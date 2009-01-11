@@ -193,14 +193,3 @@ IF(NOT OpenCV_FOUND)
   ENDIF(OpenCV_FIND_REQUIRED)
 ENDIF(NOT OpenCV_FOUND)
 
-
-#
-# $Log: FindOpenCV.cmake,v $
-# Revision 1.2  2008/11/03 16:40:34  vagvoba
-# cmake: Proper cvcam and highgui directories added to FindOpenCV.cmake
-#
-# Revision 1.1  2007/07/12 00:22:25  anton
-# cmake utilities: Added FindOpenCV.cmake based on example found all over the
-# web.  Will have to be removed when CMake provides one.
-#
-#

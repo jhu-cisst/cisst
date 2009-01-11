@@ -114,22 +114,3 @@ IF(APPLE)
                    SENSABLE_LIBRARIES_DEBUG
                    SENSABLE_LIBRARIES)
 ENDIF(APPLE)
-
-#
-# $Log: FindSensable.cmake,v $
-# Revision 1.5  2008/09/22 18:45:19  pkaz
-# FindSensable.cmake: Defined SENSABLE_LIBRARIES that includes debug and optimized keywords; removed extraneous PYTHON_LIBRARY.
-#
-# Revision 1.4  2008/09/22 14:14:07  pkaz
-# FindSensable.cmake: Only set PYTHON_LIBRARY to "-framework Python" for Apple.
-#
-# Revision 1.3  2008/05/30 17:58:54  anton
-# FindSensable.cmake:  Added include(CMakeFindFrameworks).
-#
-# Revision 1.2  2008/05/19 06:36:04  anton
-# FindSensable.cmake: Added support for frameworks on Mac OS X
-#
-# Revision 1.1  2008/04/04 20:53:40  anton
-# Added initial version of FindSensable.cmake (Support for Omni on Windows only)
-#
-#

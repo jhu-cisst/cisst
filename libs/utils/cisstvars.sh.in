@@ -86,27 +86,3 @@ fi
 
 export PYTHONPATH
 
-
-# $Log: cisstvars.sh.in,v $
-# Revision 1.6  2007/04/26 19:33:58  anton
-# All files in libraries: Applied new license text, separate copyright and
-# updated dates, added standard header where missing.
-#
-# Revision 1.5  2006/11/20 20:33:20  anton
-# Licensing: Applied new license to cisstCommon, cisstVector, cisstNumerical,
-# cisstInteractive, cisstImage and cisstOSAbstraction.
-#
-# Revision 1.4  2006/07/24 22:56:56  anton
-# CMake configuration: Moved compiled libraries to libs/lib for consistency
-# (see #215 and #231)
-#
-# Revision 1.3  2006/05/13 19:25:09  anton
-# cisstvars .sh and .csh: Added quotes to support directories with spaces.
-# See ticket #226.
-#
-# Revision 1.2  2006/05/02 19:18:49  anton
-# Build tools: Added license to scripts for env. variables.
-#
-# Revision 1.1  2006/05/02 19:08:12  anton
-# Build tools: Added scripts to set environement variables.
-#

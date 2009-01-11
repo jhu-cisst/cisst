@@ -62,29 +62,3 @@
 
 :end
 
-
-@rem $Log: cisstvars.bat.in,v $
-@rem Revision 1.7  2007/04/26 19:33:58  anton
-@rem All files in libraries: Applied new license text, separate copyright and
-@rem updated dates, added standard header where missing.
-@rem
-@rem Revision 1.6  2006/11/30 21:43:42  anton
-@rem cisstvars.bat.in: Replace intdir from "." to nothing for nmake.
-@rem
-@rem Revision 1.5  2006/11/29 21:09:55  pkaz
-@rem cisstvars.bat.in: changed to set CISST_PATH and CISST_PYTHONPATH.
-@rem
-@rem Revision 1.4  2006/11/20 20:33:20  anton
-@rem Licensing: Applied new license to cisstCommon, cisstVector, cisstNumerical,
-@rem cisstInteractive, cisstImage and cisstOSAbstraction.
-@rem
-@rem Revision 1.3  2006/07/24 22:56:56  anton
-@rem CMake configuration: Moved compiled libraries to libs/lib for consistency
-@rem (see #215 and #231)
-@rem
-@rem Revision 1.2  2006/05/02 19:18:49  anton
-@rem Build tools: Added license to scripts for env. variables.
-@rem
-@rem Revision 1.1  2006/05/02 19:08:12  anton
-@rem Build tools: Added scripts to set environement variables.
-@rem
