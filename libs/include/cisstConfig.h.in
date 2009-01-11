@@ -1,0 +1,49 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
+/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
+
+/*
+  $Id: cisstConfig.h.in 9 2009-01-04 21:17:07Z adeguet1 $
+  
+  Author(s):	Anton Deguet
+  Created on: 2004-02-18
+
+  (C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights
+  Reserved.
+  
+--- begin cisst license - do not edit ---
+
+This software is provided "as is" under an open source license, with
+no warranty.  The complete license can be found in license.txt and
+http://www.cisst.org/cisst/license.txt.
+
+--- end cisst license ---
+
+*/
+
+#ifndef _cisstConfig_h
+#define _cisstConfig_h
+
+#define ON 1
+#define OFF 0
+
+// Path to build root (to find some configuration files)
+#define CISST_BUILD_ROOT "@CISST_BINARY_DIR@"
+
+// Path to build files
+#define CISST_BUILD_LINK_DIRECTORIES "@CISST_BUILD_LINK_DIRECTORIES@"
+
+// Was cisst compiled as shared libraries or static
+#define CISST_BUILD_SHARED_LIBS @CISST_BUILD_SHARED_LIBS@ 
+
+// LAPACK3E, erc-cisst distribution of code from netlib.org
+#define CISST_HAS_CISSTNETLIB @CISST_HAS_CISSTNETLIB@
+
+// RTAI Realtime extension for Linux
+#define CISST_HAS_LINUX_RTAI @CISST_HAS_LINUX_RTAI@
+
+// Using OpenCV for optimized image processing
+#define CISST_HAS_OPENCV @SVL_HAS_OPENCV@
+
+
+#endif // _cisstConfig_h
+

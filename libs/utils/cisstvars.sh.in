@@ -1,0 +1,112 @@
+#! /bin/sh
+
+# $Id: cisstvars.sh.in 8 2009-01-04 21:13:48Z adeguet1 $
+
+# Author(s): Anton Deguet
+# Created on: 2006-05-02
+
+# (C) Copyright 2006-2007 Johns Hopkins University (JHU), All Rights
+# Reserved.
+
+# Always edit the source file: cisstvars.sh.in
+# Do not edit the generated file: cisstvars.sh
+
+# --- begin cisst license - do not edit ---
+# 
+# This software is provided "as is" under an open source license, with
+# no warranty.  The complete license can be found in license.txt and
+# http://www.cisst.org/cisst/license.txt.
+# 
+# --- end cisst license ---
+
+
+CISST_DIR="@cisst_BINARY_DIR@"
+BUILD_TESTS=@BUILD_TESTS@
+BUILD_EXAMPLES=@BUILD_EXAMPLES@
+
+OS=`uname`
+
+# Path to dynamic libraries
+if [ "${OS}" == "Darwin" ]
+then
+    if [ -z "${DYLD_LIBRARY_PATH}" ]
+    then
+        LIBRARY_PATH="${CISST_DIR}/libs/lib"
+    else
+        LIBRARY_PATH="${CISST_DIR}/libs/lib:${DYLD_LIBRARY_PATH}"
+    fi
+else
+    if [ -z "${LD_LIBRARY_PATH}" ]
+    then
+        LIBRARY_PATH="${CISST_DIR}/libs/lib"
+    else
+        LIBRARY_PATH="${CISST_DIR}/libs/lib:${LD_LIBRARY_PATH}"
+    fi
+fi
+
+# Path to Python extensions
+if [ -z "${PYTHONPATH}" ]
+then
+    PYTHONPATH="${CISST_DIR}/libs/lib"
+else
+    PYTHONPATH="${CISST_DIR}/libs/lib:${PYTHONPATH}"
+fi
+
+
+
+# Add path to test code
+if [ "${BUILD_TESTS}" == "ON" ]
+then
+    PATH="${CISST_DIR}/tests/bin:${PATH}"
+    LIBRARY_PATH="${CISST_DIR}/tests/lib:${LIBRARY_PATH}"
+    PYTHONPATH="${CISST_DIR}/tests/lib:${PYTHONPATH}"
+fi
+
+
+# Add path to example code
+if [ "${BUILD_EXAMPLES}" == "ON" ]
+then
+    PATH="${CISST_DIR}/examples/bin:${PATH}"
+    LIBRARY_PATH="${CISST_DIR}/examples/lib:${LIBRARY_PATH}"
+    PYTHONPATH="${CISST_DIR}/examples/lib:${PYTHONPATH}"
+fi
+
+
+# Export all
+export PATH
+
+if [ "${OS}" == "Darwin" ]
+then
+    DYLD_LIBRARY_PATH=${LIBRARY_PATH}
+    export DYLD_LIBRARY_PATH
+else
+    LD_LIBRARY_PATH=${LIBRARY_PATH}
+    export LD_LIBRARY_PATH
+fi
+
+export PYTHONPATH
+
+
+# $Log: cisstvars.sh.in,v $
+# Revision 1.6  2007/04/26 19:33:58  anton
+# All files in libraries: Applied new license text, separate copyright and
+# updated dates, added standard header where missing.
+#
+# Revision 1.5  2006/11/20 20:33:20  anton
+# Licensing: Applied new license to cisstCommon, cisstVector, cisstNumerical,
+# cisstInteractive, cisstImage and cisstOSAbstraction.
+#
+# Revision 1.4  2006/07/24 22:56:56  anton
+# CMake configuration: Moved compiled libraries to libs/lib for consistency
+# (see #215 and #231)
+#
+# Revision 1.3  2006/05/13 19:25:09  anton
+# cisstvars .sh and .csh: Added quotes to support directories with spaces.
+# See ticket #226.
+#
+# Revision 1.2  2006/05/02 19:18:49  anton
+# Build tools: Added license to scripts for env. variables.
+#
+# Revision 1.1  2006/05/02 19:08:12  anton
+# Build tools: Added scripts to set environement variables.
+#

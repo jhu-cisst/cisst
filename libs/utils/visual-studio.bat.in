@@ -1,0 +1,40 @@
+@rem $Id: visual-studio.bat.in 8 2009-01-04 21:13:48Z adeguet1 $
+
+@rem Author(s): Anton Deguet
+@rem Created on: 2006-05-02
+
+@rem (C) Copyright 2006-2007 Johns Hopkins University (JHU), All
+@rem Rights Reserved.
+
+@rem Always edit the source file: visual-studio.bat.in
+@rem Do not edit the generated file: visual-studio-${config}.bat
+
+@rem --- begin cisst license - do not edit ---
+@rem 
+@rem This software is provided "as is" under an open source license, with
+@rem no warranty.  The complete license can be found in license.txt and
+@rem http://www.cisst.org/cisst/license.txt.
+@rem 
+@rem --- end cisst license ---
+
+
+@call cisstvsvars.bat
+@call cisstvars.bat ${config}
+${CMAKE_MAKE_PROGRAM} /useenv cisst.sln
+
+@rem $Log: visual-studio.bat.in,v $
+@rem Revision 1.4  2007/04/26 19:33:58  anton
+@rem All files in libraries: Applied new license text, separate copyright and
+@rem updated dates, added standard header where missing.
+@rem
+@rem Revision 1.3  2006/11/20 20:33:20  anton
+@rem Licensing: Applied new license to cisstCommon, cisstVector, cisstNumerical,
+@rem cisstInteractive, cisstImage and cisstOSAbstraction.
+@rem
+@rem Revision 1.2  2006/09/15 18:40:12  anton
+@rem visual-studio.bat.in: Use CMAKE_MAKE_PROGRAM instead of devenv to support
+@rem other MS IDE (i.e. Visual Studio Express).
+@rem
+@rem Revision 1.1  2006/05/02 19:18:49  anton
+@rem Build tools: Added license to scripts for env. variables.
+@rem
