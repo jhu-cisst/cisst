@@ -21,20 +21,3 @@
 @call cisstvsvars.bat
 @call cisstvars.bat ${config}
 ${CMAKE_MAKE_PROGRAM} /useenv cisst.sln
-
-@rem $Log: visual-studio.bat.in,v $
-@rem Revision 1.4  2007/04/26 19:33:58  anton
-@rem All files in libraries: Applied new license text, separate copyright and
-@rem updated dates, added standard header where missing.
-@rem
-@rem Revision 1.3  2006/11/20 20:33:20  anton
-@rem Licensing: Applied new license to cisstCommon, cisstVector, cisstNumerical,
-@rem cisstInteractive, cisstImage and cisstOSAbstraction.
-@rem
-@rem Revision 1.2  2006/09/15 18:40:12  anton
-@rem visual-studio.bat.in: Use CMAKE_MAKE_PROGRAM instead of devenv to support
-@rem other MS IDE (i.e. Visual Studio Express).
-@rem
-@rem Revision 1.1  2006/05/02 19:18:49  anton
-@rem Build tools: Added license to scripts for env. variables.
-@rem

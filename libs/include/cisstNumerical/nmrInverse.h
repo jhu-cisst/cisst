@@ -757,32 +757,3 @@ inline F_INTEGER nmrInverse(vctFixedSizeMatrix<double, _size, _size, _storageOrd
 
 #endif // _nmrInverse_h
 
-
-// ****************************************************************************
-//                              Change History
-// ****************************************************************************
-//
-//  $Log: nmrInverse.h,v $
-//  Revision 1.5  2007/04/26 19:33:57  anton
-//  All files in libraries: Applied new license text, separate copyright and
-//  updated dates, added standard header where missing.
-//
-//  Revision 1.4  2006/11/29 22:45:07  anton
-//  cisstCommon, cisstVector and cisstNumerical: Replace C style cast by C++
-//  static_cast.  See note in ticket #239.
-//
-//  Revision 1.3  2006/11/20 20:33:19  anton
-//  Licensing: Applied new license to cisstCommon, cisstVector, cisstNumerical,
-//  cisstInteractive, cisstImage and cisstOSAbstraction.
-//
-//  Revision 1.2  2006/01/31 21:09:48  anton
-//  nmrInverse.h: Removed multiplication in template parameter as it is not
-//  supported by Micorsoft compilers.  Added new parameter and CMN_ASSERT to
-//  verufy that the size is valid.
-//
-//  Revision 1.1  2006/01/28 05:59:25  anton
-//  cisstNumerical: Added nmrInverse with tests, doxygen documentation and
-//  example for numerical quickstart.  See #207.
-//
-//
-// ****************************************************************************

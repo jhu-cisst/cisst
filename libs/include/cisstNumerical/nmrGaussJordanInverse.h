@@ -207,32 +207,3 @@ nmrGaussJordanInverse4x4(vctFixedSizeMatrix<float, 4, 4, VCT_COL_MAJOR>, bool &,
 
 #endif  // _nmrGaussJordanInverse_h
 
-
-// ****************************************************************************
-//                              Change History
-// ****************************************************************************
-//
-//  $Log: nmrGaussJordanInverse.h,v $
-//  Revision 1.5  2007/04/26 19:33:57  anton
-//  All files in libraries: Applied new license text, separate copyright and
-//  updated dates, added standard header where missing.
-//
-//  Revision 1.4  2006/11/20 20:33:19  anton
-//  Licensing: Applied new license to cisstCommon, cisstVector, cisstNumerical,
-//  cisstInteractive, cisstImage and cisstOSAbstraction.
-//
-//  Revision 1.3  2006/01/31 21:12:47  anton
-//  cisstNumerical: Added flags for deprecated symbols to avoid warnings when
-//  the deprecated classes are not really used.
-//
-//  Revision 1.2  2006/01/05 16:44:26  anton
-//  nmrGaussJordanInverse.h: Explicit declaration of instantiated functions for
-//  Microsoft compilers and minor Doxygen update.
-//
-//  Revision 1.1  2006/01/04 22:50:47  ofri
-//  Added functions nmrGaussJordanInverseNxN for N=2, 3, 4.  Tests were successful.
-//
-//
-// ****************************************************************************
-
-

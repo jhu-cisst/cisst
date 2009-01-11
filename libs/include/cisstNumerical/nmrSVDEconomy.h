@@ -928,39 +928,3 @@ inline F_INTEGER nmrSVDEconomy(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &
 
 #endif
 
-
-// ****************************************************************************
-//                              Change History
-// ****************************************************************************
-//
-//  $Log: nmrSVDEconomy.h,v $
-//  Revision 1.7  2007/08/01 04:32:41  anton
-//  cisstNumerical: Replaced non standard type "MatrixSizeType" by
-//  "nsize_type" as found in dynamic matrices and narrays.
-//
-//  Revision 1.6  2007/04/26 19:33:57  anton
-//  All files in libraries: Applied new license text, separate copyright and
-//  updated dates, added standard header where missing.
-//
-//  Revision 1.5  2006/11/29 22:45:07  anton
-//  cisstCommon, cisstVector and cisstNumerical: Replace C style cast by C++
-//  static_cast.  See note in ticket #239.
-//
-//  Revision 1.4  2006/11/20 20:33:20  anton
-//  Licensing: Applied new license to cisstCommon, cisstVector, cisstNumerical,
-//  cisstInteractive, cisstImage and cisstOSAbstraction.
-//
-//  Revision 1.3  2006/11/03 04:32:49  anton
-//  cisstNumerical: Corrected Doxygen errors and other minor updates in documentation.
-//
-//  Revision 1.2  2006/09/19 16:22:23  tian
-//  nmrSVDEconomy: Updated for new cisstNetlib name mangling.
-//
-//  Revision 1.1  2006/06/19 01:55:46  kapoor
-//  cisstNumerical: Memory efficient methods for SVD and pseudo-inverse.
-//  Currently tested and works for VCT_COL_MAJOR format only and for dynamic
-//  matrices.
-//
-//
-//
-// ****************************************************************************

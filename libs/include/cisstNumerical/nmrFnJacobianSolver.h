@@ -205,38 +205,3 @@ public:
 
 #endif // _nmrFnJacobianSolver_h
 
-
-// ****************************************************************************
-//                              Change History
-// ****************************************************************************
-//
-//  $Log: nmrFnJacobianSolver.h,v $
-//  Revision 1.6  2007/04/26 19:33:57  anton
-//  All files in libraries: Applied new license text, separate copyright and
-//  updated dates, added standard header where missing.
-//
-//  Revision 1.5  2006/11/20 20:33:19  anton
-//  Licensing: Applied new license to cisstCommon, cisstVector, cisstNumerical,
-//  cisstInteractive, cisstImage and cisstOSAbstraction.
-//
-//  Revision 1.4  2005/09/26 15:41:46  anton
-//  cisst: Added modelines for emacs and vi.
-//
-//  Revision 1.3  2005/09/24 00:04:23  anton
-//  cisstNumerical: Use cmnThrow for all exceptions, removed all #include of
-//  cisstVector.h (use more specialized vctXyz.h).
-//
-//  Revision 1.2  2005/08/13 23:34:00  kapoor
-//  Fixes for windows. Added NLP code.
-//
-//  Revision 1.1  2005/07/30 09:48:02  kapoor
-//  Numerical: Added wrappers for MINPACK for Powells method and
-//  Levenberg-Marquardt method (using analytic and approximate - BFGS jacobians)
-//
-//
-//
-// ****************************************************************************
-
-
-
-

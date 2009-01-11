@@ -21,25 +21,3 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstNumerical/nmrPInverseEconomy.h>
 
-
-// ****************************************************************************
-//                              Change History
-// ****************************************************************************
-//
-//  $Log: nmrPInverseEconomy.cpp,v $
-//  Revision 1.3  2007/04/26 19:33:57  anton
-//  All files in libraries: Applied new license text, separate copyright and
-//  updated dates, added standard header where missing.
-//
-//  Revision 1.2  2006/11/20 20:33:19  anton
-//  Licensing: Applied new license to cisstCommon, cisstVector, cisstNumerical,
-//  cisstInteractive, cisstImage and cisstOSAbstraction.
-//
-//  Revision 1.1  2006/06/19 01:55:46  kapoor
-//  cisstNumerical: Memory efficient methods for SVD and pseudo-inverse.
-//  Currently tested and works for VCT_COL_MAJOR format only and for dynamic
-//  matrices.
-//
-//
-//
-// ****************************************************************************

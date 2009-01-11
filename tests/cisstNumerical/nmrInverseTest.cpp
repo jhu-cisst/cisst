@@ -205,29 +205,3 @@ void nmrInverseTest::TestThreadSafetyDynamic(void)
 
 CPPUNIT_TEST_SUITE_REGISTRATION(nmrInverseTest);
 
-
-// ****************************************************************************
-//                              Change History
-// ****************************************************************************
-//
-// $Log: nmrInverseTest.cpp,v $
-// Revision 1.5  2007/04/26 20:12:05  anton
-// All files in tests: Applied new license text, separate copyright and
-// updated dates, added standard header where missing.
-//
-// Revision 1.4  2007/02/12 03:25:03  anton
-// cisstVector and cisstNumerical tests: Used more refined #include for vctRandom
-// (see ticket #264).
-//
-// Revision 1.3  2006/11/20 20:33:52  anton
-// Licensing: Applied new license to tests.
-//
-// Revision 1.2  2006/10/06 14:32:51  anton
-// All tests: Re-ordered #include to load cmnPortability.h before any system
-// include.
-//
-// Revision 1.1  2006/01/28 06:21:51  anton
-// cisstNumerical tests: Added nmrInverseTest (see #207).
-//
-//
-// ****************************************************************************

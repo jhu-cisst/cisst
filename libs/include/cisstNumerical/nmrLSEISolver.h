@@ -236,37 +236,3 @@ public:
 
 #endif // _nmrLSEISolver_h
 
-
-// ****************************************************************************
-//                              Change History
-// ****************************************************************************
-//
-// $Log: nmrLSEISolver.h,v $
-// Revision 1.7  2007/04/26 19:33:57  anton
-// All files in libraries: Applied new license text, separate copyright and
-// updated dates, added standard header where missing.
-//
-// Revision 1.6  2006/11/20 20:33:19  anton
-// Licensing: Applied new license to cisstCommon, cisstVector, cisstNumerical,
-// cisstInteractive, cisstImage and cisstOSAbstraction.
-//
-// Revision 1.5  2005/11/29 03:06:56  anton
-// cisstNumerical:  Systematic use of nmrNetlib.h and, modified all "min" and "max"
-// to use STL ones.
-//
-// Revision 1.4  2005/10/06 16:56:37  anton
-// Doxygen: Corrected errors and some warnings detected by Doxygen 1.4.3.
-//
-// Revision 1.3  2005/09/26 15:41:46  anton
-// cisst: Added modelines for emacs and vi.
-//
-// Revision 1.2  2005/09/24 00:04:23  anton
-// cisstNumerical: Use cmnThrow for all exceptions, removed all #include of
-// cisstVector.h (use more specialized vctXyz.h).
-//
-// Revision 1.1  2005/08/17 20:03:59  kapoor
-// cisstNumerical: Added LSEI (a more recent version of Hansons' Code)
-//
-//
-//
-// ****************************************************************************

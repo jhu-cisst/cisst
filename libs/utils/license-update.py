@@ -169,38 +169,3 @@ for file in files:
             processDirectory(file)
         else:
             processFile(file)
-
-#
-# $Log: license-update.py,v $
-# Revision 1.9  2007/04/26 19:33:58  anton
-# All files in libraries: Applied new license text, separate copyright and
-# updated dates, added standard header where missing.
-#
-# Revision 1.8  2006/11/20 20:33:20  anton
-# Licensing: Applied new license to cisstCommon, cisstVector, cisstNumerical,
-# cisstInteractive, cisstImage and cisstOSAbstraction.
-#
-# Revision 1.7  2006/05/02 19:18:19  anton
-# license-update.py: Added support for .sh, .csh and .bat files.
-#
-# Revision 1.6  2005/09/26 16:36:05  anton
-# cisst: Added modelines for emacs and vi (python), see #164.
-#
-# Revision 1.5  2005/09/07 03:31:00  anton
-# license-update.py: Added license in script as well as support for *.py and
-# *.py.in files.
-#
-# Revision 1.4  2005/08/19 05:27:40  anton
-# license-update.py: Added suffix .i for SWIG interface files.
-#
-# Revision 1.3  2005/06/03 18:57:02  anton
-# license-update script: Added support for files *.cmake and *.cmake.in
-#
-# Revision 1.2  2005/06/03 18:24:36  anton
-# license update script: Added support for *.cpp.in and *.h.in
-#
-# Revision 1.1  2005/05/19 15:20:45  anton
-# License: Added the text and a python utility to update the license in every
-# file.
-#
-#

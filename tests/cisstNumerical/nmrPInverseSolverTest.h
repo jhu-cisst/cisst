@@ -90,39 +90,3 @@ public:
 
 #endif // _nmrPInverseSolverTest_h
 
-
-// ****************************************************************************
-//                              Change History
-// ****************************************************************************
-//
-// $Log: nmrPInverseSolverTest.h,v $
-// Revision 1.8  2007/04/26 20:12:05  anton
-// All files in tests: Applied new license text, separate copyright and
-// updated dates, added standard header where missing.
-//
-// Revision 1.7  2006/11/20 20:33:52  anton
-// Licensing: Applied new license to tests.
-//
-// Revision 1.6  2006/09/29 20:17:53  anton
-// cisstNumerical Tests: Disable warnings for deprecated code with VC 8.
-//
-// Revision 1.5  2006/01/20 15:12:30  anton
-// cisstNumerical tests: Added compilation pragma to compile tests for
-// deprecated SVD, LU and PInverse solvers.
-//
-// Revision 1.4  2005/09/26 15:41:47  anton
-// cisst: Added modelines for emacs and vi.
-//
-// Revision 1.3  2005/09/06 15:41:37  anton
-// cisstNumerical tests: Added license.
-//
-// Revision 1.2  2005/08/25 16:55:35  anton
-// cisstNumerical tests: Removed #include of cisstXyz.h to avoid useless
-// dependencies and long compilations.
-//
-// Revision 1.1  2005/07/29 00:02:18  kapoor
-// Numerical Test: Some simple sanity checks for Least Squares (LS),
-// pseudo-inverse and SVD with RHS matrix. Tests compare a matrix with
-// results from MATLAB(r).
-//
-// ****************************************************************************

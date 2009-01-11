@@ -411,22 +411,3 @@ void nmrGaussJordanInverse4x4(vctFixedSizeMatrix<float, 4, 4, VCT_COL_MAJOR>, bo
                               vctFixedSizeMatrix<float, 4, 4, VCT_COL_MAJOR> &,
                               const float);
 
-
-// ****************************************************************************
-//                              Change History
-// ****************************************************************************
-//
-//  $Log: nmrGaussJordanInverse.cpp,v $
-//  Revision 1.3  2007/04/26 19:33:57  anton
-//  All files in libraries: Applied new license text, separate copyright and
-//  updated dates, added standard header where missing.
-//
-//  Revision 1.2  2006/11/20 20:33:19  anton
-//  Licensing: Applied new license to cisstCommon, cisstVector, cisstNumerical,
-//  cisstInteractive, cisstImage and cisstOSAbstraction.
-//
-//  Revision 1.1  2006/01/04 22:50:47  ofri
-//  Added functions nmrGaussJordanInverseNxN for N=2, 3, 4.  Tests were successful.
-//
-//
-// ****************************************************************************

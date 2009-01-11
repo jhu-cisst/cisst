@@ -98,30 +98,3 @@ void nmrLUSolverTest::TestFixedSizeRowMajor(void) {
 
 CPPUNIT_TEST_SUITE_REGISTRATION(nmrLUSolverTest);
 
-
-// ****************************************************************************
-//                              Change History
-// ****************************************************************************
-//
-// $Log: nmrLUSolverTest.cpp,v $
-// Revision 1.6  2007/04/26 20:12:05  anton
-// All files in tests: Applied new license text, separate copyright and
-// updated dates, added standard header where missing.
-//
-// Revision 1.5  2007/02/12 03:25:03  anton
-// cisstVector and cisstNumerical tests: Used more refined #include for vctRandom
-// (see ticket #264).
-//
-// Revision 1.4  2006/11/20 20:33:52  anton
-// Licensing: Applied new license to tests.
-//
-// Revision 1.3  2005/09/26 15:41:47  anton
-// cisst: Added modelines for emacs and vi.
-//
-// Revision 1.2  2005/09/06 15:41:37  anton
-// cisstNumerical tests: Added license.
-//
-// Revision 1.1  2005/08/04 18:56:44  anton
-// cisstNumericalTests: Added nmrLUSolverTest.
-//
-// ****************************************************************************

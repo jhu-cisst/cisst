@@ -113,22 +113,3 @@ ELSE(DIRECTSHOW_FOUND)
     ENDIF(DIRECTSHOW_FIND_REQUIRED)
   ENDIF(NOT DIRECTSHOW_FIND_QUIETLY)
 ENDIF(DIRECTSHOW_FOUND)
-
-#
-# $Log: FindDirectShow.cmake,v $
-# Revision 1.4  2007/04/26 19:33:56  anton
-# All files in libraries: Applied new license text, separate copyright and
-# updated dates, added standard header where missing.
-#
-# Revision 1.3  2007/03/09 20:25:07  anton
-# FindDirectShow.cmake: Added variables for Vfw32 and WinMMCVS
-#
-# Revision 1.2  2007/03/06 17:05:49  anton
-# FindDirectShow.cmake: Added path for SDK Windows 2003 server R2 first
-# as this is our prefered SDK.
-#
-# Revision 1.1  2007/02/23 16:53:27  anton
-# Import code from Balazs for cisstStereoVision.   Tested compilation of portable
-# code, not Linux nor Windows specific branches.  Also missing support for IPP.
-#
-#

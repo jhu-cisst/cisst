@@ -100,37 +100,3 @@ bool nmrMultiIndexCounter::IndexIsEqualTo(const nmrMultiIndexCounter & other) co
 
 	return std::equal(Index.begin(), Index.end(), other.Index.begin());
 }
-
-// ****************************************************************************
-//                              Change History
-// ****************************************************************************
-//
-//  $Log: nmrMultiIndexCounter.cpp,v $
-//  Revision 1.6  2007/04/26 19:33:57  anton
-//  All files in libraries: Applied new license text, separate copyright and
-//  updated dates, added standard header where missing.
-//
-//  Revision 1.5  2006/11/20 20:33:19  anton
-//  Licensing: Applied new license to cisstCommon, cisstVector, cisstNumerical,
-//  cisstInteractive, cisstImage and cisstOSAbstraction.
-//
-//  Revision 1.4  2005/09/26 15:41:46  anton
-//  cisst: Added modelines for emacs and vi.
-//
-//  Revision 1.3  2005/06/03 18:20:58  anton
-//  cisstNumerical: Added license.
-//
-//  Revision 1.2  2004/10/22 01:24:51  ofri
-//  Cleanup following migration to cisst, and rebuild with cygwin/gcc
-//
-//  Revision 1.1  2004/10/21 19:53:07  ofri
-//  Adding polynomial-related cpp files to the repository -- imported from Ofri.
-//  See ticket #78.
-//
-//  Revision 1.2  2003/07/10 15:50:16  ofri
-//  Adding change history log to the files in cisstNumerical. I guess in a few files
-//  there was replacement of spaces and tabs, which was recorded in CVS as
-//  a big change, unfortunately. But for most, it's just adding the tags.
-//
-//
-// ****************************************************************************

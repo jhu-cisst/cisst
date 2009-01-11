@@ -125,32 +125,3 @@ public:
 
 #endif // _nmrPInverseTest_h
 
-
-// ****************************************************************************
-//                              Change History
-// ****************************************************************************
-//
-// $Log: nmrPInverseTest.h,v $
-// Revision 1.6  2007/08/28 14:49:26  anton
-// cisstNumericalTests: Removed sprintf and code to print to cout or cerr.
-// Also removed commented code to cleanup.
-//
-// Revision 1.5  2007/04/26 20:12:05  anton
-// All files in tests: Applied new license text, separate copyright and
-// updated dates, added standard header where missing.
-//
-// Revision 1.4  2006/11/20 20:33:52  anton
-// Licensing: Applied new license to tests.
-//
-// Revision 1.3  2006/10/18 23:29:47  kapoor
-// cisstNumerical: nmrPInverse should now return the same solution as matlab,
-//     for all cases including rank deficient matrices. See ticket #244.
-//
-// Revision 1.2  2005/12/20 16:40:55  anton
-// nmrLSqLinTest.h nmrPInverseTest.h: Indentation.
-//
-// Revision 1.1  2005/11/28 22:04:44  kapoor
-// cisstNumerical: Changes to the netlib wrappers. See wiki pages SvdNotes and ticket #184.
-//
-//
-// ****************************************************************************

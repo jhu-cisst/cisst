@@ -121,36 +121,3 @@ void nmrBernsteinPolynomialLineIntegralTest::TestMidpointIntegration(nmrBernstei
 
 CPPUNIT_TEST_SUITE_REGISTRATION(nmrBernsteinPolynomialLineIntegralTest);
 
-
-// ****************************************************************************
-//                              Change History
-// ****************************************************************************
-//
-// $Log: nmrBernsteinPolynomialLineIntegralTest.cpp,v $
-// Revision 1.7  2007/04/26 20:12:05  anton
-// All files in tests: Applied new license text, separate copyright and
-// updated dates, added standard header where missing.
-//
-// Revision 1.6  2006/11/20 20:33:52  anton
-// Licensing: Applied new license to tests.
-//
-// Revision 1.5  2005/09/26 15:41:47  anton
-// cisst: Added modelines for emacs and vi.
-//
-// Revision 1.4  2005/09/06 15:41:37  anton
-// cisstNumerical tests: Added license.
-//
-// Revision 1.3  2004/10/27 17:57:21  ofri
-// cisstNumericalTest: Following ticket #82, I erased the use of valarray, and
-// instead I am using vctDynamicVector.  Huh!
-//
-// Revision 1.2  2004/10/27 02:46:32  anton
-// cisstNumericalTests: I am unsure of this modification.  It compiles with .net
-// 2003 and the tests succeeded but I feel there should be a more systematic
-// approach to this problem.
-//
-// Revision 1.1  2004/10/24 03:51:03  ofri
-// Renamed cisstNumerical test classes and files.  Tests run but fail for some
-// cases.
-//
-// ****************************************************************************

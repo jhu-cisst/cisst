@@ -932,29 +932,3 @@ inline F_INTEGER nmrNNLS(vctDynamicMatrixBase<_matrixOwnerTypeA, double> & A,
 
 #endif
 
-
-// ****************************************************************************
-//                              Change History
-// ****************************************************************************
-//
-//  $Log: nmrNNLS.h,v $
-//  Revision 1.5  2007/04/26 19:33:57  anton
-//  All files in libraries: Applied new license text, separate copyright and
-//  updated dates, added standard header where missing.
-//
-//  Revision 1.4  2006/11/29 22:45:07  anton
-//  cisstCommon, cisstVector and cisstNumerical: Replace C style cast by C++
-//  static_cast.  See note in ticket #239.
-//
-//  Revision 1.3  2006/11/20 20:33:19  anton
-//  Licensing: Applied new license to cisstCommon, cisstVector, cisstNumerical,
-//  cisstInteractive, cisstImage and cisstOSAbstraction.
-//
-//  Revision 1.2  2006/09/19 18:27:49  anton
-//  nmrNNLS: Removed trailing __ from cisstNetlib function name.
-//
-//  Revision 1.1  2006/01/31 06:27:52  anton
-//  nmrNNLS.h: Initial version.  Doesn't compile!
-//
-//
-// ****************************************************************************

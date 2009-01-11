@@ -280,33 +280,3 @@ void nmrGaussJordanInverseTest::TestSingular2x2Float(void)
 
 CPPUNIT_TEST_SUITE_REGISTRATION(nmrGaussJordanInverseTest);
 
-
-// ****************************************************************************
-//                              Change History
-// ****************************************************************************
-//
-// $Log: nmrGaussJordanInverseTest.cpp,v $
-// Revision 1.6  2007/04/26 20:12:05  anton
-// All files in tests: Applied new license text, separate copyright and
-// updated dates, added standard header where missing.
-//
-// Revision 1.5  2007/02/12 03:25:03  anton
-// cisstVector and cisstNumerical tests: Used more refined #include for vctRandom
-// (see ticket #264).
-//
-// Revision 1.4  2006/11/20 20:33:52  anton
-// Licensing: Applied new license to tests.
-//
-// Revision 1.3  2006/01/09 21:56:17  ofri
-// nmrGaussJordanInverseTest: A more organized control of tolerance led to
-// reduction in number of "errors" reported.
-//
-// Revision 1.2  2006/01/05 16:42:18  ofri
-// nmrGaussJordanInverseTest: Doesn't require "Aback", and improved documentation
-//
-// Revision 1.1  2006/01/04 22:51:54  ofri
-// Added tests for the nmrGaussJordanInverseNxN to the cisstNumerical test
-// suite.
-//
-//
-// ****************************************************************************

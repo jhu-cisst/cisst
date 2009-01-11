@@ -21,28 +21,3 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstNumerical/nmrPInverse.h>
 
-
-// ****************************************************************************
-//                              Change History
-// ****************************************************************************
-//
-//  $Log: nmrPInverse.cpp,v $
-//  Revision 1.5  2007/04/26 19:33:57  anton
-//  All files in libraries: Applied new license text, separate copyright and
-//  updated dates, added standard header where missing.
-//
-//  Revision 1.4  2006/11/28 17:30:09  anton
-//  cisstNumerical: Single declaration of NMR_PINVERSE_EPS:
-//
-//  Revision 1.3  2006/11/20 20:33:19  anton
-//  Licensing: Applied new license to cisstCommon, cisstVector, cisstNumerical,
-//  cisstInteractive, cisstImage and cisstOSAbstraction.
-//
-//  Revision 1.2  2006/11/17 22:41:32  ofri
-//  nmrPInverse : moved definition of NMR_PINVERSE_EPS to cpp file
-//
-//  Revision 1.1  2005/11/28 22:08:16  kapoor
-//  cisstNumerical: Changes to the netlib wrappers. See wiki pages SvdNotes and ticket #184.
-//
-//
-// ****************************************************************************

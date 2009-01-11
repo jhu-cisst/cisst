@@ -89,33 +89,3 @@ public:
 
 #endif // _nmrLUTest_h
 
-
-// ****************************************************************************
-//                              Change History
-// ****************************************************************************
-//
-// $Log: nmrLUTest.h,v $
-// Revision 1.6  2007/05/18 21:56:36  anton
-// cisstNumerical tests: Modified signature of test methods to avoid implicit
-// conversion between containers and containersRef as these constructors are
-// now "explicit".   See [2349] by Ofri.
-//
-// Revision 1.5  2007/04/26 20:12:05  anton
-// All files in tests: Applied new license text, separate copyright and
-// updated dates, added standard header where missing.
-//
-// Revision 1.4  2006/11/20 20:33:52  anton
-// Licensing: Applied new license to tests.
-//
-// Revision 1.3  2006/01/27 01:00:42  anton
-// cisstNumerical tests: Renamed "solution" to "data" (see #205).
-//
-// Revision 1.2  2006/01/11 04:50:32  anton
-// nmrLU: Working version, including tests for fixed/dynamic, solution/user
-// allocated pivot indices vector.  Still have to update the Doxygen comments.
-//
-// Revision 1.1  2006/01/10 23:25:33  anton
-// cisstNumerical: Incomplete but somewhat working version of nmrLU.
-//
-//
-// ****************************************************************************

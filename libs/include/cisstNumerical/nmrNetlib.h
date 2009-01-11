@@ -63,34 +63,3 @@ typedef long int F_INTEGER;
 
 #endif // _nmrNetlib_h
 
-
-// ****************************************************************************
-//                              Change History
-// ****************************************************************************
-//
-//  $Log: nmrNetlib.h,v $
-//  Revision 1.6  2007/04/26 19:33:57  anton
-//  All files in libraries: Applied new license text, separate copyright and
-//  updated dates, added standard header where missing.
-//
-//  Revision 1.5  2006/11/20 20:33:19  anton
-//  Licensing: Applied new license to cisstCommon, cisstVector, cisstNumerical,
-//  cisstInteractive, cisstImage and cisstOSAbstraction.
-//
-//  Revision 1.4  2006/01/11 20:53:17  anton
-//  cisstNumerical Code: Introduced CISST_HAS_NETLIB to indicate that any
-//  netlib distribution is available (either cnetlib or cisstNetlib).
-//
-//  Revision 1.3  2005/12/23 21:32:39  anton
-//  nmrNetlib.h: Added documentation for F_INTEGER.
-//
-//  Revision 1.2  2005/12/20 16:35:27  anton
-//  nmrNetlib: Introduced F_INTEGER for long int
-//
-//  Revision 1.1  2005/11/29 02:56:30  anton
-//  cisstNumerical: Added nmrNetlib to centralize #if for CISST_HAS_CNETLIB
-//  versus CISST_HAS_CISSTNETLIB.  Also, #undef min and max if defined in
-//  f2c.h.
-//
-//
-// ****************************************************************************
