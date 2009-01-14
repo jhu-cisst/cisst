@@ -32,7 +32,13 @@ http://www.cisst.org/cisst/license.txt.
 %include "std_iostream.i"
 
 // Force insertion of code related to Python iterators in cxx file
-%fragment("PySwigIterator_T");
+// Version 1.3.37 removed symbols starting with Py 
+#if (SWIG_VERSION > 0x010336)
+  %fragment("SwigPyIterator_T");
+#else
+  %fragment("PySwigIterator_T");
+  #define SwigPyIterator PySwigIterator  
+#endif
 
 // We define __setitem__ and __getitem__
 %ignore *::operator[];
@@ -101,7 +107,7 @@ http://www.cisst.org/cisst/license.txt.
 };
 %newobject cmnClassRegister::iterator(PyObject **PYTHON_SELF);
 %extend cmnClassRegister {
-    swig::PySwigIterator* iterator(PyObject **PYTHON_SELF) {
+    swig::SwigPyIterator* iterator(PyObject **PYTHON_SELF) {
         return swig::make_output_iterator(self->begin(), self->begin(), self->end(), *PYTHON_SELF);
     }
     %pythoncode {
@@ -120,7 +126,7 @@ http://www.cisst.org/cisst/license.txt.
 };
 %newobject cmnObjectRegister::iterator(PyObject **PYTHON_SELF);
 %extend cmnObjectRegister {
-    swig::PySwigIterator* iterator(PyObject **PYTHON_SELF) {
+    swig::SwigPyIterator* iterator(PyObject **PYTHON_SELF) {
         return swig::make_output_iterator(self->begin(), self->begin(), self->end(), *PYTHON_SELF);
     }
     %pythoncode {
@@ -167,7 +173,4 @@ CMN_GENERIC_OBJECT_PROXY_INSTANTIATE(cmnBool, bool);
 %include "cisstCommon/cmnTypeTraits.h"
 %template(cmnTypeTraitsDouble) cmnTypeTraits<double>;
 %template(cmnTypeTraitsInt) cmnTypeTraits<int>;
-
-// Wrap cmnDataObject, to be removed later
-%include "cisstCommon/cmnDataObject.h"
 

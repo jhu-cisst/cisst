@@ -43,7 +43,6 @@ http://www.cisst.org/cisst/license.txt.
 #include "cisstCommon/cmnTypeTraits.h"
 #include "cisstCommon/cmnCallbackStreambuf.h"
 #include "cisstCommon/cmnPath.h"
-#include "cisstCommon/cmnDataObject.h"
 
 #endif // _cisstCommon_i_h
 
