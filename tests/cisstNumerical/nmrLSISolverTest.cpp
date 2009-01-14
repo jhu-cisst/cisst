@@ -55,33 +55,3 @@ void nmrLSISolverTest::TestSolveBookExample(void) {
 
 CPPUNIT_TEST_SUITE_REGISTRATION(nmrLSISolverTest);
 
-
-// ****************************************************************************
-//                              Change History
-// ****************************************************************************
-//
-// $Log: nmrLSISolverTest.cpp,v $
-// Revision 1.7  2007/04/26 20:12:05  anton
-// All files in tests: Applied new license text, separate copyright and
-// updated dates, added standard header where missing.
-//
-// Revision 1.6  2006/11/20 20:33:52  anton
-// Licensing: Applied new license to tests.
-//
-// Revision 1.5  2005/09/26 15:41:47  anton
-// cisst: Added modelines for emacs and vi.
-//
-// Revision 1.4  2005/09/06 15:41:37  anton
-// cisstNumerical tests: Added license.
-//
-// Revision 1.3  2005/02/04 17:01:45  anton
-// cisstNumerical tests: Use VCT_FORTRAN_ORDER as well as VCT_COL_MAJOR
-//
-// Revision 1.2  2004/11/03 22:28:34  anton
-// cisstNumerical Tests: Added sanity check tests for LDP and NNLS.  Updated
-// other tests to use VCT_COL_MAJOR.
-//
-// Revision 1.1  2004/11/02 17:03:17  anton
-// cisstNumerical Tests: Add a sanity check test for nmrLSISolver.
-//
-// ****************************************************************************

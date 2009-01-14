@@ -1,0 +1,79 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
+/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
+/* $Id: main.cpp,v 1.6 2009/01/10 03:17:55 pkaz Exp $ */
+
+#include <cisstCommon.h>
+#include <cisstOSAbstraction.h>
+#include <cisstMultiTask.h>
+
+#include "robotLowLevel.h"
+#include "userInterface.h"
+
+using namespace std;
+
+int main(void)
+{
+    // Log configuration
+    cmnLogger::SetLoD(10);
+    cmnLogger::GetMultiplexer()->AddChannel(cout, 10);
+    cmnLogger::HaltDefaultLog();
+    cmnLogger::ResumeDefaultLog(10);
+    // add a log per thread
+    osaThreadedLogFile threadedLog("example6-");
+    cmnLogger::GetMultiplexer()->AddChannel(threadedLog, 10);
+
+    // create a single task
+    mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
+    robotLowLevel * robotTask = new robotLowLevel("RobotControl", 100 * cmn_ms);
+
+    // add single task, do not connect anything
+    taskManager->AddTask(robotTask);
+    // create the thread for the task
+    taskManager->CreateAll();
+
+    // look for the interface we are going to use
+    mtsDeviceInterface * robotInterface = robotTask->GetProvidedInterface("Robot1");
+    userInterface * UI = 0;
+    if (robotInterface) {
+        // instantiate the UI in the current thread 
+        UI = new userInterface("Robot1", robotInterface);
+    } else {
+        CMN_LOG(1) << "It looks like there is no \"Robot1\" interface" << std::endl;
+    }
+
+    // start the task
+    taskManager->StartAll();
+
+    // loop while the UI did not get a close request
+    while (!UI->CloseRequested) {
+        // the user interface method Update is equivalent to the task
+        // Run method
+        UI->Update();
+        osaSleep(10 * cmn_ms); // ask for an update every 10 ms
+    }
+
+    // stop and cleanup
+    taskManager->KillAll();
+    if (UI) {
+        delete UI;
+    }
+
+    return 0;
+}
+
+/*
+  Author(s):  Peter Kazanzides, Anton Deguet
+  Created on: 2004-04-30
+
+  (C) Copyright 2004-2008 Johns Hopkins University (JHU), All Rights
+  Reserved.
+
+--- begin cisst license - do not edit ---
+
+This software is provided "as is" under an open source license, with
+no warranty.  The complete license can be found in license.txt and
+http://www.cisst.org/cisst/license.txt.
+
+--- end cisst license ---
+
+*/
