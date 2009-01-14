@@ -63,26 +63,3 @@ class ClassRegisterTest(unittest.TestCase):
             if classInfo.GetName() == "cmnPath":
                 found_cmnPath = True
         self.failUnless(found_cmnPath)
-
-#
-# $Log: cmnClassRegisterTest.py,v $
-# Revision 1.5  2007/04/26 20:12:05  anton
-# All files in tests: Applied new license text, separate copyright and
-# updated dates, added standard header where missing.
-#
-# Revision 1.4  2006/11/20 20:33:53  anton
-# Licensing: Applied new license to tests.
-#
-# Revision 1.3  2006/05/10 18:40:25  anton
-# cisstCommon class register: Updated to use a std::map to store class services
-# and added std::type_info to the class services for a more reliable type
-# identification of templated classes.
-#
-# Revision 1.2  2006/03/13 00:32:02  anton
-# cisstCommon wrappers tests: Added "for loop" tests for objects and class
-# registers.
-#
-# Revision 1.1  2006/03/10 14:37:27  anton
-# cisstCommon wrapper tests: Added test for class and object registers.
-#
-#

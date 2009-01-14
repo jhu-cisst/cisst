@@ -31,9 +31,9 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstNumerical/nmrNetlib.h>
 
-#ifdef CISST_HAS_NETLIB
+#ifdef CISST_HAS_CISSTNETLIB
 #include <cisstNumerical/nmrSVD.h>
-#endif // CISST_HAS_NETLIB
+#endif // CISST_HAS_CISSTNETLIB
 
 #include <cisstNumerical/nmrIsOrthonormal.h>
 
@@ -43,7 +43,7 @@ class nmrIsOrthonormalTest : public CppUnit::TestCase
 
     CPPUNIT_TEST(TestRotationMatrix);
 
-#ifdef CISST_HAS_NETLIB
+#ifdef CISST_HAS_CISSTNETLIB
     CPPUNIT_TEST(TestFunctionDynamic);
     CPPUNIT_TEST(TestFunctionWithReferenceDynamic);
     CPPUNIT_TEST(TestDynamicData);
@@ -51,22 +51,22 @@ class nmrIsOrthonormalTest : public CppUnit::TestCase
 
     CPPUNIT_TEST(TestFunctionFixedSize);
     CPPUNIT_TEST(TestFixedSizeData);
-#endif // CISST_HAS_NETLIB
+#endif // CISST_HAS_CISSTNETLIB
 
     CPPUNIT_TEST_SUITE_END();
 
 protected:
-#ifdef CISST_HAS_NETLIB
+#ifdef CISST_HAS_CISSTNETLIB
     vctDynamicMatrix<double> UDynamic, VtDynamic;
     enum {SIZE = 12};
     vctFixedSizeMatrix<double, SIZE, SIZE> UFixedSize, VtFixedSize;
-#endif // CISST_HAS_NETLIB
+#endif // CISST_HAS_CISSTNETLIB
 
 public:
 
     void setUp()
     {
-#ifdef CISST_HAS_NETLIB
+#ifdef CISST_HAS_CISSTNETLIB
         // create a random matrix (size and content) to decompose
         // using SVD and then use U and Vt to test nmrIsOrthonormal
         int rows, cols;
@@ -93,7 +93,7 @@ public:
         nmrSVD(A, svdData);
         UFixedSize.Assign(svdData.U());
         VtFixedSize.Assign(svdData.Vt());
-#endif // CISST_HAS_NETLIB
+#endif // CISST_HAS_CISSTNETLIB
     }
     
     void tearDown()
@@ -102,7 +102,7 @@ public:
     /* Test if a rotation matrix is orthonormal */
     void TestRotationMatrix(void);
 
-#ifdef CISST_HAS_NETLIB
+#ifdef CISST_HAS_CISSTNETLIB
     /* Test the function without a data object */
     void TestFunctionDynamic(void);
 
@@ -120,7 +120,7 @@ public:
 
     /* Test the function with a data object */
     void TestFixedSizeData(void);
-#endif // CISST_HAS_NETLIB
+#endif // CISST_HAS_CISSTNETLIB
 
 };
 

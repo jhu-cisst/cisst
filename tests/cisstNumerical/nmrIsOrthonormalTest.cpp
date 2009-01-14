@@ -44,7 +44,7 @@ void nmrIsOrthonormalTest::TestRotationMatrix(void) {
 }
 
 
-#ifdef CISST_HAS_NETLIB
+#ifdef CISST_HAS_CISSTNETLIB
 void nmrIsOrthonormalTest::TestFunctionDynamic(void) {
     CPPUNIT_ASSERT(nmrIsOrthonormal(UDynamic));
     CPPUNIT_ASSERT(nmrIsOrthonormal(UDynamic.TransposeRef()));
@@ -133,7 +133,7 @@ void nmrIsOrthonormalTest::TestFixedSizeData(void) {
     CPPUNIT_ASSERT(nmrIsOrthonormal(VtFixedSize.TransposeRef(), data));
 }
 
-#endif // CISST_HAS_NETLIB
+#endif // CISST_HAS_CISSTNETLIB
 
 
 CPPUNIT_TEST_SUITE_REGISTRATION(nmrIsOrthonormalTest);

@@ -76,21 +76,3 @@ class ObjectRegisterTest(unittest.TestCase):
             if key == "path2":
                 path2found = True
         self.failUnless(path1found and path2found)
-
-#
-# $Log: cmnObjectRegisterTest.py,v $
-# Revision 1.4  2007/04/26 20:12:05  anton
-# All files in tests: Applied new license text, separate copyright and
-# updated dates, added standard header where missing.
-#
-# Revision 1.3  2006/11/20 20:33:53  anton
-# Licensing: Applied new license to tests.
-#
-# Revision 1.2  2006/03/13 00:32:02  anton
-# cisstCommon wrappers tests: Added "for loop" tests for objects and class
-# registers.
-#
-# Revision 1.1  2006/03/10 14:37:27  anton
-# cisstCommon wrapper tests: Added test for class and object registers.
-#
-#
