@@ -52,8 +52,8 @@ FOREACH(module ${MODULES})
                               PROPERTIES SWIG_FLAGS "-v;-modern")
   SWIG_ADD_MODULE(${module}Python python ${interface})
   SWIG_LINK_LIBRARIES(${module}Python ${module}
-                      debug ${PYTHON_DEBUG_LIBRARY}
-                      optimized ${PYTHON_LIBRARY})
+                      debug ${PYTHON_DEBUG_LIBRARIES}
+                      optimized ${PYTHON_LIBRARIES})
   # Copy the .py file generated to wherever the libraries are
   ADD_CUSTOM_COMMAND(TARGET _${module}Python
                      POST_BUILD
@@ -78,8 +78,8 @@ ADD_EXECUTABLE(pythonEmbedded pythonEmbedded.cpp)
 CISST_REQUIRES("pythonEmbedded" "cisstCommon;cisstVector")
 TARGET_LINK_LIBRARIES(pythonEmbedded myDerivedClass myReDerivedClass ${CMAKE_THREAD_LIBS_INIT})
 TARGET_LINK_LIBRARIES(pythonEmbedded
-                      debug ${PYTHON_DEBUG_LIBRARY}
-                      optimized ${PYTHON_LIBRARY})
+                      debug ${PYTHON_DEBUG_LIBRARIES}
+                      optimized ${PYTHON_LIBRARIES})
 IF(UNIX)
   IF(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     TARGET_LINK_LIBRARIES(pythonEmbedded util)

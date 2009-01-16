@@ -29,12 +29,11 @@ IF(EXISTS ${cisstMultiTask_INTERFACE})
   SWIG_ADD_MODULE(cisstMultiTaskPython python ${cisstMultiTask_INTERFACE})
   IF(WIN32)
     SET_TARGET_PROPERTIES(_cisstMultiTaskPython PROPERTIES SUFFIX .pyd)
-    SWIG_LINK_LIBRARIES(cisstMultiTaskPython cisstMultiTask
-                        debug ${PYTHON_DEBUG_LIBRARY}
-                        optimized ${PYTHON_LIBRARY})
-  ELSE(WIN32)
-    SWIG_LINK_LIBRARIES(cisstMultiTaskPython cisstMultiTask ${PYTHON_LIBRARIES})
   ENDIF(WIN32)
+  SWIG_LINK_LIBRARIES(cisstMultiTaskPython cisstMultiTask
+                      debug ${PYTHON_DEBUG_LIBRARIES}
+                      optimized ${PYTHON_LIBRARIES})
+
   # Copy the .py file generated to wherever the libraries are
   ADD_CUSTOM_COMMAND(TARGET _cisstMultiTaskPython
                      POST_BUILD

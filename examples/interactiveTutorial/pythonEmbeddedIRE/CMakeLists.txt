@@ -53,8 +53,8 @@ FOREACH(module ${MODULES})
                               PROPERTIES SWIG_FLAGS "-v;-modern;-fcompact;-fvirtual")
   SWIG_ADD_MODULE(${module}Python python ${interface})
   SWIG_LINK_LIBRARIES(${module}Python ${module}
-                      debug ${PYTHON_DEBUG_LIBRARY}
-                      optimized ${PYTHON_LIBRARY})
+                      debug ${PYTHON_DEBUG_LIBRARIES}
+                      optimized ${PYTHON_LIBRARIES})
   # uses .pyd instead of dll on Windows
   IF(WIN32)
     SET_TARGET_PROPERTIES(_${module}Python PROPERTIES SUFFIX .pyd)
