@@ -105,7 +105,7 @@ MARK_AS_ADVANCED(BUILDNAME)
 SET(CTEST_PROJECT_NAME "cisst")
 SET(CTEST_DROP_METHOD "http")
 SET(CTEST_DROP_SITE "www.cisst.org")
-SET(CTEST_DROP_LOCATION "/cisst/cisst-private/CDash/submit.php?project=cisst")
+SET(CTEST_DROP_LOCATION "/cisst/CDash/submit.php?project=cisst")
 # SET(CTEST_TRIGGER_SITE "")
 
 # Set maximum execution time
