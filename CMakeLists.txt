@@ -177,9 +177,6 @@ SET(CISST_LIBS_UNSTABLE
     cisstInteractive
     cisstOSAbstraction
     cisstMultiTask
-    cisstStereoVision
-    cisstParameterTypes
-    cisstRobot
     )
 
 SET(CISST_LIBS
