@@ -262,37 +262,3 @@ class ireEditorNotebook(wx.Notebook):
 
 
 
-# $Log: ireEditorNotebook.py,v $
-# Revision 1.9  2007/04/26 19:33:57  anton
-# All files in libraries: Applied new license text, separate copyright and
-# updated dates, added standard header where missing.
-#
-# Revision 1.8  2006/11/20 20:33:19  anton
-# Licensing: Applied new license to cisstCommon, cisstVector, cisstNumerical,
-# cisstInteractive, cisstImage and cisstOSAbstraction.
-#
-# Revision 1.7  2006/01/20 23:10:11  pkaz
-# IRE:  Disable "Run in New Thread" when embedded.  Add file extensions for saved history, workspace and Python files.
-#
-# Revision 1.6  2006/01/15 06:03:06  pkaz
-# Added ireFrame (instance of main IRE window) to shell local variables to aid debugging.
-#
-# Revision 1.5  2006/01/06 21:02:32  pkaz
-# IRE: Added toolbar bitmaps for new/open/save.  Bitmap images are in ireImages.py.
-# This resolves item 1 in #174.
-#
-# Revision 1.4  2005/12/20 20:58:41  pkaz
-# ireEditorNotebook.py:  removed import of ireSimpleDialogs and other dead code.
-#
-# Revision 1.3  2005/09/26 16:36:05  anton
-# cisst: Added modelines for emacs and vi (python), see #164.
-#
-# Revision 1.2  2005/09/06 22:43:33  alamora
-# irepy module: updated for cvs logging info, cisst license
-#
-# Revision 1.1  2005/09/06 22:30:03  alamora
-# irepy module: revision 0.10 initial checkin
-#
-# Revision 1.1  2005/01/25 00:52:29  alamora
-# First addition of IRE to the (practical) world
-#

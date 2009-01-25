@@ -82,22 +82,3 @@ class ireInputBox( wx.Frame ):
 
 
 
-##############################################################################
-# $Log: ireInputBox.py,v $
-# Revision 1.6  2007/04/26 19:33:57  anton
-# All files in libraries: Applied new license text, separate copyright and
-# updated dates, added standard header where missing.
-#
-# Revision 1.5  2006/11/20 20:33:19  anton
-# Licensing: Applied new license to cisstCommon, cisstVector, cisstNumerical,
-# cisstInteractive, cisstImage and cisstOSAbstraction.
-#
-# Revision 1.4  2005/12/20 21:00:21  pkaz
-# ireInputBox.py:  Minor cleanup.  This appears to have been a work in process.
-#
-# Revision 1.3  2005/09/26 16:36:05  anton
-# cisst: Added modelines for emacs and vi (python), see #164.
-#
-# Revision 1.2  2005/09/06 22:43:33  alamora
-# irepy module: updated for cvs logging info, cisst license
-#

@@ -144,35 +144,3 @@ class FixedSizeMatrixTest(unittest.TestCase):
     def TestInt4x4(self):
         self.IndividualTests("Int", 4, 4)
 
-
-#
-# $Log: vctFixedSizeMatrixTest.py,v $
-# Revision 1.8  2007/04/26 20:12:05  anton
-# All files in tests: Applied new license text, separate copyright and
-# updated dates, added standard header where missing.
-#
-# Revision 1.7  2006/11/20 20:33:53  anton
-# Licensing: Applied new license to tests.
-#
-# Revision 1.6  2006/05/03 01:47:37  anton
-# cisstVector wrapper tests: Renamed test classes to avoid name conflicts
-# and avoid import *.  All test cases are now visible and running.
-#
-# Revision 1.5  2005/09/26 16:36:05  anton
-# cisst: Added modelines for emacs and vi (python), see #164.
-#
-# Revision 1.4  2005/09/24 00:09:30  anton
-# wrapping: All cisstVector modules require to link with/load cisstCommon.
-# This was not the case so far because cisstVector was only relying on inline
-# features of cisstCommon.
-#
-# Revision 1.3  2005/09/06 16:27:22  anton
-# wrapping tests: Added license.
-#
-# Revision 1.2  2005/07/22 20:08:18  anton
-# Fixed size containers: Added tests for reference inputs.
-#
-# Revision 1.1  2005/07/19 17:11:17  anton
-# vctFixedSizeMatrix: Added test for SWIG/Python support.
-#
-#

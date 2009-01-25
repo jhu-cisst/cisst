@@ -52,32 +52,3 @@ print "Use irepy.launch() to launch the IRE GUI"
 #ireMain.launchIrePython()
 
 
-##############################################################################
-# $Log: __init__.py,v $
-# Revision 1.6  2007/04/26 19:33:57  anton
-# All files in libraries: Applied new license text, separate copyright and
-# updated dates, added standard header where missing.
-#
-# Revision 1.5  2006/11/20 20:33:19  anton
-# Licensing: Applied new license to cisstCommon, cisstVector, cisstNumerical,
-# cisstInteractive, cisstImage and cisstOSAbstraction.
-#
-# Revision 1.4  2005/12/21 08:21:10  pkaz
-# IRE: added support for running the IRE in a separate thread (uses Python threading module).
-#
-# Revision 1.3  2005/12/20 21:01:23  pkaz
-# __init__.py:  removed some dead code.
-#
-# Revision 1.2  2005/09/26 16:36:05  anton
-# cisst: Added modelines for emacs and vi (python), see #164.
-#
-# Revision 1.1  2005/09/06 22:43:08  alamora
-# irepy module: init revision 0.1.0 checkin
-#
-# Revision 1.2  2005/02/01 22:15:00  alamora
-# IRE now launches explicitly from irepy.launch()
-# ireSimpleDialogs no longer loaded into def ns by default
-#
-# Revision 1.1  2005/01/25 00:52:29  alamora
-# First addition of IRE to the (practical) world
-#

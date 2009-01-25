@@ -316,39 +316,3 @@ class ireListCtrlPanel(wx.Panel, listmix.ColumnSorterMixin):
         self.Text.SetDimensions(2, 0, w-2, 15)
         self.list.SetDimensions(0, 15, w, h-15)
 
-##############################################################################
-# $Log: ireListCtrlPanel.py,v $
-# Revision 1.11  2007/04/26 19:33:57  anton
-# All files in libraries: Applied new license text, separate copyright and
-# updated dates, added standard header where missing.
-#
-# Revision 1.10  2006/11/30 18:33:51  anton
-# cisstInteractive: Fix for bug on mac while loading history.
-#
-# Revision 1.9  2006/11/20 20:33:19  anton
-# Licensing: Applied new license to cisstCommon, cisstVector, cisstNumerical,
-# cisstInteractive, cisstImage and cisstOSAbstraction.
-#
-# Revision 1.8  2006/01/19 06:11:17  pkaz
-# IRE:  portability fixes -- handle Unicode versions; also older wxPython versions (no SetSashGravity).
-#
-# Revision 1.7  2006/01/06 19:47:41  pkaz
-# IRE:  Fixed column sorting for command history, register contents and scope variables.
-# Added up/down arrows to indicate sort directions.
-#
-# Revision 1.6  2006/01/04 22:43:33  pkaz
-# IRE:  improved implementation of ireListCtrlPanel and command history.
-#
-# Revision 1.5  2006/01/02 04:17:44  pkaz
-# IRE:  new (correct) implementation of drag and drop functionality.
-# This check-in resolves item 6 in #174 (drag and drop on Linux).
-#
-# Revision 1.4  2005/12/21 09:27:59  pkaz
-# ireListCtrlPanel.py: implementation of ScrollToLastItem() is for Windows (win32) only.
-#
-# Revision 1.3  2005/09/26 16:36:05  anton
-# cisst: Added modelines for emacs and vi (python), see #164.
-#
-# Revision 1.2  2005/09/06 22:43:33  alamora
-# irepy module: updated for cvs logging info, cisst license
-#

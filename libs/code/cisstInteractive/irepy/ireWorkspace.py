@@ -84,25 +84,4 @@ def main():
 if __name__ == "__main__":
 	sys.modules['ireWorkspace'] = sys.modules['__main__']
 	main()
-	
-# $Log: ireWorkspace.py,v $
-# Revision 1.5  2007/04/26 19:33:57  anton
-# All files in libraries: Applied new license text, separate copyright and
-# updated dates, added standard header where missing.
-#
-# Revision 1.4  2006/11/20 20:33:19  anton
-# Licensing: Applied new license to cisstCommon, cisstVector, cisstNumerical,
-# cisstInteractive, cisstImage and cisstOSAbstraction.
-#
-# Revision 1.3  2005/09/26 16:36:05  anton
-# cisst: Added modelines for emacs and vi (python), see #164.
-#
-# Revision 1.2  2005/09/06 22:43:33  alamora
-# irepy module: updated for cvs logging info, cisst license
-#
-# Revision 1.1  2005/09/06 22:30:03  alamora
-# irepy module: revision 0.10 initial checkin
-#
-# Revision 1.1  2005/01/25 00:52:29  alamora
-# First addition of IRE to the (practical) world
-#
+    

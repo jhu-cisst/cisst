@@ -124,20 +124,3 @@ def getSaveItemImage():
     stream = cStringIO.StringIO(getSaveItemData())
     return ImageFromStream(stream)
 
-# $Log: ireImages.py,v $
-# Revision 1.4  2007/04/26 19:33:57  anton
-# All files in libraries: Applied new license text, separate copyright and
-# updated dates, added standard header where missing.
-#
-# Revision 1.3  2006/11/20 20:33:19  anton
-# Licensing: Applied new license to cisstCommon, cisstVector, cisstNumerical,
-# cisstInteractive, cisstImage and cisstOSAbstraction.
-#
-# Revision 1.2  2006/01/06 21:02:32  pkaz
-# IRE: Added toolbar bitmaps for new/open/save.  Bitmap images are in ireImages.py.
-# This resolves item 1 in #174.
-#
-# Revision 1.1  2006/01/06 19:47:41  pkaz
-# IRE:  Fixed column sorting for command history, register contents and scope variables.
-# Added up/down arrows to indicate sort directions.
-#

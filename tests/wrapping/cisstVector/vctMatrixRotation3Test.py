@@ -131,28 +131,3 @@
 #         mr3 = vctMatRot3(qr2)
 #         self.failUnless(mr3.AlmostEqual(self.mr1))
 
-
-#
-# $Log: vctMatrixRotation3Test.py,v $
-# Revision 1.6  2008/03/13 20:46:46  anton
-# cisstVector wrapper tests: Removed tests on transformations.
-#
-# Revision 1.5  2007/04/26 20:12:05  anton
-# All files in tests: Applied new license text, separate copyright and
-# updated dates, added standard header where missing.
-#
-# Revision 1.4  2006/11/20 20:33:53  anton
-# Licensing: Applied new license to tests.
-#
-# Revision 1.3  2006/05/03 01:47:37  anton
-# cisstVector wrapper tests: Renamed test classes to avoid name conflicts
-# and avoid import *.  All test cases are now visible and running.
-#
-# Revision 1.2  2005/10/08 20:30:31  anton
-# vctMatrixRotation3Test.py: Renamed class, added method for conversion to
-# vctQuatRot3.
-#
-# Revision 1.1  2005/10/07 09:36:57  anton
-# cisstVector wrapper tests: Added preliminary tests for vctMatRot3.
-#
-#

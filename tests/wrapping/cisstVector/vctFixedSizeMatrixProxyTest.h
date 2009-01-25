@@ -105,32 +105,3 @@ class vctFixedSizeMatrixProxyTest {
 
 #endif  // _vctFixedSizeMatrixProxyTest_h
 
-
-// ****************************************************************************
-//                              Change History
-// ****************************************************************************
-//
-// $Log: vctFixedSizeMatrixProxyTest.h,v $
-// Revision 1.6  2007/04/26 20:12:05  anton
-// All files in tests: Applied new license text, separate copyright and
-// updated dates, added standard header where missing.
-//
-// Revision 1.5  2006/11/20 20:33:53  anton
-// Licensing: Applied new license to tests.
-//
-// Revision 1.4  2005/10/07 01:09:26  anton
-// cisstVector Tests: Removed #include <cisstVector.h> to avoid systematic
-// recompilation and useless dependencies.
-//
-// Revision 1.3  2005/09/26 15:41:48  anton
-// cisst: Added modelines for emacs and vi.
-//
-// Revision 1.2  2005/07/22 20:08:18  anton
-// Fixed size containers: Added tests for reference inputs.
-//
-// Revision 1.1  2005/07/19 17:11:17  anton
-// vctFixedSizeMatrix: Added test for SWIG/Python support.
-//
-//
-// ****************************************************************************
-

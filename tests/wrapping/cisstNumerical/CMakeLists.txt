@@ -56,34 +56,3 @@ SET_DIRECTORY_PROPERTIES(PROPERTIES TEST_INCLUDE_FILE
                          ${DART_TEST_FILE})
                          
 
-
-#
-# $Log: CMakeLists.txt,v $
-# Revision 1.7  2007/04/26 20:12:05  anton
-# All files in tests: Applied new license text, separate copyright and
-# updated dates, added standard header where missing.
-#
-# Revision 1.6  2006/11/20 20:33:53  anton
-# Licensing: Applied new license to tests.
-#
-# Revision 1.5  2006/05/13 19:33:01  anton
-# CMake configuration: Preliminary support for directory names with spaces.
-# See ticket #226
-#
-# Revision 1.4  2005/12/07 23:11:48  anton
-# Python tests: Use python executable to start tests (see #198).
-#
-# Revision 1.3  2005/09/14 15:44:33  anton
-# CMakeLists.txt for wrapping tests: Added dependencies on SWIG projects.
-#
-# Revision 1.2  2005/09/06 02:08:15  anton
-# CMake configuration: Created a main CMakeLists.txt for the libs, tests and
-# examples.  A lot of code has been "factorized" in the ./CMakeLists.txt.
-# Known problems: "doc" is not working yet. Dependencies on SWIG projects don't
-# work for parallel builds. If a lib is selected and then unselected, the tests
-# still appear ...
-#
-# Revision 1.1  2005/08/15 06:10:23  anton
-# cisstNumerical wrapping tests: Added required CMakeLists.txt
-#
-#
