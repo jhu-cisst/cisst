@@ -173,10 +173,11 @@ SET(CISST_LIBS_STABLE
 
 SET(CISST_LIBS_UNSTABLE
     cisstNumerical
-    cisstImage
     cisstInteractive
     cisstOSAbstraction
     cisstMultiTask
+    cisstParameterTypes
+    cisstImage
     )
 
 SET(CISST_LIBS
