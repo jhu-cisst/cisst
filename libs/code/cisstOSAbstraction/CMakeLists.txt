@@ -23,6 +23,7 @@ SET(DEPENDENCIES
 
 # all source files
 SET(SOURCE_FILES
+    osaCriticalSection.cpp
     osaDynamicLoader.cpp
     osaDynamicLoaderAndFactory.cpp
     osaGetTime.cpp
@@ -38,6 +39,7 @@ SET(SOURCE_FILES
 
 # all header files
 SET(HEADER_FILES
+    osaCriticalSection.h
     osaDynamicLoader.h
     osaDynamicLoaderAndFactory.h
     osaExport.h
