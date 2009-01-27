@@ -177,6 +177,7 @@ SET(CISST_LIBS_UNSTABLE
     cisstOSAbstraction
     cisstMultiTask
     cisstParameterTypes
+    cisstDevices
     cisstImage
     )
 
