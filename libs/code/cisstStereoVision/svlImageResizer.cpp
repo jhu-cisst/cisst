@@ -122,9 +122,9 @@ int svlImageResizer::Initialize(svlSample* inputdata)
 
         dynamic_cast<svlSampleImageBase*>(OutputData)->SetSize(i, Width[i], Height[i]);
 
-#if (CISST_HAS_OPENCV == OFF)
+#if (CISST_SVL_HAS_OPENCV == OFF)
         TempBuffer[i] = new unsigned char[Width[i] * inputimage->GetHeight(i) * inputimage->GetDataChannels()];
-#endif // CISST_HAS_OPENCV OFF
+#endif // CISST_SVL_HAS_OPENCV OFF
     }
 
     return SVL_OK;
@@ -154,12 +154,12 @@ int svlImageResizer::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata)
             return SVL_OK;
         }
 
-#if (CISST_HAS_OPENCV == ON)
+#if (CISST_SVL_HAS_OPENCV == ON)
 
         if (InterpolationEnabled) cvResize(id->IplImageRef(idx), od->IplImageRef(idx), CV_INTER_LINEAR);
         else cvResize(id->IplImageRef(idx), od->IplImageRef(idx), CV_INTER_NN);
 
-#else // CISST_HAS_OPENCV
+#else // CISST_SVL_HAS_OPENCV
 
         if (id->GetDataChannels() == 3) { // RGB
             if (InterpolationEnabled) {
@@ -214,7 +214,7 @@ int svlImageResizer::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata)
             }
         }
 
-#endif // CISST_HAS_OPENCV
+#endif // CISST_SVL_HAS_OPENCV
     }
 
     return SVL_OK;

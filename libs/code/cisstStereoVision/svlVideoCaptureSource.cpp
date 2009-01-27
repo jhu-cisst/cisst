@@ -36,25 +36,25 @@ http://www.cisst.org/cisst/license.txt.
 #include <fcntl.h>
 #endif // __GNUC__
 
-#if (CISST_HAS_SVS == ON)
+#if (CISST_SVL_HAS_SVS == ON)
 #include "vidSVSSource.h"
-#endif // CISST_HAS_SVS
+#endif // CISST_SVL_HAS_SVS
 
-#if (CISST_HAS_DIRECTSHOW == ON)
+#if (CISST_SVL_HAS_DIRECTSHOW == ON)
 #include "vidDirectShowSource.h"
-#endif // CISST_HAS_DIRECTSHOW
+#endif // CISST_SVL_HAS_DIRECTSHOW
 
-#if (CISST_HAS_VIDEO4LINUX2 == ON)
+#if (CISST_SVL_HAS_VIDEO4LINUX2 == ON)
 #include "vidV4L2Source.h"
-#endif // CISST_HAS_VIDEO4LINUX2
+#endif // CISST_SVL_HAS_VIDEO4LINUX2
 
-#if (CISST_HAS_LIBDC1394 == ON)
+#if (CISST_SVL_HAS_LIBDC1394 == ON)
 #include "vidDC1394Source.h"
-#endif // CISST_HAS_LIBDC1394
+#endif // CISST_SVL_HAS_LIBDC1394
 
-#if (CISST_HAS_OPENCV == ON)
+#if (CISST_SVL_HAS_OPENCV == ON)
 #include "vidOCVSource.h"
-#endif // CISST_HAS_OPENCV
+#endif // CISST_SVL_HAS_OPENCV
 
 using namespace std;
 
@@ -87,21 +87,21 @@ svlVideoCaptureSource::svlVideoCaptureSource(bool stereo) :
 
     // Get the number of supported capture APIs
     NumberOfSupportedAPIs = 0;
-#if (CISST_HAS_SVS == ON)
+#if (CISST_SVL_HAS_SVS == ON)
     NumberOfSupportedAPIs ++;
-#endif // CISST_HAS_SVS
-#if (CISST_HAS_DIRECTSHOW == ON)
+#endif // CISST_SVL_HAS_SVS
+#if (CISST_SVL_HAS_DIRECTSHOW == ON)
     NumberOfSupportedAPIs ++;
-#endif // CISST_HAS_DIRECTSHOW
-#if (CISST_HAS_VIDEO4LINUX2 == ON)
+#endif // CISST_SVL_HAS_DIRECTSHOW
+#if (CISST_SVL_HAS_VIDEO4LINUX2 == ON)
     NumberOfSupportedAPIs ++;
-#endif // CISST_HAS_VIDEO4LINUX2
-#if (CISST_HAS_LIBDC1394 == ON)
+#endif // CISST_SVL_HAS_VIDEO4LINUX2
+#if (CISST_SVL_HAS_LIBDC1394 == ON)
     NumberOfSupportedAPIs ++;
-#endif // CISST_HAS_LIBDC1394
-#if (CISST_HAS_OPENCV == ON)
+#endif // CISST_SVL_HAS_LIBDC1394
+#if (CISST_SVL_HAS_OPENCV == ON)
     NumberOfSupportedAPIs ++;
-#endif // CISST_HAS_OPENCV
+#endif // CISST_SVL_HAS_OPENCV
 
     // Allocate capture API handler array
     DeviceObj = new CVideoCaptureSourceBase*[NumberOfSupportedAPIs];
@@ -189,13 +189,13 @@ int svlVideoCaptureSource::Initialize(svlSample* inputdata)
         platform = DeviceObj[API[i]]->GetPlatformType();
 
         if (platform == WinDirectShow) {
-#if (CISST_HAS_DIRECTSHOW == ON)
+#if (CISST_SVL_HAS_DIRECTSHOW == ON)
             // DirectShow does not use the Format structure.
             // Instead, it has its own custom configuration format.
             if (DevSpecConfigBuffer[i] && DevSpecConfigBufferSize[i] > 0) {
                 dynamic_cast<CDirectShowSource*>(DeviceObj[API[i]])->SetMediaType(DevSpecConfigBuffer[i], DevSpecConfigBufferSize[i], APIChannelID[i]);
             }
-#endif // CISST_HAS_DIRECTSHOW
+#endif // CISST_SVL_HAS_DIRECTSHOW
         }
         else {
             if (Format[i]) DeviceObj[API[i]]->SetFormat(Format[i][0], APIChannelID[i]);
@@ -215,11 +215,11 @@ int svlVideoCaptureSource::Initialize(svlSample* inputdata)
         platform = DeviceObj[API[i]]->GetPlatformType();
 
         if (platform == WinDirectShow) {
-#if (CISST_HAS_DIRECTSHOW == ON)
+#if (CISST_SVL_HAS_DIRECTSHOW == ON)
             // DirectShow does not use the Properties structure.
             // Instead, it encodes image preperties into the custom
             // configuration format which was already set above.
-#endif // CISST_HAS_DIRECTSHOW
+#endif // CISST_SVL_HAS_DIRECTSHOW
         }
         else {
             if (Properties[i]) DeviceObj[API[i]]->SetImageProperties(Properties[i][0], APIChannelID[i]);
@@ -298,7 +298,7 @@ int svlVideoCaptureSource::CreateCaptureAPIHandlers()
     for (i = 0; i < NumberOfChannels; i ++) {
         if (DeviceID[i] < 0 || DeviceID[i] >= NumberOfEnumeratedDevices) goto labError;
         j = 0;
-#if (CISST_HAS_SVS == ON)
+#if (CISST_SVL_HAS_SVS == ON)
         if (EnumeratedDevices[DeviceID[i]].platform == WinSVS) {
             // getting API specific device and channel IDs
             APIDeviceID[i] = EnumeratedDevices[DeviceID[i]].id;
@@ -308,8 +308,8 @@ int svlVideoCaptureSource::CreateCaptureAPIHandlers()
             chperapi[j] ++;
         }
         j ++;
-#endif // CISST_HAS_SVS
-#if (CISST_HAS_DIRECTSHOW == ON)
+#endif // CISST_SVL_HAS_SVS
+#if (CISST_SVL_HAS_DIRECTSHOW == ON)
         if (EnumeratedDevices[DeviceID[i]].platform == WinDirectShow) {
             // getting API specific device and channel IDs
             APIDeviceID[i] = EnumeratedDevices[DeviceID[i]].id;
@@ -319,8 +319,8 @@ int svlVideoCaptureSource::CreateCaptureAPIHandlers()
             chperapi[j] ++;
         }
         j ++;
-#endif // CISST_HAS_DIRECTSHOW
-#if (CISST_HAS_VIDEO4LINUX2 == ON)
+#endif // CISST_SVL_HAS_DIRECTSHOW
+#if (CISST_SVL_HAS_VIDEO4LINUX2 == ON)
         if (EnumeratedDevices[DeviceID[i]].platform == LinVideo4Linux2) {
             // getting API specific device and channel IDs
             APIDeviceID[i] = EnumeratedDevices[DeviceID[i]].id;
@@ -330,8 +330,8 @@ int svlVideoCaptureSource::CreateCaptureAPIHandlers()
             chperapi[j] ++;
         }
         j ++;
-#endif // CISST_HAS_VIDEO4LINUX2
-#if (CISST_HAS_LIBDC1394 == ON)
+#endif // CISST_SVL_HAS_VIDEO4LINUX2
+#if (CISST_SVL_HAS_LIBDC1394 == ON)
         if (EnumeratedDevices[DeviceID[i]].platform == LinLibDC1394) {
             // getting API specific device and channel IDs
             APIDeviceID[i] = EnumeratedDevices[DeviceID[i]].id;
@@ -341,8 +341,8 @@ int svlVideoCaptureSource::CreateCaptureAPIHandlers()
             chperapi[j] ++;
         }
         j ++;
-#endif // CISST_HAS_LIBDC1394
-#if (CISST_HAS_OPENCV == ON)
+#endif // CISST_SVL_HAS_LIBDC1394
+#if (CISST_SVL_HAS_OPENCV == ON)
         if (EnumeratedDevices[DeviceID[i]].platform == OpenCV) {
             // getting API specific device and channel IDs
             APIDeviceID[i] = EnumeratedDevices[DeviceID[i]].id;
@@ -352,47 +352,47 @@ int svlVideoCaptureSource::CreateCaptureAPIHandlers()
             chperapi[j] ++;
         }
         j ++;
-#endif // CISST_HAS_OPENCV
+#endif // CISST_SVL_HAS_OPENCV
     }
 
     // Instantiate capture device handlers and
     // set the number of channels requested
     j = 0;
-#if (CISST_HAS_SVS == ON)
+#if (CISST_SVL_HAS_SVS == ON)
     if (chperapi[j] > 0) {
         DeviceObj[j] = new CSVSSource();
         if (DeviceObj[j]->SetStreamCount(chperapi[j]) != SVL_OK) goto labError;
     }
     j ++;
-#endif // CISST_HAS_SVS
-#if (CISST_HAS_DIRECTSHOW == ON)
+#endif // CISST_SVL_HAS_SVS
+#if (CISST_SVL_HAS_DIRECTSHOW == ON)
     if (chperapi[j] > 0) {
         DeviceObj[j] = new CDirectShowSource();
         if (DeviceObj[j]->SetStreamCount(chperapi[j]) != SVL_OK) goto labError;
     }
     j ++;
-#endif // CISST_HAS_DIRECTSHOW
-#if (CISST_HAS_VIDEO4LINUX2 == ON)
+#endif // CISST_SVL_HAS_DIRECTSHOW
+#if (CISST_SVL_HAS_VIDEO4LINUX2 == ON)
     if (chperapi[j] > 0) {
         DeviceObj[j] = new CV4L2Source();
         if (DeviceObj[j]->SetStreamCount(chperapi[j]) != SVL_OK) goto labError;
     }
     j ++;
-#endif // CISST_HAS_VIDEO4LINUX2
-#if (CISST_HAS_LIBDC1394 == ON)
+#endif // CISST_SVL_HAS_VIDEO4LINUX2
+#if (CISST_SVL_HAS_LIBDC1394 == ON)
     if (chperapi[j] > 0) {
         DeviceObj[j] = new CDC1394Source();
         if (DeviceObj[j]->SetStreamCount(chperapi[j]) != SVL_OK) goto labError;
     }
     j ++;
-#endif // CISST_HAS_LIBDC1394
-#if (CISST_HAS_OPENCV == ON)
+#endif // CISST_SVL_HAS_LIBDC1394
+#if (CISST_SVL_HAS_OPENCV == ON)
     if (chperapi[j] > 0) {
         DeviceObj[j] = new COpenCVSource();
         if (DeviceObj[j]->SetStreamCount(chperapi[j]) != SVL_OK) goto labError;
     }
     j ++;
-#endif // CISST_HAS_OPENCV
+#endif // CISST_SVL_HAS_OPENCV
 
     ret = SVL_OK;
 
@@ -515,7 +515,7 @@ int svlVideoCaptureSource::DialogFormat(unsigned int videoch)
     PlatformType platform = EnumeratedDevices[DeviceID[videoch]].platform;
 
     if (platform == WinDirectShow) {
-#if (CISST_HAS_DIRECTSHOW == ON)
+#if (CISST_SVL_HAS_DIRECTSHOW == ON)
         // Create temporary DirectShow capture module and initialize it
         CDirectShowSource device;
         device.SetStreamCount(1);
@@ -536,7 +536,7 @@ int svlVideoCaptureSource::DialogFormat(unsigned int videoch)
             device.GetMediaType(DevSpecConfigBuffer[videoch], DevSpecConfigBufferSize[videoch]);
         }
         else return SVL_FAIL;
-#endif // CISST_HAS_DIRECTSHOW
+#endif // CISST_SVL_HAS_DIRECTSHOW
     }
     else {
         // No GUI available for other APIs.
@@ -573,7 +573,7 @@ int svlVideoCaptureSource::DialogImageProperties(unsigned int videoch)
     PlatformType platform = DeviceObj[API[videoch]]->GetPlatformType();
 
     if (platform == WinDirectShow) {
-#if (CISST_HAS_DIRECTSHOW == ON)
+#if (CISST_SVL_HAS_DIRECTSHOW == ON)
         CDirectShowSource* device = dynamic_cast<CDirectShowSource*>(DeviceObj[API[videoch]]);
         if (device->ShowImageDialog(0, APIChannelID[videoch]) == SVL_OK) {
             // Store, whatever changes have been made
@@ -583,7 +583,7 @@ int svlVideoCaptureSource::DialogImageProperties(unsigned int videoch)
             DevSpecConfigBufferSize[videoch] = 0;
             device->GetMediaType(DevSpecConfigBuffer[videoch], DevSpecConfigBufferSize[videoch]);
         }
-#endif // CISST_HAS_DIRECTSHOW
+#endif // CISST_SVL_HAS_DIRECTSHOW
     }
     else {
         // No GUI available for other APIs
@@ -822,7 +822,7 @@ int svlVideoCaptureSource::GetDeviceList(DeviceInfo **deviceinfolist, bool updat
 
         // Enumerate API by API and store all results
         j = 0;
-#if (CISST_HAS_SVS == ON)
+#if (CISST_SVL_HAS_SVS == ON)
         apideviceinfos[j] = 0;
         apidevicecounts[j] = 0;
         CSVSSource *svsdevice = new CSVSSource();
@@ -838,8 +838,8 @@ int svlVideoCaptureSource::GetDeviceList(DeviceInfo **deviceinfolist, bool updat
             if (apidevicecounts[j] > 0) NumberOfEnumeratedDevices += apidevicecounts[j];
         }
         j ++;
-#endif // CISST_HAS_SVS
-#if (CISST_HAS_DIRECTSHOW == ON)
+#endif // CISST_SVL_HAS_SVS
+#if (CISST_SVL_HAS_DIRECTSHOW == ON)
         apideviceinfos[j] = 0;
         apidevicecounts[j] = 0;
         CDirectShowSource *dsdevice = new CDirectShowSource();
@@ -855,8 +855,8 @@ int svlVideoCaptureSource::GetDeviceList(DeviceInfo **deviceinfolist, bool updat
             if (apidevicecounts[j] > 0) NumberOfEnumeratedDevices += apidevicecounts[j];
         }
         j ++;
-#endif // CISST_HAS_DIRECTSHOW
-#if (CISST_HAS_VIDEO4LINUX2 == ON)
+#endif // CISST_SVL_HAS_DIRECTSHOW
+#if (CISST_SVL_HAS_VIDEO4LINUX2 == ON)
         apideviceinfos[j] = 0;
         apidevicecounts[j] = 0;
         CV4L2Source *v4l2device = new CV4L2Source();
@@ -872,8 +872,8 @@ int svlVideoCaptureSource::GetDeviceList(DeviceInfo **deviceinfolist, bool updat
             if (apidevicecounts[j] > 0) NumberOfEnumeratedDevices += apidevicecounts[j];
         }
         j ++;
-#endif // CISST_HAS_VIDEO4LINUX2
-#if (CISST_HAS_LIBDC1394 == ON)
+#endif // CISST_SVL_HAS_VIDEO4LINUX2
+#if (CISST_SVL_HAS_LIBDC1394 == ON)
         apideviceinfos[j] = 0;
         apidevicecounts[j] = 0;
         CDC1394Source *dc1394device = new CDC1394Source();
@@ -889,8 +889,8 @@ int svlVideoCaptureSource::GetDeviceList(DeviceInfo **deviceinfolist, bool updat
             if (apidevicecounts[j] > 0) NumberOfEnumeratedDevices += apidevicecounts[j];
         }
         j ++;
-#endif // CISST_HAS_LIBDC1394
-#if (CISST_HAS_OPENCV == ON)
+#endif // CISST_SVL_HAS_LIBDC1394
+#if (CISST_SVL_HAS_OPENCV == ON)
         apideviceinfos[j] = 0;
         apidevicecounts[j] = 0;
         COpenCVSource *ocvdevice = new COpenCVSource();
@@ -906,7 +906,7 @@ int svlVideoCaptureSource::GetDeviceList(DeviceInfo **deviceinfolist, bool updat
             if (apidevicecounts[j] > 0) NumberOfEnumeratedDevices += apidevicecounts[j];
         }
         j ++;
-#endif // CISST_HAS_OPENCV
+#endif // CISST_SVL_HAS_OPENCV
 
         if (NumberOfEnumeratedDevices > 0) {
             // Allocate the ONE device info array

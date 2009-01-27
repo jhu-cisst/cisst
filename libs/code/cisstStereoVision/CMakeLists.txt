@@ -67,7 +67,7 @@ SET(SOURCE_FILES
     svlPointTracker.cpp
     svlStereoImageJoiner.cpp
     svlImageFlipRotate.cpp
-# Trackers
+    # Trackers
     trackers/msbruteforce/svlTrackerMSBruteForce.cpp
     trackers/cisst/svlTrackerCisst.cpp
     trackers/cisst/trkCisstWSSD.h      # private header
@@ -113,9 +113,9 @@ SET(HEADER_FILES
     )
 
 
-OPTION(SVL_HAS_OPENCV "Compile OpenCV extensions" OFF)
-IF(SVL_HAS_OPENCV)
-
+# OpenCV
+OPTION(CISST_SVL_HAS_OPENCV "Compile OpenCV extensions" OFF)
+IF(CISST_SVL_HAS_OPENCV)
   FIND_PACKAGE(OpenCV)
   INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS})
   LINK_DIRECTORIES(${OpenCV_LINK_DIRECTORIES})
@@ -125,24 +125,22 @@ IF(SVL_HAS_OPENCV)
       ${SOURCE_FILES}
       vidOCVSource.h        # private header
       vidOCVSource.cpp
-# Trackers
+      # Trackers
       trackers/opencv/svlTrackerOpenCV.cpp
       trackers/opencv/trkOCVColor.h        # private header
       trackers/opencv/trkOCVColor.cpp
       )
   SET(HEADER_FILES
       ${HEADER_FILES}
-# Trackers
+      # Trackers
       trackers/svlTrackerOpenCV.h
       )
-
-ENDIF(SVL_HAS_OPENCV)
+ENDIF(CISST_SVL_HAS_OPENCV)
 
 
 # Windows specific
 IF(WIN32)
-
-  #generic windows specific files
+  # generic windows specific files
   SET(SOURCE_FILES
     ${SOURCE_FILES}
     winWin32.h               # private header
@@ -156,31 +154,31 @@ IF(WIN32)
     svlImageWindow.h
     )
 
-  OPTION(SVL_HAS_DIRECTSHOW "Compile DirectShow extensions" OFF)
-  IF(SVL_HAS_DIRECTSHOW)
+  OPTION(CISST_SVL_HAS_DIRECTSHOW "Compile DirectShow extensions" OFF)
+  IF(CISST_SVL_HAS_DIRECTSHOW)
 
     # Find Direct Show
     FIND_PACKAGE(DirectShow)
     INCLUDE_DIRECTORIES(${DIRECTSHOW_INCLUDE_DIR} ${DIRECTX_INCLUDE_DIR})
 
     # Find samples and compiled samples
-    SET(SVL_DS_SDK_DIR "C:/Program Files/Microsoft Platform SDK for Windows Server 2003 R2/Samples")
-    FIND_PATH(SVL_DS_CROSSBAR_PATH 
+    SET(CISST_SVL_DS_SDK_DIR "C:/Program Files/Microsoft Platform SDK for Windows Server 2003 R2/Samples")
+    FIND_PATH(CISST_SVL_DS_CROSSBAR_PATH 
               NAMES crossbar.h
-              PATHS "${SVL_DS_SDK_DIR}/Multimedia/DirectShow/Capture/AMCap")
-    FIND_FILE(SVL_DS_CROSSBAR_OBJ
+              PATHS "${CISST_SVL_DS_SDK_DIR}/Multimedia/DirectShow/Capture/AMCap")
+    FIND_FILE(CISST_SVL_DS_CROSSBAR_OBJ
               NAMES crossbar.obj
-              PATHS "${SVL_DS_SDK_DIR}/Multimedia/DirectShow/Capture/AMCap/XP32_RETAIL")
-    CONFIGURE_FILE(${SVL_DS_CROSSBAR_OBJ}
+              PATHS "${CISST_SVL_DS_SDK_DIR}/Multimedia/DirectShow/Capture/AMCap/XP32_RETAIL")
+    CONFIGURE_FILE(${CISST_SVL_DS_CROSSBAR_OBJ}
                    ${CMAKE_CURRENT_SOURCE_DIR}/crossbar-copy.obj COPYONLY)
-    FIND_PATH(SVL_DS_BASECLASSES_PATH 
+    FIND_PATH(CISST_SVL_DS_BASECLASSES_PATH 
               NAMES streams.h
-              PATHS "${SVL_DS_SDK_DIR}/Multimedia/DirectShow/BaseClasses")
-    FIND_LIBRARY(SVL_DS_strmbase_LIB
+              PATHS "${CISST_SVL_DS_SDK_DIR}/Multimedia/DirectShow/BaseClasses")
+    FIND_LIBRARY(CISST_SVL_DS_strmbase_LIB
                  NAMES strmbase
-                 PATHS "${SVL_DS_SDK_DIR}/Multimedia/DirectShow/BaseClasses/XP32_RETAIL")
+                 PATHS "${CISST_SVL_DS_SDK_DIR}/Multimedia/DirectShow/BaseClasses/XP32_RETAIL")
 
-    INCLUDE_DIRECTORIES(${SVL_DS_CROSSBAR_PATH} ${SVL_DS_BASECLASSES_PATH})
+    INCLUDE_DIRECTORIES(${CISST_SVL_DS_CROSSBAR_PATH} ${CISST_SVL_DS_BASECLASSES_PATH})
 
     SET(SOURCE_FILES
         ${SOURCE_FILES}
@@ -189,37 +187,37 @@ IF(WIN32)
         vidDirectShowSource.cpp
         )
 
-  ENDIF(SVL_HAS_DIRECTSHOW)
+  ENDIF(CISST_SVL_HAS_DIRECTSHOW)
 
-  OPTION(SVL_HAS_SVS "Compile Videre Design SVS extensions" OFF)
-  IF(SVL_HAS_SVS)
+  OPTION(CISST_SVL_HAS_SVS "Compile Videre Design SVS extensions" OFF)
+  IF(CISST_SVL_HAS_SVS)
 
-    SET(SVL_SVS_DIR "C:/Program Files/SRI International/SVS41")
-    FIND_PATH(SVL_SVS_INCLUDE
+    SET(CISST_SVL_SVS_DIR "C:/Program Files/SRI International/SVS41")
+    FIND_PATH(CISST_SVL_SVS_INCLUDE
               NAMES svs.h
-              PATHS "${SVL_SVS_DIR}/src")
-    INCLUDE_DIRECTORIES(${SVL_SVS_INCLUDE})
-    FIND_LIBRARY(SVL_svsgrab_LIBRARY
+              PATHS "${CISST_SVL_SVS_DIR}/src")
+    INCLUDE_DIRECTORIES(${CISST_SVL_SVS_INCLUDE})
+    FIND_LIBRARY(CISST_SVL_svsgrab_LIBRARY
                  NAMES svsgrab
-                 PATHS "${SVL_SVS_DIR}/bin")
-    FIND_LIBRARY(SVL_svs_LIBRARY
+                 PATHS "${CISST_SVL_SVS_DIR}/bin")
+    FIND_LIBRARY(CISST_SVL_svs_LIBRARY
                  NAMES svs
-                 PATHS "${SVL_SVS_DIR}/bin")
+                 PATHS "${CISST_SVL_SVS_DIR}/bin")
     SET(SOURCE_FILES
         ${SOURCE_FILES}
         vidSVSSource.cpp
         vidSVSSource.h          # private header
         )
 
-  ENDIF(SVL_HAS_SVS)
+  ENDIF(CISST_SVL_HAS_SVS)
 
   ADD_DEFINITIONS(-DWIN32_LEAN_AND_MEAN)
 
 ELSE(WIN32)
 
   #Turn Windows specific switches OFF on other platforms
-  SET(SVL_HAS_DIRECTSHOW "OFF" CACHE INTERNAL "SVL Has DirectShow")
-  SET(SVL_HAS_SVS        "OFF" CACHE INTERNAL "SVL Has SVS")
+  SET(CISST_SVL_HAS_DIRECTSHOW "OFF" CACHE INTERNAL "SVL Has DirectShow")
+  SET(CISST_SVL_HAS_SVS        "OFF" CACHE INTERNAL "SVL Has SVS")
 
 ENDIF(WIN32)
 
@@ -228,31 +226,31 @@ ENDIF(WIN32)
 IF(UNIX)
   #Linux specific
   IF(CMAKE_SYSTEM_NAME MATCHES Linux)
-    OPTION(SVL_HAS_VIDEO4LINUX2 "Compile Video4Linux2 extensions" OFF)
-    IF(SVL_HAS_VIDEO4LINUX2)
+    OPTION(CISST_SVL_HAS_VIDEO4LINUX2 "Compile Video4Linux2 extensions" OFF)
+    IF(CISST_SVL_HAS_VIDEO4LINUX2)
       SET(SOURCE_FILES
           ${SOURCE_FILES}
           vidV4L2Source.h           # private header
           vidV4L2Source.cpp
           )
-    ENDIF(SVL_HAS_VIDEO4LINUX2)
+    ENDIF(CISST_SVL_HAS_VIDEO4LINUX2)
 
-    OPTION(SVL_HAS_LIBDC1394 "Compile LibDC1394 extensions" OFF)
-    IF(SVL_HAS_LIBDC1394)
+    OPTION(CISST_SVL_HAS_LIBDC1394 "Compile LibDC1394 extensions" OFF)
+    IF(CISST_SVL_HAS_LIBDC1394)
       SET(SOURCE_FILES
           ${SOURCE_FILES}
           vidDC1394Source.h         # private header
           vidDC1394Source.cpp
           )
-    ENDIF(SVL_HAS_LIBDC1394)
+    ENDIF(CISST_SVL_HAS_LIBDC1394)
   ELSE(CMAKE_SYSTEM_NAME MATCHES Linux)
     #Turn Linux specific switches OFF on other platforms
-    SET(SVL_HAS_VIDEO4LINUX2 "OFF" CACHE INTERNAL "SVL Has Video4Linux2")
-    SET(SVL_HAS_LIBDC1394    "OFF" CACHE INTERNAL "SVL Has LibDC1394")
+    SET(CISST_SVL_HAS_VIDEO4LINUX2 "OFF" CACHE INTERNAL "SVL Has Video4Linux2")
+    SET(CISST_SVL_HAS_LIBDC1394    "OFF" CACHE INTERNAL "SVL Has LibDC1394")
   ENDIF(CMAKE_SYSTEM_NAME MATCHES Linux)
   # Linux and Darwin
-  OPTION(SVL_HAS_X11 "Compile X11 extensions" OFF)
-  IF(SVL_HAS_X11)
+  OPTION(CISST_SVL_HAS_X11 "Compile X11 extensions" OFF)
+  IF(CISST_SVL_HAS_X11)
     FIND_PACKAGE(X11 REQUIRED)
     INCLUDE_DIRECTORIES(X11_INCLUDE_DIR)
     SET(SOURCE_FILES
@@ -265,43 +263,57 @@ IF(UNIX)
         ${HEADER_FILES}
         svlImageWindow.h
         )
-  ENDIF(SVL_HAS_X11)
+  ENDIF(CISST_SVL_HAS_X11)
 ELSE(UNIX)
 
-  #Turn Unix specific switches OFF on other platforms
-  SET(SVL_HAS_VIDEO4LINUX2 "OFF" CACHE INTERNAL "SVL Has Video4Linux2")
-  SET(SVL_HAS_LIBDC1394    "OFF" CACHE INTERNAL "SVL Has LibDC1394")
-  SET(SVL_HAS_X11          "OFF" CACHE INTERNAL "SVL Has X11")
+  # Turn Unix specific switches OFF on other platforms
+  SET(CISST_SVL_HAS_VIDEO4LINUX2 "OFF" CACHE INTERNAL "SVL Has Video4Linux2")
+  SET(CISST_SVL_HAS_LIBDC1394    "OFF" CACHE INTERNAL "SVL Has LibDC1394")
+  SET(CISST_SVL_HAS_X11          "OFF" CACHE INTERNAL "SVL Has X11")
 
 ENDIF(UNIX)
 
+# Create the config file
+SET(CISST_SVL_CONFIG_FILE ${cisst_BINARY_DIR}/libs/include/cisstStereoVision/svlConfig.h)
+CONFIGURE_FILE(${cisst_SOURCE_DIR}/libs/include/cisstStereoVision/svlConfig.h.in
+               ${CISST_SVL_CONFIG_FILE}
+               @ONLY)
+INSTALL_FILES(/include/cisstStereoVision
+               ".h"
+               ${CISST_SVL_CONFIG_FILE})
 
+# Add the config file to the project
+# SET_SOURCE_FILES_PROPERTIES("${CISST_SVL_CONFIG_FILE}"
+#                             PROPERTIES GENERATED TRUE)
+# SET(HEADER_FILES ${HEADER_FILES} ${CISST_SVL_CONFIG_FILE})
+
+# Finally create the library
 CISST_ADD_LIBRARY_TO_PROJECT(cisstLibs)
 
-
+# Add libraries to link with based on options
 IF(WIN32)
-  IF(SVL_HAS_DIRECTSHOW)
+  IF(CISST_SVL_HAS_DIRECTSHOW)
     TARGET_LINK_LIBRARIES(cisstStereoVision
                           ${DIRECTSHOW_strmiids_LIBRARY}
                           ${DIRECTSHOW_Vfw32_LIBRARY}
                           ${DIRECTSHOW_WinMM_LIBRARY}
-                          ${SVL_DS_strmbase_LIB}
+                          ${CISST_SVL_DS_strmbase_LIB}
                           )
-    set(CMAKE_SHARED_LINKER_FLAGS
+    SET(CMAKE_SHARED_LINKER_FLAGS
         "${CMAKE_SHARED_LINKER_FLAGS} /NODEFAULTLIB:libc.lib /NODEFAULTLIB:libcmt.lib /NODEFAULTLIB:libcd.lib /NODEFAULTLIB:libcmtd.lib")
-  ENDIF(SVL_HAS_DIRECTSHOW)
+  ENDIF(CISST_SVL_HAS_DIRECTSHOW)
 
-  IF(SVL_HAS_SVS)
+  IF(CISST_SVL_HAS_SVS)
     TARGET_LINK_LIBRARIES(cisstStereoVision
-                          ${SVL_svs_LIBRARY}
-                          ${SVL_svsgrab_LIBRARY}
+                          ${CISST_SVL_svs_LIBRARY}
+                          ${CISST_SVL_svsgrab_LIBRARY}
                           )
 
-  ENDIF(SVL_HAS_SVS)
+  ENDIF(CISST_SVL_HAS_SVS)
 ENDIF(WIN32)
 
 
-IF(SVL_HAS_X11)
+IF(CISST_SVL_HAS_X11)
   TARGET_LINK_LIBRARIES(cisstStereoVision ${X11_LIBRARIES})
-ENDIF(SVL_HAS_X11)
+ENDIF(CISST_SVL_HAS_X11)
 

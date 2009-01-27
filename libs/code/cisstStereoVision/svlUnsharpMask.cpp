@@ -99,11 +99,11 @@ int svlUnsharpMask::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata)
             continue;
         }
 
-#if (CISST_HAS_OPENCV == ON)
+#if (CISST_SVL_HAS_OPENCV == ON)
 
         cvSmooth(input->IplImageRef(idx), output->IplImageRef(idx), CV_GAUSSIAN, Radius * 2 + 1);
 
-#else // CISST_HAS_OPENCV
+#else // CISST_SVL_HAS_OPENCV
 
         FilterBlur(reinterpret_cast<unsigned char*>(input->GetPointer(idx)),
                    reinterpret_cast<unsigned char*>(output->GetPointer(idx)),
@@ -111,7 +111,7 @@ int svlUnsharpMask::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata)
                    input->GetHeight(idx),
                    Radius);
 
-#endif // CISST_HAS_OPENCV
+#endif // CISST_SVL_HAS_OPENCV
 
         Sharpening(reinterpret_cast<unsigned char*>(input->GetPointer(idx)),
                    reinterpret_cast<unsigned char*>(output->GetPointer(idx)),

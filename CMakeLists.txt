@@ -179,6 +179,7 @@ SET(CISST_LIBS_UNSTABLE
     cisstParameterTypes
     cisstDevices
     cisstImage
+    cisstStereoVision
     )
 
 SET(CISST_LIBS

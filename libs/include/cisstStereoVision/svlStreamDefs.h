@@ -28,8 +28,9 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstVector.h>
 #include <cisstImage.h>
 #include <cisstOSAbstraction.h>
+#include <cisstStereoVision/svlConfig.h>
 
-#if (CISST_HAS_OPENCV == ON)
+#if (CISST_SVL_HAS_OPENCV == ON)
     #if (CISST_OS == CISST_WINDOWS) || (CISST_OS == CISST_DARWIN)
         #include <cv.h>
     #else
@@ -163,11 +164,11 @@ public:
         for (unsigned int vch = 0; vch < _VideoChannels; vch ++) {
             Image[vch] = new vctDynamicMatrix<_ValueType>;
             ImageRef[vch].SetRef(*(Image[vch]));
-#if (CISST_HAS_OPENCV == ON)
+#if (CISST_SVL_HAS_OPENCV == ON)
             int ocvdepth = GetOCVDepth();
             if (ocvdepth >= 0) OCVImageHeader[vch] = cvCreateImageHeader(cvSize(0, 0), ocvdepth, _DataChannels);
             else OCVImageHeader[vch] = 0;
-#endif // CISST_HAS_OPENCV
+#endif // CISST_SVL_HAS_OPENCV
         }
     }
 
@@ -181,11 +182,11 @@ public:
                 ImageRef[vch].SetRef(*(Image[vch]));
             }
             else Image[vch] = 0;
-#if (CISST_HAS_OPENCV == ON)
+#if (CISST_SVL_HAS_OPENCV == ON)
             int ocvdepth = GetOCVDepth();
             if (ocvdepth >= 0) OCVImageHeader[vch] = cvCreateImageHeader(cvSize(0, 0), ocvdepth, _DataChannels);
             else OCVImageHeader[vch] = 0;
-#endif // CISST_HAS_OPENCV
+#endif // CISST_SVL_HAS_OPENCV
         }
     }
 
@@ -193,9 +194,9 @@ public:
     {
         for (unsigned int vch = 0; vch < _VideoChannels; vch ++) {
             if (OwnData) delete Image[vch];
-#if (CISST_HAS_OPENCV == ON)
+#if (CISST_SVL_HAS_OPENCV == ON)
             if (OCVImageHeader[vch]) cvReleaseImageHeader(&(OCVImageHeader[vch]));
-#endif // CISST_HAS_OPENCV
+#endif // CISST_SVL_HAS_OPENCV
         }
     }
 
@@ -209,7 +210,7 @@ public:
         if (!OwnData && videochannel < _VideoChannels && pointer) {
             Image[videochannel] = pointer;
             ImageRef[videochannel].SetRef(*pointer);
-#if (CISST_HAS_OPENCV == ON)
+#if (CISST_SVL_HAS_OPENCV == ON)
             if (OCVImageHeader[videochannel]) {
                 cvInitImageHeader(OCVImageHeader[videochannel],
                                   cvSize(GetWidth(videochannel), GetHeight(videochannel)),
@@ -219,7 +220,7 @@ public:
                           GetPointer(videochannel),
                           GetWidth(videochannel) * _DataChannels);
             }
-#endif // CISST_HAS_OPENCV
+#endif // CISST_SVL_HAS_OPENCV
             return true;
         }
         return false;
@@ -233,13 +234,13 @@ public:
 
     IplImage* IplImageRef(const unsigned int videochannel = 0)
     {
-#if (CISST_HAS_OPENCV == ON)
+#if (CISST_SVL_HAS_OPENCV == ON)
         if (videochannel < _VideoChannels) return OCVImageHeader[videochannel];
         else return 0;
-#else // CISST_HAS_OPENCV
+#else // CISST_SVL_HAS_OPENCV
         CMN_LOG(2) << "Class svlSampleImageCustom: IplImageRef() called while OpenCV is disabled" << std::endl;
         return 0;
-#endif // CISST_HAS_OPENCV
+#endif // CISST_SVL_HAS_OPENCV
     }
 
     bool IsImage() { return true; }
@@ -293,7 +294,7 @@ public:
         if (videochannel < _VideoChannels && Image[videochannel]) {
             Image[videochannel]->SetSize(height,  width * _DataChannels);
             ImageRef[videochannel].SetRef(*(Image[videochannel]));
-#if (CISST_HAS_OPENCV == ON)
+#if (CISST_SVL_HAS_OPENCV == ON)
             if (OCVImageHeader[videochannel]) {
                 cvInitImageHeader(OCVImageHeader[videochannel],
                                   cvSize(width, height),
@@ -303,7 +304,7 @@ public:
                           GetPointer(videochannel),
                           width * GetBPP());
             }
-#endif // CISST_HAS_OPENCV
+#endif // CISST_SVL_HAS_OPENCV
         }
     }
 
@@ -355,7 +356,7 @@ private:
     vctDynamicMatrixRef<_ValueType> ImageRef[_VideoChannels];
     vctDynamicMatrixRef<_ValueType> InvalidRef;
 
-#if (CISST_HAS_OPENCV == ON)
+#if (CISST_SVL_HAS_OPENCV == ON)
     IplImage* OCVImageHeader[_VideoChannels];
 
     int GetOCVDepth()
@@ -365,7 +366,7 @@ private:
         if (IsTypeFloat<_ValueType>(static_cast<_ValueType>(0))) return IPL_DEPTH_32F;
         return -1;
     }
-#endif // CISST_HAS_OPENCV
+#endif // CISST_SVL_HAS_OPENCV
 };
 
 
