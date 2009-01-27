@@ -167,3 +167,22 @@ typedef mtsCommandQualifiedReadOrWriteBase<const cmnGenericObject> mtsCommandQua
 }
 
 
+// Wrap mtsVector
+%import "cisstMultiTask/mtsVector.h"
+
+// define macro
+%define MTS_INSTANTIATE_VECTOR(name, elementType)
+%template(name) mtsVector<elementType>;
+%{
+    typedef mtsVector<elementType> name;
+%}
+typedef mtsVector<elementType> name;
+%types(name *);
+%enddef
+
+// instantiate for types also instantiated in cisstVector wrappers
+MTS_INSTANTIATE_VECTOR(mtsDoubleVec, double); 
+MTS_INSTANTIATE_VECTOR(mtsIntVec, int); 
+MTS_INSTANTIATE_VECTOR(mtsShortVec, short); 
+MTS_INSTANTIATE_VECTOR(mtsLongVec, long); 
+MTS_INSTANTIATE_VECTOR(mtsBoolVec, bool); 
