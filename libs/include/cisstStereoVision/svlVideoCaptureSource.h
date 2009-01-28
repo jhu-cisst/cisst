@@ -184,11 +184,26 @@ public:
 	virtual int GetWidth(unsigned int videoch = 0) = 0;
 	virtual int GetHeight(unsigned int videoch = 0) = 0;
 
-    virtual int GetFormatList(unsigned int deviceid, svlVideoCaptureSource::ImageFormat **formatlist) { return SVL_FAIL; }
-    virtual int SetFormat(svlVideoCaptureSource::ImageFormat& format, unsigned int videoch = 0) { return SVL_FAIL; }
-    virtual int GetFormat(svlVideoCaptureSource::ImageFormat& format, unsigned int videoch = 0) { return SVL_FAIL; }
-    virtual int SetImageProperties(svlVideoCaptureSource::ImageProperties& properties, unsigned int videoch = 0) { return SVL_FAIL; }
-    virtual int GetImageProperties(svlVideoCaptureSource::ImageProperties& properties, unsigned int videoch = 0) { return SVL_FAIL; }
+    virtual int GetFormatList(unsigned int CMN_UNUSED(deviceid),
+                              svlVideoCaptureSource::ImageFormat **CMN_UNUSED(formatlist)) {
+        return SVL_FAIL;
+    }
+    virtual int SetFormat(svlVideoCaptureSource::ImageFormat & CMN_UNUSED(format),
+                          unsigned int CMN_UNUSED(videoch) = 0) {
+        return SVL_FAIL;
+    }
+    virtual int GetFormat(svlVideoCaptureSource::ImageFormat & CMN_UNUSED(format),
+                          unsigned int CMN_UNUSED(videoch) = 0) {
+        return SVL_FAIL;
+    }
+    virtual int SetImageProperties(svlVideoCaptureSource::ImageProperties & CMN_UNUSED(properties),
+                                   unsigned int CMN_UNUSED(videoch) = 0) {
+        return SVL_FAIL;
+    }
+    virtual int GetImageProperties(svlVideoCaptureSource::ImageProperties & CMN_UNUSED(properties),
+                                   unsigned int CMN_UNUSED(videoch) = 0) {
+        return SVL_FAIL;
+    }
 };
 
 

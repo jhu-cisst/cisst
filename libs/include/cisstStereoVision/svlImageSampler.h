@@ -39,12 +39,12 @@ public:
     virtual ~svlImageSamplerCallbackBase() {}
 
     // Callback
-    virtual void FrameCallback(svlSampleImageBase* image,
-                               svlBMPFileHeader* fileheader1, svlDIBHeader* dibheader1,
-                               svlBMPFileHeader* fileheader2, svlDIBHeader* dibheader2) {}
+    virtual void FrameCallback(svlSampleImageBase * CMN_UNUSED(image),
+                               svlBMPFileHeader * CMN_UNUSED(fileheader1), svlDIBHeader * CMN_UNUSED(dibheader1),
+                               svlBMPFileHeader * CMN_UNUSED(fileheader2), svlDIBHeader * CMN_UNUSED(dibheader2)) {}
 
-    unsigned int GetFrameCounter() { return FrameCounter; }
-    void ResetCounter() { FrameCounter = 0; }
+    inline unsigned int GetFrameCounter(void) { return FrameCounter; }
+    inline void ResetCounter(void) { FrameCounter = 0; }
 
 private:
     unsigned int FrameCounter;

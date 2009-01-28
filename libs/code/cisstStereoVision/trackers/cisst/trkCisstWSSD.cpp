@@ -267,7 +267,8 @@ void trkCisstWSSD::copyImage_cisst(MatrixType &src, MatrixType &dst, IndexType s
 }
 
 //Copy a input image into buffer matrix
-void trkCisstWSSD::copyImage(InterfaceImType *src, IndexType src_rows, IndexType src_cols, MatrixType &dst, IndexType startR, IndexType startC) {
+void trkCisstWSSD::copyImage(InterfaceImType *src, IndexType src_rows, IndexType src_cols,
+                             MatrixType &dst, IndexType startR, IndexType startC) {
 	for(IndexType r = 0; r < dst.rows(); r++) {
 		for(IndexType c = 0; c < dst.cols(); c++) {
 			dst.Element(r,c) = src[(startR+r)*src_cols+(startC+c)];

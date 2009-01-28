@@ -882,18 +882,19 @@ svlFilterBase::~svlFilterBase()
 {
 }
 
-int svlFilterBase::Initialize(svlSample* inputdata)
+int svlFilterBase::Initialize(svlSample* CMN_UNUSED(inputdata))
 {
     Initialized = true;
     return SVL_OK;
 }
 
-int svlFilterBase::OnStart(unsigned int procCount)
+int svlFilterBase::OnStart(unsigned int CMN_UNUSED(procCount))
 {
     return SVL_OK;
 }
 
-int svlFilterBase::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata)
+int svlFilterBase::ProcessFrame(ProcInfo* CMN_UNUSED(procInfo),
+                                svlSample* CMN_UNUSED(inputdata))
 {
     return SVL_OK;
 }

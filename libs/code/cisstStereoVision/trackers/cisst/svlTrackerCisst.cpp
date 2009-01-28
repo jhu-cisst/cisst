@@ -101,7 +101,7 @@ void svlTrackerCisst::Release()
     }
 }
 
-int svlTrackerCisst::SetTargetCount(unsigned int targetcount)
+int svlTrackerCisst::SetTargetCount(unsigned int CMN_UNUSED(targetcount))
 {
     if (Initialized) return -1;
     // hard wired to 1 until I figure out how to add more targets

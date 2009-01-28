@@ -50,7 +50,8 @@ svlImageFile* ftImagePPM::GetInstance()
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // ftImagePPM::ExtractDimensions
 // Limitations:
-int ftImagePPM::ExtractDimensions(const char* filepath, int & width, int & height)
+int ftImagePPM::ExtractDimensions(const char* CMN_UNUSED(filepath),
+                                  int & CMN_UNUSED(width), int & CMN_UNUSED(height))
 {
     // TODO
     return -1;

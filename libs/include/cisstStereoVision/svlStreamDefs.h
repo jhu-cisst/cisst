@@ -90,19 +90,19 @@ typedef vctDynamicMatrix<double> svlPointCloud;
 ////////////////////////////////////
 
 template <class __ValueType>
-static bool IsTypeFloat(__ValueType val) { return false; }
+static bool IsTypeFloat(__ValueType CMN_UNUSED(val)) { return false; }
 template <>
-static bool IsTypeFloat<float>(float val) { return true; }
+static bool IsTypeFloat<float>(float CMN_UNUSED(val)) { return true; }
 
 template <class __ValueType>
-static bool IsTypeUChar(__ValueType val) { return false; }
+static bool IsTypeUChar(__ValueType CMN_UNUSED(val)) { return false; }
 template <>
-static bool IsTypeUChar<unsigned char>(unsigned char val) { return true; }
+static bool IsTypeUChar<unsigned char>(unsigned char CMN_UNUSED(val)) { return true; }
 
 template <class __ValueType>
-static bool IsTypeUWord(__ValueType val) { return false; }
+static bool IsTypeUWord(__ValueType CMN_UNUSED(val)) { return false; }
 template <>
-static bool IsTypeUWord<unsigned short>(unsigned short val) { return true; }
+static bool IsTypeUWord<unsigned short>(unsigned short CMN_UNUSED(val)) { return true; }
 
 
 ///////////////////////////////////////
@@ -135,7 +135,7 @@ public:
     svlSampleImageBase() : svlSample() {}
     virtual ~svlSampleImageBase() {}
     virtual svlSample* GetNewInstance() = 0;
-    virtual IplImage* IplImageRef(const unsigned int videochannel = 0) { return 0; }
+    virtual IplImage* IplImageRef(const unsigned int CMN_UNUSED(videochannel) = 0) { return 0; }
     bool IsImage() { return true; }
     virtual svlStreamType GetType() = 0;
     virtual bool IsInitialized() = 0;
@@ -232,7 +232,12 @@ public:
         else return InvalidRef;
     }
 
+
+#if (CISST_SVL_HAS_OPENCV == ON)
     IplImage* IplImageRef(const unsigned int videochannel = 0)
+#else // CISST_SVL_HAS_OPENCV
+    IplImage* IplImageRef(const unsigned int CMN_UNUSED(videochannel) = 0)
+#endif // CISST_SVL_HAS_OPENCV
     {
 #if (CISST_SVL_HAS_OPENCV == ON)
         if (videochannel < _VideoChannels) return OCVImageHeader[videochannel];

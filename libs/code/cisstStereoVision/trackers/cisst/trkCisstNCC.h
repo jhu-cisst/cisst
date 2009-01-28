@@ -102,7 +102,7 @@ public:
 	//Set the initial position of the tracking window
 	void setWindowPosition(IndexType r, IndexType c);
 	// Set the initial position for tracking (empty in this case)
-	void setInitPosition(IndexType r, IndexType c){};
+	inline void setInitPosition(IndexType CMN_UNUSED(r), IndexType CMN_UNUSED(c)){};
 	// Set the image size field
 	void setImageSize(IndexType rows, IndexType cols);
 #ifdef INCL_OPENCV

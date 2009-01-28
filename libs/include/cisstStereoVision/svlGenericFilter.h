@@ -39,8 +39,10 @@ public:
     svlGenericFilterCallbackBase() {}
     virtual ~svlGenericFilterCallbackBase() {}
 
-    virtual int InitializeCallback(svlSample* inputsample, svlSample* outputsample) { return SVL_OK; }
-    virtual int ProcessCallback(svlSample* inputsample, svlSample* outputsample) { return SVL_OK; }
+    virtual int InitializeCallback(svlSample* CMN_UNUSED(inputsample),
+                                   svlSample* CMN_UNUSED(outputsample)) { return SVL_OK; }
+    virtual int ProcessCallback(svlSample* CMN_UNUSED(inputsample),
+                                svlSample* CMN_UNUSED(outputsample)) { return SVL_OK; }
     virtual void ReleaseCallback() {}
 };
 

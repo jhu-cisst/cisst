@@ -214,13 +214,13 @@ public:
     inline ApplyKernel() {}
     inline ~ApplyKernel() {}
     void inline setup(Data & data, Kernel & kernel) { 
-	window.SetRef(kernel.rows(), kernel.cols(), data.row_stride(), data.col_stride(), data.Pointer());
-	ptrKernel = &kernel;
+        window.SetRef(kernel.rows(), kernel.cols(), data.row_stride(), data.col_stride(), data.Pointer());
+        ptrKernel = &kernel;
     }
     template<class data_ref>
     inline value_type operate(index_type &row, index_type &col, data_ref windowCorner) {
-	window.SetRef(window.rows(), window.cols(), window.row_stride(), window.col_stride(), subptr(windowCorner));
-	return value_type(SumOfElementwiseProductOf(window,*ptrKernel));
+        window.SetRef(window.rows(), window.cols(), window.row_stride(), window.col_stride(), subptr(windowCorner));
+        return value_type(SumOfElementwiseProductOf(window,*ptrKernel));
     }
 };
 

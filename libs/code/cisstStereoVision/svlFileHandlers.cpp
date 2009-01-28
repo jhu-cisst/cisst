@@ -44,22 +44,28 @@ svlImageFile* svlImageFile::GetInstance()
     return 0;
 }
 
-int svlImageFile::ExtractDimensions(const char* filepath, int & width, int & height)
+int svlImageFile::ExtractDimensions(const char* CMN_UNUSED(filepath),
+                                    int & CMN_UNUSED(width),
+                                    int & CMN_UNUSED(height))
 {
     return -1;
 }
 
-int svlImageFile::Open(const char* filepath, svlImageProperties& properties)
+int svlImageFile::Open(const char* CMN_UNUSED(filepath),
+                       svlImageProperties & CMN_UNUSED(properties))
 {
     return -1;
 }
 
-int svlImageFile::ReadAndClose(unsigned char* buffer, unsigned int size)
+int svlImageFile::ReadAndClose(unsigned char* CMN_UNUSED(buffer),
+                               unsigned int CMN_UNUSED(size))
 {
     return -1;
 }
 
-int svlImageFile::Create(const char* filepath, svlImageProperties* properties, unsigned char* buffer)
+int svlImageFile::Create(const char* CMN_UNUSED(filepath),
+                         svlImageProperties * CMN_UNUSED(properties),
+                         unsigned char * CMN_UNUSED(buffer))
 {
     return -1;
 }

@@ -43,7 +43,9 @@ public:
     virtual ~svlStereoMethodBase() {}
 
     virtual int Initialize() { return SVL_FAIL; }
-    virtual int Process(svlSampleImageBase *images, int *depthmap) { return SVL_FAIL; }
+    virtual int Process(svlSampleImageBase * CMN_UNUSED(images), int * CMN_UNUSED(depthmap)) {
+        return SVL_FAIL;
+    }
     virtual void Free() {}
 };
 
