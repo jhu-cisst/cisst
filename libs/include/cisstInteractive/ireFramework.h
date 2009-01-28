@@ -39,7 +39,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstInteractive/ireExport.h>
 
 
-/*! 
+/*!
   \brief Class to manage the preparation of Python for the
   Interactive Robot Environment, and for launching the IRE IDE and
   shell.
@@ -95,8 +95,7 @@ private:
     void InitShellInstance(void);
 
     void FinalizeShellInstance(void);
-    
-    void LaunchIREShellInstance(char *startup, bool newPythonThread);
+    void LaunchIREShellInstance(char *startup, bool newPythonThread, bool useIPython);
 
 	void JoinIREShellInstance(double timeout);
 
@@ -105,22 +104,22 @@ protected:
       subsystem upon creation.  InitShellInstance changes the IRE state
       from IRE_NOT_CONSTRUCTED to IRE_INITIALIZED. */
 	ireFramework() {
-	    InitShellInstance(); 
+	    InitShellInstance();
 	}
-    
+
 	/*! Dereferences everything and cleans Python shell.  Changes the IRE
         state to IRE_FINISHED. */
 	~ireFramework() {
 	    FinalizeShellInstance();
 	}
 public:
-	
+
 	/*! Return a pointer to the instantiated instance of this object. Note
         that the IRE state will change from IRE_NOT_CONSTRUCTED to IRE_INITIALIZED
         on the first call to this function. */
 	static ireFramework* Instance(void);
 
-	
+
 	/*! Initializes the Python environment.  Called from the
       constructor, the user needs never call this function explicitly.
       As ireFramework is a singleton object, the underlying Python
@@ -132,8 +131,8 @@ public:
 	static inline void InitShell(void)  throw(std::runtime_error) {
 	    Instance()->InitShellInstance();
 	}
-	
-	
+
+
 	/*! Called explicitly from the class destructor, it removes all
       references to the Python shell.  Python is then free to clean
       itself up.  If the application wishes to restart the IRE,
@@ -143,7 +142,7 @@ public:
 	    Instance()->FinalizeShellInstance();
 	}
 
-	
+
 	/*!  Loads the "irepy" Python IRE package and
       calls the "launch()" method to launch the GUI.
 
@@ -166,15 +165,18 @@ public:
 	  the C++ code before launching the IRE.  This, however, is less
 	  portable and would best be implemented using cisstOSAbstraction.
 
+	  If the useIPython parameter is true, then IPython shell will be started instead
+	  of the IRE (GUI). IPython is an enhanced interactive Python shell, allowing autocompletion, etc.
+	  For more information, see http://ipython.scipy.org/moin/
+
       If the IRE state on entry is IRE_INITIALIZED, this method changes
       it to IRE_LAUNCHED; otherwise, it throws an exception.
       When the Python code finishes its initialization, it will call a
       callback function to change the state to IRE_ACTIVE prior to entering
       the wxPython main event loop.  On exit from the event loop, it will
       call the callback function to change the state to IRE_FINISHED. */
-      
-	static inline void LaunchIREShell(char *startup = "", bool newPythonThread = false) throw(std::runtime_error) {
-	    Instance()->LaunchIREShellInstance(startup, newPythonThread);
+	static inline void LaunchIREShell(char *startup = "", bool newPythonThread = false, bool useIPython = false) throw(std::runtime_error) {
+	    Instance()->LaunchIREShellInstance(startup, newPythonThread, useIPython);
 	}
 
 	/*! Wait for IRE shell to finish (if started in a new Python thread).  Specify a negative
@@ -195,7 +197,7 @@ public:
 
     /*! Check whether the IRE has been exited. */
     static bool IsFinished();
-	
+
     /*! This is provided as a callback to the Python code that launches the IRE, so that it can change
         the state to IRE_ACTIVE or IRE_FINISHED. */
     static void SetActiveFlag(bool flag);
