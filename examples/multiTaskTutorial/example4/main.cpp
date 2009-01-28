@@ -28,7 +28,7 @@ public:
     ~IreLaunch() {}
     void *Run(char *startup) {
         try {
-            ireFramework::LaunchIREShell(startup, false);
+            ireFramework::LaunchIREShell(startup, false, true);
         }
         catch (...) {
             cout << "*** ERROR:  could not launch IRE shell ***" << endl;
@@ -39,7 +39,7 @@ public:
 };
 #endif
 
-int main(void)
+int main(int argc, char **argv)
 {
     // log configuration, see previous examples
     cmnLogger::SetLoD(10);
@@ -85,12 +85,15 @@ int main(void)
     // Wait for IRE to initialize itself
     while (ireFramework::IsStarting())
         osaSleep(0.5);  // Wait 0.5 seconds
+    //CMN_LOG(1) << "ireFramework has started" << std::endl;
     // Loop until IRE and display task are both exited
-    while (ireFramework::IsActive() || !displayTaskObject->GetExitFlag()) 
+    while (ireFramework::IsActive() && !displayTaskObject->GetExitFlag())
         osaSleep(0.5);  // Wait 0.5 seconds
     // Cleanup and exit
     IreThread.Wait();
-#else
+#endif
+
+#if 0
     cmnPath path;
     path.AddFromEnvironment("PYTHONPATH");
     std::string exampleFile = path.Find("example4.py", cmnPath::READ);

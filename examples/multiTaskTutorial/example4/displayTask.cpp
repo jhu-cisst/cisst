@@ -39,7 +39,7 @@ void displayTask::HandleTrigger(const cmnDouble & value)
     Wakeup();
 }
 
-void displayTask::Startup(void) 
+void displayTask::Startup(void)
 {
     Amplitude = StartValue;
     TriggerValue = 0.0;
@@ -97,9 +97,9 @@ void displayTask::Run(void)
     }
     ProcessQueuedEvents();
 
-    CMN_LOG(7) << "Run: " << now.Ticks()
-               << " - Data: " << Data << std::endl;
-    
+   /* CMN_LOG(7) << "Run: " << now.Ticks()
+               << " - Data: " << Data << std::endl;*/
+
     if (UI.Closed == true) {
         ExitFlag = true;
     } else {
@@ -117,10 +117,10 @@ void displayTask::Configure(const std::string & CMN_UNUSED(filename))
     minValue = 0.5;
     maxValue = 5.0;
     StartValue =  1.0;
-    
+
     CMN_LOG_CLASS(3) << "Configure: Setting bounds to: " << minValue << ", " << maxValue << std::endl;
     CMN_LOG_CLASS(3) << "Configure: Setting start value to: " << StartValue << std::endl;
-    
+
     UI.Amplitude->bounds(minValue, maxValue);
     UI.Amplitude->value(StartValue);
     Amplitude = StartValue;
