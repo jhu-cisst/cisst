@@ -30,6 +30,7 @@ SET(CISST_EXAMPLES
     multiTaskTutorial
     nArrayBenchmark
     numericalTutorial
+    stereoTutorial
     vectorTutorial
     )    
 
