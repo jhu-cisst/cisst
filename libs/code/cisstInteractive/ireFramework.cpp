@@ -367,12 +367,12 @@ void ireFramework::LaunchIREShellInstance(char *startup, bool newPythonThread, b
     //to launch IPython shell instead of IRE
     //
     if (useIPython) {
-    	PyRun_SimpleString(startup);
-    	PyRun_SimpleString("from IPython.Shell import IPShellEmbed\n");
-    	PyRun_SimpleString("ipshell = IPShellEmbed()\n");
-    	PyRun_SimpleString("ipshell()\n");
-    	IRE_State = IRE_ACTIVE;  // for now, instead of using SetActiveState callback
-    	return;
+        PyRun_SimpleString(startup);
+        PyRun_SimpleString("from IPython.Shell import IPShellEmbed\n");
+        PyRun_SimpleString("ipshell = IPShellEmbed()\n");
+        PyRun_SimpleString("ipshell()\n");
+        IRE_State = IRE_ACTIVE;  // for now, instead of using SetActiveState callback
+        return;
     }
 
 
