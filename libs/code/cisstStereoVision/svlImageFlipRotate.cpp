@@ -21,6 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstStereoVision/svlImageFlipRotate.h>
+#include <cisstImage/imgUCharRGB.h>
 
 using namespace std;
 

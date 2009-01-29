@@ -23,6 +23,8 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlImageBuffer_h
 #define _svlImageBuffer_h
 
+#include <cisstOSAbstraction/osaThreadSignal.h>
+#include <cisstOSAbstraction/osaCriticalSection.h>
 #include <cisstStereoVision/svlStreamDefs.h>
 
 

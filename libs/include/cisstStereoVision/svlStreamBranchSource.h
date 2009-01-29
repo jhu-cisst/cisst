@@ -23,6 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlStreamBranchSource_h
 #define _svlStreamBranchSource_h
 
+#include <cisstOSAbstraction/osaStopwatch.h>
 #include <cisstStereoVision/svlStreamManager.h>
 
 // Always include last!

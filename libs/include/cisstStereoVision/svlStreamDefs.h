@@ -23,11 +23,10 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlStreamDefs_h
 #define _svlStreamDefs_h
 
-#include <cisstCommon.h>
 #include <cisstCommon/cmnLogger.h>
-#include <cisstVector.h>
-#include <cisstImage.h>
-#include <cisstOSAbstraction.h>
+#include <cisstVector/vctDynamicMatrix.h>
+#include <cisstVector/vctFixedSizeMatrix.h>
+
 #include <cisstStereoVision/svlConfig.h>
 
 #if (CISST_SVL_HAS_OPENCV == ON)

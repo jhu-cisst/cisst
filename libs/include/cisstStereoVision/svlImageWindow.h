@@ -70,9 +70,9 @@ public:
     virtual ~svlImageWindowCallbackBase() {}
 
 protected:
-    virtual void OnNewFrame(unsigned int frameid) {}
-    virtual void OnUserEvent(unsigned int winid, bool ascii, unsigned int eventid) {}
-    void GetMousePos(int& x, int& y) { x = MouseX; y = MouseY; }
+    virtual void OnNewFrame(unsigned int CMN_UNUSED(frameid)) {}
+    virtual void OnUserEvent(unsigned int CMN_UNUSED(winid), bool CMN_UNUSED(ascii), unsigned int CMN_UNUSED(eventid)) {}
+    void GetMousePos(int & x, int & y) { x = MouseX; y = MouseY; }
 
 private:
     int MouseX;
@@ -96,8 +96,8 @@ public:
 
     // methods to overwrite
     virtual int DoModal(bool show, bool fullscreen);
-    virtual void Show(bool show, int winid) {}
-    virtual void DrawImageThreadSafe(unsigned char* buffer, unsigned int buffersize, unsigned int winid) {}
+    virtual void Show(bool CMN_UNUSED(show), int CMN_UNUSED(winid)) {}
+    virtual void DrawImageThreadSafe(unsigned char * CMN_UNUSED(buffer), unsigned int CMN_UNUSED(buffersize), unsigned int CMN_UNUSED(winid)) {}
     virtual void Destroy() {}
     virtual void DestroyThreadSafe() {}
 

@@ -21,6 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstStereoVision/svlGenericFilter.h>
+#include <cisstOSAbstraction/osaSleep.h>
 
 using namespace std;
 

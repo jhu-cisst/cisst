@@ -26,6 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <vector>
 #include <map>
 
+#include <cisstOSAbstraction/osaThread.h>
 #include <cisstStereoVision/svlStreamDefs.h>
 #include <cisstStereoVision/svlSyncPoint.h>
 

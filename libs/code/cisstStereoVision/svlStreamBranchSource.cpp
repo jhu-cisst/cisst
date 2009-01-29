@@ -21,6 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstStereoVision/svlStreamBranchSource.h>
+#include <cisstOSAbstraction/osaSleep.h>
 
 using namespace std;
 

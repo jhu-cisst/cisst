@@ -22,7 +22,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "vidDC1394Source.h"
 
-#include <cisstOSAbstraction.h>
 #include <iostream>
 
 using std::cerr;

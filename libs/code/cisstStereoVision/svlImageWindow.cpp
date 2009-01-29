@@ -116,7 +116,7 @@ int svlWindowManagerBase::WaitForInitEvent()
     return 0;
 }
 
-int svlWindowManagerBase::DoModal(bool show, bool fullscreen)
+int svlWindowManagerBase::DoModal(bool CMN_UNUSED(show), bool CMN_UNUSED(fullscreen))
 {
     if (Width == 0 || Height == 0) SetClientSize(320, 240, 0);
     return 0;

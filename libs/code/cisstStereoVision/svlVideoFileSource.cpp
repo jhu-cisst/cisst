@@ -21,6 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstStereoVision/svlVideoFileSource.h>
+#include <cisstOSAbstraction/osaSleep.h>
 
 #if (CISST_OS == CISST_WINDOWS)
     #include "VfWAvi.h"

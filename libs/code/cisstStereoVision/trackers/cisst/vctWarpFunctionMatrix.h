@@ -58,8 +58,7 @@ using namespace std;
 #include "vctDynamicFunctionalMatrixOwner.h"
 #include "vctDynamicFunctionalMatrixBase.h"
 
-#include <cisstVector/vctFixedSizeVector.h>
-#include <cisstCommon.h>
+
 
 /*!
   \file

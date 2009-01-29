@@ -22,6 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include "trkCisstWSSD.h"
+#include <cisstNumerical/nmrLSqLin.h>
 
 trkCisstWSSD::trkCisstWSSD(trkCisstWSSDModel trackmodel) : trkCisstBase()
 {

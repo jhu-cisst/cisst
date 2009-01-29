@@ -21,6 +21,8 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstStereoVision/svlVideoCaptureSource.h>
+#include <cisstOSAbstraction/osaSleep.h>
+
 #include <stdio.h>
 
 #ifdef _WIN32

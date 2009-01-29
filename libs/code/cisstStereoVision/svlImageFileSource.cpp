@@ -21,6 +21,8 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstStereoVision/svlImageFileSource.h>
+#include <cisstOSAbstraction/osaSleep.h>
+
 #include <math.h>
 
 using namespace std;

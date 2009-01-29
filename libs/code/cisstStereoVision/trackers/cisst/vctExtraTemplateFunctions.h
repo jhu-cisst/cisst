@@ -24,12 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _vctExtraTemplateFunctions_h
 #define _vctExtraTemplateFunctions_h
 
-#include <cisstCommon.h>
-#include <cisstConfig.h>
-#include <cisstVector.h>
-#include <cisstNumerical.h>
 
-//#include <vctExtraTemplateFunctions.h>
 
 //*******************************************************************
 //                   Extra Template Functions

@@ -21,7 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include "svlImageBuffer.h"
-
+#include <cisstOSAbstraction/osaSleep.h>
 
 /*********************************/
 /*** svlImageBuffer class ********/

@@ -23,7 +23,8 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlSyncPoint_h
 #define _svlSyncPoint_h
 
-#include <cisstOSAbstraction.h>
+#include <cisstOSAbstraction/osaThreadSignal.h>
+#include <cisstOSAbstraction/osaCriticalSection.h>
 
 #define SVL_SYNC_ERROR      -1
 #define SVL_SYNC_OK         0

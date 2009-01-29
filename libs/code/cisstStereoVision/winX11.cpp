@@ -22,6 +22,8 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "winX11.h"
 
+#include <cisstOSAbstraction/osaSleep.h>
+
 // Motif window hints
 #define MWM_HINTS_FUNCTIONS     (1L << 0)
 #define MWM_HINTS_DECORATIONS   (1L << 1)

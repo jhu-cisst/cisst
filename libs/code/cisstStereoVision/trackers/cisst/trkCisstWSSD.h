@@ -30,10 +30,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cv.h>
 #endif
 
-#include "cisstCommon.h"
-#include <cisstConfig.h>
-#include <cisstVector.h>
-#include <cisstNumerical.h>
+
 
 #include <vector>
 #include <iostream>
