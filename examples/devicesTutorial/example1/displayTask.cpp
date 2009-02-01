@@ -13,9 +13,17 @@ displayTask::displayTask(const std::string & taskName, double period):
     ExitFlag(false)
 {
     // to communicate with the interface of the resource
-    AddRequiredInterface("Robot");
-    AddEventHandlerWrite(&displayTask::ButtonEventHandler, this,
-                         "Robot", "ButtonEventHandler", prmEventButton());
+    mtsRequiredInterface * requiredInterface = AddRequiredInterface("Robot");
+	if (requiredInterface) {
+        // bound the mtsFunction to the command provided by the interface 
+#define MTS_REQUIRED true
+#define MTS_OPTIONAL false
+        requiredInterface->AddFunction("GetPosition", GetCartesianPosition, MTS_REQUIRED);
+        requiredInterface->AddFunction("GetVelocity", GetCartesianVelocity, MTS_OPTIONAL);
+        requiredInterface->AddFunction("GetPositionJoint", GetJointPosition, MTS_OPTIONAL);
+        requiredInterface->AddEventHandlerWrite(displayTask::ButtonEventHandler, this,
+                                                "Buttons", prmEventButton());
+    }
 }
 
 void displayTask::Configure(const std::string & CMN_UNUSED(filename))
@@ -30,8 +38,6 @@ void displayTask::Startup(void)
     mtsDeviceInterface * interface = GetProvidedInterfaceFor("Robot");
     // make sure an interface has been connected
     if (interface) {
-        // bound the mtsFunction to the command provided by the interface 
-        GetCartesianPosition.Bind(interface, "GetPosition");
         // get a pointer on tip node --- name is hardcoded, bad, need a way to query all possible names
         // from the interface
         this->TipTransformationPointer = prmTransformationManager::GetTransformationNodePtr("OmniTip");
@@ -41,10 +47,9 @@ void displayTask::Startup(void)
             new prmTransformationFixed("Reference",
                                        vctFrm3::Identity(),
                                        this->BaseTransformationPointer);
-        this->DeviceProvidesCartesianVelocity =
-            GetCartesianVelocity.Bind(interface, "GetVelocity");
-        this->DeviceProvidesJointPosition =
-            GetJointPosition.Bind(interface, "GetPositionJoint");
+        // see if the commands have been found
+        this->DeviceProvidesCartesianVelocity = GetCartesianVelocity.IsValid();
+        this->DeviceProvidesJointPosition = GetJointPosition.IsValid();
         // prmPositionJoint contains dynamic vectors so we need to allocate
         // based on the size (number of joints) of the device used
         if (this->DeviceProvidesJointPosition) {
@@ -61,8 +66,6 @@ void displayTask::Startup(void)
                          << "\n - GetJointPosition function: "
                          << GetJointPosition
                          << std::endl;
-
-        AddObserverToRequiredInterface("Robot", "Buttons", "ButtonEventHandler");
     } else {
         CMN_LOG_CLASS(1) << "Startup: can not find provided interface for required interface Robot"
                          << std::endl;

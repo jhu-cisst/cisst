@@ -31,13 +31,13 @@ int main(void)
         new displayTask("DISP", PeriodDisplay * cmn_ms);
     displayTaskObject->Configure();
 
-	devSensableHD * robotObject = new devSensableHD("Omni");
+	devSensableHD * robotObject = new devSensableHD("Omni", "Omni");
     // add the tasks to the task manager
 
     taskManager->AddTask(displayTaskObject);
 	taskManager->AddTask(robotObject);
     // connect the tasks
-    taskManager->Connect("DISP", "Robot", "Omni", "DefaultArm");
+    taskManager->Connect("DISP", "Robot", "Omni", "Omni");
     // generate a nice tasks diagram
     std::ofstream dotFile("example1.dot"); 
     taskManager->ToStreamDot(dotFile);
