@@ -21,7 +21,7 @@ displayTask::displayTask(const std::string & taskName, double period):
         requiredInterface->AddFunction("GetPosition", GetCartesianPosition, MTS_REQUIRED);
         requiredInterface->AddFunction("GetVelocity", GetCartesianVelocity, MTS_OPTIONAL);
         requiredInterface->AddFunction("GetPositionJoint", GetJointPosition, MTS_OPTIONAL);
-        requiredInterface->AddEventHandlerWrite(displayTask::ButtonEventHandler, this,
+        requiredInterface->AddEventHandlerWrite(&displayTask::ButtonEventHandler, this,
                                                 "Buttons", prmEventButton());
     }
 }
