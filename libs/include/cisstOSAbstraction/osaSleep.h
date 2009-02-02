@@ -28,6 +28,9 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _osaSleep_h
 #define _osaSleep_h
 
+// Include cmnUnits to have constants available
+#include <cisstCommon/cmnUnits.h>
+
 // Always include last
 #include <cisstOSAbstraction/osaExport.h>
 
