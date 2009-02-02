@@ -278,7 +278,7 @@ int svlImageFileSource::SetSequence(unsigned int numberofdigits, unsigned int fr
 {
     if (numberofdigits > 9 || from > to)
         return SVL_FAIL;
-    unsigned int maxval = static_cast<unsigned int>(pow(static_cast<int>(10), static_cast<int>(numberofdigits)));
+    unsigned int maxval = static_cast<unsigned int>(pow(10.0f, static_cast<int>(numberofdigits)));
     if (from >= maxval || to >= maxval) return SVL_FAIL;
 
     NumberOfDigits = numberofdigits;
