@@ -46,6 +46,9 @@ const double cmnPI_4 = 0.7853981633974483096156608458198757;
 /*! PI / 180 : convert degrees to radians */
 const double cmnPI_180 = cmnPI / 180.0;
 
+/*! 180 / PI : convert radians to degrees */
+const double cmn180_PI = 180.0 / cmnPI;
+
 
 #endif // _cmnConstants_h
 
