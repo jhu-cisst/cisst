@@ -274,7 +274,7 @@ bool mtsTaskManager::Connect(const std::string & userTaskName, const std::string
     if (resourceDevice)
         resourceInterface = resourceDevice->GetProvidedInterface(providedInterfaceName);
     else {
-        CMN_LOG_CLASS(1) << "Connect: can not find a task or device named " << userTaskName << std::endl;
+        CMN_LOG_CLASS(1) << "Connect: can not find a task or device named " << resourceTaskName << std::endl;
         return false;
     }
 
