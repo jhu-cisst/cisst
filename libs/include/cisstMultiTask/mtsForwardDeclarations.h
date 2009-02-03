@@ -84,6 +84,10 @@ inline std::string mtsObjectName(const cmnGenericObject * object) {
 }
 
 
+// flag for required interfaces lists of commands
+const bool mtsRequired = true;
+const bool mtsOptional = false;
+
 
 #endif  // _mtsForwardDeclarations_h
 
