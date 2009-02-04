@@ -26,7 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #ifdef CISST_OSATHREAD
 #include <cisstOSAbstraction/osaThread.h>
-#include <cisstOSAbstraction/osaTime.h>
+#include <cisstOSAbstraction/osaSleep.h>
 #endif
 
 #if (CISST_OS == CISST_DARWIN)
@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
     // Wait for IRE to initialize itself
     while (ireFramework::IsStarting()) {
 #ifdef CISST_OSATHREAD
-        osaTime::Sleep(500);  // Wait 0.5 seconds
+        osaSleep(0.5);  // Wait 0.5 seconds
 #else
         // Need following call to give the IRE thread some time to execute.
         ireFramework::JoinIREShell(0.001);
