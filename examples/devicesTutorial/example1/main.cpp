@@ -30,12 +30,13 @@ int main(void)
     displayTask * displayTaskObject =
         new displayTask("DISP", PeriodDisplay * cmn_ms);
     displayTaskObject->Configure();
-
-	devSensableHD * robotObject = new devSensableHD("Omni", "Omni");
-    // add the tasks to the task manager
-
     taskManager->AddTask(displayTaskObject);
+
+#if (CISST_DEV_HAS_SENSABLEHD == ON)
+	devSensableHD * robotObject = new devSensableHD("Omni", "Omni");
 	taskManager->AddTask(robotObject);
+#endif
+
     // connect the tasks
     taskManager->Connect("DISP", "Robot", "Omni", "Omni");
     // generate a nice tasks diagram

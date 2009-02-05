@@ -28,7 +28,8 @@
 #ifndef _devLoPoMoCo_h
 #define _devLoPoMoCo_h
 
-#include <cisstConfig.h>
+#include <cisstDevices/devConfig.h>
+
 #if defined CISST_DEV_HAS_LOPOMOCO || defined DOXYGEN
 
 #include <cisstCommon/cmnGenericObject.h>
@@ -294,5 +295,7 @@ protected:
 
 CMN_DECLARE_SERVICES_INSTANTIATION(devLoPoMoCo);
 
+
 #endif // CISST_DEV_HAS_LOPOMOCO
+
 #endif // _devLoPoMoCo_h

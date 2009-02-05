@@ -60,8 +60,24 @@ if(CISST_DEV_HAS_LOPOMOCO)
 	devLoPoMoCo.h) 
 endif(CISST_DEV_HAS_LOPOMOCO) 
 
+# Create the config file
+SET(CISST_DEV_CONFIG_FILE ${cisst_BINARY_DIR}/libs/include/cisstDevices/devConfig.h)
+CONFIGURE_FILE(${cisst_SOURCE_DIR}/libs/include/cisstDevices/devConfig.h.in
+               ${CISST_DEV_CONFIG_FILE}
+               @ONLY)
+INSTALL_FILES(/include/cisstDevices
+               ".h"
+               ${CISST_DEV_CONFIG_FILE})
+
+# Add the config file to the project
+SET_SOURCE_FILES_PROPERTIES("${CISST_DEV_CONFIG_FILE}"
+                            PROPERTIES GENERATED TRUE)
+SET(HEADERS ${CISST_DEV_CONFIG_FILE})
+
+# Finally create the library
 CISST_ADD_LIBRARY_TO_PROJECT(cisstLibs)
 
+# Add libraries to link with based on options
 if(CISST_DEV_HAS_SENSABLEHD)
   target_link_libraries(cisstDevices ${SENSABLE_LIBRARIES})
 endif(CISST_DEV_HAS_SENSABLEHD)

@@ -22,6 +22,10 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _devSensableHD_h
 #define _devSensableHD_h
 
+#include <cisstDevices/devConfig.h>
+
+#if defined CISST_DEV_HAS_SENSABLEHD || defined DOXYGEN
+
 #include <cisstMultiTask/mtsTaskFromCallback.h>
 #include <cisstMultiTask/mtsStateData.h>
 #include <cisstParameterTypes.h>
@@ -77,6 +81,8 @@ public:
 
 CMN_DECLARE_SERVICES_INSTANTIATION(devSensableHD);
 
+
+#endif // CISST_DEV_HAS_LOPOMOCO
 
 #endif // _devSensableHD_h
 
