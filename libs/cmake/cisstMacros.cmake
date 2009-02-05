@@ -4,7 +4,7 @@
 # Author(s):  Anton Deguet
 # Created on: 2004-01-22
 #
-# (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -22,7 +22,7 @@
 # - DEPENDENCIES is a list of dependencies, for cisstVector, set it to cisstCommon
 # - SOURCE_FILES is a list of files, without any path (absolute or relative)
 # - HEADER_FILES is a list of files, without any path (absolute or relative)
-#
+# - HEADERS is a list of header files with a full path (e.g. configured header)
 #
 # Invoke this macro from within a library's CMakeLists.txt to add that library
 # to a larger project.  The name of the project is given as a macro argument.
@@ -72,6 +72,9 @@ IF(BUILD_LIBS_${LIBRARY} OR BUILD_${LIBRARY})
   EXEC_PROGRAM(${CMAKE_COMMAND}
                ARGS -E remove
                \"${LIBRARY_MAIN_HEADER_TMP}\")
+
+  # Add the main header to the library, for IDEs
+  SET(HEADERS ${HEADERS} ${LIBRARY_MAIN_HEADER})
 
   # Add the library
   ADD_LIBRARY(${LIBRARY}
