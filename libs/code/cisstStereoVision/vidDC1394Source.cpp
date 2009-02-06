@@ -21,6 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include "vidDC1394Source.h"
+#include <cisstOSAbstraction/osaSleep.h>
 
 #include <iostream>
 
@@ -256,7 +257,7 @@ int svlDC1394Context::TestIEEE1394Interface(dc1394camera_t* camera, dc1394operat
         // Check whether transmission has started
         if (dc1394_video_get_transmission(camera, &status) != DC1394_SUCCESS ||
             status == DC1394_ON) break;
-        osaSleep(0.1); // = 100 millisec
+        osaSleep(0.1 * cmn_s); // = 100 millisec
     }
     if (status != DC1394_ON) {
 #if (__verbose__ >= 2)
