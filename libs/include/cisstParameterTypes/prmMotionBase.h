@@ -41,7 +41,8 @@ class CISST_EXPORT prmMotionBase: public cmnGenericObject
         BlockingFlagMember(NO_WAIT),
         BlendingFactorMember(0),
         IsPreemptableMember(true),
-        IsCoordinatedMember(true)
+        IsCoordinatedMember(true),
+        IsGoalOnlyMember(false)
     {}
 
     /*! Set all parameters
@@ -51,12 +52,15 @@ class CISST_EXPORT prmMotionBase: public cmnGenericObject
                          const prmBlending & blendingFactor,
                          const prmTime & timeLimit,
                          const bool & isPreemptable,
-                         const bool & isCoordinated):
+                         const bool & isCoordinated,
+                         const bool & isGoalOnly
+                         ):
         BlockingFlagMember(blockingFlag), 
         BlendingFactorMember(blendingFactor),
         TimeLimitMember(timeLimit),
         IsPreemptableMember(isPreemptable),
-        IsCoordinatedMember(isCoordinated)
+        IsCoordinatedMember(isCoordinated),
+        IsGoalOnlyMember(isGoalOnly)
     {}
     
     /*! destructor
@@ -70,16 +74,17 @@ class CISST_EXPORT prmMotionBase: public cmnGenericObject
                                  const prmBlending & blendingFactor, 
                                  const prmTime & timeLimit,
                                  const bool & isPreemptable,
-                                 const bool & isCoordinated )
+                                 const bool & isCoordinated,
+                                 const bool & isGoalOnly)
     { 
         this->BlockingFlagMember = blockingFlag; 
         this->BlendingFactorMember = blendingFactor; 
         this->TimeLimitMember = timeLimit; 
         this->IsPreemptableMember = isPreemptable; 
         this->IsCoordinatedMember = isCoordinated; 
+        this->IsGoalOnlyMember = isGoalOnly; 
     }
-    
-
+   
     /*! Set and get methods for blocking flag. */
     //@{
     PRM_DECLARE_MEMBER_AND_ACCESSORS(prmBlocking, BlockingFlag);
@@ -110,6 +115,16 @@ class CISST_EXPORT prmMotionBase: public cmnGenericObject
       at the same time by lowering speed on some joints. */
     //@{
     PRM_DECLARE_MEMBER_AND_ACCESSORS(bool, IsCoordinated);
+    //@}
+
+    /*! Set and Get methods for IsGoalOnly.
+        if True Use current device settings for all except for goal .
+        Eg. Accelerations,Velcities are chosen by the robot, 
+        goal and motion base should be set by the user.
+        False by default.
+    */
+    //@{
+    PRM_DECLARE_MEMBER_AND_ACCESSORS(bool, IsGoalOnly);
     //@}
 
 };
