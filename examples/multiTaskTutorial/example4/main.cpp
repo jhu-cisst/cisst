@@ -23,12 +23,14 @@ using namespace std;
 // when LaunchIREShell is called) and FinalizeShell, because otherwise
 // the IRE (Python interpreter) would be called from multiple threads.
 class IreLaunch {
+    bool useIPython;
 public:
-    IreLaunch() {}
+    IreLaunch(bool useIPy = false) : useIPython(useIPy) {}
     ~IreLaunch() {}
     void *Run(char *startup) {
         try {
-            ireFramework::LaunchIREShell(startup, false, true);
+            CMN_LOG(3) << "Using " << (useIPython?"IPython":"wxPython") << std::endl;
+            ireFramework::LaunchIREShell(startup, false, useIPython);
         }
         catch (...) {
             cout << "*** ERROR:  could not launch IRE shell ***" << endl;
@@ -78,22 +80,19 @@ int main(int argc, char **argv)
     cmnObjectRegister::Register("TaskManager", taskManager);
 
 #if 1  // PKAZ
-    IreLaunch IRE;
+    IreLaunch IRE(argc != 1);  // if any parameters, use IPython
     cout << "*** Launching IRE shell (C++ Thread) ***" << endl;
     osaThread IreThread;
     IreThread.Create<IreLaunch,  char *> (&IRE, &IreLaunch::Run, "from example4 import *");
     // Wait for IRE to initialize itself
     while (ireFramework::IsStarting())
         osaSleep(0.5);  // Wait 0.5 seconds
-    //CMN_LOG(1) << "ireFramework has started" << std::endl;
     // Loop until IRE and display task are both exited
-    while (ireFramework::IsActive() && !displayTaskObject->GetExitFlag())
+    while (ireFramework::IsActive() || !displayTaskObject->GetExitFlag())
         osaSleep(0.5);  // Wait 0.5 seconds
     // Cleanup and exit
     IreThread.Wait();
-#endif
-
-#if 0
+#else
     cmnPath path;
     path.AddFromEnvironment("PYTHONPATH");
     std::string exampleFile = path.Find("example4.py", cmnPath::READ);
