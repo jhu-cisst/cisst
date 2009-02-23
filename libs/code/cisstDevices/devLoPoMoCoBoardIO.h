@@ -19,14 +19,14 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#ifndef _BOARDIO_H_
-#define _BOARDIO_H_
+#ifndef _devLoPoMoCoBoardIO_h
+#define _devLoPoMoCoBoardIO_h
 #include <cisstCommon/cmnPortability.h>
 
 #include <sys/io.h>
 #include <unistd.h>
 
-#include "Offsets.h"
+#include "devLoPoMoCoOffsets.h"
 
 /*
  * This class is the lowest level interface to the Low Power Motor Controller Board.
@@ -46,12 +46,12 @@ http://www.cisst.org/cisst/license.txt.
 #define inb(address)        inpb(address)
 #endif
 
-class BoardIO {
+class devLoPoMoCoBoardIO {
 	private:
 		unsigned int numTries;
 		unsigned short BaseAddress;
 	public:
-	BoardIO (unsigned int baseAddress = 0x220) {BaseAddress = baseAddress;numTries = 0;}
+	devLoPoMoCoBoardIO (unsigned int baseAddress = 0x220) {BaseAddress = baseAddress;numTries = 0;}
 	/* Set functions */
 	 void SetMotorState (unsigned short mask, unsigned short state)
 		{outw (IOCMD_SET_MOTOR_STATE | ((mask & 0x0F) << 4) | (state & 0x0F), BaseAddress + CMD_REGISTER);}
@@ -301,4 +301,4 @@ class BoardIO {
     }
 };
 
-#endif
+#endif // devLoPoMoCoBoardIO_h

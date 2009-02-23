@@ -20,8 +20,8 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
-#ifndef _OFFSETS_H_
-#define _OFFSETS_H_
+#ifndef _devLoPoMoCoOffsets_h
+#define _devLoPoMoCoOffsets_h
 /*
  * Register addresses
  */
@@ -97,4 +97,4 @@ http://www.cisst.org/cisst/license.txt.
 //#define Unused				0xB800
 //#define Unused				0xBC00
 
-#endif
+#endif // _devLoPoMoCoOffsets_h

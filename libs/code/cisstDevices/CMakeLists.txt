@@ -54,10 +54,12 @@ if(CISST_DEV_HAS_SENSABLEHD)
 endif(CISST_DEV_HAS_SENSABLEHD)
 
 if(CISST_DEV_HAS_LOPOMOCO) 
-	set(SOURCE_FILES ${SOURCE_FILES} 
-	devLoPoMoCo.cpp) 
-	set(HEADER_FILES ${HEADER_FILES} 
-	devLoPoMoCo.h) 
+  set(SOURCE_FILES ${SOURCE_FILES} 
+      devLoPoMoCo.cpp 
+      devLoPoMoCoOffsets.h
+      devLoPoMoCoBoardIO.h)
+  set(HEADER_FILES ${HEADER_FILES} 
+      devLoPoMoCo.h) 
 endif(CISST_DEV_HAS_LOPOMOCO) 
 
 # Create the config file

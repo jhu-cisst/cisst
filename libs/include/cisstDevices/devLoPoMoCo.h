@@ -38,17 +38,9 @@
 #include <vector>
 #include <string>
 #include <ostream>
-using namespace std;
 
-#include <cisstDevices/BoardIO.h>
-#include <cisstDevices/Offsets.h>
-
-// number of Axes per card
-#define LOPOMOCO_NB_AXIS 4
-
-// No more that four cards can be put together, creating a 16 axis
-// composite axes
-#define LOPOMOCO_MAX_NB_AXIS (4 * 4)
+// forward declarations
+class devLoPoMoCoBoardIO;
 
 /*!
  \ingroup mtsDeviceInterface
@@ -60,7 +52,7 @@ class devLoPoMoCo: public mtsDevice {
 
 	/*! A pointer to the low level object that converts make bit level
 	 operation more readable. */
-	std::vector<BoardIO*> Board;
+	std::vector<devLoPoMoCoBoardIO *> Board;
 
 	/*! Absolute starting number of axis on the boards. */
 	std::vector<int> StartAxis;
@@ -134,6 +126,10 @@ class devLoPoMoCo: public mtsDevice {
 	void parseInputArgument(const std::string &inputArgument, std::string &relativeFilePath, std::string &fileName);
 
 public:
+
+    /*! Number of axis per board */
+    enum {NB_AXIS = 4};
+ 
 	/*! Constructor. Prepares the maps. */
 	devLoPoMoCo(const std::string& deviceName, unsigned int numberOfBoards);
 

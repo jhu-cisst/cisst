@@ -20,8 +20,8 @@
 
 #include <cisstDevices/devLoPoMoCo.h>
 #include <cisstCommon/cmnXMLPath.h>
-#include <cisstDevices/BoardIO.h>
-#include <cisstDevices/Offsets.h>
+#include "devLoPoMoCoBoardIO.h"
+#include "devLoPoMoCoOffsets.h"
 #include <limits>
 
 CMN_IMPLEMENT_SERVICES(devLoPoMoCo);
@@ -29,7 +29,7 @@ CMN_IMPLEMENT_SERVICES(devLoPoMoCo);
 devLoPoMoCo::devLoPoMoCo(const std::string& deviceName, unsigned int numberOfBoards) :
 	mtsDevice(deviceName) {
 	this->numberOfBoards = numberOfBoards;
-	numberOfAxes = LOPOMOCO_NB_AXIS * numberOfBoards;
+	numberOfAxes = NB_AXIS * numberOfBoards;
 
 	// assigning sizes to variables
 	BaseAddress.resize(numberOfBoards);
@@ -168,7 +168,7 @@ void devLoPoMoCo::ConfigureOneBoard(const std::string& filename, const int board
 	MaxAxis[boardIndex] = EndAxis[boardIndex] - StartAxis[boardIndex];
 
 	//Board = new ddiLoPoMoCoLowLevelIO(BaseAddress);
-	Board[boardIndex] = new BoardIO(BaseAddress[boardIndex]);
+	Board[boardIndex] = new devLoPoMoCoBoardIO(BaseAddress[boardIndex]);
 
 	int version = Board[boardIndex]->BoardVersion();
 	// the latest version return 0xb0b || 0xS0 where S = ~(switch value)
