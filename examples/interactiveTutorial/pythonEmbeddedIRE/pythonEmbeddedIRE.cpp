@@ -109,7 +109,7 @@ int main(int argc, char *argv[])
     cmnObjectRegister::Register("SineGenerator", &wave);
 
     IreLaunch IRE;
-#ifdef CISST_OSATHREAD  
+#ifdef CISST_OSATHREAD
     cout << "*** Launching IRE shell (C++ Thread) ***" << endl;
 
     osaThread IreThread;

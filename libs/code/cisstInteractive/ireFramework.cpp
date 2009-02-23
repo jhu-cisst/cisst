@@ -364,8 +364,6 @@ void ireFramework::LaunchIREShellInstance(char *startup, bool newPythonThread, b
     PyTextCtrlHook::InitModule("ireLogger");
     PySys_SetArgv(2, python_args);
 
-    //to launch IPython shell instead of IRE
-    //
     if (useIPython) {
         PyRun_SimpleString(startup);
         PyRun_SimpleString("from IPython.Shell import IPShellEmbed\n");

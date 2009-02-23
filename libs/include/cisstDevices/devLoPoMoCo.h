@@ -2,8 +2,6 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
- $Id: devLoPoMoCo.h,v 1.3 2008/11/06 01:41:25 tian Exp $
-
  Author(s):  Ankur Kapoor, Tian Xia
  Created on: 2004-04-30
 
@@ -30,13 +28,11 @@
 
 #include <cisstDevices/devConfig.h>
 
-#if defined CISST_DEV_HAS_LOPOMOCO || defined DOXYGEN
 
 #include <cisstCommon/cmnGenericObject.h>
 #include <cisstMultiTask/mtsDevice.h>
 #include <cisstMultiTask/mtsDeviceInterface.h>
 #include <cisstMultiTask/mtsVector.h>
-
 #include <cisstMultiTask/mtsTask.h>
 
 #include <vector>
@@ -44,9 +40,6 @@
 #include <ostream>
 using namespace std;
 
-/*
- * LoMoPoCo constants
- */
 #include <cisstDevices/BoardIO.h>
 #include <cisstDevices/Offsets.h>
 
@@ -59,7 +52,7 @@ using namespace std;
 
 /*!
  \ingroup mtsDeviceInterface
- A specific device class for LoPoMoCo card.
+ A specific device class for the LoPoMoCo motion controller card.
  */
 class devLoPoMoCo: public mtsDevice {
 
@@ -67,7 +60,6 @@ class devLoPoMoCo: public mtsDevice {
 
 	/*! A pointer to the low level object that converts make bit level
 	 operation more readable. */
-	//devLoPoMoCoLowLevelIO *Board;
 	std::vector<BoardIO*> Board;
 
 	/*! Absolute starting number of axis on the boards. */
@@ -92,18 +84,13 @@ class devLoPoMoCo: public mtsDevice {
 	 be applied to the current limit. */
 	mtsShortVec MotorVoltages;
 
-	// Ankur's previous implementation
-	// ddiDynamicVectorDataObject<short, DDI_LOPOMOCO_NB_AXIS> MotorVoltages;
-	// this means there are four (DDI_LOPOMOCO_NB_AXIS = 4) axis per board for the motor voltages
-
 	/*! Need to read encoder periods along with each encoder read. */
 	mtsShortVec EncoderPeriods;
 
-	/*! Need to read encoder frequencies along with each encoder
-	 read. */
+	/*! Need to read encoder frequencies along with each encoder read. */
 	mtsShortVec EncoderFrequencies;
 
-	/*! FrequencyToRPSRatio */
+	/*! Frequency To RPS Ratio */
 	mtsDoubleVec FrequencyToRPSRatio;
 
 	/*! CountsToDeg */
@@ -294,8 +281,5 @@ protected:
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(devLoPoMoCo);
-
-
-#endif // CISST_DEV_HAS_LOPOMOCO
 
 #endif // _devLoPoMoCo_h
