@@ -49,10 +49,8 @@ class CISST_EXPORT prmEventButton: public cmnGenericObject
     
     /*!constructor with all parameters */
     inline prmEventButton(const mtsStateIndex & stateIndex, 
-                          const unsigned int & buttonNumber,
                           const EventType & type):
         StateIndexMember(stateIndex),
-        ButtonNumberMember(buttonNumber),
         TypeMember(type)
     {}
     
@@ -66,11 +64,6 @@ class CISST_EXPORT prmEventButton: public cmnGenericObject
       in the same state frame. */
     //@{
     PRM_DECLARE_MEMBER_AND_ACCESSORS(mtsStateIndex, StateIndex);
-    //@}
-
-    /*! Set and Get methods for button number. */
-    //@{
-    PRM_DECLARE_MEMBER_AND_ACCESSORS(unsigned int, ButtonNumber);
     //@}
 
     /*! Set and Get methods for event type. */
