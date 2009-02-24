@@ -180,6 +180,7 @@ SET(CISST_LIBS_UNSTABLE
     cisstDevices
     cisstImage
     cisstStereoVision
+    cisst3DUserInterface
     )
 
 SET(CISST_LIBS
