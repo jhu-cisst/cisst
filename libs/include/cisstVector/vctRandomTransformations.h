@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: vctRandomTransformations.h,v 1.5 2008/03/13 20:39:30 anton Exp $
+  $Id$
   
   Author(s):	Anton Deguet
   Created on:	2007-02-11

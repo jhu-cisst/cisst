@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: vctDynamicVectorLoopEngines.h,v 1.23 2008/01/15 16:40:27 anton Exp $
+  $Id$
 
   Author(s):	Ofri Sadowsky, Anton Deguet
   Created on:	2004-07-01

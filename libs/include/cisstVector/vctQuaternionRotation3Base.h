@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: vctQuaternionRotation3Base.h,v 1.18 2009/01/05 19:00:01 ofri Exp $
+  $Id$
   
   Author(s):	Anton Deguet
   Created on:	2005-08-24

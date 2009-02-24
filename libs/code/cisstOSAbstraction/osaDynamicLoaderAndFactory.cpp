@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: osaDynamicLoaderAndFactory.cpp,v 1.3 2007/04/26 19:33:57 anton Exp $
+  $Id$
 
   Author(s): Peter Kazanzides
   Created on: 2007-01-16 

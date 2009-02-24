@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: mtsStateIndex.cpp,v 1.1 2008/09/04 20:08:53 anton Exp $
+  $Id$
 
   Author(s): Peter Kazanzides
   Created on: 2004-05-04

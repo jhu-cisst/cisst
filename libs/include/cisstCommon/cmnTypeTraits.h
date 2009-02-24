@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: cmnTypeTraits.h 8 2009-01-04 21:13:48Z adeguet1 $
+  $Id$
   
   Author(s):	Anton Deguet
   Created on: 2004-01-13

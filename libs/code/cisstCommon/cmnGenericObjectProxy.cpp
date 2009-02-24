@@ -3,7 +3,7 @@
 
 
 /*
-  $Id: cmnGenericObjectProxy.cpp 20 2009-01-08 16:09:57Z adeguet1 $
+  $Id$
   
   Author(s):	Ankur Kapoor, Anton Deguet
   Created on:	2006-05-02

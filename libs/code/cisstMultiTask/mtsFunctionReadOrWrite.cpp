@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: mtsFunctionReadOrWrite.cpp,v 1.9 2008/09/04 05:15:38 anton Exp $
+  $Id$
 
   Author(s):  Peter Kazanzides, Anton Deguet
 

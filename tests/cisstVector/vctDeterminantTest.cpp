@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: vctDeterminantTest.cpp,v 1.6 2007/04/26 20:12:05 anton Exp $
+  $Id$
   
   Author(s):	Ofri Sadowsky
   Created on:	2004-04-20

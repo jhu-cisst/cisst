@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: nmrSVDTest.cpp,v 1.18 2007/08/28 14:49:26 anton Exp $
+  $Id$
   
   Author(s):  Ankur Kapoor, Anton Deguet
   Created on: 2005-10-20

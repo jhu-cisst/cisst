@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: svlStreamManager.h,v 1.6 2008/10/28 23:20:33 vagvoba Exp $
+  $Id$
   
   Author(s):  Balazs Vagvolgyi
   Created on: 2006 

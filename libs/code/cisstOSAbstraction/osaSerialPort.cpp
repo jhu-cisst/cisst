@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: osaSerialPort.cpp,v 1.13 2008/12/02 21:29:39 anton Exp $
+  $Id$
 
   Author(s): Anton Deguet
   Created on: 2004-12-10

@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: nmrBernsteinPolynomial.cpp,v 1.7 2007/04/26 19:33:57 anton Exp $
+  $Id$
 
   Author(s):	Ofri Sadowsky
   Created on:   2001-10-17

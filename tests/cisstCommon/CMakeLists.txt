@@ -1,5 +1,5 @@
 #
-# $Id: CMakeLists.txt 20 2009-01-08 16:09:57Z adeguet1 $
+# $Id$
 #
 # CMakeLists for cisstCommon tests
 #

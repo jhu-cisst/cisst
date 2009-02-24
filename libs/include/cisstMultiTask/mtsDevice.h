@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: mtsDevice.h,v 1.18 2008/11/21 05:34:50 pkaz Exp $
+  $Id$
 
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2004-04-30
@@ -155,20 +155,20 @@ class CISST_EXPORT mtsDevice: public cmnGenericObject
       \return pointer on a command void base type
      */
     template <class __classType>
-    inline mtsCommandVoidBase * AddCommandVoid(void (__classType::*action)(void),
-                                               __classType * classInstantiation,
-                                               const std::string & interfaceName,
-                                               const std::string & commandName);
-
+    inline mtsCommandVoidBase * CISST_DEPRECATED AddCommandVoid(void (__classType::*action)(void),
+                                                                __classType * classInstantiation,
+                                                                const std::string & interfaceName,
+                                                                const std::string & commandName);
+    
     /*! Create and add a void command using a function
       \param action the function pointer
       \param interfaceName name of the provided interface which will hold the command.
       \param commandName name of the command in the interface.
       \return pointer on a command void base type
     */
-    inline mtsCommandVoidBase * AddCommandVoid(void (*action)(void),
-                                               const std::string & interfaceName,
-                                               const std::string & commandName);
+    inline mtsCommandVoidBase * CISST_DEPRECATED AddCommandVoid(void (*action)(void),
+                                                                const std::string & interfaceName,
+                                                                const std::string & commandName);
     
     /*! Create and add a read command using a method
       \param action the method name, including the class name.
@@ -180,11 +180,11 @@ class CISST_EXPORT mtsDevice: public cmnGenericObject
      */
 #ifndef SWIG // SWIG can not parse this
     template <class __classType, class __argumentType>
-    inline mtsCommandReadBase * AddCommandRead(void (__classType::*action)(__argumentType &) const,
-                                               __classType * classInstantiation,
-                                               const std::string & interfaceName,
-                                               const std::string & commandName,
-                                               const __argumentType & argumentPrototype = CMN_DEFAULT_TEMPLATED_CONSTRUCTOR(__argumentType));
+    inline mtsCommandReadBase * CISST_DEPRECATED AddCommandRead(void (__classType::*action)(__argumentType &) const,
+                                                               __classType * classInstantiation,
+                                                               const std::string & interfaceName,
+                                                               const std::string & commandName,
+                                                               const __argumentType & argumentPrototype = CMN_DEFAULT_TEMPLATED_CONSTRUCTOR(__argumentType));
 
     /*! Create and add a write command using a method
       \param action the method name, including the class name.
@@ -195,11 +195,11 @@ class CISST_EXPORT mtsDevice: public cmnGenericObject
       \return pointer on a command write base type
      */
     template <class __classType, class __argumentType>
-    inline mtsCommandWriteBase * AddCommandWrite(void (__classType::*action)(const __argumentType &),
-                                                 __classType * classInstantiation,
-                                                 const std::string & interfaceName,
-                                                 const std::string & commandName,
-                                                 const __argumentType & argumentPrototype = CMN_DEFAULT_TEMPLATED_CONSTRUCTOR(__argumentType));
+    inline mtsCommandWriteBase * CISST_DEPRECATED AddCommandWrite(void (__classType::*action)(const __argumentType &),
+                                                                  __classType * classInstantiation,
+                                                                  const std::string & interfaceName,
+                                                                  const std::string & commandName,
+                                                                  const __argumentType & argumentPrototype = CMN_DEFAULT_TEMPLATED_CONSTRUCTOR(__argumentType));
 
     /*! Create and add a qualified read command using a method
       \param action the method name, including the class name.
@@ -210,12 +210,12 @@ class CISST_EXPORT mtsDevice: public cmnGenericObject
       \param argument2Prototype object provided as a prototype for the command's user
       \return pointer on a command read base type
      */template <class __classType, class __argument1Type, class __argument2Type>
-    inline mtsCommandQualifiedReadBase * AddCommandQualifiedRead(void (__classType::*action)(const __argument1Type &, __argument2Type &) const,
-                                                                 __classType * classInstantiation,
-                                                                 const std::string & interfaceName,
-                                                                 const std::string & commandName,
-                                                                 const __argument1Type & argument1Prototype = CMN_DEFAULT_TEMPLATED_CONSTRUCTOR(__argument1Type),
-                                                                 const __argument2Type & argument2Prototype = CMN_DEFAULT_TEMPLATED_CONSTRUCTOR(__argument2Type));
+    inline mtsCommandQualifiedReadBase * CISST_DEPRECATED AddCommandQualifiedRead(void (__classType::*action)(const __argument1Type &, __argument2Type &) const,
+                                                                                  __classType * classInstantiation,
+                                                                                  const std::string & interfaceName,
+                                                                                  const std::string & commandName,
+                                                                                  const __argument1Type & argument1Prototype = CMN_DEFAULT_TEMPLATED_CONSTRUCTOR(__argument1Type),
+                                                                                  const __argument2Type & argument2Prototype = CMN_DEFAULT_TEMPLATED_CONSTRUCTOR(__argument2Type));
 #endif // SWIG 
     //@}
 
@@ -248,8 +248,8 @@ protected:
       \param eventName name of the event as seen by the user task
       \return pointer on the base multicast command
     */
-    mtsCommandVoidBase * AddEventVoid(const std::string & interfaceName,
-                                      const std::string & eventName);
+    mtsCommandVoidBase * CISST_DEPRECATED AddEventVoid(const std::string & interfaceName,
+                                                       const std::string & eventName);
 
     /*!
       Add a write event to a provided interface.
@@ -259,9 +259,9 @@ protected:
       \return pointer on the base multicast command
     */
     template <class __argumentType>
-    mtsCommandWriteBase * AddEventWrite(const std::string & interfaceName,
-                                        const std::string & eventName,
-                                        const __argumentType & argumentPrototype);
+    mtsCommandWriteBase * CISST_DEPRECATED AddEventWrite(const std::string & interfaceName,
+                                                         const std::string & eventName,
+                                                         const __argumentType & argumentPrototype);
     //@}
 };
 
@@ -280,11 +280,11 @@ inline std::string mtsObjectName(const mtsDevice * object) {
 
 #ifndef SWIG
 template <class __classType, class __argumentType>
-inline mtsCommandReadBase * mtsDevice::AddCommandRead(void (__classType::*action)(__argumentType &) const,
-                                                      __classType * classInstantiation,
-                                                      const std::string & interfaceName,
-                                                      const std::string & commandName,
-                                                      const __argumentType & argumentPrototype) {
+inline mtsCommandReadBase * CISST_DEPRECATED mtsDevice::AddCommandRead(void (__classType::*action)(__argumentType &) const,
+                                                                       __classType * classInstantiation,
+                                                                       const std::string & interfaceName,
+                                                                       const std::string & commandName,
+                                                                       const __argumentType & argumentPrototype) {
     mtsDeviceInterface * interfacePointer = this->GetProvidedInterface(interfaceName);
     if (interfacePointer) {
         return interfacePointer->AddCommandRead(action, classInstantiation, commandName, argumentPrototype);

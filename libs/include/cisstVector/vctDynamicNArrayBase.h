@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: vctDynamicNArrayBase.h,v 1.13 2008/08/25 17:51:01 anton Exp $
+  $Id$
   
   Author(s):	Daniel Li
   Created on:	2006-07-10

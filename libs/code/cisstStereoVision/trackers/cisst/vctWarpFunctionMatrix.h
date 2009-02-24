@@ -1,5 +1,5 @@
 /*
-  $Id: vctWarpFunctionMatrix.h,v 1.2 2007/10/12 05:32:49 vagvoba Exp $
+  $Id$
   
   Author(s):	Ofri Sadowsky, Anton Deguet
   Created on: 2004-07-01

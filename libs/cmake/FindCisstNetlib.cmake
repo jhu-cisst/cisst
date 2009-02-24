@@ -1,5 +1,5 @@
 #
-# $Id: FindCisstNetlib.cmake 8 2009-01-04 21:13:48Z adeguet1 $
+# $Id$
 #
 # Author(s):  Anton Deguet
 # Created on: 2005-11-20
@@ -23,7 +23,7 @@
 # CISSTNETLIB_INCLUDE_DIR     - include directories to use CISSTNETLIB
 # CISSTNETLIB_LIBRARIES       - link against this to use CISSTNETLIB (fullpath)
 #
-# $Id: FindCisstNetlib.cmake 8 2009-01-04 21:13:48Z adeguet1 $
+# $Id$
 #
 
 SET(CISSTNETLIB_SEARCH_PATH

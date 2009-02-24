@@ -1,5 +1,5 @@
 
-$Id: ReadMe.txt,v 1.3 2005/09/06 22:04:15 anton Exp $
+$Id$
 
 Author(s): Anton Deguet
 

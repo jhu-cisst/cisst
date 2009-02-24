@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: vctBinaryOperations.h,v 1.19 2008/02/01 19:34:54 anton Exp $
+  $Id$
   
   Author(s):	Ofri Sadowsky
   Created on:	2003-08-18

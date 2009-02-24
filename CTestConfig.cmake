@@ -1,5 +1,5 @@
 #
-# $Id: CTestConfig.cmake 20 2009-01-08 16:09:57Z adeguet1 $
+# $Id$
 #
 # (C) Copyright 2005-2007 Johns Hopkins University (JHU), All Rights
 # Reserved.

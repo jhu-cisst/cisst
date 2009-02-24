@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: mtsTask.h,v 1.30 2009/01/09 05:39:41 pkaz Exp $
+  $Id$
 
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2004-04-30
@@ -271,8 +271,8 @@ public:
       other task.  The required interface created also contains a list
       of event handlers to be used as observers.
       PK: should move this to base class (mtsDevice). */
-    mtsRequiredInterface *AddRequiredInterface(const std::string & requiredInterfaceName, mtsRequiredInterface *requiredInterface);
-    mtsRequiredInterface *AddRequiredInterface(const std::string & requiredInterfaceName);
+    mtsRequiredInterface * AddRequiredInterface(const std::string & requiredInterfaceName, mtsRequiredInterface * requiredInterface);
+    mtsRequiredInterface * AddRequiredInterface(const std::string & requiredInterfaceName);
 
     /*! Provide a list of existing required interfaces (by names) */ 
     std::vector<std::string> GetNamesOfRequiredInterfaces(void) const;
@@ -282,8 +282,8 @@ public:
       This method can only work if the required interface has been
       connected to a provided interface from another task. */
     bool CISST_DEPRECATED AddObserverToRequiredInterface(const std::string & requiredInterfaceName,
-                                        const std::string & eventName,
-                                        const std::string & handlerName);
+                                                         const std::string & eventName,
+                                                         const std::string & handlerName);
 
     /*! Get a pointer on the provided interface that has been
       connected to a given required interface (defined by its name).
@@ -291,7 +291,7 @@ public:
       has not been connected.  See mtsTaskManager::Connect. */
     mtsDeviceInterface * GetProvidedInterfaceFor(const std::string & requiredInterfaceName) {
         mtsRequiredInterface *requiredInterface = RequiredInterfaces.GetItem(requiredInterfaceName, 3);
-        return requiredInterface?requiredInterface->GetConnectedInterface():0;
+        return requiredInterface ? requiredInterface->GetConnectedInterface() : 0;
     }
 
     /*! Get the required interface */

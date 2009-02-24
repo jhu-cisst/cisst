@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: ftImagePPM.cpp,v 1.5 2008/10/22 20:04:13 vagvoba Exp $
+  $Id$
   
   Author(s):  Ben Mitchell
   Created on: 2006 

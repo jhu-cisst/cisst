@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: mtsMulticastCommandVoid.cpp,v 1.2 2008/06/04 02:37:06 anton Exp $
+  $Id$
 
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2004-04-30

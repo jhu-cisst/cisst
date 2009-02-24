@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: SineGenerator.h,v 1.6 2007/05/31 20:52:46 anton Exp $
+  $Id$
 
   Author(s): Peter Kazanzides
   Created on: 2005-12-21

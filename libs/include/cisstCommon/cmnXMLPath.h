@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: cmnXMLPath.h 10 2009-01-04 21:38:53Z adeguet1 $
+  $Id$
   
   Author(s):	Ankur Kapoor
   Created on: 2004-04-30

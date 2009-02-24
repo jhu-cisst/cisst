@@ -1,5 +1,5 @@
 #
-# $Id: CMakeLists.txt,v 1.36 2008/03/13 20:42:50 anton Exp $
+# $Id$
 #
 # CMakeLists for cisstVector
 #

@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: osaStopwatch.h,v 1.8 2008/09/03 22:15:20 pkaz Exp $
+  $Id$
 
   Author(s):  Ofri Sadowsky
   Created on: 2005-02-17

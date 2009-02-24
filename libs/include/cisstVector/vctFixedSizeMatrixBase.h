@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: vctFixedSizeMatrixBase.h,v 1.68 2008/08/25 17:51:01 anton Exp $
+  $Id$
 
   Author(s):	Ofri Sadowsky
   Created on:	2003-11-04

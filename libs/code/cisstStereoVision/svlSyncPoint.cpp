@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: svlSyncPoint.cpp,v 1.7 2008/10/28 23:21:14 vagvoba Exp $
+  $Id$
   
   Author(s):  Balazs Vagvolgyi
   Created on: 2008 

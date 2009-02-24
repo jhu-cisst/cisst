@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: mtsTaskPeriodic.h,v 1.8 2008/09/24 19:20:46 pkaz Exp $
+  $Id$
 
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2004-04-30

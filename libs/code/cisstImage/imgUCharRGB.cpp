@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: imgUCharRGB.cpp,v 1.3 2007/04/26 19:33:56 anton Exp $
+  $Id$
 
   Author(s): Anton Deguet
   Created on: 2006-03-28

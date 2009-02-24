@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: mtsTaskFromCallback.cpp,v 1.3 2008/10/21 20:38:22 anton Exp $
+  $Id$
 
   Author(s):  Peter Kazanzides
   Created on: 2008-09-18

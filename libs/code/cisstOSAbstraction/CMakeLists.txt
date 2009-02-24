@@ -1,5 +1,5 @@
 #
-# $Id: CMakeLists.txt,v 1.21 2009/01/05 08:24:44 pkaz Exp $
+# $Id$
 #
 # CMakeLists for cisstOSAbstraction
 #

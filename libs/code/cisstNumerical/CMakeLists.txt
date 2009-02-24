@@ -1,5 +1,5 @@
 #
-# $Id: CMakeLists.txt,v 1.33 2008/10/09 20:17:25 anton Exp $
+# $Id$
 #
 # CMakeLists for cisstNumerical
 #

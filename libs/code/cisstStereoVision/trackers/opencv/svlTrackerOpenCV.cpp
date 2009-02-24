@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: svlTrackerOpenCV.cpp,v 1.3 2008/10/22 14:51:58 vagvoba Exp $
+  $Id$
   
   Author(s):  Ankur Kapoor & Balazs Vagvolgyi
   Created on: 2007

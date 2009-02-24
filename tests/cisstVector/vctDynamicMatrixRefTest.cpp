@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: vctDynamicMatrixRefTest.cpp,v 1.10 2007/08/24 02:35:16 anton Exp $
+  $Id$
   
   Author(s):  Anton Deguet
   Created on: 2004-11-17

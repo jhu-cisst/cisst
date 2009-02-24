@@ -1,5 +1,5 @@
 /*
-  $Id: vctDynamicFunctionalMatrixOwner.h,v 1.2 2007/10/19 16:57:20 vagvoba Exp $
+  $Id$
   
   Author(s):	Robert Jacques
   Created on:	2005-07-21

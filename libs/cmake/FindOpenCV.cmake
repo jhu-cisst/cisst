@@ -25,7 +25,7 @@
 #
 # ---------------------
 #
-# $Id: FindOpenCV.cmake 8 2009-01-04 21:13:48Z adeguet1 $
+# $Id$
 # ERC-CISST version:
 #  
 # - Removed deprecated code starting with cap. OPENCV

@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: svlTrackerMSBruteForce.h,v 1.2 2007/09/27 00:11:30 vagvoba Exp $
+  $Id$
 
   Author(s):  Balazs Vagvolgyi
   Created on: 2007

@@ -1,5 +1,5 @@
 #
-# $Id: CMakeLists.txt,v 1.7 2008/09/04 05:19:09 anton Exp $
+# $Id$
 #
 # (C) Copyright 2005-2007 Johns Hopkins University (JHU), All Rights
 # Reserved.

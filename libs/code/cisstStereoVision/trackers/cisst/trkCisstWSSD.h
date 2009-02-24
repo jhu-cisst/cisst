@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: trkCisstWSSD.h,v 1.3 2007/09/27 00:14:03 vagvoba Exp $
+  $Id$
 
   Author(s):  Maneesh Dewan (?)
   Created on: 2007 

@@ -1,5 +1,5 @@
 #
-# $Id: CMakeLists.txt,v 1.6 2008/11/21 21:31:42 anton Exp $
+# $Id$
 #
 # CMakeLists for cisstDevice
 #

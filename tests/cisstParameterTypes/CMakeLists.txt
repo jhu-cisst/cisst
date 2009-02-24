@@ -1,5 +1,5 @@
 #
-# $Id: CMakeLists.txt,v 1.1 2008/11/07 15:20:54 anton Exp $
+# $Id$
 #
 # CMakeLists for cisstParameterTypes Tests
 #

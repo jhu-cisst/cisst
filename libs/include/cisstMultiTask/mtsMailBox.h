@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: mtsMailBox.h,v 1.4 2008/09/05 04:31:10 anton Exp $
+  $Id$
 
   Author(s):  Peter Kazanzides
   Created on: 2007-09-05

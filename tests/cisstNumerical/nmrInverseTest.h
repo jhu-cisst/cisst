@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: nmrInverseTest.h,v 1.6 2008/09/09 15:10:58 anton Exp $
+  $Id$
   
   Author(s):  Anton Deguet
   Created on: 2006-01-27

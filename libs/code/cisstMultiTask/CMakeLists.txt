@@ -1,5 +1,5 @@
 #
-# $Id: CMakeLists.txt,v 1.15 2008/12/01 05:14:42 pkaz Exp $
+# $Id$
 #
 # CMakeLists for cisstMultiTask
 #

@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: optimizedEngines.cpp,v 1.3 2008/08/30 14:59:54 anton Exp $
+  $Id$
   
   Author(s):  Anton Deguet
   Created on: 2007-08-02

@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: devSensableHD.h,v 1.7 2008/10/21 20:35:48 anton Exp $
+  $Id$
 
   Author(s): Anton Deguet
   Created on: 2008-04-04

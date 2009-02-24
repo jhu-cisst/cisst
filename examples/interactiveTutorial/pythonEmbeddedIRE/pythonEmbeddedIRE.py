@@ -3,7 +3,7 @@
 # ex: set softtabstop=4 shiftwidth=4 tabstop=4 expandtab:
 
 #
-# $Id: pythonEmbeddedIRE.py,v 1.5 2007/05/31 20:52:46 anton Exp $
+# $Id$
 #
 
 #  Author(s): Peter Kazanzides

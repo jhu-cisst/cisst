@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: vctQuaternion.cpp,v 1.2 2007/04/26 19:33:57 anton Exp $
+  $Id$
   
   Author(s):	Anton Deguet
   Created on:	2005-02-23

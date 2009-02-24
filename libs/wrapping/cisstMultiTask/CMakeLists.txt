@@ -1,5 +1,5 @@
 #
-# $Id: CMakeLists.txt,v 1.2 2008/04/24 21:26:28 pkaz Exp $
+# $Id$
 #
 # CMakeLists for cisstMultiTask wrapping
 #

@@ -2,7 +2,7 @@
 # ex: set softtabstop=4 shiftwidth=4 tabstop=4 expandtab:
 
 #
-# $Id: vctQuaternionRotation3Test.py,v 1.6 2008/03/13 20:46:46 anton Exp $
+# $Id$
 #
 
 # Author: Anton Deguet

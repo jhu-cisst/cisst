@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: ireFramework.cpp,v 1.18 2007/04/26 19:33:56 anton Exp $
+  $Id$
 
   Author(s):  Andrew LaMora, Peter Kazanzides
   Created on: 2005-02-28

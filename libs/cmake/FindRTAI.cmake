@@ -1,5 +1,5 @@
 #
-# $Id: FindRTAI.cmake,v 1.5 2007/04/26 19:33:56 anton Exp $
+# $Id$
 #
 # Author(s):  Anton Deguet
 # Created on: 2004-02-18

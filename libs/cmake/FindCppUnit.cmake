@@ -1,5 +1,5 @@
 #
-# $Id: FindCppUnit.cmake 8 2009-01-04 21:13:48Z adeguet1 $
+# $Id$
 #
 # Author(s):  Anton Deguet
 # Created on: 2003-07-31

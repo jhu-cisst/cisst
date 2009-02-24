@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: nmrMultiIndexCounterTest.cpp,v 1.5 2007/04/26 20:12:05 anton Exp $
+  $Id$
   
   Author(s):  Ofri Sadowsky
   Created on: 2004-10-21

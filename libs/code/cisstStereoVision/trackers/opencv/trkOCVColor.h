@@ -5,7 +5,7 @@ Date  : 2007-02-15
 SVL revision: Balazs Vagvolgyi
 Date  : 2007-05-31
 
-$Id: trkOCVColor.h,v 1.5 2008/10/29 19:34:55 vagvoba Exp $
+$Id$
 */
 
 #ifndef _trkOCVColor_h

@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: osaThreadedLogFile.h,v 1.4 2008/09/09 15:22:32 anton Exp $
+  $Id$
   
   Author(s):  Anton Deguet
   Created on: 2008-01-04

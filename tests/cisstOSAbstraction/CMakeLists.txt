@@ -1,5 +1,5 @@
 #
-# $Id: CMakeLists.txt,v 1.8 2008/01/30 22:46:06 anton Exp $
+# $Id$
 #
 # CMakeLists for cisstOSAbstraction tests
 #

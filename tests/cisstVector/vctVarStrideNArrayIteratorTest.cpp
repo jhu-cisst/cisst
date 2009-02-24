@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: vctVarStrideNArrayIteratorTest.cpp,v 1.2 2007/04/26 20:12:05 anton Exp $
+  $Id$
   
   Author(s):  Daniel Li
   Created on: 2006-07-31

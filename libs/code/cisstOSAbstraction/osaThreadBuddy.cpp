@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: osaThreadBuddy.cpp,v 1.20 2008/09/24 07:26:02 pkaz Exp $
+  $Id$
 
   Author(s): Ankur Kapoor
   Created on: 2004-04-30

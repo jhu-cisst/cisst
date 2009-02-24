@@ -1,5 +1,5 @@
 #
-# $Id: example4.py,v 1.2 2008/01/22 03:32:18 pkaz Exp $
+# $Id$
 #
 # To be executed by multiTaskTutorialExample4
 #

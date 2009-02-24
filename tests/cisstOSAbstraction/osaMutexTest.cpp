@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: osaMutexTest.cpp,v 1.5 2008/08/28 20:55:08 anton Exp $
+  $Id$
   
   Author(s):  Anton Deguet
   Created on: 2008-01-30

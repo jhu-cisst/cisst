@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: ImageAdd_ITK_Benchmark.cpp,v 1.4 2008/09/04 05:44:11 anton Exp $
+  $Id$
   
   Author(s):  Ofri Sadowsky, Daniel Li
   Created on: 2007-07-01

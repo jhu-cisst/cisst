@@ -1,6 +1,6 @@
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
-// $Id: clockDevice.h,v 1.4 2008/09/04 05:29:17 anton Exp $
+// $Id$
 
 #ifndef _clockDevice_h
 #define _clockDevice_h

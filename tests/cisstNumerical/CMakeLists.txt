@@ -1,5 +1,5 @@
 #
-# $Id: CMakeLists.txt,v 1.31 2007/04/26 20:12:05 anton Exp $
+# $Id$
 #
 # CMakeLists for cisstNumerical tests
 #

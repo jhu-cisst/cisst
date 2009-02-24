@@ -1,6 +1,6 @@
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
-// $Id: sineTask.h,v 1.5 2008/09/04 14:46:30 mbalicki Exp $
+// $Id$
 
 #ifndef _sineTask_h
 #define _sineTask_h

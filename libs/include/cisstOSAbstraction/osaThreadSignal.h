@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: osaThreadSignal.h,v 1.3 2008/12/14 06:36:06 pkaz Exp $
+  $Id$
 
   Author(s): Ankur Kapoor, Peter Kazanzides, Balazs Vagvolgyi, Anton Deguet
   Created on: 2004-04-30
