@@ -93,6 +93,8 @@ public:
     */
     virtual ui3SceneManager * GetSceneManager(void);
 
+    virtual void ConfigureMenuBar(void) = 0;
+
     /*!
      This method shall perform all the necessary resource initialization and memory
      allocation that is to be done before running the behavior.
@@ -233,7 +235,7 @@ protected:
 
 protected:
 
-    void AddMenuBar(bool isManager);
+    void AddMenuBar(bool isManager = false);
 
     void SetState(const StateType & newState);
 

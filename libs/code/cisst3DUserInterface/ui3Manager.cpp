@@ -198,6 +198,10 @@ ui3Handle ui3Manager::AddBehavior(ui3BehaviorBase * behavior,
     behavior->Manager = this;
     this->Behaviors.push_back(behavior);
 
+    // create and configure the menu bar
+    behavior->AddMenuBar();
+    behavior->ConfigureMenuBar();
+
     // add the task to the task manager (mts) code 
     this->TaskManager->AddTask(behavior);
     
@@ -235,7 +239,6 @@ void ui3Manager::Startup(void)
     for (iterator = this->Behaviors.begin();
          iterator != end;
          iterator++) {
-             (*iterator)->AddMenuBar(false);
              this->SceneManager->Add((*iterator)->MenuBar);
              // this->SceneManager->Add((*iterator)->GetVisibleObject());
              (*iterator)->SetState(Idle);

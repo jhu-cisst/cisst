@@ -30,6 +30,7 @@ public:
 
     void Startup(void);
     void Cleanup(void);
+    void ConfigureMenuBar(void);
     bool RunForeground(void);
     bool RunBackground(void);
     bool RunNoInput(void);
@@ -38,7 +39,7 @@ public:
     ui3VisibleObject * GetVisibleObject(void) { return 0; }
 
 protected:
-    void OnButton1(void);
+    void FirstButtonCallback(void);
     void OnButton2(void);
     void OnButton3(void);
 

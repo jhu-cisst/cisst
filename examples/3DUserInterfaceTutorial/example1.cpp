@@ -108,6 +108,20 @@ CExampleBehavior::~CExampleBehavior()
 {
 }
 
+void CExampleBehavior::ConfigureMenuBar()
+{
+    this->MenuBar->AddClickButton("FirstButton",
+                                  1,
+                                  "",
+                                  &CExampleBehavior::FirstButtonCallback,
+                                  this);
+}
+
+void CExampleBehavior::FirstButtonCallback()
+{
+    std::cerr << "Behavior \"" << this->GetName() << "\" Button 1 pressed" << std::endl;
+}
+
 void CExampleBehavior::Startup(void)
 {
     // Creating buttons on menu bar
@@ -202,11 +216,6 @@ bool CExampleBehavior::SaveConfiguration(const std::string & configFile)
 {
     // save settings
     return true;
-}
-
-void CExampleBehavior::OnButton1()
-{
-    // button click event
 }
 
 void CExampleBehavior::OnButton2()

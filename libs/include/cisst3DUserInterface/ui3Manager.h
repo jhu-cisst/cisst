@@ -252,9 +252,14 @@ public:
 
 
 private:
+
     inline ui3VisibleObject * GetVisibleObject(void) {
         CMN_LOG_CLASS(5) << "GetVisibleObject: this method should never be called" << std::endl;
         return 0;
+    }
+
+    inline void ConfigureMenuBar(void) {
+        CMN_LOG_CLASS(5) << "ConfigureMenuBar: this method should never be called" << std::endl;
     }
 
     void SetActiveBehavior(ui3BehaviorBase * newBehavior);
