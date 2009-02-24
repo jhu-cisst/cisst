@@ -44,7 +44,7 @@ struct devSensableHDDeviceData {
     vctDynamicVectorRef<double> GimbalJointsRef;
     
     // mtsFunction called to broadcast the event
-    mtsFunctionWrite ButtonEvent;
+    mtsFunctionWrite Button1Event, Button2Event;
 	
     // local buffer used to store the position as provided
     // by Sensable
@@ -120,27 +120,25 @@ void devSensableHD::Run(void)
             currentButtonState = currentButtons & HD_DEVICE_BUTTON_1;
             previousButtonState = deviceData->Buttons.Data & HD_DEVICE_BUTTON_1;
             if (currentButtonState != previousButtonState) {
-                event.SetButtonNumber(1);
                 if (currentButtonState == 0) {
                     event.SetType(prmEventButton::RELEASED);
                 } else {
                     event.SetType(prmEventButton::CLICKED);
                 }
                 // throw the event
-                deviceData->ButtonEvent(event);
+                deviceData->Button1Event(event);
             }
             // test for button 2
             currentButtonState = currentButtons & HD_DEVICE_BUTTON_2;
             previousButtonState = deviceData->Buttons.Data & HD_DEVICE_BUTTON_2;
             if (currentButtonState != previousButtonState) {
-                event.SetButtonNumber(2);
                 if (currentButtonState == 0) {
                     event.SetType(prmEventButton::RELEASED);
                 } else {
                     event.SetType(prmEventButton::CLICKED);
                 }
                 // throw the event
-                deviceData->ButtonEvent(event);
+                deviceData->Button2Event(event);
             }
             // save previous buttons state
             deviceData->Buttons.Data = currentButtons;
@@ -249,9 +247,6 @@ void devSensableHD::SetupInterfaces(void)
         this->AddCommandRead(&mtsStateTable::GetIndexReader, &StateTable,
                              interfaceName, "GetStateIndex");
         
-        // define events, provide argument model for write events
-        deviceData->ButtonEvent.Bind(AddEventWrite(interfaceName, "Buttons", prmEventButton()));
-
         // adds frames to transformation manager
         deviceData->PositionCartesian.Data.ReferenceFrame() =
             new prmTransformationFixed(interfaceName + "Base",
@@ -263,6 +258,14 @@ void devSensableHD::SetupInterfaces(void)
             new prmTransformationDynamic(interfaceName + "Tip",
                                          deviceData->PositionFunctionForTransformationManager,
                                          deviceData->PositionCartesian.Data.ReferenceFrame());
+        
+        // Add interfaces for button with events
+        this->AddProvidedInterface(interfaceName + "Button1");
+        deviceData->Button1Event.Bind(AddEventWrite(interfaceName + "Button1",
+                                      "Button", prmEventButton()));
+        this->AddProvidedInterface(interfaceName + "Button2");
+        deviceData->Button2Event.Bind(AddEventWrite(interfaceName + "Button2",
+                                      "Button", prmEventButton()));
 
         // This allows us to return Data->RetValue from the Run method.
         this->Driver->CallbackReturnValue = HD_CALLBACK_CONTINUE;
