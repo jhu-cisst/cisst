@@ -39,6 +39,8 @@ int main(void)
 
     // connect the tasks
     taskManager->Connect("DISP", "Robot", "Omni", "Omni");
+    taskManager->Connect("DISP", "Button1", "Omni", "OmniButton1");
+    taskManager->Connect("DISP", "Button2", "Omni", "OmniButton2");
     // generate a nice tasks diagram
     std::ofstream dotFile("example1.dot"); 
     taskManager->ToStreamDot(dotFile);

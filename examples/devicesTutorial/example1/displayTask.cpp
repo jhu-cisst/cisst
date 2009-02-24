@@ -19,8 +19,19 @@ displayTask::displayTask(const std::string & taskName, double period):
         requiredInterface->AddFunction("GetPosition", GetCartesianPosition, mtsRequired);
         requiredInterface->AddFunction("GetVelocity", GetCartesianVelocity, mtsOptional);
         requiredInterface->AddFunction("GetPositionJoint", GetJointPosition, mtsOptional);
-        requiredInterface->AddEventHandlerWrite(&displayTask::ButtonEventHandler, this,
+        requiredInterface->AddEventHandlerWrite(&displayTask::Button1EventHandler, this,
                                                 "Buttons", prmEventButton());
+    }
+    // to communicate with the interface of the resource
+    requiredInterface = AddRequiredInterface("Button1");
+	if (requiredInterface) {
+        requiredInterface->AddEventHandlerWrite(&displayTask::Button1EventHandler, this,
+                                                "Button", prmEventButton());
+    }
+    requiredInterface = AddRequiredInterface("Button2");
+	if (requiredInterface) {
+        requiredInterface->AddEventHandlerWrite(&displayTask::Button2EventHandler, this,
+                                                "Button", prmEventButton());
     }
 }
 
@@ -119,26 +130,23 @@ void displayTask::Run(void)
     }
 }
 
-void displayTask::ButtonEventHandler(const prmEventButton & buttonEvent)
+void displayTask::Button1EventHandler(const prmEventButton & buttonEvent)
 {
-    switch (buttonEvent.ButtonNumber()) {
-        case 1:
-            if (buttonEvent.Type() == prmEventButton::CLICKED) {
-                UI.Button1->value(true);
-            } else {
-                UI.Button1->value(false);
-            }
-            break;
-        case 2:
-            if (buttonEvent.Type() == prmEventButton::CLICKED) {
-                UI.Button2->value(true);
-            } else {
-                UI.Button2->value(false);
-            }
-            break;
+    if (buttonEvent.Type() == prmEventButton::CLICKED) {
+        UI.Button1->value(true);
+    } else {
+        UI.Button1->value(false);
     }
 }
 
+void displayTask::Button2EventHandler(const prmEventButton & buttonEvent)
+{
+    if (buttonEvent.Type() == prmEventButton::CLICKED) {
+        UI.Button2->value(true);
+    } else {
+        UI.Button2->value(false);
+    }
+}
 
 /*
   Author(s):  Anton Deguet, Peter Kazanzides 
