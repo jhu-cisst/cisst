@@ -24,10 +24,10 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.4.7 FATAL_ERROR)
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 
 # Wrap each library
-FOREACH(lib ${CISST_LIBRARIES})
+FOREACH(lib ${CISST_LIBS})
   IF(BUILD_LIBS_${lib})
     IF(EXISTS ${cisstWrapping_SOURCE_DIR}/${lib})
-      SUBDIRS(${lib})
+      ADD_SUBDIRECTORY(${cisstWrapping_SOURCE_DIR}/${lib})
     ENDIF(EXISTS ${cisstWrapping_SOURCE_DIR}/${lib})
   ENDIF(BUILD_LIBS_${lib})
 ENDFOREACH(lib)

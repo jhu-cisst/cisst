@@ -8,15 +8,13 @@ FIND_FILE(CISST_CMAKE
 IF(EXISTS ${CISST_CMAKE})
   INCLUDE("${CISST_CMAKE}")
 
+  # Extend CMake Module Path to find cisst defined Macros
+  SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CISST_CMAKE_DIR})
+  INCLUDE(cisstMacros) # To use CISST_REQUIRES
+
   # Add the include and lib paths for cisst
   INCLUDE_DIRECTORIES(${CISST_INCLUDE_DIR})
   LINK_DIRECTORIES(${CISST_LIBRARY_DIR})
-
-  # For Microsoft compilers, see if the libraries are DLLs
-  # Useless and harmless with other compilers
-  IF(CISST_BUILD_SHARED_LIBS)
-    ADD_DEFINITIONS(-DCISST_DLL)
-  ENDIF(CISST_BUILD_SHARED_LIBS)
 
   # Add a new library
   ADD_LIBRARY(newLibrary newLibrary.h newLibrary.cpp)
@@ -28,10 +26,6 @@ IF(EXISTS ${CISST_CMAKE})
   # CISST_REQUIRES will check that the libraries are compiled
   # and set the correct link options
   CISST_REQUIRES("newProgram" "cisstCommon;cisstVector;cisstNumerical")
-
-  # This example uses cisstNetlib therefore we need the libraries
-  INCLUDE_DIRECTORIES(${CISSTNETLIB_INCLUDE_DIR})
-  TARGET_LINK_LIBRARIES(newProgram ${CISSTNETLIB_LIBRARIES})
 
 ELSE(EXISTS ${CISST_CMAKE})
   # Warn that we really need the cisst.cmake file

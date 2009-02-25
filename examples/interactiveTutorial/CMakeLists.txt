@@ -14,4 +14,5 @@
 
 PROJECT(interactiveTutorial)
 
-SUBDIRS(pythonEmbedded pythonEmbeddedIRE)
+ADD_SUBDIRECTORY(pythonEmbedded)
+ADD_SUBDIRECTORY(pythonEmbeddedIRE)

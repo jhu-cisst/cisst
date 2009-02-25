@@ -30,12 +30,12 @@ VARIABLE_REQUIRES(BUILD_LIBS_cisstInteractive REQUIREMENT_MET CISST_HAS_SWIG_PYT
 # Build everything
 FOREACH(lib ${CISST_LIBS})
   IF(BUILD_LIBS_${lib})
-    SUBDIRS(code/${lib})
+    ADD_SUBDIRECTORY(code/${lib})
   ENDIF(BUILD_LIBS_${lib})
 ENDFOREACH(lib)
 
 # Build wrappers
 IF(CISST_HAS_SWIG_PYTHON)
-  SUBDIRS(wrapping)
+  ADD_SUBDIRECTORY(wrapping)
 ENDIF(CISST_HAS_SWIG_PYTHON)
 

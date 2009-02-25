@@ -39,11 +39,6 @@ TARGET_LINK_LIBRARIES(multiTaskTutorialExample6 ${FLTK_LIBRARIES})
 # link with the cisst libraries
 CISST_REQUIRES("multiTaskTutorialExample6" "cisstCommon;cisstOSAbstraction;cisstMultiTask")
 
-
-IF(CISST_HAS_LINUX_RTAI)
-  TARGET_LINK_LIBRARIES(multiTaskTutorialExample6 ${RTAI_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
-ENDIF(CISST_HAS_LINUX_RTAI)
-
 # For apple applications with GUI
 IF(APPLE)
   FIND_PROGRAM(APPLE_REZ Rez /Developer/Tools)

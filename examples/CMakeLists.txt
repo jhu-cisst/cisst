@@ -53,6 +53,6 @@ ENDIF(NOT CISST_HAS_SWIG_PYTHON)
 # Create targets for each example
 FOREACH(example ${CISST_EXAMPLES})
   IF(BUILD_EXAMPLES_${example})
-    SUBDIRS(${example})
+    ADD_SUBDIRECTORY(${example})
   ENDIF(BUILD_EXAMPLES_${example})
 ENDFOREACH(example)

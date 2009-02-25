@@ -28,8 +28,3 @@ target_link_libraries(${PROJECT_NAME}
                       )
 
 CISST_REQUIRES(${PROJECT_NAME} "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstImage;cisstStereoVision;cisstDevices;cisstParameterTypes;cisst3DUserInterface")
-
-# IF(WIN32)
-#  set(CMAKE_EXE_LINKER_FLAGS
-#      "${CMAKE_SHARED_LINKER_FLAGS} /NODEFAULTLIB:libc.lib /NODEFAULTLIB:libcmt.lib /NODEFAULTLIB:libcd.lib /NODEFAULTLIB:libcmtd.lib")
-# ENDIF(WIN32)

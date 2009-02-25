@@ -48,10 +48,6 @@ TARGET_LINK_LIBRARIES(multiTaskTutorialExample4 ${FLTK_LIBRARIES})
 # link with the cisst libraries
 CISST_REQUIRES("multiTaskTutorialExample4" "cisstCommon;cisstOSAbstraction;cisstMultiTask;cisstInteractive")
 
-IF(CISST_HAS_LINUX_RTAI)
-  TARGET_LINK_LIBRARIES(multiTaskTutorialExample4 ${RTAI_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
-ENDIF(CISST_HAS_LINUX_RTAI)
-
 IF(UNIX)
   IF(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     TARGET_LINK_LIBRARIES(multiTaskTutorialExample4 util)

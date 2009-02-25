@@ -30,11 +30,3 @@ ADD_EXECUTABLE(numericalTutorial
 
 CISST_REQUIRES("numericalTutorial" "cisstCommon;cisstVector;cisstNumerical")
 VARIABLE_REQUIRES(BUILD_EXAMPLES_numericalTutorial REQUIREMENT_MET CISST_HAS_CISSTNETLIB)
-
-IF(CISST_HAS_CISSTNETLIB)
-  TARGET_LINK_LIBRARIES(numericalTutorial
-                        ${CISSTNETLIB_LIBRARIES}
-                        ${CISSTNETLIB_F95_LIBRARIES}
-                        ${CISSTNETLIB_GCC_LIBRARIES}
-                        ${CMAKE_THREAD_LIBS_INIT})
-ENDIF(CISST_HAS_CISSTNETLIB)

@@ -105,12 +105,3 @@ ENDIF(CISST_HAS_CISSTNETLIB)
 
 
 CISST_ADD_LIBRARY_TO_PROJECT(cisstLibs)
-
-# Windows Dll require to link      
-IF(CISST_HAS_CISSTNETLIB)
-  TARGET_LINK_LIBRARIES(cisstNumerical
-                        ${CISSTNETLIB_LIBRARIES}
-                        ${CISSTNETLIB_F95_LIBRARIES}
-                        ${CISSTNETLIB_GCC_LIBRARIES})
-ENDIF(CISST_HAS_CISSTNETLIB)
-

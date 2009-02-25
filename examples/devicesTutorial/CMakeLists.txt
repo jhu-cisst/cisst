@@ -14,7 +14,4 @@
 
 PROJECT(devicesTutorial)
 
-# Threads for cisstOSAbstraction
-FIND_PACKAGE(Threads REQUIRED)
-
-SUBDIRS(example1)
+ADD_SUBDIRECTORY(example1)

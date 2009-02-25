@@ -24,7 +24,7 @@ FOREACH(lib ${CISST_LIBRARIES})
 
   # Make sure there is actually a directory of test case
   IF(EXISTS ${cisstWrappingTests_SOURCE_DIR}/${lib})
-    SUBDIRS(${lib})
+    ADD_SUBDIRECTORY(${lib})
   ENDIF(EXISTS ${cisstWrappingTests_SOURCE_DIR}/${lib})
 
 ENDFOREACH(lib)

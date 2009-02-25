@@ -98,24 +98,17 @@ ENDIF(CISST_HAS_CISSTNETLIB)
 # Add executable for C++ tests
 ADD_EXECUTABLE(cisstNumericalTests ${SOURCE_FILES} ${HEADER_FILES})
 TARGET_LINK_LIBRARIES(cisstNumericalTests cisstTestsMain)
-CISST_REQUIRES("cisstNumericalTests" "cisstCommon;cisstVector;cisstNumerical")
+
+# If cisstOSAbstraction is compiled, compile multithreaded tests
+# and link differently
+IF(BUILD_LIBS_cisstOSAbstraction)
+  ADD_DEFINITIONS(-DBUILD_MULTITHREADED_TESTS)
+  CISST_REQUIRES("cisstNumericalTests" "cisstCommon;cisstVector;cisstNumerical;cisstOSAbstraction")
+  TARGET_LINK_LIBRARIES(cisstNumericalTests
+                        ${CMAKE_THREAD_LIBS_INIT})
+ELSE(BUILD_LIBS_cisstOSAbstraction)
+  CISST_REQUIRES("cisstNumericalTests" "cisstCommon;cisstVector;cisstNumerical")
+ENDIF(BUILD_LIBS_cisstOSAbstraction)
 
 # To generate a CTest list of tests
 CISST_ADD_TESTS(cisstNumericalTests)
-
-
-IF(CISST_HAS_CISSTNETLIB)
-  TARGET_LINK_LIBRARIES(cisstNumericalTests
-                        ${CISSTNETLIB_LIBRARIES}
-                        ${CISSTNETLIB_F95_LIBRARIES}
-                        ${CISSTNETLIB_GCC_LIBRARIES}
-                        ${CMAKE_THREAD_LIBS_INIT})
-  # If cisstOSAbstraction is compiled, compile multithreaded tests
-  IF(BUILD_LIBS_cisstOSAbstraction)
-    ADD_DEFINITIONS(-DBUILD_MULTITHREADED_TESTS)
-    CISST_REQUIRES("cisstNumericalTests" "cisstOSAbstraction")
-    TARGET_LINK_LIBRARIES(cisstNumericalTests
-                          ${CMAKE_THREAD_LIBS_INIT})
-  ENDIF(BUILD_LIBS_cisstOSAbstraction)
-ENDIF(CISST_HAS_CISSTNETLIB)
-

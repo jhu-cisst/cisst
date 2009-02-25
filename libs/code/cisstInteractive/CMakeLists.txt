@@ -32,15 +32,16 @@ SET(HEADER_FILES
     ireFramework.h
     )
 
-# Link against these libraries
-IF(WIN32)
-  LINK_LIBRARIES(debug ${PYTHON_DEBUG_LIBRARY} optimized ${PYTHON_LIBRARY}) 
-ELSE(WIN32)
-  LINK_LIBRARIES(${PYTHON_LIBRARY}) 
-ENDIF(WIN32)
-  
 # Add library to project
 CISST_ADD_LIBRARY_TO_PROJECT(cisstLibs)
+
+# Link against these libraries
+IF(WIN32)
+  TARGET_LINK_LIBRARIES(cisstInteractive debug ${PYTHON_DEBUG_LIBRARY} optimized ${PYTHON_LIBRARY}) 
+ELSE(WIN32)
+  TARGET_LINK_LIBRARIES(cisstInteractive ${PYTHON_LIBRARY}) 
+ENDIF(WIN32)
+  
 
 # Call makeIrepy to compile the Python source files (*.py) and place
 # the results (*.pyc files) in the destination directory.
