@@ -86,10 +86,10 @@ int main(int argc, char **argv)
     IreThread.Create<IreLaunch,  char *> (&IRE, &IreLaunch::Run, "from example4 import *");
     // Wait for IRE to initialize itself
     while (ireFramework::IsStarting())
-        osaSleep(0.5);  // Wait 0.5 seconds
+        osaSleep(0.5 * cmn_s);  // Wait 0.5 seconds
     // Loop until IRE and display task are both exited
     while (ireFramework::IsActive() || !displayTaskObject->GetExitFlag())
-        osaSleep(0.5);  // Wait 0.5 seconds
+        osaSleep(0.5 * cmn_s);  // Wait 0.5 seconds
     // Cleanup and exit
     IreThread.Wait();
 #else
@@ -112,6 +112,7 @@ int main(int argc, char **argv)
         Py_Finalize();
     }
     while (1) {
+        osaSleep(100.0 * cmn_ms); // sleep to save CPU
         if (displayTaskObject->GetExitFlag()) {
             break;
         }

@@ -42,7 +42,7 @@ int main(void)
 
     // Loop until both tasks are closed
     while (!(appTaskControl1->GetExitFlag() && appTaskControl2->GetExitFlag())) {
-        osaSleep(0.5); // 0.5 seconds
+        osaSleep(0.5 * cmn_s); // 0.5 seconds
     }
 
     taskManager->KillAll();

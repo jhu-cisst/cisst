@@ -53,6 +53,7 @@ int main(void)
 
     // wait until the close button of the UI is pressed
     while (1) {
+        osaSleep(100.0 * cmn_ms); // sleep to save CPU
         if (displayTaskObject->GetExitFlag()) {
             break;
         }
