@@ -55,4 +55,4 @@ SET(CISST_INSTALL_PREFIX "@CMAKE_INSTALL_PREFIX@")
 
 
 # Indicates if cmnXMLPath was compiled
-SET(USE_cmnXMLPath @USE_cmnXMLPath@)
+SET(CISST_HAS_XML @CISST_HAS_XML@)

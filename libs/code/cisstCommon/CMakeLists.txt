@@ -68,10 +68,10 @@ SET(HEADER_FILES
     )
 
 # Conditional inclusion of cmnXMLPath in the cisstCommon project.
-IF(USE_cmnXMLPath)
+IF(CISST_HAS_XML)
   SET(SOURCE_FILES ${SOURCE_FILES} cmnXMLPath.cpp)
   SET(HEADER_FILES ${HEADER_FILES} cmnXMLPath.h)
-ENDIF(USE_cmnXMLPath)
+ENDIF(CISST_HAS_XML)
 
 CISST_ADD_LIBRARY_TO_PROJECT(cisstLibs)
 

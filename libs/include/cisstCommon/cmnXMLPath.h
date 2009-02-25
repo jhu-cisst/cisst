@@ -29,6 +29,10 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _cmnXMLPath_h
 #define _cmnXMLPath_h
 
+#include <cisstConfig.h>
+
+#if CISST_HAS_XML
+
 #include <cisstCommon/cmnPortability.h>
 #include <cisstCommon/cmnTokenizer.h>
 #include <cisstCommon/cmnClassRegister.h>
@@ -170,5 +174,6 @@ public:
 
 CMN_DECLARE_SERVICES_INSTANTIATION(cmnXMLPath);
 
+#endif // CISST_HAS_XML
 
 #endif // _cmnXMLPath_h

@@ -44,6 +44,9 @@ http://www.cisst.org/cisst/license.txt.
 // Using OpenCV for optimized image processing
 #define CISST_HAS_OPENCV @SVL_HAS_OPENCV@
 
+// Using XML or not
+#define CISST_HAS_XML @CISST_HAS_XML@
+
 
 #endif // _cisstConfig_h
 
