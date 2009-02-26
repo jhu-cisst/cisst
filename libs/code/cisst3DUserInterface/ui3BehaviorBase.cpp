@@ -33,7 +33,7 @@ CMN_IMPLEMENT_SERVICES(ui3BehaviorBase)
 
 ui3BehaviorBase::ui3BehaviorBase(const std::string & name,
                                  ui3Manager * manager):
-    mtsTaskContinuous(name, 500),
+    mtsTaskContinuous(name, 500), /* all behaviors have a state table of 500, ui3Manager needs at least 3 */
     Manager(manager),
     MenuBar(0)
 {

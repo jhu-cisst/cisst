@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsTaskContinuous.h>
 #include <cisstMultiTask/mtsFunctionReadOrWrite.h>
+#include <cisstMultiTask/mtsStateData.h>
 #include <cisstParameterTypes/prmPositionCartesianGet.h>
 #include <cisstParameterTypes/prmEventButton.h>
 
@@ -248,6 +249,8 @@ protected:
      This member is set by the UI manager upon creating the behavior.
     */
     ui3Manager * Manager;
+
+    mtsFunctionRead RightMasterPositionFunction, LeftMasterPositionFunction;
 };
 
 

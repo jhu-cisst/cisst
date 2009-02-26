@@ -44,6 +44,15 @@ ui3Manager::ui3Manager(const std::string & name):
     LeftButtonReleased(false),
     LeftMasterExists(false)
 {
+    // populate the state table
+    this->RightMasterPosition.AddToStateTable(this->StateTable, "RightMasterPosition");
+    this->LeftMasterPosition.AddToStateTable(this->StateTable, "LeftMasterPosition");
+
+    // create an interface for all behaviors to access some state information
+    this->AddProvidedInterface("BehaviorsInterface");
+    this->RightMasterPosition.AddReadCommandToTask(this, "BehaviorsInterface", "RightMasterPosition");
+    this->LeftMasterPosition.AddReadCommandToTask(this, "BehaviorsInterface", "LeftMasterPosition");
+    
     // add the UI manager to the task manager
     this->TaskManager = mtsTaskManager::GetInstance();
     CMN_ASSERT(TaskManager);
@@ -200,9 +209,17 @@ ui3Handle ui3Manager::AddBehavior(ui3BehaviorBase * behavior,
     behavior->AddMenuBar();
     behavior->ConfigureMenuBar();
 
+    // create a required interface for the behavior to connect with the manager
+    mtsRequiredInterface * managerInterface;
+    managerInterface = behavior->AddRequiredInterface("ManagerInterface");
+    CMN_ASSERT(managerInterface);
+    managerInterface->AddFunction("RightMasterPosition", RightMasterPositionFunction, mtsRequired);
+    managerInterface->AddFunction("LeftMasterPosition", LeftMasterPositionFunction, mtsRequired);
+
     // add the task to the task manager (mts) code 
     this->TaskManager->AddTask(behavior);
-    
+    this->TaskManager->Connect(behavior->GetName(), "ManagerInterface",
+                               this->GetName(), "BehaviorsInterface");
     // add a button in the main menu bar with callback
     this->MenuBar->AddClickButton(behavior->GetName(),
                                   position,

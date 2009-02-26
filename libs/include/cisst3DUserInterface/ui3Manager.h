@@ -328,9 +328,12 @@ private:
     bool RightButtonPressed, RightButtonReleased;
     bool LeftButtonPressed, LeftButtonReleased;
 
-    // transformation between inputs and scen
+    // transformation between inputs and scene
     vctFrm3 RightTransform;
     vctFrm3 LeftTransform;
+
+    // positions in the state table, for behaviors to read
+    mtsStateData<prmPositionCartesianGet> RightMasterPosition, LeftMasterPosition; 
 
     // scale
     double RightScale;
