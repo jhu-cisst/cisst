@@ -25,16 +25,22 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <vtkAssembly.h>
 #include <vtkProperty.h>
-
+#include <vtkMatrix4x4.h>
 
 
 ui3VisibleObject::ui3VisibleObject(ui3Manager * manager):
     Assembly(0),
+    Matrix(0),
     Manager(manager),
     VTKHandle(0)
 {
     this->Assembly = vtkAssembly::New();
     CMN_ASSERT(this->Assembly);
+
+    this->Matrix = vtkMatrix4x4::New();
+    this->Matrix->Identity();
+
+    this->Assembly->SetUserMatrix(this->Matrix);
 }
 
 
@@ -63,19 +69,26 @@ void ui3VisibleObject::Hide()
 void ui3VisibleObject::SetPosition(vctDouble3 & position)
 {
     this->Lock();
-    this->Assembly->SetPosition(position.Pointer());
+    //this->Assembly->SetPosition(position.Pointer());
+    this->Matrix->SetElement(0, 3, position.X());
+    this->Matrix->SetElement(1, 3, position.Y());
+    this->Matrix->SetElement(2, 3, position.Z());
     this->Unlock();
 }
 
 
 void ui3VisibleObject::SetOrientation(vctMatRot3 & rotationMatrix)
 {
-    vctDoubleAxAnRot3 axisAngle(rotationMatrix, VCT_DO_NOT_NORMALIZE);
     this->Lock();
-    this->Assembly->RotateWXYZ(axisAngle.Angle() * cmn180_PI,
-                               axisAngle.Axis().X(),
-                               axisAngle.Axis().Y(),
-                               axisAngle.Axis().Z());
+    this->Matrix->SetElement(0, 0, rotationMatrix.Element(0, 0));
+    this->Matrix->SetElement(0, 1, rotationMatrix.Element(0, 1));
+    this->Matrix->SetElement(0, 2, rotationMatrix.Element(0, 2));
+    this->Matrix->SetElement(1, 0, rotationMatrix.Element(1, 0));
+    this->Matrix->SetElement(1, 1, rotationMatrix.Element(1, 1));
+    this->Matrix->SetElement(1, 2, rotationMatrix.Element(1, 2));
+    this->Matrix->SetElement(2, 0, rotationMatrix.Element(2, 0));
+    this->Matrix->SetElement(2, 1, rotationMatrix.Element(2, 1));
+    this->Matrix->SetElement(2, 2, rotationMatrix.Element(2, 2));
     this->Unlock();
 }
 

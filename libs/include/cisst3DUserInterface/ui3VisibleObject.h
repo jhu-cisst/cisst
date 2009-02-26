@@ -75,6 +75,7 @@ protected:
     }
 
     vtkAssembly * Assembly;
+    vtkMatrix4x4 * Matrix;
     ui3Manager * Manager;
     VTKHandleType VTKHandle; 
 };

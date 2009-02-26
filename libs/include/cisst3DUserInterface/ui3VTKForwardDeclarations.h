@@ -28,6 +28,7 @@ class vtkAssembly;
 class vtkBMPReader;
 class vtkCamera;
 class vtkCubeSource;
+class vtkMatrix4x4;
 class vtkPlaneSource;
 class vtkPolyDataMapper;
 class vtkProp3D;
