@@ -48,7 +48,12 @@ int main()
     cmnClassRegister::SetLoD("mtsTaskManager", 10);
 
     mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
+// #define TWO_OMNIS
+#ifdef TWO_OMNIS
     devSensableHD * sensable = new devSensableHD("Omni", "Omni1", "Omni2" /* name in driver, see Preferences in Sensable Driver */);
+#else
+    devSensableHD * sensable = new devSensableHD("Omni", "Omni1" /* name in driver, see Preferences in Sensable Driver */);
+#endif
     taskManager->AddTask(sensable);
 
     ui3Manager guiManager;
@@ -69,12 +74,15 @@ int main()
     guiManager.SetupVideoSource("camera_calib.txt");
     vctFrm3 transform;
     transform.Translation().Assign(+30.0, 0.0, -150.0); // recenter Omni's depth
-    guiManager.SetupRightMaster(sensable, "Omni1", transform, 0.5 /* scale factor */);
-    guiManager.SetupRightMasterButton(sensable, "Omni1Button1"); 
+    guiManager.SetupRightMaster(sensable, "Omni1",
+                                sensable, "Omni1Button1",
+                                transform, 0.5 /* scale factor */);
+#ifdef TWO_OMNIS
     transform.Translation().Assign(-30.0, 0.0, -150.0); // recenter Omni's depth
-    guiManager.SetupLeftMaster(sensable, "Omni2", transform, 0.5 /* scale factor */);
-    guiManager.SetupLeftMasterButton(sensable, "Omni2Button1"); 
-
+    guiManager.SetupLeftMaster(sensable, "Omni2",
+                               sensable, "Omni2Button1",
+                               transform, 0.5 /* scale factor */);
+#endif
     guiManager.SetupDisplay(640, 480, ui3Manager::StereoWindowed);
     // guiManager.SetFrequency(30.0 / 1.001);
     

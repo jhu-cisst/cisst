@@ -83,15 +83,17 @@ public:
      \param configfile      Input device configuration file
      \return                Success flag: true=success, false=error
     */
-    virtual bool SetupRightMaster(mtsDevice * device, const std::string & providedInterface,
-                                  vctFrm3 & transformation, double scale = 1.0);
+    virtual bool SetupRightMaster(mtsDevice * positionDevice, const std::string & positionInterface,
+                                  mtsDevice * buttonDevice, const std::string & buttonInterface,
+                                  const vctFrm3 & transformation = vctFrm3::Identity(),
+                                  double scale = 1.0);
+                                 
+    virtual bool SetupLeftMaster(mtsDevice * positionDevice, const std::string & positionInterface,
+                                 mtsDevice * buttonDevice, const std::string & buttonInterface,
+                                 const vctFrm3 & transformation = vctFrm3::Identity(),
+                                 double scale = 1.0);
+                                 
 
-    virtual bool SetupRightMasterButton(mtsDevice * device, const std::string & providedInterface);
-
-    virtual bool SetupLeftMaster(mtsDevice * device, const std::string & providedInterface,
-                                 vctFrm3 & transformation, double scale = 1.0);
-
-    virtual bool SetupLeftMasterButton(mtsDevice * device, const std::string & providedInterface);
 
     /*!
      Configures the image display.
@@ -333,6 +335,8 @@ private:
     // scale
     double RightScale;
     double LeftScale;
+
+    bool LeftMasterExists;
 };
 
 

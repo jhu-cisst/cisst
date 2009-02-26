@@ -41,43 +41,13 @@ ui3Manager::ui3Manager(const std::string & name):
     RightButtonPressed(false),
     RightButtonReleased(false),
     LeftButtonPressed(false),
-    LeftButtonReleased(false)
+    LeftButtonReleased(false),
+    LeftMasterExists(false)
 {
     // add the UI manager to the task manager
     this->TaskManager = mtsTaskManager::GetInstance();
     CMN_ASSERT(TaskManager);
     TaskManager->AddTask(this);
-
-    // add required interface for master arms
-    mtsRequiredInterface * requiredInterface;
-
-    // setup right master arm required interface 
-    requiredInterface = this->AddRequiredInterface("RightMaster");
-    if (requiredInterface) {
-        // bound the mtsFunction to the command provided by the interface 
-        requiredInterface->AddFunction("GetPosition", RightMasterGetCartesianPosition, mtsRequired);
-    }
-
-    // setup right master button required interface 
-    requiredInterface = this->AddRequiredInterface("RightMasterButton");
-    if (requiredInterface) {
-        requiredInterface->AddEventHandlerWrite(&ui3Manager::RightMasterButtonEventHandler, this,
-                                                "Button", prmEventButton());
-    }
-
-    // setup left master arm required interface 
-    requiredInterface = this->AddRequiredInterface("LeftMaster");
-    if (requiredInterface) {
-        // bound the mtsFunction to the command provided by the interface 
-        requiredInterface->AddFunction("GetPosition", LeftMasterGetCartesianPosition, mtsRequired);
-    }
-
-    // setup left master button required interface 
-    requiredInterface = this->AddRequiredInterface("LeftMasterButton");
-    if (requiredInterface) {
-        requiredInterface->AddEventHandlerWrite(&ui3Manager::LeftMasterButtonEventHandler, this,
-                                                "Button", prmEventButton());
-    }
 
     this->Manager = this;
     this->AddMenuBar(true);
@@ -95,46 +65,74 @@ bool ui3Manager::SetupVideoSource(const std::string& calibfile)
 }
 
 
-bool ui3Manager::SetupRightMaster(mtsDevice * device, const std::string & providedInterface,
-                                  vctFrm3 & transformation, double scale)
+bool ui3Manager::SetupRightMaster(mtsDevice * positionDevice, const std::string & positionInterface,
+                                  mtsDevice * buttonDevice, const std::string & buttonInterface,
+                                  const vctFrm3 & transformation, double scale)
 {
+    // add required interface for master arms
+    mtsRequiredInterface * requiredInterface;
+
+    // setup right master arm required interface 
+    requiredInterface = this->AddRequiredInterface("RightMaster");
+    if (requiredInterface) {
+        // bound the mtsFunction to the command provided by the interface 
+        requiredInterface->AddFunction("GetPosition", RightMasterGetCartesianPosition, mtsRequired);
+    }
+
+    // setup right master button required interface 
+    requiredInterface = this->AddRequiredInterface("RightMasterButton");
+    if (requiredInterface) {
+        requiredInterface->AddEventHandlerWrite(&ui3Manager::RightMasterButtonEventHandler, this,
+                                                "Button", prmEventButton());
+    }
+
     // connect the right master device to the right master required interface
     this->TaskManager->Connect(this->GetName(), "RightMaster",
-                               device->GetName(), providedInterface);
+                               positionDevice->GetName(), positionInterface);
     // keep the transformation and scale
     this->RightTransform.Assign(transformation);
     this->RightScale = scale;
-    return true;
-}
 
-
-bool ui3Manager::SetupRightMasterButton(mtsDevice * device, const std::string & providedInterface)
-{
     // connect the right master button device to the right master button required interface
     this->TaskManager->Connect(this->GetName(), "RightMasterButton",
-                               device->GetName(), providedInterface);
+                               buttonDevice->GetName(), buttonInterface);
     return true;
 }
 
 
-bool ui3Manager::SetupLeftMaster(mtsDevice * device, const std::string & providedInterface,
-                                 vctFrm3 & transformation, double scale)
+bool ui3Manager::SetupLeftMaster(mtsDevice * positionDevice, const std::string & positionInterface,
+                                 mtsDevice * buttonDevice, const std::string & buttonInterface,
+                                 const vctFrm3 & transformation, double scale)
 {
-    // connect the left master device to the left master required interface
+    // add required interface for master arms
+    mtsRequiredInterface * requiredInterface;
+
+    // setup left master arm required interface 
+    requiredInterface = this->AddRequiredInterface("LeftMaster");
+    if (requiredInterface) {
+        // bound the mtsFunction to the command provided by the interface 
+        requiredInterface->AddFunction("GetPosition", RightMasterGetCartesianPosition, mtsRequired);
+    }
+
+    // setup left master button required interface 
+    requiredInterface = this->AddRequiredInterface("LeftMasterButton");
+    if (requiredInterface) {
+        requiredInterface->AddEventHandlerWrite(&ui3Manager::LeftMasterButtonEventHandler, this,
+                                                "Button", prmEventButton());
+    }
+
+    // connect the left master device to the right master required interface
     this->TaskManager->Connect(this->GetName(), "LeftMaster",
-                               device->GetName(), providedInterface);
+                               positionDevice->GetName(), positionInterface);
     // keep the transformation and scale
     this->LeftTransform.Assign(transformation);
     this->LeftScale = scale;
-    return true;
-}
 
-
-bool ui3Manager::SetupLeftMasterButton(mtsDevice * device, const std::string & providedInterface)
-{
     // connect the left master button device to the left master button required interface
     this->TaskManager->Connect(this->GetName(), "LeftMasterButton",
-                               device->GetName(), providedInterface);
+                               buttonDevice->GetName(), buttonInterface);
+
+    this->LeftMasterExists = true;
     return true;
 }
 
@@ -228,9 +226,11 @@ void ui3Manager::Startup(void)
     CMN_ASSERT(this->RightCursor);
     this->SceneManager->Add(this->RightCursor);
 
-    this->LeftCursor = new ui3Cursor(this);
-    CMN_ASSERT(this->LeftCursor);
-    this->SceneManager->Add(this->LeftCursor);
+    if (this->LeftMasterExists) {
+        this->LeftCursor = new ui3Cursor(this);
+        CMN_ASSERT(this->LeftCursor);
+        this->SceneManager->Add(this->LeftCursor);
+    }
 
     this->SceneManager->Add(this->MenuBar);
 
@@ -309,11 +309,13 @@ void ui3Manager::Run(void)
     rightCursorPosition.Translation().Multiply(this->RightScale);
 
     vctFrm3 leftCursorPosition;
-    prmPositionCartesianGet leftArmPosition;
-    this->LeftMasterGetCartesianPosition(leftArmPosition);
-    // apply transformation and scale
-    this->LeftTransform.ApplyTo(leftArmPosition.Position(), leftCursorPosition);
-    leftCursorPosition.Translation().Multiply(this->LeftScale);
+    if (this->LeftMasterExists) {
+        prmPositionCartesianGet leftArmPosition;
+        this->LeftMasterGetCartesianPosition(leftArmPosition);
+        // apply transformation and scale
+        this->LeftTransform.ApplyTo(leftArmPosition.Position(), leftCursorPosition);
+        leftCursorPosition.Translation().Multiply(this->LeftScale);
+    }
 
     // set depth for current menu - hard coded to follow right arm for now.  Need access to stereo rendering to test better approaches.  Anton
     this->ActiveBehavior->MenuBar->SetDepth(rightCursorPosition.Translation().Z());
@@ -332,17 +334,18 @@ void ui3Manager::Run(void)
     this->RightCursor->SetTransformation(rightCursorPosition);
 
     // left side now
-    selectedButton = 0;
-    isOverMenu = this->ActiveBehavior->MenuBar->IsPointOnMenuBar(leftCursorPosition.Translation(), selectedButton);
-    this->LeftCursor->Set2D(isOverMenu);
-    if (selectedButton) {
-        if (this->LeftButtonReleased) {
-            selectedButton->CallBack();
-            this->LeftButtonReleased = false;
+    if (this->LeftMasterExists) {
+        selectedButton = 0;
+        isOverMenu = this->ActiveBehavior->MenuBar->IsPointOnMenuBar(leftCursorPosition.Translation(), selectedButton);
+        this->LeftCursor->Set2D(isOverMenu);
+        if (selectedButton) {
+            if (this->LeftButtonReleased) {
+                selectedButton->CallBack();
+                this->LeftButtonReleased = false;
+            }
         }
+        this->LeftCursor->SetTransformation(leftCursorPosition);
     }
-    this->LeftCursor->SetTransformation(leftCursorPosition);
-
 
     // this needs to change to a parameter
     osaSleep(10.0 * cmn_ms);
