@@ -17,6 +17,16 @@
 # set the library name
 SET(LIBRARY cisst3DUserInterface)
 
+# set dependencies
+SET(DEPENDENCIES
+    cisstCommon
+    cisstVector
+    cisstOSAbstraction
+    cisstStereoVision
+    cisstMultiTask
+    cisstParameterTypes
+    )
+
 # Find VTK settings
 FIND_PACKAGE(VTK REQUIRED)
 IF(NOT VTK_USE_RENDERING)
@@ -56,5 +66,3 @@ SET(HEADER_FILES
 
 
 CISST_ADD_LIBRARY_TO_PROJECT(cisstLibs)
-
-CISST_REQUIRES(cisst3DUserInterface "cisstCommon;cisstVector;cisstOSAbstraction;cisstStereoVision;cisstMultiTask")
