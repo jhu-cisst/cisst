@@ -35,6 +35,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <list>
 #include <algorithm>
 #include <iostream>
+#include <sstream>
+#include <fstream>
 
 
 /*! \brief
@@ -182,7 +184,7 @@ typename osaThreadedLogFileStreambuf<_element, _trait>::ChannelType *
 osaThreadedLogFileStreambuf<_element, _trait>::AddChannelForThread(const osaThreadId & threadId)
 {
     std::stringstream fileName;
-    fileName << FilePrefix << ChannelContainer.size() << ".txt";
+    fileName << this->FilePrefix << this->ChannelContainer.size() << ".txt";
     std::ofstream * newFile = new std::ofstream(fileName.str().c_str()); 
     ChannelContainer.push_back(ElementType(threadId, newFile->rdbuf()));
     return newFile->rdbuf();
