@@ -78,11 +78,15 @@ bool CExampleBehavior::RunForeground()
 {
     // running in foreground GUI mode
     // menu bar is visible
-
-    prmPositionCartesianGet position;
-    this->RightMasterPositionFunction(position);
-    std::cout << "\"Behavior \"" << this->GetName()
-              << "\" : Position: " << position.Position().Translation() << std::endl;
+    static int counter = 0;
+    counter++;
+    if (counter == 100) {
+        prmPositionCartesianGet position;
+        this->RightMasterPositionFunction(position);
+        std::cout << "\"Behavior \"" << this->GetName()
+                  << "\" : Position: " << position.Position().Translation() << std::endl;
+        counter = 0;
+    }
 
 #if 0
     // Request actor object
@@ -129,4 +133,11 @@ bool CExampleBehavior::SaveConfiguration(const std::string & configFile)
 {
     // save settings
     return true;
+}
+
+void CExampleBehavior::RightMasterButtonCallback(const prmEventButton & event)
+{
+    CMN_LOG_CLASS(6) << "RightMasterButtonCallback overloaded for \""
+                     << this->GetName() << "\": "
+                     << event.Type() << std::endl;
 }

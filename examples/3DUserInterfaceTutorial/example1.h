@@ -40,6 +40,7 @@ public:
 
 protected:
     void FirstButtonCallback(void);
+    void RightMasterButtonCallback(const prmEventButton & event);
 
 private:
 

@@ -108,6 +108,7 @@ void ui3BehaviorBase::UnsubscribeInputCallback(unsigned int inputid)
 
 void ui3BehaviorBase::Run(void)
 {
+    this->ProcessQueuedEvents();
     switch(this->State) {
     case Foreground:
         this->RunForeground();
@@ -167,3 +168,18 @@ void ui3BehaviorBase::SetState(const StateType & newState)
         }
     }
 }
+
+
+
+void ui3BehaviorBase::RightMasterButtonCallback(const prmEventButton & event)
+{
+    CMN_LOG_CLASS(6) << "RightMasterButtonCallback not overloaded for \""
+                     << this->GetName() << "\"" << std::endl;
+}
+
+void ui3BehaviorBase::LeftMasterButtonCallback(const prmEventButton & event)
+{
+    CMN_LOG_CLASS(6) << "LeftMasterButtonCallback not overloaded for \""
+                     << this->GetName() << "\"" << std::endl;
+}
+

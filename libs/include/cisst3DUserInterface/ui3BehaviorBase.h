@@ -240,6 +240,9 @@ protected:
 
     void SetState(const StateType & newState);
 
+    virtual void RightMasterButtonCallback(const prmEventButton & event);
+    virtual void LeftMasterButtonCallback(const prmEventButton & event);
+
     /*!
      State variable for storing the current UI state of the behavior.
     */
@@ -251,6 +254,10 @@ protected:
     ui3Manager * Manager;
 
     mtsFunctionRead RightMasterPositionFunction, LeftMasterPositionFunction;
+
+private:
+    /*! Event triggers, used by ui3Manager only */
+    mtsFunctionWrite RightMasterButtonEvent, LeftMasterButtonEvent;
 };
 
 

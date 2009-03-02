@@ -209,17 +209,31 @@ ui3Handle ui3Manager::AddBehavior(ui3BehaviorBase * behavior,
     behavior->AddMenuBar();
     behavior->ConfigureMenuBar();
 
-    // create a required interface for the behavior to connect with the manager
+    // create a required interface for all behaviors to connect with the manager
     mtsRequiredInterface * managerInterface;
     managerInterface = behavior->AddRequiredInterface("ManagerInterface");
     CMN_ASSERT(managerInterface);
     managerInterface->AddFunction("RightMasterPosition", behavior->RightMasterPositionFunction, mtsRequired);
     managerInterface->AddFunction("LeftMasterPosition", behavior->LeftMasterPositionFunction, mtsRequired);
 
+    // create a required interface for this behavior to connect with the manager
+    managerInterface = behavior->AddRequiredInterface("ManagerInterface" + behavior->GetName());
+    CMN_ASSERT(managerInterface);
+    managerInterface->AddEventHandlerWrite(&ui3BehaviorBase::RightMasterButtonCallback,
+                                           behavior, "RightMasterButton", prmEventButton());
+    managerInterface->AddEventHandlerWrite(&ui3BehaviorBase::LeftMasterButtonCallback,
+                                           behavior, "LeftMasterButton", prmEventButton());
+    std::string interfaceName("BehaviorInterface" + behavior->GetName());
+    this->AddProvidedInterface(interfaceName);
+    behavior->RightMasterButtonEvent.Bind(this->AddEventWrite(interfaceName, "RightMasterButton", prmEventButton()));
+    behavior->LeftMasterButtonEvent.Bind(this->AddEventWrite(interfaceName, "LeftMasterButton", prmEventButton()));
+
     // add the task to the task manager (mts) code 
     this->TaskManager->AddTask(behavior);
     this->TaskManager->Connect(behavior->GetName(), "ManagerInterface",
                                this->GetName(), "BehaviorsInterface");
+    this->TaskManager->Connect(behavior->GetName(), "ManagerInterface" + behavior->GetName(),
+                               this->GetName(), "BehaviorInterface" + behavior->GetName());
     // add a button in the main menu bar with callback
     this->MenuBar->AddClickButton(behavior->GetName(),
                                   position,
@@ -386,6 +400,9 @@ void ui3Manager::RightMasterButtonEventHandler(const prmEventButton & buttonEven
         this->RightCursor->SetPressed(false);
         this->RightButtonReleased = true;
     }
+    if (this->ActiveBehavior != this) {
+        this->ActiveBehavior->RightMasterButtonEvent(buttonEvent);
+    }
 }
 
 
@@ -397,5 +414,8 @@ void ui3Manager::LeftMasterButtonEventHandler(const prmEventButton & buttonEvent
     } else {
         this->LeftCursor->SetPressed(false);
         this->LeftButtonReleased = true;
+    }
+    if (this->ActiveBehavior) {
+        this->ActiveBehavior->RightMasterButtonEvent(buttonEvent);
     }
 }
