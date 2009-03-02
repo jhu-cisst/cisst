@@ -18,6 +18,7 @@ endif (VTK_FOUND)
 
 
 add_executable(${PROJECT_NAME}
+               main.cpp
                example1.cpp
                example1.h
                )

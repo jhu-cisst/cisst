@@ -324,6 +324,7 @@ void ui3Manager::Run(void)
     // apply transformation and scale
     this->RightTransform.ApplyTo(rightArmPosition.Position(), rightCursorPosition);
     rightCursorPosition.Translation().Multiply(this->RightScale);
+    this->RightMasterPosition.Data.Position().Assign(rightCursorPosition);
 
     vctFrm3 leftCursorPosition;
     if (this->LeftMasterExists) {
@@ -332,6 +333,7 @@ void ui3Manager::Run(void)
         // apply transformation and scale
         this->LeftTransform.ApplyTo(leftArmPosition.Position(), leftCursorPosition);
         leftCursorPosition.Translation().Multiply(this->LeftScale);
+        this->LeftMasterPosition.Data.Position().Assign(leftCursorPosition);
     }
 
     // set depth for current menu - hard coded to follow right arm for now.  Need access to stereo rendering to test better approaches.  Anton
@@ -340,7 +342,8 @@ void ui3Manager::Run(void)
     // try to figure out if the cursor is above the menu
     ui3MenuButton * selectedButton = 0;
     bool isOverMenu;
-    isOverMenu = this->ActiveBehavior->MenuBar->IsPointOnMenuBar(rightCursorPosition.Translation(), selectedButton);
+    isOverMenu = this->ActiveBehavior->MenuBar->IsPointOnMenuBar(rightCursorPosition.Translation(),
+                                                                 selectedButton);
     this->RightCursor->Set2D(isOverMenu);
     if (selectedButton) {
         if (this->RightButtonReleased) {
@@ -353,7 +356,8 @@ void ui3Manager::Run(void)
     // left side now
     if (this->LeftMasterExists) {
         selectedButton = 0;
-        isOverMenu = this->ActiveBehavior->MenuBar->IsPointOnMenuBar(leftCursorPosition.Translation(), selectedButton);
+        isOverMenu = this->ActiveBehavior->MenuBar->IsPointOnMenuBar(leftCursorPosition.Translation(),
+                                                                     selectedButton);
         this->LeftCursor->Set2D(isOverMenu);
         if (selectedButton) {
             if (this->LeftButtonReleased) {
