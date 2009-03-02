@@ -213,8 +213,8 @@ ui3Handle ui3Manager::AddBehavior(ui3BehaviorBase * behavior,
     mtsRequiredInterface * managerInterface;
     managerInterface = behavior->AddRequiredInterface("ManagerInterface");
     CMN_ASSERT(managerInterface);
-    managerInterface->AddFunction("RightMasterPosition", RightMasterPositionFunction, mtsRequired);
-    managerInterface->AddFunction("LeftMasterPosition", LeftMasterPositionFunction, mtsRequired);
+    managerInterface->AddFunction("RightMasterPosition", behavior->RightMasterPositionFunction, mtsRequired);
+    managerInterface->AddFunction("LeftMasterPosition", behavior->LeftMasterPositionFunction, mtsRequired);
 
     // add the task to the task manager (mts) code 
     this->TaskManager->AddTask(behavior);

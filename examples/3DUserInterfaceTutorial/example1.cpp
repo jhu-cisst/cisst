@@ -81,9 +81,8 @@ bool CExampleBehavior::RunForeground()
 
     prmPositionCartesianGet position;
     this->RightMasterPositionFunction(position);
-    std::cout << this->RightMasterPositionFunction << std::endl
-              << "\"Behavior \"" << this->GetName()
-              << "\" : Position: " << position.Position() << std::endl;
+    std::cout << "\"Behavior \"" << this->GetName()
+              << "\" : Position: " << position.Position().Translation() << std::endl;
 
 #if 0
     // Request actor object
