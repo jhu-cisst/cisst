@@ -271,7 +271,7 @@ void ui3Manager::Startup(void)
          iterator != end;
          iterator++) {
              this->SceneManager->Add((*iterator)->MenuBar);
-             // this->SceneManager->Add((*iterator)->GetVisibleObject());
+             this->SceneManager->Add((*iterator)->GetVisibleObject());
              (*iterator)->SetState(Idle);
     }
 

@@ -25,7 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 class CExampleBehavior : public ui3BehaviorBase
 {
 public:
-    CExampleBehavior(const std::string & name);
+    CExampleBehavior(const std::string & name, ui3Manager * manager);
     ~CExampleBehavior();
 
     void Startup(void);
@@ -36,13 +36,17 @@ public:
     bool RunNoInput(void);
     void Configure(const std::string & configFile);
     bool SaveConfiguration(const std::string & configFile);
-    ui3VisibleObject * GetVisibleObject(void) { return 0; }
+    inline ui3VisibleObject * GetVisibleObject(void) {
+        return this->VisibleObject;
+    }
 
 protected:
     void FirstButtonCallback(void);
     void RightMasterButtonCallback(const prmEventButton & event);
+    StateType PreviousState;
+    vctDouble3 Position, PreviousCursorPosition;
+    bool Following;
 
 private:
-
-    ui3SceneManager::VTKHandleType h3DModel;
+    ui3VisibleObject * VisibleObject;
 };

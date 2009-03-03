@@ -26,15 +26,71 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "example1.h"
 
+#include <vtkActor.h>
+#include <vtkAssembly.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkProperty.h>
+#include <vtkSphereSource.h>
 
-CExampleBehavior::CExampleBehavior(const std::string & name):
-    ui3BehaviorBase(std::string("CExampleBehavior:") + name, 0)
+class BehaviorVisibleObject: public ui3VisibleObject
 {
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 5);
+public:
+    inline BehaviorVisibleObject(ui3Manager * manager, vctDouble3 position):
+        ui3VisibleObject(manager),
+        Source(0),
+        Mapper(0),
+        Actor(0),
+        Position(position)
+    {}
+
+    inline bool CreateVTKObjects(void) {
+        this->Source = vtkSphereSource::New();
+        CMN_ASSERT(this->Source);
+        this->Source->SetRadius(10.0);
+
+        this->Mapper = vtkPolyDataMapper::New();
+        CMN_ASSERT(this->Mapper);
+        this->Mapper->SetInputConnection(this->Source->GetOutputPort());
+
+        this->Actor = vtkActor::New();
+        CMN_ASSERT(this->Actor);
+        this->Actor->SetMapper(this->Mapper);
+
+        this->Assembly->AddPart(this->Actor);
+        this->SetPosition(this->Position);
+        this->Hide();
+        return true;
+    }
+
+protected:
+    vtkSphereSource * Source;
+    vtkPolyDataMapper * Mapper;
+    vtkActor * Actor;
+    vctDouble3 Position; // initial position
+};
+
+CMN_DECLARE_SERVICES_INSTANTIATION(BehaviorVisibleObject);
+CMN_IMPLEMENT_SERVICES(BehaviorVisibleObject);
+
+
+CExampleBehavior::CExampleBehavior(const std::string & name, ui3Manager * manager):
+    ui3BehaviorBase(std::string("CExampleBehavior::") + name, 0),
+    VisibleObject(0),
+    Following(false)
+{
+    this->Position.X() = 0.0;
+    this->Position.Y() = 0.0;
+    this->Position.Z() = -100.0;
+    this->VisibleObject = new BehaviorVisibleObject(manager, this->Position);
+    CMN_ASSERT(this->VisibleObject);
 }
+
 
 CExampleBehavior::~CExampleBehavior()
 {
 }
+
 
 void CExampleBehavior::ConfigureMenuBar()
 {
@@ -45,82 +101,59 @@ void CExampleBehavior::ConfigureMenuBar()
                                   this);
 }
 
-void CExampleBehavior::FirstButtonCallback()
-{
-    std::cerr << "Behavior \"" << this->GetName() << "\" Button 1 pressed" << std::endl;
-}
 
 void CExampleBehavior::Startup(void)
 {
 
-#if 0
-    // Construct a new VTK actor object
-    h3DModel = GetSceneManager()->CreateActor();
-
-    // Request actor object
-    vtkActor* actor = GetSceneManager()->GetActor(h3DModel);
-
-        // Initialize actor
-        // TO DO something like:
-        //      actor->Load("3dmodel.vtk");
-
-    // Release actor object
-    GetSceneManager()->ReleaseActor(h3DModel);
-#endif
 }
+
 
 void CExampleBehavior::Cleanup(void)
 {
     // menu bar will release itself upon destruction
 }
 
+
 bool CExampleBehavior::RunForeground()
 {
-    // running in foreground GUI mode
-    // menu bar is visible
-    static int counter = 0;
-    counter++;
-    if (counter == 100) {
-        prmPositionCartesianGet position;
-        this->RightMasterPositionFunction(position);
-        std::cout << "\"Behavior \"" << this->GetName()
-                  << "\" : Position: " << position.Position().Translation() << std::endl;
-        counter = 0;
+    // detect transition, should that be handled as an event?
+    // State is used by multiple threads ...
+    if (this->State != this->PreviousState) {
+        this->PreviousState = this->State;
+        this->VisibleObject->Show();
     }
-
-#if 0
-    // Request actor object
-    vtkActor* actor = GetSceneManager()->GetActor(h3DModel);
-
-        // Manipulate actor in a thread safe manner
-        // TO DO something like:
-        //      actor->Move(ptrpos);
-
-    // Release actor object
-    GetSceneManager()->ReleaseActor(h3DModel);
-#endif
+    // running in foreground GUI mode
+    prmPositionCartesianGet position;
+    this->RightMasterPositionFunction(position);
+    if (this->Following) {
+        vctDouble3 deltaCursor;
+        deltaCursor.DifferenceOf(position.Position().Translation(),
+                                 this->PreviousCursorPosition);
+        this->Position.Add(deltaCursor);
+        this->VisibleObject->SetPosition(this->Position);
+        std::cout << this->Position << std::endl;
+    }
+    this->PreviousCursorPosition.Assign(position.Position().Translation());
     return true;
 }
 
 bool CExampleBehavior::RunBackground()
 {
-    // running in background GUI mode
-    // menu bar is hidden
-
-    // do whatever processing...
-    // TO DO
-
+    // detect transition
+    if (this->State != this->PreviousState) {
+        this->PreviousState = this->State;
+        this->VisibleObject->Hide();
+    }
     return true;
 }
 
 bool CExampleBehavior::RunNoInput()
 {
-    // running in tele-operated mode
-    // menu bar is hidden
-
-    // do whatever processing...
-    // TO DO
-
+    // detect transition
+    if (this->State != this->PreviousState) {
+        this->PreviousState = this->State;
+        this->VisibleObject->Hide();
+    }
     return true;
 }
 
@@ -135,9 +168,16 @@ bool CExampleBehavior::SaveConfiguration(const std::string & configFile)
     return true;
 }
 
+void CExampleBehavior::FirstButtonCallback()
+{
+    CMN_LOG_CLASS(6) << "Behavior \"" << this->GetName() << "\" Button 1 pressed" << std::endl;
+}
+
 void CExampleBehavior::RightMasterButtonCallback(const prmEventButton & event)
 {
-    CMN_LOG_CLASS(6) << "RightMasterButtonCallback overloaded for \""
-                     << this->GetName() << "\": "
-                     << event.Type() << std::endl;
+    if (event.Type() == prmEventButton::CLICKED) {
+        this->Following = true;
+    } else if (event.Type() == prmEventButton::RELEASED) {
+        this->Following = false;
+    }
 }

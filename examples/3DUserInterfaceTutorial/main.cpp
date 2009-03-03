@@ -51,8 +51,8 @@ int main()
 
     ui3Manager guiManager;
 
-    CExampleBehavior behavior("Example1");
-    CExampleBehavior behavior2("Example2");
+    CExampleBehavior behavior("Example1", &guiManager);
+    CExampleBehavior behavior2("Example2", &guiManager);
 
     guiManager.AddBehavior(&behavior,       // behavior reference
                            0,             // position in the menu bar: default
