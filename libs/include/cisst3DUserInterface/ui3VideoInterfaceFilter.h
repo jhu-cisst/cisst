@@ -19,9 +19,10 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#ifndef _ui3VideoSourceBase_h
-#define _ui3VideoSourceBase_h
+#ifndef _ui3VideoInterfaceFilter_h
+#define _ui3VideoInterfaceFilter_h
 
+#include <cisstStereoVision.h>
 
 #include <cisst3DUserInterface/ui3ForwardDeclarations.h>
 
@@ -29,19 +30,29 @@ http://www.cisst.org/cisst/license.txt.
  Abstract class that provides the structure for implementing interfaces between
  the 3D renderer and video capture devices.
 */
-class ui3VideoSourceBase
+class ui3VideoInterfaceFilter : public svlFilterBase
 {
 public:
     /*!
      Constructor
     */
-    ui3VideoSourceBase();
+    ui3VideoInterfaceFilter(svlStreamType streamtype, int streamid, ui3BehaviorBase* behavior);
 
     /*!
      Destructor
     */
-    virtual ~ui3VideoSourceBase();
+    virtual ~ui3VideoInterfaceFilter();
+    
+    unsigned int GetWidth(unsigned int videoch = 0);
+    unsigned int GetHeight(unsigned int videoch = 0);
+
+private:
+    int StreamID;
+    ui3BehaviorBase* ParentBehavior;
+
+    int Initialize(svlSample* inputdata = 0);
+    int ProcessFrame(ProcInfo* procInfo, svlSample* inputdata = 0);
 };
 
-#endif // _ui3VideoSourceBase_h
+#endif // _ui3VideoInterfaceFilter_h
 
