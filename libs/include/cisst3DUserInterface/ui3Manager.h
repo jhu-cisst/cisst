@@ -98,7 +98,7 @@ public:
     /*!
      Adds a render window to the UI Manager.
     */
-    virtual bool AddRenderer(unsigned int width, unsigned int height, const std::string & calibfilepath, const std::string & renderername);
+    virtual bool AddRenderer(unsigned int width, unsigned int height, int x, int y, vctFrm3 & cameraframe, double viewangle, const std::string & renderername);
 
     /*!
      Assigns a video backgrond to a render window.
@@ -258,7 +258,10 @@ protected:
     typedef struct tagRendererStruct {
         unsigned int width;
         unsigned int height;
-        std::string calibfilepath;
+        int windowposx;
+        int windowposy;
+        vctFrm3 cameraframe;
+        double viewangle;
         std::string name;
         ui3VTKRenderer* renderer;
         int streamindex;

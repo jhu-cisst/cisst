@@ -25,6 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnGenericObject.h>
 #include <cisstCommon/cmnClassServices.h>
 #include <cisstCommon/cmnClassRegisterMacros.h>
+#include <cisstVector/vctTransformationTypes.h>
 
 #include <cisst3DUserInterface/ui3ForwardDeclarations.h>
 #include <cisst3DUserInterface/ui3VTKForwardDeclarations.h>
@@ -42,7 +43,7 @@ public:
     /*!
      Constructor
     */
-    ui3VTKRenderer(void);
+    ui3VTKRenderer(unsigned int width, unsigned int height, double viewangle, vctFrm3 & cameraframe);
 
     /*!
      Destructor
@@ -53,6 +54,8 @@ public:
 
     void SetViewAngle(double angle);
     double GetViewAngle(void);
+    
+    void SetWindowPosition(int x, int y);
 
     void Add(ui3VisibleObject * object);
 
@@ -61,8 +64,11 @@ private:
     vtkRenderWindow * RenderWindow;
     vtkRenderWindowInteractor * RenderWindowInteractor;
     vtkCamera * Camera;
-    
+
+    unsigned int Width;
+    unsigned int Height;
     double ViewAngle;
+    vctFrm3 CameraFrame;
 };
 
 

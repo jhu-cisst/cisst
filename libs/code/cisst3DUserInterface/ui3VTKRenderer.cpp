@@ -36,12 +36,15 @@ http://www.cisst.org/cisst/license.txt.
 CMN_IMPLEMENT_SERVICES(ui3VTKRenderer);
 
 
-ui3VTKRenderer::ui3VTKRenderer():
+ui3VTKRenderer::ui3VTKRenderer(unsigned int width, unsigned int height, double viewangle, vctFrm3 & cameraframe):
     Renderer(0),
     RenderWindow(0),
     RenderWindowInteractor(0),
     Camera(0),
-    ViewAngle(30.0)
+    Width(width),
+    Height(height),
+    ViewAngle(viewangle),
+    CameraFrame(cameraframe)
 {
     // Create render window
     this->Renderer = vtkRenderer::New();
@@ -50,7 +53,8 @@ ui3VTKRenderer::ui3VTKRenderer():
     this->RenderWindow = vtkRenderWindow::New();
     CMN_ASSERT(this->RenderWindow);
     this->RenderWindow->AddRenderer(this->Renderer);
-    this->RenderWindow->SetSize(800, 600);
+    this->RenderWindow->SetFullScreen(1);
+    this->RenderWindow->SetSize(this->Width, this->Height);
     this->RenderWindow->SetWindowName("Renderer");
 
     this->RenderWindowInteractor = vtkRenderWindowInteractor::New();
@@ -58,10 +62,15 @@ ui3VTKRenderer::ui3VTKRenderer():
     this->RenderWindowInteractor->SetRenderWindow(this->RenderWindow);
 
     // Create camera
+    // TO DO: set camera rotation according to specified frame
     this->Camera = vtkCamera::New();
     this->Camera->SetViewUp(0.0, 1.0, 0.0);
-    this->Camera->SetPosition(0.0, 0.0, 1.0);
-    this->Camera->SetFocalPoint(0.0, 0.0, 0.0);
+    this->Camera->SetPosition(this->CameraFrame.Translation().X(),
+                              this->CameraFrame.Translation().Y(),
+                              this->CameraFrame.Translation().Z() + 1.0);
+    this->Camera->SetFocalPoint(this->CameraFrame.Translation().X(),
+                                this->CameraFrame.Translation().Y(),
+                                this->CameraFrame.Translation().Z());
     this->Camera->SetClippingRange(0.1, 10000.0);
     this->Camera->SetViewAngle(this->ViewAngle);
     this->Renderer->SetActiveCamera(this->Camera);
@@ -88,13 +97,19 @@ void ui3VTKRenderer::Render(void)
 void ui3VTKRenderer::SetViewAngle(double angle)
 {
     this->ViewAngle = angle;
-    this->Camera->SetViewAngle(ViewAngle);
+    this->Camera->SetViewAngle(this->ViewAngle);
 }
 
 
 double ui3VTKRenderer::GetViewAngle(void)
 {
     return this->ViewAngle;
+}
+
+
+void ui3VTKRenderer::SetWindowPosition(int x, int y)
+{
+    this->RenderWindow->SetPosition(x, y);
 }
 
 

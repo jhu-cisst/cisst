@@ -47,8 +47,12 @@ ui3Manager::ui3Manager(const std::string & name):
     LeftMasterExists(false)
 {
     // add video source interfaces
-    AddStream(svlTypeImageRGB,       "MonoVideoBackground");
-    AddStream(svlTypeImageRGBStereo, "StereoVideoBackground");
+    AddStream(svlTypeImageRGB,       "MonoVideo");
+    AddStream(svlTypeImageRGB,       "MonoVideo#2");
+    AddStream(svlTypeImageRGB,       "MonoVideo#3");
+    AddStream(svlTypeImageRGBStereo, "StereoVideo");
+    AddStream(svlTypeImageRGBStereo, "StereoVideo#2");
+    AddStream(svlTypeImageRGBStereo, "StereoVideo#3");
 
     // populate the state table
     this->RightMasterPosition.AddToStateTable(this->StateTable, "RightMasterPosition");
@@ -151,10 +155,9 @@ bool ui3Manager::SetupLeftMaster(mtsDevice * positionDevice, const std::string &
 }
 
 
-bool ui3Manager::AddRenderer(unsigned int width, unsigned int height, const std::string & calibfilepath, const std::string & renderername)
+bool ui3Manager::AddRenderer(unsigned int width, unsigned int height, int x, int y, vctFrm3 & cameraframe, double viewangle, const std::string & renderername)
 {
-    if (width < 1 || height < 1 ||
-        calibfilepath.empty() || renderername.empty()) return false;
+    if (width < 1 || height < 1 || renderername.empty()) return false;
 
     int rendererindex = Renderers.size();
     _RendererStruct* renderer = new _RendererStruct;
@@ -162,7 +165,10 @@ bool ui3Manager::AddRenderer(unsigned int width, unsigned int height, const std:
 
     renderer->width = width;
     renderer->height = height;
-    renderer->calibfilepath = calibfilepath;
+    renderer->windowposx = x;
+    renderer->windowposy = y;
+    renderer->cameraframe = cameraframe;
+    renderer->viewangle = viewangle;
     renderer->name = renderername;
     renderer->renderer = 0;
     renderer->streamindex = -1;
@@ -296,7 +302,10 @@ void ui3Manager::Startup(void)
     double bgheight, bgwidth;
     for (unsigned int i = 0; i < Renderers.size(); i ++) {
 
-        Renderers[i]->renderer = new ui3VTKRenderer;
+        Renderers[i]->renderer = new ui3VTKRenderer(Renderers[i]->width,
+                                                    Renderers[i]->height,
+                                                    Renderers[i]->viewangle,
+                                                    Renderers[i]->cameraframe);
         CMN_ASSERT(Renderers[i]->renderer);
 
         // Add live video background if available
@@ -327,10 +336,17 @@ void ui3Manager::Startup(void)
             // Add image plane to renderer directly, without going through scene manager
             Renderers[i]->imageplane->CreateVTKObjects();
             Renderers[i]->renderer->Add(Renderers[i]->imageplane);
-
-            // Add renderer to scene manager
-            this->SceneManager->AddRenderer(Renderers[i]->renderer);
         }
+
+        // Add renderer to scene manager
+        this->SceneManager->AddRenderer(Renderers[i]->renderer);
+    }
+
+    // Fix for VTK bug:
+    // Windows can be moved only after all render windows
+    // have already been created and set up.
+    for (unsigned int i = 0; i < Renderers.size(); i ++) {
+        Renderers[i]->renderer->SetWindowPosition(Renderers[i]->windowposx, Renderers[i]->windowposy);
     }
 
     if (this->RightMasterExists) {
@@ -533,7 +549,7 @@ void ui3Manager::OnStreamSample(svlSample* sample, int streamindex)
         // Check if there are any renderers waiting for this stream (there can be more than one)
         for (unsigned int i = 0; i < Renderers.size(); i ++) {
             if (Renderers[i] && Renderers[i]->streamindex == streamindex && Renderers[i]->imageplane) {
-                Renderers[i]->imageplane->SetImage(dynamic_cast<svlSampleImageBase*>(sample));
+                Renderers[i]->imageplane->SetImage(dynamic_cast<svlSampleImageBase*>(sample), Renderers[i]->streamchannel);
             }
         }
     }
