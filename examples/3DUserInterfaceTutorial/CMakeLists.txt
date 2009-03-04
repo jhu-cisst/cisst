@@ -16,6 +16,12 @@ else (VTK_FOUND)
     message (FATAL ERROR "VTK not found")
 endif (VTK_FOUND)
 
+IF(CISST_SVL_HAS_OPENCV)
+    # Link each example against the OpenCV library if enabled
+    FIND_PACKAGE(OpenCV)
+    INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS})
+    LINK_DIRECTORIES(${OpenCV_LINK_DIRECTORIES})
+ENDIF(CISST_SVL_HAS_OPENCV)
 
 add_executable(${PROJECT_NAME}
                main.cpp
@@ -26,6 +32,7 @@ add_executable(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
                       vtkRendering
                       ${CMAKE_THREAD_LIBS_INIT}
+                      ${OpenCV_LIBRARIES}
                       )
 
 CISST_REQUIRES(${PROJECT_NAME} "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstImage;cisstStereoVision;cisstDevices;cisstParameterTypes;cisst3DUserInterface")

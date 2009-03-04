@@ -22,7 +22,9 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaThreadedLogFile.h>
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsTaskManager.h>
-#include <cisstDevices/devSensableHD.h>
+//#include <cisstDevices/devSensableHD.h>
+
+#include <cisstStereoVision.h>
 
 #include "example1.h"
 
@@ -45,9 +47,9 @@ int main()
 #ifdef TWO_OMNIS
     devSensableHD * sensable = new devSensableHD("Omni", "Omni1", "Omni2" /* name in driver, see Preferences in Sensable Driver */);
 #else
-    devSensableHD * sensable = new devSensableHD("Omni", "Omni1" /* name in driver, see Preferences in Sensable Driver */);
+//    devSensableHD * sensable = new devSensableHD("Omni", "Omni1" /* name in driver, see Preferences in Sensable Driver */);
 #endif
-    taskManager->AddTask(sensable);
+//    taskManager->AddTask(sensable);
 
     ui3Manager guiManager;
 
@@ -63,21 +65,56 @@ int main()
                            "dvViewer_icon_128.bmp");            // icon file: no texture
 
     guiManager.Configure("config.xml");
-    // setup main user interface
-    guiManager.SetupVideoSource("camera_calib.txt");
+
+
+////////////////////////////////////////////////////////////////
+// setup video stream
+
+    svlStreamManager vidStream(1);  // running on single thread
+
+    svlVideoCaptureSource vidSource(false); // mono source
+    vidSource.DialogSetup();
+    vidStream.Trunk().Append(&vidSource);
+
+    // add guiManager as a filter to the pipeline, so it will receive video frames
+    vidStream.Trunk().Append(guiManager.GetStreamSamplerFilter("MonoVideoBackground"));
+
+/*
+    vidStream.CreateBranchAfterFilter(&vidSource, "Window");
+    svlImageWindow vidWindow;
+    vidStream.Branch("Window").Append(&vidWindow);
+*/
+
+    // start streaming
+    vidStream.Start();
+
+// setup video stream
+////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////
+// setup renderers
+/*
+    guiManager.AddRenderer(640, 480, "LeftEyeView", "camera_calibration_1.txt");
+    guiManager.AddVideoBackgroundToRenderer("LeftEyeView", "StereoVideoBackground", 0, "camera_calibration_1.txt");
+    guiManager.AddRenderer(640, 480, "RightEyeView", "camera_calibration_2.txt");
+    guiManager.AddVideoBackgroundToRenderer("RightEyeView", "StereoVideoBackground", 1, "camera_calibration_2.txt");
+*/
+// setup renderers
+////////////////////////////////////////////////////////////////
+
+
     vctFrm3 transform;
     transform.Translation().Assign(+30.0, 0.0, -150.0); // recenter Omni's depth
-    guiManager.SetupRightMaster(sensable, "Omni1",
-                                sensable, "Omni1Button1",
-                                transform, 0.5 /* scale factor */);
+//    guiManager.SetupRightMaster(sensable, "Omni1",
+//                                sensable, "Omni1Button1",
+//                                transform, 0.5 /* scale factor */);
 #ifdef TWO_OMNIS
     transform.Translation().Assign(-30.0, 0.0, -150.0); // recenter Omni's depth
     guiManager.SetupLeftMaster(sensable, "Omni2",
                                sensable, "Omni2Button1",
                                transform, 0.5 /* scale factor */);
 #endif
-    guiManager.SetupDisplay(640, 480, ui3Manager::StereoWindowed);
-    // guiManager.SetFrequency(30.0 / 1.001);
     
     // setup behavior
 
@@ -88,9 +125,14 @@ int main()
     taskManager->CreateAll();
     taskManager->StartAll();
     // replace by exit condition created by ui3Manager
-    osaSleep(100.0 * cmn_s);
+    osaSleep(15.0 * cmn_s);
     taskManager->KillAll();
 
     guiManager.SaveConfiguration("config.xml");
+
+    // it stops and disassembles the pipeline in proper
+    // order even if it has several branches
+    vidStream.EmptyFilterList();
+
     return 0;
 }
