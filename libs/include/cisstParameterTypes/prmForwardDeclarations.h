@@ -29,11 +29,22 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _prmForwardDeclarations_h
 #define _prmForwardDeclarations_h
 
-
+// transformation manager related classes
 class prmTransformationBase;
 class prmTransformationFixed;
 class prmTransformationDynamic;
 class prmTransformationManager;
+
+// robot API types
+class prmPositionCartesianGet;
+class prmPositionCartesianSet;
+class prmVelocityCartesianGet;
+class prmVelocityCartesianSet;
+
+class prmPositionJoinGet;
+class prmPositionJointSet;
+class prmVelocityJointGet;
+class prmVelocityJointSet;
 
 
 #endif // _prmForwardDeclarations_h
