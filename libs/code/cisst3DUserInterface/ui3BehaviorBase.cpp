@@ -35,7 +35,8 @@ ui3BehaviorBase::ui3BehaviorBase(const std::string & name,
                                  ui3Manager * manager):
     mtsTaskContinuous(name, 500), /* all behaviors have a state table of 500, ui3Manager needs at least 3 */
     MenuBar(0),
-    Manager(manager)
+    Manager(manager),
+    State(Background)
 {
 }
 

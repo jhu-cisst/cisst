@@ -27,7 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 #define UI3_DAVINCI 3
 
 // change this based on your configuration
-#define UI3_INPUT UI3_OMNI1
+#define UI3_INPUT UI3_NO_INPUT
 
 #include <cisstOSAbstraction/osaThreadedLogFile.h>
 #include <cisstOSAbstraction/osaSleep.h>
@@ -111,14 +111,14 @@ int main()
 // setup renderers
 
     vctFrm3 camframe = vctFrm3::Identity();
-    guiManager.AddRenderer(640, 480,        // image size
+    guiManager.AddRenderer(640, 480,        // window size
                            0, 0,            // window position
                            camframe, 30.0,  // camera parameters
                            "LeftEyeView");  // name of renderer
     guiManager.AddVideoBackgroundToRenderer("LeftEyeView", "MonoVideo");
 
     camframe.Translation().X() = 10.0;
-    guiManager.AddRenderer(640, 480,        // image size
+    guiManager.AddRenderer(640, 480,        // window size
                            640, 0,          // window position
                            camframe, 30.0,  // camera parameters
                            "RightEyeView"); // name of renderer
