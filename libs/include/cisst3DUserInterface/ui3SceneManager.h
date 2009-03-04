@@ -25,6 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnGenericObject.h>
 #include <cisstCommon/cmnClassServices.h>
 #include <cisstCommon/cmnClassRegisterMacros.h>
+#include <cisstVector/vctDynamicVector.h>
 
 #include <cisst3DUserInterface/ui3ForwardDeclarations.h>
 #include <cisst3DUserInterface/ui3VTKForwardDeclarations.h>
@@ -47,12 +48,18 @@ public:
     /*!
      Constructor
     */
-    ui3SceneManager(ui3VTKRenderer * renderer);
+    ui3SceneManager();
 
     /*!
      Destructor
     */
     ~ui3SceneManager();
+
+    /*!
+     Adds a renderer to the list of renderers.
+     All objects that are added to the scene will be registered to all renderers.
+    */
+    bool AddRenderer(ui3VTKRenderer* renderer);
 
     /*!
      Creates a VTK actor, adds it to the list of actors and returns the associated
@@ -104,7 +111,7 @@ protected:
 
     VTKHandleType LockHandle;
 
-    ui3VTKRenderer * Renderer;
+    vctDynamicVector<ui3VTKRenderer*> Renderers;
 };
 
 

@@ -32,15 +32,21 @@ http://www.cisst.org/cisst/license.txt.
 CMN_IMPLEMENT_SERVICES(ui3SceneManager);
 
 
-ui3SceneManager::ui3SceneManager(ui3VTKRenderer * renderer):
-	Renderer(renderer)
+ui3SceneManager::ui3SceneManager(void)
 {
-	CMN_ASSERT(this->Renderer);
 }
 
 
 ui3SceneManager::~ui3SceneManager(void)
 {
+}
+
+
+bool ui3SceneManager::AddRenderer(ui3VTKRenderer* renderer)
+{
+    int rendererindex = this->Renderers.size();
+    this->Renderers.resize(rendererindex + 1);
+    this->Renderers[rendererindex] = renderer;
 }
 
 
@@ -57,7 +63,9 @@ ui3SceneManager::VTKHandleType ui3SceneManager::Add(ui3VisibleObject * object)
     // if we created an actor, add it to the map
     if (objectVTKProp) {
         this->PropMap[propHandle] = objectVTKProp;
-		this->Renderer->Add(object);
+        for (unsigned int i = 0; i < this->Renderers.size(); i ++) {
+            this->Renderers[i]->Add(object);
+        }
     }
     // return the handle
     return propHandle;

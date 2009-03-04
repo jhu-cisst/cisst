@@ -96,14 +96,14 @@ public:
 
 
     /*!
-     Configures the image display.
-
-     \param width           Display window width
-     \param height          Display window height
-     \param mode            Display mode: mono mode or one of the stereo modes
-     \return                Success flag: true=success, false=error
+     Adds a render window to the UI Manager.
     */
-    virtual bool SetupDisplay(unsigned int width, unsigned int height, DisplayMode mode);
+    virtual bool AddRenderer(unsigned int width, unsigned int height, const std::string & calibfilepath, const std::string & renderername);
+
+    /*!
+     Assigns a video backgrond to a render window.
+    */
+    virtual bool AddVideoBackgroundToRenderer(const std::string & renderername, const std::string & streamname, unsigned int videochannel = 0);
 
     /*! Returns a pointer to the main user interface manager object,
      i.e. this object.
@@ -253,6 +253,20 @@ public:
     virtual bool RunNoInput(void);
 
 
+protected:
+
+    typedef struct tagRendererStruct {
+        unsigned int width;
+        unsigned int height;
+        std::string calibfilepath;
+        std::string name;
+        ui3VTKRenderer* renderer;
+        int streamindex;
+        unsigned int streamchannel;
+        ui3ImagePlane* imageplane;
+    } _RendererStruct;
+
+
 private:
 
     inline ui3VisibleObject * GetVisibleObject(void) {
@@ -293,21 +307,16 @@ private:
      Scene manager object that maintains the consistency and thread safety of 3D scene.
     */
     ui3SceneManager * SceneManager;
-    
+
     /*!
      Input device interface module. (???)
     */
     ui3InputDeviceBase InputDevice;
 
     /*!
-     VTK 3D graphics renderer module. (???)
+     3D graphics renderer modules.
     */
-    ui3VTKRenderer * Renderer;
-
-    /*!
-     Background video plane.
-    */
-    ui3ImagePlane * VideoBackground;
+    vctDynamicVector<_RendererStruct*> Renderers;
 
     /*!
      Background video stream event callback.

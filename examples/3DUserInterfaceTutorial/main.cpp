@@ -77,6 +77,7 @@ int main()
     vidStream.Trunk().Append(&vidSource);
 
     // add guiManager as a filter to the pipeline, so it will receive video frames
+    // "MonoVideoBackground" is defined in the UI Manager as a possible video interface
     vidStream.Trunk().Append(guiManager.GetStreamSamplerFilter("MonoVideoBackground"));
 
 /*
@@ -94,12 +95,13 @@ int main()
 
 ////////////////////////////////////////////////////////////////
 // setup renderers
-/*
-    guiManager.AddRenderer(640, 480, "LeftEyeView", "camera_calibration_1.txt");
-    guiManager.AddVideoBackgroundToRenderer("LeftEyeView", "StereoVideoBackground", 0, "camera_calibration_1.txt");
-    guiManager.AddRenderer(640, 480, "RightEyeView", "camera_calibration_2.txt");
-    guiManager.AddVideoBackgroundToRenderer("RightEyeView", "StereoVideoBackground", 1, "camera_calibration_2.txt");
-*/
+
+    guiManager.AddRenderer(800, 600, "not_used_yet.txt", "LeftEyeView");
+    guiManager.AddVideoBackgroundToRenderer("LeftEyeView", "MonoVideoBackground");
+
+    guiManager.AddRenderer(800, 600, "not_used_yet.txt", "RightEyeView");
+    guiManager.AddVideoBackgroundToRenderer("RightEyeView", "MonoVideoBackground");
+
 // setup renderers
 ////////////////////////////////////////////////////////////////
 

@@ -37,8 +37,6 @@ ui3Manager::ui3Manager(const std::string & name):
     Running(false),
     ActiveBehavior(0),
     SceneManager(0),
-    Renderer(0),
-    VideoBackground(0),
     RightCursor(0),
     LeftCursor(0),
     RightButtonPressed(false),
@@ -72,6 +70,9 @@ ui3Manager::ui3Manager(const std::string & name):
 
 ui3Manager::~ui3Manager()
 {
+    for (unsigned int i = 0; i < Renderers.size(); i ++) {
+        if (Renderers[i]) delete Renderers[i];
+    }
 }
 
 
@@ -147,9 +148,44 @@ bool ui3Manager::SetupLeftMaster(mtsDevice * positionDevice, const std::string &
 }
 
 
-bool ui3Manager::SetupDisplay(unsigned int width, unsigned int height, DisplayMode mode)
+bool ui3Manager::AddRenderer(unsigned int width, unsigned int height, const std::string & calibfilepath, const std::string & renderername)
 {
+    if (width < 1 || height < 1 ||
+        calibfilepath.empty() || renderername.empty()) return false;
+
+    int rendererindex = Renderers.size();
+    _RendererStruct* renderer = new _RendererStruct;
+    CMN_ASSERT(renderer);
+
+    renderer->width = width;
+    renderer->height = height;
+    renderer->calibfilepath = calibfilepath;
+    renderer->name = renderername;
+    renderer->renderer = 0;
+    renderer->streamindex = -1;
+    renderer->streamchannel = 0;
+    renderer->imageplane = 0;
+
+    Renderers.resize(rendererindex + 1);
+    Renderers[rendererindex] = renderer;
+
     return true;
+}
+
+
+bool ui3Manager::AddVideoBackgroundToRenderer(const std::string & renderername, const std::string & streamname, unsigned int videochannel)
+{
+    int index = GetStreamIndexFromName(streamname);
+    if (index >= 0) {
+        for (unsigned int i = 0; i < Renderers.size(); i ++) {
+            if (Renderers[i] && Renderers[i]->name == renderername) {
+                Renderers[i]->streamindex = index;
+                Renderers[i]->streamchannel = videochannel;
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 
@@ -248,28 +284,51 @@ ui3Handle ui3Manager::AddBehavior(ui3BehaviorBase * behavior,
 void ui3Manager::Startup(void)
 {
     CMN_LOG_CLASS(3) << "StartUp: begin" << std::endl;
-    this->Renderer = new ui3VTKRenderer();
-    CMN_ASSERT(this->Renderer);
+    CMN_ASSERT(Renderers.size());
 
-    this->SceneManager = new ui3SceneManager(this->Renderer);
+    this->SceneManager = new ui3SceneManager;
     CMN_ASSERT(this->SceneManager);
 
-    // Add live video background
-    this->VideoBackground = new ui3ImagePlane(this);
-    CMN_ASSERT(this->VideoBackground);
-    // Get bitmap dimensions from pipeline.
-    // The pipeline has to be already initialized to get the required info.
-    this->VideoBackground->SetBitmapSize(this->GetStreamWidth("MonoVideoBackground"), this->GetStreamHeight("MonoVideoBackground"));
-    // Calculate plane height to cover the whole vertical field of view
-    double bgheight = VIDEO_BACKGROUND_DISTANCE * tan((this->Renderer->GetViewAngle() / 2.0) * 3.14159265 / 180.0) * 2.0;
-    // Calculate plane width from plane height and the bitmap aspect ratio
-    double bgwidth = bgheight * this->GetStreamWidth("MonoVideoBackground") / this->GetStreamHeight("MonoVideoBackground");
-    // Set plane size (dimensions are already in millimeters)
-    this->VideoBackground->SetPhysicalSize(bgwidth, bgheight);
-    // Change pivot position to move plane to the right location.
-    // The pivot point will remain in the origin, only the plane moves.
-    this->VideoBackground->SetPhysicalPositionRelativeToPivot(vct3(-0.5 * bgwidth, 0.5 * bgheight, -VIDEO_BACKGROUND_DISTANCE));
-    this->SceneManager->Add(this->VideoBackground);
+    // Setup renderer(s)
+    double bgheight, bgwidth;
+    for (unsigned int i = 0; i < Renderers.size(); i ++) {
+
+        Renderers[i]->renderer = new ui3VTKRenderer;
+        CMN_ASSERT(Renderers[i]->renderer);
+
+        // Add live video background if available
+        if (Renderers[i]->streamindex >= 0) {
+
+            Renderers[i]->imageplane = new ui3ImagePlane(this);
+            CMN_ASSERT(Renderers[i]->imageplane);
+
+            // Get bitmap dimensions from pipeline.
+            // The pipeline has to be already initialized to get the required info.
+            Renderers[i]->imageplane->SetBitmapSize(GetStreamWidth(Renderers[i]->streamindex, Renderers[i]->streamchannel),
+                                                    GetStreamHeight(Renderers[i]->streamindex, Renderers[i]->streamchannel));
+
+            // Calculate plane height to cover the whole vertical field of view
+            bgheight = VIDEO_BACKGROUND_DISTANCE * tan((Renderers[i]->renderer->GetViewAngle() / 2.0) * 3.14159265 / 180.0) * 2.0;
+            // Calculate plane width from plane height and the bitmap aspect ratio
+            bgwidth = bgheight *
+                      GetStreamWidth(Renderers[i]->streamindex, Renderers[i]->streamchannel) /
+                      GetStreamHeight(Renderers[i]->streamindex, Renderers[i]->streamchannel);
+
+            // Set plane size (dimensions are already in millimeters)
+            Renderers[i]->imageplane->SetPhysicalSize(bgwidth, bgheight);
+
+            // Change pivot position to move plane to the right location.
+            // The pivot point will remain in the origin, only the plane moves.
+            Renderers[i]->imageplane->SetPhysicalPositionRelativeToPivot(vct3(-0.5 * bgwidth, 0.5 * bgheight, -VIDEO_BACKGROUND_DISTANCE));
+
+            // Add image plane to renderer directly, without going through scene manager
+            Renderers[i]->imageplane->CreateVTKObjects();
+            Renderers[i]->renderer->Add(Renderers[i]->imageplane);
+
+            // Add renderer to scene manager
+            this->SceneManager->AddRenderer(Renderers[i]->renderer);
+        }
+    }
 
     this->RightCursor = new ui3Cursor(this);
     CMN_ASSERT(this->RightCursor);
@@ -317,6 +376,19 @@ void ui3Manager::Cleanup(void)
 
     // Release UI manager
     // TO DO
+
+    for (unsigned int i = 0; i < Renderers.size(); i ++) {
+        if (Renderers[i]) {
+            if (Renderers[i]->renderer) {
+                delete Renderers[i]->renderer;
+                Renderers[i]->renderer = 0;
+            }
+            if (Renderers[i]->imageplane) {
+                delete Renderers[i]->imageplane;
+                Renderers[i]->imageplane = 0;
+            }
+        }
+    }
 }
 
 
@@ -412,8 +484,9 @@ void ui3Manager::Run(void)
     osaSleep(10.0 * cmn_ms);
 
     // should compute time since last render to figure out if we need it
-    this->Renderer->Render();
-    
+    for (unsigned int i = 0; i < Renderers.size(); i ++) {
+        Renderers[i]->renderer->Render();
+    }
 }
 
 
@@ -449,7 +522,12 @@ void ui3Manager::LeftMasterButtonEventHandler(const prmEventButton & buttonEvent
 
 void ui3Manager::OnStreamSample(svlSample* sample, int streamindex)
 {
-    if (Initialized && this->VideoBackground) {
-        this->VideoBackground->SetImage(dynamic_cast<svlSampleImageBase*>(sample));
+    if (Initialized) {
+        // Check if there are any renderers waiting for this stream (there can be more than one)
+        for (unsigned int i = 0; i < Renderers.size(); i ++) {
+            if (Renderers[i] && Renderers[i]->streamindex == streamindex && Renderers[i]->imageplane) {
+                Renderers[i]->imageplane->SetImage(dynamic_cast<svlSampleImageBase*>(sample));
+            }
+        }
     }
 }

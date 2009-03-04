@@ -275,10 +275,8 @@ protected:
     */
     int GetStreamIndexFromName(const std::string & streamname);
 
-    typedef vctDynamicVector<ui3VideoInterfaceFilter*> _StreamVector;
-    typedef vctDynamicVector<std::string> _StreamNameVector;
-    _StreamVector Streams;
-    _StreamNameVector StreamNames;
+    vctDynamicVector<ui3VideoInterfaceFilter*> Streams;
+    vctDynamicVector<std::string> StreamNames;
 
 public:
     /*!
