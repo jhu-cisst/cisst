@@ -33,14 +33,16 @@ int main(void)
     taskManager->AddTask(displayTaskObject);
 
 #if (CISST_DEV_HAS_SENSABLEHD == ON)
-	devSensableHD * robotObject = new devSensableHD("Omni", "Omni");
+    // name as defined in Sensable configuration
+    std::string omniName("Omni1");
+    devSensableHD * robotObject = new devSensableHD("Omni", "Omni1");
 	taskManager->AddTask(robotObject);
 #endif
 
     // connect the tasks
-    taskManager->Connect("DISP", "Robot", "Omni", "Omni");
-    taskManager->Connect("DISP", "Button1", "Omni", "OmniButton1");
-    taskManager->Connect("DISP", "Button2", "Omni", "OmniButton2");
+    taskManager->Connect("DISP", "Robot", "Omni", omniName);
+    taskManager->Connect("DISP", "Button1", "Omni", omniName + "Button1");
+    taskManager->Connect("DISP", "Button2", "Omni", omniName + "Button2");
     // generate a nice tasks diagram
     std::ofstream dotFile("example1.dot"); 
     taskManager->ToStreamDot(dotFile);

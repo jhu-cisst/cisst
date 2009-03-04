@@ -239,8 +239,8 @@ void devSensableHD::SetupInterfaces(void)
         deviceData->Buttons.AddToStateTable(this->StateTable, interfaceName + "Buttons");
 
         // provide read methods for state data
-        deviceData->PositionCartesian.AddReadCommandToTask(this, interfaceName, "GetPosition");
-        deviceData->VelocityCartesian.AddReadCommandToTask(this, interfaceName, "GetVelocity");
+        deviceData->PositionCartesian.AddReadCommandToTask(this, interfaceName, "GetPositionCartesian");
+        deviceData->VelocityCartesian.AddReadCommandToTask(this, interfaceName, "GetVelocityCartesian");
         deviceData->PositionJoint.AddReadCommandToTask(this, interfaceName, "GetPositionJoint");
 
         // add a method to read the current state index
@@ -253,7 +253,7 @@ void devSensableHD::SetupInterfaces(void)
                                        vctFrm3::Identity(),
                                        &prmTransformationManager::TheWorld);
         deviceData->PositionFunctionForTransformationManager.Bind(this->GetProvidedInterface(interfaceName)
-                                                                      ->GetCommandRead("GetPosition"));
+                                                                      ->GetCommandRead("GetPositionCartesian"));
         deviceData->PositionCartesian.Data.MovingFrame() =
             new prmTransformationDynamic(interfaceName + "Tip",
                                          deviceData->PositionFunctionForTransformationManager,

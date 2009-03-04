@@ -16,8 +16,8 @@ displayTask::displayTask(const std::string & taskName, double period):
     mtsRequiredInterface * requiredInterface = AddRequiredInterface("Robot");
 	if (requiredInterface) {
         // bound the mtsFunction to the command provided by the interface 
-        requiredInterface->AddFunction("GetPosition", GetCartesianPosition, mtsRequired);
-        requiredInterface->AddFunction("GetVelocity", GetCartesianVelocity, mtsOptional);
+        requiredInterface->AddFunction("GetPositionCartesian", GetCartesianPosition, mtsRequired);
+        requiredInterface->AddFunction("GetVelocityCartesian", GetCartesianVelocity, mtsOptional);
         requiredInterface->AddFunction("GetPositionJoint", GetJointPosition, mtsOptional);
         requiredInterface->AddEventHandlerWrite(&displayTask::Button1EventHandler, this,
                                                 "Buttons", prmEventButton());
