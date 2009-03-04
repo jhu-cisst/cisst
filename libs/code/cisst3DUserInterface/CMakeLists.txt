@@ -34,9 +34,18 @@ IF(NOT VTK_USE_RENDERING)
 ENDIF(NOT VTK_USE_RENDERING)
 INCLUDE(${VTK_USE_FILE})
 
+IF(CISST_SVL_HAS_OPENCV)
+    # Link each example against the OpenCV library if enabled
+    FIND_PACKAGE(OpenCV)
+    INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS})
+    #LINK_DIRECTORIES(${OpenCV_LINK_DIRECTORIES})
+    #TARGET_LINK_LIBRARIES(stereoTutorialSimpleStream ${OpenCV_LIBRARIES})
+ENDIF(CISST_SVL_HAS_OPENCV)
+
 # all source files
 SET(SOURCE_FILES
     ui3BehaviorBase.cpp
+    ui3ImagePlane.cpp
     ui3Cursor.cpp
     ui3InputDeviceBase.cpp
     ui3Manager.cpp
@@ -44,7 +53,7 @@ SET(SOURCE_FILES
     ui3MenuButton.cpp
     ui3SceneManager.cpp
     ui3VTKRenderer.cpp
-    ui3VideoSourceBase.cpp
+    ui3VideoInterfaceFilter.cpp
     ui3VisibleObject.cpp
     )
 
@@ -52,6 +61,7 @@ SET(SOURCE_FILES
 SET(HEADER_FILES
     ui3ForwardDeclarations.h
     ui3BehaviorBase.h
+    ui3ImagePlane.h
     ui3Cursor.h
     ui3InputDeviceBase.h
     ui3Manager.h
@@ -60,7 +70,7 @@ SET(HEADER_FILES
     ui3SceneManager.h
     ui3VTKRenderer.h
     ui3VTKForwardDeclarations.h
-    ui3VideoSourceBase.h
+    ui3VideoInterfaceFilter.h
     ui3VisibleObject.h
     )
 

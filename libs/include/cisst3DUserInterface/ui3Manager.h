@@ -26,8 +26,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisst3DUserInterface/ui3BehaviorBase.h>
 #include <cisst3DUserInterface/ui3SceneManager.h>
 #include <cisst3DUserInterface/ui3VTKRenderer.h>
-#include <cisst3DUserInterface/ui3VideoSourceBase.h>
 #include <cisst3DUserInterface/ui3Cursor.h>
+#include <cisst3DUserInterface/ui3ImagePlane.h>
 
 /*!
  Provides a default implementation for the main user interface manager.
@@ -74,7 +74,7 @@ public:
      \return                Success flag: true=success, false=error
     */
     // more parameters needed for setting up the input device
-    virtual bool SetupVideoSource(const std::string& calibfile);
+//    virtual bool SetupVideoSource(const std::string& calibfile);
 
     /*!
      Configures the connection between the UI manager and the input device(s) .
@@ -305,9 +305,14 @@ private:
     ui3VTKRenderer * Renderer;
 
     /*!
-     Video capture module. (???)
+     Background video plane.
     */
-    ui3VideoSourceBase VideoSource;
+    ui3ImagePlane * VideoBackground;
+
+    /*!
+     Background video stream event callback.
+    */
+    void OnStreamSample(svlSample* sample, int streamindex);
 
     /*! Keep a pointer on singleton task manager to make it easier to access */
     mtsTaskManager * TaskManager;
@@ -315,7 +320,7 @@ private:
     // functions which will be bound to commands
     mtsFunctionRead RightMasterGetCartesianPosition;
     mtsFunctionRead LeftMasterGetCartesianPosition;
-    
+
     // event handlers
     void RightMasterButtonEventHandler(const prmEventButton & buttonEvent);
     void LeftMasterButtonEventHandler(const prmEventButton & buttonEvent);

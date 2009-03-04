@@ -49,7 +49,7 @@ private:
     int Threshold;
 
     void FilterBlur(unsigned char* img_in, unsigned char* img_out, const int width, const int height, int radius);
-    void Sharpening(unsigned char* img_in, unsigned char* img_mask, unsigned char* img_out, const int width, const int height, int strength);
+    void Sharpening(unsigned char* img_in, unsigned char* img_mask, unsigned char* img_out, const int width, const int height);
 };
 
 #endif // _svlUnsharpMask_h

@@ -45,7 +45,7 @@ class ui3Manager;
 class ui3BehaviorBase;
 class ui3SceneManager;
 class ui3InputDeviceBase;
-class ui3VideoSourceBase;
+class ui3VideoInterfaceFilter;
 class ui3VTKRenderer;
 class ui3VisibleObject;
 class ui3MenuBar;

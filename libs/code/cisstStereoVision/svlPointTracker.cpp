@@ -341,13 +341,9 @@ void svlPointTrackerAlgoBase::SetImageSize(unsigned int width, unsigned int heig
 
 void svlPointTrackerAlgoBase::SetWorkArea(unsigned int left, unsigned int top, unsigned int right, unsigned int bottom)
 {
-    if (left < 0) left = 0;
     if (left >= Width) left = std::max(0u, Width - 1);
-    if (top < 0) top = 0;
     if (top >= Height) top = std::max(0u, Height - 1);
-    if (right < 0) right = 0;
     if (right >= Width) right = std::max(0u, Width - 1);
-    if (bottom < 0) bottom = 0;
     if (bottom >= Height) bottom = std::max(0u, Height - 1);
     Left = min(left, right);
     Top = min(top, bottom);

@@ -117,8 +117,7 @@ int svlUnsharpMask::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata)
                    reinterpret_cast<unsigned char*>(output->GetPointer(idx)),
                    reinterpret_cast<unsigned char*>(output->GetPointer(idx)),
                    input->GetWidth(idx),
-                   input->GetHeight(idx),
-                   Amount);
+                   input->GetHeight(idx));
     }
 
     return SVL_OK;
@@ -260,7 +259,7 @@ void svlUnsharpMask::FilterBlur(unsigned char* img_in, unsigned char* img_out, c
     }
 }
 
-void svlUnsharpMask::Sharpening(unsigned char* img_in, unsigned char* img_mask, unsigned char* img_out, const int width, const int height, int strength)
+void svlUnsharpMask::Sharpening(unsigned char* img_in, unsigned char* img_mask, unsigned char* img_out, const int width, const int height)
 {
     int i, in, mask, diff, out;
     const int size = width * height * 3;

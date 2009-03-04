@@ -27,6 +27,8 @@ http://www.cisst.org/cisst/license.txt.
 
 CMN_IMPLEMENT_SERVICES(ui3Manager)
 
+#define VIDEO_BACKGROUND_DISTANCE       10000.0
+
 
 ui3Manager::ui3Manager(const std::string & name):
     ui3BehaviorBase(name, 0),
@@ -36,6 +38,7 @@ ui3Manager::ui3Manager(const std::string & name):
     ActiveBehavior(0),
     SceneManager(0),
     Renderer(0),
+    VideoBackground(0),
     RightCursor(0),
     LeftCursor(0),
     RightButtonPressed(false),
@@ -44,6 +47,10 @@ ui3Manager::ui3Manager(const std::string & name):
     LeftButtonReleased(false),
     LeftMasterExists(false)
 {
+    // add video source interfaces
+    AddStream(svlTypeImageRGB,       "MonoVideoBackground");
+    AddStream(svlTypeImageRGBStereo, "StereoVideoBackground");
+
     // populate the state table
     this->RightMasterPosition.AddToStateTable(this->StateTable, "RightMasterPosition");
     this->LeftMasterPosition.AddToStateTable(this->StateTable, "LeftMasterPosition");
@@ -65,12 +72,6 @@ ui3Manager::ui3Manager(const std::string & name):
 
 ui3Manager::~ui3Manager()
 {
-}
-
-
-bool ui3Manager::SetupVideoSource(const std::string& calibfile)
-{
-    return true;
 }
 
 
@@ -253,6 +254,23 @@ void ui3Manager::Startup(void)
     this->SceneManager = new ui3SceneManager(this->Renderer);
     CMN_ASSERT(this->SceneManager);
 
+    // Add live video background
+    this->VideoBackground = new ui3ImagePlane(this);
+    CMN_ASSERT(this->VideoBackground);
+    // Get bitmap dimensions from pipeline.
+    // The pipeline has to be already initialized to get the required info.
+    this->VideoBackground->SetBitmapSize(this->GetStreamWidth("MonoVideoBackground"), this->GetStreamHeight("MonoVideoBackground"));
+    // Calculate plane height to cover the whole vertical field of view
+    double bgheight = VIDEO_BACKGROUND_DISTANCE * tan((this->Renderer->GetViewAngle() / 2.0) * 3.14159265 / 180.0) * 2.0;
+    // Calculate plane width from plane height and the bitmap aspect ratio
+    double bgwidth = bgheight * this->GetStreamWidth("MonoVideoBackground") / this->GetStreamHeight("MonoVideoBackground");
+    // Set plane size (dimensions are already in millimeters)
+    this->VideoBackground->SetPhysicalSize(bgwidth, bgheight);
+    // Change pivot position to move plane to the right location.
+    // The pivot point will remain in the origin, only the plane moves.
+    this->VideoBackground->SetPhysicalPositionRelativeToPivot(vct3(-0.5 * bgwidth, 0.5 * bgheight, -VIDEO_BACKGROUND_DISTANCE));
+    this->SceneManager->Add(this->VideoBackground);
+
     this->RightCursor = new ui3Cursor(this);
     CMN_ASSERT(this->RightCursor);
     this->SceneManager->Add(this->RightCursor);
@@ -277,6 +295,9 @@ void ui3Manager::Startup(void)
 
     // current active behavior is this
     this->SetState(Foreground);    // UI manager is in foreground by default (main menu)
+
+    // Added temporarily by Balazs
+    Initialized = true;
 
     if (!Initialized) {
         // error
@@ -330,7 +351,12 @@ void ui3Manager::Run(void)
     this->LeftButtonPressed = false;
 
     this->ProcessQueuedEvents();
-    
+
+    vctFrm3 rightCursorPosition;
+    rightCursorPosition.Translation().Assign(10.0, 10.0, -200.0);
+    this->RightCursor->SetTransformation(rightCursorPosition);
+
+/*    
     // get cursor position
     vctFrm3 rightCursorPosition;
     prmPositionCartesianGet rightArmPosition;
@@ -381,7 +407,7 @@ void ui3Manager::Run(void)
         }
         this->LeftCursor->SetTransformation(leftCursorPosition);
     }
-
+*/
     // this needs to change to a parameter
     osaSleep(10.0 * cmn_ms);
 
@@ -417,5 +443,13 @@ void ui3Manager::LeftMasterButtonEventHandler(const prmEventButton & buttonEvent
     }
     if (this->ActiveBehavior) {
         this->ActiveBehavior->RightMasterButtonEvent(buttonEvent);
+    }
+}
+
+
+void ui3Manager::OnStreamSample(svlSample* sample, int streamindex)
+{
+    if (Initialized && this->VideoBackground) {
+        this->VideoBackground->SetImage(dynamic_cast<svlSampleImageBase*>(sample));
     }
 }

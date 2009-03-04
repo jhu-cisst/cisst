@@ -24,7 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisst3DUserInterface/ui3BehaviorBase.h>
 #include <cisst3DUserInterface/ui3SceneManager.h>
 #include <cisst3DUserInterface/ui3VTKRenderer.h>
-#include <cisst3DUserInterface/ui3VideoSourceBase.h>
+#include <cisst3DUserInterface/ui3VideoInterfaceFilter.h>
 #include <cisst3DUserInterface/ui3Manager.h>
 
 
@@ -34,14 +34,17 @@ CMN_IMPLEMENT_SERVICES(ui3BehaviorBase)
 ui3BehaviorBase::ui3BehaviorBase(const std::string & name,
                                  ui3Manager * manager):
     mtsTaskContinuous(name, 500), /* all behaviors have a state table of 500, ui3Manager needs at least 3 */
-    Manager(manager),
-    MenuBar(0)
+    MenuBar(0),
+    Manager(manager)
 {
 }
 
 
 ui3BehaviorBase::~ui3BehaviorBase()
 {
+    for (unsigned int i = 0; i < Streams.size(); i ++) {
+        if (Streams[i]) delete Streams[i];
+    }
 }
 
 
@@ -169,7 +172,64 @@ void ui3BehaviorBase::SetState(const StateType & newState)
     }
 }
 
+void ui3BehaviorBase::OnStreamSample(svlSample* sample, int streamindex)
+{
+    // Default implementation does nothing
+}
 
+int ui3BehaviorBase::AddStream(svlStreamType type, const std::string & streamname)
+{
+    int streamindex = Streams.size();
+    ui3VideoInterfaceFilter* filter = new ui3VideoInterfaceFilter(type, streamindex, this);
+    CMN_ASSERT(filter);
+
+    Streams.resize(streamindex + 1);
+    StreamNames.resize(streamindex + 1);
+
+    Streams[streamindex] = filter;
+    StreamNames[streamindex] = streamname;
+
+    return streamindex;
+}
+
+unsigned int ui3BehaviorBase::GetStreamWidth(const int streamindex, unsigned int channel)
+{
+    if (streamindex < 0 || streamindex >= static_cast<int>(Streams.size())) return 0;
+    return Streams[streamindex]->GetWidth(channel);
+}
+
+unsigned int ui3BehaviorBase::GetStreamWidth(const std::string & streamname, unsigned int channel)
+{
+    return GetStreamWidth(GetStreamIndexFromName(streamname), channel);
+}
+
+unsigned int ui3BehaviorBase::GetStreamHeight(const int streamindex, unsigned int channel)
+{
+    if (streamindex < 0 || streamindex >= static_cast<int>(Streams.size())) return 0;
+    return Streams[streamindex]->GetHeight(channel);
+}
+
+unsigned int ui3BehaviorBase::GetStreamHeight(const std::string & streamname, unsigned int channel)
+{
+    return GetStreamHeight(GetStreamIndexFromName(streamname), channel);
+}
+
+int ui3BehaviorBase::GetStreamIndexFromName(const std::string & streamname)
+{
+    unsigned int i;
+    for (i = 0; i < StreamNames.size(); i ++) {
+        if (StreamNames[i] == streamname) break;
+    }
+    if (i < StreamNames.size()) return i;
+    return -1;
+}
+
+svlFilterBase* ui3BehaviorBase::GetStreamSamplerFilter(const std::string & streamname)
+{
+    int streamindex = GetStreamIndexFromName(streamname);
+    if (streamindex < 0 || streamindex >= static_cast<int>(Streams.size())) return 0;
+    return dynamic_cast<svlFilterBase*>(Streams[streamindex]);
+}
 
 void ui3BehaviorBase::RightMasterButtonCallback(const prmEventButton & event)
 {
@@ -182,4 +242,3 @@ void ui3BehaviorBase::LeftMasterButtonCallback(const prmEventButton & event)
     CMN_LOG_CLASS(6) << "LeftMasterButtonCallback not overloaded for \""
                      << this->GetName() << "\"" << std::endl;
 }
-

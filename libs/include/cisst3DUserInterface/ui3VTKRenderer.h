@@ -51,6 +51,9 @@ public:
 
     void Render(void);
 
+    void SetViewAngle(double angle);
+    double GetViewAngle(void);
+
     void Add(ui3VisibleObject * object);
 
 private:
@@ -58,6 +61,8 @@ private:
     vtkRenderWindow * RenderWindow;
     vtkRenderWindowInteractor * RenderWindowInteractor;
     vtkCamera * Camera;
+    
+    double ViewAngle;
 };
 
 

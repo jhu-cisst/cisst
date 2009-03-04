@@ -152,7 +152,11 @@ class CISST_EXPORT svlStreamManager
 friend class svlStreamEntity;
 friend class svlStreamControlMultiThread;
 
-    typedef std::map<svlStreamEntity*, svlStreamManager*> _BranchMap;
+    typedef struct tagBranchStruct {
+        svlStreamEntity* entity;
+        std::string name;
+    } _BranchStruct;
+    typedef std::map<_BranchStruct*, svlStreamManager*> _BranchMap;
     typedef std::vector<svlFilterBase*> _FilterList;
 
 public:
@@ -161,8 +165,11 @@ public:
     ~svlStreamManager();
 
     svlStreamEntity& Trunk();
+    svlStreamEntity& Branch(const std::string & name);
     svlStreamEntity* CreateBranchAfterFilter(svlFilterBase* filter);
+    svlStreamEntity* CreateBranchAfterFilter(svlFilterBase* filter, const std::string & name);
     int RemoveBranch(svlStreamEntity* entity);
+    int RemoveBranch(const std::string & name);
     int RemoveFilter(svlFilterBase* filter);
     int EmptyFilterList();
 
@@ -203,6 +210,7 @@ private:
     osaCriticalSection* CS;
 
     svlStreamEntity Entity;
+    svlStreamEntity InvalidEntity;
     _BranchMap Branches;
     _FilterList Filters;
     svlFilterBase* StreamSource;

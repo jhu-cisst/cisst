@@ -75,7 +75,25 @@ svlStreamEntity& svlStreamManager::Trunk()
     return Entity;
 }
 
+svlStreamEntity& svlStreamManager::Branch(const std::string & name)
+{
+    // Search for branch
+    _BranchMap::iterator iterbranch;
+    for (iterbranch = Branches.begin(); iterbranch != Branches.end(); iterbranch ++) {
+        if (iterbranch->first->name == name) break;
+    }
+    if (iterbranch == Branches.end())
+        return InvalidEntity;
+
+    return *(iterbranch->first->entity);
+}
+
 svlStreamEntity* svlStreamManager::CreateBranchAfterFilter(svlFilterBase* filter)
+{
+    return CreateBranchAfterFilter(filter, "");
+}
+
+svlStreamEntity* svlStreamManager::CreateBranchAfterFilter(svlFilterBase* filter, const std::string & name)
 {
     if (Initialized ||
         GetBranchEntityOfFilter(filter) == 0 ||
@@ -84,10 +102,14 @@ svlStreamEntity* svlStreamManager::CreateBranchAfterFilter(svlFilterBase* filter
 
     // Create branch stream object
     svlStreamManager* branchstream = new svlStreamManager();
-    // Add branch entity to the filter's branch list
+    // Create branch structure
+    _BranchStruct *branch = new _BranchStruct;
+    branch->entity = &(branchstream->Entity);
+    branch->name = name;
+    // Add branch to the filter's branch list
     filter->OutputBranches.push_back(&(branchstream->Entity));
-    // Add branch entity and the corresponding stream to branch map
-    Branches[&(branchstream->Entity)] = branchstream;
+    // Add branch and the corresponding stream to branch map
+    Branches[branch] = branchstream;
     // Create branch stream source
     svlStreamBranchSource* branchsource = new svlStreamBranchSource(filter->GetOutputType());
     // Add branch source to branch stream
@@ -102,8 +124,11 @@ int svlStreamManager::RemoveBranch(svlStreamEntity* entity)
     if (entity == 0) return SVL_FAIL;
     if (Initialized) return SVL_ALREADY_INITIALIZED;
 
-    // Check if the branch exists
-    _BranchMap::iterator iterbranch = Branches.find(entity);
+    // Search for branch
+    _BranchMap::iterator iterbranch;
+    for (iterbranch = Branches.begin(); iterbranch != Branches.end(); iterbranch ++) {
+        if (iterbranch->first->entity == entity) break;
+    }
     if (iterbranch == Branches.end())
         return SVL_FAIL;
 
@@ -118,6 +143,39 @@ int svlStreamManager::RemoveBranch(svlStreamEntity* entity)
         delete branchstream;
     }
 
+    // Delete branch structure
+    delete iterbranch->first;
+    // Remove branch from branch map
+    Branches.erase(iterbranch);
+
+    return SVL_OK;
+}
+
+int svlStreamManager::RemoveBranch(const std::string & name)
+{
+    if (Initialized) return SVL_ALREADY_INITIALIZED;
+
+    // Search for branch
+    _BranchMap::iterator iterbranch;
+    for (iterbranch = Branches.begin(); iterbranch != Branches.end(); iterbranch ++) {
+        if (iterbranch->first->name == name) break;
+    }
+    if (iterbranch == Branches.end())
+        return SVL_FAIL;
+
+    // Empty and delete branch stream
+    svlStreamManager* branchstream = iterbranch->second;
+    if (branchstream) {
+        // Remove every filter in the branch from the stream
+        branchstream->EmptyFilterList();
+        // Delete branch source
+        if (branchstream->StreamSource) delete branchstream->StreamSource;
+        // Delete branch stream
+        delete branchstream;
+    }
+
+    // Delete branch structure
+    delete iterbranch->first;
     // Remove branch from branch map
     Branches.erase(iterbranch);
 
@@ -620,7 +678,7 @@ svlStreamEntity* svlStreamManager::GetBranchEntityOfFilter(svlFilterBase* filter
     _BranchMap::iterator iterbranch;
     for (iterbranch = Branches.begin(); iterbranch != Branches.end(); iterbranch ++) {
         if (iterbranch->second->IsFilterInList(filter))
-            return iterbranch->first;
+            return iterbranch->first->entity;
     }
 
     return 0;
@@ -674,7 +732,7 @@ svlStreamEntity::svlStreamEntity() :
 
 int svlStreamEntity::Append(svlFilterBase* filter)
 {
-    if (filter == 0) return SVL_FAIL;
+    if (Stream == 0 || filter == 0) return SVL_FAIL;
     return Stream->AppendFilterToTrunk(filter);
 }
 

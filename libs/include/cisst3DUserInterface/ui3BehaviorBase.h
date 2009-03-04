@@ -27,7 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsStateData.h>
 #include <cisstParameterTypes/prmPositionCartesianGet.h>
 #include <cisstParameterTypes/prmEventButton.h>
-
+#include <cisstStereoVision/svlStreamManager.h>
 
 #include <cisst3DUserInterface/ui3ForwardDeclarations.h>
 #include <cisst3DUserInterface/ui3InputDeviceBase.h>
@@ -42,6 +42,7 @@ class ui3BehaviorBase: public mtsTaskContinuous
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 5);
 
     friend class ui3Manager;
+    friend class ui3VideoInterfaceFilter;
 
 private:
     void Run(void);
@@ -233,6 +234,59 @@ protected:
     /*! Method called when this behavior becomes active, i.e. the user selected it from the previous menu */
     void SetStateForeground(void);
     void SetStateBackground(void);
+
+protected:
+
+    /*!
+     If there are any video sources connected to the behavior, this method is
+     called by SVL pipelines every time a new stream sample arrives.
+     Attention:
+      This method is heavily multithreaded. It is used by all asynchronous
+      streams attached to the behavior. It may be called from several
+      independent stream threads simultaneously.
+    */
+    virtual void OnStreamSample(svlSample* sample, int streamindex);
+
+    /*!
+     Adds a new SVL source interface to the behavior and
+     returns the stream index for the new interface.
+    */
+    int AddStream(svlStreamType type, const std::string & streamname);
+
+    /*!
+     Returns image width if the specified stream is of image type.
+     Otherwise or if the SVL pipeline is not yet initialized,
+     the return value is 0.
+    */
+    unsigned int GetStreamWidth(const int streamindex, unsigned int channel = 0);
+    unsigned int GetStreamWidth(const std::string & streamname, unsigned int channel = 0);
+
+    /*!
+     Returns image height if the specified stream is of image type.
+     Otherwise or if the SVL pipeline is not yet initialized,
+     the return value is 0.
+    */
+    unsigned int GetStreamHeight(const int streamindex, unsigned int channel = 0);
+    unsigned int GetStreamHeight(const std::string & streamname, unsigned int channel = 0);
+
+    /*!
+     Returns the index of the first stream named as the specified string.
+     If no matching stream is found, the return value is negative.
+    */
+    int GetStreamIndexFromName(const std::string & streamname);
+
+    typedef vctDynamicVector<ui3VideoInterfaceFilter*> _StreamVector;
+    typedef vctDynamicVector<std::string> _StreamNameVector;
+    _StreamVector Streams;
+    _StreamNameVector StreamNames;
+
+public:
+    /*!
+     Returns a pointer to the filter that interfaces the behavior
+     with StereoVision pipelines. Using the its pointer, the filter
+     can be connected to a pipeline.
+    */
+    svlFilterBase* GetStreamSamplerFilter(const std::string & streamname);
 
 protected:
 

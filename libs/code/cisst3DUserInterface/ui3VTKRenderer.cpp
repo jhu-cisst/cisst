@@ -40,7 +40,8 @@ ui3VTKRenderer::ui3VTKRenderer():
     Renderer(0),
     RenderWindow(0),
     RenderWindowInteractor(0),
-    Camera(0)
+    Camera(0),
+    ViewAngle(30.0)
 {
     // Create render window
     this->Renderer = vtkRenderer::New();
@@ -49,7 +50,7 @@ ui3VTKRenderer::ui3VTKRenderer():
     this->RenderWindow = vtkRenderWindow::New();
     CMN_ASSERT(this->RenderWindow);
     this->RenderWindow->AddRenderer(this->Renderer);
-    this->RenderWindow->SetSize(1000, 1000);
+    this->RenderWindow->SetSize(800, 600);
     this->RenderWindow->SetWindowName("Renderer");
 
     this->RenderWindowInteractor = vtkRenderWindowInteractor::New();
@@ -62,7 +63,7 @@ ui3VTKRenderer::ui3VTKRenderer():
     this->Camera->SetPosition(0.0, 0.0, 1.0);
     this->Camera->SetFocalPoint(0.0, 0.0, 0.0);
     this->Camera->SetClippingRange(0.1, 10000.0);
-    this->Camera->SetViewAngle(30.0);
+    this->Camera->SetViewAngle(this->ViewAngle);
     this->Renderer->SetActiveCamera(this->Camera);
 
     // Initialize renderer
@@ -81,6 +82,19 @@ void ui3VTKRenderer::Render(void)
     } else {
         CMN_LOG_CLASS(1) << "Render: attempt to render before the VTK Window Renderer has been created" << std::endl;
     }
+}
+
+
+void ui3VTKRenderer::SetViewAngle(double angle)
+{
+    this->ViewAngle = angle;
+    this->Camera->SetViewAngle(ViewAngle);
+}
+
+
+double ui3VTKRenderer::GetViewAngle(void)
+{
+    return this->ViewAngle;
 }
 
 
