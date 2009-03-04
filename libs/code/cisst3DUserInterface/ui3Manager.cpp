@@ -43,6 +43,7 @@ ui3Manager::ui3Manager(const std::string & name):
     RightButtonReleased(false),
     LeftButtonPressed(false),
     LeftButtonReleased(false),
+    RightMasterExists(false),
     LeftMasterExists(false)
 {
     // add video source interfaces
@@ -87,7 +88,7 @@ bool ui3Manager::SetupRightMaster(mtsDevice * positionDevice, const std::string 
     requiredInterface = this->AddRequiredInterface("RightMaster");
     if (requiredInterface) {
         // bound the mtsFunction to the command provided by the interface 
-        requiredInterface->AddFunction("GetPosition", RightMasterGetCartesianPosition, mtsRequired);
+        requiredInterface->AddFunction("GetPositionCartesian", RightMasterGetCartesianPosition, mtsRequired);
     }
 
     // setup right master button required interface 
@@ -107,6 +108,8 @@ bool ui3Manager::SetupRightMaster(mtsDevice * positionDevice, const std::string 
     // connect the right master button device to the right master button required interface
     this->TaskManager->Connect(this->GetName(), "RightMasterButton",
                                buttonDevice->GetName(), buttonInterface);
+
+    this->RightMasterExists = true;
     return true;
 }
 
@@ -122,7 +125,7 @@ bool ui3Manager::SetupLeftMaster(mtsDevice * positionDevice, const std::string &
     requiredInterface = this->AddRequiredInterface("LeftMaster");
     if (requiredInterface) {
         // bound the mtsFunction to the command provided by the interface 
-        requiredInterface->AddFunction("GetPosition", RightMasterGetCartesianPosition, mtsRequired);
+        requiredInterface->AddFunction("GetPositionCartesian", LeftMasterGetCartesianPosition, mtsRequired);
     }
 
     // setup left master button required interface 
@@ -330,9 +333,11 @@ void ui3Manager::Startup(void)
         }
     }
 
-    this->RightCursor = new ui3Cursor(this);
-    CMN_ASSERT(this->RightCursor);
-    this->SceneManager->Add(this->RightCursor);
+    if (this->RightMasterExists) {
+        this->RightCursor = new ui3Cursor(this);
+        CMN_ASSERT(this->RightCursor);
+        this->SceneManager->Add(this->RightCursor);
+    }
 
     if (this->LeftMasterExists) {
         this->LeftCursor = new ui3Cursor(this);
@@ -424,20 +429,19 @@ void ui3Manager::Run(void)
 
     this->ProcessQueuedEvents();
 
-    vctFrm3 rightCursorPosition;
-    rightCursorPosition.Translation().Assign(10.0, 10.0, -200.0);
-    this->RightCursor->SetTransformation(rightCursorPosition);
-
-/*    
     // get cursor position
     vctFrm3 rightCursorPosition;
-    prmPositionCartesianGet rightArmPosition;
-    this->RightMasterGetCartesianPosition(rightArmPosition);
-    // apply transformation and scale
-    this->RightTransform.ApplyTo(rightArmPosition.Position(), rightCursorPosition);
-    rightCursorPosition.Translation().Multiply(this->RightScale);
-    this->RightMasterPosition.Data.Position().Assign(rightCursorPosition);
-
+    if (this->RightMasterExists) {
+        prmPositionCartesianGet rightArmPosition;
+        this->RightMasterGetCartesianPosition(rightArmPosition);
+        // apply transformation and scale
+        this->RightTransform.ApplyTo(rightArmPosition.Position(), rightCursorPosition);
+        rightCursorPosition.Translation().Multiply(this->RightScale);
+        this->RightMasterPosition.Data.Position().Assign(rightCursorPosition);
+    } else {
+        // temporary fix for menu depth
+        rightCursorPosition.Translation().Z() = -100.0;
+    }
     vctFrm3 leftCursorPosition;
     if (this->LeftMasterExists) {
         prmPositionCartesianGet leftArmPosition;
@@ -454,17 +458,20 @@ void ui3Manager::Run(void)
     // try to figure out if the cursor is above the menu
     ui3MenuButton * selectedButton = 0;
     bool isOverMenu;
-    isOverMenu = this->ActiveBehavior->MenuBar->IsPointOnMenuBar(rightCursorPosition.Translation(),
-                                                                 selectedButton);
-    this->RightCursor->Set2D(isOverMenu);
-    if (selectedButton) {
-        if (this->RightButtonReleased) {
-            selectedButton->CallBack();
-            this->RightButtonReleased = false;
-        }
-    }
-    this->RightCursor->SetTransformation(rightCursorPosition);
 
+    // right side
+    if (this->RightMasterExists) {
+        isOverMenu = this->ActiveBehavior->MenuBar->IsPointOnMenuBar(rightCursorPosition.Translation(),
+                                                                     selectedButton);
+        this->RightCursor->Set2D(isOverMenu);
+        if (selectedButton) {
+            if (this->RightButtonReleased) {
+                selectedButton->CallBack();
+                this->RightButtonReleased = false;
+            }
+        }
+        this->RightCursor->SetTransformation(rightCursorPosition);
+    }
     // left side now
     if (this->LeftMasterExists) {
         selectedButton = 0;
@@ -479,7 +486,7 @@ void ui3Manager::Run(void)
         }
         this->LeftCursor->SetTransformation(leftCursorPosition);
     }
-*/
+
     // this needs to change to a parameter
     osaSleep(10.0 * cmn_ms);
 
@@ -531,3 +538,4 @@ void ui3Manager::OnStreamSample(svlSample* sample, int streamindex)
         }
     }
 }
+

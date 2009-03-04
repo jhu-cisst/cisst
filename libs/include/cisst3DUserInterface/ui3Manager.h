@@ -353,6 +353,7 @@ private:
     double RightScale;
     double LeftScale;
 
+    bool RightMasterExists;
     bool LeftMasterExists;
 };
 

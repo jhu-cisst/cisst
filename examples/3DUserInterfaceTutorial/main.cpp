@@ -19,10 +19,23 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+// temporary fix to configure input
+// possible values:
+#define UI3_NO_INPUT 0
+#define UI3_OMNI1 1
+#define UI3_OMNI1_OMNI2 2
+#define UI3_DAVINCI 3
+
+// change this based on your configuration
+#define UI3_INPUT UI3_OMNI1
+
 #include <cisstOSAbstraction/osaThreadedLogFile.h>
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsTaskManager.h>
-//#include <cisstDevices/devSensableHD.h>
+
+#if (UI3_INPUT == UI3_OMNI1) || (UI3_INPUT == UI3_OMNI1_OMNI2)
+#include <cisstDevices/devSensableHD.h>
+#endif
 
 #include <cisstStereoVision.h>
 
@@ -43,13 +56,14 @@ int main()
     cmnClassRegister::SetLoD("mtsTaskManager", 10);
 
     mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
-// #define TWO_OMNIS
-#ifdef TWO_OMNIS
+#if (UI3_INPUT == UI3_OMNI1_OMNI2)
     devSensableHD * sensable = new devSensableHD("Omni", "Omni1", "Omni2" /* name in driver, see Preferences in Sensable Driver */);
-#else
-//    devSensableHD * sensable = new devSensableHD("Omni", "Omni1" /* name in driver, see Preferences in Sensable Driver */);
+    taskManager->AddTask(sensable);
 #endif
-//    taskManager->AddTask(sensable);
+#if (UI3_INPUT == UI3_OMNI1)
+    devSensableHD * sensable = new devSensableHD("Omni", "Omni1" /* name in driver, see Preferences in Sensable Driver */);
+    taskManager->AddTask(sensable);
+#endif
 
     ui3Manager guiManager;
 
@@ -103,25 +117,22 @@ int main()
     guiManager.AddVideoBackgroundToRenderer("RightEyeView", "MonoVideoBackground");
 
 // setup renderers
-////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////
 
-
+    
+#if (UI3_INPUT == UI3_OMNI1) || (UI3_INPUT == UI3_OMNI1_OMNI2)
     vctFrm3 transform;
     transform.Translation().Assign(+30.0, 0.0, -150.0); // recenter Omni's depth
-//    guiManager.SetupRightMaster(sensable, "Omni1",
-//                                sensable, "Omni1Button1",
-//                                transform, 0.5 /* scale factor */);
-#ifdef TWO_OMNIS
+    guiManager.SetupRightMaster(sensable, "Omni1",
+                                sensable, "Omni1Button1",
+                                transform, 0.5 /* scale factor */);
+#endif
+#if (UI3_INPUT == UI3_OMNI1_OMNI2)
     transform.Translation().Assign(-30.0, 0.0, -150.0); // recenter Omni's depth
     guiManager.SetupLeftMaster(sensable, "Omni2",
                                sensable, "Omni2Button1",
                                transform, 0.5 /* scale factor */);
 #endif
-    
-    // setup behavior
-
-    // TODO something like:
-    //      behavior.FooSetup()
 
     // following should be replaced by a utility function or method of ui3Manager 
     taskManager->CreateAll();
@@ -138,3 +149,4 @@ int main()
 
     return 0;
 }
+

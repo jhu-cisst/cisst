@@ -47,6 +47,7 @@ bool ui3SceneManager::AddRenderer(ui3VTKRenderer* renderer)
     int rendererindex = this->Renderers.size();
     this->Renderers.resize(rendererindex + 1);
     this->Renderers[rendererindex] = renderer;
+    return true; // to be fixed later
 }
 
 
