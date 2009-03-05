@@ -40,7 +40,7 @@ class CISST_EXPORT prmEventButton: public cmnGenericObject
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, 5);
 
  public:
-    typedef enum {PRESSED, RELEASED, CLICKED, DOUBLE_CLIKED} EventType;
+    typedef enum {PRESSED, RELEASED, CLICKED, DOUBLE_CLICKED} EventType;
     
  public:
     /*! default constructor */
@@ -71,7 +71,8 @@ class CISST_EXPORT prmEventButton: public cmnGenericObject
     PRM_DECLARE_MEMBER_AND_ACCESSORS(EventType, Type);
     //@}
 
-    
+    /*! Overloaded ToStream */
+    virtual void ToStream(std::ostream & outputStream) const;
 };
 
 
