@@ -123,7 +123,7 @@ void devSensableHD::Run(void)
                 if (currentButtonState == 0) {
                     event.SetType(prmEventButton::RELEASED);
                 } else {
-                    event.SetType(prmEventButton::CLICKED);
+                    event.SetType(prmEventButton::PRESSED);
                 }
                 // throw the event
                 deviceData->Button1Event(event);
@@ -135,7 +135,7 @@ void devSensableHD::Run(void)
                 if (currentButtonState == 0) {
                     event.SetType(prmEventButton::RELEASED);
                 } else {
-                    event.SetType(prmEventButton::CLICKED);
+                    event.SetType(prmEventButton::PRESSED);
                 }
                 // throw the event
                 deviceData->Button2Event(event);

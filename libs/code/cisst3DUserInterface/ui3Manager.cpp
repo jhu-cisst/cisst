@@ -549,7 +549,7 @@ void ui3Manager::RightMasterButtonEventHandler(const prmEventButton & buttonEven
 
 void ui3Manager::LeftMasterButtonEventHandler(const prmEventButton & buttonEvent)
 {
-    if (buttonEvent.Type() == prmEventButton::CLICKED) {
+    if (buttonEvent.Type() == prmEventButton::PRESSED) {
         this->LeftCursor->SetPressed(true);
         this->LeftButtonPressed = true;
     } else {

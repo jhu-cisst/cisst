@@ -132,7 +132,7 @@ void displayTask::Run(void)
 
 void displayTask::Button1EventHandler(const prmEventButton & buttonEvent)
 {
-    if (buttonEvent.Type() == prmEventButton::CLICKED) {
+    if (buttonEvent.Type() == prmEventButton::PRESSED) {
         UI.Button1->value(true);
     } else {
         UI.Button1->value(false);
@@ -141,7 +141,7 @@ void displayTask::Button1EventHandler(const prmEventButton & buttonEvent)
 
 void displayTask::Button2EventHandler(const prmEventButton & buttonEvent)
 {
-    if (buttonEvent.Type() == prmEventButton::CLICKED) {
+    if (buttonEvent.Type() == prmEventButton::PRESSED) {
         UI.Button2->value(true);
     } else {
         UI.Button2->value(false);
