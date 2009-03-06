@@ -161,7 +161,7 @@ int main()
     guiManager.SetupLeftMaster(daVinci, "MTML",
                                daVinci, "MTMLButton",
                                transform, 0.5 /* scale factor */);
-    guiManager.SetupMaM(daVinci, "MaM");
+    guiManager.SetupMaM(daVinci, "MastersAsMice");
 #endif
 
     // following should be replaced by a utility function or method of ui3Manager 

@@ -44,6 +44,7 @@ protected:
     void FirstButtonCallback(void);
     void RightMasterButtonCallback(const prmEventButton & event);
     StateType PreviousState;
+    bool PreviousMaM;
     vctDouble3 Position, PreviousCursorPosition;
     bool Following;
 

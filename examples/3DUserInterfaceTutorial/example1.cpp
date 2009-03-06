@@ -116,6 +116,11 @@ void CExampleBehavior::Cleanup(void)
 
 bool CExampleBehavior::RunForeground()
 {
+    if (this->Manager->MastersAsMice() != this->PreviousMaM) {
+        this->PreviousMaM = this->Manager->MastersAsMice();
+        this->VisibleObject->Show();
+    }
+
     // detect transition, should that be handled as an event?
     // State is used by multiple threads ...
     if (this->State != this->PreviousState) {
@@ -149,9 +154,8 @@ bool CExampleBehavior::RunBackground()
 
 bool CExampleBehavior::RunNoInput()
 {
-    // detect transition
-    if (this->State != this->PreviousState) {
-        this->PreviousState = this->State;
+    if (this->Manager->MastersAsMice() != this->PreviousMaM) {
+        this->PreviousMaM = this->Manager->MastersAsMice();
         this->VisibleObject->Hide();
     }
     return true;

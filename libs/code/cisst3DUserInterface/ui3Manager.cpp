@@ -32,7 +32,6 @@ CMN_IMPLEMENT_SERVICES(ui3Manager)
 
 ui3Manager::ui3Manager(const std::string & name):
     ui3BehaviorBase(name, 0),
-    UIMode(false),                          // ui3 is in tele-operated mode by default
     Initialized(false),
     Running(false),
     ActiveBehavior(0),
@@ -45,7 +44,7 @@ ui3Manager::ui3Manager(const std::string & name):
     LeftButtonReleased(false),
     RightMasterExists(false),
     LeftMasterExists(false),
-    MaMMode(true)
+    MaM(true)
 {
     // add video source interfaces
     AddStream(svlTypeImageRGB,       "MonoVideo");
@@ -167,7 +166,7 @@ bool ui3Manager::SetupMaM(mtsDevice * mamDevice, const std::string & mamInterfac
     this->TaskManager->Connect(this->GetName(), "MaM",
                                mamDevice->GetName(), mamInterface);
     this->HideAll();
-//    this->MaMMode = false;
+    this->MaM = false;
     return true;
 }
 
@@ -237,12 +236,6 @@ void ui3Manager::Configure(const std::string & configFile)
 bool ui3Manager::SaveConfiguration(const std::string & configFile) const
 {
     return true;
-}
-
-
-bool ui3Manager::IsInUIMode(void) const
-{
-    return UIMode;
 }
 
 
@@ -488,7 +481,7 @@ void ui3Manager::Run(void)
     // set depth for current menu - hard coded to follow right arm for now.  Need access to stereo rendering to test better approaches.  Anton
     this->ActiveBehavior->MenuBar->SetDepth(rightCursorPosition.Translation().Z());
 
-//    if (this->MaMMode) {
+//    if (this->MastersAsMice) {
         // try to figure out if the cursor is above the menu
         ui3MenuButton * selectedButton = 0;
         bool isOverMenu;
@@ -610,7 +603,7 @@ void ui3Manager::ShowAll(void)
 void ui3Manager::EnterMaMModeEventHandler(void)
 {
     this->ShowAll();
-    this->MaMMode = true;
+    this->MaM = true;
     CMN_LOG_CLASS(9) << "EnterMaMMode" << std::endl;
 }
 
@@ -618,6 +611,6 @@ void ui3Manager::EnterMaMModeEventHandler(void)
 void ui3Manager::LeaveMaMModeEventHandler(void)
 {
     this->HideAll();
-    this->MaMMode = false;
+    this->MaM = false;
     CMN_LOG_CLASS(9) << "LeaveMaMMode" << std::endl;
 }

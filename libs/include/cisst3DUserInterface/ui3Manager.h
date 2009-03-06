@@ -136,14 +136,6 @@ public:
     virtual bool SaveConfiguration(const std::string & configFile) const;
 
     /*!
-     Returns a flag signaling whether the application is in
-     interface/interaction/input/master-as-mouse mode.
-     
-     \return                User interface/interaction/input/master-as-mouse mode flag
-    */
-    bool IsInUIMode(void) const;
-
-    /*!
      Returns the current position of the pointer.
 
      \param inputid         Input device identifier
@@ -284,12 +276,6 @@ private:
     void SetActiveBehavior(ui3BehaviorBase * newBehavior);
 
     /*!
-     Flag signaling whether the application is in user
-     interface/interaction/input/master-as-mouse mode.
-    */
-    bool UIMode;
-
-    /*!
      Flag signalling whether the user interface loop has been successfully initialized.
     */
     bool Initialized;
@@ -352,7 +338,12 @@ private:
     bool LeftButtonPressed, LeftButtonReleased;
 
     // MaM (MastersAsMice) mode
-    bool MaMMode;
+    bool MaM;
+public:
+    inline bool MastersAsMice(void) const {
+        return this->MaM;
+    }
+private:
 
     // transformation between inputs and scene
     vctFrm3 RightTransform;

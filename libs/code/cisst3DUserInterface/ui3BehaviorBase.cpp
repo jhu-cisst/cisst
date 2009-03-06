@@ -113,29 +113,32 @@ void ui3BehaviorBase::UnsubscribeInputCallback(unsigned int inputid)
 void ui3BehaviorBase::Run(void)
 {
     this->ProcessQueuedEvents();
-    switch(this->State) {
-    case Foreground:
-        this->RunForeground();
-        break;
-    case Background:
-        this->RunBackground();
-        break;
-    case Idle:
-        this->RunNoInput();
-        break;
-    default:
-        break;
+    if (this->Manager->MastersAsMice()) {
+        switch(this->State) {
+        case Foreground:
+            this->RunForeground();
+            break;
+        case Background:
+            this->RunBackground();
+            break;
+        case Idle:
+        default:
+            break;
+        }
+    } else {
+        switch(this->State) {
+        case Foreground:
+        case Background:
+            this->RunNoInput();
+            break;
+        case Idle:
+        default:
+            break;
+        }
     }
     osaSleep(10.0 * cmn_ms); // bad, needs to be a variable/data member
 }
 
-void ui3BehaviorBase::OnInputAction(unsigned int inputid, ui3InputDeviceBase::InputAction action)
-{
-}
-
-void ui3BehaviorBase::DispatchGUIEvents(void)
-{
-}
 
 void ui3BehaviorBase::SetStateForeground(void)
 {

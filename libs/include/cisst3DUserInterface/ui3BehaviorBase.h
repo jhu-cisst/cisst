@@ -57,9 +57,9 @@ public:
       Enumerated behavior states
     */
     typedef enum {
-        Foreground,
-        Background,
-        Idle
+        Foreground, // running, receives GUI events
+        Background, // running, doesn't receive events
+        Idle // not running 
     } StateType;
     
 public:
@@ -214,22 +214,6 @@ protected:
      \param inputid             Input device identifier
     */
     virtual void UnsubscribeInputCallback(unsigned int inputid);
-
-    /*!
-     This method is called automatically by ui3BehaviorBase::DispatchGUIEvents
-     if any input actions occur that the application previously subscribed for
-     using the ui3BehaviorBase::SubscribeInputCallback method.
-
-     \param inputid             Input device identifier
-     \param action              Action identifier
-    */
-    virtual void OnInputAction(unsigned int inputid, ui3InputDeviceBase::InputAction action);
-
-    /*!
-     Automatically interprets relevant UI events and calls registered callback
-     methods if needed.
-    */
-    virtual void DispatchGUIEvents(void);
 
     /*! Method called when this behavior becomes active, i.e. the user selected it from the previous menu */
     void SetStateForeground(void);
