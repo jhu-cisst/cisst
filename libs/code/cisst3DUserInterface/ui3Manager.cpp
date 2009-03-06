@@ -44,7 +44,8 @@ ui3Manager::ui3Manager(const std::string & name):
     LeftButtonPressed(false),
     LeftButtonReleased(false),
     RightMasterExists(false),
-    LeftMasterExists(false)
+    LeftMasterExists(false),
+    MaMMode(true)
 {
     // add video source interfaces
     AddStream(svlTypeImageRGB,       "MonoVideo");
@@ -63,6 +64,11 @@ ui3Manager::ui3Manager(const std::string & name):
     this->RightMasterPosition.AddReadCommandToTask(this, "BehaviorsInterface", "RightMasterPosition");
     this->LeftMasterPosition.AddReadCommandToTask(this, "BehaviorsInterface", "LeftMasterPosition");
     
+    // add required interface to device to switch on/off master as mouse
+    mtsRequiredInterface * requiredInterface = this->AddRequiredInterface("MaM");
+    requiredInterface->AddEventHandlerVoid(&ui3Manager::EnterMaMModeEventHandler, this, "Enter");
+    requiredInterface->AddEventHandlerVoid(&ui3Manager::LeaveMaMModeEventHandler, this, "Leave");
+
     // add the UI manager to the task manager
     this->TaskManager = mtsTaskManager::GetInstance();
     CMN_ASSERT(TaskManager);
@@ -151,6 +157,17 @@ bool ui3Manager::SetupLeftMaster(mtsDevice * positionDevice, const std::string &
                                buttonDevice->GetName(), buttonInterface);
 
     this->LeftMasterExists = true;
+    return true;
+}
+
+
+bool ui3Manager::SetupMaM(mtsDevice * mamDevice, const std::string & mamInterface)
+{
+    // connect the left master device to the right master required interface
+    this->TaskManager->Connect(this->GetName(), "MaM",
+                               mamDevice->GetName(), mamInterface);
+    this->HideAll();
+//    this->MaMMode = false;
     return true;
 }
 
@@ -471,36 +488,38 @@ void ui3Manager::Run(void)
     // set depth for current menu - hard coded to follow right arm for now.  Need access to stereo rendering to test better approaches.  Anton
     this->ActiveBehavior->MenuBar->SetDepth(rightCursorPosition.Translation().Z());
 
-    // try to figure out if the cursor is above the menu
-    ui3MenuButton * selectedButton = 0;
-    bool isOverMenu;
+//    if (this->MaMMode) {
+        // try to figure out if the cursor is above the menu
+        ui3MenuButton * selectedButton = 0;
+        bool isOverMenu;
 
-    // right side
-    if (this->RightMasterExists) {
-        isOverMenu = this->ActiveBehavior->MenuBar->IsPointOnMenuBar(rightCursorPosition.Translation(),
-                                                                     selectedButton);
-        this->RightCursor->Set2D(isOverMenu);
-        if (selectedButton) {
-            if (this->RightButtonReleased) {
-                selectedButton->CallBack();
-                this->RightButtonReleased = false;
+        // right side
+        if (this->RightMasterExists) {
+            isOverMenu = this->ActiveBehavior->MenuBar->IsPointOnMenuBar(rightCursorPosition.Translation(),
+                                                                         selectedButton);
+            this->RightCursor->Set2D(isOverMenu);
+            if (selectedButton) {
+                if (this->RightButtonReleased) {
+                    selectedButton->CallBack();
+                    this->RightButtonReleased = false;
+                }
             }
+            this->RightCursor->SetTransformation(rightCursorPosition);
         }
-        this->RightCursor->SetTransformation(rightCursorPosition);
-    }
-    // left side now
-    if (this->LeftMasterExists) {
-        selectedButton = 0;
-        isOverMenu = this->ActiveBehavior->MenuBar->IsPointOnMenuBar(leftCursorPosition.Translation(),
-                                                                     selectedButton);
-        this->LeftCursor->Set2D(isOverMenu);
-        if (selectedButton) {
-            if (this->LeftButtonReleased) {
-                selectedButton->CallBack();
-                this->LeftButtonReleased = false;
+        // left side now
+        if (this->LeftMasterExists) {
+            selectedButton = 0;
+            isOverMenu = this->ActiveBehavior->MenuBar->IsPointOnMenuBar(leftCursorPosition.Translation(),
+                                                                         selectedButton);
+            this->LeftCursor->Set2D(isOverMenu);
+            if (selectedButton) {
+                if (this->LeftButtonReleased) {
+                    selectedButton->CallBack();
+                    this->LeftButtonReleased = false;
+                }
             }
-        }
-        this->LeftCursor->SetTransformation(leftCursorPosition);
+            this->LeftCursor->SetTransformation(leftCursorPosition);
+      //  }
     }
 
     // this needs to change to a parameter
@@ -515,7 +534,7 @@ void ui3Manager::Run(void)
 
 void ui3Manager::RightMasterButtonEventHandler(const prmEventButton & buttonEvent)
 {
-    if (buttonEvent.Type() == prmEventButton::CLICKED) {
+    if (buttonEvent.Type() == prmEventButton::PRESSED) {
         this->RightCursor->SetPressed(true);
         this->RightButtonPressed = true;
     } else {
@@ -555,3 +574,50 @@ void ui3Manager::OnStreamSample(svlSample* sample, int streamindex)
     }
 }
 
+
+void ui3Manager::HideAll(void)
+{
+    if (this->RightCursor) {
+        this->RightCursor->Hide();
+    }
+
+    if (this->LeftCursor) {
+        this->LeftCursor->Hide();
+    }
+
+    if (this->ActiveBehavior) {
+        this->ActiveBehavior->MenuBar->Hide();
+    }
+}
+
+
+void ui3Manager::ShowAll(void)
+{
+    if (this->RightCursor) {
+        this->RightCursor->Show();
+    }
+
+    if (this->LeftCursor) {
+        this->LeftCursor->Show();
+    }
+
+    if (this->ActiveBehavior) {
+        this->ActiveBehavior->MenuBar->Show();
+    }
+}
+
+
+void ui3Manager::EnterMaMModeEventHandler(void)
+{
+    this->ShowAll();
+    this->MaMMode = true;
+    CMN_LOG_CLASS(9) << "EnterMaMMode" << std::endl;
+}
+
+
+void ui3Manager::LeaveMaMModeEventHandler(void)
+{
+    this->HideAll();
+    this->MaMMode = false;
+    CMN_LOG_CLASS(9) << "LeaveMaMMode" << std::endl;
+}

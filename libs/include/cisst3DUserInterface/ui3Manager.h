@@ -93,7 +93,7 @@ public:
                                  const vctFrm3 & transformation = vctFrm3::Identity(),
                                  double scale = 1.0);
                                  
-
+    virtual bool SetupMaM(mtsDevice * mamDevice, const std::string & mamInterface);
 
     /*!
      Adds a render window to the UI Manager.
@@ -336,6 +336,12 @@ private:
     // event handlers
     void RightMasterButtonEventHandler(const prmEventButton & buttonEvent);
     void LeftMasterButtonEventHandler(const prmEventButton & buttonEvent);
+    void EnterMaMModeEventHandler(void);
+    void LeaveMaMModeEventHandler(void);
+
+    // hide/show all objects controlled by the ui3Manager
+    void HideAll(void);
+    void ShowAll(void);
 
     // cursors
     ui3Cursor * RightCursor;
@@ -344,6 +350,9 @@ private:
     // button state, might be a better implementation for this (Anton)
     bool RightButtonPressed, RightButtonReleased;
     bool LeftButtonPressed, LeftButtonReleased;
+
+    // MaM (MastersAsMice) mode
+    bool MaMMode;
 
     // transformation between inputs and scene
     vctFrm3 RightTransform;
