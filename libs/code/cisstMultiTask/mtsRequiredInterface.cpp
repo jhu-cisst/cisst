@@ -163,10 +163,10 @@ bool mtsRequiredInterface::BindCommandsAndEvents(void)
         result = iterWrite->second->Bind(OtherInterface->GetCommandWrite(iterWrite->first));
         if (!result) {
             CMN_LOG_CLASS(2) << "BindCommandsAndEvents: failed for write command \""
-                             << iterRead->first << "\"" << std::endl;
+                             << iterWrite->first << "\"" << std::endl;
         } else {
             CMN_LOG_CLASS(4) << "BindCommandsAndEvents: succeeded for write command \""
-                             << iterRead->first << "\"" << std::endl;
+                             << iterWrite->first << "\"" << std::endl;
         }
         success &= result;
     }
