@@ -175,7 +175,7 @@ void CExampleBehavior::FirstButtonCallback()
 
 void CExampleBehavior::RightMasterButtonCallback(const prmEventButton & event)
 {
-    if (event.Type() == prmEventButton::CLICKED) {
+    if (event.Type() == prmEventButton::PRESSED) {
         this->Following = true;
     } else if (event.Type() == prmEventButton::RELEASED) {
         this->Following = false;

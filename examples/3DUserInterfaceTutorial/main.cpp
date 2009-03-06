@@ -27,7 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 #define UI3_DAVINCI 3
 
 // change this based on your configuration
-#define UI3_INPUT UI3_NO_INPUT
+#define UI3_INPUT UI3_DAVINCI
 
 #include <cisstOSAbstraction/osaThreadedLogFile.h>
 #include <cisstOSAbstraction/osaSleep.h>
@@ -35,6 +35,10 @@ http://www.cisst.org/cisst/license.txt.
 
 #if (UI3_INPUT == UI3_OMNI1) || (UI3_INPUT == UI3_OMNI1_OMNI2)
 #include <cisstDevices/devSensableHD.h>
+#endif
+
+#if (UI3_INPUT == UI3_DAVINCI)
+#include <cisstDaVinciAPI/cisstDaVinciAPI.h>
 #endif
 
 #include <cisstStereoVision.h>
@@ -63,6 +67,11 @@ int main()
 #if (UI3_INPUT == UI3_OMNI1)
     devSensableHD * sensable = new devSensableHD("Omni", "Omni1" /* name in driver, see Preferences in Sensable Driver */);
     taskManager->AddTask(sensable);
+#endif
+#if (UI3_INPUT == UI3_DAVINCI)
+    cisstDaVinciAPI *daVinci = new cisstDaVinciAPI("daVinci", 0.0 /* period to be removed */,
+                                                   "10.0.0.5", 5002, 0x1111, 50);
+    taskManager->AddTask(daVinci);
 #endif
 
     ui3Manager guiManager;
@@ -142,11 +151,24 @@ int main()
                                transform, 0.5 /* scale factor */);
 #endif
 
+#if (UI3_INPUT == UI3_DAVINCI)
+    vctFrm3 transform;
+    transform.Rotation().From(vctAxAnRot3(vctDouble3(0.0, 1.0, 0.0), cmnPI));
+    guiManager.SetupRightMaster(daVinci, "MTMR",
+                                daVinci, "MTMRButton",
+                                transform, 0.5 /* scale factor */);
+    transform.Rotation().From(vctAxAnRot3(vctDouble3(0.0, 1.0, 0.0), cmnPI));
+    guiManager.SetupLeftMaster(daVinci, "MTML",
+                               daVinci, "MTMLButton",
+                               transform, 0.5 /* scale factor */);
+    guiManager.SetupMaM(daVinci, "MaM");
+#endif
+
     // following should be replaced by a utility function or method of ui3Manager 
     taskManager->CreateAll();
     taskManager->StartAll();
     // replace by exit condition created by ui3Manager
-    osaSleep(15.0 * cmn_s);
+    osaSleep(100.0 * cmn_s);
     taskManager->KillAll();
 
     guiManager.SaveConfiguration("config.xml");

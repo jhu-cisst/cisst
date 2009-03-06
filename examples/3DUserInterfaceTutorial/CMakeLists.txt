@@ -23,6 +23,16 @@ IF(CISST_SVL_HAS_OPENCV)
     LINK_DIRECTORIES(${OpenCV_LINK_DIRECTORIES})
 ENDIF(CISST_SVL_HAS_OPENCV)
 
+OPTION(HAS_DAVINCI "Build using the daVinci API" OFF)
+IF(HAS_DAVINCI)
+   FIND_PATH(daVinci_INCLUDE_DIRS cisstDaVinciAPI.h)
+   IF(daVinci_INCLUDE_DIRS)
+       INCLUDE_DIRECTORIES(${daVinci_INCLUDE_DIRS})
+   ENDIF(daVinci_INCLUDE_DIRS)
+   FIND_LIBRARY(daVinci_LIBRARIES cisstDaVinciAPI)
+ENDIF(HAS_DAVINCI)
+
+
 add_executable(${PROJECT_NAME}
                main.cpp
                example1.cpp
@@ -33,6 +43,7 @@ target_link_libraries(${PROJECT_NAME}
                       vtkRendering
                       ${CMAKE_THREAD_LIBS_INIT}
                       ${OpenCV_LIBRARIES}
+                      ${daVinci_LIBRARIES}
                       )
 
 CISST_REQUIRES(${PROJECT_NAME} "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstImage;cisstStereoVision;cisstDevices;cisstParameterTypes;cisst3DUserInterface")
