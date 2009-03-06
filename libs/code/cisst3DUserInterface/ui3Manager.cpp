@@ -62,11 +62,6 @@ ui3Manager::ui3Manager(const std::string & name):
     this->AddProvidedInterface("BehaviorsInterface");
     this->RightMasterPosition.AddReadCommandToTask(this, "BehaviorsInterface", "RightMasterPosition");
     this->LeftMasterPosition.AddReadCommandToTask(this, "BehaviorsInterface", "LeftMasterPosition");
-    
-    // add required interface to device to switch on/off master as mouse
-    mtsRequiredInterface * requiredInterface = this->AddRequiredInterface("MaM");
-    requiredInterface->AddEventHandlerVoid(&ui3Manager::EnterMaMModeEventHandler, this, "Enter");
-    requiredInterface->AddEventHandlerVoid(&ui3Manager::LeaveMaMModeEventHandler, this, "Leave");
 
     // add the UI manager to the task manager
     this->TaskManager = mtsTaskManager::GetInstance();
@@ -162,6 +157,11 @@ bool ui3Manager::SetupLeftMaster(mtsDevice * positionDevice, const std::string &
 
 bool ui3Manager::SetupMaM(mtsDevice * mamDevice, const std::string & mamInterface)
 {
+    // add required interface to device to switch on/off master as mouse
+    mtsRequiredInterface * requiredInterface = this->AddRequiredInterface("MaM");
+    requiredInterface->AddEventHandlerVoid(&ui3Manager::EnterMaMModeEventHandler, this, "Enter");
+    requiredInterface->AddEventHandlerVoid(&ui3Manager::LeaveMaMModeEventHandler, this, "Leave");
+
     // connect the left master device to the right master required interface
     this->TaskManager->Connect(this->GetName(), "MaM",
                                mamDevice->GetName(), mamInterface);
