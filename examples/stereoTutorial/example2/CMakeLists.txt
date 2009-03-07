@@ -14,16 +14,16 @@
 
 IF(CISST_SVL_HAS_X11 OR WIN32)
 
-    ADD_EXECUTABLE(stereoTutorialCameraViewer cameraviewer.cpp)
+    ADD_EXECUTABLE(stereoTutorialStereoCameraViewer stereocameraviewer.cpp)
 
     IF(UNIX)
         # Link each executable against the X11 library
         FIND_PACKAGE(X11 REQUIRED)
-        TARGET_LINK_LIBRARIES(stereoTutorialCameraViewer ${X11_LIBRARIES})
+        TARGET_LINK_LIBRARIES(stereoTutorialStereoCameraViewer ${X11_LIBRARIES})
 
         IF(CISST_SVL_HAS_LIBDC1394)
             # Also link the examples using live camera source against the DC1394 library if enabled
-            TARGET_LINK_LIBRARIES(stereoTutorialCameraViewer dc1394)
+            TARGET_LINK_LIBRARIES(stereoTutorialStereoCameraViewer dc1394)
         ENDIF(CISST_SVL_HAS_LIBDC1394)
     ENDIF(UNIX)
 
@@ -32,7 +32,7 @@ IF(CISST_SVL_HAS_X11 OR WIN32)
         FIND_PACKAGE(OpenCV)
         INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS})
         LINK_DIRECTORIES(${OpenCV_LINK_DIRECTORIES})
-        TARGET_LINK_LIBRARIES(stereoTutorialCameraViewer ${OpenCV_LIBRARIES})
+        TARGET_LINK_LIBRARIES(stereoTutorialStereoCameraViewer ${OpenCV_LIBRARIES})
     ENDIF(CISST_SVL_HAS_OPENCV)
 
     IF(WIN32)
@@ -41,7 +41,7 @@ IF(CISST_SVL_HAS_X11 OR WIN32)
             "${CMAKE_SHARED_LINKER_FLAGS} /NODEFAULTLIB:libc.lib /NODEFAULTLIB:libcmt.lib /NODEFAULTLIB:libcd.lib /NODEFAULTLIB:libcmtd.lib")
     ENDIF(WIN32)
 
-    CISST_REQUIRES("stereoTutorialCameraViewer" "cisstCommon;cisstVector;cisstOSAbstraction;cisstImage;cisstStereoVision")
+    CISST_REQUIRES("stereoTutorialStereoCameraViewer" "cisstCommon;cisstVector;cisstOSAbstraction;cisstImage;cisstStereoVision")
 
 ENDIF(CISST_SVL_HAS_X11 OR WIN32)
 
