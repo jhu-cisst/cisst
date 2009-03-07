@@ -57,11 +57,14 @@ public:
 
     virtual void Set2D(bool is2D);
 
+    virtual void SetClutched(bool clutched);
+
 protected:
     void UpdateColor(void);
 
     bool IsPressed;
     bool Is2D;
+    bool IsClutched;
 };
 
 

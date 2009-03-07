@@ -85,6 +85,7 @@ public:
     */
     virtual bool SetupRightMaster(mtsDevice * positionDevice, const std::string & positionInterface,
                                   mtsDevice * buttonDevice, const std::string & buttonInterface,
+                                  mtsDevice * clutchDevice, const std::string & clutchInterface,
                                   const vctFrm3 & transformation = vctFrm3::Identity(),
                                   double scale = 1.0);
                                  
@@ -322,6 +323,7 @@ private:
     // event handlers
     void RightMasterButtonEventHandler(const prmEventButton & buttonEvent);
     void LeftMasterButtonEventHandler(const prmEventButton & buttonEvent);
+    void RightMasterClutchEventHandler(const prmEventButton & buttonEvent);
     void EnterMaMModeEventHandler(void);
     void LeaveMaMModeEventHandler(void);
 
@@ -351,6 +353,9 @@ private:
 
     // positions in the state table, for behaviors to read
     mtsStateData<prmPositionCartesianGet> RightMasterPosition, LeftMasterPosition; 
+
+    // arm clutch
+    bool RightMasterClutch;
 
     // scale
     double RightScale;

@@ -44,6 +44,7 @@ ui3Manager::ui3Manager(const std::string & name):
     LeftButtonReleased(false),
     RightMasterExists(false),
     LeftMasterExists(false),
+    RightMasterClutch(false),
     MaM(true)
 {
     // add video source interfaces
@@ -83,6 +84,7 @@ ui3Manager::~ui3Manager()
 
 bool ui3Manager::SetupRightMaster(mtsDevice * positionDevice, const std::string & positionInterface,
                                   mtsDevice * buttonDevice, const std::string & buttonInterface,
+                                  mtsDevice * clutchDevice, const std::string & clutchInterface,
                                   const vctFrm3 & transformation, double scale)
 {
     // add required interface for master arms
@@ -94,6 +96,9 @@ bool ui3Manager::SetupRightMaster(mtsDevice * positionDevice, const std::string 
         // bound the mtsFunction to the command provided by the interface 
         requiredInterface->AddFunction("GetPositionCartesian", RightMasterGetCartesianPosition, mtsRequired);
     }
+    // connect the right master device to the right master required interface
+    this->TaskManager->Connect(this->GetName(), "RightMaster",
+                               positionDevice->GetName(), positionInterface);
 
     // setup right master button required interface 
     requiredInterface = this->AddRequiredInterface("RightMasterButton");
@@ -101,17 +106,27 @@ bool ui3Manager::SetupRightMaster(mtsDevice * positionDevice, const std::string 
         requiredInterface->AddEventHandlerWrite(&ui3Manager::RightMasterButtonEventHandler, this,
                                                 "Button", prmEventButton());
     }
+    // connect the right master button device to the right master button required interface
+    this->TaskManager->Connect(this->GetName(), "RightMasterButton",
+                               buttonDevice->GetName(), buttonInterface);
+
+    // setup right master clutch required interface 
+    requiredInterface = this->AddRequiredInterface("RightMasterClutch");
+    if (requiredInterface) {
+        requiredInterface->AddEventHandlerWrite(&ui3Manager::RightMasterClutchEventHandler, this,
+                                                "Button", prmEventButton());
+    }
+    // connect the right master clutch device to the right master clutch required interface
+    this->TaskManager->Connect(this->GetName(), "RightMasterClutch",
+                               clutchDevice->GetName(), clutchInterface);
 
     // connect the right master device to the right master required interface
     this->TaskManager->Connect(this->GetName(), "RightMaster",
                                positionDevice->GetName(), positionInterface);
+    
     // keep the transformation and scale
     this->RightTransform.Assign(transformation);
     this->RightScale = scale;
-
-    // connect the right master button device to the right master button required interface
-    this->TaskManager->Connect(this->GetName(), "RightMasterButton",
-                               buttonDevice->GetName(), buttonInterface);
 
     this->RightMasterExists = true;
     return true;
@@ -456,14 +471,18 @@ void ui3Manager::Run(void)
     this->ProcessQueuedEvents();
 
     // get cursor position
-    vctFrm3 rightCursorPosition;
+    static vctFrm3 rightCursorPosition;
     if (this->RightMasterExists) {
-        prmPositionCartesianGet rightArmPosition;
-        this->RightMasterGetCartesianPosition(rightArmPosition);
-        // apply transformation and scale
-        this->RightTransform.ApplyTo(rightArmPosition.Position(), rightCursorPosition);
-        rightCursorPosition.Translation().Multiply(this->RightScale);
-        this->RightMasterPosition.Data.Position().Assign(rightCursorPosition);
+        if (!this->RightMasterClutch) {
+            prmPositionCartesianGet rightArmPosition;
+            this->RightMasterGetCartesianPosition(rightArmPosition);
+            // apply transformation and scale
+            this->RightTransform.ApplyTo(rightArmPosition.Position(), rightCursorPosition);
+            rightCursorPosition.Translation().Multiply(this->RightScale);
+            this->RightMasterPosition.Data.Position().Assign(rightCursorPosition);
+        } else {
+            this->RightMasterPosition.Data.Position().Assign(rightCursorPosition);
+        }
     } else {
         // temporary fix for menu depth
         rightCursorPosition.Translation().Z() = -100.0;
@@ -551,6 +570,30 @@ void ui3Manager::LeftMasterButtonEventHandler(const prmEventButton & buttonEvent
     }
     if (this->ActiveBehavior) {
         this->ActiveBehavior->RightMasterButtonEvent(buttonEvent);
+    }
+}
+
+
+void ui3Manager::RightMasterClutchEventHandler(const prmEventButton & buttonEvent)
+{
+    static vctDouble3 initial, final;
+    static prmPositionCartesianGet rightArmPosition;
+    if (buttonEvent.Type() == prmEventButton::PRESSED) {
+        this->RightMasterClutch = true;
+        this->RightCursor->SetClutched(true);
+        this->RightMasterGetCartesianPosition(rightArmPosition);
+        // apply transformation and scale
+        this->RightTransform.ApplyTo(rightArmPosition.Position().Translation(), initial);
+        // initial.Multiply(this->RightScale);
+    } else {
+        this->RightMasterClutch = false;
+        this->RightCursor->SetClutched(false);
+        this->RightMasterGetCartesianPosition(rightArmPosition);
+        // apply transformation and scale
+        this->RightTransform.ApplyTo(rightArmPosition.Position().Translation(), final);
+        // final.Multiply(this->RightScale);
+        this->RightTransform.Translation().Add(initial);
+        this->RightTransform.Translation().Subtract(final);
     }
 }
 

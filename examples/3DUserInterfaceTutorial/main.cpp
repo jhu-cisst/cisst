@@ -142,6 +142,7 @@ int main()
     transform.Translation().Assign(+30.0, 0.0, -150.0); // recenter Omni's depth
     guiManager.SetupRightMaster(sensable, "Omni1",
                                 sensable, "Omni1Button1",
+                                sensable, "Omni1Button2",
                                 transform, 0.5 /* scale factor */);
 #endif
 #if (UI3_INPUT == UI3_OMNI1_OMNI2)
@@ -156,10 +157,12 @@ int main()
     transform.Rotation().From(vctAxAnRot3(vctDouble3(0.0, 1.0, 0.0), cmnPI));
     guiManager.SetupRightMaster(daVinci, "MTMR",
                                 daVinci, "MTMRButton",
+                                daVinci, "MTMRClutch",
                                 transform, 0.5 /* scale factor */);
     transform.Rotation().From(vctAxAnRot3(vctDouble3(0.0, 1.0, 0.0), cmnPI));
     guiManager.SetupLeftMaster(daVinci, "MTML",
                                daVinci, "MTMLButton",
+                               // daVinci, "MTMLClutch"
                                transform, 0.5 /* scale factor */);
     guiManager.SetupMaM(daVinci, "MastersAsMice");
 #endif

@@ -35,7 +35,8 @@ ui3Cursor::ui3Cursor(ui3Manager * manager):
     Mapper(0),
     Actor(0),
     IsPressed(false),
-    Is2D(false)
+    Is2D(false),
+    IsClutched(false)
 {}
 
 
@@ -79,6 +80,11 @@ bool ui3Cursor::CreateVTKObjects()
 void ui3Cursor::UpdateColor(void)
 {
     this->Lock();
+    if (this->IsClutched) {
+        this->Actor->GetProperty()->SetOpacity(0.5);
+    } else {
+        this->Actor->GetProperty()->SetOpacity(1.0);
+    }
     if (this->Is2D) {
         this->Source->SetRadius(1.0);
         if (this->IsPressed) {
@@ -108,5 +114,11 @@ void ui3Cursor::SetPressed(bool pressed)
 void ui3Cursor::Set2D(bool is2D)
 {
     this->Is2D = is2D;
+    this->UpdateColor();
+}
+
+void ui3Cursor::SetClutched(bool clutched)
+{
+    this->IsClutched = clutched;
     this->UpdateColor();
 }
