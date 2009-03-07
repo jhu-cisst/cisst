@@ -53,6 +53,7 @@ public:
         LinVideo4Linux2 = 2,
         LinLibDC1394    = 3,
         OpenCV          = 4,
+        MatroxImaging   = 5,
         NumberOfPlatformTypes
     };
 

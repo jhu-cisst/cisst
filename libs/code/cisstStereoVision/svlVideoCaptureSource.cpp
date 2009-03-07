@@ -58,6 +58,10 @@ http://www.cisst.org/cisst/license.txt.
 #include "vidOCVSource.h"
 #endif // CISST_SVL_HAS_OPENCV
 
+#if (CISST_SVL_HAS_MIL == ON)
+#include "vidMILDevice.h"
+#endif // CISST_SVL_HAS_MIL
+
 using namespace std;
 
 #define MAX_PROPERTIES_BUFFER_SIZE      65536
@@ -104,6 +108,9 @@ svlVideoCaptureSource::svlVideoCaptureSource(bool stereo) :
 #if (CISST_SVL_HAS_OPENCV == ON)
     NumberOfSupportedAPIs ++;
 #endif // CISST_SVL_HAS_OPENCV
+#if (CISST_SVL_HAS_MIL == ON)
+    NumberOfSupportedAPIs ++;
+#endif // CISST_SVL_HAS_MIL
 
     // Allocate capture API handler array
     DeviceObj = new CVideoCaptureSourceBase*[NumberOfSupportedAPIs];
@@ -355,6 +362,17 @@ int svlVideoCaptureSource::CreateCaptureAPIHandlers()
         }
         j ++;
 #endif // CISST_SVL_HAS_OPENCV
+#if (CISST_SVL_HAS_MIL == ON)
+        if (EnumeratedDevices[DeviceID[i]].platform == MatroxImaging) {
+            // getting API specific device and channel IDs
+            APIDeviceID[i] = EnumeratedDevices[DeviceID[i]].id;
+            APIChannelID[i] = chperapi[j];
+
+            API[i] = j;
+            chperapi[j] ++;
+        }
+        j ++;
+#endif // CISST_SVL_HAS_MIL
     }
 
     // Instantiate capture device handlers and
@@ -395,6 +413,13 @@ int svlVideoCaptureSource::CreateCaptureAPIHandlers()
     }
     j ++;
 #endif // CISST_SVL_HAS_OPENCV
+#if (CISST_SVL_HAS_MIL == ON)
+    if (chperapi[j] > 0) {
+        DeviceObj[j] = new CMILDevice();
+        if (DeviceObj[j]->SetStreamCount(chperapi[j]) != SVL_OK) goto labError;
+    }
+    j ++;
+#endif // CISST_SVL_HAS_MIL
 
     ret = SVL_OK;
 
@@ -909,6 +934,23 @@ int svlVideoCaptureSource::GetDeviceList(DeviceInfo **deviceinfolist, bool updat
         }
         j ++;
 #endif // CISST_SVL_HAS_OPENCV
+#if (CISST_SVL_HAS_MIL == ON)
+        apideviceinfos[j] = 0;
+        apidevicecounts[j] = 0;
+        CMILDevice *ocvdevice = new CMILDevice();
+        if (ocvdevice) {
+            apidevicecounts[j] = ocvdevice->GetDeviceList(&(apideviceinfos[j]));
+            if (apidevicecounts[j] > 0) {
+                apiformats[j] = new ImageFormat*[apidevicecounts[j]];
+                apiformatcounts[j] = new int[apidevicecounts[j]];
+                for (i = 0; i < apidevicecounts[j]; i ++)
+                    apiformatcounts[j][i] = ocvdevice->GetFormatList(i, &(apiformats[j][i]));
+            }
+            delete ocvdevice;
+            if (apidevicecounts[j] > 0) NumberOfEnumeratedDevices += apidevicecounts[j];
+        }
+        j ++;
+#endif // CISST_SVL_HAS_MIL
 
         if (NumberOfEnumeratedDevices > 0) {
             // Allocate the ONE device info array

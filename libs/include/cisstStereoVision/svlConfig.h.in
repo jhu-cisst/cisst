@@ -29,13 +29,16 @@ http://www.cisst.org/cisst/license.txt.
 #define CISST_SVL_HAS_OPENCV @CISST_SVL_HAS_OPENCV@
 
 // Support for Videre Design SVS
-#define CISST_SVL_HAS_OPENCV @CISST_SVL_HAS_OPENCV@
+#define CISST_SVL_HAS_SVS @CISST_SVL_HAS_SVS@
 
 // Support for libDC1394
 #define CISST_SVL_HAS_LIBDC1394 @CISST_SVL_HAS_LIBDC1394@
 
 // Support for video4linux2
 #define CISST_SVL_HAS_VIDEO4LINUX2 @CISST_SVL_HAS_VIDEO4LINUX2@
+
+// Support for video4linux2
+#define CISST_SVL_HAS_MIL @CISST_SVL_HAS_MIL@
 
 #endif // _svlConfig_h
 

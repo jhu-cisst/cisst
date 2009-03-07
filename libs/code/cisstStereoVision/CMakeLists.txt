@@ -138,6 +138,35 @@ IF(CISST_SVL_HAS_OPENCV)
 ENDIF(CISST_SVL_HAS_OPENCV)
 
 
+# TO DO: add windows support
+IF(UNIX)
+
+# Matrox Imaging Library
+OPTION(CISST_SVL_HAS_MIL "Compile MIL extensions" OFF)
+IF(CISST_SVL_HAS_MIL)
+  FIND_PATH(CISST_SVL_MIL_INCLUDE
+            NAMES mil.h
+            PATHS "/opt/matrox_imaging/mil/include"
+            )
+  INCLUDE_DIRECTORIES(${CISST_SVL_MIL_INCLUDE})
+  FIND_LIBRARY(CISST_SVL_MIL_LIBRARY
+               NAMES mil
+               PATHS "/opt/matrox_imaging/mil/lib"
+               )
+  LINK_LIBRARIES(${CISST_SVL_MIL_LIBRARY})
+
+  SET(SOURCE_FILES
+      ${SOURCE_FILES}
+      vidMILDevice.h        # private header
+      vidMILDevice.cpp
+      )
+ENDIF(CISST_SVL_HAS_MIL)
+
+ELSE(UNIX)
+  SET(CISST_SVL_HAS_MIL "OFF" CACHE INTERNAL "SVL Has MIL")
+ENDIF(UNIX)
+
+
 # Windows specific
 IF(WIN32)
   # generic windows specific files
