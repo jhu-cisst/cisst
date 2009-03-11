@@ -91,6 +91,7 @@ public:
                                  
     virtual bool SetupLeftMaster(mtsDevice * positionDevice, const std::string & positionInterface,
                                  mtsDevice * buttonDevice, const std::string & buttonInterface,
+                                 mtsDevice * clutchDevice, const std::string & clutchInterface,
                                  const vctFrm3 & transformation = vctFrm3::Identity(),
                                  double scale = 1.0);
                                  
@@ -137,29 +138,6 @@ public:
     virtual bool SaveConfiguration(const std::string & configFile) const;
 
     /*!
-     Returns the current position of the pointer.
-
-     \param inputid         Input device identifier
-     \return                3D Cartesian coordinates of the pointer in camera frame
-    */
-    vct3 GetPointerPosition(unsigned int inputId) const;
-
-    /*!
-     Returns the current position of the cursor.
-
-     \note
-     The cursor is usually rendered at the same position as the pointer, however
-     the UI manager or the behavior are allowed to remap cursor rendering coordinates
-     for special scenarios.
-     For the sake of simplicity, when in tele-operated mode, theis function returns
-     the pointer positions although the cursor will not be rendered by default.
-
-     \param inputid         Input device identifier
-     \return                3D Cartesian coordinates of the cursor in camera frame
-    */
-    vct3 GetCursorPosition(unsigned int inputId) const;
-
-    /*!
      Adds a behavior to the behavior list. The corresponding icon file has to
      contain images for all behavior states on a single bitmap.
      The method also sets the ui3BehaviorBase::Manager and the
@@ -188,13 +166,6 @@ public:
      \return                Success flag: true=success, false=error
     */
     virtual void Startup(void);
-
-    /*!
-     Terminates the running user interface main loop started earlier by calling the
-     ui3Manager::Start method. It first stops the executing thread then releases
-     the registered behaviors.
-    */
-    // virtual void Stop(void);
 
     /*!
      Called by the main user interface thread. Should not be called directly by
@@ -258,6 +229,10 @@ protected:
         std::string name;
         ui3VTKRenderer* renderer;
         int streamindex;
+  
+
+
+
         unsigned int streamchannel;
         ui3ImagePlane* imageplane;
     } _RendererStruct;
@@ -324,6 +299,7 @@ private:
     void RightMasterButtonEventHandler(const prmEventButton & buttonEvent);
     void LeftMasterButtonEventHandler(const prmEventButton & buttonEvent);
     void RightMasterClutchEventHandler(const prmEventButton & buttonEvent);
+    void LeftMasterClutchEventHandler(const prmEventButton & buttonEvent);
     void EnterMaMModeEventHandler(void);
     void LeaveMaMModeEventHandler(void);
 
@@ -356,6 +332,7 @@ private:
 
     // arm clutch
     bool RightMasterClutch;
+    bool LeftMasterClutch;
 
     // scale
     double RightScale;

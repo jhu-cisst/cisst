@@ -27,7 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 #define UI3_DAVINCI 3
 
 // change this based on your configuration
-#define UI3_INPUT UI3_DAVINCI
+#define UI3_INPUT UI3_OMNI1_OMNI2
 
 #include <cisstOSAbstraction/osaThreadedLogFile.h>
 #include <cisstOSAbstraction/osaSleep.h>
@@ -139,16 +139,17 @@ int main()
     
 #if (UI3_INPUT == UI3_OMNI1) || (UI3_INPUT == UI3_OMNI1_OMNI2)
     vctFrm3 transform;
-    transform.Translation().Assign(+30.0, 0.0, -150.0); // recenter Omni's depth
+    transform.Translation().Assign(+30.0, 0.0, -150.0); // recenter Omni's depth (right)
     guiManager.SetupRightMaster(sensable, "Omni1",
                                 sensable, "Omni1Button1",
                                 sensable, "Omni1Button2",
                                 transform, 0.5 /* scale factor */);
 #endif
 #if (UI3_INPUT == UI3_OMNI1_OMNI2)
-    transform.Translation().Assign(-30.0, 0.0, -150.0); // recenter Omni's depth
+    transform.Translation().Assign(-30.0, 0.0, -150.0); // recenter Omni's depth (left)
     guiManager.SetupLeftMaster(sensable, "Omni2",
                                sensable, "Omni2Button1",
+                               sensable, "Omni2Button2",
                                transform, 0.5 /* scale factor */);
 #endif
 
@@ -162,7 +163,7 @@ int main()
     transform.Rotation().From(vctAxAnRot3(vctDouble3(0.0, 1.0, 0.0), cmnPI));
     guiManager.SetupLeftMaster(daVinci, "MTML",
                                daVinci, "MTMLButton",
-                               // daVinci, "MTMLClutch"
+                               daVinci, "MTMLClutch"
                                transform, 0.5 /* scale factor */);
     guiManager.SetupMaM(daVinci, "MastersAsMice");
 #endif
