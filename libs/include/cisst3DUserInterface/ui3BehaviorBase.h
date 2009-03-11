@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: ui3BehaviorBase.h,v 1.15 2009/02/24 02:43:13 anton Exp $
+  $Id$
 
   Author(s):	Balazs Vagvolgyi, Simon DiMaio, Anton Deguet
   Created on:	2008-05-23

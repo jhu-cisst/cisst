@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: ui3BehaviorBase.cpp,v 1.11 2009/02/24 02:43:13 anton Exp $
+  $Id$
 
   Author(s):	Balazs Vagvolgyi, Simon DiMaio, Anton Deguet
   Created on:	2008-06-10
@@ -246,3 +246,4 @@ void ui3BehaviorBase::LeftMasterButtonCallback(const prmEventButton & event)
     CMN_LOG_CLASS(6) << "LeftMasterButtonCallback not overloaded for \""
                      << this->GetName() << "\"" << std::endl;
 }
+

@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: ui3Cursor.cpp,v 1.8 2009/02/23 16:55:06 anton Exp $
+  $Id$
 
   Author(s):	Anton Deguet
   Created on:	2009-02-04
@@ -122,3 +122,4 @@ void ui3Cursor::SetClutched(bool clutched)
     this->IsClutched = clutched;
     this->UpdateColor();
 }
+

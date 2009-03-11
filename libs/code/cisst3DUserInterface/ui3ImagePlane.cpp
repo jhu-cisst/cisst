@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: $
+  $Id$
 
   Author(s):	Balazs Vagvolgyi
   Created on:	2009-03-02
@@ -254,3 +254,4 @@ void ui3ImagePlane::SetImage(svlSampleImageBase* image, unsigned int channel)
         this->ImageData->Modified();
     }
 }
+

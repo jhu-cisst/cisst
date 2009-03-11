@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: ui3MenuButton.h,v 1.2 2009/02/17 04:14:11 anton Exp $
+  $Id$
 
   Author(s):	Balazs Vagvolgyi, Simon DiMaio, Anton Deguet
   Created on:	2008-05-23
@@ -222,3 +222,4 @@ protected:
 
 
 #endif // _ui3MenuButton_h
+

@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: ui3Manager.cpp,v 1.17 2009/02/24 14:58:26 anton Exp $
+  $Id$
 
   Author(s):	Balazs Vagvolgyi, Simon DiMaio, Anton Deguet
   Created on:	2008-05-23
@@ -678,3 +678,4 @@ void ui3Manager::LeaveMaMModeEventHandler(void)
     this->MaM = false;
     CMN_LOG_CLASS(9) << "LeaveMaMMode" << std::endl;
 }
+

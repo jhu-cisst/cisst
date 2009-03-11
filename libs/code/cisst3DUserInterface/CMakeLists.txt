@@ -1,5 +1,5 @@
 #
-# $Id: CMakeLists.txt,v 1.6 2009/02/17 22:00:10 anton Exp $
+# $Id$
 #
 # CMakeLists for cisst3DUserInterface
 #

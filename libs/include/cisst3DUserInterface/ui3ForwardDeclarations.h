@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: ui3ForwardDeclarations.h,v 1.6 2009/02/16 22:36:59 anton Exp $
+  $Id$
 
   Author(s):	Balazs Vagvolgyi, Simon DiMaio, Anton Deguet
   Created on:	2008-05-23

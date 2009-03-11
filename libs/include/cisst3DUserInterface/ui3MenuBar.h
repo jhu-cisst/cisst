@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: ui3MenuBar.h,v 1.11 2009/02/23 16:55:06 anton Exp $
+  $Id$
 
   Author(s):	Balazs Vagvolgyi, Simon DiMaio, Anton Deguet
   Created on:	2008-05-23
@@ -256,41 +256,3 @@ CMN_DECLARE_SERVICES_INSTANTIATION(ui3MenuBar);
 
 #endif // ui3MenuBar_h
 
-
-// ****************************************************************************
-//                              Change History
-// ****************************************************************************
-//
-//  $Log: ui3MenuBar.h,v $
-//  Revision 1.11  2009/02/23 16:55:06  anton
-//  Work in progress to support VTK scene locks.  Compiles, doesn't run.
-//
-//  Revision 1.10  2009/02/17 22:00:10  anton
-//  Moved more code to base class ui3VisibleObject
-//
-//  Revision 1.9  2009/02/17 04:14:11  anton
-//  New VTK framwork almost working.
-//
-//  Revision 1.8  2009/02/16 22:36:59  anton
-//  Major update for better VTK support, doesn't work yet
-//
-//  Revision 1.7  2009/02/12 15:33:12  anton
-//  ui3MenuBar: minor bug fixed so cursor changes when over menu (was working only over buttons)
-//
-//  Revision 1.6  2009/02/12 02:49:02  anton
-//  Working menus and buttons.  Messy.
-//
-//  Revision 1.5  2009/02/10 20:51:32  anton
-//  Cursor now changes when clicked, menu bar render code added, uses cursor depth to render.
-//
-//  Revision 1.4  2009/02/10 15:57:17  anton
-//  Removed CVS log at end of file, added scale and transformation between master arm and cursor
-//
-//  Revision 1.3  2008/06/18 22:55:59  vagvoba
-//  cisst3DUserInterface: include files fixed, the code now compiles
-//
-//  Revision 1.2  2008/06/10 20:34:34  anton
-//  cisst3DUserInterface: Added CMakelists.txt, added standard headers/footers,
-//  changed prefix from saw to ui3
-//
-// ****************************************************************************
