@@ -35,8 +35,8 @@ ui3BehaviorBase::ui3BehaviorBase(const std::string & name,
                                  ui3Manager * manager):
     mtsTaskContinuous(name, 500), /* all behaviors have a state table of 500, ui3Manager needs at least 3 */
     MenuBar(0),
-    Manager(manager),
-    State(Background)
+    State(Background),
+    Manager(manager)
 {
 }
 
@@ -83,12 +83,12 @@ ui3SceneManager * ui3BehaviorBase::GetSceneManager(void)
     return this->GetManager()->GetSceneManager();
 }
 
-void ui3BehaviorBase::Configure(const std::string & configFile)
+void ui3BehaviorBase::Configure(const std::string & CMN_UNUSED(configFile))
 {
     CMN_LOG_CLASS(2) << "Configure: use default configure from base class, doing nothing" << std::endl;
 }
 
-bool ui3BehaviorBase::SaveConfiguration(const std::string& configFile)
+bool ui3BehaviorBase::SaveConfiguration(const std::string & CMN_UNUSED(configFile))
 {
     CMN_LOG_CLASS(2) << "SaveConfiguration: use default save configuration from base class, doing nothing" << std::endl;
     return true;
@@ -160,7 +160,7 @@ void ui3BehaviorBase::SetState(const StateType & newState)
     }
 }
 
-void ui3BehaviorBase::OnStreamSample(svlSample* sample, int streamindex)
+void ui3BehaviorBase::OnStreamSample(svlSample * CMN_UNUSED(sample), int CMN_UNUSED(streamindex))
 {
     // Default implementation does nothing
 }
@@ -219,13 +219,13 @@ svlFilterBase* ui3BehaviorBase::GetStreamSamplerFilter(const std::string & strea
     return dynamic_cast<svlFilterBase*>(Streams[streamindex]);
 }
 
-void ui3BehaviorBase::RightMasterButtonCallback(const prmEventButton & event)
+void ui3BehaviorBase::RightMasterButtonCallback(const prmEventButton & CMN_UNUSED(event))
 {
     CMN_LOG_CLASS(6) << "RightMasterButtonCallback not overloaded for \""
                      << this->GetName() << "\"" << std::endl;
 }
 
-void ui3BehaviorBase::LeftMasterButtonCallback(const prmEventButton & event)
+void ui3BehaviorBase::LeftMasterButtonCallback(const prmEventButton & CMN_UNUSED(event))
 {
     CMN_LOG_CLASS(6) << "LeftMasterButtonCallback not overloaded for \""
                      << this->GetName() << "\"" << std::endl;

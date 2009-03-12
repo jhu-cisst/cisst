@@ -42,11 +42,11 @@ ui3Manager::ui3Manager(const std::string & name):
     RightButtonReleased(false),
     LeftButtonPressed(false),
     LeftButtonReleased(false),
-    RightMasterExists(false),
-    LeftMasterExists(false),
+    MaM(true),
     RightMasterClutch(false),
     LeftMasterClutch(false),
-    MaM(true)
+    RightMasterExists(false),
+    LeftMasterExists(false)
 {
     // add video source interfaces
     AddStream(svlTypeImageRGB,       "MonoVideo");

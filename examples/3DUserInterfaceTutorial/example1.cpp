@@ -76,8 +76,8 @@ CMN_IMPLEMENT_SERVICES(BehaviorVisibleObject);
 
 CExampleBehavior::CExampleBehavior(const std::string & name, ui3Manager * manager):
     ui3BehaviorBase(std::string("CExampleBehavior::") + name, 0),
-    VisibleObject(0),
-    Following(false)
+    Following(false),
+    VisibleObject(0)
 {
     this->Position.X() = 0.0;
     this->Position.Y() = 0.0;
@@ -161,12 +161,12 @@ bool CExampleBehavior::RunNoInput()
     return true;
 }
 
-void CExampleBehavior::Configure(const std::string & configFile)
+void CExampleBehavior::Configure(const std::string & CMN_UNUSED(configFile))
 {
     // load settings
 }
 
-bool CExampleBehavior::SaveConfiguration(const std::string & configFile)
+bool CExampleBehavior::SaveConfiguration(const std::string & CMN_UNUSED(configFile))
 {
     // save settings
     return true;
