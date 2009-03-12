@@ -152,9 +152,9 @@ public:
      \param iconfile        Image file storing all the behavior states on a singe bitmap.
      \return                Unique handle assigned to the behavior
     */
-    virtual ui3Handle AddBehavior(ui3BehaviorBase * behavior,
-                                  unsigned int position,
-                                  const std::string & iconfile);
+    virtual bool AddBehavior(ui3BehaviorBase * behavior,
+                             unsigned int position,
+                             const std::string & iconfile);
 
     /*!
      Initializes all registered behaviors, starts the user interface thread,

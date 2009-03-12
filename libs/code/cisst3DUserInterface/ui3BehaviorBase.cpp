@@ -94,22 +94,6 @@ bool ui3BehaviorBase::SaveConfiguration(const std::string& configFile)
     return true;
 }
 
-void ui3BehaviorBase::RegisterCallback(ui3Handle ctrlhandle, ControlCallbackType method)
-{
-}
-
-void ui3BehaviorBase::UnregisterCallback(ui3Handle ctrlhandle)
-{
-}
-
-void ui3BehaviorBase::SubscribeInputCallback(unsigned int inputid)
-{
-}
-
-void ui3BehaviorBase::UnsubscribeInputCallback(unsigned int inputid)
-{
-}
-
 void ui3BehaviorBase::Run(void)
 {
     this->ProcessQueuedEvents();

@@ -269,9 +269,9 @@ bool ui3Manager::SaveConfiguration(const std::string & configFile) const
 }
 
 
-ui3Handle ui3Manager::AddBehavior(ui3BehaviorBase * behavior,
-                                  unsigned int position,
-                                  const std::string & iconFile)
+bool ui3Manager::AddBehavior(ui3BehaviorBase * behavior,
+                             unsigned int position,
+                             const std::string & iconFile)
 {
     // setup UI manager pointer in newly add behavior
     behavior->Manager = this;
@@ -312,7 +312,7 @@ ui3Handle ui3Manager::AddBehavior(ui3BehaviorBase * behavior,
                                   iconFile,
                                   &ui3BehaviorBase::SetStateForeground,
                                   behavior);
-    return 0;
+    return true;  // to fix, Anton
 }
 
 

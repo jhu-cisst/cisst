@@ -52,21 +52,5 @@ class ui3MenuBar;
 class ui3MenuButton;
 class ui3Cursor;
 
-/*!
- Typedef for control handles to identify SAW objects.
-*/
-typedef unsigned int ui3Handle;
-/*!
- Static variable to create unique handles.
-*/
-static ui3Handle HandleCounter = 1;
-/*!
- Creates a new handle unique for the application.
- 
- \return                    Newly created unique handle
-*/
-static ui3Handle GetUniqueHandle() { return HandleCounter++; }
-
-
 #endif // _ui3ForwardDeclarations_h
 

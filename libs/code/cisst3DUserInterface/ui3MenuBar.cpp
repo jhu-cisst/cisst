@@ -41,7 +41,6 @@ ui3MenuBar::ui3MenuBar(ui3Manager * manager):
     ShowState(false),
     ButtonWidth(10.0),
     ButtonHeight(10.0),
-    AssemblyHandle(0),
     Background(0),
     Mapper(0),
     Actor(0),
@@ -127,12 +126,6 @@ vtkProp3D * ui3MenuBar::GetVTKProp(void)
 }
 
 
-ui3Handle ui3MenuBar::GetAssemblyHandle()
-{
-    return AssemblyHandle;
-}
-
-
 bool ui3MenuBar::IsPointOnMenuBar(const vctDouble3 & cursor3D, ButtonPointer & button)
 {
     button = 0;
@@ -163,63 +156,15 @@ bool ui3MenuBar::IsPointOnMenuBar(const vctDouble3 & cursor3D, ButtonPointer & b
 }
 
 
-ui3Handle ui3MenuBar::GetButtonAt(vct3 point)
+bool ui3MenuBar::AddCheckButton(const std::string& description, int position, const std::string& iconFile, bool state)
 {
     return 0;
 }
 
 
-ui3Handle ui3MenuBar::AddCheckButton(const std::string& description, int position, const std::string& iconFile, bool state)
+bool ui3MenuBar::AddSpacer(int position)
 {
     return 0;
-}
-
-
-ui3Handle ui3MenuBar::AddSpacer(int position)
-{
-    return 0;
-}
-
-void ui3MenuBar::Remove(ui3Handle handle)
-{
-}
-
-
-void ui3MenuBar::SetCheck(ui3Handle handle, bool state)
-{
-}
-
-
-void ui3MenuBar::SetPush(ui3Handle handle, bool state)
-{
-}
-
-void ui3MenuBar::SetHighlight(ui3Handle handle, bool state)
-{
-}
-
-void ui3MenuBar::SetEnable(ui3Handle handle, bool state)
-{
-}
-
-bool ui3MenuBar::GetCheck(ui3Handle handle)
-{
-    return false;
-}
-
-bool ui3MenuBar::GetPush(ui3Handle handle)
-{
-    return false;
-}
-
-bool ui3MenuBar::GetHighlight(ui3Handle handle)
-{
-    return false;
-}
-
-bool ui3MenuBar::GetEnable(ui3Handle handle)
-{
-    return false;
 }
 
 

@@ -181,39 +181,6 @@ protected:
      Stores user interface buttons.
     */
     ui3MenuBar * MenuBar;
-    /*!
-     Maps control handles to callback methods.
-    */
-    std::map<ui3Handle, ControlCallbackType> CallbackMap;
-
-    /*!
-     Assigns a callback method for the specified control handle.
-
-     \param ctrlhandle          Handle of the control (button) on the menu bar
-     \param method              Specifies the vertical screen coordinate
-    */
-    virtual void RegisterCallback(ui3Handle ctrlhandle, ControlCallbackType method);
-
-    /*!
-     Removes a callback method association for the specified control handle.
-
-     \param ctrlhandle          Handle of the control (button) on the menu bar
-    */
-    virtual void UnregisterCallback(ui3Handle ctrlhandle);
-
-    /*!
-     Enables input action callbacks or the specified input device.
-
-     \param inputid             Input device identifier
-    */
-    virtual void SubscribeInputCallback(unsigned int inputid);
-
-    /*!
-     Disables input action callbacks for the specified input device.
-
-     \param inputid             Input device identifier
-    */
-    virtual void UnsubscribeInputCallback(unsigned int inputid);
 
     /*! Method called when this behavior becomes active, i.e. the user selected it from the previous menu */
     void SetStateForeground(void);

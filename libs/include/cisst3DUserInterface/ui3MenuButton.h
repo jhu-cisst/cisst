@@ -57,8 +57,6 @@ public:
         PushState(false),
         HighlightState(false),
         EnableState(false),
-        Handle(0),
-        ActorHandle(0),
         BMPReader(0),
         Texture(0),
         PlaneSource(0),
@@ -91,20 +89,6 @@ public:
     bool CreateVTKObjects(void);
 
     vtkProp3D * GetVTKProp(void);
-
-    /*!
-     Returns the control handle of the button.
-
-     \return                Control handle
-    */
-    virtual ui3Handle GetHandle();
-
-    /*!
-     Returns the handle of the VTK actor created for the button.
-
-     \return                VTK actor handle
-    */
-    virtual ui3Handle GetActorHandle();
 
     /*!
      Sets the checked state of the check button.
@@ -195,14 +179,6 @@ protected:
      Flag indicates enable state: true=enabled, false=disabled.
     */
     bool EnableState;
-    /*!
-     Control handle of the button.
-    */
-    ui3Handle Handle;
-    /*!
-     Handle of the VTK actor created for the button.
-    */
-    ui3Handle ActorHandle;
 
     vtkBMPReader * BMPReader;
     vtkTexture * Texture;

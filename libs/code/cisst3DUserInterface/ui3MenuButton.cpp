@@ -80,16 +80,6 @@ vtkProp3D * ui3MenuButton::GetVTKProp(void)
 }
 
 
-ui3Handle ui3MenuButton::GetHandle()
-{
-    return Handle;
-}
-
-ui3Handle ui3MenuButton::GetActorHandle()
-{
-    return ActorHandle;
-}
-
 void ui3MenuButton::SetCheck(bool state)
 {
 }
