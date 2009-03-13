@@ -59,6 +59,8 @@ devLoPoMoCo::devLoPoMoCo(const std::string& deviceName, unsigned int numberOfBoa
 	AddCommandVoid(&devLoPoMoCo::LoadMotorVoltages, this, "WriteInterface", "LoadMotorVoltages");
 	AddCommandVoid(&devLoPoMoCo::LoadCurrentLimits, this, "WriteInterface", "LoadCurrentLimits");
 	AddCommandVoid(&devLoPoMoCo::LoadMotorVoltagesCurrentLimits, this, "WriteInterface", "LoadMotorVoltagesCurrentLimits");
+	AddCommandVoid(&devLoPoMoCo::EnableAll, this, "WriteInterface", "EnableAll");
+	AddCommandVoid(&devLoPoMoCo::DisableAll, this, "WriteInterface", "DisableAll");
 
 	// read commands
 	AddCommandRead(&devLoPoMoCo::GetPositions, this, "WriteInterface", "GetPositions");
@@ -71,13 +73,10 @@ devLoPoMoCo::devLoPoMoCo(const std::string& deviceName, unsigned int numberOfBoa
 	// method , object carrying the method , interface name , command name and argument prototype
 	AddCommandWrite(&devLoPoMoCo::SetMotorVoltages, this, "WriteInterface", "SetMotorVoltages", mtsShortVec(numberOfAxes));
 	AddCommandWrite(&devLoPoMoCo::SetCurrentLimits, this, "WriteInterface", "SetCurrentLimits", mtsShortVec(numberOfAxes));
-    AddCommandWrite(&devLoPoMoCo::SetDigitalOutput, this, "WriteInterface", "SetDigitalOutput", mtsIntVec(4)); 
+    AddCommandWrite(&devLoPoMoCo::SetDigitalOutput, this, "WriteInterface", "SetDigitalOutput", mtsIntVec(4));
 
-#if 0
-	AddCommandWrite(&devLoPoMoCo::Enable, this, "WriteInterface", "Enable", cmnShort);
-	AddCommandWrite(&devLoPoMoCo::Disable, this, "WriteInterface", "Disable", cmnShort);
-#endif
-
+	AddCommandWrite(&devLoPoMoCo::Enable, this, "WriteInterface", "Enable", cmnShort());
+	AddCommandWrite(&devLoPoMoCo::Disable, this, "WriteInterface", "Disable", cmnShort());
 	AddCommandWrite(&devLoPoMoCo::ResetEncoders, this, "WriteInterface", "ResetEncoders", cmnShort());
 	AddCommandWrite(&devLoPoMoCo::SetPositions, this, "WriteInterface", "SetPositions", mtsLongVec(numberOfAxes));
 
@@ -175,9 +174,9 @@ void devLoPoMoCo::ConfigureOneBoard(const std::string& filename, const int board
 	// version 1 boards return 0xa0a
 	// some Board[boardIndex] with 10K50E also return 0xc0c
 	CMN_LOG_CLASS(3) << "Version: " << version << std::endl;
-	if (!( ( version & 0xFF0F )== 0xb0b || (version == 0xa0a) || (version == 0xc0c) )) { 
+	if (!( ( version & 0xFF0F )== 0xb0b || (version == 0xa0a) || (version == 0xc0c) )) {
         CMN_LOG_CLASS(3) << "WARNING: Could not find a LoPoMoCo board at address (decimal) " << BaseAddress[boardIndex] << std::endl;
-        CMN_LOG_CLASS(3) << "Actually, this just means that the version number does not match" <<std::endl; 
+        CMN_LOG_CLASS(3) << "Actually, this just means that the version number does not match" <<std::endl;
     }
 
 	//unsigned short listEncoders[] = {1, 1, 1, 1};
@@ -284,7 +283,6 @@ void devLoPoMoCo::Configure(const std::string& filename){ //, const std::string 
 	}
 }
 
-#if 0
 /*! axisIndex is a flat index into the composite device with multiple boards,
  *  this axisIndex is mapped onto the correct board index and axis index within that board
  *  action taken on "Board" is always with respect to a 4 axes board
@@ -313,7 +311,6 @@ void devLoPoMoCo::Disable(const cmnShort & axisIndex) {
 		<< StartAxis[boardIndex]<< ", " << EndAxis[boardIndex] << "]" << std::endl;
 	}
 }
-#endif
 
 void devLoPoMoCo::ResetEncoders(const cmnShort & axisIndex) {
 	unsigned short listEncoders[] = { 0, 0, 0, 0 };
@@ -330,6 +327,18 @@ void devLoPoMoCo::ResetEncoders(const cmnShort & axisIndex) {
 		CMN_LOG_CLASS(5) << "Resetting encoder " << axisIndex.Data
 		<< " failed since the index is out of range ["
 		<< StartAxis[boardIndex] << ", " << EndAxis[boardIndex] << "]" << std::endl;
+	}
+}
+
+void devLoPoMoCo::EnableAll(void) {
+	for (int boardIndex = 0; boardIndex < numberOfBoards; boardIndex++) {
+		Board[boardIndex]->EnableAllMotors();
+	}
+}
+
+void devLoPoMoCo::DisableAll(void) {
+	for (int boardIndex = 0; boardIndex < numberOfBoards; boardIndex++) {
+		Board[boardIndex]->DisableAllMotors();
 	}
 }
 
@@ -394,29 +403,29 @@ void devLoPoMoCo::GetMotorCurrents(mtsShortVec & MotorCurrents) const {
 			for (unsigned int axis = 0; axis <= MaxAxis[boardIndex]; axis++) {
 				MotorCurrents[axis + StartAxis[boardIndex]] = Board[boardIndex]->GetADFIFO();
 			}
-		} else { 
+		} else {
             for (unsigned int axis = 0; axis <= MaxAxis[boardIndex]; axis++)
                 MotorCurrents[axis + StartAxis[boardIndex]] = 0x8000;
-        } 
+        }
 	}
 }
- 
+
 void devLoPoMoCo::GetPotFeedbacks(mtsShortVec & PotFeedbacks) const {
 	bool ADInterruptPending = false;
 	for (int boardIndex = 0; boardIndex < numberOfBoards; boardIndex++) {
 		Board[boardIndex]->SetPotFeedbackMaxIndex(MaxAxis[boardIndex]);
-        // Do start conversion and getting raw pot value back-to-back  
-		Board[boardIndex]->StartConvPotFeedback();        
+        // Do start conversion and getting raw pot value back-to-back
+		Board[boardIndex]->StartConvPotFeedback();
 		//ADInterruptPending = Board[boardIndex]->PollADInterruptPending(20); //5 * MaxAxis[boardIndex]);
         ADInterruptPending = Board[boardIndex]->PollADInterruptPending(10 * MaxAxis[boardIndex]);
 		if (ADInterruptPending == true) {
 			for (unsigned int axis = 0; axis <= MaxAxis[boardIndex]; axis++) {
 				PotFeedbacks[axis + StartAxis[boardIndex]] = Board[boardIndex]->GetADFIFO();
 			}
-		} else { 
+		} else {
             for (unsigned int axis = 0; axis <= MaxAxis[boardIndex]; axis++)
                 PotFeedbacks[axis + StartAxis[boardIndex]] = 0x8000;
-        } 
+        }
 	}
 }
 
