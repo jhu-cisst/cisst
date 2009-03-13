@@ -185,3 +185,4 @@ void CExampleBehavior::RightMasterButtonCallback(const prmEventButton & event)
         this->Following = false;
     }
 }
+

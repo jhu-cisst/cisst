@@ -51,3 +51,4 @@ protected:
 private:
     ui3VisibleObject * VisibleObject;
 };
+

@@ -217,6 +217,7 @@ bool ui3Manager::AddRenderer(unsigned int width, unsigned int height, int x, int
     renderer->viewangle = viewangle;
     renderer->name = renderername;
     renderer->renderer = 0;
+    renderer->rendertarget = 0;
     renderer->streamindex = -1;
     renderer->streamchannel = 0;
     renderer->imageplane = 0;
@@ -225,6 +226,24 @@ bool ui3Manager::AddRenderer(unsigned int width, unsigned int height, int x, int
     Renderers[rendererindex] = renderer;
 
     return true;
+}
+
+
+bool ui3Manager::SetRenderTargetToRenderer(const std::string & renderername, svlRenderTargetBase* rendertarget)
+{
+    if (rendertarget) {
+        for (unsigned int i = 0; i < Renderers.size(); i ++) {
+            if (Renderers[i] &&
+                Renderers[i]->name == renderername &&
+                Renderers[i]->width == rendertarget->GetWidth() &&
+                Renderers[i]->height == rendertarget->GetHeight()) {
+
+                Renderers[i]->rendertarget = rendertarget;
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 
@@ -333,6 +352,21 @@ void ui3Manager::Startup(void)
                                                     Renderers[i]->viewangle,
                                                     Renderers[i]->cameraframe);
         CMN_ASSERT(Renderers[i]->renderer);
+
+        if (Renderers[i]->rendertarget) {
+            // TO DO:
+            // - Setup VTK to render into an off-screen buffer
+            // - After each completed renderings set the off-screen
+            //   buffer to the external render target
+
+            unsigned char* tempimage = new unsigned char[Renderers[i]->width*Renderers[i]->height*3];
+            memset(tempimage, 0, Renderers[i]->width*Renderers[i]->height/2*3);
+            memset(tempimage+Renderers[i]->width*Renderers[i]->height/2*3, 64, Renderers[i]->width*Renderers[i]->height/2*3);
+
+            Renderers[i]->rendertarget->SetImage(tempimage);
+
+            delete [] tempimage;
+        }
 
         // Add live video background if available
         if (Renderers[i]->streamindex >= 0) {

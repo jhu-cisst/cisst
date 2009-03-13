@@ -206,6 +206,15 @@ int svlVideoCaptureSource::Initialize(svlSample* inputdata)
             }
 #endif // CISST_SVL_HAS_DIRECTSHOW
         }
+        else if (platform == MatroxImaging) {
+#if (CISST_SVL_HAS_MIL == ON)
+            // Check if Matrox device supports capture
+            if (dynamic_cast<CMILDevice*>(DeviceObj[API[i]])->EnableCapture(APIDeviceID[i]) == false) {
+                ret = SVL_VCS_UNABLE_TO_OPEN;
+                goto labError;
+            }
+#endif // CISST_SVL_HAS_MIL
+        }
         else {
             if (Format[i]) DeviceObj[API[i]]->SetFormat(Format[i][0], APIChannelID[i]);
         }
@@ -285,7 +294,13 @@ int svlVideoCaptureSource::Release()
 {
     for (unsigned int i = 0; i < NumberOfSupportedAPIs; i ++) {
         if (DeviceObj[i]) {
-            delete DeviceObj[i];
+            if (DeviceObj[i]->GetPlatformType() == MatroxImaging) {
+                // Object is a singleton, should not be deleted
+                dynamic_cast<CMILDevice*>(DeviceObj[i])->Release();
+            }
+            else {
+                delete DeviceObj[i];
+            }
             DeviceObj[i] = 0;
         }
     }
@@ -415,7 +430,7 @@ int svlVideoCaptureSource::CreateCaptureAPIHandlers()
 #endif // CISST_SVL_HAS_OPENCV
 #if (CISST_SVL_HAS_MIL == ON)
     if (chperapi[j] > 0) {
-        DeviceObj[j] = new CMILDevice();
+        DeviceObj[j] = CMILDevice::GetInstance();
         if (DeviceObj[j]->SetStreamCount(chperapi[j]) != SVL_OK) goto labError;
     }
     j ++;
@@ -937,16 +952,15 @@ int svlVideoCaptureSource::GetDeviceList(DeviceInfo **deviceinfolist, bool updat
 #if (CISST_SVL_HAS_MIL == ON)
         apideviceinfos[j] = 0;
         apidevicecounts[j] = 0;
-        CMILDevice *ocvdevice = new CMILDevice();
-        if (ocvdevice) {
-            apidevicecounts[j] = ocvdevice->GetDeviceList(&(apideviceinfos[j]));
+        CMILDevice *mildevice = CMILDevice::GetInstance();
+        if (mildevice) {
+            apidevicecounts[j] = mildevice->GetDeviceList(&(apideviceinfos[j]));
             if (apidevicecounts[j] > 0) {
                 apiformats[j] = new ImageFormat*[apidevicecounts[j]];
                 apiformatcounts[j] = new int[apidevicecounts[j]];
                 for (i = 0; i < apidevicecounts[j]; i ++)
-                    apiformatcounts[j][i] = ocvdevice->GetFormatList(i, &(apiformats[j][i]));
+                    apiformatcounts[j][i] = mildevice->GetFormatList(i, &(apiformats[j][i]));
             }
-            delete ocvdevice;
             if (apidevicecounts[j] > 0) NumberOfEnumeratedDevices += apidevicecounts[j];
         }
         j ++;

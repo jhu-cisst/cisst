@@ -46,4 +46,16 @@ target_link_libraries(${PROJECT_NAME}
                       ${daVinci_LIBRARIES}
                       )
 
+IF(UNIX)
+    # Link each executable against the X11 library
+    FIND_PACKAGE(X11 REQUIRED)
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${X11_LIBRARIES})
+
+    IF(CISST_SVL_HAS_LIBDC1394)
+        # Also link the examples using live camera source against the DC1394 library if enabled
+        TARGET_LINK_LIBRARIES(${PROJECT_NAME} dc1394)
+    ENDIF(CISST_SVL_HAS_LIBDC1394)
+ENDIF(UNIX)
+
+
 CISST_REQUIRES(${PROJECT_NAME} "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstImage;cisstStereoVision;cisstDevices;cisstParameterTypes;cisst3DUserInterface")

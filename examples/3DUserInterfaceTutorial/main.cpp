@@ -19,6 +19,19 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+// includes for handling keyboard
+#ifdef _WIN32
+    #include <conio.h>
+#endif // _WIN32
+#ifdef __GNUC__
+    #include <curses.h>
+    #include <iostream>
+    #include <stdio.h>
+    #include <termios.h>
+    #include <sys/ioctl.h>
+    #include <fcntl.h>
+#endif // __GNUC__
+
 // temporary fix to configure input
 // possible values:
 #define UI3_NO_INPUT 0
@@ -40,6 +53,9 @@ http://www.cisst.org/cisst/license.txt.
 #if (UI3_INPUT == UI3_DAVINCI)
 #include <cisstDaVinciAPI/cisstDaVinciAPI.h>
 #endif
+
+#define RENDER_ON_OVERLAY
+
 
 #include <cisstStereoVision.h>
 
@@ -92,7 +108,7 @@ int main()
 
 ////////////////////////////////////////////////////////////////
 // setup video stream
-
+#ifndef RENDER_ON_OVERLAY
     svlStreamManager vidStream(1);  // running on single thread
 
     svlVideoCaptureSource vidSource(false); // mono source
@@ -108,14 +124,7 @@ int main()
     svlImageWindow vidWindow;
     vidStream.Branch("Window").Append(&vidWindow);
 */
-
-    // start streaming
-    vidStream.Start();
-
-// setup video stream
-////////////////////////////////////////////////////////////////
-
-
+#endif
 ////////////////////////////////////////////////////////////////
 // setup renderers
 
@@ -124,19 +133,34 @@ int main()
                            0, 0,            // window position
                            camframe, 30.0,  // camera parameters
                            "LeftEyeView");  // name of renderer
+
+#ifdef RENDER_ON_OVERLAY
+    // Sending renderer output to an external render target
+    //   All renderer targets returned by the svlRenderTargets::Get call
+    //   shall be released by calling svlRenderTargets::Release or
+    //   svlRenderTargets::ReleaseAll before exiting the application
+    guiManager.SetRenderTargetToRenderer("LeftEyeView", svlRenderTargets::Get(0));
+#else
     guiManager.AddVideoBackgroundToRenderer("LeftEyeView", "MonoVideo");
+#endif
 
     camframe.Translation().X() = 10.0;
     guiManager.AddRenderer(640, 480,        // window size
                            640, 0,          // window position
                            camframe, 30.0,  // camera parameters
                            "RightEyeView"); // name of renderer
+#ifndef RENDER_ON_OVERLAY
     guiManager.AddVideoBackgroundToRenderer("RightEyeView", "MonoVideo");
+#endif
 
-// setup renderers
 ///////////////////////////////////////////////////////////////
+// start streaming
 
-    
+#ifndef RENDER_ON_OVERLAY
+    vidStream.Start();
+#endif
+
+
 #if (UI3_INPUT == UI3_OMNI1) || (UI3_INPUT == UI3_OMNI1_OMNI2)
     vctFrm3 transform;
     transform.Translation().Assign(+30.0, 0.0, -150.0); // recenter Omni's depth (right)
@@ -172,14 +196,82 @@ int main()
     taskManager->CreateAll();
     taskManager->StartAll();
     // replace by exit condition created by ui3Manager
-    osaSleep(100.0 * cmn_s);
+//    osaSleep(100.0 * cmn_s);
+
+#ifdef __GNUC__
+    ////////////////////////////////////////////////////
+    // modify terminal settings for single key inputs
+    struct  termios ksettings;
+    struct  termios new_ksettings;
+    int     kbrd;
+    kbrd = open("/dev/tty",O_RDWR);
+
+    #if (CISST_OS == CISST_LINUX)
+        ioctl(kbrd, TCGETS, &ksettings);
+        new_ksettings = ksettings;
+        new_ksettings.c_lflag &= !ICANON;
+        new_ksettings.c_lflag &= !ECHO;
+        ioctl(kbrd, TCSETS, &new_ksettings);
+        ioctl(kbrd, TIOCNOTTY);
+    #endif // (CISST_OS == CISST_LINUX)
+    #if (CISST_OS == CISST_DARWIN)
+        ioctl(kbrd, TIOCGETA, &ksettings);
+        new_ksettings = ksettings;
+        new_ksettings.c_lflag &= !ICANON;
+        new_ksettings.c_lflag &= !ECHO;
+        ioctl(kbrd, TIOCSETA, &new_ksettings);
+        ////////////////////////////////////////////////////
+    #endif // (CISST_OS == CISST_DARWIN)
+#endif
+
+    // wait for keyboard input in command window
+#ifdef _WIN32
+    int ch;
+#endif
+#ifdef __GNUC__
+    char ch;
+#endif
+
+    osaSleep(1.0 * cmn_s);
+
+    cerr << endl << "Keyboard commands:" << endl << endl;
+    cerr << "  In command window:" << endl;
+    cerr << "    'q'   - Quit" << endl << endl;
+    do {
+#ifdef _WIN32
+        ch = _getch();
+#endif
+#ifdef __GNUC__
+        ch = getchar();
+#endif
+    } while (ch != 'q');
+
+#ifdef __GNUC__
+    ////////////////////////////////////////////////////
+    // reset terminal settings    
+    #if (CISST_OS == CISST_LINUX)
+        ioctl(kbrd, TCSETS, &ksettings);
+    #endif // (CISST_OS == CISST_LINUX)
+    #if (CISST_OS == CISST_DARWIN)
+        ioctl(kbrd, TIOCSETA, &ksettings);
+    #endif // (CISST_OS == CISST_DARWIN)
+
+    close(kbrd);
+    ////////////////////////////////////////////////////
+#endif
+
     taskManager->KillAll();
 
     guiManager.SaveConfiguration("config.xml");
 
-    // it stops and disassembles the pipeline in proper
+#ifdef RENDER_ON_OVERLAY
+    // Release all used render targets
+    svlRenderTargets::ReleaseAll();
+#else
+    // It stops and disassembles the pipeline in proper
     // order even if it has several branches
     vidStream.EmptyFilterList();
+#endif
 
     return 0;
 }

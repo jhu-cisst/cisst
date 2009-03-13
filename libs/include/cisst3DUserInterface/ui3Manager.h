@@ -28,6 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisst3DUserInterface/ui3VTKRenderer.h>
 #include <cisst3DUserInterface/ui3Cursor.h>
 #include <cisst3DUserInterface/ui3ImagePlane.h>
+#include <cisstStereoVision/svlRenderTargets.h>
 
 /*!
  Provides a default implementation for the main user interface manager.
@@ -101,6 +102,11 @@ public:
      Adds a render window to the UI Manager.
     */
     virtual bool AddRenderer(unsigned int width, unsigned int height, int x, int y, vctFrm3 & cameraframe, double viewangle, const std::string & renderername);
+
+    /*!
+     Assigns an external render target for the renderer.
+    */
+    virtual bool SetRenderTargetToRenderer(const std::string & renderername, svlRenderTargetBase* rendertarget);
 
     /*!
      Assigns a video backgrond to a render window.
@@ -228,11 +234,8 @@ protected:
         double viewangle;
         std::string name;
         ui3VTKRenderer* renderer;
+        svlRenderTargetBase* rendertarget;
         int streamindex;
-  
-
-
-
         unsigned int streamchannel;
         ui3ImagePlane* imageplane;
     } _RendererStruct;

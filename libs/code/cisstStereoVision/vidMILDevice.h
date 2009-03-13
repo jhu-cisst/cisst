@@ -24,23 +24,50 @@ http://www.cisst.org/cisst/license.txt.
 #define _vidMILDevice_h
 
 #include <cisstStereoVision/svlVideoCaptureSource.h>
+#include <cisstStereoVision/svlRenderTargets.h>
 #include "svlImageBuffer.h"
 
 #include <mil.h>
 
 
+class CMILDeviceRenderTarget : public svlRenderTargetBase
+{
+friend class svlRenderTargets;
+
+protected:
+    CMILDeviceRenderTarget(unsigned int deviceID);
+    ~CMILDeviceRenderTarget();
+
+public:
+    bool SetImage(unsigned char* buffer);
+    unsigned int GetWidth();
+    unsigned int GetHeight();
+
+private:
+    int DeviceID;
+};
+
+
 class CMILDevice : public CVideoCaptureSourceBase
 {
+friend class CMILDeviceRenderTarget;
+
 public:
     typedef struct tagMILCaptureParameters {
         MIL_ID *MilFrames;
-        svlImageBuffer* ImageBuffer;
+        svlImageBuffer *ImageBuffer;
+        bool OverlayModified;
+        MIL_ID *MilOverlayImage;
+        unsigned char *MilOverlayBuffer;
     } MILCaptureParameters;
 
+private:
 	CMILDevice();
 	~CMILDevice();
 
 public:
+    static CMILDevice* GetInstance();
+
     svlVideoCaptureSource::PlatformType GetPlatformType();
     int SetStreamCount(unsigned int numofstreams);
 	int GetDeviceList(svlVideoCaptureSource::DeviceInfo **deviceinfo);
@@ -56,6 +83,12 @@ public:
 
     int GetFormatList(unsigned int deviceid, svlVideoCaptureSource::ImageFormat **formatlist);
     int GetFormat(svlVideoCaptureSource::ImageFormat& format, unsigned int videoch = 0);
+    void Release();
+
+    bool IsCaptureSupported(int devid);
+    bool IsOverlaySupported(int devid);
+    bool EnableCapture(int devid);
+    bool EnableOverlay(int devid);
 
 private:
     unsigned int NumOfStreams;
@@ -63,6 +96,10 @@ private:
 	bool Running;
 
 	int* DeviceID;
+	bool CaptureEnabled[2];
+	bool OverlayEnabled[2];
+	bool CaptureSupported[2];
+	bool OverlaySupported[2];
 	int Width[2];
 	int Height[2];
     svlImageBuffer** ImageBuffer;
@@ -86,7 +123,6 @@ private:
     unsigned int MilCaptureBuffers;
     MILCaptureParameters MilCaptureParams[2];
 
-    void Release();
     bool MILInitializeApplication();
     bool MILInitializeDevice(int device, bool capture, bool overlay, int& width, int& height, int& bands);
     bool MILUploadOverlay(int device);

@@ -43,6 +43,7 @@ SET(SOURCE_FILES
     svlVideoFileWriter.cpp
     svlImageFileSource.cpp
     svlImageFileWriter.cpp
+    svlRenderTargets.cpp
     svlDummySource.cpp
     svlDeinterlacer.cpp
     ipDeinterlacing.h              # private header
@@ -91,6 +92,7 @@ SET(HEADER_FILES
     svlVideoFileWriter.h
     svlImageFileSource.h
     svlImageFileWriter.h
+    svlRenderTargets.h
     svlDummySource.h
     svlDeinterlacer.h
     svlComputationalStereo.h
