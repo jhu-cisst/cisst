@@ -350,23 +350,9 @@ void ui3Manager::Startup(void)
         Renderers[i]->renderer = new ui3VTKRenderer(Renderers[i]->width,
                                                     Renderers[i]->height,
                                                     Renderers[i]->viewangle,
-                                                    Renderers[i]->cameraframe);
+                                                    Renderers[i]->cameraframe,
+                                                    Renderers[i]->rendertarget);
         CMN_ASSERT(Renderers[i]->renderer);
-
-        if (Renderers[i]->rendertarget) {
-            // TO DO:
-            // - Setup VTK to render into an off-screen buffer
-            // - After each completed renderings set the off-screen
-            //   buffer to the external render target
-
-            unsigned char* tempimage = new unsigned char[Renderers[i]->width*Renderers[i]->height*3];
-            memset(tempimage, 0, Renderers[i]->width*Renderers[i]->height/2*3);
-            memset(tempimage+Renderers[i]->width*Renderers[i]->height/2*3, 64, Renderers[i]->width*Renderers[i]->height/2*3);
-
-            Renderers[i]->rendertarget->SetImage(tempimage);
-
-            delete [] tempimage;
-        }
 
         // Add live video background if available
         if (Renderers[i]->streamindex >= 0) {

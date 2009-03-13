@@ -26,9 +26,13 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnClassServices.h>
 #include <cisstCommon/cmnClassRegisterMacros.h>
 #include <cisstVector/vctTransformationTypes.h>
+#include <cisstStereoVision/svlRenderTargets.h>
 
 #include <cisst3DUserInterface/ui3ForwardDeclarations.h>
 #include <cisst3DUserInterface/ui3VTKForwardDeclarations.h>
+
+#include <vtkUnsignedCharArray.h>
+
 
 /*!
  Class that implements the interface between VTK and the SAW framework.
@@ -43,7 +47,7 @@ public:
     /*!
      Constructor
     */
-    ui3VTKRenderer(unsigned int width, unsigned int height, double viewangle, vctFrm3 & cameraframe);
+    ui3VTKRenderer(unsigned int width, unsigned int height, double viewangle, vctFrm3 & cameraframe, svlRenderTargetBase* target = 0);
 
     /*!
      Destructor
@@ -64,11 +68,13 @@ private:
     vtkRenderWindow * RenderWindow;
     vtkRenderWindowInteractor * RenderWindowInteractor;
     vtkCamera * Camera;
+    vtkUnsignedCharArray * OffScreenBuffer;
 
     unsigned int Width;
     unsigned int Height;
     double ViewAngle;
     vctFrm3 CameraFrame;
+    svlRenderTargetBase* Target;
 };
 
 

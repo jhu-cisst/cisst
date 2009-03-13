@@ -27,35 +27,64 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <vtkAssembly.h>
 #include <vtkPropAssembly.h>
-#include <vtkRenderer.h>
-#include <vtkRenderWindow.h>
+#include <vtkOpenGLRenderer.h>
+#include <vtkOpenGLRenderWindow.h>
 #include <vtkRenderWindowInteractor.h>
 #include <vtkCamera.h>
+#if (CISST_OS == CISST_LINUX)
+    #include "vtkXOpenGLOffScreenRenderWindow.h"
+#endif //CISST_LINUX
 
 
 CMN_IMPLEMENT_SERVICES(ui3VTKRenderer);
 
 
-ui3VTKRenderer::ui3VTKRenderer(unsigned int width, unsigned int height, double viewangle, vctFrm3 & cameraframe):
+ui3VTKRenderer::ui3VTKRenderer(unsigned int width, unsigned int height, double viewangle, vctFrm3 & cameraframe, svlRenderTargetBase* target):
     Renderer(0),
     RenderWindow(0),
     RenderWindowInteractor(0),
     Camera(0),
+    OffScreenBuffer(0),
     Width(width),
     Height(height),
     ViewAngle(viewangle),
-    CameraFrame(cameraframe)
+    CameraFrame(cameraframe),
+    Target(target)
 {
     // Create render window
-    this->Renderer = vtkRenderer::New();
+    this->Renderer = vtkOpenGLRenderer::New();
     CMN_ASSERT(this->Renderer);
 
-    this->RenderWindow = vtkRenderWindow::New();
-    CMN_ASSERT(this->RenderWindow);
+    if (this->Target) {
+        // Setup off-screen rendering
+#if (CISST_OS == CISST_LINUX)
+// TO DO:
+//   Fix the off-screen renderer on Linux
+        //this->RenderWindow = vtkXOpenGLOffScreenRenderWindow::New();
+        //CMN_ASSERT(this->RenderWindow);
+        this->RenderWindow = vtkOpenGLRenderWindow::New();
+        CMN_ASSERT(this->RenderWindow);
+        this->RenderWindow->OffScreenRenderingOn();
+        this->RenderWindow->DoubleBufferOff();
+#else //CISST_LINUX
+        this->RenderWindow = vtkOpenGLRenderWindow::New();
+        CMN_ASSERT(this->RenderWindow);
+        this->RenderWindow->OffScreenRenderingOn();
+        this->RenderWindow->DoubleBufferOff();
+#endif //CISST_LINUX
+        this->OffScreenBuffer = vtkUnsignedCharArray::New();
+        CMN_ASSERT(this->OffScreenBuffer);
+        this->OffScreenBuffer->Resize(this->Width * this->Height * 3);
+    }
+    else {
+        // Setup regular in window rendering
+        this->RenderWindow = vtkOpenGLRenderWindow::New();
+        CMN_ASSERT(this->RenderWindow);
+    }
     this->RenderWindow->AddRenderer(this->Renderer);
-    this->RenderWindow->SetFullScreen(1);
+//    this->RenderWindow->SetFullScreen(1);
     this->RenderWindow->SetSize(this->Width, this->Height);
-    this->RenderWindow->SetWindowName("Renderer");
+//    this->RenderWindow->SetWindowName("Renderer");
 
     this->RenderWindowInteractor = vtkRenderWindowInteractor::New();
     CMN_ASSERT(this->RenderWindowInteractor);
@@ -88,6 +117,12 @@ void ui3VTKRenderer::Render(void)
 {
     if (this->RenderWindow) {
         this->RenderWindow->Render();
+
+        if (this->Target) {
+            // Push VTK off-screen frame buffer to external render target
+            this->RenderWindow->GetPixelData(0, 0, this->Width - 1, this->Height - 1, 0, this->OffScreenBuffer);
+            this->Target->SetImage(this->OffScreenBuffer->GetPointer(0), true);
+        }
     } else {
         CMN_LOG_CLASS(1) << "Render: attempt to render before the VTK Window Renderer has been created" << std::endl;
     }

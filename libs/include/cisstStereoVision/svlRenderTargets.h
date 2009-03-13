@@ -41,7 +41,7 @@ protected:
     virtual ~svlRenderTargetBase() {}
 
 public:
-    virtual bool SetImage(unsigned char* buffer) = 0;
+    virtual bool SetImage(unsigned char* buffer, bool vflip) = 0;
     virtual unsigned int GetWidth() = 0;
     virtual unsigned int GetHeight() = 0;
 };

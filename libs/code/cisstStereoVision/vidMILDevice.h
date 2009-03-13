@@ -39,7 +39,7 @@ protected:
     ~CMILDeviceRenderTarget();
 
 public:
-    bool SetImage(unsigned char* buffer);
+    bool SetImage(unsigned char* buffer, bool vflip);
     unsigned int GetWidth();
     unsigned int GetHeight();
 

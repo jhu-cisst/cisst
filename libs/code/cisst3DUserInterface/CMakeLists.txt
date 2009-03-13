@@ -74,5 +74,15 @@ SET(HEADER_FILES
     ui3VisibleObject.h
     )
 
+# Linux specific VTK off-screen rendering helper class
+IF(UNIX)
+    SET(SOURCE_FILES
+        ${SOURCE_FILES}
+        vtkXOpenGLOffScreenRenderWindow.cxx
+        vtkXOpenGLOffScreenRenderWindow.h     #private header
+        )
+ENDIF(UNIX)
+
 
 CISST_ADD_LIBRARY_TO_PROJECT(cisstLibs)
+

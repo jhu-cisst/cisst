@@ -28,7 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisst3DUserInterface/ui3VTKRenderer.h>
 #include <cisst3DUserInterface/ui3Cursor.h>
 #include <cisst3DUserInterface/ui3ImagePlane.h>
-#include <cisstStereoVision/svlRenderTargets.h>
+
 
 /*!
  Provides a default implementation for the main user interface manager.

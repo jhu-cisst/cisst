@@ -55,6 +55,7 @@ http://www.cisst.org/cisst/license.txt.
 #endif
 
 #define RENDER_ON_OVERLAY
+#define CAPTURE_SWAP_RGB
 
 
 #include <cisstStereoVision.h>
@@ -111,13 +112,21 @@ int main()
 #ifndef RENDER_ON_OVERLAY
     svlStreamManager vidStream(1);  // running on single thread
 
-    svlVideoCaptureSource vidSource(false); // mono source
-    vidSource.DialogSetup();
+    svlVideoCaptureSource vidSource(true); // mono source
+    cout << "Setup LEFT camera:" << endl;
+    vidSource.DialogSetup(SVL_LEFT);
+    cout << "Setup RIGHT camera:" << endl;
+    vidSource.DialogSetup(SVL_RIGHT);
     vidStream.Trunk().Append(&vidSource);
+
+#ifdef CAPTURE_SWAP_RGB
+    svlRGBSwapper vidRGBSwapper;
+    vidStream.Trunk().Append(&vidRGBSwapper);
+#endif
 
     // add guiManager as a filter to the pipeline, so it will receive video frames
     // "MonoVideoBackground" is defined in the UI Manager as a possible video interface
-    vidStream.Trunk().Append(guiManager.GetStreamSamplerFilter("MonoVideo"));
+    vidStream.Trunk().Append(guiManager.GetStreamSamplerFilter("StereoVideo"));
 
 /*
     vidStream.CreateBranchAfterFilter(&vidSource, "Window");
@@ -141,7 +150,7 @@ int main()
     //   svlRenderTargets::ReleaseAll before exiting the application
     guiManager.SetRenderTargetToRenderer("LeftEyeView", svlRenderTargets::Get(0));
 #else
-    guiManager.AddVideoBackgroundToRenderer("LeftEyeView", "MonoVideo");
+    guiManager.AddVideoBackgroundToRenderer("LeftEyeView", "StereoVideo", SVL_LEFT);
 #endif
 
     camframe.Translation().X() = 10.0;
@@ -149,8 +158,15 @@ int main()
                            640, 0,          // window position
                            camframe, 30.0,  // camera parameters
                            "RightEyeView"); // name of renderer
-#ifndef RENDER_ON_OVERLAY
-    guiManager.AddVideoBackgroundToRenderer("RightEyeView", "MonoVideo");
+
+#ifdef RENDER_ON_OVERLAY
+    // Sending renderer output to an external render target
+    //   All renderer targets returned by the svlRenderTargets::Get call
+    //   shall be released by calling svlRenderTargets::Release or
+    //   svlRenderTargets::ReleaseAll before exiting the application
+    guiManager.SetRenderTargetToRenderer("RightEyeView", svlRenderTargets::Get(1));
+#else
+    guiManager.AddVideoBackgroundToRenderer("RightEyeView", "StereoVideo", SVL_RIGHT);
 #endif
 
 ///////////////////////////////////////////////////////////////

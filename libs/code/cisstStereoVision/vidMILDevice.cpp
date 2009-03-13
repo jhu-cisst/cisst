@@ -41,7 +41,7 @@ CMILDeviceRenderTarget::~CMILDeviceRenderTarget()
 {
 }
 
-bool CMILDeviceRenderTarget::SetImage(unsigned char* buffer)
+bool CMILDeviceRenderTarget::SetImage(unsigned char* buffer, bool vflip)
 {
     if (DeviceID < 0) return false;
 
@@ -52,8 +52,20 @@ bool CMILDeviceRenderTarget::SetImage(unsigned char* buffer)
                                      device->CaptureEnabled[DeviceID],
                                      device->OverlayEnabled[DeviceID],
                                      w, h, b)) return false;
-                                     
-    memcpy(device->MilOverlayBuffer[DeviceID], buffer, w * h * b);
+
+    if (vflip) {
+        const int linesize = w * 3;
+        unsigned char* dest = device->MilOverlayBuffer[DeviceID];
+        buffer += (h - 1) * linesize;
+        for (int i = 0; i < h; i ++) {
+            memcpy(dest, buffer, linesize);
+            dest += linesize;
+            buffer -= linesize;
+        }
+    }
+    else {
+        memcpy(device->MilOverlayBuffer[DeviceID], buffer, w * h * b);
+    }
     return device->MILUploadOverlay(DeviceID);
 }
 
