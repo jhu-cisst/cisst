@@ -295,8 +295,10 @@ int svlVideoCaptureSource::Release()
     for (unsigned int i = 0; i < NumberOfSupportedAPIs; i ++) {
         if (DeviceObj[i]) {
             if (DeviceObj[i]->GetPlatformType() == MatroxImaging) {
+#if (CISST_SVL_HAS_MIL == ON)
                 // Object is a singleton, should not be deleted
                 dynamic_cast<CMILDevice*>(DeviceObj[i])->Release();
+#endif // CISST_SVL_HAS_MIL
             }
             else {
                 delete DeviceObj[i];

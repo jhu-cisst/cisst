@@ -21,7 +21,10 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstStereoVision/svlRenderTargets.h>
-#include "vidMILDevice.h"
+
+#if (CISST_SVL_HAS_MIL == ON)
+    #include "vidMILDevice.h"
+#endif // CISST_SVL_HAS_MIL
 
 using namespace std;
 
@@ -32,6 +35,7 @@ using namespace std;
 
 svlRenderTargets::svlRenderTargets()
 {
+#if (CISST_SVL_HAS_MIL == ON)
     CMILDevice *device = CMILDevice::GetInstance();
     svlVideoCaptureSource::DeviceInfo *devlist;
     int devicecount = device->GetDeviceList(&devlist);
@@ -48,6 +52,7 @@ svlRenderTargets::svlRenderTargets()
     Targets.SetAll(0);
 
     delete [] devlist;
+#endif // CISST_SVL_HAS_MIL
 }
 
 svlRenderTargets::~svlRenderTargets()
@@ -56,6 +61,7 @@ svlRenderTargets::~svlRenderTargets()
 
 svlRenderTargetBase* svlRenderTargets::Get(unsigned int deviceID)
 {
+#if (CISST_SVL_HAS_MIL == ON)
     static svlRenderTargets instance;
     if (instance.Targets.size() > deviceID) {
         if (!instance.Targets[deviceID]) {
@@ -63,6 +69,7 @@ svlRenderTargetBase* svlRenderTargets::Get(unsigned int deviceID)
         }
         return instance.Targets[deviceID];
     }
+#endif // CISST_SVL_HAS_MIL
     return 0;
 }
 
