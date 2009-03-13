@@ -7,7 +7,7 @@
   Author(s):  Ankur Kapoor
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -51,9 +51,16 @@ public:
     /*! Typedef for the specific interface. */
     typedef _classType ClassType;
 
+    /*! This type. */
+    typedef mtsCommandVoidMethod<ClassType> ThisType;
+
     /*! Typedef for pointer to member function (method) of a specific
       class (_classType). */
     typedef void(_classType::*ActionType)(void);
+
+private:
+    /*! Private copy constructor to prevent copies */
+    inline mtsCommandVoidMethod(const ThisType & CMN_UNUSED(other)) {}
 
 protected:
     /*! The pointer to member function of the receiver class that
@@ -65,7 +72,7 @@ protected:
 
 public:
     /*! The constructor. Does nothing. */
-    mtsCommandVoidMethod(): BaseType(), ClassInstantiation(0) {}
+    mtsCommandVoidMethod(void): BaseType(), ClassInstantiation(0) {}
 
     /*! The constructor.
       \param action Pointer to the member function that is to be called
@@ -85,8 +92,11 @@ public:
       invoker applies the operation on the receiver.
     */
     virtual mtsCommandBase::ReturnType Execute(void) {
-        (ClassInstantiation->*Action)();
-        return mtsCommandBase::DEV_OK;
+        if (this->IsEnabled()) {
+            (ClassInstantiation->*Action)();
+            return mtsCommandBase::DEV_OK;
+        }
+        return mtsCommandBase::DISABLED;
     }
 
     /* commented in base class */
@@ -94,7 +104,8 @@ public:
         outputStream << "mtsCommandVoidMethod: ";
         if (this->ClassInstantiation) {
             outputStream << this->Name << "(void) using class/object \""
-                         << mtsObjectName(this->ClassInstantiation) << "\"";
+                         << mtsObjectName(this->ClassInstantiation) << "\" currently "
+                         << (this->IsEnabled() ? "enabled" : "disabled");
         } else {
             outputStream << "Not initialized properly";
         }
@@ -113,8 +124,15 @@ class mtsCommandVoidFunction: public mtsCommandVoidBase {
 public:
     typedef mtsCommandVoidBase BaseType;
     
+    /*! This type. */
+    typedef mtsCommandVoidFunction ThisType;
+
     /*! Typedef for pointer to member function */
     typedef void(*ActionType)(void);
+
+private:
+    /*! Private copy constructor to prevent copies */
+    inline mtsCommandVoidFunction(const ThisType & CMN_UNUSED(other));
 
 protected:
     /*! The pointer to function used when the command is executed. */
@@ -142,8 +160,12 @@ public:
       \param to The result obtained from the conversion operation
     */
     virtual mtsCommandBase::ReturnType Execute(void) {
-        (*Action)();
-        return mtsCommandBase::DEV_OK;
+        if (this->IsEnabled()) {
+            (*Action)();
+            return mtsCommandBase::DEV_OK;
+        } else {
+            return mtsCommandBase::DISABLED;
+        }
     }
 
     /* commented in base class */

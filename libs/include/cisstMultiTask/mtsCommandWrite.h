@@ -7,7 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -48,9 +48,16 @@ public:
     /*! Typedef for the specific interface. */
     typedef _classType ClassType;
 
+    /*! This type. */
+    typedef mtsCommandWrite<ClassType, ArgumentType> ThisType;
+
     /*! Typedef for pointer to member function of the specific interface
       class. */
     typedef void(_classType::*ActionType)(const ArgumentType&);
+
+private:
+    /*! Private copy constructor to prevent copies */
+    inline mtsCommandWrite(const ThisType & CMN_UNUSED(other));
 
 protected:
     /*! The pointer to member function of the receiver class that
@@ -91,18 +98,24 @@ public:
       \param obj The data passed to the operation method
     */
     virtual mtsCommandBase::ReturnType Execute(const cmnGenericObject & argument) {
-        const ArgumentType * data = dynamic_cast< const ArgumentType * >(&argument);
-        if (data == NULL)
-            return mtsCommandBase::BAD_INPUT;
-        // (ClassInstantiation->*Action)(*data);
-        // return mtsCommandBase::DEV_OK;
-        return this->Execute(*data);
+        if (this->IsEnabled()) {
+            const ArgumentType * data = dynamic_cast< const ArgumentType * >(&argument);
+            if (data == 0) {
+                return mtsCommandBase::BAD_INPUT;
+            }
+            (ClassInstantiation->*Action)(*data);
+            return mtsCommandBase::DEV_OK;
+        }
+        return mtsCommandBase::DISABLED;
     }
 
     /*! Direct execute can be used for mtsMulticastCommandWrite */
     inline mtsCommandBase::ReturnType Execute(const ArgumentType & argument) {
-        (ClassInstantiation->*Action)(argument);
-        return mtsCommandBase::DEV_OK;
+        if (this->IsEnabled()) {
+            (ClassInstantiation->*Action)(argument);
+            return mtsCommandBase::DEV_OK;
+        }
+        return mtsCommandBase::DISABLED; 
     }
 
     /* commented in base class */
@@ -115,7 +128,8 @@ public:
         outputStream << "mtsCommandWrite: ";
         if (this->ClassInstantiation) {
             outputStream << this->Name << "(const " << this->ArgumentPrototype.ClassServices()->GetName() << "&) using class/object \""
-                         << mtsObjectName(this->ClassInstantiation) << "\"";
+                         << mtsObjectName(this->ClassInstantiation) << "\" currently "
+                         << (this->IsEnabled() ? "enabled" : "disabled");
         } else {
             outputStream << "Not initialized properly";
         }

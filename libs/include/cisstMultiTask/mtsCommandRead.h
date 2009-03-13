@@ -7,7 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2008 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -48,9 +48,16 @@ public:
     /*! Typedef for the specific interface. */
     typedef _classType ClassType;
 
+    /*! This type. */
+    typedef mtsCommandRead<ClassType, ArgumentType> ThisType;
+
     /*! Typedef for pointer to member function of the specific interface
       class. */
     typedef void(_classType::*ActionType)(ArgumentType &) const;
+
+private:
+    /*! Private copy constructor to prevent copies */
+    inline mtsCommandRead(const ThisType & CMN_UNUSED(other));
 
 protected:
     /*! The pointer to member function of the receiver class that
@@ -91,11 +98,15 @@ public:
       \param obj The data passed to the operation method
     */
     virtual mtsCommandBase::ReturnType Execute(cmnGenericObject & argument) {
-        ArgumentType * data = dynamic_cast< ArgumentType * >(&argument);
-        if (data == NULL)
-            return mtsCommandBase::BAD_INPUT;
-        (ClassInstantiation->*Action)(*data);
-        return mtsCommandBase::DEV_OK;
+        if (this->IsEnabled()) {
+            ArgumentType * data = dynamic_cast< ArgumentType * >(&argument);
+            if (data == 0) {
+                return mtsCommandBase::BAD_INPUT;
+            }
+            (ClassInstantiation->*Action)(*data);
+            return mtsCommandBase::DEV_OK;
+        }
+        return mtsCommandBase::DISABLED;
     }
 
     /* commented in base class */
@@ -108,7 +119,8 @@ public:
         outputStream << "mtsCommandRead: ";
         if (this->ClassInstantiation) {
             outputStream << this->Name << "(" << this->ArgumentPrototype.ClassServices()->GetName() << "&) using class/object \""
-                         << mtsObjectName(this->ClassInstantiation) << "\"";
+                         << mtsObjectName(this->ClassInstantiation) << "\" currently "
+                         << (this->IsEnabled() ? "enabled" : "disabled");
         } else {
             outputStream << "Not initialized properly";
         }

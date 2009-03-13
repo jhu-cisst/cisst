@@ -7,7 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2008 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -48,9 +48,16 @@ public:
     /*! Typedef for the specific interface. */
     typedef _classType ClassType;
     
+    /*! This type. */
+    typedef mtsCommandQualifiedRead<ClassType, Argument1Type, Argument2Type> ThisType;
+
     /*! Typedef for pointer to member function of the specific
       interface class. */
     typedef void(_classType::*ActionType)(const Argument1Type &, Argument2Type &) const;
+
+private:
+    /*! Private copy constructor to prevent copies */
+    inline mtsCommandQualifiedRead(const ThisType & CMN_UNUSED(other));
 
 protected:
     /*! The pointer to member function of the receiver class that
@@ -97,14 +104,19 @@ public:
     */
     virtual mtsCommandBase::ReturnType Execute(const cmnGenericObject & argument1,
                                                cmnGenericObject & argument2) {
-        Argument1Type * data1 = dynamic_cast<Argument1Type *>(&argument1);
-        if (data1 == NULL)
-            return mtsCommandBase::BAD_INPUT;
-        Argument2Type * data2 = dynamic_cast<Argument2Type *>(&argument2);
-        if (data2 == NULL)
-            return mtsCommandBase::BAD_INPUT;
-        (ClassInstantiation->*Action)(*data1, *data2);
-        return mtsCommandBase::DEV_OK;
+        if (this->IsEnabled()) {
+            Argument1Type * data1 = dynamic_cast<Argument1Type *>(&argument1);
+            if (data1 == 0) {
+                return mtsCommandBase::BAD_INPUT;
+            }
+            Argument2Type * data2 = dynamic_cast<Argument2Type *>(&argument2);
+            if (data2 == 0) {
+                return mtsCommandBase::BAD_INPUT;
+            }
+            (ClassInstantiation->*Action)(*data1, *data2);
+            return mtsCommandBase::DEV_OK;
+        }
+        return mtsCommandBase::DISABLED;
     }
 
     /* commented in base class */
@@ -124,7 +136,8 @@ public:
             outputStream << this->Name << "(const "
                          << this->Argument1Prototype.ClassServices()->GetName() << "&, "
                          << this->Argument2Prototype.ClassServices()->GetName() << "&) using class/object \""
-                         << mtsObjectName(this->ClassInstantiation) << "\"";
+                         << mtsObjectName(this->ClassInstantiation) << "\" currently "
+                         << (this->IsEnabled() ? "enabled" : "disabled");
         } else {
             outputStream << "Not initialized properly";
         }

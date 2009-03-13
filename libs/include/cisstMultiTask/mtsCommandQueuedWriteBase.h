@@ -48,7 +48,7 @@ protected:
 
 
     inline mtsCommandQueuedWriteBase(mtsMailBox * mailBox, mtsCommandWriteBase * actualCommand):
-        BaseType(actualCommand->Name),
+        BaseType(actualCommand->GetName()),
         MailBox(mailBox),
         ActualCommand(actualCommand)
     { }

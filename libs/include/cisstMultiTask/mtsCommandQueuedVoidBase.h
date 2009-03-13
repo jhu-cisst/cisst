@@ -7,7 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2005-05-02
 
-  (C) Copyright 2005-2008 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2005-2009 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -35,21 +35,28 @@ http://www.cisst.org/cisst/license.txt.
 
 class CISST_EXPORT mtsCommandQueuedVoidBase: public mtsCommandVoidBase
 {
- protected:
+ public:
     typedef mtsCommandVoidBase BaseType;
+    typedef mtsCommandQueuedVoidBase ThisType; 
+
+ protected:
     mtsMailBox * MailBox;
     mtsCommandVoidBase * ActualCommand;
 
+ private:
+    /*! Private copy constructor to prevent copies */
+    inline mtsCommandQueuedVoidBase(const ThisType & CMN_UNUSED(other));
+    
  public:
     inline mtsCommandQueuedVoidBase(void):
-        BaseType("??"),
+        BaseType(),
         MailBox(0),
         ActualCommand(0)
     {}
 
     
     inline mtsCommandQueuedVoidBase(mtsMailBox * mailBox, mtsCommandVoidBase * actualCommand):
-        BaseType(actualCommand->Name),
+        BaseType(actualCommand->GetName()),
         MailBox(mailBox),
         ActualCommand(actualCommand)
     {}

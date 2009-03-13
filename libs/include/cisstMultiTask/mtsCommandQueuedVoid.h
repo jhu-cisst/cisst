@@ -7,7 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2005-05-03
 
-  (C) Copyright 2005-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2005-2009 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -34,7 +34,6 @@ http://www.cisst.org/cisst/license.txt.
 
 /*!
   \ingroup cisstMultiTask
-
  */
 
 
@@ -44,6 +43,14 @@ http://www.cisst.org/cisst/license.txt.
 class mtsCommandQueuedVoid: public mtsCommandQueuedVoidBase
 {
     typedef mtsCommandQueuedVoidBase BaseType;
+
+    /*! This type. */
+    typedef mtsCommandQueuedVoid ThisType;
+
+private:
+    /*! Private copy constructor to prevent copies */
+    inline mtsCommandQueuedVoid(const ThisType & CMN_UNUSED(other));
+
 public:
 
     inline mtsCommandQueuedVoid(void):
@@ -61,12 +68,15 @@ public:
     }
 
     virtual mtsCommandBase::ReturnType Execute(void) {
-        if (MailBox->Write(this)) {
-            return mtsCommandBase::DEV_OK;
+        if (this->IsEnabled()) {
+            if (MailBox->Write(this)) {
+                return mtsCommandBase::DEV_OK;
+            }
+            CMN_LOG(5) << "Class mtsCommandQueuedVoid: Execute(): Mailbox full for \"" 
+                       << this->Name << "\"" <<  std::endl;
+            return mtsCommandBase::MAILBOX_FULL;
         }
-        CMN_LOG(5) << "Class mtsCommandQueuedVoid: Execute(): Mailbox full for " 
-                   << this->Name << std::endl;
-        return mtsCommandBase::MAILBOX_FULL;
+        return mtsCommandBase::DISABLED;
     }
 
     // no allocation required since the command has no argument

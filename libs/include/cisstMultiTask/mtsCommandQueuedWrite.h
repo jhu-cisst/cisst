@@ -7,7 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2005-05-02
 
-  (C) Copyright 2005-2008 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2005-2009 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -37,15 +37,23 @@ http://www.cisst.org/cisst/license.txt.
 
  */
 template <class _argumentType>
-class mtsCommandQueuedWrite: public mtsCommandQueuedWriteBase {
+class mtsCommandQueuedWrite: public mtsCommandQueuedWriteBase
+{
 public:
     typedef mtsCommandQueuedWriteBase BaseType;
     typedef _argumentType ArgumentType;
 
+    /*! This type. */
+    typedef mtsCommandQueuedWrite<ArgumentType> ThisType;
+
 protected:
     mtsQueue<ArgumentType> ArgumentsQueue;
 
- public:
+private:
+    /*! Private copy constructor to prevent copies */
+    inline mtsCommandQueuedWrite(const ThisType & CMN_UNUSED(other));
+
+public:
 
     inline mtsCommandQueuedWrite(void):
         BaseType(),
@@ -102,29 +110,27 @@ protected:
     
     
     virtual mtsCommandBase::ReturnType Execute(const cmnGenericObject & argument) {
-#if 0
-        // Following code not needed since dynamic_cast is used.
-        if (TypeInfo == 0) return mtsCommandBase::BAD_COMMAND;
-        if (&typeid(obj) != TypeInfo) return mtsCommandBase::BAD_INPUT;
-#endif
-        const ArgumentType * argumentTyped = dynamic_cast<const ArgumentType*>(&argument);
-        if (!argumentTyped) {
-            return mtsCommandBase::BAD_INPUT;
-        }
-        // Now, copy the argument to the local storage.
-        if (ArgumentsQueue.Put(*argumentTyped)) {
-            if (MailBox->Write(this)) {
-                return mtsCommandBase::DEV_OK;
-            } else {
-                CMN_LOG(5) << "Class mtsCommandQueuedWrite: Execute(): Mailbox full for " 
-                           << this->Name << std::endl;
-                ArgumentsQueue.Get();  // Pop argument from local storage
+        if (this->IsEnabled()) {
+            const ArgumentType * argumentTyped = dynamic_cast<const ArgumentType*>(&argument);
+            if (!argumentTyped) {
+                return mtsCommandBase::BAD_INPUT;
             }
-        } else {
-            CMN_LOG(5) << "Class mtsCommandQueuedWrite: Execute(): ArgumentsQueue full for "
-                       << this->Name << std::endl;
+            // Now, copy the argument to the local storage.
+            if (ArgumentsQueue.Put(*argumentTyped)) {
+                if (MailBox->Write(this)) {
+                    return mtsCommandBase::DEV_OK;
+                } else {
+                    CMN_LOG(5) << "Class mtsCommandQueuedWrite: Execute(): Mailbox full for \"" 
+                               << this->Name << "\"" << std::endl;
+                    ArgumentsQueue.Get();  // Pop argument from local storage
+                }
+            } else {
+                CMN_LOG(5) << "Class mtsCommandQueuedWrite: Execute(): ArgumentsQueue full for \""
+                           << this->Name << "\"" << std::endl;
+            }
+            return mtsCommandBase::MAILBOX_FULL;
         }
-        return mtsCommandBase::MAILBOX_FULL;
+        return mtsCommandBase::DISABLED;
     }
 
     /* commented in base class */

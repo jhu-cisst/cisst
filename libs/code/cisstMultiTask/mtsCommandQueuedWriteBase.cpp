@@ -30,6 +30,7 @@ void mtsCommandQueuedWriteBase::ToStream(std::ostream & outputStream) const {
     } else {
         outputStream << "Undefined";
     }
-    outputStream << "\" for command " << *(this->ActualCommand);
+    outputStream << "\" for command " << *(this->ActualCommand)
+                 << " currently " << (this->IsEnabled() ? "enabled" : "disabled");
 }
 
