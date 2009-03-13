@@ -7,7 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2008 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -228,9 +228,9 @@ std::vector<std::string> mtsTask::GetNamesOfRequiredInterfaces(void) const {
 }
 
 
-bool mtsTask::AddObserverToRequiredInterface(const std::string & requiredInterfaceName,
-                                             const std::string & eventName,
-                                             const std::string & handlerName)
+bool mtsTask::AddObserverToRequiredInterface(const std::string & CMN_UNUSED(requiredInterfaceName),
+                                             const std::string & CMN_UNUSED(eventName),
+                                             const std::string & CMN_UNUSED(handlerName))
 {
     CMN_LOG_CLASS(1) << "AddObserverToRequiredInterface now obsolete" << std::endl;
     return false;
