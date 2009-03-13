@@ -162,6 +162,13 @@ protected:
 	//mtsCommandBase::ReturnType StartPotFeedbackConv(void);
 	void StartPotFeedbackConv(void);
 
+	/*! Enable all axis on this board
+	 */
+    void EnableAll(void);
+	/*! Disable all axes on this board
+	 */
+    void DisableAll(void);
+
 	/*******************************
 	 * Start of the Read Commands
 	 *******************************/
@@ -255,7 +262,6 @@ protected:
 	// type is double to short
 	void CurrentLimitsToDAC(const mtsDoubleVec & fromData, mtsShortVec & toData) const;
 
-#if 0
 	/*! Enable the specified axis
 	 */
 	void Enable(const cmnShort & axisIndex);
@@ -263,7 +269,6 @@ protected:
 	/*! Disable the specified axis
 	 */
 	void Disable(const cmnShort & axisIndex);
-#endif
 
 	/*! Reset Encoder
 	 */
