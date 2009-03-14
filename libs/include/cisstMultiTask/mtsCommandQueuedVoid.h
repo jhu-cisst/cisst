@@ -31,58 +31,13 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsCommandQueuedVoidBase.h>
 
+/*! This "class" is equivalent to the base class
+  mtsCommandQueuedVoidBase as we don't need any templating for the
+  end-user class.  A typedef is enough, we don't need to derive from
+  the base class.  We preserved the same filenames just for
+  consistency. */
+typedef mtsCommandQueuedVoidBase mtsCommandQueuedVoid;
 
-/*!
-  \ingroup cisstMultiTask
- */
-
-
-// Not really needed (same as mtsCommandQueuedVoidBase) -- kept for
-// consistency with mtsCommandQueuedWriteBase and
-// mtsCommandQueuedWrite.
-class mtsCommandQueuedVoid: public mtsCommandQueuedVoidBase
-{
-    typedef mtsCommandQueuedVoidBase BaseType;
-
-    /*! This type. */
-    typedef mtsCommandQueuedVoid ThisType;
-
-private:
-    /*! Private copy constructor to prevent copies */
-    inline mtsCommandQueuedVoid(const ThisType & CMN_UNUSED(other));
-
-public:
-
-    inline mtsCommandQueuedVoid(void):
-        BaseType() 
-    {}
-
-    inline mtsCommandQueuedVoid(mtsMailBox * mailBox, mtsCommandVoidBase * actualCommand):
-        BaseType(mailBox, actualCommand)
-    {}
-    
-    virtual ~mtsCommandQueuedVoid() {}
-
-    inline virtual mtsCommandQueuedVoidBase * Clone(mtsMailBox * mailBox) const {
-        return new mtsCommandQueuedVoid(mailBox, this->ActualCommand);
-    }
-
-    virtual mtsCommandBase::ReturnType Execute(void) {
-        if (this->IsEnabled()) {
-            if (MailBox->Write(this)) {
-                return mtsCommandBase::DEV_OK;
-            }
-            CMN_LOG(5) << "Class mtsCommandQueuedVoid: Execute(): Mailbox full for \"" 
-                       << this->Name << "\"" <<  std::endl;
-            return mtsCommandBase::MAILBOX_FULL;
-        }
-        return mtsCommandBase::DISABLED;
-    }
-
-    // no allocation required since the command has no argument
-    inline virtual void Allocate(unsigned int CMN_UNUSED(size)) {}
-
-};
 
 #endif // _mtsCommandQueuedVoid_h
 

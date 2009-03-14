@@ -34,7 +34,7 @@ void mtsCommandQueuedVoidBase::ToStream(std::ostream & outputStream) const {
                  << " currently " << (this->IsEnabled() ? "enabled" : "disabled");
 }
 
-    
+#if 0    
 mtsCommandBase::ReturnType mtsCommandQueuedVoidBase::Execute(void) {
     if (this->MailBox->Write(this))
         return mtsCommandBase::DEV_OK;
@@ -43,4 +43,4 @@ mtsCommandBase::ReturnType mtsCommandQueuedVoidBase::Execute(void) {
         return mtsCommandBase::MAILBOX_FULL;
     }
 }
-
+#endif
