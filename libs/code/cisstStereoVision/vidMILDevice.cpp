@@ -39,6 +39,8 @@ CMILDeviceRenderTarget::CMILDeviceRenderTarget(unsigned int deviceID) :
 
 CMILDeviceRenderTarget::~CMILDeviceRenderTarget()
 {
+    CMILDevice *device = CMILDevice::GetInstance();
+    device->MILReleaseDevice(DeviceID);
 }
 
 bool CMILDeviceRenderTarget::SetImage(unsigned char* buffer, bool vflip)
@@ -144,6 +146,8 @@ CMILDevice::CMILDevice() :
 CMILDevice::~CMILDevice()
 {
     Release();
+    MILReleaseDevice(0);
+    MILReleaseDevice(1);
     MILReleaseApplication();
 }
 
@@ -192,7 +196,7 @@ int CMILDevice::GetDeviceList(svlVideoCaptureSource::DeviceInfo **deviceinfo)
     for (i = 0; i < 2; i ++) {
         cap = MILInitializeDevice(i, true, false, w, h, b);
         ovrl = MILInitializeDevice(i, false, true, w, h, b);
-        MILReleaseDevice(i);
+//        MILReleaseDevice(i);
         if (cap || ovrl) {
             devid[MILNumberOfDevices] = i;
             CaptureSupported[MILNumberOfDevices] = cap;
@@ -277,8 +281,8 @@ void CMILDevice::Close()
     Initialized = false;
 
     // Do not release device if overlay processing is still underway
-    if (!OverlayEnabled[0]) MILReleaseDevice(0);
-    if (!OverlayEnabled[1]) MILReleaseDevice(1);
+//    if (!OverlayEnabled[0]) MILReleaseDevice(0);
+//    if (!OverlayEnabled[1]) MILReleaseDevice(1);
 }
 
 int CMILDevice::Start()
@@ -458,7 +462,7 @@ bool CMILDevice::MILInitializeDevice(int device, bool capture, bool overlay, int
         MdispInquire(MilDisplay[device], M_OVERLAY_ID, &MilOverlayImage[device]);
         if (MilOverlayImage[device] == M_NULL) goto labError;
 
-        MdispControl(MilDisplay[device], M_TRANSPARENT_COLOR, static_cast<MIL_INT64>(M_BGR888(0,0,0)));
+        MdispControl(MilDisplay[device], M_TRANSPARENT_COLOR, static_cast<MIL_INT32>(M_BGR888(0,0,0)));
 
         MilOverlayBuffer[device] = new unsigned char[MilWidth[device] * MilHeight[device] * MilBands[device]];
     }
@@ -543,9 +547,7 @@ void CMILDevice::MILReleaseDevice(int device)
     				M_DEFAULT,
     				MILProcessingCallback,
     				&(MilCaptureParams[device]));
-        MilCaptureEnabled[device] = false;
     }
-
 	if (MilOverlayImage[device] != M_NULL) MbufClear(MilOverlayImage[device], 0);
 
     if (MilDisplay[device] != M_NULL) MdispControl(MilDisplay[device], M_AUXILIARY_KEEP_DISPLAY_ALIVE, M_ENABLE);
@@ -572,6 +574,7 @@ void CMILDevice::MILReleaseDevice(int device)
     MilDisplayImage[device] = M_NULL;
     MilOverlayImage[device] = M_NULL;
     MilDeviceInitialized[device] = false;
+    MilCaptureEnabled[device] = false;
     MilOverlayEnabled[device] = false;
 }
 

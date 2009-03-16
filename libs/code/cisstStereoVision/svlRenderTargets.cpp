@@ -60,15 +60,21 @@ svlRenderTargets::~svlRenderTargets()
     ReleaseAll();
 }
 
+svlRenderTargets* svlRenderTargets::Instance()
+{
+    static svlRenderTargets instance;
+    return &instance;
+}
+
 svlRenderTargetBase* svlRenderTargets::Get(unsigned int deviceID)
 {
 #if (CISST_SVL_HAS_MIL == ON)
-    static svlRenderTargets instance;
-    if (instance.Targets.size() > deviceID) {
-        if (!instance.Targets[deviceID]) {
-            instance.Targets[deviceID] = new CMILDeviceRenderTarget(instance.TargetDeviceID[deviceID]);
+    svlRenderTargets* instance = Instance();
+    if (instance->Targets.size() > deviceID) {
+        if (!instance->Targets[deviceID]) {
+            instance->Targets[deviceID] = new CMILDeviceRenderTarget(instance->TargetDeviceID[deviceID]);
         }
-        return instance.Targets[deviceID];
+        return instance->Targets[deviceID];
     }
 #endif // CISST_SVL_HAS_MIL
     return 0;
@@ -76,17 +82,17 @@ svlRenderTargetBase* svlRenderTargets::Get(unsigned int deviceID)
 
 void svlRenderTargets::Release(unsigned int deviceID)
 {
-    static svlRenderTargets instance;
-    if (instance.Targets.size() > deviceID) {
-        delete instance.Targets[deviceID];
+    svlRenderTargets* instance = Instance();
+    if (instance->Targets.size() > deviceID) {
+        delete instance->Targets[deviceID];
     }
 }
 
 void svlRenderTargets::ReleaseAll()
 {
-    static svlRenderTargets instance;
-    for (unsigned int i = 0; i < instance.Targets.size(); i ++) {
-        delete instance.Targets[i];
+    svlRenderTargets* instance = Instance();
+    for (unsigned int i = 0; i < instance->Targets.size(); i ++) {
+        delete instance->Targets[i];
     }
 }
 

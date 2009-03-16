@@ -145,9 +145,6 @@ int main()
 
 #ifdef RENDER_ON_OVERLAY
     // Sending renderer output to an external render target
-    //   All renderer targets returned by the svlRenderTargets::Get call
-    //   shall be released by calling svlRenderTargets::Release or
-    //   svlRenderTargets::ReleaseAll before exiting the application
     guiManager.SetRenderTargetToRenderer("LeftEyeView", svlRenderTargets::Get(0));
 #else
     guiManager.AddVideoBackgroundToRenderer("LeftEyeView", "StereoVideo", SVL_LEFT);
@@ -161,9 +158,6 @@ int main()
 
 #ifdef RENDER_ON_OVERLAY
     // Sending renderer output to an external render target
-    //   All renderer targets returned by the svlRenderTargets::Get call
-    //   shall be released by calling svlRenderTargets::Release or
-    //   svlRenderTargets::ReleaseAll before exiting the application
     guiManager.SetRenderTargetToRenderer("RightEyeView", svlRenderTargets::Get(1));
 #else
     guiManager.AddVideoBackgroundToRenderer("RightEyeView", "StereoVideo", SVL_RIGHT);

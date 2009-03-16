@@ -54,6 +54,7 @@ private:
     ~svlRenderTargets();
 
 public:
+    static svlRenderTargets* Instance();
     static svlRenderTargetBase* Get(unsigned int deviceID);
     static void Release(unsigned int deviceID);
     static void ReleaseAll();
