@@ -280,10 +280,7 @@ int main()
 
     guiManager.SaveConfiguration("config.xml");
 
-#ifdef RENDER_ON_OVERLAY
-    // Release all used render targets
-    svlRenderTargets::ReleaseAll();
-#else
+#ifndef RENDER_ON_OVERLAY
     // It stops and disassembles the pipeline in proper
     // order even if it has several branches
     vidStream.EmptyFilterList();

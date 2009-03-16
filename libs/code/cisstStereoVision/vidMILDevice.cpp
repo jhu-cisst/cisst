@@ -543,6 +543,7 @@ void CMILDevice::MILReleaseDevice(int device)
     				M_DEFAULT,
     				MILProcessingCallback,
     				&(MilCaptureParams[device]));
+        MilCaptureEnabled[device] = false;
     }
 
 	if (MilOverlayImage[device] != M_NULL) MbufClear(MilOverlayImage[device], 0);
@@ -571,7 +572,6 @@ void CMILDevice::MILReleaseDevice(int device)
     MilDisplayImage[device] = M_NULL;
     MilOverlayImage[device] = M_NULL;
     MilDeviceInitialized[device] = false;
-    MilCaptureEnabled[device] = false;
     MilOverlayEnabled[device] = false;
 }
 

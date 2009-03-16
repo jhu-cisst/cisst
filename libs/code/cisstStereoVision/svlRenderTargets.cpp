@@ -57,6 +57,7 @@ svlRenderTargets::svlRenderTargets()
 
 svlRenderTargets::~svlRenderTargets()
 {
+    ReleaseAll();
 }
 
 svlRenderTargetBase* svlRenderTargets::Get(unsigned int deviceID)

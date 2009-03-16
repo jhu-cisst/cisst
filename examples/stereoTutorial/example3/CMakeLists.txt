@@ -20,6 +20,11 @@ IF(CISST_SVL_HAS_X11 OR WIN32)
         # Link each executable against the X11 library
         FIND_PACKAGE(X11 REQUIRED)
         TARGET_LINK_LIBRARIES(stereoTutorialComputeStereo ${X11_LIBRARIES})
+
+        IF(CISST_SVL_HAS_LIBDC1394)
+            # Also link the examples using live camera source against the DC1394 library if enabled
+            TARGET_LINK_LIBRARIES(stereoTutorialComputeStereo dc1394)
+        ENDIF(CISST_SVL_HAS_LIBDC1394)
     ENDIF(UNIX)
 
     IF(CISST_SVL_HAS_OPENCV)
