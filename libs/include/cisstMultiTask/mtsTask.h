@@ -7,7 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2008 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -264,7 +264,7 @@ public:
     /********************* Methods to manage interfaces *******************/
 	
     /* documented in base class */
-    bool AddProvidedInterface(const std::string & newInterfaceName);
+    mtsDeviceInterface * AddProvidedInterface(const std::string & newInterfaceName);
 
     /*! Add a required interface.  This interface will later on be
       connected to another task and use the provided interface of the
@@ -304,6 +304,7 @@ public:
     /*! Add a write command to an event handler interface associated
       to a required interface. */
     template <class __classType, class __argumentType>
+    CISST_DEPRECATED
     mtsCommandWriteBase * AddEventHandlerWrite(void (__classType::*action)(const __argumentType &),
                                                __classType * classInstantiation,
                                                const std::string & requiredInterfaceName,
@@ -313,12 +314,14 @@ public:
     
     /*! Get the command defined as user handler based on the required
       interface name and the command name. */
+    CISST_DEPRECATED
     mtsCommandWriteBase * GetEventHandlerWrite(const std::string & requiredInterfaceName,
                                                const std::string & commandName);
 
     /*! Add a void command to an event handler interface associated
       to a required interface. */
     template <class __classType>
+    CISST_DEPRECATED
     mtsCommandVoidBase * AddEventHandlerVoid(void (__classType::*action)(void),
                                              __classType * classInstantiation,
                                              const std::string & requiredInterfaceName,
@@ -327,6 +330,7 @@ public:
     
     /*! Get the command defined as user handler based on the required
       interface name and the command name. */
+    CISST_DEPRECATED
     mtsCommandVoidBase * GetEventHandlerVoid(const std::string & requiredInterfaceName,
                                              const std::string & commandName);
 

@@ -7,7 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -93,6 +93,23 @@ mtsDeviceInterface::CommandWriteMapType & mtsDeviceInterface::GetCommandWriteMap
 
 mtsDeviceInterface::CommandQualifiedReadMapType & mtsDeviceInterface::GetCommandQualifiedReadMap(void) {
     return CommandsQualifiedRead;
+}
+
+
+mtsCommandVoidBase * mtsDeviceInterface::AddEventVoid(const std::string & eventName) {
+    mtsMulticastCommandVoid * eventMulticastCommand = new mtsMulticastCommandVoid(eventName);
+    if (eventMulticastCommand) {
+        if (AddEvent(eventName, eventMulticastCommand)) {
+            return eventMulticastCommand;
+        }
+        delete eventMulticastCommand;
+        CMN_LOG_CLASS(1) << "AddEventVoid: unable to add event \""
+                         << eventName << "\"" << std::endl;
+        return 0;
+    }
+    CMN_LOG_CLASS(0) << "AddEventVoid: unable to create multi-cast command for event \""
+                     << eventName << "\"" << std::endl;
+    return 0;
 }
 
 

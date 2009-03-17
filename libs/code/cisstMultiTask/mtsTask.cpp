@@ -205,21 +205,44 @@ const char *mtsTask::TaskStateName(TaskStateType state) const
 
 /********************* Methods to manage interfaces *******************/
 	
-bool mtsTask::AddProvidedInterface(const std::string & newInterfaceName) {
-    return ProvidedInterfaces.AddItem(newInterfaceName, new mtsTaskInterface(newInterfaceName, this));
+mtsDeviceInterface * mtsTask::AddProvidedInterface(const std::string & newInterfaceName) {
+    mtsTaskInterface * newInterface = new mtsTaskInterface(newInterfaceName, this);
+    if (newInterface) {
+        if (ProvidedInterfaces.AddItem(newInterfaceName, newInterface)) {
+            return newInterface;
+        }
+        CMN_LOG_CLASS(1) << "AddProvidedInterface: unable to add interface \""
+                         << newInterfaceName << "\"" << std::endl;
+        delete newInterface;
+        return 0;
+    }
+    CMN_LOG_CLASS(1) << "AddProvidedInterface: unable to create interface \""
+                     << newInterfaceName << "\"" << std::endl;
+    return 0;
 }
 
 
-mtsRequiredInterface *mtsTask::AddRequiredInterface(const std::string & requiredInterfaceName,
+mtsRequiredInterface * mtsTask::AddRequiredInterface(const std::string & requiredInterfaceName,
                                                     mtsRequiredInterface *requiredInterface) {
     return RequiredInterfaces.AddItem(requiredInterfaceName, requiredInterface)?requiredInterface:0;
 }
 
-mtsRequiredInterface *mtsTask::AddRequiredInterface(const std::string & requiredInterfaceName) {
+mtsRequiredInterface * mtsTask::AddRequiredInterface(const std::string & requiredInterfaceName) {
     // PK: move DEFAULT_EVENT_QUEUE_LEN somewhere else (not in mtsTaskInterface)
-    mtsMailBox *mbox = new mtsMailBox(requiredInterfaceName+"Events", mtsTaskInterface::DEFAULT_EVENT_QUEUE_LEN);
-    mtsRequiredInterface *required = new mtsRequiredInterface(requiredInterfaceName, mbox);
-    return AddRequiredInterface(requiredInterfaceName, required)?required:0;
+    mtsMailBox * mbox = new mtsMailBox(requiredInterfaceName + "Events", mtsTaskInterface::DEFAULT_EVENT_QUEUE_LEN);
+    mtsRequiredInterface * requiredInterface = new mtsRequiredInterface(requiredInterfaceName, mbox);
+    if (mbox && requiredInterface) {
+        if (RequiredInterfaces.AddItem(requiredInterfaceName, requiredInterface)) {
+            return requiredInterface;
+        }
+        CMN_LOG_CLASS(1) << "AddRequiredInterface: unable to add interface \""
+                         << requiredInterfaceName << "\"" << std::endl;
+        delete requiredInterface;
+        return 0;
+    }
+    CMN_LOG_CLASS(1) << "AddRequiredInterface: unable to create interface or mailbox for \""
+                     << requiredInterfaceName << "\"" << std::endl;
+    return 0;
 }
 
 

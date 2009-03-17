@@ -7,7 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2008 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -30,10 +30,21 @@ std::vector<std::string> mtsDevice::GetNamesOfProvidedInterfaces(void) const {
 }
 
 
-bool mtsDevice::AddProvidedInterface(const std::string & newInterfaceName) {
-    return ProvidedInterfaces.AddItem(newInterfaceName, new mtsDeviceInterface(newInterfaceName, this), 1);
+mtsDeviceInterface * mtsDevice::AddProvidedInterface(const std::string & newInterfaceName) {
+    mtsDeviceInterface * newInterface = new mtsDeviceInterface(newInterfaceName, this);
+    if (newInterface) {
+        if (ProvidedInterfaces.AddItem(newInterfaceName, newInterface, 1)) {
+            return newInterface;
+        }
+        CMN_LOG_CLASS(1) << "AddProvidedInterface: unable to add interface \""
+                         << newInterfaceName << "\"" << std::endl;
+        delete newInterface;
+        return 0;
+    }
+    CMN_LOG_CLASS(1) << "AddProvidedInterface: unable to create interface \""
+                     << newInterfaceName << "\"" << std::endl;
+    return 0;
 }
-
 
 
 mtsDeviceInterface * mtsDevice::GetProvidedInterface(const std::string & interfaceName) const {

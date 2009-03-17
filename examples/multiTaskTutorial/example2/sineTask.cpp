@@ -11,18 +11,18 @@ sineTask::sineTask(const std::string & taskName, double period):
     mtsTaskPeriodic(taskName, period, false, 5000)
 {
     SineData.AddToStateTable(StateTable, "SineData");
-    AddProvidedInterface("MainInterface");
+    mtsProvidedInterface * mainInterface = AddProvidedInterface("MainInterface");
     // add commands to access state table values
     SineData.AddReadCommandToTask(this, "MainInterface", "GetData");
     SineAmplitude.AddWriteCommandToTask(this, "MainInterface", "SetAmplitude");
     TriggerValue.AddWriteCommandToTask(this, "MainInterface", "SetTriggerValue");
     // add a command bound to a user defined method
-    this->AddCommandVoid(&sineTask::ResetTrigger, this,
-                         "MainInterface", "ResetTrigger");
+    mainInterface->AddCommandVoid(&sineTask::ResetTrigger, this,
+                                  "ResetTrigger");
     // define an event and setup our event sending function
     cmnDouble eventData; // data type used for the event payload
-    TriggerEvent.Bind(AddEventWrite("MainInterface", "TriggerEvent",
-                                    eventData));
+    TriggerEvent.Bind(mainInterface->AddEventWrite("TriggerEvent",
+                                                   eventData));
 }
 
 void sineTask::ResetTrigger(void)
@@ -58,7 +58,7 @@ void sineTask::Run(void) {
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2008 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---

@@ -7,7 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2008 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -115,10 +115,10 @@ public:
     CommandQueuedWriteMapType CommandsQueuedWrite;
 
     /*! Default length for argument buffers */
-    enum {DEFAULT_ARG_BUFFER_LEN = 16 };
+    enum {DEFAULT_ARG_BUFFER_LEN = 16};
 
     /*! Default length for event queue */
-    enum {DEFAULT_EVENT_QUEUE_LEN = 16 };
+    enum {DEFAULT_EVENT_QUEUE_LEN = 16};
 
     typedef mtsDeviceInterface BaseType;
 
@@ -151,39 +151,221 @@ private:
     virtual mtsCommandWriteBase * GetCommandWrite(const std::string & commandName) const;
 
     template <class __classType>
-    inline mtsCommandVoidBase * AddCommandVoid(void (__classType::*action)(void),
+    inline mtsCommandVoidBase * AddCommandVoid(void (__classType::*method)(void),
                                                __classType * classInstantiation,
-                                               const std::string & commandName) {
-        mtsCommandVoidBase* command = BaseType::AddCommandVoid(action, classInstantiation, commandName);
-        mtsCommandQueuedVoidBase * result = new mtsCommandQueuedVoid(0, command);
-        CommandsQueuedVoid.AddItem(commandName, result, 1);
-        return result;
-    }
+                                               const std::string & commandName);
 
-    inline mtsCommandVoidBase * AddCommandVoid(void (*action)(void),
-                                               const std::string & commandName) {
-        mtsCommandVoidBase* command = BaseType::AddCommandVoid(action, commandName);
-        mtsCommandQueuedVoidBase * result = new mtsCommandQueuedVoid(0, command);
-        CommandsQueuedVoid.AddItem(commandName, result, 1);
-        return result;
-    }
-
+    inline mtsCommandVoidBase * AddCommandVoid(void (*function)(void),
+                                               const std::string & commandName);
+    
     template <class __classType, class __argumentType>
-    inline mtsCommandWriteBase * AddCommandWrite(void (__classType::*action)(const __argumentType &),
+    inline mtsCommandWriteBase * AddCommandWrite(void (__classType::*method)(const __argumentType &),
                                                  __classType * classInstantiation, const std::string & commandName,
-                                                 const __argumentType & argumentModel) {
-        mtsCommandWriteBase* command = BaseType::AddCommandWrite<__classType, __argumentType>
-                                       (action, classInstantiation, commandName, argumentModel);
-        mtsCommandQueuedWriteBase * result = new mtsCommandQueuedWrite<__argumentType>(command);
-        CommandsQueuedWrite.AddItem(commandName, result, 1);
-        return result;
-    }
-
+                                                 const __argumentType & argumentPrototype);
 };
 
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsTaskInterface)
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsTaskInterface::ThreadResources)
+
+
+
+template <class __classType>
+inline mtsCommandVoidBase * mtsTaskInterface::AddCommandVoid(void (__classType::*method)(void),
+                                                             __classType * classInstantiation,
+                                                             const std::string & commandName) {
+    mtsCommandVoidBase * command = new mtsCommandVoidMethod<__classType>(method, classInstantiation, commandName);
+    if (command) {
+        if (CommandsVoid.AddItem(commandName, command, 1)) {
+            mtsCommandQueuedVoidBase * queuedCommand = new mtsCommandQueuedVoid(0, command);
+            if (queuedCommand) {
+                if (CommandsQueuedVoid.AddItem(commandName, queuedCommand, 1)) {
+                    return queuedCommand;
+                } else {
+                    delete command;
+                    delete queuedCommand;
+                    CMN_LOG_CLASS(1) << "AddCommandVoid: unable to add command \""
+                                     << commandName << "\"" << std::endl;
+                    return 0;
+                }
+            } else {
+                delete command;
+                CMN_LOG_CLASS(1) << "AddCommandVoid: unable to create queued command \""
+                                 << commandName << "\"" << std::endl;
+                return 0;
+            }
+        } else {
+            delete command;
+            CMN_LOG_CLASS(1) << "AddCommandVoid: unable to add command \""
+                             << commandName << "\"" << std::endl;
+            return 0;
+        }
+    } else {
+        CMN_LOG_CLASS(1) << "AddCommandVoid: unable to create command \""
+                         << commandName << "\"" << std::endl;
+        return 0;
+    }
+}
+
+
+inline mtsCommandVoidBase * mtsTaskInterface::AddCommandVoid(void (*function)(void),
+                                                             const std::string & commandName) {
+    mtsCommandVoidBase * command = new mtsCommandVoidFunction(function, commandName);
+    if (command) {
+        if (CommandsVoid.AddItem(commandName, command, 1)) {
+            mtsCommandQueuedVoidBase * queuedCommand = new mtsCommandQueuedVoid(0, command);
+            if (queuedCommand) {
+                if (CommandsQueuedVoid.AddItem(commandName, queuedCommand, 1)) {
+                    return queuedCommand;
+                } else {
+                    delete command;
+                    delete queuedCommand;
+                    CMN_LOG_CLASS(1) << "AddCommandVoid: unable to add command \""
+                                     << commandName << "\"" << std::endl;
+                    return 0;
+                }
+            } else {
+                delete command;
+                CMN_LOG_CLASS(1) << "AddCommandVoid: unable to create queued command \""
+                                 << commandName << "\"" << std::endl;
+                return 0;
+            }
+        } else {
+            delete command;
+            CMN_LOG_CLASS(1) << "AddCommandVoid: unable to add command \""
+                             << commandName << "\"" << std::endl;
+            return 0;
+        }
+    } else {
+        CMN_LOG_CLASS(1) << "AddCommandVoid: unable to create command \""
+                         << commandName << "\"" << std::endl;
+        return 0;
+    }
+}
+
+   
+template <class __classType, class __argumentType>
+inline mtsCommandWriteBase * mtsTaskInterface::AddCommandWrite(void (__classType::*method)(const __argumentType &),
+                                                               __classType * classInstantiation, const std::string & commandName,
+                                                               const __argumentType & argumentPrototype) {
+    mtsCommandWriteBase * command = new mtsCommandWrite<__classType, const __argumentType>
+        (method, classInstantiation, commandName, argumentPrototype);
+    if (command) {
+        if (CommandsWrite.AddItem(commandName, command, 1)) {
+            mtsCommandQueuedWriteBase * queuedCommand = new mtsCommandQueuedWrite<__argumentType>(command);
+            if (queuedCommand) {
+                if (CommandsQueuedWrite.AddItem(commandName, queuedCommand, 1)) {
+                    return queuedCommand;
+                } else {
+                    delete command;
+                    delete queuedCommand;
+                    CMN_LOG_CLASS(1) << "AddCommandWrite: unable to add command \""
+                                     << commandName << "\"" << std::endl;
+                    return 0;
+                }
+            } else {
+                delete command;
+                CMN_LOG_CLASS(1) << "AddCommandWrite: unable to create queued command \""
+                                 << commandName << "\"" << std::endl;
+                return 0;
+            }
+        } else {
+            delete command;
+            CMN_LOG_CLASS(1) << "AddCommandWrite: unable to add command \""
+                             << commandName << "\"" << std::endl;
+            return 0;
+        }
+    } else {
+        CMN_LOG_CLASS(1) << "AddCommandWrite: unable to create command \""
+                         << commandName << "\"" << std::endl;
+        return 0;
+    }
+}
+
+
+/* defined in mtsDeviceInterface.h, implemented here because
+   mtsTaskInterface needs to be defined */
+template <class __classType>
+inline mtsCommandVoidBase * mtsDeviceInterface::AddCommandVoid(void (__classType::*method)(void),
+                                                               __classType * classInstantiation,
+                                                               const std::string & commandName) {
+    mtsTaskInterface * taskInterface = dynamic_cast<mtsTaskInterface *>(this);
+    if (taskInterface) {
+        return taskInterface->AddCommandVoid(method, classInstantiation, commandName);
+    } else {
+        mtsCommandVoidBase * command = new mtsCommandVoidMethod<__classType>(method, classInstantiation, commandName);
+        if (command) {
+            if (CommandsVoid.AddItem(commandName, command, 1)) {
+                return command;
+            } else {
+                delete command;
+                CMN_LOG_CLASS(1) << "AddCommandVoid: unable to add command \""
+                                 << commandName << "\"" << std::endl;
+                return 0;
+            }
+        } else {
+            CMN_LOG_CLASS(1) << "AddCommandVoid: unable to create command \""
+                             << commandName << "\"" << std::endl;
+            return 0;
+        }
+    }
+}
+
+/* defined in mtsDeviceInterface.h, implemented here because
+   mtsTaskInterface needs to be defined */
+inline mtsCommandVoidBase * mtsDeviceInterface::AddCommandVoid(void (*function)(void),
+                                                               const std::string & commandName) {
+    mtsTaskInterface * taskInterface = dynamic_cast<mtsTaskInterface *>(this);
+    if (taskInterface) {
+        return taskInterface->AddCommandVoid(function, commandName);
+    } else {
+        mtsCommandVoidBase * command = new mtsCommandVoidFunction(function, commandName);
+        if (command) {
+            if (CommandsVoid.AddItem(commandName, command, 1)) {
+                return command;
+            } else {
+                delete command;
+                CMN_LOG_CLASS(1) << "AddCommandVoid: unable to add command \""
+                                 << commandName << "\"" << std::endl;
+                return 0;
+            }
+        } else {
+            CMN_LOG_CLASS(1) << "AddCommandVoid: unable to create command \""
+                             << commandName << "\"" << std::endl;
+            return 0;
+        }
+    }
+}
+
+/* defined in mtsDeviceInterface.h, implemented here because
+   mtsTaskInterface needs to be defined */
+template <class __classType, class __argumentType>
+inline mtsCommandWriteBase * mtsDeviceInterface::AddCommandWrite(void (__classType::*method)(const __argumentType &),
+                                                                 __classType * classInstantiation,
+                                                                 const std::string & commandName,
+                                                                 const __argumentType & argumentPrototype) {
+    mtsTaskInterface * taskInterface = dynamic_cast<mtsTaskInterface *>(this);
+    if (taskInterface) {
+        return taskInterface->AddCommandWrite(method, classInstantiation, commandName, argumentPrototype);
+    } else {
+        mtsCommandWriteBase * command = new mtsCommandWrite<__classType, const __argumentType>
+                                           (method, classInstantiation, commandName, argumentPrototype);
+        if (command) {
+            if (CommandsWrite.AddItem(commandName, command, 1)) {
+                return command;
+            } else {
+                delete command;
+                CMN_LOG_CLASS(1) << "AddCommandWrite: unable to add command \""
+                                 << commandName << "\"" << std::endl;
+                return 0;
+            }
+        } else {
+            CMN_LOG_CLASS(1) << "AddCommandWrite: unable to create command \""
+                             << commandName << "\"" << std::endl;
+            return 0;
+        }
+    }
+}
 
 
 #endif // _mtsTaskInterface_h

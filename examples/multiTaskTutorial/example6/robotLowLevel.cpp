@@ -20,10 +20,10 @@ robotLowLevel::robotLowLevel(const std::string & taskName, double period):
     DeltaJointRobot2.SetSize(NB_JOINTS);
 
     // create 4 interfaces, two for each robot
-    AddProvidedInterface("Robot1");
-    AddProvidedInterface("Robot1Observer");
-    AddProvidedInterface("Robot2");
-    AddProvidedInterface("Robot2Observer");
+    mtsProvidedInterface * robot1Interface = AddProvidedInterface("Robot1");
+    mtsProvidedInterface * robot1ObserverInterface = AddProvidedInterface("Robot1Observer");
+    mtsProvidedInterface * robot2Interface = AddProvidedInterface("Robot2");
+    mtsProvidedInterface * robot2ObserverInterface = AddProvidedInterface("Robot2Observer");
     // add the state data to the table
     PositionJointRobot1.AddToStateTable(StateTable, "PositionJointRobot1");
     PositionJointRobot2.AddToStateTable(StateTable, "PositionJointRobot2");
@@ -44,25 +44,25 @@ robotLowLevel::robotLowLevel(const std::string & taskName, double period):
     // provide write methods to the controlling interfaces
     // requires: method, object carrying the method, interface name, command name
     // and argument prototype
-    AddCommandWrite(&robotLowLevel::MovePositionJointRobot1, this,
-                    "Robot1", "MovePositionJoint", PositionJointRobot1.Data);
-    AddCommandWrite(&robotLowLevel::MovePositionJointRobot2, this,
-                    "Robot2", "MovePositionJoint", PositionJointRobot2.Data);
-    AddCommandVoid(&robotLowLevel::StopRobot1, this,
-                   "Robot1", "StopRobot");
-    AddCommandVoid(&robotLowLevel::StopRobot1, this,
-                   "Robot1Observer", "StopRobot");
-    AddCommandVoid(&robotLowLevel::StopRobot2, this,
-                   "Robot2", "StopRobot");
-    AddCommandVoid(&robotLowLevel::StopRobot2, this,
-                   "Robot2Observer", "StopRobot");
+    robot1Interface->AddCommandWrite(&robotLowLevel::MovePositionJointRobot1, this,
+                                     "MovePositionJoint", PositionJointRobot1.Data);
+    robot2Interface->AddCommandWrite(&robotLowLevel::MovePositionJointRobot2, this,
+                                     "MovePositionJoint", PositionJointRobot2.Data);
+    robot1Interface->AddCommandVoid(&robotLowLevel::StopRobot1, this,
+                                    "StopRobot");
+    robot1ObserverInterface->AddCommandVoid(&robotLowLevel::StopRobot1, this,
+                                            "StopRobot");
+    robot2Interface->AddCommandVoid(&robotLowLevel::StopRobot2, this,
+                                    "StopRobot");
+    robot2ObserverInterface->AddCommandVoid(&robotLowLevel::StopRobot2, this,
+                                            "StopRobot");
     // define events, provide argument prototype for write events
-    MotionFinishedRobot1.Bind(AddEventWrite("Robot1", "MotionFinished",
-                                            PositionJointRobot1.Data));
-    MotionFinishedRobot2.Bind(AddEventWrite("Robot2", "MotionFinished",
-                                            PositionJointRobot2.Data));
-    MotionStartedRobot1.Bind(AddEventVoid("Robot1", "MotionStarted"));
-    MotionStartedRobot2.Bind(AddEventVoid("Robot2", "MotionStarted"));
+    MotionFinishedRobot1.Bind(robot1Interface->AddEventWrite("MotionFinished",
+                                                             PositionJointRobot1.Data));
+    MotionFinishedRobot2.Bind(robot2Interface->AddEventWrite("MotionFinished",
+                                                             PositionJointRobot2.Data));
+    MotionStartedRobot1.Bind(robot1Interface->AddEventVoid("MotionStarted"));
+    MotionStartedRobot2.Bind(robot2Interface->AddEventVoid("MotionStarted"));
 }
 
 double robotLowLevel::SomeNoise(void)
@@ -171,7 +171,7 @@ void robotLowLevel::Run(void)
   Author(s):  Peter Kazanzides, Anton Deguet
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2008 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---

@@ -7,7 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2008 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -94,7 +94,7 @@ class CISST_EXPORT mtsDevice: public cmnGenericObject
       virtual so that mtsTaskBase can redefine it and generate the
       appropriate type of interface, i.e. mtsTaskInterface as opposed
       to mtsDeviceInterface for mtsDevice. */
-    virtual bool AddProvidedInterface(const std::string & newInterfaceName);
+    virtual mtsDeviceInterface * AddProvidedInterface(const std::string & newInterfaceName);
     
     /*! Return the list of provided interfaces.  This returns a list
       of names.  To retrieve the actual interface, use
