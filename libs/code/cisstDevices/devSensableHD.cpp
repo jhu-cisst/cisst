@@ -7,7 +7,7 @@
   Author(s): Anton Deguet
   Created on: 2008-04-04
 
-  (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2008-2009 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -209,6 +209,7 @@ void devSensableHD::SetupInterfaces(void)
     const DevicesMapType::iterator end = this->Devices.end();
     devSensableHDDeviceData * deviceData;
     std::string interfaceName;
+    mtsProvidedInterface * providedInterface;
 
     for (; iterator != end; iterator++) {
         // allocate memory
@@ -230,7 +231,7 @@ void devSensableHD::SetupInterfaces(void)
 
         // create interface with the device name, i.e. the map key
         CMN_LOG_CLASS(4) << "SetupInterfaces: creating interface \"" << interfaceName << "\"" << std::endl;
-        this->AddProvidedInterface(interfaceName);
+        providedInterface = this->AddProvidedInterface(interfaceName);
 
         // add the state data to the table
         deviceData->PositionCartesian.AddToStateTable(this->StateTable, interfaceName + "PositionCartesian");
@@ -244,15 +245,15 @@ void devSensableHD::SetupInterfaces(void)
         deviceData->PositionJoint.AddReadCommandToTask(this, interfaceName, "GetPositionJoint");
 
         // add a method to read the current state index
-        this->AddCommandRead(&mtsStateTable::GetIndexReader, &StateTable,
-                             interfaceName, "GetStateIndex");
+        providedInterface->AddCommandRead(&mtsStateTable::GetIndexReader, &StateTable,
+                                          "GetStateIndex");
         
         // adds frames to transformation manager
         deviceData->PositionCartesian.Data.ReferenceFrame() =
             new prmTransformationFixed(interfaceName + "Base",
                                        vctFrm3::Identity(),
                                        &prmTransformationManager::TheWorld);
-        deviceData->PositionFunctionForTransformationManager.Bind(this->GetProvidedInterface(interfaceName)
+        deviceData->PositionFunctionForTransformationManager.Bind(providedInterface
                                                                       ->GetCommandRead("GetPositionCartesian"));
         deviceData->PositionCartesian.Data.MovingFrame() =
             new prmTransformationDynamic(interfaceName + "Tip",
@@ -260,17 +261,19 @@ void devSensableHD::SetupInterfaces(void)
                                          deviceData->PositionCartesian.Data.ReferenceFrame());
         
         // Add interfaces for button with events
-        this->AddProvidedInterface(interfaceName + "Button1");
-        deviceData->Button1Event.Bind(AddEventWrite(interfaceName + "Button1",
-                                      "Button", prmEventButton()));
-        this->AddProvidedInterface(interfaceName + "Button2");
-        deviceData->Button2Event.Bind(AddEventWrite(interfaceName + "Button2",
-                                      "Button", prmEventButton()));
+        providedInterface = this->AddProvidedInterface(interfaceName + "Button1");
+        deviceData->Button1Event.Bind(providedInterface->AddEventWrite("Button",
+                                                                       prmEventButton()));
+        providedInterface = this->AddProvidedInterface(interfaceName + "Button2");
+        deviceData->Button2Event.Bind(providedInterface->AddEventWrite("Button",
+                                                                       prmEventButton()));
 
         // This allows us to return Data->RetValue from the Run method.
         this->Driver->CallbackReturnValue = HD_CALLBACK_CONTINUE;
         this->SetThreadReturnValue(static_cast<void *>(&this->Driver->CallbackReturnValue));
     }
+    CMN_LOG_CLASS(4) << "SetupInterfaces: interfaces created: " << std::endl
+                     << *this << std::endl;
 }
 
 
