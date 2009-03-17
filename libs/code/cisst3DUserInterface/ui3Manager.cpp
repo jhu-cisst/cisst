@@ -61,7 +61,8 @@ ui3Manager::ui3Manager(const std::string & name):
     this->LeftMasterPosition.AddToStateTable(this->StateTable, "LeftMasterPosition");
 
     // create an interface for all behaviors to access some state information
-    this->AddProvidedInterface("BehaviorsInterface");
+    mtsProvidedInterface * behaviorsInterface = 
+        this->AddProvidedInterface("BehaviorsInterface");
     this->RightMasterPosition.AddReadCommandToTask(this, "BehaviorsInterface", "RightMasterPosition");
     this->LeftMasterPosition.AddReadCommandToTask(this, "BehaviorsInterface", "LeftMasterPosition");
 
@@ -96,6 +97,10 @@ bool ui3Manager::SetupRightMaster(mtsDevice * positionDevice, const std::string 
     if (requiredInterface) {
         // bound the mtsFunction to the command provided by the interface 
         requiredInterface->AddFunction("GetPositionCartesian", RightMasterGetCartesianPosition, mtsRequired);
+    } else {
+        CMN_LOG_CLASS(1) << "SetupRightMaster: failed to add \"RightMaster\" interface, are you trying to set this arm twice?"
+                         << std::endl;
+        return false;
     }
     // connect the right master device to the right master required interface
     this->TaskManager->Connect(this->GetName(), "RightMaster",
@@ -315,9 +320,10 @@ bool ui3Manager::AddBehavior(ui3BehaviorBase * behavior,
     managerInterface->AddEventHandlerWrite(&ui3BehaviorBase::LeftMasterButtonCallback,
                                            behavior, "LeftMasterButton", prmEventButton());
     std::string interfaceName("BehaviorInterface" + behavior->GetName());
-    this->AddProvidedInterface(interfaceName);
-    behavior->RightMasterButtonEvent.Bind(this->AddEventWrite(interfaceName, "RightMasterButton", prmEventButton()));
-    behavior->LeftMasterButtonEvent.Bind(this->AddEventWrite(interfaceName, "LeftMasterButton", prmEventButton()));
+    mtsProvidedInterface * providedInterface;
+    providedInterface = this->AddProvidedInterface(interfaceName);
+    behavior->RightMasterButtonEvent.Bind(providedInterface->AddEventWrite("RightMasterButton", prmEventButton()));
+    behavior->LeftMasterButtonEvent.Bind(providedInterface->AddEventWrite("LeftMasterButton", prmEventButton()));
 
     // add the task to the task manager (mts) code 
     this->TaskManager->AddTask(behavior);
