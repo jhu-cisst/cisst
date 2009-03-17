@@ -31,6 +31,9 @@ http://www.cisst.org/cisst/license.txt.
 // Support for Videre Design SVS
 #define CISST_SVL_HAS_SVS @CISST_SVL_HAS_SVS@
 
+// Support for DirectShow
+#define CISST_SVL_HAS_DIRECTSHOW @CISST_SVL_HAS_DIRECTSHOW@
+
 // Support for libDC1394
 #define CISST_SVL_HAS_LIBDC1394 @CISST_SVL_HAS_LIBDC1394@
 

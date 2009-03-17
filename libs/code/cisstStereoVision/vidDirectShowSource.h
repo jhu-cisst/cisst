@@ -25,9 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstStereoVision/svlVideoCaptureSource.h>
 #include "svlImageBuffer.h"
-#include "streams.h"
-#include "qedit.h"
-#include "dshow.h"
+#include "vidDirectShowInputSelector.h"
 
 
 class CDirectShowSource;

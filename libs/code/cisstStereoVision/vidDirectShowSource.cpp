@@ -21,7 +21,6 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include "vidDirectShowSource.h"
-#include "crossbar.h"
 
 using namespace std;
 
@@ -727,14 +726,14 @@ int CDirectShowSource::SetDeviceInput(IBaseFilter *capfilter, int input_id)
     if (capfilter == 0) return SVL_FAIL;
 
     HRESULT hr;
-    CCrossbar *crossbar;
+    CDirectShowInputSelector *crossbar;
     GUID pincategory;
     IPin *pin;
 
     pincategory = PIN_CATEGORY_ANALOGVIDEOIN;
     pin = EnumeratePin(capfilter, 0, &pincategory);
     if (pin != 0) {
-        crossbar = new CCrossbar(pin, &hr);
+        crossbar = new CDirectShowInputSelector(pin);
         hr = crossbar->SetInputIndex((LONG)input_id);
 
         delete crossbar;
@@ -752,28 +751,31 @@ int CDirectShowSource::GetDeviceInputs(IBaseFilter *capfilter, svlVideoCaptureSo
         deviceinfo == 0) return SVL_FAIL;
 
     IPin *pin;
-	HRESULT hr;
-    CCrossbar *crossbar;
+    CDirectShowInputSelector *crossbar;
     GUID pincategory;
     LONG count;
-    int i;
+    std::string name;
+    int i, length;
 
     pincategory = PIN_CATEGORY_ANALOGVIDEOIN;
     pin = EnumeratePin(capfilter, 0, &pincategory);
     if (pin != 0) {
-        crossbar = new CCrossbar(pin, &hr);
+        crossbar = new CDirectShowInputSelector(pin);
 
-        crossbar->GetInputCount(&count);
+        count = crossbar->GetInputCount();
         if (count > SVL_VCS_ARRAY_LENGTH) count = SVL_VCS_ARRAY_LENGTH;
         deviceinfo->inputcount = count;
 
         if (count > 0) {
         // Crossbar device found
             for (i = 0; i < count; i ++) {
-                crossbar->GetInputName(i, deviceinfo->inputnames[i], SVL_VCS_STRING_LENGTH - 1);
+                crossbar->GetInputName(i, name);
+                length = std::min((int)SVL_VCS_STRING_LENGTH - 1, (int)name.length());
+                memcpy(deviceinfo->inputnames[i], name.c_str(), length);
+                deviceinfo->inputnames[i][length] = 0;
             }
 
-            crossbar->GetInputIndex(&count);
+            count = crossbar->GetInputIndex();
             deviceinfo->activeinput = count;
         }
         else {

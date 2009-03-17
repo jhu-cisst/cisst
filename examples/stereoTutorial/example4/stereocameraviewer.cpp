@@ -237,7 +237,7 @@ int CameraViewer(bool interpolation, int width, int height)
         if (viewer_stream.Trunk().Append(&viewer_resizer) != SVL_OK) goto labError;
     }
     if (viewer_stream.Trunk().Append(&viewer_fps) != SVL_OK) goto labError;
-//    if (viewer_stream.Trunk().Append(&viewer_window) != SVL_OK) goto labError;
+    if (viewer_stream.Trunk().Append(&viewer_window) != SVL_OK) goto labError;
 
     cerr << endl << "Starting stream... ";
 

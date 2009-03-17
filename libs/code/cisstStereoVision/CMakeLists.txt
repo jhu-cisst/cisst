@@ -192,29 +192,11 @@ IF(WIN32)
     FIND_PACKAGE(DirectShow)
     INCLUDE_DIRECTORIES(${DIRECTSHOW_INCLUDE_DIR} ${DIRECTX_INCLUDE_DIR})
 
-    # Find samples and compiled samples
-    SET(CISST_SVL_DS_SDK_DIR "C:/Program Files/Microsoft Platform SDK for Windows Server 2003 R2/Samples")
-    FIND_PATH(CISST_SVL_DS_CROSSBAR_PATH 
-              NAMES crossbar.h
-              PATHS "${CISST_SVL_DS_SDK_DIR}/Multimedia/DirectShow/Capture/AMCap")
-    FIND_FILE(CISST_SVL_DS_CROSSBAR_OBJ
-              NAMES crossbar.obj
-              PATHS "${CISST_SVL_DS_SDK_DIR}/Multimedia/DirectShow/Capture/AMCap/XP32_RETAIL")
-    CONFIGURE_FILE(${CISST_SVL_DS_CROSSBAR_OBJ}
-                   ${CMAKE_CURRENT_SOURCE_DIR}/crossbar-copy.obj COPYONLY)
-    FIND_PATH(CISST_SVL_DS_BASECLASSES_PATH 
-              NAMES streams.h
-              PATHS "${CISST_SVL_DS_SDK_DIR}/Multimedia/DirectShow/BaseClasses")
-    FIND_LIBRARY(CISST_SVL_DS_strmbase_LIB
-                 NAMES strmbase
-                 PATHS "${CISST_SVL_DS_SDK_DIR}/Multimedia/DirectShow/BaseClasses/XP32_RETAIL")
-
-    INCLUDE_DIRECTORIES(${CISST_SVL_DS_CROSSBAR_PATH} ${CISST_SVL_DS_BASECLASSES_PATH})
-
     SET(SOURCE_FILES
         ${SOURCE_FILES}
-	    crossbar-copy.obj       # hack, file copied from SDK sample directory as CMake doesn't allow absolute paths
-        vidDirectShowSource.h   # private header
+        vidDirectShowInputSelector.h    # private header
+        vidDirectShowInputSelector.cpp
+        vidDirectShowSource.h           # private header
         vidDirectShowSource.cpp
         )
 
