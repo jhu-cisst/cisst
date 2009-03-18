@@ -60,10 +60,12 @@ public:
   bool AddItem(const std::string & name, _ItemType * item, cmnLogger::LoDType lod = 99);
   _ItemType *GetItem(const std::string & name, cmnLogger::LoDType lod = 99) const;
   std::vector<std::string> GetNames() const;
+  typedef void (_ItemType::*VoidFuncPtr)(void);
+  void ForEachVoid(VoidFuncPtr f);
   const MapType &GetMap() const { return Map; }
   MapType &GetMap() { return Map; }
   void ToStream(std::ostream & outputStream) const;
-  void Cleanup(void);  // needed?
+  void Cleanup(void) { ForEachVoid(&_ItemType::Cleanup); }  // needed?
   // free all memory
   void DeleteAll(void);
 };
@@ -105,6 +107,14 @@ std::vector<std::string> mtsMap<_ItemType>::GetNames(void) const {
 }
 
 template <class _ItemType>
+void mtsMap<_ItemType>::ForEachVoid(VoidFuncPtr f)
+{
+    typename MapType::iterator iter;
+    for (iter = Map.begin(); iter != Map.end(); iter++)
+        (iter->second->*f)();
+}
+
+template <class _ItemType>
 void mtsMap<_ItemType>::ToStream(std::ostream & outputStream) const
 {
     unsigned int counter = 0;
@@ -114,18 +124,6 @@ void mtsMap<_ItemType>::ToStream(std::ostream & outputStream) const
          ++iter, ++counter) {
         outputStream << "- " << MapName << "[" << counter << "]: "
                      << *(iter->second) << std::endl;
-    }
-}
-
-
-template <class _ItemType>
-void mtsMap<_ItemType>::Cleanup(void) {
-    typename MapType::iterator iterator = Map.begin();
-    const typename MapType::iterator end = Map.end();
-    for (;
-         iterator != end;
-         ++iterator) {
-        iterator->second->Cleanup();
     }
 }
 
