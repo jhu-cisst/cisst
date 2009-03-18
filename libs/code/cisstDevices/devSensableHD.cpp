@@ -118,7 +118,7 @@ void devSensableHD::Run(void)
             event.SetStateIndex(stateIndex); 
             // test for button 1
             currentButtonState = currentButtons & HD_DEVICE_BUTTON_1;
-            previousButtonState = deviceData->Buttons.Data & HD_DEVICE_BUTTON_1;
+            previousButtonState = deviceData->Buttons & HD_DEVICE_BUTTON_1;
             if (currentButtonState != previousButtonState) {
                 if (currentButtonState == 0) {
                     event.SetType(prmEventButton::RELEASED);
@@ -141,7 +141,7 @@ void devSensableHD::Run(void)
                 deviceData->Button2Event(event);
             }
             // save previous buttons state
-            deviceData->Buttons.Data = currentButtons;
+            deviceData->Buttons = currentButtons;
         }
     }
 
@@ -252,7 +252,7 @@ void devSensableHD::SetupInterfaces(void)
 
         // add a method to read the current state index
         providedInterface->AddCommandRead(&mtsStateTable::GetIndexReader, &StateTable,
-                                          "GetStateIndex");
+                                          "GetStateIndex", mtsStateIndex());
         
         // adds frames to transformation manager
         deviceData->PositionCartesian.ReferenceFrame() =

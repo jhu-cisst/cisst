@@ -27,7 +27,6 @@ http://www.cisst.org/cisst/license.txt.
 #if defined CISST_DEV_HAS_SENSABLEHD || defined DOXYGEN
 
 #include <cisstMultiTask/mtsTaskFromCallback.h>
-#include <cisstMultiTask/mtsStateData.h>
 #include <cisstParameterTypes.h>
 
 // Always include last
