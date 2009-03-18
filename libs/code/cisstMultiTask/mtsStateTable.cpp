@@ -7,8 +7,7 @@
   Author(s):  Ankur Kapoor
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -30,9 +29,6 @@ http://www.cisst.org/cisst/license.txt.
 mtsStateTable::mtsStateTable(int size) :
 		HistoryLength(size), NumberStateData(0), IndexWriter(0),IndexReader(0),
 		StateVector(NumberStateData), StateVectorDataNames(NumberStateData),
-#if 0
-		DataValid(NumberStateData, false), Copy(NumberStateData, true),
-#endif
         Ticks(size, mtsStateIndex::TimeTicksType(0)),
         Tic(0.0),
         Toc(0.0),
@@ -59,58 +55,22 @@ mtsStateIndex mtsStateTable::GetIndexReader(void) const {
     return mtsStateIndex(tmp, Ticks[tmp], HistoryLength);
 }
 
-
-bool mtsStateTable::ReadFromReader(mtsStateDataId id, const mtsStateIndex & timeIndex, cmnGenericObject & obj) const {
-    CMN_ASSERT(id != -1);
-    if (id == -1) {
-        CMN_LOG(1) << "Class mtsStateTable: ReadFromReader: obj must be created using NewElement " << std::endl;
-        return false;
+mtsStateTable::AccessorBase *mtsStateTable::GetAccessor(const cmnGenericObject &element) const
+{
+    for (unsigned int i = 0; i < StateVectorElements.size(); i++) {
+        if (&element == StateVectorElements[i])
+            return StateVectorAccessors[i];
     }
-    // timeIndex refers to some time and index  tuple of the past.
-    if (!StateVector[id]) {
-        CMN_LOG(1) << "Class mtsStateTable: ReadFromReader: No state data array corresponding to given id: " << id << std::endl;
-        return false;
-    }
-    StateVector[id]->Get(timeIndex.Index(), obj);
-    return (Ticks[timeIndex.Index()] == timeIndex.Ticks());
+    return 0;
 }
 
-bool mtsStateTable::ReadVectorFromReader(mtsStateDataId id, const mtsStateIndex & timeIndexStart, 
-                                         const mtsStateIndex & timeIndexEnd, cmnGenericObject &obj) const {
-    CMN_ASSERT(id != -1);
-    if (id == -1) {
-        CMN_LOG(1) << "Class mtsStateTable: ReadVectorFromReader: obj must be created using NewElement " << std::endl;
-        return false;
-    }
-    if (!StateVector[id]) {
-        CMN_LOG(1) << "Class mtsStateTable: ReadVectorFromReader: No state data array corresponding to given id: " << id << std::endl;
-        return false;
-    }
-    // timeIndex refers to some time and index  tuple of the past.
-    // First, we check if the (time,index) tuples are valid, then we check that
-    // the Start is older (lesser Ticks) than the End.
-    // (not yet implemented -- what about wraparound?)
-    if ((Ticks[timeIndexStart.Index()] != timeIndexStart.Ticks()) ||
-        (Ticks[timeIndexEnd.Index()] != timeIndexEnd.Ticks())) {
-        CMN_LOG(1) << "ReadVectorFromReader: data not available" << std::endl;
-        return false;
-    }
-    bool ret = StateVector[id]->GetVector(timeIndexStart.Index(), timeIndexEnd.Index(), obj);
-    // If GetVector succeeded, then check if the data is still valid (has not been overwritten).
-    // Here it is sufficient to just check the oldest index (Start).
-    if (ret)
-       ret = Ticks[timeIndexStart.Index()] == timeIndexStart.Ticks();
-    return ret;
-}
-
-
-bool mtsStateTable::ReadFromReader(const std::string & name, const mtsStateIndex & timeIndex, cmnGenericObject & obj) {
+mtsStateTable::AccessorBase *mtsStateTable::GetAccessor(const std::string &name) const
+{
     for (unsigned int i = 0; i < StateVectorDataNames.size(); i++) {
-        if (StateVectorDataNames[i] == name) {
-            return ReadFromReader(i, timeIndex, obj);
-        }
+        if (name == StateVectorDataNames[i])
+            return StateVectorAccessors[i];
     }
-    return false;
+    return 0;
 }
 
 /* All the non-const methods that can be called from writer only */
@@ -119,25 +79,6 @@ mtsStateIndex mtsStateTable::GetIndexWriter(void) {
     return mtsStateIndex(IndexWriter, Ticks[IndexWriter], HistoryLength);
 }
 
-
-bool mtsStateTable::ReadFromWriter(mtsStateDataId id, const mtsStateIndex & timeIndex, cmnGenericObject &obj) {
-    CMN_ASSERT(id != -1);
-    if (id == -1) {
-        CMN_LOG(1) << "Class mtsStateTable: ReadFromWriter: obj must be created using NewElement " << std::endl;
-        return false;
-    }
-    if (timeIndex.Index() == (int)IndexWriter)
-        return false;
-    bool result = (Ticks[timeIndex.Index()] == timeIndex.Ticks());
-    if (result) {
-        if (!StateVector[id]) {
-            CMN_LOG(1) << "Class mtsStateTable: ReadFromWriter: No state data array corresponding to given id: " << id << std::endl;
-            return false;
-        }
-    }
-    StateVector[id]->Get(timeIndex.Index(), obj);
-    return result;
-}
 
 bool mtsStateTable::Write(mtsStateDataId id, const cmnGenericObject &obj) {
     bool result;

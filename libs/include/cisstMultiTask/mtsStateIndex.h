@@ -7,8 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2008 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -61,19 +60,11 @@ class CISST_EXPORT mtsStateIndex : public cmnGenericObject {
       the time */
 	int TimeIndex;
 
-    //*! Return the index into the circular buffer.*/
-	int Index(void) const {
-       return TimeIndex;
-    }
-
 	/*! The tick value corresponding to the time. */
 	TimeTicksType TimeTicks;
 
 	/*! The size of the circular buffer. */
 	int BufferLength;
-
-    /*! State table needs to have access to the internals of this class (index specifically) */
-    friend class mtsStateTable;
 
 public:
 	/*! Default constructor. Does nothing. */
@@ -94,6 +85,11 @@ public:
     /*! The length of the circular buffer. */
     int Length(void) const {
         return BufferLength;
+    }
+
+    //*! Return the index into the circular buffer.*/
+	int Index(void) const {
+       return TimeIndex;
     }
 
 	/*! Return the ticks corresponding to the time. */

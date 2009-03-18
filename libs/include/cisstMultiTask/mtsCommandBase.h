@@ -74,7 +74,8 @@ public:
         BAD_INPUT = 14,
         NO_INTERFACE = 15,
         MAILBOX_FULL = 16,
-        DISABLED = 17
+        DISABLED = 17,
+        COMMAND_FAILED = 18  // Read or QualifiedRead returned 'false'
     };
     
     /*! The constructor. Does nothing */

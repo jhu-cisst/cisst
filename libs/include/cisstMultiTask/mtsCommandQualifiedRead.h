@@ -53,7 +53,8 @@ public:
 
     /*! Typedef for pointer to member function of the specific
       interface class. */
-    typedef void(_classType::*ActionType)(const Argument1Type &, Argument2Type &) const;
+    typedef void(_classType::*ActionTypeOld)(const Argument1Type &, Argument2Type &) const;
+    typedef bool(_classType::*ActionType)(const Argument1Type &, Argument2Type &) const;
 
 private:
     /*! Private copy constructor to prevent copies */
@@ -62,7 +63,9 @@ private:
 protected:
     /*! The pointer to member function of the receiver class that
       is to be invoked for a particular instance of the command*/
+    // PKAZ 3/17/09: for now, support void return (ActionTypeOld) for backward compatibility
     ActionType Action;
+    ActionTypeOld ActionOld;
 
     /*! Stores the receiver object of the command */
     ClassType * ClassInstantiation;
@@ -88,6 +91,17 @@ public:
                             const Argument2Type & argument2Prototype):
         BaseType(name),
         Action(action),
+        ActionOld(0),
+        ClassInstantiation(classInstantiation),
+        Argument1Prototype(argument1Prototype),
+        Argument2Prototype(argument2Prototype)
+    {}
+    mtsCommandQualifiedRead(ActionTypeOld action, ClassType * classInstantiation, const std::string & name,
+                            const Argument1Type & argument1Prototype,
+                            const Argument2Type & argument2Prototype):
+        BaseType(name),
+        Action(0),
+        ActionOld(action),
         ClassInstantiation(classInstantiation),
         Argument1Prototype(argument1Prototype),
         Argument2Prototype(argument2Prototype)
@@ -113,8 +127,14 @@ public:
             if (data2 == 0) {
                 return mtsCommandBase::BAD_INPUT;
             }
-            (ClassInstantiation->*Action)(*data1, *data2);
-            return mtsCommandBase::DEV_OK;
+            mtsCommandBase::ReturnType ret = mtsCommandBase::DEV_OK;
+            if (Action) {
+                if (!(ClassInstantiation->*Action)(*data1, *data2))
+                    ret = mtsCommandBase::COMMAND_FAILED;
+            }
+            else if (ActionOld)
+                (ClassInstantiation->*ActionOld)(*data1, *data2);
+            return ret;
         }
         return mtsCommandBase::DISABLED;
     }

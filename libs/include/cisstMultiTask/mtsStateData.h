@@ -32,6 +32,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsTask.h>
 #include <cisstMultiTask/mtsVector.h>
 
+// PKAZ 3/17/09:  this entire class is deprecated and exists just for backward compatibility.
+//
 // This class handles the interface to the state table. Note that there are a few things mixed
 // in here that could be separated:
 //
@@ -50,35 +52,38 @@ template <class _elementType>
 class mtsStateData {
 protected:
     typedef mtsStateData<_elementType> ThisType;
+    typedef mtsStateTable::Accessor<_elementType> AccessorType;
     typedef _elementType value_type;
     mtsStateDataId Id;
     mtsStateTable * Table;
+    const AccessorType * Accessor;
     
 public:  // PKAZ (was protected, but needed access for daVinci example)
     void Get(const mtsStateIndex & when, value_type & data) const {
         //if (!Table) return mtsCommandBase::DEV_NOT_OK;
         //return Table->ReadFromReader(Id, when, data)?mtsCommandBase::DEV_OK:mtsCommandBase::DEV_NOT_OK;
-        if (Table) Table->ReadFromReader(Id, when, data);
+        //if (Table) Table->ReadFromReader(Id, when, data);
+        if (Accessor) Accessor->Get(when, data);
     }
 
     void GetLatest(value_type & obj) const {
         //if (!Table) return mtsCommandBase::DEV_NOT_OK;
         //return Get(Table->GetIndexReader(), obj);
-        if (Table) Get(Table->GetIndexReader(), obj);
+        //if (Table) Get(Table->GetIndexReader(), obj);
+        if (Accessor) Accessor->GetLatest(obj);
     }
 
-#ifdef CISST_GETVECTOR
     // Get a vector of data, starting and ending at the specified time indices (inclusive).
     // For now, set the start index based on the vector size. In the future, we
     // should define a new parameter type that consists of a pair of mtsStateIndex.
     void GetVector(const mtsStateIndex & end, mtsVector<value_type> & data) const {
         if (data.size() > 0) {
-            mtsStateIndex start = end;
-            start -= (data.size()-1);
-            if (Table) Table->ReadVectorFromReader(Id, start, end, data);
+            //mtsStateIndex start = end;
+            //start -= (data.size()-1);
+            //if (Table) Table->ReadVectorFromReader(Id, start, end, data);
+            if (Accessor) Accessor->GetVector(end, data);
         }
     }
-#endif
 
     void Set(const value_type & obj) {
         Data = obj;
@@ -87,7 +92,7 @@ public:  // PKAZ (was protected, but needed access for daVinci example)
 public:
     value_type Data;
     
-    mtsStateData() : Id(-1), Table(0) {}
+    mtsStateData() : Id(-1), Table(0), Accessor(0) {}
     ~mtsStateData() {}
     
     /*! Conversion assignment.  This allows to assign from an object
@@ -111,6 +116,9 @@ public:
     void AddToStateTable(mtsStateTable & table, const std::string & dataName = "") {
         Table = &table;
         Id = Table->NewElement(dataName, &Data);
+        Accessor = dynamic_cast<const AccessorType *>(table.GetAccessor(dataName));
+        if (!Accessor)
+            CMN_LOG(1) << "mtsStateData: could not get data accessor for " << dataName << std::endl;
     }
 
     /*! Adds command objects to the specified device interface. Note

@@ -37,6 +37,8 @@ http://www.cisst.org/cisst/license.txt.
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
 
+class mtsStateTable;
+
 /*!
   \file
   \brief Declaration of mtsDeviceInterface
@@ -258,6 +260,14 @@ public:
                                                __classType * classInstantiation,
                                                const std::string & commandName,
                                                const __argumentType & argumentPrototype = __argumentType());
+
+    /* AddCommandReadState and AddCommandWriteState are only relevant for tasks. */
+    template <class _elementType>
+    mtsCommandReadBase * AddCommandReadState(const mtsStateTable &stateTable,
+                         const _elementType &stateData, const std::string &commandName);
+    template <class _elementType>
+    mtsCommandWriteBase * AddCommandWriteState(const mtsStateTable &stateTable,
+                          const _elementType &stateData, const std::string &commandName);
 
     /* The following method is implemented in mtsTaskInterface.h */
     /*! Add a write command to a device interface based on a method

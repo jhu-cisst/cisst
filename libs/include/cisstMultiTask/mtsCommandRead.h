@@ -53,7 +53,8 @@ public:
 
     /*! Typedef for pointer to member function of the specific interface
       class. */
-    typedef void(_classType::*ActionType)(ArgumentType &) const;
+    typedef void(_classType::*ActionTypeOld)(ArgumentType &) const;
+    typedef bool(_classType::*ActionType)(ArgumentType &) const;
 
 private:
     /*! Private copy constructor to prevent copies */
@@ -62,7 +63,9 @@ private:
 protected:
     /*! The pointer to member function of the receiver class that
       is to be invoked for a particular instance of the command*/
+    // PKAZ 3/17/09: for now, support void return (ActionTypeOld) for backward compatibility
     ActionType Action;
+    ActionTypeOld ActionOld;
 
     /*! Stores the receiver object of the command */
     ClassType * ClassInstantiation;
@@ -84,6 +87,15 @@ public:
                    const ArgumentType & argumentPrototype):
         BaseType(name),
         Action(action),
+        ActionOld(0),
+        ClassInstantiation(classInstantiation),
+        ArgumentPrototype(argumentPrototype)
+    {}
+    mtsCommandRead(ActionTypeOld action, ClassType * classInstantiation, const std::string & name,
+                   const ArgumentType & argumentPrototype):
+        BaseType(name),
+        Action(0),
+        ActionOld(action),
         ClassInstantiation(classInstantiation),
         ArgumentPrototype(argumentPrototype)
     {}
@@ -103,8 +115,14 @@ public:
             if (data == 0) {
                 return mtsCommandBase::BAD_INPUT;
             }
-            (ClassInstantiation->*Action)(*data);
-            return mtsCommandBase::DEV_OK;
+            mtsCommandBase::ReturnType ret = mtsCommandBase::DEV_OK;
+            if (Action) {
+                if (!(ClassInstantiation->*Action)(*data))
+                    ret = mtsCommandBase::COMMAND_FAILED;
+            }
+            else if (ActionOld)
+                (ClassInstantiation->*ActionOld)(*data);
+            return ret;
         }
         return mtsCommandBase::DISABLED;
     }

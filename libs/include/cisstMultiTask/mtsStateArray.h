@@ -7,8 +7,7 @@
   Author(s):  Ankur Kapoor
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2008 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -70,20 +69,18 @@ public:
 	/*! Default destructor. */
 	virtual ~mtsStateArray() {}
 
-    
-	/*! Overloaded [] operator. Returns data at index */
-	inline virtual cmnGenericObject & operator[](index_type index){
-        return Data[index];
-    }
-    
-    
-	inline virtual const cmnGenericObject & operator[](index_type index) const {
-        return Data[index];
-    }
+    /*! Access element at index. This returns the data of the derived type
+      (value_type) rather than the base type (cmnGenericObject), which is
+      returned by the overloaded operator []. */
+    const value_type & Element(index_type index) const { return Data[index]; }
+    value_type & Element(index_type index) { return Data[index]; }
 
+	/*! Overloaded [] operator. Returns data at index (of type cmnGenericObject). */
+	inline cmnGenericObject & operator[](index_type index){ return Data[index]; }
+	inline const cmnGenericObject & operator[](index_type index) const { return Data[index]; }
     
 	/* Create the array of data. */
-	inline virtual mtsStateArrayBase * Create(const cmnGenericObject * objectExample,
+	inline mtsStateArrayBase * Create(const cmnGenericObject * objectExample,
                                               size_type size) {
         const value_type * typedObjectExample = dynamic_cast<const value_type *>(objectExample);
         if (typedObjectExample) {
@@ -101,7 +98,7 @@ public:
 
     
 	/*! Copy data from one index to another within the same array.  */
-	inline virtual void Copy(index_type indexTo, index_type indexFrom) {
+	inline void Copy(index_type indexTo, index_type indexFrom) {
         this->Data[indexTo] = this->Data[indexFrom];
     }
     
@@ -116,13 +113,12 @@ public:
 	  dynamic cast.
 	 */
     //@{
-	virtual bool Get(index_type index, cmnGenericObject & object) const;
-	virtual bool Set(index_type index, const cmnGenericObject & object);
-
-    /*! GetVector gets a vector of data. Here, we use RTTI to make sure that object
-        is of type mtsVector<_elementType> and is large enough. */
-	virtual bool GetVector(index_type indexStart, index_type indexEnd, cmnGenericObject & object) const;
+	bool Get(index_type index, cmnGenericObject & object) const;
+	bool Set(index_type index, const cmnGenericObject & object);
     //@}
+
+	/*! Get data vector from array. */
+	virtual bool GetVector(index_type indexStart, index_type indexEnd, mtsVector<_elementType> &data) const;
 };
 
 
@@ -170,37 +166,27 @@ bool mtsStateArray<_elementType>::Get(index_type index, cmnGenericObject & objec
 }
 
 template <class _elementType>
-bool mtsStateArray<_elementType>::GetVector(index_type indexStart, index_type indexEnd, cmnGenericObject &object) const {
-    // PK: why is this typeid check necessary?  The dynamic_cast should fail.
-    if (typeid(object) != typeid(mtsVector<_elementType>)) {
-		CMN_LOG(5) << "Class mtsStateArray: GetVector(): The passed object is not an mtsVector of the appropriate type. Expected: "
-                   << typeid(mtsVector<_elementType>).name() 
-                   << "Got: " << typeid(object).name() << std::endl;
-		return false;
-	}
-	mtsVector<_elementType>* pdata = dynamic_cast<mtsVector<_elementType>*>(&object);
-    if (!pdata) {
-		CMN_LOG(5) << "Class mtsStateArray: GetVector(): dynamic_cast failure" << std::endl;
-        return false;
-    }
+bool mtsStateArray<_elementType>::GetVector(index_type indexStart, index_type indexEnd,
+                                            mtsVector<_elementType> &data) const
+{
     // Make sure vector is big enough
     unsigned int numToCopy = (Data.size() + indexEnd - indexStart + 1)%Data.size();
-    if (pdata->size() < numToCopy) {
+    if (data.size() < numToCopy) {
 		CMN_LOG(1) << "Class mtsStateArray: GetVector(): provided array too small, size = "
-                   << pdata->size() << ", requested copy = " << numToCopy << std::endl;
+                   << data.size() << ", requested copy = " << numToCopy << std::endl;
         return false;
     }
-    // PK: probably should use iterators instead
+    // PK: probably should use iterators instead (or perhaps a cisstVector fastcopy?)
     unsigned int i, j;
     if (indexEnd < indexStart) {  // wrap-around case
         for (i=0, j=indexStart; j < Data.size(); i++, j++)
-            (*pdata)[i] = Data[j];
+            data[i] = Data[j];
         for (j=0; j <= indexEnd; i++, j++)
-            (*pdata)[i] = Data[j];
+            data[i] = Data[j];
     }
     else {
         for (i=0; i < numToCopy; i++)
-            (*pdata)[i] = Data[indexStart+i];
+            data[i] = Data[indexStart+i];
     }
 	return true;
 }

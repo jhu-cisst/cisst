@@ -70,8 +70,6 @@ public:
 	/*! Set data in array. */
 	virtual bool Set(index_type index, const cmnGenericObject & data) = 0;
 
-	/*! Get data vector from array. */
-	virtual bool GetVector(index_type indexStart, index_type indexEnd, cmnGenericObject & data) const = 0;
 };
 
 

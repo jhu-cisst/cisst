@@ -22,10 +22,10 @@ public:
     enum {NB_JOINTS = 2};
     typedef mtsDoubleVec PositionJointType;
 protected:
-    mtsStateData<PositionJointType> GoalJointRobot1;
-    mtsStateData<PositionJointType> GoalJointRobot2;
-    mtsStateData<PositionJointType> PositionJointRobot1;
-    mtsStateData<PositionJointType> PositionJointRobot2;
+    PositionJointType GoalJointRobot1;
+    PositionJointType GoalJointRobot2;
+    PositionJointType PositionJointRobot1;
+    PositionJointType PositionJointRobot2;
 
     // internal methods defined to move each robot
     void MovePositionJointRobot1(const PositionJointType & jointGoal);
