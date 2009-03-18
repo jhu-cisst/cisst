@@ -35,12 +35,12 @@ struct devSensableHDDeviceData {
     bool DeviceEnabled;
     
     // local copy of the buttons state as defined by Sensable
-    mtsStateData<cmnInt> Buttons;
+    cmnInt Buttons;
     
     // local copy of the position and velocities
-    mtsStateData<prmPositionCartesianGet> PositionCartesian;
-    mtsStateData<prmVelocityCartesianGet> VelocityCartesian;
-    mtsStateData<prmPositionJointGet> PositionJoint;
+    prmPositionCartesianGet PositionCartesian;
+    prmVelocityCartesianGet VelocityCartesian;
+    prmPositionJointGet PositionJoint;
     vctDynamicVectorRef<double> GimbalJointsRef;
     
     // mtsFunction called to broadcast the event
@@ -87,11 +87,11 @@ void devSensableHD::Run(void)
         hdGetDoublev(HD_CURRENT_TRANSFORM, deviceData->Frame4x4.Pointer());
 
         // retrieve cartesian velocities, write directly in state data
-        hdGetDoublev(HD_CURRENT_VELOCITY, deviceData->VelocityCartesian.Data.VelocityLinear().Pointer());
-        hdGetDoublev(HD_CURRENT_ANGULAR_VELOCITY, deviceData->VelocityCartesian.Data.VelocityAngular().Pointer());
+        hdGetDoublev(HD_CURRENT_VELOCITY, deviceData->VelocityCartesian.VelocityLinear().Pointer());
+        hdGetDoublev(HD_CURRENT_ANGULAR_VELOCITY, deviceData->VelocityCartesian.VelocityAngular().Pointer());
         
         // retrive joint positions, write directly in state data
-        hdGetDoublev(HD_CURRENT_JOINT_ANGLES, deviceData->PositionJoint.Data.Position().Pointer());
+        hdGetDoublev(HD_CURRENT_JOINT_ANGLES, deviceData->PositionJoint.Position().Pointer());
         hdGetDoublev(HD_CURRENT_GIMBAL_ANGLES, deviceData->GimbalJointsRef.Pointer());
 
         // retrieve the current button(s).
@@ -104,15 +104,15 @@ void devSensableHD::Run(void)
         mtsStateIndex stateIndex = this->StateTable.GetIndexWriter();
 
         // copy transformation to the state table
-        deviceData->PositionCartesian.Data.SetStateIndex(stateIndex);
-        deviceData->PositionCartesian.Data.Position().Translation().Assign(deviceData->Frame4x4TranslationRef);
-        deviceData->PositionCartesian.Data.Position().Rotation().Assign(deviceData->Frame4x4RotationRef);
+        deviceData->PositionCartesian.SetStateIndex(stateIndex);
+        deviceData->PositionCartesian.Position().Translation().Assign(deviceData->Frame4x4TranslationRef);
+        deviceData->PositionCartesian.Position().Rotation().Assign(deviceData->Frame4x4RotationRef);
         
         // time stamp velocity
-        deviceData->VelocityCartesian.Data.SetStateIndex(stateIndex);
+        deviceData->VelocityCartesian.SetStateIndex(stateIndex);
 
         // compare to previous value to create events
-        if (currentButtons != deviceData->Buttons.Data) {
+        if (currentButtons != deviceData->Buttons) {
             int currentButtonState, previousButtonState;
             prmEventButton event;
             event.SetStateIndex(stateIndex); 
@@ -130,7 +130,7 @@ void devSensableHD::Run(void)
             }
             // test for button 2
             currentButtonState = currentButtons & HD_DEVICE_BUTTON_2;
-            previousButtonState = deviceData->Buttons.Data & HD_DEVICE_BUTTON_2;
+            previousButtonState = deviceData->Buttons & HD_DEVICE_BUTTON_2;
             if (currentButtonState != previousButtonState) {
                 if (currentButtonState == 0) {
                     event.SetType(prmEventButton::RELEASED);
@@ -221,44 +221,50 @@ void devSensableHD::SetupInterfaces(void)
 
         deviceData->Frame4x4TranslationRef.SetRef(deviceData->Frame4x4.Column(3), 0);
         deviceData->Frame4x4RotationRef.SetRef(deviceData->Frame4x4, 0, 0);
-        deviceData->PositionJoint.Data.Position().SetSize(NB_JOINTS);
-        deviceData->GimbalJointsRef.SetRef(deviceData->PositionJoint.Data.Position(), 3, 3);
+        deviceData->PositionJoint.Position().SetSize(NB_JOINTS);
+        deviceData->GimbalJointsRef.SetRef(deviceData->PositionJoint.Position(), 3, 3);
 
         // set to zero
-        deviceData->PositionJoint.Data.Position().SetAll(0.0);
-        deviceData->VelocityCartesian.Data.VelocityLinear().SetAll(0.0);
-        deviceData->VelocityCartesian.Data.VelocityAngular().SetAll(0.0);
+        deviceData->PositionJoint.Position().SetAll(0.0);
+        deviceData->VelocityCartesian.VelocityLinear().SetAll(0.0);
+        deviceData->VelocityCartesian.VelocityAngular().SetAll(0.0);
 
         // create interface with the device name, i.e. the map key
         CMN_LOG_CLASS(4) << "SetupInterfaces: creating interface \"" << interfaceName << "\"" << std::endl;
         providedInterface = this->AddProvidedInterface(interfaceName);
 
         // add the state data to the table
-        deviceData->PositionCartesian.AddToStateTable(this->StateTable, interfaceName + "PositionCartesian");
-        deviceData->VelocityCartesian.AddToStateTable(this->StateTable, interfaceName + "VelocityCartesian");
-        deviceData->PositionJoint.AddToStateTable(this->StateTable, interfaceName + "PositionJoint");
-        deviceData->Buttons.AddToStateTable(this->StateTable, interfaceName + "Buttons");
+        this->StateTable.AddData(deviceData->PositionCartesian, interfaceName + "PositionCartesian");
+        this->StateTable.AddData(deviceData->VelocityCartesian, interfaceName + "VelocityCartesian");
+        this->StateTable.AddData(deviceData->PositionJoint, interfaceName + "PositionJoint");
+        this->StateTable.AddData(deviceData->Buttons, interfaceName + "Buttons");
 
         // provide read methods for state data
-        deviceData->PositionCartesian.AddReadCommandToTask(this, interfaceName, "GetPositionCartesian");
-        deviceData->VelocityCartesian.AddReadCommandToTask(this, interfaceName, "GetVelocityCartesian");
-        deviceData->PositionJoint.AddReadCommandToTask(this, interfaceName, "GetPositionJoint");
+        providedInterface->AddCommandReadState(this->StateTable,
+                                               deviceData->PositionCartesian,
+                                               "GetPositionCartesian");
+        providedInterface->AddCommandReadState(this->StateTable,
+                                               deviceData->VelocityCartesian,
+                                               "GetVelocityCartesian");
+        providedInterface->AddCommandReadState(this->StateTable,
+                                               deviceData->PositionJoint,
+                                               "GetPositionJoint");
 
         // add a method to read the current state index
         providedInterface->AddCommandRead(&mtsStateTable::GetIndexReader, &StateTable,
                                           "GetStateIndex");
         
         // adds frames to transformation manager
-        deviceData->PositionCartesian.Data.ReferenceFrame() =
+        deviceData->PositionCartesian.ReferenceFrame() =
             new prmTransformationFixed(interfaceName + "Base",
                                        vctFrm3::Identity(),
                                        &prmTransformationManager::TheWorld);
         deviceData->PositionFunctionForTransformationManager.Bind(providedInterface
                                                                       ->GetCommandRead("GetPositionCartesian"));
-        deviceData->PositionCartesian.Data.MovingFrame() =
+        deviceData->PositionCartesian.MovingFrame() =
             new prmTransformationDynamic(interfaceName + "Tip",
                                          deviceData->PositionFunctionForTransformationManager,
-                                         deviceData->PositionCartesian.Data.ReferenceFrame());
+                                         deviceData->PositionCartesian.ReferenceFrame());
         
         // Add interfaces for button with events
         providedInterface = this->AddProvidedInterface(interfaceName + "Button1");
