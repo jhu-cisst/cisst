@@ -162,7 +162,7 @@ private:
     template <class __classType, class __argumentType>
     inline mtsCommandWriteBase * AddCommandWrite(void (__classType::*method)(const __argumentType &),
                                                  __classType * classInstantiation, const std::string & commandName,
-                                                 const __argumentType & argumentPrototype);
+                                                 const __argumentType & argumentPrototype = CMN_DEFAULT_TEMPLATED_CONSTRUCTOR(__argumentType));
 
     /*! Adds command objects to read from the state table. Note that there are two command
         objects: a 'read' command to get the latest value, and a 'qualified read' command

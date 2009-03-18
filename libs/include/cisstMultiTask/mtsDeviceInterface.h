@@ -259,7 +259,7 @@ public:
     inline mtsCommandReadBase * AddCommandRead(void (__classType::*method)(__argumentType &) const,
                                                __classType * classInstantiation,
                                                const std::string & commandName,
-                                               const __argumentType & argumentPrototype = __argumentType());
+                                               const __argumentType & argumentPrototype = CMN_DEFAULT_TEMPLATED_CONSTRUCTOR(__argumentType));
 
     /* AddCommandReadState and AddCommandWriteState are only relevant for tasks. */
     template <class _elementType>
@@ -290,14 +290,14 @@ public:
     inline mtsCommandWriteBase * AddCommandWrite(void (__classType::*method)(const __argumentType &),
                                                  __classType * classInstantiation,
                                                  const std::string & commandName,
-                                                 const __argumentType & argumentPrototype = __argumentType());
+                                                 const __argumentType & argumentPrototype = CMN_DEFAULT_TEMPLATED_CONSTRUCTOR(__argumentType));
 
     template <class __classType, class __argument1Type, class __argument2Type>
     inline mtsCommandQualifiedReadBase * AddCommandQualifiedRead(void (__classType::*method)(const __argument1Type &, __argument2Type &) const,
                                                                  __classType * classInstantiation,
                                                                  const std::string & commandName,
-                                                                 const __argument1Type & argument1Prototype = __argument1Type(),
-                                                                 const __argument2Type & argument2Prototype = __argument2Type());
+                                                                 const __argument1Type & argument1Prototype = CMN_DEFAULT_TEMPLATED_CONSTRUCTOR(__argument1Type),
+                                                                 const __argument2Type & argument2Prototype = CMN_DEFAULT_TEMPLATED_CONSTRUCTOR(__argument2Type));
 #endif // SWIG
 
     /*! Send a human readable description of the interface. */
