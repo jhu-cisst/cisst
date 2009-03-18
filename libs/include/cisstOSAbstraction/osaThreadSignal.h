@@ -77,15 +77,13 @@ public:
     void Raise();
 
 private:
-#if (CISST_OS == CISST_WINDOWS)
-    HANDLE hEvent;
-#endif
+    /*! Internals that are OS-dependent in some way */
+    enum {INTERNALS_SIZE = 96};    // PKAZ: this can be reduced
+    char Internals[INTERNALS_SIZE];
 
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS)
-    pthread_mutex_t gnuMutex;
-    pthread_cond_t gnuCondition;
-    int Condition_State;
-#endif
+    /*! Return the size of the actual object used by the OS.  This is
+        used for testing only. */
+    static unsigned int SizeOfInternals(void);
 };
 
 #endif // _osaThreadSignal_h

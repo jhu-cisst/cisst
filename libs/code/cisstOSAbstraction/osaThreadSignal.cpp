@@ -33,12 +33,12 @@ http://www.cisst.org/cisst/license.txt.
 #include <semaphore.h>
 #endif // USE_POSIX_SEMAPHORES
 #endif // CISST_LINUX_RTAI || CISST_LINUX || CISST_DARWIN || CISST_SOLARIS
-/*
+
 #if (CISST_OS == CISST_WINDOWS)
 #include <windows.h>
 #endif
 
-
+/*
 struct osaThreadSignalInternals {
 
 #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS)
@@ -207,46 +207,68 @@ void osaThreadSignal::Raise(void)
 }
 */
 
+
+struct osaThreadSignalInternals
+{
+#if (CISST_OS == CISST_WINDOWS)
+    HANDLE hEvent;
+#endif
+
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS)
+    pthread_mutex_t gnuMutex;
+    pthread_cond_t gnuCondition;
+    int Condition_State;
+#endif
+};
+
+#define INTERNALS(A) (reinterpret_cast<osaThreadSignalInternals*>(Internals)->A)
+
 /*************************************/
 /*** osaThreadSignal class ***********/
 /*************************************/
 
 osaThreadSignal::osaThreadSignal()
 {
+    CMN_ASSERT(sizeof(Internals) >= SizeOfInternals());
+
 #if (CISST_OS == CISST_WINDOWS)
-	hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+	INTERNALS(hEvent) = CreateEvent(NULL, FALSE, FALSE, NULL);
 #endif
 
 #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS)
-    pthread_mutex_init(&gnuMutex, 0);
-    pthread_cond_init(&gnuCondition, 0);
-    Condition_State = 0;
+    pthread_mutex_init(&INTERNALS(gnuMutex), 0);
+    pthread_cond_init(&INTERNALS(gnuCondition), 0);
+    INTERNALS(Condition_State) = 0;
 #endif
 }
 
 osaThreadSignal::~osaThreadSignal()
 {
 #if (CISST_OS == CISST_WINDOWS)
-	CloseHandle(hEvent);
+	CloseHandle(INTERNALS(hEvent));
 #endif
 
 #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS)
-    pthread_cond_destroy(&gnuCondition);
-    pthread_mutex_destroy(&gnuMutex);
+    pthread_cond_destroy(&INTERNALS(gnuCondition));
+    pthread_mutex_destroy(&INTERNALS(gnuMutex));
 #endif
+}
+
+unsigned int osaThreadSignal::SizeOfInternals(void) {
+    return sizeof(osaThreadSignalInternals);
 }
 
 void osaThreadSignal::Raise()
 {
 #if (CISST_OS == CISST_WINDOWS)
-    ::SetEvent(hEvent);
+    ::SetEvent(INTERNALS(hEvent));
 #endif
 
 #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS)
-    pthread_mutex_lock(&gnuMutex);
-        pthread_cond_broadcast(&gnuCondition);
-        Condition_State = 1;
-    pthread_mutex_unlock(&gnuMutex);
+    pthread_mutex_lock(&INTERNALS(gnuMutex));
+        pthread_cond_broadcast(&INTERNALS(gnuCondition));
+        INTERNALS(Condition_State) = 1;
+    pthread_mutex_unlock(&INTERNALS(gnuMutex));
 #endif
 }
 
@@ -260,16 +282,16 @@ bool osaThreadSignal::Wait(double timeoutInSec)
     unsigned int millisec = (unsigned int)(timeoutInSec * 1000);
 
 #if (CISST_OS == CISST_WINDOWS)
-    if (WaitForSingleObject(hEvent, millisec) == WAIT_TIMEOUT) {
+    if (WaitForSingleObject(INTERNALS(hEvent), millisec) == WAIT_TIMEOUT) {
         return false;
     }
 #endif
 
 #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS)
-    pthread_mutex_lock(&gnuMutex);
+    pthread_mutex_lock(&INTERNALS(gnuMutex));
 
     // If the condition state is triggered, then release the thread.
-    if (Condition_State == 0) {
+    if (INTERNALS(Condition_State) == 0) {
         // getting absolute time timeout
         int ret, sec, usec;
         timeval now;
@@ -284,22 +306,22 @@ bool osaThreadSignal::Wait(double timeoutInSec)
         timeout.tv_sec = sec;
         timeout.tv_nsec = usec * 1000;
 
-        ret = pthread_cond_timedwait(&gnuCondition, &gnuMutex, &timeout);
+        ret = pthread_cond_timedwait(&INTERNALS(gnuCondition), &INTERNALS(gnuMutex), &timeout);
 
         if (ret == ETIMEDOUT) {
-            pthread_mutex_unlock(&gnuMutex);
+            pthread_mutex_unlock(&INTERNALS(gnuMutex));
             return false;
         }
     }
 
     // AUTOMATIC RESET:
     // condition is not referenced to anymore so it is safe to release it
-    pthread_cond_destroy(&gnuCondition);
+    pthread_cond_destroy(&INTERNALS(gnuCondition));
     // reinitializing condition = resetting state
-    pthread_cond_init(&gnuCondition, 0);
-    Condition_State = 0;
+    pthread_cond_init(&INTERNALS(gnuCondition), 0);
+    INTERNALS(Condition_State) = 0;
     
-    pthread_mutex_unlock(&gnuMutex);
+    pthread_mutex_unlock(&INTERNALS(gnuMutex));
 #endif
 
     return true;
