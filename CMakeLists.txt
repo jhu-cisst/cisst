@@ -148,9 +148,8 @@ ENDIF(UNIX)
 # Add include directory
 SET(CISST_INCLUDE_DIR
     ${cisst_BINARY_DIR}/libs/include
-    ${cisst_SOURCE_DIR}/libs/include
-    ${CISST_ADDITIONAL_INCLUDE_DIRECTORIES})
-INCLUDE_DIRECTORIES(${CISST_INCLUDE_DIR})
+    ${cisst_SOURCE_DIR}/libs/include)
+INCLUDE_DIRECTORIES(${CISST_INCLUDE_DIR} ${CISST_ADDITIONAL_INCLUDE_DIRECTORIES})
 
 
 # To have more warnings with gcc

@@ -76,6 +76,11 @@ SET_SOURCE_FILES_PROPERTIES("${CISST_DEV_CONFIG_FILE}"
                             PROPERTIES GENERATED TRUE)
 SET(HEADERS ${CISST_DEV_CONFIG_FILE})
 
+# Create the CMake config file
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/cisstDevicesBuild.cmake.in
+               ${cisst_BINARY_DIR}/cisstDevicesBuild.cmake
+               @ONLY)
+
 # Finally create the library
 CISST_ADD_LIBRARY_TO_PROJECT(cisstLibs)
 
