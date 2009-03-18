@@ -145,10 +145,10 @@ CMILDevice::CMILDevice() :
 
 CMILDevice::~CMILDevice()
 {
-    Release();
     MILReleaseDevice(0);
     MILReleaseDevice(1);
     MILReleaseApplication();
+    Release();
 }
 
 CMILDevice* CMILDevice::GetInstance()
@@ -196,7 +196,7 @@ int CMILDevice::GetDeviceList(svlVideoCaptureSource::DeviceInfo **deviceinfo)
     for (i = 0; i < 2; i ++) {
         cap = MILInitializeDevice(i, true, false, w, h, b);
         ovrl = MILInitializeDevice(i, false, true, w, h, b);
-//        MILReleaseDevice(i);
+        MILReleaseDevice(i);
         if (cap || ovrl) {
             devid[MILNumberOfDevices] = i;
             CaptureSupported[MILNumberOfDevices] = cap;
@@ -281,8 +281,8 @@ void CMILDevice::Close()
     Initialized = false;
 
     // Do not release device if overlay processing is still underway
-//    if (!OverlayEnabled[0]) MILReleaseDevice(0);
-//    if (!OverlayEnabled[1]) MILReleaseDevice(1);
+    if (!OverlayEnabled[0]) MILReleaseDevice(0);
+    if (!OverlayEnabled[1]) MILReleaseDevice(1);
 }
 
 int CMILDevice::Start()

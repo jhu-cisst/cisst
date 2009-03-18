@@ -64,36 +64,38 @@ protected:
 
     int ProcessFrame(ProcInfo* procInfo, svlSample* inputdata = 0)
     {
-        if ((FrameCount % 30) == 0) {
+        _OnSingleThread(procInfo) {
+            if ((FrameCount % 30) == 0) {
 #ifdef _WIN32
-            DWORD now;
-            now = ::GetTickCount();
+                DWORD now;
+                now = ::GetTickCount();
 
-            if (FrameCount > 0) {
-                DWORD msec = now - StartMSec;
-                printf("\rFrame #: %07d; %02.2f frames per second  ", FrameCount, (double)30000 / msec);
-            }
+                if (FrameCount > 0) {
+                    DWORD msec = now - StartMSec;
+                    printf("\rFrame #: %07d; %02.2f frames per second  ", FrameCount, (double)30000 / msec);
+                }
 
-            StartMSec = now;
+                StartMSec = now;
 #endif // _WIN32
 
 #ifdef __GNUC__
-            timeval now;
-            gettimeofday(&now, 0);
+                timeval now;
+                gettimeofday(&now, 0);
 
-            if (FrameCount > 0) {
-                int sec = now.tv_sec - StartSec;
-                int usec = now.tv_usec - StartUSec;
-                usec += 1000000 * sec;
-                printf("\rFrame #: %07d; %02.2f frames per second  ", FrameCount, (double)30000000 / usec);
-                fflush(stdout);
-            }
+                if (FrameCount > 0) {
+                    int sec = now.tv_sec - StartSec;
+                    int usec = now.tv_usec - StartUSec;
+                    usec += 1000000 * sec;
+                    printf("\rFrame #: %07d; %02.2f frames per second  ", FrameCount, (double)30000000 / usec);
+                    fflush(stdout);
+                }
 
-            StartSec = now.tv_sec;
-            StartUSec = now.tv_usec;
+                StartSec = now.tv_sec;
+                StartUSec = now.tv_usec;
 #endif // __GNUC__
+            }
+            FrameCount ++;
         }
-        FrameCount ++;
         return SVL_OK;
     }
 
@@ -197,7 +199,7 @@ public:
 int CameraViewer(bool interpolation, int width, int height)
 {
     // instantiating SVL stream and filters
-    svlStreamManager viewer_stream(1);
+    svlStreamManager viewer_stream(4);
     svlVideoCaptureSource viewer_source(true);
     svlImageResizer viewer_resizer;
     svlImageWindow viewer_window;

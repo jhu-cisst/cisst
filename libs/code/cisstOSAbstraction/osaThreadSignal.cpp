@@ -33,7 +33,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <semaphore.h>
 #endif // USE_POSIX_SEMAPHORES
 #endif // CISST_LINUX_RTAI || CISST_LINUX || CISST_DARWIN || CISST_SOLARIS
-
+/*
 #if (CISST_OS == CISST_WINDOWS)
 #include <windows.h>
 #endif
@@ -204,5 +204,104 @@ void osaThreadSignal::Raise(void)
 #else
     CMN_LOG(1) << "osaThreadSignal::Raise not implemented." << std::endl;
 #endif
+}
+*/
+
+/*************************************/
+/*** osaThreadSignal class ***********/
+/*************************************/
+
+osaThreadSignal::osaThreadSignal()
+{
+#if (CISST_OS == CISST_WINDOWS)
+	hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+#endif
+
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS)
+    pthread_mutex_init(&gnuMutex, 0);
+    pthread_cond_init(&gnuCondition, 0);
+    Condition_State = 0;
+#endif
+}
+
+osaThreadSignal::~osaThreadSignal()
+{
+#if (CISST_OS == CISST_WINDOWS)
+	CloseHandle(hEvent);
+#endif
+
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS)
+    pthread_cond_destroy(&gnuCondition);
+    pthread_mutex_destroy(&gnuMutex);
+#endif
+}
+
+void osaThreadSignal::Raise()
+{
+#if (CISST_OS == CISST_WINDOWS)
+    ::SetEvent(hEvent);
+#endif
+
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS)
+    pthread_mutex_lock(&gnuMutex);
+        pthread_cond_broadcast(&gnuCondition);
+        Condition_State = 1;
+    pthread_mutex_unlock(&gnuMutex);
+#endif
+}
+
+void osaThreadSignal::Wait()
+{
+    Wait(10000.0);
+}
+
+bool osaThreadSignal::Wait(double timeoutInSec)
+{
+    unsigned int millisec = (unsigned int)(timeoutInSec * 1000);
+
+#if (CISST_OS == CISST_WINDOWS)
+    if (WaitForSingleObject(hEvent, millisec) == WAIT_TIMEOUT) {
+        return false;
+    }
+#endif
+
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS)
+    pthread_mutex_lock(&gnuMutex);
+
+    // If the condition state is triggered, then release the thread.
+    if (Condition_State == 0) {
+        // getting absolute time timeout
+        int ret, sec, usec;
+        timeval now;
+        timespec timeout;
+        gettimeofday(&now, 0);
+        sec = now.tv_sec + millisec / 1000;
+        usec = now.tv_usec + (millisec % 1000) * 1000;
+        while (usec >= 1000000) {
+            sec ++;
+            usec -= 1000000;
+        }
+        timeout.tv_sec = sec;
+        timeout.tv_nsec = usec * 1000;
+
+        ret = pthread_cond_timedwait(&gnuCondition, &gnuMutex, &timeout);
+
+        if (ret == ETIMEDOUT) {
+            pthread_mutex_unlock(&gnuMutex);
+            return false;
+        }
+    }
+
+    // AUTOMATIC RESET:
+    // condition is not referenced to anymore so it is safe to release it
+    pthread_cond_destroy(&gnuCondition);
+    // reinitializing condition = resetting state
+    pthread_cond_init(&gnuCondition, 0);
+    Condition_State = 0;
+    
+    pthread_mutex_unlock(&gnuMutex);
+#endif
+
+    return true;
 }
 

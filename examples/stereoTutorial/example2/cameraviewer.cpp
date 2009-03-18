@@ -193,7 +193,7 @@ public:
 int CameraViewer(bool save, unsigned int fps, bool interpolation, int width, int height)
 {
     // instantiating SVL stream and filters
-    svlStreamManager viewer_stream(1);
+    svlStreamManager viewer_stream(2);
     svlVideoCaptureSource viewer_source(false);
     svlImageResizer viewer_resizer;
     svlImageSampler viewer_icondrawer;

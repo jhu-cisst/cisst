@@ -103,7 +103,7 @@ int COpenCVSource::GetDeviceList(svlVideoCaptureSource::DeviceInfo **deviceinfo)
         if (j*100 == CV_CAP_QT) maxdevices = 1;
         else maxdevices = 100;
 
-#if (CISST_HAS_VIDEO4LINUX2 == ON)
+#if (CISST_SVL_HAS_VIDEO4LINUX2 == ON)
         // OpenCV's Video4Linux implementation interferes
         // with SVL's native Video4Linux2 implementation.
         // The two cannot be used in the same time.
@@ -111,7 +111,7 @@ int COpenCVSource::GetDeviceList(svlVideoCaptureSource::DeviceInfo **deviceinfo)
         if (j*100 == CV_CAP_VFW) continue;
 #endif // CISST_HAS_VIDEO4LINUX2
 
-#if (CISST_HAS_LIBDC1394 == ON)
+#if (CISST_SVL_HAS_LIBDC1394 == ON)
         // OpenCV's DC1394 implementation may interfere
         // with SVL's native DC1394 implementation.
         // The two should be used in the same time.

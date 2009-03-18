@@ -110,7 +110,7 @@ int main()
 ////////////////////////////////////////////////////////////////
 // setup video stream
 #ifndef RENDER_ON_OVERLAY
-    svlStreamManager vidStream(1);  // running on single thread
+    svlStreamManager vidStream(2);  // running on multiple threads
 
     svlVideoCaptureSource vidSource(true); // mono source
     cout << "Setup LEFT camera:" << endl;

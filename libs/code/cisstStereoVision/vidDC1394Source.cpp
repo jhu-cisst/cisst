@@ -32,7 +32,7 @@ using std::endl;
 //////////////////////////////////////////////////////////
 // Verbose levels:                                      //
 //  0 -   quiet                                         //
-//  1 -   only error and warning messages                           //
+//  1 -   only error and warning messages               //
 //  2 -   1 + configuration setup messages              //
 //  3 -   2 + status messages                           //
 //  4 -   all, including frame capture status messages  //
@@ -754,8 +754,10 @@ int CDC1394Source::Start()
             CaptureThread[i]->Create<CDC1394SourceThread, CDC1394Source*>(CaptureProc[i],
                                                                           &CDC1394SourceThread::Proc,
                                                                           this);
+#if (__verbose__ >= 3)
+            cerr << "CDC1394Source::Start - waiting for thread " << i << " to start" << endl;
+#endif
             if (CaptureProc[i]->WaitForInit() == false) break;
-//            CaptureThread[i]->SetPriority(CaptureThread[i]->GetPriority() - 10);
 #if (__verbose__ >= 3)
             cerr << "CDC1394Source::Start - thread " << i << " started" << endl;
 #endif
