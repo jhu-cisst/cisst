@@ -21,9 +21,9 @@ sineTask::sineTask(const std::string & taskName, double period):
         // add command to access state table values to the interface
         prov->AddCommandReadState(StateTable, SineData, "GetData");
         // following should be done automatically
-        prov->AddCommandRead(&mtsStateTable::GetIndexReader, &StateTable, "GetStateIndex", mtsStateIndex());
+        prov->AddCommandRead(&mtsStateTable::GetIndexReader, &StateTable, "GetStateIndex");
         // add command to modify the sine amplitude 
-        prov->AddCommandWrite(&sineTask::SetAmplitude, this, "SetAmplitude", cmnDouble());
+        prov->AddCommandWrite(&sineTask::SetAmplitude, this, "SetAmplitude");
     }
 }
 

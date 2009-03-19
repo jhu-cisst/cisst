@@ -252,7 +252,7 @@ void devSensableHD::SetupInterfaces(void)
 
         // add a method to read the current state index
         providedInterface->AddCommandRead(&mtsStateTable::GetIndexReader, &StateTable,
-                                          "GetStateIndex", mtsStateIndex());
+                                          "GetStateIndex");
         
         // adds frames to transformation manager
         deviceData->PositionCartesian.ReferenceFrame() =

@@ -16,8 +16,8 @@ sineTask::sineTask(const std::string & taskName, double period):
         // add commands to access state table values
         mainInterface->AddCommandReadState(StateTable, SineData, "GetData");
         // add (queued) commands to set member data
-        mainInterface->AddCommandWrite(&sineTask::SetAmplitude, this, "SetAmplitude", cmnDouble());
-        mainInterface->AddCommandWrite(&sineTask::SetTrigger, this, "SetTriggerValue", cmnDouble());
+        mainInterface->AddCommandWrite(&sineTask::SetAmplitude, this, "SetAmplitude");
+        mainInterface->AddCommandWrite(&sineTask::SetTrigger, this, "SetTriggerValue");
         // add a command bound to a user defined method
         mainInterface->AddCommandVoid(&sineTask::ResetTrigger, this,"ResetTrigger");
         // define an event and setup our event sending function

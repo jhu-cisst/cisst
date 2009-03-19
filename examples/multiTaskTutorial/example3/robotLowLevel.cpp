@@ -29,9 +29,9 @@ robotLowLevel::robotLowLevel(const std::string & taskName, double period):
     StateTable.AddData(PositionJointRobot2, "PositionJointRobot2");
     // add a method to read the current state index
     robot1ObserverInterface->AddCommandRead(&mtsStateTable::GetIndexReader, &StateTable,
-                                            "GetStateIndex", mtsStateIndex());
+                                            "GetStateIndex");
     robot2ObserverInterface->AddCommandRead(&mtsStateTable::GetIndexReader, &StateTable,
-                                            "GetStateIndex", mtsStateIndex());
+                                            "GetStateIndex");
     // provide read method to all 4 interfaces
     robot1Interface->AddCommandReadState(StateTable, PositionJointRobot1,
                                          "GetPositionJoint");
