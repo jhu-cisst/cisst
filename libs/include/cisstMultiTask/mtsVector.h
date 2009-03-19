@@ -127,18 +127,16 @@ CMN_DECLARE_SERVICES_INSTANTIATION(mtsUCharVec);
 typedef mtsVector<bool> mtsBoolVec;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsBoolVec);
 
-#ifdef CISST_GETVECTOR
-// PK: the StateTable GetVector implementation will require an mtsVector
+// PK: the StateTable GetHistory implementation will require an mtsVector
 //     for every parameter type!!
 
 // Following is for a vector of cmnDouble
-typedef mtsVector<cmnDouble> mtscmnDoubleVec;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtscmnDoubleVec);
+typedef mtsVector<cmnDouble> mtsDoubleHistory;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsDoubleHistory);
 
 // Following is for a vector of cmnVector<double>
-typedef mtsVector<mtsDoubleVec> mtsDoubleVecVec;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsDoubleVecVec);
-#endif
+typedef mtsVector<mtsDoubleVec> mtsDoubleVecHistory;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsDoubleVecHistory);
 
 
 #endif // _mtsVector_h

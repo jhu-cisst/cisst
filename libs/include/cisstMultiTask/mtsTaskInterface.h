@@ -173,6 +173,10 @@ private:
     mtsCommandReadBase * AddCommandReadState(const mtsStateTable &stateTable, const _elementType &stateData,
                                              const std::string &commandName);
 
+    template <class _elementType>
+    mtsCommandQualifiedReadBase * AddCommandReadHistory(const mtsStateTable &stateTable, const _elementType &stateData,
+                                               const std::string &commandName);
+
     /*! Adds a command object to write the current value of the state data variable. Since this will
       be a queued command, it is thread-safe. */
     template <class _elementType>
@@ -396,6 +400,18 @@ mtsCommandReadBase * mtsDeviceInterface::AddCommandReadState(const mtsStateTable
     }
 }
 
+template <class _elementType>
+mtsCommandQualifiedReadBase * mtsDeviceInterface::AddCommandReadHistory(const mtsStateTable &stateTable,
+                     const _elementType &stateData, const std::string &commandName)
+{
+    mtsTaskInterface * taskInterface = dynamic_cast<mtsTaskInterface *>(this);
+    if (taskInterface)
+        return taskInterface->AddCommandReadHistory(stateTable, stateData, commandName);
+    else {
+        CMN_LOG_CLASS(1) << "AddCommandReadHistory: only valid for tasks, command = " << commandName << std::endl;
+        return 0;
+    }
+}
 
 template <class _elementType>
 mtsCommandWriteBase * mtsDeviceInterface::AddCommandWriteState(const mtsStateTable &stateTable,
@@ -425,16 +441,26 @@ mtsCommandReadBase * mtsTaskInterface::AddCommandReadState(const mtsStateTable &
         result2 = new mtsCommandQualifiedRead<AccessorType, mtsStateIndex, _elementType>
                                             (&AccessorType::Get, stateAcc, commandName, mtsStateIndex(), stateData);
         CommandsQualifiedRead.AddItem(commandName, result2, 1);
-#ifdef CISST_GETVECTOR
-        result2 = new mtsCommandQualifiedRead<AccessorType, mtsStateIndex, mtsVector<_elementType> >
-                                             (&AccessorType::GetVector, stateAcc, commandName+"Vector",
-                                              mtsStateIndex(), mtsVector<_elementType>());
-        CommandsQualifiedRead.AddItem(commandName+"Vector", result2, 1);
-#endif
     }
     else {
         result = 0;
         CMN_LOG_CLASS(1) << "AddCommandReadState: invalid parameter for command " << commandName << std::endl;
+    }
+    return result;
+}
+
+template <class _elementType>
+mtsCommandQualifiedReadBase * mtsTaskInterface::AddCommandReadHistory(const mtsStateTable &stateTable,
+                     const _elementType &stateData, const std::string &commandName)
+{
+    typedef mtsStateTable::Accessor<_elementType> AccessorType;
+    mtsCommandQualifiedReadBase *result;
+    AccessorType *stateAcc = dynamic_cast<AccessorType *>(stateTable.GetAccessor(stateData));
+    if (stateAcc) {
+        result = new mtsCommandQualifiedRead<AccessorType, mtsStateIndex, mtsVector<_elementType> >
+                                            (&AccessorType::GetHistory, stateAcc, commandName,
+                                             mtsStateIndex(), mtsVector<_elementType>());
+        CommandsQualifiedRead.AddItem(commandName, result, 1);
     }
     return result;
 }

@@ -19,17 +19,13 @@ class displayTask: public mtsTaskPeriodic {
     cmnDouble Data;
     cmnDouble AmplitudeData;
     mtsStateIndex StateIndex;
-#ifdef CISST_GETVECTOR
-    mtsVector<cmnDouble> DataVec;
-#endif
+    mtsDoubleHistory DataVec;
 
     struct {
        // functions which will be bound to commands
        mtsFunctionRead GetData;
        mtsFunctionRead GetStateIndex;
-#ifdef CISST_GETVECTOR
-       mtsFunctionQualifiedRead GetDataVector;
-#endif
+       mtsFunctionQualifiedRead GetDataHistory;
        mtsFunctionWrite SetAmplitude;
     } Generator;
 

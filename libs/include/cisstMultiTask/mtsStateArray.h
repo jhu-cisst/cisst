@@ -118,7 +118,7 @@ public:
     //@}
 
 	/*! Get data vector from array. */
-	virtual bool GetVector(index_type indexStart, index_type indexEnd, mtsVector<_elementType> &data) const;
+	virtual bool GetHistory(index_type indexStart, index_type indexEnd, mtsVector<_elementType> &data) const;
 };
 
 
@@ -166,13 +166,13 @@ bool mtsStateArray<_elementType>::Get(index_type index, cmnGenericObject & objec
 }
 
 template <class _elementType>
-bool mtsStateArray<_elementType>::GetVector(index_type indexStart, index_type indexEnd,
+bool mtsStateArray<_elementType>::GetHistory(index_type indexStart, index_type indexEnd,
                                             mtsVector<_elementType> &data) const
 {
     // Make sure vector is big enough
     unsigned int numToCopy = (Data.size() + indexEnd - indexStart + 1)%Data.size();
     if (data.size() < numToCopy) {
-		CMN_LOG(1) << "Class mtsStateArray: GetVector(): provided array too small, size = "
+		CMN_LOG(1) << "Class mtsStateArray: GetHistory(): provided array too small, size = "
                    << data.size() << ", requested copy = " << numToCopy << std::endl;
         return false;
     }

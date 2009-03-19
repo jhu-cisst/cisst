@@ -96,14 +96,14 @@ public:
         // Get a vector of data, starting and ending at the specified time indices (inclusive).
         // For now, set the start index based on the vector size. In the future, we
         // should define a new parameter type that consists of a pair of mtsStateIndex.
-        bool GetVector(const mtsStateIndex & end, mtsVector<_elementType> & data) const {
+        bool GetHistory(const mtsStateIndex & end, mtsVector<_elementType> & data) const {
             bool ret = false;
             if (data.size() > 0) {
                 mtsStateIndex start = end;
                 start -= (data.size()-1);
                 if (Table.ValidateReadIndex(start) && Table.ValidateReadIndex(end)) {
-                    ret = History.GetVector(start.Index(), end.Index(), data);
-                    // If GetVector succeeded, then check if the data is still valid (has not been overwritten).
+                    ret = History.GetHistory(start.Index(), end.Index(), data);
+                    // If GetHistory succeeded, then check if the data is still valid (has not been overwritten).
                     // Here it is sufficient to just check the oldest index (start).
                     if (ret)
                         ret = Table.ValidateReadIndex(start);

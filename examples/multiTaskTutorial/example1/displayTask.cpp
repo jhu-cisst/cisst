@@ -10,19 +10,15 @@ CMN_IMPLEMENT_SERVICES(displayTask);
 
 displayTask::displayTask(const std::string & taskName, double period):
     mtsTaskPeriodic(taskName, period, false, 5000),
-    ExitFlag(false)
-#ifdef CISST_GETVECTOR
-    ,DataVec(10)
-#endif
+    ExitFlag(false),
+    DataVec(10)
 {
     // to communicate with the interface of the resource
     mtsRequiredInterface *req = AddRequiredInterface("DataGenerator");
     if (req) {
        req->AddFunction("GetData", Generator.GetData);
        req->AddFunction("GetStateIndex", Generator.GetStateIndex);
-#ifdef CISST_GETVECTOR
-       req->AddFunction("GetDataVector", Generator.GetDataVector);
-#endif
+       req->AddFunction("GetDataHistory", Generator.GetDataHistory);
        req->AddFunction("SetAmplitude", Generator.SetAmplitude);
     }
 }
@@ -39,13 +35,22 @@ void displayTask::Configure(const std::string & CMN_UNUSED(filename))
                      << StartValue << std::endl;
     UI.Amplitude->bounds(minValue, maxValue);
     UI.Amplitude->value(StartValue);
-    AmplitudeData.Data = StartValue;
+    AmplitudeData = StartValue;
 }
 
 void displayTask::Startup(void) 
 {
+    const cmnGenericObject *obj = Generator.GetDataHistory.GetCommand()->GetArgument2Prototype();
+    CMN_LOG_CLASS(1) << "GetHistory prototype = " << obj->Services()->GetName() << std::endl;
+#if 0
+    // Future plans:  use mtsHistoryBase instead of mtsVector (equivalently, could use mtsVectorBase)
+    cmnGenericObject *newObj = obj->Services()->Create();
+    mtsHistoryBase *newObjDerived = dynamic_cast<mtsHistoryBase *>(newObj);
+    newObjDerived->SetSize(10);
+#endif
+
     // set the initial amplitude based on the configuration
-    AmplitudeData.Data = StartValue;
+    AmplitudeData = StartValue;
 
     // make the UI visible
     UI.show(0, NULL);
@@ -56,12 +61,10 @@ void displayTask::Run(void)
     // get the current time index to display it in the UI
     const mtsStateIndex now = StateTable.GetIndexWriter();
     // get the data from the sine wave generator task
-    Generator.GetData(Data);
     Generator.GetStateIndex(StateIndex);
+    Generator.GetData(Data);
+    Generator.GetDataHistory(StateIndex, DataVec);
     UI.Data->value(Data.Data);
-#ifdef CISST_GETVECTOR
-    Generator.GetDataVector(StateIndex, DataVec);
-#endif
     // check if the user has entered a new amplitude in UI
     if (UI.AmplitudeChanged) {
         // retrieve the new amplitude and send it to the sine task
@@ -74,9 +77,8 @@ void displayTask::Run(void)
     // log some extra information
     CMN_LOG_CLASS(7) << "Run : " << now.Ticks()
                      << " - Data: " << Data << std::endl;
-#ifdef CISST_GETVECTOR
-    CMN_LOG_CLASS(7) << "Last 10: " << DataVec << std::endl;
-#endif
+    // Following displays the history (last 10 values)
+    //CMN_LOG_CLASS(7) << "Last 10: " << DataVec << std::endl;
     // update the UI, process UI events 
     if (Fl::check() == 0) {
         ExitFlag = true;

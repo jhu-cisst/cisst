@@ -76,12 +76,12 @@ public:  // PKAZ (was protected, but needed access for daVinci example)
     // Get a vector of data, starting and ending at the specified time indices (inclusive).
     // For now, set the start index based on the vector size. In the future, we
     // should define a new parameter type that consists of a pair of mtsStateIndex.
-    void GetVector(const mtsStateIndex & end, mtsVector<value_type> & data) const {
+    void GetHistory(const mtsStateIndex & end, mtsVector<value_type> & data) const {
         if (data.size() > 0) {
             //mtsStateIndex start = end;
             //start -= (data.size()-1);
             //if (Table) Table->ReadVectorFromReader(Id, start, end, data);
-            if (Accessor) Accessor->GetVector(end, data);
+            if (Accessor) Accessor->GetHistory(end, data);
         }
     }
 
@@ -133,7 +133,7 @@ public:
         deviceInterface->AddCommandQualifiedRead(&ThisType::Get, this, commandName, mtsStateIndex(), this->Data);
 #ifdef CISST_GETVECTOR
         // PK: fix the following
-        deviceInterface->AddCommandQualifiedRead(&ThisType::GetVector, this, commandName+"Vector", mtsStateIndex(), mtsVector<value_type>());
+        deviceInterface->AddCommandQualifiedRead(&ThisType::GetHistory, this, commandName+"History", mtsStateIndex(), mtsVector<value_type>());
 #endif
     }
 
@@ -144,7 +144,7 @@ public:
         task->AddCommandQualifiedRead(&ThisType::Get, this, interfaceName, commandName, mtsStateIndex(), this->Data);
 #ifdef CISST_GETVECTOR
         // PK: fix the following
-        task->AddCommandQualifiedRead(&ThisType::GetVector, this, interfaceName, commandName+"Vector", mtsStateIndex(), mtsVector<value_type>());
+        task->AddCommandQualifiedRead(&ThisType::GetHistory, this, interfaceName, commandName+"History", mtsStateIndex(), mtsVector<value_type>());
 #endif
     }
 

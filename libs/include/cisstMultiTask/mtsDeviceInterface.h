@@ -266,6 +266,9 @@ public:
     mtsCommandReadBase * AddCommandReadState(const mtsStateTable &stateTable,
                          const _elementType &stateData, const std::string &commandName);
     template <class _elementType>
+    mtsCommandQualifiedReadBase * AddCommandReadHistory(const mtsStateTable &stateTable, const _elementType &stateData,
+                                               const std::string &commandName);
+    template <class _elementType>
     mtsCommandWriteBase * AddCommandWriteState(const mtsStateTable &stateTable,
                           const _elementType &stateData, const std::string &commandName);
 
