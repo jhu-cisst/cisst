@@ -31,6 +31,7 @@ SET(DIRECTSHOW_FOUND "NO")
 IF(WIN32)
   # Find DirectX Include Directory
   FIND_PATH(DIRECTX_INCLUDE_DIR ddraw.h
+    "C:/Program Files/Microsoft SDKs/Windows/v6.0A/Include"
     "C:/Program Files/Microsoft Visual Studio .NET 2003/Vc7/PlatformSDK/Include"
     "C:/Program Files/Microsoft DirectX SDK (February 2006)/Include"
     "C:/Program Files/Microsoft DirectX 9.0 SDK (June 2005)/Include"
@@ -41,6 +42,7 @@ IF(WIN32)
   # if DirectX found, then find DirectShow include directory
   IF(DIRECTX_INCLUDE_DIR)
     FIND_PATH(DIRECTSHOW_INCLUDE_DIR dshow.h
+      "C:/Program Files/Microsoft SDKs/Windows/v6.0A/Include"
       "C:/Program Files/Microsoft Platform SDK for Windows Server 2003 R2/Include"
       "C:/Program Files/Microsoft Visual Studio .NET 2003/Vc7/PlatformSDK/Include"
       "C:/Program Files/Microsoft Platform SDK/Include"
@@ -51,6 +53,7 @@ IF(WIN32)
     # if DirectShow include dir found, then find DirectShow libraries
     IF(DIRECTSHOW_INCLUDE_DIR)
       FIND_LIBRARY(DIRECTSHOW_strmiids_LIBRARY strmiids
+        "C:/Program Files/Microsoft SDKs/Windows/v6.0A/Lib"
         "C:/Program Files/Microsoft Platform SDK for Windows Server 2003 R2/Lib"
         "C:/Program Files/Microsoft Visual Studio .NET 2003/Vc7/PlatformSDK/Lib"
         "C:/Program Files/Microsoft Platform SDK/Lib"
@@ -58,6 +61,7 @@ IF(WIN32)
         DOC "Where can the DirectShow strmiids library be found"
       )
       FIND_LIBRARY(DIRECTSHOW_quartz_LIBRARY quartz
+        "C:/Program Files/Microsoft SDKs/Windows/v6.0A/Lib"
         "C:/Program Files/Microsoft Platform SDK for Windows Server 2003 R2/Lib"
         "C:/Program Files/Microsoft Visual Studio .NET 2003/Vc7/PlatformSDK/Lib"
         "C:/Program Files/Microsoft Platform SDK/Lib"
@@ -65,6 +69,7 @@ IF(WIN32)
         DOC "Where can the DirectShow quartz library be found"
       )
       FIND_LIBRARY(DIRECTSHOW_Vfw32_LIBRARY Vfw32
+        "C:/Program Files/Microsoft SDKs/Windows/v6.0A/Lib"
         "C:/Program Files/Microsoft Platform SDK for Windows Server 2003 R2/Lib"
         "C:/Program Files/Microsoft Visual Studio .NET 2003/Vc7/PlatformSDK/Lib"
         "C:/Program Files/Microsoft Platform SDK/Lib"
@@ -72,6 +77,7 @@ IF(WIN32)
         DOC "Where can the DirectShow Vfw32 library be found"
       )
       FIND_LIBRARY(DIRECTSHOW_WinMM_LIBRARY WinMM
+        "C:/Program Files/Microsoft SDKs/Windows/v6.0A/Lib"
         "C:/Program Files/Microsoft Platform SDK for Windows Server 2003 R2/Lib"
         "C:/Program Files/Microsoft Visual Studio .NET 2003/Vc7/PlatformSDK/Lib"
         "C:/Program Files/Microsoft Platform SDK/Lib"
