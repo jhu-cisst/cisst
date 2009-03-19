@@ -23,7 +23,7 @@ SET(DEPENDENCIES
     cisstOSAbstraction
     cisstVector
     cisstImage
-    cisstNumerical)
+    )
 
 # all source files
 SET(SOURCE_FILES
@@ -70,12 +70,6 @@ SET(SOURCE_FILES
     svlImageFlipRotate.cpp
     # Trackers
     trackers/msbruteforce/svlTrackerMSBruteForce.cpp
-    trackers/cisst/svlTrackerCisst.cpp
-    trackers/cisst/trkCisstWSSD.h      # private header
-    trackers/cisst/trkCisstWSSD.cpp
-    trackers/cisst/trkCisstNCC.h       # private header
-    trackers/cisst/trkCisstNCC.cpp
-    trackers/cisst/trkCisstBase.h      # private header
     )
 
 # all header files
@@ -110,9 +104,30 @@ SET(HEADER_FILES
     svlStereoImageJoiner.h
     svlImageFlipRotate.h
 # Trackers
-    trackers/svlTrackerCisst.h
     trackers/svlTrackerMSBruteForce.h
     )
+
+
+# cisstNumerical dependency
+OPTION(CISST_SVL_USE_NUMERICAL "cisstStereoVision to use cisstNumerical" OFF)
+IF(CISST_SVL_USE_NUMERICAL)
+  SET(DEPENDENCIES
+      cisstNumerical
+      )
+  SET(SOURCE_FILES
+      # Trackers
+      trackers/cisst/svlTrackerCisst.cpp
+      trackers/cisst/trkCisstWSSD.h      # private header
+      trackers/cisst/trkCisstWSSD.cpp
+      trackers/cisst/trkCisstNCC.h       # private header
+      trackers/cisst/trkCisstNCC.cpp
+      trackers/cisst/trkCisstBase.h      # private header
+      )
+  SET(HEADER_FILES
+      # Trackers
+      trackers/svlTrackerCisst.h
+      )
+ENDIF(CISST_SVL_USE_NUMERICAL)
 
 
 # OpenCV
