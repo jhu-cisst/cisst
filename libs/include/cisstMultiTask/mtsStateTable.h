@@ -69,6 +69,7 @@ public:
     public:
         AccessorBase(const mtsStateTable &table, mtsStateDataId id): Table(table), Id(id) {}
         virtual ~AccessorBase() {}
+        virtual void ToStream(std::ostream & outputStream, const mtsStateIndex & when) const = 0;
     };
 
     template <class _elementType>
@@ -80,6 +81,9 @@ public:
         Accessor(const mtsStateTable &table, mtsStateDataId id, 
                   const mtsStateArray<_elementType> *history, _elementType *data) :
             AccessorBase(table, id), History(*history), Current(data) {}
+
+        void ToStream(std::ostream & outputStream, const mtsStateIndex & when) const
+        { History.Element(when.Index()).ToStream(outputStream); }
 
         bool Get(const mtsStateIndex & when, _elementType & data) const
         { 
