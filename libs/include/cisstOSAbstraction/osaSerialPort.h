@@ -60,13 +60,16 @@ public:
     /*! Type used to define the baud rate.
       \sa SetBaudRate */
 #if (CISST_OS == CISST_WINDOWS)
-    enum BaudRateType {BaudRate9600 = CBR_9600,
+    enum BaudRateType {BaudRate300 = CBR_300,
+                       BaudRate1200 = CBR_1200,
+                       BaudRate9600 = CBR_9600,
                        BaudRate19200 = CBR_19200,
                        BaudRate38400 = CBR_38400,
                        BaudRate57600 = CBR_57600,
                        BaudRate115200 = CBR_115200};
 #else
     enum BaudRateType {BaudRate300 = B300,
+                       BaudRate1200 = B1200,
                        BaudRate9600 = B9600,
                        BaudRate19200 = B19200,
                        BaudRate38400 = B38400,

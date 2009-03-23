@@ -289,10 +289,18 @@ bool osaSerialPort::Configure(void) {
         portOptions.c_cflag &= ~CSTOPB; // 1 stop bit  
     }
 
+    // set hardware flow control
+    if (this->HardwareFlowControl) {
+        portOptions.c_cflag |= CRTSCTS;
+    } else {
+        portOptions.c_cflag &= ~CRTSCTS;
+        portOptions.c_iflag |= (IXON | IXOFF | IXANY);
+    }
+
     // defaults we don't modify
     portOptions.c_cflag |= CLOCAL; // modem control off  
     portOptions.c_cflag |= CREAD; // enable reads from port  
-    portOptions.c_lflag &= ~ICANON; // turn off line by line mode  
+    portOptions.c_lflag &= ~ICANON; // Turn off line by line mode  
     portOptions.c_lflag &= ~ECHO; // no echo of TX characters  
     portOptions.c_lflag &= ~ISIG; // no input ctrl char checking  
     portOptions.c_iflag &= ~ICRNL; // do not map CR to NL on in  
