@@ -43,8 +43,8 @@ int main(void) {
     serialPort.SetBaudRate(osaSerialPort::BaudRate1200);
     serialPort.SetCharacterSize(osaSerialPort::CharacterSize7);
     serialPort.SetParityChecking(osaSerialPort::ParityCheckingOdd);
-    serialPort.SetTwoStopBits(false);
-    serialPort.SetHardwareFlowControl(false);
+    serialPort.SetStopBits(osaSerialPort::StopBitsOne);
+    serialPort.SetFlowControl(osaSerialPort::FlowControlHardware);
 
     if (!serialPort.Open()) {
         std::cout << "Sorry, can't open serial port: " << serialPort.GetPortName() << std::endl;
@@ -52,12 +52,28 @@ int main(void) {
     }
 
     char buffer[512];
-    serialPort.Write("\x1bP", 2);
+    unsigned int bytesRead;
+
+    // get serial/model
+    serialPort.Write("\ex1_", 4);
     osaSleep(1.0 * cmn_s);
-    serialPort.Write("\x1bP", 2);
+    bytesRead = serialPort.Read(buffer, 512);
+    std::cout << "bytes read: " << bytesRead << std::endl;
+    buffer[bytesRead] = '\0';
+    std::cout << buffer << std::endl;
+    
+    // tare
+    serialPort.Write("\eT", 2);
+    // very stable K - L - M - very unstable N
+    serialPort.Write("\eK", 2);
+    
     while (true) {
-        osaSleep(100.0 * cmn_ms);
-        serialPort.Read(buffer, 512);
+        serialPort.Write("\eP", 2);
+        osaSleep(0.2 * cmn_s);
+        bytesRead = serialPort.Read(buffer, 512);
+        std::cout << "bytes read: " << bytesRead << std::endl;
+        buffer[bytesRead] = '\0';
+        std::cout << buffer << std::endl;
     }
     return 0;
 }

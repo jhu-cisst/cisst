@@ -185,7 +185,11 @@ private:
 
     bool ResponseOKAY(char* serialBuf);                   // determines whether or not reply is OKAY, used for freeports, initports and 
                                                           // Enableports, StartTrack
-    bool SetCommSettings(osaSerialPort::BaudRateType baud, osaSerialPort::ParityCheckingType parity, bool stopbits, bool hardwarecontrol);
+    bool SetCommSettings(osaSerialPort::BaudRateType baud,
+                         osaSerialPort::ParityCheckingType parity,
+                         osaSerialPort::StopBitsType stopBits,
+                         osaSerialPort::FlowControlType flowControl);
+
     void SystemBeep();                                    // sends a beep of length 2, if you want more, write another 
                                                           // function and enum and link it all up
 

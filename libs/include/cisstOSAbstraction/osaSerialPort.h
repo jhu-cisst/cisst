@@ -7,7 +7,7 @@
   Author(s): Anton Deguet
   Created on: 2004-12-06
 
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -106,6 +106,18 @@ public:
 #endif
 
 
+    /*! Type used to define the flow control.
+      \sa SetFlowControl*/
+    enum FlowControlType {FlowControlNone,
+                          FlowControlSoftware,
+                          FlowControlHardware};
+
+    /*! Type used to define stop bits.
+      \sa SetStopBits*/
+    enum StopBitsType {StopBitsOne,
+                       StopBitsTwo};
+
+
     /*! Default constructor.  Set parameters to default 8N1 (8 bits
       per character, no parity checking, 1 stop bit) and 9600 baud
       rate.  This constructor doesn't start anything, use Open() to
@@ -116,8 +128,8 @@ public:
         BaudRate(BaudRate9600),
         CharacterSize(CharacterSize8),
         ParityChecking(ParityCheckingNone),
-        TwoStopBits(false),
-        HardwareFlowControl(false)
+        StopBits(StopBitsOne),
+        FlowControl(FlowControlNone)
     {
 #if (CISST_OS == CISST_WINDOWS)
         memset(&OverlappedStructureRead, 0, sizeof(OverlappedStructureRead));
@@ -133,47 +145,47 @@ public:
     
     /*! Set a different baud rate. */
     inline void SetBaudRate(const BaudRateType & baudRate) {
-        BaudRate = baudRate;
-        CMN_LOG_CLASS(3) << "Baud rate modified to " << BaudRate
-                         << " on port " << PortName << " (not effective until Configure)" << std::endl;
+        this->BaudRate = baudRate;
+        CMN_LOG_CLASS(3) << "Baud rate modified to " << this->BaudRate
+                         << " on port " << this->PortName << " (not effective until Configure)" << std::endl;
     }
 
     /*! Set a different character size. */
     inline void SetCharacterSize(const CharacterSizeType & characterSize) {
-        CharacterSize = characterSize;
-        CMN_LOG_CLASS(3) << "Character size modified to " << CharacterSize
-                         << " on port " << PortName << " (not effective until Configure)" << std::endl;
+        this->CharacterSize = characterSize;
+        CMN_LOG_CLASS(3) << "Character size modified to " << this->CharacterSize
+                         << " on port " << this->PortName << " (not effective until Configure)" << std::endl;
     }
 
     /*! Set a different parity checking. */
     inline void SetParityChecking(const ParityCheckingType & parityChecking) {
-        ParityChecking = parityChecking;
-        CMN_LOG_CLASS(3) << "Parity checking modified to " << ParityChecking
-                         << " on port " << PortName << " (not effective until Configure)" << std::endl;
+        this->ParityChecking = parityChecking;
+        CMN_LOG_CLASS(3) << "Parity checking modified to " << this->ParityChecking
+                         << " on port " << this->PortName << " (not effective until Configure)" << std::endl;
     }
 
-    /*! Use two stop bits.  By default, one stop bit is used. */
-    inline void SetTwoStopBits(const bool & twoStopBits) {
-        TwoStopBits = twoStopBits;
-        CMN_LOG_CLASS(3) << "Use two stop bits modified to " << TwoStopBits
-                         << " on port " << PortName << " (not effective until Configure)" << std::endl;
+    /*! Set different stop bits. */
+    inline void SetStopBits(const StopBitsType & stopBits) {
+        this->StopBits = stopBits;
+        CMN_LOG_CLASS(3) << "Stop bits modified to " << this->StopBits
+                         << " on port " << this->PortName << " (not effective until Configure)" << std::endl;
     }
 
-    /*! Activate/de-activate the hardware flow control. */
-    inline void SetHardwareFlowControl(const bool & hardwareFlowControl) {
-        HardwareFlowControl = hardwareFlowControl;
-        CMN_LOG_CLASS(3) << "Hardware flow control modified to " << HardwareFlowControl
-                         << " on port " << PortName << " (not effective until Configure)" << std::endl;
+    /*! Set different flow control. */
+    inline void SetFlowControl(const FlowControlType & flowControl) {
+        this->FlowControl = flowControl;
+        CMN_LOG_CLASS(3) << "Flow control modified to " << this->FlowControl
+                         << " on port " << this->PortName << " (not effective until Configure)" << std::endl;
     }
 
     /*! Set the port name.  For a more portable code, use SetPortNumber. */
     inline void SetPortName(const std::string & portName) {
-        PortName = portName;
+        this->PortName = portName;
     }
 
     /*! Get the current port name. */
     inline std::string GetPortName(void) const {
-        return PortName;
+        return this->PortName;
     }
 
     /*! Set the serial port name based on a number, starting from 1. */
@@ -191,7 +203,7 @@ public:
 
     /*! Indicates if the port has been opened or closed correctly. */
     inline bool IsOpened(void) const {
-        return IsOpenedFlag;
+        return this->IsOpenedFlag;
     }
 
     /*! Send raw data. */
@@ -219,7 +231,6 @@ public:
        osaSleep and ClearCommBreak.
 
      */
-
     bool WriteBreak(double breakLengthInSeconds);
   
     /*! Flush. */
@@ -234,8 +245,8 @@ private:
     BaudRateType BaudRate;
     CharacterSizeType CharacterSize;
     ParityCheckingType ParityChecking;
-    bool TwoStopBits;
-    bool HardwareFlowControl;
+    StopBitsType StopBits;
+    FlowControlType FlowControl;
     
 #if (CISST_OS == CISST_WINDOWS)
     HANDLE PortHandle;
@@ -251,4 +262,3 @@ CMN_DECLARE_SERVICES_INSTANTIATION(osaSerialPort);
 
 
 #endif // _osaSerialPort_h
-

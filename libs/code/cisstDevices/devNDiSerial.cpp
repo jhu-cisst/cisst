@@ -213,12 +213,13 @@ devNDiSerial::devNDiSerial(const string & taskName, double period):
 {
     // constructor, used to set up serial pot information, the setcommsettings is used just to make sure of equality and to up the baud
     serialPort.SetPortNumber(1);
-    serialPort.SetHardwareFlowControl(true);
+    serialPort.SetFlowControl(osaSerialPort::FlowControlHardware);
     if (!serialPort.Open())  {
         CMN_LOG_CLASS(1) << "Sorry, can't open serial port: " << serialPort.GetPortName() << std::endl;
     }
     SetTimeout(8.0 * cmn_s); //Set the timeout at one second
-    SetCommSettings(osaSerialPort::BaudRate115200, osaSerialPort::ParityCheckingEven, true, true);
+    SetCommSettings(osaSerialPort::BaudRate115200, osaSerialPort::ParityCheckingEven,
+                    osaSerialPort::StopBitsTwo, osaSerialPort::FlowControlHardware);
 }
 
 
@@ -748,7 +749,10 @@ bool devNDiSerial::Reply(int expectedLength) {
 }
 
 
-bool devNDiSerial::SetCommSettings(osaSerialPort::BaudRateType baud, osaSerialPort::ParityCheckingType parity, bool twostopbits, bool hardwarecontrol) {
+bool devNDiSerial::SetCommSettings(osaSerialPort::BaudRateType baud,
+                                   osaSerialPort::ParityCheckingType parity,
+                                   osaSerialPort::StopBitsType stopBits,
+                                   osaSerialPort::FlowControlType flowControl) {
     
     char commbuf[12] = "comm 00000\r";
     char buf[256];
@@ -763,12 +767,12 @@ bool devNDiSerial::SetCommSettings(osaSerialPort::BaudRateType baud, osaSerialPo
     if (parity == osaSerialPort::ParityCheckingEven) commbuf[7] = '1';
     if (parity == osaSerialPort::ParityCheckingOdd) commbuf[7] = '2';
 
-    if (twostopbits)
+    if (stopBits == osaSerialPort::StopBitsTwo)
         commbuf[8] = '1';
     else
         commbuf[8] = '0';
 
-    if (hardwarecontrol) 
+    if (flowControl == osaSerialPort::FlowControlHardware) 
         commbuf[9] = '1';
     else
         commbuf[9] = '0';
@@ -784,8 +788,8 @@ bool devNDiSerial::SetCommSettings(osaSerialPort::BaudRateType baud, osaSerialPo
         osaSleep(100 * cmn_ms);
         serialPort.SetBaudRate(baud);
         serialPort.SetParityChecking(parity);
-        serialPort.SetTwoStopBits(twostopbits);
-        serialPort.SetHardwareFlowControl(hardwarecontrol);
+        serialPort.SetStopBits(stopBits);
+        serialPort.SetFlowControl(flowControl);
         return (comsettrue && serialPort.Configure());
     }
 }
@@ -874,7 +878,10 @@ void devNDiSerial::ProcessNextCommand() {
         break;
 
     case COMMSETTINGS:
-        SetCommSettings(osaSerialPort::BaudRate115200, osaSerialPort::ParityCheckingNone,false, true);
+        SetCommSettings(osaSerialPort::BaudRate115200,
+                        osaSerialPort::ParityCheckingNone,
+                        osaSerialPort::StopBitsOne,
+                        osaSerialPort::FlowControlHardware);
         break;
 
     case INITIALIZE:
@@ -1006,8 +1013,8 @@ void devNDiSerial::Run(void) {
                 //BX only works with 8 bit + private, can't touch
                 //serialPort.SetCharacterSize(osaSerialPort::CharacterSize);
                 serialPort.SetParityChecking(osaSerialPort::ParityCheckingNone);
-                serialPort.SetTwoStopBits(false);
-                serialPort.SetHardwareFlowControl(false);
+                serialPort.SetStopBits(osaSerialPort::StopBitsOne);
+                serialPort.SetFlowControl(osaSerialPort::FlowControlSoftware);
                 if (serialPort.Configure()) {
                     CMN_LOG_CLASS(4) << "Serial port Reset result: \"" << ReplyBuffer << "\"" << std::endl;
                     ProcessNextCommand();

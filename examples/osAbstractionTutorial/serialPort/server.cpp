@@ -39,7 +39,7 @@ int main(void) {
 
     osaSerialPort serialPort;
     serialPort.SetPortNumber(1);
-    serialPort.SetHardwareFlowControl(true);
+    serialPort.SetFlowControl(osaSerialPort::FlowControlSoftware);
 
     if (!serialPort.Open()) {
         std::cout << "Sorry, can't open serial port: " << serialPort.GetPortName() << std::endl;
