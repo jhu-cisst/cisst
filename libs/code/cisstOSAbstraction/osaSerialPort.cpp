@@ -199,19 +199,33 @@ bool osaSerialPort::Configure(void) {
         // set character size
         portOptions.ByteSize = this->CharacterSize;
 
-        // set parity
-        if (this->ParityChecking == ParityCheckingNone) {
+        // set parity checking
+        switch (this->ParityChecking) {
+        case ParityCheckingNone:
             portOptions.fParity = false;
-        } else {
+            break;
+        case ParityCheckingOdd:
             portOptions.fParity = true;
+            portOptions.Parity = ODDPARITY;
+            break;
+        case ParityCheckingEven:
+            portOptions.fParity = true;
+            portOptions.Parity = EVENPARITY;
+            break;
+        default:
+            CMN_LOG_CLASS(1) << CMN_LOG_DETAILS << "Fatal error on port " << this->PortName << std::endl;
         }
-        portOptions.Parity = this->ParityChecking;
 
-        // set number of stop bits
-        if (this->TwoStopBits) {
-            portOptions.StopBits = TWOSTOPBITS;
-        } else {
-            portOptions.StopBits = ONESTOPBIT;
+        // set stop bit to 1 or 2
+        switch (this->StopBits) {
+        case StopBitsTwo:
+            portOptions.StopBits = TWOSTOPBITS; // 2 stop bits
+            break;
+        case StopBitsOne:
+            portOptions.StopBits = ONESTOPBIT; // 1 stop bit  
+            break;
+        default:
+            CMN_LOG_CLASS(1) << CMN_LOG_DETAILS << "Fatal error on port " << this->PortName << std::endl;
         }
 
         // try to apply these settings
