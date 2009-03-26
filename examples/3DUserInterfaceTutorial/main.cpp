@@ -128,38 +128,47 @@ int main()
     // "MonoVideoBackground" is defined in the UI Manager as a possible video interface
     vidStream.Trunk().Append(guiManager.GetStreamSamplerFilter("StereoVideo"));
 
-/*
-    vidStream.CreateBranchAfterFilter(&vidSource, "Window");
-    svlImageWindow vidWindow;
-    vidStream.Branch("Window").Append(&vidWindow);
-*/
+    vidStream.Initialize();
 #endif
 ////////////////////////////////////////////////////////////////
 // setup renderers
 
     vctFrm3 camframe = vctFrm3::Identity();
-    guiManager.AddRenderer(640, 480,        // window size
+    camframe.Translation().X() = -3.5;
+
+#ifdef RENDER_ON_OVERLAY
+    guiManager.AddRenderer(svlRenderTargets::Get(0)->GetWidth(),  // render width
+                           svlRenderTargets::Get(0)->GetHeight(), // render height
                            0, 0,            // window position
                            camframe, 30.0,  // camera parameters
                            "LeftEyeView");  // name of renderer
-
-#ifdef RENDER_ON_OVERLAY
     // Sending renderer output to an external render target
     guiManager.SetRenderTargetToRenderer("LeftEyeView", svlRenderTargets::Get(0));
 #else
+    guiManager.AddRenderer(vidSource.GetWidth(SVL_LEFT),  // render width
+                           vidSource.GetHeight(SVL_LEFT), // render height
+                           0, 0,            // window position
+                           camframe, 30.0,  // camera parameters
+                           "LeftEyeView");  // name of renderer
     guiManager.AddVideoBackgroundToRenderer("LeftEyeView", "StereoVideo", SVL_LEFT);
 #endif
 
-    camframe.Translation().X() = 10.0;
-    guiManager.AddRenderer(640, 480,        // window size
-                           640, 0,          // window position
-                           camframe, 30.0,  // camera parameters
-                           "RightEyeView"); // name of renderer
+    camframe.Translation().X() = 3.5;
 
 #ifdef RENDER_ON_OVERLAY
+    guiManager.AddRenderer(svlRenderTargets::Get(0)->GetWidth(),  // render width
+                           svlRenderTargets::Get(0)->GetHeight(), // render height
+                           0, 0,            // window position
+                           camframe, 30.0,  // camera parameters
+                           "RightEyeView"); // name of renderer
     // Sending renderer output to an external render target
     guiManager.SetRenderTargetToRenderer("RightEyeView", svlRenderTargets::Get(1));
 #else
+    guiManager.AddRenderer(vidSource.GetWidth(SVL_RIGHT),  // render width
+                           vidSource.GetHeight(SVL_RIGHT), // render height
+                           20, 20,          // window position
+                           camframe, 30.0,  // camera parameters
+                           "RightEyeView");  // name of renderer
     guiManager.AddVideoBackgroundToRenderer("RightEyeView", "StereoVideo", SVL_RIGHT);
 #endif
 
