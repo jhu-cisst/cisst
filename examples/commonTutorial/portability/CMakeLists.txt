@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
 # Reserved.
 # 
 # --- begin cisst license - do not edit ---
@@ -12,6 +12,7 @@
 # 
 # --- end cisst license ---
 
-add_subdirectory(portability)
-add_subdirectory(units)
-add_subdirectory(serialization)
+add_executable(commonTutorialPortability
+               portability.cpp)
+
+cisst_requires(commonTutorialPortability "cisstCommon")

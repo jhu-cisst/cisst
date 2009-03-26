@@ -4,59 +4,61 @@
 
 #include <iostream>
 #include <cisstCommon/cmnPortability.h>
-using namespace std;
 
-void portability(void) {
+
+int main (void) {
 #if (CISST_OS == CISST_WINDOWS)
-    cout << "Running Windows" << endl;
+    std::cout << "Running Windows" << std::endl;
 #elif (CISST_OS == CISST_LINUX)
-    cout << "Running Linux" << endl;
+    std::cout << "Running Linux" << std::endl;
 #elif (CISST_OS == CISST_RTLINUX)
-    cout << "Running RT-Linux" << endl;
+    std::cout << "Running RT-Linux" << std::endl;
 #elif (CISST_OS == CISST_IRIX)
-    cout << "Running SGI Irix" << endl;
+    std::cout << "Running SGI Irix" << std::endl;
 #elif (CISST_OS == CISST_SOLARIS)
-    cout << "Running SUN Solaris" << endl;
+    std::cout << "Running SUN Solaris" << std::endl;
 #elif (CISST_OS == CISST_LINUX_RTAI)
-    cout << "Running RTAI Linux" << endl;
+    std::cout << "Running RTAI Linux" << std::endl;
 #elif (CISST_OS == CISST_CYGWIN)
-    cout << "Running Cygwin" << endl;
+    std::cout << "Running Cygwin" << std::endl;
 #elif (CISST_OS == CISST_DARWIN)
-    cout << "Running Mac OS X" << endl;
+    std::cout << "Running Mac OS X" << std::endl;
 #endif
     
 #if (CISST_COMPILER == CISST_GCC)
-    cout << "Compiling with gcc" << endl;
+    std::cout << "Compiling with gcc" << std::endl;
 #elif (CISST_COMPILER == CISST_SGI_CC)
-    cout << "Compiling with SGI CC" << endl;
+    std::cout << "Compiling with SGI CC" << std::endl;
 #elif (CISST_COMPILER == CISST_SUN_CC)
-    cout << "Compiling with SUN CC" << endl;
+    std::cout << "Compiling with SUN CC" << std::endl;
 #elif (CISST_COMPILER == CISST_INTEL_CC)
-    cout << "Compiling with Intel CC" << endl;
+    std::cout << "Compiling with Intel CC" << std::endl;
 #elif (CISST_COMPILER == CISST_DOTNET2003)
-    cout << "Compiling with Microsoft .net 2003, aka 7.1" << endl;
+    std::cout << "Compiling with Microsoft .net 2003, aka 7.1" << std::endl;
 #elif (CISST_COMPILER == CISST_DOTNET2005)
-    cout << "Compiling with Microsoft .net 2005, aka 8.0" << endl;
+    std::cout << "Compiling with Microsoft .net 2005, aka 8.0" << std::endl;
 #endif
     
 #ifdef CISST_COMPILER_IS_MSVC
-    cout << "The compiler is a Microsoft compiler" << endl;
+    std::cout << "The compiler is a Microsoft compiler" << std::endl;
 #else
-    cout << "The compiler is not a Microsoft compiler" << endl;
+    std::cout << "The compiler is not a Microsoft compiler" << std::endl;
 #endif
     
-    cout << "Please type 0 followed by the \"return\" key" << endl;
+    std::cout << "Please type \"0\" followed by the \"return\" key" << std::endl;
     double zero;
-    cin >> zero;
+    std::cin >> zero;
     double infinite = 1.0 / zero;
     double nan = infinite / infinite;
     if ((!CMN_ISFINITE(infinite)) && (CMN_ISNAN(nan))) {
-        cout << "Thank you, an infinite double looks like: "
-             << infinite << " and a NaN like: "
-             << nan << endl;
+        std::cout << "Thank you, an infinite double looks like \""
+                  << infinite << "\" and a NaN like \""
+                  << nan << "\"" << std::endl;
     } else {
-        cout << "Did you really enter \"0\"?" << endl;
+        std::cout << "Did you really enter \"0\"?" << std::endl;
     }
+
+    return 0;
 }
 
 
