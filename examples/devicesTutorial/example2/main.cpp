@@ -1,6 +1,6 @@
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
-/* $Id$ */
+/* $Id: main.cpp 109 2009-03-04 19:34:43Z adeguet1 $ */
 
 #include <cisstVector.h>
 #include <cisstOSAbstraction.h>
@@ -22,27 +22,21 @@ int main(void)
     // specify a higher, more verbose log level for these classes
     cmnClassRegister::SetLoD("mtsTaskInterface", 10);
     cmnClassRegister::SetLoD("mtsTaskManager", 10);
-    cmnClassRegister::SetLoD("devSensableHD", 10);
+    cmnClassRegister::SetLoD("devSartoriusSerial", 10);
 
     // create our two tasks
     const long PeriodDisplay = 10; // in milliseconds
     mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
     displayTask * displayTaskObject =
-        new displayTask("DISP", PeriodDisplay * cmn_ms);
+        new displayTask("Display", PeriodDisplay * cmn_ms);
     displayTaskObject->Configure();
     taskManager->AddTask(displayTaskObject);
 
-#if (CISST_DEV_HAS_SENSABLEHD == ON)
-    // name as defined in Sensable configuration
-    std::string omniName("Omni1");
-    devSensableHD * robotObject = new devSensableHD("Omni", "Omni1");
-	taskManager->AddTask(robotObject);
+    devSartoriusSerial * scaleObject = new devSartoriusSerial("Sartorius", "/dev/tty.KeySerial1");
+	taskManager->AddTask(scaleObject);
 
     // connect the tasks
-    taskManager->Connect("DISP", "Robot", "Omni", omniName);
-    taskManager->Connect("DISP", "Button1", "Omni", omniName + "Button1");
-    taskManager->Connect("DISP", "Button2", "Omni", omniName + "Button2");
-#endif
+    taskManager->Connect("Display", "Scale", "Sartorius", "Scale");
 
     // generate a nice tasks diagram
     std::ofstream dotFile("example1.dot"); 
@@ -71,10 +65,10 @@ int main(void)
 }
 
 /*
-  Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
-  Created on: 2004-04-30
+  Author(s):  Anton Deguet
+  Created on: 2009-03-27
 
-  (C) Copyright 2004-2008 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---

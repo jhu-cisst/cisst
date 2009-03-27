@@ -3,7 +3,7 @@
 #
 # CMakeLists for cisstDevice
 #
-# (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2008-2009 Johns Hopkins University (JHU), All Rights
 # Reserved.
 # 
 # --- begin cisst license - do not edit ---
@@ -35,6 +35,7 @@ set(HEADER_FILES
     devNull.h
     devNDiSerial.h
     devNDiSerialToolInformationGet.h
+    devSartoriusSerial.h
     devExport.h
     )
 
@@ -42,6 +43,7 @@ set(SOURCE_FILES
     devNull.cpp
     devNDiSerial.cpp
     devNDiSerialToolInformationGet.cpp
+    devSartoriusSerial.cpp
     )
 
 if(CISST_DEV_HAS_SENSABLEHD)
