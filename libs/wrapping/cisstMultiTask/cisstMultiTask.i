@@ -58,6 +58,9 @@ http://www.cisst.org/cisst/license.txt.
 
 %ignore *::operator[]; // We define __setitem__ and __getitem__
 
+%ignore *::AddCommandVoid;
+%ignore *::AddEventVoid;
+
 #define CISST_EXPORT
 #define CISST_DEPRECATED
 
@@ -86,6 +89,15 @@ typedef mtsCommandQualifiedReadOrWriteBase<const cmnGenericObject> mtsCommandQua
 %types(mtsCommandQualifiedReadBase *);
 %types(mtsCommandQualifiedWriteBase *);
 
+// Extend mtsCommandVoid
+%extend mtsCommandVoidBase {
+    %pythoncode {
+        def __call__(self):
+            return self.Execute()
+    }
+}
+
+// Extend mtsCommandWrite
 %extend mtsCommandReadOrWriteBase<const cmnGenericObject> {
     %pythoncode {
         def UpdateFromC(self):
@@ -94,13 +106,14 @@ typedef mtsCommandQualifiedReadOrWriteBase<const cmnGenericObject> mtsCommandQua
 
         def __call__(self, argument):
             if isinstance(argument, self.ArgumentType):
-                self.Execute(argument)
+                return self.Execute(argument)
             else:
                 realArgument = self.ArgumentType(argument)
-                self.Execute(realArgument)
+                return self.Execute(realArgument)
     }
 }
 
+// Extend mtsCommandRead
 %extend mtsCommandReadOrWriteBase<cmnGenericObject> {
     %pythoncode {
         def UpdateFromC(self):
@@ -108,9 +121,29 @@ typedef mtsCommandQualifiedReadOrWriteBase<const cmnGenericObject> mtsCommandQua
             self.ArgumentType = tmpObject.__class__
 
         def __call__(self):
-            argument = self.ArgumentType()
+            argument = self.ArgumentType(self.GetArgumentPrototype())
             self.Execute(argument)
             return argument
+    }
+}
+
+// Extend mtsCommandQualifiedRead
+%extend mtsCommandQualifiedReadOrWriteBase<cmnGenericObject> {
+    %pythoncode {
+        def UpdateFromC(self):
+            tmp1Object = self.GetArgument1ClassServices().Create()
+            self.Argument1Type = tmp1Object.__class__
+            tmp2Object = self.GetArgument2ClassServices().Create()
+            self.Argument2Type = tmp2Object.__class__
+
+        def __call__(self, argument1):
+            argument2 = self.Argument2Type(self.GetArgument2Prototype())
+            if isinstance(argument1, self.Argument1Type):
+                self.Execute(argument1, argument2)
+            else:
+                realArgument1 = self.Argument1Type(argument1)
+                self.Execute(realArgument1, argument2)
+            return argument2
     }
 }
 
@@ -145,6 +178,7 @@ typedef mtsCommandQualifiedReadOrWriteBase<const cmnGenericObject> mtsCommandQua
             commands = mtsDeviceInterface.GetNamesOfCommandsQualifiedRead(self)
             for command in commands:
                 self.__dict__[command] = mtsDeviceInterface.GetCommandQualifiedRead(self, command)
+                self.__dict__[command].UpdateFromC()
     }
 }
 
