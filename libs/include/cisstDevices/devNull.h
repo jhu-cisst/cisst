@@ -44,7 +44,7 @@ public:
     ~devNull() {}
 
     void Configure(const std::string & CMN_UNUSED(filename) = "") {}
-	void Create(void *data = 0) {}
+	void Create(void * CMN_UNUSED(data) = 0) {}
     void Run() {}
 	void Start(void) {}
 	void Kill(void) {}
