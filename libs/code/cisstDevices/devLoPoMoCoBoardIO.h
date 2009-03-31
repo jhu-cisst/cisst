@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: BoardIO.h,v 1.1 2008/09/29 21:44:42 tian Exp $
+  $Id$
 
   Author(s):  Ankur Kapoor
   Created on: 2004
@@ -23,8 +23,21 @@ http://www.cisst.org/cisst/license.txt.
 #define _devLoPoMoCoBoardIO_h
 #include <cisstCommon/cmnPortability.h>
 
+#if (CISST_OS == CISST_WINDOWS)
+#include <conio.h>
+// Previously, these were done for _BORLANDC_.
+// Note that although the following defines are needed
+// for Windows, the LoPoMoCo is not currently supported
+// on Windows.
+#define outw(data, address) outpw(address, data)
+#define inw(address)        inpw(address)
+// Paused versions (not supported)
+#define outw_p(data, address) outpw(address, data)
+#define inw_p(address)        inpw(address)
+#else
 #include <sys/io.h>
 #include <unistd.h>
+#endif
 
 #include "devLoPoMoCoOffsets.h"
 
@@ -33,18 +46,10 @@ http://www.cisst.org/cisst/license.txt.
  * All methods in this class are d and issue one or more low level IO commands
  * Since it has outw/inw MACROS, -O or -O2 optimization must be turned on especially
  * under Linux/GCC.
- * This class is main intention to provide a clearner looking upper level code, and
- * also to deal with DOS vs Linux differences in low level codes
+ * The main intention of this class is to provide a cleaner looking interface to upper
+ * level code, and also to deal with DOS vs Linux differences in low level code
+ * (though currently Windows is not supported).
  */
-
-#if (defined _BORLANDC_)
-#define outl(data, address)	outpl(address, data)
-#define inl(address)        inpl(address)
-#define outw(data, address) outpw(address, data)
-#define inw(address)        inpw(address)
-#define outb(data, address) outpb(address, data)
-#define inb(address)        inpb(address)
-#endif
 
 class devLoPoMoCoBoardIO {
 	private:
@@ -229,12 +234,10 @@ class devLoPoMoCoBoardIO {
 		outw (IOCMD_PRELOAD_ENCODERS | mask, BaseAddress + CMD_REGISTER);
 	}
 	 void SetEncoderPreloadRegister (unsigned int data) {
-		//outl (data, BaseAddress + ENCODER_LOW_REGISTER);
          outw_p (data & 0xffff, BaseAddress + ENCODER_LOW_REGISTER);
          outw_p ((data & 0xff0000) >> 16, BaseAddress + ENCODER_HIGH_REGISTER);
 	}
 	 unsigned int GetEncoder () {
-		//return (inl (BaseAddress + ENCODER_LOW_REGISTER) & 0x00FFFFFF);
          unsigned int lowbyte, highbyte;
          lowbyte = inw_p (BaseAddress + ENCODER_LOW_REGISTER);
          highbyte = inw_p (BaseAddress + ENCODER_HIGH_REGISTER);
@@ -299,6 +302,14 @@ class devLoPoMoCoBoardIO {
     inline void SetDigitalOutput(short data) {
         outw ((~data) & 0x000F, BaseAddress + DIGITAL_IO);
     }
+
+	// GSF - added 11/13/07 to get latched index values
+    unsigned int GetEncoderIndex () {
+        unsigned int lowbyte;
+        lowbyte = inw_p (BaseAddress + ENCODER_INDEX);
+        return lowbyte;
+	}
+
 };
 
 #endif // devLoPoMoCoBoardIO_h

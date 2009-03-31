@@ -68,6 +68,8 @@ devLoPoMoCo::devLoPoMoCo(const std::string& deviceName, unsigned int numberOfBoa
 	AddCommandRead(&devLoPoMoCo::GetMotorCurrents, this, "WriteInterface", "GetMotorCurrents");
 	AddCommandRead(&devLoPoMoCo::GetPotFeedbacks, this, "WriteInterface", "GetPotFeedbacks");
 	AddCommandRead(&devLoPoMoCo::GetDigitalInput, this, "WriteInterface", "GetDigitalInput");
+    // GSF -- GetLatchedIndex might only be available with 0xCCDD FPGA (MR-Robot)
+	AddCommandRead(&devLoPoMoCo::GetLatchedIndex, this, "WriteInterface", "GetLatchedIndex");
 
 	// Write methods
 	// method , object carrying the method , interface name , command name and argument prototype
@@ -112,11 +114,11 @@ devLoPoMoCo::~devLoPoMoCo() {
 
 void devLoPoMoCo::parseInputArgument(const std::string &inputArgument, std::string &relativeFilePath, std::string &fileName)
 {
-    unsigned int posSeperator = inputArgument.find('/', 0);
-    while (posSeperator != inputArgument.npos) {
-        relativeFilePath = inputArgument.substr(0, posSeperator);
-        fileName = inputArgument.substr(posSeperator+1, inputArgument.size());
-        posSeperator = inputArgument.find('/', posSeperator+1); // find the next '/'
+    unsigned int posSeparator = inputArgument.find('/', 0);
+    while (posSeparator != inputArgument.npos) {
+        relativeFilePath = inputArgument.substr(0, posSeparator);
+        fileName = inputArgument.substr(posSeparator+1, inputArgument.size());
+        posSeparator = inputArgument.find('/', posSeparator+1); // find the next '/'
     }
 
     relativeFilePath += "/"; // append a '/' at the end
@@ -173,8 +175,9 @@ void devLoPoMoCo::ConfigureOneBoard(const std::string& filename, const int board
 	// the latest version return 0xb0b || 0xS0 where S = ~(switch value)
 	// version 1 boards return 0xa0a
 	// some Board[boardIndex] with 10K50E also return 0xc0c
+    // The MR-Robot FPGA (which emulates a LoPoMoCo) returns 0xCCDD
 	CMN_LOG_CLASS(3) << "Version: " << version << std::endl;
-	if (!( ( version & 0xFF0F )== 0xb0b || (version == 0xa0a) || (version == 0xc0c) )) {
+	if (!( ( version & 0xFF0F )== 0xb0b || (version == 0xa0a) || (version == 0xc0c) || (version == 0xCCDD) )) {
         CMN_LOG_CLASS(3) << "WARNING: Could not find a LoPoMoCo board at address (decimal) " << BaseAddress[boardIndex] << std::endl;
         CMN_LOG_CLASS(3) << "Actually, this just means that the version number does not match" <<std::endl;
     }
@@ -188,7 +191,12 @@ void devLoPoMoCo::ConfigureOneBoard(const std::string& filename, const int board
 	//Board->SetEncoderPreloadRegister(0x007FFFFF);
 	//Board->PreLoadEncoders(listEncoders);
 	//Board->DisableAllMotors();
-	Board[boardIndex]->EnableAllMotors();
+    if (version == 0xCCDD) {
+        // Start with all valves/motors disabled (off)
+        Board[boardIndex]->DisableAllMotors();
+    }
+    else
+        Board[boardIndex]->EnableAllMotors();
 
 	int axis;
 	//read in the conversion factors
@@ -549,3 +557,14 @@ void devLoPoMoCo::CurrentLimitsToDAC(const mtsDoubleVec& fromData, mtsShortVec& 
 	}
 }
 
+// GSF - added 11/13/07 to get latched index values
+// Might only be available in Version 0xCCDD FPGA (MR-Robot)
+void devLoPoMoCo::GetLatchedIndex(mtsShortVec & latchedIndex) const
+{
+    for (int boardIndex = 0; boardIndex < numberOfBoards; boardIndex++) {
+        for (unsigned int axis = 0; axis <= MaxAxis[boardIndex]; axis++) {
+            Board[boardIndex]->SetEncoderIndices(false, MaxAxis[boardIndex], axis);
+            latchedIndex[axis+StartAxis[boardIndex]] = Board[boardIndex]->GetEncoderIndex() - 0x007FFFFF;
+        }
+    }
+}

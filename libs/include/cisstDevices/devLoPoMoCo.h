@@ -173,26 +173,26 @@ protected:
 	 * Start of the Read Commands
 	 *******************************/
 	/*! Get the latest encoder positions.  Assumes that encoders are
-	 latched using the PreRead operation LatchEncoders.  It is index
+	 latched using the void operation LatchEncoders.  It is indexed
 	 by the string Positions in the ReadMap. */
 	// type is Long
 	void GetPositions(mtsLongVec & Positions) const;
 
 	/*! Get the velocity.  Assumes that encoders are latched using the
-	 PreRead operation LatchEncoders and that Encoders are read using
-	 GetPositioni.  It is index by the string Velocities in the
+	 void operation LatchEncoders and that Encoders are read using
+	 GetPosition.  It is indexed by the string Velocities in the
 	 ReadMap. */
 	// type is Short
 	void GetVelocities(mtsShortVec & Velocities) const;
 
 	/*! Get the latest motor currents.  Assumes that a conversion has
-	 been started using the PreRead operation StartMotorCurrentConv.
+	 been started using the void operation StartMotorCurrentConv.
 	 It is indexed by the string MotorCurrents in the ReadMap. */
 	// type is short
 	void GetMotorCurrents(mtsShortVec & MotorCurrents) const;
 
 	/*! Get the latest pot position.  Assumes that a conversion has
-	 been started using the PreRead operation StartPotFeedbackConv.
+	 been started using the void operation StartPotFeedbackConv.
 	 It is indexed by the string PotFeedbacks in the ReadMap. */
 	// type is short
 	void GetPotFeedbacks(mtsShortVec & PotFeedbacks) const;
@@ -201,14 +201,14 @@ protected:
 	 * Start of the Write Commands
 	 *******************************/
 	/*! Write motor votlages to the DAC buffer.  Assumes that these
-	 would be loaded using the PostWrite operation LoadMotorVolatages
+	 would be loaded using the void operation LoadMotorVoltages
 	 or LoadMotorVoltagesCurrentLimits.  It is indexed by the string
 	 MotorVoltages in the WriteMap. */
 	// type is short
 	void SetMotorVoltages(const mtsShortVec & MotorVoltages);
 
 	/*! Write current limits to the DAC buffer.  Assumes that these
-	 would be loaded using the PostWrite operation LoadCurrentLimits
+	 would be loaded using the void operation LoadCurrentLimits
 	 or LoadMotorVoltagesCurrentLimits.  It is indexed by the string
 	 CurrentLimits in the WriteMap. */
 	// type is short
@@ -221,44 +221,43 @@ protected:
 	void SetPositions(const mtsLongVec & Positions);
 
 	/*! Load the motor voltage DAC buffer to actual analog output.  It
-	 is indexed by the string LoadMotorVolatages in the
-	 PostWriteMap. */
+	 is indexed by the string LoadMotorVoltages in the VoidMap. */
 	// type is void
 	void LoadMotorVoltages(void);
 
 	/*! Load the current limits DAC buffer to actual analog output.
 	 It is indexed by the string LoadCurrentLimits in the
-	 PostWriteMap. */
+	 VoidMap. */
 	// type is void
 	void LoadCurrentLimits(void);
 
 	/*! Load the motor voltages and current limits DAC buffer to
 	 actual analog output.  It is indexed by the string
-	 LoadMotorVoltagesCurrentLimits in the PostWriteMap. */
+	 LoadMotorVoltagesCurrentLimits in the VoidMap. */
 	void LoadMotorVoltagesCurrentLimits(void);
 
 	/*! Convert encoder frequencies to revolutions per second.  It is
-	 indexed by the string FrequencyToRPS in the ConversionMap. */
+	 indexed by the string FrequencyToRPS in the QualifiedReadMap. */
 	// type is shor to double
 	void FrequencyToRPS(const mtsShortVec & fromData, mtsDoubleVec & toData) const;
 
 	/*! Convert motor currents in ADC counts to mA.  It is indexed by
-	 the string ADCToMotorCurrents in the ConversionMap. */
+	 the string ADCToMotorCurrents in the QualifiedReadMap. */
 	// type is short to double
 	void ADCToMotorCurrents(const mtsShortVec & fromData, mtsDoubleVec & toData) const;
 
 	/*! Convert pot feedback in ADC counts to V.  It is indexed by the
-	 string ADCToPotFeedbacks in the ConversionMap. */
+	 string ADCToPotFeedbacks in the QualifiedReadMap. */
 	// type is short to double
 	void ADCToPotFeedbacks(const mtsShortVec & fromData, mtsVector <double> & toData) const;
 
 	/*! Convert motor voltages in V to DAC counts.  It is indexed by
-	 the string MotorVoltagesToDAC in the ConversionMap. */
+	 the string MotorVoltagesToDAC in the QualifiedReadMap. */
 	// type is DOUBLE TO SHORT
 	void MotorVoltagesToDAC(const mtsDoubleVec & fromData, mtsShortVec & toData) const;
 
 	/*! Convert currents limits in mA to DAC counts.  It is indexed by
-	 the string CurrentLimitsToDAC in the ConversionMap. */
+	 the string CurrentLimitsToDAC in the QualifiedReadMap. */
 	// type is double to short
 	void CurrentLimitsToDAC(const mtsDoubleVec & fromData, mtsShortVec & toData) const;
 
@@ -279,6 +278,10 @@ protected:
 
 	/* get digital input */
 	void GetDigitalInput(mtsIntVec & DigitalInput) const;
+
+    /* get latched index:
+        might only be available in Version 0xCCDD FPGA (MR-Robot) */
+    void GetLatchedIndex(mtsShortVec & latchedIndex) const;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(devLoPoMoCo);
