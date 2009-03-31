@@ -331,7 +331,7 @@ private:
     vctFrm3 LeftTransform;
 
     // positions in the state table, for behaviors to read
-    mtsStateData<prmPositionCartesianGet> RightMasterPosition, LeftMasterPosition; 
+    prmPositionCartesianGet RightMasterPosition, LeftMasterPosition; 
 
     // arm clutch
     bool RightMasterClutch;

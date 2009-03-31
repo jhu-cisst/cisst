@@ -57,14 +57,20 @@ ui3Manager::ui3Manager(const std::string & name):
     AddStream(svlTypeImageRGBStereo, "StereoVideo#3");
 
     // populate the state table
-    this->RightMasterPosition.AddToStateTable(this->StateTable, "RightMasterPosition");
-    this->LeftMasterPosition.AddToStateTable(this->StateTable, "LeftMasterPosition");
+    this->StateTable.AddData(this->RightMasterPosition, "RightMasterPosition");
+    this->StateTable.AddData(this->LeftMasterPosition, "LeftMasterPosition");
 
     // create an interface for all behaviors to access some state information
     mtsProvidedInterface * behaviorsInterface = 
         this->AddProvidedInterface("BehaviorsInterface");
-    this->RightMasterPosition.AddReadCommandToTask(this, "BehaviorsInterface", "RightMasterPosition");
-    this->LeftMasterPosition.AddReadCommandToTask(this, "BehaviorsInterface", "LeftMasterPosition");
+    if (behaviorsInterface) {
+        behaviorsInterface->AddCommandReadState(this->StateTable, this->RightMasterPosition,
+                                                "RightMasterPosition");
+        behaviorsInterface->AddCommandReadState(this->StateTable, this->LeftMasterPosition,
+                                                "LeftMasterPosition");
+    } else {
+        CMN_LOG_CLASS(1) << "constructor: can not add provided interface \"BehaviorsInterface\"" << std::endl;
+    }
 
     // add the UI manager to the task manager
     this->TaskManager = mtsTaskManager::GetInstance();
@@ -506,9 +512,9 @@ void ui3Manager::Run(void)
             // apply transformation and scale
             this->RightTransform.ApplyTo(rightArmPosition.Position(), rightCursorPosition);
             rightCursorPosition.Translation().Multiply(this->RightScale);
-            this->RightMasterPosition.Data.Position().Assign(rightCursorPosition);
+            this->RightMasterPosition.Position().Assign(rightCursorPosition);
         } else {
-            this->RightMasterPosition.Data.Position().Assign(rightCursorPosition);
+            this->RightMasterPosition.Position().Assign(rightCursorPosition);
         }
     } else {
         // temporary fix for menu depth
@@ -522,9 +528,9 @@ void ui3Manager::Run(void)
             // apply transformation and scale
             this->LeftTransform.ApplyTo(leftArmPosition.Position(), leftCursorPosition);
             leftCursorPosition.Translation().Multiply(this->LeftScale);
-            this->LeftMasterPosition.Data.Position().Assign(leftCursorPosition);
+            this->LeftMasterPosition.Position().Assign(leftCursorPosition);
         } else {
-            this->LeftMasterPosition.Data.Position().Assign(leftCursorPosition);
+            this->LeftMasterPosition.Position().Assign(leftCursorPosition);
         }
     }
 
@@ -569,6 +575,7 @@ void ui3Manager::Run(void)
     osaSleep(10.0 * cmn_ms);
 
     // should compute time since last render to figure out if we need it
+    std::cerr << "*" << std::flush;
     for (unsigned int i = 0; i < Renderers.size(); i ++) {
         Renderers[i]->renderer->Render();
     }

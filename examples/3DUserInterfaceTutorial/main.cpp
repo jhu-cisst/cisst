@@ -40,7 +40,7 @@ http://www.cisst.org/cisst/license.txt.
 #define UI3_DAVINCI 3
 
 // change this based on your configuration
-#define UI3_INPUT UI3_NO_INPUT
+#define UI3_INPUT UI3_DAVINCI
 
 #include <cisstOSAbstraction/osaThreadedLogFile.h>
 #include <cisstOSAbstraction/osaSleep.h>
@@ -206,7 +206,7 @@ int main()
     transform.Rotation().From(vctAxAnRot3(vctDouble3(0.0, 1.0, 0.0), cmnPI));
     guiManager.SetupLeftMaster(daVinci, "MTML",
                                daVinci, "MTMLButton",
-                               daVinci, "MTMLClutch"
+                               daVinci, "MTMLClutch",
                                transform, 0.5 /* scale factor */);
     guiManager.SetupMaM(daVinci, "MastersAsMice");
 #endif
