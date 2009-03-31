@@ -264,6 +264,7 @@ protected:
      */
     void CSVWrite(std::ostream& out, bool nonZeroOnly = false);
     void CSVWrite(std::ostream& out, unsigned int * listColumn, unsigned int number, bool nonZeroOnly = false);
+    void CSVWrite(std::ostream& out, cmnGenericObject ** listColumn, unsigned int number, bool nonZeroOnly = false);
 };
 
 

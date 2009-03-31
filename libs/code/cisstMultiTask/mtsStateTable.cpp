@@ -263,3 +263,16 @@ void mtsStateTable::CSVWrite(std::ostream& out, unsigned int *listColumn, unsign
     }
 }
 
+void mtsStateTable::CSVWrite(std::ostream& out, cmnGenericObject ** listColumn, unsigned int number, bool nonZeroOnly)
+{
+    unsigned int *listColumnId = new unsigned int[number];
+    for (unsigned int i = 0; i < number; i++) {
+        listColumnId[i] = StateVectorElements.size();  // init to invalid value
+        for (unsigned int j = 0; j < StateVectorElements.size(); j++) {
+            if (StateVectorElements[j] == listColumn[i])
+                listColumnId[i] = j;
+        }
+    }
+    CSVWrite(out, listColumnId, number, nonZeroOnly);
+    delete [] listColumnId;
+}
