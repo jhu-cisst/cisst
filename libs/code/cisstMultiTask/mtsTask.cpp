@@ -196,7 +196,7 @@ void mtsTask::Kill(void)
 
 const char *mtsTask::TaskStateName(TaskStateType state) const
 {
-    static char *taskStateNames[] = { "constructed", "initializing", "ready", "active", "finishing", "finished" };
+    static const char * taskStateNames[] = { "constructed", "initializing", "ready", "active", "finishing", "finished" };
     if ((state < CONSTRUCTED) || (state > FINISHED))
         return "unknown";
     else
