@@ -279,6 +279,13 @@ void devLoPoMoCo::Configure(const std::string& filename){ //, const std::string 
 		allFilesDefined &= xmlConfig.GetXMLValue(context.c_str(), path, configFiles[boardIndex]);
 	}
 
+    // Backward compatibility: if there is just one board and we failed to find a config file 
+    // entry in the passed XML file, then use the passed XML file as the config file.
+    if (!allFilesDefined && (numberOfBoards == 1)) {
+        parseInputArgument(filename, relativePathToConfigFiles, configFiles[0]);
+        allFilesDefined = true;
+    }
+
 	if(allFilesDefined) {
 		for (boardIndex = 0; boardIndex < numberOfBoards; boardIndex++) {
 			//configFiles[boardIndex].insert(0, RelativePathToConfigFiles);
