@@ -229,21 +229,25 @@ void devNDiSerial::Configure(const std::string & filename)
     CMN_LOG_CLASS(3) << "Configure: Using file \"" << filename << "\"" << std::endl;
 
     /* Configure "System" Interface */
-    AddProvidedInterface("System");
-    // Add commands to "System" interface
-    this->AddCommandVoid(&devNDiSerial::Reset, this, "System", "Reset");
-    this->AddCommandVoid(&devNDiSerial::Beep, this, "System", "Beep");
-    this->AddCommandVoid(&devNDiSerial::Track, this, "System", "Track");
-    this->AddCommandVoid(&devNDiSerial::Discover, this, "System", "Discover");
-    this->AddCommandVoid(&devNDiSerial::Stop, this, "System", "Stop");
-    // Add Events to "System" interface
-    EventToolUnplugged.Bind(AddEventVoid("System", "EventToolUnplugged"));
-    EventToolPlugged.Bind(AddEventVoid("System", "EventToolPlugged"));
-    
-    /* Configure Tool Interfaces */
-    ParseFile(filename);
-    
+    mtsProvidedInterface * providedInterface = AddProvidedInterface("System");
+    if (providedInterface) {
+        // Add commands to "System" interface
+        providedInterface->AddCommandVoid(&devNDiSerial::Reset, this, "Reset");
+        providedInterface->AddCommandVoid(&devNDiSerial::Beep, this, "Beep");
+        providedInterface->AddCommandVoid(&devNDiSerial::Track, this, "Track");
+        providedInterface->AddCommandVoid(&devNDiSerial::Discover, this, "Discover");
+        providedInterface->AddCommandVoid(&devNDiSerial::Stop, this, "Stop");
+        // Add Events to "System" interface
+        EventToolUnplugged.Bind(providedInterface->AddEventVoid("EventToolUnplugged"));
+        EventToolPlugged.Bind(providedInterface->AddEventVoid("EventToolPlugged"));
+        
+        /* Configure Tool Interfaces */
+        ParseFile(filename);
+    } else {
+        CMN_LOG_CLASS(1) << "Configure: can not add provided interface \"System\"" << std::endl;
+    }
 }
+
 
 void devNDiSerial::Reset(void)
 {
@@ -294,19 +298,24 @@ void devNDiSerial::Stop(void)
 }
 
 
-void devNDiSerial::ConfigureToolInterface(Tool *tool)
+void devNDiSerial::ConfigureToolInterface(Tool * tool)
 {
-    AddProvidedInterface(tool->GetName());
+    mtsProvidedInterface * providedInterface = AddProvidedInterface(tool->GetName());
     
-    //Configure getPositionCartesian - ADV, this could be simplified, StateTable API now support std::string
-    const char *namePositionCartesian = (tool->GetName() + "PositionCartesian").c_str();
-    tool->PositionCartesian.AddToStateTable(StateTable, namePositionCartesian);
-    tool->PositionCartesian.AddReadCommandToTask(this, tool->GetName(), "GetPosition");
-    
-    //Configure getToolInformation
-    const char *nameToolInformation = (tool->GetName() + "ToolInformation").c_str();
-    tool->ToolInformation.AddToStateTable(StateTable, nameToolInformation);
-    tool->ToolInformation.AddReadCommandToTask(this, tool->GetName(), "GetToolInformation");
+    if (providedInterface) {
+        //Configure getPositionCartesian
+        const std::string namePositionCartesian = (tool->GetName() + "PositionCartesian");
+        this->StateTable.AddData(tool->PositionCartesian, namePositionCartesian);
+        providedInterface->AddCommandReadState(this->StateTable, tool->PositionCartesian, "GetPosition");
+        
+        //Configure getToolInformation
+        const std::string nameToolInformation = (tool->GetName() + "ToolInformation");
+        this->StateTable.AddData(tool->ToolInformation, nameToolInformation);
+        providedInterface->AddCommandReadState(this->StateTable, tool->ToolInformation, "GetToolInformation");
+    } else {
+        CMN_LOG_CLASS(1) << "ConfigureToolInterface: can not add provided interface for tool \""
+                         << tool->GetName() << "\"" << std::endl;
+    }
 }
 
 
@@ -1267,121 +1276,121 @@ Tool::Tool(string name, string serial)
 
 void Tool::SetName(string name)
 { 
-    ToolInformation.Data.SetName(name);
+    ToolInformation.SetName(name);
 }
 
 string Tool::GetName(void) 
 { 
     string name;
-    ToolInformation.Data.GetName(name); 
+    ToolInformation.GetName(name); 
     return name;
 }
 
 void Tool::SetSerialNumber(string serial)
 { 
-    ToolInformation.Data.SetSerialNumber(serial);
+    ToolInformation.SetSerialNumber(serial);
 }
 string Tool::GetSerialNumber(void) 
 {
     string serial;
-    ToolInformation.Data.GetSerialNumber(serial); 
+    ToolInformation.GetSerialNumber(serial); 
     return serial; 
 }
 
 void Tool::SetDisabled(bool flag)
 {
-    ToolInformation.Data.SetDisabled(flag); 
+    ToolInformation.SetDisabled(flag); 
 }
 bool Tool::GetDisabled(void)
 {
     bool flag;
-    ToolInformation.Data.GetDisabled(flag); 
+    ToolInformation.GetDisabled(flag); 
     return flag;
 }
 
 void Tool::SetInitialized(bool flag)
 {
-    ToolInformation.Data.SetInitialized(flag); 
+    ToolInformation.SetInitialized(flag); 
 }
 
 bool Tool::GetInitialized(void)
 {
     bool flag;
-    ToolInformation.Data.GetInitialized(flag); 
+    ToolInformation.GetInitialized(flag); 
     return flag;
 }
 
 void Tool::SetEnabled(bool flag)
 {
-    ToolInformation.Data.SetEnabled(flag); 
+    ToolInformation.SetEnabled(flag); 
 }
 
 bool Tool::GetEnabled(void)
 {
     bool flag;
-    ToolInformation.Data.GetEnabled(flag); 
+    ToolInformation.GetEnabled(flag); 
     return flag;
 }
 
 void Tool::SetMissing(bool flag)
 {
-    ToolInformation.Data.SetMissing(flag); 
+    ToolInformation.SetMissing(flag); 
 }
 
 bool Tool::GetMissing(void)
 {
     bool flag;
-    ToolInformation.Data.GetMissing(flag); 
+    ToolInformation.GetMissing(flag); 
     return flag;
 }
 
 void Tool::SetOutOfVolume(bool flag)
 {
-    ToolInformation.Data.SetOutOfVolume(flag); 
+    ToolInformation.SetOutOfVolume(flag); 
 }
 
 bool Tool::GetOutOfVolume(void)
 {
     bool flag;
-    ToolInformation.Data.GetOutOfVolume(flag); 
+    ToolInformation.GetOutOfVolume(flag); 
     return flag;
 }
 
 void Tool::SetPartiallyOutOfVolume(bool flag)
 {
-    ToolInformation.Data.SetPartiallyOutOfVolume(flag); 
+    ToolInformation.SetPartiallyOutOfVolume(flag); 
 }
 bool Tool::GetPartiallyOutOfVolume(void)
 {
     bool flag;
-    ToolInformation.Data.GetPartiallyOutOfVolume(flag); 
+    ToolInformation.GetPartiallyOutOfVolume(flag); 
     return flag;
 }
 
 prmPositionCartesianGet Tool::GetPosition(void)
 {
-    return PositionCartesian.Data;
+    return PositionCartesian;
 }
 
 void Tool::SetPosition(prmPositionCartesianGet position)
 {
-    PositionCartesian.Data = position;
+    PositionCartesian = position;
 }
 
 void Tool::SetTranslation(double x, double y, double z)
 {
     prmCartesianPosition temp;
-    PositionCartesian.Data.GetPosition(temp);
+    PositionCartesian.GetPosition(temp);
     temp.Translation().Assign(x,y,z);
-    PositionCartesian.Data.SetPosition(temp);
+    PositionCartesian.SetPosition(temp);
 }
 
 void Tool::SetRotation(double a, double b, double c, double d)
 {
     prmCartesianPosition temp;
-    PositionCartesian.Data.GetPosition(temp);
+    PositionCartesian.GetPosition(temp);
     temp.Rotation().Assign(a,b,c,d);
-    PositionCartesian.Data.SetPosition(temp);
+    PositionCartesian.SetPosition(temp);
 }
 
 #if 0 // ADV
@@ -1399,21 +1408,21 @@ void Tool::SetTranslationAndQuaternion(double x, double y, double z, double a, d
 void Tool::SetQuaternionAndTranslation(double a, double b, double c, double d, double x, double y, double z)
 {
     prmCartesianPosition temp;
-    PositionCartesian.Data.GetPosition(temp);
+    PositionCartesian.GetPosition(temp);
     temp.Translation().Assign(x,y,z);
     temp.Rotation().FromRaw(vctQuatRot3(b,c,d,a,VCT_DO_NOT_NORMALIZE));
-    PositionCartesian.Data.SetPosition(temp);
+    PositionCartesian.SetPosition(temp);
 }
 
 void Tool::SetError(double error)
 {
-    ToolInformation.Data.SetError(error);
+    ToolInformation.SetError(error);
 }
 
 double Tool::GetError(void)
 {
     double error;
-    ToolInformation.Data.GetError(error); 
+    ToolInformation.GetError(error); 
     return error; 
 }
 

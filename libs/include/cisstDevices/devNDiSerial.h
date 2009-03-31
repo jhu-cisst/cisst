@@ -246,7 +246,7 @@ public:
     Tool(void);
     
     // Position Information
-    mtsStateData<prmPositionCartesianGet> PositionCartesian;
+    prmPositionCartesianGet PositionCartesian;
     // Position Information Data
     void SetTranslation(double x, double y, double z);
     void SetRotation(double a, double b, double c, double d);
@@ -256,7 +256,7 @@ public:
     void SetPosition(prmPositionCartesianGet position);
     
     // ToolInformation
-    mtsStateData<devNDiSerialToolInformationGet> ToolInformation;
+    devNDiSerialToolInformationGet ToolInformation;
     // Tool Identifing information
     void SetName(std::string name);
     std::string GetName(void);
