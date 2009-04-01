@@ -362,7 +362,8 @@ void ui3Manager::Startup(void)
     double bgheight, bgwidth;
     for (unsigned int i = 0; i < Renderers.size(); i ++) {
 
-        Renderers[i]->renderer = new ui3VTKRenderer(Renderers[i]->width,
+        Renderers[i]->renderer = new ui3VTKRenderer(this->SceneManager,
+                                                    Renderers[i]->width,
                                                     Renderers[i]->height,
                                                     Renderers[i]->viewangle,
                                                     Renderers[i]->cameraframe,
@@ -752,13 +753,11 @@ void* ui3Manager::CVTKRendererProc::Proc(ui3Manager* baseref)
 
     while (!KillThread) {
 
-        baseref->SceneManager->Lock();
-            // signal renderers
-            for (i = 0; i < size; i ++) {
-                // asynchronous call to render the current view; returns immediately
-                baseref->Renderers[i]->renderer->Render();
-            }
-        baseref->SceneManager->Unlock();
+        // signal renderers
+        for (i = 0; i < size; i ++) {
+            // asynchronous call to render the current view; returns immediately
+            baseref->Renderers[i]->renderer->Render();
+        }
 
         // display framerate
         if (framecount == 0) { 

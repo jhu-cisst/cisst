@@ -47,7 +47,10 @@ public:
     /*!
      Constructor
     */
-    ui3VTKRenderer(unsigned int width, unsigned int height, double viewangle, vctFrm3 & cameraframe, svlRenderTargetBase* target = 0);
+    ui3VTKRenderer(ui3SceneManager* scene,
+                   unsigned int width, unsigned int height,
+                   double viewangle, vctFrm3 & cameraframe,
+                   svlRenderTargetBase* target = 0);
 
     /*!
      Destructor
@@ -61,12 +64,14 @@ public:
 
     void SetViewAngle(double angle);
     double GetViewAngle(void);
-    
+
     void SetWindowPosition(int x, int y);
 
     void Add(ui3VisibleObject * object);
 
 private:
+    ui3SceneManager* SceneManager;
+
     vtkRenderer * Renderer;
     vtkRenderWindow * RenderWindow;
     vtkRenderWindowInteractor * RenderWindowInteractor;

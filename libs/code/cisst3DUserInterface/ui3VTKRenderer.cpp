@@ -39,7 +39,11 @@ http://www.cisst.org/cisst/license.txt.
 CMN_IMPLEMENT_SERVICES(ui3VTKRenderer);
 
 
-ui3VTKRenderer::ui3VTKRenderer(unsigned int width, unsigned int height, double viewangle, vctFrm3 & cameraframe, svlRenderTargetBase* target):
+ui3VTKRenderer::ui3VTKRenderer(ui3SceneManager* scene,
+                               unsigned int width, unsigned int height,
+                               double viewangle, vctFrm3 & cameraframe,
+                               svlRenderTargetBase* target) :
+    SceneManager(scene),
     Renderer(0),
     RenderWindow(0),
     RenderWindowInteractor(0),
@@ -51,6 +55,8 @@ ui3VTKRenderer::ui3VTKRenderer(unsigned int width, unsigned int height, double v
     CameraFrame(cameraframe),
     Target(target)
 {
+    CMN_ASSERT(this->SceneManager);
+
     // Create render window
     this->Renderer = vtkOpenGLRenderer::New();
     CMN_ASSERT(this->Renderer);
@@ -117,7 +123,10 @@ ui3VTKRenderer::~ui3VTKRenderer()
 void ui3VTKRenderer::Render(void)
 {
     if (this->RenderWindow) {
-        this->RenderWindow->Render();
+
+        this->SceneManager->Lock();
+            this->RenderWindow->Render();
+        this->SceneManager->Unlock();
 
         if (this->Target) {
             // Push VTK off-screen frame buffer to external render target

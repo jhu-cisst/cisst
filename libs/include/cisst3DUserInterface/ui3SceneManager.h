@@ -42,7 +42,8 @@ class ui3SceneManager: public cmnGenericObject
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 5);
 
-    friend class ui3Manager;
+    friend class ui3VTKRenderer;
+
 public:
     typedef void * VTKHandleType;
 
