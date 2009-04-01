@@ -752,13 +752,13 @@ void* ui3Manager::CVTKRendererProc::Proc(ui3Manager* baseref)
 
     while (!KillThread) {
 
-        //baseref->SceneManager->Lock();
+        baseref->SceneManager->Lock();
             // signal renderers
             for (i = 0; i < size; i ++) {
                 // asynchronous call to render the current view; returns immediately
                 baseref->Renderers[i]->renderer->Render();
             }
-        //baseref->SceneManager->Unlock();
+        baseref->SceneManager->Unlock();
 
         // display framerate
         if (framecount == 0) { 
