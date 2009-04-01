@@ -23,6 +23,7 @@ SET(SOURCE_FILES
     cmnDeSerializer.cpp
     cmnGenericObject.cpp
     cmnGenericObjectProxy.cpp
+    cmnGetChar.cpp
     cmnLogger.cpp
     cmnObjectRegister.cpp
     cmnOutputMultiplexer.cpp
@@ -49,6 +50,7 @@ SET(HEADER_FILES
     cmnExportMacros.h
     cmnGenericObject.h
     cmnGenericObjectProxy.h
+    cmnGetChar.h
     cmnLogger.h
     cmnLODMultiplexerStreambuf.h
     cmnLODOutputMultiplexer.h
