@@ -43,8 +43,17 @@ public:
     unsigned int GetWidth();
     unsigned int GetHeight();
 
+    void* ThreadProc(void* param);
+
 private:
     int DeviceID;
+
+    osaThread* Thread;
+    osaThreadSignal NewFrameSignal;
+    osaThreadSignal ThreadReadySignal;
+    bool TransferSuccessful;
+    bool KillThread;
+    bool ThreadKilled;
 };
 
 

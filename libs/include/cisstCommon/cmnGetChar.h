@@ -37,7 +37,7 @@ class CISST_EXPORT cmnGetCharEnvironment
 {
     /*! Internals that are OS-dependent */
 #if (CISST_OS == CISST_LINUX) || (CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI)
-    enum {INTERNALS_SIZE = 92};
+    enum {INTERNALS_SIZE = 124};
 #endif // CISST_LINUX || CISST_DARWIN ||CISST_SOLARIS || CISST_RTAI
 #if (CISST_OS == CISST_WINDOWS)
     enum {INTERNALS_SIZE = 0};

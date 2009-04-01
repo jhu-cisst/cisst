@@ -38,6 +38,7 @@ class ui3Manager: public ui3BehaviorBase
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 5);
     
     friend class ui3BehaviorBase;
+
 public:
     /*!
      Typedef for list of behaviors
@@ -240,6 +241,18 @@ protected:
         ui3ImagePlane* imageplane;
     } _RendererStruct;
 
+    class CVTKRendererProc
+    {
+    public:
+        CVTKRendererProc();
+
+        void* Proc(ui3Manager* baseref);
+
+        osaThreadSignal ThreadReadySignal;
+        bool KillThread;
+        bool ThreadKilled;
+    };
+
 
 private:
 
@@ -285,6 +298,16 @@ private:
      3D graphics renderer modules.
     */
     vctDynamicVector<_RendererStruct*> Renderers;
+
+    /*!
+     3D graphics renderer procedure class.
+    */
+    CVTKRendererProc RendererProc;
+
+    /*!
+     3D graphics renderer thread.
+    */
+    osaThread* RendererThread;
 
     /*!
      Background video stream event callback.

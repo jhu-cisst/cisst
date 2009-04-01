@@ -108,6 +108,7 @@ ui3VTKRenderer::ui3VTKRenderer(unsigned int width, unsigned int height, double v
     this->RenderWindowInteractor->Initialize();
 }
 
+
 ui3VTKRenderer::~ui3VTKRenderer()
 {
 }
@@ -152,3 +153,4 @@ void ui3VTKRenderer::Add(ui3VisibleObject * object)
 {
     this->Renderer->AddViewProp(object->GetVTKProp());
 }
+

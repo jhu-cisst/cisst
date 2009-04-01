@@ -54,6 +54,9 @@ public:
     */
     ~ui3VTKRenderer();
 
+    void Start(void);
+    void Stop(void);
+
     void Render(void);
 
     void SetViewAngle(double angle);

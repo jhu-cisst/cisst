@@ -19,19 +19,6 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-// includes for handling keyboard
-#ifdef _WIN32
-    #include <conio.h>
-#endif // _WIN32
-#ifdef __GNUC__
-    #include <curses.h>
-    #include <iostream>
-    #include <stdio.h>
-    #include <termios.h>
-    #include <sys/ioctl.h>
-    #include <fcntl.h>
-#endif // __GNUC__
-
 // temporary fix to configure input
 // possible values:
 #define UI3_NO_INPUT 0
@@ -58,6 +45,7 @@ http://www.cisst.org/cisst/license.txt.
 #define CAPTURE_SWAP_RGB
 
 
+#include <cisstCommon/cmnGetChar.h>
 #include <cisstStereoVision.h>
 
 #include "example1.h"
@@ -125,7 +113,7 @@ int main()
 #endif
 
     // add guiManager as a filter to the pipeline, so it will receive video frames
-    // "MonoVideoBackground" is defined in the UI Manager as a possible video interface
+    // "StereoVideo" is defined in the UI Manager as a possible video interface
     vidStream.Trunk().Append(guiManager.GetStreamSamplerFilter("StereoVideo"));
 
     vidStream.Initialize();
@@ -156,8 +144,8 @@ int main()
     camframe.Translation().X() = 3.5;
 
 #ifdef RENDER_ON_OVERLAY
-    guiManager.AddRenderer(svlRenderTargets::Get(0)->GetWidth(),  // render width
-                           svlRenderTargets::Get(0)->GetHeight(), // render height
+    guiManager.AddRenderer(svlRenderTargets::Get(1)->GetWidth(),  // render width
+                           svlRenderTargets::Get(1)->GetHeight(), // render height
                            0, 0,            // window position
                            camframe, 30.0,  // camera parameters
                            "RightEyeView"); // name of renderer
@@ -168,7 +156,7 @@ int main()
                            vidSource.GetHeight(SVL_RIGHT), // render height
                            20, 20,          // window position
                            camframe, 30.0,  // camera parameters
-                           "RightEyeView");  // name of renderer
+                           "RightEyeView"); // name of renderer
     guiManager.AddVideoBackgroundToRenderer("RightEyeView", "StereoVideo", SVL_RIGHT);
 #endif
 
@@ -214,70 +202,21 @@ int main()
     // following should be replaced by a utility function or method of ui3Manager 
     taskManager->CreateAll();
     taskManager->StartAll();
-    // replace by exit condition created by ui3Manager
-//    osaSleep(100.0 * cmn_s);
-
-#ifdef __GNUC__
-    ////////////////////////////////////////////////////
-    // modify terminal settings for single key inputs
-    struct  termios ksettings;
-    struct  termios new_ksettings;
-    int     kbrd;
-    kbrd = open("/dev/tty",O_RDWR);
-
-    #if (CISST_OS == CISST_LINUX)
-        ioctl(kbrd, TCGETS, &ksettings);
-        new_ksettings = ksettings;
-        new_ksettings.c_lflag &= !ICANON;
-        new_ksettings.c_lflag &= !ECHO;
-        ioctl(kbrd, TCSETS, &new_ksettings);
-        ioctl(kbrd, TIOCNOTTY);
-    #endif // (CISST_OS == CISST_LINUX)
-    #if (CISST_OS == CISST_DARWIN)
-        ioctl(kbrd, TIOCGETA, &ksettings);
-        new_ksettings = ksettings;
-        new_ksettings.c_lflag &= !ICANON;
-        new_ksettings.c_lflag &= !ECHO;
-        ioctl(kbrd, TIOCSETA, &new_ksettings);
-        ////////////////////////////////////////////////////
-    #endif // (CISST_OS == CISST_DARWIN)
-#endif
-
-    // wait for keyboard input in command window
-#ifdef _WIN32
-    int ch;
-#endif
-#ifdef __GNUC__
-    char ch;
-#endif
 
     osaSleep(1.0 * cmn_s);
 
+    int ch;
+    cmnGetCharEnvironment env;
+    env.Activate();
+    
     cerr << endl << "Keyboard commands:" << endl << endl;
     cerr << "  In command window:" << endl;
     cerr << "    'q'   - Quit" << endl << endl;
     do {
-#ifdef _WIN32
-        ch = _getch();
-#endif
-#ifdef __GNUC__
-        ch = getchar();
-#endif
+        ch = env.GetChar();
     } while (ch != 'q');
 
-#ifdef __GNUC__
-    ////////////////////////////////////////////////////
-    // reset terminal settings    
-    #if (CISST_OS == CISST_LINUX)
-        ioctl(kbrd, TCSETS, &ksettings);
-    #endif // (CISST_OS == CISST_LINUX)
-    #if (CISST_OS == CISST_DARWIN)
-        ioctl(kbrd, TIOCSETA, &ksettings);
-    #endif // (CISST_OS == CISST_DARWIN)
-
-    close(kbrd);
-    ////////////////////////////////////////////////////
-#endif
+    env.DeActivate();
 
     taskManager->KillAll();
 

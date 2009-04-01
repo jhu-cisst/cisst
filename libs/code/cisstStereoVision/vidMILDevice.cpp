@@ -31,16 +31,35 @@ using namespace std;
 
 CMILDeviceRenderTarget::CMILDeviceRenderTarget(unsigned int deviceID) :
     svlRenderTargetBase(),
-    DeviceID(deviceID)
+    DeviceID(deviceID),
+    Thread(0),
+    TransferSuccessful(true),
+    KillThread(false),
+    ThreadKilled(true)
 {
     CMILDevice *device = CMILDevice::GetInstance();
     device->EnableOverlay(deviceID);
+
+    // Start up overlay thread
+    Thread = new osaThread;
+    Thread->Create<CMILDeviceRenderTarget, void*>(this, &CMILDeviceRenderTarget::ThreadProc, 0);
+    if (ThreadReadySignal.Wait(1.0) && ThreadKilled == false) {
+        ThreadReadySignal.Raise();
+    }
+    else {
+        // If it takes longer than 1 sec, don't execute
+        KillThread = true;
+    }
 }
 
 CMILDeviceRenderTarget::~CMILDeviceRenderTarget()
 {
     CMILDevice *device = CMILDevice::GetInstance();
     device->MILReleaseDevice(DeviceID);
+
+    KillThread = true;
+    if (ThreadKilled == false) Thread->Wait();
+    delete Thread;
 }
 
 bool CMILDeviceRenderTarget::SetImage(unsigned char* buffer, bool vflip)
@@ -49,11 +68,18 @@ bool CMILDeviceRenderTarget::SetImage(unsigned char* buffer, bool vflip)
 
     int w, h, b;
     CMILDevice *device = CMILDevice::GetInstance();
+
     // Returns immediately if already initialized
     if (!device->MILInitializeDevice(DeviceID,
                                      device->CaptureEnabled[DeviceID],
                                      device->OverlayEnabled[DeviceID],
                                      w, h, b)) return false;
+
+    // Wait for thread to finish previous transfer
+    if (ThreadReadySignal.Wait(2.0) == false || TransferSuccessful == false || KillThread || ThreadKilled) {
+        // Something went terribly wrong on the thread
+        return false;
+    }
 
     if (vflip) {
         const int linesize = w * 3;
@@ -68,7 +94,12 @@ bool CMILDeviceRenderTarget::SetImage(unsigned char* buffer, bool vflip)
     else {
         memcpy(device->MilOverlayBuffer[DeviceID], buffer, w * h * b);
     }
-    return device->MILUploadOverlay(DeviceID);
+
+    // Signal Thread that there is a new frame to transfer
+    NewFrameSignal.Raise();
+
+    // Frame successfully filed for transfer
+    return true;
 }
 
 unsigned int CMILDeviceRenderTarget::GetWidth()
@@ -97,6 +128,27 @@ unsigned int CMILDeviceRenderTarget::GetHeight()
                                      device->OverlayEnabled[DeviceID],
                                      w, h, b)) return 0;
     return h;
+}
+
+void* CMILDeviceRenderTarget::ThreadProc(void* param)
+{
+    ThreadKilled = false;
+    ThreadReadySignal.Raise();
+
+    CMILDevice *device = CMILDevice::GetInstance();
+
+    while (!KillThread) {
+        if (NewFrameSignal.Wait(0.5)) {
+            TransferSuccessful = device->MILUploadOverlay(DeviceID);
+            ThreadReadySignal.Raise();
+        }
+    }
+
+    // Release waiting threads (if any)
+    ThreadReadySignal.Raise();
+
+    ThreadKilled = true;
+    return this;
 }
 
 
@@ -588,6 +640,7 @@ void CMILDevice::MILReleaseApplication()
 /*************************************/
 /*** MILProcessingCallback ***********/
 /*************************************/
+
 
 MIL_INT MFTYPE MILProcessingCallback(MIL_INT HookType, MIL_ID HookId, void MPTYPE *HookDataPtr)
 {

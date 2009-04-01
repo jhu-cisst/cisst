@@ -36,6 +36,7 @@ ui3Manager::ui3Manager(const std::string & name):
     Running(false),
     ActiveBehavior(0),
     SceneManager(0),
+    RendererThread(0),
     RightCursor(0),
     LeftCursor(0),
     RightButtonPressed(false),
@@ -81,9 +82,11 @@ ui3Manager::ui3Manager(const std::string & name):
     this->AddMenuBar(true);
 }
 
-
 ui3Manager::~ui3Manager()
 {
+    // Temporary fix
+    Cleanup();
+
     for (unsigned int i = 0; i < Renderers.size(); i ++) {
         if (Renderers[i]) delete Renderers[i];
     }
@@ -434,8 +437,17 @@ void ui3Manager::Startup(void)
     // current active behavior is this
     this->SetState(Foreground);    // UI manager is in foreground by default (main menu)
 
-    // Added temporarily by Balazs
-    Initialized = true;
+    // create renderer thread
+    RendererThread = new osaThread;
+    RendererThread->Create<CVTKRendererProc, ui3Manager*>(&RendererProc, &CVTKRendererProc::Proc, this);
+    if (RendererProc.ThreadReadySignal.Wait(1.0) && RendererProc.ThreadKilled == false) {
+        Initialized = true;
+    }
+    else {
+        // If it takes longer than 1 sec, don't execute
+        RendererProc.KillThread = true;
+        Initialized = false;
+    }
 
     if (!Initialized) {
         // error
@@ -451,10 +463,18 @@ void ui3Manager::Startup(void)
 
 void ui3Manager::Cleanup(void)
 {
+    if (!Initialized) return;
     Initialized = false;
 
     // Release UI manager
     // TO DO
+
+    if (RendererThread) {
+        RendererProc.KillThread = true;
+        if (RendererProc.ThreadKilled == false) RendererThread->Wait();
+        delete RendererThread;
+        RendererThread = 0;
+    }
 
     for (unsigned int i = 0; i < Renderers.size(); i ++) {
         if (Renderers[i]) {
@@ -573,12 +593,6 @@ void ui3Manager::Run(void)
 
     // this needs to change to a parameter
     osaSleep(10.0 * cmn_ms);
-
-    // should compute time since last render to figure out if we need it
-    std::cerr << "*" << std::flush;
-    for (unsigned int i = 0; i < Renderers.size(); i ++) {
-        Renderers[i]->renderer->Render();
-    }
 }
 
 
@@ -710,5 +724,54 @@ void ui3Manager::LeaveMaMModeEventHandler(void)
     this->HideAll();
     this->MaM = false;
     CMN_LOG_CLASS(9) << "LeaveMaMMode" << std::endl;
+}
+
+
+/****************************************/
+/*** ui3Manager::CVTKRendererProc class */
+/****************************************/
+
+ui3Manager::CVTKRendererProc::CVTKRendererProc() :
+    KillThread(false),
+    ThreadKilled(true)
+{
+}
+
+void* ui3Manager::CVTKRendererProc::Proc(ui3Manager* baseref)
+{
+    ThreadKilled = false;
+    ThreadReadySignal.Raise();
+
+    unsigned int i, framecount = 10;
+    double prevtime, time;
+    const unsigned int size = baseref->Renderers.size();
+
+    osaStopwatch stopwatch;
+    stopwatch.Start();
+    prevtime = stopwatch.GetElapsedTime();
+
+    while (!KillThread) {
+
+        //baseref->SceneManager->Lock();
+            // signal renderers
+            for (i = 0; i < size; i ++) {
+                // asynchronous call to render the current view; returns immediately
+                baseref->Renderers[i]->renderer->Render();
+            }
+        //baseref->SceneManager->Unlock();
+
+        // display framerate
+        if (framecount == 0) { 
+            time = stopwatch.GetElapsedTime();
+            printf("Framerate = %.1ffps   \r", 10.0 / (time - prevtime));
+            fflush(stdout);
+            prevtime = time;
+            framecount = 10;
+        }
+        framecount --;
+    }
+
+    ThreadKilled = true;
+    return this;
 }
 

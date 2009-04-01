@@ -42,6 +42,7 @@ class ui3SceneManager: public cmnGenericObject
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 5);
 
+    friend class ui3Manager;
 public:
     typedef void * VTKHandleType;
 
@@ -93,6 +94,17 @@ public:
     bool Unlock(VTKHandleType propHandle);
 
 	vtkPropAssembly * GetVTKProp(void);
+
+protected:
+    inline void Lock(void)
+    {
+        this->Mutex.Lock();
+    }
+
+    inline void Unlock(void)
+    {
+        this->Mutex.Unlock();
+    }
 
 protected:
     typedef std::map<VTKHandleType, vtkProp3D *> PropMapType;
