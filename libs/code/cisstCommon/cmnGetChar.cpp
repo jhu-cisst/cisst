@@ -26,7 +26,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnGetChar.h>
 
 #if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI)
-//#include <curses.h>
 #include <stdio.h>
 #include <termios.h>
 #include <sys/ioctl.h>
@@ -77,7 +76,6 @@ bool cmnGetCharEnvironment::Activate(void)
         INTERNALS(NewSettings).c_lflag &= !ICANON;
         INTERNALS(NewSettings).c_lflag &= !ECHO;
         ioctl(INTERNALS(Keyboard), TCSETS, &INTERNALS(NewSettings));
-        ioctl(INTERNALS(Keyboard), TIOCNOTTY);
         this->Activated = true;
         return true;
     }
