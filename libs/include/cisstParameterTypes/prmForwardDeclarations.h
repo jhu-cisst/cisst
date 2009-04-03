@@ -46,6 +46,7 @@ class prmPositionJointSet;
 class prmVelocityJointGet;
 class prmVelocityJointSet;
 
+class prmEventButton;
 
 #endif // _prmForwardDeclarations_h
 
