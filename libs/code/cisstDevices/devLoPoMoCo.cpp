@@ -386,6 +386,7 @@ void devLoPoMoCo::StartPotFeedbackConv(void) {
 // would be documented where needed.
 void devLoPoMoCo::GetPositions(mtsLongVec & Positions) const {
 	for (int boardIndex = 0; boardIndex < numberOfBoards; boardIndex++) {
+        //Board[boardIndex]->SetEncoderIndices(true, MaxAxis[boardIndex], 0x00);
 		for (unsigned int axis = 0; axis <= MaxAxis[boardIndex]; axis++) {
 			//EncoderPeriods.Data[axis] = Board->GetEncoderPeriod();
 			//EncoderFrequencies.Data[axis] = Board->GetEncoderFrequency();
@@ -396,19 +397,16 @@ void devLoPoMoCo::GetPositions(mtsLongVec & Positions) const {
 	}
 }
 
-/* ! TODO: ERROR: Tian: EncoderFrequencies is not set ANYWHERE!8? */
 void devLoPoMoCo::GetVelocities(mtsShortVec& Velocities) const {
-#if 0
-	for (int boardIndex = 0; boardIndex < numberOfBoards; boardIndex++) {
-		for (unsigned int axis = 0; axis <= MaxAxis[boardIndex]; axis++) {
-			//TODO: EncoderFrequencies[axis] or [axis + StartAxis[boardIndex]
-			Velocities[axis + StartAxis[boardIndex] = EncoderFrequencies.Data[axis];
-		}
-	}
-#endif
+    for (int boardIndex = 0; boardIndex < numberOfBoards; boardIndex++) {
+        for (unsigned int axis = 0; axis <= MaxAxis[boardIndex]; axis++) {
+            Board[boardIndex]->SetEncoderIndices(false, MaxAxis[boardIndex], axis);
+            Velocities[axis + StartAxis[boardIndex]] = Board[boardIndex]->GetEncoderFrequency();
+        }
+    }
 }
 
-
+// Precondition:  StartConvCurrentFeedback should be called before calling GetPotFeedback
 void devLoPoMoCo::GetMotorCurrents(mtsShortVec & MotorCurrents) const {
 	bool ADInterruptPending = false;
 	for (int boardIndex = 0; boardIndex < numberOfBoards; boardIndex++) {
@@ -425,14 +423,12 @@ void devLoPoMoCo::GetMotorCurrents(mtsShortVec & MotorCurrents) const {
 	}
 }
 
+// Precondition:  StartConvPotFeedback should be called before calling GetPotFeedback
 void devLoPoMoCo::GetPotFeedbacks(mtsShortVec & PotFeedbacks) const {
 	bool ADInterruptPending = false;
 	for (int boardIndex = 0; boardIndex < numberOfBoards; boardIndex++) {
 		Board[boardIndex]->SetPotFeedbackMaxIndex(MaxAxis[boardIndex]);
-        // Do start conversion and getting raw pot value back-to-back
-		Board[boardIndex]->StartConvPotFeedback();
-		//ADInterruptPending = Board[boardIndex]->PollADInterruptPending(20); //5 * MaxAxis[boardIndex]);
-        ADInterruptPending = Board[boardIndex]->PollADInterruptPending(10 * MaxAxis[boardIndex]);
+		ADInterruptPending = Board[boardIndex]->PollADInterruptPending(20); //5 * MaxAxis[boardIndex]);
 		if (ADInterruptPending == true) {
 			for (unsigned int axis = 0; axis <= MaxAxis[boardIndex]; axis++) {
 				PotFeedbacks[axis + StartAxis[boardIndex]] = Board[boardIndex]->GetADFIFO();
