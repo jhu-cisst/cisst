@@ -115,6 +115,7 @@ IF(CISST_SVL_USE_NUMERICAL)
       cisstNumerical
       )
   SET(SOURCE_FILES
+      ${SOURCE_FILES}
       # Trackers
       trackers/cisst/svlTrackerCisst.cpp
       trackers/cisst/trkCisstWSSD.h      # private header
@@ -124,6 +125,7 @@ IF(CISST_SVL_USE_NUMERICAL)
       trackers/cisst/trkCisstBase.h      # private header
       )
   SET(HEADER_FILES
+      ${HEADER_FILES}
       # Trackers
       trackers/svlTrackerCisst.h
       )
