@@ -19,19 +19,19 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#ifndef _ui3Cursor_h
-#define _ui3Cursor_h
+#ifndef _ui3CursorSphere_h
+#define _ui3CursorSphere_h
 
 
 #include <cisstVector/vctTransformationTypes.h>
 #include <cisst3DUserInterface/ui3VTKForwardDeclarations.h>
-#include <cisst3DUserInterface/ui3VisibleObject.h>
+#include <cisst3DUserInterface/ui3CursorBase.h>
 
 
-/*!
- Provides a default behavior and common interface for derived behavior classes.
+/*!  Simple cursor using a sphere for rendering.  Color, diameter and
+  transparency are used to show the different states.
 */
-class ui3Cursor: public ui3VisibleObject
+class ui3CursorSphere: public ui3CursorBase
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 5);
 
@@ -44,20 +44,20 @@ public:
     /*!
      Constructor: called when instantiating behaviors
     */
-    ui3Cursor(ui3Manager * manager);
+    ui3CursorSphere(ui3Manager * manager);
 
     /*!
      Destructor
     */
-    virtual ~ui3Cursor();
+    ~ui3CursorSphere();
 
-    virtual bool CreateVTKObjects(void);
+    bool CreateVTKObjects(void);
 
-    virtual void SetPressed(bool pressed);
+    void SetPressed(bool pressed);
 
-    virtual void Set2D(bool is2D);
+    void Set2D(bool is2D);
 
-    virtual void SetClutched(bool clutched);
+    void SetClutched(bool clutched);
 
 protected:
     void UpdateColor(void);
@@ -68,7 +68,7 @@ protected:
 };
 
 
-CMN_DECLARE_SERVICES_INSTANTIATION(ui3Cursor);
+CMN_DECLARE_SERVICES_INSTANTIATION(ui3CursorSphere);
 
 
-#endif // _ui3Cursor_h
+#endif // _ui3CursorSphere_h

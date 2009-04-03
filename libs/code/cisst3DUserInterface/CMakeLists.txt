@@ -45,10 +45,11 @@ ENDIF(CISST_SVL_HAS_OPENCV)
 # all source files
 SET(SOURCE_FILES
     ui3BehaviorBase.cpp
+    ui3CursorSphere.cpp
     ui3ImagePlane.cpp
-    ui3Cursor.cpp
     ui3InputDeviceBase.cpp
     ui3Manager.cpp
+    ui3MasterArm.cpp
     ui3MenuBar.cpp
     ui3MenuButton.cpp
     ui3SceneManager.cpp
@@ -61,10 +62,12 @@ SET(SOURCE_FILES
 SET(HEADER_FILES
     ui3ForwardDeclarations.h
     ui3BehaviorBase.h
+    ui3CursorBase.h
+    ui3CursorSphere.h
     ui3ImagePlane.h
-    ui3Cursor.h
     ui3InputDeviceBase.h
     ui3Manager.h
+    ui3MasterArm.h
     ui3MenuBar.h
     ui3MenuButton.h
     ui3SceneManager.h

@@ -26,7 +26,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisst3DUserInterface/ui3BehaviorBase.h>
 #include <cisst3DUserInterface/ui3SceneManager.h>
 #include <cisst3DUserInterface/ui3VTKRenderer.h>
-#include <cisst3DUserInterface/ui3Cursor.h>
+#include <cisst3DUserInterface/ui3CursorBase.h>
+#include <cisst3DUserInterface/ui3CursorSphere.h>
 #include <cisst3DUserInterface/ui3ImagePlane.h>
 
 
@@ -344,8 +345,8 @@ private:
     void ShowAll(void);
 
     // cursors
-    ui3Cursor * RightCursor;
-    ui3Cursor * LeftCursor;
+    ui3CursorBase * RightCursor;
+    ui3CursorBase * LeftCursor;
 
     // button state, might be a better implementation for this (Anton)
     bool RightButtonPressed, RightButtonReleased;

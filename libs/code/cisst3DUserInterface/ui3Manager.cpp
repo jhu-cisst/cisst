@@ -372,13 +372,13 @@ void ui3Manager::Startup(void)
     }
 
     if (this->RightMasterExists) {
-        this->RightCursor = new ui3Cursor(this);
+        this->RightCursor = new ui3CursorSphere(this);
         CMN_ASSERT(this->RightCursor);
         this->SceneManager->Add(this->RightCursor);
     }
 
     if (this->LeftMasterExists) {
-        this->LeftCursor = new ui3Cursor(this);
+        this->LeftCursor = new ui3CursorSphere(this);
         CMN_ASSERT(this->LeftCursor);
         this->SceneManager->Add(this->LeftCursor);
     }

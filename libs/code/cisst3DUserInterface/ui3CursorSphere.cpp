@@ -19,7 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include <cisst3DUserInterface/ui3Cursor.h>
+#include <cisst3DUserInterface/ui3CursorSphere.h>
 
 #include <vtkActor.h>
 #include <vtkAssembly.h>
@@ -27,10 +27,10 @@ http://www.cisst.org/cisst/license.txt.
 #include <vtkProperty.h>
 #include <vtkSphereSource.h>
 
-CMN_IMPLEMENT_SERVICES(ui3Cursor);
+CMN_IMPLEMENT_SERVICES(ui3CursorSphere);
 
-ui3Cursor::ui3Cursor(ui3Manager * manager):
-    ui3VisibleObject(manager),
+ui3CursorSphere::ui3CursorSphere(ui3Manager * manager):
+    ui3CursorBase(manager),
     Source(0),
     Mapper(0),
     Actor(0),
@@ -40,7 +40,7 @@ ui3Cursor::ui3Cursor(ui3Manager * manager):
 {}
 
 
-ui3Cursor::~ui3Cursor()
+ui3CursorSphere::~ui3CursorSphere()
 {
     if (this->Source) {
         this->Source->Delete();
@@ -56,7 +56,7 @@ ui3Cursor::~ui3Cursor()
 }
 
 
-bool ui3Cursor::CreateVTKObjects()
+bool ui3CursorSphere::CreateVTKObjects()
 {
     this->Source = vtkSphereSource::New();
     CMN_ASSERT(this->Source);
@@ -77,7 +77,7 @@ bool ui3Cursor::CreateVTKObjects()
 }
 
 
-void ui3Cursor::UpdateColor(void)
+void ui3CursorSphere::UpdateColor(void)
 {
     this->Lock();
     if (this->IsClutched) {
@@ -104,20 +104,20 @@ void ui3Cursor::UpdateColor(void)
 }
 
 
-void ui3Cursor::SetPressed(bool pressed)
+void ui3CursorSphere::SetPressed(bool pressed)
 {
     this->IsPressed = pressed;
     this->UpdateColor();
 }
 
 
-void ui3Cursor::Set2D(bool is2D)
+void ui3CursorSphere::Set2D(bool is2D)
 {
     this->Is2D = is2D;
     this->UpdateColor();
 }
 
-void ui3Cursor::SetClutched(bool clutched)
+void ui3CursorSphere::SetClutched(bool clutched)
 {
     this->IsClutched = clutched;
     this->UpdateColor();
