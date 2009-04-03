@@ -310,6 +310,16 @@ private:
     osaThread* RendererThread;
 
     /*!
+     Method to create VTK scenes.
+    */
+    bool SetupRenderers();
+
+    /*!
+     Method to release VTK scenes.
+    */
+    void ReleaseRenderers();
+
+    /*!
      Background video stream event callback.
     */
     void OnStreamSample(svlSample* sample, int streamindex);

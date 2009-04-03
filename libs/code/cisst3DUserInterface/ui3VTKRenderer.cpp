@@ -31,10 +31,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <vtkOpenGLRenderWindow.h>
 #include <vtkRenderWindowInteractor.h>
 #include <vtkCamera.h>
-#if (CISST_OS == CISST_LINUX)
-    #include "vtkXOpenGLOffScreenRenderWindow.h"
-#endif //CISST_LINUX
-
 
 CMN_IMPLEMENT_SERVICES(ui3VTKRenderer);
 
@@ -63,21 +59,10 @@ ui3VTKRenderer::ui3VTKRenderer(ui3SceneManager* scene,
 
     if (this->Target) {
         // Setup off-screen rendering
-#if (CISST_OS == CISST_LINUX)
-// TO DO:
-//   Fix the off-screen renderer on Linux
-        //this->RenderWindow = vtkXOpenGLOffScreenRenderWindow::New();
-        //CMN_ASSERT(this->RenderWindow);
         this->RenderWindow = vtkOpenGLRenderWindow::New();
         CMN_ASSERT(this->RenderWindow);
         this->RenderWindow->OffScreenRenderingOn();
         this->RenderWindow->DoubleBufferOff();
-#else //CISST_LINUX
-        this->RenderWindow = vtkOpenGLRenderWindow::New();
-        CMN_ASSERT(this->RenderWindow);
-        this->RenderWindow->OffScreenRenderingOn();
-        this->RenderWindow->DoubleBufferOff();
-#endif //CISST_LINUX
         this->OffScreenBuffer = vtkUnsignedCharArray::New();
         CMN_ASSERT(this->OffScreenBuffer);
         this->OffScreenBuffer->Resize(this->Width * this->Height * 3);

@@ -42,6 +42,11 @@ http://www.cisst.org/cisst/license.txt.
 #endif
 
 #define RENDER_ON_OVERLAY
+#ifdef RENDER_ON_OVERLAY
+    #define DEBUG_WINDOW_WITH_OVERLAY
+//    #define DEBUG_WINDOW_HAS_VIDEO_BACKGROUND
+#endif
+
 #define CAPTURE_SWAP_RGB
 
 
@@ -100,7 +105,7 @@ int main()
 #ifndef RENDER_ON_OVERLAY
     svlStreamManager vidStream(2);  // running on multiple threads
 
-    svlVideoCaptureSource vidSource(true); // mono source
+    svlVideoCaptureSource vidSource(true); // stereo source
     cout << "Setup LEFT camera:" << endl;
     vidSource.DialogSetup(SVL_LEFT);
     cout << "Setup RIGHT camera:" << endl;
@@ -110,14 +115,15 @@ int main()
 #ifdef CAPTURE_SWAP_RGB
     svlRGBSwapper vidRGBSwapper;
     vidStream.Trunk().Append(&vidRGBSwapper);
-#endif
+#endif //CAPTURE_SWAP_RGB
 
     // add guiManager as a filter to the pipeline, so it will receive video frames
     // "StereoVideo" is defined in the UI Manager as a possible video interface
     vidStream.Trunk().Append(guiManager.GetStreamSamplerFilter("StereoVideo"));
 
     vidStream.Initialize();
-#endif
+#endif //RENDER_ON_OVERLAY
+
 ////////////////////////////////////////////////////////////////
 // setup renderers
 
@@ -132,14 +138,14 @@ int main()
                            "LeftEyeView");  // name of renderer
     // Sending renderer output to an external render target
     guiManager.SetRenderTargetToRenderer("LeftEyeView", svlRenderTargets::Get(0));
-#else
+#else //RENDER_ON_OVERLAY
     guiManager.AddRenderer(vidSource.GetWidth(SVL_LEFT),  // render width
                            vidSource.GetHeight(SVL_LEFT), // render height
                            0, 0,            // window position
                            camframe, 30.0,  // camera parameters
                            "LeftEyeView");  // name of renderer
     guiManager.AddVideoBackgroundToRenderer("LeftEyeView", "StereoVideo", SVL_LEFT);
-#endif
+#endif //RENDER_ON_OVERLAY
 
     camframe.Translation().X() = 3.5;
 
@@ -151,21 +157,58 @@ int main()
                            "RightEyeView"); // name of renderer
     // Sending renderer output to an external render target
     guiManager.SetRenderTargetToRenderer("RightEyeView", svlRenderTargets::Get(1));
-#else
+#else //RENDER_ON_OVERLAY
     guiManager.AddRenderer(vidSource.GetWidth(SVL_RIGHT),  // render width
                            vidSource.GetHeight(SVL_RIGHT), // render height
                            20, 20,          // window position
                            camframe, 30.0,  // camera parameters
                            "RightEyeView"); // name of renderer
     guiManager.AddVideoBackgroundToRenderer("RightEyeView", "StereoVideo", SVL_RIGHT);
-#endif
+#endif //RENDER_ON_OVERLAY
+
+#ifdef DEBUG_WINDOW_WITH_OVERLAY
+#ifdef DEBUG_WINDOW_HAS_VIDEO_BACKGROUND
+    svlStreamManager vidStream(1);
+
+    svlVideoCaptureSource vidSource(false); // mono source
+    cout << "Setup camera:" << endl;
+    vidSource.DialogSetup();
+    vidStream.Trunk().Append(&vidSource);
+
+    svlImageResizer vidResizer;
+    vidResizer.SetOutputSize(384, 216);
+    vidStream.Trunk().Append(&vidResizer);
+
+#ifdef CAPTURE_SWAP_RGB
+    svlRGBSwapper vidRGBSwapper;
+    vidStream.Trunk().Append(&vidRGBSwapper);
+#endif //CAPTURE_SWAP_RGB
+
+    // add guiManager as a filter to the pipeline, so it will receive video frames
+    // "MonoVideo" is defined in the UI Manager as a possible video interface
+    vidStream.Trunk().Append(guiManager.GetStreamSamplerFilter("MonoVideo"));
+
+    vidStream.Initialize();
+#endif //DEBUG_WINDOW_HAS_VIDEO_BACKGROUND
+
+    guiManager.AddRenderer(384,  // render width
+                           216,  // render height
+                           0, 0,            // window position
+                           camframe, 30.0,  // camera parameters
+                           "ThirdEyeView");  // name of renderer
+
+#ifdef DEBUG_WINDOW_HAS_VIDEO_BACKGROUND
+    guiManager.AddVideoBackgroundToRenderer("ThirdEyeView", "MonoVideo");
+    vidStream.Start();
+#endif //DEBUG_WINDOW_HAS_VIDEO_BACKGROUND
+#endif //DEBUG_WINDOW_WITH_OVERLAY
 
 ///////////////////////////////////////////////////////////////
 // start streaming
 
 #ifndef RENDER_ON_OVERLAY
     vidStream.Start();
-#endif
+#endif //RENDER_ON_OVERLAY
 
 
 #if (UI3_INPUT == UI3_OMNI1) || (UI3_INPUT == UI3_OMNI1_OMNI2)
@@ -181,7 +224,7 @@ int main()
     guiManager.SetupLeftMaster(sensable, "Omni2",
                                sensable, "Omni2Button1",
                                sensable, "Omni2Button2",
-                               transform, 0.5 /* scale factor */);
+                          200     transform, 0.5 /* scale factor */);
 #endif
 
 #if (UI3_INPUT == UI3_DAVINCI)
@@ -226,7 +269,15 @@ int main()
     // It stops and disassembles the pipeline in proper
     // order even if it has several branches
     vidStream.EmptyFilterList();
-#endif
+#endif //RENDER_ON_OVERLAY
+
+#ifdef DEBUG_WINDOW_WITH_OVERLAY
+#ifdef DEBUG_WINDOW_HAS_VIDEO_BACKGROUND
+    // It stops and disassembles the pipeline in proper
+    // order even if it has several branches
+    vidStream.EmptyFilterList();
+#endif //DEBUG_WINDOW_HAS_VIDEO_BACKGROUND
+#endif //DEBUG_WINDOW_WITH_OVERLAY
 
     return 0;
 }

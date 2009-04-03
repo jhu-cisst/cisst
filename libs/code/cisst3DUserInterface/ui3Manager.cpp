@@ -358,57 +358,17 @@ void ui3Manager::Startup(void)
     this->SceneManager = new ui3SceneManager;
     CMN_ASSERT(this->SceneManager);
 
-    // Setup renderer(s)
-    double bgheight, bgwidth;
-    for (unsigned int i = 0; i < Renderers.size(); i ++) {
-
-        Renderers[i]->renderer = new ui3VTKRenderer(this->SceneManager,
-                                                    Renderers[i]->width,
-                                                    Renderers[i]->height,
-                                                    Renderers[i]->viewangle,
-                                                    Renderers[i]->cameraframe,
-                                                    Renderers[i]->rendertarget);
-        CMN_ASSERT(Renderers[i]->renderer);
-
-        // Add live video background if available
-        if (Renderers[i]->streamindex >= 0) {
-
-            Renderers[i]->imageplane = new ui3ImagePlane(this);
-            CMN_ASSERT(Renderers[i]->imageplane);
-
-            // Get bitmap dimensions from pipeline.
-            // The pipeline has to be already initialized to get the required info.
-            Renderers[i]->imageplane->SetBitmapSize(GetStreamWidth(Renderers[i]->streamindex, Renderers[i]->streamchannel),
-                                                    GetStreamHeight(Renderers[i]->streamindex, Renderers[i]->streamchannel));
-
-            // Calculate plane height to cover the whole vertical field of view
-            bgheight = VIDEO_BACKGROUND_DISTANCE * tan((Renderers[i]->renderer->GetViewAngle() / 2.0) * 3.14159265 / 180.0) * 2.0;
-            // Calculate plane width from plane height and the bitmap aspect ratio
-            bgwidth = bgheight *
-                      GetStreamWidth(Renderers[i]->streamindex, Renderers[i]->streamchannel) /
-                      GetStreamHeight(Renderers[i]->streamindex, Renderers[i]->streamchannel);
-
-            // Set plane size (dimensions are already in millimeters)
-            Renderers[i]->imageplane->SetPhysicalSize(bgwidth, bgheight);
-
-            // Change pivot position to move plane to the right location.
-            // The pivot point will remain in the origin, only the plane moves.
-            Renderers[i]->imageplane->SetPhysicalPositionRelativeToPivot(vct3(-0.5 * bgwidth, 0.5 * bgheight, -VIDEO_BACKGROUND_DISTANCE));
-
-            // Add image plane to renderer directly, without going through scene manager
-            Renderers[i]->imageplane->CreateVTKObjects();
-            Renderers[i]->renderer->Add(Renderers[i]->imageplane);
-        }
-
-        // Add renderer to scene manager
-        this->SceneManager->AddRenderer(Renderers[i]->renderer);
+    // create renderer thread
+    RendererThread = new osaThread;
+    RendererThread->Create<CVTKRendererProc, ui3Manager*>(&RendererProc, &CVTKRendererProc::Proc, this);
+    // wait for all VTK initialization to be finished
+    if (RendererProc.ThreadReadySignal.Wait(10.0) && RendererProc.ThreadKilled == false) {
+        Initialized = true;
     }
-
-    // Fix for VTK bug:
-    // Windows can be moved only after all render windows
-    // have already been created and set up.
-    for (unsigned int i = 0; i < Renderers.size(); i ++) {
-        Renderers[i]->renderer->SetWindowPosition(Renderers[i]->windowposx, Renderers[i]->windowposy);
+    else {
+        // If it takes longer than 10 sec, don't execute
+        RendererProc.KillThread = true;
+        Initialized = false;
     }
 
     if (this->RightMasterExists) {
@@ -438,18 +398,6 @@ void ui3Manager::Startup(void)
     // current active behavior is this
     this->SetState(Foreground);    // UI manager is in foreground by default (main menu)
 
-    // create renderer thread
-    RendererThread = new osaThread;
-    RendererThread->Create<CVTKRendererProc, ui3Manager*>(&RendererProc, &CVTKRendererProc::Proc, this);
-    if (RendererProc.ThreadReadySignal.Wait(1.0) && RendererProc.ThreadKilled == false) {
-        Initialized = true;
-    }
-    else {
-        // If it takes longer than 1 sec, don't execute
-        RendererProc.KillThread = true;
-        Initialized = false;
-    }
-
     if (!Initialized) {
         // error
         // return false;
@@ -464,11 +412,17 @@ void ui3Manager::Startup(void)
 
 void ui3Manager::Cleanup(void)
 {
-    if (!Initialized) return;
-    Initialized = false;
+    if (!Initialized) {
+        // if Cleanup is already called before then wait until thread is killed
+        if (RendererProc.ThreadKilled == false) {
+            RendererProc.ThreadReadySignal.Wait();
+            // raise signal again to release other waiting threads (if any)
+            RendererProc.ThreadReadySignal.Raise();
+        }
+        return;
+    }
 
-    // Release UI manager
-    // TO DO
+    Initialized = false;
 
     if (RendererThread) {
         RendererProc.KillThread = true;
@@ -477,18 +431,8 @@ void ui3Manager::Cleanup(void)
         RendererThread = 0;
     }
 
-    for (unsigned int i = 0; i < Renderers.size(); i ++) {
-        if (Renderers[i]) {
-            if (Renderers[i]->renderer) {
-                delete Renderers[i]->renderer;
-                Renderers[i]->renderer = 0;
-            }
-            if (Renderers[i]->imageplane) {
-                delete Renderers[i]->imageplane;
-                Renderers[i]->imageplane = 0;
-            }
-        }
-    }
+    // Release UI manager
+    // TO DO
 }
 
 
@@ -593,7 +537,7 @@ void ui3Manager::Run(void)
     }
 
     // this needs to change to a parameter
-    osaSleep(10.0 * cmn_ms);
+    osaSleep(20.0 * cmn_ms);
 }
 
 
@@ -663,6 +607,92 @@ void ui3Manager::LeftMasterClutchEventHandler(const prmEventButton & buttonEvent
         this->LeftTransform.ApplyTo(leftArmPosition.Position().Translation(), final);
         this->LeftTransform.Translation().Add(initial);
         this->LeftTransform.Translation().Subtract(final);
+    }
+}
+
+
+bool ui3Manager::SetupRenderers()
+{
+    CMN_LOG_CLASS(3) << "Setting up VTK renderers: begin" << std::endl;
+
+    unsigned int i;
+    double bgheight, bgwidth;
+    const unsigned int renderercount = this->Renderers.size();
+
+    for (i = 0; i < renderercount; i ++) {
+
+        Renderers[i]->renderer = new ui3VTKRenderer(this->SceneManager,
+                                                    this->Renderers[i]->width,
+                                                    this->Renderers[i]->height,
+                                                    this->Renderers[i]->viewangle,
+                                                    this->Renderers[i]->cameraframe,
+                                                    this->Renderers[i]->rendertarget);
+        CMN_ASSERT(this->Renderers[i]->renderer);
+
+        // Add live video background if available
+        if (this->Renderers[i]->streamindex >= 0) {
+
+            this->Renderers[i]->imageplane = new ui3ImagePlane(this);
+            CMN_ASSERT(this->Renderers[i]->imageplane);
+
+            // Get bitmap dimensions from pipeline.
+            // The pipeline has to be already initialized to get the required info.
+            this->Renderers[i]->imageplane->SetBitmapSize(GetStreamWidth(this->Renderers[i]->streamindex, this->Renderers[i]->streamchannel),
+                                                          GetStreamHeight(this->Renderers[i]->streamindex, this->Renderers[i]->streamchannel));
+
+            // Calculate plane height to cover the whole vertical field of view
+            bgheight = VIDEO_BACKGROUND_DISTANCE * tan((this->Renderers[i]->renderer->GetViewAngle() / 2.0) * 3.14159265 / 180.0) * 2.0;
+            // Calculate plane width from plane height and the bitmap aspect ratio
+            bgwidth = bgheight *
+                      GetStreamWidth(this->Renderers[i]->streamindex, this->Renderers[i]->streamchannel) /
+                      GetStreamHeight(this->Renderers[i]->streamindex, this->Renderers[i]->streamchannel);
+
+            // Set plane size (dimensions are already in millimeters)
+            this->Renderers[i]->imageplane->SetPhysicalSize(bgwidth, bgheight);
+
+            // Change pivot position to move plane to the right location.
+            // The pivot point will remain in the origin, only the plane moves.
+            this->Renderers[i]->imageplane->SetPhysicalPositionRelativeToPivot(vct3(-0.5 * bgwidth, 0.5 * bgheight, -VIDEO_BACKGROUND_DISTANCE));
+
+            // Add image plane to renderer directly, without going through scene manager
+            this->Renderers[i]->imageplane->CreateVTKObjects();
+            this->Renderers[i]->renderer->Add(this->Renderers[i]->imageplane);
+        }
+
+        // Add renderer to scene manager
+        this->SceneManager->AddRenderer(this->Renderers[i]->renderer);
+    }
+
+    // Fix for VTK bug:
+    // Windows can be moved only after all render windows
+    // have already been created and set up.
+    for (unsigned int i = 0; i < renderercount; i ++) {
+        this->Renderers[i]->renderer->SetWindowPosition(this->Renderers[i]->windowposx, this->Renderers[i]->windowposy);
+    }
+
+    CMN_LOG_CLASS(3) << "Setting up VTK renderers: end" << std::endl;
+
+    // TO DO:
+    //   add some error checking
+    return true;
+}
+
+
+void ui3Manager::ReleaseRenderers()
+{
+    const unsigned int renderercount = this->Renderers.size();
+
+    for (unsigned int i = 0; i < renderercount; i ++) {
+        if (this->Renderers[i]) {
+            if (this->Renderers[i]->renderer) {
+                delete this->Renderers[i]->renderer;
+                this->Renderers[i]->renderer = 0;
+            }
+            if (this->Renderers[i]->imageplane) {
+                delete this->Renderers[i]->imageplane;
+                this->Renderers[i]->imageplane = 0;
+            }
+        }
     }
 }
 
@@ -740,21 +770,25 @@ ui3Manager::CVTKRendererProc::CVTKRendererProc() :
 
 void* ui3Manager::CVTKRendererProc::Proc(ui3Manager* baseref)
 {
+    // create VTK renderers
+    baseref->SetupRenderers();
+
     ThreadKilled = false;
     ThreadReadySignal.Raise();
 
     unsigned int i, framecount = 10;
     double prevtime, time;
-    const unsigned int size = baseref->Renderers.size();
+    const unsigned int renderercount = baseref->Renderers.size();
 
     osaStopwatch stopwatch;
     stopwatch.Start();
     prevtime = stopwatch.GetElapsedTime();
 
+    // rendering loop
     while (!KillThread) {
 
         // signal renderers
-        for (i = 0; i < size; i ++) {
+        for (i = 0; i < renderercount; i ++) {
             // asynchronous call to render the current view; returns immediately
             baseref->Renderers[i]->renderer->Render();
         }
@@ -770,7 +804,13 @@ void* ui3Manager::CVTKRendererProc::Proc(ui3Manager* baseref)
         framecount --;
     }
 
+    // release VTK resources
+    baseref->ReleaseRenderers();
+
+    // signal waiting threads that rendering thread is killed
     ThreadKilled = true;
+    ThreadReadySignal.Raise();
+
     return this;
 }
 

@@ -74,17 +74,5 @@ SET(HEADER_FILES
     ui3VisibleObject.h
     )
 
-# Linux specific VTK off-screen rendering helper class
-IF(UNIX)
-    IF(CMAKE_SYSTEM_NAME MATCHES Linux)
-        SET(SOURCE_FILES
-            ${SOURCE_FILES}
-            vtkXOpenGLOffScreenRenderWindow.cxx
-            vtkXOpenGLOffScreenRenderWindow.h     #private header
-            )
-    ENDIF(CMAKE_SYSTEM_NAME MATCHES Linux)
-ENDIF(UNIX)
-
-
 CISST_ADD_LIBRARY_TO_PROJECT(cisstLibs)
 

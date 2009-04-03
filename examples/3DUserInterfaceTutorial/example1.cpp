@@ -136,7 +136,6 @@ bool CExampleBehavior::RunForeground()
                                  this->PreviousCursorPosition);
         this->Position.Add(deltaCursor);
         this->VisibleObject->SetPosition(this->Position);
-        std::cout << this->Position << std::endl;
     }
     this->PreviousCursorPosition.Assign(position.Position().Translation());
     return true;

@@ -120,7 +120,7 @@ void ui3BehaviorBase::Run(void)
             break;
         }
     }
-    osaSleep(10.0 * cmn_ms); // bad, needs to be a variable/data member
+    osaSleep(20.0 * cmn_ms); // bad, needs to be a variable/data member
 }
 
 
