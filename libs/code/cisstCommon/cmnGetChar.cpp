@@ -32,7 +32,9 @@ http://www.cisst.org/cisst/license.txt.
 #include <fcntl.h>
 #endif // CISST_LINUX || CISST_DARWIN || CISST_SOLARIS || CISST_RTAI
 
-
+#if (CISST_OS == CISST_WINDOWS)
+#include <conio.h>
+#endif // CISST_WINDOWS
 
 struct cmnGetCharEnvironmentInternals {
 #if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI)
@@ -101,7 +103,7 @@ bool cmnGetCharEnvironment::Activate(void)
 #endif // CISST_DARWIN
 
 #if (CISST_OS == CISST_WINDOWS)
-cmnGetCharEnvironment::Activate(void)
+bool cmnGetCharEnvironment::Activate(void)
 {
     if (!this->Activated) {
         this->Activated = true;
@@ -150,7 +152,7 @@ bool cmnGetCharEnvironment::DeActivate(void)
 #endif // CISST_WINDOWS
 
 
-#if (CISST_OS == CISST_LINUX) || (CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI)
 int cmnGetCharEnvironment::GetChar(void)
 {
     if (this->Activated) {
