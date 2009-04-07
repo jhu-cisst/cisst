@@ -50,13 +50,18 @@ protected:
     void SendPrintToggle(void);
     bool GetWeight(double & weightInGrams, bool & stable);
     bool GetModel(std::string & modelName);
+    bool ProcessBuffer(void);
+    typedef const char * const_char_pointer;
+    void UpdateStateTable(const const_char_pointer & buffer);
 
     /*! Placeholder for last weigth read */
     cmnDouble Weight;
 
     /*! Replies are limited to 16 chars, to be tested */
-    enum {BUFFER_SIZE = 20};
-    char CharBuffer[BUFFER_SIZE];
+    enum {BUFFER_SIZE = 512};
+    char BytesReadSoFar[BUFFER_SIZE];
+    unsigned int NbBytesReadSoFar;
+    char TempBuffer[BUFFER_SIZE];
 
     /*! Serial port instance */
     osaSerialPort SerialPort;

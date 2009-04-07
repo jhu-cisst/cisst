@@ -20,9 +20,9 @@ int main(void)
     osaThreadedLogFile threadedLog("example1-");
     cmnLogger::GetMultiplexer()->AddChannel(threadedLog, 10);
     // specify a higher, more verbose log level for these classes
-    cmnClassRegister::SetLoD("mtsTaskInterface", 10);
-    cmnClassRegister::SetLoD("mtsTaskManager", 10);
-    cmnClassRegister::SetLoD("devSartoriusSerial", 10);
+    cmnClassRegister::SetLoD("mtsTaskInterface", 5);
+    cmnClassRegister::SetLoD("mtsTaskManager", 5);
+    cmnClassRegister::SetLoD("devSartoriusSerial", 5);
 
     // create our two tasks
     const long PeriodDisplay = 10; // in milliseconds
@@ -52,6 +52,7 @@ int main(void)
     while (1) {
         osaSleep(100.0 * cmn_ms); // sleep to save CPU
         if (displayTaskObject->GetExitFlag()) {
+            std::cout << "Quitting " << std::flush;
             break;
         }
     }
@@ -59,7 +60,10 @@ int main(void)
     taskManager->KillAll();
 
     osaSleep(PeriodDisplay * 2);
-    while (!displayTaskObject->IsTerminated()) osaSleep(PeriodDisplay);
+    while (!displayTaskObject->IsTerminated()) {
+        osaSleep(PeriodDisplay);
+        std::cout << "." << std::flush;
+    }
 
     return 0;
 }

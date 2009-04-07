@@ -8,19 +8,23 @@ class displayUI {open
   } {
     Fl_Window DisplayWindow {
       label DisplayWindow open
-      xywh {449 243 546 134} type Double visible
+      xywh {449 243 649 120} type Double visible
     } {
       Fl_Return_Button Close {
         label Close
         callback {DisplayWindow->hide();}
-        xywh {445 80 75 25} box THIN_UP_BOX
+        xywh {565 52 75 25} box THIN_UP_BOX
       }
-      Fl_Progress WeightGraphic {selected
+      Fl_Progress WeightGraphic {
         xywh {25 25 495 20} selection_color 42
       }
       Fl_Value_Output WeightValue {
         label {Weight: }
         xywh {81 50 130 24}
+      }
+      Fl_Value_Output MaxWeight {
+        label {Max:} selected
+        xywh {560 24 80 23}
       }
     }
   }

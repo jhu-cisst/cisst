@@ -10,7 +10,8 @@ CMN_IMPLEMENT_SERVICES(displayTask);
 
 displayTask::displayTask(const std::string & taskName, double period):
     mtsTaskPeriodic(taskName, period, false, 500),
-    ExitFlag(false)
+    ExitFlag(false),
+    MaxWeight(0.0)
 {
     // to communicate with the interface of the resource
     mtsRequiredInterface * requiredInterface = AddRequiredInterface("Scale");
@@ -39,7 +40,20 @@ void displayTask::Run(void)
 
     // get the data from the scale
     GetWeight(this->Weight);
-    UI.WeightValue->value(this->Weight.Data);
+
+    // use a tempory copy
+    double weight = this->Weight;
+
+    // display value as is
+    UI.WeightValue->value(weight);
+
+    // use progress bar to show fancier graph
+    // update progress bar range
+    if (weight > MaxWeight) {
+        MaxWeight = weight;
+    }
+    UI.MaxWeight->value(this->MaxWeight);   
+    UI.WeightGraphic->value(weight < 0.0 ? 0.0 : weight / this->MaxWeight * 100.0);
 
     // update the UI, process UI events 
     if (Fl::check() == 0) {
