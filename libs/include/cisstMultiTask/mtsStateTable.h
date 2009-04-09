@@ -212,7 +212,7 @@ protected:
       This element is the same type as the state data table entry. */
     template<class _elementType>
     _elementType * GetStateDataElement(mtsStateDataId id) const {
-        return StateVectorElements[index];
+        return StateVectorElements[id];
     }
 
     /*! Return pointer to accessor functions for the state data element.
