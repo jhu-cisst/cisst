@@ -109,8 +109,7 @@ SET(HEADER_FILES
 
 
 # cisstNumerical dependency
-OPTION(CISST_SVL_USE_NUMERICAL "cisstStereoVision to use cisstNumerical" OFF)
-IF(CISST_SVL_USE_NUMERICAL)
+IF(BUILD_LIBS_cisstNumerical)
   SET(DEPENDENCIES
       cisstNumerical
       )
@@ -129,7 +128,7 @@ IF(CISST_SVL_USE_NUMERICAL)
       # Trackers
       trackers/svlTrackerCisst.h
       )
-ENDIF(CISST_SVL_USE_NUMERICAL)
+ENDIF(BUILD_LIBS_cisstNumerical)
 
 
 # OpenCV
@@ -137,7 +136,6 @@ OPTION(CISST_SVL_HAS_OPENCV "Compile OpenCV extensions" OFF)
 IF(CISST_SVL_HAS_OPENCV)
   FIND_PACKAGE(OpenCV)
   INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS})
-  LINK_DIRECTORIES(${OpenCV_LINK_DIRECTORIES})
   LINK_LIBRARIES(${OpenCV_LIBRARIES})
 
   SET(SOURCE_FILES
@@ -317,6 +315,11 @@ SET_SOURCE_FILES_PROPERTIES("${CISST_SVL_CONFIG_FILE}"
                             PROPERTIES GENERATED TRUE)
 SET(HEADERS ${CISST_SVL_CONFIG_FILE})
 
+# Create the CMake config file
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/cisstStereoVisionBuild.cmake.in
+               ${cisst_BINARY_DIR}/cisstStereoVisionBuild.cmake
+               @ONLY)
+
 # Finally create the library
 CISST_ADD_LIBRARY_TO_PROJECT(cisstLibs)
 
@@ -327,7 +330,6 @@ IF(WIN32)
                           ${DIRECTSHOW_strmiids_LIBRARY}
                           ${DIRECTSHOW_Vfw32_LIBRARY}
                           ${DIRECTSHOW_WinMM_LIBRARY}
-                          ${CISST_SVL_DS_strmbase_LIB}
                           )
     SET(CMAKE_SHARED_LINKER_FLAGS
         "${CMAKE_SHARED_LINKER_FLAGS} /NODEFAULTLIB:libc.lib /NODEFAULTLIB:libcmt.lib /NODEFAULTLIB:libcd.lib /NODEFAULTLIB:libcmtd.lib")

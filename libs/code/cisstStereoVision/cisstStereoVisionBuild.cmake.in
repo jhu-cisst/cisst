@@ -1,0 +1,119 @@
+#
+# $Id: $
+#
+# Cmake configuration file for the installed version of cisstStereoVision
+#
+# Author(s):  Balazs P. Vagvolgyi
+# Created on: 2009-03-30 
+#
+# (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
+# Reserved.
+#
+# --- begin cisst license - do not edit ---
+# 
+# This software is provided "as is" under an open source license, with
+# no warranty.  The complete license can be found in license.txt and
+# http://www.cisst.org/cisst/license.txt.
+# 
+# --- end cisst license ---
+
+
+# Which flags have been set and include path/libs
+set(CISST_SVL_HAS_OPENCV @CISST_SVL_HAS_OPENCV@)
+set(OpenCV_INCLUDE_DIRS "@OpenCV_INCLUDE_DIRS@")
+set(OpenCV_LIBRARIES "@OpenCV_LIBRARIES@")
+
+set(CISST_SVL_HAS_MIL @CISST_SVL_HAS_MIL@)
+set(CISST_SVL_MIL_INCLUDE "@CISST_SVL_MIL_INCLUDE@")
+set(CISST_SVL_MIL_LIBRARY "@CISST_SVL_MIL_LIBRARY@")
+
+set(CISST_SVL_HAS_DIRECTSHOW @CISST_SVL_HAS_DIRECTSHOW@)
+set(DIRECTSHOW_INCLUDE_DIR "@DIRECTSHOW_INCLUDE_DIR@")
+set(DIRECTX_INCLUDE_DIR "@DIRECTX_INCLUDE_DIR@")
+set(DIRECTSHOW_strmiids_LIBRARY "@DIRECTSHOW_strmiids_LIBRARY@")
+set(DIRECTSHOW_Vfw32_LIBRARY "@DIRECTSHOW_Vfw32_LIBRARY@")
+set(DIRECTSHOW_WinMM_LIBRARY "@DIRECTSHOW_WinMM_LIBRARY@")
+
+set(CISST_SVL_HAS_SVS @CISST_SVL_HAS_SVS@)
+set(CISST_SVL_SVS_INCLUDE "@CISST_SVL_SVS_INCLUDE@")
+set(CISST_SVL_svs_LIBRARY "@CISST_SVL_svs_LIBRARY@")
+set(CISST_SVL_svsgrab_LIBRARY "@CISST_SVL_svsgrab_LIBRARY@")
+
+set(CISST_SVL_HAS_LIBDC1394 @CISST_SVL_HAS_LIBDC1394@)
+
+set(CISST_SVL_HAS_X11 @CISST_SVL_HAS_X11@)
+set(X11_INCLUDE_DIR "@X11_INCLUDE_DIR@")
+set(X11_LIBRARIES "@X11_LIBRARIES@")
+
+
+# Add OpenCV path and libraries if needed
+if(CISST_SVL_HAS_OPENCV) 
+  set(CISST_ADDITIONAL_INCLUDE_DIRECTORIES
+      ${CISST_ADDITIONAL_INCLUDE_DIRECTORIES}
+      ${OpenCV_INCLUDE_DIRS}
+      )
+  set(CISST_ADDITIONAL_LIBRARIES
+      ${CISST_ADDITIONAL_LIBRARIES}
+      ${OpenCV_LIBRARIES}
+      )
+endif(CISST_SVL_HAS_OPENCV)
+
+# Add MIL path and libraries if needed
+if(CISST_SVL_HAS_MIL) 
+  set(CISST_ADDITIONAL_INCLUDE_DIRECTORIES
+      ${CISST_ADDITIONAL_INCLUDE_DIRECTORIES}
+      ${CISST_SVL_MIL_INCLUDE}
+      )
+  set(CISST_ADDITIONAL_LIBRARIES
+      ${CISST_ADDITIONAL_LIBRARIES}
+      ${CISST_SVL_MIL_LIBRARY}
+      )
+endif(CISST_SVL_HAS_MIL)
+
+# Add DirectShow path and libraries if needed
+if(CISST_SVL_HAS_DIRECTSHOW) 
+  set(CISST_ADDITIONAL_INCLUDE_DIRECTORIES
+      ${CISST_ADDITIONAL_INCLUDE_DIRECTORIES}
+      ${DIRECTSHOW_INCLUDE_DIR}
+      ${DIRECTX_INCLUDE_DIR}
+      )
+  set(CISST_ADDITIONAL_LIBRARIES
+      ${CISST_ADDITIONAL_LIBRARIES}
+      ${DIRECTSHOW_strmiids_LIBRARY}
+      ${DIRECTSHOW_Vfw32_LIBRARY}
+      ${DIRECTSHOW_WinMM_LIBRARY}
+      )
+endif(CISST_SVL_HAS_DIRECTSHOW)
+
+# Add SVS path and libraries if needed
+if(CISST_SVL_HAS_SVS) 
+  set(CISST_ADDITIONAL_INCLUDE_DIRECTORIES
+      ${CISST_ADDITIONAL_INCLUDE_DIRECTORIES}
+      ${CISST_SVL_SVS_INCLUDE}
+      )
+  set(CISST_ADDITIONAL_LIBRARIES
+      ${CISST_ADDITIONAL_LIBRARIES}
+      ${CISST_SVL_svs_LIBRARY}
+      ${CISST_SVL_svsgrab_LIBRARY}
+      )
+endif(CISST_SVL_HAS_SVS)
+
+# Add libDC1394 libraries if needed
+if(CISST_SVL_HAS_LIBDC1394) 
+  set(CISST_ADDITIONAL_LIBRARIES
+      ${CISST_ADDITIONAL_LIBRARIES}
+      dc1394
+      )
+endif(CISST_SVL_HAS_LIBDC1394)
+
+# Add X11 path and libraries if needed
+if(CISST_SVL_HAS_X11) 
+  set(CISST_ADDITIONAL_INCLUDE_DIRECTORIES
+      ${CISST_ADDITIONAL_INCLUDE_DIRECTORIES}
+      ${X11_INCLUDE_DIR}
+      )
+  set(CISST_ADDITIONAL_LIBRARIES
+      ${CISST_ADDITIONAL_LIBRARIES}
+      ${X11_LIBRARIES}
+      )
+endif(CISST_SVL_HAS_X11)

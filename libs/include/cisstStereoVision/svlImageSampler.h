@@ -41,7 +41,7 @@ public:
     // Callback
     virtual void FrameCallback(svlSampleImageBase * CMN_UNUSED(image),
                                svlBMPFileHeader * CMN_UNUSED(fileheader1), svlDIBHeader * CMN_UNUSED(dibheader1),
-                               svlBMPFileHeader * CMN_UNUSED(fileheader2), svlDIBHeader * CMN_UNUSED(dibheader2)) {}
+                               svlBMPFileHeader * CMN_UNUSED(fileheader2), svlDIBHeader * CMN_UNUSED(dibheader2)) = 0;
 
     inline unsigned int GetFrameCounter(void) { return FrameCounter; }
     inline void ResetCounter(void) { FrameCounter = 0; }

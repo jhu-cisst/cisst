@@ -36,13 +36,12 @@ class svlGenericFilter;
 class CISST_EXPORT svlGenericFilterCallbackBase
 {
 public:
-    svlGenericFilterCallbackBase() {}
     virtual ~svlGenericFilterCallbackBase() {}
 
     virtual int InitializeCallback(svlSample* CMN_UNUSED(inputsample),
-                                   svlSample* CMN_UNUSED(outputsample)) { return SVL_OK; }
+                                   svlSample* CMN_UNUSED(outputsample)) = 0;
     virtual int ProcessCallback(svlSample* CMN_UNUSED(inputsample),
-                                svlSample* CMN_UNUSED(outputsample)) { return SVL_OK; }
+                                svlSample* CMN_UNUSED(outputsample)) = 0;
     virtual void ReleaseCallback() {}
 };
 

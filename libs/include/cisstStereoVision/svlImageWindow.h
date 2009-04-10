@@ -66,7 +66,6 @@ friend class svlWindowManagerBase;
 friend class svlImageWindow;
 
 public:
-    svlImageWindowCallbackBase() {}
     virtual ~svlImageWindowCallbackBase() {}
 
 protected:
