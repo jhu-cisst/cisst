@@ -58,7 +58,7 @@ public:
         PushState(false),
         HighlightState(false),
         EnableState(false),
-        BMPReader(0),
+        PNGReader(0),
         Texture(0),
         PlaneSource(0),
         Mapper(0),
@@ -181,7 +181,7 @@ protected:
     */
     bool EnableState;
 
-    vtkBMPReader * BMPReader;
+    vtkPNGReader * PNGReader;
     vtkTexture * Texture;
     vtkPlaneSource * PlaneSource;
     vtkPolyDataMapper * Mapper;

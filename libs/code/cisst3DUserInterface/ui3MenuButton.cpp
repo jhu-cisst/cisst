@@ -19,10 +19,11 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
+#include <cisstConfig.h>
+#include <cisstCommon/cmnPath.h>
 #include <cisst3DUserInterface/ui3MenuButton.h>
 
-#include <vtkBMPReader.h>
+#include <vtkPNGReader.h>
 #include <vtkTexture.h>
 #include <vtkPlaneSource.h>
 #include <vtkPolyDataMapper.h>
@@ -37,14 +38,24 @@ ui3MenuButton::~ui3MenuButton()
 
 bool ui3MenuButton::CreateVTKObjects(void)
 {
-    this->BMPReader = vtkBMPReader::New();
-    CMN_ASSERT(this->BMPReader);
-    this->BMPReader->SetFileName(this->IconFile.c_str());
+    this->PNGReader = vtkPNGReader::New();
+    CMN_ASSERT(this->PNGReader);
+    cmnPath path;
+    // this is were the icons have been copied by CMake post build rule
+    path.Add(std::string(CISST_BUILD_ROOT) + "/etc/cisst3DUserInterface/icons");
+    // in case the user provided a full path, search from / as well
+    path.Add("/", cmnPath::TAIL);
+    std::string iconFullName = path.Find(this->IconFile, cmnPath::READ);
+    if (iconFullName == "") {
+        CMN_LOG(2) << "CreateVTKObjects: can find \"" << this->IconFile
+                   << "\" in path: " << path << std::endl;
+    }
+    this->PNGReader->SetFileName(iconFullName.c_str());
     
     // Create a texture object for the button.
     this->Texture = vtkTexture::New();
     CMN_ASSERT(this->Texture);
-    this->Texture->SetInput(this->BMPReader->GetOutput());
+    this->Texture->SetInput(this->PNGReader->GetOutput());
     this->Texture->InterpolateOn();
 
     // Create the button plane

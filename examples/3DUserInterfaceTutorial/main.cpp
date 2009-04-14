@@ -90,12 +90,12 @@ int main()
     CExampleBehavior behavior2("Example2", &guiManager);
 
     guiManager.AddBehavior(&behavior,       // behavior reference
-                           0,             // position in the menu bar: default
-                           "dvLUS_icon_128.bmp");            // icon file: no texture
+                           0,               // position in the menu bar: default
+                           "circle.png");   // icon file: no texture
 
     guiManager.AddBehavior(&behavior2,       // behavior reference
                            2,             // position in the menu bar: default
-                           "dvViewer_icon_128.bmp");            // icon file: no texture
+                           "square.png");            // icon file: no texture
 
     guiManager.Configure("config.xml");
 

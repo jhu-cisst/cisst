@@ -96,7 +96,7 @@ void CExampleBehavior::ConfigureMenuBar()
 {
     this->MenuBar->AddClickButton("FirstButton",
                                   1,
-                                  "",
+                                  "empty.png",
                                   &CExampleBehavior::FirstButtonCallback,
                                   this);
 }
