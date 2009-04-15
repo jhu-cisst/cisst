@@ -43,12 +43,26 @@ IF(WIN32)
     SET(SENSABLE_INCLUDE_DIR
         ${SENSABLE_BASE_ENV}/include
         ${SENSABLE_BASE_ENV}/utilities/include)
-    FIND_LIBRARY(SENSABLE_LIB_HD hd ${SENSABLE_BASE_ENV}/lib)
-    FIND_LIBRARY(SENSABLE_LIB_HL hl ${SENSABLE_BASE_ENV}/lib)
-    FIND_LIBRARY(SENSABLE_LIB_HDU hdu ${SENSABLE_BASE_ENV}/utilities/lib)
+    FIND_LIBRARY(SENSABLE_LIB_HD hd ${SENSABLE_BASE_ENV}/lib
+                                    ${SENSABLE_BASE_ENV}/lib/win32)
+    FIND_LIBRARY(SENSABLE_LIB_HL hl ${SENSABLE_BASE_ENV}/lib
+                                    ${SENSABLE_BASE_ENV}/lib/win32)
+    FIND_LIBRARY(SENSABLE_LIB_HDU hdu ${SENSABLE_BASE_ENV}/utilities/lib
+                                      ${SENSABLE_BASE_ENV}/utilities/lib/win32/Release)
+    # try to find hdud (OpenHaptics 2.x)
     FIND_LIBRARY(SENSABLE_LIB_HDUD hdud ${SENSABLE_BASE_ENV}/utilities/lib)
-    FIND_LIBRARY(SENSABLE_LIB_HLU hlu ${SENSABLE_BASE_ENV}/utilities/lib)
+    IF(NOT ${SENSABLE_LIB_HDUD})
+      # try to find hdu in Debug directory (OpenHaptics 3.x)
+      FIND_LIBRARY(SENSABLE_LIB_HDUD hdu ${SENSABLE_BASE_ENV}/utilities/lib/win32/Debug)
+    ENDIF(NOT ${SENSABLE_LIB_HDUD})
+    FIND_LIBRARY(SENSABLE_LIB_HLU hlu ${SENSABLE_BASE_ENV}/utilities/lib
+                                      ${SENSABLE_BASE_ENV}/utilities/lib/win32/Release)
+    # try to find hlud (OpenHaptics 2.x)
     FIND_LIBRARY(SENSABLE_LIB_HLUD hlud ${SENSABLE_BASE_ENV}/utilities/lib)
+    IF(NOT ${SENSABLE_LIB_HLUD})
+      # try to find hlu in Debug directory (OpenHaptics 3.x)
+      FIND_LIBRARY(SENSABLE_LIB_HLUD hlu ${SENSABLE_BASE_ENV}/utilities/lib/win32/Debug)
+    ENDIF(NOT ${SENSABLE_LIB_HLUD})
     SET(SENSABLE_LIBRARIES_RELEASE
         ${SENSABLE_LIB_HD} ${SENSABLE_LIB_HDU}
         ${SENSABLE_LIB_HL} ${SENSABLE_LIB_HLU})
