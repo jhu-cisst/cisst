@@ -17,7 +17,7 @@
    sodipodi:docname="square.svg"
    inkscape:output_extension="org.inkscape.output.svg.inkscape"
    version="1.0"
-   inkscape:export-filename="/home/saw1/code/anton/saw-cisst/source/cisst/main/libs/etc/cisst3DUserInterface/icons/square.png"
+   inkscape:export-filename="square.png"
    inkscape:export-xdpi="57.599998"
    inkscape:export-ydpi="57.599998">
   <defs
@@ -89,10 +89,10 @@
      inkscape:current-layer="layer1"
      showgrid="true"
      showguides="false"
-     inkscape:window-width="1669"
-     inkscape:window-height="1077"
-     inkscape:window-x="73"
-     inkscape:window-y="67">
+     inkscape:window-width="1280"
+     inkscape:window-height="1024"
+     inkscape:window-x="0"
+     inkscape:window-y="0">
     <inkscape:grid
        type="xygrid"
        id="grid2383"
@@ -133,10 +133,6 @@
        width="200"
        id="rect3258"
        style="fill:url(#linearGradient3290);fill-opacity:1;stroke:none;stroke-width:5.12300014;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
-    <path
-       style="fill:url(#linearGradient3343);fill-opacity:1;stroke:none;stroke-width:5.12300014;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
-       d="M 247.875,106.3125 C 213.12623,106.75153 178.30903,105.73884 143.59375,106.84375 C 135.94425,107.90813 128.64477,111.01267 122.40625,115.625 C 133.98962,144.2741 162.28748,161.20016 189.53125,172.71875 C 223.13632,186.4992 259.65095,192.45047 295.9375,193.25 C 295.02471,174.37781 298.54788,154.82215 293.21875,136.46875 C 286.52924,118.22111 267.3649,105.26872 247.875,106.3125 z"
-       id="rect3292" />
     <rect
        style="opacity:1;fill:none;fill-opacity:1;stroke:#000000;stroke-width:20;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        id="rect2413"
@@ -146,5 +142,9 @@
        y="35"
        transform="translate(100,102.36218)"
        ry="20.536005" />
+    <path
+       style="fill:url(#linearGradient3343);fill-opacity:1;stroke:none;stroke-width:5.12300014;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       d="M 247.875,106.3125 C 213.12623,106.75153 178.30903,105.73884 143.59375,106.84375 C 135.94425,107.90813 128.64477,111.01267 122.40625,115.625 C 133.98962,144.2741 162.28748,161.20016 189.53125,172.71875 C 223.13632,186.4992 259.65095,192.45047 295.9375,193.25 C 295.02471,174.37781 298.54788,154.82215 293.21875,136.46875 C 286.52924,118.22111 267.3649,105.26872 247.875,106.3125 z"
+       id="rect3292" />
   </g>
 </svg>
