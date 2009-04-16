@@ -61,7 +61,7 @@ void ui3BehaviorBase::AddMenuBar(bool isManager)
     if (!isManager) {
         this->MenuBar->AddClickButton("Hide",
                                       0,
-                                      "iconify.png",
+                                      "iconify-left.png",
                                       &ui3BehaviorBase::SetStateBackground,
                                       this);
     }
