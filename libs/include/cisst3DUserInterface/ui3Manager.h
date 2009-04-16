@@ -39,12 +39,15 @@ class ui3Manager: public ui3BehaviorBase
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 5);
     
     friend class ui3BehaviorBase;
+    friend class ui3MasterArm;
 
 public:
     /*!
      Typedef for list of behaviors
     */
-    typedef std::list<ui3BehaviorBase*> BehaviorList;
+    typedef std::list<ui3BehaviorBase *> BehaviorList;
+
+    typedef std::list<ui3MasterArm *> MasterArmList;
 
     /*!
      Enumerated display modes
@@ -164,6 +167,8 @@ public:
                              unsigned int position,
                              const std::string & iconfile);
 
+    virtual bool AddMasterArm(ui3MasterArm * arm);
+
     /*!
      Initializes all registered behaviors, starts the user interface thread,
      and executes the main loop.
@@ -281,9 +286,14 @@ private:
     ui3BehaviorBase * ActiveBehavior;
 
     /*!
-     Linked list of behaviors.
+      Linked list of behaviors.
     */
     BehaviorList Behaviors;
+
+    /*!
+      Linked list of master arms
+    */
+    MasterArmList MasterArms;
 
     /*!
      Scene manager object that maintains the consistency and thread safety of 3D scene.

@@ -22,18 +22,20 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _ui3ForwardDeclarations_h
 #define _ui3ForwardDeclarations_h
 
-class ui3UIThread;
-class ui3Manager;
+
 class ui3BehaviorBase;
-class ui3SceneManager;
-class ui3InputDeviceBase;
-class ui3VideoInterfaceFilter;
-class ui3VTKRenderer;
-class ui3VisibleObject;
-class ui3MenuBar;
-class ui3MenuButton;
 class ui3CursorBase;
 class ui3CursorSphere;
+class ui3Manager;
+class ui3MasterArm;
+class ui3MenuBar;
+class ui3MenuButton;
+class ui3SceneManager;
+class ui3UIThread;
+class ui3VideoInterfaceFilter;
+class ui3VisibleObject;
+class ui3VTKRenderer;
+
 
 #endif // _ui3ForwardDeclarations_h
 

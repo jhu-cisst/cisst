@@ -23,7 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsTaskManager.h>
-
+#include <cisst3DUserInterface/ui3MasterArm.h>
 
 CMN_IMPLEMENT_SERVICES(ui3Manager)
 
@@ -134,10 +134,6 @@ bool ui3Manager::SetupRightMaster(mtsDevice * positionDevice, const std::string 
     // connect the right master clutch device to the right master clutch required interface
     this->TaskManager->Connect(this->GetName(), "RightMasterClutch",
                                clutchDevice->GetName(), clutchInterface);
-
-    // connect the right master device to the right master required interface
-    this->TaskManager->Connect(this->GetName(), "RightMaster",
-                               positionDevice->GetName(), positionInterface);
     
     // keep the transformation and scale
     this->RightTransform.Assign(transformation);
@@ -185,10 +181,6 @@ bool ui3Manager::SetupLeftMaster(mtsDevice * positionDevice, const std::string &
     // connect the left master clutch device to the left master clutch required interface
     this->TaskManager->Connect(this->GetName(), "LeftMasterClutch",
                                clutchDevice->GetName(), clutchInterface);
-
-    // connect the left master device to the left master required interface
-    this->TaskManager->Connect(this->GetName(), "LeftMaster",
-                               positionDevice->GetName(), positionInterface);
     
     // keep the transformation and scale
     this->LeftTransform.Assign(transformation);
@@ -291,12 +283,12 @@ ui3SceneManager * ui3Manager::GetSceneManager(void)
 }
 
 
-void ui3Manager::Configure(const std::string & configFile)
+void ui3Manager::Configure(const std::string & CMN_UNUSED(configFile))
 {
 }
 
 
-bool ui3Manager::SaveConfiguration(const std::string & configFile) const
+bool ui3Manager::SaveConfiguration(const std::string & CMN_UNUSED(configFile)) const
 {
     return true;
 }
@@ -306,7 +298,7 @@ bool ui3Manager::AddBehavior(ui3BehaviorBase * behavior,
                              unsigned int position,
                              const std::string & iconFile)
 {
-    // setup UI manager pointer in newly add behavior
+    // setup UI manager pointer in newly added behavior
     behavior->Manager = this;
     this->Behaviors.push_back(behavior);
 
@@ -347,6 +339,16 @@ bool ui3Manager::AddBehavior(ui3BehaviorBase * behavior,
                                   &ui3BehaviorBase::SetStateForeground,
                                   behavior);
     return true;  // to fix, Anton
+}
+
+
+
+bool ui3Manager::AddMasterArm(ui3MasterArm * arm)
+{
+    // setup UI manager pointer in newly added arm
+    arm->SetManager(this);
+    this->MasterArms.push_back(arm);
+    return true;
 }
 
 

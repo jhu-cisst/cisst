@@ -35,7 +35,9 @@ http://www.cisst.org/cisst/license.txt.
 class ui3MasterArm
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 5);
-    
+
+    friend class ui3Manager;
+
 public:
     /*!
      Constructor
@@ -51,13 +53,16 @@ public:
                           mtsDevice * buttonDevice, const std::string & buttonInterface,
                           mtsDevice * clutchDevice, const std::string & clutchInterface);
     
-    virtual bool SetGeometry(const vctFrm3 & transformation = vctFrm3::Identity(),
-                             double scale = 1.0);
+    virtual bool SetTransformation(const vctFrm3 & transformation = vctFrm3::Identity(),
+                                   double scale = 1.0);
 
     virtual bool SetCursor(ui3CursorBase * cursor);
 
 protected:
 
+    // arm name
+    std::string Name;
+    
     // event handlers
     void ButtonEventHandler(const prmEventButton & buttonEvent);
     void ClutchEventHandler(const prmEventButton & buttonEvent);
@@ -70,17 +75,23 @@ protected:
     bool ButtonReleased;
 
     // transformation between inputs and scene
-    vctFrm3 Transform;
-    vctFrm3 LeftTransform;
+    vctFrm3 Transformation;
+    double Scale;
 
     // positions in the state table, for behaviors to read
-    prmPositionCartesianGet Position;
+    prmPositionCartesianGet CartesianPosition;
+    mtsFunctionRead GetCartesianPosition;
 
     // arm clutch
-    bool Clutch;
+    bool Clutched;
 
-    // scale
-    double Scale;
+    // ui3Manager used
+    ui3Manager * Manager;
+
+    inline bool SetManager(ui3Manager * manager) {
+        this->Manager = manager;
+        return true;
+    }
 };
 
 

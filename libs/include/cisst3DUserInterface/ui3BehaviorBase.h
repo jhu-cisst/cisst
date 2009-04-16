@@ -42,6 +42,7 @@ class ui3BehaviorBase: public mtsTaskContinuous
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 5);
 
     friend class ui3Manager;
+    friend class ui3MasterArm;
     friend class ui3VideoInterfaceFilter;
 
 private:
