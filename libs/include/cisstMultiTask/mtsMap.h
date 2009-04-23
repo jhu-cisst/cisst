@@ -122,8 +122,8 @@ void mtsMap<_ItemType>::ToStream(std::ostream & outputStream) const
     for (iter = Map.begin();
          iter != Map.end();
          ++iter, ++counter) {
-        outputStream << "- " << MapName << "[" << counter << "]: "
-                     << *(iter->second) << std::endl;
+        outputStream << "- " << MapName << "[" << counter << "] (\""
+                     << iter->first << "\"): " << *(iter->second) << std::endl;
     }
 }
 

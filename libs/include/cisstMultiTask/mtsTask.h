@@ -369,6 +369,8 @@ public:
 	/*! Reset overran period flag. */
     virtual void ResetOverranPeriod(void) { OverranPeriod = false; }
 
+    /*! Send a human readable description of the device. */
+    void ToStream(std::ostream & outputStream) const;
 };
 
 

@@ -263,14 +263,14 @@ public:
 
     /* AddCommandReadState and AddCommandWriteState are only relevant for tasks. */
     template <class _elementType>
-    mtsCommandReadBase * AddCommandReadState(const mtsStateTable &stateTable,
-                         const _elementType &stateData, const std::string &commandName);
+    mtsCommandReadBase * AddCommandReadState(const mtsStateTable & stateTable,
+                                             const _elementType & stateData, const std::string & commandName);
     template <class _elementType>
-    mtsCommandQualifiedReadBase * AddCommandReadHistory(const mtsStateTable &stateTable, const _elementType &stateData,
-                                               const std::string &commandName);
+    mtsCommandQualifiedReadBase * AddCommandReadHistory(const mtsStateTable & stateTable, const _elementType & stateData,
+                                                        const std::string & commandName);
     template <class _elementType>
-    mtsCommandWriteBase * AddCommandWriteState(const mtsStateTable &stateTable,
-                          const _elementType &stateData, const std::string &commandName);
+    mtsCommandWriteBase * AddCommandWriteState(const mtsStateTable & stateTable,
+                                               const _elementType & stateData, const std::string & commandName);
 
     /* The following method is implemented in mtsTaskInterface.h */
     /*! Add a write command to a device interface based on a method

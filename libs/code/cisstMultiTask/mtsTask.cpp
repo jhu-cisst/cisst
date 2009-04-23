@@ -321,3 +321,10 @@ bool mtsTask::WaitToTerminate(double timeout)
 	return true;
 }
 
+
+void mtsTask::ToStream(std::ostream & outputStream) const
+{
+    outputStream << "Task name: " << Name << std::endl;
+    ProvidedInterfaces.ToStream(outputStream);
+    RequiredInterfaces.ToStream(outputStream);
+}

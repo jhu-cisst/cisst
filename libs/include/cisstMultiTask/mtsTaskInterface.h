@@ -170,18 +170,18 @@ private:
         In addition, there is a 'get vector' qualified read command to read a vector of data. */
     // Note: Could use string for state, rather than the variable
     template <class _elementType>
-    mtsCommandReadBase * AddCommandReadState(const mtsStateTable &stateTable, const _elementType &stateData,
-                                             const std::string &commandName);
+    mtsCommandReadBase * AddCommandReadState(const mtsStateTable & stateTable, const _elementType & stateData,
+                                             const std::string & commandName);
 
     template <class _elementType>
-    mtsCommandQualifiedReadBase * AddCommandReadHistory(const mtsStateTable &stateTable, const _elementType &stateData,
-                                               const std::string &commandName);
+    mtsCommandQualifiedReadBase * AddCommandReadHistory(const mtsStateTable & stateTable, const _elementType & stateData,
+                                                        const std::string & commandName);
 
     /*! Adds a command object to write the current value of the state data variable. Since this will
       be a queued command, it is thread-safe. */
     template <class _elementType>
-    mtsCommandWriteBase * AddCommandWriteState(const mtsStateTable &stateTable, const _elementType &stateData,
-                                               const std::string &commandName);
+    mtsCommandWriteBase * AddCommandWriteState(const mtsStateTable & stateTable, const _elementType & stateData,
+                                               const std::string & commandName);
 };
 
 
@@ -388,39 +388,39 @@ inline mtsCommandWriteBase * mtsDeviceInterface::AddCommandWrite(void (__classTy
 }
 
 template <class _elementType>
-mtsCommandReadBase * mtsDeviceInterface::AddCommandReadState(const mtsStateTable &stateTable,
-                     const _elementType &stateData, const std::string &commandName)
+mtsCommandReadBase * mtsDeviceInterface::AddCommandReadState(const mtsStateTable & stateTable,
+                                                             const _elementType & stateData, const std::string & commandName)
 {
     mtsTaskInterface * taskInterface = dynamic_cast<mtsTaskInterface *>(this);
-    if (taskInterface)
+    if (taskInterface) {
         return taskInterface->AddCommandReadState(stateTable, stateData, commandName);
-    else {
+    } else {
         CMN_LOG_CLASS(1) << "AddCommandReadState: only valid for tasks, command = " << commandName << std::endl;
         return 0;
     }
 }
 
 template <class _elementType>
-mtsCommandQualifiedReadBase * mtsDeviceInterface::AddCommandReadHistory(const mtsStateTable &stateTable,
-                     const _elementType &stateData, const std::string &commandName)
+mtsCommandQualifiedReadBase * mtsDeviceInterface::AddCommandReadHistory(const mtsStateTable & stateTable,
+                                                                        const _elementType & stateData, const std::string & commandName)
 {
     mtsTaskInterface * taskInterface = dynamic_cast<mtsTaskInterface *>(this);
-    if (taskInterface)
+    if (taskInterface) {
         return taskInterface->AddCommandReadHistory(stateTable, stateData, commandName);
-    else {
+    } else {
         CMN_LOG_CLASS(1) << "AddCommandReadHistory: only valid for tasks, command = " << commandName << std::endl;
         return 0;
     }
 }
 
 template <class _elementType>
-mtsCommandWriteBase * mtsDeviceInterface::AddCommandWriteState(const mtsStateTable &stateTable,
-                     const _elementType &stateData, const std::string &commandName)
+mtsCommandWriteBase * mtsDeviceInterface::AddCommandWriteState(const mtsStateTable & stateTable,
+                                                               const _elementType & stateData, const std::string & commandName)
 {
     mtsTaskInterface * taskInterface = dynamic_cast<mtsTaskInterface *>(this);
-    if (taskInterface)
+    if (taskInterface) {
         return taskInterface->AddCommandWriteState(stateTable, stateData, commandName);
-    else {
+    } else {
         CMN_LOG_CLASS(1) << "AddCommandWriteState: only valid for tasks, command = " << commandName << std::endl;
         return 0;
     }
@@ -428,12 +428,12 @@ mtsCommandWriteBase * mtsDeviceInterface::AddCommandWriteState(const mtsStateTab
 
 
 template <class _elementType>
-mtsCommandReadBase * mtsTaskInterface::AddCommandReadState(const mtsStateTable &stateTable,
-                     const _elementType &stateData, const std::string &commandName)
+mtsCommandReadBase * mtsTaskInterface::AddCommandReadState(const mtsStateTable & stateTable,
+                                                           const _elementType & stateData, const std::string & commandName)
 {
     typedef mtsStateTable::Accessor<_elementType> AccessorType;
-    mtsCommandReadBase *result;
-    mtsCommandQualifiedReadBase *result2;
+    mtsCommandReadBase * result;
+    mtsCommandQualifiedReadBase * result2;
     AccessorType *stateAcc = dynamic_cast<AccessorType *>(stateTable.GetAccessor(stateData));
     if (stateAcc) {
         result = new mtsCommandRead<AccessorType, _elementType>(&AccessorType::GetLatest, stateAcc, commandName, stateData);
@@ -450,8 +450,8 @@ mtsCommandReadBase * mtsTaskInterface::AddCommandReadState(const mtsStateTable &
 }
 
 template <class _elementType>
-mtsCommandQualifiedReadBase * mtsTaskInterface::AddCommandReadHistory(const mtsStateTable &stateTable,
-                     const _elementType &stateData, const std::string &commandName)
+mtsCommandQualifiedReadBase * mtsTaskInterface::AddCommandReadHistory(const mtsStateTable & stateTable,
+                                                                      const _elementType & stateData, const std::string & commandName)
 {
     typedef mtsStateTable::Accessor<_elementType> AccessorType;
     mtsCommandQualifiedReadBase *result;
@@ -466,17 +466,18 @@ mtsCommandQualifiedReadBase * mtsTaskInterface::AddCommandReadHistory(const mtsS
 }
 
 template <class _elementType>
-mtsCommandWriteBase * mtsTaskInterface::AddCommandWriteState(const mtsStateTable &stateTable,
-                     const _elementType &stateData, const std::string &commandName)
+mtsCommandWriteBase * mtsTaskInterface::AddCommandWriteState(const mtsStateTable & stateTable,
+                                                             const _elementType & stateData, const std::string & commandName)
 {
     typedef mtsStateTable::Accessor<_elementType> AccessorType;
     mtsCommandWriteBase *result = 0;
     AccessorType *stateAcc = dynamic_cast<AccessorType *>(stateTable.GetAccessor(stateData));
-    if (stateAcc)
+    if (stateAcc) {
         result = AddCommandWrite<AccessorType, _elementType>
                                 (&AccessorType::SetCurrent, stateAcc, commandName, stateData);
-    else
+    } else {
         CMN_LOG_CLASS(1) << "AddCommandWriteState: invalid parameter for command " << commandName << std::endl;
+    }
     return result;
 }
 

@@ -68,6 +68,7 @@ class mtsTaskPeriodic;
 class mtsTaskManager;
 
 class mtsMailBox;
+class mtsStateTable;
 
 // mts vectors
 template <class _elementType> class mtsVector;
