@@ -219,15 +219,15 @@ svlFilterBase* ui3BehaviorBase::GetStreamSamplerFilter(const std::string & strea
     return dynamic_cast<svlFilterBase*>(Streams[streamindex]);
 }
 
-void ui3BehaviorBase::RightMasterButtonCallback(const prmEventButton & CMN_UNUSED(event))
+void ui3BehaviorBase::PrimaryMasterButtonCallback(const prmEventButton & CMN_UNUSED(event))
 {
-    CMN_LOG_CLASS(6) << "RightMasterButtonCallback not overloaded for \""
+    CMN_LOG_CLASS(6) << "PrimaryMasterButtonCallback not overloaded for \""
                      << this->GetName() << "\"" << std::endl;
 }
 
-void ui3BehaviorBase::LeftMasterButtonCallback(const prmEventButton & CMN_UNUSED(event))
+void ui3BehaviorBase::SecondaryMasterButtonCallback(const prmEventButton & CMN_UNUSED(event))
 {
-    CMN_LOG_CLASS(6) << "LeftMasterButtonCallback not overloaded for \""
+    CMN_LOG_CLASS(6) << "SecondaryMasterButtonCallback not overloaded for \""
                      << this->GetName() << "\"" << std::endl;
 }
 

@@ -27,7 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 #define UI3_DAVINCI 3
 
 // change this based on your configuration
-#define UI3_INPUT UI3_DAVINCI
+#define UI3_INPUT UI3_OMNI1
 
 #include <cisstOSAbstraction/osaThreadedLogFile.h>
 #include <cisstOSAbstraction/osaSleep.h>
@@ -41,13 +41,13 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstDaVinciAPI/cisstDaVinciAPI.h>
 #endif
 
-#define RENDER_ON_OVERLAY
+// #define RENDER_ON_OVERLAY
 #ifdef RENDER_ON_OVERLAY
     #define DEBUG_WINDOW_WITH_OVERLAY
 //    #define DEBUG_WINDOW_HAS_VIDEO_BACKGROUND
 #endif
 
-#define CAPTURE_SWAP_RGB
+// #define CAPTURE_SWAP_RGB
 
 
 #include <cisstCommon/cmnGetChar.h>
@@ -214,33 +214,59 @@ int main()
 #if (UI3_INPUT == UI3_OMNI1) || (UI3_INPUT == UI3_OMNI1_OMNI2)
     vctFrm3 transform;
     transform.Translation().Assign(+30.0, 0.0, -150.0); // recenter Omni's depth (right)
-    guiManager.SetupRightMaster(sensable, "Omni1",
-                                sensable, "Omni1Button1",
-                                sensable, "Omni1Button2",
-                                transform, 0.5 /* scale factor */);
+    ui3MasterArm * rightMaster = new ui3MasterArm("Omni1");
+    guiManager.AddMasterArm(rightMaster);
+    rightMaster->SetInput(sensable, "Omni1",
+                          sensable, "Omni1Button1",
+                          sensable, "Omni1Button2",
+                          ui3MasterArm::PRIMARY);
+    rightMaster->SetTransformation(transform, 0.5 /* scale factor */);
+    ui3CursorBase * rightCursor = new ui3CursorSphere(&guiManager);
+    rightMaster->SetCursor(rightCursor);
 #endif
 #if (UI3_INPUT == UI3_OMNI1_OMNI2)
     transform.Translation().Assign(-30.0, 0.0, -150.0); // recenter Omni's depth (left)
     guiManager.SetupLeftMaster(sensable, "Omni2",
                                sensable, "Omni2Button1",
                                sensable, "Omni2Button2",
-                          200     transform, 0.5 /* scale factor */);
+                               transform, 0.5 /* scale factor */);
 #endif
 
 #if (UI3_INPUT == UI3_DAVINCI)
     vctFrm3 transform;
+
+    // setup first arm
     transform.Rotation().From(vctAxAnRot3(vctDouble3(0.0, 1.0, 0.0), cmnPI));
-    guiManager.SetupRightMaster(daVinci, "MTMR",
-                                daVinci, "MTMRButton",
-                                daVinci, "MTMRClutch",
-                                transform, 0.5 /* scale factor */);
+    ui3MasterArm * rightMaster = new ui3MasterArm("MTMR");
+    guiManager.AddMasterArm(rightMaster);
+    rightMaster->SetInput(daVinci, "MTMR",
+                          daVinci, "MTMRButton",
+                          daVinci, "MTMRClutch",
+                          ui3MasterArm::PRIMARY);
+    rightMaster->SetTransformation(transform, 0.5 /* scale factor */);
+    ui3CursorBase * rightCursor = new ui3CursorSphere(&guiManager);
+    rightMaster->SetCursor(rightCursor);
+
+    // setup second arm
     transform.Rotation().From(vctAxAnRot3(vctDouble3(0.0, 1.0, 0.0), cmnPI));
-    guiManager.SetupLeftMaster(daVinci, "MTML",
-                               daVinci, "MTMLButton",
-                               daVinci, "MTMLClutch",
-                               transform, 0.5 /* scale factor */);
+    ui3MasterArm * leftMaster = new ui3MasterArm("MTML");
+    guiManager.AddMasterArm(leftMaster);
+    leftMaster->SetInput(daVinci, "MTML",
+                         daVinci, "MTMLButton",
+                         daVinci, "MTMLClutch",
+                         ui3MasterArm::SECONDARY);
+    leftMaster->SetTransformation(transform, 0.5 /* scale factor */);
+    ui3CursorBase * leftCursor = new ui3CursorSphere(&guiManager);
+    leftMaster->SetCursor(leftCursor);
+
+    // setup event for MaM transitions
     guiManager.SetupMaM(daVinci, "MastersAsMice");
 #endif
+
+    guiManager.ConnectAll();
+
+    std::cout << guiManager << std::endl;
+    std::cout << behavior << std::endl;
 
     // following should be replaced by a utility function or method of ui3Manager 
     taskManager->CreateAll();
@@ -249,17 +275,14 @@ int main()
     osaSleep(1.0 * cmn_s);
 
     int ch;
-    cmnGetCharEnvironment env;
-    env.Activate();
     
     cerr << endl << "Keyboard commands:" << endl << endl;
     cerr << "  In command window:" << endl;
     cerr << "    'q'   - Quit" << endl << endl;
     do {
-        ch = env.GetChar();
+        ch = cmnGetChar();
+        osaSleep(10.0 * cmn_ms);
     } while (ch != 'q');
-
-    env.DeActivate();
 
     taskManager->KillAll();
 

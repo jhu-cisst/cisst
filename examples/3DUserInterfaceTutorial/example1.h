@@ -42,7 +42,7 @@ public:
 
 protected:
     void FirstButtonCallback(void);
-    void RightMasterButtonCallback(const prmEventButton & event);
+    void PrimaryMasterButtonCallback(const prmEventButton & event);
     StateType PreviousState;
     bool PreviousMaM;
     vctDouble3 Position, PreviousCursorPosition;

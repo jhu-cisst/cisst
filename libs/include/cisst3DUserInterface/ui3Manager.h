@@ -24,12 +24,11 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisst3DUserInterface/ui3ForwardDeclarations.h>
 #include <cisst3DUserInterface/ui3BehaviorBase.h>
-#include <cisst3DUserInterface/ui3SceneManager.h>
-#include <cisst3DUserInterface/ui3VTKRenderer.h>
-#include <cisst3DUserInterface/ui3CursorBase.h>
-#include <cisst3DUserInterface/ui3CursorSphere.h>
-#include <cisst3DUserInterface/ui3ImagePlane.h>
+#include <cisst3DUserInterface/ui3MasterArm.h>
 
+
+// forward declaration, to be moved to cisstStereoVision
+class svlRenderTargetBase;
 
 /*!
  Provides a default implementation for the main user interface manager.
@@ -89,18 +88,6 @@ public:
      \param configfile      Input device configuration file
      \return                Success flag: true=success, false=error
     */
-    virtual bool SetupRightMaster(mtsDevice * positionDevice, const std::string & positionInterface,
-                                  mtsDevice * buttonDevice, const std::string & buttonInterface,
-                                  mtsDevice * clutchDevice, const std::string & clutchInterface,
-                                  const vctFrm3 & transformation = vctFrm3::Identity(),
-                                  double scale = 1.0);
-                                 
-    virtual bool SetupLeftMaster(mtsDevice * positionDevice, const std::string & positionInterface,
-                                 mtsDevice * buttonDevice, const std::string & buttonInterface,
-                                 mtsDevice * clutchDevice, const std::string & clutchInterface,
-                                 const vctFrm3 & transformation = vctFrm3::Identity(),
-                                 double scale = 1.0);
-                                 
     virtual bool SetupMaM(mtsDevice * mamDevice, const std::string & mamInterface);
 
     /*!
@@ -168,6 +155,9 @@ public:
                              const std::string & iconfile);
 
     virtual bool AddMasterArm(ui3MasterArm * arm);
+
+
+    void ConnectAll(void);
 
     /*!
      Initializes all registered behaviors, starts the user interface thread,
@@ -273,6 +263,8 @@ private:
 
     void SetActiveBehavior(ui3BehaviorBase * newBehavior);
 
+    void DispatchButtonEvent(const ui3MasterArm::RoleType & armRole, const prmEventButton & buttonEvent);
+
     /*!
      Flag signalling whether the user interface loop has been successfully initialized.
     */
@@ -299,11 +291,6 @@ private:
      Scene manager object that maintains the consistency and thread safety of 3D scene.
     */
     ui3SceneManager * SceneManager;
-
-    /*!
-     Input device interface module. (???)
-    */
-    ui3InputDeviceBase InputDevice;
 
     /*!
      3D graphics renderer modules.
@@ -338,15 +325,7 @@ private:
     /*! Keep a pointer on singleton task manager to make it easier to access */
     mtsTaskManager * TaskManager;
 
-    // functions which will be bound to commands
-    mtsFunctionRead RightMasterGetCartesianPosition;
-    mtsFunctionRead LeftMasterGetCartesianPosition;
-
     // event handlers
-    void RightMasterButtonEventHandler(const prmEventButton & buttonEvent);
-    void LeftMasterButtonEventHandler(const prmEventButton & buttonEvent);
-    void RightMasterClutchEventHandler(const prmEventButton & buttonEvent);
-    void LeftMasterClutchEventHandler(const prmEventButton & buttonEvent);
     void EnterMaMModeEventHandler(void);
     void LeaveMaMModeEventHandler(void);
 
@@ -354,39 +333,17 @@ private:
     void HideAll(void);
     void ShowAll(void);
 
-    // cursors
-    ui3CursorBase * RightCursor;
-    ui3CursorBase * LeftCursor;
-
-    // button state, might be a better implementation for this (Anton)
-    bool RightButtonPressed, RightButtonReleased;
-    bool LeftButtonPressed, LeftButtonReleased;
-
     // MaM (MastersAsMice) mode
     bool MaM;
+
 public:
     inline bool MastersAsMice(void) const {
         return this->MaM;
     }
+
 private:
 
-    // transformation between inputs and scene
-    vctFrm3 RightTransform;
-    vctFrm3 LeftTransform;
 
-    // positions in the state table, for behaviors to read
-    prmPositionCartesianGet RightMasterPosition, LeftMasterPosition; 
-
-    // arm clutch
-    bool RightMasterClutch;
-    bool LeftMasterClutch;
-
-    // scale
-    double RightScale;
-    double LeftScale;
-
-    bool RightMasterExists;
-    bool LeftMasterExists;
 };
 
 

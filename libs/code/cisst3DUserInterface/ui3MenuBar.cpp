@@ -126,6 +126,20 @@ vtkProp3D * ui3MenuBar::GetVTKProp(void)
 }
 
 
+
+void ui3MenuBar::SetAllButtonsUnselected(void)
+{
+    ButtonContainerType::iterator iterator;
+    const ButtonContainerType::iterator end = this->Buttons.end();
+    for (iterator = this->Buttons.begin();
+         iterator != end;
+         iterator++) {
+        (*iterator).second->SetHighlight(false);
+    }
+}
+
+
+ 
 bool ui3MenuBar::IsPointOnMenuBar(const vctDouble3 & cursor3D, ButtonPointer & button)
 {
     button = 0;
@@ -147,8 +161,6 @@ bool ui3MenuBar::IsPointOnMenuBar(const vctDouble3 & cursor3D, ButtonPointer & b
             if ((*iterator).second->IsCursorOver(cursor2D)) {
                 (*iterator).second->SetHighlight(true);
                 button = (*iterator).second;
-            } else {
-                (*iterator).second->SetHighlight(false);
             }
         }
     }

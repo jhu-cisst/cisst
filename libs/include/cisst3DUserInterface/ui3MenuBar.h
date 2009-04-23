@@ -109,6 +109,8 @@ public:
     
     virtual vtkProp3D * GetVTKProp(void);
 
+    virtual void SetAllButtonsUnselected(void);
+
     virtual void SetDepth(double depth);
 
 protected:

@@ -129,7 +129,7 @@ bool CExampleBehavior::RunForeground()
     }
     // running in foreground GUI mode
     prmPositionCartesianGet position;
-    this->RightMasterPositionFunction(position);
+    this->PrimaryMasterPositionFunction(position);
     if (this->Following) {
         vctDouble3 deltaCursor;
         deltaCursor.DifferenceOf(position.Position().Translation(),
@@ -176,7 +176,7 @@ void CExampleBehavior::FirstButtonCallback()
     CMN_LOG_CLASS(6) << "Behavior \"" << this->GetName() << "\" Button 1 pressed" << std::endl;
 }
 
-void CExampleBehavior::RightMasterButtonCallback(const prmEventButton & event)
+void CExampleBehavior::PrimaryMasterButtonCallback(const prmEventButton & event)
 {
     if (event.Type() == prmEventButton::PRESSED) {
         this->Following = true;
@@ -184,4 +184,3 @@ void CExampleBehavior::RightMasterButtonCallback(const prmEventButton & event)
         this->Following = false;
     }
 }
-

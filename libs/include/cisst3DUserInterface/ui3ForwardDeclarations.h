@@ -26,6 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 class ui3BehaviorBase;
 class ui3CursorBase;
 class ui3CursorSphere;
+class ui3ImagePlane;
 class ui3Manager;
 class ui3MasterArm;
 class ui3MenuBar;

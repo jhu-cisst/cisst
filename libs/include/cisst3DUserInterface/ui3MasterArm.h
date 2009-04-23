@@ -39,6 +39,9 @@ class ui3MasterArm
     friend class ui3Manager;
 
 public:
+
+    enum RoleType {PRIMARY, SECONDARY};
+
     /*!
      Constructor
     */
@@ -51,7 +54,8 @@ public:
 
     virtual bool SetInput(mtsDevice * positionDevice, const std::string & positionInterface,
                           mtsDevice * buttonDevice, const std::string & buttonInterface,
-                          mtsDevice * clutchDevice, const std::string & clutchInterface);
+                          mtsDevice * clutchDevice, const std::string & clutchInterface,
+                          const RoleType & role);
     
     virtual bool SetTransformation(const vctFrm3 & transformation = vctFrm3::Identity(),
                                    double scale = 1.0);
@@ -74,6 +78,9 @@ protected:
     bool ButtonPressed;
     bool ButtonReleased;
 
+    // role
+    RoleType Role;
+
     // transformation between inputs and scene
     vctFrm3 Transformation;
     double Scale;
@@ -82,8 +89,12 @@ protected:
     prmPositionCartesianGet CartesianPosition;
     mtsFunctionRead GetCartesianPosition;
 
+    // cursor position
+    vctFrm3 CursorPosition;
+
     // arm clutch
     bool Clutched;
+    vctDouble3 ClutchedOutPosition;
 
     // ui3Manager used
     ui3Manager * Manager;
@@ -92,6 +103,12 @@ protected:
         this->Manager = manager;
         return true;
     }
+
+    // used by the ui3Manager
+    void PreRun(void);
+    void UpdateCursorPosition(void);
+    void Hide(void);
+    void Show(void);
 };
 
 

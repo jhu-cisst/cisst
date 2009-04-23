@@ -45,7 +45,8 @@ ui3MasterArm::~ui3MasterArm()
 
 bool ui3MasterArm::SetInput(mtsDevice * positionDevice, const std::string & positionInterface,
                             mtsDevice * buttonDevice, const std::string & buttonInterface,
-                            mtsDevice * clutchDevice, const std::string & clutchInterface)
+                            mtsDevice * clutchDevice, const std::string & clutchInterface,
+                            const RoleType & role)
 {
     if (this->Manager == 0) {
         CMN_LOG_CLASS(1) << "SetInput: can not setup input for master arm \""
@@ -53,6 +54,8 @@ bool ui3MasterArm::SetInput(mtsDevice * positionDevice, const std::string & posi
                          << std::endl;
         return false;
     }
+
+    this->Role = role;
 
     // add required interface for master arm to Manager
     mtsRequiredInterface * requiredInterface;
@@ -128,6 +131,7 @@ bool ui3MasterArm::SetCursor(ui3CursorBase * cursor)
 }
 
 
+
 void ui3MasterArm::ButtonEventHandler(const prmEventButton & buttonEvent)
 {
     if (buttonEvent.Type() == prmEventButton::PRESSED) {
@@ -137,29 +141,80 @@ void ui3MasterArm::ButtonEventHandler(const prmEventButton & buttonEvent)
         this->Cursor->SetPressed(false);
         this->ButtonReleased = true;
     }
-    std::cerr << "--------- arm " << this->Name << " needs to pass event to active behavior " << std::endl;
-    // hack
+
     if (this->Manager->ActiveBehavior != this->Manager) {
-        this->Manager->ActiveBehavior->RightMasterButtonEvent(buttonEvent);
+        this->Manager->DispatchButtonEvent(this->Role, buttonEvent);
     }
 }
+
 
 
 void ui3MasterArm::ClutchEventHandler(const prmEventButton & buttonEvent)
 {
-    static vctDouble3 initial, final;
+    // position when user clutched out/in
+    vctDouble3 clutchedInPosition;
+    // placeholder to retrieve position from device
     static prmPositionCartesianGet armPosition;
     if (buttonEvent.Type() == prmEventButton::PRESSED) {
+        // user is using it's clutch
         this->Clutched = true;
-        this->Cursor->SetClutched(true);
-        this->GetCartesianPosition(armPosition);
-        this->Transformation.ApplyTo(armPosition.Position().Translation(), initial);
+        this->Cursor->SetClutched(true); // render differently
+        this->GetCartesianPosition(armPosition); // get the current position
+        this->Transformation.ApplyTo(armPosition.Position().Translation(), this->ClutchedOutPosition);
     } else {
+        // end of clutch
         this->Clutched = false;
-        this->Cursor->SetClutched(false);
-        this->GetCartesianPosition(armPosition);
-        this->Transformation.ApplyTo(armPosition.Position().Translation(), final);
-        this->Transformation.Translation().Add(initial);
-        this->Transformation.Translation().Subtract(final);
+        this->Cursor->SetClutched(false); // render differently
+        this->GetCartesianPosition(armPosition); // get the current position
+        // compute the updated transformation between device and cursor
+        this->Transformation.ApplyTo(armPosition.Position().Translation(), clutchedInPosition);
+        this->Transformation.Translation().Add(this->ClutchedOutPosition);
+        this->Transformation.Translation().Subtract(clutchedInPosition);
     }
 }
+
+
+
+void ui3MasterArm::PreRun(void)
+{
+    this->ButtonReleased = false;
+    this->ButtonPressed = false;
+}
+
+
+
+void ui3MasterArm::UpdateCursorPosition(void)
+{
+    // if not clutched, update the position from device
+    if (!this->Clutched) {
+        prmPositionCartesianGet armPosition;
+        this->GetCartesianPosition(armPosition);
+        // apply transformation and scale
+        this->Transformation.ApplyTo(armPosition.Position(), this->CursorPosition);
+        this->CursorPosition.Translation().Multiply(this->Scale);
+    }
+    // store position for state table
+    this->CartesianPosition.Position().Assign(this->CursorPosition);
+    // update cursor position
+    this->Cursor->SetTransformation(this->CursorPosition);
+}
+
+
+
+void ui3MasterArm::Hide(void)
+{
+    if (this->Cursor) {
+        this->Cursor->Hide();
+    }
+}
+
+
+
+void ui3MasterArm::Show(void)
+{
+    if (this->Cursor) {
+        this->Cursor->Show();
+    }
+}
+
+
