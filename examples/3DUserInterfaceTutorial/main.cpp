@@ -27,7 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 #define UI3_DAVINCI 3
 
 // change this based on your configuration
-#define UI3_INPUT UI3_OMNI1
+#define UI3_INPUT UI3_DAVINCI
 
 #include <cisstOSAbstraction/osaThreadedLogFile.h>
 #include <cisstOSAbstraction/osaSleep.h>
@@ -41,13 +41,13 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstDaVinciAPI/cisstDaVinciAPI.h>
 #endif
 
-// #define RENDER_ON_OVERLAY
+#define RENDER_ON_OVERLAY
 #ifdef RENDER_ON_OVERLAY
     #define DEBUG_WINDOW_WITH_OVERLAY
 //    #define DEBUG_WINDOW_HAS_VIDEO_BACKGROUND
 #endif
 
-// #define CAPTURE_SWAP_RGB
+#define CAPTURE_SWAP_RGB
 
 
 #include <cisstCommon/cmnGetChar.h>
@@ -264,9 +264,6 @@ int main()
 #endif
 
     guiManager.ConnectAll();
-
-    std::cout << guiManager << std::endl;
-    std::cout << behavior << std::endl;
 
     // following should be replaced by a utility function or method of ui3Manager 
     taskManager->CreateAll();

@@ -129,7 +129,9 @@ bool CExampleBehavior::RunForeground()
     }
     // running in foreground GUI mode
     prmPositionCartesianGet position;
-    this->PrimaryMasterPositionFunction(position);
+
+    this->GetPrimaryMasterPosition(position);
+
     if (this->Following) {
         vctDouble3 deltaCursor;
         deltaCursor.DifferenceOf(position.Position().Translation(),

@@ -257,7 +257,7 @@ protected:
     */
     ui3Manager * Manager;
 
-    mtsFunctionRead PrimaryMasterPositionFunction, SecondaryMasterPositionFunction;
+    mtsFunctionRead GetPrimaryMasterPosition, GetSecondaryMasterPosition;
 
 private:
     /*! Event triggers, used by ui3Manager only */

@@ -226,6 +226,7 @@ bool ui3Manager::AddMasterArm(ui3MasterArm * arm)
 }
 
 
+
 void ui3Manager::ConnectAll(void)
 {
     // create read only interface for each arm based on its role
@@ -272,10 +273,21 @@ void ui3Manager::ConnectAll(void)
                  iterator++) {
                 requiredInterface = (*iterator)->GetRequiredInterface("ManagerInterface");
                 CMN_ASSERT(requiredInterface);
-                std::cerr << "--------------------------------------- BIG BUGS HERE, should use either primary or secondary + connect should happen only once " << std::endl;
-                requiredInterface->AddFunction(commandName,
-                                               (*iterator)->PrimaryMasterPositionFunction,
-                                               mtsRequired);
+                switch ((*armIterator)->Role) {
+                case ui3MasterArm::PRIMARY:
+                    requiredInterface->AddFunction(commandName,
+                                                   (*iterator)->GetPrimaryMasterPosition,
+                                                   mtsRequired);
+                    break;
+                case ui3MasterArm::SECONDARY:
+                    requiredInterface->AddFunction(commandName,
+                                                   (*iterator)->GetSecondaryMasterPosition,
+                                                   mtsRequired);
+                    break;
+                default:
+                    CMN_LOG_CLASS(1) << "ConnectAll: unknown arm role" << std::endl;
+                }
+                // this will attempt to connect multiple times, need to put ouside the loop
                 this->TaskManager->Connect((*iterator)->GetName(), "ManagerInterface",
                                            this->GetName(), "BehaviorsInterface");
             }
