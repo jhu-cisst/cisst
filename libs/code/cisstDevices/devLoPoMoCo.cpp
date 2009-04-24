@@ -63,19 +63,19 @@ devLoPoMoCo::devLoPoMoCo(const std::string& deviceName, unsigned int numberOfBoa
 	AddCommandVoid(&devLoPoMoCo::DisableAll, this, "WriteInterface", "DisableAll");
 
 	// read commands
-	AddCommandRead(&devLoPoMoCo::GetPositions, this, "WriteInterface", "GetPositions");
-	AddCommandRead(&devLoPoMoCo::GetVelocities, this, "WriteInterface", "GetVelocities");
-	AddCommandRead(&devLoPoMoCo::GetMotorCurrents, this, "WriteInterface", "GetMotorCurrents");
-	AddCommandRead(&devLoPoMoCo::GetPotFeedbacks, this, "WriteInterface", "GetPotFeedbacks");
-	AddCommandRead(&devLoPoMoCo::GetDigitalInput, this, "WriteInterface", "GetDigitalInput");
+	AddCommandRead(&devLoPoMoCo::GetPositions, this, "WriteInterface", "GetPositions", mtsLongVec(numberOfAxes));
+	AddCommandRead(&devLoPoMoCo::GetVelocities, this, "WriteInterface", "GetVelocities", mtsShortVec(numberOfAxes));
+	AddCommandRead(&devLoPoMoCo::GetMotorCurrents, this, "WriteInterface", "GetMotorCurrents",mtsShortVec(numberOfAxes));
+	AddCommandRead(&devLoPoMoCo::GetPotFeedbacks, this, "WriteInterface", "GetPotFeedbacks",mtsShortVec(numberOfAxes));
+	AddCommandRead(&devLoPoMoCo::GetDigitalInput, this, "WriteInterface", "GetDigitalInput",mtsIntVec(numberOfAxes));
     // GSF -- GetLatchedIndex might only be available with 0xCCDD FPGA (MR-Robot)
-	AddCommandRead(&devLoPoMoCo::GetLatchedIndex, this, "WriteInterface", "GetLatchedIndex");
+	AddCommandRead(&devLoPoMoCo::GetLatchedIndex, this, "WriteInterface", "GetLatchedIndex",mtsShortVec(numberOfAxes));
 
 	// Write methods
 	// method , object carrying the method , interface name , command name and argument prototype
 	AddCommandWrite(&devLoPoMoCo::SetMotorVoltages, this, "WriteInterface", "SetMotorVoltages", mtsShortVec(numberOfAxes));
 	AddCommandWrite(&devLoPoMoCo::SetCurrentLimits, this, "WriteInterface", "SetCurrentLimits", mtsShortVec(numberOfAxes));
-    AddCommandWrite(&devLoPoMoCo::SetDigitalOutput, this, "WriteInterface", "SetDigitalOutput", mtsIntVec(4));
+    AddCommandWrite(&devLoPoMoCo::SetDigitalOutput, this, "WriteInterface", "SetDigitalOutput", mtsIntVec(numberOfBoards));
 
 	AddCommandWrite(&devLoPoMoCo::Enable, this, "WriteInterface", "Enable", cmnShort());
 	AddCommandWrite(&devLoPoMoCo::Disable, this, "WriteInterface", "Disable", cmnShort());
