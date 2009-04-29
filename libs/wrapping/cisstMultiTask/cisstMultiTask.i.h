@@ -46,6 +46,7 @@ http://www.cisst.org/cisst/license.txt.
 #include "cisstMultiTask/mtsTask.h"
 #include "cisstMultiTask/mtsTaskInterface.h"
 #include "cisstMultiTask/mtsTaskManager.h"
+#include "cisstMultiTask/mtsStateIndex.h"
 
 #endif // _cisstMultiTask_i_h
 

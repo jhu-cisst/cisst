@@ -171,13 +171,13 @@ typedef mtsCommandQualifiedReadOrWriteBase<const cmnGenericObject> mtsCommandQua
             for command in commands:
                 self.__dict__[command] = mtsDeviceInterface.GetCommandWrite(self, command)
                 self.__dict__[command].UpdateFromC()
-            commands = mtsDeviceInterface.GetNamesOfCommandsRead(self)
-            for command in commands:
-                self.__dict__[command] = mtsDeviceInterface.GetCommandRead(self, command)
-                self.__dict__[command].UpdateFromC()
             commands = mtsDeviceInterface.GetNamesOfCommandsQualifiedRead(self)
             for command in commands:
                 self.__dict__[command] = mtsDeviceInterface.GetCommandQualifiedRead(self, command)
+                self.__dict__[command].UpdateFromC()
+            commands = mtsDeviceInterface.GetNamesOfCommandsRead(self)
+            for command in commands:
+                self.__dict__[command] = mtsDeviceInterface.GetCommandRead(self, command)
                 self.__dict__[command].UpdateFromC()
     }
 }
@@ -220,3 +220,6 @@ MTS_INSTANTIATE_VECTOR(mtsIntVec, int);
 MTS_INSTANTIATE_VECTOR(mtsShortVec, short); 
 MTS_INSTANTIATE_VECTOR(mtsLongVec, long); 
 MTS_INSTANTIATE_VECTOR(mtsBoolVec, bool); 
+
+// Wrap mtsStateIndex
+%include "cisstMultiTask/mtsStateIndex.h"
