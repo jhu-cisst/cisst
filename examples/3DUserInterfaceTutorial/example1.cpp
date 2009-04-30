@@ -104,7 +104,6 @@ void CExampleBehavior::ConfigureMenuBar()
 
 void CExampleBehavior::Startup(void)
 {
-
 }
 
 

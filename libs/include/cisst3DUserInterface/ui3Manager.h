@@ -39,6 +39,7 @@ class ui3Manager: public ui3BehaviorBase
     
     friend class ui3BehaviorBase;
     friend class ui3MasterArm;
+    friend class ui3SlaveArm;
 
 public:
     /*!
@@ -47,6 +48,8 @@ public:
     typedef std::list<ui3BehaviorBase *> BehaviorList;
 
     typedef std::list<ui3MasterArm *> MasterArmList;
+
+    typedef std::map<std::string, ui3SlaveArm *> SlaveArmList;
 
     /*!
      Enumerated display modes
@@ -156,6 +159,7 @@ public:
 
     virtual bool AddMasterArm(ui3MasterArm * arm);
 
+    virtual bool AddSlaveArm(ui3SlaveArm * arm);
 
     void ConnectAll(void);
 
@@ -286,6 +290,11 @@ private:
       Linked list of master arms
     */
     MasterArmList MasterArms;
+
+    /*!
+      Map of std::string, slave arms
+    */
+    SlaveArmList SlaveArms;
 
     /*!
      Scene manager object that maintains the consistency and thread safety of 3D scene.

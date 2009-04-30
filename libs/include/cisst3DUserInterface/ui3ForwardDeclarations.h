@@ -32,6 +32,7 @@ class ui3MasterArm;
 class ui3MenuBar;
 class ui3MenuButton;
 class ui3SceneManager;
+class ui3SlaveArm;
 class ui3UIThread;
 class ui3VideoInterfaceFilter;
 class ui3VisibleObject;

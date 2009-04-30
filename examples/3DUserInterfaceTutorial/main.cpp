@@ -234,9 +234,9 @@ int main()
 
 #if (UI3_INPUT == UI3_DAVINCI)
     vctFrm3 transform;
+    transform.Rotation().From(vctAxAnRot3(vctDouble3(0.0, 1.0, 0.0), cmnPI));
 
     // setup first arm
-    transform.Rotation().From(vctAxAnRot3(vctDouble3(0.0, 1.0, 0.0), cmnPI));
     ui3MasterArm * rightMaster = new ui3MasterArm("MTMR");
     guiManager.AddMasterArm(rightMaster);
     rightMaster->SetInput(daVinci, "MTMR",
@@ -248,7 +248,6 @@ int main()
     rightMaster->SetCursor(rightCursor);
 
     // setup second arm
-    transform.Rotation().From(vctAxAnRot3(vctDouble3(0.0, 1.0, 0.0), cmnPI));
     ui3MasterArm * leftMaster = new ui3MasterArm("MTML");
     guiManager.AddMasterArm(leftMaster);
     leftMaster->SetInput(daVinci, "MTML",
@@ -258,6 +257,12 @@ int main()
     leftMaster->SetTransformation(transform, 0.5 /* scale factor */);
     ui3CursorBase * leftCursor = new ui3CursorSphere(&guiManager);
     leftMaster->SetCursor(leftCursor);
+
+    // first slave arm, i.e. PSM1
+    ui3SlaveArm * slave1 = new ui3SlaveArm("Slave1");
+    guiManager.AddSlaveArm(slave1);
+    slave1->SetInput(daVinci, "PSM1");
+    slave1->SetTransformation(transform, 0.5 /* scale factor */);
 
     // setup event for MaM transitions
     guiManager.SetupMaM(daVinci, "MastersAsMice");

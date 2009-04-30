@@ -25,6 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsTaskManager.h>
 #include <cisst3DUserInterface/ui3VTKRenderer.h>
 #include <cisst3DUserInterface/ui3ImagePlane.h>
+#include <cisst3DUserInterface/ui3SlaveArm.h>
 
 
 CMN_IMPLEMENT_SERVICES(ui3Manager)
@@ -222,6 +223,15 @@ bool ui3Manager::AddMasterArm(ui3MasterArm * arm)
     // setup UI manager pointer in newly added arm
     arm->SetManager(this);
     this->MasterArms.push_back(arm);
+    return true;
+}
+
+
+bool ui3Manager::AddSlaveArm(ui3SlaveArm * arm)
+{
+    // setup UI manager pointer in newly added arm
+    arm->SetManager(this);
+    this->SlaveArms[arm->Name] = arm;
     return true;
 }
 
