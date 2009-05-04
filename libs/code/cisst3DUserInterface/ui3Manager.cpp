@@ -41,7 +41,7 @@ ui3Manager::ui3Manager(const std::string & name):
     ActiveBehavior(0),
     SceneManager(0),
     RendererThread(0),
-    MaM(true)
+    HasMaMDevice(false)
 {
     // add video source interfaces
     AddStream(svlTypeImageRGB,       "MonoVideo");
@@ -82,8 +82,9 @@ bool ui3Manager::SetupMaM(mtsDevice * mamDevice, const std::string & mamInterfac
     // connect the left master device to the right master required interface
     this->TaskManager->Connect(this->GetName(), "MaM",
                                mamDevice->GetName(), mamInterface);
-    this->HideAll();
-    this->MaM = false;
+    
+    // update flag
+    this->HasMaMDevice = true;
     return true;
 }
 
@@ -231,10 +232,15 @@ bool ui3Manager::AddSlaveArm(ui3SlaveArm * arm)
 {
     // setup UI manager pointer in newly added arm
     arm->SetManager(this);
-    this->SlaveArms[arm->Name] = arm;
+    this->SlaveArms.AddItem(arm->Name, arm, 1);
     return true;
 }
 
+
+ui3SlaveArm * ui3Manager::GetSlaveArm(const std::string & armName)
+{
+    return this->SlaveArms.GetItem(armName, 1);
+}
 
 
 void ui3Manager::ConnectAll(void)
@@ -368,6 +374,14 @@ void ui3Manager::Startup(void)
 
     // current active behavior is this
     this->SetState(Foreground);    // UI manager is in foreground by default (main menu)
+
+    // update based on MaMDevice
+    if (this->HasMaMDevice) {
+        this->LeaveMaMModeEventHandler();
+    } else {
+        this->EnterMaMModeEventHandler();
+    }
+
 
     if (!Initialized) {
         // error

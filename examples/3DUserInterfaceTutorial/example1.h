@@ -41,12 +41,18 @@ public:
     }
 
 protected:
+    unsigned long Ticker;
     void FirstButtonCallback(void);
     void PrimaryMasterButtonCallback(const prmEventButton & event);
     StateType PreviousState;
     bool PreviousMaM;
-    vctDouble3 Position, PreviousCursorPosition;
+    vctDouble3 PreviousCursorPosition;
+    vctDouble3 Offset;
+    vctFrm3 Position;
     bool Following;
+
+    ui3SlaveArm * Slave1;
+    prmPositionCartesianGet Slave1Position;
 
 private:
     ui3VisibleObject * VisibleObject;

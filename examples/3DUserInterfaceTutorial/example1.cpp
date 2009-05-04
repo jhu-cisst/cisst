@@ -30,45 +30,72 @@ http://www.cisst.org/cisst/license.txt.
 #include <vtkAssembly.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkProperty.h>
+#include <vtkConeSource.h>
 #include <vtkSphereSource.h>
 
 class BehaviorVisibleObject: public ui3VisibleObject
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 5);
 public:
-    inline BehaviorVisibleObject(ui3Manager * manager, vctDouble3 position):
+    inline BehaviorVisibleObject(ui3Manager * manager, vctFrm3 position):
         ui3VisibleObject(manager),
-        Source(0),
-        Mapper(0),
-        Actor(0),
+        ConeSource(0),
+        ConeMapper(0),
+        ConeActor(0),
+        SphereSource(0),
+        SphereMapper(0),
+        SphereActor(0),
         Position(position)
     {}
 
     inline bool CreateVTKObjects(void) {
-        this->Source = vtkSphereSource::New();
-        CMN_ASSERT(this->Source);
-        this->Source->SetRadius(10.0);
+        this->ConeSource = vtkConeSource::New();
+        CMN_ASSERT(this->ConeSource);
+        this->ConeSource->SetRadius(1.0);
+        this->ConeSource->SetHeight(3.0);
 
-        this->Mapper = vtkPolyDataMapper::New();
-        CMN_ASSERT(this->Mapper);
-        this->Mapper->SetInputConnection(this->Source->GetOutputPort());
+        this->ConeMapper = vtkPolyDataMapper::New();
+        CMN_ASSERT(this->ConeMapper);
+        this->ConeMapper->SetInputConnection(this->ConeSource->GetOutputPort());
 
-        this->Actor = vtkActor::New();
-        CMN_ASSERT(this->Actor);
-        this->Actor->SetMapper(this->Mapper);
+        this->ConeActor = vtkActor::New();
+        CMN_ASSERT(this->ConeActor);
+        this->ConeActor->SetMapper(this->ConeMapper);
 
-        this->Assembly->AddPart(this->Actor);
-        this->SetPosition(this->Position);
-        this->Hide();
+        this->Assembly->AddPart(this->ConeActor);
+
+        this->SphereSource = vtkSphereSource::New();
+        CMN_ASSERT(this->SphereSource);
+        this->SphereSource->SetRadius(1.0);
+
+        this->SphereMapper = vtkPolyDataMapper::New();
+        CMN_ASSERT(this->SphereMapper);
+        this->SphereMapper->SetInputConnection(this->SphereSource->GetOutputPort());
+
+        this->SphereActor = vtkActor::New();
+        CMN_ASSERT(this->SphereActor);
+        this->SphereActor->SetMapper(this->SphereMapper);
+        this->SphereActor->GetProperty()->SetColor(1.0, 0.0, 0.0);
+
+
+        this->Assembly->AddPart(this->SphereActor);
+        this->SetTransformation(this->Position);
+        this->Show();
         return true;
     }
 
 protected:
-    vtkSphereSource * Source;
-    vtkPolyDataMapper * Mapper;
-    vtkActor * Actor;
-    vctDouble3 Position; // initial position
+    vtkConeSource * ConeSource;
+    vtkPolyDataMapper * ConeMapper;
+    vtkActor * ConeActor;
+
+    vtkSphereSource * SphereSource;
+    vtkPolyDataMapper * SphereMapper;
+    vtkActor * SphereActor;
+
+    vctFrm3 Position; // initial position
 };
+
 
 CMN_DECLARE_SERVICES_INSTANTIATION(BehaviorVisibleObject);
 CMN_IMPLEMENT_SERVICES(BehaviorVisibleObject);
@@ -76,14 +103,14 @@ CMN_IMPLEMENT_SERVICES(BehaviorVisibleObject);
 
 CExampleBehavior::CExampleBehavior(const std::string & name, ui3Manager * manager):
     ui3BehaviorBase(std::string("CExampleBehavior::") + name, 0),
+    Ticker(0),
     Following(false),
     VisibleObject(0)
 {
-    this->Position.X() = 0.0;
-    this->Position.Y() = 0.0;
-    this->Position.Z() = -100.0;
     this->VisibleObject = new BehaviorVisibleObject(manager, this->Position);
     CMN_ASSERT(this->VisibleObject);
+
+    this->Offset.SetAll(0.0);
 }
 
 
@@ -104,6 +131,8 @@ void CExampleBehavior::ConfigureMenuBar()
 
 void CExampleBehavior::Startup(void)
 {
+    this->Slave1 = this->Manager->GetSlaveArm("Slave1");
+    std::cout << "this->Slave1: " << this->Slave1 << std::cerr;
 }
 
 
@@ -115,6 +144,8 @@ void CExampleBehavior::Cleanup(void)
 
 bool CExampleBehavior::RunForeground()
 {
+    this->Ticker++;
+
     if (this->Manager->MastersAsMice() != this->PreviousMaM) {
         this->PreviousMaM = this->Manager->MastersAsMice();
         this->VisibleObject->Show();
@@ -129,35 +160,53 @@ bool CExampleBehavior::RunForeground()
     // running in foreground GUI mode
     prmPositionCartesianGet position;
 
+    // compute offset
     this->GetPrimaryMasterPosition(position);
-
     if (this->Following) {
         vctDouble3 deltaCursor;
         deltaCursor.DifferenceOf(position.Position().Translation(),
                                  this->PreviousCursorPosition);
-        this->Position.Add(deltaCursor);
-        this->VisibleObject->SetPosition(this->Position);
+        this->Offset.Add(deltaCursor);
     }
     this->PreviousCursorPosition.Assign(position.Position().Translation());
+
+    // apply to object
+    this->Slave1->GetCartesianPosition(this->Slave1Position);
+    this->Slave1Position.Position().Translation().Add(this->Offset);
+    this->VisibleObject->SetTransformation(this->Slave1Position.Position());
+
     return true;
 }
 
 bool CExampleBehavior::RunBackground()
 {
+    this->Ticker++;
+
     // detect transition
     if (this->State != this->PreviousState) {
         this->PreviousState = this->State;
-        this->VisibleObject->Hide();
+        this->VisibleObject->Show();
     }
+
+    this->Slave1->GetCartesianPosition(this->Slave1Position);
+    this->Slave1Position.Position().Translation().Add(this->Offset);
+    this->VisibleObject->SetTransformation(this->Slave1Position.Position());
+
     return true;
 }
 
 bool CExampleBehavior::RunNoInput()
 {
+    this->Ticker++;
     if (this->Manager->MastersAsMice() != this->PreviousMaM) {
         this->PreviousMaM = this->Manager->MastersAsMice();
-        this->VisibleObject->Hide();
+        this->VisibleObject->Show();
     }
+
+    this->Slave1->GetCartesianPosition(this->Slave1Position);
+    this->Slave1Position.Position().Translation().Add(this->Offset);
+    this->VisibleObject->SetTransformation(this->Slave1Position.Position());
+
     return true;
 }
 

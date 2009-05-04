@@ -262,7 +262,7 @@ int main()
     ui3SlaveArm * slave1 = new ui3SlaveArm("Slave1");
     guiManager.AddSlaveArm(slave1);
     slave1->SetInput(daVinci, "PSM1");
-    slave1->SetTransformation(transform, 0.5 /* scale factor */);
+    slave1->SetTransformation(transform, 1.0 /* scale factor */);
 
     // setup event for MaM transitions
     guiManager.SetupMaM(daVinci, "MastersAsMice");

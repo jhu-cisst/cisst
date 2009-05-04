@@ -22,6 +22,8 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _ui3Manager_h
 #define _ui3Manager_h
 
+#include <cisstMultiTask/mtsMap.h>
+
 #include <cisst3DUserInterface/ui3ForwardDeclarations.h>
 #include <cisst3DUserInterface/ui3BehaviorBase.h>
 #include <cisst3DUserInterface/ui3MasterArm.h>
@@ -49,7 +51,7 @@ public:
 
     typedef std::list<ui3MasterArm *> MasterArmList;
 
-    typedef std::map<std::string, ui3SlaveArm *> SlaveArmList;
+    typedef mtsMap<ui3SlaveArm> SlaveArmList;
 
     /*!
      Enumerated display modes
@@ -153,13 +155,15 @@ public:
      \param iconfile        Image file storing all the behavior states on a singe bitmap.
      \return                Unique handle assigned to the behavior
     */
-    virtual bool AddBehavior(ui3BehaviorBase * behavior,
-                             unsigned int position,
-                             const std::string & iconfile);
+    bool AddBehavior(ui3BehaviorBase * behavior,
+                     unsigned int position,
+                     const std::string & iconfile);
+    
+    bool AddMasterArm(ui3MasterArm * arm);
 
-    virtual bool AddMasterArm(ui3MasterArm * arm);
+    bool AddSlaveArm(ui3SlaveArm * arm);
 
-    virtual bool AddSlaveArm(ui3SlaveArm * arm);
+    ui3SlaveArm * GetSlaveArm(const std::string & armName);
 
     void ConnectAll(void);
 
@@ -344,8 +348,10 @@ private:
 
     // MaM (MastersAsMice) mode
     bool MaM;
+    bool HasMaMDevice;
 
 public:
+
     inline bool MastersAsMice(void) const {
         return this->MaM;
     }
