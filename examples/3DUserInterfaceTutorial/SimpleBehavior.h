@@ -26,7 +26,7 @@ class SimpleBehavior: public ui3BehaviorBase
 {
 public:
     SimpleBehavior(const std::string & name, ui3Manager * manager);
-    ~SimpleBehavior() {}
+    ~SimpleBehavior();
 
     void Startup(void) {}
     void Cleanup(void) {}
@@ -34,6 +34,8 @@ public:
     bool RunForeground(void);
     bool RunBackground(void);
     bool RunNoInput(void);
+    void OnQuit(void);
+    void OnStart(void);
     void Configure(const std::string & CMN_UNUSED(configFile)) {}
     bool SaveConfiguration(const std::string & configFile) { return true; }
     inline ui3VisibleObject * GetVisibleObject(void) {

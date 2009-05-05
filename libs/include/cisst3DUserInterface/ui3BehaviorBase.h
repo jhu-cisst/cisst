@@ -186,7 +186,10 @@ protected:
     /*! Method called when this behavior becomes active, i.e. the user selected it from the previous menu */
     void SetStateForeground(void);
     void SetStateBackground(void);
+    void SetStateIdle(void);
 
+    virtual void OnQuit(void) {};
+    virtual void OnStart(void) {};
 protected:
 
     /*!

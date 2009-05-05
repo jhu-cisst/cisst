@@ -64,6 +64,11 @@ void ui3BehaviorBase::AddMenuBar(bool isManager)
                                       "iconify-left.png",
                                       &ui3BehaviorBase::SetStateBackground,
                                       this);
+        this->MenuBar->AddClickButton("Close",
+                                      99,
+                                      "close.png",
+                                      &ui3BehaviorBase::SetStateIdle,
+                                      this);
     }
 }
 
@@ -134,11 +139,15 @@ void ui3BehaviorBase::SetStateBackground(void)
     this->SetState(Background);
 }
 
+void ui3BehaviorBase::SetStateIdle(void)
+{
+    this->SetState(Idle);
+}
+
 void ui3BehaviorBase::SetState(const StateType & newState)
 {
     if (newState != this->State) {
-        this->State = newState;
-        switch (this->State) {
+        switch (newState) {
             case Foreground:
                 if (this->Manager->ActiveBehavior) {
                     this->Manager->ActiveBehavior->MenuBar->Hide();
@@ -146,6 +155,9 @@ void ui3BehaviorBase::SetState(const StateType & newState)
                 }
                 this->MenuBar->Show();
                 this->Manager->ActiveBehavior = this;
+                if (this->State == Idle) {
+                    this->OnStart();
+                }
                 break;
             case Background:
                 this->MenuBar->Hide();
@@ -155,8 +167,13 @@ void ui3BehaviorBase::SetState(const StateType & newState)
                 break;
             case Idle:
                 this->MenuBar->Hide();
+                this->Manager->ActiveBehavior = this->Manager;
+                this->Manager->State = Foreground;
+                this->Manager->ActiveBehavior->MenuBar->Show();
+                this->OnQuit();
                 break;
         }
+        this->State = newState;
     }
 }
 

@@ -45,6 +45,19 @@ public:
         Red(true)
     {}
 
+    inline ~SimpleBehaviorVisibleObject()
+    {
+        if (this->Actor) {
+            this->Actor->Delete();
+        }
+        if (this->Mapper) {
+            this->Mapper->Delete();
+        }
+        if (this->Source) {
+            this->Source->Delete();
+        }
+    }
+
     inline bool CreateVTKObjects(void) {
         this->Source = vtkSphereSource::New();
         CMN_ASSERT(this->Source);
@@ -97,14 +110,22 @@ SimpleBehavior::SimpleBehavior(const std::string & name, ui3Manager * manager):
     this->Position.Z() = -100.0;
     this->VisibleObject = new SimpleBehaviorVisibleObject(manager, this->Position);
     CMN_ASSERT(this->VisibleObject);
+    this->VisibleObject->Show();
 }
 
 
+SimpleBehavior::~SimpleBehavior()
+{
+    if (this->VisibleObject) {
+        delete this->VisibleObject;
+    }
+}
+
 void SimpleBehavior::ConfigureMenuBar()
 {
-    this->MenuBar->AddClickButton("FirstButton",
+    this->MenuBar->AddClickButton("ToggleColor",
                                   1,
-                                  "circle.png",
+                                  "redo.png",
                                   &SimpleBehaviorVisibleObject::ToggleColor,
                                   dynamic_cast<SimpleBehaviorVisibleObject *>(this->VisibleObject));
 }
@@ -156,6 +177,21 @@ bool SimpleBehavior::RunNoInput()
         this->VisibleObject->Hide();
     }
     return true;
+}
+
+
+void SimpleBehavior::OnQuit()
+{
+    this->VisibleObject->Hide();
+}
+
+
+void SimpleBehavior::OnStart()
+{
+    this->Position.X() = 0.0;
+    this->Position.Y() = 0.0;
+    this->Position.Z() = -100.0;
+    this->VisibleObject->Show();
 }
 
 
