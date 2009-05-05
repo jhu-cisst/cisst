@@ -24,7 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsTaskManager.h>
 #include <cisstDevices/devSensableHD.h>
 
-#include "example1.h"
+#include "BehaviorWithSlave.h"
 
 #include <vtkActor.h>
 #include <vtkAssembly.h>
@@ -33,11 +33,11 @@ http://www.cisst.org/cisst/license.txt.
 #include <vtkConeSource.h>
 #include <vtkSphereSource.h>
 
-class BehaviorVisibleObject: public ui3VisibleObject
+class BehaviorWithSlaveVisibleObject: public ui3VisibleObject
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 5);
 public:
-    inline BehaviorVisibleObject(ui3Manager * manager, vctFrm3 position):
+    inline BehaviorWithSlaveVisibleObject(ui3Manager * manager, vctFrm3 position):
         ui3VisibleObject(manager),
         ConeSource(0),
         ConeMapper(0),
@@ -97,52 +97,54 @@ protected:
 };
 
 
-CMN_DECLARE_SERVICES_INSTANTIATION(BehaviorVisibleObject);
-CMN_IMPLEMENT_SERVICES(BehaviorVisibleObject);
+CMN_DECLARE_SERVICES_INSTANTIATION(BehaviorWithSlaveVisibleObject);
+CMN_IMPLEMENT_SERVICES(BehaviorWithSlaveVisibleObject);
 
 
-CExampleBehavior::CExampleBehavior(const std::string & name, ui3Manager * manager):
-    ui3BehaviorBase(std::string("CExampleBehavior::") + name, 0),
+BehaviorWithSlave::BehaviorWithSlave(const std::string & name, ui3Manager * manager):
+    ui3BehaviorBase(std::string("BehaviorWithSlave::") + name, 0),
     Ticker(0),
     Following(false),
     VisibleObject(0)
 {
-    this->VisibleObject = new BehaviorVisibleObject(manager, this->Position);
+    this->VisibleObject = new BehaviorWithSlaveVisibleObject(manager, this->Position);
     CMN_ASSERT(this->VisibleObject);
 
     this->Offset.SetAll(0.0);
 }
 
 
-CExampleBehavior::~CExampleBehavior()
+BehaviorWithSlave::~BehaviorWithSlave()
 {
 }
 
 
-void CExampleBehavior::ConfigureMenuBar()
+void BehaviorWithSlave::ConfigureMenuBar()
 {
     this->MenuBar->AddClickButton("FirstButton",
                                   1,
                                   "empty.png",
-                                  &CExampleBehavior::FirstButtonCallback,
+                                  &BehaviorWithSlave::FirstButtonCallback,
                                   this);
 }
 
 
-void CExampleBehavior::Startup(void)
+void BehaviorWithSlave::Startup(void)
 {
     this->Slave1 = this->Manager->GetSlaveArm("Slave1");
-    std::cout << "this->Slave1: " << this->Slave1 << std::cerr;
+    if (!this->Slave1) {
+        CMN_LOG_CLASS(1) << "This behavior requires a slave arm ..." << std::endl;
+    }
 }
 
 
-void CExampleBehavior::Cleanup(void)
+void BehaviorWithSlave::Cleanup(void)
 {
     // menu bar will release itself upon destruction
 }
 
 
-bool CExampleBehavior::RunForeground()
+bool BehaviorWithSlave::RunForeground()
 {
     this->Ticker++;
 
@@ -178,7 +180,7 @@ bool CExampleBehavior::RunForeground()
     return true;
 }
 
-bool CExampleBehavior::RunBackground()
+bool BehaviorWithSlave::RunBackground()
 {
     this->Ticker++;
 
@@ -195,7 +197,7 @@ bool CExampleBehavior::RunBackground()
     return true;
 }
 
-bool CExampleBehavior::RunNoInput()
+bool BehaviorWithSlave::RunNoInput()
 {
     this->Ticker++;
     if (this->Manager->MastersAsMice() != this->PreviousMaM) {
@@ -210,23 +212,23 @@ bool CExampleBehavior::RunNoInput()
     return true;
 }
 
-void CExampleBehavior::Configure(const std::string & CMN_UNUSED(configFile))
+void BehaviorWithSlave::Configure(const std::string & CMN_UNUSED(configFile))
 {
     // load settings
 }
 
-bool CExampleBehavior::SaveConfiguration(const std::string & CMN_UNUSED(configFile))
+bool BehaviorWithSlave::SaveConfiguration(const std::string & CMN_UNUSED(configFile))
 {
     // save settings
     return true;
 }
 
-void CExampleBehavior::FirstButtonCallback()
+void BehaviorWithSlave::FirstButtonCallback()
 {
     CMN_LOG_CLASS(6) << "Behavior \"" << this->GetName() << "\" Button 1 pressed" << std::endl;
 }
 
-void CExampleBehavior::PrimaryMasterButtonCallback(const prmEventButton & event)
+void BehaviorWithSlave::PrimaryMasterButtonCallback(const prmEventButton & event)
 {
     if (event.Type() == prmEventButton::PRESSED) {
         this->Following = true;

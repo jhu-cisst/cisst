@@ -27,7 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 #define UI3_DAVINCI 3
 
 // change this based on your configuration
-#define UI3_INPUT UI3_DAVINCI
+#define UI3_INPUT UI3_OMNI1
 
 #include <cisstOSAbstraction/osaThreadedLogFile.h>
 #include <cisstOSAbstraction/osaSleep.h>
@@ -39,21 +39,23 @@ http://www.cisst.org/cisst/license.txt.
 
 #if (UI3_INPUT == UI3_DAVINCI)
 #include <cisstDaVinciAPI/cisstDaVinciAPI.h>
+
+    #define RENDER_ON_OVERLAY
+    #ifdef RENDER_ON_OVERLAY
+        #define DEBUG_WINDOW_WITH_OVERLAY
+//        #define DEBUG_WINDOW_HAS_VIDEO_BACKGROUND
+    #endif
+    #define CAPTURE_SWAP_RGB
 #endif
 
-#define RENDER_ON_OVERLAY
-#ifdef RENDER_ON_OVERLAY
-    #define DEBUG_WINDOW_WITH_OVERLAY
-//    #define DEBUG_WINDOW_HAS_VIDEO_BACKGROUND
-#endif
-
-#define CAPTURE_SWAP_RGB
 
 
-#include <cisstCommon/cmnGetChar.h>
+
+#include <cisstCommon.h>
 #include <cisstStereoVision.h>
 
-#include "example1.h"
+#include "SimpleBehavior.h"
+#include "BehaviorWithSlave.h"
 
 int main()
 {
@@ -86,8 +88,8 @@ int main()
 
     ui3Manager guiManager;
 
-    CExampleBehavior behavior("Example1", &guiManager);
-    CExampleBehavior behavior2("Example2", &guiManager);
+    SimpleBehavior behavior("Example1", &guiManager);
+    BehaviorWithSlave behavior2("Example2", &guiManager);
 
     guiManager.AddBehavior(&behavior,       // behavior reference
                            0,               // position in the menu bar: default
@@ -226,10 +228,15 @@ int main()
 #endif
 #if (UI3_INPUT == UI3_OMNI1_OMNI2)
     transform.Translation().Assign(-30.0, 0.0, -150.0); // recenter Omni's depth (left)
-    guiManager.SetupLeftMaster(sensable, "Omni2",
-                               sensable, "Omni2Button1",
-                               sensable, "Omni2Button2",
-                               transform, 0.5 /* scale factor */);
+    ui3MasterArm * leftMaster = new ui3MasterArm("Omni1");
+    guiManager.AddMasterArm(leftMaster);
+    leftMaster->SetInput(sensable, "Omni2",
+                         sensable, "Omni2Button1",
+                         sensable, "Omni2Button2",
+                         ui3MasterArm::SECONDARY);
+    leftMaster->SetTransformation(transform, 0.5 /* scale factor */);
+    ui3CursorBase * leftCursor = new ui3CursorSphere(&guiManager);
+    leftMaster->SetCursor(leftCursor);
 #endif
 
 #if (UI3_INPUT == UI3_DAVINCI)

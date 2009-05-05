@@ -35,8 +35,10 @@ ENDIF(HAS_DAVINCI)
 
 add_executable(${PROJECT_NAME}
                main.cpp
-               example1.cpp
-               example1.h
+               SimpleBehavior.cpp
+               SimpleBehavior.h
+               BehaviorWithSlave.cpp
+               BehaviorWithSlave.h
                )
 
 target_link_libraries(${PROJECT_NAME}
