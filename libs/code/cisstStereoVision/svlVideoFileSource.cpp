@@ -25,9 +25,15 @@ http://www.cisst.org/cisst/license.txt.
 
 #if (CISST_OS == CISST_WINDOWS)
     #include "VfWAvi.h"
+    #include "commdlg.h"
 
     static int VFS_OleInitCounter = 0;
 #endif
+
+#if (CISST_SVL_HAS_ZLIB == ON)
+    #include "zlib.h"
+    #include "svlConverters.h"
+#endif // CISST_SVL_HAS_ZLIB
 
 
 /*************************************/
@@ -56,14 +62,18 @@ svlVideoFileSource::svlVideoFileSource(bool stereo) :
 
     unsigned int videochannels = dynamic_cast<svlSampleImageBase*>(OutputData)->GetVideoChannels();
     VideoObj.SetSize(videochannels);
+    VideoObj.SetAll(0);
+    VideoFile.SetSize(videochannels);
+    VideoFile.SetAll(0);
     FilePath.SetSize(videochannels);
-    for (unsigned int i = 0; i < videochannels; i ++) {
-#if (CISST_OS == CISST_WINDOWS)
-        VideoObj[i] = new CVfWAvi;
-#else
-        VideoObj[i] = 0;
-#endif
-    }
+    FilePartCount.SetSize(videochannels);
+    YUVBuffer.SetSize(videochannels);
+    YUVBuffer.SetAll(0);
+    YUVBufferSize.SetSize(videochannels);
+    CompressedBuffer.SetSize(videochannels);
+    CompressedBuffer.SetAll(0);
+    CompressedBufferSize.SetSize(videochannels);
+    FirstTimestamp.SetSize(videochannels);
 }
 
 svlVideoFileSource::~svlVideoFileSource()
@@ -71,11 +81,6 @@ svlVideoFileSource::~svlVideoFileSource()
     Release();
 
     if (OutputData) delete OutputData;
-    for (unsigned int i = 0; i < VideoObj.size(); i ++) {
-#if (CISST_OS == CISST_WINDOWS)
-        if (VideoObj[i]) delete reinterpret_cast<CVfWAvi*>(VideoObj[i]);
-#endif
-    }
 
 #if (CISST_OS == CISST_WINDOWS)
     if (VFS_OleInitCounter > 0) {
@@ -93,116 +98,261 @@ int svlVideoFileSource::Initialize(svlSample* inputdata)
 
 #if (CISST_OS == CISST_WINDOWS)
     CVfWAvi* tavi;
-#else
-	FILE *fp;
-    int readlen;
-    double dbvalue;
-    unsigned int width, height;
-#endif
-
+    unsigned int avicounter = 0;
     Hertz = 0.0;
-
-    for (unsigned int i = 0; i < img->GetVideoChannels(); i ++) {
-#if (CISST_OS == CISST_WINDOWS)
-        tavi = reinterpret_cast<CVfWAvi*>(VideoObj[i]);
-        tavi->Close();
-        if (tavi->InitPlaying(FilePath[i].c_str()) == 0) goto labError;
-
-        Hertz += std::max(0.1, tavi->GetFramerate());
-        img->SetSize(i, tavi->GetWidth(), tavi->GetHeight());
-#else
-        VideoObj[i] = fp = fopen(FilePath[i].c_str(), "rb");
-        if (fp == 0) goto labError;
-
-	    // Read "width"
-        readlen = static_cast<int>(fread(&width, sizeof(unsigned int), 1, fp));
-	    if (readlen < 1) goto labError;
-        if (width < 1 || width > 4096) goto labError;
-
-        // Read "height"
-        readlen = static_cast<int>(fread(&height, sizeof(unsigned int), 1, fp));
-	    if (readlen < 1) goto labError;
-        if (height < 1 || height > 4096) goto labError;
-
-        // Read "framerate"
-        readlen = static_cast<int>(fread(&dbvalue, sizeof(double), 1, fp));
-	    if (readlen < 1) goto labError;
-        if (dbvalue <= 0.0 || dbvalue > 1000.0) goto labError;
-
-        Hertz += dbvalue;
-        img->SetSize(i, width, height);
 #endif
+#if (CISST_SVL_HAS_ZLIB == ON)
+    int readlen;
+    unsigned int uivalue;
+    const std::string filestartmarker = "CisstSVLVideo\r\n";
+    char strbuffer[32];
+#endif
+
+    bool opened;
+    unsigned int i, width, height;
+
+    for (i = 0; i < img->GetVideoChannels(); i ++) {
+        if (FilePath[i].empty()) return SVL_FAIL;
     }
 
-    // Averaging framerates
-    Hertz /= img->GetVideoChannels();
+    for (i = 0; i < img->GetVideoChannels(); i ++) {
+        opened = false;
 
-    Timer.Reset();
-    Timer.Start();
-    ulFrameTime = 1.0 / Hertz;
+#if (CISST_OS == CISST_WINDOWS)
+    // Try to open as an AVI first
+        VideoObj[i] = tavi = new CVfWAvi;
+        if (tavi->InitPlaying(FilePath[i].c_str()) > 0) {
+            Hertz += std::max(0.1, tavi->GetFramerate());
+            width = tavi->GetWidth();
+            height = tavi->GetHeight();
+            avicounter ++;
+            opened = true;
+        }
+        else {
+            delete tavi;
+            VideoObj[i] = 0;
+        }
+#endif
+#if (CISST_SVL_HAS_ZLIB == ON)
+    // Try to open as a CISST video
+        while (opened == false) {
+            VideoFile[i] = fopen(FilePath[i].c_str(), "rb");
+            if (VideoFile[i] == 0) break;
+
+	        // Read "file start marker"
+            readlen = static_cast<int>(fread(strbuffer, filestartmarker.length(), 1, VideoFile[i]));
+            if (readlen < 1) break;
+            strbuffer[filestartmarker.length()] = 0;
+            if (filestartmarker.compare(strbuffer) != 0) break;
+
+	        // Read "width"
+            readlen = static_cast<int>(fread(&width, sizeof(unsigned int), 1, VideoFile[i]));
+            if (readlen < 1 || width < 1 || width > 4096) break;
+
+            // Read "height"
+            readlen = static_cast<int>(fread(&height, sizeof(unsigned int), 1, VideoFile[i]));
+            if (readlen < 1 || height < 1 || height > 4096) break;
+
+            // Read "part count"
+            readlen = static_cast<int>(fread(&uivalue, sizeof(unsigned int), 1, VideoFile[i]));
+            if (readlen < 1 || uivalue < 1 || uivalue > 256) break;
+            FilePartCount[i] = uivalue;
+
+            // Compute YUV buffer size
+            YUVBufferSize[i] = width * height * 2;
+            // Allocate YUV buffer
+            YUVBuffer[i] = new unsigned char[YUVBufferSize[i]];
+
+            // Compute data size and add some additional room for the compressor
+            CompressedBufferSize[i] = YUVBufferSize[i] + YUVBufferSize[i] / 100 + 4096;
+            // Allocate compression buffer
+            CompressedBuffer[i] = new unsigned char[CompressedBufferSize[i]];
+
+            opened = true;
+
+            break;
+        }
+#endif
+
+        // If either channel fails to open, return error
+        if (opened == false) {
+            Release();
+            return SVL_FAIL;
+        }
+
+        img->SetSize(i, width, height);
+    }
+
+#if (CISST_OS == CISST_WINDOWS)
+    if (avicounter > 0) {
+        // Averaging framerates
+        Hertz /= avicounter;
+    }
+#endif
 
     return SVL_OK;
+}
 
-labError:
-    Release();
-    return SVL_FAIL;
+int svlVideoFileSource::OnStart(unsigned int procCount)
+{
+    // Initialize video timer
+    Timer.Reset();
+    Timer.Start();
+
+#if (CISST_OS == CISST_WINDOWS)
+    if (Hertz >= 0.1) {
+        ulFrameTime = 1.0 / Hertz;
+    }
+#endif
+
+    return SVL_OK;
 }
 
 int svlVideoFileSource::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata)
 {
-    _OnSingleThread(procInfo)
-    {
-        if (FrameCounter > 0) {
-            double time = Timer.GetElapsedTime();
-            double t1 = ulFrameTime * FrameCounter;
-            double t2 = time - ulStartTime;
-            if (t1 > t2) osaSleep(t1 - t2);
-        }
-        else {
-            ulStartTime = Timer.GetElapsedTime();
+#if (CISST_OS == CISST_WINDOWS)
+    if (Hertz >= 0.1) {
+        _OnSingleThread(procInfo)
+        {
+            if (FrameCounter > 0) {
+                double time = Timer.GetElapsedTime();
+                double t1 = ulFrameTime * FrameCounter;
+                double t2 = time - ulStartTime;
+                if (t1 > t2) osaSleep(t1 - t2);
+            }
+            else {
+                ulStartTime = Timer.GetElapsedTime();
+            }
         }
     }
+#endif
 
     svlSampleImageBase* img = dynamic_cast<svlSampleImageBase*>(OutputData);
     unsigned int videochannels = img->GetVideoChannels();
-    unsigned int idx;
-    int ret = SVL_OK;
+    unsigned char* imptr;
+    unsigned int idx, datasize;
+    int ret;
+
+#if (CISST_SVL_HAS_ZLIB == ON)
+    const std::string framestartmarker = "\r\nFrame\r\n";
+    char strbuffer[16];
+    double timestamp, timespan;
+    unsigned int i, compressedpartsize, offset;
+    unsigned long longsize;
+    int readlen, err;
+    bool eof;
+#endif
 
     _ParallelLoop(procInfo, idx, videochannels)
     {
+        imptr = reinterpret_cast<unsigned char*>(img->GetPointer(idx));
+        datasize = img->GetDataSize(idx);
+        ret = SVL_FAIL;
+
 #if (CISST_OS == CISST_WINDOWS)
-        if (reinterpret_cast<CVfWAvi*>(VideoObj[idx])->CopyNextAVIFrame(reinterpret_cast<unsigned char*>(img->GetPointer(idx)),
-                                                                        img->GetDataSize(idx)) == 0) ret = SVL_FAIL;
-#else
-        // Read raw frame
-	    if (fread(img->GetPointer(idx),
-                  1,
-                  img->GetDataSize(idx),
-                  reinterpret_cast<FILE*>(VideoObj[idx])) < img->GetDataSize(idx)) {
-
-            // End of file reached
-            if (FrameCounter > 0) {
-
-                // Go back to the beginning of the file, just after the header
-                if (fseek(reinterpret_cast<FILE*>(VideoObj[idx]),
-                          2 * sizeof(unsigned int) + sizeof(double),
-                          SEEK_SET) == 0) {
-
-                    // Try to read again
-	                if (fread(img->GetPointer(idx),
-                              1,
-                              img->GetDataSize(idx),
-                              reinterpret_cast<FILE*>(VideoObj[idx])) < img->GetDataSize(idx)) ret = SVL_FAIL;
-                }
-                else ret = SVL_FAIL;
-            }
-            else {
-
-                // If it was the first frame, then file is invalid
-                ret = SVL_FAIL;
+        if (VideoObj[idx]) {
+            if (reinterpret_cast<CVfWAvi*>(VideoObj[idx])->CopyNextAVIFrame(imptr, datasize) == 1) {
+                ret = SVL_OK;
             }
         }
 #endif
+#if (CISST_SVL_HAS_ZLIB == ON)
+        while (VideoFile[idx]) {
+            eof = false;
+
+            while (1) {
+                // Read "frame start marker"
+                readlen = static_cast<int>(fread(strbuffer, framestartmarker.length(), 1, VideoFile[idx]));
+                if (readlen < 1) {
+                    eof = true;
+                    break;
+                }
+                strbuffer[framestartmarker.length()] = 0;
+                if (framestartmarker.compare(strbuffer) != 0) break;
+
+                // Read "time stamp"
+                readlen = static_cast<int>(fread(&timestamp, sizeof(double), 1, VideoFile[idx]));
+                if (readlen < 1) {
+                    eof = true;
+                    break;
+                }
+                if (timestamp < 0.0) break;
+                if (FrameCounter == 0) {
+                    FirstTimestamp[idx] = timestamp;
+                    Timer.Reset();
+                    Timer.Start();
+                }
+                else {
+                    timespan = (timestamp - FirstTimestamp[idx]) - Timer.GetElapsedTime();
+                    if (timespan > 0.0) osaSleep(timespan);
+                }
+
+                offset = 0;
+                for (i = 0; i < FilePartCount[idx]; i ++) {
+                    // Read "compressed part size"
+                    readlen = static_cast<int>(fread(&compressedpartsize, sizeof(unsigned int), 1, VideoFile[idx]));
+                    if (readlen < 1) {
+                        eof = true;
+                        break;
+                    }
+                    if (compressedpartsize == 0 || compressedpartsize > CompressedBufferSize[idx]) break;
+
+                    // Read compressed frame part
+                    readlen = static_cast<int>(fread(CompressedBuffer[idx], 1, compressedpartsize, VideoFile[idx]));
+                    if (readlen < static_cast<int>(compressedpartsize)) {
+                        eof = true;
+                        break;
+                    }
+
+                    // Decompress frame part
+                    longsize = YUVBufferSize[idx] - offset;
+                    err = uncompress(YUVBuffer[idx] + offset,
+                                    &longsize,
+                                    CompressedBuffer[idx],
+                                    compressedpartsize);
+                    if (err != Z_OK) break;
+                    offset += longsize;
+                }
+                if (i < FilePartCount[idx]) break;
+
+                if (eof == false) {
+                    // Convert YUV422 planar to RGB format
+                    YUV422PtoRGB24(YUVBuffer[idx], imptr, YUVBufferSize[idx] >> 1);
+                    ret = SVL_OK;
+                }
+
+                break;
+            }
+
+            if (eof) {
+                // End of file reached
+                if (FrameCounter > 0) {
+
+                    // Go back to the beginning of the file, just after the header
+                    if (fseek(VideoFile[idx], 27, SEEK_SET) == 0) {
+                        // Try again
+                        FrameCounter = 0;
+                        continue;
+                    }
+                    else {
+                        // Can't seek back to the beginning
+                        ret = SVL_FAIL;
+                    }
+                }
+                else {
+                    // If it was the first frame, then file is invalid
+                    ret = SVL_FAIL;
+                }
+            }
+            else {
+                // Other error, let it fail
+            }
+
+            break;
+        }
+#endif
+
+        if (ret == SVL_FAIL) break;
     }
 
     return ret;
@@ -210,17 +360,38 @@ int svlVideoFileSource::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata)
 
 int svlVideoFileSource::Release()
 {
-    for (unsigned int i = 0; i < VideoObj.size(); i ++) {
+    unsigned int i;
+
+    for (i = 0; i < VideoObj.size(); i ++) {
 #if (CISST_OS == CISST_WINDOWS)
-        if (VideoObj[i]) reinterpret_cast<CVfWAvi*>(VideoObj[i])->Close();
-#else
-        if (VideoObj[i]) fclose(reinterpret_cast<FILE*>(VideoObj[i]));
-        VideoObj[i] = 0;
+        if (VideoObj[i]) {
+            reinterpret_cast<CVfWAvi*>(VideoObj[i])->Close();
+            VideoObj[i] = 0;
+        }
+#endif
+    }
+    for (i = 0; i < VideoFile.size(); i ++) {
+#if (CISST_SVL_HAS_ZLIB == ON)
+        if (VideoFile[i]) {
+            fclose(VideoFile[i]);
+            VideoFile[i] = 0;
+        }
+        if (YUVBuffer[i]) {
+            delete [] YUVBuffer[i];
+            YUVBuffer[i] = 0;
+        }
+        if (CompressedBuffer[i]) {
+            delete [] CompressedBuffer[i];
+            CompressedBuffer[i] = 0;
+        }
 #endif
     }
 
     Timer.Stop();
+
+#if (CISST_OS == CISST_WINDOWS)
     Hertz = -1.0;
+#endif
 
     return SVL_OK;
 }

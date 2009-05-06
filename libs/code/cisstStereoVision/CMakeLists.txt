@@ -39,8 +39,6 @@ SET(SOURCE_FILES
     ftImagePPM.h                   # private header
     ftImagePPM.cpp
     svlVideoCaptureSource.cpp
-    svlVideoFileSource.cpp
-    svlVideoFileWriter.cpp
     svlImageFileSource.cpp
     svlImageFileWriter.cpp
     svlRenderTargets.cpp
@@ -82,8 +80,6 @@ SET(HEADER_FILES
     svlGenericFilter.h
     svlFileHandlers.h
     svlVideoCaptureSource.h
-    svlVideoFileSource.h
-    svlVideoFileWriter.h
     svlImageFileSource.h
     svlImageFileWriter.h
     svlRenderTargets.h
@@ -155,6 +151,36 @@ IF(CISST_SVL_HAS_OPENCV)
 ENDIF(CISST_SVL_HAS_OPENCV)
 
 
+OPTION(CISST_SVL_HAS_ZLIB "Use ZLIB extensions" OFF)
+IF(CISST_SVL_HAS_ZLIB)
+    FIND_PACKAGE(ZLIB)
+    IF(ZLIB_FOUND)
+        INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
+        LINK_LIBRARIES(${ZLIB_LIBRARIES})
+
+        IF(NOT WIN32)
+            SET(SOURCE_FILES
+                ${SOURCE_FILES}
+                svlVideoFileSource.cpp
+                )
+            SET(HEADER_FILES
+                ${HEADER_FILES}
+                svlVideoFileSource.h
+                )
+        ENDIF(NOT WIN32)
+
+        SET(SOURCE_FILES
+            ${SOURCE_FILES}
+            svlVideoFileWriter.cpp
+            )
+        SET(HEADER_FILES
+            ${HEADER_FILES}
+            svlVideoFileWriter.h
+            )
+    ENDIF(ZLIB_FOUND)
+ENDIF(CISST_SVL_HAS_ZLIB)
+
+
 # TO DO: add windows support
 IF(UNIX)
 
@@ -194,10 +220,14 @@ IF(WIN32)
     VfWAvi.h                 # private header
     VfWAvi.cpp
     svlImageWindow.cpp
+    svlVideoFileSource.cpp
+    svlVideoFileWriterAVI.cpp
     )
   SET(HEADER_FILES
     ${HEADER_FILES}
     svlImageWindow.h
+    svlVideoFileSource.h
+    svlVideoFileWriterAVI.h
     )
 
   OPTION(CISST_SVL_HAS_DIRECTSHOW "Compile DirectShow extensions" OFF)
