@@ -113,7 +113,7 @@ void svlColorSpaceConverter::ConvertColorSpace(unsigned char* buffer, unsigned i
                 break;
 
                 case svlColorSpaceYUV:
-                    RGB24toYUV24(buffer, buffer, numofpixels, Channel1, Channel2, Channel3);
+                    RGB24toYUV444(buffer, buffer, numofpixels, Channel1, Channel2, Channel3);
                 break;
             }
         break;
