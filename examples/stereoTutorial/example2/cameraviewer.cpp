@@ -193,7 +193,7 @@ public:
 int CameraViewer(bool save, unsigned int fps, bool interpolation, int width, int height)
 {
     // instantiating SVL stream and filters
-    svlStreamManager viewer_stream(2);
+    svlStreamManager viewer_stream(4);
     svlVideoCaptureSource viewer_source(false);
     svlImageResizer viewer_resizer;
     svlImageSampler viewer_icondrawer;
@@ -211,12 +211,6 @@ int CameraViewer(bool save, unsigned int fps, bool interpolation, int width, int
 
     // setup writer
     if (save == true) {
-        if (viewer_writer.LoadCodecSettings("codec.dat") != SVL_OK) {
-            viewer_writer.DialogCodec();
-            viewer_writer.SetFramerate(static_cast<double>(fps));
-            viewer_writer.SetKeyFrameInteval(std::max(1u, fps / 3));
-        }
-        cout << endl;
         viewer_writer.DialogFilePath();
         cout << endl;
         viewer_writer.Pause();
@@ -351,7 +345,6 @@ int CameraViewer(bool save, unsigned int fps, bool interpolation, int width, int
 
     // save settings
     viewer_source.SaveSettings("device.dat");
-    if (save == true) viewer_writer.SaveCodecSettings("codec.dat");
 
     // destroy pipeline
     viewer_stream.EmptyFilterList();
