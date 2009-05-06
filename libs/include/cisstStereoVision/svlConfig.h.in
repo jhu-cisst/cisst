@@ -28,6 +28,9 @@ http://www.cisst.org/cisst/license.txt.
 // Using OpenCV for optimized image processing
 #define CISST_SVL_HAS_OPENCV @CISST_SVL_HAS_OPENCV@
 
+// Using ZLIB for optimized image processing
+#define CISST_SVL_HAS_ZLIB @CISST_SVL_HAS_ZLIB@
+
 // Support for Videre Design SVS
 #define CISST_SVL_HAS_SVS @CISST_SVL_HAS_SVS@
 
