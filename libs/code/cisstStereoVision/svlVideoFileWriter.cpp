@@ -155,7 +155,7 @@ int svlVideoFileWriter::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata)
             // Convert RGB to YUV422 planar format
             RGB24toYUV422P(reinterpret_cast<unsigned char*>(img->GetPointer(i)),
                            YUVBuffer,
-                           YUVBufferSize >> 1);
+                           img->GetWidth(i) * img->GetHeight(i));
         }
 
         _SynchronizeThreads(procInfo);
