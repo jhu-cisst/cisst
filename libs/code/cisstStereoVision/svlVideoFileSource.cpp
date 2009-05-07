@@ -231,7 +231,7 @@ int svlVideoFileSource::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata)
     unsigned int videochannels = img->GetVideoChannels();
     unsigned char* imptr;
     unsigned int idx, datasize;
-    int ret;
+    int ret = SVL_FAIL;
 
 #if (CISST_SVL_HAS_ZLIB == ON)
     const std::string framestartmarker = "\r\nFrame\r\n";
@@ -307,19 +307,21 @@ int svlVideoFileSource::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata)
                     // Decompress frame part
                     longsize = YUVBufferSize[idx] - offset;
                     err = uncompress(YUVBuffer[idx] + offset,
-                                    &longsize,
-                                    CompressedBuffer[idx],
-                                    compressedpartsize);
+                                     &longsize,
+                                     CompressedBuffer[idx],
+                                     compressedpartsize);
                     if (err != Z_OK) break;
+
+                    // Convert YUV422 planar to RGB format
+                    YUV422PtoRGB24(YUVBuffer[idx] + offset,
+                                   imptr + offset * 3 / 2,
+                                   longsize >> 1);
+
                     offset += longsize;
                 }
                 if (i < FilePartCount[idx]) break;
 
-                if (eof == false) {
-                    // Convert YUV422 planar to RGB format
-                    YUV422PtoRGB24(YUVBuffer[idx], imptr, YUVBufferSize[idx] >> 1);
-                    ret = SVL_OK;
-                }
+                if (eof == false) ret = SVL_OK;
 
                 break;
             }

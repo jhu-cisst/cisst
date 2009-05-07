@@ -752,6 +752,18 @@ svlStreamControlMultiThread::svlStreamControlMultiThread(unsigned int threadcoun
 svlStreamControlMultiThread::~svlStreamControlMultiThread()
 { /* NOP */ }
 
+double svlStreamControlMultiThread::GetAbsoluteTime(osaTimeServer* timeserver)
+{
+    if (!timeserver) return -1.0;
+
+    osaAbsoluteTime abstime;
+
+    timeserver->RelativeToAbsolute(timeserver->GetRelativeTime(), abstime);
+
+    // Calculate time since UNIX creation
+    return abstime.sec + abstime.nsec / 1000000000.0;
+}
+
 void* svlStreamControlMultiThread::Proc(svlStreamManager* baseref)
 {
     svlFilterBase *filter, *prevfilter;
@@ -759,7 +771,7 @@ void* svlStreamControlMultiThread::Proc(svlStreamManager* baseref)
     svlFilterBase::ProcInfo info;
     svlSyncPoint *sync = baseref->SyncPoint;
     unsigned int counter = 0;
-    osaStopwatch timer;
+    osaTimeServer* timeserver = 0;
     int err = SVL_OK;
 
     // Initializing thread info structure
@@ -771,9 +783,9 @@ void* svlStreamControlMultiThread::Proc(svlStreamManager* baseref)
     if (ThreadID == 0) {
     // Execute only on one thread - BEGIN
 
-        // Start timer for time stamping
-        timer.Reset();
-        timer.Start();
+        // Initialize time server for accessing absolute time
+        timeserver = new osaTimeServer;
+        timeserver->SetTimeOrigin();
 
     // Execute only on one thread - END
     }
@@ -793,7 +805,7 @@ void* svlStreamControlMultiThread::Proc(svlStreamManager* baseref)
 
             if (filter->OutputData) {
                 // Get timestamp and assign it to the output sample
-                filter->OutputData->SetTimestamp(timer.GetElapsedTime());
+                filter->OutputData->SetTimestamp(GetAbsoluteTime(timeserver));
             }
 
         // Execute only on one thread - END
@@ -898,8 +910,8 @@ void* svlStreamControlMultiThread::Proc(svlStreamManager* baseref)
     if (ThreadID == 0) {
     // Execute only on one thread - BEGIN
 
-        // Stop timer
-        timer.Stop();
+        // Delete time server
+        if (timeserver) delete timeserver;
 
     // Execute only on one thread - END
     }

@@ -29,7 +29,9 @@ using namespace std;
 /*** svlImageFileWriter class ********/
 /*************************************/
 
-svlImageFileWriter::svlImageFileWriter() : svlFilterBase()
+svlImageFileWriter::svlImageFileWriter() :
+    svlFilterBase(),
+    TimestampsEnabled(false)
 {
     AddSupportedType(svlTypeImageRGB, svlTypeImageRGB);
     AddSupportedType(svlTypeImageRGBStereo, svlTypeImageRGBStereo);
@@ -129,7 +131,12 @@ int svlImageFileWriter::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata)
             buffersize = img->GetDataSize(idx);
         }
 
-        sprintf(FilePath[idx], "%s%07d.%s", FilePathPrefix[idx], FrameCounter, Extension[idx]);
+        if (TimestampsEnabled) {
+            sprintf(FilePath[idx], "%s%.3f.%s", FilePathPrefix[idx], inputdata->GetTimestamp(), Extension[idx]);
+        }
+        else {
+            sprintf(FilePath[idx], "%s%07d.%s", FilePathPrefix[idx], FrameCounter, Extension[idx]);
+        }
 
         ImageProps[idx].DataType = svlTypeImageRGB;
         ImageProps[idx].DataSize = buffersize;

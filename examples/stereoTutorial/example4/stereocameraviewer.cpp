@@ -124,6 +124,7 @@ public:
         ImageWriterFilter = 0;
         ShowFramerate = true;
         Recording = false;
+        Snapshots = false;
     }
 
     void OnNewFrame(unsigned int frameid)
@@ -186,8 +187,16 @@ public:
                 case 's':
                 {
                     if (ImageWriterFilter) {
-                        ImageWriterFilter->Record(1);
-                        cout << endl << " >>> Image files saved <<<" << endl;
+                        if (Snapshots) {
+                            ImageWriterFilter->Pause();
+                            Snapshots = false;
+                            cout << endl << " >>> Snapshots paused <<<" << endl;
+                        }
+                        else {
+                            ImageWriterFilter->Record(-1);
+                            Snapshots = true;
+                            cout << endl << " >>> Snapshots started <<<" << endl;
+                        }
                     }
                 }
                 break;
@@ -201,6 +210,7 @@ public:
     svlImageFileWriter* ImageWriterFilter;
     svlVideoFileWriter* VideoWriterFilter;
     bool Recording;
+    bool Snapshots;
 
     bool ShowFramerate;
 #ifdef _WIN32
@@ -245,8 +255,9 @@ int CameraViewer(bool save, bool interpolation, int width, int height)
     }
 
     // setup image writer
-    viewer_imagewriter.SetFilePath("left_", "bmp", SVL_LEFT);
-    viewer_imagewriter.SetFilePath("right_", "bmp", SVL_RIGHT);
+    viewer_imagewriter.SetFilePath("./images/left_", "bmp", SVL_LEFT);
+    viewer_imagewriter.SetFilePath("./images/right_", "bmp", SVL_RIGHT);
+    viewer_imagewriter.EnableTimestamps();
     viewer_imagewriter.Pause();
 
     // setup resizer
@@ -323,7 +334,7 @@ int CameraViewer(bool save, bool interpolation, int width, int height)
         if (save == true) {
             cerr << "    SPACE - Video recorder control: Record/Pause" << endl;
         }
-        cerr << "    's'   - Save image snapshots" << endl;
+        cerr << "    's'   - Image snapshots control: Record/Pause" << endl;
         cerr << "  In command window:" << endl;
         cerr << "    '1'   - Adjust LEFT image properties" << endl;
         cerr << "    '2'   - Adjust RIGHT image properties" << endl;

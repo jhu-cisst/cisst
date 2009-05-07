@@ -57,15 +57,30 @@ private:
     vctDynamicVector<bool> Disabled;
     vctDynamicVector<std::string> FilePath;
 
-    unsigned char* YUVBuffer;
-    unsigned int YUVBufferSize;
-    unsigned char* CompressedBuffer;
-    unsigned int CompressedBufferSize;
-    unsigned int* CompressedPartOffset;
-    unsigned int* CompressedPartSize;
+    vctDynamicVector<unsigned char*> YUVBuffer;
+    vctDynamicVector<unsigned int> YUVBufferSize;
+    vctDynamicVector<unsigned char*> CompressedBuffer;
+    vctDynamicVector<unsigned int> CompressedBufferSize;
+    vctDynamicVector<unsigned int*> CompressedPartOffset;
+    vctDynamicVector<unsigned int*> CompressedPartSize;
 
     int UpdateStreamCount(unsigned int count);
+
+    unsigned char* SaveBuffer[2];
+    unsigned int SaveBufferSize;
+    vctDynamicVector<unsigned int> SaveBufferOffset;
+    vctDynamicVector<unsigned int> SaveBufferUsed;
+    unsigned int SaveBufferUsedID;
+    osaThread SaveThread;
+    osaThreadSignal SaveInitEvent;
+    osaThreadSignal NewFrameEvent;
+    osaThreadSignal WriteDoneEvent;
+    bool SaveInitialized;
+    bool KillSaveThread;
+    bool SaveThreadError;
+    void* SaveProc(unsigned int videochannels);
 };
 
 #endif // _svlVideoFileWriter_h
+
 

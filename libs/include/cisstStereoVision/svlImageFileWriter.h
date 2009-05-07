@@ -47,6 +47,7 @@ public:
 
     int Disable(bool disable, int videoch = SVL_LEFT);
     int SetFilePath(const char* filepathprefix, const char* extension, int videoch = SVL_LEFT);
+    void EnableTimestamps(bool enable = true) { TimestampsEnabled = enable; }
     void Pause() { CaptureLength = 0; }
     void Record(int frames = -1) { CaptureLength = frames; }
     void SetDistanceIntensityRatio(float ratio) { DistanceScaling = ratio; }
@@ -58,6 +59,7 @@ protected:
     virtual int Release();
 
 private:
+    bool TimestampsEnabled;
     svlSampleImageRGB ImageBuffer;
     float DistanceScaling;
     svlImageFileTypeList ImageTypeList;

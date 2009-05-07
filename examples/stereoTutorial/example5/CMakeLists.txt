@@ -41,16 +41,16 @@ IF(CISST_SVL_HAS_X11 AND CISST_SVL_HAS_ZLIB)
         FIND_PACKAGE(OpenCV)
         INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS})
         LINK_DIRECTORIES(${OpenCV_LINK_DIRECTORIES})
-        TARGET_LINK_LIBRARIES(stereoTutorialCameraViewer ${OpenCV_LIBRARIES})
+        TARGET_LINK_LIBRARIES(stereoTutorialVideoPlayer ${OpenCV_LIBRARIES})
     ENDIF(CISST_SVL_HAS_OPENCV)
 
     # Link each executable against the X11 library
     FIND_PACKAGE(X11 REQUIRED)
-    TARGET_LINK_LIBRARIES(stereoTutorialCameraViewer ${X11_LIBRARIES})
+    TARGET_LINK_LIBRARIES(stereoTutorialVideoPlayer ${X11_LIBRARIES})
 
     IF(CISST_SVL_HAS_LIBDC1394)
         # Also link the examples using live camera source against the DC1394 library if enabled
-        TARGET_LINK_LIBRARIES(stereoTutorialCameraViewer dc1394)
+        TARGET_LINK_LIBRARIES(stereoTutorialVideoPlayer dc1394)
     ENDIF(CISST_SVL_HAS_LIBDC1394)
 
     CISST_REQUIRES("stereoTutorialVideoPlayer" "cisstCommon;cisstVector;cisstOSAbstraction;cisstImage;cisstStereoVision")

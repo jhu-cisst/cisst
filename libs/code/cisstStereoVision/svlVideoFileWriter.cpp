@@ -35,16 +35,12 @@ http://www.cisst.org/cisst/license.txt.
 
 svlVideoFileWriter::svlVideoFileWriter() :
     svlFilterBase(),
-    CaptureLength(-1), // Continuous saving by default
-    YUVBuffer(0),
-    YUVBufferSize(0),
-    CompressedBuffer(0),
-    CompressedBufferSize(0),
-    CompressedPartOffset(0),
-    CompressedPartSize(0)
+    CaptureLength(-1) // Continuous saving by default
 {
     AddSupportedType(svlTypeImageRGB, svlTypeImageRGB);
     AddSupportedType(svlTypeImageRGBStereo, svlTypeImageRGBStereo);
+
+    SaveBuffer[0] = SaveBuffer[1] = 0;
 }
 
 svlVideoFileWriter::~svlVideoFileWriter()
@@ -56,16 +52,19 @@ int svlVideoFileWriter::Initialize(svlSample* inputdata)
 {
     svlSampleImageBase* img = dynamic_cast<svlSampleImageBase*>(inputdata);
 
+    SaveInitialized = false;
+
     Release();
 
     if (VideoFile.size() < img->GetVideoChannels()) return SVL_FAIL;
 
     const std::string filestartmarker = "CisstSVLVideo\r\n";
     int writelen;
-    unsigned int uivalue;
-    unsigned int maxdatasize = 0;
+    unsigned int i, uivalue;
 
-    for (unsigned int i = 0; i < img->GetVideoChannels(); i ++) {
+    SaveBufferSize = 0;
+
+    for (i = 0; i < img->GetVideoChannels(); i ++) {
         if (Disabled[i]) continue;
 
         VideoFile[i] = fopen(FilePath[i].c_str(), "wb");
@@ -84,22 +83,35 @@ int svlVideoFileWriter::Initialize(svlSample* inputdata)
         uivalue = img->GetHeight(i);
         writelen = static_cast<int>(fwrite(&uivalue, sizeof(unsigned int), 1, VideoFile[i]));
 	    if (writelen < 1) goto labError;
+        // Compute YUV buffer size
+        YUVBufferSize[i] = img->GetWidth(i) * img->GetHeight(i) * 2;
+        // Allocate YUV buffer
+        YUVBuffer[i] = new unsigned char[YUVBufferSize[i]];
 
-        if (maxdatasize < img->GetDataSize(i)) maxdatasize = img->GetDataSize(i);
+        // Compute data size and add some additional room for the compressor
+        CompressedBufferSize[i] = img->GetDataSize(i) + img->GetDataSize(i) / 100 + 4096;
+        // Allocate compression buffer
+        CompressedBuffer[i] = new unsigned char[CompressedBufferSize[i]];
+
+        SaveBufferUsed[i] = 0;
+        SaveBufferOffset[i] = SaveBufferSize;
+        SaveBufferSize += CompressedBufferSize[i];
     }
-
-    // Compute YUV buffer size
-    YUVBufferSize = maxdatasize * 2 / 3;
-    // Allocate YUV buffer
-    YUVBuffer = new unsigned char[YUVBufferSize];
-
-    // Compute data size and add some additional room for the compressor
-    CompressedBufferSize = maxdatasize + maxdatasize / 100 + 4096;
-    // Allocate compression buffer
-    CompressedBuffer = new unsigned char[CompressedBufferSize];
 
     // Initialize video frame counter
     VideoFrameCounter = 0;
+
+    // Initialize data saving double buffer
+    SaveBuffer[0] = new unsigned char[SaveBufferSize];
+    SaveBuffer[1] = new unsigned char[SaveBufferSize];
+    SaveBufferUsedID = 0;
+
+    // Start data saving thread
+    SaveInitialized = false;
+    KillSaveThread = false;
+    SaveThread.Create<svlVideoFileWriter, unsigned int>(this, &svlVideoFileWriter::SaveProc, img->GetVideoChannels());
+    SaveInitEvent.Wait();
+    if (SaveInitialized == false) goto labError;
 
     OutputData = inputdata;
 
@@ -115,10 +127,10 @@ int svlVideoFileWriter::OnStart(unsigned int procCount)
     svlSampleImageBase* img = dynamic_cast<svlSampleImageBase*>(OutputData);
 
     if (VideoFrameCounter == 0) {
-        CompressedPartOffset = new unsigned int[procCount];
-        CompressedPartSize = new unsigned int[procCount];
-
         for (unsigned int i = 0; i < img->GetVideoChannels(); i ++) {
+            CompressedPartOffset[i] = new unsigned int[procCount];
+            CompressedPartSize[i] = new unsigned int[procCount];
+
             if (Disabled[i]) continue;
 
             // Write "thread count"
@@ -137,11 +149,15 @@ int svlVideoFileWriter::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata)
     // Do nothing if recording is paused
     if (CaptureLength == 0) return SVL_OK;
 
+    // Check for video saving errors
+    if (SaveThreadError) return SVL_FAIL;
+
     svlSampleImageBase* img = dynamic_cast<svlSampleImageBase*>(OutputData);
     const std::string framestartmarker = "\r\nFrame\r\n";
     const unsigned int videochannels = img->GetVideoChannels();
     const unsigned int procid = procInfo->id;
     const unsigned int proccount = procInfo->count;
+    const unsigned int savebufferid = SaveBufferUsedID ? 0 : 1;
     const double timestamp = inputdata->GetTimestamp();
     unsigned int i, j, start, end, size, width, height, offset;
     unsigned long comprsize;
@@ -150,33 +166,28 @@ int svlVideoFileWriter::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata)
     for (i = 0; i < videochannels; i ++) {
         if (Disabled[i]) continue;
 
-        _OnSingleThread(procInfo)
-        {
-            // Convert RGB to YUV422 planar format
-            RGB24toYUV422P(reinterpret_cast<unsigned char*>(img->GetPointer(i)),
-                           YUVBuffer,
-                           img->GetWidth(i) * img->GetHeight(i));
-        }
-
-        _SynchronizeThreads(procInfo);
-
         // Compute part size and offset
         width = img->GetWidth(i);
         height = img->GetHeight(i);
         size = height / proccount + 1;
-        comprsize = CompressedBufferSize / proccount;
+        comprsize = CompressedBufferSize[i] / proccount;
         start = procid * size;
-        if (start >= height) break;
+        if (start >= height) continue;
         end = start + size;
         if (end > height) end = height;
         offset = start * width;
         size = width * (end - start);
-        CompressedPartOffset[procid] = procid * comprsize;
+        CompressedPartOffset[i][procid] = procid * comprsize;
+
+        // Convert RGB to YUV422 planar format
+        RGB24toYUV422P(reinterpret_cast<unsigned char*>(img->GetPointer(i)) + offset * 3,
+                       YUVBuffer[i] + offset * 2,
+                       size);
 
         // Compress part
-        err = compress2(CompressedBuffer + CompressedPartOffset[procid],
+        err = compress2(CompressedBuffer[i] + CompressedPartOffset[i][procid],
                         &comprsize,
-                        YUVBuffer + offset * 2,
+                        YUVBuffer[i] + offset * 2,
                         size * 2,
                         1); // compression level [0,9]
         if (err != Z_OK) {
@@ -184,52 +195,49 @@ int svlVideoFileWriter::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata)
             break;
         }
 
-        CompressedPartSize[procid] = comprsize;
-
-        _SynchronizeThreads(procInfo);
-
-        _OnSingleThread(procInfo)
-        {
-            // Write "frame start marker"
-            if (static_cast<int>(fwrite(framestartmarker.c_str(),
-                                        1,
-                                        framestartmarker.length(),
-                                        VideoFile[i])) < 1) {
-                ret = SVL_FAIL;
-                break;
-            }
-
-            // Write "time stamp"
-            if (static_cast<int>(fwrite(&timestamp,
-                                        sizeof(double),
-                                        1,
-                                        VideoFile[i])) < 1) {
-                ret = SVL_FAIL;
-                break;
-            }
-
-            for (j = 0; j < proccount; j ++) {
-                // Write "compressed part size"
-	            if (static_cast<int>(fwrite(&(CompressedPartSize[j]),
-                                            sizeof(unsigned int),
-                                            1,
-                                            VideoFile[i])) < 1) {
-                    ret = SVL_FAIL;
-                    break;
-                }
-                // Write compressed frame
-	            if (fwrite(CompressedBuffer + CompressedPartOffset[j],
-                           1,
-                           CompressedPartSize[j],
-                           VideoFile[i]) < CompressedPartSize[j]) ret = SVL_FAIL;
-            }
-        }
+        CompressedPartSize[i][procid] = comprsize;
     }
 
     _SynchronizeThreads(procInfo);
 
     _OnSingleThread(procInfo)
     {
+        WriteDoneEvent.Wait();
+
+        for (i = 0; i < videochannels; i ++) {
+            SaveBufferUsed[i] = 0;
+
+            // Add "frame start marker"
+            memcpy(SaveBuffer[savebufferid] + SaveBufferOffset[i] + SaveBufferUsed[i],
+                   framestartmarker.c_str(),
+                   framestartmarker.length());
+            SaveBufferUsed[i] += framestartmarker.length();
+
+            // Add "time stamp"
+            memcpy(SaveBuffer[savebufferid] + SaveBufferOffset[i] + SaveBufferUsed[i],
+                   &timestamp,
+                   sizeof(double));
+            SaveBufferUsed[i] += sizeof(double);
+
+            for (j = 0; j < proccount; j ++) {
+                // Add "compressed part size"
+                memcpy(SaveBuffer[savebufferid] + SaveBufferOffset[i] + SaveBufferUsed[i],
+                       &(CompressedPartSize[i][j]),
+                       sizeof(unsigned int));
+                SaveBufferUsed[i] += sizeof(unsigned int);
+
+                // Add compressed frame
+                memcpy(SaveBuffer[savebufferid] + SaveBufferOffset[i] + SaveBufferUsed[i],
+                       CompressedBuffer[i] + CompressedPartOffset[i][j],
+                       CompressedPartSize[i][j]);
+                SaveBufferUsed[i] += CompressedPartSize[i][j];
+            }
+        }
+
+        // Signal data saving thread to start writing
+        SaveBufferUsedID = savebufferid;
+        NewFrameEvent.Raise();
+
         if (CaptureLength > 0) CaptureLength --;
     }
 
@@ -238,29 +246,45 @@ int svlVideoFileWriter::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata)
 
 int svlVideoFileWriter::Release()
 {
+    // Stop data saving thread
+    KillSaveThread = true;
+    if (SaveInitialized) {
+        NewFrameEvent.Raise();
+        SaveThread.Wait();
+    }
+
     for (unsigned int i = 0; i < VideoFile.size(); i ++) {
         if (VideoFile[i]) fclose(VideoFile[i]);
         VideoFile[i] = 0;
+
+        if (YUVBuffer[i]) {
+            delete [] YUVBuffer[i];
+            YUVBuffer[i] = 0;
+        }
+        if (CompressedBuffer[i]) {
+            delete [] CompressedBuffer[i];
+            CompressedBuffer[i] = 0;
+        }
+        if (CompressedPartOffset[i]) {
+            delete [] CompressedPartOffset[i];
+            CompressedPartOffset[i] = 0;
+        }
+        if (CompressedPartSize[i]) {
+            delete [] CompressedPartSize[i];
+            CompressedPartSize[i] = 0;
+        }
+        YUVBufferSize[i] = 0;
+        CompressedBufferSize[i] = 0;
     }
 
-    if (YUVBuffer) {
-        delete [] YUVBuffer;
-        YUVBuffer = 0;
+    if (SaveBuffer[0]) {
+        delete [] SaveBuffer[0];
+        SaveBuffer[0] = 0;
     }
-    if (CompressedBuffer) {
-        delete [] CompressedBuffer;
-        CompressedBuffer = 0;
+    if (SaveBuffer[1]) {
+        delete [] SaveBuffer[1];
+        SaveBuffer[1] = 0;
     }
-    if (CompressedPartOffset) {
-        delete [] CompressedPartOffset;
-        CompressedPartOffset = 0;
-    }
-    if (CompressedPartSize) {
-        delete [] CompressedPartSize;
-        CompressedPartSize = 0;
-    }
-    YUVBufferSize = 0;
-    CompressedBufferSize = 0;
 
     return SVL_OK;
 }
@@ -305,6 +329,10 @@ int svlVideoFileWriter::DialogFilePath(unsigned int videoch)
 #else
     std::cout << "Enter filename for [channel #" << videoch << "]: ";
     std::cin >> FilePath[videoch];
+    if (FilePath[videoch].rfind(".cvi") != FilePath[videoch].length() - 4) {
+        if (FilePath[videoch].at(FilePath[videoch].length() - 1) == '.') FilePath[videoch] += "cvi";
+        else FilePath[videoch] += ".cvi";
+    }
 #endif
 
     return SVL_FAIL;
@@ -343,12 +371,59 @@ int svlVideoFileWriter::UpdateStreamCount(unsigned int count)
         VideoFile.resize(count);
         Disabled.resize(count);
         FilePath.resize(count);
+        SaveBufferUsed.resize(count);
+        SaveBufferOffset.resize(count);
+        YUVBuffer.resize(count);
+        YUVBufferSize.resize(count);
+        CompressedBuffer.resize(count);
+        CompressedBufferSize.resize(count);
+        CompressedPartOffset.resize(count);
+        CompressedPartSize.resize(count);
         for (unsigned int i = prevsize; i < count; i ++) {
             VideoFile[i] = 0;
             Disabled[i] = false;
+            SaveBufferUsed[i] = 0;
+            SaveBufferOffset[i] = 0;
+            YUVBuffer[i] = 0;
+            CompressedBuffer[i] = 0;
+            CompressedPartOffset[i] = 0;
+            CompressedPartSize[i] = 0;
         }
     }
 
     return SVL_OK;
 }
+
+void* svlVideoFileWriter::SaveProc(unsigned int videochannels)
+{
+    SaveThreadError = false;
+    SaveInitialized = true;
+    SaveInitEvent.Raise();
+    WriteDoneEvent.Raise();
+
+    unsigned int i;
+
+    while (1) {
+        // Wait for new frame to arrive
+        NewFrameEvent.Wait();
+        if (KillSaveThread || SaveThreadError) break;
+
+        // Save frame(s)
+        for (i = 0; i < videochannels; i ++) {
+            if (fwrite(SaveBuffer[SaveBufferUsedID] + SaveBufferOffset[i],
+                       1,
+                       SaveBufferUsed[i],
+                       VideoFile[i]) < SaveBufferUsed[i]) {
+                // Write error
+                SaveThreadError = true;
+                return this;
+            }
+        }
+        // Signal that write is done
+        WriteDoneEvent.Raise();
+    }
+
+    return this;
+}
+
 

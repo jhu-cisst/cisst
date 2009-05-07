@@ -27,6 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <map>
 
 #include <cisstOSAbstraction/osaThread.h>
+#include <cisstOSAbstraction/osaTimeServer.h>
 #include <cisstStereoVision/svlStreamDefs.h>
 #include <cisstStereoVision/svlSyncPoint.h>
 
@@ -236,6 +237,8 @@ public:
 
 private:
     svlStreamControlMultiThread();
+
+    double GetAbsoluteTime(osaTimeServer* timeserver);
 
     unsigned int ThreadID;
     unsigned int ThreadCount;
