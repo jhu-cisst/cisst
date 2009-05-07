@@ -27,7 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 #define UI3_DAVINCI 3
 
 // change this based on your configuration
-#define UI3_INPUT UI3_OMNI1
+#define UI3_INPUT UI3_NO_INPUT
 
 #include <cisstOSAbstraction/osaThreadedLogFile.h>
 #include <cisstOSAbstraction/osaSleep.h>

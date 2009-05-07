@@ -251,12 +251,13 @@ int CameraViewer(bool save, bool interpolation, int width, int height)
     if (save == true) {
         viewer_videowriter.DialogFilePath(SVL_LEFT);
         viewer_videowriter.DialogFilePath(SVL_RIGHT);
+        viewer_videowriter.SetCompressionLevel(1); // 0-9
         viewer_videowriter.Pause();
     }
 
     // setup image writer
-    viewer_imagewriter.SetFilePath("./images/left_", "bmp", SVL_LEFT);
-    viewer_imagewriter.SetFilePath("./images/right_", "bmp", SVL_RIGHT);
+    viewer_imagewriter.SetFilePath("left_", "bmp", SVL_LEFT);
+    viewer_imagewriter.SetFilePath("right_", "bmp", SVL_RIGHT);
     viewer_imagewriter.EnableTimestamps();
     viewer_imagewriter.Pause();
 

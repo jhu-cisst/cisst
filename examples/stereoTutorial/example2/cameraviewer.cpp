@@ -212,7 +212,7 @@ int CameraViewer(bool save, bool interpolation, int width, int height)
     // setup writer
     if (save == true) {
         viewer_writer.DialogFilePath();
-        cout << endl;
+        viewer_writer.SetCompressionLevel(1); // 0-9
         viewer_writer.Pause();
     }
 

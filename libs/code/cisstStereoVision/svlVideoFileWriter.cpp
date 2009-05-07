@@ -35,7 +35,8 @@ http://www.cisst.org/cisst/license.txt.
 
 svlVideoFileWriter::svlVideoFileWriter() :
     svlFilterBase(),
-    CaptureLength(-1) // Continuous saving by default
+    CaptureLength(-1), // Continuous saving by default
+    CompressionLevel(1)
 {
     AddSupportedType(svlTypeImageRGB, svlTypeImageRGB);
     AddSupportedType(svlTypeImageRGBStereo, svlTypeImageRGBStereo);
@@ -189,7 +190,7 @@ int svlVideoFileWriter::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata)
                         &comprsize,
                         YUVBuffer[i] + offset * 2,
                         size * 2,
-                        1); // compression level [0,9]
+                        CompressionLevel);
         if (err != Z_OK) {
             ret = SVL_FAIL;
             break;
@@ -360,6 +361,11 @@ int svlVideoFileWriter::SetFilePath(const std::string filepath, unsigned int vid
     FilePath[videoch] = filepath;
 
     return SVL_OK;
+}
+
+void svlVideoFileWriter::SetCompressionLevel(unsigned int level)
+{
+    CompressionLevel = std::min(level, 9u);
 }
 
 int svlVideoFileWriter::UpdateStreamCount(unsigned int count)

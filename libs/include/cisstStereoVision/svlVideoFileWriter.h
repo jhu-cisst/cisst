@@ -40,6 +40,7 @@ public:
 
     int Disable(bool disable, unsigned int videoch = SVL_LEFT);
     int SetFilePath(const std::string filepath, unsigned int videoch = SVL_LEFT);
+    void SetCompressionLevel(unsigned int level); // 0 (no compression) - 9 (maximum compression)
 
     void Pause() { CaptureLength = 0; }
     void Record(int frames = -1) { CaptureLength = frames; }
@@ -57,6 +58,7 @@ private:
     vctDynamicVector<bool> Disabled;
     vctDynamicVector<std::string> FilePath;
 
+    unsigned int CompressionLevel;
     vctDynamicVector<unsigned char*> YUVBuffer;
     vctDynamicVector<unsigned int> YUVBufferSize;
     vctDynamicVector<unsigned char*> CompressedBuffer;
