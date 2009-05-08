@@ -119,7 +119,7 @@ protected:
     virtual void OnStop();
     virtual int Release();
 
-    void SetFilterToSource(svlStreamType output);
+    void SetFilterToSource(svlStreamType output, bool autotimestamp = true);
     int AddSupportedType(svlStreamType input, svlStreamType output);
     void UpdateOutputFormat();
     int IsDataValid(svlStreamType type, svlSample* data);
@@ -130,6 +130,7 @@ private:
     bool Running;
     bool OutputSampleModified;
     bool OutputFormatModified;
+    bool AutoTimestamp;
     double PrevInputTimestamp;
     _StreamTypeMap SupportedTypes;
     _OutputBranchList OutputBranches;

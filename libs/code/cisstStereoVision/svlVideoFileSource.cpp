@@ -52,11 +52,11 @@ svlVideoFileSource::svlVideoFileSource(bool stereo) :
 #endif
 
     if (stereo) {
-        SetFilterToSource(svlTypeImageRGBStereo);
+        SetFilterToSource(svlTypeImageRGBStereo, false);
         OutputData = new svlSampleImageRGBStereo;
     }
     else {
-        SetFilterToSource(svlTypeImageRGB);
+        SetFilterToSource(svlTypeImageRGB, false);
         OutputData = new svlSampleImageRGB;
     }
 
@@ -137,7 +137,13 @@ int svlVideoFileSource::Initialize(svlSample* inputdata)
     // Try to open as a CISST video
         while (opened == false) {
             VideoFile[i] = fopen(FilePath[i].c_str(), "rb");
-            if (VideoFile[i] == 0) break;
+            if (VideoFile[i] == 0) {
+                // Try adding the "cvi" extension
+                if (FilePath[i].at(FilePath[i].length() - 1) == '.') FilePath[i] += "cvi";
+                else FilePath[i] += ".cvi";
+                VideoFile[i] = fopen(FilePath[i].c_str(), "rb");
+                if (VideoFile[i] == 0) break;
+            }
 
 	        // Read "file start marker"
             readlen = static_cast<int>(fread(strbuffer, filestartmarker.length(), 1, VideoFile[i]));
@@ -230,7 +236,8 @@ int svlVideoFileSource::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata)
     svlSampleImageBase* img = dynamic_cast<svlSampleImageBase*>(OutputData);
     unsigned int videochannels = img->GetVideoChannels();
     unsigned char* imptr;
-    unsigned int idx, datasize;
+    unsigned int idx, datasize, timestampcount = 0;
+    double timestampsum = 0;
     int ret = SVL_FAIL;
 
 #if (CISST_SVL_HAS_ZLIB == ON)
@@ -286,6 +293,10 @@ int svlVideoFileSource::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata)
                     timespan = (timestamp - FirstTimestamp[idx]) - Timer.GetElapsedTime();
                     if (timespan > 0.0) osaSleep(timespan);
                 }
+                
+                // Saving timestamp in order to be able to write it into the sample later
+                timestampsum += timestamp;
+                timestampcount ++;
 
                 offset = 0;
                 for (i = 0; i < FilePartCount[idx]; i ++) {
@@ -357,6 +368,9 @@ int svlVideoFileSource::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata)
         if (ret == SVL_FAIL) break;
     }
 
+    // Set timestamp to the one stored in the video file
+    if (timestampcount > 0) OutputData->SetTimestamp(timestampsum / timestampcount);
+
     return ret;
 }
 
@@ -424,6 +438,38 @@ int svlVideoFileSource::DialogFilePath(unsigned int videoch)
 
     svlSampleImageBase* img = dynamic_cast<svlSampleImageBase*>(OutputData);
     if (videoch >= img->GetVideoChannels()) return SVL_WRONG_CHANNEL;
+
+#if (CISST_OS == CISST_WINDOWS)
+    OPENFILENAME ofn;
+    char path[2048], title[256];
+    char filter[] = "All Video Files (*.cvi; *.avi) *.cvi;*.avi CISST Video Files (*.cvi) *.cvi AVI Files (*.avi) *.avi All Files (*.*) *.* ";
+
+    memset(path, 0, 2048);
+    sprintf(title, "Open Video File for [channel #%d]", videoch);
+    filter[30] = filter[42] = filter[68] = filter[74] = filter[92] = filter[98] = filter[114] = filter[118] = 0;
+
+    memset(&ofn, 0, sizeof(OPENFILENAME));
+    ofn.lStructSize = sizeof(OPENFILENAME);
+    ofn.hwndOwner = GetForegroundWindow();
+    ofn.lpstrFilter = filter;
+    ofn.nFilterIndex = 1;
+    ofn.lpstrFile= path;
+    ofn.nMaxFile = 2048;
+    ofn.Flags = OFN_ENABLESIZING | OFN_NOCHANGEDIR | OFN_FILEMUSTEXIST;
+    ofn.lpstrTitle = title;
+
+    // Removing the keyboard focus from the parent window
+    SetForegroundWindow(GetDesktopWindow());
+
+    if (GetOpenFileName(&ofn)) {
+        FilePath[videoch] = path;
+        return SVL_OK;
+    }
+#else
+    std::cout << "Enter filename for [channel #" << videoch << "]: ";
+    std::cin >> FilePath[videoch];
+#endif
+
 
     std::cout << "Enter filename for [channel #" << videoch << "]: ";
     std::cin >> FilePath[videoch];

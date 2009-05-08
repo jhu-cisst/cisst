@@ -238,6 +238,7 @@ int CameraViewer(bool save, bool interpolation, int width, int height)
     }
     viewer_window.SetCallback(&viewer_window_cb);
     viewer_window.SetTitleText("Camera Viewer");
+    viewer_window.EnableTimestampInTitle();
 
     // chain filters to pipeline
     if (viewer_stream.Trunk().Append(&viewer_source) != SVL_OK) goto labError;

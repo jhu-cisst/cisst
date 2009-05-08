@@ -41,11 +41,11 @@ http://www.cisst.org/cisst/license.txt.
 using namespace std;
 
 
-////////////////////
-//  Video Player  //
-////////////////////
+///////////////////////
+//  Video Converter  //
+///////////////////////
 
-int VideoPlayer(const std::string pathname)
+int VideoConverter(const std::string source, const std::string destination)
 {
     // instantiating SVL stream and filters
     svlStreamManager viewer_stream(1);
@@ -53,7 +53,7 @@ int VideoPlayer(const std::string pathname)
     svlImageWindow viewer_window;
 
     // setup source
-    if (viewer_source.SetFilePath(pathname) != SVL_OK) goto labError;
+    if (viewer_source.SetFilePath(source) != SVL_OK) goto labError;
 
     // setup image window
     viewer_window.SetTitleText("Video Player");
@@ -178,19 +178,20 @@ int ParseNumber(char* string, unsigned int maxlen)
 
 int main(int argc, char** argv)
 {
-    cerr << endl << "stereoTutorialVideoPlayer - cisstStereoVision example by Balazs Vagvolgyi" << endl;
+    cerr << endl << "stereoTutorialVideoConverter - cisstStereoVision example by Balazs Vagvolgyi" << endl;
     cerr << "See http://www.cisst.org/cisst for details." << endl << endl;
 
-    if (argc < 2) {
+    if (argc < 3) {
         cerr << "Command line format:" << endl;
-        cerr << "     stereoTutorialVideoPlayer <pathname>" << endl;
+        cerr << "     stereoTutorialVideoConverter <source_pathname>  <destination_pathname>" << endl;
         cerr << "Example:" << endl;
-        cerr << "     stereoTutorialVideoPlayer video.cvi" << endl;
+        cerr << "     stereoTutorialVideoConverter video.avi video.cvi" << endl;
+        cerr << "     stereoTutorialVideoConverter video.cvi video.avi" << endl;
         cerr << "Quit" << endl << endl;
         return 1;
     }
 
-    VideoPlayer(argv[1]);
+    VideoConverter(argv[1], argv[2]);
 
     cerr << "Quit" << endl << endl;
     return 1;

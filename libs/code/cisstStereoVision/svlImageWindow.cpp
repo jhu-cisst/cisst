@@ -36,6 +36,7 @@ http://www.cisst.org/cisst/license.txt.
 /***************************************/
 
 svlWindowManagerBase::svlWindowManagerBase(unsigned int numofwins) :
+    Timestamp(-1.0),
     NumOfWins(numofwins),
     Width(0),
     Height(0),
@@ -48,7 +49,6 @@ svlWindowManagerBase::svlWindowManagerBase(unsigned int numofwins) :
 
 svlWindowManagerBase::~svlWindowManagerBase()
 {
-    Destroy();
     if (Width) delete [] Width;
     if (Height) delete [] Height;
     if (PosX) delete [] PosX;
@@ -116,12 +116,6 @@ int svlWindowManagerBase::WaitForInitEvent()
     return 0;
 }
 
-int svlWindowManagerBase::DoModal(bool CMN_UNUSED(show), bool CMN_UNUSED(fullscreen))
-{
-    if (Width == 0 || Height == 0) SetClientSize(320, 240, 0);
-    return 0;
-}
-
 void svlWindowManagerBase::OnNewFrame(unsigned int frameid)
 {
     if (Callback) Callback->OnNewFrame(frameid);
@@ -158,16 +152,18 @@ void* svlWindowManagerThreadProc::Proc(svlImageWindow* obj)
 /*** svlImageWindow class *******/
 /********************************/
 
-svlImageWindow::svlImageWindow() : svlFilterBase()
+svlImageWindow::svlImageWindow() :
+    svlFilterBase(),
+    WindowManager(0),
+    Thread(0),
+    ThreadProc(0),
+    Callback(0),
+    FullScreenFlag(false),
+    PositionSetFlag(false),
+    TimestampEnabled(false)
 {
     AddSupportedType(svlTypeImageRGB, svlTypeImageRGB);
     AddSupportedType(svlTypeImageRGBStereo, svlTypeImageRGBStereo);
-    WindowManager = 0;
-    Thread = 0;
-    ThreadProc = 0;
-    Callback = 0;
-    FullScreenFlag = false;
-    PositionSetFlag = false;
 }
 
 svlImageWindow::~svlImageWindow()
@@ -193,6 +189,12 @@ void svlImageWindow::SetWindowPosition(int x, int y, unsigned int videoch)
 void svlImageWindow::SetTitleText(const std::string title)
 {
     Title = title;
+}
+
+void svlImageWindow::EnableTimestampInTitle(bool enable)
+{
+    if (enable) TimestampEnabled = 1; // display timestamp
+    else if (TimestampEnabled == 1) TimestampEnabled = -1; // restore original title
 }
 
 int svlImageWindow::Initialize(svlSample* inputdata)
@@ -272,6 +274,11 @@ int svlImageWindow::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata)
 
     _ParallelLoop(procInfo, idx, videochannels)
     {
+        if (TimestampEnabled == 1) WindowManager->SetTimestamp(inputdata->GetTimestamp());
+        else if (TimestampEnabled == -1) {
+            WindowManager->SetTimestamp(-1.0);
+            TimestampEnabled = 0;
+        }
         WindowManager->DrawImageThreadSafe(reinterpret_cast<unsigned char*>(img->GetPointer(idx)), img->GetDataSize(idx), idx);
     }
 

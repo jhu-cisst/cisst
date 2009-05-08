@@ -67,7 +67,7 @@ int CWin32Window::Create(unsigned int width, unsigned int height, bool show,
         if (titleid >= 0) ostring << title << "svlImageWindow #" << titleid;
         else ostring << "svlImageWindow";
     }
-    std::string titletext(ostring.str());
+    Title = ostring.str();
 
     // Registering window class
     WNDCLASSEX wcex;
@@ -107,7 +107,7 @@ int CWin32Window::Create(unsigned int width, unsigned int height, bool show,
     // Perform application initialization:
     if (!borderless) {
         hWnd = CreateWindow(classnametext,
-                            titletext.c_str(),
+                            Title.c_str(),
                             WS_OVERLAPPED,              // style: non-resizable, no system menu
                             blposx,                     // window position [x]
                             blposy,                     // window position [y]
@@ -120,7 +120,7 @@ int CWin32Window::Create(unsigned int width, unsigned int height, bool show,
     }
     else {
         hWnd = CreateWindow(classnametext,
-                            titletext.c_str(),
+                            Title.c_str(),
                             WS_POPUP,                   // style: non-resizable, no system menu, no border
                             blposx,                     // window position [x]
                             blposy,                     // window position [y]
@@ -172,6 +172,16 @@ int CWin32Window::Show(bool show)
     return -1;
 }
 
+void CWin32Window::GetTitle(std::string & title)
+{
+    title = Title;
+}
+
+void CWin32Window::SetTitle(const std::string title)
+{
+    SetWindowText(hWnd, title.c_str());
+}
+
 LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 {
 	switch (message) {
@@ -216,9 +226,6 @@ CWin32WindowManager::~CWin32WindowManager()
 
 int CWin32WindowManager::DoModal(bool show, bool fullscreen)
 {
-    // calling default implementation
-    svlWindowManagerBase::DoModal(show, fullscreen);
-
     Destroy();
 
     unsigned int i, posx = 0;
@@ -347,6 +354,24 @@ void CWin32WindowManager::DrawImageThreadSafe(unsigned char* buffer, unsigned in
 
         csImage[winid].Leave();
         // Critical section: ends
+
+        // Display timestamp if requested
+        if (Timestamp > 0.0) {
+            std::string title;
+            Windows[winid]->GetTitle(title);
+            char timestampstring[32];
+            sprintf(timestampstring, " (timestamp=%.3f)", Timestamp);
+            title += timestampstring;
+            Windows[winid]->SetTitle(title);
+        }
+        else {
+            if (Timestamp < 0.0) {
+                // Restore original timestamp
+                std::string title;
+                Windows[winid]->GetTitle(title);
+                Windows[winid]->SetTitle(title);
+            }
+        }
 
         // force update
         RECT rect;

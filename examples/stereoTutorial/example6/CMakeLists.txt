@@ -34,7 +34,7 @@ ENDIF(WIN32)
 
 IF(CISST_SVL_HAS_X11 AND CISST_SVL_HAS_ZLIB)
 
-    ADD_EXECUTABLE(stereoTutorialVideoConverter videoplayer.cpp)
+    ADD_EXECUTABLE(stereoTutorialVideoConverter videoconverter.cpp)
 
     IF(CISST_SVL_HAS_OPENCV)
         # Link each example against the OpenCV library if enabled

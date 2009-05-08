@@ -40,7 +40,7 @@ svlStreamBranchSource::svlStreamBranchSource(svlStreamType type) : svlFilterBase
     switch (type) {
         case svlTypeImageRGB:
         {
-            SetFilterToSource(svlTypeImageRGB);
+            SetFilterToSource(svlTypeImageRGB, false);
             for (i = 0; i < SMPSRC_BUFFERS; i ++) {
                 DataBuffer[i] = new svlSampleImageRGB;
             }
@@ -49,7 +49,7 @@ svlStreamBranchSource::svlStreamBranchSource(svlStreamType type) : svlFilterBase
 
         case svlTypeImageRGBStereo:
         {
-            SetFilterToSource(svlTypeImageRGBStereo);
+            SetFilterToSource(svlTypeImageRGBStereo, false);
             for (i = 0; i < SMPSRC_BUFFERS; i ++) {
                 DataBuffer[i] = new svlSampleImageRGBStereo;
             }
@@ -58,7 +58,7 @@ svlStreamBranchSource::svlStreamBranchSource(svlStreamType type) : svlFilterBase
 
         case svlTypeImageMono8:
         {
-            SetFilterToSource(svlTypeImageMono8);
+            SetFilterToSource(svlTypeImageMono8, false);
             for (i = 0; i < SMPSRC_BUFFERS; i ++) {
                 DataBuffer[i] = new svlSampleImageMono8;
             }
@@ -67,7 +67,7 @@ svlStreamBranchSource::svlStreamBranchSource(svlStreamType type) : svlFilterBase
 
         case svlTypeImageMono8Stereo:
         {
-            SetFilterToSource(svlTypeImageMono8Stereo);
+            SetFilterToSource(svlTypeImageMono8Stereo, false);
             for (i = 0; i < SMPSRC_BUFFERS; i ++) {
                 DataBuffer[i] = new svlSampleImageMono8Stereo;
             }
@@ -76,7 +76,7 @@ svlStreamBranchSource::svlStreamBranchSource(svlStreamType type) : svlFilterBase
 
         case svlTypeImageMono16:
         {
-            SetFilterToSource(svlTypeImageMono16);
+            SetFilterToSource(svlTypeImageMono16, false);
             for (i = 0; i < SMPSRC_BUFFERS; i ++) {
                 DataBuffer[i] = new svlSampleImageMono16;
             }
@@ -85,7 +85,7 @@ svlStreamBranchSource::svlStreamBranchSource(svlStreamType type) : svlFilterBase
 
         case svlTypeImageMono16Stereo:
         {
-            SetFilterToSource(svlTypeImageMono16Stereo);
+            SetFilterToSource(svlTypeImageMono16Stereo, false);
             for (i = 0; i < SMPSRC_BUFFERS; i ++) {
                 DataBuffer[i] = new svlSampleImageMono16Stereo;
             }

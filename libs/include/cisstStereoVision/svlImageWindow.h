@@ -88,20 +88,22 @@ public:
     virtual ~svlWindowManagerBase();
     void SetCallback(svlImageWindowCallbackBase* callback) { Callback = callback; }
     void SetTitleText(const std::string title);
+    void SetTimestamp(double timestamp) { Timestamp = timestamp; }
     int SetClientSize(unsigned int width, unsigned int height, unsigned int winid);
     int SetWindowPosition(int x, int y, unsigned int winid);
     void ResetInitEvent();
     int WaitForInitEvent();
 
     // methods to overwrite
-    virtual int DoModal(bool show, bool fullscreen);
-    virtual void Show(bool CMN_UNUSED(show), int CMN_UNUSED(winid)) {}
-    virtual void DrawImageThreadSafe(unsigned char * CMN_UNUSED(buffer), unsigned int CMN_UNUSED(buffersize), unsigned int CMN_UNUSED(winid)) {}
-    virtual void Destroy() {}
-    virtual void DestroyThreadSafe() {}
+    virtual int DoModal(bool show, bool fullscreen) = 0;
+    virtual void Show(bool show, int winid) = 0;
+    virtual void DrawImageThreadSafe(unsigned char *buffer, unsigned int buffersize, unsigned int winid) = 0;
+    virtual void Destroy() = 0;
+    virtual void DestroyThreadSafe() = 0;
 
 protected:
     std::string Title;
+    double Timestamp;
     unsigned int NumOfWins;
     unsigned int *Width, *Height;
     int *PosX, *PosY;
@@ -130,6 +132,7 @@ public:
     bool GetFullScreen() { return FullScreenFlag; }
     void SetWindowPosition(int x, int y, unsigned int videoch = SVL_LEFT);
     void SetTitleText(const std::string title);
+    void EnableTimestampInTitle(bool enable = true);
     void SetCallback(svlImageWindowCallbackBase* callback) { Callback = callback; }
 
 protected:
@@ -138,6 +141,7 @@ protected:
     virtual int Release();
 
 private:
+    int TimestampEnabled;
     bool FullScreenFlag;
     bool PositionSetFlag;
     int PosX[2], PosY[2];

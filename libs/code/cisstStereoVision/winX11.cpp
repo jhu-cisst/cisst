@@ -61,6 +61,7 @@ CX11WindowManager::CX11WindowManager(unsigned int numofwins) : svlWindowManagerB
     xWindows = 0;
     xGCs = 0;
     xImg = 0;
+    Titles = 0;
     ImageBuffers = 0;
 
     // create drawing critical section and counter
@@ -79,9 +80,6 @@ CX11WindowManager::~CX11WindowManager()
 
 int CX11WindowManager::DoModal(bool show, bool fullscreen)
 {
-    // calling default implementation
-    svlWindowManagerBase::DoModal(show, fullscreen);
-
     Destroy();
     DestroyFlag = false;
 
@@ -128,6 +126,9 @@ int CX11WindowManager::DoModal(bool show, bool fullscreen)
     // create atoms for overriding default window behaviours
     atoms[0] = XInternAtom(xDisplay, "WM_DELETE_WINDOW", False);
     atoms[1] = XInternAtom(xDisplay, "_MOTIF_WM_HINTS", False);
+
+    // create title strings
+    Titles = new std::string[NumOfWins];
 
     // create images
     ImageBuffers = new unsigned char*[NumOfWins];
@@ -213,10 +214,11 @@ int CX11WindowManager::DoModal(bool show, bool fullscreen)
             if (NumOfWins > 0) ostring << Title << "svlImageWindow #" << i;
             else ostring << "svlImageWindow";
         }
-        std::string titletext(ostring.str());
+
+        Titles[i] = ostring.str();
         XSetStandardProperties(xDisplay, xWindows[i],
-                               titletext.c_str(),
-                               titletext.c_str(),
+                               Titles[i].c_str(),
+                               Titles[i].c_str(),
                                None,
                                NULL,
                                0,
@@ -440,6 +442,10 @@ labError:
         delete [] xWindows;
         xWindows = 0;
     }
+    if (Titles) {
+        delete [] Titles;
+        Titles = 0;
+    }
     if (ImageBuffers) {
         delete [] ImageBuffers;
         ImageBuffers = 0;
@@ -488,6 +494,33 @@ void CX11WindowManager::DrawImageThreadSafe(unsigned char* buffer, unsigned int 
         ImageCounter[winid] ++;
     
     csImage[winid].Leave();
+
+    // Display timestamp if requested
+    if (Timestamp > 0.0) {
+        std::string title(Titles[winid]);
+        char timestampstring[32];
+        sprintf(timestampstring, " (timestamp=%.3f)", Timestamp);
+        title += timestampstring;
+        XSetStandardProperties(xDisplay, xWindows[winid],
+                               title.c_str(),
+                               title.c_str(),
+                               None,
+                               NULL,
+                               0,
+                               NULL);
+    }
+    else {
+        if (Timestamp < 0.0) {
+            // Restore original timestamp
+            XSetStandardProperties(xDisplay, xWindows[winid],
+                                   Titles[winid].c_str(),
+                                   Titles[winid].c_str(),
+                                   None,
+                                   NULL,
+                                   0,
+                                   NULL);
+        }
+    }
 }
 
 void CX11WindowManager::Destroy()

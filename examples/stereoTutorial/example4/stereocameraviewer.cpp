@@ -124,7 +124,6 @@ public:
         ImageWriterFilter = 0;
         ShowFramerate = true;
         Recording = false;
-        Snapshots = false;
     }
 
     void OnNewFrame(unsigned int frameid)
@@ -187,16 +186,8 @@ public:
                 case 's':
                 {
                     if (ImageWriterFilter) {
-                        if (Snapshots) {
-                            ImageWriterFilter->Pause();
-                            Snapshots = false;
-                            cout << endl << " >>> Snapshots paused <<<" << endl;
-                        }
-                        else {
-                            ImageWriterFilter->Record(-1);
-                            Snapshots = true;
-                            cout << endl << " >>> Snapshots started <<<" << endl;
-                        }
+                        ImageWriterFilter->Record(1);
+                        cout << endl << " >>> Snapshots saved <<<" << endl;
                     }
                 }
                 break;
@@ -210,7 +201,6 @@ public:
     svlImageFileWriter* ImageWriterFilter;
     svlVideoFileWriter* VideoWriterFilter;
     bool Recording;
-    bool Snapshots;
 
     bool ShowFramerate;
 #ifdef _WIN32
@@ -275,6 +265,7 @@ int CameraViewer(bool save, bool interpolation, int width, int height)
     }
     viewer_window.SetCallback(&viewer_window_cb);
     viewer_window.SetTitleText("Camera Viewer");
+    viewer_window.EnableTimestampInTitle();
 
     // chain filters to pipeline
     if (viewer_stream.Trunk().Append(&viewer_source) != SVL_OK) goto labError;
@@ -335,7 +326,7 @@ int CameraViewer(bool save, bool interpolation, int width, int height)
         if (save == true) {
             cerr << "    SPACE - Video recorder control: Record/Pause" << endl;
         }
-        cerr << "    's'   - Image snapshots control: Record/Pause" << endl;
+        cerr << "    's'   - Take image snapshots" << endl;
         cerr << "  In command window:" << endl;
         cerr << "    '1'   - Adjust LEFT image properties" << endl;
         cerr << "    '2'   - Adjust RIGHT image properties" << endl;

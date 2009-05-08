@@ -803,8 +803,8 @@ void* svlStreamControlMultiThread::Proc(svlStreamManager* baseref)
         if (ThreadID == 0) {
         // Execute only on one thread - BEGIN
 
-            if (filter->OutputData) {
-                // Get timestamp and assign it to the output sample
+            if (filter->OutputData && filter->AutoTimestamp) {
+                // Get fresh timestamp and assign it to the output sample
                 filter->OutputData->SetTimestamp(GetAbsoluteTime(timeserver));
             }
 
@@ -946,6 +946,7 @@ svlFilterBase::svlFilterBase()
     Running = false;
     PrevInputTimestamp = -1.0;
     OutputFormatModified = false;
+    AutoTimestamp = true;
 }
 
 svlFilterBase::~svlFilterBase()
@@ -1022,11 +1023,12 @@ svlFilterBase* svlFilterBase::GetDownstreamFilter()
     return NextFilter;
 }
 
-void svlFilterBase::SetFilterToSource(svlStreamType output)
+void svlFilterBase::SetFilterToSource(svlStreamType output, bool autotimestamp)
 {
     SupportedTypes.clear();
     InputType = svlTypeStreamSource;
     OutputType = output;
+    AutoTimestamp = autotimestamp;
 }
 
 int svlFilterBase::AddSupportedType(svlStreamType input, svlStreamType output)

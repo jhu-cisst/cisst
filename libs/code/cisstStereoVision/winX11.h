@@ -50,6 +50,7 @@ private:
     Window *xWindows;
     GC *xGCs;
     XImage **xImg;
+    std::string *Titles;
     bool DestroyFlag;
     osaThreadSignal *DestroyedSignal;
     osaCriticalSection *csImage;

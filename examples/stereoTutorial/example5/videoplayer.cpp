@@ -53,10 +53,19 @@ int VideoPlayer(const std::string pathname)
     svlImageWindow viewer_window;
 
     // setup source
-    if (viewer_source.SetFilePath(pathname) != SVL_OK) goto labError;
+    if (pathname.empty()) {
+        viewer_source.DialogFilePath();
+    }
+    else {
+        if (viewer_source.SetFilePath(pathname) != SVL_OK) {
+            cerr << endl << "Error while opening file... " << endl;
+            goto labError;
+        }
+    }
 
     // setup image window
     viewer_window.SetTitleText("Video Player");
+    viewer_window.EnableTimestampInTitle();
 
     // chain filters to pipeline
     if (viewer_stream.Trunk().Append(&viewer_source) != SVL_OK) goto labError;
@@ -180,17 +189,13 @@ int main(int argc, char** argv)
 {
     cerr << endl << "stereoTutorialVideoPlayer - cisstStereoVision example by Balazs Vagvolgyi" << endl;
     cerr << "See http://www.cisst.org/cisst for details." << endl << endl;
+    cerr << "Command line format:" << endl;
+    cerr << "     stereoTutorialVideoPlayer [pathname-optional]" << endl;
+    cerr << "Example:" << endl;
+    cerr << "     stereoTutorialVideoPlayer video.cvi" << endl;
 
-    if (argc < 2) {
-        cerr << "Command line format:" << endl;
-        cerr << "     stereoTutorialVideoPlayer <pathname>" << endl;
-        cerr << "Example:" << endl;
-        cerr << "     stereoTutorialVideoPlayer video.cvi" << endl;
-        cerr << "Quit" << endl << endl;
-        return 1;
-    }
-
-    VideoPlayer(argv[1]);
+    if (argc > 1) VideoPlayer(argv[1]);
+    else VideoPlayer("");
 
     cerr << "Quit" << endl << endl;
     return 1;

@@ -41,8 +41,11 @@ public:
     virtual int Show(bool show = true);
     virtual void Destroy();
     HWND GetHandle() { return hWnd; }
+    void GetTitle(std::string & title);
+    void SetTitle(const std::string title);
 
 private:
+    std::string Title;
     HWND hWnd;
     unsigned int ID;
     int ClientOffsetX;
