@@ -27,6 +27,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisst3DUserInterface/ui3VTKForwardDeclarations.h>
 #include <cisst3DUserInterface/ui3CursorBase.h>
 
+class CursorTip;
+class CursorAnchor;
 
 /*!  Simple cursor using a sphere for rendering.  Color, diameter and
   transparency are used to show the different states.
@@ -75,8 +77,8 @@ protected:
     bool Is2D;
     bool IsClutched;
 
-    ui3VisibleObject * VisibleTip;
-    ui3VisibleObject * VisibleAnchor;
+    CursorTip * VisibleTip;
+    CursorAnchor * VisibleAnchor;
     ui3VisibleList * VisibleList;
 };
 

@@ -58,36 +58,9 @@ bool ui3VisibleList::CreateVTKObjects(void)
         // convert pointer to (void *)
         propHandle = reinterpret_cast<VTKHandleType>(objectVTKProp);
         (*iterator)->SetVTKHandle(propHandle);
+
+        // add to assembly
+        this->Assembly->AddPart(objectVTKProp);
     }
     return result;
-}
-
-
-void ui3VisibleList::Show(void)
-{
-    this->Lock();
-    this->Assembly->VisibilityOn();
-    this->Unlock();
-    const ListType::iterator end = Objects.end();
-    ListType::iterator iterator;
-    for (iterator = Objects.begin();
-         iterator != end;
-         ++iterator) {
-        (*iterator)->Show();
-    }
-}
-
-
-void ui3VisibleList::Hide(void)
-{
-    this->Lock();
-    this->Assembly->VisibilityOff();
-    this->Unlock();
-    const ListType::iterator end = Objects.end();
-    ListType::iterator iterator;
-    for (iterator = Objects.begin();
-         iterator != end;
-         ++iterator) {
-        (*iterator)->Hide();
-    }
 }

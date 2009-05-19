@@ -55,10 +55,6 @@ public:
 
     bool CreateVTKObjects(void);
 
-    void Show(void);
-
-    void Hide(void);
-
     void Add(ui3VisibleObject * object) {
         this->Objects.push_back(object);
     }

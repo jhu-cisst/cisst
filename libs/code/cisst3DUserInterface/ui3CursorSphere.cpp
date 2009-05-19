@@ -118,6 +118,75 @@ CMN_DECLARE_SERVICES_INSTANTIATION(CursorTip);
 CMN_IMPLEMENT_SERVICES(CursorTip);
 
 
+class CursorAnchor: public ui3VisibleObject
+{
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 5);
+
+protected:
+    vtkLineSource * Source;
+    vtkPolyDataMapper * Mapper;
+    vtkActor * Actor;
+
+public:
+    CursorAnchor(ui3Manager * manager):
+        ui3VisibleObject(manager),
+        Source(0),
+        Mapper(0),
+        Actor(0)
+    {}
+    
+    
+    ~CursorAnchor()
+    {
+        if (this->Source) {
+            this->Source->Delete();
+        }
+        
+        if (this->Mapper) {
+            this->Mapper->Delete();
+        }
+        
+        if (this->Actor) {
+            this->Actor->Delete();
+        }
+    }
+
+
+    bool CreateVTKObjects(void)
+    {
+        this->Source = vtkLineSource::New();
+        CMN_ASSERT(this->Source);
+        // this->Source->SetRadius(2.0);
+        
+        this->Mapper = vtkPolyDataMapper::New();
+        CMN_ASSERT(this->Mapper);
+        this->Mapper->SetInputConnection(this->Source->GetOutputPort());
+        
+        this->Actor = vtkActor::New();
+        CMN_ASSERT(this->Actor);
+        this->Actor->SetMapper(this->Mapper);
+        
+        this->Assembly->AddPart(this->Actor);
+
+        return true;
+    }
+
+    void SetCursorPosition(vct3 & position)
+    {
+        this->Source->SetPoint2(position.Pointer());
+    }
+
+    void SetAnchorPosition(vct3 & position)
+    {
+        this->Source->SetPoint1(position.Pointer());
+    }
+};
+
+CMN_DECLARE_SERVICES_INSTANTIATION(CursorAnchor);
+CMN_IMPLEMENT_SERVICES(CursorAnchor);
+
+
+
 ui3CursorSphere::ui3CursorSphere(ui3Manager * manager):
     ui3CursorBase(manager),
     IsPressed(false),
@@ -130,6 +199,8 @@ ui3CursorSphere::ui3CursorSphere(ui3Manager * manager):
     this->VisibleList = new ui3VisibleList(manager);
     this->VisibleTip = new CursorTip(manager);
     this->VisibleList->Add(this->VisibleTip);
+    this->VisibleAnchor = new CursorAnchor(manager);
+    this->VisibleList->Add(this->VisibleAnchor);
 }
 
 
@@ -137,6 +208,9 @@ ui3CursorSphere::~ui3CursorSphere()
 {
     if (this->VisibleTip) {
         delete this->VisibleTip;
+    }
+    if (this->VisibleAnchor) {
+        delete this->VisibleAnchor;
     }
     if (this->VisibleList) {
         delete this->VisibleList;
@@ -171,10 +245,11 @@ void ui3CursorSphere::SetClutched(bool clutched)
 
 ui3VisibleObject * ui3CursorSphere::GetVisibleObject(void)
 {
-    return this->VisibleTip;
+    return this->VisibleList;
 }
 
 void ui3CursorSphere::SetTransformation(vctDoubleFrm3 & frame)
 {
     this->VisibleTip->SetTransformation(frame);
+    this->VisibleAnchor->SetCursorPosition(frame.Translation());
 }
