@@ -35,6 +35,7 @@ class ui3SceneManager;
 class ui3SlaveArm;
 class ui3UIThread;
 class ui3VideoInterfaceFilter;
+class ui3VisibleList;
 class ui3VisibleObject;
 class ui3VTKRenderer;
 

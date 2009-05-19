@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id$
+  $Id: ui3VisibleObject.h 227 2009-04-03 21:39:16Z adeguet1 $
 
   Author(s):	Balazs Vagvolgyi, Simon DiMaio, Anton Deguet
   Created on:	2008-05-23
@@ -19,8 +19,8 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#ifndef _ui3VisibleObject_h
-#define _ui3VisibleObject_h
+#ifndef _ui3VisibleList_h
+#define _ui3VisibleList_h
 
 #include <cisstCommon/cmnGenericObject.h>
 #include <cisstCommon/cmnClassServices.h>
@@ -31,56 +31,46 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisst3DUserInterface/ui3ForwardDeclarations.h>
 #include <cisst3DUserInterface/ui3VTKForwardDeclarations.h>
 #include <cisst3DUserInterface/ui3SceneManager.h>
+#include <cisst3DUserInterface/ui3VisibleObject.h>
 
 
-/*!
- Provides a base class for all visible objects.
+/*!  
+  Cheap implementation of Composite Pattern, group of visible
+  objects behaving like a single visible object
 */
-class ui3VisibleObject: public cmnGenericObject
-{   
+class ui3VisibleList: public ui3VisibleObject
+{
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 5);
+
     friend class ui3SceneManager;
-    friend class ui3VisibleList;
 
 public:
 
-    ui3VisibleObject(ui3Manager * manager);
+    ui3VisibleList(ui3Manager * manager);
 
     /*!
      Destructor
     */
-    virtual ~ui3VisibleObject(void) {};
+    ~ui3VisibleList(void) {};
 
-    virtual bool CreateVTKObjects(void) = 0;
+    bool CreateVTKObjects(void);
 
-    virtual vtkProp3D * GetVTKProp(void);
+    void Show(void);
 
-    virtual void Show(void);
+    void Hide(void);
 
-    virtual void Hide(void);
-
-    virtual void SetPosition(vctDouble3 & position);
-
-    virtual void SetOrientation(vctDoubleMatRot3 & rotationMatrix);
-
-    virtual void SetTransformation(vctDoubleFrm3 & frame);
-
-    virtual void Lock(void);
-
-    virtual void Unlock(void);
+    void Add(ui3VisibleObject * object) {
+        this->Objects.push_back(object);
+    }
 
 protected:
     
-    typedef ui3SceneManager::VTKHandleType VTKHandleType;
-
-    void SetVTKHandle(VTKHandleType handle) {
-        this->VTKHandle = handle;
-    }
-
-    vtkAssembly * Assembly;
-    vtkMatrix4x4 * Matrix;
-    ui3Manager * Manager;
-    VTKHandleType VTKHandle; 
+    typedef std::list <ui3VisibleObject *> ListType;
+    ListType Objects;
 };
 
 
-#endif // _ui3VisibleObject_h
+CMN_DECLARE_SERVICES_INSTANTIATION(ui3VisibleList);
+
+
+#endif // _ui3VisibleList_h

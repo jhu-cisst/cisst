@@ -25,11 +25,12 @@ http://www.cisst.org/cisst/license.txt.
 
 class vtkActor;
 class vtkAssembly;
-class vtkPNGReader;
 class vtkCamera;
 class vtkCubeSource;
+class vtkLineSource;
 class vtkMatrix4x4;
 class vtkPlaneSource;
+class vtkPNGReader;
 class vtkPolyDataMapper;
 class vtkProp3D;
 class vtkPropAssembly;

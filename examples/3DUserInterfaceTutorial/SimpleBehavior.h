@@ -37,7 +37,7 @@ public:
     void OnQuit(void);
     void OnStart(void);
     void Configure(const std::string & CMN_UNUSED(configFile)) {}
-    bool SaveConfiguration(const std::string & configFile) { return true; }
+    bool SaveConfiguration(const std::string & CMN_UNUSED(configFile)) { return true; }
     inline ui3VisibleObject * GetVisibleObject(void) {
         return this->VisibleObject;
     }

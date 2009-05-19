@@ -56,6 +56,7 @@ SET(SOURCE_FILES
     ui3SlaveArm.cpp
     ui3VTKRenderer.cpp
     ui3VideoInterfaceFilter.cpp
+    ui3VisibleList.cpp
     ui3VisibleObject.cpp
     )
 
@@ -76,6 +77,7 @@ SET(HEADER_FILES
     ui3VTKRenderer.h
     ui3VTKForwardDeclarations.h
     ui3VideoInterfaceFilter.h
+    ui3VisibleList.h
     ui3VisibleObject.h
     )
 

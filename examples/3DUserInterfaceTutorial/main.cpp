@@ -27,7 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 #define UI3_DAVINCI 3
 
 // change this based on your configuration
-#define UI3_INPUT UI3_NO_INPUT
+#define UI3_INPUT UI3_OMNI1
 
 #include <cisstOSAbstraction/osaThreadedLogFile.h>
 #include <cisstOSAbstraction/osaSleep.h>
@@ -252,6 +252,7 @@ int main()
                           ui3MasterArm::PRIMARY);
     rightMaster->SetTransformation(transform, 0.5 /* scale factor */);
     ui3CursorBase * rightCursor = new ui3CursorSphere(&guiManager);
+    rightCursor->SetAnchor(ui3CursorBase::CENTER_RIGHT);
     rightMaster->SetCursor(rightCursor);
 
     // setup second arm
@@ -263,6 +264,7 @@ int main()
                          ui3MasterArm::SECONDARY);
     leftMaster->SetTransformation(transform, 0.5 /* scale factor */);
     ui3CursorBase * leftCursor = new ui3CursorSphere(&guiManager);
+    leftCursor->SetAnchor(ui3CursorBase::CENTER_LEFT);
     leftMaster->SetCursor(leftCursor);
 
     // first slave arm, i.e. PSM1

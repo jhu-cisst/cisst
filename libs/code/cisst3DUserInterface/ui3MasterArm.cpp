@@ -204,7 +204,7 @@ void ui3MasterArm::UpdateCursorPosition(void)
 void ui3MasterArm::Hide(void)
 {
     if (this->Cursor) {
-        this->Cursor->Hide();
+        this->Cursor->GetVisibleObject()->Hide();
     }
 }
 
@@ -213,7 +213,7 @@ void ui3MasterArm::Hide(void)
 void ui3MasterArm::Show(void)
 {
     if (this->Cursor) {
-        this->Cursor->Show();
+        this->Cursor->GetVisibleObject()->Show();
     }
 }
 

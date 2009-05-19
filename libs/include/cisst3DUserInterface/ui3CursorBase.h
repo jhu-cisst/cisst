@@ -25,31 +25,38 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstVector/vctTransformationTypes.h>
 #include <cisst3DUserInterface/ui3VTKForwardDeclarations.h>
+#include <cisst3DUserInterface/ui3ForwardDeclarations.h>
 #include <cisst3DUserInterface/ui3VisibleObject.h>
 
 
 /*!
   Base class for all cursors.
 */
-class ui3CursorBase: public ui3VisibleObject
+class ui3CursorBase
 {
 public:
     /*!
       Constructor: needs the UI Manager
     */
     inline ui3CursorBase(ui3Manager * manager):
-        ui3VisibleObject(manager)
+        Manager(manager)
     {}
+
+    /*! Position stick or line from one corner of the scene to the
+      cursor to help identify it */
+    enum AnchorType {NONE, TOP_LEFT, TOP_RIGHT, CENTER_LEFT, CENTER_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT};
 
     /*!
       Destructor
     */
     virtual ~ui3CursorBase() {};
 
-    /*! Create the VTK object used to represent the cursor in the
-      scene */
-    virtual bool CreateVTKObjects(void) = 0;
+    /*! Retrieve the visible object(s) associated to the cursor */
+    virtual ui3VisibleObject * GetVisibleObject(void) = 0;
 
+    /*! Update the cursor position */
+    virtual void SetTransformation(vctDoubleFrm3 & frame) = 0;
+    
     /*! Tell the cursor to display itself as "pressed" or not */
     virtual void SetPressed(bool pressed) = 0;
 
@@ -59,6 +66,20 @@ public:
     
     /*! Tell the cursor to display itself as "clutched" or not */
     virtual void SetClutched(bool clutched) = 0;
+
+    /*! Set anchor type */
+    inline virtual void SetAnchor(const AnchorType & anchor) {
+        this->Anchor = anchor;
+    }
+
+    /*! Get anchor type */
+    inline virtual void GetAnchor(AnchorType & placeHolder) const {
+        placeHolder = this->Anchor;
+    }
+
+protected:
+    ui3Manager * Manager;
+    AnchorType Anchor;
 };
 
 

@@ -355,7 +355,8 @@ void ui3Manager::Startup(void)
     for (armIterator = this->MasterArms.begin();
          armIterator != armEnd;
          armIterator++) {
-             this->SceneManager->Add((*armIterator)->Cursor);
+        this->SceneManager->Add((*armIterator)->Cursor->GetVisibleObject());
+        (*armIterator)->Show();
     }
 
     // add main menu bar

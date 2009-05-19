@@ -20,7 +20,6 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
-#include <cisst3DUserInterface/ui3MenuBar.h>
 #include <cisst3DUserInterface/ui3Manager.h>
 
 #include <vtkAssembly.h>
@@ -50,7 +49,7 @@ vtkProp3D * ui3VisibleObject::GetVTKProp(void)
 }
 
 
-void ui3VisibleObject::Show()
+void ui3VisibleObject::Show(void)
 {
     this->Lock();
     this->Assembly->VisibilityOn();
@@ -58,7 +57,7 @@ void ui3VisibleObject::Show()
 }
 
 
-void ui3VisibleObject::Hide()
+void ui3VisibleObject::Hide(void)
 {
     this->Lock();
     this->Assembly->VisibilityOff();
