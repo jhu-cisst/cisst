@@ -62,7 +62,11 @@ public:
 
     virtual void SetOrientation(vctDoubleMatRot3 & rotationMatrix);
 
-    virtual void SetTransformation(vctDoubleFrm3 & frame);
+    template <bool _storageOrder>
+    void SetTransformation(vctFrameBase<vctMatrixRotation3<double, _storageOrder> > frame) {
+        this->SetPosition(frame.Translation());
+        this->SetOrientation(frame.Rotation());
+    }
 
     virtual void Lock(void);
 

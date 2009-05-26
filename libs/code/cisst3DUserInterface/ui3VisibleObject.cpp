@@ -92,11 +92,7 @@ void ui3VisibleObject::SetOrientation(vctMatRot3 & rotationMatrix)
 }
 
 
-void ui3VisibleObject::SetTransformation(vctDoubleFrm3 & frame)
-{
-    this->SetPosition(frame.Translation());
-    this->SetOrientation(frame.Rotation());
-}
+
 
 
 void ui3VisibleObject::Lock(void)
