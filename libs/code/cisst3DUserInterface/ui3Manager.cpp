@@ -89,7 +89,9 @@ bool ui3Manager::SetupMaM(mtsDevice * mamDevice, const std::string & mamInterfac
 }
 
 
-bool ui3Manager::AddRenderer(unsigned int width, unsigned int height, int x, int y, vctFrm3 & cameraframe, double viewangle, const std::string & renderername)
+bool ui3Manager::AddRenderer(unsigned int width, unsigned int height, int x, int y,
+                             vctFrm3 & cameraframe, double viewangle, vct2 opticalcenteroffset,
+                             const std::string & renderername)
 {
     if (width < 1 || height < 1 || renderername.empty()) return false;
 
@@ -103,6 +105,7 @@ bool ui3Manager::AddRenderer(unsigned int width, unsigned int height, int x, int
     renderer->windowposy = y;
     renderer->cameraframe = cameraframe;
     renderer->viewangle = viewangle;
+    renderer->opticalcenteroffset = opticalcenteroffset;
     renderer->name = renderername;
     renderer->renderer = 0;
     renderer->rendertarget = 0;
@@ -371,6 +374,7 @@ void ui3Manager::Startup(void)
              this->SceneManager->Add((*iterator)->MenuBar);
              this->SceneManager->Add((*iterator)->GetVisibleObject());
              (*iterator)->SetState(Idle);
+             (*iterator)->GetVisibleObject()->Hide();
     }
 
     // current active behavior is this
@@ -518,6 +522,7 @@ bool ui3Manager::SetupRenderers()
                                                     this->Renderers[i]->height,
                                                     this->Renderers[i]->viewangle,
                                                     this->Renderers[i]->cameraframe,
+                                                    this->Renderers[i]->opticalcenteroffset,
                                                     this->Renderers[i]->rendertarget);
         CMN_ASSERT(this->Renderers[i]->renderer);
 

@@ -80,7 +80,6 @@ bool ui3ImagePlane::CreateVTKObjects()
     this->Actor = vtkActor::New();
     CMN_ASSERT(this->Actor);
 
-
     // Create image object
     this->ImageData->SetDimensions(this->TextureWidth, this->TextureHeight, 1);
     this->ImageData->SetScalarType(VTK_UNSIGNED_CHAR);
@@ -91,7 +90,7 @@ bool ui3ImagePlane::CreateVTKObjects()
     this->TextureBuffer = (unsigned char*)this->ImageData->GetScalarPointer();
 
     // Make whole image opaque by default
-    this->SetAlpha(128);
+    this->SetAlpha(255);
 
     // Create texture object
     this->Texture->SetInput(this->ImageData);
@@ -107,6 +106,7 @@ bool ui3ImagePlane::CreateVTKObjects()
     this->PlaneSrc->SetPoint2(this->PhysicalPositionRelativeToPivot.X(),
                                 this->PhysicalPositionRelativeToPivot.Y() - this->PhysicalHeight * ((double)this->TextureHeight / this->BitmapHeight),
                                   this->PhysicalPositionRelativeToPivot.Z());
+
     this->PlaneSrc->SetXResolution(1);
     this->PlaneSrc->SetYResolution(1);
 
@@ -232,6 +232,7 @@ void ui3ImagePlane::SetImage(svlSampleImageBase* image, unsigned int channel)
         unsigned char r, g, b;
 #endif
 
+        this->Lock();
         for (j = 0; j < bmpheight; j ++) {
             for (i = 0; i < bmpwidth; i ++) {
 #ifdef USE_BGR
@@ -252,6 +253,7 @@ void ui3ImagePlane::SetImage(svlSampleImageBase* image, unsigned int channel)
 
         // Signal VTK that the texture has been modified
         this->ImageData->Modified();
+        this->Unlock();
     }
 }
 

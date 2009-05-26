@@ -98,7 +98,9 @@ public:
     /*!
      Adds a render window to the UI Manager.
     */
-    virtual bool AddRenderer(unsigned int width, unsigned int height, int x, int y, vctFrm3 & cameraframe, double viewangle, const std::string & renderername);
+    virtual bool AddRenderer(unsigned int width, unsigned int height, int x, int y,
+                             vctFrm3 & cameraframe, double viewangle, vct2 opticalcenteroffset,
+                             const std::string & renderername);
 
     /*!
      Assigns an external render target for the renderer.
@@ -237,6 +239,7 @@ protected:
         int windowposy;
         vctFrm3 cameraframe;
         double viewangle;
+        vct2 opticalcenteroffset;
         std::string name;
         ui3VTKRenderer* renderer;
         svlRenderTargetBase* rendertarget;

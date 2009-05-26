@@ -37,7 +37,7 @@ CMN_IMPLEMENT_SERVICES(ui3VTKRenderer);
 
 ui3VTKRenderer::ui3VTKRenderer(ui3SceneManager* scene,
                                unsigned int width, unsigned int height,
-                               double viewangle, vctFrm3 & cameraframe,
+                               double viewangle, vctFrm3 & cameraframe, vct2 opticalcenteroffset,
                                svlRenderTargetBase* target) :
     SceneManager(scene),
     Renderer(0),
@@ -49,6 +49,7 @@ ui3VTKRenderer::ui3VTKRenderer(ui3SceneManager* scene,
     Height(height),
     ViewAngle(viewangle),
     CameraFrame(cameraframe),
+    OpticalCenterOffset(opticalcenteroffset),
     Target(target)
 {
     CMN_ASSERT(this->SceneManager);
@@ -116,7 +117,10 @@ void ui3VTKRenderer::Render(void)
         if (this->Target) {
             // Push VTK off-screen frame buffer to external render target
             this->RenderWindow->GetPixelData(0, 0, this->Width - 1, this->Height - 1, 0, this->OffScreenBuffer);
-            this->Target->SetImage(this->OffScreenBuffer->GetPointer(0), true);
+            this->Target->SetImage(this->OffScreenBuffer->GetPointer(0),
+                                   static_cast<int>(this->OpticalCenterOffset.X()),
+                                   static_cast<int>(this->OpticalCenterOffset.Y()),
+                                   true);
         }
     } else {
         CMN_LOG_CLASS(1) << "Render: attempt to render before the VTK Window Renderer has been created" << std::endl;
@@ -124,16 +128,15 @@ void ui3VTKRenderer::Render(void)
 }
 
 
-void ui3VTKRenderer::SetViewAngle(double angle)
-{
-    this->ViewAngle = angle;
-    this->Camera->SetViewAngle(this->ViewAngle);
-}
-
-
 double ui3VTKRenderer::GetViewAngle(void)
 {
     return this->ViewAngle;
+}
+
+
+void ui3VTKRenderer::GetOpticalCenterOffset(vct2 & offset)
+{
+    offset = this->OpticalCenterOffset;
 }
 
 

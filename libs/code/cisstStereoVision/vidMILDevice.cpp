@@ -62,7 +62,7 @@ CMILDeviceRenderTarget::~CMILDeviceRenderTarget()
     delete Thread;
 }
 
-bool CMILDeviceRenderTarget::SetImage(unsigned char* buffer, bool vflip)
+bool CMILDeviceRenderTarget::SetImage(unsigned char* buffer, int offsetx, int offsety, bool vflip)
 {
     if (DeviceID < 0) return false;
 
@@ -82,17 +82,30 @@ bool CMILDeviceRenderTarget::SetImage(unsigned char* buffer, bool vflip)
     }
 
     if (vflip) {
-        const int linesize = w * 3;
-        unsigned char* dest = device->MilOverlayBuffer[DeviceID];
-        buffer += (h - 1) * linesize;
+        const int stride = w * 3;
+        const int linesize = stride - offsetx * 3;
+        unsigned char* dest = device->MilOverlayBuffer[DeviceID] + offsetx * 3;
+        buffer += (h - 1) * stride;
         for (int i = 0; i < h; i ++) {
             memcpy(dest, buffer, linesize);
-            dest += linesize;
-            buffer -= linesize;
+            dest += stride;
+            buffer -= stride;
         }
     }
     else {
-        memcpy(device->MilOverlayBuffer[DeviceID], buffer, w * h * b);
+        if (offsetx != 0) {
+            const int stride = w * 3;
+            const int linesize = stride - offsetx * 3;
+            unsigned char* dest = device->MilOverlayBuffer[DeviceID] + offsetx * 3;
+            for (int i = 0; i < h; i ++) {
+                memcpy(dest, buffer, linesize);
+                dest += stride;
+                buffer += stride;
+            }
+        }
+        else {
+            memcpy(device->MilOverlayBuffer[DeviceID], buffer, w * h * b);
+        }
     }
 
     // Signal Thread that there is a new frame to transfer
