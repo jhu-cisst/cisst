@@ -19,6 +19,9 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+
+#include <cisstVector/vctRandom.h>
+
 #include <cisst3DUserInterface/ui3CursorSphere.h>
 #include <cisst3DUserInterface/ui3VisibleList.h>
 
@@ -173,12 +176,16 @@ public:
 
     void SetCursorPosition(vct3 & position)
     {
+        this->Lock();
         this->Source->SetPoint2(position.Pointer());
+        this->Unlock();
     }
 
     void SetAnchorPosition(vct3 & position)
     {
+        this->Lock();
         this->Source->SetPoint1(position.Pointer());
+        this->Unlock();
     }
 };
 
@@ -220,7 +227,7 @@ ui3CursorSphere::~ui3CursorSphere()
 
 void ui3CursorSphere::UpdateColor(void)
 {
-    dynamic_cast<CursorTip *>(this->VisibleTip)->UpdateColor(this->IsClutched, this->IsPressed, this->Is2D);
+    this->VisibleTip->UpdateColor(this->IsClutched, this->IsPressed, this->Is2D);
 }
 
 
@@ -250,6 +257,23 @@ ui3VisibleObject * ui3CursorSphere::GetVisibleObject(void)
 
 void ui3CursorSphere::SetTransformation(vctDoubleFrm3 & frame)
 {
+    vctDouble3 anchor;
+    switch (this->Anchor) {
+        case ui3CursorBase::CENTER_RIGHT:
+            anchor.Assign(200.0, 0.0, -200.0);
+            this->VisibleAnchor->SetAnchorPosition(anchor);
+            break;
+        case ui3CursorBase::CENTER_LEFT:
+            anchor.Assign(-200.0, 0.0, -200.0);
+            this->VisibleAnchor->SetAnchorPosition(anchor);
+            break;
+        default:
+            std::cout << "----------------- oops: " << anchor << std::endl;
+            break;
+    }
+    
+
     this->VisibleTip->SetTransformation(frame);
     this->VisibleAnchor->SetCursorPosition(frame.Translation());
+
 }
