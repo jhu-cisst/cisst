@@ -92,7 +92,7 @@ friend class svlStreamControlMultiThread;
     typedef std::map<svlStreamType, svlStreamType> _StreamTypeMap;
     typedef std::vector<svlStreamEntity*> _OutputBranchList;
 
-protected:
+public:
     typedef struct _ProcInfo {
         unsigned int  count;
         unsigned int  id;

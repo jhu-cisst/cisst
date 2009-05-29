@@ -32,8 +32,10 @@ http://www.cisst.org/cisst/license.txt.
 #if (CISST_SVL_HAS_OPENCV == ON)
     #if (CISST_OS == CISST_WINDOWS) || (CISST_OS == CISST_DARWIN)
         #include <cv.h>
+        #include <highgui.h>
     #else
         #include <opencv/cv.h>
+        #include <opencv/highgui.h>
     #endif
 #else // CISST_HAS_OPENCV
     typedef void IplImage;
@@ -134,7 +136,7 @@ public:
     svlSampleImageBase() : svlSample() {}
     virtual ~svlSampleImageBase() {}
     virtual svlSample* GetNewInstance() = 0;
-    virtual IplImage* IplImageRef(const unsigned int CMN_UNUSED(videochannel) = 0) { return 0; }
+    virtual IplImage* IplImageRef(const unsigned int videochannel = 0) = 0;
     bool IsImage() { return true; }
     virtual svlStreamType GetType() = 0;
     virtual bool IsInitialized() = 0;

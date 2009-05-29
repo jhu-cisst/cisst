@@ -26,12 +26,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlVideoCaptureSource.h>
 #include "svlImageBuffer.h"
 
-#if (CISST_OS == CISST_WINDOWS) || (CISST_OS == CISST_DARWIN)
-    #include <highgui.h>
-#else
-    #include <opencv/highgui.h>
-#endif
-
 
 class COpenCVSourceThread;
 

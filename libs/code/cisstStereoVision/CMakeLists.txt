@@ -136,6 +136,7 @@ IF(CISST_SVL_HAS_OPENCV)
 
   SET(SOURCE_FILES
       ${SOURCE_FILES}
+      svlFilterToolTracker.cpp
       vidOCVSource.h        # private header
       vidOCVSource.cpp
       # Trackers
@@ -145,6 +146,7 @@ IF(CISST_SVL_HAS_OPENCV)
       )
   SET(HEADER_FILES
       ${HEADER_FILES}
+      svlFilterToolTracker.h
       # Trackers
       trackers/svlTrackerOpenCV.h
       )
