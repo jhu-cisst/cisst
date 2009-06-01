@@ -230,6 +230,7 @@ struct osaThreadSignalInternals
 osaThreadSignal::osaThreadSignal()
 {
     CMN_ASSERT(sizeof(Internals) >= SizeOfInternals());
+    memset(&Internals, 0, sizeof(Internals));
 
 #if (CISST_OS == CISST_WINDOWS)
 	INTERNALS(hEvent) = CreateEvent(NULL, FALSE, FALSE, NULL);
