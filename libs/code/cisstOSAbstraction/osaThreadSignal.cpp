@@ -236,7 +236,9 @@ osaThreadSignal::osaThreadSignal()
 #endif
 
 #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS)
-    pthread_mutex_init(&INTERNALS(gnuMutex), 0);
+    if (pthread_mutex_init(&INTERNALS(gnuMutex), 0) != 0) {
+        CMN_LOG(1) << "Class osaMutex: error in constructor \"" << strerror(errno) << "\"" << std::endl;
+    }
     pthread_cond_init(&INTERNALS(gnuCondition), 0);
     INTERNALS(Condition_State) = 0;
 #endif
