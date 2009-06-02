@@ -123,7 +123,7 @@ struct osaThreadInternals {
 #define INTERNALS(A) (reinterpret_cast<osaThreadInternals*>(Internals)->A)
 
 // Constructor. Does nothing.
-osaThread::osaThread() : Valid(false), Signal()
+osaThread::osaThread() : Signal(), Valid(false)
 {
     CMN_ASSERT(sizeof(Internals) >= SizeOfInternals());
 }
