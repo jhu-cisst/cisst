@@ -55,6 +55,7 @@ FOREACH(proxyTest ${PROXY_TESTS})
                         cisstVector cisstCommon
                         debug ${PYTHON_DEBUG_LIBRARIES}
                         optimized ${PYTHON_LIBRARIES})
+    SET_TARGET_PROPERTIES(_${module} PROPERTIES SUFFIX .pyd)
   ELSE(WIN32)
     SWIG_LINK_LIBRARIES(${module} cisstVector cisstCommon ${PYTHON_LIBRARIES})
   ENDIF(WIN32)

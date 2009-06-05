@@ -54,6 +54,11 @@ FOREACH(module ${MODULES})
   SWIG_LINK_LIBRARIES(${module}Python ${module}
                       debug ${PYTHON_DEBUG_LIBRARIES}
                       optimized ${PYTHON_LIBRARIES})
+  # uses .pyd instead of dll on Windows
+  IF(WIN32)
+    SET_TARGET_PROPERTIES(_${module}Python PROPERTIES SUFFIX .pyd)
+  ENDIF(WIN32)
+  
   # Copy the .py file generated to wherever the libraries are
   ADD_CUSTOM_COMMAND(TARGET _${module}Python
                      POST_BUILD
