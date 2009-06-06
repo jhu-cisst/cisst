@@ -40,12 +40,16 @@ http://www.cisst.org/cisst/license.txt.
 #include "cisstMultiTask/cisstMultiTask.i.h"
 
 #include "cisstParameterTypes/prmEventButton.h"
+
 #include "cisstParameterTypes/prmPositionCartesianGet.h"
 #include "cisstParameterTypes/prmPositionCartesianSet.h"
-#include "cisstParameterTypes/prmPositionJointGet.h"
-#include "cisstParameterTypes/prmPositionJointSet.h"
 #include "cisstParameterTypes/prmVelocityCartesianGet.h"
 #include "cisstParameterTypes/prmVelocityCartesianSet.h"
+#include "cisstParameterTypes/prmForceCartesianGet.h"
+
+#include "cisstParameterTypes/prmPositionJointGet.h"
+#include "cisstParameterTypes/prmPositionJointSet.h"
+#include "cisstParameterTypes/prmVelocityJointGet.h"
 #include "cisstParameterTypes/prmVelocityJointSet.h"
 
 
