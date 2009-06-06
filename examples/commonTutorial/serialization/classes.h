@@ -26,7 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnPortability.h>
 #include <cisstCommon/cmnClassRegister.h>
 
-class CISST_EXPORT classA: public cmnGenericObject {
+class classA: public cmnGenericObject {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, 5);
 
 public:
@@ -39,7 +39,7 @@ public:
 CMN_DECLARE_SERVICES_INSTANTIATION(classA)
 
 
-class CISST_EXPORT classB: public cmnGenericObject {
+class classB: public cmnGenericObject {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, 5);
 
 public:
