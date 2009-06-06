@@ -33,6 +33,7 @@ IF(EXISTS ${cisstVector_INTERFACE})
   # uses .pyd instead of dll on Windows
   IF(WIN32)
     SET_TARGET_PROPERTIES(_cisstVectorPython PROPERTIES SUFFIX .pyd)
+    SET_TARGET_PROPERTIES(_cisstVectorPython PROPERTIES DEBUG_POSTFIX "_d")
   ENDIF(WIN32)
   # Copy the .py file generated to wherever the libraries are
   ADD_CUSTOM_COMMAND(TARGET _cisstVectorPython

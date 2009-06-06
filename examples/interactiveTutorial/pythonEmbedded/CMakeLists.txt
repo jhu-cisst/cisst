@@ -57,6 +57,7 @@ FOREACH(module ${MODULES})
   # uses .pyd instead of dll on Windows
   IF(WIN32)
     SET_TARGET_PROPERTIES(_${module}Python PROPERTIES SUFFIX .pyd)
+    SET_TARGET_PROPERTIES(_${module}Python PROPERTIES DEBUG_POSTFIX "_d")
   ENDIF(WIN32)
   
   # Copy the .py file generated to wherever the libraries are

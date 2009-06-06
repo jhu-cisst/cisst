@@ -29,6 +29,7 @@ IF(EXISTS ${cisstNumerical_INTERFACE})
   SWIG_ADD_MODULE(cisstNumericalPython python ${cisstNumerical_INTERFACE})
   IF(WIN32)
     SET_TARGET_PROPERTIES(_cisstNumericalPython PROPERTIES SUFFIX .pyd)
+    SET_TARGET_PROPERTIES(_cisstNumericalPython PROPERTIES DEBUG_POSTFIX "_d")
   ENDIF(WIN32)
   SWIG_LINK_LIBRARIES(cisstNumericalPython cisstNumerical
                       debug ${PYTHON_DEBUG_LIBRARIES}

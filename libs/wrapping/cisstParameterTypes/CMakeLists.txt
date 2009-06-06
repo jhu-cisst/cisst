@@ -29,6 +29,7 @@ IF(EXISTS ${cisstParameterTypes_INTERFACE})
   SWIG_ADD_MODULE(cisstParameterTypesPython python ${cisstParameterTypes_INTERFACE})
   IF(WIN32)
     SET_TARGET_PROPERTIES(_cisstParameterTypesPython PROPERTIES SUFFIX .pyd)
+    SET_TARGET_PROPERTIES(_cisstParameterTypesPython PROPERTIES DEBUG_POSTFIX "_d")
   ENDIF(WIN32)
   SWIG_LINK_LIBRARIES(cisstParameterTypesPython cisstParameterTypes
                       debug ${PYTHON_DEBUG_LIBRARIES}

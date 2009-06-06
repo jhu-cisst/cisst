@@ -29,6 +29,7 @@ IF(EXISTS ${cisstMultiTask_INTERFACE})
   SWIG_ADD_MODULE(cisstMultiTaskPython python ${cisstMultiTask_INTERFACE})
   IF(WIN32)
     SET_TARGET_PROPERTIES(_cisstMultiTaskPython PROPERTIES SUFFIX .pyd)
+    SET_TARGET_PROPERTIES(_cisstMultiTaskPython PROPERTIES DEBUG_POSTFIX "_d")
   ENDIF(WIN32)
   SWIG_LINK_LIBRARIES(cisstMultiTaskPython cisstMultiTask
                       debug ${PYTHON_DEBUG_LIBRARIES}
