@@ -64,7 +64,7 @@ public:
 
       \sa cmnClassRegister cmnClassServiceBase
     */  
-    virtual cmnClassServicesBase* const Services(void) const = 0;
+    virtual cmnClassServicesBase * Services(void) const = 0;
 
     
     /*! Formatted IO to a string.  This method relies on ToStream
