@@ -37,7 +37,7 @@ cmnPrintfParser::cmnPrintfParser(std::ostream & output, const cmnPrintf & output
     OutputStream(output),
     OutputFormatter(outputFormatter)
 {
-    NextFormatTextPosition = OutputFormatter.GetFormat();
+    NextFormatTextPosition = const_cast<char *>(OutputFormatter.GetFormat().c_str());
     NextFormatTextCharacter = *NextFormatTextPosition;
     FormatSequence = 0;
     NextTypeIdCharacter = 0;

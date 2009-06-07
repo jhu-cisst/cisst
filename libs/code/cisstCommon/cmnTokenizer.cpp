@@ -22,6 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include <cisstCommon/cmnTokenizer.h>
+#include <string.h>
 
 cmnTokenizer::cmnTokenizer()
     : Delimiters(DefaultDelimiters)
