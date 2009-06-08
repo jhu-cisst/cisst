@@ -29,6 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <sys/time.h>
 #include <cmath>
 #include <errno.h>
+#include <string.h>
 #ifdef USE_POSIX_SEMAPHORES
 #include <semaphore.h>
 #endif // USE_POSIX_SEMAPHORES

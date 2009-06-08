@@ -20,6 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <string>
+#include <string.h>
 
 #include <cisstCommon/cmnPortability.h>
 #include <cisstCommon/cmnLogger.h>
