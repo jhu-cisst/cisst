@@ -238,7 +238,7 @@ protected:
     mtsStateTable::AccessorBase *GetAccessor(const std::string &name) const;
 
 	/*! Get a handle for data to be used by a writer */
-	mtsStateIndex GetIndexWriter(void);
+	mtsStateIndex GetIndexWriter(void) const;
 
     /*! Start the current cycle. This just records the starting timestamp (Tic). */
     void Start(void);

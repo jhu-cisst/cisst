@@ -167,6 +167,9 @@ protected:
         Otherwise, use osaSleep. */
     void Sleep(double timeInSeconds);
 
+    /*! Return the current tick count. */
+    mtsStateIndex::TimeTicksType GetTick() const { return StateTable.GetIndexWriter().Ticks(); }
+
     /*********** Methods for thread start data and return values **********/
 
     /*! Save any 'user data' that was passed to the thread start routine. */

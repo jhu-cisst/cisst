@@ -75,7 +75,7 @@ mtsStateTable::AccessorBase *mtsStateTable::GetAccessor(const std::string &name)
 
 /* All the non-const methods that can be called from writer only */
 
-mtsStateIndex mtsStateTable::GetIndexWriter(void) {
+mtsStateIndex mtsStateTable::GetIndexWriter(void) const {
     return mtsStateIndex(IndexWriter, Ticks[IndexWriter], HistoryLength);
 }
 
