@@ -11,8 +11,6 @@
 class displayTask: public mtsTaskPeriodic {
 
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 5);
-    volatile bool ExitFlag;
-    double StartValue;
     
  protected:
     cmnDouble Data;
@@ -47,8 +45,6 @@ class displayTask: public mtsTaskPeriodic {
     void Startup(void);
     void Run(void);
     void Cleanup(void) {};
-
-    bool GetExitFlag (void) { return ExitFlag;}
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(displayTask);

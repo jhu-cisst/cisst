@@ -88,7 +88,7 @@ int main(int argc, char **argv)
     while (ireFramework::IsStarting())
         osaSleep(0.5 * cmn_s);  // Wait 0.5 seconds
     // Loop until IRE and display task are both exited
-    while (ireFramework::IsActive() || !displayTaskObject->GetExitFlag())
+    while (ireFramework::IsActive() || !displayTaskObject->IsTerminated())
         osaSleep(0.5 * cmn_s);  // Wait 0.5 seconds
     // Cleanup and exit
     IreThread.Wait();
@@ -111,11 +111,8 @@ int main(int argc, char **argv)
         fclose(fileDescriptor);
         Py_Finalize();
     }
-    while (1) {
+    while (!displayTaskObject->IsTerminated()) {
         osaSleep(100.0 * cmn_ms); // sleep to save CPU
-        if (displayTaskObject->GetExitFlag()) {
-            break;
-        }
     }
 #endif
 

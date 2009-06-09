@@ -9,16 +9,12 @@
 CMN_IMPLEMENT_SERVICES(displayTask);
 
 displayTask::displayTask(const std::string & taskName, double period):
-    mtsTaskPeriodic(taskName, period, false, 5000),
-    ExitFlag(false),
-    DataVec(10)
+    mtsTaskPeriodic(taskName, period, false, 5000)
 {
     // to communicate with the interface of the resource
     mtsRequiredInterface *req = AddRequiredInterface("DataGenerator");
     if (req) {
        req->AddFunction("GetData", Generator.GetData);
-       req->AddFunction("GetStateIndex", Generator.GetStateIndex);
-       req->AddFunction("GetDataHistory", Generator.GetDataHistory);
        req->AddFunction("SetAmplitude", Generator.SetAmplitude);
     }
 }
@@ -28,60 +24,42 @@ void displayTask::Configure(const std::string & CMN_UNUSED(filename))
     // define some values, ideally these come from a configuration
     // file and then configure the user interface
     double maxValue = 0.5; double minValue = 5.0;
-    StartValue =  1.0;
+    double startValue =  1.0;
     CMN_LOG_CLASS(3) << "Configure: setting bounds to: "
                      << minValue << ", " << maxValue << std::endl;
     CMN_LOG_CLASS(3) << "Configure: setting start value to: "
-                     << StartValue << std::endl;
+                     << startValue << std::endl;
     UI.Amplitude->bounds(minValue, maxValue);
-    UI.Amplitude->value(StartValue);
-    AmplitudeData = StartValue;
+    UI.Amplitude->value(startValue);
+    AmplitudeData = startValue;
 }
 
 void displayTask::Startup(void) 
 {
-    const cmnGenericObject *obj = Generator.GetDataHistory.GetCommand()->GetArgument2Prototype();
-    CMN_LOG_CLASS(1) << "GetHistory prototype = " << obj->Services()->GetName() << std::endl;
-#if 0
-    // Future plans:  use mtsHistoryBase instead of mtsVector (equivalently, could use mtsVectorBase)
-    cmnGenericObject *newObj = obj->Services()->Create();
-    mtsHistoryBase *newObjDerived = dynamic_cast<mtsHistoryBase *>(newObj);
-    newObjDerived->SetSize(10);
-#endif
-
-    // set the initial amplitude based on the configuration
-    AmplitudeData = StartValue;
-
     // make the UI visible
     UI.show(0, NULL);
 }
 
 void displayTask::Run(void)
 {
-    // get the current time index to display it in the UI
-    const mtsStateIndex now = StateTable.GetIndexWriter();
     // get the data from the sine wave generator task
-    Generator.GetStateIndex(StateIndex);
     Generator.GetData(Data);
-    Generator.GetDataHistory(StateIndex, DataVec);
-    UI.Data->value(Data.Data);
+    UI.Data->value(Data);
     // check if the user has entered a new amplitude in UI
     if (UI.AmplitudeChanged) {
         // retrieve the new amplitude and send it to the sine task
-        AmplitudeData.Data = UI.Amplitude->value();
+        AmplitudeData = UI.Amplitude->value();
         Generator.SetAmplitude(AmplitudeData);
         UI.AmplitudeChanged = false;
-        CMN_LOG_CLASS(7) << "Run: " << now.Ticks()
-                         << " - Amplitude: " << AmplitudeData.Data << std::endl;
+        CMN_LOG_CLASS(7) << "Run: " << this->GetTick()
+                         << " - Amplitude: " << AmplitudeData << std::endl;
     }
     // log some extra information
-    CMN_LOG_CLASS(7) << "Run : " << now.Ticks()
+    CMN_LOG_CLASS(7) << "Run : " << this->GetTick()
                      << " - Data: " << Data << std::endl;
-    // Following displays the history (last 10 values)
-    //CMN_LOG_CLASS(7) << "Last 10: " << DataVec << std::endl;
     // update the UI, process UI events 
     if (Fl::check() == 0) {
-        ExitFlag = true;
+        Kill();
     }
 }
 

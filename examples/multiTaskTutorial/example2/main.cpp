@@ -48,18 +48,14 @@ int main(void)
     taskManager->CreateAll();
     taskManager->StartAll();
 
-    while (1) {
+    while (!displayTaskObject->IsTerminated()) {
         osaSleep(100.0 * cmn_ms); // sleep to save CPU
-        if (displayTaskObject->GetExitFlag()) {
-            break;
-        }
     }
 
     taskManager->KillAll();
 
-    osaSleep(PeriodDisplay * 2);
-    while (!sineTaskObject->IsTerminated()) osaSleep(PeriodDisplay);
-    while (!displayTaskObject->IsTerminated()) osaSleep(PeriodDisplay);
+    osaSleep(PeriodSine * 2);
+    while (!sineTaskObject->IsTerminated()) osaSleep(PeriodSine);
 
     return 0;
 }

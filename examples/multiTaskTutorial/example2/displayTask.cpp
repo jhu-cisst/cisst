@@ -9,8 +9,7 @@
 CMN_IMPLEMENT_SERVICES(displayTask);
 
 displayTask::displayTask(const std::string taskName, double period):
-    mtsTaskPeriodic(taskName, period, false, 5000),
-    ExitFlag(false)
+    mtsTaskPeriodic(taskName, period, false, 5000)
 {
     mtsRequiredInterface *req = AddRequiredInterface("DataGenerator");
     if (req) {
@@ -41,7 +40,6 @@ void displayTask::HandleTrigger(const cmnDouble & value)
 
 void displayTask::Startup(void) 
 {
-    Amplitude = StartValue;
     TriggerValue = 0.0;
     WaitingForTrigger = false;
 
@@ -53,7 +51,6 @@ void displayTask::Startup(void)
 
 void displayTask::Run(void)
 {
-    const mtsStateIndex now = StateTable.GetIndexWriter();
     cmnDouble time;
     Generator.GetData(Data);
     Clock.GetClockData(time);
@@ -63,18 +60,18 @@ void displayTask::Run(void)
         Amplitude = UI.Amplitude->value();
         Generator.SetAmplitude(Amplitude);
         UI.AmplitudeChanged = false;
-        CMN_LOG(5) << "Run: " << now.Ticks()
+        CMN_LOG(5) << "Run: " << this->GetTick()
                    << " - Amplitude: " << Amplitude << std::endl;
     }
     if (UI.TriggerChanged) {
         TriggerValue = UI.Trigger->value() * Amplitude;
         Generator.SetTriggerValue(TriggerValue);
         UI.TriggerChanged = false;
-        CMN_LOG(5) << "Run : " << now.Ticks()
+        CMN_LOG(5) << "Run : " << this->GetTick()
                    << " - Trigger: " << TriggerValue << std::endl;
     }
     if (UI.DoReset) {
-        CMN_LOG(5) << "Run : " << now.Ticks()
+        CMN_LOG(5) << "Run : " << this->GetTick()
                    << " - Reset trigger." << std::endl;
         Generator.ResetTrigger();
         UI.DoReset = false;
@@ -97,11 +94,11 @@ void displayTask::Run(void)
         }
     }
     ProcessQueuedEvents();
-    CMN_LOG(7) << "Run: " << now.Ticks()
+    CMN_LOG(7) << "Run: " << this->GetTick()
                << " - Data: " << Data << std::endl;
     
     if (UI.Closed == true) {
-        ExitFlag = true;
+        Kill();
     } else {
         if (!displayUI::Semaphore) {
             displayUI::Semaphore = true;
@@ -113,17 +110,17 @@ void displayTask::Run(void)
 
 void displayTask::Configure(const std::string & CMN_UNUSED(filename))
 {
-    double maxValue, minValue;
+    double maxValue, minValue, startValue;
     minValue = 0.5;
     maxValue = 5.0;
-    StartValue =  1.0;
+    startValue =  1.0;
     
     CMN_LOG_CLASS(3) << "Configure: Setting bounds to: " << minValue << ", " << maxValue << std::endl;
-    CMN_LOG_CLASS(3) << "Configure: Setting start value to: " << StartValue << std::endl;
+    CMN_LOG_CLASS(3) << "Configure: Setting start value to: " << startValue << std::endl;
     
     UI.Amplitude->bounds(minValue, maxValue);
-    UI.Amplitude->value(StartValue);
-    Amplitude = StartValue;
+    UI.Amplitude->value(startValue);
+    Amplitude = startValue;
     TriggerValue = 0.0;
 }
 

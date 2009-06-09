@@ -20,9 +20,6 @@ sineTask::sineTask(const std::string & taskName, double period):
     if (prov) {
         // add command to access state table values to the interface
         prov->AddCommandReadState(StateTable, SineData, "GetData");
-        prov->AddCommandReadHistory(StateTable, SineData, "GetDataHistory");
-        // following should be done automatically
-        prov->AddCommandRead(&mtsStateTable::GetIndexReader, &StateTable, "GetStateIndex");
         // add command to modify the sine amplitude 
         prov->AddCommandWrite(&sineTask::SetAmplitude, this, "SetAmplitude");
     }
@@ -33,13 +30,11 @@ void sineTask::Startup(void) {
 }
 
 void sineTask::Run(void) {
-    // the state table provides an index
-    const mtsStateIndex now = StateTable.GetIndexWriter();
     // process the commands received, i.e. possible SetSineAmplitude
     ProcessQueuedCommands();
     // compute the new values based on the current time and amplitude
     SineData = SineAmplitude
-        * sin(2 * cmnPI * static_cast<double>(now.Ticks()) * Period / 10.0);
+        * sin(2 * cmnPI * static_cast<double>(this->GetTick()) * Period / 10.0);
 }
 
 /*
