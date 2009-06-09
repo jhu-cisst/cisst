@@ -16,12 +16,12 @@ using namespace std;
 int main(void)
 {
     // log configuration, see previous examples
-    cmnLogger::SetLoD(5);
-    cmnLogger::GetMultiplexer()->AddChannel(cout, 10);
+    cmnLogger::SetLoD(CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::GetMultiplexer()->AddChannel(cout, CMN_LOG_LOD_VERY_VERBOSE);
     cmnLogger::HaltDefaultLog();
-    cmnLogger::ResumeDefaultLog(5);
-    cmnClassRegister::SetLoD("sineTask", 10);
-    cmnClassRegister::SetLoD("displayTask", 10);
+    cmnLogger::ResumeDefaultLog(CMN_LOG_LOD_VERY_VERBOSE);
+    cmnClassRegister::SetLoD("sineTask", CMN_LOG_LOD_VERY_VERBOSE);
+    cmnClassRegister::SetLoD("displayTask", CMN_LOG_LOD_VERY_VERBOSE);
 
     // create our two tasks
     const double PeriodSine = 1 * cmn_ms; // in milliseconds

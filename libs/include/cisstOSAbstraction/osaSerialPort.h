@@ -54,7 +54,7 @@ class CISST_EXPORT osaSerialPort: public cmnGenericObject
       and control the level of detail for the log.
 
       \sa #CMN_DECLARE_SERVICES. */
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 5);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
 public:
     /*! Type used to define the baud rate.
@@ -146,36 +146,36 @@ public:
     /*! Set a different baud rate. */
     inline void SetBaudRate(const BaudRateType & baudRate) {
         this->BaudRate = baudRate;
-        CMN_LOG_CLASS(3) << "Baud rate modified to " << this->BaudRate
-                         << " on port " << this->PortName << " (not effective until Configure)" << std::endl;
+        CMN_LOG_CLASS_INIT_VERBOSE << "Baud rate modified to " << this->BaudRate
+                                   << " on port " << this->PortName << " (not effective until Configure)" << std::endl;
     }
 
     /*! Set a different character size. */
     inline void SetCharacterSize(const CharacterSizeType & characterSize) {
         this->CharacterSize = characterSize;
-        CMN_LOG_CLASS(3) << "Character size modified to " << this->CharacterSize
-                         << " on port " << this->PortName << " (not effective until Configure)" << std::endl;
+        CMN_LOG_CLASS_INIT_VERBOSE << "Character size modified to " << this->CharacterSize
+                                   << " on port " << this->PortName << " (not effective until Configure)" << std::endl;
     }
 
     /*! Set a different parity checking. */
     inline void SetParityChecking(const ParityCheckingType & parityChecking) {
         this->ParityChecking = parityChecking;
-        CMN_LOG_CLASS(3) << "Parity checking modified to " << this->ParityChecking
-                         << " on port " << this->PortName << " (not effective until Configure)" << std::endl;
+        CMN_LOG_CLASS_INIT_VERBOSE << "Parity checking modified to " << this->ParityChecking
+                                   << " on port " << this->PortName << " (not effective until Configure)" << std::endl;
     }
 
     /*! Set different stop bits. */
     inline void SetStopBits(const StopBitsType & stopBits) {
         this->StopBits = stopBits;
-        CMN_LOG_CLASS(3) << "Stop bits modified to " << this->StopBits
-                         << " on port " << this->PortName << " (not effective until Configure)" << std::endl;
+        CMN_LOG_CLASS_INIT_VERBOSE << "Stop bits modified to " << this->StopBits
+                                   << " on port " << this->PortName << " (not effective until Configure)" << std::endl;
     }
 
     /*! Set different flow control. */
     inline void SetFlowControl(const FlowControlType & flowControl) {
         this->FlowControl = flowControl;
-        CMN_LOG_CLASS(3) << "Flow control modified to " << this->FlowControl
-                         << " on port " << this->PortName << " (not effective until Configure)" << std::endl;
+        CMN_LOG_CLASS_INIT_VERBOSE << "Flow control modified to " << this->FlowControl
+                                   << " on port " << this->PortName << " (not effective until Configure)" << std::endl;
     }
 
     /*! Set the port name.  For a more portable code, use SetPortNumber. */

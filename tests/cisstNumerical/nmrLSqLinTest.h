@@ -128,7 +128,7 @@ public:
     
     void *RunThreadLS(argument arg)
     {
-        CMN_LOG(1) << "nmrLSqLinTest: Running thread #" << arg.number << ", " << arg.times << " iterations" << std::endl;
+        CMN_LOG_INIT_ERROR << "nmrLSqLinTest: Running thread #" << arg.number << ", " << arg.times << " iterations" << std::endl;
         for (int i = 0; i < arg.times; i++) {
             SetUp(i);
             nmrLSqLinSolutionDynamic solution(InputA);
@@ -141,7 +141,7 @@ public:
     
     void *RunThreadLSI(argument arg)
     {
-        CMN_LOG(1) << "nmrLSqLinTest: Running thread #" << arg.number << ", " << arg.times << " iterations" << std::endl;
+        CMN_LOG_INIT_ERROR << "nmrLSqLinTest: Running thread #" << arg.number << ", " << arg.times << " iterations" << std::endl;
         for (int i = 0; i < arg.times; i++) {
             SetUp(i);
             nmrLSqLinSolutionDynamic solution(InputA, InputG);
@@ -154,7 +154,7 @@ public:
     
     void *RunThreadLSEI(argument arg)
     {
-        CMN_LOG(1) << "nmrLSqLinTest: Running thread #" << arg.number << ", " << arg.times << " iterations" << std::endl;
+        CMN_LOG_INIT_ERROR << "nmrLSqLinTest: Running thread #" << arg.number << ", " << arg.times << " iterations" << std::endl;
         for (int i = 0; i < arg.times; i++) {
             SetUp(i);
             nmrLSqLinSolutionDynamic solution(InputA, InputE, InputG);

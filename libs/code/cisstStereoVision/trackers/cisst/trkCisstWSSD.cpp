@@ -101,7 +101,7 @@ void trkCisstWSSD::resetTrack() {
 	CurScale = 1;
 
 #ifdef IS_LOGGING
-	CMN_LOG(1)<<" I'm finished with resetTrack()"<<endl;
+	CMN_LOG_INIT_ERROR<<" I'm finished with resetTrack()"<<endl;
 #endif
 
 }
@@ -273,7 +273,7 @@ void trkCisstWSSD::copyImage(InterfaceImType *src, IndexType src_rows, IndexType
 	for(IndexType r = 0; r < dst.rows(); r++) {
 		for(IndexType c = 0; c < dst.cols(); c++) {
 			dst.Element(r,c) = src[(startR+r)*src_cols+(startC+c)];
-			//CMN_LOG(1)<<"("<<r<<","<<c<<")="<<dst.Element(r,c)<<endl;
+			//CMN_LOG_INIT_ERROR<<"("<<r<<","<<c<<")="<<dst.Element(r,c)<<endl;
 		}
 	}
 }
@@ -301,21 +301,21 @@ void trkCisstWSSD::pushTemplate(InterfaceImType *src, IndexType src_rows, IndexT
 		cmnThrow(std::runtime_error("trkCisstWSSD pushTemplate function - degenerate template size"));
 	}
 #ifdef IS_LOGGING
-	CMN_LOG(1) << " I'm before template copy "<<endl;
+	CMN_LOG_INIT_ERROR << " I'm before template copy "<<endl;
 #endif
 	MatrixType * temp  = new MatrixType(templateSize.Y(), templateSize.X(), VCT_COL_MAJOR);
 	//Copy in the image data
 	copyImage(src, src_rows, src_cols, *temp);
 #ifdef IS_LOGGING
-	CMN_LOG(1) << " I'm after template copy "<<endl;
+	CMN_LOG_INIT_ERROR << " I'm after template copy "<<endl;
 #endif
 	//Add the template to the list
 	allTemplates.push_back(temp);
 #ifdef IS_LOGGING
-	CMN_LOG(1) << " template : "<<endl;
+	CMN_LOG_INIT_ERROR << " template : "<<endl;
 	for(IndexType i = 0; i < templateSize.Y(); i++)
 	{
-		CMN_LOG(1) << temp->Row(i) <<endl;
+		CMN_LOG_INIT_ERROR << temp->Row(i) <<endl;
 	}
 #endif
 }
@@ -356,7 +356,7 @@ void trkCisstWSSD::computeXderivative(MatrixType &src, MatrixType &dst)
 	for(IndexType r = 0; r < dst.rows(); r++) {
 		for(IndexType c = 1; c < (dst.cols()-1); c++)  {
 			dst.Element(r,c) = (src.Element(r,c+1) - src.Element(r,c-1))/2;
-		//	CMN_LOG(1)<<"("<<r<<","<<c<<")="<<dst.Element(r,c)<<endl;
+		//	CMN_LOG_INIT_ERROR<<"("<<r<<","<<c<<")="<<dst.Element(r,c)<<endl;
 		}
 	}
 }
@@ -376,7 +376,7 @@ void trkCisstWSSD::computeXderivative_filtered(MatrixType &src, MatrixType &dst)
 				for(IndexType cc = 0; cc < X_der_filter.cols(); cc++){
 					filtered_value+=X_der_filter(rr,cc)*WarpedMatrix.Element(r+der_filter_offset/2+rr-row_cen,c+der_filter_offset/2+cc-col_cen);
 					/* #ifdef IS_LOGGING
-						CMN_LOG(1)<<"("<<r<<","<<c<<");"<<"("<<rr<<","<<cc<<");"<<"("<<r+der_filter_offset/2+rr-row_cen<<","<<c+der_filter_offset/2+cc-col_cen<<")="<<WarpedMatrix.Element(r+der_filter_offset/2+rr-row_cen,c+der_filter_offset/2+cc-col_cen)<<endl;
+						CMN_LOG_INIT_ERROR<<"("<<r<<","<<c<<");"<<"("<<rr<<","<<cc<<");"<<"("<<r+der_filter_offset/2+rr-row_cen<<","<<c+der_filter_offset/2+cc-col_cen<<")="<<WarpedMatrix.Element(r+der_filter_offset/2+rr-row_cen,c+der_filter_offset/2+cc-col_cen)<<endl;
 					#endif */
 				}
 			}
@@ -549,19 +549,19 @@ void trkCisstWSSD::computeCurrentDerivative(){
 	MatrixType * xder  = new MatrixType(templateSize.Y(), templateSize.X(), VCT_COL_MAJOR);
 	computeXderivative_filtered(current_region,*xder);
 	//#ifdef IS_LOGGING
-	//CMN_LOG(1) << " X derivative : "<<endl;
+	//CMN_LOG_INIT_ERROR << " X derivative : "<<endl;
 	//for(IndexType i = 0; i < templateSize.Y(); i++)
 	//{
-	//	CMN_LOG(1) << xder->Row(i) <<endl;
+	//	CMN_LOG_INIT_ERROR << xder->Row(i) <<endl;
 	//}
 	//#endif
 	MatrixType * yder  = new MatrixType(templateSize.Y(), templateSize.X(), VCT_COL_MAJOR);
 	computeYderivative_filtered(current_region,*yder);
 	//#ifdef IS_LOGGING
-	//CMN_LOG(1) << " Y derivative : "<<endl;
+	//CMN_LOG_INIT_ERROR << " Y derivative : "<<endl;
 	//for(IndexType i = 0; i < templateSize.Y(); i++)
 	//{
-	//	CMN_LOG(1) << yder->Row(i) <<endl;
+	//	CMN_LOG_INIT_ERROR << yder->Row(i) <<endl;
 	//}
 	//#endif
 	VectorRefType tempVec1;
@@ -657,9 +657,9 @@ void trkCisstWSSD::copyCurrentRegion()
 	// Copy current region 
 	for(IndexType r = 0; r < current_region.rows(); r++){
 		for(IndexType c = 0; c < current_region.cols(); c++) {
-	//		CMN_LOG(1) << (WarpedMatrix.Element(r,c)) <<endl;
+	//		CMN_LOG_INIT_ERROR << (WarpedMatrix.Element(r,c)) <<endl;
 			current_region.Element(r,c) = WarpedMatrix.Element(r+der_filter_offset/2,c+der_filter_offset/2);
-//			CMN_LOG(1)<< current_region.Element(r,c)<<endl;
+//			CMN_LOG_INIT_ERROR<< current_region.Element(r,c)<<endl;
 		}
 	}
 
@@ -739,10 +739,10 @@ void trkCisstWSSD::initializeTrack() {
 		double div_factor = 1.0/selectedTemplates.size();
 		A_mat.Multiply(div_factor);
 //#ifdef IS_LOGGING
-//		CMN_LOG(1)<<"A_mat ="<<endl;
+//		CMN_LOG_INIT_ERROR<<"A_mat ="<<endl;
 //		for(IndexType i = 0; i < A_mat.rows(); i++)
 //		{
-//		CMN_LOG(1) << A_mat.Row(i) <<endl;
+//		CMN_LOG_INIT_ERROR << A_mat.Row(i) <<endl;
 //		}
 //#endif 
 		MatrixType temp1, temp2;
@@ -761,15 +761,15 @@ void trkCisstWSSD::initializeTrack() {
 			Q_mat.Row(i).Assign(tempVec2);
 		}
 //#ifdef IS_LOGGING
-//		CMN_LOG(1)<<"R_mat ="<<endl;
+//		CMN_LOG_INIT_ERROR<<"R_mat ="<<endl;
 //		for(IndexType i = 0; i < R_mat.rows(); i++)
 //		{
-//		CMN_LOG(1) << R_mat.Row(i) <<endl;
+//		CMN_LOG_INIT_ERROR << R_mat.Row(i) <<endl;
 //		}
-//		CMN_LOG(1)<<"Q_mat ="<<endl;
+//		CMN_LOG_INIT_ERROR<<"Q_mat ="<<endl;
 //		for(IndexType i = 0; i < Q_mat.rows(); i++)
 //		{
-//		CMN_LOG(1) << Q_mat.Row(i) <<endl;
+//		CMN_LOG_INIT_ERROR << Q_mat.Row(i) <<endl;
 //		}
 //#endif 
 		// Set the A_lsq, B_lsq  and X_lsq matrix sizes
@@ -787,8 +787,8 @@ void trkCisstWSSD::initializeTrack() {
 void trkCisstWSSD::updateParameters(){
 	// Update the parameters from X_lsq
 	IndexType last_template = selectedTemplates.size()-1;
-	//CMN_LOG(1)<<"last_temp ="<<last_template<<endl;
-	//CMN_LOG(1)<<"X_lsq = "<<X_lsq<<endl;
+	//CMN_LOG_INIT_ERROR<<"last_temp ="<<last_template<<endl;
+	//CMN_LOG_INIT_ERROR<<"X_lsq = "<<X_lsq<<endl;
 	switch(trackmodelused){
 		case TRANS:
 			CurLoc.X() = CurLoc.X() + X_lsq[last_template];
@@ -845,10 +845,10 @@ void trkCisstWSSD::updateTrack() {
 			WarpedMatrix.SetAngleAndScale(CurAngle,CurScale);
 			copyCurrentRegion();
 			//#ifdef IS_LOGGING
-			//CMN_LOG(1) << " current region : "<<endl;
+			//CMN_LOG_INIT_ERROR << " current region : "<<endl;
 			//for(IndexType i = 0; i < templateSize.Y(); i++)
 			//{
-			//	CMN_LOG(1) << current_region.Row(i) <<endl;
+			//	CMN_LOG_INIT_ERROR << current_region.Row(i) <<endl;
 			//}
 			//#endif
 			computeCurrentDerivative();
@@ -865,37 +865,37 @@ void trkCisstWSSD::updateTrack() {
 			Diff_mat.DifferenceOf(*selectedTemplates[last_template],current_region);
 			Diff_vec.SetRef(current_region.size(),Diff_mat.Pointer());
 //#ifdef IS_LOGGING
-//		//CMN_LOG(1)<<"R_mat ="<<endl;
+//		//CMN_LOG_INIT_ERROR<<"R_mat ="<<endl;
 //		//for(IndexType i = 0; i < R_mat.rows(); i++)
 //		//{
-//		//CMN_LOG(1) << R_mat.Row(i) <<endl;
+//		//CMN_LOG_INIT_ERROR << R_mat.Row(i) <<endl;
 //		//}
-//		//CMN_LOG(1)<<"Q_mat ="<<endl;
+//		//CMN_LOG_INIT_ERROR<<"Q_mat ="<<endl;
 //		//for(IndexType i = 0; i < Q_mat.rows(); i++)
 //		//{
-//		//CMN_LOG(1) << Q_mat.Row(i) <<endl;
+//		//CMN_LOG_INIT_ERROR << Q_mat.Row(i) <<endl;
 //		//}
 //#endif
 //	#ifdef IS_LOGGING
-//	CMN_LOG(1) << " Diff_vec = "<<Diff_vec<<endl;
+//	CMN_LOG_INIT_ERROR << " Diff_vec = "<<Diff_vec<<endl;
 //	#endif
 			A_lsq.ProductOf(Q_mat,R_mat);
 			B_lsq.ProductOf(Q_mat,Diff_vec);
 #ifdef IS_LOGGING
-	CMN_LOG(1) << " A_lsq : "<<endl;
+	CMN_LOG_INIT_ERROR << " A_lsq : "<<endl;
 	for(IndexType i = 0; i < A_lsq.rows(); i++)
 	{
-		CMN_LOG(1) << A_lsq.Row(i) <<endl;
+		CMN_LOG_INIT_ERROR << A_lsq.Row(i) <<endl;
 	}
-	CMN_LOG(1) << " B_lsq = "<<B_lsq<<endl;
+	CMN_LOG_INIT_ERROR << " B_lsq = "<<B_lsq<<endl;
 #endif
 			nmrLSqLin(A_lsq,B_lsq,X_lsq);
 #ifdef IS_LOGGING
-			CMN_LOG(1)<<" X_lsq = "<<X_lsq<<endl;
+			CMN_LOG_INIT_ERROR<<" X_lsq = "<<X_lsq<<endl;
 #endif
 			updateParameters();
 #ifdef IS_LOGGING
-			CMN_LOG(1)<<" CurLoc"<<CurLoc.X()<<","<<CurLoc.Y()<<endl;
+			CMN_LOG_INIT_ERROR<<" CurLoc"<<CurLoc.X()<<","<<CurLoc.Y()<<endl;
 #endif
 		}
 

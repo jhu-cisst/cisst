@@ -78,12 +78,12 @@ public:
     HasHighPerformanceCounter = (::QueryPerformanceFrequency( &frequency )) ? true : false;
     if (HasHighPerformanceCounter) {
         this->TimeGranularity = 1.0 / static_cast<double>(frequency.QuadPart); // this value should be in seconds
-        CMN_LOG(3) << "Class osaStopwatch: Can use HighPerformance Counter, time granularity is: "
-                   << TimeGranularity * cmn_ms << " ms" << std::endl;
+        CMN_LOG_INIT_WARNING << "Class osaStopwatch: Can use HighPerformance Counter, time granularity is: "
+                             << TimeGranularity * cmn_ms << " ms" << std::endl;
     } else {
         this->TimeGranularity = 1.0e-3; // 1 millisecond
-        CMN_LOG(3) << "Class osaStopwatch: Can NOT use HighPerformance Counter, time granularity is about: "
-                   << TimeGranularity * cmn_ms << " ms" << std::endl;
+        CMN_LOG_INIT_WARNING << "Class osaStopwatch: Can NOT use HighPerformance Counter, time granularity is about: "
+                             << TimeGranularity * cmn_ms << " ms" << std::endl;
     }
 #elif (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS)
     this->TimeGranularity = 1.0e-6; // 1 microsecond

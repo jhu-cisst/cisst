@@ -44,7 +44,7 @@ void * mtsTaskFromCallback::RunInternal(void *data) {
         DoRunInternal();
 
     if (TaskState == FINISHING) {
-    	CMN_LOG_CLASS(7) << "End of task " << Name << std::endl;
+    	CMN_LOG_CLASS_RUN_WARNING << "End of task " << Name << std::endl;
         this->CleanupInternal();
     }
     // Make copy on stack before clearing inRunInternal
@@ -56,7 +56,7 @@ void * mtsTaskFromCallback::RunInternal(void *data) {
 void mtsTaskFromCallback::StartupInternal(void)
 {
     if (!Thread.IsValid()) {
-        CMN_LOG_CLASS(5) << "Initializing thread for callback task " << Name << std::endl;
+        CMN_LOG_CLASS_RUN_ERROR << "Initializing thread for callback task " << Name << std::endl;
         Thread.CreateFromCurrentThread();
     }
     BaseType::StartupInternal();
@@ -67,8 +67,8 @@ void mtsTaskFromCallback::StartupInternal(void)
 void mtsTaskFromCallback::Create(void *data)
 {
     if (TaskState != CONSTRUCTED) {
-        CMN_LOG_CLASS(1) << "ERROR: task " << Name << " cannot be created, state = " <<
-                GetTaskStateName() << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "task " << Name << " cannot be created, state = "
+                                 << GetTaskStateName() << std::endl;
         return;
     }
     StateChange.Lock();
@@ -80,23 +80,23 @@ void mtsTaskFromCallback::Start(void)
     if (TaskState == INITIALIZING)
         WaitToStart(3.0);
     if (TaskState == READY) {
-        CMN_LOG_CLASS(5) << "Starting task " << Name << std::endl;
+        CMN_LOG_CLASS_RUN_ERROR << "Starting task " << Name << std::endl;
         StateChange.Lock();
         TaskState = ACTIVE;
         StateChange.Unlock();
     }
     else
-        CMN_LOG_CLASS(1) << "Could not start task " << Name << ", state = " << GetTaskStateName() << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "Could not start task " << Name << ", state = " << GetTaskStateName() << std::endl;
 }
 
 void mtsTaskFromCallback::Suspend(void)
 {
     if (TaskState == ACTIVE) {
-        CMN_LOG_CLASS(5) << "Suspending task " << Name << std::endl;
+        CMN_LOG_CLASS_RUN_ERROR << "Suspending task " << Name << std::endl;
         StateChange.Lock();
         TaskState = READY;
         StateChange.Unlock();
-        CMN_LOG_CLASS(5) << "Suspended task " << Name << std::endl;
+        CMN_LOG_CLASS_RUN_ERROR << "Suspended task " << Name << std::endl;
     }
 }
 

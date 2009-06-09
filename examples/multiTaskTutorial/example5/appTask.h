@@ -13,7 +13,7 @@
 
 class appTask: public mtsTaskPeriodic {
 
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 5);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
     volatile bool ExitFlag;
     
  protected:

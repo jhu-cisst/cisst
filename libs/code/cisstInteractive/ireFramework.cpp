@@ -355,7 +355,7 @@ void ireFramework::LaunchIREShellInstance(char *startup, bool newPythonThread, b
     char* python_args[] = { "IRE", startup };
 
     if (IRE_State != IRE_INITIALIZED) {
-        CMN_LOG(1) << "LaunchIREShellInstance:  IRE state is " << IRE_State << "." << std::endl;
+        CMN_LOG_INIT_ERROR << "LaunchIREShellInstance:  IRE state is " << IRE_State << "." << std::endl;
         cmnThrow(std::runtime_error("LaunchIREShellInstance: invalid IRE state."));
     }
     IRE_State = IRE_LAUNCHED;

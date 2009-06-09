@@ -35,7 +35,7 @@ http://www.cisst.org/cisst/license.txt.
 
 class BehaviorWithSlaveVisibleObject: public ui3VisibleObject
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 5);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 public:
     inline BehaviorWithSlaveVisibleObject(ui3Manager * manager, vctFrm3 position):
         ui3VisibleObject(manager),
@@ -133,7 +133,7 @@ void BehaviorWithSlave::Startup(void)
 {
     this->Slave1 = this->Manager->GetSlaveArm("Slave1");
     if (!this->Slave1) {
-        CMN_LOG_CLASS(1) << "This behavior requires a slave arm ..." << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "This behavior requires a slave arm ..." << std::endl;
     }
 }
 
@@ -225,7 +225,7 @@ bool BehaviorWithSlave::SaveConfiguration(const std::string & CMN_UNUSED(configF
 
 void BehaviorWithSlave::FirstButtonCallback()
 {
-    CMN_LOG_CLASS(6) << "Behavior \"" << this->GetName() << "\" Button 1 pressed" << std::endl;
+    CMN_LOG_RUN_VERBOSE << "Behavior \"" << this->GetName() << "\" Button 1 pressed" << std::endl;
 }
 
 void BehaviorWithSlave::PrimaryMasterButtonCallback(const prmEventButton & event)

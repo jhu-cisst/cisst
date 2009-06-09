@@ -34,7 +34,7 @@ http://www.cisst.org/cisst/license.txt.
 // end of code for the DLL generation
 
 class CISST_EXPORT SineGenerator: public cmnGenericObject {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 5);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
     
 protected:
     double Amplitude;
@@ -47,13 +47,13 @@ public:
 
     double GetAmplitude() const { return Amplitude; }
     void SetAmplitude(double amp) {
-		CMN_LOG_CLASS(5) << "Setting amplitude to " << amp << std::endl;
+		CMN_LOG_CLASS_RUN_ERROR << "Setting amplitude to " << amp << std::endl;
 		Amplitude = amp;
 	}
 
     double GetFrequency() const { return Frequency; }
     void SetFrequency(double freq) {
-		CMN_LOG_CLASS(5) << "Setting frequency to " << freq << std::endl;
+		CMN_LOG_CLASS_RUN_ERROR << "Setting frequency to " << freq << std::endl;
 		Frequency = freq; }
 
     double ComputeOutput(double time)

@@ -134,7 +134,7 @@ http://www.cisst.org/cisst/license.txt.
 			          << "' failed in: " << CMN_PRETTY_FUNCTION \
 			          << ", line #" << __LINE__; \
         std::cerr << messageBuffer.str() << std::endl; \
-		CMN_LOG(1) << messageBuffer.str() << std::endl; \
+		CMN_LOG_INIT_ERROR << messageBuffer.str() << std::endl; \
 		abort(); \
 	}
 

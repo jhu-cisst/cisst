@@ -53,10 +53,10 @@ double osaGetTime(void) {
     LARGE_INTEGER liTimerFrequency, liTimeNow;
     double timerFrequency, time;
     if (QueryPerformanceCounter(&liTimeNow) ==0 )    {
-        CMN_LOG(1) << "No performance counter available" << std::endl;
+        CMN_LOG_INIT_ERROR << "No performance counter available" << std::endl;
     }
     if (QueryPerformanceFrequency(&liTimerFrequency) ==    0) {
-        CMN_LOG(1) << "No performance counter available" << std::endl;
+        CMN_LOG_INIT_ERROR << "No performance counter available" << std::endl;
     }
     timerFrequency = (double)liTimerFrequency.QuadPart;
     time = (double)liTimeNow.QuadPart/timerFrequency;

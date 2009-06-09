@@ -16,13 +16,11 @@ using namespace std;
 int main(void)
 {
     // Log configuration
-    cmnLogger::SetLoD(5);
-    cmnLogger::GetMultiplexer()->AddChannel(cout, 5);
-    cmnLogger::HaltDefaultLog();
-    cmnLogger::ResumeDefaultLog(5);
+    cmnLogger::SetLoD(CMN_LOG_LOD_RUN_ERROR);
+    cmnLogger::GetMultiplexer()->AddChannel(cout, CMN_LOG_LOD_RUN_ERROR);
     // add a log per thread
     osaThreadedLogFile threadedLog("example5-");
-    cmnLogger::GetMultiplexer()->AddChannel(threadedLog, 10);
+    cmnLogger::GetMultiplexer()->AddChannel(threadedLog, CMN_LOG_LOD_RUN_ERROR);
 
     // create our tasks
     mtsTaskManager * taskManager = mtsTaskManager::GetInstance();

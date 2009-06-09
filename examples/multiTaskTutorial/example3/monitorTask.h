@@ -12,7 +12,7 @@ const double lowerBound = -4.0;
 const double upperBound = 4.0;
 
 class monitorTask: public mtsTaskPeriodic {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 5);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 public:
     enum {NB_JOINTS = 2};
     typedef mtsDoubleVec PositionJointType;

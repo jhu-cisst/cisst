@@ -14,13 +14,13 @@ using namespace std;
 int main(void)
 {
     // Log configuration
-    cmnLogger::SetLoD(10);
-    cmnLogger::GetMultiplexer()->AddChannel(cout, 10);
+    cmnLogger::SetLoD(CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::GetMultiplexer()->AddChannel(cout, CMN_LOG_LOD_VERY_VERBOSE);
     cmnLogger::HaltDefaultLog();
-    cmnLogger::ResumeDefaultLog(10);
+    cmnLogger::ResumeDefaultLog(CMN_LOG_LOD_VERY_VERBOSE);
     // add a log per thread
     osaThreadedLogFile threadedLog("example6-");
-    cmnLogger::GetMultiplexer()->AddChannel(threadedLog, 10);
+    cmnLogger::GetMultiplexer()->AddChannel(threadedLog, CMN_LOG_LOD_VERY_VERBOSE);
 
     // create a single task
     mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
@@ -38,7 +38,7 @@ int main(void)
         // instantiate the UI in the current thread 
         UI = new userInterface("Robot1", robotInterface);
     } else {
-        CMN_LOG(1) << "It looks like there is no \"Robot1\" interface" << std::endl;
+        CMN_LOG_INIT_ERROR << "It looks like there is no \"Robot1\" interface" << std::endl;
     }
 
     // start the task

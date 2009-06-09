@@ -42,7 +42,7 @@ http://www.cisst.org/cisst/license.txt.
 
 class myGenericObject: public cmnGenericObject {
  public:
-    inline void Message(cmnLogger::LoDType lod) {
+    inline void Message(cmnLogLoD lod) {
         CMN_LOG(lod) << "Function " << Services()->GetName() << ": " << lod << std::endl;
         CMN_LOG_CLASS(lod) << lod << std::endl;
     }
@@ -50,21 +50,21 @@ class myGenericObject: public cmnGenericObject {
 
 class TestA: public myGenericObject {
     /* register this class with a default LoD 5 */
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 5);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 public:
 };
 CMN_DECLARE_SERVICES_INSTANTIATION(TestA);
 
 class TestB : public myGenericObject {
     /* register this class with a default LoD 7 */
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 7);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_VERBOSE);
 public:
 };
 CMN_DECLARE_SERVICES_INSTANTIATION(TestB);
 
 class TestC : public myGenericObject {
     /* register this class with a default LoD 3 */
-    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, 3);
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_INIT_VERBOSE);
 public:
 };
 CMN_DECLARE_SERVICES_INSTANTIATION(TestC);
@@ -76,7 +76,7 @@ public:
 
 class TestC2: public TestC {
     /* register this class with a default LoD 1 */
-    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, 1);
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 public:
     unsigned int Size;
     double * Elements;
@@ -104,7 +104,7 @@ CMN_DECLARE_SERVICES_INSTANTIATION(TestC2);
 template <int _x, int _y>
 class TestD: public cmnGenericObject {
     /* register these classes with LoD 9 */
-    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, 9);
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_VERY_VERBOSE);
 public:
     enum {X = _x};
     enum {Y = _y};

@@ -71,9 +71,9 @@ void cmnPath::Set(const std::string & path) {
 
 void cmnPath::Add(const std::string & path, bool head) {
     Tokenizer.Parse(path);
-    CMN_LOG_CLASS(3) << "Adding the following \""
-                     << path << "\" at the "
-                     << (head ? "beginning" : "end") << std::endl;
+    CMN_LOG_CLASS_INIT_VERBOSE << "Adding the following \""
+                               << path << "\" at the "
+                               << (head ? "beginning" : "end") << std::endl;
     const char* const* tokens = Tokenizer.GetTokensArray(); 
     iterator position = head ? Path.begin() : Path.end();
     while (*tokens != NULL) {
@@ -81,22 +81,22 @@ void cmnPath::Add(const std::string & path, bool head) {
         // std::cout << *tokens << std::endl;
         *tokens ++;
     }
-    CMN_LOG_CLASS(3) << "Path is now set to: " << ToString() << std::endl;
+    CMN_LOG_CLASS_INIT_VERBOSE << "Path is now set to: " << ToString() << std::endl;
 }
 
 
 void cmnPath::AddFromEnvironment(const std::string & variableName, bool head) {
-    CMN_LOG_CLASS(3) << "Adding path defined by the environment variable \""
-                     << variableName << "\" at the "
-                     << (head ? "beginning" : "end") << std::endl;
+    CMN_LOG_CLASS_INIT_VERBOSE << "Adding path defined by the environment variable \""
+                               << variableName << "\" at the "
+                               << (head ? "beginning" : "end") << std::endl;
     char * environmentVariable = 0;
     environmentVariable = getenv(variableName.c_str());
     if (environmentVariable) {
         std::string path = environmentVariable;
         this->Add(FromNative(path), head);
     } else {
-        CMN_LOG_CLASS(1) << "The environment variable \"" << variableName
-                         << "\" doesn't seem to be defined" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "The environment variable \"" << variableName
+                                 << "\" doesn't seem to be defined" << std::endl;
         return;
     }
 }
@@ -114,10 +114,10 @@ std::string cmnPath::Find(const std::string & filename, short mode) const {
         ++iter;
     }
     if (iter == end) {
-        CMN_LOG_CLASS(3) << "Couldn't find file \"" << filename << "\" in path " << ToString() << std::endl;
+        CMN_LOG_CLASS_RUN_WARNING << "Couldn't find file \"" << filename << "\" in path " << ToString() << std::endl;
         return "";
     }
-    CMN_LOG_CLASS(3) << "Found \"" << fullName << "\" in path " << ToString() << std::endl;
+    CMN_LOG_CLASS_RUN_VERBOSE << "Found \"" << fullName << "\" in path " << ToString() << std::endl;
     return fullName;
 }
 
@@ -127,11 +127,11 @@ bool cmnPath::Remove(const std::string & directory) {
     iter = std::find(Path.begin(), Path.end(), directory);
     if (iter != Path.end()) {
         Path.erase(iter);
-        CMN_LOG_CLASS(3) << "Directory " << directory << " found and removed from current path. "
-                         << "Path is now set to: " << ToString() << std::endl;
+        CMN_LOG_CLASS_INIT_VERBOSE << "Directory " << directory << " found and removed from current path. "
+                                   << "Path is now set to: " << ToString() << std::endl;
         return true;
     }
-    CMN_LOG_CLASS(3) << "Directory " << directory << " not found in current path." << std::endl;
+    CMN_LOG_CLASS_INIT_VERBOSE << "Directory " << directory << " not found in current path." << std::endl;
     return false;	
 }
 

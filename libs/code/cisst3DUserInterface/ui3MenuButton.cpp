@@ -47,8 +47,8 @@ bool ui3MenuButton::CreateVTKObjects(void)
     path.Add("/", cmnPath::TAIL);
     std::string iconFullName = path.Find(this->IconFile, cmnPath::READ);
     if (iconFullName == "") {
-        CMN_LOG(2) << "CreateVTKObjects: can find \"" << this->IconFile
-                   << "\" in path: " << path << std::endl;
+        CMN_LOG_INIT_WARNING << "CreateVTKObjects: can find \"" << this->IconFile
+                             << "\" in path: " << path << std::endl;
     }
     this->PNGReader->SetFileName(iconFullName.c_str());
     

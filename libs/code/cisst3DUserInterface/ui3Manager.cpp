@@ -156,8 +156,8 @@ bool ui3Manager::AddVideoBackgroundToRenderer(const std::string & renderername, 
 
 ui3Manager * ui3Manager::GetUIManager(void)
 {
-    CMN_LOG_CLASS(2) << "GetUIManager: Called on ui3Manager itself.  Might reveal an error as this behavior is not \"managed\""
-                     << std::endl;
+    CMN_LOG_CLASS_INIT_WARNING << "GetUIManager: Called on ui3Manager itself.  Might reveal an error as this behavior is not \"managed\""
+                               << std::endl;
     return this;
 }
 
@@ -279,11 +279,11 @@ void ui3Manager::ConnectAll(void)
                 commandName = "SecondaryMasterCartesianPosition";
                 break;
             default:
-                CMN_LOG_CLASS(1) << "ConnectAll: unknown arm role" << std::endl;
+                CMN_LOG_CLASS_INIT_ERROR << "ConnectAll: unknown arm role" << std::endl;
             }
-            CMN_LOG_CLASS(7) << "ConnectAll: added state data \""
-                             << commandName << "\" using master arm \"" 
-                             << (*armIterator)->Name << "\"" << std::endl;
+            CMN_LOG_CLASS_RUN_WARNING << "ConnectAll: added state data \""
+                                      << commandName << "\" using master arm \"" 
+                                      << (*armIterator)->Name << "\"" << std::endl;
             this->StateTable.AddData((*armIterator)->CartesianPosition, commandName);
             behaviorsInterface->AddCommandReadState(this->StateTable, (*armIterator)->CartesianPosition,
                                                     commandName);
@@ -304,7 +304,7 @@ void ui3Manager::ConnectAll(void)
                                                    mtsRequired);
                     break;
                 default:
-                    CMN_LOG_CLASS(1) << "ConnectAll: unknown arm role" << std::endl;
+                    CMN_LOG_CLASS_INIT_ERROR << "ConnectAll: unknown arm role" << std::endl;
                 }
                 // this will attempt to connect multiple times, need to put ouside the loop
                 this->TaskManager->Connect((*iterator)->GetName(), "ManagerInterface",
@@ -325,7 +325,7 @@ void ui3Manager::DispatchButtonEvent(const ui3MasterArm::RoleType & armRole, con
         this->Manager->ActiveBehavior->SecondaryMasterButtonEvent(buttonEvent);
         break;
     default:
-        CMN_LOG_CLASS(5) << "DispatchButtonEvent: unknown role" << std::endl;
+        CMN_LOG_CLASS_RUN_ERROR << "DispatchButtonEvent: unknown role" << std::endl;
     }
 }
 
@@ -333,7 +333,7 @@ void ui3Manager::DispatchButtonEvent(const ui3MasterArm::RoleType & armRole, con
 
 void ui3Manager::Startup(void)
 {
-    CMN_LOG_CLASS(3) << "StartUp: begin" << std::endl;
+    CMN_LOG_CLASS_INIT_VERBOSE << "StartUp: begin" << std::endl;
     CMN_ASSERT(Renderers.size());
 
     this->SceneManager = new ui3SceneManager;
@@ -394,7 +394,7 @@ void ui3Manager::Startup(void)
     }
     // success
     // return true;
-    CMN_LOG_CLASS(3) << "StartUp: end" << std::endl;
+    CMN_LOG_CLASS_INIT_VERBOSE << "StartUp: end" << std::endl;
     // Perform UI manager initialization
     // TO DO
 }
@@ -509,7 +509,7 @@ void ui3Manager::Run(void)
 
 bool ui3Manager::SetupRenderers()
 {
-    CMN_LOG_CLASS(3) << "Setting up VTK renderers: begin" << std::endl;
+    CMN_LOG_CLASS_INIT_VERBOSE << "Setting up VTK renderers: begin" << std::endl;
 
     unsigned int i;
     double bgheight, bgwidth;
@@ -567,7 +567,7 @@ bool ui3Manager::SetupRenderers()
         this->Renderers[i]->renderer->SetWindowPosition(this->Renderers[i]->windowposx, this->Renderers[i]->windowposy);
     }
 
-    CMN_LOG_CLASS(3) << "Setting up VTK renderers: end" << std::endl;
+    CMN_LOG_CLASS_INIT_VERBOSE << "Setting up VTK renderers: end" << std::endl;
 
     // TO DO:
     //   add some error checking
@@ -643,7 +643,7 @@ void ui3Manager::EnterMaMModeEventHandler(void)
 {
     this->ShowAll();
     this->MaM = true;
-    CMN_LOG_CLASS(9) << "EnterMaMMode" << std::endl;
+    CMN_LOG_CLASS_VERY_VERBOSE << "EnterMaMMode" << std::endl;
 }
 
 
@@ -651,7 +651,7 @@ void ui3Manager::LeaveMaMModeEventHandler(void)
 {
     this->HideAll();
     this->MaM = false;
-    CMN_LOG_CLASS(9) << "LeaveMaMMode" << std::endl;
+    CMN_LOG_CLASS_VERY_VERBOSE << "LeaveMaMMode" << std::endl;
 }
 
 

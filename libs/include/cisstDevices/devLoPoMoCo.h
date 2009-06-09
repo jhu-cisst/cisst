@@ -48,7 +48,7 @@ class devLoPoMoCoBoardIO;
  */
 class devLoPoMoCo: public mtsDevice {
 
-	CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 5);
+	CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
 	/*! A pointer to the low level object that converts make bit level
 	 operation more readable. */

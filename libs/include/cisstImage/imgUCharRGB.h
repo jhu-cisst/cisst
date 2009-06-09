@@ -76,7 +76,7 @@ namespace imgUCharRGB {
         
         std::ofstream file(fileName, std::ios::out | std::ios::binary);
         if (!file) {
-            CMN_LOG(1) << "imgUCharRGB::WritePPM: Can't open file " << fileName << std::endl;
+            CMN_LOG_INIT_ERROR << "imgUCharRGB::WritePPM: Can't open file " << fileName << std::endl;
             return false;
         }
         
@@ -98,7 +98,7 @@ namespace imgUCharRGB {
         file.flush();
         file.close();
         delete[] tempBuffer;
-        CMN_LOG(3) << "imgUCharRGB::WritePPM: Successfully saved as " << fileName << std::endl;
+        CMN_LOG_INIT_WARNING << "imgUCharRGB::WritePPM: Successfully saved as " << fileName << std::endl;
         return true;
     };
 

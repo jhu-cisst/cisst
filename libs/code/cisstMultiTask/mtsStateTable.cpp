@@ -84,16 +84,16 @@ bool mtsStateTable::Write(mtsStateDataId id, const cmnGenericObject &obj) {
     bool result;
     CMN_ASSERT(id != -1);
     if (id == -1) {
-        CMN_LOG(1) << "Class mtsStateTable: Write: obj must be created using NewElement " << std::endl;
+        CMN_LOG_INIT_ERROR << "Class mtsStateTable: Write: obj must be created using NewElement " << std::endl;
         return false;
     }
     if (!StateVector[id]) {
-        CMN_LOG(1) << "Class mtsStateTable: Write: No state data array corresponding to given id: " << id << std::endl;
+        CMN_LOG_INIT_ERROR << "Class mtsStateTable: Write: No state data array corresponding to given id: " << id << std::endl;
         return false;
     }
     result = StateVector[id]->Set(IndexWriter, obj);
     if (!result) {
-        CMN_LOG(1) << "Class mtsStateTable: Error setting data array value in id: " << id << std::endl;
+        CMN_LOG_INIT_ERROR << "Class mtsStateTable: Error setting data array value in id: " << id << std::endl;
     }
     return result;
 }

@@ -139,8 +139,8 @@ void robotLowLevel::Run(void)
         for (index = 0; index < NB_JOINTS; index++) {
             PositionJointRobot1[index] = GoalJointRobot1[index] + SomeNoise();
         }
-        CMN_LOG_CLASS(7) << "Robot1: " << PositionJointRobot1 << " (end)"
-                         << std::endl;
+        CMN_LOG_CLASS_RUN_WARNING << "Robot1: " << PositionJointRobot1 << " (end)"
+                                  << std::endl;
         IsMovingRobot1 = false;
         MotionFinishedRobot1(PositionJointRobot1);
     }
@@ -159,8 +159,8 @@ void robotLowLevel::Run(void)
         for (index = 0; index < NB_JOINTS; index++) {
             PositionJointRobot2[index] = GoalJointRobot2[index] + SomeNoise();
         }
-        CMN_LOG_CLASS(7) << "Robot2: " << PositionJointRobot2 << " (end)"
-                         << std::endl;
+        CMN_LOG_CLASS_RUN_WARNING << "Robot2: " << PositionJointRobot2 << " (end)"
+                                  << std::endl;
         IsMovingRobot2 = false;
         MotionFinishedRobot2(PositionJointRobot2);
     }

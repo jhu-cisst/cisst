@@ -48,13 +48,13 @@ void * mtsTaskPeriodic::RunInternal(void *data)
         ThreadBuddy.WaitForRemainingPeriod();
 	}
 
-	CMN_LOG_CLASS(7) << "End of task " << Name << std::endl;
+	CMN_LOG_CLASS_RUN_WARNING << "End of task " << Name << std::endl;
 	CleanupInternal();
 	return this->retValue;
 }
 
 void mtsTaskPeriodic::StartupInternal(void) {
-    CMN_LOG_CLASS(3) << "Starting StartupInternal (periodic) for " << Name << std::endl;
+    CMN_LOG_CLASS_INIT_VERBOSE << "Starting StartupInternal (periodic) for " << Name << std::endl;
     // user defined initialization, find commands from associated resource interfaces 
     ThreadBuddy.Create(GetName().c_str(), cmnInternalTo_ns(Period)); // convert to nano seconds
 
@@ -108,7 +108,7 @@ mtsTaskPeriodic::mtsTaskPeriodic(const std::string & name, double periodicityInS
 
 
 mtsTaskPeriodic::~mtsTaskPeriodic() {
-    CMN_LOG_CLASS(5) << "mtsTaskPeriodic destructor: deleting task " << Name << std::endl;
+    CMN_LOG_CLASS_RUN_ERROR << "mtsTaskPeriodic destructor: deleting task " << Name << std::endl;
     //If the task was waiting on a queue, i.e. semaphore, mailbox,
     //etc, it is removed from such a queue and messaging tasks
     //pending on its message queue are unblocked with an error return.
@@ -126,7 +126,7 @@ void mtsTaskPeriodic::Suspend(void)
     if (TaskState == ACTIVE) {
         BaseType::Suspend();
         ThreadBuddy.Suspend();
-        CMN_LOG_CLASS(5) << "Suspended task " << Name << std::endl;
+        CMN_LOG_CLASS_RUN_DEBUG << "Suspended task " << Name << std::endl;
     }
 }
 

@@ -25,10 +25,10 @@ void displayTask::Configure(const std::string & CMN_UNUSED(filename))
     // file and then configure the user interface
     double maxValue = 0.5; double minValue = 5.0;
     double startValue =  1.0;
-    CMN_LOG_CLASS(3) << "Configure: setting bounds to: "
-                     << minValue << ", " << maxValue << std::endl;
-    CMN_LOG_CLASS(3) << "Configure: setting start value to: "
-                     << startValue << std::endl;
+    CMN_LOG_CLASS_INIT_VERBOSE << "Configure: setting bounds to: "
+                               << minValue << ", " << maxValue << std::endl;
+    CMN_LOG_CLASS_INIT_VERBOSE << "Configure: setting start value to: "
+                               << startValue << std::endl;
     UI.Amplitude->bounds(minValue, maxValue);
     UI.Amplitude->value(startValue);
     AmplitudeData = startValue;
@@ -51,12 +51,12 @@ void displayTask::Run(void)
         AmplitudeData = UI.Amplitude->value();
         Generator.SetAmplitude(AmplitudeData);
         UI.AmplitudeChanged = false;
-        CMN_LOG_CLASS(7) << "Run: " << this->GetTick()
-                         << " - Amplitude: " << AmplitudeData << std::endl;
+        CMN_LOG_CLASS_RUN_VERBOSE << "Run: " << this->GetTick()
+                                  << " - Amplitude: " << AmplitudeData << std::endl;
     }
     // log some extra information
-    CMN_LOG_CLASS(7) << "Run : " << this->GetTick()
-                     << " - Data: " << Data << std::endl;
+    CMN_LOG_CLASS_RUN_VERBOSE << "Run : " << this->GetTick()
+                              << " - Data: " << Data << std::endl;
     // update the UI, process UI events 
     if (Fl::check() == 0) {
         Kill();

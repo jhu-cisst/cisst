@@ -61,21 +61,21 @@ void displayTask::Startup(void)
         // based on the size (number of joints) of the device used
         if (this->DeviceProvidesJointPosition) {
             this->JointPosition.Allocate(GetJointPosition.GetCommand()->GetArgumentPrototype());
-            CMN_LOG_CLASS(3) << "Startup: Device has "
-                             << this->JointPosition.Position().size()
-                             << " joints" << std::endl;
+            CMN_LOG_CLASS_INIT_VERBOSE << "Startup: Device has "
+                                       << this->JointPosition.Position().size()
+                                       << " joints" << std::endl;
         }
         // the output stream insertion operator << is overloaded for mtsFunction
-        CMN_LOG_CLASS(3) << "Startup:\n - GetCartesianPosition function: "
-                         << GetCartesianPosition
-                         << "\n - GetCartesianVelocity function: "
-                         << GetCartesianVelocity
-                         << "\n - GetJointPosition function: "
-                         << GetJointPosition
-                         << std::endl;
+        CMN_LOG_CLASS_INIT_VERBOSE << "Startup:\n - GetCartesianPosition function: "
+                                   << GetCartesianPosition
+                                   << "\n - GetCartesianVelocity function: "
+                                   << GetCartesianVelocity
+                                   << "\n - GetJointPosition function: "
+                                   << GetJointPosition
+                                   << std::endl;
     } else {
-        CMN_LOG_CLASS(1) << "Startup: can not find provided interface for required interface Robot"
-                         << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "Startup: can not find provided interface for required interface Robot"
+                                 << std::endl;
         exit(-1);
     }
     // make the UI visible
@@ -120,8 +120,8 @@ void displayTask::Run(void)
         UI.NewReference = false;
     }
     // log some extra information
-    CMN_LOG_CLASS(7) << "Run : " << now.Ticks()
-                     << " - Data: " << CartesianPosition << std::endl;
+    CMN_LOG_CLASS_RUN_WARNING << "Run : " << now.Ticks()
+                              << " - Data: " << CartesianPosition << std::endl;
     // update the UI, process UI events 
     if (Fl::check() == 0) {
         ExitFlag = true;

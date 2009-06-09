@@ -77,7 +77,7 @@ public:
     ~nmrSVDFixedSizeTestObject() {}
     void *RunThread(argument arg)
     {
-        CMN_LOG(1) << "nmrSVDTest: Running thread #" << arg.number << ", " << arg.times << " iterations" << std::endl;
+        CMN_LOG_INIT_ERROR << "nmrSVDTest: Running thread #" << arg.number << ", " << arg.times << " iterations" << std::endl;
         for (int i = 0; i < arg.times; i++) {
             vctRandom(input, 0.0, 10.0);
             inputOrig.Assign(input);
@@ -119,7 +119,7 @@ public:
     ~nmrSVDDynamicTestObject() {}
     void *RunThread(argument arg)
     {
-        CMN_LOG(1) << "nmrSVDTest: Running thread #" << arg.number << ", " << arg.times << " iterations" << std::endl;
+        CMN_LOG_INIT_ERROR << "nmrSVDTest: Running thread #" << arg.number << ", " << arg.times << " iterations" << std::endl;
         for (int i = 0; i < arg.times; i++) {
             cmnRandomSequence & randomSequence = cmnRandomSequence::GetInstance();
             randomSequence.ExtractRandomValue(10, 20, rows);

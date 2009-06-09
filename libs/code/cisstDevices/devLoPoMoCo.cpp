@@ -122,8 +122,8 @@ void devLoPoMoCo::parseInputArgument(const std::string &inputArgument, std::stri
     }
 
     relativeFilePath += "/"; // append a '/' at the end
-    CMN_LOG_CLASS(1) <<" input file name: "<<inputArgument<<","<<"relative file path: "<<relativeFilePath<<","
-                     <<" file name: "<<fileName<<std::endl;
+    CMN_LOG_CLASS_INIT_ERROR << " input file name: "<<inputArgument<<","<<"relative file path: "<<relativeFilePath<<","
+                             << " file name: "<<fileName<<std::endl;
 
 }
 
@@ -132,17 +132,17 @@ void devLoPoMoCo::ConfigureOneBoard(const std::string& filename, const int board
 
 	// Example@ daVinciLeftMasterBoard1.xml, high level xml: daVinciLoPoMoCoMasterLeft.xml
 	if (filename == "") {
-		CMN_LOG_CLASS(2)<< "Warning, could not configure single LoPoMoCo device" << std::endl;
+		CMN_LOG_CLASS_INIT_WARNING << "could not configure single LoPoMoCo device" << std::endl;
 		return;
 	}
-
+    
 	struct stat st;
 	if (stat(filename.c_str(), &st) < 0) {
-		CMN_LOG_CLASS(2) << "Invalid filename!! " << filename << std::endl;
+		CMN_LOG_CLASS_INIT_WARNING << "Invalid filename!! " << filename << std::endl;
 		return;
 	}
-
-	CMN_LOG_CLASS(3) << "Configuring a LoPoMoCo board with \"" << filename <<"\"" << std::endl;
+    
+	CMN_LOG_CLASS_INIT_VERBOSE << "Configuring a LoPoMoCo board with \"" << filename <<"\"" << std::endl;
 	cmnXMLPath xmlConfig;
 	xmlConfig.SetInputSource(filename);
 	char path[60];
@@ -163,7 +163,7 @@ void devLoPoMoCo::ConfigureOneBoard(const std::string& filename, const int board
 	xmlConfig.GetXMLValue(context.c_str(), "@StartAxis", StartAxis[boardIndex]);
 	xmlConfig.GetXMLValue(context.c_str(), "@EndAxis", EndAxis[boardIndex]);
 
-	CMN_LOG_CLASS(3) << "StartAxis: " << StartAxis[boardIndex] << "   EndAxis: " << EndAxis[boardIndex] << std::endl << "BaseAddress: " << BaseAddress[boardIndex] << std::endl;
+	CMN_LOG_CLASS_INIT_VERBOSE << "StartAxis: " << StartAxis[boardIndex] << "   EndAxis: " << EndAxis[boardIndex] << std::endl << "BaseAddress: " << BaseAddress[boardIndex] << std::endl;
 
 	// MaxAxis is the number of axes used on a board
 	MaxAxis[boardIndex] = EndAxis[boardIndex] - StartAxis[boardIndex];
@@ -176,10 +176,10 @@ void devLoPoMoCo::ConfigureOneBoard(const std::string& filename, const int board
 	// version 1 boards return 0xa0a
 	// some Board[boardIndex] with 10K50E also return 0xc0c
     // The MR-Robot FPGA (which emulates a LoPoMoCo) returns 0xCCDD
-	CMN_LOG_CLASS(3) << "Version: " << version << std::endl;
+	CMN_LOG_CLASS_INIT_VERBOSE << "Version: " << version << std::endl;
 	if (!( ( version & 0xFF0F )== 0xb0b || (version == 0xa0a) || (version == 0xc0c) || (version == 0xCCDD) )) {
-        CMN_LOG_CLASS(3) << "WARNING: Could not find a LoPoMoCo board at address (decimal) " << BaseAddress[boardIndex] << std::endl;
-        CMN_LOG_CLASS(3) << "Actually, this just means that the version number does not match" <<std::endl;
+        CMN_LOG_CLASS_INIT_VERBOSE << "WARNING: Could not find a LoPoMoCo board at address (decimal) " << BaseAddress[boardIndex] << std::endl;
+        CMN_LOG_CLASS_INIT_VERBOSE << "Actually, this just means that the version number does not match" <<std::endl;
     }
 
 	//unsigned short listEncoders[] = {1, 1, 1, 1};
@@ -227,7 +227,7 @@ void devLoPoMoCo::ConfigureOneBoard(const std::string& filename, const int board
 		sprintf(path, "Axis[%d]/DAC/CurrentLimitToCounts/@VoltageToCounts", axis+1);
 		xmlConfig.GetXMLValue(context.c_str(), path, VoltageToCounts[axis]);
 	}
-	CMN_LOG_CLASS(3) << "Configured a LoPoMoCo board: #" <<boardIndex<< std::endl;
+	CMN_LOG_CLASS_INIT_VERBOSE << "Configured a LoPoMoCo board: #" <<boardIndex<< std::endl;
 
 }
 
@@ -244,10 +244,10 @@ void devLoPoMoCo::Configure(const std::string& filename){ //, const std::string 
 	// we need the path in order to read other files embedded in the top-level configuration file
 	parseInputArgument(filename, relativePathToConfigFiles, justFileName);
 
-	CMN_LOG_CLASS(2)<< "Configuring a LoPoMoCo device with "<<numberOfBoards<<" boards, and "<<numberOfAxes<<" axis total"<<std::endl;
+	CMN_LOG_CLASS_INIT_WARNING<< "Configuring a LoPoMoCo device with "<<numberOfBoards<<" boards, and "<<numberOfAxes<<" axis total"<<std::endl;
 
 	if (justFileName == "") {
-		CMN_LOG_CLASS(2) << "Warning, could not configure LoPoMoCo device" << std::endl;
+		CMN_LOG_CLASS_INIT_WARNING << "Warning, could not configure LoPoMoCo device" << std::endl;
 		return;
 	}
 
@@ -256,12 +256,12 @@ void devLoPoMoCo::Configure(const std::string& filename){ //, const std::string 
 
 	struct stat st;
 	if (stat(justFileName.c_str(), &st) < 0) {
-		CMN_LOG_CLASS(2) << "Invalid justFileName!! " << justFileName << std::endl;
+		CMN_LOG_CLASS_INIT_WARNING << "Invalid justFileName!! " << justFileName << std::endl;
 		return;
 	}
 
 
-	CMN_LOG_CLASS(3) << "Configuring LoPoMoCo with \"" << justFileName << "\"" << std::endl;
+	CMN_LOG_CLASS_INIT_VERBOSE << "Configuring LoPoMoCo with \"" << justFileName << "\"" << std::endl;
 	cmnXMLPath xmlConfig;
 	xmlConfig.SetInputSource(justFileName);
 
@@ -290,11 +290,11 @@ void devLoPoMoCo::Configure(const std::string& filename){ //, const std::string 
 		for (boardIndex = 0; boardIndex < numberOfBoards; boardIndex++) {
 			//configFiles[boardIndex].insert(0, RelativePathToConfigFiles);
             configFiles[boardIndex].insert(0, relativePathToConfigFiles);
-			CMN_LOG_CLASS(3) << "Configuring board " << boardIndex + 1 << " with " << configFiles[boardIndex] << std::endl;
+			CMN_LOG_CLASS_INIT_VERBOSE << "Configuring board " << boardIndex + 1 << " with " << configFiles[boardIndex] << std::endl;
 			ConfigureOneBoard(configFiles[boardIndex].c_str(), boardIndex);
 		}
 	} else {
-		CMN_LOG_CLASS(1) << "Couldn't find all the required ConfigFile in " << justFileName << std::endl;
+		CMN_LOG_CLASS_INIT_ERROR << "Couldn't find all the required ConfigFile in " << justFileName << std::endl;
 	}
 }
 
@@ -306,10 +306,10 @@ void devLoPoMoCo::Enable(const cmnShort & axisIndex) {
 	int boardIndex;
 	boardIndex = MapAxisToBoard(axisIndex.Data);
 	if (boardIndex != -1) {
-		CMN_LOG_CLASS(7)<< "Enabling motor " << axisIndex.Data << std::endl;
+		CMN_LOG_CLASS_RUN_WARNING<< "Enabling motor " << axisIndex.Data << std::endl;
 		Board[boardIndex]->EnableMotor(axisIndex.Data - StartAxis[boardIndex]);
 	} else {
-		CMN_LOG_CLASS(5) << "Enabling motor " << axisIndex.Data
+		CMN_LOG_CLASS_RUN_ERROR << "Enabling motor " << axisIndex.Data
 		<< " failed since the index is out of range ["
 		<< StartAxis[boardIndex]<< ", " << EndAxis[boardIndex] << "]" << std::endl;
 	}
@@ -318,12 +318,12 @@ void devLoPoMoCo::Disable(const cmnShort & axisIndex) {
 	int boardIndex;
 	boardIndex = MapAxisToBoard(axisIndex.Data);
 	if (boardIndex != -1) {
-		CMN_LOG_CLASS(7)<< "Disabling motor " << axisIndex.Data << std::endl;
+		CMN_LOG_CLASS_RUN_WARNING << "Disabling motor " << axisIndex.Data << std::endl;
 		Board[boardIndex]->DisableMotor(axisIndex.Data - StartAxis[boardIndex]);
 	} else {
-		CMN_LOG_CLASS(5) << "Disabling motor " << axisIndex.Data
-		<< " failed since the index is out of range ["
-		<< StartAxis[boardIndex]<< ", " << EndAxis[boardIndex] << "]" << std::endl;
+		CMN_LOG_CLASS_RUN_ERROR << "Disabling motor " << axisIndex.Data
+                                << " failed since the index is out of range ["
+                                << StartAxis[boardIndex]<< ", " << EndAxis[boardIndex] << "]" << std::endl;
 	}
 }
 
@@ -332,16 +332,16 @@ void devLoPoMoCo::ResetEncoders(const cmnShort & axisIndex) {
 	int boardIndex = MapAxisToBoard(axisIndex.Data);
 
 	if (boardIndex != -1) {
-		CMN_LOG_CLASS(7)<< "Resetting encoder " << axisIndex.Data<< std::endl;
+		CMN_LOG_CLASS_RUN_WARNING << "Resetting encoder " << axisIndex.Data << std::endl;
 		Board[boardIndex]->SetEncoderIndices(false, 0x00, axisIndex.Data-StartAxis[boardIndex]);
 		listEncoders[axisIndex.Data-StartAxis[boardIndex]] = 1;
 		Board[boardIndex]->SetEncoderPreloadRegister(0x007FFFFF);
 		Board[boardIndex]->PreLoadEncoders(listEncoders);
 		//Board->SetEncoderIndices(true, MaxAxis, 0x00);
 	} else {
-		CMN_LOG_CLASS(5) << "Resetting encoder " << axisIndex.Data
-		<< " failed since the index is out of range ["
-		<< StartAxis[boardIndex] << ", " << EndAxis[boardIndex] << "]" << std::endl;
+		CMN_LOG_CLASS_RUN_ERROR << "Resetting encoder " << axisIndex.Data
+                                << " failed since the index is out of range ["
+                                << StartAxis[boardIndex] << ", " << EndAxis[boardIndex] << "]" << std::endl;
 	}
 }
 
@@ -392,7 +392,7 @@ void devLoPoMoCo::GetPositions(mtsLongVec & Positions) const {
 			//EncoderFrequencies.Data[axis] = Board->GetEncoderFrequency();
 			Board[boardIndex]->SetEncoderIndices(false, MaxAxis[boardIndex], axis);
 			Positions[axis + StartAxis[boardIndex]] = Board[boardIndex]->GetEncoder() - 0x007FFFFF;
-            //CMN_LOG_CLASS(1) <<"position" <<Positions<<std::endl;
+            //CMN_LOG_CLASS_INIT_ERROR <<"position" <<Positions<<std::endl;
 		}
 	}
 }

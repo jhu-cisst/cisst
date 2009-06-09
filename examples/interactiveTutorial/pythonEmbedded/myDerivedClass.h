@@ -41,7 +41,7 @@ http://www.cisst.org/cisst/license.txt.
 // end of code for the DLL generation
 
 class CISST_EXPORT myDerivedClass: public cmnGenericObject {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 5);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
     
 protected:
     vctDouble3 fixedVector;

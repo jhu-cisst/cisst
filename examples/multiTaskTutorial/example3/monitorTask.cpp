@@ -44,8 +44,8 @@ void monitorTask::Run(void)
            (CurrentPosition[i] != PreviousPosition[i])) {
             if ((!CurrentPosition[i].Greater(lowerBound)) 
                 || (!CurrentPosition[i].Lesser(upperBound))) {
-                CMN_LOG_CLASS(1) << "Run: robot " << i+1 << " out of bounds" 
-                                 << std::endl;
+                CMN_LOG_CLASS_INIT_ERROR << "Run: robot " << i+1 << " out of bounds" 
+                                         << std::endl;
                 Robot[i].StopRobot();
             }
         }

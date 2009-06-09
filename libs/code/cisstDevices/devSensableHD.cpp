@@ -148,9 +148,9 @@ void devSensableHD::Run(void)
     // check for errors and abort the callback if a scheduler error
     HDErrorInfo error;
     if (HD_DEVICE_ERROR(error = hdGetError())) {
-        CMN_LOG(5) << "devSensableHDCallback: Device error detected";
+        CMN_LOG_RUN_ERROR << "devSensableHDCallback: Device error detected";
         if (hduIsSchedulerError(&error)) {
-            CMN_LOG(5) << "devSensableHDCallback: Scheduler error detected";
+            CMN_LOG_RUN_ERROR << "devSensableHDCallback: Scheduler error detected";
             this->Driver->CallbackReturnValue = HD_CALLBACK_DONE;
             return;
         }
@@ -167,7 +167,7 @@ void devSensableHD::Run(void)
 devSensableHD::devSensableHD(const std::string & taskName):
     mtsTaskFromCallbackAdapter(taskName, 5000)
 {
-    CMN_LOG_CLASS(4) << "constructor called, looking for \"DefaultArm\"" << std::endl;
+    CMN_LOG_CLASS_INIT_DEBUG << "constructor called, looking for \"DefaultArm\"" << std::endl;
     Devices["DefaultArm"] = 0;
     this->SetupInterfaces();
 }
@@ -176,7 +176,7 @@ devSensableHD::devSensableHD(const std::string & taskName):
 devSensableHD::devSensableHD(const std::string & taskName, const std::string & firstDeviceName):
     mtsTaskFromCallbackAdapter(taskName, 5000)
 {
-    CMN_LOG_CLASS(4) << "constructor called, looking for \"" << firstDeviceName << "\"" << std::endl;
+    CMN_LOG_CLASS_INIT_DEBUG << "constructor called, looking for \"" << firstDeviceName << "\"" << std::endl;
     Devices[firstDeviceName] = 0;
     this->SetupInterfaces();
 }
@@ -188,12 +188,12 @@ devSensableHD::devSensableHD(const std::string & taskName,
     mtsTaskFromCallbackAdapter(taskName, 5000)
 {
     if (firstDeviceName == secondDeviceName) {
-        CMN_LOG_CLASS(1) << "In constructor: name of devices provided are identical, \""
-                         << firstDeviceName << "\" and \""
-                         << secondDeviceName << "\"" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "In constructor: name of devices provided are identical, \""
+                                 << firstDeviceName << "\" and \""
+                                 << secondDeviceName << "\"" << std::endl;
     }
-    CMN_LOG_CLASS(4) << "constructor called, looking for \"" << firstDeviceName
-                     << "\" and \"" << secondDeviceName << "\"" << std::endl;
+    CMN_LOG_CLASS_INIT_DEBUG << "constructor called, looking for \"" << firstDeviceName
+                             << "\" and \"" << secondDeviceName << "\"" << std::endl;
     Devices[firstDeviceName] = 0;
     Devices[secondDeviceName] = 0;
     this->SetupInterfaces();
@@ -230,7 +230,7 @@ void devSensableHD::SetupInterfaces(void)
         deviceData->VelocityCartesian.VelocityAngular().SetAll(0.0);
 
         // create interface with the device name, i.e. the map key
-        CMN_LOG_CLASS(4) << "SetupInterfaces: creating interface \"" << interfaceName << "\"" << std::endl;
+        CMN_LOG_CLASS_INIT_DEBUG << "SetupInterfaces: creating interface \"" << interfaceName << "\"" << std::endl;
         providedInterface = this->AddProvidedInterface(interfaceName);
 
         // add the state data to the table
@@ -278,8 +278,8 @@ void devSensableHD::SetupInterfaces(void)
         this->Driver->CallbackReturnValue = HD_CALLBACK_CONTINUE;
         this->SetThreadReturnValue(static_cast<void *>(&this->Driver->CallbackReturnValue));
     }
-    CMN_LOG_CLASS(4) << "SetupInterfaces: interfaces created: " << std::endl
-                     << *this << std::endl;
+    CMN_LOG_CLASS_INIT_DEBUG << "SetupInterfaces: interfaces created: " << std::endl
+                             << *this << std::endl;
 }
 
 
@@ -317,15 +317,15 @@ void devSensableHD::Create(void * data)
         CMN_ASSERT(deviceData);
         deviceData->DeviceHandle = hdInitDevice(interfaceName.c_str());
         if (HD_DEVICE_ERROR(error = hdGetError())) {
-            CMN_LOG_CLASS(1) << "Create: Failed to initialize haptic device \""
-                             << interfaceName << "\"" << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "Create: Failed to initialize haptic device \""
+                                     << interfaceName << "\"" << std::endl;
             deviceData->DeviceEnabled = false;
             return;
         }
         deviceData->DeviceEnabled = true;
-        CMN_LOG_CLASS(3) << "Create: Found device model: "
-                         << hdGetString(HD_DEVICE_MODEL_TYPE) << " for device \""
-                         << interfaceName << "\"" << std::endl;
+        CMN_LOG_CLASS_INIT_VERBOSE << "Create: Found device model: "
+                                   << hdGetString(HD_DEVICE_MODEL_TYPE) << " for device \""
+                                   << interfaceName << "\"" << std::endl;
         
     }
 
@@ -347,7 +347,7 @@ void devSensableHD::Start(void)
     hdStartScheduler();
     // Check for errors
     if (HD_DEVICE_ERROR(error = hdGetError())) {
-        CMN_LOG_CLASS(1) << "Start: Failed to start scheduler" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "Start: Failed to start scheduler" << std::endl;
     }
     
     // Call base class Start function

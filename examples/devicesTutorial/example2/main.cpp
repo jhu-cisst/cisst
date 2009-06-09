@@ -14,15 +14,15 @@ using namespace std;
 int main(void)
 {
     // log configuration
-    cmnLogger::SetLoD(10);
-    cmnLogger::GetMultiplexer()->AddChannel(cout, 10);
+    cmnLogger::SetLoD(CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::GetMultiplexer()->AddChannel(cout, CMN_LOG_LOD_VERY_VERBOSE);
     // add a log per thread
     osaThreadedLogFile threadedLog("example1-");
-    cmnLogger::GetMultiplexer()->AddChannel(threadedLog, 10);
+    cmnLogger::GetMultiplexer()->AddChannel(threadedLog, CMN_LOG_LOD_VERY_VERBOSE);
     // specify a higher, more verbose log level for these classes
-    cmnClassRegister::SetLoD("mtsTaskInterface", 5);
-    cmnClassRegister::SetLoD("mtsTaskManager", 5);
-    cmnClassRegister::SetLoD("devSartoriusSerial", 5);
+    cmnClassRegister::SetLoD("mtsTaskInterface", CMN_LOG_LOD_RUN_ERROR);
+    cmnClassRegister::SetLoD("mtsTaskManager", CMN_LOG_LOD_RUN_ERROR);
+    cmnClassRegister::SetLoD("devSartoriusSerial", CMN_LOG_LOD_RUN_ERROR);
 
     // create our two tasks
     const long PeriodDisplay = 10; // in milliseconds

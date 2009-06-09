@@ -57,8 +57,8 @@ public:
   mtsMap() : Map(), MapName("???") {}
   mtsMap(const std::string & mapName) : Map(), MapName(mapName) {}
   ~mtsMap() {}
-  bool AddItem(const std::string & name, _ItemType * item, cmnLogger::LoDType lod = 99);
-  _ItemType *GetItem(const std::string & name, cmnLogger::LoDType lod = 99) const;
+  bool AddItem(const std::string & name, _ItemType * item, cmnLogLoD lod = CMN_LOG_LOD_RUN_ERROR);
+  _ItemType *GetItem(const std::string & name, cmnLogLoD lod = CMN_LOG_LOD_RUN_ERROR) const;
   std::vector<std::string> GetNames() const;
   typedef void (_ItemType::*VoidFuncPtr)(void);
   void ForEachVoid(VoidFuncPtr f);
@@ -71,7 +71,7 @@ public:
 };
 
 template <class _ItemType>
-bool mtsMap<_ItemType>::AddItem(const std::string & name, _ItemType *item, cmnLogger::LoDType lod)
+bool mtsMap<_ItemType>::AddItem(const std::string & name, _ItemType *item, cmnLogLoD lod)
 {
     // check if this name already exists
     typename MapType::const_iterator iterator = Map.find(name);
@@ -85,7 +85,7 @@ bool mtsMap<_ItemType>::AddItem(const std::string & name, _ItemType *item, cmnLo
 }
 
 template <class _ItemType>
-_ItemType *mtsMap<_ItemType>::GetItem(const std::string & itemName, cmnLogger::LoDType lod) const {
+_ItemType *mtsMap<_ItemType>::GetItem(const std::string & itemName, cmnLogLoD lod) const {
     typename MapType::const_iterator iter;
     iter = Map.find(itemName);
     if (iter != Map.end())

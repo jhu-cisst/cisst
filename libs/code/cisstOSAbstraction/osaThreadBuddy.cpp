@@ -150,11 +150,11 @@ void osaThreadBuddy::Create(const char *name, double period, int stack_size) {
     // 6 characters.
     Data->RTTask = rt_task_init_schmod(nam2num(name), 0, stack_size, 0, SCHED_FIFO, 0xF);
     if (!Data->RTTask) {
-        CMN_LOG(1) << "OOPS!!! Couldn't create Proxy object" << std::endl;
+        CMN_LOG_INIT_ERROR << "OOPS!!! Couldn't create Proxy object" << std::endl;
         exit(1);
     }
     if (rt_task_use_fpu(Data->RTTask, 1) < 0) {
-        CMN_LOG(1) << "OOPS!!! FPU couldn't be allocated" << std::endl;
+        CMN_LOG_INIT_ERROR << "OOPS!!! FPU couldn't be allocated" << std::endl;
     }
     // maybe this should be just before we make code real-time
     // causes failure of memory intensive calls such as openGL
@@ -177,7 +177,7 @@ void osaThreadBuddy::Create(const char *name, double period, int stack_size) {
         // been used, CreateWaitableTimer will return a handle to the existing timer.
         Data->WaitTimer = CreateWaitableTimer(NULL, true, NULL);
         if (Data->WaitTimer == NULL) {
-            CMN_LOG(1) << "OOPS! Couldn't create a waitable timer" << std::endl;
+            CMN_LOG_INIT_ERROR << "OOPS! Couldn't create a waitable timer" << std::endl;
         }
     }
 }
@@ -276,10 +276,10 @@ void osaThreadBuddy::WaitForRemainingPeriod(void) {
             Data->DueTime.QuadPart = ulnow.QuadPart + Period;
 #endif
             if (QueryPerformanceCounter(&Data->DueTime) ==0 ) {
-                CMN_LOG(1) << "No performance counter available" << std::endl;
+                CMN_LOG_INIT_ERROR << "No performance counter available" << std::endl;
             }
             if (QueryPerformanceFrequency(&liTimerFrequency) == 0) {
-                CMN_LOG(1) << "No performance counter available" << std::endl;
+                CMN_LOG_INIT_ERROR << "No performance counter available" << std::endl;
             }
             // QueryPerformanceFrequency returns counts per second. Divide by 1e9 to
             // get counts per nanosecond.

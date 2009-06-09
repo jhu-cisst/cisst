@@ -308,7 +308,7 @@ protected:
 	/*! Get an element, returning 0 if out of bound*/
 	inline RealType GetElement(index_type row, index_type col) const{
 		if(Data->ValidIndex(row,col)) {
-		//	CMN_LOG(1)<<"row = "<<row<<",col = "<<col<<",data = "<<Data->Element(row,col)<<endl;
+		//	CMN_LOG_INIT_ERROR<<"row = "<<row<<",col = "<<col<<",data = "<<Data->Element(row,col)<<endl;
 			return Data->Element(row, col);
 		} else {
 			return value_type(0);
@@ -328,7 +328,7 @@ protected:
 				pLRow*pHCol*GetElement(row  ,col+1) + 	
 				pHRow*pLCol*GetElement(row+1,col  ) + 	
 				pHRow*pHCol*GetElement(row+1,col+1);
-		//CMN_LOG(1)<<"row = "<<row<<",col = "<<col<<"result = "<<result<<endl;
+		//CMN_LOG_INIT_ERROR<<"row = "<<row<<",col = "<<col<<"result = "<<result<<endl;
 		return	result;
 	}
 	

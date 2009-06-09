@@ -27,7 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 
 
 class staticAllInline: public cmnGenericObject {
-    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, 5);
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
 public:
     inline staticAllInline(void) {}
@@ -40,7 +40,7 @@ public:
 CMN_DECLARE_SERVICES_INSTANTIATION(staticAllInline);
 
 class staticNoInline: public cmnGenericObject {
-    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, 5);
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
 public:
     staticNoInline(void);

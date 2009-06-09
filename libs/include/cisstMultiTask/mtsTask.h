@@ -59,7 +59,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 class CISST_EXPORT mtsTask: public mtsDevice
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 5);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
     friend class mtsTaskManager;
 
@@ -293,7 +293,7 @@ public:
       This method will return a null pointer if the required interface
       has not been connected.  See mtsTaskManager::Connect. */
     mtsDeviceInterface * GetProvidedInterfaceFor(const std::string & requiredInterfaceName) {
-        mtsRequiredInterface *requiredInterface = RequiredInterfaces.GetItem(requiredInterfaceName, 3);
+        mtsRequiredInterface *requiredInterface = RequiredInterfaces.GetItem(requiredInterfaceName, CMN_LOG_LOD_INIT_WARNING);
         return requiredInterface ? requiredInterface->GetConnectedInterface() : 0;
     }
 
@@ -398,7 +398,7 @@ inline mtsCommandVoidBase * mtsDevice::AddCommandVoid(void (__classType::*action
             return deviceInterface->AddCommandVoid(action, classInstantiation, commandName);
         }
     }
-    CMN_LOG_CLASS(1) << "AddCommandVoid cannot find an interface named " << providedInterfaceName << std::endl;
+    CMN_LOG_CLASS_INIT_ERROR << "AddCommandVoid cannot find an interface named " << providedInterfaceName << std::endl;
     return 0;
 }
 
@@ -414,7 +414,7 @@ inline mtsCommandVoidBase * mtsDevice::AddCommandVoid(void (*action)(void),
             return deviceInterface->AddCommandVoid(action, commandName);
         }
     }
-    CMN_LOG_CLASS(1) << "AddCommandVoid cannot find an interface named " << providedInterfaceName << std::endl;
+    CMN_LOG_CLASS_INIT_ERROR << "AddCommandVoid cannot find an interface named " << providedInterfaceName << std::endl;
     return 0;
 }
 
@@ -433,7 +433,7 @@ inline mtsCommandWriteBase * mtsDevice::AddCommandWrite(void (__classType::*acti
             return deviceInterface->AddCommandWrite(action, classInstantiation, commandName, argumentModel);
         }
     }
-    CMN_LOG_CLASS(1) << "AddCommandWrite cannot find an interface named " << providedInterfaceName << std::endl;
+    CMN_LOG_CLASS_INIT_ERROR << "AddCommandWrite cannot find an interface named " << providedInterfaceName << std::endl;
     return 0;
 }
 
@@ -449,7 +449,7 @@ inline mtsCommandWriteBase * mtsTask::AddEventHandlerWrite(void (__classType::*a
     if (requiredInterface) {
         return requiredInterface->AddEventHandlerWrite(action, classInstantiation, commandName, argumentModel, queued);
     }
-    CMN_LOG_CLASS(1) << "AddEventHandlerWrite: cannot find an interface named " << requiredInterfaceName << std::endl;
+    CMN_LOG_CLASS_INIT_ERROR << "AddEventHandlerWrite: cannot find an interface named " << requiredInterfaceName << std::endl;
     return 0;
 }
 
@@ -464,7 +464,7 @@ inline mtsCommandVoidBase * mtsTask::AddEventHandlerVoid(void (__classType::*act
     if (requiredInterface) {
         return requiredInterface->AddEventHandlerVoid(action, classInstantiation, commandName, queued);
     }
-    CMN_LOG_CLASS(1) << "AddEventHandlerVoid: cannot find an interface named " << requiredInterfaceName << std::endl;
+    CMN_LOG_CLASS_INIT_ERROR << "AddEventHandlerVoid: cannot find an interface named " << requiredInterfaceName << std::endl;
     return 0;
 }
 

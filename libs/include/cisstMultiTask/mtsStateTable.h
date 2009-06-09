@@ -121,7 +121,7 @@ public:
                         ret = Table.ValidateReadIndex(start);
                 }
                 else
-                    CMN_LOG(1) << "ReadVectorFromReader: data not available" << std::endl;
+                    CMN_LOG_INIT_ERROR << "ReadVectorFromReader: data not available" << std::endl;
             }
             return ret;
         }

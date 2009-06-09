@@ -123,7 +123,7 @@ void ui3VTKRenderer::Render(void)
                                    true);
         }
     } else {
-        CMN_LOG_CLASS(1) << "Render: attempt to render before the VTK Window Renderer has been created" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "Render: attempt to render before the VTK Window Renderer has been created" << std::endl;
     }
 }
 

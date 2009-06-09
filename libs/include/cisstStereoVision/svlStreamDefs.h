@@ -244,7 +244,7 @@ public:
         if (videochannel < _VideoChannels) return OCVImageHeader[videochannel];
         else return 0;
 #else // CISST_SVL_HAS_OPENCV
-        CMN_LOG(2) << "Class svlSampleImageCustom: IplImageRef() called while OpenCV is disabled" << std::endl;
+        CMN_LOG_INIT_WARNING << "Class svlSampleImageCustom: IplImageRef() called while OpenCV is disabled" << std::endl;
         return 0;
 #endif // CISST_SVL_HAS_OPENCV
     }

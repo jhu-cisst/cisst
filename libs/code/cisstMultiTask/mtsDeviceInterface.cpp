@@ -27,19 +27,19 @@ CMN_IMPLEMENT_SERVICES(mtsDeviceInterface)
 
 
 mtsCommandVoidBase * mtsDeviceInterface::GetCommandVoid(const std::string & commandName) const {
-    return CommandsVoid.GetItem(commandName, 1);
+    return CommandsVoid.GetItem(commandName, CMN_LOG_LOD_INIT_ERROR);
 }
 
 mtsCommandReadBase * mtsDeviceInterface::GetCommandRead(const std::string & commandName) const {
-    return CommandsRead.GetItem(commandName, 1);
+    return CommandsRead.GetItem(commandName, CMN_LOG_LOD_INIT_ERROR);
 }
 
 mtsCommandWriteBase * mtsDeviceInterface::GetCommandWrite(const std::string & commandName) const {
-    return CommandsWrite.GetItem(commandName, 1);
+    return CommandsWrite.GetItem(commandName, CMN_LOG_LOD_INIT_ERROR);
 }
 
 mtsCommandQualifiedReadBase * mtsDeviceInterface::GetCommandQualifiedRead(const std::string & commandName) const {
-    return CommandsQualifiedRead.GetItem(commandName, 1);
+    return CommandsQualifiedRead.GetItem(commandName, CMN_LOG_LOD_INIT_ERROR);
 }
 
 std::vector<std::string> mtsDeviceInterface::GetNamesOfCommands(void) const {
@@ -103,12 +103,12 @@ mtsCommandVoidBase * mtsDeviceInterface::AddEventVoid(const std::string & eventN
             return eventMulticastCommand;
         }
         delete eventMulticastCommand;
-        CMN_LOG_CLASS(1) << "AddEventVoid: unable to add event \""
-                         << eventName << "\"" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "AddEventVoid: unable to add event \""
+                                 << eventName << "\"" << std::endl;
         return 0;
     }
-    CMN_LOG_CLASS(0) << "AddEventVoid: unable to create multi-cast command for event \""
-                     << eventName << "\"" << std::endl;
+    CMN_LOG_CLASS_INIT_ERROR << "AddEventVoid: unable to create multi-cast command for event \""
+                             << eventName << "\"" << std::endl;
     return 0;
 }
 
@@ -117,10 +117,10 @@ bool mtsDeviceInterface::AddEvent(const std::string & name, mtsMulticastCommandV
 {
     if (EventWriteGenerators.GetItem(name)) {
         // Is this check really needed?
-        CMN_LOG_CLASS(3) << "AddEvent (void): event " << name << " already exists as write event, ignored." << std::endl;
+        CMN_LOG_CLASS_INIT_VERBOSE << "AddEvent (void): event " << name << " already exists as write event, ignored." << std::endl;
         return false;
     }
-    return EventVoidGenerators.AddItem(name, generator, 1);
+    return EventVoidGenerators.AddItem(name, generator, CMN_LOG_LOD_INIT_ERROR);
 }
 
 
@@ -128,10 +128,10 @@ bool mtsDeviceInterface::AddEvent(const std::string & name, mtsMulticastCommandW
 {
     if (EventVoidGenerators.GetItem(name)) {
         // Is this check really needed?
-        CMN_LOG_CLASS(3) << "AddEvent (write): event " << name << " already exists as void event, ignored." << std::endl;
+        CMN_LOG_CLASS_INIT_VERBOSE << "AddEvent (write): event " << name << " already exists as void event, ignored." << std::endl;
         return false;
     }
-    return EventWriteGenerators.AddItem(name, generator, 1);
+    return EventWriteGenerators.AddItem(name, generator, CMN_LOG_LOD_INIT_ERROR);
 }
 
 
@@ -153,7 +153,7 @@ bool mtsDeviceInterface::AddObserver(const std::string & eventName, mtsCommandVo
         multicastCommand->AddCommand(handler);
         return true;
     } else {
-        CMN_LOG_CLASS(1) << "AddObserver (void): cannot find event named \"" << eventName << "\"" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "AddObserver (void): cannot find event named \"" << eventName << "\"" << std::endl;
         return false;
     }
 }
@@ -167,7 +167,7 @@ bool mtsDeviceInterface::AddObserver(const std::string & eventName, mtsCommandWr
         multicastCommand->AddCommand(handler);
         return true;
     } else {
-        CMN_LOG_CLASS(1) << "AddObserver (write): cannot find event named \"" << eventName << "\"" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "AddObserver (write): cannot find event named \"" << eventName << "\"" << std::endl;
         return false;
     }
 }
@@ -189,12 +189,12 @@ unsigned int mtsDeviceInterface::AllocateResourcesForCurrentThread(void)
         }
     }
     if (!found) {
-        CMN_LOG_CLASS(3) << "AllocateResourcesForCurrentThread: new thread Id (" << consumerId << ")" << std::endl;
+        CMN_LOG_CLASS_INIT_VERBOSE << "AllocateResourcesForCurrentThread: new thread Id (" << consumerId << ")" << std::endl;
         ThreadIdCounters.resize(ThreadIdCounters.size() + 1,
                                 ThreadIdCounterPairType(consumerId, 1));
         return 1;
     } else {
-        CMN_LOG_CLASS(3) << "AllocateResourcesForCurrentThread: already registered thread Id (" << consumerId << ")" << std::endl;
+        CMN_LOG_CLASS_INIT_VERBOSE << "AllocateResourcesForCurrentThread: already registered thread Id (" << consumerId << ")" << std::endl;
         return (iterator->second)++;
     }
 }

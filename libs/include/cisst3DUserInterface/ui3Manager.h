@@ -37,7 +37,7 @@ class svlRenderTargetBase;
 */
 class ui3Manager: public ui3BehaviorBase
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 5);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
     
     friend class ui3BehaviorBase;
     friend class ui3MasterArm;
@@ -264,12 +264,12 @@ protected:
 private:
 
     inline ui3VisibleObject * GetVisibleObject(void) {
-        CMN_LOG_CLASS(5) << "GetVisibleObject: this method should never be called" << std::endl;
+        CMN_LOG_CLASS_RUN_ERROR << "GetVisibleObject: this method should never be called" << std::endl;
         return 0;
     }
 
     inline void ConfigureMenuBar(void) {
-        CMN_LOG_CLASS(5) << "ConfigureMenuBar: this method should never be called" << std::endl;
+        CMN_LOG_CLASS_RUN_ERROR << "ConfigureMenuBar: this method should never be called" << std::endl;
     }
 
     void SetActiveBehavior(ui3BehaviorBase * newBehavior);

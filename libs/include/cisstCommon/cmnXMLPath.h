@@ -113,7 +113,7 @@ class CISST_EXPORT cmnXMLPath: public cmnGenericObject {
     /*! Register this class with a default level of detail 1.  Levels
       of details are 1 for errors, 2 for warnings and 3 for very
       verbose.  */
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 5);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
 	/*! Libxml2 document source */
 	xmlDocPtr Document;

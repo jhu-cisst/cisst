@@ -40,7 +40,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 class ui3VisibleList: public ui3VisibleObject
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 5);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
     friend class ui3SceneManager;
 

@@ -66,7 +66,7 @@ http://www.cisst.org/cisst/license.txt.
   "/bin" and "/usr/bin".
 */
 class CISST_EXPORT cmnPath: public cmnGenericObject {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 5);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
 public:
     /*! Container used to store the directories. */

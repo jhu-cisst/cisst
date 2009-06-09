@@ -35,7 +35,7 @@ class CursorAnchor;
 */
 class ui3CursorSphere: public ui3CursorBase
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 5);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
 protected:  
     /*! VTK objects used for the cursor itself, i.e. a simple

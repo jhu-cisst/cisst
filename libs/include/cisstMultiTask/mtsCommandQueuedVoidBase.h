@@ -94,8 +94,8 @@ class CISST_EXPORT mtsCommandQueuedVoidBase: public mtsCommandVoidBase
             if (MailBox->Write(this)) {
                 return mtsCommandBase::DEV_OK;
             }
-            CMN_LOG(5) << "Class mtsCommandQueuedVoid: Execute(): Mailbox full for \"" 
-                       << this->Name << "\"" <<  std::endl;
+            CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedVoid: Execute(): Mailbox full for \"" 
+                              << this->Name << "\"" <<  std::endl;
             return mtsCommandBase::MAILBOX_FULL;
         }
         return mtsCommandBase::DISABLED;

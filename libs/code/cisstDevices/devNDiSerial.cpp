@@ -215,7 +215,7 @@ devNDiSerial::devNDiSerial(const string & taskName, double period):
     serialPort.SetPortNumber(1);
     serialPort.SetFlowControl(osaSerialPort::FlowControlHardware);
     if (!serialPort.Open())  {
-        CMN_LOG_CLASS(1) << "Sorry, can't open serial port: " << serialPort.GetPortName() << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "Sorry, can't open serial port: " << serialPort.GetPortName() << std::endl;
     }
     SetTimeout(8.0 * cmn_s); //Set the timeout at one second
     SetCommSettings(osaSerialPort::BaudRate115200, osaSerialPort::ParityCheckingEven,
@@ -226,7 +226,7 @@ devNDiSerial::devNDiSerial(const string & taskName, double period):
 
 void devNDiSerial::Configure(const std::string & filename)
 {
-    CMN_LOG_CLASS(3) << "Configure: Using file \"" << filename << "\"" << std::endl;
+    CMN_LOG_CLASS_INIT_VERBOSE << "Configure: Using file \"" << filename << "\"" << std::endl;
 
     /* Configure "System" Interface */
     mtsProvidedInterface * providedInterface = AddProvidedInterface("System");
@@ -244,7 +244,7 @@ void devNDiSerial::Configure(const std::string & filename)
         /* Configure Tool Interfaces */
         ParseFile(filename);
     } else {
-        CMN_LOG_CLASS(1) << "Configure: can not add provided interface \"System\"" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "Configure: can not add provided interface \"System\"" << std::endl;
     }
 }
 
@@ -313,8 +313,8 @@ void devNDiSerial::ConfigureToolInterface(Tool * tool)
         this->StateTable.AddData(tool->ToolInformation, nameToolInformation);
         providedInterface->AddCommandReadState(this->StateTable, tool->ToolInformation, "GetToolInformation");
     } else {
-        CMN_LOG_CLASS(1) << "ConfigureToolInterface: can not add provided interface for tool \""
-                         << tool->GetName() << "\"" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "ConfigureToolInterface: can not add provided interface for tool \""
+                                 << tool->GetName() << "\"" << std::endl;
     }
 }
 
@@ -334,8 +334,8 @@ void devNDiSerial::SetTimeout(double timeInSeconds)
     // realtime duration of timeout
     this->NumTimeoutCycles =
         static_cast<int>(timeInSeconds / (this->Period))+1;
-    CMN_LOG_CLASS(4) << "TimeOutLimit Set at: " << this->NumTimeoutCycles
-                     << std::endl;
+    CMN_LOG_CLASS_INIT_DEBUG << "TimeOutLimit Set at: " << this->NumTimeoutCycles
+                             << std::endl;
 }
 
 
@@ -344,20 +344,20 @@ void devNDiSerial::ParseFile(const std::string & filename)
     // parse the configure file to get serial numbers of active tools
     // used, so they can be later mapped to created tools
     
-    CMN_LOG_CLASS(3) << "Parsing File \"" << filename << "\"" << std::endl;
+    CMN_LOG_CLASS_INIT_VERBOSE << "Parsing File \"" << filename << "\"" << std::endl;
     int i;
     //Open File
     ifstream configurationFile(filename.c_str(), ios::in);
     if (!configurationFile) {
-        CMN_LOG_CLASS(1) << "Could not find/open file \"" << filename << "\"" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "Could not find/open file \"" << filename << "\"" << std::endl;
     }
     
     // Tracker Type and Number of Tools
     string tracker;
     int number;
     configurationFile >> tracker >> number;
-    CMN_LOG_CLASS(3) << "Tracker Type: " << tracker << std::endl;
-    CMN_LOG_CLASS(3) << "Number of Tools: " << number << std::endl;
+    CMN_LOG_CLASS_INIT_VERBOSE << "Tracker Type: " << tracker << std::endl;
+    CMN_LOG_CLASS_INIT_VERBOSE << "Number of Tools: " << number << std::endl;
     
     //Read All Tools and Configure MapSerialToTool and Tools
     string name;
@@ -372,11 +372,11 @@ void devNDiSerial::ParseFile(const std::string & filename)
         //Check if name or serial number have been used. If used no interface 
         // or tool will be created with that name and a Warning will be thrown.
         if (binary_search(nameVector.begin(), nameVector.end(), name)) {
-            CMN_LOG_CLASS(2)<<"Warning: Tool Name: "<<name<<" already used."<<endl;
+            CMN_LOG_CLASS_INIT_WARNING << "Warning: Tool Name: " << name << " already used." << endl;
         } else if (binary_search(serialVector.begin(), serialVector.end(), serial)) {
-            CMN_LOG_CLASS(2)<<"Warning: Serial Number: "<<serial<<" already used."<<endl;
+            CMN_LOG_CLASS_INIT_WARNING << "Warning: Serial Number: " << serial << " already used." << endl;
         } else {
-            CMN_LOG_CLASS(3)<<"Adding Tool Name: "<<name<<" Serial: "<<serial<< endl; 
+            CMN_LOG_CLASS_INIT_VERBOSE << "Adding Tool Name: " << name << " Serial: " << serial << endl; 
             Tools[i] = new Tool(name, serial);
             Tools[i]->SetDisabled(true);
             Tools[i]->SetInitialized(false);
@@ -424,10 +424,10 @@ void devNDiSerial::InitPorts(string phsrReply, int i)
         commandStream << "pinit "
                       << phsrReply.substr(2 + i*5, 2) //first 2 chars are number of porthandles index 2 and 3 is porthandle 1...
                       << "\r";
-        CMN_LOG_CLASS(4) << phsrReply << std::endl;
+        CMN_LOG_CLASS_INIT_DEBUG << phsrReply << std::endl;
         SendCommand(commandStream.str());
     }else{
-        CMN_LOG_CLASS(4) << "InitPorts(): No Ports"<<endl;
+        CMN_LOG_CLASS_INIT_DEBUG << "InitPorts(): No Ports" << endl;
     } 
     RunStatus = PORT_INITIALIZE;
 }
@@ -449,10 +449,10 @@ void devNDiSerial::GetSerialNumber(std::string phsrReply, int i)
         commandStream << "phinf "
                       << phsrReply.substr(2 + i*5, 2)
                       << "\r";
-        CMN_LOG_CLASS(4) << "GetSerialNumber():"<< phsrReply.substr(2 + i*5, 2) << std::endl;
+        CMN_LOG_CLASS_INIT_DEBUG << "GetSerialNumber():"<< phsrReply.substr(2 + i*5, 2) << std::endl;
         SendCommand(commandStream.str());
     } else {
-        CMN_LOG_CLASS(4) << "GetSerialNumber(): No portHandles"<<endl;
+        CMN_LOG_CLASS_INIT_DEBUG << "GetSerialNumber(): No portHandles"<<endl;
     } 
     RunStatus = ACQUIRE_SERIAL;
 }
@@ -466,10 +466,10 @@ void devNDiSerial::EnablePorts(string phsrReply, int i)
         commandStream << "pena "
                       << phsrReply.substr(2 + i*5, 2)
                       << "D\r";
-        CMN_LOG_CLASS(4) << phsrReply << std::endl;
+        CMN_LOG_CLASS_INIT_DEBUG << phsrReply << std::endl;
         SendCommand(commandStream.str());
     } else {
-        CMN_LOG_CLASS(4) << "EnablePorts(): No Ports"<<endl;
+        CMN_LOG_CLASS_INIT_DEBUG << "EnablePorts(): No Ports"<<endl;
     } 
     RunStatus = PORT_ENAB;
 }
@@ -491,10 +491,10 @@ void devNDiSerial::FreePorts(string phsrReply, int i)
         commandStream << "phf "
                       << phsrReply.substr(2 + i*5, 2)
                       << "\r";
-        CMN_LOG_CLASS(4) << phsrReply << std::endl;
+        CMN_LOG_CLASS_INIT_DEBUG << phsrReply << std::endl;
         SendCommand(commandStream.str());
     } else {
-        CMN_LOG_CLASS(4) << "FreePorts(): No Ports"<<endl;
+        CMN_LOG_CLASS_INIT_DEBUG << "FreePorts(): No Ports"<<endl;
     } 
     RunStatus = PORT_FREE;
 }
@@ -694,11 +694,11 @@ void devNDiSerial::ProcessBX() {
 	    
             //cout << MapPortToTool[(int)handlenum]->GetName() << ": " << "(" <<p[4] << ", "<< p[5]<< ", "<< p[6] << ")" << endl;
         } else if (handlestat == 2) {
-            CMN_LOG_CLASS(7) << (int)handlenum << "MISSING" << endl;
+            CMN_LOG_CLASS_RUN_WARNING << (int)handlenum << "MISSING" << endl;
         } else if (handlestat == 4) {
-            CMN_LOG_CLASS(8) << (int)handlenum << "DISABLED" << endl;
+            CMN_LOG_CLASS_RUN_DEBUG << (int)handlenum << "DISABLED" << endl;
         } else{
-            CMN_LOG_CLASS(1) << "RunBX(): handlestat is wrong or too many handles: "<< (int)handlestat << "  " <<(int)handlenum << endl; 
+            CMN_LOG_CLASS_INIT_ERROR << "RunBX(): handlestat is wrong or too many handles: "<< (int)handlestat << "  " <<(int)handlenum << endl; 
         }
         PointerToValue(currentPointer,temp);   
         PointerToValue(currentPointer,temp); 
@@ -727,7 +727,7 @@ bool devNDiSerial::Reply(int expectedLength) {
     if (FlagBXREPLY) {
         if (ReplyIndex >4)
             IndefinateReplyLength = bin2Short(ReplyBuffer,2)+8;
-        CMN_LOG_CLASS(1) << "indefinate " << (IndefinateReplyLength -ReplyIndex) <<endl;
+        CMN_LOG_CLASS_INIT_ERROR << "indefinate " << (IndefinateReplyLength -ReplyIndex) <<endl;
     } else {
         if (expectedLength > -1) {
             IndefinateReplyLength = expectedLength; 
@@ -741,7 +741,7 @@ bool devNDiSerial::Reply(int expectedLength) {
     
     
     if (Replysize == 0 && ReplyIndex == 0) { //this could lead to a stallout, may be frequency is too fast for machine
-        //    CMN_LOG_CLASS(5) << "Reply(): Replysize == 0 && ReplyIndex == 0 trouble " << endl;
+        //    CMN_LOG_CLASS_RUN_ERROR << "Reply(): Replysize == 0 && ReplyIndex == 0 trouble " << endl;
     } else {
         if (Replysize != 0) {
             // if serialport.read has read anything in, throw it to the ReplyBuffer and change the index in ReplyIndex to match total 
@@ -992,13 +992,13 @@ void devNDiSerial::Run(void) {
         FlagSTANDBY = false;
     } else {
         if (TimeoutCounter>NumTimeoutCycles) {
-            CMN_LOG_CLASS(1) << "TIMEOUT DETECTED" << endl;
+            CMN_LOG_CLASS_INIT_ERROR << "TIMEOUT DETECTED" << endl;
             abort();
         }
 	
         if (NumWaitCycles > 0) {
             NumWaitCycles--;
-            CMN_LOG_CLASS(8) << "sleeping: " << NumWaitCycles << endl;
+            CMN_LOG_CLASS_RUN_DEBUG << "sleeping: " << NumWaitCycles << endl;
             return;
         }   
         if (NumWaitCyclesTester > 0) {
@@ -1025,10 +1025,10 @@ void devNDiSerial::Run(void) {
                 serialPort.SetStopBits(osaSerialPort::StopBitsOne);
                 serialPort.SetFlowControl(osaSerialPort::FlowControlSoftware);
                 if (serialPort.Configure()) {
-                    CMN_LOG_CLASS(4) << "Serial port Reset result: \"" << ReplyBuffer << "\"" << std::endl;
+                    CMN_LOG_CLASS_INIT_DEBUG << "Serial port Reset result: \"" << ReplyBuffer << "\"" << std::endl;
                     ProcessNextCommand();
                 } else {
-                    CMN_LOG_CLASS(1) << "CRASH" << endl;
+                    CMN_LOG_CLASS_INIT_ERROR << "CRASH" << endl;
                 }  
             }
             break;
@@ -1037,10 +1037,10 @@ void devNDiSerial::Run(void) {
             if (Reply(L_POL_OK)) {
                 if (ResponseOKAY(ReplyBuffer)) {
 		    
-                    CMN_LOG_CLASS(4) << "init(): INITIALIZE Response: "<< PortIndex << " OKAY" <<endl; 
+                    CMN_LOG_CLASS_INIT_DEBUG << "init(): INITIALIZE Response: "<< PortIndex << " OKAY" <<endl; 
                     ProcessNextCommand();    
                 } else {
-                    CMN_LOG_CLASS(4) << "init(): INITIALIZE Response: "<< PortIndex << " FAIL" <<endl;    
+                    CMN_LOG_CLASS_INIT_DEBUG << "init(): INITIALIZE Response: "<< PortIndex << " FAIL" <<endl;    
                 }
             }
             break;
@@ -1053,9 +1053,9 @@ void devNDiSerial::Run(void) {
                     string ret(ReplyBuffer);
                     ret = ret.substr(23,8);
                     string phsr(PortHandleResponseBuffer);
-                    CMN_LOG_CLASS(4) << "SerialNumber:::" << ret << endl;
+                    CMN_LOG_CLASS_INIT_DEBUG << "SerialNumber:::" << ret << endl;
                     MapPortToTool[stringToInt(phsr.substr(2 + PortIndex*5, 2),0,2)] = MapSerialToTool[ret];
-                    CMN_LOG_CLASS(4) << MapPortToTool[stringToInt(phsr.substr(2 + PortIndex*5, 2),0,2)]->GetName() << endl;
+                    CMN_LOG_CLASS_INIT_DEBUG << MapPortToTool[stringToInt(phsr.substr(2 + PortIndex*5, 2),0,2)]->GetName() << endl;
                     if (PortIndex < NumPorts-1) {
                         PortIndex++;
                         GetSerialNumber(PortHandleResponseBuffer,PortIndex);
@@ -1073,9 +1073,9 @@ void devNDiSerial::Run(void) {
             } else {
                 if (Reply(L_POL_OK)) {  
                     if (ResponseOKAY(ReplyBuffer)) {
-                        CMN_LOG_CLASS(4) << "InitPorts(): Port INITIALIZE Response: "<< PortIndex << " OKAY" <<endl;     
+                        CMN_LOG_CLASS_INIT_DEBUG << "InitPorts(): Port INITIALIZE Response: "<< PortIndex << " OKAY" <<endl;     
                     } else {
-                        CMN_LOG_CLASS(2) << "InitPorts(): Port INITIALIZE Response: "<< PortIndex << " FAIL" <<endl;     
+                        CMN_LOG_CLASS_INIT_WARNING << "InitPorts(): Port INITIALIZE Response: "<< PortIndex << " FAIL" <<endl;     
                     }
                     if (PortIndex < NumPorts-1) {
                         PortIndex++;
@@ -1094,9 +1094,9 @@ void devNDiSerial::Run(void) {
             } else {
                 if (Reply(L_POL_OK)) {
                     if (ResponseOKAY(ReplyBuffer)) {
-                        CMN_LOG_CLASS(4) << "EnablePorts(): Port ENAB Response: "<< PortIndex << " OKAY" <<endl;     
+                        CMN_LOG_CLASS_INIT_DEBUG << "EnablePorts(): Port ENAB Response: "<< PortIndex << " OKAY" <<endl;     
                     } else {
-                        CMN_LOG_CLASS(2) << "EnablePorts(): Port ENAB Response: "<< PortIndex << " FAIL" <<endl;     
+                        CMN_LOG_CLASS_INIT_WARNING << "EnablePorts(): Port ENAB Response: "<< PortIndex << " FAIL" <<endl;     
                     }
                     if (PortIndex < NumPorts-1) {
                         PortIndex++;
@@ -1115,9 +1115,9 @@ void devNDiSerial::Run(void) {
             } else {
                 if (Reply(L_POL_OK)) {
                     if (ResponseOKAY(ReplyBuffer)) {
-                        CMN_LOG_CLASS(4) << "FreePorts(): Port FREE Response: "<< PortIndex << " OKAY" <<endl;     
+                        CMN_LOG_CLASS_INIT_DEBUG << "FreePorts(): Port FREE Response: "<< PortIndex << " OKAY" <<endl;     
                     } else {
-                        CMN_LOG_CLASS(2) << "FreePorts(): Port FREE Response: "<< PortIndex << " FAIL" <<endl;     
+                        CMN_LOG_CLASS_INIT_WARNING << "FreePorts(): Port FREE Response: "<< PortIndex << " FAIL" <<endl;     
                     }
                     if (PortIndex < NumPorts-1) {
                         PortIndex++;
@@ -1133,9 +1133,9 @@ void devNDiSerial::Run(void) {
         case STARTTRACK:
             if (Reply(L_POL_OK)) {
                 if (ResponseOKAY(ReplyBuffer)) {
-                    CMN_LOG_CLASS(3) << "StartTrack(): StartTrack Response: OKAY" <<endl;  
+                    CMN_LOG_CLASS_INIT_VERBOSE << "StartTrack(): StartTrack Response: OKAY" <<endl;  
                 } else {
-                    CMN_LOG_CLASS(1) << "StartTrack(): StartTrack Response: FAIL" <<endl;     
+                    CMN_LOG_CLASS_INIT_ERROR << "StartTrack(): StartTrack Response: FAIL" <<endl;     
                 }
                 ProcessNextCommand();
             }
@@ -1144,9 +1144,9 @@ void devNDiSerial::Run(void) {
         case STOPTRACK:
             if (Reply(L_POL_OK)) {
                 if (ResponseOKAY(ReplyBuffer)) {
-                    CMN_LOG_CLASS(3) << "StartTrack(): StopTrack Response: OKAY" <<endl;     
+                    CMN_LOG_CLASS_INIT_VERBOSE << "StartTrack(): StopTrack Response: OKAY" <<endl;     
                 } else {
-                    CMN_LOG_CLASS(1) << "StartTrack(): StopTrack Response: FAIL" <<endl;     
+                    CMN_LOG_CLASS_INIT_ERROR << "StartTrack(): StopTrack Response: FAIL" <<endl;     
                 }
                 ProcessNextCommand();
             }
@@ -1169,9 +1169,9 @@ void devNDiSerial::Run(void) {
         case COMMSETTINGS:
             if (Reply(L_POL_OK)) {
                 if (ResponseOKAY(ReplyBuffer)) {
-                    CMN_LOG_CLASS(4) << "commSetting(): commSet Response: OKAY" <<endl;     
+                    CMN_LOG_CLASS_INIT_DEBUG << "commSetting(): commSet Response: OKAY" <<endl;     
                 }else{
-                    CMN_LOG_CLASS(1) << "commSetting(): commSet Response: FAIL" <<endl;     
+                    CMN_LOG_CLASS_INIT_ERROR << "commSetting(): commSet Response: FAIL" <<endl;     
                 }
                 ProcessNextCommand();
             }
@@ -1198,7 +1198,7 @@ void devNDiSerial::Run(void) {
             if (Reply(-1)) {
                 memcpy(PortHandleResponseBuffer, ReplyBuffer, 256);
                 NumPorts = stringToInt(PortHandleResponseBuffer, 0, 2);
-                CMN_LOG_CLASS(3) << "Found " << NumPorts << " ports" << std::endl;
+                CMN_LOG_CLASS_INIT_VERBOSE << "Found " << NumPorts << " ports" << std::endl;
                 ProcessNextCommand();
             }
             break;

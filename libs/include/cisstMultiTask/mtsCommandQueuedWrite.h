@@ -75,8 +75,8 @@ public:
         if (argumentPrototype) {
             ArgumentsQueue.SetSize(size, *argumentPrototype);
         } else {
-            CMN_LOG(1) << "Class mtsCommandQueuedWrite: constructor: Can't find argument prototype from actual command."
-                       << std::endl;
+            CMN_LOG_INIT_ERROR << "Class mtsCommandQueuedWrite: constructor: Can't find argument prototype from actual command."
+                               << std::endl;
         }
     }
 
@@ -95,15 +95,15 @@ public:
         if (ArgumentsQueue.GetSize() != size) {
             if (ArgumentsQueue.GetSize() > 0) {
                 // Probably should never happen
-                CMN_LOG(3) << "Class mtsCommandQueuedWrite: Allocate(): Changing ArgumentsQueue size from " << ArgumentsQueue.GetSize()
-                           << " to " << size << std::endl;
+                CMN_LOG_INIT_WARNING << "Class mtsCommandQueuedWrite: Allocate(): Changing ArgumentsQueue size from " << ArgumentsQueue.GetSize()
+                                     << " to " << size << std::endl;
             }
             const ArgumentType * argumentPrototype = dynamic_cast<const ArgumentType *>(this->GetArgumentPrototype());
             if (argumentPrototype) {
                 ArgumentsQueue.SetSize(size, *argumentPrototype);
             } else {
-                CMN_LOG(1) << "Class mtsCommandQueuedWrite: constructor: Can't find argument prototype from actual command."
-                           << std::endl;
+                CMN_LOG_INIT_ERROR << "Class mtsCommandQueuedWrite: constructor: Can't find argument prototype from actual command."
+                                   << std::endl;
             }
         }
     }
@@ -120,13 +120,13 @@ public:
                 if (MailBox->Write(this)) {
                     return mtsCommandBase::DEV_OK;
                 } else {
-                    CMN_LOG(5) << "Class mtsCommandQueuedWrite: Execute(): Mailbox full for \"" 
-                               << this->Name << "\"" << std::endl;
+                    CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWrite: Execute(): Mailbox full for \"" 
+                                      << this->Name << "\"" << std::endl;
                     ArgumentsQueue.Get();  // Pop argument from local storage
                 }
             } else {
-                CMN_LOG(5) << "Class mtsCommandQueuedWrite: Execute(): ArgumentsQueue full for \""
-                           << this->Name << "\"" << std::endl;
+                CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWrite: Execute(): ArgumentsQueue full for \""
+                                  << this->Name << "\"" << std::endl;
             }
             return mtsCommandBase::MAILBOX_FULL;
         }

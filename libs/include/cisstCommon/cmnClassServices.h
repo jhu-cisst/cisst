@@ -116,7 +116,7 @@ class cmnClassServices: public cmnClassServicesBase {
     typedef cmnClassServicesBase BaseType;
 
     /* documented in base class */
-    typedef BaseType::LoDType LoDType;
+    typedef BaseType::LogLoDType LogLoDType;
 
     /*!  Constructor. Sets the name of the class and the Level of Detail
       setting for the class.
@@ -126,7 +126,7 @@ class cmnClassServices: public cmnClassServicesBase {
       C++ RTTI)
       \param lod The Log Level of Detail setting to be used with this class.
     */
-    cmnClassServices(const std::string& className, const std::type_info * typeInfo, LoDType lod = CMN_LOG_DEFAULT_LOD):
+    cmnClassServices(const std::string & className, const std::type_info * typeInfo, LogLoDType lod = CMN_LOG_LOD_RUN_ERROR):
         BaseType(className, typeInfo, lod)
     {}
 

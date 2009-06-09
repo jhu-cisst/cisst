@@ -29,11 +29,11 @@ public:
     ~IreLaunch() {}
     void *Run(char *startup) {
         try {
-            CMN_LOG(3) << "Using " << (useIPython?"IPython":"wxPython") << std::endl;
+            CMN_LOG_INIT_DEBUG << "using " << (useIPython?"IPython":"wxPython") << std::endl;
             ireFramework::LaunchIREShell(startup, false, useIPython);
         }
         catch (...) {
-            cout << "*** ERROR:  could not launch IRE shell ***" << endl;
+            CMN_LOG_INIT_ERROR << "could not launch IRE shell ***" << endl;
         }
         ireFramework::FinalizeShell();
         return this;
@@ -44,12 +44,12 @@ public:
 int main(int argc, char **argv)
 {
     // log configuration, see previous examples
-    cmnLogger::SetLoD(10);
-    cmnLogger::GetMultiplexer()->AddChannel(cout, 10);
+    cmnLogger::SetLoD(CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::GetMultiplexer()->AddChannel(cout, CMN_LOG_LOD_VERY_VERBOSE);
     cmnLogger::HaltDefaultLog();
-    cmnLogger::ResumeDefaultLog(10);
-    cmnClassRegister::SetLoD("sineTask", 10);
-    cmnClassRegister::SetLoD("displayTask", 10);
+    cmnLogger::ResumeDefaultLog(CMN_LOG_LOD_VERY_VERBOSE);
+    cmnClassRegister::SetLoD("sineTask", CMN_LOG_LOD_VERY_VERBOSE);
+    cmnClassRegister::SetLoD("displayTask", CMN_LOG_LOD_VERY_VERBOSE);
 
     // create our two tasks
     const double PeriodSine = 1 * cmn_ms; // in milliseconds

@@ -102,7 +102,7 @@ bool ui3SceneManager::Unlock(VTKHandleType propHandle)
 {
     // check if we are trying to release with the correct handle
     if (propHandle != this->LockHandle) {
-        CMN_LOG_CLASS(5) << "Release: attempt to release with wrong handle" << std::endl;
+        CMN_LOG_CLASS_RUN_ERROR << "Release: attempt to release with wrong handle" << std::endl;
         return false;
     }
     // set handle to 0 and release

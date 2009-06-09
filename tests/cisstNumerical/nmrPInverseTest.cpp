@@ -88,33 +88,33 @@ see: strang, g., linear algebra and its application, second ed. pp145
         bool ret_value = true;
         for (unsigned int ii = 0; ii < 4; ii++) {
             if (!(error[ii] < tolerance)) {
-                CMN_LOG(1) << cmnPrintf("\nF :\n %.14lf \n") << ii;
-                CMN_LOG(1) << cmnPrintf("E%d :\n %.14lf \n") << ii  << error[ii];
+                CMN_LOG_INIT_ERROR << cmnPrintf("\nF :\n %.14lf \n") << ii;
+                CMN_LOG_INIT_ERROR << cmnPrintf("E%d :\n %.14lf \n") << ii  << error[ii];
                 switch (ii) {
                     case 0:
-                        CMN_LOG(1) << cmnPrintf("EM0:\n %.14lf \n") << E0;
+                        CMN_LOG_INIT_ERROR << cmnPrintf("EM0:\n %.14lf \n") << E0;
                         break;
                     case 1:
-                        CMN_LOG(1) << cmnPrintf("EM1:\n %.14lf \n") << E1;
+                        CMN_LOG_INIT_ERROR << cmnPrintf("EM1:\n %.14lf \n") << E1;
                         break;
                     case 2:
-                        CMN_LOG(1) << cmnPrintf("EM2:\n %.14lf \n") << E2;
+                        CMN_LOG_INIT_ERROR << cmnPrintf("EM2:\n %.14lf \n") << E2;
                         break;
                     case 3:
-                        CMN_LOG(1) << cmnPrintf("EM3:\n %.14lf \n") << E3;
+                        CMN_LOG_INIT_ERROR << cmnPrintf("EM3:\n %.14lf \n") << E3;
                         break;
                 }
                 ret_value &= false;
             }
         }
         if (!ret_value) {
-            CMN_LOG(1) << cmnPrintf("I :\n %.14lf \n") << inputOrig;
-            CMN_LOG(1) << cmnPrintf("U :\n %.14lf \n") << U;
-            CMN_LOG(1) << cmnPrintf("S :\n %.14lf \n") << S;
-            CMN_LOG(1) << cmnPrintf("Vt:\n %.14lf \n") << Vt;
-            CMN_LOG(1) << cmnPrintf("SM:\n %.14lf \n") << SM;
-            CMN_LOG(1) << cmnPrintf("P :\n %.14lf \n") << P;
-            CMN_LOG(1) << cmnPrintf("O :\n %.14lf \n") << pinverse;
+            CMN_LOG_INIT_ERROR << cmnPrintf("I :\n %.14lf \n") << inputOrig;
+            CMN_LOG_INIT_ERROR << cmnPrintf("U :\n %.14lf \n") << U;
+            CMN_LOG_INIT_ERROR << cmnPrintf("S :\n %.14lf \n") << S;
+            CMN_LOG_INIT_ERROR << cmnPrintf("Vt:\n %.14lf \n") << Vt;
+            CMN_LOG_INIT_ERROR << cmnPrintf("SM:\n %.14lf \n") << SM;
+            CMN_LOG_INIT_ERROR << cmnPrintf("P :\n %.14lf \n") << P;
+            CMN_LOG_INIT_ERROR << cmnPrintf("O :\n %.14lf \n") << pinverse;
         }
         CPPUNIT_ASSERT(error[0] < tolerance);
         CPPUNIT_ASSERT(error[1] < tolerance);
@@ -178,33 +178,33 @@ see: strang, g., linear algebra and its application, second ed. pp145
         bool ret_value = true;
         for (unsigned int ii = 0; ii < 4; ii++) {
             if (!(error[ii] < tolerance)) {
-                CMN_LOG(1) << cmnPrintf("\nF :\n %.14lf \n") << ii;
-                CMN_LOG(1) << cmnPrintf("E%d :\n %.14lf \n") << ii  << error[ii];
+                CMN_LOG_INIT_ERROR << cmnPrintf("\nF :\n %.14lf \n") << ii;
+                CMN_LOG_INIT_ERROR << cmnPrintf("E%d :\n %.14lf \n") << ii  << error[ii];
                 switch (ii) {
                     case 0:
-                        CMN_LOG(1) << cmnPrintf("EM0:\n %.14lf \n") << E0;
+                        CMN_LOG_INIT_ERROR << cmnPrintf("EM0:\n %.14lf \n") << E0;
                         break;
                     case 1:
-                        CMN_LOG(1) << cmnPrintf("EM1:\n %.14lf \n") << E1;
+                        CMN_LOG_INIT_ERROR << cmnPrintf("EM1:\n %.14lf \n") << E1;
                         break;
                     case 2:
-                        CMN_LOG(1) << cmnPrintf("EM2:\n %.14lf \n") << E2;
+                        CMN_LOG_INIT_ERROR << cmnPrintf("EM2:\n %.14lf \n") << E2;
                         break;
                     case 3:
-                        CMN_LOG(1) << cmnPrintf("EM3:\n %.14lf \n") << E3;
+                        CMN_LOG_INIT_ERROR << cmnPrintf("EM3:\n %.14lf \n") << E3;
                         break;
                 }
                 ret_value &= false;
             }
         }
         if (!ret_value) {
-            CMN_LOG(1) << cmnPrintf("I :\n %.14lf \n") << inputOrig;
-            CMN_LOG(1) << cmnPrintf("U :\n %.14lf \n") << U;
-            CMN_LOG(1) << cmnPrintf("S :\n %.14lf \n") << S;
-            CMN_LOG(1) << cmnPrintf("Vt:\n %.14lf \n") << Vt;
-            CMN_LOG(1) << cmnPrintf("SM:\n %.14lf \n") << SM;
-            CMN_LOG(1) << cmnPrintf("P :\n %.14lf \n") << P;
-            CMN_LOG(1) << cmnPrintf("O :\n %.14lf \n") << data.PInverse();
+            CMN_LOG_INIT_ERROR << cmnPrintf("I :\n %.14lf \n") << inputOrig;
+            CMN_LOG_INIT_ERROR << cmnPrintf("U :\n %.14lf \n") << U;
+            CMN_LOG_INIT_ERROR << cmnPrintf("S :\n %.14lf \n") << S;
+            CMN_LOG_INIT_ERROR << cmnPrintf("Vt:\n %.14lf \n") << Vt;
+            CMN_LOG_INIT_ERROR << cmnPrintf("SM:\n %.14lf \n") << SM;
+            CMN_LOG_INIT_ERROR << cmnPrintf("P :\n %.14lf \n") << P;
+            CMN_LOG_INIT_ERROR << cmnPrintf("O :\n %.14lf \n") << data.PInverse();
         }
         CPPUNIT_ASSERT(error[0] < tolerance);
         CPPUNIT_ASSERT(error[1] < tolerance);
@@ -269,33 +269,33 @@ see: strang, g., linear algebra and its application, second ed. pp145
         bool ret_value = true;
         for (unsigned int ii = 0; ii < 4; ii++) {
             if (!(error[ii] < tolerance)) {
-                CMN_LOG(1) << cmnPrintf("\nF :\n %.14lf \n") << ii;
-                CMN_LOG(1) << cmnPrintf("E%d :\n %.14lf \n") << ii  << error[ii];
+                CMN_LOG_INIT_ERROR << cmnPrintf("\nF :\n %.14lf \n") << ii;
+                CMN_LOG_INIT_ERROR << cmnPrintf("E%d :\n %.14lf \n") << ii  << error[ii];
                 switch (ii) {
                     case 0:
-                        CMN_LOG(1) << cmnPrintf("EM0:\n %.14lf \n") << E0;
+                        CMN_LOG_INIT_ERROR << cmnPrintf("EM0:\n %.14lf \n") << E0;
                         break;
                     case 1:
-                        CMN_LOG(1) << cmnPrintf("EM1:\n %.14lf \n") << E1;
+                        CMN_LOG_INIT_ERROR << cmnPrintf("EM1:\n %.14lf \n") << E1;
                         break;
                     case 2:
-                        CMN_LOG(1) << cmnPrintf("EM2:\n %.14lf \n") << E2;
+                        CMN_LOG_INIT_ERROR << cmnPrintf("EM2:\n %.14lf \n") << E2;
                         break;
                     case 3:
-                        CMN_LOG(1) << cmnPrintf("EM3:\n %.14lf \n") << E3;
+                        CMN_LOG_INIT_ERROR << cmnPrintf("EM3:\n %.14lf \n") << E3;
                         break;
                 }
                 ret_value &= false;
             }
         }
         if (!ret_value) {
-            CMN_LOG(1) << cmnPrintf("I :\n %.14lf \n") << inputOrig;
-            CMN_LOG(1) << cmnPrintf("U :\n %.14lf \n") << U;
-            CMN_LOG(1) << cmnPrintf("S :\n %.14lf \n") << S;
-            CMN_LOG(1) << cmnPrintf("Vt:\n %.14lf \n") << Vt;
-            CMN_LOG(1) << cmnPrintf("SM:\n %.14lf \n") << SM;
-            CMN_LOG(1) << cmnPrintf("P :\n %.14lf \n") << P;
-            CMN_LOG(1) << cmnPrintf("O :\n %.14lf \n") << data.PInverse();
+            CMN_LOG_INIT_ERROR << cmnPrintf("I :\n %.14lf \n") << inputOrig;
+            CMN_LOG_INIT_ERROR << cmnPrintf("U :\n %.14lf \n") << U;
+            CMN_LOG_INIT_ERROR << cmnPrintf("S :\n %.14lf \n") << S;
+            CMN_LOG_INIT_ERROR << cmnPrintf("Vt:\n %.14lf \n") << Vt;
+            CMN_LOG_INIT_ERROR << cmnPrintf("SM:\n %.14lf \n") << SM;
+            CMN_LOG_INIT_ERROR << cmnPrintf("P :\n %.14lf \n") << P;
+            CMN_LOG_INIT_ERROR << cmnPrintf("O :\n %.14lf \n") << data.PInverse();
         }
         CPPUNIT_ASSERT(error[0] < tolerance);
         CPPUNIT_ASSERT(error[1] < tolerance);
@@ -359,33 +359,33 @@ see: strang, g., linear algebra and its application, second ed. pp145
         bool ret_value = true;
         for (unsigned int ii = 0; ii < 4; ii++) {
             if (!(error[ii] < tolerance)) {
-                CMN_LOG(1) << cmnPrintf("\nF :\n %.14lf \n") << ii;
-                CMN_LOG(1) << cmnPrintf("E%d :\n %.14lf \n") << ii  << error[ii];
+                CMN_LOG_INIT_ERROR << cmnPrintf("\nF :\n %.14lf \n") << ii;
+                CMN_LOG_INIT_ERROR << cmnPrintf("E%d :\n %.14lf \n") << ii  << error[ii];
                 switch (ii) {
                     case 0:
-                        CMN_LOG(1) << cmnPrintf("EM0:\n %.14lf \n") << E0;
+                        CMN_LOG_INIT_ERROR << cmnPrintf("EM0:\n %.14lf \n") << E0;
                         break;
                     case 1:
-                        CMN_LOG(1) << cmnPrintf("EM1:\n %.14lf \n") << E1;
+                        CMN_LOG_INIT_ERROR << cmnPrintf("EM1:\n %.14lf \n") << E1;
                         break;
                     case 2:
-                        CMN_LOG(1) << cmnPrintf("EM2:\n %.14lf \n") << E2;
+                        CMN_LOG_INIT_ERROR << cmnPrintf("EM2:\n %.14lf \n") << E2;
                         break;
                     case 3:
-                        CMN_LOG(1) << cmnPrintf("EM3:\n %.14lf \n") << E3;
+                        CMN_LOG_INIT_ERROR << cmnPrintf("EM3:\n %.14lf \n") << E3;
                         break;
                 }
                 ret_value &= false;
             }
         }
         if (!ret_value) {
-            CMN_LOG(1) << cmnPrintf("I :\n %.14lf \n") << inputOrig;
-            CMN_LOG(1) << cmnPrintf("U :\n %.14lf \n") << U;
-            CMN_LOG(1) << cmnPrintf("S :\n %.14lf \n") << S;
-            CMN_LOG(1) << cmnPrintf("Vt:\n %.14lf \n") << Vt;
-            CMN_LOG(1) << cmnPrintf("SM:\n %.14lf \n") << SM;
-            CMN_LOG(1) << cmnPrintf("P :\n %.14lf \n") << P;
-            CMN_LOG(1) << cmnPrintf("O :\n %.14lf \n") << pinverse;
+            CMN_LOG_INIT_ERROR << cmnPrintf("I :\n %.14lf \n") << inputOrig;
+            CMN_LOG_INIT_ERROR << cmnPrintf("U :\n %.14lf \n") << U;
+            CMN_LOG_INIT_ERROR << cmnPrintf("S :\n %.14lf \n") << S;
+            CMN_LOG_INIT_ERROR << cmnPrintf("Vt:\n %.14lf \n") << Vt;
+            CMN_LOG_INIT_ERROR << cmnPrintf("SM:\n %.14lf \n") << SM;
+            CMN_LOG_INIT_ERROR << cmnPrintf("P :\n %.14lf \n") << P;
+            CMN_LOG_INIT_ERROR << cmnPrintf("O :\n %.14lf \n") << pinverse;
         }
         CPPUNIT_ASSERT(error[0] < tolerance);
         CPPUNIT_ASSERT(error[1] < tolerance);
@@ -443,10 +443,10 @@ void nmrPInverseTest::GenericTestCompareWithMatlab(double input_ptr[], double pi
     }
     error = errorv.LinfNorm();
     if (!(error < tolerance)) {
-        CMN_LOG(1) << cmnPrintf("\nCase No: %d\n") << caseNo;
-        CMN_LOG(1) << cmnPrintf("I:\n%.14f\n") << inputCopy;
-        CMN_LOG(1) << cmnPrintf("O:\n%.14f\n") << output;
-        CMN_LOG(1) << cmnPrintf("E:\n%.14f\n") << errorv;
+        CMN_LOG_INIT_ERROR << cmnPrintf("\nCase No: %d\n") << caseNo;
+        CMN_LOG_INIT_ERROR << cmnPrintf("I:\n%.14f\n") << inputCopy;
+        CMN_LOG_INIT_ERROR << cmnPrintf("O:\n%.14f\n") << output;
+        CMN_LOG_INIT_ERROR << cmnPrintf("E:\n%.14f\n") << errorv;
     }
     CPPUNIT_ASSERT(error < tolerance);
 }

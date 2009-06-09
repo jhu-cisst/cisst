@@ -62,7 +62,7 @@ http://www.cisst.org/cisst/license.txt.
  */
 class CISST_EXPORT mtsDevice: public cmnGenericObject
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 5);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
  protected:
 
@@ -291,7 +291,7 @@ inline mtsCommandReadBase * mtsDevice::AddCommandRead(void (__classType::*action
     if (interfacePointer) {
         return interfacePointer->AddCommandRead(action, classInstantiation, commandName, argumentPrototype);
     }
-    CMN_LOG_CLASS(1) << "AddCommandRead can not find an interface named " << interfaceName << std::endl;
+    CMN_LOG_CLASS_INIT_ERROR << "AddCommandRead can not find an interface named " << interfaceName << std::endl;
     return 0;
 }
 
@@ -307,7 +307,7 @@ inline mtsCommandQualifiedReadBase * mtsDevice::AddCommandQualifiedRead(void (__
     if (interfacePointer) {
         return interfacePointer->AddCommandQualifiedRead(action, classInstantiation, commandName, argument1Prototype, argument2Prototype);
     }
-    CMN_LOG_CLASS(1) << "AddCommandQualifiedRead: can not find an interface named " << interfaceName << std::endl;
+    CMN_LOG_CLASS_INIT_ERROR << "AddCommandQualifiedRead: can not find an interface named " << interfaceName << std::endl;
     return 0;
 }
 
@@ -325,7 +325,7 @@ mtsCommandWriteBase * mtsDevice::AddEventWrite(const std::string & interfaceName
         }
         return eventMulticastCommand;
     }
-    CMN_LOG_CLASS(1) << "AddEventWrite: can not find an interface named " << interfaceName << std::endl;
+    CMN_LOG_CLASS_INIT_ERROR << "AddEventWrite: can not find an interface named " << interfaceName << std::endl;
     return 0;
 }
 #endif // SWIG

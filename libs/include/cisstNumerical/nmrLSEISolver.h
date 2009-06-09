@@ -198,7 +198,7 @@ public:
 	bRef.Assign(b);
 	hRef.Assign(h);
 
-	CMN_LOG(1) << W << std::endl;
+	CMN_LOG_INIT_ERROR << W << std::endl;
     
     lsei_(W.Pointer(), &MDW, &ME, &MA, &MG, &N, Options.Pointer(), X.Pointer(), &RNormE,
           &RNormL, &Mode, Work.Pointer(), Index.Pointer());

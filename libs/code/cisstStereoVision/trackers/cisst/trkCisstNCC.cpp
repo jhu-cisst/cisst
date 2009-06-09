@@ -367,9 +367,9 @@ void trkCisstNCC::pushTemplate(InterfaceImType *src, IndexType src_rows, IndexTy
 	//Add the template to the list
 	allTemplates.push_back(temp2);
 #ifdef IS_LOGGING
-	CMN_LOG(1) << " template : "<<endl;
-	CMN_LOG(1) << temp->Row(0) <<endl;
-	CMN_LOG(1) << temp->Column(0) <<endl;
+	CMN_LOG_INIT_ERROR << " template : "<<endl;
+	CMN_LOG_INIT_ERROR << temp->Row(0) <<endl;
+	CMN_LOG_INIT_ERROR << temp->Column(0) <<endl;
 #endif
 	delete temp;
 }
@@ -479,16 +479,16 @@ void trkCisstNCC::initializeTrack() {
 	//Sratch image data;
 	imageCopy.SetSize(windowSize.Y(), windowSize.X(), VCT_COL_MAJOR);
 #ifdef IS_LOGGING
-	CMN_LOG(1) << "windowSize :" <<endl;
-	CMN_LOG(1) << windowSize << endl;
-	CMN_LOG(1) << "windowCenter :" <<endl;
-	CMN_LOG(1) << windowCenter << endl;
-	CMN_LOG(1) << "windowPosition :" <<endl;
-	CMN_LOG(1) << windowPosition << endl;
-	CMN_LOG(1) << "templateSize :" <<endl;
-	CMN_LOG(1) << templateSize << endl;
-	CMN_LOG(1) << "templateCenter :" <<endl;
-	CMN_LOG(1) << templateCenter << endl;
+	CMN_LOG_INIT_ERROR << "windowSize :" <<endl;
+	CMN_LOG_INIT_ERROR << windowSize << endl;
+	CMN_LOG_INIT_ERROR << "windowCenter :" <<endl;
+	CMN_LOG_INIT_ERROR << windowCenter << endl;
+	CMN_LOG_INIT_ERROR << "windowPosition :" <<endl;
+	CMN_LOG_INIT_ERROR << windowPosition << endl;
+	CMN_LOG_INIT_ERROR << "templateSize :" <<endl;
+	CMN_LOG_INIT_ERROR << templateSize << endl;
+	CMN_LOG_INIT_ERROR << "templateCenter :" <<endl;
+	CMN_LOG_INIT_ERROR << templateCenter << endl;
 #endif
 }
 //Calculate the energy under the source. Has pre-allocation.
@@ -526,9 +526,9 @@ void trkCisstNCC::updateTrack() {
 	checkRectangleBoundries(imageSize,windowSize,windowPosition);
 	copyImage_cisst(Current_image,imageCopy,windowPosition.Y(),windowPosition.X());
 #ifdef IS_LOGGING
-	CMN_LOG(1) << " current image : "<<endl;
-	CMN_LOG(1) << imageCopy.Row(0) <<endl;
-	CMN_LOG(1) << imageCopy.Column(0) <<endl;
+	CMN_LOG_INIT_ERROR << " current image : "<<endl;
+	CMN_LOG_INIT_ERROR << imageCopy.Row(0) <<endl;
+	CMN_LOG_INIT_ERROR << imageCopy.Column(0) <<endl;
 #endif
 	//Choose the correct correlation method
 	switch(convMethod) {
@@ -556,11 +556,11 @@ void trkCisstNCC::updateTrack() {
 	outputPosX = getWindowCol() + getWindowCenterRow();
 	outputPosY = getWindowRow() + getWindowCenterRow();
 #ifdef IS_LOGGING
-	CMN_LOG(1)<< "I'm in updateTrack()"<<endl;
-	CMN_LOG(1) << "CurLoc :" <<endl;
-	CMN_LOG(1) << CurLoc << endl;
-	CMN_LOG(1) << "windowPosition :" <<endl;
-	CMN_LOG(1) << windowPosition << endl;
+	CMN_LOG_INIT_ERROR<< "I'm in updateTrack()"<<endl;
+	CMN_LOG_INIT_ERROR << "CurLoc :" <<endl;
+	CMN_LOG_INIT_ERROR << CurLoc << endl;
+	CMN_LOG_INIT_ERROR << "windowPosition :" <<endl;
+	CMN_LOG_INIT_ERROR << windowPosition << endl;
 #endif
 }
 /********************************************************************

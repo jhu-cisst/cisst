@@ -34,7 +34,7 @@ http://www.cisst.org/cisst/license.txt.
 
 class SimpleBehaviorVisibleObject: public ui3VisibleObject
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 5);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 public:
     inline SimpleBehaviorVisibleObject(ui3Manager * manager, vctDouble3 position):
         ui3VisibleObject(manager),

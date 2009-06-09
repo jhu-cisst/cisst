@@ -100,7 +100,7 @@ void ui3VisibleObject::Lock(void)
     if (this->VTKHandle) {
         this->Manager->GetSceneManager()->Lock(this->VTKHandle);
     } else {
-        CMN_LOG_CLASS(5) << "Lock: attempt to lock with an object not yet added to the scene" << std::endl;
+        CMN_LOG_CLASS_RUN_ERROR << "Lock: attempt to lock with an object not yet added to the scene" << std::endl;
     }
 }
 
@@ -110,7 +110,7 @@ void ui3VisibleObject::Unlock(void)
     if (this->VTKHandle) {
         this->Manager->GetSceneManager()->Unlock(this->VTKHandle);
     } else {
-        CMN_LOG_CLASS(5) << "Unlock: attempt to unlock with an object not yet added to the scene" << std::endl;
+        CMN_LOG_CLASS_RUN_ERROR << "Unlock: attempt to unlock with an object not yet added to the scene" << std::endl;
     }
 }
 

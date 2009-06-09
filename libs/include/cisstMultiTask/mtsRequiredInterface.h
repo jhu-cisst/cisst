@@ -75,7 +75,7 @@ http://www.cisst.org/cisst/license.txt.
 
 class CISST_EXPORT mtsRequiredInterface: public cmnGenericObject
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 5);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
 protected:
 
@@ -244,7 +244,7 @@ inline mtsCommandVoidBase * mtsRequiredInterface::AddEventHandlerVoid(void (__cl
         if (MailBox)
             EventHandlersVoid.AddItem(eventName, new mtsCommandQueuedVoid(MailBox, actualCommand));
         else
-            CMN_LOG_CLASS(1) << "No mailbox for queued event handler void " << eventName << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "No mailbox for queued event handler void " << eventName << std::endl;
     } else {
         EventHandlersVoid.AddItem(eventName, actualCommand);
     }
@@ -259,7 +259,7 @@ inline mtsCommandVoidBase * mtsRequiredInterface::AddEventHandlerVoid(void (*fun
         if (MailBox)
             EventHandlersVoid.AddItem(eventName, new mtsCommandQueuedVoid(MailBox, actualCommand));
         else
-            CMN_LOG_CLASS(1) << "No mailbox for queued event handler void(func) " << eventName << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "No mailbox for queued event handler void(func) " << eventName << std::endl;
     } else {
         EventHandlersVoid.AddItem(eventName, actualCommand);
     }
@@ -279,7 +279,7 @@ inline mtsCommandWriteBase * mtsRequiredInterface::AddEventHandlerWrite(void (__
         if (MailBox)
             EventHandlersWrite.AddItem(eventName,  new mtsCommandQueuedWrite<__argumentType>(MailBox, actualCommand, DEFAULT_ARG_BUFFER_LEN));
         else
-            CMN_LOG_CLASS(1) << "No mailbox for queued event handler write " << eventName << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "No mailbox for queued event handler write " << eventName << std::endl;
     } else {
         EventHandlersWrite.AddItem(eventName, actualCommand);
     }

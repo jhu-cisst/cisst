@@ -86,11 +86,11 @@ public:
         if (typedObjectExample) {
             this->Data.resize(size, *typedObjectExample);
         } else {
-            CMN_LOG(1) << "mtsStateArray: Create used with an object example of the wrong type, received: "
-                       << objectExample->Services()->GetName()
-                       << " while expecting "
-                       << value_type::ClassServices()->GetName()
-                       << std::endl;
+            CMN_LOG_INIT_ERROR << "mtsStateArray: Create used with an object example of the wrong type, received: "
+                               << objectExample->Services()->GetName()
+                               << " while expecting "
+                               << value_type::ClassServices()->GetName()
+                               << std::endl;
             return 0;
         }
         return this;
@@ -129,9 +129,9 @@ bool mtsStateArray<_elementType>::Set(index_type index,  const cmnGenericObject 
 	//do some typechecking?? should this be an ASSERT?
 	//TODO: check if throw works
 	if (typeid(object) != typeid(_elementType)) {
-		CMN_LOG(5) << "Class mtsStateArray: Set(): The passed object is not of the same kind as array. Expected: "
-                   << typeid(_elementType).name()
-                   << " Got: " << typeid(object).name() << std::endl;
+		CMN_LOG_RUN_ERROR << "Class mtsStateArray: Set(): The passed object is not of the same kind as array. Expected: "
+                          << typeid(_elementType).name()
+                          << " Got: " << typeid(object).name() << std::endl;
 		return false;
 	}
 	const _elementType* pdata = dynamic_cast<const _elementType*>(&object);
@@ -140,7 +140,7 @@ bool mtsStateArray<_elementType>::Set(index_type index,  const cmnGenericObject 
 		Data[index] = *pdata;
 		return true;
 	} else {
-		CMN_LOG(5) << "Class mtsStateArray: Set(): Found NULL element in state data array" << std::endl;
+		CMN_LOG_RUN_ERROR << "Class mtsStateArray: Set(): Found NULL element in state data array" << std::endl;
 	}
 	return false;
 }
@@ -149,9 +149,9 @@ template <class _elementType>
 bool mtsStateArray<_elementType>::Get(index_type index, cmnGenericObject & object) const {
 	//do some typechecking?? should this be an ASSERT?
 	if (typeid(object) != typeid(_elementType)) {
-		CMN_LOG(5) << "Class mtsStateArray: Get(): The passed object is not of the same kind as array. Expected: "
-                   << typeid(_elementType).name() 
-                   << "Got: " << typeid(object).name() << std::endl;
+		CMN_LOG_RUN_ERROR << "Class mtsStateArray: Get(): The passed object is not of the same kind as array. Expected: "
+                          << typeid(_elementType).name() 
+                          << " Got: " << typeid(object).name() << std::endl;
 		return false;
 	}
 	_elementType* pdata = dynamic_cast<_elementType*>(&object);
@@ -160,7 +160,7 @@ bool mtsStateArray<_elementType>::Get(index_type index, cmnGenericObject & objec
 		*pdata = Data[index];
 		return true;
 	} else {
-		CMN_LOG(5) << "Class mtsStateArray: Get(): Found NULL element in state data array" << std::endl;
+		CMN_LOG_RUN_ERROR << "Class mtsStateArray: Get(): Found NULL element in state data array" << std::endl;
 	}
 	return false;
 }
@@ -172,8 +172,8 @@ bool mtsStateArray<_elementType>::GetHistory(index_type indexStart, index_type i
     // Make sure vector is big enough
     unsigned int numToCopy = (Data.size() + indexEnd - indexStart + 1)%Data.size();
     if (data.size() < numToCopy) {
-		CMN_LOG(1) << "Class mtsStateArray: GetHistory(): provided array too small, size = "
-                   << data.size() << ", requested copy = " << numToCopy << std::endl;
+		CMN_LOG_INIT_ERROR << "Class mtsStateArray: GetHistory(): provided array too small, size = "
+                           << data.size() << ", requested copy = " << numToCopy << std::endl;
         return false;
     }
     // PK: probably should use iterators instead (or perhaps a cisstVector fastcopy?)

@@ -39,11 +39,11 @@ void cmnGenericObject::ToStream(std::ostream & outputStream) const {
 
 
 void cmnGenericObject::SerializeRaw(std::ostream & CMN_UNUSED(outputStream)) const {
-    CMN_LOG_CLASS(5) << "No serialization implemented for: " << Services()->GetName();
+    CMN_LOG_CLASS_RUN_ERROR << "No serialization implemented for: " << Services()->GetName();
 }
 
 
 void cmnGenericObject::DeSerializeRaw(std::istream & CMN_UNUSED(inputStream)) {
-    CMN_LOG_CLASS(5) << "No de-serialization implemented for: " << Services()->GetName();
+    CMN_LOG_CLASS_RUN_ERROR << "No de-serialization implemented for: " << Services()->GetName();
 }
 

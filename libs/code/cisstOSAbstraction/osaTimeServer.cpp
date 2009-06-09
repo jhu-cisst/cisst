@@ -95,7 +95,7 @@ void osaTimeServerInternals::Synchronize(void)
         if (delta < min_delta)
             min_delta = delta;
     }
-    CMN_LOG(3) << "osaTimeServer: initial minimum counter difference = " << min_delta << std::endl;
+    CMN_LOG_INIT_VERBOSE << "osaTimeServer: initial minimum counter difference = " << min_delta << std::endl;
 
     // Now, collect the data.  We only keep samples where the FILETIME has just changed
     // and where the delta is less than the threshold (currently, 3*min_delta).
@@ -119,7 +119,7 @@ void osaTimeServerInternals::Synchronize(void)
             }
         }
     }
-    CMN_LOG(3) << "osaTimeServer: average counter difference = " << ((double)sumDelta)/(NUM_SAMPLES-1) << std::endl;
+    CMN_LOG_INIT_VERBOSE << "osaTimeServer: average counter difference = " << ((double)sumDelta)/(NUM_SAMPLES-1) << std::endl;
 
     LONGLONG sumOffset = 0LL;
     // For each pair of (counter, ftime) samples, the offset is given by:
@@ -130,8 +130,8 @@ void osaTimeServerInternals::Synchronize(void)
          // Note that overflow should not be a problem because ftime_delta should be relatively small.
          offset[i] = counterAvg[i] - (CounterFrequency*ftime_delta+OSA_100NSEC_PER_SEC/2)/OSA_100NSEC_PER_SEC;
          sumOffset += offset[i];
-         CMN_LOG(3) << "Data " << i << ": delta = " << counterDelta[i]
-                    << ", offset = " << offset[i] << std::endl;
+         CMN_LOG_INIT_VERBOSE << "Data " << i << ": delta = " << counterDelta[i]
+                              << ", offset = " << offset[i] << std::endl;
     }
 
     // Compute the mean and standard deviation of the offset.
@@ -142,7 +142,7 @@ void osaTimeServerInternals::Synchronize(void)
         stdDev += (unsigned long)(dOffset*dOffset);
     }
     stdDev = static_cast<unsigned long>(sqrt(((double)stdDev)/(NUM_SAMPLES-2)));
-    CMN_LOG(3) << "osaTimeServer: mean = " << meanOffset << ", stdDev = " << stdDev << std::endl;
+    CMN_LOG_INIT_VERBOSE << "osaTimeServer: mean = " << meanOffset << ", stdDev = " << stdDev << std::endl;
 
     // Try to improve the result by eliminating outliers (more than 1 standard deviation away)
     int numValid = 0;
@@ -158,19 +158,19 @@ void osaTimeServerInternals::Synchronize(void)
     // If we got at least 10 data points within 1 standard deviation, recompute offset.
     if (numValid > 10) {
         meanOffset = (sumOffset + numValid/2)/numValid;
-        CMN_LOG(3) << "osaTimeServer: Recomputing offset after removing outliers, number of samples = "
-                   << numValid << std::endl;
+        CMN_LOG_INIT_VERBOSE << "osaTimeServer: recomputing offset after removing outliers, number of samples = "
+                             << numValid << std::endl;
     }
     // Now, set the offset in the internal data structure.
     CounterOrigin = meanOffset;
 
-    CMN_LOG(1) << "osaTimeServer: Synchronization offset = " << CounterOrigin << std::endl;
-    CMN_LOG(5) << "osaTimeServer: Checking result:" << std::endl;
+    CMN_LOG_INIT_VERBOSE << "osaTimeServer: Synchronization offset = " << CounterOrigin << std::endl;
+    CMN_LOG_INIT_DEBUG << "osaTimeServer: Checking result:" << std::endl;
     for (i = 1; i < NUM_SAMPLES; i++) {
         double tCounter = (counterAvg[i] - CounterOrigin)*CounterResolution;
         double tFtime = (ftimes[i].QuadPart - TimeOrigin)/((double)OSA_100NSEC_PER_SEC);
-        CMN_LOG(1) << "  ftime = " << tFtime << ", counter = " << tCounter
-                   << " (diff = " << (tFtime - tCounter)*1e6 << " usec)" << std::endl;
+        CMN_LOG_INIT_DEBUG << "  ftime = " << tFtime << ", counter = " << tCounter
+                           << " (diff = " << (tFtime - tCounter)*1e6 << " usec)" << std::endl;
     }
 }
 #endif // CISST_WINDOWS
@@ -185,9 +185,9 @@ osaTimeServer::osaTimeServer()
 #if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI)
     struct timespec ts;
     clock_getres(CLOCK_REALTIME, &ts);
-    CMN_LOG(1) << "osaTimeServer:  clock resolution is " << ts.tv_nsec << " nsec." << std::endl;
+    CMN_LOG_INIT_VERBOSE << "osaTimeServer:  clock resolution is " << ts.tv_nsec << " nsec." << std::endl;
     if (ts.tv_sec)
-        CMN_LOG(1) << "osaTimeServer:  WARNING, clock resolution in seconds is " << ts.tv_sec << " sec." << std::endl;
+        CMN_LOG_INIT_WARNING << "osaTimeServer:  WARNING, clock resolution in seconds is " << ts.tv_sec << " sec." << std::endl;
     INTERNALS(TimeOrigin).tv_sec = 0L;
     INTERNALS(TimeOrigin).tv_nsec = 0L;
 #elif (CISST_OS == CISST_DARWIN)
@@ -199,19 +199,20 @@ osaTimeServer::osaTimeServer()
     INTERNALS(CounterResolution) = 0.0;
     LARGE_INTEGER counterFrequency;
     if (QueryPerformanceFrequency(&counterFrequency) == 0) {
-        CMN_LOG(1) << "osaTimeServer:  performance counter does not exist" << std::endl;
+        CMN_LOG_INIT_ERROR << "osaTimeServer:  performance counter does not exist" << std::endl;
     }
     else {
         INTERNALS(CounterResolution) = 1.0/counterFrequency.QuadPart;
-        CMN_LOG(1) << "osaTimeServer:  performance counter frequency = "
-                   <<    counterFrequency.QuadPart << ", resolution = " 
-                   << INTERNALS(CounterResolution)*1e9 << " nsec" << std::endl;
+        CMN_LOG_INIT_VERBOSE << "osaTimeServer:  performance counter frequency = "
+                             << counterFrequency.QuadPart << ", resolution = " 
+                             << INTERNALS(CounterResolution)*1e9 << " nsec" << std::endl;
         // It is very unlikely that the frequency will ever be more than 32 bits. The CounterFrequency
         // variable could be changed to 64-bit, at the expense of computation time.
-        if (counterFrequency.HighPart != 0)
-            CMN_LOG(1) << "osaTimeServer: frequency too high -- performance counter not used." << std::endl;
-        else
+        if (counterFrequency.HighPart != 0) {
+            CMN_LOG_INIT_ERROR << "osaTimeServer: frequency too high -- performance counter not used." << std::endl;
+        } else {
             INTERNALS(CounterFrequency) = counterFrequency.LowPart;
+        }
     }
     // Compute offset between 1/1/1601 (Windows epoch) and 1/1/1970 (Unix epoch)
     // because our absolute time is based on the Unix epoch. We then check against our
@@ -243,7 +244,7 @@ void osaTimeServer::SetTimeOrigin(void)
 {
 #if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI)
     if (clock_gettime(CLOCK_REALTIME, &INTERNALS(TimeOrigin)) != 0)
-        CMN_LOG(1) << "osaTimeServer::SetTimeOrigin: error return from clock_gettime" << std::endl;
+        CMN_LOG_INIT_ERROR << "osaTimeServer::SetTimeOrigin: error return from clock_gettime" << std::endl;
 #elif (CISST_OS == CISST_DARWIN)
     gettimeofday(&INTERNALS(TimeOrigin), NULL);
 #elif (CISST_OS == CISST_WINDOWS)
@@ -329,8 +330,8 @@ double osaTimeServer::EstimateDrift(void) const
         ULONGLONG counterAvg = counterPre.QuadPart + delta/2;
         double answer1 = (counterAvg - INTERNALS_CONST(CounterOrigin))*INTERNALS_CONST(CounterResolution);
         double answer2 = (newTime.QuadPart - INTERNALS_CONST(TimeOrigin))/((double)OSA_100NSEC_PER_SEC);
-        CMN_LOG(1) << "EstimateDrift:  T-system = " << answer2 << ", T-corrected = " << answer1
-                   << ", diff = " << (answer2-answer1)*1e6 << " usec, (overhead = " << delta << ")" << std::endl;
+        CMN_LOG_INIT_VERBOSE << "EstimateDrift:  T-system = " << answer2 << ", T-corrected = " << answer1
+                             << ", diff = " << (answer2-answer1)*1e6 << " usec, (overhead = " << delta << ")" << std::endl;
         return answer2-answer1;
     }
 #endif // CISST_WINDOWS
@@ -340,7 +341,7 @@ double osaTimeServer::EstimateDrift(void) const
 void osaTimeServer::RelativeToAbsolute(double relative, osaAbsoluteTime & absolute) const
 {
     if (!GetTimeOrigin(absolute))
-        CMN_LOG(1) << "osaTimeServer::RelativeToAbsolute: time origin not valid!" << std::endl;
+        CMN_LOG_INIT_ERROR << "osaTimeServer::RelativeToAbsolute: time origin not valid!" << std::endl;
     double delta_sec, delta_nsec;
     delta_nsec = modf(relative, &delta_sec)/cmn_ns;
     absolute.sec += (long) delta_sec;
@@ -351,7 +352,7 @@ double osaTimeServer::AbsoluteToRelative(const osaAbsoluteTime & absolute) const
 {
     osaAbsoluteTime origin;
     if (!GetTimeOrigin(origin))
-        CMN_LOG(1) << "osaTimeServer::AbsoluteToRelative: time origin not valid!" << std::endl;
+        CMN_LOG_INIT_ERROR << "osaTimeServer::AbsoluteToRelative: time origin not valid!" << std::endl;
     long delta_sec = absolute.sec - origin.sec;
     long delta_nsec = absolute.nsec - origin.nsec;
     if (delta_nsec < 0) {
@@ -370,7 +371,7 @@ double osaTimeServer::AbsoluteToRelative(const osaAbsoluteTime & absolute) const
     LONGLONG deltat = ftime-INTERNALS_CONST(TimeOrigin);  // could be negative
     double answer2 = deltat/((double)OSA_100NSEC_PER_SEC);
 
-    CMN_LOG(1) << "osaTimeServer::AbsoluteToRelative: answers = " << answer << ", " << answer2 << std::endl;
+    CMN_LOG_INIT_VERBOSE << "osaTimeServer::AbsoluteToRelative: answers = " << answer << ", " << answer2 << std::endl;
 #endif
 
     return answer;

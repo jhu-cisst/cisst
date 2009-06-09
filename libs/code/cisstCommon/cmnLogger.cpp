@@ -26,21 +26,21 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnLogger.h>
 
 
-cmnLogger::cmnLogger(const char * defaultLogFileName):
-    LoD(10),
+cmnLogger::cmnLogger(const std::string & defaultLogFileName):
+    LoD(CMN_LOG_LOD_VERY_VERBOSE),
     LoDMultiplexerStreambuf()
 {
-    LoDMultiplexerStreambuf.AddChannel(*(DefaultLogFile(defaultLogFileName)), 5);
+    LoDMultiplexerStreambuf.AddChannel(*(DefaultLogFile(defaultLogFileName)), CMN_LOG_LOD_RUN_ERROR);
 }
 
 
-std::ofstream* cmnLogger::DefaultLogFile(const char * defaultLogFileName) {
-    static std::ofstream defaultLogFile(defaultLogFileName);
+std::ofstream * cmnLogger::DefaultLogFile(const std::string & defaultLogFileName) {
+    static std::ofstream defaultLogFile(defaultLogFileName.c_str());
     return &defaultLogFile;
 }
 
 
-cmnLogger* cmnLogger::Instance(void) {
+cmnLogger * cmnLogger::Instance(void) {
     // create a static variable
     static cmnLogger instance;
     return &instance;

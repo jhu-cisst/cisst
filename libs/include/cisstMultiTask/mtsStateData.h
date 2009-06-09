@@ -118,7 +118,7 @@ public:
         Id = Table->NewElement(dataName, &Data);
         Accessor = dynamic_cast<const AccessorType *>(table.GetAccessor(dataName));
         if (!Accessor)
-            CMN_LOG(1) << "mtsStateData: could not get data accessor for " << dataName << std::endl;
+            CMN_LOG_INIT_ERROR << "mtsStateData: could not get data accessor for " << dataName << std::endl;
     }
 
     /*! Adds command objects to the specified device interface. Note

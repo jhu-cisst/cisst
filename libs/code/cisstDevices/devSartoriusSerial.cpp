@@ -71,7 +71,7 @@ void devSartoriusSerial::SetupInterface(void)
 
 bool devSartoriusSerial::GetWeight(double & weightInGrams, bool & stable)
 {
-    CMN_LOG_CLASS(8) << "GetWeight: entering method" << std::endl;
+    CMN_LOG_CLASS_RUN_DEBUG << "GetWeight: entering method" << std::endl;
     unsigned int nbTrials;
     nbTrials = 10;
     bool enoughData = false;
@@ -84,17 +84,17 @@ bool devSartoriusSerial::GetWeight(double & weightInGrams, bool & stable)
             this->NbBytesReadSoFar +=
                 this->SerialPort.Read(this->BytesReadSoFar + this->NbBytesReadSoFar,
                                       BUFFER_SIZE - this->NbBytesReadSoFar);
-            CMN_LOG_CLASS(8) << "GetWeight: buffer now contains "
-                             << this->NbBytesReadSoFar << " characters"
-                             << std::endl;
+            CMN_LOG_CLASS_RUN_DEBUG << "GetWeight: buffer now contains "
+                                    << this->NbBytesReadSoFar << " characters"
+                                    << std::endl;
             enoughData = this->ProcessBuffer();
         } else {
-            CMN_LOG_CLASS(5) << "GetWeight: buffer is full" << std::endl;
+            CMN_LOG_CLASS_RUN_ERROR << "GetWeight: buffer is full" << std::endl;
         }
         osaSleep(1.0 * cmn_ms); // tiny sleep
     }
     if (!enoughData) {
-        CMN_LOG_CLASS(6) << "GetWeight failed, not enought data" << std::endl;
+        CMN_LOG_RUN_VERBOSE << "GetWeight failed, not enought data" << std::endl;
         return false;
     }
     return true;
@@ -103,7 +103,7 @@ bool devSartoriusSerial::GetWeight(double & weightInGrams, bool & stable)
 
 bool devSartoriusSerial::ProcessBuffer(void)
 {
-    CMN_LOG_CLASS(8) << "ProcessBuffer: entering method" << std::endl;
+    CMN_LOG_CLASS_RUN_DEBUG << "ProcessBuffer: entering method" << std::endl;
 	static char toProcess[16];
     // we need at least 16 characters to start any processing
     if (this->NbBytesReadSoFar < 16) {
@@ -126,24 +126,24 @@ bool devSartoriusSerial::ProcessBuffer(void)
             // and in any case, remove the characters up to 'eol'
             // just found.  process is enough characters
             eolFound = true;
-            CMN_LOG_CLASS(8) << "ProcessBuffer: found eol in buffer at position " << index << std::endl;
+            CMN_LOG_CLASS_RUN_DEBUG << "ProcessBuffer: found eol in buffer at position " << index << std::endl;
             // test if the buffer already has 16 bytes
             if (index < 14) {
-                CMN_LOG_CLASS(6) << "ProcessBuffer: partial message found in buffer, this should not happen except during initialization"
-                                 << std::endl;
+                CMN_LOG_RUN_VERBOSE << "ProcessBuffer: partial message found in buffer, this should not happen except during initialization"
+                                    << std::endl;
             } else {
                 // get all 16 chars to be processed and removed from buffer
                 memcpy(toProcess, /* destination buffer */
                        this->BytesReadSoFar + index - 14, /* begining of message from index */
                        16 * sizeof(char));
-                CMN_LOG_CLASS(8) << "ProcessBuffer: bytes to process \"" << toProcess << "\"" << std::endl;
+                CMN_LOG_CLASS_RUN_DEBUG << "ProcessBuffer: bytes to process \"" << toProcess << "\"" << std::endl;
                 UpdateStateTable(toProcess);
             }
             // copy what's left from buffer in temporary buffer
             notYetProcessedBytes = this->NbBytesReadSoFar - (index + 2);
             if (notYetProcessedBytes < 0) {
-                CMN_LOG_CLASS(5) << "ProcessBuffer: negative number of bytes in buffer ("
-                                 << notYetProcessedBytes << "), this should never happen" << std::endl;
+                CMN_LOG_CLASS_RUN_ERROR << "ProcessBuffer: negative number of bytes in buffer ("
+                                        << notYetProcessedBytes << "), this should never happen" << std::endl;
                 
             } else {
                 memcpy(this->TempBuffer,
@@ -171,15 +171,15 @@ void devSartoriusSerial::UpdateStateTable(const const_char_pointer & buffer)
     if (buffer[0] == '-') {
         this->Weight = - this->Weight;
     }
-    CMN_LOG_CLASS(8) << "UpdateStateTable: found weight : " << this->Weight << std::endl;
+    CMN_LOG_CLASS_RUN_DEBUG << "UpdateStateTable: found weight : " << this->Weight << std::endl;
 }
 
 
 void devSartoriusSerial::Startup(void)
 {
     if (!this->SerialPort.Open()) {
-        CMN_LOG_CLASS(1) << "Startup: can't open serial port \""
-                         << this->SerialPort.GetPortName() << "\"" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "Startup: can't open serial port \""
+                                 << this->SerialPort.GetPortName() << "\"" << std::endl;
     }
 }
 

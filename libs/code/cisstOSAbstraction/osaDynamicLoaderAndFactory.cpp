@@ -63,8 +63,8 @@ bool osaDynamicLoaderAndFactoryBase::Init(const char *name, const char *file, co
     if (basetypep) {
         const char *loaded_basetype = (*basetypep)->name();
         if (strcmp(tinfo.name(), loaded_basetype) != 0) {
-            CMN_LOG(1) << "osaDynamicLoaderAndFactory: inconsistent base types (expected=" << tinfo.name()
-                       << ", loaded=" << loaded_basetype << ") for " << name << std::endl;
+            CMN_LOG_INIT_ERROR << "osaDynamicLoaderAndFactory: inconsistent base types (expected=" << tinfo.name()
+                               << ", loaded=" << loaded_basetype << ") for " << name << std::endl;
             Reset();
             return false;
         }
@@ -73,10 +73,10 @@ bool osaDynamicLoaderAndFactoryBase::Init(const char *name, const char *file, co
         // for the base class (rather than one in the main module and another in the dynamically-loaded
         // module). So far, it seems to work, but if not we do not consider it an error.
         if (tinfo != **basetypep)
-            CMN_LOG(5) << "osaDynamicLoaderAndFactory: comparison of type_info failed (ignored)." << std::endl;
+            CMN_LOG_INIT_WARNING << "osaDynamicLoaderAndFactory: comparison of type_info failed (ignored)." << std::endl;
     }
     else {
-        CMN_LOG(1) << "osaDynamicLoaderAndFactory: could not find BaseType for " << name << std::endl;
+        CMN_LOG_INIT_ERROR << "osaDynamicLoaderAndFactory: could not find BaseType for " << name << std::endl;
         Reset();
         return false;
     }
@@ -85,14 +85,14 @@ bool osaDynamicLoaderAndFactoryBase::Init(const char *name, const char *file, co
     const int *versionp = (const int *)GetSymbolAddr(handle, funcname.c_str());
     if (versionp) {
         if (version != *versionp) {
-            CMN_LOG(1) << "osaDynamicLoaderAndFactory: inconsistent versions (expected=" << version
-                       << ", loaded=" << *versionp << ") for " << name << std::endl;
+            CMN_LOG_INIT_ERROR << "osaDynamicLoaderAndFactory: inconsistent versions (expected=" << version
+                               << ", loaded=" << *versionp << ") for " << name << std::endl;
             Reset();
             return false;
         }
     }
     else {
-        CMN_LOG(1) << "osaDynamicLoaderAndFactory: could not find Version for " << name << std::endl;
+        CMN_LOG_INIT_ERROR << "osaDynamicLoaderAndFactory: could not find Version for " << name << std::endl;
         Reset();
         return false;
     }
@@ -100,7 +100,7 @@ bool osaDynamicLoaderAndFactoryBase::Init(const char *name, const char *file, co
     funcname.append("Create");
     create = GetSymbolAddr(handle, funcname.c_str());
     if (!create) {
-        CMN_LOG(1) << "osaDynamicLoaderAndFactory: could not find create function for " << name << std::endl;
+        CMN_LOG_INIT_ERROR << "osaDynamicLoaderAndFactory: could not find create function for " << name << std::endl;
         Reset();
         return false;
     }
@@ -108,12 +108,12 @@ bool osaDynamicLoaderAndFactoryBase::Init(const char *name, const char *file, co
     funcname.append("Destroy");
     destroy = GetSymbolAddr(handle, funcname.c_str());
     if (!destroy) {
-        CMN_LOG(1) << "osaDynamicLoaderAndFactory: could not find destroy function for " << name << std::endl;
+        CMN_LOG_INIT_ERROR << "osaDynamicLoaderAndFactory: could not find destroy function for " << name << std::endl;
         Reset();
         return false;
     }
-    CMN_LOG(5) << "osaDynamicLoaderAndFactory: loaded " << name << " (derived from " << tinfo.name() << ", version "
-               << version << ")." << std::endl;
+    CMN_LOG_INIT_VERBOSE << "osaDynamicLoaderAndFactory: loaded " << name << " (derived from " << tinfo.name() << ", version "
+                         << version << ")." << std::endl;
     return true;
 }
 

@@ -90,12 +90,12 @@ ui3SceneManager * ui3BehaviorBase::GetSceneManager(void)
 
 void ui3BehaviorBase::Configure(const std::string & CMN_UNUSED(configFile))
 {
-    CMN_LOG_CLASS(2) << "Configure: use default configure from base class, doing nothing" << std::endl;
+    CMN_LOG_CLASS_INIT_WARNING << "Configure: use default configure from base class, doing nothing" << std::endl;
 }
 
 bool ui3BehaviorBase::SaveConfiguration(const std::string & CMN_UNUSED(configFile))
 {
-    CMN_LOG_CLASS(2) << "SaveConfiguration: use default save configuration from base class, doing nothing" << std::endl;
+    CMN_LOG_CLASS_INIT_WARNING << "SaveConfiguration: use default save configuration from base class, doing nothing" << std::endl;
     return true;
 }
 
@@ -238,13 +238,13 @@ svlFilterBase* ui3BehaviorBase::GetStreamSamplerFilter(const std::string & strea
 
 void ui3BehaviorBase::PrimaryMasterButtonCallback(const prmEventButton & CMN_UNUSED(event))
 {
-    CMN_LOG_CLASS(6) << "PrimaryMasterButtonCallback not overloaded for \""
-                     << this->GetName() << "\"" << std::endl;
+    CMN_LOG_RUN_VERBOSE << "PrimaryMasterButtonCallback not overloaded for \""
+                        << this->GetName() << "\"" << std::endl;
 }
 
 void ui3BehaviorBase::SecondaryMasterButtonCallback(const prmEventButton & CMN_UNUSED(event))
 {
-    CMN_LOG_CLASS(6) << "SecondaryMasterButtonCallback not overloaded for \""
-                     << this->GetName() << "\"" << std::endl;
+    CMN_LOG_RUN_VERBOSE << "SecondaryMasterButtonCallback not overloaded for \""
+                        << this->GetName() << "\"" << std::endl;
 }
 

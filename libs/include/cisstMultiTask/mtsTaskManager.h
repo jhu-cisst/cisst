@@ -48,7 +48,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 class CISST_EXPORT mtsTaskManager: public cmnGenericObject {
     
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 5);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
     
     /*! Typedef for task name and pointer map. */
 

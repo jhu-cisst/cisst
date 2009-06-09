@@ -41,19 +41,19 @@ const std::string * cmnClassRegister::RegisterInstance(cmnClassServicesBase* cla
     
     // check if this class is already registered
     if (existingServicesPointer != NULL) {
-        CMN_LOG(1) << "Class cmnClassRegister: The class " << className
-                   << " is already registered.  You should not have this problem, this is a bug!" << std::endl;
+        CMN_LOG_INIT_ERROR << "Class cmnClassRegister: The class " << className
+                           << " is already registered.  You should not have this problem, this is a bug!" << std::endl;
     } else {
         std::pair<iterator, bool> insertionResult;
         EntryType newEntry(className, classServicesPointer);
         insertionResult = ServicesContainer.insert(newEntry);
         if (insertionResult.second) {
-            CMN_LOG(2) << "Class cmnClassRegister: The class " << className
-                       << " has been registered with Log LoD " << classServicesPointer->GetLoD() << std::endl;
+            CMN_LOG_INIT_VERBOSE << "Class cmnClassRegister: The class " << className
+                                 << " has been registered with Log LoD " << classServicesPointer->GetLoD() << std::endl;
             return &((*insertionResult.first).first);
         } else {
-            CMN_LOG(1) << "Class cmnClassRegister: The class " << className
-                       << " can not be inserted.  You should not have this problem, this is a bug!" << std::endl;            
+            CMN_LOG_INIT_ERROR << "Class cmnClassRegister: The class " << className
+                               << " can not be inserted.  You should not have this problem, this is a bug!" << std::endl;            
         }
     }
     return 0;
@@ -67,17 +67,17 @@ std::string cmnClassRegister::ToStringInstance(void) const {
 }
 
 
-bool cmnClassRegister::SetLoD(const std::string& name, LoDType lod) {
+bool cmnClassRegister::SetLoD(const std::string & name, LogLoDType lod) {
     // see if class is registered.  If so, copy preferences (lod)
     cmnClassServicesBase* classServicesPointer = FindClassServices(name);
     if (classServicesPointer != NULL) {
         classServicesPointer->SetLoD(lod);
-        CMN_LOG(2)<< "Class cmnClassRegister::SetLoD(): The class " << classServicesPointer->GetName()
-                  << " log LoD has been set to " << classServicesPointer->GetLoD() << std::endl;
+        CMN_LOG_INIT_VERBOSE << "Class cmnClassRegister::SetLoD(): The class " << classServicesPointer->GetName()
+                             << " log LoD has been set to " << classServicesPointer->GetLoD() << std::endl;
     } else {
         // we need to warn the programmer
-		CMN_LOG(1) << "Class cmnClassRegister::SetLoD(): The class " << name
-                   << " is not registered (yet?) " << std::endl;
+		CMN_LOG_INIT_WARNING << "Class cmnClassRegister::SetLoD(): The class " << name
+                             << " is not registered (yet?) " << std::endl;
     }
     return false;
 }
@@ -91,11 +91,11 @@ cmnClassServicesBase * cmnClassRegister::FindClassServicesInstance(const std::st
     iterator = ServicesContainer.find(className);
     if (iterator != end) {
             result = iterator->second;
-            CMN_LOG(7) << "Class cmnClassRegister::FindClassServicesInstance(): Found class info for "
-                       << className << std::endl; 
+            CMN_LOG_RUN_VERBOSE << "Class cmnClassRegister::FindClassServicesInstance(): Found class info for "
+                                << className << std::endl; 
     } else {
-        CMN_LOG(6) << "Class cmnClassRegister::FindClassServicesInstance(): Couldn't find class info for "
-                   << className << std::endl; 
+        CMN_LOG_RUN_WARNING << "Class cmnClassRegister::FindClassServicesInstance(): Couldn't find class info for "
+                            << className << std::endl; 
     }
     return result;
 }
@@ -109,8 +109,8 @@ cmnClassServicesBase * cmnClassRegister::FindClassServicesInstance(const std::ty
     while ((iterator != end) && (result == NULL)) {
         if ((iterator->second)->TypeInfoPointer() == &typeInfo) {
             result = iterator->second;
-            CMN_LOG(7) << "Class cmnClassRegister::FindClassServicesInstance(): Found class info for the given type_info"
-                       << std::endl;
+            CMN_LOG_RUN_VERBOSE << "Class cmnClassRegister::FindClassServicesInstance(): Found class info for the given type_info"
+                                << std::endl;
         }
         iterator++;
     }
@@ -150,4 +150,3 @@ void cmnClassRegister::ToStreamInstance(std::ostream & outputStream) const {
         outputStream << " " << iterator->first;
     }
 }    
-

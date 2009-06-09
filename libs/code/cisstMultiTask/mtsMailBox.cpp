@@ -51,7 +51,7 @@ bool mtsMailBox::ExecuteNext(void)
        commandWrite->ArgumentGet();  // Remove from parameter queue
        break;
    default:
-       CMN_LOG(5) << "Class mtsMailBox: Invalid parameter in ExecuteNext" << std::endl;
+       CMN_LOG_RUN_ERROR << "Class mtsMailBox: Invalid parameter in ExecuteNext" << std::endl;
        return false;
    }
    CommandQueue.Get();  // Remove command from mailbox queue

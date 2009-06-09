@@ -41,9 +41,9 @@ ui3SlaveArm::~ui3SlaveArm()
 bool ui3SlaveArm::SetInput(mtsDevice * positionDevice, const std::string & positionInterface)
 {
     if (this->Manager == 0) {
-        CMN_LOG_CLASS(1) << "SetInput: can not setup input for master arm \""
-                         << this->Name << "\" before adding it to a ui3Manager"
-                         << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "SetInput: can not setup input for master arm \""
+                                 << this->Name << "\" before adding it to a ui3Manager"
+                                 << std::endl;
         return false;
     }
 
@@ -56,10 +56,10 @@ bool ui3SlaveArm::SetInput(mtsDevice * positionDevice, const std::string & posit
         // bound the mtsFunction to the command provided by the interface 
         requiredInterface->AddFunction("GetPositionCartesian", this->GetCartesianPositionFunction, mtsRequired);
     } else {
-        CMN_LOG_CLASS(1) << "SetInput: failed to add \""
-                         << this->Name
-                         << "\" interface, are you trying to set this arm twice?"
-                         << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "SetInput: failed to add \""
+                                 << this->Name
+                                 << "\" interface, are you trying to set this arm twice?"
+                                 << std::endl;
         return false;
     }
     // connect the master device to the master required interface

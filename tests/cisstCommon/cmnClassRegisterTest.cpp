@@ -129,7 +129,7 @@ void cmnClassRegisterTest::TestRegistrationDynamicNoInline(void) {
 
 
 void cmnClassRegisterTest::TestLoD(void) {
-    cmnClassServicesBase::LoDType lod;
+    cmnLogLoD lod;
     const cmnClassServicesBase* classAServices = NULL;
     TestA objectA;
 
@@ -151,28 +151,28 @@ void cmnClassRegisterTest::TestLoD(void) {
 
     /* set the LoD via the class and check via the class and class
        register */
-    objectA.ClassServices()->SetLoD(9);
+    objectA.ClassServices()->SetLoD(CMN_LOG_LOD_VERY_VERBOSE);
     lod = objectA.ClassServices()->GetLoD();
-    CPPUNIT_ASSERT(lod == 9);
+    CPPUNIT_ASSERT(lod == CMN_LOG_LOD_VERY_VERBOSE);
     lod = cmnClassRegister::FindClassServices("TestA")->GetLoD();
-    CPPUNIT_ASSERT(lod == 9);
+    CPPUNIT_ASSERT(lod == CMN_LOG_LOD_VERY_VERBOSE);
 
     /* set the LoD via the class register and check via the class and
        the class register (with macro) */
-    cmnClassRegister::SetLoD("TestA", 3);
+    cmnClassRegister::SetLoD("TestA", CMN_LOG_LOD_INIT_VERBOSE);
     lod = objectA.ClassServices()->GetLoD();
-    CPPUNIT_ASSERT(lod == 3);
+    CPPUNIT_ASSERT(lod == CMN_LOG_LOD_INIT_VERBOSE);
     lod = cmnClassRegister::FindClassServices("TestA")->GetLoD();
-    CPPUNIT_ASSERT(lod == 3);
+    CPPUNIT_ASSERT(lod == CMN_LOG_LOD_INIT_VERBOSE);
 
     /* set the global LoD */
-    cmnLogger::SetLoD(5);
-    CPPUNIT_ASSERT(cmnLogger::GetLoD() == 5);
-    cmnLogger::SetLoD(8);
-    CPPUNIT_ASSERT(cmnLogger::GetLoD() == 8);
+    cmnLogger::SetLoD(CMN_LOG_LOD_RUN_ERROR);
+    CPPUNIT_ASSERT(cmnLogger::GetLoD() == CMN_LOG_LOD_RUN_ERROR);
+    cmnLogger::SetLoD(CMN_LOG_LOD_RUN_DEBUG);
+    CPPUNIT_ASSERT(cmnLogger::GetLoD() == CMN_LOG_LOD_RUN_DEBUG);
 
     /* restore the class LoD for multiple iterations of this tests*/
-    cmnClassRegister::SetLoD("TestA", 5);
+    cmnClassRegister::SetLoD("TestA", CMN_LOG_LOD_RUN_ERROR);
 }
 
 
@@ -180,38 +180,38 @@ void cmnClassRegisterTest::TestLoD(void) {
 void cmnClassRegisterTest::TestLog(void) {
     /* add an output stream to check the log */
     std::stringstream outputStream;
-    cmnLogger::GetMultiplexer()->AddChannel(outputStream, 10);
+    cmnLogger::AddChannel(outputStream, CMN_LOG_LOD_VERY_VERBOSE);
 
     /* set the level of detail for class TestA */
     TestA objectA;
-    cmnClassRegister::SetLoD("TestA", 6);
-    cmnLogger::SetLoD(5);
+    cmnClassRegister::SetLoD("TestA", CMN_LOG_LOD_RUN_WARNING);
+    cmnLogger::SetLoD(CMN_LOG_LOD_RUN_ERROR);
 
     outputStream.str("");
-    objectA.Message(4);
+    objectA.Message(CMN_LOG_LOD_INIT_DEBUG);
     CPPUNIT_ASSERT(outputStream.str() == "LoD: 4 - Function TestA: 4\nLoD: 4 - Class TestA: 4\n");
 
     outputStream.str("");
-    objectA.Message(5);
+    objectA.Message(CMN_LOG_LOD_RUN_ERROR);
     CPPUNIT_ASSERT(outputStream.str() == "LoD: 5 - Function TestA: 5\nLoD: 5 - Class TestA: 5\n");
 
     /* global LoD prevails, nothing goes thru */
     outputStream.str("");
-    objectA.Message(6);
+    objectA.Message(CMN_LOG_LOD_RUN_WARNING);
     CPPUNIT_ASSERT(outputStream.str() == "");
 
     /* set a higher global LoD */
-    cmnLogger::SetLoD(8);
+    cmnLogger::SetLoD(CMN_LOG_LOD_RUN_DEBUG);
     outputStream.str("");
-    objectA.Message(6);
+    objectA.Message(CMN_LOG_LOD_RUN_WARNING);
     CPPUNIT_ASSERT(outputStream.str() == "LoD: 6 - Function TestA: 6\nLoD: 6 - Class TestA: 6\n");
 
     outputStream.str("");
-    objectA.Message(7);
+    objectA.Message(CMN_LOG_LOD_RUN_DEBUG);
     CPPUNIT_ASSERT(outputStream.str() == "LoD: 7 - Function TestA: 7\n");
 
     /* restore the class LoD for multiple iterations of this tests*/
-    cmnClassRegister::SetLoD("TestA", 5);
+    cmnClassRegister::SetLoD("TestA", CMN_LOG_LOD_RUN_ERROR);
 
     cmnLogger::GetMultiplexer()->RemoveChannel(outputStream);
 }

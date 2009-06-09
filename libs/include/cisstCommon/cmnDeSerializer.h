@@ -98,7 +98,7 @@ inline void cmnDeSerializeRaw(std::istream & inputStream, std::string & data)
   \sa cmnSerializer cmnGenericObject
 */
 class CISST_EXPORT cmnDeSerializer: public cmnGenericObject {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 5);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
  public:
     /*! Constructor.
@@ -111,7 +111,7 @@ class CISST_EXPORT cmnDeSerializer: public cmnGenericObject {
         InputStream(inputStream)
     {
         if (!InputStream) {
-            CMN_LOG_CLASS(1) << "Input stream provided is not valid" << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "Input stream provided is not valid" << std::endl;
         } 
     }
     
@@ -143,7 +143,7 @@ class CISST_EXPORT cmnDeSerializer: public cmnGenericObject {
             const const_iterator end = ServicesContainer.end();
             const const_iterator iterator = ServicesContainer.find(servicesPointerRemote);
             if (iterator == end) {
-                CMN_LOG_CLASS(5) << "DeSerialize: Can't find corresponding class information" << std::endl;
+                CMN_LOG_CLASS_RUN_ERROR << "DeSerialize: Can't find corresponding class information" << std::endl;
             } else {
                 cmnClassServicesBase * servicesPointerLocal = iterator->second;
                 object = servicesPointerLocal->Create();
@@ -181,11 +181,11 @@ class CISST_EXPORT cmnDeSerializer: public cmnGenericObject {
             const const_iterator end = ServicesContainer.end();
             const const_iterator iterator = ServicesContainer.find(servicesPointerRemote);
             if (iterator == end) {
-                CMN_LOG_CLASS(5) << "DeSerialize: Can't find corresponding class information" << std::endl;
+                CMN_LOG_CLASS_RUN_ERROR << "DeSerialize: Can't find corresponding class information" << std::endl;
             } else {
                 cmnClassServicesBase * servicesPointerLocal = iterator->second;
                 if (servicesPointerLocal != object.Services()) {
-                    CMN_LOG_CLASS(5) << "DeSerialize: Object types don't match" << std::endl;
+                    CMN_LOG_CLASS_RUN_ERROR << "DeSerialize: Object types don't match" << std::endl;
                 } else {
                     object.DeSerializeRaw(this->InputStream);
                 }
@@ -223,14 +223,13 @@ class CISST_EXPORT cmnDeSerializer: public cmnGenericObject {
         const const_iterator end = ServicesContainer.end();
         const const_iterator iterator = ServicesContainer.find(servicesPointerRemote);
         if (iterator != end) {
-            CMN_LOG_CLASS(2) << "Class information for " << className << " has already been received" << std::endl;
+            CMN_LOG_CLASS_RUN_WARNING << "Class information for " << className << " has already been received" << std::endl;
         } else {
             EntryType newEntry(servicesPointerRemote, servicesPointerLocal);
             ServicesContainer.insert(newEntry);
         }
     }
-    
-        
+            
     std::istream & InputStream;
     
     typedef std::map<cmnClassServicesBase *, cmnClassServicesBase *> ServicesContainerType;

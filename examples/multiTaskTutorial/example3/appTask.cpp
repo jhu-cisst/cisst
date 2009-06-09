@@ -87,7 +87,7 @@ void appTask::Run(void)
 void appTask::Close(mtsTask * task)
 {
     appTask* myTask = dynamic_cast<appTask*>(task);
-    CMN_LOG(5) << "Closing task " << myTask->GetName() << std::endl;
+    CMN_LOG_RUN_ERROR << "Closing task " << myTask->GetName() << std::endl;
     myTask->ui.Hide();
     myTask->ExitFlag = true;
 }

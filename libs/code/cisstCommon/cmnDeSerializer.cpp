@@ -25,4 +25,3 @@ http://www.cisst.org/cisst/license.txt.
 
 
 CMN_IMPLEMENT_SERVICES(cmnDeSerializer);
-

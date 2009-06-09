@@ -45,13 +45,13 @@ void cmnXMLPath::SetInputSource(const char *filename)
 	/* Load XML document */
     Document = xmlParseFile(filename);
     if (Document == 0) {
-        CMN_LOG_CLASS(1) << "An error occured while parsing \"" << filename << "\"" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "An error occured while parsing \"" << filename << "\"" << std::endl;
     }
     CMN_ASSERT(Document != 0);
 
 	XPathContext = xmlXPathNewContext(Document);
 	if(XPathContext == NULL) {
-		CMN_LOG_CLASS(1) << "An error occured while parsing \"" << filename << "\"" << std::endl;
+		CMN_LOG_CLASS_INIT_ERROR << "An error occured while parsing \"" << filename << "\"" << std::endl;
 		xmlFreeDoc(Document); 
 	}
 	CMN_ASSERT(XPathContext != 0);
@@ -62,8 +62,8 @@ void cmnXMLPath::PrintValue(std::ostream &out, const char *context, const char *
 {
 	std::string str;
     if (GetXMLValue(context, XPath, str) == false) {
-        CMN_LOG_CLASS(2) << "Warning -- No nodes matched the location path \"" << XPath
-                         << "\"" << std::endl;
+        CMN_LOG_CLASS_INIT_WARNING << "Warning -- No nodes matched the location path \"" << XPath
+                                   << "\"" << std::endl;
     } else {
         out << str << std::endl;
     }
@@ -91,18 +91,18 @@ bool cmnXMLPath::GetXMLValue(const char * context, const char * XPath, xmlChar *
 			if (nodes->nodeTab[i]->type == XML_ATTRIBUTE_NODE) {
 				cur = nodes->nodeTab[i];
 				*storage = xmlNodeGetContent(cur);
-				CMN_LOG(5) << "Read Xpath: " << XPath << " Node name: " 
-					<< cur->name << " Content: " << *storage << std::endl;
+				CMN_LOG_RUN_ERROR << "Read Xpath: " << XPath << " Node name: " 
+                                  << cur->name << " Content: " << *storage << std::endl;
 			} else {
 				cur = nodes->nodeTab[i];    
-				CMN_LOG_CLASS(2) << "Warning -- Node is not attribute node \"" << XPath
-					<< "\" Node name: " << cur->name << std::endl;
+				CMN_LOG_CLASS_INIT_WARNING << "Warning -- Node is not attribute node \"" << XPath
+                                           << "\" Node name: " << cur->name << std::endl;
 			}
 		}
 		return true;
 	}
-	CMN_LOG_CLASS(2) << "Warning -- Unable to match the location path \"" << XPath
-                         << "\"" << std::endl;
+	CMN_LOG_CLASS_INIT_WARNING << "Warning -- Unable to match the location path \"" << XPath
+                               << "\"" << std::endl;
 	return false;
 }
 
@@ -135,8 +135,8 @@ bool cmnXMLPath::SetXMLValue(const char * context, const char * XPath, const xml
 			CMN_ASSERT(nodes->nodeTab[i] != 0);
 			if (nodes->nodeTab[i]->type == XML_ATTRIBUTE_NODE) {
 				xmlNodeSetContent(nodes->nodeTab[i], storage);
-				CMN_LOG(5) << "Write Xpath: " << XPath << " Node name: " 
-					<< nodes->nodeTab[i]->name << " Content: " << storage << std::endl;
+				CMN_LOG_RUN_ERROR << "Write Xpath: " << XPath << " Node name: " 
+                                  << nodes->nodeTab[i]->name << " Content: " << storage << std::endl;
 			}
 			/*
 			* All the elements returned by an XPath query are pointers to
@@ -162,14 +162,14 @@ bool cmnXMLPath::SetXMLValue(const char * context, const char * XPath, const xml
 			else
 			{
 				cur = nodes->nodeTab[i];    
-				CMN_LOG_CLASS(2) << "Warning -- Node is not attribute node \"" << XPath
-					<< "\" Node name: " << cur->name << std::endl;
+				CMN_LOG_CLASS_INIT_WARNING << "Warning -- Node is not attribute node \"" << XPath
+                                           << "\" Node name: " << cur->name << std::endl;
 			}
 		}
 		return true;
 	}
-	CMN_LOG_CLASS(2) << "Warning -- Unable to match the location path \"" << XPath
-		<< "\"" << std::endl;
+	CMN_LOG_CLASS_INIT_WARNING << "Warning -- Unable to match the location path \"" << XPath
+                               << "\"" << std::endl;
 	return false;
 }
 

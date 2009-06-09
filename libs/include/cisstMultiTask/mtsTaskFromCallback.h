@@ -78,7 +78,7 @@ http://www.cisst.org/cisst/license.txt.
 
 class CISST_EXPORT mtsTaskFromCallback : public mtsTask
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 5);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
 protected:
     typedef mtsTask BaseType;
@@ -150,7 +150,7 @@ CMN_DECLARE_SERVICES_INSTANTIATION(mtsTaskFromCallback)
 
 class CISST_EXPORT mtsTaskFromCallbackAdapter : public mtsTaskFromCallback
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 5);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
 protected:
     typedef mtsTaskFromCallback BaseType;
@@ -202,12 +202,12 @@ template <class _callbackReturnType>
 _callbackReturnType MTS_TASK_CALLBACK_CONVENTION mtsTaskFromCallbackAdapter::CallbackAdapter(void *obj)
 {
     if (!obj) {
-        CMN_LOG(1) << "CallbackAdapter got null pointer" << std::endl;
+        CMN_LOG_INIT_ERROR << "CallbackAdapter got null pointer" << std::endl;
         return _callbackReturnType();
     }
     CallbackData* _this = static_cast<CallbackData*>(obj);
     if (_this->signature != VALID) {
-        CMN_LOG(1) << "CallbackAdapter received invalid signature: " << _this->signature << std::endl;
+        CMN_LOG_INIT_ERROR << "CallbackAdapter received invalid signature: " << _this->signature << std::endl;
         return _callbackReturnType();
     }
     void *ret =_this->obj->DoCallback(0);

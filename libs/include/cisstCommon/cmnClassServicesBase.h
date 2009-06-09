@@ -29,6 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _cmnClassServicesBase_h
 #define _cmnClassServicesBase_h
 
+#include <cisstCommon/cmnLogger.h>
 #include <cisstCommon/cmnClassRegister.h>
 #include <cisstCommon/cmnGenericObject.h>
 
@@ -45,7 +46,7 @@ http://www.cisst.org/cisst/license.txt.
 class CISST_EXPORT cmnClassServicesBase {
 public:
     /*! Type used to define the logging level of detail. */
-    typedef cmnLogger::LoDType LoDType;
+    typedef cmnLogger::LogLoDType LogLoDType;
 
     /*!  Constructor. Sets the name of the class and the Level of Detail
       setting for the class.
@@ -54,7 +55,7 @@ public:
       \param typeInfo Runtime type as defined by C++ RTTI
       \param lod The Log Level of Detail setting to be used with this class.
     */
-    cmnClassServicesBase(const std::string & className, const std::type_info * typeInfo, LoDType lod = 5):
+    cmnClassServicesBase(const std::string & className, const std::type_info * typeInfo, LogLoDType lod = CMN_LOG_LOD_RUN_ERROR):
         TypeInfoMember(typeInfo),
         LoDMember(lod)
     {
@@ -121,7 +122,7 @@ public:
     
       \return The log Level of Detail.
     */
-    inline const LoDType & GetLoD(void) const {
+    inline const LogLoDType & GetLoD(void) const {
         return LoDMember;
     }
 
@@ -130,7 +131,7 @@ public:
       
     \param newLoD The log Level of Detail setting.
     */
-    inline void SetLoD(LoDType newLoD) {
+    inline void SetLoD(LogLoDType newLoD) {
         LoDMember = newLoD;
     }
 
@@ -142,7 +143,7 @@ private:
     const std::type_info * TypeInfoMember;
 
     /*! The log Level of Detail. */
-    LoDType LoDMember;
+    LogLoDType LoDMember;
 };
 
 

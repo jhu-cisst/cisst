@@ -32,12 +32,15 @@ http://www.cisst.org/cisst/license.txt.
 // main function
 int main() {
 
+    // add std::cout to see human readable log
+    cmnLogger::AddChannel(std::cout);
+
     // create an input stream in binary mode and read the content as
     // defined in write.cpp
     std::ifstream inputStream("out.dat", std::ifstream::binary);
     if (!inputStream.good()) {
-        std::cout << "Can't open \"out.dat\", please run the serialization \"write\" program first."
-                  << std::endl;
+        CMN_LOG_INIT_ERROR << "Can't open \"out.dat\", please run the serialization \"write\" program first."
+                           << std::endl;
         return -1;
     }
     cmnDeSerializer deSerialization(inputStream);

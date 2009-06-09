@@ -37,7 +37,7 @@ http://www.cisst.org/cisst/license.txt.
 /*! Button event payload */
 class CISST_EXPORT prmEventButton: public cmnGenericObject
 {
-    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, 5);
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
  public:
     typedef enum {PRESSED, RELEASED, CLICKED, DOUBLE_CLICKED} EventType;

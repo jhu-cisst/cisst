@@ -29,10 +29,10 @@ void appTask::Startup(void)
     mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
     controlledTask = dynamic_cast<robotLowLevel*>(taskManager->GetTask(ui.GetControlledName()));
     if (!controlledTask)
-        CMN_LOG(1) << "Controlled task not a robot!" << std::endl;
+        CMN_LOG_INIT_ERROR << "Controlled task not a robot!" << std::endl;
     observedTask = dynamic_cast<robotLowLevel*>(taskManager->GetTask(ui.GetObservedName()));
     if (!observedTask)
-        CMN_LOG(1) << "Observed task not a robot!" << std::endl;
+        CMN_LOG_INIT_ERROR << "Observed task not a robot!" << std::endl;
 
     ui.Show();
 }
@@ -62,7 +62,7 @@ void appTask::Run(void)
 void appTask::Close(mtsTask * task)
 {
     appTask* myTask = dynamic_cast<appTask*>(task);
-    CMN_LOG(5) << "Closing task " << myTask->GetName() << std::endl;
+    CMN_LOG_RUN_ERROR << "Closing task " << myTask->GetName() << std::endl;
     myTask->ui.Hide();
     myTask->ExitFlag = true;
 }

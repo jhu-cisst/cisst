@@ -17,7 +17,7 @@ const double MotionDelta = 0.1;
 // low-level robot interface: assumes a controller that
 // interfaces with 2 robots.
 class robotLowLevel: public mtsTaskPeriodic {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 10);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_VERY_VERBOSE);
 public:
     enum {NB_JOINTS = 2};
     typedef mtsDoubleVec PositionJointType;

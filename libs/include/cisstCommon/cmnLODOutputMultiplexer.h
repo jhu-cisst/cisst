@@ -68,7 +68,7 @@ http://www.cisst.org/cisst/license.txt.
    \sa cmnLODMultiplexerStreambuf.h, cmnMultiplexerStreambufProxy.h,
    C++ documentation of basic_streambuf and iostream
  */
-class cmnLODOutputMultiplexer : public std::ostream
+class cmnLODOutputMultiplexer: public std::ostream
 {
 private:
     /*! Declare the copy constructor private to prevent any use.  No
@@ -82,12 +82,12 @@ private:
   
     typedef std::ostream BaseType;
 
-    typedef SinkType::LodType LodType;
+    typedef SinkType::LogLoDType LogLoDType;
   
     /*! 
       Constructor that initializes base class and stores LOD.
     */
-    cmnLODOutputMultiplexer(SinkType *multiplexer, LodType lod)
+    cmnLODOutputMultiplexer(SinkType * multiplexer, LogLoDType lod)
         : BaseType(NULL), m_StreambufProxy(multiplexer, lod) {          
         if (multiplexer != NULL) {
             init(&m_StreambufProxy);
@@ -110,14 +110,14 @@ private:
     /*! 
       Returns the Level of Detail.
      */
-    LodType GetLOD(void) const {
+    LogLoDType GetLOD(void) const {
         return m_StreambufProxy.GetLOD();
     }
 
     /*! 
       Sets the Level of Detail.
      */  
-    void SetLOD(LodType lod) {
+    void SetLOD(LogLoDType lod) {
         m_StreambufProxy.SetLOD(lod);
     }
   

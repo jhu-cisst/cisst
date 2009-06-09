@@ -43,7 +43,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 class CISST_EXPORT mtsTaskContinuous: public mtsTask
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 5);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
     friend class mtsTaskManager;
 

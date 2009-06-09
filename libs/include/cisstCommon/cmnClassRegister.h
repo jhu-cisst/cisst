@@ -100,7 +100,7 @@ class cmnGenericObject;
 class CISST_EXPORT cmnClassRegister {
  public:
     /*! Type used to define the Log Level of Detail */
-    typedef cmnLogger::LoDType LoDType;
+    typedef cmnLogger::LogLoDType LogLoDType;
 
     /*! Simple typedefs to ease the declaration of iterators */
     //@{
@@ -126,14 +126,14 @@ class CISST_EXPORT cmnClassRegister {
       
       \sa FindClassServices
     */
-    cmnClassServicesBase* FindClassServicesInstance(const std::string & className);
+    cmnClassServicesBase * FindClassServicesInstance(const std::string & className);
 
     /*!
       Instance specific implementation of FindClassServices.
       
       \sa FindClassServices
     */
-    cmnClassServicesBase* FindClassServicesInstance(const std::type_info & typeInfo);
+    cmnClassServicesBase * FindClassServicesInstance(const std::type_info & typeInfo);
 
     /*! Instance specific implementation of Register.
       \sa Register */
@@ -170,7 +170,7 @@ class CISST_EXPORT cmnClassRegister {
 protected:
     /*! Constructor.  The only constructor must be private in order to
       ensure that the class register is a singleton. */
-    cmnClassRegister() {};
+    inline cmnClassRegister(void) {};
 
  public:
 
@@ -181,7 +181,7 @@ protected:
       method's scope. 
 
       \return A pointer to the class register. */
-    static cmnClassRegister* Instance(void);
+    static cmnClassRegister * Instance(void);
 
 
     /*!  The Register method registers a class pointer in the static
@@ -202,7 +202,7 @@ protected:
       #CMN_DECLARE_SERVICES_INSTANTIATION and #CMN_IMPLEMENT_SERVICES.
     */
     static inline const std::string *
-    Register(cmnClassServicesBase *classServicesPointer,
+    Register(cmnClassServicesBase * classServicesPointer,
              const std::string & className)
     {
         return Instance()->RegisterInstance(classServicesPointer,
@@ -220,7 +220,7 @@ protected:
     
       \return bool True if the class is registered.
     */
-    static bool SetLoD(const std::string& className, LoDType lod);
+    static bool SetLoD(const std::string & className, LogLoDType lod);
 
 
     /*! Get the class services by name. Returns null if the class is
@@ -231,7 +231,7 @@ protected:
       \return The pointer to the cmnClassServicesBase object
       corresponding to the className, or null if not registered.
     */
-    static inline cmnClassServicesBase* FindClassServices(const std::string& className) {
+    static inline cmnClassServicesBase * FindClassServices(const std::string & className) {
         return Instance()->FindClassServicesInstance(className);
     }
 
@@ -246,7 +246,7 @@ protected:
       corresponding to the type info, or null if not registered.
 
     */
-    static inline cmnClassServicesBase* FindClassServices(const std::type_info& typeInfo) {
+    static inline cmnClassServicesBase * FindClassServices(const std::type_info & typeInfo) {
         return Instance()->FindClassServicesInstance(typeInfo);
     }
     

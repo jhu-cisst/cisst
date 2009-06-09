@@ -73,7 +73,7 @@ osaMutex::osaMutex(void)
 {
     CMN_ASSERT(sizeof(Internals) >= SizeOfInternals());
     if (pthread_mutex_init(&INTERNALS(Mutex), 0) != 0) {
-        CMN_LOG(1) << "Class osaMutex: error in constructor \"" << strerror(errno) << "\"" << std::endl;
+        CMN_LOG_INIT_ERROR << "Class osaMutex: error in constructor \"" << strerror(errno) << "\"" << std::endl;
     }
 }
 #endif // CISST_LINUX || CISST_DARWIN || CISST_SOLARIS || CISST_RTAI

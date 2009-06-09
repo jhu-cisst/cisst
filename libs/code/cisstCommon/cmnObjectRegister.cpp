@@ -48,9 +48,9 @@ bool cmnObjectRegister::RegisterInstance(const std::string & objectName,
         }
         if (found != end) {
             // pointer already registered
-            CMN_LOG(1) << "class cmnObjectRegister: Registration failed.  There is already a registered object with the address: "
-                       << objectPointer
-                       << " (name: " << found->first << ")" << std::endl;
+            CMN_LOG_INIT_ERROR << "class cmnObjectRegister: Registration failed.  There is already a registered object with the address: "
+                               << objectPointer
+                               << " (name: " << found->first << ")" << std::endl;
             return false;
         } else {
             // actually register
@@ -59,8 +59,8 @@ bool cmnObjectRegister::RegisterInstance(const std::string & objectName,
         }
     } else {
         // name already used
-        CMN_LOG(1) << "class cmnObjectRegister: Registration failed.  There is already a registered object with the name: "
-                   << objectName << std::endl;
+        CMN_LOG_INIT_ERROR << "class cmnObjectRegister: Registration failed.  There is already a registered object with the name: "
+                           << objectName << std::endl;
         return false;
     }
     return false;
@@ -69,16 +69,16 @@ bool cmnObjectRegister::RegisterInstance(const std::string & objectName,
 
 bool cmnObjectRegister::RemoveInstance(const std::string & objectName) {
     if (ObjectContainer.erase(objectName) == 0) {
-        CMN_LOG(1) << "class cmnObjectRegister: " << objectName
-                   << " can not be removed from the register since it is not registered" 
-                   << std::endl;
+        CMN_LOG_INIT_ERROR << "class cmnObjectRegister: " << objectName
+                           << " can not be removed from the register since it is not registered" 
+                           << std::endl;
         return false;
     }
     return true;
 }
 
 
-cmnGenericObject* cmnObjectRegister::FindObjectInstance(const std::string& objectName) const {
+cmnGenericObject * cmnObjectRegister::FindObjectInstance(const std::string& objectName) const {
     cmnGenericObject * result = NULL;
     const_iterator what = ObjectContainer.find(objectName);
     if (what != ObjectContainer.end()) {
