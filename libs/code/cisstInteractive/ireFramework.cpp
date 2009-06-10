@@ -86,7 +86,7 @@ class PyTextCtrlHook {
     static PyObject* PythonWindow;       // the window that will handle the event
     static PyMethodDef Methods[];
     static cmnCallbackStreambuf<char> *Streambuf;
-    static cmnLODMultiplexerStreambuf<char>::LodType LoD;
+    static cmnLogLoD LoD;
 
 public:
     // Specify the Python callback function
@@ -113,7 +113,7 @@ PyObject* PyTextCtrlHook::PythonFunc = 0;
 PyObject* PyTextCtrlHook::PythonEventClass = 0;
 PyObject* PyTextCtrlHook::PythonWindow = 0;
 cmnCallbackStreambuf<char> *PyTextCtrlHook::Streambuf = 0;
-cmnLODMultiplexerStreambuf<char>::LodType PyTextCtrlHook::LoD = CMN_LOG_DEFAULT_LOD;
+cmnLogLoD PyTextCtrlHook::LoD = CMN_LOG_DEFAULT_LOD;
 
 // Specify the Python callback function.
 PyObject* PyTextCtrlHook::SetTextOutput(PyObject* CMN_UNUSED(self), PyObject* args)
@@ -140,7 +140,7 @@ PyObject* PyTextCtrlHook::SetTextOutput(PyObject* CMN_UNUSED(self), PyObject* ar
         Py_XINCREF(handler);           // Save reference to handler
         Py_XDECREF(PythonWindow);      // Release any previous handler
         PythonWindow = handler;
-        LoD = (cmnLODMultiplexerStreambuf<char>::LodType) iLoD;
+        LoD = static_cast<cmnLogLoD>(iLoD);
         if (!Streambuf)
             Streambuf = new cmnCallbackStreambuf<char>(PrintLog);
         cmnLogger::GetMultiplexer()->AddChannel(Streambuf, LoD);
@@ -176,7 +176,7 @@ PyObject* PyTextCtrlHook::SetLoD(PyObject* CMN_UNUSED(self), PyObject* args)
         PyErr_SetString(PyExc_TypeError, "integer type expected");
         return NULL;
     }
-    LoD = (cmnLODMultiplexerStreambuf<char>::LodType) iLoD;
+    LoD = static_cast<cmnLogLoD>(iLoD);
     if (Streambuf)
         cmnLogger::GetMultiplexer()->SetChannelLOD(Streambuf, LoD);
     Py_INCREF(Py_None);
