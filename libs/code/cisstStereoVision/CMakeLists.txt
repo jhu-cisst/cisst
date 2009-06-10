@@ -107,6 +107,7 @@ SET(HEADER_FILES
 # cisstNumerical dependency
 IF(BUILD_LIBS_cisstNumerical)
   SET(DEPENDENCIES
+      ${DEPENDENCIES}
       cisstNumerical
       )
   SET(SOURCE_FILES
