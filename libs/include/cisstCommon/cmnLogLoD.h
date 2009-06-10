@@ -51,6 +51,11 @@ typedef enum cmnLogLoD {
     CMN_LOG_LOD_NOT_USED // used only to determine number of possible LoDs
 };  
 
+
+/*! Default Level of details */
+#define CMN_LOG_DEFAULT_LOD CMN_LOG_LOD_RUN_ERROR
+
+
 /*! Human readable strings used to indicate the level of detail of a
   message.  See also cmnLogger. */
 const char * const cmnLogLoDString[CMN_LOG_LOD_NOT_USED] = {
