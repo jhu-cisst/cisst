@@ -91,6 +91,7 @@ public:
     
     inline ~cmnGenericObjectProxy(void) {}
 
+#ifndef SWIG
     /*! Conversion assignment.  This allows to assign from an object
       of the actual type without explicitly referencing the public
       data member "Data". */
@@ -105,6 +106,7 @@ public:
     inline operator value_type & (void) {
         return Data;
     }
+#endif // SWIG
 
     /*! Serialization.  Relies on the specialization, if any, of
       cmnSerializeRaw. */
