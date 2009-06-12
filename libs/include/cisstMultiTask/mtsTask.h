@@ -38,7 +38,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsCommandQueuedVoid.h>
 #include <cisstMultiTask/mtsCommandQueuedWrite.h>
 #include <cisstMultiTask/mtsDevice.h>
-#include <cisstMultiTask/mtsRequiredInterface.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 
 #include <set>
@@ -114,16 +113,6 @@ protected:
 
     /*! The return value for RunInternal. */
     void *retValue;
-
-    /*! Typedef for a map of connected interfaces (receiving commands). */
-    typedef mtsMap<mtsRequiredInterface> RequiredInterfacesMapType;
-    
-    RequiredInterfacesMapType RequiredInterfaces; // Interfaces we can send commands to
-
-    /********************* Methods to connect interfaces  *****************/
-
-    bool ConnectRequiredInterface(const std::string & requiredInterfaceName,
-                                   mtsDeviceInterface * providedInterface);
 
 
     /********************* Methods that call user methods *****************/
@@ -288,20 +277,6 @@ public:
                                                          const std::string & eventName,
                                                          const std::string & handlerName);
 
-    /*! Get a pointer on the provided interface that has been
-      connected to a given required interface (defined by its name).
-      This method will return a null pointer if the required interface
-      has not been connected.  See mtsTaskManager::Connect. */
-    mtsDeviceInterface * GetProvidedInterfaceFor(const std::string & requiredInterfaceName) {
-        mtsRequiredInterface *requiredInterface = RequiredInterfaces.GetItem(requiredInterfaceName, CMN_LOG_LOD_INIT_WARNING);
-        return requiredInterface ? requiredInterface->GetConnectedInterface() : 0;
-    }
-
-    /*! Get the required interface */
-    mtsRequiredInterface * GetRequiredInterface(const std::string & requiredInterfaceName) {
-        return RequiredInterfaces.GetItem(requiredInterfaceName);
-    }
-
     /********************* Methods to manage event handlers *******************/
 	
     /*! Add a write command to an event handler interface associated
@@ -437,7 +412,8 @@ inline mtsCommandWriteBase * mtsDevice::AddCommandWrite(void (__classType::*acti
     return 0;
 }
 
-// this method is defined in this header file
+#include <cisstMultiTask/mtsRequiredInterface.h>  // to remove when following 2 deprecated methods are removed
+// this method is defined in this header file (deprecated)
 template <class __classType, class __argumentType>
 inline mtsCommandWriteBase * mtsTask::AddEventHandlerWrite(void (__classType::*action)(const __argumentType &),
                                                            __classType * classInstantiation,
@@ -453,7 +429,7 @@ inline mtsCommandWriteBase * mtsTask::AddEventHandlerWrite(void (__classType::*a
     return 0;
 }
 
-// this method is defined in this header file
+// this method is defined in this header file (deprecated)
 template <class __classType>
 inline mtsCommandVoidBase * mtsTask::AddEventHandlerVoid(void (__classType::*action)(void),
                                                          __classType * classInstantiation,

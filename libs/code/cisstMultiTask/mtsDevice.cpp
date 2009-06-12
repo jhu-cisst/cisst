@@ -20,7 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstMultiTask/mtsDevice.h>
-
+#include <cisstMultiTask/mtsRequiredInterface.h>
 
 CMN_IMPLEMENT_SERVICES(mtsDevice)
 
@@ -49,6 +49,25 @@ mtsDeviceInterface * mtsDevice::AddProvidedInterface(const std::string & newInte
 
 mtsDeviceInterface * mtsDevice::GetProvidedInterface(const std::string & interfaceName) const {
     return ProvidedInterfaces.GetItem(interfaceName, CMN_LOG_LOD_INIT_ERROR);
+}
+
+
+mtsDeviceInterface * mtsDevice::GetProvidedInterfaceFor(const std::string & requiredInterfaceName) {
+    mtsRequiredInterface * requiredInterface = RequiredInterfaces.GetItem(requiredInterfaceName, CMN_LOG_LOD_INIT_WARNING);
+    return requiredInterface ? requiredInterface->GetConnectedInterface() : 0;
+}
+
+
+bool mtsDevice::ConnectRequiredInterface(const std::string & requiredInterfaceName, mtsDeviceInterface * providedInterface)
+{
+    mtsRequiredInterface * requiredInterface = RequiredInterfaces.GetItem(requiredInterfaceName, CMN_LOG_LOD_INIT_ERROR);
+    if (requiredInterface) {
+        requiredInterface->ConnectTo(providedInterface);
+        CMN_LOG_CLASS_INIT_VERBOSE << "ConnectRequiredInterface: required interface " << requiredInterfaceName
+                                   << " successfuly connected to provided interface " << providedInterface->GetName() << std::endl;
+        return true;
+    }
+    return false;            
 }
 
 

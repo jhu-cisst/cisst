@@ -32,21 +32,6 @@ http://www.cisst.org/cisst/license.txt.
 
 CMN_IMPLEMENT_SERVICES(mtsTask)
 
-/********************* Methods to connect interfaces  *****************/
-
-bool mtsTask::ConnectRequiredInterface(const std::string & requiredInterfaceName, mtsDeviceInterface * providedInterface)
-{
-    mtsRequiredInterface *requiredInterface = RequiredInterfaces.GetItem(requiredInterfaceName, CMN_LOG_LOD_INIT_ERROR);
-    if (requiredInterface) {
-        requiredInterface->ConnectTo(providedInterface);
-        CMN_LOG_CLASS_INIT_VERBOSE << "ConnectRequiredInterface: required interface " << requiredInterfaceName
-                                   << " successfuly connected to provided interface " << providedInterface->GetName() << std::endl;
-        return true;
-    }
-    return false;            
-}
-
-
 /********************* Methods that call user methods *****************/
 
 void mtsTask::DoRunInternal(void)
@@ -155,8 +140,7 @@ mtsTask::mtsTask(const std::string & name, unsigned int sizeStateTable) :
 	StateTable(sizeStateTable),
     OverranPeriod(false),
     ThreadStartData(0),
-    retValue(0),
-    RequiredInterfaces("RequiredInterfaces")
+    retValue(0)
 {
 }
 
