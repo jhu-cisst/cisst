@@ -61,13 +61,3 @@ ADD_CUSTOM_COMMAND(TARGET multiTaskTutorialExample4
                    ARGS -E copy
                            ${multiTaskTutorialExample4_SOURCE_DIR}/example4.py
                            ${LIBRARY_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/example4.py)
-
-
-# For apple applications with GUI
-IF(APPLE)
-  FIND_PROGRAM(APPLE_REZ Rez /Developer/Tools)
-  ADD_CUSTOM_COMMAND(TARGET multiTaskTutorialExample4
-                     POST_BUILD
-                     COMMAND ${APPLE_REZ}
-                     ARGS ${FLTK_INCLUDE_DIR}/FL/mac.r Carbon.r -o ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/multiTaskTutorialExample4)
-ENDIF(APPLE)

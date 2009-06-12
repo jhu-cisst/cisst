@@ -40,12 +40,3 @@ TARGET_LINK_LIBRARIES(multiTaskTutorialExample5 ${FLTK_LIBRARIES})
 
 # link with the cisst libraries
 CISST_REQUIRES("multiTaskTutorialExample5" "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask")
-
-# For apple applications with GUI
-IF(APPLE)
-  FIND_PROGRAM(APPLE_REZ Rez /Developer/Tools)
-  ADD_CUSTOM_COMMAND(TARGET multiTaskTutorialExample5
-                     POST_BUILD
-                     COMMAND ${APPLE_REZ}
-                     ARGS ${FLTK_INCLUDE_DIR}/FL/mac.r Carbon.r -o ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/multiTaskTutorialExample5)
-ENDIF(APPLE)
