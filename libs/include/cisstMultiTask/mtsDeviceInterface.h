@@ -25,10 +25,10 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnGenericObject.h>
 #include <cisstCommon/cmnClassRegisterMacros.h>
+#include <cisstCommon/cmnNamedMap.h>
 
 #include <cisstOSAbstraction/osaThread.h>
 
-#include <cisstMultiTask/mtsMap.h>
 #include <cisstMultiTask/mtsCommandBase.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsMulticastCommandWrite.h>
@@ -85,24 +85,24 @@ class CISST_EXPORT mtsDeviceInterface: public cmnGenericObject
 
     /*! Typedef for a map of name of zero argument command and name of
       command. */
-    typedef mtsMap<mtsCommandVoidBase> CommandVoidMapType;
+    typedef cmnNamedMap<mtsCommandVoidBase> CommandVoidMapType;
 
     /*! Typedef for a map of name of one argument command and name of
       command. */
-    typedef mtsMap<mtsCommandReadBase> CommandReadMapType;
+    typedef cmnNamedMap<mtsCommandReadBase> CommandReadMapType;
 
     /*! Typedef for a map of name of one argument command and name of
       command. */
-    typedef mtsMap<mtsCommandWriteBase> CommandWriteMapType;
+    typedef cmnNamedMap<mtsCommandWriteBase> CommandWriteMapType;
 
     /*! Typedef for a map of name of two argument command and name of
       command. */
-    typedef mtsMap<mtsCommandQualifiedReadBase> CommandQualifiedReadMapType;
+    typedef cmnNamedMap<mtsCommandQualifiedReadBase> CommandQualifiedReadMapType;
 
     /*! Typedef for a map of event name and event generator
       command. */
-    typedef mtsMap<mtsMulticastCommandVoid> EventVoidMapType;
-    typedef mtsMap<mtsMulticastCommandWriteBase> EventWriteMapType;
+    typedef cmnNamedMap<mtsMulticastCommandVoid> EventVoidMapType;
+    typedef cmnNamedMap<mtsMulticastCommandWriteBase> EventWriteMapType;
 
  protected:
 
@@ -121,12 +121,12 @@ class CISST_EXPORT mtsDeviceInterface: public cmnGenericObject
                        mtsDevice * device):
         Name(interfaceName),
         Device(device),
-        CommandsVoid("CommandVoid"),
-        CommandsRead("CommandRead"),
-        CommandsWrite("CommandWrite"),
-        CommandsQualifiedRead("CommandQualifiedRead"),
-        EventVoidGenerators("EventVoidGenerator"),
-        EventWriteGenerators("EventWriteGenerator")
+        CommandsVoid("CommandsVoid", *this),
+        CommandsRead("CommandsRead", *this),
+        CommandsWrite("CommandsWrite", *this),
+        CommandsQualifiedRead("CommandsQualifiedRead", *this),
+        EventVoidGenerators("EventVoidGenerators", *this),
+        EventWriteGenerators("EventWriteGenerators", *this)
     {}
 
     /*! Default destructor. Does nothing. */

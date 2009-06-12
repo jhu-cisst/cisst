@@ -30,7 +30,10 @@ http://www.cisst.org/cisst/license.txt.
 CMN_IMPLEMENT_SERVICES(mtsTaskManager);
 
 
-mtsTaskManager::mtsTaskManager() : TaskMap("Task"), DeviceMap("Device") {
+mtsTaskManager::mtsTaskManager():
+    TaskMap("Tasks", *this),
+    DeviceMap("Devices", *this)
+{
     __os_init();
     TimeServer.SetTimeOrigin();
 }

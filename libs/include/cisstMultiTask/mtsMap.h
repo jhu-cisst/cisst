@@ -22,6 +22,9 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsMap_h
 #define _mtsMap_h
 
+#if 0
+
+
 #include <map>
 #include <vector>
 #include <string>
@@ -140,3 +143,4 @@ void mtsMap<_ItemType>::DeleteAll(void) {
 
 #endif // _mtsMap_h
 
+#endif // if 0

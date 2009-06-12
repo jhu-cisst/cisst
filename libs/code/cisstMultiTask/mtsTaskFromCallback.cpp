@@ -48,7 +48,7 @@ void * mtsTaskFromCallback::RunInternal(void *data) {
         this->CleanupInternal();
     }
     // Make copy on stack before clearing inRunInternal
-    void *ret = this->retValue;
+    void * ret = this->ReturnValue;
     inRunInternal = false;
     return ret;
 }

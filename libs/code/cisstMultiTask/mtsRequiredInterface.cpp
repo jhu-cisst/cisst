@@ -23,16 +23,16 @@ http://www.cisst.org/cisst/license.txt.
 CMN_IMPLEMENT_SERVICES(mtsRequiredInterface)
 
 
-mtsRequiredInterface::mtsRequiredInterface(const std::string & interfaceName, mtsMailBox * mbox) :
-        Name(interfaceName),
-        MailBox(mbox),
-        OtherInterface(0),
-        CommandPointersVoid("CommandPointerVoid"),
-        CommandPointersRead("CommandPointerRead"),
-        CommandPointersWrite("CommandPointerWrite"),
-        CommandPointersQualifiedRead("CommandPointerQualifiedRead"),
-        EventHandlersVoid("EventHandlerVoid"),
-        EventHandlersWrite("EventHandlerWrite")
+mtsRequiredInterface::mtsRequiredInterface(const std::string & interfaceName, mtsMailBox * mailBox) :
+    Name(interfaceName),
+    MailBox(mailBox),
+    OtherInterface(0),
+    CommandPointersVoid("CommandPointersVoid", *this),
+    CommandPointersRead("CommandPointersRead", *this),
+    CommandPointersWrite("CommandPointersWrite", *this),
+    CommandPointersQualifiedRead("CommandPointersQualifiedRead", *this),
+    EventHandlersVoid("EventHandlersVoid", *this),
+    EventHandlersWrite("EventHandlersWrite", *this)
 {
 }
 

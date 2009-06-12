@@ -31,10 +31,12 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnGenericObject.h>
 #include <cisstCommon/cmnClassRegister.h>
+#include <cisstCommon/cmnNamedMap.h>
+
 #include <cisstOSAbstraction/osaThreadBuddy.h>
 #include <cisstOSAbstraction/osaTimeServer.h>
+
 #include <cisstMultiTask/mtsForwardDeclarations.h>
-#include <cisstMultiTask/mtsMap.h>
 
 #include <set>
 
@@ -52,10 +54,10 @@ class CISST_EXPORT mtsTaskManager: public cmnGenericObject {
     
     /*! Typedef for task name and pointer map. */
 
-    typedef mtsMap<mtsTask> TaskMapType;
+    typedef cmnNamedMap<mtsTask> TaskMapType;
 
     /*! Typedef for device name and pointer map. */
-    typedef mtsMap<mtsDevice> DeviceMapType;
+    typedef cmnNamedMap<mtsDevice> DeviceMapType;
 
     /*! Typedef for user task, composed of task name and "output port"
         name. */

@@ -46,7 +46,7 @@ void * mtsTaskContinuous::RunInternal(void *data)
 
 	CMN_LOG_CLASS_RUN_WARNING << "End of task " << Name << std::endl;
 	CleanupInternal();
-	return this->retValue;
+	return this->ReturnValue;
 }
 
 void mtsTaskContinuous::StartInternal(void)

@@ -26,10 +26,10 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnPortability.h>
 #include <cisstCommon/cmnGenericObject.h>
 #include <cisstCommon/cmnClassRegisterMacros.h>
+#include <cisstCommon/cmnNamedMap.h>
 
 #include <cisstOSAbstraction/osaThread.h>
 
-#include <cisstMultiTask/mtsMap.h>
 #include <cisstMultiTask/mtsCommandBase.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsMulticastCommandVoid.h>
@@ -78,8 +78,8 @@ class CISST_EXPORT mtsDevice: public cmnGenericObject
     /*! Default constructor. Sets the name. */
     mtsDevice(const std::string & deviceName):
         Name(deviceName),
-        ProvidedInterfaces("ProvidedInterfaces"),
-        RequiredInterfaces("RequiredInterfaces")
+        ProvidedInterfaces("ProvidedInterfaces", *this),
+        RequiredInterfaces("RequiredInterfaces", *this)
     {}
     
     /*! Default destructor. Does nothing. */
@@ -147,14 +147,14 @@ class CISST_EXPORT mtsDevice: public cmnGenericObject
     /*! Map of provided interfaces.  Used to store pointers on all
       provided interfaces. */
     //@{
-    typedef mtsMap<mtsDeviceInterface> ProvidedInterfacesMapType;
+    typedef cmnNamedMap<mtsDeviceInterface> ProvidedInterfacesMapType;
     ProvidedInterfacesMapType ProvidedInterfaces;
     //@}
 
     /*! Map of required interfaces.  Used to store pointers on all
       required interfaces. */
     //@{
-    typedef mtsMap<mtsRequiredInterface> RequiredInterfacesMapType;
+    typedef cmnNamedMap<mtsRequiredInterface> RequiredInterfacesMapType;
     RequiredInterfacesMapType RequiredInterfaces;
     //@}
 

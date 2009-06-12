@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2005-2007 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2005-2009 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---

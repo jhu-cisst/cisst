@@ -36,8 +36,8 @@ CMN_IMPLEMENT_SERVICES(mtsTaskInterface::ThreadResources)
 
 mtsTaskInterface::mtsTaskInterface(const std::string & name, mtsTask * task):
     BaseType(name, task),
-    CommandsQueuedVoid("CommandQueuedVoid"),
-    CommandsQueuedWrite("CommandQueuedWrite"),
+    CommandsQueuedVoid("CommandsQueuedVoid", *this),
+    CommandsQueuedWrite("CommandsQueuedWrite", *this),
     Mutex()
 {}
 
