@@ -255,17 +255,8 @@ public:
     /* documented in base class */
     mtsDeviceInterface * AddProvidedInterface(const std::string & newInterfaceName);
 
-    /*! Add a required interface.  This interface will later on be
-      connected to another task and use the provided interface of the
-      other task.  The required interface created also contains a list
-      of event handlers to be used as observers.
-      PK: should move this to base class (mtsDevice). */
-    mtsRequiredInterface * AddRequiredInterface(const std::string & requiredInterfaceName, mtsRequiredInterface * requiredInterface);
-    mtsRequiredInterface * AddRequiredInterface(const std::string & requiredInterfaceName);
+    /********************* Methods to manage event handlers *******************/
 
-    /*! Provide a list of existing required interfaces (by names) */ 
-    std::vector<std::string> GetNamesOfRequiredInterfaces(void) const;
-    
     /*! Associate an event (defined by its name) to a command object
       (i.e. handler defined by name) for a given required interface.
       This method can only work if the required interface has been
@@ -274,7 +265,6 @@ public:
                                                          const std::string & eventName,
                                                          const std::string & handlerName);
 
-    /********************* Methods to manage event handlers *******************/
 	
     /*! Add a write command to an event handler interface associated
       to a required interface. */

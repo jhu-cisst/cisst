@@ -206,35 +206,6 @@ mtsDeviceInterface * mtsTask::AddProvidedInterface(const std::string & newInterf
 }
 
 
-mtsRequiredInterface * mtsTask::AddRequiredInterface(const std::string & requiredInterfaceName,
-                                                    mtsRequiredInterface *requiredInterface) {
-    return RequiredInterfaces.AddItem(requiredInterfaceName, requiredInterface)?requiredInterface:0;
-}
-
-mtsRequiredInterface * mtsTask::AddRequiredInterface(const std::string & requiredInterfaceName) {
-    // PK: move DEFAULT_EVENT_QUEUE_LEN somewhere else (not in mtsTaskInterface)
-    mtsMailBox * mbox = new mtsMailBox(requiredInterfaceName + "Events", mtsTaskInterface::DEFAULT_EVENT_QUEUE_LEN);
-    mtsRequiredInterface * requiredInterface = new mtsRequiredInterface(requiredInterfaceName, mbox);
-    if (mbox && requiredInterface) {
-        if (RequiredInterfaces.AddItem(requiredInterfaceName, requiredInterface)) {
-            return requiredInterface;
-        }
-        CMN_LOG_CLASS_INIT_ERROR << "AddRequiredInterface: unable to add interface \""
-                                 << requiredInterfaceName << "\"" << std::endl;
-        delete requiredInterface;
-        return 0;
-    }
-    CMN_LOG_CLASS_INIT_ERROR << "AddRequiredInterface: unable to create interface or mailbox for \""
-                             << requiredInterfaceName << "\"" << std::endl;
-    return 0;
-}
-
-
-std::vector<std::string> mtsTask::GetNamesOfRequiredInterfaces(void) const {
-    return RequiredInterfaces.GetNames();
-}
-
-
 bool mtsTask::AddObserverToRequiredInterface(const std::string & CMN_UNUSED(requiredInterfaceName),
                                              const std::string & CMN_UNUSED(eventName),
                                              const std::string & CMN_UNUSED(handlerName))
@@ -243,9 +214,8 @@ bool mtsTask::AddObserverToRequiredInterface(const std::string & CMN_UNUSED(requ
     return false;
 }
 
-	
-/********************* Methods to manage event handlers *******************/
 
+// deprecated
 mtsCommandWriteBase * mtsTask::GetEventHandlerWrite(const std::string & requiredInterfaceName,
                                                     const std::string & commandName)
 {
@@ -256,7 +226,7 @@ mtsCommandWriteBase * mtsTask::GetEventHandlerWrite(const std::string & required
     return 0;
 }
 
-
+// deprecated
 mtsCommandVoidBase * mtsTask::GetEventHandlerVoid(const std::string & requiredInterfaceName,
                                                   const std::string & commandName)
 {
@@ -266,6 +236,8 @@ mtsCommandVoidBase * mtsTask::GetEventHandlerVoid(const std::string & requiredIn
     }
     return 0;
 }
+
+
 
 /********************* Methods for task synchronization ***************/
 

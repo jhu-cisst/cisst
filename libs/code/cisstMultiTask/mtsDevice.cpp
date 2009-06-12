@@ -21,6 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsDevice.h>
 #include <cisstMultiTask/mtsRequiredInterface.h>
+#include <cisstMultiTask/mtsTaskInterface.h>
 
 CMN_IMPLEMENT_SERVICES(mtsDevice)
 
@@ -49,6 +50,36 @@ mtsDeviceInterface * mtsDevice::AddProvidedInterface(const std::string & newInte
 
 mtsDeviceInterface * mtsDevice::GetProvidedInterface(const std::string & interfaceName) const {
     return ProvidedInterfaces.GetItem(interfaceName, CMN_LOG_LOD_INIT_ERROR);
+}
+
+
+mtsRequiredInterface * mtsDevice::AddRequiredInterface(const std::string & requiredInterfaceName,
+                                                    mtsRequiredInterface *requiredInterface) {
+    return RequiredInterfaces.AddItem(requiredInterfaceName, requiredInterface)?requiredInterface:0;
+}
+
+
+mtsRequiredInterface * mtsDevice::AddRequiredInterface(const std::string & requiredInterfaceName) {
+    // PK: move DEFAULT_EVENT_QUEUE_LEN somewhere else (not in mtsTaskInterface)
+    mtsMailBox * mbox = new mtsMailBox(requiredInterfaceName + "Events", mtsTaskInterface::DEFAULT_EVENT_QUEUE_LEN);
+    mtsRequiredInterface * requiredInterface = new mtsRequiredInterface(requiredInterfaceName, mbox);
+    if (mbox && requiredInterface) {
+        if (RequiredInterfaces.AddItem(requiredInterfaceName, requiredInterface)) {
+            return requiredInterface;
+        }
+        CMN_LOG_CLASS_INIT_ERROR << "AddRequiredInterface: unable to add interface \""
+                                 << requiredInterfaceName << "\"" << std::endl;
+        delete requiredInterface;
+        return 0;
+    }
+    CMN_LOG_CLASS_INIT_ERROR << "AddRequiredInterface: unable to create interface or mailbox for \""
+                             << requiredInterfaceName << "\"" << std::endl;
+    return 0;
+}
+
+
+std::vector<std::string> mtsDevice::GetNamesOfRequiredInterfaces(void) const {
+    return RequiredInterfaces.GetNames();
 }
 
 
