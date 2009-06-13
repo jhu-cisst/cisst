@@ -27,13 +27,16 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisst3DUserInterface/ui3VTKForwardDeclarations.h>
 #include <cisst3DUserInterface/ui3CursorBase.h>
 
+// Always include last!
+#include <cisst3DUserInterface/ui3Export.h>
+
 class CursorTip;
 class CursorAnchor;
 
 /*!  Simple cursor using a sphere for rendering.  Color, diameter and
   transparency are used to show the different states.
 */
-class ui3CursorSphere: public ui3CursorBase
+class CISST_EXPORT ui3CursorSphere: public ui3CursorBase
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 

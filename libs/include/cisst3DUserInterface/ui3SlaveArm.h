@@ -28,11 +28,13 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisst3DUserInterface/ui3ForwardDeclarations.h>
 #include <cisst3DUserInterface/ui3CursorBase.h>
 
+// Always include last!
+#include <cisst3DUserInterface/ui3Export.h>
 
 /*!
   Defines a master arm with cursor and callbacks
 */
-class ui3SlaveArm
+class CISST_EXPORT ui3SlaveArm
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 

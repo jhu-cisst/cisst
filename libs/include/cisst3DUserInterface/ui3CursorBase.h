@@ -29,10 +29,13 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisst3DUserInterface/ui3VisibleObject.h>
 
 
+// Always include last!
+#include <cisst3DUserInterface/ui3Export.h>
+
 /*!
   Base class for all cursors.
 */
-class ui3CursorBase
+class CISST_EXPORT ui3CursorBase
 {
 public:
     /*!

@@ -33,10 +33,13 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisst3DUserInterface/ui3InputDeviceBase.h>
 #include <cisst3DUserInterface/ui3MenuBar.h>
 
+// Always include last!
+#include <cisst3DUserInterface/ui3Export.h>
+
 /*!
  Provides a default behavior and common interface for derived behavior classes.
 */
-class ui3BehaviorBase: public mtsTaskContinuous
+class CISST_EXPORT ui3BehaviorBase: public mtsTaskContinuous
 {
 
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);

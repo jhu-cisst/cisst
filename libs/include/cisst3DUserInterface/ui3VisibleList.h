@@ -33,12 +33,14 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisst3DUserInterface/ui3SceneManager.h>
 #include <cisst3DUserInterface/ui3VisibleObject.h>
 
+// Always include last!
+#include <cisst3DUserInterface/ui3Export.h>
 
 /*!  
   Cheap implementation of Composite Pattern, group of visible
   objects behaving like a single visible object
 */
-class ui3VisibleList: public ui3VisibleObject
+class CISST_EXPORT ui3VisibleList: public ui3VisibleObject
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 

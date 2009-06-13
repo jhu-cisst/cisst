@@ -32,11 +32,13 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisst3DUserInterface/ui3VTKForwardDeclarations.h>
 #include <cisst3DUserInterface/ui3SceneManager.h>
 
+// Always include last!
+#include <cisst3DUserInterface/ui3Export.h>
 
 /*!
  Provides a base class for all visible objects.
 */
-class ui3VisibleObject: public cmnGenericObject
+class CISST_EXPORT ui3VisibleObject: public cmnGenericObject
 {   
     friend class ui3SceneManager;
     friend class ui3VisibleList;

@@ -34,14 +34,6 @@ IF(NOT VTK_USE_RENDERING)
 ENDIF(NOT VTK_USE_RENDERING)
 INCLUDE(${VTK_USE_FILE})
 
-IF(CISST_SVL_HAS_OPENCV)
-    # Link each example against the OpenCV library if enabled
-    FIND_PACKAGE(OpenCV)
-    INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS})
-    #LINK_DIRECTORIES(${OpenCV_LINK_DIRECTORIES})
-    #TARGET_LINK_LIBRARIES(stereoTutorialSimpleStream ${OpenCV_LIBRARIES})
-ENDIF(CISST_SVL_HAS_OPENCV)
-
 # all source files
 SET(SOURCE_FILES
     ui3BehaviorBase.cpp
@@ -66,6 +58,7 @@ SET(HEADER_FILES
     ui3BehaviorBase.h
     ui3CursorBase.h
     ui3CursorSphere.h
+    ui3Export.h
     ui3ImagePlane.h
     ui3InputDeviceBase.h
     ui3Manager.h
@@ -83,9 +76,10 @@ SET(HEADER_FILES
 
 CISST_ADD_LIBRARY_TO_PROJECT(cisstLibs)
 
+# link to other external libraries
+target_link_libraries(cisst3DUserInterface vtkRendering)
 
 # find icons
-
 set(CISST_UI3_ICONS_DIR "${cisst_SOURCE_DIR}/libs/etc/cisst3DUserInterface/icons")
 file(GLOB CISST_UI3_ICONS RELATIVE ${CISST_UI3_ICONS_DIR} ${CISST_UI3_ICONS_DIR}/*.png)
 

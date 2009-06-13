@@ -35,13 +35,15 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <vtkUnsignedCharArray.h>
 
+// Always include last!
+#include <cisst3DUserInterface/ui3Export.h>
 
 /*!
  Class that implements the interface between VTK and the SAW framework.
  It provides methods for creating and manipulating 3D objects and rendering
  scenes on the screen and/or on a frame buffer.
 */
-class ui3VTKRenderer: public cmnGenericObject
+class CISST_EXPORT ui3VTKRenderer: public cmnGenericObject
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 

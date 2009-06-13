@@ -235,14 +235,14 @@ bool ui3Manager::AddSlaveArm(ui3SlaveArm * arm)
 {
     // setup UI manager pointer in newly added arm
     arm->SetManager(this);
-    this->SlaveArms.AddItem(arm->Name, arm, 1);
+    this->SlaveArms.AddItem(arm->Name, arm, CMN_LOG_LOD_INIT_ERROR);
     return true;
 }
 
 
 ui3SlaveArm * ui3Manager::GetSlaveArm(const std::string & armName)
 {
-    return this->SlaveArms.GetItem(armName, 1);
+    return this->SlaveArms.GetItem(armName, CMN_LOG_LOD_INIT_ERROR);
 }
 
 

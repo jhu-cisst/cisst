@@ -28,6 +28,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisst3DUserInterface/ui3BehaviorBase.h>
 #include <cisst3DUserInterface/ui3MasterArm.h>
 
+// Always include last!
+#include <cisst3DUserInterface/ui3Export.h>
 
 // forward declaration, to be moved to cisstStereoVision
 class svlRenderTargetBase;
@@ -35,7 +37,7 @@ class svlRenderTargetBase;
 /*!
  Provides a default implementation for the main user interface manager.
 */
-class ui3Manager: public ui3BehaviorBase
+class CISST_EXPORT ui3Manager: public ui3BehaviorBase
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
     

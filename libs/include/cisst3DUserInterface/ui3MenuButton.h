@@ -29,6 +29,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisst3DUserInterface/ui3ForwardDeclarations.h>
 #include <cisst3DUserInterface/ui3VTKForwardDeclarations.h>
 
+// Always include last!
+#include <cisst3DUserInterface/ui3Export.h>
 
 /*!
  Typedef for pointer to member function for button callbacks.
@@ -40,7 +42,7 @@ http://www.cisst.org/cisst/license.txt.
  Implements a button on the menu bar. For creating a button spacer, do not call
  the Create function.
 */
-class ui3MenuButton
+class CISST_EXPORT ui3MenuButton
 {
     friend class ui3Manager;
 

@@ -30,6 +30,9 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisst3DUserInterface/ui3ForwardDeclarations.h>
 #include <cisst3DUserInterface/ui3VTKForwardDeclarations.h>
 
+// Always include last!
+#include <cisst3DUserInterface/ui3Export.h>
+
 /*!
  Wraps VTK object creation and access into a unified thread safe interface.
 
@@ -38,7 +41,7 @@ http://www.cisst.org/cisst/license.txt.
  (actors and assemblies). All actors and assemblies shall be created through this
  class and should be used only within the corresponding Get and Release calls.
 */
-class ui3SceneManager: public cmnGenericObject
+class CISST_EXPORT ui3SceneManager: public cmnGenericObject
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 

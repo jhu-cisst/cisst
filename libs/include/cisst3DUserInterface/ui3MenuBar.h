@@ -28,11 +28,13 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisst3DUserInterface/ui3VisibleObject.h>
 #include <cisst3DUserInterface/ui3MenuButton.h>
 
+// Always include last!
+#include <cisst3DUserInterface/ui3Export.h>
 
 /*!
  Implements a menu bar to show buttons on the lower part of the image.
 */
-class ui3MenuBar: public ui3VisibleObject
+class CISST_EXPORT ui3MenuBar: public ui3VisibleObject
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
