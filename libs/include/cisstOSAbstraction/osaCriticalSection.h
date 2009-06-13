@@ -36,8 +36,10 @@ http://www.cisst.org/cisst/license.txt.
     #include <cisstOSAbstraction/osaMutex.h>
 #endif
 
+// Always include last
+#include <cisstOSAbstraction/osaExport.h>
 
-class osaCriticalSection
+class CISST_EXPORT osaCriticalSection
 {
 public:
     osaCriticalSection();
