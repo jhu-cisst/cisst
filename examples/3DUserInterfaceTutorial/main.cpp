@@ -145,6 +145,7 @@ int main()
                            vidSource.GetHeight(SVL_LEFT), // render height
                            0, 0,            // window position
                            camframe, 30.0,  // camera parameters
+                           vct2(0.0),
                            "LeftEyeView");  // name of renderer
     guiManager.AddVideoBackgroundToRenderer("LeftEyeView", "StereoVideo", SVL_LEFT);
 #endif //RENDER_ON_OVERLAY
@@ -164,6 +165,7 @@ int main()
                            vidSource.GetHeight(SVL_RIGHT), // render height
                            20, 20,          // window position
                            camframe, 30.0,  // camera parameters
+                           vct2(0.0),
                            "RightEyeView"); // name of renderer
     guiManager.AddVideoBackgroundToRenderer("RightEyeView", "StereoVideo", SVL_RIGHT);
 #endif //RENDER_ON_OVERLAY

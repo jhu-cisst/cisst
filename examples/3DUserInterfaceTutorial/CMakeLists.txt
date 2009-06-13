@@ -12,7 +12,6 @@ if (VTK_FOUND)
     endif (NOT VTK_USE_RENDERING)
     include (${VTK_USE_FILE})
 else (VTK_FOUND)
-
     message (FATAL ERROR "VTK not found")
 endif (VTK_FOUND)
 
