@@ -25,6 +25,24 @@ http://www.cisst.org/cisst/license.txt.
 
 CMN_IMPLEMENT_SERVICES(mtsDeviceInterface)
 
+mtsDeviceInterface::mtsDeviceInterface(const std::string & interfaceName,
+                                       mtsDevice * device):
+    Name(interfaceName),
+    Device(device),
+    CommandsVoid("CommandsVoid"),
+    CommandsRead("CommandsRead"),
+    CommandsWrite("CommandsWrite"),
+    CommandsQualifiedRead("CommandsQualifiedRead"),
+    EventVoidGenerators("EventVoidGenerators"),
+    EventWriteGenerators("EventWriteGenerators")
+{
+    CommandsVoid.SetOwner(*this);
+    CommandsRead.SetOwner(*this);
+    CommandsWrite.SetOwner(*this);
+    CommandsQualifiedRead.SetOwner(*this);
+    EventVoidGenerators.SetOwner(*this);
+    EventWriteGenerators.SetOwner(*this);
+}
 
 mtsCommandVoidBase * mtsDeviceInterface::GetCommandVoid(const std::string & commandName) const {
     return CommandsVoid.GetItem(commandName, CMN_LOG_LOD_INIT_ERROR);

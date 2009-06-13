@@ -27,13 +27,19 @@ mtsRequiredInterface::mtsRequiredInterface(const std::string & interfaceName, mt
     Name(interfaceName),
     MailBox(mailBox),
     OtherInterface(0),
-    CommandPointersVoid("CommandPointersVoid", *this),
-    CommandPointersRead("CommandPointersRead", *this),
-    CommandPointersWrite("CommandPointersWrite", *this),
-    CommandPointersQualifiedRead("CommandPointersQualifiedRead", *this),
-    EventHandlersVoid("EventHandlersVoid", *this),
-    EventHandlersWrite("EventHandlersWrite", *this)
+    CommandPointersVoid("CommandPointersVoid"),
+    CommandPointersRead("CommandPointersRead"),
+    CommandPointersWrite("CommandPointersWrite"),
+    CommandPointersQualifiedRead("CommandPointersQualifiedRead"),
+    EventHandlersVoid("EventHandlersVoid"),
+    EventHandlersWrite("EventHandlersWrite")
 {
+    CommandPointersVoid.SetOwner(*this);
+    CommandPointersRead.SetOwner(*this);
+    CommandPointersWrite.SetOwner(*this);
+    CommandPointersQualifiedRead.SetOwner(*this);
+    EventHandlersVoid.SetOwner(*this);
+    EventHandlersWrite.SetOwner(*this);
 }
 
 mtsRequiredInterface::~mtsRequiredInterface()

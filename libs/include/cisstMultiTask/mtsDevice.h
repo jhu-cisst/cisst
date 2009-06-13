@@ -76,11 +76,7 @@ class CISST_EXPORT mtsDevice: public cmnGenericObject
  public:
     
     /*! Default constructor. Sets the name. */
-    mtsDevice(const std::string & deviceName):
-        Name(deviceName),
-        ProvidedInterfaces("ProvidedInterfaces", *this),
-        RequiredInterfaces("RequiredInterfaces", *this)
-    {}
+    mtsDevice(const std::string & deviceName);
     
     /*! Default destructor. Does nothing. */
     virtual ~mtsDevice() {}

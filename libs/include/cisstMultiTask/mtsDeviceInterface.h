@@ -118,16 +118,7 @@ class CISST_EXPORT mtsDeviceInterface: public cmnGenericObject
 
     /*! Constructor. Sets the name. */
     mtsDeviceInterface(const std::string & interfaceName,
-                       mtsDevice * device):
-        Name(interfaceName),
-        Device(device),
-        CommandsVoid("CommandsVoid", *this),
-        CommandsRead("CommandsRead", *this),
-        CommandsWrite("CommandsWrite", *this),
-        CommandsQualifiedRead("CommandsQualifiedRead", *this),
-        EventVoidGenerators("EventVoidGenerators", *this),
-        EventWriteGenerators("EventWriteGenerators", *this)
-    {}
+                       mtsDevice * device);
 
     /*! Default destructor. Does nothing. */
     virtual ~mtsDeviceInterface() {}

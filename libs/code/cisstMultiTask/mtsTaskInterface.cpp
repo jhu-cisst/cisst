@@ -36,10 +36,13 @@ CMN_IMPLEMENT_SERVICES(mtsTaskInterface::ThreadResources)
 
 mtsTaskInterface::mtsTaskInterface(const std::string & name, mtsTask * task):
     BaseType(name, task),
-    CommandsQueuedVoid("CommandsQueuedVoid", *this),
-    CommandsQueuedWrite("CommandsQueuedWrite", *this),
+    CommandsQueuedVoid("CommandsQueuedVoid"),
+    CommandsQueuedWrite("CommandsQueuedWrite"),
     Mutex()
-{}
+{
+    CommandsQueuedVoid.SetOwner(*this);
+    CommandsQueuedWrite.SetOwner(*this);
+}
 
 
 

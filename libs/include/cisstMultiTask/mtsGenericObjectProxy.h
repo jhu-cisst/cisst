@@ -25,8 +25,10 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnClassRegister.h>
 #include <cisstCommon/cmnSerializer.h>
 #include <cisstCommon/cmnDeSerializer.h>
-#include <cisstCommon/cmnExport.h>
+
 #include <cisstMultiTask/mtsGenericObject.h>
+// Always include last!
+#include <cisstMultiTask/mtsExport.h>
 
 /*!  Proxy class used to create a simple mtsGenericObject, i.e. data
   object with a registered type, dynamic creation, serialization and

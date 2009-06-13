@@ -31,10 +31,12 @@ CMN_IMPLEMENT_SERVICES(mtsTaskManager);
 
 
 mtsTaskManager::mtsTaskManager():
-    TaskMap("Tasks", *this),
-    DeviceMap("Devices", *this)
+    TaskMap("Tasks"),
+    DeviceMap("Devices")
 {
     __os_init();
+    TaskMap.SetOwner(*this);
+    DeviceMap.SetOwner(*this);
     TimeServer.SetTimeOrigin();
 }
 

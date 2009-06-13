@@ -25,6 +25,15 @@ http://www.cisst.org/cisst/license.txt.
 
 CMN_IMPLEMENT_SERVICES(mtsDevice)
 
+mtsDevice::mtsDevice(const std::string & deviceName):
+    Name(deviceName),
+    ProvidedInterfaces("ProvidedInterfaces"),
+    RequiredInterfaces("RequiredInterfaces")
+{
+    ProvidedInterfaces.SetOwner(*this);
+    RequiredInterfaces.SetOwner(*this);   
+}
+  
 
 std::vector<std::string> mtsDevice::GetNamesOfProvidedInterfaces(void) const {
     return ProvidedInterfaces.GetNames();
