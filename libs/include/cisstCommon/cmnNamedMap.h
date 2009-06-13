@@ -26,6 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <vector>
 #include <string>
 
+#include <cisstCommon/cmnGenericObject.h>
 #include <cisstCommon/cmnLogger.h>
 
 /*!
@@ -33,6 +34,9 @@ http://www.cisst.org/cisst/license.txt.
   \brief Declaration of cmnNamedMap
  */
 
+
+// forward declaration
+class cmnClassServicesBase;
 
 /*!
   \ingroup cisstCommon
@@ -50,7 +54,6 @@ template <class _elementType>
 class cmnNamedMap {
 
 public:
-
     /*! Type of the actual map */
     typedef std::map<std::string, _elementType *> MapType;
 
