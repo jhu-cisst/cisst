@@ -18,7 +18,7 @@ class displayTask: public mtsTaskPeriodic {
     
  protected:
     // local copy of data used in commands
-    cmnDouble Weight;
+    mtsDouble Weight;
 
     // functions which will be bound to commands
     mtsFunctionRead GetWeight;

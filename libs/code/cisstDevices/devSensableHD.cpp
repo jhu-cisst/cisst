@@ -35,7 +35,7 @@ struct devSensableHDDeviceData {
     bool DeviceEnabled;
     
     // local copy of the buttons state as defined by Sensable
-    cmnInt Buttons;
+    mtsInt Buttons;
     
     // local copy of the position and velocities
     prmPositionCartesianGet PositionCartesian;
