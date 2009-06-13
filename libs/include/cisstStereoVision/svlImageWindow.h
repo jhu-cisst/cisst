@@ -24,6 +24,10 @@ http://www.cisst.org/cisst/license.txt.
 #define _svlImageWindow_h
 
 #include <cisstStereoVision/svlStreamManager.h>
+
+// Always include last!
+#include <cisstStereoVision/svlExport.h>
+
 #include <string>
 
 #define winInput_KEY_F1             112
@@ -60,7 +64,7 @@ http://www.cisst.org/cisst/license.txt.
 
 class svlWindowManagerBase;
 
-class svlImageWindowCallbackBase
+class CISST_EXPORT svlImageWindowCallbackBase
 {
 friend class svlWindowManagerBase;
 friend class svlImageWindow;
@@ -81,7 +85,7 @@ private:
     void SetMousePos(int x, int y) { MouseX = x; MouseY = y; }
 };
 
-class svlWindowManagerBase
+class CISST_EXPORT svlWindowManagerBase
 {
 public:
     svlWindowManagerBase(unsigned int numofwins);
@@ -120,7 +124,7 @@ protected:
 class svlWindowManagerThreadProc;
 
 
-class svlImageWindow : public svlFilterBase
+class CISST_EXPORT svlImageWindow : public svlFilterBase
 {
 friend class svlWindowManagerThreadProc;
 
@@ -155,7 +159,7 @@ private:
 };
 
 
-class svlWindowManagerThreadProc
+class CISST_EXPORT svlWindowManagerThreadProc
 {
 public:
     svlWindowManagerThreadProc() {}

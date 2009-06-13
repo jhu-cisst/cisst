@@ -79,8 +79,8 @@ public:
 
 private:
     svlStreamEntity();
-    svlStreamEntity(svlStreamEntity const&);
-    svlStreamManager* Stream;
+    svlStreamEntity(svlStreamEntity const &) {};
+    svlStreamManager * Stream;
 };
 
 
