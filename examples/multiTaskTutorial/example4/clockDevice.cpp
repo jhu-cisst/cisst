@@ -15,7 +15,7 @@ clockDevice::clockDevice(const std::string & deviceName):
     Timer.Start();   // start the clock 
 }
 
-void clockDevice::GetTime(cmnDouble & time) const
+void clockDevice::GetTime(mtsDouble & time) const
 {
     time = Timer.GetElapsedTime(); // get the time since started
 }

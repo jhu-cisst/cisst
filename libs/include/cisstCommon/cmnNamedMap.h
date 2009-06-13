@@ -57,9 +57,9 @@ public:
 protected:
     MapType Map;
     std::string MapName;
-    cmnClassServicesBase * OwnerServices;
+    const cmnClassServicesBase * OwnerServices;
 
-    inline cmnClassServicesBase * Services(void) const {
+    inline const cmnClassServicesBase * Services(void) const {
         return this->OwnerServices;
     }
 

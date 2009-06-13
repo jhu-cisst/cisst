@@ -14,8 +14,8 @@ class displayTask: public mtsTaskPeriodic {
     
  protected:
     // local copy of data used in commands
-    cmnDouble Data;
-    cmnDouble AmplitudeData;
+    mtsDouble Data;
+    mtsDouble AmplitudeData;
 
     struct {
        // functions which will be bound to commands

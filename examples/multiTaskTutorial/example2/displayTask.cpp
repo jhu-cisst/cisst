@@ -30,7 +30,7 @@ displayTask::displayTask(const std::string taskName, double period):
 displayTask::~displayTask()
 {}
 
-void displayTask::HandleTrigger(const cmnDouble & value)
+void displayTask::HandleTrigger(const mtsDouble & value)
 {
     CMN_LOG_RUN_VERBOSE << "HandleTrigger: Trigger event (" << this->GetName() << "): "
                         << value << std::endl;
@@ -51,7 +51,7 @@ void displayTask::Startup(void)
 
 void displayTask::Run(void)
 {
-    cmnDouble time;
+    mtsDouble time;
     Generator.GetData(Data);
     Clock.GetClockData(time);
     UI.Data->value(Data);

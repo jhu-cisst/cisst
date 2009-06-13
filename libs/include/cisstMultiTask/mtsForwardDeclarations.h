@@ -28,8 +28,10 @@ http://www.cisst.org/cisst/license.txt.
   \brief Forward declarations and \#define for cisstMultiTask
 */
 
-#include <cisstCommon/cmnGenericObject.h>
 #include <cisstCommon/cmnClassServices.h>
+#include <cisstMultiTask/mtsGenericObject.h>
+#include <cisstMultiTask/mtsGenericObjectProxy.h>
+
 
 // commands
 class mtsCommandBase;
@@ -41,15 +43,15 @@ class mtsFunctionVoid;
 
 // one argument commands
 template <class _argumentBaseType> class mtsCommandReadOrWriteBase;
-typedef mtsCommandReadOrWriteBase<cmnGenericObject> mtsCommandReadBase;
-typedef mtsCommandReadOrWriteBase<const cmnGenericObject> mtsCommandWriteBase;
+typedef mtsCommandReadOrWriteBase<mtsGenericObject> mtsCommandReadBase;
+typedef mtsCommandReadOrWriteBase<const mtsGenericObject> mtsCommandWriteBase;
 
 template <class _argumentType> class mtsFunctionReadOrWrite;
 
 // two arguments commands
 template <class _argument2BaseType> class mtsCommandQualifiedReadOrWriteBase;
-typedef mtsCommandQualifiedReadOrWriteBase<cmnGenericObject> mtsCommandQualifiedReadBase;
-typedef mtsCommandQualifiedReadOrWriteBase<const cmnGenericObject> mtsCommandQualifiedWriteBase;
+typedef mtsCommandQualifiedReadOrWriteBase<mtsGenericObject> mtsCommandQualifiedReadBase;
+typedef mtsCommandQualifiedReadOrWriteBase<const mtsGenericObject> mtsCommandQualifiedWriteBase;
 
 template <class _argumentType> class mtsFunctionQualifiedReadOrWrite;
 
@@ -80,8 +82,8 @@ inline std::string mtsObjectName(const void * CMN_UNUSED(object)) {
     return "UnnamedObject";
 }
 
-// overload for cmnGenericObject to give at least the class name
-inline std::string mtsObjectName(const cmnGenericObject * object) {
+// overload for mtsGenericObject to give at least the class name
+inline std::string mtsObjectName(const mtsGenericObject * object) {
     return object->Services()->GetName();
 }
 

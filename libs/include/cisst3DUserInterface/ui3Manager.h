@@ -22,7 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _ui3Manager_h
 #define _ui3Manager_h
 
-#include <cisstMultiTask/mtsMap.h>
+#include <cisstCommon/cmnNamedMap.h>
 
 #include <cisst3DUserInterface/ui3ForwardDeclarations.h>
 #include <cisst3DUserInterface/ui3BehaviorBase.h>
@@ -51,7 +51,7 @@ public:
 
     typedef std::list<ui3MasterArm *> MasterArmList;
 
-    typedef mtsMap<ui3SlaveArm> SlaveArmList;
+    typedef cmnNamedMap<ui3SlaveArm> SlaveArmList;
 
     /*!
      Enumerated display modes

@@ -109,7 +109,7 @@ public:
       applies the operation on the receiver. 
       \param obj The data passed to the operation method
     */
-    virtual mtsCommandBase::ReturnType Execute(cmnGenericObject & argument) {
+    virtual mtsCommandBase::ReturnType Execute(mtsGenericObject & argument) {
         if (this->IsEnabled()) {
             ArgumentType * data = dynamic_cast< ArgumentType * >(&argument);
             if (data == 0) {
@@ -128,7 +128,7 @@ public:
     }
 
     /* commented in base class */
-    const cmnGenericObject * GetArgumentPrototype(void) const {
+    const mtsGenericObject * GetArgumentPrototype(void) const {
         return &ArgumentPrototype;
     }
 

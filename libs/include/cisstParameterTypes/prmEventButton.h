@@ -28,14 +28,14 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _prmEventButton_h
 #define _prmEventButton_h
 
+#include <cisstMultiTask/mtsGenericObject.h>
 #include <cisstMultiTask/mtsStateIndex.h>
-#include <cisstParameterTypes/prmMacros.h>
 
 // Always include last
 #include <cisstParameterTypes/prmExport.h>
 
 /*! Button event payload */
-class CISST_EXPORT prmEventButton: public cmnGenericObject
+class CISST_EXPORT prmEventButton: public mtsGenericObject
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
@@ -63,12 +63,12 @@ class CISST_EXPORT prmEventButton: public cmnGenericObject
       state index.  It allows to query any state elements that occured
       in the same state frame. */
     //@{
-    PRM_DECLARE_MEMBER_AND_ACCESSORS(mtsStateIndex, StateIndex);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(mtsStateIndex, StateIndex);
     //@}
 
     /*! Set and Get methods for event type. */
     //@{
-    PRM_DECLARE_MEMBER_AND_ACCESSORS(EventType, Type);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(EventType, Type);
     //@}
 
     /*! Overloaded ToStream */

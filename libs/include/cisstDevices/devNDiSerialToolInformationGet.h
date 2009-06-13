@@ -23,10 +23,9 @@ http://www.cisst.org/cisst/license.txt.
 #define _devNDiSerialToolInformationGet_h
 
 
+#include <cisstMultiTask/mtsGenericObject.h>
 #include <cisstMultiTask/mtsStateIndex.h>
 #include <cisstParameterTypes/prmTypes.h>
-#include <cisstParameterTypes/prmMacros.h>
-#include <cisstParameterTypes.h>
 
 #include <string>
 
@@ -34,7 +33,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstDevices/devExport.h>
 
 
-class CISST_EXPORT devNDiSerialToolInformationGet: public cmnGenericObject
+class CISST_EXPORT devNDiSerialToolInformationGet: public mtsGenericObject
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
     
@@ -80,7 +79,7 @@ class CISST_EXPORT devNDiSerialToolInformationGet: public cmnGenericObject
     
     // Tool Identifiers
     /*! Declares Set and Get methods for Name of the Tool */
-    PRM_DECLARE_MEMBER_AND_ACCESSORS(CHAR_256, Name);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(CHAR_256, Name);
     
     /*! Overloads the SetName function for string arguments */
     inline void SetName(const std::string & name) { 
@@ -96,7 +95,7 @@ class CISST_EXPORT devNDiSerialToolInformationGet: public cmnGenericObject
     }
     
     /*! Declares Set and Get methods for Serial Number of the Tool */
-    PRM_DECLARE_MEMBER_AND_ACCESSORS(CHAR_256, SerialNumber);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(CHAR_256, SerialNumber);
     
     /*! Overloads the SetSerialNumber function for string arguments */
     inline void SetSerialNumber(const std::string & serial)
@@ -113,20 +112,20 @@ class CISST_EXPORT devNDiSerialToolInformationGet: public cmnGenericObject
     }
     
     // Tool Information Data
-    PRM_DECLARE_MEMBER_AND_ACCESSORS(double, Error);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(double, Error);
     
     // Tool Information Flags
-    PRM_DECLARE_MEMBER_AND_ACCESSORS(bool, Disabled);
-    PRM_DECLARE_MEMBER_AND_ACCESSORS(bool, Initialized);
-    PRM_DECLARE_MEMBER_AND_ACCESSORS(bool, Enabled);
-    PRM_DECLARE_MEMBER_AND_ACCESSORS(bool, Missing);
-    PRM_DECLARE_MEMBER_AND_ACCESSORS(bool, OutOfVolume);
-    PRM_DECLARE_MEMBER_AND_ACCESSORS(bool, PartiallyOutOfVolume); 
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(bool, Disabled);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(bool, Initialized);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(bool, Enabled);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(bool, Missing);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(bool, OutOfVolume);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(bool, PartiallyOutOfVolume); 
 
     /* NOTE: For some unknown reason a segfault would be cause when acsessing the final
        two parameters. Each is stored as a word in length. By placing following variable
        it causes the following variable to be a buffer for the segfault for the parameter. */
-    PRM_DECLARE_MEMBER_AND_ACCESSORS(int, UNUSEDBUFFER); 
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(int, UNUSEDBUFFER); 
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(devNDiSerialToolInformationGet);

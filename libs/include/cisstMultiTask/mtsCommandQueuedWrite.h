@@ -109,7 +109,7 @@ public:
     }
     
     
-    virtual mtsCommandBase::ReturnType Execute(const cmnGenericObject & argument) {
+    virtual mtsCommandBase::ReturnType Execute(const mtsGenericObject & argument) {
         if (this->IsEnabled()) {
             const ArgumentType * argumentTyped = dynamic_cast<const ArgumentType*>(&argument);
             if (!argumentTyped) {
@@ -134,16 +134,16 @@ public:
     }
 
     /* commented in base class */
-    const cmnGenericObject * GetArgumentPrototype(void) const {
+    const mtsGenericObject * GetArgumentPrototype(void) const {
         return this->ActualCommand->GetArgumentPrototype();
     }    
 
-    inline virtual const cmnGenericObject * ArgumentPeek(void) const {
+    inline virtual const mtsGenericObject * ArgumentPeek(void) const {
         return ArgumentsQueue.Peek();
     }
     
 
-    inline virtual cmnGenericObject * ArgumentGet(void) {
+    inline virtual mtsGenericObject * ArgumentGet(void) {
         return ArgumentsQueue.Get();
     }
 };

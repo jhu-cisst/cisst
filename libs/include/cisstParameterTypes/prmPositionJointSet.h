@@ -42,20 +42,20 @@ class CISST_EXPORT prmPositionJointSet: public prmMotionBase
 protected:
     /*! masks correpsonding elements in goal, if an element is set
     true --> corresponding goal should be used */
-    PRM_DECLARE_MEMBER_AND_ACCESSORS(prmBoolVec, Mask);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(prmBoolVec, Mask);
 
     /*! a motion goal in joint angles. only goals corresponding to
     mask elements set true are used */
-    PRM_DECLARE_MEMBER_AND_ACCESSORS(prmPosition, Goal);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(prmPosition, Goal);
 
     /*! corresponding joint velocities */
-    PRM_DECLARE_MEMBER_AND_ACCESSORS(prmVelocity, Velocity);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(prmVelocity, Velocity);
 
     /*! corresponding accelerations where needed */
-    PRM_DECLARE_MEMBER_AND_ACCESSORS(prmAcceleration, Acceleration);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(prmAcceleration, Acceleration);
 
     /*! corresponding accelerations where applicable */
-    PRM_DECLARE_MEMBER_AND_ACCESSORS(prmAcceleration, Deceleration);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(prmAcceleration, Deceleration);
 
 public:
 
@@ -84,7 +84,7 @@ public:
         DecelerationMember(deceleration)
     {}
 
-    bool inline Allocate(const cmnGenericObject * model)
+    bool inline Allocate(const mtsGenericObject * model)
     {
         const ThisType * pointer = dynamic_cast<const ThisType *>(model);
         if (pointer == 0) {
@@ -105,7 +105,7 @@ public:
 
 }; // _prmPositionJointSet_h
 
-
 CMN_DECLARE_SERVICES_INSTANTIATION(prmPositionJointSet);
+
 #endif
 

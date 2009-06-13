@@ -49,6 +49,9 @@ void displayTask::Run(void)
     if (UI.AmplitudeChanged) {
         // retrieve the new amplitude and send it to the sine task
         AmplitudeData = UI.Amplitude->value();
+        AmplitudeData.SetTimestamp(mtsTaskManager::GetInstance()->GetTimeServer().GetRelativeTime());
+        AmplitudeData.SetValid(true);
+        // send it
         Generator.SetAmplitude(AmplitudeData);
         UI.AmplitudeChanged = false;
         CMN_LOG_CLASS_RUN_VERBOSE << "Run: " << this->GetTick()

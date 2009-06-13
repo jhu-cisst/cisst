@@ -13,10 +13,10 @@ class displayTask: public mtsTaskPeriodic {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
     
  protected:
-    cmnDouble Data;
-    cmnDouble Amplitude;
-    cmnDouble TriggerValue;
-    cmnDouble Time;
+    mtsDouble Data;
+    mtsDouble Amplitude;
+    mtsDouble TriggerValue;
+    mtsDouble Time;
 
     volatile bool WaitingForTrigger;
 
@@ -34,7 +34,7 @@ class displayTask: public mtsTaskPeriodic {
     } Clock;
 
     // event handler
-    void HandleTrigger(const cmnDouble & value);
+    void HandleTrigger(const mtsDouble & value);
 
     displayUI UI;
     

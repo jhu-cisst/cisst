@@ -5,7 +5,7 @@
   Author(s):	Anton Deguet
   Created on:	2008-06-26
 
-  (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2008-2009 Johns Hopkins University (JHU), All Rights
   Reserved.
 
   --- begin cisst license - do not edit ---
@@ -17,11 +17,11 @@
   --- end cisst license ---
 */
 
-#ifndef _prmMacros_h
-#define _prmMacros_h
+#ifndef _mtsMacros_h
+#define _mtsMacros_h
 
 
-#define PRM_DECLARE_MEMBER_AND_ACCESSORS(type, name) \
+#define MTS_DECLARE_MEMBER_AND_ACCESSORS(type, name) \
  protected:                                          \
     type name##Member;                               \
  public:                                             \
@@ -39,5 +39,15 @@
     }
 
 
-#endif // _prmMacros_h
+#define MTS_PROXY_CLASS_DECLARATION_FROM(className)                  \
+class className##Proxy: public mtsGenericObject, public className    \
+{                                                                    \
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_DEFAULT_LOD); \
+public:                                                              \
+    className##Proxy(void): mtsGenericObject(), className() {}       \
+};                                                                   \
+CMN_DECLARE_SERVICES_INSTANTIATION(className##Proxy)
+
+
+#endif // _mtsMacros_h
 

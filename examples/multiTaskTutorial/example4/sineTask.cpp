@@ -21,7 +21,7 @@ sineTask::sineTask(const std::string & taskName, double period):
         // add a command bound to a user defined method
         mainInterface->AddCommandVoid(&sineTask::ResetTrigger, this,"ResetTrigger");
         // define an event and setup our event sending function
-        cmnDouble eventData; // data type used for the event payload
+        mtsDouble eventData; // data type used for the event payload
         TriggerEvent.Bind(mainInterface->AddEventWrite("TriggerEvent", eventData));
     }
 }

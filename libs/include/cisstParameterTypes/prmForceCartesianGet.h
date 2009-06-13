@@ -28,24 +28,25 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _prmForceCartesianGet_h
 #define _prmForceCartesianGet_h
 
-
+#include <cisstVector/vctFixedSizeVectorTypes.h>
 #include <cisstMultiTask/mtsStateIndex.h>
+#include <cisstMultiTask/mtsGenericObject.h>
 #include <cisstParameterTypes/prmTransformationBase.h>
 #include <cisstParameterTypes/prmTransformationManager.h>
-#include <cisstParameterTypes/prmTypes.h>
-#include <cisstParameterTypes/prmMacros.h>
+
 
 // Always include last
 #include <cisstParameterTypes/prmExport.h>
 
 /*! Cartesian force get command argument */
-class CISST_EXPORT prmForceCartesianGet: public cmnGenericObject
+class CISST_EXPORT prmForceCartesianGet: public mtsGenericObject
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
  public:
     /*! default constructor */
     inline prmForceCartesianGet(void):
+        mtsGenericObject(),
         MovingFrameMember(0),
         ReferenceFrameMember(0)
     {}
@@ -72,7 +73,7 @@ class CISST_EXPORT prmForceCartesianGet: public cmnGenericObject
         force.  This is defined by a node in the transformation
         tree. */
     //@{
-    PRM_DECLARE_MEMBER_AND_ACCESSORS(prmTransformationBasePtr, MovingFrame);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(prmTransformationBasePtr, MovingFrame);
     //@}
 
 
@@ -80,19 +81,19 @@ class CISST_EXPORT prmForceCartesianGet: public cmnGenericObject
         force.  This is defined by a node in the transformation
         tree. */
     //@{
-    PRM_DECLARE_MEMBER_AND_ACCESSORS(prmTransformationBasePtr, ReferenceFrame);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(prmTransformationBasePtr, ReferenceFrame);
     //@}
 
 
     /*! Set and Get methods for force */
     //@{
-    PRM_DECLARE_MEMBER_AND_ACCESSORS(vctDouble6, Force);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDouble6, Force);
     //@}
 
 
     /*! Set and Get methods for mask */
     //@{
-    PRM_DECLARE_MEMBER_AND_ACCESSORS(vctBool6, Mask);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctBool6, Mask);
     //@}
 
 
@@ -100,7 +101,7 @@ class CISST_EXPORT prmForceCartesianGet: public cmnGenericObject
       provided for writer of the task providing the force
       data. */
     //@{
-    PRM_DECLARE_MEMBER_AND_ACCESSORS(mtsStateIndex, StateIndex);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(mtsStateIndex, StateIndex);
     //@}
 
     /*! Human readable output to stream. */

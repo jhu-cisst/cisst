@@ -101,8 +101,8 @@ public:
 };
 
 
-typedef mtsFunctionReadOrWrite<cmnGenericObject> mtsFunctionRead;
-typedef mtsFunctionReadOrWrite<const cmnGenericObject> mtsFunctionWrite;
+typedef mtsFunctionReadOrWrite<mtsGenericObject> mtsFunctionRead;
+typedef mtsFunctionReadOrWrite<const mtsGenericObject> mtsFunctionWrite;
 
 
 #endif // _mtsFunctionReadOrWrite_h

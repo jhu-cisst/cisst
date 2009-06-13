@@ -27,7 +27,8 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsStateTable_h
 #define _mtsStateTable_h
 
-#include <cisstCommon/cmnGenericObject.h>
+#include <cisstMultiTask/mtsGenericObject.h>
+#include <cisstMultiTask/mtsGenericObjectProxy.h>
 #include <cisstMultiTask/mtsStateArrayBase.h>
 #include <cisstMultiTask/mtsStateArray.h>
 #include <cisstMultiTask/mtsStateIndex.h>
@@ -53,7 +54,7 @@ typedef int mtsStateDataId;
   The state data table is the storage for the state of the task that
   the table is associated with. It is a heterogenous circular buffer
   and can contain data of any type so long as it is derived from
-  cmnGenericObject.  The state data table also resolves conflicts
+  mtsGenericObject.  The state data table also resolves conflicts
   between reads and writes to the state, by ensuring that the reader
   head is always one behind the write head. To ensure this we have an
   assumption here that there is only one writer, though there can be
@@ -147,7 +148,7 @@ protected:
       of elements that are to be added to the state when we
       advance.
       */
-    std::vector<cmnGenericObject *> StateVectorElements;
+    std::vector<mtsGenericObject *> StateVectorElements;
     
 	/*! The columns entries can be accessed by name. This vector
 	  stores the names corresponding to the columns. */
@@ -162,17 +163,17 @@ protected:
 	std::vector<mtsStateIndex::TimeTicksType> Ticks;
 
     /*! The start/end times for the current row of data. We could use
-        mtsStateData<cmnDouble> instead of (TicId, Tic) and (TocId, Toc). */
+        mtsStateData<mtsDouble> instead of (TicId, Tic) and (TocId, Toc). */
     mtsStateDataId TicId, TocId;
-    cmnDouble Tic, Toc;
+    mtsDouble Tic, Toc;
 
     /*! The measured task period (difference between current Tic and
         previous Tic). */
     mtsStateDataId PeriodId;
-    cmnDouble Period;
+    mtsDouble Period;
 
     /*! The time server used to provide absolute and relative times. */
-    const osaTimeServer *TimeServer;
+    const osaTimeServer * TimeServer;
 
     /*! The sum of all the periods (time differences between
         consecutive Tic values); used to compute average period. */
@@ -182,7 +183,7 @@ protected:
     double AvgPeriod;
 
 	/*! Write specified data. */
-	bool Write(mtsStateDataId id, const cmnGenericObject &obj);
+	bool Write(mtsStateDataId id, const mtsGenericObject &obj);
 
  public:
 	/*! Constructor. Constructs a state table with a default
@@ -228,7 +229,7 @@ protected:
         \returns Pointer to accessor class (0 if not found)
         \note This method is overloaded to accept the element pointer or string name.
     */
-    mtsStateTable::AccessorBase *GetAccessor(const cmnGenericObject &element) const;
+    mtsStateTable::AccessorBase *GetAccessor(const mtsGenericObject &element) const;
 
     /*! Return pointer to accessor functions for the state data element.
         \param name Name of state data element
@@ -249,12 +250,12 @@ protected:
 	 */
 	void Advance(void);
 
-    double GetTic() const { return Tic.Data; }
-    double GetToc() const { return Toc.Data; }
+    double GetTic(void) const { return Tic.Data; }
+    double GetToc(void) const { return Toc.Data; }
 
     /*! Return the moving average of the measured period (i.e., average of last
         HistoryLength values). */
-    double GetAveragePeriod() const { return AvgPeriod; }
+    double GetAveragePeriod(void) const { return AvgPeriod; }
 
     /*! For debugging, dumps the current data table to output
       stream. */
@@ -272,7 +273,7 @@ protected:
      */
     void CSVWrite(std::ostream& out, bool nonZeroOnly = false);
     void CSVWrite(std::ostream& out, unsigned int * listColumn, unsigned int number, bool nonZeroOnly = false);
-    void CSVWrite(std::ostream& out, cmnGenericObject ** listColumn, unsigned int number, bool nonZeroOnly = false);
+    void CSVWrite(std::ostream& out, mtsGenericObject ** listColumn, unsigned int number, bool nonZeroOnly = false);
 };
 
 

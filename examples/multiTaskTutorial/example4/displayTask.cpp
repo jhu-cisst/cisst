@@ -30,7 +30,7 @@ displayTask::displayTask(const std::string & taskName, double period):
 displayTask::~displayTask()
 {}
 
-void displayTask::HandleTrigger(const cmnDouble & value)
+void displayTask::HandleTrigger(const mtsDouble & value)
 {
     CMN_LOG_RUN_VERBOSE << "HandleTrigger: Trigger event (" << this->GetName() << "): "
                         << value << std::endl;

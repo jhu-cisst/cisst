@@ -13,7 +13,7 @@ class clockDevice: public mtsDevice {
     
  protected:
     osaStopwatch Timer;  // this is the actual device (wrapped)
-    void GetTime(cmnDouble & time) const;  // used by the command "GetTime"
+    void GetTime(mtsDouble & time) const;  // used by the command "GetTime"
 	
  public:
     // constructor doesn't need a period!

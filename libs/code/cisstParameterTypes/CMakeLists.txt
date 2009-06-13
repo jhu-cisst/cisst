@@ -51,7 +51,6 @@ SET(HEADER_FILES
     prmExport.h
     prmForwardDeclarations.h
     prmTypes.h
-    prmMacros.h
     prmMotionBase.h
 
     prmPositionJointGet.h

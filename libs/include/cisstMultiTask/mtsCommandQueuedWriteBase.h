@@ -72,13 +72,13 @@ protected:
     virtual void Allocate(unsigned int size) = 0;
 
 
-    virtual mtsCommandBase::ReturnType Execute(const cmnGenericObject & argument) = 0;
+    virtual mtsCommandBase::ReturnType Execute(const mtsGenericObject & argument) = 0;
 
     
-    virtual const cmnGenericObject * ArgumentPeek(void) const = 0;
+    virtual const mtsGenericObject * ArgumentPeek(void) const = 0;
 
 
-    virtual cmnGenericObject * ArgumentGet(void) = 0;
+    virtual mtsGenericObject * ArgumentGet(void) = 0;
 
 
     inline virtual const std::string & GetMailBoxName(void) const {

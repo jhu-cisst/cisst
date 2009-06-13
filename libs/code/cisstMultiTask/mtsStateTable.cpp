@@ -55,7 +55,7 @@ mtsStateIndex mtsStateTable::GetIndexReader(void) const {
     return mtsStateIndex(tmp, Ticks[tmp], HistoryLength);
 }
 
-mtsStateTable::AccessorBase *mtsStateTable::GetAccessor(const cmnGenericObject &element) const
+mtsStateTable::AccessorBase *mtsStateTable::GetAccessor(const mtsGenericObject &element) const
 {
     for (unsigned int i = 0; i < StateVectorElements.size(); i++) {
         if (&element == StateVectorElements[i])
@@ -80,7 +80,7 @@ mtsStateIndex mtsStateTable::GetIndexWriter(void) const {
 }
 
 
-bool mtsStateTable::Write(mtsStateDataId id, const cmnGenericObject &obj) {
+bool mtsStateTable::Write(mtsStateDataId id, const mtsGenericObject &obj) {
     bool result;
     CMN_ASSERT(id != -1);
     if (id == -1) {
@@ -103,7 +103,7 @@ void mtsStateTable::Start(void) {
     	Tic = TimeServer->GetRelativeTime(); // in seconds
         // Since IndexReader and IndexWriter are initialized to 0,
         // the first period will be 0
-        cmnDouble oldTic;
+        mtsDouble oldTic;
         StateVector[TicId]->Get(IndexReader, oldTic);
         Period = Tic - oldTic;  // in seconds
     }
@@ -120,7 +120,7 @@ void mtsStateTable::Advance(void) {
     SumOfPeriods += Period;
     // If the table is full (all entries valid), subtract the oldest one
     if (Ticks[IndexWriter] == Ticks[newIndexWriter]+HistoryLength-1) {
-        cmnDouble oldPeriod;
+        mtsDouble oldPeriod;
         StateVector[PeriodId]->Get(newIndexWriter, oldPeriod);
         SumOfPeriods -= oldPeriod;
         AvgPeriod = SumOfPeriods/(HistoryLength-1);
@@ -263,7 +263,7 @@ void mtsStateTable::CSVWrite(std::ostream& out, unsigned int *listColumn, unsign
     }
 }
 
-void mtsStateTable::CSVWrite(std::ostream& out, cmnGenericObject ** listColumn, unsigned int number, bool nonZeroOnly)
+void mtsStateTable::CSVWrite(std::ostream& out, mtsGenericObject ** listColumn, unsigned int number, bool nonZeroOnly)
 {
     unsigned int *listColumnId = new unsigned int[number];
     for (unsigned int i = 0; i < number; i++) {

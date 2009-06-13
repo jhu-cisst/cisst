@@ -33,13 +33,12 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstParameterTypes/prmTransformationBase.h>
 #include <cisstParameterTypes/prmTransformationManager.h>
 #include <cisstParameterTypes/prmTypes.h>
-#include <cisstParameterTypes/prmMacros.h>
 
 // Always include last
 #include <cisstParameterTypes/prmExport.h>
 
 /*! Cartesian position get command argument */
-class CISST_EXPORT prmPositionCartesianGet: public cmnGenericObject
+class CISST_EXPORT prmPositionCartesianGet: public mtsGenericObject
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
@@ -70,7 +69,7 @@ class CISST_EXPORT prmPositionCartesianGet: public cmnGenericObject
         position.  This is defined by a node in the transformation
         tree. */
     //@{
-    PRM_DECLARE_MEMBER_AND_ACCESSORS(prmTransformationBasePtr, MovingFrame);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(prmTransformationBasePtr, MovingFrame);
     //@}
 
 
@@ -78,13 +77,13 @@ class CISST_EXPORT prmPositionCartesianGet: public cmnGenericObject
         position.  This is defined by a node in the transformation
         tree. */
     //@{
-    PRM_DECLARE_MEMBER_AND_ACCESSORS(prmTransformationBasePtr, ReferenceFrame);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(prmTransformationBasePtr, ReferenceFrame);
     //@}
 
 
     /*! Set and Get methods for position */
     //@{
-    PRM_DECLARE_MEMBER_AND_ACCESSORS(prmCartesianPosition, Position);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(prmCartesianPosition, Position);
     //@}
 
 
@@ -103,7 +102,7 @@ class CISST_EXPORT prmPositionCartesianGet: public cmnGenericObject
       provided for writer of the task providing the position
       data. */
     //@{
-    PRM_DECLARE_MEMBER_AND_ACCESSORS(mtsStateIndex, StateIndex);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(mtsStateIndex, StateIndex);
     //@}
 
     /*! Human readable output to stream. */

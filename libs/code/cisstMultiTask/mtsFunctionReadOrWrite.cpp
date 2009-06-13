@@ -22,9 +22,9 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsCommandReadOrWriteBase.h>
 
 
-// specialize for Read using "cmnGenericObject &"
+// specialize for Read using "mtsGenericObject &"
 template <>
-bool mtsFunctionReadOrWrite<cmnGenericObject>::Bind(const mtsDeviceInterface * interface, const std::string & commandName)
+bool mtsFunctionReadOrWrite<mtsGenericObject>::Bind(const mtsDeviceInterface * interface, const std::string & commandName)
 {
     if (interface) {
         Command = interface->GetCommandRead(commandName);
@@ -33,9 +33,9 @@ bool mtsFunctionReadOrWrite<cmnGenericObject>::Bind(const mtsDeviceInterface * i
 }
 
 
-// specialize for Write using "const cmnGenericObject &"
+// specialize for Write using "const mtsGenericObject &"
 template <>
-bool mtsFunctionReadOrWrite<const cmnGenericObject>::Bind(const mtsDeviceInterface * interface, const std::string & commandName)
+bool mtsFunctionReadOrWrite<const mtsGenericObject>::Bind(const mtsDeviceInterface * interface, const std::string & commandName)
 {
     if (interface) {
         Command = interface->GetCommandWrite(commandName);
@@ -62,6 +62,6 @@ void mtsFunctionReadOrWrite<_argumentType>::ToStream(std::ostream & outputStream
 
 
 // force instantiation
-template class mtsFunctionReadOrWrite<cmnGenericObject>;
-template class mtsFunctionReadOrWrite<const cmnGenericObject>;
+template class mtsFunctionReadOrWrite<mtsGenericObject>;
+template class mtsFunctionReadOrWrite<const mtsGenericObject>;
 

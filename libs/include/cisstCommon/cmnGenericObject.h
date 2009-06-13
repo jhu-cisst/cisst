@@ -64,18 +64,15 @@ public:
 
       \sa cmnClassRegister cmnClassServiceBase
     */  
-    virtual cmnClassServicesBase * Services(void) const = 0;
-
+    virtual const cmnClassServicesBase * Services(void) const = 0;
     
     /*! Formatted IO to a string.  This method relies on ToStream
       which should be overloaded for each class. */ 
     std::string ToString(void) const;
-
   
     /*! The default ToStream method returns the name of the class.
       This method must be overloaded to provide a useful message. */
     virtual void ToStream(std::ostream & outputStream) const;
-
 
     /*! Serialize the content of the object without any extra
         information, i.e. no class type nor format version.  The
@@ -85,12 +82,6 @@ public:
     /*! De-serialize the content of the object without any extra
       information, i.e. no class type nor format version. */
     virtual void DeSerializeRaw(std::istream & inputStream);
-
-    /*! Set timestamp if not valid. This is only meaningful if the
-        derived class contains a timestamp and overrides this method.
-      \param timeStamp timestamp in seconds
-      \returns true if timestamp was set. */
-    virtual bool SetTimestampIfNotValid(double CMN_UNUSED(timeStamp)) { return false; }
 };
 
 

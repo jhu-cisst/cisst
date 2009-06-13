@@ -25,6 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnPortability.h>
 #include <cisstOSAbstraction/osaSerialPort.h>
 #include <cisstMultiTask/mtsTaskContinuous.h>
+#include <cisstMultiTask/mtsGenericObjectProxy.h>
 
 // Always include last
 #include <cisstDevices/devExport.h>
@@ -55,7 +56,7 @@ protected:
     void UpdateStateTable(const const_char_pointer & buffer);
 
     /*! Placeholder for last weigth read */
-    cmnDouble Weight;
+    mtsDouble Weight;
 
     /*! Replies are limited to 16 chars, to be tested */
     enum {BUFFER_SIZE = 512};

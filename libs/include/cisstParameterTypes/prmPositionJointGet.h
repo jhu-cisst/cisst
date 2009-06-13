@@ -27,19 +27,18 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _prmPositionJointGet_h
 #define _prmPositionJointGet_h
 
-//basic includes
-#include <cisstCommon/cmnGenericObject.h>
-#include <cisstCommon/cmnClassRegisterMacros.h>
+// basic includes
+#include <cisstMultiTask/mtsGenericObject.h>
 #include <cisstMultiTask/mtsStateIndex.h>
+
 #include <cisstParameterTypes/prmTypes.h>
-#include <cisstParameterTypes/prmMacros.h>
 
 // Always include last
 #include <cisstParameterTypes/prmExport.h>
 
 /*! motion command arguments for joint angle based motion
 */
-class CISST_EXPORT prmPositionJointGet: public cmnGenericObject
+class CISST_EXPORT prmPositionJointGet: public mtsGenericObject
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
@@ -69,9 +68,9 @@ public:
     virtual ~prmPositionJointGet();
 
     /*! Allocate memory based on an existing object of the same type.  The
-    object is provided via a cmnGenericObject pointer.  If a dynamic cast
+    object is provided via a mtsGenericObject pointer.  If a dynamic cast
     to this type is not possible, this method returns false. */
-    bool inline Allocate(const cmnGenericObject * model)
+    bool inline Allocate(const mtsGenericObject * model)
     {
         const ThisType * pointer = dynamic_cast<const ThisType *>(model);
         if (pointer == 0) {
@@ -83,14 +82,14 @@ public:
 
     /*! Set and Get methods for the the position. */
     //@{
-    PRM_DECLARE_MEMBER_AND_ACCESSORS(prmPosition, Position);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(prmPosition, Position);
     //@}
 
     /*! Set and Get methods for time index.  Current time index, as
     provided for writer of the task providing the position
     data. */
     //@{
-    PRM_DECLARE_MEMBER_AND_ACCESSORS(mtsStateIndex, StateIndex);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(mtsStateIndex, StateIndex);
     //@}
 
 
