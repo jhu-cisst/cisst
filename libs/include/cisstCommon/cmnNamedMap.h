@@ -95,6 +95,12 @@ public:
     /*! Destructor.  Relies on std::map destructor. */
     ~cmnNamedMap() {}
 
+    /*! Set the map owner */
+    inline void SetOwner(const cmnGenericObject & owner)
+    {
+        this->OwnerServices = owner.Services();
+    }
+
     /*! Add an item to the internal map.  The log level of details is used to determine ... */ 
     bool AddItem(const std::string & name,
                  _elementType * item,
