@@ -77,9 +77,9 @@ devLoPoMoCo::devLoPoMoCo(const std::string& deviceName, unsigned int numberOfBoa
 	AddCommandWrite(&devLoPoMoCo::SetCurrentLimits, this, "WriteInterface", "SetCurrentLimits", mtsShortVec(numberOfAxes));
     AddCommandWrite(&devLoPoMoCo::SetDigitalOutput, this, "WriteInterface", "SetDigitalOutput", mtsIntVec(numberOfBoards));
 
-	AddCommandWrite(&devLoPoMoCo::Enable, this, "WriteInterface", "Enable", cmnShort());
-	AddCommandWrite(&devLoPoMoCo::Disable, this, "WriteInterface", "Disable", cmnShort());
-	AddCommandWrite(&devLoPoMoCo::ResetEncoders, this, "WriteInterface", "ResetEncoders", cmnShort());
+	AddCommandWrite(&devLoPoMoCo::Enable, this, "WriteInterface", "Enable", mtsShort());
+	AddCommandWrite(&devLoPoMoCo::Disable, this, "WriteInterface", "Disable", mtsShort());
+	AddCommandWrite(&devLoPoMoCo::ResetEncoders, this, "WriteInterface", "ResetEncoders", mtsShort());
 	AddCommandWrite(&devLoPoMoCo::SetPositions, this, "WriteInterface", "SetPositions", mtsLongVec(numberOfAxes));
 
 	// Qualified Read
@@ -302,7 +302,7 @@ void devLoPoMoCo::Configure(const std::string& filename){ //, const std::string 
  *  this axisIndex is mapped onto the correct board index and axis index within that board
  *  action taken on "Board" is always with respect to a 4 axes board
  */
-void devLoPoMoCo::Enable(const cmnShort & axisIndex) {
+void devLoPoMoCo::Enable(const mtsShort & axisIndex) {
 	int boardIndex;
 	boardIndex = MapAxisToBoard(axisIndex.Data);
 	if (boardIndex != -1) {
@@ -314,7 +314,7 @@ void devLoPoMoCo::Enable(const cmnShort & axisIndex) {
 		<< StartAxis[boardIndex]<< ", " << EndAxis[boardIndex] << "]" << std::endl;
 	}
 }
-void devLoPoMoCo::Disable(const cmnShort & axisIndex) {
+void devLoPoMoCo::Disable(const mtsShort & axisIndex) {
 	int boardIndex;
 	boardIndex = MapAxisToBoard(axisIndex.Data);
 	if (boardIndex != -1) {
@@ -327,7 +327,7 @@ void devLoPoMoCo::Disable(const cmnShort & axisIndex) {
 	}
 }
 
-void devLoPoMoCo::ResetEncoders(const cmnShort & axisIndex) {
+void devLoPoMoCo::ResetEncoders(const mtsShort & axisIndex) {
 	unsigned short listEncoders[] = { 0, 0, 0, 0 };
 	int boardIndex = MapAxisToBoard(axisIndex.Data);
 

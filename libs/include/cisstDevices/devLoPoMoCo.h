@@ -29,7 +29,7 @@
 #include <cisstDevices/devConfig.h>
 
 
-#include <cisstCommon/cmnGenericObject.h>
+#include <cisstMultiTask/mtsGenericObject.h>
 #include <cisstMultiTask/mtsDevice.h>
 #include <cisstMultiTask/mtsDeviceInterface.h>
 #include <cisstMultiTask/mtsVector.h>
@@ -263,15 +263,15 @@ protected:
 
 	/*! Enable the specified axis
 	 */
-	void Enable(const cmnShort & axisIndex);
+	void Enable(const mtsShort & axisIndex);
 
 	/*! Disable the specified axis
 	 */
-	void Disable(const cmnShort & axisIndex);
+	void Disable(const mtsShort & axisIndex);
 
 	/*! Reset Encoder
 	 */
-	void ResetEncoders(const cmnShort & axisIndex);
+	void ResetEncoders(const mtsShort & axisIndex);
 
 	/* set digital output */
 	void SetDigitalOutput(const mtsIntVec & DigitalOutput);
