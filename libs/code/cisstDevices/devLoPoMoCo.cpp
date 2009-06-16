@@ -122,8 +122,8 @@ void devLoPoMoCo::parseInputArgument(const std::string &inputArgument, std::stri
     }
 
     relativeFilePath += "/"; // append a '/' at the end
-    CMN_LOG_CLASS_INIT_ERROR << " input file name: "<<inputArgument<<","<<"relative file path: "<<relativeFilePath<<","
-                             << " file name: "<<fileName<<std::endl;
+    CMN_LOG_CLASS_INIT_VERBOSE << " input file name: "<<inputArgument<<","<<"relative file path: "<<relativeFilePath<<","
+                               << " file name: "<<fileName<<std::endl;
 
 }
 
@@ -132,13 +132,13 @@ void devLoPoMoCo::ConfigureOneBoard(const std::string& filename, const int board
 
 	// Example@ daVinciLeftMasterBoard1.xml, high level xml: daVinciLoPoMoCoMasterLeft.xml
 	if (filename == "") {
-		CMN_LOG_CLASS_INIT_WARNING << "could not configure single LoPoMoCo device" << std::endl;
+		CMN_LOG_CLASS_INIT_ERROR << "ConfigureOneBoard: could not configure single LoPoMoCo device" << std::endl;
 		return;
 	}
     
 	struct stat st;
 	if (stat(filename.c_str(), &st) < 0) {
-		CMN_LOG_CLASS_INIT_WARNING << "Invalid filename!! " << filename << std::endl;
+		CMN_LOG_CLASS_INIT_ERROR << "ConfigureOneBoard: Invalid filename!! " << filename << std::endl;
 		return;
 	}
     
@@ -163,7 +163,7 @@ void devLoPoMoCo::ConfigureOneBoard(const std::string& filename, const int board
 	xmlConfig.GetXMLValue(context.c_str(), "@StartAxis", StartAxis[boardIndex]);
 	xmlConfig.GetXMLValue(context.c_str(), "@EndAxis", EndAxis[boardIndex]);
 
-	CMN_LOG_CLASS_INIT_VERBOSE << "StartAxis: " << StartAxis[boardIndex] << "   EndAxis: " << EndAxis[boardIndex] << std::endl << "BaseAddress: " << BaseAddress[boardIndex] << std::endl;
+	CMN_LOG_CLASS_INIT_DEBUG << "StartAxis: " << StartAxis[boardIndex] << "   EndAxis: " << EndAxis[boardIndex] << std::endl << "BaseAddress: " << BaseAddress[boardIndex] << std::endl;
 
 	// MaxAxis is the number of axes used on a board
 	MaxAxis[boardIndex] = EndAxis[boardIndex] - StartAxis[boardIndex];
@@ -244,10 +244,11 @@ void devLoPoMoCo::Configure(const std::string& filename){ //, const std::string 
 	// we need the path in order to read other files embedded in the top-level configuration file
 	parseInputArgument(filename, relativePathToConfigFiles, justFileName);
 
-	CMN_LOG_CLASS_INIT_WARNING<< "Configuring a LoPoMoCo device with "<<numberOfBoards<<" boards, and "<<numberOfAxes<<" axis total"<<std::endl;
+	CMN_LOG_CLASS_INIT_VERBOSE << "Configure: configuring a LoPoMoCo device with " << numberOfBoards
+                               << " boards, and " << numberOfAxes << " axis total" <<std::endl;
 
 	if (justFileName == "") {
-		CMN_LOG_CLASS_INIT_WARNING << "Warning, could not configure LoPoMoCo device" << std::endl;
+		CMN_LOG_CLASS_INIT_ERROR << "Configure: could not configure LoPoMoCo device" << std::endl;
 		return;
 	}
 
@@ -256,12 +257,12 @@ void devLoPoMoCo::Configure(const std::string& filename){ //, const std::string 
 
 	struct stat st;
 	if (stat(justFileName.c_str(), &st) < 0) {
-		CMN_LOG_CLASS_INIT_WARNING << "Invalid justFileName!! " << justFileName << std::endl;
+		CMN_LOG_CLASS_INIT_ERROR << "Configure: invalid justFileName!! " << justFileName << std::endl;
 		return;
 	}
 
 
-	CMN_LOG_CLASS_INIT_VERBOSE << "Configuring LoPoMoCo with \"" << justFileName << "\"" << std::endl;
+	CMN_LOG_CLASS_INIT_VERBOSE << "Configure: configuring LoPoMoCo with \"" << justFileName << "\"" << std::endl;
 	cmnXMLPath xmlConfig;
 	xmlConfig.SetInputSource(justFileName);
 
@@ -290,11 +291,11 @@ void devLoPoMoCo::Configure(const std::string& filename){ //, const std::string 
 		for (boardIndex = 0; boardIndex < numberOfBoards; boardIndex++) {
 			//configFiles[boardIndex].insert(0, RelativePathToConfigFiles);
             configFiles[boardIndex].insert(0, relativePathToConfigFiles);
-			CMN_LOG_CLASS_INIT_VERBOSE << "Configuring board " << boardIndex + 1 << " with " << configFiles[boardIndex] << std::endl;
+			CMN_LOG_CLASS_INIT_VERBOSE << "Configure: configuring board " << boardIndex + 1 << " with " << configFiles[boardIndex] << std::endl;
 			ConfigureOneBoard(configFiles[boardIndex].c_str(), boardIndex);
 		}
 	} else {
-		CMN_LOG_CLASS_INIT_ERROR << "Couldn't find all the required ConfigFile in " << justFileName << std::endl;
+		CMN_LOG_CLASS_INIT_ERROR << "Configure: couldn't find all the required ConfigFile in " << justFileName << std::endl;
 	}
 }
 
@@ -306,19 +307,19 @@ void devLoPoMoCo::Enable(const mtsShort & axisIndex) {
 	int boardIndex;
 	boardIndex = MapAxisToBoard(axisIndex.Data);
 	if (boardIndex != -1) {
-		CMN_LOG_CLASS_RUN_WARNING<< "Enabling motor " << axisIndex.Data << std::endl;
+		CMN_LOG_CLASS_RUN_VERBOSE << "Enabling motor " << axisIndex.Data << std::endl;
 		Board[boardIndex]->EnableMotor(axisIndex.Data - StartAxis[boardIndex]);
 	} else {
 		CMN_LOG_CLASS_RUN_ERROR << "Enabling motor " << axisIndex.Data
-		<< " failed since the index is out of range ["
-		<< StartAxis[boardIndex]<< ", " << EndAxis[boardIndex] << "]" << std::endl;
+                                << " failed since the index is out of range ["
+                                << StartAxis[boardIndex]<< ", " << EndAxis[boardIndex] << "]" << std::endl;
 	}
 }
 void devLoPoMoCo::Disable(const mtsShort & axisIndex) {
 	int boardIndex;
 	boardIndex = MapAxisToBoard(axisIndex.Data);
 	if (boardIndex != -1) {
-		CMN_LOG_CLASS_RUN_WARNING << "Disabling motor " << axisIndex.Data << std::endl;
+		CMN_LOG_CLASS_RUN_VERBOSE << "Disabling motor " << axisIndex.Data << std::endl;
 		Board[boardIndex]->DisableMotor(axisIndex.Data - StartAxis[boardIndex]);
 	} else {
 		CMN_LOG_CLASS_RUN_ERROR << "Disabling motor " << axisIndex.Data
@@ -332,7 +333,7 @@ void devLoPoMoCo::ResetEncoders(const mtsShort & axisIndex) {
 	int boardIndex = MapAxisToBoard(axisIndex.Data);
 
 	if (boardIndex != -1) {
-		CMN_LOG_CLASS_RUN_WARNING << "Resetting encoder " << axisIndex.Data << std::endl;
+		CMN_LOG_CLASS_RUN_VERBOSE << "Resetting encoder " << axisIndex.Data << std::endl;
 		Board[boardIndex]->SetEncoderIndices(false, 0x00, axisIndex.Data-StartAxis[boardIndex]);
 		listEncoders[axisIndex.Data-StartAxis[boardIndex]] = 1;
 		Board[boardIndex]->SetEncoderPreloadRegister(0x007FFFFF);
