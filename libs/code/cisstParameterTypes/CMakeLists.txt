@@ -43,6 +43,9 @@ SET(SOURCE_FILES
     prmTransformationFixed.cpp
     prmTransformationDynamic.cpp
     prmTransformationManager.cpp
+	
+	prmString.cpp
+	prmMaskedDoubleVec.cpp
     )
 
 # all header files
@@ -68,6 +71,9 @@ SET(HEADER_FILES
     prmTransformationFixed.h
     prmTransformationDynamic.h
     prmTransformationManager.h
+	
+	prmString.h
+	prmMaskedDoubleVec.h
     )
 
 CISST_ADD_LIBRARY_TO_PROJECT(cisstLibs)
