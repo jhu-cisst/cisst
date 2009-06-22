@@ -65,7 +65,7 @@ void ui3VisibleObject::Hide(void)
 }
 
 
-void ui3VisibleObject::SetPosition(vctDouble3 & position)
+void ui3VisibleObject::SetPosition(const vctDouble3 & position)
 {
     this->Lock();
     //this->Assembly->SetPosition(position.Pointer());
@@ -76,7 +76,7 @@ void ui3VisibleObject::SetPosition(vctDouble3 & position)
 }
 
 
-void ui3VisibleObject::SetOrientation(vctMatRot3 & rotationMatrix)
+void ui3VisibleObject::SetOrientation(const vctMatRot3 & rotationMatrix)
 {
     this->Lock();
     this->Matrix->SetElement(0, 0, rotationMatrix.Element(0, 0));

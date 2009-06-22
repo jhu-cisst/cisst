@@ -64,3 +64,4 @@ bool ui3VisibleList::CreateVTKObjects(void)
     }
     return result;
 }
+

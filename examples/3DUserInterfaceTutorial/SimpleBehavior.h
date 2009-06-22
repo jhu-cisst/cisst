@@ -39,7 +39,7 @@ public:
     void Configure(const std::string & CMN_UNUSED(configFile)) {}
     bool SaveConfiguration(const std::string & CMN_UNUSED(configFile)) { return true; }
     inline ui3VisibleObject * GetVisibleObject(void) {
-        return this->VisibleObject;
+        return this->VisibleList;
     }
 
 protected:
@@ -50,5 +50,8 @@ protected:
     bool Following;
 
 private:
-    ui3VisibleObject * VisibleObject;
+    ui3VisibleObject * VisibleObject1;
+    ui3VisibleObject * VisibleObject2;
+    ui3VisibleList * VisibleList;
+    double Counter;
 };

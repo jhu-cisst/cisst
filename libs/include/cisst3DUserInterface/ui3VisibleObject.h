@@ -56,23 +56,23 @@ public:
 
     virtual vtkProp3D * GetVTKProp(void);
 
-    virtual void Show(void);
+    void Show(void);
 
-    virtual void Hide(void);
+    void Hide(void);
 
-    virtual void SetPosition(vctDouble3 & position);
+    void SetPosition(const vctDouble3 & position);
 
-    virtual void SetOrientation(vctDoubleMatRot3 & rotationMatrix);
+    void SetOrientation(const vctDoubleMatRot3 & rotationMatrix);
 
     template <bool _storageOrder>
-    void SetTransformation(vctFrameBase<vctMatrixRotation3<double, _storageOrder> > frame) {
+    void SetTransformation(const vctFrameBase<vctMatrixRotation3<double, _storageOrder> > & frame) {
         this->SetPosition(frame.Translation());
         this->SetOrientation(frame.Rotation());
     }
 
-    virtual void Lock(void);
+    void Lock(void);
 
-    virtual void Unlock(void);
+    void Unlock(void);
 
 protected:
     

@@ -50,6 +50,7 @@ SET(SOURCE_FILES
     ui3VideoInterfaceFilter.cpp
     ui3VisibleList.cpp
     ui3VisibleObject.cpp
+    ui3VisibleAxes.cpp
     )
 
 # all header files
@@ -72,12 +73,13 @@ SET(HEADER_FILES
     ui3VideoInterfaceFilter.h
     ui3VisibleList.h
     ui3VisibleObject.h
+    ui3VisibleAxes.h
     )
 
 CISST_ADD_LIBRARY_TO_PROJECT(cisstLibs)
 
 # link to other external libraries
-target_link_libraries(cisst3DUserInterface vtkRendering)
+target_link_libraries(cisst3DUserInterface vtkRendering vtkHybrid)
 
 # find icons
 set(CISST_UI3_ICONS_DIR "${cisst_SOURCE_DIR}/libs/etc/cisst3DUserInterface/icons")

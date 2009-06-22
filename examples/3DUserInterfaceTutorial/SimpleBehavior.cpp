@@ -103,21 +103,36 @@ CMN_IMPLEMENT_SERVICES(SimpleBehaviorVisibleObject);
 SimpleBehavior::SimpleBehavior(const std::string & name, ui3Manager * manager):
     ui3BehaviorBase(std::string("SimpleBehavior::") + name, 0),
     Following(false),
-    VisibleObject(0)
+    VisibleList(0),
+    VisibleObject1(0),
+    VisibleObject2(0),
+    Counter(0.0)
 {
+    this->VisibleList = new ui3VisibleList(manager);
+
     this->Position.X() = 0.0;
     this->Position.Y() = 0.0;
-    this->Position.Z() = -100.0;
-    this->VisibleObject = new SimpleBehaviorVisibleObject(manager, this->Position);
-    CMN_ASSERT(this->VisibleObject);
-    this->VisibleObject->Show();
+    this->Position.Z() = 0.0;
+    this->VisibleObject1 = new SimpleBehaviorVisibleObject(manager, this->Position);
+    this->VisibleList->Add(this->VisibleObject1);
+    
+    this->Position.X() = 0.0;
+    this->Position.Y() = 20.0;
+    this->Position.Z() = 0.0;
+    this->VisibleObject2 = new ui3VisibleAxes(manager);
+    this->VisibleList->Add(this->VisibleObject2);
+    
+    //axes = new ui3VisibleAxes();
+    //this->VisibleList->Add(axes);
+    CMN_ASSERT(this->VisibleList);
+    this->VisibleList->Show();
 }
 
 
 SimpleBehavior::~SimpleBehavior()
 {
-    if (this->VisibleObject) {
-        delete this->VisibleObject;
+    if (this->VisibleList) {
+        delete this->VisibleList;
     }
 }
 
@@ -127,7 +142,7 @@ void SimpleBehavior::ConfigureMenuBar()
                                   1,
                                   "redo.png",
                                   &SimpleBehaviorVisibleObject::ToggleColor,
-                                  dynamic_cast<SimpleBehaviorVisibleObject *>(this->VisibleObject));
+                                  dynamic_cast<SimpleBehaviorVisibleObject *>(this->VisibleList));
 }
 
 
@@ -135,14 +150,14 @@ bool SimpleBehavior::RunForeground()
 {
     if (this->Manager->MastersAsMice() != this->PreviousMaM) {
         this->PreviousMaM = this->Manager->MastersAsMice();
-        this->VisibleObject->Show();
+        this->VisibleList->Show();
     }
 
     // detect transition, should that be handled as an event?
     // State is used by multiple threads ...
     if (this->State != this->PreviousState) {
         this->PreviousState = this->State;
-        this->VisibleObject->Show();
+        this->VisibleList->Show();
     }
     // running in foreground GUI mode
     prmPositionCartesianGet position;
@@ -150,11 +165,16 @@ bool SimpleBehavior::RunForeground()
     this->GetPrimaryMasterPosition(position);
 
     if (this->Following) {
+        Counter += 0.02;
         vctDouble3 deltaCursor;
         deltaCursor.DifferenceOf(position.Position().Translation(),
                                  this->PreviousCursorPosition);
         this->Position.Add(deltaCursor);
-        this->VisibleObject->SetPosition(this->Position);
+        this->VisibleList->SetPosition(this->Position);
+        this->VisibleList->SetOrientation(position.Position().Rotation());
+ 
+        this->VisibleObject2->SetOrientation(vctMatRot3(vctAxAnRot3(vctDouble3(0.0, 0.0, 1.0), Counter)));
+        this->VisibleObject2->SetPosition(vctDouble3(0.0, 20.0 * sin(Counter), 0.0));
     }
     this->PreviousCursorPosition.Assign(position.Position().Translation());
     return true;
@@ -165,7 +185,7 @@ bool SimpleBehavior::RunBackground()
     // detect transition
     if (this->State != this->PreviousState) {
         this->PreviousState = this->State;
-        this->VisibleObject->Hide();
+        this->VisibleList->Hide();
     }
     return true;
 }
@@ -174,7 +194,7 @@ bool SimpleBehavior::RunNoInput()
 {
     if (this->Manager->MastersAsMice() != this->PreviousMaM) {
         this->PreviousMaM = this->Manager->MastersAsMice();
-        this->VisibleObject->Hide();
+        this->VisibleList->Hide();
     }
     return true;
 }
@@ -182,7 +202,7 @@ bool SimpleBehavior::RunNoInput()
 
 void SimpleBehavior::OnQuit()
 {
-    this->VisibleObject->Hide();
+    this->VisibleList->Hide();
 }
 
 
@@ -191,7 +211,7 @@ void SimpleBehavior::OnStart()
     this->Position.X() = 0.0;
     this->Position.Y() = 0.0;
     this->Position.Z() = -100.0;
-    this->VisibleObject->Show();
+    this->VisibleList->Show();
 }
 
 

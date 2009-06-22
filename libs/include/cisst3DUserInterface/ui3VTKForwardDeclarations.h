@@ -25,6 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 
 class vtkActor;
 class vtkAssembly;
+class vtkAxesActor;
 class vtkCamera;
 class vtkCubeSource;
 class vtkLineSource;

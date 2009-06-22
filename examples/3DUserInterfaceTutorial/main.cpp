@@ -27,7 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 #define UI3_DAVINCI 3
 
 // change this based on your configuration
-#define UI3_INPUT UI3_OMNI1
+#define UI3_INPUT UI3_DAVINCI
 
 #include <cisstOSAbstraction/osaThreadedLogFile.h>
 #include <cisstOSAbstraction/osaSleep.h>
@@ -130,41 +130,44 @@ int main()
 // setup renderers
 
     vctFrm3 camframe = vctFrm3::Identity();
-    camframe.Translation().X() = -3.5;
+    camframe.Translation().X() = -5.42278 / 2.0;
+    double vertviewangle = (atan2(1080.0 / 2.0, 1650.0) * 2.0) * 180.0 / 3.14159265;
+    vct2 leftopticalcenteroffset(930.31037 - 1920.0 / 2.0, 525.47159);
+    vct2 rightopticalcenteroffset(1062.12935 - 1920.0 / 2.0, 538.38280);
 
 #ifdef RENDER_ON_OVERLAY
     guiManager.AddRenderer(svlRenderTargets::Get(0)->GetWidth(),  // render width
                            svlRenderTargets::Get(0)->GetHeight(), // render height
                            0, 0,            // window position
-                           camframe, 30.0,  // camera parameters
+                           camframe, vertviewangle, leftopticalcenteroffset,  // camera parameters
                            "LeftEyeView");  // name of renderer
     // Sending renderer output to an external render target
     guiManager.SetRenderTargetToRenderer("LeftEyeView", svlRenderTargets::Get(0));
 #else //RENDER_ON_OVERLAY
-    guiManager.AddRenderer(vidSource.GetWidth(SVL_LEFT),  // render width
-                           vidSource.GetHeight(SVL_LEFT), // render height
+    guiManager.AddRenderer(vidBackgroundSource.GetWidth(SVL_LEFT),  // render width
+                           vidBackgroundSource.GetHeight(SVL_LEFT), // render height
                            0, 0,            // window position
-                           camframe, 30.0,  // camera parameters
+                           camframe, vertviewangle, leftopticalcenteroffset,  // camera parameters
                            vct2(0.0),
                            "LeftEyeView");  // name of renderer
     guiManager.AddVideoBackgroundToRenderer("LeftEyeView", "StereoVideo", SVL_LEFT);
 #endif //RENDER_ON_OVERLAY
 
-    camframe.Translation().X() = 3.5;
+    camframe.Translation().X() = 5.42278 / 2.0;
 
 #ifdef RENDER_ON_OVERLAY
     guiManager.AddRenderer(svlRenderTargets::Get(1)->GetWidth(),  // render width
                            svlRenderTargets::Get(1)->GetHeight(), // render height
                            0, 0,            // window position
-                           camframe, 30.0,  // camera parameters
+                           camframe, vertviewangle, rightopticalcenteroffset,  // camera parameters
                            "RightEyeView"); // name of renderer
     // Sending renderer output to an external render target
     guiManager.SetRenderTargetToRenderer("RightEyeView", svlRenderTargets::Get(1));
 #else //RENDER_ON_OVERLAY
-    guiManager.AddRenderer(vidSource.GetWidth(SVL_RIGHT),  // render width
-                           vidSource.GetHeight(SVL_RIGHT), // render height
+    guiManager.AddRenderer(vidBackgroundSource.GetWidth(SVL_RIGHT),  // render width
+                           vidBackgroundSource.GetHeight(SVL_RIGHT), // render height
                            20, 20,          // window position
-                           camframe, 30.0,  // camera parameters
+                           camframe, vertviewangle, rightopticalcenteroffset,  // camera parameters
                            vct2(0.0),
                            "RightEyeView"); // name of renderer
     guiManager.AddVideoBackgroundToRenderer("RightEyeView", "StereoVideo", SVL_RIGHT);
@@ -198,7 +201,7 @@ int main()
     guiManager.AddRenderer(384,  // render width
                            216,  // render height
                            0, 0,            // window position
-                           camframe, 30.0,  // camera parameters
+                           camframe, 30.0, vct2(0.0, 0.0),  // camera parameters
                            "ThirdEyeView");  // name of renderer
 
 #ifdef DEBUG_WINDOW_HAS_VIDEO_BACKGROUND
