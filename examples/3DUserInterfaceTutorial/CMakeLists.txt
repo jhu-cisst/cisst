@@ -15,4 +15,5 @@
 PROJECT(3DUserInterfaceTutorial)
 
 ADD_SUBDIRECTORY(example1)
+ADD_SUBDIRECTORY(example2)
 
