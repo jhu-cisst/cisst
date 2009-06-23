@@ -45,7 +45,7 @@ SET(SOURCE_FILES
     prmTransformationManager.cpp
 	
 	prmString.cpp
-	prmMaskedDoubleVec.cpp
+	prmMaskedVector.cpp
     )
 
 # all header files
@@ -73,7 +73,7 @@ SET(HEADER_FILES
     prmTransformationManager.h
 	
 	prmString.h
-	prmMaskedDoubleVec.h
+	prmMaskedVector.h
     )
 
 CISST_ADD_LIBRARY_TO_PROJECT(cisstLibs)

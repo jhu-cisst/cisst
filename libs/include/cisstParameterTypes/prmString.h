@@ -33,14 +33,14 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsStateIndex.h>
 #include <cisstParameterTypes/prmExport.h>
 
-/*! This is a wrapper class for string based Data passing.
+/*! This is a wrapper class for string based data passing.
  *  size of the generic Data payload should be big enough to carry your largest Data
- *  usage is by contract, where all the Data objects have the same size
- *  no matter the conent length
+ *  usage is by contract, where all the string Data objects have the same size
+ *  no matter the content length
  *  Note: GetCharVector() return a reference so that the objects can be directly accessed.
  *  this needs to be reviewed.
- *  Perhaps the time stamp should be a real time stamp?
- *
+ *  
+ *  TODO: isTruncated needs to be reviewed 
  *
  */
 class CISST_EXPORT prmString : public mtsGenericObject
@@ -49,7 +49,7 @@ class CISST_EXPORT prmString : public mtsGenericObject
 
 protected:
     /*! This is a place holder for the string */
-    mtsCharVec      Data;
+    mtsCharVec      DataMember;
     /*! If a large string is assigned this flag is set. */
     bool            isTruncated;
 
@@ -86,8 +86,8 @@ public:
     //! Various ways to get the str.
     //reutrns the reference to the underlying char vector
     //would be better to return the pointer to the char data?
-    mtsCharVec & GetCharVector() { return Data; };
-    char * GetCharPointer() { return Data.Pointer(); };
+    mtsCharVec & GetCharVector() { return DataMember; };
+    char * GetCharPointer() { return DataMember.Pointer(); };
 
     void Get(std::string &str) const;
     std::string GetString() const;
@@ -107,12 +107,12 @@ public:
         if (pointer == 0) {
             return false;
         }
-        Data.SetSize(pointer->Size());
+        DataMember.SetSize(pointer->Size());
         return true;
     }
 
     inline size_type Size(void) const {
-        return Data.size();
+        return DataMember.size();
     }
 
     /*! Human readable output to stream.*/
