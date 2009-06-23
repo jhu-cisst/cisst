@@ -195,7 +195,7 @@ void cmnNamedMap<_elementType>::ForEachVoid(VoidMethodPointer method)
 {
     typename MapType::iterator iter;
     const typename MapType::iterator end = Map.end();
-    for (iter = Map.begin(); iter != Map.end(); iter++) {
+    for (iter = Map.begin(); iter != end; iter++) {
         (iter->second->*method)();
     }
 }
