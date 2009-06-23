@@ -161,6 +161,7 @@ protected:
 	 the string StartPotFeedbackConv in the PreReadMap. */
 	//mtsCommandBase::ReturnType StartPotFeedbackConv(void);
 	void StartPotFeedbackConv(void);
+	void StartPotFeedbackConvFast(void);
 
 	/*! Enable all axis on this board
 	 */

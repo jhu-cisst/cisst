@@ -27,15 +27,17 @@
 CMN_IMPLEMENT_SERVICES(devLoPoMoCo);
 
 devLoPoMoCo::devLoPoMoCo(const std::string& deviceName, unsigned int numberOfBoards) :
-	mtsDevice(deviceName) {
-	this->numberOfBoards = numberOfBoards;
-	numberOfAxes = NB_AXIS * numberOfBoards;
+    mtsDevice(deviceName) {
+    this->numberOfBoards = numberOfBoards;
+    numberOfAxes = NB_AXIS * numberOfBoards;
 
-	// assigning sizes to variables
-	BaseAddress.resize(numberOfBoards);
-	Board.resize(numberOfBoards);
-	StartAxis.resize(numberOfBoards);
-	EndAxis.resize(numberOfBoards);
+    CMN_LOG_CLASS_INIT_VERBOSE <<" Number of axes " << numberOfAxes<<std::endl; 
+
+    // assigning sizes to variables
+    BaseAddress.resize(numberOfBoards);
+    Board.resize(numberOfBoards);
+    StartAxis.resize(numberOfBoards);
+    EndAxis.resize(numberOfBoards);
     MaxAxis.resize(numberOfBoards);
 
 	MotorVoltages.SetSize(numberOfAxes);
@@ -56,6 +58,7 @@ devLoPoMoCo::devLoPoMoCo(const std::string& deviceName, unsigned int numberOfBoa
 	AddCommandVoid(&devLoPoMoCo::LatchEncoders, this, "WriteInterface","LatchEncoders");
 	AddCommandVoid(&devLoPoMoCo::StartMotorCurrentConv, this, "WriteInterface", "StartMotorCurrentConv");
 	AddCommandVoid(&devLoPoMoCo::StartPotFeedbackConv, this, "WriteInterface", "StartPotFeedbackConv");
+	AddCommandVoid(&devLoPoMoCo::StartPotFeedbackConvFast, this, "WriteInterface", "StartPotFeedbackConvFast");
 	AddCommandVoid(&devLoPoMoCo::LoadMotorVoltages, this, "WriteInterface", "LoadMotorVoltages");
 	AddCommandVoid(&devLoPoMoCo::LoadCurrentLimits, this, "WriteInterface", "LoadCurrentLimits");
 	AddCommandVoid(&devLoPoMoCo::LoadMotorVoltagesCurrentLimits, this, "WriteInterface", "LoadMotorVoltagesCurrentLimits");
@@ -198,37 +201,39 @@ void devLoPoMoCo::ConfigureOneBoard(const std::string& filename, const int board
     else
         Board[boardIndex]->EnableAllMotors();
 
+    CMN_LOG_CLASS_INIT_VERBOSE << "Board initialization" <<std::endl;
+
 	int axis;
 	//read in the conversion factors
 	for (unsigned int count = 0; count < 4; count++) {
 		// compute the corrected axis index for the composite device from multiple boards
 		axis = StartAxis[boardIndex] + count;
+		CMN_LOG_CLASS_INIT_VERBOSE << "Configuring axis"<<axis<<std::endl;
 
-		sprintf(path, "Axis[%d]/Encoder/@FrequencyToRPS", axis+1);
+		sprintf(path, "Axis[%d]/Encoder/@FrequencyToRPS", count+1);
 		xmlConfig.GetXMLValue(context.c_str(), path, FrequencyToRPSRatio[axis]);
 		// anton sprintf(path, "Axis[%d]/Encoder/@ShaftRevToEncoder", axis+1);
 		// anton xmlConfig.GetXMLValue(context.c_str(), path, CountsToDeg[axis]);
 
-		sprintf(path, "Axis[%d]/ADC/@CountsToMotorCurrents", axis+1);
+		sprintf(path, "Axis[%d]/ADC/@CountsToMotorCurrents", count+1);
 		xmlConfig.GetXMLValue(context.c_str(), path, CountsToMotorCurrents[axis]);
-		sprintf(path, "Axis[%d]/ADC/@CountsToPotFeedback", axis+1);
+		sprintf(path, "Axis[%d]/ADC/@CountsToPotFeedback", count+1);
 		xmlConfig.GetXMLValue(context.c_str(), path, CountsToPotFeedback[axis]);
 
-		sprintf(path, "Axis[%d]/DAC/@MotorSpeedToCounts", axis+1);
+		sprintf(path, "Axis[%d]/DAC/@MotorSpeedToCounts", count+1);
 		xmlConfig.GetXMLValue(context.c_str(), path, MotorSpeedToCounts[axis]);
-		sprintf(path, "Axis[%d]/DAC/CurrentLimitToCounts/@PositiveSlope", axis+1);
+		sprintf(path, "Axis[%d]/DAC/CurrentLimitToCounts/@PositiveSlope", count+1);
 		xmlConfig.GetXMLValue(context.c_str(), path, PositiveSlope[axis]);
-		sprintf(path, "Axis[%d]/DAC/CurrentLimitToCounts/@PositiveIntercept", axis+1);
+		sprintf(path, "Axis[%d]/DAC/CurrentLimitToCounts/@PositiveIntercept", count+1);
 		xmlConfig.GetXMLValue(context.c_str(), path, PositiveIntercept[axis]);
-		sprintf(path, "Axis[%d]/DAC/CurrentLimitToCounts/@NegativeSlope", axis+1);
+		sprintf(path, "Axis[%d]/DAC/CurrentLimitToCounts/@NegativeSlope", count+1);
 		xmlConfig.GetXMLValue(context.c_str(), path, NegativeSlope[axis]);
-		sprintf(path, "Axis[%d]/DAC/CurrentLimitToCounts/@NegativeIntercept", axis+1);
+		sprintf(path, "Axis[%d]/DAC/CurrentLimitToCounts/@NegativeIntercept", count+1);
 		xmlConfig.GetXMLValue(context.c_str(), path, NegativeIntercept[axis]);
-		sprintf(path, "Axis[%d]/DAC/CurrentLimitToCounts/@VoltageToCounts", axis+1);
+		sprintf(path, "Axis[%d]/DAC/CurrentLimitToCounts/@VoltageToCounts", count+1);
 		xmlConfig.GetXMLValue(context.c_str(), path, VoltageToCounts[axis]);
 	}
 	CMN_LOG_CLASS_INIT_VERBOSE << "Configured a LoPoMoCo board: #" <<boardIndex<< std::endl;
-
 }
 
 /*!
@@ -376,6 +381,12 @@ void devLoPoMoCo::StartPotFeedbackConv(void) {
 	}
 }
 
+void devLoPoMoCo::StartPotFeedbackConvFast(void) {
+	for (int boardIndex = 0; boardIndex < numberOfBoards; boardIndex++) {
+		Board[boardIndex]->StartConvPotFeedbackFast();
+	}
+}
+
 // TODO: Tian: Need review!
 // Question: WHAT DOES MaxAxis mean, and what does SetEncoderIndices do?
 // for now the velocities need to be read before the encoder positions
@@ -447,14 +458,15 @@ void devLoPoMoCo::GetDigitalInput(mtsIntVec & DigitalInput) const {
 	}
 }
 
-void devLoPoMoCo::SetMotorVoltages(const mtsShortVec & MotorVoltages) {
+void devLoPoMoCo::SetMotorVoltages(const mtsShortVec & _MotorVoltages) {
     //cached the motor volatages because they are required for converting
     //current limits to dac counts
 	for (int boardIndex = 0; boardIndex < numberOfBoards; boardIndex++) {
 		for (unsigned int axis = 0; axis <= MaxAxis[boardIndex]; axis++) {
 			Board[boardIndex]->SetMotorVoltageIndices(false, MaxAxis[boardIndex], axis);
-			Board[boardIndex]->SetMotorVoltage(MotorVoltages[axis + StartAxis[boardIndex]]);
-			this->MotorVoltages[axis + StartAxis[boardIndex]] = MotorVoltages[axis + StartAxis[boardIndex]];
+			Board[boardIndex]->SetMotorVoltage(_MotorVoltages[axis + StartAxis[boardIndex]]);
+            //this->MotorVoltages[axis + StartAxis[boardIndex]] = MotorVoltages[axis + StartAxis[boardIndex]];
+			this->MotorVoltages[axis] = _MotorVoltages[axis + StartAxis[boardIndex]];
 			//if (MotorVoltages.Data[axis] >= 4090) MotorVoltages.Data[axis] = 4090;
 			//if (MotorVoltages.Data[axis] <= -4090) MotorVoltages.Data[axis] = -4090;
 		}
@@ -548,7 +560,7 @@ void devLoPoMoCo::MotorVoltagesToDAC(const mtsDoubleVec& fromData, mtsShortVec& 
 }
 
 void devLoPoMoCo::CurrentLimitsToDAC(const mtsDoubleVec& fromData, mtsShortVec& toData) const {
-	double dac2InVolts;
+    double dac2InVolts;
 	for (int boardIndex = 0; boardIndex < numberOfBoards; boardIndex++) {
 		for (unsigned int axis = 0; axis <= MaxAxis[boardIndex]; axis++) {
 			if (this->MotorVoltages[axis + StartAxis[boardIndex]] >=0 ) {

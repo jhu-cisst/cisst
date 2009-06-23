@@ -206,6 +206,10 @@ class devLoPoMoCoBoardIO {
 		outw (IOCMD_START_CONV_POT_FEEDBACK, BaseAddress + CMD_REGISTER);
 		return numTries;
 	}
+    void StartConvPotFeedbackFast() {
+		outw (IOCMD_START_CONV_POT_FEEDBACK, BaseAddress + CMD_REGISTER);
+    }
+
 	 bool ADInterruptPending ()
 		{return ((inw (BaseAddress + STATUS_REGISTER) & 0x0002)?true:false);}
 	 bool ADInterruptFlag ()
