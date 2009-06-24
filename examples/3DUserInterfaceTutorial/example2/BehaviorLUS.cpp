@@ -50,7 +50,7 @@ http://www.cisst.org/cisst/license.txt.
 #include "vtkTextSource.h"
 #include "vtkAxesActor.h"
 
-#define SCALE .8
+#define SCALE .5
 
 class BehaviorLUSProbeHead: public ui3VisibleObject
 {
@@ -120,16 +120,10 @@ public:
 //             this->SphereActor->GetProperty()->SetColor(1.0, 0.0, 0.0);
 
 
-            this->Assembly->AddPart(this->SphereActor);
-            
-//             vctDouble3 axis;
-//             vctFrm3 probePosition;
-//             axis.Assign(1.0,0.0,0.0);
-//             vctAxAnRot3 probeRot(axis, cmnPI);
-//             probePosition.Rotation() = probeRot;
-//             probePosition.Translation() = vct3(-8.0*SCALE,12.0*SCALE, 35.0*SCALE);
-//             this->SetTransformation(probePosition);
-// 
+           // this->Assembly->AddPart(this->SphereActor);
+
+
+
 
 //===========================================================================================
 
@@ -144,6 +138,10 @@ public:
 
 
         return true;
+    }
+    
+    void SetColor(double r, double g, double b) {
+            this->probeActorS->GetProperty()->SetColor(r, g, b);
     }
 
 protected:
@@ -192,8 +190,8 @@ class BehaviorLUSProbeJoint: public ui3VisibleObject
 
         jCylinder = vtkCylinderSource::New();
         jCylinder->SetHeight( 2.5 );
-        jCylinder->SetRadius( 6 );
-        jCylinder->SetResolution( 10 );
+        jCylinder->SetRadius( 7 );
+        jCylinder->SetResolution( 25 );
 
         jointMapper = vtkPolyDataMapper::New();
         jointMapper->SetInputConnection( jCylinder->GetOutputPort() );
@@ -202,6 +200,7 @@ class BehaviorLUSProbeJoint: public ui3VisibleObject
         joint = CSOpenGLStippleActor::New();
         joint->SetMapper( jointMapper);
             //joint1 -> SetStipplePattern(2);
+        joint->SetScale(SCALE);
 
         this->Assembly->AddPart(this->joint);
         this->SetTransformation(this->Position);
@@ -245,8 +244,9 @@ class BehaviorLUSProbeShaft: public ui3VisibleObject
             //set up shaft of probe
             shaftSource = vtkCylinderSource::New();
             shaftSource->SetHeight( 30 );
-            shaftSource->SetRadius( 6 );
-            shaftSource->SetResolution( 10 );
+            shaftSource->SetRadius( 7 );
+            shaftSource->SetResolution( 25 );
+            shaftSource->SetCenter( 0.0, -15.0,0.0 );
 
             shaftMapper = vtkPolyDataMapper::New();
             shaftMapper->SetInputConnection( shaftSource->GetOutputPort() );
@@ -254,18 +254,10 @@ class BehaviorLUSProbeShaft: public ui3VisibleObject
             //vtkActor *shaftActor = vtkActor::New();
             shaftActor = CSOpenGLStippleActor::New();
             shaftActor->SetMapper( shaftMapper );
+            shaftActor->SetScale(SCALE);
             //shaftActor-> SetStipplePattern(2);
 
-            vtkAxesActor* axes = vtkAxesActor::New();
-            axes->SetTotalLength( 40.0, 40.0 , 40.0 );
-            axes->SetXAxisLabelText( "X" );
-            axes->SetYAxisLabelText( "Y" );
-            axes->SetZAxisLabelText( "Z" );
-            axes ->AxisLabelsOn();
-            axes ->Modified();
 
-
-            this->Assembly->AddPart(axes);
             this->Assembly->AddPart(this->shaftActor);
             this->SetTransformation(this->Position);
         return true;
@@ -330,7 +322,7 @@ class BehaviorLUSBackground: public ui3VisibleObject
 //set up the outline funtions
 
             outlineSource = vtkOutlineSource::New();
-            outlineSource -> SetBounds(0,160,0,130,0,0);
+            outlineSource -> SetBounds(0,70,0,70,0,0);
 
 //            vtkPolyDataMapper *mapOutline = vtkPolyDataMapper::New();
 
@@ -344,26 +336,24 @@ class BehaviorLUSBackground: public ui3VisibleObject
 
             //setting the position of the outline 
 
-           // outline -> SetUserMatrix(outlineXform); 
-            outline -> SetScale(SCALE);
+            //outline -> SetScale(SCALE);
 
 
            // std::cout << "adding text" << std::endl;
 
             warning_text = vtkVectorText::New();
-            //CreateVTKObject(warning_text, vtkVectorText);
             warning_text->SetText("Warning Text");
 
 
             warningtextMapper = vtkPolyDataMapper::New();
             warningtextMapper->SetInputConnection( warning_text->GetOutputPort() );
 
-           // CreateVTKObject(warningtextActor, vtkFollower);
             warningtextActor = vtkFollower::New();
             warningtextActor->SetMapper( warningtextMapper );
             warningtextActor->GetProperty()->SetColor(1, 165.0/255, 79.0/255);
             //warningtextActor-> VisibilityOff();
             warningtextActor-> SetScale(3);
+
 
 //setting the positon of the insertion limit warning 
 //should be along the top of the outline, above the probe 
@@ -390,11 +380,11 @@ class BehaviorLUSBackground: public ui3VisibleObject
     switch(mode)
     {
         case 1:
-            backgroundposition.Translation() = vct3(0.0,0.0,200.0);
+            backgroundposition.Translation() = vct3(0.0,0.0,-200.0);
             this->SetTransformation(backgroundposition);
             break;
         default:
-            backgroundposition.Translation() = vct3(0.0,0.0,200.0);
+            backgroundposition.Translation() = vct3(0.0,0.0,-200.0);
             this->SetTransformation(backgroundposition);
             break;
     }
@@ -450,7 +440,13 @@ BehaviorLUS::BehaviorLUS(const std::string & name, ui3Manager * manager):
     this->VisibleList = new ui3VisibleList(manager);
     
     this->ProbeList = new ui3VisibleList(manager);
+    this->ProbeListJoint1 = new ui3VisibleList(manager);
+    this->ProbeListJoint2 = new ui3VisibleList(manager);
+    this->ProbeListJoint3 = new ui3VisibleList(manager);
+    this->ProbeListShaft = new ui3VisibleList(manager);
+    this->BackgroundList = new ui3VisibleList(manager);
     this->VisibleList->Add(this->ProbeList);
+    this->VisibleList->Add(this->BackgroundList);
     
     this->ProbeHead = new BehaviorLUSProbeHead(manager, this->Position);
     this->ProbeJoint1 = new BehaviorLUSProbeJoint(manager, this->Position);
@@ -458,13 +454,30 @@ BehaviorLUS::BehaviorLUS(const std::string & name, ui3Manager * manager):
     this->ProbeJoint3 = new BehaviorLUSProbeJoint(manager, this->Position);
     this->ProbeShaft = new BehaviorLUSProbeShaft(manager, this->Position);
     this->Backgrounds = new BehaviorLUSBackground(manager, this->Position);
+    this->AxesJoint1 = new ui3VisibleAxes(manager);
+    //AxesJoint1->SetSize(15);
+    this->AxesJoint2 = new ui3VisibleAxes(manager);
+    //AxesJoint2->SetSize(20);
+    this->AxesJoint3 = new ui3VisibleAxes(manager);
+    //AxesJoint3->SetSize(25);
+    this->AxesShaft = new ui3VisibleAxes(manager);
+    //AxesShaft->SetSize(30);
     
     this->ProbeList->Add(this->ProbeHead);
-    this->ProbeList->Add(this->ProbeJoint1);
-    this->ProbeList->Add(this->ProbeJoint2);
-    this->ProbeList->Add(this->ProbeJoint3);
-    this->ProbeList->Add(this->ProbeShaft);
-    this->ProbeList->Add(this->Backgrounds);
+    this->ProbeListJoint1->Add(this->ProbeJoint1);
+    this->ProbeListJoint1->Add(this->AxesJoint1);
+    this->ProbeListJoint2->Add(this->ProbeJoint2);
+    this->ProbeListJoint2->Add(this->AxesJoint2);
+    this->ProbeListJoint3->Add(this->ProbeJoint3);
+    this->ProbeListJoint3->Add(this->AxesJoint3);
+    this->ProbeListShaft->Add(this->ProbeShaft);
+    this->ProbeListShaft->Add(this->AxesShaft);
+    this->BackgroundList->Add(this->Backgrounds);
+    
+    this->ProbeList->Add(ProbeListJoint1);
+    this->ProbeListJoint1 -> Add(ProbeListJoint2);
+    this->ProbeListJoint2 ->Add(ProbeListJoint3);
+    this->ProbeListJoint3 ->Add(ProbeListShaft);
     
     this->VisibleList->SetTransformation(vctFrm3::Identity());
 
@@ -499,6 +512,18 @@ void BehaviorLUS::ConfigureMenuBar()
 void BehaviorLUS::Startup(void)
 {
     this->Slave1 = this->Manager->GetSlaveArm("Slave1");
+
+    mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
+    CMN_ASSERT(taskManager);
+    mtsDevice * daVinci = taskManager->GetTask("daVinci");
+    CMN_ASSERT(daVinci);
+    mtsProvidedInterface * providedInterface = daVinci->GetProvidedInterface("PSM1");
+    CMN_ASSERT(providedInterface);
+    mtsCommandReadBase * command = providedInterface->GetCommandRead("GetPositionJoint");
+    CMN_ASSERT(command);
+    GetJointPositionSlave.Bind(command);
+
+
     if (!this->Slave1) {
         CMN_LOG_CLASS_INIT_ERROR << "Startup: this behavior requires a slave arm ..." << std::endl;
     }
@@ -513,7 +538,7 @@ void BehaviorLUS::Startup(void)
     ImagePlane->SetBitmapSize(GetStreamWidth("USVideo"), GetStreamHeight("USVideo"));
 
     // Set plane size (dimensions are already in millimeters)
-    ImagePlane->SetPhysicalSize(40.0, 50.0);
+    ImagePlane->SetPhysicalSize(40.0*.65, 50.0*.65);
 
     // Change pivot position to move plane to the right location.
     // The pivot point will remain in the origin, only the plane moves.
@@ -525,7 +550,7 @@ void BehaviorLUS::Startup(void)
     vctAxAnRot3 imageRot(Yaxis, cmnPI_2);
     vctFrm3 planePosition;
     planePosition.Rotation() = imageRot;
-    planePosition.Translation() = vct3(0.0, 0.0, 50.0);
+    planePosition.Translation() = vct3(0.0, 0.0, 30.0); //=================================================================================================================
     ImagePlane->SetTransformation(planePosition);
 
 
@@ -604,8 +629,6 @@ bool BehaviorLUS::RunBackground()
         this->PreviousState = this->State;
         this->VisibleList->Show();
         this->Backgrounds ->Show();
-
-
     }
 
     this->Slave1->GetCartesianPosition(this->Slave1Position);
@@ -625,16 +648,24 @@ bool BehaviorLUS::RunNoInput()
     if (this->Manager->MastersAsMice() != this->PreviousMaM) {
         this->PreviousMaM = this->Manager->MastersAsMice();
         this->VisibleList->Show();
-        this->Backgrounds ->Show();
-
+        this->BackgroundList->Show();
 
     }
+    
+    this->GetJointPositionSlave(this->JointsSlave);
+    //std::cout << JointsSlave.Position() << std::endl;
+
+    // .Positions() returns oject of type vctDynamicVector of doubles
+    // for translations you might have a meter to mm conversion to do
+
 
     this->Slave1->GetCartesianPosition(this->Slave1Position);
 //    this->Slave1Position.Position().Translation().Add(this->Offset);
-    this->ProbeList->SetTransformation(this->Slave1Position.Position());
+    this->ProbeList->SetOrientation(this->Slave1Position.Position().Rotation());
+    this->ProbeList ->SetPosition(vctDouble3(30.0, -50.0, -300.0));
+    this->BackgroundList -> SetPosition(vctDouble3(-10.0,-80.0,-300.0));
 //    this->ImagePlane->SetTransformation(this->Slave1Position.Position());
-//    this->SetJoints(this->Slave1Position.Position(), 0.0,0.0,0.0,0.0);
+    this->SetJoints(JointsSlave.Position()[4],JointsSlave.Position()[5],JointsSlave.Position()[2],JointsSlave.Position()[3]);
 }
 
 void BehaviorLUS::Configure(const std::string & CMN_UNUSED(configFile))
@@ -651,6 +682,7 @@ bool BehaviorLUS::SaveConfiguration(const std::string & CMN_UNUSED(configFile))
 void BehaviorLUS::FirstButtonCallback()
 {
     CMN_LOG_CLASS_RUN_DEBUG << "Behavior \"" << this->GetName() << "\" Button 1 pressed" << std::endl;
+    this->ProbeHead->SetColor(1.0,0.0,0.0);
 }
 
 void BehaviorLUS::EnableMapButtonCallback()
@@ -710,8 +742,8 @@ void BehaviorLUS::SetJoints(double A1, double A2, double insertion, double roll)
 
     
         //convert the pitch and yaw from radians into degrees 
-    double pitch = (A1*180/_PI);
-    double yaw = (A2*180/_PI);
+    double pitch = A1; //(A1*180/_PI);
+    double yaw = A2; //(A2*180/_PI);
 
     double total = fabs(pitch) + fabs(yaw);
 //    cout << "Probe wrist pitch: " << pitch << endl;
@@ -723,17 +755,36 @@ void BehaviorLUS::SetJoints(double A1, double A2, double insertion, double roll)
     vctDouble3 Xaxis;
     Xaxis.Assign(1.0,0.0,0.0);
     vctDouble3 Yaxis;
-    Xaxis.Assign(0.0,1.0,0.0);
+    Yaxis.Assign(0.0,1.0,0.0);
     vctDouble3 Zaxis;
-    Xaxis.Assign(0.0,0.0,1.0);
+    Zaxis.Assign(0.0,0.0,1.0);
 
+    ProbeHead -> Hide();
 
     //set up first joint position
-    this->ProbeJoint1->SetOrientation(vctMatRot3(vctAxAnRot3(Xaxis, cmnPI_2)));
-    this->ProbeJoint1->SetPosition(vctDouble3(0.0, 0.0, -60.0));
+    vctFrm3 j1pos;
+    j1pos.Rotation() = vctMatRot3(vctAxAnRot3(Xaxis, pitch)) * vctMatRot3(vctAxAnRot3 (Xaxis, cmnPI_2)) * vctMatRot3(vctAxAnRot3(Yaxis, cmnPI_2));
+    j1pos.Translation() = vctDouble3(0.0, 3.0*SCALE, -12.0*SCALE);
 
-    //first joint angle
-    this-> ProbeJoint1 -> SetOrientation(vctAxAnRot3(vctAxAnRot3(Xaxis, pitch)));
+//    this->ProbeJoint1->SetColor(1.0, 0.0, 0.0);
+    ProbeListJoint1->SetTransformation(j1pos);
+
+    //set up second joint
+    vctFrm3 j2pos;
+    j2pos.Rotation() = vctMatRot3(vctAxAnRot3(Xaxis, yaw));
+    j2pos.Translation() = vctDouble3(0.0,-7.0*SCALE,0.0);
+    ProbeListJoint2 -> SetTransformation(j2pos);
+    
+        //set up second joint
+    vctFrm3 j3pos;
+    j3pos.Rotation() = vctMatRot3(vctAxAnRot3(Xaxis, yaw));
+    j3pos.Translation() = vctDouble3(0.0,-7.0*SCALE,0.0);
+    ProbeListJoint3 -> SetTransformation(j3pos);
+    
+    vctFrm3 shaftpos;
+    shaftpos.Rotation() = vctMatRot3(vctAxAnRot3(Zaxis, pitch));
+    shaftpos.Translation() = vctDouble3(0.0, -7.0*SCALE, 0.0);
+    ProbeListShaft -> SetTransformation(shaftpos);
 #if 0
     
     //set up second joint position

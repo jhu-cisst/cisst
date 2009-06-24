@@ -75,10 +75,12 @@ protected:
 
     ui3SlaveArm * Slave1;
     prmPositionCartesianGet Slave1Position;
+    
+    mtsFunctionRead GetJointPositionSlave;
+    prmPositionJointGet JointsSlave;
 
 private:
     BehaviorLUSProbeHead * ProbeHead;
-
     BehaviorLUSProbeJoint *ProbeJoint1;
     BehaviorLUSProbeJoint *ProbeJoint2;
     BehaviorLUSProbeJoint *ProbeJoint3;
@@ -87,6 +89,16 @@ private:
 
     ui3VisibleList * VisibleList; // all actors for this behavior
     ui3VisibleList * ProbeList; // all actors moving wrt the slave arm
+    ui3VisibleList * ProbeListJoint1;
+    ui3VisibleList * ProbeListJoint2;
+    ui3VisibleList * ProbeListJoint3;
+    ui3VisibleList * ProbeListShaft;
+    ui3VisibleList * BackgroundList;
+
+    ui3VisibleAxes * AxesJoint1;
+    ui3VisibleAxes * AxesJoint2;
+    ui3VisibleAxes * AxesJoint3;
+    ui3VisibleAxes * AxesShaft;
     bool MapEnabled;
 };
 

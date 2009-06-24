@@ -208,12 +208,8 @@ int main()
     guiManager.AddRenderer(vidBackgroundSource.GetWidth(SVL_RIGHT),  // render width
                            vidBackgroundSource.GetHeight(SVL_RIGHT), // render height
                            20, 20,          // window position
-<<<<<<< .mine
-                           camframe, vertviewangle, rightopticalcenteroffset,  // camera parameters
-=======
                            camframe, vertviewangle, rightopticalcenteroffset,  // camera parameters
                            vct2(0.0),
->>>>>>> .r493
                            "RightEyeView"); // name of renderer
     guiManager.AddVideoBackgroundToRenderer("RightEyeView", "StereoVideo", SVL_RIGHT);
 #endif //RENDER_ON_OVERLAY

@@ -162,6 +162,14 @@ bool SimpleBehavior::RunForeground()
     // running in foreground GUI mode
     prmPositionCartesianGet position;
 
+    
+    vctFrm3 desiredFrame;
+    vctFrm3 applied;
+    vctFrm3 tmp;
+    
+    tmp = applied * desiredFrame;
+    desiredFrame = tmp;
+    
     this->GetPrimaryMasterPosition(position);
 
     if (this->Following) {
@@ -222,4 +230,8 @@ void SimpleBehavior::PrimaryMasterButtonCallback(const prmEventButton & event)
     } else if (event.Type() == prmEventButton::RELEASED) {
         this->Following = false;
     }
+}
+
+SimpleBehaviorVisibleObject ToggleColor(void )
+{
 }
