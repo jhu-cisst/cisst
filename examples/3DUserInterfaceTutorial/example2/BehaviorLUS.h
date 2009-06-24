@@ -55,6 +55,7 @@ public:
 
     }
     void SetJoints(double A1, double A2, double insertion, double roll);
+    void SetProbeColor(double r, double g, double b);
 
 protected:
     unsigned long Ticker;
@@ -95,6 +96,7 @@ private:
     ui3VisibleList * ProbeListShaft;
     ui3VisibleList * BackgroundList;
 
+    ui3VisibleAxes *  ProbeAxes;
     ui3VisibleAxes * AxesJoint1;
     ui3VisibleAxes * AxesJoint2;
     ui3VisibleAxes * AxesJoint3;

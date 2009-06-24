@@ -206,6 +206,10 @@ class BehaviorLUSProbeJoint: public ui3VisibleObject
         this->SetTransformation(this->Position);
         return true;
     }
+    
+    void SetColor(double r, double g, double b) {
+        this->joint->GetProperty()->SetColor(r, g, b);
+    }
 
 
     protected:
@@ -263,6 +267,9 @@ class BehaviorLUSProbeShaft: public ui3VisibleObject
         return true;
         }
 
+        void SetColor(double r, double g, double b) {
+            this->shaftActor->GetProperty()->SetColor(r, g, b);
+        }
 
     protected:
         vtkCylinderSource *shaftSource;
@@ -454,6 +461,7 @@ BehaviorLUS::BehaviorLUS(const std::string & name, ui3Manager * manager):
     this->ProbeJoint3 = new BehaviorLUSProbeJoint(manager, this->Position);
     this->ProbeShaft = new BehaviorLUSProbeShaft(manager, this->Position);
     this->Backgrounds = new BehaviorLUSBackground(manager, this->Position);
+    this->ProbeAxes = new ui3VisibleAxes(manager);
     this->AxesJoint1 = new ui3VisibleAxes(manager);
     //AxesJoint1->SetSize(15);
     this->AxesJoint2 = new ui3VisibleAxes(manager);
@@ -464,6 +472,7 @@ BehaviorLUS::BehaviorLUS(const std::string & name, ui3Manager * manager):
     //AxesShaft->SetSize(30);
     
     this->ProbeList->Add(this->ProbeHead);
+    this->ProbeList->Add(this->ProbeAxes);
     this->ProbeListJoint1->Add(this->ProbeJoint1);
     this->ProbeListJoint1->Add(this->AxesJoint1);
     this->ProbeListJoint2->Add(this->ProbeJoint2);
@@ -549,7 +558,7 @@ void BehaviorLUS::Startup(void)
     Yaxis.Assign(0.0,1.0,0.0);
     vctAxAnRot3 imageRot(Yaxis, cmnPI_2);
     vctFrm3 planePosition;
-    planePosition.Rotation() = imageRot;
+    planePosition.Rotation() = vctMatRot3(imageRot);
     planePosition.Translation() = vct3(0.0, 0.0, 30.0); //=================================================================================================================
     ImagePlane->SetTransformation(planePosition);
 
@@ -653,7 +662,7 @@ bool BehaviorLUS::RunNoInput()
     }
     
     this->GetJointPositionSlave(this->JointsSlave);
-    //std::cout << JointsSlave.Position() << std::endl;
+    std::cout << JointsSlave.Position() << std::endl;
 
     // .Positions() returns oject of type vctDynamicVector of doubles
     // for translations you might have a meter to mm conversion to do
@@ -661,11 +670,14 @@ bool BehaviorLUS::RunNoInput()
 
     this->Slave1->GetCartesianPosition(this->Slave1Position);
 //    this->Slave1Position.Position().Translation().Add(this->Offset);
-    this->ProbeList->SetOrientation(this->Slave1Position.Position().Rotation());
-    this->ProbeList ->SetPosition(vctDouble3(30.0, -50.0, -300.0));
+    vctFrm3 tmp;
+    tmp.Rotation() =vctMatRot3(this->Slave1Position.Position().Rotation()) * vctMatRot3(vctAxAnRot3(vctDouble3(0.0,0.0,1.0), cmnPI_4 ));
+    tmp.Translation() = vctDouble3(-10.0,-80.0,-300.0);
+    this->ProbeList ->SetTransformation(tmp);
+ //   this->ProbeList ->SetPosition(vctDouble3(30.0, -40.0, -300.0));
     this->BackgroundList -> SetPosition(vctDouble3(-10.0,-80.0,-300.0));
 //    this->ImagePlane->SetTransformation(this->Slave1Position.Position());
-    this->SetJoints(JointsSlave.Position()[4],JointsSlave.Position()[5],JointsSlave.Position()[2],JointsSlave.Position()[3]);
+    this->SetJoints(JointsSlave.Position()[5],JointsSlave.Position()[4],JointsSlave.Position()[2],JointsSlave.Position()[3]);
 }
 
 void BehaviorLUS::Configure(const std::string & CMN_UNUSED(configFile))
@@ -682,7 +694,7 @@ bool BehaviorLUS::SaveConfiguration(const std::string & CMN_UNUSED(configFile))
 void BehaviorLUS::FirstButtonCallback()
 {
     CMN_LOG_CLASS_RUN_DEBUG << "Behavior \"" << this->GetName() << "\" Button 1 pressed" << std::endl;
-    this->ProbeHead->SetColor(1.0,0.0,0.0);
+    this->SetProbeColor(1.0,0.0,0.0);
 }
 
 void BehaviorLUS::EnableMapButtonCallback()
@@ -731,14 +743,21 @@ void BehaviorLUS::OnStreamSample(svlSample* sample, int streamindex)
 
 void BehaviorLUS::SetJoints(double A1, double A2, double insertion, double roll)
 {
-    
-    vctDouble3 axis;
+    vctDouble3 Xaxis;
+    Xaxis.Assign(1.0,0.0,0.0);
+    vctDouble3 Yaxis;
+    Yaxis.Assign(0.0,1.0,0.0);
+    vctDouble3 Zaxis;
+    Zaxis.Assign(0.0,0.0,1.0);
+
+
     vctFrm3 probePosition;
-    axis.Assign(1.0,0.0,0.0);
-    vctAxAnRot3 probeRot(axis, cmnPI);
-    probePosition.Rotation() = probeRot;
-    probePosition.Translation() = vct3(-8.0*SCALE,12.0*SCALE, 70.0*SCALE);
+    vctAxAnRot3 probeRot(Xaxis, cmnPI);
+    probePosition.Rotation() = vctMatRot3(probeRot);
+    probePosition.Translation() = vct3(-8.0*SCALE,12.0*SCALE, 70.0*SCALE);  //-8,12, 70
     this->ProbeHead->SetTransformation(probePosition);
+    
+
 
     
         //convert the pitch and yaw from radians into degrees 
@@ -752,18 +771,13 @@ void BehaviorLUS::SetJoints(double A1, double A2, double insertion, double roll)
 //    cout << "insertion:         " << insertion << endl;
 //    cout << "roll:              " << roll << endl;
 
-    vctDouble3 Xaxis;
-    Xaxis.Assign(1.0,0.0,0.0);
-    vctDouble3 Yaxis;
-    Yaxis.Assign(0.0,1.0,0.0);
-    vctDouble3 Zaxis;
-    Zaxis.Assign(0.0,0.0,1.0);
+
 
     ProbeHead -> Hide();
 
     //set up first joint position
     vctFrm3 j1pos;
-    j1pos.Rotation() = vctMatRot3(vctAxAnRot3(Xaxis, pitch)) * vctMatRot3(vctAxAnRot3 (Xaxis, cmnPI_2)) * vctMatRot3(vctAxAnRot3(Yaxis, cmnPI_2));
+    j1pos.Rotation() = vctMatRot3(vctAxAnRot3(Xaxis, -pitch)) * vctMatRot3(vctAxAnRot3 (Xaxis, cmnPI_2)) * vctMatRot3(vctAxAnRot3(Yaxis, cmnPI_2));
     j1pos.Translation() = vctDouble3(0.0, 3.0*SCALE, -12.0*SCALE);
 
 //    this->ProbeJoint1->SetColor(1.0, 0.0, 0.0);
@@ -771,18 +785,18 @@ void BehaviorLUS::SetJoints(double A1, double A2, double insertion, double roll)
 
     //set up second joint
     vctFrm3 j2pos;
-    j2pos.Rotation() = vctMatRot3(vctAxAnRot3(Xaxis, yaw));
+    j2pos.Rotation() = vctMatRot3(vctAxAnRot3(Xaxis, -yaw));
     j2pos.Translation() = vctDouble3(0.0,-7.0*SCALE,0.0);
     ProbeListJoint2 -> SetTransformation(j2pos);
     
         //set up second joint
     vctFrm3 j3pos;
-    j3pos.Rotation() = vctMatRot3(vctAxAnRot3(Xaxis, yaw));
+    j3pos.Rotation() = vctMatRot3(vctAxAnRot3(Xaxis, -yaw));
     j3pos.Translation() = vctDouble3(0.0,-7.0*SCALE,0.0);
     ProbeListJoint3 -> SetTransformation(j3pos);
     
     vctFrm3 shaftpos;
-    shaftpos.Rotation() = vctMatRot3(vctAxAnRot3(Zaxis, pitch));
+    shaftpos.Rotation() = vctMatRot3(vctAxAnRot3(Zaxis, -pitch));
     shaftpos.Translation() = vctDouble3(0.0, -7.0*SCALE, 0.0);
     ProbeListShaft -> SetTransformation(shaftpos);
 #if 0
@@ -798,6 +812,16 @@ void BehaviorLUS::SetJoints(double A1, double A2, double insertion, double roll)
 #endif
 }
 
+
+void BehaviorLUS::SetProbeColor(double r, double g, double b)
+{
+    this->ProbeHead ->SetColor(r,g,b);
+    this->ProbeJoint1 ->SetColor(r,g,b);
+    this->ProbeJoint2 ->SetColor(r,g,b);
+    this->ProbeJoint3 ->SetColor(r,g,b);
+    this->ProbeShaft ->SetColor(r,g,b);
+
+}
 
 /*
  void  LUSWidget::SetUserMatrix(vtkMatrix4x4 *tform, float A1, float A2, float insertion, float roll)
