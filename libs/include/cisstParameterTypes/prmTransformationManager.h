@@ -90,6 +90,7 @@ protected:
 	static NodeListType Path;
     /*! Tree traversal helper */
 	static NodeListType VisitedNodes;
+	static NodeListType VisitedNodes2;
 	   
     /*! Add the frame to the tree in the transformation manager.  This
 	  method is private and can only be accessed by the "friend" class
@@ -171,9 +172,15 @@ public:
 
     /*! Helper function for computing transformations. Traverses the
       tree and stores the path between target and reference in path
-      \return void
+      \return bool true if path exists
       */
 	static bool FindPath(const prmTransformationBasePtr & target, const prmTransformationBasePtr & reference);
+
+    /*! Helper function for computing transformations. In contrast to above, this assumes a path exists and only 
+      merges two traversals from target/reference to tree root
+      \return bool true if path exists
+      */
+    static bool FindPathConnectedTree(const prmTransformationBasePtr & target, const prmTransformationBasePtr & reference);
 
     /*! Helper function for attaching with names
     */
@@ -182,6 +189,9 @@ public:
     /*! Print the path for last reference computation to a graphviz dot file
       \return void
     */
+    //return path and take path here. If you throw away the path, then its lost.
+    //make this thread safe
+    //check ofri's old code to see if any other ideas were missed.
 	static void PathToStreamDot(std::ostream & outputStream);
 
 }; /* prmTransformationManager */

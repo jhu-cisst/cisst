@@ -28,6 +28,7 @@ prmTransformationFixed prmTransformationManager::TheWorld = prmTransformationFix
 
 //initialization of helper and traversal members
 prmTransformationManager::NodeListType prmTransformationManager::VisitedNodes;
+prmTransformationManager::NodeListType prmTransformationManager::VisitedNodes2;
 prmTransformationManager::NodeListType prmTransformationManager::Path;
 
 /*! Clear the tree
@@ -185,6 +186,114 @@ bool prmTransformationManager::Detach(const prmTransformationBasePtr & frame)
     frame->Parent = NULL;
     frame->Children.clear();
     
+    return true;
+}
+
+/*!  find path between two nodes - assumes a connected tree
+*/
+bool prmTransformationManager::FindPathConnectedTree(const prmTransformationBasePtr & target, const prmTransformationBasePtr & reference)
+{
+	bool found = false;
+
+	NodeListType::iterator iter;
+	prmTransformationBasePtr current;
+	prmTransformationBasePtr temp;
+
+	//map of found edges
+	std::map<prmTransformationBasePtr,prmTransformationBasePtr> edges;
+
+	if (target == NULL || reference == NULL) 
+	{
+		return false;
+	}
+
+	//clear the tree from the root
+	VisitedNodes.clear();
+	prmTransformationManager::VisitedNodes.push_back(&prmTransformationManager::TheWorld);
+	while (!VisitedNodes.empty()) 
+	{
+		current = VisitedNodes.front();
+		current->Visited = false;
+		VisitedNodes.pop_front();			
+		for (iter = current->Children.begin();
+             iter != current->Children.end();
+             iter++)
+		{				
+			VisitedNodes.push_back(*iter);
+		}
+	}
+
+	//clean edge map
+	edges[target] = NULL;
+
+    VisitedNodes.clear();
+    VisitedNodes2.clear();
+
+	//start searching from target
+    current = target;    
+	current->Visited = true;    
+	VisitedNodes.push_back(current);
+    //path fron target to root
+    while( current->Parent != NULL)	 
+    {
+        current = current->Parent;
+        current->Visited = true;
+        VisitedNodes.push_back(current);
+    }
+
+    //path from source to root
+    current = reference;
+	current->Visited = true;    
+	VisitedNodes2.push_back(current);
+    //path fron target to root
+    while( current->Parent != NULL)	 
+    {
+        current = current->Parent;
+        current->Visited = true;
+        VisitedNodes2.push_back(current);
+    }
+
+     Path.clear();
+    //no path IF
+    // lists not empty, and front dont match
+    //while more nodes to visit, and common path to root
+    if((!VisitedNodes.empty())&&(!VisitedNodes2.empty())&&
+        (VisitedNodes.front() != VisitedNodes2.front()))
+    {
+        found = false;
+        return found;
+
+    }
+    else
+    {
+        //while more nodes to visit, and common path to root
+        while((!VisitedNodes.empty())&&(!VisitedNodes2.empty())&&
+            (VisitedNodes.front() == VisitedNodes2.front()))
+        {
+            current = VisitedNodes.front();		
+	        VisitedNodes.pop_front();
+            temp    = VisitedNodes2.front();
+            VisitedNodes2.pop_front();
+        }
+    }       
+    // the path is VisitedNodes2+current+VisitedNodes
+    //  target = reference - lists are empty path is current
+    //  target or reference = root, one list is empty
+    //  otherwise both lists have one or more elements
+ 	//generate the path
+    while(!VisitedNodes2.empty())
+    {
+        temp=VisitedNodes2.back();
+        VisitedNodes2.pop_back();
+        Path.push_back(temp);
+    }
+    Path.push_back(current);
+    while(!VisitedNodes.empty())
+    {
+        temp=VisitedNodes.front();
+        VisitedNodes.pop_front();
+        Path.push_back(temp);
+    }
     return true;
 }
 
@@ -522,7 +631,7 @@ vctFrm3 prmTransformationManager::WRTReference(const prmTransformationBasePtr & 
 	vctFrm3 curxform;
 	prmTransformationBasePtr previous, current;
 	//perform a tree traversal to get all the frames needed
-	if (prmTransformationManager::FindPath(refFrame, tipFrame))
+	if (prmTransformationManager::FindPathConnectedTree(refFrame, tipFrame))
 	{
 		//multiply and return the result
 		NodeListType::iterator iter = prmTransformationManager::Path.begin();
