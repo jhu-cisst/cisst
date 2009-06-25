@@ -30,6 +30,7 @@ class BehaviorLUSProbeHead;
 class BehaviorLUSProbeJoint;
 class BehaviorLUSProbeShaft;
 class BehaviorLUSBackground;
+class BehaviorLUSText;
 
 
 class BehaviorLUS : public ui3BehaviorBase
@@ -56,6 +57,9 @@ public:
     }
     void SetJoints(double A1, double A2, double insertion, double roll);
     void SetProbeColor(double r, double g, double b);
+    void SetWarningText(char* txt);
+    void CheckLimits(double p, double y, double i, double r);
+    void mtm_right_button_callback(const prmEventButton & payload);
 
 protected:
     unsigned long Ticker;
@@ -75,18 +79,20 @@ protected:
     ui3ImagePlane* ImagePlane;
 
     ui3SlaveArm * Slave1;
+    ui3MasterArm * RMaster;
     prmPositionCartesianGet Slave1Position;
     
     mtsFunctionRead GetJointPositionSlave;
     prmPositionJointGet JointsSlave;
 
 private:
-    BehaviorLUSProbeHead * ProbeHead;
+    BehaviorLUSProbeHead  *ProbeHead;
     BehaviorLUSProbeJoint *ProbeJoint1;
     BehaviorLUSProbeJoint *ProbeJoint2;
     BehaviorLUSProbeJoint *ProbeJoint3;
     BehaviorLUSProbeShaft *ProbeShaft;
     BehaviorLUSBackground *Backgrounds;
+    BehaviorLUSText       * WarningText;
 
     ui3VisibleList * VisibleList; // all actors for this behavior
     ui3VisibleList * ProbeList; // all actors moving wrt the slave arm
@@ -95,6 +101,7 @@ private:
     ui3VisibleList * ProbeListJoint3;
     ui3VisibleList * ProbeListShaft;
     ui3VisibleList * BackgroundList;
+    ui3VisibleList * TextList;
 
     ui3VisibleAxes *  ProbeAxes;
     ui3VisibleAxes * AxesJoint1;

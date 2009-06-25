@@ -284,6 +284,64 @@ CMN_DECLARE_SERVICES_INSTANTIATION(BehaviorLUSProbeShaft);
 CMN_IMPLEMENT_SERVICES(BehaviorLUSProbeShaft);
 
 
+//==================================================================================================================
+class BehaviorLUSText: public ui3VisibleObject
+{
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 5);
+    public:
+    inline BehaviorLUSText(ui3Manager * manager, vctFrm3 position):
+        ui3VisibleObject(manager),
+        warningtextActor(0),
+        warning_text(0),
+        warningtextMapper(0),
+       // textXform(0),
+
+       Position(position)
+        {}
+
+        inline ~BehaviorLUSText()
+        {
+        }
+        
+        inline bool CreateVTKObjects(void) {
+                      // std::cout << "adding text" << std::endl;
+
+            warning_text = vtkVectorText::New();
+            warning_text->SetText("Warning Text");
+
+
+            warningtextMapper = vtkPolyDataMapper::New();
+            warningtextMapper->SetInputConnection( warning_text->GetOutputPort() );
+
+            warningtextActor = vtkFollower::New();
+            warningtextActor->SetMapper( warningtextMapper );
+            warningtextActor->GetProperty()->SetColor(1, 165.0/255, 79.0/255);
+            //warningtextActor-> VisibilityOff();
+            warningtextActor-> SetScale(5);
+
+            this->Assembly->AddPart(this->warningtextActor);
+
+            this->SetTransformation(this->Position);
+        }
+
+        inline void SetText(char* txt)
+        {
+            this->warning_text->SetText(txt);
+        }
+
+
+    protected:
+        vtkVectorText           *warning_text;
+        vtkFollower             *warningtextActor;
+        vtkPolyDataMapper       *warningtextMapper;
+        vtkProperty             *property;
+        vctFrm3 Position;  // initial position
+        //vctMatrix4x4            *textXform;
+};
+
+CMN_DECLARE_SERVICES_INSTANTIATION(BehaviorLUSText);
+CMN_IMPLEMENT_SERVICES(BehaviorLUSText);
+        //======================================================================================================
 class BehaviorLUSBackground: public ui3VisibleObject
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 5);
@@ -297,10 +355,6 @@ class BehaviorLUSBackground: public ui3VisibleObject
         mapOutline(0),
         outline(0),
         outlineXform(0),
-        warningtextActor(0),
-        warning_text(0),
-        warningtextMapper(0),
-        textXform(0),
 
         Position(position)
         {}
@@ -329,7 +383,7 @@ class BehaviorLUSBackground: public ui3VisibleObject
 //set up the outline funtions
 
             outlineSource = vtkOutlineSource::New();
-            outlineSource -> SetBounds(0,70,0,70,0,0);
+            outlineSource -> SetBounds(0,70,0,60,0,0);
 
 //            vtkPolyDataMapper *mapOutline = vtkPolyDataMapper::New();
 
@@ -341,40 +395,9 @@ class BehaviorLUSBackground: public ui3VisibleObject
             outline->GetProperty()->SetColor(1,1,1);
             //outline -> SetStipplePattern(1);
 
-            //setting the position of the outline 
-
-            //outline -> SetScale(SCALE);
-
-
-           // std::cout << "adding text" << std::endl;
-
-            warning_text = vtkVectorText::New();
-            warning_text->SetText("Warning Text");
-
-
-            warningtextMapper = vtkPolyDataMapper::New();
-            warningtextMapper->SetInputConnection( warning_text->GetOutputPort() );
-
-            warningtextActor = vtkFollower::New();
-            warningtextActor->SetMapper( warningtextMapper );
-            warningtextActor->GetProperty()->SetColor(1, 165.0/255, 79.0/255);
-            //warningtextActor-> VisibilityOff();
-            warningtextActor-> SetScale(3);
-
-
-//setting the positon of the insertion limit warning 
-//should be along the top of the outline, above the probe 
-
-//             CreateVTKObject(textXform, vtkMatrix4x4);
-//             textXform->SetElement(0, 3, 0); //need to figure out where would be best 
-//             textXform->SetElement(1, 3, -45/(warningtextActor-> GetScale())[0]);
-//             textXform->SetElement(2, 3, DEPTH/(warningtextActor-> GetScale())[0]); //need to make this the same depth as the outline 
-// 
-//             warningtextActor -> SetUserMatrix(textXform);
-
 
         this->Assembly->AddPart(this->outline);
-        this->Assembly->AddPart(this->warningtextActor);
+
         int p = 1;
        // this->GetBackgroundPosition(p);
         this->SetTransformation(this->Position);
@@ -401,21 +424,17 @@ class BehaviorLUSBackground: public ui3VisibleObject
 
 
     protected:
-       vtkVectorText           *warning_text;
+ 
 
         vtkOutlineSource        *outlineSource;
         vtkCubeSource           *cubeSource;
 
         vtkPolyDataMapper       *mapOutline;
-        vtkPolyDataMapper       *cubePlaneMapper, *warningtextMapper;
+        vtkPolyDataMapper       *cubePlaneMapper;
 
         CSOpenGLStippleActor    *outline, *cubePlane;
 
-        vtkFollower             *warningtextActor;
-        vtkMatrix4x4            *outlineXform, *textXform;
-
-
-        vtkProperty             *property;
+        vtkMatrix4x4            *outlineXform;
         vctFrm3 Position;  // initial position
 
 };
@@ -452,8 +471,10 @@ BehaviorLUS::BehaviorLUS(const std::string & name, ui3Manager * manager):
     this->ProbeListJoint3 = new ui3VisibleList(manager);
     this->ProbeListShaft = new ui3VisibleList(manager);
     this->BackgroundList = new ui3VisibleList(manager);
+    this->TextList = new ui3VisibleList(manager);
     this->VisibleList->Add(this->ProbeList);
     this->VisibleList->Add(this->BackgroundList);
+    this->VisibleList->Add(this->TextList);
     
     this->ProbeHead = new BehaviorLUSProbeHead(manager, this->Position);
     this->ProbeJoint1 = new BehaviorLUSProbeJoint(manager, this->Position);
@@ -461,6 +482,7 @@ BehaviorLUS::BehaviorLUS(const std::string & name, ui3Manager * manager):
     this->ProbeJoint3 = new BehaviorLUSProbeJoint(manager, this->Position);
     this->ProbeShaft = new BehaviorLUSProbeShaft(manager, this->Position);
     this->Backgrounds = new BehaviorLUSBackground(manager, this->Position);
+    this->WarningText = new BehaviorLUSText(manager, this->Position);
     this->ProbeAxes = new ui3VisibleAxes(manager);
     this->AxesJoint1 = new ui3VisibleAxes(manager);
     //AxesJoint1->SetSize(15);
@@ -474,14 +496,15 @@ BehaviorLUS::BehaviorLUS(const std::string & name, ui3Manager * manager):
     this->ProbeList->Add(this->ProbeHead);
     this->ProbeList->Add(this->ProbeAxes);
     this->ProbeListJoint1->Add(this->ProbeJoint1);
-    this->ProbeListJoint1->Add(this->AxesJoint1);
+    //this->ProbeListJoint1->Add(this->AxesJoint1);
     this->ProbeListJoint2->Add(this->ProbeJoint2);
-    this->ProbeListJoint2->Add(this->AxesJoint2);
+    //this->ProbeListJoint2->Add(this->AxesJoint2);
     this->ProbeListJoint3->Add(this->ProbeJoint3);
-    this->ProbeListJoint3->Add(this->AxesJoint3);
+    //this->ProbeListJoint3->Add(this->AxesJoint3);
     this->ProbeListShaft->Add(this->ProbeShaft);
-    this->ProbeListShaft->Add(this->AxesShaft);
+    //this->ProbeListShaft->Add(this->AxesShaft);
     this->BackgroundList->Add(this->Backgrounds);
+    this->TextList->Add(this->WarningText);
     
     this->ProbeList->Add(ProbeListJoint1);
     this->ProbeListJoint1 -> Add(ProbeListJoint2);
@@ -517,11 +540,15 @@ void BehaviorLUS::ConfigureMenuBar()
 
 }
 
+void BehaviorLUS::mtm_right_button_callback(const prmEventButton & payload)
+{
+    CMN_LOG_RUN_VERBOSE << "EVENT: MTM Right Button:" << payload << endl;
+}
 
 void BehaviorLUS::Startup(void)
 {
     this->Slave1 = this->Manager->GetSlaveArm("Slave1");
-
+    this->RMaster = this->Manager->GetMasterArm("MTMR");
     mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
     CMN_ASSERT(taskManager);
     mtsDevice * daVinci = taskManager->GetTask("daVinci");
@@ -531,6 +558,12 @@ void BehaviorLUS::Startup(void)
     mtsCommandReadBase * command = providedInterface->GetCommandRead("GetPositionJoint");
     CMN_ASSERT(command);
     GetJointPositionSlave.Bind(command);
+
+//     mtsDeviceInterface * MTMR_Interface = daVinci->GetProvidedInterface("MTMR");
+//     mtsCommandWriteBase *cbMTMRightButton = mtsCommandWrite<BehaviorLUS, bool>(&BehaviorLUS::mtm_right_button_callback,
+//                                          this, "MTMRightButton", prmEventButton());
+    
+
 
 
     if (!this->Slave1) {
@@ -660,9 +693,18 @@ bool BehaviorLUS::RunNoInput()
         this->BackgroundList->Show();
 
     }
-    
+    vctDynamicVector<double> vec = RMaster -> GetMasterJointPosition();
     this->GetJointPositionSlave(this->JointsSlave);
-    std::cout << JointsSlave.Position() << std::endl;
+    //std::cout << JointsSlave.Position() << std::endl;
+//     if (RMaster->isButtonPressed())
+//     {
+//         std::cout<< "true" << std::endl;
+//     }else 
+//     {
+//         std::cout<< "false" << std::endl;
+//     }
+    
+   // std::cout<< RMaster->isButtonPressed() << std::endl;
 
     // .Positions() returns oject of type vctDynamicVector of doubles
     // for translations you might have a meter to mm conversion to do
@@ -672,12 +714,17 @@ bool BehaviorLUS::RunNoInput()
 //    this->Slave1Position.Position().Translation().Add(this->Offset);
     vctFrm3 tmp;
     tmp.Rotation() =vctMatRot3(this->Slave1Position.Position().Rotation()) * vctMatRot3(vctAxAnRot3(vctDouble3(0.0,0.0,1.0), cmnPI_4 ));
-    tmp.Translation() = vctDouble3(-10.0,-80.0,-300.0);
+    tmp.Translation() = vctDouble3(25.0,-50.0,-300.0);
     this->ProbeList ->SetTransformation(tmp);
  //   this->ProbeList ->SetPosition(vctDouble3(30.0, -40.0, -300.0));
     this->BackgroundList -> SetPosition(vctDouble3(-10.0,-80.0,-300.0));
+    this->TextList -> SetPosition(vctDouble3(-10.0,-90.0,-300.0));
+
 //    this->ImagePlane->SetTransformation(this->Slave1Position.Position());
-    this->SetJoints(JointsSlave.Position()[5],JointsSlave.Position()[4],JointsSlave.Position()[2],JointsSlave.Position()[3]);
+    //void BehaviorLUS::SetJoints(double pitch, double yaw, double insertion, double roll)
+    this->SetJoints(JointsSlave.Position()[4],JointsSlave.Position()[5],JointsSlave.Position()[2],JointsSlave.Position()[3]);
+    
+
 }
 
 void BehaviorLUS::Configure(const std::string & CMN_UNUSED(configFile))
@@ -695,6 +742,7 @@ void BehaviorLUS::FirstButtonCallback()
 {
     CMN_LOG_CLASS_RUN_DEBUG << "Behavior \"" << this->GetName() << "\" Button 1 pressed" << std::endl;
     this->SetProbeColor(1.0,0.0,0.0);
+    this->SetWarningText("roll limit reached");
 }
 
 void BehaviorLUS::EnableMapButtonCallback()
@@ -762,7 +810,7 @@ void BehaviorLUS::SetJoints(double A1, double A2, double insertion, double roll)
     
         //convert the pitch and yaw from radians into degrees 
     double pitch = A1; //(A1*180/_PI);
-    double yaw = A2; //(A2*180/_PI);
+    double yaw = -A2; //(A2*180/_PI);
 
     double total = fabs(pitch) + fabs(yaw);
 //    cout << "Probe wrist pitch: " << pitch << endl;
@@ -777,7 +825,7 @@ void BehaviorLUS::SetJoints(double A1, double A2, double insertion, double roll)
 
     //set up first joint position
     vctFrm3 j1pos;
-    j1pos.Rotation() = vctMatRot3(vctAxAnRot3(Xaxis, -pitch)) * vctMatRot3(vctAxAnRot3 (Xaxis, cmnPI_2)) * vctMatRot3(vctAxAnRot3(Yaxis, cmnPI_2));
+    j1pos.Rotation() = vctMatRot3(vctAxAnRot3(Xaxis, pitch)) * vctMatRot3(vctAxAnRot3 (Xaxis, cmnPI_2)) * vctMatRot3(vctAxAnRot3(Yaxis, cmnPI_2));
     j1pos.Translation() = vctDouble3(0.0, 3.0*SCALE, -12.0*SCALE);
 
 //    this->ProbeJoint1->SetColor(1.0, 0.0, 0.0);
@@ -785,31 +833,22 @@ void BehaviorLUS::SetJoints(double A1, double A2, double insertion, double roll)
 
     //set up second joint
     vctFrm3 j2pos;
-    j2pos.Rotation() = vctMatRot3(vctAxAnRot3(Xaxis, -yaw));
+    j2pos.Rotation() = vctMatRot3(vctAxAnRot3(Xaxis, yaw));
     j2pos.Translation() = vctDouble3(0.0,-7.0*SCALE,0.0);
     ProbeListJoint2 -> SetTransformation(j2pos);
     
         //set up second joint
     vctFrm3 j3pos;
-    j3pos.Rotation() = vctMatRot3(vctAxAnRot3(Xaxis, -yaw));
+    j3pos.Rotation() = vctMatRot3(vctAxAnRot3(Xaxis, yaw));
     j3pos.Translation() = vctDouble3(0.0,-7.0*SCALE,0.0);
     ProbeListJoint3 -> SetTransformation(j3pos);
     
     vctFrm3 shaftpos;
-    shaftpos.Rotation() = vctMatRot3(vctAxAnRot3(Zaxis, -pitch));
+    shaftpos.Rotation() = vctMatRot3(vctAxAnRot3(Zaxis, pitch));
     shaftpos.Translation() = vctDouble3(0.0, -7.0*SCALE, 0.0);
     ProbeListShaft -> SetTransformation(shaftpos);
-#if 0
     
-    //set up second joint position
-    ProbeJoint2 -> SetTransformation(this -> ProbeJoint1 ->Position);
-    vctFrm3 joint2Position;
-    vctFrm3 joint2angle;
-    vctAxAnRot3 joint2Rot(Yaxis, yaw);
-    joint2Position.Translation() = vct3(0.0,0.0, - 7.0);
-    ProbeJoint2 ->SetTransformation(joint2Position);
-    
-#endif
+    CheckLimits(pitch, yaw, insertion, roll);
 }
 
 
@@ -823,129 +862,55 @@ void BehaviorLUS::SetProbeColor(double r, double g, double b)
 
 }
 
-/*
- void  LUSWidget::SetUserMatrix(vtkMatrix4x4 *tform, float A1, float A2, float insertion, float roll)
+void BehaviorLUS::SetWarningText(char* txt)
 {
-    //convert the pitch and yaw from radians into degrees 
-    double pitch = (A1*180/_PI);
-//            pitch = pitch - 3;
-    double yaw = (A2*180/_PI);
-//            yaw = yaw - 3;
+    this -> WarningText-> SetText(txt);
+}
 
-
+void BehaviorLUS::CheckLimits(double p, double y, double i, double r)
+{
+        //convert the pitch and yaw from radians into degrees 
+    double pitch = (p*180/cmnPI);
+    double yaw = (y*180/cmnPI);
+    double insertion = i;
+    double roll = r;
+    
     double total = fabs(pitch) + fabs(yaw);
-//    cout << "Probe wrist pitch: " << pitch << endl;
-//    cout << "Probe wrist yaw:   " << yaw << endl;
-//    cout << "total angle:       " << total << endl;
-//    cout << "insertion:         " << insertion << endl;
-//    cout << "roll:              " << roll << endl;
-
-    double s[3];
-    LUSActors[0] -> GetScale(s);
-
-// cout << "scale of partActor:    " << s[0] << "  "<< s[1] <<"  " << s[2] <<"  "<< endl; 
-
-
-    t1 -> Identity();
-    t2 -> Identity();
-    t3 -> Identity();
-    t4 -> Identity();
-//     probeXform -> Identity();
-    // 
-//     probeXform -> RotateX(180);
-//     probeXform -> RotateY(90);
-//     probeXform -> Translate(-35*.4, 12*.4, -8*.4);
-    // 
-//     LUSActors[0] -> SetUserTransform(probeXform);
-
-    //incoming matrix is the transform of the probe and thus the probe Actor pitch and yaw are the joint angles
-    //setting the transform for the probe actor 
-    LUSActors[0] -> SetUserMatrix(tform);
-
-    //set up first joint
-    t1 -> SetMatrix(LUSActors[0]->GetUserMatrix());
-    t1 -> Translate(50*s[0],3*s[0] , 0);
-    t1 -> RotateZ(90);
-    t1 -> RotateZ(-pitch);
-    LUSActors[1]-> SetUserTransform(t1);
-
-    //set up second joint
-    t2 -> Identity();
-    t2 -> SetMatrix(LUSActors[1]->GetUserMatrix());
-    t2 -> RotateX(yaw);
-    t2 -> Translate(0, -7*s[0], 0);
-    LUSActors[2] -> SetUserTransform(t2);
-
-    //set up third joint
-    t3 -> Identity();
-    t3 -> SetMatrix(LUSActors[2]->GetUserMatrix());
-    t3 -> RotateX(yaw);
-    t3 -> Translate(0, -7*s[0], 0);
-    LUSActors[3] -> SetUserTransform(t3);
-
-    //set up shaft joint
-    t4 -> Identity();
-    t4 -> SetMatrix(LUSActors[3]->GetUserMatrix());
-    t4 -> RotateZ(-pitch);
-    t4 -> Translate(0, -20*s[0], 0);
-    LUSActors[4] -> SetUserTransform(t4);
-
-    //LUSActors[5] -> SetUserMatrix(tform);
-   // textAct -> SetUserMatrix (tform);
-    //textAct -> VisibilityOn();
-
-   // measuretextActor -> VisibilityOn();
-   // measuretextActor -> SetUserMatrix (tform);
-
+    
+   // std::cout << "total: " << total << std::endl;
     if (insertion < 0.165)
     {
-        //LUSActors[numActs -1 ] -> GetProperty() ->  SetColor(1, 0, 0);
-        LUSActors[numActs -1 ] -> GetProperty() ->  SetColor(163./255, 214./255, 1);
-        warningtextActor -> VisibilityOn();
-        warning_text->SetText("STOP Wrist in Cannula");
+        SetProbeColor(1, 0.0/255, 0.0/255 );
+        SetWarningText("STOP: Wrist in cannula");
     }
     else if(total >= 50 || (fabs(pitch) > 40 && fabs(yaw) < 9) || (fabs(yaw) > 40 && fabs(pitch) < 9) ) //turn red 
     {
-        ChangeColor( 1, 165.0/255, 79.0/255 );   //1, 120.0/255, 65.0/255 );
-//         textAct -> VisibilityOn();
-//         textAct -> SetInput("Joint Limit Reached");
-        warningtextActor -> VisibilityOn();
-        warning_text->SetText("Joint Limit Reached");
+        SetProbeColor( 1, 165.0/255, 79.0/255 );   //1, 120.0/255, 65.0/255 );
+        SetWarningText("Joint Limit Reached");
     }
-    else if(insertion > 0.29)
+    else if(insertion > 0.28)
     {
-        LUSActors[numActs -1 ] -> GetProperty() ->  SetColor(1, 0, 0);
+        SetProbeColor(1, 165.0/255, 79.0/255 );
 //         textAct -> VisibilityOn();
 //         textAct -> SetInput("Insertion Limit Reached");
-        warningtextActor -> VisibilityOn();
-        warning_text->SetText("Insertion Limit Reached");
+        SetWarningText("Insertion Limit Reached");
     }
     else if (roll > 4.5 || roll < -4.5)
     {
-        ChangeColor( 1, 165.0/255, 79.0/255 );
-        warningtextActor -> VisibilityOn();
-        warning_text->SetText("Roll limit Reached");
+        SetProbeColor( 1, 165.0/255, 79.0/255 );
+        SetWarningText("Roll limit Reached");
     }
     else
     {
-        ChangeColor( 127./255, 255./255, 212./255 );
-     //   textAct -> VisibilityOff();
-        LUSActors[numActs -1 ] -> GetProperty() -> SetColor( 192.0/255 , 192.0/255 , 192.0/255);
-        warningtextActor -> VisibilityOff();
+        SetProbeColor( 1.0,1.0,1.0);//127./255, 255./255, 212./255 );
+        SetWarningText(" ");
     }
 
-
-    if( total < 3 ) //turn blue 
+    if( total < 6 ) //turn blue 
     {
-        ChangeColor(159.0/255, 182.0/255, 205.0/255) ;
+        SetProbeColor(159.0/255, 182.0/255, 205.0/255) ;
     }
-
-// delete pitch;
-// delete yaw;
-// delete total;
-// delete [] s;
 
 }
-*/
 
 
