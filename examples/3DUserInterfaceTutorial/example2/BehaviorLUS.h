@@ -57,8 +57,10 @@ public:
     }
     void SetJoints(double A1, double A2, double insertion, double roll);
     void SetProbeColor(double r, double g, double b);
-    void SetWarningText(char* txt);
+    void SetText(BehaviorLUSText *obj, char* txt);
     void CheckLimits(double p, double y, double i, double r);
+    void GetMeasurement(vctFixedSizeVector<double,3u> pos);
+
     void mtm_right_button_callback(const prmEventButton & payload);
 
 protected:
@@ -70,6 +72,9 @@ protected:
 
     StateType PreviousState;
     bool PreviousMaM;
+    bool RightMTMOpen, prevRightMTMOpen;
+    bool isRightMTMOpen(double grip);
+    
     vctDouble3 PreviousCursorPosition;
     vctDouble3 Offset;
     vctFrm3 Position, ProbePosition;
@@ -84,6 +89,9 @@ protected:
     
     mtsFunctionRead GetJointPositionSlave;
     prmPositionJointGet JointsSlave;
+    
+    bool MeasurementActive;
+    vctDouble3 MeasurePoint1;
 
 private:
     BehaviorLUSProbeHead  *ProbeHead;
@@ -92,7 +100,8 @@ private:
     BehaviorLUSProbeJoint *ProbeJoint3;
     BehaviorLUSProbeShaft *ProbeShaft;
     BehaviorLUSBackground *Backgrounds;
-    BehaviorLUSText       * WarningText;
+    BehaviorLUSText       * WarningText, * MeasureText;
+    
 
     ui3VisibleList * VisibleList; // all actors for this behavior
     ui3VisibleList * ProbeList; // all actors moving wrt the slave arm

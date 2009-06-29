@@ -307,7 +307,7 @@ class BehaviorLUSText: public ui3VisibleObject
                       // std::cout << "adding text" << std::endl;
 
             warning_text = vtkVectorText::New();
-            warning_text->SetText("Warning Text");
+            warning_text->SetText(" ");
 
 
             warningtextMapper = vtkPolyDataMapper::New();
@@ -327,6 +327,11 @@ class BehaviorLUSText: public ui3VisibleObject
         inline void SetText(char* txt)
         {
             this->warning_text->SetText(txt);
+        }
+
+        inline void SetColor(double r, double g, double b)
+        {
+            this->warningtextActor->GetProperty()->SetColor(r,g,b);
         }
 
 
@@ -458,7 +463,9 @@ BehaviorLUS::BehaviorLUS(const std::string & name, ui3Manager * manager):
     ProbeJoint2(0),
     ProbeJoint3(0),
     ProbeShaft(0),
-    Backgrounds(0)
+    Backgrounds(0),
+    WarningText(0),
+    MeasureText(0)
 {
     // add video source interfaces
     AddStream(svlTypeImageRGB, "USVideo");
@@ -483,6 +490,7 @@ BehaviorLUS::BehaviorLUS(const std::string & name, ui3Manager * manager):
     this->ProbeShaft = new BehaviorLUSProbeShaft(manager, this->Position);
     this->Backgrounds = new BehaviorLUSBackground(manager, this->Position);
     this->WarningText = new BehaviorLUSText(manager, this->Position);
+    this->MeasureText = new BehaviorLUSText(manager, this->Position);
     this->ProbeAxes = new ui3VisibleAxes(manager);
     this->AxesJoint1 = new ui3VisibleAxes(manager);
     //AxesJoint1->SetSize(15);
@@ -505,6 +513,7 @@ BehaviorLUS::BehaviorLUS(const std::string & name, ui3Manager * manager):
     //this->ProbeListShaft->Add(this->AxesShaft);
     this->BackgroundList->Add(this->Backgrounds);
     this->TextList->Add(this->WarningText);
+    this->TextList->Add(this->MeasureText);
     
     this->ProbeList->Add(ProbeListJoint1);
     this->ProbeListJoint1 -> Add(ProbeListJoint2);
@@ -562,9 +571,10 @@ void BehaviorLUS::Startup(void)
 //     mtsDeviceInterface * MTMR_Interface = daVinci->GetProvidedInterface("MTMR");
 //     mtsCommandWriteBase *cbMTMRightButton = mtsCommandWrite<BehaviorLUS, bool>(&BehaviorLUS::mtm_right_button_callback,
 //                                          this, "MTMRightButton", prmEventButton());
-    
 
 
+    RightMTMOpen = true;
+    prevRightMTMOpen = RightMTMOpen;
 
     if (!this->Slave1) {
         CMN_LOG_CLASS_INIT_ERROR << "Startup: this behavior requires a slave arm ..." << std::endl;
@@ -600,8 +610,8 @@ void BehaviorLUS::Startup(void)
     this->ImagePlane->Lock();
     this->ProbeList->Add(this->ImagePlane);
     this->ImagePlane->Unlock();
-
-
+    
+    MeasurePoint1.Assign(0.0,0.0,0.0);
 
 }
 
@@ -693,18 +703,17 @@ bool BehaviorLUS::RunNoInput()
         this->BackgroundList->Show();
 
     }
-    vctDynamicVector<double> vec = RMaster -> GetMasterJointPosition();
-    this->GetJointPositionSlave(this->JointsSlave);
-    //std::cout << JointsSlave.Position() << std::endl;
-//     if (RMaster->isButtonPressed())
-//     {
-//         std::cout<< "true" << std::endl;
-//     }else 
-//     {
-//         std::cout<< "false" << std::endl;
-//     }
     
-   // std::cout<< RMaster->isButtonPressed() << std::endl;
+    vctDynamicVector<double> vec = RMaster -> GetMasterJointPosition();
+    
+    //std::cout << "mast joint 7 " << vec <<std::endl;
+    
+    RightMTMOpen = isRightMTMOpen(vec[7]);
+    
+    this->GetJointPositionSlave(this->JointsSlave);
+
+    
+
 
     // .Positions() returns oject of type vctDynamicVector of doubles
     // for translations you might have a meter to mm conversion to do
@@ -719,11 +728,25 @@ bool BehaviorLUS::RunNoInput()
  //   this->ProbeList ->SetPosition(vctDouble3(30.0, -40.0, -300.0));
     this->BackgroundList -> SetPosition(vctDouble3(-10.0,-80.0,-300.0));
     this->TextList -> SetPosition(vctDouble3(-10.0,-90.0,-300.0));
+    
+    this-> MeasureText -> SetColor(1,1,1);
+    this->MeasureText -> SetPosition(vctDouble3(0.0, 10, 0.0));
+
 
 //    this->ImagePlane->SetTransformation(this->Slave1Position.Position());
     //void BehaviorLUS::SetJoints(double pitch, double yaw, double insertion, double roll)
     this->SetJoints(JointsSlave.Position()[4],JointsSlave.Position()[5],JointsSlave.Position()[2],JointsSlave.Position()[3]);
     
+
+    if (!RightMTMOpen)
+    {
+        cout<< "getMeasurement()" << endl;
+        this-> GetMeasurement(this->Slave1Position.Position().Translation());
+    }
+    else {
+        MeasurementActive = false;
+        this->SetText(MeasureText, " ");
+    }
 
 }
 
@@ -741,8 +764,8 @@ bool BehaviorLUS::SaveConfiguration(const std::string & CMN_UNUSED(configFile))
 void BehaviorLUS::FirstButtonCallback()
 {
     CMN_LOG_CLASS_RUN_DEBUG << "Behavior \"" << this->GetName() << "\" Button 1 pressed" << std::endl;
-    this->SetProbeColor(1.0,0.0,0.0);
-    this->SetWarningText("roll limit reached");
+//     this->SetProbeColor(1.0,0.0,0.0);
+
 }
 
 void BehaviorLUS::EnableMapButtonCallback()
@@ -862,9 +885,9 @@ void BehaviorLUS::SetProbeColor(double r, double g, double b)
 
 }
 
-void BehaviorLUS::SetWarningText(char* txt)
+void BehaviorLUS::SetText(BehaviorLUSText *obj, char* txt)
 {
-    this -> WarningText-> SetText(txt);
+    obj-> SetText(txt);
 }
 
 void BehaviorLUS::CheckLimits(double p, double y, double i, double r)
@@ -881,29 +904,29 @@ void BehaviorLUS::CheckLimits(double p, double y, double i, double r)
     if (insertion < 0.165)
     {
         SetProbeColor(1, 0.0/255, 0.0/255 );
-        SetWarningText("STOP: Wrist in cannula");
+        SetText(WarningText, "STOP: Wrist in cannula");
     }
     else if(total >= 50 || (fabs(pitch) > 40 && fabs(yaw) < 9) || (fabs(yaw) > 40 && fabs(pitch) < 9) ) //turn red 
     {
         SetProbeColor( 1, 165.0/255, 79.0/255 );   //1, 120.0/255, 65.0/255 );
-        SetWarningText("Joint Limit Reached");
+        SetText(WarningText, "Joint Limit Reached");
     }
     else if(insertion > 0.28)
     {
         SetProbeColor(1, 165.0/255, 79.0/255 );
 //         textAct -> VisibilityOn();
 //         textAct -> SetInput("Insertion Limit Reached");
-        SetWarningText("Insertion Limit Reached");
+        SetText(WarningText, "Insertion Limit Reached");
     }
     else if (roll > 4.5 || roll < -4.5)
     {
         SetProbeColor( 1, 165.0/255, 79.0/255 );
-        SetWarningText("Roll limit Reached");
+        SetText(WarningText, "Roll limit Reached");
     }
     else
     {
         SetProbeColor( 1.0,1.0,1.0);//127./255, 255./255, 212./255 );
-        SetWarningText(" ");
+        SetText(WarningText, " ");
     }
 
     if( total < 6 ) //turn blue 
@@ -913,4 +936,41 @@ void BehaviorLUS::CheckLimits(double p, double y, double i, double r)
 
 }
 
+bool BehaviorLUS::isRightMTMOpen(double grip)
+{
+    if(grip > .1)
+        return true;
+    if(grip < .1)
+        return false;
+}
+
+void BehaviorLUS::GetMeasurement(vctDouble3 pos)
+{
+    char    measure_string[100];
+    
+    if(!MeasurementActive)
+    {
+        MeasurementActive = true;
+        //            memcpy(measure_point1, psm_pos, sizeof(float)*3);
+        MeasurePoint1.FastCopyOf(pos);
+        std::cout<< "MeasurePoint1 from if statement: " << MeasurePoint1<< std::endl;
+    }
+    else{
+        std::cout<< "start calcs" << std::endl;
+        vctDouble3 diff;
+        diff.DifferenceOf(MeasurePoint1,pos);
+        
+        double AbsVal;
+        AbsVal=diff.Norm();
+        std::cout<< "cout line" << std::endl;
+        std::cout<< "MeasurePoint1: " << MeasurePoint1<< std::endl;
+        std::cout<< "pos: " << pos<< std::endl;
+    std::cout<< "Absval: " << AbsVal<< std::endl;
+    
+ //   sprintf(measure_string,"%4.1fmm",measure_dist);
+    sprintf(measure_string,"%4.1fmm", AbsVal);
+    this->SetText(MeasureText, measure_string);
+    }
+
+}
 
