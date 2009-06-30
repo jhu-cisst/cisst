@@ -46,6 +46,9 @@ SET(SOURCE_FILES
 	
 	prmString.cpp
 	prmMaskedVector.cpp
+    prmActuatorState.cpp
+    prmRobotState.cpp
+    prmActuatorParameters.cpp
     )
 
 # all header files
@@ -74,6 +77,9 @@ SET(HEADER_FILES
 	
 	prmString.h
 	prmMaskedVector.h
+    prmActuatorState.h
+    prmRobotState.h
+    prmActuatorParameters.h
     )
 
 CISST_ADD_LIBRARY_TO_PROJECT(cisstLibs)
