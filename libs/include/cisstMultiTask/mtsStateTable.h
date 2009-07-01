@@ -162,15 +162,9 @@ protected:
 	  period of the task that the state table is associated with. */
 	std::vector<mtsStateIndex::TimeTicksType> Ticks;
 
-    /*! The start/end times for the current row of data. We could use
-        mtsStateData<mtsDouble> instead of (TicId, Tic) and (TocId, Toc). */
+    /*! The state table indices for Tic, Toc, and Period. */
     mtsStateDataId TicId, TocId;
-    mtsDouble Tic, Toc;
-
-    /*! The measured task period (difference between current Tic and
-        previous Tic). */
     mtsStateDataId PeriodId;
-    mtsDouble Period;
 
     /*! The time server used to provide absolute and relative times. */
     const osaTimeServer * TimeServer;
@@ -186,6 +180,14 @@ protected:
 	bool Write(mtsStateDataId id, const mtsGenericObject &obj);
 
  public:
+
+    /* The start/end times for the current row of data. */
+    mtsDouble Tic, Toc;
+
+    /*! The measured task period (difference between current Tic and
+        previous Tic). */
+    mtsDouble Period;
+
 	/*! Constructor. Constructs a state table with a default
 	  size of 256 rows. */
 	mtsStateTable(int size = 256);
