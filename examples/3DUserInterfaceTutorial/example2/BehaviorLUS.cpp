@@ -373,15 +373,15 @@ class BehaviorLUSBackground: public ui3VisibleObject
 //set up the stippled plane funtions
 
             cubeSource = vtkCubeSource::New();
-            cubeSource -> SetBounds(0,120,0,130,0,0);
+            cubeSource -> SetBounds(0,50,0,40,0,0);
 
-            mapOutline = vtkPolyDataMapper::New();
+            vtkPolyDataMapper *cubePlaneMapper = vtkPolyDataMapper::New();
 
-            mapOutline->SetInputConnection(cubeSource->GetOutputPort());
+            cubePlaneMapper->SetInputConnection(cubeSource->GetOutputPort());
 
             cubePlane = CSOpenGLStippleActor::New();
 
-            cubePlane->SetMapper(mapOutline);
+            cubePlane->SetMapper(cubePlaneMapper);
             cubePlane->GetProperty()->SetColor(1,1,1);
            // cubePlane -> SetStipplePattern(1);
 
@@ -390,7 +390,7 @@ class BehaviorLUSBackground: public ui3VisibleObject
             outlineSource = vtkOutlineSource::New();
             outlineSource -> SetBounds(0,70,0,60,0,0);
 
-//            vtkPolyDataMapper *mapOutline = vtkPolyDataMapper::New();
+            vtkPolyDataMapper *mapOutline = vtkPolyDataMapper::New();
 
             mapOutline->SetInputConnection(outlineSource->GetOutputPort());
 
@@ -410,14 +410,15 @@ class BehaviorLUSBackground: public ui3VisibleObject
         return true;
     }
     
+    
+    
     inline void GetBackgroundPosition(int mode)
     {
     vctFrm3 backgroundposition;
     switch(mode)
     {
         case 1:
-            backgroundposition.Translation() = vct3(0.0,0.0,-200.0);
-            this->SetTransformation(backgroundposition);
+            
             break;
         default:
             backgroundposition.Translation() = vct3(0.0,0.0,-200.0);
@@ -559,6 +560,7 @@ BehaviorLUS::BehaviorLUS(const std::string & name, ui3Manager * manager):
     this->ProbeJoint3 = new BehaviorLUSProbeJoint(manager, this->Position);
     this->ProbeShaft = new BehaviorLUSProbeShaft(manager, this->Position);
     this->Backgrounds = new BehaviorLUSBackground(manager, this->Position);
+    this->BackgroundMap = new BehaviorLUSBackground(manager, this->Position);
     this->WarningText = new BehaviorLUSText(manager, this->Position);
     this->MeasureText = new BehaviorLUSText(manager, this->Position);
     this->Cursor = new BehaviorLUSMarker(manager, this->Position);
@@ -583,6 +585,7 @@ BehaviorLUS::BehaviorLUS(const std::string & name, ui3Manager * manager):
     this->ProbeListShaft->Add(this->ProbeShaft);
     //this->ProbeListShaft->Add(this->AxesShaft);
     this->BackgroundList->Add(this->Backgrounds);
+    this->BackgroundList->Add(this->BackgroundMap);
     this->TextList->Add(this->WarningText);
     this->TextList->Add(this->MeasureText);
     
@@ -690,6 +693,10 @@ void BehaviorLUS::Startup(void)
     
     MeasurePoint1.Assign(0.0,0.0,0.0);
 
+    this->PreviousSlavePosition.Assign(this->Slave1Position.Position().Translation());
+    this->CursorOffset.SetAll(0.0);
+    
+
 }
 
 
@@ -717,10 +724,7 @@ bool BehaviorLUS::RunForeground()
         this->VisibleList->Show();
         this->Backgrounds->Show();
     }
-    
 
-    
-    
     // running in foreground GUI mode
     prmPositionCartesianGet position;
 
@@ -762,7 +766,7 @@ bool BehaviorLUS::RunBackground()
     }
 
     this->Slave1->GetCartesianPosition(this->Slave1Position);
-    //this->Slave1Position.Position().Translation().Add(this->Offset);
+    this->Slave1Position.Position().Translation().Add(this->Offset);
     this->ProbeList->SetTransformation(this->Slave1Position.Position());
     this->CursorList->SetTransformation(this->Slave1Position.Position());
  //   this->SetJoints(0.0,0.0,0.0,0.0);
@@ -806,7 +810,8 @@ bool BehaviorLUS::RunNoInput()
     tmp.Translation() = vctDouble3(25.0,-50.0,-300.0);
     this->ProbeList ->SetTransformation(tmp);
  //   this->ProbeList ->SetPosition(vctDouble3(30.0, -40.0, -300.0));
-    this->BackgroundList -> SetPosition(vctDouble3(-10.0,-80.0,-300.0));
+    this->Backgrounds -> SetPosition(vctDouble3(-10.0,-80.0,-300.0));
+    this->BackgroundMap->SetPosition(vctDouble3(-10.0,-120.0,-300.0));
     this->TextList -> SetPosition(vctDouble3(-10.0,-90.0,-300.0));
     
     this-> MeasureText -> SetColor(1,1,1);
@@ -831,7 +836,7 @@ bool BehaviorLUS::RunNoInput()
     if(MapEnabled)
     {
         this->CursorList->Show();
-        this->UpdateMap(ECM1Position);
+        this->UpdateMap(ECM1Position, vec[2]);
     }
     else {this->CursorList->Hide();}
 
@@ -1061,11 +1066,73 @@ void BehaviorLUS::GetMeasurement(vctDouble3 pos)
 
 }
 
-void BehaviorLUS::UpdateMap(prmPositionCartesianGet ecmFrame)
+void BehaviorLUS::UpdateMap(prmPositionCartesianGet ecmPosition, double insertion )
 {
-    this->CursorList->SetOrientation(this->Slave1Position.Position().Rotation());
-    this->CursorList->SetPosition(vctDouble3(0.0, 0.0, -300.0));
+    double scale = .2;
+
+    vctFrm3 cursorPos;
+    cursorPos.Rotation() = ecmPosition.Position().Rotation();
+    cursorPos.Translation() = ecmPosition.Position().Translation();
+
+    prmPositionCartesianGet position;
+    //translate into ECM frame
+
+
+        //take the difference between the cursor position and the ecm tip position
+        //move the cursor to the ecm tip
+
+ //   CursorList->SetTransformation(cursorPos);
+    
+    //move the cursor based on the insertion depth to the ecm rcm
+    vctFrm3 toECM_RCM;
+    toECM_RCM.Translation() = vctDouble3(0.0,0.0,insertion*1000);
+    toECM_RCM.Rotation().SetAll(0.0);
+//    CursorList -> SetTransformation(toECM_RCM);
+
+    //translate the cursor back to a normal depth
+    vctFrm3 toScreen;
+    toScreen.Translation() = vctDouble3(0.0,0.0,-100.0);
+    toScreen.Rotation().SetAll(0.0);
+//    CursorList->SetTransformation(toScreen);
+
+
+    //apply offset due to slave movement
+    // compute offset
+    
+    vctDouble3 offset;
+    vctDouble3 deltaCursor, deltaSlave;
+    vctFrm3 finalFrm;
+    this->Slave1->GetCartesianPosition(position);
+    //translate slave position to patient coordinates
+    deltaSlave.DifferenceOf(ecmPosition.Position().Translation(), position.Position().Translation());
+    
+    position.Position().Rotation() = ecmPosition.Position().Rotation();
+    position.Position().Translation() = -deltaSlave + toScreen.Translation() + toECM_RCM.Translation();
+    
+    
+    deltaCursor.DifferenceOf(position.Position().Translation(), this->PreviousSlavePosition);
+//    CursorOffset.Add(deltaCursor);
+    finalFrm.Rotation().SetAll(0.0);// = position.Position().Rotation();
+    finalFrm.Translation() = deltaCursor;//.Multiply(scale);
+
+//    this->CursorList->SetTransformation(finalFrm*toScreen*toECM_RCM*cursorPos);
+    //this->CursorList->SetTransformation(cursorPos*toScreen);//*toECM_RCM*toScreen*finalFrm);
+    //this->CursorList->SetTransformation(cursorPos);
+    this->CursorOffset += deltaCursor;
+    this->CursorList->SetOrientation(ecmPosition.Position().Rotation());
+    this->CursorList->SetPosition(ecmPosition.Position().Translation() + toScreen.Translation() + toECM_RCM.Translation() + CursorOffset);
+
+    this->PreviousSlavePosition.Assign(position.Position().Translation());
+
+    // apply to object
+  //  cursorPos.Translation().Add(offset);
+  //  this->CursorList->SetTransformation(cursorPos);
+
+    //this->CursorList->SetOrientation(this->Slave1Position.Position().Rotation());
+    //this->CursorList->SetPosition(vctDouble3(0.0, 0.0, -300.0));
     
 }
-
+//     this->Slave1->GetCartesianPosition(this->Slave1Position);
+//     this->Slave1Position.Position().Translation().Add(this->Offset);
+//     this->VisibleObject->SetTransformation(this->Slave1Position.Position());
 

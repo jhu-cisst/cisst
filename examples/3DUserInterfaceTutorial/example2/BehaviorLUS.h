@@ -77,7 +77,9 @@ protected:
     bool isRightMTMOpen(double grip);
     
     vctDouble3 PreviousCursorPosition;
+    vctDouble3 PreviousSlavePosition;
     vctDouble3 Offset;
+    vctDouble3 CursorOffset;
     vctFrm3 Position, ProbePosition;
     bool Following;
 
@@ -93,7 +95,7 @@ protected:
     mtsFunctionRead GetJointPositionSlave;
     prmPositionJointGet JointsSlave;
     
-    void UpdateMap(prmPositionCartesianGet ecmFrame);
+    void UpdateMap(prmPositionCartesianGet ecmFrame, double insertion);
     
     mtsFunctionRead GetJointPositionECM;
     prmPositionJointGet JointsECM;
@@ -107,7 +109,7 @@ private:
     BehaviorLUSProbeJoint *ProbeJoint2;
     BehaviorLUSProbeJoint *ProbeJoint3;
     BehaviorLUSProbeShaft *ProbeShaft;
-    BehaviorLUSBackground *Backgrounds;
+    BehaviorLUSBackground *Backgrounds, *BackgroundMap;
     BehaviorLUSText       *WarningText, * MeasureText;
     BehaviorLUSMarker     *Cursor;
 
