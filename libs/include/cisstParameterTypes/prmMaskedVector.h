@@ -72,8 +72,8 @@ public:
        Sets all elements to 0
     */ 
     inline void SetSize(size_type size){
-            DataMember(size);
-            MaskMember(size);
+            DataMember.SetSize(size);
+            MaskMember.SetSize(size);
             DataMember.Zeros();
             MaskMember.Zeros();
          }
