@@ -370,10 +370,10 @@ class BehaviorLUSBackground: public ui3VisibleObject
 
         inline bool CreateVTKObjects(void) {
 
-            //set up the stippled plane funtions
+//set up the stippled plane funtions
 
             cubeSource = vtkCubeSource::New();
-            cubeSource -> SetBounds(0,160,0,130,0,0);
+            cubeSource -> SetBounds(0,120,0,130,0,0);
 
             mapOutline = vtkPolyDataMapper::New();
 
@@ -400,8 +400,9 @@ class BehaviorLUSBackground: public ui3VisibleObject
             outline->GetProperty()->SetColor(1,1,1);
             //outline -> SetStipplePattern(1);
 
-
+        this->Assembly->AddPart(this->cubePlane);
         this->Assembly->AddPart(this->outline);
+
 
         int p = 1;
        // this->GetBackgroundPosition(p);
@@ -448,6 +449,69 @@ CMN_DECLARE_SERVICES_INSTANTIATION(BehaviorLUSBackground);
 CMN_IMPLEMENT_SERVICES(BehaviorLUSBackground);
 
 
+//============================================================================================================================================
+class BehaviorLUSMarker: public ui3VisibleObject
+{
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 5);
+    public:
+    inline BehaviorLUSMarker(ui3Manager * manager, vctFrm3 position):
+    ui3VisibleObject(manager),
+    jCylinder(0),
+    jointMapper(0),
+    joint(0),
+
+    Position(position)
+    {}
+
+    inline ~BehaviorLUSMarker()
+    {
+       
+    }
+
+    inline bool CreateVTKObjects(void) {
+
+        CMN_LOG_CLASS_INIT_VERBOSE << "Marker set up" << endl;
+
+        jCylinder = vtkCylinderSource::New();
+        jCylinder->SetHeight( 6 );
+        jCylinder->SetRadius( 2 );
+        jCylinder->SetResolution( 25 );
+
+        jointMapper = vtkPolyDataMapper::New();
+        jointMapper->SetInputConnection( jCylinder->GetOutputPort() );
+
+
+        joint = vtkActor::New();
+        joint->SetMapper( jointMapper);
+            //joint1 -> SetStipplePattern(2);
+        joint->SetScale(SCALE);
+
+        this->Assembly->AddPart(this->joint);
+        this->SetTransformation(this->Position);
+        return true;
+    }
+    
+    void SetColor(double r, double g, double b) {
+        this->joint->GetProperty()->SetColor(r, g, b);
+    }
+
+
+    protected:
+        vtkCylinderSource *jCylinder;
+        vtkPolyDataMapper *jointMapper;
+        vtkActor *joint;
+    public:
+        vctFrm3 Position; // initial position
+
+};
+
+CMN_DECLARE_SERVICES_INSTANTIATION(BehaviorLUSMarker);
+CMN_IMPLEMENT_SERVICES(BehaviorLUSMarker);
+
+
+//============================================================================================================================================
+
+
 
 
 
@@ -479,9 +543,15 @@ BehaviorLUS::BehaviorLUS(const std::string & name, ui3Manager * manager):
     this->ProbeListShaft = new ui3VisibleList(manager);
     this->BackgroundList = new ui3VisibleList(manager);
     this->TextList = new ui3VisibleList(manager);
+    this->CursorList = new ui3VisibleList(manager);
+    this->MarkerList = new ui3VisibleList(manager);
+    
     this->VisibleList->Add(this->ProbeList);
     this->VisibleList->Add(this->BackgroundList);
     this->VisibleList->Add(this->TextList);
+    this->VisibleList->Add(this->MarkerList);
+    this->VisibleList->Add(this->CursorList);
+    
     
     this->ProbeHead = new BehaviorLUSProbeHead(manager, this->Position);
     this->ProbeJoint1 = new BehaviorLUSProbeJoint(manager, this->Position);
@@ -491,6 +561,7 @@ BehaviorLUS::BehaviorLUS(const std::string & name, ui3Manager * manager):
     this->Backgrounds = new BehaviorLUSBackground(manager, this->Position);
     this->WarningText = new BehaviorLUSText(manager, this->Position);
     this->MeasureText = new BehaviorLUSText(manager, this->Position);
+    this->Cursor = new BehaviorLUSMarker(manager, this->Position);
     this->ProbeAxes = new ui3VisibleAxes(manager);
     this->AxesJoint1 = new ui3VisibleAxes(manager);
     //AxesJoint1->SetSize(15);
@@ -519,7 +590,9 @@ BehaviorLUS::BehaviorLUS(const std::string & name, ui3Manager * manager):
     this->ProbeListJoint1 -> Add(ProbeListJoint2);
     this->ProbeListJoint2 ->Add(ProbeListJoint3);
     this->ProbeListJoint3 ->Add(ProbeListShaft);
-    
+
+    this->CursorList-> Add(Cursor);
+
     this->VisibleList->SetTransformation(vctFrm3::Identity());
 
 
@@ -557,7 +630,9 @@ void BehaviorLUS::mtm_right_button_callback(const prmEventButton & payload)
 void BehaviorLUS::Startup(void)
 {
     this->Slave1 = this->Manager->GetSlaveArm("Slave1");
+    this->ECM1 = this->Manager->GetSlaveArm("ECM1");
     this->RMaster = this->Manager->GetMasterArm("MTMR");
+
     mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
     CMN_ASSERT(taskManager);
     mtsDevice * daVinci = taskManager->GetTask("daVinci");
@@ -567,10 +642,12 @@ void BehaviorLUS::Startup(void)
     mtsCommandReadBase * command = providedInterface->GetCommandRead("GetPositionJoint");
     CMN_ASSERT(command);
     GetJointPositionSlave.Bind(command);
-
-//     mtsDeviceInterface * MTMR_Interface = daVinci->GetProvidedInterface("MTMR");
-//     mtsCommandWriteBase *cbMTMRightButton = mtsCommandWrite<BehaviorLUS, bool>(&BehaviorLUS::mtm_right_button_callback,
-//                                          this, "MTMRightButton", prmEventButton());
+    
+    mtsProvidedInterface * providedInterfaceECM = daVinci->GetProvidedInterface("ECM1");
+    CMN_ASSERT(providedInterfaceECM);
+    mtsCommandReadBase * commandECM = providedInterfaceECM->GetCommandRead("GetPositionJoint");
+    CMN_ASSERT(commandECM);
+    GetJointPositionECM.Bind(commandECM);
 
 
     RightMTMOpen = true;
@@ -661,6 +738,7 @@ bool BehaviorLUS::RunForeground()
     this->Slave1->GetCartesianPosition(this->Slave1Position);
     //this->Slave1Position.Position().Translation().Add(this->Offset);
     this->ProbeList->SetTransformation(this->Slave1Position.Position());
+    this->CursorList->SetTransformation(this->Slave1Position.Position());
     this->SetJoints(0.0,0.0,0.0,0.0);
 
 
@@ -686,6 +764,7 @@ bool BehaviorLUS::RunBackground()
     this->Slave1->GetCartesianPosition(this->Slave1Position);
     //this->Slave1Position.Position().Translation().Add(this->Offset);
     this->ProbeList->SetTransformation(this->Slave1Position.Position());
+    this->CursorList->SetTransformation(this->Slave1Position.Position());
  //   this->SetJoints(0.0,0.0,0.0,0.0);
 
 //     this->ProbeHead->SetTransformation(this->Slave1Position.Position());
@@ -701,25 +780,26 @@ bool BehaviorLUS::RunNoInput()
         this->PreviousMaM = this->Manager->MastersAsMice();
         this->VisibleList->Show();
         this->BackgroundList->Show();
-
     }
-    
+
     vctDynamicVector<double> vec = RMaster -> GetMasterJointPosition();
-    
+
     //std::cout << "mast joint 7 " << vec <<std::endl;
-    
+
     RightMTMOpen = isRightMTMOpen(vec[7]);
-    
+
     this->GetJointPositionSlave(this->JointsSlave);
-
-    
-
+    this->GetJointPositionECM(this->JointsECM);
 
     // .Positions() returns oject of type vctDynamicVector of doubles
     // for translations you might have a meter to mm conversion to do
 
 
     this->Slave1->GetCartesianPosition(this->Slave1Position);
+    this->ECM1->GetCartesianPosition(this->ECM1Position);
+
+    std::cout << "emc position: " << ECM1Position.Position()<< std::endl;
+    std::cout << "ecm joints: " << JointsECM.Position() << std::endl;
 //    this->Slave1Position.Position().Translation().Add(this->Offset);
     vctFrm3 tmp;
     tmp.Rotation() =vctMatRot3(this->Slave1Position.Position().Rotation()) * vctMatRot3(vctAxAnRot3(vctDouble3(0.0,0.0,1.0), cmnPI_4 ));
@@ -730,7 +810,7 @@ bool BehaviorLUS::RunNoInput()
     this->TextList -> SetPosition(vctDouble3(-10.0,-90.0,-300.0));
     
     this-> MeasureText -> SetColor(1,1,1);
-    this->MeasureText -> SetPosition(vctDouble3(0.0, 10, 0.0));
+    this-> MeasureText -> SetPosition(vctDouble3(0.0, 10, 0.0));
 
 
 //    this->ImagePlane->SetTransformation(this->Slave1Position.Position());
@@ -747,6 +827,13 @@ bool BehaviorLUS::RunNoInput()
         MeasurementActive = false;
         this->SetText(MeasureText, " ");
     }
+    
+    if(MapEnabled)
+    {
+        this->CursorList->Show();
+        this->UpdateMap(ECM1Position);
+    }
+    else {this->CursorList->Hide();}
 
 }
 
@@ -956,16 +1043,16 @@ void BehaviorLUS::GetMeasurement(vctDouble3 pos)
         std::cout<< "MeasurePoint1 from if statement: " << MeasurePoint1<< std::endl;
     }
     else{
-        std::cout<< "start calcs" << std::endl;
+ //       std::cout<< "start calcs" << std::endl;
         vctDouble3 diff;
         diff.DifferenceOf(MeasurePoint1,pos);
         
         double AbsVal;
         AbsVal=diff.Norm();
-        std::cout<< "cout line" << std::endl;
-        std::cout<< "MeasurePoint1: " << MeasurePoint1<< std::endl;
-        std::cout<< "pos: " << pos<< std::endl;
-    std::cout<< "Absval: " << AbsVal<< std::endl;
+//         std::cout<< "cout line" << std::endl;
+//         std::cout<< "MeasurePoint1: " << MeasurePoint1<< std::endl;
+//         std::cout<< "pos: " << pos<< std::endl;
+//     std::cout<< "Absval: " << AbsVal<< std::endl;
     
  //   sprintf(measure_string,"%4.1fmm",measure_dist);
     sprintf(measure_string,"%4.1fmm", AbsVal);
@@ -973,4 +1060,12 @@ void BehaviorLUS::GetMeasurement(vctDouble3 pos)
     }
 
 }
+
+void BehaviorLUS::UpdateMap(prmPositionCartesianGet ecmFrame)
+{
+    this->CursorList->SetOrientation(this->Slave1Position.Position().Rotation());
+    this->CursorList->SetPosition(vctDouble3(0.0, 0.0, -300.0));
+    
+}
+
 

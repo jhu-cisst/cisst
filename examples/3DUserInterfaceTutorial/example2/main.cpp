@@ -320,6 +320,13 @@ int main()
     guiManager.AddSlaveArm(slave1);
     slave1->SetInput(daVinci, "PSM1");
     slave1->SetTransformation(transform, 1.0 /* scale factor */);
+    
+    //set up ECM as slave arm?
+    
+    ui3SlaveArm * ecm1 = new ui3SlaveArm("ECM1");
+    guiManager.AddSlaveArm(ecm1);
+    ecm1 -> SetInput(daVinci, "ECM1");
+    ecm1 -> SetTransformation(transform, 1.0);
 
     // setup event for MaM transitions
     guiManager.SetupMaM(daVinci, "MastersAsMice");

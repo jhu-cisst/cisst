@@ -31,6 +31,7 @@ class BehaviorLUSProbeJoint;
 class BehaviorLUSProbeShaft;
 class BehaviorLUSBackground;
 class BehaviorLUSText;
+class BehaviorLUSMarker;
 
 
 class BehaviorLUS : public ui3BehaviorBase
@@ -84,11 +85,18 @@ protected:
     ui3ImagePlane* ImagePlane;
 
     ui3SlaveArm * Slave1;
+    ui3SlaveArm * ECM1;
     ui3MasterArm * RMaster;
     prmPositionCartesianGet Slave1Position;
+    prmPositionCartesianGet ECM1Position;
     
     mtsFunctionRead GetJointPositionSlave;
     prmPositionJointGet JointsSlave;
+    
+    void UpdateMap(prmPositionCartesianGet ecmFrame);
+    
+    mtsFunctionRead GetJointPositionECM;
+    prmPositionJointGet JointsECM;
     
     bool MeasurementActive;
     vctDouble3 MeasurePoint1;
@@ -100,8 +108,10 @@ private:
     BehaviorLUSProbeJoint *ProbeJoint3;
     BehaviorLUSProbeShaft *ProbeShaft;
     BehaviorLUSBackground *Backgrounds;
-    BehaviorLUSText       * WarningText, * MeasureText;
-    
+    BehaviorLUSText       *WarningText, * MeasureText;
+    BehaviorLUSMarker     *Cursor;
+
+
 
     ui3VisibleList * VisibleList; // all actors for this behavior
     ui3VisibleList * ProbeList; // all actors moving wrt the slave arm
@@ -111,8 +121,10 @@ private:
     ui3VisibleList * ProbeListShaft;
     ui3VisibleList * BackgroundList;
     ui3VisibleList * TextList;
+    ui3VisibleList * MarkerList;
+    ui3VisibleList * CursorList;
 
-    ui3VisibleAxes *  ProbeAxes;
+    ui3VisibleAxes * ProbeAxes;
     ui3VisibleAxes * AxesJoint1;
     ui3VisibleAxes * AxesJoint2;
     ui3VisibleAxes * AxesJoint3;
