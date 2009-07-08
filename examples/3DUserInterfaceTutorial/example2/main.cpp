@@ -104,7 +104,7 @@ int main()
                            "square.png");            // icon file: no texture
     guiManager.AddBehavior(&behavior3,       // behavior reference
                            1,             // position in the menu bar: default
-                           "empty.png");            // icon file: no texture
+                           "resize.png");            // icon file: no texture
 
     guiManager.Configure("config.xml");
 

@@ -50,7 +50,10 @@ http://www.cisst.org/cisst/license.txt.
 #include "vtkTextSource.h"
 #include "vtkAxesActor.h"
 
-#define SCALE .5
+#define SCALE .25
+
+
+
 
 class BehaviorLUSProbeHead: public ui3VisibleObject
 {
@@ -317,7 +320,7 @@ class BehaviorLUSText: public ui3VisibleObject
             warningtextActor->SetMapper( warningtextMapper );
             warningtextActor->GetProperty()->SetColor(1, 165.0/255, 79.0/255);
             //warningtextActor-> VisibilityOff();
-            warningtextActor-> SetScale(5);
+            warningtextActor-> SetScale(2.5);
 
             this->Assembly->AddPart(this->warningtextActor);
 
@@ -353,13 +356,9 @@ class BehaviorLUSBackground: public ui3VisibleObject
     public:
     inline BehaviorLUSBackground(ui3Manager * manager, vctFrm3 position):
         ui3VisibleObject(manager),
-        outlineSource(0),
         cubeSource(0),
         cubePlaneMapper(0),
         cubePlane(0),
-        mapOutline(0),
-        outline(0),
-        outlineXform(0),
 
         Position(position)
         {}
@@ -373,7 +372,7 @@ class BehaviorLUSBackground: public ui3VisibleObject
 //set up the stippled plane funtions
 
             cubeSource = vtkCubeSource::New();
-            cubeSource -> SetBounds(0,50,0,40,0,0);
+            cubeSource -> SetBounds(0,30,0,25,0,0);
 
             vtkPolyDataMapper *cubePlaneMapper = vtkPolyDataMapper::New();
 
@@ -385,10 +384,52 @@ class BehaviorLUSBackground: public ui3VisibleObject
             cubePlane->GetProperty()->SetColor(1,1,1);
            // cubePlane -> SetStipplePattern(1);
 
+
+
+        this->Assembly->AddPart(this->cubePlane);
+
+        this->SetTransformation(this->Position);
+        return true;
+    }
+
+
+    protected:
+ 
+        vtkCubeSource           *cubeSource;
+        vtkPolyDataMapper       *cubePlaneMapper;
+        CSOpenGLStippleActor    *cubePlane;
+        vctFrm3 Position;  // initial position
+};
+
+CMN_DECLARE_SERVICES_INSTANTIATION(BehaviorLUSBackground);
+CMN_IMPLEMENT_SERVICES(BehaviorLUSBackground);
+//===========================================================================================================================================
+
+class BehaviorLUSOutline: public ui3VisibleObject
+{
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 5);
+    public:
+    inline BehaviorLUSOutline(ui3Manager * manager, vctFrm3 position):
+        ui3VisibleObject(manager),
+        outlineSource(0),
+        mapOutline(0),
+        outline(0),
+        outlineXform(0),
+
+        Position(position)
+        {}
+
+        inline ~BehaviorLUSOutline()
+        {
+        }
+
+        inline bool CreateVTKObjects(void) {
+
+
 //set up the outline funtions
 
             outlineSource = vtkOutlineSource::New();
-            outlineSource -> SetBounds(0,70,0,60,0,0);
+            outlineSource -> SetBounds(0,30,0,30,0,0);
 
             vtkPolyDataMapper *mapOutline = vtkPolyDataMapper::New();
 
@@ -400,7 +441,6 @@ class BehaviorLUSBackground: public ui3VisibleObject
             outline->GetProperty()->SetColor(1,1,1);
             //outline -> SetStipplePattern(1);
 
-        this->Assembly->AddPart(this->cubePlane);
         this->Assembly->AddPart(this->outline);
 
 
@@ -409,45 +449,26 @@ class BehaviorLUSBackground: public ui3VisibleObject
         this->SetTransformation(this->Position);
         return true;
     }
-    
-    
-    
-    inline void GetBackgroundPosition(int mode)
-    {
-    vctFrm3 backgroundposition;
-    switch(mode)
-    {
-        case 1:
-            
-            break;
-        default:
-            backgroundposition.Translation() = vct3(0.0,0.0,-200.0);
-            this->SetTransformation(backgroundposition);
-            break;
-    }
-                    
-    
-    }
+
 
 
     protected:
  
 
         vtkOutlineSource        *outlineSource;
-        vtkCubeSource           *cubeSource;
 
         vtkPolyDataMapper       *mapOutline;
-        vtkPolyDataMapper       *cubePlaneMapper;
 
-        CSOpenGLStippleActor    *outline, *cubePlane;
+        CSOpenGLStippleActor    *outline;
 
         vtkMatrix4x4            *outlineXform;
         vctFrm3 Position;  // initial position
 
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(BehaviorLUSBackground);
-CMN_IMPLEMENT_SERVICES(BehaviorLUSBackground);
+CMN_DECLARE_SERVICES_INSTANTIATION(BehaviorLUSOutline);
+CMN_IMPLEMENT_SERVICES(BehaviorLUSOutline);
+
 
 
 //============================================================================================================================================
@@ -529,6 +550,7 @@ BehaviorLUS::BehaviorLUS(const std::string & name, ui3Manager * manager):
     ProbeJoint3(0),
     ProbeShaft(0),
     Backgrounds(0),
+    Outline(0),
     WarningText(0),
     MeasureText(0)
 {
@@ -560,7 +582,7 @@ BehaviorLUS::BehaviorLUS(const std::string & name, ui3Manager * manager):
     this->ProbeJoint3 = new BehaviorLUSProbeJoint(manager, this->Position);
     this->ProbeShaft = new BehaviorLUSProbeShaft(manager, this->Position);
     this->Backgrounds = new BehaviorLUSBackground(manager, this->Position);
-    this->BackgroundMap = new BehaviorLUSBackground(manager, this->Position);
+    this->Outline = new BehaviorLUSOutline(manager, this->Position);
     this->WarningText = new BehaviorLUSText(manager, this->Position);
     this->MeasureText = new BehaviorLUSText(manager, this->Position);
     this->Cursor = new BehaviorLUSMarker(manager, this->Position);
@@ -573,6 +595,8 @@ BehaviorLUS::BehaviorLUS(const std::string & name, ui3Manager * manager):
     //AxesJoint3->SetSize(25);
     this->AxesShaft = new ui3VisibleAxes(manager);
     //AxesShaft->SetSize(30);
+    this->m = new BehaviorLUSMarker(manager, this->Position);
+    this->MarkerList->Add(m);
     
     this->ProbeList->Add(this->ProbeHead);
     this->ProbeList->Add(this->ProbeAxes);
@@ -585,14 +609,15 @@ BehaviorLUS::BehaviorLUS(const std::string & name, ui3Manager * manager):
     this->ProbeListShaft->Add(this->ProbeShaft);
     //this->ProbeListShaft->Add(this->AxesShaft);
     this->BackgroundList->Add(this->Backgrounds);
-    this->BackgroundList->Add(this->BackgroundMap);
+    this->BackgroundList->Add(this->Outline);
     this->TextList->Add(this->WarningText);
     this->TextList->Add(this->MeasureText);
+
     
     this->ProbeList->Add(ProbeListJoint1);
-    this->ProbeListJoint1 -> Add(ProbeListJoint2);
-    this->ProbeListJoint2 ->Add(ProbeListJoint3);
-    this->ProbeListJoint3 ->Add(ProbeListShaft);
+    this->ProbeListJoint1->Add(ProbeListJoint2);
+    this->ProbeListJoint2->Add(ProbeListJoint3);
+    this->ProbeListJoint3->Add(ProbeListShaft);
 
     this->CursorList-> Add(Cursor);
 
@@ -622,6 +647,16 @@ void BehaviorLUS::ConfigureMenuBar()
                                  "circle.png",
                                  &BehaviorLUS::EnableMapButtonCallback,
                                  this);
+    this->MenuBar->AddClickButton("DropMarkerButton",
+                                  3,
+                                  "iconify-top-left.png",
+                                  &BehaviorLUS::DropMarkerCallback,
+                                  this);
+    this->MenuBar->AddClickButton("RemoveMarkerButton",
+                                  4,
+                                  "undo.png",
+                                  &BehaviorLUS::RemoveMarkerCallback,
+                                  this);
 
 }
 
@@ -653,6 +688,8 @@ void BehaviorLUS::Startup(void)
     GetJointPositionECM.Bind(commandECM);
 
 
+
+
     RightMTMOpen = true;
     prevRightMTMOpen = RightMTMOpen;
 
@@ -670,7 +707,7 @@ void BehaviorLUS::Startup(void)
     ImagePlane->SetBitmapSize(GetStreamWidth("USVideo"), GetStreamHeight("USVideo"));
 
     // Set plane size (dimensions are already in millimeters)
-    ImagePlane->SetPhysicalSize(40.0*.65, 50.0*.65);
+    ImagePlane->SetPhysicalSize(40.0*.35, 50.0*.35);
 
     // Change pivot position to move plane to the right location.
     // The pivot point will remain in the origin, only the plane moves.
@@ -682,7 +719,7 @@ void BehaviorLUS::Startup(void)
     vctAxAnRot3 imageRot(Yaxis, cmnPI_2);
     vctFrm3 planePosition;
     planePosition.Rotation() = vctMatRot3(imageRot);
-    planePosition.Translation() = vct3(0.0, 0.0, 30.0); //=================================================================================================================
+    planePosition.Translation() = vct3(0.0, 0.0, 16.0); //=================================================================================================================
     ImagePlane->SetTransformation(planePosition);
 
 
@@ -696,6 +733,7 @@ void BehaviorLUS::Startup(void)
     this->PreviousSlavePosition.Assign(this->Slave1Position.Position().Translation());
     this->CursorOffset.SetAll(0.0);
     
+    MarkerCount = 0;
 
 }
 
@@ -743,7 +781,9 @@ bool BehaviorLUS::RunForeground()
     //this->Slave1Position.Position().Translation().Add(this->Offset);
     this->ProbeList->SetTransformation(this->Slave1Position.Position());
     this->CursorList->SetTransformation(this->Slave1Position.Position());
-    this->SetJoints(0.0,0.0,0.0,0.0);
+ //   this->SetJoints(0.0,0.0,0.0,0.0);
+    this->MarkerList->SetTransformation(this->Slave1Position.Position());
+
 
 
 /*
@@ -769,6 +809,7 @@ bool BehaviorLUS::RunBackground()
     this->Slave1Position.Position().Translation().Add(this->Offset);
     this->ProbeList->SetTransformation(this->Slave1Position.Position());
     this->CursorList->SetTransformation(this->Slave1Position.Position());
+    this->MarkerList->SetTransformation(this->Slave1Position.Position());
  //   this->SetJoints(0.0,0.0,0.0,0.0);
 
 //     this->ProbeHead->SetTransformation(this->Slave1Position.Position());
@@ -802,20 +843,20 @@ bool BehaviorLUS::RunNoInput()
     this->Slave1->GetCartesianPosition(this->Slave1Position);
     this->ECM1->GetCartesianPosition(this->ECM1Position);
 
-    std::cout << "emc position: " << ECM1Position.Position()<< std::endl;
-    std::cout << "ecm joints: " << JointsECM.Position() << std::endl;
+ //   std::cout << "emc position: " << ECM1Position.Position()<< std::endl;
+ //   std::cout << "ecm joints: " << JointsECM.Position() << std::endl;
 //    this->Slave1Position.Position().Translation().Add(this->Offset);
     vctFrm3 tmp;
     tmp.Rotation() =vctMatRot3(this->Slave1Position.Position().Rotation()) * vctMatRot3(vctAxAnRot3(vctDouble3(0.0,0.0,1.0), cmnPI_4 ));
-    tmp.Translation() = vctDouble3(25.0,-50.0,-300.0);
+    tmp.Translation() = vctDouble3(25.0,-45.0,-220.0); // x, y , z
     this->ProbeList ->SetTransformation(tmp);
  //   this->ProbeList ->SetPosition(vctDouble3(30.0, -40.0, -300.0));
-    this->Backgrounds -> SetPosition(vctDouble3(-10.0,-80.0,-300.0));
-    this->BackgroundMap->SetPosition(vctDouble3(-10.0,-120.0,-300.0));
-    this->TextList -> SetPosition(vctDouble3(-10.0,-90.0,-300.0));
+    this->Outline -> SetPosition(vctDouble3(8.0,-60.0,-220.0));// x, y, z
+    this->Backgrounds->SetPosition(vctDouble3(40.0,-60.0,-220.0)); //y,x,z
+    this->TextList -> SetPosition(vctDouble3(-25.0,-65.0,-220.0));
     
     this-> MeasureText -> SetColor(1,1,1);
-    this-> MeasureText -> SetPosition(vctDouble3(0.0, 10, 0.0));
+    this-> MeasureText -> SetPosition(vctDouble3(0.0, 5, 0.0));
 
 
 //    this->ImagePlane->SetTransformation(this->Slave1Position.Position());
@@ -825,7 +866,7 @@ bool BehaviorLUS::RunNoInput()
 
     if (!RightMTMOpen)
     {
-        cout<< "getMeasurement()" << endl;
+        //cout<< "getMeasurement()" << endl;
         this-> GetMeasurement(this->Slave1Position.Position().Translation());
     }
     else {
@@ -836,6 +877,7 @@ bool BehaviorLUS::RunNoInput()
     if(MapEnabled)
     {
         this->CursorList->Show();
+        this->MarkerList->Show();
         this->UpdateMap(ECM1Position, vec[2]);
     }
     else {this->CursorList->Hide();}
@@ -870,6 +912,24 @@ void BehaviorLUS::EnableMapButtonCallback()
     
     CMN_LOG_CLASS_RUN_DEBUG << "Behavior \"" << this->GetName() << "\" Enable map Button pressed" << std::endl;
     CMN_LOG_CLASS_RUN_DEBUG << "Behavior \"" << this->GetName() << "\" Enable map " << this->MapEnabled << std::endl;
+}
+
+void BehaviorLUS::DropMarkerCallback()
+{
+    this->AddMarker();
+    MarkerCount += 1;
+    std::cout << "MarkerCount: " << MarkerList->Size() << std::endl;
+}
+
+void BehaviorLUS::RemoveMarkerCallback()
+{
+    if(MarkerList->Size() >= 1)
+    {
+        this->RemoveLastMarker();
+        MarkerCount -= 1;
+    }
+    std::cout << "MarkerCount: " << MarkerList->Size() << std::endl;
+
 }
 
 void BehaviorLUS::PrimaryMasterButtonCallback(const prmEventButton & event)
@@ -1130,9 +1190,28 @@ void BehaviorLUS::UpdateMap(prmPositionCartesianGet ecmPosition, double insertio
 
     //this->CursorList->SetOrientation(this->Slave1Position.Position().Rotation());
     //this->CursorList->SetPosition(vctDouble3(0.0, 0.0, -300.0));
-    
-}
+
 //     this->Slave1->GetCartesianPosition(this->Slave1Position);
 //     this->Slave1Position.Position().Translation().Add(this->Offset);
 //     this->VisibleObject->SetTransformation(this->Slave1Position.Position());
+}
+
+void BehaviorLUS::AddMarker()
+{
+    vctFrm3 test1;
+    test1 = this->Position;
+//     test1.Rotation().SetAll(0.0);
+//     test1.Translation() = vctDouble3(0.0,0.0,-200.0);
+    BehaviorLUSMarker *newMarker = new BehaviorLUSMarker(this->Manager, test1);
+    MarkerList->SetColor(112./255, 219./255, 147./255);	
+    this->MarkerList->Add(newMarker);
+//     vtkMatrix4x4 * temp = vtkMatrix4x4::New();
+//     temp->DeepCopy(this->Cursor->GetVTKMatrix());
+//     this->MarkerList->GetLast()->SetVTKMatrix(temp);
+}
+
+void BehaviorLUS::RemoveLastMarker()
+{
+    this->MarkerList->Remove();
+}
 

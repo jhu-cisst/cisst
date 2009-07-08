@@ -30,8 +30,10 @@ class BehaviorLUSProbeHead;
 class BehaviorLUSProbeJoint;
 class BehaviorLUSProbeShaft;
 class BehaviorLUSBackground;
+class BehaviorLUSOutline;
 class BehaviorLUSText;
 class BehaviorLUSMarker;
+
 
 
 class BehaviorLUS : public ui3BehaviorBase
@@ -61,13 +63,19 @@ public:
     void SetText(BehaviorLUSText *obj, char* txt);
     void CheckLimits(double p, double y, double i, double r);
     void GetMeasurement(vctFixedSizeVector<double,3u> pos);
+    void AddMarker();
+    void RemoveLastMarker();
 
     void mtm_right_button_callback(const prmEventButton & payload);
+    void DropMarkerCallback(void);
+    void RemoveMarkerCallback(void);
+    
 
 protected:
     unsigned long Ticker;
     void FirstButtonCallback(void);
     void EnableMapButtonCallback(void);
+    void Master_clutch_callback(void);
     void PrimaryMasterButtonCallback(const prmEventButton & event);
 
 
@@ -104,14 +112,16 @@ protected:
     vctDouble3 MeasurePoint1;
 
 private:
+    int MarkerCount;
     BehaviorLUSProbeHead  *ProbeHead;
     BehaviorLUSProbeJoint *ProbeJoint1;
     BehaviorLUSProbeJoint *ProbeJoint2;
     BehaviorLUSProbeJoint *ProbeJoint3;
     BehaviorLUSProbeShaft *ProbeShaft;
-    BehaviorLUSBackground *Backgrounds, *BackgroundMap;
+    BehaviorLUSBackground *Backgrounds;
+    BehaviorLUSOutline    *Outline;
     BehaviorLUSText       *WarningText, * MeasureText;
-    BehaviorLUSMarker     *Cursor;
+    BehaviorLUSMarker     *Cursor, *m;
 
 
 
