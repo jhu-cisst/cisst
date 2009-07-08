@@ -13,3 +13,4 @@
 # --- end cisst license ---
 
 add_subdirectory(serialPort)
+add_subdirectory(socket)

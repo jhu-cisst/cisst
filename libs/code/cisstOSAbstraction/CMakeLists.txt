@@ -30,6 +30,7 @@ SET(SOURCE_FILES
     osaMutex.cpp
     osaSerialPort.cpp
     osaSleep.cpp
+    osaSocket.cpp
     osaStopwatch.cpp
     osaThread.cpp
     osaThreadBuddy.cpp
@@ -47,6 +48,7 @@ SET(HEADER_FILES
     osaMutex.h
     osaSerialPort.h
     osaSleep.h
+    osaSocket.h
     osaStopwatch.h
     osaThread.h
     osaThreadAdapter.h
@@ -56,6 +58,10 @@ SET(HEADER_FILES
     osaTimeServer.h
     )
 
+IF(WIN32)
+    LINK_LIBRARIES(WSOCK32)
+ENDIF(WIN32)
+    
 IF(UNIX AND NOT APPLE)
    # clock_gettime requires linking with librt
    LINK_LIBRARIES(rt)
