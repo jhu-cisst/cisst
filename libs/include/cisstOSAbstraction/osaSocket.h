@@ -21,12 +21,21 @@ http://www.cisst.org/cisst/license.txt.
   \file
   \brief Declaration of osaSocket
   
-  This is an implementation of an unconnected datagram (UDP) socket. In general, datagrams
-  are sent to the address from which the last datagram was received; the initial destination
-  address is set via a call to SetDestination. For a client/server application:
+  This is an implementation for an unconnected datagram (UDP) socket, with partial support
+  for a connected stream (TCP) socket (specifically, just the client side). 
+  It also supports connected datagram sockets, though there is no real advantage to
+  using them (technical detail: the class uses sendto and recvfrom, rather than send and
+  recv, regardless of whether the socket is connected or not).
 
-  Server initialization:  ssock.AssignPort(server_port);
-  Client initialization:  csock.SetDestination(server_ip, server_port);
+  In general, datagrams are sent to the address from which the last datagram was received;
+  the initial destination address is set via a call to SetDestination (or, via a call to
+  Connect, which calls SetDestination). For a UDP client/server application:
+
+  UDP server initialization:  ssock.AssignPort(server_port);
+  UDP client initialization:  csock.SetDestination(server_ip, server_port);
+
+  TCP server initialization:  not supported (need Listen and Accept)
+  TCP client initialization:  csock.Connect(server_ip, server_port);
 
   Now, messages can be sent/received by calling the Send and Receive methods. Note that
   it is not necessary for the client to assign a port number, though it is fine for it
@@ -34,7 +43,7 @@ http://www.cisst.org/cisst/license.txt.
 
   If the socket receives a message from an address that is different from the current
   destination, the destination is updated. For example, if a socket receives a message
-  from address 192.168.0.1, all subsequent messages sent to that address.
+  from address 192.168.0.1, all subsequent messages are sent to that address.
 
   \note This is a fairly minimal socket implementation. Currently, the Receive method is
   non-blocking; it would be nice to have a Receive method that blocks until a message
@@ -64,17 +73,28 @@ class CISST_EXPORT osaSocket : public cmnGenericObject {
     friend class osaSocketTest;
 
 public:
-    osaSocket();
+    enum SocketType { DATAGRAM, STREAM };
+
+    osaSocket(SocketType stype = osaSocket::DATAGRAM);
     ~osaSocket();
 
     /*! Set the port for receiving data (only needed for server)
           \param port the port number */
     void AssignPort(unsigned short port);
 
-    /*! Set the destination address (used only by clients)
+    /*! Set the destination address (used only by UDP clients; for
+          TCP clients, use Connect)
           \param host the server's IP address (e.g., 192.0.0.1)
           \param port the server's port number */
     void SetDestination(const char *host, unsigned short port);
+
+    /*! Connect to a server; this is required for stream (TCP) sockets and
+        can be used for datagram (UDP) sockets, though it provides no benefit
+        in that case (use SetDestination instead).
+          \param host the server's IP address (e.g., 192.0.0.1)
+          \param port the server's port number
+          \returns true if the connection was successful */
+    bool Connect(const char *host, unsigned short port);
 
     /*! Send a byte array via the socket.
           \param bufsend Buffer holding bytes to be sent

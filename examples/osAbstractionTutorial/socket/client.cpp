@@ -34,7 +34,19 @@ int main(void) {
     cmnLogger::ResumeDefaultLog(CMN_LOG_LOD_VERY_VERBOSE);
     cmnClassRegister::SetLoD("osaSocket", CMN_LOG_LOD_VERY_VERBOSE);
 
+    CMN_LOG_RUN_DEBUG << "Client for socket test program." << std::endl;
     osaSocket csock;
+
+#if 0
+    // Following code is useful when testing with multiple clients, so that each
+    // client can set a specific port number.
+    unsigned short portNum;
+    std::cout << "Enter port: ";
+    std::cin >> portNum;
+    std::cout << "Setting client port to " << portNum << std::endl;
+    csock.AssignPort(portNum);
+#endif
+
     csock.SetDestination("127.0.0.1", 1234);
 
     std::string str;
@@ -42,14 +54,6 @@ int main(void) {
     int bytesRead;
     bool done = false;
 
-    CMN_LOG_RUN_DEBUG << "Client for socket test program." << std::endl;
-#if 0
-    unsigned short portNum;
-    std::cout << "Enter port: ";
-    std::cin >> portNum;
-    std::cout << "Setting client port to " << portNum << std::endl;
-    csock.AssignPort(portNum);
-#endif
     CMN_LOG_RUN_DEBUG << "Enter message, server will respond with uppercase string." << std::endl;
     CMN_LOG_RUN_DEBUG << "Type 'q' to exit client, 'quit' to exit both client and server." << std::endl;
     while (!done) {
@@ -70,6 +74,8 @@ int main(void) {
         else
             done = true;
     }
+
+    csock.Close();
     return 0;
 }
 

@@ -56,5 +56,6 @@ int main(void) {
         osaSleep(10 * cmn_ms);
     }
 
+    ssock.Close();
     return 0;
 }

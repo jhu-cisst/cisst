@@ -42,7 +42,7 @@ struct osaSocketInternals {
 
 #define DEST_ADDR (reinterpret_cast<osaSocketInternals*>(Internals)->destAddr)
 
-osaSocket::osaSocket(void)
+osaSocket::osaSocket(SocketType stype)
 {
     CMN_ASSERT(sizeof(Internals) >= SizeOfInternals());
 
@@ -57,7 +57,7 @@ osaSocket::osaSocket(void)
 #endif
 
     // Create socket
-    connectionFd = socket(AF_INET, SOCK_DGRAM, 0);
+    connectionFd = socket(AF_INET, (stype == DATAGRAM)?SOCK_DGRAM:SOCK_STREAM, 0);
 
     // Clear destination address
     memset(&DEST_ADDR, 0, sizeof(DEST_ADDR));
@@ -99,9 +99,15 @@ void osaSocket::SetDestination(const char *host, unsigned short port)
         host << ":" << port << std::endl;
 }
 
+bool osaSocket::Connect(const char *host, unsigned short port)
+{
+    SetDestination(host, port);
+    return (connect(connectionFd, (struct sockaddr *)&DEST_ADDR, sizeof(DEST_ADDR)) == 0);
+}
+
 int osaSocket::Send(const char *bufsend, unsigned int msglen)
 {
-    if (DEST_ADDR.sin_family != AF_INET) {
+    if (DEST_ADDR.sin_family == 0) {
         CMN_LOG_CLASS_RUN_ERROR << "osaSocket::Send: destination address not set" << std::endl;
         return -1;
     }
@@ -140,14 +146,14 @@ int osaSocket::Receive(char *bufrecv, unsigned int maxlen)
                 CMN_LOG_CLASS_RUN_VERBOSE << "Received " << n << " chars." << std::endl;
             if (DEST_ADDR.sin_family == 0) {
                 CMN_LOG_CLASS_INIT_VERBOSE << "osaSocket setting destination address to " <<
-                    inet_ntoa(fromAddr.sin_addr) << ":" << fromAddr.sin_port << std::endl;
+                    inet_ntoa(fromAddr.sin_addr) << ":" << ntohs(fromAddr.sin_port) << std::endl;
                 DEST_ADDR = fromAddr;
             }
             else if ((DEST_ADDR.sin_addr.s_addr != fromAddr.sin_addr.s_addr) ||
                      (DEST_ADDR.sin_port != fromAddr.sin_port)) {
                 CMN_LOG_CLASS_RUN_VERBOSE << "osaSocket updating destination from " <<
-                           inet_ntoa(DEST_ADDR.sin_addr) << ":" << DEST_ADDR.sin_port << " to " <<
-                           inet_ntoa(fromAddr.sin_addr) << ":" << fromAddr.sin_port << std::endl;
+                    inet_ntoa(DEST_ADDR.sin_addr) << ":" << ntohs(DEST_ADDR.sin_port) << " to " <<
+                    inet_ntoa(fromAddr.sin_addr) << ":" << ntohs(fromAddr.sin_port) << std::endl;
                 DEST_ADDR = fromAddr;
             }
         }
