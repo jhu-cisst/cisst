@@ -1011,6 +1011,45 @@ public:
         }
     }
 
+
+    void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
+                     bool headerOnly = false, const std::string & headerPrefix = "") const
+    {
+        const size_type myRows = rows();
+        const size_type myCols = cols();
+        size_type indexRow, indexCol;
+        
+        if (headerOnly) {
+            for (indexRow = 0; indexRow < myRows; ++indexRow) {
+                for (indexCol = 0; indexCol < myCols; ++indexCol) {
+                    outputStream << headerPrefix << "-m" << indexRow << "_" << indexCol; 
+                    // delimiter between elements
+                    if (indexCol < (myCols - 1)) {
+                        outputStream << delimiter;
+                    }
+                }
+                // delimiter between rows, not at the end
+                if (indexRow < (myRows - 1)) {
+                    outputStream << delimiter;
+                }
+            }
+        } else {
+            for (indexRow = 0; indexRow < myRows; ++indexRow) {
+                for (indexCol = 0; indexCol < myCols; ++indexCol) {
+                    outputStream << this->Element(indexRow, indexCol);
+                    // delimiter between elements
+                    if (indexCol < (myCols - 1)) {
+                        outputStream << delimiter;
+                    }
+                }
+                // delimiter between rows, not at the end
+                if (indexRow < (myRows - 1)) {
+                    outputStream << delimiter;
+                }
+            }
+        }
+    }
+
     /*! Define a ConstSubmatrix class for compatibility with the fixed size matrices.
       A const submatrix has the same stride as the parent container.
 

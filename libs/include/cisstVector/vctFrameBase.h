@@ -553,6 +553,13 @@ public:
                      << this->Rotation();
     }
 
+    void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
+                     bool headerOnly = false, const std::string & headerPrefix = "") const {
+        this->Translation().ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix);
+        outputStream << delimiter;
+        this->Rotation().ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix);
+    }
+
 };
 
 
