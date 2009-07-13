@@ -122,9 +122,20 @@ public:
 
     /*! To stream method.  Uses the default << operator as defined for
         the actual type. */
-    inline virtual void ToStream(std::ostream & out) const {
-        out << Data;
+    inline virtual void ToStream(std::ostream & outputStream) const {
+        outputStream << Data;
     }
+
+    /*! To stream raw data. */
+    inline virtual void ToStreamRaw(std::ostream & outputStream, const char CMN_UNUSED(delimiter) = ' ',
+                                    bool headerOnly = false, const std::string & headerPrefix = "") const {
+        if (headerOnly) {
+            outputStream << headerPrefix << "-data";
+        } else {
+            outputStream << this->Data;
+        }
+    }
+
 };
 
 /* Some basic types defined here for now, could move somewhere
