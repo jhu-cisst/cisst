@@ -4,7 +4,7 @@
 /*
   $Id$
 
-  Author(s): Ankur Kapoor, Anton Deguet
+  Author(s): Ankur Kapoor, Anton Deguet, Min Yang Jung
   Created on: 2004-04-30
 
   (C) Copyright 2004-2008 Johns Hopkins University (JHU), All Rights
@@ -29,6 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _osaGetTime_h
 
 #include <cisstOSAbstraction/osaExport.h>
+#include <string>
 
 /*! Return the most accurate time available on the system.
   \return A double representing time in seconds
@@ -47,5 +48,7 @@ void CISST_EXPORT osaGetAbsoluteTime(osaAbsoluteTime & now);
 // Note that time can be printed using ctime(now.sec);
 #endif
 
-#endif // _osaGetTime_h
+/*! Retrieve the current local date and time. */
+void CISST_EXPORT osaGetDateTimeString(std::string & str);
 
+#endif // _osaGetTime_h
