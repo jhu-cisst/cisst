@@ -57,6 +57,11 @@ public:
     /*! Type of the actual map */
     typedef std::map<std::string, _elementType *> MapType;
 
+    typedef typename MapType::iterator iterator;
+    typedef typename MapType::const_iterator const_iterator;
+    typedef typename MapType::reverse_iterator reverse_iterator;
+    typedef typename MapType::const_reverse_iterator const_reverse_iterator;
+
 protected:
     MapType Map;
     std::string MapName;
@@ -104,13 +109,20 @@ public:
         this->OwnerServices = owner.Services();
     }
 
-    /*! Add an item to the internal map.  The log level of details is used to determine ... */ 
+    /*! Add an item to the internal map.  The log level of details is
+      used to determine the lod of a message if the item can not be
+      added. */ 
     bool AddItem(const std::string & name,
                  _elementType * item,
                  cmnLogLoD lod = CMN_LOG_LOD_RUN_ERROR);
 
     /*! Get an item by name */
     _elementType * GetItem(const std::string & name, cmnLogLoD lod = CMN_LOG_LOD_RUN_ERROR) const;
+
+    /*! Remove an item from the internal map.  The log level of
+      details is used to determine the lod of a message if the item
+      can not be removed. */ 
+    bool RemoveItem(const std::string & name, cmnLogLoD lod = CMN_LOG_LOD_RUN_ERROR);
 
     /*! List of names used, i.e. list of keys in the map */
     std::vector<std::string> GetNames() const;
@@ -139,6 +151,35 @@ public:
     /*! Delete all content while preserving keys, i.e. the map
       contains pairs of names and null pointers. */
     void DeleteAll(void);
+
+    /*! STL compatible size */
+    inline unsigned int size(void) const {
+        return this->Map.size();
+    }
+
+    inline bool empty(void) const {
+        return this->Map.empty();
+    }
+
+    inline void clear(void) {
+        this->Map.clear();
+    }
+
+    inline iterator begin(void) {
+        return this->Map.begin();
+    }
+
+    inline const_iterator begin(void) const {
+        return this->Map.begin();
+    }
+
+    inline iterator end(void) {
+        return this->Map.end();
+    }
+
+    inline const_iterator end(void) const {
+        return this->Map.end();
+    }
 };
 
 
@@ -150,10 +191,10 @@ bool cmnNamedMap<_elementType>::AddItem(const std::string & name, _elementType *
     const typename MapType::const_iterator iterator = Map.find(name);
     if (iterator != Map.end()) {
         if (this->Services()) {
-            CMN_LOG_CLASS(lod) << "map \"" << MapName << "\" already contains an item named \""
+            CMN_LOG_CLASS(lod) << "AddItem: map \"" << MapName << "\" already contains an item named \""
                                << name << "\"." << std::endl;
         } else {
-            CMN_LOG(lod) << "map \"" << MapName << "\" already contains an item named \""
+            CMN_LOG(lod) << "class mtsMap: AddItem: map \"" << MapName << "\" already contains an item named \""
                          << name << "\"." << std::endl;
         }
     return false;
@@ -169,13 +210,31 @@ _elementType * cmnNamedMap<_elementType>::GetItem(const std::string & itemName, 
         return iter->second;
     } else {
         if (this->Services()) {
-            CMN_LOG_CLASS(lod) << "can't find \"" << itemName << "\" in map \"" << MapName << "\"" << std::endl;
+            CMN_LOG_CLASS(lod) << "GetItem: can't find \"" << itemName << "\" in map \"" << MapName << "\"" << std::endl;
         } else {
-            CMN_LOG(lod) << "can't find \"" << itemName << "\" in map \"" << MapName << "\"" << std::endl;
+            CMN_LOG(lod) << "class mtsMap: GetItem: can't find \"" << itemName << "\" in map \"" << MapName << "\"" << std::endl;
         }
         return 0;
     }
 }
+
+template <class _elementType>
+bool cmnNamedMap<_elementType>::RemoveItem(const std::string & itemName, cmnLogLoD lod)
+{
+    // check if this name already exists
+    const typename MapType::iterator iterator = Map.find(itemName);
+    if (iterator == Map.end()) {
+        if (this->Services()) {
+            CMN_LOG_CLASS(lod) << "RemoveItem: can't find \"" << itemName << "\" in map \"" << MapName << "\"" << std::endl;
+        } else {
+            CMN_LOG(lod) << "class mtsMap: RemoveItem: can't find \"" << itemName << "\" in map \"" << MapName << "\"" << std::endl;
+        }
+        return false;
+    }
+    Map.erase(iterator);
+    return true;
+}
+
 
 template <class _elementType>
 std::vector<std::string> cmnNamedMap<_elementType>::GetNames(void) const {
