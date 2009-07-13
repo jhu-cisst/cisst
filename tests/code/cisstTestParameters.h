@@ -32,7 +32,7 @@ http://www.cisst.org/cisst/license.txt.
 class cisstTestParameters
 {
 public:
-    typedef enum { PRINT_HELP, RUN_TESTS, LIST_TESTS, GENERATE_CTEST_FILE } TestRunModeType;
+    typedef enum { PRINT_HELP, RUN_TESTS, LIST_TESTS, GENERATE_CTEST_FILE, RUN_AND_LIST_TESTS } TestRunModeType; 
     typedef std::list<std::string> TestNameContainerType;
 private:
     TestNameContainerType TestNames;
