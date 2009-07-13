@@ -62,6 +62,8 @@ CX11WindowManager::CX11WindowManager(unsigned int numofwins) : svlWindowManagerB
     xGCs = 0;
     xImg = 0;
     Titles = 0;
+    CustomTitles = 0;
+    CustomTitleEnabled = 0;
     ImageBuffers = 0;
 
     // create drawing critical section and counter
@@ -129,6 +131,8 @@ int CX11WindowManager::DoModal(bool show, bool fullscreen)
 
     // create title strings
     Titles = new std::string[NumOfWins];
+    CustomTitles = new std::string[NumOfWins];
+    CustomTitleEnabled = new int[NumOfWins];
 
     // create images
     ImageBuffers = new unsigned char*[NumOfWins];
@@ -205,6 +209,8 @@ int CX11WindowManager::DoModal(bool show, bool fullscreen)
         XSetNormalHints(xDisplay, xWindows[i], &wsh);
 
         // set window title
+        CustomTitleEnabled[i] = 0;
+
         std::ostringstream ostring;
         if (Title.length() > 0) {
             if (NumOfWins > 0) ostring << Title << " #" << i;
@@ -217,12 +223,8 @@ int CX11WindowManager::DoModal(bool show, bool fullscreen)
 
         Titles[i] = ostring.str();
         XSetStandardProperties(xDisplay, xWindows[i],
-                               Titles[i].c_str(),
-                               Titles[i].c_str(),
-                               None,
-                               NULL,
-                               0,
-                               NULL);
+                               Titles[i].c_str(), Titles[i].c_str(),
+                               None, NULL, 0, NULL);
 
         // set even mask
         XSelectInput(xDisplay, xWindows[i],
@@ -411,6 +413,19 @@ int CX11WindowManager::DoModal(bool show, bool fullscreen)
                         XPutImage(xDisplay, xWindows[winid], xGCs[winid], xImg[winid], 0, 0, 0, 0, Width[winid], Height[winid]);
 
                     csImage[winid].Leave();
+
+                    if (CustomTitleEnabled[winid] < 0) {
+                        // Restore original timestamp
+                        XSetStandardProperties(xDisplay, xWindows[winid],
+                                               Titles[winid].c_str(), Titles[winid].c_str(),
+                                               None, NULL, 0, NULL);
+                    }
+                    else if (CustomTitleEnabled[winid] > 0) {
+                        // Set custom timestamp
+                        XSetStandardProperties(xDisplay, xWindows[winid],
+                                               CustomTitles[winid].c_str(), CustomTitles[winid].c_str(),
+                                               None, NULL, 0, NULL);
+                    }
                 }
             }
             osaSleep(0.01);
@@ -445,6 +460,14 @@ labError:
     if (Titles) {
         delete [] Titles;
         Titles = 0;
+    }
+    if (CustomTitles) {
+        delete [] CustomTitles;
+        CustomTitles = 0;
+    }
+    if (CustomTitleEnabled) {
+        delete [] CustomTitleEnabled;
+        CustomTitleEnabled = 0;
     }
     if (ImageBuffers) {
         delete [] ImageBuffers;
@@ -481,6 +504,18 @@ void CX11WindowManager::DrawImageThreadSafe(unsigned char* buffer, unsigned int 
     const unsigned int pixsize = Width[winid] * Height[winid];
     if (buffersize > (pixsize * 3)) return;
 
+    // Modify title if requested
+    if (Timestamp > 0.0) {
+        char timestampstring[32];
+        sprintf(timestampstring, " (timestamp=%.3f)", Timestamp);
+        CustomTitles[winid] = Titles[winid] + timestampstring;
+        CustomTitleEnabled[winid] = 1;
+    }
+    else {
+        if (Timestamp == 0.0) CustomTitleEnabled[winid] = 0;
+        else CustomTitleEnabled[winid] = -1;
+    }
+
     csImage[winid].Enter();
 
         // store image in buffer
@@ -494,33 +529,6 @@ void CX11WindowManager::DrawImageThreadSafe(unsigned char* buffer, unsigned int 
         ImageCounter[winid] ++;
     
     csImage[winid].Leave();
-
-    // Display timestamp if requested
-    if (Timestamp > 0.0) {
-        std::string title(Titles[winid]);
-        char timestampstring[32];
-        sprintf(timestampstring, " (timestamp=%.3f)", Timestamp);
-        title += timestampstring;
-        XSetStandardProperties(xDisplay, xWindows[winid],
-                               title.c_str(),
-                               title.c_str(),
-                               None,
-                               NULL,
-                               0,
-                               NULL);
-    }
-    else {
-        if (Timestamp < 0.0) {
-            // Restore original timestamp
-            XSetStandardProperties(xDisplay, xWindows[winid],
-                                   Titles[winid].c_str(),
-                                   Titles[winid].c_str(),
-                                   None,
-                                   NULL,
-                                   0,
-                                   NULL);
-        }
-    }
 }
 
 void CX11WindowManager::Destroy()

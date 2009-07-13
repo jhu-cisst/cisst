@@ -154,13 +154,13 @@ void* svlWindowManagerThreadProc::Proc(svlImageWindow* obj)
 
 svlImageWindow::svlImageWindow() :
     svlFilterBase(),
-    WindowManager(0),
-    Thread(0),
-    ThreadProc(0),
-    Callback(0),
+    TimestampEnabled(false),
     FullScreenFlag(false),
     PositionSetFlag(false),
-    TimestampEnabled(false)
+    Thread(0),
+    ThreadProc(0),
+    WindowManager(0),
+    Callback(0)
 {
     AddSupportedType(svlTypeImageRGB, svlTypeImageRGB);
     AddSupportedType(svlTypeImageRGBStereo, svlTypeImageRGBStereo);

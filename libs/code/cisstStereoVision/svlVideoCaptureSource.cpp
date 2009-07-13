@@ -20,23 +20,9 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
+#include <cisstCommon.h>
 #include <cisstStereoVision/svlVideoCaptureSource.h>
 #include <cisstOSAbstraction/osaSleep.h>
-
-#include <stdio.h>
-
-#ifdef _WIN32
-#include <conio.h>
-#endif // _WIN32
-
-#ifdef __GNUC__
-#include <curses.h>
-#include <iostream>
-#include <stdio.h>
-#include <termios.h>
-#include <sys/ioctl.h>
-#include <fcntl.h>
-#endif // __GNUC__
 
 #if (CISST_SVL_HAS_SVS == ON)
 #include "vidSVSSource.h"
@@ -118,6 +104,7 @@ svlVideoCaptureSource::svlVideoCaptureSource(bool stereo) :
     InputID = new int[NumberOfChannels];
     Format = new ImageFormat*[NumberOfChannels];
     Properties = new ImageProperties*[NumberOfChannels];
+    Trigger = new ExternalTrigger[NumberOfChannels];
     DevSpecConfigBuffer = new unsigned char*[NumberOfChannels];
     DevSpecConfigBufferSize = new unsigned int[NumberOfChannels];
     APIChannelID = new int[NumberOfChannels];
@@ -133,6 +120,7 @@ svlVideoCaptureSource::svlVideoCaptureSource(bool stereo) :
         InputID[i] = -1;
         Format[i] = 0;
         Properties[i] = 0;
+        memset(&(Trigger[i]), 0, sizeof(ExternalTrigger));
         DevSpecConfigBuffer[i] = 0;
         DevSpecConfigBufferSize[i] = 0;
         APIChannelID[i] = -1;
@@ -143,16 +131,29 @@ svlVideoCaptureSource::svlVideoCaptureSource(bool stereo) :
 
 svlVideoCaptureSource::~svlVideoCaptureSource()
 {
+    unsigned int i;
+
     Release();
 
     if (OutputData) delete OutputData;
     if (DeviceObj) delete [] DeviceObj;
     if (DeviceID) delete [] DeviceID;
     if (InputID) delete [] InputID;
-    if (Format) delete [] Format;
-    if (Properties) delete [] Properties;
+    if (Format) {
+        for (i = 0; i < NumberOfChannels; i ++) {
+            if (Format[i]) delete Format[i];
+        }
+        delete [] Format;
+    }
+    if (Properties) {
+        for (i = 0; i < NumberOfChannels; i ++) {
+            if (Properties[i]) delete Properties[i];
+        }
+        delete [] Properties;
+    }
+    if (Trigger) delete [] Trigger;
     if (DevSpecConfigBuffer) {
-        for (unsigned int i = 0; i < NumberOfChannels; i ++) {
+        for (i = 0; i < NumberOfChannels; i ++) {
             if (DevSpecConfigBuffer[i]) delete DevSpecConfigBuffer[i];
         }
         delete [] DevSpecConfigBuffer;
@@ -163,8 +164,8 @@ svlVideoCaptureSource::~svlVideoCaptureSource()
     if (API) delete [] API;
     if (EnumeratedDevices) delete [] EnumeratedDevices;
     if (FormatList) {
-        for (int i = 0; i < NumberOfEnumeratedDevices; i ++) {
-            if (FormatList[i]) delete [] FormatList[i];
+        for (int j = 0; j < NumberOfEnumeratedDevices; j ++) {
+            if (FormatList[j]) delete [] FormatList[j];
         }
         delete [] FormatList;
     }
@@ -218,6 +219,11 @@ int svlVideoCaptureSource::Initialize(svlSample* inputdata)
         else {
             if (Format[i]) DeviceObj[API[i]]->SetFormat(Format[i][0], APIChannelID[i]);
         }
+    }
+
+    // Set trigger
+    for (i = 0; i < NumberOfChannels; i ++) {
+        DeviceObj[API[i]]->SetTrigger(Trigger[i], APIChannelID[i]);
     }
 
     // Open devices
@@ -457,7 +463,19 @@ int svlVideoCaptureSource::GetWidth(unsigned int videoch)
     if (IsDataValid(GetOutputType(), OutputData) != SVL_OK)
         return SVL_FAIL;
     if (videoch >= NumberOfChannels)
-        return SVL_WRONG_CHANNEL;
+        return SVL_WRONG_CHANNEL;    // Get capture API platform
+    PlatformType platform = EnumeratedDevices[DeviceID[videoch]].platform;
+
+    if (platform == LinLibDC1394) {
+#if (CISST_SVL_HAS_LIBDC1394 == ON)
+        cout << endl << "  ===== Setup external trigger =====" << endl;
+        DialogTrigger(videoch);
+#endif // CISST_SVL_HAS_LIBDC1394
+    }
+    else {
+        // External trigger is not supported in other APIs.
+    }
+
 
     return dynamic_cast<svlSampleImageBase*>(OutputData)->GetWidth(videoch);
 }
@@ -492,7 +510,17 @@ int svlVideoCaptureSource::DialogSetup(unsigned int videoch)
 
     cout << endl << "  ===== Setup capture format =====" << endl;
     DialogFormat(videoch);
-    
+
+    if (EnumeratedDevices[DeviceID[videoch]].platform == LinLibDC1394) {
+#if (CISST_SVL_HAS_LIBDC1394 == ON)
+        cout << endl << "  ===== Setup external trigger =====" << endl;
+        DialogTrigger(videoch);
+#endif // CISST_SVL_HAS_LIBDC1394
+    }
+    else {
+        // External trigger is not supported in other APIs.
+    }
+
     return SVL_OK;
 }
 
@@ -605,6 +633,68 @@ int svlVideoCaptureSource::DialogFormat(unsigned int videoch)
     return SVL_OK;
 }
 
+int svlVideoCaptureSource::DialogTrigger(unsigned int videoch)
+{
+    if (IsInitialized() == true)
+        return SVL_ALREADY_INITIALIZED;
+    if (videoch >= NumberOfChannels)
+        return SVL_WRONG_CHANNEL;
+    if (DeviceID[videoch] < 0)
+        return SVL_VCS_UNABLE_TO_OPEN;
+
+    // Make sure devices are enumerated
+    GetDeviceList(0);
+
+    // Check if device ID is in range
+    if (DeviceID[videoch] >= NumberOfEnumeratedDevices)
+        return SVL_VCS_UNABLE_TO_OPEN;
+
+    if (EnumeratedDevices[DeviceID[videoch]].platform == LinLibDC1394) {
+        ExternalTrigger trigger;
+        int ivalue;
+        std::string str;
+
+        cout << endl << "  # Enable external trigger? ['y' or 'n']: ";
+        cin >> str;
+        if (str.compare("y") != 0) {
+            memset(&trigger, 0, sizeof(ExternalTrigger));
+            cout << "    External trigger DISABLED" << endl;
+            SetTrigger(trigger, videoch);
+            return SVL_OK;
+        }
+        trigger.enable = true;
+        cout << "    External trigger ENABLED" << endl;
+
+        cout << "  # Enter trigger mode ['0'-'5' or '14'-'15']: ";
+        cin >> ivalue;
+        if (ivalue < 0) ivalue = 0;
+        trigger.mode = ivalue;
+
+        cout << "  # Enter trigger source ['0'-'3']: ";
+        cin >> ivalue;
+        if (ivalue < 0) ivalue = 0;
+        trigger.source = ivalue;
+
+        cout << "  # Enter trigger polarity ['h' or 'l']: ";
+        cin >> str;
+        if (str.compare("h") == 0) {
+            trigger.polarity = 1;
+            cout << "    Trigger polarity set to HIGH" << endl;
+        }
+        else {
+            trigger.polarity = 0;
+            cout << "    Trigger polarity set to LOW" << endl;
+        }
+
+        SetTrigger(trigger, videoch);
+    }
+    else {
+        cout << "  -!- External trigger not supported." << endl;
+    }
+
+    return SVL_OK;
+}
+
 int svlVideoCaptureSource::DialogImageProperties(unsigned int videoch)
 {
     // Available only after initialization
@@ -651,45 +741,9 @@ int svlVideoCaptureSource::DialogImageProperties(unsigned int videoch)
         if (proc->WaitForInit()) {
             GetImageProperties(videoch);
 
-#ifdef __GNUC__
-            ////////////////////////////////////////////////////
-            // modify terminal settings for single key inputs
-            struct  termios ksettings;
-            struct  termios new_ksettings;
-            int     kbrd;
-            kbrd = open("/dev/tty",O_RDWR);
- #if (CISST_OS == CISST_LINUX)
-            ioctl(kbrd, TCGETS, &ksettings);
-            new_ksettings = ksettings;
-            new_ksettings.c_lflag &= !ICANON;
-            new_ksettings.c_lflag &= !ECHO;
-            ioctl(kbrd, TCSETS, &new_ksettings);
-            ioctl(kbrd, TIOCNOTTY);
- #endif // (CISST_OS == CISST_LINUX)
- #if (CISST_OS == CISST_DARWIN)
-            ioctl(kbrd, TIOCGETA, &ksettings);
-            new_ksettings = ksettings;
-            new_ksettings.c_lflag &= !ICANON;
-            new_ksettings.c_lflag &= !ECHO;
-            ioctl(kbrd, TIOCSETA, &new_ksettings);
-            ////////////////////////////////////////////////////
- #endif // (CISST_OS == CISST_DARWIN)
-#endif
-
-            // wait for keyboard input in command window
-#ifdef _WIN32
             int ch;
-#endif
-#ifdef __GNUC__
-            char ch;
-#endif
             do {
-#ifdef _WIN32
-                ch = _getch();
-#endif
-#ifdef __GNUC__
-                ch = getchar();
-#endif
+                ch = cmnGetChar();
                 switch (ch) {
                     case '!':
                         Properties[videoch]->manual = ~(Properties[videoch]->manual);
@@ -805,20 +859,6 @@ int svlVideoCaptureSource::DialogImageProperties(unsigned int videoch)
                 SetImageProperties(videoch);
                 osaSleep(0.08);
             } while (ch != 'q');
-
-#ifdef __GNUC__
-            ////////////////////////////////////////////////////
-            // reset terminal settings    
- #if (CISST_OS == CISST_LINUX)
-            ioctl(kbrd, TCSETS, &ksettings);
- #endif // (CISST_OS == CISST_LINUX)
- #if (CISST_OS == CISST_DARWIN)
-            ioctl(kbrd, TIOCSETA, &ksettings);
- #endif // (CISST_OS == CISST_DARWIN)
-            close(kbrd);
-            ////////////////////////////////////////////////////
-#endif
-
         }
 
         proc->Kill();
@@ -1186,6 +1226,28 @@ int svlVideoCaptureSource::GetFormat(ImageFormat& format, unsigned int videoch)
     return SVL_OK;
 }
 
+int svlVideoCaptureSource::SetTrigger(ExternalTrigger& trigger, unsigned int videoch)
+{
+    if (IsInitialized() == true)
+        return SVL_ALREADY_INITIALIZED;
+    if (videoch >= NumberOfChannels)
+        return SVL_WRONG_CHANNEL;
+
+    memcpy(&(Trigger[videoch]), &trigger, sizeof(ExternalTrigger));
+
+    return SVL_OK;
+}
+
+int svlVideoCaptureSource::GetTrigger(ExternalTrigger& trigger, unsigned int videoch)
+{
+    if (videoch >= NumberOfChannels)
+        return SVL_WRONG_CHANNEL;
+
+    memcpy(&trigger, &(Trigger[videoch]), sizeof(ExternalTrigger));
+
+    return SVL_OK;
+}
+
 int svlVideoCaptureSource::SetImageProperties(ImageProperties& properties, unsigned int videoch)
 {
     // Available only after initialization
@@ -1312,6 +1374,17 @@ int svlVideoCaptureSource::SaveSettings(const char* filepath)
 		    if (writelen < sizeof(ImageProperties)) goto labError;
 	    }
 
+        // Write "trigger size"
+        intvalue = sizeof(ExternalTrigger);
+        writelen = static_cast<unsigned int>(fwrite(&intvalue, sizeof(int), 1, fp));
+		if (writelen < 1) goto labError;
+
+        // Write "trigger"
+        if (intvalue > 0) {
+            writelen = static_cast<unsigned int>(fwrite(&(Trigger[i]), 1, sizeof(ExternalTrigger), fp));
+		    if (writelen < sizeof(ExternalTrigger)) goto labError;
+	    }
+
         // Write "device specific configuration buffer size"
         writelen = static_cast<unsigned int>(fwrite(&(DevSpecConfigBufferSize[i]), sizeof(unsigned int), 1, fp));
 		if (writelen < 1) goto labError;
@@ -1402,6 +1475,19 @@ int svlVideoCaptureSource::LoadSettings(const char* filepath)
             if (readlen < sizeof(ImageProperties)) {
                 delete Properties[i];
                 Properties[i] = 0;
+                goto labError;
+            }
+        }
+
+        // Read "trigger size"
+        readlen = static_cast<unsigned int>(fread(&intvalue, sizeof(int), 1, fp));
+		if (readlen < 1) goto labError;
+
+        // Read "trigger"
+        if (intvalue == sizeof(ExternalTrigger)) {
+            readlen = static_cast<unsigned int>(fread(&(Trigger[i]), 1, sizeof(ExternalTrigger), fp));
+            if (readlen < sizeof(ExternalTrigger)) {
+                memset(&(Trigger[i]), 0, sizeof(ExternalTrigger));
                 goto labError;
             }
         }

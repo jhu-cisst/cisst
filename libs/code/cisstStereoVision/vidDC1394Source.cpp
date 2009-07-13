@@ -364,6 +364,7 @@ CDC1394Source::CDC1394Source() :
     BestISOSpeed(0),
 	DeviceID(0),
     Format(0),
+    Trigger(0),
     Width(0),
     Height(0),
     ColorCoding(0),
@@ -397,6 +398,7 @@ int CDC1394Source::SetStreamCount(unsigned int numofstreams)
     CameraNFDS = new int[NumOfStreams];
     DeviceID = new int[NumOfStreams];
     Format = new svlVideoCaptureSource::ImageFormat*[NumOfStreams];
+    Trigger = new svlVideoCaptureSource::ExternalTrigger[NumOfStreams];
     Width = new int[NumOfStreams];
     Height = new int[NumOfStreams];
     ColorCoding = new unsigned int[NumOfStreams];
@@ -411,6 +413,7 @@ int CDC1394Source::SetStreamCount(unsigned int numofstreams)
         CameraNFDS[i] = 0;
         DeviceID[i] = -1;
         Format[i] = 0;
+        memset(&(Trigger[i]), 0, sizeof(svlVideoCaptureSource::ExternalTrigger));
         Width[i] = -1;
         Height[i] = -1;
         ColorCoding[i] = 0;
@@ -628,8 +631,84 @@ int CDC1394Source::Open()
             goto labError;
         }
 #if (__verbose__ >= 3)
-            cerr << "CDC1394Source::Open - framerate accepted" << endl;
+        cerr << "CDC1394Source::Open - framerate accepted" << endl;
 #endif
+
+        if (Trigger[DeviceID[i]].enable) {
+            if (dc1394_external_trigger_set_power(Cameras[DeviceID[i]], DC1394_ON) == DC1394_SUCCESS) {
+#if (__verbose__ >= 3)
+                cerr << "CDC1394Source::Open - external trigger enabled" << endl;
+#endif
+                unsigned int ivalue = Trigger[DeviceID[i]].mode;
+                if (ivalue > 15 || (ivalue > 5 && ivalue < 14)) {
+                    ivalue = 0;
+#if (__verbose__ >= 2)
+                    cerr << "CDC1394Source::Open - unsupported trigger mode; using mode 0 instead" << endl;
+#endif
+                }
+                if (ivalue == 14) ivalue = 6;
+                if (ivalue == 15) ivalue = 7;
+                if (dc1394_external_trigger_set_mode(Cameras[DeviceID[i]], static_cast<dc1394trigger_mode_t>(ivalue + DC1394_TRIGGER_MODE_MIN)) == DC1394_SUCCESS) {
+#if (__verbose__ >= 3)
+                    cerr << "CDC1394Source::Open - external trigger mode accepted" << endl;
+#endif
+                    ivalue = Trigger[DeviceID[i]].source;
+                    if (ivalue > 3) {
+                        ivalue = 0;
+#if (__verbose__ >= 2)
+                        cerr << "CDC1394Source::Open - unsupported trigger source; using source 0 instead" << endl;
+#endif
+                    }
+                    if (dc1394_external_trigger_set_source(Cameras[DeviceID[i]], static_cast<dc1394trigger_source_t>(ivalue + DC1394_TRIGGER_SOURCE_MIN)) == DC1394_SUCCESS) {
+#if (__verbose__ >= 3)
+                        cerr << "CDC1394Source::Open - external trigger source accepted" << endl;
+#endif
+                        ivalue = Trigger[DeviceID[i]].polarity;
+                        if (ivalue > 1) {
+                            ivalue = 1;
+#if (__verbose__ >= 2)
+                            cerr << "CDC1394Source::Open - unsupported trigger polarity; using high polarity instead" << endl;
+#endif
+                        }
+                        if (dc1394_external_trigger_set_polarity(Cameras[DeviceID[i]], static_cast<dc1394trigger_polarity_t>(ivalue)) == DC1394_SUCCESS) {
+#if (__verbose__ >= 3)
+                            cerr << "CDC1394Source::Open - external trigger polarity accepted" << endl;
+#endif
+                        }
+                        else {
+#if (__verbose__ >= 2)
+                            cerr << "CDC1394Source::Open - dc1394_external_trigger_set_polarity returned error" << endl;
+                            cerr << "CDC1394Source::Open - continuing with default polarity" << endl;
+#endif
+                        }
+                    }
+                    else {
+#if (__verbose__ >= 2)
+                        cerr << "CDC1394Source::Open - dc1394_external_trigger_set_source returned error" << endl;
+                        cerr << "CDC1394Source::Open - continuing with default source" << endl;
+#endif
+                    }
+                }
+                else {
+#if (__verbose__ >= 2)
+                    cerr << "CDC1394Source::Open - dc1394_external_trigger_set_mode returned error" << endl;
+                    cerr << "CDC1394Source::Open - continuing with default mode" << endl;
+#endif
+                }
+            }
+            else {
+#if (__verbose__ >= 2)
+                cerr << "CDC1394Source::Open - dc1394_external_trigger_set_power returned error" << endl;
+                cerr << "CDC1394Source::Open - continuing with internal clock" << endl;
+#endif
+            }
+        }
+        else {
+            dc1394_external_trigger_set_power(Cameras[DeviceID[i]], DC1394_OFF);
+#if (__verbose__ >= 3)
+            cerr << "CDC1394Source::Open - external trigger disabled" << endl;
+#endif
+        }
 
         if (dc1394_capture_setup(Cameras[DeviceID[i]], FRAME_BUFFER_SIZE, DC1394_CAPTURE_FLAGS_DEFAULT) != DC1394_SUCCESS) {
 #if (__verbose__ >= 1)
@@ -824,6 +903,8 @@ int CDC1394Source::SetDevice(int devid, int inid, unsigned int videoch)
         delete Format[videoch];
         Format[videoch] = 0;
     }
+    memset(&(Trigger[videoch]), 0, sizeof(svlVideoCaptureSource::ExternalTrigger));
+
     return SVL_OK;
 }
 
@@ -1080,6 +1161,24 @@ int CDC1394Source::GetImageProperties(svlVideoCaptureSource::ImageProperties& pr
     return SVL_OK;
 }
 
+int CDC1394Source::SetTrigger(svlVideoCaptureSource::ExternalTrigger & trigger, unsigned int videoch)
+{
+    if (videoch >= NumOfStreams || Initialized) return SVL_FAIL;
+
+    memcpy(&(Trigger[videoch]), &trigger, sizeof(svlVideoCaptureSource::ExternalTrigger));
+
+    return SVL_OK;
+}
+
+int CDC1394Source::GetTrigger(svlVideoCaptureSource::ExternalTrigger & trigger, unsigned int videoch)
+{
+    if (videoch >= NumOfStreams) return SVL_FAIL;
+
+    memcpy(&trigger, &(Trigger[videoch]), sizeof(svlVideoCaptureSource::ExternalTrigger));
+
+    return SVL_OK;
+}
+
 void CDC1394Source::Release()
 {
     Close();
@@ -1097,6 +1196,7 @@ void CDC1394Source::Release()
         }
         delete [] Format;
     }
+    if (Trigger) delete [] Trigger;
     if (ColorCoding) delete [] ColorCoding;
     if (Frame) delete [] Frame;
     if (Width) delete [] Width;

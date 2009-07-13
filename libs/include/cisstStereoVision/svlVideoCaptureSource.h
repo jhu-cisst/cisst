@@ -86,6 +86,13 @@ public:
         double          framerate;
     } ImageFormat;
 
+    typedef struct _ExternalTrigger {
+        bool            enable;
+        unsigned int    mode;
+        unsigned int    source;
+        unsigned int    polarity;
+    } ExternalTrigger;
+
     typedef enum ImagePropertiesMask {
         propShutter      = 1,
         propGain         = 1 << 1,
@@ -117,6 +124,7 @@ public:
     int DialogDevice();
     int DialogInput(unsigned int deviceid);
     int DialogFormat(unsigned int videoch = SVL_LEFT);
+    int DialogTrigger(unsigned int videoch = SVL_LEFT);
     int DialogImageProperties(unsigned int videoch = SVL_LEFT);
 
     int GetDeviceList(DeviceInfo **deviceinfolist, bool update = false);
@@ -131,6 +139,8 @@ public:
     int SelectFormat(unsigned int formatid, unsigned int videoch = SVL_LEFT);
     int SetFormat(ImageFormat& format, unsigned int videoch = SVL_LEFT);
     int GetFormat(ImageFormat& format, unsigned int videoch = SVL_LEFT);
+    int SetTrigger(ExternalTrigger& trigger, unsigned int videoch = SVL_LEFT);
+    int GetTrigger(ExternalTrigger& trigger, unsigned int videoch = SVL_LEFT);
     int SetImageProperties(ImageProperties& properties, unsigned int videoch = SVL_LEFT);
     int GetImageProperties(ImageProperties& properties, unsigned int videoch = SVL_LEFT);
 
@@ -157,6 +167,7 @@ private:
     int *InputID;
     ImageFormat **Format;
     ImageProperties **Properties;
+    ExternalTrigger *Trigger;
     unsigned char **DevSpecConfigBuffer;
     unsigned int *DevSpecConfigBufferSize;
 
@@ -203,6 +214,14 @@ public:
     }
     virtual int GetImageProperties(svlVideoCaptureSource::ImageProperties & CMN_UNUSED(properties),
                                    unsigned int CMN_UNUSED(videoch) = 0) {
+        return SVL_FAIL;
+    }
+    virtual int SetTrigger(svlVideoCaptureSource::ExternalTrigger & CMN_UNUSED(trigger),
+                           unsigned int CMN_UNUSED(videoch) = 0) {
+        return SVL_FAIL;
+    }
+    virtual int GetTrigger(svlVideoCaptureSource::ExternalTrigger & CMN_UNUSED(trigger),
+                           unsigned int CMN_UNUSED(videoch) = 0) {
         return SVL_FAIL;
     }
 };

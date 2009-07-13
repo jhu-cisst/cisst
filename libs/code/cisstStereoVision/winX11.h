@@ -51,6 +51,8 @@ private:
     GC *xGCs;
     XImage **xImg;
     std::string *Titles;
+    std::string *CustomTitles;
+    int *CustomTitleEnabled;
     bool DestroyFlag;
     osaThreadSignal *DestroyedSignal;
     osaCriticalSection *csImage;

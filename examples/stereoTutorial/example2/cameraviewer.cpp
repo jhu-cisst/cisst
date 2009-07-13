@@ -21,10 +21,6 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
-#ifdef _WIN32
-#include <conio.h>
-#endif // _WIN32
-
 #include <iostream>
 #include <string>
 #include <cisstCommon.h>

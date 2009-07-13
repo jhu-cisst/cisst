@@ -29,7 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 
 /*********************************************************************
 ** LibDC1394                                                        **
-**  - compatibility: DC1394 2.0.2                                   **
+**  - compatibility: DC1394 2.0.2+                                  **
 **  - get it from:                                                  **
 **    http://sourceforge.net/project/showfiles.php?group_id=8157    **
 *********************************************************************/
@@ -87,6 +87,55 @@ typedef enum {
     DC1394_FRAMERATE_120   = 38,
     DC1394_FRAMERATE_240   = 39
 } dc1394framerate_t;
+*******************************************/
+
+/*******************************************
+** Trigger modes                          **
+********************************************
+typedef enum {
+  DC1394_TRIGGER_MODE_0  = 352,
+  DC1394_TRIGGER_MODE_1  = 353,
+  DC1394_TRIGGER_MODE_2  = 354,
+  DC1394_TRIGGER_MODE_3  = 355,
+  DC1394_TRIGGER_MODE_4  = 356,
+  DC1394_TRIGGER_MODE_5  = 357,
+  DC1394_TRIGGER_MODE_14 = 358,
+  DC1394_TRIGGER_MODE_15 = 359
+} dc1394trigger_mode_t;
+#define DC1394_TRIGGER_MODE_MIN \
+        DC1394_TRIGGER_MODE_0
+#define DC1394_TRIGGER_MODE_MAX \
+        DC1394_TRIGGER_MODE_15
+#define DC1394_TRIGGER_MODE_NUM \
+        (DC1394_TRIGGER_MODE_MAX - \
+         DC1394_TRIGGER_MODE_MIN + 1)
+*******************************************/
+
+/*******************************************
+** Trigger sources                        **
+********************************************
+typedef enum {
+  DC1394_TRIGGER_SOURCE_0 = 576,
+  DC1394_TRIGGER_SOURCE_1 = 577,
+  DC1394_TRIGGER_SOURCE_2 = 578,
+  DC1394_TRIGGER_SOURCE_3 = 579
+} dc1394trigger_source_t;
+#define DC1394_TRIGGER_SOURCE_MIN \
+        DC1394_TRIGGER_SOURCE_0
+#define DC1394_TRIGGER_SOURCE_MAX \
+        DC1394_TRIGGER_SOURCE_3
+#define DC1394_TRIGGER_SOURCE_NUM \
+        (DC1394_TRIGGER_SOURCE_MAX - \
+         DC1394_TRIGGER_SOURCE_MIN + 1)
+*******************************************/
+
+/*******************************************
+** Trigger polarity                       **
+********************************************
+typedef enum {
+  DC1394_TRIGGER_ACTIVE_LOW  = 0,
+  DC1394_TRIGGER_ACTIVE_HIGH = 1
+} dc1394trigger_polarity_t;
 *******************************************/
 
 
@@ -149,6 +198,8 @@ public:
     int GetFormat(svlVideoCaptureSource::ImageFormat& format, unsigned int videoch = 0);
     int SetImageProperties(svlVideoCaptureSource::ImageProperties& properties, unsigned int videoch = 0);
     int GetImageProperties(svlVideoCaptureSource::ImageProperties& properties, unsigned int videoch = 0);
+    int SetTrigger(svlVideoCaptureSource::ExternalTrigger & trigger, unsigned int videoch = 0);
+    int GetTrigger(svlVideoCaptureSource::ExternalTrigger & trigger, unsigned int videoch = 0);
 
 private:
     unsigned int NumOfStreams;
@@ -171,6 +222,7 @@ private:
     dc1394speed_t* BestISOSpeed;
     int* DeviceID;
     svlVideoCaptureSource::ImageFormat** Format;
+    svlVideoCaptureSource::ExternalTrigger* Trigger;
     int* Width;
     int* Height;
     unsigned int* ColorCoding;
