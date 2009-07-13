@@ -799,6 +799,34 @@ void vctFixedSizeVectorTest::TestFastCopyOfInt(void) {
 
 
 template <class _elementType>
+void vctFixedSizeVectorTest::TestZeros(void) {
+    enum {SIZE = 7};
+    typedef _elementType value_type;
+    
+    // dynamic vector
+    vctFixedSizeVector<value_type, 2 * SIZE> destination;
+    CPPUNIT_ASSERT(destination.Zeros());
+    CPPUNIT_ASSERT(destination.Equal(static_cast<value_type>(0)));
+
+    // test for not compact (every other element)
+    vctFixedSizeVectorRef<value_type, SIZE, 2> nonCompact(destination.Pointer());
+    CPPUNIT_ASSERT(!nonCompact.Zeros());
+    CPPUNIT_ASSERT(nonCompact.Equal(static_cast<value_type>(0)));
+}
+
+void vctFixedSizeVectorTest::TestZerosDouble(void) {
+    TestZeros<double>();
+}
+void vctFixedSizeVectorTest::TestZerosFloat(void) {
+    TestZeros<float>();
+}
+void vctFixedSizeVectorTest::TestZerosInt(void) {
+    TestZeros<int>();
+}
+
+
+
+template <class _elementType>
 void vctFixedSizeVectorTest::TestNormalization(void) {
     enum {SIZE = 9};
     typedef _elementType value_type;

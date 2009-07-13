@@ -765,6 +765,12 @@ void vctDynamicVectorTest::TestFastCopyOf(void) {
     vctFixedSizeVectorRef<value_type, SIZE, 2> invalidRefFixed(largerVectorFixed.Pointer());
     CPPUNIT_ASSERT(!destination.FastCopyCompatible(invalidRefFixed));
     CPPUNIT_ASSERT(!destination.FastCopyOf(invalidRefFixed));
+
+    // test for empty containers
+    validSource.SetSize(0);
+    destination.SetSize(0);
+    CPPUNIT_ASSERT(destination.FastCopyCompatible(validSource));
+    CPPUNIT_ASSERT(destination.FastCopyOf(validSource));
 }
 
 void vctDynamicVectorTest::TestFastCopyOfDouble(void) {
@@ -775,6 +781,38 @@ void vctDynamicVectorTest::TestFastCopyOfFloat(void) {
 }
 void vctDynamicVectorTest::TestFastCopyOfInt(void) {
     TestFastCopyOf<int>();
+}
+
+
+
+template <class _elementType>
+void vctDynamicVectorTest::TestZeros(void) {
+    enum {SIZE = 7};
+    typedef _elementType value_type;
+    
+    // dynamic vector
+    vctDynamicVector<value_type> destination(2 * SIZE);
+    CPPUNIT_ASSERT(destination.Zeros());
+    CPPUNIT_ASSERT(destination.Equal(static_cast<value_type>(0)));
+
+    // test for not compact (every other element)
+    vctDynamicVectorRef<value_type> nonCompact(SIZE, destination.Pointer(), 2);
+    CPPUNIT_ASSERT(!nonCompact.Zeros());
+    CPPUNIT_ASSERT(nonCompact.Equal(static_cast<value_type>(0)));
+
+    // test for empty containers
+    destination.SetSize(0);
+    CPPUNIT_ASSERT(destination.Zeros());
+}
+
+void vctDynamicVectorTest::TestZerosDouble(void) {
+    TestZeros<double>();
+}
+void vctDynamicVectorTest::TestZerosFloat(void) {
+    TestZeros<float>();
+}
+void vctDynamicVectorTest::TestZerosInt(void) {
+    TestZeros<int>();
 }
 
 

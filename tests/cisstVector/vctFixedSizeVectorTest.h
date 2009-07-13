@@ -134,6 +134,10 @@ class vctFixedSizeVectorTest : public CppUnit::TestFixture
     CPPUNIT_TEST(TestFastCopyOfFloat);
     CPPUNIT_TEST(TestFastCopyOfInt);
 
+    CPPUNIT_TEST(TestZerosDouble);
+    CPPUNIT_TEST(TestZerosFloat);
+    CPPUNIT_TEST(TestZerosInt);
+
     CPPUNIT_TEST(TestNormalizationDouble);
     CPPUNIT_TEST(TestNormalizationFloat);
 
@@ -320,6 +324,13 @@ class vctFixedSizeVectorTest : public CppUnit::TestFixture
     void TestFastCopyOfDouble(void);
     void TestFastCopyOfFloat(void);
     void TestFastCopyOfInt(void);
+
+    /*! Test Zeros */
+    template<class _elementType>
+        void TestZeros(void);
+    void TestZerosDouble(void);
+    void TestZerosFloat(void);
+    void TestZerosInt(void);
 
     /*! Test Normalization */
     template<class _elementType>
