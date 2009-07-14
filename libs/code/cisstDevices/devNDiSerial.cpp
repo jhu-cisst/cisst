@@ -1379,7 +1379,7 @@ void Tool::SetPosition(prmPositionCartesianGet position)
 
 void Tool::SetTranslation(double x, double y, double z)
 {
-    prmCartesianPosition temp;
+    vctDoubleFrm3 temp;
     PositionCartesian.GetPosition(temp);
     temp.Translation().Assign(x,y,z);
     PositionCartesian.SetPosition(temp);
@@ -1387,7 +1387,7 @@ void Tool::SetTranslation(double x, double y, double z)
 
 void Tool::SetRotation(double a, double b, double c, double d)
 {
-    prmCartesianPosition temp;
+    vctDoubleFrm3 temp;
     PositionCartesian.GetPosition(temp);
     temp.Rotation().Assign(a,b,c,d);
     PositionCartesian.SetPosition(temp);
@@ -1397,7 +1397,7 @@ void Tool::SetRotation(double a, double b, double c, double d)
 void Tool::SetTranslationAndQuaternion(double x, double y, double z, double a, double b, double c, double d)
 {
     //TODO Fix this
-    prmCartesianPosition temp;
+    vctDoubleFrm3 temp;
     PositionCartesian.Data.GetPosition(temp);
     temp.Translation().Assign(x,y,z);
     temp.Rotation().Assign(a,b,c,d);
@@ -1407,7 +1407,7 @@ void Tool::SetTranslationAndQuaternion(double x, double y, double z, double a, d
 
 void Tool::SetQuaternionAndTranslation(double a, double b, double c, double d, double x, double y, double z)
 {
-    prmCartesianPosition temp;
+    vctDoubleFrm3 temp;
     PositionCartesian.GetPosition(temp);
     temp.Translation().Assign(x,y,z);
     temp.Rotation().FromRaw(vctQuatRot3(b,c,d,a,VCT_DO_NOT_NORMALIZE));
@@ -1425,4 +1425,3 @@ double Tool::GetError(void)
     ToolInformation.GetError(error); 
     return error; 
 }
-

@@ -25,7 +25,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsGenericObject.h>
 #include <cisstMultiTask/mtsStateIndex.h>
-#include <cisstParameterTypes/prmTypes.h>
 
 #include <string>
 
