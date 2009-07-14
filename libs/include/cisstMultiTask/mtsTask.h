@@ -4,7 +4,7 @@
 /*
   $Id$
 
-  Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
+  Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet, Min Yang Jung
   Created on: 2004-04-30
 
   (C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights Reserved.
@@ -40,10 +40,11 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsCommandQueuedWrite.h>
 #include <cisstMultiTask/mtsDevice.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
+#include <cisstMultiTask/mtsHistory.h>
+#include <cisstMultiTask/mtsFunctionVoid.h>
 
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
-
 
 /*!
   \ingroup cisstMultiTask
@@ -54,11 +55,13 @@ http://www.cisst.org/cisst/license.txt.
   It is derived from mtsDevice, so it also contains the provided and required
   interfaces, with their lists of commands.
 */
+
 class CISST_EXPORT mtsTask: public mtsDevice
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
     friend class mtsTaskManager;
+    //friend class mtsCollectorState;
 
 public:
     typedef mtsDevice BaseType;
@@ -101,6 +104,11 @@ protected:
 
 	/*! The state data table object to store the states of the task. */
 	mtsStateTable StateTable;
+    
+    /*! Map of state tables, includes the default StateTable under the
+      name "StateTable" */
+    typedef cmnNamedMap<mtsStateTable> StateTableMapType;
+    StateTableMapType StateTables;
 
 	/*! True if the task took more time to do computation than allocated time.
 	  */
@@ -154,14 +162,14 @@ protected:
     void Sleep(double timeInSeconds);
 
     /*! Return the current tick count. */
-    mtsStateIndex::TimeTicksType GetTick() const { return StateTable.GetIndexWriter().Ticks(); }
+    mtsStateIndex::TimeTicksType GetTick(void) const;
 
     /*********** Methods for thread start data and return values **********/
 
     /*! Save any 'user data' that was passed to the thread start routine. */
-    virtual void SaveThreadStartData(void *data) { ThreadStartData = data; }
+    virtual void SaveThreadStartData(void * data);
 
-    virtual void SetThreadReturnValue(void *ret) { ReturnValue = ret; }
+    virtual void SetThreadReturnValue(void * returnValue);
 
 public:
     /********************* Task constructor and destructor *****************/
@@ -182,10 +190,11 @@ public:
 
         \sa mtsDevice, mtsTaskContinuous, mtsTaskPeriodic, mtsTaskFromCallback
 	 */
-	mtsTask(const std::string & name, unsigned int sizeStateTable = 256);
+    mtsTask(const std::string & name, 
+            unsigned int sizeStateTable = 256);
 
-	/*! Default Destructor. */
-	virtual ~mtsTask();
+    /*! Default Destructor. */
+    virtual ~mtsTask();
 
     /********************* Methods to be defined by user *****************/
     /* The Run, Startup, and Cleanup methods could be made protected.    */
@@ -249,6 +258,14 @@ public:
 
     /*! Return the average period. */
     double GetAveragePeriod(void) const { return StateTable.GetAveragePeriod(); }
+
+    /*! Return the name of this state table. */
+    const std::string GetDefaultStateTableName(void) const { return StateTable.GetName(); }
+
+    /*! Return the pointer to the default state table or a specific one if a name is provided. */
+    mtsStateTable * GetStateTable(const std::string & stateTableName = MTS_STATE_TABLE_DEFAULT_NAME) {
+        return this->StateTables.GetItem(stateTableName, CMN_LOG_LOD_INIT_ERROR);
+    }
 
     /********************* Methods to manage interfaces *******************/
 	

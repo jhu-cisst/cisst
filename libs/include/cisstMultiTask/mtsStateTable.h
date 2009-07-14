@@ -4,7 +4,7 @@
 /*
   $Id$
 
-  Author(s):  Ankur Kapoor
+  Author(s):  Ankur Kapoor, Min Yang Jung
   Created on: 2004-04-30
 
   (C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights Reserved.
@@ -32,7 +32,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsStateArrayBase.h>
 #include <cisstMultiTask/mtsStateArray.h>
 #include <cisstMultiTask/mtsStateIndex.h>
-
+#include <cisstMultiTask/mtsHistory.h>
 
 #include <vector>
 #include <iostream>
@@ -40,13 +40,19 @@ http://www.cisst.org/cisst/license.txt.
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
 
+#define MTS_STATE_TABLE_DEFAULT_NAME "StateTable"
+
 // Forward declaration
 class osaTimeServer;
+class mtsCollectorState;
 
 /*! mtsStateDataId.  Unique identifier for the columns of the State
   Data Table.  Typedef'ed to an int */
 typedef int mtsStateDataId;
 
+// Enable this if you want to obtain the detailed information on running task's 
+// execution timing.
+#define TASK_TIMING_ANALYSIS
 
 /*!
   \ingroup cisstMultiTask
@@ -62,6 +68,33 @@ typedef int mtsStateDataId;
   State Table elsewhere in the documentation.
  */
 class CISST_EXPORT mtsStateTable {
+
+    friend class mtsCollectorState;
+    friend class mtsTaskTest;
+    friend class mtsStateTableTest;
+    friend class mtsCollectorBaseTest;
+
+    class DataCollectionInfoStruct {
+    public:
+        /* True if data collection event can be triggered (false by default). */
+        bool TriggerEnabled;
+
+        /*! Number of data that are newly generated and are to be fetched by the 
+        data collection tool. */
+        unsigned int NewDataCount;
+
+        /*! If NewDataCount becomes greater than this vaule, an event for data collection
+            is generated. Though this value is redundant in some respect (because
+            EventTriggeringRatio is already defined), this value is kept for the purpose 
+            of efficiency. */
+        unsigned int EventTriggeringLimit;
+
+        DataCollectionInfoStruct() : TriggerEnabled(false), NewDataCount(0), EventTriggeringLimit(0)
+        {}
+
+        ~DataCollectionInfoStruct() {}
+    };
+
 public:
     class AccessorBase {
     protected:
@@ -72,7 +105,7 @@ public:
         virtual ~AccessorBase() {}
         virtual void ToStream(std::ostream & outputStream, const mtsStateIndex & when) const = 0;
     };
-
+    
     template <class _elementType>
     class Accessor : public AccessorBase {
         typedef _elementType value_type;
@@ -81,35 +114,31 @@ public:
         value_type * Current;
 
     public:
-        Accessor(const mtsStateTable &table, mtsStateDataId id, 
-                 const mtsStateArray<value_type> *history, value_type *data):
-            AccessorBase(table, id),
-            History(*history),
-            Current(data)
-        {}
+        Accessor(const mtsStateTable & table, mtsStateDataId id, 
+                 const mtsStateArray<value_type> * history, value_type * data):
+            AccessorBase(table, id), History(*history), Current(data) {}
 
-        void ToStream(std::ostream & outputStream, const mtsStateIndex & when) const
-        {
+        void ToStream(std::ostream & outputStream, const mtsStateIndex & when) const {
             History.Element(when.Index()).ToStream(outputStream);
         }
-
-
-        bool Get(const mtsStateIndex & when, value_type & data) const
-        { 
-		   data = History.Element(when.Index());
-           return Table.ValidateReadIndex(when);
+        
+        bool Get(const mtsStateIndex & when, value_type & data) const { 
+            data = History.Element(when.Index());
+            return Table.ValidateReadIndex(when);
         }
 
-        bool GetLatest(value_type & data) const
-        {  return Get(Table.GetIndexReader(), data); }
-
-        void SetCurrent(const value_type & data)
-        { *Current = data; }
-
+        bool GetLatest(value_type & data) const {
+            return Get(Table.GetIndexReader(), data);
+        }
+        
+        void SetCurrent(const value_type & data) {
+            *Current = data;
+        }
+        
         // Get a vector of data, starting and ending at the specified time indices (inclusive).
         // For now, set the start index based on the vector size. In the future, we
         // should define a new parameter type that consists of a pair of mtsStateIndex.
-        bool GetHistory(const mtsStateIndex & end, mtsVector<value_type> & data) const {
+        bool GetHistory(const mtsStateIndex & end, mtsHistory<value_type> & data) const {
             bool ret = false;
             if (data.size() > 0) {
                 mtsStateIndex start = end;
@@ -128,7 +157,8 @@ public:
         }
     };
 
-protected:
+ protected:
+
 	/*! The number of rows of the state data table. */
 	unsigned int HistoryLength;
 	
@@ -169,17 +199,7 @@ protected:
     /*! The time server used to provide absolute and relative times. */
     const osaTimeServer * TimeServer;
 
-    /*! The sum of all the periods (time differences between
-        consecutive Tic values); used to compute average period. */
-    double SumOfPeriods;
-
-    /*! The average period over the last HistoryLength samples. */
-    double AvgPeriod;
-
-	/*! Write specified data. */
-	bool Write(mtsStateDataId id, const mtsGenericObject &obj);
-
- public:
+public:
 
     /* The start/end times for the current row of data. */
     mtsDouble Tic, Toc;
@@ -188,42 +208,72 @@ protected:
         previous Tic). */
     mtsDouble Period;
 
-	/*! Constructor. Constructs a state table with a default
-	  size of 256 rows. */
-	mtsStateTable(int size = 256);
+ protected:
+    /*! The sum of all the periods (time differences between
+        consecutive Tic values); used to compute average period. */
+    double SumOfPeriods;
 
-	/*! Default destructor. Does nothing */
-	~mtsStateTable() {}
+    /*! The average period over the last HistoryLength samples. */
+    double AvgPeriod;
 
-	/*! Get a handle for data to be used by a reader.  All the const
+    /*! The name of this state table. */
+    std::string StateTableName;
+
+    /*! Data collection event handler. */
+    mtsCommandVoidBase * DataCollectionEventHandler;
+
+    DataCollectionInfoStruct DataCollectionInfo;
+
+#ifdef TASK_TIMING_ANALYSIS
+    std::vector<mtsDouble> ExecutionTimingHistory;
+    std::vector<mtsDouble> PeriodHistory;
+#endif
+
+	/*! Write specified data. */
+	bool Write(mtsStateDataId id, const mtsGenericObject &obj);
+
+ public:
+    /*! Constructor. Constructs a state table with a default
+      size of 256 rows. */
+    mtsStateTable(int size = 256, const std::string & stateTableName = MTS_STATE_TABLE_DEFAULT_NAME);
+    
+    /*! Default destructor. */
+    ~mtsStateTable();
+
+    /*! Get a handle for data to be used by a reader.  All the const
       methods, that can be called from a reader and writer. */
-	mtsStateIndex GetIndexReader(void) const;
+    mtsStateIndex GetIndexReader(void) const;
 
     inline void GetIndexReader(mtsStateIndex & timeIndex) const {
         timeIndex = GetIndexReader();
     }
 
-	/*! Verifies if the data is valid. */
-	inline bool ValidateReadIndex(const mtsStateIndex &timeIndex) const {
+    /*! Verifies if the data is valid. */
+    inline bool ValidateReadIndex(const mtsStateIndex &timeIndex) const {
         return (Ticks[timeIndex.Index()] == timeIndex.Ticks());
     }
     
-	/*! Add an element to the table. Should be called during startup
-	    of a real time loop.  All the non-const methods, that can be
-	    called from a writer only. Returns index of data within state data table. */
-	template <class _elementType>
+    /*! Check if the signal has been registered. */
+    int GetStateVectorID(const std::string & dataName) const;
+
+    /*! Add an element to the table. Should be called during startup
+      of a real time loop.  All the non-const methods, that can be
+      called from a writer only. Returns index of data within state
+      data table. */
+    template <class _elementType>
     mtsStateDataId NewElement(const std::string & name = "", _elementType * element = 0);
 
     /*! Add an element to the table (alternative to NewElement). */
     template <class _elementType>
-    void AddData(_elementType &element, const std::string & name = "")
-    { NewElement(name, &element); }
+    void AddData(_elementType &element, const std::string & name = "") {
+        NewElement(name, &element);
+    }
 
     /*! Return pointer to the state data element specified by the id.
       This element is the same type as the state data table entry. */
     template<class _elementType>
     _elementType * GetStateDataElement(mtsStateDataId id) const {
-        return StateVectorElements[id];
+        return StateVectorElements[id]; // WEIRD???
     }
 
     /*! Return pointer to accessor functions for the state data element.
@@ -240,23 +290,24 @@ protected:
     */
     mtsStateTable::AccessorBase *GetAccessor(const std::string &name) const;
 
-	/*! Get a handle for data to be used by a writer */
-	mtsStateIndex GetIndexWriter(void) const;
+    /*! Get a handle for data to be used by a writer */
+    mtsStateIndex GetIndexWriter(void) const;
 
     /*! Start the current cycle. This just records the starting timestamp (Tic). */
     void Start(void);
 
-	/*! Advance the pointers of the circular buffer. Note that since there is only a single
-        writer, it is not necessary to use mutual exclusion primitives; the critical section
-        can be handled by updating (incrementing) the write index before the read index.
-	 */
-	void Advance(void);
+    /*! Advance the pointers of the circular buffer. Note that since
+      there is only a single writer, it is not necessary to use mutual
+      exclusion primitives; the critical section can be handled by
+      updating (incrementing) the write index before the read index.
+    */
+    void Advance(void);
 
     double GetTic(void) const { return Tic.Data; }
     double GetToc(void) const { return Toc.Data; }
 
     /*! Return the moving average of the measured period (i.e., average of last
-        HistoryLength values). */
+      HistoryLength values). */
     double GetAveragePeriod(void) const { return AvgPeriod; }
 
     /*! For debugging, dumps the current data table to output
@@ -275,8 +326,55 @@ protected:
      */
     void CSVWrite(std::ostream& out, bool nonZeroOnly = false);
     void CSVWrite(std::ostream& out, unsigned int * listColumn, unsigned int number, bool nonZeroOnly = false);
-    void CSVWrite(std::ostream& out, mtsGenericObject ** listColumn, unsigned int number, bool nonZeroOnly = false);
+
+    void CSVWrite(std::ostream& out, mtsGenericObject ** listColumn, unsigned int number, bool nonZeroOnly);
+    
+    /*! A base column index of StateTable for a signal registered by user. */
+    static int StateVectorBaseIDForUser;
+    
+    //-------------------------------------------------------------------------
+    //  Data Collection
+    //-------------------------------------------------------------------------
+    /*! Fetch state table data. */
+    //void GetStateTableHistory(mtsDoubleVecHistory & history,
+    //                          const unsigned int signalIndex,
+    //                          const unsigned int lastFetchIndex);
+    
+    /*! Return the name of this state table. */
+    const std::string GetName(void) const { return StateTableName; }
+    
+    /*! Enable data collection event trigger. */
+    void ResetDataCollectionTrigger(void) { 
+        DataCollectionInfo.TriggerEnabled = true;
+    }
+    
+    /*! Set an event handler to inform the data collector about the
+      event that data in this state table is populated. */
+    void SetDataCollectionEventHandler(mtsCollectorState * collector);
+    
+    /*! Determine a ratio to generate a data collection event. */
+    void SetDataCollectionEventTriggeringRatio(const double eventTriggeringRatio);
+    
+    void GenerateDataCollectionEvent(void);
+
+#ifdef TASK_TIMING_ANALYSIS
+    void GetTimingAnalysisData(std::vector<mtsDouble>& vecExecutionTime,
+                               std::vector<mtsDouble>& vecPeriod);
+#endif
 };
+
+
+// overload mtsObjectName to provide the class name
+inline std::string mtsObjectName(const mtsStateTable * object)
+{
+    return object->GetName();
+}
+
+// overload mtsObjectName for mtsStateTable::Accessor
+template <class _elementType>
+inline std::string mtsObjectName(const mtsStateTable::Accessor<_elementType> * CMN_UNUSED(accessor)) {
+    return "mtsStateTable::Accessor";
+}
 
 
 template <class _elementType>
@@ -288,23 +386,10 @@ mtsStateDataId mtsStateTable::NewElement(const std::string & name, _elementType 
     NumberStateData = StateVector.size();
     StateVectorElements.push_back(element); 
     StateVectorDataNames.push_back(name);
-    AccessorBase *acc = new Accessor<_elementType>(*this, NumberStateData-1, elementHistory, element);
-    StateVectorAccessors.push_back(acc);
+    AccessorBase * accessor = new Accessor<_elementType>(*this, NumberStateData-1, elementHistory, element);
+    StateVectorAccessors.push_back(accessor);
     return NumberStateData-1;
 }
-
-
-// overload mtsObjectName for mtsStateTable
-inline std::string mtsObjectName(const mtsStateTable * CMN_UNUSED(object)) {
-    return "mtsStateTable";
-}
-
-// overload mtsObjectName for mtsStateTable::Accessor
-template <class _elementType>
-inline std::string mtsObjectName(const mtsStateTable::Accessor<_elementType> * CMN_UNUSED(accessor)) {
-    return "mtsStateTable::Accessor";
-}
-
 
 #endif // _mtsStateTable_h
 

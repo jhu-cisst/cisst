@@ -97,6 +97,17 @@ public:
         }
     }
 
+    virtual void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
+                             bool headerOnly = false, const std::string & headerPrefix = "") const {
+        if (headerOnly) {
+            outputStream << headerPrefix << "-timestamp" << delimiter
+                         << headerPrefix << "-valid";
+        } else {
+            outputStream << this->Timestamp() << delimiter
+                         << this->Valid();
+        } 
+    }
+
 };
 
 

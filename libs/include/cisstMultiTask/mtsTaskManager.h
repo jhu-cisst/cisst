@@ -50,6 +50,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 class CISST_EXPORT mtsTaskManager: public cmnGenericObject {
     
+    friend class mtsTaskManagerTest;
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
     
     /*! Typedef for task name and pointer map. */
@@ -105,6 +106,9 @@ protected:
 
     /*! Put a task under the control of the Manager. */
     bool AddTask(mtsTask * task);
+
+    /*! Pull out a task from the Manager. */
+    bool RemoveTask(mtsTask * task);
 
     /*! Put a device under the control of the Manager. */
     bool AddDevice(mtsDevice * device);

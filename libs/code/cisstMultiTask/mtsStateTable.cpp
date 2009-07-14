@@ -4,7 +4,7 @@
 /*
   $Id$
 
-  Author(s):  Ankur Kapoor
+  Author(s):  Ankur Kapoor, Min Yang Jung
   Created on: 2004-04-30
 
   (C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights Reserved.
@@ -18,23 +18,32 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+#include <cisstCommon/cmnAssert.h>
 #include <cisstOSAbstraction/osaTimeServer.h>
 #include <cisstMultiTask/mtsStateTable.h>
 #include <cisstMultiTask/mtsTaskManager.h>
-#include <cisstCommon/cmnAssert.h>
+#include <cisstMultiTask/mtsCollectorState.h>
 
 #include <iostream>
 #include <string>
 
-mtsStateTable::mtsStateTable(int size) :
-		HistoryLength(size), NumberStateData(0), IndexWriter(0),IndexReader(0),
-		StateVector(NumberStateData), StateVectorDataNames(NumberStateData),
-        Ticks(size, mtsStateIndex::TimeTicksType(0)),
-        Tic(0.0),
-        Toc(0.0),
-        Period(0.0),
-        SumOfPeriods(0.0),
-        AvgPeriod(0.0)
+int mtsStateTable::StateVectorBaseIDForUser;
+
+mtsStateTable::mtsStateTable(int size, const std::string & stateTableName):
+    HistoryLength(size),
+    NumberStateData(0),
+    IndexWriter(0),
+    IndexReader(0),
+    StateVector(NumberStateData),
+    StateVectorDataNames(NumberStateData),
+    Ticks(size, mtsStateIndex::TimeTicksType(0)),
+    Tic(0.0),
+    Toc(0.0),
+    Period(0.0),
+    SumOfPeriods(0.0),
+    AvgPeriod(0.0),
+    StateTableName(stateTableName), 
+    DataCollectionEventHandler(NULL)
 {
 
     // Get a pointer to the time server
@@ -46,8 +55,24 @@ mtsStateTable::mtsStateTable(int size) :
     TicId = NewElement("Tic", &Tic);
     // Add Period to the StateTable.
     PeriodId = NewElement("Period", &Period);
+
+    // Currently there are three signals maintained internally at StateTable.
+    // : "Toc", "Tic", "Period". So the value of StateVectorBaseIDForUser is 
+    // set to 3.
+    StateVectorBaseIDForUser = StateVector.size();
+
+#ifdef TASK_TIMING_ANALYSIS
+    ExecutionTimingHistory.clear();
+    PeriodHistory.clear();
+#endif
 }
 
+mtsStateTable::~mtsStateTable()
+{
+    if (DataCollectionEventHandler) {
+        delete DataCollectionEventHandler;
+    }
+}
 /* All the const methods that can be called from reader or writer */
 
 mtsStateIndex mtsStateTable::GetIndexReader(void) const {
@@ -106,6 +131,9 @@ void mtsStateTable::Start(void) {
         mtsDouble oldTic;
         StateVector[TicId]->Get(IndexReader, oldTic);
         Period = Tic - oldTic;  // in seconds
+#ifdef TASK_TIMING_ANALYSIS
+        PeriodHistory.push_back(Period);
+#endif
     }
 }
 
@@ -151,28 +179,49 @@ void mtsStateTable::Advance(void) {
         }
     }
     // Get the Toc value and write it to the state table.
-    if (TimeServer)
+    if (TimeServer) {
     	Toc = TimeServer->GetRelativeTime(); // in seconds
+#ifdef TASK_TIMING_ANALYSIS
+        mtsDouble executionTime = Toc - Tic;
+        ExecutionTimingHistory.push_back(executionTime);
+#endif
+    }
     Write(TocId, Toc);
     // now increment the IndexWriter and set its Tick value
     IndexWriter = newIndexWriter;
     Ticks[IndexWriter] = Ticks[tmpIndex] + 1;
     // move index reader to recently written data
     IndexReader = tmpIndex;
+
+    // Check if data collection event should be generated.
+    if (DataCollectionEventHandler) {
+        ++DataCollectionInfo.NewDataCount;
+
+        if (DataCollectionInfo.TriggerEnabled) {
+            // Check if the event for data collection should be triggered.
+            if (DataCollectionInfo.NewDataCount > DataCollectionInfo.EventTriggeringLimit) {
+                DataCollectionEventHandler->Execute();
+
+                DataCollectionInfo.NewDataCount = 0;
+                DataCollectionInfo.TriggerEnabled = false;
+            }
+        }
+    }
 }
 
-void mtsStateTable::ToStream(std::ostream& out) const {
-    out << "State Table: " << std::endl;
+void mtsStateTable::ToStream(std::ostream & outputStream) const {
+    outputStream << "State Table: " << this->GetName() << std::endl;
     unsigned int i;
-    out << "Ticks : ";
+    outputStream << "Ticks : ";
     for (i = 0; i < StateVector.size() - 1; i++) {
         if (!StateVectorDataNames[i].empty())
-            out << "[" << i << "]"
-                << StateVectorDataNames[i].c_str() << " : ";
+            outputStream << "[" << i << "]"
+                         << StateVectorDataNames[i].c_str() << " : ";
     }
-    out << "[" << i << "]"
-        << StateVectorDataNames[i].c_str() << std::endl;
-    
+    outputStream << "[" << i << "]"
+                 << StateVectorDataNames[i].c_str() << std::endl;
+#if 0
+    // the following is a data dump, it should go in ToStreamRaw
     for (i = 0; i < HistoryLength; i++) {
         out << i << ": ";
         out << Ticks[i] << ": ";
@@ -189,6 +238,7 @@ void mtsStateTable::ToStream(std::ostream& out) const {
             out << "<== Index for Writer";
         out << std::endl;
     }
+#endif
 }
 
 
@@ -275,4 +325,50 @@ void mtsStateTable::CSVWrite(std::ostream& out, mtsGenericObject ** listColumn, 
     }
     CSVWrite(out, listColumnId, number, nonZeroOnly);
     delete [] listColumnId;
+}
+
+int mtsStateTable::GetStateVectorID(const std::string & dataName) const
+{
+	for (unsigned int i = 0; i < StateVectorDataNames.size(); i++) {
+        if (StateVectorDataNames[i] == dataName) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+void mtsStateTable::GetTimingAnalysisData(std::vector<mtsDouble> & vecExecutionTime,
+                                          std::vector<mtsDouble> & vecPeriod)
+{
+#define COPY_VECTOR(_src, _dest)\
+    _dest.clear();\
+    _dest.insert(_dest.begin(), _src.begin(), _src.end());
+    
+    COPY_VECTOR(ExecutionTimingHistory, vecExecutionTime);
+    COPY_VECTOR(PeriodHistory, vecPeriod);
+#undef COPY_VECTOR
+}
+
+void mtsStateTable::SetDataCollectionEventHandler(mtsCollectorState * collector)
+{
+    DataCollectionEventHandler = new mtsCommandVoidMethod<mtsCollectorState>(
+        &mtsCollectorState::DataCollectionEventHandler, collector, collector->GetName());
+    
+    CMN_ASSERT(DataCollectionEventHandler);
+}
+
+void mtsStateTable::SetDataCollectionEventTriggeringRatio(const double eventTriggeringRatio)
+{
+    DataCollectionInfo.EventTriggeringLimit = 
+        (unsigned int) (HistoryLength * eventTriggeringRatio);
+}
+
+void mtsStateTable::GenerateDataCollectionEvent() 
+{
+    if (DataCollectionEventHandler) {
+        //
+        //  TODO: REPLACE THE FOLLOWING LINE WITH mtsVoidFunction.
+        //
+        DataCollectionEventHandler->Execute();
+    }
 }

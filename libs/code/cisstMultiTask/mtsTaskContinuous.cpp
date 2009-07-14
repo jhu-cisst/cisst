@@ -34,19 +34,19 @@ void * mtsTaskContinuous::RunInternal(void *data)
             return 0;
     }
 
-	while ((TaskState == ACTIVE) || (TaskState == READY)) {
+    while ((TaskState == ACTIVE) || (TaskState == READY)) {
         while (TaskState == READY) {
             // Suspend the task until there is a call to Start().
-            CMN_LOG_CLASS_INIT_VERBOSE << Name << ": Wait to start." << std::endl;
+            CMN_LOG_CLASS_INIT_VERBOSE << "RunInternal: " << this->GetName() << " Wait to start." << std::endl;
             WaitForWakeup();
         }
         if (TaskState == ACTIVE)
             DoRunInternal();
-	}
+    }
 
-	CMN_LOG_CLASS_RUN_WARNING << "End of task " << Name << std::endl;
-	CleanupInternal();
-	return this->ReturnValue;
+    CMN_LOG_CLASS_INIT_VERBOSE << "RunInternal: ending task " << this->GetName() << std::endl;
+    CleanupInternal();
+    return this->ReturnValue;
 }
 
 void mtsTaskContinuous::StartInternal(void)
@@ -56,7 +56,9 @@ void mtsTaskContinuous::StartInternal(void)
 
 /********************* Task constructor and destructor *****************/
 
-mtsTaskContinuous::mtsTaskContinuous(const std::string & name, unsigned int sizeStateTable, bool newThread):
+mtsTaskContinuous::mtsTaskContinuous(const std::string & name, 
+                                     unsigned int sizeStateTable, 
+                                     bool newThread):
     mtsTask(name, sizeStateTable),
     NewThread(newThread),
     CaptureThread(false)
@@ -65,7 +67,7 @@ mtsTaskContinuous::mtsTaskContinuous(const std::string & name, unsigned int size
 
 
 mtsTaskContinuous::~mtsTaskContinuous() {
-    CMN_LOG_CLASS_RUN_WARNING << "Deleting task " << Name << ", current state = " << GetTaskStateName() << std::endl;
+    CMN_LOG_CLASS_INIT_VERBOSE << "Deleting task " << this->GetName() << ", current state = " << GetTaskStateName() << std::endl;
     //If the task was waiting on a queue, i.e. semaphore, mailbox,
     //etc, it is removed from such a queue and messaging tasks
     //pending on its message queue are unblocked with an error return.
@@ -76,7 +78,7 @@ mtsTaskContinuous::~mtsTaskContinuous() {
         // If thread not dead, delete it.
         if (NewThread) {
             Thread.Delete();
-            CMN_LOG_CLASS_RUN_ERROR << "mtsTaskContinuous destructor: Deleting thread" << std::endl;
+            CMN_LOG_CLASS_INIT_VERBOSE << "mtsTaskContinuous destructor: Deleting thread for " << this->GetName() << std::endl;
         }
     }
 }
@@ -87,19 +89,19 @@ mtsTaskContinuous::~mtsTaskContinuous() {
 void mtsTaskContinuous::Create(void *data)
 {
     if (TaskState != CONSTRUCTED) {
-        CMN_LOG_CLASS_INIT_ERROR << "task " << Name << " cannot be created, state = "
+        CMN_LOG_CLASS_INIT_ERROR << "Create: task " << this->GetName() << " cannot be created, state = "
                                  << GetTaskStateName() << std::endl;
         return;
     }
     if (NewThread) {
-	    CMN_LOG_CLASS_INIT_VERBOSE << "Creating thread for task " << Name << std::endl;
+	    CMN_LOG_CLASS_INIT_VERBOSE << "Create: creating thread for task " << this->GetName() << std::endl;
         // Lock the StateChange mutex and unlock it when the thread starts running (in RunInternal)
         StateChange.Lock();
         TaskState = INITIALIZING;
 	    Thread.Create<mtsTaskContinuous, void*>(this, &mtsTaskContinuous::RunInternal, data);
     }
     else {
-	    CMN_LOG_CLASS_INIT_VERBOSE << "Using current thread for task " << Name << std::endl;
+	    CMN_LOG_CLASS_INIT_VERBOSE << "Create: using current thread for task " << this->GetName() << std::endl;
         Thread.CreateFromCurrentThread();
         CaptureThread = true;
         StateChange.Lock();
@@ -115,30 +117,30 @@ void mtsTaskContinuous::Start(void)
         WaitToStart(3.0);   // 3 seconds
     }
     if (TaskState == READY) {
-        CMN_LOG_CLASS_RUN_ERROR << "Starting task " << Name << std::endl;
+        CMN_LOG_CLASS_INIT_VERBOSE << "Start: starting task " << this->GetName() << std::endl;
         StateChange.Lock();
         TaskState = ACTIVE;
         StateChange.Unlock();
         if (CaptureThread) {
             if (Thread.GetId() != osaGetCurrentThreadId()) {
-                CMN_LOG_CLASS_INIT_ERROR << "Cannot start task " << Name << " (wrong thread)" << std::endl;
+                CMN_LOG_CLASS_INIT_ERROR << "Start: cannot start task " << this->GetName() << " (wrong thread)" << std::endl;
                 return;
             }
             CaptureThread = false;
-            CMN_LOG_CLASS_RUN_ERROR << "Started task " << Name << " with current thread" << std::endl;
+            CMN_LOG_CLASS_INIT_VERBOSE << "Start: started task " << this->GetName() << " with current thread" << std::endl;
             RunInternal(ThreadStartData);
         }
         StartInternal();
-        CMN_LOG_CLASS_RUN_ERROR << "Started task " << Name << std::endl;
+        CMN_LOG_CLASS_INIT_VERBOSE << "Start: started task " << this->GetName() << std::endl;
     }
     else
-        CMN_LOG_CLASS_INIT_ERROR << "Could not start task " << Name << ", state = " << GetTaskStateName() << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "Start: could not start task " << this->GetName() << ", state = " << GetTaskStateName() << std::endl;
 }
 
 void mtsTaskContinuous::Suspend(void)
 {
     if (TaskState == ACTIVE) {
-        CMN_LOG_CLASS_RUN_ERROR << "Suspending task " << Name << std::endl;
+        CMN_LOG_CLASS_RUN_VERBOSE << "Suspend: suspending task " << this->GetName() << std::endl;
         StateChange.Lock();
         TaskState = READY;
         StateChange.Unlock();

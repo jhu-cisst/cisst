@@ -44,7 +44,7 @@ void * mtsTaskFromCallback::RunInternal(void *data) {
         DoRunInternal();
 
     if (TaskState == FINISHING) {
-    	CMN_LOG_CLASS_RUN_WARNING << "End of task " << Name << std::endl;
+    	CMN_LOG_CLASS_INIT_VERBOSE << "RunInternal: end of task " << this->GetName() << std::endl;
         this->CleanupInternal();
     }
     // Make copy on stack before clearing inRunInternal
@@ -56,7 +56,7 @@ void * mtsTaskFromCallback::RunInternal(void *data) {
 void mtsTaskFromCallback::StartupInternal(void)
 {
     if (!Thread.IsValid()) {
-        CMN_LOG_CLASS_RUN_ERROR << "Initializing thread for callback task " << Name << std::endl;
+        CMN_LOG_CLASS_INIT_VERBOSE << "StartupInternal: initializing thread for callback task " << this->GetName() << std::endl;
         Thread.CreateFromCurrentThread();
     }
     BaseType::StartupInternal();
@@ -67,7 +67,7 @@ void mtsTaskFromCallback::StartupInternal(void)
 void mtsTaskFromCallback::Create(void *data)
 {
     if (TaskState != CONSTRUCTED) {
-        CMN_LOG_CLASS_INIT_ERROR << "task " << Name << " cannot be created, state = "
+        CMN_LOG_CLASS_INIT_ERROR << "Create: task " << this->GetName() << " cannot be created, state = "
                                  << GetTaskStateName() << std::endl;
         return;
     }
@@ -80,23 +80,23 @@ void mtsTaskFromCallback::Start(void)
     if (TaskState == INITIALIZING)
         WaitToStart(3.0);
     if (TaskState == READY) {
-        CMN_LOG_CLASS_RUN_ERROR << "Starting task " << Name << std::endl;
+        CMN_LOG_CLASS_INIT_VERBOSE << "Start: starting task " << this->GetName() << std::endl;
         StateChange.Lock();
         TaskState = ACTIVE;
         StateChange.Unlock();
+    } else {
+        CMN_LOG_CLASS_INIT_ERROR << "Start: could not start task " << this->GetName() << ", state = " << GetTaskStateName() << std::endl;
     }
-    else
-        CMN_LOG_CLASS_INIT_ERROR << "Could not start task " << Name << ", state = " << GetTaskStateName() << std::endl;
 }
 
 void mtsTaskFromCallback::Suspend(void)
 {
     if (TaskState == ACTIVE) {
-        CMN_LOG_CLASS_RUN_ERROR << "Suspending task " << Name << std::endl;
+        CMN_LOG_CLASS_RUN_VERBOSE << "Suspend: suspending task " << this->GetName() << std::endl;
         StateChange.Lock();
         TaskState = READY;
         StateChange.Unlock();
-        CMN_LOG_CLASS_RUN_ERROR << "Suspended task " << Name << std::endl;
+        CMN_LOG_CLASS_RUN_VERBOSE << "Suspend: suspended task " << this->GetName() << std::endl;
     }
 }
 

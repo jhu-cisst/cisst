@@ -42,18 +42,21 @@ http://www.cisst.org/cisst/license.txt.
   \sa mtsStateArray */
 class mtsStateArrayBase {
 protected:
-	/*! Protected constructor. Does nothing. */
-	inline mtsStateArrayBase(void){};
+    /*! Protected constructor. Does nothing. */
+    inline mtsStateArrayBase(void){};
+
+    /*! Class services associated to the element contained */
+    const cmnClassServicesBase * DataClassServices;
 
 public:
     typedef unsigned int index_type;
     typedef unsigned int size_type;
 
-	/*! Default destructor. Does nothing. */
-	inline virtual ~mtsStateArrayBase(void) {};
+    /*! Default destructor. Does nothing. */
+    inline virtual ~mtsStateArrayBase(void) {};
 
-	/*! Overloaded subscript operator. */
-	virtual mtsGenericObject & operator[](index_type index) = 0;
+    /*! Overloaded subscript operator. */
+    virtual mtsGenericObject & operator[](index_type index) = 0;
 
 	/*! Overloaded subscript operator. */
 	virtual const mtsGenericObject & operator[](index_type index) const = 0;

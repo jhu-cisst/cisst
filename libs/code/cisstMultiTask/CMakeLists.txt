@@ -55,6 +55,11 @@ SET(SOURCE_FILES
     mtsTaskFromCallback.cpp
 
     mtsTaskManager.cpp
+
+    mtsCollectorBase.cpp
+    mtsCollectorState.cpp    
+
+    mtsHistory.cpp
     )
 
 # all header files
@@ -111,6 +116,11 @@ SET(HEADER_FILES
     mtsTaskFromCallback.h
     
     mtsTaskManager.h
+
+    mtsCollectorBase.h    
+    mtsCollectorState.h
+    
+    mtsHistory.h
     )
 
 

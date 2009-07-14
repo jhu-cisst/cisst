@@ -4,7 +4,7 @@
 /*
   $Id$
 
-  Author(s):  Ankur Kapoor, Peter Kazanzides
+  Author(s):  Ankur Kapoor, Peter Kazanzides, Min Yang Jung
   Created on: 2004-04-30
 
   (C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights
@@ -26,6 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaGetTime.h>
 #include <cisstMultiTask/mtsTask.h>
 #include <cisstMultiTask/mtsTaskInterface.h>
+
 #include <iostream>
 #include <string>
 
@@ -36,8 +37,8 @@ CMN_IMPLEMENT_SERVICES(mtsTask)
 
 void mtsTask::DoRunInternal(void)
 {
-	StateTable.Start();
-	this->Run();
+    StateTable.Start();
+    this->Run();
     StateTable.Advance();
 }
   
@@ -46,10 +47,10 @@ void mtsTask::StartupInternal(void) {
 
     bool success = true;
     // Loop through the required interfaces and bind all commands and events
-    RequiredInterfacesMapType::MapType::const_iterator requiredIterator = RequiredInterfaces.GetMap().begin();
+    RequiredInterfacesMapType::const_iterator requiredIterator = RequiredInterfaces.begin();
     mtsDeviceInterface * connectedInterface;
     for (;
-         requiredIterator != RequiredInterfaces.GetMap().end();
+         requiredIterator != RequiredInterfaces.end();
          requiredIterator++) {
         connectedInterface = requiredIterator->second->GetConnectedInterface();
         if (connectedInterface) {
@@ -66,12 +67,13 @@ void mtsTask::StartupInternal(void) {
     // Call user-supplied startup function
     this->Startup();
     // StateChange should already be locked
-    if (success)
-       TaskState = READY;
-    else
-        CMN_LOG_CLASS_INIT_ERROR << "ERROR: Task " << GetName() << " cannot be started." << std::endl;
+    if (success) {
+       TaskState = READY;       
+    } else {
+        CMN_LOG_CLASS_INIT_ERROR << "StartupInternal: task " << this->GetName() << " cannot be started." << std::endl;
+    }
     StateChange.Unlock();
-    CMN_LOG_CLASS_INIT_VERBOSE << "Ending StartupInternal for " << Name << std::endl;
+    CMN_LOG_CLASS_INIT_VERBOSE << "Ending StartupInternal for " << this->GetName() << std::endl;
 }
 
 void mtsTask::CleanupInternal() {
@@ -82,7 +84,7 @@ void mtsTask::CleanupInternal() {
     // StateChange should be locked by Kill().
 	TaskState = FINISHED;
     StateChange.Unlock();
-	CMN_LOG_CLASS_INIT_VERBOSE << "Done base class CleanupInternal " << Name << std::endl;
+	CMN_LOG_CLASS_INIT_VERBOSE << "Done base class CleanupInternal " << this->GetName() << std::endl;
 }
 
 
@@ -95,8 +97,8 @@ void mtsTask::CleanupInternal() {
 unsigned int mtsTask::ProcessMailBoxes(ProvidedInterfacesMapType & interfaces)
 {
     unsigned int numberOfCommands = 0;
-    ProvidedInterfacesMapType::MapType::iterator iterator = interfaces.GetMap().begin();
-    const ProvidedInterfacesMapType::MapType::iterator end = interfaces.GetMap().end();
+    ProvidedInterfacesMapType::iterator iterator = interfaces.begin();
+    const ProvidedInterfacesMapType::iterator end = interfaces.end();
     for (;
          iterator != end;
          ++iterator) {
@@ -107,8 +109,8 @@ unsigned int mtsTask::ProcessMailBoxes(ProvidedInterfacesMapType & interfaces)
 
 
 unsigned int mtsTask::ProcessQueuedEvents(void) {
-    RequiredInterfacesMapType::MapType::iterator iterator = RequiredInterfaces.GetMap().begin();
-    const RequiredInterfacesMapType::MapType::iterator end = RequiredInterfaces.GetMap().end();
+    RequiredInterfacesMapType::iterator iterator = RequiredInterfaces.begin();
+    const RequiredInterfacesMapType::iterator end = RequiredInterfaces.end();
     unsigned int numberOfEvents = 0;
     for (;
          iterator != end;
@@ -130,23 +132,45 @@ void mtsTask::Sleep(double timeInSeconds)
 }
 
 
+mtsStateIndex::TimeTicksType mtsTask::GetTick(void) const {
+    return StateTable.GetIndexWriter().Ticks();
+}
+
+
+void mtsTask::SaveThreadStartData(void * data) {
+    ThreadStartData = data;
+}
+
+
+void mtsTask::SetThreadReturnValue(void * returnValue) {
+    ReturnValue = returnValue;
+}
+
+
 /********************* Task constructor and destructor *****************/
 
-mtsTask::mtsTask(const std::string & name, unsigned int sizeStateTable) :
+mtsTask::mtsTask(const std::string & name, 
+                 unsigned int sizeStateTable) :
     mtsDevice(name),
     Thread(),
     TaskState(CONSTRUCTED),
     StateChange(),
-	StateTable(sizeStateTable),
+    StateTable(sizeStateTable),
+    StateTables("StateTables"),
     OverranPeriod(false),
     ThreadStartData(0),
     ReturnValue(0)
 {
+    this->StateTables.SetOwner(*this);
+    this->StateTables.AddItem(this->StateTable.GetName(),
+                              &(this->StateTable),
+                              CMN_LOG_LOD_INIT_ERROR);
 }
+
 
 mtsTask::~mtsTask()
 {
-    CMN_LOG_CLASS_RUN_ERROR << "mtsTask destructor: deleting task " << Name << std::endl;
+    CMN_LOG_CLASS_INIT_VERBOSE << "mtsTask destructor: deleting task " << this->GetName() << std::endl;
     if (!IsTerminated()) {
         //It is safe to call CleanupInternal() more than once.
         //Should we call the user-supplied Cleanup()?
@@ -159,7 +183,11 @@ mtsTask::~mtsTask()
 
 void mtsTask::Kill(void)
 {
-    CMN_LOG_CLASS_RUN_WARNING << "Kill " << Name << std::endl;
+    CMN_LOG_CLASS_INIT_VERBOSE << "Kill: " << this->GetName() << std::endl;
+
+    // Generate a data collection event not to lose any data when killing a thread.
+    StateTable.GenerateDataCollectionEvent();
+
     StateChange.Lock();
     // If we get here, we cannot be in the INITIALIZING or FINISHING
     // states because we are holding the StateChange Mutex. 
@@ -195,12 +223,12 @@ mtsDeviceInterface * mtsTask::AddProvidedInterface(const std::string & newInterf
         if (ProvidedInterfaces.AddItem(newInterfaceName, newInterface)) {
             return newInterface;
         }
-        CMN_LOG_CLASS_INIT_ERROR << "AddProvidedInterface: unable to add interface \""
+        CMN_LOG_CLASS_INIT_ERROR << "AddProvidedInterface: task " << this->GetName() << " unable to add interface \""
                                  << newInterfaceName << "\"" << std::endl;
         delete newInterface;
         return 0;
     }
-    CMN_LOG_CLASS_INIT_ERROR << "AddProvidedInterface: unable to create interface \""
+    CMN_LOG_CLASS_INIT_ERROR << "AddProvidedInterface: task " << this->GetName() << " unable to create interface \""
                              << newInterfaceName << "\"" << std::endl;
     return 0;
 }
@@ -244,14 +272,16 @@ mtsCommandVoidBase * mtsTask::GetEventHandlerVoid(const std::string & requiredIn
 bool mtsTask::WaitToStart(double timeout)
 {
     if (TaskState == INITIALIZING) {
-        CMN_LOG_CLASS_RUN_ERROR << "Waiting for task " << Name << " to start." << std::endl;
+        CMN_LOG_CLASS_INIT_VERBOSE << "WaitToStart: waiting for task " << this->GetName() << " to start." << std::endl;
         // PK: Following doesn't work because WaitToStart is generally called from same thread
         // as Create, which is where the Lock was done.
         //StateChange.Lock();  // Should use TryLock with timeout
         // For now, we just use a Sleep and hope it is long enough
         osaSleep(timeout);
-        if (TaskState != READY)
-            CMN_LOG_CLASS_INIT_ERROR << "Task " << Name << " did not start properly, state = " << TaskStateName(TaskState) << std::endl;
+        if (TaskState != READY) {
+            CMN_LOG_CLASS_INIT_ERROR << "WaitToStart: task " << this->GetName()
+                                     << " did not start properly, state = " << TaskStateName(TaskState) << std::endl;
+        }
         StateChange.Unlock();
     }
     return (TaskState >= READY);
@@ -259,19 +289,23 @@ bool mtsTask::WaitToStart(double timeout)
 
 bool mtsTask::WaitToTerminate(double timeout)
 {
-	CMN_LOG_CLASS_RUN_ERROR << "WaitToTerminate " << Name << std::endl;
-    if (TaskState < FINISHING)
+	CMN_LOG_CLASS_INIT_VERBOSE << "WaitToTerminate: " << this->GetName() << std::endl;
+    if (TaskState < FINISHING) {
         return false;
+    }
     if (TaskState == FINISHING) {
-        CMN_LOG_CLASS_RUN_ERROR << "Waiting for task " << Name << " to finish." << std::endl;
+        CMN_LOG_CLASS_INIT_VERBOSE << "WaitToTerminate: waiting for task " << this->GetName() << " to finish." << std::endl;
         StateChange.Lock();  // Should use TryLock with timeout
-        if (TaskState != FINISHED)
-            CMN_LOG_CLASS_INIT_ERROR << "Task " << Name << " did not finish properly, state = " << GetTaskStateName() << std::endl;
+        if (TaskState != FINISHED) {
+            CMN_LOG_CLASS_INIT_ERROR << "WaitToTerminate: task " << this->GetName()
+                                     << " did not finish properly, state = " << GetTaskStateName() << std::endl;
+        }
         StateChange.Unlock();
     }
     // If task state is finished, we wait for the thread to be destroyed
     if ((TaskState == FINISHED) && Thread.IsValid()) {
-        CMN_LOG_CLASS_RUN_ERROR << "Waiting for task " << Name << " thread to exit." << std::endl;
+        CMN_LOG_CLASS_INIT_VERBOSE << "WaitToTerminate: waiting for task " << this->GetName()
+                                   << " thread to exit." << std::endl;
         Thread.Wait();
     }
 	return true;
@@ -281,6 +315,7 @@ bool mtsTask::WaitToTerminate(double timeout)
 void mtsTask::ToStream(std::ostream & outputStream) const
 {
     outputStream << "Task name: " << Name << std::endl;
+    StateTable.ToStream(outputStream);
     ProvidedInterfaces.ToStream(outputStream);
     RequiredInterfaces.ToStream(outputStream);
 }
