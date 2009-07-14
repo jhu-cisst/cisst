@@ -39,7 +39,7 @@ http://www.cisst.org/cisst/license.txt.
  Provides a base class for all visible objects.
 */
 class CISST_EXPORT ui3VisibleObject: public cmnGenericObject
-{   
+{
     friend class ui3SceneManager;
     friend class ui3VisibleList;
 
@@ -75,7 +75,7 @@ public:
     void Unlock(void);
 
 protected:
-    
+ 
     typedef ui3SceneManager::VTKHandleType VTKHandleType;
 
     void SetVTKHandle(VTKHandleType handle) {
@@ -85,7 +85,7 @@ protected:
     vtkAssembly * Assembly;
     vtkMatrix4x4 * Matrix;
     ui3Manager * Manager;
-    VTKHandleType VTKHandle; 
+    VTKHandleType VTKHandle;
 };
 
 

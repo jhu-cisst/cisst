@@ -37,9 +37,11 @@ ui3VisibleObject::ui3VisibleObject(ui3Manager * manager):
     CMN_ASSERT(this->Assembly);
 
     this->Matrix = vtkMatrix4x4::New();
+    CMN_ASSERT(this->Matrix);
     this->Matrix->Identity();
 
     this->Assembly->SetUserMatrix(this->Matrix);
+
 }
 
 
@@ -92,15 +94,12 @@ void ui3VisibleObject::SetOrientation(const vctMatRot3 & rotationMatrix)
 }
 
 
-
-
-
 void ui3VisibleObject::Lock(void)
 {
     if (this->VTKHandle) {
         this->Manager->GetSceneManager()->Lock(this->VTKHandle);
     } else {
-        CMN_LOG_CLASS_RUN_ERROR << "Lock: attempt to lock with an object not yet added to the scene" << std::endl;
+        CMN_LOG_CLASS_RUN_DEBUG << "Lock: attempt to lock with an object not yet added to the scene" << std::endl;
     }
 }
 
@@ -110,7 +109,6 @@ void ui3VisibleObject::Unlock(void)
     if (this->VTKHandle) {
         this->Manager->GetSceneManager()->Unlock(this->VTKHandle);
     } else {
-        CMN_LOG_CLASS_RUN_ERROR << "Unlock: attempt to unlock with an object not yet added to the scene" << std::endl;
+        CMN_LOG_CLASS_RUN_DEBUG << "Unlock: attempt to unlock with an object not yet added to the scene" << std::endl;
     }
 }
-
