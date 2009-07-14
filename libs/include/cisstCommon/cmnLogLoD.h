@@ -68,7 +68,7 @@ const char * const cmnLogLoDString[CMN_LOG_LOD_NOT_USED] = {
     "Warning (run)",
     "Message (run)",
     "Debug (run)",
-    "Debug"
+    "Very verbose"
 };
 
 #endif // _cmnLogLoD_h
