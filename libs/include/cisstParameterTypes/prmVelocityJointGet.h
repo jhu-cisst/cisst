@@ -27,11 +27,9 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _prmVelocityJointGet_h
 #define _prmVelocityJointGet_h
 
-//basic includes
+// basic includes
+#include <cisstVector/vctDynamicVectorTypes.h>
 #include <cisstMultiTask/mtsGenericObject.h>
-#include <cisstMultiTask/mtsStateIndex.h>
-
-#include <cisstParameterTypes/prmTypes.h>
 
 // Always include last
 #include <cisstParameterTypes/prmExport.h>
@@ -58,11 +56,9 @@ public:
     void SetSize(size_type size);
 
     /*! constructor with all possible parameters */
-    inline prmVelocityJointGet(const prmVelocity & velocity,
-                               const mtsStateIndex & stateIndex):
-            VelocityMember(velocity),
-            StateIndexMember(stateIndex)
-    {}
+    inline prmVelocityJointGet(const vctDoubleVec & velocity):
+            VelocityMember(velocity)
+     {}
 
     /*! destructor */
     virtual ~prmVelocityJointGet();
@@ -82,16 +78,8 @@ public:
 
     /*! Set and Get methods for the the velocity. */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(prmVelocity, Velocity);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, Velocity);
     //@}
-
-    /*! Set and Get methods for time index.  Current time index, as
-    provided for writer of the task providing the velocity
-    data. */
-    //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(mtsStateIndex, StateIndex);
-    //@}
-
 
     /*! Human readable output to stream. */
     void ToStream(std::ostream & outputStream) const;

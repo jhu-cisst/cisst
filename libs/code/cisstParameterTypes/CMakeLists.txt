@@ -25,7 +25,6 @@ SET(DEPENDENCIES
 # all source files
 SET(SOURCE_FILES
     prmEventButton.cpp
-    prmTypes.cpp
     prmMotionBase.cpp
 
     prmPositionJointGet.cpp
@@ -56,7 +55,6 @@ SET(HEADER_FILES
     prmEventButton.h
     prmExport.h
     prmForwardDeclarations.h
-    prmTypes.h
     prmMotionBase.h
 
     prmPositionJointGet.h

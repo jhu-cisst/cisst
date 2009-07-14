@@ -27,9 +27,10 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _prmPositionCartesianSet_h
 #define _prmPositionCartesianSet_h
 
+#include <cisstVector/vctFixedSizeVectorTypes.h>
+#include <cisstVector/vctTransformationTypes.h>
 #include <cisstParameterTypes/prmTransformationBase.h>
 #include <cisstParameterTypes/prmTransformationManager.h>
-#include <cisstParameterTypes/prmTypes.h>
 #include <cisstParameterTypes/prmMotionBase.h>
 
 // Always include last
@@ -52,24 +53,24 @@ class CISST_EXPORT prmPositionCartesianSet: public prmMotionBase
     prmTransformationBasePtr ReferenceFrame;
 
     /*! Motion command goal, relative to ReferenceFrame */
-    prmCartesianPosition Goal;
+    vctDoubleFrm3 Goal;
 
     /*! linear velocity to goal (time derivative of magnitude of the
       vector to goal */
-    prmCartesianVelocity Velocity;
+    vctDouble3 Velocity;
 
     /*! vector of rate of orientation change (single value about a
       screw axis) */
-    prmCartesianVelocity VelocityAngular;
+    vctDouble3 VelocityAngular;
     
     /*! desired time derivative of linear velocity */
-    prmCartesianAcceleration Acceleration;
+    vctDouble3 Acceleration;
 
     /*! desired time derivative of angualr velocity */
-    prmCartesianAcceleration AccelerationAngular;
+    vctDouble3 AccelerationAngular;
 
     /*! two tuple, masks position/orientation parts of the Cartesian motion*/
-    prmBoolVec Mask;
+    vctBool2 Mask;
     
  public:
     /*! default constructor */
@@ -81,12 +82,12 @@ class CISST_EXPORT prmPositionCartesianSet: public prmMotionBase
     /*!constructor with all parameters */
     prmPositionCartesianSet(const prmTransformationBasePtr & movingFrame, 
                             const prmTransformationBasePtr & referenceFrame, 
-                            const prmCartesianPosition & goal,
-                            const prmCartesianVelocity & velocity,
-                            const prmCartesianVelocity & velocityAngular,
-                            const prmCartesianAcceleration & acceleration,
-                            const prmCartesianAcceleration & accelerationAngular,
-                            const prmBoolVec & mask):
+                            const vctDoubleFrm3 & goal,
+                            const vctDouble3 & velocity,
+                            const vctDouble3 & velocityAngular,
+                            const vctDouble3 & acceleration,
+                            const vctDouble3 & accelerationAngular,
+                            const vctBool2 & mask):
         MovingFrame(movingFrame),
         ReferenceFrame(referenceFrame),
         Goal(goal), 
@@ -106,7 +107,7 @@ class CISST_EXPORT prmPositionCartesianSet: public prmMotionBase
       \param mask mask for position/orientation or both
       \return void
     */
-    void SetGoal(const prmCartesianPosition & goal, const prmBoolVec & mask)
+    void SetGoal(const vctDoubleFrm3 & goal, const vctBool2 & mask)
     {
         this->Goal = goal;
         this->Mask = mask;
@@ -116,7 +117,7 @@ class CISST_EXPORT prmPositionCartesianSet: public prmMotionBase
       \param goal cartesian position 
       \return void
     */
-    void SetGoal(const prmCartesianPosition & goal)
+    void SetGoal(const vctDoubleFrm3 & goal)
     {
         this->Goal = goal;
     }  
@@ -125,7 +126,7 @@ class CISST_EXPORT prmPositionCartesianSet: public prmMotionBase
       \param position target position 
       \return void
     */
-    void SetGoal(const vct3 & position)
+    void SetGoal(const vctDouble3 & position)
     {
         Goal.Translation().Assign(position);
     }
@@ -134,7 +135,7 @@ class CISST_EXPORT prmPositionCartesianSet: public prmMotionBase
       \param orientation target orientation
       \return void
     */
-    void SetGoal(const vctRot3 & orientation)
+    void SetGoal(const vctDoubleRot3 & orientation)
     {
        this->Goal.Rotation().Assign(orientation);
     }
@@ -151,7 +152,7 @@ class CISST_EXPORT prmPositionCartesianSet: public prmMotionBase
     /*! Get current goal parameter
       \return prmCartesianPosition current goal parameter
     */
-    prmCartesianPosition GetGoal(void) const 
+    vctDoubleFrm3 GetGoal(void) const 
     {
         return this->Goal;
     }
@@ -194,7 +195,7 @@ class CISST_EXPORT prmPositionCartesianSet: public prmMotionBase
       \param velocity planned velocity
       \return void
     */
-    void SetVelocity(const prmCartesianVelocity & velocity)
+    void SetVelocity(const vctDouble3 & velocity)
     {
         this->Velocity = velocity;
     } 
@@ -202,7 +203,7 @@ class CISST_EXPORT prmPositionCartesianSet: public prmMotionBase
     /*! Get the velocity parameter
       \return prmCartesianVelocity current planned velocity
     */
-    prmCartesianVelocity GetVelocity(void) const
+    vctDouble3 GetVelocity(void) const
     {
         return this->Velocity;
     }
@@ -211,7 +212,7 @@ class CISST_EXPORT prmPositionCartesianSet: public prmMotionBase
       \param velocityAngular planned angular velocity
       \return void
     */
-    void SetAngularVelocity(const prmCartesianVelocity & velocityAngular)
+    void SetAngularVelocity(const vctDouble3 & velocityAngular)
     {
         this->VelocityAngular = velocityAngular;
     } 
@@ -219,7 +220,7 @@ class CISST_EXPORT prmPositionCartesianSet: public prmMotionBase
     /*! Get the angular velocity parameter
       \return  prmCartesianVelocity current planned angular velocity
     */
-    prmCartesianVelocity GetAngularVelocity(void) const
+    vctDouble3 GetAngularVelocity(void) const
     {
         return this->VelocityAngular;
     }
@@ -228,7 +229,7 @@ class CISST_EXPORT prmPositionCartesianSet: public prmMotionBase
       \param acceleration acceleration vector
       \return void
     */
-    inline void SetAcceleration(const prmCartesianAcceleration & acceleration)
+    inline void SetAcceleration(const vctDouble3 & acceleration)
     {
         this->Acceleration = acceleration;
     }
@@ -236,7 +237,7 @@ class CISST_EXPORT prmPositionCartesianSet: public prmMotionBase
     /*! Get the current acceleration parameters
       \return prmCartesianAcceleration acceleration vector
     */
-    inline prmCartesianAcceleration GetAcceleration(void) const
+    inline vctDouble3 GetAcceleration(void) const
     {
         return this->Acceleration;
     }
@@ -245,7 +246,7 @@ class CISST_EXPORT prmPositionCartesianSet: public prmMotionBase
       \param accelerationAngular angular acceleration
       \return void 
     */
-    inline void SetAngularAcceleration(const prmCartesianAcceleration & accelerationAngular)
+    inline void SetAngularAcceleration(const vctDouble3 & accelerationAngular)
     {
         this->AccelerationAngular = accelerationAngular;
     }
@@ -253,7 +254,7 @@ class CISST_EXPORT prmPositionCartesianSet: public prmMotionBase
     /*! Get the current angular acceleration parameters
       \return prmCartesianAcceleration angular acceleration vector
     */
-    inline prmCartesianAcceleration GetAngularAcceleration(void) const
+    inline vctDouble3 GetAngularAcceleration(void) const
     {
         return this->AccelerationAngular;
     }
@@ -262,7 +263,7 @@ class CISST_EXPORT prmPositionCartesianSet: public prmMotionBase
       \param mask mask for moves
       \return void
     */
-    inline void SetMask(const prmBoolVec & mask)
+    inline void SetMask(const vctBool2 & mask)
     {
         this->Mask = mask;
     }
@@ -270,7 +271,7 @@ class CISST_EXPORT prmPositionCartesianSet: public prmMotionBase
     /*! Get the current mask parameter
       \return prmBoolVec current mask
     */
-    inline prmBoolVec GetMask(void) const 
+    inline vctBool2 GetMask(void) const 
     {
         return this->Mask;
     }

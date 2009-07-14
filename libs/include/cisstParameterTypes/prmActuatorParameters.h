@@ -32,12 +32,11 @@ http://www.cisst.org/cisst/license.txt.
 \this might not be parameter class (ask anton for his opinion)
 */
 
+#include <cisstVector/vctDynamicVectorTypes.h>
 #include <cisstMultiTask/mtsStateIndex.h>
 #include <cisstMultiTask/mtsMacros.h>
-//#include <cisstMultiTask.h>
-#include <cisstParameterTypes/prmTypes.h>
-//#include <cisstParameterTypes/prmMotionBase.h>
 #include <cisstMultiTask/mtsVector.h>
+
 // Always include last
 #include <cisstParameterTypes/prmExport.h>
 
@@ -118,7 +117,7 @@ public:
 
     /*! Set and Get methods for counts to mm conversion  */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(prmDoubleVec, Counts_per_mm);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, Counts_per_mm);
     //@}
 
     //@{
@@ -130,41 +129,41 @@ public:
 
 
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(prmDoubleVec, Kp);   //Proportional
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, Kp);   //Proportional
     //@}
 
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(prmDoubleVec, Kd);	//Derivative
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, Kd);	//Derivative
     //@}
 
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(prmDoubleVec, Ki);	  //Integral
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, Ki);	  //Integral
     //@}
 
     //@{
     //if IL is positive, Ki works all the time, otherwise IL works only after move is finished
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(prmDoubleVec, IL);	 //Integrator limit
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, IL);	 //Integrator limit
     //@}
 
 
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(prmDoubleVec, FV);	//FeedForward Velocity Parameters
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, FV);	//FeedForward Velocity Parameters
     //@}
 
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(prmDoubleVec, FA);	 //FeedForward Acceleration Parameters
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, FA);	 //FeedForward Acceleration Parameters
     //@}
 
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(prmDoubleVec, TorqueLimit);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, TorqueLimit);
     //@}
 
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(prmDoubleVec, TorqueLimitPeak);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, TorqueLimitPeak);
     //@}
 
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(prmDoubleVec, TorqueOffset);		//Torque offset parameter, used for break.
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, TorqueOffset);		//Torque offset parameter, used for break.
     //@}
 
 }; // _prmGalilActuator_h

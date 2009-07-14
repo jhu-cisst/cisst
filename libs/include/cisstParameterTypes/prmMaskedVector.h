@@ -23,9 +23,8 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _prmMaskedVector_h
 #define _prmMaskedVector_h
 
+#include <cisstVector/vctDynamicVectorTypes.h>
 #include <cisstMultiTask/mtsGenericObject.h>
-#include <cisstVector/vctDynamicVector.h>
-#include <cisstParameterTypes/prmTypes.h>
 #include <cisstParameterTypes/prmExport.h>
 
 //#include <cisstMultiTask/mtsForwardDeclarations.h>
@@ -46,20 +45,18 @@ public:
     
     typedef vctDynamicVector<_elementType> DataType;
 
-
     /*! Type used to define the size of the vector. */
     typedef unsigned int size_type;
 
-
-    /*! Type of vector used to store the elements. */
-      /*! Masks for the cooresponding vector. */
-    //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctBoolVec, Mask);
-    //@}
-
-    /*! Vector of values for this container*/
+    /*! Vector of values for this container */
     //@{
     MTS_DECLARE_MEMBER_AND_ACCESSORS(DataType, Data);
+    //@}
+
+
+    /*! Masks for the cooresponding vector */
+    //@{
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctBoolVec, Mask);
     //@}
 
     /*! Default constructor. */

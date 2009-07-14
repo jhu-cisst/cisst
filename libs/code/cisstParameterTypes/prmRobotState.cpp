@@ -39,18 +39,17 @@ void prmRobotState::ToStream(std::ostream & outputStream) const
 {
 
     outputStream << "JointPosition: " << this->JointPositionMember
-        << "\nJointVelocity : "		<< this->JointVelocityMember
-        << "\nJointPositionGoal: "		<< this->JointPositionGoalMember
-        << "\nJointVelocityGoal: " << this->JointVelocityGoalMember
-        << "\nJointPositionError: "	<< this->JointPositionErrorMember
-        << "\nJointVelocityError: "	<< this->JointVelocityErrorMember
-        << "\nCartesianPosition: " << this->CartesianPositionMember
-        << "\nCartesianVelocity : "		<< this->CartesianVelocityMember
-        << "\nCartesianPositionGoal: "		<< this->CartesianPositionGoalMember
-        << "\nCartesianVelocityGoal: " << this->CartesianVelocityGoalMember
-        << "\nCartesianVelocityError: "	<< this->CartesianVelocityErrorMember
-        << "\nCartesianPositionError: "	<< this->CartesianPositionErrorMember
-        << "\n StateIndex: "	<< this->StateIndexMember;
+                 << "\nJointVelocity : "		<< this->JointVelocityMember
+                 << "\nJointPositionGoal: "		<< this->JointPositionGoalMember
+                 << "\nJointVelocityGoal: " << this->JointVelocityGoalMember
+                 << "\nJointPositionError: "	<< this->JointPositionErrorMember
+                 << "\nJointVelocityError: "	<< this->JointVelocityErrorMember
+                 << "\nCartesianPosition: " << this->CartesianPositionMember
+                 << "\nCartesianVelocity : "		<< this->CartesianVelocityMember
+                 << "\nCartesianPositionGoal: "		<< this->CartesianPositionGoalMember
+                 << "\nCartesianVelocityGoal: " << this->CartesianVelocityGoalMember
+                 << "\nCartesianVelocityError: "	<< this->CartesianVelocityErrorMember
+                 << "\nCartesianPositionError: "	<< this->CartesianPositionErrorMember;
 }
 
 void prmRobotState::SetSize(size_type size){

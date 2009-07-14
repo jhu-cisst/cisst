@@ -33,7 +33,6 @@ void prmVelocityJointGet::SetSize(size_type size)
 
 void prmVelocityJointGet::ToStream(std::ostream & outputStream) const
 {
-    outputStream << "Velocity: " << this->VelocityMember
-                 << "\nState Index: " << this->StateIndexMember;
+    outputStream << "Velocity: " << this->VelocityMember;
 }
 

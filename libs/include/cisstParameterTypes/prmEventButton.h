@@ -29,7 +29,6 @@ http://www.cisst.org/cisst/license.txt.
 #define _prmEventButton_h
 
 #include <cisstMultiTask/mtsGenericObject.h>
-#include <cisstMultiTask/mtsStateIndex.h>
 
 // Always include last
 #include <cisstParameterTypes/prmExport.h>
@@ -48,9 +47,7 @@ class CISST_EXPORT prmEventButton: public mtsGenericObject
     {}
     
     /*!constructor with all parameters */
-    inline prmEventButton(const mtsStateIndex & stateIndex, 
-                          const EventType & type):
-        StateIndexMember(stateIndex),
+    inline prmEventButton(const EventType & type):
         TypeMember(type)
     {}
     
@@ -58,14 +55,6 @@ class CISST_EXPORT prmEventButton: public mtsGenericObject
      */
     virtual ~prmEventButton();
     
-    /*! Set and Get methods for state index.  The state index is set by
-      the task initiating the event and corresponds to the task's
-      state index.  It allows to query any state elements that occured
-      in the same state frame. */
-    //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(mtsStateIndex, StateIndex);
-    //@}
-
     /*! Set and Get methods for event type. */
     //@{
     MTS_DECLARE_MEMBER_AND_ACCESSORS(EventType, Type);

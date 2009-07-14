@@ -35,12 +35,21 @@ class prmTransformationFixed;
 class prmTransformationDynamic;
 class prmTransformationManager;
 
+// motion enums
+/*! Parameters type for command execution/completion behavior specification */
+typedef enum Blocking { 
+	NO_WAIT,      /*! non blocking */
+	WAIT_START,   /*! blocking until start, non preemptive */
+	WAIT_FINISH   /*! blocking type  */
+} prmBlocking ;
+
 // robot API types
 class prmPositionCartesianGet;
 class prmPositionCartesianSet;
 class prmVelocityCartesianGet;
 class prmVelocityCartesianSet;
 class prmForceCartesianGet;
+class prmForceCartesianSet;
 
 class prmPositionJoinGet;
 class prmPositionJointSet;

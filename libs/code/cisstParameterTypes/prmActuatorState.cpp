@@ -29,17 +29,16 @@ prmActuatorState::prmActuatorState(size_type size)
 void prmActuatorState::ToStream(std::ostream & outputStream) const
 {
     outputStream << "Position: "    << this->PositionMember
-        << "\nVelocity : "		    << this->VelocityMember
-        << "\nInMotion: "		    << this->InMotionMember
-        << "\nMotorOffMember: "     << this->MotorOffMember
-        << "\nSoftFwdLimitHit: "	<< this->SoftFwdLimitHitMember
-        << "\nSoftRevLimitHit: "	<< this->HardRevLimitHitMember
-         << "\nHardFwdLimitHit: "	<< this->HardFwdLimitHitMember
-        << "\nHardRevLimitHit: "	<< this->SoftRevLimitHitMember
-        << "\nHomeSwitchOn: "	    << this->HomeSwitchOnMember
-        << "\nEStopON: "			<< this->EStopONMember
-        <<"\nIsHomed: "             <<this->IsHomedMember
-        << "\n StateIndex: "	    << this->StateIndexMember;
+                 << "\nVelocity : "		    << this->VelocityMember
+                 << "\nInMotion: "		    << this->InMotionMember
+                 << "\nMotorOffMember: "     << this->MotorOffMember
+                 << "\nSoftFwdLimitHit: "	<< this->SoftFwdLimitHitMember
+                 << "\nSoftRevLimitHit: "	<< this->HardRevLimitHitMember
+                 << "\nHardFwdLimitHit: "	<< this->HardFwdLimitHitMember
+                 << "\nHardRevLimitHit: "	<< this->SoftRevLimitHitMember
+                 << "\nHomeSwitchOn: "	    << this->HomeSwitchOnMember
+                 << "\nEStopON: "			<< this->EStopONMember
+                 <<"\nIsHomed: "             <<this->IsHomedMember;
 }
 
 void prmActuatorState::SetSize(size_type size){

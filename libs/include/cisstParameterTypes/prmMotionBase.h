@@ -24,7 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 // basic includes
 #include <cisstMultiTask/mtsGenericObject.h>
 
-#include <cisstParameterTypes/prmTypes.h>
+#include <cisstParameterTypes/prmForwardDeclarations.h>
 
 
 // Always include last
@@ -39,7 +39,7 @@ class CISST_EXPORT prmMotionBase: public mtsGenericObject
     /* default constructor*/
     inline prmMotionBase():
         BlockingFlagMember(NO_WAIT),
-        BlendingFactorMember(0),
+        BlendingFactorMember(false),
         IsPreemptableMember(true),
         IsCoordinatedMember(true),
         IsGoalOnlyMember(false)
@@ -49,8 +49,8 @@ class CISST_EXPORT prmMotionBase: public mtsGenericObject
       \param 
     */
     inline prmMotionBase(const prmBlocking & blockingFlag, 
-                         const prmBlending & blendingFactor,
-                         const prmTime & timeLimit,
+                         const bool & blendingFactor,
+                         const double & timeLimit,
                          const bool & isPreemptable,
                          const bool & isCoordinated,
                          const bool & isGoalOnly
@@ -71,8 +71,8 @@ class CISST_EXPORT prmMotionBase: public mtsGenericObject
       \param 
     */
     inline void SetBaseParameter(const prmBlocking & blockingFlag, 
-                                 const prmBlending & blendingFactor, 
-                                 const prmTime & timeLimit,
+                                 const bool & blendingFactor, 
+                                 const double & timeLimit,
                                  const bool & isPreemptable,
                                  const bool & isCoordinated,
                                  const bool & isGoalOnly)
@@ -94,14 +94,14 @@ class CISST_EXPORT prmMotionBase: public mtsGenericObject
       to blend motions, and the tolerance (to be implemented later)
     */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(prmBlending, BlendingFactor);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(bool, BlendingFactor);
     //@}
 
     /*! Set and Get methods for TimeLimit.  Describes time allowed or
       requested for a motion.
     */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(prmTime, TimeLimit);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(double, TimeLimit);
     //@}
 
     /*! Set and Get methods for Preemptable parameter.  Default is

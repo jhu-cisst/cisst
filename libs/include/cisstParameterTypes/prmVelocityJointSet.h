@@ -27,8 +27,8 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _prmVelocityJointSet_h
 #define _prmVelocityJointSet_h
 
-//basic includes
-#include <cisstParameterTypes/prmTypes.h>
+// basic includes
+#include <cisstVector/vctDynamicVectorTypes.h>
 #include <cisstParameterTypes/prmMotionBase.h>
 #include <cisstParameterTypes/prmExport.h>
 
@@ -41,21 +41,21 @@ class CISST_EXPORT prmVelocityJointSet: public prmMotionBase
 protected:
     /*! Masks joints not involved in this move, true --> corresponding
     joint index velocities will be used */
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(prmBoolVec,Mask);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctBoolVec, Mask);
 
     /*! Unmasked elements (mask --> true) are only used if move is
     position guarded */
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(prmPosition, Guard);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, Guard);
 
     /*! Joint velocity goals (mask -> true) indicates goals will be
     used in the move */
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(prmVelocity, Goal);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, Goal);
 
     /*! Corresponding accelerations where needed */   
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(prmAcceleration, Acceleration);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, Acceleration);
 
     /*! Corresponding accelerations where applicable */	
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(prmAcceleration, Deceleration);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, Deceleration);
 
     /*! true --> move at specified velocity until
     MoveVelocityJointSet.goal for ANY is reached */
@@ -73,18 +73,19 @@ public:
 
     /*! this constructor sets the size of the vector type members */
     inline prmVelocityJointSet(size_type size):
-    BaseType(){
+        BaseType()
+    {
         SetSize(size);
-    };
+    }
 
     void SetSize(size_type size);
 
     /*! constructor with all parameters */
-    prmVelocityJointSet(const prmBoolVec & mask,
-                        const prmPosition & guard,
-                        const prmVelocity & velocity,
-                        const prmAcceleration & acceleration,
-                        const prmAcceleration & deceleration,
+    prmVelocityJointSet(const vctBoolVec & mask,
+                        const vctDoubleVec & guard,
+                        const vctDoubleVec & velocity,
+                        const vctDoubleVec & acceleration,
+                        const vctDoubleVec & deceleration,
                         const bool & isPositionGuarded):
         BaseType(),
         MaskMember(mask),

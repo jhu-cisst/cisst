@@ -27,13 +27,9 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _prmActuatorState_h
 #define _prmActuatorState_h
 
-//basic includes
-#include <cisstCommon/cmnGenericObject.h>
-#include <cisstOSAbstraction.h>
-#include <cisstCommon/cmnClassRegisterMacros.h>
-#include <cisstMultiTask/mtsStateIndex.h>
-#include <cisstParameterTypes/prmTypes.h>
-#include <cisstMultiTask/mtsMacros.h>
+// basic includes
+#include <cisstVector/vctDynamicVectorTypes.h>
+#include <cisstMultiTask/mtsGenericObject.h>
 #include <cisstMultiTask/mtsVector.h>
 
 // Always include last
@@ -102,45 +98,45 @@ public:
 
     /*! Set and Get methods for the the position. */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(prmBoolVec, InMotion);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctBoolVec, InMotion);
     //@}
 
     /*! Set and Get methods for the the position. */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(prmBoolVec, MotorOff);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctBoolVec, MotorOff);
     //@}
 
 
     /*! Set and Get methods for the forward SOFTWARE limits hit. */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(prmBoolVec, SoftFwdLimitHit);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctBoolVec, SoftFwdLimitHit);
     //@}
 
 
     /*! Set and Get methods for the reverse SOFTWARE Limit. */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(prmBoolVec, SoftRevLimitHit);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctBoolVec, SoftRevLimitHit);
     //@}
 
         /*! Set and Get methods for the forward HARDWARE limits hit. */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(prmBoolVec, HardFwdLimitHit);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctBoolVec, HardFwdLimitHit);
     //@}
 
     /*! Set and Get methods for the reverse HARDWARE Limit. */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(prmBoolVec, HardRevLimitHit);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctBoolVec, HardRevLimitHit);
     //@}
 
 
     /*! Set and Get methods for the  HomeSwitch . */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(prmBoolVec, HomeSwitchOn);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctBoolVec, HomeSwitchOn);
     //@}
 
     /*! Set and Get methods for state of homing variable on the controller. */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(prmBoolVec, IsHomed);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctBoolVec, IsHomed);
     //@}
 
     /*! Set and Get methods for the state of the estop button. */
@@ -148,17 +144,8 @@ public:
     MTS_DECLARE_MEMBER_AND_ACCESSORS(bool, EStopON);
     //@}
 
-
-    /*! Set and Get methods for time index.  Current time index, as
-    provided for writer of the task providing the position
-    data. */
-    //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(mtsStateIndex, StateIndex);
-    //@}
-
     /*! Human readable output to stream. */
     void ToStream(std::ostream & outputStream) const;
-
 
 }; 
 

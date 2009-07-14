@@ -27,8 +27,8 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _prmPositionJointSet_h
 #define _prmPositionJointSet_h
 
-//basic includes
-#include <cisstParameterTypes/prmTypes.h>
+// basic includes
+#include <cisstVector/vctDynamicVectorTypes.h>
 #include <cisstParameterTypes/prmMotionBase.h>
 #include <cisstParameterTypes/prmExport.h>
 
@@ -42,20 +42,20 @@ class CISST_EXPORT prmPositionJointSet: public prmMotionBase
 protected:
     /*! masks correpsonding elements in goal, if an element is set
     true --> corresponding goal should be used */
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(prmBoolVec, Mask);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctBoolVec, Mask);
 
     /*! a motion goal in joint angles. only goals corresponding to
     mask elements set true are used */
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(prmPosition, Goal);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, Goal);
 
     /*! corresponding joint velocities */
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(prmVelocity, Velocity);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, Velocity);
 
     /*! corresponding accelerations where needed */
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(prmAcceleration, Acceleration);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, Acceleration);
 
     /*! corresponding accelerations where applicable */
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(prmAcceleration, Deceleration);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, Deceleration);
 
 public:
 
@@ -72,11 +72,11 @@ public:
     void SetSize(size_type size);
 
     /*! constructor with all possible parameters */
-    prmPositionJointSet(const prmBoolVec& mask,
-                        const prmPosition& goal, 
-                        const prmVelocity & velocity,
-                        const prmAcceleration & acceleration,
-                        const prmAcceleration & deceleration):
+    prmPositionJointSet(const vctBoolVec & mask,
+                        const vctDoubleVec & goal, 
+                        const vctDoubleVec & velocity,
+                        const vctDoubleVec & acceleration,
+                        const vctDoubleVec & deceleration):
         MaskMember(mask),
         GoalMember(goal),
         VelocityMember(velocity),

@@ -27,8 +27,8 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _prmVelocityCartesianSet_h
 #define _prmVelocityCartesianSet_h
 
+#include <cisstVector/vctFixedSizeVectorTypes.h>
 #include <cisstParameterTypes/prmTransformationManager.h>
-#include <cisstParameterTypes/prmTypes.h>
 #include <cisstParameterTypes/prmMotionBase.h>
 
 // Always include last
@@ -52,19 +52,19 @@ class CISST_EXPORT prmVelocityCartesianSet: public prmMotionBase
     
     /*! Linear goal (time derivative of magnitude of the vector to
       goal. */
-    prmCartesianVelocity Velocity;
+    vctDouble3 Velocity;
 
     /*! Vector of rate of orientation change */
-    prmCartesianVelocity VelocityAngular;
+    vctDouble3 VelocityAngular;
     
     /*! desired time derivative of linear velocity - six vectors*/
-    prmCartesianAcceleration Acceleration;
+    vctDouble3 Acceleration;
 
     /*! desired time derivative of angualr velocity - six vectors*/
-    prmCartesianAcceleration AccelerationAngular;
+    vctDouble3 AccelerationAngular;
     
     /*!  probably also a 6-vector -- do we really need this or just set vel to 0? */
-    prmBoolVec Mask;
+    vctBool6 Mask;
 
  public:
 	/*! default constructor */
@@ -76,11 +76,11 @@ class CISST_EXPORT prmVelocityCartesianSet: public prmMotionBase
     /*! constructor with all parameters */
     prmVelocityCartesianSet(const prmTransformationBasePtr & movingFrame, 
                             const prmTransformationBasePtr & referenceFrame,
-                            const prmCartesianVelocity & velocity,
-                            const prmCartesianVelocity & velocityAngular,
-                            const prmCartesianAcceleration & acceleration,
-                            const prmCartesianAcceleration & accelerationAngular,
-                            const prmBoolVec & mask):
+                            const vctDouble3 & velocity,
+                            const vctDouble3 & velocityAngular,
+                            const vctDouble3 & acceleration,
+                            const vctDouble3 & accelerationAngular,
+                            const vctBool6 & mask):
         MovingFrame(movingFrame),
         ReferenceFrame(referenceFrame),  
         Velocity(velocity),
@@ -97,7 +97,7 @@ class CISST_EXPORT prmVelocityCartesianSet: public prmMotionBase
       \param velocities (3 translational and 3 angular velocities)
       \return void
     */
-    inline void SetGoal(const vct6 & velocities)
+    inline void SetGoal(const vctDouble6 & velocities)
     { 
         this->Velocity[0] = velocities[0];
         this->Velocity[1] = velocities[1];
@@ -111,7 +111,7 @@ class CISST_EXPORT prmVelocityCartesianSet: public prmMotionBase
       \param velocity translational velocity
       \return void
     */
-    inline void SetTranslationGoal(const vct3 & velocity)
+    inline void SetTranslationGoal(const vctDouble3 & velocity)
     {
         this->Velocity.Assign(velocity);
     }
@@ -120,15 +120,15 @@ class CISST_EXPORT prmVelocityCartesianSet: public prmMotionBase
       \param velocityAngular angular velocity
       \return void
     */
-    inline void SetRotationGoal(const vct3 & velocityAngular)
+    inline void SetRotationGoal(const vctDouble3 & velocityAngular)
     {
         this->VelocityAngular.Assign(velocityAngular);
     } 
 	
     /*! Get current goal 
-      \return prmCartesianVelocity current goal velocity
+      \return vctDouble3 current goal velocity
     */
-    inline prmCartesianVelocity GetGoal(void) const
+    inline vctDouble3 GetGoal(void) const
     {
         return this->Velocity;
     }
@@ -171,15 +171,15 @@ class CISST_EXPORT prmVelocityCartesianSet: public prmMotionBase
       \param velocity planned velocity
       \return void
     */
-    inline void SetVelocity(const prmCartesianVelocity & velocity)
+    inline void SetVelocity(const vctDouble3 & velocity)
     {
         this->Velocity = velocity;
     } 
     
     /*! Get the velocity parameter
-      \return  prmCartesianVelocity current planned velocity
+      \return  vctDouble3 current planned velocity
     */
-    inline prmCartesianVelocity GetVelocity(void) const
+    inline vctDouble3 GetVelocity(void) const
     {
         return this->Velocity;
     }
@@ -188,15 +188,15 @@ class CISST_EXPORT prmVelocityCartesianSet: public prmMotionBase
       \param velocityAngular planned angular velocity
       \return void
     */
-    inline void SetAngularVelocity(const prmCartesianVelocity & velocityAngular)
+    inline void SetAngularVelocity(const vctDouble3 & velocityAngular)
     {
         this->VelocityAngular = velocityAngular;
     } 
     
     /*! Get the angular velocity parameter
-      \return  prmCartesianVelocity current planned angular velocity
+      \return  vctDouble3 current planned angular velocity
     */
-    inline prmCartesianVelocity GetAngularVelocity(void) const
+    inline vctDouble3 GetAngularVelocity(void) const
     {
         return this->VelocityAngular;
     }
@@ -205,15 +205,15 @@ class CISST_EXPORT prmVelocityCartesianSet: public prmMotionBase
       \param acceleration target acceleration vector
       \return void
     */
-    inline void SetAcceleration(const prmCartesianAcceleration & acceleration)
+    inline void SetAcceleration(const vctDouble3 & acceleration)
     {
         this->Acceleration = acceleration;
     }
 
     /*! Get the current acceleration parameters
-      \return prmCartesianAcceleration acceleration vector
+      \return vctDouble3 acceleration vector
     */
-	inline prmCartesianAcceleration GetAcceleration(void) const
+	inline vctDouble3 GetAcceleration(void) const
     {
         return this->Acceleration;
     }
@@ -222,15 +222,15 @@ class CISST_EXPORT prmVelocityCartesianSet: public prmMotionBase
       \param acceleration target angular acceleration vector
       \return void 
     */
-    inline void SetAngularAcceleration(const prmCartesianAcceleration & accelerationAngular)
+    inline void SetAngularAcceleration(const vctDouble3 & accelerationAngular)
     {
         this->AccelerationAngular = accelerationAngular;
     }
     
     /*! Get the current angular acceleration parameters
-      \return prmCartesianAcceleration angular acceleration vector
+      \return vctDouble3 angular acceleration vector
     */
-	inline prmCartesianAcceleration GetAngularAcceleration(void) const
+	inline vctDouble3 GetAngularAcceleration(void) const
     {
         return this->AccelerationAngular;
     }
@@ -239,7 +239,7 @@ class CISST_EXPORT prmVelocityCartesianSet: public prmMotionBase
       \param mask mask for moves
       \return void
     */
-    inline void SetMask(const prmBoolVec & mask)
+    inline void SetMask(const vctBool6 & mask)
     {
         this->Mask = mask;
     }
@@ -247,7 +247,7 @@ class CISST_EXPORT prmVelocityCartesianSet: public prmMotionBase
     /*! Get the current mask parameter
       \return prmBoolVec current mask
     */
-	inline prmBoolVec GetMask(void) const
+	inline vctBool6 GetMask(void) const
     {
         return this->Mask;
     }
