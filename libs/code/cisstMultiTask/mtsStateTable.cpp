@@ -174,7 +174,7 @@ void mtsStateTable::Advance(void) {
     // element in the array (after Toc).
     for(i = TicId; i < StateVector.size(); i++) {
         if (StateVectorElements[i]) {
-            StateVectorElements[i]->SetTimestampIfNotValid(Tic.Data);
+            StateVectorElements[i]->SetTimestampIfAutomatic(Tic.Data);
             Write(i, *(StateVectorElements[i]));
         }
     }

@@ -53,11 +53,19 @@ class mtsGenericObject: public cmnGenericObject {
 
     /*! Time stamp.  When used in conjunction with mtsStateTable, the
       time stamp will be automatically updated using
-      SetTimestampIfNotValid. */
+      AutomaticTimeStamp. */
     MTS_DECLARE_MEMBER_AND_ACCESSORS(double, Timestamp);
 
+    /*! Turn on/off automatic timestamping by the state table.  All
+      objects stored in a state table can be automatically timestamped
+      at the end of the Run method (see mtsTask and derived classes).
+      If this flag is set to false, data objects will have to be
+      timestamped manually.  This flag is set to true by default. */
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(bool, AutomaticTimestamp);
+
     /*! General flag used to indicate if the data is valid.  This flag
-      has to be updated by the user. */
+      has to be updated by the user.  This data member is initialized
+      to false by the constructor. */
     MTS_DECLARE_MEMBER_AND_ACCESSORS(bool, Valid);
 
 public:
@@ -66,6 +74,7 @@ public:
       false. */
     inline mtsGenericObject(void):
         TimestampMember(0.0),
+        AutomaticTimestampMember(true),
         ValidMember(false)
     {}
 
@@ -73,12 +82,13 @@ public:
     inline virtual ~mtsGenericObject(void)
     {}
 
-    /*! Set timestamp if not valid. This is only meaningful if the
-      derived class contains a timestamp and overrides this method.
+    /*! Set timestamp if AutomaticTimeStamp is set to true. This is
+      only meaningful if the derived class contains a timestamp and
+      overrides this method.
       \param timeStamp time stamp in seconds
       \returns true if time stamp was set. */
-    inline bool SetTimestampIfNotValid(double timestamp) {
-        if (this->ValidMember) {
+    inline bool SetTimestampIfAutomatic(double timestamp) {
+        if (this->AutomaticTimestampMember) {
             return false;
         }
         this->TimestampMember = timestamp;
