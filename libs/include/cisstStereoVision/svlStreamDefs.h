@@ -93,17 +93,17 @@ typedef vctDynamicMatrix<double> svlPointCloud;
 template <class __ValueType>
 static bool IsTypeFloat(__ValueType CMN_UNUSED(val)) { return false; }
 template <>
-bool IsTypeFloat<float>(float CMN_UNUSED(val)) { return true; }
+inline bool IsTypeFloat<float>(float CMN_UNUSED(val)) { return true; }
 
 template <class __ValueType>
 static bool IsTypeUChar(__ValueType CMN_UNUSED(val)) { return false; }
 template <>
-bool IsTypeUChar<unsigned char>(unsigned char CMN_UNUSED(val)) { return true; }
+inline bool IsTypeUChar<unsigned char>(unsigned char CMN_UNUSED(val)) { return true; }
 
 template <class __ValueType>
 static bool IsTypeUWord(__ValueType CMN_UNUSED(val)) { return false; }
 template <>
-bool IsTypeUWord<unsigned short>(unsigned short CMN_UNUSED(val)) { return true; }
+inline bool IsTypeUWord<unsigned short>(unsigned short CMN_UNUSED(val)) { return true; }
 
 
 ///////////////////////////////////////
