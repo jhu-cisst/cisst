@@ -89,10 +89,10 @@ public:
       \returns true if time stamp was set. */
     inline bool SetTimestampIfAutomatic(double timestamp) {
         if (this->AutomaticTimestampMember) {
-            return false;
+            this->TimestampMember = timestamp;
+            return true;
         }
-        this->TimestampMember = timestamp;
-        return true;
+        return false;
     }
 
     /*! ToStream method.  This method only streams the data members of
