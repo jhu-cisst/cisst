@@ -28,11 +28,8 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _prmPositionCartesianGet_h
 #define _prmPositionCartesianGet_h
 
-
-#include <cisstMultiTask/mtsStateIndex.h>
 #include <cisstParameterTypes/prmTransformationBase.h>
 #include <cisstParameterTypes/prmTransformationManager.h>
-#include <cisstParameterTypes/prmTypes.h>
 
 // Always include last
 #include <cisstParameterTypes/prmExport.h>
@@ -43,21 +40,24 @@ class CISST_EXPORT prmPositionCartesianGet: public mtsGenericObject
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
  public:
+    /*! Base type */
+    typedef mtsGenericObject BaseType;
+
     /*! default constructor */
     inline prmPositionCartesianGet(void):
+        BaseType(),
         MovingFrameMember(0),
-        ReferenceFrameMember(0)
+        ReferenceFrameMember(0),
+        PositionMember()
     {}
     
     /*! constructor with all parameters */
     inline prmPositionCartesianGet(const prmTransformationBasePtr & movingFrame, 
                                    const prmTransformationBasePtr & referenceFrame, 
-                                   const prmCartesianPosition & position,
-                                   const mtsStateIndex & stateIndex):
+                                   const vctFrm3 & position):
         MovingFrameMember(movingFrame),
         ReferenceFrameMember(referenceFrame),
-        PositionMember(position),
-        StateIndexMember(stateIndex)
+        PositionMember(position)
     {}
     
     /*!destructor
@@ -83,7 +83,7 @@ class CISST_EXPORT prmPositionCartesianGet: public mtsGenericObject
 
     /*! Set and Get methods for position */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(prmCartesianPosition, Position);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctFrm3, Position);
     //@}
 
 
@@ -98,16 +98,16 @@ class CISST_EXPORT prmPositionCartesianGet: public mtsGenericObject
     } 
 
     
-    /*! Set and Get methods for state index.  Current state index, as
-      provided for writer of the task providing the position
-      data. */
-    //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(mtsStateIndex, StateIndex);
-    //@}
-
     /*! Human readable output to stream. */
     void ToStream(std::ostream & outputStream) const;
 
+    /*! To stream raw data. */
+    inline virtual void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
+                                    bool headerOnly = false, const std::string & headerPrefix = "") const {
+        BaseType::ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix);
+        outputStream << delimiter;
+        this->PositionMember.ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix);
+    }
 
 }; // _prmPositionCartesianGet_h
 

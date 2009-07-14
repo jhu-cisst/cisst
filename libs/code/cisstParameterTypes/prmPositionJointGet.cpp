@@ -31,9 +31,10 @@ void prmPositionJointGet::SetSize(size_type size)
     PositionMember.SetSize(size);
 }
 
+
 void prmPositionJointGet::ToStream(std::ostream & outputStream) const
 {
-    outputStream << "Position: " << this->PositionMember
-                 << "\nState Index: " << this->StateIndexMember;
+    BaseType::ToStream(outputStream);
+    outputStream << "\nPosition: " << this->PositionMember;
 }
 

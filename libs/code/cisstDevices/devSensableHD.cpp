@@ -104,18 +104,18 @@ void devSensableHD::Run(void)
         mtsStateIndex stateIndex = this->StateTable.GetIndexWriter();
 
         // copy transformation to the state table
-        deviceData->PositionCartesian.SetStateIndex(stateIndex);
+        // todo: replace by real timestamp: deviceData->PositionCartesian.SetStateIndex(stateIndex);
         deviceData->PositionCartesian.Position().Translation().Assign(deviceData->Frame4x4TranslationRef);
         deviceData->PositionCartesian.Position().Rotation().Assign(deviceData->Frame4x4RotationRef);
         
         // time stamp velocity
-        deviceData->VelocityCartesian.SetStateIndex(stateIndex);
+        // todo: real timestamp deviceData->VelocityCartesian.SetStateIndex(stateIndex);
 
         // compare to previous value to create events
         if (currentButtons != deviceData->Buttons) {
             int currentButtonState, previousButtonState;
             prmEventButton event;
-            event.SetStateIndex(stateIndex); 
+            // event.SetStateIndex(stateIndex); 
             // test for button 1
             currentButtonState = currentButtons & HD_DEVICE_BUTTON_1;
             previousButtonState = deviceData->Buttons & HD_DEVICE_BUTTON_1;

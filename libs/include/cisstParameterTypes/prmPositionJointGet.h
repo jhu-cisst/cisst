@@ -28,10 +28,8 @@ http://www.cisst.org/cisst/license.txt.
 #define _prmPositionJointGet_h
 
 // basic includes
+#include <cisstVector/vctDynamicVectorTypes.h>
 #include <cisstMultiTask/mtsGenericObject.h>
-#include <cisstMultiTask/mtsStateIndex.h>
-
-#include <cisstParameterTypes/prmTypes.h>
 
 // Always include last
 #include <cisstParameterTypes/prmExport.h>
@@ -43,6 +41,7 @@ class CISST_EXPORT prmPositionJointGet: public mtsGenericObject
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
 public:
+    typedef mtsGenericObject BaseType;
     typedef prmPositionJointGet ThisType;
     typedef unsigned int size_type;
 
@@ -58,10 +57,9 @@ public:
     void SetSize(size_type size);
 
     /*! constructor with all possible parameters */
-    inline prmPositionJointGet(const prmPosition & position,
-                               const mtsStateIndex & stateIndex):
-            PositionMember(position),
-            StateIndexMember(stateIndex)
+    inline prmPositionJointGet(const vctDoubleVec & position):
+        BaseType(),
+        PositionMember(position)
     {}
 
     /*! destructor */
@@ -82,20 +80,21 @@ public:
 
     /*! Set and Get methods for the the position. */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(prmPosition, Position);
-    //@}
-
-    /*! Set and Get methods for time index.  Current time index, as
-    provided for writer of the task providing the position
-    data. */
-    //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(mtsStateIndex, StateIndex);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, Position);
     //@}
 
 
     /*! Human readable output to stream. */
     void ToStream(std::ostream & outputStream) const;
 
+
+    /*! To stream raw data. */
+    inline virtual void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
+                                    bool headerOnly = false, const std::string & headerPrefix = "") const {
+        BaseType::ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix);
+        outputStream << delimiter;
+        this->PositionMember.ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix);
+    }
 
 }; // _prmPositionJointGet_h
 

@@ -28,9 +28,8 @@ prmPositionCartesianGet::~prmPositionCartesianGet()
 
 void prmPositionCartesianGet::ToStream(std::ostream & outputStream) const
 {
-    outputStream << "Reference frame: " << this->ReferenceFrameMember
+    BaseType::ToStream(outputStream);
+    outputStream << "\nReference frame: " << this->ReferenceFrameMember
                  << "\nMoving frame: " << this->MovingFrameMember
-                 << "\nPosition: " << this->PositionMember
-                 << "\nState Index: " << this->StateIndexMember;
+                 << "\nPosition: " << this->PositionMember;
 }
-
