@@ -278,15 +278,15 @@ bool mtsTaskManager::Connect(const std::string & userTaskName, const std::string
         return false;
     }
     // check if the user name corresponds to an existing task
-    mtsTask* userTask = TaskMap.GetItem(userTaskName);
+    mtsTask* userTask = TaskMap.GetItem(userTaskName, CMN_LOG_LOD_INIT_ERROR);
     if (!userTask) {
         CMN_LOG_CLASS_INIT_ERROR << "Connect: can not find a task named " << userTaskName << std::endl;
         return false;
     }
     // check if the resource name corresponds to an existing task or device
-    mtsDevice* resourceDevice = DeviceMap.GetItem(resourceTaskName);
+    mtsDevice* resourceDevice = DeviceMap.GetItem(resourceTaskName, CMN_LOG_LOD_INIT_DEBUG);
     if (!resourceDevice)
-       resourceDevice = TaskMap.GetItem(resourceTaskName);
+        resourceDevice = TaskMap.GetItem(resourceTaskName, CMN_LOG_LOD_INIT_ERROR);
     // find the interface pointer from the resource
     mtsDeviceInterface * resourceInterface;
     if (resourceDevice)

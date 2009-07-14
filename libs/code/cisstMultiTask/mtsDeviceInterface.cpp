@@ -133,7 +133,7 @@ mtsCommandVoidBase * mtsDeviceInterface::AddEventVoid(const std::string & eventN
 
 bool mtsDeviceInterface::AddEvent(const std::string & name, mtsMulticastCommandVoid * generator)
 {
-    if (EventWriteGenerators.GetItem(name)) {
+    if (EventWriteGenerators.GetItem(name, CMN_LOG_LOD_NOT_USED)) {
         // Is this check really needed?
         CMN_LOG_CLASS_INIT_VERBOSE << "AddEvent (void): event " << name << " already exists as write event, ignored." << std::endl;
         return false;
@@ -144,7 +144,7 @@ bool mtsDeviceInterface::AddEvent(const std::string & name, mtsMulticastCommandV
 
 bool mtsDeviceInterface::AddEvent(const std::string & name, mtsMulticastCommandWriteBase * generator)
 {
-    if (EventVoidGenerators.GetItem(name)) {
+    if (EventVoidGenerators.GetItem(name, CMN_LOG_LOD_NOT_USED)) {
         // Is this check really needed?
         CMN_LOG_CLASS_INIT_VERBOSE << "AddEvent (write): event " << name << " already exists as void event, ignored." << std::endl;
         return false;
