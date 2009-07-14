@@ -37,7 +37,7 @@ http://www.cisst.org/cisst/license.txt.
   less important the message is.  Lower values are used for the
   initialization phase (i.e. constructor, configuration, ...) while
   the higher values are used for normal operations. */
-typedef enum cmnLogLoD {
+typedef enum {
     CMN_LOG_LOD_NONE = 0,
     CMN_LOG_LOD_INIT_ERROR,
     CMN_LOG_LOD_INIT_WARNING,
@@ -49,7 +49,7 @@ typedef enum cmnLogLoD {
     CMN_LOG_LOD_RUN_DEBUG,
     CMN_LOG_LOD_VERY_VERBOSE,
     CMN_LOG_LOD_NOT_USED // used only to determine number of possible LoDs
-};  
+} cmnLogLoD;  
 
 
 /*! Default Level of details */

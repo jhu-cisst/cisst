@@ -139,7 +139,7 @@ public:
     void Stop(const double delayedStopInSeconds = 0.0);
 
     //---------------------- Miscellaneous functions ------------------------//
-    inline static const unsigned int GetCollectorCount(void) { return CollectorCount; }
+    inline static unsigned int GetCollectorCount(void) { return CollectorCount; }
 
 };
 

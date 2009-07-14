@@ -21,7 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstStereoVision/trackers/svlTrackerMSBruteForce.h>
-
+#include <string.h>
 
 svlTrackerMSBruteForce::svlTrackerMSBruteForce() : svlPointTrackerAlgoBase()
 {

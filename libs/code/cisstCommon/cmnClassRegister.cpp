@@ -40,7 +40,7 @@ const std::string * cmnClassRegister::RegisterInstance(cmnClassServicesBase* cla
     cmnClassServicesBase * existingServicesPointer = FindClassServicesInstance(className);
     
     // check if this class is already registered
-    if (existingServicesPointer != NULL) {
+    if (existingServicesPointer != 0) {
         CMN_LOG_INIT_ERROR << "Class cmnClassRegister: The class " << className
                            << " is already registered.  You should not have this problem, this is a bug!" << std::endl;
     } else {

@@ -27,7 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnPortability.h>
 #include <cisstCommon/cmnThrow.h>
-
+#include <string.h> // for memcpy
 
 /*! \brief Container class for fast copy related methods.
 

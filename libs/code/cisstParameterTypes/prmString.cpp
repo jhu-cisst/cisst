@@ -21,6 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstParameterTypes/prmString.h>
+#include <string.h> // for memcpy
 
 CMN_IMPLEMENT_SERVICES(prmString);
 

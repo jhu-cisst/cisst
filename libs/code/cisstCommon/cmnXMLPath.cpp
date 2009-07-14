@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnXMLPath.h>
 #include <cisstCommon/cmnPrintf.h>
 #include <limits>
+#include <string.h> // for strncmp
 
 // required to register the class.  default level of detail is 1 as
 // mentioned in header file
@@ -201,7 +202,10 @@ bool cmnXMLPath::GetXMLValue(const char *context, const char *XPath, double &val
 	xmlChar* tmpStorage = 0;
 	if (GetXMLValue(context, XPath, &tmpStorage) && tmpStorage != 0) {
 		// special treatment for select floating points eps, -Inf & Inf
-		for (int i = 0; tmpStorage[i] != '\0'; tmpStorage[i]=toupper(tmpStorage[i]), i++);
+		for (int i = 0;
+             tmpStorage[i] != '\0';
+             tmpStorage[i]=toupper(tmpStorage[i]), i++)
+        {}
 		if ((strncmp((char*)tmpStorage, "INF", 3) == 0) || (strncmp((char*)tmpStorage, "1.#INF", 6) == 0)) {
 			value = std::numeric_limits<double>::infinity();
 		} else if ((strncmp((char*)tmpStorage, "-INF", 4) == 0) || (strncmp((char*)tmpStorage, "-1.#INF", 7) == 0)) {
@@ -263,7 +267,10 @@ bool cmnXMLPath::GetXMLValue(const char *context, const char *XPath, bool &value
     bool result = false;
 	xmlChar* tmpStorage = 0;
 	if (GetXMLValue(context, XPath, &tmpStorage) && tmpStorage != 0) {
-		for (int i = 0; tmpStorage[i] != '\0'; tmpStorage[i]=toupper(tmpStorage[i]), i++);
+		for (int i = 0;
+             tmpStorage[i] != '\0';
+             tmpStorage[i]=toupper(tmpStorage[i]), i++)
+        {}
 		if (strncmp((char*)tmpStorage, "FALSE", 5) == 0) {
 			value = false;
 			return true;

@@ -21,6 +21,8 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include <cisstStereoVision/svlImageSampler.h>
+#include <string.h>
+
 #include "svlConverters.h"
 
 using namespace std;

@@ -41,6 +41,7 @@ MapPortToTool[portNumber] = NULL;
 #include <cisstOSAbstraction/osaSleep.h>
 
 #include <string>
+#include <string.h> // for memcpy, strlen
 
 #if (CISST_OS == CISST_WINDOWS)
 typedef signed char int8_t;

@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _svlVideoCaptureSource_h
 
 #include <cisstStereoVision/svlStreamManager.h>
+#include <string.h>
 
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
@@ -67,7 +68,7 @@ public:
 	    bool testok;
     } DeviceInfo;
 
-    typedef enum PixelType {
+    typedef enum _PixelType {
         PixelRGB8    = 0,
         PixelYUV444  = 1,
         PixelYUV422  = 2,
@@ -75,7 +76,7 @@ public:
         PixelMONO8   = 4,
         PixelMONO16  = 5,
         PixelUnknown = 6
-    };
+    } PixelType;
 
     typedef struct _ImageFormat {
         unsigned int    width;
@@ -93,14 +94,14 @@ public:
         unsigned int    polarity;
     } ExternalTrigger;
 
-    typedef enum ImagePropertiesMask {
+    typedef enum _ImagePropertiesMask {
         propShutter      = 1,
         propGain         = 1 << 1,
         propWhiteBalance = 1 << 2,
         propBrightness   = 1 << 3,
         propGamma        = 1 << 4,
         propSaturation   = 1 << 5,
-    };
+    } ImagePropertiesMask;
 
     typedef struct _ImageProperties {
         unsigned int mask;

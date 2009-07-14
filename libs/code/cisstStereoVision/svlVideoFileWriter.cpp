@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "svlConverters.h"
 #include "zlib.h"
+#include <string.h>
 
 #if (CISST_OS == CISST_WINDOWS)
     #include "commdlg.h"

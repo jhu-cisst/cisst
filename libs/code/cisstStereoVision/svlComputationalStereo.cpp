@@ -21,6 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstStereoVision/svlComputationalStereo.h>
+#include <string.h>
 
 #include "svlStereoDP.h"
 #include "svlStereoDPMono.h"

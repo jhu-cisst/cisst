@@ -31,12 +31,12 @@ http://www.cisst.org/cisst/license.txt.
 class CISST_EXPORT svlStereoImageJoiner : public svlFilterBase
 {
 public:
-    typedef enum Layout {
+    typedef enum _Layout {
         VerticalInterlaced,
         VerticalInterlacedRL,
         SideBySide,
         SideBySideRL
-    };
+    } Layout;
 
     svlStereoImageJoiner();
     virtual ~svlStereoImageJoiner();

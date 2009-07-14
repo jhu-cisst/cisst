@@ -23,6 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlImageRectifier.h>
 
 #include <stdio.h>
+#include <string.h>
 
 using namespace std;
 

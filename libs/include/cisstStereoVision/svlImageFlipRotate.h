@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _svlImageFlipRotate_h
 
 #include <cisstStereoVision/svlStreamManager.h>
+#include <string.h>
 
 // Always include last!
 #include <cisstStereoVision/svlExport.h>

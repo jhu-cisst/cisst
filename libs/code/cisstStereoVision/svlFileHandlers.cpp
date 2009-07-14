@@ -21,6 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstStereoVision/svlFileHandlers.h>
+#include <string.h> // for memcpy and strlen
 
 #include "ftImageBMP.h"
 #include "ftImagePPM.h"

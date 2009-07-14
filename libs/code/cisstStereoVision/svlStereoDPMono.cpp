@@ -21,7 +21,9 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include "svlStereoDPMono.h"
+
 #include <math.h>
+#include <string.h>
 
 #define MAX_UI16_VAL    0xFFFF
 #define MAX_I32_VAL     0x7FFFFFFF

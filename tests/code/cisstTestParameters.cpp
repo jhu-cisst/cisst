@@ -21,7 +21,8 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include "cisstTestParameters.h"
-
+#include <string.h> // for strcmp
+#include <stdlib.h> // for atoi
 
 void cisstTestParameters::ParseCmdLine(int argc, const char * argv[])
 {

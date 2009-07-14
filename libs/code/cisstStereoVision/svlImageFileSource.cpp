@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaSleep.h>
 
 #include <math.h>
+#include <string.h>
 
 using namespace std;
 

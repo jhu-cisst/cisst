@@ -21,6 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstStereoVision/svlStereoImageJoiner.h>
+#include <string.h>
 
 using namespace std;
 

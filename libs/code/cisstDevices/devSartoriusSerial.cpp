@@ -21,6 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstDevices/devSartoriusSerial.h>
 #include <cisstOSAbstraction/osaSleep.h>
 
+#include <string.h> // for memcpy
 
 CMN_IMPLEMENT_SERVICES(devSartoriusSerial);
 

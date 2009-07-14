@@ -42,10 +42,10 @@ class CISST_EXPORT devNDiSerialToolInformationGet: public mtsGenericObject
        character array of fixed size 256. Anything larger is
        truncated. This allows for easy usage for this parameter by the
        users of cisstTracker. */
-    typedef struct CHAR_256
+    typedef struct
     { 
         char Value[256];
-    };
+    } CHAR_256;
 
     CHAR_256 StringToChar256(std::string in) // Should be a reference ADV
     {
