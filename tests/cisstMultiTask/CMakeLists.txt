@@ -1,9 +1,9 @@
 #
-# $Id$
+# $Id: CMakeLists.txt mjung5 $
 #
-# CMakeLists for cisstMultiTasks Tests
+# CMakeLists for cisstMultiTask tests
 #
-# (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2008-2009 Johns Hopkins University (JHU), All Rights
 # Reserved.
 # 
 # --- begin cisst license - do not edit ---
@@ -23,6 +23,10 @@ CISST_REQUIRES(cisstMultiTasksTestsLib "cisstCommon;cisstVector;cisstOSAbstracti
 
 # all source files
 SET(SOURCE_FILES
+    mtsCollectorBaseTest.cpp
+    mtsStateTableTest.cpp
+    mtsTaskManagerTest.cpp
+    mtsTaskTest.cpp
     mtsVectorTest.cpp
     mtsMacrosTest.cpp
     mtsMatrixTest.cpp
@@ -30,17 +34,21 @@ SET(SOURCE_FILES
 
 # all header files
 SET(HEADER_FILES
+    mtsCollectorBaseTest.h
+    mtsStateTableTest.h
+    mtsTaskManagerTest.h
+    mtsTaskTest.h
     mtsVectorTest.h
     mtsMacrosTest.h
     mtsMatrixTest.h
     )
 
 # Add executable for C++ tests
-ADD_EXECUTABLE(cisstMultiTasksTests ${SOURCE_FILES} ${HEADER_FILES})
+ADD_EXECUTABLE(cisstMultiTaskTests ${SOURCE_FILES} ${HEADER_FILES})
 
-TARGET_LINK_LIBRARIES(cisstMultiTasksTests cisstTestsMain cisstMultiTasksTestsLib)
+TARGET_LINK_LIBRARIES(cisstMultiTaskTests cisstTestsMain cisstMultiTasksTestsLib)
 
-CISST_REQUIRES("cisstMultiTasksTests" "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask")
+CISST_REQUIRES("cisstMultiTaskTests" "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask")
 
 # To generate a CTest list of tests
-CISST_ADD_TESTS(cisstMultiTasksTests)
+CISST_ADD_TESTS(cisstMultiTaskTests)

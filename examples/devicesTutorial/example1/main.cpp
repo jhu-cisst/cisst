@@ -49,14 +49,22 @@ int main(void)
     taskManager->ToStreamDot(dotFile);
     dotFile.close();
 
+    // collect all state data in csv file
+    mtsCollectorState * collector =
+        new mtsCollectorState("Omni", mtsCollectorBase::COLLECTOR_LOG_FORMAT_CSV);
+    collector->AddSignal(); // all signals
+    taskManager->AddTask(collector);
+
     // create the tasks, i.e. find the commands
     taskManager->CreateAll();
     // start the periodic Run
     taskManager->StartAll();
 
+    collector->Start(0.0 * cmn_s);
+
     // wait until the close button of the UI is pressed
-    while (1) {
-        osaSleep(100.0 * cmn_ms); // sleep to save CPU
+    while (true) {
+        osaSleep(10.0 * cmn_ms); // sleep to save CPU
         if (displayTaskObject->GetExitFlag()) {
             break;
         }

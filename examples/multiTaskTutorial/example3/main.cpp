@@ -25,10 +25,10 @@ int main(void)
 
     // create our tasks
     mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
-    robotLowLevel * robotTask = new robotLowLevel("RobotControl", 100 * cmn_ms);
-    monitorTask * monitor = new monitorTask("Monitor", 50 * cmn_ms);
-    appTask * appTaskControl1 = new appTask("ControlRobot1", "Robot1", "Robot2", 100 * cmn_ms);
-    appTask * appTaskControl2 = new appTask("ControlRobot2", "Robot2", "Robot1", 300 * cmn_ms);
+    robotLowLevel * robotTask = new robotLowLevel("RobotControl", 50 * cmn_ms);
+    monitorTask * monitor = new monitorTask("Monitor", 20 * cmn_ms);
+    appTask * appTaskControl1 = new appTask("ControlRobot1", "Robot1", "Robot2", 50 * cmn_ms);
+    appTask * appTaskControl2 = new appTask("ControlRobot2", "Robot2", "Robot1", 100 * cmn_ms);
 
     // add all tasks
     taskManager->AddTask(robotTask);
@@ -49,12 +49,21 @@ int main(void)
     taskManager->Connect("ControlRobot2", "ObservedRobot",
                          "RobotControl", "Robot1Observer");
 
+    // display a graph of connections
     std::ofstream dotFile("example3.dot"); 
     taskManager->ToStreamDot(dotFile);
     dotFile.close();
 
+    // collect all state data in csv file
+    mtsCollectorState * collector =
+        new mtsCollectorState("RobotControl", mtsCollectorBase::COLLECTOR_LOG_FORMAT_CSV);
+    collector->AddSignal(); // all signals
+    taskManager->AddTask(collector);
+
     taskManager->CreateAll();
     taskManager->StartAll();
+
+    collector->Start(0.0 * cmn_s);
 
     // Loop until both tasks are closed
     while (!(appTaskControl1->GetExitFlag() && appTaskControl2->GetExitFlag())) {

@@ -51,6 +51,9 @@ FOREACH(module ${MODULES})
   SET_SOURCE_FILES_PROPERTIES(${interface}
                               PROPERTIES SWIG_FLAGS "-v;-modern")
   SWIG_ADD_MODULE(${module}Python python ${interface})
+  IF(WIN32)
+    SET_TARGET_PROPERTIES(_${module}Python PROPERTIES SUFFIX .pyd)
+  ENDIF(WIN32)
   SWIG_LINK_LIBRARIES(${module}Python ${module}
                       debug ${PYTHON_DEBUG_LIBRARIES}
                       optimized ${PYTHON_LIBRARIES})

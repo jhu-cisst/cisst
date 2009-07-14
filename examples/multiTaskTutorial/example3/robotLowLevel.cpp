@@ -9,7 +9,7 @@
 CMN_IMPLEMENT_SERVICES(robotLowLevel);
 
 robotLowLevel::robotLowLevel(const std::string & taskName, double period):
-    mtsTaskPeriodic(taskName, period, false, 5000)
+    mtsTaskPeriodic(taskName, period, false, 500)
 {
     // set all vectors to the right size
     GoalJointRobot1.SetSize(NB_JOINTS);

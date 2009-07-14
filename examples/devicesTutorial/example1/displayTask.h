@@ -5,6 +5,7 @@
 #ifndef _displayTask_h
 #define _displayTask_h
 
+#include <cisstCommon.h>
 #include <cisstVector.h>
 #include <cisstMultiTask.h>
 #include <cisstParameterTypes.h>
