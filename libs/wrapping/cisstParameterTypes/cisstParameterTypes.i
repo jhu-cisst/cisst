@@ -58,8 +58,6 @@ http://www.cisst.org/cisst/license.txt.
 
 // Import file with macros and typedefs
 %import "cisstMultiTask/mtsMacros.h"
-%import "cisstParameterTypes/prmTypes.h"
-
 
 // Wrap base type
 %include "cisstParameterTypes/prmMotionBase.h"
