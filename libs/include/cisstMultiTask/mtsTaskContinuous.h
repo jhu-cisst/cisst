@@ -75,7 +75,7 @@ public:
 	/*! Create a task with name 'name' that has a state table of the specified size.
 
         \param name The name of the task
-        \param dataCollector  Pointer to the instance of mtsCollectorBase
+        \param sizeStateTable The history size of the state table
         \param newThread True if a new thread should be created for this task
 
         \note See note in mtsTask regarding length of string name.
