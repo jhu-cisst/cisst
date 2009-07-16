@@ -221,12 +221,11 @@ bool ui3Manager::AddBehavior(ui3BehaviorBase * behavior,
 }
 
 
-
 bool ui3Manager::AddMasterArm(ui3MasterArm * arm)
 {
     // setup UI manager pointer in newly added arm
     arm->SetManager(this);
-    this->MasterArms.push_back(arm);
+    this->MasterArms.AddItem(arm->Name, arm, CMN_LOG_LOD_INIT_ERROR);
     return true;
 }
 
@@ -243,6 +242,12 @@ bool ui3Manager::AddSlaveArm(ui3SlaveArm * arm)
 ui3SlaveArm * ui3Manager::GetSlaveArm(const std::string & armName)
 {
     return this->SlaveArms.GetItem(armName, CMN_LOG_LOD_INIT_ERROR);
+}
+
+
+ui3MasterArm * ui3Manager::GetMasterArm(const std::string & armName)
+{
+    return  this->MasterArms.GetItem(armName, CMN_LOG_LOD_INIT_ERROR);
 }
 
 
@@ -271,7 +276,7 @@ void ui3Manager::ConnectAll(void)
              armIterator != armEnd;
              armIterator++) {
             std::string commandName;
-            switch ((*armIterator)->Role) {
+            switch (((*armIterator).second)->Role) {
             case ui3MasterArm::PRIMARY:
                 commandName = "PrimaryMasterCartesianPosition";
                 break;
@@ -283,16 +288,16 @@ void ui3Manager::ConnectAll(void)
             }
             CMN_LOG_CLASS_RUN_WARNING << "ConnectAll: added state data \""
                                       << commandName << "\" using master arm \"" 
-                                      << (*armIterator)->Name << "\"" << std::endl;
-            this->StateTable.AddData((*armIterator)->CartesianPosition, commandName);
-            behaviorsInterface->AddCommandReadState(this->StateTable, (*armIterator)->CartesianPosition,
+                                      << ((*armIterator).second)->Name << "\"" << std::endl;
+            this->StateTable.AddData(((*armIterator).second)->CartesianPosition, commandName);
+            behaviorsInterface->AddCommandReadState(this->StateTable, ((*armIterator).second)->CartesianPosition,
                                                     commandName);
             for (iterator = this->Behaviors.begin();
                  iterator != end;
                  iterator++) {
                 requiredInterface = (*iterator)->GetRequiredInterface("ManagerInterface");
                 CMN_ASSERT(requiredInterface);
-                switch ((*armIterator)->Role) {
+                switch (((*armIterator).second)->Role) {
                 case ui3MasterArm::PRIMARY:
                     requiredInterface->AddFunction(commandName,
                                                    (*iterator)->GetPrimaryMasterPosition,
@@ -358,8 +363,8 @@ void ui3Manager::Startup(void)
     for (armIterator = this->MasterArms.begin();
          armIterator != armEnd;
          armIterator++) {
-        this->SceneManager->Add((*armIterator)->Cursor->GetVisibleObject());
-        (*armIterator)->Show();
+        this->SceneManager->Add(((*armIterator).second)->Cursor->GetVisibleObject());
+        ((*armIterator).second)->Show();
     }
 
     // add main menu bar
@@ -456,7 +461,7 @@ void ui3Manager::Run(void)
     for (armIterator = this->MasterArms.begin();
          armIterator != armEnd;
          armIterator++) {
-        (*armIterator)->PreRun();
+        ((*armIterator).second)->PreRun();
     }
 
     // process events
@@ -467,8 +472,8 @@ void ui3Manager::Run(void)
     for (armIterator = this->MasterArms.begin();
          armIterator != armEnd;
          armIterator++) {
-        (*armIterator)->UpdateCursorPosition();
-        averageDepth += (*armIterator)->CursorPosition.Translation().Z();
+        ((*armIterator).second)->UpdateCursorPosition();
+        averageDepth += ((*armIterator).second)->CursorPosition.Translation().Z();
     }
 
     if (MasterArms.size() > 0) {
@@ -491,11 +496,11 @@ void ui3Manager::Run(void)
          armIterator != armEnd;
          armIterator++) {
         // see if this cursor is over the menu and if so returns the current button 
-        isOverMenu = this->ActiveBehavior->MenuBar->IsPointOnMenuBar((*armIterator)->CursorPosition.Translation(),
+        isOverMenu = this->ActiveBehavior->MenuBar->IsPointOnMenuBar(((*armIterator).second)->CursorPosition.Translation(),
                                                                      selectedButton);
-        (*armIterator)->Cursor->Set2D(isOverMenu);
+        ((*armIterator).second)->Cursor->Set2D(isOverMenu);
         if (selectedButton) {
-            if ((*armIterator)->ButtonReleased) {
+            if (((*armIterator).second)->ButtonReleased) {
                 selectedButton->CallBack();
                 //                (*armIterator)->ButtonReleased = false;
             }
@@ -614,7 +619,7 @@ void ui3Manager::HideAll(void)
     for (armIterator = this->MasterArms.begin();
          armIterator != armEnd;
          armIterator++) {
-        (*armIterator)->Hide();
+        ((*armIterator).second)->Hide();
     }
 
     if (this->ActiveBehavior) {
@@ -630,7 +635,7 @@ void ui3Manager::ShowAll(void)
     for (armIterator = this->MasterArms.begin();
          armIterator != armEnd;
          armIterator++) {
-        (*armIterator)->Show();
+        ((*armIterator).second)->Show();
     }
 
     if (this->ActiveBehavior) {

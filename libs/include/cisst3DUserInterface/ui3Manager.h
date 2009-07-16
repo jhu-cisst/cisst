@@ -51,7 +51,7 @@ public:
     */
     typedef std::list<ui3BehaviorBase *> BehaviorList;
 
-    typedef std::list<ui3MasterArm *> MasterArmList;
+    typedef cmnNamedMap<ui3MasterArm> MasterArmList;
 
     typedef cmnNamedMap<ui3SlaveArm> SlaveArmList;
 
@@ -168,6 +168,8 @@ public:
     bool AddSlaveArm(ui3SlaveArm * arm);
 
     ui3SlaveArm * GetSlaveArm(const std::string & armName);
+    
+    ui3MasterArm * GetMasterArm(const std::string & armName);
 
     void ConnectAll(void);
 
@@ -177,8 +179,6 @@ public:
      It returns on error or after the main loop has successfully been started.
      The running user interface loop can be terminated by calling the
      the ui3Manager::Stop method.
-
-     \return                Success flag: true=success, false=error
     */
     virtual void Startup(void);
 
@@ -232,6 +232,7 @@ public:
     virtual bool RunNoInput(void);
 
 
+    
 protected:
 
     typedef struct tagRendererStruct {
@@ -296,10 +297,10 @@ private:
     BehaviorList Behaviors;
 
     /*!
-      Linked list of master arms
+      Map of std::string, master arms
     */
     MasterArmList MasterArms;
-
+    
     /*!
       Map of std::string, slave arms
     */
