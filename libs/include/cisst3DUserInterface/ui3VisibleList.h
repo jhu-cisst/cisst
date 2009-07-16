@@ -61,9 +61,22 @@ public:
         this->Objects.push_back(object);
     }
 
+    void RemoveLast(void) {
+        this->Objects.pop_back();
+    }
+    
+    ui3VisibleObject * GetLast(void){
+        return this->Objects.back();
+    }
+    
+    unsigned int size(void) const  {
+        return this->Objects.size();
+    }
+    
+
 protected:
     
-    typedef std::list <ui3VisibleObject *> ListType;
+    typedef std::list<ui3VisibleObject *> ListType;
     ListType Objects;
 };
 
