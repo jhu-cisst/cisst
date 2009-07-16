@@ -50,8 +50,8 @@ protected:
     bool Following;
 
 private:
+    ui3VisibleList * VisibleList;
     ui3VisibleObject * VisibleObject1;
     ui3VisibleObject * VisibleObject2;
-    ui3VisibleList * VisibleList;
     double Counter;
 };

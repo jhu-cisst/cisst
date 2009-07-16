@@ -102,15 +102,17 @@ int main()
     guiManager.AddBehavior(&behavior2,       // behavior reference
                            2,             // position in the menu bar: default
                            "square.png");            // icon file: no texture
+#if 1
     guiManager.AddBehavior(&behavior3,       // behavior reference
                            1,             // position in the menu bar: default
                            "resize.png");            // icon file: no texture
-
+#endif
     guiManager.Configure("config.xml");
 
 
 ////////////////////////////////////////////////////////////////
 // setup US stream
+
     svlStreamManager vidUltrasoundStream(1);  // running on multiple threads
 
     svlVideoCaptureSource vidUltrasoundSource(false); // mono source
@@ -119,8 +121,10 @@ int main()
         vidUltrasoundSource.DialogSetup();
         vidUltrasoundSource.SaveSettings("usvideo.dat");
     }
+#if 0
     vidUltrasoundStream.Trunk().Append(&vidUltrasoundSource);
-
+#endif 
+    
     // add image cropper
     svlImageCropper vidUltrasoundCropper;
     vidUltrasoundCropper.SetRectangle(186, 27, 186 + 360 - 1, 27 + 332 - 1);
@@ -128,7 +132,8 @@ int main()
 
     // add guiManager as a filter to the pipeline, so it will receive video frames
     // "StereoVideo" is defined in the UI Manager as a possible video interface
-    vidUltrasoundStream.Trunk().Append(behavior3.GetStreamSamplerFilter("USVideo"));
+    
+//    vidUltrasoundStream.Trunk().Append(behavior3.GetStreamSamplerFilter("USVideo"));
 
 /*
     // add debug window

@@ -60,7 +60,7 @@ public:
     }
     void SetJoints(double A1, double A2, double insertion, double roll);
     void SetProbeColor(double r, double g, double b);
-    void SetText(BehaviorLUSText *obj, char* txt);
+    void SetText(BehaviorLUSText *obj, const std::string & text);
     void CheckLimits(double p, double y, double i, double r);
     void GetMeasurement(vctFixedSizeVector<double,3u> pos);
     void AddMarker();
@@ -103,12 +103,13 @@ protected:
     mtsFunctionRead GetJointPositionSlave;
     prmPositionJointGet JointsSlave;
     
-    void UpdateMap(prmPositionCartesianGet ecmFrame, double insertion);
+    void UpdateMap(prmPositionCartesianGet & ecmFrame); // ANTON TO FIX , double insertion);
     
     mtsFunctionRead GetJointPositionECM;
     prmPositionJointGet JointsECM;
     
     bool MeasurementActive;
+    bool MapEnabled;
     vctDouble3 MeasurePoint1;
 
 private:
@@ -121,7 +122,7 @@ private:
     BehaviorLUSBackground *Backgrounds;
     BehaviorLUSOutline    *Outline;
     BehaviorLUSText       *WarningText, * MeasureText;
-    BehaviorLUSMarker     *Cursor, *m;
+    BehaviorLUSMarker     *MapCursor, *m;
 
 
 
@@ -134,13 +135,13 @@ private:
     ui3VisibleList * BackgroundList;
     ui3VisibleList * TextList;
     ui3VisibleList * MarkerList;
-    ui3VisibleList * CursorList;
+    ui3VisibleList * MapCursorList;
+    ui3VisibleList * AxesList;
 
     ui3VisibleAxes * ProbeAxes;
     ui3VisibleAxes * AxesJoint1;
     ui3VisibleAxes * AxesJoint2;
     ui3VisibleAxes * AxesJoint3;
     ui3VisibleAxes * AxesShaft;
-    bool MapEnabled;
 };
 
