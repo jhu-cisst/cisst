@@ -29,7 +29,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstParameterTypes/prmTransformationBase.h>
 #include <cisstParameterTypes/prmTransformationManager.h>
-#include <cisstParameterTypes/prmTypes.h>
 #include <cisstParameterTypes/prmMotionBase.h>
 
 // Always include last
