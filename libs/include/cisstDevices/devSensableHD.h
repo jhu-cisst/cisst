@@ -57,16 +57,32 @@ public:
 
     /*! Constructor for a single arm with a user specified name.  The
       name must match the device name as defined by Sensable
-      drivers. */
+      drivers. Force output initially disabled*/
     devSensableHD(const std::string & taskName,
                   const std::string & firstDeviceName);
 
+    /*! Constructor for a single arm with a user specified name.  The
+      name must match the device name as defined by Sensable
+      drivers. Overloaded to enable/disable force output.*/
+    devSensableHD(const std::string & taskName,
+                  const std::string & firstDeviceName,
+                  bool firstDeviceForcesEnabled);
+
     /*! Constructor for two arms with a user specified names.  The
       names must match the device names as defined by Sensable
-      drivers. */
+      drivers. Force output initially disabled */
     devSensableHD(const std::string & taskName,
                   const std::string & firstDeviceName,
                   const std::string & secondDeviceName);
+
+    /*! Constructor for two arms with a user specified names.  The
+      names must match the device names as defined by Sensable
+      drivers. Overloaded to enable/disable force output. */
+    devSensableHD(const std::string & taskName,
+                  const std::string & firstDeviceName,
+                  const std::string & secondDeviceName,
+                  bool firstDeviceForcesEnabled,
+                  bool secondDeviceForcesEnabled);
 
     ~devSensableHD();
     void Configure(const std::string & CMN_UNUSED(filename) = "") {};

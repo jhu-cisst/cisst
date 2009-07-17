@@ -33,6 +33,7 @@ CMN_IMPLEMENT_SERVICES(devSensableHD);
 struct devSensableHDDeviceData {
     HHD DeviceHandle;
     bool DeviceEnabled;
+    bool ForceOutputEnabled;
     
     // local copy of the buttons state as defined by Sensable
     mtsInt Buttons;
@@ -45,7 +46,9 @@ struct devSensableHDDeviceData {
     
     // mtsFunction called to broadcast the event
     mtsFunctionWrite Button1Event, Button2Event;
-	
+
+    prmForceCartesianSet ForceCartesian;
+
     // local buffer used to store the position as provided
     // by Sensable
     typedef vctFixedSizeMatrix<double, 4, 4, VCT_COL_MAJOR> Frame4x4Type;
@@ -68,12 +71,14 @@ struct devSensableHDDriverData {
 // The task Run method
 void devSensableHD::Run(void)
 {
+	ProcessQueuedCommands();
+
     int currentButtons;
     DevicesMapType::iterator iterator = this->Devices.begin();
     const DevicesMapType::iterator end = this->Devices.end();
     devSensableHDDeviceData * deviceData;
     HHD hHD;
-
+    
     for (; iterator != end; iterator++) {
         currentButtons = 0;
         deviceData = iterator->second;
@@ -90,13 +95,18 @@ void devSensableHD::Run(void)
         hdGetDoublev(HD_CURRENT_VELOCITY, deviceData->VelocityCartesian.VelocityLinear().Pointer());
         hdGetDoublev(HD_CURRENT_ANGULAR_VELOCITY, deviceData->VelocityCartesian.VelocityAngular().Pointer());
         
-        // retrive joint positions, write directly in state data
+        // retrieve joint positions, write directly in state data
         hdGetDoublev(HD_CURRENT_JOINT_ANGLES, deviceData->PositionJoint.Position().Pointer());
         hdGetDoublev(HD_CURRENT_GIMBAL_ANGLES, deviceData->GimbalJointsRef.Pointer());
 
         // retrieve the current button(s).
         hdGetIntegerv(HD_CURRENT_BUTTONS, &currentButtons);
 
+        // apply forces
+        if(deviceData->ForceOutputEnabled)
+        {
+            hdSetDoublev(HD_CURRENT_FORCE, deviceData->ForceCartesian.Force().Pointer());
+        }
         // end haptics frame
         hdEndFrame(hHD);
 
@@ -104,18 +114,18 @@ void devSensableHD::Run(void)
         mtsStateIndex stateIndex = this->StateTable.GetIndexWriter();
 
         // copy transformation to the state table
-        // todo: replace by real timestamp: deviceData->PositionCartesian.SetStateIndex(stateIndex);
+        deviceData->PositionCartesian.SetStateIndex(stateIndex);
         deviceData->PositionCartesian.Position().Translation().Assign(deviceData->Frame4x4TranslationRef);
         deviceData->PositionCartesian.Position().Rotation().Assign(deviceData->Frame4x4RotationRef);
         
         // time stamp velocity
-        // todo: real timestamp deviceData->VelocityCartesian.SetStateIndex(stateIndex);
+        deviceData->VelocityCartesian.SetStateIndex(stateIndex);
 
         // compare to previous value to create events
         if (currentButtons != deviceData->Buttons) {
             int currentButtonState, previousButtonState;
             prmEventButton event;
-            // event.SetStateIndex(stateIndex); 
+            event.SetStateIndex(stateIndex); 
             // test for button 1
             currentButtonState = currentButtons & HD_DEVICE_BUTTON_1;
             previousButtonState = deviceData->Buttons & HD_DEVICE_BUTTON_1;
@@ -148,9 +158,10 @@ void devSensableHD::Run(void)
     // check for errors and abort the callback if a scheduler error
     HDErrorInfo error;
     if (HD_DEVICE_ERROR(error = hdGetError())) {
-        CMN_LOG_RUN_ERROR << "devSensableHDCallback: Device error detected";
+        CMN_LOG_RUN_ERROR << "devSensableHDCallback: Device error detected \""
+                          << hdGetErrorString(error.errorCode) << "\"\n";
         if (hduIsSchedulerError(&error)) {
-            CMN_LOG_RUN_ERROR << "devSensableHDCallback: Scheduler error detected";
+            CMN_LOG_RUN_ERROR << "devSensableHDCallback: Scheduler error detected\n";
             this->Driver->CallbackReturnValue = HD_CALLBACK_DONE;
             return;
         }
@@ -168,16 +179,30 @@ devSensableHD::devSensableHD(const std::string & taskName):
     mtsTaskFromCallbackAdapter(taskName, 5000)
 {
     CMN_LOG_CLASS_INIT_DEBUG << "constructor called, looking for \"DefaultArm\"" << std::endl;
-    Devices["DefaultArm"] = 0;
+    Devices["DefaultArm"] = new devSensableHDDeviceData;
+    Devices["DefaultArm"]->ForceOutputEnabled = false;
     this->SetupInterfaces();
 }
 
 
-devSensableHD::devSensableHD(const std::string & taskName, const std::string & firstDeviceName):
+devSensableHD::devSensableHD(const std::string & taskName, 
+                             const std::string & firstDeviceName):
     mtsTaskFromCallbackAdapter(taskName, 5000)
 {
     CMN_LOG_CLASS_INIT_DEBUG << "constructor called, looking for \"" << firstDeviceName << "\"" << std::endl;
-    Devices[firstDeviceName] = 0;
+    Devices[firstDeviceName] = new devSensableHDDeviceData;
+    Devices[firstDeviceName]->ForceOutputEnabled = false;
+    this->SetupInterfaces();
+}
+
+devSensableHD::devSensableHD(const std::string & taskName, 
+                             const std::string & firstDeviceName, 
+                             bool firstDeviceForcesEnabled):
+    mtsTaskFromCallbackAdapter(taskName, 5000)
+{
+    CMN_LOG_CLASS_INIT_DEBUG << "constructor called, looking for \"" << firstDeviceName << "\"" << std::endl;
+    Devices[firstDeviceName] = new devSensableHDDeviceData;
+    Devices[firstDeviceName]->ForceOutputEnabled = firstDeviceForcesEnabled;
     this->SetupInterfaces();
 }
 
@@ -194,11 +219,33 @@ devSensableHD::devSensableHD(const std::string & taskName,
     }
     CMN_LOG_CLASS_INIT_DEBUG << "constructor called, looking for \"" << firstDeviceName
                              << "\" and \"" << secondDeviceName << "\"" << std::endl;
-    Devices[firstDeviceName] = 0;
-    Devices[secondDeviceName] = 0;
+    Devices[firstDeviceName] = new devSensableHDDeviceData;
+    Devices[secondDeviceName] = new devSensableHDDeviceData;
+    Devices[firstDeviceName]->ForceOutputEnabled = false;
+    Devices[secondDeviceName]->ForceOutputEnabled = false;
     this->SetupInterfaces();
 }
 
+devSensableHD::devSensableHD(const std::string & taskName,
+                             const std::string & firstDeviceName,
+                             const std::string & secondDeviceName,
+                             bool firstDeviceForcesEnabled,
+                             bool secondDeviceForcesEnabled):
+    mtsTaskFromCallbackAdapter(taskName, 5000)
+{
+    if (firstDeviceName == secondDeviceName) {
+        CMN_LOG_CLASS_INIT_ERROR << "In constructor: name of devices provided are identical, \""
+                                 << firstDeviceName << "\" and \""
+                                 << secondDeviceName << "\"" << std::endl;
+    }
+    CMN_LOG_CLASS_INIT_DEBUG << "constructor called, looking for \"" << firstDeviceName
+                             << "\" and \"" << secondDeviceName << "\"" << std::endl;
+    Devices[firstDeviceName] = new devSensableHDDeviceData;
+    Devices[secondDeviceName] = new devSensableHDDeviceData;
+    Devices[firstDeviceName]->ForceOutputEnabled = firstDeviceForcesEnabled;
+    Devices[secondDeviceName]->ForceOutputEnabled = secondDeviceForcesEnabled;
+    this->SetupInterfaces();
+}
 
 void devSensableHD::SetupInterfaces(void)
 {
@@ -212,8 +259,6 @@ void devSensableHD::SetupInterfaces(void)
     mtsProvidedInterface * providedInterface;
 
     for (; iterator != end; iterator++) {
-        // allocate memory
-        iterator->second = new devSensableHDDeviceData;
         // use local data pointer to make code more readable
         deviceData = iterator->second;
         CMN_ASSERT(deviceData);
@@ -239,6 +284,13 @@ void devSensableHD::SetupInterfaces(void)
         this->StateTable.AddData(deviceData->PositionJoint, interfaceName + "PositionJoint");
         this->StateTable.AddData(deviceData->Buttons, interfaceName + "Buttons");
 
+        if(deviceData->ForceOutputEnabled)
+        {
+            this->StateTable.AddData(deviceData->ForceCartesian, interfaceName + "ForceCartesian");
+            providedInterface->AddCommandWriteState(this->StateTable,
+                                                    deviceData->ForceCartesian,
+                                                    "SetForceCartesian");
+        }
         // provide read methods for state data
         providedInterface->AddCommandReadState(this->StateTable,
                                                deviceData->PositionCartesian,
@@ -249,6 +301,7 @@ void devSensableHD::SetupInterfaces(void)
         providedInterface->AddCommandReadState(this->StateTable,
                                                deviceData->PositionJoint,
                                                "GetPositionJoint");
+
 
         // add a method to read the current state index
         providedInterface->AddCommandRead(&mtsStateTable::GetIndexReader, &StateTable,
@@ -326,16 +379,17 @@ void devSensableHD::Create(void * data)
         CMN_LOG_CLASS_INIT_VERBOSE << "Create: Found device model: "
                                    << hdGetString(HD_DEVICE_MODEL_TYPE) << " for device \""
                                    << interfaceName << "\"" << std::endl;
-        
+        if(deviceData->ForceOutputEnabled) {
+            hdEnable(HD_FORCE_OUTPUT);
+        } else {
+            hdDisable(HD_FORCE_OUTPUT);
+        }
     }
 
     // Schedule the main callback that will communicate with the device
     this->Driver->CallbackHandle = hdScheduleAsynchronous(mtsTaskFromCallbackAdapter::CallbackAdapter<HDCallbackCode>,
                                                           this->GetCallbackParameter(),
                                                           HD_MAX_SCHEDULER_PRIORITY);
-    // Forces should be disabled by default but make sure they are
-    hdDisable(HD_FORCE_OUTPUT);
-
     // Call base class Create function
     mtsTaskFromCallback::Create();
 }
@@ -344,6 +398,7 @@ void devSensableHD::Create(void * data)
 void devSensableHD::Start(void)
 {
     HDErrorInfo error;
+    //hdSetSchedulerRate(500);
     hdStartScheduler();
     // Check for errors
     if (HD_DEVICE_ERROR(error = hdGetError())) {

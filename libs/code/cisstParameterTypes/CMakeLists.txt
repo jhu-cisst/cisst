@@ -37,6 +37,7 @@ SET(SOURCE_FILES
     prmVelocityCartesianGet.cpp
     prmVelocityCartesianSet.cpp
     prmForceCartesianGet.cpp
+    prmForceCartesianSet.cpp
 
     prmTransformationBase.cpp
     prmTransformationFixed.cpp
@@ -67,6 +68,7 @@ SET(HEADER_FILES
     prmVelocityCartesianGet.h
     prmVelocityCartesianSet.h
     prmForceCartesianGet.h
+    prmForceCartesianSet.h
 
     prmTransformationBase.h
     prmTransformationFixed.h
