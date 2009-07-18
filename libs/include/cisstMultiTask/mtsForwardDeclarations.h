@@ -32,7 +32,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsGenericObject.h>
 #include <cisstMultiTask/mtsGenericObjectProxy.h>
 
-
 // commands
 class mtsCommandBase;
 
@@ -54,8 +53,6 @@ typedef mtsCommandQualifiedReadOrWriteBase<mtsGenericObject> mtsCommandQualified
 typedef mtsCommandQualifiedReadOrWriteBase<const mtsGenericObject> mtsCommandQualifiedWriteBase;
 
 template <class _argumentType> class mtsFunctionQualifiedReadOrWrite;
-typedef mtsFunctionReadOrWrite<mtsGenericObject> mtsFunctionRead;
-typedef mtsFunctionReadOrWrite<const mtsGenericObject> mtsFunctionWrite;
 
 // multicast commands
 class mtsMulticastCommandWriteBase;

@@ -29,8 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsFunctionBase.h>
 #include <cisstMultiTask/mtsCommandReadOrWriteBase.h>
-#include <cisstMultiTask/mtsDeviceInterface.h>
-#include <cisstMultiTask/mtsRequiredInterface.h>
+#include <cisstMultiTask/mtsForwardDeclarations.h>
 
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
@@ -80,14 +79,14 @@ public:
     }
 
     /*! Add the function object to the required interface
-      \param interface Required interface
+      \param requiredInterface Required interface
       \param commandName Name of command to bind with (string)
       \param isRequired Whether or not the command is required (false if command is optional)
       \result Boolean value, true if success, false otherwise
     */
-    bool AddToRequiredInterface(mtsRequiredInterface & intfc, const std::string & commandName,
-                                bool isRequired = true)
-    { return intfc.AddCommandPointer(commandName, Command, isRequired); }
+    bool AddToRequiredInterface(mtsRequiredInterface & requiredInterface,
+                                const std::string & commandName,
+                                bool isRequired = true);
 
     /*! Overloaded operator to enable more intuitive syntax
       e.g., Command(argument) instead of Command->Execute(argument). */
@@ -101,22 +100,9 @@ public:
 };
 
 
+typedef mtsFunctionReadOrWrite<mtsGenericObject> mtsFunctionRead;
+typedef mtsFunctionReadOrWrite<const mtsGenericObject> mtsFunctionWrite;
 
-#ifndef SWIG
-
-template <class __argumentType>
-bool mtsDeviceInterface::AddEventWrite(mtsFunctionWrite & eventTrigger, const std::string & eventName,
-                                       const __argumentType & argumentPrototype) {
-    mtsCommandWriteBase * command;
-    command = this->AddEventWrite(eventName, argumentPrototype);
-    if (command) {
-        eventTrigger.Bind(command);
-        return true;
-    }
-    return false;
-}
-
-#endif // SWIG
 
 #endif // _mtsFunctionReadOrWrite_h
 

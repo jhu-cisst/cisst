@@ -33,6 +33,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsMulticastCommandWrite.h>
 #include <cisstMultiTask/mtsMulticastCommandVoid.h>
+#include <cisstMultiTask/mtsFunctionReadOrWrite.h>
 
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
@@ -393,6 +394,19 @@ mtsCommandWriteBase * mtsDeviceInterface::AddEventWrite(const std::string & even
     CMN_LOG_CLASS_INIT_ERROR << "AddEventWrite: unable to create multi-cast command for event \""
                              << eventName << "\"" << std::endl;
     return 0;
+}
+
+
+template <class __argumentType>
+bool mtsDeviceInterface::AddEventWrite(mtsFunctionWrite & eventTrigger, const std::string & eventName,
+                                       const __argumentType & argumentPrototype) {
+    mtsCommandWriteBase * command;
+    command = this->AddEventWrite(eventName, argumentPrototype);
+    if (command) {
+        eventTrigger.Bind(command);
+        return true;
+    }
+    return false;
 }
 
 
