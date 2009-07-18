@@ -47,3 +47,37 @@ void mtsVectorTest::TestSetSizeFromInt(void)
 {
     TestSetSizeFrom<int>();
 }
+
+
+
+template <class _elementType>
+void mtsVectorTest::TestConversion(void)
+{
+    typedef _elementType value_type;
+    typedef mtsVector<value_type> VectorType;
+    typedef typename VectorType::VectorType InternalVectorType;
+    InternalVectorType original(10);
+    vctRandom(original, static_cast<value_type>(0), static_cast<value_type>(10));
+    CPPUNIT_ASSERT(original.size() == 10);
+    // test copy ctor from internal type
+    VectorType copyByConstructor(original);
+    CPPUNIT_ASSERT(copyByConstructor.Equal(original));
+    // test assign from internal type
+    VectorType copyByAssign = original;
+    CPPUNIT_ASSERT(copyByConstructor.Equal(original));
+    // test assign to internal type
+    InternalVectorType copy;
+    CPPUNIT_ASSERT(copy.size() == 0);
+    copy = copyByConstructor;
+    CPPUNIT_ASSERT(copy.Equal(copyByConstructor));
+}
+
+void mtsVectorTest::TestConversionDouble(void)
+{
+    TestConversion<double>();
+}
+
+void mtsVectorTest::TestConversionInt(void)
+{
+    TestConversion<int>();
+}

@@ -54,10 +54,13 @@ public:
         VectorType(0)
     {}
 
-    /*! Constructor with memory allocation for a given size. */
+    /*! Constructor with memory allocation for a given size.  Assign
+        zero to all elements. */
     inline mtsVector(size_type size):
         VectorType(size)
-    {}
+    {
+        VectorType::Zeros();
+    }
 
     /*! Assignment from vector base class.  This operator assign the
       data from one vector to another, it doesn't replace the object
@@ -70,6 +73,12 @@ public:
     /*! Copy constructor. */
     inline mtsVector(const ThisType & otherVector):
         mtsGenericObject(otherVector),
+        VectorType(otherVector)
+    {}
+
+    /*! Pseudo copy constructor from vector type. */
+    inline mtsVector(const VectorType & otherVector):
+        mtsGenericObject(),
         VectorType(otherVector)
     {}
 

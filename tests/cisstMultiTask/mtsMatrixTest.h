@@ -27,8 +27,13 @@ http://www.cisst.org/cisst/license.txt.
 class mtsMatrixTest: public CppUnit::TestFixture
 {
     CPPUNIT_TEST_SUITE(mtsMatrixTest);
+
     CPPUNIT_TEST(TestSetSizeFromDouble);
     CPPUNIT_TEST(TestSetSizeFromInt);
+
+    CPPUNIT_TEST(TestConversionDouble);
+    CPPUNIT_TEST(TestConversionInt);
+
     CPPUNIT_TEST_SUITE_END();
     
 public:
@@ -40,6 +45,11 @@ public:
     template <class _elementType> void TestSetSizeFrom(void);
     void TestSetSizeFromDouble(void);
     void TestSetSizeFromInt(void);
+
+    /*! Test conversion methods (ctor, =, down cast, ...) */
+    template <class _elementType> void TestConversion(void);
+    void TestConversionDouble(void);
+    void TestConversionInt(void);
 };
 
 

@@ -20,7 +20,6 @@
 #ifndef _mtsMacros_h
 #define _mtsMacros_h
 
-
 #define MTS_DECLARE_MEMBER_AND_ACCESSORS(type, name) \
  protected:                                          \
     type name##Member;                               \
@@ -39,14 +38,17 @@
     }
 
 
-#define MTS_PROXY_CLASS_DECLARATION_FROM(className)                  \
-class className##Proxy: public mtsGenericObject, public className    \
-{                                                                    \
-    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_DEFAULT_LOD); \
-public:                                                              \
-    className##Proxy(void): mtsGenericObject(), className() {}       \
-};                                                                   \
-CMN_DECLARE_SERVICES_INSTANTIATION(className##Proxy)
+#define MTS_PROXY_CLASS_DECLARATION_FROM(className, newName)          \
+class CISST_EXPORT newName: public mtsGenericObject, public className \
+{                                                                     \
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_DEFAULT_LOD);  \
+public:                                                               \
+    newName(void): mtsGenericObject(), className() {}                 \
+    newName(const className & other):                                 \
+        mtsGenericObject(),                                           \
+        className(other) {}                                           \
+};                                                                    \
+CMN_DECLARE_SERVICES_INSTANTIATION(newName)
 
 
 #endif // _mtsMacros_h

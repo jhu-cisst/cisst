@@ -49,3 +49,39 @@ void mtsMatrixTest::TestSetSizeFromInt(void)
 {
     TestSetSizeFrom<int>();
 }
+
+
+
+template <class _elementType>
+void mtsMatrixTest::TestConversion(void)
+{
+    typedef _elementType value_type;
+    typedef mtsMatrix<value_type> MatrixType;
+    typedef typename MatrixType::MatrixType InternalMatrixType;
+    typedef typename MatrixType::nsize_type nsize_type;
+    const nsize_type size(10, 12);
+    InternalMatrixType original(size);
+    vctRandom(original, static_cast<value_type>(0), static_cast<value_type>(10));
+    CPPUNIT_ASSERT(original.sizes() == size);
+    // test copy ctor from internal type
+    MatrixType copyByConstructor(original);
+    CPPUNIT_ASSERT(copyByConstructor.Equal(original));
+    // test assign from internal type
+    MatrixType copyByAssign = original;
+    CPPUNIT_ASSERT(copyByConstructor.Equal(original));
+    // test assign to internal type
+    InternalMatrixType copy;
+    CPPUNIT_ASSERT(copy.sizes() == nsize_type(0));
+    copy = copyByConstructor;
+    CPPUNIT_ASSERT(copy.Equal(copyByConstructor));
+}
+
+void mtsMatrixTest::TestConversionDouble(void)
+{
+    TestConversion<double>();
+}
+
+void mtsMatrixTest::TestConversionInt(void)
+{
+    TestConversion<int>();
+}

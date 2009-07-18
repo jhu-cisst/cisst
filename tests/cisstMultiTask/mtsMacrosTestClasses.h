@@ -39,7 +39,7 @@ public:
     double Value;
 };
 
-MTS_PROXY_CLASS_DECLARATION_FROM(mtsMacrosTestClassB);
+MTS_PROXY_CLASS_DECLARATION_FROM(mtsMacrosTestClassB, mtsMacrosTestClassBProxy);
 
 
 #endif // _mtsMacrosTestClasses_h
