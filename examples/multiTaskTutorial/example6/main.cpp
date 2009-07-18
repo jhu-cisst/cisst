@@ -38,7 +38,7 @@ int main(void)
         // instantiate the UI in the current thread 
         UI = new userInterface("Robot1", robotInterface);
     } else {
-        CMN_LOG_INIT_ERROR << "It looks like there is no \"Robot1\" interface" << std::endl;
+        std::cerr << "It looks like there is no \"Robot1\" interface" << std::endl;
     }
 
     // start the task

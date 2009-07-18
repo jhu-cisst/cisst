@@ -34,12 +34,9 @@ int main(void)
     const double PeriodDisplay = 50 * cmn_ms; // in milliseconds
     // create the task manager and the tasks/devices
     mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
-    sineTask * sineTaskObject =
-        new sineTask("SIN", PeriodSine);
-    clockDevice * clockDeviceObject =
-        new clockDevice("CLOC");
-    displayTask * displayTaskObject =
-        new displayTask("DISP", PeriodDisplay);
+    sineTask * sineTaskObject = new sineTask("SIN", PeriodSine);
+    clockDevice * clockDeviceObject = new clockDevice("CLOC");
+    displayTask * displayTaskObject = new displayTask("DISP", PeriodDisplay);
     displayTaskObject->Configure();
     // add the tasks to the task manager and connect them
     taskManager->AddTask(sineTaskObject);
@@ -54,14 +51,21 @@ int main(void)
     // add data collection for sineTask state table
     mtsCollectorState * collector;
     if (choice == 'b') {
-        collector = new mtsCollectorState("SIN", mtsCollectorBase::COLLECTOR_LOG_FORMAT_BINARY);
+        collector =
+            new mtsCollectorState("SIN",
+                                  mtsCollectorBase::COLLECTOR_LOG_FORMAT_BINARY);
     } else if (choice == 't') {
-        collector = new mtsCollectorState("SIN", mtsCollectorBase::COLLECTOR_LOG_FORMAT_PLAIN_TEXT);
+        collector =
+            new mtsCollectorState("SIN",
+                                  mtsCollectorBase::COLLECTOR_LOG_FORMAT_PLAIN_TEXT);
     } else if (choice == 'c') {
-        collector = new mtsCollectorState("SIN", mtsCollectorBase::COLLECTOR_LOG_FORMAT_CSV);
+        collector =
+            new mtsCollectorState("SIN",
+                                  mtsCollectorBase::COLLECTOR_LOG_FORMAT_CSV);
     }
+    // specify which signal (aka state data) to collect
     if (!collector->AddSignal("SineData")) {
-        CMN_LOG_INIT_ERROR << "Can't find signal named \"SineData\"" << std::endl;
+        std::cerr << "Can't find signal named \"SineData\"" << std::endl;
     }
     taskManager->AddTask(collector);
 
@@ -84,7 +88,7 @@ int main(void)
     if (choice == 'b') {
         mtsCollectorState::ConvertBinaryToText(collector->GetLogFileName(),
                                                collector->GetLogFileName() + ".csv",
-                                               ',');
+                                               ','); // comma separated
     }
     return 0;
 }

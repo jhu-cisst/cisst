@@ -9,7 +9,7 @@
 #include "displayUI.h"
 
 class displayTask: public mtsTaskPeriodic {
-    // set log level to 5
+    // set log level to "Run Error"
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
     
  protected:

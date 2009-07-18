@@ -31,7 +31,6 @@ int main(void)
     const double PeriodDisplay = 50 * cmn_ms; // in milliseconds
     mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
     sineTask * sineTaskObject = new sineTask("SIN", PeriodSine);
-    
     displayTask * displayTaskObject = new displayTask("DISP", PeriodDisplay);
     displayTaskObject->Configure();
 

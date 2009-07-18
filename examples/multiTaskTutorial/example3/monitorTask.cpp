@@ -10,18 +10,19 @@ CMN_IMPLEMENT_SERVICES(monitorTask);
 monitorTask::monitorTask(const std::string & taskName, double period):
     mtsTaskPeriodic(taskName, period, false, 10)
 {
-    char buf[20];
+    std::stringstream interfaceName;
     // For each robot
     for (int i = 0; i < 2; i++) {
         // set all vectors to the right size
         CurrentPosition[i].SetSize(NB_JOINTS);
         PreviousPosition[i].SetSize(NB_JOINTS);
-        sprintf(buf,"Robot%d", i+1);
-        mtsRequiredInterface *req = AddRequiredInterface(buf);
-        if (req) {
-            req->AddFunction("GetStateIndex", Robot[i].GetStateIndex);
-            req->AddFunction("GetPositionJoint", Robot[i].GetPositionJoint);
-            req->AddFunction("StopRobot", Robot[i].StopRobot);
+        interfaceName.str("");
+        interfaceName << "Robot" << (i + 1);
+        mtsRequiredInterface * required = AddRequiredInterface(interfaceName.str());
+        if (required) {
+            required->AddFunction("GetStateIndex", Robot[i].GetStateIndex);
+            required->AddFunction("GetPositionJoint", Robot[i].GetPositionJoint);
+            required->AddFunction("StopRobot", Robot[i].StopRobot);
         }
     }
     // no provided interface declared as this not intended to be used
@@ -34,13 +35,13 @@ void monitorTask::Startup(void)
 
 void monitorTask::Run(void)
 {
-    mtsCommandBase::ReturnType ret;
+    mtsCommandBase::ReturnType result;
     // check the positions of both robots
     for (int i = 0; i < 2; i++) {
         Robot[i].GetStateIndex(StateIndex);  // time index of robot state table
         Robot[i].GetPositionJoint(StateIndex, CurrentPosition[i]); // current data
-        ret = Robot[i].GetPositionJoint(StateIndex - 1, PreviousPosition[i]);
-        if ((ret == mtsCommandBase::DEV_OK) &&
+        result = Robot[i].GetPositionJoint(StateIndex - 1, PreviousPosition[i]);
+        if ((result == mtsCommandBase::DEV_OK) &&
            (CurrentPosition[i] != PreviousPosition[i])) {
             if ((!CurrentPosition[i].Greater(lowerBound)) 
                 || (!CurrentPosition[i].Lesser(upperBound))) {

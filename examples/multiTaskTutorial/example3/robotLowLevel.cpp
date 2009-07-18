@@ -20,27 +20,33 @@ robotLowLevel::robotLowLevel(const std::string & taskName, double period):
     DeltaJointRobot2.SetSize(NB_JOINTS);
 
     // create 4 interfaces, two for each robot
-    mtsProvidedInterface * robot1Interface = AddProvidedInterface("Robot1");
-    mtsProvidedInterface * robot1ObserverInterface = AddProvidedInterface("Robot1Observer");
-    mtsProvidedInterface * robot2Interface = AddProvidedInterface("Robot2");
-    mtsProvidedInterface * robot2ObserverInterface = AddProvidedInterface("Robot2Observer");
+    mtsProvidedInterface * robot1Interface =
+        AddProvidedInterface("Robot1");
+    mtsProvidedInterface * robot1ObserverInterface =
+        AddProvidedInterface("Robot1Observer");
+    mtsProvidedInterface * robot2Interface =
+        AddProvidedInterface("Robot2");
+    mtsProvidedInterface * robot2ObserverInterface =
+        AddProvidedInterface("Robot2Observer");
     // add the state data to the table
     StateTable.AddData(PositionJointRobot1, "PositionJointRobot1");
     StateTable.AddData(PositionJointRobot2, "PositionJointRobot2");
     // add a method to read the current state index
-    robot1ObserverInterface->AddCommandRead(&mtsStateTable::GetIndexReader, &StateTable,
+    robot1ObserverInterface->AddCommandRead(&mtsStateTable::GetIndexReader,
+                                            &StateTable,
                                             "GetStateIndex");
-    robot2ObserverInterface->AddCommandRead(&mtsStateTable::GetIndexReader, &StateTable,
+    robot2ObserverInterface->AddCommandRead(&mtsStateTable::GetIndexReader,
+                                            &StateTable,
                                             "GetStateIndex");
     // provide read method to all 4 interfaces
     robot1Interface->AddCommandReadState(StateTable, PositionJointRobot1,
                                          "GetPositionJoint");
     robot1ObserverInterface->AddCommandReadState(StateTable, PositionJointRobot1,
-                                         "GetPositionJoint");
+                                                 "GetPositionJoint");
     robot2Interface->AddCommandReadState(StateTable, PositionJointRobot2,
                                          "GetPositionJoint");
     robot2ObserverInterface->AddCommandReadState(StateTable, PositionJointRobot2,
-                                         "GetPositionJoint");
+                                                 "GetPositionJoint");
     // provide write methods to the controlling interfaces
     // requires: method, object carrying the method, interface name, command name
     // and argument prototype

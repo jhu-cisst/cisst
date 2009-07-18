@@ -12,10 +12,10 @@ displayTask::displayTask(const std::string & taskName, double period):
     mtsTaskPeriodic(taskName, period, false, 5000)
 {
     // to communicate with the interface of the resource
-    mtsRequiredInterface *req = AddRequiredInterface("DataGenerator");
-    if (req) {
-       req->AddFunction("GetData", Generator.GetData);
-       req->AddFunction("SetAmplitude", Generator.SetAmplitude);
+    mtsRequiredInterface * required = AddRequiredInterface("DataGenerator");
+    if (required) {
+       required->AddFunction("GetData", Generator.GetData);
+       required->AddFunction("SetAmplitude", Generator.SetAmplitude);
     }
 }
 
@@ -49,7 +49,8 @@ void displayTask::Run(void)
     if (UI.AmplitudeChanged) {
         // retrieve the new amplitude and send it to the sine task
         AmplitudeData = UI.Amplitude->value();
-        AmplitudeData.SetTimestamp(mtsTaskManager::GetInstance()->GetTimeServer().GetRelativeTime());
+        AmplitudeData.SetTimestamp(mtsTaskManager::GetInstance()
+                                   ->GetTimeServer().GetRelativeTime());
         AmplitudeData.SetValid(true);
         // send it
         Generator.SetAmplitude(AmplitudeData);
