@@ -25,7 +25,7 @@
 #define MTS_DECLARE_MEMBER_AND_ACCESSORS CMN_DECLARE_MEMBER_AND_ACCESSORS
 
 #define MTS_PROXY_CLASS_DECLARATION_FROM(className, newName)          \
-class CISST_EXPORT newName: public mtsGenericObject, public className \
+class newName: public mtsGenericObject, public className              \
 {                                                                     \
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_DEFAULT_LOD);  \
 public:                                                               \
