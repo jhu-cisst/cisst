@@ -60,11 +60,6 @@ mtsStateTable::mtsStateTable(int size, const std::string & stateTableName):
     // : "Toc", "Tic", "Period". So the value of StateVectorBaseIDForUser is 
     // set to 3.
     StateVectorBaseIDForUser = StateVector.size();
-
-#ifdef TASK_TIMING_ANALYSIS
-    ExecutionTimingHistory.clear();
-    PeriodHistory.clear();
-#endif
 }
 
 mtsStateTable::~mtsStateTable()
@@ -131,9 +126,6 @@ void mtsStateTable::Start(void) {
         mtsDouble oldTic;
         StateVector[TicId]->Get(IndexReader, oldTic);
         Period = Tic - oldTic;  // in seconds
-#ifdef TASK_TIMING_ANALYSIS
-        PeriodHistory.push_back(Period);
-#endif
     }
 }
 
@@ -335,18 +327,6 @@ int mtsStateTable::GetStateVectorID(const std::string & dataName) const
         }
     }
     return -1;
-}
-
-void mtsStateTable::GetTimingAnalysisData(std::vector<mtsDouble> & vecExecutionTime,
-                                          std::vector<mtsDouble> & vecPeriod)
-{
-#define COPY_VECTOR(_src, _dest)\
-    _dest.clear();\
-    _dest.insert(_dest.begin(), _src.begin(), _src.end());
-    
-    COPY_VECTOR(ExecutionTimingHistory, vecExecutionTime);
-    COPY_VECTOR(PeriodHistory, vecPeriod);
-#undef COPY_VECTOR
 }
 
 void mtsStateTable::SetDataCollectionEventHandler(mtsCollectorState * collector)

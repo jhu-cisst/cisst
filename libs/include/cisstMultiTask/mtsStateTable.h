@@ -27,6 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsStateTable_h
 #define _mtsStateTable_h
 
+#include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsGenericObject.h>
 #include <cisstMultiTask/mtsGenericObjectProxy.h>
 #include <cisstMultiTask/mtsStateArrayBase.h>
@@ -44,15 +45,11 @@ http://www.cisst.org/cisst/license.txt.
 
 // Forward declaration
 class osaTimeServer;
-class mtsCollectorState;
+
 
 /*! mtsStateDataId.  Unique identifier for the columns of the State
   Data Table.  Typedef'ed to an int */
 typedef int mtsStateDataId;
-
-// Enable this if you want to obtain the detailed information on running task's 
-// execution timing.
-#define TASK_TIMING_ANALYSIS
 
 /*!
   \ingroup cisstMultiTask
@@ -224,11 +221,6 @@ public:
 
     DataCollectionInfoStruct DataCollectionInfo;
 
-#ifdef TASK_TIMING_ANALYSIS
-    std::vector<mtsDouble> ExecutionTimingHistory;
-    std::vector<mtsDouble> PeriodHistory;
-#endif
-
 	/*! Write specified data. */
 	bool Write(mtsStateDataId id, const mtsGenericObject &obj);
 
@@ -356,11 +348,6 @@ public:
     void SetDataCollectionEventTriggeringRatio(const double eventTriggeringRatio);
     
     void GenerateDataCollectionEvent(void);
-
-#ifdef TASK_TIMING_ANALYSIS
-    void GetTimingAnalysisData(std::vector<mtsDouble>& vecExecutionTime,
-                               std::vector<mtsDouble>& vecPeriod);
-#endif
 };
 
 
