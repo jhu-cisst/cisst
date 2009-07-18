@@ -54,19 +54,19 @@ class mtsGenericObject: public cmnGenericObject {
     /*! Time stamp.  When used in conjunction with mtsStateTable, the
       time stamp will be automatically updated using
       AutomaticTimeStamp. */
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(double, Timestamp);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(double, Timestamp);
 
     /*! Turn on/off automatic timestamping by the state table.  All
       objects stored in a state table can be automatically timestamped
       at the end of the Run method (see mtsTask and derived classes).
       If this flag is set to false, data objects will have to be
       timestamped manually.  This flag is set to true by default. */
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(bool, AutomaticTimestamp);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(bool, AutomaticTimestamp);
 
     /*! General flag used to indicate if the data is valid.  This flag
       has to be updated by the user.  This data member is initialized
       to false by the constructor. */
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(bool, Valid);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(bool, Valid);
 
 public:
 

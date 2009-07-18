@@ -93,62 +93,62 @@ public:
 
     /*! Set and Get methods for the Joint position. */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, JointPosition);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, JointPosition);
     //@}
 
     /*! Set and Get methods for the Joint Velocity. */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, JointVelocity);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, JointVelocity);
     //@}
 
     /*! Set and Get methods for goal joint position. */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, JointPositionGoal);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, JointPositionGoal);
     //@}
 
     /*! Set and Get methods for goal joint velocity. */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, JointVelocityGoal);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, JointVelocityGoal);
     //@}
 
     /*! Set and Get methods for error for joint position. */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, JointPositionError);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, JointPositionError);
     //@}
 
     /*! Set and Get methods for error for joint velocity. */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, JointVelocityError);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, JointVelocityError);
     //@}
 
     /*! Set and Get methods for cartesian position. */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, CartesianPosition);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, CartesianPosition);
     //@}
 
     /*! Set and Get methods for cartesian velocity. */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, CartesianVelocity);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, CartesianVelocity);
     //@}
 
     /*! Set and Get methods for gaol cartesian position. */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, CartesianPositionGoal);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, CartesianPositionGoal);
     //@}
 
     /*! Set and Get methods for goal cartesian velocity. */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, CartesianVelocityGoal);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, CartesianVelocityGoal);
     //@}
 
     /*! Set and Get methods for cartesian position error. */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, CartesianPositionError);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, CartesianPositionError);
     //@}
 
     /*! Set and Get methods for cartesian velocity error. */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, CartesianVelocityError);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, CartesianVelocityError);
     //@}
 
     /*! Human readable output to stream. */

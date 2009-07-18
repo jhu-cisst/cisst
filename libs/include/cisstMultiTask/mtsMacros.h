@@ -20,23 +20,9 @@
 #ifndef _mtsMacros_h
 #define _mtsMacros_h
 
-#define MTS_DECLARE_MEMBER_AND_ACCESSORS(type, name) \
- protected:                                          \
-    type name##Member;                               \
- public:                                             \
-    inline void Set##name(const type & newValue) {   \
-        this->name##Member = newValue;               \
-    }                                                \
-    inline void Get##name(type & placeHolder) {      \
-        placeHolder = this->name##Member;            \
-    }                                                \
-    inline const type & name(void) const {           \
-        return this->name##Member;                   \
-    }                                                \
-    inline type & name(void) {                       \
-        return this->name##Member;                   \
-    }
-
+#include <cisstCommon/cmnAccessorMacros.h>
+// the following macro is now part of cisstCommon, cmnAccessorMacros.h
+#define MTS_DECLARE_MEMBER_AND_ACCESSORS CMN_DECLARE_MEMBER_AND_ACCESSORS
 
 #define MTS_PROXY_CLASS_DECLARATION_FROM(className, newName)          \
 class CISST_EXPORT newName: public mtsGenericObject, public className \

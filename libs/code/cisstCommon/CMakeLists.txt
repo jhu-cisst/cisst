@@ -38,6 +38,7 @@ SET(SOURCE_FILES
 
 # all header files
 SET(HEADER_FILES
+    cmnAccessorMacros.h
     cmnAssert.h
     cmnCallbackStreambuf.h
     cmnClassRegister.h

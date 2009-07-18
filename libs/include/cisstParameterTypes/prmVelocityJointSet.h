@@ -41,25 +41,25 @@ class CISST_EXPORT prmVelocityJointSet: public prmMotionBase
 protected:
     /*! Masks joints not involved in this move, true --> corresponding
     joint index velocities will be used */
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctBoolVec, Mask);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctBoolVec, Mask);
 
     /*! Unmasked elements (mask --> true) are only used if move is
     position guarded */
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, Guard);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, Guard);
 
     /*! Joint velocity goals (mask -> true) indicates goals will be
     used in the move */
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, Goal);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, Goal);
 
     /*! Corresponding accelerations where needed */   
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, Acceleration);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, Acceleration);
 
     /*! Corresponding accelerations where applicable */	
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, Deceleration);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, Deceleration);
 
     /*! true --> move at specified velocity until
     MoveVelocityJointSet.goal for ANY is reached */
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(bool, IsPositionGuarded);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(bool, IsPositionGuarded);
 
 public:
 

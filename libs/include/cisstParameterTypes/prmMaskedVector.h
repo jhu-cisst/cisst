@@ -45,20 +45,22 @@ public:
     
     typedef vctDynamicVector<_elementType> DataType;
 
+protected:
     /*! Type used to define the size of the vector. */
     typedef unsigned int size_type;
 
     /*! Vector of values for this container */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(DataType, Data);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(DataType, Data);
     //@}
 
 
     /*! Masks for the cooresponding vector */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctBoolVec, Mask);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctBoolVec, Mask);
     //@}
 
+public:
     /*! Default constructor. */
     inline prmMaskedVector(void):
          DataMember(0),

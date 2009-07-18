@@ -85,43 +85,43 @@ public:
 
     /*! Set and Get methods for postive limit. */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(mtsLongVec, ForwardLimit);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(mtsLongVec, ForwardLimit);
     //@}
 
     /*! Set and Get methods for negative limit. */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(mtsLongVec, ReverseLimit);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(mtsLongVec, ReverseLimit);
     //@}
 
     /*! Set and Get methods for velocity limit, use accelerationMax to accelerate until this limit. 
     Can used this in velocity control mode.
     */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(mtsLongVec, MaxVelocity);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(mtsLongVec, MaxVelocity);
     //@}
 
     /*! Set and Get methods for Acceleration Maximum, this is used as the actual maximum acceleration used for all motion. */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(mtsLongVec, MaxAcceleration);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(mtsLongVec, MaxAcceleration);
     //@}
 
     /*! Set and Get methods for Deceleration Maximum, this is used as the actual maximum acceleration used for all motion. */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(mtsLongVec, MaxDeceleration);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(mtsLongVec, MaxDeceleration);
     //@}
 
     /*! Set and Get methods for Deceleration Maximum, this is used as the actual maximum acceleration used for all motion. */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(mtsLongVec, LimitSwitchDeccelaration);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(mtsLongVec, LimitSwitchDeccelaration);
     //@}
 
     /*! Set and Get methods for counts to mm conversion  */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, Counts_per_mm);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, Counts_per_mm);
     //@}
 
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(int, AxisSign);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(int, AxisSign);
     //@}
 
     //PID Servo Loop Controll Parameters
@@ -129,41 +129,41 @@ public:
 
 
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, Kp);   //Proportional
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, Kp);   //Proportional
     //@}
 
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, Kd);	//Derivative
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, Kd);	//Derivative
     //@}
 
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, Ki);	  //Integral
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, Ki);	  //Integral
     //@}
 
     //@{
     //if IL is positive, Ki works all the time, otherwise IL works only after move is finished
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, IL);	 //Integrator limit
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, IL);	 //Integrator limit
     //@}
 
 
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, FV);	//FeedForward Velocity Parameters
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, FV);	//FeedForward Velocity Parameters
     //@}
 
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, FA);	 //FeedForward Acceleration Parameters
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, FA);	 //FeedForward Acceleration Parameters
     //@}
 
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, TorqueLimit);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, TorqueLimit);
     //@}
 
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, TorqueLimitPeak);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, TorqueLimitPeak);
     //@}
 
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, TorqueOffset);		//Torque offset parameter, used for break.
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, TorqueOffset);		//Torque offset parameter, used for break.
     //@}
 
 }; // _prmGalilActuator_h

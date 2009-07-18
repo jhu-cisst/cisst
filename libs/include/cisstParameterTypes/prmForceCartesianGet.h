@@ -70,7 +70,7 @@ class CISST_EXPORT prmForceCartesianGet: public mtsGenericObject
         force.  This is defined by a node in the transformation
         tree. */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(prmTransformationBasePtr, MovingFrame);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(prmTransformationBasePtr, MovingFrame);
     //@}
 
 
@@ -78,19 +78,19 @@ class CISST_EXPORT prmForceCartesianGet: public mtsGenericObject
         force.  This is defined by a node in the transformation
         tree. */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(prmTransformationBasePtr, ReferenceFrame);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(prmTransformationBasePtr, ReferenceFrame);
     //@}
 
 
     /*! Set and Get methods for force */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDouble6, Force);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDouble6, Force);
     //@}
 
 
     /*! Set and Get methods for mask */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctBool6, Mask);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctBool6, Mask);
     //@}
 
     /*! Human readable output to stream. */

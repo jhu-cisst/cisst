@@ -42,20 +42,20 @@ class CISST_EXPORT prmPositionJointSet: public prmMotionBase
 protected:
     /*! masks correpsonding elements in goal, if an element is set
     true --> corresponding goal should be used */
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctBoolVec, Mask);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctBoolVec, Mask);
 
     /*! a motion goal in joint angles. only goals corresponding to
     mask elements set true are used */
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, Goal);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, Goal);
 
     /*! corresponding joint velocities */
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, Velocity);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, Velocity);
 
     /*! corresponding accelerations where needed */
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, Acceleration);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, Acceleration);
 
     /*! corresponding accelerations where applicable */
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, Deceleration);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, Deceleration);
 
 public:
 

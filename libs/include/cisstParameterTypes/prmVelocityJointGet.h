@@ -78,7 +78,7 @@ public:
 
     /*! Set and Get methods for the the velocity. */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, Velocity);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, Velocity);
     //@}
 
     /*! Human readable output to stream. */

@@ -87,61 +87,61 @@ public:
 
     /*! Set and Get methods for the the position. */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(mtsDoubleVec, Position);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(mtsDoubleVec, Position);
     //@}
 
     /*! Set and Get methods for the the Velocity. */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(mtsDoubleVec, Velocity);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(mtsDoubleVec, Velocity);
     //@}
 
 
     /*! Set and Get methods for the the position. */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctBoolVec, InMotion);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctBoolVec, InMotion);
     //@}
 
     /*! Set and Get methods for the the position. */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctBoolVec, MotorOff);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctBoolVec, MotorOff);
     //@}
 
 
     /*! Set and Get methods for the forward SOFTWARE limits hit. */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctBoolVec, SoftFwdLimitHit);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctBoolVec, SoftFwdLimitHit);
     //@}
 
 
     /*! Set and Get methods for the reverse SOFTWARE Limit. */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctBoolVec, SoftRevLimitHit);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctBoolVec, SoftRevLimitHit);
     //@}
 
         /*! Set and Get methods for the forward HARDWARE limits hit. */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctBoolVec, HardFwdLimitHit);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctBoolVec, HardFwdLimitHit);
     //@}
 
     /*! Set and Get methods for the reverse HARDWARE Limit. */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctBoolVec, HardRevLimitHit);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctBoolVec, HardRevLimitHit);
     //@}
 
 
     /*! Set and Get methods for the  HomeSwitch . */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctBoolVec, HomeSwitchOn);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctBoolVec, HomeSwitchOn);
     //@}
 
     /*! Set and Get methods for state of homing variable on the controller. */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctBoolVec, IsHomed);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctBoolVec, IsHomed);
     //@}
 
     /*! Set and Get methods for the state of the estop button. */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(bool, EStopON);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(bool, EStopON);
     //@}
 
     /*! Human readable output to stream. */

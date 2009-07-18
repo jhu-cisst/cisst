@@ -57,7 +57,7 @@ class CISST_EXPORT prmEventButton: public mtsGenericObject
     
     /*! Set and Get methods for event type. */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(EventType, Type);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(EventType, Type);
     //@}
 
     /*! Overloaded ToStream */

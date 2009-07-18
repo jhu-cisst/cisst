@@ -87,34 +87,34 @@ class CISST_EXPORT prmMotionBase: public mtsGenericObject
    
     /*! Set and get methods for blocking flag. */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(prmBlocking, BlockingFlag);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(prmBlocking, BlockingFlag);
     //@}
 
     /*! Set and Get method for the blending parameter.  Whether or not
       to blend motions, and the tolerance (to be implemented later)
     */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(bool, BlendingFactor);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(bool, BlendingFactor);
     //@}
 
     /*! Set and Get methods for TimeLimit.  Describes time allowed or
       requested for a motion.
     */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(double, TimeLimit);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(double, TimeLimit);
     //@}
 
     /*! Set and Get methods for Preemptable parameter.  Default is
       true.*/
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(bool, IsPreemptable);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(bool, IsPreemptable);
     //@}
 
     /*! Set and Get methods for Coordinated parameter.  Force to sync
       motions between joints or rotation/translation to start and end
       at the same time by lowering speed on some joints. */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(bool, IsCoordinated);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(bool, IsCoordinated);
     //@}
 
     /*! Set and Get methods for IsGoalOnly.
@@ -124,7 +124,7 @@ class CISST_EXPORT prmMotionBase: public mtsGenericObject
         False by default.
     */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(bool, IsGoalOnly);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(bool, IsGoalOnly);
     //@}
 
 };

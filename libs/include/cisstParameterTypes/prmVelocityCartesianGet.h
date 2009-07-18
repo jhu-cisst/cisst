@@ -66,24 +66,24 @@ class CISST_EXPORT prmVelocityCartesianGet: public mtsGenericObject
         position.  This is defined by a node in the transformation
         tree. */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(prmTransformationBasePtr, MovingFrame);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(prmTransformationBasePtr, MovingFrame);
     //@}
 
     /*! Set and Get methods for the moving frame for current
         position.  This is defined by a node in the transformation
         tree. */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(prmTransformationBasePtr, ReferenceFrame);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(prmTransformationBasePtr, ReferenceFrame);
     //@}
 
     /*! Set and Get method the linear velocity parameter. */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDouble3, VelocityLinear);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDouble3, VelocityLinear);
     //@}
 
     /*! Set and Get method the angular velocity parameter. */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDouble3, VelocityAngular);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDouble3, VelocityAngular);
     //@}
 
 

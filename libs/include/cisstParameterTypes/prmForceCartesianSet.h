@@ -49,10 +49,10 @@ public:
         force, mask, movinf and reference frames.  This is 
         defined by a node in the transformation tree. */
 
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(prmTransformationBasePtr, MovingFrame);
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(prmTransformationBasePtr, ReferenceFrame);
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(ForceType, Force);
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(MaskType, Mask);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(prmTransformationBasePtr, MovingFrame);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(prmTransformationBasePtr, ReferenceFrame);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(ForceType, Force);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(MaskType, Mask);
     
  public:
     /*! default constructor */

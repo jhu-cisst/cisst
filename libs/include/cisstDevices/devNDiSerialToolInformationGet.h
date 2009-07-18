@@ -80,6 +80,7 @@ class CISST_EXPORT devNDiSerialToolInformationGet: public mtsGenericObject
     /*! Declares Set and Get methods for Name of the Tool */
     MTS_DECLARE_MEMBER_AND_ACCESSORS(CHAR_256, Name);
     
+ public:
     /*! Overloads the SetName function for string arguments */
     inline void SetName(const std::string & name) { 
         this->SetName(StringToChar256(name)); 
@@ -96,6 +97,8 @@ class CISST_EXPORT devNDiSerialToolInformationGet: public mtsGenericObject
     /*! Declares Set and Get methods for Serial Number of the Tool */
     MTS_DECLARE_MEMBER_AND_ACCESSORS(CHAR_256, SerialNumber);
     
+ public:
+
     /*! Overloads the SetSerialNumber function for string arguments */
     inline void SetSerialNumber(const std::string & serial)
     { 

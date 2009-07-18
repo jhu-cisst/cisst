@@ -69,7 +69,7 @@ class CISST_EXPORT prmPositionCartesianGet: public mtsGenericObject
         position.  This is defined by a node in the transformation
         tree. */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(prmTransformationBasePtr, MovingFrame);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(prmTransformationBasePtr, MovingFrame);
     //@}
 
 
@@ -77,15 +77,16 @@ class CISST_EXPORT prmPositionCartesianGet: public mtsGenericObject
         position.  This is defined by a node in the transformation
         tree. */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(prmTransformationBasePtr, ReferenceFrame);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(prmTransformationBasePtr, ReferenceFrame);
     //@}
 
 
     /*! Set and Get methods for position */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctFrm3, Position);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctFrm3, Position);
     //@}
 
+ public:
 
     /*! Set moving to a node in the transformation tree.  The actual
       position is computed with respect to the reference frame carried
