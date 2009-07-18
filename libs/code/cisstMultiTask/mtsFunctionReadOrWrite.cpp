@@ -48,7 +48,7 @@ bool mtsFunctionReadOrWrite<const mtsGenericObject>::Bind(const mtsDeviceInterfa
 template <class _argumentType>
 bool mtsFunctionReadOrWrite<_argumentType>::AddToRequiredInterface(mtsRequiredInterface & requiredInterface,
                                                                    const std::string & commandName,
-                                                                   bool isRequired = true)
+                                                                   bool isRequired)
 {
     return requiredInterface.AddCommandPointer(commandName, Command, isRequired);
 }
