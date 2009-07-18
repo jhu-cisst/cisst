@@ -101,9 +101,22 @@ public:
 };
 
 
-typedef mtsFunctionReadOrWrite<mtsGenericObject> mtsFunctionRead;
-typedef mtsFunctionReadOrWrite<const mtsGenericObject> mtsFunctionWrite;
 
+#ifndef SWIG
+
+template <class __argumentType>
+bool mtsDeviceInterface::AddEventWrite(mtsFunctionWrite & eventTrigger, const std::string & eventName,
+                                       const __argumentType & argumentPrototype) {
+    mtsCommandWriteBase * command;
+    command = this->AddEventWrite(eventName, argumentPrototype);
+    if (command) {
+        eventTrigger.Bind(command);
+        return true;
+    }
+    return false;
+}
+
+#endif // SWIG
 
 #endif // _mtsFunctionReadOrWrite_h
 

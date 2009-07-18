@@ -21,7 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnGenericObjectProxy.h>
 #include <cisstMultiTask/mtsDeviceInterface.h>
-
+#include <cisstMultiTask/mtsFunctionVoid.h>
 
 CMN_IMPLEMENT_SERVICES(mtsDeviceInterface)
 
@@ -128,6 +128,18 @@ mtsCommandVoidBase * mtsDeviceInterface::AddEventVoid(const std::string & eventN
     CMN_LOG_CLASS_INIT_ERROR << "AddEventVoid: unable to create multi-cast command for event \""
                              << eventName << "\"" << std::endl;
     return 0;
+}
+
+
+bool mtsDeviceInterface::AddEventVoid(mtsFunctionVoid & eventTrigger,
+                                      const std::string eventName) {
+    mtsCommandVoidBase * command;
+    command = this->AddEventVoid(eventName);
+    if (command) {
+        eventTrigger.Bind(command);
+        return true;
+    }
+    return false;
 }
 
 

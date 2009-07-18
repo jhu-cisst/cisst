@@ -54,6 +54,8 @@ typedef mtsCommandQualifiedReadOrWriteBase<mtsGenericObject> mtsCommandQualified
 typedef mtsCommandQualifiedReadOrWriteBase<const mtsGenericObject> mtsCommandQualifiedWriteBase;
 
 template <class _argumentType> class mtsFunctionQualifiedReadOrWrite;
+typedef mtsFunctionReadOrWrite<mtsGenericObject> mtsFunctionRead;
+typedef mtsFunctionReadOrWrite<const mtsGenericObject> mtsFunctionWrite;
 
 // multicast commands
 class mtsMulticastCommandWriteBase;

@@ -22,7 +22,7 @@ sineTask::sineTask(const std::string & taskName, double period):
         mainInterface->AddCommandVoid(&sineTask::ResetTrigger, this,"ResetTrigger");
         // define an event and setup our event sending function
         mtsDouble eventData; // data type used for the event payload
-        TriggerEvent.Bind(mainInterface->AddEventWrite("TriggerEvent", eventData));
+        mainInterface->AddEventWrite(TriggerEvent, "TriggerEvent", eventData);
     }
 }
 

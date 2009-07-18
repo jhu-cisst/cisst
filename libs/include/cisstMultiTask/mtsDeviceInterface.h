@@ -163,10 +163,17 @@ class CISST_EXPORT mtsDeviceInterface: public cmnGenericObject
       event. */
     //@{
     mtsCommandVoidBase * AddEventVoid(const std::string & eventName);
+
     template <class __argumentType>
     mtsCommandWriteBase * AddEventWrite(const std::string & eventName,
                                         const __argumentType & argumentPrototype);
     //@}
+
+    bool AddEventVoid(mtsFunctionVoid & eventTrigger, const std::string eventName);
+
+    template <class __argumentType>
+    bool AddEventWrite(mtsFunctionWrite & eventTrigger, const std::string & eventName,
+                       const __argumentType & argumentPrototype);
     
     /*! Add an observer for the specified event.
       \param name Name of event
@@ -313,7 +320,7 @@ protected:
 
 
 
-// Now provides implementation of AddCommands knowing that mtsInterface has been defined
+// Now provides implementation of AddCommands and AddEvent knowing that mtsInterface has been defined
 #include <cisstMultiTask/mtsCommandVoid.h>
 #include <cisstMultiTask/mtsCommandRead.h>
 #include <cisstMultiTask/mtsCommandWrite.h>
@@ -387,6 +394,7 @@ mtsCommandWriteBase * mtsDeviceInterface::AddEventWrite(const std::string & even
                              << eventName << "\"" << std::endl;
     return 0;
 }
+
 
 #endif // SWIG
 
