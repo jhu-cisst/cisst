@@ -93,6 +93,8 @@ class CISST_EXPORT prmForceCartesianGet: public mtsGenericObject
     CMN_DECLARE_MEMBER_AND_ACCESSORS(vctBool6, Mask);
     //@}
 
+public:
+
     /*! Human readable output to stream. */
     void ToStream(std::ostream & outputStream) const;
 

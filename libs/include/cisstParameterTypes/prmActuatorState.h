@@ -144,6 +144,8 @@ public:
     CMN_DECLARE_MEMBER_AND_ACCESSORS(bool, EStopON);
     //@}
 
+public:
+
     /*! Human readable output to stream. */
     void ToStream(std::ostream & outputStream) const;
 

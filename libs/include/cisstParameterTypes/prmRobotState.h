@@ -151,6 +151,8 @@ public:
     CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, CartesianVelocityError);
     //@}
 
+public:
+
     /*! Human readable output to stream. */
     void ToStream(std::ostream & outputStream) const;
 

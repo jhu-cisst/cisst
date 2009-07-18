@@ -86,6 +86,7 @@ class CISST_EXPORT prmVelocityCartesianGet: public mtsGenericObject
     CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDouble3, VelocityAngular);
     //@}
 
+public:
 
 	/*! Set and Get methods for both linear and angular velocities.
       These methods assumes that the vector 6 elements stores the

@@ -81,6 +81,8 @@ public:
     CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, Velocity);
     //@}
 
+public:
+
     /*! Human readable output to stream. */
     void ToStream(std::ostream & outputStream) const;
 

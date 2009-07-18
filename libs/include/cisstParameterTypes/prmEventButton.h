@@ -60,6 +60,8 @@ class CISST_EXPORT prmEventButton: public mtsGenericObject
     CMN_DECLARE_MEMBER_AND_ACCESSORS(EventType, Type);
     //@}
 
+public:
+
     /*! Overloaded ToStream */
     virtual void ToStream(std::ostream & outputStream) const;
 };
