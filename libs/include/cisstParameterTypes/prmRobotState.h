@@ -32,6 +32,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsGenericObject.h>
 #include <cisstMultiTask/mtsMacros.h>
 #include <cisstMultiTask/mtsVector.h>
+#include <cisstVector/vctTransformationTypes.h>
 
 // Always include last
 #include <cisstParameterTypes/prmExport.h>
@@ -93,65 +94,69 @@ public:
 
     /*! Set and Get methods for the Joint position. */
     //@{
-    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, JointPosition);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, JointPosition);
     //@}
 
     /*! Set and Get methods for the Joint Velocity. */
     //@{
-    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, JointVelocity);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, JointVelocity);
     //@}
 
     /*! Set and Get methods for goal joint position. */
     //@{
-    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, JointPositionGoal);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, JointPositionGoal);
     //@}
 
     /*! Set and Get methods for goal joint velocity. */
     //@{
-    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, JointVelocityGoal);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, JointVelocityGoal);
     //@}
 
     /*! Set and Get methods for error for joint position. */
     //@{
-    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, JointPositionError);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, JointPositionError);
     //@}
 
     /*! Set and Get methods for error for joint velocity. */
     //@{
-    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, JointVelocityError);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, JointVelocityError);
     //@}
 
     /*! Set and Get methods for cartesian position. */
     //@{
-    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, CartesianPosition);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, CartesianPosition);
     //@}
 
     /*! Set and Get methods for cartesian velocity. */
     //@{
-    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, CartesianVelocity);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, CartesianVelocity);
     //@}
 
     /*! Set and Get methods for gaol cartesian position. */
     //@{
-    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, CartesianPositionGoal);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, CartesianPositionGoal);
     //@}
 
     /*! Set and Get methods for goal cartesian velocity. */
     //@{
-    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, CartesianVelocityGoal);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, CartesianVelocityGoal);
     //@}
 
     /*! Set and Get methods for cartesian position error. */
     //@{
-    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, CartesianPositionError);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, CartesianPositionError);
     //@}
 
     /*! Set and Get methods for cartesian velocity error. */
     //@{
-    CMN_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, CartesianVelocityError);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleVec, CartesianVelocityError);
     //@}
 
-public:
+    /*! Set and Get methods for EndEffector Frame wrt base robot frame. 
+        Slightly redundant. */
+    //@{
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctFrmDouble4x4, EndEffectorFrame);
+    //@}
 
     /*! Human readable output to stream. */
     void ToStream(std::ostream & outputStream) const;

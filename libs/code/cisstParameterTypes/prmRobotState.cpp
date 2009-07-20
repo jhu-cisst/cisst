@@ -38,18 +38,19 @@ prmRobotState::prmRobotState(size_type size)
 void prmRobotState::ToStream(std::ostream & outputStream) const
 {
 
-    outputStream << "JointPosition: " << this->JointPositionMember
-                 << "\nJointVelocity : "		<< this->JointVelocityMember
-                 << "\nJointPositionGoal: "		<< this->JointPositionGoalMember
-                 << "\nJointVelocityGoal: " << this->JointVelocityGoalMember
-                 << "\nJointPositionError: "	<< this->JointPositionErrorMember
-                 << "\nJointVelocityError: "	<< this->JointVelocityErrorMember
-                 << "\nCartesianPosition: " << this->CartesianPositionMember
+    outputStream << "JointPosition: "               << this->JointPositionMember
+                 << "\nJointVelocity : "		    << this->JointVelocityMember
+                 << "\nJointPositionGoal: "		    << this->JointPositionGoalMember
+                 << "\nJointVelocityGoal: "         << this->JointVelocityGoalMember
+                 << "\nJointPositionError: "	    << this->JointPositionErrorMember
+                 << "\nJointVelocityError: "	    << this->JointVelocityErrorMember
+                 << "\nCartesianPosition: "         << this->CartesianPositionMember
                  << "\nCartesianVelocity : "		<< this->CartesianVelocityMember
                  << "\nCartesianPositionGoal: "		<< this->CartesianPositionGoalMember
-                 << "\nCartesianVelocityGoal: " << this->CartesianVelocityGoalMember
+                 << "\nCartesianVelocityGoal: "     << this->CartesianVelocityGoalMember
                  << "\nCartesianVelocityError: "	<< this->CartesianVelocityErrorMember
-                 << "\nCartesianPositionError: "	<< this->CartesianPositionErrorMember;
+                 << "\nCartesianPositionError: "	<< this->CartesianPositionErrorMember
+                 << "\nEndEffectorFrame: "          << this->EndEffectorFrameMember;
 }
 
 void prmRobotState::SetSize(size_type size){
