@@ -55,6 +55,9 @@ public:
 
     void SetSize(size_type size);
 
+    /*! Human readable output to stream. */
+    void ToStream(std::ostream & outputStream) const;
+
     ///*! constructor with all possible parameters */
     //inline prmRobotState(const prmPosition & position,
     //                           const mtsStateIndex & stateIndex):
@@ -158,8 +161,7 @@ public:
     MTS_DECLARE_MEMBER_AND_ACCESSORS(vctFrmDouble4x4, EndEffectorFrame);
     //@}
 
-    /*! Human readable output to stream. */
-    void ToStream(std::ostream & outputStream) const;
+   
 
 }; // _prmRobotState_h
 
