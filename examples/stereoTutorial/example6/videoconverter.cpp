@@ -43,18 +43,31 @@ int VideoConverter(const std::string source, const std::string destination)
 {
     // instantiating SVL stream and filters
     svlStreamManager viewer_stream(1);
-    svlVideoFileSource viewer_source(false);
+    svlVideoFileSource viewer_source(true);
+    svlImageRectifier viewer_rectifier;
+    svlImageFileWriter viewer_writer;
     svlImageWindow viewer_window;
 
     // setup source
-    if (viewer_source.SetFilePath(source) != SVL_OK) goto labError;
+    viewer_source.DialogFilePath(SVL_LEFT);
+    viewer_source.DialogFilePath(SVL_RIGHT);
+
+    // setup source
+    viewer_rectifier.LoadTable("C:\\Documents and Settings\\bvagvolgyi\\My Documents\\Calibration\\20071128_JHMI_daVinci_0_degree\\left_rectif.txt", SVL_LEFT);
+    viewer_rectifier.LoadTable("C:\\Documents and Settings\\bvagvolgyi\\My Documents\\Calibration\\20071128_JHMI_daVinci_0_degree\\right_rectif.txt", SVL_RIGHT);
+
+    // setup writer
+    viewer_writer.SetFilePath("left_", "bmp", SVL_LEFT);
+    viewer_writer.SetFilePath("right_", "bmp", SVL_RIGHT);
 
     // setup image window
     viewer_window.SetTitleText("Video Player");
 
     // chain filters to pipeline
-    if (viewer_stream.Trunk().Append(&viewer_source) != SVL_OK) goto labError;
-    if (viewer_stream.Trunk().Append(&viewer_window) != SVL_OK) goto labError;
+    viewer_stream.Trunk().Append(&viewer_source);
+    viewer_stream.Trunk().Append(&viewer_rectifier);
+    viewer_stream.Trunk().Append(&viewer_writer);
+    viewer_stream.Trunk().Append(&viewer_window);
 
     cerr << endl << "Starting stream... ";
 
@@ -125,7 +138,7 @@ int main(int argc, char** argv)
     cerr << endl << "stereoTutorialVideoConverter - cisstStereoVision example by Balazs Vagvolgyi" << endl;
     cerr << "See http://www.cisst.org/cisst for details." << endl << endl;
 
-    if (argc < 3) {
+    if (argc < 1/*3*/) {
         cerr << "Command line format:" << endl;
         cerr << "     stereoTutorialVideoConverter <source_pathname>  <destination_pathname>" << endl;
         cerr << "Example:" << endl;
@@ -135,7 +148,7 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    VideoConverter(argv[1], argv[2]);
+    VideoConverter("", "");//argv[1], argv[2]);
 
     cerr << "Quit" << endl << endl;
     return 1;

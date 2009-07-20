@@ -27,6 +27,11 @@ IF(CISST_SVL_HAS_X11 OR WIN32)
         ENDIF(CISST_SVL_HAS_LIBDC1394)
     ENDIF(UNIX)
 
+    IF(CISST_SVL_HAS_SVS)
+        INCLUDE_DIRECTORIES(${SVS_INCLUDE_DIR})
+        TARGET_LINK_LIBRARIES(stereoTutorialCameraViewer ${SVS_svs_LIBRARY} ${SVS_svsgrab_LIBRARY})
+    ENDIF(CISST_SVL_HAS_SVS)
+
     IF(CISST_SVL_HAS_OPENCV)
         # Link each example against the OpenCV library if enabled
         FIND_PACKAGE(OpenCV)
@@ -41,7 +46,7 @@ IF(CISST_SVL_HAS_X11 OR WIN32)
             "${CMAKE_SHARED_LINKER_FLAGS} /NODEFAULTLIB:libc.lib /NODEFAULTLIB:libcmt.lib /NODEFAULTLIB:libcd.lib /NODEFAULTLIB:libcmtd.lib")
     ENDIF(WIN32)
 
-    CISST_REQUIRES("stereoTutorialCameraViewer" "cisstCommon;cisstVector;cisstOSAbstraction;cisstImage;cisstStereoVision")
+    CISST_REQUIRES("stereoTutorialCameraViewer" "cisstCommon;cisstVector;cisstOSAbstraction;cisstStereoVision")
 
 ENDIF(CISST_SVL_HAS_X11 OR WIN32)
 

@@ -22,7 +22,6 @@ SET(DEPENDENCIES
     cisstCommon
     cisstOSAbstraction
     cisstVector
-    cisstImage
     )
 
 # all source files
@@ -131,31 +130,78 @@ ENDIF(BUILD_LIBS_cisstNumerical)
 # OpenCV
 OPTION(CISST_SVL_HAS_OPENCV "Compile OpenCV extensions" OFF)
 IF(CISST_SVL_HAS_OPENCV)
-  FIND_PACKAGE(OpenCV)
-  INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS})
-  SET(SOURCE_FILES
-      ${SOURCE_FILES}
-      svlFilterToolTracker.cpp
-      vidOCVSource.h        # private header
-      vidOCVSource.cpp
-      # Trackers
-      trackers/opencv/svlTrackerOpenCV.cpp
-      trackers/opencv/trkOCVColor.h        # private header
-      trackers/opencv/trkOCVColor.cpp
-      )
-  SET(HEADER_FILES
-      ${HEADER_FILES}
-      svlFilterToolTracker.h
-      # Trackers
-      trackers/svlTrackerOpenCV.h
-      )
+    FIND_PACKAGE(OpenCV COMPONENTS CV CXCORE CVAUX HIGHGUI)
+    IF(OpenCV_FOUND)
+        MARK_AS_ADVANCED(FORCE
+                         OpenCV_ROOT_DIR
+                         OpenCV_INCLUDE_DIRS
+                         OpenCV_CV_INCLUDE_DIR
+                         OpenCV_CXCORE_INCLUDE_DIR
+                         OpenCV_CVAUX_INCLUDE_DIR
+                        #OpenCV_CVCAM_INCLUDE_DIR
+                         OpenCV_HIGHGUI_INCLUDE_DIR
+                         OpenCV_LIBRARIES
+                         OpenCV_CV_LIBRARY
+                         OpenCV_CXCORE_LIBRARY
+                         OpenCV_CVAUX_LIBRARY
+                        #OpenCV_CVCAM_LIBRARY
+                         OpenCV_CVHAARTRAINING_LIBRARY
+                         OpenCV_CXTS_LIBRARY
+                         OpenCV_HIGHGUI_LIBRARY
+                         OpenCV_ML_LIBRARY
+                        #OpenCV_TRS_LIBRARY
+                         )
+
+        INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS})
+        SET(SOURCE_FILES
+            ${SOURCE_FILES}
+            svlFilterToolTracker.cpp
+            vidOCVSource.h        # private header
+            vidOCVSource.cpp
+            # Trackers
+            trackers/opencv/svlTrackerOpenCV.cpp
+            trackers/opencv/trkOCVColor.h        # private header
+            trackers/opencv/trkOCVColor.cpp
+            )
+        SET(HEADER_FILES
+            ${HEADER_FILES}
+            svlFilterToolTracker.h
+            # Trackers
+            trackers/svlTrackerOpenCV.h
+            )
+    ELSE(OpenCV_FOUND)
+        MARK_AS_ADVANCED(CLEAR
+                         OpenCV_ROOT_DIR
+                         OpenCV_INCLUDE_DIRS
+                         OpenCV_CV_INCLUDE_DIR
+                         OpenCV_CXCORE_INCLUDE_DIR
+                         OpenCV_CVAUX_INCLUDE_DIR
+                        #OpenCV_CVCAM_INCLUDE_DIR
+                         OpenCV_HIGHGUI_INCLUDE_DIR
+                         OpenCV_LIBRARIES
+                         OpenCV_CV_LIBRARY
+                         OpenCV_CXCORE_LIBRARY
+                         OpenCV_CVAUX_LIBRARY
+                        #OpenCV_CVCAM_LIBRARY
+                         OpenCV_CVHAARTRAINING_LIBRARY
+                         OpenCV_CXTS_LIBRARY
+                         OpenCV_HIGHGUI_LIBRARY
+                         OpenCV_ML_LIBRARY
+                        #OpenCV_TRS_LIBRARY
+                         )
+    ENDIF(OpenCV_FOUND)
 ENDIF(CISST_SVL_HAS_OPENCV)
 
 
 OPTION(CISST_SVL_HAS_ZLIB "Use ZLIB extensions" OFF)
 IF(CISST_SVL_HAS_ZLIB)
-    FIND_PACKAGE(ZLIB)
+    FIND_PACKAGE(ZLIB REQUIRED)
     IF(ZLIB_FOUND)
+        MARK_AS_ADVANCED(FORCE
+                         ZLIB_INCLUDE_DIR
+                         ZLIB_LIBRARY
+                         )
+
         INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
 
         IF(NOT WIN32)
@@ -177,6 +223,11 @@ IF(CISST_SVL_HAS_ZLIB)
             ${HEADER_FILES}
             svlVideoFileWriter.h
             )
+    ELSE(ZLIB_FOUND)
+        MARK_AS_ADVANCED(CLEAR
+                         ZLIB_INCLUDE_DIR
+                         ZLIB_LIBRARY
+                         )
     ENDIF(ZLIB_FOUND)
 ENDIF(CISST_SVL_HAS_ZLIB)
 
@@ -187,20 +238,40 @@ IF(UNIX)
 # Matrox Imaging Library
 OPTION(CISST_SVL_HAS_MIL "Compile MIL extensions" OFF)
 IF(CISST_SVL_HAS_MIL)
-  FIND_PATH(CISST_SVL_MIL_INCLUDE
-            NAMES mil.h
-            PATHS "/opt/matrox_imaging/mil/include"
+
+    SET(MIL_FOUND "NO")
+    FIND_PATH(MIL_INCLUDE_DIR mil.h
+              "/opt/matrox_imaging/mil/include"
+              DOC "What is the path where the file mil.h can be found"
+              )
+    FIND_LIBRARY(MIL_mil_LIBRARY mil
+                 "/opt/matrox_imaging/mil/lib"
+                 DOC "Where can the MIL mil library be found"
+                 )
+    IF(MIL_INCLUDE_DIR)
+        IF(MIL_mil_LIBRARY)
+            SET(MIL_FOUND "YES")
+        ENDIF(MIL_mil_LIBRARY)
+    ENDIF(MIL_INCLUDE_DIR)
+
+    IF(MIL_FOUND)
+        MARK_AS_ADVANCED(FORCE
+                         MIL_INCLUDE_DIR
+                         MIL_mil_LIBRARY
+                         )
+
+        INCLUDE_DIRECTORIES(${MIL_INCLUDE_DIR})
+        SET(SOURCE_FILES
+            ${SOURCE_FILES}
+            vidMILDevice.h      # private header
+            vidMILDevice.cpp
             )
-  INCLUDE_DIRECTORIES(${CISST_SVL_MIL_INCLUDE})
-  FIND_LIBRARY(CISST_SVL_MIL_LIBRARY
-               NAMES mil
-               PATHS "/opt/matrox_imaging/mil/lib"
-               )
-  SET(SOURCE_FILES
-      ${SOURCE_FILES}
-      vidMILDevice.h        # private header
-      vidMILDevice.cpp
-      )
+    ELSE(MIL_FOUND)
+        MARK_AS_ADVANCED(CLEAR
+                         MIL_INCLUDE_DIR
+                         MIL_mil_LIBRARY
+                         )
+    ENDIF(MIL_FOUND)
 ENDIF(CISST_SVL_HAS_MIL)
 
 ELSE(UNIX)
@@ -230,41 +301,84 @@ IF(WIN32)
 
   OPTION(CISST_SVL_HAS_DIRECTSHOW "Compile DirectShow extensions" OFF)
   IF(CISST_SVL_HAS_DIRECTSHOW)
+    FIND_PACKAGE(DirectShow REQUIRED)
+    IF(DIRECTSHOW_FOUND)
+        MARK_AS_ADVANCED(FORCE
+                         DIRECTSHOW_INCLUDE_DIR
+                         DIRECTX_INCLUDE_DIR
+                         DIRECTSHOW_strmiids_LIBRARY
+                         DIRECTSHOW_quartz_LIBRARY
+                         DIRECTSHOW_Vfw32_LIBRARY
+                         DIRECTSHOW_WinMM_LIBRARY 
+                         )
 
-    # Find Direct Show
-    FIND_PACKAGE(DirectShow)
-    INCLUDE_DIRECTORIES(${DIRECTSHOW_INCLUDE_DIR} ${DIRECTX_INCLUDE_DIR})
-
-    SET(SOURCE_FILES
-        ${SOURCE_FILES}
-        vidDirectShowInputSelector.h    # private header
-        vidDirectShowInputSelector.cpp
-        vidDirectShowSource.h           # private header
-        vidDirectShowSource.cpp
-        )
-
+        INCLUDE_DIRECTORIES(${DIRECTSHOW_INCLUDE_DIR} ${DIRECTX_INCLUDE_DIR})
+        SET(SOURCE_FILES
+            ${SOURCE_FILES}
+            vidDirectShowInputSelector.h    # private header
+            vidDirectShowInputSelector.cpp
+            vidDirectShowSource.h           # private header
+            vidDirectShowSource.cpp
+            )
+    ELSE(DIRECTSHOW_FOUND)
+        MARK_AS_ADVANCED(CLEAR
+                         DIRECTSHOW_INCLUDE_DIR
+                         DIRECTX_INCLUDE_DIR
+                         DIRECTSHOW_strmiids_LIBRARY
+                         DIRECTSHOW_quartz_LIBRARY
+                         DIRECTSHOW_Vfw32_LIBRARY
+                         DIRECTSHOW_WinMM_LIBRARY 
+                         )
+    ENDIF(DIRECTSHOW_FOUND)
   ENDIF(CISST_SVL_HAS_DIRECTSHOW)
 
   OPTION(CISST_SVL_HAS_SVS "Compile Videre Design SVS extensions" OFF)
   IF(CISST_SVL_HAS_SVS)
 
-    SET(CISST_SVL_SVS_DIR "C:/Program Files/SRI International/SVS41")
-    FIND_PATH(CISST_SVL_SVS_INCLUDE
-              NAMES svs.h
-              PATHS "${CISST_SVL_SVS_DIR}/src")
-    INCLUDE_DIRECTORIES(${CISST_SVL_SVS_INCLUDE})
-    FIND_LIBRARY(CISST_SVL_svsgrab_LIBRARY
-                 NAMES svsgrab
-                 PATHS "${CISST_SVL_SVS_DIR}/bin")
-    FIND_LIBRARY(CISST_SVL_svs_LIBRARY
-                 NAMES svs
-                 PATHS "${CISST_SVL_SVS_DIR}/bin")
-    SET(SOURCE_FILES
-        ${SOURCE_FILES}
-        vidSVSSource.cpp
-        vidSVSSource.h          # private header
-        )
+    SET(SVS_FOUND "NO")
+    FIND_PATH(SVS_INCLUDE_DIR svs.h
+              "C:/Program Files/SRI International/SVS42/src"
+              "C:/Program Files/SRI International/SVS41/src"
+              DOC "What is the path where the file svs.h can be found"
+              )
+    FIND_LIBRARY(SVS_svs_LIBRARY svs
+                 "C:/Program Files/SRI International/SVS42/bin"
+                 "C:/Program Files/SRI International/SVS41/bin"
+                 DOC "Where can the SVS svs library be found"
+                 )
+    FIND_LIBRARY(SVS_svsgrab_LIBRARY svsgrab
+                 "C:/Program Files/SRI International/SVS42/bin"
+                 "C:/Program Files/SRI International/SVS41/bin"
+                 DOC "Where can the SVS svsgrab library be found"
+                 )
+    IF(SVS_INCLUDE_DIR)
+        IF(SVS_svs_LIBRARY)
+            IF(SVS_svsgrab_LIBRARY)
+                SET(SVS_FOUND "YES")
+            ENDIF(SVS_svsgrab_LIBRARY)
+        ENDIF(SVS_svs_LIBRARY)
+    ENDIF(SVS_INCLUDE_DIR)
 
+    IF(SVS_FOUND)
+        MARK_AS_ADVANCED(FORCE
+                         SVS_INCLUDE_DIR
+                         SVS_svs_LIBRARY
+                         SVS_svsgrab_LIBRARY
+                         )
+
+        INCLUDE_DIRECTORIES(${SVS_INCLUDE_DIR})
+        SET(SOURCE_FILES
+            ${SOURCE_FILES}
+            vidSVSSource.h      # private header
+            vidSVSSource.cpp
+            )
+    ELSE(SVS_FOUND)
+        MARK_AS_ADVANCED(CLEAR
+                         SVS_INCLUDE_DIR
+                         SVS_svs_LIBRARY
+                         SVS_svsgrab_LIBRARY
+                         )
+    ENDIF(SVS_FOUND)
   ENDIF(CISST_SVL_HAS_SVS)
 
   ADD_DEFINITIONS(-DWIN32_LEAN_AND_MEAN)

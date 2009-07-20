@@ -28,7 +28,7 @@ IF(WIN32)
     set(CMAKE_EXE_LINKER_FLAGS
         "${CMAKE_SHARED_LINKER_FLAGS} /NODEFAULTLIB:libc.lib /NODEFAULTLIB:libcmt.lib /NODEFAULTLIB:libcd.lib /NODEFAULTLIB:libcmtd.lib")
 
-    CISST_REQUIRES("stereoTutorialVideoConverter" "cisstCommon;cisstVector;cisstOSAbstraction;cisstImage;cisstStereoVision")
+    CISST_REQUIRES("stereoTutorialVideoConverter" "cisstCommon;cisstVector;cisstOSAbstraction;cisstStereoVision")
 
 ENDIF(WIN32)
 
@@ -53,6 +53,6 @@ IF(CISST_SVL_HAS_X11 AND CISST_SVL_HAS_ZLIB)
         TARGET_LINK_LIBRARIES(stereoTutorialVideoConverter dc1394)
     ENDIF(CISST_SVL_HAS_LIBDC1394)
 
-    CISST_REQUIRES("stereoTutorialVideoConverter" "cisstCommon;cisstVector;cisstOSAbstraction;cisstImage;cisstStereoVision")
+    CISST_REQUIRES("stereoTutorialVideoConverter" "cisstCommon;cisstVector;cisstOSAbstraction;cisstStereoVision")
 
 ENDIF(CISST_SVL_HAS_X11 AND CISST_SVL_HAS_ZLIB)

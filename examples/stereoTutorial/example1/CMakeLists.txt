@@ -41,7 +41,7 @@ IF(CISST_SVL_HAS_X11 OR WIN32)
             "${CMAKE_SHARED_LINKER_FLAGS} /NODEFAULTLIB:libc.lib /NODEFAULTLIB:libcmt.lib /NODEFAULTLIB:libcd.lib /NODEFAULTLIB:libcmtd.lib")
     ENDIF(WIN32)
 
-    CISST_REQUIRES("stereoTutorialSimpleStream" "cisstCommon;cisstVector;cisstOSAbstraction;cisstImage;cisstStereoVision")
+    CISST_REQUIRES("stereoTutorialSimpleStream" "cisstCommon;cisstVector;cisstOSAbstraction;cisstStereoVision")
 
 ENDIF(CISST_SVL_HAS_X11 OR WIN32)
 
