@@ -238,7 +238,7 @@ int svlVideoFileSource::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata)
     unsigned char* imptr;
     unsigned int idx, datasize, timestampcount = 0;
     double timestampsum = 0;
-    int ret = SVL_FAIL;
+    int ret = SVL_OK;
 
 #if (CISST_SVL_HAS_ZLIB == ON)
     const std::string framestartmarker = "\r\nFrame\r\n";
