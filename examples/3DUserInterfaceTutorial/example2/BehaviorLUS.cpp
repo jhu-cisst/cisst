@@ -558,7 +558,7 @@ BehaviorLUS::BehaviorLUS(const std::string & name, ui3Manager * manager):
     ui3BehaviorBase(std::string("BehaviorLUS::") + name, 0),
     Ticker(0),
     Following(false),
-    MapEnabled(false),
+    MapEnabled(true),
     ImagePlane(0),
     VisibleList(0),
     MarkerList(0),
@@ -570,11 +570,17 @@ BehaviorLUS::BehaviorLUS(const std::string & name, ui3Manager * manager):
     Backgrounds(0),
     Outline(0),
     WarningText(0),
-    MeasureText(0)
+    MeasureText(0),
+    ClutchPressed(false),
+    MarkerDropped(false),
+    setCenter(false)
 {
     // add video source interfaces
     AddStream(svlTypeImageRGB, "USVideo");
 std::cout<< "constructor=======================================================================" << std::endl;
+
+    this->camera2map = vtkMatrix4x4::New();
+
     this->VisibleList = new ui3VisibleList(manager);
     
     this->ProbeList = new ui3VisibleList(manager);
@@ -595,8 +601,6 @@ std::cout<< "constructor========================================================
     this->VisibleList->Add(this->MapCursorList);
     this->VisibleList->Add(this->AxesList);
 
-    
-    
     this->ProbeHead = new BehaviorLUSProbeHead(manager, this->Position);
     this->ProbeJoint1 = new BehaviorLUSProbeJoint(manager, this->Position);
     this->ProbeJoint2 = new BehaviorLUSProbeJoint(manager, this->Position);
@@ -640,16 +644,18 @@ std::cout<< "constructor========================================================
     this->ProbeListJoint2->Add(ProbeListJoint3);
     this->ProbeListJoint3->Add(ProbeListShaft);
 
-    this->MapCursorList-> Add(MapCursor);
+ //   this->MapCursorList-> Add(MapCursor);
+    this->VisibleList->Add(MapCursor);
 
     this->AxesList->Add(this->AxesJoint1);
+    this->AxesList->Add(this->AxesJoint2);
     std::cout << "2" << std::endl;
 
     // this->VisibleList->SetTransformation(vctFrm3::Identity());
 
     std::cout << "1" << std::endl;
 
-
+    this->zero_position[0] = zero_position[1] = 0.0;
     this->Offset.SetAll(0.0);
 
     std::cout<< " end constructor=====================================================================================" << std::endl;
@@ -688,38 +694,52 @@ void BehaviorLUS::ConfigureMenuBar()
     std::cout<< "end con fig menu ======================================================================================================" << std::endl;
 }
 
-void BehaviorLUS::mtm_right_button_callback(const prmEventButton & payload)
-{
-    CMN_LOG_RUN_VERBOSE << "EVENT: MTM Right Button:" << payload << endl;
-}
+
+
+
 
 void BehaviorLUS::Startup(void)
 {
     this->Slave1 = this->Manager->GetSlaveArm("Slave1");
     this->ECM1 = this->Manager->GetSlaveArm("ECM1");
-    this->RMaster = this->Manager->GetMasterArm("MTMR");
+ //   this->RMaster = this->Manager->GetMasterArm("MTMR");
 
+    // To get the joint values, we need to access the device directly
     mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
     CMN_ASSERT(taskManager);
     mtsDevice * daVinci = taskManager->GetTask("daVinci");
     CMN_ASSERT(daVinci);
+    // get PSM1 interface
     mtsProvidedInterface * providedInterface = daVinci->GetProvidedInterface("PSM1");
     CMN_ASSERT(providedInterface);
     mtsCommandReadBase * command = providedInterface->GetCommandRead("GetPositionJoint");
     CMN_ASSERT(command);
     GetJointPositionSlave.Bind(command);
+    command = providedInterface->GetCommandRead("GetPositionCartesian");
+    CMN_ASSERT(command);
+    GetCartesianPositionSlave.Bind(command);
+    // get slave interface
+    providedInterface = daVinci->GetProvidedInterface("ECM1");
+    CMN_ASSERT(providedInterface);
+    command = providedInterface->GetCommandRead("GetPositionJoint");
+    CMN_ASSERT(command);
+    GetJointPositionECM.Bind(command);
     
-    mtsProvidedInterface * providedInterfaceECM = daVinci->GetProvidedInterface("ECM1");
-    CMN_ASSERT(providedInterfaceECM);
-    mtsCommandReadBase * commandECM = providedInterfaceECM->GetCommandRead("GetPositionJoint");
-    CMN_ASSERT(commandECM);
-    GetJointPositionECM.Bind(commandECM);
+    // get clutch interface
+    providedInterface = daVinci->GetProvidedInterface("MasterClutchPedal");
+    CMN_ASSERT(providedInterface);
+    mtsCommandWrite<BehaviorLUS, prmEventButton> * clutchCallbackCommand =
+        new mtsCommandWrite<BehaviorLUS, prmEventButton>(&BehaviorLUS::MasterClutchPedalCallback, this,
+                                                         "MasterClutchPedalCallback", prmEventButton());
+    CMN_ASSERT(clutchCallbackCommand);
+    providedInterface->AddObserver("Button", clutchCallbackCommand);
 
     std::cout<< "start up ======================================================================================================" << std::endl;
 
 
     RightMTMOpen = true;
     prevRightMTMOpen = RightMTMOpen;
+    LeftMTMOpen = true;
 
     if (!this->Slave1) {
         CMN_LOG_CLASS_INIT_ERROR << "Startup: this behavior requires a slave arm ..." << std::endl;
@@ -807,7 +827,7 @@ bool BehaviorLUS::RunForeground()
     this->Slave1->GetCartesianPosition(this->Slave1Position);
     //this->Slave1Position.Position().Translation().Add(this->Offset);
     this->ProbeList->SetTransformation(this->Slave1Position.Position());
-    this->MapCursorList->SetTransformation(this->Slave1Position.Position());
+   // this->MapCursorList->SetTransformation(this->Slave1Position.Position());
  //   this->SetJoints(0.0,0.0,0.0,0.0);
     //this->MarkerList->SetTransformation(this->Slave1Position.Position());
 
@@ -837,7 +857,7 @@ bool BehaviorLUS::RunBackground()
     this->ProbeList->SetTransformation(this->Slave1Position.Position());
     this->GetJointPositionSlave(this->JointsSlave);
 //    this->SetJoints(JointsSlave.Position().Element(4),JointsSlave.Position().Element(5),JointsSlave.Position().Element(2),JointsSlave.Position().Element(3));
-    this->MapCursorList->SetTransformation(this->Slave1Position.Position());
+   // this->MapCursorList->SetTransformation(this->Slave1Position.Position());
    // this->MarkerList->SetTransformation(this->Slave1Position.Position());
  //   this->SetJoints(0.0,0.0,0.0,0.0);
 
@@ -893,7 +913,7 @@ bool BehaviorLUS::RunNoInput()
     //void BehaviorLUS::SetJoints(double pitch, double yaw, double insertion, double roll)
     this->SetJoints(JointsSlave.Position()[4],JointsSlave.Position()[5],JointsSlave.Position()[2],JointsSlave.Position()[3]);
     
-
+//measurement tool
     if (!RightMTMOpen)
     {
         //cout<< "getMeasurement()" << endl;
@@ -903,15 +923,48 @@ bool BehaviorLUS::RunNoInput()
         MeasurementActive = false;
         this->SetText(MeasureText, " ");
     }
-    
+
+//prepare to drop marker
+    if(ClutchPressed & !RightMTMOpen) //ClutchPressed
+    {
+        AddMarker();
+    }
+
+//prepare to remove marker
+    if(ClutchPressed & !LeftMTMOpen)
+    {
+        if (MarkerList->size() >= 1)
+        {
+            this->RemoveLastMarker();
+            MarkerCount -= 1;
+        }
+    }
+    this->AxesJoint2->SetTransformation(Slave1Position.Position());
+//update the map if enabled other wise it should be hidden.
     if(MapEnabled)
     {
         this->MapCursorList->Show();
         this->MarkerList->Show();
-        this->UpdateMap(ECM1Position); // ANTON TO FIX, vec[2]);
+
+        vctDouble3 xAxis, yAxis, zAxis;
+        xAxis = Slave1Position.Position().Rotation().Column(0);
+        yAxis = Slave1Position.Position().Rotation().Column(1);
+        zAxis = Slave1Position.Position().Rotation().Column(2);
+
+//         this->UpdateMap(this->camera2map,
+//           JointsECM.Position().Pointer(), // q_ecm
+//           Slave1Position.Position().Translation().Pointer(),
+//           xAxis.Pointer(),
+//           yAxis.Pointer(),
+//           zAxis.Pointer(), 
+//           setCenter); // ANTON TO FIX, vec[2]);
+        vctFrm3 markerPos_ECMRCM = GetCurrentCursorPositionWRTECMRCM();
+        //std::cout << "markerPos_ECMRCM: " << markerPos_ECMRCM <<std::endl;
+        //MapCursor->SetTransformation(markerPos_ECMRCM);
+
     }
     else {this->MapCursorList->Hide();}
-
+    return true;
 }
 
 void BehaviorLUS::Configure(const std::string & CMN_UNUSED(configFile))
@@ -973,7 +1026,31 @@ void BehaviorLUS::PrimaryMasterButtonCallback(const prmEventButton & event)
         this->Following = true;
     } else if (event.Type() == prmEventButton::RELEASED) {
         this->RightMTMOpen = true;
+        this->MarkerDropped = false;
         this->Following = false;
+    }
+}
+
+void BehaviorLUS::SecondaryMasterButtonCallback(const prmEventButton & event)
+{
+    if (event.Type() == prmEventButton::PRESSED) {
+        this->LeftMTMOpen = false;
+        std::cout << "left button pressed" <<std::endl;
+    } else if (event.Type() == prmEventButton::RELEASED) {
+        this->LeftMTMOpen = true;
+        this->MarkerRemoved = false;
+        std::cout << "left button released" <<std::endl;
+    }
+}
+
+void BehaviorLUS::MasterClutchPedalCallback(const prmEventButton & payload)
+{
+    if (payload.Type() == prmEventButton::PRESSED) {
+        this->ClutchPressed = true;
+        std::cout << ClutchPressed << std::endl;
+    } else {
+        this->ClutchPressed = false;
+        std::cout << ClutchPressed << std::endl;
     }
 }
 
@@ -1008,7 +1085,6 @@ void BehaviorLUS::SetJoints(double A1, double A2, double insertion, double roll)
     Yaxis.Assign(0.0,1.0,0.0);
     vctDouble3 Zaxis;
     Zaxis.Assign(0.0,0.0,1.0);
-
 
     vctFrm3 probePosition;
     vctAxAnRot3 probeRot(Xaxis, cmnPI);
@@ -1134,7 +1210,7 @@ void BehaviorLUS::GetMeasurement(vctDouble3 pos)
     correctionFrame.Translation() = correction;
     frame.ProductOf(Slave1Position.Position(), correctionFrame);
 
-    this->AxesList->SetTransformation(frame); // somewhat useless display as the absolute position of tools is not well known
+    //this->AxesList->SetTransformation(frame); // somewhat useless display as the absolute position of tools is not well known
 /*
      this->AxesList->SetOrientation(Slave1Position.Position().Rotation());
      this->AxesList->SetPosition(pos);*/
@@ -1162,9 +1238,154 @@ void BehaviorLUS::GetMeasurement(vctDouble3 pos)
     }
 }
 
+/*!
+    Transform the probe position. Return the cursor position in map coordinates.
+    @param P_psmtip_ecmframe    Result: position of PSM tip in ECM frame (hframe aka ECM frame). -- double 4
+    @param q_ecm                ecm joint vector -- 4 floats
+    @param P_psmtip_cam         Position of PSM tip in camera frame. -- 3 floats, translation
+    @param x,y,z axis 		columns  of the PSM rotation matrix 
 
-void BehaviorLUS::UpdateMap(prmPositionCartesianGet & ecmPosition) // ANTON TO FIX, double insertion )
+    @return 
+ */
+// [0] = outer yaw
+// [1] = outer pitch
+// [2] = scope insertion
+// [3] = scope roll
+
+void BehaviorLUS::UpdateMap(vtkMatrix4x4 * Camera2ECM,
+          double *q_ecm,  // q_ecm
+          double *P_psmtip_cam,
+          double *xaxis, double *yaxis, double *zaxis,
+          bool & setCenter)
 {
+    double *P_psmtip_ecmframe;
+    double  ecm_rcm_to_tip_displacement[4]={0.0};
+//    vtkMatrix4x4  *T_to_horiz, *T_yaw, *T_pitch, *T_roll;
+//    CreateVTKObject(T_to_horiz, vtkMatrix4x4);
+    vtkMatrix4x4 *T_to_horiz = vtkMatrix4x4::New();
+    vtkMatrix4x4 *T_yaw = vtkMatrix4x4::New();
+    vtkMatrix4x4 *T_pitch = vtkMatrix4x4::New();
+    vtkMatrix4x4 *T_roll = vtkMatrix4x4::New();
+
+    double  xaxis_ecm[4], yaxis_ecm[4], zaxis_ecm[4];
+
+    double  P_tmp1[4], P_tmp2[4], withZoffset[3];
+    double  angle   = 30;  //angle for S system
+    double  Zoffset = 50;
+    int     i;
+    // float *P_psmtip_ecmframe[4];
+
+
+    // Get ECM insertion dispacement in millimetres.
+    ecm_rcm_to_tip_displacement[2] = q_ecm[2]*1000.0;
+
+    SetTransform ( T_to_horiz,   1.0, 0.0, 0.0, 0.0,
+                                 0.0, cos(angle*cmnPI/180), -sin(angle*cmnPI/180), 0.0,
+                                 0.0, sin(angle*cmnPI/180),  cos(angle*cmnPI/180), 0.0);
+
+    SetTransform(T_yaw, cos(q_ecm[0]), 0.0, sin(q_ecm[0]), 0.0,
+                        0.0,           1.0, 0.0,           0.0,
+                        -sin(q_ecm[0]),0.0, cos(q_ecm[0]),0.0);
+
+    SetTransform(T_pitch,   1.0, 0.0,            0.0,             0.0,
+                            0.0, cos(-q_ecm[1]), -sin(-q_ecm[1]), 0.0,
+                            0.0, sin(-q_ecm[1]),  cos(-q_ecm[1]), 0.0);
+
+    SetTransform(T_roll, cos(q_ecm[3]), -sin(q_ecm[3]), 0.0, 0.0,
+                         sin(q_ecm[3]),  cos(q_ecm[3]), 0.0, 0.0,
+                         0.0,            0.0,           1.0, 0.0);
+
+
+
+    // Transform PSM TIP coordinates from control point to center of probe.
+    P_psmtip_cam[0] += xaxis[2]*40.0;
+    P_psmtip_cam[1] += yaxis[2]*40.0;
+    P_psmtip_cam[2] += zaxis[2]*40.0;
+
+//         // Transform PSM1 TIP positions into the "nominal" ECM RCM frame
+    vectorSum(P_psmtip_cam, ecm_rcm_to_tip_displacement, P_tmp1);
+    T_roll -> MultiplyPoint(P_tmp1, P_tmp2);
+    T_pitch -> MultiplyPoint(P_tmp2, P_tmp1);
+    T_yaw -> MultiplyPoint(P_tmp1, P_tmp2);
+    T_to_horiz -> MultiplyPoint(P_tmp2, P_psmtip_ecmframe);
+//cout << "1536" << endl;
+//         // Transform xaxis positions into the "nominal" ECM RCM frame
+            //vectorSum(xaxis, ecm_rcm_to_tip_displacement, P_tmp1);
+    P_tmp1[0] = xaxis[0]; //xaxis[0];
+    P_tmp1[1] = yaxis[0]; //xaxis[1];
+    P_tmp1[2] = zaxis[0]; //xaxis[2];
+    P_tmp1[3] = 1.0;
+    T_roll -> MultiplyPoint(P_tmp1, P_tmp2);
+    T_pitch -> MultiplyPoint(P_tmp2, P_tmp1);
+    T_yaw -> MultiplyPoint(P_tmp1, P_tmp2);
+//cout << "1542" << endl;
+    T_to_horiz -> MultiplyPoint(P_tmp2, xaxis_ecm);
+
+//         // Transform yaxis positions into the "nominal" ECM RCM frame
+            //vectorSum(yaxis, ecm_rcm_to_tip_displacement, P_tmp1);
+    P_tmp1[0] = xaxis[1]; //yaxis[0];
+    P_tmp1[1] = yaxis[1]; //yaxis[1];
+    P_tmp1[2] = zaxis[1]; //yaxis[2];
+    P_tmp1[3] = 1.0;
+    T_roll -> MultiplyPoint(P_tmp1, P_tmp2);
+    T_pitch -> MultiplyPoint(P_tmp2, P_tmp1);
+    T_yaw -> MultiplyPoint(P_tmp1, P_tmp2);
+    T_to_horiz -> MultiplyPoint(P_tmp2, yaxis_ecm);
+
+//         // Transform zaxis positions into the "nominal" ECM RCM frame
+            //vectorSum(zaxis, ecm_rcm_to_tip_displacement, P_tmp1);
+    P_tmp1[0] = xaxis[2]; //zaxis[0];
+    P_tmp1[1] = yaxis[2]; //zaxis[1];
+    P_tmp1[2] = zaxis[2]; //zaxis[2];
+    P_tmp1[3] = 1.0;
+    T_roll -> MultiplyPoint(P_tmp1, P_tmp2);
+    T_pitch -> MultiplyPoint(P_tmp2, P_tmp1);
+    T_yaw -> MultiplyPoint(P_tmp1, P_tmp2);
+    T_to_horiz -> MultiplyPoint(P_tmp2, zaxis_ecm);
+
+
+
+        // Column for x-axis
+    Camera2ECM->SetElement(0, 0, xaxis[2]);
+    Camera2ECM->SetElement(1, 0, -yaxis[2]);
+    Camera2ECM->SetElement(2, 0, zaxis[2]);
+
+        // Column for y-axis
+    Camera2ECM->SetElement(0, 1, -xaxis[0]);
+    Camera2ECM->SetElement(1, 1, yaxis[0]);
+    Camera2ECM->SetElement(2, 1, -zaxis[0]);
+
+        // Column for z-axis
+    Camera2ECM->SetElement(0, 2, xaxis[1]);
+    Camera2ECM->SetElement(1, 2, -yaxis[1]);
+    Camera2ECM->SetElement(2, 2, zaxis[1]);
+        
+
+
+
+        // Reset this position to be the center of the map.
+        // TO DO: existing marker coordinates are not updated.
+    if(setCenter==true)
+    {
+        zero_position[0] = P_psmtip_ecmframe[0];
+        zero_position[1] = P_psmtip_ecmframe[2];
+    }
+
+//this works!
+    Camera2ECM -> SetElement(0, 3, (-(P_psmtip_ecmframe[0]-zero_position[0])/5.0)+ 40.5); //x stays the same
+    Camera2ECM -> SetElement(1, 3, (+(P_psmtip_ecmframe[2]-zero_position[1])/5.0)- 43.0); //z of ECM becomes y
+    Camera2ECM -> SetElement(2, 3, DEPTH);//P_psmtip_ecmframe[1]); //y of ECM becomes z, should be at fixed depth of 60 mm
+
+  //  cursorActor -> SetUserMatrix(Camera2ECM);
+
+    Camera2ECM->Print(std::cout);
+    //MapCursor->SetVTKMatrix(Camera2ECM);
+    //std::cout << "MapCursor" << MapCursor->GetTransformation() << std::endl;
+ //   CursorPos = GetCurrentCursorPositionWRTECMRCM();
+
+
+#if 0
+    //============================================================================
     // double scale = .2;
 
     vctFrm3 cursorPos;
@@ -1231,12 +1452,16 @@ void BehaviorLUS::UpdateMap(prmPositionCartesianGet & ecmPosition) // ANTON TO F
     //     this->Slave1->GetCartesianPosition(this->Slave1Position);
     //     this->Slave1Position.Position().Translation().Add(this->Offset);
     //     this->VisibleObject->SetTransformation(this->Slave1Position.Position());
+#endif
 }
 
 
 
 void BehaviorLUS::AddMarker(void)
 {
+    if(MarkerDropped == false)
+    {
+#if 0
     vctFrm3 test1;
     //test1.Rotation().Identity();
     test1.Translation() = vctDouble3(0.0,20.0, -50.0);
@@ -1258,13 +1483,213 @@ void BehaviorLUS::AddMarker(void)
     newMarker->Show();
     newMarker->SetTransformation(test1);
     this->MarkerList->Add(newMarker);
-    std::cout << "AddMarker has been called " << Slave1Position.Position() << std::endl;
+#endif
+
+    vctFrm3 * topush = new vctFrm3(MapCursor->GetTransformation());
+    this->AbsoluteMarkerPosition.push_back(topush);
+
+    std::cout << "AddMarker has been called " << *topush << std::endl;
+
+    MarkerDropped = true;
+    }
+    else {
+    }
 
 }
 
 
 void BehaviorLUS::RemoveLastMarker(void)
 {
-    this->MarkerList->RemoveLast();
+    if(MarkerRemoved ==false)
+    {
+        std::cout << "marker removed" << std::endl;
+        this->MarkerList->RemoveLast();
+        MarkerRemoved = true;
+    }
 }
 
+/*methods to add
+query cursor position
+*/
+vctFrm3 BehaviorLUS::GetCurrentCursorPositionWRTECM(void)
+{
+
+    vctFrm3 frame, correctionFrame;
+
+    vctDouble3 correction(0.0, 0.0, 30.0); // 30 mm along probe
+
+    correctionFrame.Translation() = correction;
+    frame.ProductOf(Slave1Position.Position(), correctionFrame);
+
+    return frame;
+}
+
+vctFrm3 BehaviorLUS::GetCurrentCursorPositionWRTECMRCM(void)
+{
+    vctDouble3 Xaxis;
+    Xaxis.Assign(1.0,0.0,0.0);
+    vctDouble3 Yaxis;
+    Yaxis.Assign(0.0,1.0,0.0);
+    vctDouble3 Zaxis;
+    Zaxis.Assign(0.0,0.0,1.0);
+
+    // get joint values for ECM
+    GetJointPositionECM(JointsECM);
+// [0] = outer yaw
+// [1] = outer pitch
+// [2] = scope insertion
+// [3] = scope roll
+
+    vctFrm3 transform;
+    transform.Rotation().From(vctAxAnRot3(vctDouble3(0.0, 1.0, 0.0), cmnPI));
+
+    double yaw0 = JointsECM.Position()[0];
+    double pitch1 = JointsECM.Position()[1];
+    double insert2 = JointsECM.Position()[2]*1000;//convert to mm
+    double roll3 = JointsECM.Position()[3];
+    double angle = 30*cmnPI/180;
+
+    /* old code
+    vctFrm3 yawFrame0;
+    yawFrame0.Rotation() = vctMatRot3( vctAxAnRot3(Yaxis, -yaw0 ) );
+
+    vctFrm3 pitchFrame1;
+    pitchFrame1.Rotation() = vctMatRot3( vctAxAnRot3(Xaxis, -pitch1) );
+
+    vctFrm3 insertFrame2;
+    insertFrame2.Translation() = vctDouble3(0.0, 0.0, -insert2);
+
+    vctFrm3 rollFrame3;
+    rollFrame3.Rotation() = vctMatRot3( vctAxAnRot3(Zaxis, -roll3) );
+
+    vctFrm3 T_to_horiz;
+    T_to_horiz.Rotation() = vctMatRot3(vctAxAnRot3(Xaxis, -angle));
+    */
+    vctFrm3 yawFrame0;
+    yawFrame0.Rotation() = vctMatRot3( vctAxAnRot3(Yaxis, yaw0 ) );
+
+    vctFrm3 pitchFrame1;
+    pitchFrame1.Rotation() = vctMatRot3( vctAxAnRot3(Xaxis, -pitch1) );
+
+    vctFrm3 insertFrame2;
+    insertFrame2.Translation() = vctDouble3(0.0, 0.0, insert2);
+
+    vctFrm3 rollFrame3;
+    rollFrame3.Rotation() = vctMatRot3( vctAxAnRot3(Zaxis, roll3) );
+
+    vctFrm3 T_to_horiz;
+    T_to_horiz.Rotation() = vctMatRot3(vctAxAnRot3(Xaxis, angle));
+
+    vctFrm3 fixedPoint;
+    fixedPoint.Translation()= GetCurrentCursorPositionWRTECM().Translation();
+    
+    // raw cartesian position from slave daVinci, no ui3 correction
+    prmPositionCartesianGet slavePosition;
+    GetCartesianPositionSlave(slavePosition);
+    fixedPoint.Assign(slavePosition.Position());
+    
+ //   fixedPoint.Translation().
+
+
+    vctFrm3 finalFrame;
+ //   finalFrame = yawFrame*pitchFrame*insertFrame*rollFrame*GetCurrentCursorPositionWRTECM();
+ //  finalFrame = rollFrame3 * insertFrame2 * pitchFrame1 * yawFrame0 * GetCurrentCursorPositionWRTECM();  // us
+ //   finalFrame = rollFrame3*insertFrame2*yawFrame0*pitchFrame1*GetCurrentCursorPositionWRTECM(); // simon email
+ //   finalFrame = yawFrame0*pitchFrame1*rollFrame3*insertFrame2*GetCurrentCursorPositionWRTECM();//*transform; // old code?
+    //new test code
+    vctFrm3 imdtframe;
+    // imdtframe = yawFrame0 * pitchFrame1 * insertFrame2 * rollFrame3 * fixedpoint; // workinf fixed point !!!
+    imdtframe = yawFrame0 * pitchFrame1 * insertFrame2 * rollFrame3 * fixedPoint; //* GetCurrentCursorPositionWRTECM(); // working fixed point !!!
+    imdtframe = imdtframe.InverseSelf();
+    finalFrame = transform * imdtframe;//*GetCurrentCursorPositionWRTECM();//*transform; // old 
+    std::cout << "finalFrame: " << finalFrame << std::endl;
+ //   finalFrame.Translation() = finalFrame.Translation()*.6;
+    if(finalFrame.Translation().Z() >-50)
+    {
+        finalFrame.Translation().Z() = -50;
+    }
+    
+    if(finalFrame.Translation().X() <-20)
+    {
+        finalFrame.Translation().X() = -20;
+    }else if (finalFrame.Translation().X() >20)
+    {
+        finalFrame.Translation().X() =20;
+    }
+    
+    if(finalFrame.Translation().Y() <-20)
+    {
+        finalFrame.Translation().Y() = -20;
+    }else if (finalFrame.Translation().Y() >20)
+    {
+        finalFrame.Translation().Y() =20;
+    }
+
+#if 0
+    finalFrame.Translation().Z() = -100;
+    finalFrame.Translation().X() = -1;
+    finalFrame.Translation().Y() = -1;
+#endif
+    std::cout << "finalFrame clipped: " << finalFrame << std::endl;
+    AxesJoint1->SetTransformation(finalFrame);
+   //finalFrame = rollFrame3*insertFrame2*pitchFrame1*yawFrame0*GetCurrentCursorPositionWRTECM();
+    
+    return finalFrame;
+
+}
+
+
+
+/*
+
+// temparary placeholder for data conversion double to float
+vctFloat3 psmtip = Slave1Position.Position().Translation();
+vctFloat3 xAxis, yAxis, zAxis;
+xAxis = Slave1.Position().Rotation().Column(0);
+
+vtkMatrix4x4 *camera2map = vtkMatrix4x4::New(); //should be in constructor
+
+UpdateMap(camera2map
+          ECMJoints.Position().Pointer(), // q_ecm
+          psmtip.Pointer(),
+          xAxis.Pointer(),
+          yAxis.Pointer(),
+          zAxis.Pointer())
+{
+
+delete all vtkobjects at the end of this function
+}
+*/
+
+void BehaviorLUS::SetTransform(vtkMatrix4x4 *mat, double e11, double e12, double e13, double e14,
+                                     double e21, double e22, double e23, double e24,
+                                     double e31, double e32, double e33, double e34)
+{
+    double elements[16] = { e11,  e12,  e13,  e14,
+        e21,  e22,  e23,  e24,
+        e31,  e32,  e33,  e34,
+        0.0,  0.0,  0.0,  1.0};
+
+        mat -> DeepCopy(elements);
+
+}
+
+/*--------------------------------------------------------------------------------------*/
+
+/*!
+    Vector sum (4x1).
+    @param  A       4x1 vector.
+    @param  B       4x1 vector.
+    @param  Result  The vector sum. 3x1 vector.
+    @returns        Pointer to Result=A+B.
+ */
+void BehaviorLUS::vectorSum(double A[4], double B[4], double Result[4])
+{
+
+    Result[0] = A[0] + B[0];
+    Result[1] = A[1] + B[1];
+    Result[2] = A[2] + B[2];
+    Result[3] = 1.0;
+
+
+}

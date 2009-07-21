@@ -73,6 +73,7 @@ int main()
     cmnClassRegister::SetLoD("mtsTaskManager", CMN_LOG_LOD_VERY_VERBOSE);
     cmnClassRegister::SetLoD("BehaviorLUS", CMN_LOG_LOD_VERY_VERBOSE);
     cmnClassRegister::SetLoD("BehaviorWithSlave", CMN_LOG_LOD_VERY_VERBOSE);
+    cmnClassRegister::SetLoD("dvapi_stream", CMN_LOG_LOD_INIT_VERBOSE);
 
     mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
 #if (UI3_INPUT == UI3_OMNI1_OMNI2)
@@ -303,7 +304,7 @@ int main()
                           daVinci, "MTMRButton",
                           daVinci, "MTMRClutch",
                           ui3MasterArm::PRIMARY);
-    rightMaster->SetTransformation(transform, 0.5 /* scale factor */);
+    rightMaster->SetTransformation(transform, 1.0 /* scale factor */);
     ui3CursorBase * rightCursor = new ui3CursorSphere(&guiManager);
     rightCursor->SetAnchor(ui3CursorBase::CENTER_RIGHT);
     rightMaster->SetCursor(rightCursor);
@@ -315,7 +316,7 @@ int main()
                          daVinci, "MTMLButton",
                          daVinci, "MTMLClutch",
                          ui3MasterArm::SECONDARY);
-    leftMaster->SetTransformation(transform, 0.5 /* scale factor */);
+    leftMaster->SetTransformation(transform, 1.0 /* scale factor */);
     ui3CursorBase * leftCursor = new ui3CursorSphere(&guiManager);
     leftCursor->SetAnchor(ui3CursorBase::CENTER_LEFT);
     leftMaster->SetCursor(leftCursor);

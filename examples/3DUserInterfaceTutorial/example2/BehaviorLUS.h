@@ -21,9 +21,10 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include <cisst3DUserInterface.h>
+#include <list>
+
 
 #define DEPTH           -200
-#define _PI             3.14159265358979
 
 // forward declarations
 class BehaviorLUSProbeHead;
@@ -66,9 +67,11 @@ public:
     void AddMarker();
     void RemoveLastMarker();
 
-    void mtm_right_button_callback(const prmEventButton & payload);
+    void MasterClutchPedalCallback(const prmEventButton & payload);
     void DropMarkerCallback(void);
     void RemoveMarkerCallback(void);
+    vctFrm3 GetCurrentCursorPositionWRTECM(void);
+    vctFrm3 GetCurrentCursorPositionWRTECMRCM(void);
     
 
 protected:
@@ -77,14 +80,17 @@ protected:
     void EnableMapButtonCallback(void);
     void Master_clutch_callback(void);
     void PrimaryMasterButtonCallback(const prmEventButton & event);
+    void SecondaryMasterButtonCallback(const prmEventButton & event);
 
 
     StateType PreviousState;
     bool PreviousMaM;
-    bool RightMTMOpen, prevRightMTMOpen;
-    bool isRightMTMOpen(double grip);
+    bool RightMTMOpen, prevRightMTMOpen, LeftMTMOpen;
+    bool ClutchPressed, MarkerDropped, MarkerRemoved;
+    //    bool isRightMTMOpen(double grip);
     
     vctDouble3 PreviousCursorPosition;
+    vctFrm3 CursorPos;
     vctDouble3 PreviousSlavePosition;
     vctDouble3 Offset;
     vctDouble3 CursorOffset;
@@ -96,21 +102,33 @@ protected:
 
     ui3SlaveArm * Slave1;
     ui3SlaveArm * ECM1;
-    ui3MasterArm * RMaster;
+    // ui3MasterArm * RMaster;
     prmPositionCartesianGet Slave1Position;
     prmPositionCartesianGet ECM1Position;
     
     mtsFunctionRead GetJointPositionSlave;
-    prmPositionJointGet JointsSlave;
-    
-    void UpdateMap(prmPositionCartesianGet & ecmFrame); // ANTON TO FIX , double insertion);
-    
+    mtsFunctionRead GetCartesianPositionSlave;
     mtsFunctionRead GetJointPositionECM;
+    prmPositionJointGet JointsSlave;
     prmPositionJointGet JointsECM;
     
+    void UpdateMap(vtkMatrix4x4 * Camera2Frame,
+                   double *q_ecm,  // q_ecm
+                   double *P_psmtip_cam,
+                   double *xaxis, double *yaxis, double *zaxis,
+                   bool & setCenter); // ANTON TO FIX , double insertion);
+#if 0
+    mtsFunctionRead GetJointPositionECM;
+    prmPositionJointGet JointsECM;
+#endif
     bool MeasurementActive;
     bool MapEnabled;
+    bool setCenter;
     vctDouble3 MeasurePoint1;
+    
+    std::list<vctFrm3*> AbsoluteMarkerPosition;
+    vtkMatrix4x4 * camera2map;
+    double          zero_position[2];
 
 private:
     int MarkerCount;
@@ -143,5 +161,11 @@ private:
     ui3VisibleAxes * AxesJoint2;
     ui3VisibleAxes * AxesJoint3;
     ui3VisibleAxes * AxesShaft;
+    
+    void                    SetTransform(vtkMatrix4x4 *mat, 
+                                         double e11, double e12, double e13, double e14,
+                                         double e21, double e22, double e23, double e24,
+                                         double e31, double e32, double e33, double e34);
+    void                    vectorSum(double A[4], double B[4], double Result[4]);
 };
 
