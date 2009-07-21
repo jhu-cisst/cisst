@@ -80,17 +80,34 @@ void ui3VisibleObject::SetPosition(const vctDouble3 & position)
 
 void ui3VisibleObject::SetOrientation(const vctMatRot3 & rotationMatrix)
 {
+    unsigned int i, j;
     this->Lock();
-    this->Matrix->SetElement(0, 0, rotationMatrix.Element(0, 0));
-    this->Matrix->SetElement(0, 1, rotationMatrix.Element(0, 1));
-    this->Matrix->SetElement(0, 2, rotationMatrix.Element(0, 2));
-    this->Matrix->SetElement(1, 0, rotationMatrix.Element(1, 0));
-    this->Matrix->SetElement(1, 1, rotationMatrix.Element(1, 1));
-    this->Matrix->SetElement(1, 2, rotationMatrix.Element(1, 2));
-    this->Matrix->SetElement(2, 0, rotationMatrix.Element(2, 0));
-    this->Matrix->SetElement(2, 1, rotationMatrix.Element(2, 1));
-    this->Matrix->SetElement(2, 2, rotationMatrix.Element(2, 2));
+    for (i = 0; i < 3; i++) {
+        for (j = 0; j < 3; j++) {
+            this->Matrix->SetElement(i, j, rotationMatrix.Element(i, j));
+        }
+    }
     this->Unlock();
+}
+
+
+vctDoubleFrm3 ui3VisibleObject::GetTransformation(void) const
+{
+    vctDoubleFrm3 result;
+    unsigned int i, j;
+    for (i = 0; i < 3; i++) {
+        result.Translation().Element(i) = this->Matrix->GetElement(i, 3);
+        for (j = 0; j < 3; j++) {
+            result.Rotation().Element(i, j) = this->Matrix->GetElement(i, j);
+        }
+    }
+    return result;
+}
+
+
+void ui3VisibleObject::SetVTKMatrix(vtkMatrix4x4* matrix)
+{
+    this->Matrix->DeepCopy(matrix);
 }
 
 
@@ -112,3 +129,5 @@ void ui3VisibleObject::Unlock(void)
         CMN_LOG_CLASS_RUN_DEBUG << "Unlock: attempt to unlock with an object not yet added to the scene" << std::endl;
     }
 }
+
+

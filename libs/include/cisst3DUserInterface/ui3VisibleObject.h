@@ -70,6 +70,10 @@ public:
         this->SetOrientation(frame.Rotation());
     }
 
+    vctDoubleFrm3 GetTransformation(void) const;
+
+    void SetVTKMatrix(vtkMatrix4x4 * matrix);
+
     void Lock(void);
 
     void Unlock(void);
