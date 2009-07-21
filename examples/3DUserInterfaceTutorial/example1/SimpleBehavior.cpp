@@ -136,13 +136,22 @@ SimpleBehavior::~SimpleBehavior()
     }
 }
 
+
+void SimpleBehavior::ToggleColor()
+{
+    if (this->VisibleObject1) {
+        this->VisibleObject1->ToggleColor();
+    }
+}
+
+
 void SimpleBehavior::ConfigureMenuBar()
 {
     this->MenuBar->AddClickButton("ToggleColor",
                                   1,
                                   "redo.png",
-                                  &SimpleBehaviorVisibleObject::ToggleColor,
-                                  dynamic_cast<SimpleBehaviorVisibleObject *>(this->VisibleList));
+                                  &SimpleBehavior::ToggleColor,
+                                  this);
 }
 
 

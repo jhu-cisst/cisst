@@ -22,6 +22,9 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisst3DUserInterface.h>
 
+// forward declaration for our visible objects
+class SimpleBehaviorVisibleObject;
+
 class SimpleBehavior: public ui3BehaviorBase
 {
 public:
@@ -44,14 +47,15 @@ public:
 
 protected:
     void PrimaryMasterButtonCallback(const prmEventButton & event);
+    void ToggleColor(void);
     StateType PreviousState;
     bool PreviousMaM;
     vctDouble3 Position, PreviousCursorPosition;
     bool Following;
 
 private:
-    ui3VisibleObject * VisibleObject1;
-    ui3VisibleObject * VisibleObject2;
     ui3VisibleList * VisibleList;
+    SimpleBehaviorVisibleObject * VisibleObject1;
+    ui3VisibleAxes * VisibleObject2;
     double Counter;
 };
