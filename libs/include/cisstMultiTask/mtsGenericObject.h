@@ -31,6 +31,8 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnGenericObject.h>
 #include <cisstCommon/cmnClassServices.h>
+#include <cisstCommon/cmnSerializer.h>
+#include <cisstCommon/cmnDeSerializer.h>
 
 #include <cisstMultiTask/mtsMacros.h>
 
@@ -118,6 +120,15 @@ public:
         } 
     }
 
+    virtual void SerializeRaw(std::ostream & outputStream) const {
+        cmnSerializeRaw(outputStream, this->Timestamp());
+        cmnSerializeRaw(outputStream, this->Valid());
+    }
+
+    virtual void DeSerializeRaw(std::istream & inputStream) {
+        cmnDeSerializeRaw(inputStream, this->Timestamp());
+        cmnDeSerializeRaw(inputStream, this->Valid());
+    }
 };
 
 

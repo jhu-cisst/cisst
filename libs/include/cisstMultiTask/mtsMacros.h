@@ -24,16 +24,20 @@
 // the following macro is now part of cisstCommon, cmnAccessorMacros.h
 #define MTS_DECLARE_MEMBER_AND_ACCESSORS CMN_DECLARE_MEMBER_AND_ACCESSORS
 
-#define MTS_PROXY_CLASS_DECLARATION_FROM(className, newName)          \
-class newName: public mtsGenericObject, public className              \
-{                                                                     \
-    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_DEFAULT_LOD);  \
-public:                                                               \
-    newName(void): mtsGenericObject(), className() {}                 \
-    newName(const className & other):                                 \
-        mtsGenericObject(),                                           \
-        className(other) {}                                           \
-};                                                                    \
+// macro to create simple multiple inheritance with mtsGenericObject
+#define MTS_PROXY_CLASS_DECLARATION_FROM(className, newName)                 \
+class newName: public mtsGenericObject, public className                     \
+{                                                                            \
+    CMN_DECLARE_SERVICES_EXPORT(CMN_DYNAMIC_CREATION, CMN_LOG_DEFAULT_LOD);  \
+public:                                                                      \
+    newName(void): mtsGenericObject(), className() {}                        \
+    newName(const className & other):                                        \
+        mtsGenericObject(),                                                  \
+        className(other) {}                                                  \
+    void SerializeRaw(std::ostream & outputStream) const {                   \
+        mtsGenericObject::SerializeRaw(outputStream);                        \
+    }                                                                        \
+};                                                                           \
 CMN_DECLARE_SERVICES_INSTANTIATION(newName)
 
 

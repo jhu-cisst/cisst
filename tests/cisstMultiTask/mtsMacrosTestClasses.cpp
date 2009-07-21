@@ -22,6 +22,5 @@ http://www.cisst.org/cisst/license.txt.
 #include "mtsMacrosTestClasses.h"
 
 CMN_IMPLEMENT_SERVICES(mtsMacrosTestClassA);
-
 CMN_IMPLEMENT_SERVICES(mtsMacrosTestClassBProxy);
 

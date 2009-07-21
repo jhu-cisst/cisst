@@ -24,7 +24,13 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsGenericObject.h>
 
-class mtsMacrosTestClassA: public mtsGenericObject
+// check if this module is build as a DLL
+#ifdef cisstMultiTasksTestsLib_EXPORTS
+#define CISST_THIS_LIBRARY_AS_DLL
+#endif
+#include <cisstCommon/cmnExportMacros.h>
+
+class CISST_EXPORT mtsMacrosTestClassA: public mtsGenericObject
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, 5);
     MTS_DECLARE_MEMBER_AND_ACCESSORS(double, Value);

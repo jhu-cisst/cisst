@@ -17,7 +17,7 @@
 # test library
 add_library(cisstMultiTasksTestsLib
             mtsMacrosTestClasses.h
-	    mtsMacrosTestClasses.cpp)
+            mtsMacrosTestClasses.cpp)
 
 CISST_REQUIRES(cisstMultiTasksTestsLib "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask")
 
@@ -30,6 +30,7 @@ SET(SOURCE_FILES
     mtsVectorTest.cpp
     mtsMacrosTest.cpp
     mtsMatrixTest.cpp
+    mtsTransformationTypesTest.cpp
     )
 
 # all header files
@@ -41,6 +42,7 @@ SET(HEADER_FILES
     mtsVectorTest.h
     mtsMacrosTest.h
     mtsMatrixTest.h
+    mtsTransformationTypesTest.h
     )
 
 # Add executable for C++ tests
