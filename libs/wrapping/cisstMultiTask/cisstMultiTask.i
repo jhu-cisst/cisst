@@ -38,6 +38,9 @@ http://www.cisst.org/cisst/license.txt.
 %import "cisstCommon/cisstCommon.i"
 %import "cisstVector/cisstVector.i"
 
+// use class type to create the correct Python type
+%apply cmnGenericObject * {mtsGenericObject *};
+
 // It is useful to wrap osaTimeServer. This can be removed
 // if cisstOSAbstraction is wrapped.
 %include "cisstOSAbstraction/osaTimeServer.h"
