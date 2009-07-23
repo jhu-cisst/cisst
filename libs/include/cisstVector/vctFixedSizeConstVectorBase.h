@@ -612,7 +612,7 @@ class vctFixedSizeConstVectorBase
     /*! Test if the method FastCopyOf can be used instead of Assign.
       See FastCopyOf for more details. */
     template<unsigned int __size, int __stride, class __dataPtrType>
-    inline bool FastCopyCompatible(const vctFixedSizeConstVectorBase<__size, __stride, value_type, __dataPtrType> & source)
+    inline bool FastCopyCompatible(const vctFixedSizeConstVectorBase<__size, __stride, value_type, __dataPtrType> & source) const
     {
         return vctFastCopy::VectorCopyCompatible(*this, source);
     }
@@ -620,7 +620,7 @@ class vctFixedSizeConstVectorBase
     /*! Test if the method FastCopyOf can be used instead of Assign.
       See FastCopyOf for more details. */
     template<class __vectorOwnerType>
-    inline bool FastCopyCompatible(const vctDynamicConstVectorBase<__vectorOwnerType, value_type> & source)
+    inline bool FastCopyCompatible(const vctDynamicConstVectorBase<__vectorOwnerType, value_type> & source) const
     {
         return vctFastCopy::VectorCopyCompatible(*this, source);
     }

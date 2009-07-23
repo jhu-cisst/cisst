@@ -715,7 +715,7 @@ public:
     /*! Test if the method FastCopyOf can be used instead of Assign.
       See FastCopyOf for more details. */
     template<class __nArrayOwnerType>
-    inline bool FastCopyCompatible(const vctDynamicConstNArrayBase<__nArrayOwnerType, value_type, DIMENSION> & source)
+    inline bool FastCopyCompatible(const vctDynamicConstNArrayBase<__nArrayOwnerType, value_type, DIMENSION> & source) const
     {
         return vctFastCopy::NArrayCopyCompatible(*this, source);
     }

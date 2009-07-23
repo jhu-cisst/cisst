@@ -647,13 +647,13 @@ public:
       See FastCopyOf for more details. */
     //@{
     template<class __matrixOwnerType>
-    inline bool FastCopyCompatible(const vctDynamicConstMatrixBase<__matrixOwnerType, value_type> & source)
+    inline bool FastCopyCompatible(const vctDynamicConstMatrixBase<__matrixOwnerType, value_type> & source) const
     {
         return vctFastCopy::MatrixCopyCompatible(*this, source);
     }
     
     template<unsigned int __rows, unsigned int __cols, int __rowStride, int __colStride, class __dataPtrType>
-    inline bool FastCopyCompatible(const vctFixedSizeConstMatrixBase<__rows, __cols, __rowStride, __colStride, value_type, __dataPtrType> & source)
+    inline bool FastCopyCompatible(const vctFixedSizeConstMatrixBase<__rows, __cols, __rowStride, __colStride, value_type, __dataPtrType> & source) const
     {
         return vctFastCopy::MatrixCopyCompatible(*this, source);
     }
