@@ -28,7 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _vctFixedSizeVectorBase_h
 #define _vctFixedSizeVectorBase_h
 
-
+#include <cisstCommon/cmnDeSerializer.h>
 #include <cisstVector/vctFixedSizeConstVectorBase.h>
 
 #include <cstdarg>

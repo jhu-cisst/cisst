@@ -1264,6 +1264,20 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
         typedef vctFixedSizeMatrixRef<value_type, _subRows, _subCols, ROWSTRIDE, COLSTRIDE>
             Type;
     };
+
+    /*! Binary deserialization */
+    void DeSerializeRaw(std::istream & inputStream) 
+    {
+        const size_type myRows = this->rows();
+        const size_type myCols = this->cols();
+        size_type indexRow, indexCol;
+        
+        for (indexRow = 0; indexRow < myRows; ++indexRow) {
+            for (indexCol = 0; indexCol < myCols; ++indexCol) {
+                cmnDeSerializeRaw(inputStream, this->Element(indexRow, indexCol));
+            }
+        }
+    }
         
 };
 

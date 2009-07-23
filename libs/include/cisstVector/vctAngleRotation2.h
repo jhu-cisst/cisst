@@ -31,6 +31,7 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include <cisstCommon/cmnConstants.h>
+#include <cisstCommon/cmnSerializer.h>
 
 #include <cisstVector/vctFixedSizeVector.h>
 #include <cisstVector/vctExport.h>
@@ -345,10 +346,23 @@ protected:
         return outputStream.str();
     }
     
+    /*!  Print the matrix in a human readable format */
     inline void ToStream(std::ostream & outputStream) const {
         outputStream << "Angle: "
                      << std::endl
                      << this->Angle();
+    }
+
+    /*! Binary serialization */
+    void SerializeRaw(std::ostream & outputStream) const 
+    {
+        cmnSerializeRaw(outputStream, this->Angle());
+    }
+
+    /*! Binary deserialization */
+    void DeSerializeRaw(std::istream & inputStream)
+    {
+        cmnDeSerializeRaw(inputStream, this->Angle());
     }
 };
 

@@ -150,14 +150,14 @@ typedef vctFrameBase<vctFloatRot3 > vctFloatFrm3;
 /*! Define a transformation in dimension 3 using a 4 by 4 matrix of
   doubles. */
 //@{
-typedef vctFrame4x4<double, VCT_ROW_MAJOR> vctFrmDouble4x4;
+typedef vctFrame4x4<double, VCT_ROW_MAJOR> vctDoubleFrm4x4;
 typedef vctFrame4x4<double, VCT_ROW_MAJOR> vctFrm4x4;
 //@}
 
 /*! Define a transformation in dimension 3 using a 4 by 4 matrix of
   floats. */
 //@{
-typedef vctFrame4x4<float, VCT_ROW_MAJOR> vctFrmFloat4x4;
+typedef vctFrame4x4<float, VCT_ROW_MAJOR> vctFloatFrm4x4;
 //@}
 
 
@@ -171,7 +171,7 @@ typedef vctAngleRotation2 vctAnRot2;
 /*! Define a rotation in dimension 2 using an
   angle (of type AngleType). */ 
 //@{
-typedef vctAngleRotation2 vctFloatAnRot3;
+typedef vctAngleRotation2 vctFloatAnRot2;
 //@}
 
 

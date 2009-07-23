@@ -265,6 +265,16 @@ class vctFixedSizeVector : public vctFixedSizeVectorBase<
         return *this;
     }
 
+    /*! Binary deserialization */
+    void DeSerializeRaw(std::istream & inputStream)
+    {
+        size_type index;
+        const size_type mySize = this->size();
+        for (index = 0; index < mySize; ++index) {
+            cmnDeSerializeRaw(inputStream, this->Element(index));
+        }
+    }
+
 };
 
 

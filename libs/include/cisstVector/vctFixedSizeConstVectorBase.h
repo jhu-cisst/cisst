@@ -1067,7 +1067,8 @@ class vctFixedSizeConstVectorBase
         ToStream(outputStream);
         return outputStream.str();
     }
-    
+
+    /*!  Print the matrix in a human readable format */    
     void ToStream(std::ostream & outputStream) const {
         size_type index;
         const size_type mySize = size();
@@ -1089,7 +1090,7 @@ class vctFixedSizeConstVectorBase
         }
     }
   
-
+    /*! Print data only with optional separator */
     void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
                      bool headerOnly = false, const std::string & headerPrefix = "") const
     {
@@ -1112,6 +1113,16 @@ class vctFixedSizeConstVectorBase
         }
     }
   
+    /*! Binary serialization */
+    void SerializeRaw(std::ostream & outputStream) const 
+    {
+        size_type index;
+        const size_type mySize = this->size();
+        for (index = 0; index < mySize; ++index) {
+            cmnSerializeRaw(outputStream, this->Element(index));
+        }
+    }
+
 };
 
 

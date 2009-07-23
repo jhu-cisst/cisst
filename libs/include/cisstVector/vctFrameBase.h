@@ -543,6 +543,7 @@ public:
         return outputStream.str();
     }
     
+    /*!  Print the matrix in a human readable format */    
     void ToStream(std::ostream & outputStream) const {
         outputStream << "translation: "
                      << std::endl
@@ -558,6 +559,20 @@ public:
         this->Translation().ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix);
         outputStream << delimiter;
         this->Rotation().ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix);
+    }
+
+    /*! Binary serialization */
+    void SerializeRaw(std::ostream & outputStream) const 
+    {
+        this->Translation().SerializeRaw(outputStream);
+        this->Rotation().SerializeRaw(outputStream);
+    }
+
+    /*! Binary deserialization */
+    void DeSerializeRaw(std::istream & inputStream)
+    {
+        this->Translation().DeSerializeRaw(inputStream);
+        this->Rotation().DeSerializeRaw(inputStream);
     }
 
 };
