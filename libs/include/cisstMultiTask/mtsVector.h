@@ -106,6 +106,20 @@ public:
         VectorType::ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix);
     }
 
+    /*! Binary serialization */
+    void SerializeRaw(std::ostream & outputStream) const 
+    {
+        mtsGenericObject::SerializeRaw(outputStream);
+        VectorType::SerializeRaw(outputStream);
+    }
+
+    /*! Binary deserialization */
+    void DeSerializeRaw(std::istream & inputStream) 
+    {
+        mtsGenericObject::DeSerializeRaw(inputStream);
+        VectorType::DeSerializeRaw(inputStream);
+    }
+
 };
 
 

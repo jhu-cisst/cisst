@@ -96,6 +96,13 @@ void mtsTransformationTypesTest::TestSerializeRawDoubleMatFrm3(void)
     TestSerializeRaw(initial);
 }
 
+void mtsTransformationTypesTest::TestSerializeRawDoubleVec(void)
+{
+    mtsDoubleVec initial(8);
+    vctRandom(initial, -10.0, 10.0);
+    TestSerializeRaw(initial);
+}
+
 void mtsTransformationTypesTest::TestSerializeRawDoubleMat(void)
 {
     mtsDoubleMat initial(6, 8);
