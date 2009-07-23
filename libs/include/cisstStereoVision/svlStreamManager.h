@@ -53,7 +53,8 @@ http://www.cisst.org/cisst/license.txt.
 #define _OnSingleThread(_info) \
             if((_info)->id==0)
 #define _ParallelLoop(_info, _idx, _count) \
-            _idx=(_info)->id*((_count)/(_info)->count+1);for(const unsigned int _end=std::min((_count),_idx+(_count)/(_info)->count+1);_idx<_end;_idx++)
+            _idx=(_info)->id*std::max(1001*(_count)/(_info)->count,1000u)/1000; \
+            for(const unsigned int _end=std::min((_count),((_info)->id+1)*std::max(1001*(_count)/(_info)->count,1000u)/1000);_idx<_end;_idx++)
 #define _ParallelInterleavedLoop(_info, _idx, _count) \
             _idx=(_info)->id;for(const unsigned int _step=(_info)->count,_end=(_count);_idx<_end;_idx+=_step)
 #define _GetParallelSubRange(_info, _count, _from, _to) \

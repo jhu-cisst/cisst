@@ -42,7 +42,7 @@ using namespace std;
 int VideoPlayer(const std::string pathname)
 {
     // instantiating SVL stream and filters
-    svlStreamManager viewer_stream(1);
+    svlStreamManager viewer_stream(4);
     svlVideoFileSource viewer_source(false);
     svlImageWindow viewer_window;
 

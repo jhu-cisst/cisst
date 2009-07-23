@@ -49,7 +49,7 @@ int main()
     resizer.EnableInterpolation();
 
     // Setup window
-    window.SetTitleText("Uniform noise");
+    window.SetTitleText("Resizing");
 
     // Setup unsharp masking
     // (Tip: enable OpenCV in CMake for higher performance)
