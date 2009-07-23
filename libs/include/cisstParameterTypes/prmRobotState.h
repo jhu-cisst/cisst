@@ -158,7 +158,7 @@ public:
     /*! Set and Get methods for EndEffector Frame wrt base robot frame. 
         Slightly redundant. */
     //@{
-    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctFrmDouble4x4, EndEffectorFrame);
+    MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleFrm4x4, EndEffectorFrame);
     //@}
 
    
