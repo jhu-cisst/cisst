@@ -22,13 +22,22 @@ http://www.cisst.org/cisst/license.txt.
 #include <cppunit/TestCase.h>
 #include <cppunit/extensions/HelperMacros.h>
 
+#include <cisstMultiTask/mtsMatrix.h>
 #include <cisstMultiTask/mtsTransformationTypes.h>
 
 class mtsTransformationTypesTest: public CppUnit::TestFixture
 {
     CPPUNIT_TEST_SUITE(mtsTransformationTypesTest);
 
+    CPPUNIT_TEST(TestSerializeRawDoubleQuat);
+    CPPUNIT_TEST(TestSerializeRawDoubleQuatRot3);
+    CPPUNIT_TEST(TestSerializeRawDoubleAxAnRot3);
+    CPPUNIT_TEST(TestSerializeRawDoubleRodRot3);
     CPPUNIT_TEST(TestSerializeRawDoubleMatRot3);
+    CPPUNIT_TEST(TestSerializeRawDoubleQuatFrm3);
+    CPPUNIT_TEST(TestSerializeRawDoubleMatFrm3);
+
+    CPPUNIT_TEST(TestSerializeRawDoubleMat);
 
     CPPUNIT_TEST_SUITE_END();
     
@@ -38,8 +47,16 @@ public:
     void tearDown(void) {}
     
     /*! Test the SerializeRaw method */
-    template <class _elementType> void TestSerializeRaw(void);
+    template <class _elementType> void TestSerializeRaw(_elementType & initial);
+    void TestSerializeRawDoubleQuat(void);
+    void TestSerializeRawDoubleQuatRot3(void);
+    void TestSerializeRawDoubleAxAnRot3(void);
+    void TestSerializeRawDoubleRodRot3(void);
     void TestSerializeRawDoubleMatRot3(void);
+    void TestSerializeRawDoubleQuatFrm3(void);
+    void TestSerializeRawDoubleMatFrm3(void);
+
+    void TestSerializeRawDoubleMat(void);
 };
 
 

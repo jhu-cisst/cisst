@@ -20,32 +20,85 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include "mtsTransformationTypesTest.h"
-#include <cisstVector/vctRandomTransformations.h>
+#include <cisstVector/vctRandom.h>
 
-#include <strstream>
+#include <sstream>
 
 template <class _elementType>
-void mtsTransformationTypesTest::TestSerializeRaw(void)
+void mtsTransformationTypesTest::TestSerializeRaw(_elementType & initial)
 {
-    _elementType initial;
     initial.Timestamp() = 3.1435;
     initial.AutomaticTimestamp() = !initial.AutomaticTimestamp(); // do not use default value
     initial.Valid() = !initial.Valid();  // do not use default value
-    vctRandom(initial);
 
-    std::strstream serializationStream;
+    std::stringstream serializationStream;
     initial.SerializeRaw(serializationStream);
 
     _elementType final;
     final.DeSerializeRaw(serializationStream);
 
+    // check data inherited from mtsGenericObject
     CPPUNIT_ASSERT(initial.Timestamp() == initial.Timestamp());
     CPPUNIT_ASSERT(initial.AutomaticTimestamp() == initial.AutomaticTimestamp());
     CPPUNIT_ASSERT(initial.Valid() == initial.Valid());
-    // CPPUNIT_ASSERT(final.Equal(initial));
+    // check data from the transformation using the Equal method
+    CPPUNIT_ASSERT(final.Equal(initial));
+}
+
+void mtsTransformationTypesTest::TestSerializeRawDoubleQuat(void)
+{
+    mtsDoubleQuat initial;
+    vctRandom(initial, -10.0, 10.0);
+    TestSerializeRaw(initial);
+}
+
+void mtsTransformationTypesTest::TestSerializeRawDoubleQuatRot3(void)
+{
+    mtsDoubleQuatRot3 initial;
+    vctRandom(initial);
+    TestSerializeRaw(initial);
+}
+
+void mtsTransformationTypesTest::TestSerializeRawDoubleAxAnRot3(void)
+{
+    mtsDoubleAxAnRot3 initial;
+    vctRandom(initial);
+    TestSerializeRaw(initial);
+}
+
+void mtsTransformationTypesTest::TestSerializeRawDoubleRodRot3(void)
+{
+    mtsDoubleRodRot3 initial;
+    vctRandom(initial);
+    TestSerializeRaw(initial);
 }
 
 void mtsTransformationTypesTest::TestSerializeRawDoubleMatRot3(void)
 {
-    TestSerializeRaw<mtsDoubleMatRot3>();
+    mtsDoubleMatRot3 initial;
+    vctRandom(initial);
+    TestSerializeRaw(initial);
+}
+
+void mtsTransformationTypesTest::TestSerializeRawDoubleQuatFrm3(void)
+{
+    mtsDoubleQuatFrm3 initial;
+    vctRandom(initial.Translation(), -10.0, 10.0);
+    vctRandom(initial.Rotation());
+    TestSerializeRaw(initial);
+}
+
+void mtsTransformationTypesTest::TestSerializeRawDoubleMatFrm3(void)
+{
+    mtsDoubleMatFrm3 initial;
+    vctRandom(initial.Translation(), -10.0, 10.0);
+    vctRandom(initial.Rotation());
+    TestSerializeRaw(initial);
+}
+
+void mtsTransformationTypesTest::TestSerializeRawDoubleMat(void)
+{
+    mtsDoubleMat initial(6, 8);
+    vctRandom(initial, -10.0, 10.0);
+    TestSerializeRaw(initial);
 }

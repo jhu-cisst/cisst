@@ -43,6 +43,17 @@ class mtsMacrosTestClassB
 {
 public:
     double Value;
+
+    void SerializeRaw(std::ostream & outputStream) const 
+    {
+        cmnSerializeRaw(outputStream, this->Value);
+    }
+
+    void DeSerializeRaw(std::istream & inputStream)
+    {
+        cmnDeSerializeRaw(inputStream, this->Value);
+    }
+
 };
 
 MTS_PROXY_CLASS_DECLARATION_FROM(mtsMacrosTestClassB, mtsMacrosTestClassBProxy);
