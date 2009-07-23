@@ -58,7 +58,7 @@ public:
       #CMN_DECLARE_SERVICES_INSTANTIATION and #CMN_IMPLEMENT_SERVICES.
       In NO WAY, a user should redefine/overload this method
       otherwise.
-      
+       
       \return A pointer on the class services.  This points to the
       unique instance of cmnClassServiceBase for a given class.
 
@@ -74,9 +74,13 @@ public:
       This method must be overloaded to provide a useful message. */
     virtual void ToStream(std::ostream & outputStream) const;
 
+    /*! Non formated text output.  Delimiter can be used to create CSV
+      data files if the object requires multiple values (e.g. vector,
+      matrix, ).  When headerOnly is set to true, the method should
+      create a label for each value (e.g. v1, v2, v3).  The prefix can
+      be used to generated a more useful label (e.g. position-v1) */
     virtual void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
                              bool headerOnly = false, const std::string & headerPrefix = "") const;
-
 
     /*! Serialize the content of the object without any extra
         information, i.e. no class type nor format version.  The

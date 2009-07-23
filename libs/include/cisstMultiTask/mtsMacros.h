@@ -36,6 +36,11 @@ public:                                                                      \
         className(other) {}                                                  \
     void SerializeRaw(std::ostream & outputStream) const {                   \
         mtsGenericObject::SerializeRaw(outputStream);                        \
+        className::SerializeRaw(outputStream);                               \
+    }                                                                        \
+    void DeSerializeRaw(std::istream & inputStream) {                        \
+        mtsGenericObject::DeSerializeRaw(inputStream);                       \
+        className::DeSerializeRaw(inputStream);                              \
     }                                                                        \
 };                                                                           \
 CMN_DECLARE_SERVICES_INSTANTIATION(newName)
