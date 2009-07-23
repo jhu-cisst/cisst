@@ -336,6 +336,26 @@ public:
         this->Matrix.SetSize(matrixSize, this->StorageOrder());
     }
     //@}
+
+    /*! Binary deserialization */
+    void DeSerializeRaw(std::istream & inputStream) 
+    {
+        // get and set size
+        size_type myRows;
+        size_type myCols;
+        cmnDeSerializeRaw(inputStream, myRows);
+        cmnDeSerializeRaw(inputStream, myCols);
+        this->SetSize(myRows, myCols);
+        
+        // get data
+        size_type indexRow, indexCol;
+        for (indexRow = 0; indexRow < myRows; ++indexRow) {
+            for (indexCol = 0; indexCol < myCols; ++indexCol) {
+                cmnDeSerializeRaw(inputStream, this->Element(indexRow, indexCol));
+            }
+        }
+    }
+
 };
 
 

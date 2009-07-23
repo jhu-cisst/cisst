@@ -358,6 +358,30 @@ public:
         return *this;
     }
 
+    /*! Binary deserialization.  This method can not resize the
+      existing block of memory and will throw an exception is the
+      sizes don't match. */
+    void DeSerializeRaw(std::istream & inputStream) throw(std::runtime_error)
+    {
+        // get and set size
+        size_type myRows;
+        size_type myCols;
+        cmnDeSerializeRaw(inputStream, myRows);
+        cmnDeSerializeRaw(inputStream, myCols);
+
+        if ((myRows != this->rows()) || (myCols != this->cols())) {
+            cmnThrow(std::runtime_error("vctDynamicMatrixRef::DeSerializeRaw: Sizes of matrices don't match"));
+        }
+        
+        // get data
+        size_type indexRow, indexCol;
+        for (indexRow = 0; indexRow < myRows; ++indexRow) {
+            for (indexCol = 0; indexCol < myCols; ++indexCol) {
+                cmnDeSerializeRaw(inputStream, this->Element(indexRow, indexCol));
+            }
+        }
+    }
+
 };
 
 

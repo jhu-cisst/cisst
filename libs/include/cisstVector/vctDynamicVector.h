@@ -29,6 +29,7 @@ http://www.cisst.org/cisst/license.txt.
   \brief Declaration of vctDynamicVector
 */
 
+#include <cisstCommon/cmnDeSerializer.h>
 
 #include <cisstVector/vctDynamicVectorBase.h>
 #include <cisstVector/vctDynamicVectorOwner.h>
@@ -299,6 +300,22 @@ public:
     void SetSize(size_type size) {
         this->Vector.SetSize(size);
     }
+
+    /*! Binary deserialization */
+    void DeSerializeRaw(std::istream & inputStream) 
+    {
+        // get and set size
+        size_type mySize;
+        cmnDeSerializeRaw(inputStream, mySize);
+        this->SetSize(mySize);
+        
+        // get data
+        size_type index;
+        for (index = 0; index < mySize; ++index) {
+            cmnDeSerializeRaw(inputStream, this->Element(index));
+        }
+    }
+
 };
 
 
