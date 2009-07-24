@@ -20,10 +20,25 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include "prmEventButtonTest.h"
+#include "prmTestGenericObjectConstructor.h"
 #include "prmSetAndTestGenericObjectSerialization.h"
 
 #include <cisstVector/vctRandom.h>
 #include <cisstParameterTypes/prmEventButton.h>
+
+
+void prmEventButtonTest::TestConstructors(void)
+{
+    // make sure the constructors call the mtsGenericObject constructor
+    prmEventButton eventButton(prmEventButton::PRESSED);
+    prmTestGenericObjectConstructor(eventButton);
+
+    // modify some values and then use copy constructor
+    prmTestGenericObjectConstructorSwapValues(eventButton);
+    prmEventButton eventButtonCopy(eventButton);
+    prmTestGenericObjectCopyConstructor(eventButton, eventButtonCopy);
+    CPPUNIT_ASSERT(eventButton.Type() == eventButtonCopy.Type());
+}
 
 
 void prmEventButtonTest::TestSerialize(void)

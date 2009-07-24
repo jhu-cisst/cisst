@@ -80,6 +80,14 @@ public:
         ValidMember(false)
     {}
 
+    /*! Copy constructor */
+    inline mtsGenericObject(const mtsGenericObject & other):
+        cmnGenericObject(),
+        TimestampMember(other.TimestampMember),
+        AutomaticTimestampMember(other.AutomaticTimestampMember),
+        ValidMember(other.ValidMember)
+    {}
+
     /*! Destructor.  Does nothing specific. */
     inline virtual ~mtsGenericObject(void)
     {}
@@ -97,11 +105,18 @@ public:
         return false;
     }
 
-    /*! ToStream method.  This method only streams the data members of
-      mtsGenericObject, i.e. the Timestamp and Valid flag.  It should
-      be called by any derived class re-implementing ToStream. */
+    /*! Human readable text output.  This method only streams the data
+      members of mtsGenericObject, i.e. the Timestamp and Valid flag.
+      It should be called by any derived class re-implementing
+      ToStream. */
     virtual void ToStream(std::ostream & outputStream) const {
-        outputStream << "Timestamp (s): " << this->Timestamp();
+        outputStream << "Timestamp (";
+        if (this->AutomaticTimestamp()) {
+            outputStream << "automatic";
+        } else {
+            outputStream << "manual";
+        }
+        outputStream << "): " << this->Timestamp();
         if (this->Valid()) {
             outputStream << " (valid)";
         } else {
@@ -109,24 +124,31 @@ public:
         }
     }
 
+    /*! Raw text output to stream */
     virtual void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
                              bool headerOnly = false, const std::string & headerPrefix = "") const {
         if (headerOnly) {
             outputStream << headerPrefix << "-timestamp" << delimiter
+                         << headerPrefix << "-automatic-timestamp" << delimiter
                          << headerPrefix << "-valid";
         } else {
             outputStream << this->Timestamp() << delimiter
+                         << this->AutomaticTimestamp() << delimiter
                          << this->Valid();
         } 
     }
 
+    /*! Binary serialization */
     virtual void SerializeRaw(std::ostream & outputStream) const {
         cmnSerializeRaw(outputStream, this->Timestamp());
+        cmnSerializeRaw(outputStream, this->AutomaticTimestamp());
         cmnSerializeRaw(outputStream, this->Valid());
     }
 
+    /*! Binary deserialization */
     virtual void DeSerializeRaw(std::istream & inputStream) {
         cmnDeSerializeRaw(inputStream, this->Timestamp());
+        cmnDeSerializeRaw(inputStream, this->AutomaticTimestamp());
         cmnDeSerializeRaw(inputStream, this->Valid());
     }
 };

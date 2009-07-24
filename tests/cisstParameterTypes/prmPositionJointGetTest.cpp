@@ -20,10 +20,25 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include "prmPositionJointGetTest.h"
+#include "prmTestGenericObjectConstructor.h"
 #include "prmSetAndTestGenericObjectSerialization.h"
 
 #include <cisstVector/vctRandom.h>
 #include <cisstParameterTypes/prmPositionJointGet.h>
+
+
+void prmPositionJointGetTest::TestConstructors(void)
+{
+    // make sure the constructors call the mtsGenericObject constructor
+    prmPositionJointGet position;
+    prmTestGenericObjectConstructor(position);
+
+    // modify some values and then use copy constructor
+    prmTestGenericObjectConstructorSwapValues(position);
+    prmPositionJointGet positionCopy(position);
+    prmTestGenericObjectCopyConstructor(position, positionCopy);
+    CPPUNIT_ASSERT(position.Position().Equal(positionCopy.Position()));
+}
 
 
 void prmPositionJointGetTest::TestSerialize(void)

@@ -20,10 +20,25 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include "prmPositionCartesianGetTest.h"
+#include "prmTestGenericObjectConstructor.h"
 #include "prmSetAndTestGenericObjectSerialization.h"
 
 #include <cisstVector/vctRandom.h>
 #include <cisstParameterTypes/prmPositionCartesianGet.h>
+
+
+void prmPositionCartesianGetTest::TestConstructors(void)
+{
+    // make sure the constructors call the mtsGenericObject constructor
+    prmPositionCartesianGet position;
+    prmTestGenericObjectConstructor(position);
+
+    // modify some values and then use copy constructor
+    prmTestGenericObjectConstructorSwapValues(position);
+    prmPositionCartesianGet positionCopy(position);
+    prmTestGenericObjectCopyConstructor(position, positionCopy);
+    CPPUNIT_ASSERT(position.Position().Equal(positionCopy.Position()));
+}
 
 
 void prmPositionCartesianGetTest::TestSerialize(void)

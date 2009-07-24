@@ -25,6 +25,7 @@ SET(SOURCE_FILES
 # all header files
 SET(HEADER_FILES
     prmSetAndTestGenericObjectSerialization.h
+    prmTestGenericObjectConstructor.h
     prmEventButtonTest.h
     prmPositionCartesianGetTest.h
     prmPositionJointGetTest.h

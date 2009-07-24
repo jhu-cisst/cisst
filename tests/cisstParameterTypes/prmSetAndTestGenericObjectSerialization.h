@@ -39,9 +39,9 @@ void prmSetAndTestGenericObjectSerialization(_elementType & initial)
     final.DeSerializeRaw(serializationStream);
     
     // check data inherited from mtsGenericObject
-    CPPUNIT_ASSERT(initial.Timestamp() == initial.Timestamp());
-    CPPUNIT_ASSERT(initial.AutomaticTimestamp() == initial.AutomaticTimestamp());
-    CPPUNIT_ASSERT(initial.Valid() == initial.Valid());
+    CPPUNIT_ASSERT(initial.Timestamp() == final.Timestamp());
+    CPPUNIT_ASSERT(initial.AutomaticTimestamp() == final.AutomaticTimestamp());
+    CPPUNIT_ASSERT(initial.Valid() == final.Valid());
 }
 
 #endif // _prmSetAndTestGenericObjectSerialization_h

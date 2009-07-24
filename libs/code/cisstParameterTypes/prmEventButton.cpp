@@ -27,20 +27,21 @@ prmEventButton::~prmEventButton()
 
 void prmEventButton::ToStream(std::ostream & outputStream) const
 {
+    BaseType::ToStream(outputStream);
     switch (this->Type()) {
         case prmEventButton::PRESSED:
-            outputStream << "EventButton PRESSED";
+            outputStream << " EventButton PRESSED";
             break;
         case prmEventButton::RELEASED:
-            outputStream << "EventButton RELEASED";
+            outputStream << " EventButton RELEASED";
             break;
         case prmEventButton::CLICKED:
-            outputStream << "EventButton CLICKED";
+            outputStream << " EventButton CLICKED";
             break;
         case prmEventButton::DOUBLE_CLICKED:
-            outputStream << "EventButton DOUBLE_CLICKED";
+            outputStream << " EventButton DOUBLE_CLICKED";
             break;
         default:
-            outputStream << "EventButton of unknown type.  This should not happen." << std::endl;
+            outputStream << " EventButton of unknown type, probably not yet set." << std::endl;
     }
 }
