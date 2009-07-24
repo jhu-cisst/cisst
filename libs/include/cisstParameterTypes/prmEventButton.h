@@ -39,6 +39,7 @@ class CISST_EXPORT prmEventButton: public mtsGenericObject
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
  public:
+    typedef mtsGenericObject BaseType;
     typedef enum {PRESSED, RELEASED, CLICKED, DOUBLE_CLICKED} EventType;
     
  public:
@@ -64,6 +65,32 @@ public:
 
     /*! Overloaded ToStream */
     virtual void ToStream(std::ostream & outputStream) const;
+
+    /*! Binary serialization */
+    void SerializeRaw(std::ostream & outputStream) const 
+    {
+        BaseType::SerializeRaw(outputStream);
+        cmnSerializeRaw(outputStream, this->TypeMember);
+    }
+
+    /*! To stream raw data. */
+    inline virtual void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
+                                    bool headerOnly = false, const std::string & headerPrefix = "") const {
+        BaseType::ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix);
+        outputStream << delimiter;
+        if (headerOnly) {
+            outputStream << headerPrefix << "-type";
+        } else {
+            outputStream << this->Type();
+        }
+    }
+
+    /*! Binary deserialization */
+    void DeSerializeRaw(std::istream & inputStream) 
+    {
+        BaseType::DeSerializeRaw(inputStream);
+        cmnDeSerializeRaw(inputStream, this->TypeMember);
+    }
 };
 
 

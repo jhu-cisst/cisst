@@ -41,15 +41,20 @@ class CISST_EXPORT prmVelocityJointGet: public mtsGenericObject
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
 public:
+    typedef mtsGenericObject BaseType;
     typedef prmVelocityJointGet ThisType;
     typedef unsigned int size_type;
 
     /*! default constructor - does nothing for now */
-    inline prmVelocityJointGet(void) {}
+    inline prmVelocityJointGet(void):
+        BaseType()
+    {}
 
     /*! resizes the vector type members */
 
-    inline prmVelocityJointGet(size_type size) { 
+    inline prmVelocityJointGet(size_type size):
+        BaseType()
+    { 
         SetSize(size);
     }
 
@@ -57,7 +62,8 @@ public:
 
     /*! constructor with all possible parameters */
     inline prmVelocityJointGet(const vctDoubleVec & velocity):
-            VelocityMember(velocity)
+        BaseType(),
+        VelocityMember(velocity)
      {}
 
     /*! destructor */

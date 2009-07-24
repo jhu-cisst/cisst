@@ -49,7 +49,6 @@ public:
     inline prmPositionJointGet(void) {}
 
     /*! resizes the vector type members */
-
     inline prmPositionJointGet(size_type size) { 
         SetSize(size);
     }
@@ -95,6 +94,20 @@ public:
         BaseType::ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix);
         outputStream << delimiter;
         this->PositionMember.ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix);
+    }
+
+    /*! Binary serialization */
+    void SerializeRaw(std::ostream & outputStream) const 
+    {
+        BaseType::SerializeRaw(outputStream);
+        this->PositionMember.SerializeRaw(outputStream);
+    }
+
+    /*! Binary deserialization */
+    void DeSerializeRaw(std::istream & inputStream) 
+    {
+        BaseType::DeSerializeRaw(inputStream);
+        this->PositionMember.DeSerializeRaw(inputStream);
     }
 
 }; // _prmPositionJointGet_h

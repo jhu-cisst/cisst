@@ -16,11 +16,18 @@
 
 # all source files
 SET(SOURCE_FILES
+    prmEventButtonTest.cpp
+    prmPositionCartesianGetTest.cpp
+    prmPositionJointGetTest.cpp
     prmTransformationManagerTests.cpp
     )
 
 # all header files
 SET(HEADER_FILES
+    prmSetAndTestGenericObjectSerialization.h
+    prmEventButtonTest.h
+    prmPositionCartesianGetTest.h
+    prmPositionJointGetTest.h
     prmTransformationManagerTests.h
     )
 
