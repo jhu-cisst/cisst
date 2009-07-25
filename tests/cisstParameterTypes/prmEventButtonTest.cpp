@@ -35,6 +35,7 @@ void prmEventButtonTest::TestConstructors(void)
 
     // modify some values and then use copy constructor
     prmTestGenericObjectConstructorSwapValues(eventButton);
+    eventButton.Type() = prmEventButton::RELEASED;
     prmEventButton eventButtonCopy(eventButton);
     prmTestGenericObjectCopyConstructor(eventButton, eventButtonCopy);
     CPPUNIT_ASSERT(eventButton.Type() == eventButtonCopy.Type());

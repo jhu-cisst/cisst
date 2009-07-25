@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: prmPositionCartesianGetTest.cpp 456 2009-06-13 03:11:44Z adeguet1 $
+  $Id: prmVelocityJointGetTest.cpp 456 2009-06-13 03:11:44Z adeguet1 $
   
   Author(s):  Anton Deguet
   Created on: 2009-04-29
@@ -19,41 +19,40 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include "prmPositionCartesianGetTest.h"
+#include "prmVelocityJointGetTest.h"
 #include "prmTestGenericObjectConstructor.h"
 #include "prmSetAndTestGenericObjectSerialization.h"
 
 #include <cisstVector/vctRandom.h>
-#include <cisstParameterTypes/prmPositionCartesianGet.h>
+#include <cisstParameterTypes/prmVelocityJointGet.h>
 
 
-void prmPositionCartesianGetTest::TestConstructors(void)
+void prmVelocityJointGetTest::TestConstructors(void)
 {
     // make sure the constructors call the mtsGenericObject constructor
-    prmPositionCartesianGet position;
-    prmTestGenericObjectConstructor(position);
+    prmVelocityJointGet velocity(8);
+    prmTestGenericObjectConstructor(velocity);
 
     // modify some values and then use copy constructor
-    prmTestGenericObjectConstructorSwapValues(position);
-    vctRandom(position.Position().Translation(), -10.0, 10.0);
-    vctRandom(position.Position().Rotation());
-    prmPositionCartesianGet positionCopy(position);
-    prmTestGenericObjectCopyConstructor(position, positionCopy);
-    CPPUNIT_ASSERT(position.Position().Equal(positionCopy.Position()));
+    prmTestGenericObjectConstructorSwapValues(velocity);
+    vctRandom(velocity.Velocity(), -10.0, 10.0);
+    prmVelocityJointGet velocityCopy(velocity);
+    prmTestGenericObjectCopyConstructor(velocity, velocityCopy);
+    CPPUNIT_ASSERT(velocity.Velocity().Equal(velocityCopy.Velocity()));
 }
 
 
-void prmPositionCartesianGetTest::TestSerialize(void)
+void prmVelocityJointGetTest::TestSerialize(void)
 {
-    prmPositionCartesianGet initial, final;
+    prmVelocityJointGet initial, final;
+    initial.SetSize(8);
     // test part inherited from mtsGenericObject
     prmSetAndTestGenericObjectSerialization(initial);
 
-    vctRandom(initial.Position().Translation(), -10.0, 10.0);
-    vctRandom(initial.Position().Rotation());
+    vctRandom(initial.Velocity(), -10.0, 10.0);
     std::stringstream serializationStream;
     initial.SerializeRaw(serializationStream);
     final.DeSerializeRaw(serializationStream);
-
-    CPPUNIT_ASSERT(final.Position().Equal(initial.Position()));
+    
+    CPPUNIT_ASSERT(final.Velocity().Equal(initial.Velocity()));
 }

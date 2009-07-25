@@ -30,11 +30,12 @@ http://www.cisst.org/cisst/license.txt.
 void prmPositionJointGetTest::TestConstructors(void)
 {
     // make sure the constructors call the mtsGenericObject constructor
-    prmPositionJointGet position;
+    prmPositionJointGet position(8);
     prmTestGenericObjectConstructor(position);
 
     // modify some values and then use copy constructor
     prmTestGenericObjectConstructorSwapValues(position);
+    vctRandom(position.Position(), -10.0, 10.0);
     prmPositionJointGet positionCopy(position);
     prmTestGenericObjectCopyConstructor(position, positionCopy);
     CPPUNIT_ASSERT(position.Position().Equal(positionCopy.Position()));
@@ -44,6 +45,7 @@ void prmPositionJointGetTest::TestConstructors(void)
 void prmPositionJointGetTest::TestSerialize(void)
 {
     prmPositionJointGet initial, final;
+    initial.SetSize(8);
     // test part inherited from mtsGenericObject
     prmSetAndTestGenericObjectSerialization(initial);
 

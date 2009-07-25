@@ -19,6 +19,9 @@ SET(SOURCE_FILES
     prmEventButtonTest.cpp
     prmPositionCartesianGetTest.cpp
     prmPositionJointGetTest.cpp
+    prmVelocityCartesianGetTest.cpp
+    prmVelocityJointGetTest.cpp
+    prmForceCartesianGetTest.cpp
     prmTransformationManagerTests.cpp
     )
 
@@ -29,6 +32,9 @@ SET(HEADER_FILES
     prmEventButtonTest.h
     prmPositionCartesianGetTest.h
     prmPositionJointGetTest.h
+    prmVelocityCartesianGetTest.h
+    prmVelocityJointGetTest.h
+    prmForceCartesianGetTest.h
     prmTransformationManagerTests.h
     )
 
