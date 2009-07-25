@@ -100,29 +100,15 @@ public:
     /*! Human readable output to stream. */
     void ToStream(std::ostream & outputStream) const;
 
-
     /*! To stream raw data. */
-    inline virtual void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
-                                    bool headerOnly = false, const std::string & headerPrefix = "") const {
-        BaseType::ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix);
-        outputStream << delimiter;
-        this->ForceMember.ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix + "-angular");
-    }
-
+    void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
+                     bool headerOnly = false, const std::string & headerPrefix = "") const;
+    
     /*! Binary serialization */
-    void SerializeRaw(std::ostream & outputStream) const 
-    {
-        BaseType::SerializeRaw(outputStream);
-        this->ForceMember.SerializeRaw(outputStream);
-    }
+    void SerializeRaw(std::ostream & outputStream) const;
 
     /*! Binary deserialization */
-    void DeSerializeRaw(std::istream & inputStream) 
-    {
-        BaseType::DeSerializeRaw(inputStream);
-        this->ForceMember.DeSerializeRaw(inputStream);
-    }
-
+    void DeSerializeRaw(std::istream & inputStream);
 
 }; // _prmForceCartesianGet_h
 

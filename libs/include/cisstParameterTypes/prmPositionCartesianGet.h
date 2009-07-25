@@ -103,26 +103,14 @@ class CISST_EXPORT prmPositionCartesianGet: public mtsGenericObject
     void ToStream(std::ostream & outputStream) const;
 
     /*! To stream raw data. */
-    inline virtual void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
-                                    bool headerOnly = false, const std::string & headerPrefix = "") const {
-        BaseType::ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix);
-        outputStream << delimiter;
-        this->PositionMember.ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix);
-    }
+    void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
+                     bool headerOnly = false, const std::string & headerPrefix = "") const;
 
     /*! Binary serialization */
-    void SerializeRaw(std::ostream & outputStream) const 
-    {
-        BaseType::SerializeRaw(outputStream);
-        this->PositionMember.SerializeRaw(outputStream);
-    }
+    void SerializeRaw(std::ostream & outputStream) const;
 
     /*! Binary deserialization */
-    void DeSerializeRaw(std::istream & inputStream) 
-    {
-        BaseType::DeSerializeRaw(inputStream);
-        this->PositionMember.DeSerializeRaw(inputStream);
-    }
+    void DeSerializeRaw(std::istream & inputStream);
 
 }; // _prmPositionCartesianGet_h
 

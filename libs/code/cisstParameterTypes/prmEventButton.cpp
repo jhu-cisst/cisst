@@ -45,3 +45,26 @@ void prmEventButton::ToStream(std::ostream & outputStream) const
             outputStream << " EventButton of unknown type, probably not yet set." << std::endl;
     }
 }
+
+void prmEventButton::ToStreamRaw(std::ostream & outputStream, const char delimiter,
+                                 bool headerOnly, const std::string & headerPrefix) const {
+    BaseType::ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix);
+    outputStream << delimiter;
+    if (headerOnly) {
+        outputStream << headerPrefix << "-type";
+    } else {
+        outputStream << this->Type();
+    }
+}
+
+void prmEventButton::SerializeRaw(std::ostream & outputStream) const 
+{
+    BaseType::SerializeRaw(outputStream);
+    cmnSerializeRaw(outputStream, this->TypeMember);
+}
+
+void prmEventButton::DeSerializeRaw(std::istream & inputStream) 
+{
+    BaseType::DeSerializeRaw(inputStream);
+    cmnDeSerializeRaw(inputStream, this->TypeMember);
+}

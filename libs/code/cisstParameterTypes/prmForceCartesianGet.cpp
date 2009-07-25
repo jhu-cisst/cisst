@@ -34,3 +34,22 @@ void prmForceCartesianGet::ToStream(std::ostream & outputStream) const
                  << "\nMask: " << this->MaskMember;
 }
 
+void prmForceCartesianGet::ToStreamRaw(std::ostream & outputStream, const char delimiter,
+                                       bool headerOnly, const std::string & headerPrefix) const
+{
+    BaseType::ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix);
+    outputStream << delimiter;
+    this->ForceMember.ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix + "-angular");
+}
+
+void prmForceCartesianGet::SerializeRaw(std::ostream & outputStream) const 
+{
+    BaseType::SerializeRaw(outputStream);
+    this->ForceMember.SerializeRaw(outputStream);
+}
+
+void prmForceCartesianGet::DeSerializeRaw(std::istream & inputStream) 
+{
+    BaseType::DeSerializeRaw(inputStream);
+    this->ForceMember.DeSerializeRaw(inputStream);
+}

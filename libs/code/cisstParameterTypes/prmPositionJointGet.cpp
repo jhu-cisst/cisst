@@ -38,3 +38,21 @@ void prmPositionJointGet::ToStream(std::ostream & outputStream) const
     outputStream << "\nPosition: " << this->PositionMember;
 }
 
+void prmPositionJointGet::ToStreamRaw(std::ostream & outputStream, const char delimiter,
+                                      bool headerOnly, const std::string & headerPrefix) const {
+    BaseType::ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix);
+    outputStream << delimiter;
+    this->PositionMember.ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix);
+}
+
+void prmPositionJointGet::SerializeRaw(std::ostream & outputStream) const 
+{
+    BaseType::SerializeRaw(outputStream);
+    this->PositionMember.SerializeRaw(outputStream);
+}
+
+void prmPositionJointGet::DeSerializeRaw(std::istream & inputStream) 
+{
+    BaseType::DeSerializeRaw(inputStream);
+    this->PositionMember.DeSerializeRaw(inputStream);
+}
