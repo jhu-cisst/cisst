@@ -92,6 +92,27 @@ public:
     /*! Human readable output to stream. */
     void ToStream(std::ostream & outputStream) const;
 
+    /*! To stream raw data. */
+    inline virtual void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
+                                    bool headerOnly = false, const std::string & headerPrefix = "") const {
+        BaseType::ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix);
+        outputStream << delimiter;
+        this->VelocityMember.ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix);
+    }
+
+    /*! Binary serialization */
+    void SerializeRaw(std::ostream & outputStream) const 
+    {
+        BaseType::SerializeRaw(outputStream);
+        this->VelocityMember.SerializeRaw(outputStream);
+    }
+
+    /*! Binary deserialization */
+    void DeSerializeRaw(std::istream & inputStream) 
+    {
+        BaseType::DeSerializeRaw(inputStream);
+        this->VelocityMember.DeSerializeRaw(inputStream);
+    }
 
 }; // _prmVelocityJointGet_h
 

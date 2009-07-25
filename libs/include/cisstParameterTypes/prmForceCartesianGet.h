@@ -43,6 +43,8 @@ class CISST_EXPORT prmForceCartesianGet: public mtsGenericObject
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
  public:
+    typedef mtsGenericObject BaseType;
+
     /*! default constructor */
     inline prmForceCartesianGet(void):
         mtsGenericObject(),
@@ -97,6 +99,29 @@ public:
 
     /*! Human readable output to stream. */
     void ToStream(std::ostream & outputStream) const;
+
+
+    /*! To stream raw data. */
+    inline virtual void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
+                                    bool headerOnly = false, const std::string & headerPrefix = "") const {
+        BaseType::ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix);
+        outputStream << delimiter;
+        this->ForceMember.ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix + "-angular");
+    }
+
+    /*! Binary serialization */
+    void SerializeRaw(std::ostream & outputStream) const 
+    {
+        BaseType::SerializeRaw(outputStream);
+        this->ForceMember.SerializeRaw(outputStream);
+    }
+
+    /*! Binary deserialization */
+    void DeSerializeRaw(std::istream & inputStream) 
+    {
+        BaseType::DeSerializeRaw(inputStream);
+        this->ForceMember.DeSerializeRaw(inputStream);
+    }
 
 
 }; // _prmForceCartesianGet_h

@@ -41,6 +41,8 @@ class CISST_EXPORT prmVelocityCartesianGet: public mtsGenericObject
 	CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
  public:
+    typedef mtsGenericObject BaseType;
+
 	/*! default constructor */
     inline prmVelocityCartesianGet(void):
         MovingFrameMember(0),
@@ -117,6 +119,31 @@ public:
     /*! Human readable output to stream. */
     void ToStream(std::ostream & outputStream) const;
 
+    /*! To stream raw data. */
+    inline virtual void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
+                                    bool headerOnly = false, const std::string & headerPrefix = "") const {
+        BaseType::ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix);
+        outputStream << delimiter;
+        this->VelocityLinearMember.ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix + "-linear");
+        outputStream << delimiter;
+        this->VelocityAngularMember.ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix + "-angular");
+    }
+
+    /*! Binary serialization */
+    void SerializeRaw(std::ostream & outputStream) const 
+    {
+        BaseType::SerializeRaw(outputStream);
+        this->VelocityLinearMember.SerializeRaw(outputStream);
+        this->VelocityAngularMember.SerializeRaw(outputStream);
+    }
+
+    /*! Binary deserialization */
+    void DeSerializeRaw(std::istream & inputStream) 
+    {
+        BaseType::DeSerializeRaw(inputStream);
+        this->VelocityLinearMember.DeSerializeRaw(inputStream);
+        this->VelocityAngularMember.DeSerializeRaw(inputStream);
+    }
 
 }; // _prmVelocityCartesianGet_h
 
