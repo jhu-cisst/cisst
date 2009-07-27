@@ -41,7 +41,6 @@ public:
     void UserControl(void);
     
     void GetPositions(void);
-    void GetPositions(int DeviceNo);
     void SetScaleFactor(double Scale);
     void SetForceLimit(double FLimit);
     void SetOffsetMultiplier(double OffMult);
@@ -49,19 +48,17 @@ public:
     void DecrementScaleFactor(void);
     void IncrementForceLimit(void);
     void DecrementForceLimit(void);
+    void SetForceMode(int Mode);
     
 protected:
     vctFixedSizeVector<double, 6> ForceMaster;
     vctFixedSizeVector<double, 6> ForceSlave;
     vct3 WorkspaceOffset;
     vct3 ClutchOffset;
-    vct3 RatchetOffset;
     vct3 Error;
-    vct3 p2RGoal;
     vct3 p1Goal;
     vct3 p2Goal;
-    vct3 p1Error;
-    vct3 p2Error;
+    vct3 p2RGoal;
    
     prmForceCartesianSet    firstDeviceForce;
     prmForceCartesianSet    secondDeviceForce;
@@ -70,19 +67,14 @@ protected:
     prmPositionCartesianGet p1Clutched;
     prmPositionCartesianGet p2Clutched;
     prmPositionCartesianGet p2R;
-    vct3 firstDeviceLastForce;
-    vct3 secondDeviceLastForce;
 
     bool firstIteration;
-    bool ratchetMaster;
-    bool ratchetSlave;
-    int clutch;
+    bool clutch;
     double ScaleFactor;
     double FMax;
     double ForceFeedNormMaster;
     double ForceFeedNormSlave;
-    double OffsetMultiplier;
-
+    int ForceMode;
 };
 
 
