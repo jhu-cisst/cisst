@@ -327,7 +327,7 @@ bool COpenCVSource::IsRunning()
     return Running;
 }
 
-int COpenCVSource::SetDevice(int devid, int inid, unsigned int videoch)
+int COpenCVSource::SetDevice(int devid, int CMN_UNUSED(inid), unsigned int videoch)
 {
     if (videoch >= NumOfStreams) return SVL_FAIL;
     DeviceID[videoch] = devid;

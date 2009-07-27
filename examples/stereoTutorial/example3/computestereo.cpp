@@ -164,7 +164,7 @@ labError:
 //             main             //
 //////////////////////////////////
 
-int main(int argc, char** argv)
+int main(int CMN_UNUSED(argc), char** CMN_UNUSED(argv))
 {
     cerr << endl << "computestereo - cisstStereoVision example by Balazs Vagvolgyi" << endl;
     cerr << "See http://www.cisst.org/cisst for details." << endl << endl;

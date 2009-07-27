@@ -56,7 +56,7 @@ protected:
         return SVL_OK;
     }
 
-    int ProcessFrame(ProcInfo* procInfo, svlSample* inputdata = 0)
+    int ProcessFrame(ProcInfo* procInfo, svlSample* CMN_UNUSED(inputdata) = 0)
     {
         _OnSingleThread(procInfo) {
             if ((FrameCount % 30) == 0) {
@@ -114,10 +114,12 @@ class CViewerWindowCallback : public svlImageWindowCallbackBase
 public:
     CViewerWindowCallback() : svlImageWindowCallbackBase()
     {
-        VideoWriterFilter = 0;
         ImageWriterFilter = 0;
+#if (CISST_SVL_HAS_ZLIB == ON)
+        VideoWriterFilter = 0;
         ShowFramerate = true;
         Recording = false;
+#endif // CISST_SVL_HAS_ZLIB
     }
 
     void OnNewFrame(unsigned int frameid)
@@ -155,11 +157,12 @@ public:
         }
     }
 
-    void OnUserEvent(unsigned int winid, bool ascii, unsigned int eventid)
+    void OnUserEvent(unsigned int CMN_UNUSED(winid), bool ascii, unsigned int eventid)
     {
         // handling user inputs
         if (ascii) {
             switch (eventid) {
+#if (CISST_SVL_HAS_ZLIB == ON)
                 case ' ':
                 {
                     if (VideoWriterFilter) {
@@ -176,6 +179,7 @@ public:
                     }
                 }
                 break;
+#endif // CISST_SVL_HAS_ZLIB
 
                 case 's':
                 {
@@ -193,8 +197,10 @@ public:
     }
 
     svlImageFileWriter* ImageWriterFilter;
+#if (CISST_SVL_HAS_ZLIB == ON)
     svlVideoFileWriter* VideoWriterFilter;
     bool Recording;
+#endif // CISST_SVL_HAS_ZLIB
 
     bool ShowFramerate;
 #ifdef _WIN32
@@ -211,8 +217,12 @@ public:
 //  CameraViewer  //
 ////////////////////
 
-int CameraViewer(bool save, bool interpolation, int width, int height)
+int CameraViewer(bool interpolation, bool save, int width, int height)
 {
+#if (CISST_SVL_HAS_ZLIB == OFF)
+    save = false;
+#endif // CISST_SVL_HAS_ZLIB
+
     // instantiating SVL stream and filters
     svlStreamManager viewer_stream(8);
     svlVideoCaptureSource viewer_source(true);
@@ -220,7 +230,9 @@ int CameraViewer(bool save, bool interpolation, int width, int height)
     svlImageWindow viewer_window;
     CViewerWindowCallback viewer_window_cb;
     svlImageFileWriter viewer_imagewriter;
+#if (CISST_SVL_HAS_ZLIB == ON)
     svlVideoFileWriter viewer_videowriter;
+#endif // CISST_SVL_HAS_ZLIB
     CFPSFilter viewer_fps;
 
     // setup source
@@ -231,6 +243,7 @@ int CameraViewer(bool save, bool interpolation, int width, int height)
         viewer_source.DialogSetup(SVL_RIGHT);
     }
 
+#if (CISST_SVL_HAS_ZLIB == ON)
     // setup video writer
     if (save == true) {
         viewer_videowriter.DialogFilePath(SVL_LEFT);
@@ -238,6 +251,7 @@ int CameraViewer(bool save, bool interpolation, int width, int height)
         viewer_videowriter.SetCompressionLevel(1); // 0-9
         viewer_videowriter.Pause();
     }
+#endif // CISST_SVL_HAS_ZLIB
 
     // setup image writer
     viewer_imagewriter.SetFilePath("left_", "bmp", SVL_LEFT);
@@ -254,18 +268,22 @@ int CameraViewer(bool save, bool interpolation, int width, int height)
 
     // setup image window
     viewer_window_cb.ImageWriterFilter = &viewer_imagewriter;
+#if (CISST_SVL_HAS_ZLIB == ON)
     if (save == true) {
         viewer_window_cb.VideoWriterFilter = &viewer_videowriter;
     }
+#endif // CISST_SVL_HAS_ZLIB
     viewer_window.SetCallback(&viewer_window_cb);
     viewer_window.SetTitleText("Camera Viewer");
     viewer_window.EnableTimestampInTitle();
 
     // chain filters to pipeline
     if (viewer_stream.Trunk().Append(&viewer_source) != SVL_OK) goto labError;
+#if (CISST_SVL_HAS_ZLIB == ON)
     if (save == true) {
         if (viewer_stream.Trunk().Append(&viewer_videowriter) != SVL_OK) goto labError;
     }
+#endif // CISST_SVL_HAS_ZLIB
     if (viewer_stream.Trunk().Append(&viewer_imagewriter) != SVL_OK) goto labError;
     if (width > 0 && height > 0) {
         if (viewer_stream.Trunk().Append(&viewer_resizer) != SVL_OK) goto labError;
@@ -286,9 +304,11 @@ int CameraViewer(bool save, bool interpolation, int width, int height)
     do {
         cerr << endl << "Keyboard commands:" << endl << endl;
         cerr << "  In image window:" << endl;
+#if (CISST_SVL_HAS_ZLIB == ON)
         if (save == true) {
             cerr << "    SPACE - Video recorder control: Record/Pause" << endl;
         }
+#endif // CISST_SVL_HAS_ZLIB
         cerr << "    's'   - Take image snapshots" << endl;
         cerr << "  In command window:" << endl;
         cerr << "    '1'   - Adjust LEFT image properties" << endl;
@@ -394,14 +414,19 @@ int main(int argc, char** argv)
                 cerr << "Command line format:" << endl;
                 cerr << "     stereoTutorialStereoCameraViewer [options]" << endl;
                 cerr << "Options:" << endl;
+#if (CISST_SVL_HAS_ZLIB == ON)
                 cerr << "     -v        Save video files" << endl;
+#endif // CISST_SVL_HAS_ZLIB
                 cerr << "     -i        Interpolation ON [default: OFF]" << endl;
                 cerr << "     -w#       Displayed image width" << endl;
                 cerr << "     -h#       Displayed image height" << endl;
                 cerr << "Examples:" << endl;
                 cerr << "     stereoTutorialStereoCameraViewer" << endl;
-                cerr << "     stereoTutorialStereoCameraViewer -w800 -h600" << endl;
-                cerr << "     stereoTutorialStereoCameraViewer -v -i -w1024 -h768" << endl;
+#if (CISST_SVL_HAS_ZLIB == ON)
+                cerr << "     stereoTutorialStereoCameraViewer -v -i -w800 -h600" << endl;
+#else // CISST_SVL_HAS_ZLIB
+                cerr << "     stereoTutorialStereoCameraViewer -i -w1024 -h768" << endl;
+#endif // CISST_SVL_HAS_ZLIB
                 return 1;
             break;
 
@@ -409,9 +434,11 @@ int main(int argc, char** argv)
                 interpolation = true;
             break;
 
+#if (CISST_SVL_HAS_ZLIB == ON)
             case 'v':
                 save = true;
             break;
+#endif // CISST_SVL_HAS_ZLIB
 
             case 'w':
                 ivalue = ParseNumber(argv[i] + 2, 4);
@@ -432,7 +459,7 @@ int main(int argc, char** argv)
     //////////////////////////////
     // starting viewer
 
-    CameraViewer(save, interpolation, width, height);
+    CameraViewer(interpolation, save, width, height);
 
     cerr << "Quit" << endl;
     return 1;

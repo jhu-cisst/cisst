@@ -66,9 +66,9 @@ svlRenderTargets* svlRenderTargets::Instance()
     return &instance;
 }
 
+#if (CISST_SVL_HAS_MIL == ON)
 svlRenderTargetBase* svlRenderTargets::Get(unsigned int deviceID)
 {
-#if (CISST_SVL_HAS_MIL == ON)
     svlRenderTargets* instance = Instance();
     if (instance->Targets.size() > deviceID) {
         if (!instance->Targets[deviceID]) {
@@ -76,9 +76,14 @@ svlRenderTargetBase* svlRenderTargets::Get(unsigned int deviceID)
         }
         return instance->Targets[deviceID];
     }
-#endif // CISST_SVL_HAS_MIL
     return 0;
 }
+#else // CISST_SVL_HAS_MIL
+svlRenderTargetBase* svlRenderTargets::Get(unsigned int CMN_UNUSED(deviceID))
+{
+    return 0;
+}
+#endif // CISST_SVL_HAS_MIL
 
 void svlRenderTargets::Release(unsigned int deviceID)
 {

@@ -104,7 +104,7 @@ SET(HEADER_FILES
 
 
 # cisstNumerical dependency
-IF(BUILD_LIBS_cisstNumerical)
+IF(BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB)
   SET(DEPENDENCIES
       ${DEPENDENCIES}
       cisstNumerical
@@ -124,7 +124,7 @@ IF(BUILD_LIBS_cisstNumerical)
       # Trackers
       trackers/svlTrackerCisst.h
       )
-ENDIF(BUILD_LIBS_cisstNumerical)
+ENDIF(BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB)
 
 
 # OpenCV
@@ -190,6 +190,27 @@ IF(CISST_SVL_HAS_OPENCV)
                         #OpenCV_TRS_LIBRARY
                          )
     ENDIF(OpenCV_FOUND)
+
+ELSE(CISST_SVL_HAS_OPENCV)
+    MARK_AS_ADVANCED(FORCE
+                     OpenCV_ROOT_DIR
+                     OpenCV_INCLUDE_DIRS
+                     OpenCV_CV_INCLUDE_DIR
+                     OpenCV_CXCORE_INCLUDE_DIR
+                     OpenCV_CVAUX_INCLUDE_DIR
+                    #OpenCV_CVCAM_INCLUDE_DIR
+                     OpenCV_HIGHGUI_INCLUDE_DIR
+                     OpenCV_LIBRARIES
+                     OpenCV_CV_LIBRARY
+                     OpenCV_CXCORE_LIBRARY
+                     OpenCV_CVAUX_LIBRARY
+                    #OpenCV_CVCAM_LIBRARY
+                     OpenCV_CVHAARTRAINING_LIBRARY
+                     OpenCV_CXTS_LIBRARY
+                     OpenCV_HIGHGUI_LIBRARY
+                     OpenCV_ML_LIBRARY
+                    #OpenCV_TRS_LIBRARY
+                     )
 ENDIF(CISST_SVL_HAS_OPENCV)
 
 
@@ -229,6 +250,12 @@ IF(CISST_SVL_HAS_ZLIB)
                          ZLIB_LIBRARY
                          )
     ENDIF(ZLIB_FOUND)
+
+ELSE(CISST_SVL_HAS_ZLIB)
+    MARK_AS_ADVANCED(FORCE
+                     ZLIB_INCLUDE_DIR
+                     ZLIB_LIBRARY
+                     )
 ENDIF(CISST_SVL_HAS_ZLIB)
 
 
@@ -271,7 +298,14 @@ IF(CISST_SVL_HAS_MIL)
                          MIL_INCLUDE_DIR
                          MIL_mil_LIBRARY
                          )
+        MESSAGE(FATAL_ERROR "Matrox Imaging Library (MIL) required, please specify it's location.")
     ENDIF(MIL_FOUND)
+
+ELSE(CISST_SVL_HAS_MIL)
+    MARK_AS_ADVANCED(FORCE
+                     MIL_INCLUDE_DIR
+                     MIL_mil_LIBRARY
+                     )
 ENDIF(CISST_SVL_HAS_MIL)
 
 ELSE(UNIX)
@@ -330,6 +364,16 @@ IF(WIN32)
                          DIRECTSHOW_WinMM_LIBRARY 
                          )
     ENDIF(DIRECTSHOW_FOUND)
+
+  ELSE(CISST_SVL_HAS_DIRECTSHOW)
+    MARK_AS_ADVANCED(FORCE
+                     DIRECTSHOW_INCLUDE_DIR
+                     DIRECTX_INCLUDE_DIR
+                     DIRECTSHOW_strmiids_LIBRARY
+                     DIRECTSHOW_quartz_LIBRARY
+                     DIRECTSHOW_Vfw32_LIBRARY
+                     DIRECTSHOW_WinMM_LIBRARY 
+                     )
   ENDIF(CISST_SVL_HAS_DIRECTSHOW)
 
   OPTION(CISST_SVL_HAS_SVS "Compile Videre Design SVS extensions" OFF)
@@ -378,7 +422,15 @@ IF(WIN32)
                          SVS_svs_LIBRARY
                          SVS_svsgrab_LIBRARY
                          )
+        MESSAGE(FATAL_ERROR "Videre Design SVS (SVS) required, please specify it's location.")
     ENDIF(SVS_FOUND)
+
+  ELSE(CISST_SVL_HAS_SVS)
+      MARK_AS_ADVANCED(FORCE
+                       SVS_INCLUDE_DIR
+                       SVS_svs_LIBRARY
+                       SVS_svsgrab_LIBRARY
+                       )
   ENDIF(CISST_SVL_HAS_SVS)
 
   ADD_DEFINITIONS(-DWIN32_LEAN_AND_MEAN)

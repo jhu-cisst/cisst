@@ -172,7 +172,7 @@ svlVideoCaptureSource::~svlVideoCaptureSource()
     if (FormatListSize) delete [] FormatListSize;
 }
 
-int svlVideoCaptureSource::Initialize(svlSample* inputdata)
+int svlVideoCaptureSource::Initialize(svlSample* CMN_UNUSED(inputdata))
 {
     PlatformType platform;
     unsigned int i;
@@ -275,7 +275,7 @@ labError:
     return ret;
 }
 
-int svlVideoCaptureSource::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata)
+int svlVideoCaptureSource::ProcessFrame(ProcInfo* procInfo, svlSample* CMN_UNUSED(inputdata))
 {
     svlImageRGB* image;
     unsigned int idx;

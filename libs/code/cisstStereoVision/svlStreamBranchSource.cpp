@@ -122,7 +122,7 @@ svlStreamBranchSource::~svlStreamBranchSource()
     }
 }
 
-int svlStreamBranchSource::Initialize(svlSample* inputdata)
+int svlStreamBranchSource::Initialize(svlSample* CMN_UNUSED(inputdata))
 {
     Release();
 
@@ -137,7 +137,7 @@ int svlStreamBranchSource::Initialize(svlSample* inputdata)
     return SVL_OK;
 }
 
-int svlStreamBranchSource::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata)
+int svlStreamBranchSource::ProcessFrame(ProcInfo* procInfo, svlSample* CMN_UNUSED(inputdata))
 {
     int ret = SVL_OK;
 

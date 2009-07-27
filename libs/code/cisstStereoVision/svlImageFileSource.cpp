@@ -63,7 +63,7 @@ svlImageFileSource::~svlImageFileSource()
     if (OutputData) delete OutputData;
 }
 
-int svlImageFileSource::Initialize(svlSample* inputdata)
+int svlImageFileSource::Initialize(svlSample* CMN_UNUSED(inputdata))
 {
     Release();
 
@@ -142,7 +142,7 @@ int svlImageFileSource::Initialize(svlSample* inputdata)
     return SVL_OK;
 }
 
-int svlImageFileSource::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata)
+int svlImageFileSource::ProcessFrame(ProcInfo* procInfo, svlSample* CMN_UNUSED(inputdata))
 {
     _OnSingleThread(procInfo)
     {

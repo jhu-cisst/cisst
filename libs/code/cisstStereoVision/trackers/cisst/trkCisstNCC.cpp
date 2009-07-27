@@ -311,7 +311,7 @@ void trkCisstNCC::copyImage_cisst(MatrixType &src, MatrixType &dst, IndexType st
 	}
 }
 //Copy a input image into buffer matrix
-void trkCisstNCC::copyImage(InterfaceImType *src, IndexType src_rows, IndexType src_cols, MatrixType &dst, IndexType startR, IndexType startC) {
+void trkCisstNCC::copyImage(InterfaceImType *src, IndexType CMN_UNUSED(src_rows), IndexType src_cols, MatrixType &dst, IndexType startR, IndexType startC) {
 	for(IndexType r = 0; r < dst.rows(); r++) {
 		for(IndexType c = 0; c < dst.cols(); c++) {
 			dst.Element(r,c) = src[(startR+r)*src_cols+(startC+c)];
@@ -419,9 +419,9 @@ void trkCisstNCC::checkRectangleBoundries(PointType & imSize, PointType & size, 
 	} else if (position.X() > imSize.Y()) { 
 		position.X() = 0;
 	}
-	if(position.Y() < 0)
+	if(position.Y() <= 0)
 		position.Y() = 0;
-	if(position.X() < 0)
+	if(position.X() <= 0)
 		position.X() = 0;
 }
 //Inititalize the pre-allocated data for tracking

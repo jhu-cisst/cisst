@@ -380,14 +380,14 @@ void svlPointTrackerAlgoBase::Release()
     // to release resources allocated in the Initialize method
 }
 
-int svlPointTrackerAlgoBase::PreProcessImage(unsigned char* image)
+int svlPointTrackerAlgoBase::PreProcessImage(unsigned char* CMN_UNUSED(image))
 {
     // derived classes may override this method
     // for image pre-processing
     return 0;
 }
 
-int svlPointTrackerAlgoBase::Track(unsigned char* image)
+int svlPointTrackerAlgoBase::Track(unsigned char* CMN_UNUSED(image))
 {
     // derived classes shall override this method
     return 0;

@@ -268,7 +268,7 @@ void trkCisstWSSD::copyImage_cisst(MatrixType &src, MatrixType &dst, IndexType s
 }
 
 //Copy a input image into buffer matrix
-void trkCisstWSSD::copyImage(InterfaceImType *src, IndexType src_rows, IndexType src_cols,
+void trkCisstWSSD::copyImage(InterfaceImType *src, IndexType CMN_UNUSED(src_rows), IndexType src_cols,
                              MatrixType &dst, IndexType startR, IndexType startC) {
 	for(IndexType r = 0; r < dst.rows(); r++) {
 		for(IndexType c = 0; c < dst.cols(); c++) {
@@ -361,7 +361,7 @@ void trkCisstWSSD::computeXderivative(MatrixType &src, MatrixType &dst)
 	}
 }
 	
-void trkCisstWSSD::computeXderivative_filtered(MatrixType &src, MatrixType &dst)
+void trkCisstWSSD::computeXderivative_filtered(MatrixType & CMN_UNUSED(src), MatrixType &dst)
 {
 	// compute X derivative of the template
 	dst.SetAll(0);
@@ -398,7 +398,7 @@ void trkCisstWSSD::computeYderivative(MatrixType &src, MatrixType &dst)
 		}
 	}
 }
-void trkCisstWSSD::computeYderivative_filtered(MatrixType &src, MatrixType &dst)
+void trkCisstWSSD::computeYderivative_filtered(MatrixType & CMN_UNUSED(src), MatrixType &dst)
 {
 	// compute X derivative of the template
 	dst.SetAll(0);

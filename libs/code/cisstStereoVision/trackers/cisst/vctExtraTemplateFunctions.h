@@ -189,7 +189,7 @@ public:
 		size_type rowIndex, colIndex;
         for (rowIndex = 0; rowIndex < rows; ++rowIndex) {
             for (colIndex = 0; colIndex < cols; ++colIndex) {
-				out.Element(rowIndex, colIndex) = op.operate(rowIndex, colIndex, self.Pointer(rowIndex, colIndex));
+				out.Element(rowIndex, colIndex) = op.operate(self.Pointer(rowIndex, colIndex));
             }
         }
     }
@@ -213,7 +213,7 @@ public:
         ptrKernel = &kernel;
     }
     template<class data_ref>
-    inline value_type operate(index_type &row, index_type &col, data_ref windowCorner) {
+    inline value_type operate(data_ref windowCorner) {
         window.SetRef(window.rows(), window.cols(), window.row_stride(), window.col_stride(), subptr(windowCorner));
         return value_type(SumOfElementwiseProductOf(window,*ptrKernel));
     }

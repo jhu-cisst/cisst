@@ -29,7 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 
 using namespace std;
 
-
+#if (CISST_SVL_HAS_ZLIB == ON)
 ///////////////////////////////////
 //  Icon drawer callback class   //
 ///////////////////////////////////
@@ -45,8 +45,8 @@ public:
     }
 
     void FrameCallback(svlSampleImageBase* image,
-                       svlBMPFileHeader* fileheader1, svlDIBHeader* dibheader1,
-                       svlBMPFileHeader* fileheader2, svlDIBHeader* dibheader2)
+                       svlBMPFileHeader* CMN_UNUSED(fileheader1), svlDIBHeader* CMN_UNUSED(dibheader1),
+                       svlBMPFileHeader* CMN_UNUSED(fileheader2), svlDIBHeader* CMN_UNUSED(dibheader2))
     {
         if (RecordFlag && ((GetFrameCounter() / 15) % 2) == 0) {
 
@@ -79,6 +79,7 @@ private:
     bool RecordFlag;
     double AspectRatio;
 };
+#endif // CISST_SVL_HAS_ZLIB
 
 ///////////////////////////////////
 //     Window callback class     //
@@ -89,9 +90,11 @@ class CViewerWindowCallback : public svlImageWindowCallbackBase
 public:
     CViewerWindowCallback() : svlImageWindowCallbackBase()
     {
+#if (CISST_SVL_HAS_ZLIB == ON)
         IconDrawerFilter = 0;
         RecorderFilter = 0;
         Recording = false;
+#endif // CISST_SVL_HAS_ZLIB
         ShowFramerate = true;
     }
 
@@ -130,13 +133,13 @@ public:
         }
     }
 
-    void OnUserEvent(unsigned int winid, bool ascii, unsigned int eventid)
+#if (CISST_SVL_HAS_ZLIB == ON)
+    void OnUserEvent(unsigned int CMN_UNUSED(winid), bool ascii, unsigned int eventid)
     {
         // handling user inputs
         if (ascii) {
             switch (eventid) {
                 case ' ':
-                {
                     if (RecorderFilter && IconDrawerFilter) {
                         if (Recording) {
                             ((svlVideoFileWriter*)RecorderFilter)->Pause();
@@ -151,7 +154,6 @@ public:
                             cout << endl << " >>> Recording started <<<" << endl;
                         }
                     }
-                }
                 break;
 
                 default:
@@ -159,10 +161,13 @@ public:
             }
         }
     }
+#endif // CISST_SVL_HAS_ZLIB
 
+#if (CISST_SVL_HAS_ZLIB == ON)
     CViewerIconDrawerCallback* IconDrawerFilter;
     svlFilterBase* RecorderFilter;
     bool Recording;
+#endif // CISST_SVL_HAS_ZLIB
 
     bool ShowFramerate;
 #ifdef _WIN32
@@ -179,17 +184,23 @@ public:
 //  CameraViewer  //
 ////////////////////
 
-int CameraViewer(bool save, bool interpolation, int width, int height)
+int CameraViewer(bool interpolation, bool save, int width, int height)
 {
+#if (CISST_SVL_HAS_ZLIB == OFF)
+    save = false;
+#endif // CISST_SVL_HAS_ZLIB
+
     // instantiating SVL stream and filters
     svlStreamManager viewer_stream(8);
     svlVideoCaptureSource viewer_source(false);
     svlImageResizer viewer_resizer;
-    svlImageSampler viewer_icondrawer;
-    CViewerIconDrawerCallback viewer_icondrawer_cb;
     svlImageWindow viewer_window;
     CViewerWindowCallback viewer_window_cb;
+#if (CISST_SVL_HAS_ZLIB == ON)
+    svlImageSampler viewer_icondrawer;
+    CViewerIconDrawerCallback viewer_icondrawer_cb;
     svlVideoFileWriter viewer_writer;
+#endif // CISST_SVL_HAS_ZLIB
 
     // setup source
     // Delete "device.dat" to reinitialize input device
@@ -198,19 +209,7 @@ int CameraViewer(bool save, bool interpolation, int width, int height)
         viewer_source.DialogSetup();
     }
 
-    // setup writer
-    if (save == true) {
-        viewer_writer.DialogFilePath();
-        viewer_writer.SetCompressionLevel(1); // 0-9
-        viewer_writer.Pause();
-    }
-
-    // setup resizer
-    if (width > 0 && height > 0) {
-        viewer_resizer.EnableInterpolation(interpolation);
-        viewer_resizer.SetOutputSize(width, height);
-    }
-
+#if (CISST_SVL_HAS_ZLIB == ON)
     // setup icon drawer
     viewer_icondrawer.SetCallback(&viewer_icondrawer_cb);
     if (width > 0 && height > 0) {
@@ -220,26 +219,46 @@ int CameraViewer(bool save, bool interpolation, int width, int height)
         viewer_icondrawer_cb.SetAspectRatio(1.0);
     }
 
+    // setup writer
+    if (save == true) {
+        viewer_writer.DialogFilePath();
+        viewer_writer.SetCompressionLevel(1); // 0-9
+        viewer_writer.Pause();
+    }
+#endif // CISST_SVL_HAS_ZLIB
+
+    // setup resizer
+    if (width > 0 && height > 0) {
+        viewer_resizer.EnableInterpolation(interpolation);
+        viewer_resizer.SetOutputSize(width, height);
+    }
+
     // setup image window
+#if (CISST_SVL_HAS_ZLIB == ON)
     if (save == true) {
         viewer_window_cb.IconDrawerFilter = &viewer_icondrawer_cb;
         viewer_window_cb.RecorderFilter = &viewer_writer;
     }
+#endif // CISST_SVL_HAS_ZLIB
     viewer_window.SetCallback(&viewer_window_cb);
     viewer_window.SetTitleText("Camera Viewer");
     viewer_window.EnableTimestampInTitle();
 
     // chain filters to pipeline
     if (viewer_stream.Trunk().Append(&viewer_source) != SVL_OK) goto labError;
+#if (CISST_SVL_HAS_ZLIB == ON)
     if (save == true) {
         if (viewer_stream.Trunk().Append(&viewer_writer) != SVL_OK) goto labError;
     }
+#endif // CISST_SVL_HAS_ZLIB
     if (width > 0 && height > 0) {
         if (viewer_stream.Trunk().Append(&viewer_resizer) != SVL_OK) goto labError;
     }
+#if (CISST_SVL_HAS_ZLIB == ON)
     if (save == true) {
         if (viewer_stream.Trunk().Append(&viewer_icondrawer) != SVL_OK) goto labError;
     }
+#endif // CISST_SVL_HAS_ZLIB
     if (viewer_stream.Trunk().Append(&viewer_window) != SVL_OK) goto labError;
 
     cerr << endl << "Starting stream... ";
@@ -254,10 +273,12 @@ int CameraViewer(bool save, bool interpolation, int width, int height)
 
     do {
         cerr << endl << "Keyboard commands:" << endl << endl;
+#if (CISST_SVL_HAS_ZLIB == ON)
         cerr << "  In image window:" << endl;
         if (save == true) {
             cerr << "    SPACE - Video recorder control: Record/Pause" << endl;
         }
+#endif // CISST_SVL_HAS_ZLIB
         cerr << "  In command window:" << endl;
         cerr << "    'i'   - Adjust image properties" << endl;
         cerr << "    'q'   - Quit" << endl << endl;
@@ -354,14 +375,19 @@ int main(int argc, char** argv)
                 cerr << "Command line format:" << endl;
                 cerr << "     stereoTutorialCameraViewer [options]" << endl;
                 cerr << "Options:" << endl;
+#if (CISST_SVL_HAS_ZLIB == ON)
                 cerr << "     -v        Save video file" << endl;
+#endif // CISST_SVL_HAS_ZLIB
                 cerr << "     -i        Interpolation ON [default: OFF]" << endl;
                 cerr << "     -w#       Displayed image width" << endl;
                 cerr << "     -h#       Displayed image height" << endl;
                 cerr << "Examples:" << endl;
                 cerr << "     stereoTutorialCameraViewer" << endl;
-                cerr << "     stereoTutorialCameraViewer -w800 -h600" << endl;
+#if (CISST_SVL_HAS_ZLIB == ON)
                 cerr << "     stereoTutorialCameraViewer -v -i -w1024 -h768" << endl;
+#else // CISST_SVL_HAS_ZLIB
+                cerr << "     stereoTutorialCameraViewer -i -w800 -h600" << endl;
+#endif // CISST_SVL_HAS_ZLIB
                 return 1;
             break;
 
@@ -369,9 +395,11 @@ int main(int argc, char** argv)
                 interpolation = true;
             break;
 
+#if (CISST_SVL_HAS_ZLIB == ON)
             case 'v':
                 save = true;
             break;
+#endif // CISST_SVL_HAS_ZLIB
 
             case 'w':
                 ivalue = ParseNumber(argv[i] + 2, 4);
@@ -392,7 +420,7 @@ int main(int argc, char** argv)
     //////////////////////////////
     // starting viewer
 
-    CameraViewer(save, interpolation, width, height);
+    CameraViewer(interpolation, save, width, height);
 
     cerr << "Quit" << endl;
     return 1;

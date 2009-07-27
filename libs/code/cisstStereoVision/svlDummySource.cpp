@@ -76,7 +76,7 @@ svlDummySource::~svlDummySource()
     if (ImageBuffer[1]) delete [] ImageBuffer[1];
 }
 
-int svlDummySource::Initialize(svlSample* inputdata)
+int svlDummySource::Initialize(svlSample* CMN_UNUSED(inputdata))
 {
     Release();
 
@@ -124,7 +124,7 @@ int svlDummySource::Initialize(svlSample* inputdata)
     return SVL_OK;
 }
 
-int svlDummySource::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata)
+int svlDummySource::ProcessFrame(ProcInfo* procInfo, svlSample* CMN_UNUSED(inputdata))
 {
     svlSampleImageBase* img = dynamic_cast<svlSampleImageBase*>(OutputData);
     const unsigned int videochannels = img->GetVideoChannels();

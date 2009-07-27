@@ -90,7 +90,7 @@ svlVideoFileSource::~svlVideoFileSource()
 #endif
 }
 
-int svlVideoFileSource::Initialize(svlSample* inputdata)
+int svlVideoFileSource::Initialize(svlSample* CMN_UNUSED(inputdata))
 {
     Release();
 
@@ -199,7 +199,7 @@ int svlVideoFileSource::Initialize(svlSample* inputdata)
     return SVL_OK;
 }
 
-int svlVideoFileSource::OnStart(unsigned int procCount)
+int svlVideoFileSource::OnStart(unsigned int CMN_UNUSED(procCount))
 {
     // Initialize video timer
     Timer.Reset();
@@ -214,7 +214,7 @@ int svlVideoFileSource::OnStart(unsigned int procCount)
     return SVL_OK;
 }
 
-int svlVideoFileSource::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata)
+int svlVideoFileSource::ProcessFrame(ProcInfo* procInfo, svlSample* CMN_UNUSED(inputdata))
 {
 #if (CISST_OS == CISST_WINDOWS)
     if (Hertz >= 0.1) {

@@ -130,7 +130,7 @@ void svlTrackerOpenCV::Release()
     }
 }
 
-int svlTrackerOpenCV::SetTargetCount(unsigned int targetcount)
+int svlTrackerOpenCV::SetTargetCount(unsigned int CMN_UNUSED(targetcount))
 {
     if (Initialized) return -1;
     if (svlPointTrackerAlgoBase::SetTargetCount(5) != 0) return -2;
