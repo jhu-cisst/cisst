@@ -74,6 +74,8 @@ protected:
         // added to provide tip position to the frame manager
         mtsFunctionRead PositionFunctionForTransformationManager;
 
+        bool Clutch;
+
         std::string Name;
     };
 

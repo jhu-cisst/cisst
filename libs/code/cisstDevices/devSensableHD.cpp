@@ -111,8 +111,10 @@ void devSensableHD::Run(void)
             previousButtonState = deviceData->Buttons & HD_DEVICE_BUTTON_2;
             if (currentButtonState != previousButtonState) {
                 if (currentButtonState == 0) {
+                    deviceData->Clutch = false;
                     event.SetType(prmEventButton::RELEASED);
                 } else {
+                    deviceData->Clutch = true;
                     event.SetType(prmEventButton::PRESSED);
                 }
                 // throw the event
@@ -265,6 +267,7 @@ void devSensableHD::SetupInterfaces(void)
         deviceData->PositionJoint.Position().SetAll(0.0);
         deviceData->VelocityCartesian.VelocityLinear().SetAll(0.0);
         deviceData->VelocityCartesian.VelocityAngular().SetAll(0.0);
+        deviceData->Clutch = false;
 
         // create interface with the device name, i.e. the map key
         CMN_LOG_CLASS_INIT_DEBUG << "SetupInterfaces: creating interface \"" << interfaceName << "\"" << std::endl;

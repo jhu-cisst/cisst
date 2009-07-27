@@ -2,10 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: devSensableHD.h 556 2009-07-17 20:19:24Z gsevinc1 $
+  $Id: devSensableHDMasterSlave.h 556 2009-07-17 20:19:24Z gsevinc1 $
 
   Author(s): Gorkem Sevinc, Anton Deguet
-  Created on: 2008-04-04
+  Created on: 2008-07-17
 
   (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
   Reserved.
@@ -23,6 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _devSensableHDMasterSlave_h
 
 #include <cisstParameterTypes.h>
+#include <cisstCommon.h>
 #include <cisstDevices/devSensableHD.h>
 
 // Always include last
@@ -36,23 +37,52 @@ public:
                              const std::string & firstDeviceName,
                              const std::string & secondDeviceName);
 
-    ~devSensableHDMasterSlave() {};
-    void UserControl();
-
-protected:
-    bool firstIteration;
-    vctFixedSizeVector<double, 6> ForceFeed;
-    double ScaleFactor;
-    double FMax;
-    double ForceFeedNorm;
-    vct3 posDiff;
+    ~devSensableHDMasterSlave(void) {};
+    void UserControl(void);
     
+    void GetPositions(void);
+    void GetPositions(int DeviceNo);
+    void SetScaleFactor(double Scale);
+    void SetForceLimit(double FLimit);
+    void SetOffsetMultiplier(double OffMult);
+    void IncrementScaleFactor(void);
+    void DecrementScaleFactor(void);
+    void IncrementForceLimit(void);
+    void DecrementForceLimit(void);
+    
+protected:
+    vctFixedSizeVector<double, 6> ForceMaster;
+    vctFixedSizeVector<double, 6> ForceSlave;
+    vct3 WorkspaceOffset;
+    vct3 ClutchOffset;
+    vct3 RatchetOffset;
+    vct3 Error;
+    vct3 p2RGoal;
+    vct3 p1Goal;
+    vct3 p2Goal;
+    vct3 p1Error;
+    vct3 p2Error;
+   
     prmForceCartesianSet    firstDeviceForce;
     prmForceCartesianSet    secondDeviceForce;
-    prmPositionCartesianGet firstDevicePos;
-    prmPositionCartesianGet secondDevicePos;
+    prmPositionCartesianGet p1;
+    prmPositionCartesianGet p2;
+    prmPositionCartesianGet p1Clutched;
+    prmPositionCartesianGet p2Clutched;
+    prmPositionCartesianGet p2R;
+    vct3 firstDeviceLastForce;
+    vct3 secondDeviceLastForce;
 
-    vct3 Offset;
+    bool firstIteration;
+    bool ratchetMaster;
+    bool ratchetSlave;
+    int clutch;
+    double ScaleFactor;
+    double FMax;
+    double ForceFeedNormMaster;
+    double ForceFeedNormSlave;
+    double OffsetMultiplier;
+
 };
 
 
