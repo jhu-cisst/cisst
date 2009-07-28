@@ -9,8 +9,8 @@ CMN_IMPLEMENT_SERVICES(clockDevice);
 
 clockDevice::clockDevice(const std::string & deviceName):
     mtsDevice(deviceName) {
-    AddProvidedInterface("MainInterface");   // interface name for lack of better name
-    AddCommandRead(&clockDevice::GetTime, this, "MainInterface", "GetTime");
+    mtsProvidedInterface * mainInterface = AddProvidedInterface("MainInterface");
+    mainInterface->AddCommandRead(&clockDevice::GetTime, this, "GetTime");
     Timer.Reset();   // reset the clock
     Timer.Start();   // start the clock 
 }
