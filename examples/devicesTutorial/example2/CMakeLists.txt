@@ -42,12 +42,3 @@ target_link_libraries(devicesTutorialExample2 ${FLTK_LIBRARIES})
 
 # link with the cisst libraries
 cisst_requires("devicesTutorialExample2" "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstParameterTypes;cisstDevices")
-
-# For apple applications with GUI
-if(APPLE)
-  find_program(APPLE_REZ Rez /Developer/Tools)
-  add_custom_command(TARGET devicesTutorialExample2
-                     POST_BUILD
-                     COMMAND ${APPLE_REZ}
-                     ARGS ${FLTK_INCLUDE_DIR}/FL/mac.r Carbon.r -o ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/devicesTutorialExample2)
-endif(APPLE)
