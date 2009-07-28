@@ -111,22 +111,6 @@ bool mtsDevice::ConnectRequiredInterface(const std::string & requiredInterfaceNa
 }
 
 
-mtsCommandVoidBase * mtsDevice::AddEventVoid(const std::string & interfaceName,
-                                             const std::string & eventName) {
-    mtsDeviceInterface * interface = this->GetProvidedInterface(interfaceName);
-    if (interface) {
-        mtsMulticastCommandVoid * eventMulticastCommand = new mtsMulticastCommandVoid(eventName);
-        bool added = interface->AddEvent(eventName, eventMulticastCommand);
-        if (!added) {
-            delete eventMulticastCommand;
-        }
-        return eventMulticastCommand;
-    }
-    CMN_LOG_CLASS_INIT_ERROR << "AddEventVoid: can not find an interface named " << interfaceName << std::endl;
-    return 0;
-}
-
-
 void mtsDevice::ToStream(std::ostream & outputStream) const
 {
     outputStream << "Device name: " << Name << std::endl;

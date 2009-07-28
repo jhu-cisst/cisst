@@ -234,39 +234,6 @@ mtsDeviceInterface * mtsTask::AddProvidedInterface(const std::string & newInterf
 }
 
 
-bool mtsTask::AddObserverToRequiredInterface(const std::string & CMN_UNUSED(requiredInterfaceName),
-                                             const std::string & CMN_UNUSED(eventName),
-                                             const std::string & CMN_UNUSED(handlerName))
-{
-    CMN_LOG_CLASS_INIT_ERROR << "AddObserverToRequiredInterface now obsolete" << std::endl;
-    return false;
-}
-
-
-// deprecated
-mtsCommandWriteBase * mtsTask::GetEventHandlerWrite(const std::string & requiredInterfaceName,
-                                                    const std::string & commandName)
-{
-    mtsRequiredInterface * requiredInterface = GetRequiredInterface(requiredInterfaceName);
-    if (requiredInterface) {
-        return requiredInterface->GetEventHandlerWrite(commandName);
-    }
-    return 0;
-}
-
-// deprecated
-mtsCommandVoidBase * mtsTask::GetEventHandlerVoid(const std::string & requiredInterfaceName,
-                                                  const std::string & commandName)
-{
-    mtsRequiredInterface * requiredInterface = GetRequiredInterface(requiredInterfaceName);
-    if (requiredInterface) {
-        return requiredInterface->GetEventHandlerVoid(commandName);
-    }
-    return 0;
-}
-
-
-
 /********************* Methods for task synchronization ***************/
 
 bool mtsTask::WaitToStart(double timeout)

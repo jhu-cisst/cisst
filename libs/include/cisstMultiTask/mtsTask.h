@@ -31,6 +31,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaThread.h>
 #include <cisstOSAbstraction/osaMutex.h>
 
+#include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsStateTable.h>
 #include <cisstMultiTask/mtsMailBox.h>
 #include <cisstMultiTask/mtsCommandVoid.h>
@@ -39,9 +40,9 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsCommandQueuedVoid.h>
 #include <cisstMultiTask/mtsCommandQueuedWrite.h>
 #include <cisstMultiTask/mtsDevice.h>
-#include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsHistory.h>
 #include <cisstMultiTask/mtsFunctionVoid.h>
+#include <cisstMultiTask/mtsTaskInterface.h>
 
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
@@ -272,50 +273,6 @@ public:
     /* documented in base class */
     mtsDeviceInterface * AddProvidedInterface(const std::string & newInterfaceName);
 
-    /********************* Methods to manage event handlers *******************/
-
-    /*! Associate an event (defined by its name) to a command object
-      (i.e. handler defined by name) for a given required interface.
-      This method can only work if the required interface has been
-      connected to a provided interface from another task. */
-    bool CISST_DEPRECATED AddObserverToRequiredInterface(const std::string & requiredInterfaceName,
-                                                         const std::string & eventName,
-                                                         const std::string & handlerName);
-
-	
-    /*! Add a write command to an event handler interface associated
-      to a required interface. */
-    template <class __classType, class __argumentType>
-    CISST_DEPRECATED
-    mtsCommandWriteBase * AddEventHandlerWrite(void (__classType::*action)(const __argumentType &),
-                                               __classType * classInstantiation,
-                                               const std::string & requiredInterfaceName,
-                                               const std::string & commandName,
-                                               const __argumentType & argumentModel = __argumentType(),
-                                               bool queued = true);
-    
-    /*! Get the command defined as user handler based on the required
-      interface name and the command name. */
-    CISST_DEPRECATED
-    mtsCommandWriteBase * GetEventHandlerWrite(const std::string & requiredInterfaceName,
-                                               const std::string & commandName);
-
-    /*! Add a void command to an event handler interface associated
-      to a required interface. */
-    template <class __classType>
-    CISST_DEPRECATED
-    mtsCommandVoidBase * AddEventHandlerVoid(void (__classType::*action)(void),
-                                             __classType * classInstantiation,
-                                             const std::string & requiredInterfaceName,
-                                             const std::string & commandName,
-                                             bool queued = true);
-    
-    /*! Get the command defined as user handler based on the required
-      interface name and the command name. */
-    CISST_DEPRECATED
-    mtsCommandVoidBase * GetEventHandlerVoid(const std::string & requiredInterfaceName,
-                                             const std::string & commandName);
-
     
     /********************* Methods for task synchronization ***************/
 
@@ -357,96 +314,6 @@ public:
 
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsTask)
-
-
-#include <cisstMultiTask/mtsTaskInterface.h>
-
-// these two methods are defined in mtsDevice.h but implemented here
-// as they require the definition of mtsTaskInterface
-template <class __classType>
-inline mtsCommandVoidBase * mtsDevice::AddCommandVoid(void (__classType::*action)(void),
-                                                      __classType * classInstantiation,
-                                                      const std::string & providedInterfaceName,
-                                                      const std::string & commandName) {
-    mtsDeviceInterface * deviceInterface = this->GetProvidedInterface(providedInterfaceName);
-    if (deviceInterface) {
-        mtsTaskInterface * taskInterface = dynamic_cast<mtsTaskInterface *>(deviceInterface);
-        if (taskInterface) {
-            return taskInterface->AddCommandVoid(action, classInstantiation, commandName);
-        } else {
-            return deviceInterface->AddCommandVoid(action, classInstantiation, commandName);
-        }
-    }
-    CMN_LOG_CLASS_INIT_ERROR << "AddCommandVoid cannot find an interface named " << providedInterfaceName << std::endl;
-    return 0;
-}
-
-inline mtsCommandVoidBase * mtsDevice::AddCommandVoid(void (*action)(void),
-                                                      const std::string & providedInterfaceName,
-                                                      const std::string & commandName) {
-    mtsDeviceInterface * deviceInterface = this->GetProvidedInterface(providedInterfaceName);
-    if (deviceInterface) {
-        mtsTaskInterface * taskInterface = dynamic_cast<mtsTaskInterface *>(deviceInterface);
-        if (taskInterface) {
-            return taskInterface->AddCommandVoid(action, commandName);
-        } else {
-            return deviceInterface->AddCommandVoid(action, commandName);
-        }
-    }
-    CMN_LOG_CLASS_INIT_ERROR << "AddCommandVoid cannot find an interface named " << providedInterfaceName << std::endl;
-    return 0;
-}
-
-template <class __classType, class __argumentType>
-inline mtsCommandWriteBase * mtsDevice::AddCommandWrite(void (__classType::*action)(const __argumentType &),
-                                                        __classType * classInstantiation,
-                                                        const std::string & providedInterfaceName,
-                                                        const std::string & commandName,
-                                                        const __argumentType & argumentModel) {
-    mtsDeviceInterface * deviceInterface = this->GetProvidedInterface(providedInterfaceName);
-    if (deviceInterface) {
-        mtsTaskInterface * taskInterface = dynamic_cast<mtsTaskInterface *>(deviceInterface);
-        if (taskInterface) {
-            return taskInterface->AddCommandWrite(action, classInstantiation, commandName, argumentModel);
-        } else {
-            return deviceInterface->AddCommandWrite(action, classInstantiation, commandName, argumentModel);
-        }
-    }
-    CMN_LOG_CLASS_INIT_ERROR << "AddCommandWrite cannot find an interface named " << providedInterfaceName << std::endl;
-    return 0;
-}
-
-#include <cisstMultiTask/mtsRequiredInterface.h>  // to remove when following 2 deprecated methods are removed
-// this method is defined in this header file (deprecated)
-template <class __classType, class __argumentType>
-inline mtsCommandWriteBase * mtsTask::AddEventHandlerWrite(void (__classType::*action)(const __argumentType &),
-                                                           __classType * classInstantiation,
-                                                           const std::string & requiredInterfaceName,
-                                                           const std::string & commandName,
-                                                           const __argumentType & argumentModel,
-                                                           bool queued)  {
-    mtsRequiredInterface * requiredInterface = GetRequiredInterface(requiredInterfaceName);
-    if (requiredInterface) {
-        return requiredInterface->AddEventHandlerWrite(action, classInstantiation, commandName, argumentModel, queued);
-    }
-    CMN_LOG_CLASS_INIT_ERROR << "AddEventHandlerWrite: cannot find an interface named " << requiredInterfaceName << std::endl;
-    return 0;
-}
-
-// this method is defined in this header file (deprecated)
-template <class __classType>
-inline mtsCommandVoidBase * mtsTask::AddEventHandlerVoid(void (__classType::*action)(void),
-                                                         __classType * classInstantiation,
-                                                         const std::string & requiredInterfaceName,
-                                                         const std::string & commandName,
-                                                         bool queued)  {
-    mtsRequiredInterface * requiredInterface = GetRequiredInterface(requiredInterfaceName);
-    if (requiredInterface) {
-        return requiredInterface->AddEventHandlerVoid(action, classInstantiation, commandName, queued);
-    }
-    CMN_LOG_CLASS_INIT_ERROR << "AddEventHandlerVoid: cannot find an interface named " << requiredInterfaceName << std::endl;
-    return 0;
-}
 
 
 #endif // _mtsTask_h
