@@ -25,7 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 class SimpleBehavior: public ui3BehaviorBase
 {
 public:
-    SimpleBehavior(const std::string & name, ui3Manager * manager);
+    SimpleBehavior(const std::string & name);
     ~SimpleBehavior();
 
     void Startup(void) {}

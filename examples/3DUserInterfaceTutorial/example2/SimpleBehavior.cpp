@@ -36,8 +36,8 @@ class SimpleBehaviorVisibleObject: public ui3VisibleObject
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 public:
-    inline SimpleBehaviorVisibleObject(ui3Manager * manager, vctDouble3 position):
-        ui3VisibleObject(manager),
+    inline SimpleBehaviorVisibleObject(vctDouble3 position):
+        ui3VisibleObject(),
         Source(0),
         Mapper(0),
         Actor(0),
@@ -72,7 +72,7 @@ public:
         this->Actor->SetMapper(this->Mapper);
         this->Actor->GetProperty()->SetColor(1.0, 0.0, 0.0);
 
-        this->Assembly->AddPart(this->Actor);
+        this->AddPart(this->Actor);
         this->SetPosition(this->Position);
         this->Hide();
         return true;
@@ -100,7 +100,7 @@ CMN_DECLARE_SERVICES_INSTANTIATION(SimpleBehaviorVisibleObject);
 CMN_IMPLEMENT_SERVICES(SimpleBehaviorVisibleObject);
 
 
-SimpleBehavior::SimpleBehavior(const std::string & name, ui3Manager * manager):
+SimpleBehavior::SimpleBehavior(const std::string & name):
     ui3BehaviorBase(std::string("SimpleBehavior::") + name, 0),
     Following(false),
     VisibleList(0),
@@ -108,18 +108,18 @@ SimpleBehavior::SimpleBehavior(const std::string & name, ui3Manager * manager):
     VisibleObject2(0),
     Counter(0.0)
 {
-    this->VisibleList = new ui3VisibleList(manager);
+    this->VisibleList = new ui3VisibleList();
 
     this->Position.X() = 0.0;
     this->Position.Y() = 0.0;
     this->Position.Z() = 0.0;
-    this->VisibleObject1 = new SimpleBehaviorVisibleObject(manager, this->Position);
+    this->VisibleObject1 = new SimpleBehaviorVisibleObject(this->Position);
     this->VisibleList->Add(this->VisibleObject1);
     
     this->Position.X() = 0.0;
     this->Position.Y() = 20.0;
     this->Position.Z() = 0.0;
-    this->VisibleObject2 = new ui3VisibleAxes(manager);
+    this->VisibleObject2 = new ui3VisibleAxes();
     this->VisibleList->Add(this->VisibleObject2);
     
     //axes = new ui3VisibleAxes();

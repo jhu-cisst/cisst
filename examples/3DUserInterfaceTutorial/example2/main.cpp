@@ -92,9 +92,9 @@ int main()
 
     ui3Manager guiManager;
 
-    SimpleBehavior behavior("Example1", &guiManager);
-    BehaviorWithSlave behavior2("Example2", &guiManager);
-    BehaviorLUS behavior3("Example3", &guiManager);
+    SimpleBehavior behavior("Example1");
+    BehaviorWithSlave behavior2("Example2");
+    BehaviorLUS behavior3("Example3");
 
     guiManager.AddBehavior(&behavior,       // behavior reference
                            0,               // position in the menu bar: default
@@ -134,7 +134,7 @@ int main()
     // add guiManager as a filter to the pipeline, so it will receive video frames
     // "StereoVideo" is defined in the UI Manager as a possible video interface
     
-//    vidUltrasoundStream.Trunk().Append(behavior3.GetStreamSamplerFilter("USVideo"));
+    vidUltrasoundStream.Trunk().Append(behavior3.GetStreamSamplerFilter("USVideo"));
 
 /*
     // add debug window
@@ -305,7 +305,7 @@ int main()
                           daVinci, "MTMRClutch",
                           ui3MasterArm::PRIMARY);
     rightMaster->SetTransformation(transform, 1.0 /* scale factor */);
-    ui3CursorBase * rightCursor = new ui3CursorSphere(&guiManager);
+    ui3CursorBase * rightCursor = new ui3CursorSphere();
     rightCursor->SetAnchor(ui3CursorBase::CENTER_RIGHT);
     rightMaster->SetCursor(rightCursor);
 
@@ -317,7 +317,7 @@ int main()
                          daVinci, "MTMLClutch",
                          ui3MasterArm::SECONDARY);
     leftMaster->SetTransformation(transform, 1.0 /* scale factor */);
-    ui3CursorBase * leftCursor = new ui3CursorSphere(&guiManager);
+    ui3CursorBase * leftCursor = new ui3CursorSphere();
     leftCursor->SetAnchor(ui3CursorBase::CENTER_LEFT);
     leftMaster->SetCursor(leftCursor);
 
