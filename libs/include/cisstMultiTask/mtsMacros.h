@@ -34,6 +34,11 @@ public:                                                                      \
     newName(const className & other):                                        \
         mtsGenericObject(),                                                  \
         className(other) {}                                                  \
+    void ToStream(std::ostream & outputStream) const {                       \
+        mtsGenericObject::ToStream(outputStream);                            \
+        outputStream << std::endl;                                           \
+        className::ToStream(outputStream);                                   \
+    }                                                                        \
     void SerializeRaw(std::ostream & outputStream) const {                   \
         mtsGenericObject::SerializeRaw(outputStream);                        \
         className::SerializeRaw(outputStream);                               \
