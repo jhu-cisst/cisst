@@ -47,17 +47,17 @@ class CISST_EXPORT ui3ImagePlane: public ui3VisibleObject
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
 protected:
-    vtkTexture              *Texture;
-    vtkImageData            *ImageData;
-    vtkPlaneSource          *PlaneSrc;
-    vtkPolyDataMapper       *Mapper;
-    vtkActor                *Actor;
+    vtkTexture              * Texture;
+    vtkImageData            * ImageData;
+    vtkPlaneSource          * PlaneSource;
+    vtkPolyDataMapper       * Mapper;
+    vtkActor                * Actor;
 
     unsigned int            BitmapWidth;
     unsigned int            BitmapHeight;
     unsigned int            TextureWidth;
     unsigned int            TextureHeight;
-    unsigned char           *TextureBuffer;
+    unsigned char           * TextureBuffer;
     double                  PhysicalWidth;
     double                  PhysicalHeight;
     vct3                    PhysicalPositionRelativeToPivot;
@@ -66,7 +66,7 @@ public:
     /*!
      Constructor: called when instantiating behaviors
     */
-    ui3ImagePlane(ui3Manager * manager);
+    ui3ImagePlane(void);
 
     /*!
      Destructor

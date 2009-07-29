@@ -148,6 +148,7 @@ void ui3VTKRenderer::SetWindowPosition(int x, int y)
 
 void ui3VTKRenderer::Add(ui3VisibleObject * object)
 {
+    CMN_ASSERT(object->GetVTKProp());
     this->Renderer->AddViewProp(object->GetVTKProp());
 }
 

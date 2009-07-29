@@ -22,6 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisst3DUserInterface/ui3SceneManager.h>
 #include <cisst3DUserInterface/ui3VisibleObject.h>
+#include <cisst3DUserInterface/ui3VisibleList.h>
 #include <cisst3DUserInterface/ui3VTKRenderer.h>
 
 #include <vtkActor.h>
@@ -32,49 +33,43 @@ http://www.cisst.org/cisst/license.txt.
 CMN_IMPLEMENT_SERVICES(ui3SceneManager);
 
 
-ui3SceneManager::ui3SceneManager(void)
+ui3SceneManager::ui3SceneManager(void):
+    VisibleObjects(0)
 {
+    this->VisibleObjects = new ui3VisibleList();
+    this->VisibleObjects->Show(); // leave visibility control to each part
+    CMN_ASSERT(this->VisibleObjects);
 }
 
 
 ui3SceneManager::~ui3SceneManager(void)
 {
+    if (this->VisibleObjects) {
+        delete this->VisibleObjects;
+    }
 }
 
 
-bool ui3SceneManager::AddRenderer(ui3VTKRenderer* renderer)
+bool ui3SceneManager::AddRenderer(ui3VTKRenderer * renderer)
 {
-    int rendererindex = this->Renderers.size();
-    this->Renderers.resize(rendererindex + 1);
-    this->Renderers[rendererindex] = renderer;
+    unsigned int rendererIndex = this->Renderers.size();
+    this->Renderers.resize(rendererIndex + 1);
+    this->Renderers[rendererIndex] = renderer;
+    renderer->Add(this->VisibleObjects);
     return true; // to be fixed later
 }
 
 
 ui3SceneManager::VTKHandleType ui3SceneManager::Add(ui3VisibleObject * object)
 {
-    object->CreateVTKObjects();
-    vtkProp3D * objectVTKProp = object->GetVTKProp();
-    CMN_ASSERT(objectVTKProp);
-
-    // convert pointer to (void *)
-    VTKHandleType propHandle = reinterpret_cast<VTKHandleType>(objectVTKProp);
-    object->SetVTKHandle(propHandle);
-
-    // if we created an actor, add it to the map
-    if (objectVTKProp) {
-        this->PropMap[propHandle] = objectVTKProp;
-        for (unsigned int i = 0; i < this->Renderers.size(); i ++) {
-            this->Renderers[i]->Add(object);
-        }
-    }
-    // return the handle
-    return propHandle;
+    this->VisibleObjects->Add(object);
+    return 0;
 }
 
 
 bool ui3SceneManager::Delete(VTKHandleType propHandle)
 {
+#if 0
     // make sure we have this handle registered
     PropIteratorType iterator = this->PropMap.find(propHandle);
     if (iterator != this->PropMap.end()) {
@@ -84,6 +79,7 @@ bool ui3SceneManager::Delete(VTKHandleType propHandle)
         this->PropMap.erase(iterator);
         return true;
     }
+#endif
     return false;
 }
 

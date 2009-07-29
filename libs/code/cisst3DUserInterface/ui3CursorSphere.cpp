@@ -45,8 +45,8 @@ protected:
     vtkActor * Actor;
 
 public:
-    CursorTip(ui3Manager * manager):
-        ui3VisibleObject(manager),
+    CursorTip():
+        ui3VisibleObject(),
         Source(0),
         Mapper(0),
         Actor(0)
@@ -83,7 +83,7 @@ public:
         CMN_ASSERT(this->Actor);
         this->Actor->SetMapper(this->Mapper);
         
-        this->Assembly->AddPart(this->Actor);
+        this->AddPart(this->Actor);
 
         return true;
     }
@@ -131,8 +131,8 @@ protected:
     vtkActor * Actor;
 
 public:
-    CursorAnchor(ui3Manager * manager):
-        ui3VisibleObject(manager),
+    CursorAnchor(void):
+        ui3VisibleObject(),
         Source(0),
         Mapper(0),
         Actor(0)
@@ -169,8 +169,10 @@ public:
         CMN_ASSERT(this->Actor);
         this->Actor->SetMapper(this->Mapper);
         
-        this->Assembly->AddPart(this->Actor);
-
+        this->AddPart(this->Actor);
+        
+        this->Actor->VisibilityOff();
+        
         return true;
     }
 
@@ -194,19 +196,19 @@ CMN_IMPLEMENT_SERVICES(CursorAnchor);
 
 
 
-ui3CursorSphere::ui3CursorSphere(ui3Manager * manager):
-    ui3CursorBase(manager),
+ui3CursorSphere::ui3CursorSphere(void):
+    ui3CursorBase(),
     IsPressed(false),
     Is2D(false),
     IsClutched(false),
     VisibleTip(0),
     VisibleAnchor(0),
-    VisibleList()
+    VisibleList(0)
 {
-    this->VisibleList = new ui3VisibleList(manager);
-    this->VisibleTip = new CursorTip(manager);
+    this->VisibleList = new ui3VisibleList();
+    this->VisibleTip = new CursorTip();
     this->VisibleList->Add(this->VisibleTip);
-    this->VisibleAnchor = new CursorAnchor(manager);
+    this->VisibleAnchor = new CursorAnchor();
     this->VisibleList->Add(this->VisibleAnchor);
 }
 

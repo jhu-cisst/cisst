@@ -41,8 +41,8 @@ public:
     /*!
       Constructor: needs the UI Manager
     */
-    inline ui3CursorBase(ui3Manager * manager):
-        Manager(manager)
+    inline ui3CursorBase():
+        SceneManager(0)
     {}
 
     /*! Position stick or line from one corner of the scene to the
@@ -81,7 +81,7 @@ public:
     }
 
 protected:
-    ui3Manager * Manager;
+    ui3SceneManager * SceneManager;
     AnchorType Anchor;
 };
 

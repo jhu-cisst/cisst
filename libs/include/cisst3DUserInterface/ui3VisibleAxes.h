@@ -40,8 +40,8 @@ class CISST_EXPORT ui3VisibleAxes: public ui3VisibleObject
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 public:
-    inline ui3VisibleAxes(ui3Manager * manager):
-        ui3VisibleObject(manager),
+    inline ui3VisibleAxes(void):
+        ui3VisibleObject(),
         AxesActor(0)
     {}
 

@@ -42,7 +42,7 @@ public:
     /*!
      Constructor
     */
-    ui3MenuBar(ui3Manager * manager);
+    ui3MenuBar(void);
 
     /*!
      Destructor
@@ -109,8 +109,6 @@ public:
 
     bool CreateVTKObjects(void);
     
-    vtkProp3D * GetVTKProp(void);
-
     void SetAllButtonsUnselected(void);
 
     void SetDepth(double depth);

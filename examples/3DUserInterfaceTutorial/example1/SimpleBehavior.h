@@ -28,7 +28,7 @@ class SimpleBehaviorVisibleObject;
 class SimpleBehavior: public ui3BehaviorBase
 {
 public:
-    SimpleBehavior(const std::string & name, ui3Manager * manager);
+    SimpleBehavior(const std::string & name);
     ~SimpleBehavior();
 
     void Startup(void) {}

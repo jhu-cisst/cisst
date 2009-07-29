@@ -37,8 +37,8 @@ class BehaviorWithSlaveVisibleObject: public ui3VisibleObject
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 public:
-    inline BehaviorWithSlaveVisibleObject(ui3Manager * manager, vctFrm3 position):
-        ui3VisibleObject(manager),
+    inline BehaviorWithSlaveVisibleObject(vctFrm3 position):
+        ui3VisibleObject(),
         ConeSource(0),
         ConeMapper(0),
         ConeActor(0),
@@ -62,7 +62,7 @@ public:
         CMN_ASSERT(this->ConeActor);
         this->ConeActor->SetMapper(this->ConeMapper);
 
-        this->Assembly->AddPart(this->ConeActor);
+        this->AddPart(this->ConeActor);
 
         this->SphereSource = vtkSphereSource::New();
         CMN_ASSERT(this->SphereSource);
@@ -78,7 +78,7 @@ public:
         this->SphereActor->GetProperty()->SetColor(1.0, 0.0, 0.0);
 
 
-        this->Assembly->AddPart(this->SphereActor);
+        this->AddPart(this->SphereActor);
         this->SetTransformation(this->Position);
         this->Show();
         return true;
@@ -101,13 +101,13 @@ CMN_DECLARE_SERVICES_INSTANTIATION(BehaviorWithSlaveVisibleObject);
 CMN_IMPLEMENT_SERVICES(BehaviorWithSlaveVisibleObject);
 
 
-BehaviorWithSlave::BehaviorWithSlave(const std::string & name, ui3Manager * manager):
+BehaviorWithSlave::BehaviorWithSlave(const std::string & name):
     ui3BehaviorBase(std::string("BehaviorWithSlave::") + name, 0),
     Ticker(0),
     Following(false),
     VisibleObject(0)
 {
-    this->VisibleObject = new BehaviorWithSlaveVisibleObject(manager, this->Position);
+    this->VisibleObject = new BehaviorWithSlaveVisibleObject(this->Position);
     CMN_ASSERT(this->VisibleObject);
 
     this->Offset.SetAll(0.0);

@@ -25,7 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 class BehaviorWithSlave : public ui3BehaviorBase
 {
 public:
-    BehaviorWithSlave(const std::string & name, ui3Manager * manager);
+    BehaviorWithSlave(const std::string & name);
     ~BehaviorWithSlave();
 
     void Startup(void);

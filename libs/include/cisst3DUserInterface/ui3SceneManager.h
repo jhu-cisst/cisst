@@ -46,6 +46,7 @@ class CISST_EXPORT ui3SceneManager: public cmnGenericObject
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
     friend class ui3VTKRenderer;
+    friend class ui3Manager;
 
 public:
     typedef void * VTKHandleType;
@@ -111,14 +112,8 @@ protected:
     }
 
 protected:
-    typedef std::map<VTKHandleType, vtkProp3D *> PropMapType;
-    typedef PropMapType::iterator PropIteratorType;
-    typedef PropMapType::value_type PropPairType;
-    
-    /*!
-     Mapping between actor handles and VTK actor objects.
-    */
-    PropMapType PropMap;
+
+    ui3VisibleList * VisibleObjects;
 
     /*!
      Synchronization object that ensures the thread safety of VTK calls.

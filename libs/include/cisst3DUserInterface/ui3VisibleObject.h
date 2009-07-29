@@ -45,13 +45,15 @@ class CISST_EXPORT ui3VisibleObject: public cmnGenericObject
 
 public:
 
-    ui3VisibleObject(ui3Manager * manager);
+    ui3VisibleObject(void);
 
     /*!
      Destructor
     */
     virtual ~ui3VisibleObject(void) {};
 
+    /*! This method needs to be overload by the user to create the
+      actual VTK objects */
     virtual bool CreateVTKObjects(void) = 0;
 
     virtual vtkProp3D * GetVTKProp(void);
@@ -63,6 +65,8 @@ public:
     void SetPosition(const vctDouble3 & position);
 
     void SetOrientation(const vctDoubleMatRot3 & rotationMatrix);
+
+    void SetScale(const double & scale);
 
     template <bool _storageOrder>
     void SetTransformation(const vctFrameBase<vctMatrixRotation3<double, _storageOrder> > & frame) {
@@ -78,18 +82,38 @@ public:
 
     void Unlock(void);
 
+    void AddPart(vtkProp3D * part);
+    
+    bool WasCreated(void){
+        return Created;
+    };
+
+
 protected:
- 
     typedef ui3SceneManager::VTKHandleType VTKHandleType;
 
     void SetVTKHandle(VTKHandleType handle) {
         this->VTKHandle = handle;
     }
 
+ private:
+    // make assembly private to control access
     vtkAssembly * Assembly;
+    std::vector<vtkProp3D *> Parts;
+
+ protected:
     vtkMatrix4x4 * Matrix;
-    ui3Manager * Manager;
+    ui3SceneManager * SceneManager;
     VTKHandleType VTKHandle;
+
+    bool Created;
+    
+    bool Visible;
+
+    virtual void ShowFromParent(void);
+
+    virtual void HideFromParent(void);
+
 };
 
 

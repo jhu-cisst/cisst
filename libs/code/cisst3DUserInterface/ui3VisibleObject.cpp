@@ -20,18 +20,20 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
-#include <cisst3DUserInterface/ui3Manager.h>
+#include <cisst3DUserInterface/ui3VisibleObject.h>
 
 #include <vtkAssembly.h>
 #include <vtkProperty.h>
 #include <vtkMatrix4x4.h>
 
 
-ui3VisibleObject::ui3VisibleObject(ui3Manager * manager):
+ui3VisibleObject::ui3VisibleObject(void):
     Assembly(0),
     Matrix(0),
-    Manager(manager),
-    VTKHandle(0)
+    SceneManager(0),
+    VTKHandle(0),
+    Created(false),
+    Visible(true)
 {
     this->Assembly = vtkAssembly::New();
     CMN_ASSERT(this->Assembly);
@@ -41,7 +43,6 @@ ui3VisibleObject::ui3VisibleObject(ui3Manager * manager):
     this->Matrix->Identity();
 
     this->Assembly->SetUserMatrix(this->Matrix);
-
 }
 
 
@@ -53,41 +54,80 @@ vtkProp3D * ui3VisibleObject::GetVTKProp(void)
 
 void ui3VisibleObject::Show(void)
 {
-    this->Lock();
-    this->Assembly->VisibilityOn();
-    this->Unlock();
+    this->Visible = true;
+    this->ShowFromParent();
 }
 
 
 void ui3VisibleObject::Hide(void)
 {
-    this->Lock();
-    this->Assembly->VisibilityOff();
-    this->Unlock();
+    this->Visible = false;
+    this->HideFromParent();
+}
+
+
+void ui3VisibleObject::HideFromParent(void)
+{
+    unsigned int index;
+    for (index = 0; index < Parts.size(); index++) {
+        Parts[index]->VisibilityOff();
+    }
+}
+
+
+void ui3VisibleObject::ShowFromParent(void)
+{
+    unsigned int index;
+    for (index = 0; index < Parts.size(); index++) {
+        if (this->Visible) {
+            Parts[index]->VisibilityOn();
+        } else {
+            Parts[index]->VisibilityOff();
+        }
+    }
 }
 
 
 void ui3VisibleObject::SetPosition(const vctDouble3 & position)
 {
-    this->Lock();
-    //this->Assembly->SetPosition(position.Pointer());
-    this->Matrix->SetElement(0, 3, position.X());
-    this->Matrix->SetElement(1, 3, position.Y());
-    this->Matrix->SetElement(2, 3, position.Z());
-    this->Unlock();
+    if (this->Created) {
+        this->Lock();
+        this->Matrix->SetElement(0, 3, position.X());
+        this->Matrix->SetElement(1, 3, position.Y());
+        this->Matrix->SetElement(2, 3, position.Z());
+        this->Unlock();
+    } else {
+        CMN_LOG_CLASS_RUN_DEBUG << "SetPosition: called on object not yet created" << std::endl;
+    }
 }
 
 
 void ui3VisibleObject::SetOrientation(const vctMatRot3 & rotationMatrix)
 {
-    unsigned int i, j;
-    this->Lock();
-    for (i = 0; i < 3; i++) {
-        for (j = 0; j < 3; j++) {
-            this->Matrix->SetElement(i, j, rotationMatrix.Element(i, j));
+    if (this->Created) {
+        unsigned int i, j;
+        this->Lock();
+        for (i = 0; i < 3; i++) {
+            for (j = 0; j < 3; j++) {
+                this->Matrix->SetElement(i, j, rotationMatrix.Element(i, j));
+            }
         }
+        this->Unlock();
+    } else {
+        CMN_LOG_CLASS_RUN_DEBUG << "SetOrientation: called on object not yet created" << std::endl;
     }
-    this->Unlock();
+}
+
+
+void ui3VisibleObject::SetScale(const double & scale)
+{
+    if (this->Created) {
+        this->Lock();
+        this->Assembly->SetScale(scale);
+        this->Unlock();
+    } else {
+        CMN_LOG_CLASS_RUN_DEBUG << "SetScale: called on object not yet created" << std::endl;
+    }
 }
 
 
@@ -107,14 +147,18 @@ vctDoubleFrm3 ui3VisibleObject::GetTransformation(void) const
 
 void ui3VisibleObject::SetVTKMatrix(vtkMatrix4x4* matrix)
 {
-    this->Matrix->DeepCopy(matrix);
+    if (this->Created) {
+        this->Matrix->DeepCopy(matrix);
+    } else {
+        CMN_LOG_CLASS_RUN_DEBUG << "SetVTKMatrix: called on object not yet created" << std::endl;
+    }
 }
 
 
 void ui3VisibleObject::Lock(void)
 {
-    if (this->VTKHandle) {
-        this->Manager->GetSceneManager()->Lock(this->VTKHandle);
+    if (this->Created) {
+        this->SceneManager->Lock(this->VTKHandle);
     } else {
         CMN_LOG_CLASS_RUN_DEBUG << "Lock: attempt to lock with an object not yet added to the scene" << std::endl;
     }
@@ -123,11 +167,16 @@ void ui3VisibleObject::Lock(void)
 
 void ui3VisibleObject::Unlock(void)
 {
-    if (this->VTKHandle) {
-        this->Manager->GetSceneManager()->Unlock(this->VTKHandle);
+    if (this->Created) {
+        this->SceneManager->Unlock(this->VTKHandle);
     } else {
         CMN_LOG_CLASS_RUN_DEBUG << "Unlock: attempt to unlock with an object not yet added to the scene" << std::endl;
     }
 }
 
 
+void ui3VisibleObject::AddPart(vtkProp3D * part)
+{
+    this->Assembly->AddPart(part);
+    this->Parts.push_back(part);
+}

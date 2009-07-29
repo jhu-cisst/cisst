@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <vtkAssembly.h>
 #include <vtkProperty.h>
 #include <vtkAxesActor.h>
+#include <vtkMatrix4x4.h>
 
 
 CMN_IMPLEMENT_SERVICES(ui3VisibleAxes);
@@ -38,15 +39,21 @@ ui3VisibleAxes::~ui3VisibleAxes()
 
 bool ui3VisibleAxes::CreateVTKObjects(void) 
 {
+
     this->AxesActor = vtkAxesActor::New();
     CMN_ASSERT(this->AxesActor);
     
     this->AxesActor->SetShaftTypeToCylinder();
     
-    this->Assembly->AddPart(this->AxesActor);
+    this->AddPart(this->AxesActor);
     this->SetSize(10.0);
     this->ShowLabels();
-    this->Hide();
+    this->Show();
+
+    this->Matrix->SetElement(0, 3, 0.0);
+    this->Matrix->SetElement(1, 3, 0.0);
+    this->Matrix->SetElement(2, 3, -200.0);
+    
  
     return true;
 }

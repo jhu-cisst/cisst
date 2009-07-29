@@ -56,7 +56,7 @@ public:
     /*!
      Constructor: called when instantiating behaviors
     */
-    ui3CursorSphere(ui3Manager * manager);
+    ui3CursorSphere(void);
 
     /*!
      Destructor

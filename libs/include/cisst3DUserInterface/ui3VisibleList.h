@@ -48,17 +48,33 @@ class CISST_EXPORT ui3VisibleList: public ui3VisibleObject
 
 public:
 
-    ui3VisibleList(ui3Manager * manager);
+    ui3VisibleList(void);
 
     /*!
      Destructor
     */
     ~ui3VisibleList(void) {};
 
+    bool Update(ui3SceneManager * sceneManager);
+
     bool CreateVTKObjects(void);
 
     void Add(ui3VisibleObject * object) {
         this->Objects.push_back(object);
+        this->UpdateNeeded();
+    }
+
+    void Add(ui3VisibleList * list) {
+        this->Objects.push_back(list);
+        list->ParentList = this;
+        this->UpdateNeeded();
+    }
+
+    void UpdateNeeded(void) {
+        this->UpdateNeededMember = true;
+        if (this->ParentList) {
+            this->ParentList->UpdateNeeded();
+        }
     }
 
     void RemoveLast(void) {
@@ -75,9 +91,17 @@ public:
     
 
 protected:
-    
+
+    void ShowFromParent(void);
+
+    void HideFromParent(void);
+
     typedef std::list<ui3VisibleObject *> ListType;
     ListType Objects;
+
+    ui3VisibleList * ParentList;
+
+    bool UpdateNeededMember;
 };
 
 
