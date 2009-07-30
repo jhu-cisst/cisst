@@ -106,7 +106,7 @@ void ui3VisibleObject::SetPosition(const vctDouble3 & position)
 
 void ui3VisibleObject::SetOrientation(const vctMatRot3 & rotationMatrix)
 {
-    CMN_LOG_CLASS_RUN_VERBOSE << "SetOrientation: called for object \"" << this->Name() << "\"" << std::endl; 
+    CMN_LOG_CLASS_VERY_VERBOSE << "SetOrientation: called for object \"" << this->Name() << "\"" << std::endl; 
     if (this->Created()) {
         unsigned int i, j;
         this->Lock();

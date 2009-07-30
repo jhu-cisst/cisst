@@ -648,7 +648,7 @@ void ui3Manager::EnterMaMModeEventHandler(void)
 {
     this->ShowAll();
     this->MaM = true;
-    CMN_LOG_CLASS_VERY_VERBOSE << "EnterMaMMode" << std::endl;
+    CMN_LOG_CLASS_RUN_VERBOSE << "EnterMaMMode" << std::endl;
 }
 
 
@@ -656,7 +656,7 @@ void ui3Manager::LeaveMaMModeEventHandler(void)
 {
     this->HideAll();
     this->MaM = false;
-    CMN_LOG_CLASS_VERY_VERBOSE << "LeaveMaMMode" << std::endl;
+    CMN_LOG_CLASS_RUN_VERBOSE << "LeaveMaMMode" << std::endl;
 }
 
 
