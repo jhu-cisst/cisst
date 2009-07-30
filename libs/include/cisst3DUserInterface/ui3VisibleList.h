@@ -48,7 +48,7 @@ class CISST_EXPORT ui3VisibleList: public ui3VisibleObject
 
 public:
 
-    ui3VisibleList(void);
+    ui3VisibleList(const std::string & name);
 
     /*!
      Destructor
@@ -59,23 +59,9 @@ public:
 
     bool CreateVTKObjects(void);
 
-    void Add(ui3VisibleObject * object) {
-        this->Objects.push_back(object);
-        this->UpdateNeeded();
-    }
+    void Add(ui3VisibleObject * object);
 
-    void Add(ui3VisibleList * list) {
-        this->Objects.push_back(list);
-        list->ParentList = this;
-        this->UpdateNeeded();
-    }
-
-    void UpdateNeeded(void) {
-        this->UpdateNeededMember = true;
-        if (this->ParentList) {
-            this->ParentList->UpdateNeeded();
-        }
-    }
+    void Add(ui3VisibleList * list);
 
     void RemoveLast(void) {
         this->Objects.pop_back();
@@ -88,20 +74,22 @@ public:
     unsigned int size(void) const  {
         return this->Objects.size();
     }
+
+    void RecursiveUpdateNeeded(void);
     
 
 protected:
 
-    void ShowFromParent(void);
-
-    void HideFromParent(void);
+    void PropagateVisibility(bool visible);
 
     typedef std::list<ui3VisibleObject *> ListType;
     ListType Objects;
 
     ui3VisibleList * ParentList;
 
-    bool UpdateNeededMember;
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(bool, UpdateNeeded);
+
+
 };
 
 

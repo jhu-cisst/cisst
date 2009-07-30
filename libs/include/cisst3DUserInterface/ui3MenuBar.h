@@ -42,7 +42,7 @@ public:
     /*!
      Constructor
     */
-    ui3MenuBar(void);
+    ui3MenuBar(const std::string & name);
 
     /*!
      Destructor

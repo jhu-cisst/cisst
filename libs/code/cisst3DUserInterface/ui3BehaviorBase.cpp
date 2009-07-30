@@ -54,7 +54,7 @@ void ui3BehaviorBase::AddMenuBar(bool isManager)
     CMN_ASSERT(this->Manager);
 
     // create the menu bar
-    this->MenuBar = new ui3MenuBar();
+    this->MenuBar = new ui3MenuBar(this->GetName());
     CMN_ASSERT(this->MenuBar);
 
     // add a button in the main menu bar with callback

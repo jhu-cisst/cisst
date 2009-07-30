@@ -25,6 +25,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnGenericObject.h>
 #include <cisstCommon/cmnClassServices.h>
 #include <cisstCommon/cmnClassRegisterMacros.h>
+#include <cisstCommon/cmnAccessorMacros.h>
+
 #include <cisstVector/vctFixedSizeVectorTypes.h>
 #include <cisstVector/vctTransformationTypes.h>
 
@@ -45,7 +47,7 @@ class CISST_EXPORT ui3VisibleObject: public cmnGenericObject
 
 public:
 
-    ui3VisibleObject(void);
+    ui3VisibleObject(const std::string & name = "Unnamed");
 
     /*!
      Destructor
@@ -83,13 +85,8 @@ public:
     void Unlock(void);
 
     void AddPart(vtkProp3D * part);
-    
-    bool WasCreated(void){
-        return Created;
-    };
 
-
-protected:
+ protected:
     typedef ui3SceneManager::VTKHandleType VTKHandleType;
 
     void SetVTKHandle(VTKHandleType handle) {
@@ -106,14 +103,14 @@ protected:
     ui3SceneManager * SceneManager;
     VTKHandleType VTKHandle;
 
-    bool Created;
+    virtual void PropagateVisibility(bool visible);
+
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(bool, Created);
+
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(bool, Visible);
+
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(std::string, Name);
     
-    bool Visible;
-
-    virtual void ShowFromParent(void);
-
-    virtual void HideFromParent(void);
-
 };
 
 

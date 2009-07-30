@@ -31,11 +31,40 @@ http://www.cisst.org/cisst/license.txt.
 CMN_IMPLEMENT_SERVICES(ui3VisibleList);
 
 
-ui3VisibleList::ui3VisibleList(void):
-    ui3VisibleObject(),
+ui3VisibleList::ui3VisibleList(const std::string & name):
+    ui3VisibleObject(name + " (list)"),
     ParentList(0),
     UpdateNeededMember(true)
 {
+}
+
+
+void ui3VisibleList::Add(ui3VisibleObject * object)
+{
+    this->Objects.push_back(object);
+    this->SetUpdateNeeded(true);
+    CMN_LOG_CLASS_RUN_VERBOSE << "Add: object \"" << object->Name() << "\" added to list \""
+                              << this->Name() << "\"" << std::endl;
+}
+
+
+void ui3VisibleList::Add(ui3VisibleList * list)
+{
+    this->Objects.push_back(list);
+    list->ParentList = this;
+    this->SetUpdateNeeded(true);
+    CMN_LOG_CLASS_RUN_VERBOSE << "Add: list \"" << list->Name() << "\" added to list \""
+                              << this->Name() << "\"" <<std::endl;
+}
+
+
+void ui3VisibleList::RecursiveUpdateNeeded(void)
+{
+    this->UpdateNeededMember = true;
+    this->Assembly->Modified();
+    if (this->ParentList) {
+        this->ParentList->UpdateNeeded();
+    }
 }
 
 
@@ -73,20 +102,23 @@ bool ui3VisibleList::Update(ui3SceneManager * sceneManager)
             // this is a list, i.e. a node
 
             // check if the corresponding VTK object has been added
-            if (!listPointer->Created) {
+            if (!listPointer->Created()) {
+                CMN_LOG_CLASS_RUN_VERBOSE << "Update: list \"" << listPointer->Name()
+                                          << "\" added in update for \""
+                                          << this->Name() << "\"" << std::endl;
                 // set vtk handle on visible object
                 objectVTKProp = listPointer->GetVTKProp();
                 CMN_ASSERT(objectVTKProp);
-                
+
                 // convert pointer to (void *)
                 propHandle = reinterpret_cast<VTKHandleType>(objectVTKProp);
                 listPointer->SetVTKHandle(propHandle);
-                
+ 
                 // add to assembly
                 this->Assembly->AddPart(objectVTKProp);
-                
+
                 // mark as created so we don't create it again
-                listPointer->Created = true;
+                listPointer->SetCreated(true);
             }
 
             // pass the update to children
@@ -95,7 +127,10 @@ bool ui3VisibleList::Update(ui3SceneManager * sceneManager)
 
         } else {
             // check it this object has already been created
-            if (!objectPointer->Created) {
+            if (!objectPointer->Created()) {
+                CMN_LOG_CLASS_RUN_VERBOSE << "Update: object \"" << objectPointer->Name()
+                                          << "\" created in update for \""
+                                          << this->Name() << "\"" << std::endl;
                 // this is an object, i.e. a leaf
                 result &= objectPointer->CreateVTKObjects();
                 
@@ -114,9 +149,10 @@ bool ui3VisibleList::Update(ui3SceneManager * sceneManager)
                 objectPointer->SceneManager = sceneManager;
 
                 // mark as created so we don't create it again
-                objectPointer->Created = true;
+                objectPointer->SetCreated(true);
             }
         }
+        objectPointer->PropagateVisibility(objectPointer->Visible());
     }
 
     this->UpdateNeededMember = false;
@@ -125,39 +161,28 @@ bool ui3VisibleList::Update(ui3SceneManager * sceneManager)
 }
 
 
-
 bool ui3VisibleList::CreateVTKObjects(void)
 {
     return true;
 }
 
 
-void ui3VisibleList::ShowFromParent(void)
+void ui3VisibleList::PropagateVisibility(bool visible)
 {
     const ListType::iterator end = Objects.end();
     ListType::iterator iterator;
 
-    for (iterator = Objects.begin();
-         iterator != end;
-         ++iterator) {
-        if (this->Visible) {
-            (*iterator)->ShowFromParent();
-        } else {
-            (*iterator)->HideFromParent();
+    if (visible) {
+        for (iterator = Objects.begin();
+             iterator != end;
+             ++iterator) {
+            (*iterator)->PropagateVisibility(this->Visible());
+        }
+    } else {
+        for (iterator = Objects.begin();
+             iterator != end;
+             ++iterator) {
+            (*iterator)->PropagateVisibility(false);
         }
     }
 }
-
-
-void ui3VisibleList::HideFromParent(void)
-{
-    const ListType::iterator end = Objects.end();
-    ListType::iterator iterator;
-
-    for (iterator = Objects.begin();
-         iterator != end;
-         ++iterator) {
-        (*iterator)->HideFromParent();
-    }
-}
-

@@ -36,7 +36,7 @@ CMN_IMPLEMENT_SERVICES(ui3SceneManager);
 ui3SceneManager::ui3SceneManager(void):
     VisibleObjects(0)
 {
-    this->VisibleObjects = new ui3VisibleList();
+    this->VisibleObjects = new ui3VisibleList("Scene objects");
     this->VisibleObjects->Show(); // leave visibility control to each part
     CMN_ASSERT(this->VisibleObjects);
 }

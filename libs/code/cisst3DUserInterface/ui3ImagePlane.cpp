@@ -28,7 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 CMN_IMPLEMENT_SERVICES(ui3ImagePlane);
 
 ui3ImagePlane::ui3ImagePlane(void):
-    ui3VisibleObject(),
+    ui3VisibleObject("ImagePlane"),
     Texture(0),
     ImageData(0),
     PlaneSource(0),
@@ -119,7 +119,6 @@ bool ui3ImagePlane::CreateVTKObjects(void)
     // Map texture onto the plane
     this->Actor->SetTexture(this->Texture);
     this->Actor->GetProperty()->SetOpacity(1.0);
-
     this->AddPart(this->Actor);
 
     return true;

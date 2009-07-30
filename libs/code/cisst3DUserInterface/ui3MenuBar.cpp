@@ -36,8 +36,8 @@ CMN_IMPLEMENT_SERVICES(ui3MenuBar);
 const unsigned int MaxButtons = 5;
 
 
-ui3MenuBar::ui3MenuBar(void):
-    ui3VisibleObject(),
+ui3MenuBar::ui3MenuBar(const std::string & name):
+    ui3VisibleObject(name + "MenuBar"),
     ShowState(false),
     ButtonWidth(10.0),
     ButtonHeight(10.0),
@@ -87,7 +87,7 @@ bool ui3MenuBar::CreateVTKObjects(void)
     CMN_ASSERT(this->Actor);
     this->Actor->SetMapper(this->Mapper);
 
-    this->Visible = false;
+    this->SetVisible(false);
     this->Actor->GetProperty()->SetColor(0.5, 0.5, 0.5);
     this->Actor->GetProperty()->SetOpacity(0.1);
 

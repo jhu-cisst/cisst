@@ -112,7 +112,6 @@ protected:
     }
 
 protected:
-
     ui3VisibleList * VisibleObjects;
 
     /*!

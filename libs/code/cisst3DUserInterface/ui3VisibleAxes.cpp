@@ -42,19 +42,17 @@ bool ui3VisibleAxes::CreateVTKObjects(void)
 
     this->AxesActor = vtkAxesActor::New();
     CMN_ASSERT(this->AxesActor);
-    
+
     this->AxesActor->SetShaftTypeToCylinder();
-    
+
     this->AddPart(this->AxesActor);
     this->SetSize(10.0);
     this->ShowLabels();
-    this->Show();
 
     this->Matrix->SetElement(0, 3, 0.0);
     this->Matrix->SetElement(1, 3, 0.0);
     this->Matrix->SetElement(2, 3, -200.0);
-    
- 
+
     return true;
 }
 
