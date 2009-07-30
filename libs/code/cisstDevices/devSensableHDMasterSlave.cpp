@@ -38,13 +38,44 @@ devSensableHDMasterSlave::devSensableHDMasterSlave(const std::string & taskName,
     ScaleFactor = 0.15;
     FMax = 40.0;
     ForceMode = 0;
+    ForceMasterCoefficient = 1.0;
     firstIteration = true;
     clutch = false;
+    MasterClutch = false;
+
+    // Initialize provided interfaces
+    mtsProvidedInterface * providedInterface;
+    providedInterface = AddProvidedInterface("ProvidesSensableHDMasterSlave");
+
+    StateTable.AddData(ScaleFactor, "ScaleFactor");
+    StateTable.AddData(FMax, "ForceLimit");
+    StateTable.AddData(MasterClutch, "ClutchOn");
+    StateTable.AddData(ForceMode, "ForceMode");
+    StateTable.AddData(ForceMasterCoefficient, "ForceCoefficient");
+
+    providedInterface->AddCommandReadState(StateTable, ScaleFactor, "GetScaleFactor");
+    providedInterface->AddCommandReadState(StateTable, FMax, "GetForceLimit");
+    providedInterface->AddCommandReadState(StateTable, MasterClutch, "GetClutch");
+    providedInterface->AddCommandReadState(StateTable, ForceMode, "GetForceMode");
+    providedInterface->AddCommandReadState(StateTable, ForceMasterCoefficient, "GetForceCoefficient");
+
+    providedInterface->AddCommandWrite(&devSensableHDMasterSlave::SetScaleFactor, this, "SetScaleFactor", ScaleFactor);
+    providedInterface->AddCommandWrite(&devSensableHDMasterSlave::SetForceLimit, this, "SetForceLimit", FMax);
+    providedInterface->AddCommandWrite(&devSensableHDMasterSlave::SetClutch, this, "SetClutch", clutch);
+    providedInterface->AddCommandWrite(&devSensableHDMasterSlave::SetForceMode, this, "SetForceMode", ForceMode);
+    providedInterface->AddCommandWrite(&devSensableHDMasterSlave::SetForceCoefficient, this, "SetForceCoefficient", ForceMasterCoefficient);
+
+    providedInterface->AddCommandVoid(&devSensableHDMasterSlave::IncrementScaleFactor, this, "IncrementScaleFactor");
+    providedInterface->AddCommandVoid(&devSensableHDMasterSlave::DecrementScaleFactor, this, "DecrementScaleFactor");
+    providedInterface->AddCommandVoid(&devSensableHDMasterSlave::IncrementForceLimit, this, "IncrementForceLimit");
+    providedInterface->AddCommandVoid(&devSensableHDMasterSlave::DecrementForceLimit, this, "DecrementForceLimit");
 }
 
 
 void devSensableHDMasterSlave::UserControl(void)
 {   
+    //ProcessQueuedCommands();
+
     ForceMaster.SetAll(0.0);
     ForceSlave.SetAll(0.0);
 
@@ -57,7 +88,7 @@ void devSensableHDMasterSlave::UserControl(void)
     }
 
     // If clutching the first device
-    if(DevicesVector(0)->Clutch == true) {
+    if(DevicesVector(0)->Clutch == true || MasterClutch == true) {
         // Get the positions of the second device
         p2 = DevicesVector(1)->PositionCartesian;
 
@@ -141,6 +172,9 @@ void devSensableHDMasterSlave::UserControl(void)
         ForceMaster.Multiply(ScaleFactor);
         ForceSlave.Multiply(ScaleFactor);
 
+        //Apply the coefficient
+        ForceMaster.Multiply(ForceMasterCoefficient);
+
         // Set force to the prm type
         firstDeviceForce.SetForce(ForceMaster);
         secondDeviceForce.SetForce(ForceSlave);
@@ -158,48 +192,48 @@ void devSensableHDMasterSlave::GetPositions(void)
     p2 = DevicesVector(1)->PositionCartesian;
 } 
 
-void devSensableHDMasterSlave::SetScaleFactor(double Scale)
+void devSensableHDMasterSlave::SetScaleFactor(const mtsDouble & Scale)
 {
     ScaleFactor = Scale;
 }
 
-void devSensableHDMasterSlave::SetForceLimit(double FLimit)
+void devSensableHDMasterSlave::SetForceLimit(const mtsDouble& FLimit)
 {
     FMax = FLimit;
+}
+
+void devSensableHDMasterSlave::SetForceMode(const mtsInt& Mode)
+{
+    ForceMode = Mode;
+}
+
+void devSensableHDMasterSlave::SetClutch(const mtsBool& commandedClutch)
+{
+    MasterClutch = commandedClutch;
+}
+
+void devSensableHDMasterSlave::SetForceCoefficient(const mtsDouble& commandedCoefficient)
+{
+    ForceMasterCoefficient = commandedCoefficient;
 }
 
 void devSensableHDMasterSlave::IncrementScaleFactor(void)
 {
     ScaleFactor *= 1.25;
-    printf("- Scale factor: %f\n", ScaleFactor);
 }
 
 void devSensableHDMasterSlave::DecrementScaleFactor(void)
 {
     ScaleFactor *= 0.8;
-    printf("- Scale factor: %f\n", ScaleFactor);
 }
 
 void devSensableHDMasterSlave::IncrementForceLimit(void)
 {
     FMax *= 1.25;
-    printf("- Force Limit: %f\n", FMax);
 }
 
 void devSensableHDMasterSlave::DecrementForceLimit(void)
 {
     FMax *= 0.8;
-    printf("- Force Limit: %f\n", FMax);
 }
 
-void devSensableHDMasterSlave::SetForceMode(int Mode)
-{
-    ForceMode = Mode;
-    if(Mode == 0) {
-        printf("* Ratchet Mode active.\n");
-    } else if(Mode == 1) {
-        printf("* Force Capping Mode active.\n");
-    } else if(Mode == 2) {
-        printf("* infinite Force Mode active.\n");
-    }
-}

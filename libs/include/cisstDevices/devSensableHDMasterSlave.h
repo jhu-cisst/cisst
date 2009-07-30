@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstParameterTypes.h>
 #include <cisstCommon.h>
+#include <cisstMultiTask/mtsTaskFromCallback.h>
 #include <cisstDevices/devSensableHD.h>
 
 // Always include last
@@ -41,14 +42,16 @@ public:
     void UserControl(void);
     
     void GetPositions(void);
-    void SetScaleFactor(double Scale);
-    void SetForceLimit(double FLimit);
+    void SetScaleFactor(const mtsDouble& Scale);
+    void SetForceLimit(const mtsDouble& FLimit);
+    void SetForceMode(const mtsInt& Mode);
+    void SetClutch(const mtsBool& commandedClutch);
+    void SetForceCoefficient(const mtsDouble& commandedCoefficient);
     void SetOffsetMultiplier(double OffMult);
     void IncrementScaleFactor(void);
     void DecrementScaleFactor(void);
     void IncrementForceLimit(void);
     void DecrementForceLimit(void);
-    void SetForceMode(int Mode);
     
 protected:
     vctFixedSizeVector<double, 6> ForceMaster;
@@ -69,12 +72,14 @@ protected:
     prmPositionCartesianGet p2R;
 
     bool firstIteration;
-    bool clutch;
-    double ScaleFactor;
-    double FMax;
+    mtsBool clutch;
+    mtsBool MasterClutch;
+    mtsDouble ScaleFactor;
+    mtsDouble FMax;
+    mtsInt ForceMode;
+    mtsDouble ForceMasterCoefficient;
     double ForceFeedNormMaster;
     double ForceFeedNormSlave;
-    int ForceMode;
 };
 
 
