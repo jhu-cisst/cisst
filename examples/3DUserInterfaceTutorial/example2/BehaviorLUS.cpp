@@ -381,7 +381,7 @@ class BehaviorLUSBackground: public ui3VisibleObject
            // cubePlane -> SetStipplePattern(1);
 
 
-
+        this->cubePlane->VisibilityOff();
         this->AddPart(this->cubePlane);
 
         this->SetTransformation(this->Position);
@@ -443,6 +443,7 @@ public:
         outline->GetProperty()->SetColor(1,1,1);
         //outline -> SetStipplePattern(1);
         
+        this->outline->VisibilityOff();
         this->AddPart(this->outline);
         
         
@@ -484,7 +485,8 @@ class BehaviorLUSMarker: public ui3VisibleObject
     jointMapper(0),
     joint(0),
     Position()
-    {}
+    { std::cout << "marker constructor called" << std::endl;
+    }
 
     inline ~BehaviorLUSMarker()
     {
@@ -493,7 +495,7 @@ class BehaviorLUSMarker: public ui3VisibleObject
 
     inline bool CreateVTKObjects(void) {
 
-        CMN_LOG_CLASS_INIT_VERBOSE << "Marker set up" << endl;
+        std::cout << "Marker set up" << endl;
 
         jCylinder = vtkCylinderSource::New();
         CMN_ASSERT(jCylinder);
@@ -583,24 +585,24 @@ std::cout<< "constructor========================================================
 
     this->camera2map = vtkMatrix4x4::New();
 
-    this->VisibleList = new ui3VisibleList();
+    this->VisibleList = new ui3VisibleList("LUS Main");
     
-    this->ProbeList = new ui3VisibleList();
-    this->ProbeListJoint1 = new ui3VisibleList();
-    this->ProbeListJoint2 = new ui3VisibleList();
-    this->ProbeListJoint3 = new ui3VisibleList();
-    this->ProbeListShaft = new ui3VisibleList();
-    this->BackgroundList = new ui3VisibleList();
-    this->TextList = new ui3VisibleList();
-    this->MapCursorList = new ui3VisibleList();
-    this->MarkerList = new ui3VisibleList();
-    this->AxesList = new ui3VisibleList();
+    this->ProbeList = new ui3VisibleList("Probe");
+    this->ProbeListJoint1 = new ui3VisibleList("ProbeJoint1");
+    this->ProbeListJoint2 = new ui3VisibleList("ProbeJoint2");
+    this->ProbeListJoint3 = new ui3VisibleList("ProbeJoint3");
+    this->ProbeListShaft = new ui3VisibleList("ProbeShaft");
+    this->BackgroundList = new ui3VisibleList("Background");
+    this->TextList = new ui3VisibleList("Text");
+    this->MapCursorList = new ui3VisibleList("MapCursor");
+    this->MarkerList = new ui3VisibleList("Marker");
+    this->AxesList = new ui3VisibleList("Axes");
     
     this->VisibleList->Add(this->ProbeList);
     this->VisibleList->Add(this->BackgroundList);
     this->VisibleList->Add(this->TextList);
     this->VisibleList->Add(this->MarkerList);
-    this->VisibleList->Add(this->MapCursorList);
+//    this->VisibleList->Add(this->MapCursorList);
     this->VisibleList->Add(this->AxesList);
 
     this->ProbeHead = new BehaviorLUSProbeHead(this->Position);
@@ -824,7 +826,6 @@ bool BehaviorLUS::RunForeground()
     if (this->Manager->MastersAsMice() != this->PreviousMaM) {
         this->PreviousMaM = this->Manager->MastersAsMice();
         this->VisibleList->Show();
-        this->Backgrounds->Show();
 
     }
 
@@ -833,7 +834,6 @@ bool BehaviorLUS::RunForeground()
     if (this->State != this->PreviousState) {
         this->PreviousState = this->State;
         this->VisibleList->Show();
-        this->Backgrounds->Show();
     }
 
     // running in foreground GUI mode
@@ -880,7 +880,6 @@ bool BehaviorLUS::RunBackground()
     if (this->State != this->PreviousState) {
         this->PreviousState = this->State;
         this->VisibleList->Show();
-        this->Backgrounds ->Show();
     }
 
     this->Slave1->GetCartesianPosition(this->Slave1Position);
@@ -906,7 +905,9 @@ bool BehaviorLUS::RunNoInput()
     if (this->Manager->MastersAsMice() != this->PreviousMaM) {
         this->PreviousMaM = this->Manager->MastersAsMice();
         this->VisibleList->Show();
-        this->BackgroundList->Show();
+        this->ProbeList->Show();
+        std::cout << "probe head visiblity: " << this->ProbeHead->Visible() << " : " << this->ProbeHead->Created()<< std::endl;
+        std::cout << "Image plane visiblity" << this->ImagePlane->Visible()<< std::endl;
     }
 
     //this->AxesJoint1->SetTransformation(this->Slave1Position.Position());
@@ -967,7 +968,6 @@ bool BehaviorLUS::RunNoInput()
 //update the map if enabled other wise it should be hidden.
     if(MapEnabled)
     {
-        this->MapCursorList->Show();
         this->MarkerList->Show();
 
         vctDouble3 xAxis, yAxis, zAxis;
@@ -987,7 +987,7 @@ bool BehaviorLUS::RunNoInput()
         //MapCursor->SetTransformation(markerPos_ECMRCM);
 
     }
-    else {this->MapCursorList->Hide();}
+    else {}
     return true;
 }
 
@@ -1542,6 +1542,7 @@ void BehaviorLUS::AddMarker(void)
             new BehaviorLUSMarker();
         // newMarkerVisible->CreateVTKObjects();
         newMarkerVisible->Show();
+        std::cout<< "newMarkerVisible: " << newMarkerVisible->Visible() << std::endl;
         newMarker->VisibleObject = newMarkerVisible;
         // set the position of the marker based on current cursor position
         newMarker->AbsolutePosition = GetCurrentCursorPositionWRTECMRCM();
@@ -1668,8 +1669,12 @@ vctFrm3 BehaviorLUS::GetCurrentCursorPositionWRTECMRCM(void)
     imdtframe = yawFrame0 * pitchFrame1 * insertFrame2 * rollFrame3 * slavePosition.Position(); //* GetCurrentCursorPositionWRTECM(); // working fixed point !!!
     finalFrame = imdtframe.InverseSelf();
 
-    AxesJoint1->SetTransformation(finalFrame);
-    MapCursor->SetTransformation(finalFrame);
+    vctFrm3 cursorVTK;
+    
+    ECMRCMtoVTK.ApplyTo(finalFrame, cursorVTK);// cursorVTK = ECMRCMtoVTK * finalframe
+    
+    AxesJoint1->SetTransformation(cursorVTK);
+    MapCursor->SetTransformation(cursorVTK);
 
     return finalFrame;
 }
@@ -1711,9 +1716,6 @@ void BehaviorLUS::UpdateVisibleMap(void)
     MarkersType::iterator iter = Markers.begin();
     const MarkersType::iterator end = Markers.end();
     vctDouble3 currentOrigin;
- 
-    // transformation to go from absolute to SAW (i.e. VTK visible)
-    vctFrm3 toSAW;
 
     // iterate through all elements to build a bounding box
     if (iter != end)
@@ -1737,7 +1739,7 @@ void BehaviorLUS::UpdateVisibleMap(void)
         // computer the transformation to be applied to all absolute coordinates
         // to be display in the SAW coordinate system
         vctDouble3 centerInSAW(0.0, 0.0, -200.0); // hard coded for now
-        toSAW.Translation().Assign(centerInSAW - center);
+        ECMRCMtoVTK.Translation().Assign(centerInSAW - center);
     }
 
     std::cout << "Bouding box: [" << corner1 << "] [" << corner2 << "]" << std::endl;
@@ -1746,7 +1748,7 @@ void BehaviorLUS::UpdateVisibleMap(void)
     vctFrm3 positionInSAW;
     for (iter = Markers.begin(); iter != end; iter++)
     {
-        toSAW.ApplyTo((*iter)->AbsolutePosition, positionInSAW);
+        ECMRCMtoVTK.ApplyTo((*iter)->AbsolutePosition, positionInSAW);
         (*iter)->VisibleObject->SetTransformation(positionInSAW);
         std::cout << "Marker at: " << positionInSAW.Translation() << std::endl;
     }

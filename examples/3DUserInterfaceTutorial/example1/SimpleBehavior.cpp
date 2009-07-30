@@ -107,7 +107,7 @@ SimpleBehavior::SimpleBehavior(const std::string & name):
     VisibleObject2(0),
     Counter(0.0)
 {
-    this->VisibleList = new ui3VisibleList();
+    this->VisibleList = new ui3VisibleList("SimpleBehavior");
 
     this->VisibleObject1 = new SimpleBehaviorVisibleObject();
     this->VisibleList->Add(this->VisibleObject1);
@@ -116,7 +116,6 @@ SimpleBehavior::SimpleBehavior(const std::string & name):
     this->VisibleList->Add(this->VisibleObject2);
     
     CMN_ASSERT(this->VisibleList);
-    this->VisibleList->Hide();
 }
 
 

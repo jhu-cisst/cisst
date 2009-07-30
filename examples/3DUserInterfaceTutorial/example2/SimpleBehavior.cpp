@@ -108,7 +108,7 @@ SimpleBehavior::SimpleBehavior(const std::string & name):
     VisibleObject2(0),
     Counter(0.0)
 {
-    this->VisibleList = new ui3VisibleList();
+    this->VisibleList = new ui3VisibleList("SimpleBehavior");
 
     this->Position.X() = 0.0;
     this->Position.Y() = 0.0;

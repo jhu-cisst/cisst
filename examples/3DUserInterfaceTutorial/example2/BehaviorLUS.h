@@ -99,7 +99,7 @@ protected:
     vctDouble3 Offset;
     vctDouble3 CursorOffset;
     vctFrm3 Position, ProbePosition;
-
+    
 
     void OnStreamSample(svlSample* sample, int streamindex);
     ui3ImagePlane* ImagePlane;
@@ -137,6 +137,8 @@ protected:
     
     vtkMatrix4x4 * camera2map;
     double          zero_position[2];
+    
+    vctFrm3 ECMRCMtoVTK;
 
 private:
 
