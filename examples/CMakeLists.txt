@@ -27,6 +27,7 @@ SET(CISST_EXAMPLES
     3DUserInterfaceTutorial
     commonTutorial
     devicesTutorial
+    interactiveOmniTutorial
     interactiveTutorial
     multiTaskTutorial
     nArrayBenchmark
