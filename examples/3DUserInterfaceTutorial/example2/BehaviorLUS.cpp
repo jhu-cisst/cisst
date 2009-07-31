@@ -515,7 +515,6 @@ class BehaviorLUSMarker: public ui3VisibleObject
         // joint->SetScale(SCALE);
 
         this->AddPart(this->joint);
-        this->SetTransformation(this->Position);
         return true;
     }
     
@@ -615,6 +614,10 @@ std::cout<< "constructor========================================================
     this->WarningText = new BehaviorLUSText(this->Position);
     this->MeasureText = new BehaviorLUSText(this->Position);
     this->MapCursor = new BehaviorLUSMarker();
+    this->M1 = new BehaviorLUSMarker();
+    this->M2 = new BehaviorLUSMarker();
+    this->M3 = new BehaviorLUSMarker();
+    this->M4 = new BehaviorLUSMarker();
     this->ProbeAxes = new ui3VisibleAxes();
     this->AxesJoint1 = new ui3VisibleAxes();
     //AxesJoint1->SetSize(15);
@@ -651,6 +654,15 @@ std::cout<< "constructor========================================================
 
     this->AxesList->Add(this->AxesJoint1);
     this->AxesList->Add(this->AxesJoint2);
+    
+    this->MarkerList->Add(M1);
+    this->MarkerList->Add(M2);
+    this->MarkerList->Add(M3);
+    this->MarkerList->Add(M4);
+    //this->MarkerList->Add(new BehaviorLUSMarker()); 
+    this->MarkerList->Hide();
+
+    
     std::cout << "2" << std::endl;
 
     // this->VisibleList->SetTransformation(vctFrm3::Identity());
@@ -950,17 +962,13 @@ bool BehaviorLUS::RunNoInput()
 //prepare to drop marker if clutch and right MTM are pressed
     if(ClutchPressed & !RightMTMOpen) //ClutchPressed
     {
-        AddMarker();
+        this->AddMarker();
     }
 
 //prepare to remove marker if clutch and left MTM are pressed
     if(ClutchPressed & !LeftMTMOpen)
     {
-        if (MarkerList->size() >= 1)
-        {
-            this->RemoveLastMarker();
-            MarkerCount -= 1;
-        }
+       this->RemoveLastMarker();
     }
     //show the position of the 'tool'
     this->AxesJoint2->SetTransformation(Slave1Position.Position());
@@ -968,7 +976,6 @@ bool BehaviorLUS::RunNoInput()
 //update the map if enabled other wise it should be hidden.
     if(MapEnabled)
     {
-        this->MarkerList->Show();
 
         vctDouble3 xAxis, yAxis, zAxis;
         xAxis = Slave1Position.Position().Rotation().Column(0);
@@ -983,6 +990,7 @@ bool BehaviorLUS::RunNoInput()
 //           zAxis.Pointer(), 
 //           setCenter); // ANTON TO FIX, vec[2]);
         vctFrm3 markerPos_ECMRCM = GetCurrentCursorPositionWRTECMRCM();
+        this->UpdateVisibleMap();
         //std::cout << "markerPos_ECMRCM: " << markerPos_ECMRCM <<std::endl;
         //MapCursor->SetTransformation(markerPos_ECMRCM);
 
@@ -1071,9 +1079,9 @@ soon to be distroyed
  */
 void BehaviorLUS::DropMarkerCallback()
 {
-    this->AddMarker();
-    MarkerCount += 1;
-    std::cout << "MarkerCount: " << MarkerList->size() << std::endl;
+//     this->AddMarker();
+//     MarkerCount += 1;
+//     std::cout << "MarkerCount: " << MarkerCount << std::endl;
 }
 
 /*!
@@ -1084,12 +1092,12 @@ also soon to be distroyed
 
 void BehaviorLUS::RemoveMarkerCallback()
 {
-    if (MarkerList->size() >= 1)
-    {
-        this->RemoveLastMarker();
-        MarkerCount -= 1;
-    }
-    std::cout << "MarkerCount: " << MarkerList->size() << std::endl;
+//     if (MarkerList->size() >= 1)
+//     {
+//         this->RemoveLastMarker();
+//         MarkerCount -= 1;
+//     }
+//     std::cout << "MarkerCount: " << MarkerCount << std::endl;
 
 }
 
@@ -1536,24 +1544,54 @@ void BehaviorLUS::AddMarker(void)
     newMarker->SetTransformation(test1);
     this->MarkerList->Add(newMarker);
 #endif
-        MarkerType * newMarker = new MarkerType;
-        // create a visible object for each marker
-        BehaviorLUSMarker * newMarkerVisible =
-            new BehaviorLUSMarker();
-        // newMarkerVisible->CreateVTKObjects();
-        newMarkerVisible->Show();
-        std::cout<< "newMarkerVisible: " << newMarkerVisible->Visible() << std::endl;
-        newMarker->VisibleObject = newMarkerVisible;
-        // set the position of the marker based on current cursor position
-        newMarker->AbsolutePosition = GetCurrentCursorPositionWRTECMRCM();
-        // add the marker to the list
-        this->Markers.push_back(newMarker);
-        this->MarkerList->Add(newMarkerVisible);
-        // update the list (updates bounding box and position of all markers
-        this->UpdateVisibleMap();
 
-        std::cout << "AddMarker has been called " << MapCursor->GetTransformation() << std::endl;
+        BehaviorLUSMarker * newMarkerVisible;
+        
+        switch(MarkerCount)
+        {
+            case 0:
+                    M1->SetTransformation(MapCursor->GetTransformation());
+                    newMarkerVisible= M1;
+                    std::cout<< "M1 placed" <<std::endl;
+                    break;
+            case 1: 
+                    M2->SetTransformation(MapCursor->GetTransformation());
+                    newMarkerVisible= M2;
+                    break;
+            case 2: 
+                    M3->SetTransformation(MapCursor->GetTransformation());
+                    newMarkerVisible= M3;
+                    break;
+            case 3:
+                    M4->SetTransformation(MapCursor->GetTransformation());
+                    newMarkerVisible= M4;
+                    break;
+            default: std::cout << "there are no more markers to drop" << std::endl;
+        }
 
+        if(MarkerCount < 4)
+        {
+            MarkerType * newMarker = new MarkerType;
+            // create a visible object for each marker
+    
+            // newMarkerVisible->CreateVTKObjects();
+            newMarkerVisible->Show();
+            std::cout<< "newMarkerVisible: " << newMarkerVisible->Visible() << std::endl;
+            newMarker->VisibleObject = newMarkerVisible;
+            // set the position of the marker based on current cursor position
+            newMarker->AbsolutePosition = GetCurrentCursorPositionWRTECMRCM();
+            std::cout << "GetCurrentCursorPositionWRTECMRCM()" << newMarker->AbsolutePosition << std::endl;
+            // add the marker to the list
+            this->Markers.push_back(newMarker); //need to delete them too
+            this->MarkerList->Add(newMarkerVisible);
+            // update the list (updates bounding box and position of all markers
+            this->UpdateVisibleMap();
+    
+            std::cout << "AddMarker has been called " << MapCursor->GetTransformation() << std::endl;
+    
+
+            MarkerCount++;
+        }
         MarkerDropped = true;
     }
     else {
@@ -1572,7 +1610,29 @@ void BehaviorLUS::RemoveLastMarker(void)
     if(MarkerRemoved ==false)
     {
         std::cout << "marker removed" << std::endl;
-        this->MarkerList->RemoveLast();
+        //this->MarkerList->RemoveLast();
+        switch(MarkerCount)
+        {
+            case 1:
+                M1->Hide();
+                MarkerCount--;
+                std::cout<< "M1 hidden" <<std::endl;
+                break;
+            case 2: 
+                M2->Hide();
+                MarkerCount--;
+                break;
+            case 3: 
+                M3->Hide();
+                MarkerCount--;
+                break;
+            case 4: 
+                M4->Hide();
+                MarkerCount--;
+                break;
+           default: std::cout << "there are no more markers to hide" << std::endl;
+        }
+        std::cout << "Marker Count: " << MarkerCount << std::endl;
         MarkerRemoved = true;
     }
 }
@@ -1621,9 +1681,9 @@ vctFrm3 BehaviorLUS::GetCurrentCursorPositionWRTECMRCM(void)
 
     double yaw0 = JointsECM.Position()[0];
     double pitch1 = JointsECM.Position()[1];
-    double insert2 = JointsECM.Position()[2]*1000;//convert to mm
+    double insert2 = JointsECM.Position()[2]*1000.0;//convert to mm
     double roll3 = JointsECM.Position()[3];
-    double angle = 30*cmnPI/180;
+    double angle = 30.0*cmnPI/180.0;
  
     //create frame for yaw
     vctFrm3 yawFrame0;
@@ -1642,7 +1702,7 @@ vctFrm3 BehaviorLUS::GetCurrentCursorPositionWRTECMRCM(void)
     rollFrame3.Rotation() = vctMatRot3( vctAxAnRot3(Zaxis, roll3) );
 
     vctFrm3 T_to_horiz;
-    T_to_horiz.Rotation() = vctMatRot3(vctAxAnRot3(Xaxis, angle));
+    T_to_horiz.Rotation() = vctMatRot3( vctAxAnRot3(Xaxis, angle) );
 
     //create frame for the current probe center in the camera frame
     vctFrm3 fixedPoint;
@@ -1651,6 +1711,14 @@ vctFrm3 BehaviorLUS::GetCurrentCursorPositionWRTECMRCM(void)
     // raw cartesian position from slave daVinci, no ui3 correction
     prmPositionCartesianGet slavePosition;
     GetCartesianPositionSlave(slavePosition);
+
+//     std::cout<< "Slave1Position" << Slave1Position<< std::endl;
+//     std::cout<< "slavePosition" << slavePosition<< std::endl;
+//     std::cout<< "slavePosition inverse" << slavePosition.Position().Inverse()<< std::endl;
+//     
+    vctFrm3 ProbeOffset;
+    ProbeOffset.Translation().Assign(vctDouble3(0.0, 0.0, 30.0));
+    
 //    fixedPoint.Assign(slavePosition.Position());
 //    fixedPoint.Translation().Assign(slavePosition.Position().Translation());
 
@@ -1664,10 +1732,12 @@ vctFrm3 BehaviorLUS::GetCurrentCursorPositionWRTECMRCM(void)
  //   finalFrame = rollFrame3*insertFrame2*yawFrame0*pitchFrame1*GetCurrentCursorPositionWRTECM(); // simon email
  //   finalFrame = yawFrame0*pitchFrame1*rollFrame3*insertFrame2*GetCurrentCursorPositionWRTECM();//*transform; // old code?
     //new test code
+
+    ECMtoECMRCM = yawFrame0 * pitchFrame1 * insertFrame2 * rollFrame3;
     vctFrm3 imdtframe;
     // imdtframe = yawFrame0 * pitchFrame1 * insertFrame2 * rollFrame3 * fixedpoint; // workinf fixed point !!!
-    imdtframe = yawFrame0 * pitchFrame1 * insertFrame2 * rollFrame3 * slavePosition.Position(); //* GetCurrentCursorPositionWRTECM(); // working fixed point !!!
-    finalFrame = imdtframe.InverseSelf();
+    imdtframe = ECMtoECMRCM * slavePosition.Position()* ProbeOffset; //* GetCurrentCursorPositionWRTECM(); // working fixed point !!!
+    finalFrame = imdtframe;//.Inverse(); // .InverseSelf();
 
     vctFrm3 cursorVTK;
     
@@ -1736,16 +1806,29 @@ void BehaviorLUS::UpdateVisibleMap(void)
         center.SumOf(corner1, corner2);
         center.Divide(2.0);
 
+                
+        vctFrm3 ECMtoVTK;
+        ECMtoVTK.Rotation().From( vctAxAnRot3(vctDouble3(0.0,1.0,0.0), cmnPI) );
+        
+        vctFrm3 ECMtoECMRCMInverse = ECMtoECMRCM.Inverse();
+        
         // computer the transformation to be applied to all absolute coordinates
         // to be display in the SAW coordinate system
         vctDouble3 centerInSAW(0.0, 0.0, -200.0); // hard coded for now
-        ECMRCMtoVTK.Translation().Assign(centerInSAW - center);
+        vctDouble3 BBcenterInSAW = ECMtoVTK * ECMtoECMRCMInverse * center;
+
+        vctFrm3 VTKrecenter;
+        VTKrecenter.Translation().Assign(centerInSAW - BBcenterInSAW);
+
+        ECMRCMtoVTK =VTKrecenter * ECMtoVTK * ECMtoECMRCMInverse;
+
     }
 
     std::cout << "Bouding box: [" << corner1 << "] [" << corner2 << "]" << std::endl;
     
     // apply the transformation to all absolute coordinates
     vctFrm3 positionInSAW;
+//    this->MarkerList->SetTransformation(ECMRCMtoVTK);
     for (iter = Markers.begin(); iter != end; iter++)
     {
         ECMRCMtoVTK.ApplyTo((*iter)->AbsolutePosition, positionInSAW);

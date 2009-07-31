@@ -138,7 +138,8 @@ protected:
     vtkMatrix4x4 * camera2map;
     double          zero_position[2];
     
-    vctFrm3 ECMRCMtoVTK;
+
+    
 
 private:
 
@@ -164,12 +165,16 @@ private:
     BehaviorLUSOutline    *Outline;
     BehaviorLUSText       *WarningText, * MeasureText;
     BehaviorLUSMarker     *MapCursor;
+    BehaviorLUSMarker     *M1,*M2,*M3, *M4;
     
     ui3VisibleAxes * ProbeAxes;
     ui3VisibleAxes * AxesJoint1;
     ui3VisibleAxes * AxesJoint2;
     ui3VisibleAxes * AxesJoint3;
     ui3VisibleAxes * AxesShaft;
+
+    vctFrm3 ECMtoECMRCM;
+    vctFrm3 ECMRCMtoVTK;
     
     void                    SetTransform(vtkMatrix4x4 *mat, 
                                          double e11, double e12, double e13, double e14,
