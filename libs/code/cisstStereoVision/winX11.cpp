@@ -50,7 +50,7 @@ http://www.cisst.org/cisst/license.txt.
 /*** CX11WindowManager class *********/
 /*************************************/
 
-CX11WindowManager::CX11WindowManager(unsigned int numofwins) : svlWindowManagerBase(numofwins)
+CX11WindowManager::CX11WindowManager(unsigned int numofwins) : CWindowManagerBase(numofwins)
 {
     LButtonDown = false;
     RButtonDown = false;

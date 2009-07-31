@@ -23,7 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlTrackerOpenCV_h
 #define _svlTrackerOpenCV_h
 
-#include <cisstStereoVision/svlPointTracker.h>
+#include <cisstStereoVision/svlFilterPointTracker.h>
 
 
 class svlTrackerOpenCV : public svlPointTrackerAlgoBase
@@ -42,7 +42,7 @@ protected:
     void Release();
 
     int SetTargetCount(unsigned int targetcount);
-    int GetTarget(unsigned int targetid, svlPointTracker::TargetType* target);
+    int GetTarget(unsigned int targetid, svlFilterPointTracker::TargetType* target);
 
     int PreProcessImage(unsigned char* image);
 	int Track(unsigned char* image);

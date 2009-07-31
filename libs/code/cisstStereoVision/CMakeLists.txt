@@ -26,79 +26,89 @@ SET(DEPENDENCIES
 
 # all source files
 SET(SOURCE_FILES
+  # Public System API
     svlStreamManager.cpp
     svlSyncPoint.cpp
+    svlSeries.cpp
+    svlRenderTargets.cpp
+    svlStreamBranchSource.cpp
+    svlFileHandlers.cpp
+
+  # Filter API
+    svlFilterSourceDummy.cpp
+    svlFilterVideoDeinterlacer.cpp
+    svlFilterSourceVideoCapture.cpp
+    svlFilterSourceImageFile.cpp
+    svlFilterImageFileWriter.cpp
+    svlFilterGeneric.cpp
+    svlFilterComputationalStereo.cpp
+    svlFilterStereoImageOptimizer.cpp
+    svlFilterImageRectifier.cpp
+    svlFilterUnsharpMask.cpp
+    svlFilterImageSampler.cpp
+    svlFilterRGBSwapper.cpp
+    svlFilterStreamTypeConverter.cpp
+    svlFilterColorSpaceConverter.cpp
+    svlFilterImageCropper.cpp
+    svlFilterImageResizer.cpp
+    svlFilterPointTracker.cpp
+    svlFilterStereoImageJoiner.cpp
+    svlFilterImageFlipRotate.cpp
+
+  # Private System API
     svlImageBuffer.h               # private header
     svlImageBuffer.cpp
-    svlSeries.cpp
-    svlGenericFilter.cpp
-    svlFileHandlers.cpp
     ftImageBMP.h                   # private header
     ftImageBMP.cpp
     ftImagePPM.h                   # private header
     ftImagePPM.cpp
-    svlVideoCaptureSource.cpp
-    svlImageFileSource.cpp
-    svlImageFileWriter.cpp
-    svlRenderTargets.cpp
-    svlDummySource.cpp
-    svlDeinterlacer.cpp
     ipDeinterlacing.h              # private header
     ipDeinterlacing.cpp
     svlConverters.h                # private header
     svlConverters.cpp
-    svlComputationalStereo.cpp
     svlStereoDP.h                  # private header 
     svlStereoDP.cpp
     svlStereoDPMono.h              # private header
     svlStereoDPMono.cpp
-    svlStereoColorMatching.cpp
-    svlImageRectifier.cpp
-    svlUnsharpMask.cpp
-    svlImageSampler.cpp
-    svlRGBSwapper.cpp
-    svlStreamTypeConverter.cpp
-    svlColorSpaceConverter.cpp
-    svlImageCropper.cpp
-    svlStreamBranchSource.cpp
-    svlImageResizer.cpp
-    svlPointTracker.cpp
-    svlStereoImageJoiner.cpp
-    svlImageFlipRotate.cpp
-    # Trackers
+
+  # Trackers
     trackers/msbruteforce/svlTrackerMSBruteForce.cpp
     )
 
 # all header files
 SET(HEADER_FILES
+  # Public System API
+    svlStreamManager.h
     svlSyncPoint.h
     svlSeries.h
-    svlExport.h
-    svlStreamManager.h
-    svlStreamDefs.h
-    svlGenericFilter.h
-    svlFileHandlers.h
-    svlVideoCaptureSource.h
-    svlImageFileSource.h
-    svlImageFileWriter.h
     svlRenderTargets.h
-    svlDummySource.h
-    svlDeinterlacer.h
-    svlComputationalStereo.h
-    svlStereoColorMatching.h
-    svlImageRectifier.h
-    svlUnsharpMask.h
-    svlImageSampler.h
-    svlRGBSwapper.h
-    svlStreamTypeConverter.h
-    svlColorSpaceConverter.h
-    svlImageCropper.h
     svlStreamBranchSource.h
-    svlImageResizer.h
-    svlPointTracker.h
-    svlStereoImageJoiner.h
-    svlImageFlipRotate.h
-# Trackers
+    svlExport.h
+    svlStreamDefs.h
+    svlFileHandlers.h
+
+  # Filter API
+    svlFilterSourceDummy.h
+    svlFilterVideoDeinterlacer.h
+    svlFilterSourceVideoCapture.h
+    svlFilterSourceImageFile.h
+    svlFilterImageFileWriter.h
+    svlFilterGeneric.h
+    svlFilterComputationalStereo.h
+    svlFilterStereoImageOptimizer.h
+    svlFilterImageRectifier.h
+    svlFilterUnsharpMask.h
+    svlFilterImageSampler.h
+    svlFilterRGBSwapper.h
+    svlFilterStreamTypeConverter.h
+    svlFilterColorSpaceConverter.h
+    svlFilterImageCropper.h
+    svlFilterImageResizer.h
+    svlFilterPointTracker.h
+    svlFilterStereoImageJoiner.h
+    svlFilterImageFlipRotate.h
+
+  # Trackers
     trackers/svlTrackerMSBruteForce.h
     )
 
@@ -169,6 +179,8 @@ IF(CISST_SVL_HAS_OPENCV)
             # Trackers
             trackers/svlTrackerOpenCV.h
             )
+        MESSAGE(STATUS "OpenCV found - Switch to advanced view for details")
+
     ELSE(OpenCV_FOUND)
         MARK_AS_ADVANCED(CLEAR
                          OpenCV_ROOT_DIR
@@ -228,22 +240,26 @@ IF(CISST_SVL_HAS_ZLIB)
         IF(NOT WIN32)
             SET(SOURCE_FILES
                 ${SOURCE_FILES}
-                svlVideoFileSource.cpp
+                svlFilterSourceImageFile.cpp
                 )
             SET(HEADER_FILES
                 ${HEADER_FILES}
-                svlVideoFileSource.h
+                svlFilterSourceImageFile.h
                 )
         ENDIF(NOT WIN32)
 
         SET(SOURCE_FILES
             ${SOURCE_FILES}
-            svlVideoFileWriter.cpp
+            svlFilterSourceVideoFile.cpp
+            svlFilterVideoFileWriter.cpp
             )
         SET(HEADER_FILES
             ${HEADER_FILES}
-            svlVideoFileWriter.h
+            svlFilterSourceVideoFile.h
+            svlFilterVideoFileWriter.h
             )
+        MESSAGE(STATUS "ZLIB found - Switch to advanced view for details")
+
     ELSE(ZLIB_FOUND)
         MARK_AS_ADVANCED(CLEAR
                          ZLIB_INCLUDE_DIR
@@ -293,6 +309,8 @@ IF(CISST_SVL_HAS_MIL)
             vidMILDevice.h      # private header
             vidMILDevice.cpp
             )
+        MESSAGE(STATUS "Matrox Imaging Library (MIL) found - Switch to advanced view for details")
+
     ELSE(MIL_FOUND)
         MARK_AS_ADVANCED(CLEAR
                          MIL_INCLUDE_DIR
@@ -322,15 +340,17 @@ IF(WIN32)
     winWin32.cpp
     VfWAvi.h                 # private header
     VfWAvi.cpp
-    svlImageWindow.cpp
-    svlVideoFileSource.cpp
-    svlVideoFileWriterAVI.cpp
+    svlFilterImageWindow.cpp
+    svlFilterSourceImageFile.cpp
+    svlFilterSourceVideoFile.cpp
+    svlFilterVideoFileWriterAVI.cpp
     )
   SET(HEADER_FILES
     ${HEADER_FILES}
-    svlImageWindow.h
-    svlVideoFileSource.h
-    svlVideoFileWriterAVI.h
+    svlFilterImageWindow.h
+    svlFilterSourceImageFile.h
+    svlFilterSourceVideoFile.h
+    svlFilterVideoFileWriterAVI.h
     )
 
   OPTION(CISST_SVL_HAS_DIRECTSHOW "Compile DirectShow extensions" OFF)
@@ -354,6 +374,8 @@ IF(WIN32)
             vidDirectShowSource.h           # private header
             vidDirectShowSource.cpp
             )
+        MESSAGE(STATUS "DirectShow found - Switch to advanced view for details")
+
     ELSE(DIRECTSHOW_FOUND)
         MARK_AS_ADVANCED(CLEAR
                          DIRECTSHOW_INCLUDE_DIR
@@ -416,6 +438,8 @@ IF(WIN32)
             vidSVSSource.h      # private header
             vidSVSSource.cpp
             )
+        MESSAGE(STATUS "Videre Design SVS (SVS) found - Switch to advanced view for details")
+
     ELSE(SVS_FOUND)
         MARK_AS_ADVANCED(CLEAR
                          SVS_INCLUDE_DIR
@@ -474,17 +498,20 @@ IF(UNIX)
   OPTION(CISST_SVL_HAS_X11 "Compile X11 extensions" OFF)
   IF(CISST_SVL_HAS_X11)
     FIND_PACKAGE(X11 REQUIRED)
-    INCLUDE_DIRECTORIES(${X11_INCLUDE_DIR})
-    SET(SOURCE_FILES
-        ${SOURCE_FILES}
-        winX11.h                 # private header
-        winX11.cpp
-        svlImageWindow.cpp
-        )
-    SET(HEADER_FILES
-        ${HEADER_FILES}
-        svlImageWindow.h
-        )
+    IF(X11_FOUND)
+      INCLUDE_DIRECTORIES(${X11_INCLUDE_DIR})
+      SET(SOURCE_FILES
+          ${SOURCE_FILES}
+          winX11.h                 # private header
+          winX11.cpp
+          svlFilterImageWindow.cpp
+          )
+      SET(HEADER_FILES
+          ${HEADER_FILES}
+          svlFilterImageWindow.h
+          )
+      MESSAGE(STATUS "X11 found - Switch to advanced view for details")
+    ENDIF(X11_FOUND)
   ENDIF(CISST_SVL_HAS_X11)
 ELSE(UNIX)
 

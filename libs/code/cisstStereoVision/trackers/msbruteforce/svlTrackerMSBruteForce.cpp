@@ -91,7 +91,7 @@ int svlTrackerMSBruteForce::Initialize()
         // half the work area
         LowerScale->SetWorkArea(Left / 2, Top / 2, Right / 2, Bottom / 2);
         // adding targets
-        svlPointTracker::TargetType params;
+        svlFilterPointTracker::TargetType params;
         for (i = 0; i < TargetCount; i ++) {
             params.x = TargetParams[i].x / 2;
             params.y = TargetParams[i].y / 2;
@@ -203,7 +203,7 @@ int svlTrackerMSBruteForce::Track(unsigned char* image)
 
         if (TargetsAdded) {
             // scale back results
-            svlPointTracker::TargetType target;
+            svlFilterPointTracker::TargetType target;
             for (i = 0; i < TargetCount; i ++) {
                 LowerScale->GetTarget(i, &target);
                 TargetParams[i].x = target.x * 2 + 1;

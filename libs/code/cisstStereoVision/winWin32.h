@@ -24,7 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _winWin32_h
 #define _winWin32_h
 
-#include <cisstStereoVision/svlImageWindow.h>
+#include <cisstStereoVision/svlFilterImageWindow.h>
 
 #include <windows.h>
 
@@ -52,7 +52,7 @@ private:
     int ClientOffsetY;
 };
 
-class CWin32WindowManager : public svlWindowManagerBase
+class CWin32WindowManager : public CWindowManagerBase
 {
 public:
     CWin32WindowManager(unsigned int numofwins);

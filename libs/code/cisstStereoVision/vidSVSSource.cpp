@@ -47,9 +47,9 @@ CSVSSource::~CSVSSource()
     if (OutputBuffer) delete [] OutputBuffer;
 }
 
-svlVideoCaptureSource::PlatformType CSVSSource::GetPlatformType()
+svlFilterSourceVideoCapture::PlatformType CSVSSource::GetPlatformType()
 {
-    return svlVideoCaptureSource::WinSVS;
+    return svlFilterSourceVideoCapture::WinSVS;
 }
 
 int CSVSSource::SetStreamCount(unsigned int numofstreams)
@@ -71,7 +71,7 @@ int CSVSSource::SetStreamCount(unsigned int numofstreams)
     return SVL_OK;
 }
 
-int CSVSSource::GetDeviceList(svlVideoCaptureSource::DeviceInfo **deviceinfo)
+int CSVSSource::GetDeviceList(svlFilterSourceVideoCapture::DeviceInfo **deviceinfo)
 {
     // Test device availability
     bool available = false;
@@ -93,21 +93,21 @@ int CSVSSource::GetDeviceList(svlVideoCaptureSource::DeviceInfo **deviceinfo)
 
     // Allocate memory for device info array
     // CALLER HAS TO FREE UP THIS ARRAY!!!
-    deviceinfo[0] = new svlVideoCaptureSource::DeviceInfo[2];
-    memset(deviceinfo[0], 0, 2 * sizeof(svlVideoCaptureSource::DeviceInfo));
+    deviceinfo[0] = new svlFilterSourceVideoCapture::DeviceInfo[2];
+    memset(deviceinfo[0], 0, 2 * sizeof(svlFilterSourceVideoCapture::DeviceInfo));
 
     deviceinfo[0][0].id = 0;
     sprintf(deviceinfo[0][0].name, "Small Vision System - Left");
     deviceinfo[0][0].activeinput = -1;
     deviceinfo[0][0].inputcount = 0;
-    deviceinfo[0][0].platform = svlVideoCaptureSource::WinSVS;
+    deviceinfo[0][0].platform = svlFilterSourceVideoCapture::WinSVS;
     deviceinfo[0][0].testok = true;
 
     deviceinfo[0][1].id = 1;
     sprintf(deviceinfo[0][1].name, "Small Vision System - Right");
     deviceinfo[0][1].activeinput = -1;
     deviceinfo[0][1].inputcount = 0;
-    deviceinfo[0][1].platform = svlVideoCaptureSource::WinSVS;
+    deviceinfo[0][1].platform = svlFilterSourceVideoCapture::WinSVS;
     deviceinfo[0][1].testok = true;
 
     return 2;
@@ -285,14 +285,14 @@ int CSVSSource::GetHeight(unsigned int videoch)
     return -1;
 }
 
-int CSVSSource::GetFormatList(unsigned int deviceid, svlVideoCaptureSource::ImageFormat **formatlist)
+int CSVSSource::GetFormatList(unsigned int deviceid, svlFilterSourceVideoCapture::ImageFormat **formatlist)
 {
     if (formatlist == 0) return SVL_FAIL;
 
-    formatlist[0] = new svlVideoCaptureSource::ImageFormat[1];
+    formatlist[0] = new svlFilterSourceVideoCapture::ImageFormat[1];
     formatlist[0][0].width = 640;
     formatlist[0][0].height = 480;
-    formatlist[0][0].colorspace = svlVideoCaptureSource::PixelRGB8;
+    formatlist[0][0].colorspace = svlFilterSourceVideoCapture::PixelRGB8;
     formatlist[0][0].rgb_order = true;
     formatlist[0][0].yuyv_order = false;
     formatlist[0][0].framerate = 25.0;
@@ -300,13 +300,13 @@ int CSVSSource::GetFormatList(unsigned int deviceid, svlVideoCaptureSource::Imag
     return 1;
 }
 
-int CSVSSource::GetFormat(svlVideoCaptureSource::ImageFormat& format, unsigned int videoch)
+int CSVSSource::GetFormat(svlFilterSourceVideoCapture::ImageFormat& format, unsigned int videoch)
 {
     if (videoch >= NumOfStreams) return SVL_FAIL;
 
     format.width = 640;
     format.height = 480;
-    format.colorspace = svlVideoCaptureSource::PixelRGB8;
+    format.colorspace = svlFilterSourceVideoCapture::PixelRGB8;
     format.rgb_order = true;
     format.yuyv_order = false;
     format.framerate = 25.0;

@@ -577,7 +577,7 @@ int CV4L2Source::GetHeight(unsigned int videoch)
     return CapHeight[videoch];
 }
 
-int CV4L2Source::GetFormatList(unsigned int deviceid, svlVideoCaptureSource::ImageFormat **formatlist)
+int CV4L2Source::GetFormatList(unsigned int CMN_UNUSED(deviceid), svlVideoCaptureSource::ImageFormat **formatlist)
 {
     if (formatlist == 0) return SVL_FAIL;
 

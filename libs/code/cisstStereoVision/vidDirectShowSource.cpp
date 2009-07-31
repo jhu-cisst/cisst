@@ -78,9 +78,9 @@ CDirectShowSource::~CDirectShowSource()
     }
 }
 
-svlVideoCaptureSource::PlatformType CDirectShowSource::GetPlatformType()
+svlFilterSourceVideoCapture::PlatformType CDirectShowSource::GetPlatformType()
 {
-    return svlVideoCaptureSource::WinDirectShow;
+    return svlFilterSourceVideoCapture::WinDirectShow;
 }
 
 int CDirectShowSource::SetStreamCount(unsigned int numofstreams)
@@ -192,7 +192,7 @@ void CDirectShowSource::Release()
     Initialized = false;
 }
 
-int CDirectShowSource::GetDeviceList(svlVideoCaptureSource::DeviceInfo **deviceinfo)
+int CDirectShowSource::GetDeviceList(svlFilterSourceVideoCapture::DeviceInfo **deviceinfo)
 {
     if (deviceinfo == 0) return SVL_FAIL;
 
@@ -241,8 +241,8 @@ int CDirectShowSource::GetDeviceList(svlVideoCaptureSource::DeviceInfo **devicei
     // Allocate memory for device info array
     // CALLER HAS TO FREE UP THIS ARRAY!!!
     if (counter > 0) {
-        deviceinfo[0] = new svlVideoCaptureSource::DeviceInfo[counter];
-        memset(deviceinfo[0], 0, counter * sizeof(svlVideoCaptureSource::DeviceInfo));
+        deviceinfo[0] = new svlFilterSourceVideoCapture::DeviceInfo[counter];
+        memset(deviceinfo[0], 0, counter * sizeof(svlFilterSourceVideoCapture::DeviceInfo));
 
         // Get capture device inputs
         for (i = 0; i < counter; i ++) {
@@ -250,7 +250,7 @@ int CDirectShowSource::GetDeviceList(svlVideoCaptureSource::DeviceInfo **devicei
             if (TestOpen(i) == SVL_OK) {
                 deviceinfo[0][i].id = i;
                 deviceinfo[0][i].testok = true;
-                deviceinfo[0][i].platform = svlVideoCaptureSource::WinDirectShow;
+                deviceinfo[0][i].platform = svlFilterSourceVideoCapture::WinDirectShow;
                 GetDeviceInputs(pTestCapFilt, deviceinfo[0] + i);
                 TestClose();
             }
@@ -745,7 +745,7 @@ int CDirectShowSource::SetDeviceInput(IBaseFilter *capfilter, int input_id)
     return SVL_FAIL;
 }
 
-int CDirectShowSource::GetDeviceInputs(IBaseFilter *capfilter, svlVideoCaptureSource::DeviceInfo *deviceinfo)
+int CDirectShowSource::GetDeviceInputs(IBaseFilter *capfilter, svlFilterSourceVideoCapture::DeviceInfo *deviceinfo)
 {
     if (capfilter == 0 ||
         deviceinfo == 0) return SVL_FAIL;

@@ -22,6 +22,23 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include "trkCisstNCC.h"
+
+#ifdef _MSC_VER
+    // Quick fix for Visual Studio Intellisense:
+    // The Intellisense parser can't handle the CMN_UNUSED macro
+    // correctly if defined in cmnPortability.h, thus
+    // we should redefine it here for it.
+    // Removing this part of the code will not effect compilation
+    // in any way, on any platforms.
+    #undef CMN_UNUSED
+    #define CMN_UNUSED(argument) argument
+#endif
+
+
+/*********************************/
+/*** trkCisstNCC class ***********/
+/*********************************/
+
 /********************************************************************
 TODO / BUGS
 1) Improve Dynamic Loop Engine. *Don't* use iterators. Possibly specific classes 
@@ -98,10 +115,6 @@ Later TODO
 [ ]	Switch sum & sqsum to long or ulong. If int input data is used
 ********************************************************************/
 
-
-//*******************************************************************
-//               Normalized Crosscorelation class
-//*******************************************************************
 trkCisstNCC::trkCisstNCC(void) : trkCisstBase()
 {
 	convMethod = Standard;
@@ -172,6 +185,9 @@ void trkCisstNCC::setWindowCenter(IndexType r, IndexType c) {
 void trkCisstNCC::setWindowPosition(IndexType r, IndexType c) {
 	windowPosition.X() = c;
 	windowPosition.Y() = r;
+}
+// Set the initial position for tracking (empty in this case)
+void trkCisstNCC::setInitPosition(IndexType CMN_UNUSED(r), IndexType CMN_UNUSED(c)) {
 }
 // Set the size of the current image
 void trkCisstNCC::setCurrentimageSize(IndexType rows, IndexType cols) {

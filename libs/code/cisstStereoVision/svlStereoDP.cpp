@@ -55,7 +55,7 @@ using namespace std;
 svlStereoDP::svlStereoDP(int width, int height, int left, int top, int right, int bottom,
                          int mindisparity, int maxdisparity, int ppoffset,
                          int scale, int blocksize, int searchrad, int smoothness,
-                         double tempfilt, bool disparityinterpolation) : svlStereoMethodBase()
+                         double tempfilt, bool disparityinterpolation) : svlComputationalStereoMethodBase()
 {
     // ScoreTruncationLevel has been determined
     // experimentally in the Scharstein-Szelinski paper.

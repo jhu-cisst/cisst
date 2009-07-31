@@ -23,7 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _vidDirectShowSource_h
 #define _vidDirectShowSource_h
 
-#include <cisstStereoVision/svlVideoCaptureSource.h>
+#include <cisstStereoVision/svlFilterSourceVideoCapture.h>
 #include "svlImageBuffer.h"
 #include "vidDirectShowInputSelector.h"
 
@@ -113,12 +113,12 @@ private:
     int GetPinCategory(IPin *pin, GUID *category);
 
 	int SetDeviceInput(IBaseFilter *capfilter, int input_id = 0);
-	int GetDeviceInputs(IBaseFilter *capfilter, svlVideoCaptureSource::DeviceInfo *deviceinfo);
+	int GetDeviceInputs(IBaseFilter *capfilter, svlFilterSourceVideoCapture::DeviceInfo *deviceinfo);
 
 public:
-    svlVideoCaptureSource::PlatformType GetPlatformType();
+    svlFilterSourceVideoCapture::PlatformType GetPlatformType();
     int SetStreamCount(unsigned int numofstreams);
-	int GetDeviceList(svlVideoCaptureSource::DeviceInfo **deviceinfo);
+	int GetDeviceList(svlFilterSourceVideoCapture::DeviceInfo **deviceinfo);
 	int Open();
 	void Close();
 	int Start();

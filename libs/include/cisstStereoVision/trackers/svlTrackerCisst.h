@@ -23,7 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlTrackerCisst_h
 #define _svlTrackerCisst_h
 
-#include <cisstStereoVision/svlPointTracker.h>
+#include <cisstStereoVision/svlFilterPointTracker.h>
 
 
 enum trkCisstType
@@ -49,7 +49,7 @@ protected:
     void Release();
 
     int SetTargetCount(unsigned int targetcount);
-    int GetTarget(unsigned int targetid, svlPointTracker::TargetType* target);
+    int GetTarget(unsigned int targetid, svlFilterPointTracker::TargetType* target);
 
     int PreProcessImage(unsigned char* image);
 	int Track(unsigned char* image);

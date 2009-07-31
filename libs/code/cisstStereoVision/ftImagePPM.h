@@ -31,7 +31,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <string>
 #include <fstream>
-//#include "svlImageFileSource.h"
+//#include "svlFilterSourceImageFile.h"
 #include <cisstStereoVision/svlFileHandlers.h>
 
 #define IMAGEPPM_MAX_DIMENISION     8192
@@ -44,7 +44,7 @@ public:
     ~ftImagePPM();
     svlImageFile* GetInstance();
 
-    int ExtractDimensions(const char* filepath, int & width, int & height);
+    int ExtractDimensions(const char * filepath, int & width, int & height);
     int Open(const char* filepath, svlImageProperties& properties);
     int ReadAndClose(unsigned char* buffer, unsigned int size);
     int Create(const char* filepath, svlImageProperties* properties, unsigned char* buffer);

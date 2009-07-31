@@ -892,7 +892,7 @@ bool CDC1394Source::IsRunning()
     return Running;
 }
 
-int CDC1394Source::SetDevice(int devid, int inid, unsigned int videoch)
+int CDC1394Source::SetDevice(int devid, int CMN_UNUSED(inid), unsigned int videoch)
 {
     if (videoch >= NumOfStreams) return SVL_FAIL;
     DeviceID[videoch] = devid;

@@ -20,6 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
+
 #ifndef _svlStreamManager_h
 #define _svlStreamManager_h
 
@@ -33,6 +34,7 @@ http://www.cisst.org/cisst/license.txt.
 
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
+
 
 #define SVL_ALREADY_PROCESSED        10
 #define SVL_TYPE_MISMATCH           -12
@@ -83,7 +85,6 @@ private:
     svlStreamEntity(svlStreamEntity const &) {};
     svlStreamManager * Stream;
 };
-
 
 class CISST_EXPORT svlFilterBase
 {

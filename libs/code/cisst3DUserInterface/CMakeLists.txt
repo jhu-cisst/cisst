@@ -81,6 +81,25 @@ CISST_ADD_LIBRARY_TO_PROJECT(cisstLibs)
 # link to other external libraries
 target_link_libraries(cisst3DUserInterface vtkRendering vtkHybrid)
 
+IF(UNIX)
+    # Link each executable against the X11 library
+    FIND_PACKAGE(X11 REQUIRED)
+    TARGET_LINK_LIBRARIES(cisst3DUserInterface ${X11_LIBRARIES})
+
+    IF(CISST_SVL_HAS_LIBDC1394)
+        # Also link the examples using live camera source against the DC1394 library if enabled
+        TARGET_LINK_LIBRARIES(cisst3DUserInterface dc1394)
+    ENDIF(CISST_SVL_HAS_LIBDC1394)
+ENDIF(UNIX)
+
+IF(CISST_SVL_HAS_OPENCV)
+    # Link each example against the OpenCV library if enabled
+    FIND_PACKAGE(OpenCV)
+    INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS})
+    LINK_DIRECTORIES(${OpenCV_LINK_DIRECTORIES})
+    TARGET_LINK_LIBRARIES(cisst3DUserInterface ${OpenCV_LIBRARIES})
+ENDIF(CISST_SVL_HAS_OPENCV)
+
 # find icons
 set(CISST_UI3_ICONS_DIR "${cisst_SOURCE_DIR}/libs/etc/cisst3DUserInterface/icons")
 file(GLOB CISST_UI3_ICONS RELATIVE ${CISST_UI3_ICONS_DIR} ${CISST_UI3_ICONS_DIR}/*.png)

@@ -42,10 +42,10 @@ public:
     virtual ~svlImageFile();
     virtual svlImageFile* GetInstance();
 
-    virtual int ExtractDimensions(const char* filepath, int & width, int & height);
-    virtual int Open(const char* filepath, svlImageProperties& properties);
-    virtual int ReadAndClose(unsigned char* buffer, unsigned int size);
-    virtual int Create(const char* filepath, svlImageProperties* properties, unsigned char* buffer);
+    virtual int ExtractDimensions(const char * filepath, int & width, int & height);
+    virtual int Open(const char * filepath, svlImageProperties & properties);
+    virtual int ReadAndClose(unsigned char * buffer, unsigned int size);
+    virtual int Create(const char * filepath, svlImageProperties * properties, unsigned char * buffer);
 };
 
 /*************************************/

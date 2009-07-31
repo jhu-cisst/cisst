@@ -23,11 +23,11 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlStereoDP_h
 #define _svlStereoDP_h
 
-#include <cisstStereoVision/svlComputationalStereo.h>
+#include <cisstStereoVision/svlFilterComputationalStereo.h>
 
 #define ST_DP_TEMP_BUFF_SIZE        2048
 
-class svlStereoDP : public svlStereoMethodBase
+class svlStereoDP : public svlComputationalStereoMethodBase
 {
 public:
     svlStereoDP(int width, int height, int left, int top, int right, int bottom,

@@ -23,7 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlTrackerMSBruteForce_h
 #define _svlTrackerMSBruteForce_h
 
-#include <cisstStereoVision/svlPointTracker.h>
+#include <cisstStereoVision/svlFilterPointTracker.h>
 #include <cisstStereoVision/svlSeries.h>
 
 

@@ -23,13 +23,13 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _winX11_h
 #define _winX11_h
 
-#include <cisstStereoVision/svlImageWindow.h>
+#include <cisstStereoVision/svlFilterImageWindow.h>
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/Xos.h>
 
-class CX11WindowManager : public svlWindowManagerBase
+class CX11WindowManager : public CWindowManagerBase
 {
 public:
     CX11WindowManager(unsigned int numofwins);

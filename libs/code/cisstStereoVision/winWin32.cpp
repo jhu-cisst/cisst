@@ -64,8 +64,8 @@ int CWin32Window::Create(unsigned int width, unsigned int height, bool show,
         else ostring << title;
     }
     else {
-        if (titleid >= 0) ostring << title << "svlImageWindow #" << titleid;
-        else ostring << "svlImageWindow";
+        if (titleid >= 0) ostring << title << "svlFilterImageWindow #" << titleid;
+        else ostring << "svlFilterImageWindow";
     }
     Title = ostring.str();
 
@@ -205,7 +205,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 /*** CWin32WindowManager class *********/
 /***************************************/
 
-CWin32WindowManager::CWin32WindowManager(unsigned int numofwins) : svlWindowManagerBase(numofwins)
+CWin32WindowManager::CWin32WindowManager(unsigned int numofwins) : CWindowManagerBase(numofwins)
 {
     Windows = 0;
     WindowHandles = 0;

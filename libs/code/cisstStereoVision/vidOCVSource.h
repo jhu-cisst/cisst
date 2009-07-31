@@ -23,7 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _vidOCVSource_h
 #define _vidOCVSource_h
 
-#include <cisstStereoVision/svlVideoCaptureSource.h>
+#include <cisstStereoVision/svlFilterSourceVideoCapture.h>
 #include "svlImageBuffer.h"
 
 
@@ -38,9 +38,9 @@ public:
 	~COpenCVSource();
 
 public:
-    svlVideoCaptureSource::PlatformType GetPlatformType();
+    svlFilterSourceVideoCapture::PlatformType GetPlatformType();
     int SetStreamCount(unsigned int numofstreams);
-	int GetDeviceList(svlVideoCaptureSource::DeviceInfo **deviceinfo);
+	int GetDeviceList(svlFilterSourceVideoCapture::DeviceInfo **deviceinfo);
 	int Open();
 	void Close();
 	int Start();
@@ -51,8 +51,8 @@ public:
 	int GetWidth(unsigned int videoch = 0);
 	int GetHeight(unsigned int videoch = 0);
 
-    int GetFormatList(unsigned int deviceid, svlVideoCaptureSource::ImageFormat **formatlist);
-    int GetFormat(svlVideoCaptureSource::ImageFormat& format, unsigned int videoch = 0);
+    int GetFormatList(unsigned int deviceid, svlFilterSourceVideoCapture::ImageFormat **formatlist);
+    int GetFormat(svlFilterSourceVideoCapture::ImageFormat& format, unsigned int videoch = 0);
 
 private:
     unsigned int NumOfStreams;

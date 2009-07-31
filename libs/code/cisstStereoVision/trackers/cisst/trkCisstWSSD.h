@@ -108,11 +108,11 @@ public:
 	//Set the center offset of the template.
 	void setTemplateCenter(IndexType r, IndexType c);
 	//Set the tracking window size
-	inline void setWindowSize(IndexType CMN_UNUSED(rows), IndexType CMN_UNUSED(cols)){};
+	void setWindowSize(IndexType rows, IndexType cols);
 	//Set the center offset of the tracking window
-	inline void setWindowCenter(IndexType CMN_UNUSED(r), IndexType CMN_UNUSED(c)){};
+	void setWindowCenter(IndexType r, IndexType c);
 	//Set the initial position of the tracking window
-	inline void setWindowPosition(IndexType CMN_UNUSED(r), IndexType CMN_UNUSED(c)){};
+	void setWindowPosition(IndexType r, IndexType c);
 	// Set the initial position for tracking 
 	void setInitPosition(IndexType r, IndexType c);
 	// Set the image size field

@@ -29,6 +29,17 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstStereoVision/svlConfig.h>
 
+#ifdef _MSC_VER
+    // Quick fix for Visual Studio Intellisense:
+    // The Intellisense parser can't handle the CMN_UNUSED macro
+    // correctly if defined in cmnPortability.h, thus
+    // we should redefine it here for it.
+    // Removing this part of the code will not effect compilation
+    // in any way, on any platforms.
+    #undef CMN_UNUSED
+    #define CMN_UNUSED(argument) argument
+#endif
+
 #if (CISST_SVL_HAS_OPENCV == ON)
     #if (CISST_OS == CISST_WINDOWS) || (CISST_OS == CISST_DARWIN)
         #include <cv.h>

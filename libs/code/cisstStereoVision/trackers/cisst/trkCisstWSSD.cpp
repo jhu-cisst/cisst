@@ -24,6 +24,22 @@ http://www.cisst.org/cisst/license.txt.
 #include "trkCisstWSSD.h"
 #include <cisstNumerical/nmrLSqLin.h>
 
+#ifdef _MSC_VER
+    // Quick fix for Visual Studio Intellisense:
+    // The Intellisense parser can't handle the CMN_UNUSED macro
+    // correctly if defined in cmnPortability.h, thus
+    // we should redefine it here for it.
+    // Removing this part of the code will not effect compilation
+    // in any way, on any platforms.
+    #undef CMN_UNUSED
+    #define CMN_UNUSED(argument) argument
+#endif
+
+
+/**********************************/
+/*** trkCisstWSSD class ***********/
+/**********************************/
+
 trkCisstWSSD::trkCisstWSSD(trkCisstWSSDModel trackmodel) : trkCisstBase()
 {
 	templateLookahead = 0;
@@ -121,6 +137,15 @@ void trkCisstWSSD::setTemplateSize(IndexType rows, IndexType cols) {
 void trkCisstWSSD::setTemplateCenter(IndexType row, IndexType col) {
 	templateCenter.X() = col;
 	templateCenter.Y() = row;
+}
+//Set the tracking window size
+void trkCisstWSSD::setWindowSize(IndexType CMN_UNUSED(rows), IndexType CMN_UNUSED(cols)) {
+}
+//Set the center offset of the tracking window
+void trkCisstWSSD::setWindowCenter(IndexType CMN_UNUSED(r), IndexType CMN_UNUSED(c)) {
+}
+//Set the initial position of the tracking window
+void trkCisstWSSD::setWindowPosition(IndexType CMN_UNUSED(r), IndexType CMN_UNUSED(c)) {
 }
 // Set the intiial position for tracking
 void trkCisstWSSD::setInitPosition(IndexType r, IndexType c)

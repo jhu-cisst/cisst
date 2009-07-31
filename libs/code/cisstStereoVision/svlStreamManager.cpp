@@ -22,10 +22,20 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstStereoVision/svlStreamManager.h>
 
+#ifdef _MSC_VER
+    // Quick fix for Visual Studio Intellisense:
+    // The Intellisense parser can't handle the CMN_UNUSED macro
+    // correctly if defined in cmnPortability.h, thus
+    // we should redefine it here for it.
+    // Removing this part of the code will not effect compilation
+    // in any way, on any platforms.
+    #undef CMN_UNUSED
+    #define CMN_UNUSED(argument) argument
+#endif
+
 #define MAX_WAIT_LOCK_TIME      1000
 
 using namespace std;
-
 
 /*************************************/
 /*** svlStreamManager class **********/
@@ -964,7 +974,7 @@ int svlFilterBase::OnStart(unsigned int CMN_UNUSED(procCount))
     return SVL_OK;
 }
 
-int svlFilterBase::ProcessFrame(ProcInfo* CMN_UNUSED(procInfo),
+int svlFilterBase::ProcessFrame(svlFilterBase::ProcInfo* CMN_UNUSED(procInfo),
                                 svlSample* CMN_UNUSED(inputdata))
 {
     return SVL_OK;

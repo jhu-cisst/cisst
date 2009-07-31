@@ -26,11 +26,22 @@ http://www.cisst.org/cisst/license.txt.
 #include "ftImageBMP.h"
 #include "ftImagePPM.h"
 
+#ifdef _MSC_VER
+    // Quick fix for Visual Studio Intellisense:
+    // The Intellisense parser can't handle the CMN_UNUSED macro
+    // correctly if defined in cmnPortability.h, thus
+    // we should redefine it here for it.
+    // Removing this part of the code will not effect compilation
+    // in any way, on any platforms.
+    #undef CMN_UNUSED
+    #define CMN_UNUSED(argument) argument
+#endif
+
 using namespace std;
 
-/*************************************/
-/*** svlFileHandlers class ***********/
-/*************************************/
+/**********************************/
+/*** svlImageFile class ***********/
+/**********************************/
 
 svlImageFile::svlImageFile()
 {
@@ -45,28 +56,22 @@ svlImageFile* svlImageFile::GetInstance()
     return 0;
 }
 
-int svlImageFile::ExtractDimensions(const char* CMN_UNUSED(filepath),
-                                    int & CMN_UNUSED(width),
-                                    int & CMN_UNUSED(height))
+int svlImageFile::ExtractDimensions(const char * CMN_UNUSED(filepath), int & CMN_UNUSED(width), int & CMN_UNUSED(height))
 {
     return -1;
 }
 
-int svlImageFile::Open(const char* CMN_UNUSED(filepath),
-                       svlImageProperties & CMN_UNUSED(properties))
+int svlImageFile::Open(const char * CMN_UNUSED(filepath), svlImageProperties & CMN_UNUSED(properties))
 {
     return -1;
 }
 
-int svlImageFile::ReadAndClose(unsigned char* CMN_UNUSED(buffer),
-                               unsigned int CMN_UNUSED(size))
+int svlImageFile::ReadAndClose(unsigned char * CMN_UNUSED(buffer), unsigned int CMN_UNUSED(size))
 {
     return -1;
 }
 
-int svlImageFile::Create(const char* CMN_UNUSED(filepath),
-                         svlImageProperties * CMN_UNUSED(properties),
-                         unsigned char * CMN_UNUSED(buffer))
+int svlImageFile::Create(const char * CMN_UNUSED(filepath), svlImageProperties * CMN_UNUSED(properties), unsigned char * CMN_UNUSED(buffer))
 {
     return -1;
 }
