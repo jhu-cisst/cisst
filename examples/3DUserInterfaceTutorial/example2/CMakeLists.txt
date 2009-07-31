@@ -15,6 +15,11 @@ else (VTK_FOUND)
     message (FATAL ERROR "VTK not found")
 endif (VTK_FOUND)
 
+IF(CISST_SVL_HAS_SVS)
+    INCLUDE_DIRECTORIES(${SVS_INCLUDE_DIR})
+    LINK_LIBRARIES(${SVS_svs_LIBRARY} ${SVS_svsgrab_LIBRARY})
+ENDIF(CISST_SVL_HAS_SVS)
+
 IF(CISST_SVL_HAS_OPENCV)
     # Link each example against the OpenCV library if enabled
     FIND_PACKAGE(OpenCV)
@@ -63,4 +68,4 @@ IF(UNIX)
 ENDIF(UNIX)
 
 
-CISST_REQUIRES(${PROJECT_NAME} "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstImage;cisstStereoVision;cisstDevices;cisstParameterTypes;cisst3DUserInterface")
+CISST_REQUIRES(${PROJECT_NAME} "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstStereoVision;cisstDevices;cisstParameterTypes;cisst3DUserInterface")

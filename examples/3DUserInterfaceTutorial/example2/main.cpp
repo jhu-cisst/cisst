@@ -27,7 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 #define UI3_DAVINCI 3
 
 // change this based on your configuration
-#define UI3_INPUT UI3_DAVINCI
+#define UI3_INPUT UI3_NO_INPUT
 
 #include <cisstOSAbstraction/osaThreadedLogFile.h>
 #include <cisstOSAbstraction/osaSleep.h>
@@ -116,7 +116,7 @@ int main()
 
     svlStreamManager vidUltrasoundStream(1);  // running on multiple threads
 
-    svlVideoCaptureSource vidUltrasoundSource(false); // mono source
+    svlFilterSourceVideoCapture vidUltrasoundSource(false); // mono source
     if (vidUltrasoundSource.LoadSettings("usvideo.dat") != SVL_OK) {
         cout << "Setup Ultrasound video input:" << endl;
         vidUltrasoundSource.DialogSetup();
@@ -127,7 +127,7 @@ int main()
 #endif 
     
     // add image cropper
-    svlImageCropper vidUltrasoundCropper;
+    svlFilterImageCropper vidUltrasoundCropper;
     vidUltrasoundCropper.SetRectangle(186, 27, 186 + 360 - 1, 27 + 332 - 1);
     vidUltrasoundStream.Trunk().Append(&vidUltrasoundCropper);
 
@@ -138,11 +138,11 @@ int main()
 
 /*
     // add debug window
-    svlImageWindow vidUltrasoundWindow;
+    svlFilterImageWindow vidUltrasoundWindow;
     vidUltrasoundStream.Trunk().Append(&vidUltrasoundWindow);
 
     // save one frame
-    svlImageFileWriter vidUltrasoundWriter;
+    svlFilterImageFileWriter vidUltrasoundWriter;
     vidUltrasoundWriter.SetFilePath("usimage", "bmp");
     vidUltrasoundWriter.Record(1);
     vidUltrasoundStream.Trunk().Append(&vidUltrasoundWriter);
@@ -154,7 +154,7 @@ int main()
 #ifndef RENDER_ON_OVERLAY
     svlStreamManager vidBackgroundStream(2);  // running on multiple threads
 
-    svlVideoCaptureSource vidBackgroundSource(true); // stereo source
+    svlFilterSourceVideoCapture vidBackgroundSource(true); // stereo source
     cout << "Setup LEFT camera:" << endl;
     vidBackgroundSource.DialogSetup(SVL_LEFT);
     cout << "Setup RIGHT camera:" << endl;
@@ -162,7 +162,7 @@ int main()
     vidBackgroundStream.Trunk().Append(&vidBackgroundSource);
 
 #ifdef CAPTURE_SWAP_RGB
-    svlRGBSwapper vidBackgroundRGBSwapper;
+    svlFilterRGBSwapper vidBackgroundRGBSwapper;
     vidBackgroundStream.Trunk().Append(&vidBackgroundRGBSwapper);
 #endif //CAPTURE_SWAP_RGB
 
@@ -195,7 +195,6 @@ int main()
                            vidBackgroundSource.GetHeight(SVL_LEFT), // render height
                            0, 0,            // window position
                            camframe, vertviewangle, leftopticalcenteroffset,  // camera parameters
-                           vct2(0.0),
                            "LeftEyeView");  // name of renderer
     guiManager.AddVideoBackgroundToRenderer("LeftEyeView", "StereoVideo", SVL_LEFT);
 #endif //RENDER_ON_OVERLAY
@@ -215,7 +214,6 @@ int main()
                            vidBackgroundSource.GetHeight(SVL_RIGHT), // render height
                            20, 20,          // window position
                            camframe, vertviewangle, rightopticalcenteroffset,  // camera parameters
-                           vct2(0.0),
                            "RightEyeView"); // name of renderer
     guiManager.AddVideoBackgroundToRenderer("RightEyeView", "StereoVideo", SVL_RIGHT);
 #endif //RENDER_ON_OVERLAY
@@ -224,7 +222,7 @@ int main()
 #ifdef DEBUG_WINDOW_HAS_VIDEO_BACKGROUND
     svlStreamManager vidBackgroundStream(1);
 
-    svlVideoCaptureSource vidBackgroundSource(false); // mono source
+    svlFilterSourceVideoCapture vidBackgroundSource(false); // mono source
     cout << "Setup camera:" << endl;
     vidBackgroundSource.DialogSetup();
     vidBackgroundStream.Trunk().Append(&vidBackgroundSource);

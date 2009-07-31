@@ -27,7 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 #define UI3_DAVINCI 3
 
 // change this based on your configuration
-#define UI3_INPUT UI3_DAVINCI
+#define UI3_INPUT UI3_NO_INPUT
 
 #include <cisstOSAbstraction/osaThreadedLogFile.h>
 #include <cisstOSAbstraction/osaSleep.h>
@@ -59,24 +59,17 @@ http://www.cisst.org/cisst/license.txt.
 
 int main()
 {
-    // log configuration, high LoD means no global filtering
+    // log configuration
     cmnLogger::SetLoD(CMN_LOG_LOD_VERY_VERBOSE);
 	cmnLogger::GetMultiplexer()->AddChannel(std::cout, CMN_LOG_LOD_VERY_VERBOSE);
     // add a log per thread
     osaThreadedLogFile threadedLog("example1-");
     cmnLogger::GetMultiplexer()->AddChannel(threadedLog, CMN_LOG_LOD_VERY_VERBOSE);
-
-    // specify a log level for these classes
+    // specify a higher, more verbose log level for these classes
     cmnClassRegister::SetLoD("ui3BehaviorBase", CMN_LOG_LOD_VERY_VERBOSE);
-    cmnClassRegister::SetLoD("ui3VisibleObject", CMN_LOG_LOD_RUN_VERBOSE);
-    cmnClassRegister::SetLoD("ui3MenuBar", CMN_LOG_LOD_RUN_VERBOSE);
-    cmnClassRegister::SetLoD("ui3Manager", CMN_LOG_LOD_RUN_VERBOSE);
-    cmnClassRegister::SetLoD("mtsTaskInterface", CMN_LOG_LOD_RUN_VERBOSE);
-    cmnClassRegister::SetLoD("mtsTaskManager", CMN_LOG_LOD_RUN_VERBOSE);
-    cmnClassRegister::SetLoD("SimpleBehaviorVisibleObject", CMN_LOG_LOD_RUN_VERBOSE);
-    cmnClassRegister::SetLoD("dvapi_stream", CMN_LOG_LOD_INIT_VERBOSE);
-    cmnClassRegister::SetLoD("ui3CursorSphere", CMN_LOG_LOD_RUN_VERBOSE);
-    cmnClassRegister::SetLoD("ui3VisibleList", CMN_LOG_LOD_RUN_VERBOSE);
+    cmnClassRegister::SetLoD("ui3Manager", CMN_LOG_LOD_VERY_VERBOSE);
+    cmnClassRegister::SetLoD("mtsTaskInterface", CMN_LOG_LOD_VERY_VERBOSE);
+    cmnClassRegister::SetLoD("mtsTaskManager", CMN_LOG_LOD_VERY_VERBOSE);
 
     mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
 #if (UI3_INPUT == UI3_OMNI1_OMNI2)
@@ -95,9 +88,9 @@ int main()
 
     ui3Manager guiManager;
 
-    SimpleBehavior behavior("Example1");
-    BehaviorWithSlave behavior2("Example2");
-    
+    SimpleBehavior behavior("Example1", &guiManager);
+    BehaviorWithSlave behavior2("Example2", &guiManager);
+
     guiManager.AddBehavior(&behavior,       // behavior reference
                            0,               // position in the menu bar: default
                            "circle.png");   // icon file: no texture
@@ -114,7 +107,7 @@ int main()
 #ifndef RENDER_ON_OVERLAY
     svlStreamManager vidStream(2);  // running on multiple threads
 
-    svlVideoCaptureSource vidBackgroundSource(true); // stereo source
+    svlFilterSourceVideoCapture vidBackgroundSource(true); // stereo source
     cout << "Setup LEFT camera:" << endl;
     vidBackgroundSource.DialogSetup(SVL_LEFT);
     cout << "Setup RIGHT camera:" << endl;
@@ -122,7 +115,7 @@ int main()
     vidStream.Trunk().Append(&vidBackgroundSource);
 
 #ifdef CAPTURE_SWAP_RGB
-    svlRGBSwapper vidRGBSwapper;
+    svlFilterRGBSwapper vidRGBSwapper;
     vidStream.Trunk().Append(&vidRGBSwapper);
 #endif //CAPTURE_SWAP_RGB
 
@@ -182,17 +175,17 @@ int main()
 #ifdef DEBUG_WINDOW_HAS_VIDEO_BACKGROUND
     svlStreamManager vidStream(1);
 
-    svlVideoCaptureSource vidSource(false); // mono source
+    svlFilterSourceVideoCapture vidSource(false); // mono source
     cout << "Setup camera:" << endl;
     vidSource.DialogSetup();
     vidStream.Trunk().Append(&vidSource);
 
-    svlImageResizer vidResizer;
+    svlFilterImageResizer vidResizer;
     vidResizer.SetOutputSize(384, 216);
     vidStream.Trunk().Append(&vidResizer);
 
 #ifdef CAPTURE_SWAP_RGB
-    svlRGBSwapper vidRGBSwapper;
+    svlFilterRGBSwapper vidRGBSwapper;
     vidStream.Trunk().Append(&vidRGBSwapper);
 #endif //CAPTURE_SWAP_RGB
 
@@ -233,8 +226,7 @@ int main()
                           sensable, "Omni1Button2",
                           ui3MasterArm::PRIMARY);
     rightMaster->SetTransformation(transform, 0.5 /* scale factor */);
-    ui3CursorBase * rightCursor = new ui3CursorSphere();
-    rightCursor->SetAnchor(ui3CursorBase::CENTER_RIGHT);
+    ui3CursorBase * rightCursor = new ui3CursorSphere(&guiManager);
     rightMaster->SetCursor(rightCursor);
 #endif
 #if (UI3_INPUT == UI3_OMNI1_OMNI2)
@@ -262,7 +254,7 @@ int main()
                           daVinci, "MTMRClutch",
                           ui3MasterArm::PRIMARY);
     rightMaster->SetTransformation(transform, 0.5 /* scale factor */);
-    ui3CursorBase * rightCursor = new ui3CursorSphere();
+    ui3CursorBase * rightCursor = new ui3CursorSphere(&guiManager);
     rightCursor->SetAnchor(ui3CursorBase::CENTER_RIGHT);
     rightMaster->SetCursor(rightCursor);
 
@@ -274,7 +266,7 @@ int main()
                          daVinci, "MTMLClutch",
                          ui3MasterArm::SECONDARY);
     leftMaster->SetTransformation(transform, 0.5 /* scale factor */);
-    ui3CursorBase * leftCursor = new ui3CursorSphere();
+    ui3CursorBase * leftCursor = new ui3CursorSphere(&guiManager);
     leftCursor->SetAnchor(ui3CursorBase::CENTER_LEFT);
     leftMaster->SetCursor(leftCursor);
 
