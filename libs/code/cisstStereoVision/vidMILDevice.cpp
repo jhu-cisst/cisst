@@ -222,9 +222,9 @@ CMILDevice* CMILDevice::GetInstance()
     return &instance;
 }
 
-svlVideoCaptureSource::PlatformType CMILDevice::GetPlatformType()
+svlFilterSourceVideoCapture::PlatformType CMILDevice::GetPlatformType()
 {
-    return svlVideoCaptureSource::MatroxImaging;
+    return svlFilterSourceVideoCapture::MatroxImaging;
 }
 
 int CMILDevice::SetStreamCount(unsigned int numofstreams)
@@ -246,7 +246,7 @@ int CMILDevice::SetStreamCount(unsigned int numofstreams)
     return SVL_OK;
 }
 
-int CMILDevice::GetDeviceList(svlVideoCaptureSource::DeviceInfo **deviceinfo)
+int CMILDevice::GetDeviceList(svlFilterSourceVideoCapture::DeviceInfo **deviceinfo)
 {
     if (deviceinfo == 0 || Initialized) return SVL_FAIL;
 
@@ -276,11 +276,11 @@ int CMILDevice::GetDeviceList(svlVideoCaptureSource::DeviceInfo **deviceinfo)
     // CALLER HAS TO FREE UP THIS ARRAY!!!
     if (MILNumberOfDevices > 0) {
 
-        deviceinfo[0] = new svlVideoCaptureSource::DeviceInfo[MILNumberOfDevices];
+        deviceinfo[0] = new svlFilterSourceVideoCapture::DeviceInfo[MILNumberOfDevices];
 
         for (i = 0; i < MILNumberOfDevices; i ++) {
             // platform
-            deviceinfo[0][i].platform = svlVideoCaptureSource::MatroxImaging;
+            deviceinfo[0][i].platform = svlFilterSourceVideoCapture::MatroxImaging;
 
             // id
             deviceinfo[0][i].id = devid[i];
@@ -395,14 +395,14 @@ int CMILDevice::GetHeight(unsigned int videoch)
     return ImageBuffer[videoch]->GetHeight();
 }
 
-int CMILDevice::GetFormatList(unsigned int deviceid, svlVideoCaptureSource::ImageFormat **formatlist)
+int CMILDevice::GetFormatList(unsigned int deviceid, svlFilterSourceVideoCapture::ImageFormat **formatlist)
 {
     if (static_cast<int>(deviceid) >= MILNumberOfDevices || formatlist == 0) return SVL_FAIL;
 
-    formatlist[0] = new svlVideoCaptureSource::ImageFormat[1];
+    formatlist[0] = new svlFilterSourceVideoCapture::ImageFormat[1];
     formatlist[0][0].width = Width[deviceid];
     formatlist[0][0].height = Height[deviceid];
-    formatlist[0][0].colorspace = svlVideoCaptureSource::PixelRGB8;
+    formatlist[0][0].colorspace = svlFilterSourceVideoCapture::PixelRGB8;
     formatlist[0][0].rgb_order = true;
     formatlist[0][0].yuyv_order = false;
     formatlist[0][0].framerate = -1.0;
@@ -410,13 +410,13 @@ int CMILDevice::GetFormatList(unsigned int deviceid, svlVideoCaptureSource::Imag
     return 1;
 }
 
-int CMILDevice::GetFormat(svlVideoCaptureSource::ImageFormat& format, unsigned int videoch)
+int CMILDevice::GetFormat(svlFilterSourceVideoCapture::ImageFormat& format, unsigned int videoch)
 {
     if (DeviceID[videoch] >= MILNumberOfDevices) return SVL_FAIL;
 
     format.width = Width[DeviceID[videoch]];
     format.height = Height[DeviceID[videoch]];
-    format.colorspace = svlVideoCaptureSource::PixelRGB8;
+    format.colorspace = svlFilterSourceVideoCapture::PixelRGB8;
     format.rgb_order = true;
     format.yuyv_order = false;
     format.framerate = -1.0;

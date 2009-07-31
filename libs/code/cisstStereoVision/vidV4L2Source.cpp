@@ -79,9 +79,9 @@ CV4L2Source::~CV4L2Source()
     Release();
 }
 
-svlVideoCaptureSource::PlatformType CV4L2Source::GetPlatformType()
+svlFilterSourceVideoCapture::PlatformType CV4L2Source::GetPlatformType()
 {
-    return svlVideoCaptureSource::LinVideo4Linux2;
+    return svlFilterSourceVideoCapture::LinVideo4Linux2;
 }
 
 int CV4L2Source::SetStreamCount(unsigned int numofstreams)
@@ -125,16 +125,16 @@ int CV4L2Source::SetStreamCount(unsigned int numofstreams)
     return SVL_OK;
 }
 
-int CV4L2Source::GetDeviceList(svlVideoCaptureSource::DeviceInfo **deviceinfo)
+int CV4L2Source::GetDeviceList(svlFilterSourceVideoCapture::DeviceInfo **deviceinfo)
 {
     if (deviceinfo == 0 || Initialized) return SVL_FAIL;
 
     char tempname[64];
-    svlVideoCaptureSource::DeviceInfo tempinfo[16];
+    svlFilterSourceVideoCapture::DeviceInfo tempinfo[16];
     v4l2_capability devprops;
     int i, fd, counter;
 
-    memset(tempinfo, 0, sizeof(svlVideoCaptureSource::DeviceInfo) * 16);
+    memset(tempinfo, 0, sizeof(svlFilterSourceVideoCapture::DeviceInfo) * 16);
 
 #ifdef __verbose__
     cout << "Starting enumeration... " << endl;
@@ -169,7 +169,7 @@ int CV4L2Source::GetDeviceList(svlVideoCaptureSource::DeviceInfo **deviceinfo)
                     (devprops.capabilities & V4L2_CAP_READWRITE) != 0) {
 
                     // platform
-                    tempinfo[counter].platform = svlVideoCaptureSource::LinVideo4Linux2;
+                    tempinfo[counter].platform = svlFilterSourceVideoCapture::LinVideo4Linux2;
 
                     // id
                     tempinfo[counter].id = i;
@@ -207,8 +207,8 @@ int CV4L2Source::GetDeviceList(svlVideoCaptureSource::DeviceInfo **deviceinfo)
     // Allocate memory for device info array
     // CALLER HAS TO FREE UP THIS ARRAY!!!
     if (counter > 0) {
-        deviceinfo[0] = new svlVideoCaptureSource::DeviceInfo[counter];
-        memcpy(deviceinfo[0], tempinfo, counter * sizeof(svlVideoCaptureSource::DeviceInfo));
+        deviceinfo[0] = new svlFilterSourceVideoCapture::DeviceInfo[counter];
+        memcpy(deviceinfo[0], tempinfo, counter * sizeof(svlFilterSourceVideoCapture::DeviceInfo));
     }
     else {
         deviceinfo[0] = 0;
@@ -577,14 +577,14 @@ int CV4L2Source::GetHeight(unsigned int videoch)
     return CapHeight[videoch];
 }
 
-int CV4L2Source::GetFormatList(unsigned int CMN_UNUSED(deviceid), svlVideoCaptureSource::ImageFormat **formatlist)
+int CV4L2Source::GetFormatList(unsigned int CMN_UNUSED(deviceid), svlFilterSourceVideoCapture::ImageFormat **formatlist)
 {
     if (formatlist == 0) return SVL_FAIL;
 
-    formatlist[0] = new svlVideoCaptureSource::ImageFormat[1];
+    formatlist[0] = new svlFilterSourceVideoCapture::ImageFormat[1];
     formatlist[0][0].width = 720;
     formatlist[0][0].height = 480;
-    formatlist[0][0].colorspace = svlVideoCaptureSource::PixelYUV422;
+    formatlist[0][0].colorspace = svlFilterSourceVideoCapture::PixelYUV422;
     formatlist[0][0].rgb_order = true;
     formatlist[0][0].yuyv_order = false;
     formatlist[0][0].framerate = 30.0;
@@ -592,13 +592,13 @@ int CV4L2Source::GetFormatList(unsigned int CMN_UNUSED(deviceid), svlVideoCaptur
     return 1;
 }
 
-int CV4L2Source::GetFormat(svlVideoCaptureSource::ImageFormat& format, unsigned int videoch)
+int CV4L2Source::GetFormat(svlFilterSourceVideoCapture::ImageFormat& format, unsigned int videoch)
 {
     if (videoch >= NumOfStreams) return SVL_FAIL;
 
     format.width = 720;
     format.height = 480;
-    format.colorspace = svlVideoCaptureSource::PixelYUV422;
+    format.colorspace = svlFilterSourceVideoCapture::PixelYUV422;
     format.rgb_order = true;
     format.yuyv_order = false;
     format.framerate = 30.0;
@@ -736,7 +736,7 @@ void CV4L2Source::Release()
     OutputBuffer = 0;
 }
 
-int CV4L2Source::GetDeviceInputs(int fd, svlVideoCaptureSource::DeviceInfo *deviceinfo)
+int CV4L2Source::GetDeviceInputs(int fd, svlFilterSourceVideoCapture::DeviceInfo *deviceinfo)
 {
     if (fd < 0 || deviceinfo == 0) return SVL_FAIL;
 

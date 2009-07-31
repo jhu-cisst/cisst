@@ -23,7 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _vidMILDevice_h
 #define _vidMILDevice_h
 
-#include <cisstStereoVision/svlVideoCaptureSource.h>
+#include <cisstStereoVision/svlFilterSourceVideoCapture.h>
 #include <cisstStereoVision/svlRenderTargets.h>
 #include "svlImageBuffer.h"
 
@@ -77,21 +77,21 @@ private:
 public:
     static CMILDevice* GetInstance();
 
-    svlVideoCaptureSource::PlatformType GetPlatformType();
+    svlFilterSourceVideoCapture::PlatformType GetPlatformType();
     int SetStreamCount(unsigned int numofstreams);
-	int GetDeviceList(svlVideoCaptureSource::DeviceInfo **deviceinfo);
-	int Open();
-	void Close();
-	int Start();
+    int GetDeviceList(svlFilterSourceVideoCapture::DeviceInfo **deviceinfo);
+    int Open();
+    void Close();
+    int Start();
     svlImageRGB* GetLatestFrame(bool waitfornew, unsigned int videoch = 0);
-	int Stop();
-	bool IsRunning();
+    int Stop();
+    bool IsRunning();
     int SetDevice(int devid, int inid, unsigned int videoch = 0);
-	int GetWidth(unsigned int videoch = 0);
-	int GetHeight(unsigned int videoch = 0);
+    int GetWidth(unsigned int videoch = 0);
+    int GetHeight(unsigned int videoch = 0);
 
-    int GetFormatList(unsigned int deviceid, svlVideoCaptureSource::ImageFormat **formatlist);
-    int GetFormat(svlVideoCaptureSource::ImageFormat& format, unsigned int videoch = 0);
+    int GetFormatList(unsigned int deviceid, svlFilterSourceVideoCapture::ImageFormat **formatlist);
+    int GetFormat(svlFilterSourceVideoCapture::ImageFormat& format, unsigned int videoch = 0);
     void Release();
 
     bool IsCaptureSupported(int devid);
@@ -102,15 +102,15 @@ public:
 private:
     unsigned int NumOfStreams;
     bool Initialized;
-	bool Running;
+    bool Running;
 
-	int* DeviceID;
-	bool CaptureEnabled[2];
-	bool OverlayEnabled[2];
-	bool CaptureSupported[2];
-	bool OverlaySupported[2];
-	int Width[2];
-	int Height[2];
+    int* DeviceID;
+    bool CaptureEnabled[2];
+    bool OverlayEnabled[2];
+    bool CaptureSupported[2];
+    bool OverlaySupported[2];
+    int Width[2];
+    int Height[2];
     svlImageBuffer** ImageBuffer;
 
     int MILNumberOfDevices;
