@@ -76,10 +76,10 @@ int ComputeStereo(const char* filepath1, const char* filepath2,
 
     // 3D reconstruction
     svlStreamManager stereo_stream(2);
-    svlImageFileSource stereo_source(true);
-    svlComputationalStereo stereo_stereo;
-    svlStreamTypeConverter stereo_converter(svlTypeDepthMap, svlTypeImageRGB);
-    svlImageWindow stereo_window;
+    svlFilterSourceImageFile stereo_source(true);
+    svlFilterComputationalStereo stereo_stereo;
+    svlFilterStreamTypeConverter stereo_converter(svlTypeDepthMap, svlTypeImageRGB);
+    svlFilterImageWindow stereo_window;
 
 
 //////////////////////////////////////////////////////////////

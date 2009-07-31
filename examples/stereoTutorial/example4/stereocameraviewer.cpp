@@ -196,9 +196,9 @@ public:
         }
     }
 
-    svlImageFileWriter* ImageWriterFilter;
+    svlFilterImageFileWriter* ImageWriterFilter;
 #if (CISST_SVL_HAS_ZLIB == ON)
-    svlVideoFileWriter* VideoWriterFilter;
+    svlFilterVideoFileWriter* VideoWriterFilter;
     bool Recording;
 #endif // CISST_SVL_HAS_ZLIB
 
@@ -225,13 +225,13 @@ int CameraViewer(bool interpolation, bool save, int width, int height)
 
     // instantiating SVL stream and filters
     svlStreamManager viewer_stream(8);
-    svlVideoCaptureSource viewer_source(true);
-    svlImageResizer viewer_resizer;
-    svlImageWindow viewer_window;
+    svlFilterSourceVideoCapture viewer_source(true);
+    svlFilterImageResizer viewer_resizer;
+    svlFilterImageWindow viewer_window;
     CViewerWindowCallback viewer_window_cb;
-    svlImageFileWriter viewer_imagewriter;
+    svlFilterImageFileWriter viewer_imagewriter;
 #if (CISST_SVL_HAS_ZLIB == ON)
-    svlVideoFileWriter viewer_videowriter;
+    svlFilterVideoFileWriter viewer_videowriter;
 #endif // CISST_SVL_HAS_ZLIB
     CFPSFilter viewer_fps;
 

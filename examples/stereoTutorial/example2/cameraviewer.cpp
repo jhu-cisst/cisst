@@ -142,13 +142,13 @@ public:
                 case ' ':
                     if (RecorderFilter && IconDrawerFilter) {
                         if (Recording) {
-                            ((svlVideoFileWriter*)RecorderFilter)->Pause();
+                            ((svlFilterVideoFileWriter*)RecorderFilter)->Pause();
                             IconDrawerFilter->Pause();
                             Recording = false;
                             cout << endl << " >>> Recording paused <<<" << endl;
                         }
                         else {
-                            ((svlVideoFileWriter*)RecorderFilter)->Record(-1);
+                            ((svlFilterVideoFileWriter*)RecorderFilter)->Record(-1);
                             IconDrawerFilter->Record();
                             Recording = true;
                             cout << endl << " >>> Recording started <<<" << endl;
@@ -192,14 +192,14 @@ int CameraViewer(bool interpolation, bool save, int width, int height)
 
     // instantiating SVL stream and filters
     svlStreamManager viewer_stream(8);
-    svlVideoCaptureSource viewer_source(false);
-    svlImageResizer viewer_resizer;
-    svlImageWindow viewer_window;
+    svlFilterSourceVideoCapture viewer_source(false);
+    svlFilterImageResizer viewer_resizer;
+    svlFilterImageWindow viewer_window;
     CViewerWindowCallback viewer_window_cb;
 #if (CISST_SVL_HAS_ZLIB == ON)
-    svlImageSampler viewer_icondrawer;
+    svlFilterImageSampler viewer_icondrawer;
     CViewerIconDrawerCallback viewer_icondrawer_cb;
-    svlVideoFileWriter viewer_writer;
+    svlFilterVideoFileWriter viewer_writer;
 #endif // CISST_SVL_HAS_ZLIB
 
     // setup source

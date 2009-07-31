@@ -43,8 +43,8 @@ int VideoPlayer(const std::string pathname)
 {
     // instantiating SVL stream and filters
     svlStreamManager viewer_stream(4);
-    svlVideoFileSource viewer_source(false);
-    svlImageWindow viewer_window;
+    svlFilterSourceVideoFile viewer_source(false);
+    svlFilterImageWindow viewer_window;
 
     // setup source
     if (pathname.empty()) {

@@ -31,11 +31,11 @@ int main()
     svlStreamManager stream(4); // number of threads per stream
     svlStreamEntity *branch;
 
-    svlDummySource video_source(svlTypeImageRGB); // try svlTypeImageRGBStereo for stereo image source
-    svlImageResizer resizer;
-    svlImageWindow window;
-    svlUnsharpMask unsharpmask;
-    svlImageWindow window2;
+    svlFilterSourceDummy video_source(svlTypeImageRGB); // try svlTypeImageRGBStereo for stereo image source
+    svlFilterImageResizer resizer;
+    svlFilterImageWindow window;
+    svlFilterUnsharpMask unsharpmask;
+    svlFilterImageWindow window2;
 
     // Setup dummy video source
     video_source.SetDimensions(320, 240);

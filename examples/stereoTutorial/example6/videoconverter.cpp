@@ -43,10 +43,10 @@ int VideoConverter(const std::string source, const std::string destination)
 {
     // instantiating SVL stream and filters
     svlStreamManager viewer_stream(1);
-    svlVideoFileSource viewer_source(true);
-    svlImageRectifier viewer_rectifier;
-    svlImageFileWriter viewer_writer;
-    svlImageWindow viewer_window;
+    svlFilterSourceVideoFile viewer_source(true);
+    svlFilterImageRectifier viewer_rectifier;
+    svlFilterImageFileWriter viewer_writer;
+    svlFilterImageWindow viewer_window;
 
     // setup source
     viewer_source.DialogFilePath(SVL_LEFT);
