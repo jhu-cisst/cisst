@@ -27,7 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 #define UI3_DAVINCI 3
 
 // change this based on your configuration
-#define UI3_INPUT UI3_NO_INPUT
+#define UI3_INPUT UI3_DAVINCI
 
 #include <cisstOSAbstraction/osaThreadedLogFile.h>
 #include <cisstOSAbstraction/osaSleep.h>
@@ -122,8 +122,8 @@ int main()
         vidUltrasoundSource.DialogSetup();
         vidUltrasoundSource.SaveSettings("usvideo.dat");
     }
-#if 0
-    vidUltrasoundStream.Trunk().Append(&vidUltrasoundSource);
+#if 1
+    vidUltrasoundStream.Trunk().Append(&vidUltrasoundSource);  //this crashes
 #endif 
     
     // add image cropper
@@ -302,7 +302,7 @@ int main()
                           daVinci, "MTMRButton",
                           daVinci, "MTMRClutch",
                           ui3MasterArm::PRIMARY);
-    rightMaster->SetTransformation(transform, 1.0 /* scale factor */);
+    rightMaster->SetTransformation(transform, 0.5 /* scale factor */);
     ui3CursorBase * rightCursor = new ui3CursorSphere();
     rightCursor->SetAnchor(ui3CursorBase::CENTER_RIGHT);
     rightMaster->SetCursor(rightCursor);
@@ -314,7 +314,7 @@ int main()
                          daVinci, "MTMLButton",
                          daVinci, "MTMLClutch",
                          ui3MasterArm::SECONDARY);
-    leftMaster->SetTransformation(transform, 1.0 /* scale factor */);
+    leftMaster->SetTransformation(transform, 0.5 /* scale factor */);
     ui3CursorBase * leftCursor = new ui3CursorSphere();
     leftCursor->SetAnchor(ui3CursorBase::CENTER_LEFT);
     leftMaster->SetCursor(leftCursor);

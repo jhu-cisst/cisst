@@ -70,6 +70,7 @@ public:
     void RemoveLastMarker();
 
     void MasterClutchPedalCallback(const prmEventButton & payload);
+    void CameraControlPedalCallback(const prmEventButton & payload);
     void DropMarkerCallback(void);
     void RemoveMarkerCallback(void);
     vctFrm3 GetCurrentCursorPositionWRTECM(void);
@@ -88,13 +89,13 @@ protected:
     StateType PreviousState;
     bool PreviousMaM;
     bool RightMTMOpen, prevRightMTMOpen, LeftMTMOpen;
-    bool ClutchPressed, MarkerDropped, MarkerRemoved;
+    bool ClutchPressed,CameraPressed, MarkerDropped, MarkerRemoved;
     bool Following;
     bool MapEnabled;
     //    bool isRightMTMOpen(double grip);
 
     vctDouble3 PreviousCursorPosition;
-    vctFrm3 CursorPos;
+    vctDouble3 CursorPosition;
     vctDouble3 PreviousSlavePosition;
     vctDouble3 Offset;
     vctDouble3 CursorOffset;
@@ -166,6 +167,7 @@ private:
     BehaviorLUSText       *WarningText, * MeasureText;
     BehaviorLUSMarker     *MapCursor;
     BehaviorLUSMarker     *M1,*M2,*M3, *M4;
+    BehaviorLUSMarker * MyMarkers[20];
     
     ui3VisibleAxes * ProbeAxes;
     ui3VisibleAxes * AxesJoint1;
@@ -175,6 +177,8 @@ private:
 
     vctFrm3 ECMtoECMRCM;
     vctFrm3 ECMRCMtoVTK;
+    double ECMRCMtoVTKscale;
+    vctDouble3 CenterRotatedTranslated;
     
     void                    SetTransform(vtkMatrix4x4 *mat, 
                                          double e11, double e12, double e13, double e14,
