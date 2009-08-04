@@ -59,12 +59,16 @@ class mainGUI {open
             xywh {15 240 95 20} labelsize 12
           }
           Fl_Button CappingOn {
-            label {Cap Forces} selected
+            label {Cap Forces}
             xywh {130 240 95 20} labelsize 12
           }
           Fl_Button InfiniteOn {
             label {Infinite Force}
             xywh {240 240 95 20} labelsize 12
+          }
+          Fl_Light_Button ClutchSlave {
+            label {Clutch Slave} selected
+            xywh {360 230 110 20} labelsize 13
           }
         }
       }

@@ -32,13 +32,15 @@ displayTask::displayTask(const std::string & taskName, double period):
     {
         requiredInterface->AddFunction("GetScaleFactor", GetScaleFactor);
         requiredInterface->AddFunction("GetForceLimit", GetForceLimit);
-        requiredInterface->AddFunction("GetClutch", GetClutch);
+        requiredInterface->AddFunction("GetMasterClutch", GetMasterClutch);
+        requiredInterface->AddFunction("GetSlaveClutch", GetSlaveClutch);
         requiredInterface->AddFunction("GetForceMode", GetForceMode);
         requiredInterface->AddFunction("GetForceCoefficient", GetForceCoefficient);
 
         requiredInterface->AddFunction("SetScaleFactor", SetScaleFactor);
         requiredInterface->AddFunction("SetForceLimit", SetForceLimit);
-        requiredInterface->AddFunction("SetClutch", SetClutch);
+        requiredInterface->AddFunction("SetMasterClutch", SetMasterClutch);
+        requiredInterface->AddFunction("SetSlaveClutch", SetSlaveClutch);
         requiredInterface->AddFunction("SetForceMode", SetForceMode);
         requiredInterface->AddFunction("SetForceCoefficient", SetForceCoefficient);
 
@@ -51,6 +53,8 @@ displayTask::displayTask(const std::string & taskName, double period):
     commandedForceLimit = 0.0;
     commandedScaleFactor = 0.0;
     commandedForceCoeff = 0.0;
+    commandedMasterClutch = false;
+    commandedSlaveClutch = false;
     FLimit = 0.0;
     ScaleFact = 0.0;
     FMode = 0;
@@ -74,11 +78,21 @@ void displayTask::Run(void)
         return;
     }
 
+    GetForceLimit(FLimit);
+    UI.ForceLimitVal->value(FLimit);
+
+    GetScaleFactor(ScaleFact);
+    UI.ScaleFactorVal->value(ScaleFact);
+
     commandedForceLimit = UI.ForceLimit->value();
-    SetForceLimit(commandedForceLimit);
+    if(FLimit != commandedForceLimit) {   
+        SetForceLimit(commandedForceLimit);
+    }
 
     commandedScaleFactor = UI.ScaleFactor->value();
-    SetScaleFactor(commandedScaleFactor);
+    if(ScaleFact != commandedScaleFactor) {
+        SetScaleFactor(commandedScaleFactor);
+    }
 
     GetForceCoefficient(FCoeff);
     UI.ForceCoefficientVal->value(FCoeff);
@@ -87,14 +101,9 @@ void displayTask::Run(void)
     if(commandedForceCoeff != FCoeff) {
         SetForceCoefficient(commandedForceCoeff);
     }
-    
-    GetForceLimit(FLimit);
-    UI.ForceLimitVal->value(FLimit);
 
-    GetScaleFactor(ScaleFact);
-    UI.ScaleFactorVal->value(ScaleFact);
-
-    GetClutch(MasterClutch);
+    GetMasterClutch(MasterClutch);
+    GetSlaveClutch(SlaveClutch);
 
     GetForceMode(FMode);
     const char * ForceModeName;
@@ -108,14 +117,26 @@ void displayTask::Run(void)
     UI.CurrentForceMode->value(ForceModeName);
 
     if(UI.ClutchMaster->value() == 1) {
-        commandedClutch = true;
-        if(MasterClutch != commandedClutch) {
-            SetClutch(commandedClutch);
+        commandedMasterClutch = true;
+        if(MasterClutch != commandedMasterClutch) {
+            SetMasterClutch(commandedMasterClutch);
         }
     } else if(UI.ClutchMaster->value() == 0) {
-        commandedClutch = false;
-        if(MasterClutch != commandedClutch) {
-            SetClutch(commandedClutch);
+        commandedMasterClutch = false;
+        if(MasterClutch != commandedMasterClutch) {
+            SetMasterClutch(commandedMasterClutch);
+        }
+    }
+
+    if(UI.ClutchSlave->value() == 1) {
+        commandedSlaveClutch = true;
+        if(SlaveClutch != commandedSlaveClutch) {
+            SetSlaveClutch(commandedSlaveClutch);
+        }
+    } else if(UI.ClutchSlave->value() == 0) {
+        commandedSlaveClutch = false;
+        if(SlaveClutch != commandedSlaveClutch) {
+            SetSlaveClutch(commandedSlaveClutch);
         }
     }
 

@@ -39,12 +39,14 @@ class displayTask: public mtsTaskPeriodic
     
     mtsFunctionRead         GetScaleFactor;
     mtsFunctionRead         GetForceLimit;
-    mtsFunctionRead         GetClutch;
+    mtsFunctionRead         GetMasterClutch;
+    mtsFunctionRead         GetSlaveClutch;
     mtsFunctionRead         GetForceMode;
     mtsFunctionRead         GetForceCoefficient;
     mtsFunctionWrite        SetScaleFactor;
     mtsFunctionWrite        SetForceLimit;
-    mtsFunctionWrite        SetClutch;
+    mtsFunctionWrite        SetMasterClutch;
+    mtsFunctionWrite        SetSlaveClutch;
     mtsFunctionWrite        SetForceMode;
     mtsFunctionWrite        SetForceCoefficient;
     mtsFunctionVoid         IncrementScaleFactor;
@@ -58,12 +60,14 @@ class displayTask: public mtsTaskPeriodic
     mtsDouble               commandedScaleFactor;
     mtsDouble               commandedForceCoeff;
     mtsInt                  commandedForceMode;
-    mtsBool                 commandedClutch;
+    mtsBool                 commandedMasterClutch;
+    mtsBool                 commandedSlaveClutch;
     mtsDouble               FLimit;
     mtsDouble               ScaleFact;
     mtsDouble               FCoeff;
     mtsInt                  FMode;
     mtsBool                 MasterClutch;
+    mtsBool                 SlaveClutch;
  public:
     // see sineTask.h documentation
     displayTask(const std::string & taskName, double period);
