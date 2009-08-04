@@ -39,13 +39,13 @@ public:
                              const std::string & secondDeviceName);
 
     ~devSensableHDMasterSlave(void) {};
+
     void UserControl(void);
-    
-    void GetPositions(void);
     void SetScaleFactor(const mtsDouble& Scale);
     void SetForceLimit(const mtsDouble& FLimit);
     void SetForceMode(const mtsInt& Mode);
-    void SetClutch(const mtsBool& commandedClutch);
+    void SetMasterClutch(const mtsBool& commandedClutch);
+    void SetSlaveClutch(const mtsBool& commandedClutch);
     void SetForceCoefficient(const mtsDouble& commandedCoefficient);
     void SetOffsetMultiplier(double OffMult);
     void IncrementScaleFactor(void);
@@ -61,6 +61,7 @@ protected:
     vct3 Error;
     vct3 p1Goal;
     vct3 p2Goal;
+    vct3 p1RGoal;
     vct3 p2RGoal;
    
     prmForceCartesianSet    firstDeviceForce;
@@ -69,17 +70,20 @@ protected:
     prmPositionCartesianGet p2;
     prmPositionCartesianGet p1Clutched;
     prmPositionCartesianGet p2Clutched;
+    prmPositionCartesianGet p1R;
     prmPositionCartesianGet p2R;
 
-    bool firstIteration;
-    mtsBool clutch;
-    mtsBool MasterClutch;
-    mtsDouble ScaleFactor;
-    mtsDouble FMax;
-    mtsInt ForceMode;
-    mtsDouble ForceMasterCoefficient;
-    double ForceFeedNormMaster;
-    double ForceFeedNormSlave;
+    bool        firstIteration;
+    bool        clutchDone;
+    mtsInt      clutch;
+    mtsBool     MasterClutch;
+    mtsBool     SlaveClutch;
+    mtsDouble   ScaleFactor;
+    mtsDouble   FMax;
+    mtsInt      ForceMode;
+    mtsDouble   ForceMasterCoefficient;
+    double      ForceFeedNormMaster;
+    double      ForceFeedNormSlave;
 };
 
 
