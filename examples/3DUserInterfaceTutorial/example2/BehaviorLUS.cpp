@@ -1060,6 +1060,8 @@ void BehaviorLUS::SetUpScene(void)
     //Set the position and color of the measurement text object
     this->MeasureText->SetColor(0./255, 34./255, 102.0/255);
     this->MeasureText->SetPosition(vctDouble3(0.0, 5, 0.0));
+    
+    MapCursor->SetColor(159.0/255, 182.0/255, 205.0/255);
 
 }
 
@@ -1549,7 +1551,7 @@ void BehaviorLUS::AddMarker(void)
 
             BehaviorLUSMarker * newMarkerVisible;
             newMarkerVisible = MyMarkers[MarkerCount];
-    
+            newMarkerVisible->SetColor(153.0/255.0, 255.0/255.0, 153.0/255.0); 
             if(MarkerCount < 20)
             {
                 MarkerType * newMarker = new MarkerType;
@@ -1808,9 +1810,9 @@ void BehaviorLUS::UpdateVisibleMap(void)
         double h,w, ratioH, ratioW;
         h = corner2Rotated.Y() - corner1Rotated.Y();
         w = corner2Rotated.X() - corner1Rotated.X();
-        std::cout << "h: " << h << " w: " << w << std::endl;
-        ratioH = h/(25.0/1.5);
-        ratioW = w/(30.0/1.5);
+        //std::cout << "h: " << h << " w: " << w << std::endl;
+        ratioH = h/(25.0/1.25);
+        ratioW = w/(30.0/1.25);
         if(ratioH > ratioW)
         {
             ratioW = ratioH;//ratioW is now biggest
@@ -1818,7 +1820,7 @@ void BehaviorLUS::UpdateVisibleMap(void)
         if(ratioW >1)
         {
             ECMRCMtoVTKscale = 1.0/ratioW;
-            std::cout << "ECMRCMtoVTKscale" << ECMRCMtoVTKscale << std::endl;
+            //std::cout << "ECMRCMtoVTKscale" << ECMRCMtoVTKscale << std::endl;
         }
        
         // computer the transformation to be applied to all absolute coordinates
@@ -1842,7 +1844,7 @@ void BehaviorLUS::UpdateVisibleMap(void)
 //         ECMRCMtoVTK =VTKrecenter * ECMtoVTK * ECMtoECMRCMInverse;
             vctFrm3 VTKrecenter;
 
-            std::cout << "offsetUp: " << offsetUp << std::endl;
+            //std::cout << "offsetUp: " << offsetUp << std::endl;
             VTKrecenter.Translation().Assign(offsetUp);
             ECMRCMtoVTK =VTKrecenter * ECMtoVTK * ECMtoECMRCMInverse;
             

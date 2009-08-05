@@ -27,7 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 #define UI3_DAVINCI 3
 
 // change this based on your configuration
-#define UI3_INPUT UI3_NO_INPUT
+#define UI3_INPUT UI3_DAVINCI
 
 #include <cisstOSAbstraction/osaThreadedLogFile.h>
 #include <cisstOSAbstraction/osaSleep.h>
@@ -88,8 +88,8 @@ int main()
 
     ui3Manager guiManager;
 
-    SimpleBehavior behavior("Example1", &guiManager);
-    BehaviorWithSlave behavior2("Example2", &guiManager);
+    SimpleBehavior behavior("Example1");
+    BehaviorWithSlave behavior2("Example2");
 
     guiManager.AddBehavior(&behavior,       // behavior reference
                            0,               // position in the menu bar: default
@@ -254,7 +254,7 @@ int main()
                           daVinci, "MTMRClutch",
                           ui3MasterArm::PRIMARY);
     rightMaster->SetTransformation(transform, 0.5 /* scale factor */);
-    ui3CursorBase * rightCursor = new ui3CursorSphere(&guiManager);
+    ui3CursorBase * rightCursor = new ui3CursorSphere();
     rightCursor->SetAnchor(ui3CursorBase::CENTER_RIGHT);
     rightMaster->SetCursor(rightCursor);
 
@@ -266,7 +266,7 @@ int main()
                          daVinci, "MTMLClutch",
                          ui3MasterArm::SECONDARY);
     leftMaster->SetTransformation(transform, 0.5 /* scale factor */);
-    ui3CursorBase * leftCursor = new ui3CursorSphere(&guiManager);
+    ui3CursorBase * leftCursor = new ui3CursorSphere();
     leftCursor->SetAnchor(ui3CursorBase::CENTER_LEFT);
     leftMaster->SetCursor(leftCursor);
 
