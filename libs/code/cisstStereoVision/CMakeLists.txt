@@ -309,6 +309,7 @@ IF(CISST_SVL_HAS_MIL)
             vidMILDevice.h      # private header
             vidMILDevice.cpp
             )
+        SET(CISST_ADDITIONAL_LIBRARIES ${CISST_ADDITIONAL_LIBRARIES} ${MIL_mil_LIBRARY})
         MESSAGE(STATUS "Matrox Imaging Library (MIL) found - Switch to advanced view for details")
 
     ELSE(MIL_FOUND)
