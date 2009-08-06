@@ -31,6 +31,10 @@ devSensableHDMasterSlave::devSensableHDMasterSlave(const std::string & taskName,
 {
     // Initialize the vectors and variables
     ClutchOffset.SetAll(0.0);
+    LeftClutchOffset.SetAll(0.0);
+    RightClutchOffset.SetAll(0.0);
+    LeftClutchMSOffset.SetAll(0.0);
+    RightClutchMSOffset.SetAll(0.0);
     WorkspaceOffset.SetAll(0.0);
     Error.SetAll(0.0);
     ForceMaster.SetAll(0.0);
@@ -38,12 +42,15 @@ devSensableHDMasterSlave::devSensableHDMasterSlave(const std::string & taskName,
     ScaleFactor = 0.15;
     FMax = 40.0;
     ForceMode = 0;
-    clutch = 0;
+    clutchMode = 0;
     ForceMasterCoefficient = 1.0;
     firstIteration = true;
     MasterClutch = false;
     SlaveClutch = false;
+    MasterSlaveClutch = false;
     clutchDone = false;
+    bothClutched = false;
+    clutchOffsetAdd = false;
 
     // Initialize provided interfaces
     mtsProvidedInterface * providedInterface;
@@ -53,6 +60,7 @@ devSensableHDMasterSlave::devSensableHDMasterSlave(const std::string & taskName,
     StateTable.AddData(FMax, "ForceLimit");
     StateTable.AddData(MasterClutch, "MasterClutch");
     StateTable.AddData(SlaveClutch, "SlaveClutch");
+    StateTable.AddData(MasterSlaveClutch, "MasterSlaveClutch");
     StateTable.AddData(ForceMode, "ForceMode");
     StateTable.AddData(ForceMasterCoefficient, "ForceCoefficient");
 
@@ -60,6 +68,7 @@ devSensableHDMasterSlave::devSensableHDMasterSlave(const std::string & taskName,
     providedInterface->AddCommandReadState(StateTable, FMax, "GetForceLimit");
     providedInterface->AddCommandReadState(StateTable, MasterClutch, "GetMasterClutch");
     providedInterface->AddCommandReadState(StateTable, SlaveClutch, "GetSlaveClutch");
+    providedInterface->AddCommandReadState(StateTable, MasterSlaveClutch, "GetMasterSlaveClutch");
     providedInterface->AddCommandReadState(StateTable, ForceMode, "GetForceMode");
     providedInterface->AddCommandReadState(StateTable, ForceMasterCoefficient, "GetForceCoefficient");
 
@@ -71,6 +80,8 @@ devSensableHDMasterSlave::devSensableHDMasterSlave(const std::string & taskName,
                                         this, "SetMasterClutch", MasterClutch);
     providedInterface->AddCommandWrite(&devSensableHDMasterSlave::SetSlaveClutch, 
                                         this, "SetSlaveClutch", SlaveClutch);
+    providedInterface->AddCommandWrite(&devSensableHDMasterSlave::SetMasterSlaveClutch, 
+                                        this, "SetMasterSlaveClutch", MasterSlaveClutch);
     providedInterface->AddCommandWrite(&devSensableHDMasterSlave::SetForceMode, 
                                         this, "SetForceMode", ForceMode);
     providedInterface->AddCommandWrite(&devSensableHDMasterSlave::SetForceCoefficient, 
@@ -102,10 +113,14 @@ void devSensableHDMasterSlave::UserControl(void)
     }
 
     // If clutching the first device
-    if(DevicesVector(0)->Clutch == true || MasterClutch == true) {
+    if((DevicesVector(0)->Clutch == true || MasterClutch == true) && DevicesVector(1)->Clutch == false) {
         // Get the positions of the second device
         p2 = DevicesVector(1)->PositionCartesian;
 
+        if(clutchOffsetAdd == true) {
+            p2Goal.Subtract(RightClutchMSOffset);
+            clutchOffsetAdd = false;
+        }
         // Compute the current force (F = kp * (secondDeviceGoal - secondDeviceLastPosition) )
         ForceSlave.XYZ().DifferenceOf(p2Goal, p2.Position().Translation());
         ForceSlave.XYZ().Multiply(ScaleFactor);
@@ -127,14 +142,19 @@ void devSensableHDMasterSlave::UserControl(void)
         
         // Compute the offset of the master device from its original position
         p1Clutched = DevicesVector(0)->PositionCartesian;
-        ClutchOffset.DifferenceOf(p1Clutched.Position().Translation(), p1.Position().Translation());
-        clutch = 1;
+        LeftClutchOffset.DifferenceOf(p1Clutched.Position().Translation(), p1.Position().Translation());
+        
+        clutchMode = 1;
         clutchDone = true;
-    } else if(DevicesVector(1)->Clutch == true || SlaveClutch == true) {
+    } else if((DevicesVector(1)->Clutch == true || SlaveClutch == true) && DevicesVector(0)->Clutch == false) {
         // Get the positions of the first device
         p1 = DevicesVector(0)->PositionCartesian;
 
         // Compute the current force (F = kp * (firstDeviceGoal - firstDeviceLastPosition) )
+        if(clutchOffsetAdd == true) {
+            p1Goal.Add(LeftClutchMSOffset);
+            clutchOffsetAdd = false;
+        }
         ForceMaster.XYZ().DifferenceOf(p1Goal, p1.Position().Translation());
         ForceMaster.XYZ().Multiply(ScaleFactor);
 
@@ -155,24 +175,45 @@ void devSensableHDMasterSlave::UserControl(void)
         
         // Compute the offset of the slave device from its original position
         p2Clutched = DevicesVector(1)->PositionCartesian;
-        ClutchOffset.DifferenceOf(p2Clutched.Position().Translation(), p2.Position().Translation());
-        clutch = 2;   
+        RightClutchOffset.DifferenceOf(p2Clutched.Position().Translation(), p2.Position().Translation());
+        
+        clutchMode = 2;   
         clutchDone = true;
+    } else if ((DevicesVector(0)->Clutch == true && DevicesVector(1)->Clutch == true) || MasterSlaveClutch == true) {
+        // Set both devices' forces to 0
+        DevicesVector(0)->ForceCartesian.SetAll(0.0, true);
+        DevicesVector(1)->ForceCartesian.SetAll(0.0, true);
+
+        // Get the positions of both devices
+        p1Clutched = DevicesVector(0)->PositionCartesian;
+        p2Clutched = DevicesVector(1)->PositionCartesian;
+        
+        // Compute left and right clutch offsets
+        LeftClutchMSOffset.DifferenceOf(p1Clutched.Position().Translation(), p1.Position().Translation());
+        RightClutchMSOffset.DifferenceOf(p2Clutched.Position().Translation(), p2.Position().Translation());
+        
+        clutchOffsetAdd = bothClutched = clutchDone = true;
     } else {
         // Read in the current positions of the two devices
         p1 = DevicesVector(0)->PositionCartesian;
         p2 = DevicesVector(1)->PositionCartesian;
 
         // If clutching is done
-        if(clutch != 0 && clutchDone == true) {
+        if(clutchMode != 0 && clutchDone == true) {
             clutchDone = false;
             // Add the clutch offset to the current offset
-            if(clutch == 1) {
-                WorkspaceOffset.Add(ClutchOffset);
-            } else {
-                WorkspaceOffset.Subtract(ClutchOffset);
+            if(clutchMode == 1) {
+                WorkspaceOffset.Add(LeftClutchOffset);
+            } 
+            if(clutchMode == 2) {
+                WorkspaceOffset.Subtract(RightClutchOffset);
             }
-            ClutchOffset.SetAll(0.0);
+            if(bothClutched == true) {
+                WorkspaceOffset.DifferenceOf(p1.Position().Translation(), p2.Position().Translation());
+                bothClutched = false;
+            }
+            LeftClutchOffset.SetAll(0.0);
+            RightClutchOffset.SetAll(0.0);
         }
         
         //p2R = p2 + WorkspaceOffset
@@ -253,6 +294,11 @@ void devSensableHDMasterSlave::SetMasterClutch(const mtsBool& commandedClutch)
 void devSensableHDMasterSlave::SetSlaveClutch(const mtsBool& commandedClutch)
 {
     SlaveClutch = commandedClutch;
+}
+
+void devSensableHDMasterSlave::SetMasterSlaveClutch(const mtsBool& commandedClutch)
+{
+    MasterSlaveClutch = commandedClutch;
 }
 
 void devSensableHDMasterSlave::SetForceCoefficient(const mtsDouble& commandedCoefficient)

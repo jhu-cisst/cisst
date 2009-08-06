@@ -34,6 +34,7 @@ displayTask::displayTask(const std::string & taskName, double period):
         requiredInterface->AddFunction("GetForceLimit", GetForceLimit);
         requiredInterface->AddFunction("GetMasterClutch", GetMasterClutch);
         requiredInterface->AddFunction("GetSlaveClutch", GetSlaveClutch);
+        requiredInterface->AddFunction("GetMasterSlaveClutch", GetMasterSlaveClutch);
         requiredInterface->AddFunction("GetForceMode", GetForceMode);
         requiredInterface->AddFunction("GetForceCoefficient", GetForceCoefficient);
 
@@ -41,6 +42,7 @@ displayTask::displayTask(const std::string & taskName, double period):
         requiredInterface->AddFunction("SetForceLimit", SetForceLimit);
         requiredInterface->AddFunction("SetMasterClutch", SetMasterClutch);
         requiredInterface->AddFunction("SetSlaveClutch", SetSlaveClutch);
+        requiredInterface->AddFunction("SetMasterSlaveClutch", SetMasterSlaveClutch);
         requiredInterface->AddFunction("SetForceMode", SetForceMode);
         requiredInterface->AddFunction("SetForceCoefficient", SetForceCoefficient);
 
@@ -104,6 +106,7 @@ void displayTask::Run(void)
 
     GetMasterClutch(MasterClutch);
     GetSlaveClutch(SlaveClutch);
+    GetMasterSlaveClutch(MasterSlaveClutch);
 
     GetForceMode(FMode);
     const char * ForceModeName;
@@ -116,27 +119,43 @@ void displayTask::Run(void)
     }
     UI.CurrentForceMode->value(ForceModeName);
 
-    if(UI.ClutchMaster->value() == 1) {
+    if(UI.ClutchMaster->value() == 1 && UI.ClutchSlave->value() == 0) {
         commandedMasterClutch = true;
         if(MasterClutch != commandedMasterClutch) {
             SetMasterClutch(commandedMasterClutch);
         }
-    } else if(UI.ClutchMaster->value() == 0) {
+    } else if(UI.ClutchMaster->value() == 0 && UI.ClutchSlave->value() == 0) {
         commandedMasterClutch = false;
         if(MasterClutch != commandedMasterClutch) {
             SetMasterClutch(commandedMasterClutch);
         }
     }
 
-    if(UI.ClutchSlave->value() == 1) {
+    if(UI.ClutchSlave->value() == 1 && UI.ClutchMaster->value() == 0) {
         commandedSlaveClutch = true;
         if(SlaveClutch != commandedSlaveClutch) {
             SetSlaveClutch(commandedSlaveClutch);
         }
-    } else if(UI.ClutchSlave->value() == 0) {
+    } else if(UI.ClutchSlave->value() == 0 && UI.ClutchMaster->value() == 0) {
         commandedSlaveClutch = false;
         if(SlaveClutch != commandedSlaveClutch) {
             SetSlaveClutch(commandedSlaveClutch);
+        }
+    }
+
+    if(UI.ClutchMaster->value() == 1 && UI.ClutchSlave->value() == 1)
+    {
+        commandedMasterSlaveClutch = true;
+        if(MasterSlaveClutch != commandedMasterSlaveClutch) {
+            SetMasterSlaveClutch(commandedMasterSlaveClutch);
+            commandedMasterClutch = false;
+            SetMasterClutch(commandedMasterClutch);
+            SetSlaveClutch(commandedMasterClutch);
+        }
+    } else {
+        commandedMasterSlaveClutch = false;
+        if(MasterSlaveClutch != commandedMasterSlaveClutch) {
+            SetMasterSlaveClutch(commandedMasterSlaveClutch);
         }
     }
 

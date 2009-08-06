@@ -46,6 +46,7 @@ public:
     void SetForceMode(const mtsInt& Mode);
     void SetMasterClutch(const mtsBool& commandedClutch);
     void SetSlaveClutch(const mtsBool& commandedClutch);
+    void SetMasterSlaveClutch(const mtsBool& commandedClutch);
     void SetForceCoefficient(const mtsDouble& commandedCoefficient);
     void SetOffsetMultiplier(double OffMult);
     void IncrementScaleFactor(void);
@@ -58,6 +59,10 @@ protected:
     vctFixedSizeVector<double, 6> ForceSlave;
     vct3 WorkspaceOffset;
     vct3 ClutchOffset;
+    vct3 LeftClutchOffset;
+    vct3 RightClutchOffset;
+    vct3 LeftClutchMSOffset;
+    vct3 RightClutchMSOffset;
     vct3 Error;
     vct3 p1Goal;
     vct3 p2Goal;
@@ -75,13 +80,16 @@ protected:
 
     bool        firstIteration;
     bool        clutchDone;
-    mtsInt      clutch;
+    bool        bothClutched;
+    bool        clutchOffsetAdd;
     mtsBool     MasterClutch;
     mtsBool     SlaveClutch;
-    mtsDouble   ScaleFactor;
-    mtsDouble   FMax;
+    mtsBool     MasterSlaveClutch;
+    mtsInt      clutchMode;
     mtsInt      ForceMode;
     mtsDouble   ForceMasterCoefficient;
+    mtsDouble   ScaleFactor;
+    mtsDouble   FMax;
     double      ForceFeedNormMaster;
     double      ForceFeedNormSlave;
 };
