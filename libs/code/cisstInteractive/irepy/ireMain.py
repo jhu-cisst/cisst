@@ -112,8 +112,8 @@ class ireMain(wx.Frame):
     ID_LOAD_CISSTCOMMON = wx.NewId()
     ID_LOAD_CISSTVECTOR = wx.NewId()
     ID_LOAD_CISSTNUMERICAL = wx.NewId()
-    ID_LOAD_CISSTDEVICEINTERFACE = wx.NewId()
-    ID_LOAD_CISSTREALTIME = wx.NewId()
+    ID_LOAD_CISSTMULTITASK = wx.NewId()
+    ID_LOAD_CISSTPARAMETERTYPES = wx.NewId()
 
     #------------------------------------------------------
     #IRE CONSTRUCTOR
@@ -192,8 +192,8 @@ class ireMain(wx.Frame):
         menu.Append(self.ID_LOAD_CISSTCOMMON, "Import cisst&Common", "Import cisstCommon")
         menu.Append(self.ID_LOAD_CISSTVECTOR, "Import cisst&Vector", "Import cisstVector")
         menu.Append(self.ID_LOAD_CISSTNUMERICAL, "Import cisst&Numerical", "Import cisstNumerical")
-        menu.Append(self.ID_LOAD_CISSTDEVICEINTERFACE, "Import cisst&DeviceInterface", "Import cisstDeviceInterface")
-        menu.Append(self.ID_LOAD_CISSTREALTIME, "Import cisst&RealTime", "Import cisstRealTime")
+        menu.Append(self.ID_LOAD_CISSTMULTITASK, "Import cisst&MultiTask", "Import cisstMultiTask")
+        menu.Append(self.ID_LOAD_CISSTPARAMETERTYPES, "Import cisst&ParameterTypes", "Import cisstParameterTypes")
 
         menu = self.HelpMenu = wx.Menu()
         menu.Append(wx.ID_ABOUT, "&About...", "About this program")
@@ -238,8 +238,8 @@ class ireMain(wx.Frame):
         wx.EVT_MENU(self, self.ID_LOAD_CISSTCOMMON,  self.OnImportCisstCommon)
         wx.EVT_MENU(self, self.ID_LOAD_CISSTVECTOR,  self.OnImportCisstVector)
         wx.EVT_MENU(self, self.ID_LOAD_CISSTNUMERICAL,  self.OnImportCisstNumerical)
-        wx.EVT_MENU(self, self.ID_LOAD_CISSTDEVICEINTERFACE,  self.OnImportCisstDeviceInterface)
-        wx.EVT_MENU(self, self.ID_LOAD_CISSTREALTIME,  self.OnImportCisstRealTime)
+        wx.EVT_MENU(self, self.ID_LOAD_CISSTMULTITASK,  self.OnImportCisstMultiTask)
+        wx.EVT_MENU(self, self.ID_LOAD_CISSTPARAMETERTYPES,  self.OnImportCisstParameterTypes)
 
         wx.EVT_UPDATE_UI(self, wx.ID_NEW, self.OnUpdateMenu)
         wx.EVT_UPDATE_UI(self, wx.ID_OPEN, self.OnUpdateMenu)
@@ -259,8 +259,8 @@ class ireMain(wx.Frame):
         wx.EVT_UPDATE_UI(self, self.ID_LOAD_CISSTCOMMON, self.OnUpdateMenu)
         wx.EVT_UPDATE_UI(self, self.ID_LOAD_CISSTVECTOR, self.OnUpdateMenu)
         wx.EVT_UPDATE_UI(self, self.ID_LOAD_CISSTNUMERICAL, self.OnUpdateMenu)
-        wx.EVT_UPDATE_UI(self, self.ID_LOAD_CISSTDEVICEINTERFACE, self.OnUpdateMenu)
-        wx.EVT_UPDATE_UI(self, self.ID_LOAD_CISSTREALTIME, self.OnUpdateMenu)
+        wx.EVT_UPDATE_UI(self, self.ID_LOAD_CISSTMULTITASK, self.OnUpdateMenu)
+        wx.EVT_UPDATE_UI(self, self.ID_LOAD_CISSTPARAMETERTYPES, self.OnUpdateMenu)
         #wx.EVT_UPDATE_UI(self, self.ID_TRUNCATEHISTORY, self.OnTruncateHistory)
         
         self.Bind(wx.EVT_CLOSE, self.OnCloseWindow)
@@ -445,17 +445,17 @@ class ireMain(wx.Frame):
         print "importing cisstNumerical"
 		self.Shell.push("from cisstNumericalPython import *")
 
-    def OnImportCisstDeviceInterface(self, event):
-        self.ImportCisstDeviceInterface()
-    def ImportCisstDeviceInterface(self):
-        print "importing cisstDeviceInterface"
-		self.Shell.push("from cisstDeviceInterfacePython import *")
+    def OnImportCisstMultiTask(self, event):
+        self.ImportCisstMultiTask()
+    def ImportCisstMultiTask(self):
+        print "importing cisstMultiTask"
+		self.Shell.push("from cisstMultiTaskPython import *")
 
-    def OnImportCisstRealTime(self, event):
-        self.ImportCisstRealTime()
-    def ImportCisstRealTime(self):
-        print "importing cisstRealTime"
-		self.Shell.push("from cisstRealTimePython import *")
+    def OnImportCisstParameterTypes(self, event):
+        self.ImportCisstParameterTypes()
+    def ImportCisstParameterTypes(self):
+        print "importing cisstParameterTypes"
+		self.Shell.push("from cisstParameterTypesPython import *")
 
 	#------------------------------------------------------
 	# Diary Functions
@@ -921,10 +921,10 @@ class ireMain(wx.Frame):
                 event.Enable(ModuleAvailable('cisstVectorPython'))
             elif id == self.ID_LOAD_CISSTNUMERICAL:
                 event.Enable(ModuleAvailable('cisstNumericalPython'))
-            elif id == self.ID_LOAD_CISSTDEVICEINTERFACE:
-                event.Enable(ModuleAvailable('cisstDeviceInterfacePython'))
-            elif id == self.ID_LOAD_CISSTREALTIME:
-                event.Enable(ModuleAvailable('cisstRealTimePython'))
+            elif id == self.ID_LOAD_CISSTMULTITASK:
+                event.Enable(ModuleAvailable('cisstMultiTaskPython'))
+            elif id == self.ID_LOAD_CISSTPARAMETERTYPES:
+                event.Enable(ModuleAvailable('cisstParameterTypesPython'))
             else:
                 event.Enable(False)
         except AttributeError:
