@@ -106,7 +106,8 @@ class CISST_EXPORT mtsTaskInterface: public mtsDeviceInterface {
         }
     };
 
-    typedef std::pair<osaThreadId, ThreadResources *> ThreadResourcesPairType;
+    // typedef std::pair<osaThreadId, ThreadResources *> ThreadResourcesPairType;
+    typedef std::pair<unsigned int, ThreadResources *> ThreadResourcesPairType;
     typedef std::vector<ThreadResourcesPairType> ThreadResourcesMapType;
     ThreadResourcesMapType ThreadResourcesMap;
 
@@ -130,28 +131,31 @@ private:
     /*! Semaphore used internally */
     osaMutex Mutex;
 
-	/*! A vector of task interfaces (including mailboxes) for incoming commands. */
-	ThreadResourcesMapType QueuedCommands;
+    /*! A vector of task interfaces (including mailboxes) for incoming commands. */
+    ThreadResourcesMapType QueuedCommands;
 
  protected:
     /*! Process all messages in mailboxes. Returns number of commands processed. */
     unsigned int ProcessMailBoxes();
 
  public:
-    virtual unsigned int AllocateResourcesForCurrentThread(void);
+    // virtual unsigned int AllocateResourcesForCurrentThread(void);
+    unsigned int AllocateResources(const std::string & userName);
+ 
+    mtsTaskInterface(const std::string & name, mtsTask * task);
 
-	mtsTaskInterface(const std::string & name, mtsTask * task);
+    /*! Default Destructor. */
+    virtual ~mtsTaskInterface();
 
-	/*! Default Destructor. */
-	virtual ~mtsTaskInterface();
+    /*! The member function that is executed once the task
+      terminates. This does some cleanup work */
+    void Cleanup(void);
 
-	/*! The member function that is executed once the task terminates. This
-	  does some cleanup work */
-	void Cleanup(void);
-
-    virtual mtsCommandVoidBase * GetCommandVoid(const std::string & commandName) const;
-
-    virtual mtsCommandWriteBase * GetCommandWrite(const std::string & commandName) const;
+    virtual mtsCommandVoidBase * GetCommandVoid(const std::string & commandName,
+                                                unsigned int userId) const;
+    
+    virtual mtsCommandWriteBase * GetCommandWrite(const std::string & commandName,
+                                                  unsigned int userId) const;
 
     template <class __classType>
     inline mtsCommandVoidBase * AddCommandVoid(void (__classType::*method)(void),
@@ -166,10 +170,11 @@ private:
                                                  __classType * classInstantiation, const std::string & commandName,
                                                  const __argumentType & argumentPrototype = CMN_DEFAULT_TEMPLATED_CONSTRUCTOR(__argumentType));
 
-    /*! Adds command objects to read from the state table. Note that there are two command
-        objects: a 'read' command to get the latest value, and a 'qualified read' command
-        to get the value at the specified time.
-        In addition, there is a 'get vector' qualified read command to read a vector of data. */
+    /*! Adds command objects to read from the state table. Note that
+      there are two command objects: a 'read' command to get the
+      latest value, and a 'qualified read' command to get the value at
+      the specified time.  In addition, there is a 'get vector'
+      qualified read command to read a vector of data. */
     // Note: Could use string for state, rather than the variable
     template <class _elementType>
     mtsCommandReadBase * AddCommandReadState(const mtsStateTable & stateTable, const _elementType & stateData,
@@ -179,8 +184,9 @@ private:
     mtsCommandQualifiedReadBase * AddCommandReadHistory(const mtsStateTable & stateTable, const _elementType & stateData,
                                                         const std::string & commandName);
 
-    /*! Adds a command object to write the current value of the state data variable. Since this will
-      be a queued command, it is thread-safe. */
+    /*! Adds a command object to write the current value of the state
+      data variable. Since this will be a queued command, it is
+      thread-safe. */
     template <class _elementType>
     mtsCommandWriteBase * AddCommandWriteState(const mtsStateTable & stateTable, const _elementType & stateData,
                                                const std::string & commandName);
@@ -484,4 +490,3 @@ mtsCommandWriteBase * mtsTaskInterface::AddCommandWriteState(const mtsStateTable
 }
 
 #endif // _mtsTaskInterface_h
-

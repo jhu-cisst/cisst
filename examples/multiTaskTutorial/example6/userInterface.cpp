@@ -36,11 +36,12 @@ userInterface::userInterface(const std::string & robotName,
     // tell task or device that this thread will use it, will create a
     // mailbox if needed.  if this method is not called, call to
     // GetCommandXyz will likely fail
-    interfacePointer->AllocateResourcesForCurrentThread();
+    unsigned int userId;
+    userId = interfacePointer->AllocateResources("UserDefinedInterfaceExample6");
 
     // -2- Connect to the device/task that provides the required resources
     Robot.ConnectTo(interfacePointer);
-    Robot.BindCommandsAndEvents();
+    Robot.BindCommandsAndEvents(userId);
 
     // -3- Setup the user interface
     Window = new Fl_Double_Window(500, 400, Name.c_str());

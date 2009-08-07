@@ -129,7 +129,7 @@ void mtsRequiredInterface::Disconnect(void)
 #endif
 }
 
-bool mtsRequiredInterface::BindCommandsAndEvents(void)
+bool mtsRequiredInterface::BindCommandsAndEvents(unsigned int userId)
 {
     bool success = true;
     bool result;
@@ -138,7 +138,7 @@ bool mtsRequiredInterface::BindCommandsAndEvents(void)
     for (iterVoid = CommandPointersVoid.begin();
          iterVoid != CommandPointersVoid.end();
          iterVoid++) {
-        result = iterVoid->second->Bind(OtherInterface->GetCommandVoid(iterVoid->first));
+        result = iterVoid->second->Bind(OtherInterface->GetCommandVoid(iterVoid->first, userId));
         if (!result) {
             CMN_LOG_CLASS_INIT_WARNING << "BindCommandsAndEvents: failed for void command \""
                                        << iterVoid->first << "\"" << std::endl;
@@ -166,7 +166,7 @@ bool mtsRequiredInterface::BindCommandsAndEvents(void)
     for (iterWrite = CommandPointersWrite.begin();
          iterWrite != CommandPointersWrite.end();
          iterWrite++) {
-        result = iterWrite->second->Bind(OtherInterface->GetCommandWrite(iterWrite->first));
+        result = iterWrite->second->Bind(OtherInterface->GetCommandWrite(iterWrite->first, userId));
         if (!result) {
             CMN_LOG_CLASS_INIT_WARNING << "BindCommandsAndEvents: failed for write command \""
                                        << iterWrite->first << "\"" << std::endl;

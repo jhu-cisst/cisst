@@ -34,7 +34,7 @@ template <class _elementType>
 class mtsMatrix: public mtsGenericObject,
                  public vctDynamicMatrix<_elementType> {
     // declare services, requires dynamic creation
-    CMN_DECLARE_SERVICES_EXPORT(CMN_DYNAMIC_CREATION, 5);
+    CMN_DECLARE_SERVICES_EXPORT(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 public:
     /*! Type of elements. */
     typedef _elementType value_type;

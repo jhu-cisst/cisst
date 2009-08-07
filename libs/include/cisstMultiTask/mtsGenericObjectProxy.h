@@ -73,7 +73,7 @@ http://www.cisst.org/cisst/license.txt.
 template <class _elementType>
 class mtsGenericObjectProxy: public mtsGenericObject
 {
-    CMN_DECLARE_SERVICES_EXPORT(CMN_DYNAMIC_CREATION, 5);
+    CMN_DECLARE_SERVICES_EXPORT(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
 public:
     typedef mtsGenericObjectProxy<_elementType> ThisType;

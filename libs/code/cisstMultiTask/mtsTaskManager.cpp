@@ -4,7 +4,7 @@
 /*
   $Id$
 
-  Author(s):  Ankur Kapoor, Peter Kazanzides
+  Author(s):  Ankur Kapoor, Peter Kazanzides, Min Yang Jung
   Created on: 2004-04-30
 
   (C) Copyright 2004-2008 Johns Hopkins University (JHU), All Rights
@@ -19,13 +19,18 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+#include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsTaskManager.h>
-
 #include <cisstMultiTask/mtsDevice.h>
 #include <cisstMultiTask/mtsDeviceInterface.h>
 #include <cisstMultiTask/mtsTask.h>
 #include <cisstMultiTask/mtsTaskInterface.h>
 
+#if CISST_MTS_HAS_ICE
+#include <cisstMultiTask/mtsDeviceProxy.h>
+#include <cisstMultiTask/mtsTaskManagerProxyServer.h>
+#include <cisstMultiTask/mtsTaskManagerProxyClient.h>
+#endif // CISST_MTS_HAS_ICE
 
 CMN_IMPLEMENT_SERVICES(mtsTaskManager);
 
@@ -33,6 +38,13 @@ CMN_IMPLEMENT_SERVICES(mtsTaskManager);
 mtsTaskManager::mtsTaskManager():
     TaskMap("Tasks"),
     DeviceMap("Devices")
+#if CISST_MTS_HAS_ICE
+    ,
+    TaskManagerTypeMember(TASK_MANAGER_LOCAL),
+    TaskManagerCommunicatorID("TaskManagerServerSender"),
+    ProxyGlobalTaskManager(NULL),
+    ProxyTaskManagerClient(NULL)
+#endif
 {
     __os_init();
     TaskMap.SetOwner(*this);
@@ -41,8 +53,24 @@ mtsTaskManager::mtsTaskManager():
 }
 
 
-mtsTaskManager::~mtsTaskManager(){
+mtsTaskManager::~mtsTaskManager()
+{
     this->Kill();
+
+#if CISST_MTS_HAS_ICE
+    // Clean up resources allocated for proxy objects.
+    if (ProxyGlobalTaskManager) {
+        ProxyGlobalTaskManager->Stop();
+        osaSleep(200 * cmn_ms);
+        delete ProxyGlobalTaskManager;
+    }
+
+    if (ProxyTaskManagerClient) {
+        ProxyTaskManagerClient->Stop();
+        osaSleep(200 * cmn_ms);
+        delete ProxyTaskManagerClient;
+    }
+#endif
 }
 
 
@@ -56,7 +84,7 @@ bool mtsTaskManager::AddTask(mtsTask * task) {
     bool result = TaskMap.AddItem(task->GetName(), task, CMN_LOG_LOD_INIT_ERROR);
     if (result) {
         CMN_LOG_CLASS_INIT_VERBOSE << "AddTask: added task named "
-                                   << task->GetName() << std::endl;
+                                   << task->GetName() << std::endl;    
     }
     return result;
 }
@@ -101,6 +129,10 @@ std::vector<std::string> mtsTaskManager::GetNamesOfDevices(void) const {
 
 std::vector<std::string> mtsTaskManager::GetNamesOfTasks(void) const {
     return TaskMap.GetNames();
+}
+
+void mtsTaskManager::GetNamesOfTasks(std::vector<std::string> & taskNameContainer) const {
+    TaskMap.GetNames(taskNameContainer);
 }
 
 
@@ -259,16 +291,19 @@ void mtsTaskManager::ToStreamDot(std::ostream & outputStream) const {
 }
 
 
-bool mtsTaskManager::Connect(const std::string & userTaskName, const std::string & interfaceRequiredName,
+bool mtsTaskManager::Connect(const std::string & userTaskName, const std::string & requiredInterfaceName,
                              const std::string & resourceTaskName, const std::string & providedInterfaceName)
 {
-    const UserType fullUserName(userTaskName, interfaceRequiredName);
+    // True if the resource task specified is provided by a remote task
+    bool requestServerSideConnect = false;
+
+    const UserType fullUserName(userTaskName, requiredInterfaceName);
     const ResourceType fullResourceName(resourceTaskName, providedInterfaceName);
     const AssociationType association(fullUserName, fullResourceName);
     // check if this connection has already been established
     AssociationSetType::const_iterator associationIterator = AssociationSet.find(association);
     if (associationIterator != AssociationSet.end()) {
-        CMN_LOG_CLASS_INIT_ERROR << "Connect: " << userTaskName << "::" << interfaceRequiredName
+        CMN_LOG_CLASS_INIT_ERROR << "Connect: " << userTaskName << "::" << requiredInterfaceName
                                  << " is already connected to " << resourceTaskName << "::" << providedInterfaceName << std::endl;
         return false;
     }
@@ -278,23 +313,66 @@ bool mtsTaskManager::Connect(const std::string & userTaskName, const std::string
         return false;
     }
     // check if the user name corresponds to an existing task
-    mtsTask* userTask = TaskMap.GetItem(userTaskName, CMN_LOG_LOD_INIT_ERROR);
+    mtsDevice * userTask = TaskMap.GetItem(userTaskName, CMN_LOG_LOD_INIT_ERROR);
     if (!userTask) {
-        CMN_LOG_CLASS_INIT_ERROR << "Connect: can not find a task named " << userTaskName << std::endl;
-        return false;
+        userTask = DeviceMap.GetItem(userTaskName);
+        if (!userTask) {
+            CMN_LOG_CLASS_INIT_ERROR << "Connect: can not find a user task or device named " << userTaskName << std::endl;
+            return false;
+        }
     }
     // check if the resource name corresponds to an existing task or device
     mtsDevice* resourceDevice = DeviceMap.GetItem(resourceTaskName, CMN_LOG_LOD_INIT_DEBUG);
-    if (!resourceDevice)
+
+    if (!resourceDevice) {        
         resourceDevice = TaskMap.GetItem(resourceTaskName, CMN_LOG_LOD_INIT_ERROR);
-    // find the interface pointer from the resource
-    mtsDeviceInterface * resourceInterface;
-    if (resourceDevice)
-        resourceInterface = resourceDevice->GetProvidedInterface(providedInterfaceName);
-    else {
-        CMN_LOG_CLASS_INIT_ERROR << "Connect: can not find a task or device named " << resourceTaskName << std::endl;
-        return false;
     }
+    // find the interface pointer from the local resource first
+    mtsTask * clientTask = 0;
+    mtsDeviceInterface * resourceInterface;
+    if (resourceDevice) {
+        // Note that a SERVER task has to be able to get resource interface pointer here
+        // (a SERVER task should not reach here).
+        resourceInterface = resourceDevice->GetProvidedInterface(providedInterfaceName);
+    }
+#if CISST_MTS_HAS_ICE
+    else {
+        // If we cannot find, the resource interface should be at remote or doesn't exist.
+        switch (GetTaskManagerType()) {
+            case TASK_MANAGER_LOCAL:
+                CMN_LOG_CLASS_INIT_ERROR << "Connect: Cannot find a task or device named " << resourceTaskName << std::endl;
+                return false;
+
+            case TASK_MANAGER_SERVER:
+                CMN_LOG_CLASS_INIT_ERROR << "Connect: Global task manager should not call this method." << std::endl;
+                return false;
+
+            case TASK_MANAGER_CLIENT:
+                // Assume that a user task has to be of mtsTask type.
+                clientTask = dynamic_cast<mtsTask*>(userTask);
+                if (!clientTask) {
+                    CMN_LOG_CLASS_INIT_ERROR << "Connect: ." << std::endl;
+                    return false;
+                }
+
+                // Try to get the information about the provided interface at server side
+                // from the global task manager. If successful, the provided interface proxy
+                // is created and connection across networks is established.
+                // Note that a CLIENT task has to be able to get resource interface pointer 
+                // here (a SERVER task should not reach here).
+                resourceInterface = ProxyTaskManagerClient->GetProvidedInterfaceProxy(
+                    resourceTaskName, providedInterfaceName, 
+                    userTaskName, requiredInterfaceName, 
+                    clientTask);
+                if (!resourceInterface) {
+                    CMN_LOG_CLASS_INIT_ERROR << "Connect through networks: Cannot find the task or device named " << resourceTaskName << std::endl;
+                    return false;
+                }
+
+                requestServerSideConnect = true;
+        }
+    }
+#endif // CISST_MTS_HAS_ICE
 
     // check the interface pointer we got
     if (resourceInterface == 0) {
@@ -303,22 +381,91 @@ bool mtsTaskManager::Connect(const std::string & userTaskName, const std::string
         return false;
     }
     // attempt to connect 
-    if (!(userTask->ConnectRequiredInterface(interfaceRequiredName, resourceInterface))) {
-        CMN_LOG_CLASS_INIT_ERROR << "Connect: connection failed, does " << interfaceRequiredName << " exist?" << std::endl;
+    if (!(userTask->ConnectRequiredInterface(requiredInterfaceName, resourceInterface))) {
+        CMN_LOG_CLASS_INIT_ERROR << "Connect: connection failed, does " << requiredInterfaceName << " exist?" << std::endl;
         return false;
     }
 
     // connected, add to the map of connections
     AssociationSet.insert(association);
-    CMN_LOG_CLASS_INIT_VERBOSE << "Connect: " << userTaskName << "::" << interfaceRequiredName
+    CMN_LOG_CLASS_INIT_VERBOSE << "Connect: " << userTaskName << "::" << requiredInterfaceName
                                << " successfully connected to " << resourceTaskName << "::" << providedInterfaceName << std::endl;
+#if CISST_MTS_HAS_ICE
+    if (requestServerSideConnect) {
+        // At client side, if the connection between the actual required interface and 
+        // the provided interface proxy is established successfully, connect the actual 
+        // provided interface with the required interface proxy at server side.
+        if (!clientTask->SendConnectServerSide(requiredInterfaceName,
+                                               userTaskName, requiredInterfaceName,
+                                               resourceTaskName, providedInterfaceName))
+        {
+            CMN_LOG_CLASS_INIT_ERROR << "Connect: server side connection failed." << std::endl;
+            return false;
+        }
+
+        const std::string serverTaskProxyName = mtsDeviceProxy::GetServerTaskProxyName(
+            resourceTaskName, providedInterfaceName, userTaskName, requiredInterfaceName);
+        const std::string clientTaskProxyName = mtsDeviceProxy::GetClientTaskProxyName(
+            resourceTaskName, providedInterfaceName, userTaskName, requiredInterfaceName);
+
+        // update the command id.
+        clientTask->SendGetCommandId(requiredInterfaceName, serverTaskProxyName, 
+                                     clientTaskProxyName, providedInterfaceName);
+
+        // If the server side connection is successful, we should update the server-side
+        // event handler proxy id and enable event handler proxies.
+        if (!clientTask->SendUpdateEventHandlerId(requiredInterfaceName,
+                                                  serverTaskProxyName,
+                                                  clientTaskProxyName))
+        {
+            CMN_LOG_CLASS_INIT_ERROR << "Connect: event handler proxy update failed." << std::endl;
+            return false;
+        }
+    }
+#endif // CISST_MTS_HAS_ICE
+
     return true;
 }
-
 
 bool mtsTaskManager::Disconnect(const std::string & userTaskName, const std::string & requiredInterfaceName,
-                                const std::string & resourceTaskName, const std::string & providedInterfaceName) {
-    CMN_LOG_CLASS_INIT_ERROR << "Disconnect not implemented!!!" << std::endl;
+                                const std::string & resourceTaskName, const std::string & providedInterfaceName)
+{
+    CMN_LOG_CLASS_RUN_ERROR << "Disconnect not implemented!!!" << std::endl;
     return true;
 }
 
+#if CISST_MTS_HAS_ICE
+
+void mtsTaskManager::StartProxies()
+{
+    // Start the task manager proxy
+    if (TaskManagerTypeMember == TASK_MANAGER_SERVER) {        
+        // Convert a number into a string.
+        std::stringstream endpointInfo;
+        endpointInfo << "tcp -p " << BASE_PORT_NUMBER_TASK_MANAGER_LAYER;
+
+        ProxyGlobalTaskManager = new mtsTaskManagerProxyServer(
+            "TaskManagerServerAdapter", endpointInfo.str(), TaskManagerCommunicatorID);
+        ProxyGlobalTaskManager->Start(this);
+    } else {
+        CMN_LOG_CLASS_INIT_DEBUG << "GlobalTaskManagerIP: " << GlobalTaskManagerIP << std::endl;
+        CMN_LOG_CLASS_INIT_DEBUG << "ServerTaskIP: " << ServerTaskIP << std::endl;
+
+        // Convert a number into a string.
+        std::stringstream buffer;
+        buffer << ":default -h " << GlobalTaskManagerIP
+               << " -p " << BASE_PORT_NUMBER_TASK_MANAGER_LAYER;
+
+        ProxyTaskManagerClient = new mtsTaskManagerProxyClient(
+            buffer.str(), TaskManagerCommunicatorID);
+        ProxyTaskManagerClient->Start(this);
+
+        // For all tasks, create and run provided interface proxies.
+        TaskMapType::MapType::const_iterator it = TaskMap.GetMap().begin();
+        const TaskMapType::MapType::const_iterator itEnd = TaskMap.GetMap().end();
+        for (; it != itEnd; ++it) {
+            it->second->RunProvidedInterfaceProxy(ProxyTaskManagerClient, ServerTaskIP);
+        }
+    }
+}
+#endif // CISST_MTS_HAS_ICE

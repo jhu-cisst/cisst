@@ -77,6 +77,8 @@ class CISST_EXPORT mtsRequiredInterface: public cmnGenericObject
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
+    friend class mtsDeviceProxy;
+
 protected:
 
     // PK: TEMP (copied from mtsTaskInterface.h)    
@@ -136,16 +138,21 @@ protected:
     virtual mtsCommandWriteBase * GetEventHandlerWrite(const std::string & eventName) const;
     //@}
     
-    void ConnectTo(mtsDeviceInterface *other) { OtherInterface = other; }
+    void ConnectTo(mtsDeviceInterface * other) { OtherInterface = other; }
     void Disconnect(void);  // this could work if we use function objects rather than ptrs, or have special NOP command object
-    bool BindCommandsAndEvents(void);
 
-    void DisableAllEvents() {
+    /*! Bind command and events.  This method needs to provide a user
+      Id so that GetCommandVoid and GetCommandWrite (queued
+      commands) know which mailbox to use.  The user Id is provided
+      by the provided interface when calling AllocateResources. */ 
+    bool BindCommandsAndEvents(unsigned int userId);
+
+    inline void DisableAllEvents(void) {
         EventHandlersVoid.ForEachVoid(&mtsCommandBase::Disable);
         EventHandlersWrite.ForEachVoid(&mtsCommandBase::Disable);
     }
 
-    void EnableAllEvents() {
+    inline void EnableAllEvents(void) {
         EventHandlersVoid.ForEachVoid(&mtsCommandBase::Enable);
         EventHandlersWrite.ForEachVoid(&mtsCommandBase::Enable);
     }
@@ -155,7 +162,7 @@ protected:
 
     /*! Send a human readable description of the interface. */
     void ToStream(std::ostream & outputStream) const;
-
+    
 protected:
     template <class _CommandType>
     class CommandInfo {
@@ -173,6 +180,14 @@ protected:
         {  outputStream << *cmdPtr;
            if (!isRequired)
                outputStream << "(OPT)";
+        }
+        const unsigned int GetCommandID() const
+        {
+            return (*cmdPtr)->GetCommandID();
+        }
+        const std::string GetName() const
+        {
+            return (*cmdPtr)->GetName();
         }
     };
         

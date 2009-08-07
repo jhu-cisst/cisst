@@ -29,6 +29,7 @@ mtsDeviceInterface::mtsDeviceInterface(const std::string & interfaceName,
                                        mtsDevice * device):
     Name(interfaceName),
     Device(device),
+    UserCounter(0),
     CommandsVoid("CommandsVoid"),
     CommandsRead("CommandsRead"),
     CommandsWrite("CommandsWrite"),
@@ -44,7 +45,8 @@ mtsDeviceInterface::mtsDeviceInterface(const std::string & interfaceName,
     EventWriteGenerators.SetOwner(*this);
 }
 
-mtsCommandVoidBase * mtsDeviceInterface::GetCommandVoid(const std::string & commandName) const {
+mtsCommandVoidBase * mtsDeviceInterface::GetCommandVoid(const std::string & commandName,
+                                                        unsigned int CMN_UNUSED(userId)) const {
     return CommandsVoid.GetItem(commandName, CMN_LOG_LOD_INIT_ERROR);
 }
 
@@ -52,7 +54,8 @@ mtsCommandReadBase * mtsDeviceInterface::GetCommandRead(const std::string & comm
     return CommandsRead.GetItem(commandName, CMN_LOG_LOD_INIT_ERROR);
 }
 
-mtsCommandWriteBase * mtsDeviceInterface::GetCommandWrite(const std::string & commandName) const {
+mtsCommandWriteBase * mtsDeviceInterface::GetCommandWrite(const std::string & commandName,
+                                                          unsigned int CMN_UNUSED(userId)) const {
     return CommandsWrite.GetItem(commandName, CMN_LOG_LOD_INIT_ERROR);
 }
 
@@ -203,7 +206,7 @@ bool mtsDeviceInterface::AddObserver(const std::string & eventName, mtsCommandWr
 }
 
 
-
+#if 0
 unsigned int mtsDeviceInterface::AllocateResourcesForCurrentThread(void)
 {
     // no queued commands in this interface, we just keep track of the
@@ -227,6 +230,19 @@ unsigned int mtsDeviceInterface::AllocateResourcesForCurrentThread(void)
         CMN_LOG_CLASS_INIT_VERBOSE << "AllocateResourcesForCurrentThread: already registered thread Id (" << consumerId << ")" << std::endl;
         return (iterator->second)++;
     }
+}
+#endif
+
+unsigned int mtsDeviceInterface::AllocateResources(const std::string & userName)
+{
+    // no queued commands in this interface, we just keep track of the
+    // requests
+    this->UserCounter++;
+    CMN_LOG_CLASS_INIT_VERBOSE << "AllocateResource: interface \"" << this->Name
+                               << "\"received request number "
+                               << this->UserCounter << " from \""
+                               << userName << "\"" << std::endl;
+    return this->UserCounter;
 }
 
 

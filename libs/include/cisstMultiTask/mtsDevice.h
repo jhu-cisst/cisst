@@ -129,6 +129,9 @@ class CISST_EXPORT mtsDevice: public cmnGenericObject
         return RequiredInterfaces.GetItem(requiredInterfaceName);
     }
 
+    /*! Connect a required interface, used by mtsTaskManager */
+    bool ConnectRequiredInterface(const std::string & requiredInterfaceName,
+                                  mtsDeviceInterface * providedInterface);
 
  protected:
     /*! Thread Id counter.  Used to count how many "user" tasks are
@@ -153,10 +156,6 @@ class CISST_EXPORT mtsDevice: public cmnGenericObject
     typedef cmnNamedMap<mtsRequiredInterface> RequiredInterfacesMapType;
     RequiredInterfacesMapType RequiredInterfaces;
     //@}
-
-    /*! Connect a required interface, used by mtsTaskManager */
-    bool ConnectRequiredInterface(const std::string & requiredInterfaceName,
-                                   mtsDeviceInterface * providedInterface);
 
  public:
 

@@ -31,12 +31,19 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnGenericObject.h>
 #include <cisstCommon/cmnClassRegister.h>
+#include <cisstCommon/cmnAssert.h>
 #include <cisstCommon/cmnNamedMap.h>
 
 #include <cisstOSAbstraction/osaThreadBuddy.h>
 #include <cisstOSAbstraction/osaTimeServer.h>
 
 #include <cisstMultiTask/mtsForwardDeclarations.h>
+#include <cisstMultiTask/mtsConfig.h>
+
+#if CISST_MTS_HAS_ICE
+#include <cisstMultiTask/mtsProxyBaseCommon.h>
+#include <cisstMultiTask/mtsDeviceInterfaceProxy.h>
+#endif // CISST_MTS_HAS_ICE
 
 #include <set>
 
@@ -49,12 +56,12 @@ http://www.cisst.org/cisst/license.txt.
   and devices.  It is a Singleton object.
 */
 class CISST_EXPORT mtsTaskManager: public cmnGenericObject {
-    
-    friend class mtsTaskManagerTest;
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
-    
-    /*! Typedef for task name and pointer map. */
 
+    friend class mtsTaskManagerTest;
+
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+
+    /*! Typedef for task name and pointer map. */
     typedef cmnNamedMap<mtsTask> TaskMapType;
 
     /*! Typedef for device name and pointer map. */
@@ -74,6 +81,15 @@ public:
 
     // Default mailbox size -- perhaps this should be specified elsewhere
     enum { MAILBOX_DEFAULT_SIZE = 16 };
+
+#ifdef CISST_MTS_HAS_ICE
+    /*! Typedef for task manager type. */
+    typedef enum {
+        TASK_MANAGER_LOCAL,
+        TASK_MANAGER_SERVER, // global task manager
+        TASK_MANAGER_CLIENT  // general task manager
+    } TaskManagerType;
+#endif
 
 protected:
 
@@ -122,6 +138,9 @@ protected:
 
     /*! List all tasks already added */
     std::vector<std::string> GetNamesOfTasks(void) const;
+    
+    /*! Fetch all tasks already added. (overloaded) */
+    void GetNamesOfTasks(std::vector<std::string>& taskNameContainer) const;
 
     /*! Retrieve a device by name.  Return 0 if the device is not
         known. */
@@ -136,7 +155,7 @@ protected:
     */
     bool Connect(const std::string & userTaskName, const std::string & requiredInterfaceName,
                  const std::string & resourceTaskName, const std::string & providedInterfaceName);
-    
+
     /*! Disconnect the required interface of a user task to the provided
       interface of a resource task (or device).
     */
@@ -181,11 +200,71 @@ protected:
     inline void Kill(void) {
         __os_exit();
     }
+
+#if CISST_MTS_HAS_ICE
+    //-------------------------------------------------------------------------
+    //  Proxy-related
+    //-------------------------------------------------------------------------
+protected:
+    /*! Task manager proxy objects. Both are initialized as null at first and 
+      will be assigned later. Either one of the objects should be null and the 
+      other has to be valid.
+      ProxyServer is valid iff this is the global task manager.
+      ProxyClient is valid iff this is a general task manager.
+    */
+    mtsTaskManagerProxyServer * ProxyGlobalTaskManager;
+    mtsTaskManagerProxyClient * ProxyTaskManagerClient;
+
+    /*! Task manager type. */
+    TaskManagerType TaskManagerTypeMember;
+
+    /*! Task manager communicator ID. Used as one of ICE proxy object properties. */
+    const std::string TaskManagerCommunicatorID;
+
+    /*! IP address information. */
+    std::string GlobalTaskManagerIP;
+    std::string ServerTaskIP;
+
+    /*! Start two kinds of proxies.
+      Task Manager Layer: Start either GlobalTaskManagerProxy of TaskManagerClientProxy
+      according to the type of this task manager.
+      Task Layer: While iterating all tasks, create and start all provided interface 
+      proxies (see mtsTask::RunProvidedInterfaceProxy()).
+    */
+    void StartProxies();
+
+public:
+    /*! Set the type of task manager-global task manager (server) or conventional
+      task manager (client)-and start an appropriate task manager proxy.
+      Also start a task interface proxy. */
+    void SetTaskManagerType(const TaskManagerType taskManagerType) {
+        TaskManagerTypeMember = taskManagerType;
+        StartProxies();
+    }
+
+    /*! Getter */
+    inline TaskManagerType GetTaskManagerType() { return TaskManagerTypeMember; }
+
+    inline mtsTaskManagerProxyServer * GetProxyGlobalTaskManager() const {
+        return ProxyGlobalTaskManager;
+    }
+
+    inline mtsTaskManagerProxyClient * GetProxyTaskManagerClient() const {
+        return ProxyTaskManagerClient;
+    }
+
+    /*! Setter */
+    inline void SetGlobalTaskManagerIP(const std::string & globalTaskManagerIP) {
+        GlobalTaskManagerIP = globalTaskManagerIP;
+    }
+
+    inline void SetServerTaskIP(const std::string & serverTaskIP) {
+        ServerTaskIP = serverTaskIP;
+    }
+#endif // CISST_MTS_HAS_ICE
 };
 
-
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsTaskManager)
-
 
 #endif // _mtsTaskManager_h
 

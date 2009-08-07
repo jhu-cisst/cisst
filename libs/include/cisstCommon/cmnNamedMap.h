@@ -125,8 +125,11 @@ public:
     bool RemoveItem(const std::string & name, cmnLogLoD lod = CMN_LOG_LOD_RUN_ERROR);
 
     /*! List of names used, i.e. list of keys in the map */
-    std::vector<std::string> GetNames() const;
-    
+    //@{
+    void GetNames(std::vector<std::string> & placeHolder) const;
+    std::vector<std::string> GetNames(void) const;
+    //@}
+
     /*! Type of void method in class _elementType */
     typedef void (_elementType::*VoidMethodPointer)(void);
 
@@ -237,17 +240,25 @@ bool cmnNamedMap<_elementType>::RemoveItem(const std::string & itemName, cmnLogL
 
 
 template <class _elementType>
-std::vector<std::string> cmnNamedMap<_elementType>::GetNames(void) const {
-    std::vector<std::string> names;
+void cmnNamedMap<_elementType>::GetNames(std::vector<std::string> & placeHolder) const {
+    placeHolder.clear();
     typename MapType::const_iterator iter = Map.begin();
     const typename MapType::const_iterator end = Map.end();
     for (;
          iter != end;
          ++iter) {
-        names.push_back(iter->first);
+        placeHolder.push_back(iter->first);
     }
+}
+
+
+template <class _elementType>
+std::vector<std::string> cmnNamedMap<_elementType>::GetNames(void) const {
+    std::vector<std::string> names;
+    GetNames(names);
     return names;
 }
+
 
 template <class _elementType>
 void cmnNamedMap<_elementType>::ForEachVoid(VoidMethodPointer method)
@@ -258,6 +269,7 @@ void cmnNamedMap<_elementType>::ForEachVoid(VoidMethodPointer method)
         (iter->second->*method)();
     }
 }
+
 
 template <class _elementType>
 void cmnNamedMap<_elementType>::ToStream(std::ostream & outputStream) const
@@ -272,6 +284,7 @@ void cmnNamedMap<_elementType>::ToStream(std::ostream & outputStream) const
                      << iter->first << "\"): " << *(iter->second) << std::endl;
     }
 }
+
 
 template <class _elementType>
 void cmnNamedMap<_elementType>::DeleteAll(void) {
