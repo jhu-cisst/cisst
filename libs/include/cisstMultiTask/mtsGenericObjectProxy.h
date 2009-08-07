@@ -86,6 +86,11 @@ public:
     inline mtsGenericObjectProxy(void)
     {}
     
+    /*! Copy constructor. */
+    inline mtsGenericObjectProxy(const ThisType & other) : 
+        BaseType(other), Data(other.Data)
+    {}
+    
     /*! Conversion constructor.  This allows to construct the proxy
         object using an object of the actual type. */
     inline mtsGenericObjectProxy(const value_type & data):
