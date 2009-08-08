@@ -158,21 +158,21 @@ typedef mtsCommandQualifiedReadOrWriteBase<const mtsGenericObject> mtsCommandQua
             interfaces = mtsDevice.GetNamesOfProvidedInterfaces(self)
             for interface in interfaces:
                 self.__dict__[interface] = mtsDevice.GetProvidedInterface(self, interface)
-                self.__dict__[interface].AllocateResourcesForCurrentThread()
-                self.__dict__[interface].UpdateFromC()
+                userId = self.__dict__[interface].AllocateResources('Python')
+                self.__dict__[interface].UpdateFromC(userId)
     }
 }
 
 %include "cisstMultiTask/mtsDeviceInterface.h"
 %extend mtsDeviceInterface {
     %pythoncode {
-        def UpdateFromC(self):
+        def UpdateFromC(self, userId):
             commands = mtsDeviceInterface.GetNamesOfCommandsVoid(self)
             for command in commands:
-                self.__dict__[command] = mtsDeviceInterface.GetCommandVoid(self, command)
+                self.__dict__[command] = mtsDeviceInterface.GetCommandVoid(self, command, userId)
             commands = mtsDeviceInterface.GetNamesOfCommandsWrite(self)
             for command in commands:
-                self.__dict__[command] = mtsDeviceInterface.GetCommandWrite(self, command)
+                self.__dict__[command] = mtsDeviceInterface.GetCommandWrite(self, command, userId)
                 self.__dict__[command].UpdateFromC()
             commands = mtsDeviceInterface.GetNamesOfCommandsQualifiedRead(self)
             for command in commands:
