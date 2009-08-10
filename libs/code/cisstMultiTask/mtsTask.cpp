@@ -336,7 +336,7 @@ void mtsTask::RunProvidedInterfaceProxy(mtsTaskManagerProxyClient * globalTaskMa
     }
 
     // No provided interface, no required interface proxy.
-    if (ProvidedInterfaces.GetCount() <= 0) {
+    if (ProvidedInterfaces.size() <= 0) {
         CMN_LOG_CLASS_RUN_ERROR << "RunProvidedInterfaceProxy failed: " 
             << "No provided interface exists." << std::endl;
         return;
@@ -363,7 +363,7 @@ void mtsTask::RunProvidedInterfaceProxy(mtsTaskManagerProxyClient * globalTaskMa
         adapterName = adapterNameBase + "_" + providedInterfaceName;
         
         // Assign a new port number for to-be-newly-created proxy object.
-        portNumber = GetNewPortNumberAsString(ProvidedInterfaceProxies.GetCount());
+        portNumber = GetNewPortNumberAsString(ProvidedInterfaceProxies.size());
         endpointInfo = endpointInfoBase + portNumber;
         endpointInfoForClient = ":default -h " +
                                 serverTaskIP + " " +
@@ -417,7 +417,7 @@ void mtsTask::RunRequiredInterfaceProxy(mtsTaskManagerProxyClient * globalTaskMa
     }
 
     // No actual required interface, no proxy object.
-    if (RequiredInterfaces.GetCount() <= 0) {
+    if (RequiredInterfaces.size() <= 0) {
         CMN_LOG_CLASS_RUN_ERROR << "RunRequiredInterfaceProxy failed: " 
             << "No required interface exists." << std::endl;
         return;
