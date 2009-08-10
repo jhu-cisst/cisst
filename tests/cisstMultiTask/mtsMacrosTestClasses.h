@@ -43,6 +43,12 @@ class mtsMacrosTestClassB
 {
 public:
     double Value;
+    
+    /*! To stream human readable output */
+    virtual void ToStream(std::ostream & outputStream) const {
+        outputStream << this->Value << std::endl;
+    }
+
 
     void SerializeRaw(std::ostream & outputStream) const 
     {
