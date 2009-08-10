@@ -78,7 +78,7 @@ INSTALL_FILES(/include/cisstDevices
 # Add the config file to the project
 SET_SOURCE_FILES_PROPERTIES("${CISST_DEV_CONFIG_FILE}"
                             PROPERTIES GENERATED TRUE)
-SET(HEADERS ${CISST_DEV_CONFIG_FILE})
+SET(ADDITIONAL_HEADER_FILES ${CISST_DEV_CONFIG_FILE})
 
 # Create the CMake config file
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/cisstDevicesBuild.cmake.in

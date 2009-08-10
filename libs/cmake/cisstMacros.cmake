@@ -22,7 +22,8 @@
 # - DEPENDENCIES is a list of dependencies, for cisstVector, set it to cisstCommon
 # - SOURCE_FILES is a list of files, without any path (absolute or relative)
 # - HEADER_FILES is a list of files, without any path (absolute or relative)
-# - HEADERS is a list of header files with a full path (e.g. configured header)
+# - ADDITIONAL_SOURCE_FILES is a list of source files with a full path (e.g. generated source)
+# - ADDITIONAL_HEADER_FILES is a list of header files with a full path (e.g. configured/generated header)
 #
 # Invoke this macro from within a library's CMakeLists.txt to add that library
 # to a larger project.  The name of the project is given as a macro argument.
@@ -76,11 +77,16 @@ IF(BUILD_LIBS_${LIBRARY} OR BUILD_${LIBRARY})
   # Add the main header to the library, for IDEs
   SET(HEADERS ${HEADERS} ${LIBRARY_MAIN_HEADER})
 
+  # Use the additional include path
+  INCLUDE_DIRECTORIES(${CISST_ADDITIONAL_INCLUDE_DIRECTORIES})
+
   # Add the library
   ADD_LIBRARY(${LIBRARY}
               ${IS_SHARED}
               ${SOURCES}
+              ${ADDITIONAL_SOURCE_FILES}
               ${HEADERS}
+              ${ADDITIONAL_HEADER_FILES}
               )
   INSTALL_TARGETS(/lib ${LIBRARY})
 

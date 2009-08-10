@@ -163,7 +163,7 @@ if(CISST_MTS_HAS_ICE)
       ${cisst_SOURCE_DIR}/libs/etc/${LIBRARY}/Ice/config.server
       ${cisst_SOURCE_DIR}/libs/etc/${LIBRARY}/Ice/mtsDeviceInterfaceProxy.ice
       ${cisst_SOURCE_DIR}/libs/etc/${LIBRARY}/Ice/mtsTaskManagerProxy.ice
-      )    
+      )
 
   #
   # ICE
@@ -177,7 +177,9 @@ if(CISST_MTS_HAS_ICE)
 
   find_package(Ice)
 
-  include_directories(${ICE_INCLUDE_DIR})
+  CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_INCLUDE_DIRECTORIES ICE_INCLUDE_DIR)
+  CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_LIBRARIES ICE_LIBRARY_NAME)
+  CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_LINK_DIRECTORIES ICE_LIBRARY_DIR)
 
   # create a list of include directories for slice
   foreach(ice_include_dir ${ICE_INCLUDE_DIR})
@@ -205,7 +207,7 @@ if(CISST_MTS_HAS_ICE)
 
     include_directories(${CMAKE_CURRENT_BINARY_DIR})
     
-    set(EXTRA_SOURCE_FILES ${EXTRA_SOURCE_FILES} ${GENERATED_CPP_FILE})
+    set(ADDITIONAL_SOURCE_FILES ${ADDITIONAL_SOURCE_FILES} ${GENERATED_CPP_FILE})
 
   endforeach(slice_file ${SLICE_FILES})
 
@@ -224,7 +226,7 @@ INSTALL_FILES(/include/cisstMultiTask
 # Add the config file to the project
 SET_SOURCE_FILES_PROPERTIES("${CISST_MTS_CONFIG_FILE}"
                             PROPERTIES GENERATED TRUE)
-SET(HEADERS ${CISST_MTS_CONFIG_FILE})
+SET(ADDITIONAL_HEADER_FILES ${CISST_MTS_CONFIG_FILE})
 
 
 # Finally add the library
@@ -232,9 +234,6 @@ CISST_ADD_LIBRARY_TO_PROJECT(cisstLibs)
 
 
 if(CISST_MTS_HAS_ICE)
-  # if Ice is used, link against the required libraries
-  link_directories(${ICE_LIBRARY_DIR})
-
   if(WIN32)
     target_link_libraries(cisstMultiTask 
                           optimized Ice debug Iced

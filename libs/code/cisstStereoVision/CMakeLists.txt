@@ -590,7 +590,7 @@ INSTALL_FILES(/include/cisstStereoVision
 # Add the config file to the project
 SET_SOURCE_FILES_PROPERTIES("${CISST_SVL_CONFIG_FILE}"
                             PROPERTIES GENERATED TRUE)
-SET(HEADERS ${CISST_SVL_CONFIG_FILE})
+SET(ADDITIONAL_HEADER_FILES ${CISST_SVL_CONFIG_FILE})
 
 # Finally create the library
 CISST_ADD_LIBRARY_TO_PROJECT(cisstLibs)
