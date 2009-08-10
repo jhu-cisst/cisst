@@ -27,13 +27,6 @@ SET(DEPENDENCIES
     cisstParameterTypes
     )
 
-# Find VTK settings
-FIND_PACKAGE(VTK REQUIRED)
-IF(NOT VTK_USE_RENDERING)
-    MESSAGE(FATAL_ERROR "${LIBRARY} requires VTK_USE_RENDERING.")
-ENDIF(NOT VTK_USE_RENDERING)
-INCLUDE(${VTK_USE_FILE})
-
 # all source files
 SET(SOURCE_FILES
     ui3BehaviorBase.cpp
@@ -76,29 +69,44 @@ SET(HEADER_FILES
     ui3VisibleAxes.h
     )
 
-CISST_ADD_LIBRARY_TO_PROJECT(cisstLibs)
 
-# link to other external libraries
-target_link_libraries(cisst3DUserInterface vtkRendering vtkHybrid)
+# VTK Dependency
+FIND_PACKAGE(VTK REQUIRED)
+IF(VTK_FOUND)
+    MARK_AS_ADVANCED(FORCE VTK_DIR)
 
-IF(UNIX)
-    # Link each executable against the X11 library
-    FIND_PACKAGE(X11 REQUIRED)
-    TARGET_LINK_LIBRARIES(cisst3DUserInterface ${X11_LIBRARIES})
+    IF(VTK_USE_RENDERING)
+        INCLUDE(${VTK_USE_FILE})
 
-    IF(CISST_SVL_HAS_LIBDC1394)
-        # Also link the examples using live camera source against the DC1394 library if enabled
-        TARGET_LINK_LIBRARIES(cisst3DUserInterface dc1394)
-    ENDIF(CISST_SVL_HAS_LIBDC1394)
-ENDIF(UNIX)
+        SET(UI3_ADDITIONAL_INCLUDE_DIRECTORIES
+            "${UI3_ADDITIONAL_INCLUDE_DIRECTORIES}"
+            "${VTK_INCLUDE_DIRS}"
+            )
+        SET(UI3_ADDITIONAL_LINK_DIRECTORIES
+            "${UI3_ADDITIONAL_LINK_DIRECTORIES}"
+            "${VTK_LIBRARY_DIRS}"
+            )
+        SET(UI3_ADDITIONAL_LIBRARIES
+            "${UI3_ADDITIONAL_LIBRARIES}"
+            vtkRendering
+            vtkHybrid
+            )
+        MESSAGE(STATUS "VTK found - Switch to advanced view for details")
 
-IF(CISST_SVL_HAS_OPENCV)
-    # Link each example against the OpenCV library if enabled
-    FIND_PACKAGE(OpenCV)
-    INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS})
-    LINK_DIRECTORIES(${OpenCV_LINK_DIRECTORIES})
-    TARGET_LINK_LIBRARIES(cisst3DUserInterface ${OpenCV_LIBRARIES})
-ENDIF(CISST_SVL_HAS_OPENCV)
+    ELSE(VTK_USE_RENDERING)
+        MESSAGE(FATAL_ERROR "${LIBRARY} requires vtkRendering to be compiled in VTK.")
+    ENDIF(VTK_USE_RENDERING)
+ELSE(VTK_FOUND)
+    MARK_AS_ADVANCED(CLEAR VTK_DIR)
+    MESSAGE(FATAL_ERROR "${LIBRARY} requires VTK.")
+ENDIF(VTK_FOUND)
+
+
+# Exporting settings to applications that link against cisst
+CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_INCLUDE_DIRECTORIES UI3_ADDITIONAL_INCLUDE_DIRECTORIES)
+CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_LINK_DIRECTORIES UI3_ADDITIONAL_LINK_DIRECTORIES)
+CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_LIBRARIES UI3_ADDITIONAL_LIBRARIES)
+
 
 # find icons
 set(CISST_UI3_ICONS_DIR "${cisst_SOURCE_DIR}/libs/etc/cisst3DUserInterface/icons")
@@ -113,3 +121,7 @@ foreach(icon ${CISST_UI3_ICONS})
                             ${CISST_UI3_ICONS_DIR}/${icon}
                             ${cisst_BINARY_DIR}/etc/cisst3DUserInterface/icons/${icon})
 endforeach(icon)
+
+
+CISST_ADD_LIBRARY_TO_PROJECT(cisstLibs)
+

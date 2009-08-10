@@ -84,7 +84,6 @@ IF(BUILD_LIBS_${LIBRARY} OR BUILD_${LIBRARY})
               )
   INSTALL_TARGETS(/lib ${LIBRARY})
 
-
   # Add dependencies for linking, also check BUILD_xxx for dependencies
   IF(DEPENDENCIES)
     # Check that dependencies are build
@@ -116,7 +115,6 @@ ENDMACRO(CISST_ADD_LIBRARY_TO_PROJECT)
 
 
 
-
 # Macro used to compare required libraries for a given target with
 # libraries actually compiled.  This macro adds the required link
 # options.
@@ -133,15 +131,19 @@ MACRO(CISST_REQUIRES WHO_REQUIRES REQUIRED_CISST_LIBRARIES)
        MESSAGE("${WHO_REQUIRES} requires ${required} which doesn't exist or hasn't been compiled")
      ENDIF("${CISST_LIBRARIES}"  MATCHES ${required})
    ENDFOREACH(required)
+
    # Second, create a list of libraries in the right order
    FOREACH(existing ${CISST_LIBRARIES})
      IF("${REQUIRED_CISST_LIBRARIES}" MATCHES ${existing})
        SET(CISST_LIBRARIES_TO_USE ${CISST_LIBRARIES_TO_USE} ${existing})
      ENDIF("${REQUIRED_CISST_LIBRARIES}" MATCHES ${existing})
    ENDFOREACH(existing)
-   # Link with the required libraries
+
+   # Finally, link with the required libraries
    TARGET_LINK_LIBRARIES(${WHO_REQUIRES} ${CISST_LIBRARIES_TO_USE} ${CISST_ADDITIONAL_LIBRARIES})
+
 ENDMACRO(CISST_REQUIRES)
+
 
 
 # Macro to add all the available tests

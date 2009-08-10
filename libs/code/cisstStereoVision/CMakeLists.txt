@@ -162,7 +162,15 @@ IF(CISST_SVL_HAS_OPENCV)
                         #OpenCV_TRS_LIBRARY
                          )
 
-        INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS})
+        SET(SVL_ADDITIONAL_INCLUDE_DIRECTORIES
+            "${SVL_ADDITIONAL_INCLUDE_DIRECTORIES}"
+            "${OpenCV_INCLUDE_DIRS}"
+            )
+        SET(SVL_ADDITIONAL_LIBRARIES
+            "${SVL_ADDITIONAL_LIBRARIES}"
+            "${OpenCV_LIBRARIES}"
+            )
+
         SET(SOURCE_FILES
             ${SOURCE_FILES}
             svlFilterToolTracker.cpp
@@ -235,27 +243,32 @@ IF(CISST_SVL_HAS_ZLIB)
                          ZLIB_LIBRARY
                          )
 
-        INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
+        SET(SVL_ADDITIONAL_INCLUDE_DIRECTORIES
+            "${SVL_ADDITIONAL_INCLUDE_DIRECTORIES}"
+            "${ZLIB_INCLUDE_DIR}"
+            )
+        SET(SVL_ADDITIONAL_LIBRARIES
+            "${SVL_ADDITIONAL_LIBRARIES}"
+            "${ZLIB_LIBRARIES}"
+            )
 
         IF(NOT WIN32)
             SET(SOURCE_FILES
                 ${SOURCE_FILES}
-                svlFilterSourceImageFile.cpp
+                svlFilterSourceVideoFile.cpp
                 )
             SET(HEADER_FILES
                 ${HEADER_FILES}
-                svlFilterSourceImageFile.h
+                svlFilterSourceVideoFile.h
                 )
         ENDIF(NOT WIN32)
 
         SET(SOURCE_FILES
             ${SOURCE_FILES}
-            svlFilterSourceVideoFile.cpp
             svlFilterVideoFileWriter.cpp
             )
         SET(HEADER_FILES
             ${HEADER_FILES}
-            svlFilterSourceVideoFile.h
             svlFilterVideoFileWriter.h
             )
         MESSAGE(STATUS "ZLIB found - Switch to advanced view for details")
@@ -303,13 +316,21 @@ IF(CISST_SVL_HAS_MIL)
                          MIL_mil_LIBRARY
                          )
 
-        INCLUDE_DIRECTORIES(${MIL_INCLUDE_DIR})
+        SET(SVL_ADDITIONAL_INCLUDE_DIRECTORIES
+            "${SVL_ADDITIONAL_INCLUDE_DIRECTORIES}"
+            "${MIL_INCLUDE_DIR}"
+            )
+        SET(SVL_ADDITIONAL_LIBRARIES
+            "${SVL_ADDITIONAL_LIBRARIES}"
+            "${MIL_mil_LIBRARY}"
+            )
+
         SET(SOURCE_FILES
             ${SOURCE_FILES}
             vidMILDevice.h      # private header
             vidMILDevice.cpp
             )
-        SET(CISST_ADDITIONAL_LIBRARIES ${CISST_ADDITIONAL_LIBRARIES} ${MIL_mil_LIBRARY})
+        SET(SVL_ADDITIONAL_LIBRARIES ${SVL_ADDITIONAL_LIBRARIES} ${MIL_mil_LIBRARY})
         MESSAGE(STATUS "Matrox Imaging Library (MIL) found - Switch to advanced view for details")
 
     ELSE(MIL_FOUND)
@@ -336,23 +357,30 @@ ENDIF(UNIX)
 IF(WIN32)
   # generic windows specific files
   SET(SOURCE_FILES
-    ${SOURCE_FILES}
-    winWin32.h               # private header
-    winWin32.cpp
-    VfWAvi.h                 # private header
-    VfWAvi.cpp
-    svlFilterImageWindow.cpp
-    svlFilterSourceImageFile.cpp
-    svlFilterSourceVideoFile.cpp
-    svlFilterVideoFileWriterAVI.cpp
-    )
+      ${SOURCE_FILES}
+      winWin32.h               # private header
+      winWin32.cpp
+      VfWAvi.h                 # private header
+      VfWAvi.cpp
+      svlFilterImageWindow.cpp
+      svlFilterSourceVideoFile.cpp
+      svlFilterVideoFileWriterAVI.cpp
+      )
   SET(HEADER_FILES
-    ${HEADER_FILES}
-    svlFilterImageWindow.h
-    svlFilterSourceImageFile.h
-    svlFilterSourceVideoFile.h
-    svlFilterVideoFileWriterAVI.h
-    )
+      ${HEADER_FILES}
+      svlFilterImageWindow.h
+      svlFilterSourceVideoFile.h
+      svlFilterVideoFileWriterAVI.h
+      )
+  SET(SVL_ADDITIONAL_LIBRARIES
+      "${SVL_ADDITIONAL_LIBRARIES}"
+      vfw32
+      )
+
+  # set windows specific linker flags enabling C++ code compilation on .NET compilers
+  SET(SVL_ADDITIONAL_EXE_LINKER_FLAGS
+      "${SVL_ADDITIONAL_EXE_LINKER_FLAGS} /NODEFAULTLIB:libc.lib /NODEFAULTLIB:libcmt.lib /NODEFAULTLIB:libcd.lib /NODEFAULTLIB:libcmtd.lib"
+      )
 
   OPTION(CISST_SVL_HAS_DIRECTSHOW "Compile DirectShow extensions" OFF)
   IF(CISST_SVL_HAS_DIRECTSHOW)
@@ -362,12 +390,20 @@ IF(WIN32)
                          DIRECTSHOW_INCLUDE_DIR
                          DIRECTX_INCLUDE_DIR
                          DIRECTSHOW_strmiids_LIBRARY
-                         DIRECTSHOW_quartz_LIBRARY
-                         DIRECTSHOW_Vfw32_LIBRARY
                          DIRECTSHOW_WinMM_LIBRARY 
                          )
 
-        INCLUDE_DIRECTORIES(${DIRECTSHOW_INCLUDE_DIR} ${DIRECTX_INCLUDE_DIR})
+        SET(SVL_ADDITIONAL_INCLUDE_DIRECTORIES
+            "${SVL_ADDITIONAL_INCLUDE_DIRECTORIES}"
+            "${DIRECTSHOW_INCLUDE_DIR}"
+            "${DIRECTX_INCLUDE_DIR}"
+            )
+        SET(SVL_ADDITIONAL_LIBRARIES
+            "${SVL_ADDITIONAL_LIBRARIES}"
+            "${DIRECTSHOW_strmiids_LIBRARY}"
+            "${DIRECTSHOW_WinMM_LIBRARY}"
+            )
+
         SET(SOURCE_FILES
             ${SOURCE_FILES}
             vidDirectShowInputSelector.h    # private header
@@ -382,8 +418,6 @@ IF(WIN32)
                          DIRECTSHOW_INCLUDE_DIR
                          DIRECTX_INCLUDE_DIR
                          DIRECTSHOW_strmiids_LIBRARY
-                         DIRECTSHOW_quartz_LIBRARY
-                         DIRECTSHOW_Vfw32_LIBRARY
                          DIRECTSHOW_WinMM_LIBRARY 
                          )
     ENDIF(DIRECTSHOW_FOUND)
@@ -393,8 +427,6 @@ IF(WIN32)
                      DIRECTSHOW_INCLUDE_DIR
                      DIRECTX_INCLUDE_DIR
                      DIRECTSHOW_strmiids_LIBRARY
-                     DIRECTSHOW_quartz_LIBRARY
-                     DIRECTSHOW_Vfw32_LIBRARY
                      DIRECTSHOW_WinMM_LIBRARY 
                      )
   ENDIF(CISST_SVL_HAS_DIRECTSHOW)
@@ -433,7 +465,16 @@ IF(WIN32)
                          SVS_svsgrab_LIBRARY
                          )
 
-        INCLUDE_DIRECTORIES(${SVS_INCLUDE_DIR})
+        SET(SVL_ADDITIONAL_INCLUDE_DIRECTORIES
+            "${SVL_ADDITIONAL_INCLUDE_DIRECTORIES}"
+            "${SVS_INCLUDE_DIR}"
+            )
+        SET(SVL_ADDITIONAL_LIBRARIES
+            "${SVL_ADDITIONAL_LIBRARIES}"
+            "${SVS_svs_LIBRARY}"
+            "${SVS_svsgrab_LIBRARY}"
+            )
+
         SET(SOURCE_FILES
             ${SOURCE_FILES}
             vidSVSSource.h      # private header
@@ -500,7 +541,15 @@ IF(UNIX)
   IF(CISST_SVL_HAS_X11)
     FIND_PACKAGE(X11 REQUIRED)
     IF(X11_FOUND)
-      INCLUDE_DIRECTORIES(${X11_INCLUDE_DIR})
+      SET(SVL_ADDITIONAL_INCLUDE_DIRECTORIES
+          "${SVL_ADDITIONAL_INCLUDE_DIRECTORIES}"
+          "${X11_INCLUDE_DIR}"
+          )
+        SET(SVL_ADDITIONAL_LIBRARIES
+            "${SVL_ADDITIONAL_LIBRARIES}"
+            "${X11_LIBRARIES}"
+            )
+
       SET(SOURCE_FILES
           ${SOURCE_FILES}
           winX11.h                 # private header
@@ -523,6 +572,12 @@ ELSE(UNIX)
 
 ENDIF(UNIX)
 
+# Exporting settings to applications that link against cisst
+CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_INCLUDE_DIRECTORIES SVL_ADDITIONAL_INCLUDE_DIRECTORIES)
+CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_LINK_DIRECTORIES SVL_ADDITIONAL_LINK_DIRECTORIES)
+CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_LIBRARIES SVL_ADDITIONAL_LIBRARIES)
+SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}${SVL_ADDITIONAL_EXE_LINKER_FLAGS}")
+
 # Create the config file
 SET(CISST_SVL_CONFIG_FILE ${cisst_BINARY_DIR}/libs/include/cisstStereoVision/svlConfig.h)
 CONFIGURE_FILE(${cisst_SOURCE_DIR}/libs/include/cisstStereoVision/svlConfig.h.in
@@ -537,50 +592,6 @@ SET_SOURCE_FILES_PROPERTIES("${CISST_SVL_CONFIG_FILE}"
                             PROPERTIES GENERATED TRUE)
 SET(HEADERS ${CISST_SVL_CONFIG_FILE})
 
-# Create the CMake config file
-CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/cisstStereoVisionBuild.cmake.in
-               ${cisst_BINARY_DIR}/cisstStereoVisionBuild.cmake
-               @ONLY)
-
 # Finally create the library
 CISST_ADD_LIBRARY_TO_PROJECT(cisstLibs)
-
-# Add libraries to link with based on options
-IF(WIN32)
-  IF(CISST_SVL_HAS_DIRECTSHOW)
-    TARGET_LINK_LIBRARIES(cisstStereoVision
-                          ${DIRECTSHOW_strmiids_LIBRARY}
-                          ${DIRECTSHOW_Vfw32_LIBRARY}
-                          ${DIRECTSHOW_WinMM_LIBRARY}
-                          )
-    SET(CMAKE_SHARED_LINKER_FLAGS
-        "${CMAKE_SHARED_LINKER_FLAGS} /NODEFAULTLIB:libc.lib /NODEFAULTLIB:libcmt.lib /NODEFAULTLIB:libcd.lib /NODEFAULTLIB:libcmtd.lib")
-  ENDIF(CISST_SVL_HAS_DIRECTSHOW)
-
-  IF(CISST_SVL_HAS_SVS)
-    TARGET_LINK_LIBRARIES(cisstStereoVision
-                          ${CISST_SVL_svs_LIBRARY}
-                          ${CISST_SVL_svsgrab_LIBRARY}
-                          )
-
-  ENDIF(CISST_SVL_HAS_SVS)
-ENDIF(WIN32)
-
-IF(CISST_SVL_HAS_OPENCV)
-  TARGET_LINK_LIBRARIES(cisstStereoVision ${OpenCV_LIBRARIES})
-ENDIF(CISST_SVL_HAS_OPENCV)
-
-IF(CISST_SVL_HAS_ZLIB)
-    IF(ZLIB_FOUND)
-        TARGET_LINK_LIBRARIES(cisstStereoVision ${ZLIB_LIBRARIES})
-    ENDIF(ZLIB_FOUND)
-ENDIF(CISST_SVL_HAS_ZLIB)
-
-IF(CISST_SVL_HAS_MIL)
-  TARGET_LINK_LIBRARIES(cisstStereoVision ${CISST_SVL_MIL_LIBRARY})
-ENDIF(CISST_SVL_HAS_MIL)
-
-IF(CISST_SVL_HAS_X11)
-  TARGET_LINK_LIBRARIES(cisstStereoVision ${X11_LIBRARIES})
-ENDIF(CISST_SVL_HAS_X11)
 
