@@ -60,22 +60,22 @@ IF(WIN32)
         "C:/DXSDK/Include/Lib"
         DOC "Where can the DirectShow strmiids library be found"
       )
-      FIND_LIBRARY(DIRECTSHOW_quartz_LIBRARY quartz
-        "C:/Program Files/Microsoft SDKs/Windows/v6.0A/Lib"
-        "C:/Program Files/Microsoft Platform SDK for Windows Server 2003 R2/Lib"
-        "C:/Program Files/Microsoft Visual Studio .NET 2003/Vc7/PlatformSDK/Lib"
-        "C:/Program Files/Microsoft Platform SDK/Lib"
-        "C:/DXSDK/Include/Lib"
-        DOC "Where can the DirectShow quartz library be found"
-      )
-      FIND_LIBRARY(DIRECTSHOW_Vfw32_LIBRARY Vfw32
-        "C:/Program Files/Microsoft SDKs/Windows/v6.0A/Lib"
-        "C:/Program Files/Microsoft Platform SDK for Windows Server 2003 R2/Lib"
-        "C:/Program Files/Microsoft Visual Studio .NET 2003/Vc7/PlatformSDK/Lib"
-        "C:/Program Files/Microsoft Platform SDK/Lib"
-        "C:/DXSDK/Include/Lib"
-        DOC "Where can the DirectShow Vfw32 library be found"
-      )
+#      FIND_LIBRARY(DIRECTSHOW_quartz_LIBRARY quartz
+#        "C:/Program Files/Microsoft SDKs/Windows/v6.0A/Lib"
+#        "C:/Program Files/Microsoft Platform SDK for Windows Server 2003 R2/Lib"
+#        "C:/Program Files/Microsoft Visual Studio .NET 2003/Vc7/PlatformSDK/Lib"
+#        "C:/Program Files/Microsoft Platform SDK/Lib"
+#        "C:/DXSDK/Include/Lib"
+#        DOC "Where can the DirectShow quartz library be found"
+#      )
+#      FIND_LIBRARY(DIRECTSHOW_Vfw32_LIBRARY Vfw32
+#        "C:/Program Files/Microsoft SDKs/Windows/v6.0A/Lib"
+#        "C:/Program Files/Microsoft Platform SDK for Windows Server 2003 R2/Lib"
+#        "C:/Program Files/Microsoft Visual Studio .NET 2003/Vc7/PlatformSDK/Lib"
+#        "C:/Program Files/Microsoft Platform SDK/Lib"
+#        "C:/DXSDK/Include/Lib"
+#        DOC "Where can the DirectShow Vfw32 library be found"
+#      )
       FIND_LIBRARY(DIRECTSHOW_WinMM_LIBRARY WinMM
         "C:/Program Files/Microsoft SDKs/Windows/v6.0A/Lib"
         "C:/Program Files/Microsoft Platform SDK for Windows Server 2003 R2/Lib"
@@ -87,10 +87,10 @@ IF(WIN32)
 
       # if DirectShow libraries found, then we're ok
       IF(DIRECTSHOW_strmiids_LIBRARY)
-        IF(DIRECTSHOW_quartz_LIBRARY)
+#        IF(DIRECTSHOW_quartz_LIBRARY)
           # everything found
           SET(DIRECTSHOW_FOUND "YES")
-        ENDIF(DIRECTSHOW_quartz_LIBRARY)
+#        ENDIF(DIRECTSHOW_quartz_LIBRARY)
       ENDIF(DIRECTSHOW_strmiids_LIBRARY)
     ENDIF(DIRECTSHOW_INCLUDE_DIR)
   ENDIF(DIRECTX_INCLUDE_DIR)
@@ -106,7 +106,7 @@ IF(DIRECTSHOW_FOUND)
 
   SET(DIRECTSHOW_LIBRARIES
     ${DIRECTSHOW_strmiids_LIBRARY}
-    ${DIRECTSHOW_quartz_LIBRARY}
+#    ${DIRECTSHOW_quartz_LIBRARY}
   )
 ELSE(DIRECTSHOW_FOUND)
   # make FIND_PACKAGE friendly

@@ -38,6 +38,7 @@ public:
 
     int DialogFilePath(unsigned int videoch = SVL_LEFT);
     int DialogCodec();
+    void GetEncoderName(std::string& name) { name = EncoderName; }
 
     int Disable(bool disable, unsigned int videoch = SVL_LEFT);
     int SetFilePath(const std::string filepath, unsigned int videoch = SVL_LEFT);
@@ -64,6 +65,7 @@ private:
     vctDynamicVector<void*> VideoObj;
     vctDynamicVector<bool> Disabled;
     vctDynamicVector<std::string> FilePath;
+    std::string EncoderName;
 
     int UpdateStreamCount(unsigned int count);
 };

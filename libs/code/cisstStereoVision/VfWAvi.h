@@ -23,6 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _CVfWAvi_h
 #define _CVfWAvi_h
 
+#include <string>
 #include "windows.h"
 #include "vfw.h"
 
@@ -41,6 +42,7 @@ public:
 
 protected:
     char PathName[1024];
+    std::string CompressorName;
     PAVIFILE PAviFile;
     AVIFILEINFO FileInfo;
     PAVISTREAM PAviStream;
@@ -83,6 +85,7 @@ public:
     int GetCurrentFrameNumber() { return CurrentFrame; }
     void GetCompressOptions(AVICOMPRESSOPTIONS &coptions) { coptions = CompressionOptions; }
     void SetCompressOptions(AVICOMPRESSOPTIONS &coptions) { CompressionOptions = coptions; }
+    void GetCompressorName(std::string& name) { name = CompressorName; }
     void SetKeyFrameInterval(unsigned int interval);
 
     int ShowCompressionDialog();

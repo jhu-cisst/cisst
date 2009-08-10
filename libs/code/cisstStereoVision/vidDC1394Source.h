@@ -23,7 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _vidDC1394Source_h
 #define _vidDC1394Source_h
 
-#include <cisstStereoVision/svlVideoCaptureSource.h>
+#include <cisstStereoVision/svlFilterSourceVideoCapture.h>
 #include "svlImageBuffer.h"
 
 
@@ -145,7 +145,7 @@ public:
     static svlDC1394Context* Instance();
 
     dc1394_t* GetContext();
-	int GetDeviceList(svlVideoCaptureSource::DeviceInfo **deviceinfo);
+	int GetDeviceList(svlFilterSourceVideoCapture::DeviceInfo **deviceinfo);
 	dc1394camera_t** GetCameras();
 	unsigned int GetNumberOfCameras();
     dc1394operation_mode_t* GetBestOpMode();
@@ -162,7 +162,7 @@ private:
     dc1394_t* Context;
     dc1394camera_list_t* CameraList;
     dc1394camera_t** Cameras;
-    svlVideoCaptureSource::DeviceInfo* DeviceInfos;
+    svlFilterSourceVideoCapture::DeviceInfo* DeviceInfos;
     unsigned int NumberOfCameras;
     dc1394operation_mode_t* BestOpMode;
     dc1394speed_t* BestISOSpeed;
@@ -180,9 +180,9 @@ public:
 	~CDC1394Source();
 
 public:
-    svlVideoCaptureSource::PlatformType GetPlatformType();
+    svlFilterSourceVideoCapture::PlatformType GetPlatformType();
     int SetStreamCount(unsigned int numofstreams);
-	int GetDeviceList(svlVideoCaptureSource::DeviceInfo **deviceinfo);
+	int GetDeviceList(svlFilterSourceVideoCapture::DeviceInfo **deviceinfo);
 	int Open();
 	void Close();
 	int Start();
@@ -193,13 +193,13 @@ public:
 	int GetWidth(unsigned int videoch = 0);
 	int GetHeight(unsigned int videoch = 0);
 
-    int GetFormatList(unsigned int deviceid, svlVideoCaptureSource::ImageFormat **formatlist);
-    int SetFormat(svlVideoCaptureSource::ImageFormat& format, unsigned int videoch = 0);
-    int GetFormat(svlVideoCaptureSource::ImageFormat& format, unsigned int videoch = 0);
-    int SetImageProperties(svlVideoCaptureSource::ImageProperties& properties, unsigned int videoch = 0);
-    int GetImageProperties(svlVideoCaptureSource::ImageProperties& properties, unsigned int videoch = 0);
-    int SetTrigger(svlVideoCaptureSource::ExternalTrigger & trigger, unsigned int videoch = 0);
-    int GetTrigger(svlVideoCaptureSource::ExternalTrigger & trigger, unsigned int videoch = 0);
+    int GetFormatList(unsigned int deviceid, svlFilterSourceVideoCapture::ImageFormat **formatlist);
+    int SetFormat(svlFilterSourceVideoCapture::ImageFormat& format, unsigned int videoch = 0);
+    int GetFormat(svlFilterSourceVideoCapture::ImageFormat& format, unsigned int videoch = 0);
+    int SetImageProperties(svlFilterSourceVideoCapture::ImageProperties& properties, unsigned int videoch = 0);
+    int GetImageProperties(svlFilterSourceVideoCapture::ImageProperties& properties, unsigned int videoch = 0);
+    int SetTrigger(svlFilterSourceVideoCapture::ExternalTrigger & trigger, unsigned int videoch = 0);
+    int GetTrigger(svlFilterSourceVideoCapture::ExternalTrigger & trigger, unsigned int videoch = 0);
 
 private:
     unsigned int NumOfStreams;
@@ -221,8 +221,8 @@ private:
     dc1394operation_mode_t* BestOpMode;
     dc1394speed_t* BestISOSpeed;
     int* DeviceID;
-    svlVideoCaptureSource::ImageFormat** Format;
-    svlVideoCaptureSource::ExternalTrigger* Trigger;
+    svlFilterSourceVideoCapture::ImageFormat** Format;
+    svlFilterSourceVideoCapture::ExternalTrigger* Trigger;
     int* Width;
     int* Height;
     unsigned int* ColorCoding;
@@ -232,10 +232,10 @@ private:
     int CaptureFrame(unsigned int videoch);
 
     void Release();
-    int GetModeFromFormat(unsigned int width, unsigned int height, svlVideoCaptureSource::PixelType colspc, unsigned int& mode);
-    int GetSupportedFrameratesForFormat(unsigned int devid, svlVideoCaptureSource::ImageFormat& format, double **fpslist, unsigned int& listsize);
+    int GetModeFromFormat(unsigned int width, unsigned int height, svlFilterSourceVideoCapture::PixelType colspc, unsigned int& mode);
+    int GetSupportedFrameratesForFormat(unsigned int devid, svlFilterSourceVideoCapture::ImageFormat& format, double **fpslist, unsigned int& listsize);
     int GetFramerateFromFPS(double fps, unsigned int& framerate);
-    int GetFormatFromMode(unsigned int mode, svlVideoCaptureSource::ImageFormat& format);
+    int GetFormatFromMode(unsigned int mode, svlFilterSourceVideoCapture::ImageFormat& format);
     void SwapRGBBuffer(unsigned char* buffer, const unsigned int numberofpixels);
 };
 

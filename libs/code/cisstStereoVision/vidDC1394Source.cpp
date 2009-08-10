@@ -42,7 +42,7 @@ using std::endl;
 
 #define DEFAULT_WIDTH           1024
 #define DEFAULT_HEIGHT          768
-#define DEFAULT_COLORSPACE      svlVideoCaptureSource::PixelYUV422
+#define DEFAULT_COLORSPACE      svlFilterSourceVideoCapture::PixelYUV422
 #define DEFAULT_FRAMERATE       30
 #define FRAME_BUFFER_SIZE       2
 #define MAX_VENDOR_LEN          32
@@ -64,14 +64,14 @@ dc1394_t* svlDC1394Context::GetContext()
     return Instance()->Context;
 }
 
-int svlDC1394Context::GetDeviceList(svlVideoCaptureSource::DeviceInfo **deviceinfo)
+int svlDC1394Context::GetDeviceList(svlFilterSourceVideoCapture::DeviceInfo **deviceinfo)
 {
     if (deviceinfo) {
         // Allocate memory for device info array
         // CALLER HAS TO FREE UP THIS ARRAY!!!
         if (NumberOfCameras > 0) {
-            deviceinfo[0] = new svlVideoCaptureSource::DeviceInfo[NumberOfCameras];
-            memcpy(deviceinfo[0], DeviceInfos, NumberOfCameras * sizeof(svlVideoCaptureSource::DeviceInfo));
+            deviceinfo[0] = new svlFilterSourceVideoCapture::DeviceInfo[NumberOfCameras];
+            memcpy(deviceinfo[0], DeviceInfos, NumberOfCameras * sizeof(svlFilterSourceVideoCapture::DeviceInfo));
         }
         else {
             deviceinfo[0] = 0;
@@ -121,7 +121,7 @@ void svlDC1394Context::Enumerate()
     int len;
     unsigned int i;
     char tempname[MAX_MODEL_LEN], tempvendor[MAX_MODEL_LEN];
-    svlVideoCaptureSource::DeviceInfo *tempinfo;
+    svlFilterSourceVideoCapture::DeviceInfo *tempinfo;
 
     // Get camera structures
     Cameras = new dc1394camera_t*[CameraList->num];
@@ -133,8 +133,8 @@ void svlDC1394Context::Enumerate()
 
     BestOpMode = new dc1394operation_mode_t[CameraList->num];
     BestISOSpeed = new dc1394speed_t[CameraList->num];
-    tempinfo = new svlVideoCaptureSource::DeviceInfo[CameraList->num];
-    memset(tempinfo, 0, CameraList->num * sizeof(svlVideoCaptureSource::DeviceInfo));
+    tempinfo = new svlFilterSourceVideoCapture::DeviceInfo[CameraList->num];
+    memset(tempinfo, 0, CameraList->num * sizeof(svlFilterSourceVideoCapture::DeviceInfo));
 
     NumberOfCameras = 0;
     for (i = 0; i < CameraList->num; i ++) {
@@ -176,7 +176,7 @@ void svlDC1394Context::Enumerate()
         else {
             sprintf(tempinfo[NumberOfCameras].name, "%s (%s) [1394A]", tempname, tempvendor);
         }
-        tempinfo[NumberOfCameras].platform = svlVideoCaptureSource::LinLibDC1394;
+        tempinfo[NumberOfCameras].platform = svlFilterSourceVideoCapture::LinLibDC1394;
         tempinfo[NumberOfCameras].inputcount = -1;
         tempinfo[NumberOfCameras].activeinput = -1;
         tempinfo[NumberOfCameras].testok = false;
@@ -185,8 +185,8 @@ void svlDC1394Context::Enumerate()
     }
 
     if (NumberOfCameras > 0) {
-        DeviceInfos = new svlVideoCaptureSource::DeviceInfo[NumberOfCameras];
-        memcpy(DeviceInfos, tempinfo, NumberOfCameras * sizeof(svlVideoCaptureSource::DeviceInfo));
+        DeviceInfos = new svlFilterSourceVideoCapture::DeviceInfo[NumberOfCameras];
+        memcpy(DeviceInfos, tempinfo, NumberOfCameras * sizeof(svlFilterSourceVideoCapture::DeviceInfo));
     }
 
     if (tempinfo) delete [] tempinfo;
@@ -378,9 +378,9 @@ CDC1394Source::~CDC1394Source()
     Release();
 }
 
-svlVideoCaptureSource::PlatformType CDC1394Source::GetPlatformType()
+svlFilterSourceVideoCapture::PlatformType CDC1394Source::GetPlatformType()
 {
-    return svlVideoCaptureSource::LinLibDC1394;
+    return svlFilterSourceVideoCapture::LinLibDC1394;
 }
 
 int CDC1394Source::SetStreamCount(unsigned int numofstreams)
@@ -397,8 +397,8 @@ int CDC1394Source::SetStreamCount(unsigned int numofstreams)
     CameraFDSet = new fd_set[NumOfStreams];
     CameraNFDS = new int[NumOfStreams];
     DeviceID = new int[NumOfStreams];
-    Format = new svlVideoCaptureSource::ImageFormat*[NumOfStreams];
-    Trigger = new svlVideoCaptureSource::ExternalTrigger[NumOfStreams];
+    Format = new svlFilterSourceVideoCapture::ImageFormat*[NumOfStreams];
+    Trigger = new svlFilterSourceVideoCapture::ExternalTrigger[NumOfStreams];
     Width = new int[NumOfStreams];
     Height = new int[NumOfStreams];
     ColorCoding = new unsigned int[NumOfStreams];
@@ -413,7 +413,7 @@ int CDC1394Source::SetStreamCount(unsigned int numofstreams)
         CameraNFDS[i] = 0;
         DeviceID[i] = -1;
         Format[i] = 0;
-        memset(&(Trigger[i]), 0, sizeof(svlVideoCaptureSource::ExternalTrigger));
+        memset(&(Trigger[i]), 0, sizeof(svlFilterSourceVideoCapture::ExternalTrigger));
         Width[i] = -1;
         Height[i] = -1;
         ColorCoding[i] = 0;
@@ -424,7 +424,7 @@ int CDC1394Source::SetStreamCount(unsigned int numofstreams)
     return SVL_OK;
 }
 
-int CDC1394Source::GetDeviceList(svlVideoCaptureSource::DeviceInfo **deviceinfo)
+int CDC1394Source::GetDeviceList(svlFilterSourceVideoCapture::DeviceInfo **deviceinfo)
 {
     svlDC1394Context* context = svlDC1394Context::Instance();
     Context = context->GetContext();
@@ -448,7 +448,7 @@ int CDC1394Source::Open()
     double fps;
     unsigned int i, j;
     unsigned int mode = 0, framerate = 0;
-    svlVideoCaptureSource::PixelType colorspace = svlVideoCaptureSource::PixelRGB8;
+    svlFilterSourceVideoCapture::PixelType colorspace = svlFilterSourceVideoCapture::PixelRGB8;
     dc1394video_modes_t modes;
     dc1394framerates_t framerates;
     bool found;
@@ -511,31 +511,31 @@ int CDC1394Source::Open()
         OutputBuffer[i] = new svlImageBuffer(Width[i], Height[i]);
 
         switch (colorspace) {
-            case svlVideoCaptureSource::PixelRGB8:
+            case svlFilterSourceVideoCapture::PixelRGB8:
                 ColorCoding[i] = DC1394_COLOR_CODING_RGB8;
             break;
 
-            case svlVideoCaptureSource::PixelYUV444:
+            case svlFilterSourceVideoCapture::PixelYUV444:
                 ColorCoding[i] = DC1394_COLOR_CODING_YUV444;
             break;
 
-            case svlVideoCaptureSource::PixelYUV422:
+            case svlFilterSourceVideoCapture::PixelYUV422:
                 ColorCoding[i] = DC1394_COLOR_CODING_YUV422;
             break;
 
-            case svlVideoCaptureSource::PixelYUV411:
+            case svlFilterSourceVideoCapture::PixelYUV411:
                 ColorCoding[i] = DC1394_COLOR_CODING_YUV411;
             break;
 
-            case svlVideoCaptureSource::PixelMONO8:
+            case svlFilterSourceVideoCapture::PixelMONO8:
                 ColorCoding[i] = DC1394_COLOR_CODING_MONO8;
             break;
 
-            case svlVideoCaptureSource::PixelMONO16:
+            case svlFilterSourceVideoCapture::PixelMONO16:
                 ColorCoding[i] = DC1394_COLOR_CODING_MONO16;
             break;
 
-            case svlVideoCaptureSource::PixelUnknown:
+            case svlFilterSourceVideoCapture::PixelUnknown:
             default:
                 ColorCoding[i] = DC1394_COLOR_CODING_MONO8;
         }
@@ -728,11 +728,11 @@ int CDC1394Source::Open()
         }
 
         // Setting defualt image properties
-        svlVideoCaptureSource::ImageProperties properties;
-        memset(&properties, 0, sizeof(svlVideoCaptureSource::ImageProperties));
-        properties.mask = svlVideoCaptureSource::propShutter & svlVideoCaptureSource::propGain &
-                          svlVideoCaptureSource::propWhiteBalance & svlVideoCaptureSource::propBrightness &
-                          svlVideoCaptureSource::propGamma & svlVideoCaptureSource::propSaturation;
+        svlFilterSourceVideoCapture::ImageProperties properties;
+        memset(&properties, 0, sizeof(svlFilterSourceVideoCapture::ImageProperties));
+        properties.mask = svlFilterSourceVideoCapture::propShutter & svlFilterSourceVideoCapture::propGain &
+                          svlFilterSourceVideoCapture::propWhiteBalance & svlFilterSourceVideoCapture::propBrightness &
+                          svlFilterSourceVideoCapture::propGamma & svlFilterSourceVideoCapture::propSaturation;
         SetImageProperties(properties, i);
     }
 
@@ -903,7 +903,7 @@ int CDC1394Source::SetDevice(int devid, int CMN_UNUSED(inid), unsigned int video
         delete Format[videoch];
         Format[videoch] = 0;
     }
-    memset(&(Trigger[videoch]), 0, sizeof(svlVideoCaptureSource::ExternalTrigger));
+    memset(&(Trigger[videoch]), 0, sizeof(svlFilterSourceVideoCapture::ExternalTrigger));
 
     return SVL_OK;
 }
@@ -1002,7 +1002,7 @@ int CDC1394Source::CaptureFrame(unsigned int videoch)
     return SVL_OK;
 }
 
-int CDC1394Source::GetFormatList(unsigned int deviceid, svlVideoCaptureSource::ImageFormat **formatlist)
+int CDC1394Source::GetFormatList(unsigned int deviceid, svlFilterSourceVideoCapture::ImageFormat **formatlist)
 {
     if (deviceid >= NumberOfCameras || formatlist == 0 || Cameras == 0) return SVL_FAIL;
 
@@ -1012,7 +1012,7 @@ int CDC1394Source::GetFormatList(unsigned int deviceid, svlVideoCaptureSource::I
     // Allocate memory for format array
     // CALLER HAS TO FREE UP THIS ARRAY!!!
     unsigned int listsize = modes.num, validlistsize = modes.num;
-    svlVideoCaptureSource::ImageFormat *templist = new svlVideoCaptureSource::ImageFormat[listsize];
+    svlFilterSourceVideoCapture::ImageFormat *templist = new svlFilterSourceVideoCapture::ImageFormat[listsize];
     double *fpslist;
     unsigned int fpslistsize, i, j;
 
@@ -1020,7 +1020,7 @@ int CDC1394Source::GetFormatList(unsigned int deviceid, svlVideoCaptureSource::I
         if (GetFormatFromMode(modes.modes[i], templist[i]) != SVL_OK) {
             templist[i].width = -1;
             templist[i].height = -1;
-            templist[i].colorspace = svlVideoCaptureSource::PixelUnknown;
+            templist[i].colorspace = svlFilterSourceVideoCapture::PixelUnknown;
             validlistsize --;
             continue;
         }
@@ -1034,11 +1034,11 @@ int CDC1394Source::GetFormatList(unsigned int deviceid, svlVideoCaptureSource::I
         delete [] fpslist;
     }
 
-    formatlist[0] = new svlVideoCaptureSource::ImageFormat[validlistsize];
+    formatlist[0] = new svlFilterSourceVideoCapture::ImageFormat[validlistsize];
     for (i = 0, j = 0; i < listsize; i ++) {
         if (templist[i].width > 0 && templist[i].height > 0 &&
-            templist[i].colorspace != svlVideoCaptureSource::PixelUnknown) {
-            memcpy(formatlist[0] + j, templist + i, sizeof(svlVideoCaptureSource::ImageFormat));
+            templist[i].colorspace != svlFilterSourceVideoCapture::PixelUnknown) {
+            memcpy(formatlist[0] + j, templist + i, sizeof(svlFilterSourceVideoCapture::ImageFormat));
             j ++;
         }
     }
@@ -1048,26 +1048,26 @@ int CDC1394Source::GetFormatList(unsigned int deviceid, svlVideoCaptureSource::I
     return validlistsize;
 }
 
-int CDC1394Source::SetFormat(svlVideoCaptureSource::ImageFormat& format, unsigned int videoch)
+int CDC1394Source::SetFormat(svlFilterSourceVideoCapture::ImageFormat& format, unsigned int videoch)
 {
     if (videoch >= NumOfStreams || Initialized) return SVL_FAIL;
 
-    if (Format[videoch] == 0) Format[videoch] = new svlVideoCaptureSource::ImageFormat;
-    memcpy(Format[videoch], &format, sizeof(svlVideoCaptureSource::ImageFormat));
+    if (Format[videoch] == 0) Format[videoch] = new svlFilterSourceVideoCapture::ImageFormat;
+    memcpy(Format[videoch], &format, sizeof(svlFilterSourceVideoCapture::ImageFormat));
 
     return SVL_OK;
 }
 
-int CDC1394Source::GetFormat(svlVideoCaptureSource::ImageFormat& format, unsigned int videoch)
+int CDC1394Source::GetFormat(svlFilterSourceVideoCapture::ImageFormat& format, unsigned int videoch)
 {
     if (videoch >= NumOfStreams || Initialized || Format[videoch] == 0) return SVL_FAIL;
 
-    memcpy(&format, Format[videoch], sizeof(svlVideoCaptureSource::ImageFormat));
+    memcpy(&format, Format[videoch], sizeof(svlFilterSourceVideoCapture::ImageFormat));
 
     return SVL_OK;
 }
 
-int CDC1394Source::SetImageProperties(svlVideoCaptureSource::ImageProperties& properties, unsigned int videoch)
+int CDC1394Source::SetImageProperties(svlFilterSourceVideoCapture::ImageProperties& properties, unsigned int videoch)
 {
     if (videoch >= NumOfStreams) return SVL_FAIL;
 
@@ -1077,38 +1077,38 @@ int CDC1394Source::SetImageProperties(svlVideoCaptureSource::ImageProperties& pr
 
     if (Initialized) {
         // Setting modes and values
-        if (properties.mask & svlVideoCaptureSource::propShutter) {
-            if (properties.manual & svlVideoCaptureSource::propShutter) mode = DC1394_FEATURE_MODE_MANUAL;
+        if (properties.mask & svlFilterSourceVideoCapture::propShutter) {
+            if (properties.manual & svlFilterSourceVideoCapture::propShutter) mode = DC1394_FEATURE_MODE_MANUAL;
             else mode = DC1394_FEATURE_MODE_AUTO;
             dc1394_feature_set_mode(Cameras[DeviceID[videoch]], DC1394_FEATURE_SHUTTER, mode);
             dc1394_feature_set_value(Cameras[DeviceID[videoch]], DC1394_FEATURE_SHUTTER, properties.shutter);
         }
-        if (properties.mask & svlVideoCaptureSource::propGain) {
-            if (properties.manual & svlVideoCaptureSource::propGain) mode = DC1394_FEATURE_MODE_MANUAL;
+        if (properties.mask & svlFilterSourceVideoCapture::propGain) {
+            if (properties.manual & svlFilterSourceVideoCapture::propGain) mode = DC1394_FEATURE_MODE_MANUAL;
             else mode = DC1394_FEATURE_MODE_AUTO;
             dc1394_feature_set_mode(Cameras[DeviceID[videoch]], DC1394_FEATURE_GAIN, mode);
             dc1394_feature_set_value(Cameras[DeviceID[videoch]], DC1394_FEATURE_GAIN, properties.gain);
         }
-        if (properties.mask & svlVideoCaptureSource::propWhiteBalance) {
-            if (properties.manual & svlVideoCaptureSource::propWhiteBalance) mode = DC1394_FEATURE_MODE_MANUAL;
+        if (properties.mask & svlFilterSourceVideoCapture::propWhiteBalance) {
+            if (properties.manual & svlFilterSourceVideoCapture::propWhiteBalance) mode = DC1394_FEATURE_MODE_MANUAL;
             else mode = DC1394_FEATURE_MODE_AUTO;
             dc1394_feature_set_mode(Cameras[DeviceID[videoch]], DC1394_FEATURE_WHITE_BALANCE, mode);
             dc1394_feature_whitebalance_set_value(Cameras[DeviceID[videoch]], properties.wb_u_b, properties.wb_v_r);
         }
-        if (properties.mask & svlVideoCaptureSource::propGamma) {
-            if (properties.manual & svlVideoCaptureSource::propGamma) mode = DC1394_FEATURE_MODE_MANUAL;
+        if (properties.mask & svlFilterSourceVideoCapture::propGamma) {
+            if (properties.manual & svlFilterSourceVideoCapture::propGamma) mode = DC1394_FEATURE_MODE_MANUAL;
             else mode = DC1394_FEATURE_MODE_AUTO;
             dc1394_feature_set_mode(Cameras[DeviceID[videoch]], DC1394_FEATURE_GAMMA, mode);
             dc1394_feature_set_value(Cameras[DeviceID[videoch]], DC1394_FEATURE_GAMMA, properties.gamma);
         }
-        if (properties.mask & svlVideoCaptureSource::propBrightness) {
-            if (properties.manual & svlVideoCaptureSource::propBrightness) mode = DC1394_FEATURE_MODE_MANUAL;
+        if (properties.mask & svlFilterSourceVideoCapture::propBrightness) {
+            if (properties.manual & svlFilterSourceVideoCapture::propBrightness) mode = DC1394_FEATURE_MODE_MANUAL;
             else mode = DC1394_FEATURE_MODE_AUTO;
             dc1394_feature_set_mode(Cameras[DeviceID[videoch]], DC1394_FEATURE_BRIGHTNESS, mode);
             dc1394_feature_set_value(Cameras[DeviceID[videoch]], DC1394_FEATURE_BRIGHTNESS, properties.brightness);
         }
-        if (properties.mask & svlVideoCaptureSource::propSaturation) {
-            if (properties.manual & svlVideoCaptureSource::propSaturation) mode = DC1394_FEATURE_MODE_MANUAL;
+        if (properties.mask & svlFilterSourceVideoCapture::propSaturation) {
+            if (properties.manual & svlFilterSourceVideoCapture::propSaturation) mode = DC1394_FEATURE_MODE_MANUAL;
             else mode = DC1394_FEATURE_MODE_AUTO;
             dc1394_feature_set_mode(Cameras[DeviceID[videoch]], DC1394_FEATURE_SATURATION, mode);
             dc1394_feature_set_value(Cameras[DeviceID[videoch]], DC1394_FEATURE_SATURATION, properties.saturation);
@@ -1120,33 +1120,33 @@ int CDC1394Source::SetImageProperties(svlVideoCaptureSource::ImageProperties& pr
     return SVL_OK;
 }
 
-int CDC1394Source::GetImageProperties(svlVideoCaptureSource::ImageProperties& properties, unsigned int videoch)
+int CDC1394Source::GetImageProperties(svlFilterSourceVideoCapture::ImageProperties& properties, unsigned int videoch)
 {
     if (videoch >= NumOfStreams) return SVL_FAIL;
     if (!Initialized) return SVL_FAIL;
 
     dc1394feature_mode_t mode;
 
-    memset(&properties, 0, sizeof(svlVideoCaptureSource::ImageProperties));
-    properties.mask = svlVideoCaptureSource::propShutter & svlVideoCaptureSource::propGain &
-                      svlVideoCaptureSource::propWhiteBalance & svlVideoCaptureSource::propBrightness &
-                      svlVideoCaptureSource::propGamma & svlVideoCaptureSource::propSaturation;
+    memset(&properties, 0, sizeof(svlFilterSourceVideoCapture::ImageProperties));
+    properties.mask = svlFilterSourceVideoCapture::propShutter & svlFilterSourceVideoCapture::propGain &
+                      svlFilterSourceVideoCapture::propWhiteBalance & svlFilterSourceVideoCapture::propBrightness &
+                      svlFilterSourceVideoCapture::propGamma & svlFilterSourceVideoCapture::propSaturation;
 
     Mutex.Lock();
 
     // Getting AUTO/MANUAL modes
     dc1394_feature_get_mode(Cameras[DeviceID[videoch]], DC1394_FEATURE_SHUTTER, &mode);
-    if (mode == DC1394_FEATURE_MODE_MANUAL) properties.manual += svlVideoCaptureSource::propShutter;
+    if (mode == DC1394_FEATURE_MODE_MANUAL) properties.manual += svlFilterSourceVideoCapture::propShutter;
     dc1394_feature_get_mode(Cameras[DeviceID[videoch]], DC1394_FEATURE_GAIN, &mode);
-    if (mode == DC1394_FEATURE_MODE_MANUAL) properties.manual += svlVideoCaptureSource::propGain;
+    if (mode == DC1394_FEATURE_MODE_MANUAL) properties.manual += svlFilterSourceVideoCapture::propGain;
     dc1394_feature_get_mode(Cameras[DeviceID[videoch]], DC1394_FEATURE_WHITE_BALANCE, &mode);
-    if (mode == DC1394_FEATURE_MODE_MANUAL) properties.manual += svlVideoCaptureSource::propWhiteBalance;
+    if (mode == DC1394_FEATURE_MODE_MANUAL) properties.manual += svlFilterSourceVideoCapture::propWhiteBalance;
     dc1394_feature_get_mode(Cameras[DeviceID[videoch]], DC1394_FEATURE_GAMMA, &mode);
-    if (mode == DC1394_FEATURE_MODE_MANUAL) properties.manual += svlVideoCaptureSource::propGamma;
+    if (mode == DC1394_FEATURE_MODE_MANUAL) properties.manual += svlFilterSourceVideoCapture::propGamma;
     dc1394_feature_get_mode(Cameras[DeviceID[videoch]], DC1394_FEATURE_BRIGHTNESS, &mode);
-    if (mode == DC1394_FEATURE_MODE_MANUAL) properties.manual += svlVideoCaptureSource::propBrightness;
+    if (mode == DC1394_FEATURE_MODE_MANUAL) properties.manual += svlFilterSourceVideoCapture::propBrightness;
     dc1394_feature_get_mode(Cameras[DeviceID[videoch]], DC1394_FEATURE_SATURATION, &mode);
-    if (mode == DC1394_FEATURE_MODE_MANUAL) properties.manual += svlVideoCaptureSource::propSaturation;
+    if (mode == DC1394_FEATURE_MODE_MANUAL) properties.manual += svlFilterSourceVideoCapture::propSaturation;
 
     // Getting property values
     dc1394_feature_get_value(Cameras[DeviceID[videoch]], DC1394_FEATURE_SHUTTER, &(properties.shutter));
@@ -1161,20 +1161,20 @@ int CDC1394Source::GetImageProperties(svlVideoCaptureSource::ImageProperties& pr
     return SVL_OK;
 }
 
-int CDC1394Source::SetTrigger(svlVideoCaptureSource::ExternalTrigger & trigger, unsigned int videoch)
+int CDC1394Source::SetTrigger(svlFilterSourceVideoCapture::ExternalTrigger & trigger, unsigned int videoch)
 {
     if (videoch >= NumOfStreams || Initialized) return SVL_FAIL;
 
-    memcpy(&(Trigger[videoch]), &trigger, sizeof(svlVideoCaptureSource::ExternalTrigger));
+    memcpy(&(Trigger[videoch]), &trigger, sizeof(svlFilterSourceVideoCapture::ExternalTrigger));
 
     return SVL_OK;
 }
 
-int CDC1394Source::GetTrigger(svlVideoCaptureSource::ExternalTrigger & trigger, unsigned int videoch)
+int CDC1394Source::GetTrigger(svlFilterSourceVideoCapture::ExternalTrigger & trigger, unsigned int videoch)
 {
     if (videoch >= NumOfStreams) return SVL_FAIL;
 
-    memcpy(&trigger, &(Trigger[videoch]), sizeof(svlVideoCaptureSource::ExternalTrigger));
+    memcpy(&trigger, &(Trigger[videoch]), sizeof(svlFilterSourceVideoCapture::ExternalTrigger));
 
     return SVL_OK;
 }
@@ -1221,140 +1221,140 @@ void CDC1394Source::Release()
     OutputBuffer = 0;
 }
 
-int CDC1394Source::GetModeFromFormat(unsigned int width, unsigned int height, svlVideoCaptureSource::PixelType colspc, unsigned int& mode)
+int CDC1394Source::GetModeFromFormat(unsigned int width, unsigned int height, svlFilterSourceVideoCapture::PixelType colspc, unsigned int& mode)
 {
     if (width == 160 && height == 120) {
-        if (colspc == svlVideoCaptureSource::PixelYUV444) mode = DC1394_VIDEO_MODE_160x120_YUV444;
+        if (colspc == svlFilterSourceVideoCapture::PixelYUV444) mode = DC1394_VIDEO_MODE_160x120_YUV444;
         else return SVL_FAIL;
     }
     else if (width == 320 && height == 240) {
-        if (colspc == svlVideoCaptureSource::PixelYUV422) mode = DC1394_VIDEO_MODE_320x240_YUV422;
+        if (colspc == svlFilterSourceVideoCapture::PixelYUV422) mode = DC1394_VIDEO_MODE_320x240_YUV422;
         else return SVL_FAIL;
     }
     else if (width == 640 && height == 480) {
         switch (colspc) {
-            case svlVideoCaptureSource::PixelYUV411:
+            case svlFilterSourceVideoCapture::PixelYUV411:
                 mode = DC1394_VIDEO_MODE_640x480_YUV411;
             break;
 
-            case svlVideoCaptureSource::PixelYUV422:
+            case svlFilterSourceVideoCapture::PixelYUV422:
                 mode = DC1394_VIDEO_MODE_640x480_YUV422;
             break;
 
-            case svlVideoCaptureSource::PixelRGB8:
+            case svlFilterSourceVideoCapture::PixelRGB8:
                 mode = DC1394_VIDEO_MODE_640x480_RGB8;
             break;
 
-            case svlVideoCaptureSource::PixelMONO8:
+            case svlFilterSourceVideoCapture::PixelMONO8:
                 mode = DC1394_VIDEO_MODE_640x480_MONO8;
             break;
 
-            case svlVideoCaptureSource::PixelMONO16:
+            case svlFilterSourceVideoCapture::PixelMONO16:
                 mode = DC1394_VIDEO_MODE_640x480_MONO16;
             break;
 
-            case svlVideoCaptureSource::PixelYUV444:
-            case svlVideoCaptureSource::PixelUnknown:
+            case svlFilterSourceVideoCapture::PixelYUV444:
+            case svlFilterSourceVideoCapture::PixelUnknown:
             default:
                 return SVL_FAIL;
         }
     }
     else if (width == 800 && height == 600) {
         switch (colspc) {
-            case svlVideoCaptureSource::PixelYUV422:
+            case svlFilterSourceVideoCapture::PixelYUV422:
                 mode = DC1394_VIDEO_MODE_800x600_YUV422;
             break;
 
-            case svlVideoCaptureSource::PixelRGB8:
+            case svlFilterSourceVideoCapture::PixelRGB8:
                 mode = DC1394_VIDEO_MODE_800x600_RGB8;
             break;
 
-            case svlVideoCaptureSource::PixelMONO8:
+            case svlFilterSourceVideoCapture::PixelMONO8:
                 mode = DC1394_VIDEO_MODE_800x600_MONO8;
             break;
 
-            case svlVideoCaptureSource::PixelMONO16:
+            case svlFilterSourceVideoCapture::PixelMONO16:
                 mode = DC1394_VIDEO_MODE_800x600_MONO16;
             break;
 
-            case svlVideoCaptureSource::PixelYUV411:
-            case svlVideoCaptureSource::PixelYUV444:
-            case svlVideoCaptureSource::PixelUnknown:
+            case svlFilterSourceVideoCapture::PixelYUV411:
+            case svlFilterSourceVideoCapture::PixelYUV444:
+            case svlFilterSourceVideoCapture::PixelUnknown:
             default:
                 return SVL_FAIL;
         }
     }
     else if (width == 1024 && height == 768) {
         switch (colspc) {
-            case svlVideoCaptureSource::PixelYUV422:
+            case svlFilterSourceVideoCapture::PixelYUV422:
                 mode = DC1394_VIDEO_MODE_1024x768_YUV422;
             break;
 
-            case svlVideoCaptureSource::PixelRGB8:
+            case svlFilterSourceVideoCapture::PixelRGB8:
                 mode = DC1394_VIDEO_MODE_1024x768_RGB8;
             break;
 
-            case svlVideoCaptureSource::PixelMONO8:
+            case svlFilterSourceVideoCapture::PixelMONO8:
                 mode = DC1394_VIDEO_MODE_1024x768_MONO8;
             break;
 
-            case svlVideoCaptureSource::PixelMONO16:
+            case svlFilterSourceVideoCapture::PixelMONO16:
                 mode = DC1394_VIDEO_MODE_1024x768_MONO16;
             break;
 
-            case svlVideoCaptureSource::PixelYUV411:
-            case svlVideoCaptureSource::PixelYUV444:
-            case svlVideoCaptureSource::PixelUnknown:
+            case svlFilterSourceVideoCapture::PixelYUV411:
+            case svlFilterSourceVideoCapture::PixelYUV444:
+            case svlFilterSourceVideoCapture::PixelUnknown:
             default:
                 return SVL_FAIL;
         }
     }
     else if (width == 1280 && height == 960) {
         switch (colspc) {
-            case svlVideoCaptureSource::PixelYUV422:
+            case svlFilterSourceVideoCapture::PixelYUV422:
                 mode = DC1394_VIDEO_MODE_1280x960_YUV422;
             break;
 
-            case svlVideoCaptureSource::PixelRGB8:
+            case svlFilterSourceVideoCapture::PixelRGB8:
                 mode = DC1394_VIDEO_MODE_1280x960_RGB8;
             break;
 
-            case svlVideoCaptureSource::PixelMONO8:
+            case svlFilterSourceVideoCapture::PixelMONO8:
                 mode = DC1394_VIDEO_MODE_1280x960_MONO8;
             break;
 
-            case svlVideoCaptureSource::PixelMONO16:
+            case svlFilterSourceVideoCapture::PixelMONO16:
                 mode = DC1394_VIDEO_MODE_1280x960_MONO16;
             break;
 
-            case svlVideoCaptureSource::PixelYUV411:
-            case svlVideoCaptureSource::PixelYUV444:
-            case svlVideoCaptureSource::PixelUnknown:
+            case svlFilterSourceVideoCapture::PixelYUV411:
+            case svlFilterSourceVideoCapture::PixelYUV444:
+            case svlFilterSourceVideoCapture::PixelUnknown:
             default:
                 return SVL_FAIL;
         }
     }
     else if (width == 1600 && height == 1200) {
         switch (colspc) {
-            case svlVideoCaptureSource::PixelYUV422:
+            case svlFilterSourceVideoCapture::PixelYUV422:
                 mode = DC1394_VIDEO_MODE_1600x1200_YUV422;
             break;
 
-            case svlVideoCaptureSource::PixelRGB8:
+            case svlFilterSourceVideoCapture::PixelRGB8:
                 mode = DC1394_VIDEO_MODE_1600x1200_RGB8;
             break;
 
-            case svlVideoCaptureSource::PixelMONO8:
+            case svlFilterSourceVideoCapture::PixelMONO8:
                 mode = DC1394_VIDEO_MODE_1600x1200_MONO8;
             break;
 
-            case svlVideoCaptureSource::PixelMONO16:
+            case svlFilterSourceVideoCapture::PixelMONO16:
                 mode = DC1394_VIDEO_MODE_1600x1200_MONO16;
             break;
 
-            case svlVideoCaptureSource::PixelYUV411:
-            case svlVideoCaptureSource::PixelYUV444:
-            case svlVideoCaptureSource::PixelUnknown:
+            case svlFilterSourceVideoCapture::PixelYUV411:
+            case svlFilterSourceVideoCapture::PixelYUV444:
+            case svlFilterSourceVideoCapture::PixelUnknown:
             default:
                 return SVL_FAIL;
         }
@@ -1364,7 +1364,7 @@ int CDC1394Source::GetModeFromFormat(unsigned int width, unsigned int height, sv
     return SVL_OK;
 }
 
-int CDC1394Source::GetSupportedFrameratesForFormat(unsigned int devid, svlVideoCaptureSource::ImageFormat& format, double **fpslist, unsigned int& listsize)
+int CDC1394Source::GetSupportedFrameratesForFormat(unsigned int devid, svlFilterSourceVideoCapture::ImageFormat& format, double **fpslist, unsigned int& listsize)
 {
     if (fpslist == 0 || Cameras == 0 || devid >= NumberOfCameras) return SVL_FAIL;
 
@@ -1448,145 +1448,145 @@ int CDC1394Source::GetFramerateFromFPS(double fps, unsigned int& framerate)
     return SVL_OK;
 }
 
-int CDC1394Source::GetFormatFromMode(unsigned int mode, svlVideoCaptureSource::ImageFormat& format)
+int CDC1394Source::GetFormatFromMode(unsigned int mode, svlFilterSourceVideoCapture::ImageFormat& format)
 {
     switch (mode) {
         case DC1394_VIDEO_MODE_160x120_YUV444:
             format.width = 160;
             format.height = 120;
-            format.colorspace = svlVideoCaptureSource::PixelYUV444;
+            format.colorspace = svlFilterSourceVideoCapture::PixelYUV444;
         break;
 
         case DC1394_VIDEO_MODE_320x240_YUV422:
             format.width = 320;
             format.height = 240;
-            format.colorspace = svlVideoCaptureSource::PixelYUV422;
+            format.colorspace = svlFilterSourceVideoCapture::PixelYUV422;
         break;
 
         case DC1394_VIDEO_MODE_640x480_YUV411:
             format.width = 640;
             format.height = 480;
-            format.colorspace = svlVideoCaptureSource::PixelYUV411;
+            format.colorspace = svlFilterSourceVideoCapture::PixelYUV411;
         break;
 
         case DC1394_VIDEO_MODE_640x480_YUV422:
             format.width = 640;
             format.height = 480;
-            format.colorspace = svlVideoCaptureSource::PixelYUV422;
+            format.colorspace = svlFilterSourceVideoCapture::PixelYUV422;
         break;
 
         case DC1394_VIDEO_MODE_640x480_RGB8:
             format.width = 640;
             format.height = 480;
-            format.colorspace = svlVideoCaptureSource::PixelRGB8;
+            format.colorspace = svlFilterSourceVideoCapture::PixelRGB8;
         break;
 
         case DC1394_VIDEO_MODE_640x480_MONO8:
             format.width = 640;
             format.height = 480;
-            format.colorspace = svlVideoCaptureSource::PixelMONO8;
+            format.colorspace = svlFilterSourceVideoCapture::PixelMONO8;
         break;
 
         case DC1394_VIDEO_MODE_640x480_MONO16:
             format.width = 640;
             format.height = 480;
-            format.colorspace = svlVideoCaptureSource::PixelMONO16;
+            format.colorspace = svlFilterSourceVideoCapture::PixelMONO16;
         break;
 
         case DC1394_VIDEO_MODE_800x600_YUV422:
             format.width = 800;
             format.height = 600;
-            format.colorspace = svlVideoCaptureSource::PixelYUV422;
+            format.colorspace = svlFilterSourceVideoCapture::PixelYUV422;
         break;
 
         case DC1394_VIDEO_MODE_800x600_RGB8:
             format.width = 800;
             format.height = 600;
-            format.colorspace = svlVideoCaptureSource::PixelRGB8;
+            format.colorspace = svlFilterSourceVideoCapture::PixelRGB8;
         break;
 
         case DC1394_VIDEO_MODE_800x600_MONO8:
             format.width = 800;
             format.height = 600;
-            format.colorspace = svlVideoCaptureSource::PixelMONO8;
+            format.colorspace = svlFilterSourceVideoCapture::PixelMONO8;
         break;
 
         case DC1394_VIDEO_MODE_1024x768_YUV422:
             format.width = 1024;
             format.height = 768;
-            format.colorspace = svlVideoCaptureSource::PixelYUV422;
+            format.colorspace = svlFilterSourceVideoCapture::PixelYUV422;
         break;
 
         case DC1394_VIDEO_MODE_1024x768_RGB8:
             format.width = 1024;
             format.height = 768;
-            format.colorspace = svlVideoCaptureSource::PixelRGB8;
+            format.colorspace = svlFilterSourceVideoCapture::PixelRGB8;
         break;
 
         case DC1394_VIDEO_MODE_1024x768_MONO8:
             format.width = 1024;
             format.height = 768;
-            format.colorspace = svlVideoCaptureSource::PixelMONO8;
+            format.colorspace = svlFilterSourceVideoCapture::PixelMONO8;
         break;
 
         case DC1394_VIDEO_MODE_800x600_MONO16:
             format.width = 800;
             format.height = 600;
-            format.colorspace = svlVideoCaptureSource::PixelMONO16;
+            format.colorspace = svlFilterSourceVideoCapture::PixelMONO16;
         break;
 
         case DC1394_VIDEO_MODE_1024x768_MONO16:
             format.width = 1024;
             format.height = 768;
-            format.colorspace = svlVideoCaptureSource::PixelMONO16;
+            format.colorspace = svlFilterSourceVideoCapture::PixelMONO16;
         break;
 
         case DC1394_VIDEO_MODE_1280x960_YUV422:
             format.width = 1280;
             format.height = 960;
-            format.colorspace = svlVideoCaptureSource::PixelYUV422;
+            format.colorspace = svlFilterSourceVideoCapture::PixelYUV422;
         break;
 
         case DC1394_VIDEO_MODE_1280x960_RGB8:
             format.width = 1280;
             format.height = 960;
-            format.colorspace = svlVideoCaptureSource::PixelRGB8;
+            format.colorspace = svlFilterSourceVideoCapture::PixelRGB8;
         break;
 
         case DC1394_VIDEO_MODE_1280x960_MONO8:
             format.width = 1280;
             format.height = 960;
-            format.colorspace = svlVideoCaptureSource::PixelMONO8;
+            format.colorspace = svlFilterSourceVideoCapture::PixelMONO8;
         break;
 
         case DC1394_VIDEO_MODE_1600x1200_YUV422:
             format.width = 1600;
             format.height = 1200;
-            format.colorspace = svlVideoCaptureSource::PixelYUV422;
+            format.colorspace = svlFilterSourceVideoCapture::PixelYUV422;
         break;
 
         case DC1394_VIDEO_MODE_1600x1200_RGB8:
             format.width = 1600;
             format.height = 1200;
-            format.colorspace = svlVideoCaptureSource::PixelRGB8;
+            format.colorspace = svlFilterSourceVideoCapture::PixelRGB8;
         break;
 
         case DC1394_VIDEO_MODE_1600x1200_MONO8:
             format.width = 1600;
             format.height = 1200;
-            format.colorspace = svlVideoCaptureSource::PixelMONO8;
+            format.colorspace = svlFilterSourceVideoCapture::PixelMONO8;
         break;
 
         case DC1394_VIDEO_MODE_1280x960_MONO16:
             format.width = 1280;
             format.height = 960;
-            format.colorspace = svlVideoCaptureSource::PixelMONO16;
+            format.colorspace = svlFilterSourceVideoCapture::PixelMONO16;
         break;
 
         case DC1394_VIDEO_MODE_1600x1200_MONO16:
             format.width = 1600;
             format.height = 1200;
-            format.colorspace = svlVideoCaptureSource::PixelMONO16;
+            format.colorspace = svlFilterSourceVideoCapture::PixelMONO16;
         break;
 
         default:

@@ -182,6 +182,7 @@ int svlFilterVideoFileWriterAVI::DialogCodec()
     CVfWAvi tavi;
     if (tavi.ShowCompressionDialog()) {
         tavi.GetCompressOptions(reinterpret_cast<AVICOMPRESSOPTIONS*>(CompressOptions)[0]);
+        tavi.GetCompressorName(EncoderName);
         return SVL_OK;
     }
 
@@ -267,6 +268,13 @@ int svlFilterVideoFileWriterAVI::SaveCodecSettings(const std::string filepath)
         if (writelen < static_cast<int>(uivalue)) goto labError;
     }
 
+    // Write "compressor name"
+    char codecname[64];
+    memset(codecname, 0, 64);
+    memcpy(codecname, EncoderName.c_str(), std::max(63u, EncoderName.length()));
+    writelen = static_cast<int>(fwrite(codecname, 1, 64, fp));
+    if (writelen < 64) goto labError;
+
     ret = SVL_OK;
 
 labError:
@@ -315,6 +323,13 @@ int svlFilterVideoFileWriterAVI::LoadCodecSettings(const std::string filepath)
         tco->cbParms = 0;
         tco->lpParms = 0;
     }
+
+    // Read "compressor name"
+    char codecname[64];
+    readlen = static_cast<int>(fread(codecname, 1, 64, fp));
+    if (readlen < 64) goto labError;
+    codecname[63] = 0;
+    EncoderName = codecname;
 
     ret = SVL_OK;
 
