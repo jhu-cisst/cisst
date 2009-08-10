@@ -23,6 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _vidDirectShowInputSelector_h
 #define _vidDirectShowInputSelector_h
 
+/*
 // dirty hack, should be activated based on SDK version
 // see http://social.msdn.microsoft.com/Forums/en-US/windowssdk/thread/ed097d2c-3d68-4f48-8448-277eaaf68252/
 // can also search google for "missing dxtrans.h" for more info
@@ -31,11 +32,10 @@ http://www.cisst.org/cisst/license.txt.
 #define __IDxtAlphaSetter_INTERFACE_DEFINED__
 #define __IDxtJpeg_INTERFACE_DEFINED__
 #define __IDxtKey_INTERFACE_DEFINED__
+*/
+//#include <qedit.h>
 
-#include <qedit.h>
 #include "dshow.h"
-#include "qedit.h"
-
 #include <list>
 
 
