@@ -48,6 +48,11 @@ public:                                                                      \
         className::DeSerializeRaw(inputStream);                              \
     }                                                                        \
 };                                                                           \
+inline std::ostream & operator << (std::ostream & output,                    \
+                                   const newName & object) {                 \
+    object.ToStream(output);                                                 \
+    return output;                                                           \
+}                                                                            \
 CMN_DECLARE_SERVICES_INSTANTIATION(newName)
 
 
