@@ -271,7 +271,7 @@ int svlFilterVideoFileWriterAVI::SaveCodecSettings(const std::string filepath)
     // Write "compressor name"
     char codecname[64];
     memset(codecname, 0, 64);
-    memcpy(codecname, EncoderName.c_str(), std::max(63u, EncoderName.length()));
+    memcpy(codecname, EncoderName.c_str(), std::max(static_cast<std::string::size_type>(63), EncoderName.length()));
     writelen = static_cast<int>(fwrite(codecname, 1, 64, fp));
     if (writelen < 64) goto labError;
 
