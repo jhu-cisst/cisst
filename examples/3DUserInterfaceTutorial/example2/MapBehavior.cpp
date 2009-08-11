@@ -235,6 +235,7 @@ bool MapBehavior::RunForeground()
     if (this->Manager->MastersAsMice() != this->PreviousMaM) {
         this->PreviousMaM = this->Manager->MastersAsMice();
         this->VisibleList->Show();
+        this->MarkerList->Show();
     }
 
     // detect transition, should that be handled as an event?
@@ -242,23 +243,24 @@ bool MapBehavior::RunForeground()
     if (this->State != this->PreviousState) {
         this->PreviousState = this->State;
         this->VisibleList->Show();
+        this->MarkerList->Show();
     }
     // running in foreground GUI mode
     prmPositionCartesianGet position;
 
     // compute offset
-    this->GetPrimaryMasterPosition(position);
-    if (this->Following) {
-        if (this->Transition)
-        {
-            this->PreviousCursorPosition.Assign(position.Position().Translation());
-            this->Transition = false;
-        }
-        vctDouble3 deltaCursor;
-        deltaCursor.DifferenceOf(position.Position().Translation(),
-                                 this->PreviousCursorPosition);
-        this->Offset.Add(deltaCursor);
-    }
+//     this->GetPrimaryMasterPosition(position);
+//     if (this->Following) {
+//         if (this->Transition)
+//         {
+//             this->PreviousCursorPosition.Assign(position.Position().Translation());
+//             this->Transition = false;
+//         }
+//         vctDouble3 deltaCursor;
+//         deltaCursor.DifferenceOf(position.Position().Translation(),
+//                                  this->PreviousCursorPosition);
+//         this->Offset.Add(deltaCursor);
+//     }
     this->PreviousCursorPosition.Assign(position.Position().Translation());
 
     // apply to object
@@ -276,6 +278,7 @@ bool MapBehavior::RunBackground()
     if (this->State != this->PreviousState) {
         this->PreviousState = this->State;
         this->VisibleList->Show();
+        this->MarkerList->Show();
     }
 
     this->Transition = true;
@@ -481,10 +484,13 @@ void MapBehavior::UpdateCursorPosition(void)
     vctFrm3 finalFrame;
     finalFrame = GetCurrentCursorPositionWRTECMRCM();
     vctFrm3 cursorVTK;
-//     vctFrm3 ECMtoVTK;
-//     ECMtoVTK.Rotation().From( vctAxAnRot3(vctDouble3(0.0,1.0,0.0), cmnPI) );
-// 
-//     ECMRCMtoVTK = ECMtoVTK * ECMtoECMRCM.Inverse();
+    if(MarkerCount == 0)
+    {
+        vctFrm3 ECMtoVTK;
+        ECMtoVTK.Rotation().From( vctAxAnRot3(vctDouble3(0.0,1.0,0.0), cmnPI) );
+    
+        ECMRCMtoVTK = ECMtoVTK * ECMtoECMRCM.Inverse();
+    }
 
     ECMRCMtoVTK.ApplyTo(finalFrame, cursorVTK);// cursorVTK = ECMRCMtoVTK * finalframe
 
@@ -600,7 +606,7 @@ the position of the marker is the position of the cursor at the time that it is 
 
 void MapBehavior::AddMarker(void)
 {
-    if(MarkerDropped == false)
+    if(MarkerDropped == false && MarkerCount < MARKER_MAX)
     {
 
         MapMarker * newMarkerVisible;
@@ -637,7 +643,7 @@ Removes the last marker from the list
  */
 void MapBehavior::RemoveLastMarker(void)
 {
-    MarkersType::iterator iter;
+    MarkersType::iterator iter = Markers.begin();
     const MarkersType::iterator end = Markers.end();
     if(MarkerRemoved ==false)
     {
@@ -647,10 +653,12 @@ void MapBehavior::RemoveLastMarker(void)
             if(remove <= MarkerCount)
                 MyMarkers[remove]->Hide();
 
-//             for (iter = Markers.begin(); iter != end; iter++)
+//             while(iter != end)
 //             {
-//                 if((*iter)->count == remove)
+//                 int check = (*iter)->count;
+//                 if(check == remove)
 //                     Markers.erase(iter);
+//                 iter++;
 //             }
             std::cout << "marker removed" << std::endl;
         }else{

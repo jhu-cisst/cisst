@@ -167,10 +167,15 @@ bool MeasurementBehavior::RunForeground()
 
     // compute offset
     this->GetPrimaryMasterPosition(position);
-    if (!this->RightMTMOpen) {
+    if (this->Following) {
+        if (this->Transition)
+        {
+            this->PreviousCursorPosition.Assign(position.Position().Translation());
+            this->Transition = false;
+        }
         vctDouble3 deltaCursor;
         deltaCursor.DifferenceOf(position.Position().Translation(),
-                                this->PreviousCursorPosition);
+                                 this->PreviousCursorPosition);
         this->Offset.Add(deltaCursor);
     }
     this->PreviousCursorPosition.Assign(position.Position().Translation());
@@ -192,7 +197,7 @@ bool MeasurementBehavior::RunBackground()
         this->PreviousState = this->State;
         this->VisibleList->Show();
     }
-
+    this->Transition = true;
     this->Slave1->GetCartesianPosition(this->Slave1Position);
     this->Slave1Position.Position().Translation().Add(this->Offset);
     this->VisibleList->SetPosition(this->Slave1Position.Position().Translation());
@@ -208,7 +213,7 @@ bool MeasurementBehavior::RunNoInput()
         this->VisibleList->Show();
     }
 
-
+    this->Transition = true;
     this->Slave1->GetCartesianPosition(this->Slave1Position);
     this->Slave1Position.Position().Translation().Add(this->Offset);
     this->VisibleList->SetPosition(this->Slave1Position.Position().Translation());

@@ -66,6 +66,7 @@ class MeasurementBehavior : public ui3BehaviorBase
         bool RightMTMOpen;
         
         bool MeasurementActive;
+        bool Transition;
         vctDouble3 MeasurePoint1;
 };
 
