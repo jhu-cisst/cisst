@@ -24,14 +24,14 @@ http://www.cisst.org/cisst/license.txt.
 
 void mtsMulticastCommandWriteBase::AddCommand(BaseType * command) {
     if (command) {
-#ifndef CISST_MTS_HAS_ICE
+#if !CISST_MTS_HAS_ICE
         if (typeid(*(command->GetArgumentPrototype())) != typeid(*(this->GetArgumentPrototype()))) {
             CMN_LOG_INIT_ERROR << "Class mtsMulticastCommandWriteBase: AddCommand: command argument type don't match" << std::endl;
             exit(0);
         } else {
 #endif
             this->Commands.push_back(command);
-#ifndef CISST_MTS_HAS_ICE
+#if !CISST_MTS_HAS_ICE
         }
 #endif
     }
