@@ -188,6 +188,8 @@ typedef mtsCommandQualifiedReadOrWriteBase<const mtsGenericObject> mtsCommandQua
 %include "cisstMultiTask/mtsTask.h"
 %include "cisstMultiTask/mtsTaskInterface.h"
 
+%include "cisstMultiTask/mtsRequiredInterface.h"
+
 %include "cisstMultiTask/mtsTaskManager.h"
 %extend mtsTaskManager {
     %pythoncode {

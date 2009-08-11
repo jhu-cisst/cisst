@@ -62,6 +62,7 @@ from ireEditorNotebook import *
 from ireListCtrlPanel import *
 from ireLogCtrl import *
 from ireWorkspace import *
+from ireTaskTree import *
 from ireInputBox import *
 import ireImages
 
@@ -108,6 +109,7 @@ class ireMain(wx.Frame):
     ID_TRUNCATEHISTORY = wx.NewId()
     ID_LOADHISTORY = wx.NewId()
     ID_CLEARHISTORY = wx.NewId()
+    ID_TASKTREE = wx.NewId()
     ID_TESTINPUTBOX = wx.NewId()
     ID_LOAD_CISSTCOMMON = wx.NewId()
     ID_LOAD_CISSTVECTOR = wx.NewId()
@@ -186,7 +188,8 @@ class ireMain(wx.Frame):
         menu.Append(self.ID_LOADHISTORY, "Load &command history... \tCtrl+6", "Load archived commands")
         menu.Append(self.ID_CLEARHISTORY, "C&lear command history... \tCtrl+7", "Clear your command history")
         menu.AppendSeparator()
-        menu.Append(self.ID_TESTINPUTBOX, "&Test input box", "Create test input box")
+        menu.Append(self.ID_TASKTREE, "&Task Manager", "Show Task Manager browser")
+        menu.Append(self.ID_TESTINPUTBOX, "Test &input box", "Create test input box")
         
         menu = self.ImportMenu = wx.Menu()
         menu.Append(self.ID_LOAD_CISSTCOMMON, "Import cisst&Common", "Import cisstCommon")
@@ -234,6 +237,7 @@ class ireMain(wx.Frame):
         wx.EVT_MENU(self, self.ID_TRUNCATEHISTORY, self.OnTruncateHistory)
         wx.EVT_MENU(self, self.ID_LOADHISTORY, self.OnLoadHistory)
         wx.EVT_MENU(self, self.ID_CLEARHISTORY, self.OnClearHistory)
+        wx.EVT_MENU(self, self.ID_TASKTREE, self.OnTaskTree)
         wx.EVT_MENU(self, self.ID_TESTINPUTBOX, self.OnTestInputBox)
         wx.EVT_MENU(self, self.ID_LOAD_CISSTCOMMON,  self.OnImportCisstCommon)
         wx.EVT_MENU(self, self.ID_LOAD_CISSTVECTOR,  self.OnImportCisstVector)
@@ -256,6 +260,7 @@ class ireMain(wx.Frame):
         wx.EVT_UPDATE_UI(self, wx.ID_SELECTALL, self.OnUpdateMenu)
         wx.EVT_UPDATE_UI(self, self.ID_RUNINSHELL, self.OnUpdateMenu)
         wx.EVT_UPDATE_UI(self, self.ID_RUNINNEWPROCESS, self.OnUpdateMenu)
+        wx.EVT_UPDATE_UI(self, self.ID_TASKTREE, self.OnUpdateMenu)
         wx.EVT_UPDATE_UI(self, self.ID_LOAD_CISSTCOMMON, self.OnUpdateMenu)
         wx.EVT_UPDATE_UI(self, self.ID_LOAD_CISSTVECTOR, self.OnUpdateMenu)
         wx.EVT_UPDATE_UI(self, self.ID_LOAD_CISSTNUMERICAL, self.OnUpdateMenu)
@@ -830,6 +835,17 @@ class ireMain(wx.Frame):
         frame = ireInputBox(None, -1, "Test Size/Position")
         frame.Show(True)
         
+    def OnTaskTree(self, event):        
+        taskManager = self.ObjectRegister.FindObject("TaskManager")
+        if taskManager:
+            frame = ireTaskTree(None, -1, "Task Manager", taskManager)
+            frame.Show(True)
+        else:
+            text = "Task Manager not found"
+            msgdlg = wx.MessageDialog(self, text, "Task Manager", wx.OK | wx.ICON_ERROR)
+            msgdlg.ShowModal()
+            msgdlg.Destroy()
+        
     #-------------------------------------------------
 	# Methods for running scripts in the main or 
 	# separate threads.
@@ -915,6 +931,8 @@ class ireMain(wx.Frame):
             # (otherwise, tries to start a new copy of the entire program).
             elif id == self.ID_RUNINNEWPROCESS:
                 event.Enable(hasattr(self.EditorNotebook, 'bufferSaveAs') and self.EditorNotebook.hasBuffer() and not ireEmbedded)
+            elif id == self.ID_TASKTREE:
+                event.Enable(ireEmbedded)  # Really, should check for existence of TaskManager
             elif id == self.ID_LOAD_CISSTCOMMON:
                 event.Enable(ModuleAvailable('cisstCommonPython'))
             elif id == self.ID_LOAD_CISSTVECTOR:

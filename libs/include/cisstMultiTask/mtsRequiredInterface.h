@@ -164,6 +164,7 @@ protected:
     void ToStream(std::ostream & outputStream) const;
     
 protected:
+#ifndef SWIG  // SWIG cannot deal with this
     template <class _CommandType>
     class CommandInfo {
         _CommandType **cmdPtr;
@@ -190,6 +191,7 @@ protected:
             return (*cmdPtr)->GetName();
         }
     };
+#endif // !SWIG
         
     /*! Typedef for a map of name of zero argument command and name of command. */
     typedef cmnNamedMap<CommandInfo<mtsCommandVoidBase> > CommandPointerVoidMapType;
@@ -249,6 +251,7 @@ public:
 };
 
 
+#ifndef SWIG
 template <class __classType>
 inline mtsCommandVoidBase * mtsRequiredInterface::AddEventHandlerVoid(void (__classType::*method)(void),
                                                                       __classType * classInstantiation,
@@ -300,6 +303,7 @@ inline mtsCommandWriteBase * mtsRequiredInterface::AddEventHandlerWrite(void (__
     }
     return EventHandlersWrite.GetItem(eventName);
 }
+#endif  // !SWIG
 
 /*! Stream out operator. */
 template <class _CommandType>
