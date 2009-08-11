@@ -386,7 +386,7 @@ public:
     /*! Update event handler proxy id at server side and enable them if used. 
         Proxy id is replaced with a pointer to an actual event generator command 
         object at client side. */
-    bool mtsTask::SendUpdateEventHandlerId(
+    bool SendUpdateEventHandlerId(
         const std::string & requiredInterfaceProxyName,
         const std::string & serverTaskProxyName,
         const std::string & clientTaskProxyName);
