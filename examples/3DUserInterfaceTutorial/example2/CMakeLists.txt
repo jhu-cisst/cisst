@@ -23,6 +23,10 @@ add_executable(${PROJECT_NAME}
                BehaviorLUS.h
                CSOpenGLStippleActor.cxx
                CSOpenGLStippleActor.h
+               MeasurementBehavior.h
+               MeasurementBehavior.cpp
+               MapBehavior.cpp
+               MapBehavior.h
                )
 
 target_link_libraries(${PROJECT_NAME}

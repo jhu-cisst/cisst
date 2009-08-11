@@ -57,6 +57,8 @@ http://www.cisst.org/cisst/license.txt.
 #include "SimpleBehavior.h"
 #include "BehaviorWithSlave.h"
 #include "BehaviorLUS.h"
+#include "MeasurementBehavior.h"
+#include "MapBehavior.h"
 
 int main()
 {
@@ -92,9 +94,11 @@ int main()
 
     ui3Manager guiManager;
 
-    SimpleBehavior behavior("Example1");
-    BehaviorWithSlave behavior2("Example2");
-    BehaviorLUS behavior3("Example3");
+    SimpleBehavior behavior("SimpleBehavior");
+    BehaviorWithSlave behavior2("BehaviorWithSlave");
+    BehaviorLUS behavior3("BehaviorLUS");
+    MeasurementBehavior behavior4("MeasurementBehavior");
+    MapBehavior behavior5("MapBehavior");
 
     guiManager.AddBehavior(&behavior,       // behavior reference
                            0,               // position in the menu bar: default
@@ -103,11 +107,20 @@ int main()
     guiManager.AddBehavior(&behavior2,       // behavior reference
                            2,             // position in the menu bar: default
                            "square.png");            // icon file: no texture
-#if 1
+
     guiManager.AddBehavior(&behavior3,       // behavior reference
                            1,             // position in the menu bar: default
                            "resize.png");            // icon file: no texture
+
+    guiManager.AddBehavior(&behavior4,       // behavior reference
+                            3,             // position in the menu bar: default
+                            "move.png");            // icon file: no texture
+#if 1
+    guiManager.AddBehavior(&behavior5,       // behavior reference
+                            4,             // position in the menu bar: default
+                            "iconify-top-left.png");            // icon file: no texture
 #endif
+    
     guiManager.Configure("config.xml");
 
 
