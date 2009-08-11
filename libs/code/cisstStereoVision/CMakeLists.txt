@@ -530,6 +530,10 @@ IF(UNIX)
           vidDC1394Source.h         # private header
           vidDC1394Source.cpp
           )
+      SET(SVL_ADDITIONAL_LIBRARIES
+          "${SVL_ADDITIONAL_LIBRARIES}"
+          dc1394
+          )  
     ENDIF(CISST_SVL_HAS_LIBDC1394)
   ELSE(CMAKE_SYSTEM_NAME MATCHES Linux)
     #Turn Linux specific switches OFF on other platforms
