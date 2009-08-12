@@ -129,7 +129,7 @@ int svlFilterSourceDummy::SetImage(unsigned char* buffer, unsigned int size)
             delete [] ImageBuffer[0];
             ImageBuffer[0] = 0;
         }
-        memset(reinterpret_cast<unsigned char*>(img->GetPointer()), 0, img->GetDataSize());
+        memset(img->GetUCharPointer(), 0, img->GetDataSize());
     }
     else {
         if (size != img->GetDataSize()) return SVL_FAIL;
@@ -151,7 +151,7 @@ int svlFilterSourceDummy::SetImage(unsigned char* buffer_left, unsigned int size
             delete [] ImageBuffer[0];
             ImageBuffer[0] = 0;
         }
-        memset(reinterpret_cast<unsigned char*>(img->GetPointer(SVL_LEFT)), 0, img->GetDataSize(SVL_LEFT));
+        memset(img->GetUCharPointer(SVL_LEFT), 0, img->GetDataSize(SVL_LEFT));
     }
     else {
         if (size_left == img->GetDataSize(SVL_LEFT)) {
@@ -165,7 +165,7 @@ int svlFilterSourceDummy::SetImage(unsigned char* buffer_left, unsigned int size
             delete [] ImageBuffer[1];
             ImageBuffer[1] = 0;
         }
-        memset(reinterpret_cast<unsigned char*>(img->GetPointer(SVL_RIGHT)), 0, img->GetDataSize(SVL_RIGHT));
+        memset(img->GetUCharPointer(SVL_RIGHT), 0, img->GetDataSize(SVL_RIGHT));
     }
     else {
         if (size_right == img->GetDataSize(SVL_RIGHT)) {

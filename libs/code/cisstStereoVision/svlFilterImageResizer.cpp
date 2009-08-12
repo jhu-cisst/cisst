@@ -165,53 +165,53 @@ int svlFilterImageResizer::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata
         if (id->GetDataChannels() == 3) { // RGB
             if (InterpolationEnabled) {
                 if (weq) {
-                    ResampleAndInterpolateVRGB24(reinterpret_cast<unsigned char*>(id->GetPointer(idx)), id->GetHeight(idx),
-                                                 reinterpret_cast<unsigned char*>(od->GetPointer(idx)), od->GetHeight(idx),
+                    ResampleAndInterpolateVRGB24(id->GetUCharPointer(idx), id->GetHeight(idx),
+                                                 od->GetUCharPointer(idx), od->GetHeight(idx),
                                                  od->GetWidth(idx));
                 }
                 else if (heq) {
-                    ResampleAndInterpolateHRGB24(reinterpret_cast<unsigned char*>(id->GetPointer(idx)), id->GetWidth(idx),
-                                                 reinterpret_cast<unsigned char*>(od->GetPointer(idx)), od->GetWidth(idx),
+                    ResampleAndInterpolateHRGB24(id->GetUCharPointer(idx), id->GetWidth(idx),
+                                                 od->GetUCharPointer(idx), od->GetWidth(idx),
                                                  id->GetHeight(idx));
                 }
                 else {
-                    ResampleAndInterpolateHRGB24(reinterpret_cast<unsigned char*>(id->GetPointer(idx)), id->GetWidth(idx),
+                    ResampleAndInterpolateHRGB24(id->GetUCharPointer(idx), id->GetWidth(idx),
                                                  TempBuffer[idx], od->GetWidth(idx),
                                                  id->GetHeight(idx));
                     ResampleAndInterpolateVRGB24(TempBuffer[idx], id->GetHeight(idx),
-                                                 reinterpret_cast<unsigned char*>(od->GetPointer(idx)), od->GetHeight(idx),
+                                                 od->GetUCharPointer(idx), od->GetHeight(idx),
                                                  od->GetWidth(idx));
                 }
             }
             else {
-                ResampleRGB24(reinterpret_cast<unsigned char*>(id->GetPointer(idx)), id->GetWidth(idx), id->GetHeight(idx),
-                              reinterpret_cast<unsigned char*>(od->GetPointer(idx)), od->GetWidth(idx), od->GetHeight(idx));
+                ResampleRGB24(id->GetUCharPointer(idx), id->GetWidth(idx), id->GetHeight(idx),
+                              od->GetUCharPointer(idx), od->GetWidth(idx), od->GetHeight(idx));
             }
         }
         else { // Mono8
             if (InterpolationEnabled) {
                 if (weq) {
-                    ResampleAndInterpolateVMono8(reinterpret_cast<unsigned char*>(id->GetPointer(idx)), id->GetHeight(idx),
-                                                 reinterpret_cast<unsigned char*>(od->GetPointer(idx)), od->GetHeight(idx),
+                    ResampleAndInterpolateVMono8(id->GetUCharPointer(idx), id->GetHeight(idx),
+                                                 od->GetUCharPointer(idx), od->GetHeight(idx),
                                                  od->GetWidth(idx));
                 }
                 else if (heq) {
-                    ResampleAndInterpolateHMono8(reinterpret_cast<unsigned char*>(id->GetPointer(idx)), id->GetWidth(idx),
-                                                 reinterpret_cast<unsigned char*>(od->GetPointer(idx)), od->GetWidth(idx),
+                    ResampleAndInterpolateHMono8(id->GetUCharPointer(idx), id->GetWidth(idx),
+                                                 od->GetUCharPointer(idx), od->GetWidth(idx),
                                                  id->GetHeight(idx));
                 }
                 else {
-                    ResampleAndInterpolateHMono8(reinterpret_cast<unsigned char*>(id->GetPointer(idx)), id->GetWidth(idx),
+                    ResampleAndInterpolateHMono8(id->GetUCharPointer(idx), id->GetWidth(idx),
                                                  TempBuffer[idx], od->GetWidth(idx),
                                                  id->GetHeight(idx));
                     ResampleAndInterpolateVMono8(TempBuffer[idx], id->GetHeight(idx),
-                                                 reinterpret_cast<unsigned char*>(od->GetPointer(idx)), od->GetHeight(idx),
+                                                 od->GetUCharPointer(idx), od->GetHeight(idx),
                                                  od->GetWidth(idx));
                 }
             }
             else {
-                ResampleMono8(reinterpret_cast<unsigned char*>(id->GetPointer(idx)), id->GetWidth(idx), id->GetHeight(idx),
-                              reinterpret_cast<unsigned char*>(od->GetPointer(idx)), od->GetWidth(idx), od->GetHeight(idx));
+                ResampleMono8(id->GetUCharPointer(idx), id->GetWidth(idx), id->GetHeight(idx),
+                              od->GetUCharPointer(idx), od->GetWidth(idx), od->GetHeight(idx));
             }
         }
 

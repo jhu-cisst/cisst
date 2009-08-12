@@ -106,8 +106,8 @@ int svlFilterUnsharpMask::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata)
 
 #else // CISST_SVL_HAS_OPENCV
 
-        FilterBlur(reinterpret_cast<unsigned char*>(input->GetPointer(idx)),
-                   reinterpret_cast<unsigned char*>(output->GetPointer(idx)),
+        FilterBlur(input->GetUCharPointer(idx),
+                   output->GetUCharPointer(idx),
                    input->GetWidth(idx),
                    input->GetHeight(idx),
                    Radius);

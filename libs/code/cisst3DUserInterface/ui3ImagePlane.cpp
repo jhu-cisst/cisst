@@ -224,7 +224,7 @@ void ui3ImagePlane::SetImage(svlSampleImageBase* image, unsigned int channel)
         const unsigned int  bmpheight = this->BitmapHeight;
         const unsigned int  rightborder = (this->TextureWidth - bmpwidth) << 2;
 
-        unsigned char *imagebuf = reinterpret_cast<unsigned char*>(image->GetUCharPointer(channel));
+        unsigned char *imagebuf = image->GetUCharPointer(channel);
         unsigned char *texture = this->TextureBuffer;
         unsigned int i, j;
 #ifdef USE_BGR
