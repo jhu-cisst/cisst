@@ -121,15 +121,15 @@ int svlFilterImageFileWriter::ProcessFrame(ProcInfo* procInfo, svlSample* inputd
         if (Disabled[idx]) continue;
 
         if (img->GetType() == svlTypeDepthMap) {
-            float32toRGB24(reinterpret_cast<float*>(img->GetPointer(idx)),
-                           reinterpret_cast<unsigned char*>(ImageBuffer.GetPointer(idx)),
+            float32toRGB24(reinterpret_cast<float*>(img->GetUCharPointer(idx)),
+                           ImageBuffer.GetUCharPointer(idx),
                            img->GetWidth(idx) * img->GetHeight(idx),
                            DistanceScaling);
-            buffer = reinterpret_cast<unsigned char*>(ImageBuffer.GetPointer(idx));
+            buffer = ImageBuffer.GetUCharPointer(idx);
             buffersize = ImageBuffer.GetDataSize(idx);
         }
         else {
-            buffer = reinterpret_cast<unsigned char*>(img->GetPointer(idx));
+            buffer = img->GetUCharPointer(idx);
             buffersize = img->GetDataSize(idx);
         }
 

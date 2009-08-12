@@ -137,8 +137,8 @@ void ConvertImage(svlSampleImageBase* inimage, svlSampleImageBase* outimage, int
             partsize = imgsize / threads;
             offset = partsize * threadid;
 
-            inputbuffer = reinterpret_cast<unsigned char*>(inimage->GetPointer(i)) + offset * inimage->GetBPP();
-            outputbuffer = reinterpret_cast<unsigned char*>(outimage->GetPointer(i)) + offset * outimage->GetBPP();
+            inputbuffer = inimage->GetUCharPointer(i) + offset * inimage->GetBPP();
+            outputbuffer = outimage->GetUCharPointer(i) + offset * outimage->GetBPP();
 
             Converter(intype, outtype, inputbuffer, outputbuffer, partsize, param);
         }
@@ -150,8 +150,8 @@ void ConvertImage(svlSampleImageBase* inimage, svlSampleImageBase* outimage, int
         partsize = imgsize / threads;
         offset = partsize * threadid;
 
-        inputbuffer = reinterpret_cast<unsigned char*>(inimage->GetPointer()) + offset * inimage->GetBPP();
-        outputbuffer = reinterpret_cast<unsigned char*>(outimage->GetPointer()) + offset * outimage->GetBPP();
+        inputbuffer = inimage->GetUCharPointer() + offset * inimage->GetBPP();
+        outputbuffer = outimage->GetUCharPointer() + offset * outimage->GetBPP();
 
         Converter(intype, outtype, inputbuffer, outputbuffer, partsize, param);
     }

@@ -46,9 +46,9 @@ public:
     void Record(int frames = -1) { CaptureLength = frames; }
 
 protected:
-    virtual int Initialize(svlSample* inputdata = 0);
+    virtual int Initialize(svlSample* inputdata);
     virtual int OnStart(unsigned int procCount);
-    virtual int ProcessFrame(ProcInfo* procInfo, svlSample* inputdata = 0);
+    virtual int ProcessFrame(ProcInfo* procInfo, svlSample* inputdata);
     virtual int Release();
 
 private:

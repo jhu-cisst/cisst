@@ -227,9 +227,9 @@ int svlFilterPointTracker::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata
         }
 
         // Process data
-        Tracker[idx]->PreProcessImage(reinterpret_cast<unsigned char*>(img->GetPointer(idx)));
+        Tracker[idx]->PreProcessImage(img->GetUCharPointer(idx));
         for (j = 0; j < Iterations; j ++) {
-            Tracker[idx]->Track(reinterpret_cast<unsigned char*>(img->GetPointer(idx)));
+            Tracker[idx]->Track(img->GetUCharPointer(idx));
         }
         err = StoreResults(idx);
         if (err != SVL_OK) return err;

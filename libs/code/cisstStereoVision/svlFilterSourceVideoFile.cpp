@@ -52,8 +52,8 @@ http://www.cisst.org/cisst/license.txt.
 /***************************************/
 
 svlFilterSourceVideoFile::svlFilterSourceVideoFile(bool stereo) :
-    svlFilterBase(),
-    Hertz(-1.0)
+    svlFilterSourceBase(false),  // manual timestamp management
+    AVIFrequency(-1.0)
 {
 #if (CISST_OS == CISST_WINDOWS)
     if (VFS_OleInitCounter < 1) {
@@ -63,11 +63,11 @@ svlFilterSourceVideoFile::svlFilterSourceVideoFile(bool stereo) :
 #endif
 
     if (stereo) {
-        SetFilterToSource(svlTypeImageRGBStereo, false);
+        AddSupportedType(svlTypeImageRGBStereo);
         OutputData = new svlSampleImageRGBStereo;
     }
     else {
-        SetFilterToSource(svlTypeImageRGB, false);
+        AddSupportedType(svlTypeImageRGB);
         OutputData = new svlSampleImageRGB;
     }
 
@@ -85,6 +85,8 @@ svlFilterSourceVideoFile::svlFilterSourceVideoFile(bool stereo) :
     CompressedBuffer.SetAll(0);
     CompressedBufferSize.SetSize(videochannels);
     FirstTimestamp.SetSize(videochannels);
+
+    TargetFrequency = -1.0;
 }
 
 svlFilterSourceVideoFile::~svlFilterSourceVideoFile()
@@ -101,7 +103,7 @@ svlFilterSourceVideoFile::~svlFilterSourceVideoFile()
 #endif
 }
 
-int svlFilterSourceVideoFile::Initialize(svlSample* CMN_UNUSED(inputdata))
+int svlFilterSourceVideoFile::Initialize()
 {
     Release();
 
@@ -110,7 +112,7 @@ int svlFilterSourceVideoFile::Initialize(svlSample* CMN_UNUSED(inputdata))
 #if (CISST_OS == CISST_WINDOWS)
     CVfWAvi* tavi;
     unsigned int avicounter = 0;
-    Hertz = 0.0;
+    AVIFrequency = 0.0;
 #endif
 #if (CISST_SVL_HAS_ZLIB == ON)
     int readlen;
@@ -133,7 +135,7 @@ int svlFilterSourceVideoFile::Initialize(svlSample* CMN_UNUSED(inputdata))
     // Try to open as an AVI first
         VideoObj[i] = tavi = new CVfWAvi;
         if (tavi->InitPlaying(FilePath[i].c_str()) > 0) {
-            Hertz += std::max(0.1, tavi->GetFramerate());
+            AVIFrequency += std::max(0.1, tavi->GetFramerate());
             width = tavi->GetWidth();
             height = tavi->GetHeight();
             avicounter ++;
@@ -203,7 +205,7 @@ int svlFilterSourceVideoFile::Initialize(svlSample* CMN_UNUSED(inputdata))
 #if (CISST_OS == CISST_WINDOWS)
     if (avicounter > 0) {
         // Averaging framerates
-        Hertz /= avicounter;
+        AVIFrequency /= avicounter;
     }
 #endif
 
@@ -212,37 +214,16 @@ int svlFilterSourceVideoFile::Initialize(svlSample* CMN_UNUSED(inputdata))
 
 int svlFilterSourceVideoFile::OnStart(unsigned int CMN_UNUSED(procCount))
 {
-    // Initialize video timer
-    Timer.Reset();
-    Timer.Start();
-
-#if (CISST_OS == CISST_WINDOWS)
-    if (Hertz >= 0.1) {
-        ulFrameTime = 1.0 / Hertz;
-    }
-#endif
+    if (TargetFrequency < 0.1) TargetFrequency = AVIFrequency;
+    RestartTargetTimer();
 
     return SVL_OK;
 }
 
-int svlFilterSourceVideoFile::ProcessFrame(ProcInfo* procInfo, svlSample* CMN_UNUSED(inputdata))
+int svlFilterSourceVideoFile::ProcessFrame(ProcInfo* procInfo)
 {
-#if (CISST_OS == CISST_WINDOWS)
-    if (Hertz >= 0.1) {
-        _OnSingleThread(procInfo)
-        {
-            if (FrameCounter > 0) {
-                double time = Timer.GetElapsedTime();
-                double t1 = ulFrameTime * FrameCounter;
-                double t2 = time - ulStartTime;
-                if (t1 > t2) osaSleep(t1 - t2);
-            }
-            else {
-                ulStartTime = Timer.GetElapsedTime();
-            }
-        }
-    }
-#endif
+    // Try to keep TargetFrequency
+    _OnSingleThread(procInfo) WaitForTargetTimer();
 
     svlSampleImageBase* img = dynamic_cast<svlSampleImageBase*>(OutputData);
     unsigned int videochannels = img->GetVideoChannels();
@@ -263,7 +244,7 @@ int svlFilterSourceVideoFile::ProcessFrame(ProcInfo* procInfo, svlSample* CMN_UN
 
     _ParallelLoop(procInfo, idx, videochannels)
     {
-        imptr = reinterpret_cast<unsigned char*>(img->GetPointer(idx));
+        imptr = img->GetUCharPointer(idx);
         datasize = img->GetDataSize(idx);
         ret = SVL_FAIL;
 
@@ -295,19 +276,22 @@ int svlFilterSourceVideoFile::ProcessFrame(ProcInfo* procInfo, svlSample* CMN_UN
                     break;
                 }
                 if (timestamp < 0.0) break;
-                if (FrameCounter == 0) {
-                    FirstTimestamp[idx] = timestamp;
-                    Timer.Reset();
-                    Timer.Start();
-                }
-                else {
-                    timespan = (timestamp - FirstTimestamp[idx]) - Timer.GetElapsedTime();
-                    if (timespan > 0.0) osaSleep(timespan);
-                }
-                
                 // Saving timestamp in order to be able to write it into the sample later
                 timestampsum += timestamp;
                 timestampcount ++;
+
+                if (!IsTargetTimerRunning()) {
+                    // Try to keep orignal frame intervals
+                    if (FrameCounter == 0) {
+                        FirstTimestamp[idx] = timestamp;
+                        CVITimer.Reset();
+                        CVITimer.Start();
+                    }
+                    else {
+                        timespan = (timestamp - FirstTimestamp[idx]) - CVITimer.GetElapsedTime();
+                        if (timespan > 0.0) osaSleep(timespan);
+                    }
+                }
 
                 offset = 0;
                 for (i = 0; i < FilePartCount[idx]; i ++) {
@@ -354,7 +338,8 @@ int svlFilterSourceVideoFile::ProcessFrame(ProcInfo* procInfo, svlSample* CMN_UN
 
                     // Go back to the beginning of the file, just after the header
                     if (fseek(VideoFile[idx], 27, SEEK_SET) == 0) {
-                        // Try again
+                        // Play again if needed
+                        if (!LoopFlag) return SVL_STOP_REQUEST;
                         FrameCounter = 0;
                         continue;
                     }
@@ -414,32 +399,13 @@ int svlFilterSourceVideoFile::Release()
 #endif
     }
 
-    Timer.Stop();
+    if (CVITimer.IsRunning()) CVITimer.Stop();
 
 #if (CISST_OS == CISST_WINDOWS)
-    Hertz = -1.0;
+    AVIFrequency = -1.0;
 #endif
 
     return SVL_OK;
-}
-
-int svlFilterSourceVideoFile::GetWidth(unsigned int videoch)
-{
-    svlSampleImageBase* img = dynamic_cast<svlSampleImageBase*>(OutputData);
-    if (videoch >= img->GetVideoChannels()) return SVL_WRONG_CHANNEL;
-    return static_cast<int>(img->GetWidth(videoch));
-}
-
-int svlFilterSourceVideoFile::GetHeight(unsigned int videoch)
-{
-    svlSampleImageBase* img = dynamic_cast<svlSampleImageBase*>(OutputData);
-    if (videoch >= img->GetVideoChannels()) return SVL_WRONG_CHANNEL;
-    return static_cast<int>(img->GetHeight(videoch));
-}
-
-double svlFilterSourceVideoFile::GetFramerate()
-{
-    return Hertz;
 }
 
 int svlFilterSourceVideoFile::DialogFilePath(unsigned int videoch)
@@ -480,10 +446,6 @@ int svlFilterSourceVideoFile::DialogFilePath(unsigned int videoch)
     std::cout << "Enter filename for [channel #" << videoch << "]: ";
     std::cin >> FilePath[videoch];
 #endif
-
-
-    std::cout << "Enter filename for [channel #" << videoch << "]: ";
-    std::cin >> FilePath[videoch];
 
     return SVL_OK;
 }

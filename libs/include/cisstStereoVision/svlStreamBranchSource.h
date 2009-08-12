@@ -23,7 +23,6 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlStreamBranchSource_h
 #define _svlStreamBranchSource_h
 
-#include <cisstOSAbstraction/osaStopwatch.h>
 #include <cisstStereoVision/svlStreamManager.h>
 
 // Always include last!
@@ -31,7 +30,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #define SMPSRC_BUFFERS          2
 
-class CISST_EXPORT svlStreamBranchSource : public svlFilterBase
+class CISST_EXPORT svlStreamBranchSource : public svlFilterSourceBase
 {
 friend class svlStreamManager;
 friend class svlStreamControlMultiThread;
@@ -41,22 +40,16 @@ private:
     svlSample* DataBuffer[SMPSRC_BUFFERS];
     osaThreadSignal NewFrameEvent;
 
-    osaStopwatch Timer;
-    double ulStartTime;
-    double ulFrameTime;
-    double Hertz;
-
 private:
     svlStreamBranchSource(svlStreamType type);
     svlStreamBranchSource();
     ~svlStreamBranchSource();
 
-    int Initialize(svlSample* inputdata = 0);
-    int ProcessFrame(ProcInfo* procInfo, svlSample* inputdata = 0);
-    int Release();
+    int Initialize();
+    int ProcessFrame(ProcInfo* procInfo);
 
     static bool IsTypeSupported(svlStreamType type);
-    void SetupSource(svlSample* inputdata, double hertz);
+    void SetInputSample(svlSample* inputdata);
     void PushSample(svlSample* inputdata);
     int PullSample();
 };

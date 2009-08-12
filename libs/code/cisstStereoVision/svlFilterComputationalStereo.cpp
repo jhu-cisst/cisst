@@ -249,32 +249,32 @@ int svlFilterComputationalStereo::ProcessFrame(ProcInfo* procInfo, svlSample* in
 
             // Process data
             if (inputtype == svlTypeImageRGBStereo) {
-                CreateXCheckImageColor(reinterpret_cast<unsigned char*>(stimg->GetPointer(SVL_LEFT)),
-                                       reinterpret_cast<unsigned char*>(XCheckImage->GetPointer(SVL_RIGHT)),
+                CreateXCheckImageColor(stimg->GetUCharPointer(SVL_LEFT),
+                                       XCheckImage->GetUCharPointer(SVL_RIGHT),
                                        stimg->GetWidth(SVL_LEFT),
                                        stimg->GetHeight(SVL_LEFT));
-                CreateXCheckImageColor(reinterpret_cast<unsigned char*>(stimg->GetPointer(SVL_RIGHT)),
-                                       reinterpret_cast<unsigned char*>(XCheckImage->GetPointer(SVL_LEFT)),
+                CreateXCheckImageColor(stimg->GetUCharPointer(SVL_RIGHT),
+                                       XCheckImage->GetUCharPointer(SVL_LEFT),
                                        stimg->GetWidth(SVL_RIGHT),
                                        stimg->GetHeight(SVL_RIGHT));
             }
             else if (inputtype == svlTypeImageMono8Stereo) {
-                CreateXCheckImageMono<unsigned char>(reinterpret_cast<unsigned char*>(stimg->GetPointer(SVL_LEFT)),
-                                                     reinterpret_cast<unsigned char*>(XCheckImage->GetPointer(SVL_RIGHT)),
+                CreateXCheckImageMono<unsigned char>(stimg->GetUCharPointer(SVL_LEFT),
+                                                     XCheckImage->GetUCharPointer(SVL_RIGHT),
                                                      stimg->GetWidth(SVL_LEFT),
                                                      stimg->GetHeight(SVL_LEFT));
-                CreateXCheckImageMono<unsigned char>(reinterpret_cast<unsigned char*>(stimg->GetPointer(SVL_RIGHT)),
-                                                     reinterpret_cast<unsigned char*>(XCheckImage->GetPointer(SVL_LEFT)),
+                CreateXCheckImageMono<unsigned char>(stimg->GetUCharPointer(SVL_RIGHT),
+                                                     XCheckImage->GetUCharPointer(SVL_LEFT),
                                                      stimg->GetWidth(SVL_RIGHT),
                                                      stimg->GetHeight(SVL_RIGHT));
             }
             else if (inputtype == svlTypeImageMono16Stereo) {
-                CreateXCheckImageMono<unsigned short>(reinterpret_cast<unsigned short*>(stimg->GetPointer(SVL_LEFT)),
-                                                      reinterpret_cast<unsigned short*>(XCheckImage->GetPointer(SVL_RIGHT)),
+                CreateXCheckImageMono<unsigned short>(reinterpret_cast<unsigned short*>(stimg->GetUCharPointer(SVL_LEFT)),
+                                                      reinterpret_cast<unsigned short*>(XCheckImage->GetUCharPointer(SVL_RIGHT)),
                                                       stimg->GetWidth(SVL_LEFT),
                                                       stimg->GetHeight(SVL_LEFT));
-                CreateXCheckImageMono<unsigned short>(reinterpret_cast<unsigned short*>(stimg->GetPointer(SVL_RIGHT)),
-                                                      reinterpret_cast<unsigned short*>(XCheckImage->GetPointer(SVL_LEFT)),
+                CreateXCheckImageMono<unsigned short>(reinterpret_cast<unsigned short*>(stimg->GetUCharPointer(SVL_RIGHT)),
+                                                      reinterpret_cast<unsigned short*>(XCheckImage->GetUCharPointer(SVL_LEFT)),
                                                       stimg->GetWidth(SVL_RIGHT),
                                                       stimg->GetHeight(SVL_RIGHT));
             }

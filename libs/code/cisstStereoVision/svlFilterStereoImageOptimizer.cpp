@@ -118,8 +118,8 @@ int svlFilterStereoImageOptimizer::ProcessFrame(ProcInfo* procInfo, svlSample* i
 
             l_r = l_g = l_b = r_r = r_g = r_b = 0;
 
-            leftimg = reinterpret_cast<svlRGB*>(img->GetPointer(SVL_LEFT));
-            rightimg = reinterpret_cast<svlRGB*>(img->GetPointer(SVL_RIGHT));
+            leftimg = reinterpret_cast<svlRGB*>(img->GetUCharPointer(SVL_LEFT));
+            rightimg = reinterpret_cast<svlRGB*>(img->GetUCharPointer(SVL_RIGHT));
 
             for (j = roi_t; j < roi_b; j ++) {
                 k = j * width + roi_l;
@@ -154,7 +154,7 @@ int svlFilterStereoImageOptimizer::ProcessFrame(ProcInfo* procInfo, svlSample* i
 
     // Apply correction on the left image
     unsigned int pixelcount = img->GetWidth(SVL_LEFT) * img->GetHeight(SVL_LEFT);
-    unsigned char *pImg = reinterpret_cast<unsigned char*>(img->GetPointer(SVL_LEFT));
+    unsigned char *pImg = img->GetUCharPointer(SVL_LEFT);
     unsigned char *ptr;
     unsigned int idx;
     int k;

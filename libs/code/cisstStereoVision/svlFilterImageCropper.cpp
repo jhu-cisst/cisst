@@ -209,8 +209,8 @@ int svlFilterImageCropper::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata
         stride = id->GetWidth(idx) * id->GetDataChannels();
         width = od->GetWidth(idx) * od->GetDataChannels();
         height = od->GetHeight(idx);
-        input = reinterpret_cast<unsigned char*>(id->GetPointer(idx)) + stride * Top[idx] + Left[idx] * id->GetDataChannels();
-        output = reinterpret_cast<unsigned char*>(od->GetPointer(idx));
+        input = id->GetUCharPointer(idx) + stride * Top[idx] + Left[idx] * id->GetDataChannels();
+        output = od->GetUCharPointer(idx);
 
         // copy data
         for (j = 0; j < height; j ++) {

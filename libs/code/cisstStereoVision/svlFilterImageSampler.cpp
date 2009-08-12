@@ -273,8 +273,8 @@ int svlFilterImageSampler::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata
         switch (GetInputType()) {
             case svlTypeDepthMap:
                 // Convert float32 values to grayscale8
-                float32toGray8(reinterpret_cast<float*>(inimage->GetPointer()),
-                               reinterpret_cast<unsigned char*>(ImageBuffer->GetPointer()),
+                float32toGray8(reinterpret_cast<float*>(inimage->GetUCharPointer()),
+                               ImageBuffer->GetUCharPointer(),
                                inimage->GetWidth() * inimage->GetHeight(),
                                DistanceScaling);
                 outimage = ImageBuffer;
@@ -282,8 +282,8 @@ int svlFilterImageSampler::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata
 
             case svlTypeImageMono16:
                 // Convert grayscale16 values to grayscale8
-                Gray16toGray8(reinterpret_cast<unsigned short*>(inimage->GetPointer()),
-                              reinterpret_cast<unsigned char*>(ImageBuffer->GetPointer()),
+                Gray16toGray8(reinterpret_cast<unsigned short*>(inimage->GetUCharPointer()),
+                              ImageBuffer->GetUCharPointer(),
                               inimage->GetWidth() * inimage->GetHeight(),
                               0);
                 outimage = ImageBuffer;
@@ -291,12 +291,12 @@ int svlFilterImageSampler::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata
 
             case svlTypeImageMono16Stereo:
                 // Convert grayscale16 values to grayscale8
-                Gray16toGray8(reinterpret_cast<unsigned short*>(inimage->GetPointer(SVL_LEFT)),
-                              reinterpret_cast<unsigned char*>(ImageBuffer->GetPointer(SVL_LEFT)),
+                Gray16toGray8(reinterpret_cast<unsigned short*>(inimage->GetUCharPointer(SVL_LEFT)),
+                              ImageBuffer->GetUCharPointer(SVL_LEFT),
                               inimage->GetWidth(SVL_LEFT) * inimage->GetHeight(SVL_LEFT),
                               0);
-                Gray16toGray8(reinterpret_cast<unsigned short*>(inimage->GetPointer(SVL_RIGHT)),
-                              reinterpret_cast<unsigned char*>(ImageBuffer->GetPointer(SVL_RIGHT)),
+                Gray16toGray8(reinterpret_cast<unsigned short*>(inimage->GetUCharPointer(SVL_RIGHT)),
+                              ImageBuffer->GetUCharPointer(SVL_RIGHT),
                               inimage->GetWidth(SVL_RIGHT) * inimage->GetHeight(SVL_RIGHT),
                               0);
                 outimage = ImageBuffer;

@@ -78,7 +78,7 @@ int svlFilterImageRectifier::Initialize(svlSample* inputdata)
 
     channels = output->GetVideoChannels();
     for (i = 0; i < channels; i ++) {
-        memset(output->GetPointer(i), 0, output->GetDataSize(i));
+        memset(output->GetUCharPointer(i), 0, output->GetDataSize(i));
     }
 
     return SVL_OK;
@@ -101,8 +101,8 @@ int svlFilterImageRectifier::ProcessFrame(ProcInfo* procInfo, svlSample* inputda
     {
         // Processing
         if (SimpleModeEnabled) {
-            Translate(reinterpret_cast<unsigned char*>(id->GetPointer(idx)),
-                      reinterpret_cast<unsigned char*>(od->GetPointer(idx)),
+            Translate(id->GetUCharPointer(idx),
+                      od->GetUCharPointer(idx),
                       id->GetWidth(idx) * id->GetDataChannels(),
                       id->GetHeight(idx),
                       HorizTranslation[idx] * id->GetDataChannels(),
@@ -111,12 +111,12 @@ int svlFilterImageRectifier::ProcessFrame(ProcInfo* procInfo, svlSample* inputda
         else {
             if (RectifLUT[idx]) {
                 Rectify(RectifLUT[idx],
-                        reinterpret_cast<unsigned char*>(id->GetPointer(idx)),
-                        reinterpret_cast<unsigned char*>(od->GetPointer(idx)),
+                        id->GetUCharPointer(idx),
+                        od->GetUCharPointer(idx),
                         InterpolationEnabled);
             }
             else {
-                memcpy(od->GetPointer(idx), id->GetPointer(idx), id->GetDataSize(idx));
+                memcpy(od->GetUCharPointer(idx), id->GetUCharPointer(idx), id->GetDataSize(idx));
             }
         }
     }

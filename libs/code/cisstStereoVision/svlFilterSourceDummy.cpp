@@ -21,7 +21,6 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstStereoVision/svlFilterSourceDummy.h>
-#include <cisstOSAbstraction/osaSleep.h>
 #include <string.h>
 
 #ifdef _MSC_VER
@@ -43,39 +42,19 @@ using namespace std;
 /*** svlFilterSourceDummy class ******/
 /*************************************/
 
-svlFilterSourceDummy::svlFilterSourceDummy(svlStreamType type) : svlFilterBase()
+svlFilterSourceDummy::svlFilterSourceDummy(svlStreamType type) :
+    svlFilterSourceBase(),
+    Disparity(0),
+    Noise(false)
 {
-    switch (type) {
-        case svlTypeImageRGB:
-            SetFilterToSource(svlTypeImageRGB);
-            OutputData = new svlSampleImageRGB;
-        break;
-
-        case svlTypeImageRGBStereo:
-            SetFilterToSource(svlTypeImageRGBStereo);
-            OutputData = new svlSampleImageRGBStereo;
-        break;
-
-        // Other types may be added in the future
-        case svlTypeInvalid:
-        case svlTypeStreamSource:
-        case svlTypeStreamSink:
-        case svlTypeImageMono8:
-        case svlTypeImageMono8Stereo:
-        case svlTypeImageMono16:
-        case svlTypeImageMono16Stereo:
-        case svlTypeImageCustom:
-        case svlTypeDepthMap:
-        case svlTypeRigidXform:
-        case svlTypePointCloud:
-        break;
+    // Other types may be added in the future
+    if (type == svlTypeImageRGB ||
+        type == svlTypeImageRGBStereo) {
+        AddSupportedType(type);
+        OutputData = svlSample::GetNewFromType(type);
     }
 
     ImageBuffer[0] = ImageBuffer[1] = 0;
-
-    Disparity = 0;
-    Hertz = 30.0;
-    Noise = false;
 }
 
 svlFilterSourceDummy::~svlFilterSourceDummy()
@@ -87,79 +66,36 @@ svlFilterSourceDummy::~svlFilterSourceDummy()
     if (ImageBuffer[1]) delete [] ImageBuffer[1];
 }
 
-int svlFilterSourceDummy::Initialize(svlSample* CMN_UNUSED(inputdata))
+int svlFilterSourceDummy::Initialize()
 {
     Release();
 
-    switch (GetOutputType()) {
-        case svlTypeImageRGB:
-        {
-            svlSampleImageRGB* img = dynamic_cast<svlSampleImageRGB*>(OutputData);
-            if (img->GetWidth() <= 0 ||
-                img->GetHeight() <= 0)
-                return SVL_DMYSRC_DATA_NOT_INITIALIZED;
-        }
-        break;
-
-        case svlTypeImageRGBStereo:
-        {
-            svlSampleImageRGBStereo* img = dynamic_cast<svlSampleImageRGBStereo*>(OutputData);
-            if (img->GetWidth(SVL_LEFT) <= 0 ||
-                img->GetHeight(SVL_LEFT) <= 0 ||
-                img->GetWidth(SVL_RIGHT) <= 0 ||
-                img->GetHeight(SVL_RIGHT) <= 0)
-                return SVL_DMYSRC_DATA_NOT_INITIALIZED;
-        }
-        break;
-
-        case svlTypeInvalid:
-        case svlTypeStreamSource:
-        case svlTypeStreamSink:
-        case svlTypeImageMono8:
-        case svlTypeImageMono8Stereo:
-        case svlTypeImageMono16:
-        case svlTypeImageMono16Stereo:
-        case svlTypeImageCustom:
-        case svlTypeDepthMap:
-        case svlTypeRigidXform:
-        case svlTypePointCloud:
-            return SVL_FAIL;
+    svlSampleImageBase* img = dynamic_cast<svlSampleImageBase*>(OutputData);
+    for (unsigned int i = 0; i < img->GetVideoChannels(); i ++) {
+        if (img->GetWidth(i) <= 0 || img->GetHeight(i) <= 0)
+            return SVL_DMYSRC_DATA_NOT_INITIALIZED;
     }
 
     srand(time(0));
 
-    Timer.Reset();
-    Timer.Start();
-    ulFrameTime = 1.0 / Hertz;
-
     return SVL_OK;
 }
 
-int svlFilterSourceDummy::ProcessFrame(ProcInfo* procInfo, svlSample* CMN_UNUSED(inputdata))
+int svlFilterSourceDummy::ProcessFrame(ProcInfo* procInfo)
 {
+    // Try to keep TargetFrequency
+    _OnSingleThread(procInfo) WaitForTargetTimer();
+
     svlSampleImageBase* img = dynamic_cast<svlSampleImageBase*>(OutputData);
     const unsigned int videochannels = img->GetVideoChannels();
     unsigned int channel, idx;
     unsigned char* ptr;
 
-    _OnSingleThread(procInfo)
-    {
-        if (FrameCounter > 0) {
-            double time = Timer.GetElapsedTime();
-            double t1 = ulFrameTime * FrameCounter;
-            double t2 = time - ulStartTime;
-            if (t1 > t2) osaSleep(t1 - t2);
-        }
-        else {
-            ulStartTime = Timer.GetElapsedTime();
-        }
-    }
-
     if (Noise) {
 
         for (channel = 0; channel < videochannels; channel ++) {
 
-            ptr = reinterpret_cast<unsigned char*>(img->GetPointer(channel));
+            ptr = img->GetUCharPointer(channel);
 
             _ParallelLoop(procInfo, idx, img->GetDataSize(channel))
             {
@@ -172,20 +108,14 @@ int svlFilterSourceDummy::ProcessFrame(ProcInfo* procInfo, svlSample* CMN_UNUSED
         _ParallelLoop(procInfo, idx, videochannels)
         {
             if (ImageBuffer[idx]) {
-                memcpy(img->GetPointer(idx), ImageBuffer[idx], img->GetDataSize(idx));
+                memcpy(img->GetUCharPointer(idx), ImageBuffer[idx], img->GetDataSize(idx));
             }
             else {
-                memset(img->GetPointer(idx), 0, img->GetDataSize(idx));
+                memset(img->GetUCharPointer(idx), 0, img->GetDataSize(idx));
             }
         }
     }
 
-    return SVL_OK;
-}
-
-int svlFilterSourceDummy::Release()
-{
-    Timer.Stop();
     return SVL_OK;
 }
 
@@ -257,70 +187,6 @@ int svlFilterSourceDummy::SetDimensions(unsigned int width, unsigned int height)
 
     if (OutputData->IsImage()) {
         dynamic_cast<svlSampleImageBase*>(OutputData)->SetSize(width, height);
-    }
-
-    return SVL_OK;
-}
-
-int svlFilterSourceDummy::GetWidth(int videoch)
-{
-    if (videoch != 0 && videoch != 1) return SVL_FAIL;
-    if (IsDataValid(GetOutputType(), OutputData) != SVL_OK)
-        return SVL_FAIL;
-
-    switch (GetOutputType()) {
-        case svlTypeImageRGB:
-            return dynamic_cast<svlSampleImageBase*>(OutputData)->GetWidth();
-        break;
-
-        case svlTypeImageRGBStereo:
-            return dynamic_cast<svlSampleImageBase*>(OutputData)->GetWidth(videoch);
-        break;
-
-        case svlTypeInvalid:
-        case svlTypeStreamSource:
-        case svlTypeStreamSink:
-        case svlTypeImageMono8:
-        case svlTypeImageMono8Stereo:
-        case svlTypeImageMono16:
-        case svlTypeImageMono16Stereo:
-        case svlTypeImageCustom:
-        case svlTypeDepthMap:
-        case svlTypeRigidXform:
-        case svlTypePointCloud:
-            return SVL_FAIL;
-    }
-
-    return SVL_OK;
-}
-
-int svlFilterSourceDummy::GetHeight(int videoch)
-{
-    if (videoch != 0 && videoch != 1) return SVL_FAIL;
-    if (IsDataValid(GetOutputType(), OutputData) != SVL_OK)
-        return SVL_FAIL;
-
-    switch (GetOutputType()) {
-        case svlTypeImageRGB:
-            return dynamic_cast<svlSampleImageBase*>(OutputData)->GetHeight();
-        break;
-
-        case svlTypeImageRGBStereo:
-            return dynamic_cast<svlSampleImageBase*>(OutputData)->GetHeight(videoch);
-        break;
-
-        case svlTypeInvalid:
-        case svlTypeStreamSource:
-        case svlTypeStreamSink:
-        case svlTypeImageMono8:
-        case svlTypeImageMono8Stereo:
-        case svlTypeImageMono16:
-        case svlTypeImageMono16Stereo:
-        case svlTypeImageCustom:
-        case svlTypeDepthMap:
-        case svlTypeRigidXform:
-        case svlTypePointCloud:
-            return SVL_FAIL;
     }
 
     return SVL_OK;

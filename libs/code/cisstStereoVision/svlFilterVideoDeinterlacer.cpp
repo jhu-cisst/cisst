@@ -74,22 +74,22 @@ int svlFilterVideoDeinterlacer::ProcessFrame(ProcInfo* procInfo, svlSample* inpu
             break;
 
             case svlDeinterlacingBlending:
-                Blending(reinterpret_cast<unsigned char*>(img->GetPointer(idx)),
+                Blending(img->GetUCharPointer(idx),
                          static_cast<int>(img->GetWidth(idx)), static_cast<int>(img->GetHeight(idx)));
             break;
 
             case svlDeinterlacingDiscarding:
-                Discarding(reinterpret_cast<unsigned char*>(img->GetPointer(idx)),
+                Discarding(img->GetUCharPointer(idx),
                            static_cast<int>(img->GetWidth(idx)), static_cast<int>(img->GetHeight(idx)));
             break;
 
             case svlDeinterlacingAdaptiveBlending:
-                AdaptiveBlending(reinterpret_cast<unsigned char*>(img->GetPointer(idx)),
+                AdaptiveBlending(img->GetUCharPointer(idx),
                                  static_cast<int>(img->GetWidth(idx)), static_cast<int>(img->GetHeight(idx)));
             break;
 
             case svlDeinterlacingAdaptiveDiscarding:
-                AdaptiveDiscarding(reinterpret_cast<unsigned char*>(img->GetPointer(idx)),
+                AdaptiveDiscarding(img->GetUCharPointer(idx),
                                    static_cast<int>(img->GetWidth(idx)), static_cast<int>(img->GetHeight(idx)));
             break;
         }

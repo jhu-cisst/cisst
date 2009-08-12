@@ -189,8 +189,8 @@ int svlStereoDP::Process(svlSampleImageBase *images, int *disparitymap)
         return -1;
 
     // Creating scales of the stereo input images
-    CreateScale(reinterpret_cast<svlRGB*>(images->GetPointer(SVL_LEFT)), LeftImage);
-    CreateScale(reinterpret_cast<svlRGB*>(images->GetPointer(SVL_RIGHT)), RightImage);
+    CreateScale(reinterpret_cast<svlRGB*>(images->GetUCharPointer(SVL_LEFT)), LeftImage);
+    CreateScale(reinterpret_cast<svlRGB*>(images->GetUCharPointer(SVL_RIGHT)), RightImage);
 
     // Running optimization
     DisparityOptimization();

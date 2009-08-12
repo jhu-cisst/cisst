@@ -222,24 +222,24 @@ int svlFilterImageFlipRotate::ProcessFrame(ProcInfo* procInfo, svlSample* inputd
         switch (GetInputType()) {
             case svlTypeImageRGB:
             case svlTypeImageRGBStereo:
-                FlipRotate<imgUCharRGB::Pixel>(reinterpret_cast<imgUCharRGB::Pixel*>(input->GetPointer(idx)),
-                                               reinterpret_cast<imgUCharRGB::Pixel*>(output->GetPointer(idx)),
+                FlipRotate<imgUCharRGB::Pixel>(reinterpret_cast<imgUCharRGB::Pixel*>(input->GetUCharPointer(idx)),
+                                               reinterpret_cast<imgUCharRGB::Pixel*>(output->GetUCharPointer(idx)),
                                                input->GetWidth(idx), input->GetHeight(idx),
                                                QuickCopy[idx], StartOffset[idx], Stride[idx], LineStride[idx]);
             break;
 
             case svlTypeImageMono8:
             case svlTypeImageMono8Stereo:
-                FlipRotate<unsigned char>(reinterpret_cast<unsigned char*>(input->GetPointer(idx)),
-                                          reinterpret_cast<unsigned char*>(output->GetPointer(idx)),
+                FlipRotate<unsigned char>(input->GetUCharPointer(idx),
+                                          output->GetUCharPointer(idx),
                                           input->GetWidth(idx), input->GetHeight(idx),
                                           QuickCopy[idx], StartOffset[idx], Stride[idx], LineStride[idx]);
             break;
 
             case svlTypeImageMono16:
             case svlTypeImageMono16Stereo:
-                FlipRotate<unsigned short>(reinterpret_cast<unsigned short*>(input->GetPointer(idx)),
-                                           reinterpret_cast<unsigned short*>(output->GetPointer(idx)),
+                FlipRotate<unsigned short>(reinterpret_cast<unsigned short*>(input->GetUCharPointer(idx)),
+                                           reinterpret_cast<unsigned short*>(output->GetUCharPointer(idx)),
                                            input->GetWidth(idx), input->GetHeight(idx),
                                            QuickCopy[idx], StartOffset[idx], Stride[idx], LineStride[idx]);
             break;

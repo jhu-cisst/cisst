@@ -96,7 +96,7 @@ int svlFilterUnsharpMask::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata)
     _ParallelLoop(procInfo, idx, videochannels)
     {
         if (Radius == 0 || Amount == 256) {
-            memcpy(output->GetPointer(idx), input->GetPointer(idx), output->GetDataSize(idx));
+            memcpy(output->GetUCharPointer(idx), input->GetUCharPointer(idx), output->GetDataSize(idx));
             continue;
         }
 
@@ -114,9 +114,9 @@ int svlFilterUnsharpMask::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata)
 
 #endif // CISST_SVL_HAS_OPENCV
 
-        Sharpening(reinterpret_cast<unsigned char*>(input->GetPointer(idx)),
-                   reinterpret_cast<unsigned char*>(output->GetPointer(idx)),
-                   reinterpret_cast<unsigned char*>(output->GetPointer(idx)),
+        Sharpening(input->GetUCharPointer(idx),
+                   output->GetUCharPointer(idx),
+                   output->GetUCharPointer(idx),
                    input->GetWidth(idx),
                    input->GetHeight(idx));
     }

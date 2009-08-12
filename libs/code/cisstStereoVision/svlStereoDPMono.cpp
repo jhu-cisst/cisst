@@ -181,8 +181,8 @@ int svlStereoDPMono::Process(svlSampleImageBase *images, int *disparitymap)
 
     // Creating scales of the stereo input images
     unsigned int bpp = images->GetBPP();
-    void* leftinput = images->GetPointer(SVL_LEFT);
-    void* rightinput = images->GetPointer(SVL_RIGHT);
+    void* leftinput = images->GetUCharPointer(SVL_LEFT);
+    void* rightinput = images->GetUCharPointer(SVL_RIGHT);
     if (bpp == 1) {
         CreateScale<unsigned char>(reinterpret_cast<unsigned char*>(leftinput), LeftImage);
         CreateScale<unsigned char>(reinterpret_cast<unsigned char*>(rightinput), RightImage);

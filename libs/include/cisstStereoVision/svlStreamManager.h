@@ -27,8 +27,10 @@ http://www.cisst.org/cisst/license.txt.
 #include <vector>
 #include <map>
 
+#include <cisstVector/vctDynamicVector.h>
 #include <cisstOSAbstraction/osaThread.h>
 #include <cisstOSAbstraction/osaTimeServer.h>
+#include <cisstOSAbstraction/osaStopwatch.h>
 #include <cisstStereoVision/svlStreamDefs.h>
 #include <cisstStereoVision/svlSyncPoint.h>
 
@@ -36,20 +38,31 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlExport.h>
 
 
+// Status codes
+#define SVL_STREAM_RUNNING            0
+#define SVL_STREAM_CREATED            1
+#define SVL_STREAM_INITIALIZED        2
+#define SVL_STREAM_STOPPED            3
+#define SVL_STREAM_RELEASED           4
 #define SVL_ALREADY_PROCESSED        10
+#define SVL_STOP_REQUEST             11
+
+// Error codes
 #define SVL_TYPE_MISMATCH           -12
 #define SVL_ALREADY_INITIALIZED     -13
-#define SVL_FILTER_NOT_IN_LIST      -14
-#define SVL_NOT_SOURCE              -15
-#define SVL_NO_SOURCE_IN_LIST       -16
-#define SVL_NOT_YET_INITIALIZED     -17
-#define SVL_ALREADY_RUNNING         -18
+#define SVL_NOT_INITIALIZED         -14
+#define SVL_ALREADY_RUNNING         -15
+#define SVL_FILTER_NOT_IN_LIST      -16
+#define SVL_NOT_SOURCE              -17
+#define SVL_NO_SOURCE_IN_LIST       -18
 #define SVL_INVALID_INPUT_TYPE      -19
 #define SVL_INVALID_OUTPUT_TYPE     -20
 #define SVL_NO_INPUT_DATA           -21
 #define SVL_WRONG_CHANNEL           -22
 #define SVL_CONSTRUCTION_FAILED     -23
 #define SVL_ALLOCATION_ERROR        -24
+#define SVL_NOT_IMAGE               -25
+#define SVL_WAIT_TIMEOUT            -26
 
 
 #define _OnSingleThread(_info) \
@@ -68,6 +81,7 @@ http://www.cisst.org/cisst/license.txt.
 
 
 class svlFilterBase;
+class svlFilterSourceBase;
 class svlStreamManager;
 class svlStreamControlMultiThread;
 
@@ -88,6 +102,7 @@ private:
 
 class CISST_EXPORT svlFilterBase
 {
+friend class svlFilterSourceBase;
 friend class svlStreamManager;
 friend class svlStreamControlMultiThread;
 
@@ -115,13 +130,12 @@ protected:
     svlSample* OutputData;
     unsigned int FrameCounter;
 
-    virtual int Initialize(svlSample* inputdata = 0);
+    virtual int Initialize(svlSample* inputdata);
     virtual int OnStart(unsigned int procCount);
-    virtual int ProcessFrame(ProcInfo* procInfo, svlSample* inputdata = 0);
+    virtual int ProcessFrame(ProcInfo* procInfo, svlSample* inputdata) = 0;
     virtual void OnStop();
     virtual int Release();
 
-    void SetFilterToSource(svlStreamType output, bool autotimestamp = true);
     int AddSupportedType(svlStreamType input, svlStreamType output);
     void UpdateOutputFormat();
     int IsDataValid(svlStreamType type, svlSample* data);
@@ -132,7 +146,6 @@ private:
     bool Running;
     bool OutputSampleModified;
     bool OutputFormatModified;
-    bool AutoTimestamp;
     double PrevInputTimestamp;
     _StreamTypeMap SupportedTypes;
     _OutputBranchList OutputBranches;
@@ -145,6 +158,55 @@ private:
 
     svlFilterBase* GetUpstreamFilter();
     svlFilterBase* GetDownstreamFilter();
+};
+
+
+class CISST_EXPORT svlFilterSourceBase : public svlFilterBase
+{
+friend class svlFilterBase;
+friend class svlStreamManager;
+friend class svlStreamControlMultiThread;
+
+public:
+    svlFilterSourceBase(bool autotimestamps = true);
+    virtual ~svlFilterSourceBase();
+
+    virtual int GetWidth(unsigned int videoch = SVL_LEFT);
+    virtual int GetHeight(unsigned int videoch = SVL_LEFT);
+    virtual double GetTargetFrequency();
+    virtual int SetTargetFrequency(double hertz);
+    virtual void SetLoop(bool loop = true);
+    virtual bool GetLoop();
+
+protected:
+    int AddSupportedType(svlStreamType output);
+
+    virtual int Initialize();
+    virtual int OnStart(unsigned int procCount);
+    virtual int ProcessFrame(ProcInfo* procInfo) = 0;
+    virtual void OnStop();
+    virtual int Release();
+
+    int RestartTargetTimer();
+    int StopTargetTimer();
+    int WaitForTargetTimer();
+    bool IsTargetTimerRunning();
+
+    double TargetFrequency;
+    bool LoopFlag;
+
+private:
+    // Dispatched to source specific methods declared above
+    int Initialize(svlSample* inputdata);
+    int ProcessFrame(ProcInfo* procInfo, svlSample* inputdata);
+
+    // Hidden from derived classes
+    int AddSupportedType(svlStreamType input, svlStreamType output);
+
+    bool AutoTimestamp;
+    osaStopwatch TargetTimer;
+    double TargetStartTime;
+    double TargetFrameTime;
 };
 
 
@@ -183,6 +245,8 @@ public:
     int Start();
     void Stop();
     bool IsRunning();
+    int WaitForStop(double timeout = -1.0);
+    int GetStreamStatus();
 
 private:
     ///////////////////////////////////////////////
@@ -191,13 +255,13 @@ private:
     int SetThreads(unsigned int threadcount);
 
     int AddFilter(svlFilterBase* filter);
-    int SetSourceFilter(svlFilterBase* filter);
+    int SetSourceFilter(svlFilterSourceBase* source);
 
     int ConnectFilterToBranch(svlStreamEntity* entity, svlFilterBase* filter);
     int ConnectFilters(svlFilterBase* filter1, svlFilterBase* filter2);
 
     // Convenience method combining AddFilter and SetSourceFilter
-    int AddSourceFilter(svlFilterBase* filter);
+    int AddSourceFilter(svlFilterSourceBase* source);
     // Convenience method combining AddFilter and ConnectFilters
     int AddFilterAndConnect(svlFilterBase* filter, svlFilterBase* connect_to);
 
@@ -208,8 +272,8 @@ private:
 
 private:
     unsigned int ThreadCount;
-    svlStreamControlMultiThread** ControlInstanceMulti;
-    osaThread** ControlThreadMulti;
+    vctDynamicVector<svlStreamControlMultiThread*> ControlInstanceMulti;
+    vctDynamicVector<osaThread*> ControlThreadMulti;
     svlSyncPoint* SyncPoint;
     osaCriticalSection* CS;
 
@@ -217,16 +281,17 @@ private:
     svlStreamEntity InvalidEntity;
     _BranchMap Branches;
     _FilterList Filters;
-    svlFilterBase* StreamSource;
+    svlFilterSourceBase* StreamSource;
     bool Initialized;
     bool Running;
     bool StopThread;
-    bool ErrorOnThread;
+    int StreamStatus;
 
     int AppendFilterToTrunk(svlFilterBase* filter);
     svlStreamEntity* GetBranchEntityOfFilter(svlFilterBase* filter);
     bool IsFilterInList(svlFilterBase* filter);
     int ReInitializeDownstreamFilters(svlFilterBase* fromfilter);
+    void InternalStop(unsigned int callingthreadID);
 };
 
 

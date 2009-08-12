@@ -94,9 +94,9 @@ int svlFilterStereoImageJoiner::ProcessFrame(ProcInfo* procInfo, svlSample* inpu
         svlSampleImageBase* od = dynamic_cast<svlSampleImageBase*>(OutputData);
         unsigned int stride = id->GetWidth(SVL_LEFT) * id->GetBPP();
         unsigned int height = id->GetHeight();
-        unsigned char *input1 = reinterpret_cast<unsigned char*>(id->GetPointer(SVL_LEFT));
-        unsigned char *input2 = reinterpret_cast<unsigned char*>(id->GetPointer(SVL_RIGHT));
-        unsigned char *output = reinterpret_cast<unsigned char*>(od->GetPointer());
+        unsigned char *input1 = id->GetUCharPointer(SVL_LEFT);
+        unsigned char *input2 = id->GetUCharPointer(SVL_RIGHT);
+        unsigned char *output = od->GetUCharPointer();
 
         // copy data
         switch (ImageLayout) {

@@ -21,7 +21,6 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstStereoVision/svlFilterSourceImageFile.h>
-#include <cisstOSAbstraction/osaSleep.h>
 
 #include <math.h>
 #include <string.h>
@@ -43,15 +42,19 @@ using namespace std;
 /*** svlFilterSourceImageFile class ****/
 /***************************************/
 
-svlFilterSourceImageFile::svlFilterSourceImageFile(bool stereo) : svlFilterBase()
+svlFilterSourceImageFile::svlFilterSourceImageFile(bool stereo) :
+    svlFilterSourceBase(),
+    NumberOfDigits(0),
+    From(0),
+    To(0)
 {
     Stereo = stereo;
     if (Stereo) {
-        SetFilterToSource(svlTypeImageRGBStereo);
+        AddSupportedType(svlTypeImageRGBStereo);
         OutputData = new svlSampleImageRGBStereo;
     }
     else {
-        SetFilterToSource(svlTypeImageRGB);
+        AddSupportedType(svlTypeImageRGB);
         OutputData = new svlSampleImageRGB;
     }
 
@@ -60,11 +63,6 @@ svlFilterSourceImageFile::svlFilterSourceImageFile(bool stereo) : svlFilterBase(
         FilePathPrefix[i][0] = 0;
         Extension[i][0] = 0;
     }
-    NumberOfDigits = 0;
-    From = 0;
-    To = 0;
-
-    Hertz = 30.0;
 }
 
 svlFilterSourceImageFile::~svlFilterSourceImageFile()
@@ -74,7 +72,7 @@ svlFilterSourceImageFile::~svlFilterSourceImageFile()
     if (OutputData) delete OutputData;
 }
 
-int svlFilterSourceImageFile::Initialize(svlSample* CMN_UNUSED(inputdata))
+int svlFilterSourceImageFile::Initialize()
 {
     Release();
 
@@ -146,27 +144,13 @@ int svlFilterSourceImageFile::Initialize(svlSample* CMN_UNUSED(inputdata))
         img->SetSize(SVL_LEFT, ImageProps[SVL_LEFT].Width, ImageProps[SVL_LEFT].Height);
     }
 
-    Timer.Reset();
-    Timer.Start();
-    ulFrameTime = 1.0 / Hertz;
-
     return SVL_OK;
 }
 
-int svlFilterSourceImageFile::ProcessFrame(ProcInfo* procInfo, svlSample* CMN_UNUSED(inputdata))
+int svlFilterSourceImageFile::ProcessFrame(ProcInfo* procInfo)
 {
-    _OnSingleThread(procInfo)
-    {
-        if (FrameCounter > 0) {
-            double time = Timer.GetElapsedTime();
-            double t1 = ulFrameTime * FrameCounter;
-            double t2 = time - ulStartTime;
-            if (t1 > t2) osaSleep(t1 - t2);
-        }
-        else {
-            ulStartTime = Timer.GetElapsedTime();
-        }
-    }
+    // Try to keep TargetFrequency
+    _OnSingleThread(procInfo) WaitForTargetTimer();
 
     ////////////////////////////////////////////
     //    Check if the filename has changed   //
@@ -195,7 +179,7 @@ int svlFilterSourceImageFile::ProcessFrame(ProcInfo* procInfo, svlSample* CMN_UN
             return SVL_IFS_WRONG_IMAGE_SIZE;
 
         // reading data and closing file
-        if (ImageFile[idx]->ReadAndClose(reinterpret_cast<unsigned char*>(img->GetPointer(idx)), img->GetDataSize(idx)) != SVL_OK)
+        if (ImageFile[idx]->ReadAndClose(img->GetUCharPointer(idx), img->GetDataSize(idx)) != SVL_OK)
             return SVL_IFS_WRONG_IMAGE_DATA_SIZE;
     }
 
@@ -218,38 +202,6 @@ int svlFilterSourceImageFile::Release()
     }
 
     return SVL_OK;
-}
-
-int svlFilterSourceImageFile::GetWidth(int videoch)
-{
-    if (IsDataValid(GetOutputType(), OutputData) != SVL_OK)
-        return SVL_FAIL;
-    if (Stereo) {
-        svlSampleImageRGBStereo* img = dynamic_cast<svlSampleImageRGBStereo*>(OutputData);
-        if (videoch == SVL_LEFT) return img->GetWidth(SVL_LEFT);
-        if (videoch == SVL_RIGHT) return img->GetWidth(SVL_RIGHT);
-    }
-    else {
-        svlSampleImageRGB* img = dynamic_cast<svlSampleImageRGB*>(OutputData);
-        return img->GetWidth();
-    }
-    return SVL_WRONG_CHANNEL;
-}
-
-int svlFilterSourceImageFile::GetHeight(int videoch)
-{
-    if (IsDataValid(GetOutputType(), OutputData) != SVL_OK)
-        return SVL_FAIL;
-    if (Stereo) {
-        svlSampleImageRGBStereo* img = dynamic_cast<svlSampleImageRGBStereo*>(OutputData);
-        if (videoch == SVL_LEFT) return img->GetHeight(SVL_LEFT);
-        if (videoch == SVL_RIGHT) return img->GetHeight(SVL_RIGHT);
-    }
-    else {
-        svlSampleImageRGB* img = dynamic_cast<svlSampleImageRGB*>(OutputData);
-        return img->GetHeight();
-    }
-    return SVL_WRONG_CHANNEL;
 }
 
 int svlFilterSourceImageFile::SetFilePath(const char* filepathprefix, const char* extension, int videoch)

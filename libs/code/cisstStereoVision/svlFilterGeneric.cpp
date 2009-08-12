@@ -21,7 +21,6 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstStereoVision/svlFilterGeneric.h>
-#include <cisstOSAbstraction/osaSleep.h>
 
 using namespace std;
 
@@ -32,7 +31,6 @@ using namespace std;
 
 ////////////////////////////////////////////////////
 // Valid inputs:
-//          svlTypeStreamSource,
 //          svlTypeImageRGB,
 //          svlTypeImageMono8,
 //          svlTypeImageMono16,
@@ -62,68 +60,16 @@ svlFilterGeneric::svlFilterGeneric(svlStreamType inputtype, svlStreamType output
 {
     if (inputtype != svlTypeInvalid &&
         inputtype != svlTypeStreamSink &&
+        inputtype != svlTypeStreamSource &&
         outputtype != svlTypeInvalid &&
-        outputtype != svlTypeStreamSource &&
-        outputtype != svlTypeStreamSink) {
+        outputtype != svlTypeStreamSink &&
+        outputtype != svlTypeStreamSource) {
 
-        if (inputtype == svlTypeStreamSource) {
-            // setting output type
-            SetFilterToSource(outputtype);
-        }
-        else {
-            // mapping input type to output type
-            AddSupportedType(inputtype, outputtype);
-        }
-
-        // initializing output sample
-        switch (outputtype) {
-            case svlTypeImageRGB:
-                OutputData = new svlSampleImageRGB;
-            break;
-
-            case svlTypeImageRGBStereo:
-                OutputData = new svlSampleImageRGBStereo;
-            break;
-
-            case svlTypeImageMono8:
-                OutputData = new svlSampleImageMono8;
-            break;
-
-            case svlTypeImageMono8Stereo:
-                OutputData = new svlSampleImageMono8Stereo;
-            break;
-
-            case svlTypeImageMono16:
-                OutputData = new svlSampleImageMono16;
-            break;
-
-            case svlTypeImageMono16Stereo:
-                OutputData = new svlSampleImageMono16Stereo;
-            break;
-
-            case svlTypeDepthMap:
-                OutputData = new svlSampleDepthMap;
-            break;
-
-            case svlTypeRigidXform:
-                OutputData = new svlSampleRigidXform;
-                if (OutputData) dynamic_cast<svlSampleRigidXform*>(OutputData)->frame4x4 = svlRigidXform::Eye();
-            break;
-
-            case svlTypePointCloud:
-                OutputData = new svlSamplePointCloud;
-            break;
-
-            // Other types may be added in the future
-            case svlTypeInvalid:
-            case svlTypeStreamSource:
-            case svlTypeStreamSink:
-            case svlTypeImageCustom:
-            break;
-        }
+        // mapping input type to output type
+        AddSupportedType(inputtype, outputtype);
+        OutputData = svlSample::GetNewFromType(outputtype);
     }
 
-    Hertz = 30.0;
     CallbackObj = 0;
 }
 
@@ -240,13 +186,6 @@ int svlFilterGeneric::Initialize(svlSample* inputdata)
         break;
     }
 
-    // Initialize source timer
-    if (GetInputType() == svlTypeStreamSource) {
-        Timer.Reset();
-        Timer.Start();
-        ulFrameTime = 1.0 / Hertz;
-    }
-
     return SVL_OK;
 }
 
@@ -256,19 +195,6 @@ int svlFilterGeneric::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata)
 
     _OnSingleThread(procInfo)
     {
-        // Try to maintain source sample frequency
-        if (GetInputType() == svlTypeStreamSource) {
-            if (FrameCounter > 0) {
-                double time = Timer.GetElapsedTime();
-                double t1 = ulFrameTime * FrameCounter;
-                double t2 = time - ulStartTime;
-                if (t1 > t2) osaSleep(t1 - t2);
-            }
-            else {
-                ulStartTime = Timer.GetElapsedTime();
-            }
-        }
-
         // Call process callback
         ret = CallbackObj->ProcessCallback(inputdata, OutputData);
     }
@@ -278,12 +204,22 @@ int svlFilterGeneric::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata)
 
 int svlFilterGeneric::Release()
 {
-    // Stop source timer
-    if (GetInputType() == svlTypeStreamSource) Timer.Stop();
-
     // Call release callback
     if (CallbackObj) CallbackObj->ReleaseCallback();
 
     return SVL_OK;
+}
+
+
+/*******************************************/
+/*** svlGenericFilterCallbackBase class ****/
+/*******************************************/
+
+svlGenericFilterCallbackBase::~svlGenericFilterCallbackBase()
+{
+}
+
+void svlGenericFilterCallbackBase::ReleaseCallback()
+{
 }
 

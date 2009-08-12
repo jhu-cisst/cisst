@@ -70,41 +70,7 @@ svlFilterStreamTypeConverter::svlFilterStreamTypeConverter(svlStreamType inputty
         AddSupportedType(inputtype, outputtype);
 
         // initializing output sample
-        switch (outputtype) {
-            case svlTypeImageRGB:
-                OutputData = new svlSampleImageRGB;
-            break;
-
-            case svlTypeImageRGBStereo:
-                OutputData = new svlSampleImageRGBStereo;
-            break;
-
-            case svlTypeImageMono8:
-                OutputData = new svlSampleImageMono8;
-            break;
-
-            case svlTypeImageMono8Stereo:
-                OutputData = new svlSampleImageMono8Stereo;
-            break;
-
-            case svlTypeImageMono16:
-                OutputData = new svlSampleImageMono16;
-            break;
-
-            case svlTypeImageMono16Stereo:
-                OutputData = new svlSampleImageMono16Stereo;
-            break;
-
-            // Other types may be added in the future
-            case svlTypeDepthMap:
-            case svlTypeInvalid:
-            case svlTypeStreamSource:
-            case svlTypeStreamSink:
-            case svlTypeImageCustom:
-            case svlTypeRigidXform:
-            case svlTypePointCloud:
-            break;
-        }
+        OutputData = svlSample::GetNewFromType(outputtype);
     }
 
     DistanceScaling = 1.0f;

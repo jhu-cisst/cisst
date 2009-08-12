@@ -52,8 +52,8 @@ public:
     int LoadCodecSettings(const std::string filepath);
 
 protected:
-    virtual int Initialize(svlSample* inputdata = 0);
-    virtual int ProcessFrame(ProcInfo* procInfo, svlSample* inputdata = 0);
+    virtual int Initialize(svlSample* inputdata);
+    virtual int ProcessFrame(ProcInfo* procInfo, svlSample* inputdata);
     virtual int Release();
 
 private:

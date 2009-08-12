@@ -27,6 +27,7 @@ SET(DEPENDENCIES
 # all source files
 SET(SOURCE_FILES
   # Public System API
+    svlStreamDefs.cpp
     svlStreamManager.cpp
     svlSyncPoint.cpp
     svlSeries.cpp
@@ -78,13 +79,13 @@ SET(SOURCE_FILES
 # all header files
 SET(HEADER_FILES
   # Public System API
+    svlStreamDefs.h
     svlStreamManager.h
     svlSyncPoint.h
     svlSeries.h
     svlRenderTargets.h
     svlStreamBranchSource.h
     svlExport.h
-    svlStreamDefs.h
     svlFileHandlers.h
 
   # Filter API

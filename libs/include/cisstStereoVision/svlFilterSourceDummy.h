@@ -31,15 +31,13 @@ http://www.cisst.org/cisst/license.txt.
 #define SVL_DMYSRC_DISPARITY_CAP            200
 #define SVL_DMYSRC_DATA_NOT_INITIALIZED     -7000
 
-class CISST_EXPORT svlFilterSourceDummy : public svlFilterBase
+class CISST_EXPORT svlFilterSourceDummy : public svlFilterSourceBase
 {
 public:
     svlFilterSourceDummy(svlStreamType type);
     virtual ~svlFilterSourceDummy();
 
     int SetDimensions(unsigned int width, unsigned int height);
-    int GetWidth(int videoch = SVL_LEFT);
-    int GetHeight(int videoch = SVL_LEFT);
 
     void EnableNoiseImage(bool noise) { Noise = noise; }
     void SetStereoNoiseDisparity(int disparity);
@@ -47,23 +45,14 @@ public:
     int SetImage(unsigned char* buffer, unsigned int size);
     int SetImage(unsigned char* buffer_left, unsigned int size_left, unsigned char* buffer_right, unsigned int size_right);
 
-    void SetTargetFrequency(double hertz) { Hertz = hertz; }
-    double GetTargetFrequency() { return Hertz; }
-
 protected:
-    virtual int Initialize(svlSample* inputdata = 0);
-    virtual int ProcessFrame(ProcInfo* procInfo, svlSample* inputdata = 0);
-    virtual int Release();
+    virtual int Initialize();
+    virtual int ProcessFrame(ProcInfo* procInfo);
 
 private:
     bool Noise;
     int Disparity;
     unsigned char* ImageBuffer[2];
-
-    osaStopwatch Timer;
-    double ulFrameTime;
-    double ulStartTime;
-    double Hertz;
 
     void Translate(unsigned char* src, unsigned char* dest, const int width, const int height, const int trhoriz, const int trvert);
 };

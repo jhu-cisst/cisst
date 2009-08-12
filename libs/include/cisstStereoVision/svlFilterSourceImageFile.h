@@ -39,23 +39,18 @@ http://www.cisst.org/cisst/license.txt.
 #define SVL_IFS_EXTENSION_LENGTH            64
 #define SVL_IFS_FULLPATH_LENGTH             1152
 
-class CISST_EXPORT svlFilterSourceImageFile : public svlFilterBase
+class CISST_EXPORT svlFilterSourceImageFile : public svlFilterSourceBase
 {
 public:
     svlFilterSourceImageFile(bool stereo = false);
     virtual ~svlFilterSourceImageFile();
 
-    int GetWidth(int videoch = SVL_LEFT);
-    int GetHeight(int videoch = SVL_LEFT);
-
     int SetFilePath(const char* filepathprefix, const char* extension, int videoch = SVL_LEFT);
     int SetSequence(unsigned int numberofdigits = 0, unsigned int from = 0, unsigned int to = 0);
-    void SetTargetFrequency(double hertz) { Hertz = hertz; }
-    double GetTargetFrequency() { return Hertz; }
 
 protected:
-    virtual int Initialize(svlSample* inputdata = 0);
-    virtual int ProcessFrame(ProcInfo* procInfo, svlSample* inputdata = 0);
+    virtual int Initialize();
+    virtual int ProcessFrame(ProcInfo* procInfo);
     virtual int Release();
 
 private:
@@ -70,11 +65,6 @@ private:
     unsigned int From;
     unsigned int To;
     unsigned int FileCounter;
-
-    osaStopwatch Timer;
-    double ulStartTime;
-    double ulFrameTime;
-    double Hertz;
 
     void BuildFilePath(int videoch, unsigned int framecounter = 0);
 };

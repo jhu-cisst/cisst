@@ -46,8 +46,8 @@ public:
     void SetChannelMask(bool ch1, bool ch2, bool ch3);
 
 protected:
-    virtual int Initialize(svlSample* inputdata = 0);
-    virtual int ProcessFrame(ProcInfo* procInfo, svlSample* inputdata = 0);
+    virtual int Initialize(svlSample* inputdata);
+    virtual int ProcessFrame(ProcInfo* procInfo, svlSample* inputdata);
     virtual int Release();
 
 private:

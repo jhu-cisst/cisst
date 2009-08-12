@@ -70,7 +70,7 @@ int svlFilterColorSpaceConverter::ProcessFrame(ProcInfo* procInfo, svlSample* in
 
     _ParallelLoop(procInfo, idx, videochannels)
     {
-        ConvertColorSpace(reinterpret_cast<unsigned char*>(img->GetPointer(idx)), img->GetWidth(idx) * img->GetHeight(idx));
+        ConvertColorSpace(img->GetUCharPointer(idx), img->GetWidth(idx) * img->GetHeight(idx));
     }
 
     return SVL_OK;

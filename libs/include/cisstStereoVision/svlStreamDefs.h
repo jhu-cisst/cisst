@@ -124,19 +124,20 @@ inline bool IsTypeUWord<unsigned short>(unsigned short CMN_UNUSED(val)) { return
 class svlSample
 {
 public:
-    svlSample() : ModifiedFlag(true) {}
-    virtual ~svlSample() {}
+    svlSample();
+    virtual ~svlSample();
     virtual svlSample* GetNewInstance() = 0;
     virtual svlStreamType GetType() = 0;
-    virtual bool IsImage() { return false; }
-    virtual bool IsInitialized() { return false; }
-    void SetTimestamp(double ts) { Timestamp = ts; }
-    double GetTimestamp() { return Timestamp; }
-    void SetModified(bool modified) { ModifiedFlag = modified; }
-    bool IsModified() { return ModifiedFlag; }
+    virtual bool IsImage();
+    virtual bool IsInitialized();
+    void SetTimestamp(double ts);
+    double GetTimestamp();
+    void SetModified(bool modified);
+    bool IsModified();
+    static svlSample* GetNewFromType(svlStreamType type);
 
 private:
-    double Timestamp;       // [seconds]
+    double Timestamp; // [seconds]
     bool ModifiedFlag;
 };
 
@@ -144,11 +145,11 @@ private:
 class svlSampleImageBase : public svlSample
 {
 public:
-    svlSampleImageBase() : svlSample() {}
-    virtual ~svlSampleImageBase() {}
+    svlSampleImageBase();
+    virtual ~svlSampleImageBase();
     virtual svlSample* GetNewInstance() = 0;
     virtual IplImage* IplImageRef(const unsigned int videochannel = 0) = 0;
-    bool IsImage() { return true; }
+    bool IsImage();
     virtual svlStreamType GetType() = 0;
     virtual bool IsInitialized() = 0;
     virtual void SetSize(const unsigned int width, const unsigned int height) = 0;
@@ -160,8 +161,8 @@ public:
     virtual unsigned int GetWidth(const unsigned int videochannel = 0) = 0;
     virtual unsigned int GetHeight(const unsigned int videochannel = 0) = 0;
     virtual unsigned int GetDataSize(const unsigned int videochannel = 0) = 0;
-    virtual void* GetPointer(const unsigned int videochannel = 0) = 0;
-    virtual void* GetPointer(const unsigned int videochannel, const unsigned int x, const unsigned int y) = 0;
+    virtual unsigned char* GetUCharPointer(const unsigned int videochannel = 0) = 0;
+    virtual unsigned char* GetUCharPointer(const unsigned int videochannel, const unsigned int x, const unsigned int y) = 0;
 };
 
 
@@ -353,13 +354,23 @@ public:
         return 0;
     }
 
-    void* GetPointer(const unsigned int videochannel = 0)
+    unsigned char* GetUCharPointer(const unsigned int videochannel = 0)
+    {
+        return reinterpret_cast<unsigned char*>(GetPointer(videochannel));
+    }
+
+    unsigned char* GetUCharPointer(const unsigned int videochannel, const unsigned int x, const unsigned int y)
+    {
+        return reinterpret_cast<unsigned char*>(GetPointer(videochannel, x, y));
+    }
+
+    _ValueType* GetPointer(const unsigned int videochannel = 0)
     {
         if (videochannel < _VideoChannels && Image[videochannel]) return Image[videochannel]->Pointer();
         return 0;
     }
 
-    void* GetPointer(const unsigned int videochannel, const unsigned int x, const unsigned int y)
+    _ValueType* GetPointer(const unsigned int videochannel, const unsigned int x, const unsigned int y)
     {
         if (videochannel < _VideoChannels && Image[videochannel]) {
             return Image[videochannel]->Pointer(y, x * _DataChannels);
@@ -399,34 +410,34 @@ typedef svlSampleImageCustom<float,          1, 1>   svlSampleDepthMap;
 class svlSampleRigidXform : public svlSample
 {
 public:
-    svlSampleRigidXform() : svlSample() {}
-    svlSample* GetNewInstance() { return new svlSampleRigidXform; }
+    svlSampleRigidXform();
+    svlSample* GetNewInstance();
+    svlStreamType GetType();
+    bool IsInitialized();
+    unsigned char* GetUCharPointer();
+    double* GetPointer();
+    unsigned int GetDataSize();
 
     svlRigidXform frame4x4;
-
-    svlStreamType GetType() { return svlTypeRigidXform; }
-    bool IsInitialized() { return true; }
-    void* GetPointer() { return frame4x4.Pointer();}
-    unsigned int GetDataSize() { return (frame4x4.size() * sizeof(double)); }
 };
 
 
 class svlSamplePointCloud : public svlSample
 {
 public:
-    svlSamplePointCloud() : svlSample() {}
-    svlSample* GetNewInstance() { return new svlSamplePointCloud; }
+    svlSamplePointCloud();
+    svlSample* GetNewInstance();
+    svlStreamType GetType();
+    bool IsInitialized();
+    void SetSize(unsigned int dimensions, unsigned int size);
+    void SetSize(svlSamplePointCloud& sample);
+    unsigned int GetDimensions();
+    unsigned int GetSize();
+    unsigned char* GetUCharPointer();
+    double* GetPointer();
+    unsigned int GetDataSize();
 
     svlPointCloud points;
-
-    svlStreamType GetType() { return svlTypePointCloud; }
-    bool IsInitialized() { if (points.cols() > 0) { return true; } return false; }
-    void SetSize(unsigned int dimensions, unsigned int size) { points.SetSize(dimensions, size); }
-    void SetSize(svlSamplePointCloud& sample) { SetSize(sample.GetDimensions(), sample.GetSize()); }
-    unsigned int GetDimensions() { return points.rows(); }
-    unsigned int GetSize() { return points.cols(); }
-    void* GetPointer() { return points.Pointer();}
-    unsigned int GetDataSize() { return (points.size() * sizeof(double)); }
 };
 
 

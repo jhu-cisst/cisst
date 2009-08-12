@@ -42,58 +42,109 @@ using namespace std;
 int VideoConverter(const std::string source, const std::string destination)
 {
     // instantiating SVL stream and filters
-    svlStreamManager viewer_stream(1);
-    svlFilterSourceVideoFile viewer_source(true);
-    svlFilterImageRectifier viewer_rectifier;
-    svlFilterImageFileWriter viewer_writer;
-    svlFilterImageWindow viewer_window;
+    svlStreamManager converter_stream(1);
+    svlFilterSourceVideoFile converter_source(false);
+    svlFilterVideoFileWriterAVI converter_writerAVI;
+#if (CISST_SVL_HAS_ZLIB == ON)
+    svlFilterVideoFileWriter converter_writerCVI;
+#endif // CISST_SVL_HAS_ZLIB
+    svlFilterBase* converter_writer = 0;
 
     // setup source
-    viewer_source.DialogFilePath(SVL_LEFT);
-    viewer_source.DialogFilePath(SVL_RIGHT);
+    if (source.empty()) {
+        if (converter_source.DialogFilePath() != SVL_OK) {
+            cerr << "No source file has been selected." << endl;
+            return -1;
+        }
+    }
+    else {
+        converter_source.SetFilePath(source);
+    }
 
-    // setup source
-    viewer_rectifier.LoadTable("C:\\Documents and Settings\\bvagvolgyi\\My Documents\\Calibration\\20071128_JHMI_daVinci_0_degree\\left_rectif.txt", SVL_LEFT);
-    viewer_rectifier.LoadTable("C:\\Documents and Settings\\bvagvolgyi\\My Documents\\Calibration\\20071128_JHMI_daVinci_0_degree\\right_rectif.txt", SVL_RIGHT);
+    converter_source.SetTargetFrequency(1000.0); // as fast as possible
+    converter_source.SetLoop(false);
 
-    // setup writer
-    viewer_writer.SetFilePath("left_", "bmp", SVL_LEFT);
-    viewer_writer.SetFilePath("right_", "bmp", SVL_RIGHT);
+    // setup destination
+    if (destination.empty()) {
+#if (CISST_SVL_HAS_ZLIB == ON)
+        cerr << "Select video format - AVI or CVI [press 'a' or 'c']";
+        int ch = cmnGetChar();
+        cerr << endl;
+        switch (ch) {
+            case 'a':
+                if (converter_writerAVI.DialogFilePath() != SVL_OK) {
+                    cerr << "No destination file has been selected." << endl;
+                    return -1;
+                }
+                converter_writerAVI.DialogCodec();
+                converter_writer = &converter_writerAVI;
+            break;
 
-    // setup image window
-    viewer_window.SetTitleText("Video Player");
+            case 'c':
+                if (converter_writerCVI.DialogFilePath() != SVL_OK) {
+                    cerr << "No destination file has been selected." << endl;
+                    return -1;
+                }
+                converter_writer = &converter_writerCVI;
+            break;
+
+            default:
+            break;
+        }
+#else // CISST_SVL_HAS_ZLIB
+        if (converter_writerAVI.DialogFilePath() != SVL_OK) {
+            cerr << "No destination file has been selected." << endl;
+            return -1;
+        }
+        converter_writerAVI.DialogCodec();
+        converter_writer = &converter_writerAVI;
+#endif // CISST_SVL_HAS_ZLIB
+    }
+    else {
+#if (CISST_SVL_HAS_ZLIB == ON)
+        if (destination.rfind(".avi") == destination.length() - 4) {
+            converter_writerAVI.SetFilePath(destination);
+        }
+        else if (destination.rfind(".cvi") == destination.length() - 4) {
+            converter_writerCVI.SetFilePath(destination);
+        }
+        else {
+            cerr << "Cannot recognize file extension. Available options: '.AVI' or '.CVI'" << endl;
+            return -1;
+        }
+#else // CISST_SVL_HAS_ZLIB
+        converter_writerAVI.SetFilePath(destination);
+        if (destination.rfind(".avi") == destination.length() - 4) {
+            converter_writerAVI.SetFilePath(destination);
+        }
+        else {
+            cerr << "Cannot recognize file extension.  Available options: '.AVI'" << endl;
+            return -1;
+        }
+#endif // CISST_SVL_HAS_ZLIB
+    }
 
     // chain filters to pipeline
-    viewer_stream.Trunk().Append(&viewer_source);
-    viewer_stream.Trunk().Append(&viewer_rectifier);
-    viewer_stream.Trunk().Append(&viewer_writer);
-    viewer_stream.Trunk().Append(&viewer_window);
+    converter_stream.Trunk().Append(&converter_source);
+    converter_stream.Trunk().Append(converter_writer);
 
-    cerr << endl << "Starting stream... ";
+    cerr << endl << "Conversion in progress. Please wait..." << endl;
 
     // initialize and start stream
-    if (viewer_stream.Start() != SVL_OK) goto labError;
+    if (converter_stream.Start() != SVL_OK) goto labError;
 
-    cerr << "Done" << endl;
-
-    int ch;
-
-    do {
-        cerr << endl << "Keyboard commands:" << endl << endl;
-        cerr << "  In command window:" << endl;
-        cerr << "    'q'   - Quit" << endl << endl;
-
-        ch = cmnGetChar();
-        osaSleep(1.0 * cmn_ms);
-    } while (ch != 'q');
-
-    cerr << endl;
-
-    // stop stream
-    viewer_stream.Stop();
+    converter_stream.WaitForStop();
+    if (converter_stream.GetStreamStatus() < 0) {
+        // Some error
+        cerr << endl << "Error while conversion." << endl;
+    }
+    else {
+        // Success
+        cerr << endl << "Conversion done." << endl;
+    }
 
     // destroy pipeline
-    viewer_stream.EmptyFilterList();
+    converter_stream.EmptyFilterList();
 
 labError:
     return 0;
@@ -104,51 +155,23 @@ labError:
 //             main             //
 //////////////////////////////////
 
-int ParseNumber(char* string, unsigned int maxlen)
-{
-    if (string == 0 || maxlen == 0) return -1;
-
-    int ivalue, j;
-    char ch;
-
-    // parse number
-    j = 0;
-    ivalue = 0;
-    ch = string[j];
-    // 4 digits max
-    while (ch != 0 && j < (int)maxlen) {
-        // check if number
-        ch -= '0';
-        if (ch > 9 || ch < 0) {
-            ivalue = -1;
-            break;
-        }
-        ivalue = ivalue * 10 + ch;
-        // step to next digit
-        j ++;
-        ch = string[j];
-    }
-    if (j == 0) ivalue = -1;
-
-    return ivalue;
-}
-
 int main(int argc, char** argv)
 {
     cerr << endl << "stereoTutorialVideoConverter - cisstStereoVision example by Balazs Vagvolgyi" << endl;
-    cerr << "See http://www.cisst.org/cisst for details." << endl << endl;
+    cerr << "See http://www.cisst.org/cisst for details." << endl;
+    cerr << "Command line format:" << endl;
+    cerr << "     stereoTutorialVideoConverter [source_pathname [destination_pathname]]" << endl;
+    cerr << "Examples:" << endl;
+    cerr << "     stereoTutorialVideoConverter src.cvi" << endl;
+    cerr << "     stereoTutorialVideoConverter src.avi dest.cvi" << endl << endl;
 
-    if (argc < 1/*3*/) {
-        cerr << "Command line format:" << endl;
-        cerr << "     stereoTutorialVideoConverter <source_pathname>  <destination_pathname>" << endl;
-        cerr << "Example:" << endl;
-        cerr << "     stereoTutorialVideoConverter video.avi video.cvi" << endl;
-        cerr << "     stereoTutorialVideoConverter video.cvi video.avi" << endl;
-        cerr << "Quit" << endl << endl;
-        return 1;
+    string source, destination;
+    if (argc >= 2) {
+        source = argv[1];
+        if (argc >= 3) source = argv[2];
     }
 
-    VideoConverter("", "");//argv[1], argv[2]);
+    VideoConverter(source, destination);
 
     cerr << "Quit" << endl << endl;
     return 1;

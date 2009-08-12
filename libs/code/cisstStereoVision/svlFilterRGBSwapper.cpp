@@ -65,7 +65,7 @@ int svlFilterRGBSwapper::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata)
 
     _ParallelLoop(procInfo, idx, videochannels)
     {
-        SwapChannels(reinterpret_cast<unsigned char*>(img->GetPointer(idx)), img->GetWidth(idx) * img->GetHeight(idx));
+        SwapChannels(img->GetUCharPointer(idx), img->GetWidth(idx) * img->GetHeight(idx));
     }
 
     return SVL_OK;

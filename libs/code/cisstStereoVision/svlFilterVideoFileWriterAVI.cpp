@@ -109,7 +109,7 @@ int svlFilterVideoFileWriterAVI::ProcessFrame(ProcInfo* procInfo, svlSample* inp
 
     _ParallelLoop(procInfo, idx, videochannels)
     {
-        if (reinterpret_cast<CVfWAvi*>(VideoObj[idx])->AddFrameToAVI(reinterpret_cast<unsigned char*>(img->GetPointer(idx)),
+        if (reinterpret_cast<CVfWAvi*>(VideoObj[idx])->AddFrameToAVI(img->GetUCharPointer(idx),
                                                                      img->GetDataSize(idx)) == 0) ret = SVL_FAIL;
     }
 

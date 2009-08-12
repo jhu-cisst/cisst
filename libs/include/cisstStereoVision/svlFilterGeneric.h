@@ -36,11 +36,11 @@ class svlFilterGeneric;
 class CISST_EXPORT svlGenericFilterCallbackBase
 {
 public:
-    virtual ~svlGenericFilterCallbackBase() {}
+    virtual ~svlGenericFilterCallbackBase();
 
     virtual int InitializeCallback(svlSample* inputsample, svlSample* outputsample) = 0;
     virtual int ProcessCallback(svlSample* inputsample, svlSample* outputsample) = 0;
-    virtual void ReleaseCallback() {}
+    virtual void ReleaseCallback();
 };
 
 class CISST_EXPORT svlFilterGeneric : public svlFilterBase
@@ -50,21 +50,14 @@ public:
     virtual ~svlFilterGeneric();
 
     int SetCallback(svlGenericFilterCallbackBase* callbackobj);
-    void SetTargetSourceFrequency(double hertz) { Hertz = hertz; }
-    double GetTargetSourceFrequency() { return Hertz; }
 
 protected:
-    virtual int Initialize(svlSample* inputdata = 0);
-    virtual int ProcessFrame(ProcInfo* procInfo, svlSample* inputdata = 0);
+    virtual int Initialize(svlSample* inputdata);
+    virtual int ProcessFrame(ProcInfo* procInfo, svlSample* inputdata);
     virtual int Release();
 
 private:
     svlGenericFilterCallbackBase* CallbackObj;
-
-    osaStopwatch Timer;
-    double ulFrameTime;
-    double ulStartTime;
-    double Hertz;
 };
 
 #endif // _svlFilterGeneric_h

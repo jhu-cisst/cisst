@@ -303,7 +303,7 @@ int svlFilterImageWindow::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata)
             WindowManager->SetTimestamp(-1.0);
             TimestampEnabled = 0;
         }
-        WindowManager->DrawImageThreadSafe(reinterpret_cast<unsigned char*>(img->GetPointer(idx)), img->GetDataSize(idx), idx);
+        WindowManager->DrawImageThreadSafe(img->GetUCharPointer(idx), img->GetDataSize(idx), idx);
     }
 
     _SynchronizeThreads(procInfo);

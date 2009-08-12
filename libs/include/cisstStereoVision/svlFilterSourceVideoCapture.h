@@ -43,7 +43,7 @@ http://www.cisst.org/cisst/license.txt.
 class CVideoCaptureSourceBase;
 class CVideoCaptureSourceDialogThread;
 
-class CISST_EXPORT svlFilterSourceVideoCapture : public svlFilterBase
+class CISST_EXPORT svlFilterSourceVideoCapture : public svlFilterSourceBase
 {
 friend class CVideoCaptureSourceDialogThread;
 
@@ -118,8 +118,8 @@ public:
     svlFilterSourceVideoCapture(bool stereo = false);
     virtual ~svlFilterSourceVideoCapture();
 
-    int GetWidth(unsigned int videoch = SVL_LEFT);
-    int GetHeight(unsigned int videoch = SVL_LEFT);
+    double GetTargetFrequency();
+    int SetTargetFrequency(double hertz);
 
     int DialogSetup(unsigned int videoch = SVL_LEFT);
     int DialogDevice();
@@ -149,8 +149,8 @@ public:
     int LoadSettings(const char* filepath);
 
 protected:
-    virtual int Initialize(svlSample* inputdata = 0);
-    virtual int ProcessFrame(ProcInfo* procInfo, svlSample* inputdata = 0);
+    virtual int Initialize();
+    virtual int ProcessFrame(ProcInfo* procInfo);
     virtual int Release();
 
 private:

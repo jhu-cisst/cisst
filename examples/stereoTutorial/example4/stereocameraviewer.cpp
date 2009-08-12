@@ -50,7 +50,7 @@ public:
     }
 
 protected:
-    int Initialize(svlSample* inputdata = 0)
+    int Initialize(svlSample* inputdata)
     {
         OutputData = inputdata;
         return SVL_OK;

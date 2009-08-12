@@ -69,7 +69,7 @@ using namespace std;
 /*******************************************/
 
 svlFilterSourceVideoCapture::svlFilterSourceVideoCapture(bool stereo) :
-    svlFilterBase(),
+    svlFilterSourceBase(),
     EnumeratedDevices(0),
     NumberOfEnumeratedDevices(-1),
     FormatList(0),
@@ -77,13 +77,13 @@ svlFilterSourceVideoCapture::svlFilterSourceVideoCapture(bool stereo) :
 {
     if (stereo) {
         NumberOfChannels = 2;
-        SetFilterToSource(svlTypeImageRGBStereo);
+        AddSupportedType(svlTypeImageRGBStereo);
         // forcing output sample to handle external buffers
         OutputData = new svlSampleImageRGBStereo(false);
     }
     else {
         NumberOfChannels = 1;
-        SetFilterToSource(svlTypeImageRGB);
+        AddSupportedType(svlTypeImageRGB);
         // forcing output sample to handle external buffers
         OutputData = new svlSampleImageRGB(false);
     }
@@ -138,6 +138,9 @@ svlFilterSourceVideoCapture::svlFilterSourceVideoCapture(bool stereo) :
         APIDeviceID[i] = -1;
         API[i] = -1;
     }
+
+    //Disable automatic frame timing
+    TargetFrequency = -1.0;
 }
 
 svlFilterSourceVideoCapture::~svlFilterSourceVideoCapture()
@@ -183,7 +186,7 @@ svlFilterSourceVideoCapture::~svlFilterSourceVideoCapture()
     if (FormatListSize) delete [] FormatListSize;
 }
 
-int svlFilterSourceVideoCapture::Initialize(svlSample* CMN_UNUSED(inputdata))
+int svlFilterSourceVideoCapture::Initialize()
 {
     PlatformType platform;
     unsigned int i;
@@ -286,7 +289,7 @@ labError:
     return ret;
 }
 
-int svlFilterSourceVideoCapture::ProcessFrame(ProcInfo* procInfo, svlSample* CMN_UNUSED(inputdata))
+int svlFilterSourceVideoCapture::ProcessFrame(ProcInfo* procInfo)
 {
     svlImageRGB* image;
     unsigned int idx;
@@ -469,36 +472,14 @@ labError:
     return ret;
 }
 
-int svlFilterSourceVideoCapture::GetWidth(unsigned int videoch)
+double svlFilterSourceVideoCapture::GetTargetFrequency()
 {
-    if (IsDataValid(GetOutputType(), OutputData) != SVL_OK)
-        return SVL_FAIL;
-    if (videoch >= NumberOfChannels)
-        return SVL_WRONG_CHANNEL;    // Get capture API platform
-    PlatformType platform = EnumeratedDevices[DeviceID[videoch]].platform;
-
-    if (platform == LinLibDC1394) {
-#if (CISST_SVL_HAS_LIBDC1394 == ON)
-        cout << endl << "  ===== Setup external trigger =====" << endl;
-        DialogTrigger(videoch);
-#endif // CISST_SVL_HAS_LIBDC1394
-    }
-    else {
-        // External trigger is not supported in other APIs.
-    }
-
-
-    return dynamic_cast<svlSampleImageBase*>(OutputData)->GetWidth(videoch);
+    return -1.0;
 }
 
-int svlFilterSourceVideoCapture::GetHeight(unsigned int videoch)
+int svlFilterSourceVideoCapture::SetTargetFrequency(double CMN_UNUSED(hertz))
 {
-    if (IsDataValid(GetOutputType(), OutputData) != SVL_OK)
-        return SVL_FAIL;
-    if (videoch >= NumberOfChannels)
-        return SVL_WRONG_CHANNEL;
-
-    return dynamic_cast<svlSampleImageBase*>(OutputData)->GetHeight(videoch);
+    return SVL_FAIL;
 }
 
 int svlFilterSourceVideoCapture::DialogSetup(unsigned int videoch)
@@ -710,7 +691,7 @@ int svlFilterSourceVideoCapture::DialogImageProperties(unsigned int videoch)
 {
     // Available only after initialization
     if (IsInitialized() == false)
-        return SVL_NOT_YET_INITIALIZED;
+        return SVL_NOT_INITIALIZED;
     if (videoch >= NumberOfChannels)
         return SVL_WRONG_CHANNEL;
 
@@ -1263,7 +1244,7 @@ int svlFilterSourceVideoCapture::SetImageProperties(ImageProperties& properties,
 {
     // Available only after initialization
     if (IsInitialized() == false)
-        return SVL_NOT_YET_INITIALIZED;
+        return SVL_NOT_INITIALIZED;
     if (videoch >= NumberOfChannels)
         return SVL_WRONG_CHANNEL;
 
@@ -1281,7 +1262,7 @@ int svlFilterSourceVideoCapture::SetImageProperties(unsigned int videoch)
 {
     // Available only after initialization
     if (IsInitialized() == false)
-        return SVL_NOT_YET_INITIALIZED;
+        return SVL_NOT_INITIALIZED;
     if (videoch >= NumberOfChannels)
         return SVL_WRONG_CHANNEL;
     if (Properties[videoch] == 0)
@@ -1294,7 +1275,7 @@ int svlFilterSourceVideoCapture::GetImageProperties(ImageProperties& properties,
 {
     // Available only after initialization
     if (IsInitialized() == false)
-        return SVL_NOT_YET_INITIALIZED;
+        return SVL_NOT_INITIALIZED;
     if (videoch >= NumberOfChannels)
         return SVL_WRONG_CHANNEL;
 
@@ -1311,7 +1292,7 @@ int svlFilterSourceVideoCapture::GetImageProperties(unsigned int videoch)
 {
     // Available only after initialization
     if (IsInitialized() == false)
-        return SVL_NOT_YET_INITIALIZED;
+        return SVL_NOT_INITIALIZED;
     if (videoch >= NumberOfChannels)
         return SVL_WRONG_CHANNEL;
 

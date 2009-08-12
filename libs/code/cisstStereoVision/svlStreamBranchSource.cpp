@@ -42,84 +42,22 @@ using namespace std;
 /*** svlStreamBranchSource class *****/
 /*************************************/
 
-svlStreamBranchSource::svlStreamBranchSource(svlStreamType type) : svlFilterBase()
+svlStreamBranchSource::svlStreamBranchSource(svlStreamType type) :
+    svlFilterSourceBase(false), // manual timestamp management
+    NextFreeBufferPos(0)
 {
     unsigned int i;
 
     OutputData = 0;
     for (i = 0; i < SMPSRC_BUFFERS; i ++) DataBuffer[i] = 0;
 
-    switch (type) {
-        case svlTypeImageRGB:
-        {
-            SetFilterToSource(svlTypeImageRGB, false);
-            for (i = 0; i < SMPSRC_BUFFERS; i ++) {
-                DataBuffer[i] = new svlSampleImageRGB;
-            }
-        }
-        break;
-
-        case svlTypeImageRGBStereo:
-        {
-            SetFilterToSource(svlTypeImageRGBStereo, false);
-            for (i = 0; i < SMPSRC_BUFFERS; i ++) {
-                DataBuffer[i] = new svlSampleImageRGBStereo;
-            }
-        }
-        break;
-
-        case svlTypeImageMono8:
-        {
-            SetFilterToSource(svlTypeImageMono8, false);
-            for (i = 0; i < SMPSRC_BUFFERS; i ++) {
-                DataBuffer[i] = new svlSampleImageMono8;
-            }
-        }
-        break;
-
-        case svlTypeImageMono8Stereo:
-        {
-            SetFilterToSource(svlTypeImageMono8Stereo, false);
-            for (i = 0; i < SMPSRC_BUFFERS; i ++) {
-                DataBuffer[i] = new svlSampleImageMono8Stereo;
-            }
-        }
-        break;
-
-        case svlTypeImageMono16:
-        {
-            SetFilterToSource(svlTypeImageMono16, false);
-            for (i = 0; i < SMPSRC_BUFFERS; i ++) {
-                DataBuffer[i] = new svlSampleImageMono16;
-            }
-        }
-        break;
-
-        case svlTypeImageMono16Stereo:
-        {
-            SetFilterToSource(svlTypeImageMono16Stereo, false);
-            for (i = 0; i < SMPSRC_BUFFERS; i ++) {
-                DataBuffer[i] = new svlSampleImageMono16Stereo;
-            }
-        }
-        break;
-
-        // Other types may be added in the future
-        case svlTypeInvalid:
-        case svlTypeStreamSource:
-        case svlTypeStreamSink:
-        case svlTypeImageCustom:
-        case svlTypeDepthMap:
-        case svlTypeRigidXform:
-        case svlTypePointCloud:
-        break;
+    AddSupportedType(type);
+    for (i = 0; i < SMPSRC_BUFFERS; i ++) {
+        DataBuffer[i] = svlSample::GetNewFromType(type);
     }
-
-    NextFreeBufferPos = 0;
-    Hertz = 30.0;
 }
 
-svlStreamBranchSource::svlStreamBranchSource() : svlFilterBase()
+svlStreamBranchSource::svlStreamBranchSource() : svlFilterSourceBase()
 {
     // Never should be called called
 }
@@ -133,7 +71,7 @@ svlStreamBranchSource::~svlStreamBranchSource()
     }
 }
 
-int svlStreamBranchSource::Initialize(svlSample* CMN_UNUSED(inputdata))
+int svlStreamBranchSource::Initialize()
 {
     Release();
 
@@ -141,37 +79,22 @@ int svlStreamBranchSource::Initialize(svlSample* CMN_UNUSED(inputdata))
     if (readypos >= SMPSRC_BUFFERS) readypos = 0;
     OutputData = DataBuffer[readypos];
 
-    Timer.Reset();
-    Timer.Start();
-    ulFrameTime = 1.0 / Hertz;
-
     return SVL_OK;
 }
 
-int svlStreamBranchSource::ProcessFrame(ProcInfo* procInfo, svlSample* CMN_UNUSED(inputdata))
+int svlStreamBranchSource::ProcessFrame(ProcInfo* procInfo)
 {
     int ret = SVL_OK;
 
     _OnSingleThread(procInfo)
     {
-        if (FrameCounter > 0) {
-            double time = Timer.GetElapsedTime();
-            double t1 = ulFrameTime * FrameCounter;
-            double t2 = time - ulStartTime;
-            if (t1 > t2) osaSleep(t1 - t2);
-        }
-        else {
-            ulStartTime = Timer.GetElapsedTime();
-        }
+        // Try to keep TargetFrequency
+        WaitForTargetTimer();
+
         ret = PullSample();
     }
 
     return ret;
-}
-
-int svlStreamBranchSource::Release()
-{
-    return SVL_OK;
 }
 
 bool svlStreamBranchSource::IsTypeSupported(svlStreamType type)
@@ -198,12 +121,11 @@ bool svlStreamBranchSource::IsTypeSupported(svlStreamType type)
     return false;
 }
 
-void svlStreamBranchSource::SetupSource(svlSample* inputdata, double hertz)
+void svlStreamBranchSource::SetInputSample(svlSample* inputdata)
 {
     for (unsigned int i = 0; i < SMPSRC_BUFFERS; i ++) {
         dynamic_cast<svlSampleImageBase*>(DataBuffer[i])->SetSize(*(dynamic_cast<svlSampleImageBase*>(inputdata)));
     }
-    Hertz = hertz;
 }
 
 void svlStreamBranchSource::PushSample(svlSample* inputdata)
@@ -215,7 +137,7 @@ void svlStreamBranchSource::PushSample(svlSample* inputdata)
 
     // TODO: tripple buffering
     for (unsigned int i = 0; i < vidchannels; i ++) {
-        memcpy(outputbuffer->GetPointer(i), dynamic_cast<svlSampleImageBase*>(inputdata)->GetPointer(i), outputbuffer->GetDataSize(i));
+        memcpy(outputbuffer->GetUCharPointer(i), dynamic_cast<svlSampleImageBase*>(inputdata)->GetUCharPointer(i), outputbuffer->GetDataSize(i));
     }
     // TODO: tripple buffering
 

@@ -182,7 +182,7 @@ int svlFilterVideoFileWriter::ProcessFrame(ProcInfo* procInfo, svlSample* inputd
         CompressedPartOffset[i][procid] = procid * comprsize;
 
         // Convert RGB to YUV422 planar format
-        RGB24toYUV422P(reinterpret_cast<unsigned char*>(img->GetPointer(i)) + offset * 3,
+        RGB24toYUV422P(img->GetUCharPointer(i) + offset * 3,
                        YUVBuffer[i] + offset * 2,
                        size);
 

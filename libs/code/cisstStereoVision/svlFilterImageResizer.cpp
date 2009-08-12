@@ -151,7 +151,7 @@ int svlFilterImageResizer::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata
         heq = (Height[idx] == id->GetHeight(idx));
 
         if (weq && heq) {
-            memcpy(od->GetPointer(idx), id->GetPointer(idx), id->GetDataSize(idx));
+            memcpy(od->GetUCharPointer(idx), id->GetUCharPointer(idx), id->GetDataSize(idx));
             return SVL_OK;
         }
 
