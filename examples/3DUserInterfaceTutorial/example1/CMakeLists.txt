@@ -4,17 +4,6 @@
 
 project(3DUserInterfaceExample1)
 
-# Find VTK settings 
-find_package(VTK REQUIRED) 
-if (VTK_FOUND) 
-  if (NOT VTK_USE_RENDERING) 
-    message (FATAL_ERROR "${PROJECT_NAME} requires VTK_USE_RENDERING.") 
-  endif (NOT VTK_USE_RENDERING) 
-  include (${VTK_USE_FILE}) 
-else (VTK_FOUND) 
-  message (FATAL ERROR "VTK not found") 
-endif (VTK_FOUND) 
-
 OPTION(HAS_DAVINCI "Build using the daVinci API" OFF)
 IF(HAS_DAVINCI)
    FIND_PATH(daVinci_INCLUDE_DIRS cisstDaVinciAPI.h)

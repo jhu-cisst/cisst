@@ -145,6 +145,16 @@ MACRO(CISST_REQUIRES WHO_REQUIRES REQUIRED_CISST_LIBRARIES)
      ENDIF("${REQUIRED_CISST_LIBRARIES}" MATCHES ${existing})
    ENDFOREACH(existing)
 
+   # Include extra packages as needed
+   FOREACH(package ${CISST_ADDITIONAL_PACKAGES})
+     FIND_PACKAGE(${package} REQUIRED)
+   ENDFOREACH(package)
+
+   # Include extra cmake files as needed
+   FOREACH(fileCMake ${CISST_ADDITIONAL_CMAKE_FILES})
+     INCLUDE(${fileCMake})
+   ENDFOREACH(fileCMake)
+
    # Finally, link with the required libraries
    TARGET_LINK_LIBRARIES(${WHO_REQUIRES} ${CISST_LIBRARIES_TO_USE} ${CISST_ADDITIONAL_LIBRARIES})
 
