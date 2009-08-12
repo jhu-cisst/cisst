@@ -178,7 +178,6 @@ if(CISST_MTS_HAS_ICE)
   find_package(Ice)
 
   CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_INCLUDE_DIRECTORIES ICE_INCLUDE_DIR)
-  CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_LIBRARIES ICE_LIBRARY_NAME)
   CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_LINK_DIRECTORIES ICE_LIBRARY_DIR)
 
   # create a list of include directories for slice
@@ -211,6 +210,8 @@ if(CISST_MTS_HAS_ICE)
 
   endforeach(slice_file ${SLICE_FILES})
 
+  set(ADDITIONAL_SOURCE_FILES ${ADDITIONAL_SOURCE_FILES} ${ICE_RESOURCE_FILES})
+
 endif(CISST_MTS_HAS_ICE)
 
 
@@ -232,14 +233,23 @@ SET(ADDITIONAL_HEADER_FILES ${CISST_MTS_CONFIG_FILE})
 # Finally add the library
 CISST_ADD_LIBRARY_TO_PROJECT(cisstLibs)
 
-
 if(CISST_MTS_HAS_ICE)
   if(WIN32)
-    target_link_libraries(cisstMultiTask 
-                          optimized Ice debug Iced
-                          optimized IceUtil debug IceUtild)
+	set(ICE_LIBRARIES_OPTIMIZED Ice IceUtil)
+	set(ICE_LIBRARIES_DEBUG Iced IceUtild)
+    target_link_libraries(cisstMultiTask
+                             optimized Ice
+                             debug Iced
+                             optimized IceUtil
+                             debug IceUtild)
+    CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_LIBRARIES_DEBUG ICE_LIBRARIES_DEBUG)
+    CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_LIBRARIES_OPTIMIZED ICE_LIBRARIES_OPTIMIZED)
   else(WIN32)
-    target_link_libraries(cisstMultiTask ${ICE_LIBRARY_NAME} IceUtil) 
+    set(ICE_LIBRARIES ${ICE_LIBRARY_NAME} IceUtil)
+    target_link_libraries(cisstMultiTask
+                          ${ICE_LIBRARIES})
+    CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_LIBRARIES ICE_LIBRARIES)
   endif(WIN32)
+  
 endif(CISST_MTS_HAS_ICE)
 
