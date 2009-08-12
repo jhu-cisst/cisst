@@ -36,9 +36,9 @@ http://www.cisst.org/cisst/license.txt.
 #include "vidV4L2Source.h"
 #endif // CISST_SVL_HAS_VIDEO4LINUX2
 
-#if (CISST_SVL_HAS_LIBDC1394 == ON)
+#if (CISST_SVL_HAS_DC1394 == ON)
 #include "vidDC1394Source.h"
-#endif // CISST_SVL_HAS_LIBDC1394
+#endif // CISST_SVL_HAS_DC1394
 
 #if (CISST_SVL_HAS_OPENCV == ON)
 #include "vidOCVSource.h"
@@ -99,9 +99,9 @@ svlFilterSourceVideoCapture::svlFilterSourceVideoCapture(bool stereo) :
 #if (CISST_SVL_HAS_VIDEO4LINUX2 == ON)
     NumberOfSupportedAPIs ++;
 #endif // CISST_SVL_HAS_VIDEO4LINUX2
-#if (CISST_SVL_HAS_LIBDC1394 == ON)
+#if (CISST_SVL_HAS_DC1394 == ON)
     NumberOfSupportedAPIs ++;
-#endif // CISST_SVL_HAS_LIBDC1394
+#endif // CISST_SVL_HAS_DC1394
 #if (CISST_SVL_HAS_OPENCV == ON)
     NumberOfSupportedAPIs ++;
 #endif // CISST_SVL_HAS_OPENCV
@@ -377,7 +377,7 @@ int svlFilterSourceVideoCapture::CreateCaptureAPIHandlers()
         }
         j ++;
 #endif // CISST_SVL_HAS_VIDEO4LINUX2
-#if (CISST_SVL_HAS_LIBDC1394 == ON)
+#if (CISST_SVL_HAS_DC1394 == ON)
         if (EnumeratedDevices[DeviceID[i]].platform == LinLibDC1394) {
             // getting API specific device and channel IDs
             APIDeviceID[i] = EnumeratedDevices[DeviceID[i]].id;
@@ -387,7 +387,7 @@ int svlFilterSourceVideoCapture::CreateCaptureAPIHandlers()
             chperapi[j] ++;
         }
         j ++;
-#endif // CISST_SVL_HAS_LIBDC1394
+#endif // CISST_SVL_HAS_DC1394
 #if (CISST_SVL_HAS_OPENCV == ON)
         if (EnumeratedDevices[DeviceID[i]].platform == OpenCV) {
             // getting API specific device and channel IDs
@@ -436,13 +436,13 @@ int svlFilterSourceVideoCapture::CreateCaptureAPIHandlers()
     }
     j ++;
 #endif // CISST_SVL_HAS_VIDEO4LINUX2
-#if (CISST_SVL_HAS_LIBDC1394 == ON)
+#if (CISST_SVL_HAS_DC1394 == ON)
     if (chperapi[j] > 0) {
         DeviceObj[j] = new CDC1394Source();
         if (DeviceObj[j]->SetStreamCount(chperapi[j]) != SVL_OK) goto labError;
     }
     j ++;
-#endif // CISST_SVL_HAS_LIBDC1394
+#endif // CISST_SVL_HAS_DC1394
 #if (CISST_SVL_HAS_OPENCV == ON)
     if (chperapi[j] > 0) {
         DeviceObj[j] = new COpenCVSource();
@@ -504,10 +504,10 @@ int svlFilterSourceVideoCapture::DialogSetup(unsigned int videoch)
     DialogFormat(videoch);
 
     if (EnumeratedDevices[DeviceID[videoch]].platform == LinLibDC1394) {
-#if (CISST_SVL_HAS_LIBDC1394 == ON)
+#if (CISST_SVL_HAS_DC1394 == ON)
         cout << endl << "  ===== Setup external trigger =====" << endl;
         DialogTrigger(videoch);
-#endif // CISST_SVL_HAS_LIBDC1394
+#endif // CISST_SVL_HAS_DC1394
     }
     else {
         // External trigger is not supported in other APIs.
@@ -949,7 +949,7 @@ int svlFilterSourceVideoCapture::GetDeviceList(DeviceInfo **deviceinfolist, bool
         }
         j ++;
 #endif // CISST_SVL_HAS_VIDEO4LINUX2
-#if (CISST_SVL_HAS_LIBDC1394 == ON)
+#if (CISST_SVL_HAS_DC1394 == ON)
         apideviceinfos[j] = 0;
         apidevicecounts[j] = 0;
         CDC1394Source *dc1394device = new CDC1394Source();
@@ -965,7 +965,7 @@ int svlFilterSourceVideoCapture::GetDeviceList(DeviceInfo **deviceinfolist, bool
             if (apidevicecounts[j] > 0) NumberOfEnumeratedDevices += apidevicecounts[j];
         }
         j ++;
-#endif // CISST_SVL_HAS_LIBDC1394
+#endif // CISST_SVL_HAS_DC1394
 #if (CISST_SVL_HAS_OPENCV == ON)
         apideviceinfos[j] = 0;
         apidevicecounts[j] = 0;

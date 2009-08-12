@@ -316,7 +316,6 @@ IF(CISST_SVL_HAS_MIL)
                          MIL_INCLUDE_DIR
                          MIL_mil_LIBRARY
                          )
-
         SET(SVL_ADDITIONAL_INCLUDE_DIRECTORIES
             "${SVL_ADDITIONAL_INCLUDE_DIRECTORIES}"
             "${MIL_INCLUDE_DIR}"
@@ -325,13 +324,11 @@ IF(CISST_SVL_HAS_MIL)
             "${SVL_ADDITIONAL_LIBRARIES}"
             "${MIL_mil_LIBRARY}"
             )
-
         SET(SOURCE_FILES
             ${SOURCE_FILES}
             vidMILDevice.h      # private header
             vidMILDevice.cpp
             )
-        SET(SVL_ADDITIONAL_LIBRARIES ${SVL_ADDITIONAL_LIBRARIES} ${MIL_mil_LIBRARY})
         MESSAGE(STATUS "Matrox Imaging Library (MIL) found - Switch to advanced view for details")
 
     ELSE(MIL_FOUND)
@@ -525,7 +522,7 @@ ENDIF(WIN32)
 
 # UNIX specific
 IF(UNIX)
-  #Linux specific
+  # Linux specific
   IF(CMAKE_SYSTEM_NAME MATCHES Linux)
     OPTION(CISST_SVL_HAS_VIDEO4LINUX2 "Compile Video4Linux2 extensions" OFF)
     IF(CISST_SVL_HAS_VIDEO4LINUX2)
@@ -535,25 +532,70 @@ IF(UNIX)
           vidV4L2Source.cpp
           )
     ENDIF(CISST_SVL_HAS_VIDEO4LINUX2)
+  ELSE(CMAKE_SYSTEM_NAME MATCHES Linux)
+    #Turn Linux specific switches OFF on other platforms
+    SET(CISST_SVL_HAS_VIDEO4LINUX2 "OFF" CACHE INTERNAL "SVL Has Video4Linux2")
+  ENDIF(CMAKE_SYSTEM_NAME MATCHES Linux)
 
-    OPTION(CISST_SVL_HAS_LIBDC1394 "Compile LibDC1394 extensions" OFF)
-    IF(CISST_SVL_HAS_LIBDC1394)
+  # Linux and Darwin
+  OPTION(CISST_SVL_HAS_DC1394 "Compile LibDC1394 extensions" OFF)
+  IF(CISST_SVL_HAS_DC1394)
+    SET(DC1394_FOUND "NO")
+
+    FIND_PATH(DC1394_INCLUDE_DIR
+              NAMES
+                dc1394/dc1394.h
+              PATHS
+                "/usr/include"
+                "/opt/local/include"
+              DOC "What is the path where dc1394/dc1394.h can be found"
+              )
+    FIND_LIBRARY(DC1394_dc1394_LIBRARY dc1394
+                 "/usr/lib"
+                 "/opt/local/lib"
+                 DOC "Where can the DC1394 library be found"
+                 )
+    IF(DC1394_INCLUDE_DIR)
+      IF(DC1394_dc1394_LIBRARY)
+        SET(DC1394_FOUND "YES")
+      ENDIF(DC1394_dc1394_LIBRARY)
+    ENDIF(DC1394_INCLUDE_DIR)
+
+    IF(DC1394_FOUND)
+      MARK_AS_ADVANCED(FORCE
+                       DC1394_INCLUDE_DIR
+                       DC1394_dc1394_LIBRARY
+                       )
+      SET(SVL_ADDITIONAL_INCLUDE_DIRECTORIES
+          "${SVL_ADDITIONAL_INCLUDE_DIRECTORIES}"
+          "${DC1394_INCLUDE_DIR}"
+          )
+      SET(SVL_ADDITIONAL_LIBRARIES
+          "${SVL_ADDITIONAL_LIBRARIES}"
+          "${DC1394_dc1394_LIBRARY}"
+          )
       SET(SOURCE_FILES
           ${SOURCE_FILES}
           vidDC1394Source.h         # private header
           vidDC1394Source.cpp
           )
-      SET(SVL_ADDITIONAL_LIBRARIES
-          "${SVL_ADDITIONAL_LIBRARIES}"
-          dc1394
-          )  
-    ENDIF(CISST_SVL_HAS_LIBDC1394)
-  ELSE(CMAKE_SYSTEM_NAME MATCHES Linux)
-    #Turn Linux specific switches OFF on other platforms
-    SET(CISST_SVL_HAS_VIDEO4LINUX2 "OFF" CACHE INTERNAL "SVL Has Video4Linux2")
-    SET(CISST_SVL_HAS_LIBDC1394    "OFF" CACHE INTERNAL "SVL Has LibDC1394")
-  ENDIF(CMAKE_SYSTEM_NAME MATCHES Linux)
-  # Linux and Darwin
+      MESSAGE(STATUS "DC1394 found - Switch to advanced view for details")
+
+    ELSE(DC1394_FOUND)
+      MARK_AS_ADVANCED(CLEAR
+                       DC1394_INCLUDE_DIR
+                       DC1394_dc1394_LIBRARY
+                       )
+      MESSAGE(FATAL_ERROR "DC1394 required, please specify it's location.")
+    ENDIF(DC1394_FOUND)
+
+  ELSE(CISST_SVL_HAS_DC1394)
+    MARK_AS_ADVANCED(FORCE
+                     DC1394_INCLUDE_DIR
+                     DC1394_dc1394_LIBRARY
+                     )
+  ENDIF(CISST_SVL_HAS_DC1394)
+
   OPTION(CISST_SVL_HAS_X11 "Compile X11 extensions" OFF)
   IF(CISST_SVL_HAS_X11)
     FIND_PACKAGE(X11 REQUIRED)
@@ -584,7 +626,7 @@ ELSE(UNIX)
 
   # Turn Unix specific switches OFF on other platforms
   SET(CISST_SVL_HAS_VIDEO4LINUX2 "OFF" CACHE INTERNAL "SVL Has Video4Linux2")
-  SET(CISST_SVL_HAS_LIBDC1394    "OFF" CACHE INTERNAL "SVL Has LibDC1394")
+  SET(CISST_SVL_HAS_DC1394    "OFF" CACHE INTERNAL "SVL Has LibDC1394")
   SET(CISST_SVL_HAS_X11          "OFF" CACHE INTERNAL "SVL Has X11")
 
 ENDIF(UNIX)

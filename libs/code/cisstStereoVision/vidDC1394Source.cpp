@@ -727,6 +727,9 @@ int CDC1394Source::Open()
             goto labError;
         }
 
+        // Disable warnings
+        dc1394_log_register_handler(DC1394_LOG_WARNING, 0, 0);
+
         // Setting defualt image properties
         svlFilterSourceVideoCapture::ImageProperties properties;
         memset(&properties, 0, sizeof(svlFilterSourceVideoCapture::ImageProperties));

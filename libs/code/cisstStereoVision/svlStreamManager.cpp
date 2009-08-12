@@ -1069,15 +1069,15 @@ void* svlStreamControlMultiThread::Proc(svlStreamManager* baseref)
 /*************************************/
 
 svlFilterBase::svlFilterBase() :
-    InputType(svlTypeInvalid),
-    OutputType(svlTypeInvalid),
-    PrevFilter(0),
-    NextFilter(0),
     OutputData(0),
     Initialized(false),
     Running(false),
+    OutputFormatModified(false),
     PrevInputTimestamp(-1.0),
-    OutputFormatModified(false)
+    InputType(svlTypeInvalid),
+    OutputType(svlTypeInvalid),
+    PrevFilter(0),
+    NextFilter(0)
 {
 }
 
@@ -1189,9 +1189,9 @@ int svlFilterBase::OnConnectInput(svlStreamType inputtype)
 
 svlFilterSourceBase::svlFilterSourceBase(bool autotimestamps) :
     svlFilterBase(),
-    AutoTimestamp(autotimestamps),
-    LoopFlag(true),
     TargetFrequency(30.0),
+    LoopFlag(true),
+    AutoTimestamp(autotimestamps),
     TargetStartTime(0.0),
     TargetFrameTime(0.0)
 {

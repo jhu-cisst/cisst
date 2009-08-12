@@ -122,13 +122,13 @@ int COpenCVSource::GetDeviceList(svlFilterSourceVideoCapture::DeviceInfo **devic
         if (j*100 == CV_CAP_VFW) continue;
 #endif // CISST_HAS_VIDEO4LINUX2
 
-#if (CISST_SVL_HAS_LIBDC1394 == ON)
+#if (CISST_SVL_HAS_DC1394 == ON)
         // OpenCV's DC1394 implementation may interfere
         // with SVL's native DC1394 implementation.
         // The two should be used in the same time.
         // Skipping OpenCV DC1394 devices.
         if (j*100 == CV_CAP_IEEE1394) continue;
-#endif // CISST_HAS_LIBDC1394
+#endif // CISST_SVL_HAS_DC1394
 
         for (i = 0; i < maxdevices; i ++) {
         // Find cameras

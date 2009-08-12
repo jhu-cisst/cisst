@@ -44,8 +44,8 @@ using namespace std;
 
 svlFilterSourceDummy::svlFilterSourceDummy(svlStreamType type) :
     svlFilterSourceBase(),
-    Disparity(0),
-    Noise(false)
+    Noise(false),
+    Disparity(0)
 {
     // Other types may be added in the future
     if (type == svlTypeImageRGB ||
