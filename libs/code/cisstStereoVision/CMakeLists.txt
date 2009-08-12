@@ -439,16 +439,22 @@ IF(WIN32)
     FIND_PATH(SVS_INCLUDE_DIR svs.h
               "C:/Program Files/SRI International/SVS42/src"
               "C:/Program Files/SRI International/SVS41/src"
+              "D:/Program Files/SRI International/SVS42/src"
+              "D:/Program Files/SRI International/SVS41/src"
               DOC "What is the path where the file svs.h can be found"
               )
     FIND_LIBRARY(SVS_svs_LIBRARY svs
                  "C:/Program Files/SRI International/SVS42/bin"
                  "C:/Program Files/SRI International/SVS41/bin"
+                 "D:/Program Files/SRI International/SVS42/bin"
+                 "D:/Program Files/SRI International/SVS41/bin"
                  DOC "Where can the SVS svs library be found"
                  )
     FIND_LIBRARY(SVS_svsgrab_LIBRARY svsgrab
                  "C:/Program Files/SRI International/SVS42/bin"
                  "C:/Program Files/SRI International/SVS41/bin"
+                 "D:/Program Files/SRI International/SVS42/bin"
+                 "D:/Program Files/SRI International/SVS41/bin"
                  DOC "Where can the SVS svsgrab library be found"
                  )
     IF(SVS_INCLUDE_DIR)
