@@ -60,7 +60,8 @@ void displayTask::Startup(void)
         // prmPositionJoint contains dynamic vectors so we need to allocate
         // based on the size (number of joints) of the device used
         if (this->DeviceProvidesJointPosition) {
-            this->JointPosition.Allocate(GetJointPosition.GetCommand()->GetArgumentPrototype());
+            // adeguet1: hack this->JointPosition.Allocate(GetJointPosition.GetCommand()->GetArgumentPrototype());
+            this->JointPosition.Position().SetSize(6);
             CMN_LOG_CLASS_INIT_VERBOSE << "Startup: Device has "
                                        << this->JointPosition.Position().size()
                                        << " joints" << std::endl;

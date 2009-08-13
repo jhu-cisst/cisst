@@ -36,9 +36,6 @@ add_executable(devicesTutorialExample3
 	       ${devicesTutorialExample3_FLTK_UI_SRCS}
 	       )
 
-# ADD_EXECUTABLE(devicesTutorialExample3
-#	       MainTeleop.cpp
-#	      )
 
 target_link_libraries(devicesTutorialExample3 ${SENSABLE_LIBRARIES} ${FLTK_LIBRARIES})
 

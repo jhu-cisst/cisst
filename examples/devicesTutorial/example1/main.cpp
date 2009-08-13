@@ -25,7 +25,7 @@ int main(void)
     cmnClassRegister::SetLoD("devSensableHD", CMN_LOG_LOD_VERY_VERBOSE);
 
     // create our two tasks
-    const long PeriodDisplay = 10; // in milliseconds
+    const double PeriodDisplay = 10.0; // in milliseconds
     mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
     displayTask * displayTaskObject =
         new displayTask("DISP", PeriodDisplay * cmn_ms);
