@@ -14,6 +14,13 @@
 
 project(devicesTutorial)
 
-add_subdirectory(example1)
 add_subdirectory(example2)
-add_subdirectory(example3)
+
+if(CISST_DEV_HAS_SENSABLEHD)
+  add_subdirectory(example1)
+  add_subdirectory(example3)
+endif(CISST_DEV_HAS_SENSABLEHD)
+
+if(CISST_DEV_HAS_OPENIGTLINK)
+  add_subdirectory(example4)
+endif(CISST_DEV_HAS_OPENIGTLINK)

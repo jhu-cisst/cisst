@@ -1,0 +1,81 @@
+# data file for the Fltk User Interface Designer (fluid)
+version 1.0109 
+header_name {.h} 
+code_name {.cxx}
+class trackerUI {open selected
+} {
+  Function {trackerUI()} {open
+  } {
+    Fl_Window DisplayWindow {
+      callback CloseWindow_CB open
+      xywh {200 200 340 160} type Double align 0 visible
+    } {
+      Fl_Group {} {
+        label Rotation open
+        xywh {0 20 250 100} labelsize 12
+      } {
+        Fl_Value_Input {Rotation[0]} {
+          xywh {10 30 70 20} box PLASTIC_DOWN_BOX labelsize 12 minimum -100 maximum 100 step 0.1 value 1 textfont 4 textsize 11
+        }
+        Fl_Value_Input {Rotation[1]} {
+          xywh {90 30 70 20} box PLASTIC_DOWN_BOX labelsize 12 minimum -100 maximum 100 step 0.1 textfont 4 textsize 11
+        }
+        Fl_Value_Input {Rotation[2]} {
+          xywh {170 30 70 20} box PLASTIC_DOWN_BOX labelsize 12 minimum -100 maximum 100 step 0.1 textfont 4 textsize 11
+        }
+        Fl_Value_Input {Rotation[3]} {
+          xywh {10 60 70 20} box PLASTIC_DOWN_BOX labelsize 12 minimum -100 maximum 100 step 0.1 textfont 4 textsize 11
+        }
+        Fl_Value_Input {Rotation[4]} {
+          xywh {90 60 70 20} box PLASTIC_DOWN_BOX labelsize 12 minimum -100 maximum 100 step 0.1 value 1 textfont 4 textsize 11
+        }
+        Fl_Value_Input {Rotation[5]} {
+          xywh {170 60 70 20} box PLASTIC_DOWN_BOX labelsize 12 minimum -100 maximum 100 step 0.1 textfont 4 textsize 11
+        }
+        Fl_Value_Input {Rotation[6]} {
+          xywh {10 90 70 20} box PLASTIC_DOWN_BOX labelsize 12 minimum -100 maximum 100 step 0.1 textfont 4 textsize 11
+        }
+        Fl_Value_Input {Rotation[7]} {
+          xywh {90 90 70 20} box PLASTIC_DOWN_BOX labelsize 12 minimum -100 maximum 100 step 0.1 textfont 4 textsize 11
+        }
+        Fl_Value_Input {Rotation[8]} {
+          xywh {170 90 70 20} box PLASTIC_DOWN_BOX labelsize 12 minimum -100 maximum 100 step 0.1 value 1 textfont 4 textsize 11
+        }
+      }
+      Fl_Group {} {
+        label Translation open
+        xywh {250 20 90 100} labelsize 12
+      } {
+        Fl_Value_Input {Translation[0]} {
+          xywh {260 30 70 20} box PLASTIC_DOWN_BOX labelsize 12 minimum -100 maximum 100 step 0.1 textfont 4 textsize 11
+        }
+        Fl_Value_Input {Translation[1]} {
+          xywh {260 60 70 20} box PLASTIC_DOWN_BOX labelsize 12 minimum -100 maximum 100 step 0.1 textfont 4 textsize 11
+        }
+        Fl_Value_Input {Translation[2]} {
+          xywh {260 90 70 20} box PLASTIC_DOWN_BOX labelsize 12 minimum -100 maximum 100 step 0.1 textfont 4 textsize 11
+        }
+      }
+      Fl_Return_Button BtnQuit {
+        label Quit
+        callback {QuitClicked = true;}
+        xywh {10 120 60 30} box PLASTIC_UP_BOX labelsize 12
+      }
+    }
+    code {// constructor
+QuitClicked = false;} {}
+  }
+  Function {CloseWindow_CB(Fl_Widget*, void *caller)} {return_type {static void}
+  } {
+    code {// a little hack in order to not use static members
+// the window will send the this pointer (this class) as the caller
+// make sure this callback is added to the window itself
+
+ if (Fl::event()==FL_SHORTCUT && Fl::event_key()==FL_Escape)
+    return; // ignore Escape key
+
+((trackerUI*)caller)->QuitClicked = true;} {}
+  }
+  decl {bool QuitClicked;} {public
+  }
+} 

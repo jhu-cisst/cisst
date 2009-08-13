@@ -14,13 +14,14 @@
 # 
 # --- end cisst license ---
 
+
 # set the library name
 set(LIBRARY cisstDevices)
 
 # make sure all options are set for all devices to OFF
 option(CISST_DEV_HAS_SENSABLEHD "Build Sensable Device using HD library" OFF)
 option(CISST_DEV_HAS_LOPOMOCO "Build LoPoMoCo card extension" OFF)
-
+option(CISST_DEV_HAS_OPENIGTLINK "Open IGT Link protocol" OFF)
 
 # set dependencies
 set(DEPENDENCIES
@@ -66,6 +67,25 @@ if(CISST_DEV_HAS_LOPOMOCO)
       devLoPoMoCo.h) 
 endif(CISST_DEV_HAS_LOPOMOCO) 
 
+if(CISST_DEV_HAS_OPENIGTLINK)
+  find_package(OpenIGTLink REQUIRED)
+  include(${OpenIGTLink_USE_FILE})
+  set(SOURCE_FILES ${SOURCE_FILES}
+      devOpenIGTLink.cpp)
+  set(HEADER_FILES ${HEADER_FILES}
+      devOpenIGTLink.h)
+  set(UI3_ADDITIONAL_CMAKE_FILES
+      "${UI3_ADDITIONAL_CMAKE_FILES}"
+      ${OpenIGTLink_USE_FILE})
+  set(UI3_ADDITIONAL_PACKAGES
+      "${UI3_ADDITIONAL_PACKAGES}"
+      OpenIGTLink)
+endif(CISST_DEV_HAS_OPENIGTLINK)
+
+# Exporting settings to applications that link against cisst
+CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_PACKAGES UI3_ADDITIONAL_PACKAGES)
+CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_CMAKE_FILES UI3_ADDITIONAL_CMAKE_FILES)
+
 # Create the config file
 SET(CISST_DEV_CONFIG_FILE ${cisst_BINARY_DIR}/libs/include/cisstDevices/devConfig.h)
 CONFIGURE_FILE(${cisst_SOURCE_DIR}/libs/include/cisstDevices/devConfig.h.in
@@ -92,4 +112,3 @@ CISST_ADD_LIBRARY_TO_PROJECT(cisstLibs)
 if(CISST_DEV_HAS_SENSABLEHD)
   target_link_libraries(cisstDevices ${SENSABLE_LIBRARIES})
 endif(CISST_DEV_HAS_SENSABLEHD)
-
