@@ -20,9 +20,9 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _trackerSimulator_h
 #define _trackerSimulator_h
 
-#include <cisstMultiTask/mtsTaskPeriodic.h>
-#include <cisstOSAbstraction/osaSleep.h>
-#include <cisstParameterTypes/prmPositionCartesianGet.h>
+#include <cisstMultiTask.h>
+#include <cisstOSAbstraction.h>
+#include <cisstParameterTypes.h>
 
 #include "trackerUI.h"
 

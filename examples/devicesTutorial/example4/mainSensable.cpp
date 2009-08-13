@@ -17,11 +17,10 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include <cisstDevices/devOpenIGTLink.h>
-#include <cisstMultiTask.h>
+#include <cisstCommon.h>
 #include <cisstOSAbstraction.h>
-
-#include "trackerSimulator.h"
+#include <cisstMultiTask.h>
+#include <cisstDevices.h>
 
 int main()
 {
@@ -32,34 +31,32 @@ int main()
     osaThreadedLogFile threadedLog("example4-");
     cmnLogger::GetMultiplexer()->AddChannel(threadedLog, CMN_LOG_LOD_VERY_VERBOSE);
 
-    mtsTaskManager *taskManager = mtsTaskManager::GetInstance();
+    mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
 
     // create instances
-    devOpenIGTLink *devOpenIGTLinkObj = new devOpenIGTLink("client", 50.0 * cmn_ms, "127.0.0.1", 18944);
-    trackerSimulator *trackerSimulatorObj = new trackerSimulator("trackerSimulator", 50.0 * cmn_ms);
+    devOpenIGTLink * devOpenIGTLinkObj = new devOpenIGTLink("client", 50.0 * cmn_ms, "127.0.0.1", 18944);
+    devSensableHD * devSensableHDObj = new devSensableHD("devSensableHD", "Omni1");
 
     // add instances to task manager
     taskManager->AddTask(devOpenIGTLinkObj);
-    taskManager->AddTask(trackerSimulatorObj);
+    taskManager->AddTask(devSensableHDObj);
 
     // connect tasks
     taskManager->Connect(devOpenIGTLinkObj->GetName(), "CartesianPosition",
-                         trackerSimulatorObj->GetName(), "CartesianPosition");
+                         devSensableHDObj->GetName(), "Omni1");
 
     // create and start tasks
     taskManager->CreateAll();
     taskManager->StartAll();
-
-    // loop until GUI exits
-    while (!trackerSimulatorObj->GetExitFlag()) {
-        osaSleep(100.0 * cmn_ms);
-    }
-
-    // kill tasks
-    taskManager->KillAll();
-    while (!trackerSimulatorObj->IsTerminated()) {
-        osaSleep(250.0 * cmn_ms);
-    }
+    
+    std::cout << "Keyboard commands:" << std::endl
+              << "  In command window:" << std::endl
+              << "    'q'   - Quit" << std::endl;
+    char ch;
+    do {
+        ch = cmnGetChar();
+        osaSleep(10.0 * cmn_ms);
+    } while (ch != 'q');
 
     return 0;
 }

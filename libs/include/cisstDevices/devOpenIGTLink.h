@@ -20,13 +20,13 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _devOpenIGTLink_h
 #define _devOpenIGTLink_h
 
-#include <cisstDevices/devConfig.h>
 #include <cisstMultiTask/mtsTaskPeriodic.h>
 #include <cisstParameterTypes/prmPositionCartesianGet.h>
+#include <cisstDevices/devConfig.h>
 // always include last
 #include <cisstDevices/devExport.h>
 
-#ifdef CISST_DEV_HAS_OPENIGTLINK || defined DOXYGEN
+#ifdef CISST_DEV_HAS_OPENIGTLINK
 
 #include <igtlClientSocket.h>
 #include <igtlTransformMessage.h>
@@ -41,7 +41,7 @@ protected:
     igtl::Matrix4x4 FrameIGT;
     prmPositionCartesianGet FrameCISST;
 
-    mtsFunctionRead GetCartesianPosition;
+    mtsFunctionRead GetPositionCartesian;
 
 public:
     devOpenIGTLink(const std::string & taskName, double period,

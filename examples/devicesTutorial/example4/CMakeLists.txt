@@ -13,34 +13,48 @@
 #
 # --- end cisst license ---
 
-# name of project and executable
 project(devicesTutorialExample4)
 
 find_package(OpenIGTLink REQUIRED)
 include(${OpenIGTLink_USE_FILE})
 
 find_package(FLTK REQUIRED)
-include_directories(${${PROJECT_NAME}_SOURCE_DIR}
-  ${FLTK_INCLUDE_DIR}
-  )
+include_directories(${devicesTutorialExample4_SOURCE_DIR}
+                    ${FLTK_INCLUDE_DIR}
+                    )
 
-fltk_wrap_ui(${PROJECT_NAME}
-  trackerUI.fl
-  )
+fltk_wrap_ui(devicesTutorialExample4Simulator
+             trackerUI.fl
+             )
 
-# name the main executable and specifies with source files to use
-add_executable(${PROJECT_NAME}
-  main.cpp
+add_executable(devicesTutorialExample4Simulator
+  mainSimulator.cpp
   trackerSimulator.cpp
   trackerSimulator.h
-  ${${PROJECT_NAME}_FLTK_UI_SRCS}
-  )
+  ${devicesTutorialExample4Simulator_FLTK_UI_SRCS}
+)
 
-target_link_libraries(${PROJECT_NAME}
+target_link_libraries(devicesTutorialExample4Simulator
   ${FLTK_LIBRARIES}
+  OpenIGTLink
   )
 
-# link with the cisst libraries
-cisst_requires(${PROJECT_NAME}
-  "cisstCommon;cisstDevices;cisstOSAbstraction;cisstMultiTask;cisstParameterTypes;cisstVector"
+cisst_requires(devicesTutorialExample4Simulator
+  "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstParameterTypes;cisstDevices"
   )
+
+
+if(CISST_DEV_HAS_SENSABLEHD)
+  find_package(Sensable REQUIRED)
+  include_directories(${SENSABLE_INCLUDE_DIR})
+  add_executable(devicesTutorialExample4Sensable
+    mainSensable.cpp
+    )
+  target_link_libraries(devicesTutorialExample4Sensable
+    ${SENSABLE_LIBRARIES}
+    OpenIGTLink
+  )
+  cisst_requires(devicesTutorialExample4Sensable
+    "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstParameterTypes;cisstDevices"
+    )
+endif(CISST_DEV_HAS_SENSABLEHD)

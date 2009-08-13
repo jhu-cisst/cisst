@@ -27,7 +27,7 @@ devOpenIGTLink::devOpenIGTLink(const std::string & taskName, double period,
 {
     mtsRequiredInterface * requiredInterface = AddRequiredInterface("CartesianPosition");
     if (requiredInterface) {
-        requiredInterface->AddFunction("GetCartesianPosition", GetCartesianPosition);
+        requiredInterface->AddFunction("GetPositionCartesian", GetPositionCartesian);
     }
 
     Client = igtl::ClientSocket::New();
@@ -54,7 +54,7 @@ devOpenIGTLink::~devOpenIGTLink()
 
 void devOpenIGTLink::Run()
 {
-    GetCartesianPosition(FrameCISST);
+    GetPositionCartesian(FrameCISST);
     CMN_LOG_CLASS_RUN_DEBUG << "Run: sending frame " << FrameCISST << std::endl;
 
     for (unsigned int r = 0; r < 3; r++) {
