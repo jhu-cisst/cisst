@@ -27,14 +27,7 @@
 #define _devLoPoMoCo_h
 
 #include <cisstDevices/devConfig.h>
-
-
-#include <cisstMultiTask/mtsGenericObject.h>
-#include <cisstMultiTask/mtsDevice.h>
-#include <cisstMultiTask/mtsDeviceInterface.h>
-#include <cisstMultiTask/mtsVector.h>
-#include <cisstMultiTask/mtsTask.h>
-
+#include <cisstMultiTask.h>
 #include <vector>
 #include <string>
 #include <ostream>
