@@ -191,27 +191,24 @@ devSensableHD::devSensableHD(const std::string & taskName,
     this->SetupInterfaces();
 }
 
+devSensableHD::devSensableHD(const char * taskName,
+                             const char * firstDeviceName,
+                             const char * secondDeviceName):
+    mtsTaskFromCallbackAdapter(taskName, 5000)
+{
+    this->SetInterfaces(std::string(firstDeviceName), std::string(secondDeviceName), 
+                        false, false);
+    this->SetupInterfaces();
+}
+
 
 devSensableHD::devSensableHD(const std::string & taskName,
                              const std::string & firstDeviceName,
                              const std::string & secondDeviceName):
     mtsTaskFromCallbackAdapter(taskName, 5000)
 {
-    if (firstDeviceName == secondDeviceName) {
-        CMN_LOG_CLASS_INIT_ERROR << "In constructor: name of devices provided are identical, \""
-                                 << firstDeviceName << "\" and \""
-                                 << secondDeviceName << "\"" << std::endl;
-    }
-    CMN_LOG_CLASS_INIT_DEBUG << "constructor called, looking for \"" << firstDeviceName
-                             << "\" and \"" << secondDeviceName << "\"" << std::endl;
-    DevicesVector.SetSize(2);
-    DevicesHandleVector.SetSize(2);
-    DevicesVector(0) = new DeviceData;
-    DevicesVector(1) = new DeviceData;
-    DevicesVector(0)->Name = firstDeviceName;
-    DevicesVector(1)->Name = secondDeviceName;
-    DevicesVector(0)->ForceOutputEnabled = false;
-    DevicesVector(1)->ForceOutputEnabled = false;
+    this->SetInterfaces(firstDeviceName, secondDeviceName, 
+                        false, false);
     this->SetupInterfaces();
 }
 
@@ -221,6 +218,16 @@ devSensableHD::devSensableHD(const std::string & taskName,
                              bool firstDeviceForcesEnabled,
                              bool secondDeviceForcesEnabled):
     mtsTaskFromCallbackAdapter(taskName, 5000)
+{
+    this->SetInterfaces(firstDeviceName, secondDeviceName, 
+                        firstDeviceForcesEnabled, secondDeviceForcesEnabled);
+    this->SetupInterfaces();
+}
+
+void devSensableHD::SetInterfaces(const std::string & firstDeviceName,
+                                  const std::string & secondDeviceName,
+                                  bool firstDeviceForcesEnabled,
+                                  bool secondDeviceForcesEnabled)
 {
     if (firstDeviceName == secondDeviceName) {
         CMN_LOG_CLASS_INIT_ERROR << "In constructor: name of devices provided are identical, \""
@@ -237,8 +244,8 @@ devSensableHD::devSensableHD(const std::string & taskName,
     DevicesVector(1)->Name = secondDeviceName;
     DevicesVector(0)->ForceOutputEnabled = firstDeviceForcesEnabled;
     DevicesVector(1)->ForceOutputEnabled = secondDeviceForcesEnabled;
-    this->SetupInterfaces();
 }
+   
 
 void devSensableHD::SetupInterfaces(void)
 {
@@ -401,7 +408,7 @@ void devSensableHD::Create(void * data)
 void devSensableHD::Start(void)
 {
     HDErrorInfo error;
-    //hdSetSchedulerRate(500);
+    hdSetSchedulerRate(500);
     hdStartScheduler();
     // Check for errors
     if (HD_DEVICE_ERROR(error = hdGetError())) {

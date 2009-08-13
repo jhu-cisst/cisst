@@ -82,6 +82,10 @@ protected:
     vctDynamicVector<DeviceData *> DevicesVector;
     vctDynamicVector<devSensableHDHandle *> DevicesHandleVector;
     devSensableHDDriverData * Driver;
+    void SetInterfaces(const std::string & firstDeviceName,
+                       const std::string & secondDeviceName,
+                       bool firstDeviceForcesEnabled,
+                       bool secondDeviceForcesEnabled);
     void SetupInterfaces(void);
 
 private:
@@ -106,9 +110,15 @@ public:
     /*! Constructor for two arms with a user specified names.  The
       names must match the device names as defined by Sensable
       drivers. Force output initially disabled */
+    //@{
     devSensableHD(const std::string & taskName,
                   const std::string & firstDeviceName,
                   const std::string & secondDeviceName);
+
+    devSensableHD(const char * taskName,
+                  const char * firstDeviceName,
+                  const char * secondDeviceName);
+    //@}
 
     /*! Constructor for two arms with a user specified names.  The
       names must match the device names as defined by Sensable
