@@ -1,0 +1,67 @@
+# data file for the Fltk User Interface Designer (fluid)
+version 1.0109 
+header_name {.h} 
+code_name {.cxx}
+class clientUI {open
+} {
+  Function {clientUI()} {open
+  } {
+    Fl_Window ClientWindow {
+      label Client open
+      xywh {466 199 356 258} type Double visible
+    } {
+      Fl_Return_Button Close {
+        label Close
+        callback {ClientWindow->hide();  Opened = false;}
+        xywh {230 215 105 30} box THIN_UP_BOX
+      }
+      Fl_Button ToggleButton {
+        label Toggle
+        callback {this->ToggleRequested = true;}
+        xywh {145 20 120 30}
+      }
+      Fl_Value_Slider WriteValue {
+        xywh {20 60 120 30} type {Horz Knob} maximum 100 step 1 value 50 textsize 14
+      }
+      Fl_Button WriteButton {
+        label Write
+        callback {this->WriteRequested = true;}
+        xywh {145 60 120 30}
+      }
+      Fl_Button ReadButton {
+        label Read
+        callback {this->ReadRequested = true;}
+        xywh {145 100 120 30}
+      }
+      Fl_Value_Output ReadValue {
+        xywh {88 101 51 28}
+      }
+      Fl_Button QualifiedReadButton {
+        label {Qualified Read}
+        callback {this->QualifiedReadRequested = true;}
+        xywh {145 138 120 30}
+      }
+      Fl_Value_Output QualifiedReadValue {
+        xywh {88 138 51 28}
+      }
+      Fl_Value_Output EventValue {
+        label Events
+        xywh {145 176 120 28}
+      }
+    }
+  }
+  Function {show(int argc, char**argv)} {open
+  } {
+    code {ClientWindow->show();} {}
+  }
+  decl {bool ToggleRequested;} {public
+  }
+  decl {bool WriteRequested;} {public
+  }
+  decl {bool ReadRequested;} {public
+  }
+  decl {bool QualifiedReadRequested;} {public
+  }
+  decl {bool Opened;} {public
+  }
+} 

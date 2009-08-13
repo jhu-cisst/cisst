@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2005-2007 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2005-2009 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -12,20 +12,21 @@
 # 
 # --- end cisst license ---
 
-PROJECT(multiTaskTutorial)
+project(multiTaskTutorial)
 
-ADD_SUBDIRECTORY(example1)
-ADD_SUBDIRECTORY(example2)
-ADD_SUBDIRECTORY(example3)
-ADD_SUBDIRECTORY(example6)
+add_subdirectory(example1)
+add_subdirectory(example2)
+add_subdirectory(example3)
+add_subdirectory(example6)
 
-IF(CISST_HAS_SWIG_PYTHON)
-  ADD_SUBDIRECTORY(example4)
-  ADD_SUBDIRECTORY(example5)
-ENDIF(CISST_HAS_SWIG_PYTHON)
+if (CISST_HAS_SWIG_PYTHON)
+  add_subdirectory(example4)
+  add_subdirectory(example5)
+endif (CISST_HAS_SWIG_PYTHON)
 
-IF(CISST_MTS_HAS_ICE)
-  ADD_SUBDIRECTORY(example7)
-  ADD_SUBDIRECTORY(example8)
-ENDIF(CISST_MTS_HAS_ICE)
+if (CISST_MTS_HAS_ICE)
+  add_subdirectory(example7)
+  add_subdirectory(example8)
+  add_subdirectory(example9)
+endif (CISST_MTS_HAS_ICE)
 
