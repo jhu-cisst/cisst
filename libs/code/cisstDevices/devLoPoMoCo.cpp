@@ -52,54 +52,54 @@ devLoPoMoCo::devLoPoMoCo(const std::string& deviceName, unsigned int numberOfBoa
 	NegativeIntercept.SetSize(numberOfAxes);
 	VoltageToCounts.SetSize(numberOfAxes);
 
-	AddProvidedInterface("WriteInterface");
-
-	// void commands, no parameters
-	AddCommandVoid(&devLoPoMoCo::LatchEncoders, this, "WriteInterface","LatchEncoders");
-	AddCommandVoid(&devLoPoMoCo::StartMotorCurrentConv, this, "WriteInterface", "StartMotorCurrentConv");
-	AddCommandVoid(&devLoPoMoCo::StartPotFeedbackConv, this, "WriteInterface", "StartPotFeedbackConv");
-	AddCommandVoid(&devLoPoMoCo::StartPotFeedbackConvFast, this, "WriteInterface", "StartPotFeedbackConvFast");
-	AddCommandVoid(&devLoPoMoCo::LoadMotorVoltages, this, "WriteInterface", "LoadMotorVoltages");
-	AddCommandVoid(&devLoPoMoCo::LoadCurrentLimits, this, "WriteInterface", "LoadCurrentLimits");
-	AddCommandVoid(&devLoPoMoCo::LoadMotorVoltagesCurrentLimits, this, "WriteInterface", "LoadMotorVoltagesCurrentLimits");
-	AddCommandVoid(&devLoPoMoCo::EnableAll, this, "WriteInterface", "EnableAll");
-	AddCommandVoid(&devLoPoMoCo::DisableAll, this, "WriteInterface", "DisableAll");
-
-	// read commands
-	AddCommandRead(&devLoPoMoCo::GetPositions, this, "WriteInterface", "GetPositions", mtsLongVec(numberOfAxes));
-	AddCommandRead(&devLoPoMoCo::GetVelocities, this, "WriteInterface", "GetVelocities", mtsShortVec(numberOfAxes));
-	AddCommandRead(&devLoPoMoCo::GetMotorCurrents, this, "WriteInterface", "GetMotorCurrents",mtsShortVec(numberOfAxes));
-	AddCommandRead(&devLoPoMoCo::GetPotFeedbacks, this, "WriteInterface", "GetPotFeedbacks",mtsShortVec(numberOfAxes));
-	AddCommandRead(&devLoPoMoCo::GetDigitalInput, this, "WriteInterface", "GetDigitalInput",mtsIntVec(numberOfAxes));
-    // GSF -- GetLatchedIndex might only be available with 0xCCDD FPGA (MR-Robot)
-	AddCommandRead(&devLoPoMoCo::GetLatchedIndex, this, "WriteInterface", "GetLatchedIndex",mtsShortVec(numberOfAxes));
-
-	// Write methods
-	// method , object carrying the method , interface name , command name and argument prototype
-	AddCommandWrite(&devLoPoMoCo::SetMotorVoltages, this, "WriteInterface", "SetMotorVoltages", mtsShortVec(numberOfAxes));
-	AddCommandWrite(&devLoPoMoCo::SetCurrentLimits, this, "WriteInterface", "SetCurrentLimits", mtsShortVec(numberOfAxes));
-    AddCommandWrite(&devLoPoMoCo::SetDigitalOutput, this, "WriteInterface", "SetDigitalOutput", mtsIntVec(numberOfBoards));
-
-	AddCommandWrite(&devLoPoMoCo::Enable, this, "WriteInterface", "Enable", mtsShort());
-	AddCommandWrite(&devLoPoMoCo::Disable, this, "WriteInterface", "Disable", mtsShort());
-	AddCommandWrite(&devLoPoMoCo::ResetEncoders, this, "WriteInterface", "ResetEncoders", mtsShort());
-	AddCommandWrite(&devLoPoMoCo::SetPositions, this, "WriteInterface", "SetPositions", mtsLongVec(numberOfAxes));
-
-	// Qualified Read
-	// method , object carrying the method , interface name , command name and argument prototype A and argument prototype B
-	AddCommandQualifiedRead(&devLoPoMoCo::FrequencyToRPS, this,
-			"WriteInterface", "FrequencyToRPS", mtsShortVec(numberOfAxes), mtsDoubleVec(numberOfAxes));
-	AddCommandQualifiedRead(&devLoPoMoCo::ADCToMotorCurrents, this,
-			"WriteInterface", "ADCToMotorCurrents",mtsShortVec(numberOfAxes), mtsDoubleVec(numberOfAxes));
-	AddCommandQualifiedRead(&devLoPoMoCo::ADCToPotFeedbacks, this,
-			"WriteInterface", "ADCToPotFeedbacks",mtsShortVec(numberOfAxes), mtsDoubleVec(numberOfAxes));
-	AddCommandQualifiedRead(&devLoPoMoCo::MotorVoltagesToDAC, this,
-			"WriteInterface", "MotorVoltagesToDAC", mtsDoubleVec(numberOfAxes),mtsShortVec(numberOfAxes));
-	AddCommandQualifiedRead(&devLoPoMoCo::CurrentLimitsToDAC, this,
-			"WriteInterface", "CurrentLimitsToDAC", mtsDoubleVec(numberOfAxes),mtsShortVec(numberOfAxes));
-
-	// set the relative path to configuration files
-	//RelativePathToConfigFiles(relativePathToConfigFiles);
+    mtsProvidedInterface * provided = AddProvidedInterface("WriteInterface"); 
+    if(provided) { 
+        //void commands, no parameters 
+        provided->AddCommandVoid(&devLoPoMoCo::LatchEncoders, this, "LatchEncoders");
+        provided->AddCommandVoid(&devLoPoMoCo::StartMotorCurrentConv, this, "StartMotorCurrentConv");
+        provided->AddCommandVoid(&devLoPoMoCo::StartPotFeedbackConv, this, "StartPotFeedbackConv");
+        provided->AddCommandVoid(&devLoPoMoCo::StartPotFeedbackConvFast, this, "StartPotFeedbackConvFast");
+        provided->AddCommandVoid(&devLoPoMoCo::LoadMotorVoltages, this, "LoadMotorVoltages");
+        provided->AddCommandVoid(&devLoPoMoCo::LoadCurrentLimits, this, "LoadCurrentLimits");
+        provided->AddCommandVoid(&devLoPoMoCo::LoadMotorVoltagesCurrentLimits, this, "LoadMotorVoltagesCurrentLimits");
+        provided->AddCommandVoid(&devLoPoMoCo::EnableAll, this, "EnableAll");
+        provided->AddCommandVoid(&devLoPoMoCo::DisableAll, this, "DisableAll");
+        
+        // read commands
+        provided->AddCommandRead(&devLoPoMoCo::GetPositions, this, "GetPositions", mtsLongVec(numberOfAxes));
+        provided->AddCommandRead(&devLoPoMoCo::GetVelocities, this, "GetVelocities", mtsShortVec(numberOfAxes));
+        provided->AddCommandRead(&devLoPoMoCo::GetMotorCurrents, this, "GetMotorCurrents",mtsShortVec(numberOfAxes));
+        provided->AddCommandRead(&devLoPoMoCo::GetPotFeedbacks, this, "GetPotFeedbacks",mtsShortVec(numberOfAxes));
+        provided->AddCommandRead(&devLoPoMoCo::GetDigitalInput, this, "GetDigitalInput",mtsIntVec(numberOfAxes));
+        // GSF -- GetLatchedIndex might only be available with 0xCCDD FPGA (MR-Robot)
+        provided->AddCommandRead(&devLoPoMoCo::GetLatchedIndex, this, "GetLatchedIndex",mtsShortVec(numberOfAxes));
+        
+        // Write methods
+        // method , object carrying the method , interface name , command name and argument prototype
+        provided->AddCommandWrite(&devLoPoMoCo::SetMotorVoltages, this, "SetMotorVoltages", mtsShortVec(numberOfAxes));
+        provided->AddCommandWrite(&devLoPoMoCo::SetCurrentLimits, this, "SetCurrentLimits", mtsShortVec(numberOfAxes));
+        provided->AddCommandWrite(&devLoPoMoCo::SetDigitalOutput, this, "SetDigitalOutput", mtsIntVec(numberOfBoards));
+        
+        provided->AddCommandWrite(&devLoPoMoCo::Enable, this, "Enable", mtsShort());
+        provided->AddCommandWrite(&devLoPoMoCo::Disable, this, "Disable", mtsShort());
+        provided->AddCommandWrite(&devLoPoMoCo::ResetEncoders, this, "ResetEncoders", mtsShort());
+        provided->AddCommandWrite(&devLoPoMoCo::SetPositions, this, "SetPositions", mtsLongVec(numberOfAxes));
+        
+        // Qualified Read
+        // method , object carrying the method , interface name , command name and argument prototype A and argument prototype B
+        provided->AddCommandQualifiedRead(&devLoPoMoCo::FrequencyToRPS, this,
+                                "FrequencyToRPS", mtsShortVec(numberOfAxes), mtsDoubleVec(numberOfAxes));
+        provided->AddCommandQualifiedRead(&devLoPoMoCo::ADCToMotorCurrents, this,
+                                "ADCToMotorCurrents",mtsShortVec(numberOfAxes), mtsDoubleVec(numberOfAxes));
+        provided->AddCommandQualifiedRead(&devLoPoMoCo::ADCToPotFeedbacks, this,
+                                "ADCToPotFeedbacks",mtsShortVec(numberOfAxes), mtsDoubleVec(numberOfAxes));
+        provided->AddCommandQualifiedRead(&devLoPoMoCo::MotorVoltagesToDAC, this,
+                                "MotorVoltagesToDAC", mtsDoubleVec(numberOfAxes),mtsShortVec(numberOfAxes));
+        provided->AddCommandQualifiedRead(&devLoPoMoCo::CurrentLimitsToDAC, this,
+                                "CurrentLimitsToDAC", mtsDoubleVec(numberOfAxes),mtsShortVec(numberOfAxes));
+    } 
+        // set the relative path to configuration files
+        //RelativePathToConfigFiles(relativePathToConfigFiles);
 
 }
 
