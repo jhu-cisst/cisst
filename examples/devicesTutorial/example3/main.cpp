@@ -45,14 +45,19 @@ int main(void)
     const double PeriodDisplay = 1.0; // in milliseconds
     mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
     
-    displayTask * displayTaskObject = new displayTask("Display", PeriodDisplay * cmn_ms);
-    taskManager->AddTask(displayTaskObject);
+    displayTask * displayTaskObjectFirstPair = new displayTask("DisplayFirstPair", PeriodDisplay * cmn_ms);
+    displayTask * displayTaskObjectSecondPair = new displayTask("DisplaySecondPair", PeriodDisplay * cmn_ms);
+    taskManager->AddTask(displayTaskObjectFirstPair);
+    taskManager->AddTask(displayTaskObjectSecondPair);
 
-    devSensableHDMasterSlave * sensableOmni = new devSensableHDMasterSlave("Omni", "Omni1", "Omni2");
+    //devSensableHDMasterSlave * sensableOmni = new devSensableHDMasterSlave("Omni", "Omni1", "Omni2");
+    devSensableHDMasterSlave * sensableOmni = new devSensableHDMasterSlave("Omni", "Omni1", "Omni2", "Omni3", "Omni4");
     taskManager->AddTask(sensableOmni);
 
-    taskManager->Connect("Display", "RequiresSensableHDMasterSlave", 
-                         "Omni", "ProvidesSensableHDMasterSlave");
+    taskManager->Connect("DisplayFirstPair", "TeleoperationParameters", 
+                         "Omni", "TeleoperationParametersOmni1Omni2");
+    taskManager->Connect("DisplaySecondPair", "TeleoperationParameters",
+                         "Omni", "TeleoperationParametersOmni3Omni4");
 
     // generate a nice tasks diagram
     std::ofstream dotFile("example1.dot"); 
@@ -67,12 +72,12 @@ int main(void)
     do
     {
         osaSleep(10.0 * cmn_ms);
-    } while(!displayTaskObject->GetExitFlag());
+    } while(!displayTaskObjectFirstPair->GetExitFlag());
     // cleanup
     taskManager->KillAll();
 
     osaSleep(PeriodDisplay * 2);
-    while (!displayTaskObject->IsTerminated()) osaSleep(PeriodDisplay);
+    while (!displayTaskObjectFirstPair->IsTerminated()) osaSleep(PeriodDisplay);
 
     return 0;
 }

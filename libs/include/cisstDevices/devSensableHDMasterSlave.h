@@ -38,8 +38,18 @@ public:
                              const std::string & firstDeviceName,
                              const std::string & secondDeviceName);
 
+    devSensableHDMasterSlave(const std::string & taskName,
+                             const std::string & firstDeviceName,
+                             const std::string & secondDeviceName,
+                             const std::string & thirdDeviceName,
+                             const std::string & fourthDeviceName);
+
     ~devSensableHDMasterSlave(void) {};
 
+    void InitializeVariables(int index);
+    void SetupTeleoperationInterfaces(const std::string & firstDeviceName, 
+                                      const std::string & secondDeviceName,
+                                      int pair);
     void UserControl(void);
     void SetScaleFactor(const mtsDouble& Scale);
     void SetForceLimit(const mtsDouble& FLimit);
@@ -55,43 +65,50 @@ public:
     void DecrementForceLimit(void);
     
 protected:
-    vctFixedSizeVector<double, 6> ForceMaster;
-    vctFixedSizeVector<double, 6> ForceSlave;
-    vct3 WorkspaceOffset;
-    vct3 ClutchOffset;
-    vct3 LeftClutchOffset;
-    vct3 RightClutchOffset;
-    vct3 LeftClutchMSOffset;
-    vct3 RightClutchMSOffset;
-    vct3 Error;
-    vct3 p1Goal;
-    vct3 p2Goal;
-    vct3 p1RGoal;
-    vct3 p2RGoal;
-   
-    prmForceCartesianSet    firstDeviceForce;
-    prmForceCartesianSet    secondDeviceForce;
-    prmPositionCartesianGet p1;
-    prmPositionCartesianGet p2;
-    prmPositionCartesianGet p1Clutched;
-    prmPositionCartesianGet p2Clutched;
-    prmPositionCartesianGet p1R;
-    prmPositionCartesianGet p2R;
+    struct DevData {
+        vctFixedSizeVector<double, 6> ForceMaster;
+        vctFixedSizeVector<double, 6> ForceSlave;
+        vct3 WorkspaceOffset;
+        vct3 ClutchOffset;
+        vct3 LeftClutchOffset;
+        vct3 RightClutchOffset;
+        vct3 LeftClutchMSOffset;
+        vct3 RightClutchMSOffset;
+        vct3 Error;
+        vct3 p1Goal;
+        vct3 p2Goal;
+        vct3 p1RGoal;
+        vct3 p2RGoal;
+       
+        prmForceCartesianSet    firstDeviceForce;
+        prmForceCartesianSet    secondDeviceForce;
+        prmPositionCartesianGet p1;
+        prmPositionCartesianGet p2;
+        prmPositionCartesianGet p1Clutched;
+        prmPositionCartesianGet p2Clutched;
+        prmPositionCartesianGet p1R;
+        prmPositionCartesianGet p2R;
 
-    bool        firstIteration;
-    bool        clutchDone;
-    bool        bothClutched;
-    bool        clutchOffsetAdd;
-    mtsBool     MasterClutch;
-    mtsBool     SlaveClutch;
-    mtsBool     MasterSlaveClutch;
-    mtsInt      clutchMode;
-    mtsInt      ForceMode;
-    mtsDouble   ForceMasterCoefficient;
-    mtsDouble   ScaleFactor;
-    mtsDouble   FMax;
-    double      ForceFeedNormMaster;
-    double      ForceFeedNormSlave;
+        bool        firstIteration;
+        bool        clutchDone;
+        bool        bothClutched;
+        bool        clutchOffsetAdd;
+        mtsBool     MasterClutch;
+        mtsBool     SlaveClutch;
+        mtsBool     MasterSlaveClutch;
+        mtsInt      clutchMode;
+        mtsInt      ForceMode;
+        mtsDouble   ForceMasterCoefficient;
+        mtsDouble   ScaleFactor;
+        mtsDouble   FMax;
+        double      ForceFeedNormMaster;
+        double      ForceFeedNormSlave;
+        int         MasterDeviceNo;
+        int         SlaveDeviceNo;
+    };
+
+    vctDynamicVector<DevData *> DevicesStruct;
+    int                         PairNumber;
 };
 
 

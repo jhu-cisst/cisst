@@ -77,6 +77,8 @@ protected:
         bool Clutch;
 
         std::string Name;
+
+        int DeviceNumber;
     };
 
     vctDynamicVector<DeviceData *> DevicesVector;
@@ -86,6 +88,14 @@ protected:
                        const std::string & secondDeviceName,
                        bool firstDeviceForcesEnabled,
                        bool secondDeviceForcesEnabled);
+    void SetInterfaces(const std::string & firstDeviceName,
+                       const std::string & secondDeviceName,
+                       const std::string & thirdDeviceName,
+                       const std::string & fourthDeviceName,
+                       bool firstDeviceForcesEnabled,
+                       bool secondDeviceForcesEnabled,
+                       bool thirdDeviceForcesEnabled,
+                       bool fourthDeviceForcesEnabled);
     void SetupInterfaces(void);
 
 private:
@@ -128,6 +138,37 @@ public:
                   const std::string & secondDeviceName,
                   bool firstDeviceForcesEnabled,
                   bool secondDeviceForcesEnabled);
+
+    /*! Constructor for four arms with a user specified names.  The
+      names must match the device names as defined by Sensable
+      drivers. Force output initially disabled */
+    //@{
+    devSensableHD(const std::string & taskName,
+                  const std::string & firstDeviceName,
+                  const std::string & secondDeviceName,
+                  const std::string & thirdDeviceName,
+                  const std::string & fourthDeviceName);
+
+    devSensableHD(const char * taskName,
+                  const char * firstDeviceName,
+                  const char * secondDeviceName,
+                  const char * thirdDeviceName,
+                  const char * fourthDeviceName);
+    //@}
+
+    /*! Constructor for four arms with a user specified names.  The
+      names must match the device names as defined by Sensable
+      drivers. Overloaded to enable/disable force output. */
+    devSensableHD(const std::string & taskName,
+                  const std::string & firstDeviceName,
+                  const std::string & secondDeviceName,
+                  const std::string & thirdDeviceName,
+                  const std::string & fourthDeviceName,
+                  bool firstDeviceForcesEnabled,
+                  bool secondDeviceForcesEnabled,
+                  bool thirdDeviceForcesEnabled,
+                  bool fourthDeviceForcesEnabled);
+
 
     ~devSensableHD();
     void Configure(const std::string & CMN_UNUSED(filename) = "") {};

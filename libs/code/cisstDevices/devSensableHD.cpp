@@ -156,6 +156,7 @@ devSensableHD::devSensableHD(const std::string & taskName):
     DevicesVector.SetSize(1);
     DevicesHandleVector.SetSize(1);
     DevicesVector(0) = new DeviceData;
+    DevicesVector(0)->DeviceNumber = 0;
     DevicesVector(0)->Name = "DefaultArm";
     DevicesVector(0)->ForceOutputEnabled = false;
     this->SetupInterfaces();
@@ -170,6 +171,7 @@ devSensableHD::devSensableHD(const std::string & taskName,
     DevicesVector.SetSize(1);
     DevicesHandleVector.SetSize(1);
     DevicesVector(0) = new DeviceData;
+    DevicesVector(0)->DeviceNumber = 0;
     DevicesVector(0)->Name = firstDeviceName;
     DevicesVector(0)->ForceOutputEnabled = false;
     
@@ -185,6 +187,7 @@ devSensableHD::devSensableHD(const std::string & taskName,
     DevicesVector.SetSize(1);
     DevicesHandleVector.SetSize(1);
     DevicesVector(0) = new DeviceData;
+    DevicesVector(0)->DeviceNumber = 0;
     DevicesVector(0)->Name = firstDeviceName;
     DevicesVector(0)->ForceOutputEnabled = firstDeviceForcesEnabled;
     
@@ -224,6 +227,48 @@ devSensableHD::devSensableHD(const std::string & taskName,
     this->SetupInterfaces();
 }
 
+devSensableHD::devSensableHD(const std::string & taskName,
+                             const std::string & firstDeviceName,
+                             const std::string & secondDeviceName,
+                             const std::string & thirdDeviceName,
+                             const std::string & fourthDeviceName):
+    mtsTaskFromCallbackAdapter(taskName, 5000)
+{
+    this->SetInterfaces(firstDeviceName, secondDeviceName, thirdDeviceName, fourthDeviceName,
+                        false, false, false, false);
+    this->SetupInterfaces();
+}
+
+devSensableHD::devSensableHD(const char * taskName,
+                             const char * firstDeviceName,
+                             const char * secondDeviceName,
+                             const char * thirdDeviceName,
+                             const char * fourthDeviceName):
+    mtsTaskFromCallbackAdapter(taskName, 5000)
+{
+    this->SetInterfaces(std::string(firstDeviceName), std::string(secondDeviceName), 
+                        std::string(thirdDeviceName), std::string(fourthDeviceName),
+                        false, false, false, false);
+    this->SetupInterfaces();
+}
+
+devSensableHD::devSensableHD(const std::string & taskName,
+                             const std::string & firstDeviceName,
+                             const std::string & secondDeviceName,
+                             const std::string & thirdDeviceName,
+                             const std::string & fourthDeviceName,
+                             bool firstDeviceForcesEnabled,
+                             bool secondDeviceForcesEnabled,
+                             bool thirdDeviceForcesEnabled,
+                             bool fourthDeviceForcesEnabled):
+    mtsTaskFromCallbackAdapter(taskName, 5000)
+{
+    this->SetInterfaces(firstDeviceName, secondDeviceName, thirdDeviceName, fourthDeviceName,
+                        firstDeviceForcesEnabled, secondDeviceForcesEnabled, 
+                        thirdDeviceForcesEnabled, fourthDeviceForcesEnabled);
+    this->SetupInterfaces();
+}
+
 void devSensableHD::SetInterfaces(const std::string & firstDeviceName,
                                   const std::string & secondDeviceName,
                                   bool firstDeviceForcesEnabled,
@@ -238,12 +283,43 @@ void devSensableHD::SetInterfaces(const std::string & firstDeviceName,
                              << "\" and \"" << secondDeviceName << "\"" << std::endl;
     DevicesVector.SetSize(2);
     DevicesHandleVector.SetSize(2);
-    DevicesVector(0) = new DeviceData;
-    DevicesVector(1) = new DeviceData;
+    int index = 0;
+    for(index; index < 2; index++)
+    {
+        DevicesVector(index) = new DeviceData;
+        DevicesVector(index)->DeviceNumber = index;
+    }
     DevicesVector(0)->Name = firstDeviceName;
     DevicesVector(1)->Name = secondDeviceName;
     DevicesVector(0)->ForceOutputEnabled = firstDeviceForcesEnabled;
     DevicesVector(1)->ForceOutputEnabled = secondDeviceForcesEnabled;
+}
+
+void devSensableHD::SetInterfaces(const std::string & firstDeviceName,
+                                  const std::string & secondDeviceName,
+                                  const std::string & thirdDeviceName,
+                                  const std::string & fourthDeviceName,
+                                  bool firstDeviceForcesEnabled,
+                                  bool secondDeviceForcesEnabled,
+                                  bool thirdDeviceForcesEnabled,
+                                  bool fourthDeviceForcesEnabled)
+{
+    DevicesVector.SetSize(4);
+    DevicesHandleVector.SetSize(4);
+    int index = 0;
+    for(index; index < 4; index++)
+    {
+        DevicesVector(index) = new DeviceData;
+        DevicesVector(index)->DeviceNumber = index;
+    }
+    DevicesVector(0)->Name = firstDeviceName;
+    DevicesVector(1)->Name = secondDeviceName;
+    DevicesVector(2)->Name = thirdDeviceName;
+    DevicesVector(3)->Name = fourthDeviceName;
+    DevicesVector(0)->ForceOutputEnabled = firstDeviceForcesEnabled;
+    DevicesVector(1)->ForceOutputEnabled = secondDeviceForcesEnabled;
+    DevicesVector(2)->ForceOutputEnabled = thirdDeviceForcesEnabled;
+    DevicesVector(3)->ForceOutputEnabled = fourthDeviceForcesEnabled;
 }
    
 
