@@ -44,7 +44,7 @@ SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${cisst_SOURCE_DIR}/libs/cmake)
 # Options
 OPTION(BUILD_TESTS "Build tests." OFF)
 OPTION(BUILD_EXAMPLES "Build examples." OFF)
-
+OPTION(BUILD_UTILITIES "Build utility programs built using cisst." OFF)
 
 IF(UNIX)
   OPTION(BUILD_DOC "Build the documentation." OFF)
@@ -247,6 +247,10 @@ IF(BUILD_EXAMPLES)
   ADD_SUBDIRECTORY(examples)
 ENDIF(BUILD_EXAMPLES)
 
+IF(BUILD_UTILITIES)
+  ADD_SUBDIRECTORY(utilities)
+ENDIF(BUILD_UTILITIES)
+
 IF(BUILD_DOC)
   ADD_SUBDIRECTORY(doc)
 ENDIF(BUILD_DOC)
@@ -332,7 +336,7 @@ IF(WIN32)
           "${EXECUTABLE_OUTPUT_PATH}" "${EXECUTABLE_OUTPUT_PATH}/${CISST_PATH_CONFIGURATION}"
           "${LIBRARY_OUTPUT_PATH}" "${LIBRARY_OUTPUT_PATH}/${CISST_PATH_CONFIGURATION}")
       
-      # To find tests releated programs and libraries
+      # To find tests programs and libraries
       IF(BUILD_TESTS)
         SET(CISST_PATH_CMAKE_FORMAT
             ${CISST_PATH_CMAKE_FORMAT}
@@ -344,7 +348,7 @@ IF(WIN32)
             "${cisst_BINARY_DIR}/tests/bin" "${cisst_BINARY_DIR}/tests/bin/${CISST_PATH_CONFIGURATION}")
       ENDIF(BUILD_TESTS)
 
-      # To find examples releated programs and libraries
+      # To find examples programs and libraries
       IF(BUILD_EXAMPLES)
         SET(CISST_PATH_CMAKE_FORMAT
             ${CISST_PATH_CMAKE_FORMAT}
@@ -355,6 +359,18 @@ IF(WIN32)
             "${cisst_BINARY_DIR}/examples/lib" "${cisst_BINARY_DIR}/examples/lib/${CISST_PATH_CONFIGURATION}"
             "${cisst_BINARY_DIR}/examples/bin" "${cisst_BINARY_DIR}/examples/bin/${CISST_PATH_CONFIGURATION}")
       ENDIF(BUILD_EXAMPLES)
+
+      # To find utilities programs and libraries
+      IF(BUILD_UTILITIES)
+        SET(CISST_PATH_CMAKE_FORMAT
+            ${CISST_PATH_CMAKE_FORMAT}
+            "${cisst_BINARY_DIR}/utilities/lib/${CISST_PATH_CONFIGURATION}"
+            "${cisst_BINARY_DIR}/utilities/bin/${CISST_PATH_CONFIGURATION}")
+        SET(CISST_PYTHONPATH_CMAKE_FORMAT
+            ${CISST_PYTHONPATH_CMAKE_FORMAT}
+            "${cisst_BINARY_DIR}/utilities/lib" "${cisst_BINARY_DIR}/utilities/lib/${CISST_PATH_CONFIGURATION}"
+            "${cisst_BINARY_DIR}/utilities/bin" "${cisst_BINARY_DIR}/utilities/bin/${CISST_PATH_CONFIGURATION}")
+      ENDIF(BUILD_UTILITIES)
 
       # Convert to native format to be able to compare 
       FILE(TO_NATIVE_PATH "${CISST_PATH_CMAKE_FORMAT}" CISST_PATH)

@@ -23,6 +23,7 @@
 set CISST_DIR="@cisst_BINARY_DIR@"
 set BUILD_TESTS=@BUILD_TESTS@
 set BUILD_EXAMPLES=@BUILD_EXAMPLES@
+set BUILD_UTILITIES=@BUILD_UTILITIES@
 
 set OS=`uname`
 
@@ -62,6 +63,14 @@ if (${BUILD_EXAMPLES} == "ON") then
     setenv PATH "${CISST_DIR}/examples/bin:$PATH"
     set LIBRARY_PATH="${CISST_DIR}/examples/lib:$LIBRARY_PATH"
     setenv PYTHONPATH "${CISST_DIR}/examples/lib:$PYTHONPATH"
+endif
+
+
+# Add path to utility code
+if (${BUILD_UTILITIES} == "ON") then
+    setenv PATH "${CISST_DIR}/utilities/bin:$PATH"
+    set LIBRARY_PATH="${CISST_DIR}/utilities/lib:$LIBRARY_PATH"
+    setenv PYTHONPATH "${CISST_DIR}/utilities/lib:$PYTHONPATH"
 endif
 
 
