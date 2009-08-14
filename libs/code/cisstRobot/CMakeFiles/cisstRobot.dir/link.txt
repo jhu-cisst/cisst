@@ -1,2 +1,0 @@
-/usr/bin/ar cr ../../lib/libcisstRobot.a  CMakeFiles/cisstRobot.dir/robRnBlender.o CMakeFiles/cisstRobot.dir/robSO3Blender.o CMakeFiles/cisstRobot.dir/robRnConstant.o CMakeFiles/cisstRobot.dir/robSE3Constant.o CMakeFiles/cisstRobot.dir/robDOF.o CMakeFiles/cisstRobot.dir/robFunctionPiecewise.o CMakeFiles/cisstRobot.dir/robHermite.o CMakeFiles/cisstRobot.dir/robLinear.o CMakeFiles/cisstRobot.dir/robSigmoid.o CMakeFiles/cisstRobot.dir/robSLERP.o CMakeFiles/cisstRobot.dir/robTrajectory.o
-/usr/bin/ranlib ../../lib/libcisstRobot.a
