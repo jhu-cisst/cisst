@@ -255,7 +255,7 @@ void mtsDeviceInterfaceProxyClient::SendExecuteCommandVoid(const int commandId) 
 }
 
 void mtsDeviceInterfaceProxyClient::SendExecuteCommandWriteSerialized(
-    const int commandId, const cmnGenericObject & argument)
+    const int commandId, const mtsGenericObject & argument)
 {
     if (!IsValidSession) return;
 
@@ -269,7 +269,7 @@ void mtsDeviceInterfaceProxyClient::SendExecuteCommandWriteSerialized(
 }
 
 void mtsDeviceInterfaceProxyClient::SendExecuteCommandReadSerialized(
-    const int commandId, cmnGenericObject & argument)
+    const int commandId, mtsGenericObject & argument)
 {
     if (!IsValidSession) return;
 
@@ -286,7 +286,7 @@ void mtsDeviceInterfaceProxyClient::SendExecuteCommandReadSerialized(
 }
 
 void mtsDeviceInterfaceProxyClient::SendExecuteCommandQualifiedReadSerialized(
-    const int commandId, const cmnGenericObject & argument1, cmnGenericObject & argument2)
+    const int commandId, const mtsGenericObject & argument1, mtsGenericObject & argument2)
 {
     if (!IsValidSession) return;
 
@@ -316,15 +316,16 @@ void mtsDeviceInterfaceProxyClient::SendExecuteCommandQualifiedReadSerialized(
 //-------------------------------------------------------------------------
 //  Definition by mtsDeviceInterfaceProxy.ice
 //-------------------------------------------------------------------------
-mtsDeviceInterfaceProxyClient::DeviceInterfaceClientI::DeviceInterfaceClientI(
-    const Ice::CommunicatorPtr& communicator,                           
-    const Ice::LoggerPtr& logger,
-    const mtsDeviceInterfaceProxy::DeviceInterfaceServerPrx& server,
-    mtsDeviceInterfaceProxyClient * deviceInterfaceClient)
-    : Runnable(true), 
-      Communicator(communicator), Logger(logger),
-      Server(server), DeviceInterfaceClient(deviceInterfaceClient),      
-      Sender(new SendThread<DeviceInterfaceClientIPtr>(this))      
+mtsDeviceInterfaceProxyClient::DeviceInterfaceClientI::DeviceInterfaceClientI(const Ice::CommunicatorPtr& communicator,                           
+                                                                              const Ice::LoggerPtr& logger,
+                                                                              const mtsDeviceInterfaceProxy::DeviceInterfaceServerPrx& server,
+                                                                              mtsDeviceInterfaceProxyClient * deviceInterfaceClient):
+    Runnable(true), 
+    Communicator(communicator),
+    Sender(new SendThread<DeviceInterfaceClientIPtr>(this)),
+    Logger(logger),
+    Server(server),
+    DeviceInterfaceClient(deviceInterfaceClient)
 {
 }
 

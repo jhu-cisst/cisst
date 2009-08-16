@@ -30,7 +30,7 @@ CMN_IMPLEMENT_SERVICES(mtsTaskFromCallbackAdapter)
 // this is possible for callbacks. Thus, we use the inRunInternal flag
 // to make sure that re-entrancy is handled.
 
-void * mtsTaskFromCallback::RunInternal(void *data) {
+void * mtsTaskFromCallback::RunInternal(void * CMN_UNUSED(data)) {
     if (inRunInternal) {
         if (TaskState == ACTIVE)
            this->OverranPeriod = true;
@@ -64,7 +64,7 @@ void mtsTaskFromCallback::StartupInternal(void)
 
 /********************* Methods to change task state ******************/
 
-void mtsTaskFromCallback::Create(void *data)
+void mtsTaskFromCallback::Create(void * CMN_UNUSED(data))
 {
     if (TaskState != CONSTRUCTED) {
         CMN_LOG_CLASS_INIT_ERROR << "Create: task " << this->GetName() << " cannot be created, state = "

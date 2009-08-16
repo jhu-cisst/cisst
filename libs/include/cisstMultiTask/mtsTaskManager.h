@@ -206,6 +206,12 @@ protected:
     //  Proxy-related
     //-------------------------------------------------------------------------
 protected:
+    /*! Task manager type. */
+    TaskManagerType TaskManagerTypeMember;
+
+    /*! Task manager communicator ID. Used as one of ICE proxy object properties. */
+    const std::string TaskManagerCommunicatorID;
+
     /*! Task manager proxy objects. Both are initialized as null at first and 
       will be assigned later. Either one of the objects should be null and the 
       other has to be valid.
@@ -214,12 +220,6 @@ protected:
     */
     mtsTaskManagerProxyServer * ProxyGlobalTaskManager;
     mtsTaskManagerProxyClient * ProxyTaskManagerClient;
-
-    /*! Task manager type. */
-    TaskManagerType TaskManagerTypeMember;
-
-    /*! Task manager communicator ID. Used as one of ICE proxy object properties. */
-    const std::string TaskManagerCommunicatorID;
 
     /*! IP address information. */
     std::string GlobalTaskManagerIP;

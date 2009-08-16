@@ -136,8 +136,8 @@ protected:
                                public IceUtil::Monitor<IceUtil::Mutex>
     {
     private:
-        Ice::CommunicatorPtr Communicator;
         bool Runnable;
+        Ice::CommunicatorPtr Communicator;
         
         IceUtil::ThreadPtr Sender;
         Ice::LoggerPtr Logger;

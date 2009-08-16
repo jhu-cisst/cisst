@@ -288,7 +288,7 @@ bool mtsTask::WaitToStart(double timeout)
     return (TaskState >= READY);
 }
 
-bool mtsTask::WaitToTerminate(double timeout)
+bool mtsTask::WaitToTerminate(double CMN_UNUSED(timeout))
 {
 	CMN_LOG_CLASS_INIT_VERBOSE << "WaitToTerminate: " << this->GetName() << std::endl;
     if (TaskState < FINISHING) {

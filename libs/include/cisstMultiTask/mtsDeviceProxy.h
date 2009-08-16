@@ -133,7 +133,7 @@ public:
     {}
     virtual ~mtsDeviceProxy();
 
-    void Configure(const std::string & deviceName) {};
+    inline void Configure(const std::string & CMN_UNUSED(deviceName)) {};
 
     /*! Return a name for a server device proxy. */
     static std::string GetServerTaskProxyName(

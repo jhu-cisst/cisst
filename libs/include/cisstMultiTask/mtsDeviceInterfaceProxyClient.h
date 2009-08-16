@@ -137,10 +137,10 @@ public:
         mtsDeviceInterfaceProxy::FunctionProxySet & functionProxies);
 
     void SendExecuteCommandVoid(const int commandId) const;
-    void SendExecuteCommandWriteSerialized(const int commandId, const cmnGenericObject & argument);
-    void SendExecuteCommandReadSerialized(const int commandId, cmnGenericObject & argument);
+    void SendExecuteCommandWriteSerialized(const int commandId, const mtsGenericObject & argument);
+    void SendExecuteCommandReadSerialized(const int commandId, mtsGenericObject & argument);
     void SendExecuteCommandQualifiedReadSerialized(
-        const int commandId, const cmnGenericObject & argument1, cmnGenericObject & argument2);
+        const int commandId, const mtsGenericObject & argument1, mtsGenericObject & argument2);
 
     //-------------------------------------------------------------------------
     //  Definition by mtsDeviceInterfaceProxy.ice
@@ -150,9 +150,8 @@ protected:
                                    public IceUtil::Monitor<IceUtil::Mutex>
     {
     private:
-        Ice::CommunicatorPtr Communicator;
         bool Runnable;
-        
+        Ice::CommunicatorPtr Communicator;        
         IceUtil::ThreadPtr Sender;
         Ice::LoggerPtr Logger;
         mtsDeviceInterfaceProxy::DeviceInterfaceServerPrx Server;

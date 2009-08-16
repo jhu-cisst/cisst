@@ -91,8 +91,6 @@ void mtsTaskManagerProxyClient::StartClient()
 
 void mtsTaskManagerProxyClient::Runner(ThreadArguments<mtsTaskManager> * arguments)
 {
-    mtsTaskManager * TaskManager = reinterpret_cast<mtsTaskManager*>(arguments->argument);
-
     mtsTaskManagerProxyClient * ProxyClient = 
         dynamic_cast<mtsTaskManagerProxyClient*>(arguments->proxy);
 
@@ -308,15 +306,16 @@ bool mtsTaskManagerProxyClient::SendGetProvidedInterfaceAccessInfo(
 //-------------------------------------------------------------------------
 //  Definition by mtsTaskManagerProxy.ice
 //-------------------------------------------------------------------------
-mtsTaskManagerProxyClient::TaskManagerClientI::TaskManagerClientI(
-    const Ice::CommunicatorPtr& communicator,                           
-    const Ice::LoggerPtr& logger,
-    const mtsTaskManagerProxy::TaskManagerServerPrx& server,
-    mtsTaskManagerProxyClient * taskManagerClient)
-    : Runnable(true), 
-      Communicator(communicator), Logger(logger),
-      Server(server), TaskManagerClient(taskManagerClient),      
-      Sender(new SendThread<TaskManagerClientIPtr>(this))      
+mtsTaskManagerProxyClient::TaskManagerClientI::TaskManagerClientI(const Ice::CommunicatorPtr& communicator,
+                                                                  const Ice::LoggerPtr& logger,
+                                                                  const mtsTaskManagerProxy::TaskManagerServerPrx& server,
+                                                                  mtsTaskManagerProxyClient * taskManagerClient):
+    Runnable(true), 
+    Communicator(communicator),
+    Sender(new SendThread<TaskManagerClientIPtr>(this)),
+    Logger(logger),
+    Server(server),
+    TaskManagerClient(taskManagerClient)
 {
 }
 

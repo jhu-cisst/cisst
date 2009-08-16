@@ -114,20 +114,24 @@ public:
     class ProxyLogger : public Ice::Logger
     {
     public:
-        void print(const ::std::string& log) {
-            Log(log);
+        void print(const ::std::string & message) {
+            CMN_LOG_RUN_VERBOSE << "ICE: " << message << std::endl;
+            // Log(log);
         }
-        void trace(const ::std::string& log1, const ::std::string& log2) {
-            Log(log1, log2);
+        void trace(const ::std::string & category, const ::std::string & message) {
+            CMN_LOG_RUN_DEBUG << "ICE: " << category << " :: " << message << std::endl;
+            // Log(log1, log2);
         }
-        void warning(const ::std::string& log) {
-            Log("##### WARNING: " + log);
+        void warning(const ::std::string & message) {
+            CMN_LOG_RUN_WARNING << "ICE: " << message << std::endl;
+            // Log("##### WARNING: " + log);
         }
-        void error(const ::std::string& log) {
-            Log("##### ERROR: " + log);
+        void error(const ::std::string & message) {
+            CMN_LOG_RUN_ERROR << "ICE: " << message << std::endl;
+            // Log("##### ERROR: " + log);
         }
 
-        void Log(const std::string& className, const std::string& description) {
+        void Log(const std::string & className, const std::string & description) {
             std::string log = className + ": ";
             log += description;
 
@@ -198,6 +202,12 @@ protected:
     /*! The flag which is true only if this proxy is runnable. */
     bool Runnable;
 
+    /*! Set as true when a session is to be closed.
+        For a client, this is set when a client notifies a server of disconnection.
+        For a server, this is set when a client calls Shutdown() which allows safe
+        and clean termination. */
+    bool IsValidSession;
+
     /*! The worker thread that actually runs a proxy. */
     osaThread WorkerThread;
 
@@ -222,14 +232,14 @@ protected:
         (not supported yet). */
     const std::string IceObjectIdentity;
 
-    /*! The global unique id of this Ice object. */
-    std::string IceGUID;
-
     /*! The proxy communicator. */
     Ice::CommunicatorPtr IceCommunicator;
 
     /*! The Ice default logger. */
     Ice::LoggerPtr IceLogger;
+
+    /*! The global unique id of this Ice object. */
+    std::string IceGUID;
 
     /*! Initialize Ice module. */
     virtual void IceInitialize(void) = 0;
@@ -245,12 +255,6 @@ protected:
         return IceGUID;
     }
 
-    /*! Set as true when a session is to be closed.
-        For a client, this is set when a client notifies a server of disconnection.
-        For a server, this is set when a client calls Shutdown() which allows safe
-        and clean termination. */
-    bool IsValidSession;
-
     //-----------------------------------------------------
     //  Serialization and Deserialization
     //-----------------------------------------------------
@@ -262,11 +266,7 @@ protected:
     cmnSerializer * Serializer;
     cmnDeSerializer * DeSerializer;
 
-    //
-    //  TODO: should the first argument be cmnGenericObject or mtsGenericObject?
-    //
-    void Serialize(const cmnGenericObject & argument, std::string & serializedData)
-    //void Serialize(const mtsGenericObject & argument, std::string & serializedData)
+    void Serialize(const mtsGenericObject & argument, std::string & serializedData)
     {
         SerializationBuffer.str("");    
         Serializer->Serialize(argument);
