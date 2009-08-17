@@ -5,7 +5,7 @@
   Author(s):	Rajesh Kumar, Anton Deguet
   Created on:	2008-03-12
 
-  (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -41,6 +41,7 @@ class CISST_EXPORT prmForceCartesianSet: public prmMotionBase
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 public:
+    typedef prmMotionBase BaseType;
     typedef vctFixedSizeVector<double, 6> ForceType;
     typedef vctFixedSizeVector<bool, 6> MaskType;
 
@@ -83,6 +84,19 @@ public:
     /*!destructor
      */
     virtual ~prmForceCartesianSet();
+
+    /*! Human readable output to stream. */
+    void ToStream(std::ostream & outputStream) const;
+
+    /*! To stream raw data. */
+    void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
+                     bool headerOnly = false, const std::string & headerPrefix = "") const;
+
+    /*! Binary serialization */
+    void SerializeRaw(std::ostream & outputStream) const;
+
+    /*! Binary deserialization */
+    void DeSerializeRaw(std::istream & inputStream);
     
 }; // _prmForceCartesianSet_h
 

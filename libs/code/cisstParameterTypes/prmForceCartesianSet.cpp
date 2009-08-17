@@ -5,7 +5,7 @@
   Author(s):	Rajesh Kumar, Anton Deguet
   Created on:   2008-03-12
 
-  (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2008-2009 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -25,3 +25,33 @@ prmForceCartesianSet::~prmForceCartesianSet()
 {
 }
 
+
+void prmForceCartesianSet::ToStream(std::ostream & outputStream) const
+{
+    BaseType::ToStream(outputStream);
+    outputStream << "\nForce: " << this->ForceMember
+                 << "\nMask: " << this->MaskMember;
+}
+
+void prmForceCartesianSet::ToStreamRaw(std::ostream & outputStream, const char delimiter,
+                                          bool headerOnly, const std::string & headerPrefix) const {
+    BaseType::ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix);
+    outputStream << delimiter;
+    this->ForceMember.ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix);
+    outputStream << delimiter;
+    this->MaskMember.ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix);
+}
+
+void prmForceCartesianSet::SerializeRaw(std::ostream & outputStream) const 
+{
+    BaseType::SerializeRaw(outputStream);
+    this->ForceMember.SerializeRaw(outputStream);
+    this->MaskMember.SerializeRaw(outputStream);
+}
+
+void prmForceCartesianSet::DeSerializeRaw(std::istream & inputStream) 
+{
+    BaseType::DeSerializeRaw(inputStream);
+    this->ForceMember.DeSerializeRaw(inputStream);
+    this->MaskMember.DeSerializeRaw(inputStream);
+}
