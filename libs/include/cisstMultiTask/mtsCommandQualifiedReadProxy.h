@@ -50,17 +50,17 @@ protected:
 
     /*! ID assigned by the server as a pointer to the actual command in server's
         memory space. */
-    CommandProxyIdType CommandId;
+    CommandIDType CommandId;
 
 public:
-    mtsCommandQualifiedReadProxy(const int commandId, 
+    mtsCommandQualifiedReadProxy(const CommandIDType commandId, 
                                  mtsDeviceInterfaceProxyClient * providedInterfaceProxy):
         BaseType(),
         ProvidedInterfaceProxy(providedInterfaceProxy),
         CommandId(commandId)
     {}
 
-    mtsCommandQualifiedReadProxy(const int commandId,
+    mtsCommandQualifiedReadProxy(const CommandIDType commandId,
                                  mtsDeviceInterfaceProxyClient * providedInterfaceProxy,
                                  const std::string & name):
                          //ArgumentPointerType argumentProtoType) :
@@ -75,7 +75,7 @@ public:
     {}
 
     /*! Update CommandId. */
-    void SetCommandId(const CommandProxyIdType & newCommandId) {
+    void SetCommandId(const CommandIDType & newCommandId) {
         CommandId = newCommandId;
     }
 

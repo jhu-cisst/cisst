@@ -104,7 +104,7 @@ module mtsDeviceInterfaceProxy
         // This id is set as the pointer to the function proxy at server side.
         // Note that this is valid only for 32-bit OS. Under 64-bit machine, this
         // should be changed so as to be able to handle 64-bit address space.
-        int FunctionProxyId;
+        long FunctionProxyId;
     };
 
     sequence<FunctionProxyInfo> FunctionProxySequence;
@@ -129,7 +129,7 @@ module mtsDeviceInterfaceProxy
         // This id is set as the pointer to the function proxy at client side.
         // Note that this is valid only for 32-bit OS. Under 64-bit machine, this
         // should be changed so as to be able to handle 64-bit address space.
-        int ProxyId;
+        long ProxyId;
     };
     sequence<EventGeneratorProxyElement> EventGeneratorProxySequence;
 
@@ -144,8 +144,8 @@ module mtsDeviceInterfaceProxy
 	//-----------------------------------------------------------------------------
 	interface DeviceInterfaceClient
 	{
-        void ExecuteEventVoid(int CommandId);
-        void ExecuteEventWriteSerialized(int CommandId, string argument);
+        void ExecuteEventVoid(long CommandId);
+        void ExecuteEventWriteSerialized(long CommandId, string argument);
 	};
 
 	//-----------------------------------------------------------------------------
@@ -197,10 +197,10 @@ module mtsDeviceInterfaceProxy
 		// (see http://zeroc.com/doc/Ice-3.3.1/manual/Slice.5.8.html)
 		// (Also see http://www.zeroc.com/doc/Ice-3.3.1/manual/Cpp.7.6.html for
 		// Mapping for simple built-in types)
-		void ExecuteCommandVoid(int CommandId);
-        void ExecuteCommandWriteSerialized(int CommandId, string argument);
-        void ExecuteCommandReadSerialized(int CommandId, out string argument);
-        void ExecuteCommandQualifiedReadSerialized(int CommandId, string argument1, out string argument2);
+		void ExecuteCommandVoid(long CommandId);
+        void ExecuteCommandWriteSerialized(long CommandId, string argument);
+        void ExecuteCommandReadSerialized(long CommandId, out string argument);
+        void ExecuteCommandQualifiedReadSerialized(long CommandId, string argument1, out string argument2);
 	};
 
 };

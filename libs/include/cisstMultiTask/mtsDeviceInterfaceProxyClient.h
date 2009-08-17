@@ -114,8 +114,8 @@ public:
     //-------------------------------------------------------------------------
     //  Methods to Receive and Process Events (Server -> Client)
     //-------------------------------------------------------------------------
-    void ReceiveExecuteEventVoid(const int commandId);
-    void ReceiveExecuteEventWriteSerialized(const int commandId, const std::string argument);
+    void ReceiveExecuteEventVoid(const CommandIDType commandId);
+    void ReceiveExecuteEventWriteSerialized(const CommandIDType commandId, const std::string argument);
 
     //-------------------------------------------------------------------------
     //  Methods to Send Events (Client -> Server)
@@ -136,11 +136,11 @@ public:
         const std::string & clientTaskProxyName,
         mtsDeviceInterfaceProxy::FunctionProxySet & functionProxies);
 
-    void SendExecuteCommandVoid(const int commandId) const;
-    void SendExecuteCommandWriteSerialized(const int commandId, const mtsGenericObject & argument);
-    void SendExecuteCommandReadSerialized(const int commandId, mtsGenericObject & argument);
+    void SendExecuteCommandVoid(const CommandIDType commandId) const;
+    void SendExecuteCommandWriteSerialized(const CommandIDType commandId, const mtsGenericObject & argument);
+    void SendExecuteCommandReadSerialized(const CommandIDType commandId, mtsGenericObject & argument);
     void SendExecuteCommandQualifiedReadSerialized(
-        const int commandId, const mtsGenericObject & argument1, mtsGenericObject & argument2);
+        const CommandIDType commandId, const mtsGenericObject & argument1, mtsGenericObject & argument2);
 
     //-------------------------------------------------------------------------
     //  Definition by mtsDeviceInterfaceProxy.ice
@@ -168,8 +168,8 @@ protected:
         void Stop();
 
         // Server -> Client
-        void ExecuteEventVoid(::Ice::Int, const ::Ice::Current&);
-        void ExecuteEventWriteSerialized(::Ice::Int, const ::std::string&, const ::Ice::Current&);
+        void ExecuteEventVoid(::Ice::IceCommandIDType, const ::Ice::Current&);
+        void ExecuteEventWriteSerialized(::Ice::IceCommandIDType, const ::std::string&, const ::Ice::Current&);
     };
 };
 

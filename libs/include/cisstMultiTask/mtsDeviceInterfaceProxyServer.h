@@ -152,17 +152,17 @@ protected:
         mtsDeviceInterfaceProxy::FunctionProxySet & functionProxies);
 
     /*! Execute actual command objects. */
-    void ReceiveExecuteCommandVoid(const int commandId) const;
-    void ReceiveExecuteCommandWriteSerialized(const int commandId, const std::string & argument);
-    void ReceiveExecuteCommandReadSerialized(const int commandId, std::string & argument);
-    void ReceiveExecuteCommandQualifiedReadSerialized(const int commandId, const std::string & argument1, std::string & argument2);
+    void ReceiveExecuteCommandVoid(const CommandIDType commandId) const;
+    void ReceiveExecuteCommandWriteSerialized(const CommandIDType commandId, const std::string & argument);
+    void ReceiveExecuteCommandReadSerialized(const CommandIDType commandId, std::string & argument);
+    void ReceiveExecuteCommandQualifiedReadSerialized(const CommandIDType commandId, const std::string & argument1, std::string & argument2);
 
     //-------------------------------------------------------------------------
     //  Methods to Send Events (Server -> Client)
     //-------------------------------------------------------------------------
 public:
-    void SendExecuteEventVoid(const int commandId) const;
-    void SendExecuteEventWriteSerialized(const int commandId, const mtsGenericObject & argument);
+    void SendExecuteEventVoid(const CommandIDType commandId) const;
+    void SendExecuteEventWriteSerialized(const CommandIDType commandId, const mtsGenericObject & argument);
 
     //-------------------------------------------------------------------------
     //  Definition by mtsDeviceInterfaceProxy.ice
@@ -207,10 +207,10 @@ protected:
             const std::string & clientTaskProxyName,
             mtsDeviceInterfaceProxy::FunctionProxySet&, const ::Ice::Current&) const;
 
-        void ExecuteCommandVoid(::Ice::Int, const ::Ice::Current&);
-        void ExecuteCommandWriteSerialized(::Ice::Int, const ::std::string&, const ::Ice::Current&);
-        void ExecuteCommandReadSerialized(::Ice::Int, ::std::string&, const ::Ice::Current&);
-        void ExecuteCommandQualifiedReadSerialized(::Ice::Int, const ::std::string&, ::std::string&, const ::Ice::Current&);
+        void ExecuteCommandVoid(::Ice::IceCommandIDType, const ::Ice::Current&);
+        void ExecuteCommandWriteSerialized(::Ice::IceCommandIDType, const ::std::string&, const ::Ice::Current&);
+        void ExecuteCommandReadSerialized(::Ice::IceCommandIDType, ::std::string&, const ::Ice::Current&);
+        void ExecuteCommandQualifiedReadSerialized(::Ice::IceCommandIDType, const ::std::string&, ::std::string&, const ::Ice::Current&);
 
     };
 };

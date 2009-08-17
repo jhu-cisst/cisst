@@ -131,14 +131,9 @@ public:
 
     /*! Get the command name.  This method doesn't allow to change the
       command name. */
-    inline const std::string & GetName(void) const {
+    inline const std::string & GetName(void) const {        
         return this->Name;
     }
-
-    /*! Defines the type of command id for command proxy objects.  If
-      OS changes from 32-bit to 64-bit, we can just modify this
-      definition. */
-    typedef int CommandProxyIdType;
 };
 
 

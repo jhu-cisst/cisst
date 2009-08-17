@@ -55,7 +55,7 @@ public:
 protected:
     /*! CommandId is set as a pointer to a mtsFunctionWrite at peer's
       memory space which binds to an actual write command. */
-    CommandProxyIdType CommandId;
+    CommandIDType CommandId;
     
     /*! Device interface proxy objects which execute a write command at 
         peer's memory space across networks. */
@@ -64,7 +64,7 @@ protected:
 
 public:
     /*! The constructors. */
-    mtsCommandWriteProxy(const CommandProxyIdType commandId, 
+    mtsCommandWriteProxy(const CommandIDType commandId, 
                          mtsDeviceInterfaceProxyClient * providedInterfaceProxy) :
         BaseType(),
         CommandId(commandId),
@@ -72,7 +72,7 @@ public:
         RequiredInterfaceProxy(NULL)
     {}
 
-    mtsCommandWriteProxy(const CommandProxyIdType commandId, 
+    mtsCommandWriteProxy(const CommandIDType commandId, 
                          mtsDeviceInterfaceProxyServer * requiredInterfaceProxy) :
         BaseType(),
         CommandId(commandId),
@@ -81,7 +81,7 @@ public:
     {}
     
     /*! The constructor with a name. */
-    mtsCommandWriteProxy(const CommandProxyIdType commandId,
+    mtsCommandWriteProxy(const CommandIDType commandId,
                          mtsDeviceInterfaceProxyClient * providedInterfaceProxy,
                          const std::string & name) :
         BaseType(name),
@@ -90,7 +90,7 @@ public:
         RequiredInterfaceProxy(NULL)
     {}
 
-    mtsCommandWriteProxy(const CommandProxyIdType commandId,
+    mtsCommandWriteProxy(const CommandIDType commandId,
                          mtsDeviceInterfaceProxyServer * requiredInterfaceProxy,
                          const std::string & name) :
         BaseType(name),
@@ -104,7 +104,7 @@ public:
     {}
 
     /*! Update CommandId. */
-    void SetCommandId(const CommandProxyIdType & newCommandId) {
+    void SetCommandId(const CommandIDType & newCommandId) {
         CommandId = newCommandId;
     }
 

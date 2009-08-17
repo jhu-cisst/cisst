@@ -143,7 +143,7 @@ mtsProvidedInterface * mtsDeviceProxy::CreateProvidedInterfaceProxy(
     // Create command proxies.
     // CommandId is initially set to zero meaning that it needs to be updated later.
     // An actual value will be assigned later when UpdateCommandId() is executed.
-    int commandId = 0;
+    CommandIDType commandId = 0;
     std::string commandName;
 
 #define ADD_COMMAND_PROXY_BEGIN(_commandType) \

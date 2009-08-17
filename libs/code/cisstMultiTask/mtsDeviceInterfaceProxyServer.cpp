@@ -357,7 +357,7 @@ void mtsDeviceInterfaceProxyServer::ReceiveGetCommandId(
     serverTaskProxy->GetFunctionPointers(functionProxies);
 }
 
-void mtsDeviceInterfaceProxyServer::ReceiveExecuteCommandVoid(const int commandId) const
+void mtsDeviceInterfaceProxyServer::ReceiveExecuteCommandVoid(const CommandIDType commandId) const
 {
     mtsFunctionVoid * functionVoid = reinterpret_cast<mtsFunctionVoid *>(commandId);
     CMN_ASSERT(functionVoid);
@@ -366,7 +366,7 @@ void mtsDeviceInterfaceProxyServer::ReceiveExecuteCommandVoid(const int commandI
 }
 
 void mtsDeviceInterfaceProxyServer::ReceiveExecuteCommandWriteSerialized(
-    const int commandId, const std::string & argument)
+    const CommandIDType commandId, const std::string & argument)
 {
     mtsFunctionWrite * functionWrite = reinterpret_cast<mtsFunctionWrite*>(commandId);
     CMN_ASSERT(functionWrite);
@@ -386,7 +386,7 @@ void mtsDeviceInterfaceProxyServer::ReceiveExecuteCommandWriteSerialized(
 }
 
 void mtsDeviceInterfaceProxyServer::ReceiveExecuteCommandReadSerialized(
-    const int commandId, std::string & argument)
+    const CommandIDType commandId, std::string & argument)
 {
     mtsFunctionRead * functionRead = reinterpret_cast<mtsFunctionRead*>(commandId);
     CMN_ASSERT(functionRead);
@@ -409,7 +409,7 @@ void mtsDeviceInterfaceProxyServer::ReceiveExecuteCommandReadSerialized(
 }
 
 void mtsDeviceInterfaceProxyServer::ReceiveExecuteCommandQualifiedReadSerialized(
-    const int commandId, const std::string & argument1, std::string & argument2)
+    const CommandIDType commandId, const std::string & argument1, std::string & argument2)
 {
     mtsFunctionQualifiedRead * functionQualifiedRead
          = reinterpret_cast<mtsFunctionQualifiedRead*>(commandId);
@@ -446,7 +446,7 @@ void mtsDeviceInterfaceProxyServer::ReceiveExecuteCommandQualifiedReadSerialized
 //-------------------------------------------------------------------------
 //  Methods to Send Events
 //-------------------------------------------------------------------------
-void mtsDeviceInterfaceProxyServer::SendExecuteEventVoid(const int commandId) const
+void mtsDeviceInterfaceProxyServer::SendExecuteEventVoid(const CommandIDType commandId) const
 {
     if (!IsValidSession) return;
 
@@ -457,7 +457,7 @@ void mtsDeviceInterfaceProxyServer::SendExecuteEventVoid(const int commandId) co
 
 void mtsDeviceInterfaceProxyServer::SendExecuteEventWriteSerialized(
     //const int commandId, const cmnGenericObject & argument)
-    const int commandId, const mtsGenericObject & argument)
+    const CommandIDType commandId, const mtsGenericObject & argument)
 {
     if (!IsValidSession) return;
 
@@ -614,7 +614,7 @@ void mtsDeviceInterfaceProxyServer::DeviceInterfaceServerI::GetCommandId(
 }
 
 void mtsDeviceInterfaceProxyServer::DeviceInterfaceServerI::ExecuteCommandVoid(
-    ::Ice::Int commandID, const ::Ice::Current&)
+    ::Ice::IceCommandIDType commandID, const ::Ice::Current&)
 {
     //Logger->trace("TIServer", "<<<<< RECV: ExecuteCommandVoid");
 
@@ -622,7 +622,7 @@ void mtsDeviceInterfaceProxyServer::DeviceInterfaceServerI::ExecuteCommandVoid(
 }
 
 void mtsDeviceInterfaceProxyServer::DeviceInterfaceServerI::ExecuteCommandWriteSerialized(
-    ::Ice::Int commandID, const ::std::string& argument, const ::Ice::Current&)
+    ::Ice::IceCommandIDType commandID, const ::std::string& argument, const ::Ice::Current&)
 {
     //Logger->trace("TIServer", "<<<<< RECV: ExecuteCommandWriteSerialized");
 
@@ -630,7 +630,7 @@ void mtsDeviceInterfaceProxyServer::DeviceInterfaceServerI::ExecuteCommandWriteS
 }
 
 void mtsDeviceInterfaceProxyServer::DeviceInterfaceServerI::ExecuteCommandReadSerialized(
-    ::Ice::Int commandID, ::std::string& argument, const ::Ice::Current&)
+    ::Ice::IceCommandIDType commandID, ::std::string& argument, const ::Ice::Current&)
 {
     //Logger->trace("TIServer", "<<<<< RECV: ExecuteCommandReadSerialized");
 
@@ -638,7 +638,7 @@ void mtsDeviceInterfaceProxyServer::DeviceInterfaceServerI::ExecuteCommandReadSe
 }
 
 void mtsDeviceInterfaceProxyServer::DeviceInterfaceServerI::ExecuteCommandQualifiedReadSerialized(
-    ::Ice::Int commandID, const ::std::string& argument1, ::std::string& argument2, const ::Ice::Current&)
+    ::Ice::IceCommandIDType commandID, const ::std::string& argument1, ::std::string& argument2, const ::Ice::Current&)
 {
     //Logger->trace("TIServer", "<<<<< RECV: ExecuteCommandQualifiedReadSerialized");
 

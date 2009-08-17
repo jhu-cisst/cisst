@@ -165,7 +165,7 @@ void mtsDeviceInterfaceProxyClient::OnEnd()
 //    return true;
 //}
 
-void mtsDeviceInterfaceProxyClient::ReceiveExecuteEventVoid(const int commandId)
+void mtsDeviceInterfaceProxyClient::ReceiveExecuteEventVoid(const CommandIDType commandId)
 {
     mtsMulticastCommandVoid * eventVoidGeneratorProxy = 
         reinterpret_cast<mtsMulticastCommandVoid*>(commandId);
@@ -175,7 +175,7 @@ void mtsDeviceInterfaceProxyClient::ReceiveExecuteEventVoid(const int commandId)
 }
 
 void mtsDeviceInterfaceProxyClient::ReceiveExecuteEventWriteSerialized(
-    const int commandId, const std::string argument)
+    const CommandIDType commandId, const std::string argument)
 {
     static char buf[1024];
     sprintf(buf, "ReceiveExecuteEventWriteSerialized: %d bytes received", argument.size());
@@ -245,7 +245,7 @@ void mtsDeviceInterfaceProxyClient::SendGetCommandId(
     DeviceInterfaceServerProxy->GetCommandId(clientTaskProxyName, functionProxies);
 }
 
-void mtsDeviceInterfaceProxyClient::SendExecuteCommandVoid(const int commandId) const
+void mtsDeviceInterfaceProxyClient::SendExecuteCommandVoid(const CommandIDType commandId) const
 {
     if (!IsValidSession) return;
 
@@ -255,7 +255,7 @@ void mtsDeviceInterfaceProxyClient::SendExecuteCommandVoid(const int commandId) 
 }
 
 void mtsDeviceInterfaceProxyClient::SendExecuteCommandWriteSerialized(
-    const int commandId, const mtsGenericObject & argument)
+    const CommandIDType commandId, const mtsGenericObject & argument)
 {
     if (!IsValidSession) return;
 
@@ -269,7 +269,7 @@ void mtsDeviceInterfaceProxyClient::SendExecuteCommandWriteSerialized(
 }
 
 void mtsDeviceInterfaceProxyClient::SendExecuteCommandReadSerialized(
-    const int commandId, mtsGenericObject & argument)
+    const CommandIDType commandId, mtsGenericObject & argument)
 {
     if (!IsValidSession) return;
 
@@ -286,7 +286,7 @@ void mtsDeviceInterfaceProxyClient::SendExecuteCommandReadSerialized(
 }
 
 void mtsDeviceInterfaceProxyClient::SendExecuteCommandQualifiedReadSerialized(
-    const int commandId, const mtsGenericObject & argument1, mtsGenericObject & argument2)
+    const CommandIDType commandId, const mtsGenericObject & argument1, mtsGenericObject & argument2)
 {
     if (!IsValidSession) return;
 
@@ -380,7 +380,7 @@ void mtsDeviceInterfaceProxyClient::DeviceInterfaceClientI::Stop()
 //}
 
 void mtsDeviceInterfaceProxyClient::DeviceInterfaceClientI::ExecuteEventVoid(
-    ::Ice::Int commandId, const ::Ice::Current&)
+    ::Ice::IceCommandIDType commandId, const ::Ice::Current&)
 {
     Logger->trace("TIClient", "<<<<< RECV: ExecuteEventVoid");
 
@@ -388,7 +388,7 @@ void mtsDeviceInterfaceProxyClient::DeviceInterfaceClientI::ExecuteEventVoid(
 }
 
 void mtsDeviceInterfaceProxyClient::DeviceInterfaceClientI::ExecuteEventWriteSerialized(
-    ::Ice::Int commandId, const ::std::string& argument, const ::Ice::Current&)
+    ::Ice::IceCommandIDType commandId, const ::std::string& argument, const ::Ice::Current&)
 {
     Logger->trace("TIClient", "<<<<< RECV: ExecuteEventWriteSerialized");
 
