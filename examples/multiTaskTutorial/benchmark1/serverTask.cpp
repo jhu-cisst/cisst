@@ -21,11 +21,9 @@ serverTask::serverTask(const std::string & taskName, double period):
     // add one interface, this will create an mtsTaskInterface
     mtsProvidedInterface * provided = AddProvidedInterface("Provided");
     if (provided) {
-        provided->AddCommandVoid(&serverTask::Toggle, this, "Toggle");
         provided->AddCommandWrite(&serverTask::Write, this, "Write");
         provided->AddCommandReadState(this->StateTable, this->ReadValue, "Read");
-        provided->AddCommandQualifiedRead(&serverTask::QualifiedRead, this, "QualifiedRead");
-        provided->AddEventVoid(this->EventVoid, "EventVoid");
+        provided->AddCommandWrite(&serverTask::TriggerEvent, this, "TriggerEvent");
         provided->AddEventWrite(this->EventWrite, "EventWrite", value_type());
     }
 
@@ -37,12 +35,6 @@ serverTask::serverTask(const std::string & taskName, double period):
 
     // Allocates space for samples
     this->Samples.SetSize(confNumberOfSamples);
-}
-
-
-void serverTask::Toggle(void)
-{
-    CMN_LOG_CLASS_RUN_VERBOSE << "Toggle" << std::endl;
 }
 
 
@@ -62,23 +54,27 @@ void serverTask::Write(const value_type & data)
     if (this->SamplesCollected == confNumberOfSamples) {
         this->BenchmarkDoneMember = true;
         double average = Samples.SumOfElements() / Samples.size();
-        double min, max;
+        double min = 0.0;
+        double max = 0.0;
         Samples.MinAndMaxElement(min, max);
-        std::cout << "Client period (ms): " << cmnInternalTo_ms(confClientPeriod) << std::endl
-                  << "Server period (ms): " << cmnInternalTo_ms(confServerPeriod) << std::endl
-                  << "Size of elements used (in bytes): " << sizeof(value_type) << std::endl
-                  << "Number of samples: " << this->SamplesCollected << std::endl
-                  << "Average (ms): " << cmnInternalTo_ms(average) << std::endl
-                  << "Min (ms): " << cmnInternalTo_ms(min) << std::endl
-                  << "Max (ms): " << cmnInternalTo_ms(max) << std::endl;
+        std::cout << "scs: server->client->server: client read (previous cycle data) and writes back (queued)" << std::endl
+                  << "scs: Client period (ms): " << cmnInternalTo_ms(confClientPeriod) << std::endl
+                  << "scs: Server period (ms): " << cmnInternalTo_ms(confServerPeriod) << std::endl
+                  << "scs: Size of elements used (in bytes): " << sizeof(value_type) << std::endl
+                  << "scs: Number of samples: " << this->SamplesCollected << std::endl
+                  << "scs: Average (ms): " << cmnInternalTo_ms(average) << std::endl
+                  << "scs: Min (ms): " << cmnInternalTo_ms(min) << std::endl
+                  << "scs: Max (ms): " << cmnInternalTo_ms(max) << std::endl;
         this->SamplesCollected++; // just to avoid printing results again
     }
 }
 
 
-void serverTask::QualifiedRead(const value_type & data, value_type & placeHolder) const
+void serverTask::TriggerEvent(const value_type & data)
 {
-    CMN_LOG_CLASS_RUN_VERBOSE << "QualifiedRead" << std::endl;
+    CMN_LOG_CLASS_RUN_VERBOSE << "TriggerEvent" << std::endl;
+    // send data back to measure loop time
+    this->EventWrite(data);
 }
 
 

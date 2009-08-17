@@ -20,15 +20,16 @@ protected:
     
     mtsFunctionWrite WriteServer;
     mtsFunctionRead ReadServer;
-    mtsFunctionQualifiedRead QualifiedReadServer;
 
+    mtsFunctionWrite TriggerEvent;
     void EventWriteHandler(const value_type & value);
-    void EventVoidHandler(void);
 
     // time benchmarking
     const osaTimeServer * TimeServer;
     bool BenchmarkDoneMember;
+    unsigned int NumberOfskippedElement;
     unsigned int SamplesCollected;
+    vctDynamicVector<double> Samples;
 
 public:
     // see sineTask.h documentation

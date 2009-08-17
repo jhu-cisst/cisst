@@ -17,22 +17,17 @@ protected:
     // type of object used for benchmarks
     typedef prmPositionCartesianGet value_type;
 
-    mtsFunctionVoid EventVoid;
+    void Write(const value_type & data);
+    void TriggerEvent(const value_type & data);
     mtsFunctionWrite EventWrite;
 
-    void Toggle(void);
-    void Write(const value_type & data);
-    void QualifiedRead(const value_type & data, value_type & placeHolder) const;
-
     value_type ReadValue;
-
-    void SendButtonClickEvent() { EventVoid(); }
 
     // time benchmarking
     const osaTimeServer * TimeServer;
     bool BenchmarkDoneMember;
-    unsigned int SamplesCollected;
     unsigned int NumberOfskippedElement;
+    unsigned int SamplesCollected;
     vctDynamicVector<double> Samples;
 
 public:
