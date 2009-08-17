@@ -16,8 +16,11 @@ project(devicesTutorial)
 
 add_subdirectory(example2)
 
-if(CISST_DEV_HAS_SENSABLEHD)
+if(CISST_DEV_HAS_SENSABLEHD OR CISST_MTS_HAS_ICE)
   add_subdirectory(example1)
+endif(CISST_DEV_HAS_SENSABLEHD OR CISST_MTS_HAS_ICE)
+
+if(CISST_DEV_HAS_SENSABLEHD)
   add_subdirectory(example3)
 endif(CISST_DEV_HAS_SENSABLEHD)
 
