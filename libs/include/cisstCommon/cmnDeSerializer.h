@@ -57,7 +57,7 @@ inline void cmnDeSerializeRaw(std::istream & inputStream, _elementType & data)
 {
     inputStream.read(reinterpret_cast<char *>(&data), sizeof(_elementType));
     if (inputStream.fail()) {
-        cmnThrow(std::runtime_error("cmnDeSerializer::DeSerializeRaw(_elementType): Error occured with std::istream::read"));
+        cmnThrow("cmnDeSerializer::DeSerializeRaw(_elementType): Error occured with std::istream::read");
     }
 }
 
@@ -75,7 +75,7 @@ inline void cmnDeSerializeRaw(std::istream & inputStream, std::string & data)
     data.resize(size);
     inputStream.read(const_cast<char *>(data.c_str()), size * sizeof(std::string::value_type));
     if (inputStream.fail()) {
-        cmnThrow(std::runtime_error("cmnDeSerializer::DeSerializeRaw(std::string): Error occured with std::istream::read"));
+        cmnThrow("cmnDeSerializer::DeSerializeRaw(std::string): Error occured with std::istream::read");
     }
 }
 
@@ -148,7 +148,7 @@ class CISST_EXPORT cmnDeSerializer: public cmnGenericObject {
                 cmnClassServicesBase * servicesPointerLocal = iterator->second;
                 object = servicesPointerLocal->Create();
                 if (object == 0) {
-                    cmnThrow(std::runtime_error("cmnDeSerialize::DeSerialize: Dynamic creation failed"));
+                    cmnThrow("cmnDeSerialize::DeSerialize: Dynamic creation failed");
                 }
                 object->DeSerializeRaw(this->InputStream);
             }
@@ -214,7 +214,7 @@ class CISST_EXPORT cmnDeSerializer: public cmnGenericObject {
         // look for local equivalent
         cmnClassServicesBase * servicesPointerLocal = cmnClassRegister::FindClassServices(className);
         if (servicesPointerLocal == 0) {
-            cmnThrow(std::runtime_error("cmnDeSerializer::DeSerializeServices: Class name doesn't match any existing one"));
+            cmnThrow(std::string("cmnDeSerializer::DeSerializeServices: Class name doesn't match any existing one:") + className);
         }
         // read remote one and add it to the list provided that we
         // don't already have it

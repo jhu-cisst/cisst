@@ -55,7 +55,7 @@ inline void cmnSerializeRaw(std::ostream & outputStream, const _elementType & da
 {
     outputStream.write(reinterpret_cast<const char *>(&data), sizeof(_elementType));
     if (outputStream.fail()) {
-        cmnThrow(std::runtime_error("cmnSerializer::SerializeRaw(_elementType): Error occured with std::ostream::write"));
+        cmnThrow("cmnSerializer::SerializeRaw(_elementType): Error occured with std::ostream::write");
     }
 }
 
@@ -72,7 +72,7 @@ inline void cmnSerializeRaw(std::ostream & outputStream, const std::string & dat
     cmnSerializeRaw(outputStream, size);
     outputStream.write(data.c_str(), size * sizeof(std::string::value_type));
     if (outputStream.fail()) {
-        cmnThrow(std::runtime_error("cmnSerializer::SerializeRaw(std::string): Error occured with std::ostream::write"));
+        cmnThrow("cmnSerializer::SerializeRaw(std::string): Error occured with std::ostream::write");
     }        
 }
 
