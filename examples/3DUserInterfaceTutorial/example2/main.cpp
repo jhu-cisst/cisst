@@ -59,6 +59,7 @@ http://www.cisst.org/cisst/license.txt.
 #include "BehaviorLUS.h"
 #include "MeasurementBehavior.h"
 #include "MapBehavior.h"
+#include "ToyBehavior.h"
 
 int main()
 {
@@ -74,6 +75,7 @@ int main()
     cmnClassRegister::SetLoD("mtsTaskInterface", CMN_LOG_LOD_VERY_VERBOSE);
     cmnClassRegister::SetLoD("mtsTaskManager", CMN_LOG_LOD_VERY_VERBOSE);
     cmnClassRegister::SetLoD("BehaviorLUS", CMN_LOG_LOD_VERY_VERBOSE);
+    cmnClassRegister::SetLoD("SimpleBehavior", CMN_LOG_LOD_VERY_VERBOSE);
     cmnClassRegister::SetLoD("BehaviorWithSlave", CMN_LOG_LOD_VERY_VERBOSE);
     cmnClassRegister::SetLoD("dvapi_stream", CMN_LOG_LOD_INIT_VERBOSE);
 
@@ -99,6 +101,7 @@ int main()
     BehaviorLUS behavior3("BehaviorLUS");
     MeasurementBehavior behavior4("MeasurementBehavior");
     MapBehavior behavior5("MapBehavior");
+    ToyBehavior behavior6("ToyBehavior");
 
     guiManager.AddBehavior(&behavior,       // behavior reference
                            0,               // position in the menu bar: default
@@ -110,16 +113,19 @@ int main()
 
     guiManager.AddBehavior(&behavior3,       // behavior reference
                            1,             // position in the menu bar: default
-                           "resize.png");            // icon file: no texture
+                           "LUS.png");            // icon file: no texture
 
     guiManager.AddBehavior(&behavior4,       // behavior reference
                             3,             // position in the menu bar: default
-                            "move.png");            // icon file: no texture
+                            "measure.png");            // icon file: no texture
 #if 1
     guiManager.AddBehavior(&behavior5,       // behavior reference
                             4,             // position in the menu bar: default
-                            "iconify-top-left.png");            // icon file: no texture
+                            "map.png");            // icon file: no texture
 #endif
+    guiManager.AddBehavior(&behavior6,       // behavior reference
+                            5,             // position in the menu bar: default
+                            "toy.png");            // icon file: no texture
     
     guiManager.Configure("config.xml");
 

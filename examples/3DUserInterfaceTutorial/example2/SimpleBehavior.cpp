@@ -43,7 +43,8 @@ public:
         Actor(0),
         Position(position),
         Red(true)
-    {}
+        {    std::cout << "calling the visible object constructor " << std::endl;
+    }
 
     inline ~SimpleBehaviorVisibleObject()
     {
@@ -59,6 +60,7 @@ public:
     }
 
     inline bool CreateVTKObjects(void) {
+        std::cout << "calling create VTK objects " << std::endl;
         this->Source = vtkSphereSource::New();
         CMN_ASSERT(this->Source);
         this->Source->SetRadius(10.0);
@@ -71,10 +73,11 @@ public:
         CMN_ASSERT(this->Actor);
         this->Actor->SetMapper(this->Mapper);
         this->Actor->GetProperty()->SetColor(1.0, 0.0, 0.0);
-
+        this->Actor->VisibilityOff();
+        
         this->AddPart(this->Actor);
-        this->SetPosition(this->Position);
-        this->Hide();
+        //this->SetPosition(this->Position);
+
         return true;
     }
 
@@ -105,25 +108,13 @@ SimpleBehavior::SimpleBehavior(const std::string & name):
     Following(false),
     VisibleList(0),
     VisibleObject1(0),
-    VisibleObject2(0),
     Counter(0.0)
 {
     this->VisibleList = new ui3VisibleList("SimpleBehavior");
 
-    this->Position.X() = 0.0;
-    this->Position.Y() = 0.0;
-    this->Position.Z() = 0.0;
     this->VisibleObject1 = new SimpleBehaviorVisibleObject(this->Position);
     this->VisibleList->Add(this->VisibleObject1);
-    
-    this->Position.X() = 0.0;
-    this->Position.Y() = 20.0;
-    this->Position.Z() = 0.0;
-    this->VisibleObject2 = new ui3VisibleAxes();
-    this->VisibleList->Add(this->VisibleObject2);
-    
-    //axes = new ui3VisibleAxes();
-    //this->VisibleList->Add(axes);
+
     CMN_ASSERT(this->VisibleList);
     this->VisibleList->Show();
 }
@@ -142,7 +133,12 @@ void SimpleBehavior::ConfigureMenuBar()
                                   1,
                                   "redo.png",
                                   &SimpleBehaviorVisibleObject::ToggleColor,
-                                  dynamic_cast<SimpleBehaviorVisibleObject *>(this->VisibleList));
+                                  dynamic_cast<SimpleBehaviorVisibleObject *>(this->VisibleObject1));
+    this->MenuBar->AddClickButton("NewSphere",
+                                  2,
+                                  "sphere.png",
+                                  &SimpleBehavior::NewSphereCallback,
+                                  this);
 }
 
 
@@ -173,16 +169,18 @@ bool SimpleBehavior::RunForeground()
     this->GetPrimaryMasterPosition(position);
 
     if (this->Following) {
-        Counter += 0.02;
+        if (this->Transition)
+        {
+            this->PreviousCursorPosition.Assign(position.Position().Translation());
+            this->Transition = false;
+        }
         vctDouble3 deltaCursor;
         deltaCursor.DifferenceOf(position.Position().Translation(),
                                  this->PreviousCursorPosition);
         this->Position.Add(deltaCursor);
         this->VisibleList->SetPosition(this->Position);
         this->VisibleList->SetOrientation(position.Position().Rotation());
- 
-        this->VisibleObject2->SetOrientation(vctMatRot3(vctAxAnRot3(vctDouble3(0.0, 0.0, 1.0), Counter)));
-        this->VisibleObject2->SetPosition(vctDouble3(0.0, 20.0 * sin(Counter), 0.0));
+
     }
     this->PreviousCursorPosition.Assign(position.Position().Translation());
     return true;
@@ -195,6 +193,7 @@ bool SimpleBehavior::RunBackground()
         this->PreviousState = this->State;
         this->VisibleList->Hide();
     }
+    this->Transition = true;
     return true;
 }
 
@@ -204,6 +203,7 @@ bool SimpleBehavior::RunNoInput()
         this->PreviousMaM = this->Manager->MastersAsMice();
         this->VisibleList->Hide();
     }
+    this->Transition = true;
     return true;
 }
 
@@ -219,6 +219,7 @@ void SimpleBehavior::OnStart()
     this->Position.X() = 0.0;
     this->Position.Y() = 0.0;
     this->Position.Z() = -100.0;
+    this->VisibleList->SetPosition(this->Position);
     this->VisibleList->Show();
 }
 
@@ -232,6 +233,23 @@ void SimpleBehavior::PrimaryMasterButtonCallback(const prmEventButton & event)
     }
 }
 
-SimpleBehaviorVisibleObject ToggleColor(void )
+void SimpleBehavior::ToggleColor()
 {
+
+}
+
+void SimpleBehavior::NewSphereCallback()
+{
+    std::cout << "calling new sphere callback "  << std::endl;
+    vctFrm3 SphereFrame;
+    Counter += 20.0;
+    SphereFrame = VisibleObject1->GetTransformation();
+    SphereFrame.Translation().Y() = Counter;
+    SimpleBehaviorVisibleObject * newVisibleObj = new SimpleBehaviorVisibleObject(SphereFrame.Translation());
+    newVisibleObj->Show();
+    this->VisibleList->Add(newVisibleObj);
+    
+    std::cout << "Visibility of new object: " << newVisibleObj->Visible() << std::endl;
+    std::cout << "Creation status of new object: " << newVisibleObj->Created() << std::endl;
+    std::cout << "Placement: " << newVisibleObj->GetTransformation() << std::endl;
 }

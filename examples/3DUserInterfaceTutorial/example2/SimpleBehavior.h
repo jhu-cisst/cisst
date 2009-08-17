@@ -44,6 +44,7 @@ public:
 
 protected:
     void PrimaryMasterButtonCallback(const prmEventButton & event);
+    void ToggleColor(void);
     StateType PreviousState;
     bool PreviousMaM;
     vctDouble3 Position, PreviousCursorPosition;
@@ -52,6 +53,7 @@ protected:
 private:
     ui3VisibleList * VisibleList;
     ui3VisibleObject * VisibleObject1;
-    ui3VisibleObject * VisibleObject2;
     double Counter;
+    bool Transition;
+    void NewSphereCallback(void);
 };

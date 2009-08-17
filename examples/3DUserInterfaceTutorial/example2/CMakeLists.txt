@@ -25,8 +25,10 @@ add_executable(${PROJECT_NAME}
                CSOpenGLStippleActor.h
                MeasurementBehavior.h
                MeasurementBehavior.cpp
-               MapBehavior.cpp
                MapBehavior.h
+               MapBehavior.cpp
+               ToyBehavior.h
+               ToyBehavior.cpp
                )
 
 target_link_libraries(${PROJECT_NAME}

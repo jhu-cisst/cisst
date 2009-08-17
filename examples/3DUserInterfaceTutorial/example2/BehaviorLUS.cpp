@@ -56,8 +56,8 @@ http://www.cisst.org/cisst/license.txt.
 /*!
 
 This class creates the VTK object from a STL file of the ultrasound probe head
-@param manager The ui3Manager responsible for this class
 @param position The starting position of the object
+@param name name of the object
 
 */
 #if 1
@@ -126,8 +126,8 @@ CMN_IMPLEMENT_SERVICES(BehaviorLUSProbeHead);
 /*!
 
 This class creates the VTK object that will become the joints of the probe
-@param manager The ui3Manager responsible for this class
 @param position The starting position of the object
+@param name name of the object
 
  */
 
@@ -195,8 +195,8 @@ CMN_IMPLEMENT_SERVICES(BehaviorLUSProbeJoint);
 /*!
 
 This class creates the VTK object that will become the shaft of the probe
-@param manager The ui3Manager responsible for this class
 @param position The starting position of the object
+@param name name of the object
 
  */
 
@@ -269,8 +269,8 @@ CMN_IMPLEMENT_SERVICES(BehaviorLUSProbeShaft);
 /*!
 
 This class creates the VTK text object that will create text in the scene
-@param manager The ui3Manager responsible for this class
 @param position The starting position of the object
+@param name name of the object
 
  */
 class BehaviorLUSText: public ui3VisibleObject
@@ -344,8 +344,8 @@ CMN_IMPLEMENT_SERVICES(BehaviorLUSText);
 /*!
 
 This class creates the VTK objects that will become the background for the map
-@param manager The ui3Manager responsible for this class
 @param position The starting position of the object
+@param name name of the object
 
  */
 class BehaviorLUSBackground: public ui3VisibleObject
@@ -411,8 +411,8 @@ CMN_IMPLEMENT_SERVICES(BehaviorLUSBackground);
 /*!
 
 This class creates the VTK object that will become the outline for the probe graphic
-@param manager The ui3Manager responsible for this class
 @param position The starting position of the object
+@param name name of the object
 
  */
 
@@ -426,36 +426,32 @@ public:
         mapOutline(0),
         outline(0),
         outlineXform(0),
-        
+
         Position(position)
-    {}
-    
+        {}
+
     inline ~BehaviorLUSOutline()
-    {}
-    
+        {}
+
     inline bool CreateVTKObjects(void) {
         //set up the outline funtions
-        
+
         outlineSource = vtkOutlineSource::New();
         CMN_ASSERT(outlineSource);
         outlineSource -> SetBounds(0,30,0,30,0,0);
-        
+
         vtkPolyDataMapper *mapOutline = vtkPolyDataMapper::New();
         CMN_ASSERT(mapOutline);
         mapOutline->SetInputConnection(outlineSource->GetOutputPort());
-        
+
         outline = CSOpenGLStippleActor::New();
         CMN_ASSERT(outline);
         outline->SetMapper(mapOutline);
         outline->GetProperty()->SetColor(1,1,1);
-        //outline -> SetStipplePattern(1);
-        
+
         this->outline->VisibilityOff();
         this->AddPart(this->outline);
-        
-        
-        //int p = 1;
-        // this->GetBackgroundPosition(p);
+
         this->SetTransformation(this->Position);
         return true;
     }
@@ -474,12 +470,10 @@ CMN_DECLARE_SERVICES_INSTANTIATION(BehaviorLUSOutline);
 CMN_IMPLEMENT_SERVICES(BehaviorLUSOutline);
 
 
-
-//============================================================================================================================================
 /*!
 
 This class creates the VTK object that will become the cursor and markers of the map
-@param manager The ui3Manager responsible for this class
+@param name name of the object
 
  */
 class BehaviorLUSMarker: public ui3VisibleObject
@@ -565,7 +559,6 @@ struct MarkerType
 
 constructor
 @param name the name of the class
-@param manager The ui3Manager responsible for this class
 
 */
 
@@ -588,11 +581,11 @@ BehaviorLUS::BehaviorLUS(const std::string & name):
 {
     // add video source interfaces
     AddStream(svlTypeImageRGB, "USVideo");
-std::cout<< "constructor=======================================================================" << std::endl;
 
-
+    //create main list for the behavior
     this->VisibleList = new ui3VisibleList("LUS Main");
-    
+
+    //create subordinate lists
     this->ProbeList = new ui3VisibleList("Probe");
     this->ProbeListJoint1 = new ui3VisibleList("ProbeJoint1");
     this->ProbeListJoint2 = new ui3VisibleList("ProbeJoint2");
@@ -602,11 +595,13 @@ std::cout<< "constructor========================================================
     this->TextList = new ui3VisibleList("Text");
     this->MarkerList = new ui3VisibleList("Marker");
     
+    //add sub list to behavior list
     this->VisibleList->Add(this->ProbeList);
     this->VisibleList->Add(this->BackgroundList);
     this->VisibleList->Add(this->TextList);
     this->VisibleList->Add(this->MarkerList);
 
+    //create visible objects
     this->ProbeHead = new BehaviorLUSProbeHead(this->Position, "ProbeHeadSTL");
     this->ProbeJoint1 = new BehaviorLUSProbeJoint(this->Position);
     this->ProbeJoint2 = new BehaviorLUSProbeJoint(this->Position);
@@ -617,7 +612,8 @@ std::cout<< "constructor========================================================
     this->WarningText = new BehaviorLUSText(this->Position);
     this->MeasureText = new BehaviorLUSText(this->Position);
     this->MapCursor = new BehaviorLUSMarker("MapCursor");
-    
+
+    //add them to thier lists
     this->ProbeList->Add(this->ProbeHead);
     this->ProbeListJoint1->Add(this->ProbeJoint1);
     this->ProbeListJoint2->Add(this->ProbeJoint2);
@@ -628,7 +624,6 @@ std::cout<< "constructor========================================================
     this->TextList->Add(this->WarningText);
     this->TextList->Add(this->MeasureText);
 
-    
     this->ProbeList->Add(ProbeListJoint1);
     this->ProbeListJoint1->Add(ProbeListJoint2);
     this->ProbeListJoint2->Add(ProbeListJoint3);
@@ -636,7 +631,7 @@ std::cout<< "constructor========================================================
 
     this->VisibleList->Add(MapCursor);
 
-    
+    //create map cursors NOTE: this is a problem
     for(int i = 0; i<20 ; i++)
     {
 
@@ -646,13 +641,6 @@ std::cout<< "constructor========================================================
 
     this->MarkerList->Hide();
 
-    
-    std::cout << "2" << std::endl;
-
-    // this->VisibleList->SetTransformation(vctFrm3::Identity());
-
-    std::cout << "1" << std::endl;
-
     this->Offset.SetAll(0.0);
 
     ClutchPressed = false;
@@ -661,7 +649,6 @@ std::cout<< "constructor========================================================
     MapEnabled=false;
     ECMRCMtoVTKscale = 1;
 
-    std::cout<< " end constructor=====================================================================================" << std::endl;
 }
 /*!
 
@@ -682,8 +669,7 @@ Configures the menu bar specific for this behavior.  Creates the needed buttons 
 
 void BehaviorLUS::ConfigureMenuBar()
 {
-    
-    std::cout<< "config menu ======================================================================================================" << std::endl;
+//create the buttons that will be used in the behavior, each button has a callback function
     this->MenuBar->AddClickButton("FirstButton",
                                   1,
                                   "empty.png",
@@ -692,7 +678,7 @@ void BehaviorLUS::ConfigureMenuBar()
 
     this->MenuBar->AddClickButton("EnableMapButton",
                                  2,
-                                 "circle.png",
+                                 "map.png",
                                  &BehaviorLUS::EnableMapButtonCallback,
                                  this);
     this->MenuBar->AddClickButton("ReSetMapButton",
@@ -700,13 +686,13 @@ void BehaviorLUS::ConfigureMenuBar()
                                   "undo.png",
                                   &BehaviorLUS::ReSetMapButtonCallback,
                                   this);
-    std::cout<< "end config menu ======================================================================================================" << std::endl;
+
 }
 
 
 /*!
 
-All the things that only need to be done once
+Configures some of the objects within the scene.  This function only needs to be called once.
 
  */
 
@@ -756,8 +742,6 @@ void BehaviorLUS::Startup(void)
     providedInterface->AddObserver("Button", cameraCallbackCommand);
 
 
-    std::cout<< "start up ======================================================================================================" << std::endl;
-
     //Set the default position of the booleans
     RightMTMOpen = true;
     prevRightMTMOpen = RightMTMOpen;
@@ -783,18 +767,16 @@ void BehaviorLUS::Startup(void)
     // Change pivot position to move plane to the right location.
     // The pivot point will remain in the origin, only the plane moves.
     ImagePlane->SetPhysicalPositionRelativeToPivot(vct3(0.0, 0.0, 0.0));
-    
-
 
     this->ImagePlane->Lock();
     this->ProbeList->Add(this->ImagePlane);
     this->ImagePlane->Unlock();
-    
+
     MeasurePoint1.Assign(0.0,0.0,0.0);
 
     this->PreviousSlavePosition.Assign(this->Slave1Position.Position().Translation());
     this->CursorOffset.SetAll(0.0);
-    
+
     MarkerCount = 0;
 
 }
@@ -809,7 +791,11 @@ void BehaviorLUS::Cleanup(void)
 {
     // menu bar will release itself upon destruction
 }
+/*!
 
+Preform when in MaM mode and behavior is active
+
+*/
 
 bool BehaviorLUS::RunForeground()
 {
@@ -854,6 +840,12 @@ bool BehaviorLUS::RunForeground()
     return true;
 }
 
+/*!
+
+Preform when in MaM mode and behavior is not active
+
+ */
+
 bool BehaviorLUS::RunBackground()
 {
     this->Ticker++;
@@ -874,6 +866,12 @@ bool BehaviorLUS::RunBackground()
 
     return true;
 }
+
+/*!
+
+Preform when not in MaM and the behavior is active
+
+ */
 
 bool BehaviorLUS::RunNoInput()
 {
@@ -898,7 +896,7 @@ bool BehaviorLUS::RunNoInput()
 
     this->SetJoints(JointsSlave.Position()[4],JointsSlave.Position()[5],JointsSlave.Position()[2],JointsSlave.Position()[3]);
 
-//measurement tool should be updated if right MTM is closed
+    //measurement tool should be updated if right MTM is closed
     if (!RightMTMOpen && !ClutchPressed)
     {
         this-> GetMeasurement();
@@ -909,19 +907,19 @@ bool BehaviorLUS::RunNoInput()
         //this->SetText(MeasureText, " ");
     }
 
-//prepare to drop marker if clutch and right MTM are pressed
+    //prepare to drop marker if clutch and right MTM are pressed
     if(ClutchPressed & !RightMTMOpen) //ClutchPressed
     {
         this->AddMarker();
     }
 
-//prepare to remove marker if clutch and left MTM are pressed
+    //prepare to remove marker if clutch and left MTM are pressed
     if(ClutchPressed & !LeftMTMOpen)
     {
        this->RemoveLastMarker();
     }
 
-//update the map if enabled other wise it should be hidden.
+    //update the map if enabled other wise it should be hidden.
     if(MapEnabled)
     {
 
@@ -931,7 +929,7 @@ bool BehaviorLUS::RunNoInput()
 
         UpdateCursorPosition();
 
-
+        //this is true when the slave position is being updated 
         if(CameraPressed ||
            (!ClutchPressed && (PreviousSlavePosition == Slave1Position.Position().Translation())))
         {
@@ -950,9 +948,10 @@ bool BehaviorLUS::RunNoInput()
         }
     }
     else {
-    Backgrounds->Hide();
-    MarkerList->Hide();
-    MapCursor->Hide();
+        //hide the map if it is not enabled
+        Backgrounds->Hide();
+        MarkerList->Hide();
+        MapCursor->Hide();
     }
     PreviousSlavePosition=Slave1Position.Position().Translation();
     return true;
@@ -1020,7 +1019,7 @@ bool BehaviorLUS::SaveConfiguration(const std::string & CMN_UNUSED(configFile))
 
 /*!
 
-Function callback for the first button
+Function callback for the first button, currently this button does nothing
 
  */
 
@@ -1037,7 +1036,7 @@ Function callback to toggle whether the map is functioning or not
 
 void BehaviorLUS::EnableMapButtonCallback()
 {
-    if (this -> MapEnabled == true)
+    if (this->MapEnabled == true)
     {
         this->MapEnabled = false;
     }
@@ -1050,6 +1049,7 @@ void BehaviorLUS::EnableMapButtonCallback()
 }
 /*!
 
+Function Callback to reset the map.  Returns the map to the original starting conditons
 
 */
 
@@ -1110,10 +1110,8 @@ void BehaviorLUS::MasterClutchPedalCallback(const prmEventButton & payload)
 {
     if (payload.Type() == prmEventButton::PRESSED) {
         this->ClutchPressed = true;
-        //std::cout << ClutchPressed << std::endl;
     } else {
         this->ClutchPressed = false;
-        //std::cout << ClutchPressed << std::endl;
     }
 }
 
@@ -1259,7 +1257,7 @@ changes the text and color of the probe accordingly
 
 void BehaviorLUS::CheckLimits(double p, double y, double i, double r)
 {
-        //convert the pitch and yaw from radians into degrees 
+    //convert the pitch and yaw from radians into degrees 
     double pitch = (p*180/cmnPI);
     double yaw = (y*180/cmnPI);
     double insertion = i;
@@ -1295,7 +1293,7 @@ void BehaviorLUS::CheckLimits(double p, double y, double i, double r)
         SetText(WarningText, " ");
     }
 
-    if( total < 6 ) //turn blue if the probe is straight 
+    if( total < 6 ) //turn blue if the probe is straight
     {
         SetProbeColor(159.0/255, 182.0/255, 205.0/255) ;
     }
@@ -1312,23 +1310,23 @@ void BehaviorLUS::GetMeasurement()
 {
 
     char    measure_string[100];
-    vctFrm3 frame, correctionFrame;
-    vctDouble3 correction(0.0, 0.0, 30.0); // 30 mm along probe
+    vctFrm3 correctionFrame;
 
-    correctionFrame.Translation() = correction;
-    frame.ProductOf(Slave1Position.Position(), correctionFrame); //Moves the point from the control point of the probe to the center
+    //returns the center point of the probe
+    correctionFrame = GetCurrentCursorPositionWRTECM();
 
     if (!MeasurementActive)
     {
         MeasurementActive = true;
         //saves the first point
-        MeasurePoint1.Assign(frame.Translation());
+        MeasurePoint1.Assign(correctionFrame.Translation());
         std::cout<< "MeasurePoint1 from if statement: " << MeasurePoint1<< std::endl;
     } else {
         //calculates the distance maoved
         vctDouble3 diff;
-        diff.DifferenceOf(MeasurePoint1, frame.Translation());
+        diff.DifferenceOf(MeasurePoint1, correctionFrame.Translation());
 
+        //finds the absolute distance moved
         double AbsVal = diff.Norm();
 
         //displays the distance in mm 
@@ -1356,7 +1354,6 @@ void BehaviorLUS::AddMarker(void)
             {
                 MarkerType * newMarker = new MarkerType;
                 // create a visible object for each marker
-                // newMarkerVisible->CreateVTKObjects();
                 newMarkerVisible->Show();
                 std::cout<< "newMarkerVisible: " << newMarkerVisible->Visible() << std::endl;
                 newMarker->VisibleObject = newMarkerVisible;
@@ -1430,6 +1427,7 @@ Returns the current position of the center of the tool in the frame of the camer
 
 vctFrm3 BehaviorLUS::GetCurrentCursorPositionWRTECMRCM(void)
 {
+    //create axes for later use
     vctDouble3 Xaxis;
     Xaxis.Assign(1.0,0.0,0.0);
     vctDouble3 Yaxis;
@@ -1448,7 +1446,6 @@ vctFrm3 BehaviorLUS::GetCurrentCursorPositionWRTECMRCM(void)
     double pitch1 = JointsECM.Position()[1];
     double insert2 = JointsECM.Position()[2]*1000.0;//convert to mm
     double roll3 = JointsECM.Position()[3];
-    double angle = 30.0*cmnPI/180.0;
  
     //create frame for yaw
     vctFrm3 yawFrame0;
@@ -1465,18 +1462,12 @@ vctFrm3 BehaviorLUS::GetCurrentCursorPositionWRTECMRCM(void)
     //create frame for the roll
     vctFrm3 rollFrame3;
     rollFrame3.Rotation() = vctMatRot3( vctAxAnRot3(Zaxis, roll3) );
-
-    vctFrm3 T_to_horiz;
-    T_to_horiz.Rotation() = vctMatRot3( vctAxAnRot3(Xaxis, angle) );
-
-    //create frame for the current probe center in the camera frame
-    vctFrm3 fixedPoint;
-    fixedPoint.Translation()= GetCurrentCursorPositionWRTECM().Translation();
  
     // raw cartesian position from slave daVinci, no ui3 correction
     prmPositionCartesianGet slavePosition;
     GetCartesianPositionSlave(slavePosition);
 
+    //move the control point to center of probe NOTE: could use function.
     vctFrm3 ProbeOffset;
     ProbeOffset.Translation().Assign(vctDouble3(0.0, 0.0, 30.0));
 
@@ -1484,11 +1475,12 @@ vctFrm3 BehaviorLUS::GetCurrentCursorPositionWRTECMRCM(void)
 
     vctFrm3 finalFrame;
 
+    //undo camera movement to get in EMC RCM frame
     ECMtoECMRCM = yawFrame0 * pitchFrame1 * insertFrame2 * rollFrame3;
-    vctFrm3 imdtframe;
-    imdtframe = ECMtoECMRCM * slavePosition.Position()* ProbeOffset; //* GetCurrentCursorPositionWRTECM(); // working fixed point !!!
-    finalFrame = imdtframe;//.Inverse(); // .InverseSelf();
-    
+
+    //find position of the slave in this new frame
+    finalFrame = ECMtoECMRCM * slavePosition.Position()* ProbeOffset;
+
     return finalFrame;
 }
 
@@ -1499,12 +1491,17 @@ updates the map cursor position, by converting the absolute frame into to the vt
 
 void BehaviorLUS::UpdateCursorPosition(void)
 {
+    //get 'absolute' cordinates of the slave
     vctFrm3 finalFrame;
     finalFrame = GetCurrentCursorPositionWRTECMRCM();
+
+    //convert absolute frame to a display frame in VTK
+    //ECMRCMtoVTK is updated in function UpdateVisibleMap
     vctFrm3 cursorVTK;
-    
     ECMRCMtoVTK.ApplyTo(finalFrame, cursorVTK);// cursorVTK = ECMRCMtoVTK * finalframe
 
+    //make sure the cursor is displayed correctly with repect to the centering of the map and other markers
+    //CenterRotatedTranslated and ECMRCMtoVTKscale are updated in function UpdateVisibleMap
     vctDouble3 t1;
     t1 = (cursorVTK.Translation() - CenterRotatedTranslated) * ECMRCMtoVTKscale;
     t1 += CenterRotatedTranslated;
@@ -1512,7 +1509,7 @@ void BehaviorLUS::UpdateCursorPosition(void)
     MapCursor->SetTransformation(cursorVTK);
 }
 
-/*
+/*!
 
 // this method should be called after:
 // -1- a marker is added (not required with removed)
@@ -1564,11 +1561,14 @@ void BehaviorLUS::UpdateVisibleMap(void)
         corners[6].Assign(corner2[0], corner2[1], corner1[2]);
         corners[7].Assign(corner2[0], corner2[1], corner2[2]);
 
+        //create rotation into VTK frame for display
         vctFrm3 ECMtoVTK;
         ECMtoVTK.Rotation().From( vctAxAnRot3(vctDouble3(0.0,1.0,0.0), cmnPI) );
-        
+
+        //inverse kinimatics of the camera
         vctFrm3 ECMtoECMRCMInverse = ECMtoECMRCM.Inverse();
-        
+
+        //rotate entire bounding box into VTK frame
         vctFrm3 temp;
         temp = ECMtoVTK * ECMtoECMRCMInverse;
         vctDouble3 corner1Rotated, corner2Rotated;
@@ -1586,10 +1586,10 @@ void BehaviorLUS::UpdateVisibleMap(void)
         }
         centerRotated.SumOf(corner1Rotated, corner2Rotated);
         centerRotated.Divide(2.0);
+        //find scale to keep markers in the specified background
         double h,w, ratioH, ratioW;
         h = corner2Rotated.Y() - corner1Rotated.Y();
         w = corner2Rotated.X() - corner1Rotated.X();
-        //std::cout << "h: " << h << " w: " << w << std::endl;
         ratioH = h/(25.0/1.25);
         ratioW = w/(30.0/1.25);
         if(ratioH > ratioW)
@@ -1598,10 +1598,10 @@ void BehaviorLUS::UpdateVisibleMap(void)
         }
         if(ratioW >1)
         {
+            //scale factor
             ECMRCMtoVTKscale = 1.0/ratioW;
-            //std::cout << "ECMRCMtoVTKscale" << ECMRCMtoVTKscale << std::endl;
         }
-        ECMRCMtoVTKscale = 0.14; // hard coded for now to check things
+        ECMRCMtoVTKscale = 0.14; // NOTE: hard coded for now for a know workspace
 
         // computer the transformation to be applied to all absolute coordinates
         // to be display in the SAW coordinate system
@@ -1614,15 +1614,12 @@ void BehaviorLUS::UpdateVisibleMap(void)
 
         vctFrm3 VTKrecenter;
 
-        //std::cout << "offsetUp: " << offsetUp << std::endl;
         VTKrecenter.Translation().Assign(offsetUp);
         ECMRCMtoVTK =VTKrecenter * ECMtoVTK * ECMtoECMRCMInverse;
-        
+
         CenterRotatedTranslated = VTKrecenter * centerRotated;
     }
 
- //   std::cout << "Bouding box: [" << corner1 << "] [" << corner2 << "]" << std::endl;
-    
     // apply the transformation to all absolute coordinates
 
     vctFrm3 positionInSAW;

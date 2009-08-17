@@ -122,7 +122,7 @@ constructor
 */
 
 MapBehavior::MapBehavior(const std::string & name):
-        ui3BehaviorBase(std::string("BehaviorWithSlave::") + name, 0),
+        ui3BehaviorBase(std::string("MapBehavior::") + name, 0),
         Ticker(0),
         Following(false),
         VisibleList(0),
