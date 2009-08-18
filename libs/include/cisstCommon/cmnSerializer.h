@@ -106,6 +106,9 @@ class CISST_EXPORT cmnSerializer: public cmnGenericObject {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
  public:
+
+    typedef long long int pointer;
+
     /*! Constructor.
 
       \param outputStream any stream derived from
@@ -141,7 +144,7 @@ class CISST_EXPORT cmnSerializer: public cmnGenericObject {
         const cmnClassServicesBase* servicesPointer = object.Services();
         this->SerializeServices(servicesPointer);
         // serialize the object preceeded by its services pointer
-        cmnSerializeRaw(this->OutputStream, servicesPointer);
+        cmnSerializeRaw(this->OutputStream, reinterpret_cast<pointer>(servicesPointer));
         object.SerializeRaw(this->OutputStream);
     }
 
@@ -181,7 +184,7 @@ class CISST_EXPORT cmnSerializer: public cmnGenericObject {
             // sent the info with null pointer so that reader can
             // differentiate from other services pointers
             const cmnClassServicesBase * invalidClassServices = 0;
-            cmnSerializeRaw(this->OutputStream, invalidClassServices);
+            cmnSerializeRaw(this->OutputStream, reinterpret_cast<pointer>(invalidClassServices));
             cmnSerializeRaw(this->OutputStream, servicesPointer->GetName());
             cmnSerializeRaw(this->OutputStream, servicesPointer);
             ServicesContainer.push_back(servicesPointer);

@@ -101,6 +101,9 @@ class CISST_EXPORT cmnDeSerializer: public cmnGenericObject {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
  public:
+
+    typedef long long int pointer;
+
     /*! Constructor.
 
       \param inputStream any stream derived from
@@ -133,7 +136,7 @@ class CISST_EXPORT cmnDeSerializer: public cmnGenericObject {
     inline cmnGenericObject * DeSerialize(void) {
         cmnGenericObject * object = 0;
         // get object services
-        cmnClassServicesBase * servicesPointerRemote;
+        pointer servicesPointerRemote;
         cmnDeSerializeRaw(this->InputStream, servicesPointerRemote);
         if (servicesPointerRemote == 0) {
             this->DeSerializeServices();
@@ -171,7 +174,7 @@ class CISST_EXPORT cmnDeSerializer: public cmnGenericObject {
     template <class _elementType>
     inline void DeSerialize(_elementType & object) {
         // get object services
-        cmnClassServicesBase * servicesPointerRemote;
+        pointer servicesPointerRemote;
         cmnDeSerializeRaw(this->InputStream, servicesPointerRemote);
         if (servicesPointerRemote == 0) {
             this->DeSerializeServices();
@@ -218,7 +221,7 @@ class CISST_EXPORT cmnDeSerializer: public cmnGenericObject {
         }
         // read remote one and add it to the list provided that we
         // don't already have it
-        cmnClassServicesBase * servicesPointerRemote;
+        pointer servicesPointerRemote;
         cmnDeSerializeRaw(this->InputStream, servicesPointerRemote);
         const const_iterator end = ServicesContainer.end();
         const const_iterator iterator = ServicesContainer.find(servicesPointerRemote);
@@ -232,7 +235,7 @@ class CISST_EXPORT cmnDeSerializer: public cmnGenericObject {
             
     std::istream & InputStream;
     
-    typedef std::map<cmnClassServicesBase *, cmnClassServicesBase *> ServicesContainerType;
+    typedef std::map<pointer, cmnClassServicesBase *> ServicesContainerType;
     typedef ServicesContainerType::value_type EntryType;
 
     typedef ServicesContainerType::const_iterator const_iterator;
