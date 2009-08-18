@@ -19,10 +19,13 @@ serverTask::serverTask(const std::string & taskName, double period):
     // add ServerData to the StateTable defined in mtsTask
     this->StateTable.AddData(ReadValue, "ReadValue");
     // add one interface, this will create an mtsTaskInterface
-    mtsProvidedInterface * provided = AddProvidedInterface("Provided");
+    mtsProvidedInterface * provided = AddProvidedInterface("Provided1");
     if (provided) {
         provided->AddCommandWrite(&serverTask::Write, this, "Write");
         provided->AddCommandReadState(this->StateTable, this->ReadValue, "Read");
+    }
+    provided = AddProvidedInterface("Provided2");
+    if (provided) {
         provided->AddCommandWrite(&serverTask::TriggerEvent, this, "TriggerEvent");
         provided->AddEventWrite(this->EventWrite, "EventWrite", value_type());
     }

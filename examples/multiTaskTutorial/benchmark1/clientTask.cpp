@@ -13,17 +13,20 @@ clientTask::clientTask(const std::string & taskName, double period):
     SamplesCollected(0)
 {
     // to communicate with the interface of the resource
-    mtsRequiredInterface * required = AddRequiredInterface("Required");
+    mtsRequiredInterface * required = AddRequiredInterface("Required1");
     if (required) {
         required->AddFunction("Write", this->WriteServer);
         required->AddFunction("Read", this->ReadServer);
+    }
+    required = AddRequiredInterface("Required2");
+    if (required) {
         required->AddFunction("TriggerEvent", this->TriggerEvent);
         required->AddEventHandlerWrite(&clientTask::EventWriteHandler, this, "EventWrite", value_type());
     }
-
+    
     // Get a pointer to the time server
     this->TimeServer = &mtsTaskManager::GetInstance()->GetTimeServer();
-
+    
     // Allocates space for samples
     this->Samples.SetSize(confNumberOfSamples);
 }
@@ -81,7 +84,7 @@ void clientTask::Run(void)
     double time;
     time = this->TimeServer->GetRelativeTime();
     parameter.SetTimestamp(time);
-    // this->TriggerEvent(parameter);
+    this->TriggerEvent(parameter);
 }
 
 

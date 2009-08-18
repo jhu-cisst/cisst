@@ -28,7 +28,8 @@ int main(int CMN_UNUSED(argc), char * CMN_UNUSED(argv))
     taskManager->AddTask(server);
 
     // connect the tasks, task.RequiresInterface -> task.ProvidesInterface
-    taskManager->Connect("Client", "Required", "Server", "Provided");
+    taskManager->Connect("Client", "Required1", "Server", "Provided1");
+    taskManager->Connect("Client", "Required2", "Server", "Provided2");
 
     // create the tasks, i.e. find the commands
     taskManager->CreateAll();
