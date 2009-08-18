@@ -372,7 +372,7 @@ void mtsDeviceInterfaceProxyServer::ReceiveExecuteCommandWriteSerialized(
     CMN_ASSERT(functionWrite);
 
     static char buf[1024];
-    sprintf(buf, "ExecuteCommandWriteSerialized: %d bytes received", argument.size());
+    sprintf(buf, "ExecuteCommandWriteSerialized: %lu bytes received", argument.size());
     IceLogger->trace("TIServer", buf);
 
     // Deserialization
@@ -416,7 +416,7 @@ void mtsDeviceInterfaceProxyServer::ReceiveExecuteCommandQualifiedReadSerialized
     CMN_ASSERT(functionQualifiedRead);
 
     static char buf[1024];
-    sprintf(buf, "ExecuteCommandQualifiedReadSerialized: %d bytes received", argument1.size());
+    sprintf(buf, "ExecuteCommandQualifiedReadSerialized: %lu bytes received", argument1.size());
     IceLogger->trace("TIServer", buf);
 
     // Deserialization for argument1
@@ -473,14 +473,16 @@ void mtsDeviceInterfaceProxyServer::SendExecuteEventWriteSerialized(
 //-------------------------------------------------------------------------
 //  Definition by mtsTaskManagerProxy.ice
 //-------------------------------------------------------------------------
-mtsDeviceInterfaceProxyServer::DeviceInterfaceServerI::DeviceInterfaceServerI(
-    const Ice::CommunicatorPtr& communicator,
-    const Ice::LoggerPtr& logger,
-    mtsDeviceInterfaceProxyServer * deviceInterfaceServer) 
-    : Communicator(communicator), Logger(logger),
-      DeviceInterfaceServer(deviceInterfaceServer),
-      Runnable(true),
-      Sender(new SendThread<DeviceInterfaceServerIPtr>(this))
+mtsDeviceInterfaceProxyServer
+::DeviceInterfaceServerI
+::DeviceInterfaceServerI(const Ice::CommunicatorPtr& communicator,
+                         const Ice::LoggerPtr& logger,
+                         mtsDeviceInterfaceProxyServer * deviceInterfaceServer):
+    Communicator(communicator),
+    Logger(logger),
+    DeviceInterfaceServer(deviceInterfaceServer),
+    Runnable(true),
+    Sender(new SendThread<DeviceInterfaceServerIPtr>(this))
 {
 }
 

@@ -222,10 +222,10 @@ protected:
     {
     private:
         Ice::CommunicatorPtr Communicator;
-        bool Runnable;        
-        IceUtil::ThreadPtr Sender;
         Ice::LoggerPtr Logger;
         mtsTaskManagerProxyServer * TaskManagerServer;
+        bool Runnable;        
+        IceUtil::ThreadPtr Sender;
 
     public:
         TaskManagerServerI(const Ice::CommunicatorPtr& communicator, 

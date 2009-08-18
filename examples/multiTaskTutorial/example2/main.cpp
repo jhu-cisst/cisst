@@ -49,7 +49,7 @@ int main(void)
     taskManager->ToStreamDot(dotFile);
     dotFile.close();
     // add data collection for sineTask state table
-    mtsCollectorState * collector;
+    mtsCollectorState * collector = 0;
     if (choice == 'b') {
         collector =
             new mtsCollectorState("SIN",

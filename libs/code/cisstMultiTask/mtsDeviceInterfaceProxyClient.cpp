@@ -178,7 +178,7 @@ void mtsDeviceInterfaceProxyClient::ReceiveExecuteEventWriteSerialized(
     const CommandIDType commandId, const std::string argument)
 {
     static char buf[1024];
-    sprintf(buf, "ReceiveExecuteEventWriteSerialized: %d bytes received", argument.size());
+    sprintf(buf, "ReceiveExecuteEventWriteSerialized: %lu bytes received", argument.size());
     IceLogger->trace("TIClient", buf);
 
     // Deserialization

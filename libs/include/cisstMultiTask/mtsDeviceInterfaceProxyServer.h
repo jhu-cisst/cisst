@@ -173,10 +173,10 @@ protected:
     {
     private:
         Ice::CommunicatorPtr Communicator;
-        bool Runnable;
-        IceUtil::ThreadPtr Sender;
         Ice::LoggerPtr Logger;
         mtsDeviceInterfaceProxyServer * DeviceInterfaceServer;
+        bool Runnable;
+        IceUtil::ThreadPtr Sender;
 
     public:
         DeviceInterfaceServerI(const Ice::CommunicatorPtr& communicator, 

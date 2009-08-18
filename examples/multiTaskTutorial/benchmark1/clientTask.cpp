@@ -81,7 +81,7 @@ void clientTask::Run(void)
     double time;
     time = this->TimeServer->GetRelativeTime();
     parameter.SetTimestamp(time);
-    //    this->TriggerEvent(parameter);
+    // this->TriggerEvent(parameter);
 }
 
 

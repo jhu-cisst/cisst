@@ -423,14 +423,15 @@ bool mtsTaskManagerProxyServer::SendConnectServerSide(
 //-------------------------------------------------------------------------
 //  Definition by mtsTaskManagerProxy.ice
 //-------------------------------------------------------------------------
-mtsTaskManagerProxyServer::TaskManagerServerI::TaskManagerServerI(
-    const Ice::CommunicatorPtr& communicator,
-    const Ice::LoggerPtr& logger,
-    mtsTaskManagerProxyServer * taskManagerServer) 
-    : Communicator(communicator), Logger(logger),
-      TaskManagerServer(taskManagerServer),
-      Runnable(true),
-      Sender(new SendThread<TaskManagerServerIPtr>(this))
+mtsTaskManagerProxyServer
+::TaskManagerServerI::TaskManagerServerI(const Ice::CommunicatorPtr& communicator,
+                                         const Ice::LoggerPtr& logger,
+                                         mtsTaskManagerProxyServer * taskManagerServer):
+    Communicator(communicator),
+    Logger(logger),
+    TaskManagerServer(taskManagerServer),
+    Runnable(true),
+    Sender(new SendThread<TaskManagerServerIPtr>(this))
 {
 }
 
