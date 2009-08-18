@@ -5,8 +5,11 @@
 #include <cisstCommon.h>
 #include <cisstOSAbstraction.h>
 #include <cisstMultiTask.h>
+#include <cisstParameterTypes.h>
 
 #include "clientTask.h"
+
+#include <sstream>
 
 
 int main(int argc, char * argv[])
@@ -17,6 +20,34 @@ int main(int argc, char * argv[])
         exit(-1);
     }
 
+    // before we start, estimate overhead related to serialization and de-serialization of parameters
+    osaTimeServer timeServer;
+    std::stringstream serializationStream;
+    cmnSerializer serialization(serializationStream);
+    cmnDeSerializer deSerialization(serializationStream);
+    unsigned int index;
+    prmPositionCartesianGet parameter;
+    cmnGenericObject * generated;
+    timeServer.SetTimeOrigin();
+    for (index = 0; index < confNumberOfSamples; index++) {
+        serialization.Serialize(parameter);
+        generated = deSerialization.DeSerialize();
+        if (generated->Services() != parameter.Services()) {
+            std::cout << "Serialization test failed!" << std::endl;
+            exit(0);
+        }
+        // delete generated object created by de-serialization
+        delete generated;
+    }
+    double elapsedTime = timeServer.GetRelativeTime();
+    std::cout << std::endl << std::endl
+              << "Serialization, dynamic creation and deserialization time for "
+              << confNumberOfSamples << " samples of " << parameter.Services()->GetName()
+              << ": " << cmnInternalTo_ms(elapsedTime) << " (ms)" << std::endl
+              << "Per sample: " << cmnInternalTo_ms(elapsedTime / confNumberOfSamples) << " (ms)" << std::endl
+              << std::endl << std::endl;
+
+    // networking part
     std::string globalTaskManagerIP(argv[1]);
 
     // Log configuration

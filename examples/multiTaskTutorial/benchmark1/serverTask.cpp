@@ -66,6 +66,7 @@ void serverTask::Write(const value_type & data)
                   << "scs: Size of elements used (in bytes): " << sizeof(value_type) << std::endl
                   << "scs: Number of samples: " << this->SamplesCollected << std::endl
                   << "scs: Average (ms): " << cmnInternalTo_ms(average) << std::endl
+                  << "scs: Standard deviation (ms): " << cmnInternalTo_ms(StandardDeviation(this->Samples)) << std::endl
                   << "scs: Min (ms): " << cmnInternalTo_ms(min) << std::endl
                   << "scs: Max (ms): " << cmnInternalTo_ms(max) << std::endl;
         this->SamplesCollected++; // just to avoid printing results again

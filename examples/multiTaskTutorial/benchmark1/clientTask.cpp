@@ -65,6 +65,7 @@ void clientTask::EventWriteHandler(const value_type & data)
                   << "csc: Size of elements used (in bytes): " << sizeof(value_type) << std::endl
                   << "csc: Number of samples: " << this->SamplesCollected << std::endl
                   << "csc: Average (ms): " << cmnInternalTo_ms(average) << std::endl
+                  << "csc: Standard deviation (ms): " << cmnInternalTo_ms(StandardDeviation(this->Samples)) << std::endl
                   << "csc: Min (ms): " << cmnInternalTo_ms(min) << std::endl
                   << "csc: Max (ms): " << cmnInternalTo_ms(max) << std::endl;
         this->SamplesCollected++; // just to avoid printing results again
