@@ -22,39 +22,41 @@ find_package(FLTK REQUIRED)
 include_directories(${devicesTutorialExample4_SOURCE_DIR}
                     ${FLTK_INCLUDE_DIR}
                     )
-
 fltk_wrap_ui(devicesTutorialExample4Simulator
              trackerUI.fl
              )
 
 add_executable(devicesTutorialExample4Simulator
-  mainSimulator.cpp
-  trackerSimulator.cpp
-  trackerSimulator.h
-  ${devicesTutorialExample4Simulator_FLTK_UI_SRCS}
-)
+               mainSimulator.cpp
+               trackerSimulator.cpp
+               trackerSimulator.h
+               ${devicesTutorialExample4Simulator_FLTK_UI_SRCS}
+               )
 
 target_link_libraries(devicesTutorialExample4Simulator
-  ${FLTK_LIBRARIES}
-  OpenIGTLink
-  )
+                      OpenIGTLink
+                      ${FLTK_LIBRARIES}
+                      )
 
 cisst_requires(devicesTutorialExample4Simulator
-  "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstParameterTypes;cisstDevices"
-  )
+               "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstParameterTypes;cisstDevices"
+               )
 
 
 if(CISST_DEV_HAS_SENSABLEHD)
   find_package(Sensable REQUIRED)
   include_directories(${SENSABLE_INCLUDE_DIR})
+
   add_executable(devicesTutorialExample4Sensable
-    mainSensable.cpp
-    )
+                 mainSensable.cpp
+                 )
+
   target_link_libraries(devicesTutorialExample4Sensable
-    ${SENSABLE_LIBRARIES}
-    OpenIGTLink
-  )
+                        OpenIGTLink
+                        ${SENSABLE_LIBRARIES}
+                        )
+
   cisst_requires(devicesTutorialExample4Sensable
-    "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstParameterTypes;cisstDevices"
-    )
+                 "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstParameterTypes;cisstDevices"
+                 )
 endif(CISST_DEV_HAS_SENSABLEHD)

@@ -2,11 +2,12 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
- $Id$
+  $Id$
 
- Author(s): Ali Uneri
+  Author(s):  Ali Uneri
+  Created on: 2009-08-13
 
- (C) Copyright 2007-2009 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2009 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -27,36 +28,41 @@ int main()
     // log configuration
     cmnLogger::SetLoD(CMN_LOG_LOD_VERY_VERBOSE);
     cmnLogger::GetMultiplexer()->AddChannel(std::cout, CMN_LOG_LOD_VERY_VERBOSE);
+    cmnClassRegister::SetLoD("devOpenIGTLinkServer", CMN_LOG_LOD_VERY_VERBOSE);
     // add a log per thread
     osaThreadedLogFile threadedLog("example4-");
     cmnLogger::GetMultiplexer()->AddChannel(threadedLog, CMN_LOG_LOD_VERY_VERBOSE);
 
     mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
 
-    // create instances
-    devOpenIGTLink * devOpenIGTLinkObj = new devOpenIGTLink("client", 50.0 * cmn_ms, "127.0.0.1", 18944);
-    devSensableHD * devSensableHDObj = new devSensableHD("devSensableHD", "Omni1");
+    // create tasks
+    devOpenIGTLinkServer * devOpenIGTLinkServerTask = new devOpenIGTLinkServer("trackerServer", 50.0 * cmn_ms, 18944);
+    devSensableHD * devSensableHDTask = new devSensableHD("devSensableHD", "Omni1");
 
     // add instances to task manager
-    taskManager->AddTask(devOpenIGTLinkObj);
-    taskManager->AddTask(devSensableHDObj);
+    taskManager->AddTask(devOpenIGTLinkServerTask);
+    taskManager->AddTask(devSensableHDTask);
 
     // connect tasks
-    taskManager->Connect(devOpenIGTLinkObj->GetName(), "CartesianPosition",
-                         devSensableHDObj->GetName(), "Omni1");
+    taskManager->Connect(devOpenIGTLinkServerTask->GetName(), "CartesianPosition",
+                         devSensableHDTask->GetName(), "Omni1");
 
-    // create and start tasks
+    // create and start all tasks
     taskManager->CreateAll();
     taskManager->StartAll();
-    
-    std::cout << "Keyboard commands:" << std::endl
-              << "  In command window:" << std::endl
-              << "    'q'   - Quit" << std::endl;
-    char ch;
+
+    std::cout << "Press 'q' to quit." << std::endl;
+    char command;
     do {
-        ch = cmnGetChar();
+        command = cmnGetChar();
         osaSleep(10.0 * cmn_ms);
-    } while (ch != 'q');
+    } while (command != 'q');
+
+    // kill all tasks
+    taskManager->KillAll();
+    while (!devSensableHDTask->IsTerminated()) {
+        osaSleep(100.0 * cmn_ms);
+    }
 
     return 0;
 }

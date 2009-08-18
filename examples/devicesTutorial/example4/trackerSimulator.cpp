@@ -2,11 +2,12 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
- $Id$
+  $Id$
 
- Author(s): Ali Uneri
+  Author(s):  Ali Uneri
+  Created on: 2009-08-11
 
- (C) Copyright 2007-2009 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2009 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -21,21 +22,24 @@ http://www.cisst.org/cisst/license.txt.
 
 CMN_IMPLEMENT_SERVICES(trackerSimulator);
 
+
 trackerSimulator::trackerSimulator(const std::string & taskName, double period):
     mtsTaskPeriodic(taskName, period, false, 500),
     ExitFlag(false)
 {
-    mtsProvidedInterface *providedInterface;    
-    providedInterface = AddProvidedInterface("CartesianPosition");
+    mtsProvidedInterface * providedInterface;
+    providedInterface = AddProvidedInterface("PositionCartesian");
 
-    StateTable.AddData(CartesianPosition, "CartesianPosition");
-    providedInterface->AddCommandReadState(StateTable, CartesianPosition, "GetCartesianPosition");
+    StateTable.AddData(PositionCartesian, "PositionCartesian");
+    providedInterface->AddCommandReadState(StateTable, PositionCartesian, "GetPositionCartesian");
 }
+
 
 void trackerSimulator::Startup()
 {
-    UI.DisplayWindow->show(); 
+    UI.DisplayWindow->show();
 }
+
 
 void trackerSimulator::Run()
 {
@@ -48,9 +52,9 @@ void trackerSimulator::Run()
     }
 
     for (unsigned int r = 0; r < 3; r++) {
-        CartesianPosition.Position().Translation()[r] = UI.Translation[r]->value();
+        PositionCartesian.Position().Translation().Element(r) = UI.Translation[r]->value();
         for (unsigned int c = 0; c < 3; c++) {
-            CartesianPosition.Position().Rotation().Element(r,c) = UI.Rotation[(r*3)+c]->value();
+            PositionCartesian.Position().Rotation().Element(r,c) = UI.Rotation[(r*3)+c]->value();
         }
     }
 
