@@ -100,9 +100,11 @@ inline void cmnDeSerializeRaw(std::istream & inputStream, std::string & data)
 class CISST_EXPORT cmnDeSerializer: public cmnGenericObject {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
- public:
-
-    typedef long long int pointer;
+public:
+    /*! Type used to identify objects over the network.  It uses the
+      services pointer but as the sender or receiver could be a 32
+      or 64 bits OS, we use a data type that can handle both. */   
+    typedef long long int TypeId;
 
     /*! Constructor.
 
@@ -136,15 +138,15 @@ class CISST_EXPORT cmnDeSerializer: public cmnGenericObject {
     inline cmnGenericObject * DeSerialize(void) {
         cmnGenericObject * object = 0;
         // get object services
-        pointer servicesPointerRemote;
-        cmnDeSerializeRaw(this->InputStream, servicesPointerRemote);
-        if (servicesPointerRemote == 0) {
+        TypeId typeId;
+        cmnDeSerializeRaw(this->InputStream, typeId);
+        if (typeId == 0) {
             this->DeSerializeServices();
             // read again to deserialize coming object
             object = this->DeSerialize();
         } else {
             const const_iterator end = ServicesContainer.end();
-            const const_iterator iterator = ServicesContainer.find(servicesPointerRemote);
+            const const_iterator iterator = ServicesContainer.find(typeId);
             if (iterator == end) {
                 CMN_LOG_CLASS_RUN_ERROR << "DeSerialize: Can't find corresponding class information" << std::endl;
             } else {
@@ -174,15 +176,15 @@ class CISST_EXPORT cmnDeSerializer: public cmnGenericObject {
     template <class _elementType>
     inline void DeSerialize(_elementType & object) {
         // get object services
-        pointer servicesPointerRemote;
-        cmnDeSerializeRaw(this->InputStream, servicesPointerRemote);
-        if (servicesPointerRemote == 0) {
+        TypeId typeId;
+        cmnDeSerializeRaw(this->InputStream, typeId);
+        if (typeId == 0) {
             this->DeSerializeServices();
             // read again to deserialize coming object
             this->DeSerialize(object);
         } else {
             const const_iterator end = ServicesContainer.end();
-            const const_iterator iterator = ServicesContainer.find(servicesPointerRemote);
+            const const_iterator iterator = ServicesContainer.find(typeId);
             if (iterator == end) {
                 CMN_LOG_CLASS_RUN_ERROR << "DeSerialize: Can't find corresponding class information" << std::endl;
             } else {
@@ -221,21 +223,21 @@ class CISST_EXPORT cmnDeSerializer: public cmnGenericObject {
         }
         // read remote one and add it to the list provided that we
         // don't already have it
-        pointer servicesPointerRemote;
-        cmnDeSerializeRaw(this->InputStream, servicesPointerRemote);
+        TypeId typeId;
+        cmnDeSerializeRaw(this->InputStream, typeId);
         const const_iterator end = ServicesContainer.end();
-        const const_iterator iterator = ServicesContainer.find(servicesPointerRemote);
+        const const_iterator iterator = ServicesContainer.find(typeId);
         if (iterator != end) {
             CMN_LOG_CLASS_RUN_WARNING << "Class information for " << className << " has already been received" << std::endl;
         } else {
-            EntryType newEntry(servicesPointerRemote, servicesPointerLocal);
+            EntryType newEntry(typeId, servicesPointerLocal);
             ServicesContainer.insert(newEntry);
         }
     }
             
     std::istream & InputStream;
     
-    typedef std::map<pointer, cmnClassServicesBase *> ServicesContainerType;
+    typedef std::map<TypeId, cmnClassServicesBase *> ServicesContainerType;
     typedef ServicesContainerType::value_type EntryType;
 
     typedef ServicesContainerType::const_iterator const_iterator;
