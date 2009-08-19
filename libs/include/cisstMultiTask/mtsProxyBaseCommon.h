@@ -71,7 +71,8 @@ Task layer          : 11705 (e.g. the server task)
 #define BASE_PORT_NUMBER_TASK_LAYER         11705
 
 /*! Typedef for Command ID */
-#define CommandIDType IceUtil::Int64
+//#define CommandIDType IceUtil::Int64
+#define CommandIDType long long int
 #define IceCommandIDType Long
 
 //-----------------------------------------------------------------------------
