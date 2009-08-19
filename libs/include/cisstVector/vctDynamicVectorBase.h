@@ -136,12 +136,12 @@ public:
     
     /*! Access an element by index.
       \return a reference to the element[index] */    
-    reference operator[](index_type index) {
+    reference operator[](int index) {
         return *Pointer(index);
     }
 
     /* documented in base class */
-    const_reference operator[](index_type index) const {
+    const_reference operator[](int index) const {
         return BaseType::operator[](index);
     }
     
@@ -156,12 +156,12 @@ public:
     /*! Addition to the STL requirements.  Return a pointer to an element of the
       container, specified by its index.
     */
-    pointer Pointer(index_type index = 0) {
+    pointer Pointer(int index = 0) {
         return this->Vector.Pointer(index);
     }
 
     /* documented in base class */
-    const_pointer Pointer(index_type index = 0) const {
+    const_pointer Pointer(int index = 0) const {
         return BaseType::Pointer(index);
     }
 
@@ -257,7 +257,7 @@ public:
         return this->Assign(other);
     }
 
-    template<size_t __size, int __stride, class __elementType, class __dataPtrType>
+    template<unsigned int __size, int __stride, class __elementType, class __dataPtrType>
     inline ThisType & Assign(const vctFixedSizeConstVectorBase<__size, __stride, __elementType, __dataPtrType>
                              & other) {
         vctDynamicVectorLoopEngines::
@@ -369,7 +369,7 @@ public:
         return vctFastCopy::VectorCopy(*this, source, performSafetyChecks);
     }
 
-    template<size_t __size, int __stride, class __dataPtrType>
+    template<unsigned int __size, int __stride, class __dataPtrType>
     inline bool FastCopyOf(const vctFixedSizeConstVectorBase<__size, __stride, value_type, __dataPtrType> & source,
                            bool performSafetyChecks = true)
         throw(std::runtime_error)
@@ -414,7 +414,7 @@ public:
     */
 
     inline ThisType & Assign(value_type element0, value_type element1, ...) throw(std::runtime_error) {
-        const size_type size = this->size();
+        const unsigned int size = this->size();
         if (size < 2) {
             cmnThrow(std::runtime_error("vctDynamicVector: Assign from va_list requires size >= 2"));
         }
@@ -422,7 +422,7 @@ public:
         this->at(1) = element1;
         va_list nextArg;
         va_start(nextArg, element1);
-        for (index_type i = 2; i < size; ++i) {
+        for (unsigned int i = 2; i < size; ++i) {
             this->at(i) = value_type( va_arg(nextArg, ElementVaArgPromotion) );
         }
         va_end(nextArg);
@@ -632,7 +632,7 @@ public:
     template<class __inputVectorOwner, class __indexVectorOwner>
     inline void SelectFrom(
         const vctDynamicConstVectorBase<__inputVectorOwner, _elementType> & input,
-        const vctDynamicConstVectorBase<__indexVectorOwner, index_type> & index)
+        const vctDynamicConstVectorBase<__indexVectorOwner, unsigned int> & index)
     {
         vctDynamicVectorLoopEngines::SelectByIndex::Run(*this, input, index);
     }

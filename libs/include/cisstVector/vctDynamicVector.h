@@ -306,7 +306,7 @@ public:
     {
         // get and set size
         size_type mySize;
-        cmnDeSerializeSizeRaw(inputStream, mySize);
+        cmnDeSerializeRaw(inputStream, mySize);
         this->SetSize(mySize);
         
         // get data

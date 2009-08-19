@@ -366,8 +366,8 @@ public:
         // get and set size
         size_type myRows;
         size_type myCols;
-        cmnDeSerializeSizeRaw(inputStream, myRows);
-        cmnDeSerializeSizeRaw(inputStream, myCols);
+        cmnDeSerializeRaw(inputStream, myRows);
+        cmnDeSerializeRaw(inputStream, myCols);
 
         if ((myRows != this->rows()) || (myCols != this->cols())) {
             cmnThrow(std::runtime_error("vctDynamicMatrixRef::DeSerializeRaw: Sizes of matrices don't match"));

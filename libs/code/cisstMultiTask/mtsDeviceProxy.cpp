@@ -241,7 +241,7 @@ void mtsDeviceProxy::GetEventGeneratorProxyPointers(
         element.Name = namesOfEventHandlers##_type[i];\
         eventGenerator = providedInterfaceProxy->Event##_type##Generators.GetItem(element.Name);\
         CMN_ASSERT(eventGenerator);\
-        element.ProxyId = reinterpret_cast<CommandIDType>(eventGenerator);\
+        element.ProxyId = reinterpret_cast<long int>(eventGenerator);\
         eventGeneratorProxies.EventGenerator##_type##Proxies.push_back(element);
 #define GET_EVENT_GENERATOR_PROXY_END\
     }
@@ -387,7 +387,7 @@ void mtsDeviceProxy::GetFunctionPointers(
     it##_commandType = Function##_commandType##ProxyMap.GetMap().begin();\
     for (; it##_commandType != Function##_commandType##ProxyMap.GetMap().end(); ++it##_commandType) {\
         element.Name = it##_commandType->first;\
-        element.FunctionProxyId = reinterpret_cast<CommandIDType>(it##_commandType->second);\
+        element.FunctionProxyId = reinterpret_cast<long int>(it##_commandType->second);\
         functionProxySet.Function##_commandType##Proxies.push_back(element)
 #define GET_FUNCTION_PROXY_END\
     }

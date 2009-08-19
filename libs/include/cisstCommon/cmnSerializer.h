@@ -37,7 +37,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <string>
 #include <vector>
 #include <fstream>
-#include <cstddef>
 
 #include <cisstCommon/cmnExport.h>
 
@@ -61,21 +60,6 @@ inline void cmnSerializeRaw(std::ostream & outputStream, const _elementType & da
 }
 
 
-/*! Serialization helper function for STL size object.  This function
-  converts a size_t object to an unsigned long long int before using
-  cmnSerializeRaw.  This operation is required for all size_t as the
-  writer/reader can be both 32 bits or 64 bits programs.
-  
-  This function should be use to implement the SerializeRaw method of
-  classes derived from cmnGenericObject. */
-inline void cmnSerializeSizeRaw(std::ostream & outputStream, const size_t & data)
-    throw (std::runtime_error) 
-{
-    unsigned long long int dataToSend = data;
-    cmnSerializeRaw(outputStream, dataToSend);
-}
-
-
 /*! Serialization helper function for an STL string.  This function
   first serializes the string size and then writes all the string
   characters (<code>char</code>) to the output stream.  If the write
@@ -85,7 +69,7 @@ inline void cmnSerializeRaw(std::ostream & outputStream, const std::string & dat
     throw (std::runtime_error)
 {
     const std::string::size_type size = data.size();
-    cmnSerializeSizeRaw(outputStream, size);
+    cmnSerializeRaw(outputStream, size);
     outputStream.write(data.c_str(), size * sizeof(std::string::value_type));
     if (outputStream.fail()) {
         cmnThrow("cmnSerializer::SerializeRaw(std::string): Error occured with std::ostream::write");
@@ -121,12 +105,12 @@ inline void cmnSerializeRaw(std::ostream & outputStream, const std::string & dat
 class CISST_EXPORT cmnSerializer: public cmnGenericObject {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
-public:
+ public:
 
     /*! Type used to identify objects over the network.  It uses the
       services pointer but as the sender or receiver could be a 32
       or 64 bits OS, we use a data type that can handle both. */   
-    typedef unsigned long long int TypeId;
+    typedef long long int TypeId;
 
     /*! Constructor.
 
@@ -160,11 +144,11 @@ public:
      */
     inline void Serialize(const cmnGenericObject & object) {
         // get object services and send information if needed
-        const cmnClassServicesBase * servicesPointer = object.Services();
+        const cmnClassServicesBase* servicesPointer = object.Services();
         this->SerializeServices(servicesPointer);
         // serialize the object preceeded by its type Id
         TypeId typeId = reinterpret_cast<TypeId>(servicesPointer);
-        cmnSerializeRaw(this->OutputStream, typeId);
+        cmnSerializeRaw(this->OutputStream, servicesPointer);
         object.SerializeRaw(this->OutputStream);
     }
 
@@ -203,11 +187,10 @@ public:
             CMN_LOG_CLASS_RUN_VERBOSE << "Sending information related to class " << servicesPointer->GetName() << std::endl; 
             // sent the info with null pointer so that reader can
             // differentiate from other services pointers
-            TypeId invalidClassServices = 0;
-            cmnSerializeRaw(this->OutputStream, invalidClassServices);
+            const cmnClassServicesBase * invalidClassServices = 0;
+            cmnSerializeRaw(this->OutputStream, reinterpret_cast<pointer>(invalidClassServices));
             cmnSerializeRaw(this->OutputStream, servicesPointer->GetName());
-            TypeId typeId = reinterpret_cast<TypeId>(servicesPointer);
-            cmnSerializeRaw(this->OutputStream, typeId);
+            cmnSerializeRaw(this->OutputStream, servicesPointer);
             ServicesContainer.push_back(servicesPointer);
         }
     }
@@ -217,7 +200,6 @@ public:
 
     std::ostream & OutputStream;
 
-    /*! List of types already sent, uses the native pointer type */
     typedef std::list<const cmnClassServicesBase *> ServicesContainerType;
     typedef ServicesContainerType::const_iterator const_iterator;
     typedef ServicesContainerType::iterator iterator;

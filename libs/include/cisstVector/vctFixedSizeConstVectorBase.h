@@ -1073,8 +1073,8 @@ class vctFixedSizeConstVectorBase
         size_type index;
         const size_type mySize = size();
         // preserve the formatting flags as they were
-        const size_type width = outputStream.width(12);
-        const size_type precision = outputStream.precision(6);
+        const int width = outputStream.width(12);
+        const int precision = outputStream.precision(6);
         bool showpoint = ((outputStream.flags() & std::ios_base::showpoint) != 0);
         outputStream << std::setprecision(6) << std::showpoint;
         for (index = 0; index < mySize; ++index) {
