@@ -988,8 +988,8 @@ public:
         const size_type myRows = rows();
         const size_type myCols = cols();
         // preserve the formatting flags as they were
-        const int width = outputStream.width(12);
-        const int precision = outputStream.precision(6);
+        const size_type width = outputStream.width(12);
+        const size_type precision = outputStream.precision(6);
         bool showpoint = ((outputStream.flags() & std::ios_base::showpoint) != 0);
         outputStream << std::setprecision(6) << std::showpoint;
         size_type indexRow, indexCol;
@@ -1083,8 +1083,8 @@ public:
         const size_type myCols = cols();
         size_type indexRow, indexCol;
         
-        cmnSerializeRaw(outputStream, myRows);
-        cmnSerializeRaw(outputStream, myCols);
+        cmnSerializeSizeRaw(outputStream, myRows);
+        cmnSerializeSizeRaw(outputStream, myCols);
         for (indexRow = 0; indexRow < myRows; ++indexRow) {
             for (indexCol = 0; indexCol < myCols; ++indexCol) {
                 cmnSerializeRaw(outputStream, this->Element(indexRow, indexCol));

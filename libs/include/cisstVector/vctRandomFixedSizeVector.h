@@ -50,7 +50,7 @@ void vctRandom(vctFixedSizeVectorBase<_size, _stride, _elementType, _dataPtrType
                const _elementType min,
                const _elementType max) {
     cmnRandomSequence & randomSequence = cmnRandomSequence::GetInstance();
-    const unsigned int size = vector.size();
+    const typename vctFixedSizeVector<_elementType, _size>::size_type size = vector.size();
     unsigned int index;
     for (index = 0; index < size; ++index) {
         randomSequence.ExtractRandomValue(min, max,

@@ -343,8 +343,8 @@ public:
         // get and set size
         size_type myRows;
         size_type myCols;
-        cmnDeSerializeRaw(inputStream, myRows);
-        cmnDeSerializeRaw(inputStream, myCols);
+        cmnDeSerializeSizeRaw(inputStream, myRows);
+        cmnDeSerializeSizeRaw(inputStream, myCols);
         this->SetSize(myRows, myCols);
         
         // get data
