@@ -164,7 +164,7 @@ public:
         this->SerializeServices(servicesPointer);
         // serialize the object preceeded by its type Id
         TypeId typeId = reinterpret_cast<TypeId>(servicesPointer);
-        cmnSerializeRaw(this->OutputStream, servicesPointer);
+        cmnSerializeRaw(this->OutputStream, typeId);
         object.SerializeRaw(this->OutputStream);
     }
 
