@@ -38,6 +38,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <string>
 #include <fstream>
 #include <map>
+#include <cstddef>
 
 #include <cisstCommon/cmnExport.h>
 
@@ -59,6 +60,22 @@ inline void cmnDeSerializeRaw(std::istream & inputStream, _elementType & data)
     if (inputStream.fail()) {
         cmnThrow("cmnDeSerializer::DeSerializeRaw(_elementType): Error occured with std::istream::read");
     }
+}
+
+
+/*! De-serialization helper function for STL size object.  This
+  function converts a serialized size (unsigned long long int) to the
+  host size_t object.  This operation is required for all size_t as
+  the writer/reader can be both 32 bits or 64 bits programs.
+  
+  This function should be use to implement the DeSerializeRaw method of
+  classes derived from cmnGenericObject. */
+inline void cmnDeSerializeSizeRaw(std::istream & inputStream, size_t & data)
+    throw (std::runtime_error) 
+{
+    unsigned long long int dataToRead;
+    cmnDeSerializeRaw(inputStream, dataToRead);
+    data = dataToRead;
 }
 
 

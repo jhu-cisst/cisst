@@ -37,6 +37,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <string>
 #include <vector>
 #include <fstream>
+#include <cstddef>
 
 #include <cisstCommon/cmnExport.h>
 
@@ -60,6 +61,21 @@ inline void cmnSerializeRaw(std::ostream & outputStream, const _elementType & da
 }
 
 
+/*! Serialization helper function for STL size object.  This function
+  converts a size_t object to an unsigned long long int before using
+  cmnSerializeRaw.  This operation is required for all size_t as the
+  writer/reader can be both 32 bits or 64 bits programs.
+  
+  This function should be use to implement the SerializeRaw method of
+  classes derived from cmnGenericObject. */
+inline void cmnSerializeSizeRaw(std::ostream & outputStream, const size_t & data)
+    throw (std::runtime_error) 
+{
+    unsigned long long int dataToSend = data;
+    cmnSerializeRaw(outputStream, dataToSend);
+}
+
+
 /*! Serialization helper function for an STL string.  This function
   first serializes the string size and then writes all the string
   characters (<code>char</code>) to the output stream.  If the write
@@ -69,7 +85,7 @@ inline void cmnSerializeRaw(std::ostream & outputStream, const std::string & dat
     throw (std::runtime_error)
 {
     const std::string::size_type size = data.size();
-    cmnSerializeRaw(outputStream, size);
+    cmnSerializeSizeRaw(outputStream, size);
     outputStream.write(data.c_str(), size * sizeof(std::string::value_type));
     if (outputStream.fail()) {
         cmnThrow("cmnSerializer::SerializeRaw(std::string): Error occured with std::ostream::write");
@@ -110,7 +126,7 @@ public:
     /*! Type used to identify objects over the network.  It uses the
       services pointer but as the sender or receiver could be a 32
       or 64 bits OS, we use a data type that can handle both. */   
-    typedef long long int TypeId;
+    typedef unsigned long long int TypeId;
 
     /*! Constructor.
 
