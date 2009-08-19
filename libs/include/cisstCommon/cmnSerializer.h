@@ -106,12 +106,6 @@ class CISST_EXPORT cmnSerializer: public cmnGenericObject {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
  public:
-
-    /*! Type used to identify objects over the network.  It uses the
-      services pointer but as the sender or receiver could be a 32
-      or 64 bits OS, we use a data type that can handle both. */   
-    typedef long long int TypeId;
-
     /*! Constructor.
 
       \param outputStream any stream derived from
@@ -146,8 +140,7 @@ class CISST_EXPORT cmnSerializer: public cmnGenericObject {
         // get object services and send information if needed
         const cmnClassServicesBase* servicesPointer = object.Services();
         this->SerializeServices(servicesPointer);
-        // serialize the object preceeded by its type Id
-        TypeId typeId = reinterpret_cast<TypeId>(servicesPointer);
+        // serialize the object preceeded by its services pointer
         cmnSerializeRaw(this->OutputStream, servicesPointer);
         object.SerializeRaw(this->OutputStream);
     }
@@ -188,7 +181,7 @@ class CISST_EXPORT cmnSerializer: public cmnGenericObject {
             // sent the info with null pointer so that reader can
             // differentiate from other services pointers
             const cmnClassServicesBase * invalidClassServices = 0;
-            cmnSerializeRaw(this->OutputStream, reinterpret_cast<pointer>(invalidClassServices));
+            cmnSerializeRaw(this->OutputStream, invalidClassServices);
             cmnSerializeRaw(this->OutputStream, servicesPointer->GetName());
             cmnSerializeRaw(this->OutputStream, servicesPointer);
             ServicesContainer.push_back(servicesPointer);
