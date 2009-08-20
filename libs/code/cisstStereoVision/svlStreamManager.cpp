@@ -145,10 +145,11 @@ int svlStreamManager::RemoveBranch(svlStreamEntity* entity)
     // Empty and delete branch stream
     svlStreamManager* branchstream = iterbranch->second;
     if (branchstream) {
+        svlFilterSourceBase* branchsource = branchstream->StreamSource;
         // Remove every filter in the branch from the stream
         branchstream->EmptyFilterList();
         // Delete branch source
-        if (branchstream->StreamSource) delete branchstream->StreamSource;
+        if (branchsource) delete branchsource;
         // Delete branch stream
         delete branchstream;
     }
@@ -176,10 +177,13 @@ int svlStreamManager::RemoveBranch(const std::string & name)
     // Empty and delete branch stream
     svlStreamManager* branchstream = iterbranch->second;
     if (branchstream) {
+        svlFilterSourceBase* branchsource = branchstream->StreamSource;
         // Remove every filter in the branch from the stream
         branchstream->EmptyFilterList();
         // Delete branch source
         if (branchstream->StreamSource) delete branchstream->StreamSource;
+        // Delete branch source
+        if (branchsource) delete branchsource;
         // Delete branch stream
         delete branchstream;
     }
@@ -223,6 +227,8 @@ int svlStreamManager::RemoveFilter(svlFilterBase* filter)
             }
             // Remove filter from the list of filters
             Filters.erase(iterfilter);
+            // If filter is source, set source filter to null
+            if (filter == dynamic_cast<svlFilterBase*>(StreamSource)) StreamSource = 0;
             return SVL_OK;
         }
     }

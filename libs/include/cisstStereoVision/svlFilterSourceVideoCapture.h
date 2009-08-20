@@ -133,6 +133,7 @@ public:
     int PrintDeviceList(bool update = false);
     int PrintInputList(int deviceid, bool update = false);
     int SetDevice(int deviceid, int inputid = 0, unsigned int videoch = SVL_LEFT);
+    int GetDevice(int & deviceid, int & inputid, unsigned int videoch = SVL_LEFT);
 
     int GetFormatList(ImageFormat **formatlist, unsigned int videoch = SVL_LEFT);
     void ReleaseFormatList(ImageFormat *formatlist);

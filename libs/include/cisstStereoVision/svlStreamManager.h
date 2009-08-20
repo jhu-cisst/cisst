@@ -125,6 +125,7 @@ public:
     svlStreamType GetOutputType();
     bool IsInitialized();
     bool IsRunning();
+    inline unsigned int GetFrameCounter() { return FrameCounter; }
 
 protected:
     svlSample* OutputData;

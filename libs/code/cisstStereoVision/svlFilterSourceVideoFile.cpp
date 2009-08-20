@@ -209,6 +209,9 @@ int svlFilterSourceVideoFile::Initialize()
     }
 #endif
 
+    // Initialize video frame counter
+    VideoFrameCounter = 0;
+
     return SVL_OK;
 }
 
@@ -282,7 +285,7 @@ int svlFilterSourceVideoFile::ProcessFrame(ProcInfo* procInfo)
 
                 if (!IsTargetTimerRunning()) {
                     // Try to keep orignal frame intervals
-                    if (FrameCounter == 0) {
+                    if (VideoFrameCounter == 0) {
                         FirstTimestamp[idx] = timestamp;
                         CVITimer.Reset();
                         CVITimer.Start();
@@ -334,13 +337,13 @@ int svlFilterSourceVideoFile::ProcessFrame(ProcInfo* procInfo)
 
             if (eof) {
                 // End of file reached
-                if (FrameCounter > 0) {
+                if (VideoFrameCounter > 0) {
 
                     // Go back to the beginning of the file, just after the header
                     if (fseek(VideoFile[idx], 27, SEEK_SET) == 0) {
                         // Play again if needed
                         if (!LoopFlag) return SVL_STOP_REQUEST;
-                        FrameCounter = 0;
+                        VideoFrameCounter = 0;
                         continue;
                     }
                     else {

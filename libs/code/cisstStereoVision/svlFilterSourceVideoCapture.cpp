@@ -1103,6 +1103,17 @@ int svlFilterSourceVideoCapture::SetDevice(int deviceid, int inputid, unsigned i
     return SVL_OK;
 }
 
+int svlFilterSourceVideoCapture::GetDevice(int & deviceid, int & inputid, unsigned int videoch)
+{
+    if (videoch >= NumberOfChannels)
+        return SVL_WRONG_CHANNEL;
+
+    deviceid = DeviceID[videoch];
+    inputid = InputID[videoch];
+
+    return SVL_OK;
+}
+
 int svlFilterSourceVideoCapture::GetFormatList(ImageFormat **formatlist, unsigned int videoch)
 {
     if (formatlist == 0)
