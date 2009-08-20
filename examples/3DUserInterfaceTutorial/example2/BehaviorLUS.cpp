@@ -1601,7 +1601,7 @@ void BehaviorLUS::UpdateVisibleMap(void)
             //scale factor
             ECMRCMtoVTKscale = 1.0/ratioW;
         }
-        ECMRCMtoVTKscale = 0.14; // NOTE: hard coded for now for a know workspace
+        ECMRCMtoVTKscale = 0.14; // NOTE: hard coded for now for a known workspace
 
         // computer the transformation to be applied to all absolute coordinates
         // to be display in the SAW coordinate system
