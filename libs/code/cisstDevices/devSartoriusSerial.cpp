@@ -48,7 +48,7 @@ devSartoriusSerial::devSartoriusSerial(const std::string & taskName,
 
 void devSartoriusSerial::SetSerialPortDefaults(void)
 {
-    this->SerialPort.SetBaudRate(osaSerialPort::BaudRate1200);
+    this->SerialPort.SetBaudRate(osaSerialPort::BaudRate19200);
     this->SerialPort.SetCharacterSize(osaSerialPort::CharacterSize7);
     this->SerialPort.SetParityChecking(osaSerialPort::ParityCheckingOdd);
     this->SerialPort.SetStopBits(osaSerialPort::StopBitsOne);
@@ -89,6 +89,7 @@ bool devSartoriusSerial::GetWeight(double & weightInGrams, bool & stable)
                                     << this->NbBytesReadSoFar << " characters"
                                     << std::endl;
             enoughData = this->ProcessBuffer();
+            weightInGrams = this->Weight.Data;
         } else {
             CMN_LOG_CLASS_RUN_ERROR << "GetWeight: buffer is full" << std::endl;
         }

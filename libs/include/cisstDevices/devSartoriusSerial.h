@@ -49,7 +49,9 @@ protected:
 
     /*! "System" Commands: */
     void SendPrintToggle(void);
+public: // Balazs
     bool GetWeight(double & weightInGrams, bool & stable);
+protected: // Balazs
     bool GetModel(std::string & modelName);
     bool ProcessBuffer(void);
     typedef const char * const_char_pointer;
