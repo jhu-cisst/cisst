@@ -61,8 +61,6 @@ public:
 
     void Add(ui3VisibleObject * object);
 
-    void Add(ui3VisibleList * list);
-
     void RemoveLast(void) {
         this->Objects.pop_back();
     }
@@ -76,7 +74,6 @@ public:
     }
 
     void RecursiveUpdateNeeded(void);
-    
 
 protected:
 
@@ -85,7 +82,6 @@ protected:
     typedef std::list<ui3VisibleObject *> ListType;
     ListType Objects;
 
-    ui3VisibleList * ParentList;
 
     CMN_DECLARE_MEMBER_AND_ACCESSORS(bool, UpdateNeeded);
 

@@ -176,14 +176,18 @@ public:
     void SetCursorPosition(vct3 & position)
     {
         this->Lock();
-        this->Source->SetPoint2(position.Pointer());
+        if (this->Created()) {
+        	this->Source->SetPoint2(position.Pointer());
+        }
         this->Unlock();
     }
 
     void SetAnchorPosition(vct3 & position)
     {
         this->Lock();
-        this->Source->SetPoint1(position.Pointer());
+        if (this->Created()) {
+        	this->Source->SetPoint1(position.Pointer());
+        }
         this->Unlock();
     }
 };

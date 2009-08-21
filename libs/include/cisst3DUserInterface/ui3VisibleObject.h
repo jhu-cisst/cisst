@@ -86,6 +86,11 @@ public:
 
     void AddPart(vtkProp3D * part);
 
+    bool IsAddedToScene(void) const;
+
+    void WaitForCreation(void) const;
+
+
  protected:
     typedef ui3SceneManager::VTKHandleType VTKHandleType;
 
@@ -102,6 +107,13 @@ public:
     vtkMatrix4x4 * Matrix;
     ui3SceneManager * SceneManager;
     VTKHandleType VTKHandle;
+    ui3VisibleList * ParentList;
+
+
+ private:
+	bool IsSceneList;
+
+ protected:
 
     virtual void PropagateVisibility(bool visible);
 

@@ -33,28 +33,19 @@ CMN_IMPLEMENT_SERVICES(ui3VisibleList);
 
 ui3VisibleList::ui3VisibleList(const std::string & name):
     ui3VisibleObject(name + " (list)"),
-    ParentList(0),
     UpdateNeededMember(true)
 {
 }
 
 
-void ui3VisibleList::Add(ui3VisibleObject * object)
+void ui3VisibleList::Add(ui3VisibleObject * objectPointer)
 {
-    this->Objects.push_back(object);
-    this->SetUpdateNeeded(true);
-    CMN_LOG_CLASS_RUN_VERBOSE << "Add: object \"" << object->Name() << "\" added to list \""
-                              << this->Name() << "\"" << std::endl;
-}
+	this->Objects.push_back(objectPointer);
+	objectPointer->ParentList = this;
+	this->RecursiveUpdateNeeded();
+	CMN_LOG_CLASS_RUN_VERBOSE << "Add: object \"" << objectPointer->Name() << "\" added to list \""
+	                          << this->Name() << "\"" << std::endl;
 
-
-void ui3VisibleList::Add(ui3VisibleList * list)
-{
-    this->Objects.push_back(list);
-    list->ParentList = this;
-    this->SetUpdateNeeded(true);
-    CMN_LOG_CLASS_RUN_VERBOSE << "Add: list \"" << list->Name() << "\" added to list \""
-                              << this->Name() << "\"" <<std::endl;
 }
 
 
@@ -63,7 +54,7 @@ void ui3VisibleList::RecursiveUpdateNeeded(void)
     this->UpdateNeededMember = true;
     this->Assembly->Modified();
     if (this->ParentList) {
-        this->ParentList->UpdateNeeded();
+        this->ParentList->RecursiveUpdateNeeded();
     }
 }
 

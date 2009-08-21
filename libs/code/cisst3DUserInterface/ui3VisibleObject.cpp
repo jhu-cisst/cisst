@@ -21,6 +21,9 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include <cisst3DUserInterface/ui3VisibleObject.h>
+#include <cisst3DUserInterface/ui3VisibleList.h>
+
+#include <cisstOSAbstraction/osaSleep.h>
 
 #include <vtkAssembly.h>
 #include <vtkProperty.h>
@@ -32,6 +35,8 @@ ui3VisibleObject::ui3VisibleObject(const std::string & name):
     Matrix(0),
     SceneManager(0),
     VTKHandle(0),
+    ParentList(0),
+    IsSceneList(false),
     CreatedMember(false),
     VisibleMember(true),
     NameMember(name)
@@ -66,6 +71,19 @@ void ui3VisibleObject::Hide(void)
     CMN_LOG_CLASS_RUN_DEBUG << "Hide: called for object \"" << this->Name() << "\"" << std::endl; 
     this->SetVisible(false);
     this->PropagateVisibility(false);
+}
+
+
+bool ui3VisibleObject::IsAddedToScene(void) const
+{
+	if (this->IsSceneList) {
+		return true;
+	} else {
+		if (this->ParentList) {
+			return this->ParentList->IsAddedToScene();
+		}
+	}
+	return false;
 }
 
 
@@ -186,4 +204,18 @@ void ui3VisibleObject::AddPart(vtkProp3D * part)
     CMN_LOG_CLASS_RUN_DEBUG << "AddPart: part added to object \"" << this->Name() << "\"" << std::endl;
     this->Assembly->AddPart(part);
     this->Parts.push_back(part);
+}
+
+
+void ui3VisibleObject::WaitForCreation(void) const
+{
+	if (!this->IsAddedToScene()) {
+		CMN_LOG_CLASS_RUN_ERROR << "WaitForCreation: object \"" << this->Name()
+		                        << "\" not added to scene (could be added to a list not yet added to the main scene)"
+		                        << std::endl;
+		return;
+	}
+	while (!this->Created()) {
+		osaSleep(10.0 * cmn_ms); // 10 milliseconds
+	}
 }
