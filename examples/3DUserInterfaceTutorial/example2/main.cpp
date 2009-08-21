@@ -97,7 +97,7 @@ int main()
     ui3Manager guiManager;
 
     SimpleBehavior behavior("SimpleBehavior");
-#if 0
+#if 1
     BehaviorWithSlave behavior2("BehaviorWithSlave");
     BehaviorLUS behavior3("BehaviorLUS");
     MeasurementBehavior behavior4("MeasurementBehavior");
@@ -107,7 +107,7 @@ int main()
     guiManager.AddBehavior(&behavior,       // behavior reference
                            0,               // position in the menu bar: default
                            "circle.png");   // icon file: no texture
-#if 0
+#if 1
     guiManager.AddBehavior(&behavior2,       // behavior reference
                            2,             // position in the menu bar: default
                            "square.png");            // icon file: no texture

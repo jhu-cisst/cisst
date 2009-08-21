@@ -88,10 +88,6 @@ class Widget: public ui3VisibleObject
         ui3VisibleObject(name),
         SphereSource(0),
         SphereMapper(0),
-        ctl1(0),
-        ctl2(0),
-        ctl3(0),
-        ctl4(0),
         OutlineSource(0),
         OutlineMapper(0),
         OutlineActor(0),
@@ -102,73 +98,92 @@ class Widget: public ui3VisibleObject
 
         this->SphereSource = vtkSphereSource::New();
         CMN_ASSERT(this->SphereSource);
-        this->SphereSource->SetRadius(5.0);
+        this->SphereSource->SetRadius(3.0);
 
         this->SphereMapper = vtkPolyDataMapper::New();
         CMN_ASSERT(this->SphereMapper);
         this->SphereMapper->SetInputConnection(this->SphereSource->GetOutputPort());
 
         //create the top control point
-        this->ctl1 = vtkActor::New();
-        CMN_ASSERT(this->ctl1);
-        this->ctl1->SetMapper(this->SphereMapper);
-        this->ctl1->GetProperty()->SetColor(1.0, 0.0, 0.0);
-        this->ctl1->SetPosition(15.0, 0.0, 0.0);
+        this->sphere1 = vtkActor::New();
+        CMN_ASSERT(this->sphere1);
+        this->sphere1->SetMapper(this->SphereMapper);
+        this->sphere1->GetProperty()->SetColor(1.0, 0.0, 0.0);
+        this->sphere1->SetPosition(20.0, 0.0, 0.0);
         
         //create the bottom control point
-        this->ctl2 = vtkActor::New();
-        CMN_ASSERT(this->ctl2);
-        this->ctl2->SetMapper(this->SphereMapper);
-        this->ctl2->GetProperty()->SetColor(1.0, 0.0, 0.0);
-        this->ctl2->SetPosition(-15.0, 0.0, 0.0);
+        this->sphere2 = vtkActor::New();
+        CMN_ASSERT(this->sphere2);
+        this->sphere2->SetMapper(this->SphereMapper);
+        this->sphere2->GetProperty()->SetColor(0.0, 1.0, 0.0);
+        this->sphere2->SetPosition(-20.0, 0.0, 0.0);
         
         //create the right ctl point
-        this->ctl3 = vtkActor::New();
-        CMN_ASSERT(this->ctl3);
-        this->ctl3->SetMapper(this->SphereMapper);
-        this->ctl3->GetProperty()->SetColor(1.0, 0.0, 0.0);
-        this->ctl3->SetPosition(0.0, 15.0, 0.0);
+        this->sphere3 = vtkActor::New();
+        CMN_ASSERT(this->sphere3);
+        this->sphere3->SetMapper(this->SphereMapper);
+        this->sphere3->GetProperty()->SetColor(0.0, 0.0, 1.0);
+        this->sphere3->SetPosition(0.0, 20.0, 0.0);
         
         //create the left ctl point
-        this->ctl4 = vtkActor::New();
-        CMN_ASSERT(this->ctl4);
-        this->ctl4->SetMapper(this->SphereMapper);
-        this->ctl4->GetProperty()->SetColor(1.0, 0.0, 0.0);
-        this->ctl3->SetPosition(0.0, -15.0, 0.0);
+        this->sphere4 = vtkActor::New();
+        CMN_ASSERT(this->sphere4);
+        this->sphere4->SetMapper(this->SphereMapper);
+        this->sphere4->GetProperty()->SetColor(1.0, 1.0, 1.0);
+        this->sphere4->SetPosition(0.0, -20.0, 0.0);
 
-        this->AddPart(this->ctl1);
-        this->AddPart(this->ctl2);
-        this->AddPart(this->ctl3);
-        this->AddPart(this->ctl4);
-        
+        this->AddPart(this->sphere1);
+        this->AddPart(this->sphere2);
+        this->AddPart(this->sphere3);
+        this->AddPart(this->sphere4);
+
         this->OutlineSource= vtkOutlineSource::New();
-        OutlineSource->SetBounds(-15,15,-15,15,-15,15);
-        
-        vtkPolyDataMapper *OutlineMapper = vtkPolyDataMapper::New();
-        OutlineMapper->SetInputConnection(OutlineSource->GetOutputPort());
-        
-        OutlineActor = vtkActor::New();;
-        OutlineActor->SetMapper(this->OutlineMapper);
-        OutlineActor->GetProperty()->SetColor(1,1,1);
-        
+        this->OutlineSource->SetBounds(-15,15,-15,15,-15,15);
+
+        this->OutlineMapper = vtkPolyDataMapper::New();
+        this->OutlineMapper->SetInputConnection(OutlineSource->GetOutputPort());
+
+        this->OutlineActor = vtkActor::New();
+        this->OutlineActor->SetMapper(this->OutlineMapper);
+        this->OutlineActor->GetProperty()->SetColor(1,1,1);
+        this->OutlineActor->SetPosition(0.0,0.0,0.0);
+
         this->AddPart(this->OutlineActor);
 
         this->SetTransformation(this->Position);
-        this->Hide();
+
+        this->CreateControlPoints();
         return true;
         }
+
+        void CreateControlPoints(void)
+        {
+            vctFrm3 ctl1, ctl2, ctl3, ctl4;
+            ctl1.Translation().Assign(20.0, 0.0, 0.0);
+            ctl2.Translation().Assign(-20.0, 0.0, 0.0);
+            ctl3.Translation().Assign(0.0, 20.0, 0.0);
+            ctl4.Translation().Assign(0.0, -20.0, 0.0);
+            Rel_ControlPoints.push_back(ctl1);
+            Rel_ControlPoints.push_back(ctl2);
+            Rel_ControlPoints.push_back(ctl3);
+            Rel_ControlPoints.push_back(ctl4);
+        }
         
+        std::list<vctFrm3> GetRelativeControlPoints(void)
+        {
+            return Rel_ControlPoints;
+        }
 
     protected:
 
         vtkSphereSource * SphereSource;
         vtkPolyDataMapper * SphereMapper;
-        vtkActor * ctl1, *ctl2, *ctl3, *ctl4;
+        vtkActor * sphere1, *sphere2, *sphere3, *sphere4;
         vtkOutlineSource * OutlineSource;
         vtkPolyDataMapper * OutlineMapper;
         vtkActor * OutlineActor;
 
-
+        std::list<vctFrm3> Rel_ControlPoints;
 
         vctFrm3 Position; // initial position
 };
@@ -182,7 +197,9 @@ ToyBehavior::ToyBehavior(const std::string & name):
         ui3BehaviorBase(std::string("ToyBehavior::") + name, 0),
         Ticker(0),
         Following(false),
-        VisibleList(0)
+        VisibleList(0),
+        RightMTMOpen(true),
+        Transition(true)
 {
     this->VisibleList = new ui3VisibleList("ToyList");
     CMN_ASSERT(this->VisibleList);
@@ -240,10 +257,16 @@ void ToyBehavior::Cleanup(void)
 bool ToyBehavior::RunForeground()
 {
     this->Ticker++;
+    // running in foreground GUI mode
+    prmPositionCartesianGet position;
+
+    // compute offset
+    this->GetPrimaryMasterPosition(position);
 
     if (this->Manager->MastersAsMice() != this->PreviousMaM) {
         this->PreviousMaM = this->Manager->MastersAsMice();
         this->VisibleList->Show();
+        this->OnStart();
     }
 
     // detect transition, should that be handled as an event?
@@ -251,25 +274,22 @@ bool ToyBehavior::RunForeground()
     if (this->State != this->PreviousState) {
         this->PreviousState = this->State;
         this->VisibleList->Show();
+        this->PreviousCursorPosition.Assign(position.Position().Translation());
     }
-    // running in foreground GUI mode
-    prmPositionCartesianGet position;
 
-    // compute offset
-    this->GetPrimaryMasterPosition(position);
-    if (this->Following) {
+    if (!this->RightMTMOpen) {
+        if(this->Transition)
+        {
+            this->PreviousCursorPosition.Assign(position.Position().Translation());
+            this->Transition = false;
+        }
         vctDouble3 deltaCursor;
         deltaCursor.DifferenceOf(position.Position().Translation(),
                                  this->PreviousCursorPosition);
-        this->Offset.Add(deltaCursor);
+        this->Position.Translation().Add(deltaCursor);
+        this->VisibleList->SetPosition(this->Position.Translation());
     }
     this->PreviousCursorPosition.Assign(position.Position().Translation());
-
-    // apply to object
-    this->Slave1->GetCartesianPosition(this->Slave1Position);
-    this->Slave1Position.Position().Translation().Add(this->Offset);
-    this->VisibleList->SetTransformation(this->Slave1Position.Position());
-
     return true;
 }
 
@@ -282,11 +302,7 @@ bool ToyBehavior::RunBackground()
         this->PreviousState = this->State;
         this->VisibleList->Show();
     }
-
-    this->Slave1->GetCartesianPosition(this->Slave1Position);
-    this->Slave1Position.Position().Translation().Add(this->Offset);
-    this->VisibleList->SetTransformation(this->Slave1Position.Position());
-
+    this->Transition = true;
     return true;
 }
 
@@ -297,11 +313,8 @@ bool ToyBehavior::RunNoInput()
         this->PreviousMaM = this->Manager->MastersAsMice();
         this->VisibleList->Show();
     }
-
-    this->Slave1->GetCartesianPosition(this->Slave1Position);
-    this->Slave1Position.Position().Translation().Add(this->Offset);
-    this->VisibleList->SetTransformation(this->Slave1Position.Position());
-
+    
+    this->Transition = true;
     return true;
 }
 
@@ -316,6 +329,13 @@ bool ToyBehavior::SaveConfiguration(const std::string & CMN_UNUSED(configFile))
     return true;
 }
 
+void ToyBehavior::OnStart()
+{
+    this->Position.Translation().Assign(vctDouble3(0.0,0.0,-150.0));
+    this->VisibleList->SetPosition(this->Position.Translation());
+    this->VisibleList->Show();
+}
+
 void ToyBehavior::FirstButtonCallback()
 {
     CMN_LOG_RUN_VERBOSE << "Behavior \"" << this->GetName() << "\" Button 1 pressed" << std::endl;
@@ -324,9 +344,9 @@ void ToyBehavior::FirstButtonCallback()
 void ToyBehavior::PrimaryMasterButtonCallback(const prmEventButton & event)
 {
     if (event.Type() == prmEventButton::PRESSED) {
-        this->RightMTMOpen = true;
-    } else if (event.Type() == prmEventButton::RELEASED) {
         this->RightMTMOpen = false;
+    } else if (event.Type() == prmEventButton::RELEASED) {
+        this->RightMTMOpen = true;
     }
 }
 
@@ -350,4 +370,31 @@ ui3VisibleObject * ToyBehavior::FindClosestShape(void)
     
 }
 
+int ToyBehavior::FindClosestControlPoint(void)
+{
+    int counter = 0, toReturn;
+    vctFrm3 absoluteControlPoint;
+    double closestDist = cmnTypeTraits<double>::MaxPositiveValue();
 
+    Frames = WidgetObject->GetRelativeControlPoints();
+
+    ListFrameType::iterator iter;
+    const ListFrameType::iterator end = Frames.end();
+
+    for(iter = Frames.begin(); iter != end; ++iter)
+    {
+        absoluteControlPoint = VisibleList->GetTransformation() * (*iter);
+        vctDouble3 diff;
+        diff.DifferenceOf(PreviousCursorPosition, absoluteControlPoint.Translation() );
+        
+        double absolDiff = diff.Norm();
+        if(absolDiff < closestDist)
+        {
+            toReturn = counter;
+            closestDist = absolDiff;
+        }
+        counter++;
+    }
+    
+    return toReturn;
+}

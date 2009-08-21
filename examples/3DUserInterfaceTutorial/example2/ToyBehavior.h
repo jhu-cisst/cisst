@@ -37,6 +37,7 @@ class ToyBehavior : public ui3BehaviorBase
         bool RunForeground(void);
         bool RunBackground(void);
         bool RunNoInput(void);
+        void OnStart(void);
         void Configure(const std::string & configFile);
         bool SaveConfiguration(const std::string & configFile);
         inline ui3VisibleObject * GetVisibleObject(void) {
@@ -51,6 +52,8 @@ class ToyBehavior : public ui3BehaviorBase
         void AddCubeCallback(void);
         void AddCylinderCallback(void);
         ui3VisibleObject * FindClosestShape(void);
+        int FindClosestControlPoint(void);
+
 
         StateType PreviousState;
         bool PreviousMaM;
@@ -61,7 +64,9 @@ class ToyBehavior : public ui3BehaviorBase
 
         ui3SlaveArm * Slave1;
         prmPositionCartesianGet Slave1Position;
-
+        
+        typedef std::list<vctFrm3> ListFrameType;
+        ListFrameType Frames;
     private:
         ui3VisibleList * VisibleList;
         Widget * WidgetObject;

@@ -23,6 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisst3DUserInterface.h>
 #include <list>
 #include <limits>
+#define MARKER_MAX 20
 
 class MapMarker;
 struct MarkerType;
@@ -89,7 +90,7 @@ class MapBehavior : public ui3BehaviorBase
         ui3VisibleList * VisibleList;
         ui3VisibleObject * MapCursor;
         ui3VisibleList * MarkerList;
-        MapMarker * MyMarkers[20];
+        MapMarker * MyMarkers[MARKER_MAX];
         bool RightMTMOpen, LeftMTMOpen;
         bool CameraPressed, ClutchPressed;
         bool MarkerDropped, MarkerRemoved;

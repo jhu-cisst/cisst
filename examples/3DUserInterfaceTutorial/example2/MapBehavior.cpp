@@ -32,7 +32,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <vtkProperty.h>
 #include <vtkCylinderSource.h>
 
-#define MARKER_MAX 20
+
 
 /*!
 
@@ -132,12 +132,13 @@ MapBehavior::MapBehavior(const std::string & name):
     this->VisibleList= new ui3VisibleList("MapBehavior");
     this->MarkerList = new ui3VisibleList("MarkerList");
     
-    this->MapCursor=new MapMarker("marker1");
-    for(int i = 0; i<MARKER_MAX ; i++)
-    {
-        MyMarkers[i] = new MapMarker("marker");
-        this->MarkerList->Add(MyMarkers[i]);
-    }
+    this->MapCursor=new MapMarker("MapCursor");
+    
+//     for(int i = 0; i<MARKER_MAX ; i++)
+//     {
+//         MyMarkers[i] = new MapMarker("marker");
+//         this->MarkerList->Add(MyMarkers[i]);
+//     }
 
     this->MarkerList->Hide();
     
@@ -610,7 +611,8 @@ void MapBehavior::AddMarker(void)
     {
 
         MapMarker * newMarkerVisible = new MapMarker("marker");
-        //newMarkerVisible = MyMarkers[MarkerCount];
+        MarkerList->Add(newMarkerVisible);
+        MyMarkers[MarkerCount] = newMarkerVisible;
         newMarkerVisible->WaitForCreation();
         newMarkerVisible->SetColor(153.0/255.0, 255.0/255.0, 153.0/255.0); 
         if(MarkerCount < MARKER_MAX)
@@ -681,31 +683,39 @@ int MapBehavior::FindClosestMarker()
     double closestDist = cmnTypeTraits<double>::MaxPositiveValue();
     vctDouble3 dist;
     double abs;
-    int currentCount = 0;
-    MarkersType::iterator iter;
+    int currentCount = 0, returnValue;
+    MarkersType::iterator iter1, iter2;
     const MarkersType::iterator end = Markers.end();
-    for (iter = Markers.begin(); iter != end; iter++)
+    for (iter1 = Markers.begin(); iter1 != end; iter1++)
     {
-        dist.DifferenceOf(pos.Translation(), (*iter)->AbsolutePosition.Translation());
+        dist.DifferenceOf(pos.Translation(), (*iter1)->AbsolutePosition.Translation());
         abs = dist.Norm();
         if(abs < closestDist)
         {
-            currentCount = (*iter)->count;
+            currentCount = (*iter1)->count;
             closestDist = abs;
         }
     }
-    if(closestDist < 2.0)
+    
+        //if there is one close to the cursor, turn it red
+        //return value is that markers count
+    for(iter2 = Markers.begin(); iter2 !=end; iter2++)
     {
-        this->MyMarkers[currentCount]->SetColor(255.0/255.0, 0.0/255.0, 51.0/255.0);
-        return currentCount;
-    }
-    else 
-    {
-        for (int j = 0; j<MarkerCount; j++)
+        if(closestDist < 2.0 && (*iter2)->count == currentCount)
         {
-            this->MyMarkers[j]->SetColor(153.0/255.0, 255.0/255.0, 153.0/255.0);
+            (*iter2)->VisibleObject->SetColor(255.0/255.0, 0.0/255.0, 51.0/255.0);
+            returnValue = currentCount;
+        }else{
+             //otherwise, all the markers should be green, return an invalid number
+            (*iter2)->VisibleObject->SetColor(153.0/255.0, 255.0/255.0, 153.0/255.0);
         }
-        return MARKER_MAX +1;
     }
+    
+    if(closestDist >2.0)
+    {
+        returnValue = MARKER_MAX + 1;
+    }
+
+    return returnValue;
 
 }
