@@ -283,7 +283,7 @@ int svlFilterSourceVideoFile::ProcessFrame(ProcInfo* procInfo)
                 timestampsum += timestamp;
                 timestampcount ++;
 
-                if (!IsTargetTimerRunning()) {
+                if (!CVITimer.IsRunning()) {
                     // Try to keep orignal frame intervals
                     if (VideoFrameCounter == 0) {
                         FirstTimestamp[idx] = timestamp;
