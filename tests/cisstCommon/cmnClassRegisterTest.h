@@ -86,7 +86,9 @@ public:
         this->Elements[0] = 1;
         this->Elements[1] = 2;
     }
-    inline TestC2(const TestC2 & other) {
+    inline TestC2(const TestC2 & other):
+        TestC(other)
+    {
         this->Size = other.Size;
         if (this->Size != 0) {
             this->Elements = new double[this->Size];
@@ -134,11 +136,9 @@ class cmnClassRegisterTest : public CppUnit::TestFixture
     CPPUNIT_TEST_SUITE_END();
     
  public:
-    void setUp(void) {
-    }
-    
-    void tearDown(void) {
-    }
+    void setUp(void);
+
+    void tearDown(void);
     
     /*! Test the class registration. */
     void TestRegistration(void);
@@ -164,6 +164,10 @@ class cmnClassRegisterTest : public CppUnit::TestFixture
 
     /*! Test iterators */
     void TestIterators(void);
+
+protected:
+    /* add an output stream to check the log */
+    std::stringstream OutputStream;
 };
 
 
