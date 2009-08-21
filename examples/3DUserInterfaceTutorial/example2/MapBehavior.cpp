@@ -314,7 +314,7 @@ bool MapBehavior::RunNoInput()
 //prepare to remove marker if clutch and left MTM are pressed
     if(ClutchPressed && !LeftMTMOpen)
     {
-        this->RemoveLastMarker();
+        this->RemoveMarker();
     }
 
 //check if the map should be updated
@@ -609,8 +609,9 @@ void MapBehavior::AddMarker(void)
     if(MarkerDropped == false && MarkerCount < MARKER_MAX)
     {
 
-        MapMarker * newMarkerVisible;
-        newMarkerVisible = MyMarkers[MarkerCount];
+        MapMarker * newMarkerVisible = new MapMarker("marker");
+        //newMarkerVisible = MyMarkers[MarkerCount];
+        newMarkerVisible->WaitForCreation();
         newMarkerVisible->SetColor(153.0/255.0, 255.0/255.0, 153.0/255.0); 
         if(MarkerCount < MARKER_MAX)
         {
@@ -641,7 +642,7 @@ void MapBehavior::AddMarker(void)
 Removes the last marker from the list
 
  */
-void MapBehavior::RemoveLastMarker(void)
+void MapBehavior::RemoveMarker(void)
 {
     MarkersType::iterator iter = Markers.begin();
     const MarkersType::iterator end = Markers.end();

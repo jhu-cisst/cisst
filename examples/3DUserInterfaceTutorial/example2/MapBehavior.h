@@ -75,7 +75,7 @@ class MapBehavior : public ui3BehaviorBase
         vctFrm3 GetCurrentCursorPositionWRTECMRCM(void);
         void UpdateVisibleMap(void);
         void AddMarker();
-        void RemoveLastMarker();
+        void RemoveMarker();
         int FindClosestMarker();
 
         typedef  std::list<MarkerType*> MarkersType;

@@ -22,8 +22,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisst3DUserInterface.h>
 #include <list>
-#include "BehaviorLUSProbeHead.cpp"
-
 
 #define DEPTH           -200
 
@@ -36,7 +34,6 @@ class BehaviorLUSOutline;
 class BehaviorLUSText;
 class BehaviorLUSMarker;
 struct MarkerType;
-
 
 
 class BehaviorLUS : public ui3BehaviorBase

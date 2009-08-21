@@ -97,16 +97,17 @@ int main()
     ui3Manager guiManager;
 
     SimpleBehavior behavior("SimpleBehavior");
+#if 0
     BehaviorWithSlave behavior2("BehaviorWithSlave");
     BehaviorLUS behavior3("BehaviorLUS");
     MeasurementBehavior behavior4("MeasurementBehavior");
     MapBehavior behavior5("MapBehavior");
     ToyBehavior behavior6("ToyBehavior");
-
+#endif
     guiManager.AddBehavior(&behavior,       // behavior reference
                            0,               // position in the menu bar: default
                            "circle.png");   // icon file: no texture
-
+#if 0
     guiManager.AddBehavior(&behavior2,       // behavior reference
                            2,             // position in the menu bar: default
                            "square.png");            // icon file: no texture
@@ -126,7 +127,7 @@ int main()
     guiManager.AddBehavior(&behavior6,       // behavior reference
                             5,             // position in the menu bar: default
                             "toy.png");            // icon file: no texture
-    
+#endif
     guiManager.Configure("config.xml");
 
 
@@ -153,7 +154,7 @@ int main()
     // add guiManager as a filter to the pipeline, so it will receive video frames
     // "StereoVideo" is defined in the UI Manager as a possible video interface
     
-    vidUltrasoundStream.Trunk().Append(behavior3.GetStreamSamplerFilter("USVideo"));
+ //   vidUltrasoundStream.Trunk().Append(behavior3.GetStreamSamplerFilter("USVideo"));
 
 /*
     // add debug window

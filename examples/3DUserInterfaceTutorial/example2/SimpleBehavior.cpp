@@ -36,15 +36,13 @@ class SimpleBehaviorVisibleObject: public ui3VisibleObject
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 public:
-    inline SimpleBehaviorVisibleObject(vctDouble3 position):
-        ui3VisibleObject(),
+    inline SimpleBehaviorVisibleObject(const std::string & name):
+        ui3VisibleObject(name),
         Source(0),
         Mapper(0),
         Actor(0),
-        Position(position),
         Red(true)
-        {    std::cout << "calling the visible object constructor " << std::endl;
-    }
+    {}
 
     inline ~SimpleBehaviorVisibleObject()
     {
@@ -76,7 +74,6 @@ public:
         this->Actor->VisibilityOff();
         
         this->AddPart(this->Actor);
-        //this->SetPosition(this->Position);
 
         return true;
     }
@@ -95,7 +92,6 @@ protected:
     vtkSphereSource * Source;
     vtkPolyDataMapper * Mapper;
     vtkActor * Actor;
-    vctDouble3 Position; // initial position
     bool Red;
 };
 
@@ -112,7 +108,7 @@ SimpleBehavior::SimpleBehavior(const std::string & name):
 {
     this->VisibleList = new ui3VisibleList("SimpleBehavior");
 
-    this->VisibleObject1 = new SimpleBehaviorVisibleObject(this->Position);
+    this->VisibleObject1 = new SimpleBehaviorVisibleObject("Sphere0");
     this->VisibleList->Add(this->VisibleObject1);
 
     CMN_ASSERT(this->VisibleList);
@@ -240,16 +236,13 @@ void SimpleBehavior::ToggleColor()
 
 void SimpleBehavior::NewSphereCallback()
 {
-    std::cout << "calling new sphere callback "  << std::endl;
-    vctFrm3 SphereFrame;
-    Counter += 20.0;
-    SphereFrame = VisibleObject1->GetTransformation();
-    SphereFrame.Translation().Y() = Counter;
-    SimpleBehaviorVisibleObject * newVisibleObj = new SimpleBehaviorVisibleObject(SphereFrame.Translation());
-    newVisibleObj->Show();
+    vctDouble3 sphereOffset;
+    Counter += 5.0;
+    sphereOffset.Y() = Counter;
+    std::stringstream objectName;
+    objectName << "Sphere" << Counter;
+    SimpleBehaviorVisibleObject * newVisibleObj = new SimpleBehaviorVisibleObject(objectName.str());
     this->VisibleList->Add(newVisibleObj);
-    
-    std::cout << "Visibility of new object: " << newVisibleObj->Visible() << std::endl;
-    std::cout << "Creation status of new object: " << newVisibleObj->Created() << std::endl;
-    std::cout << "Placement: " << newVisibleObj->GetTransformation() << std::endl;
+    newVisibleObj->WaitForCreation();
+    newVisibleObj->SetPosition(sphereOffset);
 }
