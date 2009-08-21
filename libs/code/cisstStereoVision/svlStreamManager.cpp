@@ -1076,6 +1076,7 @@ void* svlStreamControlMultiThread::Proc(svlStreamManager* baseref)
 
 svlFilterBase::svlFilterBase() :
     OutputData(0),
+    FrameCounter(0),
     Initialized(false),
     Running(false),
     OutputFormatModified(false),

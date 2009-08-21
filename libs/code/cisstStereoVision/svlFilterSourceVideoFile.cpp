@@ -187,6 +187,9 @@ int svlFilterSourceVideoFile::Initialize()
             // Allocate compression buffer
             CompressedBuffer[i] = new unsigned char[CompressedBufferSize[i]];
 
+            // Initialize video frame counter
+            VideoFrameCounter = 0;
+
             opened = true;
 
             break;
@@ -208,9 +211,6 @@ int svlFilterSourceVideoFile::Initialize()
         AVIFrequency /= avicounter;
     }
 #endif
-
-    // Initialize video frame counter
-    VideoFrameCounter = 0;
 
     return SVL_OK;
 }
@@ -283,7 +283,7 @@ int svlFilterSourceVideoFile::ProcessFrame(ProcInfo* procInfo)
                 timestampsum += timestamp;
                 timestampcount ++;
 
-                if (!CVITimer.IsRunning()) {
+                if (!IsTargetTimerRunning()) {
                     // Try to keep orignal frame intervals
                     if (VideoFrameCounter == 0) {
                         FirstTimestamp[idx] = timestamp;
@@ -359,6 +359,8 @@ int svlFilterSourceVideoFile::ProcessFrame(ProcInfo* procInfo)
             else {
                 // Other error, let it fail
             }
+
+            VideoFrameCounter ++;
 
             break;
         }
