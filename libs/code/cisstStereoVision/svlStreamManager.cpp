@@ -646,6 +646,10 @@ void svlStreamManager::Stop()
         }
     }
 
+    for (iterfilter = Filters.begin(); iterfilter != Filters.end(); iterfilter ++) {
+        (*iterfilter)->Running = false;
+    }
+
     Running = false;
     StopThread = true;
 
@@ -676,7 +680,6 @@ void svlStreamManager::Stop()
 
     for (iterfilter = Filters.begin(); iterfilter != Filters.end(); iterfilter ++) {
         (*iterfilter)->OnStop();
-        (*iterfilter)->Running = false;
     }
 
     StreamStatus = SVL_STREAM_STOPPED;
@@ -697,6 +700,10 @@ void svlStreamManager::InternalStop(unsigned int callingthreadID)
             // Stop branch stream
             (*iterbranchlist)->Stream->Stop();
         }
+    }
+
+    for (iterfilter = Filters.begin(); iterfilter != Filters.end(); iterfilter ++) {
+        (*iterfilter)->Running = false;
     }
 
     Running = false;
@@ -733,7 +740,6 @@ void svlStreamManager::InternalStop(unsigned int callingthreadID)
 
     for (iterfilter = Filters.begin(); iterfilter != Filters.end(); iterfilter ++) {
         (*iterfilter)->OnStop();
-        (*iterfilter)->Running = false;
     }
 }
 

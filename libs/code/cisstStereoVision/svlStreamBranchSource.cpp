@@ -176,7 +176,7 @@ int svlStreamBranchSource::PullSample()
 {
     // Make sure a new frame has arrived since the last call
     if (BufferUsage <= 1) {
-        while (!NewFrameEvent.Wait(1.0)) {
+        while (!NewFrameEvent.Wait(0.5)) {
             if (IsRunning() == false) return SVL_OK;
         }
     }
