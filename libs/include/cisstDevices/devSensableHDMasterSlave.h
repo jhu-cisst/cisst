@@ -5,7 +5,7 @@
   $Id: devSensableHDMasterSlave.h 556 2009-07-17 20:19:24Z gsevinc1 $
 
   Author(s): Gorkem Sevinc, Anton Deguet
-  Created on: 2008-07-17
+  Created on: 2009-07-17
 
   (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
   Reserved.
@@ -26,6 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon.h>
 #include <cisstMultiTask/mtsTaskFromCallback.h>
 #include <cisstDevices/devSensableHD.h>
+#include <cisstRobot/robCollaborativeControlForce.h>
 
 // Always include last
 #include <cisstDevices/devExport.h>
@@ -46,11 +47,24 @@ public:
 
     ~devSensableHDMasterSlave(void) {};
 
-    void InitializeVariables(int index);
+    /*!
+        SetupTeleoperationInterfaces function takes in two device names and
+        creates the necessary interfaces for multitasking.
+    */
     void SetupTeleoperationInterfaces(const std::string & firstDeviceName, 
                                       const std::string & secondDeviceName,
                                       int pair);
+
+    /*!
+        UserControl function overloads the base function from devSensableHD. 
+        This function has been designed to carry out any user control task
+        using the Phantom Omnis. In this case, this function is carrying out
+        teleoperation using the robCollaborativeControlForce class.
+    */
     void UserControl(void);
+    /*!
+        Mutators for GUI related parameters, such as scale factor and force limit.
+    */
     void SetScaleFactor(const mtsDouble& Scale);
     void SetForceLimit(const mtsDouble& FLimit);
     void SetForceMode(const mtsInt& Mode);
@@ -58,57 +72,36 @@ public:
     void SetSlaveClutch(const mtsBool& commandedClutch);
     void SetMasterSlaveClutch(const mtsBool& commandedClutch);
     void SetForceCoefficient(const mtsDouble& commandedCoefficient);
-    void SetOffsetMultiplier(double OffMult);
-    void IncrementScaleFactor(void);
-    void DecrementScaleFactor(void);
-    void IncrementForceLimit(void);
-    void DecrementForceLimit(void);
     
 protected:
+    
+    /*!
+        DevData struct holds the current values provided by the devSensableHD class and
+        the parameters calculated throughout teleoperation. This DevData struct is created
+        for each pair of devices being used. 
+    */
     struct DevData {
         vctFixedSizeVector<double, 6> ForceMaster;
         vctFixedSizeVector<double, 6> ForceSlave;
-        vct3 WorkspaceOffset;
-        vct3 ClutchOffset;
-        vct3 LeftClutchOffset;
-        vct3 RightClutchOffset;
-        vct3 LeftClutchMSOffset;
-        vct3 RightClutchMSOffset;
-        vct3 Error;
-        vct3 p1Goal;
-        vct3 p2Goal;
-        vct3 p1RGoal;
-        vct3 p2RGoal;
-       
-        prmForceCartesianSet    firstDeviceForce;
-        prmForceCartesianSet    secondDeviceForce;
-        prmPositionCartesianGet p1;
-        prmPositionCartesianGet p2;
-        prmPositionCartesianGet p1Clutched;
-        prmPositionCartesianGet p2Clutched;
-        prmPositionCartesianGet p1R;
-        prmPositionCartesianGet p2R;
-
-        bool        firstIteration;
-        bool        clutchDone;
-        bool        bothClutched;
-        bool        clutchOffsetAdd;
-        mtsBool     MasterClutch;
-        mtsBool     SlaveClutch;
-        mtsBool     MasterSlaveClutch;
-        mtsInt      clutchMode;
-        mtsInt      ForceMode;
-        mtsDouble   ForceMasterCoefficient;
-        mtsDouble   ScaleFactor;
-        mtsDouble   FMax;
-        double      ForceFeedNormMaster;
-        double      ForceFeedNormSlave;
-        int         MasterDeviceNo;
-        int         SlaveDeviceNo;
+        mtsDouble                     ForceLimit;
+        mtsDouble                     ScaleFactor;
+        mtsDouble                     ForceCoefficient;
+        mtsInt                        ForceMode;
+        mtsBool                       MasterClutchGUI;
+        mtsBool                       SlaveClutchGUI;
+        mtsBool                       MasterSlaveClutchGUI;
+        int                           MasterDeviceNo;
+        int                           SlaveDeviceNo;
     };
 
-    vctDynamicVector<DevData *> DevicesStruct;
-    int                         PairNumber;
+    /*!
+        Vectors of DevData and robCollaborativeControlForce objects.
+    */
+    vctDynamicVector<DevData *> DevicePair;
+    vctDynamicVector<robCollaborativeControlForce *> RobotPair;
+    //std::vector<DevData *> DevicePair;
+    int PairCount;
+    mtsInt PairNumber;
 };
 
 
