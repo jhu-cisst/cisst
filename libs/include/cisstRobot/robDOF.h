@@ -3,8 +3,17 @@
 
 #include <cisstVector/vctTransformationTypes.h>
 #include <cisstVector/vctFixedSizeVectorTypes.h>
-#include <stdint.h>
 #include <iostream>
+
+#ifdef _MSC_VER
+typedef __int32 int32_t;
+typedef unsigned __int32 uint32_t;
+typedef __int64 int64_t;
+typedef unsigned __int64 uint64_t;
+#else
+#include <stdint.h>
+#endif
+
 using namespace std;
 
 typedef double real;

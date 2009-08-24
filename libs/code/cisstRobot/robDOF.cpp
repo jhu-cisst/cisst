@@ -50,14 +50,14 @@ robDOF::robDOF( const Rn& x, const Rn& xd, const Rn& xdd ){
 }
 
 
-bool robDOF::IsTime()        const {return dof & TIME;}
-bool robDOF::IsReal()        const {return dof & REAL;}
-bool robDOF::IsCartesian()   const {return dof & CARTESIAN;}
-bool robDOF::IsTranslation() const {return dof & ( TX | TY | TZ ); }
-bool robDOF::IsRotation()    const {return dof & ( RX | RY | RZ ); }
+bool robDOF::IsTime()        const {return 0 < (dof & TIME);}
+bool robDOF::IsReal()        const {return 0 < (dof & REAL);}
+bool robDOF::IsCartesian()   const {return 0 < (dof & CARTESIAN);}
+bool robDOF::IsTranslation() const {return 0 < (dof & ( TX | TY | TZ )); }
+bool robDOF::IsRotation()    const {return 0 < (dof & ( RX | RY | RZ )); }
 
 uint64_t robDOF::GetDOF( )             const  {  return dof;  }
-bool     robDOF::IsSet( uint64_t dof ) const  {  return (this->dof & dof);  }
+bool     robDOF::IsSet( uint64_t dof ) const  {  return 0 < ((this->dof & dof));  }
 
 size_t robDOF::DOFtoIndex( uint64_t dof ){
   if( dof & ( robDOF::X1 | robDOF::X1D | robDOF::X1DD ) )
