@@ -146,8 +146,8 @@ void devSensableHDMasterSlave::UserControl(void)
         // Call robCollaborativeControlForce Update function, which carries out the 
         // teleoperation process with the given positions and clutches, then returns
         // two forces
-        RobotPair(index)->Update(DevicesVector(pairData->MasterDeviceNo)->PositionCartesian, 
-                                 DevicesVector(pairData->SlaveDeviceNo)->PositionCartesian, 
+        RobotPair(index)->Update(DevicesVector(pairData->MasterDeviceNo)->PositionCartesian.Position().Translation(), 
+                                 DevicesVector(pairData->SlaveDeviceNo)->PositionCartesian.Position().Translation(), 
                                  DevicesVector(pairData->MasterDeviceNo)->Clutch, 
                                  DevicesVector(pairData->SlaveDeviceNo)->Clutch, 
                                  DevicesVector(pairData->MasterDeviceNo)->ForceCartesian.Force(), 
@@ -156,10 +156,10 @@ void devSensableHDMasterSlave::UserControl(void)
         // If the pair has the GUI attached
         if(index == PairNumber) {
             // Update the values through the GUI
-            RobotPair(index)->SetParameters(pairData->ForceLimit, pairData->ScaleFactor, 
-                                            pairData->ForceCoefficient, pairData->ForceMode, 
-                                            pairData->MasterClutchGUI, pairData->SlaveClutchGUI,
-                                            pairData->MasterSlaveClutchGUI);
+            RobotPair(index)->SetParameters(pairData->ForceLimit.Data, pairData->ScaleFactor.Data, 
+                                            pairData->ForceCoefficient.Data, pairData->ForceMode.Data, 
+                                            pairData->MasterClutchGUI.Data, pairData->SlaveClutchGUI.Data,
+                                            pairData->MasterSlaveClutchGUI.Data);
         }
     }
 }

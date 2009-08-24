@@ -23,8 +23,10 @@ http://www.cisst.org/cisst/license.txt.
 #define _robCollaborativeControlForce_h
 
 #include <cisstCommon.h>
-#include <cisstParameterTypes.h>
 #include <cisstVector.h>
+
+//Always include last
+#include <cisstRobot/robExport.h>
 
 class CISST_EXPORT robCollaborativeControlForce {
 
@@ -37,10 +39,10 @@ public:
         These values are currently being used by devicesTutorialExample3 GUI via 
         devSensableHDMasterSlave class.
     */
-    void SetParameters(const mtsDouble & commandedForceLimit, const mtsDouble & commandedScaleFactor, 
-                       const mtsDouble & commandedForceCoefficient, const mtsInt & commandedForceMode, 
-                       const mtsBool & commandedMasterClutchGUI, const mtsBool & commandedSlaveClutchGUI,
-                       const mtsBool & commandedMasterSlaveClutchGUI);
+    void SetParameters(const double & commandedForceLimit, const double & commandedScaleFactor, 
+                       const double & commandedForceCoefficient, const int & commandedForceMode, 
+                       const bool & commandedMasterClutchGUI, const bool & commandedSlaveClutchGUI,
+                       const bool & commandedMasterSlaveClutchGUI);
 
     /*!
         Update function's goal is to carry out position to force control. Two position parameters
@@ -48,8 +50,8 @@ public:
         and the clutch parameters to calculate the desired force values for teleoperation. 
         ** Designed for Phantom Omni teleoperation, has not been tested on other platforms.
     */
-    void Update(const prmPositionCartesianGet & p1, 
-                const prmPositionCartesianGet & p2,
+    void Update(const vct3 & p1, 
+                const vct3 & p2,
                 const bool ClutchMaster,
                 const bool ClutchSlave,
                 vctFixedSizeVector<double, 6> & ForceMaster,
@@ -78,30 +80,25 @@ protected:
     vct3 p2Goal;
     vct3 p1RGoal;
     vct3 p2RGoal;
-   
-    prmForceCartesianSet    firstDeviceForce;
-    prmForceCartesianSet    secondDeviceForce;
-    prmPositionCartesianGet p1;
-    prmPositionCartesianGet p2;
-    prmPositionCartesianGet p1Clutched;
-    prmPositionCartesianGet p2Clutched;
-    prmPositionCartesianGet p1R;
-    prmPositionCartesianGet p2R;
-    prmPositionCartesianGet p1Last;
-    prmPositionCartesianGet p2Last;
-
+    vct3 p1Clutched;
+    vct3 p2Clutched;
+    vct3 p1R;
+    vct3 p2R;
+    vct3 p1Last;
+    vct3 p2Last;
+    
     bool        firstIteration;
     bool        clutchDone;
     bool        bothClutched;
     bool        clutchOffsetAdd;
-    mtsBool     MasterClutch;
-    mtsBool     SlaveClutch;
-    mtsBool     MasterSlaveClutch;
-    mtsInt      clutchMode;
-    mtsInt      ForceMode;
-    mtsDouble   ForceMasterCoefficient;
-    mtsDouble   ScaleFactor;
-    mtsDouble   FMax;
+    bool     MasterClutch;
+    bool     SlaveClutch;
+    bool     MasterSlaveClutch;
+    int      clutchMode;
+    int      ForceMode;
+    double   ForceMasterCoefficient;
+    double   ScaleFactor;
+    double   FMax;
     double      ForceFeedNormMaster;
     double      ForceFeedNormSlave;
     int         MasterDeviceNo;

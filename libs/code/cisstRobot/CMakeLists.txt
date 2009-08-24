@@ -18,7 +18,6 @@ SET(LIBRARY cisstRobot)
 SET(DEPENDENCIES
     cisstCommon
     cisstVector
-	cisstParameterTypes
     )
 
 # all source files
@@ -52,6 +51,7 @@ SET(HEADER_FILES
 	robSLERP.h
 	robTrajectory.h
 	robCollaborativeControlForce.h
+	robExport.h
     )
 
 CISST_ADD_LIBRARY_TO_PROJECT(cisstLibs)

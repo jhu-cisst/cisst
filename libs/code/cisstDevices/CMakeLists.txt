@@ -30,6 +30,7 @@ set(DEPENDENCIES
     cisstOSAbstraction
     cisstMultiTask
     cisstParameterTypes
+	cisstRobot
     )
 
 set(HEADER_FILES
