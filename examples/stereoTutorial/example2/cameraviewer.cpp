@@ -81,6 +81,94 @@ private:
 };
 #endif // CISST_SVL_HAS_ZLIB
 
+
+////////////////////////
+//     FPS filter     //
+////////////////////////
+
+class CFPSFilter : public svlFilterBase
+{
+public:
+    CFPSFilter() :
+        svlFilterBase(),
+        Manager(0),
+        ShowFramerate(true)
+
+    {
+        AddSupportedType(svlTypeImageRGB, svlTypeImageRGB);
+    }
+
+protected:
+    int Initialize(svlSample* inputdata)
+    {
+        OutputData = inputdata;
+        return SVL_OK;
+    }
+
+    int ProcessFrame(ProcInfo* procInfo, svlSample* CMN_UNUSED(inputdata) = 0)
+    {
+        if (!ShowFramerate) return SVL_OK;
+
+        _OnSingleThread(procInfo) {
+            unsigned int framecount = GetFrameCounter();
+            if ((framecount % 30) == 0) {
+#ifdef _WIN32
+                DWORD now;
+                now = ::GetTickCount();
+
+                if (framecount > 0) {
+                    DWORD msec = now - StartMSec;
+                    printf("\rFrame #: %07d; %02.2f fps (Buffer: %.0f%%, Dropped: %d)     ",
+                           framecount,
+                           (double)30000 / msec,
+                           Manager->Branch("Recorder").GetBufferUsageRatio() * 100.0,
+                           Manager->Branch("Recorder").GetDroppedSampleCount());
+                }
+
+                StartMSec = now;
+#endif // _WIN32
+
+#ifdef __GNUC__
+                timeval now;
+                gettimeofday(&now, 0);
+
+                if (framecount > 0) {
+                    int sec = now.tv_sec - StartSec;
+                    int usec = now.tv_usec - StartUSec;
+                    usec += 1000000 * sec;
+                    printf("\rFrame #: %07d; %02.2f fps (Buffer: %.0f%%, Dropped: %d)     ",
+                           framecount,
+                           (double)30000000 / usec,
+                           Manager->Branch("Recorder").GetBufferUsageRatio() * 100.0,
+                           Manager->Branch("Recorder").GetDroppedSampleCount());
+                    fflush(stdout);
+                }
+
+                StartSec = now.tv_sec;
+                StartUSec = now.tv_usec;
+#endif // __GNUC__
+            }
+        }
+
+        return SVL_OK;
+    }
+
+public:
+    svlStreamManager* Manager;
+    bool ShowFramerate;
+    bool Recording;
+
+private:
+#ifdef _WIN32
+    DWORD StartMSec;
+#endif // _WIN32
+#ifdef __GNUC__
+    unsigned int StartSec;
+    unsigned int StartUSec;
+#endif // __GNUC__
+};
+
+
 ///////////////////////////////////
 //     Window callback class     //
 ///////////////////////////////////
@@ -93,44 +181,9 @@ public:
 #if (CISST_SVL_HAS_ZLIB == ON)
         IconDrawerFilter = 0;
         RecorderFilter = 0;
+        Manager = 0;
         Recording = false;
 #endif // CISST_SVL_HAS_ZLIB
-        ShowFramerate = true;
-    }
-
-    void OnNewFrame(unsigned int frameid)
-    {
-        if (ShowFramerate) {
-            if ((frameid % 30) == 0) {
-#ifdef _WIN32
-                DWORD now;
-                now = ::GetTickCount();
-
-                if (frameid > 0) {
-                    DWORD msec = now - StartMSec;
-                    printf("\rFrame #: %07d; %02.2f frames per second  ", frameid, (double)30000 / msec);
-                }
-
-                StartMSec = now;
-#endif // _WIN32
-
-#ifdef __GNUC__
-                timeval now;
-                gettimeofday(&now, 0);
-
-                if (frameid > 0) {
-                    int sec = now.tv_sec - StartSec;
-                    int usec = now.tv_usec - StartUSec;
-                    usec += 1000000 * sec;
-                    printf("\rFrame #: %07d; %02.2f frames per second  ", frameid, (double)30000000 / usec);
-                    fflush(stdout);
-                }
-
-                StartSec = now.tv_sec;
-                StartUSec = now.tv_usec;
-#endif // __GNUC__
-            }
-        }
     }
 
 #if (CISST_SVL_HAS_ZLIB == ON)
@@ -143,11 +196,13 @@ public:
                     if (RecorderFilter && IconDrawerFilter) {
                         if (Recording) {
                             ((svlFilterVideoFileWriter*)RecorderFilter)->Pause();
+                            Manager->Branch("Recorder").BlockInput(true);
                             IconDrawerFilter->Pause();
                             Recording = false;
                             cout << endl << " >>> Recording paused <<<" << endl;
                         }
                         else {
+                            Manager->Branch("Recorder").BlockInput(false);
                             ((svlFilterVideoFileWriter*)RecorderFilter)->Record(-1);
                             IconDrawerFilter->Record();
                             Recording = true;
@@ -164,19 +219,11 @@ public:
 #endif // CISST_SVL_HAS_ZLIB
 
 #if (CISST_SVL_HAS_ZLIB == ON)
+    svlStreamManager* Manager;
     CViewerIconDrawerCallback* IconDrawerFilter;
     svlFilterBase* RecorderFilter;
     bool Recording;
 #endif // CISST_SVL_HAS_ZLIB
-
-    bool ShowFramerate;
-#ifdef _WIN32
-    DWORD StartMSec;
-#endif // _WIN32
-#ifdef __GNUC__
-    unsigned int StartSec;
-    unsigned int StartUSec;
-#endif // __GNUC__
 };
 
 
@@ -201,6 +248,7 @@ int CameraViewer(bool interpolation, bool save, int width, int height)
     CViewerIconDrawerCallback viewer_icondrawer_cb;
     svlFilterVideoFileWriter viewer_writer;
 #endif // CISST_SVL_HAS_ZLIB
+    CFPSFilter viewer_fps;
 
     // setup source
     // Delete "device.dat" to reinitialize input device
@@ -222,7 +270,7 @@ int CameraViewer(bool interpolation, bool save, int width, int height)
     // setup writer
     if (save == true) {
         viewer_writer.DialogFilePath();
-        viewer_writer.SetCompressionLevel(1); // 0-9
+        viewer_writer.SetCompressionLevel(9); // 0-9
         viewer_writer.Pause();
     }
 #endif // CISST_SVL_HAS_ZLIB
@@ -238,6 +286,8 @@ int CameraViewer(bool interpolation, bool save, int width, int height)
     if (save == true) {
         viewer_window_cb.IconDrawerFilter = &viewer_icondrawer_cb;
         viewer_window_cb.RecorderFilter = &viewer_writer;
+        viewer_window_cb.Manager = &viewer_stream;
+        viewer_fps.Manager = &viewer_stream;
     }
 #endif // CISST_SVL_HAS_ZLIB
     viewer_window.SetCallback(&viewer_window_cb);
@@ -246,11 +296,6 @@ int CameraViewer(bool interpolation, bool save, int width, int height)
 
     // chain filters to pipeline
     if (viewer_stream.Trunk().Append(&viewer_source) != SVL_OK) goto labError;
-#if (CISST_SVL_HAS_ZLIB == ON)
-    if (save == true) {
-        if (viewer_stream.Trunk().Append(&viewer_writer) != SVL_OK) goto labError;
-    }
-#endif // CISST_SVL_HAS_ZLIB
     if (width > 0 && height > 0) {
         if (viewer_stream.Trunk().Append(&viewer_resizer) != SVL_OK) goto labError;
     }
@@ -260,6 +305,15 @@ int CameraViewer(bool interpolation, bool save, int width, int height)
     }
 #endif // CISST_SVL_HAS_ZLIB
     if (viewer_stream.Trunk().Append(&viewer_window) != SVL_OK) goto labError;
+    if (viewer_stream.Trunk().Append(&viewer_fps) != SVL_OK) goto labError;
+
+    // but the recorder on a branch in order to enable buffering
+    viewer_stream.CreateBranchAfterFilter(&viewer_source, "Recorder", 200); // Buffer size in frames
+#if (CISST_SVL_HAS_ZLIB == ON)
+    if (save == true) {
+        if (viewer_stream.Branch("Recorder").Append(&viewer_writer) != SVL_OK) goto labError;
+    }
+#endif // CISST_SVL_HAS_ZLIB
 
     cerr << endl << "Starting stream... ";
 
@@ -288,11 +342,11 @@ int CameraViewer(bool interpolation, bool save, int width, int height)
         switch (ch) {
             case 'i':
                 // Adjust image properties
-                viewer_window_cb.ShowFramerate = false;
+                viewer_fps.ShowFramerate = false;
                 cerr << endl << endl;
                 viewer_source.DialogImageProperties();
                 cerr << endl;
-                viewer_window_cb.ShowFramerate = true;
+                viewer_fps.ShowFramerate = true;
             break;
 
             default:

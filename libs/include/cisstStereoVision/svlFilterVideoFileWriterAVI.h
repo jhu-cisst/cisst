@@ -45,18 +45,25 @@ public:
     int SetFramerate(double fps);
     int SetKeyFrameInteval(unsigned int interval);
 
-    void Pause() { CaptureLength = 0; }
-    void Record(int frames = -1) { CaptureLength = frames; }
+    void Pause();
+    void Record(int frames = -1);
 
     int SaveCodecSettings(const std::string filepath);
     int LoadCodecSettings(const std::string filepath);
 
 protected:
     virtual int Initialize(svlSample* inputdata);
+    virtual int OnStart(unsigned int procCount);
     virtual int ProcessFrame(ProcInfo* procInfo, svlSample* inputdata);
     virtual int Release();
 
 private:
+    bool Action;
+    double ActionTime;
+    double TargetActionTime;
+    osaTimeServer* TimeServer;
+    unsigned int TargetCaptureLength;
+
     unsigned int VideoFrameCounter;
     unsigned int CaptureLength;
     double Framerate;

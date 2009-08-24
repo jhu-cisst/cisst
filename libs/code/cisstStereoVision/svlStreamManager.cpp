@@ -98,12 +98,12 @@ svlStreamEntity& svlStreamManager::Branch(const std::string & name)
     return *(iterbranch->first->entity);
 }
 
-svlStreamEntity* svlStreamManager::CreateBranchAfterFilter(svlFilterBase* filter)
+svlStreamEntity* svlStreamManager::CreateBranchAfterFilter(svlFilterBase* filter, unsigned int buffersize)
 {
-    return CreateBranchAfterFilter(filter, "");
+    return CreateBranchAfterFilter(filter, "", buffersize);
 }
 
-svlStreamEntity* svlStreamManager::CreateBranchAfterFilter(svlFilterBase* filter, const std::string & name)
+svlStreamEntity* svlStreamManager::CreateBranchAfterFilter(svlFilterBase* filter, const std::string & name, unsigned int buffersize)
 {
     if (Initialized ||
         GetBranchEntityOfFilter(filter) == 0 ||
@@ -116,12 +116,13 @@ svlStreamEntity* svlStreamManager::CreateBranchAfterFilter(svlFilterBase* filter
     _BranchStruct *branch = new _BranchStruct;
     branch->entity = &(branchstream->Entity);
     branch->name = name;
+    branch->buffersize = buffersize;
     // Add branch to the filter's branch list
     filter->OutputBranches.push_back(&(branchstream->Entity));
     // Add branch and the corresponding stream to branch map
     Branches[branch] = branchstream;
     // Create branch stream source
-    svlStreamBranchSource* branchsource = new svlStreamBranchSource(filter->GetOutputType());
+    svlStreamBranchSource* branchsource = new svlStreamBranchSource(filter->GetOutputType(), buffersize);
     // Add branch source to branch stream
     branchstream->AddSourceFilter(branchsource);
 
@@ -442,7 +443,6 @@ int svlStreamManager::Initialize()
         // Setup input sample
         branchstream = (*iterbranchlist)->Stream;
         dynamic_cast<svlStreamBranchSource*>(branchstream->StreamSource)->SetInputSample(source->OutputData);
-        branchstream->StreamSource->SetTargetFrequency(100.0);
         // Initialize branch stream
         err = branchstream->Initialize();
         if (err != SVL_OK) {
@@ -476,7 +476,6 @@ int svlStreamManager::Initialize()
             // Setup input sample
             branchstream = (*iterbranchlist)->Stream;
             dynamic_cast<svlStreamBranchSource*>(branchstream->StreamSource)->SetInputSample(filter->OutputData);
-            branchstream->StreamSource->SetTargetFrequency(100.0);
             // Initialize branch stream
             err = branchstream->Initialize();
             if (err != SVL_OK) {
@@ -864,6 +863,34 @@ int svlStreamEntity::Append(svlFilterBase* filter)
 {
     if (Stream == 0 || filter == 0) return SVL_FAIL;
     return Stream->AppendFilterToTrunk(filter);
+}
+
+int svlStreamEntity::GetDroppedSampleCount()
+{
+    svlStreamBranchSource* branchsource = dynamic_cast<svlStreamBranchSource*>(Stream->StreamSource);
+    if (branchsource) return static_cast<int>(branchsource->GetDroppedSampleCount());
+    return SVL_FAIL;
+}
+
+int svlStreamEntity::GetBufferUsage()
+{
+    svlStreamBranchSource* branchsource = dynamic_cast<svlStreamBranchSource*>(Stream->StreamSource);
+    if (branchsource) return branchsource->GetBufferUsage();
+    return SVL_FAIL;
+}
+
+double svlStreamEntity::GetBufferUsageRatio()
+{
+    svlStreamBranchSource* branchsource = dynamic_cast<svlStreamBranchSource*>(Stream->StreamSource);
+    if (branchsource) return branchsource->GetBufferUsageRatio();
+    return -1.0;
+}
+
+int svlStreamEntity::BlockInput(bool block)
+{
+    svlStreamBranchSource* branchsource = dynamic_cast<svlStreamBranchSource*>(Stream->StreamSource);
+    if (branchsource) return branchsource->BlockInput(block);
+    return SVL_FAIL;
 }
 
 

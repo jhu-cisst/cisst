@@ -37,17 +37,23 @@ http://www.cisst.org/cisst/license.txt.
 svlFilterVideoFileWriter::svlFilterVideoFileWriter() :
     svlFilterBase(),
     CaptureLength(-1), // Continuous saving by default
+    Action(false),
+    ActionTime(0.0),
     CompressionLevel(1)
 {
     AddSupportedType(svlTypeImageRGB, svlTypeImageRGB);
     AddSupportedType(svlTypeImageRGBStereo, svlTypeImageRGBStereo);
 
     SaveBuffer[0] = SaveBuffer[1] = 0;
+
+    TimeServer = new osaTimeServer;
+    TimeServer->SetTimeOrigin();
 }
 
 svlFilterVideoFileWriter::~svlFilterVideoFileWriter()
 {
     Release();
+    delete TimeServer;
 }
 
 int svlFilterVideoFileWriter::Initialize(svlSample* inputdata)
@@ -140,6 +146,10 @@ int svlFilterVideoFileWriter::OnStart(unsigned int procCount)
         }
     }
 
+    CaptureLength = TargetCaptureLength;
+    ActionTime = TargetActionTime;
+    Action = false;
+
     return SVL_OK;
 }
 
@@ -148,8 +158,23 @@ int svlFilterVideoFileWriter::ProcessFrame(ProcInfo* procInfo, svlSample* inputd
     // Passing the same image for the next filter
     OutputData = inputdata;
 
-    // Do nothing if recording is paused
-    if (CaptureLength == 0) return SVL_OK;
+    _OnSingleThread(procInfo) {
+        if (Action) {
+            CaptureLength = TargetCaptureLength;
+            ActionTime = TargetActionTime;
+            Action = false;
+        }
+    }
+    _SynchronizeThreads(procInfo);
+
+    if (CaptureLength == 0) {
+        if (ActionTime < inputdata->GetTimestamp()) return SVL_OK;
+        // Process remaining samples in the buffer when paused
+    }
+    else {
+        // Drop frames when restarted
+        if (ActionTime > inputdata->GetTimestamp()) return SVL_OK;
+    }
 
     // Check for video saving errors
     if (SaveThreadError) return SVL_FAIL;
@@ -367,6 +392,28 @@ int svlFilterVideoFileWriter::SetFilePath(const std::string filepath, unsigned i
 void svlFilterVideoFileWriter::SetCompressionLevel(unsigned int level)
 {
     CompressionLevel = std::min(level, 9u);
+}
+
+void svlFilterVideoFileWriter::Pause()
+{
+    // Get current absolute time
+    osaAbsoluteTime abstime;
+    TimeServer->RelativeToAbsolute(TimeServer->GetRelativeTime(), abstime);
+    TargetActionTime = abstime.sec + abstime.nsec / 1000000000.0;
+
+    TargetCaptureLength = 0;
+    Action = true;
+}
+
+void svlFilterVideoFileWriter::Record(int frames)
+{
+    // Get current absolute time
+    osaAbsoluteTime abstime;
+    TimeServer->RelativeToAbsolute(TimeServer->GetRelativeTime(), abstime);
+    TargetActionTime = abstime.sec + abstime.nsec / 1000000000.0;
+
+    TargetCaptureLength = frames;
+    Action = true;
 }
 
 int svlFilterVideoFileWriter::UpdateStreamCount(unsigned int count)

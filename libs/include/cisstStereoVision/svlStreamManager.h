@@ -94,6 +94,11 @@ friend class svlStreamControlMultiThread;
 public:
     int Append(svlFilterBase* filter);
 
+    int GetDroppedSampleCount();
+    int GetBufferUsage();
+    double GetBufferUsageRatio();
+    int BlockInput(bool block);
+
 private:
     svlStreamEntity();
     svlStreamEntity(svlStreamEntity const &) {};
@@ -222,6 +227,7 @@ friend class svlStreamControlMultiThread;
     typedef struct tagBranchStruct {
         svlStreamEntity* entity;
         std::string name;
+        unsigned int buffersize;
     } _BranchStruct;
     typedef std::map<_BranchStruct*, svlStreamManager*> _BranchMap;
     typedef std::vector<svlFilterBase*> _FilterList;
@@ -233,8 +239,8 @@ public:
 
     svlStreamEntity& Trunk();
     svlStreamEntity& Branch(const std::string & name);
-    svlStreamEntity* CreateBranchAfterFilter(svlFilterBase* filter);
-    svlStreamEntity* CreateBranchAfterFilter(svlFilterBase* filter, const std::string & name);
+    svlStreamEntity* CreateBranchAfterFilter(svlFilterBase* filter, unsigned int buffersize = 3);
+    svlStreamEntity* CreateBranchAfterFilter(svlFilterBase* filter, const std::string & name, unsigned int buffersize = 3);
     int RemoveBranch(svlStreamEntity* entity);
     int RemoveBranch(const std::string & name);
     int RemoveFilter(svlFilterBase* filter);

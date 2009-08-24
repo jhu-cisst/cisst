@@ -42,8 +42,8 @@ public:
     int SetFilePath(const std::string filepath, unsigned int videoch = SVL_LEFT);
     void SetCompressionLevel(unsigned int level); // 0 (no compression) - 9 (maximum compression)
 
-    void Pause() { CaptureLength = 0; }
-    void Record(int frames = -1) { CaptureLength = frames; }
+    void Pause();
+    void Record(int frames = -1);
 
 protected:
     virtual int Initialize(svlSample* inputdata);
@@ -57,6 +57,12 @@ private:
     vctDynamicVector<FILE*> VideoFile;
     vctDynamicVector<bool> Disabled;
     vctDynamicVector<std::string> FilePath;
+
+    bool Action;
+    double ActionTime;
+    double TargetActionTime;
+    osaTimeServer* TimeServer;
+    unsigned int TargetCaptureLength;
 
     unsigned int CompressionLevel;
     vctDynamicVector<unsigned char*> YUVBuffer;

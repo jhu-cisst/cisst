@@ -28,7 +28,6 @@ http://www.cisst.org/cisst/license.txt.
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
 
-#define SMPSRC_BUFFERS          2
 
 class CISST_EXPORT svlStreamBranchSource : public svlFilterSourceBase
 {
@@ -36,12 +35,7 @@ friend class svlStreamManager;
 friend class svlStreamControlMultiThread;
 
 private:
-    int NextFreeBufferPos;
-    svlSample* DataBuffer[SMPSRC_BUFFERS];
-    osaThreadSignal NewFrameEvent;
-
-private:
-    svlStreamBranchSource(svlStreamType type);
+    svlStreamBranchSource(svlStreamType type, unsigned int buffersize);
     svlStreamBranchSource();
     ~svlStreamBranchSource();
 
@@ -52,6 +46,25 @@ private:
     void SetInputSample(svlSample* inputdata);
     void PushSample(svlSample* inputdata);
     int PullSample();
+
+    bool InputBlocked;
+    const int BufferSize;
+    unsigned int DroppedSamples;
+    vctDynamicVector<int> BackwardPos;
+    vctDynamicVector<int> ForwardPos;
+    int LockedPos;
+    int OldestPos;
+    int NewestPos;
+    int BufferUsage;
+    vctDynamicVector<svlSample*> SampleBuffer;
+    osaCriticalSection CS;
+    osaThreadSignal NewFrameEvent;
+
+public:
+    int GetBufferUsage();
+    double GetBufferUsageRatio();
+    unsigned int GetDroppedSampleCount();
+    int BlockInput(bool block);
 };
 
 #endif // _svlStreamBranchSource_h

@@ -34,6 +34,8 @@ static int VFW_OleInitCounter = 0;
 
 svlFilterVideoFileWriterAVI::svlFilterVideoFileWriterAVI() :
     svlFilterBase(),
+    Action(false),
+    ActionTime(0.0),
     CaptureLength(-1), // Continuous saving by default
     Framerate(30.0),
     KeyFrames(30),
@@ -46,6 +48,9 @@ svlFilterVideoFileWriterAVI::svlFilterVideoFileWriterAVI() :
         CoInitialize(0);
         VFW_OleInitCounter = 1;
     }
+
+    TimeServer = new osaTimeServer;
+    TimeServer->SetTimeOrigin();
 }
 
 svlFilterVideoFileWriterAVI::~svlFilterVideoFileWriterAVI()
@@ -57,6 +62,8 @@ svlFilterVideoFileWriterAVI::~svlFilterVideoFileWriterAVI()
         VFW_OleInitCounter = 0;
     }
     if (CompressOptions) delete reinterpret_cast<AVICOMPRESSOPTIONS*>(CompressOptions);
+
+    delete TimeServer;
 }
 
 int svlFilterVideoFileWriterAVI::Initialize(svlSample* inputdata)
@@ -94,13 +101,37 @@ labError:
     return SVL_FAIL;
 }
 
+int svlFilterVideoFileWriterAVI::OnStart(unsigned int procCount)
+{
+    CaptureLength = TargetCaptureLength;
+    ActionTime = TargetActionTime;
+    Action = false;
+
+    return SVL_OK;
+}
+
 int svlFilterVideoFileWriterAVI::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata)
 {
     // Passing the same image for the next filter
     OutputData = inputdata;
 
-    // Do nothing if recording is paused
-    if (CaptureLength == 0) return SVL_OK;
+    _OnSingleThread(procInfo) {
+        if (Action) {
+            CaptureLength = TargetCaptureLength;
+            ActionTime = TargetActionTime;
+            Action = false;
+        }
+    }
+    _SynchronizeThreads(procInfo);
+
+    if (CaptureLength == 0) {
+        if (ActionTime < inputdata->GetTimestamp()) return SVL_OK;
+        // Process remaining samples in the buffer when paused
+    }
+    else {
+        // Drop frames when restarted
+        if (ActionTime > inputdata->GetTimestamp()) return SVL_OK;
+    }
 
     svlSampleImageBase* img = dynamic_cast<svlSampleImageBase*>(OutputData);
     unsigned int videochannels = img->GetVideoChannels();
@@ -233,6 +264,28 @@ int svlFilterVideoFileWriterAVI::SetKeyFrameInteval(unsigned int interval)
     KeyFrames = interval;
 
     return SVL_OK;
+}
+
+void svlFilterVideoFileWriterAVI::Pause()
+{
+    // Get current absolute time
+    osaAbsoluteTime abstime;
+    TimeServer->RelativeToAbsolute(TimeServer->GetRelativeTime(), abstime);
+    TargetActionTime = abstime.sec + abstime.nsec / 1000000000.0;
+
+    TargetCaptureLength = 0;
+    Action = true;
+}
+
+void svlFilterVideoFileWriterAVI::Record(int frames)
+{
+    // Get current absolute time
+    osaAbsoluteTime abstime;
+    TimeServer->RelativeToAbsolute(TimeServer->GetRelativeTime(), abstime);
+    TargetActionTime = abstime.sec + abstime.nsec / 1000000000.0;
+
+    TargetCaptureLength = frames;
+    Action = true;
 }
 
 int svlFilterVideoFileWriterAVI::SaveCodecSettings(const std::string filepath)

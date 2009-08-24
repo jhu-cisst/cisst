@@ -42,22 +42,42 @@ using namespace std;
 /*** svlStreamBranchSource class *****/
 /*************************************/
 
-svlStreamBranchSource::svlStreamBranchSource(svlStreamType type) :
+svlStreamBranchSource::svlStreamBranchSource(svlStreamType type, unsigned int buffersize) :
     svlFilterSourceBase(false), // manual timestamp management
-    NextFreeBufferPos(0)
+    InputBlocked(false),
+    BufferSize(std::max(3, static_cast<int>(buffersize))), // buffer size is greater or equal to 3
+    DroppedSamples(0),
+    BufferUsage(0)
 {
-    unsigned int i;
-
-    OutputData = 0;
-    for (i = 0; i < SMPSRC_BUFFERS; i ++) DataBuffer[i] = 0;
-
     AddSupportedType(type);
-    for (i = 0; i < SMPSRC_BUFFERS; i ++) {
-        DataBuffer[i] = svlSample::GetNewFromType(type);
+
+    SampleBuffer.SetSize(BufferSize);
+    SampleBuffer.SetAll(0);
+    BackwardPos.SetSize(BufferSize);
+    ForwardPos.SetSize(BufferSize);
+
+    int i;
+
+    // Create samples in the buffer
+    for (i = 0; i < BufferSize; i ++) {
+        SampleBuffer[i] = svlSample::GetNewFromType(type);
     }
+
+    // Initialize chained list of samples
+    for (i = 2; i < BufferSize; i ++) {
+        BackwardPos[i] = i - 1;
+        ForwardPos[i - 1] = i;
+    }
+    BackwardPos[1] = BufferSize - 1;
+    ForwardPos[BufferSize - 1] = 1;
+    NewestPos = 1;
+    OldestPos = -1;
+    LockedPos = -1;
 }
 
-svlStreamBranchSource::svlStreamBranchSource() : svlFilterSourceBase()
+svlStreamBranchSource::svlStreamBranchSource() :
+    svlFilterSourceBase(),
+    BufferSize(0)
 {
     // Never should be called called
 }
@@ -66,8 +86,8 @@ svlStreamBranchSource::~svlStreamBranchSource()
 {
     Release();
 
-    for (unsigned int i = 0; i < SMPSRC_BUFFERS; i ++) {
-        if (DataBuffer[i]) delete DataBuffer[i];
+    for (int i = 0; i < BufferSize; i ++) {
+        if (SampleBuffer[i]) delete SampleBuffer[i];
     }
 }
 
@@ -75,9 +95,8 @@ int svlStreamBranchSource::Initialize()
 {
     Release();
 
-    int readypos = NextFreeBufferPos + 1;
-    if (readypos >= SMPSRC_BUFFERS) readypos = 0;
-    OutputData = DataBuffer[readypos];
+    // Pass unused but initialized sample downstream
+    OutputData = SampleBuffer[0];
 
     return SVL_OK;
 }
@@ -88,9 +107,6 @@ int svlStreamBranchSource::ProcessFrame(ProcInfo* procInfo)
 
     _OnSingleThread(procInfo)
     {
-        // Try to keep TargetFrequency
-        WaitForTargetTimer();
-
         ret = PullSample();
     }
 
@@ -123,41 +139,93 @@ bool svlStreamBranchSource::IsTypeSupported(svlStreamType type)
 
 void svlStreamBranchSource::SetInputSample(svlSample* inputdata)
 {
-    for (unsigned int i = 0; i < SMPSRC_BUFFERS; i ++) {
-        dynamic_cast<svlSampleImageBase*>(DataBuffer[i])->SetSize(*(dynamic_cast<svlSampleImageBase*>(inputdata)));
+    for (int i = 0; i < BufferSize; i ++) {
+        dynamic_cast<svlSampleImageBase*>(SampleBuffer[i])->SetSize(*(dynamic_cast<svlSampleImageBase*>(inputdata)));
     }
 }
 
 void svlStreamBranchSource::PushSample(svlSample* inputdata)
 {
-    int freepos = NextFreeBufferPos;
+    if (InputBlocked) return;
 
-    svlSampleImageBase* outputbuffer = dynamic_cast<svlSampleImageBase*>(DataBuffer[freepos]);
-    unsigned int vidchannels = outputbuffer->GetVideoChannels();
+    svlSampleImageBase* outputbuffer = dynamic_cast<svlSampleImageBase*>(SampleBuffer[NewestPos]);
+    const unsigned int vidchannels = outputbuffer->GetVideoChannels();
 
-    // TODO: tripple buffering
+    // Passing time stamp
+    outputbuffer->SetTimestamp(inputdata->GetTimestamp());
+
     for (unsigned int i = 0; i < vidchannels; i ++) {
         memcpy(outputbuffer->GetUCharPointer(i), dynamic_cast<svlSampleImageBase*>(inputdata)->GetUCharPointer(i), outputbuffer->GetDataSize(i));
     }
-    // TODO: tripple buffering
 
-    freepos ++;
-    if (freepos >= SMPSRC_BUFFERS) freepos = 0;
-    NextFreeBufferPos = freepos;
+    CS.Enter();
+        NewestPos = ForwardPos[NewestPos];
+        if (NewestPos != OldestPos) {
+            BufferUsage ++;
+        }
+        else {
+            OldestPos = ForwardPos[NewestPos];
+            DroppedSamples ++;
+        }
+    CS.Leave();
 
     NewFrameEvent.Raise();
 }
 
 int svlStreamBranchSource::PullSample()
 {
-    while (!NewFrameEvent.Wait(1.0)) {
-        if (IsRunning() == false) break;
+    // Make sure a new frame has arrived since the last call
+    if (BufferUsage <= 1) {
+        while (!NewFrameEvent.Wait(1.0)) {
+            if (IsRunning() == false) return SVL_OK;
+        }
     }
 
-    int readypos = NextFreeBufferPos + 1;
-    if (readypos >= SMPSRC_BUFFERS) readypos = 0;
-    OutputData = DataBuffer[readypos];
+    CS.Enter();
+        if (LockedPos >= 0) {
+            ForwardPos[LockedPos] = ForwardPos[OldestPos];
+            BackwardPos[LockedPos] = BackwardPos[OldestPos];
+            ForwardPos[BackwardPos[OldestPos]] = LockedPos;
+            BackwardPos[ForwardPos[OldestPos]] = LockedPos;
+
+            LockedPos = OldestPos;
+            OldestPos = ForwardPos[OldestPos];
+
+            BufferUsage --;
+        }
+        else {
+            // At start: wait for one more pushed frame
+            LockedPos = 0;
+            OldestPos = 1;
+            BufferUsage --;
+
+            CS.Leave();
+            return PullSample();
+        }
+    CS.Leave();
+
+    OutputData = SampleBuffer[LockedPos];
 
     return SVL_OK;
 }
 
+int svlStreamBranchSource::GetBufferUsage()
+{
+    return BufferUsage;
+}
+
+double svlStreamBranchSource::GetBufferUsageRatio()
+{
+    return static_cast<double>(BufferUsage) / (BufferSize - 1);
+}
+
+unsigned int svlStreamBranchSource::GetDroppedSampleCount()
+{
+    return DroppedSamples;
+}
+
+int svlStreamBranchSource::BlockInput(bool block)
+{
+    InputBlocked = block;
+    return SVL_OK;
+}
