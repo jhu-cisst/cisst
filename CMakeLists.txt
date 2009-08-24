@@ -200,6 +200,7 @@ SET(CISST_LIBS_UNSTABLE
     cisstImage
     cisstStereoVision
     cisst3DUserInterface
+    cisstRobot
     )
 
 SET(CISST_LIBS
