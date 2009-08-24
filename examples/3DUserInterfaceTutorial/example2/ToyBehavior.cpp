@@ -34,11 +34,11 @@ http://www.cisst.org/cisst/license.txt.
 #include <vtkSphereSource.h>
 #include <vtkOutlineSource.h>
 
-class ToyBehaviorVisibleObject: public ui3VisibleObject
+class ToyBehaviorSphere: public ui3VisibleObject
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
     public:
-    inline ToyBehaviorVisibleObject(vctFrm3 position, const std::string & name = "sphere"):
+    inline ToyBehaviorSphere(vctFrm3 position, const std::string & name = "sphere"):
         ui3VisibleObject(name),
         SphereSource(0),
         SphereMapper(0),
@@ -77,8 +77,8 @@ class ToyBehaviorVisibleObject: public ui3VisibleObject
 };
 
 
-CMN_DECLARE_SERVICES_INSTANTIATION(ToyBehaviorVisibleObject);
-CMN_IMPLEMENT_SERVICES(ToyBehaviorVisibleObject);
+CMN_DECLARE_SERVICES_INSTANTIATION(ToyBehaviorSphere);
+CMN_IMPLEMENT_SERVICES(ToyBehaviorSphere);
 
 class Widget: public ui3VisibleObject
 {
@@ -352,7 +352,7 @@ void ToyBehavior::PrimaryMasterButtonCallback(const prmEventButton & event)
 
 void ToyBehavior::AddSphereCallback(void)
 {
-    
+	ToyBehaviorSphere * newSphere = new ToyBehaviorSphere("sphere");
 }
 
 void ToyBehavior::AddCubeCallback(void)

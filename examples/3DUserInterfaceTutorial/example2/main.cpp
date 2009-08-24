@@ -154,9 +154,9 @@ int main()
     // add guiManager as a filter to the pipeline, so it will receive video frames
     // "StereoVideo" is defined in the UI Manager as a possible video interface
     
- //   vidUltrasoundStream.Trunk().Append(behavior3.GetStreamSamplerFilter("USVideo"));
+    vidUltrasoundStream.Trunk().Append(behavior3.GetStreamSamplerFilter("USVideo"));
 
-/*
+
     // add debug window
     svlFilterImageWindow vidUltrasoundWindow;
     vidUltrasoundStream.Trunk().Append(&vidUltrasoundWindow);
@@ -166,7 +166,7 @@ int main()
     vidUltrasoundWriter.SetFilePath("usimage", "bmp");
     vidUltrasoundWriter.Record(1);
     vidUltrasoundStream.Trunk().Append(&vidUltrasoundWriter);
-*/
+
     vidUltrasoundStream.Initialize();
 
 ////////////////////////////////////////////////////////////////

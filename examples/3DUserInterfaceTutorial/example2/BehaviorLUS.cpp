@@ -779,38 +779,6 @@ void BehaviorLUS::Startup(void)
 
     MarkerCount = 0;
     
-    //=====================================
-    //repeated below
-    
-    this->Slave1->GetCartesianPosition(this->Slave1Position);
-    
-    //rotate the image plane such that it lines up with the probe
-    vctDouble3 Xaxis;
-    Xaxis.Assign(1.0,0.0,0.0);
-    vctDouble3 Yaxis;
-    Yaxis.Assign(0.0,1.0,0.0);
-    vctAxAnRot3 imageRot(Yaxis, cmnPI_2);
-    vctFrm3 planePosition;
-    planePosition.Rotation() = vctMatRot3(imageRot);
-    planePosition.Translation() = vctDouble3(0.0, 0.0, 16.0); //===============================================================================
-    ImagePlane->WaitForCreation();
-    ImagePlane->SetTransformation(planePosition);
-
-    //Set the position of the backgrounds and text in scene space
-    this->Outline->WaitForCreation();
-    this->Outline->SetPosition(vctDouble3(8.0,-60.0,-220.0));// x, y, z
-    this->Backgrounds->WaitForCreation();
-    this->Backgrounds->SetPosition(vctDouble3(55.0,-48.0,-220.0)); //y,x,z
-    this->TextList->WaitForCreation();
-    this->TextList->SetPosition(vctDouble3(-25.0,-65.0,-220.0));
-
-    //Set the position and color of the measurement text object
-    this->MeasureText->WaitForCreation();
-    this->MeasureText->SetColor(0./255, 34./255, 102.0/255);
-    this->MeasureText->SetPosition(vctDouble3(0.0, 5, 0.0));
-    
-    this->MapCursor->WaitForCreation();
-    MapCursor->SetColor(159.0/255, 182.0/255, 205.0/255);
 
 
 }
@@ -914,19 +882,18 @@ bool BehaviorLUS::RunNoInput()
         this->PreviousMaM = this->Manager->MastersAsMice();
         this->VisibleList->Show();
         this->ProbeList->Show();
+        this->SetUpScene();
     }
 
 
     this->GetJointPositionSlave(this->JointsSlave);
     this->GetJointPositionECM(this->JointsECM);
 
-    // .Positions() returns oject of type vctDynamicVector of doubles
+    // .Positions() returns object of type vctDynamicVector of doubles
     // for translations you might have a meter to mm conversion to do
 
     this->Slave1->GetCartesianPosition(this->Slave1Position);
     this->ECM1->GetCartesianPosition(this->ECM1Position);
-
-    this->SetUpScene();
 
     this->SetJoints(JointsSlave.Position()[4],JointsSlave.Position()[5],JointsSlave.Position()[2],JointsSlave.Position()[3]);
 
@@ -1005,6 +972,37 @@ void BehaviorLUS::SetUpScene(void)
     tmp.Translation() = vctDouble3(25.0,-45.0,-220.0); // x, y , z
     this->ProbeList->WaitForCreation();
     this->ProbeList->SetTransformation(tmp);
+
+
+    //this section should only happen once
+
+    //rotate the image plane such that it lines up with the probe
+    vctDouble3 Xaxis;
+    Xaxis.Assign(1.0,0.0,0.0);
+    vctDouble3 Yaxis;
+    Yaxis.Assign(0.0,1.0,0.0);
+    vctAxAnRot3 imageRot(Yaxis, cmnPI_2);
+    vctFrm3 planePosition;
+    planePosition.Rotation() = vctMatRot3(imageRot);
+    planePosition.Translation() = vctDouble3(0.0, 0.0, 16.0); //===============================================================================
+    ImagePlane->WaitForCreation();
+    ImagePlane->SetTransformation(planePosition);
+
+    //Set the position of the backgrounds and text in scene space
+    this->Outline->WaitForCreation();
+    this->Outline->SetPosition(vctDouble3(8.0,-60.0,-220.0));// x, y, z
+    this->Backgrounds->WaitForCreation();
+    this->Backgrounds->SetPosition(vctDouble3(55.0,-48.0,-220.0)); //y,x,z
+    this->TextList->WaitForCreation();
+    this->TextList->SetPosition(vctDouble3(-25.0,-65.0,-220.0));
+
+    //Set the position and color of the measurement text object
+    this->MeasureText->WaitForCreation();
+    this->MeasureText->SetColor(0./255, 34./255, 102.0/255);
+    this->MeasureText->SetPosition(vctDouble3(0.0, 5, 0.0));
+
+    this->MapCursor->WaitForCreation();
+    MapCursor->SetColor(159.0/255, 182.0/255, 205.0/255);
 
 }
 
@@ -1174,6 +1172,13 @@ void BehaviorLUS::SetJoints(double A1, double A2, double insertion, double roll)
     Yaxis.Assign(0.0,1.0,0.0);
     vctDouble3 Zaxis;
     Zaxis.Assign(0.0,0.0,1.0);
+
+    //Set the position of the probe in the scene space
+    vctFrm3 tmp;
+    tmp.Rotation() = vctMatRot3(this->Slave1Position.Position().Rotation()) * vctMatRot3(vctAxAnRot3(vctDouble3(0.0,0.0,1.0), cmnPI_4 ));
+    tmp.Translation() = vctDouble3(25.0,-45.0,-220.0); // x, y , z
+    this->ProbeList->WaitForCreation();
+    this->ProbeList->SetTransformation(tmp);
 
     //translate and rotate the probe head graphic into camera frame and such that it lines up with the physical tool
     vctFrm3 probePosition;
