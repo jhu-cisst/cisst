@@ -4,6 +4,7 @@
 #include <cisstRobot/robSLERP.h>
 #include <cisstRobot/robRnConstant.h>
 #include <cisstRobot/robSE3Constant.h>
+#include <cisstRobot/robSE3Track.h>
 #include <cisstRobot/robFunctionPiecewise.h>
 
 #include <typeinfo>
@@ -11,55 +12,68 @@
 using namespace std;
 using namespace cisstRobot;
 
-robMapping::robMapping() { };
+robMapping::robMapping() {}
 robMapping::robMapping( const robDOF& from, const robDOF& to ){
   domain = from;
   codomain = to;
 }
   
-// 
+robTrajectory::robTrajectory(robClock* clock, robDevice* device){ 
+  this->clock = clock;
+  this->device = device; 
+}
+
+
 void robTrajectory::Clear(){ functions.clear(); }
 
 robError robTrajectory::Insert( robFunction* function, 
-				uint64_t indof, uint64_t outdof ){
+				uint64_t indof, 
+				uint64_t outdof ){
+
+   // create a mapping from time to joint positions
+  robDOF rd1(indof), rd2(outdof);
+  robMapping mapping( rd1, rd2 );
 
   // see if a mapping is already in the table
-  // create a mapping from time to joint positions
-  robMapping mapping( robDOF( robDOF::TIME ), robDOF( outdof ) );
+  std::map< robMapping, robFunction* >::iterator iter =  functions.find(mapping);
 
-  // see if a mapping is already in the table
-  std::map<robMapping, robFunction*>::iterator iter = functions.find(mapping);
-
-  //  std::map<robMapping, robFunction*>::iterator iter = functions.find(mapping);
-  // nope...the mapping isn't in the table...add a new one
+  // nope...the mapping is not in the table...add a new one
   if( iter == functions.end() ) { 
+    
+    // create a new piecewise function
     robFunctionPiecewise* fnpw = new robFunctionPiecewise();
+    
+    // insert the function in the piecewise function
     fnpw->Insert( function );
-
+    
     // this is used to hold the result from the insertion
     std::pair< std::map<robMapping, robFunction*>::iterator, bool > result;
 
-    // insert the (mapping, function) pair
+    // insert the mapping/piecewise function pair
     result = functions.insert( std::make_pair( mapping, fnpw ) );
 
     // if the insertion happened return right away
     if( result.second == true ){  return SUCCESS;  }
+    
     // the insertion didn't work
     else{ 
       cout <<"robTrajectory::Insert: Couldn't insert in the map" << endl;
       return FAILURE;
     }
   }
-
+  
+  // the mapping is already in the map
   else{
-    // check if the existing function is a piecewise function
-    robFunctionPiecewise* fnpw=dynamic_cast<robFunctionPiecewise*>(iter->second);
     
-    // nope the function isn't a piecewise function...
+    // check if the existing function is a piecewise function
+    robFunctionPiecewise* fnpw = dynamic_cast<robFunctionPiecewise*>(iter->second);
+  
+    //  nope the function isn't a piecewise function, we can't add the function
     if( fnpw == NULL ) { 
-      cout<<"robTrajectory::Insert: mapping conflict." << endl;
+      cout<<"robTrajectory::Insert: Mapping conflict." << endl;
       return FAILURE;
     }
+
     // the function is a piecewise function so insert the new function in there
     else{
       fnpw->Insert( function );
@@ -72,429 +86,451 @@ robError robTrajectory::Linear( real ti, real qi,
 				real tf, real qf, 
 				uint64_t dof, 
 				bool sticky ){
+  // should check that only one Rn dof is set
   return Linear( ti, Rn(1,qi), tf, Rn(1,qf), dof, sticky );
 }
 
-robError robTrajectory::Linear( real ti, const Rn& qi, 
-				real tf, const Rn& qf, 
-				uint64_t dof, 
+robError robTrajectory::Linear( real qi, real qf, 
+				real vmax, uint64_t dof, 
 				bool sticky ){
-  
-  if( tf < ti ){
-    cout << "robTrajectory::Linear: ti must be less than tf" <<endl;
+  if(clock==NULL){
+    cout << "robTrajectory::Linear: No clock" << endl;
     return FAILURE;
   }
+  
+  real ti = clock->Evaluate();
+  real tf = ti + fabs(qf-qi)/fabs(vmax);
+
+  if( Linear( ti, qi, tf, qf, dof, sticky ) == FAILURE ){
+    cout << "robTrajectory::Linear: failed to create a linear trajectory" << endl;
+    return FAILURE;
+  }
+
+  return SUCCESS;
+}
+
+robError robTrajectory::Linear( const Rn& qi, 
+				const Rn& qf, 
+				real vmax, uint64_t dof, bool sticky ){
+  // test for vector size
   if( qi.size() != qf.size() ){
     cout << "robTrajectory::Linear: vectors must have the same length" << endl;
     return FAILURE;
   }
-  if( !(dof & robDOF::XPOS) ) {
-    cout << "robTrajectory::Linear: trajectory is not for positions DOF" << endl;
+
+  // get the current time
+  real ti = clock->Evaluate();
+
+  // find the longuest time
+  real tf = -1;
+  for(size_t i=0; i<qi.size(); i++){
+    real t = ti + fabs(qf[i]-qi[i])/fabs(vmax);
+    if( tf < t ) tf = t;
+  }
+
+  if( Linear( ti, qi, tf, qf, dof, sticky ) == FAILURE ){
+    cout << "robTrajectory::Linear: failed to create a linear trajectory" << endl;
+    return FAILURE;
+  }
+  return SUCCESS;
+}
+    
+robError robTrajectory::Linear( real ti, const Rn& qi, 
+				real tf, const Rn& qf, 
+				uint64_t dof, bool sticky ){
+
+  // check that the time is ok
+  if( tf < ti ){
+    cout << "robTrajectory::Linear: ti must be less than tf" <<endl;
     return FAILURE;
   }
 
-  // create a mapping from time to joint positions
-  robMapping mapping( robDOF( robDOF::TIME ), robDOF( dof & robDOF::XPOS ) );
-
-  // see if a mapping is already in the table
-  std::map<robMapping, robFunction*>::iterator iter = functions.find(mapping);
-
-  // nope...the mapping isn't in the table...add a new one
-  if( iter == functions.end() ) { 
-
-    // create the linear function
-    robLinear* fnlin = new robLinear(ti, qi, tf, qf);
-    robFunctionPiecewise* fnpw = new robFunctionPiecewise();
-    fnpw->Insert( fnlin );
-
-    // do we want to hold the position at the end
-    if(sticky){
-      robRnConstant* fncte = new robRnConstant( qf, tf );
-      fnpw->Insert( fncte );
-    }
-
-    // this is used to hold the result from the insertion
-    std::pair< std::map<robMapping, robFunction*>::iterator, bool > result;
-
-    // insert the (mapping, function) pair
-    result = functions.insert( std::make_pair( mapping, fnpw ) );
-
-    // if the insertion happened return right away
-    if( result.second == true ){  return SUCCESS;  }
-
-    // the insertion didn't work
-    else{ 
-      cout <<"robTrajectory::Linear: Couldn't insert in the map" << endl;
-      return FAILURE;
-    }
+  // check that the vector size match
+  if( qi.size() != qf.size() ){
+    cout << "robTrajectory::Linear: vectors must have the same length" << endl;
+    return FAILURE;
   }
 
-  // the mapping is already in the table
-  else{
+  // check that we need real position and/or velocities and/or accelerations
+  dof &= ( robDOF::XPOS | robDOF::TX  | robDOF::TY  | robDOF::TZ |
+	   robDOF::XVEL | robDOF::VX  | robDOF::VY  | robDOF::VZ |
+	   robDOF::XACC | robDOF::VXD | robDOF::VYD | robDOF::VZD );
+  if( !dof ){
+    cout << "robTrajectory::Linear: expected real position values" << endl;
+    return FAILURE;
+  }
 
-    // check if the existing function is a piecewise function
-    robFunctionPiecewise* fnpw=dynamic_cast<robFunctionPiecewise*>(iter->second);
+  // create a linear function
+  robLinear* fnlin = new robLinear(ti, qi, tf, qf);
 
-    // nope the function isn't a piecewise function...
-    if( fnpw == NULL ) { 
-      cout<<"robTrajectory::Linear: mapping conflict." << endl;
-      return FAILURE;
-    }
+  // insert the linear function as a mapping F:R1->Rn
+  if( Insert(fnlin, robDOF::TIME, dof) == FAILURE ){
+    cout << "robTrajectory::Linear: Failed to insert the function." << endl;
+    return FAILURE;
+  }
+
+  // do we want to hold the position at the end
+  if(sticky){
+    // create a constant function at time tf
+    robRnConstant* fncte = new robRnConstant( qf, tf );
     
-    // the function is a piecewise function so insert the new function in there
-    else{
-      // create the linear function
-      robLinear* fnlin = new robLinear(ti, qi, tf, qf);
-      fnpw->Insert( fnlin );
-
-      // do we want to hold the position at the end
-      if(sticky){
-	robRnConstant* fncte = new robRnConstant( qf, tf );
-	fnpw->Insert( fncte );
-      }
-
-      return SUCCESS;
+    // insert the constant function as a mapping F:R1->Rn
+    if( Insert( fncte, robDOF::TIME, dof) == FAILURE ){
+      cout << "robTrajectory::Linear: Failed to insert the function." << endl;
+      return FAILURE;
     }
   }
+  return SUCCESS;
 }
-
 
 robError robTrajectory::Sigmoid( real ti, real qi,
 				 real tf, real qf, 
 				 uint64_t dof, 
 				 bool sticky ){
-
+  // check the time
   if( tf < ti ){
-    cout<<"robTrajectory::sigmoid: initial time is later than final time" <<endl;
-    return FAILURE;
-  }
-  if( !(dof & robDOF::XPOS) ){
-    cout<<"robTrajectory::sigmoid: DOF of sigmoid must be position" <<endl;
+    cout<<"robTrajectory::Sigmoid: initial time is later than final time" <<endl;
     return FAILURE;
   }
 
-  // create a mapping from time to joint positions
-  robMapping mapping( robDOF( robDOF::TIME ), robDOF( dof & robDOF::XPOS ) );
-
-  // see if a mapping is already in the table
-  std::map<robMapping, robFunction*>::iterator iter = functions.find(mapping);
-
-  // nope...the mapping isn't in the table...add a new one
-  if( iter == functions.end() ) { 
-
-    // create the linear function
-    robSigmoid* fnsig = new robSigmoid(ti, qi, tf, qf);
-    robFunctionPiecewise* fnpw = new robFunctionPiecewise();
-    fnpw->Insert( fnsig );
-    // do we want to hold the position at the end
-    if(sticky){
-      robRnConstant* fncte = new robRnConstant( qf, tf );
-      fnpw->Insert( fncte );
-    }
-
-    // this is used to hold the result from the insertion
-    std::pair< std::map<robMapping, robFunction*>::iterator, bool > result;
-
-    // insert the (mapping, function) pair
-    result = functions.insert( std::make_pair( mapping, fnpw ) );
-
-    // if the insertion happened return right away
-    if( result.second == true ){  return SUCCESS;  }
-
-    // the insertion didn't work
-    else{ 
-      cout <<"robTrajectory::sigmoid: Couldn't insert in the map" << endl;
-      return FAILURE;
-    }
-
+  // check that a position DOF is used (should make sure that there's only 1 dof)
+  dof &= (robDOF::XPOS|robDOF::XVEL|robDOF::XACC);
+  if( !dof ){
+    cout<<"robTrajectory::Sigmoid: DOF of sigmoid must be position" <<endl;
+    return FAILURE;
   }
 
-  // the mapping is already in the table
-  else{
+  // create the linear function
+  robSigmoid* fnsig = new robSigmoid(ti, qi, tf, qf);
 
-    // check if the existing function is a piecewise function
-    robFunctionPiecewise* fnpw=dynamic_cast<robFunctionPiecewise*>(iter->second);
+  // insert the linear function as a mapping F:R1->Rn
+  if( Insert(fnsig, robDOF::TIME, dof) == FAILURE ){
+    cout << "robTrajectory::Simoid: Failed to insert the function." << endl;
+    return FAILURE;
+  }
 
-    // nope the function isn't a piecewise function...
-    if( fnpw == NULL ) { 
-      cout<<"robTrajectory::sigmoid: mapping conflict." << endl;
-      return FAILURE;
-    }
+  // do we want to hold the position at the end
+  if(sticky){
+    // create a constant function at time tf
+    robRnConstant* fncte = new robRnConstant( qf, tf );
     
-    // the function is a piecewise function so insert the new function in there
-    else{
-
-      // create the linear function
-      robSigmoid* fnsig = new robSigmoid(ti, qi, tf, qf);
-      fnpw->Insert( fnsig );
-
-      // do we want to hold the position at the end
-      if(sticky){
-	robRnConstant* fncte = new robRnConstant( qf, tf );
-	fnpw->Insert( fncte );
-      }
-
-      return SUCCESS;
+    // insert the constant function as a mapping F:R1->Rn
+    if( Insert( fncte, robDOF::TIME, dof) == FAILURE ){
+      cout << "robTrajectory::Sigmoid: Failed to insert the function." << endl;
+      return FAILURE;
     }
   }
+  return SUCCESS;
+}
+
+robError robTrajectory::Sigmoid( real ti, const Rn& qi,
+				 real tf, const Rn& qf, 
+				 uint64_t dof, 
+				 bool sticky ){
+  // check that the vector size match
+  if( qi.size() != qf.size() ){
+    cout << "robTrajectory::Sigmoid: vectors must have the same length" << endl;
+    return FAILURE;
+  }
+  // this part is really ugly
+  uint64_t mask = robDOF::X1 | robDOF::X1D | robDOF::X1DD ;
+  for( size_t i=0; i<qi.size(); i++ ){
+
+    while( mask != (robDOF::X8 | robDOF::X8D | robDOF::X8DD) ){
+      if( mask & dof ){
+	if( Sigmoid(ti, qi[i], tf, qf[i], dof & mask, sticky ) == FAILURE ){
+	  cout << "robTrajectory::Sigmoid: Failed to create a sigmoid." << endl;
+	  return FAILURE;
+	}
+	mask <<= 1;
+	break;
+      }
+      mask <<= 1;
+    }
+  }
+  return SUCCESS;
 }
 
 robError robTrajectory::Translation( real ti, const SE3& Rti,
 				     real tf, const SE3& Rtf,
 				     uint64_t dof,
 				     bool sticky ){
-  
+  // check the time
   if( tf < ti ){
-    cout<<"robTrajectory::translation: initial time is later than final" <<endl;
+    cout<<"robTrajectory::Translation: initial time is later than final" <<endl;
     return FAILURE;
   }
 
-  if( !(dof & (robDOF::TX|robDOF::TY|robDOF::TZ)) ){
-    cout<<"robTrajectory::translation: expected translation DOF" <<endl;
+  // check the DOF are for translation and/or derivatives
+  dof &= (robDOF::TX |robDOF::TY |robDOF::TZ|
+	  robDOF::VX |robDOF::VY |robDOF::VZ|
+	  robDOF::VXD|robDOF::VYD|robDOF::VZD );
+  if( !dof ){
+    cout<<"robTrajectory::Translation: expected translation DOF" <<endl;
     return FAILURE;
   }
+  
+  Rn Ti(3, Rti[0][3], Rti[1][3], Rti[2][3] );
+  Rn Tf(3, Rtf[0][3], Rtf[1][3], Rtf[2][3] );
 
-  // create a mapping from time to joint positions
-  robMapping mapping( robDOF( robDOF::TIME ), 
-		      robDOF( dof & (robDOF::TX|robDOF::TY|robDOF::TZ) ) );
-
-  // see if this mapping is already in the table
-  std::map<robMapping, robFunction*>::iterator iter = functions.find(mapping);
-
-  R3 Ti = Rti.Translation();
-  R3 Tf = Rtf.Translation();
-
-  // nope...the mapping isn't in the table...add a new one
-  if( iter == functions.end() ) { 
-
-    // create the linear function
-    robLinear* fnlin = new robLinear( ti, Rn(3, Ti[0], Ti[1], Ti[2]), 
-				      tf, Rn(3, Tf[0], Tf[1], Tf[2]) );
-    robFunctionPiecewise* fnpw = new robFunctionPiecewise();
-    fnpw->Insert( fnlin );
-
-    // do we want to hold the position at the end
-    if(sticky){
-      robRnConstant* fncte = new robRnConstant( Rn(3, Tf[0], Tf[1], Tf[2]), tf );
-      fnpw->Insert( fncte );
-    }
-
-    // this is used to hold the result from the insertion
-    std::pair< std::map<robMapping, robFunction*>::iterator, bool > result;
-
-    // insert the (mapping, function) pair in the table
-    result = functions.insert( std::make_pair( mapping, fnpw ) );
-
-    // if the insertion happened return right away
-    if( result.second == true ){  return SUCCESS;  }
-
-    // the insertion didn't work
-    else{ 
-      cout <<"robTrajectory::translation: Couldn't insert in the map" << endl;
-      return FAILURE;
-    }
-
+  if( Linear(ti, Ti, tf, Tf, dof, sticky) == FAILURE ){
+    cout << "robTrajectory::Translation: failed to create a linear function"<<endl;
+    return FAILURE;
   }
-
-  // the mapping is already in the table
-  else{
-
-    // check if the existing function is a piecewise function
-    robFunctionPiecewise* fnpw=dynamic_cast<robFunctionPiecewise*>(iter->second);
-
-    // nope the function isn't a piecewise function...
-    if( fnpw == NULL ) { 
-      cout<<"robTrajectory::translation: mapping conflict." << endl;
-      return FAILURE;
-    }
-    
-    // the function is a piecewise function so insert the new function in there
-    else{
-
-      // create the linear function
-      robLinear* fnlin = new robLinear(ti, Rn(3, Ti[0], Ti[1], Ti[2]), 
-				       tf, Rn(3, Tf[0], Tf[1], Tf[2]) );
-      fnpw->Insert( fnlin );
-
-      // do we want to hold the position at the end
-      if(sticky){
-	robRnConstant* fncte = new robRnConstant(Rn(3, Tf[0], Tf[1], Tf[2]), tf);
-	fnpw->Insert( fncte );
-      }
-
-      return SUCCESS;
-    }
-  }
+  return SUCCESS;
 }
 
 robError robTrajectory::Rotation( real ti, const SE3& Rti,
 				  real tf, const SE3& Rtf,
 				  uint64_t dof,
 				  bool sticky ){
-
+  // check the time
   if( tf < ti ){
-    cout<<"robTrajectory::rotation: initial time is later than final" <<endl;
+    cout<<"robTrajectory::Rotation: initial time is later than final" <<endl;
     return FAILURE;
   }
-  if( !(dof & (robDOF::RX|robDOF::RY|robDOF::RZ)) ){
-    cout<<"robTrajectory::rotation: expected rotation DOF" <<endl;
+
+  // check the DOF are for rotation and/or velocities and/or accelerations
+  dof &= (robDOF::RX |robDOF::RY |robDOF::RZ|
+	  robDOF::WX |robDOF::WY |robDOF::WZ|
+	  robDOF::WXD|robDOF::WYD|robDOF::WZD );
+  if( !dof ){
+    cout<<"robTrajectory::Rotation: expected rotation DOF" <<endl;
     return FAILURE;
   }
   
-  // create a mapping from time to joint positions
-  robMapping mapping( robDOF( robDOF::TIME ), 
-		      robDOF( dof & (robDOF::RX|robDOF::RY|robDOF::RZ) ) );
-  
-  // see if this mapping is already in the table
-  std::map<robMapping, robFunction*>::iterator iter = functions.find(mapping);
+  // create slerp
+  robSLERP* fnslerp = new robSLERP( ti, Rti, tf, Rtf );
 
-  // nope...the mapping isn't in the table...add a new one
-  if( iter == functions.end() ) { 
-
-    // create the linear function
-    robSLERP* fnslerp = new robSLERP( ti, Rti, tf, Rtf );
-    robFunctionPiecewise* fnpw = new robFunctionPiecewise();
-    fnpw->Insert( fnslerp );
-
-    // do we want to hold the position at the end
-    if(sticky){
-      robSE3Constant* fncte = new robSE3Constant( Rtf, tf );
-      fnpw->Insert( fncte );
-    }
-
-    // this is used to hold the result from the insertion
-    std::pair< std::map<robMapping, robFunction*>::iterator, bool > result;
-
-    // insert the (mapping, function) pair in the table
-    result = functions.insert( std::make_pair( mapping, fnpw ) );
-
-    // if the insertion happened return right away
-    if( result.second == true ){  return SUCCESS;  }
-
-    // the insertion didn't work
-    else{ 
-      cout <<"robTrajectory::rotation: Couldn't insert in the map" << endl;
-      return FAILURE;
-    }
-
+  // insert the linear function as a mapping F:R1->Rn
+  if( Insert( fnslerp, robDOF::TIME, dof ) == FAILURE ){
+    cout << "robTrajectory::Rotation: Failed to insert the function." << endl;
+    return FAILURE;
   }
 
-  // the mapping is already in the table
-  else{
-
-    // check if the existing function is a piecewise function
-    robFunctionPiecewise* fnpw=dynamic_cast<robFunctionPiecewise*>(iter->second);
-
-    // nope the function isn't a piecewise function...
-    if( fnpw == NULL ) { 
-      cout<<"robTrajectory::rotation: mapping conflict." << endl;
-      return FAILURE;
-    }
+  // do we want to hold the position at the end
+  if(sticky){
+    // create a constant function at time tf
+    robSE3Constant* fncte = new robSE3Constant( Rtf, tf );
     
-    // the function is a piecewise function so insert the new function in there
-    else{
-
-      // create the linear function
-      robSLERP* fnslerp = new robSLERP( ti, Rti, tf, Rtf );
-      fnpw->Insert( fnslerp );
-
-      // do we want to hold the position at the end
-      if(sticky){
-	robSE3Constant* fncte = new robSE3Constant( Rtf, tf );
-	fnpw->Insert( fncte );
-      }
-
-      return SUCCESS;
+    // insert the constant function as a mapping F:R1->Rn
+    if( Insert( fncte, robDOF::TIME, dof ) == FAILURE ){
+      cout << "robTrajectory::Rotation: Failed to insert the function." << endl;
+      return FAILURE;
     }
-
   }
+  return SUCCESS;
 }
 				      
 robError robTrajectory::Linear( real ti, const SE3& Rti,
 				real tf, const SE3& Rtf,
 				uint64_t dof, 
 				bool sticky ){
-  
-  Translation(ti, Rti, tf, Rtf, dof, sticky);
-  Rotation(ti, Rti, tf, Rtf, dof, sticky);
-  return SUCCESS;
-}
-  
-robError robTrajectory::Evaluate( robDOF& output ){
 
-  // make sure that the domain is there
-  if( device == NULL ){
-    cout<<"robTrajectory::evaluate: NULL device."<<endl;
+  if( Translation(ti, Rti, tf, Rtf, dof, sticky) == FAILURE ){
+    cout << "robTrajectory::Linear: Failed to create a translation" << endl;
+    return FAILURE;
+  }
+  if( Rotation(ti, Rti, tf, Rtf, dof, sticky) == FAILURE ){
+    cout << "robTrajectory::Linear: Failed to create a rotation" << endl;
     return FAILURE;
   }
 
-  // invoke the domain to get some input for the functions
-  robDOFRn fninput;
-  fninput = device->generate();
+  return SUCCESS;
+}
+
+robError robTrajectory::Linear( const SE3& Rtwi, const SE3& Rtwf, 
+				real vmax, real wmax,
+				uint64_t dof, bool sticky ){
+  // ensure the clock is there
+  if(clock==NULL){
+    cout << "robTrajectory::Linear: No clock" << endl;
+    return FAILURE;
+  }
+
+  real ti = clock->Evaluate();
+ 
+  // compute the translation time: timet
+  R3 pwi = Rtwi.Translation();
+  R3 pwf = Rtwf.Translation();
+  R3 pif = pwf - pwi;
+  real timet = pif.Norm() / fabs(vmax);
+
+  // compute the rotation time: clock
+  SE3 Rtiw(Rtwi);
+  Rtiw.InverseSelf();
+  SE3 Rtif = Rtiw * Rtwf;
+  SO3 Rif;
+  for(int r=0; r<3; r++) for(int c=0; c<3; c++) Rif[r][c] = Rtif[r][c];
+  vctAxisAngleRotation3<real> ut(Rif);
+  real timeR = ut.Angle()/ fabs(wmax);
+
+  // compute the final time
+  real tf = ti+timet;
+  if( timet < timeR )
+    tf = ti+timeR;
+
+  // create the motion
+  if( Linear(ti, Rtwi, tf, Rtwf, dof, sticky) == FAILURE ){
+    cout << "robTrajectory::Linear: Could not create a linear trajectory" << endl;
+    return FAILURE;
+  }
+
+  return SUCCESS;
+}
+
+robError robTrajectory::Linear( const std::vector<SE3>& Rt, 
+				real vmax, real wmax,
+				uint64_t dof, bool sticky){
+
+  // ensure the clock is there
+  if(clock==NULL){
+    cout << "robTrajectory::Linear: No clock" << endl;
+    return FAILURE;
+  }
+
+  real ti = clock->Evaluate();
+
+  for(size_t i=0; i<Rt.size()-1; i++){
+    SE3 Rtwi = Rt[i];
+    SE3 Rtwf = Rt[i+1];
+
+    // compute the translation time: timet
+    R3 pwi = Rtwi.Translation();
+    R3 pwf = Rtwf.Translation();
+    R3 pif = pwf - pwi;
+    real timet = pif.Norm() / fabs(vmax);
+    
+    // compute the rotation time: clock
+    SE3 Rtiw(Rtwi);
+    Rtiw.InverseSelf();
+    SE3 Rtif = Rtiw * Rtwf;
+    SO3 Rif;
+    for(int r=0; r<3; r++) for(int c=0; c<3; c++) Rif[r][c] = Rtif[r][c];
+    vctAxisAngleRotation3<real> ut(Rif);
+    real timeR = ut.Angle()/fabs(wmax);
+
+    // compute the final time
+    real tf = ti+timet;
+    if( timet < timeR )
+      tf = ti+timeR;
+
+    // create the motion
+    if( Linear(ti, Rtwi, tf, Rtwf, dof, sticky) == FAILURE ){
+      cout<<"robTrajectory::Linear: Could not create a linear trajectory" << endl;
+      return FAILURE;
+    }
+    ti+=tf;
+  }
+  return SUCCESS;
+}
+
+robError robTrajectory::SE3Track( uint64_t dof, real vmax, real wmax, real vdmax ){
+
+  // check the DOF are for rotation and/or velocities and/or accelerations
+  dof &= (robDOF::RX | robDOF::RY | robDOF::RZ |
+	  robDOF::TX | robDOF::TY | robDOF::TZ );
+  if( !dof ){
+    cout<<"robTrajectory::SE3Track: expected Cartesian DOF" <<endl;
+    return FAILURE;
+  }
+
+  // create slerp
+  robSE3Track* fntrack = new robSE3Track( vmax, wmax, vdmax );
+  
+  // insert the linear function as a mapping F:R1->Rn
+  //if( Insert( fntrack, robDOF::TIME | robDOF::CARTESIAN, dof ) == FAILURE ){
+  if( Insert( fntrack, dof, dof ) == FAILURE ){
+    cout << "robTrajectory::SE3Track: Failed to insert the function." << endl;
+    return FAILURE;
+  }
+  return SUCCESS;
+}
+
+robError robTrajectory::Evaluate( robDOF& output ){
+
+  // make sure that the domain is there
+  if( clock == NULL ){
+    cout<<"robTrajectory::evaluate: no clock."<<endl;
+    return FAILURE;
+  }
+
+  robDOF fninput( clock->Evaluate() );
+  if( device != NULL ){
+    device->Generate( fninput );
+  }
 
   // evaluate each function in the maps
   std::map<robMapping, robFunction*>::iterator iter;
-
+  
   for(iter=functions.begin(); iter!=functions.end(); iter++){
-
-    robMapping mapping = iter->first;          // the dof mask
+    
+    robMapping mapping = iter->first;      // the dof mask
     robFunction* function = iter->second;  // the function
 
+    // Handle real outputs
     if( mapping.To().IsReal() ){
-      try{
-	robDOFRn& fnoutput = dynamic_cast<robDOFRn&>(output);
-	robDOFRn dofrn;
-	dofrn.Set( robDOF::XPOS );
-	function->Evaluate( fninput, dofrn );
-	fnoutput.x = dofrn.x;
-	fnoutput.xd = dofrn.xd;
-	fnoutput.xdd = dofrn.xdd;
-      }
-      catch(std::bad_cast){
-	cout<< "robTrajectory::evaluate: expected robDOFRn parameter" << endl;
-	return FAILURE;
+
+      // Evaluate the real function
+      robDOF rnoutput( mapping.To().GetDOF() );
+      if( function->Evaluate( fninput, rnoutput ) == SUCCESS ){
+	output.Set( mapping.To().GetDOF(), rnoutput.x, rnoutput.xd, rnoutput.xdd );
       }
     }
 
+    // Handle Cartesian output
     if( mapping.To().IsCartesian() ){
-      try{
-	robDOFSE3& fnoutput = dynamic_cast<robDOFSE3&>(output);
 
-	if(mapping.To().IsTranslation()){
-	  robDOFRn doft;
-	  doft.Set( robDOF::TX | robDOF::TY | robDOF::TZ );
-	  if( function->Evaluate( fninput, doft ) == SUCCESS ){
-	    fnoutput.Rt[0][3] = doft.x.at(0);
-	    fnoutput.Rt[1][3] = doft.x.at(1);
-	    fnoutput.Rt[2][3] = doft.x.at(2);
-	    fnoutput.vw[0]    = doft.xd.at(0);
-	    fnoutput.vw[1]    = doft.xd.at(1);
-	    fnoutput.vw[2]    = doft.xd.at(2);
-	    fnoutput.vdwd[0]  = doft.xdd.at(0);
-	    fnoutput.vdwd[1]  = doft.xdd.at(1);
-	    fnoutput.vdwd[2]  = doft.xdd.at(2);
-	  }
+      // hold results from evaluations
+      robDOF se3output( mapping.To().GetDOF() );
+
+      // handle both rotation and translation (i.e. like SE3 tracking)
+      if( mapping.To().IsRotation() && mapping.To().IsTranslation () ){
+
+	if( function->Evaluate( fninput, se3output ) == SUCCESS ){
+	  output.Set( mapping.To().GetDOF(), 
+		      se3output.Rt, 
+		      se3output.vw, 
+		      se3output.vdwd );
 	}
-	if(mapping.To().IsRotation()){
-	  robDOFSE3 dofR;
-	  dofR.Set( robDOF::RX | robDOF::RY | robDOF::RZ );
-	  if( function->Evaluate( fninput, dofR ) == SUCCESS ){
-	    fnoutput.Rt.Rotation() = dofR.Rt.Rotation();
-	    fnoutput.vw[3]    = dofR.vw[3];
-	    fnoutput.vw[4]    = dofR.vw[4];
-	    fnoutput.vw[5]    = dofR.vw[5];
-	    fnoutput.vdwd[3]  = dofR.vdwd[3];
-	    fnoutput.vdwd[4]  = dofR.vdwd[4];
-	    fnoutput.vdwd[5]  = dofR.vdwd[5];
-	  }
+
+      }
+
+      // handle the rotation function copy directly in dofse3
+      else if(mapping.To().IsRotation()){
+
+	if( function->Evaluate( fninput, se3output ) == SUCCESS ){
+	  output.Set( mapping.To().GetDOF(), 
+		      se3output.Rt, 
+		      se3output.vw, 
+		      se3output.vdwd );
 	}
       }
-      catch(std::bad_cast){
-	cout<< "robTrajectory::evaluate: expected robDOFSE3 parameter" << endl;
-	return FAILURE;
+
+      // handle the translation function use a Rn and copy the results in dofse3
+      else if(mapping.To().IsTranslation()){
+
+	robDOF doft( mapping.To().GetDOF() );
+	if( function->Evaluate( fninput, doft ) == SUCCESS ){
+	  // copy the Rn values in the SE3 
+	  se3output.Rt[0][3] = doft.x[0]; 
+	  se3output.Rt[1][3] = doft.x[1]; 
+	  se3output.Rt[2][3] = doft.x[2];
+	  /*
+	  se3output.vw[3]    = doft.xd[3];
+	  se3output.vw[4]    = doft.xd[4];
+	  se3output.vw[5]    = doft.xd[5];
+	  se3output.vdwd[3]  = doft.xdd[3];
+	  se3output.vdwd[4]  = doft.xdd[4];
+	  se3output.vdwd[5]  = doft.xdd[5];
+	  */
+	  output.Set( mapping.To().GetDOF(), 
+		      se3output.Rt, 
+		      se3output.vw, 
+		      se3output.vdwd );
+	}
       }
     }
-  }
-  
+  }  
   return SUCCESS;
 }

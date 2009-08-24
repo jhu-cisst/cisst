@@ -1,5 +1,4 @@
 #include <cisstRobot/robSO3Blender.h>
-#include <cisstRobot/robFunctionPiecewise.h>
 
 #include <typeinfo>
 #include <iostream>
@@ -10,10 +9,17 @@ robSO3Blender::robSO3Blender( real ti,
 			      real T1, real T2,
 			      const SO3& Rw0, 
 			      const SO3& Rw1, 
-			      const SO3& Rw2){
+			      const SO3& Rw2,
+			      real tA,
+			      real tB ){
   this->ti = ti;
   this->T1 = T1;
   this->T2 = T2;
+  this->tauA = tA;
+  this->tauB = tB;
+
+  xmin = ti;
+  xmax = xmin+T1+T2;
 
   SO3 R0w;
   R0w.InverseOf( Rw0 );
@@ -27,6 +33,12 @@ robSO3Blender::robSO3Blender( real ti,
 
   this->n1t1 = vctAxisAngleRotation3<real>(R01);
   this->n2t2 = vctAxisAngleRotation3<real>(R12);
+  /*
+  cout << n1t1 << endl << n2t2 << endl;
+  cout <<"R0" << Rw0 <<endl << endl;
+  cout <<"R1" << Rw1 <<endl << endl;
+  cout <<"R2" << Rw2 <<endl << endl;
+  */
   this->Rw1 = Rw1;
 
 }
@@ -92,56 +104,45 @@ SO3 robSO3Blender::R0b( real h ){
 
 robDomainAttribute robSO3Blender::IsDefinedFor( const robDOF& input ) const{
   
-  try{
-    
-    const robDOFRn& inputrn = dynamic_cast<const robDOFRn&>(input);
-    
-    // test the dof are real numbers
-    if( !inputrn.IsReal() ){
-      cout << "robSO3Blender::IsDefinedFor: expected a real input" << endl;
-      return UNDEFINED;
-    }
-
-    // test to see that the input is a time value
-    if( !inputrn.IsSet( robDOF::TIME ) ){ 
-      cout << "robSO3Blender::IsDefinedFor: expected a time input" << endl;
-      return UNDEFINED;
-    }
-
-    real t = inputrn.x.at(0);
-    if( xmin <= t && t <= xmax ) return DEFINED;
-    else                         return UNDEFINED;
-
-  }
-  catch( std::bad_cast ){
-    cout<<"robSO3Blender::IsDefinedFor: unable to cast the input as a Rn"<<endl;
+  // test the dof are real numbers
+  if( !input.IsTime() ){
+    cout << "robSO3Blender::IsDefinedFor: expected a time input" << endl;
     return UNDEFINED;
   }
 
+  real t = input.t;
+  if( xmin <= t && t <= xmax ) return DEFINED;
+  else                         return UNDEFINED;
 }
 
 robError robSO3Blender::Evaluate( const robDOF& input, robDOF& output ){  
 
-  try{
-    const robDOFRn& inputrn = dynamic_cast<const robDOFRn&>(input); 
-    robDOFSE3& outputrn     = dynamic_cast<robDOFSE3&>(output); 
+  // test the dof are real numbers
+  if( !input.IsTime() ){
+    cout << "robSO3Blender::Evaluate: expected a time input" << endl;
+    return FAILURE;
+  }
 
-    real t = inputrn.x.at(0) - ti;
-    real tau = robFunctionPiecewise::TAU;
-    real tp = t-this->T1;
+  real t = input.t - ti;
+  //real tau = robFunctionPiecewise::TAU;
+  //real tau = 0.005;//robFunctionPiecewise::TAU;
+  real tp = t-this->T1;
     
-    real ta = (( tau - tp ) * ( tau - tp )/ (4.0*tau*T1)) * n1t1.Angle();
-    real tb = (( tau + tp ) * ( tau + tp )/ (4.0*tau*T2)) * n2t2.Angle();
-    vctAxisAngleRotation3<real> nata( n1t1.Axis(), -ta );
-    vctAxisAngleRotation3<real> nbtb( n2t2.Axis(),  tb );
+  real ta = (( tauA - tp ) * ( tauA - tp )/ (4.0*tauA*T1)) * n1t1.Angle();
+  real tb = (( tauB + tp ) * ( tauB + tp )/ (4.0*tauB*T2)) * n2t2.Angle();
+  vctAxisAngleRotation3<real> nata( n1t1.Axis(), -ta );
+  vctAxisAngleRotation3<real> nbtb( n2t2.Axis(),  tb );
+  
+  SO3 Ra( nata );
+  SO3 Rb( nbtb );
+  SO3 R;
+  R = Rw1 * Ra * Rb;
 
-    SO3 Ra( nata );
-    SO3 Rb( nbtb );
-    SO3 R;
-    R = Rw1 * Ra * Rb;
+  output = robDOF( SE3( R, R3(0.0))  );
+  
+  return SUCCESS;
+}
 
-    outputrn = robDOFSE3( SE3( R, R3(0.0))  );
-    
     /*
     real h = inputrn.x.at(0) - xmin;
     SO3 RB;
@@ -153,12 +154,4 @@ robError robSO3Blender::Evaluate( const robDOF& input, robDOF& output ){
     //cout << SE3( RB, R3(0.0)) << endl;
     outputrn = robDOFSE3( SE3( RB, R3(0.0)), R6(0.0), R6(0.0) );
     */
-
-    return SUCCESS;
-  }
-  catch( std::bad_cast ){
-    cout << "robSO3Blender::Evaluate: unable to cast the input/output" << endl;
-    return FAILURE;
-  }
-}
 

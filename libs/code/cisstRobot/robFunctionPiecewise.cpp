@@ -13,7 +13,10 @@ const real robFunctionPiecewise::TAU = 0.1;
 robDomainAttribute robFunctionPiecewise::IsDefinedFor(const robDOF& input)const{
 
   // check if there's any function
-  if( functions.empty() ) { /* handle error */ }
+  if( functions.empty() ) { 
+    cout << "robFunctionPiecewise::IsDefinedFor: No function defined." << endl;
+    return UNDEFINED;
+  }
   
   // check if the input is defined for any function
   for( size_t i=0; i<functions.size(); i++ ){ 
@@ -22,7 +25,6 @@ robDomainAttribute robFunctionPiecewise::IsDefinedFor(const robDOF& input)const{
   }
 
   return UNDEFINED;
-
 }
 
 // insert a function in the list
@@ -31,16 +33,17 @@ robError robFunctionPiecewise::Insert( robFunction* function ){
     cout <<"robFunctionPiecewise::Insert: NULL function" << endl;
     return FAILURE;
   }
-  else{
-    functions.push_back(function);
-  }
+
+  functions.push_back(function);
   return SUCCESS;
 }  
 
 robError robFunctionPiecewise::Evaluate( const robDOF& input, robDOF& output ){
 
   // check if there's any function
-  if( functions.empty() ) {    return FAILURE;    }
+  if( functions.empty() ) {
+    return FAILURE;
+  }
 
   robFunction* defined  = NULL;
   robFunction* incoming = NULL;
@@ -85,34 +88,29 @@ robError robFunctionPiecewise::Evaluate( const robDOF& input, robDOF& output ){
     }
   }
 
-  // outgoing but nowhere to go. Stop?
-  if( outgoing != NULL && defined == NULL && incoming == NULL ){
-    throw( robDomainLimit() );
-    return FAILURE;
-  }
   // no function defined
-  if( outgoing == NULL && defined == NULL && incoming == NULL ){
-    return FAILURE;
-  }
-  // only incoming
-  if( outgoing == NULL && defined == NULL && incoming != NULL ){
-    //throw( robDomainLimit() );
-    return FAILURE;
-  }
-
-  // process the cases...
+  if( outgoing == NULL && defined == NULL && incoming == NULL ){ return FAILURE; }
+  // just one outgoing function
+  if( outgoing != NULL && defined == NULL && incoming == NULL ){ return FAILURE; }
+  // just one incoming function (should ramp up)
+  if( outgoing == NULL && defined == NULL && incoming != NULL ){ return FAILURE; }
   // All functions are not null! That should be impossible
-  if( outgoing != NULL && defined != NULL && incoming != NULL ){
-    cout << "robFunctionPiecewise::Evaluate: 3 functions are blended." << endl;
-    return FAILURE;
-  }
+  if( outgoing != NULL && defined != NULL && incoming != NULL ){ return FAILURE; }
 
   // this case is when we're about to enter a corner
   if( outgoing == NULL && defined != NULL && incoming != NULL ){ 
-    if( output.IsReal() || output.IsTranslation() )
-      { BlendRn( defined, incoming, input, output ); }
-    else if( output.IsRotation() )
-      { BlendSO3( defined, incoming, input, output ); }
+    if( output.IsReal() || output.IsTranslation() ){
+      if( BlendRn( defined, incoming, input, output ) == FAILURE ){
+	cout << "robFunctionPiecewise::Evaluate: Failed to blend reals" << endl;
+	return FAILURE;
+      }
+    }
+    else if( output.IsRotation() ){ 
+      if( BlendSO3( defined, incoming, input, output ) == FAILURE ){
+	cout << "robFunctionPiecewise::Evaluate: Failed to blend SO3" << endl;
+	return FAILURE;
+      }
+    }
     else{ 
       cout << "robFunctionPiecewise::Evaluate: Unknown output" << endl; 
       return FAILURE;
@@ -121,10 +119,18 @@ robError robFunctionPiecewise::Evaluate( const robDOF& input, robDOF& output ){
 
   // this case is when we're about to leave a corner
   if( outgoing != NULL && defined != NULL && incoming == NULL ){ 
-    if( output.IsReal() || output.IsTranslation() )
-      { BlendRn( outgoing, defined, input, output ); }
-    else if( output.IsRotation() )
-      { BlendSO3( outgoing, defined, input, output ); }
+    if( output.IsReal() || output.IsTranslation() ){ 
+      if( BlendRn( outgoing, defined, input, output ) == FAILURE ){
+	cout << "robFunctionPiecewise::Evaluate: Failed to blend reals" << endl;
+	return FAILURE;
+      }
+    }
+    else if( output.IsRotation() ){ 
+      if( BlendSO3( outgoing, defined, input, output ) == FAILURE ){
+	cout << "robFunctionPiecewise::Evaluate: Failed to blend SO3" << endl;
+	return FAILURE;
+      }
+    }
     else{
       cout << "robFunctionPiecewise::Evaluate: Unknown output" << endl;
       return FAILURE;
@@ -133,55 +139,148 @@ robError robFunctionPiecewise::Evaluate( const robDOF& input, robDOF& output ){
 
   // this case is when we're cruising
   if( outgoing == NULL && defined != NULL && incoming == NULL ){
-    defined->Evaluate( input, output );
+    if( defined->Evaluate( input, output ) == FAILURE ){
+      cout << "robFunctionPiecewise::Evaluate: Failed to evaluate function" <<endl;
+      return FAILURE;
+    }
     if( blender != NULL ){                 // check if the blender needs to
       delete blender;                      // be removed
       blender = NULL;
     }
   }
-
+  
   return SUCCESS;
 }
 
 // this function should return robError
-void robFunctionPiecewise::BlendSO3( robFunction*  initial,
-				     robFunction*  final, 
-				     const robDOF& input,
-				     robDOF& output ){
+robError robFunctionPiecewise::BlendSO3( robFunction*  initial,
+					 robFunction*  final, 
+					 const robDOF& input,
+					 robDOF& output ){
   
+  // is the input time?
+  if( !input.IsTime() ){
+    cout << "robFunctionPiecewise::BlendSO3: expected time input" << endl;
+    return FAILURE;
+  }
+
   // is there a blender?
   if( blender == NULL ){
-    // create a SO3 blender (Taylor)
-    try{
-      const robDOFRn& inputrn = dynamic_cast<const robDOFRn&>(input);
-      robDOFRn time(inputrn);
 
-      // WARNING: hack
-      robDOFSE3 t0out, t1out, t2out; 
-      time.x.at(0) = -1000.0;          // evaluate the function at its begining 
-      initial->Evaluate(time, t0out);
-      time.x.at(0) =  1000.0;          // evaluate the midpoint
-      initial->Evaluate(time, t1out);
-      final  ->Evaluate(time, t2out);  // evaluate the function at its end
+    robDOF time(input);              // clone the input 
 
-      SO3 R0, R1, R2;                  // Can we do this differently?
-      for( int r=0; r<3; r++ ){
-	for( int c=0; c<3; c++ ){
-	  R0[r][c] = t0out.Rt[r][c];
-	  R1[r][c] = t1out.Rt[r][c];
-	  R2[r][c] = t2out.Rt[r][c];
-	}
+    robDOF t0out, t1out, t2out; 
+    time.t = -1000.0;
+    initial->Evaluate(time, t0out);  // evaluate the function at its begining 
+    time.t =  1000.0;
+    initial->Evaluate(time, t1out);  // evaluate the midpoint
+    final  ->Evaluate(time, t2out);  // evaluate the function at its end
+
+    SO3 R0, R1, R2;                  // Can we do this differently?
+    for( int r=0; r<3; r++ ){
+      for( int c=0; c<3; c++ ){
+	R0[r][c] = t0out.Rt[r][c];
+	R1[r][c] = t1out.Rt[r][c];
+	R2[r][c] = t2out.Rt[r][c];
       }
-      // create a new SO3 blender
-      blender = new robSO3Blender(inputrn.x.at(0)+TAU-initial->Duration(),
-				  initial->Duration(),final->Duration(),R0,R1,R2);
     }
-    catch(std::bad_cast)
-      {cout << "robFunctionPiecewise::BlendSO3: unable to cast input" << endl;}
+    // create a new SO3 blender
+    blender = new robSO3Blender(input.t + TAU - initial->Duration(), // T1
+				initial->Duration(),                 // T2
+				final->Duration(),                   // T3
+				R0,R1,R2);                           // R1, R2, R3
   }
 
   // evaluate the blender
-  blender->Evaluate( input, output );
+  if( blender->Evaluate( input, output ) == FAILURE ){
+    cout << "robFunctionPiecewise::BlendSO3: Failed to evaluate blender" << endl;
+    return FAILURE;
+  }
+  return SUCCESS;
+}
+
+robError robFunctionPiecewise::PackSO3( const robDOF& input1, 
+					const robDOF& input2,
+					robDOF& output ){
+
+  if( input1.IsRotation() && input2.IsRotation() ){
+
+    SO3 R, Rw1, R11;
+    for(size_t r=0; r<3; r++){
+      for(size_t c=0; c<3; c++){
+	Rw1[r][c] = input1.Rt[r][c];
+	R11[r][c] = input2.Rt[r][c];
+      }
+    }
+
+    R = Rw1*R11;
+    output = robDOF( SE3( R, R3() ), R6(0.0), R6(0.0) );      
+    return SUCCESS;
+  }
+  else{
+    cout << "robFunctionPiecewise::PackSE3: expected rotation inputs" <<endl;
+    return FAILURE;
+  }
+}
+
+robError robFunctionPiecewise::BlendRn( robFunction*  initial,
+					robFunction*  final, 
+					const robDOF& input,
+					robDOF& output ){
+  
+  if( !input.IsTime() ){
+    cout << "robFunctionPiecewise::BlendRn: expected time input" << endl;
+    return FAILURE;
+  }
+
+  robDOF finalout;
+  final->Evaluate(input, finalout);               // evaluate the final function
+  
+  if( blender == NULL ){                          // no blender!?
+
+    robDOF initialout;
+    initial->Evaluate( input, initialout);        // create one
+
+    // cast the input and create a function with of N blenders
+    real ti = input.t;
+    real tf = ti + 2.0*TAU;
+    blender = new robRnBlender(ti, initialout.x, initialout.xd, initialout.xdd,
+			       tf, finalout.x,   finalout.xd,   finalout.xdd ); 
+  }
+  
+  robDOF blenderout;
+  if( blender->Evaluate( input, blenderout ) == FAILURE ){
+    cout << "robFunctionPiecewise::BlendRn: Failed to evaluate blender" << endl;
+    return FAILURE;
+  }
+
+  if( PackRn( finalout, blenderout, output ) == FAILURE ){
+    cout << "robFunctionPiecewise::BlendRn: Faile to pack output" << endl;
+    return FAILURE;
+  }
+
+  return SUCCESS;
+}
+
+
+robError robFunctionPiecewise::PackRn( const robDOF& input1, 
+				       const robDOF& input2,
+				       robDOF& output ){
+
+  if( (input1.IsReal()        && input2.IsReal()) || 
+      (input1.IsTranslation() && input2.IsTranslation()) ){
+    // blend the values
+    output  = robDOF( input1.x + input2.x, 
+		      input1.xd + input2.xd,
+		      input1.xdd + input2.xdd );
+    return SUCCESS;
+  }
+  else{
+    cout << "robFunctionPiecewise::PackRn: expected real inputs" << endl;
+    return FAILURE;
+  }
+}
+
 
   // this part is for RCCL blender
   /*
@@ -214,86 +313,3 @@ void robFunctionPiecewise::BlendSO3( robFunction*  initial,
   blender->Evaluate( input, blenderout ); // evaluate the blender
   PackSO3( finalout, blenderout, output );// write to output
   */
-  //cout << "robFunctionPiecewise::BlendSO3 (LEAVE)" << endl;
-}
-
-// this is for RCCL blender
-// return robError
-void robFunctionPiecewise::PackSO3( const robDOFSE3& input1, 
-				    const robDOFSE3& input2,
-				    robDOF& output ){
-
-  try{
-    // cast the output as SO3
-    robDOFSE3& outputse3 = dynamic_cast<robDOFSE3&>(output);
-
-    SO3 R, Rw1, R11;
-    for(size_t r=0; r<3; r++){
-      for(size_t c=0; c<3; c++){
-	Rw1[r][c] = input1.Rt[r][c];
-	R11[r][c] = input2.Rt[r][c];
-      }
-    }
-    
-    R = Rw1*R11;
-    //cout << R << endl;
-    outputse3 = robDOFSE3( SE3( R, R3() ), R6(0.0), R6(0.0) );      
-  }
-  catch(std::bad_cast)
-    {cout << "robFunctionPiecewise::PackSE3: Couldn't cast the output" <<endl;}
-}
-
-// blend 2 real vectors Based on the RCCL 5th order Hermite blending
-// return robError
-void robFunctionPiecewise::BlendRn( robFunction*  initial,
-				    robFunction*  final, 
-				    const robDOF& input,
-				    robDOF& output ){
-  
-  robDOFRn finalout;
-  final->Evaluate(input, finalout);               // evaluate the final function
-  
-  if( blender == NULL ){                          // no blender!?
-    robDOFRn initialout;
-    initial->Evaluate( input, initialout);        // create one
-
-    try{
-      // cast the input and create a function with of N blenders
-      const robDOFRn& inputrn = dynamic_cast<const robDOFRn&>(input);
-      blender = new robRnBlender( inputrn.x.at(0),
-				  initialout.x, 
-				  initialout.xd,
-				  initialout.xdd,
-				  inputrn.x.at(0) + 2.0*TAU, 
-				  finalout.x, 
-				  finalout.xd,
-				  finalout.xdd ); 
-    }
-    catch(std::bad_cast){
-      cout << "robFunctionPiecewise::BlendRn: unable to cast input" << endl;
-    }
-  }
-  
-  robDOFRn blenderout;
-  blender->Evaluate( input, blenderout );         // evaluate the blender
-  
-  PackRn( finalout, blenderout, output );       // write to output
-}
-
-
-void robFunctionPiecewise::PackRn( const robDOFRn& input1, 
-				   const robDOFRn& input2,
-				   robDOF& output ){
-  
-  try{
-    // cast the output as real
-    robDOFRn& outputrn = dynamic_cast<robDOFRn&>(output);
-    // blend the values
-    outputrn  = robDOFRn( input1.x + input2.x, 
-			  input1.xd + input2.xd,
-			  input1.xdd + input2.xdd );
-  }
-  catch(std::bad_cast){
-    cout << "robFunctionPiecewise::PackRn: Couldn't cast output" <<endl;
-  }
-}

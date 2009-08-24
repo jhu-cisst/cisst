@@ -52,7 +52,6 @@ robLinear::robLinear( real x1, const Rn& y1, real x2, const Rn& y2 ){
 
   Rn m = (y2-y1)/(x2-x1);
   Rn b = y1 - m*x1;
-
   A.SetSize(y1.size(), 2, VCT_ROW_MAJOR);
   for(size_t i=0; i<y1.size(); i++){
     A[i][0] = m[i];   
@@ -65,62 +64,45 @@ robLinear::robLinear( real x1, const Rn& y1, real x2, const Rn& y2 ){
 }
 
 robDomainAttribute robLinear::IsDefinedFor( const robDOF& input ) const{
-  try{
 
-    const robDOFRn& inputrn = dynamic_cast<const robDOFRn&>(input);
-
-    // test the dof are real numbers
-    if( !inputrn.IsReal() ) {
-      cout << "robLinear::IsDefinedFor: expected a real input" << endl;
-      return UNDEFINED;
-    }
-
-    // for now, make sure that only time is accepted
-    if( !inputrn.IsSet( robDOF::TIME ) ) { 
-      cout << "robLinear::IsDefinedFor: expected a time input" << endl;
-      return UNDEFINED;
-    }
-
-    // test that the time is within the bounds
-    real t = inputrn.x.at(0);
-    real tmin = xmin.at(0);
-    real tmax = xmax.at(0);
-
-    if( tmin <= t && t <= tmax )                           return DEFINED;
-    if( tmin-robFunctionPiecewise::TAU <= t && t <= tmin ) return INCOMING;
-    if( tmax <= t && t <= tmax+robFunctionPiecewise::TAU ) return OUTGOING;
-    if( tmax+robFunctionPiecewise::TAU < t )               return EXPIRED;
-
+  // test the dof are real numbers
+  if( !input.IsTime() ) {
+    cout << "robLinear::IsDefinedFor: expected a time input" << endl;
     return UNDEFINED;
   }
-  catch( std::bad_cast ){
-    cout << "robLinear::IsDefinedFor: unable to cast the input as a Rn" << endl;
-    return UNDEFINED;
-  }
+
+  // test that the time is within the bounds
+  real t = input.t;
+  real tmin = xmin.at(0);
+  real tmax = xmax.at(0);
+  
+  if( tmin <= t && t <= tmax )                           return DEFINED;
+  if( tmin-robFunctionPiecewise::TAU <= t && t <= tmin ) return INCOMING;
+  if( tmax <= t && t <= tmax+robFunctionPiecewise::TAU ) return OUTGOING;
+  if( tmax+robFunctionPiecewise::TAU < t )               return EXPIRED;
+
+  return UNDEFINED;
 }
 
 robError robLinear::Evaluate( const robDOF& input, robDOF& output ){
-  //cout << "robLinear::Evaluate (ENTER) " << typeid(output).name() << endl;
-  try{
-    const robDOFRn& inputrn = dynamic_cast<const robDOFRn&>(input); 
-    robDOFRn& outputrn = dynamic_cast<robDOFRn&>(output); 
-    Rn x = inputrn.x;         // get the x vector 
 
-    x.resize( x.size()+1 );   // augment x with an homogeneous coordinate
-    x[ x.size()-1 ] = 1;      // 
-
-    Rn y = A * x;
-    size_t N = y.size();
-
-    // set the output
-    outputrn = robDOFRn( y, A.Column(0), Rn(N, 0.0) );
-    //cout << "robLinear::Evaluate (LEAVE) " << endl;
-
-    return SUCCESS;
-  }
-
-  catch( std::bad_cast ){
-    cout << "robLinear::Evaluate: unable to cast the input/output as a Rn"<<endl;
+  // test the dof are real numbers
+  if( !input.IsTime() ) {
+    cout << "robLinear::Evaluate: expected a real input" << endl;
     return FAILURE;
   }
+
+  //Rn x = input.x;         // get the x vector 
+  Rn x = Rn(1, input.t);
+    
+  x.resize( x.size()+1 );   // augment x with an homogeneous coordinate
+  x[ x.size()-1 ] = 1;      // 
+  
+  Rn y = A * x;
+  size_t N = y.size();
+  
+  // set the output
+  output = robDOF( y, A.Column(0), Rn(N, 0.0) );
+
+  return SUCCESS;
 }

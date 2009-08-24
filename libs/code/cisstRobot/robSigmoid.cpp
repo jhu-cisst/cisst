@@ -79,54 +79,35 @@ robSigmoid::robSigmoid( real y1, real y2, real ydmax ) {
 
 robDomainAttribute robSigmoid::IsDefinedFor( const robDOF& input ) const{
 
-  try{
-
-    const robDOFRn& inputrn = dynamic_cast<const robDOFRn&>(input);
-
-    // test the dof are real numbers
-    if( !inputrn.IsReal() ){
-      cout << "robSigmoid::IsDefinedFor: expected a real input" << endl;
-      return UNDEFINED;
-    }
-
-    // test to see that the input is a time value
-    if( !inputrn.IsSet( robDOF::TIME ) ){ 
-      cout << "robSigmoid::IsDefinedFor: expected a time input" << endl;
-      return UNDEFINED;
-    }
-
-    real t = inputrn.x.at(0);
-    if( xmin <= t && t <= xmax )                           return DEFINED;
-    if( xmin-robFunctionPiecewise::TAU <= t && t <= xmin ) return INCOMING;
-    if( xmax <= t && t <= xmax+robFunctionPiecewise::TAU ) return OUTGOING;
-    if( xmax+robFunctionPiecewise::TAU < t )               return EXPIRED;
-    
+  // test the dof are real numbers
+  if( !input.IsTime() ){
+    cout << "robSigmoid::IsDefinedFor: expected a time input" << endl;
     return UNDEFINED;
   }
-  catch( std::bad_cast ){
-    cout << "robSigmoid::IsDefinedFor: unable to cast the input as a Rn" << endl;
-    return UNDEFINED;
-  }
+
+  real t = input.t;
+  if( xmin <= t && t <= xmax )                           return DEFINED;
+  if( xmin-robFunctionPiecewise::TAU <= t && t <= xmin ) return INCOMING;
+  if( xmax <= t && t <= xmax+robFunctionPiecewise::TAU ) return OUTGOING;
+  if( xmax+robFunctionPiecewise::TAU < t )               return EXPIRED;
+  
+  return UNDEFINED;
 }
-
 
 robError robSigmoid::Evaluate( const robDOF& input, robDOF& output ){  
 
-  try{
-    const robDOFRn& inputrn = dynamic_cast<const robDOFRn&>(input); 
-    robDOFRn& outputrn      = dynamic_cast<robDOFRn&>(output); 
-
-    real t = inputrn.x.at(0);
-    real term1 = exp( -x3*( t + ts) );
-    real term2 = 1+term1;
-
-    outputrn = robDOFRn( Rn( 1, x1 /(term2) + x2 ), 
-			 Rn( 1,  x1*x3*term1 /(term2*term2) ),
-			 Rn( 1, x1*x3*x3*term1*(term1-1)/(term2*term2*term2) ) );
-    return SUCCESS;
-  }
-  catch( std::bad_cast ){
-    cout<<"robSigmoid::Evaluate: unable to cast the input/output as reals"<<endl;
+  if( !input.IsTime() ){
+    cout << "robSigmoid::Evaluate: expected a time input" << endl;
     return FAILURE;
   }
+
+  real t = input.t;
+  real term1 = exp( -x3*( t + ts) );
+  real term2 = 1+term1;
+  
+  output = robDOF( Rn( 1, x1 /(term2) + x2 ), 
+		   Rn( 1,  x1*x3*term1 /(term2*term2) ),
+		   Rn( 1, x1*x3*x3*term1*(term1-1)/(term2*term2*term2) ) );
+  return SUCCESS;
 }
+
