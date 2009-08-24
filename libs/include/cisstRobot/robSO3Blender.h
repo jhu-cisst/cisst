@@ -2,6 +2,7 @@
 #define _robSO3Blender_h
 
 #include <cisstRobot/robFunction.h>
+#include <cisstRobot/robFunctionPiecewise.h>
 
 #include <cisstVector/vctTransformationTypes.h>
 
@@ -23,6 +24,7 @@ namespace cisstRobot{
   
     // Taylor's blender
     real T1, T2, ti;
+    real tauA, tauB;
     SO3 Rw1;
     vctAxisAngleRotation3<real> n1t1;
     vctAxisAngleRotation3<real> n2t2;
@@ -38,7 +40,10 @@ namespace cisstRobot{
        \param R2 The final orientation
      */
     robSO3Blender( real ti, 
-		   real T1, real T2, const SO3& R0, const SO3& R1, const SO3& R2 );
+		   real T1, real T2, 
+		   const SO3& R0, const SO3& R1, const SO3& R2,
+		   real tA=robFunctionPiecewise::TAU,
+		   real tB=robFunctionPiecewise::TAU );
 
     //! Build a blender for R1->SO3 mappings based on Lloyd's paper
     /**

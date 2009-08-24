@@ -12,7 +12,7 @@ namespace cisstRobot{
     
   public:
     
-    virtual robDOFRn generate() = 0;
+    virtual robError Generate( robDOF& dof ) = 0;
     
   };
 }

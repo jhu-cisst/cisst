@@ -9,24 +9,31 @@ namespace cisstRobot{
   class robDomainLimit {};
 
   class robFunctionPiecewise : public robFunction {
+
   protected:
-    
+
     std::vector< robFunction* > functions;
     robFunction* blender;
 
-    void PackRn( const robDOFRn& input1, const robDOFRn& input2,robDOF& output );
-    void PackSO3(const robDOFSE3& input1,const robDOFSE3& input2,robDOF& output);
+    robError PackRn( const robDOF& input1, const robDOF& input2,robDOF& output );
+    robError PackSO3(const robDOF& input1, const robDOF& input2,robDOF& output);
 
-    void BlendRn( robFunction* initial, robFunction* final,
-		  const robDOF& input, robDOF& output );
-    void BlendSO3( robFunction* initial, robFunction* final,
-		   const robDOF& input, robDOF& output );
+    robError BlendRn( robFunction* initial, 
+		      robFunction* final,
+		      const robDOF& input, 
+		      robDOF& output );
+    robError BlendSO3( robFunction* initial, 
+		       robFunction* final,
+		       const robDOF& input, 
+		       robDOF& output );
 
 
   public:
     
     static const double TAU;
     
+    robFunctionPiecewise(){blender=NULL;}
+
     //! Insert a function
     /**
        This inserts a new function in the piecewise function. The function is

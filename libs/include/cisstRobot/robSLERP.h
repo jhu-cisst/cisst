@@ -20,7 +20,7 @@ namespace cisstRobot{
   public:
 
     //! hack...
-    virtual real Duration() const { return xmax-xmin; }
+    real Duration() const { return xmax-xmin; }
     
     //! Create a SLERP between ti and tf
     robSLERP( real ti, const SE3& Ri, real tf, const SE3& Rf);

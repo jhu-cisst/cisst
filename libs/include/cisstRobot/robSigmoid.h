@@ -15,6 +15,9 @@ namespace cisstRobot{
     
   public:
 
+    //! hack...
+    real Duration() const { return xmax-xmin; }
+
     //! Create a 1D->1D sigmoid mapping
     /**
        Define a sigmoid function that is bounded by \f$(x1,y1)\f$ and \f$(x2,y2)\f$
