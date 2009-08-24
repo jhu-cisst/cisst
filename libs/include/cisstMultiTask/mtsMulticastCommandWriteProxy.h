@@ -30,7 +30,6 @@ http://www.cisst.org/cisst/license.txt.
 #define _mtsMulticastCommandWriteProxy_h
 
 #include <cisstMultiTask/mtsMulticastCommandWriteBase.h>
-#include <vector>
 
 #include <cisstMultiTask/mtsExport.h>
 
@@ -41,19 +40,27 @@ http://www.cisst.org/cisst/license.txt.
  */
 class mtsMulticastCommandWriteProxy : public mtsMulticastCommandWriteBase
 {
+    friend class mtsDeviceProxy;
+
 public:
     typedef mtsMulticastCommandWriteBase BaseType;
 
-public:
+protected:
+    /*! Argument prototype. Deserialization recovers the original argument
+        prototype object. */
+    mtsGenericObject * ArgumentPrototype;
+
     /*! The constructor with a name. */
     mtsMulticastCommandWriteProxy(const std::string & name) :
-        BaseType(name)
+        BaseType(name),
+        ArgumentPrototype(NULL)
     {}
 
     /*! Default destructor. Does nothing. */
     ~mtsMulticastCommandWriteProxy() 
     {}
-    
+
+public:
     /*! Execute all the commands in the composite. */
     virtual mtsCommandBase::ReturnType Execute(const mtsGenericObject & argument) {
         unsigned int index;        
@@ -63,16 +70,14 @@ public:
         return mtsCommandBase::DEV_OK;
     }
 
-    /*! Return a pointer on the argument prototype.  Uses the first
-      command added to find the argument prototype.  If no command is
-      available, return 0 (null pointer) */
+    /*! Set an argument prototype */
+    void SetArgumentPrototype(mtsGenericObject * argumentPrototype) {
+        ArgumentPrototype = argumentPrototype;
+    }
+
+    /*! Return a pointer on the argument prototype */
     const mtsGenericObject * GetArgumentPrototype(void) const {
-        //
-        // TODO: FIX ME
-        //
-        static mtsDouble TEMP_VAR_FIX_ME;
-        //return reinterpret_cast<const mtsGenericObject *>(0x1122);
-        return &TEMP_VAR_FIX_ME;
+        return ArgumentPrototype;
     }
 };
 

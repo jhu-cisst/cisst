@@ -18,6 +18,7 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+#include <cisstCommon/cmnDeSerializer.h>
 #include <cisstMultiTask/mtsDeviceProxy.h>
 #include <cisstMultiTask/mtsDeviceInterface.h>
 #include <cisstMultiTask/mtsDeviceInterfaceProxy.h>
@@ -140,11 +141,18 @@ mtsProvidedInterface * mtsDeviceProxy::CreateProvidedInterfaceProxy(
         return NULL;
     }
 
-    // Create command proxies.
-    // CommandId is initially set to zero meaning that it needs to be updated later.
-    // An actual value will be assigned later when UpdateCommandId() is executed.
-    CommandIDType commandId = 0;
+    // Create command proxies using the information fetched from the server.
+    // CommandId is initially set to zero which needs to be updated later.
+    // Actual values will be assigned later when GetCommandId() is called.
+    // This lazy initialization is for thread-safety.
+    // Note that argument prototypes should be deserialized, if any.
     std::string commandName;
+    mtsGenericObject * argumentPrototype = NULL,
+                     * argument1Prototype = NULL, 
+                     * argument2Prototype = NULL;
+
+    std::stringstream streamBuffer;
+    cmnDeSerializer deserializer(streamBuffer);
 
 #define ADD_COMMAND_PROXY_BEGIN(_commandType) \
     {\
@@ -159,26 +167,49 @@ mtsProvidedInterface * mtsDeviceProxy::CreateProvidedInterfaceProxy(
 
     // 2-1) Void
     ADD_COMMAND_PROXY_BEGIN(Void)
-        newCommandVoid = new mtsCommandVoidProxy(commandId, proxyClient, commandName);
+        newCommandVoid = new mtsCommandVoidProxy(NULL, proxyClient, commandName);
         providedInterfaceProxy->GetCommandVoidMap().AddItem(commandName, newCommandVoid);
     ADD_COMMAND_PROXY_END
 
     // 2-2) Write
     ADD_COMMAND_PROXY_BEGIN(Write)
-        newCommandWrite = new mtsCommandWriteProxy(commandId, proxyClient, commandName);
+        newCommandWrite = new mtsCommandWriteProxy(NULL, proxyClient, commandName);
         providedInterfaceProxy->GetCommandWriteMap().AddItem(commandName, newCommandWrite);
+        // argument deserialization
+        streamBuffer.str("");
+        streamBuffer << it->ArgumentPrototypeSerialized;
+        argumentPrototype = dynamic_cast<mtsGenericObject *>(deserializer.DeSerialize());
+        CMN_ASSERT(argumentPrototype);
+        newCommandWrite->SetArgumentPrototype(argumentPrototype);
     ADD_COMMAND_PROXY_END
 
     // 2-3) Read
     ADD_COMMAND_PROXY_BEGIN(Read)
-        newCommandRead = new mtsCommandReadProxy(commandId, proxyClient, commandName);
+        newCommandRead = new mtsCommandReadProxy(NULL, proxyClient, commandName);
         providedInterfaceProxy->GetCommandReadMap().AddItem(commandName, newCommandRead);
+        // argument deserialization
+        streamBuffer.str("");
+        streamBuffer << it->ArgumentPrototypeSerialized;
+        argumentPrototype = dynamic_cast<mtsGenericObject *>(deserializer.DeSerialize());
+        CMN_ASSERT(argumentPrototype);
+        newCommandRead->SetArgumentPrototype(argumentPrototype);
     ADD_COMMAND_PROXY_END
 
     // 2-4) QualifiedRead
     ADD_COMMAND_PROXY_BEGIN(QualifiedRead)
-        newCommandQualifiedRead = new mtsCommandQualifiedReadProxy(commandId, proxyClient, commandName);
+        newCommandQualifiedRead = new mtsCommandQualifiedReadProxy(NULL, proxyClient, commandName);
         providedInterfaceProxy->GetCommandQualifiedReadMap().AddItem(commandName, newCommandQualifiedRead);
+        // argument1 deserialization
+        streamBuffer.str("");
+        streamBuffer << it->Argument1PrototypeSerialized;
+        argument1Prototype = dynamic_cast<mtsGenericObject *>(deserializer.DeSerialize());
+        CMN_ASSERT(argument1Prototype);
+        // argument2 deserialization
+        streamBuffer.str("");
+        streamBuffer << it->Argument2PrototypeSerialized;
+        argument2Prototype = dynamic_cast<mtsGenericObject *>(deserializer.DeSerialize());
+        CMN_ASSERT(argument2Prototype);
+        newCommandQualifiedRead->SetArgumentPrototype(argument1Prototype, argument2Prototype);
     ADD_COMMAND_PROXY_END
 
 #undef ADD_COMMAND_PROXY_BEGIN
@@ -187,6 +218,7 @@ mtsProvidedInterface * mtsDeviceProxy::CreateProvidedInterfaceProxy(
     // 3) Create event generator proxies.
     std::string eventName;
 
+    // 3-1) EventVoid
     mtsFunctionVoid * eventVoidGeneratorProxy = NULL;
     mtsDeviceInterfaceProxy::EventVoidSequence::const_iterator itEventVoid =
         providedInterfaceInfo.EventsVoid.begin();
@@ -198,6 +230,7 @@ mtsProvidedInterface * mtsDeviceProxy::CreateProvidedInterfaceProxy(
         CMN_ASSERT(eventVoidGeneratorProxy->Bind(providedInterfaceProxy->AddEventVoid(eventName)));
     }
 
+    // 3-1) EventWrite
     mtsFunctionWrite * eventWriteGeneratorProxy = NULL;
     mtsMulticastCommandWriteProxy * eventMulticastCommandProxy = NULL;
 
@@ -209,6 +242,14 @@ mtsProvidedInterface * mtsDeviceProxy::CreateProvidedInterfaceProxy(
         CMN_ASSERT(EventWriteGeneratorProxyMap.AddItem(eventName, eventWriteGeneratorProxy));
 
         eventMulticastCommandProxy = new mtsMulticastCommandWriteProxy(eventName);
+        
+        // event argument deserialization
+        streamBuffer.str("");
+        streamBuffer << itEventWrite->ArgumentPrototypeSerialized;
+        argumentPrototype = dynamic_cast<mtsGenericObject *>(deserializer.DeSerialize());
+        CMN_ASSERT(argumentPrototype);
+        eventMulticastCommandProxy->SetArgumentPrototype(argumentPrototype);
+
         CMN_ASSERT(providedInterfaceProxy->AddEvent(eventName, eventMulticastCommandProxy));
         CMN_ASSERT(eventWriteGeneratorProxy->Bind(eventMulticastCommandProxy));
     }
@@ -231,7 +272,7 @@ void mtsDeviceProxy::GetEventGeneratorProxyPointers(
     //    element.Name = namesOfEventHandlersVoid[i];
     //    eventGenerator = providedInterfaceProxy->EventVoidGenerators.GetItem(element.Name);
     //    CMN_ASSERT(eventGenerator);
-    //    element.ProxyId = reinterpret_cast<int>(eventGenerator);
+    //    element.ProxyId = reinterpret_cast<CommandIDType>(eventGenerator);
     //    eventGeneratorProxies.EventGeneratorVoidProxies.push_back(element);
     //}
 #define GET_EVENT_GENERATOR_PROXY_BEGIN(_type)\
@@ -241,7 +282,7 @@ void mtsDeviceProxy::GetEventGeneratorProxyPointers(
         element.Name = namesOfEventHandlers##_type[i];\
         eventGenerator = providedInterfaceProxy->Event##_type##Generators.GetItem(element.Name);\
         CMN_ASSERT(eventGenerator);\
-        element.ProxyId = reinterpret_cast<int>(eventGenerator);\
+        element.ProxyId = reinterpret_cast<CommandIDType>(eventGenerator);\
         eventGeneratorProxies.EventGenerator##_type##Proxies.push_back(element);
 #define GET_EVENT_GENERATOR_PROXY_END\
     }
@@ -323,12 +364,12 @@ mtsRequiredInterface * mtsDeviceProxy::CreateRequiredInterfaceProxy(
     // 2. Event handler proxies.
     std::string eventName;
 
-    // All CommandId values are initially set to zero meaning that they need 
-    // to be updated later. An actual value will be assigned by the client when 
-    // the server execute GetListsOfEventGeneratorsRegistered() method.
+    // All CommandId values are initially set to zero and will be updated later. 
+    // Actual values will be assigned by UpdateEventHandlerId() method.
+    // ('lazy initialization')
     // Also note that all events are disabled by default. Commands that are
     // actually bounded and used at the client will only be enabled by the
-    // execution of the GetListsOfEventGeneratorsRegistered() method.
+    // execution of UpdateEventHandlerId() method.
     mtsCommandVoidProxy * actualEventVoidCommandProxy = NULL;
     std::vector<std::string> namesOfEventsVoid = providedInterface->GetNamesOfEventsVoid();
     for (unsigned int i = 0; i < namesOfEventsVoid.size(); ++i) {
@@ -347,6 +388,12 @@ mtsRequiredInterface * mtsDeviceProxy::CreateRequiredInterfaceProxy(
         eventName = namesOfEventsWrite[i];
         actualEventWriteCommandProxy = new mtsCommandWriteProxy(NULL, proxyServer, eventName);
         actualEventWriteCommandProxy->Disable();
+
+        //
+        //
+        //  FIX: HERE THE ARGUMENT PROTOTYPE OF mtsCommandWrite SHOULD BE RECOVERED!!!
+        //
+        //
 
         CMN_ASSERT(EventHandlerWriteProxyMap.AddItem(eventName, actualEventWriteCommandProxy));
         CMN_ASSERT(requiredInterfaceProxy->EventHandlersWrite.AddItem(
@@ -379,7 +426,7 @@ void mtsDeviceProxy::GetFunctionPointers(
     it = FunctionVoidProxyMap.GetMap().begin();
     //for (; it != FunctionVoidProxyMap.GetMap().end(); ++it) {
     //    element.Name = it->first;
-    //    element.FunctionProxyId = reinterpret_cast<int>(it->second);
+    //    element.FunctionProxyId = reinterpret_cast<CommandIDType>(it->second);
     //    functionProxy.FunctionVoidProxies.push_back(element);
     //}
 #define GET_FUNCTION_PROXY_BEGIN(_commandType)\
@@ -387,7 +434,7 @@ void mtsDeviceProxy::GetFunctionPointers(
     it##_commandType = Function##_commandType##ProxyMap.GetMap().begin();\
     for (; it##_commandType != Function##_commandType##ProxyMap.GetMap().end(); ++it##_commandType) {\
         element.Name = it##_commandType->first;\
-        element.FunctionProxyId = reinterpret_cast<int>(it##_commandType->second);\
+        element.FunctionProxyId = reinterpret_cast<CommandIDType>(it##_commandType->second);\
         functionProxySet.Function##_commandType##Proxies.push_back(element)
 #define GET_FUNCTION_PROXY_END\
     }

@@ -106,7 +106,9 @@ protected:
     EventWriteGeneratorProxyMapType EventWriteGeneratorProxyMap;
 
 public:
-    /*! Create a provided interface proxy and returns the pointer to it. */
+    /*! Create a provided interface proxy and returns the pointer to it. All command
+        proxies and event generator proxies are dynamically created here based on the 
+        information received from the server. */
     mtsProvidedInterface * CreateProvidedInterfaceProxy(
         mtsDeviceInterfaceProxyClient * proxyClient,
         const mtsDeviceInterfaceProxy::ProvidedInterfaceInfo & providedInterfaceInfo);

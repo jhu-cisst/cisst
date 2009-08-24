@@ -514,6 +514,24 @@ bool mtsTask::SendGetProvidedInterfaceInfo(
         providedInterfaceName, providedInterfaceInfo);
 }
 
+bool mtsTask::SendCreateClientProxies(
+    const std::string & requiredInterfaceProxyName,
+    const std::string & userTaskName, const std::string & requiredInterfaceName,
+    const std::string & resourceTaskName, const std::string & providedInterfaceName)
+{
+    // Get a required interface proxy.
+    mtsDeviceInterfaceProxyClient * requiredInterfaceProxy = 
+        GetRequiredInterfaceProxy(requiredInterfaceProxyName);
+    if (!requiredInterfaceProxy) {
+        CMN_LOG_CLASS_RUN_ERROR << "SendCreateClientProxies: "
+            << "Cannot find required interface proxy: " << requiredInterfaceProxyName << std::endl;
+        return false;
+    }
+
+    return requiredInterfaceProxy->SendCreateClientProxies(
+        userTaskName, requiredInterfaceName, resourceTaskName, providedInterfaceName);
+}
+
 bool mtsTask::SendConnectServerSide(
     const std::string & requiredInterfaceProxyName,
     const std::string & userTaskName, const std::string & requiredInterfaceName,

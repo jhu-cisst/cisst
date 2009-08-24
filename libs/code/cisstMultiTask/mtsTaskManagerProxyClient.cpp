@@ -200,7 +200,7 @@ mtsDeviceInterface * mtsTaskManagerProxyClient::GetProvidedInterfaceProxy(
         return NULL;
     }
 
-    // Create a provided interface proxy using the information received from the 
+    // 5. Create a provided interface proxy using the information received from the 
     // server task.
     mtsDeviceInterface * providedInterfaceProxy = 
         serverTaskProxy->CreateProvidedInterfaceProxy(

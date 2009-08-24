@@ -42,27 +42,27 @@ module mtsDeviceInterfaceProxy
 	
 	struct CommandWriteInfo { 
 		string Name;
-		string ArgumentTypeName;
+        string ArgumentPrototypeSerialized;
 	};
 	
 	struct CommandReadInfo { 
 		string Name;
-		string ArgumentTypeName;
+        string ArgumentPrototypeSerialized;
 	};
 	
 	struct CommandQualifiedReadInfo { 
 		string Name;
-		string Argument1TypeName;
-		string Argument2TypeName;
+        string Argument1PrototypeSerialized;
+        string Argument2PrototypeSerialized;
 	};
 	
 	struct EventVoidInfo { 
 		string Name;
 	};
 	
-	struct EventWriteInfo { 
+	struct EventWriteInfo {
 		string Name;
-        string ArgumentTypeName;
+        string ArgumentPrototypeSerialized;
 	};
 
 	sequence<CommandVoidInfo>          CommandVoidSequence;
@@ -160,11 +160,21 @@ module mtsDeviceInterfaceProxy
             shutdown (or close) safely and cleanly. */
         void Shutdown();
 
-        /*! Get the information about the provided interface which will be used to 
+        /*! Get the information on the provided interface which will be used to 
             create a provided interface proxy at client side. */
         ["cpp:const"] idempotent 
         bool GetProvidedInterfaceInfo(string providedInterfaceName,
                                       out ProvidedInterfaceInfo info);
+
+        /*! Send the information on the required interface that will be used to
+            create a required interface proxy at the server side. Then, the server will
+            create client proxies (e.g. client task proxy, required interface proxy)
+            using this information.
+            This information includes the serialized argument prototypes of the event 
+            handlers' at the client side.
+            Return false if any proxy object creation process failed. */
+        bool CreateClientProxies(string userTaskName, string requiredInterfaceName,
+			                     string resourceTaskName, string providedInterfaceName);
 
         /*! Call mtsTaskManager::Connect() at server side. */
         bool ConnectServerSide(string userTaskName, string requiredInterfaceName,

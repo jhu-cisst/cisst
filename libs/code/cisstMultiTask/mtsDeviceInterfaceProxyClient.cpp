@@ -182,7 +182,19 @@ void mtsDeviceInterfaceProxyClient::ReceiveExecuteEventWriteSerialized(
     IceLogger->trace("TIClient", buf);
 
     // Deserialization
-    DeSerializationBuffer.str("");
+	/*
+    mtsMulticastCommandWriteProxy * eventWriteGeneratorProxy;
+    CommandExecution.Lock();
+    {
+        DeSerializationBuffer.str("");
+        DeSerializationBuffer << argument;
+
+        eventWriteGeneratorProxy = reinterpret_cast<mtsMulticastCommandWriteProxy*>(commandId);
+        CMN_ASSERT(eventWriteGeneratorProxy);
+    }
+    CommandExecution.Unlock();
+	*/
+	DeSerializationBuffer.str("");
     DeSerializationBuffer << argument;
     
     mtsMulticastCommandWriteProxy * eventWriteGeneratorProxy = 
@@ -208,6 +220,18 @@ const bool mtsDeviceInterfaceProxyClient::SendGetProvidedInterfaceInfo(
 
     return DeviceInterfaceServerProxy->GetProvidedInterfaceInfo(
         providedInterfaceName, providedInterfaceInfo);
+}
+
+bool mtsDeviceInterfaceProxyClient::SendCreateClientProxies(
+    const std::string & userTaskName, const std::string & requiredInterfaceName,
+    const std::string & resourceTaskName, const std::string & providedInterfaceName)
+{
+    if (!IsValidSession) return false;
+
+    IceLogger->trace("TIClient", ">>>>> SEND: SendCreateClientProxies");
+
+    return DeviceInterfaceServerProxy->CreateClientProxies(
+        userTaskName, requiredInterfaceName, resourceTaskName, providedInterfaceName);
 }
 
 bool mtsDeviceInterfaceProxyClient::SendConnectServerSide(

@@ -28,7 +28,6 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsCommandWriteProxy_h
 #define _mtsCommandWriteProxy_h
 
-#include <cisstCommon/cmnSerializer.h>
 #include <cisstMultiTask/mtsCommandReadOrWriteBase.h>
 #include <cisstMultiTask/mtsDeviceInterfaceProxyClient.h>
 #include <cisstMultiTask/mtsDeviceInterfaceProxyServer.h>
@@ -36,38 +35,47 @@ http://www.cisst.org/cisst/license.txt.
 /*!
   \ingroup cisstMultiTask
 
-  mtsCommandWriteProxy is a proxy for mtsCommandWrite. This proxy contains
-  CommandId assigned as a function pointer of mtsFunctionWrite type.
-  When Execute() method is called, the CommandId with payload is sent to the 
-  server task across networks.
+  mtsCommandWriteProxy is a proxy class for mtsCommandWrite. This class contains
+  CommandId of which value is a function pointer of mtsFunctionWrite type.
+  When Execute() method is called, a CommandId value with payload is sent to the 
+  connected server task across a network.
 
-  Note that there can be two kinds of interface proxy class that manages 
-  this process. The first one is mtsDeviceInterfaceProxyClient which is used
-  to execute write commands at a server side, and the other one is 
-  mtsDeviceInterfaceProxyServer which propagates events generated at a server
-  to a client. Only one of them can be initialized while the other has to
-  be NULL.
+  Note that there are two different usages of this class: as a command or an event.
+  If this class used as COMMANDS, an instance of mtsDeviceInterfaceProxyClient 
+  class should be provided and this is used to execute a write command at a server.
+  When this is used for EVENTS, an instance of mtsDeviceInterfaceProxyServer class
+  takes care of the process of event propagation across a network so that an event
+  is sent to a client and an event handler is called at a client side.
+  Currently, only one of them can be initialized as a valid value while the other 
+  has to be NULL.
 */
 class mtsCommandWriteProxy: public mtsCommandWriteBase {
+
+    friend class mtsDeviceProxy;
+    
 public:
     typedef mtsCommandWriteBase BaseType;
 
 protected:
     /*! CommandId is set as a pointer to a mtsFunctionWrite at peer's
-      memory space which binds to an actual write command. */
+        memory space which binds to an actual write command. */
     CommandIDType CommandId;
+
+    /*! Argument prototype. Deserialization recovers the original argument
+        prototype object. */
+    mtsGenericObject * ArgumentPrototype;
     
     /*! Device interface proxy objects which execute a write command at 
         peer's memory space across networks. */
     mtsDeviceInterfaceProxyClient * ProvidedInterfaceProxy;
     mtsDeviceInterfaceProxyServer * RequiredInterfaceProxy;
 
-public:
     /*! The constructors. */
     mtsCommandWriteProxy(const CommandIDType commandId, 
                          mtsDeviceInterfaceProxyClient * providedInterfaceProxy) :
         BaseType(),
         CommandId(commandId),
+        ArgumentPrototype(NULL),
         ProvidedInterfaceProxy(providedInterfaceProxy),
         RequiredInterfaceProxy(NULL)
     {}
@@ -76,6 +84,7 @@ public:
                          mtsDeviceInterfaceProxyServer * requiredInterfaceProxy) :
         BaseType(),
         CommandId(commandId),
+        ArgumentPrototype(NULL),
         ProvidedInterfaceProxy(NULL),
         RequiredInterfaceProxy(requiredInterfaceProxy)
     {}
@@ -86,6 +95,7 @@ public:
                          const std::string & name) :
         BaseType(name),
         CommandId(commandId),
+        ArgumentPrototype(NULL),
         ProvidedInterfaceProxy(providedInterfaceProxy),
         RequiredInterfaceProxy(NULL)
     {}
@@ -95,6 +105,7 @@ public:
                          const std::string & name) :
         BaseType(name),
         CommandId(commandId),
+        ArgumentPrototype(NULL),
         ProvidedInterfaceProxy(NULL),
         RequiredInterfaceProxy(requiredInterfaceProxy)
     {}
@@ -107,9 +118,10 @@ public:
     void SetCommandId(const CommandIDType & newCommandId) {
         CommandId = newCommandId;
     }
-
-    /*! The execute method. */
-    virtual mtsCommandBase::ReturnType Execute(const mtsGenericObject & argument) {
+    
+public:    
+    /*! Direct execute can be used for mtsMulticastCommandWrite. */
+    inline mtsCommandBase::ReturnType Execute(const ArgumentType & argument) {
         if (this->IsEnabled()) {
             if (ProvidedInterfaceProxy) {
                 ProvidedInterfaceProxy->SendExecuteCommandWriteSerialized(CommandId, argument);
@@ -117,7 +129,6 @@ public:
                 CMN_ASSERT(RequiredInterfaceProxy);
                 RequiredInterfaceProxy->SendExecuteEventWriteSerialized(CommandId, argument);
             }
-            return mtsCommandBase::DEV_OK;
         }
         return mtsCommandBase::DISABLED;
     }
@@ -134,12 +145,14 @@ public:
         outputStream << "Currently " << (this->IsEnabled() ? "enabled" : "disabled");
     }
 
+    /*! Set an argument prototype */
+    void SetArgumentPrototype(mtsGenericObject * argumentPrototype) {
+        ArgumentPrototype = argumentPrototype;
+    }
+    
     /*! Return a pointer on the argument prototype */
     const mtsGenericObject * GetArgumentPrototype(void) const {
-        //
-        // TODO: FIX ME
-        //
-        return reinterpret_cast<const mtsGenericObject *>(0x1234);
+        return ArgumentPrototype;
     }
 };
 

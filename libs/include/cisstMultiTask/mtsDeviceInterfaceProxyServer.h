@@ -23,13 +23,12 @@ http://www.cisst.org/cisst/license.txt.
 #define _mtsDeviceInterfaceProxyServer_h
 
 #include <cisstCommon/cmnDeSerializer.h>
+//#include <cisstOSAbstraction/osaMutex.h>
 #include <cisstMultiTask/mtsDeviceInterface.h>
 #include <cisstMultiTask/mtsDeviceInterfaceProxy.h>
 #include <cisstMultiTask/mtsProxyBaseServer.h>
 
 #include <cisstMultiTask/mtsExport.h>
-
-//#include <string>
 
 /*!
   \ingroup cisstMultiTask
@@ -85,6 +84,10 @@ protected:
     /*! Pointer to the task connected. */
     mtsTask * ConnectedTask;
 
+    /*! Mutex to prevent the ICE library from calling a callback function before 
+        the previous function call has not completed yet. */
+    //osaMutex CommandExecution;
+
     /*! Connected client object. */
     DeviceInterfaceClientProxyType ConnectedClient;
 
@@ -131,6 +134,11 @@ protected:
     const bool ReceiveGetProvidedInterfaceInfo(
         const std::string & providedInterfaceName,
         mtsDeviceInterfaceProxy::ProvidedInterfaceInfo & providedInterfaceInfo);
+
+    /*! Create server-side proxy objects (client task proxy, required interface proxy). */
+    bool ReceiveCreateClientProxies(
+        const std::string & userTaskName, const std::string & requiredInterfaceName,
+        const std::string & resourceTaskName, const std::string & providedInterfaceName);
 
     /*! Connect at server side. 
         This method creates a client task proxy (mtsDeviceProxy) and a required
@@ -193,6 +201,12 @@ protected:
         bool GetProvidedInterfaceInfo(const std::string &,
                                       ::mtsDeviceInterfaceProxy::ProvidedInterfaceInfo&,
                                       const ::Ice::Current&) const;
+        
+        bool CreateClientProxies(
+            const std::string & userTaskName, const std::string & requiredInterfaceName,
+            const std::string & resourceTaskName, const std::string & providedInterfaceName,
+            const ::Ice::Current&);
+
         bool ConnectServerSide(
             const std::string & userTaskName, const std::string & requiredInterfaceName,
             const std::string & resourceTaskName, const std::string & providedInterfaceName,

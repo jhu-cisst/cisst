@@ -48,8 +48,8 @@ http://www.cisst.org/cisst/license.txt.
 
      Proxy server: a proxy that WORKS AS a server and runs at the server side
      Proxy client: a proxy that WORKS AS a client and runs at the client side
-     Server proxy: a PSEUDO-proxy server that runs at the client side
-     Client proxy: a PSEUDO-proxy client that runs at the server side
+     Server proxy: a virtual server that runs at the client side
+     Client proxy: a virtual client that runs at the server side
 */
 
 //-----------------------------------------------------------------------------
@@ -71,7 +71,7 @@ Task layer          : 11705 (e.g. the server task)
 #define BASE_PORT_NUMBER_TASK_LAYER         11705
 
 /*! Typedef for Command ID */
-#define CommandIDType IceUtil::Int64
+#define CommandIDType unsigned long long
 #define IceCommandIDType Long
 
 //-----------------------------------------------------------------------------

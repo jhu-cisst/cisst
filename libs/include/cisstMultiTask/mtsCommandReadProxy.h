@@ -29,7 +29,6 @@ http://www.cisst.org/cisst/license.txt.
 #define _mtsCommandReadProxy_h
 
 #include <cisstMultiTask/mtsCommandReadOrWriteBase.h>
-#include <cisstCommon/cmnSerializer.h>
 
 /*!
   \ingroup cisstMultiTask
@@ -41,31 +40,40 @@ http://www.cisst.org/cisst/license.txt.
   this process.
 */
 class mtsCommandReadProxy: public mtsCommandReadBase {
+    
+    friend class mtsDeviceProxy;
+
 public:
-    //typedef cmnDouble ArgumentType;
     typedef mtsCommandReadBase BaseType;
 
-protected:    
-    mtsDeviceInterfaceProxyClient * ProvidedInterfaceProxy;
-
-    /*! ID assigned by the server as a pointer to the actual command in server's
-        memory space. */
+protected:
+    /*! CommandId is set as a pointer to a mtsFunctionRead at peer's
+        memory space which binds to an actual write command. */
     CommandIDType CommandId;
 
-public:
+    /*! Argument prototype. Deserialization recovers the original argument
+        prototype object. */
+    mtsGenericObject * ArgumentPrototype;
+
+    /*! Device interface proxy objects which execute a command at 
+        peer's memory space across networks. */
+    mtsDeviceInterfaceProxyClient * ProvidedInterfaceProxy;
+
     mtsCommandReadProxy(const CommandIDType commandId, 
                         mtsDeviceInterfaceProxyClient * providedInterfaceProxy):
         BaseType(),
-        ProvidedInterfaceProxy(providedInterfaceProxy), 
-        CommandId(commandId)
+        CommandId(commandId),
+        ArgumentPrototype(NULL), 
+        ProvidedInterfaceProxy(providedInterfaceProxy)
     {}
 
     mtsCommandReadProxy(const CommandIDType commandId,
                         mtsDeviceInterfaceProxyClient * providedInterfaceProxy,
                         const std::string & name):
         BaseType(name),
-        ProvidedInterfaceProxy(providedInterfaceProxy),
-        CommandId(commandId)
+        CommandId(commandId),
+        ArgumentPrototype(NULL), 
+        ProvidedInterfaceProxy(providedInterfaceProxy)
     {}
 
     virtual ~mtsCommandReadProxy()
@@ -76,9 +84,11 @@ public:
         CommandId = newCommandId;
     }
 
+public:
     /*! The execute method. */
     virtual mtsCommandBase::ReturnType Execute(mtsGenericObject & argument) {
         if (this->IsEnabled()) {
+            CMN_ASSERT(ProvidedInterfaceProxy);
             ProvidedInterfaceProxy->SendExecuteCommandReadSerialized(CommandId, argument);
             return mtsCommandBase::DEV_OK;
         }
@@ -92,12 +102,14 @@ public:
         outputStream << "Currently " << (this->IsEnabled() ? "enabled" : "disabled");
     }
 
+    /*! Set an argument prototype */
+    void SetArgumentPrototype(mtsGenericObject * argumentPrototype) {
+        ArgumentPrototype = argumentPrototype;
+    }
+
     /*! Return a pointer on the argument prototype */
     const mtsGenericObject * GetArgumentPrototype(void) const {
-        //
-        // TODO: FIX ME
-        //
-        return reinterpret_cast<const mtsGenericObject *>(0x5678);
+        return ArgumentPrototype;
     }
 };
 

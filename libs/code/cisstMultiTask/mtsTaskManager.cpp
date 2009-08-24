@@ -393,8 +393,35 @@ bool mtsTaskManager::Connect(const std::string & userTaskName, const std::string
 #if CISST_MTS_HAS_ICE
     if (requestServerSideConnect) {
         // At client side, if the connection between the actual required interface and 
-        // the provided interface proxy is established successfully, connect the actual 
-        // provided interface with the required interface proxy at server side.
+        // the provided interface proxy is established successfully, request the server
+        // that it connects the actual provided interface with the required interface proxy.
+        // This server-side connection consists of two steps: 
+        // a. CreateClientProxies() and b. ConnectServerSide()
+
+        // a. CreateClientProxies()
+        // Let the server create client proxy objects (e.g. client task proxy, required 
+        // interface proxy). Note that this command contains the serialized argument 
+        // prototypes of the actual event handlers'.
+
+        //
+        //
+        //  TODO: EXTRACT AND TRANSMIT THE EVENT HANDLER'S ARGUMENT PROTOTYPES
+        //
+        //
+
+        if (!clientTask->SendCreateClientProxies(requiredInterfaceName,
+                                                 userTaskName, requiredInterfaceName,
+                                                 resourceTaskName, providedInterfaceName))
+        {
+            CMN_LOG_CLASS_INIT_ERROR << "Connect: server side proxy creation failed." << std::endl;
+            return false;
+        }
+
+        // b. ConnectServerSide()
+        // Now that we have all the proxy objects for both sides (server and client),
+        // the remaining process is to simply connect two sets of interfaces--actual
+        // provided interface and required interface proxy at the server side and
+        // actual required interface and provided interface proxy at the client side.
         if (!clientTask->SendConnectServerSide(requiredInterfaceName,
                                                userTaskName, requiredInterfaceName,
                                                resourceTaskName, providedInterfaceName))

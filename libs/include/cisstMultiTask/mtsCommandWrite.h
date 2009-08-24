@@ -76,6 +76,9 @@ public:
     
     
     /*! The constructor.
+    //
+    // FIXME: this needs to be updated.
+    //
       \param action Pointer to the member function that is to be called
       by the invoker of the command
       \param interface Pointer to the receiver of the command

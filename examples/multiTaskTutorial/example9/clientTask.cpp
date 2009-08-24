@@ -18,7 +18,7 @@ clientTask::clientTask(const std::string & taskName, double period):
         required->AddFunction("Read", this->ReadServer);
         required->AddFunction("QualifiedRead", this->QualifiedReadServer);
         required->AddEventHandlerVoid(&clientTask::EventVoidHandler, this, "EventVoid");
-        required->AddEventHandlerWrite(&clientTask::EventWriteHandler, this, "EventWrite", mtsDouble());
+        //required->AddEventHandlerWrite(&clientTask::EventWriteHandler, this, "EventWrite", mtsDouble());
     }
 }
 

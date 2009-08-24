@@ -139,8 +139,7 @@ public:
             ChangeProxyState(BaseType::PROXY_FINISHING);
 
             if (this->IceCommunicator) {
-                try {
-                    // gcc doesn't like this OutputDebugString(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 6");
+                try {                    
                     this->IceCommunicator->destroy();
                     
                     ChangeProxyState(BaseType::PROXY_FINISHED);

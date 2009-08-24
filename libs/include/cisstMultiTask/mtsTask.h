@@ -376,6 +376,12 @@ public:
         const std::string & providedInterfaceName,
         mtsDeviceInterfaceProxy::ProvidedInterfaceInfo & providedInterfaceInfo);
 
+    /*! Create server-side proxy objects. */
+    bool SendCreateClientProxies(
+        const std::string & requiredInterfaceProxyName,
+        const std::string & userTaskName, const std::string & requiredInterfaceName,
+        const std::string & resourceTaskName, const std::string & providedInterfaceName);
+
     /*! Connect the actual provided interface with the required interface proxy 
         at server side. */
     bool SendConnectServerSide(
