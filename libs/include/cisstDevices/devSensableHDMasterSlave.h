@@ -97,8 +97,10 @@ protected:
     /*!
         Vectors of DevData and robCollaborativeControlForce objects.
     */
-    vctDynamicVector<DevData *> DevicePair;
-    vctDynamicVector<robCollaborativeControlForce *> RobotPair;
+    //vctDynamicVector<DevData *> DevicePair;
+    //vctDynamicVector<robCollaborativeControlForce *> RobotPair;
+    std::vector<DevData *> DevicePair;
+    std::vector<robCollaborativeControlForce *> RobotPair;
     //std::vector<DevData *> DevicePair;
     int PairCount;
     mtsInt PairNumber;

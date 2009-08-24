@@ -30,18 +30,18 @@ devSensableHDMasterSlave::devSensableHDMasterSlave(const std::string & taskName,
     devSensableHD(taskName, firstDeviceName, secondDeviceName, true, true)
 {
     // Initialize the struct and class vectors
-    RobotPair.SetSize(1);
-    DevicePair.SetSize(1);
-    DevicePair(0) = new DevData;
-    RobotPair(0) = new robCollaborativeControlForce();
+    RobotPair.resize(1);
+    DevicePair.resize(1);
+    DevicePair[0] = new DevData;
+    RobotPair[0] = new robCollaborativeControlForce();
     
     // Assign device numbers
-    if(DevicesVector(0)->Name == firstDeviceName) {
-        DevicePair(0)->MasterDeviceNo = DevicesVector(0)->DeviceNumber;
-        DevicePair(0)->SlaveDeviceNo = DevicesVector(1)->DeviceNumber;
+    if(DevicesVector[0]->Name == firstDeviceName) {
+        DevicePair[0]->MasterDeviceNo = DevicesVector(0)->DeviceNumber;
+        DevicePair[0]->SlaveDeviceNo = DevicesVector(1)->DeviceNumber;
     } else {
-        DevicePair(0)->MasterDeviceNo = DevicesVector(1)->DeviceNumber;
-        DevicePair(0)->SlaveDeviceNo = DevicesVector(0)->DeviceNumber;
+        DevicePair[0]->MasterDeviceNo = DevicesVector(1)->DeviceNumber;
+        DevicePair[0]->SlaveDeviceNo = DevicesVector(0)->DeviceNumber;
     }
 
     PairNumber = 0;
@@ -59,18 +59,18 @@ devSensableHDMasterSlave::devSensableHDMasterSlave(const std::string & taskName,
                   thirdDeviceName, fourthDeviceName, true, true, true, true)
 {
     // Initialize the class and struct vectors
-    RobotPair.SetSize(2);
-    DevicePair.SetSize(2);
-    DevicePair(0) = new DevData;
-    DevicePair(1) = new DevData;
-    RobotPair(0) = new robCollaborativeControlForce();
-    RobotPair(1) = new robCollaborativeControlForce();
+    RobotPair.resize(2);
+    DevicePair.resize(2);
+    DevicePair[0] = new DevData;
+    DevicePair[1] = new DevData;
+    RobotPair[0] = new robCollaborativeControlForce();
+    RobotPair[1] = new robCollaborativeControlForce();
 
     // Assign device numbers, * hard coded for now *
-    DevicePair(0)->MasterDeviceNo = 0;
-    DevicePair(0)->SlaveDeviceNo = 1;
-    DevicePair(1)->MasterDeviceNo = 2;
-    DevicePair(1)->SlaveDeviceNo = 3;
+    DevicePair[0]->MasterDeviceNo = 0;
+    DevicePair[0]->SlaveDeviceNo = 1;
+    DevicePair[1]->MasterDeviceNo = 2;
+    DevicePair[1]->SlaveDeviceNo = 3;
     
     // Pair Number assigns which pair is being used for the GUI. 
     // Change this value to test the other pair, default is the first pair.
@@ -91,7 +91,7 @@ void devSensableHDMasterSlave::SetupTeleoperationInterfaces(const std::string & 
 
     // Initialize Values
     DevData * pairData;
-    pairData = DevicePair(pair);
+    pairData = DevicePair[pair];
     pairData->ForceLimit = 40.0;
     pairData->ScaleFactor = 0.15;
     pairData->ForceCoefficient = 1.0;
@@ -141,12 +141,12 @@ void devSensableHDMasterSlave::UserControl(void)
     for(index; index < PairCount; index++)
     {
         // Get the device pair data
-        pairData = DevicePair(index);
+        pairData = DevicePair[index];
 
         // Call robCollaborativeControlForce Update function, which carries out the 
         // teleoperation process with the given positions and clutches, then returns
         // two forces
-        RobotPair(index)->Update(DevicesVector(pairData->MasterDeviceNo)->PositionCartesian.Position().Translation(), 
+        RobotPair[index]->Update(DevicesVector(pairData->MasterDeviceNo)->PositionCartesian.Position().Translation(), 
                                  DevicesVector(pairData->SlaveDeviceNo)->PositionCartesian.Position().Translation(), 
                                  DevicesVector(pairData->MasterDeviceNo)->Clutch, 
                                  DevicesVector(pairData->SlaveDeviceNo)->Clutch, 
@@ -156,7 +156,7 @@ void devSensableHDMasterSlave::UserControl(void)
         // If the pair has the GUI attached
         if(index == PairNumber) {
             // Update the values through the GUI
-            RobotPair(index)->SetParameters(pairData->ForceLimit.Data, pairData->ScaleFactor.Data, 
+            RobotPair[index]->SetParameters(pairData->ForceLimit.Data, pairData->ScaleFactor.Data, 
                                             pairData->ForceCoefficient.Data, pairData->ForceMode.Data, 
                                             pairData->MasterClutchGUI.Data, pairData->SlaveClutchGUI.Data,
                                             pairData->MasterSlaveClutchGUI.Data);
@@ -166,35 +166,35 @@ void devSensableHDMasterSlave::UserControl(void)
 
 void devSensableHDMasterSlave::SetScaleFactor(const mtsDouble & Scale)
 {
-    DevicePair(PairNumber)->ScaleFactor = Scale;
+    DevicePair[PairNumber]->ScaleFactor = Scale;
 }
 
 void devSensableHDMasterSlave::SetForceLimit(const mtsDouble& FLimit)
 {
-    DevicePair(PairNumber)->ForceLimit = FLimit;
+    DevicePair[PairNumber]->ForceLimit = FLimit;
 }
 
 void devSensableHDMasterSlave::SetForceMode(const mtsInt& Mode)
 {
-    DevicePair(PairNumber)->ForceMode = Mode;
+    DevicePair[PairNumber]->ForceMode = Mode;
 }
 
 void devSensableHDMasterSlave::SetMasterClutch(const mtsBool& commandedClutch)
 {
-    DevicePair(PairNumber)->MasterClutchGUI = commandedClutch;
+    DevicePair[PairNumber]->MasterClutchGUI = commandedClutch;
 }
 
 void devSensableHDMasterSlave::SetSlaveClutch(const mtsBool& commandedClutch)
 {
-    DevicePair(PairNumber)->SlaveClutchGUI = commandedClutch;
+    DevicePair[PairNumber]->SlaveClutchGUI = commandedClutch;
 }
 
 void devSensableHDMasterSlave::SetMasterSlaveClutch(const mtsBool& commandedClutch)
 {
-    DevicePair(PairNumber)->MasterSlaveClutchGUI = commandedClutch;
+    DevicePair[PairNumber]->MasterSlaveClutchGUI = commandedClutch;
 }
 
 void devSensableHDMasterSlave::SetForceCoefficient(const mtsDouble& commandedCoefficient)
 {
-    DevicePair(PairNumber)->ForceCoefficient = commandedCoefficient;
+    DevicePair[PairNumber]->ForceCoefficient = commandedCoefficient;
 }
