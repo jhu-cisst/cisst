@@ -30,7 +30,8 @@ namespace cisstRobot{
     real wmax;
     real wdmax;
 
-    uint32_t numwp;
+    //uint32_t numwp;
+    unsigned long int numwp;
 
     robError Evaluate(const robDOF& input);
 

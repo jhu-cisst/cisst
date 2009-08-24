@@ -30,15 +30,15 @@ robCollaborativeControlForce::robCollaborativeControlForce(void)
     RightClutchMSOffset.SetAll(0.0);
     WorkspaceOffset.SetAll(0.0);
     Error.SetAll(0.0);
-    ScaleFactor = 0.15;
-    FMax = 40.0;
-    ForceMode = 0;
+    ScaleFactor() = 0.15;
+    FMax() = 40.0;
+    ForceMode() = 0;
     clutchMode = 0;
-    ForceMasterCoefficient = 1.0;
+    ForceMasterCoefficient() = 1.0;
     firstIteration = true;
-    MasterClutch = false;
-    SlaveClutch = false;
-    MasterSlaveClutch = false;
+    MasterClutch() = false;
+    SlaveClutch() = false;
+    MasterSlaveClutch() = false;
     clutchDone = false;
     bothClutched = false;
     clutchOffsetAdd = false;
@@ -61,25 +61,24 @@ void robCollaborativeControlForce::Update(const vct3 & p1,
     }
 
     // If clutching the first device
-    if((ClutchMaster == true || MasterClutch == true) 
-                             && ClutchSlave == false) {
+    if((ClutchMaster == true || MasterClutch() == true) && ClutchSlave == false) {
         if(clutchOffsetAdd == true) {
             p2Goal.Subtract(RightClutchMSOffset);
             clutchOffsetAdd = false;
         }
         // Compute the current force (F = kp * (secondDeviceGoal - secondDeviceLastPosition) )
         ForceSlave.XYZ().DifferenceOf(p2Goal, p2);
-        ForceSlave.XYZ().Multiply(ScaleFactor);
+        ForceSlave.XYZ().Multiply(ScaleFactor());
         ForceMaster.SetAll(0.0);
 
         // Cap the forces, apply ratchet effect or apply the current force
         //  on the slave device depending on the force mode
         ForceFeedNormSlave = ForceSlave.XYZ().Norm();
-        if(ForceFeedNormSlave >= (FMax / 4.0)) {
-            if(ForceMode == 0) {
+        if(ForceFeedNormSlave >= (FMax() / 4.0)) {
+            if(ForceMode() == 0) {
                 p2Goal.Assign(p2);
-            } else if (ForceMode == 1) {
-                ForceSlave.Divide(FMax / ForceFeedNormSlave);
+            } else if (ForceMode() == 1) {
+                ForceSlave.Divide(FMax() / ForceFeedNormSlave);
             }
         }
 
@@ -88,25 +87,24 @@ void robCollaborativeControlForce::Update(const vct3 & p1,
         
         clutchMode = 1;
         clutchDone = true;
-    } else if((ClutchSlave == true || SlaveClutch == true) 
-                                 && ClutchMaster == false) {
+    } else if((ClutchSlave == true || SlaveClutch() == true) && ClutchMaster == false) {
         // Compute the current force (F = kp * (firstDeviceGoal - firstDeviceLastPosition) )
         if(clutchOffsetAdd == true) {
             p1Goal.Add(LeftClutchMSOffset);
             clutchOffsetAdd = false;
         }
         ForceMaster.XYZ().DifferenceOf(p1Goal, p1);
-        ForceMaster.XYZ().Multiply(ScaleFactor);
+        ForceMaster.XYZ().Multiply(ScaleFactor());
         ForceSlave.SetAll(0.0);
 
         // Cap the forces, apply ratchet effect or apply the current force
         //  on the slave device depending on the force mode
         ForceFeedNormMaster = ForceMaster.XYZ().Norm();
-        if(ForceFeedNormMaster >= (FMax / 4.0)) {
-            if(ForceMode == 0) {
+        if(ForceFeedNormMaster >= (FMax() / 4.0)) {
+            if(ForceMode() == 0) {
                 p1Goal.Assign(p1);
-            } else if (ForceMode == 1) {
-                ForceMaster.Divide(FMax / ForceFeedNormMaster);
+            } else if (ForceMode() == 1) {
+                ForceMaster.Divide(FMax() / ForceFeedNormMaster);
             }
         }
 
@@ -115,8 +113,7 @@ void robCollaborativeControlForce::Update(const vct3 & p1,
         
         clutchMode = 2;   
         clutchDone = true;
-    } else if ((ClutchMaster == true 
-              && ClutchSlave == true) || MasterSlaveClutch == true) {
+    } else if ((ClutchMaster == true && ClutchSlave == true) || MasterSlaveClutch() == true) {
         // Set both devices' forces to 0
         ForceMaster.SetAll(0.0);
         ForceSlave.SetAll(0.0);
@@ -169,29 +166,29 @@ void robCollaborativeControlForce::Update(const vct3 & p1,
         // on the master and on the slave device depending on the force mode
         //if(||ForceMaster|| > ForceLimit) { ForceMaster /= (FLimit / ||ForceMaster||)
         ForceFeedNormMaster = ForceMaster.XYZ().Norm();
-        if(ForceFeedNormMaster >= FMax) {
-            if(ForceMode == 0) {
+        if(ForceFeedNormMaster >= FMax()) {
+            if(ForceMode() == 0) {
                 WorkspaceOffset.DifferenceOf(p1, p2);
-            } else if(ForceMode == 1) {
-                ForceMaster.Divide(FMax / ForceFeedNormMaster);
+            } else if(ForceMode() == 1) {
+                ForceMaster.Divide(FMax() / ForceFeedNormMaster);
             }
         }
 
         ForceFeedNormSlave = ForceSlave.XYZ().Norm();
-        if(ForceFeedNormSlave >= FMax) {
-            if(ForceMode == 0) {
+        if(ForceFeedNormSlave >= FMax()) {
+            if(ForceMode() == 0) {
                 WorkspaceOffset.DifferenceOf(p1, p2);
-            } else if(ForceMode == 1) {
-                ForceSlave.Divide(FMax / ForceFeedNormSlave);
+            } else if(ForceMode() == 1) {
+                ForceSlave.Divide(FMax() / ForceFeedNormSlave);
             }
         }
 
         // Apply the scale factor (kp) to the forces
-        ForceMaster.Multiply(ScaleFactor);
-        ForceSlave.Multiply(ScaleFactor);
+        ForceMaster.Multiply(ScaleFactor());
+        ForceSlave.Multiply(ScaleFactor());
 
         //Apply the coefficient
-        ForceMaster.Multiply(ForceMasterCoefficient);
+        ForceMaster.Multiply(ForceMasterCoefficient());
     }  
 }
 
@@ -200,11 +197,11 @@ void robCollaborativeControlForce::SetParameters(const double & commandedForceLi
                                                  const bool & commandedMasterClutchGUI, const bool & commandedSlaveClutchGUI,
                                                  const bool & commandedMasterSlaveClutchGUI)
 {
-    FMax = commandedForceLimit;
-    ScaleFactor = commandedScaleFactor;
-    ForceMasterCoefficient = commandedForceCoefficient;
-    ForceMode = commandedForceMode;
-    MasterClutch = commandedMasterClutchGUI;
-    SlaveClutch = commandedSlaveClutchGUI;
-    MasterSlaveClutch = commandedMasterSlaveClutchGUI;
+    FMax() = commandedForceLimit;
+    ScaleFactor() = commandedScaleFactor;
+    ForceMasterCoefficient() = commandedForceCoefficient;
+    ForceMode() = commandedForceMode;
+    MasterClutch() = commandedMasterClutchGUI;
+    SlaveClutch() = commandedSlaveClutchGUI;
+    MasterSlaveClutch() = commandedMasterSlaveClutchGUI;
 }

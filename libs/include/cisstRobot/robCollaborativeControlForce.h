@@ -22,8 +22,8 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _robCollaborativeControlForce_h
 #define _robCollaborativeControlForce_h
 
-#include <cisstCommon.h>
-#include <cisstVector.h>
+#include <cisstCommon/cmnAccessorMacros.h>
+#include <cisstVector/vctTypes.h>
 
 //Always include last
 #include <cisstRobot/robExport.h>
@@ -62,12 +62,10 @@ protected:
         Parameters being used by the Update function for teleoperation
         
         vct3 declarations include the offsets for the workspace, clutch overall,
-        
         clutch left and right, and the goals for first and second device.
-        prm declarations include the forces, current and temporary positions. 
         
-        Other declarations are mostly used to manipulate the above mentioned
-        data, such as temporary booleans, scale factor, force limit, etc.
+        Other declarations(bool, double) are mostly used to manipulate the above 
+        mentioned data, such as temporary booleans, scale factor, force limit, etc.
     */
     vct3 WorkspaceOffset;
     vct3 ClutchOffset;
@@ -91,18 +89,17 @@ protected:
     bool        clutchDone;
     bool        bothClutched;
     bool        clutchOffsetAdd;
-    bool     MasterClutch;
-    bool     SlaveClutch;
-    bool     MasterSlaveClutch;
-    int      clutchMode;
-    int      ForceMode;
-    double   ForceMasterCoefficient;
-    double   ScaleFactor;
-    double   FMax;
+    int         clutchMode;
     double      ForceFeedNormMaster;
     double      ForceFeedNormSlave;
-    int         MasterDeviceNo;
-    int         SlaveDeviceNo;
+
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(bool, MasterClutch);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(bool, SlaveClutch);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(bool, MasterSlaveClutch);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(int, ForceMode);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(double, ForceMasterCoefficient);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(double, ScaleFactor);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(double, FMax);
 
 private:
 
