@@ -778,6 +778,40 @@ void BehaviorLUS::Startup(void)
     this->CursorOffset.SetAll(0.0);
 
     MarkerCount = 0;
+    
+    //=====================================
+    //repeated below
+    
+    this->Slave1->GetCartesianPosition(this->Slave1Position);
+    
+    //rotate the image plane such that it lines up with the probe
+    vctDouble3 Xaxis;
+    Xaxis.Assign(1.0,0.0,0.0);
+    vctDouble3 Yaxis;
+    Yaxis.Assign(0.0,1.0,0.0);
+    vctAxAnRot3 imageRot(Yaxis, cmnPI_2);
+    vctFrm3 planePosition;
+    planePosition.Rotation() = vctMatRot3(imageRot);
+    planePosition.Translation() = vctDouble3(0.0, 0.0, 16.0); //===============================================================================
+    ImagePlane->WaitForCreation();
+    ImagePlane->SetTransformation(planePosition);
+
+    //Set the position of the backgrounds and text in scene space
+    this->Outline->WaitForCreation();
+    this->Outline->SetPosition(vctDouble3(8.0,-60.0,-220.0));// x, y, z
+    this->Backgrounds->WaitForCreation();
+    this->Backgrounds->SetPosition(vctDouble3(55.0,-48.0,-220.0)); //y,x,z
+    this->TextList->WaitForCreation();
+    this->TextList->SetPosition(vctDouble3(-25.0,-65.0,-220.0));
+
+    //Set the position and color of the measurement text object
+    this->MeasureText->WaitForCreation();
+    this->MeasureText->SetColor(0./255, 34./255, 102.0/255);
+    this->MeasureText->SetPosition(vctDouble3(0.0, 5, 0.0));
+    
+    this->MapCursor->WaitForCreation();
+    MapCursor->SetColor(159.0/255, 182.0/255, 205.0/255);
+
 
 }
 
@@ -965,35 +999,12 @@ Places certian objects in the correct posisiton is the scene
 
 void BehaviorLUS::SetUpScene(void)
 {
-    
-        //rotate the image plane such that it lines up with the probe
-    vctDouble3 Xaxis;
-    Xaxis.Assign(1.0,0.0,0.0);
-    vctDouble3 Yaxis;
-    Yaxis.Assign(0.0,1.0,0.0);
-    vctAxAnRot3 imageRot(Yaxis, cmnPI_2);
-    vctFrm3 planePosition;
-    planePosition.Rotation() = vctMatRot3(imageRot);
-    planePosition.Translation() = vctDouble3(0.0, 0.0, 16.0); //===============================================================================
-    ImagePlane->SetTransformation(planePosition);
-    
-    
-     //Set the position of the probe in the scene space
+   //Set the position of the probe in the scene space
     vctFrm3 tmp;
     tmp.Rotation() = vctMatRot3(this->Slave1Position.Position().Rotation()) * vctMatRot3(vctAxAnRot3(vctDouble3(0.0,0.0,1.0), cmnPI_4 ));
     tmp.Translation() = vctDouble3(25.0,-45.0,-220.0); // x, y , z
+    this->ProbeList->WaitForCreation();
     this->ProbeList->SetTransformation(tmp);
-
-    //Set the position of the backgrounds and text in scene space
-    this->Outline->SetPosition(vctDouble3(8.0,-60.0,-220.0));// x, y, z
-    this->Backgrounds->SetPosition(vctDouble3(55.0,-48.0,-220.0)); //y,x,z
-    this->TextList->SetPosition(vctDouble3(-25.0,-65.0,-220.0));
-
-    //Set the position and color of the measurement text object
-    this->MeasureText->SetColor(0./255, 34./255, 102.0/255);
-    this->MeasureText->SetPosition(vctDouble3(0.0, 5, 0.0));
-    
-    MapCursor->SetColor(159.0/255, 182.0/255, 205.0/255);
 
 }
 
