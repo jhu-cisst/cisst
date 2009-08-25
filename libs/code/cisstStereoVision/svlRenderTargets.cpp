@@ -100,7 +100,10 @@ void svlRenderTargets::Release(unsigned int deviceID)
 {
     svlRenderTargets* instance = Instance();
     if (instance->Targets.size() > deviceID) {
-        delete instance->Targets[deviceID];
+        if (instance->Targets[deviceID]) {
+            delete instance->Targets[deviceID];
+            instance->Targets[deviceID] = 0;
+        }
     }
 }
 
@@ -108,7 +111,13 @@ void svlRenderTargets::ReleaseAll()
 {
     svlRenderTargets* instance = Instance();
     for (unsigned int i = 0; i < instance->Targets.size(); i ++) {
-        delete instance->Targets[i];
+        if (instance->Targets[i]) {
+            delete instance->Targets[i];
+            instance->Targets[i] = 0;
+        }
     }
+#if (CISST_SVL_HAS_MIL == ON)
+    CMILDevice::GetInstance()->ReleaseAll();
+#endif // CISST_SVL_HAS_MIL
 }
 

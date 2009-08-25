@@ -12,7 +12,6 @@
 
 --- begin cisst license - do not edit ---
 
-This software is provided "as is" under an open source license, with
 no warranty.  The complete license can be found in license.txt and
 http://www.cisst.org/cisst/license.txt.
 
@@ -21,6 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include "vidMILDevice.h"
+#include <cisstOSAbstraction/osaSleep.h>
 
 using namespace std;
 
@@ -37,8 +37,7 @@ CMILDeviceRenderTarget::CMILDeviceRenderTarget(unsigned int deviceID) :
     KillThread(false),
     ThreadKilled(true)
 {
-    CMILDevice *device = CMILDevice::GetInstance();
-    device->EnableOverlay(deviceID);
+    CMILDevice::GetInstance()->EnableOverlay(deviceID, true);
 
     // Start up overlay thread
     Thread = new osaThread;
@@ -54,15 +53,14 @@ CMILDeviceRenderTarget::CMILDeviceRenderTarget(unsigned int deviceID) :
 
 CMILDeviceRenderTarget::~CMILDeviceRenderTarget()
 {
-    CMILDevice *device = CMILDevice::GetInstance();
-    device->MILReleaseDevice(DeviceID);
-
     KillThread = true;
     if (ThreadKilled == false) Thread->Wait();
     delete Thread;
+
+    CMILDevice::GetInstance()->EnableOverlay(DeviceID, false);
 }
 
-bool CMILDeviceRenderTarget::SetImage(unsigned char* buffer, int offsetx, int offsety, bool vflip)
+bool CMILDeviceRenderTarget::SetImage(unsigned char* buffer, int offsetx, int CMN_UNUSED(offsety), bool vflip)
 {
     if (DeviceID < 0) return false;
 
@@ -81,11 +79,15 @@ bool CMILDeviceRenderTarget::SetImage(unsigned char* buffer, int offsetx, int of
         return false;
     }
 
+    const int offsetabs = (offsetx) > 0 ? offsetx : -offsetx;
+
     if (vflip) {
         const int stride = w * 3;
-        const int linesize = stride - offsetx * 3;
-        unsigned char* dest = device->MilOverlayBuffer[DeviceID] + offsetx * 3;
+        const int linesize = stride - offsetabs * 3;
+        unsigned char* dest = device->MilOverlayBuffer[DeviceID];
         buffer += (h - 1) * stride;
+        if (offsetx < 0) buffer += offsetabs * 3;
+        else dest += offsetabs * 3;
         for (int i = 0; i < h; i ++) {
             memcpy(dest, buffer, linesize);
             dest += stride;
@@ -95,8 +97,10 @@ bool CMILDeviceRenderTarget::SetImage(unsigned char* buffer, int offsetx, int of
     else {
         if (offsetx != 0) {
             const int stride = w * 3;
-            const int linesize = stride - offsetx * 3;
-            unsigned char* dest = device->MilOverlayBuffer[DeviceID] + offsetx * 3;
+            const int linesize = stride - offsetabs * 3;
+            unsigned char* dest = device->MilOverlayBuffer[DeviceID];
+            if (offsetx < 0) buffer += offsetabs * 3;
+            else dest += offsetabs * 3;
             for (int i = 0; i < h; i ++) {
                 memcpy(dest, buffer, linesize);
                 dest += stride;
@@ -143,7 +147,7 @@ unsigned int CMILDeviceRenderTarget::GetHeight()
     return h;
 }
 
-void* CMILDeviceRenderTarget::ThreadProc(void* param)
+void* CMILDeviceRenderTarget::ThreadProc(void* CMN_UNUSED(param))
 {
     ThreadKilled = false;
     ThreadReadySignal.Raise();
@@ -197,8 +201,8 @@ CMILDevice::CMILDevice() :
     MilDigitizer[0] = MilDigitizer[1] = M_NULL;
     MilDisplayImage[0] = MilDisplayImage[1] = M_NULL;
     MilOverlayImage[0] = MilOverlayImage[1] = M_NULL;
-    MilCaptureEnabled[0] = MilCaptureEnabled[0] = false;
-    MilOverlayEnabled[0] = MilOverlayEnabled[0] = false;
+    MilCaptureEnabled[0] = MilCaptureEnabled[1] = false;
+    MilOverlayEnabled[0] = MilOverlayEnabled[1] = false;
     MilDeviceID[0] = M_DEV0;
     MilDeviceID[1] = M_DEV1;
     MilDeviceInitialized[0] = MilDeviceInitialized[1] = false;
@@ -210,16 +214,21 @@ CMILDevice::CMILDevice() :
 
 CMILDevice::~CMILDevice()
 {
-    MILReleaseDevice(0);
-    MILReleaseDevice(1);
-    MILReleaseApplication();
-    Release();
+    ReleaseAll();
 }
 
 CMILDevice* CMILDevice::GetInstance()
 {
     static CMILDevice instance;
     return &instance;
+}
+
+void CMILDevice::ReleaseAll()
+{
+    Release();
+    MILReleaseDevice(0);
+    MILReleaseDevice(1);
+    MILReleaseApplication();
 }
 
 svlFilterSourceVideoCapture::PlatformType CMILDevice::GetPlatformType()
@@ -375,7 +384,7 @@ bool CMILDevice::IsRunning()
     return Running;
 }
 
-int CMILDevice::SetDevice(int devid, int inid, unsigned int videoch)
+int CMILDevice::SetDevice(int devid, int CMN_UNUSED(inid), unsigned int videoch)
 {
     if (videoch >= NumOfStreams) return SVL_FAIL;
     DeviceID[videoch] = devid;
@@ -436,17 +445,17 @@ bool CMILDevice::IsOverlaySupported(int devid)
     return OverlaySupported[devid];
 }
 
-bool CMILDevice::EnableCapture(int devid)
+bool CMILDevice::EnableCapture(int devid, bool enable)
 {
     if (devid < 0 || devid > 1) return false;
-    if (CaptureSupported[devid]) CaptureEnabled[devid] = true;
+    if (CaptureSupported[devid]) CaptureEnabled[devid] = enable;
     return CaptureEnabled[devid];
 }
 
-bool CMILDevice::EnableOverlay(int devid)
+bool CMILDevice::EnableOverlay(int devid, bool enable)
 {
     if (devid < 0 || devid > 1) return false;
-    if (OverlaySupported[devid]) OverlayEnabled[devid] = true;
+    if (OverlaySupported[devid]) OverlayEnabled[devid] = enable;
     return OverlayEnabled[devid];
 }
 
@@ -625,10 +634,18 @@ void CMILDevice::MILReleaseDevice(int device)
         MilCaptureParams[device].MilFrames = 0;
     }
 
-    if (MilDisplayImage[device] != M_NULL) MbufFree(MilDisplayImage[device]);
-    if (MilDisplay[device] != M_NULL) MdispFree(MilDisplay[device]);
-    if (MilDigitizer[device] != M_NULL) MdigFree(MilDigitizer[device]);
-    if (MilSystem[device] != M_NULL) MsysFree(MilSystem[device]);
+        if (MilDisplay[device] != M_NULL && MilDisplayImage[device] != M_NULL)
+    MdispDeselect(MilDisplay[device], MilDisplayImage[device]);
+        if (MilDigitizer[device] != M_NULL)
+    MdigHalt(MilDigitizer[device]);
+        if (MilDisplayImage[device] != M_NULL)
+    MbufFree(MilDisplayImage[device]);
+        if (MilDigitizer[device] != M_NULL)
+    MdigFree(MilDigitizer[device]);
+        if (MilDisplay[device] != M_NULL)
+    MdispFree(MilDisplay[device]);
+        if (MilSystem[device] != M_NULL)
+    MsysFree(MilSystem[device]);
 
 	if (MilOverlayBuffer[device]) delete [] MilOverlayBuffer[device];
     MilOverlayBuffer[device] = 0;
@@ -655,15 +672,14 @@ void CMILDevice::MILReleaseApplication()
 /*************************************/
 
 
-MIL_INT MFTYPE MILProcessingCallback(MIL_INT HookType, MIL_ID HookId, void MPTYPE *HookDataPtr)
+MIL_INT MFTYPE MILProcessingCallback(MIL_INT CMN_UNUSED(HookType), MIL_ID HookId, void MPTYPE *HookDataPtr)
 {
-	MIL_INT milbufferindex;
 	CMILDevice::MILCaptureParameters *milcaptureparams = (CMILDevice::MILCaptureParameters*)HookDataPtr;
 
-	// Get modified buffer index
-	MdigGetHookInfo(HookId, M_MODIFIED_BUFFER+M_BUFFER_INDEX, &milbufferindex);
-
     if (milcaptureparams->ImageBuffer) {
+        MIL_INT milbufferindex;
+	    // Get modified buffer index
+	    MdigGetHookInfo(HookId, M_MODIFIED_BUFFER+M_BUFFER_INDEX, &milbufferindex);
     	MbufGetColor(milcaptureparams->MilFrames[milbufferindex],
     				 M_PACKED+M_RGB24,
     				 M_ALL_BANDS,

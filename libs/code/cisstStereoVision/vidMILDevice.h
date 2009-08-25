@@ -76,6 +76,7 @@ private:
 
 public:
     static CMILDevice* GetInstance();
+    void ReleaseAll();
 
     svlFilterSourceVideoCapture::PlatformType GetPlatformType();
     int SetStreamCount(unsigned int numofstreams);
@@ -96,8 +97,8 @@ public:
 
     bool IsCaptureSupported(int devid);
     bool IsOverlaySupported(int devid);
-    bool EnableCapture(int devid);
-    bool EnableOverlay(int devid);
+    bool EnableCapture(int devid, bool enable = true);
+    bool EnableOverlay(int devid, bool enable = true);
 
 private:
     unsigned int NumOfStreams;
