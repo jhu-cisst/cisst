@@ -609,10 +609,12 @@ void MapBehavior::AddMarker(void)
 {
     if(MarkerDropped == false && MarkerCount < MARKER_MAX)
     {
-
+        //create new marker!
         MapMarker * newMarkerVisible = new MapMarker("marker");
+        //must be added to the list
         MarkerList->Add(newMarkerVisible);
-        MyMarkers[MarkerCount] = newMarkerVisible;
+        MyMarkers[MarkerCount] = newMarkerVisible;  //NOTE: this array should be gone, but I am using it to hide the markers when they are being removed
+        //make sure the new marker is created and part of the scene before editting it
         newMarkerVisible->WaitForCreation();
         newMarkerVisible->SetColor(153.0/255.0, 255.0/255.0, 153.0/255.0); 
         if(MarkerCount < MARKER_MAX)
@@ -654,7 +656,7 @@ void MapBehavior::RemoveMarker(void)
         {
             int remove = FindClosestMarker();
             if(remove <= MarkerCount)
-                MyMarkers[remove]->Hide();
+                MyMarkers[remove]->Hide();//NOTE: this should be done directly on the marker type list
 
 //             while(iter != end)
 //             {

@@ -204,7 +204,7 @@ ToyBehavior::ToyBehavior(const std::string & name):
     this->VisibleList = new ui3VisibleList("ToyList");
     CMN_ASSERT(this->VisibleList);
     
-    this->WidgetObject = new Widget(this->Position);
+    this->WidgetObject = new Widget(this->Position); //NOTE: I would like to use the 3DObjectViewer instead, should work, some error about virtual function....
 
     this->VisibleList->Add(this->WidgetObject);
     this->Offset.SetAll(0.0);
@@ -352,49 +352,22 @@ void ToyBehavior::PrimaryMasterButtonCallback(const prmEventButton & event)
 
 void ToyBehavior::AddSphereCallback(void)
 {
-//S	ToyBehaviorSphere * newSphere = new ToyBehaviorSphere("sphere");
+//	ToyBehaviorSphere * newSphere = new ToyBehaviorSphere("sphere");
 }
 
 void ToyBehavior::AddCubeCallback(void)
 {
-    
+    //need to write this
 }
 
 void ToyBehavior::AddCylinderCallback(void)
 {
-    
+    //need to write this
 }
 
 ui3VisibleObject * ToyBehavior::FindClosestShape(void)
 {
-    
+    // this should find the closet shape the cursor is near, and highlight it.  this will be the one that is manitulated
 }
 
-int ToyBehavior::FindClosestControlPoint(void)
-{
-    int counter = 0, toReturn;
-    vctFrm3 absoluteControlPoint;
-    double closestDist = cmnTypeTraits<double>::MaxPositiveValue();
 
-    Frames = WidgetObject->GetRelativeControlPoints();
-
-    ListFrameType::iterator iter;
-    const ListFrameType::iterator end = Frames.end();
-
-    for(iter = Frames.begin(); iter != end; ++iter)
-    {
-        absoluteControlPoint = VisibleList->GetTransformation() * (*iter);
-        vctDouble3 diff;
-        diff.DifferenceOf(PreviousCursorPosition, absoluteControlPoint.Translation() );
-        
-        double absolDiff = diff.Norm();
-        if(absolDiff < closestDist)
-        {
-            toReturn = counter;
-            closestDist = absolDiff;
-        }
-        counter++;
-    }
-    
-    return toReturn;
-}

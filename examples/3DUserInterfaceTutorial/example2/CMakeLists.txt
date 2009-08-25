@@ -29,6 +29,8 @@ add_executable(3DUserInterfaceExample2
                MapBehavior.cpp
                ToyBehavior.h
                ToyBehavior.cpp
+               cs3DObjectViewer.h
+               cs3DObjectViewer.cpp
                )
 
 target_link_libraries(3DUserInterfaceExample2

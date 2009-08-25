@@ -22,6 +22,8 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisst3DUserInterface.h>
 
+#include "cs3DObjectViewer.h"
+
 class ToyBehaviorVisibleObject;
 class Widget;
 
@@ -52,7 +54,7 @@ class ToyBehavior : public ui3BehaviorBase
         void AddCubeCallback(void);
         void AddCylinderCallback(void);
         ui3VisibleObject * FindClosestShape(void);
-        int FindClosestControlPoint(void);
+
 
 
         StateType PreviousState;

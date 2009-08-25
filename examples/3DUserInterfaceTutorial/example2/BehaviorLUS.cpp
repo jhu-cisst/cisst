@@ -779,6 +779,10 @@ void BehaviorLUS::Startup(void)
 
     MarkerCount = 0;
     
+    //=====================================
+    //repeated below
+    
+
 
 
 }
@@ -973,9 +977,7 @@ void BehaviorLUS::SetUpScene(void)
     this->ProbeList->WaitForCreation();
     this->ProbeList->SetTransformation(tmp);
 
-
-    //this section should only happen once
-
+    
     //rotate the image plane such that it lines up with the probe
     vctDouble3 Xaxis;
     Xaxis.Assign(1.0,0.0,0.0);
@@ -1000,9 +1002,9 @@ void BehaviorLUS::SetUpScene(void)
     this->MeasureText->WaitForCreation();
     this->MeasureText->SetColor(0./255, 34./255, 102.0/255);
     this->MeasureText->SetPosition(vctDouble3(0.0, 5, 0.0));
-
+    
     this->MapCursor->WaitForCreation();
-    MapCursor->SetColor(159.0/255, 182.0/255, 205.0/255);
+    this->MapCursor->SetColor(159.0/255, 182.0/255, 205.0/255);
 
 }
 
