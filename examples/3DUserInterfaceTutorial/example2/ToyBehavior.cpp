@@ -352,7 +352,7 @@ void ToyBehavior::PrimaryMasterButtonCallback(const prmEventButton & event)
 
 void ToyBehavior::AddSphereCallback(void)
 {
-	ToyBehaviorSphere * newSphere = new ToyBehaviorSphere("sphere");
+//S	ToyBehaviorSphere * newSphere = new ToyBehaviorSphere("sphere");
 }
 
 void ToyBehavior::AddCubeCallback(void)
