@@ -118,9 +118,13 @@ CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_PACKAGES UI3_ADDITIONAL_PACKAGES)
 CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_CMAKE_FILES UI3_ADDITIONAL_CMAKE_FILES)
 
 
+CISST_ADD_LIBRARY_TO_PROJECT(cisstLibs)
+
+
 # find icons
 set(CISST_UI3_ICONS_DIR "${cisst_SOURCE_DIR}/libs/etc/cisst3DUserInterface/icons")
 file(GLOB CISST_UI3_ICONS RELATIVE ${CISST_UI3_ICONS_DIR} ${CISST_UI3_ICONS_DIR}/*.png)
+message("Icons: ${CISST_UI3_ICONS}")
 
 # post build command to copy icons in build tree
 foreach(icon ${CISST_UI3_ICONS})
@@ -131,7 +135,4 @@ foreach(icon ${CISST_UI3_ICONS})
                             ${CISST_UI3_ICONS_DIR}/${icon}
                             ${cisst_BINARY_DIR}/etc/cisst3DUserInterface/icons/${icon})
 endforeach(icon)
-
-
-CISST_ADD_LIBRARY_TO_PROJECT(cisstLibs)
 
