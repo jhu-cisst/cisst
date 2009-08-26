@@ -225,7 +225,7 @@ protected:
         Ice::LoggerPtr Logger;
         mtsTaskManagerProxyServer * TaskManagerServer;
         bool Runnable;        
-        IceUtil::ThreadPtr Sender;
+        IceUtil::ThreadPtr SenderThreadPtr;
 
     public:
         TaskManagerServerI(const Ice::CommunicatorPtr& communicator, 

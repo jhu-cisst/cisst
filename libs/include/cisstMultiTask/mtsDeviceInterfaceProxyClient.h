@@ -161,7 +161,7 @@ protected:
     private:
         bool Runnable;
         Ice::CommunicatorPtr Communicator;        
-        IceUtil::ThreadPtr Sender;
+        IceUtil::ThreadPtr SenderThreadPtr;
         Ice::LoggerPtr Logger;
         mtsDeviceInterfaceProxy::DeviceInterfaceServerPrx Server;
         mtsDeviceInterfaceProxyClient * DeviceInterfaceClient;

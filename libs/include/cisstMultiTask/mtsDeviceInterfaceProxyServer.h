@@ -184,7 +184,7 @@ protected:
         Ice::LoggerPtr Logger;
         mtsDeviceInterfaceProxyServer * DeviceInterfaceServer;
         bool Runnable;
-        IceUtil::ThreadPtr Sender;
+        IceUtil::ThreadPtr SenderThreadPtr;
 
     public:
         DeviceInterfaceServerI(const Ice::CommunicatorPtr& communicator, 

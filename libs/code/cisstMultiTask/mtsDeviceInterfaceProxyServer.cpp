@@ -548,7 +548,7 @@ mtsDeviceInterfaceProxyServer
     Logger(logger),
     DeviceInterfaceServer(deviceInterfaceServer),
     Runnable(true),
-    Sender(new SendThread<DeviceInterfaceServerIPtr>(this))
+    SenderThreadPtr(new SenderThread<DeviceInterfaceServerIPtr>(this))
 {
 }
 
@@ -557,7 +557,7 @@ void mtsDeviceInterfaceProxyServer::DeviceInterfaceServerI::Start()
     DeviceInterfaceServer->GetLogger()->trace(
         "mtsDeviceInterfaceProxyServer", "Send thread starts");
 
-    Sender->start();
+    SenderThreadPtr->start();
 }
 
 void mtsDeviceInterfaceProxyServer::DeviceInterfaceServerI::Run()
@@ -607,8 +607,8 @@ void mtsDeviceInterfaceProxyServer::DeviceInterfaceServerI::Stop()
 
         notify();
 
-        callbackSenderThread = Sender;
-        Sender = 0; // Resolve cyclic dependency.
+        callbackSenderThread = SenderThreadPtr;
+        SenderThreadPtr = 0; // Resolve cyclic dependency.
     }
     callbackSenderThread->getThreadControl().join();
 }

@@ -431,7 +431,7 @@ mtsTaskManagerProxyServer
     Logger(logger),
     TaskManagerServer(taskManagerServer),
     Runnable(true),
-    Sender(new SendThread<TaskManagerServerIPtr>(this))
+    SenderThreadPtr(new SenderThread<TaskManagerServerIPtr>(this))
 {
 }
 
@@ -441,7 +441,7 @@ void mtsTaskManagerProxyServer::TaskManagerServerI::Start()
     TaskManagerServer->GetLogger()->trace(
         "mtsTaskManagerProxyServer", "Send thread starts");
 
-    Sender->start();
+    SenderThreadPtr->start();
 }
 
 void mtsTaskManagerProxyServer::TaskManagerServerI::Run()
@@ -490,8 +490,8 @@ void mtsTaskManagerProxyServer::TaskManagerServerI::Stop()
 
         notify();
 
-        callbackSenderThread = Sender;
-        Sender = 0; // Resolve cyclic dependency.
+        callbackSenderThread = SenderThreadPtr;
+        SenderThreadPtr = 0; // Resolve cyclic dependency.
     }
     callbackSenderThread->getThreadControl().join();
 }

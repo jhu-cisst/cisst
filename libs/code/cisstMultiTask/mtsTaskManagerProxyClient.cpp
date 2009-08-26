@@ -312,7 +312,7 @@ mtsTaskManagerProxyClient::TaskManagerClientI::TaskManagerClientI(const Ice::Com
                                                                   mtsTaskManagerProxyClient * taskManagerClient):
     Runnable(true), 
     Communicator(communicator),
-    Sender(new SendThread<TaskManagerClientIPtr>(this)),
+    SenderThreadPtr(new SenderThread<TaskManagerClientIPtr>(this)),
     Logger(logger),
     Server(server),
     TaskManagerClient(taskManagerClient)
@@ -323,7 +323,7 @@ void mtsTaskManagerProxyClient::TaskManagerClientI::Start()
 {
     CMN_LOG_RUN_VERBOSE << "TaskManagerProxyClient: Send thread starts" << std::endl;
 
-    Sender->start();
+    SenderThreadPtr->start();
 }
 
 void mtsTaskManagerProxyClient::TaskManagerClientI::Run()
@@ -349,8 +349,8 @@ void mtsTaskManagerProxyClient::TaskManagerClientI::Stop()
         Runnable = false;
         notify();
 
-        callbackSenderThread = Sender;
-        Sender = 0; // Resolve cyclic dependency.
+        callbackSenderThread = SenderThreadPtr;
+        SenderThreadPtr = 0; // Resolve cyclic dependency.
     }
     callbackSenderThread->getThreadControl().join();
 }

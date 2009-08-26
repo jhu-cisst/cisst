@@ -184,13 +184,13 @@ protected:
     };
 
     template<class _SenderType>
-    class SendThread : public IceUtil::Thread
+    class SenderThread : public IceUtil::Thread
     {
     private:
         const _SenderType Sender;
 
     public:
-        SendThread(const _SenderType& sender) : Sender(sender) {}          
+        SenderThread(const _SenderType& sender) : Sender(sender) {}          
         virtual void run() { Sender->Run(); }
     };
 

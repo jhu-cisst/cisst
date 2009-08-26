@@ -139,7 +139,7 @@ protected:
         bool Runnable;
         Ice::CommunicatorPtr Communicator;
         
-        IceUtil::ThreadPtr Sender;
+        IceUtil::ThreadPtr SenderThreadPtr;
         Ice::LoggerPtr Logger;
         mtsTaskManagerProxy::TaskManagerServerPrx Server;
         mtsTaskManagerProxyClient * TaskManagerClient;
