@@ -334,7 +334,7 @@ void mtsTaskManagerProxyClient::TaskManagerClientI::Run()
         static int num = 0;
         std::cout << "client send: " << ++num << std::endl;
 #endif
-        timedWait(IceUtil::Time::milliSeconds(10));
+        osaSleep(10 * cmn_ms);
     }
 }
 

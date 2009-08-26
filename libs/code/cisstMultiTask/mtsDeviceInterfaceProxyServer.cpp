@@ -568,7 +568,7 @@ void mtsDeviceInterfaceProxyServer::DeviceInterfaceServerI::Run()
 
     while(Runnable)
     {
-        timedWait(IceUtil::Time::milliSeconds(10));
+        osaSleep(10 * cmn_ms);
 
 #ifdef _COMMUNICATION_TEST_
         if(!clients.empty())

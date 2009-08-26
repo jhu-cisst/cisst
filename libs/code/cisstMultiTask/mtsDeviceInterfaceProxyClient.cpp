@@ -365,7 +365,7 @@ void mtsDeviceInterfaceProxyClient::DeviceInterfaceClientI::Run()
 {
     while (Runnable)
     {
-        timedWait(IceUtil::Time::milliSeconds(10));
+        osaSleep(10 * cmn_ms);
     }
 }
 

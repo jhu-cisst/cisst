@@ -19,9 +19,10 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+#include <cisstCommon/cmnAssert.h>
+#include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsTaskManagerProxyServer.h>
 #include <cisstMultiTask/mtsTaskGlobal.h>
-#include <cisstCommon/cmnAssert.h>
 
 #include <sstream>
 
@@ -451,7 +452,7 @@ void mtsTaskManagerProxyServer::TaskManagerServerI::Run()
 #endif
 
     while(Runnable) {
-        timedWait(IceUtil::Time::milliSeconds(10));
+        osaSleep(10 * cmn_ms);
 
 #ifdef _COMMUNICATION_TEST_
         if(!clients.empty())
