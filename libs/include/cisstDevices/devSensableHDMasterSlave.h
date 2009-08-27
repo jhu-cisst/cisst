@@ -31,10 +31,12 @@ http://www.cisst.org/cisst/license.txt.
 // Always include last
 #include <cisstDevices/devExport.h>
 
+
 class CISST_EXPORT devSensableHDMasterSlave: public devSensableHD {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 10);
 
 public:
+
     devSensableHDMasterSlave(const std::string & taskName,
                              const std::string & firstDeviceName,
                              const std::string & secondDeviceName);
@@ -65,13 +67,14 @@ public:
     /*!
         Mutators for GUI related parameters, such as scale factor and force limit.
     */
-    void SetScaleFactor(const mtsDouble& Scale);
+    void SetLinearGain(const mtsDouble& Scale);
     void SetForceLimit(const mtsDouble& FLimit);
     void SetForceMode(const mtsInt& Mode);
     void SetMasterClutch(const mtsBool& commandedClutch);
     void SetSlaveClutch(const mtsBool& commandedClutch);
     void SetMasterSlaveClutch(const mtsBool& commandedClutch);
     void SetForceCoefficient(const mtsDouble& commandedCoefficient);
+    void SetCollaborativeControlParameter(const prmCollaborativeControlForce & commandedClutch);
     
 protected:
     
@@ -83,10 +86,7 @@ protected:
     struct DevData {
         vctFixedSizeVector<double, 6> ForceMaster;
         vctFixedSizeVector<double, 6> ForceSlave;
-        mtsDouble                     ForceLimit;
-        mtsDouble                     ScaleFactor;
-        mtsDouble                     ForceCoefficient;
-        mtsInt                        ForceMode;
+        prmCollaborativeControlForce Parameter;
         mtsBool                       MasterClutchGUI;
         mtsBool                       SlaveClutchGUI;
         mtsBool                       MasterSlaveClutchGUI;
@@ -97,11 +97,8 @@ protected:
     /*!
         Vectors of DevData and robCollaborativeControlForce objects.
     */
-    //vctDynamicVector<DevData *> DevicePair;
-    //vctDynamicVector<robCollaborativeControlForce *> RobotPair;
     std::vector<DevData *> DevicePair;
     std::vector<robCollaborativeControlForce *> RobotPair;
-    //std::vector<DevData *> DevicePair;
     int PairCount;
     mtsInt PairNumber;
 };

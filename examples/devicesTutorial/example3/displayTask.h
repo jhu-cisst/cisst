@@ -26,52 +26,51 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstParameterTypes.h>
 #include <cisstCommon.h>
+#include <cisstRobot/robCollaborativeControlForce.h>
 
 #include "mainGUI.h"
 
+
 class displayTask: public mtsTaskPeriodic
 {
-    // set log level to 5
+    // set log level to RUN_ERROR
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
     volatile bool ExitFlag;
     
  protected:
-    
-    mtsFunctionRead         GetScaleFactor;
+
+    mtsFunctionRead         GetLinearGain;
     mtsFunctionRead         GetForceLimit;
     mtsFunctionRead         GetMasterClutch;
     mtsFunctionRead         GetSlaveClutch;
     mtsFunctionRead         GetMasterSlaveClutch;
     mtsFunctionRead         GetForceMode;
     mtsFunctionRead         GetForceCoefficient;
-    mtsFunctionWrite        SetScaleFactor;
+    mtsFunctionRead         GetCollaborativeControlParameter;
+    mtsFunctionWrite        SetLinearGain;
     mtsFunctionWrite        SetForceLimit;
     mtsFunctionWrite        SetMasterClutch;
     mtsFunctionWrite        SetSlaveClutch;
     mtsFunctionWrite        SetMasterSlaveClutch;
     mtsFunctionWrite        SetForceMode;
     mtsFunctionWrite        SetForceCoefficient;
-    mtsFunctionVoid         IncrementScaleFactor;
-    mtsFunctionVoid         DecrementScaleFactor;
-    mtsFunctionVoid         IncrementForceLimit;
-    mtsFunctionVoid         DecrementForceLimit;
+    mtsFunctionWrite        SetCollaborativeControlParameter;
 
     mainGUI                 UI;
 
     mtsDouble               commandedForceLimit;
-    mtsDouble               commandedScaleFactor;
+    mtsDouble               commandedLinearGain;
     mtsDouble               commandedForceCoeff;
     mtsInt                  commandedForceMode;
     mtsBool                 commandedMasterClutch;
     mtsBool                 commandedSlaveClutch;
     mtsBool                 commandedMasterSlaveClutch;
-    mtsDouble               FLimit;
-    mtsDouble               ScaleFact;
-    mtsDouble               FCoeff;
-    mtsInt                  FMode;
     mtsBool                 MasterClutch;
     mtsBool                 SlaveClutch;
     mtsBool                 MasterSlaveClutch;
+
+    prmCollaborativeControlForce   MainTaskParameter;
+
  public:
     // see sineTask.h documentation
     displayTask(const std::string & taskName, double period);

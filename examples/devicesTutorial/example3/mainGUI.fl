@@ -8,7 +8,7 @@ class mainGUI {open
   } {
     Fl_Window DisplayWindow {
       callback CloseWindow_CB open
-      xywh {501 277 502 346} type Double align 0 visible
+      xywh {715 280 502 346} type Double align 0 visible
     } {
       Fl_Return_Button BtnQuit {
         label Quit
@@ -62,12 +62,12 @@ class mainGUI {open
             label {Cap Forces}
             xywh {130 240 95 20} labelsize 12
           }
-          Fl_Button InfiniteOn {
-            label {Infinite Force}
+          Fl_Button RawOn {
+            label {Raw Force} selected
             xywh {240 240 95 20} labelsize 12
           }
           Fl_Light_Button ClutchSlave {
-            label {Clutch Slave} selected
+            label {Clutch Slave}
             xywh {360 230 110 20} labelsize 13
           }
         }

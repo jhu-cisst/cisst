@@ -30,36 +30,22 @@ displayTask::displayTask(const std::string & taskName, double period):
     mtsRequiredInterface *requiredInterface = AddRequiredInterface("TeleoperationParameters");
     if(requiredInterface)
     {
-        requiredInterface->AddFunction("GetScaleFactor", GetScaleFactor);
-        requiredInterface->AddFunction("GetForceLimit", GetForceLimit);
         requiredInterface->AddFunction("GetMasterClutch", GetMasterClutch);
         requiredInterface->AddFunction("GetSlaveClutch", GetSlaveClutch);
         requiredInterface->AddFunction("GetMasterSlaveClutch", GetMasterSlaveClutch);
-        requiredInterface->AddFunction("GetForceMode", GetForceMode);
-        requiredInterface->AddFunction("GetForceCoefficient", GetForceCoefficient);
+        requiredInterface->AddFunction("GetCollaborativeControlParameter", GetCollaborativeControlParameter);
 
-        requiredInterface->AddFunction("SetScaleFactor", SetScaleFactor);
-        requiredInterface->AddFunction("SetForceLimit", SetForceLimit);
         requiredInterface->AddFunction("SetMasterClutch", SetMasterClutch);
         requiredInterface->AddFunction("SetSlaveClutch", SetSlaveClutch);
         requiredInterface->AddFunction("SetMasterSlaveClutch", SetMasterSlaveClutch);
-        requiredInterface->AddFunction("SetForceMode", SetForceMode);
-        requiredInterface->AddFunction("SetForceCoefficient", SetForceCoefficient);
-
-        requiredInterface->AddFunction("IncrementScaleFactor", IncrementScaleFactor);
-        requiredInterface->AddFunction("DecrementScaleFactor", DecrementScaleFactor);
-        requiredInterface->AddFunction("IncrementForceLimit", IncrementForceLimit);
-        requiredInterface->AddFunction("DecrementForceLimit", DecrementForceLimit);
+        requiredInterface->AddFunction("SetCollaborativeControlParameter", SetCollaborativeControlParameter);
     }
 
     commandedForceLimit = 0.0;
-    commandedScaleFactor = 0.0;
+    commandedLinearGain = 0.0;
     commandedForceCoeff = 0.0;
     commandedMasterClutch = false;
     commandedSlaveClutch = false;
-    FLimit = 0.0;
-    ScaleFact = 0.0;
-    FMode = 0;
     commandedForceMode = 0;
 } 
 
@@ -70,52 +56,52 @@ void displayTask::Startup(void)
 
 void displayTask::Run(void)
 {
+    bool ParameterChanged = false;
     ProcessQueuedCommands();
     ProcessQueuedEvents();
 
     Fl::check();
     if (Fl::thread_message() != 0) {
-        //CMN_LOG_CLASS(3) << "GUI Error" << Fl::thread_message() << std::endl;
         std::cerr << "GUI Error" << Fl::thread_message() << std::endl;
         return;
     }
-
-    GetForceLimit(FLimit);
-    UI.ForceLimitVal->value(FLimit);
-
-    GetScaleFactor(ScaleFact);
-    UI.ScaleFactorVal->value(ScaleFact);
+    GetCollaborativeControlParameter(MainTaskParameter);
+   
+    UI.ForceLimitVal->value(MainTaskParameter.ForceLimit());
+    UI.ScaleFactorVal->value(MainTaskParameter.LinearGain());
+    UI.ForceCoefficientVal->value(MainTaskParameter.ForceFeedbackRatio());
 
     commandedForceLimit = UI.ForceLimit->value();
-    if(FLimit != commandedForceLimit) {   
-        SetForceLimit(commandedForceLimit);
+    if(MainTaskParameter.LinearGain() != commandedForceLimit) {   
+        MainTaskParameter.SetForceLimit(commandedForceLimit);
+        ParameterChanged = true;
     }
 
-    commandedScaleFactor = UI.ScaleFactor->value();
-    if(ScaleFact != commandedScaleFactor) {
-        SetScaleFactor(commandedScaleFactor);
+    commandedLinearGain = UI.ScaleFactor->value();
+    if(MainTaskParameter.LinearGain() != commandedLinearGain) {
+        MainTaskParameter.SetLinearGain(commandedLinearGain);
+        ParameterChanged = true;
     }
-
-    GetForceCoefficient(FCoeff);
-    UI.ForceCoefficientVal->value(FCoeff);
 
     commandedForceCoeff = UI.ForceCoefficient->value();
-    if(commandedForceCoeff != FCoeff) {
-        SetForceCoefficient(commandedForceCoeff);
+    if(commandedForceCoeff != MainTaskParameter.ForceFeedbackRatio()) {
+        MainTaskParameter.SetForceFeedbackRatio(commandedForceCoeff);
+        ParameterChanged = true;
     }
 
     GetMasterClutch(MasterClutch);
     GetSlaveClutch(SlaveClutch);
     GetMasterSlaveClutch(MasterSlaveClutch);
 
-    GetForceMode(FMode);
     const char * ForceModeName;
-    if(FMode == 0) {
+    if(MainTaskParameter.ForceMode() == robCollaborativeControlForce::ParameterType::RATCHETED) {
         ForceModeName = "Ratchet";
-    } else if(FMode == 1) {
+    } else if(MainTaskParameter.ForceMode() == robCollaborativeControlForce::ParameterType::CAPPED) {
         ForceModeName = "Capping";
-    } else if(FMode == 2) {
-        ForceModeName = "Infinite";
+    } else if(MainTaskParameter.ForceMode() == robCollaborativeControlForce::ParameterType::RAW) {
+        ForceModeName = "Raw";
+    } else {
+        ForceModeName = "";
     }
     UI.CurrentForceMode->value(ForceModeName);
 
@@ -160,22 +146,29 @@ void displayTask::Run(void)
     }
 
     if(UI.RatchetOn->value() == 1) {
-        commandedForceMode = 0;
-        if(FMode != commandedForceMode) {
-            SetForceMode(commandedForceMode);
+        commandedForceMode = 1;
+        if((int)MainTaskParameter.ForceMode() != commandedForceMode.Data) {
+            MainTaskParameter.SetForceMode((robCollaborativeControlForce::ParameterType::ForceModeType)commandedForceMode.Data);
+            ParameterChanged = true;
         }
     } else if(UI.CappingOn->value() == 1) {
-        commandedForceMode = 1;
-        if(FMode != commandedForceMode) {
-            SetForceMode(commandedForceMode);
-        }
-    } else if(UI.InfiniteOn->value() == 1) {
         commandedForceMode = 2;
-        if(FMode != commandedForceMode) {
-            SetForceMode(commandedForceMode);
+        if((int)MainTaskParameter.ForceMode() != commandedForceMode.Data) {
+            MainTaskParameter.SetForceMode((robCollaborativeControlForce::ParameterType::ForceModeType)commandedForceMode.Data);
+            ParameterChanged = true;
+        }
+    } else if(UI.RawOn->value() == 1) {
+        commandedForceMode = 0;
+        if((int)MainTaskParameter.ForceMode() != commandedForceMode.Data) {
+            MainTaskParameter.SetForceMode((robCollaborativeControlForce::ParameterType::ForceModeType)commandedForceMode.Data);
+            ParameterChanged = true;
         }
     }
     
+    if(ParameterChanged == true) {
+        SetCollaborativeControlParameter(MainTaskParameter);
+    }
+
     if(UI.QuitClicked) {
         this->ExitFlag = true;
     }

@@ -31,18 +31,38 @@ http://www.cisst.org/cisst/license.txt.
 class CISST_EXPORT robCollaborativeControlForce {
 
 public:
+    class ParameterType {
+
+    public:
+        enum ForceModeType {RAW, RATCHETED, CAPPED};
+        CMN_DECLARE_MEMBER_AND_ACCESSORS(ForceModeType, ForceMode);
+        CMN_DECLARE_MEMBER_AND_ACCESSORS(double, ForceFeedbackRatio); //ForceMasterCoefficient
+        CMN_DECLARE_MEMBER_AND_ACCESSORS(double, LinearGain); //ScaleFactor
+        CMN_DECLARE_MEMBER_AND_ACCESSORS(double, ForceLimit); // FMax
+    public:
+        /*! Human readable output to stream. */
+        void ToStream(std::ostream & outputStream) const;
+
+        /*! To stream raw data. */
+        void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
+                     bool headerOnly = false, const std::string & headerPrefix = "") const;
+
+        /*! Binary serialization */
+        void SerializeRaw(std::ostream & outputStream) const;
+
+        /*! Binary deserialization */
+        void DeSerializeRaw(std::istream & inputStream);
+    };
+
     robCollaborativeControlForce(void);
     ~robCollaborativeControlForce(void) {};
     /*!
         Set Parameters function takes arguments from the parent class to mutate the values of;
-        Force Limit, Scale Factor Force Coefficient, Force Mode, Master & Slave Clutch.
+        Force Limit, Scale Factor Force Coefficient, Force Mode.
         These values are currently being used by devicesTutorialExample3 GUI via 
         devSensableHDMasterSlave class.
     */
-    void SetParameters(const double & commandedForceLimit, const double & commandedScaleFactor, 
-                       const double & commandedForceCoefficient, const int & commandedForceMode, 
-                       const bool & commandedMasterClutchGUI, const bool & commandedSlaveClutchGUI,
-                       const bool & commandedMasterSlaveClutchGUI);
+    void SetParameters(const ParameterType & commandedParameter);
 
     /*!
         Update function's goal is to carry out position to force control. Two position parameters
@@ -85,21 +105,18 @@ protected:
     vct3 p1Last;
     vct3 p2Last;
     
-    bool        firstIteration;
-    bool        clutchDone;
-    bool        bothClutched;
-    bool        clutchOffsetAdd;
-    int         clutchMode;
+    bool        FirstIteration;
+    bool        ClutchDone;
+    bool        BothClutched;
+    bool        ClutchOffsetAdd;
+    int         ClutchMode;
     double      ForceFeedNormMaster;
     double      ForceFeedNormSlave;
 
-    CMN_DECLARE_MEMBER_AND_ACCESSORS(bool, MasterClutch);
-    CMN_DECLARE_MEMBER_AND_ACCESSORS(bool, SlaveClutch);
-    CMN_DECLARE_MEMBER_AND_ACCESSORS(bool, MasterSlaveClutch);
-    CMN_DECLARE_MEMBER_AND_ACCESSORS(int, ForceMode);
-    CMN_DECLARE_MEMBER_AND_ACCESSORS(double, ForceMasterCoefficient);
-    CMN_DECLARE_MEMBER_AND_ACCESSORS(double, ScaleFactor);
-    CMN_DECLARE_MEMBER_AND_ACCESSORS(double, FMax);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(bool, ApplicationMasterClutch);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(bool, ApplicationSlaveClutch);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(bool, ApplicationMasterSlaveClutch);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(ParameterType, Parameter);
 
 private:
 

@@ -50,6 +50,8 @@ SET(SOURCE_FILES
     prmRobotState.cpp
     prmActuatorParameters.cpp
     prmGainParameters.cpp
+	
+	prmCollaborativeControlForce.cpp
     )
 
 # all header files
@@ -82,6 +84,8 @@ SET(HEADER_FILES
     prmRobotState.h
     prmActuatorParameters.h
     prmGainParameters.h
+	
+	prmCollaborativeControlForce.h
     )
 
 CISST_ADD_LIBRARY_TO_PROJECT(cisstLibs)

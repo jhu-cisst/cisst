@@ -46,9 +46,7 @@ int main(void)
     mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
     
     displayTask * displayTaskObjectFirstPair = new displayTask("DisplayFirstPair", PeriodDisplay * cmn_ms);
-    displayTask * displayTaskObjectSecondPair = new displayTask("DisplaySecondPair", PeriodDisplay * cmn_ms);
     taskManager->AddTask(displayTaskObjectFirstPair);
-    taskManager->AddTask(displayTaskObjectSecondPair);
 
     //devSensableHDMasterSlave * sensableOmni = new devSensableHDMasterSlave("Omni", "Omni1", "Omni2");
     devSensableHDMasterSlave * sensableOmni = new devSensableHDMasterSlave("Omni", "Omni1", "Omni2", "Omni3", "Omni4");
@@ -56,8 +54,6 @@ int main(void)
 
     taskManager->Connect("DisplayFirstPair", "TeleoperationParameters", 
                          "Omni", "TeleoperationParametersOmni1Omni2");
-    taskManager->Connect("DisplaySecondPair", "TeleoperationParameters",
-                         "Omni", "TeleoperationParametersOmni3Omni4");
 
     // generate a nice tasks diagram
     std::ofstream dotFile("example1.dot"); 

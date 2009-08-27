@@ -84,6 +84,7 @@ void devSensableHDMasterSlave::SetupTeleoperationInterfaces(const std::string & 
                                                             const std::string & secondDeviceName,
                                                             int pair)
 {
+    
     // Create the provided interface
     mtsProvidedInterface * providedInterface;
     std::string providedInterfaceName = "TeleoperationParameters" + firstDeviceName + secondDeviceName;
@@ -92,45 +93,37 @@ void devSensableHDMasterSlave::SetupTeleoperationInterfaces(const std::string & 
     // Initialize Values
     DevData * pairData;
     pairData = DevicePair[pair];
-    pairData->ForceLimit = 40.0;
-    pairData->ScaleFactor = 0.15;
-    pairData->ForceCoefficient = 1.0;
-    pairData->ForceMode = 0;
-    pairData->MasterClutchGUI = pairData->SlaveClutchGUI = pairData->MasterSlaveClutchGUI = false;
+    pairData->Parameter.ForceLimit() = 40.0;
+    pairData->Parameter.LinearGain() = 0.15;
+    pairData->Parameter.ForceFeedbackRatio() = 1.0;
+    pairData->Parameter.ForceMode() = prmCollaborativeControlForce::RATCHETED;
+    pairData->MasterClutchGUI = false;
+    pairData->SlaveClutchGUI = false;
+    pairData->MasterSlaveClutchGUI = false;
 
     // Add values to the state table
-    StateTable.AddData(pairData->ScaleFactor, "ScaleFactor");
-    StateTable.AddData(pairData->ForceLimit, "ForceLimit");
     StateTable.AddData(pairData->MasterClutchGUI, "MasterClutch");
     StateTable.AddData(pairData->SlaveClutchGUI, "SlaveClutch");
     StateTable.AddData(pairData->MasterSlaveClutchGUI, "MasterSlaveClutch");
-    StateTable.AddData(pairData->ForceMode, "ForceMode");
-    StateTable.AddData(pairData->ForceCoefficient, "ForceCoefficient");
+    StateTable.AddData(pairData->Parameter, "CollaborativeControlParameter");
+
 
     // Add read functions to the interface
-    providedInterface->AddCommandReadState(StateTable, pairData->ScaleFactor, "GetScaleFactor");
-    providedInterface->AddCommandReadState(StateTable, pairData->ForceLimit, "GetForceLimit");
     providedInterface->AddCommandReadState(StateTable, pairData->MasterClutchGUI, "GetMasterClutch");
     providedInterface->AddCommandReadState(StateTable, pairData->SlaveClutchGUI, "GetSlaveClutch");
     providedInterface->AddCommandReadState(StateTable, pairData->MasterSlaveClutchGUI, "GetMasterSlaveClutch");
-    providedInterface->AddCommandReadState(StateTable, pairData->ForceMode, "GetForceMode");
-    providedInterface->AddCommandReadState(StateTable, pairData->ForceCoefficient, "GetForceCoefficient");
+    providedInterface->AddCommandReadState(StateTable, pairData->Parameter, "GetCollaborativeControlParameter");
 
     // Add write functions to the interface
-    providedInterface->AddCommandWrite(&devSensableHDMasterSlave::SetScaleFactor, 
-                                        this, "SetScaleFactor", pairData->ScaleFactor);
-    providedInterface->AddCommandWrite(&devSensableHDMasterSlave::SetForceLimit, 
-                                        this, "SetForceLimit", pairData->ForceLimit);
     providedInterface->AddCommandWrite(&devSensableHDMasterSlave::SetMasterClutch, 
-                                        this, "SetMasterClutch", pairData->MasterClutchGUI);
+                                       this, "SetMasterClutch", pairData->MasterClutchGUI);
     providedInterface->AddCommandWrite(&devSensableHDMasterSlave::SetSlaveClutch, 
-                                        this, "SetSlaveClutch", pairData->SlaveClutchGUI);
+                                       this, "SetSlaveClutch", pairData->SlaveClutchGUI);
     providedInterface->AddCommandWrite(&devSensableHDMasterSlave::SetMasterSlaveClutch, 
-                                        this, "SetMasterSlaveClutch", pairData->MasterSlaveClutchGUI);
-    providedInterface->AddCommandWrite(&devSensableHDMasterSlave::SetForceMode, 
-                                        this, "SetForceMode", pairData->ForceMode);
-    providedInterface->AddCommandWrite(&devSensableHDMasterSlave::SetForceCoefficient, 
-                                        this, "SetForceCoefficient", pairData->ForceCoefficient);
+                                       this, "SetMasterSlaveClutch", pairData->MasterSlaveClutchGUI);
+    providedInterface->AddCommandWrite(&devSensableHDMasterSlave::SetCollaborativeControlParameter, 
+                                       this, "SetCollaborativeControlParameter", pairData->Parameter);
+
 }
 
 
@@ -156,27 +149,38 @@ void devSensableHDMasterSlave::UserControl(void)
         // If the pair has the GUI attached
         if(index == PairNumber) {
             // Update the values through the GUI
-            RobotPair[index]->SetParameters(pairData->ForceLimit.Data, pairData->ScaleFactor.Data, 
-                                            pairData->ForceCoefficient.Data, pairData->ForceMode.Data, 
-                                            pairData->MasterClutchGUI.Data, pairData->SlaveClutchGUI.Data,
-                                            pairData->MasterSlaveClutchGUI.Data);
+            RobotPair[index]->SetParameter(pairData->Parameter);
+            RobotPair[index]->SetApplicationMasterClutch(pairData->MasterClutchGUI);
+            RobotPair[index]->SetApplicationSlaveClutch(pairData->SlaveClutchGUI);
+            RobotPair[index]->SetApplicationMasterSlaveClutch(pairData->MasterSlaveClutchGUI);
         }
     }
 }
 
-void devSensableHDMasterSlave::SetScaleFactor(const mtsDouble & Scale)
+void devSensableHDMasterSlave::SetLinearGain(const mtsDouble & Scale)
 {
-    DevicePair[PairNumber]->ScaleFactor = Scale;
+    DevicePair[PairNumber]->Parameter.LinearGain() = Scale.Data;
 }
 
 void devSensableHDMasterSlave::SetForceLimit(const mtsDouble& FLimit)
 {
-    DevicePair[PairNumber]->ForceLimit = FLimit;
+    DevicePair[PairNumber]->Parameter.ForceLimit() = FLimit.Data;
 }
 
 void devSensableHDMasterSlave::SetForceMode(const mtsInt& Mode)
 {
-    DevicePair[PairNumber]->ForceMode = Mode;
+    if(Mode.Data == 0) {
+        DevicePair[PairNumber]->Parameter.ForceMode() = prmCollaborativeControlForce::RATCHETED;
+    } else if (Mode.Data == 1) {
+        DevicePair[PairNumber]->Parameter.ForceMode() = prmCollaborativeControlForce::CAPPED;
+    } else if (Mode.Data == 2) {
+        DevicePair[PairNumber]->Parameter.ForceMode() = prmCollaborativeControlForce::RAW;
+    }
+}
+
+void devSensableHDMasterSlave::SetForceCoefficient(const mtsDouble& commandedCoefficient)
+{
+    DevicePair[PairNumber]->Parameter.ForceFeedbackRatio() = commandedCoefficient.Data;
 }
 
 void devSensableHDMasterSlave::SetMasterClutch(const mtsBool& commandedClutch)
@@ -194,7 +198,8 @@ void devSensableHDMasterSlave::SetMasterSlaveClutch(const mtsBool& commandedClut
     DevicePair[PairNumber]->MasterSlaveClutchGUI = commandedClutch;
 }
 
-void devSensableHDMasterSlave::SetForceCoefficient(const mtsDouble& commandedCoefficient)
+void devSensableHDMasterSlave::SetCollaborativeControlParameter(const prmCollaborativeControlForce & parameter)
 {
-    DevicePair[PairNumber]->ForceCoefficient = commandedCoefficient;
+    DevicePair[PairNumber]->Parameter = parameter;
 }
+
