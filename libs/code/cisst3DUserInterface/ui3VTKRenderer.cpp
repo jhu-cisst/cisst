@@ -83,17 +83,19 @@ ui3VTKRenderer::ui3VTKRenderer(ui3SceneManager* scene,
     this->RenderWindowInteractor->SetRenderWindow(this->RenderWindow);
 
     // Create camera
+    double viewangle;
     vctDouble3 viewup, position, axis;
     this->CameraGeometry.GetPositionAxisViewUp(position, axis, viewup, this->CameraID);
-    OpticalCenterOffset[0] = (this->CameraGeometry.GetIntrinsics(CameraID).cc[0] - this->Width) / 2.0;
-    OpticalCenterOffset[1] = (this->CameraGeometry.GetIntrinsics(CameraID).cc[1] - this->Height) / 2.0;
+    OpticalCenterOffset[0] = this->CameraGeometry.GetIntrinsics(CameraID).cc[0] - this->Width / 2.0;
+    OpticalCenterOffset[1] = this->CameraGeometry.GetIntrinsics(CameraID).cc[1] - this->Height / 2.0;
 
     this->Camera = vtkCamera::New();
     this->Camera->SetViewUp(viewup[0], viewup[1], viewup[2]);
     this->Camera->SetPosition(position[0], position[1], position[2]);
     this->Camera->SetFocalPoint(position[0] + axis[0], position[1] + axis[1], position[2] + axis[2]);
     this->Camera->SetClippingRange(0.1, 10000.0);
-    this->Camera->SetViewAngle(this->CameraGeometry.GetViewAngleVertical(this->CameraID));
+    viewangle = this->CameraGeometry.GetViewAngleVertical(this->Height, this->CameraID);
+    this->Camera->SetViewAngle(viewangle);
     this->Renderer->SetActiveCamera(this->Camera);
 
     // Initialize renderer

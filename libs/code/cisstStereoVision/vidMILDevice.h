@@ -54,6 +54,8 @@ private:
     bool TransferSuccessful;
     bool KillThread;
     bool ThreadKilled;
+
+    void TranslateImage(unsigned char* src, unsigned char* dest, const int width, const int height, const int trhoriz, const int trvert, bool vflip);
 };
 
 

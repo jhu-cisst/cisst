@@ -23,6 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlCameraGeometry_h
 #define _svlCameraGeometry_h
 
+#include <ostream>
 #include <cisstVector.h>
 
 
@@ -34,17 +35,21 @@ public:
         double cc[2];
         double a;
         double kc[5];
+        friend std::ostream & operator << (std::ostream & stream, const _Intrinsics & objref);
     } Intrinsics;
 
     typedef struct _Extrinsics {
         vctDoubleRodRot3 om;
         vctDouble3       T;
         vctDoubleFrm4x4  frame;
+        friend std::ostream & operator << (std::ostream & stream, const _Extrinsics & objref);
     } Extrinsics;
 
 public:
     svlCameraGeometry();
     virtual ~svlCameraGeometry();
+
+    friend std::ostream & operator << (std::ostream & stream, const svlCameraGeometry & objref);
 
     void SetIntrinsics(const Intrinsics & intrinsics, const unsigned int cam_id = 0);
     void SetIntrinsics(const double fc[2], const double cc[2], const double a, const double kc[5], const unsigned int cam_id = 0);
@@ -61,22 +66,23 @@ public:
     void SetPerspective(const double focallength, const unsigned int cam_id = 0);
     int LoadCalibration(const std::string & filepath);
 
-    int GetIntrinsics(Intrinsics & intrinsics, const unsigned int cam_id = 0);
-    Intrinsics GetIntrinsics(const unsigned int cam_id = 0);
-    int GetExtrinsics(Extrinsics & extrinsics, const unsigned int cam_id = 0);
-    Extrinsics GetExtrinsics(const unsigned int cam_id = 0);
+    int GetIntrinsics(Intrinsics & intrinsics, const unsigned int cam_id = 0) const;
+    Intrinsics GetIntrinsics(const unsigned int cam_id = 0) const;
+    int GetExtrinsics(Extrinsics & extrinsics, const unsigned int cam_id = 0) const;
+    Extrinsics GetExtrinsics(const unsigned int cam_id = 0) const;
 
-    int GetPosition(vctDouble3 & position, const unsigned int cam_id = 0);
-    int GetAxis(vctDouble3 & axis, const unsigned int cam_id = 0);
-    int GetViewUp(vctDouble3 & viewup, const unsigned int cam_id = 0);
-    int GetPositionAxisViewUp(vctDouble3 & position, vctDouble3 & axis, vctDouble3 & viewup, const unsigned int cam_id = 0);
-    double GetViewAngleHorizontal(double imagewidth, const unsigned int cam_id = 0);
-    double GetViewAngleVertical(double imageheight, const unsigned int cam_id = 0);
+    int GetPosition(vctDouble3 & position, const unsigned int cam_id = 0) const;
+    int GetAxis(vctDouble3 & axis, const unsigned int cam_id = 0) const;
+    int GetViewUp(vctDouble3 & viewup, const unsigned int cam_id = 0) const;
+    int GetPositionAxisViewUp(vctDouble3 & position, vctDouble3 & axis, vctDouble3 & viewup, const unsigned int cam_id = 0) const;
+    double GetViewAngleHorizontal(double imagewidth, const unsigned int cam_id = 0) const;
+    double GetViewAngleVertical(double imageheight, const unsigned int cam_id = 0) const;
 
-    int IsCameraPerspective(const unsigned int cam_id);
-    int IsCameraPairRectified(const unsigned int cam_id1, const unsigned int cam_id2);
+    int IsCameraPerspective(const unsigned int cam_id) const;
+    int IsCameraPairRectified(const unsigned int cam_id1, const unsigned int cam_id2) const;
 
     int SetWorldToCenter();
+    int RotateWorldAboutY(double degrees);
 
     void Wrld2Cam(const unsigned int cam_id, vctDouble2 & point2D, const vctDouble3 & point3D);
     vctDouble2 Wrld2Cam(const unsigned int cam_id, const vctDouble3 & point3D);

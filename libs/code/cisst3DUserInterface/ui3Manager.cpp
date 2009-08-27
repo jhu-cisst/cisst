@@ -516,7 +516,7 @@ bool ui3Manager::SetupRenderers()
     CMN_LOG_CLASS_INIT_VERBOSE << "Setting up VTK renderers: begin" << std::endl;
 
     unsigned int i;
-    double bgheight, bgwidth;
+    double bgheight, bgwidth, viewangle;
     const unsigned int renderercount = this->Renderers.size();
 
     for (i = 0; i < renderercount; i ++) {
@@ -541,8 +541,8 @@ bool ui3Manager::SetupRenderers()
                                                           GetStreamHeight(this->Renderers[i]->streamindex, this->Renderers[i]->streamchannel));
 
             // Calculate plane height to cover the whole vertical field of view
-            bgheight = VIDEO_BACKGROUND_DISTANCE * 2.0 *
-                       tan((this->Renderers[i]->camgeometry.GetViewAngleVertical(this->Renderers[i]->camid) / 2.0) * 3.14159265 / 180.0);
+            viewangle = this->Renderers[i]->camgeometry.GetViewAngleVertical(this->Renderers[i]->height, this->Renderers[i]->camid);
+            bgheight = VIDEO_BACKGROUND_DISTANCE * 2.0 * tan(viewangle * 3.14159265 / 360.0);
             // Calculate plane width from plane height and the bitmap aspect ratio
             bgwidth = bgheight *
                       GetStreamWidth(this->Renderers[i]->streamindex, this->Renderers[i]->streamchannel) /

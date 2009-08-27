@@ -60,7 +60,7 @@ CMILDeviceRenderTarget::~CMILDeviceRenderTarget()
     CMILDevice::GetInstance()->EnableOverlay(DeviceID, false);
 }
 
-bool CMILDeviceRenderTarget::SetImage(unsigned char* buffer, int offsetx, int CMN_UNUSED(offsety), bool vflip)
+bool CMILDeviceRenderTarget::SetImage(unsigned char* buffer, int offsetx, int offsety, bool vflip)
 {
     if (DeviceID < 0) return false;
 
@@ -79,38 +79,8 @@ bool CMILDeviceRenderTarget::SetImage(unsigned char* buffer, int offsetx, int CM
         return false;
     }
 
-    const int offsetabs = (offsetx) > 0 ? offsetx : -offsetx;
-
-    if (vflip) {
-        const int stride = w * 3;
-        const int linesize = stride - offsetabs * 3;
-        unsigned char* dest = device->MilOverlayBuffer[DeviceID];
-        buffer += (h - 1) * stride;
-        if (offsetx < 0) buffer += offsetabs * 3;
-        else dest += offsetabs * 3;
-        for (int i = 0; i < h; i ++) {
-            memcpy(dest, buffer, linesize);
-            dest += stride;
-            buffer -= stride;
-        }
-    }
-    else {
-        if (offsetx != 0) {
-            const int stride = w * 3;
-            const int linesize = stride - offsetabs * 3;
-            unsigned char* dest = device->MilOverlayBuffer[DeviceID];
-            if (offsetx < 0) buffer += offsetabs * 3;
-            else dest += offsetabs * 3;
-            for (int i = 0; i < h; i ++) {
-                memcpy(dest, buffer, linesize);
-                dest += stride;
-                buffer += stride;
-            }
-        }
-        else {
-            memcpy(device->MilOverlayBuffer[DeviceID], buffer, w * h * b);
-        }
-    }
+    // Copy image to the Matrox buffer with translation and flip...
+    TranslateImage(buffer, device->MilOverlayBuffer[DeviceID], w * 3, h, offsetx * 3, offsety, vflip);
 
     // Signal Thread that there is a new frame to transfer
     NewFrameSignal.Raise();
@@ -166,6 +136,78 @@ void* CMILDeviceRenderTarget::ThreadProc(void* CMN_UNUSED(param))
 
     ThreadKilled = true;
     return this;
+}
+
+void CMILDeviceRenderTarget::TranslateImage(unsigned char* src, unsigned char* dest, const int width, const int height, const int trhoriz, const int trvert, bool vflip)
+{
+    int abs_h = std::abs(trhoriz);
+    int abs_v = std::abs(trvert);
+
+    if (vflip) {
+        if (width <= abs_h || height <= abs_v) {
+            src += width * (height - 1);
+            for (int j = 0; j < height; j ++) {
+                memcpy(dest, src, width);
+                src -= width;
+                dest += width;
+            }
+            return;
+        }
+
+        int linecopysize = width - abs_h;
+        int xfrom = std::max(0, trhoriz);
+        int yfrom = std::max(0, trvert);
+        int yto = height + std::min(0, trvert);
+        int copyxoffset = std::max(0, -trhoriz);
+        int copyyoffset = std::max(0, -trvert);
+
+        if (trhoriz == 0) {
+            src += width * (height - copyyoffset - 1);
+            dest += width * yfrom;
+            for (int j = height - abs_v - 1; j >= 0; j --) {
+                memcpy(dest, src, width);
+                src -= width;
+                dest += width;
+            }
+            return;
+        }
+
+        src += width * (height - copyyoffset - 1) + copyxoffset;
+        dest += width * yfrom + xfrom;
+        for (int j = yfrom; j < yto; j ++) {
+            memcpy(dest, src, linecopysize);
+            src -= width;
+            dest += width;
+        }
+    }
+    else {
+        if (width <= abs_h || height <= abs_v) {
+            memset(dest, 0, width * height);
+            return;
+        }
+
+        if (trhoriz == 0) {
+            memcpy(dest + std::max(0, trvert) * width,
+                   src + std::max(0, -trvert) * width,
+                   width * (height - abs_v));
+            return;
+        }
+
+        int linecopysize = width - abs_h;
+        int xfrom = std::max(0, trhoriz);
+        int yfrom = std::max(0, trvert);
+        int yto = height + std::min(0, trvert);
+        int copyxoffset = std::max(0, -trhoriz);
+        int copyyoffset = std::max(0, -trvert);
+
+        src += width * copyyoffset + copyxoffset;
+        dest += width * yfrom + xfrom;
+        for (int j = yfrom; j < yto; j ++) {
+            memcpy(dest, src, linecopysize);
+            src += width;
+            dest += width;
+        }
+    }
 }
 
 
