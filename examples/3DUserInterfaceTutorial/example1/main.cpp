@@ -53,7 +53,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon.h>
 #include <cisstStereoVision.h>
-#include <cisstStereoVision/svlCameraGeometry.h>
 
 #include "SimpleBehavior.h"
 #include "BehaviorWithSlave.h"
@@ -147,7 +146,7 @@ int main()
     guiManager.AddRenderer(svlRenderTargets::Get(1)->GetWidth(),  // render width
                            svlRenderTargets::Get(1)->GetHeight(), // render height
                            0, 0,                                  // window position
-                           camera_geometry, SVL_RIGHT             // camera parameters
+                           camera_geometry, SVL_RIGHT,             // camera parameters
                            "RightEyeView");                       // name of renderer
 
     // Sending renderer output to external render targets

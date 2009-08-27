@@ -84,7 +84,6 @@ ui3VTKRenderer::ui3VTKRenderer(ui3SceneManager* scene,
 
     // Create camera
     vctDouble3 viewup, position, axis;
-    double focallength = this->CameraGeometry.GetIntrinsics(CameraID).fc[1];
     this->CameraGeometry.GetPositionAxisViewUp(position, axis, viewup, this->CameraID);
     OpticalCenterOffset[0] = (this->CameraGeometry.GetIntrinsics(CameraID).cc[0] - this->Width) / 2.0;
     OpticalCenterOffset[1] = (this->CameraGeometry.GetIntrinsics(CameraID).cc[1] - this->Height) / 2.0;
