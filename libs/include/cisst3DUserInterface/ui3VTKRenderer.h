@@ -29,6 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstVector/vctFixedSizeVectorTypes.h>
 
 #include <cisstStereoVision/svlRenderTargets.h>
+#include <cisstStereoVision/svlCameraGeometry.h>
 
 #include <cisst3DUserInterface/ui3ForwardDeclarations.h>
 #include <cisst3DUserInterface/ui3VTKForwardDeclarations.h>
@@ -53,7 +54,7 @@ public:
     */
     ui3VTKRenderer(ui3SceneManager* scene,
                    unsigned int width, unsigned int height,
-                   double viewangle, vctFrm3 & cameraframe, vct2 opticalcenteroffset,
+                   svlCameraGeometry & camgeometry, unsigned int camid,
                    svlRenderTargetBase* target = 0);
 
     /*!
@@ -65,9 +66,6 @@ public:
     void Stop(void);
 
     void Render(void);
-
-    double GetViewAngle(void);
-    void GetOpticalCenterOffset(vct2 & offset);
 
     void SetWindowPosition(int x, int y);
 
@@ -84,9 +82,9 @@ private:
 
     unsigned int Width;
     unsigned int Height;
-    double ViewAngle;
-    vctFrm3 CameraFrame;
-    vct2 OpticalCenterOffset;
+    svlCameraGeometry CameraGeometry;
+    unsigned int CameraID;
+    vctDouble2 OpticalCenterOffset;
     svlRenderTargetBase* Target;
 };
 

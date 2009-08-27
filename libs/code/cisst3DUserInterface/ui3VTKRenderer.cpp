@@ -38,7 +38,7 @@ CMN_IMPLEMENT_SERVICES(ui3VTKRenderer);
 
 ui3VTKRenderer::ui3VTKRenderer(ui3SceneManager* scene,
                                unsigned int width, unsigned int height,
-                               double viewangle, vctFrm3 & cameraframe, vct2 opticalcenteroffset,
+                               svlCameraGeometry & camgeometry, unsigned int camid,
                                svlRenderTargetBase* target) :
     SceneManager(scene),
     Renderer(0),
@@ -48,9 +48,8 @@ ui3VTKRenderer::ui3VTKRenderer(ui3SceneManager* scene,
     OffScreenBuffer(0),
     Width(width),
     Height(height),
-    ViewAngle(viewangle),
-    CameraFrame(cameraframe),
-    OpticalCenterOffset(opticalcenteroffset),
+    CameraGeometry(camgeometry),
+    CameraID(camid),
     Target(target)
 {
     CMN_ASSERT(this->SceneManager);
@@ -84,17 +83,18 @@ ui3VTKRenderer::ui3VTKRenderer(ui3SceneManager* scene,
     this->RenderWindowInteractor->SetRenderWindow(this->RenderWindow);
 
     // Create camera
-    // TO DO: set camera rotation according to specified frame
+    vctDouble3 viewup, position, axis;
+    double focallength = this->CameraGeometry.GetIntrinsics(CameraID).fc[1];
+    this->CameraGeometry.GetPositionAxisViewUp(position, axis, viewup, this->CameraID);
+    OpticalCenterOffset[0] = (this->CameraGeometry.GetIntrinsics(CameraID).cc[0] - this->Width) / 2.0;
+    OpticalCenterOffset[1] = (this->CameraGeometry.GetIntrinsics(CameraID).cc[1] - this->Height) / 2.0;
+
     this->Camera = vtkCamera::New();
-    this->Camera->SetViewUp(0.0, 1.0, 0.0);
-    this->Camera->SetPosition(this->CameraFrame.Translation().X(),
-                              this->CameraFrame.Translation().Y(),
-                              this->CameraFrame.Translation().Z() + 1.0);
-    this->Camera->SetFocalPoint(this->CameraFrame.Translation().X(),
-                                this->CameraFrame.Translation().Y(),
-                                this->CameraFrame.Translation().Z());
+    this->Camera->SetViewUp(viewup[0], viewup[1], viewup[2]);
+    this->Camera->SetPosition(position[0], position[1], position[2]);
+    this->Camera->SetFocalPoint(position[0] + axis[0], position[1] + axis[1], position[2] + axis[2]);
     this->Camera->SetClippingRange(0.1, 10000.0);
-    this->Camera->SetViewAngle(this->ViewAngle);
+    this->Camera->SetViewAngle(this->CameraGeometry.GetViewAngleVertical(this->CameraID));
     this->Renderer->SetActiveCamera(this->Camera);
 
     // Initialize renderer
@@ -122,25 +122,13 @@ void ui3VTKRenderer::Render(void)
             // Push VTK off-screen frame buffer to external render target
             this->RenderWindow->GetPixelData(0, 0, this->Width - 1, this->Height - 1, 0, this->OffScreenBuffer);
             this->Target->SetImage(this->OffScreenBuffer->GetPointer(0),
-                                   static_cast<int>(this->OpticalCenterOffset.X()),
-                                   static_cast<int>(this->OpticalCenterOffset.Y()),
+                                   static_cast<int>(this->OpticalCenterOffset[0]),
+                                   static_cast<int>(this->OpticalCenterOffset[1]),
                                    true);
         }
     } else {
         CMN_LOG_CLASS_INIT_ERROR << "Render: attempt to render before the VTK Window Renderer has been created" << std::endl;
     }
-}
-
-
-double ui3VTKRenderer::GetViewAngle(void)
-{
-    return this->ViewAngle;
-}
-
-
-void ui3VTKRenderer::GetOpticalCenterOffset(vct2 & offset)
-{
-    offset = this->OpticalCenterOffset;
 }
 
 

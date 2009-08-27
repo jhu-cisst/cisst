@@ -27,6 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisst3DUserInterface/ui3ForwardDeclarations.h>
 #include <cisst3DUserInterface/ui3BehaviorBase.h>
 #include <cisst3DUserInterface/ui3MasterArm.h>
+#include <cisstStereoVision/svlCameraGeometry.h>
 
 // Always include last!
 #include <cisst3DUserInterface/ui3Export.h>
@@ -101,7 +102,7 @@ public:
      Adds a render window to the UI Manager.
     */
     virtual bool AddRenderer(unsigned int width, unsigned int height, int x, int y,
-                             vctFrm3 & cameraframe, double viewangle, vct2 opticalcenteroffset,
+                             svlCameraGeometry & camgeometry, unsigned int camid,
                              const std::string & renderername);
 
     /*!
@@ -240,9 +241,8 @@ protected:
         unsigned int height;
         int windowposx;
         int windowposy;
-        vctFrm3 cameraframe;
-        double viewangle;
-        vct2 opticalcenteroffset;
+        svlCameraGeometry camgeometry;
+        unsigned int camid;
         std::string name;
         ui3VTKRenderer* renderer;
         svlRenderTargetBase* rendertarget;

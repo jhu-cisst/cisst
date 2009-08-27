@@ -56,6 +56,8 @@ http://www.cisst.org/cisst/license.txt.
 #define SVL_RIGHT                   1
 #define SVL_OK                      0
 #define SVL_FAIL                    -1
+#define SVL_NO                      0
+#define SVL_YES                     1
 
 
 //////////////////////////////

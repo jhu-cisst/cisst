@@ -34,6 +34,7 @@ SET(SOURCE_FILES
     svlRenderTargets.cpp
     svlStreamBranchSource.cpp
     svlFileHandlers.cpp
+    svlCameraGeometry.cpp
 
   # Filter API
     svlFilterSourceDummy.cpp
@@ -87,6 +88,7 @@ SET(HEADER_FILES
     svlStreamBranchSource.h
     svlExport.h
     svlFileHandlers.h
+    svlCameraGeometry.h
 
   # Filter API
     svlFilterSourceDummy.h
