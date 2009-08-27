@@ -30,7 +30,7 @@ int main(int argc, char * argv[])
     cmnClassRegister::SetLoD("devSensableHD", CMN_LOG_LOD_VERY_VERBOSE);
 
     // create our server task
-    devSensableHD * robotObject = new devSensableHD("Omni", "Omni1");
+    devSensableHD * robotObject = new devSensableHD("Omni", "Omni1", true);
 
     // Get the TaskManager instance and set operation mode
     mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
