@@ -26,8 +26,9 @@ http://www.cisst.org/cisst/license.txt.
 #include <ostream>
 #include <cisstVector.h>
 
+#include <cisstStereoVision/svlExport.h>
 
-class svlCameraGeometry
+class CISST_EXPORT svlCameraGeometry
 {
 public:
     typedef struct _Intrinsics {
@@ -49,7 +50,7 @@ public:
     svlCameraGeometry();
     virtual ~svlCameraGeometry();
 
-    friend std::ostream & operator << (std::ostream & stream, const svlCameraGeometry & objref);
+    friend CISST_EXPORT std::ostream & operator << (std::ostream & stream, const svlCameraGeometry & objref);
 
     void SetIntrinsics(const Intrinsics & intrinsics, const unsigned int cam_id = 0);
     void SetIntrinsics(const double fc[2], const double cc[2], const double a, const double kc[5], const unsigned int cam_id = 0);

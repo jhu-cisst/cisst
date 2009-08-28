@@ -53,6 +53,13 @@ vctMatrixRotation3BaseFromRaw(vctMatrixRotation3Base<vctFixedSizeMatrix<double, 
 template CISST_EXPORT void
 vctMatrixRotation3BaseFromRaw(vctMatrixRotation3Base<vctFixedSizeMatrix<float, 3, 3> > & matrixRotation,
                               const vctQuaternionRotation3Base<vctFixedSizeVector<float, 4> > & quaternionRotation);
+
+template CISST_EXPORT void
+vctMatrixRotation3BaseFromRaw(vctMatrixRotation3Base<vctFixedSizeMatrixRef<double, 3, 3, 4, 1> > & matrixRotation,
+                              const vctQuaternionRotation3Base<vctFixedSizeVector<double, 4> > & quaternionRotation);
+template CISST_EXPORT void
+vctMatrixRotation3BaseFromRaw(vctMatrixRotation3Base<vctFixedSizeMatrixRef<float, 3, 3, 4, 1> > & matrixRotation,
+                              const vctQuaternionRotation3Base<vctFixedSizeVector<float, 4> > & quaternionRotation);
 #endif
 #endif // SWIG
 #endif // DOXYGEN
