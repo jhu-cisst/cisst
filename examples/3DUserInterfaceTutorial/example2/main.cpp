@@ -197,8 +197,14 @@ int main()
 // setup renderers
 
     svlCameraGeometry camera_geometry;
-    camera_geometry.LoadCalibration("stereo_calibration.txt");
+    // Load Camera calibration results
+    camera_geometry.LoadCalibration("/home/saw1/calibration/davinci_mock_or/calib_results.txt");
+    // Center world in between the two cameras (da Vinci specific)
     camera_geometry.SetWorldToCenter();
+    // Rotate world by 180 degrees (VTK specific)
+    camera_geometry.RotateWorldAboutY(180.0);
+    // Display camera configuration
+    std::cerr << camera_geometry;
 
 #ifdef RENDER_ON_OVERLAY
 
