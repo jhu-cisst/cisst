@@ -37,4 +37,15 @@ target_link_libraries(3DUserInterfaceExample2
                       ${daVinci_LIBRARIES}
                       )
 
+# Copy VTK models to the build tree
+IF(WIN32)
+    CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/probeEnd.STL
+            ${CMAKE_BINARY_DIR}/examples/3DUserInterfaceTutorial/example2/probeEnd.STL COPYONLY)
+ELSE(WIN32)
+    CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/probeEnd.STL
+            ${CMAKE_BINARY_DIR}/examples/bin/probeEnd.STL COPYONLY)
+ENDIF(WIN32)
+
 CISST_REQUIRES(3DUserInterfaceExample2 "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstStereoVision;cisstDevices;cisstParameterTypes;cisst3DUserInterface")
+
+
