@@ -24,6 +24,7 @@ CMN_IMPLEMENT_SERVICES(osaSocket);
 
 #if (CISST_OS == CISST_WINDOWS)
 #include <Winsock2.h>
+typedef int socklen_t;
 #define WINSOCKVERSION MAKEWORD(2,2)
 #else
 #include <arpa/inet.h>
