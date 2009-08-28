@@ -177,7 +177,7 @@ std::list<vctFrm3> cs3DObjectViewer::GetSceneControlPoints(void)
 
 int cs3DObjectViewer::FindClosestControlPoint(vctFrm3 CursorPos)
 {
-    int counter = 0, toReturn;
+    int counter = 0, toReturn = -1;
     vctFrm3 absoluteControlPoint;
     double closestDist = cmnTypeTraits<double>::MaxPositiveValue();
 
@@ -203,3 +203,4 @@ int cs3DObjectViewer::FindClosestControlPoint(vctFrm3 CursorPos)
     
     return toReturn;
 }
+

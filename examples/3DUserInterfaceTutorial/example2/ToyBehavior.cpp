@@ -368,6 +368,7 @@ void ToyBehavior::AddCylinderCallback(void)
 ui3VisibleObject * ToyBehavior::FindClosestShape(void)
 {
     // this should find the closet shape the cursor is near, and highlight it.  this will be the one that is manitulated
+    return 0;
 }
 
 

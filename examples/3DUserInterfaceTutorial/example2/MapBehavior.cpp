@@ -685,7 +685,7 @@ int MapBehavior::FindClosestMarker()
     double closestDist = cmnTypeTraits<double>::MaxPositiveValue();
     vctDouble3 dist;
     double abs;
-    int currentCount = 0, returnValue;
+    int currentCount = 0, returnValue = -1;
     MarkersType::iterator iter1, iter2;
     const MarkersType::iterator end = Markers.end();
     for (iter1 = Markers.begin(); iter1 != end; iter1++)
