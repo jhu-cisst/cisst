@@ -18,38 +18,43 @@ SET(LIBRARY cisstRobot)
 SET(DEPENDENCIES
     cisstCommon
     cisstVector
+    cisstNumerical
     )
 
 # all source files
 SET(SOURCE_FILES
-	robRnBlender.cpp
-	robSO3Blender.cpp
-	robRnConstant.cpp
-	robSE3Constant.cpp
-	robDOF.cpp
-	robFunctionPiecewise.cpp
-	robHermite.cpp
-	robLinear.cpp
-	robSigmoid.cpp
-	robSLERP.cpp
-	robTrajectory.cpp
+#	robRnBlender.cpp
+#	robSO3Blender.cpp
+#	robRnConstant.cpp
+#	robSE3Constant.cpp
+#	robSE3Track.cpp
+#	robDOF.cpp
+#	robFunctionPiecewise.cpp
+#	robHermite.cpp
+#	robLinear.cpp
+#	robSigmoid.cpp
+#	robQuintic.cpp
+#	robSLERP.cpp
+#	robTrajectory.cpp
 	robCollaborativeControlForce.cpp
     )
 
 # all header files
 SET(HEADER_FILES
-	robRnBlender.h
-	robSO3Blender.h
-	robRnConstant.h
-	robSE3Constant.h
-	robDOF.h
-	robFunction.h	
-	robFunctionPiecewise.h
-	robHermite.h
-	robLinear.h
-	robSigmoid.h
-	robSLERP.h
-	robTrajectory.h
+#	robRnBlender.h
+#	robSO3Blender.h
+#	robRnConstant.h
+#	robSE3Constant.h
+#	robSE3Track.h
+#	robDOF.h
+#	robFunction.h	
+#	robFunctionPiecewise.h
+#	robHermite.h
+#	robLinear.h
+#	robSigmoid.h
+#	robQuintic.h
+#	robSLERP.h
+#	robTrajectory.h
 	robCollaborativeControlForce.h
 	robExport.h
     )

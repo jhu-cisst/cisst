@@ -31,7 +31,7 @@ http://www.cisst.org/cisst/license.txt.
 class CISST_EXPORT robCollaborativeControlForce {
 
 public:
-    class ParameterType {
+    class CISST_EXPORT ParameterType {
 
     public:
         enum ForceModeType {RAW, RATCHETED, CAPPED};
