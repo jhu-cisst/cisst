@@ -1,7 +1,8 @@
 #
 #   $Id$
 #
-#   Author(s): Ali Uneri
+#   Author(s):  Ali Uneri
+#   Created on: 2009-08-13
 #
 #   (C) Copyright 2007-2009 Johns Hopkins University (JHU), All Rights Reserved.
 #

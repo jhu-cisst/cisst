@@ -8,58 +8,104 @@ class trackerUI {open selected
   } {
     Fl_Window DisplayWindow {
       callback CloseWindow_CB open
-      xywh {200 200 340 160} type Double align 0 visible
+      xywh {100 100 530 250} type Double align 0 hide
     } {
-      Fl_Group {} {
-        label Rotation open
-        xywh {0 20 250 100} labelsize 12
-      } {
-        Fl_Value_Input {Rotation[0]} {
-          xywh {10 30 70 20} box PLASTIC_DOWN_BOX labelsize 12 minimum -100 maximum 100 step 0.1 value 1 textfont 4 textsize 11
-        }
-        Fl_Value_Input {Rotation[1]} {
-          xywh {90 30 70 20} box PLASTIC_DOWN_BOX labelsize 12 minimum -100 maximum 100 step 0.1 textfont 4 textsize 11
-        }
-        Fl_Value_Input {Rotation[2]} {
-          xywh {170 30 70 20} box PLASTIC_DOWN_BOX labelsize 12 minimum -100 maximum 100 step 0.1 textfont 4 textsize 11
-        }
-        Fl_Value_Input {Rotation[3]} {
-          xywh {10 60 70 20} box PLASTIC_DOWN_BOX labelsize 12 minimum -100 maximum 100 step 0.1 textfont 4 textsize 11
-        }
-        Fl_Value_Input {Rotation[4]} {
-          xywh {90 60 70 20} box PLASTIC_DOWN_BOX labelsize 12 minimum -100 maximum 100 step 0.1 value 1 textfont 4 textsize 11
-        }
-        Fl_Value_Input {Rotation[5]} {
-          xywh {170 60 70 20} box PLASTIC_DOWN_BOX labelsize 12 minimum -100 maximum 100 step 0.1 textfont 4 textsize 11
-        }
-        Fl_Value_Input {Rotation[6]} {
-          xywh {10 90 70 20} box PLASTIC_DOWN_BOX labelsize 12 minimum -100 maximum 100 step 0.1 textfont 4 textsize 11
-        }
-        Fl_Value_Input {Rotation[7]} {
-          xywh {90 90 70 20} box PLASTIC_DOWN_BOX labelsize 12 minimum -100 maximum 100 step 0.1 textfont 4 textsize 11
-        }
-        Fl_Value_Input {Rotation[8]} {
-          xywh {170 90 70 20} box PLASTIC_DOWN_BOX labelsize 12 minimum -100 maximum 100 step 0.1 value 1 textfont 4 textsize 11
-        }
-      }
-      Fl_Group {} {
-        label Translation open
-        xywh {250 20 90 100} labelsize 12
-      } {
-        Fl_Value_Input {Translation[0]} {
-          xywh {260 30 70 20} box PLASTIC_DOWN_BOX labelsize 12 minimum -100 maximum 100 step 0.1 textfont 4 textsize 11
-        }
-        Fl_Value_Input {Translation[1]} {
-          xywh {260 60 70 20} box PLASTIC_DOWN_BOX labelsize 12 minimum -100 maximum 100 step 0.1 textfont 4 textsize 11
-        }
-        Fl_Value_Input {Translation[2]} {
-          xywh {260 90 70 20} box PLASTIC_DOWN_BOX labelsize 12 minimum -100 maximum 100 step 0.1 textfont 4 textsize 11
-        }
-      }
       Fl_Return_Button BtnQuit {
         label Quit
         callback {QuitClicked = true;}
-        xywh {10 120 60 30} box PLASTIC_UP_BOX labelsize 12
+        xywh {450 210 70 30} box PLASTIC_UP_BOX labelsize 12
+      }
+      Fl_Group {} {
+        label {Sent Rotation}
+        xywh {10 80 250 100} box PLASTIC_UP_BOX labelsize 12 align 2
+      } {
+        Fl_Value_Input {FrameSend[0]} {
+          xywh {20 90 70 20} box PLASTIC_DOWN_BOX labelsize 12 minimum -100 maximum 100 step 0.1 value 1 textfont 4 textsize 11
+        }
+        Fl_Value_Input {FrameSend[1]} {
+          xywh {100 90 70 20} box PLASTIC_DOWN_BOX labelsize 12 minimum -100 maximum 100 step 0.1 textfont 4 textsize 11
+        }
+        Fl_Value_Input {FrameSend[2]} {
+          xywh {180 90 70 20} box PLASTIC_DOWN_BOX labelsize 12 minimum -100 maximum 100 step 0.1 textfont 4 textsize 11
+        }
+        Fl_Value_Input {FrameSend[3]} {
+          xywh {20 120 70 20} box PLASTIC_DOWN_BOX labelsize 12 minimum -100 maximum 100 step 0.1 textfont 4 textsize 11
+        }
+        Fl_Value_Input {FrameSend[4]} {
+          xywh {100 120 70 20} box PLASTIC_DOWN_BOX labelsize 12 minimum -100 maximum 100 step 0.1 value 1 textfont 4 textsize 11
+        }
+        Fl_Value_Input {FrameSend[5]} {
+          xywh {180 120 70 20} box PLASTIC_DOWN_BOX labelsize 12 minimum -100 maximum 100 step 0.1 textfont 4 textsize 11
+        }
+        Fl_Value_Input {FrameSend[6]} {
+          xywh {20 150 70 20} box PLASTIC_DOWN_BOX labelsize 12 minimum -100 maximum 100 step 0.1 textfont 4 textsize 11
+        }
+        Fl_Value_Input {FrameSend[7]} {
+          xywh {100 150 70 20} box PLASTIC_DOWN_BOX labelsize 12 minimum -100 maximum 100 step 0.1 textfont 4 textsize 11
+        }
+        Fl_Value_Input {FrameSend[8]} {
+          xywh {180 150 70 20} box PLASTIC_DOWN_BOX labelsize 12 minimum -100 maximum 100 step 0.1 value 1 textfont 4 textsize 11
+        }
+      }
+      Fl_Group {} {
+        label {Sent Translation}
+        xywh {10 10 250 40} box PLASTIC_UP_BOX labelsize 12 align 2
+      } {
+        Fl_Value_Input {FrameSend[9]} {
+          xywh {20 20 70 20} box PLASTIC_DOWN_BOX labelsize 12 minimum -100 maximum 100 step 0.1 textfont 4 textsize 11
+        }
+        Fl_Value_Input {FrameSend[10]} {
+          xywh {100 20 70 20} box PLASTIC_DOWN_BOX labelsize 12 minimum -100 maximum 100 step 0.1 textfont 4 textsize 11
+        }
+        Fl_Value_Input {FrameSend[11]} {
+          xywh {180 20 70 20} box PLASTIC_DOWN_BOX labelsize 12 minimum -100 maximum 100 step 0.1 textfont 4 textsize 11
+        }
+      }
+      Fl_Group {} {
+        label {Received Rotation}
+        xywh {270 80 250 100} box PLASTIC_UP_BOX labelsize 12 align 2
+      } {
+        Fl_Value_Input {FrameRecv[0]} {
+          xywh {280 90 70 20} box PLASTIC_DOWN_BOX labelsize 12 minimum -100 maximum 100 step 0.1 value 1 textfont 4 textsize 11
+        }
+        Fl_Value_Input {FrameRecv[1]} {
+          xywh {360 90 70 20} box PLASTIC_DOWN_BOX labelsize 12 minimum -100 maximum 100 step 0.1 textfont 4 textsize 11
+        }
+        Fl_Value_Input {FrameRecv[2]} {
+          xywh {440 90 70 20} box PLASTIC_DOWN_BOX labelsize 12 minimum -100 maximum 100 step 0.1 textfont 4 textsize 11
+        }
+        Fl_Value_Input {FrameRecv[3]} {
+          xywh {280 120 70 20} box PLASTIC_DOWN_BOX labelsize 12 minimum -100 maximum 100 step 0.1 textfont 4 textsize 11
+        }
+        Fl_Value_Input {FrameRecv[4]} {
+          xywh {360 120 70 20} box PLASTIC_DOWN_BOX labelsize 12 minimum -100 maximum 100 step 0.1 value 1 textfont 4 textsize 11
+        }
+        Fl_Value_Input {FrameRecv[5]} {
+          xywh {440 120 70 20} box PLASTIC_DOWN_BOX labelsize 12 minimum -100 maximum 100 step 0.1 textfont 4 textsize 11
+        }
+        Fl_Value_Input {FrameRecv[6]} {
+          xywh {280 150 70 20} box PLASTIC_DOWN_BOX labelsize 12 minimum -100 maximum 100 step 0.1 textfont 4 textsize 11
+        }
+        Fl_Value_Input {FrameRecv[7]} {
+          xywh {360 150 70 20} box PLASTIC_DOWN_BOX labelsize 12 minimum -100 maximum 100 step 0.1 textfont 4 textsize 11
+        }
+        Fl_Value_Input {FrameRecv[8]} {
+          xywh {440 150 70 20} box PLASTIC_DOWN_BOX labelsize 12 minimum -100 maximum 100 step 0.1 value 1 textfont 4 textsize 11
+        }
+      }
+      Fl_Group {} {
+        label {Received Translation}
+        xywh {270 10 250 40} box PLASTIC_UP_BOX labelsize 12 align 2
+      } {
+        Fl_Value_Input {FrameRecv[9]} {
+          xywh {280 20 70 20} box PLASTIC_DOWN_BOX labelsize 12 minimum -100 maximum 100 step 0.1 textfont 4 textsize 11
+        }
+        Fl_Value_Input {FrameRecv[10]} {
+          xywh {360 20 70 20} box PLASTIC_DOWN_BOX labelsize 12 minimum -100 maximum 100 step 0.1 textfont 4 textsize 11
+        }
+        Fl_Value_Input {FrameRecv[11]} {
+          xywh {440 20 70 20} box PLASTIC_DOWN_BOX labelsize 12 minimum -100 maximum 100 step 0.1 textfont 4 textsize 11
+        }
       }
     }
     code {// constructor

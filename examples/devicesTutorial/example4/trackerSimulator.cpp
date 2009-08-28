@@ -27,11 +27,20 @@ trackerSimulator::trackerSimulator(const std::string & taskName, double period):
     mtsTaskPeriodic(taskName, period, false, 500),
     ExitFlag(false)
 {
-    mtsProvidedInterface * providedInterface;
-    providedInterface = AddProvidedInterface("PositionCartesian");
+    // required interfaces
+    mtsRequiredInterface * requiredInterface;
+    requiredInterface = AddRequiredInterface("RequiresPositionCartesian");
+    if (requiredInterface) {
+        requiredInterface->AddFunction("GetPositionCartesian", GetPositionCartesian);
+    }
 
-    StateTable.AddData(PositionCartesian, "PositionCartesian");
-    providedInterface->AddCommandReadState(StateTable, PositionCartesian, "GetPositionCartesian");
+    // provided interfaces
+    mtsProvidedInterface * providedInterface;
+    providedInterface = AddProvidedInterface("ProvidesPositionCartesian");
+    if (providedInterface) {
+        StateTable.AddData(FrameSend, "FrameSend");
+        providedInterface->AddCommandReadState(StateTable, FrameSend, "GetPositionCartesian");
+    }
 }
 
 
@@ -51,11 +60,22 @@ void trackerSimulator::Run()
         return;
     }
 
-    for (unsigned int r = 0; r < 3; r++) {
-        PositionCartesian.Position().Translation().Element(r) = UI.Translation[r]->value();
-        for (unsigned int c = 0; c < 3; c++) {
-            PositionCartesian.Position().Rotation().Element(r,c) = UI.Rotation[(r*3)+c]->value();
-        }
+    // get frame to be sent from the UI
+    for (unsigned int i = 0; i < 3; i++) {
+        FrameSend.Position().Rotation().Element(i,0) = UI.FrameSend[i]->value();
+        FrameSend.Position().Rotation().Element(i,1) = UI.FrameSend[i+3]->value();
+        FrameSend.Position().Rotation().Element(i,2) = UI.FrameSend[i+6]->value();
+        FrameSend.Position().Translation().Element(i) = UI.FrameSend[i+9]->value();
+    }
+
+    GetPositionCartesian(FrameRecv);
+
+    // set received frame on the UI
+    for (unsigned int i = 0; i < 3; i++) {
+        UI.FrameRecv[i]->value(FrameRecv.Position().Rotation().Element(i,0));
+        UI.FrameRecv[i+3]->value(FrameRecv.Position().Rotation().Element(i,1));
+        UI.FrameRecv[i+6]->value(FrameRecv.Position().Rotation().Element(i,2));
+        UI.FrameRecv[i+9]->value(FrameRecv.Position().Translation().Element(i));
     }
 
     if (UI.QuitClicked) {

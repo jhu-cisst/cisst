@@ -72,9 +72,9 @@ if(CISST_DEV_HAS_OPENIGTLINK)
   find_package(OpenIGTLink REQUIRED)
   include(${OpenIGTLink_USE_FILE})
   set(SOURCE_FILES ${SOURCE_FILES}
-      devOpenIGTLinkServer.cpp)
+      devOpenIGTLink.cpp)
   set(HEADER_FILES ${HEADER_FILES}
-      devOpenIGTLinkServer.h)
+      devOpenIGTLink.h)
   set(DEV_ADDITIONAL_CMAKE_FILES
       "${DEV_ADDITIONAL_CMAKE_FILES}"
       ${OpenIGTLink_USE_FILE})
