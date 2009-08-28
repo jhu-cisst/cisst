@@ -7,11 +7,11 @@
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
-# 
+#
 # This software is provided "as is" under an open source license, with
 # no warranty.  The complete license can be found in license.txt and
 # http://www.cisst.org/cisst/license.txt.
-# 
+#
 # --- end cisst license ---
 
 # set the library name
@@ -31,6 +31,7 @@ SET(SOURCE_FILES
     osaSerialPort.cpp
     osaSleep.cpp
     osaSocket.cpp
+    osaSocketServer.cpp
     osaStopwatch.cpp
     osaThread.cpp
     osaThreadBuddy.cpp
@@ -49,6 +50,7 @@ SET(HEADER_FILES
     osaSerialPort.h
     osaSleep.h
     osaSocket.h
+    osaSocketServer.h
     osaStopwatch.h
     osaThread.h
     osaThreadAdapter.h
@@ -61,11 +63,10 @@ SET(HEADER_FILES
 IF(WIN32)
     LINK_LIBRARIES(WSOCK32)
 ENDIF(WIN32)
-    
+
 IF(UNIX AND NOT APPLE)
    # clock_gettime requires linking with librt
    LINK_LIBRARIES(rt)
 ENDIF(UNIX AND NOT APPLE)
 
 CISST_ADD_LIBRARY_TO_PROJECT(cisstLibs)
-
