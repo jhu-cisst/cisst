@@ -18,6 +18,8 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+#include <string.h>
+
 #include <cisstCommon.h>
 #include <cisstOSAbstraction.h>
 

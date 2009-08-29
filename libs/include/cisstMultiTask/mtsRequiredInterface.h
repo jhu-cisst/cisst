@@ -196,12 +196,12 @@ protected:
                 outputStream << " (required)";
             }
         }
-        const unsigned int GetCommandID(void) const
+        unsigned int GetCommandID(void) const
         {
             return (*CommandPointer)->GetCommandID();
         }
 
-        const std::string GetName(void) const
+        std::string GetName(void) const
         {
             return (*CommandPointer)->GetName();
         }

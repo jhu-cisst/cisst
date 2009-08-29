@@ -9,7 +9,7 @@
 #include "serverTask.h"
 #include "clientTask.h"
 
-int main(int CMN_UNUSED(argc), char * CMN_UNUSED(argv))
+int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
 {
     // log configuration
     cmnLogger::SetLoD(CMN_LOG_LOD_VERY_VERBOSE);

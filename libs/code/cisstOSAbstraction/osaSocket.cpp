@@ -32,6 +32,7 @@ typedef int socklen_t;
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <string.h>  // for memset
 #endif
 
 struct osaSocketInternals {
