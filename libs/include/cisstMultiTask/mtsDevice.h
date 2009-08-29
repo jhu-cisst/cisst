@@ -161,6 +161,9 @@ class CISST_EXPORT mtsDevice: public cmnGenericObject
 
     /*! Send a human readable description of the device. */
     void ToStream(std::ostream & outputStream) const;
+
+    /*! Put in format suitable for graph visualization. */
+    std::string ToGraphFormat(void) const;
 };
 
 

@@ -37,19 +37,29 @@ CMN_IMPLEMENT_SERVICES(mtsTaskManager);
 
 mtsTaskManager::mtsTaskManager():
     TaskMap("Tasks"),
-    DeviceMap("Devices")
+    DeviceMap("Devices"),
 #if CISST_MTS_HAS_ICE
     ,
     TaskManagerTypeMember(TASK_MANAGER_LOCAL),
     TaskManagerCommunicatorID("TaskManagerServerSender"),
     ProxyGlobalTaskManager(NULL),
-    ProxyTaskManagerClient(NULL)
+    ProxyTaskManagerClient(NULL),
 #endif
+    jgraphSocket(osaSocket::TCP)
 {
     __os_init();
     TaskMap.SetOwner(*this);
     DeviceMap.SetOwner(*this);
     TimeServer.SetTimeOrigin();
+    // Try to connect to the JGraph application software (Java program).
+    // Note that the JGraph application also sends event messages back via the socket,
+    // though we don't currently read them. To do this, it would be best to implement
+    // the TaskManager as a periodic task.
+    socketConn = jgraphSocket.Connect("127.0.0.1", 4444);
+    if (socketConn)
+        osaSleep(1.0);  // need to wait or JGraph server will not start properly
+    else
+        CMN_LOG_CLASS_INIT_WARNING << "Failed to connect to JGraph server" << std::endl;
 }
 
 
@@ -71,6 +81,8 @@ mtsTaskManager::~mtsTaskManager()
         delete ProxyTaskManagerClient;
     }
 #endif
+
+    jgraphSocket.Close();
 }
 
 
@@ -84,7 +96,12 @@ bool mtsTaskManager::AddTask(mtsTask * task) {
     bool result = TaskMap.AddItem(task->GetName(), task, CMN_LOG_LOD_INIT_ERROR);
     if (result) {
         CMN_LOG_CLASS_INIT_VERBOSE << "AddTask: added task named "
-                                   << task->GetName() << std::endl;    
+                                   << task->GetName() << std::endl;
+        if (socketConn) {
+            std::string buffer = task->ToGraphFormat();
+            CMN_LOG_CLASS_INIT_VERBOSE << "Sending " << buffer << std::endl;
+            jgraphSocket.Send(buffer);
+        }
     }
     return result;
 }
@@ -111,6 +128,11 @@ bool mtsTaskManager::AddDevice(mtsDevice * device) {
     if (result) {
         CMN_LOG_CLASS_INIT_VERBOSE << "AddDevice: added device named "
                                    << device->GetName() << std::endl;
+        if (socketConn) {
+            std::string buffer = device->ToGraphFormat();
+            CMN_LOG_CLASS_INIT_VERBOSE << "Sending " << buffer;
+            jgraphSocket.Send(buffer);
+        }
     }
     return result;
 }
@@ -390,6 +412,13 @@ bool mtsTaskManager::Connect(const std::string & userTaskName, const std::string
     AssociationSet.insert(association);
     CMN_LOG_CLASS_INIT_VERBOSE << "Connect: " << userTaskName << "::" << requiredInterfaceName
                                << " successfully connected to " << resourceTaskName << "::" << providedInterfaceName << std::endl;
+    if (socketConn) {
+        std::string message = "add edge [" + userTaskName + ", " + resourceTaskName + ", "
+                                           + requiredInterfaceName + ", " + providedInterfaceName + "]\n";
+        CMN_LOG_CLASS_INIT_VERBOSE << "Sending " << message;
+        jgraphSocket.Send(message);
+    }
+
 #if CISST_MTS_HAS_ICE
     if (requestServerSideConnect) {
         // At client side, if the connection between the actual required interface and 

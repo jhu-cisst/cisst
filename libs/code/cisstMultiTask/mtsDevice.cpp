@@ -117,3 +117,26 @@ void mtsDevice::ToStream(std::ostream & outputStream) const
     ProvidedInterfaces.ToStream(outputStream);
 }
 
+std::string mtsDevice::ToGraphFormat(void) const
+{
+    std::string buffer("add taska [[");
+    buffer = "add taska [[" + Name + "],[";
+    RequiredInterfacesMapType::const_iterator reqit = RequiredInterfaces.begin();
+    while (reqit != RequiredInterfaces.end()) {
+        buffer += reqit->first;
+        reqit++;
+        if (reqit != RequiredInterfaces.end())
+            buffer += ",";
+    }
+    buffer += "],[";
+    ProvidedInterfacesMapType::const_iterator provit = ProvidedInterfaces.begin();
+    while (provit != ProvidedInterfaces.end()) {
+        buffer += provit->first;
+        provit++;
+        if (provit != ProvidedInterfaces.end())
+            buffer += ",";
+    }
+    buffer += "]]\n";
+    return buffer;
+}
+

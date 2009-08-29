@@ -36,6 +36,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstOSAbstraction/osaThreadBuddy.h>
 #include <cisstOSAbstraction/osaTimeServer.h>
+#include <cisstOSAbstraction/osaSocket.h>
 
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsConfig.h>
@@ -105,6 +106,9 @@ protected:
 
     /*! Time server used by all tasks. */
     osaTimeServer TimeServer;
+
+    osaSocket jgraphSocket;
+    bool socketConn;
 
     /*! Constructor.  Protected because this is a singleton.
         Does OS-specific initialization to start real-time operations. */
