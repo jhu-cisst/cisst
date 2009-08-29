@@ -93,7 +93,7 @@ public:
         typedef _class value_type;
     public:
         /*! Specialization of create when dynamic creation is
-          enabled.  Call new for the given class.  This methods
+          enabled.  Call new for the given class.  This method
           requires a default constructor for the aforementioned
           class. */
         inline static cmnGenericObject * Create(void) {
@@ -101,7 +101,7 @@ public:
         }
 
         /*! Specialization of create(other) when dynamic creation is
-          enabled.  Call new for the given class.  This methods
+          enabled.  Call new for the given class.  This method
           requires a copy constructor for the aforementioned class. */
         inline static cmnGenericObject * Create(const cmnGenericObject & other) {
             const value_type * otherPointer = dynamic_cast<const value_type *>(&other);
@@ -113,7 +113,7 @@ public:
         }
 
         /*! Specialization of create(other) when dynamic creation is
-          enabled.  Call new for the given class.  This methods
+          enabled.  Call new for the given class.  This method
           requires a copy constructor for the aforementioned class. */
         inline static bool Create(cmnGenericObject * existing, const cmnGenericObject & other) {
             const value_type * otherPointer = dynamic_cast<const value_type *>(&other);
@@ -126,7 +126,7 @@ public:
         }
 
         /*! Specialization of delete when dynamic creation is
-          enabled.  Call new for the given class. */
+          enabled.  Call destructor for the given class. */
         inline static bool Delete(cmnGenericObject * existing) {
             value_type * existingPointer = dynamic_cast<value_type *>(existing);
             if (existingPointer) {
