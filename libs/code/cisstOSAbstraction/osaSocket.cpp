@@ -151,7 +151,7 @@ bool osaSocket::Connect(const std::string & host, unsigned short port)
 
 int osaSocket::Send(const char * bufsend, unsigned int msglen)
 {
-    int retval;
+    int retval = 0;
     if (SocketType == UDP) {
         socklen_t length = sizeof(SERVER_ADDR);
         retval = sendto(SocketFD, bufsend, msglen, 0, reinterpret_cast<struct sockaddr *>(&SERVER_ADDR), length);
