@@ -24,12 +24,12 @@ displayTask::displayTask(const std::string & taskName, double period):
     requiredInterface = AddRequiredInterface("Button1");
 	if (requiredInterface) {
         requiredInterface->AddEventHandlerWrite(&displayTask::Button1EventHandler, this,
-                                                "Button", prmEventButton());
+                                                "Button");
     }
     requiredInterface = AddRequiredInterface("Button2");
 	if (requiredInterface) {
         requiredInterface->AddEventHandlerWrite(&displayTask::Button2EventHandler, this,
-                                                "Button", prmEventButton());
+                                                "Button");
     }
 }
 

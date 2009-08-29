@@ -21,7 +21,7 @@ clientTask::clientTask(const std::string & taskName, double period):
     required = AddRequiredInterface("Required2");
     if (required) {
         required->AddFunction("TriggerEvent", this->TriggerEvent);
-        required->AddEventHandlerWrite(&clientTask::EventWriteHandler, this, "EventWrite", value_type());
+        required->AddEventHandlerWrite(&clientTask::EventWriteHandler, this, "EventWrite");
     }
     
     // Get a pointer to the time server

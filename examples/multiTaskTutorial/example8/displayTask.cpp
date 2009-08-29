@@ -22,7 +22,7 @@ displayTask::displayTask(const std::string & taskName, double period):
        req->AddEventHandlerVoid(
            &displayTask::ButtonEventHandler, this, "ButtonEventHandler", false);
        req->AddEventHandlerWrite(&displayTask::HandleEventWrite, this,
-                                 "WriteEvent", this->DataFromEventWrite, false);
+                                 "WriteEvent", false);
     }
 }
 

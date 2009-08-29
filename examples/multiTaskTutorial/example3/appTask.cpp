@@ -4,7 +4,6 @@
 
 #include <math.h>
 #include "appTask.h"
-#include "robotLowLevel.h"
 
 CMN_IMPLEMENT_SERVICES(appTask);
 
@@ -21,7 +20,7 @@ appTask::appTask(const std::string & taskName,
         req->AddFunction("GetPositionJoint", GetPositionJointControlled);
         req->AddFunction("MovePositionJoint", MovePositionJointControlled);
         req->AddEventHandlerWrite(&appTask::HandleMotionFinishedControlled, this,
-                                  "MotionFinished", PositionJointType(NB_JOINTS));
+                                  "MotionFinished");
         req->AddEventHandlerVoid(&appTask::HandleMotionStartedControlled, this,
                                   "MotionStarted");
     }
@@ -34,10 +33,11 @@ appTask::appTask(const std::string & taskName,
 // Mutex for UI
 static osaMutex myMutex;
 
-void appTask::HandleMotionFinishedControlled(const PositionJointType &)
-{
+void appTask::HandleMotionFinishedControlled(const PositionJointType & position)
+{ 
     myMutex.Lock();
     ui.ShowMoving(false);
+    CMN_LOG_RUN_VERBOSE << "Event motion finished at position: " << position << std::endl;
     myMutex.Unlock();
 }
 
@@ -52,6 +52,16 @@ void appTask::Startup(void)
 {
     Ticks = 0;
     ui.SetCloseHandler(Close);
+    PositionControlled.ReconstructFrom(*(GetPositionJointControlled.GetArgumentPrototype()));
+
+    //    GetPositionJointControlled.GetArgumentPrototype()->Services()->Create(&PositionControlled,
+    //                                                                      *(GetPositionJointControlled.GetArgumentPrototype()));
+
+    GetPositionJointObserved.GetArgumentPrototype()->Services()->Create(&PositionObserved,
+                                                                        *(GetPositionJointObserved.GetArgumentPrototype()));
+
+    MovePositionJointControlled.GetArgumentPrototype()->Services()->Create(&PositionDesired,
+                                                                           *(MovePositionJointControlled.GetArgumentPrototype()));
 
     myMutex.Lock();
     ui.Show();
@@ -63,23 +73,18 @@ void appTask::Run(void)
     Ticks++;
     ProcessQueuedEvents();
 
-    PositionJointType posControlled;
-    posControlled.SetSize(NB_JOINTS);
-    PositionJointType posObserved;
-    posObserved.SetSize(NB_JOINTS);
-    PositionJointType posDesired;
-    posDesired.SetSize(NB_JOINTS);
-    GetPositionJointControlled(posControlled);
-    GetPositionJointObserved(posObserved);
+    GetPositionJointControlled(PositionControlled);
+    GetPositionJointObserved(PositionObserved);
+
     myMutex.Lock();
     if (ui.MoveControlledPressed) {
         ui.MoveControlledPressed = false;
-        ui.GetGoalControlled(posDesired[0], posDesired[1]);
-        MovePositionJointControlled(posDesired);
+        ui.GetGoalControlled(PositionDesired[0], PositionDesired[1]);
+        MovePositionJointControlled(PositionDesired);
     }
     ui.Update(Ticks,
-              posControlled[0], posControlled[1],
-              posObserved[0], posObserved[1]);
+              PositionControlled[0], PositionControlled[1],
+              PositionObserved[0], PositionObserved[1]);
     Fl::check();
     myMutex.Unlock();
 }

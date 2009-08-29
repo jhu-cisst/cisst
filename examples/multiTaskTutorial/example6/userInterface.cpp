@@ -31,7 +31,7 @@ userInterface::userInterface(const std::string & robotName,
     Robot.AddEventHandlerVoid(&userInterface::CallBackStarted, this,
                               "MotionStarted", false);
     Robot.AddEventHandlerWrite(&userInterface::CallBackFinished, this,
-                  "MotionFinished", PositionJointType(NB_JOINTS), false);
+                               "MotionFinished", false);
 
     // tell task or device that this thread will use it, will create a
     // mailbox if needed.  if this method is not called, call to
