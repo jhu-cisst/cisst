@@ -49,13 +49,13 @@ void cmnClassRegisterTest::tearDown(void)
 
 void cmnClassRegisterTest::TestRegistration(void) {
 
-    const cmnClassServicesBase* classAServices = NULL;
-    const cmnClassServicesBase* classBServices = NULL;
-    const cmnClassServicesBase* classCServices = NULL;
-    const cmnClassServicesBase* classC1Services = NULL;
-    const cmnClassServicesBase* classC2Services = NULL;
-    const cmnClassServicesBase* classD12Services = NULL;
-    const cmnClassServicesBase* classD34Services = NULL;
+    const cmnClassServicesBase* classAServices = 0;
+    const cmnClassServicesBase* classBServices = 0;
+    const cmnClassServicesBase* classCServices = 0;
+    const cmnClassServicesBase* classC1Services = 0;
+    const cmnClassServicesBase* classC2Services = 0;
+    const cmnClassServicesBase* classD12Services = 0;
+    const cmnClassServicesBase* classD34Services = 0;
 
     classAServices = cmnClassRegister::FindClassServices("TestA");
     CPPUNIT_ASSERT(classAServices);
@@ -71,7 +71,7 @@ void cmnClassRegisterTest::TestRegistration(void) {
 
     /* class TestC1 is not registered */
     classC1Services = cmnClassRegister::FindClassServices("TestC1");
-    CPPUNIT_ASSERT(classC1Services == NULL);
+    CPPUNIT_ASSERT(classC1Services == 0);
     /* but the base class is, we should be able to get some
        services */
     TestC1 objectC1;
@@ -97,7 +97,7 @@ void cmnClassRegisterTest::TestRegistration(void) {
 
 void cmnClassRegisterTest::TestRegistrationStaticAllInline(void) {
 
-    const cmnClassServicesBase* staticAllInlineServices = NULL;
+    const cmnClassServicesBase* staticAllInlineServices = 0;
     staticAllInlineServices = cmnClassRegister::FindClassServices("staticAllInline");
     CPPUNIT_ASSERT(staticAllInlineServices);
     CPPUNIT_ASSERT(staticAllInline::ClassServices()->GetName() == "staticAllInline");
@@ -109,7 +109,7 @@ void cmnClassRegisterTest::TestRegistrationStaticAllInline(void) {
 
 void cmnClassRegisterTest::TestRegistrationStaticNoInline(void) {
 
-    const cmnClassServicesBase* staticNoInlineServices = NULL;
+    const cmnClassServicesBase* staticNoInlineServices = 0;
     staticNoInlineServices = cmnClassRegister::FindClassServices("staticNoInline");
     CPPUNIT_ASSERT(staticNoInlineServices);
     CPPUNIT_ASSERT(staticNoInline::ClassServices()->GetName() == "staticNoInline");
@@ -121,7 +121,7 @@ void cmnClassRegisterTest::TestRegistrationStaticNoInline(void) {
 #if USE_DYNAMIC_LIB_CLASS_REGISTRATION_TESTS
 void cmnClassRegisterTest::TestRegistrationDynamicAllInline(void) {
 
-    const cmnClassServicesBase* dynamicAllInlineServices = NULL;
+    const cmnClassServicesBase* dynamicAllInlineServices = 0;
     dynamicAllInlineServices = cmnClassRegister::FindClassServices("dynamicAllInline");
     CPPUNIT_ASSERT(dynamicAllInlineServices);
     CPPUNIT_ASSERT(dynamicAllInline::ClassServices()->GetName() == "dynamicAllInline");
@@ -132,7 +132,7 @@ void cmnClassRegisterTest::TestRegistrationDynamicAllInline(void) {
 
 
 void cmnClassRegisterTest::TestRegistrationDynamicNoInline(void) {
-    const cmnClassServicesBase* dynamicNoInlineServices = NULL;
+    const cmnClassServicesBase* dynamicNoInlineServices = 0;
     dynamicNoInlineServices = cmnClassRegister::FindClassServices("dynamicNoInline");
     CPPUNIT_ASSERT(dynamicNoInlineServices);
     CPPUNIT_ASSERT(dynamicNoInline::ClassServices()->GetName() == "dynamicNoInline");
@@ -144,7 +144,7 @@ void cmnClassRegisterTest::TestRegistrationDynamicNoInline(void) {
 
 void cmnClassRegisterTest::TestLoD(void) {
     cmnLogLoD lod;
-    const cmnClassServicesBase* classAServices = NULL;
+    const cmnClassServicesBase* classAServices = 0;
     TestA objectA;
 
     /* access the class lod via the class itself, therefore should
@@ -156,7 +156,7 @@ void cmnClassRegisterTest::TestLoD(void) {
     /* try again via the class register, but first check that the
        class is known */
     classAServices = cmnClassRegister::FindClassServices("TestA");
-    CPPUNIT_ASSERT(classAServices != NULL);
+    CPPUNIT_ASSERT(classAServices != 0);
     /* the class info known by the object should be the same as the
        one known by the class register */
     CPPUNIT_ASSERT(classAServices == objectA.ClassServices());
@@ -244,10 +244,10 @@ void cmnClassRegisterTest::TestLog(void) {
 
 void cmnClassRegisterTest::TestDynamicCreation(void) {
     cmnGenericObject* objectA = cmnClassRegister::Create("TestA");
-    CPPUNIT_ASSERT(objectA == NULL);
+    CPPUNIT_ASSERT(objectA == 0);
     
     cmnGenericObject* objectB = cmnClassRegister::Create("TestB");
-    CPPUNIT_ASSERT(objectB == NULL);
+    CPPUNIT_ASSERT(objectB == 0);
     
     cmnGenericObject* objectC = cmnClassRegister::Create("TestC");
     CPPUNIT_ASSERT(objectC);
@@ -256,7 +256,7 @@ void cmnClassRegisterTest::TestDynamicCreation(void) {
 
     /* if the class does not contain the needed macros, we should not be able to create */    
     cmnGenericObject* objectC1 = cmnClassRegister::Create("TestC1");
-    CPPUNIT_ASSERT(objectC1 == NULL);
+    CPPUNIT_ASSERT(objectC1 == 0);
 
     cmnGenericObject* objectC2 = cmnClassRegister::Create("TestC2");
     CPPUNIT_ASSERT(objectC2);
@@ -264,35 +264,64 @@ void cmnClassRegisterTest::TestDynamicCreation(void) {
     CPPUNIT_ASSERT(typeid(*objectC2) == typeid(realObjectC2));
     CPPUNIT_ASSERT(typeid(*objectC2) != typeid(realObjectC));
     /* test that default constructor has been used */
-    TestC2 * createdOjectC2defautCtor = dynamic_cast<TestC2 *>(objectC2);
-    CPPUNIT_ASSERT(createdOjectC2defautCtor != 0);
-    CPPUNIT_ASSERT(createdOjectC2defautCtor->Size == 2);
-    CPPUNIT_ASSERT(createdOjectC2defautCtor->Elements[0] == 1.0);
-    CPPUNIT_ASSERT(createdOjectC2defautCtor->Elements[1] == 2.0);
+    TestC2 * createdOjectC2DefaultCtor = dynamic_cast<TestC2 *>(objectC2);
+    CPPUNIT_ASSERT(createdOjectC2DefaultCtor != 0);
+    CPPUNIT_ASSERT(createdOjectC2DefaultCtor->Size == 2);
+    CPPUNIT_ASSERT(createdOjectC2DefaultCtor->Elements[0] == 1.0);
+    CPPUNIT_ASSERT(createdOjectC2DefaultCtor->Elements[1] == 2.0);
     /* now test the copy constructor */
-    free(createdOjectC2defautCtor->Elements);
-    createdOjectC2defautCtor->Size = 3;
-    createdOjectC2defautCtor->Elements = new double[3];
-    createdOjectC2defautCtor->Elements[0] = 3;
-    createdOjectC2defautCtor->Elements[1] = 2;
-    createdOjectC2defautCtor->Elements[2] = 1;
-    cmnGenericObject * createdOjectCopyCtor = createdOjectC2defautCtor->ClassServices()->Create(*createdOjectC2defautCtor);
+    free(createdOjectC2DefaultCtor->Elements);
+    createdOjectC2DefaultCtor->Size = 3;
+    createdOjectC2DefaultCtor->Elements = new double[3];
+    createdOjectC2DefaultCtor->Elements[0] = 3;
+    createdOjectC2DefaultCtor->Elements[1] = 2;
+    createdOjectC2DefaultCtor->Elements[2] = 1;
+    cmnGenericObject * createdOjectCopyCtor = createdOjectC2DefaultCtor->ClassServices()->Create(*createdOjectC2DefaultCtor);
     CPPUNIT_ASSERT(createdOjectCopyCtor != 0);
     TestC2 * createdOjectC2CopyCtor = dynamic_cast<TestC2 *>(createdOjectCopyCtor);
     CPPUNIT_ASSERT(createdOjectC2CopyCtor != 0);
-    CPPUNIT_ASSERT(createdOjectC2CopyCtor->Size == createdOjectC2defautCtor->Size);
-    CPPUNIT_ASSERT(createdOjectC2CopyCtor->Elements != createdOjectC2defautCtor->Elements); // pointer should change
-    CPPUNIT_ASSERT(createdOjectC2CopyCtor->Elements[0] == createdOjectC2defautCtor->Elements[0]);
-    CPPUNIT_ASSERT(createdOjectC2CopyCtor->Elements[1] == createdOjectC2defautCtor->Elements[1]);
-    CPPUNIT_ASSERT(createdOjectC2CopyCtor->Elements[2] == createdOjectC2defautCtor->Elements[2]);
+    CPPUNIT_ASSERT(createdOjectC2CopyCtor->Size == createdOjectC2DefaultCtor->Size);
+    CPPUNIT_ASSERT(createdOjectC2CopyCtor->Elements != createdOjectC2DefaultCtor->Elements); // pointer should change
+    CPPUNIT_ASSERT(createdOjectC2CopyCtor->Elements[0] == createdOjectC2DefaultCtor->Elements[0]);
+    CPPUNIT_ASSERT(createdOjectC2CopyCtor->Elements[1] == createdOjectC2DefaultCtor->Elements[1]);
+    CPPUNIT_ASSERT(createdOjectC2CopyCtor->Elements[2] == createdOjectC2DefaultCtor->Elements[2]);
 
     /* test the copy constructor from an actual object, using the class register */
     createdOjectCopyCtor = cmnClassRegister::Create("TestC2", realObjectC2);
     CPPUNIT_ASSERT(createdOjectCopyCtor != 0);
-    CPPUNIT_ASSERT(createdOjectC2CopyCtor->Elements != createdOjectC2defautCtor->Elements); // pointer should change
+    createdOjectC2CopyCtor = dynamic_cast<TestC2 *>(createdOjectCopyCtor);
+    CPPUNIT_ASSERT(createdOjectC2CopyCtor != 0);
+    CPPUNIT_ASSERT(createdOjectC2CopyCtor->Elements != realObjectC2.Elements); // pointer should change
+
+    /* try to delete the object using the class register */
+    cmnGenericObject * pointer = createdOjectCopyCtor;
+    const cmnClassServicesBase * services = createdOjectCopyCtor->Services();
+    services->Delete(createdOjectCopyCtor);
+    CPPUNIT_ASSERT(pointer == createdOjectCopyCtor);
+    CPPUNIT_ASSERT(typeid(*pointer) == typeid(*createdOjectCopyCtor));
+
+    /* use the placement new to recreate the object */
+    /* now test the copy constructor */
+    free(realObjectC2.Elements);
+    realObjectC2.Size = 4;
+    realObjectC2.Elements = new double[4];
+    realObjectC2.Elements[0] = 4;
+    realObjectC2.Elements[1] = 3;
+    realObjectC2.Elements[2] = 2;
+    realObjectC2.Elements[3] = 1;
+    services->Create(createdOjectCopyCtor, realObjectC2);
+    createdOjectC2CopyCtor = dynamic_cast<TestC2 *>(createdOjectCopyCtor);
+    CPPUNIT_ASSERT(createdOjectC2CopyCtor);
+    CPPUNIT_ASSERT(createdOjectC2CopyCtor != 0);
+    CPPUNIT_ASSERT(createdOjectC2CopyCtor->Elements != realObjectC2.Elements); // pointer should change
+    CPPUNIT_ASSERT(createdOjectC2CopyCtor->Size == realObjectC2.Size);
+    CPPUNIT_ASSERT(createdOjectC2CopyCtor->Elements[0] == realObjectC2.Elements[0]);
+    CPPUNIT_ASSERT(createdOjectC2CopyCtor->Elements[1] == realObjectC2.Elements[1]);
+    CPPUNIT_ASSERT(createdOjectC2CopyCtor->Elements[2] == realObjectC2.Elements[2]);
+    CPPUNIT_ASSERT(createdOjectC2CopyCtor->Elements[3] == realObjectC2.Elements[3]);
 
     /* test the copy constructor with another type */
-    createdOjectCopyCtor = createdOjectC2defautCtor->ClassServices()->Create(*objectC);
+    createdOjectCopyCtor = createdOjectC2DefaultCtor->ClassServices()->Create(*objectC);
     CPPUNIT_ASSERT(createdOjectCopyCtor == 0);
 
     /* test dynamic creation of templated type */

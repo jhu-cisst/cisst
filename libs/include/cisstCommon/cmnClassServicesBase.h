@@ -98,6 +98,11 @@ public:
     */
     virtual cmnGenericObject * Create(const cmnGenericObject & other) const = 0;   
     
+    /*! Placement new using copy constructor */
+    virtual bool Create(cmnGenericObject * existing, const cmnGenericObject & other) const = 0;
+
+    /*! Call destructor explicitely */
+    virtual bool Delete(cmnGenericObject * existing) const = 0;
 
     /*! Get the name associated with the class.
     
