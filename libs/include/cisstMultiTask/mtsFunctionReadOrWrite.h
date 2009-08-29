@@ -95,6 +95,9 @@ public:
     /*! Access to underlying command object. */
     mtsCommandReadOrWriteBase<ArgumentType> * GetCommand(void) const { return Command; }
 
+    /*! Access to the command argument prototype. */
+    const mtsGenericObject * GetArgumentPrototype(void) const;
+
     /*! Human readable output to stream. */
     void ToStream(std::ostream & outputStream) const;
 };

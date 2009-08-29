@@ -45,6 +45,10 @@ http://www.cisst.org/cisst/license.txt.
 
 template <class _argumentType>
 class mtsCommandReadOrWriteBase : public mtsCommandBase {
+
+    // to modify the argument prototype
+    friend class mtsMulticastCommandWriteBase;
+
 public:
     typedef mtsCommandBase BaseType;
     typedef _argumentType ArgumentType;
@@ -79,13 +83,19 @@ public:
     }
 
     /*! Return a pointer on the argument prototype */
-    virtual const mtsGenericObject * GetArgumentPrototype(void) const = 0;
+    virtual const mtsGenericObject * GetArgumentPrototype(void) const {
+        return this->ArgumentPrototype;
+    }
 
     /*! Return const pointer of class services associated to the
         argument type. */
     inline const cmnClassServicesBase * GetArgumentClassServices(void) const {
         return this->GetArgumentPrototype()->Services();
     }
+
+protected:
+    mtsGenericObject * ArgumentPrototype;
+
 };
 
 

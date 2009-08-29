@@ -73,6 +73,7 @@ public:
         if (this->Commands[0]) {
             return this->Commands[0]->GetArgumentPrototype();
         }
+        return 0;
     }
 
     /* documented in base class */

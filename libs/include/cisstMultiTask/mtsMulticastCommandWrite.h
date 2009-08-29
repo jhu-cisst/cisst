@@ -49,20 +49,20 @@ public:
     typedef mtsMulticastCommandWriteBase BaseType;
     typedef _argumentType ArgumentType;
 
-protected:
-
-    /*! Argument prototype */
-    ArgumentType ArgumentPrototype;
-    
 public:
     /*! Default constructor. Does nothing. */
     mtsMulticastCommandWrite(const std::string & name, const ArgumentType & argumentPrototype):
-        BaseType(name),
-        ArgumentPrototype(argumentPrototype)
-    {}
+        BaseType(name)
+    {
+        this->ArgumentPrototype = new ArgumentType(argumentPrototype);
+    }
     
     /*! Default destructor. Does nothing. */
-    ~mtsMulticastCommandWrite() {}
+    ~mtsMulticastCommandWrite() {
+        if (this->ArgumentPrototype) {
+            delete this->ArgumentPrototype;
+        }
+    }
     
     /*! Execute all the commands in the composite. */
     virtual mtsCommandBase::ReturnType Execute(const mtsGenericObject & argument) {
@@ -76,13 +76,6 @@ public:
             Commands[index]->Execute(*data);
         }
         return mtsCommandBase::DEV_OK;
-    }
-
-    /*! Return a pointer on the argument prototype.  Uses the first
-      command added to find the argument prototype.  If no command is
-      available, return 0 (null pointer) */
-    const mtsGenericObject * GetArgumentPrototype(void) const {
-        return &ArgumentPrototype;
     }
 };
 

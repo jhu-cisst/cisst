@@ -276,7 +276,7 @@ template <class __classType, class __argumentType>
 inline mtsCommandWriteBase * mtsTaskInterface::AddCommandWrite(void (__classType::*method)(const __argumentType &),
                                                                __classType * classInstantiation, const std::string & commandName,
                                                                const __argumentType & argumentPrototype) {
-    mtsCommandWriteBase * command = new mtsCommandWrite<__classType, const __argumentType>
+    mtsCommandWriteBase * command = new mtsCommandWrite<__classType, __argumentType>
         (method, classInstantiation, commandName, argumentPrototype);
     if (command) {
         if (CommandsWrite.AddItem(commandName, command, CMN_LOG_LOD_INIT_ERROR)) {
@@ -376,7 +376,7 @@ inline mtsCommandWriteBase * mtsDeviceInterface::AddCommandWrite(void (__classTy
     if (taskInterface) {
         return taskInterface->AddCommandWrite(method, classInstantiation, commandName, argumentPrototype);
     } else {
-        mtsCommandWriteBase * command = new mtsCommandWrite<__classType, const __argumentType>
+        mtsCommandWriteBase * command = new mtsCommandWrite<__classType, __argumentType>
                                            (method, classInstantiation, commandName, argumentPrototype);
         if (command) {
             if (CommandsWrite.AddItem(commandName, command, CMN_LOG_LOD_INIT_ERROR)) {

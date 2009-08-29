@@ -65,11 +65,6 @@ public:
     /*! Execute all the commands in the composite. */
     virtual mtsCommandBase::ReturnType Execute(const mtsGenericObject & argument) = 0;
 
-    /*! Return a pointer on the argument prototype.  Uses the first
-      command added to find the argument prototype.  If no command is
-      available, return 0 (null pointer) */
-    virtual const mtsGenericObject * GetArgumentPrototype(void) const = 0;    
-
     /* documented in base class */
     virtual void ToStream(std::ostream & outputStream) const;
 };

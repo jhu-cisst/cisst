@@ -62,8 +62,18 @@ mtsCommandBase::ReturnType mtsFunctionReadOrWrite<_argumentType>::operator()(Arg
 
 
 template <class _argumentType>
+const mtsGenericObject * mtsFunctionReadOrWrite<_argumentType>::GetArgumentPrototype(void) const
+{
+    if (this->Command) {
+        return this->Command->GetArgumentPrototype();
+    }
+    return 0;
+}
+
+
+template <class _argumentType>
 void mtsFunctionReadOrWrite<_argumentType>::ToStream(std::ostream & outputStream) const {
-    if (this->Command != 0) {
+    if (this->Command) {
         outputStream << "mtsFunctionReadOrWrite for " << *Command;
     } else {
         outputStream << "mtsFunctionReadOrWrite not initialized";

@@ -21,9 +21,11 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstMultiTask/mtsCollectorState.h>
-#include <cisstMultiTask/mtsTaskManager.h>
-#include <cisstOSAbstraction/osaGetTime.h>
+
+#include <cisstCommon/cmnGenericObjectProxy.h>
 #include <cisstCommon/cmnThrow.h>
+#include <cisstOSAbstraction/osaGetTime.h>
+#include <cisstMultiTask/mtsTaskManager.h>
 
 #include <iostream>
 #include <fstream>

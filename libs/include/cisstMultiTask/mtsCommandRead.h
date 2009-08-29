@@ -70,9 +70,6 @@ protected:
     /*! Stores the receiver object of the command */
     ClassType * ClassInstantiation;
 
-    /*! Argument prototype */
-    ArgumentType ArgumentPrototype;
-
 public:
     /*! The constructor. Does nothing */
     mtsCommandRead(void): BaseType(), ClassInstantiation(0) {}
@@ -88,21 +85,28 @@ public:
         BaseType(name),
         Action(action),
         ActionOld(0),
-        ClassInstantiation(classInstantiation),
-        ArgumentPrototype(argumentPrototype)
-    {}
+        ClassInstantiation(classInstantiation)
+    {
+        this->ArgumentPrototype = new ArgumentType(argumentPrototype);
+    }
+
     mtsCommandRead(ActionTypeOld action, ClassType * classInstantiation, const std::string & name,
                    const ArgumentType & argumentPrototype):
         BaseType(name),
         Action(0),
         ActionOld(action),
-        ClassInstantiation(classInstantiation),
-        ArgumentPrototype(argumentPrototype)
-    {}
+        ClassInstantiation(classInstantiation)
+    {
+        this->ArgumentPrototype = new ArgumentType(argumentPrototype);
+    }
 
 
     /*! The destructor. Does nothing */
-    virtual ~mtsCommandRead() {}
+    virtual ~mtsCommandRead() {
+        if (this->ArgumentPrototype) {
+            delete this->ArgumentPrototype;
+        }
+    }
 
     
     /*! The execute method. Calling the execute method from the invoker
@@ -128,15 +132,10 @@ public:
     }
 
     /* commented in base class */
-    const mtsGenericObject * GetArgumentPrototype(void) const {
-        return &ArgumentPrototype;
-    }
-
-    /* commented in base class */
     virtual void ToStream(std::ostream & outputStream) const {
         outputStream << "mtsCommandRead: ";
         if (this->ClassInstantiation) {
-            outputStream << this->Name << "(" << this->ArgumentPrototype.ClassServices()->GetName() << "&) using class/object \""
+            outputStream << this->Name << "(" << this->GetArgumentPrototype()->Services()->GetName() << "&) using class/object \""
                          << mtsObjectName(this->ClassInstantiation) << "\" currently "
                          << (this->IsEnabled() ? "enabled" : "disabled");
         } else {
