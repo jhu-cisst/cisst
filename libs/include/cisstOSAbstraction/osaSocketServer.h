@@ -23,14 +23,18 @@ http://www.cisst.org/cisst/license.txt.
   \brief Declaration of osaSocketServer
   \ingroup cisstOSAbstraction
 
-  This class implements a TCP server capable of handling multiple clients. It
-  is initialized as follows.
+  This class implements a TCP server capable of handling multiple clients;
+  for every client connection, the Accept method returns a new socket that can be
+  used to service requests from that client.
+  It is initialized as follows:
     \code
-    server.AssignPort(serverPort);
-    server.Listen();
+    osaSocketServer socketServer;
+    socketServer.AssignPort(serverPort);
+    socketServer.Listen();
+    osaSocket *server;
     do {
-        socket = server.Accept();
-    } while (socket != NULL);
+        server = socketServer.Accept();
+    } while (server != NULL);
     \endcode
 
   \note Please refer to osAbstractionTutorial/sockets for usage examples.
@@ -57,9 +61,6 @@ public:
     /*! \brief Destructor */
     ~osaSocketServer(void);
 
-    /*! \return IP address of the localhost as a string */
-    std::string GetLocalhostIP(void);
-
     /*! \brief Set the port for receiving data
         \param port The port number
         \return true on success */
@@ -70,7 +71,7 @@ public:
     bool Listen(int backlog = 5);
 
     /*! \brief Accept an incoming connection
-        \return Pointer to the accepted socket or NULL on failure */
+        \return Pointer to the accepted socket or 0 on failure */
     osaSocket * Accept(void);
 
     /*! \brief Check if a particular socket is still connected
@@ -78,7 +79,7 @@ public:
         \return true if connected */
     bool IsConnected(osaSocket * socket);
 
-    /*! \return A socket to read from or NULL on failure */
+    /*! \return A socket to read from or 0 on failure */
     osaSocket * Select(void);
 
     /*! \brief Close the socket */

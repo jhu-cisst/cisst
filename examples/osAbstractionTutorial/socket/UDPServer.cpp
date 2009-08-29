@@ -50,7 +50,7 @@ int main(void)
 
     std::cout << std::endl
               << "Started server on "
-              << socket.GetLocalhostIP() << ":" << port << std::endl
+              << osaSocket::GetLocalhostIP() << ":" << port << std::endl
               << std::endl;
 
     while (isServerConnected) {

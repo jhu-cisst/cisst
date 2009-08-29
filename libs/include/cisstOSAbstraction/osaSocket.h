@@ -24,26 +24,28 @@ http://www.cisst.org/cisst/license.txt.
   \ingroup cisstOSAbstraction
 
   This is a cross-platform socket library with basic support for UDP (datagram)
-  and TCP (stream) sockets. BSD socket API is used on Unix-like systems, while
-  Winsock2 API is used on Windows.
+  and TCP (stream) sockets. The BSD socket API is used on Unix-like systems, while
+  the Winsock2 API is used on Windows.
 
-  For the UDP, both a server and client can be defined and set as such
+  For UDP, both a server and client can be defined and set as follows:
     \code
     server.AssignPort(serverPort);
     client.SetDestination(serverHost, serverPort);
     \endcode
   where serverHost could either be the hostname or the IP address of the
-  server. UDP sockets update their destination to the origin of last message
+  server. UDP sockets update their destination to the origin of the last message
   received.
 
-  For the TCP case, client has to additionally call the Connect() method, while
+  For the TCP case, the client has to additionally call the Connect() method, while
   the server is created using the osaSocketServer class.
     \code
     client.SetDestination(serverIP, serverPort);
     client.Connect();
+    // or
+    client.Connect(serverIP, serverPort);
     \endcode
   The TCP server is defined using osaSocketServer, which calls an overloaded
-  osaSocket constructor upon accepting a connection.
+  osaSocket constructor upon accepting a connection (see osaSocketServer class).
 
   \note Please refer to osAbstractionTutorial/sockets for usage examples.
 */
@@ -75,24 +77,26 @@ public:
     /*! \brief Default constructor */
     osaSocket(SocketTypes type = TCP);
 
-    /*! \brief osaSocketServer constructor */
+    /*! \brief osaSocketServer constructor (for use by osaSocketServer) */
     osaSocket(int socketFD);
 
     /*! \brief Destructor */
     ~osaSocket(void);
 
     /*! \return Socket file descriptor */
-    int GetIdentifier(void) {
+    int GetIdentifier(void) const {
         return SocketFD;
     };
 
-    /*! \return IP address of the localhost */
-    std::string GetLocalhostIP(void);
+    /*! \return IP address of the localhost as a string */
+    // Perhaps this should be outside the class
+    static std::string GetLocalhostIP(void);
 
     /*! \brief Sets the port of a UDP server */
     bool AssignPort(unsigned short port);
 
-    /*! \param host Server's hostname or IP address (e.g. localhost, 127.0.0.1)
+    /*! \brief Set the destination address for UDP or TCP socket
+        \param host Server's hostname or IP address (e.g. localhost, 127.0.0.1)
         \param port Server's port number */
     void SetDestination(const std::string & host, unsigned short port);
 
@@ -100,20 +104,28 @@ public:
                used after SetDestination()
         \return true if the connection was successful */
     bool Connect(void);
-
+ 
+    /*! \brief Connect to the server; required for TCP sockets; includes call
+               to SetDestination()
+        \param host Server's hostname or IP address (e.g. localhost, 127.0.0.1)
+        \param port Server's port number
+        \return true if the connection was successful */
+    bool Connect(const std::string & host, unsigned short port);
+ 
     /*! \brief Send a byte array via the socket
         \param bufsend Buffer holding bytes to be sent
         \param msglen Number of bytes to send
         \return Number of bytes sent (-1 if error) */
     int Send(const char * bufsend, unsigned int msglen);
-    int Send(const char * bufsend) {
-        return Send(bufsend, strlen(bufsend));
-    };
+
+    /*! \brief Send a string via the socket
+        \param bufsend String to be sent
+        \return Number of bytes sent (-1 if error) */
     int Send(const std::string & bufsend) {
         return Send(bufsend.c_str(), bufsend.length());
     };
 
-    /*! \brief Receiva a byte array via the socket
+    /*! \brief Receive a byte array via the socket
         \param bufrecv Buffer to store received data
         \param maxlen Maximum number of bytes to receive
         \return Number of bytes received */
@@ -124,7 +136,7 @@ public:
 
 protected:
     /*! \return IP address (as a number) for the given host */
-    unsigned long GetIP(const std::string & host);
+    unsigned long GetIP(const std::string & host) const;
 
     SocketTypes SocketType;
     int SocketFD;

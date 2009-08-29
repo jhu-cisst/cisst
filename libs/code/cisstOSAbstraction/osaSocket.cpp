@@ -91,11 +91,11 @@ std::string osaSocket::GetLocalhostIP(void)
 {
     char hostname[256] = { 0 };
     gethostname(hostname, 255);
-    CMN_LOG_CLASS_RUN_VERBOSE << "GetLocalhostIP: hostname is " << hostname << std::endl;
+    CMN_LOG_RUN_VERBOSE << "GetLocalhostIP: hostname is " << hostname << std::endl;
 
     struct hostent * he = gethostbyname(hostname);
     if (!he) {
-        CMN_LOG_CLASS_RUN_ERROR << "GetLocalhostIP: invalid host" << std::endl;
+        CMN_LOG_RUN_ERROR << "GetLocalhostIP: invalid host" << std::endl;
         return "";
     }
     struct in_addr localAddr;
@@ -143,6 +143,11 @@ bool osaSocket::Connect(void)
     return true;
 }
 
+bool osaSocket::Connect(const std::string & host, unsigned short port)
+{
+    SetDestination(host, port);
+    return Connect();
+}
 
 int osaSocket::Send(const char * bufsend, unsigned int msglen)
 {
@@ -208,8 +213,8 @@ int osaSocket::Receive(char * bufrecv, unsigned int maxlen)
     return retval;
 }
 
-
-unsigned long osaSocket::GetIP(const std::string & host)
+// This could be static or external to the osaSocket class
+unsigned long osaSocket::GetIP(const std::string & host) const
 {
     hostent * he = gethostbyname(host.c_str());
     if (he) {
@@ -217,7 +222,7 @@ unsigned long osaSocket::GetIP(const std::string & host)
             return *reinterpret_cast<unsigned long *>(he->h_addr_list[0]);
         }
     }
-    CMN_LOG_CLASS_RUN_ERROR << "GetIP: invalid host" << std::endl;
+    CMN_LOG_CLASS_RUN_ERROR << "GetIP: invalid host " << host << std::endl;
     return 0;
 }
 

@@ -52,6 +52,7 @@ osaSocketServer::osaSocketServer(void)
     }
     CMN_LOG_CLASS_INIT_VERBOSE << "osaSocketServer: created socket server " << SocketFD << std::endl;
 
+    // Change to non-blocking socket
 #if (CISST_OS == CISST_WINDOWS)
     unsigned long arg = 1L;
     ioctlsocket(SocketFD, FIONBIO, &arg);
@@ -65,23 +66,6 @@ osaSocketServer::osaSocketServer(void)
 osaSocketServer::~osaSocketServer(void)
 {
     Close();
-}
-
-
-std::string osaSocketServer::GetLocalhostIP(void)
-{
-    char hostname[256] = { 0 };
-    gethostname(hostname, 255);
-    CMN_LOG_CLASS_RUN_VERBOSE << "GetLocalhostIP: hostname is " << hostname << std::endl;
-
-    struct hostent * he = gethostbyname(hostname);
-    if (!he) {
-        CMN_LOG_CLASS_RUN_ERROR << "GetLocalhostIP: invalid host" << std::endl;
-        return "";
-    }
-    struct in_addr localAddr;
-    memcpy(&localAddr, he->h_addr_list[0], sizeof(struct in_addr));
-    return inet_ntoa(localAddr);
 }
 
 
@@ -116,7 +100,7 @@ osaSocket * osaSocketServer::Accept(void)
 {
     int newSocketFD = accept(SocketFD, 0, 0);
     if (newSocketFD == -1) {
-        return NULL;
+        return 0;
     }
     CMN_LOG_CLASS_RUN_VERBOSE << "Accept: connection request accepted" << std::endl;
     osaSocket * newSocket = new osaSocket(newSocketFD);
@@ -149,7 +133,7 @@ osaSocket * osaSocketServer::Select(void)
             delete it->second;
             Clients.erase(it);
             if (!Clients.size()) {
-                return NULL;
+                return 0;
             }
         } else {
             FD_SET(it->first, &readfds);
@@ -160,14 +144,14 @@ osaSocket * osaSocketServer::Select(void)
                     delete it->second;
                     Clients.erase(it);
                     if (!Clients.size()) {
-                        return NULL;
+                        return 0;
                     }
                 }
                 return it->second;
             }
         }
     }
-    return NULL;
+    return 0;
 }
 
 
