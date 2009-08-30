@@ -322,7 +322,7 @@ public:
     //-----------------------------------------------------
     //  Getters
     //-----------------------------------------------------
-    inline const bool IsInitalized() const  { return InitSuccessFlag; }
+    inline bool IsInitalized(void) const  { return InitSuccessFlag; }
     
     inline const Ice::LoggerPtr GetLogger() const { return IceLogger; }
 

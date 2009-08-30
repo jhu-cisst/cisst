@@ -210,7 +210,7 @@ void mtsDeviceInterfaceProxyClient::ReceiveExecuteEventWriteSerialized(
 //-------------------------------------------------------------------------
 //  Methods to Send Events
 //-------------------------------------------------------------------------
-const bool mtsDeviceInterfaceProxyClient::SendGetProvidedInterfaceInfo(
+bool mtsDeviceInterfaceProxyClient::SendGetProvidedInterfaceInfo(
     const std::string & providedInterfaceName,
     mtsDeviceInterfaceProxy::ProvidedInterfaceInfo & providedInterfaceInfo)
 {

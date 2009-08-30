@@ -55,7 +55,7 @@ public:
     }
 
     /*! Return true if the current proxy state is active. */
-    const bool IsActiveProxy() const {
+    bool IsActiveProxy(void) const {
         return (ProxyState == mtsProxyBaseClient<mtsTaskManager>::PROXY_ACTIVE);
     }
 

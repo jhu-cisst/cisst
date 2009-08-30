@@ -39,7 +39,6 @@ mtsTaskManager::mtsTaskManager():
     TaskMap("Tasks"),
     DeviceMap("Devices"),
 #if CISST_MTS_HAS_ICE
-    ,
     TaskManagerTypeMember(TASK_MANAGER_LOCAL),
     TaskManagerCommunicatorID("TaskManagerServerSender"),
     ProxyGlobalTaskManager(NULL),

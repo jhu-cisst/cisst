@@ -123,7 +123,7 @@ public:
     {}
     virtual ~mtsProxyBaseClient() {}
 
-    inline const bool IsRunnable(void) const { return this->Runnable; }
+    inline bool IsRunnable(void) const { return this->Runnable; }
 
     virtual void Start(_argumentType * callingClass) = 0;
 

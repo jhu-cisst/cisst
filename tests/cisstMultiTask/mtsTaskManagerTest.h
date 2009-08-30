@@ -22,7 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cppunit/TestCase.h>
 #include <cppunit/extensions/HelperMacros.h>
 
-//#include <cisstMultiTask/mtsCollector.h>
+#include <cisstCommon/cmnGenericObjectProxy.h>
 #include <cisstMultiTask/mtsStateData.h>
 #include <cisstMultiTask/mtsTaskPeriodic.h>
 #include <cisstMultiTask/mtsTaskManager.h>

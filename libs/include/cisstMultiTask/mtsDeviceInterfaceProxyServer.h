@@ -58,7 +58,7 @@ public:
     }
 
     /*! Return true if the current proxy state is active. */
-    const bool IsActiveProxy() const {
+    bool IsActiveProxy(void) const {
         return (ProxyState == mtsProxyBaseServer<mtsTask>::PROXY_ACTIVE);
     }
 
@@ -131,7 +131,7 @@ protected:
     void ReceiveAddClient(const DeviceInterfaceClientProxyType & clientProxy);
 
     /*! Update the information of all tasks. */
-    const bool ReceiveGetProvidedInterfaceInfo(
+    bool ReceiveGetProvidedInterfaceInfo(
         const std::string & providedInterfaceName,
         mtsDeviceInterfaceProxy::ProvidedInterfaceInfo & providedInterfaceInfo);
 

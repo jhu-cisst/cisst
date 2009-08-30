@@ -172,7 +172,7 @@ void mtsDeviceInterfaceProxyServer::ReceiveAddClient(const DeviceInterfaceClient
     ConnectedClient = clientProxy;
 }
 
-const bool mtsDeviceInterfaceProxyServer::ReceiveGetProvidedInterfaceInfo(
+bool mtsDeviceInterfaceProxyServer::ReceiveGetProvidedInterfaceInfo(
     const std::string & providedInterfaceName,
     ::mtsDeviceInterfaceProxy::ProvidedInterfaceInfo & providedInterfaceInfo)
 {
