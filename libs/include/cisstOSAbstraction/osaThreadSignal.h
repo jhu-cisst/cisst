@@ -37,7 +37,7 @@ http://www.cisst.org/cisst/license.txt.
 //class CISST_EXPORT osaThreadSignal {
 //
 //    /*! Internals that are OS-dependent in some way */
-//    enum {INTERNALS_SIZE = 96};    // PKAZ: this can be reduced
+//    enum {INTERNALS_SIZE = 128};    // BALAZS: OS X 10.6 x86_64 requires 120 bytes
 //    char Internals[INTERNALS_SIZE];
 //
 //    /*! Return the size of the actual object used by the OS.  This is
@@ -78,7 +78,7 @@ public:
 
 private:
     /*! Internals that are OS-dependent in some way */
-    enum {INTERNALS_SIZE = 96 };    // PKAZ: this can be reduced
+    enum {INTERNALS_SIZE = 128};    // BALAZS: OS X 10.6 x86_64 requires 120 bytes
     char Internals[INTERNALS_SIZE];
 
     /*! Return the size of the actual object used by the OS.  This is
