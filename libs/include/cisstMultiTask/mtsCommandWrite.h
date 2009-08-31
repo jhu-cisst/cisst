@@ -42,8 +42,6 @@ http://www.cisst.org/cisst/license.txt.
 template <class _classType, class _argumentType>
 class mtsCommandWrite: public mtsCommandWriteBase {
 
-    friend class mtsMulticastCommandWriteBase;
-
 public:
     typedef _argumentType ArgumentType;
     typedef mtsCommandWriteBase BaseType;
@@ -70,11 +68,11 @@ protected:
     /*! Stores the receiver object of the command */
     ClassType * ClassInstantiation;
 
-public:
+private:
     /*! The constructor. Does nothing */
     mtsCommandWrite(void): BaseType() {}
     
-    
+public:
     /*! The constructor.
     //
     // FIXME: this needs to be updated.

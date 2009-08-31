@@ -31,7 +31,7 @@ void mtsMulticastCommandWriteBase::AddCommand(BaseType * command) {
             exit(0);
         } else {
             // copy the multicast command prototype to each added command using in place new
-            this->GetArgumentPrototype()->Services()->Create(command->ArgumentPrototype, *(this->GetArgumentPrototype()));
+            this->GetArgumentPrototype()->Services()->Create(const_cast<mtsGenericObject *>(command->GetArgumentPrototype()), *(this->GetArgumentPrototype()));
             // add the command to the list
             this->Commands.push_back(command);
         }

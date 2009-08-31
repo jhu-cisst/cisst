@@ -39,19 +39,21 @@ protected:
     mtsMailBox * MailBox;
     mtsCommandWriteBase * ActualCommand;
 
- public:
+private:
     inline mtsCommandQueuedWriteBase(void):
         BaseType("??"),
         MailBox(0),
         ActualCommand(0)
     {}
 
-
+public:
     inline mtsCommandQueuedWriteBase(mtsMailBox * mailBox, mtsCommandWriteBase * actualCommand):
         BaseType(actualCommand->GetName()),
         MailBox(mailBox),
         ActualCommand(actualCommand)
-    { }
+    {
+        this->SetArgumentPrototype(ActualCommand->GetArgumentPrototype());
+    }
 
 
     inline virtual ~mtsCommandQueuedWriteBase() {}
