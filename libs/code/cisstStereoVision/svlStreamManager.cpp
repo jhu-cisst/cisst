@@ -1045,8 +1045,8 @@ void* svlStreamControlMultiThread::Proc(svlStreamManager* baseref)
                 // Set modified flag
                 filter->OutputData->SetModified(filter->OutputSampleModified);
 
-                // Store timstamp of previously processed input sample
-                filter->PrevInputTimestamp = prevfilter->OutputData->GetTimestamp();
+                // Pass timestamp downstream
+                filter->OutputData->SetTimestamp(prevfilter->OutputData->GetTimestamp());
             }
 
             if (ThreadID == 0) {
@@ -1113,7 +1113,6 @@ svlFilterBase::svlFilterBase() :
     Initialized(false),
     Running(false),
     OutputFormatModified(false),
-    PrevInputTimestamp(-1.0),
     InputType(svlTypeInvalid),
     OutputType(svlTypeInvalid),
     PrevFilter(0),

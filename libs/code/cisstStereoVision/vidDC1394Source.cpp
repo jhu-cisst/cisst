@@ -140,6 +140,7 @@ void svlDC1394Context::Enumerate()
     for (i = 0; i < CameraList->num; i ++) {
         if (Cameras[i] == 0) continue;
 
+#if (CISST_SVL_DC1394_ENABLE_800Mbps == ON)
         // Check if IEEE1394B operation mode is supported
         if (TestIEEE1394Interface(Cameras[i], DC1394_OPERATION_MODE_1394B, DC1394_ISO_SPEED_800) == SVL_OK) {
             BestOpMode[i] = DC1394_OPERATION_MODE_1394B;
@@ -149,6 +150,10 @@ void svlDC1394Context::Enumerate()
             BestOpMode[i] = DC1394_OPERATION_MODE_LEGACY;
             BestISOSpeed[i] = DC1394_ISO_SPEED_400;
         }
+#else // CISST_SVL_DC1394_ENABLE_800Mbps
+        BestOpMode[i] = DC1394_OPERATION_MODE_LEGACY;
+        BestISOSpeed[i] = DC1394_ISO_SPEED_400;
+#endif // CISST_SVL_DC1394_ENABLE_800Mbps
 
         // Build device model string
         len = strlen(Cameras[i]->model);

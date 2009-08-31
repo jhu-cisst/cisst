@@ -21,6 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <iostream>
 #include <cisstStereoVision.h>
+#include <cisstCommon/cmnGetChar.h>
 
 using namespace std;
 
@@ -70,14 +71,13 @@ int main()
         stream.Branch("mybranch").Append(&window2)     != SVL_OK) goto labError;
 
     cout << "Streaming is just about to start." << endl;
-    cout << "Press any key and ENTER to stop stream..." << endl;
+    cout << "Press any key to stop stream..." << endl;
 
     // Initialize and start stream
     if (stream.Start() != SVL_OK) goto labError;
 
     // Wait for user input
-    char ch; cin.get(ch); cin.get(ch);
-    cout << endl;
+    cmnGetChar();
 
     // Safely stopping and deconstructing stream before de-allocation
     stream.EmptyFilterList();

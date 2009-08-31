@@ -40,6 +40,9 @@ http://www.cisst.org/cisst/license.txt.
 // Support for libDC1394
 #define CISST_SVL_HAS_DC1394 @CISST_SVL_HAS_DC1394@
 
+// Support for IEEE1394B switch on Darwin
+#define CISST_SVL_DC1394_ENABLE_800Mbps @CISST_SVL_DC1394_ENABLE_800Mbps@
+
 // Support for video4linux2
 #define CISST_SVL_HAS_VIDEO4LINUX2 @CISST_SVL_HAS_VIDEO4LINUX2@
 

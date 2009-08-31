@@ -152,7 +152,6 @@ private:
     bool Running;
     bool OutputSampleModified;
     bool OutputFormatModified;
-    double PrevInputTimestamp;
     _StreamTypeMap SupportedTypes;
     _OutputBranchList OutputBranches;
     svlStreamType InputType;

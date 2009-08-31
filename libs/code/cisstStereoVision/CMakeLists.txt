@@ -573,6 +573,13 @@ IF(UNIX)
             MESSAGE(STATUS "DC1394 found - Switch to advanced view for details")
             OPTION(CISST_SVL_HAS_DC1394 "Compile DC1394 extensions" ON)
 
+            # Can't auto-detect IEEE1394B on Darwin
+            IF(CMAKE_SYSTEM_NAME MATCHES Darwin)
+                OPTION(CISST_SVL_DC1394_ENABLE_800Mbps "Enable IEEE1394B (800Mbps)" OFF)
+            ELSE(CMAKE_SYSTEM_NAME MATCHES Darwin)
+                SET(CISST_SVL_DC1394_ENABLE_800Mbps "OFF" CACHE INTERNAL "Enable IEEE1394B (800Mbps)")
+            ENDIF(CMAKE_SYSTEM_NAME MATCHES Darwin)
+
         ELSE(DC1394_FOUND)
             IF(CISST_SVL_HAS_DC1394)
                 MARK_AS_ADVANCED(CLEAR ${DC1394_OPTIONS})

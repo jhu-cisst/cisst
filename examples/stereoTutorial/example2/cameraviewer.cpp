@@ -118,11 +118,13 @@ protected:
 
                 if (framecount > 0) {
                     DWORD msec = now - StartMSec;
-                    printf("\rFrame #: %07d; %02.2f fps (Buffer: %.0f%%, Dropped: %d)     ",
-                           framecount,
-                           (double)30000 / msec,
-                           Manager->Branch("Recorder").GetBufferUsageRatio() * 100.0,
-                           Manager->Branch("Recorder").GetDroppedSampleCount());
+                    std::cerr << "\rFrame #: " << framecount << "; "
+                    << std::setprecision(1) << std::fixed << (double)30000 / usec << " fps";
+                    if (Manager) {
+                        std::cerr << " (Buffer: " << Manager->Branch("Recorder").GetBufferUsageRatio() * 100.0
+                        << "%, Dropped: " << Manager->Branch("Recorder").GetDroppedSampleCount() << ")";
+                    }
+                    std::cerr << "     \r";
                 }
 
                 StartMSec = now;
@@ -136,12 +138,13 @@ protected:
                     int sec = now.tv_sec - StartSec;
                     int usec = now.tv_usec - StartUSec;
                     usec += 1000000 * sec;
-                    printf("\rFrame #: %07d; %02.2f fps (Buffer: %.0f%%, Dropped: %d)     ",
-                           framecount,
-                           (double)30000000 / usec,
-                           Manager->Branch("Recorder").GetBufferUsageRatio() * 100.0,
-                           Manager->Branch("Recorder").GetDroppedSampleCount());
-                    fflush(stdout);
+                    std::cerr << "\rFrame #: " << framecount << "; "
+                              << std::setprecision(1) << std::fixed << (double)30000000 / usec << " fps";
+                    if (Manager) {
+                        std::cerr << " (Buffer: " << Manager->Branch("Recorder").GetBufferUsageRatio() * 100.0
+                                  << "%, Dropped: " << Manager->Branch("Recorder").GetDroppedSampleCount() << ")";
+                    }
+                    std::cerr << "     \r";
                 }
 
                 StartSec = now.tv_sec;
@@ -307,8 +310,13 @@ int CameraViewer(bool interpolation, bool save, int width, int height)
     if (viewer_stream.Trunk().Append(&viewer_window) != SVL_OK) goto labError;
     if (viewer_stream.Trunk().Append(&viewer_fps) != SVL_OK) goto labError;
 
-    // but the recorder on a branch in order to enable buffering
-    viewer_stream.CreateBranchAfterFilter(&viewer_source, "Recorder", 200); // Buffer size in frames
+    // put the recorder on a branch in order to enable buffering
+    if (width > 0 && height > 0) {
+        viewer_stream.CreateBranchAfterFilter(&viewer_resizer, "Recorder", 200); // Buffer size in frames
+    }
+    else {
+        viewer_stream.CreateBranchAfterFilter(&viewer_source, "Recorder", 200); // Buffer size in frames
+    }
 #if (CISST_SVL_HAS_ZLIB == ON)
     if (save == true) {
         if (viewer_stream.Branch("Recorder").Append(&viewer_writer) != SVL_OK) goto labError;
