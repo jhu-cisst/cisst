@@ -119,10 +119,10 @@ protected:
                 if (framecount > 0) {
                     DWORD msec = now - StartMSec;
                     std::cerr << "\rFrame #: " << framecount << "; "
-                    << std::setprecision(1) << std::fixed << (double)30000 / usec << " fps";
+                              << std::setprecision(1) << std::fixed << (double)30000 / msec << " fps";
                     if (Manager) {
                         std::cerr << " (Buffer: " << Manager->Branch("Recorder").GetBufferUsageRatio() * 100.0
-                        << "%, Dropped: " << Manager->Branch("Recorder").GetDroppedSampleCount() << ")";
+                                  << "%, Dropped: " << Manager->Branch("Recorder").GetDroppedSampleCount() << ")";
                     }
                     std::cerr << "     \r";
                 }
