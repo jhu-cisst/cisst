@@ -37,7 +37,7 @@ class CISST_EXPORT cmnGetCharEnvironment
 {
     /*! Internals that are OS-dependent */
 #if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI)
-    enum {INTERNALS_SIZE = 124};
+    enum {INTERNALS_SIZE = 160}; // BALAZS: OS X 10.6 x86_64 requires 152 bytes
 #endif // CISST_LINUX || CISST_DARWIN ||CISST_SOLARIS || CISST_RTAI
 #if (CISST_OS == CISST_WINDOWS)
     enum {INTERNALS_SIZE = 1};
