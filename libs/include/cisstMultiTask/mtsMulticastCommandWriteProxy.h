@@ -48,17 +48,20 @@ public:
 protected:
     /*! Argument prototype. Deserialization recovers the original argument
         prototype object. */
-    mtsGenericObject * ArgumentPrototype;
+    //mtsGenericObject * ArgumentPrototype;
 
     /*! The constructor with a name. */
-    mtsMulticastCommandWriteProxy(const std::string & name) :
-        BaseType(name),
-        ArgumentPrototype(NULL)
-    {}
+    mtsMulticastCommandWriteProxy(const std::string & name) : BaseType(name)
+    {
+        ArgumentPrototype = 0;
+    }
 
     /*! Default destructor. Does nothing. */
-    ~mtsMulticastCommandWriteProxy() 
-    {}
+    ~mtsMulticastCommandWriteProxy() {
+        if (this->ArgumentPrototype) {
+            delete this->ArgumentPrototype;
+        }
+    }
 
 public:
     /*! Execute all the commands in the composite. */
@@ -72,12 +75,7 @@ public:
 
     /*! Set an argument prototype */
     void SetArgumentPrototype(mtsGenericObject * argumentPrototype) {
-        ArgumentPrototype = argumentPrototype;
-    }
-
-    /*! Return a pointer on the argument prototype */
-    const mtsGenericObject * GetArgumentPrototype(void) const {
-        return ArgumentPrototype;
+        this->ArgumentPrototype = argumentPrototype;
     }
 };
 

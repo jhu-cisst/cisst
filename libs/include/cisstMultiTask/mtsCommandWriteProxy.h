@@ -47,11 +47,12 @@ http://www.cisst.org/cisst/license.txt.
   takes care of the process of event propagation across a network so that an event
   is sent to a client and an event handler is called at a client side.
   Currently, only one of them can be initialized as a valid value while the other 
-  has to be NULL.
+  has to be 0.
 */
 class mtsCommandWriteProxy: public mtsCommandWriteBase {
 
     friend class mtsDeviceProxy;
+    friend class mtsMulticastCommandWriteBase;
     
 public:
     typedef mtsCommandWriteBase BaseType;
@@ -63,31 +64,39 @@ protected:
 
     /*! Argument prototype. Deserialization recovers the original argument
         prototype object. */
-    mtsGenericObject * ArgumentPrototype;
+    //mtsGenericObject * ArgumentPrototype;
     
     /*! Device interface proxy objects which execute a write command at 
         peer's memory space across networks. */
     mtsDeviceInterfaceProxyClient * ProvidedInterfaceProxy;
     mtsDeviceInterfaceProxyServer * RequiredInterfaceProxy;
 
+    /*! Initialization method */
+    void Initialize()
+    {
+        this->ArgumentPrototype = 0;
+    }
+
     /*! The constructors. */
     mtsCommandWriteProxy(const CommandIDType commandId, 
                          mtsDeviceInterfaceProxyClient * providedInterfaceProxy) :
         BaseType(),
-        CommandId(commandId),
-        ArgumentPrototype(NULL),
+        CommandId(commandId),        
         ProvidedInterfaceProxy(providedInterfaceProxy),
-        RequiredInterfaceProxy(NULL)
-    {}
+        RequiredInterfaceProxy(0)
+    {
+        Initialize();
+    }
 
     mtsCommandWriteProxy(const CommandIDType commandId, 
                          mtsDeviceInterfaceProxyServer * requiredInterfaceProxy) :
         BaseType(),
         CommandId(commandId),
-        ArgumentPrototype(NULL),
-        ProvidedInterfaceProxy(NULL),
+        ProvidedInterfaceProxy(0),
         RequiredInterfaceProxy(requiredInterfaceProxy)
-    {}
+    {
+        Initialize();
+    }
     
     /*! The constructor with a name. */
     mtsCommandWriteProxy(const CommandIDType commandId,
@@ -95,24 +104,29 @@ protected:
                          const std::string & name) :
         BaseType(name),
         CommandId(commandId),
-        ArgumentPrototype(NULL),
         ProvidedInterfaceProxy(providedInterfaceProxy),
-        RequiredInterfaceProxy(NULL)
-    {}
+        RequiredInterfaceProxy(0)
+    {
+        Initialize();
+    }
 
     mtsCommandWriteProxy(const CommandIDType commandId,
                          mtsDeviceInterfaceProxyServer * requiredInterfaceProxy,
                          const std::string & name) :
         BaseType(name),
         CommandId(commandId),
-        ArgumentPrototype(NULL),
-        ProvidedInterfaceProxy(NULL),
+        ProvidedInterfaceProxy(0),
         RequiredInterfaceProxy(requiredInterfaceProxy)
-    {}
+    {
+        Initialize();
+    }
 
-    /*! The destructor. Does nothing */
-    virtual ~mtsCommandWriteProxy() 
-    {}
+    /*! The destructor. */
+    virtual ~mtsCommandWriteProxy() {
+        if (this->ArgumentPrototype) {
+            delete this->ArgumentPrototype;
+        }
+    }
 
     /*! Update CommandId. */
     void SetCommandId(const CommandIDType & newCommandId) {
@@ -136,7 +150,7 @@ public:
     /*! For debugging. Generate a human readable output for the
       command object */
     void ToStream(std::ostream & outputStream) const {
-        outputStream << "mtsCommandWriteProxy: " << Name << ", " << CommandId << " with ";
+        outputStream << "mtsCommandWriteProxy: " << this->Name << ", " << CommandId << " with ";
         if (ProvidedInterfaceProxy) {
             outputStream << ProvidedInterfaceProxy->ClassServices()->GetName() << std::endl;
         } else {
@@ -147,12 +161,7 @@ public:
 
     /*! Set an argument prototype */
     void SetArgumentPrototype(mtsGenericObject * argumentPrototype) {
-        ArgumentPrototype = argumentPrototype;
-    }
-    
-    /*! Return a pointer on the argument prototype */
-    const mtsGenericObject * GetArgumentPrototype(void) const {
-        return ArgumentPrototype;
+        this->ArgumentPrototype = argumentPrototype;
     }
 };
 

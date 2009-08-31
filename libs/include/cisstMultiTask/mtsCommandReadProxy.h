@@ -53,31 +53,43 @@ protected:
 
     /*! Argument prototype. Deserialization recovers the original argument
         prototype object. */
-    mtsGenericObject * ArgumentPrototype;
+    //mtsGenericObject * ArgumentPrototype;
 
     /*! Device interface proxy objects which execute a command at 
         peer's memory space across networks. */
     mtsDeviceInterfaceProxyClient * ProvidedInterfaceProxy;
 
+    /*! Initialization method */
+    void Initialize()
+    {
+        this->ArgumentPrototype = 0;
+    }
+
     mtsCommandReadProxy(const CommandIDType commandId, 
                         mtsDeviceInterfaceProxyClient * providedInterfaceProxy):
         BaseType(),
         CommandId(commandId),
-        ArgumentPrototype(NULL), 
         ProvidedInterfaceProxy(providedInterfaceProxy)
-    {}
+    {
+        Initialize();
+    }
 
     mtsCommandReadProxy(const CommandIDType commandId,
                         mtsDeviceInterfaceProxyClient * providedInterfaceProxy,
                         const std::string & name):
         BaseType(name),
         CommandId(commandId),
-        ArgumentPrototype(NULL), 
         ProvidedInterfaceProxy(providedInterfaceProxy)
-    {}
+    {
+        Initialize();
+    }
 
-    virtual ~mtsCommandReadProxy()
-    {}
+    virtual ~mtsCommandReadProxy() {
+        if (this->ArgumentPrototype) {
+            delete this->ArgumentPrototype;
+        }
+    }
+    
 
     /*! Update CommandId. */
     void SetCommandId(const CommandIDType & newCommandId) {
@@ -104,12 +116,7 @@ public:
 
     /*! Set an argument prototype */
     void SetArgumentPrototype(mtsGenericObject * argumentPrototype) {
-        ArgumentPrototype = argumentPrototype;
-    }
-
-    /*! Return a pointer on the argument prototype */
-    const mtsGenericObject * GetArgumentPrototype(void) const {
-        return ArgumentPrototype;
+        this->ArgumentPrototype = argumentPrototype;
     }
 };
 
