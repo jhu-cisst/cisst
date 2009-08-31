@@ -65,7 +65,11 @@ void mtsDeviceInterfaceProxyServer::Start(mtsTask * callingTask)
         ThreadArgumentsInfo.Runner = mtsDeviceInterfaceProxyServer::Runner;
 
         WorkerThread.Create<ProxyWorker<mtsTask>, ThreadArguments<mtsTask>*>(
-            &ProxyWorkerInfo, &ProxyWorker<mtsTask>::Run, &ThreadArgumentsInfo, "C-PRX");
+            &ProxyWorkerInfo, &ProxyWorker<mtsTask>::Run, &ThreadArgumentsInfo, 
+            // Set the name of this thread as DIS which means Device Interface Server.
+            // This is to avoid the thread name conflict with mtsTaskManagerProxyServer
+            // class because Linux RTAI doesn't allow two threads to have the same thread name.
+            "DIS");
     }
 }
 

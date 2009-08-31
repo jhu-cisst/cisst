@@ -77,7 +77,11 @@ void mtsTaskManagerProxyClient::Start(mtsTaskManager * callingTaskManager)
         ThreadArgumentsInfo.Runner = mtsTaskManagerProxyClient::Runner;
 
         WorkerThread.Create<ProxyWorker<mtsTaskManager>, ThreadArguments<mtsTaskManager>*>(
-            &ProxyWorkerInfo, &ProxyWorker<mtsTaskManager>::Run, &ThreadArgumentsInfo, "S-PRX");
+            &ProxyWorkerInfo, &ProxyWorker<mtsTaskManager>::Run, &ThreadArgumentsInfo, 
+            // Set the name of this thread as TMC which means Task Manager Client.
+            // This is to avoid the thread name conflict with mtsDeviceInterfaceProxyClient
+            // class because Linux RTAI doesn't allow two threads to have the same thread name.
+            "TMC");
     }
 }
 

@@ -87,7 +87,11 @@ void mtsTaskManagerProxyServer::Start(mtsTaskManager * callingTaskManager)
 
         // Note that a worker thread is created but is not yet running.
         WorkerThread.Create<ProxyWorker<mtsTaskManager>, ThreadArguments<mtsTaskManager>*>(
-            &ProxyWorkerInfo, &ProxyWorker<mtsTaskManager>::Run, &ThreadArgumentsInfo, "C-PRX");
+            &ProxyWorkerInfo, &ProxyWorker<mtsTaskManager>::Run, &ThreadArgumentsInfo, 
+            // Set the name of this thread as TMS which means Task Manager Server.
+            // This is to avoid the thread name conflict with mtsDeviceInterfaceProxyServer
+            // class because Linux RTAI doesn't allow two threads to have the same thread name.
+            "TMS");
     }
 }
 
