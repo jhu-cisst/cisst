@@ -197,9 +197,9 @@ bool ui3Manager::AddBehavior(ui3BehaviorBase * behavior,
     requiredInterface = behavior->AddRequiredInterface("ManagerInterface" + behavior->GetName());
     CMN_ASSERT(requiredInterface);
     requiredInterface->AddEventHandlerWrite(&ui3BehaviorBase::PrimaryMasterButtonCallback,
-                                            behavior, "PrimaryMasterButton", prmEventButton());
+                                            behavior, "PrimaryMasterButton");
     requiredInterface->AddEventHandlerWrite(&ui3BehaviorBase::SecondaryMasterButtonCallback,
-                                            behavior, "SecondaryMasterButton", prmEventButton());
+                                            behavior, "SecondaryMasterButton");
     std::string interfaceName("BehaviorInterface" + behavior->GetName());
     mtsProvidedInterface * providedInterface;
     providedInterface = this->AddProvidedInterface(interfaceName);

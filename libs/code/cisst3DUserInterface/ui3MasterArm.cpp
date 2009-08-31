@@ -80,7 +80,7 @@ bool ui3MasterArm::SetInput(mtsDevice * positionDevice, const std::string & posi
     requiredInterface = this->Manager->AddRequiredInterface(this->Name + "Button");
     if (requiredInterface) {
         requiredInterface->AddEventHandlerWrite(&ui3MasterArm::ButtonEventHandler, this,
-                                                "Button", prmEventButton());
+                                                "Button");
     } else {
         CMN_LOG_CLASS_INIT_ERROR << "SetInput: failed to add \""
                                  << this->Name
@@ -96,7 +96,7 @@ bool ui3MasterArm::SetInput(mtsDevice * positionDevice, const std::string & posi
     requiredInterface = this->Manager->AddRequiredInterface(this->Name + "Clutch");
     if (requiredInterface) {
         requiredInterface->AddEventHandlerWrite(&ui3MasterArm::ClutchEventHandler, this,
-                                                "Button", prmEventButton());
+                                                "Button");
     } else {
         CMN_LOG_CLASS_INIT_ERROR << "SetInput: failed to add \""
                                  << this->Name
