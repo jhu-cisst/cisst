@@ -183,7 +183,7 @@ protected:
     void KillAll(void);
 
     /*! Cleanup.  Since the task manager is a singleton, the
-      destructor will be called when the program exists but the
+      destructor will be called when the program exits but the
       user/programmer will not be able to control when exactly.  If
       the cleanup requires some objects to still be instantiated (log
       files, ...), this might lead to crashes.  To avoid this, the

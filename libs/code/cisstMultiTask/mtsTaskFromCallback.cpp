@@ -71,8 +71,7 @@ void mtsTaskFromCallback::Create(void * CMN_UNUSED(data))
                                  << GetTaskStateName() << std::endl;
         return;
     }
-    StateChange.Lock();
-    TaskState = INITIALIZING;
+    ChangeState(INITIALIZING);
 }
 
 void mtsTaskFromCallback::Start(void)
@@ -81,9 +80,7 @@ void mtsTaskFromCallback::Start(void)
         WaitToStart(3.0);
     if (TaskState == READY) {
         CMN_LOG_CLASS_INIT_VERBOSE << "Start: starting task " << this->GetName() << std::endl;
-        StateChange.Lock();
-        TaskState = ACTIVE;
-        StateChange.Unlock();
+        ChangeState(ACTIVE);
     } else {
         CMN_LOG_CLASS_INIT_ERROR << "Start: could not start task " << this->GetName() << ", state = " << GetTaskStateName() << std::endl;
     }
@@ -93,9 +90,7 @@ void mtsTaskFromCallback::Suspend(void)
 {
     if (TaskState == ACTIVE) {
         CMN_LOG_CLASS_RUN_VERBOSE << "Suspend: suspending task " << this->GetName() << std::endl;
-        StateChange.Lock();
-        TaskState = READY;
-        StateChange.Unlock();
+        ChangeState(READY);
         CMN_LOG_CLASS_RUN_VERBOSE << "Suspend: suspended task " << this->GetName() << std::endl;
     }
 }

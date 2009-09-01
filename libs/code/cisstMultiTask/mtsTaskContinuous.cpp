@@ -95,17 +95,14 @@ void mtsTaskContinuous::Create(void *data)
     }
     if (NewThread) {
 	    CMN_LOG_CLASS_INIT_VERBOSE << "Create: creating thread for task " << this->GetName() << std::endl;
-        // Lock the StateChange mutex and unlock it when the thread starts running (in RunInternal)
-        StateChange.Lock();
-        TaskState = INITIALIZING;
+        ChangeState(INITIALIZING);
 	    Thread.Create<mtsTaskContinuous, void*>(this, &mtsTaskContinuous::RunInternal, data);
     }
     else {
 	    CMN_LOG_CLASS_INIT_VERBOSE << "Create: using current thread for task " << this->GetName() << std::endl;
         Thread.CreateFromCurrentThread();
         CaptureThread = true;
-        StateChange.Lock();
-        TaskState = INITIALIZING;
+        ChangeState(INITIALIZING);
         RunInternal(data);
     }
 }
@@ -118,9 +115,7 @@ void mtsTaskContinuous::Start(void)
     }
     if (TaskState == READY) {
         CMN_LOG_CLASS_INIT_VERBOSE << "Start: starting task " << this->GetName() << std::endl;
-        StateChange.Lock();
-        TaskState = ACTIVE;
-        StateChange.Unlock();
+        ChangeState(ACTIVE);
         if (CaptureThread) {
             if (Thread.GetId() != osaGetCurrentThreadId()) {
                 CMN_LOG_CLASS_INIT_ERROR << "Start: cannot start task " << this->GetName() << " (wrong thread)" << std::endl;
@@ -141,9 +136,7 @@ void mtsTaskContinuous::Suspend(void)
 {
     if (TaskState == ACTIVE) {
         CMN_LOG_CLASS_RUN_VERBOSE << "Suspend: suspending task " << this->GetName() << std::endl;
-        StateChange.Lock();
-        TaskState = READY;
-        StateChange.Unlock();
+        ChangeState(READY);
     }
 }
 

@@ -201,7 +201,6 @@ class CISST_EXPORT mtsDeviceInterface: public cmnGenericObject
       interface will check if there is already a queue for the
       resource task or not.  This method must be called before any
       GetCommand. */
-    //    virtual unsigned int AllocateResourcesForCurrentThread(void);
     virtual unsigned int AllocateResources(const std::string & userName);
 
     virtual inline unsigned int ProcessMailBoxes(void) {

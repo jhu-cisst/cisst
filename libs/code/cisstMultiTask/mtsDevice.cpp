@@ -105,7 +105,9 @@ bool mtsDevice::ConnectRequiredInterface(const std::string & requiredInterfaceNa
         requiredInterface->ConnectTo(providedInterface);
         CMN_LOG_CLASS_INIT_VERBOSE << "ConnectRequiredInterface: required interface " << requiredInterfaceName
                                    << " successfuly connected to provided interface " << providedInterface->GetName() << std::endl;
-        return true;
+        unsigned int userId = providedInterface->AllocateResources(this->GetName());
+        CMN_LOG_CLASS_INIT_VERBOSE << "Binding commands and events with user Id " << userId << std::endl;
+        return requiredInterface->BindCommandsAndEvents(userId);
     }
     return false;            
 }

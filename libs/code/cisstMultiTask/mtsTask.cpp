@@ -51,48 +51,37 @@ void mtsTask::DoRunInternal(void)
 void mtsTask::StartupInternal(void) {
     CMN_LOG_CLASS_INIT_VERBOSE << "Starting StartupInternal for " << Name << std::endl;
 
+    // Loop through the required interfaces and make sure they are all connected. This extra check is probably not needed.
     bool success = true;
-    unsigned int userId;
-    // Loop through the required interfaces and bind all commands and events
     RequiredInterfacesMapType::const_iterator requiredIterator = RequiredInterfaces.begin();
     mtsDeviceInterface * connectedInterface;
     for (;
          requiredIterator != RequiredInterfaces.end();
          requiredIterator++) {
         connectedInterface = requiredIterator->second->GetConnectedInterface();
-        if (connectedInterface) {
-            CMN_LOG_CLASS_INIT_VERBOSE << "StartupInternal: ask " << connectedInterface->GetName() 
-                                       << " to allocate resources for " << this->GetName() << std::endl;
-            userId = connectedInterface->AllocateResources(this->GetName());
-            CMN_LOG_CLASS_INIT_VERBOSE << "StartupInternal: binding commands and events with user Id "
-                                       << userId << std::endl;
-            success &= requiredIterator->second->BindCommandsAndEvents(userId);
-        } else {
+        if (!connectedInterface) {
             CMN_LOG_CLASS_INIT_WARNING << "StartupInternal: void pointer to required interface (required not connected to provided)" << std::endl;
             success = false;
         }
     }
-    // Call user-supplied startup function
-    this->Startup();
-    // StateChange should already be locked
     if (success) {
-       TaskState = READY;       
-    } else {
+        // Call user-supplied startup function
+        this->Startup();
+        ChangeState(READY);
+    }
+    else {
         CMN_LOG_CLASS_INIT_ERROR << "StartupInternal: task " << this->GetName() << " cannot be started." << std::endl;
     }
-    StateChange.Unlock();
     CMN_LOG_CLASS_INIT_VERBOSE << "Ending StartupInternal for " << this->GetName() << std::endl;
 }
 
 void mtsTask::CleanupInternal() {
     // Call user-supplied cleanup function
-	this->Cleanup();
+    this->Cleanup();
     // Perform Cleanup on all interfaces provided
     ProvidedInterfaces.ForEachVoid(&mtsDeviceInterface::Cleanup);
-    // StateChange should be locked by Kill().
-	TaskState = FINISHED;
-    StateChange.Unlock();
-	CMN_LOG_CLASS_INIT_VERBOSE << "Done base class CleanupInternal " << this->GetName() << std::endl;
+    ChangeState(FINISHED);
+    CMN_LOG_CLASS_INIT_VERBOSE << "Done base class CleanupInternal " << this->GetName() << std::endl;
 }
 
 
@@ -154,6 +143,46 @@ void mtsTask::SetThreadReturnValue(void * returnValue) {
     ReturnValue = returnValue;
 }
 
+void mtsTask::ChangeState(TaskStateType newState)
+{
+    StateChange.Lock();
+    TaskState = newState;
+    StateChange.Unlock();
+    StateChangeSignal.Raise();
+}
+
+bool mtsTask::WaitForState(TaskStateType desiredState, double timeout)
+{
+    if (TaskState == desiredState)
+        return true;
+    if (osaGetCurrentThreadId() == Thread.GetId()) {
+        // This shouldn't happen
+        CMN_LOG_CLASS_INIT_WARNING << "WaitForState(" << TaskStateName(desiredState) << "): called from self for task "
+                                   << this->GetName() << std::endl;
+    }
+    else {
+        CMN_LOG_CLASS_INIT_VERBOSE << "WaitForState: waiting for task " << this->GetName() << " to enter state "
+                                   << TaskStateName(desiredState) << std::endl;
+        double curTime = osaGetTime();
+        double startTime = curTime;
+        double endTime = startTime + timeout;
+        while (timeout > 0) {
+            StateChangeSignal.Wait(timeout);
+            curTime = osaGetTime();
+            if (TaskState == desiredState)
+                break;
+            timeout = endTime - curTime;
+         }
+        if (TaskState == desiredState)
+            CMN_LOG_CLASS_INIT_VERBOSE << "WaitForState: waited for " << curTime-startTime
+                                       << " seconds." << std::endl;
+        else
+            CMN_LOG_CLASS_INIT_ERROR << "WaitForState: task " << this->GetName()
+                                     << " did not reach state " << TaskStateName(desiredState)
+                                     << ", current state = " << GetTaskStateName() << std::endl;
+    }
+    return (TaskState == desiredState);
+}
 
 /********************* Task constructor and destructor *****************/
 
@@ -163,6 +192,7 @@ mtsTask::mtsTask(const std::string & name,
     Thread(),
     TaskState(CONSTRUCTED),
     StateChange(),
+    StateChangeSignal(),
     StateTable(sizeStateTable),
     StateTables("StateTables"),
     OverranPeriod(false),
@@ -217,24 +247,17 @@ mtsTask::~mtsTask()
 
 void mtsTask::Kill(void)
 {
-    CMN_LOG_CLASS_INIT_VERBOSE << "Kill: " << this->GetName() << std::endl;
+    CMN_LOG_CLASS_INIT_VERBOSE << "Kill: " << this->GetName() << ", current state = " << GetTaskStateName() << std::endl;
 
     // Generate a data collection event not to lose any data when killing a thread.
     StateTable.GenerateDataCollectionEvent();
 
-    StateChange.Lock();
-    // If we get here, we cannot be in the INITIALIZING or FINISHING
-    // states because we are holding the StateChange Mutex. 
-    if (TaskState == FINISHED)
-        StateChange.Unlock();
-    else if (TaskState == CONSTRUCTED) {
-        TaskState = FINISHED;
-        StateChange.Unlock();
-    }
-    else {
-        TaskState = FINISHING;
-        // Unlock StateChange in RunInternal
-    }
+    // If the task has only been constructed (i.e., no thread created), then we just enter the FINISHED state directly.
+    // Otherwise, we set the state to FINISHING and let the thread (RunInternal) set it to FINISHED.
+    if (TaskState == CONSTRUCTED)
+        ChangeState(FINISHED);
+    else
+        ChangeState(FINISHING);
 }
 
 
@@ -250,7 +273,7 @@ const char *mtsTask::TaskStateName(TaskStateType state) const
 }
 
 /********************* Methods to manage interfaces *******************/
-	
+    
 mtsDeviceInterface * mtsTask::AddProvidedInterface(const std::string & newInterfaceName) {
     mtsTaskInterface * newInterface = new mtsTaskInterface(newInterfaceName, this);
     if (newInterface) {
@@ -272,44 +295,28 @@ mtsDeviceInterface * mtsTask::AddProvidedInterface(const std::string & newInterf
 
 bool mtsTask::WaitToStart(double timeout)
 {
-    if (TaskState == INITIALIZING) {
-        CMN_LOG_CLASS_INIT_VERBOSE << "WaitToStart: waiting for task " << this->GetName() << " to start." << std::endl;
-        // PK: Following doesn't work because WaitToStart is generally called from same thread
-        // as Create, which is where the Lock was done.
-        //StateChange.Lock();  // Should use TryLock with timeout
-        // For now, we just use a Sleep and hope it is long enough
-        osaSleep(timeout);
-        if (TaskState != READY) {
-            CMN_LOG_CLASS_INIT_ERROR << "WaitToStart: task " << this->GetName()
-                                     << " did not start properly, state = " << TaskStateName(TaskState) << std::endl;
-        }
-        StateChange.Unlock();
-    }
+    if (TaskState == INITIALIZING)
+        WaitForState(READY, timeout);
     return (TaskState >= READY);
 }
 
-bool mtsTask::WaitToTerminate(double CMN_UNUSED(timeout))
+bool mtsTask::WaitToTerminate(double timeout)
 {
-	CMN_LOG_CLASS_INIT_VERBOSE << "WaitToTerminate: " << this->GetName() << std::endl;
+    bool ret = true;
     if (TaskState < FINISHING) {
-        return false;
+        CMN_LOG_CLASS_INIT_WARNING << "WaitToTerminate: not finishing task " << this->GetName() << std::endl;
+        ret = false;
     }
-    if (TaskState == FINISHING) {
-        CMN_LOG_CLASS_INIT_VERBOSE << "WaitToTerminate: waiting for task " << this->GetName() << " to finish." << std::endl;
-        StateChange.Lock();  // Should use TryLock with timeout
-        if (TaskState != FINISHED) {
-            CMN_LOG_CLASS_INIT_ERROR << "WaitToTerminate: task " << this->GetName()
-                                     << " did not finish properly, state = " << GetTaskStateName() << std::endl;
-        }
-        StateChange.Unlock();
-    }
+    else if (TaskState == FINISHING)
+        ret = WaitForState(FINISHED, timeout);
+
     // If task state is finished, we wait for the thread to be destroyed
     if ((TaskState == FINISHED) && Thread.IsValid()) {
         CMN_LOG_CLASS_INIT_VERBOSE << "WaitToTerminate: waiting for task " << this->GetName()
                                    << " thread to exit." << std::endl;
         Thread.Wait();
     }
-	return true;
+    return ret;
 }
 
 
