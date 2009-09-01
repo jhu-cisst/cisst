@@ -12,10 +12,7 @@ monitorTask::monitorTask(const std::string & taskName, double period):
 {
     std::stringstream interfaceName;
     // For each robot
-    for (int i = 0; i < 2; i++) {
-        // set all vectors to the right size
-        CurrentPosition[i].SetSize(NB_JOINTS);
-        PreviousPosition[i].SetSize(NB_JOINTS);
+    for (unsigned int i = 0; i < 2; i++) {
         interfaceName.str("");
         interfaceName << "Robot" << (i + 1);
         mtsRequiredInterface * required = AddRequiredInterface(interfaceName.str());
@@ -31,13 +28,17 @@ monitorTask::monitorTask(const std::string & taskName, double period):
 
 void monitorTask::Startup(void) 
 {
+    for (unsigned int i = 0; i < 2; i++) {
+        CurrentPosition[i].ReconstructFrom(*(Robot[i].GetPositionJoint.GetArgument2Prototype()));
+        PreviousPosition[i].ReconstructFrom(CurrentPosition[i]);
+    }
 }
 
 void monitorTask::Run(void)
 {
     mtsCommandBase::ReturnType result;
     // check the positions of both robots
-    for (int i = 0; i < 2; i++) {
+    for (unsigned int i = 0; i < 2; i++) {
         Robot[i].GetStateIndex(StateIndex);  // time index of robot state table
         Robot[i].GetPositionJoint(StateIndex, CurrentPosition[i]); // current data
         result = Robot[i].GetPositionJoint(StateIndex - 1, PreviousPosition[i]);

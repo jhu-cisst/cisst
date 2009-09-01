@@ -14,7 +14,6 @@ const double upperBound = 4.0;
 class monitorTask: public mtsTaskPeriodic {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 public:
-    enum {NB_JOINTS = 2};
     typedef mtsDoubleVec PositionJointType;
 protected:
     // Robot[0] and Robot[1] are required interfaces

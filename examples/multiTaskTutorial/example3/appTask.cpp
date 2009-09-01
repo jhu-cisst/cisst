@@ -53,16 +53,8 @@ void appTask::Startup(void)
     Ticks = 0;
     ui.SetCloseHandler(Close);
     PositionControlled.ReconstructFrom(*(GetPositionJointControlled.GetArgumentPrototype()));
-
-    //    GetPositionJointControlled.GetArgumentPrototype()->Services()->Create(&PositionControlled,
-    //                                                                      *(GetPositionJointControlled.GetArgumentPrototype()));
-
-    GetPositionJointObserved.GetArgumentPrototype()->Services()->Create(&PositionObserved,
-                                                                        *(GetPositionJointObserved.GetArgumentPrototype()));
-
-    MovePositionJointControlled.GetArgumentPrototype()->Services()->Create(&PositionDesired,
-                                                                           *(MovePositionJointControlled.GetArgumentPrototype()));
-
+    PositionObserved.ReconstructFrom(*(GetPositionJointObserved.GetArgumentPrototype()));
+    PositionDesired.ReconstructFrom(*(MovePositionJointControlled.GetArgumentPrototype()));
     myMutex.Lock();
     ui.Show();
     myMutex.Unlock();

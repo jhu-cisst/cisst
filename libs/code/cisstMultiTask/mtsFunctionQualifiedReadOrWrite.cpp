@@ -42,6 +42,26 @@ mtsCommandBase::ReturnType mtsFunctionQualifiedReadOrWrite<_argumentType>::opera
 
 
 template <class _argumentType>
+const mtsGenericObject * mtsFunctionQualifiedReadOrWrite<_argumentType>::GetArgument1Prototype(void) const
+{
+    if (this->Command) {
+        return this->Command->GetArgument1Prototype();
+    }
+    return 0;
+}
+
+
+template <class _argumentType>
+const mtsGenericObject * mtsFunctionQualifiedReadOrWrite<_argumentType>::GetArgument2Prototype(void) const
+{
+    if (this->Command) {
+        return this->Command->GetArgument2Prototype();
+    }
+    return 0;
+}
+
+
+template <class _argumentType>
 void mtsFunctionQualifiedReadOrWrite<_argumentType>::ToStream(std::ostream & outputStream) const {
     if (this->Command != 0) {
         outputStream << "mtsFunctionQualifiedReadOrWrite for " << *Command;
