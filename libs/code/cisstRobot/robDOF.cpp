@@ -56,8 +56,8 @@ bool robDOF::IsCartesian()   const {return 0 < (dof & CARTESIAN);}
 bool robDOF::IsTranslation() const {return 0 < (dof & ( TX | TY | TZ )); }
 bool robDOF::IsRotation()    const {return 0 < (dof & ( RX | RY | RZ )); }
 
-uint64_t robDOF::GetDOF( )             const  {  return dof;  }
-bool     robDOF::IsSet( uint64_t dof ) const  {  return 0 < ((this->dof & dof));  }
+uint64_t robDOF::GetDOF( )             const  { return dof; }
+bool     robDOF::IsSet( uint64_t dof ) const  { return 0 < ((this->dof & dof)); }
 
 size_t robDOF::DOFtoIndex( uint64_t dof ){
   if( dof & ( robDOF::X1 | robDOF::X1D | robDOF::X1DD ) )

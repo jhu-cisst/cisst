@@ -2,6 +2,7 @@
 #include <cisstRobot/robQuintic.h>
 #include <cisstRobot/robSLERP.h>
 #include <cisstRobot/robSO3Blender.h>
+#include <cisstRobot/robSO3Bezier.h>
 
 using namespace cisstRobot;
 
@@ -17,16 +18,13 @@ robSE3Track::robSE3Track( real vmax, real wmax, real vdmax, real wdmax ){
   this->wdmax = wdmax;
 
   numwp=0;
-  
 }
 
 robDomainAttribute robSE3Track::IsDefinedFor( const robDOF& input ) const{
-
   // test the dof are SE3 or time
   if( input.IsCartesian() || input.IsTime() ){
     return DEFINED;
   }
-
   return UNDEFINED;
 }
 
@@ -40,21 +38,23 @@ robError robSE3Track::Evaluate( const robDOF& input, robDOF& output ){
       t1 = input.t;                        // the new time
       tw0 = input.Rt.Translation();        // the new position
       tw1 = input.Rt.Translation();        // the new position
-      Rw0 = SO3( input.Rt[0][0], input.Rt[0][1], input.Rt[0][2], 
-		 input.Rt[1][0], input.Rt[1][1], input.Rt[1][2], 
-		 input.Rt[2][0], input.Rt[2][1], input.Rt[2][2], VCT_NORMALIZE );
-      Rw1 = SO3( input.Rt[0][0], input.Rt[0][1], input.Rt[0][2], 
-		 input.Rt[1][0], input.Rt[1][1], input.Rt[1][2], 
-		 input.Rt[2][0], input.Rt[2][1], input.Rt[2][2], VCT_NORMALIZE );
+      Rw0 = SO3(input.Rt[0][0], input.Rt[0][1], input.Rt[0][2], 
+		input.Rt[1][0], input.Rt[1][1], input.Rt[1][2], 
+		input.Rt[2][0], input.Rt[2][1], input.Rt[2][2], VCT_NORMALIZE);
+      Rw1 = SO3(input.Rt[0][0], input.Rt[0][1], input.Rt[0][2], 
+		input.Rt[1][0], input.Rt[1][1], input.Rt[1][2], 
+		input.Rt[2][0], input.Rt[2][1], input.Rt[2][2], VCT_NORMALIZE);
       v1 = R3(0.0);
       w1 = R3(0.0);
       numwp++;
-
     }
+
     else{
 
       // if the blenders are there
-      if( txblender != NULL && tyblender != NULL && tzblender != NULL &&
+      if( txblender != NULL && 
+	  tyblender != NULL && 
+	  tzblender != NULL &&
 	  so3blender!= NULL ){
 
 	Evaluate(input);       // do one more evaluation to avoid 
@@ -68,69 +68,64 @@ robError robSE3Track::Evaluate( const robDOF& input, robDOF& output ){
 
       t2 = input.t;                        // the new time
       tw2 = input.Rt.Translation();        // the new position
-      Rw2 = SO3( input.Rt[0][0], input.Rt[0][1], input.Rt[0][2], 
-		 input.Rt[1][0], input.Rt[1][1], input.Rt[1][2], 
-		 input.Rt[2][0], input.Rt[2][1], input.Rt[2][2], VCT_NORMALIZE );
+      Rw2 = SO3(input.Rt[0][0], input.Rt[0][1], input.Rt[0][2], 
+		input.Rt[1][0], input.Rt[1][1], input.Rt[1][2], 
+		input.Rt[2][0], input.Rt[2][1], input.Rt[2][2], VCT_NORMALIZE);
 
-      SO3 R0w, R02;
-      R0w.InverseOf(Rw0);                  // 
-      R02 = R0w * Rw2;                     // relative orientation wrt frame i
-      vctAxisAngleRotation3<real> r02;     //(R12, VCT_NORMALIZE);// axis angle 
-
-      ///
-      R3 tw = tw2-tw0;                     // the relative position wrt frame W
-      v2 = tw/(t2-t0)/2.0;                 // approximate the new linear velocity
-      w2 = r02.Axis()*r02.Angle()/(t2-t0); // approximate the new angular vel
-      w2 = Rw0*w2;                         // orient angular vel. wrt to frame w
-      
-      tw = tw2-tw1;                        // the relative position wrt frame W
       real dt = t2-t0;
 
-      if( 0 < vmax )                       // limit on linear acceleration?
-	dt = tw.Norm()/vmax;               // time for a straight line at vmax
-
-      if( 0 < vdmax )
-	dt = ( dt +                        // this is a bound on the time to move
-	       fabs(vmax-v1.Norm())/vdmax +
-	       fabs(vmax-v2.Norm())/vdmax );// time to accelerate to/from vmax
-
-      if( 0 < wmax ){
-	if( t2 < r02.Angle()/wmax )        // check if the rotation takes more time
-	  dt = r02.Angle()/wmax;
-      }
-      ///
-      /*
-      R3 tw = tw2-tw0;                     // the relative position wrt frame W
-      v2 = tw/(t2-t0);                 // approximate the new linear velocity
-      w2 = r02.Axis()*r02.Angle()/(t2-t0); // approximate the new angular vel
-      w2 = Rw0*w2;                         // orient angular vel. wrt to frame w
-      
-      tw = tw2-tw1;                     // the relative position wrt frame W
-      real dt = tw.Norm()/vmax;         // time for a straight line at vmax
-      //real dt = tw.Norm()/vmax;       // time for a straight line at vmax
-      //if( t2 < r12.Angle()/wmax )     // check if the rotation takes more time
-      //t2 = r12.Angle()/wmax;
-      */
-
-      if( dt < t2-t0  ){  // should we get "there" before the next reading?
-	v2 = R3(0.0);     // if so, put v2 to 0. 
+      if( input.IsSet( robDOF::VW ) ){
+	v2 = R3( input.vw[0], input.vw[1], input.vw[2] );
+	w2 = R3( input.vw[3], input.vw[4], input.vw[5] );
       }
 
-      txblender=new robQuintic(t2, tw1[0], v1[0], 0.0, t2+dt, tw2[0], v2[0],0.0);
-      tyblender=new robQuintic(t2, tw1[1], v1[1], 0.0, t2+dt, tw2[1], v2[1],0.0);
-      tzblender=new robQuintic(t2, tw1[2], v1[2], 0.0, t2+dt, tw2[2], v2[2],0.0);
+      else{
 
-      so3blender = new robSO3Blender( t0, t2-t0, dt, Rw0, Rw1, Rw2, (t2-t0)*0.1, dt*0.1 );
-      //so3blender = new robSLERP(t2, SE3( Rw1, R3() ),   t2+dt, SE3(Rw2, R3()) );
+	R3 tw = tw2-tw0;                     // relative position wrt W
+
+	SO3 R0w, R02;                        // relative orientation wrt 0
+	R0w.InverseOf(Rw0);                  //
+	R02 = R0w * Rw2;                     // relative orientation wrt frame i
+	vctAxisAngleRotation3<real> r02(R02);//
+	
+	v2 = tw/(t2-t0)/2.0;                        // approximate v2
+	w2 = r02.Axis()*r02.Angle()/(t2-t0)/2000.0; // approximate w2
+	w2 = Rw0*w2;                                // orient w2 wrt W
+
+	if( 0 < vmax )                      // limit on linear acceleration?
+	  dt = tw.Norm()/vmax;              // time for a straight line at vmax
+	
+	if( 0 < vdmax )
+	  dt = (dt +                        // this is a bound on the time 
+		fabs(vmax-v1.Norm())/vdmax +
+		fabs(vmax-v2.Norm())/vdmax);// time to accelerate to/from vmax
+	
+	if( 0 < wmax ){
+	  if( t2 < r02.Angle()/wmax )       // check if the rotation is longer
+	    dt = r02.Angle()/wmax;
+	}
+	
+	if( dt < t2-t0  ){  // should we get "there" before the next reading?
+	  v2 = R3(0.0);     // if so, put v2 to 0. 
+	}
+      }
+
+      txblender=new robQuintic(t2,tw1[0],v1[0], 0.0, t2+dt, tw2[0], v2[0],0.0);
+      tyblender=new robQuintic(t2,tw1[1],v1[1], 0.0, t2+dt, tw2[1], v2[1],0.0);
+      tzblender=new robQuintic(t2,tw1[2],v1[2], 0.0, t2+dt, tw2[2], v2[2],0.0);
+
+      so3blender = new robSO3Bezier( t2, t2+dt, Rw1, w1, Rw2, w2, wmax );
 
       t0 = t2;                             // backup the old time
       tw0 = tw2;                           // backup the old position
       Rw0 = Rw2;                           // backup the old orientation
       numwp++;
+      w1 = w2;
     }
   }
 
   if ( input.IsTime() ){
+
     t1 = input.t;
     // nothing has been set yet! Rw1, tw1 are empty
     if( numwp == 0 ){
@@ -210,7 +205,9 @@ robError robSE3Track::Evaluate(const robDOF& input){
   }
 
   if( so3blender->IsDefinedFor( input ) == DEFINED ){ 
+
     robDOF dof;
+
     if( so3blender->Evaluate( input, dof ) == FAILURE ){
       cout << "robSE3Track::Evaluate: so3blender failed" << endl;
       return FAILURE;
@@ -218,14 +215,15 @@ robError robSE3Track::Evaluate(const robDOF& input){
     Rw1 = SO3( dof.Rt[0][0], dof.Rt[0][1], dof.Rt[0][2], 
 	       dof.Rt[1][0], dof.Rt[1][1], dof.Rt[1][2], 
 	       dof.Rt[2][0], dof.Rt[2][1], dof.Rt[2][2] );
-    
-    w1[3] = dof.vw[3];     // set the X rot vel
-    w1[4] = dof.vw[4];     // set the Y rot vel
-    w1[5] = dof.vw[5];     // set the Z rot vel
-  
-    w1d[3] = dof.vdwd[3];  // set the X rot acc
-    w1d[4] = dof.vdwd[4];  // set the Y rot acc
-    w1d[5] = dof.vdwd[5];  // set the Z rot acc
+    /*
+    w1[0] = dof.vw[3];     // set the X rot vel
+    w1[1] = dof.vw[4];     // set the Y rot vel
+    w1[2] = dof.vw[5];     // set the Z rot vel
+
+    w1d[0] = dof.vdwd[3];  // set the X rot acc
+    w1d[1] = dof.vdwd[4];  // set the Y rot acc
+    w1d[2] = dof.vdwd[5];  // set the Z rot acc
+    */
   }
   else{
     Rw1 = Rw2;

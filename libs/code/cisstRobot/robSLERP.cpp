@@ -6,7 +6,8 @@ using namespace cisstRobot;
 
 robSLERP::robSLERP( real ti, const SE3& Rti, real tf, const SE3& Rtf ){
   if( tf < ti ){
-    cout << "robSLERP::robSLERP: ti must be less than tf " << ti << " " << tf << endl;
+    cout << "robSLERP::robSLERP: ti must be less than tf " 
+	 << ti << " " << tf << endl;
   }
 
   xmin = ti;
@@ -101,7 +102,6 @@ robError robSLERP::Evaluate( const robDOF& input, robDOF& output ){
   // if theta = 180 degrees then result is not fully defined
   // we could rotate around any axis normal to qinitial or qfinal
   if (fabs(stheta) < 0.001){ // fabs is floating point absolute
-    
     SO3 Rwi( Quaternion( qinitial.X()*0.5 + qfinal.X()*0.5,
 			 qinitial.Y()*0.5 + qfinal.Y()*0.5,
 			 qinitial.Z()*0.5 + qfinal.Z()*0.5,
@@ -128,7 +128,25 @@ robError robSLERP::Evaluate( const robDOF& input, robDOF& output ){
   vw[4] = w[1];
   vw[5] = w[2];
   output = robDOF( SE3(Rwi, R3(0.0)), vw, R6(0.0) );
-    
-  //cout << "EXIT prmSLERP::evaluate" << endl;
+  /*
+  SO3 R1w(qinitial);
+  R1w.InverseSelf();
+  SO3 R1i;
+  R1i = R1w*Rwi;
+
+  vctAxisAngleRotation3<real> ut(R1i);
+  cout << ut.Angle() << " " << ut.Angle()/t << endl;
+
+  Quaternion q(Quaternion( qinitial.X()*ratioA + qfinal.X()*ratioB,
+			   qinitial.Y()*ratioA + qfinal.Y()*ratioB,
+			   qinitial.Z()*ratioA + qfinal.Z()*ratioB,
+			   qinitial.R()*ratioA + qfinal.R()*ratioB ) );
+
+  Quaternion qs(qinitial);
+  qs.ConjugateSelf();
+  Quaternion qsp;
+  qsp = qs*qfinal;
+  cout << q.R() << endl;
+  */  
   return SUCCESS;
 }

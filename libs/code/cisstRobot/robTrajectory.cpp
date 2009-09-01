@@ -486,7 +486,6 @@ robError robTrajectory::Evaluate( robDOF& output ){
 
       // handle both rotation and translation (i.e. like SE3 tracking)
       if( mapping.To().IsRotation() && mapping.To().IsTranslation () ){
-
 	if( function->Evaluate( fninput, se3output ) == SUCCESS ){
 	  output.Set( mapping.To().GetDOF(), 
 		      se3output.Rt, 
