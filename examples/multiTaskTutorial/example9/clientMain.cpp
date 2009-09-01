@@ -65,7 +65,7 @@ int main(int argc, char * argv[])
     
     // cleanup
     taskManager->KillAll();
-
+    taskManager->Cleanup();
     return 0;
 }
 

@@ -74,7 +74,7 @@ int main(void)
 
     osaSleep(PeriodDisplay * 2);
     while (!displayTaskObjectFirstPair->IsTerminated()) osaSleep(PeriodDisplay);
-
+    taskManager->Cleanup();
     return 0;
 }
 

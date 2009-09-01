@@ -61,6 +61,7 @@ int main(void)
     osaSleep(PeriodSine * 2);
     while (!sineTaskObject->IsTerminated()) osaSleep(PeriodSine);
 
+    taskManager->Cleanup();
     return 0;
 }
 

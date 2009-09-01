@@ -77,6 +77,7 @@ int main(void)
     while (!appTaskControl1->IsTerminated()) osaTime::Sleep(PeriodRobot);
     while (!appTaskControl2->IsTerminated()) osaTime::Sleep(PeriodRobot);
     */
+    taskManager->Cleanup();
     return 0;
 }
 

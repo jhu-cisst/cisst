@@ -64,7 +64,7 @@ int main(void)
         osaSleep(PeriodDisplay);
         std::cout << "." << std::flush;
     }
-
+    taskManager->Cleanup();
     return 0;
 }
 

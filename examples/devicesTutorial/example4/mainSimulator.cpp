@@ -71,6 +71,6 @@ int main()
     while (!trackerSimulatorTask->IsTerminated()) {
         osaSleep(100.0 * cmn_ms);
     }
-
+    taskManager->Cleanup();
     return 0;
 }

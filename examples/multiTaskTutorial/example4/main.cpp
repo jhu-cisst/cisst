@@ -123,6 +123,7 @@ int main(int argc, char **argv)
     while (!sineTaskObject->IsTerminated()) osaSleep(PeriodDisplay);
     while (!displayTaskObject->IsTerminated()) osaSleep(PeriodDisplay);
 
+    taskManager->Cleanup();
     return 0;
 }
 

@@ -58,6 +58,7 @@ int main(void)
         delete UI;
     }
 
+    taskManager->Cleanup();
     return 0;
 }
 

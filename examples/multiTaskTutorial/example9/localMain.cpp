@@ -49,7 +49,7 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
     }
     // cleanup
     taskManager->KillAll();
-
+    taskManager->Cleanup();
     return 0;
 }
 

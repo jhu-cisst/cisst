@@ -90,6 +90,7 @@ int main(void)
                                                collector->GetLogFileName() + ".csv",
                                                ','); // comma separated
     }
+    taskManager->Cleanup();
     return 0;
 }
 

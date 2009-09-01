@@ -70,6 +70,6 @@ int main()
     while (!devSensableHDTask->IsTerminated()) {
         osaSleep(100.0 * cmn_ms);
     }
-
+    taskManager->Cleanup;
     return 0;
 }

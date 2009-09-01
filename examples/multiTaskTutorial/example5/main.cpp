@@ -50,6 +50,7 @@ int main(void)
     while (!robot2Task->IsTerminated()) osaTime::Sleep(PeriodRobot);
     while (!appTaskControl->IsTerminated()) osaTime::Sleep(PeriodRobot);
     */
+    taskManager->Cleanup();
     return 0;
 }
 
