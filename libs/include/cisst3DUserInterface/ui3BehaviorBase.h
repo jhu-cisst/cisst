@@ -252,6 +252,9 @@ protected:
 
     virtual void PrimaryMasterButtonCallback(const prmEventButton & event);
     virtual void SecondaryMasterButtonCallback(const prmEventButton & event);
+    virtual void SetStateIdleCallback(void);
+    virtual void SetStateForegroundCallback(void);
+    virtual void SetStateBackgroundCallback(void);
 
     /*!
      State variable for storing the current UI state of the behavior.

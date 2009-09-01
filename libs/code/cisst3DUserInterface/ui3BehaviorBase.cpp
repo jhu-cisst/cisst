@@ -132,17 +132,23 @@ void ui3BehaviorBase::Run(void)
 void ui3BehaviorBase::SetStateForeground(void)
 {
     this->SetState(Foreground);
+    this->SetStateForegroundCallback();
 }
+
 
 void ui3BehaviorBase::SetStateBackground(void)
 {
     this->SetState(Background);
+    this->SetStateBackgroundCallback();
 }
+
 
 void ui3BehaviorBase::SetStateIdle(void)
 {
     this->SetState(Idle);
+    this->SetStateIdleCallback();
 }
+
 
 void ui3BehaviorBase::SetState(const StateType & newState)
 {
@@ -167,6 +173,9 @@ void ui3BehaviorBase::SetState(const StateType & newState)
                 break;
             case Idle:
                 this->MenuBar->Hide();
+                if (this->GetVisibleObject()) {
+                    this->GetVisibleObject()->Hide();
+                }
                 this->Manager->ActiveBehavior = this->Manager;
                 this->Manager->State = Foreground;
                 this->Manager->ActiveBehavior->MenuBar->Show();
@@ -177,10 +186,12 @@ void ui3BehaviorBase::SetState(const StateType & newState)
     }
 }
 
+
 void ui3BehaviorBase::OnStreamSample(svlSample * CMN_UNUSED(sample), int CMN_UNUSED(streamindex))
 {
     // Default implementation does nothing
 }
+
 
 int ui3BehaviorBase::AddStream(svlStreamType type, const std::string & streamname)
 {
@@ -197,16 +208,19 @@ int ui3BehaviorBase::AddStream(svlStreamType type, const std::string & streamnam
     return streamindex;
 }
 
+
 unsigned int ui3BehaviorBase::GetStreamWidth(const int streamindex, unsigned int channel)
 {
     if (streamindex < 0 || streamindex >= static_cast<int>(Streams.size())) return 0;
     return Streams[streamindex]->GetWidth(channel);
 }
 
+
 unsigned int ui3BehaviorBase::GetStreamWidth(const std::string & streamname, unsigned int channel)
 {
     return GetStreamWidth(GetStreamIndexFromName(streamname), channel);
 }
+
 
 unsigned int ui3BehaviorBase::GetStreamHeight(const int streamindex, unsigned int channel)
 {
@@ -214,10 +228,12 @@ unsigned int ui3BehaviorBase::GetStreamHeight(const int streamindex, unsigned in
     return Streams[streamindex]->GetHeight(channel);
 }
 
+
 unsigned int ui3BehaviorBase::GetStreamHeight(const std::string & streamname, unsigned int channel)
 {
     return GetStreamHeight(GetStreamIndexFromName(streamname), channel);
 }
+
 
 int ui3BehaviorBase::GetStreamIndexFromName(const std::string & streamname)
 {
@@ -229,12 +245,14 @@ int ui3BehaviorBase::GetStreamIndexFromName(const std::string & streamname)
     return -1;
 }
 
-svlFilterBase* ui3BehaviorBase::GetStreamSamplerFilter(const std::string & streamname)
+
+svlFilterBase * ui3BehaviorBase::GetStreamSamplerFilter(const std::string & streamname)
 {
     int streamindex = GetStreamIndexFromName(streamname);
     if (streamindex < 0 || streamindex >= static_cast<int>(Streams.size())) return 0;
     return dynamic_cast<svlFilterBase*>(Streams[streamindex]);
 }
+
 
 void ui3BehaviorBase::PrimaryMasterButtonCallback(const prmEventButton & CMN_UNUSED(event))
 {
@@ -242,9 +260,31 @@ void ui3BehaviorBase::PrimaryMasterButtonCallback(const prmEventButton & CMN_UNU
                         << this->GetName() << "\"" << std::endl;
 }
 
+
 void ui3BehaviorBase::SecondaryMasterButtonCallback(const prmEventButton & CMN_UNUSED(event))
 {
     CMN_LOG_RUN_VERBOSE << "SecondaryMasterButtonCallback not overloaded for \""
+                        << this->GetName() << "\"" << std::endl;
+}
+
+
+void ui3BehaviorBase::SetStateIdleCallback(void)
+{
+    CMN_LOG_RUN_VERBOSE << "SetStateIdleCallback not overloaded for \""
+                        << this->GetName() << "\"" << std::endl;
+}
+
+
+void ui3BehaviorBase::SetStateForegroundCallback(void)
+{
+    CMN_LOG_RUN_VERBOSE << "SetStateForegroundCallback not overloaded for \""
+                        << this->GetName() << "\"" << std::endl;
+}
+
+
+void ui3BehaviorBase::SetStateBackgroundCallback(void)
+{
+    CMN_LOG_RUN_VERBOSE << "SetStateBackgroundCallback not overloaded for \""
                         << this->GetName() << "\"" << std::endl;
 }
 
