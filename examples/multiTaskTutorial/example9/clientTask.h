@@ -13,7 +13,7 @@ class clientTask: public mtsTaskPeriodic {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
 protected:
-    mtsFunctionVoid ToggleServer;
+    mtsFunctionVoid VoidServer;
     mtsFunctionWrite WriteServer;
     mtsFunctionRead ReadServer;
     mtsFunctionQualifiedRead QualifiedReadServer;

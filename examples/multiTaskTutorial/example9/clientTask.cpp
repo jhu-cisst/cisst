@@ -13,12 +13,12 @@ clientTask::clientTask(const std::string & taskName, double period):
     // to communicate with the interface of the resource
     mtsRequiredInterface * required = AddRequiredInterface("Required");
     if (required) {
-        required->AddFunction("Toggle", this->ToggleServer);
+        required->AddFunction("Void", this->VoidServer);
         required->AddFunction("Write", this->WriteServer);
         required->AddFunction("Read", this->ReadServer);
         required->AddFunction("QualifiedRead", this->QualifiedReadServer);
         required->AddEventHandlerVoid(&clientTask::EventVoidHandler, this, "EventVoid");
-        //required->AddEventHandlerWrite(&clientTask::EventWriteHandler, this, "EventWrite", mtsDouble());
+        required->AddEventHandlerWrite(&clientTask::EventWriteHandler, this, "EventWrite");
     }
 }
 
@@ -68,10 +68,10 @@ void clientTask::Run(void)
         // check if toggle requested in UI
         fltkMutex.Lock();
         {
-            if (UI.ToggleRequested) {
-                CMN_LOG_CLASS_RUN_VERBOSE << "Run: ToggleRequested" << std::endl;
-                this->ToggleServer();
-                UI.ToggleRequested = false;
+            if (UI.VoidRequested) {
+                CMN_LOG_CLASS_RUN_VERBOSE << "Run: VoidRequested" << std::endl;
+                this->VoidServer();
+                UI.VoidRequested = false;
             }
             
             if (UI.WriteRequested) {

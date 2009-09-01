@@ -16,7 +16,7 @@ protected:
     mtsFunctionVoid EventVoid;
     mtsFunctionWrite EventWrite;
 
-    void Toggle(void);
+    void Void(void);
     void Write(const mtsDouble & data);
     void QualifiedRead(const mtsDouble & data, mtsDouble & placeHolder) const;
 

@@ -8,24 +8,20 @@ class serverUI {open
   } {
     Fl_Window ServerWindow {
       label Server open
-      xywh {512 218 356 258} type Double visible
+      xywh {785 393 356 258} type Double visible
     } {
       Fl_Return_Button Close {
         label Close
         callback {ServerWindow->hide();  Opened = false;}
         xywh {230 215 105 30} box THIN_UP_BOX
       }
-      Fl_Check_Button ToggleValue {
-        label Toggle
+      Fl_Check_Button VoidValue {
+        label Void
         xywh {130 18 35 26} down_box THIN_DOWN_BOX align 4
       }
       Fl_Value_Output WriteValue {
         label Write
         xywh {130 51 36 24}
-      }
-      Fl_Slider ReadValue {
-        label Read
-        xywh {130 85 155 25} type {Horz Knob} align 4 maximum 100 step 1 value 50
       }
       Fl_Button VoidEventButton {
         label {Void Event}
@@ -36,6 +32,10 @@ class serverUI {open
         label {Write Event}
         callback {this->WriteEventRequested = true;}
         xywh {50 160 80 30}
+      }
+      Fl_Value_Slider ReadValue {
+        label Read
+        xywh {130 85 195 25} type {Horz Knob} align 4 maximum 100 step 1 value 50 textsize 14
       }
     }
   }

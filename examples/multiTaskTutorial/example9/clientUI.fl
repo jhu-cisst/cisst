@@ -15,13 +15,13 @@ class clientUI {open
         callback {ClientWindow->hide();  Opened = false;}
         xywh {230 215 105 30} box THIN_UP_BOX
       }
-      Fl_Button ToggleButton {
-        label Toggle
-        callback {this->ToggleRequested = true;}
+      Fl_Button VoidButton {
+        label void
+        callback {this->VoidRequested = true;}
         xywh {145 20 120 30}
       }
       Fl_Value_Slider WriteValue {
-        xywh {20 60 120 30} type {Horz Knob} maximum 100 step 1 value 50 textsize 14
+        xywh {20 60 120 30} type {Horz Knob} align 4 maximum 100 step 1 value 50 textsize 14
       }
       Fl_Button WriteButton {
         label Write
@@ -54,7 +54,7 @@ class clientUI {open
   } {
     code {ClientWindow->show();} {}
   }
-  decl {bool ToggleRequested;} {public
+  decl {bool VoidRequested;} {public
   }
   decl {bool WriteRequested;} {public
   }
