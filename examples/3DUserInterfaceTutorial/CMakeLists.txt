@@ -17,6 +17,7 @@ project(3DUserInterfaceTutorial)
 # library of sample behavior
 add_subdirectory(behaviors)
 
+include_directories(behaviors)
 
 # programs, depends on hardware availability
 
