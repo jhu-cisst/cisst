@@ -2,27 +2,14 @@
 # $Id$
 #
 
-project(3DUserInterfaceExample1)
+project(3DUserInterfaceTutorialExample1)
 
-OPTION(HAS_DAVINCI "Build using the daVinci API" OFF)
-IF(HAS_DAVINCI)
-   FIND_PATH(daVinci_INCLUDE_DIRS cisstDaVinciAPI.h)
-   IF(daVinci_INCLUDE_DIRS)
-       INCLUDE_DIRECTORIES(${daVinci_INCLUDE_DIRS})
-   ENDIF(daVinci_INCLUDE_DIRS)
-   FIND_LIBRARY(daVinci_LIBRARIES cisstDaVinciAPI)
-ENDIF(HAS_DAVINCI)
-
-add_executable(${PROJECT_NAME}
+add_executable(3DUserInterfaceTutorialExample1
                main.cpp
-               SimpleBehavior.cpp
-               SimpleBehavior.h
-               BehaviorWithSlave.cpp
-               BehaviorWithSlave.h
                )
-
-target_link_libraries(${PROJECT_NAME}
-                      ${daVinci_LIBRARIES}
+			   
+target_link_libraries(3DUserInterfaceTutorialExample1
+                      3DUserInterfaceTutorialBehaviors
                       )
 
-CISST_REQUIRES(${PROJECT_NAME} "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstStereoVision;cisstDevices;cisstParameterTypes;cisst3DUserInterface")
+CISST_REQUIRES(3DUserInterfaceTutorialExample1 "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstStereoVision;cisstDevices;cisstParameterTypes;cisst3DUserInterface")
