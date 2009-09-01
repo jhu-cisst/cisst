@@ -34,84 +34,80 @@ http://www.cisst.org/cisst/license.txt.
 #include "vtkFollower.h"
 
 
-class MeasurementText: public ui3VisibleObject
+class MeasurementBehaviorVisibleObject: public ui3VisibleObject
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 5);
 public:
-    inline MeasurementText(vctFrm3 position, const std::string & name = "Text"):
+    inline MeasurementBehaviorVisibleObject(vctFrm3 position, const std::string & name = "Text"):
         ui3VisibleObject(name),
-        warningtextActor(0),
-        warning_text(0),
-        warningtextMapper(0),
+        Text(0),
+        TextMapper(0),
+        TextActor(0),
         Position(position)
     {}
     
-        inline ~MeasurementText()
+    inline ~MeasurementBehaviorVisibleObject()
     {}
         
     inline bool CreateVTKObjects(void) {
-
-        warning_text = vtkVectorText::New();
-        CMN_ASSERT(warning_text);
-        warning_text->SetText(" ");
-
-        warningtextMapper = vtkPolyDataMapper::New();
-        CMN_ASSERT(warningtextMapper);
-        warningtextMapper->SetInputConnection( warning_text->GetOutputPort() );
-
-        warningtextActor = vtkFollower::New();
-        CMN_ASSERT(warningtextActor);
-        warningtextActor->SetMapper( warningtextMapper );
-        warningtextActor->GetProperty()->SetColor(1, 165.0/255, 79.0/255 );
-        //warningtextActor-> VisibilityOff();
-        warningtextActor-> SetScale(2.5);
-
-        this->AddPart(this->warningtextActor);
-
-        this->SetTransformation(this->Position);
+        
+        Text = vtkVectorText::New();
+        CMN_ASSERT(Text);
+        Text->SetText(" ");
+        
+        TextMapper = vtkPolyDataMapper::New();
+        CMN_ASSERT(TextMapper);
+        TextMapper->SetInputConnection(Text->GetOutputPort());
+        
+        TextActor = vtkFollower::New();
+        CMN_ASSERT(TextActor);
+        TextActor->SetMapper(TextMapper);
+        TextActor->GetProperty()->SetColor(1, 165.0/255, 79.0/255 );
+        TextActor-> SetScale(2.5);
+        
+        this->AddPart(this->TextActor);
+        
         return true;
     }
 
     inline void SetText(const std::string & text)
     {
-        if (this->warning_text) {
-            this->warning_text->SetText(text.c_str());
+        if (this->Text) {
+            this->Text->SetText(text.c_str());
         }
     }
-    
 
     inline void SetColor(double r, double g, double b)
     {
-        if (this->warningtextActor && (r+g+b)<= 3) {
-            this->warningtextActor->GetProperty()->SetColor(r,g,b);
+        if (this->TextActor && (r+g+b)<= 3) {
+            this->TextActor->GetProperty()->SetColor(r,g,b);
         }
     }
     
     
 protected:
-    vtkFollower             *warningtextActor;
-    vtkVectorText           *warning_text;
-    vtkPolyDataMapper       *warningtextMapper;
-    vtkProperty             *property;
+    vtkVectorText * Text;
+    vtkPolyDataMapper * TextMapper;
+    vtkFollower * TextActor;
     vctFrm3 Position;  // initial position
-    //vctMatrix4x4            *textXform;
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(MeasurementText);
-CMN_IMPLEMENT_SERVICES(MeasurementText);
+
+CMN_DECLARE_SERVICES_INSTANTIATION(MeasurementBehaviorVisibleObject);
+CMN_IMPLEMENT_SERVICES(MeasurementBehaviorVisibleObject);
 
 
 MeasurementBehavior::MeasurementBehavior(const std::string & name):
-        ui3BehaviorBase(std::string("MeasurementBehavior::") + name, 0),
-        Ticker(0),
-        Following(false),
-        VisibleList(0),
-        TEXT(0)
+    ui3BehaviorBase(std::string("MeasurementBehavior::") + name, 0),
+    Ticker(0),
+    Following(false),
+    VisibleList(0),
+    VisibleObject(0)
 {
     this->VisibleList = new ui3VisibleList("TextList");
-    this->TEXT = new MeasurementText(this->Position);
+    this->VisibleObject = new MeasurementBehaviorVisibleObject(this->Position);
     
-    this->VisibleList->Add(TEXT);
+    this->VisibleList->Add(this->VisibleObject);
 }
 
 
@@ -122,11 +118,6 @@ MeasurementBehavior::~MeasurementBehavior()
 
 void MeasurementBehavior::ConfigureMenuBar()
 {
-    this->MenuBar->AddClickButton("FirstButton",
-                                  1,
-                                  "empty.png",
-                                  &MeasurementBehavior::FirstButtonCallback,
-                                  this);
 }
 
 
@@ -218,18 +209,17 @@ bool MeasurementBehavior::RunNoInput()
     this->Slave1Position.Position().Translation().Add(this->Offset);
     this->VisibleList->SetPosition(this->Slave1Position.Position().Translation());
     
-    if (!RightMTMOpen)
-{
-    this-> GetMeasurement();
-}
-    else {
+    if (!RightMTMOpen) {
+        this-> GetMeasurement();
+    } else {
         MeasurementActive = false;
         //can either leave the last measurement on the screen or let it dispear
         //this->SetText(MeasureText, " ");
     }
-
+    
     return true;
 }
+
 
 void MeasurementBehavior::Configure(const std::string & CMN_UNUSED(configFile))
 {
@@ -238,14 +228,11 @@ void MeasurementBehavior::Configure(const std::string & CMN_UNUSED(configFile))
 
 bool MeasurementBehavior::SaveConfiguration(const std::string & CMN_UNUSED(configFile))
 {
-        // save settings
+    // save settings
     return true;
 }
 
-void MeasurementBehavior::FirstButtonCallback()
-{
-    CMN_LOG_RUN_VERBOSE << "Behavior \"" << this->GetName() << "\" Button 1 pressed" << std::endl;
-}
+
 
 void MeasurementBehavior::PrimaryMasterButtonCallback(const prmEventButton & event)
 {
@@ -264,42 +251,27 @@ Displays the absolute 3D distance the center of the probe has moved since being 
 
  */
 
-void MeasurementBehavior::GetMeasurement()
+void MeasurementBehavior::GetMeasurement(void)
 {
-
+    
     char    measure_string[100];
     vctFrm3 frame;
     frame = Slave1Position.Position(); //Moves the point from the control point of the probe to the center
 
-    if (!MeasurementActive)
-    {
+    if (!MeasurementActive) {
         MeasurementActive = true;
         //saves the first point
         MeasurePoint1.Assign(frame.Translation());
-        std::cout<< "MeasurePoint1 from if statement: " << MeasurePoint1<< std::endl;
     } else {
         //calculates the distance maoved
         vctDouble3 diff;
         diff.DifferenceOf(MeasurePoint1, frame.Translation());
-
+        
         double AbsVal = diff.Norm();
-
+        
         //displays the distance in mm 
         sprintf(measure_string,"%4.1fmm", AbsVal);
-        this->SetText(TEXT, measure_string);
+        this->VisibleObject->SetText(measure_string);
     }
-}
-
-/*!
-
-Sets the text of the text objects
-@param obj the text object in which the text is being set or changed
-@param text the text
-
- */
-
-void MeasurementBehavior::SetText(MeasurementText * obj, const std::string & text)
-{
-    obj->SetText(text);
 }
 

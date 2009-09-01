@@ -22,51 +22,49 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisst3DUserInterface.h>
 
-class MeasurementText;
+class MeasurementBehaviorVisibleObject;
 
 class MeasurementBehavior : public ui3BehaviorBase
 {
-    public:
-        MeasurementBehavior(const std::string & name);
-        ~MeasurementBehavior();
-
-        void Startup(void);
-        void Cleanup(void);
-        void ConfigureMenuBar(void);
-        bool RunForeground(void);
-        bool RunBackground(void);
-        bool RunNoInput(void);
-        void Configure(const std::string & configFile);
-        bool SaveConfiguration(const std::string & configFile);
-        inline ui3VisibleObject * GetVisibleObject(void) {
-            return this->VisibleList;
-        }
-
-    protected:
-        unsigned long Ticker;
-        void FirstButtonCallback(void);
-        void PrimaryMasterButtonCallback(const prmEventButton & event);
-        void SetText(MeasurementText *obj, const std::string & text);
-
-        StateType PreviousState;
-        bool PreviousMaM;
-        vctDouble3 PreviousCursorPosition;
-        vctDouble3 Offset;
-        vctFrm3 Position;
-        bool Following;
-
-        ui3SlaveArm * Slave1;
-        prmPositionCartesianGet Slave1Position;
-        
-        void GetMeasurement(void);
-
-    private:
-        ui3VisibleList * VisibleList;
-        MeasurementText * TEXT;
-        bool RightMTMOpen;
-        
-        bool MeasurementActive;
-        bool Transition;
-        vctDouble3 MeasurePoint1;
+public:
+    MeasurementBehavior(const std::string & name);
+    ~MeasurementBehavior();
+    
+    void Startup(void);
+    void Cleanup(void);
+    void ConfigureMenuBar(void);
+    bool RunForeground(void);
+    bool RunBackground(void);
+    bool RunNoInput(void);
+    void Configure(const std::string & configFile);
+    bool SaveConfiguration(const std::string & configFile);
+    inline ui3VisibleObject * GetVisibleObject(void) {
+        return this->VisibleList;
+    }
+    
+protected:
+    unsigned long Ticker;
+    void PrimaryMasterButtonCallback(const prmEventButton & event);
+    
+    StateType PreviousState;
+    bool PreviousMaM;
+    vctDouble3 PreviousCursorPosition;
+    vctDouble3 Offset;
+    vctFrm3 Position;
+    bool Following;
+    
+    ui3SlaveArm * Slave1;
+    prmPositionCartesianGet Slave1Position;
+    
+    void GetMeasurement(void);
+    
+private:
+    ui3VisibleList * VisibleList;
+    MeasurementBehaviorVisibleObject * VisibleObject;
+    bool RightMTMOpen;
+    
+    bool MeasurementActive;
+    bool Transition;
+    vctDouble3 MeasurePoint1;
 };
 
