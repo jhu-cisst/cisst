@@ -38,13 +38,15 @@ CMN_IMPLEMENT_SERVICES(mtsTaskManager);
 mtsTaskManager::mtsTaskManager():
     TaskMap("Tasks"),
     DeviceMap("Devices"),
+    JGraphSocket(osaSocket::TCP),
+    JGraphSocketConnected(false)
 #if CISST_MTS_HAS_ICE
+    ,
     TaskManagerTypeMember(TASK_MANAGER_LOCAL),
     TaskManagerCommunicatorID("TaskManagerServerSender"),
     ProxyGlobalTaskManager(NULL),
-    ProxyTaskManagerClient(NULL),
+    ProxyTaskManagerClient(NULL)
 #endif
-    jgraphSocket(osaSocket::TCP)
 {
     __os_init();
     TaskMap.SetOwner(*this);
@@ -54,15 +56,22 @@ mtsTaskManager::mtsTaskManager():
     // Note that the JGraph application also sends event messages back via the socket,
     // though we don't currently read them. To do this, it would be best to implement
     // the TaskManager as a periodic task.
-    socketConn = jgraphSocket.Connect("127.0.0.1", 4444);
-    if (socketConn)
-        osaSleep(1.0);  // need to wait or JGraph server will not start properly
-    else
+    JGraphSocketConnected = JGraphSocket.Connect("127.0.0.1", 4444);
+    if (JGraphSocketConnected) {
+        osaSleep(1.0 * cmn_s);  // need to wait or JGraph server will not start properly
+    } else {
         CMN_LOG_CLASS_INIT_WARNING << "Failed to connect to JGraph server" << std::endl;
+    }
 }
 
 
 mtsTaskManager::~mtsTaskManager()
+{
+    // this should remain empty, please use Cleanup instead!
+}
+
+
+void mtsTaskManager::Cleanup(void)
 {
     this->Kill();
 
@@ -81,7 +90,8 @@ mtsTaskManager::~mtsTaskManager()
     }
 #endif
 
-    jgraphSocket.Close();
+    JGraphSocket.Close();
+    JGraphSocketConnected = false;
 }
 
 
@@ -96,10 +106,10 @@ bool mtsTaskManager::AddTask(mtsTask * task) {
     if (result) {
         CMN_LOG_CLASS_INIT_VERBOSE << "AddTask: added task named "
                                    << task->GetName() << std::endl;
-        if (socketConn) {
+        if (JGraphSocketConnected) {
             std::string buffer = task->ToGraphFormat();
             CMN_LOG_CLASS_INIT_VERBOSE << "Sending " << buffer << std::endl;
-            jgraphSocket.Send(buffer);
+            JGraphSocket.Send(buffer);
         }
     }
     return result;
@@ -127,10 +137,10 @@ bool mtsTaskManager::AddDevice(mtsDevice * device) {
     if (result) {
         CMN_LOG_CLASS_INIT_VERBOSE << "AddDevice: added device named "
                                    << device->GetName() << std::endl;
-        if (socketConn) {
+        if (JGraphSocketConnected) {
             std::string buffer = device->ToGraphFormat();
             CMN_LOG_CLASS_INIT_VERBOSE << "Sending " << buffer;
-            jgraphSocket.Send(buffer);
+            JGraphSocket.Send(buffer);
         }
     }
     return result;
@@ -350,7 +360,7 @@ bool mtsTaskManager::Connect(const std::string & userTaskName, const std::string
     }
     // find the interface pointer from the local resource first
     mtsTask * clientTask = 0;
-    mtsDeviceInterface * resourceInterface;
+    mtsDeviceInterface * resourceInterface = 0;
     if (resourceDevice) {
         // Note that a SERVER task has to be able to get resource interface pointer here
         // (a SERVER task should not reach here).
@@ -411,11 +421,11 @@ bool mtsTaskManager::Connect(const std::string & userTaskName, const std::string
     AssociationSet.insert(association);
     CMN_LOG_CLASS_INIT_VERBOSE << "Connect: " << userTaskName << "::" << requiredInterfaceName
                                << " successfully connected to " << resourceTaskName << "::" << providedInterfaceName << std::endl;
-    if (socketConn) {
+    if (JGraphSocketConnected) {
         std::string message = "add edge [" + userTaskName + ", " + resourceTaskName + ", "
                                            + requiredInterfaceName + ", " + providedInterfaceName + "]\n";
         CMN_LOG_CLASS_INIT_VERBOSE << "Sending " << message;
-        jgraphSocket.Send(message);
+        JGraphSocket.Send(message);
     }
 
 #if CISST_MTS_HAS_ICE

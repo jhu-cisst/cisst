@@ -107,8 +107,8 @@ protected:
     /*! Time server used by all tasks. */
     osaTimeServer TimeServer;
 
-    osaSocket jgraphSocket;
-    bool socketConn;
+    osaSocket JGraphSocket;
+    bool JGraphSocketConnected;
 
     /*! Constructor.  Protected because this is a singleton.
         Does OS-specific initialization to start real-time operations. */
@@ -122,7 +122,9 @@ protected:
     static mtsTaskManager * GetInstance(void) ;
 
     /*! Return a reference to the time server. */
-    const osaTimeServer &GetTimeServer(void) { return TimeServer; }
+    inline const osaTimeServer & GetTimeServer(void) {
+        return TimeServer;
+    }
 
     /*! Put a task under the control of the Manager. */
     bool AddTask(mtsTask * task);
@@ -180,21 +182,15 @@ protected:
     /*! Stop all tasks.  This method will call the mtsTask::Kill method for each task. */
     void KillAll(void);
 
-    /*! For debugging. Dumps to stream the maps maintained by the manager.
-      Here is a typical output: 
-      <CODE>
-      Task Map: {Name, Address}
-      { BSVO, 0x80a59a0 }
-      { TRAJ, 0x81e3080 }
-      { DISP, 0x81e38d8 }
-      Interface Map: {Name, Address}
-      { BSVO, 0x80a59a0 }
-      { LoPoMoCo, 0x81e40e0 }
-      Interface Association Map: {Task, Task/Interface}
-      { BSVO, LoPoMoCo }
-      { TRAJ, BSVO }
-      </CODE>
-     */
+    /*! Cleanup.  Since the task manager is a singleton, the
+      destructor will be called when the program exists but the
+      user/programmer will not be able to control when exactly.  If
+      the cleanup requires some objects to still be instantiated (log
+      files, ...), this might lead to crashes.  To avoid this, the
+      Cleanup method should be called before the program quits. */
+    void Cleanup(void);
+
+    /*! For debugging. Dumps to stream the maps maintained by the manager. */
     void ToStream(std::ostream & outputStream) const;
 
     /*! Create a dot file to be used by graphviz to generate a nice
