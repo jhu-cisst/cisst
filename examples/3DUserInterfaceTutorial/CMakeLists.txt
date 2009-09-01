@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2005-2007 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2005-2009 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -12,8 +12,27 @@
 # 
 # --- end cisst license ---
 
-PROJECT(3DUserInterfaceTutorial)
+project(3DUserInterfaceTutorial)
 
-ADD_SUBDIRECTORY(example1)
-ADD_SUBDIRECTORY(example2)
+# library of sample behavior
+add_subdirectory(behaviors)
 
+
+# programs, depends on hardware availability
+
+# Sensable specific examples, requires cisstDevices
+if (CISST_DEV_HAS_SENSABLEHD)
+    add_subdirectory(example1)
+    add_subdirectory(example2)
+endif (CISST_DEV_HAS_SENSABLEHD)
+
+# Intuitive Surgical Inc daVinci - requires Read Only API.  Contact cisst devel group.
+option (CISST_UI3_HAS_DAVINCI "Build 3DUserInterface example using the daVinci API" OFF)
+if (CISST_UI3_HAS_DAVINCI)
+    find_path (daVinci_INCLUDE_DIRS cisstDaVinciAPI.h)
+    if (daVinci_INCLUDE_DIRS)
+        include_directories(${daVinci_INCLUDE_DIRS})
+    endif (daVinci_INCLUDE_DIRS)
+    find_library (daVinci_LIBRARIES cisstDaVinciAPI)
+    add_subdirectory(example3)
+endif (CISST_UI3_HAS_DAVINCI)
