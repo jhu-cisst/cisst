@@ -21,9 +21,9 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include <cisstStereoVision/svlFilterImageSampler.h>
+#include <cisstStereoVision/svlConverters.h>
 #include <string.h>
 
-#include "svlConverters.h"
 
 using namespace std;
 
@@ -73,7 +73,7 @@ int svlFilterImageSampler::Initialize(svlSample* inputdata)
             ImageBuffer->SetSize(*image);
 
         case svlTypeImageMono8:
-            dibhdrsize = sizeof(svlDIBHeader) + 256 * sizeof(svlRGBQUAD);
+            dibhdrsize = sizeof(svlDIBHeader) + 256 * sizeof(svlRGBA);
             ucharptr = new unsigned char[dibhdrsize];
             memset(ucharptr, 0, dibhdrsize * sizeof(unsigned char));
 
@@ -111,7 +111,7 @@ int svlFilterImageSampler::Initialize(svlSample* inputdata)
             ImageBuffer->SetSize(*image);
 
         case svlTypeImageMono8Stereo:
-            dibhdrsize = sizeof(svlDIBHeader) + 256 * sizeof(svlRGBQUAD);
+            dibhdrsize = sizeof(svlDIBHeader) + 256 * sizeof(svlRGBA);
             ucharptr = new unsigned char[2 * dibhdrsize];
             memset(ucharptr, 0, 2 * dibhdrsize * sizeof(unsigned char));
 
@@ -249,6 +249,8 @@ int svlFilterImageSampler::Initialize(svlSample* inputdata)
             FileHeader[1]->bfSize = FileHeader[1]->bfOffBits + image->GetDataSize(SVL_RIGHT);
         break;
 
+        case svlTypeImageRGBA:
+        case svlTypeImageRGBAStereo:
         case svlTypeInvalid:
         case svlTypeStreamSource:
         case svlTypeStreamSink:
@@ -273,32 +275,32 @@ int svlFilterImageSampler::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata
         switch (GetInputType()) {
             case svlTypeDepthMap:
                 // Convert float32 values to grayscale8
-                float32toGray8(reinterpret_cast<float*>(inimage->GetUCharPointer()),
-                               ImageBuffer->GetUCharPointer(),
-                               inimage->GetWidth() * inimage->GetHeight(),
-                               DistanceScaling);
+                svlConverter::float32toGray8(reinterpret_cast<float*>(inimage->GetUCharPointer()),
+                                             ImageBuffer->GetUCharPointer(),
+                                             inimage->GetWidth() * inimage->GetHeight(),
+                                             DistanceScaling);
                 outimage = ImageBuffer;
             break;
 
             case svlTypeImageMono16:
                 // Convert grayscale16 values to grayscale8
-                Gray16toGray8(reinterpret_cast<unsigned short*>(inimage->GetUCharPointer()),
-                              ImageBuffer->GetUCharPointer(),
-                              inimage->GetWidth() * inimage->GetHeight(),
-                              0);
+                svlConverter::Gray16toGray8(reinterpret_cast<unsigned short*>(inimage->GetUCharPointer()),
+                                            ImageBuffer->GetUCharPointer(),
+                                            inimage->GetWidth() * inimage->GetHeight(),
+                                            0);
                 outimage = ImageBuffer;
             break;
 
             case svlTypeImageMono16Stereo:
                 // Convert grayscale16 values to grayscale8
-                Gray16toGray8(reinterpret_cast<unsigned short*>(inimage->GetUCharPointer(SVL_LEFT)),
-                              ImageBuffer->GetUCharPointer(SVL_LEFT),
-                              inimage->GetWidth(SVL_LEFT) * inimage->GetHeight(SVL_LEFT),
-                              0);
-                Gray16toGray8(reinterpret_cast<unsigned short*>(inimage->GetUCharPointer(SVL_RIGHT)),
-                              ImageBuffer->GetUCharPointer(SVL_RIGHT),
-                              inimage->GetWidth(SVL_RIGHT) * inimage->GetHeight(SVL_RIGHT),
-                              0);
+                svlConverter::Gray16toGray8(reinterpret_cast<unsigned short*>(inimage->GetUCharPointer(SVL_LEFT)),
+                                            ImageBuffer->GetUCharPointer(SVL_LEFT),
+                                            inimage->GetWidth(SVL_LEFT) * inimage->GetHeight(SVL_LEFT),
+                                            0);
+                svlConverter::Gray16toGray8(reinterpret_cast<unsigned short*>(inimage->GetUCharPointer(SVL_RIGHT)),
+                                            ImageBuffer->GetUCharPointer(SVL_RIGHT),
+                                            inimage->GetWidth(SVL_RIGHT) * inimage->GetHeight(SVL_RIGHT),
+                                            0);
                 outimage = ImageBuffer;
             break;
 
@@ -309,6 +311,8 @@ int svlFilterImageSampler::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata
                 outimage = dynamic_cast<svlSampleImageBase*>(inputdata);
             break;
 
+            case svlTypeImageRGBA:
+            case svlTypeImageRGBAStereo:
             case svlTypeInvalid:
             case svlTypeStreamSource:
             case svlTypeStreamSink:

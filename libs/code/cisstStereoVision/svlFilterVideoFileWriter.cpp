@@ -21,8 +21,8 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstStereoVision/svlFilterVideoFileWriter.h>
+#include <cisstStereoVision/svlConverters.h>
 
-#include "svlConverters.h"
 #include "zlib.h"
 #include <string.h>
 
@@ -207,9 +207,9 @@ int svlFilterVideoFileWriter::ProcessFrame(ProcInfo* procInfo, svlSample* inputd
         CompressedPartOffset[i][procid] = procid * comprsize;
 
         // Convert RGB to YUV422 planar format
-        RGB24toYUV422P(img->GetUCharPointer(i) + offset * 3,
-                       YUVBuffer[i] + offset * 2,
-                       size);
+        svlConverter::RGB24toYUV422P(img->GetUCharPointer(i) + offset * 3,
+                                     YUVBuffer[i] + offset * 2,
+                                     size);
 
         // Compress part
         err = compress2(CompressedBuffer[i] + CompressedPartOffset[i][procid],

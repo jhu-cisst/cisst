@@ -32,9 +32,11 @@ using namespace std;
 ////////////////////////////////////////////////////
 // Valid inputs:
 //          svlTypeImageRGB,
+//          svlTypeImageRGBA,
 //          svlTypeImageMono8,
 //          svlTypeImageMono16,
 //          svlTypeImageRGBStereo,
+//          svlTypeImageRGBAStereo,
 //          svlTypeImageMono8Stereo,
 //          svlTypeImageMono16Stereo,
 //          svlTypeDepthMap,
@@ -42,9 +44,11 @@ using namespace std;
 //          svlTypePointCloud
 // Valid outputs:
 //          svlTypeImageRGB,
+//          svlTypeImageRGBA,
 //          svlTypeImageMono8,
 //          svlTypeImageMono16,
 //          svlTypeImageRGBStereo,
+//          svlTypeImageRGBAStereo,
 //          svlTypeImageMono8Stereo,
 //          svlTypeImageMono16Stereo,
 //          svlTypeDepthMap,
@@ -98,92 +102,15 @@ int svlFilterGeneric::Initialize(svlSample* inputdata)
     int ret = CallbackObj->InitializeCallback(inputdata, OutputData);
     if (ret != SVL_OK) return ret;
 
-    unsigned int buffersize;
-
     // checking if the callback has initialized the output data correctly
-    switch (GetOutputType()) {
-        case svlTypeImageRGB:
-        {
-            svlSampleImageRGB* img = dynamic_cast<svlSampleImageRGB*>(OutputData);
-            buffersize = img->GetWidth() * img->GetHeight() * sizeof(svlRGB);
-            if (buffersize != img->GetDataSize())
+    if (OutputData == 0) return SVL_GEN_INVALID_OUTPUT_DATA;
+    if (OutputData->IsImage()) {
+        svlSampleImageBase* img = dynamic_cast<svlSampleImageBase*>(OutputData);
+        if (img == 0) return SVL_GEN_INVALID_OUTPUT_DATA;
+        for (unsigned int i = 0; i < img->GetVideoChannels(); i ++) {
+            if ((img->GetWidth(i) * img->GetHeight(i) * img->GetDataChannels()) != img->GetDataSize(i))
                 return SVL_GEN_INVALID_OUTPUT_DATA;
         }
-        break;
-
-        case svlTypeImageRGBStereo:
-        {
-            svlSampleImageRGBStereo* stimg = dynamic_cast<svlSampleImageRGBStereo*>(OutputData);
-            buffersize = stimg->GetWidth(SVL_LEFT) * stimg->GetHeight(SVL_LEFT) * sizeof(svlRGB);
-            if (buffersize != stimg->GetDataSize(SVL_LEFT))
-                return SVL_GEN_INVALID_OUTPUT_DATA;
-            buffersize = stimg->GetWidth(SVL_RIGHT) * stimg->GetHeight(SVL_RIGHT) * sizeof(svlRGB);
-            if (buffersize != stimg->GetDataSize(SVL_RIGHT))
-                return SVL_GEN_INVALID_OUTPUT_DATA;
-        }
-        break;
-
-        case svlTypeImageMono8:
-        {
-            svlSampleImageMono8* img = dynamic_cast<svlSampleImageMono8*>(OutputData);
-            buffersize = img->GetWidth() * img->GetHeight() * sizeof(unsigned char);
-            if (buffersize != img->GetDataSize())
-                return SVL_GEN_INVALID_OUTPUT_DATA;
-        }
-        break;
-
-        case svlTypeImageMono8Stereo:
-        {
-            svlSampleImageMono8Stereo* stimg = dynamic_cast<svlSampleImageMono8Stereo*>(OutputData);
-            buffersize = stimg->GetWidth(SVL_LEFT) * stimg->GetHeight(SVL_LEFT) * sizeof(unsigned char);
-            if (buffersize != stimg->GetDataSize(SVL_LEFT))
-                return SVL_GEN_INVALID_OUTPUT_DATA;
-            buffersize = stimg->GetWidth(SVL_RIGHT) * stimg->GetHeight(SVL_RIGHT) * sizeof(unsigned char);
-            if (buffersize != stimg->GetDataSize(SVL_RIGHT))
-                return SVL_GEN_INVALID_OUTPUT_DATA;
-        }
-
-        case svlTypeImageMono16:
-        {
-            svlSampleImageMono16* img = dynamic_cast<svlSampleImageMono16*>(OutputData);
-            buffersize = img->GetWidth() * img->GetHeight() * sizeof(unsigned short);
-            if (buffersize != img->GetDataSize())
-                return SVL_GEN_INVALID_OUTPUT_DATA;
-        }
-        break;
-
-        case svlTypeImageMono16Stereo:
-        {
-            svlSampleImageMono16Stereo* stimg = dynamic_cast<svlSampleImageMono16Stereo*>(OutputData);
-            buffersize = stimg->GetWidth(SVL_LEFT) * stimg->GetHeight(SVL_LEFT) * sizeof(unsigned short);
-            if (buffersize != stimg->GetDataSize(SVL_LEFT))
-                return SVL_GEN_INVALID_OUTPUT_DATA;
-            buffersize = stimg->GetWidth(SVL_RIGHT) * stimg->GetHeight(SVL_RIGHT) * sizeof(unsigned short);
-            if (buffersize != stimg->GetDataSize(SVL_RIGHT))
-                return SVL_GEN_INVALID_OUTPUT_DATA;
-        }
-
-        case svlTypeDepthMap:
-        {
-            svlSampleDepthMap* img = dynamic_cast<svlSampleDepthMap*>(OutputData);
-            buffersize = img->GetWidth() * img->GetHeight() * sizeof(float);
-            if (buffersize != img->GetDataSize())
-                return SVL_GEN_INVALID_OUTPUT_DATA;
-        }
-        break;
-
-        case svlTypeRigidXform:
-        case svlTypePointCloud:
-            if (OutputData == 0)
-                return SVL_GEN_INVALID_OUTPUT_DATA;
-        break;
-
-        // Other types may be added in the future
-        case svlTypeInvalid:
-        case svlTypeStreamSource:
-        case svlTypeStreamSink:
-        case svlTypeImageCustom:
-        break;
     }
 
     return SVL_OK;

@@ -32,7 +32,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #if (CISST_SVL_HAS_ZLIB == ON)
     #include "zlib.h"
-    #include "svlConverters.h"
+    #include <cisstStereoVision/svlConverters.h>
 #endif // CISST_SVL_HAS_ZLIB
 
 #ifdef _MSC_VER
@@ -322,9 +322,9 @@ int svlFilterSourceVideoFile::ProcessFrame(ProcInfo* procInfo)
                     if (err != Z_OK) break;
 
                     // Convert YUV422 planar to RGB format
-                    YUV422PtoRGB24(YUVBuffer[idx] + offset,
-                                   imptr + offset * 3 / 2,
-                                   longsize >> 1);
+                    svlConverter::YUV422PtoRGB24(YUVBuffer[idx] + offset,
+                                                 imptr + offset * 3 / 2,
+                                                 longsize >> 1);
 
                     offset += longsize;
                 }

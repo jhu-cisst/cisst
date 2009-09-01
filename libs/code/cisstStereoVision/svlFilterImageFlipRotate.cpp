@@ -82,6 +82,8 @@ int svlFilterImageFlipRotate::Initialize(svlSample* inputdata)
             output = new svlSampleImageMono16Stereo;
         break;
 
+        case svlTypeImageRGBA:
+        case svlTypeImageRGBAStereo:
         case svlTypeDepthMap:
         case svlTypeInvalid:
         case svlTypeStreamSource:
@@ -244,6 +246,8 @@ int svlFilterImageFlipRotate::ProcessFrame(ProcInfo* procInfo, svlSample* inputd
                                            QuickCopy[idx], StartOffset[idx], Stride[idx], LineStride[idx]);
             break;
 
+            case svlTypeImageRGBA:
+            case svlTypeImageRGBAStereo:
             case svlTypeDepthMap:
             case svlTypeInvalid:
             case svlTypeStreamSource:

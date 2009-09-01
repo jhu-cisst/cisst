@@ -73,7 +73,9 @@ svlSample* svlSample::GetNewFromType(svlStreamType type)
         case svlTypeStreamSink:        return 0;                              break;
         case svlTypeImageCustom:       return 0;                              break;
         case svlTypeImageRGB:          return new svlSampleImageRGB;          break;
+        case svlTypeImageRGBA:         return new svlSampleImageRGBA;         break;
         case svlTypeImageRGBStereo:    return new svlSampleImageRGBStereo;    break;
+        case svlTypeImageRGBAStereo:   return new svlSampleImageRGBAStereo;   break;
         case svlTypeImageMono8:        return new svlSampleImageMono8;        break;
         case svlTypeImageMono8Stereo:  return new svlSampleImageMono8Stereo;  break;
         case svlTypeImageMono16:       return new svlSampleImageMono16;       break;

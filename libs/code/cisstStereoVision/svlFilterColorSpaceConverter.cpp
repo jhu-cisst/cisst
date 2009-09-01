@@ -21,9 +21,10 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstStereoVision/svlFilterColorSpaceConverter.h>
-#include "svlConverters.h"
+#include <cisstStereoVision/svlConverters.h>
 
 using namespace std;
+
 
 /*******************************************/
 /*** svlFilterColorSpaceConverter class ****/
@@ -105,15 +106,15 @@ void svlFilterColorSpaceConverter::ConvertColorSpace(unsigned char* buffer, unsi
                 break;
 
                 case svlColorSpaceHSV:
-                    RGB24toHSV24(buffer, buffer, numofpixels, Channel1, Channel2, Channel3);
+                    svlConverter::RGB24toHSV24(buffer, buffer, numofpixels, Channel1, Channel2, Channel3);
                 break;
 
                 case svlColorSpaceHSL:
-                    RGB24toHSL24(buffer, buffer, numofpixels, Channel1, Channel2, Channel3);
+                    svlConverter::RGB24toHSL24(buffer, buffer, numofpixels, Channel1, Channel2, Channel3);
                 break;
 
                 case svlColorSpaceYUV:
-                    RGB24toYUV444(buffer, buffer, numofpixels, Channel1, Channel2, Channel3);
+                    svlConverter::RGB24toYUV444(buffer, buffer, numofpixels, Channel1, Channel2, Channel3);
                 break;
             }
         break;

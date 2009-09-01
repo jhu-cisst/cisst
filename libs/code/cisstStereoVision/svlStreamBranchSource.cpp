@@ -125,6 +125,8 @@ bool svlStreamBranchSource::IsTypeSupported(svlStreamType type)
             return true;
 
         // Other types may be added in the future
+        case svlTypeImageRGBA:
+        case svlTypeImageRGBAStereo:
         case svlTypeInvalid:
         case svlTypeStreamSource:
         case svlTypeStreamSink:

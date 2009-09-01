@@ -70,7 +70,9 @@ enum svlStreamType
     svlTypeStreamSource,      // Capture sources have an input connector of this type
     svlTypeStreamSink,        // Render filters may have an output connector of this type
     svlTypeImageRGB,          // Single RGB image
+    svlTypeImageRGBA,         // Single RGBA image
     svlTypeImageRGBStereo,    // Dual RGB image
+    svlTypeImageRGBAStereo,   // Dual RGBA image
     svlTypeImageMono8,        // Single Grayscale image (8bpp)
     svlTypeImageMono8Stereo,  // Dual Grayscale image (8bpp)
     svlTypeImageMono16,       // Single Grayscale image (16bpp)
@@ -92,6 +94,8 @@ typedef vctDynamicMatrix<unsigned short> svlImageMono16;
 typedef vctDynamicMatrixRef<unsigned short> svlImageMono16Ref;
 typedef vctDynamicMatrix<unsigned char> svlImageRGB;
 typedef vctDynamicMatrixRef<unsigned char> svlImageRGBRef;
+typedef vctDynamicMatrix<unsigned char> svlImageRGBA;
+typedef vctDynamicMatrixRef<unsigned char> svlImageRGBARef;
 typedef vctDynamicMatrix<float> svlDepthMap;
 typedef vctDynamicMatrixRef<float> svlDepthMapRef;
 
@@ -279,6 +283,10 @@ public:
                 if (_VideoChannels == 1) return svlTypeImageRGB;
                 if (_VideoChannels == 2) return svlTypeImageRGBStereo;
             }
+            if (_DataChannels == 4) {
+                if (_VideoChannels == 1) return svlTypeImageRGBA;
+                if (_VideoChannels == 2) return svlTypeImageRGBAStereo;
+            }
         }
         if (IsTypeUWord<_ValueType>(static_cast<_ValueType>(0))) {
             if (_DataChannels == 1) {
@@ -405,7 +413,9 @@ typedef svlSampleImageCustom<unsigned char,  1, 2>   svlSampleImageMono8Stereo;
 typedef svlSampleImageCustom<unsigned short, 1, 1>   svlSampleImageMono16;
 typedef svlSampleImageCustom<unsigned short, 1, 2>   svlSampleImageMono16Stereo;
 typedef svlSampleImageCustom<unsigned char,  3, 1>   svlSampleImageRGB;
+typedef svlSampleImageCustom<unsigned char,  4, 1>   svlSampleImageRGBA;
 typedef svlSampleImageCustom<unsigned char,  3, 2>   svlSampleImageRGBStereo;
+typedef svlSampleImageCustom<unsigned char,  4, 2>   svlSampleImageRGBAStereo;
 typedef svlSampleImageCustom<float,          1, 1>   svlSampleDepthMap;
 
 
@@ -494,18 +504,18 @@ typedef struct _svlDIBHeader {
     unsigned int biClrImportant;
 } svlDIBHeader;
 
-typedef struct _svlRGBQUAD {
-    unsigned char B;
-    unsigned char G;
-    unsigned char R;
-    unsigned char A;
-} svlRGBQUAD;
-
 typedef struct _svlRGB {
     unsigned char B;
     unsigned char G;
     unsigned char R;
 } svlRGB;
+
+typedef struct _svlRGBA {
+    unsigned char B;
+    unsigned char G;
+    unsigned char R;
+    unsigned char A;
+} svlRGBA;
 
 #pragma pack()
 

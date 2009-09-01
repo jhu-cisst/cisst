@@ -58,6 +58,8 @@ int svlFilterUnsharpMask::Initialize(svlSample* inputdata)
             OutputData = new svlSampleImageRGBStereo;
         break;
 
+        case svlTypeImageRGBA:
+        case svlTypeImageRGBAStereo:
         case svlTypeInvalid:
         case svlTypeStreamSource:
         case svlTypeStreamSink:

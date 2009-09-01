@@ -35,6 +35,7 @@ SET(SOURCE_FILES
     svlStreamBranchSource.cpp
     svlFileHandlers.cpp
     svlCameraGeometry.cpp
+    svlConverters.cpp
 
   # Filter API
     svlFilterSourceDummy.cpp
@@ -66,8 +67,6 @@ SET(SOURCE_FILES
     ftImagePPM.cpp
     ipDeinterlacing.h              # private header
     ipDeinterlacing.cpp
-    svlConverters.h                # private header
-    svlConverters.cpp
     svlStereoDP.h                  # private header 
     svlStereoDP.cpp
     svlStereoDPMono.h              # private header
@@ -89,6 +88,7 @@ SET(HEADER_FILES
     svlExport.h
     svlFileHandlers.h
     svlCameraGeometry.h
+    svlConverters.h
 
   # Filter API
     svlFilterSourceDummy.h

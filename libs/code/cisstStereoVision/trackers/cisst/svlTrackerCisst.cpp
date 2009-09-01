@@ -21,10 +21,10 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstStereoVision/trackers/svlTrackerCisst.h>
+#include <cisstStereoVision/svlConverters.h>
 #include "trkCisstBase.h"
 #include "trkCisstNCC.h"
 #include "trkCisstWSSD.h"
-#include "../../svlConverters.h"
 
 #ifdef _MSC_VER
     // Quick fix for Visual Studio Intellisense:
@@ -143,7 +143,7 @@ int svlTrackerCisst::Track(unsigned char* image)
     unsigned int templatesize, windowsize;
 
     // the Cisst trackers work on 16bpp grayscale images only
-    RGB24toGray16(image, Image16, Width * Height);
+    svlConverter::RGB24toGray16(image, Image16, Width * Height);
 
     if (!TargetsAdded) {
     // tracker and target initialization

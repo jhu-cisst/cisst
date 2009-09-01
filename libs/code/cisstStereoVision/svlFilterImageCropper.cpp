@@ -177,6 +177,8 @@ int svlFilterImageCropper::Initialize(svlSample* inputdata)
         }
 
         // Other types may be added in the future
+        case svlTypeImageRGBA:
+        case svlTypeImageRGBAStereo:
         case svlTypeInvalid:
         case svlTypeStreamSource:
         case svlTypeStreamSink:

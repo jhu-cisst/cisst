@@ -21,9 +21,9 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstStereoVision/svlFilterImageFileWriter.h>
+#include <cisstStereoVision/svlConverters.h>
 #include <string.h>
 
-#include "svlConverters.h"
 
 using namespace std;
 
@@ -86,6 +86,8 @@ int svlFilterImageFileWriter::Initialize(svlSample* inputdata)
             ImageBuffer.SetSize(*depth);
         break;
 
+        case svlTypeImageRGBA:
+        case svlTypeImageRGBAStereo:
         case svlTypeInvalid:
         case svlTypeStreamSource:
         case svlTypeStreamSink:
@@ -121,10 +123,10 @@ int svlFilterImageFileWriter::ProcessFrame(ProcInfo* procInfo, svlSample* inputd
         if (Disabled[idx]) continue;
 
         if (img->GetType() == svlTypeDepthMap) {
-            float32toRGB24(reinterpret_cast<float*>(img->GetUCharPointer(idx)),
-                           ImageBuffer.GetUCharPointer(idx),
-                           img->GetWidth(idx) * img->GetHeight(idx),
-                           DistanceScaling);
+            svlConverter::float32toRGB24(reinterpret_cast<float*>(img->GetUCharPointer(idx)),
+                                         ImageBuffer.GetUCharPointer(idx),
+                                         img->GetWidth(idx) * img->GetHeight(idx),
+                                         DistanceScaling);
             buffer = ImageBuffer.GetUCharPointer(idx);
             buffersize = ImageBuffer.GetDataSize(idx);
         }
