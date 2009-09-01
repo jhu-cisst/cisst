@@ -48,7 +48,7 @@ double osaGetTime(void) {
 #if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS)
     struct timeval currentTime;
     gettimeofday(&currentTime, NULL);
-    return ((double) currentTime.tv_sec) + ((double)currentTime.tv_usec) / 1000.0 * 1000.0;
+    return ((double) currentTime.tv_sec) + ((double)currentTime.tv_usec) / (1000.0 * 1000.0);
 #endif // CISST_LINUX || CISST_DARWIN || CISST_SOLARIS
 #if (CISST_OS == CISST_WINDOWS)
     LARGE_INTEGER liTimerFrequency, liTimeNow;
