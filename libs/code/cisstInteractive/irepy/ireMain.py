@@ -66,6 +66,14 @@ from ireTaskTree import *
 from ireInputBox import *
 import ireImages
 
+ireScope = False
+try:
+   from wxOscilloscope import *
+   ireScope = True
+except ImportError,e:
+   print 'Could not import wxOscilloscope:', e
+
+
 # Now, see if the IRE is embedded in a C++ application.
 # This can be determined by checking whether the ireLogger
 # module can be imported, because ireLogger is created
@@ -111,6 +119,7 @@ class ireMain(wx.Frame):
     ID_CLEARHISTORY = wx.NewId()
     ID_TASKTREE = wx.NewId()
     ID_TESTINPUTBOX = wx.NewId()
+    ID_OSCILLOSCOPE = wx.NewId()
     ID_LOAD_CISSTCOMMON = wx.NewId()
     ID_LOAD_CISSTVECTOR = wx.NewId()
     ID_LOAD_CISSTNUMERICAL = wx.NewId()
@@ -189,7 +198,9 @@ class ireMain(wx.Frame):
         menu.Append(self.ID_CLEARHISTORY, "C&lear command history... \tCtrl+7", "Clear your command history")
         menu.AppendSeparator()
         menu.Append(self.ID_TASKTREE, "&Task Manager", "Show Task Manager browser")
-        menu.Append(self.ID_TESTINPUTBOX, "Test &input box", "Create test input box")
+        menu.Append(self.ID_TESTINPUTBOX, "&Test input box", "Create test input box")
+        if ireScope:
+            menu.Append(self.ID_OSCILLOSCOPE, "&Oscilloscope", "Show oscilloscope")
         
         menu = self.ImportMenu = wx.Menu()
         menu.Append(self.ID_LOAD_CISSTCOMMON, "Import cisst&Common", "Import cisstCommon")
@@ -239,6 +250,7 @@ class ireMain(wx.Frame):
         wx.EVT_MENU(self, self.ID_CLEARHISTORY, self.OnClearHistory)
         wx.EVT_MENU(self, self.ID_TASKTREE, self.OnTaskTree)
         wx.EVT_MENU(self, self.ID_TESTINPUTBOX, self.OnTestInputBox)
+        wx.EVT_MENU(self, self.ID_OSCILLOSCOPE, self.OnOscilloscope)
         wx.EVT_MENU(self, self.ID_LOAD_CISSTCOMMON,  self.OnImportCisstCommon)
         wx.EVT_MENU(self, self.ID_LOAD_CISSTVECTOR,  self.OnImportCisstVector)
         wx.EVT_MENU(self, self.ID_LOAD_CISSTNUMERICAL,  self.OnImportCisstNumerical)
@@ -843,6 +855,19 @@ class ireMain(wx.Frame):
         else:
             text = "Task Manager not found"
             msgdlg = wx.MessageDialog(self, text, "Task Manager", wx.OK | wx.ICON_ERROR)
+            msgdlg.ShowModal()
+            msgdlg.Destroy()
+        
+    def OnOscilloscope(self, event):        
+        import gettext
+        gettext.install("irepy")
+        taskManager = self.ObjectRegister.FindObject("TaskManager")
+        if taskManager:
+            self.scopeFrame = COscilloscope(self, taskManager)
+            self.scopeFrame.Show()
+        else:
+            text = "Task Manager not found"
+            msgdlg = wx.MessageDialog(self, text, "Oscilloscope", wx.OK | wx.ICON_ERROR)
             msgdlg.ShowModal()
             msgdlg.Destroy()
         
