@@ -320,7 +320,7 @@ inline mtsCommandWriteBase * mtsRequiredInterface::AddEventHandlerWrite(void (__
                                                                         const std::string & eventName,
                                                                         bool queued) {
     mtsCommandWriteBase * actualCommand =
-        new mtsCommandWrite<__classType, __argumentType>(method, classInstantiation, eventName, CMN_DEFAULT_TEMPLATED_CONSTRUCTOR(__argumentType));
+        new mtsCommandWrite<__classType, __argumentType>(method, classInstantiation, eventName, __argumentType());
     if (queued) {
         if (MailBox)
             EventHandlersWrite.AddItem(eventName,  new mtsCommandQueuedWrite<__argumentType>(MailBox, actualCommand, DEFAULT_ARG_BUFFER_LEN));
