@@ -24,7 +24,7 @@ serverTask::serverTask(const std::string & taskName, double period):
         provided->AddCommandReadState(this->StateTable, this->ReadValue, "Read");
         provided->AddCommandQualifiedRead(&serverTask::QualifiedRead, this, "QualifiedRead");
         provided->AddEventVoid(this->EventVoid, "EventVoid");
-        provided->AddEventWrite(this->EventWrite, "EventWrite", mtsDouble());
+        provided->AddEventWrite(this->EventWrite, "EventWrite", mtsDouble(3.14));
     }
 }
 
