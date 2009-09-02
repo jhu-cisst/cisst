@@ -120,7 +120,7 @@ bool devSartoriusSerial::ProcessBuffer(void)
     index = 0;
     
     // try to find 'eol'
-    while ((index < (this->NbBytesReadSoFar - 1))
+    while ((index < static_cast<int>(this->NbBytesReadSoFar - 1))
            && (!eolFound)) {
         if ((this->BytesReadSoFar[index] == '\r')
             && (this->BytesReadSoFar[index + 1] == '\n')) {
@@ -146,7 +146,7 @@ bool devSartoriusSerial::ProcessBuffer(void)
             if (notYetProcessedBytes < 0) {
                 CMN_LOG_CLASS_RUN_ERROR << "ProcessBuffer: negative number of bytes in buffer ("
                                         << notYetProcessedBytes << "), this should never happen" << std::endl;
-                
+                return false;
             } else {
                 memcpy(this->TempBuffer,
                        this->BytesReadSoFar + index + 2, /* start after end of message */
@@ -154,6 +154,7 @@ bool devSartoriusSerial::ProcessBuffer(void)
                 // copy back and update number of bytes read
                 memcpy(this->BytesReadSoFar, this->TempBuffer, notYetProcessedBytes);
                 this->NbBytesReadSoFar = notYetProcessedBytes;
+                return true;
             }
         }
         index++;
