@@ -68,7 +68,7 @@ http://www.cisst.org/cisst/license.txt.
 #define CISST_DEPRECATED
 
 // Wrap commands
-%import "cisstMultiTask/mtsCommandBase.h"
+%include "cisstMultiTask/mtsCommandBase.h"
 %include "cisstMultiTask/mtsCommandVoidBase.h"
 %include "cisstMultiTask/mtsCommandReadOrWriteBase.h"
 %include "cisstMultiTask/mtsCommandQualifiedReadOrWriteBase.h"
