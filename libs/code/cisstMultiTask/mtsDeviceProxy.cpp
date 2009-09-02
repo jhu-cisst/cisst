@@ -389,6 +389,7 @@ mtsRequiredInterface * mtsDeviceProxy::CreateRequiredInterfaceProxy(
         actualEventWriteCommandProxy = new mtsCommandWriteProxy(NULL, proxyServer, eventName);
         actualEventWriteCommandProxy->Disable();
 
+   
         //
         //
         //  FIX: HERE THE ARGUMENT PROTOTYPE OF mtsCommandWrite SHOULD BE RECOVERED!!!

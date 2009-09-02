@@ -24,15 +24,22 @@ http://www.cisst.org/cisst/license.txt.
 
 void mtsMulticastCommandWriteBase::AddCommand(BaseType * command) {
     if (command) {
-        CMN_ASSERT(command->GetArgumentPrototype());
-        CMN_ASSERT(this->GetArgumentPrototype());
-        if (command->GetArgumentPrototype()->Services() != this->GetArgumentPrototype()->Services()) {
-            CMN_LOG_INIT_ERROR << "Class mtsMulticastCommandWriteBase: AddCommand: command argument type don't match" << std::endl;
-            exit(0);
+        // check if the command already has an argument prototype
+        if (command->GetArgumentPrototype()) {
+            CMN_ASSERT(this->GetArgumentPrototype());
+            if (command->GetArgumentPrototype()->Services() != this->GetArgumentPrototype()->Services()) {
+                CMN_LOG_INIT_ERROR << "Class mtsMulticastCommandWriteBase: AddCommand: command argument type don't match" << std::endl;
+                exit(0);
+            } else {
+                // copy the multicast command prototype to each added command using in place new
+                this->GetArgumentPrototype()->Services()->Create(const_cast<mtsGenericObject *>(command->GetArgumentPrototype()), *(this->GetArgumentPrototype()));
+                // Add the command to the list
+                this->Commands.push_back(command);
+            }
         } else {
-            // copy the multicast command prototype to each added command using in place new
-            this->GetArgumentPrototype()->Services()->Create(const_cast<mtsGenericObject *>(command->GetArgumentPrototype()), *(this->GetArgumentPrototype()));
-            // add the command to the list
+            // create a new object
+            command->SetArgumentPrototype(reinterpret_cast<const mtsGenericObject *>(this->GetArgumentPrototype()->Services()->Create(*(this->GetArgumentPrototype()))));
+            // Add the command to the list
             this->Commands.push_back(command);
         }
     }

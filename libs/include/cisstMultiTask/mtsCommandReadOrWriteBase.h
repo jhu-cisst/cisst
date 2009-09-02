@@ -46,6 +46,8 @@ http://www.cisst.org/cisst/license.txt.
 template <class _argumentType>
 class mtsCommandReadOrWriteBase : public mtsCommandBase {
 
+    friend class mtsMulticastCommandWriteBase;
+
 public:
     typedef mtsCommandBase BaseType;
     typedef _argumentType ArgumentType;
