@@ -22,6 +22,7 @@ int main(void)
     // add a log per thread
     osaThreadedLogFile threadedLog("example3-");
     cmnLogger::GetMultiplexer()->AddChannel(threadedLog, CMN_LOG_LOD_VERY_VERBOSE);
+    cmnClassRegister::SetLoD("appTask", CMN_LOG_LOD_VERY_VERBOSE);
 
     // create our tasks
     mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
@@ -66,7 +67,7 @@ int main(void)
     collector->Start(0.0 * cmn_s);
 
     // Loop until both tasks are closed
-    while (!(appTaskControl1->GetExitFlag() && appTaskControl2->GetExitFlag())) {
+    while (!(appTaskControl1->IsTerminated() && appTaskControl2->IsTerminated())) {
         osaSleep(0.1 * cmn_s); // in seconds
     }
     taskManager->KillAll();

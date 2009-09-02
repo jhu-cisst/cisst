@@ -12,7 +12,6 @@ appTask::appTask(const std::string & taskName,
                  const std::string & observedRobot,
                  double period):
     mtsTaskPeriodic(taskName, period, false, 5000),
-    ExitFlag(false),
     ui(controlledRobot, observedRobot, this)
 {
     mtsRequiredInterface *req = AddRequiredInterface("ControlledRobot");
@@ -84,9 +83,10 @@ void appTask::Run(void)
 void appTask::Close(mtsTask * task)
 {
     appTask* myTask = dynamic_cast<appTask*>(task);
+    CMN_ASSERT(myTask);
     CMN_LOG_INIT_VERBOSE << "Closing task " << myTask->GetName() << std::endl;
     myTask->ui.Hide();
-    myTask->ExitFlag = true;
+    myTask->Kill();
 }
 
 /*

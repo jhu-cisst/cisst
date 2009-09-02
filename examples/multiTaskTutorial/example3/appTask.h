@@ -10,7 +10,6 @@
 
 class appTask: public mtsTaskPeriodic {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
-    volatile bool ExitFlag;
  public:
     typedef mtsDoubleVec PositionJointType;
  protected:
@@ -40,8 +39,6 @@ class appTask: public mtsTaskPeriodic {
     void Startup(void);
     void Run(void);
     void Cleanup(void) {};
-
-    inline bool GetExitFlag (void) const { return ExitFlag;}
 
     // callback to close
     static void Close(mtsTask * task);
