@@ -198,7 +198,7 @@ class ireMain(wx.Frame):
         menu.Append(self.ID_CLEARHISTORY, "C&lear command history... \tCtrl+7", "Clear your command history")
         menu.AppendSeparator()
         menu.Append(self.ID_TASKTREE, "&Task Manager", "Show Task Manager browser")
-        menu.Append(self.ID_TESTINPUTBOX, "&Test input box", "Create test input box")
+        menu.Append(self.ID_TESTINPUTBOX, "Test &input box", "Create test input box")
         if ireScope:
             menu.Append(self.ID_OSCILLOSCOPE, "&Oscilloscope", "Show oscilloscope")
         
@@ -904,7 +904,7 @@ class ireMain(wx.Frame):
 'Developed by the Engineering Research Center for'.center(twidth) + '\n' + \
 'Computer-Integrated Surgical Systems & Technology (CISST)'.center(twidth) + '\n' + \
 'http://cisst.org'.center(twidth) + '\n\n' + \
-'Copyright (c) 2004-2006, The Johns Hopkins University'.center(twidth) + '\n' + \
+'Copyright (c) 2004-2009, The Johns Hopkins University'.center(twidth) + '\n' + \
 'All Rights Reserved.\n\n'.center(twidth) + '\n\n' + \
 'Based on the Py module of wxPython:\n' + \
 '  Shell Revision: %s\n' % self.Shell.revision + \
