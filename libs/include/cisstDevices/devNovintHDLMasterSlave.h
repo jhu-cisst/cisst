@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: devSensableHDMasterSlave.h 556 2009-07-17 20:19:24Z gsevinc1 $
+  $Id: devNovintHDLMasterSlave.h 556 2009-07-17 20:19:24Z gsevinc1 $
 
   Author(s): Gorkem Sevinc, Anton Deguet
   Created on: 2009-07-17
@@ -19,35 +19,35 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#ifndef _devSensableHDMasterSlave_h
-#define _devSensableHDMasterSlave_h
+#ifndef _devNovintHDLMasterSlave_h
+#define _devNovintHDLMasterSlave_h
 
 #include <cisstParameterTypes.h>
 #include <cisstCommon.h>
 #include <cisstMultiTask/mtsTaskFromCallback.h>
-#include <cisstDevices/devSensableHD.h>
+#include <cisstDevices/devNovintHDL.h>
 #include <cisstRobot/robCollaborativeControlForce.h>
 
 // Always include last
 #include <cisstDevices/devExport.h>
 
 
-class CISST_EXPORT devSensableHDMasterSlave: public devSensableHD {
+class CISST_EXPORT devNovintHDLMasterSlave: public devNovintHDL {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 10);
 
 public:
 
-    devSensableHDMasterSlave(const std::string & taskName,
+    devNovintHDLMasterSlave(const std::string & taskName,
                              const std::string & firstDeviceName,
                              const std::string & secondDeviceName);
 
-    devSensableHDMasterSlave(const std::string & taskName,
+    devNovintHDLMasterSlave(const std::string & taskName,
                              const std::string & firstDeviceName,
                              const std::string & secondDeviceName,
                              const std::string & thirdDeviceName,
                              const std::string & fourthDeviceName);
 
-    ~devSensableHDMasterSlave(void) {};
+    ~devNovintHDLMasterSlave(void) {};
 
     /*!
         SetupTeleoperationInterfaces function takes in two device names and
@@ -58,7 +58,7 @@ public:
                                       int pair);
 
     /*!
-        UserControl function overloads the base function from devSensableHD. 
+        UserControl function overloads the base function from devNovintHDL. 
         This function has been designed to carry out any user control task
         using the Phantom Omnis. In this case, this function is carrying out
         teleoperation using the robCollaborativeControlForce class.
@@ -80,14 +80,14 @@ public:
 protected:
     
     /*!
-        DevData struct holds the current values provided by the devSensableHD class and
+        DevData struct holds the current values provided by the devNovintHDL class and
         the parameters calculated throughout teleoperation. This DevData struct is created
         for each pair of devices being used. 
     */
     struct DevData {
         vctFixedSizeVector<double, 6> ForceMaster;
         vctFixedSizeVector<double, 6> ForceSlave;
-        prmCollaborativeControlForce Parameter;
+        prmCollaborativeControlForce  Parameter;
         mtsBool                       MasterClutchGUI;
         mtsBool                       SlaveClutchGUI;
         mtsBool                       MasterSlaveClutchGUI;
@@ -105,7 +105,7 @@ protected:
 };
 
 
-CMN_DECLARE_SERVICES_INSTANTIATION(devSensableHDMasterSlave);
+CMN_DECLARE_SERVICES_INSTANTIATION(devNovintHDLMasterSlave);
 
-#endif // _devSensableHDMasterSlave_h
+#endif // _devNovintHDLMasterSlave_h
 

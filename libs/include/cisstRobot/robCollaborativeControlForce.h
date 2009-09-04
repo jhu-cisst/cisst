@@ -37,8 +37,11 @@ public:
         enum ForceModeType {RAW, RATCHETED, CAPPED};
         CMN_DECLARE_MEMBER_AND_ACCESSORS(ForceModeType, ForceMode);
         CMN_DECLARE_MEMBER_AND_ACCESSORS(double, ForceFeedbackRatio); //ForceMasterCoefficient
-        CMN_DECLARE_MEMBER_AND_ACCESSORS(double, LinearGain); //ScaleFactor
+        CMN_DECLARE_MEMBER_AND_ACCESSORS(double, LinearGainMaster); //ScaleFactor
+        CMN_DECLARE_MEMBER_AND_ACCESSORS(double, LinearGainSlave);
         CMN_DECLARE_MEMBER_AND_ACCESSORS(double, ForceLimit); // FMax
+        CMN_DECLARE_MEMBER_AND_ACCESSORS(double, ErrorLimit);
+        CMN_DECLARE_MEMBER_AND_ACCESSORS(double, MasterToSlaveScale);
     public:
         /*! Human readable output to stream. */
         void ToStream(std::ostream & outputStream) const;

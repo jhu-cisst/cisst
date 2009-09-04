@@ -34,4 +34,7 @@ http://www.cisst.org/cisst/license.txt.
 // Support for OpenIGTLink
 #define CISST_DEV_HAS_OPENIGTLINK @CISST_DEV_HAS_OPENIGTLINK@
 
+// Using Novint HDL (i.e. Falcon, ...)
+#define CISST_DEV_HAS_NOVINTHDL @CISST_DEV_HAS_NOVINTHDL@
+
 #endif // _devConfig_h 

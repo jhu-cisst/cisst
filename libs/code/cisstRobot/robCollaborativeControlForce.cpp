@@ -25,8 +25,10 @@ void robCollaborativeControlForce::ParameterType::ToStream(std::ostream & output
 {
     outputStream << "\nForce Mode: " << this->ForceModeMember
                  << "\nFeedback Ratio: " << this->ForceFeedbackRatioMember
-                 << "\nLinear Gain: " << this->LinearGainMember
-                 << "\nForce Limit Ratio: " << this->ForceLimitMember;
+                 << "\nLinear Gain Master: " << this->LinearGainMasterMember
+                 << "\nLinear Gain Slave: " << this->LinearGainSlaveMember
+                 << "\nForce Limit Ratio: " << this->ForceLimitMember
+                 << "\nMaster to Slave Scale: " << this->MasterToSlaveScaleMember;
 }   
 
 void robCollaborativeControlForce::ParameterType::ToStreamRaw(std::ostream & outputStream, const char delimiter,
@@ -39,8 +41,10 @@ void robCollaborativeControlForce::ParameterType::ToStreamRaw(std::ostream & out
     } else {
         outputStream  << this->ForceModeMember << delimiter
                       << this->ForceFeedbackRatioMember << delimiter
-                      << this->LinearGainMember << delimiter
-                      << this->ForceLimitMember;
+                      << this->LinearGainMasterMember << delimiter
+                      << this->LinearGainSlaveMember << delimiter
+                      << this->ForceLimitMember << delimiter
+                      << this->MasterToSlaveScaleMember;
     }
                                                                   
 }
@@ -49,16 +53,20 @@ void robCollaborativeControlForce::ParameterType::SerializeRaw(std::ostream & ou
 {
     cmnSerializeRaw(outputStream, this->ForceModeMember);
     cmnSerializeRaw(outputStream, this->ForceFeedbackRatioMember);
-    cmnSerializeRaw(outputStream, this->LinearGainMember);
+    cmnSerializeRaw(outputStream, this->LinearGainMasterMember);
+    cmnSerializeRaw(outputStream, this->LinearGainSlaveMember);
     cmnSerializeRaw(outputStream, this->ForceLimitMember);
+    cmnSerializeRaw(outputStream, this->MasterToSlaveScaleMember);
 }
 
 void robCollaborativeControlForce::ParameterType::DeSerializeRaw(std::istream & inputStream) 
 {
     cmnDeSerializeRaw(inputStream, this->ForceModeMember);
     cmnDeSerializeRaw(inputStream, this->ForceFeedbackRatioMember);
-    cmnDeSerializeRaw(inputStream, this->LinearGainMember);
+    cmnDeSerializeRaw(inputStream, this->LinearGainMasterMember);
+    cmnDeSerializeRaw(inputStream, this->LinearGainSlaveMember);
     cmnDeSerializeRaw(inputStream, this->ForceLimitMember);
+    cmnDeSerializeRaw(inputStream, this->MasterToSlaveScaleMember);
 }
 
 
@@ -71,9 +79,12 @@ robCollaborativeControlForce::robCollaborativeControlForce(void)
     RightClutchMSOffset.SetAll(0.0);
     WorkspaceOffset.SetAll(0.0);
     Error.SetAll(0.0);
-    Parameter().LinearGain() = 0.15;
+    Parameter().LinearGainMaster() = 0.3;
+    Parameter().LinearGainSlave() = 0.3;
     Parameter().ForceLimit() = 40.0;
+    Parameter().ErrorLimit() = 20.0;
     Parameter().ForceMode() = ParameterType::RATCHETED;
+    Parameter().MasterToSlaveScale() = 1.0;
     ClutchMode = 0;
     Parameter().ForceFeedbackRatio() = 1.0;
     FirstIteration = true;
@@ -114,13 +125,13 @@ void robCollaborativeControlForce::Update(const vct3 & p1,
         }
         // Compute the current force (F = kp * (secondDeviceGoal - secondDeviceLastPosition) )
         ForceSlave.XYZ().DifferenceOf(p2Goal, p2);
-        ForceSlave.XYZ().Multiply(Parameter().LinearGain());
+        ForceSlave.XYZ().Multiply(Parameter().LinearGainSlave());
         ForceMaster.SetAll(0.0);
 
         // Cap the forces, apply ratchet effect or apply the current force
         //  on the slave device depending on the force mode
         ForceFeedNormSlave = ForceSlave.XYZ().Norm();
-        if(ForceFeedNormSlave >= (Parameter().ForceLimit() / 4.0)) {
+        if(ForceFeedNormSlave >= (Parameter().ForceLimit() / 2.0)) {
             switch(Parameter().ForceMode()) {
                 case ParameterType::RATCHETED:
                     p2Goal.Assign(p2);
@@ -145,13 +156,13 @@ void robCollaborativeControlForce::Update(const vct3 & p1,
             ClutchOffsetAdd = false;
         }
         ForceMaster.XYZ().DifferenceOf(p1Goal, p1);
-        ForceMaster.XYZ().Multiply(Parameter().LinearGain());
+        ForceMaster.XYZ().Multiply(Parameter().LinearGainMaster());
         ForceSlave.SetAll(0.0);
 
         // Cap the forces, apply ratchet effect or apply the current force
         //  on the slave device depending on the force mode
         ForceFeedNormMaster = ForceMaster.XYZ().Norm();
-        if(ForceFeedNormMaster >= (Parameter().ForceLimit() / 4.0)) {
+        if(ForceFeedNormMaster >= (Parameter().ForceLimit() / 2.0)) {
             switch(Parameter().ForceMode()) {
                 case ParameterType::RATCHETED:
                     p1Goal.Assign(p1);
@@ -206,6 +217,22 @@ void robCollaborativeControlForce::Update(const vct3 & p1,
         //Error = p2R - p1
         Error.DifferenceOf(p2R, p1);
         Error.Multiply(0.5);
+
+        /*
+        double ErrorNorm = Error.Norm();
+        if(Error.Norm() >= Parameter().ErrorLimit()) {
+            switch(Parameter().ForceMode()) {
+                case ParameterType::RATCHETED:
+                    WorkspaceOffset.DifferenceOf(p1, p2);
+                    break;
+                case ParameterType::CAPPED:
+                    Error.Divide(Error.Norm() / Parameter().ErrorLimit());
+                    break;
+                default:
+                    break;
+            }
+        }*/
+
         //p2RGoal = p2R - 1/2(Error)
         p2RGoal.DifferenceOf(p2R, Error);
         //p1Goal = p1 + 1/2(Error)
@@ -250,8 +277,9 @@ void robCollaborativeControlForce::Update(const vct3 & p1,
         }
 
         // Apply the scale factor (kp) to the forces
-        ForceMaster.Multiply(Parameter().LinearGain());
-        ForceSlave.Multiply(Parameter().LinearGain());
+        ForceMaster.Multiply(Parameter().LinearGainMaster());
+        ForceMaster.Multiply(2.0);
+        ForceSlave.Multiply(Parameter().LinearGainSlave());
         
         // Apply the Force Feedback ratio on the master arm
         ForceMaster.Multiply(Parameter().ForceFeedbackRatio());

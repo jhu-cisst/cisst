@@ -184,7 +184,7 @@ public:
 CMN_DECLARE_SERVICES_INSTANTIATION(devSensableHD);
 
 
-#endif // CISST_DEV_HAS_LOPOMOCO
+#endif // CISST_DEV_HAS_SENSABLEHD
 
 #endif // _devSensableHD_h
 

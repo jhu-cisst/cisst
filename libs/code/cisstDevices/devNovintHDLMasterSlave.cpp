@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: devSensableHDMasterSlave.cpp 557 2009-07-17 20:39:06Z gsevinc1 $
+  $Id: devNovintHDLMasterSlave.cpp 557 2009-07-17 20:39:06Z gsevinc1 $
 
   Author(s): Gorkem Sevinc, Anton Deguet
   Created on: 2008-07-17
@@ -20,14 +20,14 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 // Sensable headers
-#include <cisstDevices/devSensableHDMasterSlave.h>
+#include <cisstDevices/devNovintHDLMasterSlave.h>
 
-CMN_IMPLEMENT_SERVICES(devSensableHDMasterSlave);
+CMN_IMPLEMENT_SERVICES(devNovintHDLMasterSlave);
 
-devSensableHDMasterSlave::devSensableHDMasterSlave(const std::string & taskName,
-                                                   const std::string & firstDeviceName,
-                                                   const std::string & secondDeviceName):
-    devSensableHD(taskName, firstDeviceName, secondDeviceName, true, true)
+devNovintHDLMasterSlave::devNovintHDLMasterSlave(const std::string & taskName,
+                                                 const std::string & firstDeviceName,
+                                                 const std::string & secondDeviceName):
+    devNovintHDL(taskName, firstDeviceName, secondDeviceName)
 {
     // Initialize the struct and class vectors
     RobotPair.resize(1);
@@ -50,13 +50,13 @@ devSensableHDMasterSlave::devSensableHDMasterSlave(const std::string & taskName,
     SetupTeleoperationInterfaces(firstDeviceName, secondDeviceName, PairNumber);
 }
 
-devSensableHDMasterSlave::devSensableHDMasterSlave(const std::string & taskName,
+devNovintHDLMasterSlave::devNovintHDLMasterSlave(const std::string & taskName,
                                                    const std::string & firstDeviceName,
                                                    const std::string & secondDeviceName,
                                                    const std::string & thirdDeviceName,
                                                    const std::string & fourthDeviceName):
-    devSensableHD(taskName, firstDeviceName, secondDeviceName, 
-                  thirdDeviceName, fourthDeviceName, true, true, true, true)
+    devNovintHDL(taskName, firstDeviceName, secondDeviceName, 
+                  thirdDeviceName, fourthDeviceName)
 {
     // Initialize the class and struct vectors
     RobotPair.resize(2);
@@ -80,7 +80,7 @@ devSensableHDMasterSlave::devSensableHDMasterSlave(const std::string & taskName,
     SetupTeleoperationInterfaces(firstDeviceName, secondDeviceName, PairNumber);
 }
 
-void devSensableHDMasterSlave::SetupTeleoperationInterfaces(const std::string & firstDeviceName, 
+void devNovintHDLMasterSlave::SetupTeleoperationInterfaces(const std::string & firstDeviceName, 
                                                             const std::string & secondDeviceName,
                                                             int pair)
 {
@@ -94,8 +94,8 @@ void devSensableHDMasterSlave::SetupTeleoperationInterfaces(const std::string & 
     DevData * pairData;
     pairData = DevicePair[pair];
     pairData->Parameter.ForceLimit() = 40.0;
-    pairData->Parameter.LinearGainMaster() = 0.15;
-    pairData->Parameter.LinearGainSlave() = 0.15;
+    pairData->Parameter.LinearGainMaster() = 0.3;
+    pairData->Parameter.LinearGainSlave() = 0.3;
     pairData->Parameter.ForceFeedbackRatio() = 1.0;
     pairData->Parameter.ForceMode() = prmCollaborativeControlForce::RATCHETED;
     pairData->MasterClutchGUI = false;
@@ -116,19 +116,19 @@ void devSensableHDMasterSlave::SetupTeleoperationInterfaces(const std::string & 
     providedInterface->AddCommandReadState(StateTable, pairData->Parameter, "GetCollaborativeControlParameter");
 
     // Add write functions to the interface
-    providedInterface->AddCommandWrite(&devSensableHDMasterSlave::SetMasterClutch, 
+    providedInterface->AddCommandWrite(&devNovintHDLMasterSlave::SetMasterClutch, 
                                        this, "SetMasterClutch", pairData->MasterClutchGUI);
-    providedInterface->AddCommandWrite(&devSensableHDMasterSlave::SetSlaveClutch, 
+    providedInterface->AddCommandWrite(&devNovintHDLMasterSlave::SetSlaveClutch, 
                                        this, "SetSlaveClutch", pairData->SlaveClutchGUI);
-    providedInterface->AddCommandWrite(&devSensableHDMasterSlave::SetMasterSlaveClutch, 
+    providedInterface->AddCommandWrite(&devNovintHDLMasterSlave::SetMasterSlaveClutch, 
                                        this, "SetMasterSlaveClutch", pairData->MasterSlaveClutchGUI);
-    providedInterface->AddCommandWrite(&devSensableHDMasterSlave::SetCollaborativeControlParameter, 
+    providedInterface->AddCommandWrite(&devNovintHDLMasterSlave::SetCollaborativeControlParameter, 
                                        this, "SetCollaborativeControlParameter", pairData->Parameter);
 
 }
 
 
-void devSensableHDMasterSlave::UserControl(void)
+void devNovintHDLMasterSlave::UserControl(void)
 {   
     DevData * pairData;
     int index = 0;
@@ -158,22 +158,22 @@ void devSensableHDMasterSlave::UserControl(void)
     }
 }
 
-void devSensableHDMasterSlave::SetLinearGainMaster(const mtsDouble & Scale)
+void devNovintHDLMasterSlave::SetLinearGainMaster(const mtsDouble & Scale)
 {
     DevicePair[PairNumber]->Parameter.LinearGainMaster() = Scale.Data;
 }
 
-void devSensableHDMasterSlave::SetLinearGainSlave(const mtsDouble & Scale)
+void devNovintHDLMasterSlave::SetLinearGainSlave(const mtsDouble & Scale)
 {
     DevicePair[PairNumber]->Parameter.LinearGainSlave() = Scale.Data;
 }
 
-void devSensableHDMasterSlave::SetForceLimit(const mtsDouble& FLimit)
+void devNovintHDLMasterSlave::SetForceLimit(const mtsDouble& FLimit)
 {
     DevicePair[PairNumber]->Parameter.ForceLimit() = FLimit.Data;
 }
 
-void devSensableHDMasterSlave::SetForceMode(const mtsInt& Mode)
+void devNovintHDLMasterSlave::SetForceMode(const mtsInt& Mode)
 {
     if(Mode.Data == 0) {
         DevicePair[PairNumber]->Parameter.ForceMode() = prmCollaborativeControlForce::RATCHETED;
@@ -184,27 +184,27 @@ void devSensableHDMasterSlave::SetForceMode(const mtsInt& Mode)
     }
 }
 
-void devSensableHDMasterSlave::SetForceCoefficient(const mtsDouble& commandedCoefficient)
+void devNovintHDLMasterSlave::SetForceCoefficient(const mtsDouble& commandedCoefficient)
 {
     DevicePair[PairNumber]->Parameter.ForceFeedbackRatio() = commandedCoefficient.Data;
 }
 
-void devSensableHDMasterSlave::SetMasterClutch(const mtsBool& commandedClutch)
+void devNovintHDLMasterSlave::SetMasterClutch(const mtsBool& commandedClutch)
 {
     DevicePair[PairNumber]->MasterClutchGUI = commandedClutch;
 }
 
-void devSensableHDMasterSlave::SetSlaveClutch(const mtsBool& commandedClutch)
+void devNovintHDLMasterSlave::SetSlaveClutch(const mtsBool& commandedClutch)
 {
     DevicePair[PairNumber]->SlaveClutchGUI = commandedClutch;
 }
 
-void devSensableHDMasterSlave::SetMasterSlaveClutch(const mtsBool& commandedClutch)
+void devNovintHDLMasterSlave::SetMasterSlaveClutch(const mtsBool& commandedClutch)
 {
     DevicePair[PairNumber]->MasterSlaveClutchGUI = commandedClutch;
 }
 
-void devSensableHDMasterSlave::SetCollaborativeControlParameter(const prmCollaborativeControlForce & parameter)
+void devNovintHDLMasterSlave::SetCollaborativeControlParameter(const prmCollaborativeControlForce & parameter)
 {
     DevicePair[PairNumber]->Parameter = parameter;
 }

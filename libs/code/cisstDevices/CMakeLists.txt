@@ -22,6 +22,7 @@ set(LIBRARY cisstDevices)
 option(CISST_DEV_HAS_SENSABLEHD "Build Sensable Device using HD library" OFF)
 option(CISST_DEV_HAS_LOPOMOCO "Build LoPoMoCo card extension" OFF)
 option(CISST_DEV_HAS_OPENIGTLINK "Open IGT Link protocol" OFF)
+option(CISST_DEV_HAS_NOVINTHDL "Build Novint Device using HDL library" OFF)
 
 # set dependencies
 set(DEPENDENCIES
@@ -89,6 +90,17 @@ if(CISST_DEV_HAS_OPENIGTLINK)
       OpenIGTLink)
 endif(CISST_DEV_HAS_OPENIGTLINK)
 
+if(CISST_DEV_HAS_NOVINTHDL)
+  find_package(NovintHDL REQUIRED)
+  include_directories(${NOVINT_INCLUDE_DIR})
+  set(SOURCE_FILES ${SOURCE_FILES}
+      devNovintHDL.cpp
+	  devNovintHDLMasterSlave.cpp)
+  set(HEADER_FILES ${HEADER_FILES}
+      devNovintHDL.h
+	  devNovintHDLMasterSlave.h)
+endif(CISST_DEV_HAS_NOVINTHDL)
+
 # Exporting settings to applications that link against cisst
 CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_PACKAGES DEV_ADDITIONAL_PACKAGES)
 CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_CMAKE_FILES DEV_ADDITIONAL_CMAKE_FILES)
@@ -121,3 +133,7 @@ CISST_ADD_LIBRARY_TO_PROJECT(cisstLibs)
 if(CISST_DEV_HAS_SENSABLEHD)
   target_link_libraries(cisstDevices ${SENSABLE_LIBRARIES})
 endif(CISST_DEV_HAS_SENSABLEHD)
+
+if(CISST_DEV_HAS_NOVINTHDL)
+  target_link_libraries(cisstDevices ${NOVINT_LIBRARIES})
+endif(CISST_DEV_HAS_NOVINTHDL)
