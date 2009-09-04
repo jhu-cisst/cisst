@@ -25,14 +25,14 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 // MJUNG:
-// A server task proxy is of mtsDevice type, not mtsTask because we assume that
-// there is only one required interface at client side, which means there is
-// only one user thread. Thus, we don't need to consider thread synchronization
-// issues at client side.
+// A server task proxy is of mtsDevice type rather than mtsTask type because we 
+// assume that there is only one required interface at client side, which means 
+// there is only one user thread. Thus, we currently don't need to consider 
+// thread synchronization issues at client.
 // However, if there can be more than one required interface at client side, we
-// need to consider them. Moreover, if one required interface can connect to 
-// more than one provided interface, things get more complicated. (However, the 
-// current design doesn't allow such connection.)
+// need to consider those issues. Moreover, if one required interface can connect 
+// to more than one provided interface, things get more complicated. (However, 
+// the current design doesn't allow such a connection.)
 #ifndef _mtsDeviceProxy_h
 #define _mtsDeviceProxy_h
 

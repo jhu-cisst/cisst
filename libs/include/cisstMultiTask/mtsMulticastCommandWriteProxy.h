@@ -30,6 +30,8 @@ http://www.cisst.org/cisst/license.txt.
 #define _mtsMulticastCommandWriteProxy_h
 
 #include <cisstMultiTask/mtsMulticastCommandWriteBase.h>
+#include <cisstMultiTask/mtsProxySerializer.h>
+#include <vector>
 
 #include <cisstMultiTask/mtsExport.h>
 
@@ -44,6 +46,7 @@ class mtsMulticastCommandWriteProxy : public mtsMulticastCommandWriteBase
 
 public:
     typedef mtsMulticastCommandWriteBase BaseType;
+    mtsProxySerializer Serializer;
 
 protected:
     /*! Argument prototype. Deserialization recovers the original argument
@@ -77,6 +80,9 @@ public:
     void SetArgumentPrototype(mtsGenericObject * argumentPrototype) {
         this->ArgumentPrototype = argumentPrototype;
     }
+
+    /*! Getter */
+    mtsProxySerializer * GetSerializer() { return &Serializer; }
 };
 
 #endif // _mtsMulticastCommandWriteProxy_h

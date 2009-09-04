@@ -31,6 +31,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsCommandReadOrWriteBase.h>
 #include <cisstMultiTask/mtsDeviceInterfaceProxyClient.h>
 #include <cisstMultiTask/mtsDeviceInterfaceProxyServer.h>
+#include <cisstMultiTask/mtsProxySerializer.h>
 
 /*!
   \ingroup cisstMultiTask
@@ -71,6 +72,10 @@ protected:
     mtsDeviceInterfaceProxyClient * ProvidedInterfaceProxy;
     mtsDeviceInterfaceProxyServer * RequiredInterfaceProxy;
 
+    /*! Per-command serializer and deserializer */
+    mtsProxySerializer Serializer;
+
+public:
     /*! Initialization method */
     void Initialize()
     {
@@ -80,7 +85,7 @@ protected:
     /*! The constructors. */
     mtsCommandWriteProxy(const CommandIDType commandId, 
                          mtsDeviceInterfaceProxyClient * providedInterfaceProxy) :
-        BaseType(),
+        mtsCommandWriteBase(),
         CommandId(commandId),        
         ProvidedInterfaceProxy(providedInterfaceProxy),
         RequiredInterfaceProxy(0)
@@ -90,7 +95,7 @@ protected:
 
     mtsCommandWriteProxy(const CommandIDType commandId, 
                          mtsDeviceInterfaceProxyServer * requiredInterfaceProxy) :
-        BaseType(),
+        mtsCommandWriteBase(),
         CommandId(commandId),
         ProvidedInterfaceProxy(0),
         RequiredInterfaceProxy(requiredInterfaceProxy)
@@ -102,7 +107,7 @@ protected:
     mtsCommandWriteProxy(const CommandIDType commandId,
                          mtsDeviceInterfaceProxyClient * providedInterfaceProxy,
                          const std::string & name) :
-        BaseType(name),
+        mtsCommandWriteBase(name),
         CommandId(commandId),
         ProvidedInterfaceProxy(providedInterfaceProxy),
         RequiredInterfaceProxy(0)
@@ -113,7 +118,7 @@ protected:
     mtsCommandWriteProxy(const CommandIDType commandId,
                          mtsDeviceInterfaceProxyServer * requiredInterfaceProxy,
                          const std::string & name) :
-        BaseType(name),
+        mtsCommandWriteBase(name),
         CommandId(commandId),
         ProvidedInterfaceProxy(0),
         RequiredInterfaceProxy(requiredInterfaceProxy)
@@ -131,6 +136,14 @@ protected:
     /*! Update CommandId. */
     void SetCommandId(const CommandIDType & newCommandId) {
         CommandId = newCommandId;
+
+        if (ProvidedInterfaceProxy) {
+            CMN_ASSERT(ProvidedInterfaceProxy->AddPerCommandSerializer(CommandId, &Serializer));
+        } else {
+            // Either ProvidedInterfaceProxy or RequiredInterfaceProxy should be valid.
+            CMN_ASSERT(RequiredInterfaceProxy);
+            CMN_ASSERT(RequiredInterfaceProxy->AddPerEventGeneratorSerializer(CommandId, &Serializer));
+        }
     }
     
 public:    

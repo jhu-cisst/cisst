@@ -259,25 +259,6 @@ protected:
         return IceGUID;
     }
 
-    //-----------------------------------------------------
-    //  Serialization and Deserialization
-    //-----------------------------------------------------
-    /*! Buffers for serialization and deserialization. */
-    std::stringstream SerializationBuffer;
-    std::stringstream DeSerializationBuffer;
-
-    /*! Per-proxy Serializer and DeSerializer. */
-    cmnSerializer * Serializer;
-    cmnDeSerializer * DeSerializer;
-
-    void Serialize(const mtsGenericObject & argument, std::string & serializedData)
-    {
-        SerializationBuffer.str("");    
-        Serializer->Serialize(argument);
-
-        serializedData = SerializationBuffer.str();
-    }
-
 public:
     mtsProxyBaseCommon(const std::string& propertyFileName,
                        const std::string& objectIdentity,
@@ -293,16 +274,10 @@ public:
         IceGUID("")
     {
         //IceUtil::CtrlCHandler ctrCHandler(onCtrlC);
-
-        Serializer = new cmnSerializer(SerializationBuffer);
-        DeSerializer = new cmnDeSerializer(DeSerializationBuffer);
     }
 
     virtual ~mtsProxyBaseCommon() 
-    {
-        delete Serializer;
-        delete DeSerializer;
-    }
+    {}
 
     /*! Initialize and start the proxy (returns immediately). */
     virtual void Start(_ArgumentType * callingClass) = 0;

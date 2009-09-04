@@ -37,6 +37,7 @@ http://www.cisst.org/cisst/license.txt.
 
 template <class _argumentType>
 class CISST_EXPORT mtsFunctionQualifiedReadOrWrite: public mtsFunctionBase {
+protected:
     typedef _argumentType ArgumentType;
     typedef mtsCommandQualifiedReadOrWriteBase<ArgumentType> CommandType;
     CommandType * Command;

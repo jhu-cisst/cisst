@@ -144,6 +144,7 @@ if(CISST_MTS_HAS_ICE)
       mtsProxyBaseCommon.h
       mtsProxyBaseClient.h
       mtsProxyBaseServer.h
+      mtsProxySerializer.h
       mtsTaskManagerProxyClient.h
       mtsTaskManagerProxyServer.h
       mtsDeviceInterfaceProxyClient.h
@@ -154,6 +155,8 @@ if(CISST_MTS_HAS_ICE)
       mtsCommandWriteProxy.h
       mtsCommandReadProxy.h
       mtsCommandQualifiedReadProxy.h
+      mtsFunctionReadOrWriteProxy.h
+      mtsFunctionQualifiedReadOrWriteProxy.h
       mtsMulticastCommandWriteProxy.h
       mtsEventWriteGeneratorProxy.h
       )

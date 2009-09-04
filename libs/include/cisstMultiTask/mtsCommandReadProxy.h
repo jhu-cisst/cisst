@@ -29,6 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _mtsCommandReadProxy_h
 
 #include <cisstMultiTask/mtsCommandReadOrWriteBase.h>
+#include <cisstMultiTask/mtsProxySerializer.h>
 
 /*!
   \ingroup cisstMultiTask
@@ -57,17 +58,23 @@ protected:
 
     /*! Device interface proxy objects which execute a command at 
         peer's memory space across networks. */
-    mtsDeviceInterfaceProxyClient * ProvidedInterfaceProxy;
-
     /*! Initialization method */
     void Initialize()
     {
         this->ArgumentPrototype = 0;
     }
 
+    /*! Device interface proxy objects which execute a read command at 
+        peer's memory space across networks. */
+    mtsDeviceInterfaceProxyClient * ProvidedInterfaceProxy;
+
+    /*! Per-command serializer and deserializer */
+    mtsProxySerializer Serializer;
+
+public:
     mtsCommandReadProxy(const CommandIDType commandId, 
                         mtsDeviceInterfaceProxyClient * providedInterfaceProxy):
-        BaseType(),
+        mtsCommandReadBase(),
         CommandId(commandId),
         ProvidedInterfaceProxy(providedInterfaceProxy)
     {
@@ -77,7 +84,7 @@ protected:
     mtsCommandReadProxy(const CommandIDType commandId,
                         mtsDeviceInterfaceProxyClient * providedInterfaceProxy,
                         const std::string & name):
-        BaseType(name),
+        mtsCommandReadBase(name),
         CommandId(commandId),
         ProvidedInterfaceProxy(providedInterfaceProxy)
     {
@@ -94,6 +101,15 @@ protected:
     /*! Update CommandId. */
     void SetCommandId(const CommandIDType & newCommandId) {
         CommandId = newCommandId;
+
+        ProvidedInterfaceProxy->AddPerCommandSerializer(CommandId, &Serializer);
+
+        // MJUNG: Currently, there are only two types of events: eventVoid, eventWrite.
+        // Thus, we don't need to modify the mtsCommandReadProxy or 
+        // the mtsCommandQualifiedReadProxy class such that it can support events.
+        // In the future, however, if the design is extended such that event types such 
+        // as eventRead or eventQualifiedRead are introduced, we should update here as
+        // well.
     }
 
 public:

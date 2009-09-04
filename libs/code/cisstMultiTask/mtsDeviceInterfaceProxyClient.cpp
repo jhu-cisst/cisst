@@ -94,8 +94,14 @@ void mtsDeviceInterfaceProxyClient::Runner(ThreadArguments<mtsTask> * arguments)
 {
     mtsDeviceInterfaceProxyClient * ProxyClient = 
         dynamic_cast<mtsDeviceInterfaceProxyClient*>(arguments->proxy);
+    if (!ProxyClient) {
+        CMN_LOG_RUN_ERROR << "mtsDeviceInterfaceProxyClient: Failed to create a proxy server." << std::endl;
+        return;
+    }
+    
+    ProxyClient->SetConnectedTask(arguments->argument);
 
-    ProxyClient->GetLogger()->trace("mtsDeviceInterfaceProxyClient", "Proxy client thread starts.");
+    ProxyClient->GetLogger()->trace("mtsDeviceInterfaceProxyClient", "Proxy server starts.....");
 
     try {
         ProxyClient->StartClient();        
@@ -105,7 +111,7 @@ void mtsDeviceInterfaceProxyClient::Runner(ThreadArguments<mtsTask> * arguments)
         ProxyClient->GetLogger()->trace("mtsDeviceInterfaceProxyClient exception: ", msg);
     }
 
-    ProxyClient->GetLogger()->trace("mtsDeviceInterfaceProxyClient", "Proxy client thread ends.");
+    ProxyClient->GetLogger()->trace("mtsDeviceInterfaceProxyClient", "Proxy server terminates.....");
 }
 
 void mtsDeviceInterfaceProxyClient::Stop()
@@ -129,46 +135,27 @@ void mtsDeviceInterfaceProxyClient::OnEnd()
 }
 
 //-------------------------------------------------------------------------
+//  Method to register per-command serializer
+//-------------------------------------------------------------------------
+const bool mtsDeviceInterfaceProxyClient::AddPerCommandSerializer(
+    const CommandIDType commandId, mtsProxySerializer * argumentSerializer)
+{
+    CMN_ASSERT(argumentSerializer);
+
+    PerCommandSerializerMapType::const_iterator it = PerCommandSerializerMap.find(commandId);
+    if (it != PerCommandSerializerMap.end()) {
+        CMN_LOG_RUN_ERROR << "mtsDeviceInterfaceProxyClient: CommandId already exists." << std::endl;
+        return false;
+    }
+
+    PerCommandSerializerMap[commandId] = argumentSerializer;
+
+    return true;
+}
+
+//-------------------------------------------------------------------------
 //  Methods to Receive and Process Events (Server -> Client)
 //-------------------------------------------------------------------------
-//bool mtsDeviceInterfaceProxyClient::ReceiveGetListsOfEventGeneratorsRegistered(
-//    const std::string & serverTaskProxyName,
-//    const std::string & clientTaskName,
-//    const std::string & requiredInterfaceName,
-//    mtsDeviceInterfaceProxy::ListsOfEventGeneratorsRegistered & eventGeneratorProxies) const
-//{ 
-//    /*
-//    mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
-//
-//    // Get the client task to access the required interface.
-//    mtsDevice * clientTask = taskManager->GetDevice(clientTaskName);
-//    if (!clientTask) {
-//        clientTask = dynamic_cast<mtsDevice*>(taskManager->GetTask(clientTaskName));
-//    }
-//    CMN_ASSERT(clientTask);
-//
-//    // Get the required interface.
-//    mtsRequiredInterface * requiredInterface = 
-//        clientTask->GetRequiredInterface(requiredInterfaceName);
-//    CMN_ASSERT(requiredInterface);
-//    
-//    // Get the provided interface proxy.
-//    mtsProvidedInterface * providedInterfaceProxy = 
-//        requiredInterface->GetConnectedInterface();
-//    CMN_ASSERT(providedInterfaceProxy);
-//
-//    // Get the server task proxy.
-//    mtsDeviceProxy * serverTaskProxy = dynamic_cast<mtsDeviceProxy*>(
-//        taskManager->GetDevice(serverTaskProxyName));
-//    CMN_ASSERT(serverTaskProxy);
-//
-//    serverTaskProxy->GetEventGeneratorProxyPointers(
-//        providedInterfaceProxy, requiredInterface, eventGeneratorProxies);
-//        */
-//
-//    return true;
-//}
-
 void mtsDeviceInterfaceProxyClient::ReceiveExecuteEventVoid(const CommandIDType commandId)
 {
     mtsMulticastCommandVoid * eventVoidGeneratorProxy = 
@@ -185,30 +172,17 @@ void mtsDeviceInterfaceProxyClient::ReceiveExecuteEventWriteSerialized(
     sprintf(buf, "ReceiveExecuteEventWriteSerialized: %lu bytes received", argument.size());
     IceLogger->trace("TIClient", buf);
 
-    // Deserialization
-	/*
-    mtsMulticastCommandWriteProxy * eventWriteGeneratorProxy;
-    CommandExecution.Lock();
-    {
-        DeSerializationBuffer.str("");
-        DeSerializationBuffer << argument;
-
-        eventWriteGeneratorProxy = reinterpret_cast<mtsMulticastCommandWriteProxy*>(commandId);
-        CMN_ASSERT(eventWriteGeneratorProxy);
-    }
-    CommandExecution.Unlock();
-	*/
-	DeSerializationBuffer.str("");
-    DeSerializationBuffer << argument;
-    
     mtsMulticastCommandWriteProxy * eventWriteGeneratorProxy = 
         reinterpret_cast<mtsMulticastCommandWriteProxy*>(commandId);
     CMN_ASSERT(eventWriteGeneratorProxy);
+
+    // Get a per-command serializer.
+    mtsProxySerializer * deserializer = eventWriteGeneratorProxy->GetSerializer();
         
-    const mtsGenericObject * obj = dynamic_cast<mtsGenericObject *>(DeSerializer->DeSerialize());
-    CMN_ASSERT(obj);
-    //(*eventWriteGeneratorProxy)(*obj);
-    eventWriteGeneratorProxy->Execute(*obj);
+    mtsGenericObject * serializedArgument = deserializer->DeSerialize(argument);
+    CMN_ASSERT(serializedArgument);
+
+    eventWriteGeneratorProxy->Execute(*serializedArgument);
 }
 
 //-------------------------------------------------------------------------
@@ -289,11 +263,23 @@ void mtsDeviceInterfaceProxyClient::SendExecuteCommandWriteSerialized(
 
     //Logger->trace("TIClient", ">>>>> SEND: SendExecuteCommandWriteSerialized");
 
-    // Serialization
-    std::string serializedData;
-    Serialize(argument, serializedData);
+    // Get a per-command serializer.
+    mtsProxySerializer * serializer = PerCommandSerializerMap[commandId];
+    if (!serializer) {
+        CMN_LOG_RUN_ERROR << "mtsDeviceInterfaceProxyClient: cannot find serializer (commandWrite)." << std::endl;
+        return;
+    }
+
+    // Serialize the argument passed.
+    std::string serializedArgument;
+    serializer->Serialize(argument, serializedArgument);
+    if (serializedArgument.size() == 0) {
+        CMN_LOG_RUN_ERROR << "mtsDeviceInterfaceProxyClient: serialization failure (commandWrite): " 
+            << argument.ToString() << std::endl;
+        return;
+    }
     
-    DeviceInterfaceServerProxy->ExecuteCommandWriteSerialized(commandId, serializedData);
+    DeviceInterfaceServerProxy->ExecuteCommandWriteSerialized(commandId, serializedArgument);
 }
 
 void mtsDeviceInterfaceProxyClient::SendExecuteCommandReadSerialized(
@@ -303,14 +289,20 @@ void mtsDeviceInterfaceProxyClient::SendExecuteCommandReadSerialized(
 
     //Logger->trace("TIClient", ">>>>> SEND: SendExecuteCommandReadSerialized");
 
-    std::string serializedData;
+    // Placeholder for an argument of which value is to be set by the peer.
+    std::string serializedArgument;
 
-    DeviceInterfaceServerProxy->ExecuteCommandReadSerialized(commandId, serializedData);
+    DeviceInterfaceServerProxy->ExecuteCommandReadSerialized(commandId, serializedArgument);
 
-    // Deserialization
-    DeSerializationBuffer.str("");
-    DeSerializationBuffer << serializedData;
-    DeSerializer->DeSerialize(argument);
+    // Deserialize the argument.
+    // Get a per-command serializer.
+    mtsProxySerializer * deserializer = PerCommandSerializerMap[commandId];
+    if (!deserializer) {
+        CMN_LOG_RUN_ERROR << "mtsDeviceInterfaceProxyClient: cannot find deserializer (commandRead)" << std::endl;
+        return;
+    }
+
+    deserializer->DeSerialize(serializedArgument, argument);
 }
 
 void mtsDeviceInterfaceProxyClient::SendExecuteCommandQualifiedReadSerialized(
@@ -320,21 +312,31 @@ void mtsDeviceInterfaceProxyClient::SendExecuteCommandQualifiedReadSerialized(
 
     //Logger->trace("TIClient", ">>>>> SEND: SendExecuteCommandQualifiedRead");
     
-    // Serialization for argument1 (write)
-    std::string serializedData;
-    Serialize(argument1, serializedData);
+    // Get a per-command serializer.
+    mtsProxySerializer * serializer = PerCommandSerializerMap[commandId];
+    if (!serializer) {
+        CMN_LOG_RUN_ERROR << "mtsDeviceInterfaceProxyClient: cannot find serializer (commandQRead)" << std::endl;
+        return;
+    }
 
-    // Deserialization for argument2 (read)
-    std::string serializedDataFromServer;
+    // Serialize the argument1.
+    std::string serializedArgument1;
+    serializer->Serialize(argument1, serializedArgument1);
+    if (serializedArgument1.size() == 0) {
+        CMN_LOG_RUN_ERROR << "mtsDeviceInterfaceProxyClient: serialization failure (commandQRead): " 
+            << argument1.ToString() << std::endl;
+        return;
+    }
+
+    // Placeholder for an argument of which value is to be set by the peer.
+    std::string serializedArgument2;
 
     // Execute the command across networks
     DeviceInterfaceServerProxy->ExecuteCommandQualifiedReadSerialized(
-        commandId, serializedData, serializedDataFromServer);
+        commandId, serializedArgument1, serializedArgument2);
 
-    // Deserialization
-    DeSerializationBuffer.str("");
-    DeSerializationBuffer << serializedDataFromServer;
-    DeSerializer->DeSerialize(argument2);
+    // Deserialize the argument2.
+    serializer->DeSerialize(serializedArgument2, argument2);
 }
 
 //-------------------------------------------------------------------------

@@ -36,8 +36,9 @@ http://www.cisst.org/cisst/license.txt.
   TODO: add class summary here
 */
 class mtsTask;
-class mtsCommandVoidProxy;
-class mtsCommandWriteProxy;
+
+// TODO: ADD the following line in the forward declaration.h (???)
+class mtsProxySerializer;
 
 class CISST_EXPORT mtsDeviceInterfaceProxyServer : public mtsProxyBaseServer<mtsTask> {
     
@@ -81,6 +82,9 @@ protected:
     /*! Typedef for client proxy. */
     typedef mtsDeviceInterfaceProxy::DeviceInterfaceClientPrx DeviceInterfaceClientProxyType;
 
+    /*! Typedef for per-command proxy serializer. */
+    typedef std::map<CommandIDType, mtsProxySerializer *> PerEventGeneratorSerializerMapType;
+
     /*! Pointer to the task connected. */
     mtsTask * ConnectedTask;
 
@@ -90,6 +94,9 @@ protected:
 
     /*! Connected client object. */
     DeviceInterfaceClientProxyType ConnectedClient;
+
+    /*! Per-event-generator proxy serializer container. */
+    PerEventGeneratorSerializerMapType PerEventGeneratorSerializerMap;
 
     //-------------------------------------------------------------------------
     //  Proxy Implementation
@@ -161,14 +168,20 @@ protected:
 
     /*! Execute actual command objects. */
     void ReceiveExecuteCommandVoid(const CommandIDType commandId) const;
-    void ReceiveExecuteCommandWriteSerialized(const CommandIDType commandId, const std::string & argument);
-    void ReceiveExecuteCommandReadSerialized(const CommandIDType commandId, std::string & argument);
-    void ReceiveExecuteCommandQualifiedReadSerialized(const CommandIDType commandId, const std::string & argument1, std::string & argument2);
+    void ReceiveExecuteCommandWriteSerialized(const CommandIDType commandId, const std::string & serializedArgument);
+    void ReceiveExecuteCommandReadSerialized(const CommandIDType commandId, std::string & serializedArgument);
+    void ReceiveExecuteCommandQualifiedReadSerialized(const CommandIDType commandId, const std::string & serializedArgument1, std::string & serializedArgument2);
+
+public:
+    //-------------------------------------------------------------------------
+    //  Method to register per-command serializer
+    //-------------------------------------------------------------------------
+    const bool AddPerEventGeneratorSerializer(
+        const CommandIDType commandId, mtsProxySerializer * argumentSerializer);
 
     //-------------------------------------------------------------------------
     //  Methods to Send Events (Server -> Client)
     //-------------------------------------------------------------------------
-public:
     void SendExecuteEventVoid(const CommandIDType commandId) const;
     void SendExecuteEventWriteSerialized(const CommandIDType commandId, const mtsGenericObject & argument);
 

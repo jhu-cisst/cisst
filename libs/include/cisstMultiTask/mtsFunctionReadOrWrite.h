@@ -36,6 +36,7 @@ http://www.cisst.org/cisst/license.txt.
 
 template <class _argumentType>
 class CISST_EXPORT mtsFunctionReadOrWrite: public mtsFunctionBase {
+protected:
     typedef _argumentType ArgumentType;
     typedef mtsCommandReadOrWriteBase<ArgumentType> CommandType;
     CommandType * Command;
@@ -55,7 +56,7 @@ public:
     }
     
     /*! Destructor. */
-    ~mtsFunctionReadOrWrite() {}
+    virtual ~mtsFunctionReadOrWrite() {}
 
     /*! Bind the function object to a command.  The method will return
       false if the interface pointer is null, if the command can not

@@ -29,11 +29,16 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsExport.h>
 
+#include <map>
+
 /*!
   \ingroup cisstMultiTask
 
   TODO: add class summary here
 */
+
+// TODO: ADD the following line in the forward declaration.h (???)
+class mtsProxySerializer;
 
 class CISST_EXPORT mtsDeviceInterfaceProxyClient : public mtsProxyBaseClient<mtsTask> {
     
@@ -47,7 +52,7 @@ public:
     /*! Set a client task connected to this proxy client. Currently, this client task 
         can have the same number of the provided interfaces provided by the server task,
         which means only 1:1 connection between a provided interface and a required
-        interface is allowed, right now. */
+        interface is allowed at this moment. */
     void SetConnectedTask(mtsTask * clientTask) { ConnectedTask = clientTask; }
 
     /*! Entry point to run a proxy. */
@@ -77,6 +82,9 @@ protected:
     /*! Typedef for server proxy. */
     typedef mtsDeviceInterfaceProxy::DeviceInterfaceServerPrx DeviceInterfaceServerProxyType;
 
+    /*! Typedef for per-command proxy serializer. */
+    typedef std::map<CommandIDType, mtsProxySerializer *> PerCommandSerializerMapType;
+
     /*! Pointer to the task connected. */
     mtsTask * ConnectedTask;
 
@@ -86,6 +94,9 @@ protected:
 
     /*! Connected server object */
     DeviceInterfaceServerProxyType DeviceInterfaceServerProxy;
+
+    /*! Per-command proxy serializer container. */
+    PerCommandSerializerMapType PerCommandSerializerMap;
     
     //-------------------------------------------------------------------------
     //  Processing Methods
@@ -116,6 +127,12 @@ protected:
     void OnEnd();
 
 public:
+    //-------------------------------------------------------------------------
+    //  Method to register per-command serializer
+    //-------------------------------------------------------------------------
+    const bool AddPerCommandSerializer(
+        const CommandIDType commandId, mtsProxySerializer * argumentSerializer);
+
     //-------------------------------------------------------------------------
     //  Methods to Receive and Process Events (Server -> Client)
     //-------------------------------------------------------------------------
