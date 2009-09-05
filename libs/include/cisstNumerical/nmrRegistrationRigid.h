@@ -31,6 +31,7 @@ http://www.cisst.org/cisst/license.txt.
     \param dataSet1   The first set of fiducial points
     \param dataSet2   The second set of fiducial points
     \param transform  The computed transformation from dataSet1 to dataSet2
+    \param fre        Pointer to location to store Fiducial Registration Error (FRE), if not 0.
     \returns true if registration successful
 
     \note This function is templated so that it will work when the data sets are of type
@@ -41,7 +42,7 @@ http://www.cisst.org/cisst/license.txt.
 template <class _matrixOwnerType>
 bool CISST_EXPORT nmrRegistrationRigid(vctDynamicConstVectorBase<_matrixOwnerType, vct3> &dataSet1,
                                        vctDynamicConstVectorBase<_matrixOwnerType, vct3> &dataSet2,
-                                       vctFrm3 &transform);
+                                       vctFrm3 &transform, double *fre = 0);
 
 #endif
 

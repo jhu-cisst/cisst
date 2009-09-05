@@ -25,9 +25,10 @@ http://www.cisst.org/cisst/license.txt.
 template <class _matrixOwnerType>
 bool nmrRegistrationRigid(vctDynamicConstVectorBase<_matrixOwnerType, vct3> &dataSet1,
                           vctDynamicConstVectorBase<_matrixOwnerType, vct3> &dataSet2,
-                          vctFrm3 &transform)
+                          vctFrm3 &transform, double *fre)
 {
     size_t npoints = dataSet1.size();
+    size_t i;
     if (npoints != dataSet2.size()) {
         CMN_LOG_RUN_WARNING << "nmrRegistrationPairedPoint: incompatible sizes: " << npoints << ", "
                             << dataSet2.size() << std::endl;
@@ -46,7 +47,7 @@ bool nmrRegistrationRigid(vctDynamicConstVectorBase<_matrixOwnerType, vct3> &dat
     // Compute the sum of the outer products of (dataSet1-avg1) and (dataSet2-avg2)
     vctDouble3x3 H, sumH;
     sumH.SetAll(0.0);
-    for (size_t i = 0; i < npoints; i++) {
+    for (i = 0; i < npoints; i++) {
         H.OuterProductOf(dataSet1[i]-avg1, dataSet2[i]-avg2);
         sumH.Add(H);
     }
@@ -71,6 +72,15 @@ bool nmrRegistrationRigid(vctDynamicConstVectorBase<_matrixOwnerType, vct3> &dat
     vctMatRot3 R;
     R.Assign(X);
     transform = vctFrm3(R, avg2-R*avg1);
+
+    // Now, compute residual error if fre is not null
+    if (fre) {
+        double err2 = 0.0;
+        for (i = 0; i < npoints; i++)
+            err2 += (dataSet2[i] - transform*dataSet1[i]).NormSquare();
+        *fre = sqrt(err2/npoints);
+    }
+
     return true;
 }
 
@@ -80,11 +90,11 @@ bool nmrRegistrationRigid(vctDynamicConstVectorBase<_matrixOwnerType, vct3> &dat
 template bool nmrRegistrationRigid<vctDynamicVectorRefOwner<vct3> >(
                                vctDynamicConstVectorBase<vctDynamicVectorRefOwner<vct3>, vct3>&,
                                vctDynamicConstVectorBase<vctDynamicVectorRefOwner<vct3>, vct3>&,
-                               vctFrm3&);
+                               vctFrm3&, double *);
 
 // For vctDynamicConstVector
 template bool CISST_EXPORT nmrRegistrationRigid<vctDynamicVectorOwner<vct3> >(
                                vctDynamicConstVectorBase<vctDynamicVectorOwner<vct3>, vct3>&,
                                vctDynamicConstVectorBase<vctDynamicVectorOwner<vct3>, vct3>&,
-                               vctFrm3&);
+                               vctFrm3&, double *);
 

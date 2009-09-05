@@ -75,6 +75,8 @@ bool AccuracyDataSet::ComputeRegistration()
         return false;
     }
 
+    // Call the registration method. Note that if desired, we can also get
+    // the FRE by passing the address of a double variable to this function.
     bool ret = nmrRegistrationRigid(P1, P2, transform);
     cout << transform << endl;
     return ret;
