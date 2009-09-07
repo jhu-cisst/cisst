@@ -7,7 +7,7 @@ class clientUI {open
   Function {clientUI()} {open
   } {
     Fl_Window ClientWindow {
-      label Client open
+      label Client open selected
       xywh {466 199 356 258} type Double visible
     } {
       Fl_Return_Button Close {
@@ -16,37 +16,37 @@ class clientUI {open
         xywh {230 215 105 30} box THIN_UP_BOX
       }
       Fl_Button VoidButton {
-        label void
+        label Void
         callback {this->VoidRequested = true;}
-        xywh {145 20 120 30}
+        xywh {215 20 120 30}
       }
       Fl_Value_Slider WriteValue {
-        xywh {20 60 120 30} type {Horz Knob} align 4 maximum 100 step 1 value 50 textsize 14
+        xywh {15 60 190 30} type {Horz Knob} align 4 maximum 100 step 1 value 50 textsize 14
       }
       Fl_Button WriteButton {
         label Write
         callback {this->WriteRequested = true;}
-        xywh {145 60 120 30}
+        xywh {215 60 120 30}
       }
       Fl_Button ReadButton {
         label Read
         callback {this->ReadRequested = true;}
-        xywh {145 100 120 30}
+        xywh {215 100 120 30}
       }
       Fl_Value_Output ReadValue {
-        xywh {88 101 51 28}
+        xywh {15 101 191 28}
       }
       Fl_Button QualifiedReadButton {
         label {Qualified Read}
         callback {this->QualifiedReadRequested = true;}
-        xywh {145 138 120 30}
+        xywh {215 138 120 30}
       }
       Fl_Value_Output QualifiedReadValue {
-        xywh {88 138 51 28}
+        xywh {15 138 191 28}
       }
       Fl_Value_Output EventValue {
-        label Events
-        xywh {145 176 120 28}
+        label {Events   }
+        xywh {215 176 120 28}
       }
     }
   }

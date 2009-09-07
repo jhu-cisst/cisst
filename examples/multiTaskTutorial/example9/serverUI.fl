@@ -17,21 +17,21 @@ class serverUI {open
       }
       Fl_Check_Button VoidValue {
         label Void
-        xywh {130 18 35 26} down_box THIN_DOWN_BOX align 4
+        xywh {130 9 35 26} down_box THIN_DOWN_BOX align 4
       }
       Fl_Value_Output WriteValue {
         label Write
-        xywh {130 51 36 24}
+        xywh {130 47 195 27}
       }
       Fl_Button VoidEventButton {
         label {Void Event}
         callback {this->VoidEventRequested = true;}
-        xywh {50 120 80 30}
+        xywh {15 125 115 30}
       }
       Fl_Button WriteEventButton {
         label {Write Event}
         callback {this->WriteEventRequested = true;}
-        xywh {50 160 80 30}
+        xywh {15 165 115 30}
       }
       Fl_Value_Slider ReadValue {
         label Read
