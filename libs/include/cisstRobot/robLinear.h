@@ -12,7 +12,7 @@ namespace cisstRobot{
   protected:
     
     //! The matrix
-    vctDynamicMatrix<real> A;  // a dynamic matrix to hold the mapping
+    vctDynamicMatrix<Real> A;  // a dynamic matrix to hold the mapping
     
     //! The minimum/maximum values of the domain
     Rn xmin, xmax;
@@ -28,7 +28,7 @@ namespace cisstRobot{
        \param x2 The upper value of the domain
        \param y2 The value \f$f(x2)\f$
      */
-    robLinear( real x1, real y1, real x2, real y2 );
+    robLinear( Real x1, Real y1, Real x2, Real y2 );
 
     //! Define a linear mapping M:R1->Rn
     /**
@@ -39,7 +39,7 @@ namespace cisstRobot{
        \param x2 The upper value of the domain
        \param y2 The value \f$y2 = f(x2)\f$
      */
-    robLinear( real x1, const Rn& y1, real x2, const Rn& y2 );
+    robLinear( Real x1, const Rn& y1, Real x2, const Rn& y2 );
     
     //! Define a linear mapping M:R1->R3 (read a time varying translation)
     /**
@@ -50,7 +50,7 @@ namespace cisstRobot{
        \param x2 The upper value of the domain
        \param y2 The value \f$y2 = f(x2)\f$
      */
-    robLinear( real x1, const R3& y1, real x2, const R3& y2 );
+    robLinear( Real x1, const R3& y1, Real x2, const R3& y2 );
     
     //! Return true if the function is defined for the given input
     robDomainAttribute IsDefinedFor( const robDOF& input ) const; 

@@ -1,3 +1,4 @@
+#include <cisstCommon/cmnLogger.h>
 #include <cisstRobot/robFunctionPiecewise.h>
 #include <cisstRobot/robRnBlender.h>
 #include <cisstRobot/robSO3Blender.h>
@@ -8,13 +9,13 @@
 using namespace std;
 using namespace cisstRobot;
 
-const real robFunctionPiecewise::TAU = 0.1;
+const Real robFunctionPiecewise::TAU = 0.1;
 
 robDomainAttribute robFunctionPiecewise::IsDefinedFor(const robDOF& input)const{
 
   // check if there's any function
   if( functions.empty() ) { 
-    cout << "robFunctionPiecewise::IsDefinedFor: No function defined." << endl;
+    CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__ << ": No function defined" <<endl;
     return UNDEFINED;
   }
   
@@ -30,7 +31,7 @@ robDomainAttribute robFunctionPiecewise::IsDefinedFor(const robDOF& input)const{
 // insert a function in the list
 robError robFunctionPiecewise::Insert( robFunction* function ){
   if(function == NULL) { 
-    cout <<"robFunctionPiecewise::Insert: NULL function" << endl;
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ << ": Function is NULL" << endl;
     return FAILURE;
   }
 
@@ -42,6 +43,7 @@ robError robFunctionPiecewise::Evaluate( const robDOF& input, robDOF& output ){
 
   // check if there's any function
   if( functions.empty() ) {
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ << ": No function defined" << endl;
     return FAILURE;
   }
 
@@ -74,7 +76,8 @@ robError robFunctionPiecewise::Evaluate( const robDOF& input, robDOF& output ){
 
     case OUTGOING:
       if( outgoing != NULL )
-	cout<<"robFunctionPiecewise::Evaluate: Overlapping outgoing functions\n";
+	CMN_LOG_RUN_VERBOSE << __PRETTY_FUNCTION__ 
+			    << ": Overlapping outgoing functions" << endl;
       else
 	outgoing = *fn;                          // this is the outgoing function
       break;
@@ -89,30 +92,32 @@ robError robFunctionPiecewise::Evaluate( const robDOF& input, robDOF& output ){
   }
 
   // no function defined
-  if( outgoing == NULL && defined == NULL && incoming == NULL ){ return FAILURE; }
+  if( outgoing == NULL && defined == NULL && incoming == NULL ){return FAILURE;}
   // just one outgoing function
-  if( outgoing != NULL && defined == NULL && incoming == NULL ){ return FAILURE; }
+  if( outgoing != NULL && defined == NULL && incoming == NULL ){return FAILURE;}
   // just one incoming function (should ramp up)
-  if( outgoing == NULL && defined == NULL && incoming != NULL ){ return FAILURE; }
+  if( outgoing == NULL && defined == NULL && incoming != NULL ){return FAILURE;}
   // All functions are not null! That should be impossible
-  if( outgoing != NULL && defined != NULL && incoming != NULL ){ return FAILURE; }
+  if( outgoing != NULL && defined != NULL && incoming != NULL ){return FAILURE;}
 
   // this case is when we're about to enter a corner
   if( outgoing == NULL && defined != NULL && incoming != NULL ){ 
     if( output.IsReal() || output.IsTranslation() ){
       if( BlendRn( defined, incoming, input, output ) == FAILURE ){
-	cout << "robFunctionPiecewise::Evaluate: Failed to blend reals" << endl;
+	CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+			  << ": Failed to blend incomming Real functions" <<endl;
 	return FAILURE;
       }
     }
     else if( output.IsRotation() ){ 
       if( BlendSO3( defined, incoming, input, output ) == FAILURE ){
-	cout << "robFunctionPiecewise::Evaluate: Failed to blend SO3" << endl;
+	CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+			  << ": Failed to blend incomming SO3 functions" << endl;
 	return FAILURE;
       }
     }
     else{ 
-      cout << "robFunctionPiecewise::Evaluate: Unknown output" << endl; 
+      CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ << ": Unknown output" << endl;
       return FAILURE;
     }
   }
@@ -121,18 +126,21 @@ robError robFunctionPiecewise::Evaluate( const robDOF& input, robDOF& output ){
   if( outgoing != NULL && defined != NULL && incoming == NULL ){ 
     if( output.IsReal() || output.IsTranslation() ){ 
       if( BlendRn( outgoing, defined, input, output ) == FAILURE ){
-	cout << "robFunctionPiecewise::Evaluate: Failed to blend reals" << endl;
+	CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+			  << ": Failed to blend outgoing Real functions" << endl;
 	return FAILURE;
       }
     }
     else if( output.IsRotation() ){ 
       if( BlendSO3( outgoing, defined, input, output ) == FAILURE ){
-	cout << "robFunctionPiecewise::Evaluate: Failed to blend SO3" << endl;
+	CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+			  << ": Failed to blend outgoing SO3 functions" << endl;
 	return FAILURE;
       }
     }
     else{
-      cout << "robFunctionPiecewise::Evaluate: Unknown output" << endl;
+	CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+			  << ": Unknown output" << endl;
       return FAILURE;
     }
   }
@@ -140,7 +148,8 @@ robError robFunctionPiecewise::Evaluate( const robDOF& input, robDOF& output ){
   // this case is when we're cruising
   if( outgoing == NULL && defined != NULL && incoming == NULL ){
     if( defined->Evaluate( input, output ) == FAILURE ){
-      cout << "robFunctionPiecewise::Evaluate: Failed to evaluate function" <<endl;
+	CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+			  << ": Failed to evaluate defined function" << endl;
       return FAILURE;
     }
     if( blender != NULL ){                 // check if the blender needs to
@@ -160,7 +169,7 @@ robError robFunctionPiecewise::BlendSO3( robFunction*  initial,
   
   // is the input time?
   if( !input.IsTime() ){
-    cout << "robFunctionPiecewise::BlendSO3: expected time input" << endl;
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ << ": Expected time input" << endl;
     return FAILURE;
   }
 
@@ -185,15 +194,16 @@ robError robFunctionPiecewise::BlendSO3( robFunction*  initial,
       }
     }
     // create a new SO3 blender
-    blender = new robSO3Blender(input.t + TAU - initial->Duration(), // T1
-				initial->Duration(),                 // T2
-				final->Duration(),                   // T3
-				R0,R1,R2);                           // R1, R2, R3
+    blender = new robSO3Blender(input.t + TAU - initial->Duration(),// T1
+				initial->Duration(),                // T2
+				final->Duration(),                  // T3
+				R0,R1,R2);                          // R1, R2, R3
   }
 
   // evaluate the blender
   if( blender->Evaluate( input, output ) == FAILURE ){
-    cout << "robFunctionPiecewise::BlendSO3: Failed to evaluate blender" << endl;
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+		      << ": Failed to evaluate blender" << endl;
     return FAILURE;
   }
   return SUCCESS;
@@ -218,7 +228,7 @@ robError robFunctionPiecewise::PackSO3( const robDOF& input1,
     return SUCCESS;
   }
   else{
-    cout << "robFunctionPiecewise::PackSE3: expected rotation inputs" <<endl;
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ << ": Expected SO3 inputs" << endl;
     return FAILURE;
   }
 }
@@ -229,7 +239,7 @@ robError robFunctionPiecewise::BlendRn( robFunction*  initial,
 					robDOF& output ){
   
   if( !input.IsTime() ){
-    cout << "robFunctionPiecewise::BlendRn: expected time input" << endl;
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ << ": Expected time input" << endl;
     return FAILURE;
   }
 
@@ -242,20 +252,21 @@ robError robFunctionPiecewise::BlendRn( robFunction*  initial,
     initial->Evaluate( input, initialout);        // create one
 
     // cast the input and create a function with of N blenders
-    real ti = input.t;
-    real tf = ti + 2.0*TAU;
+    Real ti = input.t;
+    Real tf = ti + 2.0*TAU;
     blender = new robRnBlender(ti, initialout.x, initialout.xd, initialout.xdd,
 			       tf, finalout.x,   finalout.xd,   finalout.xdd ); 
   }
   
   robDOF blenderout;
   if( blender->Evaluate( input, blenderout ) == FAILURE ){
-    cout << "robFunctionPiecewise::BlendRn: Failed to evaluate blender" << endl;
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+		      << ": Failed to evaluate blender" << endl;
     return FAILURE;
   }
 
   if( PackRn( finalout, blenderout, output ) == FAILURE ){
-    cout << "robFunctionPiecewise::BlendRn: Faile to pack output" << endl;
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ << ": Failed to pack output" <<endl;
     return FAILURE;
   }
 
@@ -276,7 +287,7 @@ robError robFunctionPiecewise::PackRn( const robDOF& input1,
     return SUCCESS;
   }
   else{
-    cout << "robFunctionPiecewise::PackRn: expected real inputs" << endl;
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ << ": Expected Real inputs" <<endl;
     return FAILURE;
   }
 }

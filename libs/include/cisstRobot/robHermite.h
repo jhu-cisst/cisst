@@ -8,15 +8,15 @@ namespace cisstRobot{
   class robHermite : public robFunction {
   private:
     
-    real a0, a1, a2, a3, a4, a5;
-    real xmin, xmax;
+    Real a0, a1, a2, a3, a4, a5;
+    Real xmin, xmax;
     
   public:
     
-    robHermite( real x1, real y1, real y1d, real y1dd, 
-		real x2, real y2, real y2d, real y2dd );
+    robHermite( Real x1, Real y1, Real y1d, Real y1dd, 
+		Real x2, Real y2, Real y2d, Real y2dd );
     
-    robHermite( real x1, const R3& y1, real x2, const R3& y2 );
+    robHermite( Real x1, const R3& y1, Real x2, const R3& y2 );
     
     robDomainAttribute IsDefinedFor( const robDOF& input ) const; 
     

@@ -1,3 +1,4 @@
+#include <cisstCommon/cmnLogger.h>
 #include <cisstRobot/robSO3Bezier.h>
 
 using namespace std;
@@ -15,15 +16,17 @@ robSO3Bezier::robSO3Bezier( const SO3& Rw0,
   Rwi = SO3(q1);
 }
 
-robSO3Bezier::robSO3Bezier( real t1, 
-			    real t2,
+robSO3Bezier::robSO3Bezier( Real t1, 
+			    Real t2,
 			    const SO3& Rw1, 
 			    const R3& w1, 
 			    const SO3& Rw2, 
 			    const R3& w2,
-			    real wmax ) {
-  if( t2 < t1 )
-    {cerr << "robSO3Bezier::robSO3Bezier: t2 must be greater than t1" << endl;}
+			    Real wmax ) {
+  if( t2 < t1 ){
+    CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__ 
+			<< ": t initial must be less than t final" << endl;
+  }
 
   this->tmin=t1;
   this->tmax=t2;
@@ -46,7 +49,7 @@ robSO3Bezier::robSO3Bezier( real t1,
       // 1st control point
       {
 	R3 w = w1;                 // get the angular velocity (outgoing)
-	real theta = w.Norm();     // get the unit vector
+	Real theta = w.Norm();     // get the unit vector
 	w.NormalizedSelf();
 	vctAxAnRot3 ut(w, theta);  // create a rotation from Rw1 to Rwa by 
 	SO3 R1a(ut);               // going at the constant velocity w for 1
@@ -58,7 +61,7 @@ robSO3Bezier::robSO3Bezier( real t1,
       // 2nd control point
       {
 	R3 w = -w2;                // get the angular velocity (incoming vel)
-	real theta = w.Norm();     // get the unit vector
+	Real theta = w.Norm();     // get the unit vector
 	w.NormalizedSelf();
 	vctAxAnRot3 ut(w, theta);  // create a rotation from Rw1 to Rwa by
 	SO3 R2b(ut);               // going at the constant velocity w for 1
@@ -71,7 +74,7 @@ robSO3Bezier::robSO3Bezier( real t1,
     else if( 0 < w1.Norm() ){    // 3 ctrl point: leaving q1 along w1
       nctrlpoints = 3;
       R3 w = w1;                 // get the angular velocity (outgoing)
-      real theta = w.Norm();     // get the unit vector
+      Real theta = w.Norm();     // get the unit vector
       w.NormalizedSelf();
       vctAxAnRot3 ut(w, theta);  // create a rotation from Rw1 to Rwa by 
       SO3 R1a(ut);               // going at the constant velocity w for 1
@@ -83,7 +86,7 @@ robSO3Bezier::robSO3Bezier( real t1,
     else if( 0 < w2.Norm() ){    // 3 ctrl point: arriving to q2 along w2
       nctrlpoints = 3;
       R3 w = -w2;                // get the angular velocity (incoming vel)
-      real theta = w.Norm();     // get the unit vector
+      Real theta = w.Norm();     // get the unit vector
       w.NormalizedSelf();
       vctAxAnRot3 ut(w, theta);  // create a rotation from Rw1 to Rwa by
       SO3 R2b(ut);               // going at the constant velocity w for 1
@@ -95,13 +98,13 @@ robSO3Bezier::robSO3Bezier( real t1,
 }
 
 robDomainAttribute robSO3Bezier::IsDefinedFor( const robDOF& input ) const{ 
-  // test the dof are real numbers
+  // test the dof are Real numbers
   if( !input.IsTime() ){
-    cout << "robSO3Bezier::IsDefinedFor: expected a time input" << endl;
+    CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__ << ": Expected time input" <<endl;
     return UNDEFINED;
   }
 
-  real t = input.t;
+  Real t = input.t;
   if( tmin <= t && t <= tmax ) return DEFINED;
     
   return DEFINED;
@@ -109,11 +112,11 @@ robDomainAttribute robSO3Bezier::IsDefinedFor( const robDOF& input ) const{
 
 Quaternion robSO3Bezier::SLERP( const Quaternion &qi, 
 				const Quaternion &qf, 
-				real t){
+				Real t){
 
-  real ctheta=(qi.X()*qf.X() + qi.Y()*qf.Y() + qi.Z()*qf.Z() + qi.R()*qf.R());
+  Real ctheta=(qi.X()*qf.X() + qi.Y()*qf.Y() + qi.Z()*qf.Z() + qi.R()*qf.R());
 
-  real theta = acosf(ctheta);
+  Real theta = acosf(ctheta);
 
   // if theta = 180 degrees then result is not fully defined
   // we could rotate around any axis normal to qinitial or qfinal
@@ -124,8 +127,8 @@ Quaternion robSO3Bezier::SLERP( const Quaternion &qi,
 		       qi.R()*0.5 + qf.R()*0.5, VCT_NORMALIZE );
   }
   
-  real A = sin( (1-t) * theta) / sin(theta);
-  real B = sin(    t  * theta) / sin(theta);
+  Real A = sin( (1-t) * theta) / sin(theta);
+  Real B = sin(    t  * theta) / sin(theta);
 
   return Quaternion( qi.X()*A + qf.X()*B, 
 		     qi.Y()*A + qf.Y()*B,
@@ -136,7 +139,7 @@ Quaternion robSO3Bezier::SLERP( const Quaternion &qi,
 
 robError robSO3Bezier::Evaluate( const robDOF& input, robDOF& output ){
 
-  real t= (input.t-tmin)/(tmax-tmin);    // set time between 0 and 1
+  Real t= (input.t-tmin)/(tmax-tmin);    // set time between 0 and 1
   Quaternion q;
   // cout << nctrlpoints << endl;
   // nctrlpoints=2;
@@ -169,7 +172,7 @@ robError robSO3Bezier::Evaluate( const robDOF& input, robDOF& output ){
   }
 
   // evaluate the next angular velocity
-  real dt = t-ti;        // time difference
+  Real dt = t-ti;        // time difference
   SO3 Rwj(q);            // current orientation
   SO3 Riw;               // inverse of previous orrientation 
   Riw.InverseOf(Rwi);

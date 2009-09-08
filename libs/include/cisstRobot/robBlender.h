@@ -12,7 +12,7 @@ namespace cisstRobot{
     robHermite* hermite;
     //robBezier*  bezier;
     
-    real xmin, xmax;
+    Real xmin, xmax;
 
   public:
     

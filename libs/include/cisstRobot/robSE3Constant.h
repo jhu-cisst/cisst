@@ -14,7 +14,7 @@ namespace cisstRobot{
   public:
 
     //! hack...
-    virtual real Duration() const { return xmax.at(0)-xmin.at(0); }
+    virtual Real Duration() const { return xmax.at(0)-xmin.at(0); }
     
     
     //! Create an SE3 constant function (M:R1->SE3)
@@ -24,7 +24,7 @@ namespace cisstRobot{
        \param x1 The lower value of the domain (default -infinity)
        \param x2 The upper value of the domain (default infinity)
      */
-    robSE3Constant( const SE3& Rt, real xstart=FLT_MIN, real xend=FLT_MAX);
+    robSE3Constant( const SE3& Rt, Real xstart=FLT_MIN, Real xend=FLT_MAX);
     
     //! Return true if the function is defined for the given input
     robDomainAttribute IsDefinedFor( const robDOF& input ) const;

@@ -1,3 +1,4 @@
+#include <cisstCommon/cmnLogger.h>
 #include <cisstRobot/robRnBlender.h>
 #include <cisstRobot/robFunctionPiecewise.h>
 
@@ -6,17 +7,19 @@
 using namespace std;
 using namespace cisstRobot;
 
-robRnBlender::robRnBlender(real xi, const Rn& yi, const Rn& yid, const Rn& yidd,
-			   real xf, const Rn& yf, const Rn& yfd, const Rn& yfdd){
+robRnBlender::robRnBlender(Real xi, const Rn& yi, const Rn& yid, const Rn& yidd,
+			   Real xf, const Rn& yf, const Rn& yfd, const Rn& yfdd){
 
   if( xf < xi ){
-    cout << "robRnBlender::robRnBlender: x1 must be less than x2" << endl;
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+		      << ": t initial must be less than t final" << endl;
   }
 
   if( yi.size() != yid.size() || yi.size() != yidd.size() ||
       yf.size() != yfd.size() || yf.size() != yfdd.size() || 
       yi.size() != yf.size() ){
-    cout << "robRnBlender::robRnBlender: vectors must have the same size"<< endl;
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+			<< ": Vectors must have the same length" << endl;
   }
       
   xmin = xi;
@@ -30,13 +33,13 @@ robRnBlender::robRnBlender(real xi, const Rn& yi, const Rn& yid, const Rn& yidd,
 
 robDomainAttribute robRnBlender::IsDefinedFor( const robDOF& input ) const{
   
-  // test the dof are real numbers
+  // test the dof are Real numbers
   if( !input.IsTime() ){
-    cout << "robRnBlender::IsDefinedFor: expected a time input" << endl;
+    CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__ << ": Expected time input" <<endl;
     return UNDEFINED;
   }
 
-  real x = input.t;
+  Real x = input.t;
   if( xmin <= x && x <= xmax ) return DEFINED;
   else                         return UNDEFINED;
   
@@ -44,20 +47,23 @@ robDomainAttribute robRnBlender::IsDefinedFor( const robDOF& input ) const{
 
 robError robRnBlender::Evaluate( const robDOF& input, robDOF& output ){  
 
-
   Rn y(blenders.size(), 0.0);
   Rn yd(blenders.size(), 0.0);
   Rn ydd(blenders.size(), 0.0);
   
   for(size_t i=0; i<blenders.size(); i++){
     robDOF blenderout;
+
     if( blenders[i]->Evaluate(input, blenderout) == FAILURE ){
-      cout << "robRnBlender::Evaluate: failed to evaluate function." << endl;
+      CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+			<< ": Failed to evaluate a blender" << endl;
       return FAILURE;
     }
+
     y[i] = blenderout.x.at(0);
     yd[i] = blenderout.xd.at(0);
     ydd[i] = blenderout.xdd.at(0);
+
   }
   
   output = robDOF( y, yd, ydd );

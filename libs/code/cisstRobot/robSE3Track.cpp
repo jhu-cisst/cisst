@@ -1,3 +1,4 @@
+#include <cisstCommon/cmnLogger.h>
 #include <cisstRobot/robSE3Track.h>
 #include <cisstRobot/robQuintic.h>
 #include <cisstRobot/robSLERP.h>
@@ -6,7 +7,7 @@
 
 using namespace cisstRobot;
 
-robSE3Track::robSE3Track( real vmax, real wmax, real vdmax, real wdmax ){
+robSE3Track::robSE3Track( Real vmax, Real wmax, Real vdmax, Real wdmax ){
   txblender = NULL;
   tyblender = NULL;
   tzblender = NULL;
@@ -72,7 +73,7 @@ robError robSE3Track::Evaluate( const robDOF& input, robDOF& output ){
 		input.Rt[1][0], input.Rt[1][1], input.Rt[1][2], 
 		input.Rt[2][0], input.Rt[2][1], input.Rt[2][2], VCT_NORMALIZE);
 
-      real dt = t2-t0;
+      Real dt = t2-t0;
 
       if( input.IsSet( robDOF::VW ) ){
 	v2 = R3( input.vw[0], input.vw[1], input.vw[2] );
@@ -86,11 +87,11 @@ robError robSE3Track::Evaluate( const robDOF& input, robDOF& output ){
 	SO3 R0w, R02;                        // relative orientation wrt 0
 	R0w.InverseOf(Rw0);                  //
 	R02 = R0w * Rw2;                     // relative orientation wrt frame i
-	vctAxisAngleRotation3<real> r02(R02);//
+	vctAxisAngleRotation3<Real> r02(R02);//
 	
 	v2 = tw/(t2-t0)/2.0;                        // approximate v2
 	w2 = r02.Axis()*r02.Angle()/(t2-t0)/2000.0; // approximate w2
-	w2 = Rw0*w2;                                // orient w2 wrt W
+	//w2 = Rw0*w2;                                // orient w2 wrt W
 
 	if( 0 < vmax )                      // limit on linear acceleration?
 	  dt = tw.Norm()/vmax;              // time for a straight line at vmax
@@ -129,7 +130,7 @@ robError robSE3Track::Evaluate( const robDOF& input, robDOF& output ){
     t1 = input.t;
     // nothing has been set yet! Rw1, tw1 are empty
     if( numwp == 0 ){
-      cout << "robSE3Track::Evaluate: not initialized" << endl;
+      CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ << ": Not initialized" << endl;
       return FAILURE;
     }
 
@@ -159,7 +160,8 @@ robError robSE3Track::Evaluate(const robDOF& input){
   if( txblender->IsDefinedFor( input ) == DEFINED ){ 
     robDOF dof;
     if( txblender->Evaluate( input, dof ) == FAILURE ){
-      cout << "robSE3Track::Evaluate: txblender failed" << endl;
+      CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+			<< ": Failed to evaluate TX blender" << endl;
       return FAILURE;
     }
     tw1[0] = dof.x[0];     // set the X position
@@ -175,7 +177,8 @@ robError robSE3Track::Evaluate(const robDOF& input){
   if( tyblender->IsDefinedFor( input ) == DEFINED ){ 
     robDOF dof;
     if( tyblender->Evaluate( input, dof ) == FAILURE ){
-      cout << "robSE3Track::Evaluate: tyblender failed" << endl;
+      CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+			<< ": Failed to evaluate TY blender" << endl;
       return FAILURE;
     }
     tw1[1] = dof.x[0];     // set the Y position
@@ -191,7 +194,8 @@ robError robSE3Track::Evaluate(const robDOF& input){
   if( tzblender->IsDefinedFor( input ) == DEFINED ){ 
     robDOF dof;
     if( tzblender->Evaluate( input, dof ) == FAILURE ){
-      cout << "robSE3Track::Evaluate: tzblender failed" << endl;
+      CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+			<< ": Failed to evaluate TZ blender" << endl;
       return FAILURE;
     }
     tw1[2] = dof.x[0];     // set the Z position
@@ -209,7 +213,8 @@ robError robSE3Track::Evaluate(const robDOF& input){
     robDOF dof;
 
     if( so3blender->Evaluate( input, dof ) == FAILURE ){
-      cout << "robSE3Track::Evaluate: so3blender failed" << endl;
+      CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+			<< ": Failed to evaluate SO3 blender" << endl;
       return FAILURE;
     }
     Rw1 = SO3( dof.Rt[0][0], dof.Rt[0][1], dof.Rt[0][2], 

@@ -7,6 +7,8 @@
 #include <cisstRobot/robSE3Track.h>
 #include <cisstRobot/robFunctionPiecewise.h>
 
+#include <cisstCommon/cmnLogger.h>
+
 #include <typeinfo>
 #include <iostream>
 using namespace std;
@@ -23,7 +25,6 @@ robTrajectory::robTrajectory(robClock* clock, robDevice* device){
   this->device = device; 
 }
 
-
 void robTrajectory::Clear(){ functions.clear(); }
 
 robError robTrajectory::Insert( robFunction* function, 
@@ -35,7 +36,7 @@ robError robTrajectory::Insert( robFunction* function,
   robMapping mapping( rd1, rd2 );
 
   // see if a mapping is already in the table
-  std::map< robMapping, robFunction* >::iterator iter =  functions.find(mapping);
+  std::map< robMapping, robFunction* >::iterator iter = functions.find(mapping);
 
   // nope...the mapping is not in the table...add a new one
   if( iter == functions.end() ) { 
@@ -57,7 +58,8 @@ robError robTrajectory::Insert( robFunction* function,
     
     // the insertion didn't work
     else{ 
-      cout <<"robTrajectory::Insert: Couldn't insert in the map" << endl;
+      CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+			<< ": Failed to insert the function" << endl;
       return FAILURE;
     }
   }
@@ -66,11 +68,12 @@ robError robTrajectory::Insert( robFunction* function,
   else{
     
     // check if the existing function is a piecewise function
-    robFunctionPiecewise* fnpw = dynamic_cast<robFunctionPiecewise*>(iter->second);
+    robFunctionPiecewise* fnpw
+      =dynamic_cast<robFunctionPiecewise*>(iter->second);
   
     //  nope the function isn't a piecewise function, we can't add the function
     if( fnpw == NULL ) { 
-      cout<<"robTrajectory::Insert: Mapping conflict." << endl;
+      CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ << ": Mapping conflict" << endl;
       return FAILURE;
     }
 
@@ -82,27 +85,35 @@ robError robTrajectory::Insert( robFunction* function,
   }
 }
 
-robError robTrajectory::Linear( real ti, real qi, 
-				real tf, real qf, 
+robError robTrajectory::Linear( Real ti, Real qi, 
+				Real tf, Real qf, 
 				uint64_t dof, 
 				bool sticky ){
   // should check that only one Rn dof is set
   return Linear( ti, Rn(1,qi), tf, Rn(1,qf), dof, sticky );
 }
 
-robError robTrajectory::Linear( real qi, real qf, 
-				real vmax, uint64_t dof, 
+robError robTrajectory::Linear( Real qi, Real qf, 
+				Real vmax, uint64_t dof, 
 				bool sticky ){
   if(clock==NULL){
-    cout << "robTrajectory::Linear: No clock" << endl;
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ << ": No clock is defined" << endl;
     return FAILURE;
   }
   
-  real ti = clock->Evaluate();
-  real tf = ti + fabs(qf-qi)/fabs(vmax);
+  robDOF time;
+  if( clock->Read( time ) == FAILURE ){
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+		      << ": Failed to query the clock" << endl;
+    return FAILURE;
+  }
+  Real ti=time.t;
+
+  Real tf = ti + fabs(qf-qi)/fabs(vmax);
 
   if( Linear( ti, qi, tf, qf, dof, sticky ) == FAILURE ){
-    cout << "robTrajectory::Linear: failed to create a linear trajectory" << endl;
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+		      << ": Failed to create the trajectory"<< endl;
     return FAILURE;
   }
 
@@ -111,53 +122,63 @@ robError robTrajectory::Linear( real qi, real qf,
 
 robError robTrajectory::Linear( const Rn& qi, 
 				const Rn& qf, 
-				real vmax, uint64_t dof, bool sticky ){
+				Real vmax, uint64_t dof, bool sticky ){
   // test for vector size
   if( qi.size() != qf.size() ){
-    cout << "robTrajectory::Linear: vectors must have the same length" << endl;
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+		      << ": vectors must have the same length" << endl;
     return FAILURE;
   }
 
   // get the current time
-  real ti = clock->Evaluate();
+  robDOF time;
+  if( clock->Read(time) == FAILURE ){
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+		      << ": Failed to query the clock" << endl;
+    return FAILURE;
+  }
+  Real ti=time.t;
 
   // find the longuest time
-  real tf = -1;
+  Real tf = -1;
   for(size_t i=0; i<qi.size(); i++){
-    real t = ti + fabs(qf[i]-qi[i])/fabs(vmax);
+    Real t = ti + fabs(qf[i]-qi[i])/fabs(vmax);
     if( tf < t ) tf = t;
   }
 
   if( Linear( ti, qi, tf, qf, dof, sticky ) == FAILURE ){
-    cout << "robTrajectory::Linear: failed to create a linear trajectory" << endl;
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+		      << ": Failed to create the trajectory" << endl;
     return FAILURE;
   }
   return SUCCESS;
 }
     
-robError robTrajectory::Linear( real ti, const Rn& qi, 
-				real tf, const Rn& qf, 
+robError robTrajectory::Linear( Real ti, const Rn& qi, 
+				Real tf, const Rn& qf, 
 				uint64_t dof, bool sticky ){
 
   // check that the time is ok
   if( tf < ti ){
-    cout << "robTrajectory::Linear: ti must be less than tf" <<endl;
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+		      << ": t initial must be less than t final" << endl;
     return FAILURE;
   }
 
   // check that the vector size match
   if( qi.size() != qf.size() ){
-    cout << "robTrajectory::Linear: vectors must have the same length" << endl;
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+		      << ": Vectors must have the same length" << endl;
     return FAILURE;
   }
 
-  // check that we need real position and/or velocities and/or accelerations
+  // check that we need Real position and/or velocities and/or accelerations
   dof &= ( robDOF::XPOS | robDOF::TX  | robDOF::TY  | robDOF::TZ |
 	   robDOF::XVEL | robDOF::VX  | robDOF::VY  | robDOF::VZ |
 	   robDOF::XACC | robDOF::VXD | robDOF::VYD | robDOF::VZD );
-  if( !dof ){
-    cout << "robTrajectory::Linear: expected real position values" << endl;
-    return FAILURE;
+  if( !dof ){ 
+    CMN_LOG_RUN_VERBOSE << __PRETTY_FUNCTION__ << ": No DOF!" << endl;
+    return SUCCESS;
   }
 
   // create a linear function
@@ -165,7 +186,8 @@ robError robTrajectory::Linear( real ti, const Rn& qi,
 
   // insert the linear function as a mapping F:R1->Rn
   if( Insert(fnlin, robDOF::TIME, dof) == FAILURE ){
-    cout << "robTrajectory::Linear: Failed to insert the function." << endl;
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+		      << ": Failed to insert the function" << endl;
     return FAILURE;
   }
 
@@ -176,28 +198,30 @@ robError robTrajectory::Linear( real ti, const Rn& qi,
     
     // insert the constant function as a mapping F:R1->Rn
     if( Insert( fncte, robDOF::TIME, dof) == FAILURE ){
-      cout << "robTrajectory::Linear: Failed to insert the function." << endl;
+      CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+			<< ": Failed to insert the sticky function" << endl;
       return FAILURE;
     }
   }
   return SUCCESS;
 }
 
-robError robTrajectory::Sigmoid( real ti, real qi,
-				 real tf, real qf, 
+robError robTrajectory::Sigmoid( Real ti, Real qi,
+				 Real tf, Real qf, 
 				 uint64_t dof, 
 				 bool sticky ){
   // check the time
   if( tf < ti ){
-    cout<<"robTrajectory::Sigmoid: initial time is later than final time" <<endl;
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+		      << ": t initial must be less than t final" << endl;
     return FAILURE;
   }
 
-  // check that a position DOF is used (should make sure that there's only 1 dof)
+  //check that a position DOF is used (should make sure that there's only 1 dof)
   dof &= (robDOF::XPOS|robDOF::XVEL|robDOF::XACC);
   if( !dof ){
-    cout<<"robTrajectory::Sigmoid: DOF of sigmoid must be position" <<endl;
-    return FAILURE;
+    CMN_LOG_RUN_VERBOSE << __PRETTY_FUNCTION__ << ": No DOF!" << endl;
+    return SUCCESS; 
   }
 
   // create the linear function
@@ -205,7 +229,8 @@ robError robTrajectory::Sigmoid( real ti, real qi,
 
   // insert the linear function as a mapping F:R1->Rn
   if( Insert(fnsig, robDOF::TIME, dof) == FAILURE ){
-    cout << "robTrajectory::Simoid: Failed to insert the function." << endl;
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+		      << ": Failed to insert the function" << endl;
     return FAILURE;
   }
 
@@ -216,30 +241,33 @@ robError robTrajectory::Sigmoid( real ti, real qi,
     
     // insert the constant function as a mapping F:R1->Rn
     if( Insert( fncte, robDOF::TIME, dof) == FAILURE ){
-      cout << "robTrajectory::Sigmoid: Failed to insert the function." << endl;
+      CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+			<< ": Failed to insert the sticky function" << endl;
       return FAILURE;
     }
   }
   return SUCCESS;
 }
 
-robError robTrajectory::Sigmoid( real ti, const Rn& qi,
-				 real tf, const Rn& qf, 
+robError robTrajectory::Sigmoid( Real ti, const Rn& qi,
+				 Real tf, const Rn& qf, 
 				 uint64_t dof, 
 				 bool sticky ){
   // check that the vector size match
   if( qi.size() != qf.size() ){
-    cout << "robTrajectory::Sigmoid: vectors must have the same length" << endl;
+      CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+			<< ": Vectors must have the same length" << endl;
     return FAILURE;
   }
-  // this part is really ugly
+  // this part is Really ugly
   uint64_t mask = robDOF::X1 | robDOF::X1D | robDOF::X1DD ;
   for( size_t i=0; i<qi.size(); i++ ){
 
     while( mask != (robDOF::X8 | robDOF::X8D | robDOF::X8DD) ){
       if( mask & dof ){
 	if( Sigmoid(ti, qi[i], tf, qf[i], dof & mask, sticky ) == FAILURE ){
-	  cout << "robTrajectory::Sigmoid: Failed to create a sigmoid." << endl;
+	  CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+			    << ": Failed to create the trajectory" << endl;
 	  return FAILURE;
 	}
 	mask <<= 1;
@@ -251,13 +279,14 @@ robError robTrajectory::Sigmoid( real ti, const Rn& qi,
   return SUCCESS;
 }
 
-robError robTrajectory::Translation( real ti, const SE3& Rti,
-				     real tf, const SE3& Rtf,
+robError robTrajectory::Translation( Real ti, const SE3& Rti,
+				     Real tf, const SE3& Rtf,
 				     uint64_t dof,
 				     bool sticky ){
   // check the time
   if( tf < ti ){
-    cout<<"robTrajectory::Translation: initial time is later than final" <<endl;
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+		      << ": t initial must be less than t final" << endl;
     return FAILURE;
   }
 
@@ -265,28 +294,30 @@ robError robTrajectory::Translation( real ti, const SE3& Rti,
   dof &= (robDOF::TX |robDOF::TY |robDOF::TZ|
 	  robDOF::VX |robDOF::VY |robDOF::VZ|
 	  robDOF::VXD|robDOF::VYD|robDOF::VZD );
-  if( !dof ){
-    cout<<"robTrajectory::Translation: expected translation DOF" <<endl;
-    return FAILURE;
+  if( !dof ){ 
+    CMN_LOG_RUN_VERBOSE << __PRETTY_FUNCTION__ << ": No DOF!" << endl;
+    return SUCCESS;
   }
   
   Rn Ti(3, Rti[0][3], Rti[1][3], Rti[2][3] );
   Rn Tf(3, Rtf[0][3], Rtf[1][3], Rtf[2][3] );
 
   if( Linear(ti, Ti, tf, Tf, dof, sticky) == FAILURE ){
-    cout << "robTrajectory::Translation: failed to create a linear function"<<endl;
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+		      << ": Failed to create the trajectory" << endl;
     return FAILURE;
   }
   return SUCCESS;
 }
 
-robError robTrajectory::Rotation( real ti, const SE3& Rti,
-				  real tf, const SE3& Rtf,
+robError robTrajectory::Rotation( Real ti, const SE3& Rti,
+				  Real tf, const SE3& Rtf,
 				  uint64_t dof,
 				  bool sticky ){
   // check the time
   if( tf < ti ){
-    cout<<"robTrajectory::Rotation: initial time is later than final" <<endl;
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+		      << ": t initial must be less than t final" << endl;
     return FAILURE;
   }
 
@@ -295,8 +326,8 @@ robError robTrajectory::Rotation( real ti, const SE3& Rti,
 	  robDOF::WX |robDOF::WY |robDOF::WZ|
 	  robDOF::WXD|robDOF::WYD|robDOF::WZD );
   if( !dof ){
-    cout<<"robTrajectory::Rotation: expected rotation DOF" <<endl;
-    return FAILURE;
+    CMN_LOG_RUN_VERBOSE << __PRETTY_FUNCTION__ << ": No DOF!" << endl;
+    return SUCCESS;
   }
   
   // create slerp
@@ -304,7 +335,8 @@ robError robTrajectory::Rotation( real ti, const SE3& Rti,
 
   // insert the linear function as a mapping F:R1->Rn
   if( Insert( fnslerp, robDOF::TIME, dof ) == FAILURE ){
-    cout << "robTrajectory::Rotation: Failed to insert the function." << endl;
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+		      << ": Failed to insert the function" << endl;
     return FAILURE;
   }
 
@@ -315,24 +347,28 @@ robError robTrajectory::Rotation( real ti, const SE3& Rti,
     
     // insert the constant function as a mapping F:R1->Rn
     if( Insert( fncte, robDOF::TIME, dof ) == FAILURE ){
-      cout << "robTrajectory::Rotation: Failed to insert the function." << endl;
+      CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+			<< ": Failed to insert the sticky function" << endl;
       return FAILURE;
     }
   }
   return SUCCESS;
 }
 				      
-robError robTrajectory::Linear( real ti, const SE3& Rti,
-				real tf, const SE3& Rtf,
+robError robTrajectory::Linear( Real ti, const SE3& Rti,
+				Real tf, const SE3& Rtf,
 				uint64_t dof, 
 				bool sticky ){
 
   if( Translation(ti, Rti, tf, Rtf, dof, sticky) == FAILURE ){
-    cout << "robTrajectory::Linear: Failed to create a translation" << endl;
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+		      << ": Failed to create the translation" << endl;
     return FAILURE;
   }
+
   if( Rotation(ti, Rti, tf, Rtf, dof, sticky) == FAILURE ){
-    cout << "robTrajectory::Linear: Failed to create a rotation" << endl;
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+		      << ": Failed to create the rotation" << endl;
     return FAILURE;
   }
 
@@ -340,21 +376,28 @@ robError robTrajectory::Linear( real ti, const SE3& Rti,
 }
 
 robError robTrajectory::Linear( const SE3& Rtwi, const SE3& Rtwf, 
-				real vmax, real wmax,
+				Real vmax, Real wmax,
 				uint64_t dof, bool sticky ){
   // ensure the clock is there
   if(clock==NULL){
-    cout << "robTrajectory::Linear: No clock" << endl;
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+		      << ": No clock defined" << endl;
     return FAILURE;
   }
 
-  real ti = clock->Evaluate();
- 
+  robDOF time;
+  if( clock->Read( time ) == FAILURE ){
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+		      << ": Failed to query the clock" << endl;
+    return FAILURE;
+  }
+  Real ti=time.t;
+
   // compute the translation time: timet
   R3 pwi = Rtwi.Translation();
   R3 pwf = Rtwf.Translation();
   R3 pif = pwf - pwi;
-  real timet = pif.Norm() / fabs(vmax);
+  Real timet = pif.Norm() / fabs(vmax);
 
   // compute the rotation time: clock
   SE3 Rtiw(Rtwi);
@@ -362,17 +405,18 @@ robError robTrajectory::Linear( const SE3& Rtwi, const SE3& Rtwf,
   SE3 Rtif = Rtiw * Rtwf;
   SO3 Rif;
   for(int r=0; r<3; r++) for(int c=0; c<3; c++) Rif[r][c] = Rtif[r][c];
-  vctAxisAngleRotation3<real> ut(Rif);
-  real timeR = ut.Angle()/ fabs(wmax);
+  vctAxisAngleRotation3<Real> ut(Rif);
+  Real timeR = ut.Angle()/ fabs(wmax);
 
   // compute the final time
-  real tf = ti+timet;
+  Real tf = ti+timet;
   if( timet < timeR )
     tf = ti+timeR;
 
   // create the motion
   if( Linear(ti, Rtwi, tf, Rtwf, dof, sticky) == FAILURE ){
-    cout << "robTrajectory::Linear: Could not create a linear trajectory" << endl;
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+		      << ": Failed to create a trajectory" << endl;
     return FAILURE;
   }
 
@@ -380,16 +424,23 @@ robError robTrajectory::Linear( const SE3& Rtwi, const SE3& Rtwf,
 }
 
 robError robTrajectory::Linear( const std::vector<SE3>& Rt, 
-				real vmax, real wmax,
+				Real vmax, Real wmax,
 				uint64_t dof, bool sticky){
 
   // ensure the clock is there
   if(clock==NULL){
-    cout << "robTrajectory::Linear: No clock" << endl;
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+		      << ": No clock defined" << endl;
     return FAILURE;
   }
 
-  real ti = clock->Evaluate();
+  robDOF time;
+  if( clock->Read( time ) == FAILURE ){
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+		      << ": Failed to query the clock" << endl;
+    return FAILURE;
+  }
+  Real ti = time.t;
 
   for(size_t i=0; i<Rt.size()-1; i++){
     SE3 Rtwi = Rt[i];
@@ -399,7 +450,7 @@ robError robTrajectory::Linear( const std::vector<SE3>& Rt,
     R3 pwi = Rtwi.Translation();
     R3 pwf = Rtwf.Translation();
     R3 pif = pwf - pwi;
-    real timet = pif.Norm() / fabs(vmax);
+    Real timet = pif.Norm() / fabs(vmax);
     
     // compute the rotation time: clock
     SE3 Rtiw(Rtwi);
@@ -407,17 +458,18 @@ robError robTrajectory::Linear( const std::vector<SE3>& Rt,
     SE3 Rtif = Rtiw * Rtwf;
     SO3 Rif;
     for(int r=0; r<3; r++) for(int c=0; c<3; c++) Rif[r][c] = Rtif[r][c];
-    vctAxisAngleRotation3<real> ut(Rif);
-    real timeR = ut.Angle()/fabs(wmax);
+    vctAxisAngleRotation3<Real> ut(Rif);
+    Real timeR = ut.Angle()/fabs(wmax);
 
     // compute the final time
-    real tf = ti+timet;
+    Real tf = ti+timet;
     if( timet < timeR )
       tf = ti+timeR;
 
     // create the motion
     if( Linear(ti, Rtwi, tf, Rtwf, dof, sticky) == FAILURE ){
-      cout<<"robTrajectory::Linear: Could not create a linear trajectory" << endl;
+      CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+			<< ": Failed to create the trajectory" << endl;
       return FAILURE;
     }
     ti+=tf;
@@ -425,23 +477,26 @@ robError robTrajectory::Linear( const std::vector<SE3>& Rt,
   return SUCCESS;
 }
 
-robError robTrajectory::SE3Track( uint64_t dof, real vmax, real wmax, real vdmax ){
+robError robTrajectory::SE3Track( uint64_t dof, 
+				  Real vmax, 
+				  Real wmax, 
+				  Real vdmax ){
 
   // check the DOF are for rotation and/or velocities and/or accelerations
   dof &= (robDOF::RX | robDOF::RY | robDOF::RZ |
 	  robDOF::TX | robDOF::TY | robDOF::TZ );
-  if( !dof ){
-    cout<<"robTrajectory::SE3Track: expected Cartesian DOF" <<endl;
-    return FAILURE;
+  if( !dof ){ 
+    CMN_LOG_RUN_VERBOSE << __PRETTY_FUNCTION__ << ": No DOF!" << endl;
+    return SUCCESS;
   }
 
   // create slerp
   robSE3Track* fntrack = new robSE3Track( vmax, wmax, vdmax );
   
   // insert the linear function as a mapping F:R1->Rn
-  //if( Insert( fntrack, robDOF::TIME | robDOF::CARTESIAN, dof ) == FAILURE ){
-  if( Insert( fntrack, dof, dof ) == FAILURE ){
-    cout << "robTrajectory::SE3Track: Failed to insert the function." << endl;
+  if( Insert( fntrack, robDOF::TIME | robDOF::CARTESIAN, dof ) == FAILURE ){
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+		      << ": Failed to insert the function" << endl;
     return FAILURE;
   }
   return SUCCESS;
@@ -451,13 +506,23 @@ robError robTrajectory::Evaluate( robDOF& output ){
 
   // make sure that the domain is there
   if( clock == NULL ){
-    cout<<"robTrajectory::evaluate: no clock."<<endl;
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+		      << ": No clock defined" << endl;
     return FAILURE;
   }
 
-  robDOF fninput( clock->Evaluate() );
+  robDOF fninput;
+  if( clock->Read( fninput ) == FAILURE ){
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+		      << ": Failed to query the clock" << endl;
+    return FAILURE;
+  }
+
   if( device != NULL ){
-    device->Generate( fninput );
+    if( device->Read( fninput ) == FAILURE ){
+      CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__ 
+			<< ": Failed to query the device" << endl;
+    }
   }
 
   // evaluate each function in the maps
@@ -468,68 +533,68 @@ robError robTrajectory::Evaluate( robDOF& output ){
     robMapping mapping = iter->first;      // the dof mask
     robFunction* function = iter->second;  // the function
 
-    // Handle real outputs
-    if( mapping.To().IsReal() ){
-
-      // Evaluate the real function
-      robDOF rnoutput( mapping.To().GetDOF() );
-      if( function->Evaluate( fninput, rnoutput ) == SUCCESS ){
-	output.Set( mapping.To().GetDOF(), rnoutput.x, rnoutput.xd, rnoutput.xdd );
+    // Handle SE3xtime->SE3 trajectory 
+    if( mapping.From().IsCartesian() && 
+	mapping.From().IsTime()      &&
+	mapping.To().IsCartesian() ){
+      robDOF SE3output( mapping.To().GetDOF() );
+      if( function->Evaluate( fninput, SE3output ) == SUCCESS ){
+	output.Set( mapping.To().GetDOF(), 
+		    SE3output.Rt, 
+		    SE3output.vw, 
+		    SE3output.vdwd );
       }
     }
 
-    // Handle Cartesian output
-    if( mapping.To().IsCartesian() ){
+    // this else is necessary because the following mappings also depend
+    // on time
+    else{
 
-      // hold results from evaluations
-      robDOF se3output( mapping.To().GetDOF() );
-
-      // handle both rotation and translation (i.e. like SE3 tracking)
-      if( mapping.To().IsRotation() && mapping.To().IsTranslation () ){
-	if( function->Evaluate( fninput, se3output ) == SUCCESS ){
+      // Handle a R1->Rn trajectory ( i.e. time -> joints )
+      if( mapping.From().IsTime() && mapping.To().IsReal() ){
+	robDOF Rnoutput( mapping.To().GetDOF() );
+	if( function->Evaluate( fninput, Rnoutput ) == SUCCESS ){
 	  output.Set( mapping.To().GetDOF(), 
-		      se3output.Rt, 
-		      se3output.vw, 
-		      se3output.vdwd );
-	}
-
-      }
-
-      // handle the rotation function copy directly in dofse3
-      else if(mapping.To().IsRotation()){
-
-	if( function->Evaluate( fninput, se3output ) == SUCCESS ){
-	  output.Set( mapping.To().GetDOF(), 
-		      se3output.Rt, 
-		      se3output.vw, 
-		      se3output.vdwd );
+		      Rnoutput.x, 
+		      Rnoutput.xd, 
+		      Rnoutput.xdd );
 	}
       }
-
-      // handle the translation function use a Rn and copy the results in dofse3
-      else if(mapping.To().IsTranslation()){
-
-	robDOF doft( mapping.To().GetDOF() );
-	if( function->Evaluate( fninput, doft ) == SUCCESS ){
-	  // copy the Rn values in the SE3 
-	  se3output.Rt[0][3] = doft.x[0]; 
-	  se3output.Rt[1][3] = doft.x[1]; 
-	  se3output.Rt[2][3] = doft.x[2];
+      
+      // Handle R1->SO3 trajectory (i.e. time -> orientation)
+      if( mapping.From().IsTime() && mapping.To().IsRotation() ){
+	robDOF SE3output( mapping.To().GetDOF() );
+	if( function->Evaluate( fninput, SE3output ) == SUCCESS ){
+	  output.Set( mapping.To().GetDOF(), 
+		      SE3output.Rt, 
+		      SE3output.vw, 
+		      SE3output.vdwd );
+	}
+      }
+      
+      // Handle a R1->R3 trajectory (i.e. time->translation)
+      if(mapping.From().IsTime() && mapping.To().IsTranslation()){
+	robDOF Rnoutput( mapping.To().GetDOF() );
+	if( function->Evaluate( fninput, Rnoutput ) == SUCCESS ){
+	  robDOF SE3output( mapping.To().GetDOF() );
+	  SE3output.Rt[0][3] = Rnoutput.x[0]; 
+	  SE3output.Rt[1][3] = Rnoutput.x[1]; 
+	  SE3output.Rt[2][3] = Rnoutput.x[2];
 	  /*
-	  se3output.vw[3]    = doft.xd[3];
-	  se3output.vw[4]    = doft.xd[4];
-	  se3output.vw[5]    = doft.xd[5];
-	  se3output.vdwd[3]  = doft.xdd[3];
-	  se3output.vdwd[4]  = doft.xdd[4];
+	    se3output.vw[3]    = doft.xd[3];
+	    se3output.vw[4]    = doft.xd[4];
+	    se3output.vw[5]    = doft.xd[5];
+	    se3output.vdwd[3]  = doft.xdd[3];
+	    se3output.vdwd[4]  = doft.xdd[4];
 	  se3output.vdwd[5]  = doft.xdd[5];
 	  */
 	  output.Set( mapping.To().GetDOF(), 
-		      se3output.Rt, 
-		      se3output.vw, 
-		      se3output.vdwd );
+		      SE3output.Rt, 
+		      SE3output.vw, 
+		      SE3output.vdwd );
 	}
       }
     }
-  }  
+  }
   return SUCCESS;
 }

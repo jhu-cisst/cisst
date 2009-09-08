@@ -1,24 +1,31 @@
 #ifndef _robClock_h
 #define _robClock_h
 
+#include <cisstRobot/robDevice.h>
 #include <cisstRobot/robDOF.h>
 
 namespace cisstRobot{
-  class robClock{
+
+  class robClock : robDevice {
   protected:
     
     // Mutex;
-    double t;
-    double p;
+    Real time;
+    Real period;
 
+    virtual Real Time() = 0;
+    
   public:
     
-    robClock(){t=0; p=0;}
-    robClock(real x, real y){t=x;p=y;}
-    real Evaluate() { return t; }
+    robClock();
+    virtual ~robClock();
 
-    robClock operator ++(int) { t += p; return *this; }
-    
+    virtual robError Open();
+    virtual robError Close();
+
+    virtual robError Read( robDOF& dof );
+    virtual robError Write( const robDOF& dof );
+
   };
 }
 

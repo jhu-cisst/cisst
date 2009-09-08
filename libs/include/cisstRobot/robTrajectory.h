@@ -88,8 +88,8 @@ namespace cisstRobot{
 	\param dof The DOF
 	\param sticky Add a constant function at tf
     */
-    robError Linear( real ti, real qi, 
-		     real tf, real qf, 
+    robError Linear( Real ti, Real qi, 
+		     Real tf, Real qf, 
 		     uint64_t dof, 
 		     bool sticky=true );
 
@@ -103,7 +103,7 @@ namespace cisstRobot{
 	\param dof The DOF
 	\param sticky Add a constant function at tf
     */
-    robError Linear( real qi, real qf, real vmax, uint64_t dof, bool sticky=true );
+    robError Linear( Real qi, Real qf, Real vmax, uint64_t dof, bool sticky=true );
     
     //! Create a linear nD trajectory
     /** 
@@ -116,8 +116,8 @@ namespace cisstRobot{
 	\param dof The DOF
 	\param sticky Add a constant function at tf
     */
-    robError Linear( real ti, const Rn& qi, 
-		     real tf, const Rn& qf, 
+    robError Linear( Real ti, const Rn& qi, 
+		     Real tf, const Rn& qf, 
 		     uint64_t dof, 
 		     bool sticky=true );
     
@@ -131,7 +131,7 @@ namespace cisstRobot{
 	\param dof The DOF
 	\param sticky Add a constant function at tf
     */
-    robError Linear( const Rn& qi, const Rn& qf, real vmax, 
+    robError Linear( const Rn& qi, const Rn& qf, Real vmax, 
 		     uint64_t dof, bool sticky=true );
     
     
@@ -147,8 +147,8 @@ namespace cisstRobot{
 	\param dof The DOF
 	\param sticky Add a constant function at tf
     */
-    robError Linear( real ti, const SE3& Rti, 
-		     real tf, const SE3& Rtf, 
+    robError Linear( Real ti, const SE3& Rti, 
+		     Real tf, const SE3& Rtf, 
 		     uint64_t dof, 
 		     bool sticky=true );
     
@@ -163,7 +163,7 @@ namespace cisstRobot{
 	\param dof The DOF
 	\param sticky Add a constant function at tf
     */
-    robError Linear( const SE3& Rti, const SE3& Rtf, real vmax, real wmax,
+    robError Linear( const SE3& Rti, const SE3& Rtf, Real vmax, Real wmax,
 		     uint64_t dof, bool sticky=true );
     
     //! Create a linear Cartesian trajectory
@@ -178,7 +178,7 @@ namespace cisstRobot{
 	\param sticky Add a constant function at the end
     */
     robError Linear( const std::vector<SE3>& Rt, 
-		     real vmax, real wmax,
+		     Real vmax, Real wmax,
 		     uint64_t dof, bool sticky=true );
     
     //! Create a 1D sigmoid trajectory
@@ -192,8 +192,8 @@ namespace cisstRobot{
 	\param dof The DOF
 	\param sticky Add a constant function at tf
     */
-    robError Sigmoid( real ti, real yi,
-		      real tf, real yf,
+    robError Sigmoid( Real ti, Real yi,
+		      Real tf, Real yf,
 		      uint64_t dof, 
 		      bool sticky=true );
     
@@ -207,7 +207,7 @@ namespace cisstRobot{
 	\param dof The DOF
 	\param sticky Add a constant function at tf
     */
-    robError Sigmoid( real yi, real yf, real vmax, uint64_t dof, bool sticky=true);
+    robError Sigmoid( Real yi, Real yf, Real vmax, uint64_t dof, bool sticky=true);
     
     //! Create a nD sigmoid trajectory
     /** 
@@ -221,8 +221,8 @@ namespace cisstRobot{
 	\param dof The DOF
 	\param sticky Add a constant function at tf
     */
-    robError Sigmoid( real ti, const Rn& yi, 
-		      real tf, const Rn& yf, 
+    robError Sigmoid( Real ti, const Rn& yi, 
+		      Real tf, const Rn& yf, 
 		      uint64_t dof, 
 		      bool sticky=true );
     
@@ -249,8 +249,8 @@ namespace cisstRobot{
 	\param dof The DOF
 	\param sticky Add a constant function at tf
     */
-    robError Translation( real ti, const SE3& Rti,
-			  real tf, const SE3& Rtf,
+    robError Translation( Real ti, const SE3& Rti,
+			  Real tf, const SE3& Rtf,
 			  uint64_t dof,
 			  bool sticky );
     
@@ -263,8 +263,8 @@ namespace cisstRobot{
 	\param dof The DOF
 	\param sticky Add a constant function at tf
     */
-    robError Rotation( real ti, const SE3& Rti,
-		       real tf, const SE3& Rtf,
+    robError Rotation( Real ti, const SE3& Rti,
+		       Real tf, const SE3& Rtf,
 		       uint64_t dof,
 		       bool sticky );
 
@@ -275,7 +275,7 @@ namespace cisstRobot{
 	\param vmax The maximum angular velocity
 	\param vmax The maximum linear acceleration
     */
-    robError SE3Track( uint64_t dof, real vmax=-1, real wmax=-1, real vdmax=-1 );
+    robError SE3Track( uint64_t dof, Real vmax=-1, Real wmax=-1, Real vdmax=-1 );
     
     //! remove all the functions
     void Clear();

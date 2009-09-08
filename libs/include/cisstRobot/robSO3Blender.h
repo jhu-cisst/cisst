@@ -13,21 +13,21 @@ namespace cisstRobot{
     // RCCL blender
     SO3 Rw0;           // rotation from final frame to initial frame
     SO3 R10;           // rotation from final frame to initial frame
-    real w0;           // initial angular velocity
+    Real w0;           // initial angular velocity
     R3 uv;             // axis for RV
-    vctAxisAngleRotation3<real> uctc;
+    vctAxisAngleRotation3<Real> uctc;
 
-    real xmin, xmax;
+    Real xmin, xmax;
     
-    SO3 Rb1( real h );
-    SO3 R0b( real h );
+    SO3 Rb1( Real h );
+    SO3 R0b( Real h );
   
     // Taylor's blender
-    real T1, T2, ti;
-    real tauA, tauB;
+    Real T1, T2, ti;
+    Real tauA, tauB;
     SO3 Rw1;
-    vctAxisAngleRotation3<real> n1t1;
-    vctAxisAngleRotation3<real> n2t2;
+    vctAxisAngleRotation3<Real> n1t1;
+    vctAxisAngleRotation3<Real> n2t2;
     
   public:
     
@@ -39,11 +39,11 @@ namespace cisstRobot{
        \param R1 The midpoint orientation
        \param R2 The final orientation
      */
-    robSO3Blender( real ti, 
-		   real T1, real T2, 
+    robSO3Blender( Real ti, 
+		   Real T1, Real T2, 
 		   const SO3& R0, const SO3& R1, const SO3& R2,
-		   real tA=robFunctionPiecewise::TAU,
-		   real tB=robFunctionPiecewise::TAU );
+		   Real tA=robFunctionPiecewise::TAU,
+		   Real tB=robFunctionPiecewise::TAU );
 
     //! Build a blender for R1->SO3 mappings based on Lloyd's paper
     /**
@@ -52,7 +52,7 @@ namespace cisstRobot{
        \param R1 The 2nd orientation at t=x1
        \param w0w The 1st velocity at t=x1
      */
-    robSO3Blender( real x1, const SO3& R0, const SO3& R1, const R3& w0w );
+    robSO3Blender( Real x1, const SO3& R0, const SO3& R1, const R3& w0w );
     
     //! Return true if the function is defined for the given input
     robDomainAttribute IsDefinedFor( const robDOF& x ) const; 

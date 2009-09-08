@@ -6,8 +6,8 @@
 using namespace std;
 using namespace cisstRobot;
 
-robR3Blender::robR3Blender( real xi, const R3& ti, const R3& vi, const R3& vid,
-			    real xf, const R3& tf, const R3& vf, const R3& vfd ){
+robR3Blender::robR3Blender( Real xi, const R3& ti, const R3& vi, const R3& vid,
+			    Real xf, const R3& tf, const R3& vf, const R3& vfd ){
   if( xf < xi ){
     cout << "robR3Blender::robR3Blender: x1 must be less than x2" << endl;
   }
@@ -25,9 +25,9 @@ robDomainAttribute robR3Blender::IsDefinedFor( const robDOF& input ) const{
     
     const robDOFRn& inputrn = dynamic_cast<const robDOFRn&>(input);
     
-    // test the dof are real numbers
+    // test the dof are Real numbers
     if( !inputrn.IsReal() ){
-      cout << "robR3Blender::IsDefinedFor: expected a real input" << endl;
+      cout << "robR3Blender::IsDefinedFor: expected a Real input" << endl;
       return UNDEFINED;
     }
 
@@ -37,7 +37,7 @@ robDomainAttribute robR3Blender::IsDefinedFor( const robDOF& input ) const{
       return UNDEFINED;
     }
 
-    real t = inputrn.x.at(0);
+    Real t = inputrn.x.at(0);
     if( xmin <= t && t <= xmax ) return DEFINED;
     else                         return UNDEFINED;
 
@@ -54,11 +54,11 @@ robError robR3Blender::Evaluate( const robDOF& input, robDOF& output ){
     const robDOFRn& inputrn = dynamic_cast<const robDOFRn&>(input); 
     robDOFRn& outputrn      = dynamic_cast<robDOFRn&>(output); 
 
-    real t1 = inputrn.x.at(0) - xmin;
-    real t2 = t1*t1;
-    real t3 = t2*t1;
-    real t4 = t3*t1;
-    real t5 = t4*t1;
+    Real t1 = inputrn.x.at(0) - xmin;
+    Real t2 = t1*t1;
+    Real t3 = t2*t1;
+    Real t4 = t3*t1;
+    Real t5 = t4*t1;
 
     outputrn = robDOFRn( Rn(1,   a5*t5 +   a4*t4 +   a3*t3 +   a2*t2 + a1*t1+a0),
 			 Rn(1, 5*a5*t4 + 4*a4*t3 + 3*a3*t2 + 2*a2*t1 + a1 ),
@@ -67,7 +67,7 @@ robError robR3Blender::Evaluate( const robDOF& input, robDOF& output ){
     return SUCCESS;
   }
   catch( std::bad_cast ){
-    cout<<"robR3Blender::Evaluate: unable to cast the input/output as reals"<<endl;
+    cout<<"robR3Blender::Evaluate: unable to cast the input/output as Reals"<<endl;
     return FAILURE;
   }
 }

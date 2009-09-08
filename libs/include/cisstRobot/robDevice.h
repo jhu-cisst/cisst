@@ -12,7 +12,11 @@ namespace cisstRobot{
     
   public:
     
-    virtual robError Generate( robDOF& dof ) = 0;
+    virtual robError Open() = 0;
+    virtual robError Close() = 0;
+
+    virtual robError Read( robDOF& dof ) = 0;
+    virtual robError Write( const robDOF& dof ) = 0;
     
   };
 }

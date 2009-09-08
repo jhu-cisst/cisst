@@ -15,15 +15,15 @@ namespace cisstRobot{
     Quaternion qinitial;
     Quaternion qfinal;
     R3 w;               
-    real xmin, xmax;
+    Real xmin, xmax;
 
   public:
 
     //! hack...
-    real Duration() const { return xmax-xmin; }
+    Real Duration() const { return xmax-xmin; }
     
     //! Create a SLERP between ti and tf
-    robSLERP( real ti, const SE3& Ri, real tf, const SE3& Rf);
+    robSLERP( Real ti, const SE3& Ri, Real tf, const SE3& Rf);
     
     //! Return true if the function is defined for the given input
     robDomainAttribute IsDefinedFor( const robDOF& input ) const; 

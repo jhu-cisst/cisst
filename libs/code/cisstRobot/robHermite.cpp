@@ -1,3 +1,4 @@
+#include <cisstCommon/cmnLogger.h>
 #include <cisstRobot/robHermite.h>
 #include <cisstRobot/robFunctionPiecewise.h>
 
@@ -6,11 +7,12 @@
 using namespace std;
 using namespace cisstRobot;
 
-robHermite::robHermite( real x1, real y1, real y1d, real y1dd, 
-			real x2, real y2, real y2d, real y2dd ){
+robHermite::robHermite( Real x1, Real y1, Real y1d, Real y1dd, 
+			Real x2, Real y2, Real y2d, Real y2dd ){
 
   if( x2 < x1 ){
-    cout << "robHermite::robHermite: x1 must be less than x2" << endl;
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+		      << ": t initial must be less than t final" << endl;
   }
 
   xmin = x1;
@@ -20,15 +22,15 @@ robHermite::robHermite( real x1, real y1, real y1d, real y1dd,
   a1 = y1d-y2d;
   a2 = (y1dd-y2dd)/2.0;
 
-  vctFixedSizeMatrix<real,3,3,VCT_ROW_MAJOR> A;
+  vctFixedSizeMatrix<Real,3,3,VCT_ROW_MAJOR> A;
 
-  real h1 = 2.0*robFunctionPiecewise::TAU;
+  Real h1 = 2.0*robFunctionPiecewise::TAU;
   /*
     A = [  h^5    h^4    h^3]
         [ 5h^4   4h^3   3h^2]
 	[20h^3  12h^2   6h^1]
    */
-  real h2 = h1*h1;
+  Real h2 = h1*h1;
 
   // WARNIG THIS IS FOR A TAU=0.1
   A[0][0] = 18750.0;  A[0][1] = -1875.0;  A[0][2] =  62.5;
@@ -46,13 +48,13 @@ robHermite::robHermite( real x1, real y1, real y1d, real y1dd,
 
 robDomainAttribute robHermite::IsDefinedFor( const robDOF& input ) const{
   
-  // test the dof are real numbers
+  // test the dof are Real numbers
   if( !input.IsTime() ){
-    cout << "robHermite::IsDefinedFor: expected a time input" << endl;
+    CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__ << ": Expected time input" <<endl;
     return UNDEFINED;
   }
 
-  real t = input.t;
+  Real t = input.t;
   if( xmin <= t && t <= xmax ) return DEFINED;
   else                         return UNDEFINED;
 }
@@ -60,15 +62,15 @@ robDomainAttribute robHermite::IsDefinedFor( const robDOF& input ) const{
 robError robHermite::Evaluate( const robDOF& input, robDOF& output ){  
   
   if( !input.IsTime() ){
-    cout << "robHermite::Evaluate: expected a time input" << endl;
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ << ": Expected time input" << endl;
     return FAILURE;
   }
 
-  real t1 = input.t - xmin;
-  real t2 = t1*t1;
-  real t3 = t2*t1;
-  real t4 = t3*t1;
-  real t5 = t4*t1;
+  Real t1 = input.t - xmin;
+  Real t2 = t1*t1;
+  Real t3 = t2*t1;
+  Real t4 = t3*t1;
+  Real t5 = t4*t1;
   
   output = robDOF( Rn(1,   a5*t5 +   a4*t4 +   a3*t3 +   a2*t2 + a1*t1+a0),
 		   Rn(1, 5*a5*t4 + 4*a4*t3 + 3*a3*t2 + 2*a2*t1 + a1 ),

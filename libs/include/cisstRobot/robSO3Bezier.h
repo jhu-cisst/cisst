@@ -18,23 +18,23 @@ namespace cisstRobot{
     Quaternion qa;
     Quaternion qb;
 
-    real ti;
+    Real ti;
     SO3 Rwi;
 
-    real tmin;
-    real tmax;
+    Real tmin;
+    Real tmax;
 
-    Quaternion SLERP( const Quaternion &q1, const Quaternion &q2, real t);
+    Quaternion SLERP( const Quaternion &q1, const Quaternion &q2, Real t);
 
   public:
 
-    robSO3Bezier( real t1,
-		  real t2,
+    robSO3Bezier( Real t1,
+		  Real t2,
 		  const SO3& Rw1, 
 		  const R3&  w1, 
 		  const SO3& Rw2, 
 		  const R3&  w2,
-		  real wmax );
+		  Real wmax );
 
     robSO3Bezier( const SO3& Rw0, 
 		  const SO3& Rw1, 

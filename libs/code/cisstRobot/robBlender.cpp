@@ -10,7 +10,7 @@ robBlender::robBlender( const robDOF& input,
 			const robDOF& outgoing, 
 			const robDOF& incoming ){
   
-  // test the dof are real numbers
+  // test the dof are Real numbers
   if( !input.IsTime() ){
     cout << "robBlender::robBlender: expected a time input" << endl;
   }
@@ -31,13 +31,13 @@ robBlender::robBlender( const robDOF& input,
 
 robDomainAttribute robBlender::IsDefinedFor( const robDOF& input ) const {
 
-  // test the dof are real numbers
+  // test the dof are Real numbers
   if( !input.IsTime() ){
     cout << "robBlender::IsDefinedFor: expected a time input " << endl;
     return UNDEFINED;
   }
   
-  real t = inputrn.t;
+  Real t = inputrn.t;
   if( xmin <= t && t <= xmax ) return DEFINED;
   if( xmin-robBlender::TAU <= t && t <= xmin ) return INCOMING;
   if( xmax <= t && t <= xmax+robBlender::TAU ) return OUTGOING;

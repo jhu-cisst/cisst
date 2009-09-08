@@ -1,3 +1,4 @@
+#include <cisstCommon/cmnLogger.h>
 #include <cisstRobot/robDOF.h>
 
 #include <iostream>
@@ -30,7 +31,7 @@ robDOF::robDOF( const SE3& Rt, const R6& vw, const R6& vdwd ){
   this->vdwd = vdwd;
 }
 
-robDOF::robDOF( real x ){
+robDOF::robDOF( Real x ){
   this->dof = robDOF::TIME;
   this->t = x; 
 }
@@ -77,6 +78,13 @@ size_t robDOF::DOFtoIndex( uint64_t dof ){
   if( dof & ( robDOF::X8 | robDOF::X8D | robDOF::X8DD ) )
     return 7;
   return 8;
+}
+
+void robDOF::Set( uint64_t dof, Real t ){
+  if( dof & robDOF::TIME ){
+    this->dof |= robDOF::TIME;
+    this->t = t;
+  }
 }
 
 void robDOF::Set( uint64_t dof, const SE3& Rt, const R6& vw, const R6& vdwd ){
@@ -129,7 +137,7 @@ void robDOF::SetPos( uint64_t dof, const SE3& Rt ){
 
 void robDOF::SetPos( uint64_t dof, const Rn& x ){
 
-  // ensure only real positions are considered
+  // ensure only Real positions are considered
   dof &= robDOF::XPOS;
 
   if( dof ){                                     // should we bother with this dof?
@@ -149,10 +157,16 @@ void robDOF::SetPos( uint64_t dof, const Rn& x ){
 	    this->x.at(tidx) = x.at(sidx++);     // copy the value
 	    this->dof |= mask;                   // mark the position bit
 	  }
-	  else { cout << "robDOF::SetPos: invalid index" << endl; }
+	  else { 
+	    CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__ 
+				<< ": Invalid index" << endl;
+	  }
 
 	}
-	else {cout << "robDOF::SetPos: source does not contain DOF" << endl;}
+	else {
+	  CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__ 
+			      << ": Source does not contain DOF" << endl;
+	}
       }
       mask <<= 1;                                // shift the mask
     }
@@ -174,20 +188,20 @@ void robDOF::SetVel( uint64_t dof, const R6& vw ){
 }
 
 void robDOF::SetVel( uint64_t dof, const Rn& xd ){
-
-  // ensure only real velocities are considered
+  
+  // ensure only Real velocities are considered
   dof &= robDOF::XVEL;
-
+  
   if( dof ){                                     // should we bother with this dof?
-
+    
     uint64_t mask = robDOF::X1D;                 // start the bit mask at X1D
     size_t sidx = 0;                             // the source index
     for(size_t i=0; i<8; i++){                   // scan the 8 positions bits
-
+      
       if( dof & mask ){                          // test the bit
-
+	
 	if( sidx < xd.size() ){
-
+	  
 	  size_t tidx=robDOF::DOFtoIndex(mask);// get target vector index
 	  if( tidx < 8 ){                        // make sure the index is valid
 	    if(this->xd.size()<=tidx)            // target vector big enough?
@@ -195,10 +209,16 @@ void robDOF::SetVel( uint64_t dof, const Rn& xd ){
 	    this->xd.at(tidx) = xd.at(sidx++);   // copy the value
 	    this->dof |= mask;                   // mark the position bit
 	  }
-	  else { cout << "robDOF::SetVel: invalid index" << endl; }
-
+	  else { 
+	    CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__ 
+				<< ": Invalid index" << endl;
+	  }
 	}
-	else {cout << "robDOF::SetVel: source does not contain DOF" << endl;}
+
+	else {
+	  CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__ 
+			      << ": Source does not contain DOF" << endl;
+	}
       }
       mask <<= 1;                                // shift the mask
     }
@@ -208,23 +228,23 @@ void robDOF::SetVel( uint64_t dof, const Rn& xd ){
 void robDOF::SetAcc( uint64_t dof, const R6& vdwd ){
   // ensure that only linear/angular velocities are considered
   dof &= robDOF::VDWD;
-
+  
   if( dof ){            // should we bother with this dof?
-    if( dof & robDOF::VXD ){ this->vdwd[0] = vdwd[0]; this->dof |= robDOF::VXD; }
-    if( dof & robDOF::VYD ){ this->vdwd[1] = vdwd[1]; this->dof |= robDOF::VYD; }
-    if( dof & robDOF::VZD ){ this->vdwd[2] = vdwd[2]; this->dof |= robDOF::VZD; }
-    if( dof & robDOF::WXD ){ this->vdwd[3] = vdwd[3]; this->dof |= robDOF::WXD; }
-    if( dof & robDOF::WYD ){ this->vdwd[4] = vdwd[4]; this->dof |= robDOF::WYD; }
-    if( dof & robDOF::WZD ){ this->vdwd[5] = vdwd[5]; this->dof |= robDOF::WZD; }
+    if( dof & robDOF::VXD ){this->vdwd[0] = vdwd[0]; this->dof |= robDOF::VXD;}
+    if( dof & robDOF::VYD ){this->vdwd[1] = vdwd[1]; this->dof |= robDOF::VYD;}
+    if( dof & robDOF::VZD ){this->vdwd[2] = vdwd[2]; this->dof |= robDOF::VZD;}
+    if( dof & robDOF::WXD ){this->vdwd[3] = vdwd[3]; this->dof |= robDOF::WXD;}
+    if( dof & robDOF::WYD ){this->vdwd[4] = vdwd[4]; this->dof |= robDOF::WYD;}
+    if( dof & robDOF::WZD ){this->vdwd[5] = vdwd[5]; this->dof |= robDOF::WZD;}
   }
 }
 
 void robDOF::SetAcc( uint64_t dof, const Rn& xdd ){
 
-  // ensure only real velocities are considered
+  // ensure only Real velocities are considered
   dof &= robDOF::XACC;
 
-  if( dof ){                                     // should we bother with this dof?
+  if( dof ){                                     // should we bother?
 
     uint64_t mask = robDOF::X1DD;                // start the bit mask at X1D
     size_t sidx = 0;                             // the source index
@@ -241,10 +261,16 @@ void robDOF::SetAcc( uint64_t dof, const Rn& xdd ){
 	    this->xdd.at(tidx) = xdd.at(sidx++); // copy the value
 	    this->dof |= mask;                   // mark the position bit
 	  }
-	  else { cout << "robDOF::SetAcc: invalid index" << endl; }
+	  else { 
+	    CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__ 
+				<< ": Invalid index" << endl;
+	  }
 
 	}
-	else {cout << "robDOF::SetAcc: source does not contain DOF" << endl;}
+	else {
+	  CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__ 
+			      << ": Source does not contain DOF" << endl;
+	}
       }
       mask <<= 1;                                // shift the mask
     }

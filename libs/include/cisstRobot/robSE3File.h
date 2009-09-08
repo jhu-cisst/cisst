@@ -11,14 +11,19 @@ namespace cisstRobot{
   class robSE3File : public robDevice {
   protected:
     
+    std::string filename;
     std::ifstream ifs;
     
   public:
     
     robSE3File( const std::string& filename );
-    ~robSE3File(){ ifs.close(); }
+    ~robSE3File();
 
-    robError Generate( robDOF& dof );
+    robError Read( robDOF& dof );
+    robError Write( const robDOF& dof );
+
+    robError Open();
+    robError Close();
     
   };
 }

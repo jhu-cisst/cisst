@@ -6,7 +6,7 @@
 
 namespace cisstRobot{
 
-  //! A blending function for real vectors
+  //! A blending function for Real vectors
   /**
      This function "blends" two functions F:R1->Rn by using a 5th order Hermite
      polynomial. The blending is C2 continuous
@@ -16,7 +16,7 @@ namespace cisstRobot{
     
     std::vector<robHermite*> blenders;
     
-    real xmin, xmax;
+    Real xmin, xmax;
 
   public:
 
@@ -24,15 +24,15 @@ namespace cisstRobot{
     /**
        \param xi The lower value of the domain. This is the start point of the
                  blender
-       \param yi A vector of real values \f$yi=f(xi)\f$
+       \param yi A vector of Real values \f$yi=f(xi)\f$
        \param yid A vector of 1st derivatives \f$yid=\dot{f}(xi)\f$
        \param yidd A vector of 2nd derivatives \f$yidd=\ddot{f}(xi)\f$
-       \param yf A vector of real values \f$yi=f(xi)\f$
+       \param yf A vector of Real values \f$yi=f(xi)\f$
        \param yfd A vector of 1st derivatives \f$yid=\dot{f}(xi)\f$
        \param yfdd A vector of 2nd derivatives \f$yidd=\ddot{f}(xi)\f$
      */
-    robRnBlender( real xi, const Rn& yi, const Rn& yid, const Rn& yidd,
-		  real xf, const Rn& yf, const Rn& yfd, const Rn& yfdd );
+    robRnBlender( Real xi, const Rn& yi, const Rn& yid, const Rn& yidd,
+		  Real xf, const Rn& yf, const Rn& yfd, const Rn& yfdd );
     
     //! Return true if the function is defined for the given input
     robDomainAttribute IsDefinedFor( const robDOF& input ) const; 

@@ -1,13 +1,14 @@
+#include <cisstCommon/cmnLogger.h>
 #include <cisstRobot/robSLERP.h>
 #include <cisstRobot/robFunctionPiecewise.h>
 #include <typeinfo>
 using namespace std;
 using namespace cisstRobot;
 
-robSLERP::robSLERP( real ti, const SE3& Rti, real tf, const SE3& Rtf ){
+robSLERP::robSLERP( Real ti, const SE3& Rti, Real tf, const SE3& Rtf ){
   if( tf < ti ){
-    cout << "robSLERP::robSLERP: ti must be less than tf " 
-	 << ti << " " << tf << endl;
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+		      << ": t initial must be less than t final" << endl;
   }
 
   xmin = ti;
@@ -24,7 +25,7 @@ robSLERP::robSLERP( real ti, const SE3& Rti, real tf, const SE3& Rtf ){
   qinitial.From( Ri );
   qfinal.From( Rf );
 
-  real ctheta = ( qinitial.X()*qfinal.X() +
+  Real ctheta = ( qinitial.X()*qfinal.X() +
 		  qinitial.Y()*qfinal.Y() +
 		  qinitial.Z()*qfinal.Z() +
 		  qinitial.R()*qfinal.R() );
@@ -46,11 +47,11 @@ robSLERP::robSLERP( real ti, const SE3& Rti, real tf, const SE3& Rtf ){
   SO3 Rif;                // relative rotation wrt initial frame
   Rif = Riw*Rwf;          //
   
-  vctAxisAngleRotation3<real> utif(Rif); // axis angle of Rif
+  vctAxisAngleRotation3<Real> utif(Rif); // axis angle of Rif
   R3 ui = utif.Axis();                   // the axis wrt initial frame
                                          // this axis remains constant
   R3 uw = Rwi * ui;                      // the axis wrt world frame
-  real td = utif.Angle() / (xmax-xmin);  // the angular rate
+  Real td = utif.Angle() / (xmax-xmin);  // the angular rate
 
   w = uw * td;                           // the angular velocity
 }
@@ -58,11 +59,11 @@ robSLERP::robSLERP( real ti, const SE3& Rti, real tf, const SE3& Rtf ){
 robDomainAttribute robSLERP::IsDefinedFor( const robDOF& input ) const{
 
   if( !input.IsTime() ){
-    cout << "robSLERP::IsDefinedFor: expected a time input" << endl;
+    CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__ << ": Expected time input" <<endl;
     return UNDEFINED;
   }
 
-  real x = input.t;
+  Real x = input.t;
   if( xmin <= x && x <= xmax )                           return DEFINED;
   if( xmin-robFunctionPiecewise::TAU <= x && x <= xmin ) return INCOMING;
   if( xmax <= x && x <= xmax+robFunctionPiecewise::TAU ) return OUTGOING;
@@ -75,17 +76,17 @@ robDomainAttribute robSLERP::IsDefinedFor( const robDOF& input ) const{
 robError robSLERP::Evaluate( const robDOF& input, robDOF& output ){
 
   if( !input.IsTime() ){
-    cout << "robSLERP::Evaluate: expected a time input" << endl;
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ << ": Expected time input" << endl;
     return FAILURE;
   }
 
-  real t = input.t;
+  Real t = input.t;
   t = (t-xmin) / (xmax-xmin);
   if( t < 0.0 ) t = 0;
   if( 1.0 < t ) t = 1;
     
   // cos theta
-  real ctheta = ( qinitial.X()*qfinal.X() +
+  Real ctheta = ( qinitial.X()*qfinal.X() +
 		  qinitial.Y()*qfinal.Y() +
 		  qinitial.Z()*qfinal.Z() +
 		  qinitial.R()*qfinal.R() );
@@ -96,8 +97,8 @@ robError robSLERP::Evaluate( const robDOF& input, robDOF& output ){
     return SUCCESS;
   }
 
-  real theta = acos(ctheta);
-  real stheta = sqrt(1.0 - ctheta*ctheta);
+  Real theta = acos(ctheta);
+  Real stheta = sqrt(1.0 - ctheta*ctheta);
   
   // if theta = 180 degrees then result is not fully defined
   // we could rotate around any axis normal to qinitial or qfinal
@@ -115,8 +116,8 @@ robError robSLERP::Evaluate( const robDOF& input, robDOF& output ){
     return SUCCESS;
   }
     
-  real ratioA = sin((1 - t) * theta) / stheta;
-  real ratioB = sin(t * theta) / stheta;
+  Real ratioA = sin((1 - t) * theta) / stheta;
+  Real ratioB = sin(t * theta) / stheta;
   
   //calculate Quaternion.
   SO3 Rwi( Quaternion( qinitial.X()*ratioA + qfinal.X()*ratioB,
@@ -134,7 +135,7 @@ robError robSLERP::Evaluate( const robDOF& input, robDOF& output ){
   SO3 R1i;
   R1i = R1w*Rwi;
 
-  vctAxisAngleRotation3<real> ut(R1i);
+  vctAxisAngleRotation3<Real> ut(R1i);
   cout << ut.Angle() << " " << ut.Angle()/t << endl;
 
   Quaternion q(Quaternion( qinitial.X()*ratioA + qfinal.X()*ratioB,

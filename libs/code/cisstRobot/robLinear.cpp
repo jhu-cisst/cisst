@@ -1,3 +1,4 @@
+#include <cisstCommon/cmnLogger.h>
 #include <cisstRobot/robLinear.h>
 #include <cisstRobot/robFunctionPiecewise.h>
 #include <iostream>
@@ -6,14 +7,16 @@
 using namespace std;
 using namespace cisstRobot;
 
-robLinear::robLinear( real x1, real y1, real x2, real y2 ){
+robLinear::robLinear( Real x1, Real y1, Real x2, Real y2 ){
+
   if( x2 < x1 ){
-    cout << "robLinear::robLinear: x1 must be less than x2" << endl;
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+		      << ": t initial must be less than t final" << endl;
   }
 
-  real m = (y2-y1)/(x2-x1);
+  Real m = (y2-y1)/(x2-x1);
 
-  real b = y1 - m*x1;
+  Real b = y1 - m*x1;
   A.SetSize(1, 2, VCT_ROW_MAJOR);
   A[0][0] = m;
   A[0][1] = b;
@@ -23,9 +26,10 @@ robLinear::robLinear( real x1, real y1, real x2, real y2 ){
 
 }
 
-robLinear::robLinear( real x1, const R3& y1, real x2, const R3& y2 ){
+robLinear::robLinear( Real x1, const R3& y1, Real x2, const R3& y2 ){
   if( x2 < x1 ){
-    cout << "robLinear::robLinear: x1 must be less than x2" << endl;
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+		      << ": t initial must be less than t final" << endl;
   }
 
   R3 m = (y2-y1)/(x2-x1);
@@ -41,13 +45,15 @@ robLinear::robLinear( real x1, const R3& y1, real x2, const R3& y2 ){
 
 }
 
-robLinear::robLinear( real x1, const Rn& y1, real x2, const Rn& y2 ){
+robLinear::robLinear( Real x1, const Rn& y1, Real x2, const Rn& y2 ){
   if( x2 < x1 ){
-    cout << "robLinear::robLinear: x1 must be less than x2" << endl;
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+		      << ": t initial must be less than t final" << endl;
   }
 
   if( y1.size()!=y2.size() ){
-    cout<<"robLinear::robLinear: y1 and y2 must have the same length." << endl;
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+		      << ": Vectors must have the same length" << endl;
   }
 
   Rn m = (y2-y1)/(x2-x1);
@@ -65,16 +71,17 @@ robLinear::robLinear( real x1, const Rn& y1, real x2, const Rn& y2 ){
 
 robDomainAttribute robLinear::IsDefinedFor( const robDOF& input ) const{
 
-  // test the dof are real numbers
+  // test the dof are Real numbers
   if( !input.IsTime() ) {
-    cout << "robLinear::IsDefinedFor: expected a time input" << endl;
+    CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__ 
+			<< ": Expcected a time input" << endl;
     return UNDEFINED;
   }
 
   // test that the time is within the bounds
-  real t = input.t;
-  real tmin = xmin.at(0);
-  real tmax = xmax.at(0);
+  Real t = input.t;
+  Real tmin = xmin.at(0);
+  Real tmax = xmax.at(0);
   
   if( tmin <= t && t <= tmax )                           return DEFINED;
   if( tmin-robFunctionPiecewise::TAU <= t && t <= tmin ) return INCOMING;
@@ -86,9 +93,10 @@ robDomainAttribute robLinear::IsDefinedFor( const robDOF& input ) const{
 
 robError robLinear::Evaluate( const robDOF& input, robDOF& output ){
 
-  // test the dof are real numbers
+  // test the dof are Real numbers
   if( !input.IsTime() ) {
-    cout << "robLinear::Evaluate: expected a real input" << endl;
+    CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__ 
+			<< ": Expcected a time input" << endl;
     return FAILURE;
   }
 

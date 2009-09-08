@@ -1,3 +1,4 @@
+#include <cisstCommon/cmnLogger.h>
 #include <cisstRobot/robSE3Constant.h>
 #include <cisstRobot/robFunctionPiecewise.h>
 #include <typeinfo>
@@ -5,9 +6,10 @@
 using namespace std;
 using namespace cisstRobot;
 
-robSE3Constant::robSE3Constant(const SE3& Rt, real x1, real x2){
+robSE3Constant::robSE3Constant(const SE3& Rt, Real x1, Real x2){
   if( x2 < x1 ){
-    cout << "robSE3Constant::robSE3Constant: x1 must be less than x2" << endl;
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+		      << ": t initial must be less than t final" << endl;
   }
 
   this->Rt = Rt; 
@@ -18,16 +20,16 @@ robSE3Constant::robSE3Constant(const SE3& Rt, real x1, real x2){
 
 robDomainAttribute robSE3Constant::IsDefinedFor( const robDOF& input ) const{
 
-  // test the dof are real numbers
+  // test the dof are Real numbers
   if( !input.IsTime() ){
-    cout << "robSE3Constant::IsDefinedFor: expected a time input" << endl;
+    CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__ << ": Expected time input" <<endl;
     return UNDEFINED;
   }
 
   // test that the time is within the bounds
-  real t =    input.t;
-  real tmin = xmin.at(0);
-  real tmax = xmax.at(0);
+  Real t =    input.t;
+  Real tmin = xmin.at(0);
+  Real tmax = xmax.at(0);
   
   if( tmin <= t && t <= tmax )                           return DEFINED;
   if( tmin-robFunctionPiecewise::TAU <= t && t <= tmin ) return INCOMING;
@@ -41,7 +43,7 @@ robDomainAttribute robSE3Constant::IsDefinedFor( const robDOF& input ) const{
 robError robSE3Constant::Evaluate( const robDOF& input, robDOF& output ){
 
   if( !input.IsTime() ){
-    cout << "robSE3Constant::Evaluate: expected a time input" << endl;
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ << ": Expected time input" << endl;
     return FAILURE;
   }
 

@@ -20,7 +20,7 @@ namespace cisstRobot{
        \param x1 The lower value of the domain (default -infinity)
        \param x2 The upper value of the domain (default infinity)
      */
-    robRnConstant( real y, real x1=FLT_MIN, real x2=FLT_MAX);
+    robRnConstant( Real y, Real x1=FLT_MIN, Real x2=FLT_MAX);
 
     //! Define a constant function R1->Rn
     /**
@@ -30,7 +30,7 @@ namespace cisstRobot{
        \param x1 The lower value of the domain (default -infinity)
        \param x2 The upper value of the domain (default infinity)
      */
-    robRnConstant( const Rn& y, real x1=FLT_MIN, real x2=FLT_MAX);
+    robRnConstant( const Rn& y, Real x1=FLT_MIN, Real x2=FLT_MAX);
 
     //! Define a constant function R1->R3
     /**
@@ -40,7 +40,7 @@ namespace cisstRobot{
        \param x1 The lower value of the domain (default -infinity)
        \param x2 The upper value of the domain (default infinity)
      */
-    robRnConstant( const R3& y, real x1=FLT_MIN, real x2=FLT_MAX);
+    robRnConstant( const R3& y, Real x1=FLT_MIN, Real x2=FLT_MAX);
     
     //! Return true if the function is defined for the given input
     robDomainAttribute IsDefinedFor( const robDOF& input ) const;

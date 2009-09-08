@@ -9,15 +9,15 @@ namespace cisstRobot{
 
   private:
     
-    real xmin;
-    real xmax;
-    vctFixedSizeVector<real, 6> b;
+    Real xmin;
+    Real xmax;
+    vctFixedSizeVector<Real, 6> b;
 
   public:
 
     robQuintic(){}
-    robQuintic( real t1, real x1, real v1, real a1, 
-		real t2, real x2, real v2, real a2 );
+    robQuintic( Real t1, Real x1, Real v1, Real a1, 
+		Real t2, Real x2, Real v2, Real a2 );
 
     robDomainAttribute IsDefinedFor( const robDOF& input ) const;
 

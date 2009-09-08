@@ -21,7 +21,7 @@ namespace cisstRobot{
     
   public:
 
-    virtual real Duration() const { return 0.0; }
+    virtual Real Duration() const { return 0.0; }
     
     //! Is the function defined for the input
     /**

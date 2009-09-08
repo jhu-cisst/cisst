@@ -16,16 +16,21 @@ typedef unsigned __int64 uint64_t;
 
 using namespace std;
 
-typedef double real;
-typedef vctFrame4x4< real,VCT_ROW_MAJOR> SE3;
-typedef vctMatrixRotation3<real,VCT_ROW_MAJOR> SO3;
-typedef vctQuaternionRotation3<real> Quaternion;
-typedef vctFixedSizeVector<real,1> R1;
-typedef vctFixedSizeVector<real,2> R2;
-typedef vctFixedSizeVector<real,3> R3;
-typedef vctFixedSizeVector<real,4> R4;
-typedef vctFixedSizeVector<real,6> R6;
-typedef vctDynamicVector<real>     Rn;
+#ifdef SINGLE_PRECISION
+typedef float Real;
+#else
+typedef double Real;
+#endif
+
+typedef vctFrame4x4< Real,VCT_ROW_MAJOR> SE3;
+typedef vctMatrixRotation3<Real,VCT_ROW_MAJOR> SO3;
+typedef vctQuaternionRotation3<Real> Quaternion;
+typedef vctFixedSizeVector<Real,1> R1;
+typedef vctFixedSizeVector<Real,2> R2;
+typedef vctFixedSizeVector<Real,3> R3;
+typedef vctFixedSizeVector<Real,4> R4;
+typedef vctFixedSizeVector<Real,6> R6;
+typedef vctDynamicVector<Real>     Rn;
 
 namespace cisstRobot{
 
@@ -48,7 +53,7 @@ namespace cisstRobot{
   
   public:
 
-    real t;
+    Real t;
 
     //! The orientation and position
     SE3 Rt;
@@ -57,7 +62,7 @@ namespace cisstRobot{
     //! The angular and linear accelerations
     R6  vdwd;
     
-    //! A vector of real numbers (joint positions)
+    //! A vector of Real numbers (joint positions)
     Rn  x;
     //! A vector of 1st time derivatives (joint velocities)
     Rn  xd;
@@ -89,10 +94,10 @@ namespace cisstRobot{
      */
     bool IsRotation()   const;
 
-    //! Is one of the DOF a real value (read joint value)
+    //! Is one of the DOF a Real value (read joint value)
     /**
-       \return true if one of the DOF is real valued. That is any 
-       real position, an velocity or acceleration. These DOF are used to represent
+       \return true if one of the DOF is Real valued. That is any 
+       Real position, an velocity or acceleration. These DOF are used to represent
        joint positions, velocities and acceleration. A maximum of 8 joints are
        supported.
      */
@@ -120,19 +125,19 @@ namespace cisstRobot{
     {  return dof1.dof == dof2.dof;  }
     
 
-    //! Create a real DOF object with a single value
+    //! Create a Real DOF object with a single value
     /**
        Create a 1D DOF object and only sets the TIME DOF mask
      */
-    robDOF( real x );
+    robDOF( Real x );
 
-    //! Create a real DOF object with a vector of values
+    //! Create a Real DOF object with a vector of values
     /**
        Create a nD DOF object and sets the X1-X8 DOF mask
      */
     robDOF( const Rn& x );
 
-    //! Create a real DOF object with a vector of values and their derivatives
+    //! Create a Real DOF object with a vector of values and their derivatives
     /**
        Create a nD DOF object and sets the X, XD and XDD DOF mask
     */
@@ -155,9 +160,9 @@ namespace cisstRobot{
     robDOF( const SE3& Rt, const R6& vw, const R6& vdwd );
 
 
-
+    void Set( uint64_t dof, Real t );
     void Set( uint64_t dof, const Rn& x, const Rn& xd=Rn(), const Rn& xdd=Rn() );
-    void Set( uint64_t dof, const SE3& x, const R6& xd=R6(), const R6& xdd=R6() );
+    void Set( uint64_t dof, const SE3& x, const R6& xd=R6(), const R6& xdd=R6());
 
     void SetPos( uint64_t dof, const Rn& x );
     void SetPos( uint64_t dof, const SE3& Rt );
@@ -216,7 +221,7 @@ namespace cisstRobot{
     //! DOF of the Cartesian angular acceleration along the Z axis
     static const uint64_t WZD = 0x0000000000200000ULL;
     
-    //! DOF of all real positions (joint positions)   (bits 33-40)
+    //! DOF of all Real positions (joint positions)   (bits 33-40)
     static const uint64_t XPOS= 0x000000FF00000000ULL;
     //! DOF of the 1st joint position
     static const uint64_t X1  = 0x0000000100000000ULL;
@@ -235,7 +240,7 @@ namespace cisstRobot{
     //! DOF of the 8th joint position
     static const uint64_t X8  = 0x0000008000000000ULL;
     
-    //! DOF of all real velocities (joint velocities) (bits 41-48)
+    //! DOF of all Real velocities (joint velocities) (bits 41-48)
     static const uint64_t XVEL= 0x0000FF0000000000ULL;
     //! DOF of the 1st joint velocity
     static const uint64_t X1D = 0x0000010000000000ULL;
@@ -254,7 +259,7 @@ namespace cisstRobot{
     //! DOF of the 8th joint velocity
     static const uint64_t X8D = 0x0000800000000000ULL;
     
-    //! DOF of all real velocities (joint accelerations) (bits 49-56)
+    //! DOF of all Real velocities (joint accelerations) (bits 49-56)
     static const uint64_t XACC= 0x00FF000000000000ULL;
     //! DOF of the 1st joint acceleration
     static const uint64_t X1DD= 0x0001000000000000ULL;

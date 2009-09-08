@@ -23,12 +23,12 @@ namespace cisstRobot{
     R3 v1, v1d, v2, v2d;       // linear velocity/acceleration
     R3 w1, w1d, w2, w2d;       // angular velocity/acceleration
 
-    real t0, t1, t2;// old, current and future time;
+    Real t0, t1, t2;// old, current and future time;
     
-    real vmax;
-    real vdmax;
-    real wmax;
-    real wdmax;
+    Real vmax;
+    Real vdmax;
+    Real wmax;
+    Real wdmax;
 
     //uint32_t numwp;
     unsigned long int numwp;
@@ -37,7 +37,7 @@ namespace cisstRobot{
 
   public:
 
-    robSE3Track( real vmax=-1, real wmax=-1, real vdmax=-1, real wdmax=-1 );
+    robSE3Track( Real vmax=-1, Real wmax=-1, Real vdmax=-1, Real wdmax=-1 );
 
     robDomainAttribute IsDefinedFor( const robDOF& input ) const;
 

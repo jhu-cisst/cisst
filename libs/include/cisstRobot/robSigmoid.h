@@ -8,15 +8,15 @@ namespace cisstRobot{
   class robSigmoid : public robFunction {
   protected:
     
-    real x1, x2, x3;  // parameters scale, offset, spread
-    real ts;          // time shift
+    Real x1, x2, x3;  // parameters scale, offset, spread
+    Real ts;          // time shift
     
-    real xmin, xmax;
+    Real xmin, xmax;
     
   public:
 
     //! hack...
-    real Duration() const { return xmax-xmin; }
+    Real Duration() const { return xmax-xmin; }
 
     //! Create a 1D->1D sigmoid mapping
     /**
@@ -27,7 +27,7 @@ namespace cisstRobot{
        \param x2 The upper value of the domain
        \param y2 The value \f$y2=sigmoid(x2)\f$
     */
-    robSigmoid( real x1, real y1, real x2, real y2 );
+    robSigmoid( Real x1, Real y1, Real x2, Real y2 );
     
     //! Create a 1D->1D sigmoid mapping
     /**
@@ -37,7 +37,7 @@ namespace cisstRobot{
        \param x2 The upper value of the domain
        \param ydmax The maximum velocity at the saddle point
     */
-    robSigmoid( real x1, real x2, real ydmax );
+    robSigmoid( Real x1, Real x2, Real ydmax );
 
     //! Return true if the input is between x1 and x2
     robDomainAttribute IsDefinedFor( const robDOF& input ) const; 
