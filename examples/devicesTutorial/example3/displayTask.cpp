@@ -42,7 +42,8 @@ displayTask::displayTask(const std::string & taskName, double period):
     }
 
     commandedForceLimit = 0.0;
-    commandedLinearGain = 0.0;
+    commandedLinearGainMaster = 0.0;
+    commandedLinearGainSlave = 0.0;
     commandedForceCoeff = 0.0;
     commandedMasterClutch = false;
     commandedSlaveClutch = false;
@@ -68,18 +69,25 @@ void displayTask::Run(void)
     GetCollaborativeControlParameter(MainTaskParameter);
    
     UI.ForceLimitVal->value(MainTaskParameter.ForceLimit());
-    UI.ScaleFactorVal->value(MainTaskParameter.LinearGain());
+    UI.LinearGainMasterVal->value(MainTaskParameter.LinearGainMaster());
+    UI.LinearGainSlaveVal->value(MainTaskParameter.LinearGainSlave());
     UI.ForceCoefficientVal->value(MainTaskParameter.ForceFeedbackRatio());
 
     commandedForceLimit = UI.ForceLimit->value();
-    if(MainTaskParameter.LinearGain() != commandedForceLimit) {   
+    if(MainTaskParameter.ForceLimit() != commandedForceLimit) {   
         MainTaskParameter.SetForceLimit(commandedForceLimit);
         ParameterChanged = true;
     }
 
-    commandedLinearGain = UI.ScaleFactor->value();
-    if(MainTaskParameter.LinearGain() != commandedLinearGain) {
-        MainTaskParameter.SetLinearGain(commandedLinearGain);
+    commandedLinearGainMaster = UI.LinearGainMaster->value();
+    if(MainTaskParameter.LinearGainMaster() != commandedLinearGainMaster) {
+        MainTaskParameter.SetLinearGainMaster(commandedLinearGainMaster);
+        ParameterChanged = true;
+    }
+
+    commandedLinearGainSlave = UI.LinearGainSlave->value();
+    if(MainTaskParameter.LinearGainSlave() != commandedLinearGainSlave) {
+        MainTaskParameter.SetLinearGainSlave(commandedLinearGainSlave);
         ParameterChanged = true;
     }
 

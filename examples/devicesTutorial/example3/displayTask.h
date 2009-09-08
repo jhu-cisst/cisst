@@ -39,7 +39,8 @@ class displayTask: public mtsTaskPeriodic
     
  protected:
 
-    mtsFunctionRead         GetLinearGain;
+    mtsFunctionRead         GetLinearGainMaster;
+    mtsFunctionRead         GetLinearGainSlave;
     mtsFunctionRead         GetForceLimit;
     mtsFunctionRead         GetMasterClutch;
     mtsFunctionRead         GetSlaveClutch;
@@ -47,7 +48,8 @@ class displayTask: public mtsTaskPeriodic
     mtsFunctionRead         GetForceMode;
     mtsFunctionRead         GetForceCoefficient;
     mtsFunctionRead         GetCollaborativeControlParameter;
-    mtsFunctionWrite        SetLinearGain;
+    mtsFunctionWrite        SetLinearGainMaster;
+    mtsFunctionWrite        SetLinearGainSlave;
     mtsFunctionWrite        SetForceLimit;
     mtsFunctionWrite        SetMasterClutch;
     mtsFunctionWrite        SetSlaveClutch;
@@ -59,7 +61,8 @@ class displayTask: public mtsTaskPeriodic
     mainGUI                 UI;
 
     mtsDouble               commandedForceLimit;
-    mtsDouble               commandedLinearGain;
+    mtsDouble               commandedLinearGainMaster;
+    mtsDouble               commandedLinearGainSlave;
     mtsDouble               commandedForceCoeff;
     mtsInt                  commandedForceMode;
     mtsBool                 commandedMasterClutch;
