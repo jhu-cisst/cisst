@@ -149,6 +149,12 @@ CMN_DECLARE_SERVICES_INSTANTIATION(cmnLong);
 typedef cmnGenericObjectProxy<unsigned long> cmnULong;
 CMN_DECLARE_SERVICES_INSTANTIATION(cmnULong);
 
+typedef cmnGenericObjectProxy<long long> cmnLongLong;
+CMN_DECLARE_SERVICES_INSTANTIATION(cmnLongLong);
+
+typedef cmnGenericObjectProxy<unsigned long long> cmnULongLong;
+CMN_DECLARE_SERVICES_INSTANTIATION(cmnULongLong);
+
 typedef cmnGenericObjectProxy<int> cmnInt;
 CMN_DECLARE_SERVICES_INSTANTIATION(cmnInt);
 

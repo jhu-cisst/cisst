@@ -54,7 +54,7 @@ class CISST_EXPORT mtsStateIndex : public mtsGenericObject {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
  public:
-    /*! TimeTicks are typedef'ed as unsigned long */
+    /*! TimeTicks are typedef'ed as unsigned long long (64 bits)*/
     typedef unsigned long long int TimeTicksType;
     
  private:
@@ -153,11 +153,6 @@ public:
     }
 };
 
-// TimeTickType wrapper
-typedef cmnGenericObjectProxy<mtsStateIndex::TimeTicksType> cmnTimeTick;
-CMN_DECLARE_SERVICES_INSTANTIATION(cmnTimeTick);
-
-#endif // _mtsStateIndex_h
-
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsStateIndex)
 
+#endif // _mtsStateIndex_h

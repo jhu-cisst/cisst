@@ -392,7 +392,7 @@ bool mtsCollectorState::FetchStateTableData(const mtsStateTable * table,
 {
     std::ofstream outputStream;
     if (LogFormat == COLLECTOR_LOG_FORMAT_BINARY) {
-        cmnTimeTick timeTick;
+        cmnULongLong timeTick;
         outputStream.open(LogFileName.c_str(), std::ios::binary | std::ios::app);
         {            
             unsigned int i;

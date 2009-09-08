@@ -22,7 +22,5 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsStateIndex.h>
 
 
-CMN_IMPLEMENT_SERVICES_TEMPLATED(cmnTimeTick);
-
 CMN_IMPLEMENT_SERVICES(mtsStateIndex)
 
