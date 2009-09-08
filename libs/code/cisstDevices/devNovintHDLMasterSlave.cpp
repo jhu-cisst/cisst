@@ -5,7 +5,7 @@
   $Id: devNovintHDLMasterSlave.cpp 557 2009-07-17 20:39:06Z gsevinc1 $
 
   Author(s): Gorkem Sevinc, Anton Deguet
-  Created on: 2008-07-17
+  Created on: 2009-09-04
 
   (C) Copyright 2008-2009 Johns Hopkins University (JHU), All Rights
   Reserved.
@@ -33,7 +33,12 @@ devNovintHDLMasterSlave::devNovintHDLMasterSlave(const std::string & taskName,
     RobotPair.resize(1);
     DevicePair.resize(1);
     DevicePair[0] = new DevData;
-    RobotPair[0] = new robCollaborativeControlForce();
+    RobotPair[0] = new robCollaborativeControlForce(0.5, 
+                                                    0.5, 
+                                                    20.0, 
+                                                    robCollaborativeControlForce::ParameterType::ForceModeType::RATCHETED,
+                                                    1.0,
+                                                    1.0);;
     
     // Assign device numbers
     if(DevicesVector[0]->Name == firstDeviceName) {
@@ -51,10 +56,10 @@ devNovintHDLMasterSlave::devNovintHDLMasterSlave(const std::string & taskName,
 }
 
 devNovintHDLMasterSlave::devNovintHDLMasterSlave(const std::string & taskName,
-                                                   const std::string & firstDeviceName,
-                                                   const std::string & secondDeviceName,
-                                                   const std::string & thirdDeviceName,
-                                                   const std::string & fourthDeviceName):
+                                                 const std::string & firstDeviceName,
+                                                 const std::string & secondDeviceName,
+                                                 const std::string & thirdDeviceName,
+                                                 const std::string & fourthDeviceName):
     devNovintHDL(taskName, firstDeviceName, secondDeviceName, 
                   thirdDeviceName, fourthDeviceName)
 {
@@ -63,8 +68,18 @@ devNovintHDLMasterSlave::devNovintHDLMasterSlave(const std::string & taskName,
     DevicePair.resize(2);
     DevicePair[0] = new DevData;
     DevicePair[1] = new DevData;
-    RobotPair[0] = new robCollaborativeControlForce();
-    RobotPair[1] = new robCollaborativeControlForce();
+    RobotPair[0] = new robCollaborativeControlForce(0.5, 
+                                                    0.5, 
+                                                    20.0, 
+                                                    robCollaborativeControlForce::ParameterType::ForceModeType::RATCHETED,
+                                                    1.0,
+                                                    1.0);;
+    RobotPair[1] = new robCollaborativeControlForce(0.5, 
+                                                    0.5, 
+                                                    20.0, 
+                                                    robCollaborativeControlForce::ParameterType::ForceModeType::RATCHETED,
+                                                    1.0,
+                                                    1.0);;
 
     // Assign device numbers, * hard coded for now *
     DevicePair[0]->MasterDeviceNo = 0;
@@ -81,8 +96,8 @@ devNovintHDLMasterSlave::devNovintHDLMasterSlave(const std::string & taskName,
 }
 
 void devNovintHDLMasterSlave::SetupTeleoperationInterfaces(const std::string & firstDeviceName, 
-                                                            const std::string & secondDeviceName,
-                                                            int pair)
+                                                           const std::string & secondDeviceName,
+                                                           int pair)
 {
     
     // Create the provided interface

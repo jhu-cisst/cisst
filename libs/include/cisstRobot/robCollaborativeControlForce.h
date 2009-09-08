@@ -58,6 +58,12 @@ public:
     };
 
     robCollaborativeControlForce(void);
+    robCollaborativeControlForce(double linearGainMaster,
+                                 double linearGainSlave, 
+                                 double forceLimit,
+                                 ParameterType::ForceModeType forceMode,
+                                 double masterToSlaveScale,
+                                 double forceFeedbackRatio);
     ~robCollaborativeControlForce(void) {};
     /*!
         Set Parameters function takes arguments from the parent class to mutate the values of;

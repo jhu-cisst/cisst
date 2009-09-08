@@ -5,7 +5,7 @@
   $Id: devSensableHDMasterSlave.cpp 557 2009-07-17 20:39:06Z gsevinc1 $
 
   Author(s): Gorkem Sevinc, Anton Deguet
-  Created on: 2008-07-17
+  Created on: 2009-07-17
 
   (C) Copyright 2008-2009 Johns Hopkins University (JHU), All Rights
   Reserved.
@@ -33,7 +33,12 @@ devSensableHDMasterSlave::devSensableHDMasterSlave(const std::string & taskName,
     RobotPair.resize(1);
     DevicePair.resize(1);
     DevicePair[0] = new DevData;
-    RobotPair[0] = new robCollaborativeControlForce();
+    RobotPair[0] = new robCollaborativeControlForce(0.15, 
+                                                    0.15, 
+                                                    40.0, 
+                                                    robCollaborativeControlForce::ParameterType::ForceModeType::RATCHETED,
+                                                    1.0,
+                                                    1.0);;
     
     // Assign device numbers
     if(DevicesVector[0]->Name == firstDeviceName) {
@@ -63,8 +68,18 @@ devSensableHDMasterSlave::devSensableHDMasterSlave(const std::string & taskName,
     DevicePair.resize(2);
     DevicePair[0] = new DevData;
     DevicePair[1] = new DevData;
-    RobotPair[0] = new robCollaborativeControlForce();
-    RobotPair[1] = new robCollaborativeControlForce();
+    RobotPair[0] = new robCollaborativeControlForce(0.15, 
+                                                    0.15, 
+                                                    40.0, 
+                                                    robCollaborativeControlForce::ParameterType::ForceModeType::RATCHETED,
+                                                    1.0,
+                                                    1.0);
+    RobotPair[1] = new robCollaborativeControlForce(0.15, 
+                                                    0.15, 
+                                                    40.0, 
+                                                    robCollaborativeControlForce::ParameterType::ForceModeType::RATCHETED,
+                                                    1.0,
+                                                    1.0);
 
     // Assign device numbers, * hard coded for now *
     DevicePair[0]->MasterDeviceNo = 0;

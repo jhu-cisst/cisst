@@ -4,8 +4,8 @@
 /*
   $Id: devNovintHDL.cpp 683 2009-08-14 21:40:14Z gsevinc1 $
 
-  Author(s): Anton Deguet
-  Created on: 2008-04-04
+  Author(s): Gorkem Sevinc, Anton Deguet
+  Created on: 2009-09-04
 
   (C) Copyright 2008-2009 Johns Hopkins University (JHU), All Rights
   Reserved.
@@ -22,16 +22,12 @@ http://www.cisst.org/cisst/license.txt.
 // Sensable headers
 #include <hdl/hdl.h>
 #include <hdlu/hdlu.h>
-
-// Define this before including mtsTaskFromCallback.h (which is included by
-// devNovintHDL.h).
-// #define MTS_TASK_CALLBACK_CONVENTION HDCALLBACK
 #include <cisstDevices/devNovintHDL.h>
 
 CMN_IMPLEMENT_SERVICES(devNovintHDL);
 
 struct devNovintHDLDriverData {
-    HDLOpHandle CallbackHandle; //HDLOpHandle CallbackHandle
+    HDLOpHandle CallbackHandle;
     HDLServoOpExitCode CallbackReturnValue;
 };
 
@@ -64,7 +60,7 @@ void devNovintHDL::Run(void)
         hdlToolPosition(deviceData->PositionCartesian.Position().Translation().Pointer());
         deviceData->PositionCartesian.Position().Translation().Multiply(1000.0); //Convert from m to mm
 
-        //hdlToolButton(&(deviceData->ButtonPressed));
+        // hdlToolButton(&(deviceData->ButtonPressed));  // boolean indicating if any button is pressed, not used now.
         hdlToolButtons(&(currentButtons));
 
         // apply forces
@@ -104,6 +100,34 @@ void devNovintHDL::Run(void)
                 // throw the event
                 deviceData->Button2Event(event);
             }
+            // test for button 3
+            currentButtonState = currentButtons & HDL_BUTTON_3;
+            previousButtonState = deviceData->Buttons & HDL_BUTTON_3;
+            if (currentButtonState != previousButtonState) {
+                if (currentButtonState == 0) {
+                    deviceData->Clutch = false;
+                    event.SetType(prmEventButton::RELEASED);
+                } else {
+                    deviceData->Clutch = true;
+                    event.SetType(prmEventButton::PRESSED);
+                }
+                // throw the event
+                deviceData->Button3Event(event);
+            }
+            // test for button 4
+            currentButtonState = currentButtons & HDL_BUTTON_4;
+            previousButtonState = deviceData->Buttons & HDL_BUTTON_4;
+            if (currentButtonState != previousButtonState) {
+                if (currentButtonState == 0) {
+                    deviceData->Clutch = false;
+                    event.SetType(prmEventButton::RELEASED);
+                } else {
+                    deviceData->Clutch = true;
+                    event.SetType(prmEventButton::PRESSED);
+                }
+                // throw the event
+                deviceData->Button4Event(event);
+            }
             // save previous buttons state
             deviceData->Buttons = currentButtons;
         }
@@ -120,7 +144,7 @@ void devNovintHDL::Run(void)
             return;
         }
     }
-*/
+    */
     // call user defined control loop (if redefined from derived class)
     UserControl();
 
@@ -162,8 +186,8 @@ devNovintHDL::devNovintHDL(const std::string & taskName,
 
 
 devNovintHDL::devNovintHDL(const char * taskName,
-                             const char * firstDeviceName,
-                             const char * secondDeviceName):
+                           const char * firstDeviceName,
+                           const char * secondDeviceName):
     mtsTaskFromCallbackAdapter(taskName, 5000)
 {
     this->SetInterfaces(std::string(firstDeviceName), std::string(secondDeviceName));
@@ -172,8 +196,8 @@ devNovintHDL::devNovintHDL(const char * taskName,
 
 
 devNovintHDL::devNovintHDL(const std::string & taskName,
-                             const std::string & firstDeviceName,
-                             const std::string & secondDeviceName):
+                           const std::string & firstDeviceName,
+                           const std::string & secondDeviceName):
     mtsTaskFromCallbackAdapter(taskName, 5000)
 {
     this->SetInterfaces(firstDeviceName, secondDeviceName);
@@ -182,10 +206,10 @@ devNovintHDL::devNovintHDL(const std::string & taskName,
 
 
 devNovintHDL::devNovintHDL(const std::string & taskName,
-                             const std::string & firstDeviceName,
-                             const std::string & secondDeviceName,
-                             const std::string & thirdDeviceName,
-                             const std::string & fourthDeviceName):
+                           const std::string & firstDeviceName,
+                           const std::string & secondDeviceName,
+                           const std::string & thirdDeviceName,
+                           const std::string & fourthDeviceName):
     mtsTaskFromCallbackAdapter(taskName, 5000)
 {
     this->SetInterfaces(firstDeviceName, secondDeviceName, thirdDeviceName, fourthDeviceName);
@@ -194,10 +218,10 @@ devNovintHDL::devNovintHDL(const std::string & taskName,
 
 
 devNovintHDL::devNovintHDL(const char * taskName,
-                             const char * firstDeviceName,
-                             const char * secondDeviceName,
-                             const char * thirdDeviceName,
-                             const char * fourthDeviceName):
+                           const char * firstDeviceName,
+                           const char * secondDeviceName,
+                           const char * thirdDeviceName,
+                           const char * fourthDeviceName):
     mtsTaskFromCallbackAdapter(taskName, 5000)
 {
     this->SetInterfaces(std::string(firstDeviceName), std::string(secondDeviceName), 
@@ -229,9 +253,9 @@ void devNovintHDL::SetInterfaces(const std::string & firstDeviceName,
 }
 
 void devNovintHDL::SetInterfaces(const std::string & firstDeviceName,
-                                  const std::string & secondDeviceName,
-                                  const std::string & thirdDeviceName,
-                                  const std::string & fourthDeviceName)
+                                 const std::string & secondDeviceName,
+                                 const std::string & thirdDeviceName,
+                                 const std::string & fourthDeviceName)
 {
     DevicesVector.SetSize(4);
     DevicesHandleVector.SetSize(4);
@@ -317,6 +341,7 @@ devNovintHDL::~devNovintHDL()
     unsigned int index = 0;
     const unsigned int end = this->DevicesVector.size();
     
+    // Delete structs created
     for (index; index != end; index++) {
         if (DevicesVector(index)) {
             delete DevicesVector(index);
@@ -341,17 +366,20 @@ void devNovintHDL::Create(void * data)
 
     CMN_ASSERT(this->Driver);
 
+    // Get the number of devices connected and display to the user
     this->DeviceCount = hdlCountDevices();
-    CMN_LOG_CLASS_INIT_VERBOSE << this->DeviceCount << std::endl;
+    CMN_LOG_CLASS_INIT_VERBOSE << "Number of haptic devices connected: " << this->DeviceCount << std::endl;
+
     for (index; index != end; index++) {
         deviceData = DevicesVector(index);
         interfaceName = DevicesVector(index)->Name;
         handle = DevicesHandleVector(index);
         CMN_ASSERT(deviceData);
-        handle->DeviceHandle = hdlInitNamedDevice(interfaceName.c_str());
-        //handle->DeviceHandle = hdlInitIndexedDevice(index);
-        error = hdlGetError();
 
+        // Initialize device(s) based on name provided
+        handle->DeviceHandle = hdlInitNamedDevice(interfaceName.c_str());
+        
+        error = hdlGetError();
         if (error != HDL_NO_ERROR)
         {
             CMN_LOG_CLASS_INIT_ERROR << "Create: Failed to initialize haptic device number "
@@ -359,7 +387,9 @@ void devNovintHDL::Create(void * data)
             deviceData->DeviceEnabled = false;
             return;
         }
+
         deviceData->DeviceEnabled = true;
+        // Get the device model and display to the user
         const char * model = hdlDeviceModel();
         if (model) {
             CMN_LOG_CLASS_INIT_VERBOSE << "Create: Found device model: "
@@ -378,14 +408,13 @@ void devNovintHDL::Create(void * data)
 
 void devNovintHDL::Start(void)
 {
-    //HDLServoOpExitCode error;
-    
+    // Start the device
     hdlStart();
+    // Check for errors
     HDLError error = hdlGetError();
     if (error != HDL_NO_ERROR) {
         CMN_LOG_CLASS_INIT_ERROR << "Start: Failed to start scheduler" << std::endl;
     }
-    // Check for errors
     
     // Schedule the main callback that will communicate with the device
     this->Driver->CallbackHandle = hdlCreateServoOp(mtsTaskFromCallbackAdapter::CallbackAdapter<HDLServoOpExitCode>,

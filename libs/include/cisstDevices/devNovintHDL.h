@@ -4,8 +4,8 @@
 /*
   $Id: devNovintHDL.h 683 2009-08-14 21:40:14Z gsevinc1 $
 
-  Author(s): Anton Deguet
-  Created on: 2008-04-04
+  Author(s): Gorkem Sevinc, Anton Deguet
+  Created on: 2009-09-04
 
   (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
   Reserved.
@@ -57,7 +57,7 @@ protected:
         prmPositionCartesianGet PositionCartesian;
         
         // mtsFunction called to broadcast the event
-        mtsFunctionWrite Button1Event, Button2Event;
+        mtsFunctionWrite Button1Event, Button2Event, Button3Event, Button4Event;
 
         prmForceCartesianSet ForceCartesian;
 

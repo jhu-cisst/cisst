@@ -79,11 +79,42 @@ robCollaborativeControlForce::robCollaborativeControlForce(void)
     RightClutchMSOffset.SetAll(0.0);
     WorkspaceOffset.SetAll(0.0);
     Error.SetAll(0.0);
-    Parameter().LinearGainMaster() = 0.3;
-    Parameter().LinearGainSlave() = 0.3;
-    Parameter().ForceLimit() = 40.0;
-    Parameter().ErrorLimit() = 20.0;
-    Parameter().ForceMode() = ParameterType::RATCHETED;
+    Parameter().LinearGainMaster() = 0.0;
+    Parameter().LinearGainSlave() = 0.0;
+    Parameter().ForceLimit() = 0.0;
+    Parameter().ErrorLimit() = 0.0;
+    Parameter().ForceMode() = ParameterType::RAW;
+    Parameter().MasterToSlaveScale() = 1.0;
+    ClutchMode = 0;
+    Parameter().ForceFeedbackRatio() = 1.0;
+    FirstIteration = true;
+    ApplicationMasterClutch() = false;
+    ApplicationSlaveClutch() = false;
+    ApplicationMasterSlaveClutch() = false;
+    ClutchDone = false;
+    BothClutched = false;
+    ClutchOffsetAdd = false;
+}
+
+robCollaborativeControlForce::robCollaborativeControlForce(double linearGainMaster,
+                                                           double linearGainSlave, 
+                                                           double forceLimit,
+                                                           ParameterType::ForceModeType forceMode,
+                                                           double masterToSlaveScale,
+                                                           double forceFeedbackRatio)
+{
+    ClutchOffset.SetAll(0.0);
+    LeftClutchOffset.SetAll(0.0);
+    RightClutchOffset.SetAll(0.0);
+    LeftClutchMSOffset.SetAll(0.0);
+    RightClutchMSOffset.SetAll(0.0);
+    WorkspaceOffset.SetAll(0.0);
+    Error.SetAll(0.0);
+    Parameter().LinearGainMaster() = linearGainMaster;
+    Parameter().LinearGainSlave() = linearGainSlave;
+    Parameter().ForceLimit() = forceLimit;
+    Parameter().ErrorLimit() = 40.0;
+    Parameter().ForceMode() = forceMode;
     Parameter().MasterToSlaveScale() = 1.0;
     ClutchMode = 0;
     Parameter().ForceFeedbackRatio() = 1.0;
@@ -278,7 +309,7 @@ void robCollaborativeControlForce::Update(const vct3 & p1,
 
         // Apply the scale factor (kp) to the forces
         ForceMaster.Multiply(Parameter().LinearGainMaster());
-        ForceMaster.Multiply(2.0);
+        //ForceMaster.Multiply(2.0);
         ForceSlave.Multiply(Parameter().LinearGainSlave());
         
         // Apply the Force Feedback ratio on the master arm
