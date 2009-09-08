@@ -150,7 +150,7 @@ public:
       \param input The input vector
       \param output The output vector
     */
-    template<int __stride1, class __dataPtrType1, int __stride2, class __dataPtrType2>
+    template <stride_type __stride1, class __dataPtrType1, stride_type __stride2, class __dataPtrType2>
     inline void
     ApplyTo(const vctFixedSizeConstVectorBase<DIMENSION, __stride1, value_type, __dataPtrType1> & input,
             vctFixedSizeVectorBase<DIMENSION, __stride2, value_type, __dataPtrType2> & output) const {
@@ -169,7 +169,7 @@ public:
       \param input The input vector
       \return The output vector
     */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline vctFixedSizeVector<value_type, DIMENSION>
     ApplyTo(const vctFixedSizeConstVectorBase<DIMENSION, __stride, value_type, __dataPtrType> & input) const {
         vctFixedSizeVector<value_type, DIMENSION> result;
@@ -230,8 +230,8 @@ public:
 
 
     /*! Apply this transform to a matrix of three rows */
-    template <unsigned int __cols, int __rowStride1, int __colStride1, class __dataPtrType1, 
-              int __rowStride2, int __colStride2, class __dataPtrType2>
+    template <size_type __cols, stride_type __rowStride1, stride_type __colStride1, class __dataPtrType1, 
+              stride_type __rowStride2, stride_type __colStride2, class __dataPtrType2>
     inline void
     ApplyTo(const vctFixedSizeConstMatrixBase<DIMENSION, __cols, __rowStride1, __colStride1, value_type, __dataPtrType1> & input,
             vctFixedSizeMatrixBase<DIMENSION, __cols, __rowStride2, __colStride2, value_type, __dataPtrType2> & output) const
@@ -240,7 +240,7 @@ public:
         typedef typename inputType::ConstColumnRefType inputColumnType;
         typedef vctFixedSizeMatrixBase<DIMENSION, __cols, __rowStride2, __colStride2, value_type, __dataPtrType2> outputType;
         typedef typename outputType::ColumnRefType outputColumnType;
-        unsigned int columnIndex;
+        index_type columnIndex;
         for (columnIndex = 0; columnIndex < __cols; ++columnIndex) {
             const inputColumnType inputColumn(input.Column(columnIndex));
             outputColumnType outputColumn(output.Column(columnIndex));
@@ -256,17 +256,17 @@ public:
       DIMENSION-vector object.
     */
     inline void 
-    ApplyTo(unsigned int inputSize, const vctFixedSizeVector<value_type, DIMENSION> * input,
+    ApplyTo(size_type inputSize, const vctFixedSizeVector<value_type, DIMENSION> * input,
             vctFixedSizeVector<value_type, DIMENSION> * output) const
     {
-        unsigned int index;
+        index_type index;
         for (index = 0; index < inputSize; ++index) {
             this->ApplyTo(input[index], output[index]);
         }
     }
 
 
-    template<int __stride1, class __dataPtrType1, int __stride2, class __dataPtrType2>
+    template <stride_type __stride1, class __dataPtrType1, stride_type __stride2, class __dataPtrType2>
     inline void
     ApplyInverseTo(const vctFixedSizeConstVectorBase<DIMENSION, __stride1, value_type, __dataPtrType1> & input,
                    vctFixedSizeVectorBase<DIMENSION, __stride2, value_type, __dataPtrType2> & output) const {
@@ -282,7 +282,7 @@ public:
       \param input The input vector
       \param output The output vector
     */
-    template<class __vectorOwnerType1, class __vectorOwnerType2>
+    template <class __vectorOwnerType1, class __vectorOwnerType2>
     inline void
     ApplyInverseTo(const vctDynamicConstVectorBase<__vectorOwnerType1, value_type> & input,
                    vctDynamicVectorBase<__vectorOwnerType2, value_type> & output) const {
@@ -305,7 +305,7 @@ public:
       \param input The input vector
       \return The output vector
     */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline vctFixedSizeVector<value_type, DIMENSION>
     ApplyInverseTo(const vctFixedSizeConstVectorBase<DIMENSION, __stride, value_type, __dataPtrType> & input) const {
         vctFixedSizeVector<value_type, DIMENSION> result;

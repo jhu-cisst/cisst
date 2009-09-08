@@ -82,8 +82,13 @@ protected:
     EventHandlerWriteProxyMapType EventHandlerWriteProxyMap;
 
 public:
-    /*! Create a required interface proxy, populate it with commands and events, and 
-        returns the pointer to it. */
+
+    /*! Type defined to be large enough to cast back and forth to
+      command pointer */
+    typedef long int CommandIdType;
+ 
+    /*! Create a required interface proxy, populate it with commands
+      and events, and returns the pointer to it. */
     mtsRequiredInterface * CreateRequiredInterfaceProxy(
         mtsProvidedInterface * providedInterface, const std::string & requiredInterfaceName,
         mtsDeviceInterfaceProxyServer * proxyServer);

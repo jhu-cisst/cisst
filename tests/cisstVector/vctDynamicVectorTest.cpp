@@ -251,9 +251,9 @@ void vctDynamicVectorTest::TestSelect(void)
     enum {INPUT_SIZE = 12, OUTPUT_SIZE = 5};
     vctDynamicVector<_elementType> inputVector(INPUT_SIZE);
     vctDynamicVector<_elementType> outputVector(OUTPUT_SIZE);
-    vctDynamicVector<unsigned int> indexVector(OUTPUT_SIZE);
+    vctDynamicVector<vct::index_type> indexVector(OUTPUT_SIZE);
     vctRandom(inputVector, _elementType(-10), _elementType(10));
-    vctRandom(indexVector, (unsigned int)(0), (unsigned int)(INPUT_SIZE));
+    vctRandom(indexVector, static_cast<vct::size_type>(0), static_cast<vct::size_type>(INPUT_SIZE));
     vctGenericVectorTest::TestSelect(inputVector, indexVector, outputVector);
 }
 

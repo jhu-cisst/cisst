@@ -45,16 +45,17 @@ http://www.cisst.org/cisst/license.txt.
   multiple random sequence objects to coexist, these interfaces may
   need to be changed.
 */
-template <unsigned int _rows, unsigned int _cols, int _rowStride, 
-          int _colStride, class _elementType, class _dataPtrType>
+template <vct::size_type _rows, vct::size_type _cols,
+          vct::stride_type _rowStride, vct::stride_type _colStride,
+          class _elementType, class _dataPtrType>
 void vctRandom(vctFixedSizeMatrixBase<_rows, _cols, _rowStride, _colStride,
                _elementType, _dataPtrType> & matrix,
                const _elementType min,
                const _elementType max) {
     cmnRandomSequence & randomSequence = cmnRandomSequence::GetInstance();
-    const unsigned int rows = matrix.rows();
-    const unsigned int cols = matrix.cols();
-    unsigned int rowIndex, colIndex;
+    const vct::size_type rows = matrix.rows();
+    const vct::size_type cols = matrix.cols();
+    vct::index_type rowIndex, colIndex;
     for (rowIndex = 0; rowIndex < rows; ++rowIndex) {
         for (colIndex = 0; colIndex < cols; ++colIndex) {
             randomSequence.ExtractRandomValue(min, max,

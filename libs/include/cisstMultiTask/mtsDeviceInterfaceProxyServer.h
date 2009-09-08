@@ -54,7 +54,7 @@ public:
     void Start(mtsTask * callingTask);
 
     /*! Change the proxy state as active. */
-    void SetAsActiveProxy() {
+    void SetAsActiveProxy(void) {
         ChangeProxyState(mtsProxyBaseServer<mtsTask>::PROXY_ACTIVE);
     }
 
@@ -69,7 +69,7 @@ public:
     }
 
     /*! Stop the proxy. */
-    void Stop();
+    void Stop(void);
 
     /*! Set a server task connected to this proxy server. This server task has 
         to provide at least one provided interface. */

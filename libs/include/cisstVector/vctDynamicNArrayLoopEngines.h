@@ -47,15 +47,15 @@ http://www.cisst.org/cisst/license.txt.
 
   \sa SoNi SoNiNi SoNiSi NoNiNi NoNiSi NoSiNi NioSi NioNi NoNi Nio NioSiNi MinAndMax
 */
-template <unsigned int _dimension>
+template <vct::size_type _dimension>
 class vctDynamicNArrayLoopEngines
 {
 public:
     /* define types */
-    typedef unsigned int size_type;
-    typedef int stride_type;
-    typedef int difference_type;
-    typedef unsigned int index_type;
+    typedef vct::size_type size_type;
+    typedef vct::stride_type stride_type;
+    typedef vct::difference_type difference_type;
+    typedef vct::index_type index_type;
 
     VCT_NARRAY_TRAITS_TYPEDEFS(_dimension);
 
@@ -218,7 +218,7 @@ public:
             return numberOfWrappedDimensions;
         
         stridesIter += numberOfWrappedDimensions;
-        int targetOffset;
+        difference_type targetOffset;
         do {
             --targetsIter;
             --stndIter;

@@ -29,8 +29,8 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
-#include <cisstVector/vctFixedSizeVector.h>
 #include <cisstCommon/cmnTypeTraits.h>
+#include <cisstVector/vctFixedSizeVector.h>
 
 /*!
   \ingroup cisstVector
@@ -67,17 +67,17 @@ http://www.cisst.org/cisst/license.txt.
   current implementation does not test for it, but assumes it.  In
   most cases, we compare absolute values of numbers to the tolerance.
  */
-template<class _elementType, unsigned int _size>
+template <class _elementType, vct::size_type _size>
 class vctBarycentricVector : public vctFixedSizeVector<_elementType, _size>
 {
 public:
     typedef vctFixedSizeVector<_elementType, _size> BaseType;
     typedef vctBarycentricVector<_elementType, _size> ThisType;
 
-    typedef typename BaseType::value_type value_type;
+    VCT_CONTAINER_TRAITS_TYPEDEFS(_elementType);
     typedef class cmnTypeTraits<value_type> TypeTraits;
 
-    /*! Default constructr -- call base class def. ctor */
+    /*! Default constructor -- call base class def. ctor */
     vctBarycentricVector()
         : BaseType()
     {}
@@ -93,9 +93,9 @@ public:
     {}
 
     /*! copy constructor from a general vector */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     vctBarycentricVector(const vctFixedSizeVectorBase<_size, __stride, _elementType, __dataPtrType> & other)
-    : BaseType(other)
+        : BaseType(other)
     {}
 
     vctBarycentricVector(_elementType value)
@@ -111,14 +111,14 @@ public:
     {}
 
     vctBarycentricVector(_elementType element0, _elementType element1, _elementType element2,
-        _elementType element3)
+                         _elementType element3)
         : BaseType(element0, element1, element2, element3)
     {}
 
     /* This one cannot call BaseType constructor as we cannot identify the
      unknown arguments */
     vctBarycentricVector(_elementType element0, _elementType element1, _elementType element2,
-        _elementType element3, _elementType element4, ...)
+                         _elementType element3, _elementType element4, ...)
     {
         (*this)[0] = element0;
         (*this)[1] = element1;
@@ -127,7 +127,7 @@ public:
         (*this)[4] = element4;
         va_list nextArg;
         va_start(nextArg, element4);
-        for (unsigned int i = 5; i < _size; ++i) {
+        for (index_type i = 5; i < _size; ++i) {
             (*this)[i] = va_arg(nextArg, value_type);
         }
         va_end(nextArg);

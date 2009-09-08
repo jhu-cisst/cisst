@@ -37,6 +37,8 @@ int main (void) {
     std::cout << "Compiling with Microsoft .net 2003, aka 7.1" << std::endl;
 #elif (CISST_COMPILER == CISST_DOTNET2005)
     std::cout << "Compiling with Microsoft .net 2005, aka 8.0" << std::endl;
+#elif (CISST_COMPILER == CISST_DOTNET2008)
+    std::cout << "Compiling with Microsoft .net 2008, aka 9.0" << std::endl;
 #endif
     
 #ifdef CISST_COMPILER_IS_MSVC
@@ -44,7 +46,14 @@ int main (void) {
 #else
     std::cout << "The compiler is not a Microsoft compiler" << std::endl;
 #endif
-    
+
+    std::cout << "Size of unsigned int: " << sizeof(unsigned int) << std::endl
+              << "Size of unsigned long int: " << sizeof(unsigned long int) << std::endl
+              << "Size of unsigned long long int: " << sizeof(unsigned long long int) << std::endl
+              << "Size of unsigned long: " << sizeof(unsigned long) << std::endl
+              << "Size of unsigned long long: " << sizeof(unsigned long long) << std::endl
+              << "Size of size_t: " << sizeof(size_t) << std::endl;
+
     std::cout << "Please type \"0\" followed by the \"return\" key" << std::endl;
     double zero;
     std::cin >> zero;

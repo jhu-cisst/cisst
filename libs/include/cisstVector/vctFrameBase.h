@@ -48,17 +48,17 @@ http://www.cisst.org/cisst/license.txt.
 
   \sa vctQuaternionRotation3 vctMatrixRotation3 vctFixedSizeVector
 */
-template<class _rotationType>
+template <class _rotationType>
 class vctFrameBase
 {
 public:
     enum {DIMENSION = _rotationType::DIMENSION};
-    typedef typename _rotationType::value_type value_type;
+    VCT_CONTAINER_TRAITS_TYPEDEFS(typename _rotationType::value_type);
     typedef vctFrameBase<_rotationType> ThisType;
     typedef _rotationType RotationType;
     typedef vctFixedSizeVector<value_type, DIMENSION> TranslationType;
     typedef cmnTypeTraits<value_type> TypeTraits;
-    
+
 protected:
     RotationType RotationMember;
     TranslationType TranslationMember;
@@ -67,12 +67,12 @@ public:
 
 
     /*! Default constructor. Sets the rotation matrix to identity. */
-    vctFrameBase() {
+    vctFrameBase(void) {
         Assign(Identity());
     }
     
     /*! Constructor from a translation and a rotation. */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     vctFrameBase(const RotationType & rotation,
                  const vctFixedSizeConstVectorBase<DIMENSION, __stride, value_type, __dataPtrType> & translation):
         RotationMember(rotation),
@@ -92,7 +92,7 @@ public:
         return *this;
     }
 
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
 	inline ThisType & Assign(const RotationType & rotation,
                              const vctFixedSizeConstVectorBase<DIMENSION, __stride, value_type, __dataPtrType> & translation) {
         RotationMember.Assign(rotation);
@@ -149,7 +149,7 @@ public:
       \param input The input vector
       \param output The output vector
     */
-    template<int __stride1, class __dataPtrType1, int __stride2, class __dataPtrType2>
+    template <stride_type __stride1, class __dataPtrType1, stride_type __stride2, class __dataPtrType2>
     inline void
     ApplyTo(const vctFixedSizeConstVectorBase<DIMENSION, __stride1, value_type, __dataPtrType1> & input,
             vctFixedSizeVectorBase<DIMENSION, __stride2, value_type, __dataPtrType2> & output) const {
@@ -166,7 +166,7 @@ public:
       \param input The input vector
       \return The output vector
     */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline vctFixedSizeVector<value_type, DIMENSION>
     ApplyTo(const vctFixedSizeConstVectorBase<DIMENSION, __stride, value_type, __dataPtrType> & input) const {
         TranslationType result;
@@ -233,7 +233,7 @@ public:
       stored into another dynamic vector.  It is assumed that both are
       of size DIMENSION.
     */
-    template<class _vectorOwnerType1, class _vectorOwnerType2>
+    template <class _vectorOwnerType1, class _vectorOwnerType2>
     inline void
     ApplyTo(const vctDynamicConstVectorBase<_vectorOwnerType1, value_type> & input,
             vctDynamicVectorBase<_vectorOwnerType2, value_type> & output) const
@@ -258,7 +258,7 @@ public:
       stored into a fixed size vector.  It is assumed that both are
       of size DIMENSION.
     */
-    template<class _vectorOwnerType1, int __stride2, class __dataPtrType2>
+    template <class _vectorOwnerType1, stride_type __stride2, class __dataPtrType2>
     inline void
     ApplyTo(const vctDynamicConstVectorBase<_vectorOwnerType1, value_type> & input,
             vctFixedSizeVectorBase<DIMENSION, __stride2, value_type, __dataPtrType2>  & output) const
@@ -271,8 +271,9 @@ public:
 
 
     /*! Apply this transform to a matrix of three rows */
-    template<unsigned int __cols, int __rowStride1, int __colStride1, class __dataPtrType1, 
-             int __rowStride2, int __colStride2, class __dataPtrType2>
+    template <size_type __cols,
+              stride_type __rowStride1, stride_type __colStride1, class __dataPtrType1, 
+              stride_type __rowStride2, stride_type __colStride2, class __dataPtrType2>
     inline void ApplyTo(const vctFixedSizeConstMatrixBase<DIMENSION, __cols, __rowStride1, __colStride1, value_type, __dataPtrType1> & input,
                         vctFixedSizeMatrixBase<DIMENSION, __cols, __rowStride2, __colStride2, value_type, __dataPtrType2> & output) const
     {
@@ -292,10 +293,10 @@ public:
       dataPtrType.  For simplicity, this version is writtend for a
       DIMENSION-vector object.
     */
-    inline void ApplyTo(unsigned int inputSize, const vctFixedSizeVector<value_type, DIMENSION> *input,
+    inline void ApplyTo(size_type inputSize, const vctFixedSizeVector<value_type, DIMENSION> * input,
                         vctFixedSizeVector<value_type, DIMENSION> * output) const
     {
-        unsigned int index;
+        index_type index;
         for (index = 0; index < inputSize; ++index) {
             this->ApplyTo(input[index], output[index]);
         }
@@ -304,7 +305,7 @@ public:
     /*! Apply the transofrmation to a dynamic matrix of DIMENSION rows.  Store the result
       to a second dynamic matrix.
     */
-    template<class __matrixOwnerType1, class __matrixOwnerType2>
+    template <class __matrixOwnerType1, class __matrixOwnerType2>
     inline void ApplyTo(const vctDynamicConstMatrixBase<__matrixOwnerType1, value_type> & input,
                         vctDynamicMatrixBase<__matrixOwnerType2, value_type> & output) const
     {
@@ -320,7 +321,8 @@ public:
     }
 
 
-    template<int __stride1, class __dataPtrType1, int __stride2, class __dataPtrType2>
+    template <stride_type __stride1, class __dataPtrType1,
+              stride_type __stride2, class __dataPtrType2>
     inline void
     ApplyInverseTo(const vctFixedSizeConstVectorBase<DIMENSION, __stride1, value_type, __dataPtrType1> & input,
                    vctFixedSizeVectorBase<DIMENSION, __stride2, value_type, __dataPtrType2> & output) const {
@@ -336,7 +338,7 @@ public:
       \param input The input vector
       \param output The output vector
     */
-    template<class _vectorOwnerType1, class _vectorOwnerType2>
+    template <class _vectorOwnerType1, class _vectorOwnerType2>
     inline void
     ApplyInverseTo(const vctDynamicConstVectorBase<_vectorOwnerType1, value_type> & input,
                    vctDynamicVectorBase<_vectorOwnerType2, value_type> & output) const
@@ -362,7 +364,7 @@ public:
       stored into a fixed size vector.  It is assumed that both are
       of size DIMENSION.
     */
-    template<class _vectorOwnerType1, int __stride2, class __dataPtrType2>
+    template <class _vectorOwnerType1, stride_type __stride2, class __dataPtrType2>
     inline void
     ApplyInverseTo(const vctDynamicConstVectorBase<_vectorOwnerType1, value_type> & input,
             vctFixedSizeVectorBase<DIMENSION, __stride2, value_type, __dataPtrType2>  & output) const
@@ -385,7 +387,7 @@ public:
       \param input The input vector
       \return The output vector
     */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline vctFixedSizeVector<value_type, DIMENSION>
     ApplyInverseTo(const vctFixedSizeConstVectorBase<DIMENSION, __stride, value_type, __dataPtrType> & input) const {
         vctFixedSizeVector<value_type, DIMENSION> result;
@@ -399,7 +401,7 @@ public:
       \param input The input vector
       \return The output vector
     */
-    template<class _vectorOwnerType>
+    template <class _vectorOwnerType>
     inline vctFixedSizeVector<value_type, DIMENSION>
     ApplyInverseTo(const vctDynamicConstVectorBase<_vectorOwnerType, value_type> & input) const
     {
@@ -422,8 +424,9 @@ public:
     }
 
     /*! Apply the inverse transform to a fixed-size matrix of three rows */
-    template<unsigned int __cols, int __rowStride1, int __colStride1, class __dataPtrType1, 
-             int __rowStride2, int __colStride2, class __dataPtrType2>
+    template <size_type __cols,
+              stride_type __rowStride1, stride_type __colStride1, class __dataPtrType1, 
+              stride_type __rowStride2, stride_type __colStride2, class __dataPtrType2>
     inline void ApplyInverseTo(const vctFixedSizeConstMatrixBase<DIMENSION, __cols, __rowStride1, __colStride1, value_type, __dataPtrType1> & input,
                         vctFixedSizeMatrixBase<DIMENSION, __cols, __rowStride2, __colStride2, value_type, __dataPtrType2> & output) const
     {
@@ -440,7 +443,7 @@ public:
     /*! Apply the inverse transofrmation to a dynamic matrix of DIMENSION rows.  Store the result
       to a second dynamic matrix.
     */
-    template<class __matrixOwnerType1, class __matrixOwnerType2>
+    template <class __matrixOwnerType1, class __matrixOwnerType2>
     inline void ApplyInverseTo(const vctDynamicConstMatrixBase<__matrixOwnerType1, value_type> & input,
     vctDynamicMatrixBase<__matrixOwnerType2, value_type> & output) const
     {
@@ -461,7 +464,7 @@ public:
         DIMENSION.  The return value is always a fixed-size vector.
     */
     //@{
-    template <int _stride, class _dataPtrType>
+    template <stride_type _stride, class _dataPtrType>
     inline vctFixedSizeVector<value_type, DIMENSION>
     operator * (const vctFixedSizeConstVectorBase<DIMENSION, _stride, value_type, _dataPtrType> & vector) const
     {
@@ -587,7 +590,7 @@ operator * (const vctFrameBase<_rotationType> & frame1,
     return result;
 }
 
-template<unsigned int _cols, int _rowStride, int _colStride, class _rotationType, class _elementType, class _dataPtrType>
+template <vct::size_type _cols, vct::stride_type _rowStride, vct::stride_type _colStride, class _rotationType, class _elementType, class _dataPtrType>
 inline vctFixedSizeMatrix<_elementType, 3, _cols >
 operator *(const vctFrameBase<_rotationType> & frame,
            const vctFixedSizeConstMatrixBase<3, _cols, _rowStride, _colStride, _elementType, _dataPtrType> & matrix)
@@ -598,7 +601,7 @@ operator *(const vctFrameBase<_rotationType> & frame,
 }
 
 /*! Stream out operator. */
-template<class _rotationType>
+template <class _rotationType>
 std::ostream & operator << (std::ostream & output,
                             const vctFrameBase<_rotationType> & frame) {
     frame.ToStream(output);

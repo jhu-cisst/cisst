@@ -48,17 +48,17 @@ http://www.cisst.org/cisst/license.txt.
 
 /* Forward declarations */
 #ifndef DOXYGEN
-template<unsigned int _size,
-         int _stride, class _dataPtrType,
-         int __stride, class __dataPtrType,
+template<vct::size_type _size,
+         vct::stride_type _stride, class _dataPtrType,
+         vct::stride_type __stride, class __dataPtrType,
          class _elementType,
          class _elementOperationType>
 inline vctFixedSizeVector<bool, _size>
 vctFixedSizeVectorElementwiseCompareVector(const vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType> & vector1,
                                            const vctFixedSizeConstVectorBase<_size, __stride, _elementType, __dataPtrType> & vector2);
 
-template<unsigned int _size,
-         int _stride, class _dataPtrType,
+template<vct::size_type _size,
+         vct::stride_type _stride, class _dataPtrType,
          class _elementType,
          class _elementOperationType>
 inline vctFixedSizeVector<bool, _size>
@@ -104,7 +104,7 @@ vctFixedSizeVectorElementwiseCompareScalar(const vctFixedSizeConstVectorBase<_si
 
   \sa vctFixedStrideVectorConstIterator vctFixedSizeVectorTraits
 */
-template<unsigned int _size, int _stride, class _elementType, class _dataPtrType>
+template<vct::size_type _size, vct::stride_type _stride, class _elementType, class _dataPtrType>
 class vctFixedSizeConstVectorBase
 {
  public:
@@ -611,7 +611,7 @@ class vctFixedSizeConstVectorBase
 
     /*! Test if the method FastCopyOf can be used instead of Assign.
       See FastCopyOf for more details. */
-    template<unsigned int __size, int __stride, class __dataPtrType>
+    template <size_type __size, stride_type __stride, class __dataPtrType>
     inline bool FastCopyCompatible(const vctFixedSizeConstVectorBase<__size, __stride, value_type, __dataPtrType> & source) const
     {
         return vctFastCopy::VectorCopyCompatible(*this, source);
@@ -632,7 +632,7 @@ class vctFixedSizeConstVectorBase
     \param otherVector second operand of the dot product ("this" is the first operand)
     \return The dot product of this and otherVector.
     */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline value_type DotProduct(const vctFixedSizeConstVectorBase<_size, __stride, value_type, __dataPtrType> & otherVector) const {
         return vctFixedSizeVectorRecursiveEngines<_size>::template
 	    SoViVi<typename vctBinaryOperations<value_type>::Addition,
@@ -656,7 +656,7 @@ class vctFixedSizeConstVectorBase
 
       \return A boolean.
     */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline bool Equal(const vctFixedSizeConstVectorBase<_size, __stride,
                       value_type, __dataPtrType> & otherVector) const {
         return vctFixedSizeVectorRecursiveEngines<_size>::template
@@ -666,14 +666,14 @@ class vctFixedSizeConstVectorBase
     }
 
     /* documented above */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline bool operator == (const vctFixedSizeConstVectorBase<_size, __stride,
                              value_type, __dataPtrType> & otherVector) const {
         return Equal(otherVector);
     }
 
     /* documented above */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline bool AlmostEqual(const vctFixedSizeConstVectorBase<_size, __stride,
                             value_type, __dataPtrType> & otherVector,
                             value_type tolerance) const {
@@ -681,14 +681,14 @@ class vctFixedSizeConstVectorBase
     }
 
     /* documented above */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline bool AlmostEqual(const vctFixedSizeConstVectorBase<_size, __stride,
                             value_type, __dataPtrType> & otherVector) const {
         return ((*this - otherVector).LinfNorm() <= cmnTypeTraits<_elementType>::Tolerance());
     }
     
     /* documented above */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline bool NotEqual(const vctFixedSizeConstVectorBase<_size, __stride,
                          value_type, __dataPtrType> & otherVector) const {
         return vctFixedSizeVectorRecursiveEngines<_size>::template
@@ -698,14 +698,14 @@ class vctFixedSizeConstVectorBase
     }
     
     /* documented above */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline bool operator != (const vctFixedSizeConstVectorBase<_size, __stride,
                              value_type, __dataPtrType> & otherVector) const {
         return NotEqual(otherVector);
     }
 
     /* documented above */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline bool Lesser(const vctFixedSizeConstVectorBase<_size, __stride,
                        value_type, __dataPtrType> & otherVector) const {
         return vctFixedSizeVectorRecursiveEngines<_size>::template
@@ -715,7 +715,7 @@ class vctFixedSizeConstVectorBase
     }
     
     /* documented above */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline bool LesserOrEqual(const vctFixedSizeConstVectorBase<_size, __stride,
                               value_type, __dataPtrType> & otherVector) const {
         return vctFixedSizeVectorRecursiveEngines<_size>::template
@@ -725,7 +725,7 @@ class vctFixedSizeConstVectorBase
     }
 
     /* documented above */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline bool Greater(const vctFixedSizeConstVectorBase<_size, __stride,
                         value_type, __dataPtrType> & otherVector) const {
         return vctFixedSizeVectorRecursiveEngines<_size>::template
@@ -735,7 +735,7 @@ class vctFixedSizeConstVectorBase
     }
 
     /* documented above */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline bool GreaterOrEqual(const vctFixedSizeConstVectorBase<_size, __stride,
                                value_type, __dataPtrType> & otherVector) const {
         return vctFixedSizeVectorRecursiveEngines<_size>::template
@@ -760,7 +760,7 @@ class vctFixedSizeConstVectorBase
 
       \return A vector of booleans.
     */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline BoolVectorValueType
     ElementwiseEqual(const vctFixedSizeConstVectorBase<_size, __stride, value_type, __dataPtrType> & otherVector) const {
         return vctFixedSizeVectorElementwiseCompareVector<
@@ -769,7 +769,7 @@ class vctFixedSizeConstVectorBase
     }
 
     /* documented above */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline BoolVectorValueType
     ElementwiseNotEqual(const vctFixedSizeConstVectorBase<_size, __stride, value_type, __dataPtrType> & otherVector) const {
         return vctFixedSizeVectorElementwiseCompareVector<
@@ -778,7 +778,7 @@ class vctFixedSizeConstVectorBase
     }
 
     /* documented above */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline BoolVectorValueType
     ElementwiseLesser(const vctFixedSizeConstVectorBase<_size, __stride, value_type, __dataPtrType> & otherVector) const {
         return vctFixedSizeVectorElementwiseCompareVector<
@@ -787,7 +787,7 @@ class vctFixedSizeConstVectorBase
     }
 
     /* documented above */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline BoolVectorValueType
     ElementwiseLesserOrEqual(const vctFixedSizeConstVectorBase<_size, __stride, value_type, __dataPtrType> & otherVector) const {
         return vctFixedSizeVectorElementwiseCompareVector<
@@ -796,7 +796,7 @@ class vctFixedSizeConstVectorBase
     }
 
     /* documented above */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline BoolVectorValueType
     ElementwiseGreater(const vctFixedSizeConstVectorBase<_size, __stride, value_type, __dataPtrType> & otherVector) const {
         return vctFixedSizeVectorElementwiseCompareVector<
@@ -805,7 +805,7 @@ class vctFixedSizeConstVectorBase
     }
 
     /* documented above */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline BoolVectorValueType
     ElementwiseGreaterOrEqual(const vctFixedSizeConstVectorBase<_size, __stride, value_type, __dataPtrType> & otherVector) const {
         return vctFixedSizeVectorElementwiseCompareVector<
@@ -1025,7 +1025,7 @@ class vctFixedSizeConstVectorBase
     
     */
 #ifndef SWIG // SWIG 1.3.21 doesn't handle sub-classes
-    template<size_type _subPosition, int _subStride>
+    template<size_type _subPosition, stride_type _subStride>
     class SubsequenceTraits {
         public:
         enum {
@@ -1056,7 +1056,7 @@ class vctFixedSizeConstVectorBase
       parent container are equal.  For more sophisticated subsequences,
       the user has to write customized code.
     */
-    template<unsigned int _subSize>
+    template <size_type _subSize>
     class ConstSubvector {
     public:
         typedef vctFixedSizeConstVectorRef<value_type, _subSize, STRIDE> Type;
@@ -1073,8 +1073,8 @@ class vctFixedSizeConstVectorBase
         size_type index;
         const size_type mySize = size();
         // preserve the formatting flags as they were
-        const int width = outputStream.width(12);
-        const int precision = outputStream.precision(6);
+        const size_t width = outputStream.width(12);
+        const size_t precision = outputStream.precision(6);
         bool showpoint = ((outputStream.flags() & std::ios_base::showpoint) != 0);
         outputStream << std::setprecision(6) << std::showpoint;
         for (index = 0; index < mySize; ++index) {
@@ -1134,7 +1134,8 @@ class vctFixedSizeConstVectorBase
   \param vector2 second operand of the dot product.
   \return The dot product of vector1 and vector2.
 */
-template<unsigned int _size, int _vector1Stride, class _vector1Data, int _vector2Stride, class _vector2Data, class _elementType>
+template <vct::size_type _size, vct::stride_type _vector1Stride, class _vector1Data,
+          vct::stride_type _vector2Stride, class _vector2Data, class _elementType>
 inline _elementType
 vctDotProduct(const vctFixedSizeConstVectorBase<_size, _vector1Stride, _elementType, _vector1Data> & vector1,
               const vctFixedSizeConstVectorBase<_size, _vector2Stride, _elementType, _vector2Data> & vector2)
@@ -1149,7 +1150,8 @@ vctDotProduct(const vctFixedSizeConstVectorBase<_size, _vector1Stride, _elementT
   \param vector2 second operand of the dot product.
   \return The dot product of vector1 and vector2.
 */
-template<unsigned int _size, int _vector1Stride, class _vector1Data, int _vector2Stride, class _vector2Data, class _elementType>
+template <vct::size_type _size, vct::stride_type _vector1Stride, class _vector1Data,
+          vct::stride_type _vector2Stride, class _vector2Data, class _elementType>
 inline _elementType
 operator * (const vctFixedSizeConstVectorBase<_size, _vector1Stride, _elementType, _vector1Data> & vector1,
             const vctFixedSizeConstVectorBase<_size, _vector2Stride, _elementType, _vector2Data> & vector2) {
@@ -1157,19 +1159,19 @@ operator * (const vctFixedSizeConstVectorBase<_size, _vector1Stride, _elementTyp
 }
 
 /*! Return true if all the elements of the vector are nonzero, false otherwise */
-template<unsigned int _size, int _stride, class _elementType, class _dataPtrType>
+template <vct::size_type _size, vct::stride_type _stride, class _elementType, class _dataPtrType>
 inline bool vctAll(const vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType> & vector) {
     return vector.All();
 }
 
 /*! Return true if any element of the vector is nonzero, false otherwise */
-template<unsigned int _size, int _stride, class _elementType, class _dataPtrType>
+template <vct::size_type _size, vct::stride_type _stride, class _elementType, class _dataPtrType>
 inline bool vctAny(const vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType> & vector) {
     return vector.Any();
 }
 
 /*! Stream out operator. */
-template<unsigned int _size, int _stride, class _elementType, class _dataPtrType>
+template <vct::size_type _size, vct::stride_type _stride, class _elementType, class _dataPtrType>
 std::ostream & operator << (std::ostream & output,
                             const vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType> & vector) {
     vector.ToStream(output);

@@ -41,11 +41,12 @@ void vctDynamicNArrayRefTest::TestRefOnArray(void)
     typedef vctDynamicNArrayRef<value_type, DIMENSION> ArrayRefType;
     typedef vctDynamicConstNArrayRef<value_type, DIMENSION> ConstArrayRefType;
 
+    typedef typename ArrayType::index_type index_type;
     typedef typename ArrayType::nsize_type SizesType;
     typedef typename ArrayType::nsize_type IndicesType;
 
     SizesType sizes;
-    vctRandom(sizes, static_cast<size_type>(MIN_SIZE), static_cast<size_type>(MAX_SIZE));
+    vctRandom(sizes, static_cast<index_type>(MIN_SIZE), static_cast<index_type>(MAX_SIZE));
 
     ArrayType nArray1(sizes);
     vctRandom(nArray1, static_cast<value_type>(-10), static_cast<value_type>(10));
@@ -70,7 +71,7 @@ void vctDynamicNArrayRefTest::TestRefOnArray(void)
     CPPUNIT_ASSERT(nArray1.sizes() == nArray1ConstRef2.sizes());
     CPPUNIT_ASSERT(nArray1.strides() == nArray1ConstRef2.strides());
 
-    unsigned int i, j, k, l;
+    index_type i, j, k, l;
     IndicesType indices;
     for (i = 0; i < nArray1.size(0); i++) {
         for (j = 0; j < nArray1.size(1); j++) {
@@ -129,6 +130,8 @@ void vctDynamicNArrayRefTest::TestSubarrayRef(void)
     typedef vctDynamicNArrayRef<value_type, DIMENSION> ArrayRefType;
     typedef vctDynamicConstNArrayRef<value_type, DIMENSION> ConstArrayRefType;
 
+    typedef typename ArrayType::size_type size_type;
+    typedef typename ArrayType::index_type index_type;
     typedef typename ArrayType::nsize_type SizesType;
     typedef typename ArrayType::nsize_type IndicesType;
 
@@ -149,7 +152,7 @@ void vctDynamicNArrayRefTest::TestSubarrayRef(void)
     ConstArrayRefType subConstNArray1;
     subConstNArray1.SubarrayOf(nArray1, starts, lengths);
     
-    unsigned int i, j, k;
+    index_type i, j, k;
     IndicesType indicesSub, indices;
     
     CPPUNIT_ASSERT(subNArray1.sizes() == lengths);
@@ -198,6 +201,8 @@ void vctDynamicNArrayRefTest::TestPermutationRef(void)
     typedef vctDynamicNArrayRef<value_type, DIMENSION> ArrayRefType;
     typedef vctDynamicConstNArrayRef<value_type, DIMENSION> ConstArrayRefType;
 
+    typedef typename ArrayType::size_type size_type;
+    typedef typename ArrayType::index_type index_type;
     typedef typename ArrayType::nsize_type SizesType;
     typedef typename ArrayType::ndimension_type DimensionsType;
     typedef typename ArrayType::nindex_type IndicesType;
@@ -213,7 +218,7 @@ void vctDynamicNArrayRefTest::TestPermutationRef(void)
     IndicesType swaps;
     
     // build a permutation vector
-    unsigned int index;
+    index_type index;
     for (index = 0; index < permutation.size(); index++) {
         permutation.Element(index) = index;
     }
@@ -238,7 +243,7 @@ void vctDynamicNArrayRefTest::TestPermutationRef(void)
         CPPUNIT_ASSERT(permutedConstNArray1.size(index) == nArray1.size(permutation[index]));
     }
 
-    unsigned int i, j, k, l, m, n;
+    index_type i, j, k, l, m, n;
     IndicesType indicesPermuted, indices;
     
     for (i = 0; i < nArray1.size(0); i++) {
@@ -305,21 +310,21 @@ void vctDynamicNArrayRefTest::TestPermutationRefInt(void) {
 // sizes for windowing are provided so that many refs can be created
 // with the same sizes.  The vector indices must contain all indices
 // between 0 and _dimension - 1, it is used to compute a permutation.
-template <unsigned int _dimension>
+template <vct::size_type _dimension>
 void vctDynamicNArrayRefTestSetWorstArrayRef(vctDynamicNArray<double, _dimension> & baseArray,
-                                             const vctFixedSizeVector<unsigned int, _dimension - 1> & sizes,
-                                             vctFixedSizeVector<unsigned int, _dimension - 1> indices,
+                                             const vctFixedSizeVector<vct::size_type, _dimension - 1> & sizes,
+                                             vctFixedSizeVector<vct::index_type, _dimension - 1> indices,
                                              vctDynamicNArrayRef<double, _dimension - 1> & array) {
-    typedef unsigned int index_type;
+    typedef vct::index_type index_type;
 
     // reslice
     vctDynamicNArrayRef<double, _dimension - 1> baseSliced;
-    unsigned int sliceDirection;
-    unsigned int sliceIndex;
+    index_type sliceDirection;
+    index_type sliceIndex;
     
     cmnRandomSequence & randomSequence = cmnRandomSequence::GetInstance();
-    randomSequence.ExtractRandomValue(static_cast<unsigned int>(0), _dimension, sliceDirection);
-    randomSequence.ExtractRandomValue(static_cast<unsigned int>(0), baseArray.size(sliceDirection), sliceIndex);
+    randomSequence.ExtractRandomValue(static_cast<index_type>(0), _dimension, sliceDirection);
+    randomSequence.ExtractRandomValue(static_cast<index_type>(0), baseArray.size(sliceDirection), sliceIndex);
     baseSliced.SliceOf(baseArray, sliceDirection, sliceIndex);
 
     // permute
@@ -352,6 +357,8 @@ void vctDynamicNArrayRefTest::TestEngines(void)
     typedef vctDynamicNArray<value_type, DIMENSION> ArrayType;
     typedef vctDynamicNArrayRef<value_type, DIMENSION - 1> ArrayRefType;
 
+    typedef ArrayType::size_type size_type;
+    typedef ArrayType::index_type index_type;
     typedef ArrayType::nsize_type larger_nsize_type;
     typedef ArrayType::nindex_type larger_nindex_type;
 
@@ -379,7 +386,7 @@ void vctDynamicNArrayRefTest::TestEngines(void)
         allIndices.Element(index) = index;
     }
 
-    // first test that the set worsta array ref doesn't break everything
+    // first test that the set worst array ref doesn't break everything
     vctRandom(sizes, static_cast<size_type>(MIN_SIZE), static_cast<size_type>(MAX_SIZE));
     vctDynamicNArrayRefTestSetWorstArrayRef<DIMENSION>(baseArray1, sizes, allIndices, array1);
     for (index = 0; index < array1.dimension(); index++) {
@@ -407,7 +414,7 @@ void vctDynamicNArrayRefTest::TestEngines(void)
     }
     
     // test address of elements accessed directly
-    unsigned int i, j, k, l;
+    index_type i, j, k, l;
     value_type * currentPointer;
     nindex_type currentIndices;
     for (i = 0; i < array1.size(0); i++) {

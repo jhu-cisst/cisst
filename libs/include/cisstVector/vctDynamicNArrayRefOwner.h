@@ -36,7 +36,7 @@ http://www.cisst.org/cisst/license.txt.
 /*!
   This templated class owns a dynamically allocated array, but does
   not provide any other operations */
-template<class _elementType, unsigned int _dimension>
+template<class _elementType, vct::size_type _dimension>
 class vctDynamicNArrayRefOwner
 {
 public:
@@ -231,7 +231,7 @@ protected:
         nsize_type sorted_sizes(SizesMember);
         nstride_type sorted_strides(StridesMember);
         
-        unsigned int i = 0;
+        index_type i = 0;
         bool swap;
         while (i < this->dimension()) {
             swap = true;

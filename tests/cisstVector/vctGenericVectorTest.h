@@ -228,7 +228,7 @@ class vctGenericVectorTest
     template <class _inputContainerType, class _indexContainerType, class _outputContainerType>
     static void TestSelect(const _inputContainerType  & input,
                            const _indexContainerType  & index,
-                                 _outputContainerType & output)
+                           _outputContainerType & output)
     {
         CPPUNIT_ASSERT(index.size() == output.size());
 

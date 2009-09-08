@@ -76,7 +76,7 @@ IF(CISST_HAS_CISSTNETLIB)
       nmrLSISolver.h
       nmrLSqLin.h
       nmrLU.h
-      nmrLUSolver.h
+#      nmrLUSolver.h
       nmrHFTISolver.h
       nmrNNLSSolver.h
       nmrCallBack.h
@@ -84,7 +84,7 @@ IF(CISST_HAS_CISSTNETLIB)
       nmrPInverseEconomy.h
       nmrSVD.h
       nmrSVDEconomy.h
-      nmrSVDSolver.h
+#      nmrSVDSolver.h
       nmrSVDRSSolver.h
       )
 ENDIF(CISST_HAS_CISSTNETLIB)

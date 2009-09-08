@@ -48,14 +48,14 @@ http://www.cisst.org/cisst/license.txt.
 
 /* Forward declarations */
 #ifndef DOXYGEN
-template<class _vectorOwnerType, class __vectorOwnerType, class _elementType,
-         class _elementOperationType>
+template <class _vectorOwnerType, class __vectorOwnerType, class _elementType,
+          class _elementOperationType>
 vctReturnDynamicVector<bool>
 vctDynamicVectorElementwiseCompareVector(const vctDynamicConstVectorBase<_vectorOwnerType, _elementType> & vector1,
                                          const vctDynamicConstVectorBase<_vectorOwnerType, _elementType> & vector2);
 
-template<class _vectorOwnerType, class _elementType,
-         class _elementOperationType>
+template <class _vectorOwnerType, class _elementType,
+          class _elementOperationType>
 vctReturnDynamicVector<bool>
 vctDynamicVectorElementwiseCompareScalar(const vctDynamicConstVectorBase<_vectorOwnerType, _elementType> & vector,
                                          const _elementType & scalar);
@@ -77,7 +77,7 @@ vctDynamicVectorElementwiseCompareScalar(const vctDynamicConstVectorBase<_vector
 
   \param _elementType the type of elements of the vector.
 */
-template<class _vectorOwnerType, typename _elementType>
+template <class _vectorOwnerType, typename _elementType>
 class vctDynamicConstVectorBase
 {
 public:
@@ -568,7 +568,7 @@ public:
 
     /*! Test if the method FastCopyOf can be used instead of Assign.
       See FastCopyOf for more details. */
-    template<class __vectorOwnerType>
+    template <class __vectorOwnerType>
     inline bool FastCopyCompatible(const vctDynamicConstVectorBase<__vectorOwnerType, value_type> & source) const
     {
         return vctFastCopy::VectorCopyCompatible(*this, source);
@@ -576,7 +576,7 @@ public:
 
     /*! Test if the method FastCopyOf can be used instead of Assign.
       See FastCopyOf for more details. */
-    template<unsigned int __size, int __stride, class __dataPtrType>
+    template <size_type __size, stride_type __stride, class __dataPtrType>
     inline bool FastCopyCompatible(const vctFixedSizeConstVectorBase<__size, __stride, value_type, __dataPtrType> & source) const
     {
         return vctFastCopy::VectorCopyCompatible(*this, source);
@@ -708,7 +708,7 @@ public:
       
       \return A vector of booleans.
     */
-    template<class __vectorOwnerType>
+    template <class __vectorOwnerType>
     BoolVectorReturnType
     ElementwiseEqual(const vctDynamicConstVectorBase<__vectorOwnerType, _elementType> & otherVector) const {
         return vctDynamicVectorElementwiseCompareVector<
@@ -718,7 +718,7 @@ public:
 
 
     /* documented above */
-    template<class __vectorOwnerType>
+    template <class __vectorOwnerType>
     BoolVectorReturnType
     ElementwiseNotEqual(const vctDynamicConstVectorBase<__vectorOwnerType, _elementType> & otherVector) const {
         return vctDynamicVectorElementwiseCompareVector<
@@ -727,7 +727,7 @@ public:
     }
     
     /* documented above */
-    template<class __vectorOwnerType>
+    template <class __vectorOwnerType>
     BoolVectorReturnType
     ElementwiseLesser(const vctDynamicConstVectorBase<__vectorOwnerType, _elementType> & otherVector) const {
         return vctDynamicVectorElementwiseCompareVector<
@@ -736,7 +736,7 @@ public:
     }
 
     /* documented above */
-    template<class __vectorOwnerType>
+    template <class __vectorOwnerType>
     BoolVectorReturnType
     ElementwiseLesserOrEqual(const vctDynamicConstVectorBase<__vectorOwnerType, _elementType> & otherVector) const {
         return vctDynamicVectorElementwiseCompareVector<
@@ -745,7 +745,7 @@ public:
     }
 
     /* documented above */
-    template<class __vectorOwnerType>
+    template <class __vectorOwnerType>
     BoolVectorReturnType
     ElementwiseGreater(const vctDynamicConstVectorBase<__vectorOwnerType, _elementType> & otherVector) const {
         return vctDynamicVectorElementwiseCompareVector<
@@ -754,7 +754,7 @@ public:
     }
 
     /* documented above */
-    template<class __vectorOwnerType>
+    template <class __vectorOwnerType>
     BoolVectorReturnType
     ElementwiseGreaterOrEqual(const vctDynamicConstVectorBase<__vectorOwnerType, _elementType> & otherVector) const {
         return vctDynamicVectorElementwiseCompareVector<
@@ -932,8 +932,8 @@ public:
         size_type index;
         const size_type mySize = size();
         // preserve the formatting flags as they were
-        const int width = outputStream.width(12);
-        const int precision = outputStream.precision(6);
+        const size_t width = outputStream.width(12);
+        const size_t precision = outputStream.precision(6);
         bool showpoint = ((outputStream.flags() & std::ios_base::showpoint) != 0);
         outputStream << std::setprecision(6) << std::showpoint;
         for (index = 0; index < mySize; ++index) {
@@ -978,7 +978,7 @@ public:
         const size_type mySize = size();
         size_type index;
         
-        cmnSerializeRaw(outputStream, mySize);
+        cmnSerializeSizeRaw(outputStream, mySize);
         for (index = 0; index < mySize; ++index) {
             cmnSerializeRaw(outputStream, this->Element(index));
         }
@@ -989,7 +989,7 @@ public:
 
 
 /* documented in class.  Implementation moved here for .Net 2003 */
-template<class _vectorOwnerType, class _elementType>
+template <class _vectorOwnerType, class _elementType>
 inline typename vctDynamicConstVectorBase<_vectorOwnerType, _elementType>::BoolVectorReturnType
 vctDynamicConstVectorBase<_vectorOwnerType, _elementType>::ElementwiseEqual(const value_type & scalar) const {
     return vctDynamicVectorElementwiseCompareScalar<_vectorOwnerType,  value_type,
@@ -997,7 +997,7 @@ vctDynamicConstVectorBase<_vectorOwnerType, _elementType>::ElementwiseEqual(cons
 }
 
 /* documented in class.  Implementation moved here for .Net 2003 */
-template<class _vectorOwnerType, class _elementType>
+template <class _vectorOwnerType, class _elementType>
 inline typename vctDynamicConstVectorBase<_vectorOwnerType, _elementType>::BoolVectorReturnType
 vctDynamicConstVectorBase<_vectorOwnerType, _elementType>::ElementwiseNotEqual(const value_type & scalar) const {
     return vctDynamicVectorElementwiseCompareScalar<_vectorOwnerType,  value_type,
@@ -1005,7 +1005,7 @@ vctDynamicConstVectorBase<_vectorOwnerType, _elementType>::ElementwiseNotEqual(c
 }
 
 /* documented in class.  Implementation moved here for .Net 2003 */
-template<class _vectorOwnerType, class _elementType>
+template <class _vectorOwnerType, class _elementType>
 inline typename vctDynamicConstVectorBase<_vectorOwnerType, _elementType>::BoolVectorReturnType
 vctDynamicConstVectorBase<_vectorOwnerType, _elementType>::ElementwiseLesser(const value_type & scalar) const {
     return vctDynamicVectorElementwiseCompareScalar<_vectorOwnerType,  value_type,
@@ -1013,7 +1013,7 @@ vctDynamicConstVectorBase<_vectorOwnerType, _elementType>::ElementwiseLesser(con
 }
 
 /* documented in class.  Implementation moved here for .Net 2003 */
-template<class _vectorOwnerType, class _elementType>
+template <class _vectorOwnerType, class _elementType>
 inline typename vctDynamicConstVectorBase<_vectorOwnerType, _elementType>::BoolVectorReturnType
 vctDynamicConstVectorBase<_vectorOwnerType, _elementType>::ElementwiseLesserOrEqual(const value_type & scalar) const {
     return vctDynamicVectorElementwiseCompareScalar<_vectorOwnerType,  value_type,
@@ -1021,7 +1021,7 @@ vctDynamicConstVectorBase<_vectorOwnerType, _elementType>::ElementwiseLesserOrEq
 }
 
 /* documented in class.  Implementation moved here for .Net 2003 */
-template<class _vectorOwnerType, class _elementType>
+template <class _vectorOwnerType, class _elementType>
 inline typename vctDynamicConstVectorBase<_vectorOwnerType, _elementType>::BoolVectorReturnType
 vctDynamicConstVectorBase<_vectorOwnerType, _elementType>::ElementwiseGreater(const value_type & scalar) const {
     return vctDynamicVectorElementwiseCompareScalar<_vectorOwnerType,  value_type,
@@ -1029,7 +1029,7 @@ vctDynamicConstVectorBase<_vectorOwnerType, _elementType>::ElementwiseGreater(co
 }
 
 /* documented in class.  Implementation moved here for .Net 2003 */
-template<class _vectorOwnerType, class _elementType>
+template <class _vectorOwnerType, class _elementType>
 inline typename vctDynamicConstVectorBase<_vectorOwnerType, _elementType>::BoolVectorReturnType
 vctDynamicConstVectorBase<_vectorOwnerType, _elementType>::ElementwiseGreaterOrEqual(const value_type & scalar) const {
     return vctDynamicVectorElementwiseCompareScalar<_vectorOwnerType,  value_type,
@@ -1064,19 +1064,19 @@ inline _elementType operator * (const vctDynamicConstVectorBase<_vector1OwnerTyp
 }
 
 /*! Return true if all the elements of the vector are nonzero, false otherwise */
-template<class _vectorOwnerType, typename _elementType>
+template <class _vectorOwnerType, typename _elementType>
 inline bool vctAll(const vctDynamicConstVectorBase<_vectorOwnerType, _elementType> & vector) {
     return vector.All();
 }
 
 /*! Return true if any element of the vector is nonzero, false otherwise */
-template<class _vectorOwnerType, typename _elementType>
+template <class _vectorOwnerType, typename _elementType>
 inline bool vctAny(const vctDynamicConstVectorBase<_vectorOwnerType, _elementType> & vector) {
     return vector.Any();
 }
 
 /*! Stream out operator. */
-template<class _vectorOwnerType, typename _elementType>
+template <class _vectorOwnerType, typename _elementType>
 std::ostream & operator << (std::ostream & output,
                             const vctDynamicConstVectorBase<_vectorOwnerType, _elementType> & vector) {
     vector.ToStream(output);
@@ -1084,12 +1084,12 @@ std::ostream & operator << (std::ostream & output,
 }
 
 #ifndef DOXYGEN
-template<unsigned int __size, class _vectorOwnerType, class __elementType>
+template <vct::size_type __size, class _vectorOwnerType, class __elementType>
 std::ostream & operator << (std::ostream & output,
                             const vctDynamicConstVectorBase< _vectorOwnerType, vctFixedSizeVector<__elementType, __size> > & vector)
 {
-    int numElements = vector.size();
-    int counter;
+    vct::size_type numElements = vector.size();
+    vct::size_type counter;
     for (counter = 0; counter < numElements; ++counter) {
         output << "[ ";
         vector[counter].ToStream(output);
@@ -1101,7 +1101,7 @@ std::ostream & operator << (std::ostream & output,
 
 
 // helper function declared and used in vctFixedSizeVectorBase.h
-template<unsigned int _size, int _stride, class _elementType, class _dataPtrType, class _vectorOwnerType>
+template <vct::size_type _size, vct::stride_type _stride, class _elementType, class _dataPtrType, class _vectorOwnerType>
 inline void vctFixedSizeVectorBaseAssignDynamicConstVectorBase(
     vctFixedSizeVectorBase<_size, _stride, _elementType, _dataPtrType> & fixedSizeVector,
     const vctDynamicConstVectorBase<_vectorOwnerType, _elementType> & dynamicVector)

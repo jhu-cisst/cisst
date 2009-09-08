@@ -59,7 +59,7 @@ public:
     void Start(mtsTask * callingTask);
 
     /*! Change the proxy state as active. */
-    void SetAsActiveProxy() {
+    void SetAsActiveProxy(void) {
         ChangeProxyState(mtsProxyBaseClient<mtsTask>::PROXY_ACTIVE);
     }
 
@@ -68,12 +68,12 @@ public:
         return (ProxyState == mtsProxyBaseClient<mtsTask>::PROXY_ACTIVE);
     }
 
-    void ShutdownSession() {
+    void ShutdownSession(void) {
         mtsProxyBaseClient<mtsTask>::ShutdownSession();
     }
 
     /*! Stop the proxy. */
-    void Stop();
+    void Stop(void);
 
 protected:
     /*! Typedef for base type. */

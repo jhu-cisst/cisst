@@ -51,9 +51,9 @@ void vctRandom(vctDynamicMatrixBase<_matrixOwnerType, _elementType> & matrix,
                const typename vctDynamicMatrixBase<_matrixOwnerType, _elementType>::value_type max)
 {
     cmnRandomSequence & randomSequence = cmnRandomSequence::GetInstance();
-    const unsigned int rows = matrix.rows();
-    const unsigned int cols = matrix.cols();
-    unsigned int rowIndex, colIndex;
+    const vct::size_type rows = matrix.rows();
+    const vct::size_type cols = matrix.cols();
+    vct::index_type rowIndex, colIndex;
     for (rowIndex = 0; rowIndex < rows; ++rowIndex) {
         for (colIndex = 0; colIndex < cols; ++colIndex) {
             randomSequence.ExtractRandomValue(min, max,

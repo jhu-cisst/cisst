@@ -44,7 +44,7 @@ http://www.cisst.org/cisst/license.txt.
   completeness.
 
 */
-template<class _elementType, unsigned int _size, int _stride>
+template <class _elementType, vct::size_type _size, vct::stride_type _stride>
 class vctFixedSizeVectorTraits
 {
 public:

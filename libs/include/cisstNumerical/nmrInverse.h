@@ -88,7 +88,7 @@ public:
       vctDynamicMatrix and vctDynamicVector (unsigned int).  To call
       the Fortran based routines, these values must be cast to
       #F_INTEGER. */
-    typedef unsigned int size_type;
+    typedef vct::size_type size_type;
 
     enum {NB = 64};
  
@@ -413,12 +413,12 @@ public:
   to overlay a fixed size container).
  */
 #ifndef SWIG
-template <unsigned int _size, bool _storageOrder>
+template <vct::size_type _size, bool _storageOrder>
 class nmrInverseFixedSizeData
 {
 public:
 #ifndef DOXYGEN
-    typedef unsigned int size_type;
+    typedef vct::size_type size_type;
     enum {MAX_SIZE_1 = (_size > 1) ? _size : 1};
     enum {NB = 64};
     enum {LWORK = _size * NB};
@@ -678,7 +678,7 @@ inline F_INTEGER nmrInverse(vctDynamicMatrixBase<_matrixOwnerTypeA, double> & A)
   \test TestFixedSizeColumnMajorUserAlloc
         TestFixedSizeRowMajorUserAlloc
  */
-template <unsigned int _size, unsigned int _maxSize1, unsigned int _lWork, bool _storageOrder>
+template <vct::size_type _size, vct::size_type _maxSize1, vct::size_type _lWork, bool _storageOrder>
 inline F_INTEGER nmrInverse(vctFixedSizeMatrix<double, _size, _size, _storageOrder> & A, 
                             vctFixedSizeVector<F_INTEGER, _maxSize1> & pivotIndices,
                             vctFixedSizeVector<double, _lWork> & workspace)
@@ -726,7 +726,7 @@ inline F_INTEGER nmrInverse(vctFixedSizeMatrix<double, _size, _size, _storageOrd
   \test TestFixedSizeColumnMajor
         TestFixedSizeRowMajor
  */
-template <unsigned int _size, bool _storageOrder>
+template <vct::size_type _size, bool _storageOrder>
 inline F_INTEGER nmrInverse(vctFixedSizeMatrix<double, _size, _size, _storageOrder> & A,
                             nmrInverseFixedSizeData<_size, _storageOrder> & data)
 {
@@ -743,7 +743,7 @@ inline F_INTEGER nmrInverse(vctFixedSizeMatrix<double, _size, _size, _storageOrd
  
   \param A A fixed size square matrix.
 */
-template <unsigned int _size, bool _storageOrder>
+template <vct::size_type _size, bool _storageOrder>
 inline F_INTEGER nmrInverse(vctFixedSizeMatrix<double, _size, _size, _storageOrder> & A) 
 {
     nmrInverseFixedSizeData<_size, _storageOrder> data;

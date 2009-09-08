@@ -78,7 +78,7 @@ http://www.cisst.org/cisst/license.txt.
   \param _elementType Type of elements referenced.  Also defined as
   <code>value_type</code>.
 */
-template<class _elementType>
+template <class _elementType>
 class vctDynamicConstVectorRef :
     public vctDynamicConstVectorBase<vctDynamicVectorRefOwner<_elementType>, _elementType>
 {
@@ -117,7 +117,7 @@ public:
       from a fixed-size vector to a dynamic vector representation.
       \note The size and stride values are taken from the fixed size vector.
     */
-    template<unsigned int __size, int __stride, class __dataPtrType>
+    template <size_type __size, stride_type __stride, class __dataPtrType>
     vctDynamicConstVectorRef(const vctFixedSizeConstVectorBase<__size, __stride, _elementType, __dataPtrType> & otherVector)
     {
         SetRef(otherVector);
@@ -129,7 +129,7 @@ public:
       \note The stride values are taken from the fixed size vector, but the starting point and 
       length must be specified.
     */
-    template<unsigned int __size, int __stride, class __dataPtrType>
+    template <size_type __size, stride_type __stride, class __dataPtrType>
     vctDynamicConstVectorRef(const vctFixedSizeConstVectorBase<__size, __stride, _elementType, __dataPtrType> & otherVector,
                              size_type startPosition, size_type length)
     {
@@ -139,7 +139,7 @@ public:
     /*! Initialize a dynamic reference to a dynamic vector.
       \note the starting point, size, and stride, are taken from the other vector.
     */
-    template<class __vectorOwnerType>
+    template <class __vectorOwnerType>
     vctDynamicConstVectorRef(const vctDynamicConstVectorBase<__vectorOwnerType, _elementType> & otherVector)
     {
         SetRef(otherVector);
@@ -149,7 +149,7 @@ public:
       \note the stride is taken from the other vector, but the starting point and the
       length must be specified.
     */
-    template<class __vectorOwnerType>
+    template <class __vectorOwnerType>
     vctDynamicConstVectorRef(const vctDynamicConstVectorBase<__vectorOwnerType, _elementType> & otherVector,
                              size_type startPosition, size_type length)
     {
@@ -164,7 +164,7 @@ public:
       \note the size and memory stride of this reference will be equal to the
       size and memory stride of the input vector.
     */
-    template<unsigned int __size, int __stride, class __dataPtrType>
+    template <size_type __size, stride_type __stride, class __dataPtrType>
     void SetRef(const vctFixedSizeConstVectorBase<__size, __stride, _elementType, __dataPtrType> & otherVector)
     {
         SetRef(otherVector.size(), otherVector.Pointer(), otherVector.stride());
@@ -176,7 +176,7 @@ public:
       \note This method verifies that the size of this vector does not exceed the
       size of the input vector (otherwise cmnThrow is used to throw std::out_of_range).
     */
-    template<unsigned int __size, int __stride, class __dataPtrType>
+    template <size_type __size, stride_type __stride, class __dataPtrType>
     void SetRef(const vctFixedSizeConstVectorBase<__size, __stride, _elementType, __dataPtrType> & otherVector,
                 size_type startPosition, size_type length) throw(std::out_of_range)
     {
@@ -190,7 +190,7 @@ public:
       \note the size and memory stride of this reference will be equal to the
       size memory stride of the input vector.
     */
-    template<class __vectorOwnerType>
+    template <class __vectorOwnerType>
     void SetRef(const vctDynamicConstVectorBase<__vectorOwnerType, _elementType> & otherVector)
     {
         SetRef(otherVector.size(), otherVector.Pointer(), otherVector.stride());
@@ -202,7 +202,7 @@ public:
       \note This method verifies that the size of this vector does not exceed the
       size of the input vector (otherwise cmnThrow is used to throw std::out_of_range).
     */
-    template<class __vectorOwnerType>
+    template <class __vectorOwnerType>
     void SetRef(const vctDynamicConstVectorBase<__vectorOwnerType, _elementType> & otherVector,
                 size_type startPosition, size_type length) throw(std::out_of_range)
     {

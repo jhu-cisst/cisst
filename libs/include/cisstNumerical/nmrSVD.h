@@ -112,7 +112,7 @@ public:
       vctDynamicMatrix and vctDynamicVector (unsigned int).  To call
       the Fortran based routines, these values must be cast to
       #F_INTEGER. */
-    typedef unsigned int size_type;
+    typedef vct::size_type size_type;
 
     /*! Matrix size type, i.e. vector of two elements: number of rows
         and columns. */
@@ -670,12 +670,12 @@ public:
   to overlay a fixed size container).
  */
 #ifndef SWIG
-template <unsigned int _rows, unsigned int _cols, bool _storageOrder = VCT_ROW_MAJOR>
+template <vct::size_type _rows, vct::size_type _cols, bool _storageOrder = VCT_ROW_MAJOR>
 class nmrSVDFixedSizeData
 {
 public:
 #ifndef DOXYGEN
-    typedef unsigned int size_type;
+    typedef vct::size_type size_type;
 
     enum {M = (_storageOrder == VCT_COL_MAJOR) ? _rows : _cols};
     enum {N = (_storageOrder == VCT_COL_MAJOR) ? _cols : _rows};
@@ -1114,8 +1114,8 @@ inline F_INTEGER nmrSVD(vctDynamicMatrixBase<_matrixOwnerTypeA, double> & A,
         nmrSVDTest::TestFixedSizeColumnMajorMGeqN_T2
         nmrSVDTest::TestFixedSizeRowMajorMGeqN_T2
  */
-template <unsigned int _rows, unsigned int _cols, unsigned int _minmn,
-          unsigned int _work, bool _storageOrder>
+template <vct::size_type _rows, vct::size_type _cols, vct::size_type _minmn,
+          vct::size_type _work, bool _storageOrder>
 inline F_INTEGER nmrSVD(vctFixedSizeMatrix<double, _rows, _cols, _storageOrder> & A, 
                         vctFixedSizeMatrix<double, _rows, _rows, _storageOrder> & U,
                         vctFixedSizeVector<double, _minmn> & S,
@@ -1177,7 +1177,7 @@ inline F_INTEGER nmrSVD(vctFixedSizeMatrix<double, _rows, _cols, _storageOrder> 
         nmrSVDTest::TestFixedSizeColumnMajorMGeqN_T2
         nmrSVDTest::TestFixedSizeRowMajorMGeqN_T2
  */
-template <unsigned int _rows, unsigned int _cols, unsigned int _minmn, bool _storageOrder>
+template <vct::size_type _rows, vct::size_type _cols, vct::size_type _minmn, bool _storageOrder>
 inline F_INTEGER nmrSVD(vctFixedSizeMatrix<double, _rows, _cols, _storageOrder> & A,
                         vctFixedSizeMatrix<double, _rows, _rows, _storageOrder> & U,
                         vctFixedSizeVector<double, _minmn> & S,
@@ -1214,7 +1214,7 @@ inline F_INTEGER nmrSVD(vctFixedSizeMatrix<double, _rows, _cols, _storageOrder> 
         nmrSVDTest::TestFixedSizeColumnMajorMGeqN
         nmrSVDTest::TestFixedSizeRowMajorMGeqN
  */
-template <unsigned int _rows, unsigned int _cols, bool _storageOrder>
+template <vct::size_type _rows, vct::size_type _cols, bool _storageOrder>
 inline F_INTEGER nmrSVD(vctFixedSizeMatrix<double, _rows, _cols, _storageOrder> & A,
                         nmrSVDFixedSizeData<_rows, _cols, _storageOrder> & data)
 {

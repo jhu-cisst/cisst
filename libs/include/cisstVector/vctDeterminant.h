@@ -38,7 +38,7 @@ http://www.cisst.org/cisst/license.txt.
 
   \param _size The size of the square matrix
 */
-template<unsigned int _size>
+template <vct::size_type _size>
 class vctDeterminant
 {
 public:
@@ -48,7 +48,7 @@ public:
 
       \param matrix A fixed size square matrix
     */
-    template<int _rowStride, int _colStride, class _elementType, class _dataPtrType>
+    template <vct::stride_type _rowStride, vct::stride_type _colStride, class _elementType, class _dataPtrType>
     static _elementType Compute(const vctFixedSizeConstMatrixBase<_size, _size, _rowStride, _colStride, _elementType, _dataPtrType> & matrix);
 };
 
@@ -60,7 +60,7 @@ class vctDeterminant<1>
 {
 public:
     enum {SIZE = 1};
-    template<int _rowStride, int _colStride, class _elementType, class _dataPtrType>
+    template <vct::stride_type _rowStride, vct::stride_type _colStride, class _elementType, class _dataPtrType>
     static _elementType Compute(const vctFixedSizeConstMatrixBase<SIZE, SIZE, _rowStride, _colStride, _elementType, _dataPtrType> & matrix)
     {
         return matrix.Element(0, 0);
@@ -73,7 +73,7 @@ class vctDeterminant<2>
 {
 public:
     enum {SIZE = 2};
-    template<int _rowStride, int _colStride, class _elementType, class _dataPtrType>
+    template <vct::stride_type _rowStride, vct::stride_type _colStride, class _elementType, class _dataPtrType>
     static _elementType Compute(const vctFixedSizeConstMatrixBase<SIZE, SIZE, _rowStride, _colStride, _elementType, _dataPtrType> & matrix)
     {
         return matrix.Element(0, 0) * matrix.Element(1, 1) - matrix.Element(0, 1) * matrix.Element(1, 0);
@@ -86,7 +86,7 @@ class vctDeterminant<3>
 {
 public:
     enum {SIZE = 3};
-    template<int _rowStride, int _colStride, class _elementType, class _dataPtrType>
+    template<vct::stride_type _rowStride, vct::stride_type _colStride, class _elementType, class _dataPtrType>
     static _elementType Compute(const vctFixedSizeConstMatrixBase<SIZE, SIZE, _rowStride, _colStride, _elementType, _dataPtrType> & matrix)
     {
         return

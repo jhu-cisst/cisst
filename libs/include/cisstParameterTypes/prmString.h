@@ -55,7 +55,7 @@ protected:
 
 public:
     typedef prmString ThisType;
-    typedef unsigned int size_type;
+    typedef size_t size_type;
 
     /*! size of the generic Data payload,
      *  it should be big enough to carry your largest Data

@@ -47,7 +47,7 @@ http://www.cisst.org/cisst/license.txt.
 
   \sa vctFixedSizeConstVectorRef
 */
-template<class _elementType, unsigned int _size, int _stride>
+template <class _elementType, vct::size_type _size, vct::stride_type _stride>
 class vctFixedSizeVectorRef : public vctFixedSizeVectorBase<
     _size, _stride, _elementType, 
     typename vctFixedSizeVectorTraits<_elementType, _size, _stride>::pointer >
@@ -77,7 +77,7 @@ class vctFixedSizeVectorRef : public vctFixedSizeVectorBase<
       \note This constructor is explicit.
       \note The stride values are taken from the fixed size vector.
     */
-    template<unsigned int __size, class __dataPtrType>
+    template <size_type __size, class __dataPtrType>
     explicit vctFixedSizeVectorRef(vctFixedSizeVectorBase<__size, _stride, _elementType, __dataPtrType> & otherVector,
                                    size_type startPosition = 0)
     {
@@ -110,7 +110,7 @@ class vctFixedSizeVectorRef : public vctFixedSizeVectorBase<
       \note this vector must be contained in the input vector, that is, startPos+_size <= __size
       (otherwise cmnThrow is used to throw std::out_of_range).
     */
-    template<unsigned int __size, class __dataPtrType>
+    template <size_type __size, class __dataPtrType>
     void SetRef(vctFixedSizeVectorBase<__size, _stride, _elementType, __dataPtrType> & otherVector,
                 size_type startPosition = 0)
     {
@@ -146,17 +146,17 @@ class vctFixedSizeVectorRef : public vctFixedSizeVectorBase<
       \param other The vector to be copied.
     */
     //@{
-	inline CISST_DEPRECATED ThisType & operator=(const ThisType & other) {
+	inline CISST_DEPRECATED ThisType & operator = (const ThisType & other) {
 		return reinterpret_cast<ThisType &>(this->Assign(other));
 	}
 
-	template<int __stride>
-	inline ThisType & operator=(const vctFixedSizeConstVectorRef<value_type, _size, __stride> & other) {
+	template <stride_type __stride>
+	inline ThisType & operator = (const vctFixedSizeConstVectorRef<value_type, _size, __stride> & other) {
 		return reinterpret_cast<ThisType &>(this->Assign(other));
 	}
 
-	template<int __stride, class __elementType, class __dataPtrType>
-	inline ThisType & operator=(const vctFixedSizeConstVectorBase<_size, __stride, __elementType, __dataPtrType> & other) {
+	template <stride_type __stride, class __elementType, class __dataPtrType>
+	inline ThisType & operator = (const vctFixedSizeConstVectorBase<_size, __stride, __elementType, __dataPtrType> & other) {
 		return reinterpret_cast<ThisType &>(this->Assign(other));
 	}
     //@}

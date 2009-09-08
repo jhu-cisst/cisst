@@ -125,7 +125,7 @@ http://www.cisst.org/cisst/license.txt.
 
   \sa vctDynamicVectorBase vctDynamicConstVectorBase
 */
-template<class _elementType>
+template <class _elementType>
 class vctDynamicVector : public vctDynamicVectorBase<vctDynamicVectorOwner<_elementType>, _elementType>
 {
 
@@ -179,7 +179,7 @@ public:
         this->at(1) = element1;
         va_list nextArg;
         va_start(nextArg, element1);
-        for (unsigned int i = 2; i < size; ++i) {
+        for (index_type i = 2; i < size; ++i) {
             this->at(i) = value_type( va_arg(nextArg, ElementVaArgPromotion) );
         }
         va_end(nextArg);
@@ -214,7 +214,7 @@ public:
     /*! Copy constructor: Allocate memory and copy all the elements
       from the other vector.
     */
-    template<class _otherVectorOwnerType>
+    template <class _otherVectorOwnerType>
     vctDynamicVector(const vctDynamicConstVectorBase<_otherVectorOwnerType, value_type> & otherVector) {
         SetSize(otherVector.size());
         this->Assign(otherVector);
@@ -225,14 +225,14 @@ public:
       from the other vector.  This constructor can also be used for
       type conversions.
     */
-    template<class _otherVectorOwnerType, typename _otherVectorElementType>
+    template <class _otherVectorOwnerType, typename _otherVectorElementType>
     explicit vctDynamicVector(const vctDynamicConstVectorBase<_otherVectorOwnerType, _otherVectorElementType> & otherVector) {
         SetSize(otherVector.size());
         this->Assign(otherVector);
     }
 
     /*! Constructor from a fixed-size vector */
-    template<unsigned int __size, int __stride, class __elementType, class __dataPtrType>
+    template <size_type __size, stride_type __stride, class __elementType, class __dataPtrType>
     explicit vctDynamicVector(const vctFixedSizeConstVectorBase<__size, __stride, __elementType, __dataPtrType> & fixedVector) {
         SetSize(__size);
         this->Assign(fixedVector);
@@ -244,7 +244,7 @@ public:
       elements of the input vector are copied into this vector.
     */
     template <class __vectorOwnerType, typename __elementType>
-    ThisType & operator=(const vctDynamicConstVectorBase<__vectorOwnerType, __elementType> & otherVector) {
+    ThisType & operator = (const vctDynamicConstVectorBase<__vectorOwnerType, __elementType> & otherVector) {
         SetSize(otherVector.size());
         this->Assign(otherVector);
 		return *this;
@@ -256,7 +256,7 @@ public:
       allocates new memory the size of the input vector.  Then the
       elements of the input vector are copied into this vector.
     */
-    ThisType & operator=(const ThisType& other) {
+    ThisType & operator = (const ThisType& other) {
         SetSize(other.size());
         this->Assign(other);
 		return *this;
@@ -269,7 +269,7 @@ public:
       vector.  The right hand side operand must be a temporary object
       returned, e.g., from a function or overloaded operator.
     */
-    ThisType & operator=(const vctReturnDynamicVector<value_type> & other);
+    ThisType & operator = (const vctReturnDynamicVector<value_type> & other);
 
     /*! Assignement of a scalar to all elements.  See also SetAll. */
     inline ThisType & operator = (const value_type & value) {
@@ -306,7 +306,7 @@ public:
     {
         // get and set size
         size_type mySize;
-        cmnDeSerializeRaw(inputStream, mySize);
+        cmnDeSerializeSizeRaw(inputStream, mySize);
         this->SetSize(mySize);
         
         // get data
@@ -336,7 +336,7 @@ public:
   deallocation.  Never use it on an object that is going to remain
   in scope after constructing the vctReturnDynamicVector.
 */
-template<class _elementType>
+template <class _elementType>
 class vctReturnDynamicVector : public vctDynamicVector<_elementType> {
 public:
     /*! Base type of vctReturnDynamicVector. */
@@ -344,31 +344,31 @@ public:
     explicit vctReturnDynamicVector(const BaseType & other) {
         BaseType & nonConstOther = const_cast<BaseType &>(other);
         // if we don't save it in a variable, it will be destroyed in the Release operation
-        const unsigned int size = other.size();
+        const vct::size_type size = other.size();
         this->Vector.Own(size, nonConstOther.Vector.Release());
     }
 };
 
 
 // implementation of the special copy constuctor of vctDynamicVector
-template<class _elementType>
+template <class _elementType>
 vctDynamicVector<_elementType>::vctDynamicVector(const vctReturnDynamicVector<_elementType> & other) {
     vctReturnDynamicVector<_elementType> & nonConstOther =
         const_cast< vctReturnDynamicVector<_elementType> & >(other);
     // if we don't save it in a variable, it will be destroyed in the Release operation
-    const unsigned int size = other.size();
+    const size_type size = other.size();
     this->Vector.Own(size, nonConstOther.Vector.Release());
 }
 
 
 // implementation of the special assignment operator from vctReturnDynamicVector to vctDynamicVector
-template<class _elementType>
+template <class _elementType>
 vctDynamicVector<_elementType> &
-vctDynamicVector<_elementType>::operator =(const vctReturnDynamicVector<_elementType> & other) {
+vctDynamicVector<_elementType>::operator = (const vctReturnDynamicVector<_elementType> & other) {
     vctReturnDynamicVector<_elementType> & nonConstOther =
         const_cast< vctReturnDynamicVector<_elementType> & >(other);
     // if we don't save it in a variable, it will be destroyed in the Release operation
-    const unsigned int size = other.size();
+    const vct::size_type size = other.size();
     this->Vector.Disown();
     this->Vector.Own(size, nonConstOther.Vector.Release());
     return *this;
@@ -382,7 +382,7 @@ vctDynamicVector<_elementType>::operator =(const vctReturnDynamicVector<_element
   \param inputVector2 The second operand of the binary operation.
   \return The vector result of \f$op(vector1, vector2)\f$.
 */
-template<class _vectorOwnerType1, class _vectorOwnerType2, class _elementType>
+template <class _vectorOwnerType1, class _vectorOwnerType2, class _elementType>
 vctReturnDynamicVector<_elementType>
 operator + (const vctDynamicConstVectorBase<_vectorOwnerType1, _elementType> & inputVector1,
             const vctDynamicConstVectorBase<_vectorOwnerType2, _elementType> & inputVector2) {
@@ -393,7 +393,7 @@ operator + (const vctDynamicConstVectorBase<_vectorOwnerType1, _elementType> & i
 }
 
 /* documented above */
-template<class _vectorOwnerType1, class _vectorOwnerType2, class _elementType>
+template <class _vectorOwnerType1, class _vectorOwnerType2, class _elementType>
 vctReturnDynamicVector<_elementType>
 operator - (const vctDynamicConstVectorBase<_vectorOwnerType1, _elementType> & inputVector1,
             const vctDynamicConstVectorBase<_vectorOwnerType2, _elementType> & inputVector2) {
@@ -416,7 +416,7 @@ operator - (const vctDynamicConstVectorBase<_vectorOwnerType1, _elementType> & i
   \return The cross product as a vctReturnDynamicVector
 */
 //@{
-template<class _vectorOwnerType1, class _vectorOwnerType2, class _elementType>
+template <class _vectorOwnerType1, class _vectorOwnerType2, class _elementType>
 vctReturnDynamicVector<_elementType>
 operator % (const vctDynamicConstVectorBase<_vectorOwnerType1, _elementType> & inputVector1,
             const vctDynamicConstVectorBase<_vectorOwnerType2, _elementType> & inputVector2) {
@@ -426,7 +426,7 @@ operator % (const vctDynamicConstVectorBase<_vectorOwnerType1, _elementType> & i
     return vctReturnDynamicVector<value_type>(resultStorage);
 }
 
-template<class _vectorOwnerType1, class _vectorOwnerType2, class _elementType>
+template <class _vectorOwnerType1, class _vectorOwnerType2, class _elementType>
 vctReturnDynamicVector<_elementType>
 vctCrossProduct(const vctDynamicConstVectorBase<_vectorOwnerType1, _elementType> & inputVector1,
                 const vctDynamicConstVectorBase<_vectorOwnerType2, _elementType> & inputVector2) {
@@ -447,7 +447,7 @@ vctCrossProduct(const vctDynamicConstVectorBase<_vectorOwnerType1, _elementType>
   \param inputScalar The second operand of the binary operation.
   \return The vector result of \f$op(vector, scalar)\f$.
 */
-template<class _vectorOwnerType, class _elementType>
+template <class _vectorOwnerType, class _elementType>
 vctReturnDynamicVector<_elementType>
 operator + (const vctDynamicConstVectorBase<_vectorOwnerType, _elementType> & inputVector,
             const _elementType & inputScalar) {
@@ -458,7 +458,7 @@ operator + (const vctDynamicConstVectorBase<_vectorOwnerType, _elementType> & in
 }
 
 /* documented above */
-template<class _vectorOwnerType, class _elementType>
+template <class _vectorOwnerType, class _elementType>
 vctReturnDynamicVector<_elementType>
 operator - (const vctDynamicConstVectorBase<_vectorOwnerType, _elementType> & inputVector,
             const _elementType & inputScalar) {
@@ -469,7 +469,7 @@ operator - (const vctDynamicConstVectorBase<_vectorOwnerType, _elementType> & in
 }
 
 /* documented above */
-template<class _vectorOwnerType, class _elementType>
+template <class _vectorOwnerType, class _elementType>
 vctReturnDynamicVector<_elementType>
 operator * (const vctDynamicConstVectorBase<_vectorOwnerType, _elementType> & inputVector,
             const _elementType & inputScalar) {
@@ -480,7 +480,7 @@ operator * (const vctDynamicConstVectorBase<_vectorOwnerType, _elementType> & in
 }
 
 /* documented above */
-template<class _vectorOwnerType, class _elementType>
+template <class _vectorOwnerType, class _elementType>
 vctReturnDynamicVector<_elementType>
 operator / (const vctDynamicConstVectorBase<_vectorOwnerType, _elementType> & inputVector,
             const _elementType & inputScalar) {
@@ -501,7 +501,7 @@ operator / (const vctDynamicConstVectorBase<_vectorOwnerType, _elementType> & in
   \param inputVector The second operand of the binary operation.
   \return The vector result of \f$op(scalar, vector)\f$.
 */
-template<class _vectorOwnerType, class _elementType>
+template <class _vectorOwnerType, class _elementType>
 vctReturnDynamicVector<_elementType>
 operator + (const _elementType & inputScalar,
             const vctDynamicConstVectorBase<_vectorOwnerType, _elementType> & inputVector) {
@@ -512,7 +512,7 @@ operator + (const _elementType & inputScalar,
 }
 
 /* documented above */
-template<class _vectorOwnerType, class _elementType>
+template <class _vectorOwnerType, class _elementType>
 vctReturnDynamicVector<_elementType>
 operator - (const _elementType & inputScalar,
             const vctDynamicConstVectorBase<_vectorOwnerType, _elementType> & inputVector) {
@@ -523,7 +523,7 @@ operator - (const _elementType & inputScalar,
 }
 
 /* documented above */
-template<class _vectorOwnerType, class _elementType>
+template <class _vectorOwnerType, class _elementType>
 vctReturnDynamicVector<_elementType>
 operator * (const _elementType & inputScalar,
             const vctDynamicConstVectorBase<_vectorOwnerType, _elementType> & inputVector) {
@@ -534,7 +534,7 @@ operator * (const _elementType & inputScalar,
 }
 
 /* documented above */
-template<class _vectorOwnerType, class _elementType>
+template <class _vectorOwnerType, class _elementType>
 vctReturnDynamicVector<_elementType>
 operator / (const _elementType & inputScalar,
             const vctDynamicConstVectorBase<_vectorOwnerType, _elementType> & inputVector) {
@@ -552,7 +552,7 @@ operator / (const _elementType & inputScalar,
   \param inputVector The operand of the unary operation
   \return The vector result of \f$op(vector)\f$.
 */
-template<class _vectorOwnerType, class _elementType>
+template <class _vectorOwnerType, class _elementType>
 vctReturnDynamicVector<_elementType>
 operator - (const vctDynamicConstVectorBase<_vectorOwnerType, _elementType> & inputVector) {
     typedef _elementType value_type;
@@ -627,8 +627,8 @@ vctDynamicConstVectorBase<_vectorOwnerType, _elementType>::Normalized(void) cons
 }
 
 /* documented in class vctDynamicConstVectorBase */
-template<class _vectorOwnerType, class __vectorOwnerType, class _elementType,
-         class _elementOperationType>
+template <class _vectorOwnerType, class __vectorOwnerType, class _elementType,
+          class _elementOperationType>
 inline vctReturnDynamicVector<bool>
 vctDynamicVectorElementwiseCompareVector(const vctDynamicConstVectorBase<_vectorOwnerType, _elementType> & vector1,
                                          const vctDynamicConstVectorBase<_vectorOwnerType, _elementType> & vector2) {
@@ -639,7 +639,7 @@ vctDynamicVectorElementwiseCompareVector(const vctDynamicConstVectorBase<_vector
 }
 
 /* documented in class vctDynamicConstVectorBase */
-template<class _vectorOwnerType, class _elementType, class _elementOperationType>
+template <class _vectorOwnerType, class _elementType, class _elementOperationType>
 inline vctReturnDynamicVector<bool>
 vctDynamicVectorElementwiseCompareScalar(const vctDynamicConstVectorBase<_vectorOwnerType, _elementType> & vector,
                                          const _elementType & scalar) {

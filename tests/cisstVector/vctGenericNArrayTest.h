@@ -35,12 +35,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <stdexcept>
 
 
-/* define common types */
-typedef unsigned int size_type;
-typedef int stride_type;
-typedef unsigned int dimension_type;
-
-
 /* Please check vctGenericContainerTest.h for some basic
    guidelines. */
 class vctGenericNArrayTest

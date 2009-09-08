@@ -285,9 +285,9 @@ void vctFixedSizeVectorTest::TestSelect(void)
     enum {INPUT_SIZE = 12, OUTPUT_SIZE = 5};
     vctFixedSizeVector<_elementType, INPUT_SIZE> inputVector;
     vctFixedSizeVector<_elementType, OUTPUT_SIZE> outputVector;
-    vctFixedSizeVector<unsigned int, OUTPUT_SIZE> indexVector;
+    vctFixedSizeVector<vct::index_type, OUTPUT_SIZE> indexVector;
     vctRandom(inputVector, _elementType(-10), _elementType(10));
-    vctRandom(indexVector, (unsigned int)(0), (unsigned int)(INPUT_SIZE));
+    vctRandom(indexVector, static_cast<vct::index_type>(0), static_cast<vct::index_type>(INPUT_SIZE));
     vctGenericVectorTest::TestSelect(inputVector, indexVector, outputVector);
 }
 

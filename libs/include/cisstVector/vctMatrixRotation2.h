@@ -104,8 +104,8 @@ public:
                  element10, element11)
     {}
 
-    template <int __stride1, class __dataPtrType1,
-              int __stride2, class __dataPtrType2>
+    template <stride_type __stride1, class __dataPtrType1,
+              stride_type __stride2, class __dataPtrType2>
     inline vctMatrixRotation2(const vctFixedSizeConstVectorBase<DIMENSION, __stride1, value_type, __dataPtrType1>& v1,
                               const vctFixedSizeConstVectorBase<DIMENSION, __stride2, value_type, __dataPtrType2>& v2,
                               bool vectorsAreColumns = true)
@@ -135,8 +135,8 @@ public:
                  normalizeInput)
     {}
 
-    template <int __stride1, class __dataPtrType1,
-              int __stride2, class __dataPtrType2>
+    template <stride_type __stride1, class __dataPtrType1,
+              stride_type __stride2, class __dataPtrType2>
     inline vctMatrixRotation2(const vctFixedSizeConstVectorBase<DIMENSION, __stride1, value_type, __dataPtrType1>& v1,
                               const vctFixedSizeConstVectorBase<DIMENSION, __stride2, value_type, __dataPtrType2>& v2,
                               bool vectorsAreColumns, bool normalizeInput):
@@ -167,7 +167,7 @@ public:
       \note The constructor is declared explicit, to force the user to
       be aware of the conversion being made.
     */
-    template<int __rowStride, int __colStride, class __dataPtrType>
+    template <stride_type __rowStride, stride_type __colStride, class __dataPtrType>
     explicit inline
     vctMatrixRotation2(const vctFixedSizeMatrixBase<ROWS, COLS, __rowStride, __colStride, value_type, __dataPtrType> & matrix):
         BaseType(matrix)

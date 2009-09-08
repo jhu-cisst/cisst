@@ -66,7 +66,7 @@ class nmrIsOrthonormalDynamicData {
 
 public:
     /*! Type used for sizes within nmrIsOrthonormalDynamicData. */
-    typedef unsigned int size_type;
+    typedef vct::size_type size_type;
 
 protected:
     /*! Memory allocated for Workspace matrices if needed. */
@@ -331,7 +331,7 @@ public:
   \sa nmrIsOrthonormal
  */
 #ifndef SWIG
-template <class _elementType, unsigned int _rows>
+template <class _elementType, vct::size_type _rows>
 class nmrIsOrthonormalFixedSizeData
 {
 public:
@@ -443,7 +443,7 @@ public:
   \param data Workspace used to compute the product
   \param tolerance Tolerance used to compare the product with identity
  */
-template <unsigned int _size, int _rowStride, int _colStride, typename _elementType, class _dataPtrType>
+template <vct::size_type _size, vct::stride_type _rowStride, vct::stride_type _colStride, typename _elementType, class _dataPtrType>
 bool nmrIsOrthonormal(const vctFixedSizeConstMatrixBase<_size, _size, _rowStride, _colStride, _elementType, _dataPtrType> & A,
                       nmrIsOrthonormalFixedSizeData<_elementType, _size> & data,
                       _elementType tolerance = cmnTypeTraits<_elementType>::Tolerance()) {
@@ -461,7 +461,7 @@ bool nmrIsOrthonormal(const vctFixedSizeConstMatrixBase<_size, _size, _rowStride
   \param A A square fixed size matrix
   \param tolerance Tolerance used to compare the product with identity
  */
-template <unsigned int _size, int _rowStride, int _colStride, typename _elementType, class _dataPtrType>
+template <vct::size_type _size, vct::stride_type _rowStride, vct::stride_type _colStride, typename _elementType, class _dataPtrType>
 bool nmrIsOrthonormal(const vctFixedSizeConstMatrixBase<_size, _size, _rowStride, _colStride, _elementType, _dataPtrType> & A,
                       _elementType tolerance = cmnTypeTraits<_elementType>::Tolerance()) {
     typedef vctFixedSizeConstMatrixBase<_size, _size, _rowStride, _colStride, _elementType, _dataPtrType> InputType;

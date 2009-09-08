@@ -69,7 +69,10 @@ void cmnPortabilityTest::TestWithCMake(void) {
                        || (std::string(CISST_CMAKE_CXX_COMPILER) == std::string("g++-3.4"))
                        || (std::string(CISST_CMAKE_CXX_COMPILER) == std::string("g++-4.0"))
                        || (std::string(CISST_CMAKE_CXX_COMPILER) == std::string("g++-4.1"))
-                       || (std::string(CISST_CMAKE_CXX_COMPILER) == std::string("g++-4.2")));
+                       || (std::string(CISST_CMAKE_CXX_COMPILER) == std::string("g++-4.2"))
+                       || (std::string(CISST_CMAKE_CXX_COMPILER) == std::string("g++-4.3"))
+                       || (std::string(CISST_CMAKE_CXX_COMPILER) == std::string("g++-4.4"))
+                       || (std::string(CISST_CMAKE_CXX_COMPILER) == std::string("g++-4.5")));
     } else {
         CPPUNIT_ASSERT(CISST_CMAKE_CXX_COMPILER == CMakeCompilerStrings[CISST_COMPILER]);
     }
@@ -94,6 +97,9 @@ void cmnPortabilityTest::TestWithCMake(void) {
         }
         if (CISST_COMPILER == CISST_DOTNET2005) {
             CPPUNIT_ASSERT(std::string(CISST_CMAKE_GENERATOR) == std::string("Visual Studio 8 2005"));
+        }
+        if (CISST_COMPILER == CISST_DOTNET2008) {
+            CPPUNIT_ASSERT(std::string(CISST_CMAKE_GENERATOR) == std::string("Visual Studio 9 2008"));
         }
     }
 }

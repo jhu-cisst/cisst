@@ -195,25 +195,25 @@ void trkCisstNCC::setCurrentimageSize(IndexType rows, IndexType cols) {
 }
 
 //Get image location
-unsigned int trkCisstNCC::getWindowRow() { return windowPosition.Y(); }
-unsigned int trkCisstNCC::getWindowCol() { return windowPosition.X(); }
+trkCisstNCC::IndexType trkCisstNCC::getWindowRow() { return windowPosition.Y(); }
+trkCisstNCC::IndexType trkCisstNCC::getWindowCol() { return windowPosition.X(); }
 //Get the correlation score, bounded [-1,1]	
 double trkCisstNCC::getTrackScore() { return score; }
 //Get template dimentions
-unsigned int trkCisstNCC::getTemplateNumRows() { return templateSize.Y(); }
-unsigned int trkCisstNCC::getTemplateNumCols() { return templateSize.X(); }
+trkCisstNCC::IndexType trkCisstNCC::getTemplateNumRows() { return templateSize.Y(); }
+trkCisstNCC::IndexType trkCisstNCC::getTemplateNumCols() { return templateSize.X(); }
 //Get template center location
-unsigned int trkCisstNCC::getTemplateCenterRow() { return templateCenter.Y(); }
-unsigned int trkCisstNCC::getTemplateCenterCol() { return templateCenter.X(); }
+trkCisstNCC::IndexType trkCisstNCC::getTemplateCenterRow() { return templateCenter.Y(); }
+trkCisstNCC::IndexType trkCisstNCC::getTemplateCenterCol() { return templateCenter.X(); }
 //Get the tracking window size
-unsigned int trkCisstNCC::getWindowNumRows() { return windowSize.Y(); }
-unsigned int trkCisstNCC::getWindowNumCols() { return windowSize.X(); }
+trkCisstNCC::IndexType trkCisstNCC::getWindowNumRows() { return windowSize.Y(); }
+trkCisstNCC::IndexType trkCisstNCC::getWindowNumCols() { return windowSize.X(); }
 //Get the relative center position of the window
-unsigned int trkCisstNCC::getWindowCenterRow() { return windowCenter.Y(); }
-unsigned int trkCisstNCC::getWindowCenterCol() { return windowCenter.X(); }
+trkCisstNCC::IndexType trkCisstNCC::getWindowCenterRow() { return windowCenter.Y(); }
+trkCisstNCC::IndexType trkCisstNCC::getWindowCenterCol() { return windowCenter.X(); }
 //Get the current image size
-unsigned int trkCisstNCC::getCurrentimageNumRows() { return imageSize.Y(); }
-unsigned int trkCisstNCC::getCurrentimageNumCols() { return imageSize.X(); }
+trkCisstNCC::IndexType trkCisstNCC::getCurrentimageNumRows() { return imageSize.Y(); }
+trkCisstNCC::IndexType trkCisstNCC::getCurrentimageNumCols() { return imageSize.X(); }
 //Get the current (tracked) location
 double trkCisstNCC::getOutputPosX() {return outputPosX;}
 double trkCisstNCC::getOutputPosY() {return outputPosY;}
@@ -399,7 +399,7 @@ void trkCisstNCC::popTemplate() {
 
 //Get the number of templates loaded
 //Explicit unsigned int required, can't use the typedef in MS.Net
-unsigned int trkCisstNCC::getNumberOfTemplates() {
+trkCisstNCC::IndexType trkCisstNCC::getNumberOfTemplates() {
 	return allTemplates.size();
 }
 
@@ -706,7 +706,7 @@ void trkCisstNCC::test() {
 	TestType multi(rowsK , colsK , VCT_COL_MAJOR );
 
 	
-	unsigned int indexRow , indexColumn ;
+	trkCisstNCC::IndexType indexRow , indexColumn ;
 	for ( indexRow = 0; indexRow < rowsK ; ++ indexRow ) {
 		for ( indexColumn = 0; indexColumn < colsK ; ++ indexColumn ) {
 			kernel.at( indexRow , indexColumn ) = indexRow;

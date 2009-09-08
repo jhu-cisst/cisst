@@ -67,7 +67,7 @@ public:
     }
 
     /*! Generic test for fixed size matrices. */
-    template <unsigned int _rows, unsigned int _cols, unsigned int _minmn> 
+    template <vct::size_type _rows, vct::size_type _cols, vct::size_type _minmn> 
     void GenericTestFixedSize(const vctFixedSizeMatrix<double, _rows, _cols, VCT_COL_MAJOR> & input,
                               const vctFixedSizeMatrix<double, _rows, _cols, VCT_COL_MAJOR> & output,
                               const vctFixedSizeVector<F_INTEGER, _minmn> & pivotIndices);

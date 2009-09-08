@@ -30,7 +30,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstVector/vctDynamicConstVectorBase.h>
 #include <cisstVector/vctDynamicConstMatrixBase.h>
 
-template<unsigned int _size, int _stride, class _elementType, class _dataPtrType>
+template <vct::size_type _size, vct::stride_type _stride, class _elementType, class _dataPtrType>
 bool cmnTypePrintf(cmnPrintfParser & parser, 
                    const vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType> & vector)
 {
@@ -38,7 +38,7 @@ bool cmnTypePrintf(cmnPrintfParser & parser,
         return false;
     }
 
-    unsigned int counter;
+    vct::size_type counter;
     for (counter = 0; counter < _size; ++counter) {
         cmnTypePrintf(parser, vector[counter]);
         if (counter != (_size-1))
@@ -48,11 +48,11 @@ bool cmnTypePrintf(cmnPrintfParser & parser,
     return true;
 }
 
-template<class _vectorOwnerType, class _elementType>
+template <class _vectorOwnerType, class _elementType>
 bool cmnTypePrintf(cmnPrintfParser & parser, 
                    const vctDynamicConstVectorBase<_vectorOwnerType, _elementType> & vector)
 {
-    const unsigned int vectorSize = vector.size();
+    const vct::size_type vectorSize = vector.size();
     if (vectorSize < 1)
         return true;
 
@@ -60,7 +60,7 @@ bool cmnTypePrintf(cmnPrintfParser & parser,
         return false;
     }
 
-    unsigned int counter;
+    vct::size_type counter;
     for (counter = 0; counter < vectorSize; ++counter) {
         const _elementType element = vector[counter];
         cmnTypePrintf(parser, element);
@@ -72,7 +72,7 @@ bool cmnTypePrintf(cmnPrintfParser & parser,
 }
 
 
-template<unsigned int _rows, unsigned int _cols, int _rowStride, int _colStride,
+template <vct::size_type _rows, vct::size_type _cols, vct::stride_type _rowStride, vct::stride_type _colStride,
 class _elementType, class _dataPtrType>
     inline bool cmnTypePrintf(cmnPrintfParser & parser, 
     const vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStride,
@@ -82,7 +82,7 @@ class _elementType, class _dataPtrType>
         return false;
     }
 
-    unsigned int rowCounter, colCounter;
+    vct::size_type rowCounter, colCounter;
     for (rowCounter = 0; rowCounter < _rows; ++rowCounter) {
         for (colCounter = 0; colCounter < _cols; ++colCounter) {
             cmnTypePrintf(parser, matrix.Element(rowCounter, colCounter));
@@ -97,12 +97,12 @@ class _elementType, class _dataPtrType>
 }
 
 
-template<class _matrixOwnerType, class _elementType>
+template <class _matrixOwnerType, class _elementType>
 bool cmnTypePrintf(cmnPrintfParser & parser, 
                    const vctDynamicConstMatrixBase<_matrixOwnerType, _elementType> & matrix)
 {
-    const unsigned int rows = matrix.rows();
-    const unsigned int cols = matrix.cols();
+    const vct::size_type rows = matrix.rows();
+    const vct::size_type cols = matrix.cols();
 
     if (matrix.size() < 1)
         return true;
@@ -111,7 +111,7 @@ bool cmnTypePrintf(cmnPrintfParser & parser,
         return false;
     }
 
-    unsigned int rowCounter, colCounter;
+    vct::size_type rowCounter, colCounter;
     for (rowCounter = 0; rowCounter < rows; ++rowCounter) {
         for (colCounter = 0; colCounter < cols; ++colCounter) {
             cmnTypePrintf(parser, matrix.Element(rowCounter, colCounter));

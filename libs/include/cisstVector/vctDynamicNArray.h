@@ -7,7 +7,7 @@
   Author(s):	Daniel Li
   Created on:	2006-07-10
 
-  (C) Copyright 2006-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2006-2009 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -121,7 +121,7 @@ http://www.cisst.org/cisst/license.txt.
 
   \sa vctDynamicNArrayBase vctDynamicConstNArrayBase
 */
-template<class _elementType, unsigned int _dimension>
+template<class _elementType, vct::size_type _dimension>
 class vctDynamicNArray :
     public vctDynamicNArrayBase<vctDynamicNArrayOwner<_elementType, _dimension>, _elementType, _dimension>
 {
@@ -172,7 +172,7 @@ public:
         SetSize(otherNArray.sizes());
         this->Assign(otherNArray);
     }
-    template<class _otherNArrayOwnerType>
+    template <class _otherNArrayOwnerType>
     vctDynamicNArray(const vctDynamicConstNArrayBase<_otherNArrayOwnerType, value_type, _dimension> & otherNArray)
     {
         SetSize(otherNArray.sizes());
@@ -184,7 +184,7 @@ public:
       from the other nArray.  This constructor can also be used for
       type conversions.
     */
-    template<class _otherNArrayOwnerType, typename _otherNArrayElementType>
+    template <class _otherNArrayOwnerType, typename _otherNArrayElementType>
     explicit vctDynamicNArray(const vctDynamicConstNArrayBase<_otherNArrayOwnerType, _otherNArrayElementType, _dimension> & otherNArray)
     {
         SetSize(otherNArray.sizes());
@@ -264,7 +264,7 @@ public:
   deallocation.  Never use it on an object that is going to remain in
   scope after constructing the vctReturnDynamicNArray.
 */
-template<class _elementType, unsigned int _dimension>
+template <class _elementType, vct::size_type _dimension>
 class vctReturnDynamicNArray : public vctDynamicNArray<_elementType, _dimension>
 {
 public:
@@ -286,7 +286,7 @@ public:
 
 
 // implementation of the special copy constructor of vctDynamicNArray
-template<class _elementType, unsigned int _dimension>
+template <class _elementType, vct::size_type _dimension>
 vctDynamicNArray<_elementType, _dimension>::vctDynamicNArray(const vctReturnDynamicNArray<_elementType, _dimension> & other)
 {
     vctReturnDynamicNArray<_elementType, _dimension> & nonConstOther =
@@ -299,7 +299,7 @@ vctDynamicNArray<_elementType, _dimension>::vctDynamicNArray(const vctReturnDyna
 
 
 // implementation of the special assignment operator from vctReturnDynamicNArray to vctDynamicNArray
-template<class _elementType, unsigned int _dimension>
+template <class _elementType, vct::size_type _dimension>
 vctDynamicNArray<_elementType, _dimension> &
 vctDynamicNArray<_elementType, _dimension>::operator = (const vctReturnDynamicNArray<_elementType, _dimension> & other)
 {
@@ -321,7 +321,7 @@ vctDynamicNArray<_elementType, _dimension>::operator = (const vctReturnDynamicNA
   \param inputNArray2 The second operand of the binary operation.
   \return The nArray result of \f$op(nArray1, nArray2)\f$.
 */
-template<class _nArrayOwnerType1, class _nArrayOwnerType2, class _elementType, unsigned int _dimension>
+template <class _nArrayOwnerType1, class _nArrayOwnerType2, class _elementType, vct::size_type _dimension>
 vctReturnDynamicNArray<_elementType, _dimension>
 operator + (const vctDynamicConstNArrayBase<_nArrayOwnerType1, _elementType, _dimension> & inputNArray1,
             const vctDynamicConstNArrayBase<_nArrayOwnerType2, _elementType, _dimension> & inputNArray2)
@@ -333,7 +333,7 @@ operator + (const vctDynamicConstNArrayBase<_nArrayOwnerType1, _elementType, _di
 }
 
 /* documented above */
-template<class _nArrayOwnerType1, class _nArrayOwnerType2, class _elementType, unsigned int _dimension>
+template <class _nArrayOwnerType1, class _nArrayOwnerType2, class _elementType, vct::size_type _dimension>
 vctReturnDynamicNArray<_elementType, _dimension>
 operator - (const vctDynamicConstNArrayBase<_nArrayOwnerType1, _elementType, _dimension> & inputNArray1,
             const vctDynamicConstNArrayBase<_nArrayOwnerType2, _elementType, _dimension> & inputNArray2)
@@ -355,7 +355,7 @@ operator - (const vctDynamicConstNArrayBase<_nArrayOwnerType1, _elementType, _di
   \param inputScalar The second operand of the binary operation.
   \return The nArray result of \f$op(nArray, scalar)\f$.
 */
-template<class _nArrayOwnerType, class _elementType, unsigned int _dimension>
+template <class _nArrayOwnerType, class _elementType, vct::size_type _dimension>
 vctReturnDynamicNArray<_elementType, _dimension>
 operator + (const vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dimension> & inputNArray,
             const _elementType & inputScalar)
@@ -367,7 +367,7 @@ operator + (const vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dim
 }
 
 /* documented above */
-template<class _nArrayOwnerType, class _elementType, unsigned int _dimension>
+template <class _nArrayOwnerType, class _elementType, vct::size_type _dimension>
 vctReturnDynamicNArray<_elementType, _dimension>
 operator - (const vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dimension> & inputNArray,
             const _elementType & inputScalar)
@@ -379,7 +379,7 @@ operator - (const vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dim
 }
 
 /* documented above */
-template<class _nArrayOwnerType, class _elementType, unsigned int _dimension>
+template <class _nArrayOwnerType, class _elementType, vct::size_type _dimension>
 vctReturnDynamicNArray<_elementType, _dimension>
 operator * (const vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dimension> & inputNArray,
             const _elementType & inputScalar)
@@ -391,7 +391,7 @@ operator * (const vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dim
 }
 
 /* documented above */
-template<class _nArrayOwnerType, class _elementType, unsigned int _dimension>
+template <class _nArrayOwnerType, class _elementType, vct::size_type _dimension>
 vctReturnDynamicNArray<_elementType, _dimension>
 operator / (const vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dimension> & inputNArray,
             const _elementType & inputScalar)
@@ -412,7 +412,7 @@ operator / (const vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dim
   \param inputNArray The second operand of the binary operation.
   \return The nArray result of \f$op(scalar, nArray)\f$.
 */
-template<class _nArrayOwnerType, class _elementType, unsigned int _dimension>
+template <class _nArrayOwnerType, class _elementType, vct::size_type _dimension>
 vctReturnDynamicNArray<_elementType, _dimension>
 operator + (const _elementType & inputScalar,
             const vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dimension> & inputNArray)
@@ -424,7 +424,7 @@ operator + (const _elementType & inputScalar,
 }
 
 /* documented above */
-template<class _nArrayOwnerType, class _elementType, unsigned int _dimension>
+template <class _nArrayOwnerType, class _elementType, vct::size_type _dimension>
 vctReturnDynamicNArray<_elementType, _dimension>
 operator - (const _elementType & inputScalar,
             const vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dimension> & inputNArray)
@@ -436,7 +436,7 @@ operator - (const _elementType & inputScalar,
 }
 
 /* documented above */
-template<class _nArrayOwnerType, class _elementType, unsigned int _dimension>
+template <class _nArrayOwnerType, class _elementType, vct::size_type _dimension>
 vctReturnDynamicNArray<_elementType, _dimension>
 operator * (const _elementType & inputScalar,
             const vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dimension> & inputNArray)
@@ -448,7 +448,7 @@ operator * (const _elementType & inputScalar,
 }
 
 /* documented above */
-template<class _nArrayOwnerType, class _elementType, unsigned int _dimension>
+template <class _nArrayOwnerType, class _elementType, vct::size_type _dimension>
 vctReturnDynamicNArray<_elementType, _dimension>
 operator / (const _elementType & inputScalar,
             const vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dimension> & inputNArray)
@@ -467,7 +467,7 @@ operator / (const _elementType & inputScalar,
   \param inputNArray The operand of the unary operation
   \return The nArray result of \f$op(nArray)\f$.
 */
-template<class _nArrayOwnerType, class _elementType, unsigned int _dimension>
+template <class _nArrayOwnerType, class _elementType, vct::size_type _dimension>
 vctReturnDynamicNArray<_elementType, _dimension>
 operator - (const vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dimension> & inputNArray)
 {
@@ -481,7 +481,7 @@ operator - (const vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dim
 
 
 #ifndef DOXYGEN
-template<class _nArrayOwnerType1, class _nArrayOwnerType2, class _elementType, unsigned int _dimension>
+template <class _nArrayOwnerType1, class _nArrayOwnerType2, class _elementType, vct::size_type _dimension>
 vctReturnDynamicNArray<_elementType, _dimension>
 operator * (const vctDynamicConstNArrayBase<_nArrayOwnerType1, _elementType, _dimension> & inputNArray1,
             const vctDynamicConstNArrayBase<_nArrayOwnerType2, _elementType, _dimension> & inputNArray2)
@@ -499,7 +499,7 @@ operator * (const vctDynamicConstNArrayBase<_nArrayOwnerType1, _elementType, _di
 
 
 /* documented in class vctDynamicConstNArrayBase */
-template <class _nArrayOwnerType, class _elementType, unsigned int _dimension>
+template <class _nArrayOwnerType, class _elementType, vct::size_type _dimension>
 inline typename vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dimension>::NArrayReturnType
 vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dimension>::Abs(void) const
 {
@@ -512,7 +512,7 @@ vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dimension>::Abs(void)
 }
 
 /* documented in class vctDynamicConstNArrayBase */
-template <class _nArrayOwnerType, class _elementType, unsigned int _dimension>
+template <class _nArrayOwnerType, class _elementType, vct::size_type _dimension>
 inline typename vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dimension>::NArrayReturnType
 vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dimension>::Negation(void) const
 {
@@ -525,7 +525,7 @@ vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dimension>::Negation(
 }
 
 /* documented in class vctDynamicConstNArrayBase */
-template <class _nArrayOwnerType, class _elementType, unsigned int _dimension>
+template <class _nArrayOwnerType, class _elementType, vct::size_type _dimension>
 inline typename vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dimension>::NArrayReturnType
 vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dimension>::Floor(void) const
 {
@@ -538,7 +538,7 @@ vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dimension>::Floor(voi
 }
 
 /* documented in class vctDynamicConstNArrayBase */
-template <class _nArrayOwnerType, class _elementType, unsigned int _dimension>
+template <class _nArrayOwnerType, class _elementType, vct::size_type _dimension>
 inline typename vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dimension>::NArrayReturnType
 vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dimension>::Ceil(void) const
 {
@@ -551,8 +551,8 @@ vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dimension>::Ceil(void
 }
 
 /* Documented in class vctDynamicConstNArrayBase */
-template<class _nArrayOwnerType, class __nArrayOwnerType, class _elementType,
-         class _elementOperationType, unsigned int _dimension>
+template <class _nArrayOwnerType, class __nArrayOwnerType, class _elementType,
+         class _elementOperationType, vct::size_type _dimension>
 inline vctReturnDynamicNArray<bool, _dimension>
 vctDynamicNArrayElementwiseCompareNArray(const vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dimension> & nArray1,
                                          const vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dimension> & nArray2)
@@ -564,7 +564,7 @@ vctDynamicNArrayElementwiseCompareNArray(const vctDynamicConstNArrayBase<_nArray
 }
 
 /* documented in class vctDynamicConstNArrayBase */
-template<class _nArrayOwnerType, class _elementType, class _elementOperationType, unsigned int _dimension>
+template <class _nArrayOwnerType, class _elementType, class _elementOperationType, vct::size_type _dimension>
 inline vctReturnDynamicNArray<bool, _dimension>
 vctDynamicNArrayElementwiseCompareScalar(const vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dimension> & nArray,
                                          const _elementType & scalar)
@@ -577,11 +577,11 @@ vctDynamicNArrayElementwiseCompareScalar(const vctDynamicConstNArrayBase<_nArray
 
 
 /* documented in class vctDynamicConstNArrayBase */
-template <class _nArrayOwnerType, class _elementType, unsigned int _dimension>
+template <class _nArrayOwnerType, class _elementType, vct::size_type _dimension>
 inline vctDynamicNArrayRef<_elementType, _dimension - 1>
 vctDynamicNArrayNArraySlice(vctDynamicNArrayBase<_nArrayOwnerType, _elementType, _dimension> & input,
-                            unsigned int dimension,
-                            unsigned int index)
+                            vct::size_type dimension,
+                            vct::index_type index)
 {
     vctDynamicNArrayRef<_elementType, _dimension - 1> slice;
     slice.SliceOf(input, dimension, index);
@@ -592,17 +592,17 @@ vctDynamicNArrayNArraySlice(vctDynamicNArrayBase<_nArrayOwnerType, _elementType,
 template <class _nArrayOwnerType, class _elementType>
 inline _elementType &
 vctDynamicNArrayElementSlice(vctDynamicNArrayBase<_nArrayOwnerType, _elementType, 1> & input,
-                             unsigned int index)
+                             vct::index_type index)
 {
-    return input.Element(vctFixedSizeVector<unsigned int, 1>(index));
+    return input.Element(vctFixedSizeVector<vct::index_type, 1>(index));
 }
 
 /* documented in class vctDynamicConstNArrayBase */
-template <class _nArrayOwnerType, class _elementType, unsigned int _dimension>
+template <class _nArrayOwnerType, class _elementType, vct::size_type _dimension>
 inline vctDynamicConstNArrayRef<_elementType, _dimension - 1>
 vctDynamicNArrayConstNArraySlice(const vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dimension> & input,
-                                 unsigned int dimension,
-                                 unsigned int index)
+                                 vct::size_type dimension,
+                                 vct::index_type index)
 {
     vctDynamicConstNArrayRef<_elementType, _dimension - 1> slice;
     slice.SliceOf(input, dimension, index);
@@ -613,9 +613,9 @@ vctDynamicNArrayConstNArraySlice(const vctDynamicConstNArrayBase<_nArrayOwnerTyp
 template <class _nArrayOwnerType, class _elementType>
 inline const _elementType &
 vctDynamicNArrayConstElementSlice(const vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, 1> & input,
-                                  unsigned int index)
+                                  vct::index_type index)
 {
-    return input.Element(vctFixedSizeVector<unsigned int, 1>(index));
+    return input.Element(vctFixedSizeVector<vct::index_type, 1>(index));
 }
 
 #endif // DOXYGEN

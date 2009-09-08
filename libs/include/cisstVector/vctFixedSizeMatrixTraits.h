@@ -44,8 +44,9 @@ http://www.cisst.org/cisst/license.txt.
   completeness.
 
 */
-template<class _elementType, unsigned int _rows, unsigned int _cols,
-         int _rowStride, int _colStride>
+template <class _elementType,
+          vct::size_type _rows, vct::size_type _cols,
+          vct::stride_type _rowStride, vct::stride_type _colStride>
 class vctFixedSizeMatrixTraits
 {
 public:

@@ -49,7 +49,7 @@ http://www.cisst.org/cisst/license.txt.
   \param _rowMajor the storage order, either #VCT_ROW_MAJOR (default) or #VCT_COL_MAJOR.
 */
 
-template<class _elementType, unsigned int _rows, unsigned int _cols, bool _rowMajor>
+template<class _elementType, vct::size_type _rows, vct::size_type _cols, bool _rowMajor>
 class vctFixedSizeMatrix : public vctFixedSizeMatrixBase
 <_rows, _cols, _rowMajor?_cols:1, _rowMajor?1:_rows, _elementType, 
  typename vctFixedSizeMatrixTraits<_elementType, _rows, _cols, _rowMajor?_cols:1, _rowMajor?1:_rows>::array >
@@ -105,8 +105,8 @@ class vctFixedSizeMatrix : public vctFixedSizeMatrixBase
         CMN_ASSERT( this->size() > 1 );
         (*this).at(0) = element0;
         (*this).at(1) = element1;
-        int elementIndex = 2;
-        const int numElements = this->size();
+        index_type elementIndex = 2;
+        const size_type numElements = this->size();
         va_list nextArg;
         va_start(nextArg, element1);
         for (; elementIndex < numElements; ++elementIndex) {
@@ -120,7 +120,7 @@ class vctFixedSizeMatrix : public vctFixedSizeMatrixBase
       type, which will be converted using standard conversion to
       elements of this matrix.
     */
-    template<class __elementType, int __rowStride, int __colStride, class __dataPtrType>
+    template <class __elementType, stride_type __rowStride, stride_type __colStride, class __dataPtrType>
     explicit inline
     vctFixedSizeMatrix(const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride, __colStride, __elementType, __dataPtrType> & matrix) {
         this->Assign(matrix);
@@ -141,7 +141,7 @@ class vctFixedSizeMatrix : public vctFixedSizeMatrixBase
         this->Assign(matrix);
     }
     
-	template<int __rowStride, int __colStride, class __elementType, class __dataPtrType>
+	template <stride_type __rowStride, stride_type __colStride, class __elementType, class __dataPtrType>
     inline ThisType & operator = (const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride, __colStride, __elementType,__dataPtrType> & other) {
         // Experimental static_cast replacing reinterpret_cast.  Return the reinterpret_cast if you encounter
         // compilation errors.
@@ -152,13 +152,13 @@ class vctFixedSizeMatrix : public vctFixedSizeMatrixBase
 		return static_cast<ThisType &>(this->Assign(other));
 	}
 
-	template<int __rowStride, int __colStride>
+	template <stride_type __rowStride, stride_type __colStride>
     inline ThisType & operator = (const vctFixedSizeConstMatrixRef<value_type, _rows, _cols, __rowStride, __colStride> & other)
 	{
 		return static_cast<ThisType &>(this->Assign(other));
 	}
 
-	template<int __rowStride, int __colStride, class __elementType>
+	template <stride_type __rowStride, stride_type __colStride, class __elementType>
     inline ThisType & operator = (const vctFixedSizeConstMatrixRef<__elementType, _rows, _cols, __rowStride, __colStride> & other)
 	{
 		this->Assign(other);
@@ -182,24 +182,24 @@ class vctFixedSizeMatrix : public vctFixedSizeMatrixBase
   \param matrix1 The first operand of the binary operation.
   \param matrix2 The second operand of the binary operation.
   \return The matrix result of \f$op(matrix1, matrix2)\f$. */
-template<unsigned int _rows, unsigned int _cols,
-         int _input1RowStride, int _input1ColStride, class _input1Data,
-         int _input2RowStride, int _input2ColStride, class _input2Data, class _elementType>
-    inline vctFixedSizeMatrix<_elementType, _rows, _cols>
-    operator + (const vctFixedSizeConstMatrixBase<_rows, _cols, _input1RowStride, _input1ColStride, _elementType, _input1Data> & matrix1,
-                const vctFixedSizeConstMatrixBase<_rows, _cols, _input2RowStride, _input2ColStride, _elementType, _input2Data> & matrix2) {
+template <vct::size_type _rows, vct::size_type _cols,
+          vct::stride_type _input1RowStride, vct::stride_type _input1ColStride, class _input1Data,
+          vct::stride_type _input2RowStride, vct::stride_type _input2ColStride, class _input2Data, class _elementType>
+inline vctFixedSizeMatrix<_elementType, _rows, _cols>
+operator + (const vctFixedSizeConstMatrixBase<_rows, _cols, _input1RowStride, _input1ColStride, _elementType, _input1Data> & matrix1,
+            const vctFixedSizeConstMatrixBase<_rows, _cols, _input2RowStride, _input2ColStride, _elementType, _input2Data> & matrix2) {
     vctFixedSizeMatrix<_elementType, _rows, _cols> result;
     result.SumOf(matrix1, matrix2);
     return result; 
 }
 
 /* documented above */
-template<unsigned int _rows, unsigned int _cols,
-         int _input1RowStride, int _input1ColStride, class _input1Data,
-         int _input2RowStride, int _input2ColStride, class _input2Data, class _elementType>
-    inline vctFixedSizeMatrix<_elementType, _rows, _cols>
-    operator - (const vctFixedSizeConstMatrixBase<_rows, _cols, _input1RowStride, _input1ColStride, _elementType, _input1Data> & matrix1,
-                const vctFixedSizeConstMatrixBase<_rows, _cols, _input2RowStride, _input2ColStride, _elementType, _input2Data> & matrix2) {
+template <vct::size_type _rows, vct::size_type _cols,
+          vct::stride_type _input1RowStride, vct::stride_type _input1ColStride, class _input1Data,
+          vct::stride_type _input2RowStride, vct::stride_type _input2ColStride, class _input2Data, class _elementType>
+inline vctFixedSizeMatrix<_elementType, _rows, _cols>
+operator - (const vctFixedSizeConstMatrixBase<_rows, _cols, _input1RowStride, _input1ColStride, _elementType, _input1Data> & matrix1,
+            const vctFixedSizeConstMatrixBase<_rows, _cols, _input2RowStride, _input2ColStride, _elementType, _input2Data> & matrix2) {
     vctFixedSizeMatrix<_elementType, _rows, _cols> result;
     result.DifferenceOf(matrix1, matrix2);
     return result; 
@@ -213,7 +213,7 @@ template<unsigned int _rows, unsigned int _cols,
  \param matrix The first operand of the binary operation.
  \param scalar The second operand of the binary operation.
  \return The matrix result of \f$op(matrix, scalar)\f$. */
-template<unsigned int _rows, unsigned int _cols, int _rowStride, int _colStride, class _elementType, class _dataPtrType>
+template <vct::size_type _rows, vct::size_type _cols, vct::stride_type _rowStride, vct::stride_type _colStride, class _elementType, class _dataPtrType>
 inline vctFixedSizeMatrix<_elementType, _rows, _cols> 
 operator + (const vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStride, _elementType, _dataPtrType> & matrix,
             const _elementType & scalar)
@@ -224,7 +224,7 @@ operator + (const vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStri
 }
 
 /* documented above */
-template<unsigned int _rows, unsigned int _cols, int _rowStride, int _colStride, class _elementType, class _dataPtrType>
+template <vct::size_type _rows, vct::size_type _cols, vct::stride_type _rowStride, vct::stride_type _colStride, class _elementType, class _dataPtrType>
 inline vctFixedSizeMatrix<_elementType, _rows, _cols> 
 operator - (const vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStride, _elementType, _dataPtrType> & matrix,
             const _elementType & scalar)
@@ -235,7 +235,7 @@ operator - (const vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStri
 }
 
 /* documented above */
-template<unsigned int _rows, unsigned int _cols, int _rowStride, int _colStride, class _elementType, class _dataPtrType>
+template <vct::size_type _rows, vct::size_type _cols, vct::stride_type _rowStride, vct::stride_type _colStride, class _elementType, class _dataPtrType>
 inline vctFixedSizeMatrix<_elementType, _rows, _cols> 
 operator * (const vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStride, _elementType, _dataPtrType> & matrix,
             const _elementType & scalar)
@@ -246,7 +246,7 @@ operator * (const vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStri
 }
 
 /* documented above */
-template<unsigned int _rows, unsigned int _cols, int _rowStride, int _colStride, class _elementType, class _dataPtrType>
+template <vct::size_type _rows, vct::size_type _cols, vct::stride_type _rowStride, vct::stride_type _colStride, class _elementType, class _dataPtrType>
 inline vctFixedSizeMatrix<_elementType, _rows, _cols> 
 operator / (const vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStride, _elementType, _dataPtrType> & matrix,
             const _elementType & scalar)
@@ -264,7 +264,7 @@ operator / (const vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStri
  \param scalar The first operand of the binary operation.
  \param matrix The second operand of the binary operation.
  \return The matrix result of \f$op(scalar, matrix)\f$. */
-template<unsigned int _rows, unsigned int _cols, int _rowStride, int _colStride, class _elementType, class _dataPtrType>
+template <vct::size_type _rows, vct::size_type _cols, vct::stride_type _rowStride, vct::stride_type _colStride, class _elementType, class _dataPtrType>
 inline vctFixedSizeMatrix<_elementType, _rows, _cols> 
 operator + (const _elementType & scalar,
             const vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStride, _elementType, _dataPtrType> & matrix)
@@ -275,7 +275,7 @@ operator + (const _elementType & scalar,
 }
 
 /* documented above */
-template<unsigned int _rows, unsigned int _cols, int _rowStride, int _colStride, class _elementType, class _dataPtrType>
+template <vct::size_type _rows, vct::size_type _cols, vct::stride_type _rowStride, vct::stride_type _colStride, class _elementType, class _dataPtrType>
 inline vctFixedSizeMatrix<_elementType, _rows, _cols> 
 operator - (const _elementType & scalar,
             const vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStride, _elementType, _dataPtrType> & matrix)
@@ -286,7 +286,7 @@ operator - (const _elementType & scalar,
 }
 
 /* documented above */
-template<unsigned int _rows, unsigned int _cols, int _rowStride, int _colStride, class _elementType, class _dataPtrType>
+template <vct::size_type _rows, vct::size_type _cols, vct::stride_type _rowStride, vct::stride_type _colStride, class _elementType, class _dataPtrType>
 inline vctFixedSizeMatrix<_elementType, _rows, _cols> 
 operator * (const _elementType & scalar,
             const vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStride, _elementType, _dataPtrType> & matrix)
@@ -297,7 +297,7 @@ operator * (const _elementType & scalar,
 }
 
 /* documented above */
-template<unsigned int _rows, unsigned int _cols, int _rowStride, int _colStride, class _elementType, class _dataPtrType>
+template <vct::size_type _rows, vct::size_type _cols, vct::stride_type _rowStride, vct::stride_type _colStride, class _elementType, class _dataPtrType>
 inline vctFixedSizeMatrix<_elementType, _rows, _cols> 
 operator / (const _elementType & scalar,
             const vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStride, _elementType, _dataPtrType> & matrix)
@@ -316,7 +316,7 @@ operator / (const _elementType & scalar,
   \param matrix The operand of the unary operation
   \return The matrix result of \f$op(matrix)\f$.
 */
-template<unsigned int _rows, unsigned int _cols, int _rowStride, int _colStride, class _elementType, class _dataPtrType>
+template <vct::size_type _rows, vct::size_type _cols, vct::stride_type _rowStride, vct::stride_type _colStride, class _elementType, class _dataPtrType>
 inline vctFixedSizeMatrix<_elementType, _rows, _cols> 
 operator - (const vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStride, _elementType, _dataPtrType> & matrix)
 {
@@ -327,10 +327,10 @@ operator - (const vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStri
 //@}
 
 
-template<unsigned int _rows, unsigned int _cols, unsigned int _input1Cols,
-         int _input1RowStride, int _input1ColStride, class _input1DataPtrType, 
-         int _input2RowStride, int _input2ColStride, class _input2DataPtrType,
-         class _elementType>
+template <vct::size_type _rows, vct::size_type _cols, vct::size_type _input1Cols,
+          vct::stride_type _input1RowStride, vct::stride_type _input1ColStride, class _input1DataPtrType, 
+          vct::stride_type _input2RowStride, vct::stride_type _input2ColStride, class _input2DataPtrType,
+          class _elementType>
 inline vctFixedSizeMatrix<_elementType, _rows, _cols>
 operator * (const vctFixedSizeConstMatrixBase<_rows, _input1Cols, _input1RowStride, _input1ColStride, _elementType, _input1DataPtrType> & input1Matrix,
             const vctFixedSizeConstMatrixBase<_input1Cols, _cols, _input2RowStride, _input2ColStride, _elementType, _input2DataPtrType> & input2Matrix) {
@@ -340,10 +340,10 @@ operator * (const vctFixedSizeConstMatrixBase<_rows, _input1Cols, _input1RowStri
 }
 
 
-template<unsigned int _rows, unsigned int _cols,
-         int _inputMatrixRowStride, int _inputMatrixColStride, class _inputMAtrixDataPtrType, 
-         int _inputVectorStride, class _inputVectorDataPtrType,
-         class _elementType>
+template <vct::size_type _rows, vct::size_type _cols,
+          vct::stride_type _inputMatrixRowStride, vct::stride_type _inputMatrixColStride, class _inputMAtrixDataPtrType, 
+          vct::stride_type _inputVectorStride, class _inputVectorDataPtrType,
+          class _elementType>
 inline vctFixedSizeVector<_elementType, _rows>
 operator * (const vctFixedSizeConstMatrixBase<_rows, _cols, _inputMatrixRowStride, _inputMatrixColStride, _elementType, _inputMAtrixDataPtrType> & inputMatrix,
             const vctFixedSizeConstVectorBase<_cols, _inputVectorStride, _elementType, _inputVectorDataPtrType> & inputVector)
@@ -354,10 +354,10 @@ operator * (const vctFixedSizeConstMatrixBase<_rows, _cols, _inputMatrixRowStrid
 }
 
 
-template<unsigned int _rows, unsigned int _cols,
-         int _inputVectorStride, class _inputVectorDataPtrType,
-         int _inputMatrixRowStride, int _inputMatrixColStride, class _inputMatrixDataPtrType, 
-         class _elementType>
+template <vct::size_type _rows, vct::size_type _cols,
+          vct::stride_type _inputVectorStride, class _inputVectorDataPtrType,
+          vct::stride_type _inputMatrixRowStride, vct::stride_type _inputMatrixColStride, class _inputMatrixDataPtrType, 
+          class _elementType>
 inline vctFixedSizeVector<_elementType, _cols>
 operator * (const vctFixedSizeConstVectorBase<_rows, _inputVectorStride, _elementType, _inputVectorDataPtrType> & inputVector,
             const vctFixedSizeConstMatrixBase<_rows, _cols, _inputMatrixRowStride, _inputMatrixColStride, _elementType, _inputMatrixDataPtrType> & inputMatrix)
@@ -374,7 +374,7 @@ operator * (const vctFixedSizeConstVectorBase<_rows, _inputVectorStride, _elemen
 #ifndef DOXYGEN
 
 /* documented in class vctFixedSizeConstMatrixBase */
-template<unsigned int _rows, unsigned int _cols, int _rowStride, int _colStride, class _elementType, class _dataPtrType>
+template <vct::size_type _rows, vct::size_type _cols, vct::stride_type _rowStride, vct::stride_type _colStride, class _elementType, class _dataPtrType>
 inline typename  vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStride, _elementType, _dataPtrType>::MatrixValueType 
 vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStride, _elementType, _dataPtrType>::Abs(void) const {
     MatrixValueType result;
@@ -385,7 +385,7 @@ vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStride, _elementType, 
 }
     
 /* documented in class vctFixedSizeConstMatrixBase */
-template<unsigned int _rows, unsigned int _cols, int _rowStride, int _colStride, class _elementType, class _dataPtrType>
+template <vct::size_type _rows, vct::size_type _cols, vct::stride_type _rowStride, vct::stride_type _colStride, class _elementType, class _dataPtrType>
 inline typename  vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStride, _elementType, _dataPtrType>::MatrixValueType
 vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStride, _elementType, _dataPtrType>::Negation(void) const {
     MatrixValueType result;
@@ -396,7 +396,7 @@ vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStride, _elementType, 
 }
 
 /* documented in class vctFixedSizeConstMatrixBase */
-template<unsigned int _rows, unsigned int _cols, int _rowStride, int _colStride, class _elementType, class _dataPtrType>
+template <vct::size_type _rows, vct::size_type _cols, vct::stride_type _rowStride, vct::stride_type _colStride, class _elementType, class _dataPtrType>
 inline typename  vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStride, _elementType, _dataPtrType>::MatrixValueType
 vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStride, _elementType, _dataPtrType>::Floor(void) const {
     MatrixValueType result;
@@ -407,7 +407,7 @@ vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStride, _elementType, 
 }
 
 /* documented in class vctFixedSizeConstMatrixBase */
-template<unsigned int _rows, unsigned int _cols, int _rowStride, int _colStride, class _elementType, class _dataPtrType>
+template <vct::size_type _rows, vct::size_type _cols, vct::stride_type _rowStride, vct::stride_type _colStride, class _elementType, class _dataPtrType>
 inline typename  vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStride, _elementType, _dataPtrType>::MatrixValueType
 vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStride, _elementType, _dataPtrType>::Ceil(void) const {
     MatrixValueType result;
@@ -418,7 +418,7 @@ vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStride, _elementType, 
 }
 
 /* documented in class vctFixedSizeConstMatrixBase */
-template<unsigned int _rows, unsigned int _cols, int _rowStride, int _colStride, class _elementType, class _dataPtrType>
+template <vct::size_type _rows, vct::size_type _cols, vct::stride_type _rowStride, vct::stride_type _colStride, class _elementType, class _dataPtrType>
 const typename vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStride, _elementType, _dataPtrType>::MatrixValueType &
 vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStride, _elementType, _dataPtrType>::Eye(void) {
     static MatrixValueType result(_elementType(0));
@@ -431,11 +431,11 @@ vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStride, _elementType, 
 }
 
 /* documented in class vctFixedSizeConstMatrixBase */
-template<unsigned int _rows, unsigned int _cols,
-         int _rowStride, int _colStride, class _dataPtrType,
-         int __rowStride, int __colStride, class __dataPtrType,
-         class _elementType,
-         class _elementOperationType>
+template <vct::size_type _rows, vct::size_type _cols,
+          vct::stride_type _rowStride, vct::stride_type _colStride, class _dataPtrType,
+          vct::stride_type __rowStride, vct::stride_type __colStride, class __dataPtrType,
+          class _elementType,
+          class _elementOperationType>
 inline vctFixedSizeMatrix<bool, _rows, _cols>
 vctFixedSizeMatrixElementwiseCompareMatrix(const vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStride,
                                            _elementType, _dataPtrType> & matrix1,
@@ -448,10 +448,10 @@ vctFixedSizeMatrixElementwiseCompareMatrix(const vctFixedSizeConstMatrixBase<_ro
 }
 
 /* documented in class vctFixedSizeConstMatrixBase */
-template<unsigned int _rows, unsigned int _cols,
-         int _rowStride, int _colStride, class _dataPtrType,
-         class _elementType,
-         class _elementOperationType>
+template <vct::size_type _rows, vct::size_type _cols,
+          vct::stride_type _rowStride, vct::stride_type _colStride, class _dataPtrType,
+          class _elementType,
+          class _elementOperationType>
 inline vctFixedSizeMatrix<bool, _rows, _cols>
 vctFixedSizeMatrixElementwiseCompareScalar(const vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStride,
                                            _elementType, _dataPtrType> & matrix,

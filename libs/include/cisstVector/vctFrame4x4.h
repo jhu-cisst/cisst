@@ -47,7 +47,7 @@ http://www.cisst.org/cisst/license.txt.
 
   \sa vctDynamicMatrix, vctFixedSizeMatrix, vctFrameBase
 */
-template<class _elementType, bool _rowMajor>
+template <class _elementType, bool _rowMajor>
 class vctFrame4x4: 
     public vctFrame4x4Base<vctFixedSizeMatrix<_elementType, 4, 4, _rowMajor> >
 {
@@ -152,7 +152,7 @@ vctFrame4x4ConstBase<_containerType>::Inverse(void) const {
 
 // operators
 template <class _containerType,
-          int _stride, class _dataPtrType>
+          vct::stride_type _stride, class _dataPtrType>
 inline vctFixedSizeVector<typename _containerType::value_type, 3>
 operator * (const vctFrame4x4ConstBase<_containerType> & frame,
             const vctFixedSizeConstVectorBase<3, _stride, typename _containerType::value_type, _dataPtrType> & vector) {
@@ -171,7 +171,7 @@ operator * (const vctFrame4x4ConstBase<_containerType1> & frame1,
 }
 
 template <class _containerType,
-          unsigned int _cols, int _rowStride, int _colStride, class _dataPtrType>
+          vct::size_type _cols, vct::stride_type _rowStride, vct::stride_type _colStride, class _dataPtrType>
 inline vctFixedSizeMatrix<typename _containerType::value_type, 3, _cols >
 operator * (const vctFrame4x4ConstBase<_containerType> & frame,
             const vctFixedSizeConstMatrixBase<3, _cols, _rowStride, _colStride, typename _containerType::value_type, _dataPtrType> & matrix)

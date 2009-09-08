@@ -49,7 +49,7 @@ http://www.cisst.org/cisst/license.txt.
   See the base class (vctFixedSizeConstVectorBase) for template
   parameter details.
 */
-template<class _elementType, unsigned int _size, int _stride>
+template <class _elementType, vct::size_type _size, vct::stride_type _stride>
 class vctFixedSizeConstVectorRef : public vctFixedSizeConstVectorBase<
     _size, _stride, _elementType, 
     typename vctFixedSizeVectorTraits<_elementType, _size, _stride>::pointer >
@@ -82,9 +82,9 @@ class vctFixedSizeConstVectorRef : public vctFixedSizeConstVectorBase<
       protects the content.
       \note The stride values are taken from the fixed size vector.
     */
-    template<unsigned int __size, class __dataPtrType>
+    template <size_type __size, class __dataPtrType>
     vctFixedSizeConstVectorRef(const vctFixedSizeConstVectorBase<__size, _stride, _elementType, __dataPtrType> & otherVector,
-                                        size_type startPosition = 0)
+                               size_type startPosition = 0)
     {
         SetRef(otherVector, startPosition);
     }
@@ -117,7 +117,7 @@ class vctFixedSizeConstVectorRef : public vctFixedSizeConstVectorBase<
       \note this vector must be contained in the input vector, that is, startPos+_size <= __size
       (otherwise cmnThrow is used to throw std::out_of_range).
     */
-    template<unsigned int __size, class __dataPtrType>
+    template <size_type __size, class __dataPtrType>
     void SetRef(const vctFixedSizeConstVectorBase<__size, _stride, _elementType, __dataPtrType> & otherVector,
                 size_type startPosition = 0)
     {

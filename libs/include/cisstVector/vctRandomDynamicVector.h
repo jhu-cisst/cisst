@@ -51,8 +51,8 @@ void vctRandom(vctDynamicVectorBase<_vectorOwnerType, _elementType> & vector,
                const typename vctDynamicVectorBase<_vectorOwnerType, _elementType>::value_type max)
 {
     cmnRandomSequence & randomSequence = cmnRandomSequence::GetInstance();
-    const unsigned int size = vector.size();
-    unsigned int index;
+    const vct::size_type size = vector.size();
+    vct::index_type index;
     for (index = 0; index < size; ++index) {
         randomSequence.ExtractRandomValue(min, max,
                                           vector[index]);    

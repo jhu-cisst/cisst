@@ -36,9 +36,9 @@ http://www.cisst.org/cisst/license.txt.
 
 
 // forward declaration of Assign method from dynamic matrix to fixed size
-template<unsigned int _rows, unsigned int _cols,
-         int _rowStride, int _colStride,
-         class _elementType, class _dataPtrType, class _matrixOwnerType>
+template <vct::size_type _rows, vct::size_type _cols,
+          vct::stride_type _rowStride, vct::stride_type _colStride,
+          class _elementType, class _dataPtrType, class _matrixOwnerType>
 inline void vctFixedSizeMatrixBaseAssignDynamicConstMatrixBase(
     vctFixedSizeMatrixBase<_rows, _cols, _rowStride, _colStride, _elementType, _dataPtrType> & fixedSizeMatrix,
     const vctDynamicConstMatrixBase<_matrixOwnerType, _elementType> & dynamicMatrix);
@@ -55,8 +55,9 @@ inline void vctFixedSizeMatrixBaseAssignDynamicConstMatrixBase(
   
   \sa vctFixedSizeConstMatrixBase
 */
-template<unsigned int _rows, unsigned int _cols, int _rowStride, 
-         int _colStride, class _elementType, class _dataPtrType>
+template <vct::size_type _rows, vct::size_type _cols,
+          vct::stride_type _rowStride, vct::stride_type _colStride,
+          class _elementType, class _dataPtrType>
 class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
 <_rows, _cols, _rowStride, _colStride, _elementType, _dataPtrType>
 {
@@ -73,10 +74,10 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
     
     /*! Type of the base class. */
     typedef vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStride, 
-        _elementType, _dataPtrType> BaseType;
+                                        _elementType, _dataPtrType> BaseType;
     
     typedef vctFixedSizeMatrixTraits<_elementType, _rows, _cols, 
-        _rowStride, _colStride> MatrixTraits;
+                                     _rowStride, _colStride> MatrixTraits;
 
     typedef typename MatrixTraits::iterator iterator;
     typedef typename MatrixTraits::const_iterator const_iterator;
@@ -292,20 +293,20 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
 
     //@{ Methods to select a subset of rows or columns from another matrix
     /*! Select a subset of rows from another matrix */
-    template<unsigned int __rows, int __rowStride, int __colStride, class __dataPtrType,
-             int __indexStride, class __indexDataPtrType>
+    template <size_type __rows, stride_type __rowStride, stride_type __colStride, class __dataPtrType,
+              stride_type __indexStride, class __indexDataPtrType>
     void SelectRowsFrom(const vctFixedSizeConstMatrixBase<__rows, _cols, __rowStride, __colStride, _elementType, __dataPtrType> & inputMatrix,
-                        const vctFixedSizeConstVectorBase<_rows, __indexStride, unsigned int, __indexDataPtrType> & rowIndexVector)
+                        const vctFixedSizeConstVectorBase<_rows, __indexStride, index_type, __indexDataPtrType> & rowIndexVector)
     {
         vctFixedSizeMatrixLoopEngines::SelectRowsByIndex::
             Run(*this, inputMatrix, rowIndexVector);
     }
 
     /*! Select a subset of columns from another matrix */
-    template<unsigned int __cols, int __rowStride, int __colStride, class __dataPtrType,
-             int __indexStride, class __indexDataPtrType>
+    template <size_type __cols, stride_type __rowStride, stride_type __colStride, class __dataPtrType,
+              stride_type __indexStride, class __indexDataPtrType>
     void SelectColsFrom(const vctFixedSizeConstMatrixBase<_rows, __cols, __rowStride, __colStride, _elementType, __dataPtrType> & inputMatrix,
-                        const vctFixedSizeConstVectorBase<_cols, __indexStride, unsigned int, __indexDataPtrType> & colIndexVector)
+                        const vctFixedSizeConstVectorBase<_cols, __indexStride, index_type, __indexDataPtrType> & colIndexVector)
     {
         this->TransposeRef().SelectRowsFrom(inputMatrix.TransposeRef(), colIndexVector);
     }
@@ -323,11 +324,11 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
 
       \note Do not use this method for an in-place permutation of the input matrix.
     */
-    template<int __rowStride, int __colStride, class __dataPtrType>
+    template <stride_type __rowStride, stride_type __colStride, class __dataPtrType>
     void RowPermutationOf(const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride, __colStride,
-                          _elementType, __dataPtrType> & inputMatrix, const unsigned int permutedRowIndexes[])
+                          _elementType, __dataPtrType> & inputMatrix, const index_type permutedRowIndexes[])
     {
-        unsigned int thisRowIndex;
+        index_type thisRowIndex;
         for (thisRowIndex = 0; thisRowIndex < ROWS; ++thisRowIndex) {
             Row(thisRowIndex).Assign( inputMatrix.Row(permutedRowIndexes[thisRowIndex]) );
         }
@@ -345,11 +346,11 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
 
       \note Do not use this method for an in-place permutation of the input matrix.
     */
-    template<int __rowStride, int __colStride, class __dataPtrType>
+    template <stride_type __rowStride, stride_type __colStride, class __dataPtrType>
     void RowInversePermutationOf(const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride, __colStride,
-                                 _elementType, __dataPtrType> & inputMatrix, const unsigned int permutedRowIndexes[])
+                                 _elementType, __dataPtrType> & inputMatrix, const index_type permutedRowIndexes[])
     {
-        unsigned int thisRowIndex;
+        index_type thisRowIndex;
         for (thisRowIndex = 0; thisRowIndex < ROWS; ++thisRowIndex) {
             Row(permutedRowIndexes[thisRowIndex]).Assign( inputMatrix.Row(thisRowIndex) );
         }
@@ -367,11 +368,11 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
 
       \note Do not use this method for an in-place permutation of the input matrix.
     */
-    template<int __rowStride, int __colStride, class __dataPtrType>
+    template <stride_type __rowStride, stride_type __colStride, class __dataPtrType>
     void ColumnPermutationOf(const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride, __colStride,
-                             _elementType, __dataPtrType> & inputMatrix, const unsigned int permutedColumnIndexes[])
+                             _elementType, __dataPtrType> & inputMatrix, const index_type permutedColumnIndexes[])
     {
-        unsigned int thisColumnIndex;
+        index_type thisColumnIndex;
         for (thisColumnIndex = 0; thisColumnIndex < COLS; ++thisColumnIndex) {
             Column(thisColumnIndex).Assign( inputMatrix.Column(permutedColumnIndexes[thisColumnIndex]) );
         }
@@ -389,11 +390,11 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
 
       \note Do not use this method for an in-place permutation of the input matrix.
     */
-    template<int __rowStride, int __colStride, class __dataPtrType>
+    template <stride_type __rowStride, stride_type __colStride, class __dataPtrType>
     void ColumnInversePermutationOf(const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride, __colStride,
-                                    _elementType, __dataPtrType> & inputMatrix, const unsigned int permutedColumnIndexes[])
+                                    _elementType, __dataPtrType> & inputMatrix, const index_type permutedColumnIndexes[])
     {
-        unsigned int thisColumnIndex;
+        index_type thisColumnIndex;
         for (thisColumnIndex = 0; thisColumnIndex < COLS; ++thisColumnIndex) {
             Column(permutedColumnIndexes[thisColumnIndex]).Assign( inputMatrix.Column(thisColumnIndex) );
         }
@@ -458,7 +459,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
 
     /*! Assignment operation between matrices of different types
     */
-    template<int __rowStride, int __colStride, class __elementType, class __dataPtrType>
+    template <stride_type __rowStride, stride_type __colStride, class __elementType, class __dataPtrType>
     inline ThisType & Assign(const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride, __colStride, __elementType, __dataPtrType> & other) {
         vctFixedSizeMatrixLoopEngines::
             MoMi<typename vctUnaryOperations<value_type, __elementType>::Identity>::
@@ -567,7 +568,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
       \param other The matrix to be copied.
     */
     //@{
-    template <int __rowStride, int __colStride, class __elementType, class __dataPtrType>
+    template <stride_type __rowStride, stride_type __colStride, class __elementType, class __dataPtrType>
     inline ThisType & ForceAssign(const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride, __colStride,
                                                                     __elementType, __dataPtrType> & other) {
         return this->Assign(other);
@@ -629,7 +630,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
         to turn off the different safety checks for each FastCopyOf.
         \code
         bool canUseFastCopy = destination.FastCopyCompatible(source);
-        unsigned int index;
+        vct::index_type index;
         for (index = 0; index < 1000; index++) {
             DoSomethingUseful(source);
             if (canUseFastCopy) {
@@ -648,7 +649,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
         <code>vctFastCopy::PerformChecks</code>.
      */
     //@{
-    template<class __matrixOwnerType>
+    template <class __matrixOwnerType>
     inline bool FastCopyOf(const vctDynamicConstMatrixBase<__matrixOwnerType, value_type> & source,
                            bool performSafetyChecks = vctFastCopy::PerformChecks)
         throw(std::runtime_error)
@@ -656,7 +657,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
         return vctFastCopy::MatrixCopy(*this, source, performSafetyChecks);
     }
 
-    template<class __dataPtrType>
+    template <class __dataPtrType>
     inline bool FastCopyOf(const vctFixedSizeConstMatrixBase<ROWS, COLS, ROWSTRIDE, COLSTRIDE, value_type, __dataPtrType> & source,
                            bool performSafetyChecks = vctFastCopy::PerformChecks)
         throw(std::runtime_error)
@@ -695,8 +696,8 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
       
       \return The vector "this" modified.
     */
-    template<int __input1RowStride, int __input1ColStride, class __input1DataPtrType,
-             int __input2RowStride, int __input2ColStride, class __input2DataPtrType>
+    template <stride_type __input1RowStride, stride_type __input1ColStride, class __input1DataPtrType,
+              stride_type __input2RowStride, stride_type __input2ColStride, class __input2DataPtrType>
     inline ThisType & SumOf(const vctFixedSizeConstMatrixBase<_rows, _cols, __input1RowStride, __input1ColStride,
                             value_type, __input1DataPtrType> & input1Matrix,
                             const vctFixedSizeConstMatrixBase<_rows, _cols, __input2RowStride, __input2ColStride,
@@ -707,8 +708,8 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
     }
     
     /* documented above */
-    template<int __input1RowStride, int __input1ColStride, class __input1DataPtrType,
-             int __input2RowStride, int __input2ColStride, class __input2DataPtrType>
+    template <stride_type __input1RowStride, stride_type __input1ColStride, class __input1DataPtrType,
+              stride_type __input2RowStride, stride_type __input2ColStride, class __input2DataPtrType>
     inline ThisType & DifferenceOf(const vctFixedSizeConstMatrixBase<_rows, _cols, __input1RowStride, __input1ColStride,
                                    value_type, __input1DataPtrType> & input1Matrix,
                                    const vctFixedSizeConstMatrixBase<_rows, _cols, __input2RowStride, __input2ColStride,
@@ -719,8 +720,8 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
     }
 
     /* documented above */
-    template<int __input1RowStride, int __input1ColStride, class __input1DataPtrType,
-             int __input2RowStride, int __input2ColStride, class __input2DataPtrType>
+    template <stride_type __input1RowStride, stride_type __input1ColStride, class __input1DataPtrType,
+              stride_type __input2RowStride, stride_type __input2ColStride, class __input2DataPtrType>
     inline ThisType & ElementwiseProductOf(const vctFixedSizeConstMatrixBase<_rows, _cols, __input1RowStride, __input1ColStride,
                                            value_type, __input1DataPtrType> & input1Matrix,
                                            const vctFixedSizeConstMatrixBase<_rows, _cols, __input2RowStride, __input2ColStride,
@@ -731,8 +732,8 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
     }    
     
     /* documented above */
-    template<int __input1RowStride, int __input1ColStride, class __input1DataPtrType,
-             int __input2RowStride, int __input2ColStride, class __input2DataPtrType>
+    template <stride_type __input1RowStride, stride_type __input1ColStride, class __input1DataPtrType,
+              stride_type __input2RowStride, stride_type __input2ColStride, class __input2DataPtrType>
     inline ThisType & ElementwiseRatioOf(const vctFixedSizeConstMatrixBase<_rows, _cols, __input1RowStride, __input1ColStride,
                                          value_type, __input1DataPtrType> & input1Matrix,
                                          const vctFixedSizeConstMatrixBase<_rows, _cols, __input2RowStride, __input2ColStride,
@@ -743,8 +744,8 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
     }
 
     /* documented above */
-    template<int __input1RowStride, int __input1ColStride, class __input1DataPtrType,
-             int __input2RowStride, int __input2ColStride, class __input2DataPtrType>
+    template <stride_type __input1RowStride, stride_type __input1ColStride, class __input1DataPtrType,
+              stride_type __input2RowStride, stride_type __input2ColStride, class __input2DataPtrType>
     inline ThisType & ElementwiseMinOf(const vctFixedSizeConstMatrixBase<_rows, _cols, __input1RowStride, __input1ColStride,
                                        value_type, __input1DataPtrType> & input1Matrix,
                                        const vctFixedSizeConstMatrixBase<_rows, _cols, __input2RowStride, __input2ColStride,
@@ -755,8 +756,8 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
     }
 
     /* documented above */
-    template<int __input1RowStride, int __input1ColStride, class __input1DataPtrType,
-             int __input2RowStride, int __input2ColStride, class __input2DataPtrType>
+    template <stride_type __input1RowStride, stride_type __input1ColStride, class __input1DataPtrType,
+              stride_type __input2RowStride, stride_type __input2ColStride, class __input2DataPtrType>
     inline ThisType & ElementwiseMaxOf(const vctFixedSizeConstMatrixBase<_rows, _cols, __input1RowStride, __input1ColStride,
                                        value_type, __input1DataPtrType> & input1Matrix,
                                        const vctFixedSizeConstMatrixBase<_rows, _cols, __input2RowStride, __input2ColStride,
@@ -785,7 +786,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
       
       \return The vector "this" modified.
     */
-    template<int __rowStride, int __colStride, class __dataPtrType>
+    template <stride_type __rowStride, stride_type __colStride, class __dataPtrType>
     inline ThisType & Add(const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride, __colStride, value_type, __dataPtrType> & otherMatrix) {
         vctFixedSizeMatrixLoopEngines::
             MioMi<typename vctStoreBackBinaryOperations<value_type>::Addition>::
@@ -794,7 +795,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
     }
 
     /* documented above */
-    template<int __rowStride, int __colStride, class __dataPtrType>
+    template <stride_type __rowStride, stride_type __colStride, class __dataPtrType>
     inline ThisType & Subtract(const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride, __colStride, value_type, __dataPtrType> & otherMatrix) {
         vctFixedSizeMatrixLoopEngines::
             MioMi<typename vctStoreBackBinaryOperations<value_type>::Subtraction>::
@@ -803,7 +804,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
     }
     
     /* documented above */
-    template<int __rowStride, int __colStride, class __dataPtrType>
+    template <stride_type __rowStride, stride_type __colStride, class __dataPtrType>
     inline ThisType & ElementwiseMultiply(const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride, __colStride, value_type, __dataPtrType> & otherMatrix) {
         vctFixedSizeMatrixLoopEngines::
             MioMi<typename vctStoreBackBinaryOperations<value_type>::Multiplication>::
@@ -812,7 +813,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
     }
 
     /* documented above */
-    template<int __rowStride, int __colStride, class __dataPtrType>
+    template <stride_type __rowStride, stride_type __colStride, class __dataPtrType>
     inline ThisType & ElementwiseDivide(const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride, __colStride, value_type, __dataPtrType> & otherMatrix) {
         vctFixedSizeMatrixLoopEngines::
             MioMi<typename vctStoreBackBinaryOperations<value_type>::Division>::
@@ -821,7 +822,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
     }
 
     /* documented above */
-    template<int __rowStride, int __colStride, class __dataPtrType>
+    template <stride_type __rowStride, stride_type __colStride, class __dataPtrType>
     inline ThisType & ElementwiseMin(const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride, __colStride, value_type, __dataPtrType> & otherMatrix) {
         vctFixedSizeMatrixLoopEngines::
             MioMi<typename vctStoreBackBinaryOperations<value_type>::Minimum>::
@@ -830,7 +831,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
     }
     
     /* documented above */
-    template<int __rowStride, int __colStride, class __dataPtrType>
+    template <stride_type __rowStride, stride_type __colStride, class __dataPtrType>
     inline ThisType & ElementwiseMax(const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride, __colStride, value_type, __dataPtrType> & otherMatrix) {
         vctFixedSizeMatrixLoopEngines::
             MioMi<typename vctStoreBackBinaryOperations<value_type>::Maximum>::
@@ -839,13 +840,13 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
     }
 
     /* documented above */
-    template<int __rowStride, int __colStride, class __dataPtrType>
+    template <stride_type __rowStride, stride_type __colStride, class __dataPtrType>
     inline ThisType & operator += (const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride, __colStride, value_type, __dataPtrType> & otherMatrix) {
         return this->Add(otherMatrix);
     }
     
     /* documented above */
-    template<int __rowStride, int __colStride, class __dataPtrType>
+    template <stride_type __rowStride, stride_type __colStride, class __dataPtrType>
     inline ThisType & operator -= (const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride, __colStride, value_type, __dataPtrType> & otherMatrix) {
         return this->Subtract(otherMatrix);
     }
@@ -868,7 +869,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
       
       \return The matrix "this" modified.
     */
-    template<int __rowStride, int __colStride, class __dataPtrType>
+    template <stride_type __rowStride, stride_type __colStride, class __dataPtrType>
     inline ThisType & SumOf(const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride, __colStride, value_type, __dataPtrType> & matrix, 
                             const value_type scalar) {
         vctFixedSizeMatrixLoopEngines::
@@ -878,7 +879,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
     }
     
     /* documented above */
-    template<int __rowStride, int __colStride, class __dataPtrType>
+    template <stride_type __rowStride, stride_type __colStride, class __dataPtrType>
     inline ThisType & DifferenceOf(const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride, __colStride, value_type, __dataPtrType> & matrix, 
                                    const value_type scalar) {
         vctFixedSizeMatrixLoopEngines::
@@ -888,7 +889,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
     }
     
     /* documented above */    
-    template<int __rowStride, int __colStride, class __dataPtrType>
+    template <stride_type __rowStride, stride_type __colStride, class __dataPtrType>
     inline ThisType & ProductOf(const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride, __colStride, value_type, __dataPtrType> & matrix, 
                                 const value_type scalar) {
         vctFixedSizeMatrixLoopEngines::
@@ -898,7 +899,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
     }
     
     /* documented above */
-    template<int __rowStride, int __colStride, class __dataPtrType>
+    template <stride_type __rowStride, stride_type __colStride, class __dataPtrType>
     inline ThisType & RatioOf(const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride, __colStride, value_type, __dataPtrType> & matrix, 
                               const value_type scalar) {
         vctFixedSizeMatrixLoopEngines::
@@ -908,7 +909,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
     }
 
     /* documented above */
-    template<int __rowStride, int __colStride, class __dataPtrType>
+    template <stride_type __rowStride, stride_type __colStride, class __dataPtrType>
     inline ThisType & ClippedAboveOf(const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride, __colStride, value_type, __dataPtrType> & matrix, 
                                      const value_type upperBound) {
         vctFixedSizeMatrixLoopEngines::
@@ -918,7 +919,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
     }
 
     /* documented above */
-    template<int __rowStride, int __colStride, class __dataPtrType>
+    template <stride_type __rowStride, stride_type __colStride, class __dataPtrType>
     inline ThisType & ClippedBelowOf(const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride, __colStride, value_type, __dataPtrType> & matrix, 
                                      const value_type lowerBound) {
         vctFixedSizeMatrixLoopEngines::
@@ -945,7 +946,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
       
       \return The matrix "this" modified.
     */
-    template<int __rowStride, int __colStride, class __dataPtrType>
+    template <stride_type __rowStride, stride_type __colStride, class __dataPtrType>
     inline ThisType & SumOf(const value_type scalar,
                             const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride, __colStride, value_type, __dataPtrType> & matrix) {
         vctFixedSizeMatrixLoopEngines::
@@ -955,7 +956,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
     }
     
     /* documented above */
-    template<int __rowStride, int __colStride, class __dataPtrType>
+    template <stride_type __rowStride, stride_type __colStride, class __dataPtrType>
     inline ThisType & DifferenceOf(const value_type scalar,
                                    const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride, __colStride, value_type, __dataPtrType> & matrix) {
         vctFixedSizeMatrixLoopEngines::
@@ -965,7 +966,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
     }
     
     /* documented above */
-    template<int __rowStride, int __colStride, class __dataPtrType>
+    template <stride_type __rowStride, stride_type __colStride, class __dataPtrType>
     inline ThisType & ProductOf(const value_type scalar,
                                 const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride, __colStride, value_type, __dataPtrType> & matrix) {
         vctFixedSizeMatrixLoopEngines::
@@ -975,7 +976,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
     }
     
     /* documented above */
-    template<int __rowStride, int __colStride, class __dataPtrType>
+    template <stride_type __rowStride, stride_type __colStride, class __dataPtrType>
     inline ThisType & RatioOf(const value_type scalar,
                               const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride, __colStride, value_type, __dataPtrType> & matrix) {
         vctFixedSizeMatrixLoopEngines::
@@ -985,7 +986,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
     }
 
     /* documented above */
-    template<int __rowStride, int __colStride, class __dataPtrType>
+    template <stride_type __rowStride, stride_type __colStride, class __dataPtrType>
     inline ThisType & ClippedAboveOf(const value_type upperBound,
                                      const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride, __colStride, value_type, __dataPtrType> & matrix) {
         vctFixedSizeMatrixLoopEngines::
@@ -995,7 +996,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
     }
 
     /* documented above */
-    template<int __rowStride, int __colStride, class __dataPtrType>
+    template <stride_type __rowStride, stride_type __colStride, class __dataPtrType>
     inline ThisType & ClippedBelowOf(const value_type lowerBound,
                                      const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride, __colStride, value_type, __dataPtrType> & matrix) {
         vctFixedSizeMatrixLoopEngines::
@@ -1089,7 +1090,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
     //@}
 
 
-    template<int __rowStride, int __colStride, class __dataPtrType>
+    template <stride_type __rowStride, stride_type __colStride, class __dataPtrType>
     inline ThisType & AddProductOf(const value_type scalar,
                                    const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride, __colStride, value_type, __dataPtrType> & otherMatrix)
     {
@@ -1114,7 +1115,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
       
       \return The matrix "this" modified.
     */
-    template<int __rowStride, int __colStride, class __dataPtrType>
+    template <stride_type __rowStride, stride_type __colStride, class __dataPtrType>
     inline ThisType & AbsOf(const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride, __colStride, value_type, __dataPtrType> & otherMatrix) {
         vctFixedSizeMatrixLoopEngines::
             MoMi<typename vctUnaryOperations<value_type>::AbsValue>::
@@ -1123,7 +1124,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
     }
 
     /* documented above */
-    template<int __rowStride, int __colStride, class __dataPtrType>
+    template <stride_type __rowStride, stride_type __colStride, class __dataPtrType>
     inline ThisType & NegationOf(const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride, __colStride, value_type, __dataPtrType> & otherMatrix) {
         vctFixedSizeMatrixLoopEngines::
             MoMi<typename vctUnaryOperations<value_type>::Negation>::
@@ -1132,7 +1133,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
     }
 
     /* documented above */
-    template<int __rowStride, int __colStride, class __dataPtrType>
+    template <stride_type __rowStride, stride_type __colStride, class __dataPtrType>
     inline ThisType & FloorOf(const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride, __colStride, value_type, __dataPtrType> & otherMatrix) {
         vctFixedSizeMatrixLoopEngines::
             MoMi<typename vctUnaryOperations<value_type>::Floor>::
@@ -1141,7 +1142,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
     }
 
     /* documented above */
-    template<int __rowStride, int __colStride, class __dataPtrType>
+    template <stride_type __rowStride, stride_type __colStride, class __dataPtrType>
     inline ThisType & CeilOf(const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride, __colStride, value_type, __dataPtrType> & otherMatrix) {
         vctFixedSizeMatrixLoopEngines::
             MoMi<typename vctUnaryOperations<value_type>::Ceil>::
@@ -1152,7 +1153,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
 
 
 
-    template<int __rowStride, int __colStride, class __dataPtrType>
+    template <stride_type __rowStride, stride_type __colStride, class __dataPtrType>
     inline ThisType & TransposeOf(const vctFixedSizeConstMatrixBase<_cols, _rows, __rowStride, __colStride, value_type, __dataPtrType> & otherMatrix) {
         Assign(otherMatrix.TransposeRef());
         return *this;
@@ -1211,8 +1212,8 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
     \param input2Matrix The right operand of the binary operation.
     
     \return The matrix "this" modified. */
-    template<unsigned int __input1Cols, int __input1RowStride, int __input1ColStride, class __input1DataPtrType, 
-        int __input2RowStride, int __input2ColStride, class __input2DataPtrType>
+    template <size_type __input1Cols, stride_type __input1RowStride, stride_type __input1ColStride, class __input1DataPtrType, 
+              stride_type __input2RowStride, stride_type __input2ColStride, class __input2DataPtrType>
         void ProductOf(const vctFixedSizeConstMatrixBase<_rows, __input1Cols, __input1RowStride, __input1ColStride,
                        _elementType, __input1DataPtrType> & input1Matrix,
                        const vctFixedSizeConstMatrixBase<__input1Cols, _cols, __input2RowStride, __input2ColStride,
@@ -1230,7 +1231,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
 
     /*! Compute the outer product of two vectors and store the result to
       this matrix.  The outer product (v1*v2)[i,j] = v1[i] * v2[j] */
-    template<int __stride1, class __dataPtrType1, int __stride2, class __dataPtrType2>
+    template <stride_type __stride1, class __dataPtrType1, stride_type __stride2, class __dataPtrType2>
         void OuterProductOf(const vctFixedSizeConstVectorBase<_rows, __stride1, _elementType, __dataPtrType1> & columnVector,
         const vctFixedSizeConstVectorBase<_cols, __stride2, _elementType, __dataPtrType2> & rowVector)
     {
@@ -1257,7 +1258,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
       memory strides between the elements of the parent matrix and submatrix are equal.
       For more sophisticated submatrices, the user has to write customized code.
     */
-    template<unsigned int _subRows, unsigned int _subCols>
+    template <size_type _subRows, size_type _subCols>
     class Submatrix
     {
     public:

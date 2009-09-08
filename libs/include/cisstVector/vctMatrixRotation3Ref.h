@@ -50,7 +50,7 @@ http://www.cisst.org/cisst/license.txt.
 
   \sa vctMatrixRotation3Base vctFixedSizeMatrix
 */
-template <class _elementType, int _rowStride, int _colStride>
+template <class _elementType, vct::stride_type _rowStride, vct::stride_type _colStride>
 class vctMatrixRotation3Ref: public vctMatrixRotation3Base<vctFixedSizeMatrixRef<_elementType, 3, 3, _rowStride, _colStride> >
 {
  public:

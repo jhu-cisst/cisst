@@ -166,14 +166,14 @@ void trkCisstWSSD::setImageSize(IndexType rows, IndexType cols) {
 //Get the correlation score, bounded [-1,1]	
 double trkCisstWSSD::getTrackScore() { return 1; }
 //Get template dimentions
-unsigned int trkCisstWSSD::getTemplateNumRows() { return templateSize.Y(); }
-unsigned int trkCisstWSSD::getTemplateNumCols() { return templateSize.X(); }
+trkCisstWSSD::IndexType trkCisstWSSD::getTemplateNumRows() { return templateSize.Y(); }
+trkCisstWSSD::IndexType trkCisstWSSD::getTemplateNumCols() { return templateSize.X(); }
 //Get template center location
-unsigned int trkCisstWSSD::getTemplateCenterRow() { return static_cast<unsigned int>(templateCenter.Y()+0.5); }
-unsigned int trkCisstWSSD::getTemplateCenterCol() { return static_cast<unsigned int>(templateCenter.X()+0.5); }
+trkCisstWSSD::IndexType trkCisstWSSD::getTemplateCenterRow() { return static_cast<IndexType>(templateCenter.Y()+0.5); }
+trkCisstWSSD::IndexType trkCisstWSSD::getTemplateCenterCol() { return static_cast<IndexType>(templateCenter.X()+0.5); }
 //Get the current image size
-unsigned int trkCisstWSSD::getCurrentimageNumRows() { return imageSize.Y(); }
-unsigned int trkCisstWSSD::getCurrentimageNumCols() { return imageSize.X(); }
+trkCisstWSSD::IndexType trkCisstWSSD::getCurrentimageNumRows() { return imageSize.Y(); }
+trkCisstWSSD::IndexType trkCisstWSSD::getCurrentimageNumCols() { return imageSize.X(); }
 //Get the current (tracked) location
 double trkCisstWSSD::getOutputPosX() {return outputPosX;}
 double trkCisstWSSD::getOutputPosY() {return outputPosY;}
@@ -315,7 +315,7 @@ void trkCisstWSSD::pushTemplate(InterfaceImType *src, IndexType src_rows, IndexT
 	}
 	MatrixType * temp  = new MatrixType(templateSize.Y(), templateSize.X(), VCT_COL_MAJOR);
 	//Copy in the image data
-	copyImage(src, src_rows, src_cols, *temp, r - static_cast<unsigned int>(templateCenter.Y()), c - static_cast<unsigned int>(templateCenter.X()));
+	copyImage(src, src_rows, src_cols, *temp, r - static_cast<IndexType>(templateCenter.Y()), c - static_cast<IndexType>(templateCenter.X()));
 	//Add the template to the list
 	allTemplates.push_back(temp);
 }
@@ -352,7 +352,7 @@ void trkCisstWSSD::popTemplate() {
 }
 //Get the number of templates loaded
 //Explicit unsigned int required, can't use the typedef in MS.Net
-unsigned int trkCisstWSSD::getNumberOfTemplates() {
+trkCisstWSSD::IndexType trkCisstWSSD::getNumberOfTemplates() {
 	return allTemplates.size();
 }
 void trkCisstWSSD::pushSelectedTemplate(IndexType index) {

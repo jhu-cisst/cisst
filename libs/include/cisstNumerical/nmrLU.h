@@ -90,7 +90,7 @@ public:
       vctDynamicMatrix and vctDynamicVector (unsigned int).  To call
       the Fortran based routines, these values must be cast to
       #F_INTEGER. */
-    typedef unsigned int size_type;
+    typedef vct::size_type size_type;
 
     typedef vctFixedSizeVector<size_type, 2> nsize_type;
 
@@ -272,9 +272,9 @@ public:
                         vctDynamicMatrixBase<_matrixOwnerTypeU, double> & U)
         throw(std::runtime_error)
     {
-        const unsigned int rows = A.rows();
-        const unsigned int cols = A.cols();
-        unsigned int rowIndex, colIndex;
+        const size_type rows = A.rows();
+        const size_type cols = A.cols();
+        size_type rowIndex, colIndex;
         L.SetAll(0.0);
         L.Diagonal().SetAll(1.0);
         U.SetAll(0.0);
@@ -467,12 +467,12 @@ public:
   to overlay a fixed size container).
  */
 #ifndef SWIG
-template <unsigned int _rows, unsigned int _cols>
+template <vct::size_type _rows, vct::size_type _cols>
 class nmrLUFixedSizeData
 {
 public:
 #ifndef DOXYGEN
-    typedef unsigned int size_type;
+    typedef vct::size_type size_type;
     enum {MIN_MN = (_rows < _cols) ? _rows : _cols};
 #endif // DOXYGEN
     /*! Type of the input matrix A (size computed from the data
@@ -572,7 +572,7 @@ public:
                         MatrixTypeU & U)
         throw(std::runtime_error)
     {
-        unsigned int rowIndex, colIndex;
+        vct::size_type rowIndex, colIndex;
         L.SetAll(0.0);
         L.Diagonal().SetAll(1.0);
         U.SetAll(0.0);
@@ -800,7 +800,7 @@ inline F_INTEGER nmrLU(vctDynamicMatrixBase<_matrixOwnerTypeA, double> & A,
         nmrLUTest::TestFixedSizeUserOutputColumnMajorMLeqN
         nmrLUTest::TestFixedSizeUserOutputColumnMajorMGeqN
  */
-template <unsigned int _rows, unsigned int _cols, unsigned int _minmn>
+template <vct::size_type _rows, vct::size_type _cols, vct::size_type _minmn>
 inline F_INTEGER nmrLU(vctFixedSizeMatrix<double, _rows, _cols, VCT_COL_MAJOR> & A, 
                        vctFixedSizeVector<F_INTEGER, _minmn> & pivotIndices)
 {
@@ -842,7 +842,7 @@ inline F_INTEGER nmrLU(vctFixedSizeMatrix<double, _rows, _cols, VCT_COL_MAJOR> &
         nmrLUTest::TestFixedSizeUserOutputColumnMajorMLeqN
         nmrLUTest::TestFixedSizeUserOutputColumnMajorMGeqN
  */
-template <unsigned int _rows, unsigned int _cols>
+template <vct::size_type _rows, vct::size_type _cols>
 inline F_INTEGER nmrLU(vctFixedSizeMatrix<double, _rows, _cols, VCT_COL_MAJOR> & A,
                        nmrLUFixedSizeData<_rows, _cols> & data)
 {

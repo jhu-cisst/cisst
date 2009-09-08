@@ -28,6 +28,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnTypeTraits.h>
 #include <cisstCommon/cmnPortability.h>
 
+#include <cisstVector/vctContainerTraits.h>
+
 #include <iostream>
 #include <algorithm>
 #include <stdexcept>

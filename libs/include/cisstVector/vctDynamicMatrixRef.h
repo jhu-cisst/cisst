@@ -76,7 +76,7 @@ http://www.cisst.org/cisst/license.txt.
   \param _elementType Type of elements referenced.  Also defined as
   <code>value_type</code>.
 */
-template<class _elementType>
+template <class _elementType>
 class vctDynamicMatrixRef: public vctDynamicMatrixBase<vctDynamicMatrixRefOwner<_elementType>, _elementType>
 {
 public:
@@ -156,7 +156,7 @@ public:
       the input matrix.  For a more advanced access, customize the parameters 
       yourself (see the other ctors).
     */
-    template<unsigned int __rows, unsigned int __cols, int __rowStride, int __colStride, typename __dataPtrType>
+    template <size_type __rows, size_type __cols, stride_type __rowStride, stride_type __colStride, typename __dataPtrType>
     inline vctDynamicMatrixRef(vctFixedSizeMatrixBase<__rows, __cols, __rowStride, __colStride, _elementType, __dataPtrType> & otherMatrix)
     {
         SetRef(otherMatrix);
@@ -172,7 +172,7 @@ public:
       the input matrix.  For a more advanced access, customize the parameters 
       yourself (see the other ctors).
     */
-    template<unsigned int __rows, unsigned int __cols, int __rowStride, int __colStride, typename __dataPtrType>
+    template <size_type __rows, size_type __cols, stride_type __rowStride, stride_type __colStride, typename __dataPtrType>
     inline vctDynamicMatrixRef(vctFixedSizeMatrixBase<__rows, __cols, __rowStride, __colStride, _elementType, __dataPtrType> & otherMatrix,
                                size_type startRow, size_type startCol, size_type rows, size_type cols)
     {
@@ -184,7 +184,7 @@ public:
       the input matrix.  For a more advanced access, customize the parameters 
       yourself (see the other ctors).
     */
-    template<class __ownerType>
+    template <class __ownerType>
     inline vctDynamicMatrixRef(vctDynamicMatrixBase<__ownerType, _elementType> & otherMatrix)
     {
         SetRef(otherMatrix);
@@ -201,14 +201,14 @@ public:
       yourself (see the other ctors).
     */
     //@
-    template<class __ownerType>
+    template <class __ownerType>
     inline vctDynamicMatrixRef(vctDynamicMatrixBase<__ownerType, _elementType> & otherMatrix,
                                size_type startRow, size_type startCol, size_type rows, size_type cols)
     {
         SetRef(otherMatrix, startRow, startCol, rows, cols);
     }
 
-    template<class __ownerType>
+    template <class __ownerType>
     inline vctDynamicMatrixRef(vctDynamicMatrixBase<__ownerType, _elementType> & otherMatrix,
                                const nsize_type & start, const nsize_type & matrixSize)
     {
@@ -260,7 +260,7 @@ public:
     /*! Set a dynamic reference to a fixed-size matrix.  The reference
       will have identical dimensions and strides as the input matrix.
     */
-    template<unsigned int __rows, unsigned int __cols, int __rowStride, int __colStride, typename __dataPtrType>
+    template <size_type __rows, size_type __cols, stride_type __rowStride, stride_type __colStride, typename __dataPtrType>
     inline void SetRef(vctFixedSizeMatrixBase<__rows, __cols, __rowStride, __colStride, _elementType, __dataPtrType> & otherMatrix)
     {
         SetRef(otherMatrix.rows(), otherMatrix.cols(), otherMatrix.row_stride(), otherMatrix.col_stride(),
@@ -279,7 +279,7 @@ public:
       \note This method verifies that the size of this matrix does not exceed the
       size of the input matrix (otherwise cmnThrow is used to throw std::out_of_range).
     */
-    template<unsigned int __rows, unsigned int __cols, int __rowStride, int __colStride, typename __dataPtrType>
+    template <size_type __rows, size_type __cols, stride_type __rowStride, stride_type __colStride, typename __dataPtrType>
     inline void SetRef(vctFixedSizeMatrixBase<__rows, __cols, __rowStride, __colStride, _elementType, __dataPtrType> & otherMatrix,
                        size_type startRow, size_type startCol, size_type rows, size_type cols)
     {
@@ -292,7 +292,7 @@ public:
     /*! Set a dynamic reference to a dynamic matrix.  The reference
       will have identical dimensions and strides as the input matrix.
     */
-    template<class __ownerType>
+    template <class __ownerType>
     inline void SetRef(vctDynamicMatrixBase<__ownerType, _elementType> & otherMatrix)
     {
         SetRef(otherMatrix.rows(), otherMatrix.cols(), otherMatrix.row_stride(), otherMatrix.col_stride(),
@@ -312,7 +312,7 @@ public:
       size of the input matrix (otherwise cmnThrow is used to throw std::out_of_range).
     */
     //@{
-    template<class __ownerType>
+    template <class __ownerType>
     inline void SetRef(vctDynamicMatrixBase<__ownerType, _elementType> & otherMatrix,
                        size_type startRow, size_type startCol, size_type rows, size_type cols)
     {
@@ -323,7 +323,7 @@ public:
                otherMatrix.Pointer(startRow, startCol));
     }
 
-    template<class __ownerType>
+    template <class __ownerType>
     inline void SetRef(vctDynamicMatrixBase<__ownerType, _elementType> & otherMatrix,
                        const nsize_type & start, const nsize_type & matrixSize)
     {
@@ -338,16 +338,16 @@ public:
       \param other The matrix to be copied.
     */
     //@{
-	inline ThisType & operator=(const ThisType & other) {
+	inline ThisType & operator = (const ThisType & other) {
 		return reinterpret_cast<ThisType &>(this->Assign(other));
 	}
 
-	inline ThisType & operator=(const vctDynamicConstMatrixRef<_elementType> & other) {
+	inline ThisType & operator = (const vctDynamicConstMatrixRef<_elementType> & other) {
 		return reinterpret_cast<ThisType &>(this->Assign(other));
 	}
 
-    template<class __matrixOwnerType, typename __elementType>
-	inline ThisType & operator=(const vctDynamicConstMatrixBase<__matrixOwnerType, __elementType> & other) {
+    template <class __matrixOwnerType, typename __elementType>
+	inline ThisType & operator = (const vctDynamicConstMatrixBase<__matrixOwnerType, __elementType> & other) {
 		return reinterpret_cast<ThisType &>(this->Assign(other));
 	}
     //@}
@@ -390,7 +390,7 @@ public:
   since these need the const-matrix base.
 */
 #ifndef DOXYGEN
-template<class _resultVectorOwnerType, class _matrixOwnerType, class _vectorOwnerType, class _elementType>
+template <class _resultVectorOwnerType, class _matrixOwnerType, class _vectorOwnerType, class _elementType>
 inline
 void vctMultiplyMatrixVector(vctDynamicVectorBase<_resultVectorOwnerType, _elementType> & result,
                              const vctDynamicConstMatrixBase<_matrixOwnerType, _elementType> & matrix,
@@ -405,7 +405,7 @@ void vctMultiplyMatrixVector(vctDynamicVectorBase<_resultVectorOwnerType, _eleme
 }
 
 
-template<class _resultVectorOwnerType, class _vectorOwnerType, class _matrixOwnerType, class _elementType>
+template <class _resultVectorOwnerType, class _vectorOwnerType, class _matrixOwnerType, class _elementType>
 inline
 void vctMultiplyVectorMatrix(vctDynamicVectorBase<_resultVectorOwnerType, _elementType> & result,
                              const vctDynamicConstVectorBase<_vectorOwnerType, _elementType> & vector,

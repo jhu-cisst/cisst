@@ -65,8 +65,8 @@ http://www.cisst.org/cisst/license.txt.
 
   // the matrixRows and matrixCols variables can be set to any value at
   // any time before creating the matrix.
-  unsigned int matrixRows = 12;
-  unsigned int matrixCols = 9;
+  size_t matrixRows = 12;
+  size_t matrixCols = 9;
   
   // constructor allocation
   vctDynamicMatrix<ElementType> m1(matrixRows, matrixCols);
@@ -136,7 +136,7 @@ http://www.cisst.org/cisst/license.txt.
 
   \sa vctDynamicMatrixBase vctDynamicConstMatrixBase
 */
-template<class _elementType>
+template <class _elementType>
 class vctDynamicMatrix : public vctDynamicMatrixBase<vctDynamicMatrixOwner<_elementType>, _elementType>
 {
 
@@ -207,7 +207,7 @@ public:
     /*! Copy constructor: Allocate memory and copy all the elements
       from the other matrix. The storage order can be either
       #VCT_ROW_MAJOR or #VCT_COL_MAJOR.*/
-    template<class __matrixOwnerType, typename __otherMatrixElementType>
+    template <class __matrixOwnerType, typename __otherMatrixElementType>
     vctDynamicMatrix(const vctDynamicConstMatrixBase<__matrixOwnerType, __otherMatrixElementType> & otherMatrix, bool storageOrder) {
         SetSize(otherMatrix.rows(), otherMatrix.cols(), storageOrder);
         this->Assign(otherMatrix);
@@ -218,7 +218,7 @@ public:
       from the other matrix. The storage order of the copied matrix is
       defined by the source matrix.
     */
-    template<class __matrixOwnerType>
+    template <class __matrixOwnerType>
     vctDynamicMatrix(const vctDynamicConstMatrixBase<__matrixOwnerType, value_type> & otherMatrix) {
         SetSize(otherMatrix.rows(), otherMatrix.cols(), otherMatrix.StorageOrder());
         this->Assign(otherMatrix);
@@ -230,7 +230,7 @@ public:
       defined by the source matrix.  This constructor can also be used
       for type conversions.
     */
-    template<class __matrixOwnerType, typename __otherMatrixElementType>
+    template <class __matrixOwnerType, typename __otherMatrixElementType>
     explicit vctDynamicMatrix(const vctDynamicConstMatrixBase<__matrixOwnerType, __otherMatrixElementType> & otherMatrix) {
         SetSize(otherMatrix.rows(), otherMatrix.cols(), otherMatrix.StorageOrder());
         this->Assign(otherMatrix);
@@ -245,7 +245,7 @@ public:
       \todo This assumes a row major storage.  Needs more work.
     */
     template <class __matrixOwnerType, typename __elementType>
-    ThisType & operator=(const vctDynamicConstMatrixBase<__matrixOwnerType, __elementType> & otherMatrix) {
+    ThisType & operator = (const vctDynamicConstMatrixBase<__matrixOwnerType, __elementType> & otherMatrix) {
         SetSize(otherMatrix.rows(), otherMatrix.cols());
         this->Assign(otherMatrix);
 		return *this;
@@ -257,7 +257,7 @@ public:
       allocates new memory the size of the input matrix.  Then the
       elements of the input matrix are copied into this matrix.
     */
-    ThisType & operator=(const ThisType& otherMatrix) {
+    ThisType & operator = (const ThisType& otherMatrix) {
         SetSize(otherMatrix.rows(), otherMatrix.cols(), otherMatrix.StorageOrder());
         this->Assign(otherMatrix);
 		return *this;
@@ -272,7 +272,7 @@ public:
 
       \todo This operator needs some revisions.
     */
-    ThisType & operator=(const vctReturnDynamicMatrix<value_type> & otherMatrix);
+    ThisType & operator = (const vctReturnDynamicMatrix<value_type> & otherMatrix);
 
     /*! Assignement of a scalar to all elements.  See also SetAll. */
     inline ThisType & operator = (const value_type & value) {
@@ -343,8 +343,8 @@ public:
         // get and set size
         size_type myRows;
         size_type myCols;
-        cmnDeSerializeRaw(inputStream, myRows);
-        cmnDeSerializeRaw(inputStream, myCols);
+        cmnDeSerializeSizeRaw(inputStream, myRows);
+        cmnDeSerializeSizeRaw(inputStream, myCols);
         this->SetSize(myRows, myCols);
         
         // get data
@@ -374,18 +374,20 @@ public:
   deallocation.  Never use it on an object that is going to remain
   in scope after constructing the vctReturnDynamicMatrix.
 */
-template<class _elementType>
+template <class _elementType>
 class vctReturnDynamicMatrix : public vctDynamicMatrix<_elementType> {
 public:
     /*! Base type of vctReturnDynamicMatrix. */
     typedef vctDynamicMatrix<_elementType> BaseType;
 
+    VCT_CONTAINER_TRAITS_TYPEDEFS(_elementType);
+
     explicit vctReturnDynamicMatrix(const BaseType & other)
     {
         BaseType & nonConstOther = const_cast<BaseType &>(other);
         // if we don't save it in a variable, it will be destroyed in the Release operation
-        const unsigned int rows = other.rows();
-        const unsigned int cols = other.cols();
+        const size_type rows = other.rows();
+        const size_type cols = other.cols();
         const bool storageOrder = other.StorageOrder();
         this->Matrix.Own(rows, cols, storageOrder, nonConstOther.Matrix.Release());
     }
@@ -393,27 +395,27 @@ public:
 
 
 // implementation of the special copy constuctor of vctDynamicMatrix
-template<class _elementType>
+template <class _elementType>
 vctDynamicMatrix<_elementType>::vctDynamicMatrix(const vctReturnDynamicMatrix<_elementType> & other) {
     vctReturnDynamicMatrix<_elementType> & nonConstOther =
         const_cast< vctReturnDynamicMatrix<_elementType> & >(other);
     // if we don't save it in a variable, it will be destroyed in the Release operation
-    const unsigned int rows = other.rows();
-    const unsigned int cols = other.cols();
+    const size_type rows = other.rows();
+    const size_type cols = other.cols();
     const bool storageOrder = other.StorageOrder();
     this->Matrix.Own(rows, cols, storageOrder, nonConstOther.Matrix.Release());
 }
 
 
 // implementation of the special assignment operator from vctReturnDynamicMatrix to vctDynamicMatrix
-template<class _elementType>
+template <class _elementType>
 vctDynamicMatrix<_elementType> &
-vctDynamicMatrix<_elementType>::operator =(const vctReturnDynamicMatrix<_elementType> & other) {
+vctDynamicMatrix<_elementType>::operator = (const vctReturnDynamicMatrix<_elementType> & other) {
     vctReturnDynamicMatrix<_elementType> & nonConstOther =
         const_cast< vctReturnDynamicMatrix<_elementType> & >(other);
     // if we don't save it in a variable, it will be destroyed in the Release operation
-    const unsigned int rows = other.rows();
-    const unsigned int cols = other.cols();
+    const size_type rows = other.rows();
+    const size_type cols = other.cols();
     const bool storageOrder = other.StorageOrder();
     this->Matrix.Disown();
     this->Matrix.Own(rows, cols, storageOrder, nonConstOther.Matrix.Release());
@@ -428,7 +430,7 @@ vctDynamicMatrix<_elementType>::operator =(const vctReturnDynamicMatrix<_element
   \param inputMatrix2 The second operand of the binary operation.
   \return The matrix result of \f$op(matrix1, matrix2)\f$.
 */
-template<class _matrixOwnerType1, class _matrixOwnerType2, class _elementType>
+template <class _matrixOwnerType1, class _matrixOwnerType2, class _elementType>
 vctReturnDynamicMatrix<_elementType>
 operator + (const vctDynamicConstMatrixBase<_matrixOwnerType1, _elementType> & inputMatrix1,
             const vctDynamicConstMatrixBase<_matrixOwnerType2, _elementType> & inputMatrix2) {
@@ -439,7 +441,7 @@ operator + (const vctDynamicConstMatrixBase<_matrixOwnerType1, _elementType> & i
 }
 
 /* documented above */
-template<class _matrixOwnerType1, class _matrixOwnerType2, class _elementType>
+template <class _matrixOwnerType1, class _matrixOwnerType2, class _elementType>
 vctReturnDynamicMatrix<_elementType>
 operator - (const vctDynamicConstMatrixBase<_matrixOwnerType1, _elementType> & inputMatrix1,
             const vctDynamicConstMatrixBase<_matrixOwnerType2, _elementType> & inputMatrix2) {
@@ -460,7 +462,7 @@ operator - (const vctDynamicConstMatrixBase<_matrixOwnerType1, _elementType> & i
   \param inputScalar The second operand of the binary operation.
   \return The matrix result of \f$op(matrix, scalar)\f$.
 */
-template<class _matrixOwnerType, class _elementType>
+template <class _matrixOwnerType, class _elementType>
 vctReturnDynamicMatrix<_elementType>
 operator + (const vctDynamicConstMatrixBase<_matrixOwnerType, _elementType> & inputMatrix,
             const _elementType & inputScalar) {
@@ -471,7 +473,7 @@ operator + (const vctDynamicConstMatrixBase<_matrixOwnerType, _elementType> & in
 }
 
 /* documented above */
-template<class _matrixOwnerType, class _elementType>
+template <class _matrixOwnerType, class _elementType>
 vctReturnDynamicMatrix<_elementType>
 operator - (const vctDynamicConstMatrixBase<_matrixOwnerType, _elementType> & inputMatrix,
             const _elementType & inputScalar) {
@@ -482,7 +484,7 @@ operator - (const vctDynamicConstMatrixBase<_matrixOwnerType, _elementType> & in
 }
 
 /* documented above */
-template<class _matrixOwnerType, class _elementType>
+template <class _matrixOwnerType, class _elementType>
 vctReturnDynamicMatrix<_elementType>
 operator * (const vctDynamicConstMatrixBase<_matrixOwnerType, _elementType> & inputMatrix,
             const _elementType & inputScalar) {
@@ -493,7 +495,7 @@ operator * (const vctDynamicConstMatrixBase<_matrixOwnerType, _elementType> & in
 }
 
 /* documented above */
-template<class _matrixOwnerType, class _elementType>
+template <class _matrixOwnerType, class _elementType>
 vctReturnDynamicMatrix<_elementType>
 operator / (const vctDynamicConstMatrixBase<_matrixOwnerType, _elementType> & inputMatrix,
             const _elementType & inputScalar) {
@@ -514,7 +516,7 @@ operator / (const vctDynamicConstMatrixBase<_matrixOwnerType, _elementType> & in
   \param inputMatrix The second operand of the binary operation.
   \return The matrix result of \f$op(scalar, matrix)\f$.
 */
-template<class _matrixOwnerType, class _elementType>
+template <class _matrixOwnerType, class _elementType>
 vctReturnDynamicMatrix<_elementType>
 operator + (const _elementType & inputScalar,
             const vctDynamicConstMatrixBase<_matrixOwnerType, _elementType> & inputMatrix) {
@@ -525,7 +527,7 @@ operator + (const _elementType & inputScalar,
 }
 
 /* documented above */
-template<class _matrixOwnerType, class _elementType>
+template <class _matrixOwnerType, class _elementType>
 vctReturnDynamicMatrix<_elementType>
 operator - (const _elementType & inputScalar,
             const vctDynamicConstMatrixBase<_matrixOwnerType, _elementType> & inputMatrix) {
@@ -536,7 +538,7 @@ operator - (const _elementType & inputScalar,
 }
 
 /* documented above */
-template<class _matrixOwnerType, class _elementType>
+template <class _matrixOwnerType, class _elementType>
 vctReturnDynamicMatrix<_elementType>
 operator * (const _elementType & inputScalar,
             const vctDynamicConstMatrixBase<_matrixOwnerType, _elementType> & inputMatrix) {
@@ -547,7 +549,7 @@ operator * (const _elementType & inputScalar,
 }
 
 /* documented above */
-template<class _matrixOwnerType, class _elementType>
+template <class _matrixOwnerType, class _elementType>
 vctReturnDynamicMatrix<_elementType>
 operator / (const _elementType & inputScalar,
             const vctDynamicConstMatrixBase<_matrixOwnerType, _elementType> & inputMatrix) {
@@ -565,7 +567,7 @@ operator / (const _elementType & inputScalar,
   \param inputMatrix The operand of the unary operation
   \return The matrix result of \f$op(matrix)\f$.
 */
-template<class _matrixOwnerType, class _elementType>
+template <class _matrixOwnerType, class _elementType>
 vctReturnDynamicMatrix<_elementType>
 operator - (const vctDynamicConstMatrixBase<_matrixOwnerType, _elementType> & inputMatrix) {
     typedef _elementType value_type;
@@ -578,7 +580,7 @@ operator - (const vctDynamicConstMatrixBase<_matrixOwnerType, _elementType> & in
 
 
 #ifndef DOXYGEN
-template<class _matrixOwnerType1, class _matrixOwnerType2, class _elementType>
+template <class _matrixOwnerType1, class _matrixOwnerType2, class _elementType>
 vctReturnDynamicMatrix<_elementType>
 operator * (const vctDynamicConstMatrixBase<_matrixOwnerType1, _elementType> & inputMatrix1,
             const vctDynamicConstMatrixBase<_matrixOwnerType2, _elementType> & inputMatrix2) {
@@ -589,7 +591,7 @@ operator * (const vctDynamicConstMatrixBase<_matrixOwnerType1, _elementType> & i
 }
 
 
-template<class _matrixOwnerType, class _vectorOwnerType, class _elementType>
+template <class _matrixOwnerType, class _vectorOwnerType, class _elementType>
 vctReturnDynamicVector<_elementType>
 operator * (const vctDynamicConstMatrixBase<_matrixOwnerType, _elementType> & inputMatrix,
             const vctDynamicConstVectorBase<_vectorOwnerType, _elementType> & inputVector) {
@@ -600,7 +602,7 @@ operator * (const vctDynamicConstMatrixBase<_matrixOwnerType, _elementType> & in
 }
 
 
-template<class _vectorOwnerType, class _matrixOwnerType, class _elementType>
+template <class _vectorOwnerType, class _matrixOwnerType, class _elementType>
 vctReturnDynamicVector<_elementType>
 operator * (const vctDynamicConstVectorBase<_vectorOwnerType, _elementType> & inputVector,
             const vctDynamicConstMatrixBase<_matrixOwnerType, _elementType> & inputMatrix) {
@@ -676,8 +678,8 @@ vctDynamicConstMatrixBase<_matrixOwnerType, _elementType>::Eye(size_type size) {
 }
 
 /* Documented in class vctDynamicConstMatrixBase */
-template<class _matrixOwnerType, class __matrixOwnerType, class _elementType,
-         class _elementOperationType>
+template <class _matrixOwnerType, class __matrixOwnerType, class _elementType,
+          class _elementOperationType>
 inline vctReturnDynamicMatrix<bool>
 vctDynamicMatrixElementwiseCompareMatrix(const vctDynamicConstMatrixBase<_matrixOwnerType, _elementType> & matrix1,
                                          const vctDynamicConstMatrixBase<_matrixOwnerType, _elementType> & matrix2) {
@@ -688,8 +690,8 @@ vctDynamicMatrixElementwiseCompareMatrix(const vctDynamicConstMatrixBase<_matrix
 }
 
 /* documented in class vctDynamicConstMatrixBase */
-template<class _matrixOwnerType, class _elementType,
-         class _elementOperationType>
+template <class _matrixOwnerType, class _elementType,
+          class _elementOperationType>
 inline vctReturnDynamicMatrix<bool>
 vctDynamicMatrixElementwiseCompareScalar(const vctDynamicConstMatrixBase<_matrixOwnerType, _elementType> & matrix,
                                          const _elementType & scalar) {

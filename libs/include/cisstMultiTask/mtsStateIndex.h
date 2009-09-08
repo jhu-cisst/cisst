@@ -54,7 +54,7 @@ class CISST_EXPORT mtsStateIndex : public mtsGenericObject {
 
  public:
     /*! TimeTicks are typedef'ed as unsigned long */
-    typedef unsigned long TimeTicksType;
+    typedef unsigned long long int TimeTicksType;
     
  private:
 	/*! The index into the set of circular buffers corresponding to

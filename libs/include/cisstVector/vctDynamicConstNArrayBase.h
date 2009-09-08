@@ -39,12 +39,12 @@ http://www.cisst.org/cisst/license.txt.
 
 
 template <class _nArrayOwnerType, class __nArrayOwnerType, class _elementType,
-          class _elementOperationType, unsigned int _dimension>
+          class _elementOperationType, vct::size_type _dimension>
 inline vctReturnDynamicNArray<bool, _dimension>
 vctDynamicNArrayElementwiseCompareNArray(const vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dimension> & nArray1,
                                          const vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dimension> & nArray2);
 
-template <class _nArrayOwnerType, class _elementType, class _elementOperationType, unsigned int _dimension>
+template <class _nArrayOwnerType, class _elementType, class _elementOperationType, vct::size_type _dimension>
 inline vctReturnDynamicNArray<bool, _dimension>
 vctDynamicNArrayElementwiseCompareScalar(const vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dimension> & nArray,
                                          const _elementType & scalar);
@@ -54,27 +54,27 @@ vctDynamicNArrayElementwiseCompareScalar(const vctDynamicConstNArrayBase<_nArray
    dimension is 1 return an element, otherwise return an NArray of
    lesser dimension.  The class below is used to specify which
    function is used. */
-template <class _nArrayOwnerType, class _elementType, unsigned int _dimension>
+template <class _nArrayOwnerType, class _elementType, vct::size_type _dimension>
 inline vctDynamicNArrayRef<_elementType, _dimension - 1>
 vctDynamicNArrayNArraySlice(vctDynamicNArrayBase<_nArrayOwnerType, _elementType, _dimension> & input,
-                            unsigned int dimension,
-                            unsigned int index);
+                            vct::size_type dimension,
+                            vct::index_type index);
 
 template <class _nArrayOwnerType, class _elementType>
 inline _elementType &
 vctDynamicNArrayElementSlice(vctDynamicNArrayBase<_nArrayOwnerType, _elementType, 1> & input,
-                             unsigned int index);
+                             vct::index_type index);
 
-template <class _nArrayOwnerType, class _elementType, unsigned int _dimension>
+template <class _nArrayOwnerType, class _elementType, vct::size_type _dimension>
 inline vctDynamicConstNArrayRef<_elementType, _dimension - 1>
 vctDynamicNArrayConstNArraySlice(const vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dimension> & input,
-                                 unsigned int dimension,
-                                 unsigned int index);
+                                 vct::size_type dimension,
+                                 vct::index_type index);
 
 template <class _nArrayOwnerType, class _elementType>
 inline const _elementType &
 vctDynamicNArrayConstElementSlice(const vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, 1> & input,
-                                  unsigned int index);
+                                  vct::index_type index);
 
 
 /* Class used to specify the type of a slice based on the dimension.
@@ -82,7 +82,7 @@ vctDynamicNArrayConstElementSlice(const vctDynamicConstNArrayBase<_nArrayOwnerTy
    function to call.  Code couldn't be inline since it requires a full
    definition of vctDynamicNArrayRef and vctDynamicConstNArrayRef.
    This can't be solved just with forward declarations. */
-template <unsigned int _dimension>
+template <vct::size_type _dimension>
 class vctDynamicNArrayTypes
 {
 public:
@@ -95,13 +95,13 @@ public:
 
         template <class _nArrayOwnerType> 
         static ConstSliceRefType ConstSliceOf(const vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dimension> & input,
-                                              unsigned int dimension, unsigned int index) {
+                                              vct::size_type dimension, vct::index_type index) {
             return vctDynamicNArrayConstNArraySlice(input, dimension, index);
         }
 
         template <class _nArrayOwnerType> 
         static SliceRefType SliceOf(vctDynamicNArrayBase<_nArrayOwnerType, _elementType, _dimension> & input,
-                                    unsigned int dimension, unsigned int index) {
+                                    vct::size_type dimension, vct::index_type index) {
             return vctDynamicNArrayNArraySlice(input, dimension, index);
         }
     };
@@ -122,13 +122,13 @@ public:
 
         template <class _nArrayOwnerType> 
         static ConstSliceRefType ConstSliceOf(const vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, 1> & input,
-                                              unsigned int CMN_UNUSED(dimension), unsigned int index) {
+                                              vct::size_type CMN_UNUSED(dimension), vct::index_type index) {
             return vctDynamicNArrayConstElementSlice(input, index);
         }
 
         template <class _nArrayOwnerType> 
         static SliceRefType SliceOf(vctDynamicNArrayBase<_nArrayOwnerType, _elementType, 1> & input,
-                                    unsigned int CMN_UNUSED(dimension), unsigned int index) {
+                                    vct::size_type CMN_UNUSED(dimension), vct::index_type index) {
             return vctDynamicNArrayElementSlice(input, index);
         }
     };
@@ -152,7 +152,7 @@ public:
   \param _nArrayOwnerType the type of nArray owner
   \param _elementType the type of elements of the nArray
  */
-template<class _nArrayOwnerType, typename _elementType, unsigned int _dimension>
+template <class _nArrayOwnerType, typename _elementType, vct::size_type _dimension>
 class vctDynamicConstNArrayBase
 {
 public:
@@ -714,7 +714,7 @@ public:
 
     /*! Test if the method FastCopyOf can be used instead of Assign.
       See FastCopyOf for more details. */
-    template<class __nArrayOwnerType>
+    template <class __nArrayOwnerType>
     inline bool FastCopyCompatible(const vctDynamicConstNArrayBase<__nArrayOwnerType, value_type, DIMENSION> & source) const
     {
         return vctFastCopy::NArrayCopyCompatible(*this, source);
@@ -841,7 +841,7 @@ public:
 
       \return An nArray of booleans.
     */
-    template<class __nArrayOwnerType>
+    template <class __nArrayOwnerType>
     inline BoolNArrayReturnType
     ElementwiseEqual(const vctDynamicConstNArrayBase<__nArrayOwnerType, value_type, DIMENSION> & otherNArray) const
     {
@@ -850,7 +850,7 @@ public:
     }
 
     /* documented above */
-    template<class __nArrayOwnerType>
+    template <class __nArrayOwnerType>
     inline BoolNArrayReturnType
     ElementwiseNotEqual(const vctDynamicConstNArrayBase<__nArrayOwnerType, value_type, DIMENSION> & otherNArray) const
     {
@@ -859,7 +859,7 @@ public:
     }
 
     /* documented above */
-    template<class __nArrayOwnerType>
+    template <class __nArrayOwnerType>
     inline BoolNArrayReturnType
     ElementwiseLesser(const vctDynamicConstNArrayBase<__nArrayOwnerType, value_type, DIMENSION> & otherNArray) const
     {
@@ -868,7 +868,7 @@ public:
     }
 
     /* documented above */
-    template<class __nArrayOwnerType>
+    template <class __nArrayOwnerType>
     inline BoolNArrayReturnType
     ElementwiseLesserOrEqual(const vctDynamicConstNArrayBase<__nArrayOwnerType, value_type, DIMENSION> & otherNArray) const
     {
@@ -877,7 +877,7 @@ public:
     }
 
     /* documented above */
-    template<class __nArrayOwnerType>
+    template <class __nArrayOwnerType>
     inline BoolNArrayReturnType
     ElementwiseGreater(const vctDynamicConstNArrayBase<__nArrayOwnerType, value_type, DIMENSION> & otherNArray) const
     {
@@ -886,7 +886,7 @@ public:
     }
 
     /* documented above */
-    template<class __nArrayOwnerType>
+    template <class __nArrayOwnerType>
     inline BoolNArrayReturnType
     ElementwiseGreaterOrEqual(const vctDynamicConstNArrayBase<__nArrayOwnerType, value_type, DIMENSION> & otherNArray) const
     {
@@ -1047,8 +1047,8 @@ public:
     /*!  Print the nArray to a text stream */
     void ToStream(std::ostream & outputStream) const {
         // preserve the formatting flags as they were
-        const int width = outputStream.width(12);
-        const int precision = outputStream.precision(6);
+        const size_t width = outputStream.width(12);
+        const size_t precision = outputStream.precision(6);
         bool showpoint = ((outputStream.flags() & std::ios_base::showpoint) != 0);
         outputStream << std::setprecision(6) << std::showpoint;
 #if 0
@@ -1065,7 +1065,7 @@ public:
 
 #ifndef DOXYGEN
 /* documented in class.  Implementation moved here for .Net 2003 */
-template<class _nArrayOwnerType, class _elementType, unsigned int _dimension>
+template <class _nArrayOwnerType, class _elementType, vct::size_type _dimension>
 inline typename vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dimension>::BoolNArrayReturnType
 vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dimension>::ElementwiseEqual(const _elementType & scalar) const
 {
@@ -1074,7 +1074,7 @@ vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dimension>::Elementwi
 }
 
 /* documented in class.  Implementation moved here for .Net 2003 */
-template<class _nArrayOwnerType, class _elementType, unsigned int _dimension>
+template <class _nArrayOwnerType, class _elementType, vct::size_type _dimension>
 inline typename vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dimension>::BoolNArrayReturnType
 vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dimension>::ElementwiseNotEqual(const _elementType & scalar) const
 {
@@ -1083,7 +1083,7 @@ vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dimension>::Elementwi
 }
 
 /* documented in class.  Implementation moved here for .Net 2003 */
-template<class _nArrayOwnerType, class _elementType, unsigned int _dimension>
+template <class _nArrayOwnerType, class _elementType, vct::size_type _dimension>
 inline typename vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dimension>::BoolNArrayReturnType
 vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dimension>::ElementwiseLesser(const _elementType & scalar) const
 {
@@ -1092,7 +1092,7 @@ vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dimension>::Elementwi
 }
 
 /* documented in class.  Implementation moved here for .Net 2003 */
-template<class _nArrayOwnerType, class _elementType, unsigned int _dimension>
+template <class _nArrayOwnerType, class _elementType, vct::size_type _dimension>
 inline typename vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dimension>::BoolNArrayReturnType
 vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dimension>::ElementwiseLesserOrEqual(const _elementType & scalar) const
 {
@@ -1101,7 +1101,7 @@ vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dimension>::Elementwi
 }
 
 /* documented in class.  Implementation moved here for .Net 2003 */
-template<class _nArrayOwnerType, class _elementType, unsigned int _dimension>
+template <class _nArrayOwnerType, class _elementType, vct::size_type _dimension>
 inline typename vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dimension>::BoolNArrayReturnType
 vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dimension>::ElementwiseGreater(const _elementType & scalar) const
 {
@@ -1110,7 +1110,7 @@ vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dimension>::Elementwi
 }
 
 /* documented in class.  Implementation moved here for .Net 2003 */
-template<class _nArrayOwnerType, class _elementType, unsigned int _dimension>
+template <class _nArrayOwnerType, class _elementType, vct::size_type _dimension>
 inline typename vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dimension>::BoolNArrayReturnType
 vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dimension>::ElementwiseGreaterOrEqual(const _elementType & scalar) const
 {
@@ -1120,20 +1120,20 @@ vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dimension>::Elementwi
 #endif // DOXYGEN
 
 /*! Return true if all the elements of the NArray are nonzero, false otherwise */
-template<class _nArrayOwnerType, typename _elementType, unsigned int _dimension>
+template <class _nArrayOwnerType, typename _elementType, vct::size_type _dimension>
 inline bool vctAll(const vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dimension> & nArray)
 {
     return nArray.All();
 }
 
 /*! Return true if any element of the NArray is nonzero, false otherwise */
-template<class _nArrayOwnerType, typename _elementType, unsigned int _dimension>
+template <class _nArrayOwnerType, typename _elementType, vct::size_type _dimension>
 inline bool vctAny(const vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dimension> & nArray) {
     return nArray.Any();
 }
 
 /*! Stream out operator. */
-template<class _nArrayOwnerType, typename _elementType, unsigned int _dimension>
+template <class _nArrayOwnerType, typename _elementType, vct::size_type _dimension>
 std::ostream & operator << (std::ostream & output,
                             const vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dimension> & nArray) {
     nArray.ToStream(output);

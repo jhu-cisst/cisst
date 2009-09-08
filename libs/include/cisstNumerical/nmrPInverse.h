@@ -54,7 +54,7 @@ public:
       vctDynamicMatrix and vctDynamicVector (unsigned int).  To call
       the Fortran based routines, these values must be cast to
       #F_INTEGER. */
-    typedef unsigned int size_type;
+    typedef vct::size_type size_type;
 
 protected:
     /*!
@@ -496,11 +496,11 @@ public:
   nmrPInverseDataBase<vctFixedSizeMatrix<4, 3, VCT_COL_MAJOR>
   No extra workspace of allocation etc is required for fixed size.
  */
-template <unsigned int _rows, unsigned int _cols, bool _storageOrder>
+template <vct::size_type _rows, vct::size_type _cols, bool _storageOrder>
 class nmrPInverseFixedSizeData
 {
 public:
-    typedef unsigned int size_type;
+    typedef vct::size_type size_type;
 #ifndef DOXYGEN
     enum {MIN_MN = (_rows < _cols) ? _rows : _cols};
     enum {LWORK_1 = 3 * MIN_MN + (_rows > _cols) ? _rows : _cols};
@@ -782,7 +782,7 @@ public:
 template <class _matrixOwnerType>
 inline F_INTEGER nmrPInverse(vctDynamicMatrixBase<_matrixOwnerType, double> &A, nmrPInverseDynamicData &data) throw (std::runtime_error)
 {
-    typedef unsigned int size_type;
+    typedef vct::size_type size_type;
 
     typename nmrPInverseDynamicData::Friend dataFriend(data);
     F_INTEGER ret_value;
@@ -886,12 +886,12 @@ inline F_INTEGER nmrPInverse(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &A,
         nmrPInverseTest::TestFixedSizeColumnMajorMGeqN_T2
         nmrPInverseTest::TestFixedSizeRowMajorMGeqN_T2
  */
-template <unsigned int _rows, unsigned int _cols, unsigned int _work, bool _storageOrder, class _dataPtrType>
+template <vct::size_type _rows, vct::size_type _cols, vct::size_type _work, bool _storageOrder, class _dataPtrType>
 inline F_INTEGER nmrPInverse(vctFixedSizeMatrix<double, _rows, _cols, _storageOrder> & A,
                              vctFixedSizeMatrix<double, _cols, _rows, _storageOrder> & pInverse,
                              vctFixedSizeVectorBase<_work, 1, double, _dataPtrType> & workspace)
 {
-    typedef unsigned int size_type;
+    typedef vct::size_type size_type;
     const size_type lwork = nmrPInverseFixedSizeData<_rows, _cols, _storageOrder>::LWORK;
     const size_type lwork_3 = nmrPInverseFixedSizeData<_rows, _cols, _storageOrder>::LWORK_3;
     const size_type minmn = nmrPInverseFixedSizeData<_rows, _cols, _storageOrder>::MIN_MN;
@@ -959,7 +959,7 @@ inline F_INTEGER nmrPInverse(vctFixedSizeMatrix<double, _rows, _cols, _storageOr
         nmrPInverseTest::TestFixedSizeColumnMajorMGeqN_T2
         nmrPInverseTest::TestFixedSizeRowMajorMGeqN_T2
  */
-template <unsigned int _rows, unsigned int _cols, bool _storageOrder>
+template <vct::size_type _rows, vct::size_type _cols, bool _storageOrder>
 inline F_INTEGER nmrPInverse(vctFixedSizeMatrix<double, _rows, _cols, _storageOrder> &A,
                              vctFixedSizeMatrix<double, _cols, _rows, _storageOrder> &pInverse)
 {
@@ -988,7 +988,7 @@ inline F_INTEGER nmrPInverse(vctFixedSizeMatrix<double, _rows, _cols, _storageOr
         nmrPInverseTest::TestFixedSizeColumnMajorMGeqN
         nmrPInverseTest::TestFixedSizeRowMajorMGeqN
  */
-template <unsigned int _rows, unsigned int _cols, bool _storageOrder>
+template <vct::size_type _rows, vct::size_type _cols, bool _storageOrder>
 inline F_INTEGER nmrPInverse(vctFixedSizeMatrix<double, _rows, _cols, _storageOrder> &A,
                              nmrPInverseFixedSizeData<_rows, _cols, _storageOrder> &data)
 {

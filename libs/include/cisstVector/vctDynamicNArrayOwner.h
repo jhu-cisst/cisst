@@ -30,17 +30,17 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
-template<class _ownerType, bool _forward>
+template <class _ownerType, bool _forward>
 class vctVarStrideNArrayIterator;
 
-template<class _ownerType, bool _forward>
+template <class _ownerType, bool _forward>
 class vctVarStrideNArrayConstIterator;
 
 
 /*!
   This templated class owns a dynamically allocated array, but does
   not provide any other operations */
-template<class _elementType, unsigned int _dimension>
+template <class _elementType, vct::size_type _dimension>
 class vctDynamicNArrayOwner
 {
 public:
@@ -131,7 +131,7 @@ public:
     /*! Return the stride of a dimension.
       \param dimension the dimension of interest
       \return the stride of the nArray in the given dimension */
-    difference_type stride(dimension_type dimension) const
+    stride_type stride(dimension_type dimension) const
     {
         if (dimension < DIMENSION)
             return StridesMember[dimension];

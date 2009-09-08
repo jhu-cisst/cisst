@@ -37,9 +37,9 @@ http://www.cisst.org/cisst/license.txt.
 
 #ifndef DOXYGEN
 // forward declaration of auxiliary function to multiply matrix*vector
-template<unsigned int _resultSize, int _resultStride, class _resultElementType, class _resultDataPtrType,
-unsigned int _matrixCols, int _matrixRowStride, int _matrixColStride, class _matrixDataPtrType,
-int _vectorStride, class _vectorDataPtrType>
+template <vct::size_type _resultSize, vct::stride_type _resultStride, class _resultElementType, class _resultDataPtrType,
+          vct::size_type _matrixCols, vct::stride_type _matrixRowStride, vct::stride_type _matrixColStride, class _matrixDataPtrType,
+          vct::stride_type _vectorStride, class _vectorDataPtrType>
 inline void MultiplyMatrixVector(
     vctFixedSizeVectorBase<_resultSize, _resultStride, _resultElementType, _resultDataPtrType> & result,
     const vctFixedSizeConstMatrixBase<_resultSize, _matrixCols, _matrixRowStride, _matrixColStride, 
@@ -47,9 +47,9 @@ inline void MultiplyMatrixVector(
     const vctFixedSizeConstVectorBase<_matrixCols, _vectorStride, _resultElementType, _vectorDataPtrType> & vector);
 
 // forward declaration of auxiliary function to multiply vector*matrix
-template<unsigned int _resultSize, int _resultStride, class _resultElementType, class _resultDataPtrType,
-unsigned int _vectorSize, int _vectorStride, class _vectorDataPtrType,
-int _matrixRowStride, int _matrixColStride, class _matrixDataPtrType >
+template <vct::size_type _resultSize, vct::stride_type _resultStride, class _resultElementType, class _resultDataPtrType,
+          vct::size_type _vectorSize, vct::stride_type _vectorStride, class _vectorDataPtrType,
+          vct::stride_type _matrixRowStride, vct::stride_type _matrixColStride, class _matrixDataPtrType >
 inline void MultiplyVectorMatrix(
     vctFixedSizeVectorBase<_resultSize, _resultStride, _resultElementType, _resultDataPtrType> & result,
     const vctFixedSizeConstVectorBase<_vectorSize, _vectorStride, _resultElementType, _vectorDataPtrType> & vector,
@@ -57,7 +57,7 @@ inline void MultiplyVectorMatrix(
     _resultElementType, _matrixDataPtrType> & matrix);
 
 // forward declaration of Assign method from dynamic vector to fixed size
-template<unsigned int _size, int _stride, class _elementType, class _dataPtrType, class _vectorOwnerType>
+template <vct::size_type _size, vct::stride_type _stride, class _elementType, class _dataPtrType, class _vectorOwnerType>
 inline void vctFixedSizeVectorBaseAssignDynamicConstVectorBase(
     vctFixedSizeVectorBase<_size, _stride, _elementType, _dataPtrType> & fixedSizeVector,
     const vctDynamicConstVectorBase<_vectorOwnerType, _elementType> & dynamicVector);
@@ -75,7 +75,7 @@ inline void vctFixedSizeVectorBaseAssignDynamicConstVectorBase(
 
   \sa vctFixedSizeConstVectorBase
 */
-template<unsigned int _size, int _stride, class _elementType, class _dataPtrType>
+template <vct::size_type _size, vct::stride_type _stride, class _elementType, class _dataPtrType>
 class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType>
 {
  public:
@@ -273,7 +273,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
       \param other The vector to be copied.
     */
     //@{
-    template<int __stride, class __elementType, class __dataPtrType>
+    template <stride_type __stride, class __elementType, class __dataPtrType>
     inline ThisType & Assign(const vctFixedSizeConstVectorBase<_size, __stride, __elementType, __dataPtrType> & other) {
         vctFixedSizeVectorRecursiveEngines<_size>::template
             VoVi< typename vctUnaryOperations<value_type, __elementType>::Identity >::
@@ -281,7 +281,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
         return *this;
     }
 
-    template<int __stride, class __elementType, class __dataPtrType>
+    template <stride_type __stride, class __elementType, class __dataPtrType>
     inline ThisType & operator = (const vctFixedSizeConstVectorBase<_size, __stride, __elementType, __dataPtrType> & other) {
         return this->Assign(other);
     }
@@ -367,7 +367,8 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
         (*this)[4] = element4;
         va_list nextArg;
         va_start(nextArg, element4);
-        for (unsigned int i = 5; i < _size; ++i) {
+        index_type i;
+        for (i = 5; i < _size; ++i) {
             (*this)[i] = static_cast<value_type>(va_arg(nextArg, typename TypeTraits::VaArgPromotion));
         }
         va_end(nextArg);
@@ -427,7 +428,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
       \param other The vector to be copied.
     */
     //@{
-    template <int __stride, class __elementType, class __dataPtrType>
+    template <stride_type __stride, class __elementType, class __dataPtrType>
     inline ThisType & ForceAssign(const vctFixedSizeConstVectorBase<_size, __stride, __elementType, __dataPtrType> & other) {
         return this->Assign(other);
     }
@@ -481,7 +482,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
         to turn off the different safety checks for each FastCopyOf.
         \code
         bool canUseFastCopy = destination.FastCopyCompatible(source);
-        unsigned int index;
+        index_type index;
         for (index = 0; index < 1000; index++) {
             DoSomethingUseful(source);
             if (canUseFastCopy) {
@@ -498,7 +499,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
         avoid safety checks, use with extreme caution.
      */
     //@{
-    template<class __vectorOwnerType>
+    template <class __vectorOwnerType>
     inline bool FastCopyOf(const vctDynamicConstVectorBase<__vectorOwnerType, value_type> & source,
                            bool performSafetyChecks = true)
         throw(std::runtime_error)
@@ -506,7 +507,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
         return vctFastCopy::VectorCopy(*this, source, performSafetyChecks);
     }
 
-    template<class __dataPtrType>
+    template <class __dataPtrType>
     inline bool FastCopyOf(const vctFixedSizeConstVectorBase<SIZE, STRIDE, value_type, __dataPtrType> & source,
                            bool performSafetyChecks = true)
         throw(std::runtime_error)
@@ -521,7 +522,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
       of my size.  The concatenation result is stored in this vector.  The function is useful, e.g.,
       when embedding vectors from R^n into R^{n+1} or into homogeneous space.
     */
-    template<int __stride, class __elementTypeVector, class __dataPtrType, class __elementType>
+    template <stride_type __stride, class __elementTypeVector, class __dataPtrType, class __elementType>
     inline ThisType & ConcatenationOf(const vctFixedSizeConstVectorBase<SIZEMINUSONE, __stride, __elementTypeVector, __dataPtrType> & other,
                                       __elementType last) {
         // recursive copy for the first size-1 elements
@@ -721,22 +722,22 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
       return it.
     */
     //@{
-    RowConstMatrixRefType AsRowMatrix() const
+    RowConstMatrixRefType AsRowMatrix(void) const
     {
         return BaseType::AsRowMatrix();
     }
 
-    RowMatrixRefType AsRowMatrix()
+    RowMatrixRefType AsRowMatrix(void)
     {
         return RowMatrixRefType(Pointer());
     }
 
-    ColConstMatrixRefType AsColMatrix() const
+    ColConstMatrixRefType AsColMatrix(void) const
     {
         return BaseType::AsColMatrix();
     }
 
-    ColMatrixRefType AsColMatrix()
+    ColMatrixRefType AsColMatrix(void)
     {
         return ColMatrixRefType(Pointer());
     }
@@ -747,11 +748,10 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
       requirement of order or uniqueness in the indexes sequence, and no verification
       that the indexes are valid.
     */
-    template<unsigned int __inputSize, int __inputStride, class __inputDataPtrType,
-        int __indexStride, class __indexDataPtrType>
-    inline void SelectFrom(
-        const vctFixedSizeConstVectorBase<__inputSize, __inputStride, _elementType, __inputDataPtrType> & input,
-        const vctFixedSizeConstVectorBase<_size, __indexStride, unsigned int, __indexDataPtrType> & index)
+    template <size_type __inputSize, stride_type __inputStride, class __inputDataPtrType,
+              stride_type __indexStride, class __indexDataPtrType>
+    inline void SelectFrom(const vctFixedSizeConstVectorBase<__inputSize, __inputStride, _elementType, __inputDataPtrType> & input,
+                           const vctFixedSizeConstVectorBase<_size, __indexStride, index_type, __indexDataPtrType> & index)
     {
         vctFixedSizeVectorRecursiveEngines<_size>::SelectByIndex::Unfold(*this, input, index);
     }
@@ -761,10 +761,9 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
       check that the size of the vector is 3, and can only be
       performed on arguments vectors of size 3.
     */
-    template<int __stride1, class __dataPtr1Type, int __stride2, class __dataPtr2Type>
-        inline void CrossProductOf(
-            const vctFixedSizeConstVectorBase<3, __stride1, _elementType, __dataPtr1Type> & inputVector1,
-            const vctFixedSizeConstVectorBase<3, __stride2, _elementType, __dataPtr2Type> & inputVector2) 
+    template <stride_type __stride1, class __dataPtr1Type, stride_type __stride2, class __dataPtr2Type>
+    inline void CrossProductOf(const vctFixedSizeConstVectorBase<3, __stride1, _elementType, __dataPtr1Type> & inputVector1,
+                               const vctFixedSizeConstVectorBase<3, __stride2, _elementType, __dataPtr2Type> & inputVector2) 
     {
         CMN_ASSERT(SIZE == 3);
         (*this)[0] = inputVector1[1] *  inputVector2[2] - inputVector1[2] * inputVector2[1];
@@ -789,7 +788,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
       
       \return The vector "this" modified.
     */
-    template<int __stride1, class __dataPtrType1, int __stride2, class __dataPtrType2>
+    template <stride_type __stride1, class __dataPtrType1, stride_type __stride2, class __dataPtrType2>
     inline ThisType & SumOf(const vctFixedSizeConstVectorBase<_size, __stride1, value_type, __dataPtrType1> & vector1, 
                             const vctFixedSizeConstVectorBase<_size, __stride2, value_type, __dataPtrType2> & vector2) {
         vctFixedSizeVectorRecursiveEngines<_size>::template
@@ -800,7 +799,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
     
     
     /* documented above */
-    template<int __stride1, class __dataPtrType1, int __stride2, class __dataPtrType2>
+    template <stride_type __stride1, class __dataPtrType1, stride_type __stride2, class __dataPtrType2>
     inline ThisType & DifferenceOf(const vctFixedSizeConstVectorBase<_size, __stride1, value_type, __dataPtrType1> & vector1, 
                                    const vctFixedSizeConstVectorBase<_size, __stride2, value_type, __dataPtrType2> & vector2) {
         vctFixedSizeVectorRecursiveEngines<_size>::template
@@ -810,7 +809,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
     }
     
     /* documented above */
-    template<int __stride1, class __dataPtrType1, int __stride2, class __dataPtrType2>
+    template <stride_type __stride1, class __dataPtrType1, stride_type __stride2, class __dataPtrType2>
     inline ThisType & ElementwiseProductOf(const vctFixedSizeConstVectorBase<_size, __stride1, value_type, __dataPtrType1> & vector1, 
                                            const vctFixedSizeConstVectorBase<_size, __stride2, value_type, __dataPtrType2> & vector2) {
         vctFixedSizeVectorRecursiveEngines<_size>::template
@@ -820,7 +819,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
     }
     
     /* documented above */
-    template<int __stride1, class __dataPtrType1, int __stride2, class __dataPtrType2>
+    template <stride_type __stride1, class __dataPtrType1, stride_type __stride2, class __dataPtrType2>
     inline ThisType & ElementwiseRatioOf(const vctFixedSizeConstVectorBase<_size, __stride1, value_type, __dataPtrType1> & vector1, 
                                          const vctFixedSizeConstVectorBase<_size, __stride2, value_type, __dataPtrType2> & vector2) {
         vctFixedSizeVectorRecursiveEngines<_size>::template
@@ -830,7 +829,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
     }
 
     /* documented above */
-    template<int __stride1, class __dataPtrType1, int __stride2, class __dataPtrType2>
+    template <stride_type __stride1, class __dataPtrType1, stride_type __stride2, class __dataPtrType2>
     inline ThisType & ElementwiseMinOf(const vctFixedSizeConstVectorBase<_size, __stride1, value_type, __dataPtrType1> & vector1, 
                                        const vctFixedSizeConstVectorBase<_size, __stride2, value_type, __dataPtrType2> & vector2) {
         vctFixedSizeVectorRecursiveEngines<_size>::template
@@ -840,7 +839,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
     }
 
     /* documented above */
-    template<int __stride1, class __dataPtrType1, int __stride2, class __dataPtrType2>
+    template <stride_type __stride1, class __dataPtrType1, stride_type __stride2, class __dataPtrType2>
     inline ThisType & ElementwiseMaxOf(const vctFixedSizeConstVectorBase<_size, __stride1, value_type, __dataPtrType1> & vector1, 
                                        const vctFixedSizeConstVectorBase<_size, __stride2, value_type, __dataPtrType2> & vector2) {
         vctFixedSizeVectorRecursiveEngines<_size>::template
@@ -866,7 +865,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
       
       \return The vector "this" modified.
     */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline ThisType & Add(const vctFixedSizeConstVectorBase<_size, __stride, value_type, __dataPtrType> & otherVector) {
         vctFixedSizeVectorRecursiveEngines<_size>::template
             VioVi< typename vctStoreBackBinaryOperations<value_type>::Addition >::
@@ -875,7 +874,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
     }
     
     /* documented above */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline ThisType & Subtract(const vctFixedSizeConstVectorBase<_size, __stride, value_type, __dataPtrType> & otherVector) {
         vctFixedSizeVectorRecursiveEngines<_size>::template
             VioVi< typename vctStoreBackBinaryOperations<value_type>::Subtraction >::
@@ -884,7 +883,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
     }
     
     /* documented above */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline ThisType & ElementwiseMultiply(const vctFixedSizeConstVectorBase<_size, __stride, value_type, __dataPtrType> & otherVector) {
         vctFixedSizeVectorRecursiveEngines<_size>::template
             VioVi< typename vctStoreBackBinaryOperations<value_type>::Multiplication >::
@@ -893,7 +892,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
     }
     
     /* documented above */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline ThisType & ElementwiseDivide(const vctFixedSizeConstVectorBase<_size, __stride, value_type, __dataPtrType> & otherVector) {
         vctFixedSizeVectorRecursiveEngines<_size>::template
             VioVi< typename vctStoreBackBinaryOperations<value_type>::Division >::
@@ -902,7 +901,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
     }
     
     /* documented above */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline ThisType & ElementwiseMin(const vctFixedSizeConstVectorBase<_size, __stride, value_type, __dataPtrType> & otherVector) {
         vctFixedSizeVectorRecursiveEngines<_size>::template
             VioVi< typename vctStoreBackBinaryOperations<value_type>::Minimum >::
@@ -911,7 +910,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
     }
 
     /* documented above */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline ThisType & ElementwiseMax(const vctFixedSizeConstVectorBase<_size, __stride, value_type, __dataPtrType> & otherVector) {
         vctFixedSizeVectorRecursiveEngines<_size>::template
             VioVi< typename vctStoreBackBinaryOperations<value_type>::Maximum >::
@@ -920,13 +919,13 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
     }
 
     /* documented above */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline ThisType & operator += (const vctFixedSizeConstVectorBase<_size, __stride, value_type, __dataPtrType> & otherVector) {
         return this->Add(otherVector);
     }
     
     /* documented above */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline ThisType & operator -= (const vctFixedSizeConstVectorBase<_size, __stride, value_type, __dataPtrType> & otherVector) {
         return this->Subtract(otherVector);
     }
@@ -938,7 +937,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
     //@{
     /*! Swap the elements of both vectors with each other.
     */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline ThisType & SwapElementsWith(vctFixedSizeVectorBase<_size, __stride, value_type, __dataPtrType> & otherVector) {
         vctFixedSizeVectorRecursiveEngines<_size>::template
             VioVio< typename vctStoreBackBinaryOperations<value_type>::Swap >::
@@ -963,7 +962,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
       
       \return The vector "this" modified.
     */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline ThisType & SumOf(const vctFixedSizeConstVectorBase<_size, __stride, value_type, __dataPtrType> & vector, 
                             const value_type scalar) {
         vctFixedSizeVectorRecursiveEngines<_size>::template
@@ -973,7 +972,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
     }
     
     /* documented above */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline ThisType & DifferenceOf(const vctFixedSizeConstVectorBase<_size, __stride, value_type, __dataPtrType> & vector,
                                    const value_type scalar) {
         vctFixedSizeVectorRecursiveEngines<_size>::template
@@ -983,7 +982,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
     }
     
     /* documented above */    
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline ThisType & ProductOf(const vctFixedSizeConstVectorBase<_size, __stride, value_type, __dataPtrType> & vector,
                                 const value_type scalar) {
         vctFixedSizeVectorRecursiveEngines<_size>::template
@@ -993,7 +992,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
     }
     
     /* documented above */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline ThisType & RatioOf(const vctFixedSizeConstVectorBase<_size, __stride, value_type, __dataPtrType> & vector,
                               const value_type scalar) {
         vctFixedSizeVectorRecursiveEngines<_size>::template
@@ -1003,7 +1002,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
     }
 
     /* documented above */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline ThisType & ClippedAboveOf(const vctFixedSizeConstVectorBase<_size, __stride, value_type, __dataPtrType> & vector,
                                      const value_type upperBound) {
         vctFixedSizeVectorRecursiveEngines<_size>::template
@@ -1013,7 +1012,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
     }
 
     /* documented above */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline ThisType & ClippedBelowOf(const vctFixedSizeConstVectorBase<_size, __stride, value_type, __dataPtrType> & vector,
                                      const value_type lowerBound) {
         vctFixedSizeVectorRecursiveEngines<_size>::template
@@ -1040,7 +1039,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
       
       \return The vector "this" modified.
     */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline ThisType & SumOf(const value_type scalar,
                             const vctFixedSizeConstVectorBase<_size, __stride, value_type, __dataPtrType> & vector) {
         vctFixedSizeVectorRecursiveEngines<_size>::template
@@ -1050,7 +1049,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
     }
     
     /* documented above */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline ThisType & DifferenceOf(const value_type scalar,
                                    const vctFixedSizeConstVectorBase<_size, __stride, value_type, __dataPtrType> & vector) {
         vctFixedSizeVectorRecursiveEngines<_size>::template
@@ -1060,7 +1059,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
     }
     
     /* documented above */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline ThisType & ProductOf(const value_type scalar,
                                 const vctFixedSizeConstVectorBase<_size, __stride, value_type, __dataPtrType> & vector) {
         vctFixedSizeVectorRecursiveEngines<_size>::template
@@ -1070,7 +1069,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
     }
     
     /* documented above */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline ThisType & RatioOf(const value_type scalar,
                               const vctFixedSizeConstVectorBase<_size, __stride, value_type, __dataPtrType> & vector) {
         vctFixedSizeVectorRecursiveEngines<_size>::template
@@ -1080,7 +1079,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
     }
 
     /* documented above */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline ThisType & ClippedAboveOf(const value_type upperBound,
                                      const vctFixedSizeConstVectorBase<_size, __stride, value_type, __dataPtrType> & vector) {
         vctFixedSizeVectorRecursiveEngines<_size>::template
@@ -1090,7 +1089,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
     }
 
     /* documented above */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline ThisType & ClippedBelowOf(const value_type lowerBound,
                                      const vctFixedSizeConstVectorBase<_size, __stride, value_type, __dataPtrType> & vector) {
         vctFixedSizeVectorRecursiveEngines<_size>::template
@@ -1185,7 +1184,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
     //@}
 
 
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline ThisType & AddProductOf(const value_type scalar,
                                    const vctFixedSizeConstVectorBase<_size, __stride, value_type, __dataPtrType> & otherVector)
     {
@@ -1209,8 +1208,8 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
       
       \return The vector "this" modified.
     */
-    template<unsigned int __matrixCols, int __matrixRowStride, int __matrixColStride, class __matrixDataPtrType,
-             int __vectorStride, class __vectorDataPtrType>
+    template <size_type __matrixCols, stride_type __matrixRowStride, stride_type __matrixColStride, class __matrixDataPtrType,
+              stride_type __vectorStride, class __vectorDataPtrType>
     inline ThisType & ProductOf(const vctFixedSizeConstMatrixBase<_size, __matrixCols, __matrixRowStride, __matrixColStride, _elementType, __matrixDataPtrType> & inputMatrix,
                                 const vctFixedSizeConstVectorBase<__matrixCols, __vectorStride, _elementType, __vectorDataPtrType> & inputVector)
     {
@@ -1218,8 +1217,8 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
         return *this;
     }
 
-    template<unsigned int __vectorSize, int __vectorStride, class __vectorDataPtrType,
-             int __matrixRowStride, int __matrixColStride, class __matrixDataPtrType>
+    template <size_type __vectorSize, stride_type __vectorStride, class __vectorDataPtrType,
+              stride_type __matrixRowStride, stride_type __matrixColStride, class __matrixDataPtrType>
     inline ThisType & ProductOf(const vctFixedSizeConstVectorBase<__vectorSize,  __vectorStride, _elementType, __vectorDataPtrType> & inputVector,
                                 const vctFixedSizeConstMatrixBase<__vectorSize, _size, __matrixRowStride, __matrixColStride, _elementType, __matrixDataPtrType> & inputMatrix )
     {
@@ -1243,7 +1242,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
       
       \return The vector "this" modified.
     */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline ThisType & AbsOf(const vctFixedSizeConstVectorBase<_size, __stride, value_type, __dataPtrType> & otherVector) {
         vctFixedSizeVectorRecursiveEngines<_size>::template
             VoVi< typename vctUnaryOperations<value_type>::AbsValue >::
@@ -1252,7 +1251,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
     }
 
     /* documented above */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline ThisType & NegationOf(const vctFixedSizeConstVectorBase<_size, __stride, value_type, __dataPtrType> & otherVector) {
         vctFixedSizeVectorRecursiveEngines<_size>::template
             VoVi< typename vctUnaryOperations<value_type>::Negation >::
@@ -1261,7 +1260,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
     }
 
     /* documented above */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline ThisType & FloorOf(const vctFixedSizeConstVectorBase<_size, __stride, value_type, __dataPtrType> & otherVector) {
         vctFixedSizeVectorRecursiveEngines<_size>::template
             VoVi< typename vctUnaryOperations<value_type>::Floor >::
@@ -1270,7 +1269,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
     }
 
     /* documented above */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline ThisType & CeilOf(const vctFixedSizeConstVectorBase<_size, __stride, value_type, __dataPtrType> & otherVector) {
         vctFixedSizeVectorRecursiveEngines<_size>::template
             VoVi< typename vctUnaryOperations<value_type>::Ceil>::
@@ -1279,7 +1278,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
     }
 
     /* documented above */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline ThisType & NormalizedOf(const vctFixedSizeConstVectorBase<_size, __stride, value_type, __dataPtrType> & otherVector) throw(std::runtime_error) {
         *this = otherVector;
         this->NormalizedSelf();
@@ -1350,7 +1349,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
       A subsequence obtained this way may be non-const.  Use
       GetConstSubsequence to obtain a const subsequence.
     */
-    template<class _subsequenceType>
+    template <class _subsequenceType>
     void GetSubsequence(size_type position, _subsequenceType & result) {
         CMN_ASSERT( (_subsequenceType::STRIDE % ThisType::STRIDE) == 0 );
         CMN_ASSERT( position + 
@@ -1359,7 +1358,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
         result.SetRef( Pointer(position) );
     }
 
-    template<class _subsequenceType>
+    template <class _subsequenceType>
     void GetConstSubsequence(size_type position, _subsequenceType & result) {
         BaseType::GetConstSubsequence(position, result);
     }
@@ -1382,7 +1381,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
       parent container are equal.  For more sophisticated subsequences,
       the user has to write cusomized code.
     */
-    template<unsigned int _subSize>
+    template <size_type _subSize>
     class Subvector {
     public:
         typedef vctFixedSizeVectorRef<value_type, _subSize, STRIDE> Type;

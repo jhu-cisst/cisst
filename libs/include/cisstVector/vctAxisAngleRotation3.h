@@ -163,7 +163,7 @@ public:
       \param axis A unit vector of size 3.
       \param angle The angle in radian
     */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline vctAxisAngleRotation3(const vctFixedSizeConstVectorBase<DIMENSION, __stride, value_type, __dataPtrType> & axis,
                                  const AngleType angle)
         throw(std::runtime_error)
@@ -237,7 +237,7 @@ public:
       \param angle The angle in radian
       \param normalizeInput Normalize the input or convert as is (#VCT_NORMALIZE or #VCT_DO_NOT_NORMALIZE)
     */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline vctAxisAngleRotation3(const vctFixedSizeConstVectorBase<DIMENSION, __stride, value_type, __dataPtrType> & axis,
                                  const AngleType angle,
                                  bool normalizeInput)
@@ -346,7 +346,7 @@ public:
     //@{
 
     /*! Conversion from an angle and an axis. */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline ThisType & From(const vctFixedSizeConstVectorBase<DIMENSION, __stride, value_type, __dataPtrType> & axis,
                            const AngleType angle)
         throw(std::runtime_error)
@@ -412,7 +412,7 @@ public:
     //@{
 
     /*! Conversion from an axis and an angle. */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline ThisType & FromNormalized(const vctFixedSizeConstVectorBase<DIMENSION, __stride, value_type, __dataPtrType> & axis,
                                            const AngleType angle)
     {
@@ -453,7 +453,7 @@ public:
     //@{
 
     /*! Conversion from an axis and an angle. */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline ThisType & FromRaw(const vctFixedSizeConstVectorBase<DIMENSION, __stride, value_type, __dataPtrType> & axis,
                                     const AngleType angle)
     {

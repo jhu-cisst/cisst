@@ -69,14 +69,14 @@ public:
 #ifdef CISST_HAS_CISSTNETLIB
         // create a random matrix (size and content) to decompose
         // using SVD and then use U and Vt to test nmrIsOrthonormal
-        int rows, cols;
+        vct::size_type rows, cols;
         bool storageOrder = VCT_ROW_MAJOR;
         vctDynamicMatrix<double> ADynamic;
         vctDynamicVector<double> SDynamic;
         cmnRandomSequence & randomSequence = cmnRandomSequence::GetInstance();
         randomSequence.ExtractRandomValue(storageOrder);
-        randomSequence.ExtractRandomValue(10, 20, rows);
-        randomSequence.ExtractRandomValue(10, 20, cols);
+        randomSequence.ExtractRandomValue(static_cast<vct::size_type>(10), static_cast<vct::size_type>(20), rows);
+        randomSequence.ExtractRandomValue(static_cast<vct::size_type>(10), static_cast<vct::size_type>(20), cols);
         ADynamic.SetSize(rows, cols, storageOrder);
         vctRandom(ADynamic, -10.0, 10.0);
         UDynamic.SetSize(rows, rows, storageOrder);

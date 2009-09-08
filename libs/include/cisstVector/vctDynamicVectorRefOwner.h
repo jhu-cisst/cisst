@@ -81,11 +81,11 @@ public:
         return Stride;
     }
     
-    pointer Pointer(int index = 0) {
+    pointer Pointer(index_type index = 0) {
         return Data + Stride * index;
     }
 
-    const_pointer Pointer(int index = 0) const {
+    const_pointer Pointer(index_type index = 0) const {
         return Data + Stride * index;
     }
     
@@ -123,7 +123,7 @@ public:
 
 protected:
     size_type Size;
-    int Stride;
+    stride_type Stride;
     value_type* Data;
     
 private:

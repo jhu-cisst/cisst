@@ -23,6 +23,8 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _vctForwardDeclarations_h
 #define _vctForwardDeclarations_h
 
+#include <cisstVector/vctContainerTraits.h>
+
 /*!
   \file
   \brief Forward declarations and \#define for cisstVector
@@ -69,40 +71,40 @@ const bool VCT_DO_NOT_NORMALIZE = false;
 
 
 // fixed size vectors
-template <unsigned int _size, int _stride, class _elementType, class _dataPtrType>
+template <vct::size_type _size, vct::stride_type _stride, class _elementType, class _dataPtrType>
 class vctFixedSizeConstVectorBase;
 
-template <unsigned int _size, int _stride, class _elementType, class _dataPtrType>
+template <vct::size_type _size, vct::stride_type _stride, class _elementType, class _dataPtrType>
 class vctFixedSizeVectorBase;
 
-template <class _elementType, unsigned int _size, int _stride>
+template <class _elementType, vct::size_type _size, vct::stride_type _stride>
 class vctFixedSizeConstVectorRef;
 
-template <class _elementType, unsigned int _size, int _stride>
+template <class _elementType, vct::size_type _size, vct::stride_type _stride>
 class vctFixedSizeVectorRef;
 
-template <class _elementType, unsigned int _size>
+template <class _elementType, vct::size_type _size>
 class vctFixedSizeVector;
 
 
 // fixed size matrices
-template <unsigned int _rows, unsigned int _cols, int _rowStride, 
-          int _colStride, class _elementType, class _dataPtrType>
+template <vct::size_type _rows, vct::size_type _cols, vct::stride_type _rowStride, 
+          vct::stride_type _colStride, class _elementType, class _dataPtrType>
 class vctFixedSizeConstMatrixBase;
 
-template <unsigned int _rows, unsigned int _cols, int _rowStride, 
-          int _colStride, class _elementType, class _dataPtrType>
+template <vct::size_type _rows, vct::size_type _cols, vct::stride_type _rowStride, 
+          vct::stride_type _colStride, class _elementType, class _dataPtrType>
 class vctFixedSizeMatrixBase;
 
-template <class _elementType, unsigned int _rows, unsigned int _cols,
-          int _rowStride, int _colStride>
+template <class _elementType, vct::size_type _rows, vct::size_type _cols,
+          vct::stride_type _rowStride, vct::stride_type _colStride>
 class vctFixedSizeConstMatrixRef;
 
-template <class _elementType, unsigned int _rows, unsigned int _cols,
-          int _rowStride, int _colStride>
+template <class _elementType, vct::size_type _rows, vct::size_type _cols,
+          vct::stride_type _rowStride, vct::stride_type _colStride>
 class vctFixedSizeMatrixRef;
 
-template <class _elementType, unsigned int _rows, unsigned int _cols,
+template <class _elementType, vct::size_type _rows, vct::size_type _cols,
           bool _rowMajor = VCT_ROW_MAJOR>
 class vctFixedSizeMatrix;
 
@@ -160,28 +162,28 @@ class vctDynamicMatrixRefOwner;
 
 
 // dynamic nArrays
-template <class _nArrayOwnerType, class _elementType, unsigned int _dimension>
+template <class _nArrayOwnerType, class _elementType, vct::size_type _dimension>
 class vctDynamicConstNArrayBase;
 
-template <class _nArrayOwnerType, class _elementType, unsigned int _dimension>
+template <class _nArrayOwnerType, class _elementType, vct::size_type _dimension>
 class vctDynamicNArrayBase;
 
-template <class _elementType, unsigned int _dimension>
+template <class _elementType, vct::size_type _dimension>
 class vctDynamicConstNArrayRef;
 
-template <class _elementType, unsigned int _dimension>
+template <class _elementType, vct::size_type _dimension>
 class vctDynamicNArrayRef;
 
-template <class _elementType, unsigned int _dimension>
+template <class _elementType, vct::size_type _dimension>
 class vctDynamicNArray;
 
-template <class _elementType, unsigned int _dimension>
+template <class _elementType, vct::size_type _dimension>
 class vctReturnDynamicNArray;
 
-template <class _elementType, unsigned int _dimension>
+template <class _elementType, vct::size_type _dimension>
 class vctDynamicNArrayOwner;
 
-template <class _elementType, unsigned int _dimension>
+template <class _elementType, vct::size_type _dimension>
 class vctDynamicNArrayRefOwner;
 
 
@@ -189,8 +191,8 @@ class vctDynamicNArrayRefOwner;
 template <class _containerType> class vctMatrixRotation3ConstBase;
 template <class _containerType> class vctMatrixRotation3Base;
 template <class _elementType, bool _rowMajor = VCT_ROW_MAJOR> class vctMatrixRotation3;
-template <class _elementType, int _rowStride, int _colStride> class vctMatrixRotation3Ref;
-template <class _elementType, int _rowStride, int _colStride> class vctMatrixRotation3ConstRef;
+template <class _elementType, vct::stride_type _rowStride, vct::stride_type _colStride> class vctMatrixRotation3Ref;
+template <class _elementType, vct::stride_type _rowStride, vct::stride_type _colStride> class vctMatrixRotation3ConstRef;
 
 template <class _containerType>
 class vctQuaternionBase;

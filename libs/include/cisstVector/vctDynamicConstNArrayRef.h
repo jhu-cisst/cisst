@@ -88,7 +88,7 @@ http://www.cisst.org/cisst/license.txt.
 
   \param _dimension Dimension of the const nArray ref.
 */
-template <class _elementType, unsigned int _dimension>
+template <class _elementType, vct::size_type _dimension>
 class vctDynamicConstNArrayRef :
     public vctDynamicConstNArrayBase<vctDynamicNArrayRefOwner<_elementType, _dimension>, _elementType, _dimension>
 {
@@ -157,10 +157,8 @@ public:
     /*! Create a reference to a fixed-size vector.
         \note see corresponding SetRef method below
      */
-    template <unsigned int __size, int __stride, typename __dataPtrType>
-    inline vctDynamicConstNArrayRef(
-        const vctFixedSizeConstVectorBase<__size, __stride, value_type, __dataPtrType>
-        & vector)
+    template <size_type __size, stride_type __stride, typename __dataPtrType>
+    inline vctDynamicConstNArrayRef(const vctFixedSizeConstVectorBase<__size, __stride, value_type, __dataPtrType> & vector)
     {
         this->SetRef(vector);
     }
@@ -177,7 +175,7 @@ public:
     /*! Create a reference to a fixed-size matrix.
         \note see corresponding SetRef method below
      */
-    template <unsigned int __rows, unsigned int __cols, int __rowStride, int __colStride, typename __dataPtrType>
+    template <size_type __rows, size_type __cols, stride_type __rowStride, stride_type __colStride, typename __dataPtrType>
     inline vctDynamicConstNArrayRef(const vctFixedSizeConstMatrixBase<__rows, __cols,
                                                                       __rowStride, __colStride,
                                                                       value_type, __dataPtrType>
@@ -323,10 +321,8 @@ public:
     /*! Set a reference to a fixed-size vector. The reference will have
         identical size and stride as the input vector.
      */
-    template <unsigned int __size, int __stride, typename __dataPtrType>
-    inline void SetRef(
-        const vctFixedSizeConstVectorBase<__size, __stride, value_type, __dataPtrType>
-        & vector)
+    template <size_type __size, stride_type __stride, typename __dataPtrType>
+    inline void SetRef(const vctFixedSizeConstVectorBase<__size, __stride, value_type, __dataPtrType> & vector)
     {
         this->SetRef( vector.Pointer(), nsize_type(__size), nstride_type(__stride) );
     }
@@ -345,11 +341,8 @@ public:
     /*! Set a reference to a fixed-size matrix. The reference will have
         identical sizes and strides as the input matrix.
      */
-    template <unsigned int __rows, unsigned int __cols, int __rowStride, int __colStride, typename __dataPtrType>
-    inline void SetRef(const vctFixedSizeConstMatrixBase<__rows, __cols,
-                                                         __rowStride, __colStride,
-                                                         value_type, __dataPtrType>
-                       & matrix)
+    template <size_type __rows, size_type __cols, stride_type __rowStride, stride_type __colStride, typename __dataPtrType>
+    inline void SetRef(const vctFixedSizeConstMatrixBase<__rows, __cols, __rowStride, __colStride, value_type, __dataPtrType> & matrix)
     {
         this->SetRef(matrix.Pointer(),
                      nsize_type(__rows, __cols),

@@ -33,7 +33,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #define MINRANK 2
 
-template <unsigned int _rows, unsigned int _cols, bool _storageOrder, unsigned int _minmn>
+template <vct::size_type _rows, vct::size_type _cols, bool _storageOrder, vct::size_type _minmn>
 void nmrPInverseTest::GenericTestFixedSize(void)
 {
     vctFixedSizeMatrix<double, _rows, _cols, _storageOrder> indepVectors;
@@ -57,7 +57,7 @@ void nmrPInverseTest::GenericTestFixedSize(void)
     vctRandom(indepVectors, 0.0, 10.0);
     nmrSVD(indepVectors, U, S, Vt);
     SM.SetAll(0.);
-    for (unsigned int rank = _minmn; rank >= MINRANK; rank--) {
+    for (vct::size_type rank = _minmn; rank >= MINRANK; rank--) {
         if (rank < S.size()) S(rank) = 1e-18; // some number less than eps
         SM.Diagonal().Assign(S);
         P.ProductOf(SM, Vt);
@@ -86,7 +86,7 @@ see: strang, g., linear algebra and its application, second ed. pp145
         error[3] = E3.LinfNorm();
 
         bool ret_value = true;
-        for (unsigned int ii = 0; ii < 4; ii++) {
+        for (vct::size_type ii = 0; ii < 4; ii++) {
             if (!(error[ii] < tolerance)) {
                 CMN_LOG_INIT_ERROR << cmnPrintf("\nF :\n %.14lf \n") << ii;
                 CMN_LOG_INIT_ERROR << cmnPrintf("E%d :\n %.14lf \n") << ii  << error[ii];
@@ -123,7 +123,7 @@ see: strang, g., linear algebra and its application, second ed. pp145
     }
 }
 
-template <unsigned int _rows, unsigned int _cols, bool _storageOrder, unsigned int _minmn>
+template <vct::size_type _rows, vct::size_type _cols, bool _storageOrder, vct::size_type _minmn>
 void nmrPInverseTest::GenericTestFixedSizeUsingDataObject(void)
 {
     vctFixedSizeMatrix<double, _rows, _cols, _storageOrder> indepVectors;
@@ -147,7 +147,7 @@ void nmrPInverseTest::GenericTestFixedSizeUsingDataObject(void)
     vctRandom(indepVectors, 0.0, 10.0);
     nmrSVD(indepVectors, U, S, Vt);
     SM.SetAll(0.);
-    for (unsigned int rank = _minmn; rank >= MINRANK; rank--) {
+    for (vct::size_type rank = _minmn; rank >= MINRANK; rank--) {
         if (rank < S.size()) S(rank) = 1e-18; // some number less than eps
         SM.Diagonal().Assign(S);
         P.ProductOf(SM, Vt);
@@ -176,7 +176,7 @@ see: strang, g., linear algebra and its application, second ed. pp145
         error[3] = E3.LinfNorm();
 
         bool ret_value = true;
-        for (unsigned int ii = 0; ii < 4; ii++) {
+        for (vct::size_type ii = 0; ii < 4; ii++) {
             if (!(error[ii] < tolerance)) {
                 CMN_LOG_INIT_ERROR << cmnPrintf("\nF :\n %.14lf \n") << ii;
                 CMN_LOG_INIT_ERROR << cmnPrintf("E%d :\n %.14lf \n") << ii  << error[ii];
@@ -213,9 +213,9 @@ see: strang, g., linear algebra and its application, second ed. pp145
     }
 }
 
-void nmrPInverseTest::GenericTestDynamicUsingDataObject(unsigned int rows, unsigned int cols, bool storageOrder)
+void nmrPInverseTest::GenericTestDynamicUsingDataObject(vct::size_type rows, vct::size_type cols, bool storageOrder)
 {
-    const unsigned int minmn = (rows < cols) ? rows : cols;
+    const vct::size_type minmn = (rows < cols) ? rows : cols;
     vctDynamicMatrix<double> indepVectors(rows, cols, storageOrder);
     vctDynamicMatrix<double> input       (rows, cols, storageOrder);
     vctDynamicMatrix<double> inputOrig   (rows, cols, storageOrder);
@@ -238,7 +238,7 @@ void nmrPInverseTest::GenericTestDynamicUsingDataObject(unsigned int rows, unsig
     vctRandom(indepVectors, 0.0, 10.0);
     nmrSVD(indepVectors, U, S, Vt);
     SM.SetAll(0.);
-    for (unsigned int rank = minmn; rank >= MINRANK; rank--) {
+    for (vct::size_type rank = minmn; rank >= MINRANK; rank--) {
         if (rank < S.size()) S(rank) = 1e-18; // some number less than eps
         SM.Diagonal().Assign(S);
         P.ProductOf(SM, Vt);
@@ -267,7 +267,7 @@ see: strang, g., linear algebra and its application, second ed. pp145
         error[3] = E3.LinfNorm();
 
         bool ret_value = true;
-        for (unsigned int ii = 0; ii < 4; ii++) {
+        for (vct::size_type ii = 0; ii < 4; ii++) {
             if (!(error[ii] < tolerance)) {
                 CMN_LOG_INIT_ERROR << cmnPrintf("\nF :\n %.14lf \n") << ii;
                 CMN_LOG_INIT_ERROR << cmnPrintf("E%d :\n %.14lf \n") << ii  << error[ii];
@@ -304,9 +304,9 @@ see: strang, g., linear algebra and its application, second ed. pp145
     }
 }
 
-void nmrPInverseTest::GenericTestDynamic(unsigned int rows, unsigned int cols, bool storageOrder)
+void nmrPInverseTest::GenericTestDynamic(vct::size_type rows, vct::size_type cols, bool storageOrder)
 {
-    const unsigned int minmn = (rows < cols) ? rows : cols;
+    const vct::size_type minmn = (rows < cols) ? rows : cols;
     vctDynamicMatrix<double> indepVectors(rows, cols, storageOrder);
     vctDynamicMatrix<double> input       (rows, cols, storageOrder);
     vctDynamicMatrix<double> inputOrig   (rows, cols, storageOrder);
@@ -328,7 +328,7 @@ void nmrPInverseTest::GenericTestDynamic(unsigned int rows, unsigned int cols, b
     vctRandom(indepVectors, 0.0, 10.0);
     nmrSVD(indepVectors, U, S, Vt);
     SM.SetAll(0.);
-    for (unsigned int rank = minmn; rank >= MINRANK; rank--) {
+    for (vct::size_type rank = minmn; rank >= MINRANK; rank--) {
         if (rank < S.size()) S(rank) = 1e-18; // some number less than eps
         SM.Diagonal().Assign(S);
         P.ProductOf(SM, Vt);
@@ -357,7 +357,7 @@ see: strang, g., linear algebra and its application, second ed. pp145
         error[3] = E3.LinfNorm();
 
         bool ret_value = true;
-        for (unsigned int ii = 0; ii < 4; ii++) {
+        for (vct::size_type ii = 0; ii < 4; ii++) {
             if (!(error[ii] < tolerance)) {
                 CMN_LOG_INIT_ERROR << cmnPrintf("\nF :\n %.14lf \n") << ii;
                 CMN_LOG_INIT_ERROR << cmnPrintf("E%d :\n %.14lf \n") << ii  << error[ii];
@@ -426,7 +426,7 @@ void nmrPInverseTest::TestDynamicRowMajor(void) {
     GenericTestDynamic(rows, cols, VCT_ROW_MAJOR);
 }
 
-template <unsigned int _rows, unsigned int _cols>
+template <vct::size_type _rows, vct::size_type _cols>
 void nmrPInverseTest::GenericTestCompareWithMatlab(double input_ptr[], double pinverse_ptr[], int caseNo, double tolerance = cmnTypeTraits<double>::Tolerance())
 {
     vctFixedSizeMatrix<double, _rows, _cols, VCT_COL_MAJOR> input;
@@ -438,7 +438,7 @@ void nmrPInverseTest::GenericTestCompareWithMatlab(double input_ptr[], double pi
     inputCopy.Assign(input);
     nmrPInverse(input, output);
     double *output_ptr = output.Pointer();
-    for (unsigned int ii = 0; ii < _rows*_cols; ii++) {
+    for (vct::size_type ii = 0; ii < _rows*_cols; ii++) {
         errorv(ii) = output_ptr[ii] - pinverse_ptr[ii];
     }
     error = errorv.LinfNorm();

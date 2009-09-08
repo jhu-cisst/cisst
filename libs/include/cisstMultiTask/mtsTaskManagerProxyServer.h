@@ -58,7 +58,7 @@ public:
     void Start(mtsTaskManager * callingTaskManager);
 
     /*! Change the proxy state as active. */
-    void SetAsActiveProxy() {
+    void SetAsActiveProxy(void) {
         ChangeProxyState(mtsProxyBaseServer<mtsTaskManager>::PROXY_ACTIVE);
     }
 

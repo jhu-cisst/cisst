@@ -30,6 +30,17 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _vctContainerTraits_h
 #define _vctContainerTraits_h
 
+#include <cstddef>
+
+namespace vct
+{
+    typedef size_t size_type;
+    typedef size_t index_type;
+    typedef ptrdiff_t stride_type;
+    typedef ptrdiff_t difference_type;
+}
+
+
 /*! Macro used to define multiple types based on the type of elements.
   This will define size_type, index_type, difference_type,
   stride_type, value_type, reference, const_reference, pointer,
@@ -39,10 +50,10 @@ http://www.cisst.org/cisst/license.txt.
   \param type Type of element, e.g. double, float, char.
  */
 #define VCT_CONTAINER_TRAITS_TYPEDEFS(type) \
-    typedef unsigned int size_type; \
-    typedef unsigned int index_type; \
-    typedef int difference_type; \
-    typedef int stride_type; \
+    typedef vct::size_type size_type; \
+    typedef vct::index_type index_type; \
+    typedef vct::difference_type difference_type; \
+    typedef vct::stride_type stride_type; \
     typedef type value_type; \
     typedef value_type & reference; \
     typedef const value_type & const_reference; \
@@ -60,7 +71,7 @@ http://www.cisst.org/cisst/license.txt.
     typedef vctFixedSizeVector<size_type, dimension> nsize_type; \
     typedef vctFixedSizeVector<stride_type, dimension> nstride_type; \
     typedef vctFixedSizeVector<index_type, dimension> nindex_type; \
-    typedef unsigned int dimension_type; \
+    typedef size_type dimension_type; \
     typedef vctFixedSizeVector<dimension_type, dimension> ndimension_type
 
 

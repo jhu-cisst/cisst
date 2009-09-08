@@ -144,9 +144,9 @@ class vctMatrixRotation3: public vctMatrixRotation3Base<vctFixedSizeMatrix<_elem
       By default the vectors represents the columns of the matrix. If
       the parameter vectorsAreColumns is set to false, the vectors
       provided will be used to set the matrix row by row. */
-    template <int __stride1, class __dataPtrType1,
-              int __stride2, class __dataPtrType2,
-              int __stride3, class __dataPtrType3>
+    template <stride_type __stride1, class __dataPtrType1,
+              stride_type __stride2, class __dataPtrType2,
+              stride_type __stride3, class __dataPtrType3>
     inline vctMatrixRotation3(const vctFixedSizeConstVectorBase<DIMENSION, __stride1, value_type, __dataPtrType1>& v1,
                               const vctFixedSizeConstVectorBase<DIMENSION, __stride2, value_type, __dataPtrType2>& v2,
                               const vctFixedSizeConstVectorBase<DIMENSION, __stride3, value_type, __dataPtrType3>& v3,
@@ -259,9 +259,9 @@ class vctMatrixRotation3: public vctMatrixRotation3Base<vctFixedSizeMatrix<_elem
       By default the vectors represents the columns of the matrix. If
       the parameter vectorsAreColumns is set to false, the vectors
       provided will be used to set the matrix row by row. */
-    template <int __stride1, class __dataPtrType1,
-              int __stride2, class __dataPtrType2,
-              int __stride3, class __dataPtrType3>
+    template <stride_type __stride1, class __dataPtrType1,
+              stride_type __stride2, class __dataPtrType2,
+              stride_type __stride3, class __dataPtrType3>
     inline vctMatrixRotation3(const vctFixedSizeConstVectorBase<DIMENSION, __stride1, value_type, __dataPtrType1>& v1,
                               const vctFixedSizeConstVectorBase<DIMENSION, __stride2, value_type, __dataPtrType2>& v2,
                               const vctFixedSizeConstVectorBase<DIMENSION, __stride3, value_type, __dataPtrType3>& v3,
@@ -348,7 +348,7 @@ class vctMatrixRotation3: public vctMatrixRotation3Base<vctFixedSizeMatrix<_elem
       \note The constructor is declared explicit, to force the user to
       be aware of the conversion being made.
     */
-    template<int __rowStride, int __colStride, class __dataPtrType>
+    template <stride_type __rowStride, stride_type __colStride, class __dataPtrType>
     explicit inline
     vctMatrixRotation3(const vctFixedSizeMatrixBase<ROWS, COLS, __rowStride, __colStride, value_type, __dataPtrType> & matrix)
     {

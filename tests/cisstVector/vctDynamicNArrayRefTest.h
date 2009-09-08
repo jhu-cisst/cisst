@@ -50,11 +50,6 @@ class vctDynamicNArrayRefTest : public CppUnit::TestFixture
 
     enum {MIN_SIZE = 3, MAX_SIZE = 8};
 
-    typedef unsigned int size_type;
-    typedef unsigned int dimension_type;
-    typedef unsigned int index_type;
-    typedef int stride_type;
-
     void setUp(void) {
     }
     

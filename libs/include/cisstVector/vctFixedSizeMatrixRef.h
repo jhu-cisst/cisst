@@ -47,8 +47,8 @@ http://www.cisst.org/cisst/license.txt.
   
   \sa vctFixedSizeConstMatrixRef
 */
-template<class _elementType, unsigned int _rows, unsigned int _cols,
-         int _rowStride, int _colStride>
+template <class _elementType, vct::size_type _rows, vct::size_type _cols,
+          vct::stride_type _rowStride, vct::stride_type _colStride>
 class vctFixedSizeMatrixRef : public vctFixedSizeMatrixBase
   <_rows, _cols,_rowStride, _colStride, _elementType,
    typename vctFixedSizeMatrixTraits<_elementType, _rows, _cols, _rowStride, _colStride>::pointer>
@@ -83,7 +83,7 @@ class vctFixedSizeMatrixRef : public vctFixedSizeMatrixBase
       The constructor is declared as explicit, and care must be taken when a matrix
       object is passed as a function argument.
     */
-    template<unsigned int __rows, unsigned int __cols, class __dataPtrType>
+    template <size_type __rows, size_type __cols, class __dataPtrType>
     inline explicit vctFixedSizeMatrixRef(vctFixedSizeMatrixBase<__rows, __cols, _rowStride, _colStride, _elementType, __dataPtrType> & matrix)
     {
         SetRef(matrix, 0, 0);
@@ -92,7 +92,7 @@ class vctFixedSizeMatrixRef : public vctFixedSizeMatrixBase
 
     /*! Convenience constructor to initialize a reference to a fixed-size matrix object.
     */
-    template<unsigned int __rows, unsigned int __cols, class __dataPtrType>
+    template <size_type __rows, size_type __cols, class __dataPtrType>
     inline vctFixedSizeMatrixRef(
         vctFixedSizeMatrixBase<__rows, __cols, _rowStride, _colStride, _elementType, __dataPtrType>
         & matrix, index_type startRow, index_type startCol )
@@ -103,7 +103,7 @@ class vctFixedSizeMatrixRef : public vctFixedSizeMatrixBase
     /*! Convenience constructor to initialize a fixed-size reference
       to a dynamic matrix.  The constructor involves assertion that
       the sizes and strides match */
-    template<class __matrixOwnerType>
+    template <class __matrixOwnerType>
     inline vctFixedSizeMatrixRef(vctDynamicMatrixBase<__matrixOwnerType, _elementType> & matrix,
                                  index_type startRow, index_type startCol)
     {
@@ -128,7 +128,7 @@ class vctFixedSizeMatrixRef : public vctFixedSizeMatrixBase
       \note This method verifies that the size of this matrix does not exceed the
       size of the input matrix (otherwise cmnThrow is used to throw std::out_of_range).
     */
-    template<unsigned int __rows, unsigned int __cols, class __dataPtrType>
+    template <size_type __rows, size_type __cols, class __dataPtrType>
     inline void SetRef(vctFixedSizeMatrixBase<__rows, __cols, _rowStride, _colStride, _elementType, __dataPtrType> & matrix,
                        index_type startRow, index_type startCol)
     {
@@ -153,7 +153,7 @@ class vctFixedSizeMatrixRef : public vctFixedSizeMatrixBase
       \note This method verifies that the size of this matrix does not exceed the
       size of the input matrix (otherwise cmnThrow is used to throw std::out_of_range).
     */
-    template<class __matrixOwnerType>
+    template <class __matrixOwnerType>
     inline void SetRef(vctDynamicMatrixBase<__matrixOwnerType, _elementType> & matrix,
                        index_type startRow, index_type startCol)
     {
@@ -176,12 +176,12 @@ class vctFixedSizeMatrixRef : public vctFixedSizeMatrixBase
 		return reinterpret_cast<ThisType &>(this->Assign(other));
 	}
 
-	template<int __rowStride, int __colStride>
+	template <stride_type __rowStride, stride_type __colStride>
 	inline ThisType & operator=(const vctFixedSizeConstMatrixRef<_elementType, _rows, _cols, __rowStride, __colStride> & other) {
 		return reinterpret_cast<ThisType &>(this->Assign(other));
 	}
 
-	template<int __rowStride, int __colStride, class __elementType, class __dataPtrType>
+	template <stride_type __rowStride, stride_type __colStride, class __elementType, class __dataPtrType>
 	inline ThisType & operator=(const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride, __colStride, __elementType, __dataPtrType> & other) {
 		return reinterpret_cast<ThisType &>(this->Assign(other));
 	}
@@ -202,9 +202,9 @@ class vctFixedSizeMatrixRef : public vctFixedSizeMatrixBase
    vctFixedSizeVectorBase. This is an auxiliary function which
    multiplies matrix*vector and stored the result directly into a
    matrix */
-template<unsigned int _resultSize, int _resultStride, class _resultElementType, class _resultDataPtrType,
-         unsigned int _matrixCols, int _matrixRowStride, int _matrixColStride, class _matrixDataPtrType,
-         int _vectorStride, class _vectorDataPtrType>
+template <vct::size_type _resultSize, vct::stride_type _resultStride, class _resultElementType, class _resultDataPtrType,
+          vct::size_type _matrixCols, vct::stride_type _matrixRowStride, vct::stride_type _matrixColStride, class _matrixDataPtrType,
+          vct::stride_type _vectorStride, class _vectorDataPtrType>
 inline void MultiplyMatrixVector(
                                  // create matrix references to both vectors and use the matrix product
                                  vctFixedSizeVectorBase<_resultSize, _resultStride, _resultElementType, _resultDataPtrType> & result,
@@ -222,9 +222,9 @@ inline void MultiplyMatrixVector(
    vctFixedSizeVectorBase. This is an auxiliary function which
    multiplies vector*matrix and stored the result directly into a
    vector */
-template<unsigned int _resultSize, int _resultStride, class _resultElementType, class _resultDataPtrType,
-         unsigned int _vectorSize, int _vectorStride, class _vectorDataPtrType,
-         int _matrixRowStride, int _matrixColStride, class _matrixDataPtrType >
+template <vct::size_type _resultSize, vct::stride_type _resultStride, class _resultElementType, class _resultDataPtrType,
+          vct::size_type _vectorSize, vct::stride_type _vectorStride, class _vectorDataPtrType,
+          vct::stride_type _matrixRowStride, vct::stride_type _matrixColStride, class _matrixDataPtrType >
 inline void MultiplyVectorMatrix(
                                  vctFixedSizeVectorBase<_resultSize, _resultStride, _resultElementType, _resultDataPtrType> & result,
                                  const vctFixedSizeConstVectorBase<_vectorSize, _vectorStride, _resultElementType, _vectorDataPtrType> & vector,

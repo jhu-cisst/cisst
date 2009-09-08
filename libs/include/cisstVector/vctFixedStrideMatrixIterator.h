@@ -89,7 +89,7 @@ http://www.cisst.org/cisst/license.txt.
   care, and do not try to mix iterators from different containers into
   the same expression.
 */
-template<class _elementType, int _columnStride, unsigned int _numColumns, int _rowStride>
+template <class _elementType, vct::stride_type _columnStride, vct::size_type _numColumns, vct::stride_type _rowStride>
 class vctFixedStrideMatrixConstIterator:
     public std::iterator<std::random_access_iterator_tag, _elementType>
 {
@@ -112,7 +112,7 @@ public:
 
 protected:
     value_type * DataPtr;
-    int CurrentColumn;
+    difference_type CurrentColumn;
 
     enum {ROW_FIRST_INDEX = (ROW_STRIDE >= NUM_COLUMNS * COL_STRIDE)};
 
@@ -157,7 +157,7 @@ public:
       \param initialColumn column index where the iterator is initialized
     */
     explicit vctFixedStrideMatrixConstIterator(value_type * dataPtr, 
-        int initialColumn = 0)
+                                               index_type initialColumn = 0)
         : DataPtr(dataPtr)
         , CurrentColumn(initialColumn) {
         CMN_ASSERT(ROW_STRIDE * COL_STRIDE > 0);
@@ -177,7 +177,7 @@ public:
       \param initialColumn column index where the iterator is initialized
     */
     explicit vctFixedStrideMatrixConstIterator(const value_type * dataPtr,
-        int initialColumn = 0)
+                                               index_type initialColumn = 0)
         : DataPtr(const_cast<value_type *>(dataPtr))
         , CurrentColumn(initialColumn) {
         CMN_ASSERT(ROW_STRIDE * COL_STRIDE > 0);
@@ -323,7 +323,7 @@ public:
 
 
 /*! const_iterator + difference_type required by STL */
-template<class _elementType, int _columnStride, unsigned int _numColumns, int _rowStride>
+template <class _elementType, vct::stride_type _columnStride, vct::index_type _numColumns, vct::stride_type _rowStride>
 vctFixedStrideMatrixConstIterator<_elementType, _columnStride, _numColumns,_rowStride>
 operator+(const vctFixedStrideMatrixConstIterator<_elementType, _columnStride, _numColumns, _rowStride> & iterator,
           typename vctFixedStrideMatrixConstIterator<_elementType, _columnStride, _numColumns, _rowStride>::difference_type difference)
@@ -333,7 +333,7 @@ operator+(const vctFixedStrideMatrixConstIterator<_elementType, _columnStride, _
 }
 
 /*! difference_type + const_iterator required by STL */
-template<class _elementType, int _columnStride, unsigned int _numColumns, int _rowStride>
+template <class _elementType, vct::stride_type _columnStride, vct::index_type _numColumns, vct::stride_type _rowStride>
 vctFixedStrideMatrixConstIterator<_elementType, _columnStride, _numColumns, _rowStride>
 operator+(typename vctFixedStrideMatrixConstIterator<_elementType, _columnStride, _numColumns, _rowStride>::difference_type difference,
           const vctFixedStrideMatrixConstIterator<_elementType, _columnStride, _numColumns, _rowStride> & iterator)
@@ -343,7 +343,7 @@ operator+(typename vctFixedStrideMatrixConstIterator<_elementType, _columnStride
 }
 
 /*! const_iterator - difference_type required by STL */
-template<class _elementType, int _columnStride, unsigned int _numColumns, int _rowStride>
+template <class _elementType, vct::stride_type _columnStride, vct::index_type _numColumns, vct::stride_type _rowStride>
 vctFixedStrideMatrixConstIterator<_elementType, _columnStride, _numColumns, _rowStride>
 operator-(const vctFixedStrideMatrixConstIterator<_elementType, _columnStride, _numColumns, _rowStride> & iterator,
           typename vctFixedStrideMatrixConstIterator<_elementType, _columnStride, _numColumns,_rowStride>::difference_type difference)
@@ -354,7 +354,7 @@ operator-(const vctFixedStrideMatrixConstIterator<_elementType, _columnStride, _
 
 
 /*! \sa vctFixedStrideMatrixConstIterator */
-template<class _elementType, int _columnStride, unsigned int _numColumns, int _rowStride>
+template <class _elementType, vct::stride_type _columnStride, vct::index_type _numColumns, vct::stride_type _rowStride>
 class vctFixedStrideMatrixIterator:
     public vctFixedStrideMatrixConstIterator<_elementType, _columnStride, _numColumns, _rowStride>
 {
@@ -376,8 +376,8 @@ public:
       there is no constructor that takes a const element pointer.
     */
     explicit vctFixedStrideMatrixIterator(value_type * dataPtr,
-        int initialColumn = 0)
-        : BaseType(dataPtr, initialColumn) 
+                                          index_type initialColumn = 0)
+        : BaseType(dataPtr, initialColumn)
     {}
 
 
@@ -444,7 +444,7 @@ public:
 
 
 /*! iterator + difference_type required by STL */
-template<class _elementType, int _columnStride, unsigned int _numColumns, int _rowStride>
+template <class _elementType, vct::stride_type _columnStride, vct::index_type _numColumns, vct::stride_type _rowStride>
 vctFixedStrideMatrixIterator<_elementType, _columnStride,_numColumns, _rowStride>
 operator+(const vctFixedStrideMatrixIterator<_elementType, _columnStride, _numColumns, _rowStride> & iterator,
           typename vctFixedStrideMatrixIterator<_elementType,_columnStride, _numColumns, _rowStride>::difference_type difference)
@@ -454,7 +454,7 @@ operator+(const vctFixedStrideMatrixIterator<_elementType, _columnStride, _numCo
 }
 
 /*! difference_type + iterator required by STL */
-template<class _elementType, int _columnStride, unsigned int _numColumns, int _rowStride>
+template <class _elementType, vct::stride_type _columnStride, vct::index_type _numColumns, vct::stride_type _rowStride>
 vctFixedStrideMatrixIterator< _elementType, _columnStride, _numColumns, _rowStride>
 operator+(typename vctFixedStrideMatrixIterator< _elementType, _columnStride, _numColumns, _rowStride>::difference_type difference,
           const vctFixedStrideMatrixIterator<_elementType, _columnStride, _numColumns, _rowStride> & iterator)
@@ -464,7 +464,7 @@ operator+(typename vctFixedStrideMatrixIterator< _elementType, _columnStride, _n
 }
 
 /*! iterator - difference_type required by STL */
-template<class _elementType, int _columnStride, unsigned int _numColumns, int _rowStride>
+template <class _elementType, vct::stride_type _columnStride, vct::index_type _numColumns, vct::stride_type _rowStride>
 vctFixedStrideMatrixIterator<_elementType, _columnStride, _numColumns, _rowStride>
 operator-(const vctFixedStrideMatrixIterator<_elementType, _columnStride, _numColumns, _rowStride> & iterator,
           typename vctFixedStrideMatrixIterator<_elementType, _columnStride, _numColumns, _rowStride>::difference_type difference)

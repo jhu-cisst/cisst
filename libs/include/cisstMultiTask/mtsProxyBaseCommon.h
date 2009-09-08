@@ -299,9 +299,9 @@ public:
     //-----------------------------------------------------
     inline bool IsInitalized(void) const  { return InitSuccessFlag; }
     
-    inline const Ice::LoggerPtr GetLogger() const { return IceLogger; }
+    inline const Ice::LoggerPtr GetLogger(void) const { return IceLogger; }
 
-    inline Ice::CommunicatorPtr GetIceCommunicator() const { return IceCommunicator; }
+    inline Ice::CommunicatorPtr GetIceCommunicator(void) const { return IceCommunicator; }
 };
 
 #endif // _mtsProxyBaseCommon_h

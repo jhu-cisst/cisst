@@ -559,18 +559,18 @@ public:
       \param input The input vector
       \param output The output vector
     */
-    template<int __stride1, class __dataPtrType1, int __stride2, class __dataPtrType2>
+    template <stride_type __stride1, class __dataPtrType1, stride_type __stride2, class __dataPtrType2>
     inline void
     ApplyTo(const vctFixedSizeConstVectorBase<DIMENSION, __stride1, value_type, __dataPtrType1> & input,
             vctFixedSizeVectorBase<DIMENSION, __stride2, value_type, __dataPtrType2> & output) const
     {
         CMN_ASSERT(input.Pointer() != output.Pointer());
         vctQuaternionVectorProductByElements(this->X(), this->Y(), this->Z(), this->R(),
-            input.X(), input.Y(), input.Z(), output);
+                                             input.X(), input.Y(), input.Z(), output);
     }
 
 
-    template<class __vectorOwnerType, int __stride, class __dataPtrType>
+    template <class __vectorOwnerType, stride_type __stride, class __dataPtrType>
     inline void
     ApplyTo(const vctDynamicConstVectorBase<__vectorOwnerType, value_type> & input,
             vctFixedSizeVectorBase<DIMENSION, __stride, value_type, __dataPtrType> & output) const
@@ -578,7 +578,7 @@ public:
         CMN_ASSERT(input.Pointer() != output.Pointer());
         CMN_ASSERT(input.size() == DIMENSION);
         vctQuaternionVectorProductByElements(this->X(), this->Y(), this->Z(), this->R(),
-            input.X(), input.Y(), input.Z(), output);
+                                             input.X(), input.Y(), input.Z(), output);
     }
 
 
@@ -590,7 +590,7 @@ public:
       \param input The input vector
       \return The output vector
     */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline vctFixedSizeVector<value_type, DIMENSION>
     ApplyTo(const vctFixedSizeConstVectorBase<DIMENSION, __stride, value_type, __dataPtrType> & input) const
     {
@@ -599,7 +599,7 @@ public:
         return result;
     }
 
-    template<class __vectorOwnerType>
+    template <class __vectorOwnerType>
     inline vctFixedSizeVector<value_type, DIMENSION>
     ApplyTo(const vctDynamicConstVectorBase<__vectorOwnerType, value_type> & input) const
     {
@@ -612,14 +612,14 @@ public:
 
     /*! Apply this rotation to a fixed size matrix with 3 rows.  The result is
       stored in another fixed matrix. */
-    template <unsigned int __cols, int __rowStride1, int __colStride1, class __dataPtrType1,
-              int __rowStride2, int __colStride2, class __dataPtrType2>
+    template <size_type __cols, stride_type __rowStride1, stride_type __colStride1, class __dataPtrType1,
+              stride_type __rowStride2, stride_type __colStride2, class __dataPtrType2>
     inline void ApplyTo(const vctFixedSizeConstMatrixBase<DIMENSION, __cols, __rowStride1, __colStride1, value_type, __dataPtrType1> & input,
                         vctFixedSizeMatrixBase<DIMENSION, __cols, __rowStride2, __colStride2, value_type, __dataPtrType2> & output) const
     {
         CMN_ASSERT(input.Pointer() != output.Pointer());
-        const unsigned int numCols = input.cols();
-        unsigned int col;
+        const size_type numCols = input.cols();
+        index_type col;
         for (col = 0; col < numCols; ++col) {
             vctFixedSizeConstVectorRef<value_type, DIMENSION, __rowStride1> inputCol(input.Column(col));
             vctFixedSizeVectorRef<value_type, DIMENSION, __rowStride2> outputCol(output.Column(col));
@@ -629,14 +629,14 @@ public:
 
     /*! Apply this rotation to a dynamic matrix with 3 rows.  The result is
       stored in another dynamic matrix. */
-    template<class __matrixOwnerType1, class __matrixOwnerType2>
+    template <class __matrixOwnerType1, class __matrixOwnerType2>
     inline void ApplyTo(const vctDynamicConstMatrixBase<__matrixOwnerType1, value_type> & input,
                         vctDynamicMatrixBase<__matrixOwnerType2, value_type> & output) const
     {
         CMN_ASSERT((input.rows() == DIMENSION) && (output.rows() == DIMENSION) && (input.cols() == output.cols()));
         CMN_ASSERT(input.Pointer() != output.Pointer());
-        const unsigned int numCols = input.cols();
-        unsigned int col;
+        const size_type numCols = input.cols();
+        index_type col;
         for (col = 0; col < numCols; ++col) {
             vctDynamicConstVectorRef<value_type> inputCol(input.Column(col));
             vctDynamicVectorRef<value_type> outputCol(output.Column(col));
@@ -677,7 +677,7 @@ public:
       into another dynamic vector passed by reference by the caller.
       It is assumed that both are of size 3.
     */
-    template<class _vectorOwnerType1, class _vectorOwnerType2>
+    template <class _vectorOwnerType1, class _vectorOwnerType2>
     inline void
     ApplyTo(const vctDynamicConstVectorBase<_vectorOwnerType1, value_type> & input,
             vctDynamicVectorBase<_vectorOwnerType2, value_type> & output) const
@@ -701,18 +701,18 @@ public:
       \param input The input vector
       \param output The output vector
     */
-    template<int __stride1, class __dataPtrType1, int __stride2, class __dataPtrType2>
+    template <stride_type __stride1, class __dataPtrType1, stride_type __stride2, class __dataPtrType2>
     inline void
     ApplyInverseTo(const vctFixedSizeConstVectorBase<DIMENSION, __stride1, value_type, __dataPtrType1> & input,
                    vctFixedSizeVectorBase<DIMENSION, __stride2, value_type, __dataPtrType2> & output) const
     {
         CMN_ASSERT(input.Pointer() != output.Pointer());
         vctQuaternionVectorProductByElements(-this->X(), -this->Y(), -this->Z(), this->R(),
-            input.X(), input.Y(), input.Z(), output);
+                                             input.X(), input.Y(), input.Z(), output);
     }
 
 
-    template<class __vectorOwnerType, int __stride, class __dataPtrType>
+    template <class __vectorOwnerType, stride_type __stride, class __dataPtrType>
     inline void
     ApplyInverseTo(const vctDynamicConstVectorBase<__vectorOwnerType, value_type> & input,
                    vctFixedSizeVectorBase<DIMENSION, __stride, value_type, __dataPtrType> & output) const
@@ -720,7 +720,7 @@ public:
         CMN_ASSERT(input.Pointer() != output.Pointer());
         CMN_ASSERT(input.size() == DIMENSION);
         vctQuaternionVectorProductByElements(-this->X(), -this->Y(), -this->Z(), this->R(),
-            input.X(), input.Y(), input.Z(), output);
+                                             input.X(), input.Y(), input.Z(), output);
     }
 
 
@@ -732,7 +732,7 @@ public:
       \param input The input vector
       \return The output vector
     */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline vctFixedSizeVector<value_type, DIMENSION>
     ApplyInverseTo(const vctFixedSizeConstVectorBase<DIMENSION, __stride, value_type, __dataPtrType> & input) const
     {
@@ -741,7 +741,7 @@ public:
         return result;
     }
     
-    template<class __vectorOwnerType>
+    template <class __vectorOwnerType>
     inline vctFixedSizeVector<value_type, DIMENSION>
     ApplyInverseTo(const vctDynamicConstVectorBase<__vectorOwnerType, value_type> & input) const
     {
@@ -754,14 +754,14 @@ public:
 
     /*! Apply this inverse rotation to a fixed size matrix with 3 rows.  The result is
       stored in another fixed matrix. */
-    template <unsigned int __cols, int __rowStride1, int __colStride1, class __dataPtrType1,
-              int __rowStride2, int __colStride2, class __dataPtrType2>
+    template <size_type __cols, stride_type __rowStride1, stride_type __colStride1, class __dataPtrType1,
+              stride_type __rowStride2, stride_type __colStride2, class __dataPtrType2>
     inline void ApplyInverseTo(const vctFixedSizeConstMatrixBase<DIMENSION, __cols, __rowStride1, __colStride1, value_type, __dataPtrType1> & input,
-                        vctFixedSizeMatrixBase<DIMENSION, __cols, __rowStride2, __colStride2, value_type, __dataPtrType2> & output) const
+                               vctFixedSizeMatrixBase<DIMENSION, __cols, __rowStride2, __colStride2, value_type, __dataPtrType2> & output) const
     {
         CMN_ASSERT(input.Pointer() != output.Pointer());
-        const unsigned int numCols = input.cols();
-        unsigned int col;
+        const size_type numCols = input.cols();
+        index_type col;
         for (col = 0; col < numCols; ++col) {
             vctFixedSizeConstVectorRef<value_type, DIMENSION, __rowStride1> inputCol(input.Column(col));
             vctFixedSizeVectorRef<value_type, DIMENSION, __rowStride2> outputCol(output.Column(col));
@@ -801,7 +801,7 @@ public:
       The result is stored into another dynamic vector passed by
       reference by the caller.  It is assumed that both are of size 3.
     */
-    template<class _vectorOwnerType1, class _vectorOwnerType2>
+    template <class _vectorOwnerType1, class _vectorOwnerType2>
     inline void
     ApplyInverseTo(const vctDynamicConstVectorBase<_vectorOwnerType1, value_type> & input,
                    vctDynamicVectorBase<_vectorOwnerType2, value_type> & output) const
@@ -819,14 +819,14 @@ public:
 
     /*! Apply this rotation inverse to a dynamic matrix with 3 rows.  The result is
       stored in another dynamic matrix. */
-    template<class __matrixOwnerType1, class __matrixOwnerType2>
+    template <class __matrixOwnerType1, class __matrixOwnerType2>
     inline void ApplyInverseTo(const vctDynamicConstMatrixBase<__matrixOwnerType1, value_type> & input,
                         vctDynamicMatrixBase<__matrixOwnerType2, value_type> & output) const
     {
         CMN_ASSERT((input.rows() == DIMENSION) && (output.rows() == DIMENSION) && (input.cols() == output.cols()));
         CMN_ASSERT(input.Pointer() != output.Pointer());
-        const unsigned int numCols = input.cols();
-        unsigned int col;
+        const size_type numCols = input.cols();
+        index_type col;
         for (col = 0; col < numCols; ++col) {
             vctDynamicConstVectorRef<value_type> inputCol(input.Column(col));
             vctDynamicVectorRef<value_type> outputCol(output.Column(col));
@@ -893,7 +893,7 @@ public:
       From(vctAxisAngleRotation3) instead.
    
     */
-    template <int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline CISST_DEPRECATED const ThisType &
     From(const vctFixedSizeConstVectorBase<3, __stride, value_type, __dataPtrType> & axis,
          const AngleType & angle) {
@@ -920,7 +920,7 @@ public:
       \note This method is deprecated.  Use
       From(vctRodriguezRotation3Base) instead.
     */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline CISST_DEPRECATED const ThisType & 
     From(const vctFixedSizeConstVectorBase<3, __stride, value_type, __dataPtrType> & rodriguezRotation) {
 	const value_type axisLength = rodriguezRotation.Norm();
@@ -942,7 +942,7 @@ public:
 
       \note This method is deprecated.  Use vctAxisAngleRotation3.From() instead.
     */
-    template <int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline CISST_DEPRECATED
     void GetAxisAngle(vctFixedSizeVectorBase<3, __stride, value_type, __dataPtrType> & axis,
                       value_type & angle) {
@@ -964,7 +964,7 @@ public:
 
 
 
-template<class _containerType, class _elementType, int _stride, class _dataPtrType>
+template <class _containerType, class _elementType, vct::stride_type _stride, class _dataPtrType>
 inline vctFixedSizeVector<_elementType, 3>
 operator * (const vctQuaternionRotation3Base<_containerType> & rotationQuaternion,
             const vctFixedSizeConstVectorBase<3, _stride, _elementType, _dataPtrType> & vector) {
@@ -973,7 +973,7 @@ operator * (const vctQuaternionRotation3Base<_containerType> & rotationQuaternio
     return result;
 }
 
-template<class _containerType, class _elementType, class _vectorOwnerType>
+template <class _containerType, class _elementType, class _vectorOwnerType>
 inline vctFixedSizeVector<_elementType, 3>
 operator * (const vctQuaternionRotation3Base<_containerType> & rotationQuaternion,
             const vctDynamicConstVectorBase<_vectorOwnerType, _elementType> & vector) {
@@ -989,7 +989,7 @@ operator * (const vctQuaternionRotation3Base<_containerType> & rotationQuaternio
   the conjugate of q.  This is the basic operation in applying a quaternion
   rotation.
 */
-template<class _elementType, int __strideOut, class __dataPtrTypeOut>
+template <class _elementType, vct::stride_type __strideOut, class __dataPtrTypeOut>
 inline void vctQuaternionVectorProductByElements(
      const _elementType qX, const _elementType qY, const _elementType qZ, const _elementType qR,
      const _elementType vX, const _elementType vY, const _elementType vZ,

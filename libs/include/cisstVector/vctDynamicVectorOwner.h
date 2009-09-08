@@ -74,7 +74,7 @@ public:
         return Size;
     }
 
-    int stride() const
+    stride_type stride(void) const
     {
         return DEFAULT_STRIDE;
     }

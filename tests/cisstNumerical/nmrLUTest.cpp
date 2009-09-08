@@ -28,10 +28,10 @@ http://www.cisst.org/cisst/license.txt.
 
 
 void nmrLUTest::TestDynamicDataColumnMajor(void) {
-    int rows, cols;
+    vct::size_type rows, cols;
     cmnRandomSequence & randomSequence = cmnRandomSequence::GetInstance();
-    randomSequence.ExtractRandomValue(10, 20, rows);
-    randomSequence.ExtractRandomValue(10, 20, cols);
+    randomSequence.ExtractRandomValue(static_cast<vct::size_type>(10), static_cast<vct::size_type>(20), rows);
+    randomSequence.ExtractRandomValue(static_cast<vct::size_type>(10), static_cast<vct::size_type>(20), cols);
     vctDynamicMatrix<double> input(rows, cols , VCT_COL_MAJOR);
     vctRandom(input, 0.0, 10.0);
     vctDynamicMatrix<double> output(rows, cols, VCT_COL_MAJOR);
@@ -43,16 +43,16 @@ void nmrLUTest::TestDynamicDataColumnMajor(void) {
 
 
 void nmrLUTest::TestDynamicUserOutputColumnMajor(void) {
-    int rows, cols;
+    vct::size_type rows, cols;
     cmnRandomSequence & randomSequence = cmnRandomSequence::GetInstance();
-    randomSequence.ExtractRandomValue(10, 20, rows);
-    randomSequence.ExtractRandomValue(10, 20, cols);
+    randomSequence.ExtractRandomValue(static_cast<vct::size_type>(10), static_cast<vct::size_type>(20), rows);
+    randomSequence.ExtractRandomValue(static_cast<vct::size_type>(10), static_cast<vct::size_type>(20), cols);
     vctDynamicMatrix<double> input(rows, cols , VCT_COL_MAJOR);
     vctRandom(input, 0.0, 10.0);
     vctDynamicMatrix<double> output(rows, cols, VCT_COL_MAJOR);
     output.Assign(input);
 
-    const unsigned int minmn = (rows > cols) ? cols : rows;
+    const vct::size_type minmn = (rows > cols) ? cols : rows;
     vctDynamicVector<F_INTEGER> pivotIndices(minmn);
     nmrLU(output, pivotIndices);
     nmrLUTest::GenericTestDynamic(input, output, pivotIndices);
@@ -61,7 +61,7 @@ void nmrLUTest::TestDynamicUserOutputColumnMajor(void) {
 
 
 
-template <unsigned int _rows, unsigned int _cols, unsigned int _minmn> 
+template <vct::size_type _rows, vct::size_type _cols, vct::size_type _minmn> 
 void nmrLUTest::GenericTestFixedSize(const vctFixedSizeMatrix<double, _rows, _cols, VCT_COL_MAJOR> & input,
                                      const vctFixedSizeMatrix<double, _rows, _cols, VCT_COL_MAJOR> & output,
                                      const vctFixedSizeVector<F_INTEGER, _minmn> & pivotIndices) {

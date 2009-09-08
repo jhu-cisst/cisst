@@ -41,7 +41,7 @@ http://www.cisst.org/cisst/license.txt.
 
   \sa vctDynamicConstNArrayBase
 */
-template<class _nArrayOwnerType, typename _elementType, unsigned int _dimension>
+template<class _nArrayOwnerType, typename _elementType, vct::size_type _dimension>
 class vctDynamicNArrayBase: public vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dimension>
 {
 public:
@@ -375,7 +375,7 @@ public:
       \param other The nArray to be copied.
     */
     //@{
-    template<class __nArrayOwnerType, typename __elementType>
+    template <class __nArrayOwnerType, typename __elementType>
     inline ThisType & Assign(const vctDynamicConstNArrayBase<__nArrayOwnerType, __elementType, DIMENSION> & other)
     {
         vctDynamicNArrayLoopEngines<DIMENSION>::template
@@ -385,7 +385,7 @@ public:
         return *this;
     }
 
-    template<class __nArrayOwnerType, typename __elementType>
+    template <class __nArrayOwnerType, typename __elementType>
     inline ThisType & operator = (const vctDynamicConstNArrayBase<__nArrayOwnerType, __elementType, DIMENSION> & other)
     {
         return this->Assign(other);
@@ -507,7 +507,7 @@ public:
         to turn off the different safety checks for each FastCopyOf.
         \code
         bool canUseFastCopy = destination.FastCopyPossible(source);
-        unsigned int index;
+        vct::index_type index;
         for (index = 0; index < 1000; index++) {
             DoSomethingUseful(source);
             if (canUseFastCopy) {
@@ -524,7 +524,7 @@ public:
         avoid safety checks, use with extreme caution.
      */
     //@{
-    template<class __nArrayOwnerType>
+    template <class __nArrayOwnerType>
     inline bool FastCopyOf(const vctDynamicConstNArrayBase<__nArrayOwnerType, value_type, DIMENSION> & source,
                            bool performSafetyChecks = true)
         throw(std::runtime_error)
@@ -550,7 +550,7 @@ public:
       
       \return The nArray "this" modified.
     */
-    template<class __nArrayOwnerType1, class __nArrayOwnerType2>
+    template <class __nArrayOwnerType1, class __nArrayOwnerType2>
     inline ThisType & SumOf(const vctDynamicConstNArrayBase<__nArrayOwnerType1, value_type, DIMENSION> & nArray1,
                             const vctDynamicConstNArrayBase<__nArrayOwnerType2, value_type, DIMENSION> & nArray2)
     {
@@ -561,7 +561,7 @@ public:
     }    
     
     /* documented above */
-    template<class __nArrayOwnerType1, class __nArrayOwnerType2>
+    template <class __nArrayOwnerType1, class __nArrayOwnerType2>
     inline ThisType & DifferenceOf(const vctDynamicConstNArrayBase<__nArrayOwnerType1, value_type, DIMENSION> & nArray1,
                                    const vctDynamicConstNArrayBase<__nArrayOwnerType2, value_type, DIMENSION> & nArray2)
     {
@@ -572,7 +572,7 @@ public:
     }
     
     /* documented above */
-    template<class __nArrayOwnerType1, class __nArrayOwnerType2>
+    template <class __nArrayOwnerType1, class __nArrayOwnerType2>
     inline ThisType & ElementwiseProductOf(const vctDynamicConstNArrayBase<__nArrayOwnerType1, value_type, DIMENSION> & nArray1,
                                            const vctDynamicConstNArrayBase<__nArrayOwnerType2, value_type, DIMENSION> & nArray2)
     {
@@ -583,7 +583,7 @@ public:
     }
     
     /* documented above */
-    template<class __nArrayOwnerType1, class __nArrayOwnerType2>
+    template <class __nArrayOwnerType1, class __nArrayOwnerType2>
     inline ThisType & ElementwiseRatioOf(const vctDynamicConstNArrayBase<__nArrayOwnerType1, value_type, DIMENSION> & nArray1,
                                          const vctDynamicConstNArrayBase<__nArrayOwnerType2, value_type, DIMENSION> & nArray2)
     {
@@ -594,7 +594,7 @@ public:
     }
 
     /* documented above */
-    template<class __nArrayOwnerType1, class __nArrayOwnerType2>
+    template <class __nArrayOwnerType1, class __nArrayOwnerType2>
     inline ThisType & ElementwiseMinOf(const vctDynamicConstNArrayBase<__nArrayOwnerType1, value_type, DIMENSION> & nArray1,
                                        const vctDynamicConstNArrayBase<__nArrayOwnerType2, value_type, DIMENSION> & nArray2)
     {
@@ -605,7 +605,7 @@ public:
     }
 
     /* documented above */
-    template<class __nArrayOwnerType1, class __nArrayOwnerType2>
+    template <class __nArrayOwnerType1, class __nArrayOwnerType2>
     inline ThisType & ElementwiseMaxOf(const vctDynamicConstNArrayBase<__nArrayOwnerType1, value_type, DIMENSION> & nArray1,
                                        const vctDynamicConstNArrayBase<__nArrayOwnerType2, value_type, DIMENSION> & nArray2)
     {
@@ -634,7 +634,7 @@ public:
       
       \return The nArray "this" modified.
     */
-    template<class __nArrayOwnerType>
+    template <class __nArrayOwnerType>
     inline ThisType & Add(const vctDynamicConstNArrayBase<__nArrayOwnerType, value_type, DIMENSION> & otherNArray)
     {
         vctDynamicNArrayLoopEngines<DIMENSION>::template
@@ -644,7 +644,7 @@ public:
     }
 
     /* documented above */
-    template<class __nArrayOwnerType>
+    template <class __nArrayOwnerType>
     inline ThisType & Subtract(const vctDynamicConstNArrayBase<__nArrayOwnerType, value_type, DIMENSION> & otherNArray)
     {
         vctDynamicNArrayLoopEngines<DIMENSION>::template
@@ -654,7 +654,7 @@ public:
     }
     
     /* documented above */
-    template<class __nArrayOwnerType>
+    template <class __nArrayOwnerType>
     inline ThisType & ElementwiseMultiply(const vctDynamicConstNArrayBase<__nArrayOwnerType, value_type, DIMENSION> & otherNArray)
     {
         vctDynamicNArrayLoopEngines<DIMENSION>::template
@@ -664,7 +664,7 @@ public:
     }
     
     /* documented above */
-    template<class __nArrayOwnerType>
+    template <class __nArrayOwnerType>
     inline ThisType & ElementwiseDivide(const vctDynamicConstNArrayBase<__nArrayOwnerType, value_type, DIMENSION> & otherNArray)
     {
         vctDynamicNArrayLoopEngines<DIMENSION>::template
@@ -674,7 +674,7 @@ public:
     }
     
     /* documented above */
-    template<class __nArrayOwnerType>
+    template <class __nArrayOwnerType>
     inline ThisType & ElementwiseMin(const vctDynamicConstNArrayBase<__nArrayOwnerType, value_type, DIMENSION> & otherNArray)
     {
         vctDynamicNArrayLoopEngines<DIMENSION>::template
@@ -684,7 +684,7 @@ public:
     }
 
     /* documented above */
-    template<class __nArrayOwnerType>
+    template <class __nArrayOwnerType>
     inline ThisType & ElementwiseMax(const vctDynamicConstNArrayBase<__nArrayOwnerType, value_type, DIMENSION> & otherNArray)
     {
         vctDynamicNArrayLoopEngines<DIMENSION>::template
@@ -694,14 +694,14 @@ public:
     }
 
     /* documented above */
-    template<class __nArrayOwnerType>
+    template <class __nArrayOwnerType>
     inline ThisType & operator += (const vctDynamicConstNArrayBase<__nArrayOwnerType, value_type, DIMENSION> & otherNArray)
     {
         return this->Add(otherNArray);
     }
     
     /* documented above */
-    template<class __nArrayOwnerType>
+    template <class __nArrayOwnerType>
     inline ThisType & operator -= (const vctDynamicConstNArrayBase<__nArrayOwnerType, value_type, DIMENSION> & otherNArray)
     {
         return this->Subtract(otherNArray);
@@ -724,7 +724,7 @@ public:
       
       \return The nArray "this" modified.
     */
-    template<class __nArrayOwnerType>
+    template <class __nArrayOwnerType>
     inline ThisType & SumOf(const vctDynamicConstNArrayBase<__nArrayOwnerType, value_type, DIMENSION> & nArray, 
                             const value_type scalar)
     {
@@ -735,7 +735,7 @@ public:
     }
     
     /* documented above */
-    template<class __nArrayOwnerType>
+    template <class __nArrayOwnerType>
     inline ThisType & DifferenceOf(const vctDynamicConstNArrayBase<__nArrayOwnerType, value_type, DIMENSION> & nArray,
                                    const value_type scalar)
     {
@@ -746,7 +746,7 @@ public:
     }
     
     /* documented above */    
-    template<class __nArrayOwnerType>
+    template <class __nArrayOwnerType>
     inline ThisType & ProductOf(const vctDynamicConstNArrayBase<__nArrayOwnerType, value_type, DIMENSION> & nArray,
                                 const value_type scalar)
     {
@@ -757,7 +757,7 @@ public:
     }
     
     /* documented above */
-    template<class __nArrayOwnerType>
+    template <class __nArrayOwnerType>
     inline ThisType & RatioOf(const vctDynamicConstNArrayBase<__nArrayOwnerType, value_type, DIMENSION> & nArray,
                               const value_type scalar)
     {
@@ -768,7 +768,7 @@ public:
     }
 
     /* documented above */
-    template<class __nArrayOwnerType>
+    template <class __nArrayOwnerType>
     inline ThisType & ClippedAboveOf(const vctDynamicConstNArrayBase<__nArrayOwnerType, value_type, DIMENSION> & nArray,
                                      const value_type lowerBound)
     {
@@ -779,7 +779,7 @@ public:
     }
 
     /* documented above */
-    template<class __nArrayOwnerType>
+    template <class __nArrayOwnerType>
     inline ThisType & ClippedBelowOf(const vctDynamicConstNArrayBase<__nArrayOwnerType, value_type, DIMENSION> & nArray,
                                      const value_type upperBound)
     {
@@ -807,7 +807,7 @@ public:
       
       \return The nArray "this" modified.
     */
-    template<class __nArrayOwnerType>
+    template <class __nArrayOwnerType>
     inline ThisType & SumOf(const value_type scalar,
                             const vctDynamicConstNArrayBase<__nArrayOwnerType, value_type, DIMENSION> & nArray)
     {
@@ -818,7 +818,7 @@ public:
     }
     
     /* documented above */
-    template<class __nArrayOwnerType>
+    template <class __nArrayOwnerType>
     inline ThisType & DifferenceOf(const value_type scalar,
                                    const vctDynamicConstNArrayBase<__nArrayOwnerType, value_type, DIMENSION> & nArray)
     {
@@ -829,7 +829,7 @@ public:
     }
     
     /* documented above */
-    template<class __nArrayOwnerType>
+    template <class __nArrayOwnerType>
     inline ThisType & ProductOf(const value_type scalar,
                                 const vctDynamicConstNArrayBase<__nArrayOwnerType, value_type, DIMENSION> & nArray)
     {
@@ -840,7 +840,7 @@ public:
     }
     
     /* documented above */
-    template<class __nArrayOwnerType>
+    template <class __nArrayOwnerType>
     inline ThisType & RatioOf(const value_type scalar,
                               const vctDynamicConstNArrayBase<__nArrayOwnerType, value_type, DIMENSION> & nArray)
     {
@@ -851,7 +851,7 @@ public:
     }
 
     /* documented above */
-    template<class __nArrayOwnerType>
+    template <class __nArrayOwnerType>
     inline ThisType & ClippedAboveOf(const value_type upperBound,
                                      const vctDynamicConstNArrayBase<__nArrayOwnerType, value_type, DIMENSION> & nArray)
     {
@@ -862,7 +862,7 @@ public:
     }
 
     /* documented above */
-    template<class __nArrayOwnerType>
+    template <class __nArrayOwnerType>
     inline ThisType & ClippedBelowOf(const value_type lowerBound,
                                      const vctDynamicConstNArrayBase<__nArrayOwnerType, value_type, DIMENSION> & nArray)
     {
@@ -968,7 +968,7 @@ public:
     //@}
 
 
-    template<class __nArrayOwnerType>
+    template <class __nArrayOwnerType>
     inline ThisType & AddProductOf(const value_type scalar,
                                    const vctDynamicConstNArrayBase<__nArrayOwnerType, value_type, DIMENSION> & otherNArray)
     {
@@ -993,7 +993,7 @@ public:
       
       \return The nArray "this" modified.
     */
-    template<class __nArrayOwnerType>
+    template <class __nArrayOwnerType>
     inline ThisType & AbsOf(const vctDynamicConstNArrayBase<__nArrayOwnerType, value_type, DIMENSION> & otherNArray)
     {
         vctDynamicNArrayLoopEngines<DIMENSION>::template
@@ -1003,7 +1003,7 @@ public:
     }
 
     /* documented above */
-    template<class __nArrayOwnerType>
+    template <class __nArrayOwnerType>
     inline ThisType & NegationOf(const vctDynamicConstNArrayBase<__nArrayOwnerType, value_type, DIMENSION> & otherNArray)
     {
         vctDynamicNArrayLoopEngines<DIMENSION>::template
@@ -1013,7 +1013,7 @@ public:
     }
 
     /* documented above */
-    template<class __nArrayOwnerType>
+    template <class __nArrayOwnerType>
     inline ThisType & FloorOf(const vctDynamicConstNArrayBase<__nArrayOwnerType, value_type, DIMENSION> & otherNArray)
     {
         vctDynamicNArrayLoopEngines<DIMENSION>::template
@@ -1023,7 +1023,7 @@ public:
     }
 
     /* documented above */
-    template<class __nArrayOwnerType>
+    template <class __nArrayOwnerType>
     inline ThisType & CeilOf(const vctDynamicConstNArrayBase<__nArrayOwnerType, value_type, DIMENSION> & otherNArray)
     {
         vctDynamicNArrayLoopEngines<DIMENSION>::template

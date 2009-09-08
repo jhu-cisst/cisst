@@ -117,9 +117,9 @@ class vctDynamicNArrayTest : public CppUnit::TestFixture
     void tearDown(void) {
     }
     
-    typedef unsigned int size_type;
-    typedef unsigned int dimension_type;
-    typedef int stride_type;
+    typedef vct::size_type size_type;
+    typedef vct::size_type dimension_type;
+    typedef vct::stride_type stride_type;
 
     /*! Test assignments */
     template<class _elementType>

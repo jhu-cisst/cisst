@@ -46,7 +46,7 @@ http://www.cisst.org/cisst/license.txt.
   need to be changed.
 */
 
-template <class _nArrayOwnerType, typename _elementType, unsigned int _dimension>
+template <class _nArrayOwnerType, typename _elementType, vct::size_type _dimension>
 void vctRandom(vctDynamicNArrayBase<_nArrayOwnerType, _elementType, _dimension> & nArray,
                const typename vctDynamicNArrayBase<_nArrayOwnerType, _elementType, _dimension>::value_type min,
                const typename vctDynamicNArrayBase<_nArrayOwnerType, _elementType, _dimension>::value_type max)

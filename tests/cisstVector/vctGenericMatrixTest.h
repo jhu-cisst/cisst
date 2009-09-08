@@ -46,9 +46,11 @@ public:
     static void TestAssignment(const _containerType1 & matrix1,
                                _containerType2 & matrix2) {
         typedef typename _containerType1::value_type value_type;
-        unsigned int colIndex, rowIndex;
-        const unsigned int cols = matrix1.cols();
-        const unsigned int rows = matrix1.rows();
+        typedef typename _containerType1::size_type size_type;
+        typedef typename _containerType1::index_type index_type;
+        index_type colIndex, rowIndex;
+        const size_type cols = matrix1.cols();
+        const size_type rows = matrix1.rows();
 
 		// Test a simple assignment of one matrix to another.
         vctRandom(matrix2, value_type(-10), value_type(10));
@@ -94,9 +96,11 @@ public:
     template <class _containerType1>
     static void TestZeros(_containerType1 & matrix1) {
         typedef typename _containerType1::value_type value_type;
-        unsigned int colIndex, rowIndex;
-        const unsigned int cols = matrix1.cols();
-        const unsigned int rows = matrix1.rows();
+        typedef typename _containerType1::size_type size_type;
+        typedef typename _containerType1::index_type index_type;
+        index_type colIndex, rowIndex;
+        const size_type cols = matrix1.cols();
+        const size_type rows = matrix1.rows();
 
         vctRandom(matrix1, value_type(-10), value_type(10));
         bool result = matrix1.Zeros();
@@ -120,10 +124,12 @@ public:
     static void TestAccessMethods(_containerType1 & matrix1,
                                   const _containerType2 & matrix2) {
         typedef typename _containerType1::value_type value_type;
-        unsigned int index, rowIndex, colIndex;
-        const unsigned int size = matrix2.size();
-        const unsigned int rows = matrix2.rows();
-        const unsigned int cols = matrix2.cols();
+        typedef typename _containerType1::size_type size_type;
+        typedef typename _containerType1::index_type index_type;
+        index_type index, rowIndex, colIndex;
+        const size_type size = matrix2.size();
+        const size_type rows = matrix2.rows();
+        const size_type cols = matrix2.cols();
         
         value_type element;
         index = 0;
@@ -247,10 +253,13 @@ public:
                            _outputRowSelectionType & outputRowSelection,
                            _outputColSelectionType & outputColSelection)
     {
-        const unsigned int inputRows = inputMatrix.rows();
-        const unsigned int inputCols = inputMatrix.cols();
-        const unsigned int outputRows = outputRowSelection.rows();
-        const unsigned int outputCols = outputColSelection.cols();
+        typedef typename _inputMatrixType::size_type size_type;
+        typedef typename _inputMatrixType::index_type index_type;
+
+        const size_type inputRows = inputMatrix.rows();
+        const size_type inputCols = inputMatrix.cols();
+        const size_type outputRows = outputRowSelection.rows();
+        const size_type outputCols = outputColSelection.cols();
 
         CPPUNIT_ASSERT(rowIndexes.size() == outputRows);
         CPPUNIT_ASSERT(colIndexes.size() == outputCols);
@@ -264,27 +273,26 @@ public:
         outputRowSelection.SelectRowsFrom(inputMatrix, rowIndexes);
         outputColSelection.SelectColsFrom(inputMatrix, colIndexes);
 
-        unsigned int indx;
+        index_type indx;
         for (indx = 0; indx < outputRows; ++indx) {
             CPPUNIT_ASSERT( outputRowSelection.Row(indx).Equal(inputMatrix.Row( rowIndexes[indx] )) );
         }
         for (indx = 0; indx < outputCols; ++indx) {
             CPPUNIT_ASSERT( outputColSelection.Column(indx).Equal(inputMatrix.Column( colIndexes[indx] )) );
         }
-
     }
 
-    template<class _matrixType1>
+    template <class _matrixType1>
     static void TestExchangeAndPermutationOperations(_matrixType1 & matrix,
-        const unsigned int row1, const unsigned int row2,
-        const unsigned int col1, const unsigned int col2,
-        const unsigned int rowPermutation[], const unsigned int colPermutation[] )
+                                                     const vct::size_type row1, const vct::size_type row2,
+                                                     const vct::size_type col1, const vct::size_type col2,
+                                                     const vct::index_type rowPermutation[], const vct::index_type colPermutation[] )
     {
-        const unsigned int rows = matrix.rows();
-        const unsigned int cols = matrix.cols();
+        const vct::size_type rows = matrix.rows();
+        const vct::size_type cols = matrix.cols();
         _matrixType1 matrixCopy(matrix);
 
-        unsigned int counter;
+        vct::index_type counter;
         matrix.ExchangeRows(row1, row2);
         CPPUNIT_ASSERT( matrixCopy.Row(row1) == matrix.Row(row2) );
         CPPUNIT_ASSERT( matrixCopy.Row(row2) == matrix.Row(row1) );
@@ -338,11 +346,13 @@ public:
                                                   typename _matrixType1::value_type tolerance
                                                   = cmnTypeTraits<typename _matrixType1::value_type>::Tolerance()) {
         typedef typename _matrixType1::value_type value_type;
-        unsigned int rowIndex, colIndex, index;
+        typedef typename _matrixType1::size_type size_type;
+        typedef typename _matrixType1::index_type index_type;
+        index_type rowIndex, colIndex, index;
         value_type sum;
-        const unsigned int rows = matrix1.rows();
-        const unsigned int cols = matrix2.cols();
-        const unsigned int common = matrix1.cols();
+        const size_type rows = matrix1.rows();
+        const size_type cols = matrix2.cols();
+        const size_type common = matrix1.cols();
         
         matrix3.ProductOf(matrix1, matrix2);
         for (rowIndex = 0; rowIndex < rows; rowIndex++) {
@@ -407,10 +417,12 @@ public:
                                                   typename _matrixType1::value_type tolerance
                                                   = cmnTypeTraits<typename _matrixType1::value_type>::Tolerance()) {
         typedef typename _matrixType1::value_type value_type;
-        unsigned int rowIndex, index;
+        typedef typename _matrixType1::size_type size_type;
+        typedef typename _matrixType1::index_type index_type;
+        index_type rowIndex, index;
         value_type sum;
-        const unsigned int rows = matrix1.rows();
-        const unsigned int common = matrix1.cols();
+        const size_type rows = matrix1.rows();
+        const size_type common = matrix1.cols();
         
         vector2.ProductOf(matrix1, vector1);
         for (rowIndex = 0; rowIndex < rows; rowIndex++) {
@@ -439,10 +451,12 @@ public:
                                                   typename _matrixType1::value_type tolerance
                                                   = cmnTypeTraits<typename _matrixType1::value_type>::Tolerance()) {
         typedef typename _matrixType1::value_type value_type;
-        unsigned int colIndex, index;
+        typedef typename _matrixType1::size_type size_type;
+        typedef typename _matrixType1::index_type index_type;
+        index_type colIndex, index;
         value_type sum;
-        const unsigned int common = matrix1.rows();
-        const unsigned int cols = matrix1.cols();
+        const size_type common = matrix1.rows();
+        const size_type cols = matrix1.cols();
         
         vector2.ProductOf(vector1, matrix1);
         for (colIndex = 0; colIndex < cols; colIndex++) {

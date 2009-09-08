@@ -59,7 +59,7 @@ public:
     //: Test if m1 and m2 are an inverse pair, by computing m1*m2 and m2*m1 and comparing
     // the result to the identity matrix.  The test passes if the absolute maximum
     // difference is less than the given tolerance.
-    template<class _elementType, unsigned int _size, bool _rowMajor1, bool _rowMajor2>
+    template <class _elementType, vct::size_type _size, bool _rowMajor1, bool _rowMajor2>
     void TestMatrixInverse(
         const vctFixedSizeMatrix<_elementType, _size, _size, _rowMajor1> & m1,
         const vctFixedSizeMatrix<_elementType, _size, _size, _rowMajor2> & m2,
@@ -68,19 +68,19 @@ public:
     //: This method creates a singular matrix from a given matrix m, by selecting
     // a random row and random coefficients, then setting the selected row to be
     // a linear combination of the other rows with corresponding coefficients.
-    template<class _elementType, unsigned int _size, bool _rowMajor>
+    template <class _elementType, vct::size_type _size, bool _rowMajor>
     void MakeSingularMatrix(vctFixedSizeMatrix<_elementType, _size, _size, _rowMajor> & m);
 
     //: Test that the inverse computed by nmrGaussJordanInverseNxN is an inverse, by creating
     // a random matrix, trying to compute its inverse, and then if it's nonsingular verify
     // the inverse property: A * A^{-1} = I, and A^{-1}^{-1} = A.
-    template<class _elementType>
+    template <class _elementType>
     void TestInverse4x4(void);
 
-    template<class _elementType>
+    template <class _elementType>
     void TestInverse3x3(void);
 
-    template<class _elementType>
+    template <class _elementType>
     void TestInverse2x2(void);
 
     void TestInverse4x4Double(void);
@@ -104,13 +104,13 @@ public:
     // good enough for us, and if an incorrect input is generated, we ignore that error.
     // Note that there are still some numerical stability issues that cause incorrect
     // detection, and these may shadow the other rare cases.
-    template<class _elementType>
+    template <class _elementType>
     void TestSingular4x4(void);
 
-    template<class _elementType>
+    template <class _elementType>
     void TestSingular3x3(void);
 
-    template<class _elementType>
+    template <class _elementType>
     void TestSingular2x2(void);
 
     void TestSingular4x4Double(void);

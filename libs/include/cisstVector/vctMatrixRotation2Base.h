@@ -181,8 +181,8 @@ public:
       By default the vectors represents the columns of the matrix. If
       the parameter vectorsAreColumns is set to false, the vectors
       provided will be used to set the matrix row by row. */
-    template <int __stride1, class __dataPtrType1,
-              int __stride2, class __dataPtrType2>
+    template <stride_type __stride1, class __dataPtrType1,
+              stride_type __stride2, class __dataPtrType2>
     inline vctMatrixRotation2Base(const vctFixedSizeConstVectorBase<2, __stride1, value_type, __dataPtrType1>& v1,
                                   const vctFixedSizeConstVectorBase<2, __stride2, value_type, __dataPtrType2>& v2,
                                   bool vectorsAreColumns = true)
@@ -276,8 +276,8 @@ public:
       By default the vectors represents the columns of the matrix. If
       the parameter vectorsAreColumns is set to false, the vectors
       provided will be used to set the matrix row by row. */
-    template <int __stride1, class __dataPtrType1,
-              int __stride2, class __dataPtrType2>
+    template <stride_type __stride1, class __dataPtrType1,
+              stride_type __stride2, class __dataPtrType2>
     inline vctMatrixRotation2Base(const vctFixedSizeConstVectorBase<DIMENSION, __stride1, value_type, __dataPtrType1>& v1,
                                   const vctFixedSizeConstVectorBase<DIMENSION, __stride2, value_type, __dataPtrType2>& v2,
                                   bool vectorsAreColumns, bool normalizeInput)
@@ -334,7 +334,7 @@ public:
       \note The constructor is declared explicit, to force the user to
       be aware of the conversion being made.
     */
-    template<int __rowStride, int __colStride, class __dataPtrType>
+    template <stride_type __rowStride, stride_type __colStride, class __dataPtrType>
     explicit inline
     vctMatrixRotation2Base(const vctFixedSizeMatrixBase<ROWS, COLS, __rowStride, __colStride, value_type, __dataPtrType> & matrix)
     {
@@ -383,8 +383,8 @@ public:
       By default the vectors represents the columns of the matrix. If
       the parameter vectorsAreColumns is set to false, the vectors
       provided will be used to set the matrix row by row. */
-    template <int __stride1, class __dataPtrType1,
-              int __stride2, class __dataPtrType2>
+    template <stride_type __stride1, class __dataPtrType1,
+              stride_type __stride2, class __dataPtrType2>
     inline ThisType &
     From(const vctFixedSizeConstVectorBase<DIMENSION, __stride1, value_type, __dataPtrType1>& v1,
          const vctFixedSizeConstVectorBase<DIMENSION, __stride2, value_type, __dataPtrType2>& v2,
@@ -457,8 +457,8 @@ public:
       By default the vectors represents the columns of the matrix. If
       the parameter vectorsAreColumns is set to false, the vectors
       provided will be used to set the matrix row by row. */
-    template <int __stride1, class __dataPtrType1,
-              int __stride2, class __dataPtrType2>
+    template <stride_type __stride1, class __dataPtrType1,
+              stride_type __stride2, class __dataPtrType2>
     inline ThisType &
     FromNormalized(const vctFixedSizeConstVectorBase<DIMENSION, __stride1, value_type, __dataPtrType1>& v1,
                    const vctFixedSizeConstVectorBase<DIMENSION, __stride2, value_type, __dataPtrType2>& v2,
@@ -529,8 +529,8 @@ public:
       By default the vectors represents the columns of the matrix. If
       the parameter vectorsAreColumns is set to false, the vectors
       provided will be used to set the matrix row by row. */
-    template <int __stride1, class __dataPtrType1,
-              int __stride2, class __dataPtrType2>
+    template <stride_type __stride1, class __dataPtrType1,
+              stride_type __stride2, class __dataPtrType2>
     inline ThisType &
     FromRaw(const vctFixedSizeConstVectorBase<DIMENSION, __stride1, value_type, __dataPtrType1>& v1,
             const vctFixedSizeConstVectorBase<DIMENSION, __stride2, value_type, __dataPtrType2>& v2,
@@ -593,7 +593,7 @@ public:
       introduced to allow using results of matrix operations and
       assign them to a rotation matrix.
     */
-    template<int __rowStride, int __colStride, class __dataPtrType>
+    template <stride_type __rowStride, stride_type __colStride, class __dataPtrType>
     inline ThisType &
     FromRaw(const vctFixedSizeMatrixBase<DIMENSION, DIMENSION, __rowStride, __colStride, value_type, __dataPtrType> & matrix) {
         this->Assign(matrix);
@@ -682,7 +682,7 @@ public:
       \param input The input vector
       \param output The output vector
     */
-    template<int __stride1, class __dataPtrType1, int __stride2, class __dataPtrType2>
+    template <stride_type __stride1, class __dataPtrType1, stride_type __stride2, class __dataPtrType2>
     inline void
     ApplyTo(const vctFixedSizeConstVectorBase<DIMENSION, __stride1, value_type, __dataPtrType1> & input,
             vctFixedSizeVectorBase<DIMENSION, __stride2, value_type, __dataPtrType2> & output) const {
@@ -699,7 +699,7 @@ public:
       \param input The input vector
       \return The output vector
     */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline vctFixedSizeVector<value_type, 2>
     ApplyTo(const vctFixedSizeConstVectorBase<DIMENSION, __stride, value_type, __dataPtrType> & input) const
     {
@@ -743,7 +743,7 @@ public:
       into another dynamic vector passed by reference by the caller.
       It is assumed that both are of size 2.
     */
-    template<class _vectorOwnerType1, class _vectorOwnerType2>
+    template <class _vectorOwnerType1, class _vectorOwnerType2>
     inline void
     ApplyTo(const vctDynamicConstVectorBase<_vectorOwnerType1, value_type> & input,
             vctDynamicVectorBase<_vectorOwnerType2, value_type> & output) const {
@@ -762,7 +762,7 @@ public:
       \param input The input vector
       \param output The output vector
     */
-    template<int __stride1, class __dataPtrType1, int __stride2, class __dataPtrType2>
+    template <stride_type __stride1, class __dataPtrType1, stride_type __stride2, class __dataPtrType2>
     inline void
     ApplyInverseTo(const vctFixedSizeConstVectorBase<DIMENSION, __stride1, value_type, __dataPtrType1> & input,
                    vctFixedSizeVectorBase<DIMENSION, __stride2, value_type, __dataPtrType2> & output) const {
@@ -779,7 +779,7 @@ public:
       \param input The input vector
       \return The output vector
     */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline vctFixedSizeVector<value_type, 2>
     ApplyInverseTo(const vctFixedSizeConstVectorBase<DIMENSION, __stride, value_type, __dataPtrType> & input) const {
         vctFixedSizeVector<value_type, 2> result;
@@ -821,7 +821,7 @@ public:
       The result is stored into another dynamic vector passed by
       reference by the caller.  It is assumed that both are of size 2.
     */
-    template<class _vectorOwnerType1, class _vectorOwnerType2>
+    template <class _vectorOwnerType1, class _vectorOwnerType2>
     inline void
     ApplyInverseTo(const vctDynamicConstVectorBase<_vectorOwnerType1, value_type> & input,
                    vctDynamicVectorBase<_vectorOwnerType2, value_type> & output) const
@@ -848,7 +848,7 @@ public:
       This prevents compiler confusion between the overloaded RotMat*RotMat and
       the base-class Mat*Vec
     */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline vctFixedSizeVector<value_type, 2>
     operator * (const vctFixedSizeConstVectorBase<DIMENSION, __stride, value_type, __dataPtrType> & input) const
     {

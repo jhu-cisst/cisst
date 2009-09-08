@@ -48,8 +48,8 @@ http://www.cisst.org/cisst/license.txt.
   See the base class (vctFixedSizeConstMatrixBase) for template
   parameter details.
 */
-template<class _elementType, unsigned int _rows, unsigned int _cols,
-         int _rowStride, int _colStride>
+template <class _elementType, vct::size_type _rows, vct::size_type _cols,
+          vct::stride_type _rowStride, vct::stride_type _colStride>
 class vctFixedSizeConstMatrixRef : public vctFixedSizeConstMatrixBase
   <_rows, _cols,_rowStride, _colStride, _elementType,
    typename vctFixedSizeMatrixTraits<_elementType, _rows, _cols, _rowStride, _colStride>::pointer>
@@ -83,7 +83,7 @@ class vctFixedSizeConstMatrixRef : public vctFixedSizeConstMatrixBase
     /*! Convenience constructor to initialize a reference to a fixed-size matrix object.
       Since the argument is const, there is no worry about explicit instantiation.
     */
-    template<unsigned int __rows, unsigned int __cols, class __dataPtrType>
+    template <size_type __rows, size_type __cols, class __dataPtrType>
     inline vctFixedSizeConstMatrixRef(const vctFixedSizeConstMatrixBase<__rows, __cols, _rowStride, _colStride, _elementType, __dataPtrType> & matrix)
     {
         SetRef(matrix, 0, 0);
@@ -91,7 +91,7 @@ class vctFixedSizeConstMatrixRef : public vctFixedSizeConstMatrixBase
 
     /*! Convenience constructor to initialize a reference to a fixed-size matrix object.
     */
-    template<unsigned int __rows, unsigned int __cols, class __dataPtrType>
+    template <size_type __rows, size_type __cols, class __dataPtrType>
     inline vctFixedSizeConstMatrixRef(const vctFixedSizeConstMatrixBase<__rows, __cols, _rowStride, _colStride, _elementType, __dataPtrType> & matrix,
                                       size_type startRow, size_type startCol)
     {
@@ -100,7 +100,7 @@ class vctFixedSizeConstMatrixRef : public vctFixedSizeConstMatrixBase
 
     /*! Convenience constructor to initialize a fixed-size reference to a dynamic matrix.
       The involves assertion that the sizes and strides match */
-    template<class __matrixOwnerType>
+    template <class __matrixOwnerType>
     inline vctFixedSizeConstMatrixRef(const vctDynamicConstMatrixBase<__matrixOwnerType, _elementType> & matrix,
                                       size_type startRow, size_type startCol)
     {
@@ -132,7 +132,7 @@ class vctFixedSizeConstMatrixRef : public vctFixedSizeConstMatrixBase
       \note This method asserts that the size of this matrix does not exceed the
       size of the input matrix (otherwise cmnThrow is used to throw std::out_of_range).
     */
-    template<unsigned int __rows, unsigned int __cols, class __dataPtrType>
+    template <size_type __rows, size_type __cols, class __dataPtrType>
     inline void SetRef(const vctFixedSizeConstMatrixBase<__rows, __cols, _rowStride, _colStride, _elementType, __dataPtrType> & matrix,
                        size_type startRow, size_type startCol)
     {
@@ -151,7 +151,7 @@ class vctFixedSizeConstMatrixRef : public vctFixedSizeConstMatrixBase
       \note This method asserts that the size of this matrix does not exceed the
       size of the input matrix (otherwise cmnThrow is used to throw std::out_of_range).
     */
-    template<class __matrixOwnerType>
+    template <class __matrixOwnerType>
     inline void SetRef(const vctDynamicConstMatrixBase<__matrixOwnerType, _elementType> & matrix,
                        size_type startRow, size_type startCol)
     {
@@ -167,8 +167,9 @@ class vctFixedSizeConstMatrixRef : public vctFixedSizeConstMatrixBase
 };
 
 
-template<unsigned int _rows, unsigned int _cols, int _rowStride, 
-         int _colStride, class _elementType, class _dataPtrType>
+template <vct::size_type _rows, vct::size_type _cols,
+          vct::stride_type _rowStride, vct::stride_type _colStride,
+          class _elementType, class _dataPtrType>
 inline vctFixedSizeConstMatrixRef<_elementType, _cols, _rows, _colStride, _rowStride>
 vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStride,
                             _elementType, _dataPtrType>::TransposeRef() const {
@@ -176,8 +177,9 @@ vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStride,
 }
 
 
-template<unsigned int _rows, unsigned int _cols, int _rowStride, 
-         int _colStride, class _elementType, class _dataPtrType>
+template <vct::size_type _rows, vct::size_type _cols,
+          vct::stride_type _rowStride, vct::stride_type _colStride,
+          class _elementType, class _dataPtrType>
 typename vctFixedSizeMatrixBase<_rows, _cols, _rowStride, _colStride, _elementType, _dataPtrType>::RefTransposeType
 inline vctFixedSizeMatrixBase<_rows, _cols, _rowStride, _colStride,
                               _elementType, _dataPtrType>::TransposeRef(void) {

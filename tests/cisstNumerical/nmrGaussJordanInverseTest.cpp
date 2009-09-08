@@ -29,7 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 const double nmrGaussJordanInverseTest::ToleranceScale = 20;
 const double nmrGaussJordanInverseTest::RandomElementRange = 10;
 
-template<class _elementType, unsigned int _size, bool _rowMajor1, bool _rowMajor2>
+template <class _elementType, vct::size_type _size, bool _rowMajor1, bool _rowMajor2>
 void nmrGaussJordanInverseTest::TestMatrixInverse(
     const vctFixedSizeMatrix<_elementType, _size, _size, _rowMajor1> & m1,
     const vctFixedSizeMatrix<_elementType, _size, _size, _rowMajor2> & m2,
@@ -57,19 +57,19 @@ void nmrGaussJordanInverseTest::TestMatrixInverse(
 }
 
 
-template<class _elementType, unsigned int _size, bool _rowMajor>
+template <class _elementType, vct::size_type _size, bool _rowMajor>
 void nmrGaussJordanInverseTest::MakeSingularMatrix(vctFixedSizeMatrix<_elementType, _size, _size, _rowMajor> & m)
 {
     typedef _elementType value_type;
     vctFixedSizeVector<value_type, _size> combinationCoefficients;
     vctRandom(combinationCoefficients, value_type(0), value_type(1));
-    int selectedRow = cmnRandomSequence::GetInstance().ExtractRandomInt(0, _size);
+    vct::size_type selectedRow = cmnRandomSequence::GetInstance().ExtractRandomUnsignedInt(0, _size);
     combinationCoefficients[selectedRow] = value_type(0);
     vctFixedSizeVector<value_type, _size> combination = combinationCoefficients * m;
     m.Row(selectedRow).Assign( combination );
 }
 
-template<class _elementType>
+template <class _elementType>
 void nmrGaussJordanInverseTest::TestInverse4x4(void)
 {
     typedef _elementType value_type;
@@ -96,7 +96,7 @@ void nmrGaussJordanInverseTest::TestInverse4x4(void)
 
 }
 
-template<class _elementType>
+template <class _elementType>
 void nmrGaussJordanInverseTest::TestInverse3x3(void)
 {
     typedef _elementType value_type;
@@ -124,7 +124,7 @@ void nmrGaussJordanInverseTest::TestInverse3x3(void)
 }
 
 
-template<class _elementType>
+template <class _elementType>
 void nmrGaussJordanInverseTest::TestInverse2x2(void)
 {
     typedef _elementType value_type;
@@ -151,7 +151,7 @@ void nmrGaussJordanInverseTest::TestInverse2x2(void)
 
 }
 
-template<class _elementType>
+template <class _elementType>
 void nmrGaussJordanInverseTest::TestSingular4x4(void)
 {
     typedef _elementType value_type;
@@ -174,7 +174,7 @@ void nmrGaussJordanInverseTest::TestSingular4x4(void)
 }
 
 
-template<class _elementType>
+template <class _elementType>
 void nmrGaussJordanInverseTest::TestSingular3x3(void)
 {
     typedef _elementType value_type;
@@ -196,7 +196,7 @@ void nmrGaussJordanInverseTest::TestSingular3x3(void)
     CPPUNIT_ASSERT(nonsingular);
 }
 
-template<class _elementType>
+template <class _elementType>
 void nmrGaussJordanInverseTest::TestSingular2x2(void)
 {
     typedef _elementType value_type;

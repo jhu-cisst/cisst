@@ -1589,17 +1589,17 @@ FIXED SIZE
   nmrSVDSolutionBase<vctFixedSizeMatrix<4, 3, VCT_COL_MAJOR>
   No extra work of allocation etc is required for fixed size.
 */
-template <unsigned int _ma, unsigned int _me, unsigned int _mg, unsigned int _n>
+template <vct::size_type _ma, vct::size_type _me, vct::size_type _mg, vct::size_type _n>
 class nmrLSqLinSolutionFixedSize
 {
 public:
     enum {MIN_MN = (_ma<_n) ? _ma : _n};
     enum {K = (_ma + _mg > _n)?(_ma + _mg) : _n};
-    enum {LWORK_LS = 2*((unsigned int)MIN_MN)};
-    enum {LWORK_LSI = _n + (_mg + 2)*(_n + 7) + (unsigned int)K};
-    enum {LWORK_LSEI = 2*(_me + _n) + (_mg + 2)*(_n + 7) + (unsigned int)K};
-    enum {LWORK_TMP = ((unsigned int)LWORK_LS > (unsigned int)LWORK_LSI) ? (unsigned int)LWORK_LS : (unsigned int)LWORK_LSI};
-    enum {LWORK = ((unsigned int)LWORK_LSEI > (unsigned int)LWORK_TMP) ? (unsigned int)LWORK_LSEI : (unsigned int)LWORK_TMP};
+    enum {LWORK_LS = 2*((vct::size_type)MIN_MN)};
+    enum {LWORK_LSI = _n + (_mg + 2)*(_n + 7) + (vct::size_type)K};
+    enum {LWORK_LSEI = 2*(_me + _n) + (_mg + 2)*(_n + 7) + (vct::size_type)K};
+    enum {LWORK_TMP = ((vct::size_type)LWORK_LS > (vct::size_type)LWORK_LSI) ? (vct::size_type)LWORK_LS : (vct::size_type)LWORK_LSI};
+    enum {LWORK = ((vct::size_type)LWORK_LSEI > (vct::size_type)LWORK_TMP) ? (vct::size_type)LWORK_LSEI : (vct::size_type)LWORK_TMP};
     enum {LIWORK = _mg + 2*_n + 2};
     typedef vctFixedSizeMatrixRef<double, _ma, _n, 1, _ma> TypeA;
     //make sizes 1 if 0, it does not effect anything else
@@ -1708,7 +1708,7 @@ public:
 /* Overloaded function for Least Squares (LS) */
 /******************************************************************************/
 
-template <unsigned int _ma, unsigned int _n, unsigned int _work>
+template <vct::size_type _ma, vct::size_type _n, vct::size_type _work>
 inline long int nmrLSqLin(vctFixedSizeMatrix<double, _ma, _n, VCT_COL_MAJOR> &A,
                           vctFixedSizeVector<double, _ma> &b,
                           vctFixedSizeVector<double, _n> &x,
@@ -1732,7 +1732,7 @@ inline long int nmrLSqLin(vctFixedSizeMatrix<double, _ma, _n, VCT_COL_MAJOR> &A,
     return ret_value;
 }
 
-template <unsigned int _ma, unsigned int _n>
+template <vct::size_type _ma, vct::size_type _n>
 inline long int nmrLSqLin(vctFixedSizeMatrix<double, _ma, _n, VCT_COL_MAJOR> &A,
                           vctFixedSizeVector<double, _ma> &b,
                           vctFixedSizeVector<double, _n> &x)
@@ -1742,7 +1742,7 @@ inline long int nmrLSqLin(vctFixedSizeMatrix<double, _ma, _n, VCT_COL_MAJOR> &A,
     return ret_value;
 }
 
-template <unsigned int _ma, unsigned int _n>
+template <vct::size_type _ma, vct::size_type _n>
 inline long int nmrLSqLin(vctFixedSizeMatrix<double, _ma, _n, VCT_COL_MAJOR> &A,
                           vctFixedSizeVector<double, _ma> &b,
                           nmrLSqLinSolutionFixedSize<_ma, 0, 0, _n> &solution)
@@ -1756,7 +1756,7 @@ inline long int nmrLSqLin(vctFixedSizeMatrix<double, _ma, _n, VCT_COL_MAJOR> &A,
 /* Overloaded function for Least Squares Inequality (LSI) */
 /******************************************************************************/
 
-template <unsigned int _ma, unsigned int _mg, unsigned int _n, unsigned int _work, unsigned int _iwork>
+template <vct::size_type _ma, vct::size_type _mg, vct::size_type _n, vct::size_type _work, vct::size_type _iwork>
 inline long int nmrLSqLin(vctFixedSizeMatrix<double, _ma, _n, VCT_COL_MAJOR> &A, vctFixedSizeVector<double, _ma> &b,
                           vctFixedSizeMatrix<double, _mg, _n, VCT_COL_MAJOR> &G, vctFixedSizeVector<double, _mg> &h,
                           vctFixedSizeVector<double, _n> &x,
@@ -1788,7 +1788,7 @@ inline long int nmrLSqLin(vctFixedSizeMatrix<double, _ma, _n, VCT_COL_MAJOR> &A,
     return mode;
 }
 
-template <unsigned int _ma, unsigned int _mg, unsigned int _n>
+template <vct::size_type _ma, vct::size_type _mg, vct::size_type _n>
 inline long int nmrLSqLin(vctFixedSizeMatrix<double, _ma, _n, VCT_COL_MAJOR> &A,
                           vctFixedSizeVector<double, _ma> &b,
                           vctFixedSizeMatrix<double, _mg, _n, VCT_COL_MAJOR> &G,
@@ -1808,7 +1808,7 @@ inline long int nmrLSqLin(vctFixedSizeMatrix<double, _ma, _n, VCT_COL_MAJOR> &A,
     return ret_value;
 }
 
-template <unsigned int _ma, unsigned int _mg, unsigned int _n>
+template <vct::size_type _ma, vct::size_type _mg, vct::size_type _n>
 inline long int nmrLSqLin(vctFixedSizeMatrix<double, _ma, _n, VCT_COL_MAJOR> &A,
                           vctFixedSizeVector<double, _ma> &b,
                           vctFixedSizeMatrix<double, _mg, _n, VCT_COL_MAJOR> &G,
@@ -1831,8 +1831,8 @@ inline long int nmrLSqLin(vctFixedSizeMatrix<double, _ma, _n, VCT_COL_MAJOR> &A,
 /* Overloaded function for Least Squares Equality & Inequality (LSEI) */
 /******************************************************************************/
 
-template <unsigned int _ma, unsigned int _me, unsigned int _mg,
-          unsigned int _n, unsigned int _work, unsigned int _iwork>
+template <vct::size_type _ma, vct::size_type _me, vct::size_type _mg,
+          vct::size_type _n, vct::size_type _work, vct::size_type _iwork>
 inline long int nmrLSqLin(vctFixedSizeMatrix<double, _ma, _n, VCT_COL_MAJOR> &A, vctFixedSizeVector<double, _ma> &b,
                           vctFixedSizeMatrix<double, _me, _n, VCT_COL_MAJOR> &E, vctFixedSizeVector<double, _me> &f,
                           vctFixedSizeMatrix<double, _mg, _n, VCT_COL_MAJOR> &G, vctFixedSizeVector<double, _mg> &h,
@@ -1869,7 +1869,7 @@ inline long int nmrLSqLin(vctFixedSizeMatrix<double, _ma, _n, VCT_COL_MAJOR> &A,
     return mode;
 }
 
-template <unsigned int _ma, unsigned int _me, unsigned int _mg, unsigned int _n>
+template <vct::size_type _ma, vct::size_type _me, vct::size_type _mg, vct::size_type _n>
 inline long int nmrLSqLin(vctFixedSizeMatrix<double, _ma, _n, VCT_COL_MAJOR> &A, vctFixedSizeVector<double, _ma> &b,
                           vctFixedSizeMatrix<double, _me, _n, VCT_COL_MAJOR> &E, vctFixedSizeVector<double, _me> &f,
                           vctFixedSizeMatrix<double, _mg, _n, VCT_COL_MAJOR> &G, vctFixedSizeVector<double, _mg> &h,
@@ -1888,7 +1888,7 @@ inline long int nmrLSqLin(vctFixedSizeMatrix<double, _ma, _n, VCT_COL_MAJOR> &A,
     return ret_value;
 }
 
-template <unsigned int _ma, unsigned int _me, unsigned int _mg, unsigned int _n>
+template <vct::size_type _ma, vct::size_type _me, vct::size_type _mg, vct::size_type _n>
 inline long int nmrLSqLin(vctFixedSizeMatrix<double, _ma, _n, VCT_COL_MAJOR> &A, vctFixedSizeVector<double, _ma> &b,
                           vctFixedSizeMatrix<double, _me, _n, VCT_COL_MAJOR> &E, vctFixedSizeVector<double, _me> &f,
                           vctFixedSizeMatrix<double, _mg, _n, VCT_COL_MAJOR> &G, vctFixedSizeVector<double, _mg> &h,

@@ -61,16 +61,16 @@ public:
     {}
 
     /*! Templated generic test */
-    template <unsigned int _rows, unsigned int _cols, bool _storageOrder, unsigned int _minmn>
+    template <vct::size_type _rows, vct::size_type _cols, bool _storageOrder, vct::size_type _minmn>
         void GenericTestFixedSize(void);
-    template <unsigned int _rows, unsigned int _cols, bool _storageOrder, unsigned int _minmn>
+    template <vct::size_type _rows, vct::size_type _cols, bool _storageOrder, vct::size_type _minmn>
         void GenericTestFixedSizeUsingDataObject(void);
 
-    template <unsigned int _rows, unsigned int _cols>
+    template <vct::size_type _rows, vct::size_type _cols>
         void GenericTestCompareWithMatlab(double input_ptr[], double pinverse_ptr[], int caseNo, double tolerance);
 
-    void GenericTestDynamic(unsigned int rows, unsigned int cols, bool storageOrder);
-    void GenericTestDynamicUsingDataObject(unsigned int rows, unsigned int cols, bool storageOrder);
+    void GenericTestDynamic(vct::size_type rows, vct::size_type cols, bool storageOrder);
+    void GenericTestDynamicUsingDataObject(vct::size_type rows, vct::size_type cols, bool storageOrder);
 
     /*! Test using column major matrices. */
     void TestDynamicColumnMajorUsingDataObject(void);
