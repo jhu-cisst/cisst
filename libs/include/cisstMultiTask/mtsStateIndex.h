@@ -30,6 +30,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsGenericObject.h>
 #include <cisstCommon/cmnSerializer.h>
 #include <cisstCommon/cmnDeSerializer.h>
+#include <cisstCommon/cmnGenericObjectProxy.h>
 
 #include <cisstMultiTask/mtsExport.h>
 
@@ -152,6 +153,9 @@ public:
     }
 };
 
+// TimeTickType wrapper
+typedef cmnGenericObjectProxy<mtsStateIndex::TimeTicksType> cmnTimeTick;
+CMN_DECLARE_SERVICES_INSTANTIATION(cmnTimeTick);
 
 #endif // _mtsStateIndex_h
 
