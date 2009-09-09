@@ -45,8 +45,7 @@ int main(void)
         std::cout << "> Enter port: ";
         std::cin >> port;
     }
-    socket.SetDestination(host.c_str(), port);
-    isClientConnected = socket.Connect();
+    isClientConnected = socket.Connect(host.c_str(), port);
 
     std::cout << std::endl
               << "Send a string message and server will respond with the uppercase version" << std::endl

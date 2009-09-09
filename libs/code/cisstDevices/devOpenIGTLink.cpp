@@ -105,8 +105,7 @@ void devOpenIGTLink::Run(void)
             } while (Socket == NULL);
             IsConnected = true;
         } else if (ConnectionType == CLIENT) {
-            Socket->SetDestination(Host.c_str(), Port);
-            IsConnected = Socket->Connect();
+            IsConnected = Socket->Connect(Host.c_str(), Port);
         }
     }
 
@@ -207,7 +206,7 @@ bool devOpenIGTLink::ReceiveFrame(prmPositionCartesianGet & frameCISST)
 void devOpenIGTLink::SkipMessage(void)
 {
     unsigned long long dummySize = HeaderIGT.body_size;
-    int blockSize = 512;
+    const int blockSize = 512;
     char dummy[blockSize];
     int bytesRead;
 
@@ -222,10 +221,10 @@ void devOpenIGTLink::FrameCISSTtoIGT(const prmPositionCartesianGet & frameCISST,
                                      igtl_float32 * frameIGT)
 {
     for (unsigned int i = 0; i < 3; i++) {
-        frameIGT[i]   = frameCISST.Position().Rotation().Element(i,0);
-        frameIGT[i+3] = frameCISST.Position().Rotation().Element(i,1);
-        frameIGT[i+6] = frameCISST.Position().Rotation().Element(i,2);
-        frameIGT[i+9] = frameCISST.Position().Translation().Element(i);
+        frameIGT[i]   = static_cast<float>(frameCISST.Position().Rotation().Element(i,0));
+        frameIGT[i+3] = static_cast<float>(frameCISST.Position().Rotation().Element(i,1));
+        frameIGT[i+6] = static_cast<float>(frameCISST.Position().Rotation().Element(i,2));
+        frameIGT[i+9] = static_cast<float>(frameCISST.Position().Translation().Element(i));
     }
 }
 

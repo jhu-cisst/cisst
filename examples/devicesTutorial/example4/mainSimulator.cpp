@@ -25,7 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "trackerSimulator.h"
 
-#define IS_SERVER true  // make this false to run as a client
+#define IS_SERVER 1  // make this 0 to run as a client
 
 int main()
 {
@@ -41,36 +41,37 @@ int main()
 
     // create tasks
 #if IS_SERVER
-    devOpenIGTLink * devOpenIGTLinkTask = new devOpenIGTLink("trackerServer", 50.0 * cmn_ms, 18944);
+    devOpenIGTLink * devOpenIGTLinkObj = new devOpenIGTLink("trackerServer", 50.0 * cmn_ms, 18944);
 #else
-    devOpenIGTLink * devOpenIGTLinkTask = new devOpenIGTLink("trackerClient", 50.0 * cmn_ms, "localhost", 18944);
+    devOpenIGTLink * devOpenIGTLinkObj = new devOpenIGTLink("trackerClient", 50.0 * cmn_ms, "localhost", 18944);
 #endif
-    trackerSimulator * trackerSimulatorTask = new trackerSimulator("trackerSimulator", 50.0 * cmn_ms);
+    trackerSimulator * trackerSimulatorObj = new trackerSimulator("trackerSimulator", 50.0 * cmn_ms);
 
     // add tasks to task manager
-    taskManager->AddTask(devOpenIGTLinkTask);
-    taskManager->AddTask(trackerSimulatorTask);
+    taskManager->AddTask(devOpenIGTLinkObj);
+    taskManager->AddTask(trackerSimulatorObj);
 
     // connect tasks
-    taskManager->Connect(devOpenIGTLinkTask->GetName(), "RequiresPositionCartesian",
-                         trackerSimulatorTask->GetName(), "ProvidesPositionCartesian");
-    taskManager->Connect(trackerSimulatorTask->GetName(), "RequiresPositionCartesian",
-                         devOpenIGTLinkTask->GetName(), "ProvidesPositionCartesian");
+    taskManager->Connect(devOpenIGTLinkObj->GetName(), "RequiresPositionCartesian",
+                         trackerSimulatorObj->GetName(), "ProvidesPositionCartesian");
+    taskManager->Connect(trackerSimulatorObj->GetName(), "RequiresPositionCartesian",
+                         devOpenIGTLinkObj->GetName(), "ProvidesPositionCartesian");
 
     // create and start all tasks
     taskManager->CreateAll();
     taskManager->StartAll();
 
     // loop until GUI exits
-    while (!trackerSimulatorTask->GetExitFlag()) {
+    while (!trackerSimulatorObj->GetExitFlag()) {
         osaSleep(100.0 * cmn_ms);
     }
 
     // kill all tasks
     taskManager->KillAll();
-    while (!trackerSimulatorTask->IsTerminated()) {
+    while (!trackerSimulatorObj->IsTerminated()) {
         osaSleep(100.0 * cmn_ms);
     }
     taskManager->Cleanup();
+
     return 0;
 }

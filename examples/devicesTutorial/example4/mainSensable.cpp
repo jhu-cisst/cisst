@@ -23,14 +23,14 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask.h>
 #include <cisstDevices.h>
 
-#define IS_SERVER true  // make this false to run as a client
+#define IS_SERVER 1  // make this 0 to run as a client
 
 int main()
 {
     // log configuration
     cmnLogger::SetLoD(CMN_LOG_LOD_VERY_VERBOSE);
     cmnLogger::GetMultiplexer()->AddChannel(std::cout, CMN_LOG_LOD_VERY_VERBOSE);
-    cmnClassRegister::SetLoD("devOpenIGTLink", CMN_LOG_LOD_VERY_VERBOSE);
+    cmnClassRegister::SetLoD("devOpenIGTLink", CMN_LOG_LOD_RUN_WARNING);
 
     // add a log per thread
     osaThreadedLogFile threadedLog("example4-");
@@ -40,19 +40,19 @@ int main()
 
     // create tasks
 #if IS_SERVER
-    devOpenIGTLink * devOpenIGTLinkTask = new devOpenIGTLink("trackerServer", 50.0 * cmn_ms, 18944);
+    devOpenIGTLink * devOpenIGTLinkObj = new devOpenIGTLink("trackerServer", 50.0 * cmn_ms, 18944);
 #else
-    devOpenIGTLink * devOpenIGTLinkTask = new devOpenIGTLink("trackerClient", 50.0 * cmn_ms, "localhost", 18944);
+    devOpenIGTLink * devOpenIGTLinkObj = new devOpenIGTLink("trackerClient", 50.0 * cmn_ms, "localhost", 18944);
 #endif
-    devSensableHD * devSensableHDTask = new devSensableHD("devSensableHD", "Omni1");
+    devSensableHD * devSensableHDObj = new devSensableHD("devSensableHD", "Omni1");
 
-    // add instances to task manager
-    taskManager->AddTask(devOpenIGTLinkTask);
-    taskManager->AddTask(devSensableHDTask);
+    // add tasks to task manager
+    taskManager->AddTask(devOpenIGTLinkObj);
+    taskManager->AddTask(devSensableHDObj);
 
     // connect tasks
-    taskManager->Connect(devOpenIGTLinkTask->GetName(), "CartesianPosition",
-                         devSensableHDTask->GetName(), "Omni1");
+    taskManager->Connect(devOpenIGTLinkObj->GetName(), "RequiresPositionCartesian",
+                         devSensableHDObj->GetName(), "Omni1");
 
     // create and start all tasks
     taskManager->CreateAll();
@@ -67,9 +67,10 @@ int main()
 
     // kill all tasks
     taskManager->KillAll();
-    while (!devSensableHDTask->IsTerminated()) {
+    while (!devSensableHDObj->IsTerminated()) {
         osaSleep(100.0 * cmn_ms);
     }
-    taskManager->Cleanup;
+    taskManager->Cleanup();
+
     return 0;
 }
