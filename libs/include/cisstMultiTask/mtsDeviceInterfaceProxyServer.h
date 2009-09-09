@@ -176,7 +176,7 @@ public:
     //-------------------------------------------------------------------------
     //  Method to register per-command serializer
     //-------------------------------------------------------------------------
-    const bool AddPerEventGeneratorSerializer(
+    bool AddPerEventGeneratorSerializer(
         const CommandIDType commandId, mtsProxySerializer * argumentSerializer);
 
     //-------------------------------------------------------------------------

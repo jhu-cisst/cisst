@@ -130,7 +130,7 @@ public:
     //-------------------------------------------------------------------------
     //  Method to register per-command serializer
     //-------------------------------------------------------------------------
-    const bool AddPerCommandSerializer(
+    bool AddPerCommandSerializer(
         const CommandIDType commandId, mtsProxySerializer * argumentSerializer);
 
     //-------------------------------------------------------------------------
