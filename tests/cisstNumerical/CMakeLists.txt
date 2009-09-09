@@ -51,12 +51,12 @@ IF(CISST_HAS_CISSTNETLIB)
       nmrLSISolverTest.cpp
       nmrLSqLinTest.cpp
       nmrLUTest.cpp
-#      nmrLUSolverTest.cpp
+      nmrLUSolverTest.cpp
       nmrNNLSSolverTest.cpp
       nmrPInverseTest.cpp
       nmrPInverseSolverTest.cpp
       nmrSVDTest.cpp
-#      nmrSVDSolverTest.cpp
+      nmrSVDSolverTest.cpp
       nmrSVDRSSolverTest.cpp
       )
 
@@ -68,12 +68,12 @@ IF(CISST_HAS_CISSTNETLIB)
       nmrLSISolverTest.h
       nmrLSqLinTest.h
       nmrLUTest.h
-#      nmrLUSolverTest.h
+      nmrLUSolverTest.h
       nmrNNLSSolverTest.h
       nmrPInverseTest.h
       nmrPInverseSolverTest.h
       nmrSVDTest.h
-#      nmrSVDSolverTest.h
+      nmrSVDSolverTest.h
       nmrSVDRSSolverTest.h
       )
 

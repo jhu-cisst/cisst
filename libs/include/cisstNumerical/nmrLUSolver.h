@@ -199,7 +199,7 @@ public:
         Allocate(A, allocateLU, allocateP);
     }
 
-    template <unsigned int _rows, unsigned int _cols>
+    template <vct::size_type _rows, vct::size_type _cols>
     nmrLUSolver(const vctFixedSizeMatrix<double, _rows, _cols, VCT_COL_MAJOR> & A,
                 bool allocateLU = false, bool allocateP = false) {
         Allocate(A, allocateLU, allocateP);
@@ -251,7 +251,7 @@ public:
         Allocate(A.rows(), A.cols(), allocateLU, allocateP);
     }
 
-    template <unsigned int _rows, unsigned int _cols>
+    template <vct::size_type _rows, vct::size_type _cols>
     inline void Allocate(const vctFixedSizeMatrix<double, _rows, _cols, VCT_COL_MAJOR> & A,
                          bool allocateLU = false, bool allocateP = false) {
         Allocate(_rows, _cols, allocateLU, allocateP);
@@ -303,7 +303,7 @@ public:
         if (AllocatePFlag) UpdateP();
     }
     
-    template <unsigned int _rows, unsigned int _cols>
+    template <vct::size_type _rows, vct::size_type _cols>
     inline void Solve(vctFixedSizeMatrix<double, _rows, _cols, VCT_COL_MAJOR> & A) {
         vctDynamicMatrixRef<double> Aref(A);
         Solve(Aref);

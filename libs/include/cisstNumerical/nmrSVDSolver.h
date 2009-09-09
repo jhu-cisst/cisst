@@ -150,7 +150,7 @@ public:
     nmrSVDSolver(const vctDynamicMatrixBase<_matrixOwnerType, double> &A) {
         Allocate(A);
     }
-    template <unsigned int _rows, unsigned int _cols, bool _storageOrder>
+    template <vct::size_type _rows, vct::size_type _cols, bool _storageOrder>
     nmrSVDSolver(const vctFixedSizeMatrix<double, _rows, _cols, _storageOrder> & A) {
         Allocate(A);
     }
@@ -200,7 +200,7 @@ public:
     inline void Allocate(const vctDynamicMatrixBase<_matrixOwnerType, double> &A) {
         Allocate(A.rows(), A.cols(), A.IsRowMajor());
     }
-    template <unsigned int _rows, unsigned int _cols, bool _storageOrder>
+    template <vct::size_type _rows, vct::size_type _cols, bool _storageOrder>
     inline void Allocate(const vctFixedSizeMatrix<double, _rows, _cols, _storageOrder> & A) {
         Allocate(_rows, _cols, _storageOrder);
     }
@@ -263,7 +263,7 @@ public:
 	}
     
 
-    template <unsigned int _rows, unsigned int _cols, bool _storageOrder>
+    template <vct::size_type _rows, vct::size_type _cols, bool _storageOrder>
     inline void Solve(vctFixedSizeMatrix<double, _rows, _cols, _storageOrder> & A) {
         vctDynamicMatrixRef<double> Aref(A);
         Solve(Aref);
