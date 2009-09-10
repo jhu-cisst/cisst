@@ -28,8 +28,9 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsCommandQualifiedReadProxy_h
 #define _mtsCommandQualifiedReadProxy_h
 
-#include <cisstMultiTask/mtsCommandReadOrWriteBase.h>
+#include <cisstMultiTask/mtsCommandQualifiedReadOrWriteBase.h>
 #include <cisstMultiTask/mtsProxySerializer.h>
+#include <cisstMultiTask/mtsDeviceInterfaceProxyClient.h>
 
 /*!
   \ingroup cisstMultiTask
@@ -66,7 +67,7 @@ protected:
 public:
     mtsCommandQualifiedReadProxy(const CommandIDType commandId, 
                                  mtsDeviceInterfaceProxyClient * providedInterfaceProxy):
-        mtsCommandQualifiedReadBase(),
+        BaseType(),
         CommandId(commandId),
         Argument1Prototype(NULL),
         Argument2Prototype(NULL),

@@ -33,4 +33,5 @@ add_subdirectory(example9) # show all types of commands and events + ICE if avai
 
 if (BUILD_LIBS_cisstParameterTypes)
   add_subdirectory(benchmark1) # benchmarking loop time + ICE if available
+  add_subdirectory(benchmark2) # benchmarking latency + ICE if available
 endif (BUILD_LIBS_cisstParameterTypes)
