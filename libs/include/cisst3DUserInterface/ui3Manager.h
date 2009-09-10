@@ -348,6 +348,8 @@ private:
     void EnterMaMModeEventHandler(void);
     void LeaveMaMModeEventHandler(void);
 
+    void RecenterMasterCursors(const vctDouble3 & lowerCorner, const vctDouble3 & upperCorner);
+
     // hide/show all objects controlled by the ui3Manager
     void HideAll(void);
     void ShowAll(void);

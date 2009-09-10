@@ -611,6 +611,63 @@ void ui3Manager::OnStreamSample(svlSample* sample, int streamindex)
 }
 
 
+void ui3Manager::RecenterMasterCursors(const vctDouble3 & lowerCorner, const vctDouble3 & upperCorner)
+{
+    MasterArmList::iterator armIterator;
+    const MasterArmList::iterator armEnd = this->MasterArms.end();
+    // compute a bounding box of current cursors
+    vctDouble3 currentLowerCorner, currentUpperCorner;
+    armIterator = this->MasterArms.begin();
+    if (armIterator == armEnd) {
+        CMN_LOG_CLASS_RUN_WARNING << "RecenterMasterCursors: can not recenter, no master arm defined" << std::endl;
+        return;
+    }
+    currentLowerCorner.Assign(((*armIterator).second)->CartesianPosition.Position().Translation());
+    currentUpperCorner.Assign(((*armIterator).second)->CartesianPosition.Position().Translation());
+    armIterator++;
+    for (;
+         armIterator != armEnd;
+         armIterator++) {
+        currentLowerCorner.ElementwiseMinOf(currentLowerCorner, ((*armIterator).second)->CartesianPosition.Position().Translation());
+        currentUpperCorner.ElementwiseMaxOf(currentUpperCorner, ((*armIterator).second)->CartesianPosition.Position().Translation());
+    }    
+
+    // compute size and translation between two bounding boxes
+    vctDouble3 center, currentCenter;
+    // compute sizes
+    center.DifferenceOf(upperCorner, lowerCorner);
+    double size = center.Norm();
+    currentCenter.DifferenceOf(currentUpperCorner, currentLowerCorner);
+    double currentSize = currentCenter.Norm();
+    double ratio = 1.0;
+    if ((size >= 0.1) // original bounding box is not a point (user just want to recenter, not scale)
+        && (currentSize >= 0.1) // current box is not a point (more than one cursor)
+        && (currentSize > size) // we only scale down
+        ) {
+        ratio = size / currentSize;
+    }
+
+    // compute centers
+    center.SumOf(upperCorner, lowerCorner);
+    center.Divide(2.0);
+    currentCenter.SumOf(currentUpperCorner, currentLowerCorner);
+    currentCenter.Divide(2.0);
+
+    // set new cursor position
+    vctDouble3 newPosition;
+    vctDouble3 relativePosition;
+    for (armIterator = this->MasterArms.begin();
+         armIterator != armEnd;
+         armIterator++) {
+        newPosition.Assign(((*armIterator).second)->CartesianPosition.Position().Translation());
+        relativePosition.DifferenceOf(newPosition, currentCenter);
+        relativePosition.Multiply(ratio);
+        newPosition.SumOf(center, relativePosition);
+        ((*armIterator).second)->SetCursorPosition(newPosition);
+    }    
+}
+
+
 void ui3Manager::HideAll(void)
 {
     MasterArmList::iterator armIterator;
@@ -645,6 +702,7 @@ void ui3Manager::ShowAll(void)
 
 void ui3Manager::EnterMaMModeEventHandler(void)
 {
+    this->RecenterMasterCursors(vct3(-20.0, -20.0, -150), vct3(20.0, 20.0, -130.0));
     this->ShowAll();
     this->MaM = true;
     CMN_LOG_CLASS_RUN_VERBOSE << "EnterMaMMode" << std::endl;

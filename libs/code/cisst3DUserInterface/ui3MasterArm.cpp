@@ -124,6 +124,30 @@ bool ui3MasterArm::SetTransformation(const vctFrm3 & transformation,
 
 
 
+void ui3MasterArm::SetCursorPosition(const vctDouble3 & desiredCursorPosition)
+{
+    // get the current arm position
+    prmPositionCartesianGet armPosition;
+    this->GetCartesianPosition(armPosition);
+    // apply transformation and scale
+    vctDouble3 actualCursorPosition;
+    this->Transformation.ApplyTo(armPosition.Position().Translation(), actualCursorPosition);
+    actualCursorPosition.Multiply(this->Scale);
+    // compute difference and apply to inverse of transformation
+    vctDouble3 differenceInScene;
+    differenceInScene.DifferenceOf(desiredCursorPosition, actualCursorPosition);
+    differenceInScene.Divide(this->Scale);
+    // create a transformation corresponding to the difference
+    vctFrm3 cursorTransformation;
+    cursorTransformation.Translation().Assign(differenceInScene);
+    // and apply it (compound) to the overall transformation.  May be we should keep these as separate data members
+    vctFrm3 newTransformation;
+    cursorTransformation.ApplyTo(this->Transformation, newTransformation);
+    this->Transformation.Assign(newTransformation);
+}
+
+
+
 bool ui3MasterArm::SetCursor(ui3CursorBase * cursor)
 {
     this->Cursor = cursor;
@@ -154,7 +178,7 @@ void ui3MasterArm::ClutchEventHandler(const prmEventButton & buttonEvent)
     // position when user clutched out/in
     vctDouble3 clutchedInPosition;
     // placeholder to retrieve position from device
-    static prmPositionCartesianGet armPosition;
+    prmPositionCartesianGet armPosition;
     if (buttonEvent.Type() == prmEventButton::PRESSED) {
         // user is using it's clutch
         this->Clutched = true;

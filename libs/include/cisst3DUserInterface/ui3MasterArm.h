@@ -62,6 +62,8 @@ public:
     virtual bool SetTransformation(const vctFrm3 & transformation = vctFrm3::Identity(),
                                    double scale = 1.0);
 
+    virtual void SetCursorPosition(const vctDouble3 & position);
+
     virtual bool SetCursor(ui3CursorBase * cursor);
 
 protected:

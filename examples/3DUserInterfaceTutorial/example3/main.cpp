@@ -152,7 +152,7 @@ int main()
                           daVinci, "MTMRButton",
                           daVinci, "MTMRClutch",
                           ui3MasterArm::PRIMARY);
-    rightMaster->SetTransformation(transform, 0.5 /* scale factor */);
+    rightMaster->SetTransformation(transform, 0.8 /* scale factor */);
     ui3CursorBase * rightCursor = new ui3CursorSphere();
     rightCursor->SetAnchor(ui3CursorBase::CENTER_RIGHT);
     rightMaster->SetCursor(rightCursor);
@@ -164,7 +164,7 @@ int main()
                          daVinci, "MTMLButton",
                          daVinci, "MTMLClutch",
                          ui3MasterArm::SECONDARY);
-    leftMaster->SetTransformation(transform, 0.5 /* scale factor */);
+    leftMaster->SetTransformation(transform, 0.8 /* scale factor */);
     ui3CursorBase * leftCursor = new ui3CursorSphere();
     leftCursor->SetAnchor(ui3CursorBase::CENTER_LEFT);
     leftMaster->SetCursor(leftCursor);
