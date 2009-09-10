@@ -5,6 +5,7 @@
 #include <cisstCommon.h>
 #include <cisstOSAbstraction.h>
 #include <cisstMultiTask.h>
+#include <cisstParameterTypes.h>
 
 #include "clientTask.h"
 #include "configuration.h"
@@ -20,7 +21,7 @@ int main(int argc, char * argv[])
         exit(-1);
     }
 
-    /*
+    //*
     // before we start, estimate overhead related to serialization and de-serialization of parameters
     osaTimeServer timeServer;
     std::stringstream serializationStream;
@@ -47,7 +48,7 @@ int main(int argc, char * argv[])
               << ": " << cmnInternalTo_ms(elapsedTime) << " (ms)" << std::endl
               << "Per sample: " << cmnInternalTo_ms(elapsedTime / confNumberOfSamples) << " (ms)" << std::endl
               << std::endl << std::endl;
-    */
+    //*/
 
     // networking part
     std::string globalTaskManagerIP(argv[1]);
