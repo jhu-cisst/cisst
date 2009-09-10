@@ -5,7 +5,7 @@
 #ifndef _configuration_h
 #define _configuration_h
 
-const double confClientPeriod = 1.0 * cmn_ms;
+const double confClientPeriod = 10.0 * cmn_ms;
 const double confServerPeriod = 1.0 * cmn_ms;
 
 const unsigned int confNumberOfSamples = 10000;

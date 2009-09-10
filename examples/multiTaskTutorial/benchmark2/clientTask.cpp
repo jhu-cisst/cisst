@@ -80,10 +80,10 @@ void clientTask::ShowResults()
               << "--------------------------------------------------------------------" << std::endl
               << "Size of elements used (in bytes) : " << sizeof(mtsDouble) << std::endl
               << "Number of samples: " << NumberOfSamplesCollected << std::endl
-              << "avg (ms) : " << cmnInternalTo_ms(average) << std::endl
-              << "std (ms) : " << cmnInternalTo_ms(StandardDeviation(Results)) << std::endl
-              << "min (ms) : " << cmnInternalTo_ms(min) << std::endl
-              << "max (ms) : " << cmnInternalTo_ms(max) << std::endl;
+              << "avg (ns) : " << cmnInternalTo_ns(average) << std::endl
+              << "std (ns) : " << cmnInternalTo_ns(StandardDeviation(Results)) << std::endl
+              << "min (ns) : " << cmnInternalTo_ns(min) << std::endl
+              << "max (ns) : " << cmnInternalTo_ns(max) << std::endl;
 }
 
 /*
