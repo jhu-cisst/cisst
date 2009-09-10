@@ -165,7 +165,7 @@ mtsProvidedInterface * mtsDeviceInterfaceProxyServer::GetProvidedInterface(
 //-------------------------------------------------------------------------
 //  Method to register per-command serializer
 //-------------------------------------------------------------------------
-const bool mtsDeviceInterfaceProxyServer::AddPerEventGeneratorSerializer(
+bool mtsDeviceInterfaceProxyServer::AddPerEventGeneratorSerializer(
     const CommandIDType commandId, mtsProxySerializer * argumentSerializer)
 {
     CMN_ASSERT(argumentSerializer);

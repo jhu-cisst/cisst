@@ -137,7 +137,7 @@ void mtsDeviceInterfaceProxyClient::OnEnd()
 //-------------------------------------------------------------------------
 //  Method to register per-command serializer
 //-------------------------------------------------------------------------
-const bool mtsDeviceInterfaceProxyClient::AddPerCommandSerializer(
+bool mtsDeviceInterfaceProxyClient::AddPerCommandSerializer(
     const CommandIDType commandId, mtsProxySerializer * argumentSerializer)
 {
     CMN_ASSERT(argumentSerializer);
