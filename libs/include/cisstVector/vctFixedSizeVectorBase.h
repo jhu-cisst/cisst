@@ -425,6 +425,10 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
       vectors for API consistency (usable in templated code).  There
       is obviously not resize involved on fixed size vectors.
 
+      \note If the destination vector doesn't have the same size as
+      the source and can not be resized, an exception will be thrown
+      by the Assign method called internally.
+
       \param other The vector to be copied.
     */
     //@{

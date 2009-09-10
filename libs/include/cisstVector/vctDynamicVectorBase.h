@@ -284,19 +284,21 @@ public:
       vectors for API consistency (usable in templated code).  There
       is obviously not resize involved on fixed size vectors.
 
+      \note If the destination vector doesn't have the same size as
+      the source and can not be resized, an exception will be thrown
+      by the Assign method called internally.
+
       \param other The vector to be copied.
     */
     //@{
     template <class __vectorOwnerType, typename __elementType>
     inline ThisType & ForceAssign(const vctDynamicConstVectorBase<__vectorOwnerType, __elementType> & other) {
-        this->SetSize(other.size());
         return this->Assign(other);
     }
     
     template <size_type __size, stride_type __stride, class __elementType, class __dataPtrType>
     inline ThisType & ForceAssign(const vctFixedSizeConstVectorBase<__size, __stride, __elementType, __dataPtrType>
                                   & other) {
-        this->SetSize(other.size());
         return this->Assign(other);
     }
     //@}

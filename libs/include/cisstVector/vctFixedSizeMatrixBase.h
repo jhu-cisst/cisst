@@ -565,6 +565,10 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
       matrices for API consistency (usable in templated code).  There
       is obviously not resize involved on fixed size matrices.
 
+      \note If the destination matrix doesn't have the same size as
+      the source and can not be resized, an exception will be thrown
+      by the Assign method called internally.
+
       \param other The matrix to be copied.
     */
     //@{

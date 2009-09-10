@@ -454,12 +454,15 @@ public:
 
       \note For a non-reallocating Assign, it is recommended to use
       the Assign() methods.
-      
+     
+      \note If the destination array doesn't have the same size as
+      the source and can not be resized, an exception will be thrown
+      by the Assign method called internally.
+ 
       \param other The array to be copied.
     */
     template <class __nArrayOwnerType, typename __elementType>
     inline ThisType & ForceAssign(const vctDynamicConstNArrayBase<__nArrayOwnerType, __elementType, DIMENSION> & other) {
-        this->SetSize(other.size());
         return this->Assign(other);
     }
 

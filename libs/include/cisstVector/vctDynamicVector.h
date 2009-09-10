@@ -277,6 +277,21 @@ public:
         return *this;
     }
 
+    // documented in base class
+    template <class __vectorOwnerType, typename __elementType>
+    inline ThisType & ForceAssign(const vctDynamicConstVectorBase<__vectorOwnerType, __elementType> & other) {
+        this->SetSize(other.size());
+        return this->Assign(other);
+    }
+
+    // documented in base class
+    template <size_type __size, stride_type __stride, class __elementType, class __dataPtrType>
+    inline ThisType & ForceAssign(const vctFixedSizeConstVectorBase<__size, __stride, __elementType, __dataPtrType>
+                                  & other) {
+        this->SetSize(other.size());
+        return this->Assign(other);
+    }
+
     /*! Non-destructive size change.  Change the size to the specified
       size, and copy as many elements as possible from the former
       vector.

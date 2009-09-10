@@ -237,6 +237,12 @@ public:
         return *this;
     }
 
+    // documented in base class
+    template <class __nArrayOwnerType, typename __elementType>
+    inline ThisType & ForceAssign(const vctDynamicConstNArrayBase<__nArrayOwnerType, __elementType, _dimension> & other) {
+        this->SetSize(other.size());
+        return this->Assign(other);
+    }
 
     /*! Destructive size change.  Change the size to the specified
       size. Discard all of the old values. */

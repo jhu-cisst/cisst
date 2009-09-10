@@ -528,6 +528,10 @@ public:
       \note For a non-reallocating Assign, it is recommended to use
       the Assign() methods.
       
+      \note If the destination matrix doesn't have the same size as
+      the source and can not be resized, an exception will be thrown
+      by the Assign method called internally.
+
       \note This method is provided for both fixed size and dynamic
       matrices for API consistency (usable in templated code).  There
       is obviously not resize involved on fixed size matrices.
@@ -537,7 +541,6 @@ public:
     //@{
     template <class __matrixOwnerType, typename __elementType>
     inline ThisType & ForceAssign(const vctDynamicConstMatrixBase<__matrixOwnerType, __elementType> & other) {
-        this->SetSize(other.size());
         return this->Assign(other);
     }
     
@@ -547,7 +550,6 @@ public:
     inline ThisType & ForceAssign(const vctFixedSizeConstMatrixBase<__rows, __cols,
                                                                     __rowStride, __colStride,
                                                                     __elementType, __dataPtrType>  & other) {
-        this->SetSize(other.size());
         return this->Assign(other);
     }
     //@}
