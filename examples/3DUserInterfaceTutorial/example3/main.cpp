@@ -189,8 +189,9 @@ int main()
 
     // following should be replaced by a utility function or method of ui3Manager 
     taskManager->CreateAll();
+    osaSleep(10.0 * cmn_s);
+    
     taskManager->StartAll();
-
     osaSleep(1.0 * cmn_s);
 
     int ch;
@@ -200,7 +201,7 @@ int main()
     cerr << "    'q'   - Quit" << endl << endl;
     do {
         ch = cmnGetChar();
-        osaSleep(10.0 * cmn_ms);
+        osaSleep(100.0 * cmn_ms);
     } while (ch != 'q');
 
     taskManager->KillAll();
