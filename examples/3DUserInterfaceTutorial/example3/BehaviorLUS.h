@@ -20,6 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
+#include <cisstParameterTypes/prmPositionJointGet.h>
 #include <cisst3DUserInterface.h>
 #include <list>
 
