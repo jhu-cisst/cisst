@@ -80,7 +80,7 @@ public:
     void Configure(const std::string & CMN_UNUSED(filename)) {};
     void Startup(void);
     void Run(void);
-    void Cleanup(void) {}; // user defined cleanup
+    void Cleanup(void);
     
 };
 

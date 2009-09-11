@@ -195,3 +195,9 @@ void devSartoriusSerial::Run(void)
     this->GetWeight(this->Weight.Data, stable); 
     osaSleep(1.0 * cmn_ms); // way smaller than delay from scale
 }
+
+void devSartoriusSerial::Cleanup(void)
+{
+    this->SerialPort.Close();
+}
+
