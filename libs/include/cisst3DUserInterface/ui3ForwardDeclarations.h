@@ -28,6 +28,7 @@ class ui3CursorBase;
 class ui3CursorSphere;
 class ui3ImagePlane;
 class ui3Manager;
+class ui3ManagerCVTKRendererProc;
 class ui3MasterArm;
 class ui3MenuBar;
 class ui3MenuButton;

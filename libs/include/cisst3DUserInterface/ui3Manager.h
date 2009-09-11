@@ -35,6 +35,20 @@ http://www.cisst.org/cisst/license.txt.
 // forward declaration, to be moved to cisstStereoVision
 class svlRenderTargetBase;
 
+
+class ui3ManagerCVTKRendererProc
+{
+public:
+    ui3ManagerCVTKRendererProc(void);
+    
+    void * Proc(ui3Manager * baseref);
+    
+    osaThreadSignal ThreadReadySignal;
+    bool KillThread;
+    bool ThreadKilled;
+};
+
+
 /*!
  Provides a default implementation for the main user interface manager.
 */
@@ -42,6 +56,7 @@ class CISST_EXPORT ui3Manager: public ui3BehaviorBase
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
     
+    friend class ui3ManagerCVTKRendererProc;
     friend class ui3BehaviorBase;
     friend class ui3MasterArm;
     friend class ui3SlaveArm;
@@ -251,19 +266,6 @@ protected:
         ui3ImagePlane* imageplane;
     } _RendererStruct;
 
-    class CVTKRendererProc
-    {
-    public:
-        CVTKRendererProc();
-
-        void* Proc(ui3Manager* baseref);
-
-        osaThreadSignal ThreadReadySignal;
-        bool KillThread;
-        bool ThreadKilled;
-    };
-
-
 private:
 
     inline ui3VisibleObject * GetVisibleObject(void) {
@@ -319,7 +321,7 @@ private:
     /*!
      3D graphics renderer procedure class.
     */
-    CVTKRendererProc RendererProc;
+    ui3ManagerCVTKRendererProc RendererProc;
 
     /*!
      3D graphics renderer thread.
@@ -368,6 +370,9 @@ private:
 
 
 };
+
+
+
 
 
 CMN_DECLARE_SERVICES_INSTANTIATION(ui3Manager)

@@ -345,7 +345,7 @@ void ui3Manager::Startup(void)
 
     // create renderer thread
     RendererThread = new osaThread;
-    RendererThread->Create<CVTKRendererProc, ui3Manager*>(&RendererProc, &CVTKRendererProc::Proc, this);
+    RendererThread->Create<ui3ManagerCVTKRendererProc, ui3Manager*>(&RendererProc, &ui3ManagerCVTKRendererProc::Proc, this);
     // wait for all VTK initialization to be finished
     if (RendererProc.ThreadReadySignal.Wait(10.0) && RendererProc.ThreadKilled == false) {
         Initialized = true;
@@ -721,13 +721,13 @@ void ui3Manager::LeaveMaMModeEventHandler(void)
 /*** ui3Manager::CVTKRendererProc class */
 /****************************************/
 
-ui3Manager::CVTKRendererProc::CVTKRendererProc() :
+ui3ManagerCVTKRendererProc::ui3ManagerCVTKRendererProc() :
     KillThread(false),
     ThreadKilled(true)
 {
 }
 
-void* ui3Manager::CVTKRendererProc::Proc(ui3Manager* baseref)
+void* ui3ManagerCVTKRendererProc::Proc(ui3Manager* baseref)
 {
     // create VTK renderers
     baseref->SetupRenderers();

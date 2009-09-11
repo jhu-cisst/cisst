@@ -47,6 +47,7 @@ class CISST_EXPORT ui3SceneManager: public cmnGenericObject
 
     friend class ui3VTKRenderer;
     friend class ui3Manager;
+    friend class ui3ManagerCVTKRendererProc;
 
 public:
     typedef void * VTKHandleType;
