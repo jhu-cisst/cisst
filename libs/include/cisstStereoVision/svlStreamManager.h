@@ -103,6 +103,7 @@ private:
     svlStreamEntity();
     svlStreamEntity(svlStreamEntity const &) {};
     svlStreamManager * Stream;
+    svlFilterBase * Root;
 };
 
 class CISST_EXPORT svlFilterBase
@@ -243,7 +244,7 @@ public:
     int RemoveBranch(svlStreamEntity* entity);
     int RemoveBranch(const std::string & name);
     int RemoveFilter(svlFilterBase* filter);
-    int EmptyFilterList();
+    int RemoveAll();
 
     int Initialize();
     void Release();

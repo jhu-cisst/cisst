@@ -80,7 +80,7 @@ int main()
     cmnGetChar();
 
     // Safely stopping and deconstructing stream before de-allocation
-    stream.EmptyFilterList();
+    stream.RemoveAll();
 
     cout << "Success... Quitting." << endl;
     return 1;

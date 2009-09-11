@@ -144,7 +144,7 @@ int VideoConverter(const std::string source, const std::string destination)
     }
 
     // destroy pipeline
-    converter_stream.EmptyFilterList();
+    converter_stream.RemoveAll();
 
 labError:
     return 0;

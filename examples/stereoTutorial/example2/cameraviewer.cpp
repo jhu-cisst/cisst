@@ -372,7 +372,7 @@ int CameraViewer(bool interpolation, bool save, int width, int height)
     viewer_source.SaveSettings("device.dat");
 
     // destroy pipeline
-    viewer_stream.EmptyFilterList();
+    viewer_stream.RemoveAll();
 
 labError:
     return 0;

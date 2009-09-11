@@ -90,7 +90,7 @@ int VideoPlayer(const std::string pathname)
     viewer_stream.Stop();
 
     // destroy pipeline
-    viewer_stream.EmptyFilterList();
+    viewer_stream.RemoveAll();
 
 labError:
     return 0;

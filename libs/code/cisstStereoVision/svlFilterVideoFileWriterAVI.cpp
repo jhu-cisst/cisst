@@ -36,6 +36,8 @@ svlFilterVideoFileWriterAVI::svlFilterVideoFileWriterAVI() :
     svlFilterBase(),
     Action(false),
     ActionTime(0.0),
+    TargetActionTime(0.0),
+    TargetCaptureLength(-1),
     CaptureLength(-1), // Continuous saving by default
     Framerate(30.0),
     KeyFrames(30),

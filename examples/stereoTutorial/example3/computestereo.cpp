@@ -155,7 +155,7 @@ int ComputeStereo(const char* filepath1, const char* filepath2,
 
 labError:
     // clean up
-    stereo_stream.EmptyFilterList();
+    stereo_stream.RemoveAll();
     return 0;
 }
 
