@@ -285,9 +285,9 @@ void ui3Manager::ConnectAll(void)
             default:
                 CMN_LOG_CLASS_INIT_ERROR << "ConnectAll: unknown arm role" << std::endl;
             }
-            CMN_LOG_CLASS_RUN_WARNING << "ConnectAll: added state data \""
-                                      << commandName << "\" using master arm \"" 
-                                      << ((*armIterator).second)->Name << "\"" << std::endl;
+            CMN_LOG_CLASS_INIT_DEBUG << "ConnectAll: added state data \""
+                                     << commandName << "\" using master arm \"" 
+                                     << ((*armIterator).second)->Name << "\"" << std::endl;
             this->StateTable.AddData(((*armIterator).second)->CartesianPosition, commandName);
             behaviorsInterface->AddCommandReadState(this->StateTable, ((*armIterator).second)->CartesianPosition,
                                                     commandName);
@@ -301,20 +301,31 @@ void ui3Manager::ConnectAll(void)
                     requiredInterface->AddFunction(commandName,
                                                    (*iterator)->GetPrimaryMasterPosition,
                                                    mtsRequired);
+                    CMN_LOG_CLASS_INIT_DEBUG << "ConnectAll: added required command \""
+                                             << commandName << "\" to required interface \"ManagerInterface\" of behavior \"" 
+                                             << (*iterator)->GetName() << "\" to be bound to \"GetPrimaryMasterPosition\"" << std::endl;
                     break;
                 case ui3MasterArm::SECONDARY:
                     requiredInterface->AddFunction(commandName,
                                                    (*iterator)->GetSecondaryMasterPosition,
                                                    mtsRequired);
+                    CMN_LOG_CLASS_INIT_DEBUG << "ConnectAll: added required command \""
+                                             << commandName << "\" to required interface \"ManagerInterface\" of behavior \"" 
+                                             << (*iterator)->GetName() << "\" to be bound to \"GetSecondaryMasterPosition\"" << std::endl;
                     break;
                 default:
                     CMN_LOG_CLASS_INIT_ERROR << "ConnectAll: unknown arm role" << std::endl;
                 }
-                // this will attempt to connect multiple times, need to put ouside the loop
-                this->TaskManager->Connect((*iterator)->GetName(), "ManagerInterface",
-                                           this->GetName(), "BehaviorsInterface");
             }
         }
+    }
+
+    // finally, connect all
+    for (iterator = this->Behaviors.begin();
+         iterator != end;
+         iterator++) {
+        this->TaskManager->Connect((*iterator)->GetName(), "ManagerInterface",
+                                   this->GetName(), "BehaviorsInterface");
     }
 }
 
