@@ -24,10 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsTaskManager.h>
 
-
 #include <cisstDaVinciAPI/cisstDaVinciAPI.h>
-
-
 
 #include <cisstCommon.h>
 #include <cisstStereoVision.h>
@@ -54,7 +51,6 @@ int main()
     cisstDaVinciAPI *daVinci = new cisstDaVinciAPI("daVinci", 0.0 /* period to be removed */,
                                                    "10.0.0.5", 5002, 0x1111, 50);
     taskManager->AddTask(daVinci);
-
 
     ui3Manager guiManager;
 
@@ -207,7 +203,7 @@ int main()
     taskManager->KillAll();
     taskManager->Cleanup();
 
-    vidUltrasoundStream.EmptyFilterList();
+    vidUltrasoundStream.RemoveAll();
 
 
     return 0;
