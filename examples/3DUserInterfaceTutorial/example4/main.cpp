@@ -29,6 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision.h>
 
 #include <SimpleBehavior.h>
+#include <ImageViewer.h>
 
 int main()
 {
@@ -40,12 +41,14 @@ int main()
     cmnLogger::GetMultiplexer()->AddChannel(threadedLog, CMN_LOG_LOD_VERY_VERBOSE);
     // specify a higher, more verbose log level for these classes
     cmnClassRegister::SetLoD("ui3BehaviorBase", CMN_LOG_LOD_VERY_VERBOSE);
+    cmnClassRegister::SetLoD("ui3Widget3D", CMN_LOG_LOD_VERY_VERBOSE);
     cmnClassRegister::SetLoD("ui3Manager", CMN_LOG_LOD_VERY_VERBOSE);
     cmnClassRegister::SetLoD("mtsTaskInterface", CMN_LOG_LOD_VERY_VERBOSE);
     cmnClassRegister::SetLoD("mtsTaskManager", CMN_LOG_LOD_VERY_VERBOSE);
     cmnClassRegister::SetLoD("dvapi_stream", CMN_LOG_LOD_RUN_ERROR);
 
     cmnClassRegister::SetLoD("SimpleBehavior", CMN_LOG_LOD_VERY_VERBOSE);
+    cmnClassRegister::SetLoD("ImageViewer", CMN_LOG_LOD_VERY_VERBOSE);
 
     mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
 
@@ -55,16 +58,15 @@ int main()
 
     ui3Manager guiManager;
 
-    SimpleBehavior behavior("Example1");
-
-    guiManager.AddBehavior(&behavior,       // behavior reference
+    SimpleBehavior simpleBehavior("SimpleBehavior1");
+    guiManager.AddBehavior(&simpleBehavior, // behavior reference
                            0,               // position in the menu bar: default
                            "circle.png");   // icon file: no texture
 
-    guiManager.Configure("config.xml");
-
-    ////////////////////////////////////////////////////////////////
-    // setup renderers
+    ImageViewer imageViewer("ImageViewer1");
+    guiManager.AddBehavior(&imageViewer,
+                           1,
+                           "square.png");
 
     svlCameraGeometry camera_geometry;
     camera_geometry.SetPerspective(400.0, 2);
