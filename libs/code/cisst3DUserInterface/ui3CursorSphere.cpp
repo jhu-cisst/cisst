@@ -90,28 +90,30 @@ public:
 
     void UpdateColor(bool isClutched, bool isPressed, bool is2D)
     {
-        this->Lock();
-        if (isClutched) {
-            this->Actor->GetProperty()->SetOpacity(0.5);
-        } else {
-            this->Actor->GetProperty()->SetOpacity(1.0);
-        }
-        if (is2D) {
-            this->Source->SetRadius(1.0);
-            if (isPressed) {
-                this->Actor->GetProperty()->SetColor(0.5, 0.8, 0.8);
+        if (this->Created()) {
+            this->Lock();
+            if (isClutched) {
+                this->Actor->GetProperty()->SetOpacity(0.5);
             } else {
-                this->Actor->GetProperty()->SetColor(0.5, 1.0, 1.0);
+                this->Actor->GetProperty()->SetOpacity(1.0);
             }
-        } else {
-            this->Source->SetRadius(2.0);
-            if (isPressed) {
-                this->Actor->GetProperty()->SetColor(1.0, 0.8, 0.8);
+            if (is2D) {
+                this->Source->SetRadius(1.0);
+                if (isPressed) {
+                    this->Actor->GetProperty()->SetColor(0.5, 0.8, 0.8);
+                } else {
+                    this->Actor->GetProperty()->SetColor(0.5, 1.0, 1.0);
+                }
             } else {
-                this->Actor->GetProperty()->SetColor(1.0, 1.0, 1.0);
+                this->Source->SetRadius(2.0);
+                if (isPressed) {
+                    this->Actor->GetProperty()->SetColor(1.0, 0.8, 0.8);
+                } else {
+                    this->Actor->GetProperty()->SetColor(1.0, 1.0, 1.0);
+                }
             }
+            this->Unlock();
         }
-        this->Unlock();
     }
 };
 
