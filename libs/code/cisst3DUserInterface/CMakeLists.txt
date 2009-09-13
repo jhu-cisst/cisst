@@ -44,6 +44,7 @@ SET(SOURCE_FILES
     ui3VisibleList.cpp
     ui3VisibleObject.cpp
     ui3VisibleAxes.cpp
+    ui3Widget3D.cpp
     )
 
 # all header files
@@ -67,6 +68,7 @@ SET(HEADER_FILES
     ui3VisibleList.h
     ui3VisibleObject.h
     ui3VisibleAxes.h
+    ui3Widget3D.h
     )
 
 

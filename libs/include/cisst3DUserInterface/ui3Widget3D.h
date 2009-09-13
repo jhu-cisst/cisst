@@ -4,10 +4,10 @@
 /*
   $Id: ui3VisibleObject.h 227 2009-04-03 21:39:16Z adeguet1 $
 
-  Author(s):	Balazs Vagvolgyi, Simon DiMaio, Anton Deguet
-  Created on:	2008-05-23
+  Author(s):	Anton Deguet
+  Created on:	2009-09-13
 
-  (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -19,8 +19,8 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#ifndef _ui3VisibleList_h
-#define _ui3VisibleList_h
+#ifndef _ui3Widget3D_h
+#define _ui3Widget3D_h
 
 #include <cisstCommon/cmnGenericObject.h>
 #include <cisstCommon/cmnClassServices.h>
@@ -31,65 +31,51 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisst3DUserInterface/ui3ForwardDeclarations.h>
 #include <cisst3DUserInterface/ui3VTKForwardDeclarations.h>
 #include <cisst3DUserInterface/ui3SceneManager.h>
-#include <cisst3DUserInterface/ui3VisibleObject.h>
+#include <cisst3DUserInterface/ui3VisibleList.h>
 
 // Always include last!
 #include <cisst3DUserInterface/ui3Export.h>
+
+
+class ui3Widget3DRotationHandle;
+
 
 /*!  
   Cheap implementation of Composite Pattern, group of visible
   objects behaving like a single visible object
 */
-class CISST_EXPORT ui3VisibleList: public ui3VisibleObject
+class CISST_EXPORT ui3Widget3D: public ui3VisibleList
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
     friend class ui3SceneManager;
 
 public:
+    typedef ui3VisibleList BaseType;
 
-    ui3VisibleList(const std::string & name);
+    ui3Widget3D(const std::string & name);
 
     /*!
      Destructor
     */
-    ~ui3VisibleList(void) {};
-
-    bool Update(ui3SceneManager * sceneManager);
+    ~ui3Widget3D(void) {};
 
     bool CreateVTKObjects(void);
 
     bool Add(ui3VisibleObject * object);
 
-    void RemoveLast(void) {
-        this->Objects.pop_back();
-    }
-    
-    ui3VisibleObject * GetLast(void){
-        return this->Objects.back();
-    }
-    
-    unsigned int size(void) const  {
-        return this->Objects.size();
-    }
-
-    void RecursiveUpdateNeeded(void);
+    void SetSize(double size);
 
 protected:
 
-    void PropagateVisibility(bool visible);
-
-    typedef std::list<ui3VisibleObject *> ListType;
-    ListType Objects;
-
-
-    CMN_DECLARE_MEMBER_AND_ACCESSORS(bool, UpdateNeeded);
-
-
+    double Size;
+    ui3VisibleList * UserObjects;
+    ui3VisibleList * Handles;
+    ui3Widget3DRotationHandle * RotationHandles[4];
 };
 
 
-CMN_DECLARE_SERVICES_INSTANTIATION(ui3VisibleList);
+CMN_DECLARE_SERVICES_INSTANTIATION(ui3Widget3D);
 
 
-#endif // _ui3VisibleList_h
+#endif // _ui3Widget3D_h

@@ -38,14 +38,23 @@ ui3VisibleList::ui3VisibleList(const std::string & name):
 }
 
 
-void ui3VisibleList::Add(ui3VisibleObject * objectPointer)
+bool ui3VisibleList::Add(ui3VisibleObject * objectPointer)
 {
+    // verify that the pointer is not already in the list
+    if (std::find(this->Objects.begin(),
+                  this->Objects.end(),
+                  objectPointer) != this->Objects.end()) {
+        CMN_LOG_CLASS_RUN_ERROR << "Add: object \"" << objectPointer->Name() << "\" already in list \""
+                                << this->Name() << "\"" << std::endl;
+        return false;
+    }
+    // otherwise, add it to the list
 	this->Objects.push_back(objectPointer);
 	objectPointer->ParentList = this;
 	this->RecursiveUpdateNeeded();
 	CMN_LOG_CLASS_RUN_VERBOSE << "Add: object \"" << objectPointer->Name() << "\" added to list \""
 	                          << this->Name() << "\"" << std::endl;
-
+    return true;
 }
 
 
