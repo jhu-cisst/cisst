@@ -30,8 +30,8 @@ http://www.cisst.org/cisst/license.txt.
 // Always include last!
 #include <cisst3DUserInterface/ui3Export.h>
 
-class CursorTip;
-class CursorAnchor;
+class ui3CursorSphereTip;
+class ui3CursorSphereAnchor;
 
 /*!  Simple cursor using a sphere for rendering.  Color, diameter and
   transparency are used to show the different states.
@@ -79,9 +79,9 @@ protected:
     bool IsPressed;
     bool Is2D;
     bool IsClutched;
-
-    CursorTip * VisibleTip;
-    CursorAnchor * VisibleAnchor;
+    
+    ui3CursorSphereTip * VisibleTip;
+    ui3CursorSphereAnchor * VisibleAnchor;
     ui3VisibleList * VisibleList;
 };
 

@@ -35,7 +35,7 @@ http://www.cisst.org/cisst/license.txt.
 CMN_IMPLEMENT_SERVICES(ui3CursorSphere);
 
 
-class CursorTip: public ui3VisibleObject
+class ui3CursorSphereTip: public ui3VisibleObject
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
@@ -45,15 +45,15 @@ protected:
     vtkActor * Actor;
 
 public:
-    CursorTip():
-        ui3VisibleObject("CursorSphere"),
+    ui3CursorSphereTip():
+        ui3VisibleObject("ui3CursorSphereTip"),
         Source(0),
         Mapper(0),
         Actor(0)
     {}
     
     
-    ~CursorTip()
+    ~ui3CursorSphereTip()
     {
         if (this->Source) {
             this->Source->Delete();
@@ -118,11 +118,11 @@ public:
 };
 
 
-CMN_DECLARE_SERVICES_INSTANTIATION(CursorTip);
-CMN_IMPLEMENT_SERVICES(CursorTip);
+CMN_DECLARE_SERVICES_INSTANTIATION(ui3CursorSphereTip);
+CMN_IMPLEMENT_SERVICES(ui3CursorSphereTip);
 
 
-class CursorAnchor: public ui3VisibleObject
+class ui3CursorSphereAnchor: public ui3VisibleObject
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
@@ -132,15 +132,15 @@ protected:
     vtkActor * Actor;
 
 public:
-    CursorAnchor(void):
-        ui3VisibleObject("CursorAnchor"),
+    ui3CursorSphereAnchor(void):
+        ui3VisibleObject("ui3CursorSphereAnchor"),
         Source(0),
         Mapper(0),
         Actor(0)
     {}
     
     
-    ~CursorAnchor()
+    ~ui3CursorSphereAnchor()
     {
         if (this->Source) {
             this->Source->Delete();
@@ -194,8 +194,8 @@ public:
     }
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(CursorAnchor);
-CMN_IMPLEMENT_SERVICES(CursorAnchor);
+CMN_DECLARE_SERVICES_INSTANTIATION(ui3CursorSphereAnchor);
+CMN_IMPLEMENT_SERVICES(ui3CursorSphereAnchor);
 
 
 
@@ -208,11 +208,10 @@ ui3CursorSphere::ui3CursorSphere(void):
     VisibleAnchor(0),
     VisibleList(0)
 {
-    
     this->VisibleList = new ui3VisibleList("CursorSphere");
-    this->VisibleTip = new CursorTip();
+    this->VisibleTip = new ui3CursorSphereTip();
     this->VisibleList->Add(this->VisibleTip);
-    this->VisibleAnchor = new CursorAnchor();
+    this->VisibleAnchor = new ui3CursorSphereAnchor();
     this->VisibleList->Add(this->VisibleAnchor);
     this->VisibleList->Hide();
 }
