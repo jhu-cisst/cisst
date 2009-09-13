@@ -59,7 +59,7 @@ public:
     inline bool CreateVTKObjects(void) {
         this->Source = vtkSphereSource::New();
         CMN_ASSERT(this->Source);
-        this->Source->SetRadius(10.0);
+        this->Source->SetRadius(5.0);
 
         this->Mapper = vtkPolyDataMapper::New();
         CMN_ASSERT(this->Mapper);
@@ -78,10 +78,10 @@ public:
 
     void ToggleColor(void) {
         if (this->Red) {
-            this->Actor->GetProperty()->SetColor(0.0, 1.0, 0.0);
+            this->Actor->GetProperty()->SetColor(0.1, 0.9, 0.2);
             this->Red = false;
         } else {
-            this->Actor->GetProperty()->SetColor(1.0, 0.0, 0.0);
+            this->Actor->GetProperty()->SetColor(0.9, 0.1, 0.2);
             this->Red = true;
         }
     }
@@ -110,8 +110,8 @@ SimpleBehavior::SimpleBehavior(const std::string & name):
 
     this->VisibleObject1 = new SimpleBehaviorVisibleObject();
     this->VisibleList->Add(this->VisibleObject1);
-    
-    this->VisibleObject2 = new ui3VisibleAxes();
+
+    this->VisibleObject2 = new SimpleBehaviorVisibleObject();
     this->VisibleList->Add(this->VisibleObject2);
     
     CMN_ASSERT(this->VisibleList);
@@ -131,8 +131,9 @@ void SimpleBehavior::ToggleColor()
     if (this->VisibleObject1) {
         this->VisibleObject1->ToggleColor();
     }
-
-  
+    if (this->VisibleObject2) {
+        this->VisibleObject2->ToggleColor();
+    }
 }
 
 
@@ -161,22 +162,17 @@ bool SimpleBehavior::RunForeground()
     }
     // running in foreground GUI mode
     prmPositionCartesianGet position;
-
     this->GetPrimaryMasterPosition(position);
-
     if (this->Following) {
-        Counter += 0.02;
         vctDouble3 deltaCursor;
         deltaCursor.DifferenceOf(position.Position().Translation(),
                                  this->PreviousCursorPosition);
         this->Position.Add(deltaCursor);
         this->VisibleList->SetPosition(this->Position);
         this->VisibleList->SetOrientation(position.Position().Rotation());
- 
-        this->VisibleObject2->SetOrientation(vctMatRot3(vctAxAnRot3(vctDouble3(0.0, 0.0, 1.0), Counter)));
-        this->VisibleObject2->SetPosition(vctDouble3(0.0, 20.0 * sin(Counter), 0.0));
     }
     this->PreviousCursorPosition.Assign(position.Position().Translation());
+    this->UpdateRelativePosition();
     return true;
 }
 
@@ -187,6 +183,7 @@ bool SimpleBehavior::RunBackground()
         this->PreviousState = this->State;
         this->VisibleList->Hide();
     }
+    this->UpdateRelativePosition();
     return true;
 }
 
@@ -221,7 +218,16 @@ void SimpleBehavior::PrimaryMasterButtonCallback(const prmEventButton & event)
 {
     if (event.Type() == prmEventButton::PRESSED) {
         this->Following = true;
+        CMN_LOG_CLASS_VERY_VERBOSE << "Primary master button pressed, following started" << std::endl;
     } else if (event.Type() == prmEventButton::RELEASED) {
         this->Following = false;
+        CMN_LOG_CLASS_VERY_VERBOSE << "Primary master button pressed, following ended" << std::endl;
     }
+}
+
+
+void SimpleBehavior::UpdateRelativePosition(void)
+{
+    this->Counter += 0.01;
+    this->VisibleObject2->SetPosition(vctDouble3(0.0, 20.0 * sin(Counter), 0.0));
 }

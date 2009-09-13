@@ -48,14 +48,14 @@ public:
 protected:
     void PrimaryMasterButtonCallback(const prmEventButton & event);
     void ToggleColor(void);
+    void UpdateRelativePosition(void);
     StateType PreviousState;
     bool PreviousMaM;
     vctDouble3 Position, PreviousCursorPosition;
     bool Following;
 
-private:
     ui3VisibleList * VisibleList;
     SimpleBehaviorVisibleObject * VisibleObject1;
-    ui3VisibleAxes * VisibleObject2;
+    SimpleBehaviorVisibleObject * VisibleObject2;
     double Counter;
 };
