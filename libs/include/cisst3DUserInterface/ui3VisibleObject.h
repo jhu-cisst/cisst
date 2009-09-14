@@ -64,16 +64,23 @@ public:
 
     void Hide(void);
 
-    void SetPosition(const vctDouble3 & position);
+    void SetPosition(const vctDouble3 & position, bool useLock = true);
 
-    void SetOrientation(const vctDoubleMatRot3 & rotationMatrix);
+    void SetOrientation(const vctDoubleMatRot3 & rotationMatrix, bool useLock = true);
 
-    void SetScale(const double & scale);
+    void SetScale(const double & scale, bool useLock = true);
 
     template <bool _storageOrder>
-    void SetTransformation(const vctFrameBase<vctMatrixRotation3<double, _storageOrder> > & frame) {
-        this->SetPosition(frame.Translation());
-        this->SetOrientation(frame.Rotation());
+    void SetTransformation(const vctFrameBase<vctMatrixRotation3<double, _storageOrder> > & frame,
+                           bool useLock = true) {
+        if (useLock) {
+            this->Lock();
+        }
+        this->SetPosition(frame.Translation(), false);
+        this->SetOrientation(frame.Rotation(), false);
+        if (useLock) {
+            this->Unlock();
+        }
     }
 
     vctDoubleFrm3 GetTransformation(void) const;
@@ -98,6 +105,7 @@ public:
         this->VTKHandle = handle;
     }
 
+    
  private:
     // make assembly private to control access
     vtkAssembly * Assembly;

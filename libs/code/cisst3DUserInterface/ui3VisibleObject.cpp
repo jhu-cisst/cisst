@@ -107,46 +107,58 @@ void ui3VisibleObject::PropagateVisibility(bool visible)
 }
 
 
-void ui3VisibleObject::SetPosition(const vctDouble3 & position)
+void ui3VisibleObject::SetPosition(const vctDouble3 & position, bool useLock)
 {
     CMN_LOG_CLASS_VERY_VERBOSE << "SetPosition: called for object \"" << this->Name() << "\"" << std::endl; 
     if (this->Created()) {
-        this->Lock();
+        if (useLock) {
+            this->Lock();
+        }
         this->Matrix->SetElement(0, 3, position.X());
         this->Matrix->SetElement(1, 3, position.Y());
         this->Matrix->SetElement(2, 3, position.Z());
-        this->Unlock();
+        if (useLock) {
+            this->Unlock();
+        }
     } else {
         CMN_LOG_CLASS_RUN_VERBOSE << "SetPosition: called on object \"" << this->Name() << "\" not yet created" << std::endl;
     }
 }
 
 
-void ui3VisibleObject::SetOrientation(const vctMatRot3 & rotationMatrix)
+void ui3VisibleObject::SetOrientation(const vctMatRot3 & rotationMatrix, bool useLock)
 {
     CMN_LOG_CLASS_VERY_VERBOSE << "SetOrientation: called for object \"" << this->Name() << "\"" << std::endl; 
     if (this->Created()) {
         unsigned int i, j;
-        this->Lock();
+        if (useLock) {
+            this->Lock();
+        }
         for (i = 0; i < 3; i++) {
             for (j = 0; j < 3; j++) {
                 this->Matrix->SetElement(i, j, rotationMatrix.Element(i, j));
             }
         }
-        this->Unlock();
+        if (useLock) {
+            this->Unlock();
+        }
     } else {
         CMN_LOG_CLASS_RUN_VERBOSE << "SetOrientation: called on object \"" << this->Name() << "\" not yet created" << std::endl;
     }
 }
 
 
-void ui3VisibleObject::SetScale(const double & scale)
+void ui3VisibleObject::SetScale(const double & scale, bool useLock)
 {
     CMN_LOG_CLASS_VERY_VERBOSE << "SetScale: called for object \"" << this->Name() << "\"" << std::endl; 
     if (this->Created()) {
-        this->Lock();
+        if (useLock) {
+            this->Lock();
+        }
         this->Assembly->SetScale(scale);
-        this->Unlock();
+        if (useLock) {
+            this->Unlock();
+        }
     } else {
         CMN_LOG_CLASS_RUN_VERBOSE << "SetScale: called on object \"" << this->Name() << "\" not yet created" << std::endl;
     }

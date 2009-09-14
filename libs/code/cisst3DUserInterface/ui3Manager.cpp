@@ -402,16 +402,7 @@ void ui3Manager::Startup(void)
         this->EnterMaMModeEventHandler();
     }
 
-
-    if (!Initialized) {
-        // error
-        // return false;
-    }
-    // success
-    // return true;
     CMN_LOG_CLASS_INIT_VERBOSE << "StartUp: end" << std::endl;
-    // Perform UI manager initialization
-    // TO DO
 }
 
 
@@ -491,8 +482,9 @@ void ui3Manager::Run(void)
     } else {
         averageDepth = -100.0; // should be camera focal distance?
     }
-        
+
     // set depth for current menu, take the average depth of all master arms
+    this->ActiveBehavior->MenuBar->Show();
     this->ActiveBehavior->MenuBar->SetDepth(averageDepth); // rightCursorPosition.Translation().Z());
 
 

@@ -163,16 +163,18 @@ bool SimpleBehavior::RunForeground()
     // running in foreground GUI mode
     prmPositionCartesianGet position;
     this->GetPrimaryMasterPosition(position);
+    this->VisibleList->Lock();
     if (this->Following) {
         vctDouble3 deltaCursor;
         deltaCursor.DifferenceOf(position.Position().Translation(),
                                  this->PreviousCursorPosition);
         this->Position.Add(deltaCursor);
-        this->VisibleList->SetPosition(this->Position);
-        this->VisibleList->SetOrientation(position.Position().Rotation());
+        this->VisibleList->SetPosition(this->Position, false);
+        this->VisibleList->SetOrientation(position.Position().Rotation(), false);
     }
     this->PreviousCursorPosition.Assign(position.Position().Translation());
     this->UpdateRelativePosition();
+    this->VisibleList->Unlock();
     return true;
 }
 
@@ -183,7 +185,9 @@ bool SimpleBehavior::RunBackground()
         this->PreviousState = this->State;
         this->VisibleList->Hide();
     }
+    this->VisibleList->Lock();
     this->UpdateRelativePosition();
+    this->VisibleList->Unlock();
     return true;
 }
 
@@ -229,5 +233,5 @@ void SimpleBehavior::PrimaryMasterButtonCallback(const prmEventButton & event)
 void SimpleBehavior::UpdateRelativePosition(void)
 {
     this->Counter += 0.01;
-    this->VisibleObject2->SetPosition(vctDouble3(0.0, 20.0 * sin(Counter), 0.0));
+    this->VisibleObject2->SetPosition(vctDouble3(0.0, 20.0 * sin(Counter), 0.0), false);
 }
