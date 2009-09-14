@@ -26,6 +26,11 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstOSAbstraction/osaTimeServer.h>
 
+#if (CISST_OS == CISST_LINUX_RTAI)
+#include <rtai_lxrt.h>
+#include <unistd.h>
+#endif // CISST_LINUX_RTAI
+
 #if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI)
 #include <sys/time.h>
 #include <unistd.h>
@@ -45,8 +50,11 @@ const unsigned long OSA_100NSEC_PER_SEC = 10000000UL;
 
 // PKAZ: IMPORTANT NOTES:
 //
-//   1) For now, using Linux implementation for RTAI, but need to check if there is something
-//      better available on RTAI.
+//   1) In RTAI, calling clock_gettime or gettimeofday from hard-real-time tasks will switch them
+//      to soft-real-time.  Thus, GetRelativeTime must call rt_get_time_ns. It seems that rt_get_time_ns
+//      has significant drift with respect to clock_gettime, at least on some machines (such as the
+//      Neuromate control computer) -- this must be fixed. Note that we are using the RT timer in
+//      one-shot mode -- this is set in __os_init (osaThreadBuddy.cpp).
 //
 //   2) According to the documentation, clock_gettime is available on Solaris, but should be tested.
 //
@@ -58,7 +66,11 @@ const unsigned long OSA_100NSEC_PER_SEC = 10000000UL;
 
 
 struct osaTimeServerInternals {
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI)
+#if (CISST_OS == CISST_LINUX_RTAI)
+    struct timespec TimeOrigin;
+    RTIME CounterOrigin;
+    void Synchronize(void);
+#elif (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_SOLARIS)
     struct timespec TimeOrigin;
 #elif (CISST_OS == CISST_DARWIN) 
     struct timeval TimeOrigin;
@@ -175,6 +187,32 @@ void osaTimeServerInternals::Synchronize(void)
 }
 #endif // CISST_WINDOWS
 
+#if (CISST_OS == CISST_LINUX_RTAI)
+// PK: although this synchronization seems to work, on some machines it seems that the CPU
+//     time-stamp counter (TSC) is poorly calibrated and so the reading (from rt_get_time_ns)
+//     will drift significantly with respect to the absolute time returned by clock_gettime.
+void osaTimeServerInternals::Synchronize(void)
+{
+    RTIME counterPre, counterPost, counterAvg, timediff;
+    struct timespec curTime;
+
+    counterPre = rt_get_time_ns();
+    int rc = clock_gettime(CLOCK_REALTIME, &curTime);
+    counterPost = rt_get_time_ns();
+    counterAvg = (counterPost + counterPre + 1)/2;
+    if (rc == 0)
+        timediff = (curTime.tv_sec - TimeOrigin.tv_sec)*1000000000LL +
+                   (curTime.tv_nsec - TimeOrigin.tv_nsec);
+    else {
+        CMN_LOG_INIT_ERROR << "osaTimeServer::Synchronize: error return from clock_gettime" << std::endl;
+        timediff = 0LL;
+    }
+    CounterOrigin = counterAvg - timediff;
+    CMN_LOG_INIT_VERBOSE << "osaTimeServer::Synchronize: counterAvg = " << counterAvg
+                         << ", timediff = " << timediff << std::endl;
+}
+#endif // CISST_LINUX_RTAI
+
 #define INTERNALS(A) (reinterpret_cast<osaTimeServerInternals*>(Internals)->A)
 
 #define INTERNALS_CONST(A) (reinterpret_cast<osaTimeServerInternals*>(const_cast<osaTimeServer *>(this)->Internals)->A)
@@ -190,6 +228,9 @@ osaTimeServer::osaTimeServer()
         CMN_LOG_INIT_WARNING << "osaTimeServer:  WARNING, clock resolution in seconds is " << ts.tv_sec << " sec." << std::endl;
     INTERNALS(TimeOrigin).tv_sec = 0L;
     INTERNALS(TimeOrigin).tv_nsec = 0L;
+#if (CISST_OS == CISST_LINUX_RTAI)
+    INTERNALS(CounterOrigin) = 0LL;
+#endif
 #elif (CISST_OS == CISST_DARWIN)
     INTERNALS(TimeOrigin).tv_sec = 0L;
     INTERNALS(TimeOrigin).tv_usec = 0L;
@@ -242,7 +283,13 @@ unsigned int osaTimeServer::SizeOfInternals(void) {
 
 void osaTimeServer::SetTimeOrigin(void)
 {
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI)
+#if (CISST_OS == CISST_LINUX_RTAI)
+    if (clock_gettime(CLOCK_REALTIME, &INTERNALS(TimeOrigin)) == 0)
+        // On RTAI, synchronize rt_get_time_ns with clock_gettime
+        INTERNALS(Synchronize());
+    else
+        CMN_LOG_INIT_ERROR << "osaTimeServer::SetTimeOrigin: error return from clock_gettime" << std::endl;
+#elif (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_SOLARIS)
     if (clock_gettime(CLOCK_REALTIME, &INTERNALS(TimeOrigin)) != 0)
         CMN_LOG_INIT_ERROR << "osaTimeServer::SetTimeOrigin: error return from clock_gettime" << std::endl;
 #elif (CISST_OS == CISST_DARWIN)
@@ -291,7 +338,10 @@ bool osaTimeServer::GetTimeOrigin(osaAbsoluteTime & origin) const
 double osaTimeServer::GetRelativeTime(void) const
 {
     double answer;
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI)
+#if (CISST_OS == CISST_LINUX_RTAI)
+    RTIME time = rt_get_time_ns();  // RTIME is long long (64 bits)
+    answer = static_cast<double>(time-INTERNALS_CONST(CounterOrigin))*cmn_ns;
+#elif (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_SOLARIS)
     struct timespec currentTime;
     clock_gettime(CLOCK_REALTIME, &currentTime);
     answer = (currentTime.tv_sec-INTERNALS_CONST(TimeOrigin).tv_sec) + (currentTime.tv_nsec-INTERNALS_CONST(TimeOrigin).tv_nsec)*cmn_ns;
