@@ -53,7 +53,7 @@ public:
      Constructor
     */
     ui3VTKRenderer(ui3SceneManager* scene,
-                   unsigned int width, unsigned int height,
+                   unsigned int width, unsigned int height, bool borderless,
                    svlCameraGeometry & camgeometry, unsigned int camid,
                    svlRenderTargetBase* target = 0);
 

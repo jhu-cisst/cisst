@@ -37,7 +37,7 @@ CMN_IMPLEMENT_SERVICES(ui3VTKRenderer);
 
 
 ui3VTKRenderer::ui3VTKRenderer(ui3SceneManager* scene,
-                               unsigned int width, unsigned int height,
+                               unsigned int width, unsigned int height, bool borderless,
                                svlCameraGeometry & camgeometry, unsigned int camid,
                                svlRenderTargetBase* target) :
     SceneManager(scene),
@@ -76,6 +76,7 @@ ui3VTKRenderer::ui3VTKRenderer(ui3SceneManager* scene,
     this->RenderWindow->AddRenderer(this->Renderer);
 //    this->RenderWindow->SetFullScreen(1);
     this->RenderWindow->SetSize(this->Width, this->Height);
+    if (borderless) this->RenderWindow->BordersOff();
 //    this->RenderWindow->SetWindowName("Renderer");
 
     this->RenderWindowInteractor = vtkRenderWindowInteractor::New();
@@ -93,7 +94,7 @@ ui3VTKRenderer::ui3VTKRenderer(ui3SceneManager* scene,
     this->Camera->SetViewUp(viewup[0], viewup[1], viewup[2]);
     this->Camera->SetPosition(position[0], position[1], position[2]);
     this->Camera->SetFocalPoint(position[0] + axis[0], position[1] + axis[1], position[2] + axis[2]);
-    this->Camera->SetClippingRange(0.1, 10000.0);
+    this->Camera->SetClippingRange(0.1, 20000.0);
     viewangle = this->CameraGeometry.GetViewAngleVertical(this->Height, this->CameraID);
     this->Camera->SetViewAngle(viewangle);
     this->Renderer->SetActiveCamera(this->Camera);
@@ -136,6 +137,7 @@ void ui3VTKRenderer::Render(void)
 void ui3VTKRenderer::SetWindowPosition(int x, int y)
 {
     this->RenderWindow->SetPosition(x, y);
+    this->RenderWindow->BordersOff();
 }
 
 

@@ -44,8 +44,10 @@ class CISST_EXPORT ui3VisibleObject: public cmnGenericObject
 {
     friend class ui3SceneManager;
     friend class ui3VisibleList;
+    friend class ui3Manager;
 
 public:
+    typedef ui3SceneManager::VTKHandleType VTKHandleType;
 
     ui3VisibleObject(const std::string & name = "Unnamed");
 
@@ -101,8 +103,6 @@ public:
 
 
  protected:
-    typedef ui3SceneManager::VTKHandleType VTKHandleType;
-
     void SetVTKHandle(VTKHandleType handle) {
         this->VTKHandle = handle;
     }

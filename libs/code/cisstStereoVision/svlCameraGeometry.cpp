@@ -22,7 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstStereoVision/svlCameraGeometry.h>
 #include <cisstStereoVision/svlStreamDefs.h>
-#include <iostream>
+#include <sstream>
 
 
 /*************************************/
@@ -113,56 +113,56 @@ int svlCameraGeometry::LoadCalibration(const std::string & filepath)
     int pos;
     char chstr[2048];
     std::string str;
-    std::ifstream fin1, fin2;
+    std::ifstream fin;
 
     // reading whole file into string buffer
-    fin1.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+    fin.exceptions(std::ios_base::eofbit | std::ios_base::failbit | std::ios_base::badbit);
     try {
-        fin1.open(filepath.c_str());
+        fin.open(filepath.c_str());
         memset(chstr, 0, 2048);
-        pos = fin1.read(chstr, 2047).gcount();
+        pos = fin.read(chstr, 2047).gcount();
     } catch (std::ifstream::failure e) {
     }
-    fin1.close();
+    fin.close();
+
+    str.assign(chstr);
+    std::istringstream strstrm(str);
 
     // re-reading file and parsing values
-    fin2.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+    strstrm.exceptions(std::ios_base::eofbit | std::ios_base::failbit | std::ios_base::badbit);
     try {
-        fin2.open(filepath.c_str());
-        str.assign(chstr);
-
         ///////////////////////////
         // LEFT CAMERA INTRINSIC
 
         // left focal length
         pos = str.find("fc_left = [ ");
         if (pos >= 0) {
-            fin2.seekg(pos + 12);
-            fin2 >> fc[0] >> fc[1];
+            strstrm.seekg(pos + 12);
+            strstrm >> fc[0] >> fc[1];
         }
         else success = SVL_FAIL;
 
         // left principal point
         pos = str.find("cc_left = [ ");
         if (pos >= 0) {
-            fin2.seekg(pos + 12);
-            fin2 >> cc[0] >> cc[1];
+            strstrm.seekg(pos + 12);
+            strstrm >> cc[0] >> cc[1];
         }
         else success = SVL_FAIL;
 
         // left skew
         pos = str.find("alpha_c_left = [ ");
         if (pos >= 0) {
-            fin2.seekg(pos + 17);
-            fin2 >> a;
+            strstrm.seekg(pos + 17);
+            strstrm >> a;
         }
         else success = SVL_FAIL;
 
         // left radial distortion
         pos = str.find("kc_left = [ ");
         if (pos >= 0) {
-            fin2.seekg(pos + 12);
-            fin2 >> kc[0] >> kc[1] >> kc[2] >> kc[3] >> kc[4];
+            strstrm.seekg(pos + 12);
+            strstrm >> kc[0] >> kc[1] >> kc[2] >> kc[3] >> kc[4];
         }
         else success = SVL_FAIL;
 
@@ -174,32 +174,32 @@ int svlCameraGeometry::LoadCalibration(const std::string & filepath)
         // right focal length
         pos = str.find("fc_right = [ ");
         if (pos >= 0) {
-            fin2.seekg(pos + 13);
-            fin2 >> fc[0] >> fc[1];
+            strstrm.seekg(pos + 13);
+            strstrm >> fc[0] >> fc[1];
         }
         else success = SVL_FAIL;
 
         // right principal point
         pos = str.find("cc_right = [ ");
         if (pos >= 0) {
-            fin2.seekg(pos + 13);
-            fin2 >> cc[0] >> cc[1];
+            strstrm.seekg(pos + 13);
+            strstrm >> cc[0] >> cc[1];
         }
         else success = SVL_FAIL;
 
         // right skew
         pos = str.find("alpha_c_right = [ ");
         if (pos >= 0) {
-            fin2.seekg(pos + 18);
-            fin2 >> a;
+            strstrm.seekg(pos + 18);
+            strstrm >> a;
         }
         else success = SVL_FAIL;
 
         // right radial distortion
         pos = str.find("kc_right = [ ");
         if (pos >= 0) {
-            fin2.seekg(pos + 13);
-            fin2 >> kc[0] >> kc[1] >> kc[2] >> kc[3] >> kc[4];
+            strstrm.seekg(pos + 13);
+            strstrm >> kc[0] >> kc[1] >> kc[2] >> kc[3] >> kc[4];
         }
         else success = SVL_FAIL;
 
@@ -214,24 +214,23 @@ int svlCameraGeometry::LoadCalibration(const std::string & filepath)
         // rotation between cameras
         pos = str.find(" om = [ ");
         if (pos >= 0) {
-            fin2.seekg(pos + 8);
-            fin2 >> om[0] >> om[1] >> om[2];
+            strstrm.seekg(pos + 8);
+            strstrm >> om[0] >> om[1] >> om[2];
         }
         else success = SVL_FAIL;
 
         // translation between cameras
         pos = str.find(" T = [ ");
         if (pos >= 0) {
-            fin2.seekg(pos + 7);
-            fin2 >> T[0] >> T[1] >> T[2];
+            strstrm.seekg(pos + 7);
+            strstrm >> T[0] >> T[1] >> T[2];
         }
         else success = SVL_FAIL;
 
         if (success == SVL_OK) SetExtrinsics(om, T, SVL_RIGHT);
-    } catch (std::ifstream::failure e) {
+    } catch (std::istringstream::failure e) {
         success = SVL_FAIL;
     }
-    fin2.close();
 
     return success;
 }

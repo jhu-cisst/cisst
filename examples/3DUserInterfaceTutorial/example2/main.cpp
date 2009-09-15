@@ -26,7 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 #define UI3_OMNI1_OMNI2 2
 
 // change this based on your configuration
-#define UI3_INPUT UI3_OMNI1_OMNI2
+#define UI3_INPUT UI3_OMNI1
 
 #include <cisstOSAbstraction/osaThreadedLogFile.h>
 #include <cisstOSAbstraction/osaSleep.h>
@@ -54,7 +54,8 @@ int main()
 
     mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
 
-    devSensableHD * sensable = new devSensableHD("Omni", "Omni1", "Omni2" /* name in driver, see Preferences in Sensable Driver */);
+    //devSensableHD * sensable = new devSensableHD("Omni", "Omni1", "Omni2" /* name in driver, see Preferences in Sensable Driver */);
+    devSensableHD * sensable = new devSensableHD("Omni", "Omni1");
     taskManager->AddTask(sensable);
 
     ui3Manager guiManager;
@@ -75,15 +76,17 @@ int main()
 
 ////////////////////////////////////////////////////////////////
 // setup video stream
-#if 0
-#ifndef RENDER_ON_OVERLAY
+
     svlStreamManager vidStream(2);  // running on multiple threads
 
     svlFilterSourceVideoCapture vidBackgroundSource(true); // stereo source
-    cout << "Setup LEFT camera:" << endl;
-    vidBackgroundSource.DialogSetup(SVL_LEFT);
-    cout << "Setup RIGHT camera:" << endl;
-    vidBackgroundSource.DialogSetup(SVL_RIGHT);
+    if (vidBackgroundSource.LoadSettings("capture_device.dat") != SVL_OK) {
+        cout << "Setup LEFT camera:" << endl;
+        vidBackgroundSource.DialogSetup(SVL_LEFT);
+        cout << "Setup RIGHT camera:" << endl;
+        vidBackgroundSource.DialogSetup(SVL_RIGHT);
+        vidBackgroundSource.SaveSettings("capture_device.dat");
+    }
     vidStream.Trunk().Append(&vidBackgroundSource);
 
 #ifdef CAPTURE_SWAP_RGB
@@ -96,128 +99,56 @@ int main()
     vidStream.Trunk().Append(guiManager.GetStreamSamplerFilter("StereoVideo"));
 
     vidStream.Initialize();
-#endif //RENDER_ON_OVERLAY
-#endif
+
 ////////////////////////////////////////////////////////////////
 // setup renderers
 
     svlCameraGeometry camera_geometry;
     // Load Camera calibration results
-//#if (UI3_INPUT == UI3_DAVINCI)
-//    camera_geometry.LoadCalibration("/home/saw1/calibration/davinci_mock_or/calib_results.txt");
-//#else
-//    camera_geometry.LoadCalibration("D:/Development/calib_results.txt");
-//#endif
+    camera_geometry.LoadCalibration("D:/Development/calibration/miccai_saw_demo/calib_results.txt");
     // Center world in between the two cameras (da Vinci specific)
-//    camera_geometry.SetWorldToCenter();
+    camera_geometry.SetWorldToCenter();
     // Rotate world by 180 degrees (VTK specific)
-//    camera_geometry.RotateWorldAboutY(180.0);
+    camera_geometry.RotateWorldAboutY(180.0);
     // Display camera configuration
     std::cerr << camera_geometry;
-#if 0
-#ifdef RENDER_ON_OVERLAY
 
     // *** Left view ***
-    guiManager.AddRenderer(svlRenderTargets::Get(0)->GetWidth(),  // render width
-                           svlRenderTargets::Get(0)->GetHeight(), // render height
-                           0, 0,                                  // window position
-                           camera_geometry, SVL_LEFT,             // camera parameters
-                           "LeftEyeView");                        // name of renderer
+    guiManager.AddRenderer(800,                         // render width
+                           600,                         // render height
+                           true,                        // borderless flag
+                           0, 0,                        // window position
+                           camera_geometry, SVL_LEFT,   // camera parameters
+                           "LeftEyeView");              // name of renderer
 
     // *** Right view ***
-    guiManager.AddRenderer(svlRenderTargets::Get(1)->GetWidth(),  // render width
-                           svlRenderTargets::Get(1)->GetHeight(), // render height
-                           0, 0,                                  // window position
-                           camera_geometry, SVL_RIGHT,             // camera parameters
-                           "RightEyeView");                       // name of renderer
-
-    // Sending renderer output to external render targets
-    guiManager.SetRenderTargetToRenderer("LeftEyeView",  svlRenderTargets::Get(0));
-    guiManager.SetRenderTargetToRenderer("RightEyeView", svlRenderTargets::Get(1));
-
-#else //RENDER_ON_OVERLAY
-
-    // *** Left view ***
-    guiManager.AddRenderer(800,  // render width
-                           600, // render height
-                           0, 0,                                    // window position
-                           camera_geometry, SVL_LEFT,               // camera parameters
-                           "LeftEyeView");                          // name of renderer
-
-    // *** Right view ***
-    guiManager.AddRenderer(800,  // render width
-                           600, // render height
-                           20, 20,                                   // window position
-                           camera_geometry, SVL_RIGHT,               // camera parameters
-                           "RightEyeView");                          // name of renderer
+    guiManager.AddRenderer(800,                         // render width
+                           600,                         // render height
+                           true,                        // borderless flag
+                           800, 0,                      // window position
+                           camera_geometry, SVL_RIGHT,  // camera parameters
+                           "RightEyeView");             // name of renderer
 
     // Creating video background image planes
     guiManager.AddVideoBackgroundToRenderer("LeftEyeView",  "StereoVideo", SVL_LEFT);
     guiManager.AddVideoBackgroundToRenderer("RightEyeView", "StereoVideo", SVL_RIGHT);
 
-#endif //RENDER_ON_OVERLAY
-
-#ifdef DEBUG_WINDOW_WITH_OVERLAY
-#ifdef DEBUG_WINDOW_HAS_VIDEO_BACKGROUND
-    svlStreamManager vidStream(1);
-
-    svlFilterSourceVideoCapture vidSource(false); // mono source
-    cout << "Setup camera:" << endl;
-    vidSource.DialogSetup();
-    vidStream.Trunk().Append(&vidSource);
-
-    svlFilterImageResizer vidResizer;
-    vidResizer.SetOutputSize(384, 216);
-    vidStream.Trunk().Append(&vidResizer);
-
-#ifdef CAPTURE_SWAP_RGB
-    svlFilterRGBSwapper vidRGBSwapper;
-    vidStream.Trunk().Append(&vidRGBSwapper);
-#endif //CAPTURE_SWAP_RGB
-
-    // add guiManager as a filter to the pipeline, so it will receive video frames
-    // "MonoVideo" is defined in the UI Manager as a possible video interface
-    vidStream.Trunk().Append(guiManager.GetStreamSamplerFilter("MonoVideo"));
-
-    vidStream.Initialize();
-#endif //DEBUG_WINDOW_HAS_VIDEO_BACKGROUND
-    // Add third camera: simple perspective camera placed in the world center
-#endif
-#endif
-
-    camera_geometry.SetPerspective(400.0, 2);
-    camera_geometry.RotateWorldAboutY(180.0);
-
-    guiManager.AddRenderer(384,                // render width
-                           216,                // render height
-                           0, 0,               // window position
-                           camera_geometry, 2, // camera parameters
-                           "ThirdEyeView");    // name of renderer
-
-#ifdef DEBUG_WINDOW_HAS_VIDEO_BACKGROUND
-    guiManager.AddVideoBackgroundToRenderer("ThirdEyeView", "MonoVideo");
-    vidStream.Start();
-#endif //DEBUG_WINDOW_HAS_VIDEO_BACKGROUND
-//#endif //DEBUG_WINDOW_WITH_OVERLAY
-
 ///////////////////////////////////////////////////////////////
 // start streaming
-#if 0
-#ifndef RENDER_ON_OVERLAY
+
     vidStream.Start();
-#endif //RENDER_ON_OVERLAY
-#endif
+
 
 #if (UI3_INPUT == UI3_OMNI1) || (UI3_INPUT == UI3_OMNI1_OMNI2)
     vctFrm3 transform;
-    transform.Translation().Assign(+30.0, 0.0, -150.0); // recenter Omni's depth (right)
+    transform.Translation().Assign(0.0, 0.0, -150.0); // recenter Omni's depth (right)
     ui3MasterArm * rightMaster = new ui3MasterArm("Omni1");
     guiManager.AddMasterArm(rightMaster);
     rightMaster->SetInput(sensable, "Omni1",
                           sensable, "Omni1Button1",
                           sensable, "Omni1Button2",
                           ui3MasterArm::PRIMARY);
-    rightMaster->SetTransformation(transform, 0.5 /* scale factor */);
+    rightMaster->SetTransformation(transform, 1.0 /* scale factor */);
     ui3CursorBase * rightCursor = new ui3CursorSphere();
     rightCursor->SetAnchor(ui3CursorBase::CENTER_RIGHT);
     rightMaster->SetCursor(rightCursor);
@@ -234,44 +165,6 @@ int main()
     ui3CursorBase * leftCursor = new ui3CursorSphere();
     leftCursor->SetAnchor(ui3CursorBase::CENTER_LEFT);
     leftMaster->SetCursor(leftCursor);
-#endif
-
-#if (UI3_INPUT == UI3_DAVINCI)
-    vctFrm3 transform;
-    transform.Rotation().From(vctAxAnRot3(vctDouble3(0.0, 1.0, 0.0), cmnPI));
-
-    // setup first arm
-    ui3MasterArm * rightMaster = new ui3MasterArm("MTMR");
-    guiManager.AddMasterArm(rightMaster);
-    rightMaster->SetInput(daVinci, "MTMR",
-                          daVinci, "MTMRButton",
-                          daVinci, "MTMRClutch",
-                          ui3MasterArm::PRIMARY);
-    rightMaster->SetTransformation(transform, 0.5 /* scale factor */);
-    ui3CursorBase * rightCursor = new ui3CursorSphere();
-    rightCursor->SetAnchor(ui3CursorBase::CENTER_RIGHT);
-    rightMaster->SetCursor(rightCursor);
-
-    // setup second arm
-    ui3MasterArm * leftMaster = new ui3MasterArm("MTML");
-    guiManager.AddMasterArm(leftMaster);
-    leftMaster->SetInput(daVinci, "MTML",
-                         daVinci, "MTMLButton",
-                         daVinci, "MTMLClutch",
-                         ui3MasterArm::SECONDARY);
-    leftMaster->SetTransformation(transform, 0.5 /* scale factor */);
-    ui3CursorBase * leftCursor = new ui3CursorSphere();
-    leftCursor->SetAnchor(ui3CursorBase::CENTER_LEFT);
-    leftMaster->SetCursor(leftCursor);
-
-    // first slave arm, i.e. PSM1
-    ui3SlaveArm * slave1 = new ui3SlaveArm("Slave1");
-    guiManager.AddSlaveArm(slave1);
-    slave1->SetInput(daVinci, "PSM1");
-    slave1->SetTransformation(transform, 1.0 /* scale factor */);
-
-    // setup event for MaM transitions
-    guiManager.SetupMaM(daVinci, "MastersAsMice");
 #endif
 
     guiManager.ConnectAll();
@@ -295,20 +188,9 @@ int main()
     taskManager->KillAll();
 
     guiManager.SaveConfiguration("config.xml");
-#if 0
-#ifndef RENDER_ON_OVERLAY
-    // It stops and disassembles the pipeline in proper
-    // order even if it has several branches
-    vidStream.EmptyFilterList();
-#endif //RENDER_ON_OVERLAY
-#endif
-#ifdef DEBUG_WINDOW_WITH_OVERLAY
-#ifdef DEBUG_WINDOW_HAS_VIDEO_BACKGROUND
-    // It stops and disassembles the pipeline in proper
-    // order even if it has several branches
-    vidStream.EmptyFilterList();
-#endif //DEBUG_WINDOW_HAS_VIDEO_BACKGROUND
-#endif //DEBUG_WINDOW_WITH_OVERLAY
+
+    // Releasing video pipeline before destruction
+    vidStream.RemoveAll();
 
     return 0;
 }

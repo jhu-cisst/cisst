@@ -109,6 +109,7 @@ int main()
     // *** Left view ***
     guiManager.AddRenderer(svlRenderTargets::Get(0)->GetWidth(),  // render width
                            svlRenderTargets::Get(0)->GetHeight(), // render height
+                           false,                                 // borderless?
                            0, 0,                                  // window position
                            camera_geometry, SVL_LEFT,             // camera parameters
                            "LeftEyeView");                        // name of renderer
@@ -116,6 +117,7 @@ int main()
     // *** Right view ***
     guiManager.AddRenderer(svlRenderTargets::Get(1)->GetWidth(),  // render width
                            svlRenderTargets::Get(1)->GetHeight(), // render height
+                           false,                                 // borderless?
                            0, 0,                                  // window position
                            camera_geometry, SVL_RIGHT,             // camera parameters
                            "RightEyeView");                       // name of renderer
@@ -130,6 +132,7 @@ int main()
 
     guiManager.AddRenderer(384,                // render width
                            216,                // render height
+                           false,              // borderless?
                            0, 0,               // window position
                            camera_geometry, 2, // camera parameters
                            "ThirdEyeView");    // name of renderer

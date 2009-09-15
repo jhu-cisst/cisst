@@ -100,7 +100,7 @@ bool ui3ImagePlane::CreateVTKObjects(void)
     this->PlaneSource->SetOrigin(this->PhysicalPositionRelativeToPivot.X(),
                                  this->PhysicalPositionRelativeToPivot.Y(),
                                  this->PhysicalPositionRelativeToPivot.Z());
-    this->PlaneSource->SetPoint1(this->PhysicalPositionRelativeToPivot.X() + this->PhysicalWidth * ((double)this->TextureWidth / this->BitmapWidth),
+    this->PlaneSource->SetPoint1(this->PhysicalPositionRelativeToPivot.X() - this->PhysicalWidth * ((double)this->TextureWidth / this->BitmapWidth),
                                  this->PhysicalPositionRelativeToPivot.Y(),
                                  this->PhysicalPositionRelativeToPivot.Z());
     this->PlaneSource->SetPoint2(this->PhysicalPositionRelativeToPivot.X(),

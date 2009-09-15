@@ -89,7 +89,7 @@ bool ui3Manager::SetupMaM(mtsDevice * mamDevice, const std::string & mamInterfac
 }
 
 
-bool ui3Manager::AddRenderer(unsigned int width, unsigned int height, int x, int y,
+bool ui3Manager::AddRenderer(unsigned int width, unsigned int height, bool borderless, int x, int y,
                              svlCameraGeometry & camgeometry, unsigned int camid,
                              const std::string & renderername)
 {
@@ -101,6 +101,7 @@ bool ui3Manager::AddRenderer(unsigned int width, unsigned int height, int x, int
 
     renderer->width = width;
     renderer->height = height;
+    renderer->borderless = borderless;
     renderer->windowposx = x;
     renderer->windowposy = y;
     renderer->camgeometry = camgeometry;
@@ -527,6 +528,7 @@ bool ui3Manager::SetupRenderers()
         Renderers[i]->renderer = new ui3VTKRenderer(this->SceneManager,
                                                     this->Renderers[i]->width,
                                                     this->Renderers[i]->height,
+                                                    this->Renderers[i]->borderless,
                                                     this->Renderers[i]->camgeometry,
                                                     this->Renderers[i]->camid,
                                                     this->Renderers[i]->rendertarget);
@@ -540,26 +542,39 @@ bool ui3Manager::SetupRenderers()
 
             // Get bitmap dimensions from pipeline.
             // The pipeline has to be already initialized to get the required info.
-            this->Renderers[i]->imageplane->SetBitmapSize(GetStreamWidth(this->Renderers[i]->streamindex, this->Renderers[i]->streamchannel),
-                                                          GetStreamHeight(this->Renderers[i]->streamindex, this->Renderers[i]->streamchannel));
+            unsigned int streamwidth = GetStreamWidth(this->Renderers[i]->streamindex, this->Renderers[i]->streamchannel);
+            unsigned int streamheight = GetStreamHeight(this->Renderers[i]->streamindex, this->Renderers[i]->streamchannel);
+            this->Renderers[i]->imageplane->SetBitmapSize(streamwidth, streamheight);
 
             // Calculate plane height to cover the whole vertical field of view
             viewangle = this->Renderers[i]->camgeometry.GetViewAngleVertical(this->Renderers[i]->height, this->Renderers[i]->camid);
             bgheight = VIDEO_BACKGROUND_DISTANCE * 2.0 * tan(viewangle * 3.14159265 / 360.0);
             // Calculate plane width from plane height and the bitmap aspect ratio
-            bgwidth = bgheight *
-                      GetStreamWidth(this->Renderers[i]->streamindex, this->Renderers[i]->streamchannel) /
-                      GetStreamHeight(this->Renderers[i]->streamindex, this->Renderers[i]->streamchannel);
+            bgwidth = bgheight * streamwidth / streamheight;
 
             // Set plane size (dimensions are already in millimeters)
             this->Renderers[i]->imageplane->SetPhysicalSize(bgwidth, bgheight);
 
+            // Calculate image shift required for correct principal point placement
+            double magratio = bgwidth / streamwidth;
+            double ccx = magratio * (this->Renderers[i]->camgeometry.GetIntrinsics(this->Renderers[i]->camid).cc[0] - streamwidth / 2.0);
+            double ccy = magratio * (this->Renderers[i]->camgeometry.GetIntrinsics(this->Renderers[i]->camid).cc[1] - streamheight / 2.0);
+
             // Change pivot position to move plane to the right location.
             // The pivot point will remain in the origin, only the plane moves.
-            this->Renderers[i]->imageplane->SetPhysicalPositionRelativeToPivot(vct3(-0.5 * bgwidth, 0.5 * bgheight, -VIDEO_BACKGROUND_DISTANCE));
+            this->Renderers[i]->imageplane->SetPhysicalPositionRelativeToPivot(vct3(0.5 * bgwidth + ccx,
+                                                                                    0.5 * bgheight + ccy,
+                                                                                    VIDEO_BACKGROUND_DISTANCE));
 
-            // Add image plane to renderer directly, without going through scene manager
-            this->Renderers[i]->imageplane->CreateVTKObjects();
+            this->Renderers[i]->imageplane->Update(this->SceneManager);
+
+            // Apply camera transformation to the image plane
+            vctFrameBase<vctRot3> frame;
+            vctDoubleFrm4x4 frm4x4(this->Renderers[i]->camgeometry.GetExtrinsics(this->Renderers[i]->camid).frame);
+            frame.Translation().Assign(frm4x4.Translation());
+            frame.Rotation().Assign(frm4x4.Rotation());
+            this->Renderers[i]->imageplane->SetTransformation(frame);
+
             this->Renderers[i]->renderer->Add(this->Renderers[i]->imageplane);
         }
 
