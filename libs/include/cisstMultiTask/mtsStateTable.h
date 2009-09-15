@@ -319,7 +319,7 @@ public:
     void CSVWrite(std::ostream& out, bool nonZeroOnly = false);
     void CSVWrite(std::ostream& out, unsigned int * listColumn, unsigned int number, bool nonZeroOnly = false);
 
-    void CSVWrite(std::ostream& out, mtsGenericObject ** listColumn, unsigned int number, bool nonZeroOnly);
+    void CSVWrite(std::ostream& out, mtsGenericObject ** listColumn, unsigned int number, bool nonZeroOnly = false);
     
     /*! A base column index of StateTable for a signal registered by user. */
     static int StateVectorBaseIDForUser;
