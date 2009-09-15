@@ -18,7 +18,7 @@ SET(LIBRARY cisstRobot)
 SET(DEPENDENCIES
     cisstCommon
     cisstVector
-    cisstNumerical
+#    cisstNumerical
     )
 
 # all source files
