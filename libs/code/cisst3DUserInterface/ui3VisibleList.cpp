@@ -128,28 +128,14 @@ bool ui3VisibleList::Update(ui3SceneManager * sceneManager)
         } else {
             // check it this object has already been created
             if (!objectPointer->Created()) {
-                CMN_LOG_CLASS_RUN_VERBOSE << "Update: object \"" << objectPointer->Name()
-                                          << "\" created in update for \""
+                CMN_LOG_CLASS_RUN_VERBOSE << "Update: calling Update for object \"" << objectPointer->Name()
+                                          << "\" in update for \""
                                           << this->Name() << "\"" << std::endl;
-                // this is an object, i.e. a leaf
-                result &= objectPointer->CreateVTKObjects();
-                
-                // set vtk handle on visible object
-                objectVTKProp = objectPointer->GetVTKProp();
-                CMN_ASSERT(objectVTKProp);
-                
-                // convert pointer to (void *)
-                propHandle = reinterpret_cast<VTKHandleType>(objectVTKProp);
-                objectPointer->SetVTKHandle(propHandle);
-                
+                objectPointer->Update(sceneManager);
+
                 // add to assembly
+                objectVTKProp = objectPointer->GetVTKProp();
                 this->Assembly->AddPart(objectVTKProp);
-
-                // set the scene manager to get the Lock/Unlock working
-                objectPointer->SceneManager = sceneManager;
-
-                // mark as created so we don't create it again
-                objectPointer->SetCreated(true);
             }
         }
         objectPointer->PropagateVisibility(objectPointer->Visible());

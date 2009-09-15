@@ -52,6 +52,37 @@ ui3VisibleObject::ui3VisibleObject(const std::string & name):
 }
 
 
+bool ui3VisibleObject::Update(ui3SceneManager * sceneManager)
+{
+    vtkProp3D * objectVTKProp;
+    VTKHandleType propHandle;
+    bool result = true;
+
+    // check it this object has already been created
+    if (!this->Created()) {
+        CMN_LOG_CLASS_RUN_VERBOSE << "Update: object \"" << this->Name()
+                                  << "\" created" << std::endl;
+        // this is an object, i.e. a leaf
+        result = this->CreateVTKObjects();
+                
+        // set vtk handle on visible object
+        objectVTKProp = this->GetVTKProp();
+        CMN_ASSERT(objectVTKProp);
+                
+        // convert pointer to (void *)
+        propHandle = reinterpret_cast<VTKHandleType>(objectVTKProp);
+        this->SetVTKHandle(propHandle);
+
+        // set the scene manager to get the Lock/Unlock working
+        this->SceneManager = sceneManager;
+
+        // mark as created so we don't create it again
+        this->SetCreated(true);
+    }
+    return result;
+}
+
+
 vtkProp3D * ui3VisibleObject::GetVTKProp(void)
 {
     return this->Assembly;
