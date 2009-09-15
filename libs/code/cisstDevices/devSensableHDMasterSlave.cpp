@@ -38,7 +38,7 @@ devSensableHDMasterSlave::devSensableHDMasterSlave(const std::string & taskName,
                                                     40.0, 
                                                     robCollaborativeControlForce::ParameterType::ForceModeType::RATCHETED,
                                                     1.0,
-                                                    1.0);;
+                                                    1.0);
     
     // Assign device numbers
     if(DevicesVector[0]->Name == firstDeviceName) {
