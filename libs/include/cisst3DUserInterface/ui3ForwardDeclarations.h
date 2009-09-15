@@ -39,7 +39,7 @@ class ui3VideoInterfaceFilter;
 class ui3VisibleList;
 class ui3VisibleObject;
 class ui3VTKRenderer;
-
+class ui3Widget3D;
 
 #endif // _ui3ForwardDeclarations_h
 

@@ -89,6 +89,8 @@ public:
 
     vctDoubleFrm3 GetTransformation(void) const;
 
+    vctDoubleFrm3 GetAbsoluteTransformation(void) const;
+
     void SetVTKMatrix(vtkMatrix4x4 * matrix);
 
     void Lock(void);
@@ -118,7 +120,6 @@ public:
     ui3SceneManager * SceneManager;
     VTKHandleType VTKHandle;
     ui3VisibleList * ParentList;
-
 
  private:
 	bool IsSceneList;

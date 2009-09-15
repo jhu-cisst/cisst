@@ -244,6 +244,9 @@ public:
     */
     svlFilterBase* GetStreamSamplerFilter(const std::string & streamname);
 
+    typedef std::list<ui3Widget3D *> Widget3DList;
+    Widget3DList Widget3Ds;
+
 protected:
 
     void AddMenuBar(bool isManager = false);

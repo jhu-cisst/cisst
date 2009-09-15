@@ -131,7 +131,7 @@ bool ui3VisibleList::Update(ui3SceneManager * sceneManager)
                 CMN_LOG_CLASS_RUN_VERBOSE << "Update: calling Update for object \"" << objectPointer->Name()
                                           << "\" in update for \""
                                           << this->Name() << "\"" << std::endl;
-                objectPointer->Update(sceneManager);
+                result &= objectPointer->Update(sceneManager);
 
                 // add to assembly
                 objectVTKProp = objectPointer->GetVTKProp();

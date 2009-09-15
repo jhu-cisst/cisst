@@ -27,6 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisst3DUserInterface/ui3ImagePlane.h>
 #include <cisst3DUserInterface/ui3SlaveArm.h>
 #include <cisst3DUserInterface/ui3VisibleList.h>
+#include <cisst3DUserInterface/ui3Widget3D.h>
 
 CMN_IMPLEMENT_SERVICES(ui3Manager)
 
@@ -510,6 +511,38 @@ void ui3Manager::Run(void)
         }
     }
 
+    // try to find Widget3D
+    BehaviorList::iterator iterator;
+    const BehaviorList::iterator end = this->Behaviors.end();
+    unsigned int handleCounter;
+    vctDouble3 position;
+    for (iterator = this->Behaviors.begin();
+         iterator != end;
+         iterator++) {
+        Widget3DList::iterator widgetIterator;
+        const Widget3DList::iterator widgetEnd = (*iterator)->Widget3Ds.end();
+        for (widgetIterator =  (*iterator)->Widget3Ds.begin();
+             widgetIterator != widgetEnd;
+             widgetIterator++) {
+            for (handleCounter = 0;
+                 handleCounter < 4;
+                 handleCounter++) {
+                position = (*widgetIterator)->RotationHandles[handleCounter]->GetTransformation().Translation();
+                std::cout << "Pos[" << handleCounter << "]: " << position << std::endl;
+                position = (*widgetIterator)->RotationHandles[handleCounter]->GetAbsoluteTransformation().Translation();
+                std::cout << "PosAbs[" << handleCounter << "]: " << position << std::endl;
+
+            }
+        }
+    }
+        
+//         for (armIterator = this->MasterArms.begin();
+//              armIterator != armEnd;
+//              armIterator++) {
+//             ((*armIterator).second)->PreRun();
+//         }
+//     }
+    
     // this needs to change to a parameter
     osaSleep(20.0 * cmn_ms);
 }

@@ -60,22 +60,49 @@ public:
     */
     ~ui3Widget3D(void) {};
 
-    bool CreateVTKObjects(void);
-
     bool Add(ui3VisibleObject * object);
 
     void SetSize(double size);
 
-protected:
+    void Highligh(bool highlight);
 
-    double Size;
+    // protected:
+
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(double, RotationHandlesSpacing);
+
+ public:
     ui3VisibleList * UserObjects;
     ui3VisibleList * Handles;
     ui3Widget3DRotationHandle * RotationHandles[4];
+
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(bool, RotationHandlesActive);
 };
 
-
 CMN_DECLARE_SERVICES_INSTANTIATION(ui3Widget3D);
+
+
+
+
+class ui3Widget3DRotationHandle: public ui3VisibleObject
+{
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+
+protected:
+    vtkSphereSource * Source;
+    vtkPolyDataMapper * Mapper;
+    vtkActor * Actor;
+
+public:
+    ui3Widget3DRotationHandle();
+    
+    ~ui3Widget3DRotationHandle();
+
+    bool CreateVTKObjects(void);
+
+    void UpdateColor(bool selected);
+};
+
+CMN_DECLARE_SERVICES_INSTANTIATION(ui3Widget3DRotationHandle);
 
 
 #endif // _ui3Widget3D_h

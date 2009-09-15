@@ -210,6 +210,20 @@ vctDoubleFrm3 ui3VisibleObject::GetTransformation(void) const
 }
 
 
+vctDoubleFrm3 ui3VisibleObject::GetAbsoluteTransformation(void) const
+{
+    vctDoubleFrm3 result;
+    if (!this->ParentList) {
+        return result;
+    }
+    vctDoubleFrm3 parent, relative;
+    relative = this->GetTransformation();
+    parent = this->ParentList->GetAbsoluteTransformation();
+    parent.ApplyTo(relative, result);
+    return result;
+}
+
+
 void ui3VisibleObject::SetVTKMatrix(vtkMatrix4x4* matrix)
 {
     if (this->Created()) {

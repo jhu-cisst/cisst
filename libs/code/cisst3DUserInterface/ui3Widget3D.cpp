@@ -30,76 +30,66 @@ http://www.cisst.org/cisst/license.txt.
 #include <vtkProperty.h>
 #include <vtkSphereSource.h>
 
-class ui3Widget3DRotationHandle: public ui3VisibleObject
-{
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
-protected:
-    vtkSphereSource * Source;
-    vtkPolyDataMapper * Mapper;
-    vtkActor * Actor;
-
-public:
-    ui3Widget3DRotationHandle():
-        ui3VisibleObject("ui3Widget3DRotationHandle"),
-        Source(0),
-        Mapper(0),
-        Actor(0)
-    {}
-    
-    
-    ~ui3Widget3DRotationHandle()
-    {
-        if (this->Source) {
-            this->Source->Delete();
-        }
-        
-        if (this->Mapper) {
-            this->Mapper->Delete();
-        }
-        
-        if (this->Actor) {
-            this->Actor->Delete();
-        }
-    }
-
-
-    bool CreateVTKObjects(void)
-    {
-        this->Source = vtkSphereSource::New();
-        CMN_ASSERT(this->Source);
-        this->Source->SetRadius(2.0);
-        
-        this->Mapper = vtkPolyDataMapper::New();
-        CMN_ASSERT(this->Mapper);
-        this->Mapper->SetInputConnection(this->Source->GetOutputPort());
-        
-        this->Actor = vtkActor::New();
-        CMN_ASSERT(this->Actor);
-        this->Actor->SetMapper(this->Mapper);
-
-        this->AddPart(this->Actor);
-        return true;
-    }
-
-
-    void UpdateColor(bool selected)
-    {
-        if (this->Created()) {
-            this->Lock();
-            if (selected) {
-                this->Actor->GetProperty()->SetOpacity(1.0);
-            } else {
-                this->Actor->GetProperty()->SetOpacity(0.5);
-            }
-            this->Unlock();
-        }
-    }
-};
-
-
-CMN_DECLARE_SERVICES_INSTANTIATION(ui3Widget3DRotationHandle);
 CMN_IMPLEMENT_SERVICES(ui3Widget3DRotationHandle);
+
+
+ui3Widget3DRotationHandle::ui3Widget3DRotationHandle():
+    ui3VisibleObject("ui3Widget3DRotationHandle"),
+    Source(0),
+    Mapper(0),
+    Actor(0)
+{}
+    
+    
+ui3Widget3DRotationHandle::~ui3Widget3DRotationHandle()
+{
+    if (this->Source) {
+        this->Source->Delete();
+    }
+    
+    if (this->Mapper) {
+        this->Mapper->Delete();
+    }
+    
+    if (this->Actor) {
+        this->Actor->Delete();
+    }
+}
+
+
+bool ui3Widget3DRotationHandle::CreateVTKObjects(void)
+{
+    this->Source = vtkSphereSource::New();
+    CMN_ASSERT(this->Source);
+    this->Source->SetRadius(2.0);
+    
+    this->Mapper = vtkPolyDataMapper::New();
+    CMN_ASSERT(this->Mapper);
+    this->Mapper->SetInputConnection(this->Source->GetOutputPort());
+    
+    this->Actor = vtkActor::New();
+    CMN_ASSERT(this->Actor);
+    this->Actor->SetMapper(this->Mapper);
+    
+    this->AddPart(this->Actor);
+    return true;
+}
+
+
+void ui3Widget3DRotationHandle::UpdateColor(bool selected)
+{
+    if (this->Created()) {
+        this->Lock();
+        if (selected) {
+            this->Actor->GetProperty()->SetOpacity(1.0);
+        } else {
+            this->Actor->GetProperty()->SetOpacity(0.5);
+        }
+        this->Unlock();
+    }
+}
+
 
 
 
@@ -132,30 +122,6 @@ ui3Widget3D::ui3Widget3D(const std::string & name):
 }
 
 
-bool ui3Widget3D::CreateVTKObjects(void)
-{
-    // create handles to be used and add them to base class list
-    short upDown = -1;
-    short leftRight = -1;
-    unsigned int handleCounter = 0;
-    vctDouble3 position;
-    ui3Widget3DRotationHandle * handle;
-    for (; upDown <= 1; upDown +=2) {
-        for (; leftRight <= 1; leftRight +=2) {
-            handle = new ui3Widget3DRotationHandle();
-            CMN_ASSERT(handle);
-            position.Assign(leftRight * this->Size, upDown * this->Size, 0.0);
-            CMN_LOG_CLASS_VERY_VERBOSE << "CreateVTKObjects: adding rotation handle at: " << position << std::endl;
-            handle->SetPosition(position);
-            this->Handles->Add(handle);
-            this->RotationHandles[handleCounter] = handle;
-            handleCounter++;
-        }
-    }
-    return true;
-}
-
-
 bool ui3Widget3D::Add(ui3VisibleObject * object)
 {
     CMN_ASSERT(this->UserObjects);
@@ -165,7 +131,7 @@ bool ui3Widget3D::Add(ui3VisibleObject * object)
 
 void ui3Widget3D::SetSize(double size)
 {
-    this->Size = size;
+    this->SetRotationHandlesSpacing(size);
     unsigned int handleCounter;
     vctDouble3 position;
 
