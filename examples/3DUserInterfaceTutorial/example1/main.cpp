@@ -19,14 +19,6 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-// temporary fix to configure input
-// possible values:
-#define UI3_NO_INPUT 0
-#define UI3_OMNI1 1
-
-// change this based on your configuration
-#define UI3_INPUT UI3_OMNI1_OMNI2
-
 #include <cisstOSAbstraction/osaThreadedLogFile.h>
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsTaskManager.h>
@@ -35,6 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision.h>
 
 #include <SimpleBehavior.h>
+#include <ImageViewer.h>
 
 int main()
 {
@@ -58,23 +51,22 @@ int main()
 
     ui3Manager guiManager;
 
-    SimpleBehavior behavior("Example1");
-
-    guiManager.AddBehavior(&behavior,       // behavior reference
+    SimpleBehavior simpleBehavior("SimpleBehavior1");
+    guiManager.AddBehavior(&simpleBehavior, // behavior reference
                            0,               // position in the menu bar: default
                            "circle.png");   // icon file: no texture
 
-    guiManager.Configure("config.xml");
-
-    ////////////////////////////////////////////////////////////////
-    // setup renderers
+    ImageViewer imageViewer("ImageViewer1");
+    guiManager.AddBehavior(&imageViewer,
+                           1,
+                           "square.png");
 
     svlCameraGeometry camera_geometry;
     camera_geometry.SetPerspective(400.0, 2);
     camera_geometry.RotateWorldAboutY(180.0);
 
-    guiManager.AddRenderer(800,                // render width
-                           600,                // render height
+    guiManager.AddRenderer(400,                // render width
+                           300,                // render height
                            false,              // borderless flag
                            0, 0,               // window position
                            camera_geometry, 2, // camera parameters

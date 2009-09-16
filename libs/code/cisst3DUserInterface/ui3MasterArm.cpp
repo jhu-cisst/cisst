@@ -250,10 +250,9 @@ void ui3MasterArm::Show(void)
 void ui3MasterArm::UpdateIntention(ui3Selectable * selectable)
 {
     double intention = selectable->GetIntention(this->CursorPosition);
-    std::cout << intention << std::endl;
     if (intention > HighestIntention) {
         HighestIntention = intention;
         ToBeSelected = selectable;
     }
-    selectable->ShowIntention(intention);
+    selectable->UpdateOverallIntention(intention);
 }

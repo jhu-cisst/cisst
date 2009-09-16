@@ -127,7 +127,7 @@ ImageViewer::~ImageViewer()
 }
 
 
-void ImageViewer::ToggleColor()
+void ImageViewer::ToggleColor(void)
 {
     if (this->VisibleObject1) {
         this->VisibleObject1->ToggleColor();
@@ -138,17 +138,33 @@ void ImageViewer::ToggleColor()
 }
 
 
-void ImageViewer::ConfigureMenuBar()
+void ImageViewer::ToggleHandles(void)
+{
+    if (this->Widget3D->HandlesActive()) {
+        this->Widget3D->SetHandlesActive(false);
+    } else {
+        this->Widget3D->SetHandlesActive(true);
+    }
+}
+
+
+void ImageViewer::ConfigureMenuBar(void)
 {
     this->MenuBar->AddClickButton("ToggleColor",
                                   1,
                                   "redo.png",
                                   &ImageViewer::ToggleColor,
                                   this);
+    this->MenuBar->AddClickButton("Move",
+                                  2,
+                                  "move.png",
+                                  &ImageViewer::ToggleHandles,
+                                  this);
+
 }
 
 
-bool ImageViewer::RunForeground()
+bool ImageViewer::RunForeground(void)
 {
     if (this->Manager->MastersAsMice() != this->PreviousMaM) {
         this->PreviousMaM = this->Manager->MastersAsMice();
@@ -177,7 +193,7 @@ bool ImageViewer::RunForeground()
     return true;
 }
 
-bool ImageViewer::RunBackground()
+bool ImageViewer::RunBackground(void)
 {
     // detect transition
     if (this->State != this->PreviousState) {
@@ -188,7 +204,7 @@ bool ImageViewer::RunBackground()
     return true;
 }
 
-bool ImageViewer::RunNoInput()
+bool ImageViewer::RunNoInput(void)
 {
     if (this->Manager->MastersAsMice() != this->PreviousMaM) {
         this->PreviousMaM = this->Manager->MastersAsMice();
@@ -198,13 +214,13 @@ bool ImageViewer::RunNoInput()
 }
 
 
-void ImageViewer::OnQuit()
+void ImageViewer::OnQuit(void)
 {
     this->Widget3D->Hide();
 }
 
 
-void ImageViewer::OnStart()
+void ImageViewer::OnStart(void)
 {
     this->Position.X() = 0.0;
     this->Position.Y() = 0.0;

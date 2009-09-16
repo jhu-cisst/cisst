@@ -467,6 +467,34 @@ void ui3Manager::Run(void)
         ((*armIterator).second)->PreRun();
     }
 
+    // init all selectable objects
+    BehaviorList::iterator behaviorIterator;
+    const BehaviorList::iterator behaviorEnd = this->Behaviors.end();
+    unsigned int handleCounter;
+    for (behaviorIterator = this->Behaviors.begin();
+         behaviorIterator != behaviorEnd;
+         behaviorIterator++) {
+        // test if the behavior is running
+        if (((*behaviorIterator)->State == ui3BehaviorBase::Foreground)
+            || ((*behaviorIterator)->State == ui3BehaviorBase::Background)) {
+            Widget3DList::iterator widgetIterator;
+            // go through all the 3D widgets
+            const Widget3DList::iterator widgetEnd = (*behaviorIterator)->Widget3Ds.end();
+            for (widgetIterator =  (*behaviorIterator)->Widget3Ds.begin();
+                 widgetIterator != widgetEnd;
+                 widgetIterator++) {
+                // check if the widget's handles are active
+                if ((*widgetIterator)->HandlesActive()) {
+                    for (handleCounter = 0;
+                         handleCounter < 4;
+                         handleCounter++) {
+                        (*widgetIterator)->RotationHandles[handleCounter]->ResetOverallIntention();
+                    }
+                }
+            }
+        }
+    }
+
     // process events
     this->ProcessQueuedEvents();
 
@@ -495,51 +523,91 @@ void ui3Manager::Run(void)
 
     ui3MenuButton * selectedButton = 0;
     bool isOverMenu;
+    ui3MasterArm * armPointer;
 
     for (armIterator = this->MasterArms.begin();
          armIterator != armEnd;
          armIterator++) {
+        armPointer = (*armIterator).second;
         // see if this cursor is over the menu and if so returns the current button 
-        isOverMenu = this->ActiveBehavior->MenuBar->IsPointOnMenuBar(((*armIterator).second)->CursorPosition.Translation(),
+        isOverMenu = this->ActiveBehavior->MenuBar->IsPointOnMenuBar(armPointer->CursorPosition.Translation(),
                                                                      selectedButton);
-        ((*armIterator).second)->Cursor->Set2D(isOverMenu);
+        armPointer->Cursor->Set2D(isOverMenu);
         if (selectedButton) {
-            if (((*armIterator).second)->ButtonReleased) {
+            if (armPointer->ButtonReleased) {
                 selectedButton->CallBack();
                 //                (*armIterator)->ButtonReleased = false;
             }
         }
-    }
 
-    // try to find Widget3D
-    BehaviorList::iterator iterator;
-    const BehaviorList::iterator end = this->Behaviors.end();
-    unsigned int handleCounter;
-    vctDouble3 position;
-    for (iterator = this->Behaviors.begin();
-         iterator != end;
-         iterator++) {
-        Widget3DList::iterator widgetIterator;
-        const Widget3DList::iterator widgetEnd = (*iterator)->Widget3Ds.end();
-        for (widgetIterator =  (*iterator)->Widget3Ds.begin();
-             widgetIterator != widgetEnd;
-             widgetIterator++) {
-            for (handleCounter = 0;
-                 handleCounter < 4;
-                 handleCounter++) {
-                // position = (*widgetIterator)->RotationHandles[handleCounter]->GetAbsoluteTransformation().Translation();
-                unsigned int counter = 0;
-                for (armIterator = this->MasterArms.begin();
-                     armIterator != armEnd;
-                     armIterator++) {
-                    std::cout << counter << std::endl;
-                    counter++;
-                    ((*armIterator).second)->UpdateIntention((*widgetIterator)->RotationHandles[handleCounter]);
+        // try to find Widget3D
+        BehaviorList::iterator behaviorIterator;
+        const BehaviorList::iterator behaviorEnd = this->Behaviors.end();
+        unsigned int handleCounter;
+        vctDouble3 position;
+        for (behaviorIterator = this->Behaviors.begin();
+             behaviorIterator != behaviorEnd;
+             behaviorIterator++) {
+            // test if the behavior is running
+            if (((*behaviorIterator)->State == ui3BehaviorBase::Foreground)
+                || ((*behaviorIterator)->State == ui3BehaviorBase::Background)) {
+                Widget3DList::iterator widgetIterator;
+                // go through all the 3D widgets
+                const Widget3DList::iterator widgetEnd = (*behaviorIterator)->Widget3Ds.end();
+                for (widgetIterator =  (*behaviorIterator)->Widget3Ds.begin();
+                     widgetIterator != widgetEnd;
+                     widgetIterator++) {
+                    // check if the widget's handles are active
+                    if ((*widgetIterator)->HandlesActive()) {
+                        for (handleCounter = 0;
+                             handleCounter < 4;
+                             handleCounter++) {
+                            armPointer->UpdateIntention((*widgetIterator)->RotationHandles[handleCounter]);
+                        }
+                    }
                 }
             }
         }
     }
-        
+
+    // show intention for all selectable objects
+    for (behaviorIterator = this->Behaviors.begin();
+         behaviorIterator != behaviorEnd;
+         behaviorIterator++) {
+        // test if the behavior is running
+        if (((*behaviorIterator)->State == ui3BehaviorBase::Foreground)
+            || ((*behaviorIterator)->State == ui3BehaviorBase::Background)) {
+            Widget3DList::iterator widgetIterator;
+            // go through all the 3D widgets
+            const Widget3DList::iterator widgetEnd = (*behaviorIterator)->Widget3Ds.end();
+            for (widgetIterator =  (*behaviorIterator)->Widget3Ds.begin();
+                 widgetIterator != widgetEnd;
+                 widgetIterator++) {
+                // check if the widget's handles are active
+                if ((*widgetIterator)->HandlesActive()) {
+                    for (handleCounter = 0;
+                         handleCounter < 4;
+                         handleCounter++) {
+                        (*widgetIterator)->RotationHandles[handleCounter]->ShowIntention();
+                    }
+                }
+            }
+        }
+
+        // now figure out which selectable callback if any
+        if (armPointer->ButtonPressed) {
+            if (armPointer->ToBeSelected) {
+                armPointer->Selected = armPointer->ToBeSelected;
+                armPointer->Selected->Select(armPointer->CursorPosition);
+            }
+        } else if (armPointer->ButtonReleased) {
+            if (armPointer->Selected) {
+                armPointer->Selected->Release(armPointer->CursorPosition);
+                armPointer->Selected = 0;
+            }
+        }
+    }
+               
     // this needs to change to a parameter
     osaSleep(20.0 * cmn_ms);
 }

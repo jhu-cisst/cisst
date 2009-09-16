@@ -34,8 +34,11 @@ http://www.cisst.org/cisst/license.txt.
 CMN_IMPLEMENT_SERVICES(ui3Widget3DRotationHandle);
 
 
-ui3Widget3DRotationHandle::ui3Widget3DRotationHandle():
+ui3Widget3DRotationHandle::ui3Widget3DRotationHandle(unsigned int handleNumber,
+                                                     ui3Widget3D * widget3D):
     ui3Selectable("ui3Widget3DRotationHandle"),
+    HandleNumber(handleNumber),
+    Widget3D(widget3D),
     Source(0),
     Mapper(0),
     Actor(0)
@@ -91,7 +94,7 @@ void ui3Widget3DRotationHandle::UpdateColor(bool selected)
 }
 
 
-void ui3Widget3DRotationHandle::ShowIntention(double intention)
+void ui3Widget3DRotationHandle::ShowIntention(void)
 {
     if (this->Created()) {
         // this->Lock();
@@ -99,8 +102,8 @@ void ui3Widget3DRotationHandle::ShowIntention(double intention)
             this->Actor->GetProperty()->SetOpacity(1.0);
             this->Actor->GetProperty()->SetColor(0.0, 1.0, 0.0);
         } else {
-            this->Actor->GetProperty()->SetOpacity(0.5 + (intention * 0.5));
-            this->Actor->GetProperty()->SetColor(1.0, 1.0 - intention, 1.0 - intention);
+            this->Actor->GetProperty()->SetOpacity(0.5 + (this->OverallIntention * 0.5));
+            this->Actor->GetProperty()->SetColor(1.0, 1.0 - this->OverallIntention, 1.0 - this->OverallIntention);
         }
         // this->Unlock();
     }
@@ -118,6 +121,19 @@ double ui3Widget3DRotationHandle::GetIntention(const vctFrm3 & cursorPosition) c
     } else {
         return (1.0 - (distance / threshold)); // normalized between 0 and 1
     } 
+}
+
+
+void ui3Widget3DRotationHandle::OnSelect(void)
+{
+    CMN_LOG_CLASS_VERY_VERBOSE << "OnSelect: called for handle " << this->HandleNumber << std::endl;
+}
+
+
+
+void ui3Widget3DRotationHandle::OnRelease(void)
+{
+    CMN_LOG_CLASS_VERY_VERBOSE << "OnRelease: called for handle " << this->HandleNumber << std::endl;
 }
 
 
@@ -142,11 +158,14 @@ ui3Widget3D::ui3Widget3D(const std::string & name):
     for (handleCounter = 0;
          handleCounter < 4;
          handleCounter++) {
-        handle = new ui3Widget3DRotationHandle();
+        handle = new ui3Widget3DRotationHandle(handleCounter, this);
         CMN_ASSERT(handle);
         this->Handles->Add(handle);
         this->RotationHandles[handleCounter] = handle;
     }
+
+    // set handles as active
+    this->SetHandlesActive(true);
 }
 
 
@@ -157,9 +176,9 @@ bool ui3Widget3D::Add(ui3VisibleObject * object)
 }
 
 
-void ui3Widget3D::SetSize(double size)
+void ui3Widget3D::SetSize(double halfSize)
 {
-    this->SetRotationHandlesSpacing(size);
+    this->SetRotationHandlesSpacing(halfSize);
     unsigned int handleCounter;
     vctDouble3 position;
 
@@ -168,9 +187,30 @@ void ui3Widget3D::SetSize(double size)
     for (handleCounter = 0;
          handleCounter < 4;
          handleCounter++) {
-        position.Assign(orientation[handleCounter] * size, orientation[handleCounter + 1] * size, 0.0);
+        position.Assign(orientation[handleCounter] * halfSize, orientation[handleCounter + 1] * halfSize, 0.0);
         CMN_LOG_CLASS_VERY_VERBOSE << "SetSize: position rotation handle at: " << position << std::endl;
         CMN_ASSERT(this->RotationHandles[handleCounter]);
         this->RotationHandles[handleCounter]->SetPosition(position);
+    }
+}
+
+
+void ui3Widget3D::SetHandlesActive(bool handlesActive)
+{
+    this->HandlesActiveMember = handlesActive;
+    unsigned int handleCounter;
+
+    if (this->HandlesActive()) {
+        for (handleCounter = 0;
+             handleCounter < 4;
+             handleCounter++) {
+            this->RotationHandles[handleCounter]->Show();
+        }        
+    } else {
+        for (handleCounter = 0;
+             handleCounter < 4;
+             handleCounter++) {
+            this->RotationHandles[handleCounter]->Hide();
+        }        
     }
 }

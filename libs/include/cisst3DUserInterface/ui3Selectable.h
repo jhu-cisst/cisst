@@ -53,16 +53,39 @@ public:
     */
     virtual ~ui3Selectable(void) {};
 
+    void ResetOverallIntention(void);
+
+    double UpdateOverallIntention(double intention);
+
     virtual double GetIntention(const vctFrm3 & cursorPosition) const = 0; 
 
-    virtual void ShowIntention(double intention) = 0;
+    virtual void ShowIntention() = 0;
+
+    inline void Select(const vctFrm3 initialPosition) {
+        this->SetSelected(true);
+        this->InitialPosition.Assign(initialPosition);
+        this->OnSelect();
+    }
+
+    inline void Release(const vctFrm3 finalPosition) {
+        this->SetSelected(false);
+        this->FinalPosition.Assign(finalPosition);
+        this->OnRelease();
+    }
 
     CMN_DECLARE_MEMBER_AND_ACCESSORS(bool, Activated);
 
     CMN_DECLARE_MEMBER_AND_ACCESSORS(bool, Selected);
 
- protected:
+public:
+    /*! Callbacks to be overloaded by derived classes */
+    virtual void OnSelect(void) = 0;
+    virtual void OnRelease(void) = 0;
+
+protected:
+    vctFrm3 InitialPosition, FinalPosition;
     ui3MasterArm * MasterArm;
+    double OverallIntention;
 };
 
 

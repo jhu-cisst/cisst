@@ -33,3 +33,17 @@ ui3Selectable::ui3Selectable(const std::string & name):
 {
 }
 
+
+void ui3Selectable::ResetOverallIntention(void)
+{
+    this->OverallIntention = 0.0;
+}
+
+
+double ui3Selectable::UpdateOverallIntention(double intention)
+{
+    if (intention > this->OverallIntention) {
+        this->OverallIntention = intention;
+    }
+    return this->OverallIntention;
+}

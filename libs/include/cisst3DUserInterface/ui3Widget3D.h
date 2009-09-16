@@ -50,6 +50,7 @@ class CISST_EXPORT ui3Widget3D: public ui3VisibleList
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
     friend class ui3SceneManager;
+    friend class ui3Manager;
 
 public:
     typedef ui3VisibleList BaseType;
@@ -63,20 +64,25 @@ public:
 
     bool Add(ui3VisibleObject * object);
 
-    void SetSize(double size);
-
-    void Highligh(bool highlight);
-
-    // protected:
-
     CMN_DECLARE_MEMBER_AND_ACCESSORS(double, RotationHandlesSpacing);
 
- public:
+public:
+    void SetSize(double halfSize);
+
+    /*! Determines if the handles are active, i.e. visible and allow to move the 3D widget */
+    void SetHandlesActive(bool handlesActive);
+    inline bool HandlesActive(void) const {
+        return this->HandlesActiveMember;
+    }
+
+protected:
     ui3VisibleList * UserObjects;
     ui3VisibleList * Handles;
     ui3Widget3DRotationHandle * RotationHandles[4];
 
     CMN_DECLARE_MEMBER_AND_ACCESSORS(bool, RotationHandlesActive);
+
+    bool HandlesActiveMember;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(ui3Widget3D);
@@ -89,12 +95,14 @@ class ui3Widget3DRotationHandle: public ui3Selectable
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
 protected:
+    unsigned int HandleNumber;
+    ui3Widget3D * Widget3D;
     vtkSphereSource * Source;
     vtkPolyDataMapper * Mapper;
     vtkActor * Actor;
 
 public:
-    ui3Widget3DRotationHandle();
+    ui3Widget3DRotationHandle(unsigned int handleNumber, ui3Widget3D * widget3D);
     
     ~ui3Widget3DRotationHandle();
 
@@ -104,7 +112,11 @@ public:
 
     double GetIntention(const vctFrm3 & cursorPosition) const;
 
-    void ShowIntention(double intention);
+    void ShowIntention(void);
+
+    void OnSelect(void);
+
+    void OnRelease(void);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(ui3Widget3DRotationHandle);

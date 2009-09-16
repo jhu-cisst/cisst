@@ -48,6 +48,7 @@ public:
 protected:
     void PrimaryMasterButtonCallback(const prmEventButton & event);
     void ToggleColor(void);
+    void ToggleHandles(void);
     void UpdateRelativePosition(void);
     StateType PreviousState;
     bool PreviousMaM;
