@@ -64,7 +64,7 @@ int main(void)
     taskManager->CreateAll();
     taskManager->StartAll();
 
-    collector->Start(0.0 * cmn_s);
+    collector->StartCollection(0.0 * cmn_s); // start now
 
     // Loop until both tasks are closed
     while (!(appTaskControl1->IsTerminated() && appTaskControl2->IsTerminated())) {

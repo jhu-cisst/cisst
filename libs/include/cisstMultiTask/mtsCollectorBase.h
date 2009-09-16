@@ -132,11 +132,11 @@ public:
 
     /*! Begin collecting data. Data collection will begin after delayedStart 
     second(s). If it is zero (by default), it means 'start now'. */
-    void Start(const double delayedStartInSeconds = 0.0);
+    void StartCollection(const double delayedStartInSeconds = 0.0);
 
     /*! End collecting data. Data collection will end after delayedStop
     second(s). If it is zero (by default), it means 'stop now'. */
-    void Stop(const double delayedStopInSeconds = 0.0);
+    void StopCollection(const double delayedStopInSeconds = 0.0);
 
     //---------------------- Miscellaneous functions ------------------------//
     inline static unsigned int GetCollectorCount(void) { return CollectorCount; }

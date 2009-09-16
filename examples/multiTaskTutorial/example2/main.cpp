@@ -73,7 +73,7 @@ int main(void)
     taskManager->StartAll();
 
     collector->SetSamplingInterval(4); // collect every other 4 sample
-    collector->Start(0.0); // delay in seconds
+    collector->StartCollection(0.0); // delay in seconds
 
     while (!displayTaskObject->IsTerminated()) {
         osaSleep(100.0 * cmn_ms); // sleep to save CPU

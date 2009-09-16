@@ -129,7 +129,7 @@ void mtsCollectorBase::Cleanup(void)
 }
 
 
-void mtsCollectorBase::Start(const double delayedStartInSecond)
+void mtsCollectorBase::StartCollection(const double delayedStartInSecond)
 {    
     // Check for state transition
     switch (Status) {
@@ -154,7 +154,7 @@ void mtsCollectorBase::Start(const double delayedStartInSecond)
 }
 
 
-void mtsCollectorBase::Stop(const double delayedStopInSecond)
+void mtsCollectorBase::StopCollection(const double delayedStopInSecond)
 {
     // Check for state transition
     switch (Status) {
