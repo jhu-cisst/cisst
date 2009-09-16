@@ -49,14 +49,11 @@ protected:
     void PrimaryMasterButtonCallback(const prmEventButton & event);
     void ToggleColor(void);
     void ToggleHandles(void);
-    void UpdateRelativePosition(void);
     StateType PreviousState;
     bool PreviousMaM;
     vctDouble3 Position, PreviousCursorPosition;
-    bool Following;
 
     ui3Widget3D * Widget3D;
     ImageViewerVisibleObject * VisibleObject1;
     ImageViewerVisibleObject * VisibleObject2;
-    double Counter;
 };

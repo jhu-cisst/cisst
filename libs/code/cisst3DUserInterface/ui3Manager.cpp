@@ -529,14 +529,14 @@ void ui3Manager::Run(void)
          armIterator != armEnd;
          armIterator++) {
         armPointer = (*armIterator).second;
-        // see if this cursor is over the menu and if so returns the current button 
+
+        // see if this cursor is over the menu and if so returns the current button -- Buttons should be ui3Selectable and code below could be used.
         isOverMenu = this->ActiveBehavior->MenuBar->IsPointOnMenuBar(armPointer->CursorPosition.Translation(),
                                                                      selectedButton);
         armPointer->Cursor->Set2D(isOverMenu);
         if (selectedButton) {
             if (armPointer->ButtonReleased) {
                 selectedButton->CallBack();
-                //                (*armIterator)->ButtonReleased = false;
             }
         }
 
@@ -559,13 +559,30 @@ void ui3Manager::Run(void)
                      widgetIterator++) {
                     // check if the widget's handles are active
                     if ((*widgetIterator)->HandlesActive()) {
+                        // check that the handles is not already selected
                         for (handleCounter = 0;
                              handleCounter < 4;
                              handleCounter++) {
-                            armPointer->UpdateIntention((*widgetIterator)->RotationHandles[handleCounter]);
+                            if (!(*widgetIterator)->RotationHandles[handleCounter]->Selected() &&
+                                (*widgetIterator)->RotationHandles[handleCounter]->Activated()) {
+                                armPointer->UpdateIntention((*widgetIterator)->RotationHandles[handleCounter]);
+                            }
                         }
                     }
                 }
+            }
+        }
+
+        // now figure out which selectable callback if any
+        if (armPointer->ButtonPressed) {
+            if (armPointer->ToBeSelected) {
+                armPointer->Selected = armPointer->ToBeSelected;
+                armPointer->Selected->Select(armPointer->CursorPosition);
+            }
+        } else if (armPointer->ButtonReleased) {
+            if (armPointer->Selected) {
+                armPointer->Selected->Release(armPointer->CursorPosition);
+                armPointer->Selected = 0;
             }
         }
     }
@@ -593,17 +610,22 @@ void ui3Manager::Run(void)
                 }
             }
         }
-
-        // now figure out which selectable callback if any
-        if (armPointer->ButtonPressed) {
-            if (armPointer->ToBeSelected) {
-                armPointer->Selected = armPointer->ToBeSelected;
-                armPointer->Selected->Select(armPointer->CursorPosition);
-            }
-        } else if (armPointer->ButtonReleased) {
-            if (armPointer->Selected) {
-                armPointer->Selected->Release(armPointer->CursorPosition);
-                armPointer->Selected = 0;
+    }
+     
+    // based on callbacks, update position/orientation of 3D Widgets
+    for (behaviorIterator = this->Behaviors.begin();
+         behaviorIterator != behaviorEnd;
+         behaviorIterator++) {
+        // test if the behavior is running
+        if (((*behaviorIterator)->State == ui3BehaviorBase::Foreground)
+            || ((*behaviorIterator)->State == ui3BehaviorBase::Background)) {
+            Widget3DList::iterator widgetIterator;
+            // go through all the 3D widgets
+            const Widget3DList::iterator widgetEnd = (*behaviorIterator)->Widget3Ds.end();
+            for (widgetIterator =  (*behaviorIterator)->Widget3Ds.begin();
+                 widgetIterator != widgetEnd;
+                 widgetIterator++) {
+                (*widgetIterator)->UpdatePosition();
             }
         }
     }

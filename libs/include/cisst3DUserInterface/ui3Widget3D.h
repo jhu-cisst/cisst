@@ -83,6 +83,10 @@ protected:
     CMN_DECLARE_MEMBER_AND_ACCESSORS(bool, RotationHandlesActive);
 
     bool HandlesActiveMember;
+
+    void UpdatePosition(void);
+
+    unsigned int PreviousHandlesUsed;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(ui3Widget3D);
@@ -114,9 +118,9 @@ public:
 
     void ShowIntention(void);
 
-    void OnSelect(void);
+    inline void OnSelect(void) {};
 
-    void OnRelease(void);
+    inline void OnRelease(void) {};
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(ui3Widget3DRotationHandle);

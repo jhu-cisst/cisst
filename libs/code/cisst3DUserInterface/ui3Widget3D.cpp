@@ -124,25 +124,14 @@ double ui3Widget3DRotationHandle::GetIntention(const vctFrm3 & cursorPosition) c
 }
 
 
-void ui3Widget3DRotationHandle::OnSelect(void)
-{
-    CMN_LOG_CLASS_VERY_VERBOSE << "OnSelect: called for handle " << this->HandleNumber << std::endl;
-}
-
-
-
-void ui3Widget3DRotationHandle::OnRelease(void)
-{
-    CMN_LOG_CLASS_VERY_VERBOSE << "OnRelease: called for handle " << this->HandleNumber << std::endl;
-}
-
 
 CMN_IMPLEMENT_SERVICES(ui3Widget3D);
 
 
 ui3Widget3D::ui3Widget3D(const std::string & name):
     BaseType(name + "-3DWidget"),
-    UserObjects(0)
+    UserObjects(0),
+    PreviousHandlesUsed(0)
 {
     this->UserObjects = new ui3VisibleList(this->Name() + "[user objects]");
     CMN_ASSERT(this->UserObjects);
@@ -205,12 +194,57 @@ void ui3Widget3D::SetHandlesActive(bool handlesActive)
              handleCounter < 4;
              handleCounter++) {
             this->RotationHandles[handleCounter]->Show();
+            this->RotationHandles[handleCounter]->SetActivated(true);
         }        
     } else {
         for (handleCounter = 0;
              handleCounter < 4;
              handleCounter++) {
             this->RotationHandles[handleCounter]->Hide();
+            this->RotationHandles[handleCounter]->SetActivated(false);
         }        
     }
+}
+
+
+void ui3Widget3D::UpdatePosition(void)
+{
+    unsigned int handleCounter;
+    unsigned int handlesUsed = 0;
+    unsigned int handleValue = 2;
+    ui3Widget3DRotationHandle * firstHandle;
+    ui3Widget3DRotationHandle * secondHandle;
+
+    // figure out which handles are used, 2/4/8/16
+    for (handleCounter = 0;
+         handleCounter < 4;
+         handleCounter++) {
+        if (this->RotationHandles[handleCounter]->Selected()) {
+            handlesUsed += handleValue;
+        }
+        handleValue += handleValue;
+    }
+
+    // test if we are entering in a new manipulation
+    if (handlesUsed != this->PreviousHandlesUsed) {
+        std::cerr << "new manipulation" << std::endl;
+    }
+
+
+    switch (handlesUsed) {
+    case 0: // no handle used
+        break;
+    case 2: // one handle only
+    case 4:
+    case 8:
+    case 16:
+        std::cerr << ".";
+        break;
+    default:
+        // two handles
+        std::cerr << "two handles manipulation not yet implemented" << std::endl;
+        break;
+    }
+
+    this->PreviousHandlesUsed = handlesUsed;
 }

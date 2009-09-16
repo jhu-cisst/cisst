@@ -64,12 +64,14 @@ public:
     inline void Select(const vctFrm3 initialPosition) {
         this->SetSelected(true);
         this->InitialPosition.Assign(initialPosition);
+        std::cout << "Select" << std::endl;
         this->OnSelect();
     }
 
     inline void Release(const vctFrm3 finalPosition) {
         this->SetSelected(false);
         this->FinalPosition.Assign(finalPosition);
+        std::cout << "Release" << std::endl;
         this->OnRelease();
     }
 

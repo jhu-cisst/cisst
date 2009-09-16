@@ -100,11 +100,9 @@ CMN_IMPLEMENT_SERVICES(ImageViewerVisibleObject);
 
 ImageViewer::ImageViewer(const std::string & name):
     ui3BehaviorBase(std::string("ImageViewer::") + name, 0),
-    Following(false),
     Widget3D(0),
     VisibleObject1(0),
-    VisibleObject2(0),
-    Counter(0.0)
+    VisibleObject2(0)
 {
     this->Widget3D = new ui3Widget3D("ImageViewer");
     this->Widget3Ds.push_back(this->Widget3D);
@@ -168,19 +166,21 @@ bool ImageViewer::RunForeground(void)
 {
     if (this->Manager->MastersAsMice() != this->PreviousMaM) {
         this->PreviousMaM = this->Manager->MastersAsMice();
-        this->Widget3D->Show();
+        this->Widget3D->SetHandlesActive(true);
     }
 
     // detect transition, should that be handled as an event?
     // State is used by multiple threads ...
     if (this->State != this->PreviousState) {
         this->PreviousState = this->State;
-        this->Widget3D->Show();
+        this->Widget3D->SetHandlesActive(true);
     }
     // running in foreground GUI mode
     prmPositionCartesianGet position;
     this->GetPrimaryMasterPosition(position);
-    if (this->Following) {
+
+    /*
+    if (this->Selected) {
         vctDouble3 deltaCursor;
         deltaCursor.DifferenceOf(position.Position().Translation(),
                                  this->PreviousCursorPosition);
@@ -189,7 +189,7 @@ bool ImageViewer::RunForeground(void)
         this->Widget3D->SetOrientation(position.Position().Rotation());
     }
     this->PreviousCursorPosition.Assign(position.Position().Translation());
-    this->UpdateRelativePosition();
+    */
     return true;
 }
 
@@ -198,9 +198,8 @@ bool ImageViewer::RunBackground(void)
     // detect transition
     if (this->State != this->PreviousState) {
         this->PreviousState = this->State;
-        this->Widget3D->Hide();
+        this->Widget3D->SetHandlesActive(false);
     }
-    this->UpdateRelativePosition();
     return true;
 }
 
@@ -228,11 +227,14 @@ void ImageViewer::OnStart(void)
     this->Widget3D->SetPosition(this->Position);
     this->Widget3D->SetSize(20.0);
     this->Widget3D->Show();
+
+    this->VisibleObject2->SetPosition(vctDouble3(0.0, 10.0, 0.0));
 }
 
 
 void ImageViewer::PrimaryMasterButtonCallback(const prmEventButton & event)
 {
+#if 0
     if (event.Type() == prmEventButton::PRESSED) {
         this->Following = true;
         CMN_LOG_CLASS_VERY_VERBOSE << "Primary master button pressed, following started" << std::endl;
@@ -240,11 +242,5 @@ void ImageViewer::PrimaryMasterButtonCallback(const prmEventButton & event)
         this->Following = false;
         CMN_LOG_CLASS_VERY_VERBOSE << "Primary master button pressed, following ended" << std::endl;
     }
-}
-
-
-void ImageViewer::UpdateRelativePosition(void)
-{
-    this->Counter += 0.01;
-    this->VisibleObject2->SetPosition(vctDouble3(0.0, 20.0 * sin(Counter), 0.0));
+#endif
 }
