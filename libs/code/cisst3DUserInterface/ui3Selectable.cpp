@@ -2,10 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id$
+  $Id: ui3Selectable.cpp 858 2009-09-15 13:39:28Z adeguet1 $
 
   Author(s):	Balazs Vagvolgyi, Simon DiMaio, Anton Deguet
-  Created on:	2008-05-23
+  Created on:	2008-06-10
 
   (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
   Reserved.
@@ -19,29 +19,17 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#ifndef _ui3ForwardDeclarations_h
-#define _ui3ForwardDeclarations_h
 
+#include <cisst3DUserInterface/ui3Selectable.h>
+#include <cisst3DUserInterface/ui3VisibleList.h>
 
-class ui3BehaviorBase;
-class ui3CursorBase;
-class ui3CursorSphere;
-class ui3ImagePlane;
-class ui3Manager;
-class ui3ManagerCVTKRendererProc;
-class ui3MasterArm;
-class ui3MenuBar;
-class ui3MenuButton;
-class ui3SceneManager;
-class ui3Selectable;
-class ui3SlaveArm;
-class ui3UIThread;
-class ui3VideoInterfaceFilter;
-class ui3VisibleList;
-class ui3VisibleObject;
-class ui3VTKRenderer;
-class ui3Widget3D;
+#include <cisstOSAbstraction/osaSleep.h>
 
-
-#endif // _ui3ForwardDeclarations_h
+ui3Selectable::ui3Selectable(const std::string & name):
+    BaseType(name),
+    ActivatedMember(false),
+    SelectedMember(false),
+    MasterArm(0)
+{
+}
 

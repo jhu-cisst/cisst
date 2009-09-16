@@ -32,6 +32,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisst3DUserInterface/ui3VTKForwardDeclarations.h>
 #include <cisst3DUserInterface/ui3SceneManager.h>
 #include <cisst3DUserInterface/ui3VisibleList.h>
+#include <cisst3DUserInterface/ui3Selectable.h>
 
 // Always include last!
 #include <cisst3DUserInterface/ui3Export.h>
@@ -83,7 +84,7 @@ CMN_DECLARE_SERVICES_INSTANTIATION(ui3Widget3D);
 
 
 
-class ui3Widget3DRotationHandle: public ui3VisibleObject
+class ui3Widget3DRotationHandle: public ui3Selectable
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
@@ -100,6 +101,10 @@ public:
     bool CreateVTKObjects(void);
 
     void UpdateColor(bool selected);
+
+    double GetIntention(const vctFrm3 & cursorPosition) const;
+
+    void ShowIntention(double intention);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(ui3Widget3DRotationHandle);

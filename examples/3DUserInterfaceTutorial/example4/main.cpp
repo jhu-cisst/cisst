@@ -74,6 +74,7 @@ int main()
 
     guiManager.AddRenderer(400,                // render width
                            300,                // render height
+                           false,              // borderless window
                            0, 0,               // window position
                            camera_geometry, 2, // camera parameters
                            "ThirdEyeView");    // name of renderer

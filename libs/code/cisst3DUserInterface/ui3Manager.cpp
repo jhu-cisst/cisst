@@ -527,22 +527,19 @@ void ui3Manager::Run(void)
             for (handleCounter = 0;
                  handleCounter < 4;
                  handleCounter++) {
-                position = (*widgetIterator)->RotationHandles[handleCounter]->GetTransformation().Translation();
-                std::cout << "Pos[" << handleCounter << "]: " << position << std::endl;
-                position = (*widgetIterator)->RotationHandles[handleCounter]->GetAbsoluteTransformation().Translation();
-                std::cout << "PosAbs[" << handleCounter << "]: " << position << std::endl;
-
+                // position = (*widgetIterator)->RotationHandles[handleCounter]->GetAbsoluteTransformation().Translation();
+                unsigned int counter = 0;
+                for (armIterator = this->MasterArms.begin();
+                     armIterator != armEnd;
+                     armIterator++) {
+                    std::cout << counter << std::endl;
+                    counter++;
+                    ((*armIterator).second)->UpdateIntention((*widgetIterator)->RotationHandles[handleCounter]);
+                }
             }
         }
     }
         
-//         for (armIterator = this->MasterArms.begin();
-//              armIterator != armEnd;
-//              armIterator++) {
-//             ((*armIterator).second)->PreRun();
-//         }
-//     }
-    
     // this needs to change to a parameter
     osaSleep(20.0 * cmn_ms);
 }

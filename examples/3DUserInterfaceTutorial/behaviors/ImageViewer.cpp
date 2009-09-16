@@ -107,12 +107,13 @@ ImageViewer::ImageViewer(const std::string & name):
     Counter(0.0)
 {
     this->Widget3D = new ui3Widget3D("ImageViewer");
+    this->Widget3Ds.push_back(this->Widget3D);
 
     this->VisibleObject1 = new ImageViewerVisibleObject();
-    //    this->Widget3D->Add(this->VisibleObject1);
+    this->Widget3D->Add(this->VisibleObject1);
 
     this->VisibleObject2 = new ImageViewerVisibleObject();
-    // this->Widget3D->Add(this->VisibleObject2);
+    this->Widget3D->Add(this->VisibleObject2);
     
     CMN_ASSERT(this->Widget3D);
 }

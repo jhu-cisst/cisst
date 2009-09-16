@@ -113,6 +113,15 @@ protected:
     void UpdateCursorPosition(void);
     void Hide(void);
     void Show(void);
+
+    // used to figure out which object is selected or to be selected
+    ui3Selectable * Selected;
+    double HighestIntention;
+    ui3Selectable * ToBeSelected;
+
+    void UpdateIntention(ui3Selectable * selectable);
+
+
 };
 
 

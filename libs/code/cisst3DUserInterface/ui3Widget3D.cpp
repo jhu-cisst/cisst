@@ -35,7 +35,7 @@ CMN_IMPLEMENT_SERVICES(ui3Widget3DRotationHandle);
 
 
 ui3Widget3DRotationHandle::ui3Widget3DRotationHandle():
-    ui3VisibleObject("ui3Widget3DRotationHandle"),
+    ui3Selectable("ui3Widget3DRotationHandle"),
     Source(0),
     Mapper(0),
     Actor(0)
@@ -91,6 +91,34 @@ void ui3Widget3DRotationHandle::UpdateColor(bool selected)
 }
 
 
+void ui3Widget3DRotationHandle::ShowIntention(double intention)
+{
+    if (this->Created()) {
+        // this->Lock();
+        if (this->Selected()) {
+            this->Actor->GetProperty()->SetOpacity(1.0);
+            this->Actor->GetProperty()->SetColor(0.0, 1.0, 0.0);
+        } else {
+            this->Actor->GetProperty()->SetOpacity(0.5 + (intention * 0.5));
+            this->Actor->GetProperty()->SetColor(1.0, 1.0 - intention, 1.0 - intention);
+        }
+        // this->Unlock();
+    }
+}
+
+
+double ui3Widget3DRotationHandle::GetIntention(const vctFrm3 & cursorPosition) const
+{
+    vctDouble3 difference;
+    difference.DifferenceOf(cursorPosition.Translation(), this->GetAbsoluteTransformation().Translation());
+    double distance = difference.Norm();
+    const double threshold = 20;
+    if (distance > threshold) {
+        return 0.0;
+    } else {
+        return (1.0 - (distance / threshold)); // normalized between 0 and 1
+    } 
+}
 
 
 CMN_IMPLEMENT_SERVICES(ui3Widget3D);

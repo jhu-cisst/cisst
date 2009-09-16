@@ -38,6 +38,7 @@ SET(SOURCE_FILES
     ui3MenuBar.cpp
     ui3MenuButton.cpp
     ui3SceneManager.cpp
+    ui3Selectable.cpp
     ui3SlaveArm.cpp
     ui3VTKRenderer.cpp
     ui3VideoInterfaceFilter.cpp
@@ -62,6 +63,7 @@ SET(HEADER_FILES
     ui3MenuBar.h
     ui3MenuButton.h
     ui3SceneManager.h
+    ui3Selectable.h
     ui3VTKRenderer.h
     ui3VTKForwardDeclarations.h
     ui3VideoInterfaceFilter.h

@@ -22,8 +22,9 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisst3DUserInterface/ui3MasterArm.h>
 
 #include <cisstMultiTask/mtsTaskManager.h>
-#include <cisst3DUserInterface/ui3Manager.h>
 
+#include <cisst3DUserInterface/ui3Manager.h>
+#include <cisst3DUserInterface/ui3Selectable.h>
 
 CMN_IMPLEMENT_SERVICES(ui3MasterArm)
 
@@ -34,7 +35,8 @@ ui3MasterArm::ui3MasterArm(const std::string & name):
     ButtonPressed(false),
     ButtonReleased(false),
     Clutched(false),
-    Manager(0)
+    Manager(0),
+    Selected(0)
 {
 }
 
@@ -203,6 +205,8 @@ void ui3MasterArm::PreRun(void)
 {
     this->ButtonReleased = false;
     this->ButtonPressed = false;
+    this->HighestIntention = 0.0;
+    this->ToBeSelected = 0;
 }
 
 
@@ -242,3 +246,14 @@ void ui3MasterArm::Show(void)
 }
 
 
+
+void ui3MasterArm::UpdateIntention(ui3Selectable * selectable)
+{
+    double intention = selectable->GetIntention(this->CursorPosition);
+    std::cout << intention << std::endl;
+    if (intention > HighestIntention) {
+        HighestIntention = intention;
+        ToBeSelected = selectable;
+    }
+    selectable->ShowIntention(intention);
+}
