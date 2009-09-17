@@ -37,7 +37,8 @@ CMN_IMPLEMENT_SERVICES(ui3VTKRenderer);
 
 
 ui3VTKRenderer::ui3VTKRenderer(ui3SceneManager* scene,
-                               unsigned int width, unsigned int height, bool borderless,
+                               unsigned int width, unsigned int height,
+                               double zoom, bool borderless,
                                svlCameraGeometry & camgeometry, unsigned int camid,
                                svlRenderTargetBase* target) :
     SceneManager(scene),
@@ -96,7 +97,7 @@ ui3VTKRenderer::ui3VTKRenderer(ui3SceneManager* scene,
     this->Camera->SetFocalPoint(position[0] + axis[0], position[1] + axis[1], position[2] + axis[2]);
     this->Camera->SetClippingRange(0.1, 20000.0);
     viewangle = this->CameraGeometry.GetViewAngleVertical(this->Height, this->CameraID);
-    this->Camera->SetViewAngle(viewangle);
+    this->Camera->SetViewAngle(viewangle / zoom);
     this->Renderer->SetActiveCamera(this->Camera);
 
     // Initialize renderer

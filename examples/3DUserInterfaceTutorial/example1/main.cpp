@@ -65,8 +65,8 @@ int main()
     camera_geometry.SetPerspective(400.0, 2);
     camera_geometry.RotateWorldAboutY(180.0);
 
-    guiManager.AddRenderer(400,                // render width
-                           300,                // render height
+    guiManager.AddRenderer(800, 600,           // render width & height
+                           1.0,                // virtual camera zoom
                            false,              // borderless flag
                            0, 0,               // window position
                            camera_geometry, 2, // camera parameters

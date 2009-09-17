@@ -90,7 +90,8 @@ bool ui3Manager::SetupMaM(mtsDevice * mamDevice, const std::string & mamInterfac
 }
 
 
-bool ui3Manager::AddRenderer(unsigned int width, unsigned int height, bool borderless, int x, int y,
+bool ui3Manager::AddRenderer(unsigned int width, unsigned int height,
+                             double zoom, bool borderless, int x, int y,
                              svlCameraGeometry & camgeometry, unsigned int camid,
                              const std::string & renderername)
 {
@@ -102,6 +103,7 @@ bool ui3Manager::AddRenderer(unsigned int width, unsigned int height, bool borde
 
     renderer->width = width;
     renderer->height = height;
+    renderer->zoom = zoom;
     renderer->borderless = borderless;
     renderer->windowposx = x;
     renderer->windowposy = y;
@@ -663,6 +665,7 @@ bool ui3Manager::SetupRenderers()
         Renderers[i]->renderer = new ui3VTKRenderer(this->SceneManager,
                                                     this->Renderers[i]->width,
                                                     this->Renderers[i]->height,
+                                                    this->Renderers[i]->zoom,
                                                     this->Renderers[i]->borderless,
                                                     this->Renderers[i]->camgeometry,
                                                     this->Renderers[i]->camid,

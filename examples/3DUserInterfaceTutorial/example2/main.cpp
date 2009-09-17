@@ -89,10 +89,10 @@ int main()
     }
     vidStream.Trunk().Append(&vidBackgroundSource);
 
-#ifdef CAPTURE_SWAP_RGB
-    svlFilterRGBSwapper vidRGBSwapper;
-    vidStream.Trunk().Append(&vidRGBSwapper);
-#endif //CAPTURE_SWAP_RGB
+    svlFilterImageRectifier vidRectifier;
+    vidRectifier.LoadTable("D:/Development/calibration/miccai_saw_demo/left_rectif.txt", SVL_LEFT);
+    vidRectifier.LoadTable("D:/Development/calibration/miccai_saw_demo/right_rectif.txt", SVL_RIGHT);
+    vidStream.Trunk().Append(&vidRectifier);
 
     // add guiManager as a filter to the pipeline, so it will receive video frames
     // "StereoVideo" is defined in the UI Manager as a possible video interface
@@ -105,25 +105,26 @@ int main()
 
     svlCameraGeometry camera_geometry;
     // Load Camera calibration results
-    camera_geometry.LoadCalibration("D:/Development/calibration/miccai_saw_demo/calib_results.txt");
+    camera_geometry.LoadCalibration("D:/Development/calibration/miccai_saw_demo/calib_results_rectified.txt");
     // Center world in between the two cameras (da Vinci specific)
     camera_geometry.SetWorldToCenter();
     // Rotate world by 180 degrees (VTK specific)
     camera_geometry.RotateWorldAboutY(180.0);
+
     // Display camera configuration
     std::cerr << camera_geometry;
 
     // *** Left view ***
-    guiManager.AddRenderer(800,                         // render width
-                           600,                         // render height
+    guiManager.AddRenderer(800, 900,                    // render width & height
+                           1.2,                         // virtual camera zoom to hide the image borders created by the rectifier
                            true,                        // borderless flag
                            0, 0,                        // window position
                            camera_geometry, SVL_LEFT,   // camera parameters
                            "LeftEyeView");              // name of renderer
 
     // *** Right view ***
-    guiManager.AddRenderer(800,                         // render width
-                           600,                         // render height
+    guiManager.AddRenderer(800, 900,                    // render width & height
+                           1.2,                         // virtual camera zoom to hide the image borders created by the rectifier
                            true,                        // borderless flag
                            800, 0,                      // window position
                            camera_geometry, SVL_RIGHT,  // camera parameters

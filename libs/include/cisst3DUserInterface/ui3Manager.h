@@ -116,7 +116,8 @@ public:
     /*!
      Adds a render window to the UI Manager.
     */
-    virtual bool AddRenderer(unsigned int width, unsigned int height, bool borderless, int x, int y,
+    virtual bool AddRenderer(unsigned int width, unsigned int height,
+                             double zoom, bool borderless, int x, int y,
                              svlCameraGeometry & camgeometry, unsigned int camid,
                              const std::string & renderername);
 
@@ -254,6 +255,7 @@ protected:
     typedef struct tagRendererStruct {
         unsigned int width;
         unsigned int height;
+        double zoom;
         bool borderless;
         int windowposx;
         int windowposy;
