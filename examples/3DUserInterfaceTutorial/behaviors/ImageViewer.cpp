@@ -170,6 +170,7 @@ bool ImageViewer::RunForeground(void)
 {
     if (this->Manager->MastersAsMice() != this->PreviousMaM) {
         this->PreviousMaM = this->Manager->MastersAsMice();
+        this->Widget3D->Show();
         this->Widget3D->SetHandlesActive(true);
     }
 
@@ -177,6 +178,7 @@ bool ImageViewer::RunForeground(void)
     // State is used by multiple threads ...
     if (this->State != this->PreviousState) {
         this->PreviousState = this->State;
+        this->Widget3D->Show();
         this->Widget3D->SetHandlesActive(true);
     }
     // running in foreground GUI mode
@@ -202,6 +204,7 @@ bool ImageViewer::RunBackground(void)
     // detect transition
     if (this->State != this->PreviousState) {
         this->PreviousState = this->State;
+        this->Widget3D->Show();
         this->Widget3D->SetHandlesActive(false);
     }
     return true;

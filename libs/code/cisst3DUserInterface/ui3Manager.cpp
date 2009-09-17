@@ -515,7 +515,6 @@ void ui3Manager::Run(void)
     }
 
     // set depth for current menu, take the average depth of all master arms
-    this->ActiveBehavior->MenuBar->Show();
     this->ActiveBehavior->MenuBar->SetDepth(averageDepth); // rightCursorPosition.Translation().Z());
 
 

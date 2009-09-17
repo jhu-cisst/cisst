@@ -27,9 +27,9 @@ http://www.cisst.org/cisst/license.txt.
 
 ui3Selectable::ui3Selectable(const std::string & name):
     BaseType(name),
-    ActivatedMember(false),
     SelectedMember(false),
-    MasterArm(0)
+    MasterArm(0),
+    ActivatedMember(false)
 {
 }
 
@@ -46,4 +46,15 @@ double ui3Selectable::UpdateOverallIntention(double intention)
         this->OverallIntention = intention;
     }
     return this->OverallIntention;
+}
+
+
+void ui3Selectable::SetActivated(bool activated)
+{
+    this->ActivatedMember = activated;
+    if (activated) {
+        this->Show();
+    } else {
+        this->Hide();
+    }
 }

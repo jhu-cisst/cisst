@@ -105,6 +105,7 @@ void ui3BehaviorBase::Run(void)
     if (this->Manager->MastersAsMice()) {
         switch(this->State) {
         case Foreground:
+            this->MenuBar->Show();
             this->RunForeground();
             break;
         case Background:

@@ -208,18 +208,14 @@ void ui3Widget3D::SetHandlesActive(bool handlesActive)
         for (handleCounter = 0;
              handleCounter < 4;
              handleCounter++) {
-            this->SideHandles[handleCounter]->Show();
             this->SideHandles[handleCounter]->SetActivated(true);
-            this->CornerHandles[handleCounter]->Show();
             this->CornerHandles[handleCounter]->SetActivated(true);
         }        
     } else {
         for (handleCounter = 0;
              handleCounter < 4;
              handleCounter++) {
-            this->SideHandles[handleCounter]->Hide();
             this->SideHandles[handleCounter]->SetActivated(false);
-            this->CornerHandles[handleCounter]->Hide();
             this->CornerHandles[handleCounter]->SetActivated(false);
         }        
     }
@@ -229,7 +225,6 @@ void ui3Widget3D::SetHandlesActive(bool handlesActive)
 void ui3Widget3D::UpdatePosition(void)
 {
     unsigned int handleCounter;
-    unsigned int handlesUsed = 0;
     int firstSideHandle = -1; // invalid number
     int secondSideHandle = -1; // invalid number
     int cornerHandle = -1; // invalid number
@@ -271,9 +266,10 @@ void ui3Widget3D::UpdatePosition(void)
             this->UserObjects->SetTransformation(vctFrm3::Identity(), false);
             this->Handles->SetPosition(vct3(0.0));
             this->Handles->SetOrientation(newPosition.Rotation().InverseSelf(), false);
+            // this->Handles->SetTransformation(vctFrm3::Identity(), false);
             // this->PositionBeforeManipulation.Assign(this->GetAbsoluteTransformation());
-        } else if (secondSideHandle == -1) {
-            // de-activate all but the one opposite direction
+        } else if ((secondSideHandle == -1) && (cornerHandle == -1)){
+            // de-activate all but the one opposite direction of selected side handle
             this->SetHandlesActive(false);
             this->SideHandles[(firstSideHandle + 2) % 4]->Show();
             this->SideHandles[(firstSideHandle + 2) % 4]->SetActivated(true);
@@ -285,10 +281,11 @@ void ui3Widget3D::UpdatePosition(void)
 
     // do the actual computation if needed
     if (cornerHandle != -1) {
-        vctDouble3 translation;
+        vctDouble3 translation, translationInWorld;
         translation.DifferenceOf(this->CornerHandles[cornerHandle]->FinalPosition.Translation(),
                                  this->CornerHandles[cornerHandle]->InitialPosition.Translation());
-        CurrentTransformation.Translation().Assign(translation);
+        this->GetTransformation().Rotation().ApplyInverseTo(translation, translationInWorld);
+        CurrentTransformation.Translation().Assign(translationInWorld);
         CurrentTransformation.Rotation().Assign(vctFrm3::RotationType::Identity());
         this->UserObjects->SetTransformation(CurrentTransformation);
         this->Handles->SetTransformation(CurrentTransformation);
@@ -298,7 +295,7 @@ void ui3Widget3D::UpdatePosition(void)
             // one handed manipulation
 
             // get handle displacement
-            vctDouble3 center, initial, current, rodriguez;
+            vctDouble3 center, initial, current;
             center.Assign(this->GetAbsoluteTransformation().Translation());
             initial.DifferenceOf(this->SideHandles[firstSideHandle]->InitialPosition.Translation(),
                                  center);
@@ -306,10 +303,29 @@ void ui3Widget3D::UpdatePosition(void)
             current.DifferenceOf(this->SideHandles[firstSideHandle]->FinalPosition.Translation(),
                                  center);
             current.NormalizedSelf();
-            rodriguez.CrossProductOf(initial, current);
+
+            vctDouble3 axis;
+            double initialAngle, currentAngle, angle;
+            // rotation along Y
+            if ((firstSideHandle == 0) || (firstSideHandle == 2)) {
+                initialAngle = atan2(initial.X(), initial.Z());
+                currentAngle = atan2(current.X(), current.Z());
+                angle = currentAngle - initialAngle;
+                axis.Assign(0.0, 1.0, 0.0);
+            } else {
+                // rotation along X
+                initialAngle = atan2(initial.Y(), initial.Z());
+                currentAngle = atan2(current.Y(), current.Z());
+                angle = initialAngle - currentAngle;
+                axis.Assign(1.0, 0.0, 0.0);
+            }
+            vctDouble3 axisInWorld;
+            this->GetTransformation().Rotation().ApplyInverseTo(axis, axisInWorld);
             CurrentTransformation.Translation().SetAll(0.0);
-            CurrentTransformation.Rotation().From(vctRodRot3(rodriguez));
+            CurrentTransformation.Rotation().From(vctAxAnRot3(axisInWorld, angle));
             this->UserObjects->SetTransformation(CurrentTransformation);
+            //            vctFrm3 handlesTransformation;
+            // this->GetTransformation().Rotation().ApplyInverseTo(CurrentTransformation.Rotation(), handlesTransformation.Rotation());
             this->Handles->SetTransformation(CurrentTransformation);
         } else {
             // two handed manipulation

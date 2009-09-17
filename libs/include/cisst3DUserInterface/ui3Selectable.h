@@ -77,7 +77,11 @@ public:
         this->OnRelease();
     }
 
-    CMN_DECLARE_MEMBER_AND_ACCESSORS(bool, Activated);
+    void SetActivated(bool activated);
+
+    inline bool Activated(void) const {
+        return this->ActivatedMember;
+    }
 
     CMN_DECLARE_MEMBER_AND_ACCESSORS(bool, Selected);
 
@@ -90,6 +94,7 @@ protected:
     vctFrm3 InitialPosition, FinalPosition;
     ui3MasterArm * MasterArm;
     double OverallIntention;
+    bool ActivatedMember;
 };
 
 
