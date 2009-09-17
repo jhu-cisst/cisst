@@ -488,7 +488,8 @@ void ui3Manager::Run(void)
                     for (handleCounter = 0;
                          handleCounter < 4;
                          handleCounter++) {
-                        (*widgetIterator)->RotationHandles[handleCounter]->ResetOverallIntention();
+                        (*widgetIterator)->SideHandles[handleCounter]->ResetOverallIntention();
+                        (*widgetIterator)->CornerHandles[handleCounter]->ResetOverallIntention();
                     }
                 }
             }
@@ -528,6 +529,7 @@ void ui3Manager::Run(void)
     for (armIterator = this->MasterArms.begin();
          armIterator != armEnd;
          armIterator++) {
+        bool transitionDetected;
         armPointer = (*armIterator).second;
 
         // see if this cursor is over the menu and if so returns the current button -- Buttons should be ui3Selectable and code below could be used.
@@ -540,32 +542,41 @@ void ui3Manager::Run(void)
             }
         }
 
-        // try to find Widget3D
-        BehaviorList::iterator behaviorIterator;
-        const BehaviorList::iterator behaviorEnd = this->Behaviors.end();
-        unsigned int handleCounter;
-        vctDouble3 position;
-        for (behaviorIterator = this->Behaviors.begin();
-             behaviorIterator != behaviorEnd;
-             behaviorIterator++) {
-            // test if the behavior is running
-            if (((*behaviorIterator)->State == ui3BehaviorBase::Foreground)
-                || ((*behaviorIterator)->State == ui3BehaviorBase::Background)) {
-                Widget3DList::iterator widgetIterator;
-                // go through all the 3D widgets
-                const Widget3DList::iterator widgetEnd = (*behaviorIterator)->Widget3Ds.end();
-                for (widgetIterator =  (*behaviorIterator)->Widget3Ds.begin();
-                     widgetIterator != widgetEnd;
-                     widgetIterator++) {
-                    // check if the widget's handles are active
-                    if ((*widgetIterator)->HandlesActive()) {
-                        // check that the handles is not already selected
-                        for (handleCounter = 0;
-                             handleCounter < 4;
-                             handleCounter++) {
-                            if (!(*widgetIterator)->RotationHandles[handleCounter]->Selected() &&
-                                (*widgetIterator)->RotationHandles[handleCounter]->Activated()) {
-                                armPointer->UpdateIntention((*widgetIterator)->RotationHandles[handleCounter]);
+        // test if this arm already has something selected
+        if (armPointer->Selected) {
+            armPointer->Selected->FinalPosition.Assign(armPointer->CursorPosition);
+        } else {
+            // try to find Widget3D
+            BehaviorList::iterator behaviorIterator;
+            const BehaviorList::iterator behaviorEnd = this->Behaviors.end();
+            unsigned int handleCounter;
+            vctDouble3 position;
+            for (behaviorIterator = this->Behaviors.begin();
+                 behaviorIterator != behaviorEnd;
+                 behaviorIterator++) {
+                // test if the behavior is running
+                if (((*behaviorIterator)->State == ui3BehaviorBase::Foreground)
+                    || ((*behaviorIterator)->State == ui3BehaviorBase::Background)) {
+                    Widget3DList::iterator widgetIterator;
+                    // go through all the 3D widgets
+                    const Widget3DList::iterator widgetEnd = (*behaviorIterator)->Widget3Ds.end();
+                    for (widgetIterator =  (*behaviorIterator)->Widget3Ds.begin();
+                         widgetIterator != widgetEnd;
+                         widgetIterator++) {
+                        // check if the widget's handles are active
+                        if ((*widgetIterator)->HandlesActive()) {
+                            // check that the handles is not already selected
+                            for (handleCounter = 0;
+                                 handleCounter < 4;
+                                 handleCounter++) {
+                                if (!(*widgetIterator)->SideHandles[handleCounter]->Selected() &&
+                                    (*widgetIterator)->SideHandles[handleCounter]->Activated()) {
+                                    armPointer->UpdateIntention((*widgetIterator)->SideHandles[handleCounter]);
+                                }
+                                if (!(*widgetIterator)->CornerHandles[handleCounter]->Selected() &&
+                                    (*widgetIterator)->CornerHandles[handleCounter]->Activated()) {
+                                    armPointer->UpdateIntention((*widgetIterator)->CornerHandles[handleCounter]);
+                                }
                             }
                         }
                     }
@@ -574,13 +585,16 @@ void ui3Manager::Run(void)
         }
 
         // now figure out which selectable callback if any
+        transitionDetected = false;
         if (armPointer->ButtonPressed) {
             if (armPointer->ToBeSelected) {
+                transitionDetected = true;
                 armPointer->Selected = armPointer->ToBeSelected;
                 armPointer->Selected->Select(armPointer->CursorPosition);
             }
         } else if (armPointer->ButtonReleased) {
             if (armPointer->Selected) {
+                transitionDetected = true;
                 armPointer->Selected->Release(armPointer->CursorPosition);
                 armPointer->Selected = 0;
             }
@@ -605,7 +619,8 @@ void ui3Manager::Run(void)
                     for (handleCounter = 0;
                          handleCounter < 4;
                          handleCounter++) {
-                        (*widgetIterator)->RotationHandles[handleCounter]->ShowIntention();
+                        (*widgetIterator)->SideHandles[handleCounter]->ShowIntention();
+                        (*widgetIterator)->CornerHandles[handleCounter]->ShowIntention();
                     }
                 }
             }
@@ -613,6 +628,7 @@ void ui3Manager::Run(void)
     }
      
     // based on callbacks, update position/orientation of 3D Widgets
+    // TODO, add test to see if any arm is selected before doing all of this
     for (behaviorIterator = this->Behaviors.begin();
          behaviorIterator != behaviorEnd;
          behaviorIterator++) {

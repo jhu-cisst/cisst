@@ -38,8 +38,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisst3DUserInterface/ui3Export.h>
 
 
-class ui3Widget3DRotationHandle;
-
+class ui3Widget3DHandle;
 
 /*!  
   Cheap implementation of Composite Pattern, group of visible
@@ -64,7 +63,7 @@ public:
 
     bool Add(ui3VisibleObject * object);
 
-    CMN_DECLARE_MEMBER_AND_ACCESSORS(double, RotationHandlesSpacing);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(double, HandlesSpacing);
 
 public:
     void SetSize(double halfSize);
@@ -78,15 +77,21 @@ public:
 protected:
     ui3VisibleList * UserObjects;
     ui3VisibleList * Handles;
-    ui3Widget3DRotationHandle * RotationHandles[4];
+    ui3Widget3DHandle * SideHandles[4];
+    ui3Widget3DHandle * CornerHandles[4];
 
-    CMN_DECLARE_MEMBER_AND_ACCESSORS(bool, RotationHandlesActive);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(bool, SideHandlesActive);
+    CMN_DECLARE_MEMBER_AND_ACCESSORS(bool, CornerHandlesActive);
 
     bool HandlesActiveMember;
 
     void UpdatePosition(void);
 
-    unsigned int PreviousHandlesUsed;
+    int PreviousFirstSideHandle;
+    int PreviousSecondSideHandle;
+    int PreviousCornerHandle;
+
+    vctFrm3 CurrentTransformation;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(ui3Widget3D);
@@ -94,7 +99,7 @@ CMN_DECLARE_SERVICES_INSTANTIATION(ui3Widget3D);
 
 
 
-class ui3Widget3DRotationHandle: public ui3Selectable
+class ui3Widget3DHandle: public ui3Selectable
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
@@ -106,9 +111,9 @@ protected:
     vtkActor * Actor;
 
 public:
-    ui3Widget3DRotationHandle(unsigned int handleNumber, ui3Widget3D * widget3D);
+    ui3Widget3DHandle(unsigned int handleNumber, ui3Widget3D * widget3D);
     
-    ~ui3Widget3DRotationHandle();
+    ~ui3Widget3DHandle();
 
     bool CreateVTKObjects(void);
 
@@ -123,7 +128,7 @@ public:
     inline void OnRelease(void) {};
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(ui3Widget3DRotationHandle);
+CMN_DECLARE_SERVICES_INSTANTIATION(ui3Widget3DHandle);
 
 
 #endif // _ui3Widget3D_h

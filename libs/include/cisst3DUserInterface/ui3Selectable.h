@@ -42,6 +42,8 @@ http://www.cisst.org/cisst/license.txt.
 */
 class CISST_EXPORT ui3Selectable: public ui3VisibleObject
 {
+    friend class ui3Manager;
+    friend class ui3Widget3D;
 
 public:
     typedef ui3VisibleObject BaseType;

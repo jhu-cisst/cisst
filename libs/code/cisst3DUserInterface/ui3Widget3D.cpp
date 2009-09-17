@@ -4,7 +4,7 @@
 /*
   $Id: ui3Widget3D.cpp 137 2009-03-11 18:51:15Z adeguet1 $
 
-  Author(s):	Balazs Vagvolgyi, Simon DiMaio, Anton Deguet
+  Author(s):	Anton Deguet
   Created on:	2008-06-10
 
   (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
@@ -23,6 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisst3DUserInterface/ui3Widget3D.h>
 #include <cisst3DUserInterface/ui3SceneManager.h>
 #include <cisst3DUserInterface/ui3VisibleList.h>
+#include <cisst3DUserInterface/ui3MasterArm.h>
 
 #include <vtkActor.h>
 #include <vtkAssembly.h>
@@ -30,13 +31,11 @@ http://www.cisst.org/cisst/license.txt.
 #include <vtkProperty.h>
 #include <vtkSphereSource.h>
 
+CMN_IMPLEMENT_SERVICES(ui3Widget3DHandle);
 
-CMN_IMPLEMENT_SERVICES(ui3Widget3DRotationHandle);
-
-
-ui3Widget3DRotationHandle::ui3Widget3DRotationHandle(unsigned int handleNumber,
-                                                     ui3Widget3D * widget3D):
-    ui3Selectable("ui3Widget3DRotationHandle"),
+ui3Widget3DHandle::ui3Widget3DHandle(unsigned int handleNumber,
+                                     ui3Widget3D * widget3D):
+    ui3Selectable("ui3Widget3DHandle"),
     HandleNumber(handleNumber),
     Widget3D(widget3D),
     Source(0),
@@ -45,7 +44,7 @@ ui3Widget3DRotationHandle::ui3Widget3DRotationHandle(unsigned int handleNumber,
 {}
     
     
-ui3Widget3DRotationHandle::~ui3Widget3DRotationHandle()
+ui3Widget3DHandle::~ui3Widget3DHandle()
 {
     if (this->Source) {
         this->Source->Delete();
@@ -61,7 +60,7 @@ ui3Widget3DRotationHandle::~ui3Widget3DRotationHandle()
 }
 
 
-bool ui3Widget3DRotationHandle::CreateVTKObjects(void)
+bool ui3Widget3DHandle::CreateVTKObjects(void)
 {
     this->Source = vtkSphereSource::New();
     CMN_ASSERT(this->Source);
@@ -80,7 +79,7 @@ bool ui3Widget3DRotationHandle::CreateVTKObjects(void)
 }
 
 
-void ui3Widget3DRotationHandle::UpdateColor(bool selected)
+void ui3Widget3DHandle::UpdateColor(bool selected)
 {
     if (this->Created()) {
         this->Lock();
@@ -94,7 +93,7 @@ void ui3Widget3DRotationHandle::UpdateColor(bool selected)
 }
 
 
-void ui3Widget3DRotationHandle::ShowIntention(void)
+void ui3Widget3DHandle::ShowIntention(void)
 {
     if (this->Created()) {
         // this->Lock();
@@ -110,12 +109,12 @@ void ui3Widget3DRotationHandle::ShowIntention(void)
 }
 
 
-double ui3Widget3DRotationHandle::GetIntention(const vctFrm3 & cursorPosition) const
+double ui3Widget3DHandle::GetIntention(const vctFrm3 & cursorPosition) const
 {
     vctDouble3 difference;
     difference.DifferenceOf(cursorPosition.Translation(), this->GetAbsoluteTransformation().Translation());
     double distance = difference.Norm();
-    const double threshold = 20;
+    const double threshold = 5.0; // in mm
     if (distance > threshold) {
         return 0.0;
     } else {
@@ -125,13 +124,17 @@ double ui3Widget3DRotationHandle::GetIntention(const vctFrm3 & cursorPosition) c
 
 
 
+
 CMN_IMPLEMENT_SERVICES(ui3Widget3D);
 
 
 ui3Widget3D::ui3Widget3D(const std::string & name):
     BaseType(name + "-3DWidget"),
     UserObjects(0),
-    PreviousHandlesUsed(0)
+    Handles(0),
+    PreviousFirstSideHandle(-1),
+    PreviousSecondSideHandle(-1),
+    PreviousCornerHandle(-1)
 {
     this->UserObjects = new ui3VisibleList(this->Name() + "[user objects]");
     CMN_ASSERT(this->UserObjects);
@@ -143,14 +146,22 @@ ui3Widget3D::ui3Widget3D(const std::string & name):
 
     // create handles to be used and add them to base class list
     unsigned int handleCounter;
-    ui3Widget3DRotationHandle * handle;
+    ui3Widget3DHandle * handle;
     for (handleCounter = 0;
          handleCounter < 4;
          handleCounter++) {
-        handle = new ui3Widget3DRotationHandle(handleCounter, this);
+        handle = new ui3Widget3DHandle(handleCounter, this);
         CMN_ASSERT(handle);
         this->Handles->Add(handle);
-        this->RotationHandles[handleCounter] = handle;
+        this->SideHandles[handleCounter] = handle;
+    }
+    for (handleCounter = 0;
+         handleCounter < 4;
+         handleCounter++) {
+        handle = new ui3Widget3DHandle(handleCounter, this);
+        CMN_ASSERT(handle);
+        this->Handles->Add(handle);
+        this->CornerHandles[handleCounter] = handle;
     }
 
     // set handles as active
@@ -167,19 +178,23 @@ bool ui3Widget3D::Add(ui3VisibleObject * object)
 
 void ui3Widget3D::SetSize(double halfSize)
 {
-    this->SetRotationHandlesSpacing(halfSize);
+    this->SetHandlesSpacing(halfSize);
     unsigned int handleCounter;
     vctDouble3 position;
 
-    const short orientation[5] = {-1, 0, 1, 0, -1};
-    
+    const short sides[5] = {-1, 0, 1, 0, -1};
+    const short corners[5] = {-1, -1, 1, 1, -1};
     for (handleCounter = 0;
          handleCounter < 4;
          handleCounter++) {
-        position.Assign(orientation[handleCounter] * halfSize, orientation[handleCounter + 1] * halfSize, 0.0);
-        CMN_LOG_CLASS_VERY_VERBOSE << "SetSize: position rotation handle at: " << position << std::endl;
-        CMN_ASSERT(this->RotationHandles[handleCounter]);
-        this->RotationHandles[handleCounter]->SetPosition(position);
+        position.Assign(sides[handleCounter] * halfSize, sides[handleCounter + 1] * halfSize, 0.0);
+        CMN_LOG_CLASS_VERY_VERBOSE << "SetSize: set side handle at: " << position << std::endl;
+        CMN_ASSERT(this->SideHandles[handleCounter]);
+        this->SideHandles[handleCounter]->SetPosition(position);
+        position.Assign(corners[handleCounter] * halfSize, corners[handleCounter + 1] * halfSize, 0.0);
+        CMN_LOG_CLASS_VERY_VERBOSE << "SetSize: set corner handle at: " << position << std::endl;
+        CMN_ASSERT(this->CornerHandles[handleCounter]);
+        this->CornerHandles[handleCounter]->SetPosition(position);
     }
 }
 
@@ -193,15 +208,19 @@ void ui3Widget3D::SetHandlesActive(bool handlesActive)
         for (handleCounter = 0;
              handleCounter < 4;
              handleCounter++) {
-            this->RotationHandles[handleCounter]->Show();
-            this->RotationHandles[handleCounter]->SetActivated(true);
+            this->SideHandles[handleCounter]->Show();
+            this->SideHandles[handleCounter]->SetActivated(true);
+            this->CornerHandles[handleCounter]->Show();
+            this->CornerHandles[handleCounter]->SetActivated(true);
         }        
     } else {
         for (handleCounter = 0;
              handleCounter < 4;
              handleCounter++) {
-            this->RotationHandles[handleCounter]->Hide();
-            this->RotationHandles[handleCounter]->SetActivated(false);
+            this->SideHandles[handleCounter]->Hide();
+            this->SideHandles[handleCounter]->SetActivated(false);
+            this->CornerHandles[handleCounter]->Hide();
+            this->CornerHandles[handleCounter]->SetActivated(false);
         }        
     }
 }
@@ -211,40 +230,94 @@ void ui3Widget3D::UpdatePosition(void)
 {
     unsigned int handleCounter;
     unsigned int handlesUsed = 0;
-    unsigned int handleValue = 2;
-    ui3Widget3DRotationHandle * firstHandle;
-    ui3Widget3DRotationHandle * secondHandle;
+    int firstSideHandle = -1; // invalid number
+    int secondSideHandle = -1; // invalid number
+    int cornerHandle = -1; // invalid number
 
-    // figure out which handles are used, 2/4/8/16
+    // figure out which handles are used
     for (handleCounter = 0;
          handleCounter < 4;
          handleCounter++) {
-        if (this->RotationHandles[handleCounter]->Selected()) {
-            handlesUsed += handleValue;
+        if (this->SideHandles[handleCounter]->Selected()) {
+            // save the handle index
+            if (firstSideHandle == -1) {
+                firstSideHandle = handleCounter;
+            } else {
+                secondSideHandle = handleCounter;
+            }
         }
-        handleValue += handleValue;
+        if (this->CornerHandles[handleCounter]->Selected()) {
+            // save the handle index
+            cornerHandle = handleCounter;
+        }
+    }
+    // sanity check, corner always prevails
+    if (cornerHandle != -1) {
+        firstSideHandle = -1;
+        secondSideHandle = -1;
     }
 
-    // test if we are entering in a new manipulation
-    if (handlesUsed != this->PreviousHandlesUsed) {
-        std::cerr << "new manipulation" << std::endl;
+    // test for transition, should re-activate all handles
+    if ((firstSideHandle != this->PreviousFirstSideHandle)
+        || (secondSideHandle != this->PreviousSecondSideHandle)
+        || (cornerHandle != this->PreviousCornerHandle)) {
+        // no handle selected, re-activate all
+        if ((firstSideHandle == -1) && (cornerHandle == -1)) {
+            this->SetHandlesActive(true);
+            // apply last known transformation to whole widget but keep the handles in place
+            vctFrm3 newPosition;
+            this->GetTransformation().ApplyTo(this->CurrentTransformation, newPosition);
+            this->SetTransformation(newPosition, false);
+            this->UserObjects->SetTransformation(vctFrm3::Identity(), false);
+            this->Handles->SetPosition(vct3(0.0));
+            this->Handles->SetOrientation(newPosition.Rotation().InverseSelf(), false);
+            // this->PositionBeforeManipulation.Assign(this->GetAbsoluteTransformation());
+        } else if (secondSideHandle == -1) {
+            // de-activate all but the one opposite direction
+            this->SetHandlesActive(false);
+            this->SideHandles[(firstSideHandle + 2) % 4]->Show();
+            this->SideHandles[(firstSideHandle + 2) % 4]->SetActivated(true);
+        } else {
+            // de-activate all
+            this->SetHandlesActive(false);
+        }
     }
 
+    // do the actual computation if needed
+    if (cornerHandle != -1) {
+        vctDouble3 translation;
+        translation.DifferenceOf(this->CornerHandles[cornerHandle]->FinalPosition.Translation(),
+                                 this->CornerHandles[cornerHandle]->InitialPosition.Translation());
+        CurrentTransformation.Translation().Assign(translation);
+        CurrentTransformation.Rotation().Assign(vctFrm3::RotationType::Identity());
+        this->UserObjects->SetTransformation(CurrentTransformation);
+        this->Handles->SetTransformation(CurrentTransformation);
+    }
+    if (firstSideHandle != -1) {
+        if (secondSideHandle == -1) {
+            // one handed manipulation
 
-    switch (handlesUsed) {
-    case 0: // no handle used
-        break;
-    case 2: // one handle only
-    case 4:
-    case 8:
-    case 16:
-        std::cerr << ".";
-        break;
-    default:
-        // two handles
-        std::cerr << "two handles manipulation not yet implemented" << std::endl;
-        break;
+            // get handle displacement
+            vctDouble3 center, initial, current, rodriguez;
+            center.Assign(this->GetAbsoluteTransformation().Translation());
+            initial.DifferenceOf(this->SideHandles[firstSideHandle]->InitialPosition.Translation(),
+                                 center);
+            initial.NormalizedSelf();
+            current.DifferenceOf(this->SideHandles[firstSideHandle]->FinalPosition.Translation(),
+                                 center);
+            current.NormalizedSelf();
+            rodriguez.CrossProductOf(initial, current);
+            CurrentTransformation.Translation().SetAll(0.0);
+            CurrentTransformation.Rotation().From(vctRodRot3(rodriguez));
+            this->UserObjects->SetTransformation(CurrentTransformation);
+            this->Handles->SetTransformation(CurrentTransformation);
+        } else {
+            // two handed manipulation
+            std::cerr << "two handles manipulation not yet implemented" << std::endl;
+        }
     }
 
-    this->PreviousHandlesUsed = handlesUsed;
+    this->PreviousFirstSideHandle = firstSideHandle;
+    this->PreviousSecondSideHandle = secondSideHandle;
+    this->PreviousCornerHandle = cornerHandle;
 }

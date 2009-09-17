@@ -30,6 +30,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <vtkPolyDataMapper.h>
 #include <vtkProperty.h>
 #include <vtkSphereSource.h>
+#include <vtkCubeSource.h>
 
 class ImageViewerVisibleObject: public ui3VisibleObject
 {
@@ -57,9 +58,12 @@ public:
     }
 
     inline bool CreateVTKObjects(void) {
-        this->Source = vtkSphereSource::New();
+        this->Source = vtkCubeSource::New();
         CMN_ASSERT(this->Source);
-        this->Source->SetRadius(5.0);
+        //this->Source->SetRadius(5.0);
+        this->Source->SetXLength(10.0);
+        this->Source->SetYLength(6.0);
+        this->Source->SetZLength(2.0);
 
         this->Mapper = vtkPolyDataMapper::New();
         CMN_ASSERT(this->Mapper);
@@ -87,7 +91,7 @@ public:
     }
 
 protected:
-    vtkSphereSource * Source;
+    vtkCubeSource * Source;
     vtkPolyDataMapper * Mapper;
     vtkActor * Actor;
     vctDouble3 Position; // initial position
