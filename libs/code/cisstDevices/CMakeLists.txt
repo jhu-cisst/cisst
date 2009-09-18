@@ -40,6 +40,7 @@ set(HEADER_FILES
     devNDiSerialToolInformationGet.h
     devSartoriusSerial.h
     devExport.h
+	devKeyboard.h
     )
 
 set(SOURCE_FILES
@@ -47,6 +48,7 @@ set(SOURCE_FILES
     devNDiSerial.cpp
     devNDiSerialToolInformationGet.cpp
     devSartoriusSerial.cpp
+	devKeyboard.cpp
     )
 
 if(CISST_DEV_HAS_SENSABLEHD)
