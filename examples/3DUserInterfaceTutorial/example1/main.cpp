@@ -90,6 +90,7 @@ int main()
 
     // following should be replaced by a utility function or method of ui3Manager 
     taskManager->CreateAll();
+    osaSleep(3.0 * cmn_s);
     taskManager->StartAll();
 
     osaSleep(1.0 * cmn_s);
