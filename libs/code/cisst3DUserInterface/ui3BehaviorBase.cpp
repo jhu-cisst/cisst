@@ -26,6 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisst3DUserInterface/ui3VTKRenderer.h>
 #include <cisst3DUserInterface/ui3VideoInterfaceFilter.h>
 #include <cisst3DUserInterface/ui3Manager.h>
+#include <cisst3DUserInterface/ui3Widget3D.h>
 
 
 CMN_IMPLEMENT_SERVICES(ui3BehaviorBase)
@@ -46,6 +47,27 @@ ui3BehaviorBase::~ui3BehaviorBase()
     for (unsigned int i = 0; i < Streams.size(); i ++) {
         if (Streams[i]) delete Streams[i];
     }
+}
+
+
+void ui3BehaviorBase::AddWidget3D(ui3Widget3D * widget3D)
+{
+    this->Widget3Ds.push_back(widget3D);
+
+    unsigned int handleCounter;
+    for (handleCounter = 0;
+         handleCounter < 4;
+         handleCounter++) {
+        this->AddSelectable(widget3D->SideHandles[handleCounter]);
+        this->AddSelectable(widget3D->CornerHandles[handleCounter]);
+    }
+
+}
+
+
+void ui3BehaviorBase::AddSelectable(ui3Selectable * selectable)
+{
+    this->Selectables.push_back(selectable);
 }
 
 

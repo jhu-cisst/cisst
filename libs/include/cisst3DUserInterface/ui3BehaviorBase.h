@@ -236,7 +236,6 @@ protected:
     vctDynamicVector<ui3VideoInterfaceFilter*> Streams;
     vctDynamicVector<std::string> StreamNames;
 
-public:
     /*!
      Returns a pointer to the filter that interfaces the behavior
      with StereoVision pipelines. Using the its pointer, the filter
@@ -244,10 +243,17 @@ public:
     */
     svlFilterBase* GetStreamSamplerFilter(const std::string & streamname);
 
+
+    // list of ui3 widgets
     typedef std::list<ui3Widget3D *> Widget3DList;
     Widget3DList Widget3Ds;
+    void AddWidget3D(ui3Widget3D * widget3D);
 
-protected:
+    // list of selectables objects, includes handles for ui3Widgets
+    typedef std::list<ui3Selectable *> SelectableList;
+    SelectableList Selectables;
+    void AddSelectable(ui3Selectable * selectable);
+
 
     void AddMenuBar(bool isManager = false);
 

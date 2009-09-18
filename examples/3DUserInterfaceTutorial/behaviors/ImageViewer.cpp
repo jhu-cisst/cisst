@@ -109,7 +109,7 @@ ImageViewer::ImageViewer(const std::string & name):
     VisibleObject2(0)
 {
     this->Widget3D = new ui3Widget3D("ImageViewer");
-    this->Widget3Ds.push_back(this->Widget3D);
+    this->AddWidget3D(this->Widget3D);
 
     this->VisibleObject1 = new ImageViewerVisibleObject();
     this->Widget3D->Add(this->VisibleObject1);

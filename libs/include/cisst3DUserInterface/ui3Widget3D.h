@@ -49,6 +49,7 @@ class CISST_EXPORT ui3Widget3D: public ui3VisibleList
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
     friend class ui3SceneManager;
+    friend class ui3BehaviorBase;
     friend class ui3Manager;
 
 public:

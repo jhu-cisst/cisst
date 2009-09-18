@@ -471,29 +471,21 @@ void ui3Manager::Run(void)
 
     // init all selectable objects
     BehaviorList::iterator behaviorIterator;
+    SelectableList::iterator selectableIterator;
     const BehaviorList::iterator behaviorEnd = this->Behaviors.end();
-    unsigned int handleCounter;
     for (behaviorIterator = this->Behaviors.begin();
          behaviorIterator != behaviorEnd;
          behaviorIterator++) {
         // test if the behavior is running
         if (((*behaviorIterator)->State == ui3BehaviorBase::Foreground)
             || ((*behaviorIterator)->State == ui3BehaviorBase::Background)) {
-            Widget3DList::iterator widgetIterator;
-            // go through all the 3D widgets
-            const Widget3DList::iterator widgetEnd = (*behaviorIterator)->Widget3Ds.end();
-            for (widgetIterator =  (*behaviorIterator)->Widget3Ds.begin();
-                 widgetIterator != widgetEnd;
-                 widgetIterator++) {
-                // check if the widget's handles are active
-                if ((*widgetIterator)->HandlesActive()) {
-                    for (handleCounter = 0;
-                         handleCounter < 4;
-                         handleCounter++) {
-                        (*widgetIterator)->SideHandles[handleCounter]->ResetOverallIntention();
-                        (*widgetIterator)->CornerHandles[handleCounter]->ResetOverallIntention();
-                    }
-                }
+            
+            // go through all the selectable objects
+            const SelectableList::iterator selectableEnd = (*behaviorIterator)->Selectables.end();
+            for (selectableIterator = (*behaviorIterator)->Selectables.begin();
+                 selectableIterator != selectableEnd;
+                 selectableIterator++) {
+                (*selectableIterator)->ResetOverallIntention();
             }
         }
     }
@@ -547,10 +539,8 @@ void ui3Manager::Run(void)
         if (armPointer->Selected) {
             armPointer->Selected->FinalPosition.Assign(armPointer->CursorPosition);
         } else {
-            // try to find Widget3D
             BehaviorList::iterator behaviorIterator;
             const BehaviorList::iterator behaviorEnd = this->Behaviors.end();
-            unsigned int handleCounter;
             vctDouble3 position;
             for (behaviorIterator = this->Behaviors.begin();
                  behaviorIterator != behaviorEnd;
@@ -558,28 +548,12 @@ void ui3Manager::Run(void)
                 // test if the behavior is running
                 if (((*behaviorIterator)->State == ui3BehaviorBase::Foreground)
                     || ((*behaviorIterator)->State == ui3BehaviorBase::Background)) {
-                    Widget3DList::iterator widgetIterator;
-                    // go through all the 3D widgets
-                    const Widget3DList::iterator widgetEnd = (*behaviorIterator)->Widget3Ds.end();
-                    for (widgetIterator =  (*behaviorIterator)->Widget3Ds.begin();
-                         widgetIterator != widgetEnd;
-                         widgetIterator++) {
-                        // check if the widget's handles are active
-                        if ((*widgetIterator)->HandlesActive()) {
-                            // check that the handles is not already selected
-                            for (handleCounter = 0;
-                                 handleCounter < 4;
-                                 handleCounter++) {
-                                if (!(*widgetIterator)->SideHandles[handleCounter]->Selected() &&
-                                    (*widgetIterator)->SideHandles[handleCounter]->Activated()) {
-                                    armPointer->UpdateIntention((*widgetIterator)->SideHandles[handleCounter]);
-                                }
-                                if (!(*widgetIterator)->CornerHandles[handleCounter]->Selected() &&
-                                    (*widgetIterator)->CornerHandles[handleCounter]->Activated()) {
-                                    armPointer->UpdateIntention((*widgetIterator)->CornerHandles[handleCounter]);
-                                }
-                            }
-                        }
+                    // go through all the selectable objects
+                    const SelectableList::iterator selectableEnd = (*behaviorIterator)->Selectables.end();
+                    for (selectableIterator = (*behaviorIterator)->Selectables.begin();
+                         selectableIterator != selectableEnd;
+                         selectableIterator++) {
+                        armPointer->UpdateIntention((*selectableIterator));
                     }
                 }
             }
@@ -609,21 +583,12 @@ void ui3Manager::Run(void)
         // test if the behavior is running
         if (((*behaviorIterator)->State == ui3BehaviorBase::Foreground)
             || ((*behaviorIterator)->State == ui3BehaviorBase::Background)) {
-            Widget3DList::iterator widgetIterator;
-            // go through all the 3D widgets
-            const Widget3DList::iterator widgetEnd = (*behaviorIterator)->Widget3Ds.end();
-            for (widgetIterator =  (*behaviorIterator)->Widget3Ds.begin();
-                 widgetIterator != widgetEnd;
-                 widgetIterator++) {
-                // check if the widget's handles are active
-                if ((*widgetIterator)->HandlesActive()) {
-                    for (handleCounter = 0;
-                         handleCounter < 4;
-                         handleCounter++) {
-                        (*widgetIterator)->SideHandles[handleCounter]->ShowIntention();
-                        (*widgetIterator)->CornerHandles[handleCounter]->ShowIntention();
-                    }
-                }
+            // go through all the selectable objects
+            const SelectableList::iterator selectableEnd = (*behaviorIterator)->Selectables.end();
+            for (selectableIterator = (*behaviorIterator)->Selectables.begin();
+                 selectableIterator != selectableEnd;
+                 selectableIterator++) {
+                (*selectableIterator)->ShowIntention();
             }
         }
     }
