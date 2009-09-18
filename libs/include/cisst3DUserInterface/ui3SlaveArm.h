@@ -53,6 +53,8 @@ public:
     virtual ~ui3SlaveArm();
 
     virtual bool SetInput(mtsDevice * positionDevice, const std::string & positionInterface);
+
+    virtual bool SetInput(const std::string & positionDevice, const std::string & positionInterface);
     
     virtual bool SetTransformation(const vctFrm3 & transformation = vctFrm3::Identity(),
                                    double scale = 1.0);

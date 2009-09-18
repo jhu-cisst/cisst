@@ -75,13 +75,19 @@ ui3Manager::~ui3Manager()
 
 bool ui3Manager::SetupMaM(mtsDevice * mamDevice, const std::string & mamInterface)
 {
+    return this->SetupMaM(mamDevice->GetName(), mamInterface);
+}
+
+
+bool ui3Manager::SetupMaM(const std::string & mamDevice, const std::string & mamInterface)
+{
     // add required interface to device to switch on/off master as mouse
     mtsRequiredInterface * requiredInterface = this->AddRequiredInterface("MaM");
     requiredInterface->AddEventHandlerWrite(&ui3Manager::MaMModeEventHandler, this, "Button");
 
     // connect the left master device to the right master required interface
     this->TaskManager->Connect(this->GetName(), "MaM",
-                               mamDevice->GetName(), mamInterface);
+                               mamDevice, mamInterface);
     
     // update flag
     this->HasMaMDevice = true;

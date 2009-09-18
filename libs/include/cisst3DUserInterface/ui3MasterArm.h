@@ -59,6 +59,11 @@ public:
                           mtsDevice * clutchDevice, const std::string & clutchInterface,
                           const RoleType & role);
     
+    virtual bool SetInput(const std::string & positionDeviceInterface, const std::string & positionInterface,
+                          const std::string & buttonDeviceInterface, const std::string & buttonInterface,
+                          const std::string & clutchDeviceInterface, const std::string & clutchInterface,
+                          const RoleType & role);
+
     virtual bool SetTransformation(const vctFrm3 & transformation = vctFrm3::Identity(),
                                    double scale = 1.0);
 

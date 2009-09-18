@@ -111,6 +111,7 @@ public:
      \param configfile      Input device configuration file
      \return                Success flag: true=success, false=error
     */
+    virtual bool SetupMaM(const std::string & mamDevice, const std::string & mamInterface);
     virtual bool SetupMaM(mtsDevice * mamDevice, const std::string & mamInterface);
 
     /*!

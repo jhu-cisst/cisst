@@ -40,6 +40,12 @@ ui3SlaveArm::~ui3SlaveArm()
 
 bool ui3SlaveArm::SetInput(mtsDevice * positionDevice, const std::string & positionInterface)
 {
+    return this->SetInput(positionDevice->GetName(), positionInterface);
+}
+
+
+bool ui3SlaveArm::SetInput(const std::string & positionDevice, const std::string & positionInterface)
+{
     if (this->Manager == 0) {
         CMN_LOG_CLASS_INIT_ERROR << "SetInput: can not setup input for master arm \""
                                  << this->Name << "\" before adding it to a ui3Manager"
@@ -64,10 +70,9 @@ bool ui3SlaveArm::SetInput(mtsDevice * positionDevice, const std::string & posit
     }
     // connect the master device to the master required interface
     this->Manager->TaskManager->Connect(this->Manager->GetName(), this->Name,
-                                        positionDevice->GetName(), positionInterface);
+                                        positionDevice, positionInterface);
     return true;
 }
-    
 
 
 bool ui3SlaveArm::SetTransformation(const vctFrm3 & transformation,
