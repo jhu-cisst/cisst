@@ -193,8 +193,8 @@ protected:
 
     virtual void OnQuit(void) {};
     virtual void OnStart(void) {};
-protected:
 
+public:
     /*!
      If there are any video sources connected to the behavior, this method is
      called by SVL pipelines every time a new stream sample arrives.
