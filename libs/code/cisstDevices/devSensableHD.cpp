@@ -76,6 +76,7 @@ void devSensableHD::Run(void)
         hdGetIntegerv(HD_CURRENT_BUTTONS, &currentButtons);
 
         // apply forces
+       // deviceData->ForceCartesian.Force().Y() += 0.784;
         if(deviceData->ForceOutputEnabled)
         {
             hdSetDoublev(HD_CURRENT_FORCE, deviceData->ForceCartesian.Force().Pointer());
@@ -139,9 +140,6 @@ void devSensableHD::Run(void)
    
     // call user defined control loop (if redefined from derived class)
     UserControl();
-
-    // always last, sync the state table
-    this->StateTable.Advance();
     
     // return flag to continue calling this function
     this->Driver->CallbackReturnValue = HD_CALLBACK_CONTINUE;
@@ -484,7 +482,7 @@ void devSensableHD::Create(void * data)
 void devSensableHD::Start(void)
 {
     HDErrorInfo error;
-    hdSetSchedulerRate(500);
+    hdSetSchedulerRate(1000);
     hdStartScheduler();
     // Check for errors
     if (HD_DEVICE_ERROR(error = hdGetError())) {

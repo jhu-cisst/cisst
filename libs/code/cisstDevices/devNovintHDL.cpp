@@ -64,7 +64,7 @@ void devNovintHDL::Run(void)
         hdlToolButtons(&(currentButtons));
 
         // apply forces
-        deviceData->ForceCartesian.Force().Y() += 1.421;
+        // deviceData->ForceCartesian.Force().Y() += 1.421;
         hdlSetToolForce(deviceData->ForceCartesian.Force().Pointer());
 
         // time stamp used to date data
@@ -148,9 +148,6 @@ void devNovintHDL::Run(void)
     // call user defined control loop (if redefined from derived class)
     UserControl();
 
-    // always last, sync the state table
-    this->StateTable.Advance();
-    
     // return flag to continue calling this function
     this->Driver->CallbackReturnValue = HDL_SERVOOP_CONTINUE;
 
