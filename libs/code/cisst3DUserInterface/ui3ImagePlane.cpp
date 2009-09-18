@@ -231,7 +231,6 @@ void ui3ImagePlane::SetImage(svlSampleImageBase* image, unsigned int channel)
         unsigned char r, g, b;
 #endif
 
-        this->Lock();
         for (j = 0; j < bmpheight; j ++) {
             for (i = 0; i < bmpwidth; i ++) {
 #ifdef USE_BGR
@@ -252,7 +251,6 @@ void ui3ImagePlane::SetImage(svlSampleImageBase* image, unsigned int channel)
 
         // Signal VTK that the texture has been modified
         this->ImageData->Modified();
-        this->Unlock();
     }
 }
 
