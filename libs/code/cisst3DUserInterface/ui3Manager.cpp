@@ -77,8 +77,7 @@ bool ui3Manager::SetupMaM(mtsDevice * mamDevice, const std::string & mamInterfac
 {
     // add required interface to device to switch on/off master as mouse
     mtsRequiredInterface * requiredInterface = this->AddRequiredInterface("MaM");
-    requiredInterface->AddEventHandlerVoid(&ui3Manager::EnterMaMModeEventHandler, this, "Enter");
-    requiredInterface->AddEventHandlerVoid(&ui3Manager::LeaveMaMModeEventHandler, this, "Leave");
+    requiredInterface->AddEventHandlerWrite(&ui3Manager::MaMModeEventHandler, this, "Button");
 
     // connect the left master device to the right master required interface
     this->TaskManager->Connect(this->GetName(), "MaM",
@@ -400,12 +399,13 @@ void ui3Manager::Startup(void)
     this->SetState(Foreground);    // UI manager is in foreground by default (main menu)
 
     // update based on MaMDevice
+    prmEventButton pseudoEvent;
     if (this->HasMaMDevice) {
-        this->LeaveMaMModeEventHandler();
+        pseudoEvent.Type() = prmEventButton::RELEASED;
     } else {
-        this->EnterMaMModeEventHandler();
+        pseudoEvent.Type() = prmEventButton::PRESSED;
     }
-
+    this->MaMModeEventHandler(pseudoEvent);
     CMN_LOG_CLASS_INIT_VERBOSE << "StartUp: end" << std::endl;
 }
 
@@ -821,20 +821,18 @@ void ui3Manager::ShowAll(void)
 }
 
 
-void ui3Manager::EnterMaMModeEventHandler(void)
+void ui3Manager::MaMModeEventHandler(const prmEventButton & payload)
 {
-    this->RecenterMasterCursors(vct3(-20.0, -20.0, -150), vct3(20.0, 20.0, -130.0));
-    this->ShowAll();
-    this->MaM = true;
-    CMN_LOG_CLASS_RUN_VERBOSE << "EnterMaMMode" << std::endl;
-}
-
-
-void ui3Manager::LeaveMaMModeEventHandler(void)
-{
-    this->HideAll();
-    this->MaM = false;
-    CMN_LOG_CLASS_RUN_VERBOSE << "LeaveMaMMode" << std::endl;
+    if (payload.Type() == prmEventButton::PRESSED) {
+        this->RecenterMasterCursors(vct3(-20.0, -20.0, -150), vct3(20.0, 20.0, -130.0));
+        this->ShowAll();
+        this->MaM = true;
+        CMN_LOG_CLASS_RUN_VERBOSE << "EnterMaMMode" << std::endl;
+    } else {
+        this->HideAll();
+        this->MaM = false;
+        CMN_LOG_CLASS_RUN_VERBOSE << "LeaveMaMMode" << std::endl;
+    }
 }
 
 

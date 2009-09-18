@@ -350,8 +350,7 @@ private:
     mtsTaskManager * TaskManager;
 
     // event handlers
-    void EnterMaMModeEventHandler(void);
-    void LeaveMaMModeEventHandler(void);
+    void MaMModeEventHandler(const prmEventButton & payload);
 
     void RecenterMasterCursors(const vctDouble3 & lowerCorner, const vctDouble3 & upperCorner);
 
