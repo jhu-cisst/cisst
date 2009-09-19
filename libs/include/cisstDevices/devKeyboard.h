@@ -35,7 +35,7 @@ http://www.cisst.org/cisst/license.txt.
 
 class CISST_EXPORT devKeyboard: public mtsTaskContinuous {
     // declare services, requires dynamic creation
-    CMN_DECLARE_SERVICES_EXPORT(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 public:
     devKeyboard(void);
     ~devKeyboard(void) {};
