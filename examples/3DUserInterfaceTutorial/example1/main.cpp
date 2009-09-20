@@ -23,6 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsTaskManager.h>
 #include <cisstDevices/devSensableHD.h>
+#include <cisstDevices/devKeyboard.h>
 #include <cisstCommon.h>
 #include <cisstStereoVision.h>
 
@@ -45,7 +46,7 @@ int main()
 
     mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
 
-    devSensableHD * sensable = new devSensableHD("Omni", "Omni1" /* name in driver, see Preferences in Sensable Driver */);
+    devSensableHD * sensable = new devSensableHD("Omni", "Omni1", "Omni2" /* name in driver, see Preferences in Sensable Driver */);
     taskManager->AddTask(sensable);
 
 
@@ -62,7 +63,7 @@ int main()
                            "square.png");
 
     svlCameraGeometry camera_geometry;
-    camera_geometry.SetPerspective(400.0, 2);
+    camera_geometry.SetPerspective(800.0, 2);
     camera_geometry.RotateWorldAboutY(180.0);
 
     guiManager.AddRenderer(800, 600,           // render width & height
@@ -73,7 +74,7 @@ int main()
                            "ThirdEyeView");    // name of renderer
 
     vctFrm3 transform;
-    transform.Translation().Assign(+30.0, 0.0, -150.0); // recenter Omni's depth (right)
+    transform.Translation().Assign(+30.0, 0.0, +150.0); // recenter Omni's depth (right)
     ui3MasterArm * rightMaster = new ui3MasterArm("Omni1");
     guiManager.AddMasterArm(rightMaster);
     rightMaster->SetInput(sensable, "Omni1",
@@ -85,6 +86,28 @@ int main()
     rightCursor->SetAnchor(ui3CursorBase::CENTER_RIGHT);
     rightMaster->SetCursor(rightCursor);
 
+    transform.Translation().Assign(+30.0, 0.0, -150.0); // recenter Omni's depth (right)
+    ui3MasterArm * leftMaster = new ui3MasterArm("Omni2");
+    guiManager.AddMasterArm(leftMaster);
+    leftMaster->SetInput(sensable, "Omni2",
+                         sensable, "Omni2Button1",
+                         sensable, "Omni2Button2",
+                         ui3MasterArm::SECONDARY);
+    leftMaster->SetTransformation(transform, 0.5 /* scale factor */);
+    ui3CursorBase * leftCursor = new ui3CursorSphere();
+    leftCursor->SetAnchor(ui3CursorBase::CENTER_LEFT);
+    leftMaster->SetCursor(leftCursor);
+
+
+    // connect keyboard to ui3 and Omnis
+    devKeyboard * keyboard = new devKeyboard();
+
+    taskManager->AddTask(keyboard);
+    keyboard->SetQuitKey('q');
+
+    // MaM
+    keyboard->AddKeyButtonEvent('m', "MaM", true);
+    guiManager.SetupMaM(keyboard, "MaM");
 
     guiManager.ConnectAll();
 
@@ -93,17 +116,11 @@ int main()
     osaSleep(3.0 * cmn_s);
     taskManager->StartAll();
 
-    osaSleep(1.0 * cmn_s);
+	osaSleep(1.0 * cmn_s);
 
-    int ch;
-    
-    cerr << endl << "Keyboard commands:" << endl << endl;
-    cerr << "  In command window:" << endl;
-    cerr << "    'q'   - Quit" << endl << endl;
     do {
-        ch = cmnGetChar();
         osaSleep(10.0 * cmn_ms);
-    } while (ch != 'q');
+    } while (!keyboard->Done());
 
     taskManager->KillAll();
 
