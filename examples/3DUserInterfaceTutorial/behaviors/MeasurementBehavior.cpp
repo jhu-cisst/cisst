@@ -103,6 +103,7 @@ MeasurementBehavior::MeasurementBehavior(const std::string & name):
     VisibleList(0),
     VisibleObject(0)
 {
+    this->Offset.Assign(0.0, 0.0, 0.0);
     this->VisibleList = new ui3VisibleList("TextList");
     this->VisibleObject = new MeasurementBehaviorVisibleObject(this->Position);
     
@@ -144,6 +145,7 @@ bool MeasurementBehavior::RunForeground()
     if (this->Manager->MastersAsMice() != this->PreviousMaM) {
         this->PreviousMaM = this->Manager->MastersAsMice();
         this->VisibleList->Show();
+        this->DelayToGrab = 20;
     }
 
     // detect transition, should that be handled as an event?
@@ -151,22 +153,29 @@ bool MeasurementBehavior::RunForeground()
     if (this->State != this->PreviousState) {
         this->PreviousState = this->State;
         this->VisibleList->Show();
+        this->DelayToGrab = 20;
     }
+    if (this->DelayToGrab > 0) {
+        this->DelayToGrab--;
+    }
+
     // running in foreground GUI mode
     prmPositionCartesianGet position;
 
     // compute offset
-    this->GetPrimaryMasterPosition(position);
-    if (this->Following) {
-        if (this->Transition)
-        {
-            this->PreviousCursorPosition.Assign(position.Position().Translation());
-            this->Transition = false;
+    if (this->DelayToGrab == 0) {
+        this->GetPrimaryMasterPosition(position);
+        if (this->Following) {
+            if (this->Transition)
+                {
+                    this->PreviousCursorPosition.Assign(position.Position().Translation());
+                    this->Transition = false;
+                }
+            vctDouble3 deltaCursor;
+            deltaCursor.DifferenceOf(position.Position().Translation(),
+                                     this->PreviousCursorPosition);
+            this->Offset.Add(deltaCursor);
         }
-        vctDouble3 deltaCursor;
-        deltaCursor.DifferenceOf(position.Position().Translation(),
-                                 this->PreviousCursorPosition);
-        this->Offset.Add(deltaCursor);
     }
     this->PreviousCursorPosition.Assign(position.Position().Translation());
 
@@ -207,9 +216,10 @@ bool MeasurementBehavior::RunNoInput()
     this->Slave1->GetCartesianPosition(this->Slave1Position);
     this->Slave1Position.Position().Translation().Add(this->Offset);
     this->VisibleList->SetPosition(this->Slave1Position.Position().Translation());
+    this->VisibleList->Show();
     
     if (!RightMTMOpen) {
-        this-> GetMeasurement();
+        this->GetMeasurement();
     } else {
         MeasurementActive = false;
         //can either leave the last measurement on the screen or let it dispear

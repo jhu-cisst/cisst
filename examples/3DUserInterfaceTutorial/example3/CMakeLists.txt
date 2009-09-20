@@ -15,6 +15,7 @@
 
 add_executable (3DUserInterfaceTutorialExample3
                 main.cpp
+		MapBehavior.cpp
                 BehaviorLUS.cpp
                 BehaviorLUS.h
                 CSOpenGLStippleActor.cxx
@@ -22,6 +23,7 @@ add_executable (3DUserInterfaceTutorialExample3
                 )
 
 target_link_libraries (3DUserInterfaceTutorialExample3
+                       3DUserInterfaceTutorialBehaviors
                        ${daVinci_LIBRARIES}
                        )
 

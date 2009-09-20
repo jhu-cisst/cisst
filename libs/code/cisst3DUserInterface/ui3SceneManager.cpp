@@ -88,7 +88,7 @@ bool ui3SceneManager::Delete(VTKHandleType propHandle)
 vtkProp3D * ui3SceneManager::Lock(VTKHandleType propHandle)
 {
     // lock the whole scene
-    // this->Mutex.Lock();
+    this->Mutex.Lock();
     this->LockHandle = propHandle;
     // should we test to see if this handle actually exists?
     return reinterpret_cast<vtkProp3D *>(propHandle);
@@ -104,6 +104,6 @@ bool ui3SceneManager::Unlock(VTKHandleType propHandle)
     }
     // set handle to 0 and release
     this->LockHandle = 0;
-    // this->Mutex.Unlock();
+    this->Mutex.Unlock();
     return true;
 }

@@ -66,5 +66,6 @@ private:
     bool MeasurementActive;
     bool Transition;
     vctDouble3 MeasurePoint1;
+    int DelayToGrab;
 };
 

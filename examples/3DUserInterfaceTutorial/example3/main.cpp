@@ -31,6 +31,11 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "BehaviorLUS.h"
 
+#include <MeasurementBehavior.h>
+#include "MapBehavior.h"
+#include <ImageViewer.h>
+
+#define HAS_ULTRASOUDS 0
 int main()
 {
     // log configuration
@@ -54,12 +59,31 @@ int main()
 
     ui3Manager guiManager;
 
+#if HAS_ULTRASOUDS
     BehaviorLUS behavior3("BehaviorLUS");
-
     guiManager.AddBehavior(&behavior3,       // behavior reference
                            1,             // position in the menu bar: default
                            "LUS.png");            // icon file: no texture
+#else
+    MeasurementBehavior measurementBehavior("Measure");
+    guiManager.AddBehavior(&measurementBehavior,
+                           1,
+                           "measure.png");
+
+    MapBehavior mapBehavior("Map");
+    guiManager.AddBehavior(&mapBehavior,
+                           2,
+                           "map.png");
+
+    ImageViewer imageViewer("image");
+    guiManager.AddBehavior(&imageViewer,
+                           3,
+                           "move.png");
+
     
+#endif
+
+#if HAS_ULTRASOUDS
     svlStreamManager vidUltrasoundStream(1);  // running on multiple threads
 
     svlFilterSourceVideoCapture vidUltrasoundSource(false); // mono source
@@ -92,13 +116,14 @@ int main()
     vidUltrasoundStream.Trunk().Append(&vidUltrasoundWriter);
 
     vidUltrasoundStream.Initialize();
-    
+#endif
+
     ////////////////////////////////////////////////////////////////
     // setup renderers
 
     svlCameraGeometry camera_geometry;
     // Load Camera calibration results
-    camera_geometry.LoadCalibration("/home/saw1/calibration/davinci_mock_or/calib_results.txt");
+    camera_geometry.LoadCalibration("/home/saw1/calibration/davinci_miccai/calib_results.txt");
     // Center world in between the two cameras (da Vinci specific)
     camera_geometry.SetWorldToCenter();
     // Rotate world by 180 degrees (VTK specific)
@@ -107,24 +132,26 @@ int main()
     std::cerr << camera_geometry;
 
     // *** Left view ***
-    guiManager.AddRenderer(svlRenderTargets::Get(0)->GetWidth(),  // render width
-                           svlRenderTargets::Get(0)->GetHeight(), // render height
+    guiManager.AddRenderer(svlRenderTargets::Get(1)->GetWidth(),  // render width
+                           svlRenderTargets::Get(1)->GetHeight(), // render height
+                           1.0,                                   // virtual camera zoom
                            false,                                 // borderless?
                            0, 0,                                  // window position
                            camera_geometry, SVL_LEFT,             // camera parameters
                            "LeftEyeView");                        // name of renderer
 
     // *** Right view ***
-    guiManager.AddRenderer(svlRenderTargets::Get(1)->GetWidth(),  // render width
-                           svlRenderTargets::Get(1)->GetHeight(), // render height
+    guiManager.AddRenderer(svlRenderTargets::Get(0)->GetWidth(),  // render width
+                           svlRenderTargets::Get(0)->GetHeight(), // render height
+                           1.0,                                   // virtual camera zoom
                            false,                                 // borderless?
                            0, 0,                                  // window position
-                           camera_geometry, SVL_RIGHT,             // camera parameters
+                           camera_geometry, SVL_RIGHT,            // camera parameters
                            "RightEyeView");                       // name of renderer
 
     // Sending renderer output to external render targets
-    guiManager.SetRenderTargetToRenderer("LeftEyeView",  svlRenderTargets::Get(0));
-    guiManager.SetRenderTargetToRenderer("RightEyeView", svlRenderTargets::Get(1));
+    guiManager.SetRenderTargetToRenderer("LeftEyeView",  svlRenderTargets::Get(1));
+    guiManager.SetRenderTargetToRenderer("RightEyeView", svlRenderTargets::Get(0));
 
 
     // Add third camera: simple perspective camera placed in the world center
@@ -132,6 +159,7 @@ int main()
 
     guiManager.AddRenderer(384,                // render width
                            216,                // render height
+                           1.0,                // virtual camera zoom
                            false,              // borderless?
                            0, 0,               // window position
                            camera_geometry, 2, // camera parameters
@@ -139,7 +167,9 @@ int main()
 
     ///////////////////////////////////////////////////////////////
     // start streaming
+#if HAS_ULTRASOUDS
     vidUltrasoundStream.Start();
+#endif
 
     vctFrm3 transform;
     transform.Rotation().From(vctAxAnRot3(vctDouble3(0.0, 1.0, 0.0), cmnPI));
@@ -206,8 +236,9 @@ int main()
     taskManager->KillAll();
     taskManager->Cleanup();
 
+#if HAS_ULTRASOUDS
     vidUltrasoundStream.RemoveAll();
-
+#endif
 
     return 0;
 }
