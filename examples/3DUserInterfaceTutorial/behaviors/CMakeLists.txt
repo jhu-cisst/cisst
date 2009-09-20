@@ -19,6 +19,8 @@ add_library (3DUserInterfaceTutorialBehaviors
 	     MeasurementBehavior.cpp
 	     ImageViewer.h
 	     ImageViewer.cpp
+		 RegistrationBehavior.h
+		 RegistrationBehavior.cpp
 	     )
 
 CISST_REQUIRES(3DUserInterfaceTutorialBehaviors "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstStereoVision;cisstRobot;cisstParameterTypes;cisst3DUserInterface")

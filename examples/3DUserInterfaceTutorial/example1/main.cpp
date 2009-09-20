@@ -4,8 +4,8 @@
 /*
   $Id$
 
-  Author(s):	Balazs Vagvolgyi, Simon DiMaio, Anton Deguet
-  Created on:	2008-05-23
+  Author(s):  Balazs Vagvolgyi, Simon DiMaio, Anton Deguet
+  Created on: 2008-05-23
 
   (C) Copyright 2008-2009 Johns Hopkins University (JHU), All Rights
   Reserved.
@@ -29,12 +29,13 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <SimpleBehavior.h>
 #include <ImageViewer.h>
+#include <RegistrationBehavior.h>
 
 int main()
 {
     // log configuration
     cmnLogger::SetLoD(CMN_LOG_LOD_VERY_VERBOSE);
-	cmnLogger::GetMultiplexer()->AddChannel(std::cout, CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::GetMultiplexer()->AddChannel(std::cout, CMN_LOG_LOD_VERY_VERBOSE);
     // add a log per thread
     osaThreadedLogFile threadedLog("example1-");
     cmnLogger::GetMultiplexer()->AddChannel(threadedLog, CMN_LOG_LOD_VERY_VERBOSE);
@@ -43,6 +44,7 @@ int main()
     cmnClassRegister::SetLoD("ui3Manager", CMN_LOG_LOD_VERY_VERBOSE);
     cmnClassRegister::SetLoD("mtsTaskInterface", CMN_LOG_LOD_VERY_VERBOSE);
     cmnClassRegister::SetLoD("mtsTaskManager", CMN_LOG_LOD_VERY_VERBOSE);
+    cmnClassRegister::SetLoD("RegistrationBehavior", CMN_LOG_LOD_VERY_VERBOSE);
 
     mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
 
@@ -61,6 +63,10 @@ int main()
     guiManager.AddBehavior(&imageViewer,
                            1,
                            "square.png");
+    RegistrationBehavior registrationBehavior("RegistrationBehavior1");
+    guiManager.AddBehavior(&registrationBehavior,  // behavior reference
+                           2,                      // position in the menu bar: default
+                           "cube.png");            // icon file: no texture
 
     svlCameraGeometry camera_geometry;
     camera_geometry.SetPerspective(800.0, 2);
@@ -116,7 +122,7 @@ int main()
     osaSleep(3.0 * cmn_s);
     taskManager->StartAll();
 
-	osaSleep(1.0 * cmn_s);
+    osaSleep(1.0 * cmn_s);
 
     do {
         osaSleep(10.0 * cmn_ms);

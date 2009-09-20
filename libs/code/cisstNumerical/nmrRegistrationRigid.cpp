@@ -22,9 +22,9 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstNumerical/nmrSVD.h>
 #include <cisstNumerical/nmrRegistrationRigid.h>
 
-template <class _matrixOwnerType>
-bool nmrRegistrationRigid(vctDynamicConstVectorBase<_matrixOwnerType, vct3> &dataSet1,
-                          vctDynamicConstVectorBase<_matrixOwnerType, vct3> &dataSet2,
+template <class _vectorOwnerType>
+bool nmrRegistrationRigid(vctDynamicConstVectorBase<_vectorOwnerType, vct3> &dataSet1,
+                          vctDynamicConstVectorBase<_vectorOwnerType, vct3> &dataSet2,
                           vctFrm3 &transform, double *fre)
 {
     size_t npoints = dataSet1.size();
