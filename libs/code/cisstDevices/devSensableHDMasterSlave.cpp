@@ -33,8 +33,8 @@ devSensableHDMasterSlave::devSensableHDMasterSlave(const std::string & taskName,
     RobotPair.resize(1);
     DevicePair.resize(1);
     DevicePair[0] = new DevData;
-    RobotPair[0] = new robCollaborativeControlForce(0.15, 
-                                                    0.15, 
+    RobotPair[0] = new robCollaborativeControlForce(0.40, 
+                                                    0.40, 
                                                     40.0, 
                                                     robCollaborativeControlForce::ParameterType::ForceModeType::RATCHETED,
                                                     1.0,

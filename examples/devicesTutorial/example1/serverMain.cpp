@@ -20,7 +20,7 @@ int main(int argc, char * argv[])
     std::string serverTaskIP(argv[2]);
 
     // log configuration
-    cmnLogger::SetLoD(CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::SetLoD(CMN_LOG_LOD_RUN_ERROR);
     cmnLogger::GetMultiplexer()->AddChannel(std::cout, CMN_LOG_LOD_VERY_VERBOSE);
     // add a log per thread
     osaThreadedLogFile threadedLog("example9Server");

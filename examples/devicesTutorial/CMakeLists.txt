@@ -22,6 +22,7 @@ add_subdirectory(example2)
 
 if(CISST_DEV_HAS_SENSABLEHD)
   add_subdirectory(example3)
+  add_subdirectory(example5)
 endif(CISST_DEV_HAS_SENSABLEHD)
 
 if(CISST_DEV_HAS_OPENIGTLINK)
