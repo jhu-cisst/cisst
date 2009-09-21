@@ -179,6 +179,40 @@ public:
 	    Instance()->LaunchIREShellInstance(startup, newPythonThread, useIPython);
 	}
 
+    /*! Single argument function that can be passed directly to osaThread::Create, e.g.,:
+        \code
+        osaThread IreThread;
+        IreThread.Create<char *> (&ireFramework::RunIRE_wxPython, "print 'using wxPython'");
+        \endcode
+    */
+    static inline void *RunIRE_wxPython(char *startup) {
+        try {
+            LaunchIREShell(startup, false, false);
+        }
+        catch (...) {
+            CMN_LOG_INIT_ERROR << "Could not launch IRE shell (wxPython)" << std::endl;
+        }
+        FinalizeShell();
+        return 0;
+    }
+
+    /*! Single argument function that can be passed directly to osaThread::Create, e.g.,:
+        \code
+        osaThread IreThread;
+        IreThread.Create<char *> (&ireFramework::RunIRE_IPython, "print 'using IPython'");
+        \endcode
+    */
+    static inline void *RunIRE_IPython(char *startup) {
+        try {
+            LaunchIREShell(startup, false, true);
+        }
+        catch (...) {
+            CMN_LOG_INIT_ERROR << "Could not launch IRE shell (IPython)" << std::endl;
+        }
+        FinalizeShell();
+        return 0;
+    }
+
 	/*! Wait for IRE shell to finish (if started in a new Python thread).  Specify a negative
 	    timeout to wait forever. */
 	static inline void JoinIREShell(double timeout) {
@@ -210,7 +244,6 @@ public:
         necessary). This is provided to facililate relaunching of the IRE. */
     static void Reset();
 };
-
 
 #endif // _ireFramework_h
 

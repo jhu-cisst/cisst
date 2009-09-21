@@ -87,13 +87,12 @@ SET_DIRECTORY_PROPERTIES(PROPERTIES
                          ADDITIONAL_MAKE_CLEAN_FILES
                          "${CISST_CLEAN_FILES}")
 
-# Built executable with embedding
+ADD_EXECUTABLE(pythonEmbeddedIRE pythonEmbeddedIRE.cpp)
+
 IF(EXAMPLE_IRE_USE_OSATHREAD)
-  ADD_EXECUTABLE(pythonEmbeddedIRE pythonEmbeddedIRE.cpp IreLaunchCpp.h)
   ADD_DEFINITIONS(-DCISST_OSATHREAD)
   CISST_REQUIRES("pythonEmbeddedIRE" "cisstCommon;cisstInteractive;cisstOSAbstraction")
 ELSE(EXAMPLE_IRE_USE_OSATHREAD)
-  ADD_EXECUTABLE(pythonEmbeddedIRE pythonEmbeddedIRE.cpp IreLaunchPy.h)
   CISST_REQUIRES("pythonEmbeddedIRE" "cisstCommon;cisstInteractive")
 ENDIF(EXAMPLE_IRE_USE_OSATHREAD)
 

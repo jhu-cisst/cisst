@@ -37,7 +37,7 @@ using namespace std;
 
 #include "SineGenerator.h"
 
-// For clarity, we provide separate implementations of IreLaunch for the following cases:
+// This program demonstrates the following two cases:
 //
 // 1) The C++ program creates a separate thread for launching the IRE (CISST_OSATHREAD defined).
 //
@@ -47,15 +47,6 @@ using namespace std;
 // Note that the second parameter to ireFramework::LaunchIREShell() is false (the default) or true,
 // corresponding to cases 1 and 2 respectively.
 //
-#ifdef CISST_OSATHREAD
-// Class for launching the IRE from a dedicated C++ thread.  In this case, we call LaunchIREShell()
-// with false as the second parameter.  This causes the IRE to be started in the current thread and
-// LaunchIREShell() will not return until the IRE is exited.  When LaunchIREShell() returns, we
-// call FinalizeShell().
-#include "IreLaunchCpp.h"
-#else   // !CISST_OSATHREAD
-#include "IreLaunchPy.h"
-#endif
 
 int main(int argc, char *argv[])
 {
@@ -108,16 +99,18 @@ int main(int argc, char *argv[])
     cout << "*** Registering sine wave generator ***" << endl;
     cmnObjectRegister::Register("SineGenerator", &wave);
 
-    IreLaunch IRE;
 #ifdef CISST_OSATHREAD
     cout << "*** Launching IRE shell (C++ Thread) ***" << endl;
-
     osaThread IreThread;
-    IreThread.Create<IreLaunch,  char *> (&IRE, &IreLaunch::Run, "from pythonEmbeddedIRE import *");
+    IreThread.Create<char *> (&ireFramework::RunIRE_wxPython, "from pythonEmbeddedIRE import *");
 #else
     cout << "*** Launching IRE shell (Python Thread) ***" << endl;
-
-    IRE.Run("from pythonEmbeddedIRE import *");
+    try {
+        ireFramework::LaunchIREShell("from pythonEmbeddedIRE import *", true);
+    }
+    catch (...) {
+        cout << "*** ERROR:  could not launch IRE shell ***" << endl;
+    }
 #endif
 
     // Wait for IRE to initialize itself
@@ -153,6 +146,8 @@ int main(int argc, char *argv[])
     cout << "*** Clean up and exit ***" << endl;
 #ifdef CISST_OSATHREAD
     IreThread.Wait();
+#else
+    ireFramework::FinalizeShell();
 #endif
     return 0;
 }

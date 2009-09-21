@@ -16,31 +16,6 @@
 
 using namespace std;
 
-#if 1  // PKAZ
-// Launch IRE in C++-created thread (using osaThread)
-// Note that it is best to do all IRE actions in the Run() method,
-// including the calls to ireFramework::Instance (which should occur
-// when LaunchIREShell is called) and FinalizeShell, because otherwise
-// the IRE (Python interpreter) would be called from multiple threads.
-class IreLaunch {
-    bool useIPython;
-public:
-    IreLaunch(bool useIPy = false) : useIPython(useIPy) {}
-    ~IreLaunch() {}
-    void *Run(char *startup) {
-        try {
-            CMN_LOG_INIT_DEBUG << "using " << (useIPython?"IPython":"wxPython") << std::endl;
-            ireFramework::LaunchIREShell(startup, false, useIPython);
-        }
-        catch (...) {
-            CMN_LOG_INIT_ERROR << "could not launch IRE shell ***" << endl;
-        }
-        ireFramework::FinalizeShell();
-        return this;
-    }
-};
-#endif
-
 int main(int argc, char **argv)
 {
     // log configuration, see previous examples
@@ -76,14 +51,16 @@ int main(int argc, char **argv)
     // we should not need this ...
     osaSleep(2.0); // seconds
 
-    // start a python shell, will resume after shell is closed
     cmnObjectRegister::Register("TaskManager", taskManager);
 
+    // start a python shell, will resume after shell is closed
 #if 1  // PKAZ
-    IreLaunch IRE(argc != 1);  // if any parameters, use IPython
     cout << "*** Launching IRE shell (C++ Thread) ***" << endl;
     osaThread IreThread;
-    IreThread.Create<IreLaunch,  char *> (&IRE, &IreLaunch::Run, "from example4 import *");
+    if (argc != 1)   // if any parameters, use IPython
+        IreThread.Create<char *> (&ireFramework::RunIRE_IPython, "from example4 import *");
+    else             // else use wxPython
+        IreThread.Create<char *> (&ireFramework::RunIRE_wxPython, "from example4 import *");
     // Wait for IRE to initialize itself
     while (ireFramework::IsStarting())
         osaSleep(0.5 * cmn_s);  // Wait 0.5 seconds
