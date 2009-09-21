@@ -40,7 +40,8 @@ class vtkRenderWindow;
 class vtkRenderWindowInteractor;
 class vtkSphereSource;
 class vtkTexture;
-
+class vtkVolumeReader;
+class vtkVolume16Reader;
 
 #endif // _ui3VTKForwardDeclarations_h
 

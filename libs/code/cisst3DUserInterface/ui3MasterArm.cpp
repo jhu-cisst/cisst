@@ -157,6 +157,9 @@ void ui3MasterArm::SetCursorPosition(const vctDouble3 & desiredCursorPosition)
     vctFrm3 newTransformation;
     cursorTransformation.ApplyTo(this->Transformation, newTransformation);
     this->Transformation.Assign(newTransformation);
+    // apply transformation and scale
+    this->Transformation.ApplyTo(armPosition.Position(), this->CursorPosition);
+    this->CursorPosition.Translation().Multiply(this->Scale);
 }
 
 

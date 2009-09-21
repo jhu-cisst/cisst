@@ -63,16 +63,17 @@ int main()
     guiManager.AddBehavior(&imageViewer,
                            1,
                            "square.png");
+    /*
     RegistrationBehavior registrationBehavior("RegistrationBehavior1");
     guiManager.AddBehavior(&registrationBehavior,  // behavior reference
                            2,                      // position in the menu bar: default
                            "cube.png");            // icon file: no texture
-
+*/
     svlCameraGeometry camera_geometry;
-    camera_geometry.SetPerspective(800.0, 2);
+    camera_geometry.SetPerspective(400.0, 2);
     camera_geometry.RotateWorldAboutY(180.0);
 
-    guiManager.AddRenderer(800, 600,           // render width & height
+    guiManager.AddRenderer(400, 300,           // render width & height
                            1.0,                // virtual camera zoom
                            false,              // borderless flag
                            0, 0,               // window position

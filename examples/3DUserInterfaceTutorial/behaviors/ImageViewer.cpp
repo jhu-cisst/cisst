@@ -31,92 +31,389 @@ http://www.cisst.org/cisst/license.txt.
 #include <vtkProperty.h>
 #include <vtkSphereSource.h>
 #include <vtkCubeSource.h>
+#include <vtkContourFilter.h>
+#include <vtkStripper.h>
+#include <vtkVolumeReader.h>
+#include <vtkPolyDataNormals.h>
+#include <vtkVolume16Reader.h>
+#include <vtkOutlineFilter.h>
+#include <vtkImageActor.h>
+#include <vtkLookupTable.h>
+#include <vtkImageMapToColors.h>
 
-class ImageViewerVisibleObject: public ui3VisibleObject
+
+class ImageViewerSkinVisibleObject: public ui3VisibleObject
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 public:
-    inline ImageViewerVisibleObject(void):
+    inline ImageViewerSkinVisibleObject(vtkVolumeReader * input):
         ui3VisibleObject(),
-        Source(0),
-        Mapper(0),
-        Actor(0),
-        Red(true)
+        Input(input),
+        SkinExtractor(0),
+        SkinNormals(0),
+        SkinStripper(0),
+        SkinMapper(0),
+        SkinActor(0)
     {}
 
-    inline ~ImageViewerVisibleObject()
+    inline ~ImageViewerSkinVisibleObject()
     {
-        if (this->Actor) {
-            this->Actor->Delete();
+        if (this->SkinActor) {
+            this->SkinActor->Delete();
+            this->SkinActor = 0;
         }
-        if (this->Mapper) {
-            this->Mapper->Delete();
+        if (this->SkinMapper) {
+            this->SkinMapper->Delete();
+            this->SkinMapper = 0;
         }
-        if (this->Source) {
-            this->Source->Delete();
+        if (this->SkinStripper) {
+            this->SkinStripper->Delete();
+            this->SkinStripper = 0;
+        }
+        if (this->SkinNormals) {
+            this->SkinNormals->Delete();
+            this->SkinNormals = 0;
+        }
+        if (this->SkinExtractor) {
+            this->SkinExtractor->Delete();
+            this->SkinExtractor = 0;
         }
     }
 
     inline bool CreateVTKObjects(void) {
-        this->Source = vtkCubeSource::New();
-        CMN_ASSERT(this->Source);
-        //this->Source->SetRadius(5.0);
-        this->Source->SetXLength(10.0);
-        this->Source->SetYLength(6.0);
-        this->Source->SetZLength(2.0);
+        // Extract skin isosurfaces.
+        SkinExtractor = vtkContourFilter::New();
+        CMN_ASSERT(SkinExtractor);
+        CMN_ASSERT(this->Input);
+        SkinExtractor->SetInputConnection(this->Input->GetOutputPort());
+        SkinExtractor->SetValue(0, 500);
+        SkinNormals = vtkPolyDataNormals::New();
+        CMN_ASSERT(SkinNormals);
+        SkinNormals->SetInputConnection(SkinExtractor->GetOutputPort());
+        SkinNormals->SetFeatureAngle(60.0);
+        SkinStripper = vtkStripper::New();
+        CMN_ASSERT(SkinStripper);
+        SkinStripper->SetInputConnection(SkinNormals->GetOutputPort());
+        SkinMapper = vtkPolyDataMapper::New();
+        CMN_ASSERT(SkinMapper);
+        SkinMapper->SetInputConnection(SkinStripper->GetOutputPort());
+        SkinMapper->ScalarVisibilityOff();
+        SkinActor = vtkActor::New();
+        CMN_ASSERT(SkinActor);
+        SkinActor->SetMapper(SkinMapper);
+        SkinActor->GetProperty()->SetDiffuseColor(1, .49, .25);
+        SkinActor->GetProperty()->SetSpecular(.3);
+        SkinActor->GetProperty()->SetSpecularPower(20);
 
-        this->Mapper = vtkPolyDataMapper::New();
-        CMN_ASSERT(this->Mapper);
-        this->Mapper->SetInputConnection(this->Source->GetOutputPort());
+        // Set skin to semi-transparent.
+        SkinActor->GetProperty()->SetOpacity(1.0);
+    
+        // Scale the actors.
+        SkinActor->SetScale(0.2);
 
-        this->Actor = vtkActor::New();
-        CMN_ASSERT(this->Actor);
-        this->Actor->SetMapper(this->Mapper);
-        this->Actor->GetProperty()->SetColor(1.0, 0.0, 0.0);
-
-        this->Actor->VisibilityOff();
-
-        this->AddPart(this->Actor);
+        this->AddPart(this->SkinActor);
         return true;
     }
 
-    void ToggleColor(void) {
-        if (this->Red) {
-            this->Actor->GetProperty()->SetColor(0.1, 0.9, 0.2);
-            this->Red = false;
-        } else {
-            this->Actor->GetProperty()->SetColor(0.9, 0.1, 0.2);
-            this->Red = true;
+protected:
+    vtkVolumeReader * Input; // this class does NOT own the input
+    vtkContourFilter * SkinExtractor;
+    vtkPolyDataNormals * SkinNormals;
+    vtkStripper * SkinStripper;
+    vtkPolyDataMapper * SkinMapper;
+    vtkActor * SkinActor;
+};
+
+CMN_DECLARE_SERVICES_INSTANTIATION(ImageViewerSkinVisibleObject);
+CMN_IMPLEMENT_SERVICES(ImageViewerSkinVisibleObject);
+
+
+class ImageViewerBoneVisibleObject: public ui3VisibleObject
+{
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+public:
+    inline ImageViewerBoneVisibleObject(vtkVolumeReader * input):
+        ui3VisibleObject(),
+        Input(input),
+        BoneExtractor(0),
+        BoneNormals(0),
+        BoneStripper(0),
+        BoneMapper(0),
+        BoneActor(0)
+    {}
+
+    inline ~ImageViewerBoneVisibleObject()
+    {
+        if (this->BoneActor) {
+            this->BoneActor->Delete();
+            this->BoneActor = 0;
+        }
+        if (this->BoneMapper) {
+            this->BoneMapper->Delete();
+            this->BoneMapper = 0;
+        }
+        if (this->BoneStripper) {
+            this->BoneStripper->Delete();
+            this->BoneStripper = 0;
+        }
+        if (this->BoneNormals) {
+            this->BoneNormals->Delete();
+            this->BoneNormals = 0;
+        }
+        if (this->BoneExtractor) {
+            this->BoneExtractor->Delete();
+            this->BoneExtractor = 0;
         }
     }
 
+    inline bool CreateVTKObjects() {
+        BoneExtractor = vtkContourFilter::New();
+        CMN_ASSERT(BoneExtractor);
+        BoneExtractor->SetInputConnection(this->Input->GetOutputPort());
+        BoneExtractor->SetValue(0, 1150);
+        BoneNormals = vtkPolyDataNormals::New();
+        CMN_ASSERT(BoneNormals);
+        BoneNormals->SetInputConnection(BoneExtractor->GetOutputPort());
+        BoneNormals->SetFeatureAngle(60.0);
+        BoneStripper = vtkStripper::New();
+        CMN_ASSERT(BoneStripper);
+        BoneStripper->SetInputConnection(BoneNormals->GetOutputPort());
+        BoneMapper = vtkPolyDataMapper::New();
+        CMN_ASSERT(BoneMapper);
+        BoneMapper->SetInputConnection(BoneStripper->GetOutputPort());
+        BoneMapper->ScalarVisibilityOff();
+        BoneActor = vtkActor::New();
+        CMN_ASSERT(BoneActor);
+        BoneActor->SetMapper(BoneMapper);
+        BoneActor->GetProperty()->SetDiffuseColor(1.0, 1.0, .9412);
+
+        BoneActor->SetScale(0.2);
+        this->AddPart(this->BoneActor);
+        return true;
+    }
+
 protected:
-    vtkCubeSource * Source;
-    vtkPolyDataMapper * Mapper;
-    vtkActor * Actor;
-    vctDouble3 Position; // initial position
-    bool Red;
+    vtkVolumeReader * Input; // this class does NOT own the input
+    vtkContourFilter * BoneExtractor;
+    vtkPolyDataNormals * BoneNormals;
+    vtkStripper * BoneStripper;
+    vtkPolyDataMapper * BoneMapper;
+    vtkActor * BoneActor;
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(ImageViewerVisibleObject);
-CMN_IMPLEMENT_SERVICES(ImageViewerVisibleObject);
+CMN_DECLARE_SERVICES_INSTANTIATION(ImageViewerBoneVisibleObject);
+CMN_IMPLEMENT_SERVICES(ImageViewerBoneVisibleObject);
+
+
+class ImageViewerOutlineVisibleObject: public ui3VisibleObject
+{
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+public:
+    inline ImageViewerOutlineVisibleObject(vtkVolumeReader * input):
+        ui3VisibleObject(),
+        Input(input)
+    {}
+
+    inline ~ImageViewerOutlineVisibleObject()
+    {
+        if (this->OutlineData) {
+            this->OutlineData->Delete();
+            this->OutlineData = 0;
+        }
+        if (this->OutlineMapper) {
+            this->OutlineMapper->Delete();
+            this->OutlineMapper = 0;
+        }
+        if (this->OutlineActor) {
+            this->OutlineActor->Delete();
+            this->OutlineActor = 0;
+        }
+    }
+
+    inline bool CreateVTKObjects(void) {
+        // Create a frame for the data volume.
+        OutlineData = vtkOutlineFilter::New();
+        CMN_ASSERT(OutlineData);
+        OutlineData->SetInputConnection(Input->GetOutputPort());
+        OutlineMapper = vtkPolyDataMapper::New();
+        CMN_ASSERT(OutlineMapper);
+        OutlineMapper->SetInputConnection(OutlineData->GetOutputPort());
+        OutlineActor = vtkActor::New();
+        CMN_ASSERT(OutlineActor);
+        OutlineActor->SetMapper(OutlineMapper);
+        OutlineActor->GetProperty()->SetColor(1,1,1);
+
+        // Scale the actors.
+        OutlineActor->SetScale(0.2);
+        this->AddPart(this->OutlineActor);
+        return true;
+    }
+
+    vctDouble3 GetCenter(void) {
+        vctDouble3 center;
+        center.Assign(OutlineActor->GetCenter());
+        return center;
+    }
+
+protected:
+    vtkVolumeReader * Input; // this class does NOT own the input
+    vtkOutlineFilter * OutlineData;
+    vtkPolyDataMapper *OutlineMapper;
+    vtkActor * OutlineActor;
+};
+
+CMN_DECLARE_SERVICES_INSTANTIATION(ImageViewerOutlineVisibleObject);
+CMN_IMPLEMENT_SERVICES(ImageViewerOutlineVisibleObject);
+
+
+class ImageViewerSlicesVisibleObject: public ui3VisibleObject
+{
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+public:
+    inline ImageViewerSlicesVisibleObject(vtkVolumeReader * input):
+        ui3VisibleObject(),
+        Input(input),
+        bwLut(0),
+        hueLut(0),
+        satLut(0),
+        sagittalColors(0),
+        sagittal(0),
+        axialColors(0),
+        axial(0),
+        coronalColors(0),
+        coronal(0)
+    {}
+
+    inline ~ImageViewerSlicesVisibleObject()
+    {
+    }
+
+    inline bool CreateVTKObjects(void) {      
+        // Create slice planes.
+        // Start by creating a black/white lookup table.
+        bwLut = vtkLookupTable::New();
+        bwLut->SetTableRange (0, 2000);
+        bwLut->SetSaturationRange (0, 0);
+        bwLut->SetHueRange (0, 0);
+        bwLut->SetValueRange (0, 1);
+        bwLut->Build(); //effective built
+
+        // Now create a lookup table that consists of the full hue circle
+        // (from HSV).
+        hueLut = vtkLookupTable::New();
+        hueLut->SetTableRange (0, 2000);
+        hueLut->SetHueRange (0, 1);
+        hueLut->SetSaturationRange (1, 1);
+        hueLut->SetValueRange (1, 1);
+        hueLut->Build(); //effective built
+
+        // Finally, create a lookup table with a single hue but having a range
+        // in the saturation of the hue.
+        satLut = vtkLookupTable::New();
+        satLut->SetTableRange (0, 2000);
+        satLut->SetHueRange (.6, .6);
+        satLut->SetSaturationRange (0, 1);
+        satLut->SetValueRange (1, 1);
+        satLut->Build(); //effective built
+
+        // Create the first sagittal slice plane.
+        sagittalColors = vtkImageMapToColors::New();
+        sagittalColors->SetInputConnection(Input->GetOutputPort());
+        sagittalColors->SetLookupTable(bwLut);
+        sagittal = vtkImageActor::New();
+        sagittal->SetInput(sagittalColors->GetOutput());
+        sagittal->SetDisplayExtent(32,32, 0,63, 0,92);
+
+        // Create the second (axial) plane of the three planes. We use the
+        // same approach as before except that the extent differs.
+        axialColors = vtkImageMapToColors::New();
+        axialColors->SetInputConnection(Input->GetOutputPort());
+        axialColors->SetLookupTable(bwLut);
+        axial = vtkImageActor::New();
+        axial->SetInput(axialColors->GetOutput());
+        axial->SetDisplayExtent(0,63, 0,63, 46, 46);
+
+        // Create the third (coronal) plane of the three planes. We use 
+        // the same approach as before except that the extent differs.
+        coronalColors = vtkImageMapToColors::New();
+        coronalColors->SetInputConnection(Input->GetOutputPort());
+        coronalColors->SetLookupTable(bwLut);
+        coronal = vtkImageActor::New();
+        coronal->SetInput(coronalColors->GetOutput());
+        coronal->SetDisplayExtent(0,63, 32,32, 0,92);
+        axial->SetScale(0.2);
+        coronal->SetScale(0.2);
+        sagittal->SetScale(0.2);
+
+        this->AddPart(this->axial);
+        this->AddPart(this->coronal);
+        this->AddPart(this->sagittal);
+        return true;
+    }
+
+    void ShowHide(bool showAxial, bool showCoronal, bool showSagittal) {
+        this->Lock();
+        axial->SetVisibility(showAxial);
+        coronal->SetVisibility(showCoronal);
+        sagittal->SetVisibility(showSagittal);
+        this->Unlock();
+    }
+
+protected:
+    vtkVolumeReader * Input; // this class does NOT own the input
+    vtkLookupTable * bwLut;
+    vtkLookupTable * hueLut;
+    vtkLookupTable * satLut;
+    
+    vtkImageMapToColors * sagittalColors;
+    vtkImageActor * sagittal;
+    vtkImageMapToColors * axialColors;
+    vtkImageActor * axial;
+    vtkImageMapToColors * coronalColors;
+    vtkImageActor * coronal;
+};
+
+CMN_DECLARE_SERVICES_INSTANTIATION(ImageViewerSlicesVisibleObject);
+CMN_IMPLEMENT_SERVICES(ImageViewerSlicesVisibleObject);
 
 
 ImageViewer::ImageViewer(const std::string & name):
     ui3BehaviorBase(std::string("ImageViewer::") + name, 0),
     Widget3D(0),
-    VisibleObject1(0),
-    VisibleObject2(0)
+    Skin(0),
+    SkinShow(true),
+    Bone(0),
+    BoneShow(true),
+    Outline(0),
+    Slices(0),
+    SlicesAxialShow(true),
+    SlicesCoronalShow(true),
+    SlicesSagittalShow(true),
+    Widget3DHandlesActive(true)
 {
     this->Widget3D = new ui3Widget3D("ImageViewer");
     this->AddWidget3D(this->Widget3D);
 
-    this->VisibleObject1 = new ImageViewerVisibleObject();
-    this->Widget3D->Add(this->VisibleObject1);
+    // hard coded for now :-(
+    VolumeReader = vtkVolume16Reader::New();
+    VolumeReader->SetDataDimensions(64,64);
+    VolumeReader->SetDataByteOrderToLittleEndian();
+    VolumeReader->SetFilePrefix("C:\\anton\\cisst-saw\\saw\\demos\\NIHLapUS_Sunnyvale_Experiments\\Projects\\dvIGSDemo\\build\\VTKData\\Data\\headsq\\quarter");
+    VolumeReader->SetImageRange(1, 93);
+    VolumeReader->SetDataSpacing(3.2, 3.2, 1.5);
 
-    this->VisibleObject2 = new ImageViewerVisibleObject();
-    this->Widget3D->Add(this->VisibleObject2);
-    
+    this->Skin = new ImageViewerSkinVisibleObject(VolumeReader);
+    this->Widget3D->Add(this->Skin);
+
+    this->Bone = new ImageViewerBoneVisibleObject(VolumeReader);
+    this->Widget3D->Add(this->Bone);
+
+    this->Outline = new ImageViewerOutlineVisibleObject(VolumeReader);
+    this->Widget3D->Add(this->Outline);
+
+    this->Slices = new ImageViewerSlicesVisibleObject(VolumeReader);
+    this->Widget3D->Add(this->Slices);
+
     CMN_ASSERT(this->Widget3D);
 }
 
@@ -129,40 +426,95 @@ ImageViewer::~ImageViewer()
 }
 
 
-void ImageViewer::ToggleColor(void)
-{
-    if (this->VisibleObject1) {
-        this->VisibleObject1->ToggleColor();
-    }
-    if (this->VisibleObject2) {
-        this->VisibleObject2->ToggleColor();
-    }
-}
-
-
 void ImageViewer::ToggleHandles(void)
 {
     if (this->Widget3D->HandlesActive()) {
+        this->Widget3DHandlesActive = false;
         this->Widget3D->SetHandlesActive(false);
     } else {
+        this->Widget3DHandlesActive = false;
         this->Widget3D->SetHandlesActive(true);
     }
 }
 
 
+void ImageViewer::ToggleSkin(void)
+{
+    if (this->SkinShow) {
+        this->SkinShow = false;
+        this->Skin->Hide();
+    } else {
+        this->SkinShow = true;
+        this->Skin->Show();
+    }
+}
+
+
+void ImageViewer::ToggleBone(void)
+{
+    if (this->BoneShow) {
+        this->BoneShow = false;
+        this->Bone->Hide();
+    } else {
+        this->BoneShow = true;
+        this->Bone->Show();
+    }
+}
+
+
+void ImageViewer::ToggleSlicesAxial(void)
+{
+    this->SlicesAxialShow = !this->SlicesAxialShow;
+    this->Slices->ShowHide(this->SlicesAxialShow, this->SlicesCoronalShow, this->SlicesSagittalShow);
+}
+
+
+void ImageViewer::ToggleSlicesCoronal(void)
+{
+    this->SlicesCoronalShow = !this->SlicesCoronalShow;
+    this->Slices->ShowHide(this->SlicesAxialShow, this->SlicesCoronalShow, this->SlicesSagittalShow);
+}
+
+
+void ImageViewer::ToggleSlicesSagittal(void)
+{
+    this->SlicesSagittalShow = !this->SlicesSagittalShow;
+    this->Slices->ShowHide(this->SlicesAxialShow, this->SlicesCoronalShow, this->SlicesSagittalShow);
+}
+
+
 void ImageViewer::ConfigureMenuBar(void)
 {
-    this->MenuBar->AddClickButton("ToggleColor",
+    this->MenuBar->AddClickButton("ToggleSkin",
                                   1,
-                                  "redo.png",
-                                  &ImageViewer::ToggleColor,
+                                  "empty.png",
+                                  &ImageViewer::ToggleSkin,
+                                  this);
+    this->MenuBar->AddClickButton("ToggleBone",
+                                  2,
+                                  "empty.png",
+                                  &ImageViewer::ToggleBone,
+                                  this);
+    this->MenuBar->AddClickButton("ToggleSlicesAxial",
+                                  3,
+                                  "empty.png",
+                                  &ImageViewer::ToggleSlicesAxial,
+                                  this);
+    this->MenuBar->AddClickButton("ToggleSlicesCoronal",
+                                  4,
+                                  "empty.png",
+                                  &ImageViewer::ToggleSlicesCoronal,
+                                  this);
+    this->MenuBar->AddClickButton("ToggleSlices",
+                                  5,
+                                  "empty.png",
+                                  &ImageViewer::ToggleSlicesSagittal,
                                   this);
     this->MenuBar->AddClickButton("Move",
-                                  2,
+                                  6,
                                   "move.png",
                                   &ImageViewer::ToggleHandles,
                                   this);
-
 }
 
 
@@ -171,7 +523,7 @@ bool ImageViewer::RunForeground(void)
     if (this->Manager->MastersAsMice() != this->PreviousMaM) {
         this->PreviousMaM = this->Manager->MastersAsMice();
         this->Widget3D->Show();
-        this->Widget3D->SetHandlesActive(true);
+        this->Widget3D->SetHandlesActive(this->Widget3DHandlesActive);
     }
 
     // detect transition, should that be handled as an event?
@@ -179,7 +531,7 @@ bool ImageViewer::RunForeground(void)
     if (this->State != this->PreviousState) {
         this->PreviousState = this->State;
         this->Widget3D->Show();
-        this->Widget3D->SetHandlesActive(true);
+        this->Widget3D->SetHandlesActive(this->Widget3DHandlesActive);
     }
     // running in foreground GUI mode
     prmPositionCartesianGet position;
@@ -214,7 +566,7 @@ bool ImageViewer::RunNoInput(void)
 {
     if (this->Manager->MastersAsMice() != this->PreviousMaM) {
         this->PreviousMaM = this->Manager->MastersAsMice();
-        this->Widget3D->Hide();
+        this->Widget3D->SetHandlesActive(false);
     }
     return true;
 }
@@ -230,12 +582,15 @@ void ImageViewer::OnStart(void)
 {
     this->Position.X() = 0.0;
     this->Position.Y() = 0.0;
-    this->Position.Z() = -100.0;
+    this->Position.Z() = -200.0;
     this->Widget3D->SetPosition(this->Position);
-    this->Widget3D->SetSize(20.0);
+    this->Widget3D->SetSize(25.0);
     this->Widget3D->Show();
-
-    this->VisibleObject2->SetPosition(vctDouble3(0.0, 10.0, 0.0));
+    vctDouble3 center = -(this->Outline->GetCenter());
+    this->Skin->SetPosition(center);
+    this->Bone->SetPosition(center);
+    this->Slices->SetPosition(center);
+    this->Outline->SetPosition(center);
 }
 
 

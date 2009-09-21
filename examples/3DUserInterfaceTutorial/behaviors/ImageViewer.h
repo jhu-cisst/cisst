@@ -23,7 +23,10 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisst3DUserInterface.h>
 
 // forward declaration for our visible objects
-class ImageViewerVisibleObject;
+class ImageViewerSkinVisibleObject;
+class ImageViewerBoneVisibleObject;
+class ImageViewerOutlineVisibleObject;
+class ImageViewerSlicesVisibleObject;
 
 class ImageViewer: public ui3BehaviorBase
 {
@@ -47,13 +50,29 @@ public:
 
 protected:
     void PrimaryMasterButtonCallback(const prmEventButton & event);
-    void ToggleColor(void);
     void ToggleHandles(void);
+    void ToggleSkin(void);
+    void ToggleBone(void);
+    void ToggleSlicesAxial(void);
+    void ToggleSlicesCoronal(void);
+    void ToggleSlicesSagittal(void);
+
     StateType PreviousState;
     bool PreviousMaM;
     vctDouble3 Position, PreviousCursorPosition;
 
+    vtkVolume16Reader * VolumeReader;
+
     ui3Widget3D * Widget3D;
-    ImageViewerVisibleObject * VisibleObject1;
-    ImageViewerVisibleObject * VisibleObject2;
+    ImageViewerSkinVisibleObject * Skin;
+    bool SkinShow;
+    ImageViewerBoneVisibleObject * Bone;
+    bool BoneShow;
+    ImageViewerOutlineVisibleObject * Outline;
+    ImageViewerSlicesVisibleObject * Slices;
+    bool SlicesAxialShow;
+    bool SlicesCoronalShow;
+    bool SlicesSagittalShow;
+
+    bool Widget3DHandlesActive;
 };

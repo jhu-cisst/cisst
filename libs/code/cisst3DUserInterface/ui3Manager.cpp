@@ -572,6 +572,7 @@ void ui3Manager::Run(void)
             if (armPointer->ToBeSelected) {
                 transitionDetected = true;
                 armPointer->Selected = armPointer->ToBeSelected;
+                armPointer->SetCursorPosition(armPointer->Selected->GetAbsoluteTransformation().Translation());
                 armPointer->Selected->Select(armPointer->CursorPosition);
             }
         } else if (armPointer->ButtonReleased) {

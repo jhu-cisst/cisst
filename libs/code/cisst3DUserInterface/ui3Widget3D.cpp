@@ -113,6 +113,7 @@ double ui3Widget3DHandle::GetIntention(const vctFrm3 & cursorPosition) const
 {
     vctDouble3 difference;
     difference.DifferenceOf(cursorPosition.Translation(), this->GetAbsoluteTransformation().Translation());
+    difference.Z() /= 3.0;
     double distance = difference.Norm();
     const double threshold = 5.0; // in mm
     if (distance > threshold) {
