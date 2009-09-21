@@ -67,7 +67,7 @@ public:
     }
 
     double GetIntention(const vctFrm3 & cursorPosition) const {
-        vctDouble3 difference;
+        vct3 difference;
         difference.DifferenceOf(cursorPosition.Translation(), this->GetAbsoluteTransformation().Translation());
         double distance = difference.Norm();
         const double threshold = 5.0;  // in mm
@@ -150,7 +150,7 @@ protected:
     vtkCubeSource * Source;
     vtkPolyDataMapper * Mapper;
     vtkActor * Actor;
-    vctDouble3 Position;  // initial position
+    vct3 Position;  // initial position
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(RegistrationModel);
@@ -168,15 +168,16 @@ RegistrationBehavior::RegistrationBehavior(const std::string & name):
     ModelFiducials(0)
 {
     this->Widget3D = new ui3Widget3D("RegistrationBehavior");
-    this->AddWidget3D(this->Widget3D);
+    CMN_ASSERT(this->Widget3D);
+    AddWidget3D(this->Widget3D);
 
     this->VisibleObject1 = new RegistrationModel();
+    CMN_ASSERT(this->VisibleObject1);
     this->Widget3D->Add(this->VisibleObject1);
 
     this->ModelFiducials = new ui3VisibleList("RegistrationModelFiducials");
+    CMN_ASSERT(this->ModelFiducials);
     this->Widget3D->Add(this->ModelFiducials);
-
-    CMN_ASSERT(this->Widget3D);
 }
 
 
@@ -218,13 +219,6 @@ bool RegistrationBehavior::RunForeground(void)
         this->Widget3D->Show();
         this->Widget3D->SetHandlesActive(true);
     }
-
-    //prmPositionCartesianGet position;
-    //this->GetPrimaryMasterPosition(position);
-    //position = this->VisibleObject1->GetTransformation() * Registrat
-    //this->VisibleObject1->add
-    //this->VisibleObject1->SetTransformation(Registration);
-
     return true;
 }
 
@@ -259,15 +253,15 @@ void RegistrationBehavior::OnQuit(void)
 void RegistrationBehavior::OnStart(void)
 {
     // adjust scaling
-    this->VisibleObject1->Actor->SetScale(0.25);
+    //this->VisibleObject1->Actor->SetScale(0.25);
 
     // adjust position offsets
-    vctDouble6 bounds;
+    vct6 bounds;
     this->VisibleObject1->Lock();
     bounds.Assign(this->VisibleObject1->Actor->GetBounds());
     this->VisibleObject1->Unlock();
 
-    vctDouble3 offset;
+    vct3 offset;
     for (unsigned int i = 0; i < offset.size(); i++) {
         offset[i] = (bounds[2*i] + bounds[(2*i)+1]) / -2.0;
     }
@@ -293,9 +287,12 @@ void RegistrationBehavior::OnStart(void)
     rotateZYX = rotateZ * rotateY * rotateX;
     this->VisibleObject1->SetOrientation(rotateZYX);
 
-    this->Position.Assign(0.0, 0.0, -150.0);
+    this->ModelFiducials->SetPosition(vct3(0.0));
+    this->ModelFiducials->Show();
+
+    this->Position.Assign(0.0, 0.0, -500.0);
     this->Widget3D->SetPosition(this->Position);
-    this->Widget3D->SetSize(30.0);
+    this->Widget3D->SetSize(150.0);
     this->Widget3D->Show();
 }
 
@@ -312,29 +309,26 @@ void RegistrationBehavior::PrimaryMasterButtonCallback(const prmEventButton & ev
         if (VirtualFiducials.size() < NUM_FIDUCIALS) {
             fiducialID = VirtualFiducials.size();
             VirtualFiducials.resize(fiducialID + 1);
-            this->Widget3D->GetAbsoluteTransformation().ApplyInverseTo(position.Position().Translation(),
-                                                                       VirtualFiducials[fiducialID]);
+            VirtualFiducials[fiducialID] = this->Widget3D->GetAbsoluteTransformation().Inverse() *
+                                           position.Position().Translation();
+
+            //RegistrationModelFiducials * modelFiducial = new RegistrationModelFiducials(fiducialID);
+            //this->ModelFiducials->Add(modelFiducial);
+            //this->ModelFiducials->SetPosition(vct3(0.0));
+            //this->ModelFiducials->GetLast()->SetPosition(VirtualFiducials[fiducialID]);
+            //this->ModelFiducials->GetLast()->Show();
+
             CMN_LOG_CLASS_RUN_VERBOSE << "PrimaryMasterButtonCallback: added virtual fiducial: "
                                       << VirtualFiducials[fiducialID] << std::endl;
         } else if (RealFiducials.size() < NUM_FIDUCIALS) {
             fiducialID = RealFiducials.size();
             RealFiducials.resize(fiducialID + 1);
-            this->Widget3D->GetAbsoluteTransformation().ApplyInverseTo(position.Position().Translation(),
-                                                                       RealFiducials[fiducialID]);
+            RealFiducials[fiducialID] = this->Widget3D->GetAbsoluteTransformation().Inverse() *
+                                        position.Position().Translation();
+
             CMN_LOG_CLASS_RUN_VERBOSE << "PrimaryMasterButtonCallback: added real fiducial: "
                                       << RealFiducials[fiducialID] << std::endl;
         }
-
-        //std::cout << Fiducials[fiducialID] << std::endl;
-
-        //vctFrm3 currentTransformation;
-        //currentTransformation.Translation().Assign(Fiducials[fiducialID]);
-        //currentTransformation.Rotation().Assign(vctFrm3::RotationType::Identity());
-
-        //RegistrationModelFiducials * modelFiducial = new RegistrationModelFiducials(fiducialID);
-        //modelFiducial->SetTransformation(currentTransformation);
-        //this->ModelFiducials->Add(modelFiducial);
-        //this->ModelFiducials->SetTransformation(currentTransformation);
     }
 }
 
@@ -356,8 +350,7 @@ void RegistrationBehavior::Register(void)
     } else if (RealFiducials.size() < NUM_FIDUCIALS) {
         CMN_LOG_CLASS_RUN_VERBOSE << "Register: collect more real fiducials" << std::endl;
     } else {
-        vctFrm3 registration;
-        nmrRegistrationRigid(VirtualFiducials, RealFiducials, registration);
-        this->VisibleObject1->SetTransformation(registration);
+        nmrRegistrationRigid(VirtualFiducials, RealFiducials, Registration);
+        this->VisibleObject1->SetTransformation(Registration);
     }
 }

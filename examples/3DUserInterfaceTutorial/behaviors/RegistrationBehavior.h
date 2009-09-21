@@ -73,8 +73,9 @@ protected:
     ui3Widget3D * Widget3D;
     RegistrationModel * VisibleObject1;
     ui3VisibleList * ModelFiducials;
-    vctDynamicVector<vctDouble3> VirtualFiducials;
-    vctDynamicVector<vctDouble3> RealFiducials;
+    vctDynamicVector<vct3> VirtualFiducials;
+    vctDynamicVector<vct3> RealFiducials;
+    vctFrm3 Registration;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(RegistrationBehavior);
