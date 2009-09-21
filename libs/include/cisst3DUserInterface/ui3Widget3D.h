@@ -93,6 +93,11 @@ protected:
     int PreviousCornerHandle;
 
     vctFrm3 CurrentTransformation;
+
+	void ComputeTransform(double pointa[3], double pointb[3],
+                          double point1[3], double point2[3], 
+                          double object_displacement[3],
+				          double object_rotation[4]);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(ui3Widget3D);

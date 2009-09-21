@@ -543,7 +543,8 @@ void ui3Manager::Run(void)
 
         // test if this arm already has something selected
         if (armPointer->Selected) {
-            armPointer->Selected->FinalPosition.Assign(armPointer->CursorPosition);
+			armPointer->Selected->PreviousPosition.Assign(armPointer->Selected->CurrentPosition);
+            armPointer->Selected->CurrentPosition.Assign(armPointer->CursorPosition);
         } else {
             BehaviorList::iterator behaviorIterator;
             const BehaviorList::iterator behaviorEnd = this->Behaviors.end();

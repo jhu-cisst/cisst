@@ -65,6 +65,7 @@ public:
 
     inline void Select(const vctFrm3 initialPosition) {
         this->SetSelected(true);
+		this->PreviousPosition.Assign(initialPosition);
         this->InitialPosition.Assign(initialPosition);
         std::cout << "Select" << std::endl;
         this->OnSelect();
@@ -72,7 +73,8 @@ public:
 
     inline void Release(const vctFrm3 finalPosition) {
         this->SetSelected(false);
-        this->FinalPosition.Assign(finalPosition);
+		this->PreviousPosition.Assign(this->CurrentPosition);
+        this->CurrentPosition.Assign(finalPosition);
         std::cout << "Release" << std::endl;
         this->OnRelease();
     }
@@ -91,7 +93,7 @@ public:
     virtual void OnRelease(void) = 0;
 
 protected:
-    vctFrm3 InitialPosition, FinalPosition;
+    vctFrm3 InitialPosition, PreviousPosition, CurrentPosition;
     ui3MasterArm * MasterArm;
     double OverallIntention;
     bool ActivatedMember;
