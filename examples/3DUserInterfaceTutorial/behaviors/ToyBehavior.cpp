@@ -55,6 +55,7 @@ class ToyBehaviorSphere: public ui3VisibleObject
         this->SphereMapper = vtkPolyDataMapper::New();
         CMN_ASSERT(this->SphereMapper);
         this->SphereMapper->SetInputConnection(this->SphereSource->GetOutputPort());
+        this->SphereMapper->ImmediateModeRenderingOn();
 
         this->SphereActor = vtkActor::New();
         CMN_ASSERT(this->SphereActor);
@@ -103,6 +104,7 @@ class Widget: public ui3VisibleObject
         this->SphereMapper = vtkPolyDataMapper::New();
         CMN_ASSERT(this->SphereMapper);
         this->SphereMapper->SetInputConnection(this->SphereSource->GetOutputPort());
+        this->SphereMapper->ImmediateModeRenderingOn();
 
         //create the top control point
         this->sphere1 = vtkActor::New();
@@ -142,6 +144,7 @@ class Widget: public ui3VisibleObject
 
         this->OutlineMapper = vtkPolyDataMapper::New();
         this->OutlineMapper->SetInputConnection(OutlineSource->GetOutputPort());
+        this->OutlineMapper->ImmediateModeRenderingOn();
 
         this->OutlineActor = vtkActor::New();
         this->OutlineActor->SetMapper(this->OutlineMapper);

@@ -82,6 +82,7 @@ bool ui3MenuBar::CreateVTKObjects(void)
     this->Mapper = vtkPolyDataMapper::New();
     CMN_ASSERT(this->Mapper);
     this->Mapper->SetInputConnection(this->Background->GetOutputPort());
+    this->Mapper->ImmediateModeRenderingOn();
 
     this->Actor = vtkActor::New();
     CMN_ASSERT(this->Actor);

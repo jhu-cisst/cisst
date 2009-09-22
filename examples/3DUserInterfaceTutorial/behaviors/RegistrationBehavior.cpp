@@ -57,6 +57,7 @@ public:
         this->Mapper = vtkPolyDataMapper::New();
         CMN_ASSERT(this->Mapper);
         this->Mapper->SetInputConnection(this->Source->GetOutputPort());
+        this->Mapper->ImmediateModeRenderingOn();
     
         this->Actor = vtkActor::New();
         CMN_ASSERT(this->Actor);

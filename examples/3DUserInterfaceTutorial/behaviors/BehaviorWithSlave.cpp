@@ -57,6 +57,7 @@ public:
         this->ConeMapper = vtkPolyDataMapper::New();
         CMN_ASSERT(this->ConeMapper);
         this->ConeMapper->SetInputConnection(this->ConeSource->GetOutputPort());
+        this->ConeMapper->ImmediateModeRenderingOn();
 
         this->ConeActor = vtkActor::New();
         CMN_ASSERT(this->ConeActor);
@@ -71,6 +72,7 @@ public:
         this->SphereMapper = vtkPolyDataMapper::New();
         CMN_ASSERT(this->SphereMapper);
         this->SphereMapper->SetInputConnection(this->SphereSource->GetOutputPort());
+        this->SphereMapper->ImmediateModeRenderingOn();
 
         this->SphereActor = vtkActor::New();
         CMN_ASSERT(this->SphereActor);

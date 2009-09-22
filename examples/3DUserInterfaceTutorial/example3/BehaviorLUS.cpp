@@ -84,6 +84,7 @@ public:
             partMapper = vtkPolyDataMapper::New();
             CMN_ASSERT(partMapper);
             partMapper->SetInputConnection( reader->GetOutputPort() );
+            partMapper->ImmediateModeRenderingOn();
 
 
             probeActorS = CSOpenGLStippleActor::New();
@@ -159,6 +160,7 @@ class BehaviorLUSProbeJoint: public ui3VisibleObject
         jointMapper = vtkPolyDataMapper::New();
         CMN_ASSERT(jointMapper);
         jointMapper->SetInputConnection( jCylinder->GetOutputPort() );
+        jointMapper->ImmediateModeRenderingOn();
 
 
         joint = CSOpenGLStippleActor::New();
@@ -231,6 +233,7 @@ class BehaviorLUSProbeShaft: public ui3VisibleObject
             shaftMapper = vtkPolyDataMapper::New();
             CMN_ASSERT(shaftMapper);
             shaftMapper->SetInputConnection( shaftSource->GetOutputPort() );
+            shaftMapper->ImmediateModeRenderingOn();
 
             //vtkActor *shaftActor = vtkActor::New();
             shaftActor = CSOpenGLStippleActor::New();
@@ -296,6 +299,7 @@ public:
         warningtextMapper = vtkPolyDataMapper::New();
         CMN_ASSERT(warningtextMapper);
         warningtextMapper->SetInputConnection( warning_text->GetOutputPort() );
+        warningtextMapper->ImmediateModeRenderingOn();
 
         warningtextActor = vtkFollower::New();
         CMN_ASSERT(warningtextActor);
@@ -379,6 +383,7 @@ class BehaviorLUSBackground: public ui3VisibleObject
             vtkPolyDataMapper *cubePlaneMapper = vtkPolyDataMapper::New();
             CMN_ASSERT(cubePlaneMapper);
             cubePlaneMapper->SetInputConnection(cubeSource->GetOutputPort());
+            cubePlaneMapper->ImmediateModeRenderingOn();
 
             cubePlane = CSOpenGLStippleActor::New();
             CMN_ASSERT(cubePlane);
@@ -442,6 +447,7 @@ public:
         vtkPolyDataMapper *mapOutline = vtkPolyDataMapper::New();
         CMN_ASSERT(mapOutline);
         mapOutline->SetInputConnection(outlineSource->GetOutputPort());
+        mapOutline->ImmediateModeRenderingOn();
 
         outline = CSOpenGLStippleActor::New();
         CMN_ASSERT(outline);
@@ -506,6 +512,7 @@ class BehaviorLUSMarker: public ui3VisibleObject
         jointMapper = vtkPolyDataMapper::New();
         CMN_ASSERT(jointMapper);
         jointMapper->SetInputConnection( jCylinder->GetOutputPort() );
+        jointMapper->ImmediateModeRenderingOn();
 
 
         joint = vtkActor::New();

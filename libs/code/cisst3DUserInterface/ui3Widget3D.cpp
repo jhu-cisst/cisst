@@ -64,11 +64,12 @@ bool ui3Widget3DHandle::CreateVTKObjects(void)
 {
     this->Source = vtkSphereSource::New();
     CMN_ASSERT(this->Source);
-    this->Source->SetRadius(2.0);
+    this->Source->SetRadius(0.5);
     
     this->Mapper = vtkPolyDataMapper::New();
     CMN_ASSERT(this->Mapper);
     this->Mapper->SetInputConnection(this->Source->GetOutputPort());
+    this->Mapper->ImmediateModeRenderingOn();
     
     this->Actor = vtkActor::New();
     CMN_ASSERT(this->Actor);
@@ -81,15 +82,17 @@ bool ui3Widget3DHandle::CreateVTKObjects(void)
 
 void ui3Widget3DHandle::UpdateColor(bool selected)
 {
+#if 0
     if (this->Created()) {
         this->Lock();
         if (selected) {
             this->Actor->GetProperty()->SetOpacity(1.0);
         } else {
-            this->Actor->GetProperty()->SetOpacity(0.5);
+            this->Actor->GetProperty()->SetOpacity(1.0);
         }
         this->Unlock();
     }
+#endif
 }
 
 
@@ -101,7 +104,8 @@ void ui3Widget3DHandle::ShowIntention(void)
             this->Actor->GetProperty()->SetOpacity(1.0);
             this->Actor->GetProperty()->SetColor(0.0, 1.0, 0.0);
         } else {
-            this->Actor->GetProperty()->SetOpacity(0.5 + (this->OverallIntention * 0.5));
+            //            this->Actor->GetProperty()->SetOpacity(0.5 + (this->OverallIntention * 0.5));
+            this->Actor->GetProperty()->SetOpacity(1.0);
             this->Actor->GetProperty()->SetColor(1.0, 1.0 - this->OverallIntention, 1.0 - this->OverallIntention);
         }
         // this->Unlock();
@@ -358,7 +362,7 @@ void ui3Widget3D::UpdatePosition(void)
 			angle = object_rotation[0];
 			axis.Assign(object_rotation+1);
 			//memcpy(axis.Pointer(), object_rotation+1, 3*sizeof(double));
-			cout << "angle: " << angle << " axis X: " << axis.X() << " axis Y: " << axis.Y() << " axis Z: " << axis.Z() << endl; 
+			// cout << "angle: " << angle << " axis X: " << axis.X() << " axis Y: " << axis.Y() << " axis Z: " << axis.Z() << endl; 
 			
 			vctDouble3 axisInWorld;
 			this->GetTransformation().Rotation().ApplyInverseTo(axis, axisInWorld);

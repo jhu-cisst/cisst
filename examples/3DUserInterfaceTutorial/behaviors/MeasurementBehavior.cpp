@@ -57,6 +57,7 @@ public:
         TextMapper = vtkPolyDataMapper::New();
         CMN_ASSERT(TextMapper);
         TextMapper->SetInputConnection(Text->GetOutputPort());
+        TextMapper->ImmediateModeRenderingOn();
         
         TextActor = vtkFollower::New();
         CMN_ASSERT(TextActor);

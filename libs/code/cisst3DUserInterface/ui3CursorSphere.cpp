@@ -73,11 +73,12 @@ public:
     {
         this->Source = vtkSphereSource::New();
         CMN_ASSERT(this->Source);
-        this->Source->SetRadius(2.0);
+        this->Source->SetRadius(1.0);
         
         this->Mapper = vtkPolyDataMapper::New();
         CMN_ASSERT(this->Mapper);
         this->Mapper->SetInputConnection(this->Source->GetOutputPort());
+        this->Mapper->ImmediateModeRenderingOn();
         
         this->Actor = vtkActor::New();
         CMN_ASSERT(this->Actor);
@@ -98,14 +99,14 @@ public:
                 this->Actor->GetProperty()->SetOpacity(1.0);
             }
             if (is2D) {
-                this->Source->SetRadius(1.0);
+                this->Source->SetRadius(0.9);
                 if (isPressed) {
                     this->Actor->GetProperty()->SetColor(0.5, 0.8, 0.8);
                 } else {
                     this->Actor->GetProperty()->SetColor(0.5, 1.0, 1.0);
                 }
             } else {
-                this->Source->SetRadius(2.0);
+                this->Source->SetRadius(1.0);
                 if (isPressed) {
                     this->Actor->GetProperty()->SetColor(1.0, 0.8, 0.8);
                 } else {
@@ -165,6 +166,7 @@ public:
         this->Mapper = vtkPolyDataMapper::New();
         CMN_ASSERT(this->Mapper);
         this->Mapper->SetInputConnection(this->Source->GetOutputPort());
+        this->Mapper->ImmediateModeRenderingOn();
         
         this->Actor = vtkActor::New();
         CMN_ASSERT(this->Actor);
@@ -266,11 +268,11 @@ void ui3CursorSphere::SetTransformation(vctDoubleFrm3 & frame)
     vctDouble3 anchor;
     switch (this->Anchor) {
         case ui3CursorBase::CENTER_RIGHT:
-            anchor.Assign(200.0, 0.0, -200.0);
+            anchor.Assign(200.0, 0.0, -50.0);
             this->VisibleAnchor->SetAnchorPosition(anchor);
             break;
         case ui3CursorBase::CENTER_LEFT:
-            anchor.Assign(-200.0, 0.0, -200.0);
+            anchor.Assign(-200.0, 0.0, -50.0);
             this->VisibleAnchor->SetAnchorPosition(anchor);
             break;
         default:

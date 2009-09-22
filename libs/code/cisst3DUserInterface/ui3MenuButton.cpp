@@ -73,6 +73,7 @@ bool ui3MenuButton::CreateVTKObjects(void)
     this->Mapper = vtkPolyDataMapper::New();
     CMN_ASSERT(this->Mapper);
     this->Mapper->SetInput(this->PlaneSource->GetOutput());
+    this->Mapper->ImmediateModeRenderingOn();
 
     // Create an actor for the button.
     this->Actor = vtkActor::New();

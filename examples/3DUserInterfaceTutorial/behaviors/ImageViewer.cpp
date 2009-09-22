@@ -98,6 +98,7 @@ public:
         CMN_ASSERT(SkinMapper);
         SkinMapper->SetInputConnection(SkinStripper->GetOutputPort());
         SkinMapper->ScalarVisibilityOff();
+        SkinMapper->ImmediateModeRenderingOn();
         SkinActor = vtkActor::New();
         CMN_ASSERT(SkinActor);
         SkinActor->SetMapper(SkinMapper);
@@ -109,7 +110,7 @@ public:
         SkinActor->GetProperty()->SetOpacity(1.0);
     
         // Scale the actors.
-        SkinActor->SetScale(0.2);
+        SkinActor->SetScale(0.05);
 
         this->AddPart(this->SkinActor);
         return true;
@@ -182,12 +183,13 @@ public:
         CMN_ASSERT(BoneMapper);
         BoneMapper->SetInputConnection(BoneStripper->GetOutputPort());
         BoneMapper->ScalarVisibilityOff();
+        BoneMapper->ImmediateModeRenderingOn();
         BoneActor = vtkActor::New();
         CMN_ASSERT(BoneActor);
         BoneActor->SetMapper(BoneMapper);
         BoneActor->GetProperty()->SetDiffuseColor(1.0, 1.0, .9412);
 
-        BoneActor->SetScale(0.2);
+        BoneActor->SetScale(0.05);
         this->AddPart(this->BoneActor);
         return true;
     }
@@ -238,13 +240,14 @@ public:
         OutlineMapper = vtkPolyDataMapper::New();
         CMN_ASSERT(OutlineMapper);
         OutlineMapper->SetInputConnection(OutlineData->GetOutputPort());
+        OutlineMapper->ImmediateModeRenderingOn();
         OutlineActor = vtkActor::New();
         CMN_ASSERT(OutlineActor);
         OutlineActor->SetMapper(OutlineMapper);
         OutlineActor->GetProperty()->SetColor(1,1,1);
 
         // Scale the actors.
-        OutlineActor->SetScale(0.2);
+        OutlineActor->SetScale(0.05);
         this->AddPart(this->OutlineActor);
         return true;
     }
@@ -341,9 +344,9 @@ public:
         coronal = vtkImageActor::New();
         coronal->SetInput(coronalColors->GetOutput());
         coronal->SetDisplayExtent(0,63, 32,32, 0,92);
-        axial->SetScale(0.2);
-        coronal->SetScale(0.2);
-        sagittal->SetScale(0.2);
+        axial->SetScale(0.05);
+        coronal->SetScale(0.05);
+        sagittal->SetScale(0.05);
 
         this->AddPart(this->axial);
         this->AddPart(this->coronal);
@@ -398,7 +401,7 @@ ImageViewer::ImageViewer(const std::string & name):
     VolumeReader = vtkVolume16Reader::New();
     VolumeReader->SetDataDimensions(64,64);
     VolumeReader->SetDataByteOrderToLittleEndian();
-    VolumeReader->SetFilePrefix("C:\\anton\\cisst-saw\\saw\\demos\\NIHLapUS_Sunnyvale_Experiments\\Projects\\dvIGSDemo\\build\\VTKData\\Data\\headsq\\quarter");
+    VolumeReader->SetFilePrefix("/home/saw1/code/headsq/quarter");
     VolumeReader->SetImageRange(1, 93);
     VolumeReader->SetDataSpacing(3.2, 3.2, 1.5);
 
@@ -411,9 +414,10 @@ ImageViewer::ImageViewer(const std::string & name):
     this->Outline = new ImageViewerOutlineVisibleObject(VolumeReader);
     this->Widget3D->Add(this->Outline);
 
+#if 0
     this->Slices = new ImageViewerSlicesVisibleObject(VolumeReader);
     this->Widget3D->Add(this->Slices);
-
+#endif
     CMN_ASSERT(this->Widget3D);
 }
 
@@ -495,6 +499,7 @@ void ImageViewer::ConfigureMenuBar(void)
                                   "empty.png",
                                   &ImageViewer::ToggleBone,
                                   this);
+#if 0
     this->MenuBar->AddClickButton("ToggleSlicesAxial",
                                   3,
                                   "empty.png",
@@ -510,6 +515,7 @@ void ImageViewer::ConfigureMenuBar(void)
                                   "empty.png",
                                   &ImageViewer::ToggleSlicesSagittal,
                                   this);
+#endif
     this->MenuBar->AddClickButton("Move",
                                   6,
                                   "move.png",
@@ -582,14 +588,14 @@ void ImageViewer::OnStart(void)
 {
     this->Position.X() = 0.0;
     this->Position.Y() = 0.0;
-    this->Position.Z() = -200.0;
+    this->Position.Z() = -50.0;
     this->Widget3D->SetPosition(this->Position);
-    this->Widget3D->SetSize(25.0);
+    this->Widget3D->SetSize(7.0);
     this->Widget3D->Show();
     vctDouble3 center = -(this->Outline->GetCenter());
     this->Skin->SetPosition(center);
     this->Bone->SetPosition(center);
-    this->Slices->SetPosition(center);
+    // this->Slices->SetPosition(center);
     this->Outline->SetPosition(center);
 }
 

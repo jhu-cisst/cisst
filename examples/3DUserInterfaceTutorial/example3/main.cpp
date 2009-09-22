@@ -141,6 +141,7 @@ int main()
                            "LeftEyeView");                        // name of renderer
 
     // *** Right view ***
+
     guiManager.AddRenderer(svlRenderTargets::Get(0)->GetWidth(),  // render width
                            svlRenderTargets::Get(0)->GetHeight(), // render height
                            1.0,                                   // virtual camera zoom
@@ -153,7 +154,7 @@ int main()
     guiManager.SetRenderTargetToRenderer("LeftEyeView",  svlRenderTargets::Get(1));
     guiManager.SetRenderTargetToRenderer("RightEyeView", svlRenderTargets::Get(0));
 
-
+#if 0
     // Add third camera: simple perspective camera placed in the world center
     camera_geometry.SetPerspective(400.0, 2);
 
@@ -164,6 +165,7 @@ int main()
                            0, 0,               // window position
                            camera_geometry, 2, // camera parameters
                            "ThirdEyeView");    // name of renderer
+#endif
 
     ///////////////////////////////////////////////////////////////
     // start streaming
@@ -172,6 +174,7 @@ int main()
 #endif
 
     vctFrm3 transform;
+    transform.Translation().Assign(0.0, 0.0, 0.0);
     transform.Rotation().From(vctAxAnRot3(vctDouble3(0.0, 1.0, 0.0), cmnPI));
 
     // setup first arm
@@ -205,7 +208,7 @@ int main()
     slave1->SetTransformation(transform, 1.0 /* scale factor */);
     
     //set up ECM as slave arm
-        ui3SlaveArm * ecm1 = new ui3SlaveArm("ECM1");
+    ui3SlaveArm * ecm1 = new ui3SlaveArm("ECM1");
     guiManager.AddSlaveArm(ecm1);
     ecm1 -> SetInput(daVinci, "ECM1");
     ecm1 -> SetTransformation(transform, 1.0);

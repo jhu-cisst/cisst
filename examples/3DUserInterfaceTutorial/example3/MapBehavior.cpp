@@ -71,6 +71,7 @@ class MapMarker: public ui3VisibleObject
         markerMapper = vtkPolyDataMapper::New();
         CMN_ASSERT(markerMapper);
         markerMapper->SetInputConnection( mCylinder->GetOutputPort() );
+        markerMapper->ImmediateModeRenderingOn();
 
 
         marker = vtkActor::New();

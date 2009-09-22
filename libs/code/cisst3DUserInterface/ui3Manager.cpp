@@ -475,10 +475,12 @@ void ui3Manager::Run(void)
         ((*armIterator).second)->PreRun();
     }
 
-    // init all selectable objects
     BehaviorList::iterator behaviorIterator;
     SelectableList::iterator selectableIterator;
     const BehaviorList::iterator behaviorEnd = this->Behaviors.end();
+
+    if (this->MaM) {
+    // init all selectable objects
     for (behaviorIterator = this->Behaviors.begin();
          behaviorIterator != behaviorEnd;
          behaviorIterator++) {
@@ -495,10 +497,12 @@ void ui3Manager::Run(void)
             }
         }
     }
-
+    }
+    
     // process events
     this->ProcessQueuedEvents();
 
+    if (this->MaM) {
     // for all cursors, update position
     double averageDepth = 0.0;
     for (armIterator = this->MasterArms.begin();
@@ -619,7 +623,7 @@ void ui3Manager::Run(void)
             }
         }
     }
-               
+    }
     // this needs to change to a parameter
     osaSleep(20.0 * cmn_ms);
 }
@@ -832,7 +836,7 @@ void ui3Manager::ShowAll(void)
 void ui3Manager::MaMModeEventHandler(const prmEventButton & payload)
 {
     if (payload.Type() == prmEventButton::PRESSED) {
-        this->RecenterMasterCursors(vct3(-20.0, -20.0, -150), vct3(20.0, 20.0, -130.0));
+        this->RecenterMasterCursors(vct3(-5.0, -10.0, -50), vct3(5.0, 10.0, -50.0));
         this->ShowAll();
         this->MaM = true;
         CMN_LOG_CLASS_RUN_VERBOSE << "EnterMaMMode" << std::endl;
