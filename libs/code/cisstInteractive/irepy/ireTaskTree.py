@@ -25,6 +25,8 @@ The IRE Task Tree
 #import wxPython GUI package
 import wx
 
+import wx.py as py
+
 #create a class derived from wxFrame
 class ireTaskTree( wx.Frame ):
 
@@ -79,6 +81,54 @@ class ireTaskTree( wx.Frame ):
             cmdId = self.tree.AppendItem(parentId, cmd)
 
 
+import sys
+
+class MyShell(py.shell.Shell):
+
+    def __init__(self, parent, id=-1, pos=wx.DefaultPosition, size=wx.DefaultSize, locals={}):
+        py.editwindow.EditWindow.__init__(self, parent, id, pos, size)
+
+        # Grab these so they can be restored by self.redirect* methods.
+        self.stdin = sys.stdin
+        self.stdout = sys.stdout
+        self.stderr = sys.stderr
+
+        # Create a replacement for stdin.
+        self.reader = py.pseudo.PseudoFileIn(self.readline, self.readlines)
+        self.reader.input = ''
+        self.reader.isreading = False
+
+        # Set up the interpreter.
+        self.interp = py.interpreter.Interpreter(locals=locals,
+                                  rawin=self.raw_input,
+                                  stdin=self.reader,
+                                  stdout=py.pseudo.PseudoFileOut(self.writeOut),
+                                  stderr=py.pseudo.PseudoFileErr(self.writeErr))
+
+        # Find out for which keycodes the interpreter will autocomplete.
+        self.autoCompleteKeys = self.interp.getAutoCompleteKeys()
+
+        # Keep track of the last non-continuation prompt positions.
+        self.promptPosStart = 0
+        self.promptPosEnd = 0
+
+        # Keep track of multi-line commands.
+        self.more = False
+
+        self.noteMode = 0
+
+        self.history = []
+        self.historyIndex = -1
+
+        # Assign handlers for keyboard events.
+        self.Bind(wx.EVT_CHAR, self.OnChar)
+        self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
+
+        # Assign handler for idle time.
+        self.waiting = False
+        self.Bind(wx.EVT_IDLE, self.OnIdle)
+
+
 class ireSignalSelect( wx.Dialog ):
 
 	def __init__ (self, parent, id, title, taskManager):
@@ -86,8 +136,9 @@ class ireSignalSelect( wx.Dialog ):
 		wx.Dialog.__init__(self, parent, id, title)
 
         self.taskManager = taskManager
+        self.suffix = ''
 
-        self.tree = wx.TreeCtrl(self)
+        self.tree = wx.TreeCtrl(self, style = wx.TR_DEFAULT_STYLE | wx.TR_HIDE_ROOT)
         root = self.tree.AddRoot("TaskManager")
         self.AddTaskNodes(root, self.taskManager.GetNamesOfDevices(), self.taskManager.GetDevice)		
         self.AddTaskNodes(root, self.taskManager.GetNamesOfTasks(), self.taskManager.GetTask)
@@ -98,7 +149,7 @@ class ireSignalSelect( wx.Dialog ):
 
         lay = wx.LayoutConstraints()
         lay.top.SameAs(self, wx.Top, 10)         # Top margin of 10
-        lay.bottom.SameAs(self, wx.Bottom, 35)   # Bottom margin of 35, to leave room for a button
+        lay.bottom.SameAs(self, wx.Bottom, 85)   # Bottom margin of 35, to leave room for a button
         lay.left.SameAs(self, wx.Left, 10)       # Left margin of 10
         lay.right.SameAs(self, wx.Right, 10)     # Right margin of 10
         self.tree.SetConstraints(lay)
@@ -118,23 +169,57 @@ class ireSignalSelect( wx.Dialog ):
         self.CancelButton.SetConstraints(lay)
         self.Layout()
         self.SetAutoLayout(True)
+        self.shell = MyShell(self, pos=(10, self.tree.Size[1]+15), size=(self.tree.Size[0],50))
+        self.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.OnTreeItemActivated)
 
     def AddTaskNodes(self, parentId, items, getter):
         for item in items:
-            taskId = self.tree.AppendItem(parentId, item)
             task = getter(item)
-            self.AddProvInterfaceNodes(taskId, task)
+            if len(task.GetNamesOfProvidedInterfaces()) > 0:
+                taskId = self.tree.AppendItem(parentId, item)
+                self.AddProvInterfaceNodes(taskId, task)
 
     def AddProvInterfaceNodes(self, parentId, task):
         for item in task.GetNamesOfProvidedInterfaces():
             provId = self.tree.AppendItem(parentId, item)
             provInterface = task.GetProvidedInterface(item)
-            self.AddCommandNodes(provId, provInterface, provInterface.GetNamesOfCommandsRead())
+            if len(provInterface.GetNamesOfCommandsRead()) > 0:
+                self.AddCommandNodes(provId, provInterface, provInterface.GetNamesOfCommandsRead())
 
     def AddCommandNodes(self, parentId, interface, cmdList):
         for cmd in cmdList:
             cmdId = self.tree.AppendItem(parentId, cmd)
             self.tree.SetItemPyData(cmdId, interface.GetCommandRead(cmd))
 
+    def OnTreeItemActivated(self, evt):
+        command = self.tree.GetItemText(self.tree.GetSelection())
+        tmp = self.tree.GetItemPyData(self.tree.GetSelection())
+        tmp.UpdateFromC()
+        self.shell.interp.locals[command] = tmp.ArgumentType
+        self.shell.write(command)
+
     def GetSelection(self):
-        return self.tree.GetItemPyData(self.tree.GetSelection())
+        command = self.tree.GetItemText(self.tree.GetSelection())
+        suffix = ''
+        # First, check the current line (if user has not pressed enter)
+        line = self.shell.GetText()
+        if line[0:len(command)] == command:
+            suffix = line[len(command):]
+        else:
+            # Otherwise, look through command history.
+            # It would make more sense to loop through history.reverse() and break
+            # after the first match, but for some reason that doesn't work.
+            for item in self.shell.history:
+                if item[0:len(command)] == command:
+                    suffix = item[len(command):]
+        commandObject = self.tree.GetItemPyData(self.tree.GetSelection())
+        if commandObject:
+            y = commandObject()
+            try:
+                y = float(eval('y'+suffix))
+            except TypeError:
+                msgdlg = wx.MessageDialog(self, "Invalid Type", "Select Signal", wx.OK | wx.ICON_ERROR)
+                msgdlg.ShowModal()
+                msgdlg.Destroy()
+                commandObject = None
+        return (commandObject,suffix)

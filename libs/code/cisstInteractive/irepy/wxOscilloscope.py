@@ -22,6 +22,7 @@ class Cchannel:
         self.index  = index
         self.color  = color
         self.readCommand = None
+        self.readCommandSuffix = ''
 
         self.enable   = 1
         self.enableID = wx.NewId()
@@ -97,9 +98,8 @@ class Cchannel:
         self.offs = string.atof(sc.GetValue())
 
     def SetReadCommand(self, readCommand):
-        if readCommand:
-            readCommand.UpdateFromC()
-        self.readCommand = readCommand
+        self.readCommand = readCommand[0]
+        self.readCommandSuffix = readCommand[1]
 
 
 class COscilloscope(wx.Frame):
@@ -426,8 +426,9 @@ class COscilloscope(wx.Frame):
         for channel in self.channels:
             y = 0
             if channel.readCommand:
-                # PK: Calling .Data is a hack that only works for mtsDouble
-                y = channel.readCommand().Data
+                y = channel.readCommand()
+                if channel.readCommandSuffix:
+                    y = eval('y'+channel.readCommandSuffix)
 
             # shift left and append y to end of ydata array
             channel.ydata[:-1] = channel.ydata[1:]
@@ -469,11 +470,11 @@ class COscilloscope(wx.Frame):
             self.ResetPlotData()
             self.ResetPlotAxis()
 
-    def AddSignal(self, chan, readCommand):
-       if chan >= 0 and chan < 4:
-           self.channels[chan].SetReadCommand(readCommand)
-       else:
-           print 'Channel number ', chan, ' out of range (0-3)'
+#    def AddSignal(self, chan, readCommand):
+#       if chan >= 0 and chan < 4:
+#           self.channels[chan].SetReadCommand(readCommand)
+#       else:
+#           print 'Channel number ', chan, ' out of range (0-3)'
 
  
 class MyApp(wx.App):
