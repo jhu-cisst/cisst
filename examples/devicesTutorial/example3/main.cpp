@@ -23,11 +23,14 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsTaskManager.h>
 #include <cisstDevices/devSensableHDMasterSlave.h>
+#ifdef CISST_HAS_IRE
+#include <cisstInteractive.h>
+#endif
 #include <cisstCommon.h>
 
 #include "displayTask.h"
 
-#define USE_AS_SERVER 1
+#define USE_AS_SERVER 0
 
 using namespace std;
 
@@ -61,13 +64,22 @@ int main(int argc, char * argv[])
 
     const double PeriodDisplay = 1.0; // in milliseconds
     mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
-#if 0
     displayTask * displayTaskObjectFirstPair = new displayTask("DisplayFirstPair", PeriodDisplay * cmn_ms);
     taskManager->AddTask(displayTaskObjectFirstPair);
-#endif
     devSensableHDMasterSlave * sensableOmni = new devSensableHDMasterSlave("RemoteOmni", "Omni1", "Omni2");
     // devSensableHDMasterSlave * sensableOmni = new devSensableHDMasterSlave("Omni", "Omni1", "Omni2", "Omni3", "Omni4");
     taskManager->AddTask(sensableOmni);
+
+#ifdef CISST_HAS_IRE
+    cmnObjectRegister::Register("TaskManager", taskManager);
+
+    cout << "*** Launching IRE shell (C++ Thread) ***" << endl;
+    osaThread IreThread;
+    if (argc != 1)   // if any parameters, use IPython
+        IreThread.Create<char *> (&ireFramework::RunIRE_IPython, "");
+    else             // else use wxPython
+        IreThread.Create<char *> (&ireFramework::RunIRE_wxPython, "");
+#endif
 
 #if USE_AS_SERVER
     taskManager->SetGlobalTaskManagerIP(globalTaskManagerIP);
@@ -75,10 +87,9 @@ int main(int argc, char * argv[])
     taskManager->SetTaskManagerType(mtsTaskManager::TASK_MANAGER_CLIENT); // client of task manager
 #endif
 
-#if 0
+
     taskManager->Connect("DisplayFirstPair", "TeleoperationParameters", 
                          "RemoteOmni", "TeleoperationParametersOmni1Omni2");
-#endif
 
     // generate a nice tasks diagram
     std::ofstream dotFile("example1.dot"); 
@@ -95,11 +106,16 @@ int main(int argc, char * argv[])
     do
     {
         osaSleep(10.0 * cmn_ms);
-    } while (true); // while(!displayTaskObjectFirstPair->GetExitFlag());
+    } while(!displayTaskObjectFirstPair->GetExitFlag());
     // cleanup
     taskManager->KillAll();
 
     osaSleep(PeriodDisplay * 2);
+
+#ifdef CISST_HAS_IRE
+    // Cleanup and exit
+    IreThread.Wait();
+#endif
     // while (!displayTaskObjectFirstPair->IsTerminated()) osaSleep(PeriodDisplay);
     taskManager->Cleanup();
     return 0;

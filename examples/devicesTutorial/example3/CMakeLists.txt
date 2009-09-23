@@ -18,6 +18,8 @@ project(devicesTutorialExample3)
 find_package(Sensable REQUIRED)
 include_directories(${SENSABLE_INCLUDE_DIR})
 
+OPTION(DEV_EXAMPLE_USE_IRE "Use IRE in devicesTutorial example." OFF)
+
 find_package (FLTK REQUIRED)
 # add include paths
 include_directories(${devicesTutorialExample3_SOURCE_DIR}
@@ -40,4 +42,10 @@ add_executable(devicesTutorialExample3
 target_link_libraries(devicesTutorialExample3 ${SENSABLE_LIBRARIES} ${FLTK_LIBRARIES})
 
 # link with the cisst libraries
-CISST_REQUIRES(devicesTutorialExample3 "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstParameterTypes;cisstDevices")
+IF(DEV_EXAMPLE_USE_IRE)
+   ADD_DEFINITIONS(-DCISST_HAS_IRE)
+   CISST_REQUIRES(devicesTutorialExample3 "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstParameterTypes;cisstDevices;cisstInteractive")
+ELSE(DEV_EXAMPLE_USE_IRE)
+   CISST_REQUIRES(devicesTutorialExample3 "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstParameterTypes;cisstDevices")
+ENDIF(DEV_EXAMPLE_USE_IRE)
+
