@@ -83,6 +83,15 @@ class ireTaskTree( wx.Frame ):
 
 import sys
 
+try:
+    from cisstMultiTaskPython import *
+except Exception, e:
+    print "Could not load cisstMultiTaskPython: ", e
+try:
+    from cisstParameterTypesPython import *
+except Exception, e:
+    print "Could not load cisstParameterTypesPython: ", e
+
 class MyShell(py.shell.Shell):
 
     def __init__(self, parent, id=-1, pos=wx.DefaultPosition, size=wx.DefaultSize, locals={}):
