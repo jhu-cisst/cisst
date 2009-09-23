@@ -124,7 +124,11 @@ typedef mtsCommandQualifiedReadOrWriteBase<const mtsGenericObject> mtsCommandQua
             self.ArgumentType = tmpObject.__class__
 
         def __call__(self):
-            argument = self.ArgumentType(self.GetArgumentPrototype())
+            # PK: figure out if the first statement (after try) is still needed
+            try:
+                argument = self.ArgumentType(self.GetArgumentPrototype())
+            except Exception:
+                argument = self.GetArgumentPrototype()
             self.Execute(argument)
             return argument
     }

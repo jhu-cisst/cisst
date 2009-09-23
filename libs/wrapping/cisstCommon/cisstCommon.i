@@ -93,6 +93,7 @@ http://www.cisst.org/cisst/license.txt.
 
 // Wrap the generic object class
 %include "cisstCommon/cmnGenericObject.h"
+%import "cisstCommon/cmnAccessorMacros.h"
 
 // Wrap the class register and add required code to generate python iterators
 %newobject cmnClassServicesBase::Create;
