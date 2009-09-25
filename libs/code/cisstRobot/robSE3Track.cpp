@@ -91,7 +91,7 @@ robError robSE3Track::Evaluate( const robDOF& input, robDOF& output ){
 	
 	v2 = tw/(t2-t0)/2.0;                        // approximate v2
 	w2 = r02.Axis()*r02.Angle()/(t2-t0)/2000.0; // approximate w2
-	//w2 = Rw0*w2;                                // orient w2 wrt W
+	//w2 = Rw0*w2;                              // orient w2 wrt W
 
 	if( 0 < vmax )                      // limit on linear acceleration?
 	  dt = tw.Norm()/vmax;              // time for a straight line at vmax
@@ -109,6 +109,7 @@ robError robSE3Track::Evaluate( const robDOF& input, robDOF& output ){
 	if( dt < t2-t0  ){  // should we get "there" before the next reading?
 	  v2 = R3(0.0);     // if so, put v2 to 0. 
 	}
+
       }
 
       txblender=new robQuintic(t2,tw1[0],v1[0], 0.0, t2+dt, tw2[0], v2[0],0.0);
@@ -154,7 +155,6 @@ robError robSE3Track::Evaluate( const robDOF& input, robDOF& output ){
 robError robSE3Track::Evaluate(const robDOF& input){
 
   // make sure that each blender is defined for the input because these
-
   // polynomials can go crazy when extrapolating
 
   if( txblender->IsDefinedFor( input ) == DEFINED ){ 
@@ -238,3 +238,4 @@ robError robSE3Track::Evaluate(const robDOF& input){
 
   return SUCCESS;
 }
+

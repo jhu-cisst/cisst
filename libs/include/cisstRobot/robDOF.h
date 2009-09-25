@@ -1,46 +1,16 @@
 #ifndef _robDOF_h
 #define _robDOF_h
 
-#include <cisstVector/vctTransformationTypes.h>
-#include <cisstVector/vctFixedSizeVectorTypes.h>
+#include <cisstRobot/robDefines.h>
+
 #include <iostream>
-
-#ifdef _MSC_VER
-typedef __int32 int32_t;
-typedef unsigned __int32 uint32_t;
-typedef __int64 int64_t;
-typedef unsigned __int64 uint64_t;
-#else
-#include <stdint.h>
-#endif
-
-using namespace std;
-
-#ifdef SINGLE_PRECISION
-typedef float Real;
-#else
-typedef double Real;
-#endif
-
-typedef vctFrame4x4< Real,VCT_ROW_MAJOR> SE3;
-typedef vctMatrixRotation3<Real,VCT_ROW_MAJOR> SO3;
-typedef vctQuaternionRotation3<Real> Quaternion;
-typedef vctFixedSizeVector<Real,1> R1;
-typedef vctFixedSizeVector<Real,2> R2;
-typedef vctFixedSizeVector<Real,3> R3;
-typedef vctFixedSizeVector<Real,4> R4;
-typedef vctFixedSizeVector<Real,6> R6;
-typedef vctDynamicVector<Real>     Rn;
 
 namespace cisstRobot{
 
-  enum robError{ SUCCESS, FAILURE };
-
-  
   //! Degrees for freedom (DOF) of a robot.
   /**
      robDOF defines the degrees of freedom used to generate trajectories and 
-     control a robot. The DOF include joint position, velocities and accelerations
+     control a robot.The DOF include joint position, velocities and accelerations
      as well as Cartesian position, velocities and accelerations. Forces and
      torques are also available.
   */
@@ -77,30 +47,30 @@ namespace cisstRobot{
     /**
        \return true if one of the DOF is a Cartesian value. That is any 
        Cartesian position, orientation, velocity or acceleration.
-     */
+    */
     bool IsCartesian()  const;
 
     //! Is one of the DOF a Cartesian translation
     /**
        \return true if one of the DOF is a Cartesian translation. That is any 
        Cartesian position, a linear velocity or acceleration.
-     */
+    */
     bool IsTranslation()const;
 
     //! Is one of the DOF a Cartesian orientation
     /**
        \return true if one of the DOF is a Cartesian orientation. That is any 
        Cartesian orientation, an angular velocity or acceleration.
-     */
+    */
     bool IsRotation()   const;
 
     //! Is one of the DOF a Real value (read joint value)
     /**
        \return true if one of the DOF is Real valued. That is any 
-       Real position, an velocity or acceleration. These DOF are used to represent
+       Real position, velocity or acceleration. These DOF are used to represent
        joint positions, velocities and acceleration. A maximum of 8 joints are
        supported.
-     */
+    */
     bool IsReal()       const;
     bool IsTime()       const;
     
@@ -120,7 +90,7 @@ namespace cisstRobot{
     //! Used by the map
     friend bool operator <  ( const robDOF& dof1, const robDOF& dof2 )
     {  return dof1.dof < dof2.dof;   }
-   //! Used by the map
+    //! Used by the map
     friend bool operator == ( const robDOF& dof1, const robDOF& dof2 )
     {  return dof1.dof == dof2.dof;  }
     
@@ -128,13 +98,13 @@ namespace cisstRobot{
     //! Create a Real DOF object with a single value
     /**
        Create a 1D DOF object and only sets the TIME DOF mask
-     */
+    */
     robDOF( Real x );
 
     //! Create a Real DOF object with a vector of values
     /**
        Create a nD DOF object and sets the X1-X8 DOF mask
-     */
+    */
     robDOF( const Rn& x );
 
     //! Create a Real DOF object with a vector of values and their derivatives
@@ -145,18 +115,18 @@ namespace cisstRobot{
 
     //! Create a Cartesian DOF object with orientation and position
     /**
-       This creates a Cartesian DOF object with the given position and orientation
+       Creates a Cartesian DOF object with the given position and orientation
        and only sets the mask of Cartesian position and orientation
-     */
+    */
     robDOF( const SE3& Rt );
 
     //! Create a Cartesian DOF object with position velocities and accelerations
     /**
-       This creates a Cartesian DOF object with the given position and orientation
+       Creates a Cartesian DOF object with the given position and orientation
        velocities and accelerations and sets the mask of Cartesian 
        position/orientation, linear/angular velocities and linear/angular
        accelerations
-     */
+    */
     robDOF( const SE3& Rt, const R6& vw, const R6& vdwd );
 
 
@@ -206,7 +176,7 @@ namespace cisstRobot{
     //! DOF of the Cartesian angular velocity about the Z axis 
     static const uint64_t WZ  = 0x0000000000002000ULL;
     
-    //! DOF of all Cartesian angular (WD) and linear (VD) accelerations(bits 17-22)
+    //! All Cartesian angular (WD) and linear (VD) accelerations(bits 17-22)
     static const uint64_t VDWD= 0x00000000003F0000ULL;
     //! DOF of the Cartesian linear acceleration along the X axis
     static const uint64_t VXD = 0x0000000000010000ULL;
