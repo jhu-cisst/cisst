@@ -1,0 +1,40 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
+/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
+
+/*
+$Id: $
+
+Author(s): Anton Deguet
+Created on: 2009-02-05
+
+(C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights
+Reserved.
+
+--- begin cisst license - do not edit ---
+
+This software is provided "as is" under an open source license, with
+no warranty. The complete license can be found in license.txt and
+http://www.cisst.org/cisst/license.txt.
+
+--- end cisst license ---
+
+*/
+
+#ifndef _devConfig_h
+#define _devConfig_h
+
+#include <cisstConfig.h>
+
+// Using Sensable (i.e. Omni, Phantom, ...)
+#define CISST_DEV_HAS_SENSABLEHD @CISST_DEV_HAS_SENSABLEHD@
+
+// Support for LoPoMoCo (JHU Low Power Motor Control)
+#define CISST_DEV_HAS_LOPOMOCO @CISST_DEV_HAS_LOPOMOCO@
+
+// Support for OpenIGTLink
+#define CISST_DEV_HAS_OPENIGTLINK @CISST_DEV_HAS_OPENIGTLINK@
+
+// Using Novint HDL (i.e. Falcon, ...)
+#define CISST_DEV_HAS_NOVINTHDL @CISST_DEV_HAS_NOVINTHDL@
+
+#endif // _devConfig_h 

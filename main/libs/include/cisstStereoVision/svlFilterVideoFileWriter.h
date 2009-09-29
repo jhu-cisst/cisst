@@ -1,0 +1,94 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
+/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
+
+/*
+  $Id: svlVideoFileWriter.h 327 2009-05-07 21:46:49Z bvagvol1 $
+  
+  Author(s):  Balazs Vagvolgyi
+  Created on: 2006 
+
+  (C) Copyright 2006-2007 Johns Hopkins University (JHU), All Rights
+  Reserved.
+
+--- begin cisst license - do not edit ---
+
+This software is provided "as is" under an open source license, with
+no warranty.  The complete license can be found in license.txt and
+http://www.cisst.org/cisst/license.txt.
+
+--- end cisst license ---
+
+*/
+
+#ifndef _svlFilterVideoFileWriter_h
+#define _svlFilterVideoFileWriter_h
+
+#include <cisstStereoVision/svlStreamManager.h>
+#include <string>
+
+// Always include last!
+#include <cisstStereoVision/svlExport.h>
+
+
+class CISST_EXPORT svlFilterVideoFileWriter : public svlFilterBase
+{
+public:
+    svlFilterVideoFileWriter();
+    ~svlFilterVideoFileWriter();
+
+    int DialogFilePath(unsigned int videoch = SVL_LEFT);
+
+    int Disable(bool disable, unsigned int videoch = SVL_LEFT);
+    int SetFilePath(const std::string filepath, unsigned int videoch = SVL_LEFT);
+    void SetCompressionLevel(unsigned int level); // 0 (no compression) - 9 (maximum compression)
+
+    void Pause();
+    void Record(int frames = -1);
+
+protected:
+    virtual int Initialize(svlSample* inputdata);
+    virtual int OnStart(unsigned int procCount);
+    virtual int ProcessFrame(ProcInfo* procInfo, svlSample* inputdata);
+    virtual int Release();
+
+private:
+    unsigned int VideoFrameCounter;
+    unsigned int CaptureLength;
+    vctDynamicVector<FILE*> VideoFile;
+    vctDynamicVector<bool> Disabled;
+    vctDynamicVector<std::string> FilePath;
+
+    bool Action;
+    double ActionTime;
+    double TargetActionTime;
+    osaTimeServer* TimeServer;
+    unsigned int TargetCaptureLength;
+
+    unsigned int CompressionLevel;
+    vctDynamicVector<unsigned char*> YUVBuffer;
+    vctDynamicVector<unsigned int> YUVBufferSize;
+    vctDynamicVector<unsigned char*> CompressedBuffer;
+    vctDynamicVector<unsigned int> CompressedBufferSize;
+    vctDynamicVector<unsigned int*> CompressedPartOffset;
+    vctDynamicVector<unsigned int*> CompressedPartSize;
+
+    int UpdateStreamCount(unsigned int count);
+
+    unsigned char* SaveBuffer[2];
+    unsigned int SaveBufferSize;
+    vctDynamicVector<unsigned int> SaveBufferOffset;
+    vctDynamicVector<unsigned int> SaveBufferUsed;
+    unsigned int SaveBufferUsedID;
+    osaThread SaveThread;
+    osaThreadSignal SaveInitEvent;
+    osaThreadSignal NewFrameEvent;
+    osaThreadSignal WriteDoneEvent;
+    bool SaveInitialized;
+    bool KillSaveThread;
+    bool SaveThreadError;
+    void* SaveProc(unsigned int videochannels);
+};
+
+#endif // _svlFilterVideoFileWriter_h
+
+

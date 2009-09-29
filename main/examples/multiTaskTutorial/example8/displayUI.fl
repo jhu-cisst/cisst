@@ -1,0 +1,76 @@
+# data file for the Fltk User Interface Designer (fluid)
+version 1.0109 
+header_name {.h} 
+code_name {.cxx}
+class displayUI {open
+} {
+  Function {displayUI()} {open
+  } {
+    Fl_Window DisplayWindow {
+      label DisplayWindow open selected
+      xywh {512 218 356 258} type Double visible
+    } {
+      Fl_Value_Output Data1 {
+        label {Data:}
+        xywh {25 180 75 25} box THIN_DOWN_BOX align 5
+      }
+      Fl_Return_Button Close {
+        label Close
+        callback {DisplayWindow->hide();}
+        xywh {230 215 105 30} box THIN_UP_BOX
+      }
+      Fl_Dial Amplitude1 {
+        label {Amplitude:}
+        callback {Amplitude1Changed = true;}
+        xywh {25 70 75 75} box OSHADOW_BOX color 1 align 1
+      }
+      Fl_Check_Button Button1 {
+        label {Cmd Void}
+        callback {Button1Clicked = true;}
+        xywh {85 220 25 25} down_box THIN_DOWN_BOX align 4
+      }
+      Fl_Check_Button Button2 {
+        label {Event Void}
+        xywh {115 220 25 25} box OFLAT_BOX down_box BORDER_BOX align 8 deactivate
+      }
+      Fl_Value_Output Data2 {
+        label {Previous amplitude:}
+        xywh {141 180 75 25} box THIN_DOWN_BOX align 133
+      }
+      Fl_Dial Amplitude2 {
+        label {Amplitude:}
+        callback {Amplitude2Changed = true;}
+        xywh {141 70 75 75} box OSHADOW_BOX color 1 align 1
+      }
+      Fl_Text_Display {} {
+        label {CmdWrite, CmdRead}
+        xywh {25 45 75 0} align 129
+      }
+      Fl_Text_Display {} {
+        label CmdQRead
+        xywh {140 37 75 0} align 129
+      }
+      Fl_Text_Display {} {
+        label EventWrite
+        xywh {255 37 75 0} align 129
+      }
+      Fl_Value_Output Data3 {
+        label {Data:}
+        xywh {260 180 75 25} box THIN_DOWN_BOX align 5
+      }
+    }
+    code {Amplitude1Changed = false;
+Amplitude2Changed = false;} {}
+    code {Button1Clicked = false;} {}
+  }
+  Function {show(int argc, char**argv)} {open
+  } {
+    code {DisplayWindow->show();} {}
+  }
+  decl {bool Amplitude1Changed;} {public
+  }
+  decl {bool Amplitude2Changed;} {public
+  }
+  decl {bool Button1Clicked;} {public
+  }
+} 
