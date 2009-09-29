@@ -69,13 +69,14 @@ public:
     } DeviceInfo;
 
     typedef enum _PixelType {
-        PixelRGB8    = 0,
-        PixelYUV444  = 1,
-        PixelYUV422  = 2,
-        PixelYUV411  = 3,
-        PixelMONO8   = 4,
-        PixelMONO16  = 5,
-        PixelUnknown = 6
+        PixelRGB8    = 0,   // 24 bits per pixel
+        PixelYUV444  = 1,   // 24 bits per pixel
+        PixelYUV422  = 2,   // 16 bits per pixel
+        PixelYUV411  = 3,   // 12 bits per pixel
+        PixelMONO8   = 4,   //  8 bits per pixel
+        PixelMONO16  = 5,   // 16 bits per pixel
+        PixelUnknown = 6,
+        PixelTypeCount
     } PixelType;
 
     typedef struct _ImageFormat {
