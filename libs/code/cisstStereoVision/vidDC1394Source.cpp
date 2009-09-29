@@ -100,6 +100,11 @@ dc1394speed_t* svlDC1394Context::GetBestISOSpeed()
     return BestISOSpeed;
 }
 
+unsigned int svlDC1394Context::GetPixelTypeBitSize(svlFilterSourceVideoCapture::PixelType type)
+{
+    return PixelTypeBitSize[type];
+}
+
 void svlDC1394Context::Enumerate()
 {
     //////////////////////////////////////////////////////////////////////
@@ -338,6 +343,14 @@ svlDC1394Context::svlDC1394Context() :
 {
     Context = dc1394_new();
     Enumerate();
+
+    PixelTypeBitSize[svlFilterSourceVideoCapture::PixelRGB8]    = 24;
+    PixelTypeBitSize[svlFilterSourceVideoCapture::PixelYUV444]  = 24;
+    PixelTypeBitSize[svlFilterSourceVideoCapture::PixelYUV422]  = 16;
+    PixelTypeBitSize[svlFilterSourceVideoCapture::PixelYUV411]  = 12;
+    PixelTypeBitSize[svlFilterSourceVideoCapture::PixelMONO8]   =  8;
+    PixelTypeBitSize[svlFilterSourceVideoCapture::PixelMONO16]  = 16;
+    PixelTypeBitSize[svlFilterSourceVideoCapture::PixelUnknown] = 32;
 }
 
 svlDC1394Context::~svlDC1394Context()
@@ -505,7 +518,10 @@ int CDC1394Source::Open()
         int camsp, mbps;
         if (BestISOSpeed[DeviceID[i]] == DC1394_ISO_SPEED_800) camsp = 800;
         else camsp = 400;
-        mbps = static_cast<int>(fps * Width[i] * Height[i] * 3 * 8 / 1024 / 1024);
+        mbps = static_cast<int>(fps *
+                                Width[i] * Height[i] *
+                                svlDC1394Context::Instance()->GetPixelTypeBitSize(colorspace) /
+                                1024 / 1024);
         if (camsp < mbps) {
 #if (__verbose__ >= 1)
             cerr << "CDC1394Source::Open - Framerate reduced due to insufficient bus bandwidth" << endl;

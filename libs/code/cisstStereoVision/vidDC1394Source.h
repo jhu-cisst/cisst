@@ -159,6 +159,7 @@ public:
 	unsigned int GetNumberOfCameras();
     dc1394operation_mode_t* GetBestOpMode();
     dc1394speed_t* GetBestISOSpeed();
+	unsigned int GetPixelTypeBitSize(svlFilterSourceVideoCapture::PixelType type);
 
 private:
     svlDC1394Context();
@@ -175,6 +176,7 @@ private:
     unsigned int NumberOfCameras;
     dc1394operation_mode_t* BestOpMode;
     dc1394speed_t* BestISOSpeed;
+    unsigned int PixelTypeBitSize[svlFilterSourceVideoCapture::PixelTypeCount];
 };
 
 
