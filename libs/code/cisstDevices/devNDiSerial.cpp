@@ -4,7 +4,7 @@
 /*
   $Id$
 
-  Author(s): Eric Lin, Joseph Vidalis
+  Author(s):  Eric Lin, Joseph Vidalis
   Created on: 2008-09-10
 
   (C) Copyright 2008 Johns Hopkins University (JHU), All Rights Reserved.
@@ -18,30 +18,294 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
-/*
-In discovery mode poll the port handle for its serial and put it into int form.
-Then Set up the Map like this:
-int serial;
-MapPortToTool[portNumber] = MapSerialToTool[serial];
-
-To Use a Port handle to Set data for an interface:
-MapPortToTool[portNumber]->SetTranslationAndPosition(x,y,z,a,b,c,d);
-
-When Freeing a port Number:
-MapPortToTool[portNumber] = NULL;
-
-
-*/
-
-
+#include <cisstOSAbstraction/osaSleep.h>
 #include <cisstDevices/devNDiSerial.h>
 
-#include <cisstCommon/cmnConstants.h>
-#include <cisstOSAbstraction/osaSleep.h>
+#include <cstdio>
 
-#include <string>
-#include <string.h> // for memcpy, strlen
+CMN_IMPLEMENT_SERVICES(devNDiSerial);
+
+
+devNDiSerial::devNDiSerial(const std::string & taskName, const std::string & serialPort) :
+    mtsTaskContinuous(taskName, 5000)
+{
+    SerialPort.SetPortName(serialPort);
+    if (!SerialPort.Open()) {
+        CMN_LOG_CLASS_INIT_ERROR << "devNDiSerial: sorry, can't open serial port: " << SerialPort.GetPortName() << std::endl;
+    }
+    ResetSerialPort();
+    Beep(2);
+    Beep(6);
+    SetSerialPortSettings(osaSerialPort::BaudRate115200,
+                          osaSerialPort::CharacterSize8,
+                          osaSerialPort::ParityCheckingNone,
+                          osaSerialPort::StopBitsOne,
+                          osaSerialPort::FlowControlNone);
+    Beep(8);
+}
+
+
+bool devNDiSerial::ResetSerialPort(void)
+{
+    SerialPort.WriteBreak(0.5 * cmn_s);
+    osaSleep(200.0 * cmn_ms);
+
+    SerialPort.SetBaudRate(osaSerialPort::BaudRate9600);
+    SerialPort.SetCharacterSize(osaSerialPort::CharacterSize8);
+    SerialPort.SetParityChecking(osaSerialPort::ParityCheckingNone);
+    SerialPort.SetStopBits(osaSerialPort::StopBitsOne);
+    SerialPort.SetFlowControl(osaSerialPort::FlowControlNone);
+    SerialPort.Configure();
+
+    if (!CheckResponse("RESET")) {
+        CMN_LOG_CLASS_INIT_ERROR << "ResetSerialPort: failed to reset" << std::endl;
+        return false;
+    }
+    return true;
+}
+
+
+unsigned int devNDiSerial::ComputeCRC(const char * CRCdata)
+{
+    static unsigned char oddparity[16] = { 0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0 };
+    unsigned Data, uCrc = 0;
+    unsigned char *puch = (unsigned char *)CRCdata;
+
+    while (*puch) {
+        Data = (*puch ^ (uCrc & 0xff)) & 0xff;
+        uCrc >>= 8;
+	
+        if (oddparity[Data & 0x0f] ^ oddparity[Data >> 4]) {
+            uCrc ^= 0xc001;
+        }
+        Data <<= 6;
+        uCrc ^= Data;
+        Data <<= 1;
+        uCrc ^= Data;
+        puch++;
+    }
+    return uCrc;
+}
+
+
+bool devNDiSerial::CheckResponse(const char * expectedResponse, double timeOut)
+{
+    const size_t replySize = strlen(expectedResponse) + 5;  // 4 for the CRC + carriage return
+    CMN_ASSERT(replySize <= BUFFER_SIZE);
+    unsigned int bytesRead = 0;
+    do {
+        bytesRead += SerialPort.Read(SerialPortBuffer + bytesRead, replySize);
+    } while (bytesRead < replySize);
+    // save received CRC in a separate string
+    char receivedCRC[5];
+    strncpy(receivedCRC, SerialPortBuffer + (bytesRead - 5), 4);
+    receivedCRC[4] = '\0';
+
+    // terminate response and compute CRC
+    SerialPortBuffer[bytesRead-5] = '\0';
+    char computedCRC[5];
+    sprintf(computedCRC, "%04X", ComputeCRC(SerialPortBuffer));
+    computedCRC[4] = '\0';
+
+    // compare CRCs
+    if (strncmp(receivedCRC, computedCRC, 4) != 0) {
+        CMN_LOG_CLASS_RUN_ERROR << "CheckResponse: expected \"" << expectedResponse
+                                << "\", received \"" << SerialPortBuffer << receivedCRC
+                                << "\", but computed CRC \"" << computedCRC << "\"" << std::endl;
+        return false;
+    }
+
+    // compare Responses
+    if (strncmp(expectedResponse, SerialPortBuffer, replySize) != 0) {
+        CMN_LOG_CLASS_RUN_ERROR << "CheckResponse: expected \"" << expectedResponse
+                                << "\", but received \"" << SerialPortBuffer << "\" (correct CRCs)" << std::endl;
+        return false;
+    }
+
+    CMN_LOG_CLASS_RUN_DEBUG << "CheckResponse: correctly received \"" << SerialPortBuffer << "\"" << std::endl;
+    return true;
+}
+
+
+void devNDiSerial::CommandInitialize(void)
+{
+    SerialPortBufferPointer = SerialPortBuffer;
+}
+
+
+void devNDiSerial::CommandAppend(const char command)
+{
+    *SerialPortBufferPointer = command;
+    SerialPortBufferPointer++;
+}
+
+
+void devNDiSerial::CommandAppend(const char * command)
+{
+    const size_t size = strlen(command);
+    strncpy(SerialPortBufferPointer, command, size);
+    SerialPortBufferPointer += size;
+}
+
+
+void devNDiSerial::CommandAppend(unsigned int command)
+{
+    //! \todo Verify spaceAvailable
+    const int spaceAvailable = BUFFER_SIZE - (SerialPortBufferPointer - SerialPortBuffer);
+    SerialPortBufferPointer += _snprintf(SerialPortBufferPointer, spaceAvailable, "%d", command);
+}
+
+
+bool devNDiSerial::CommandSend(void)
+{
+    CommandAppend('\r');
+    CommandAppend('\0');
+
+    const size_t bytesToSend = strlen(SerialPortBuffer);
+    const size_t bytesSent = SerialPort.Write(SerialPortBuffer, bytesToSend);
+    if (bytesSent != bytesToSend) {
+        CMN_LOG_CLASS_RUN_ERROR << "SendCommand: sent only " << bytesSent << " of " << bytesToSend
+                                << " for command \"" << SerialPortBuffer << "\"" << std::endl;
+        return false;
+    }
+    CMN_LOG_CLASS_RUN_DEBUG << "SendCommand: successfully sent command \"" << SerialPortBuffer << "\"" << std::endl;
+    return true;
+}
+
+
+bool devNDiSerial::SetSerialPortSettings(osaSerialPort::BaudRateType baudRate,
+                                         osaSerialPort::CharacterSizeType characterSize,
+                                         osaSerialPort::ParityCheckingType parityChecking,
+                                         osaSerialPort::StopBitsType stopBits,
+                                         osaSerialPort::FlowControlType flowControl)
+{
+    CommandInitialize();
+    CommandAppend("COMM ");
+
+    switch (baudRate) {
+        case osaSerialPort::BaudRate9600:
+            CommandAppend('0');
+            break;
+        case osaSerialPort::BaudRate19200:
+            CommandAppend('2');
+            break;
+        case osaSerialPort::BaudRate38400:
+            CommandAppend('3');
+            break;
+        case osaSerialPort::BaudRate57600:
+            CommandAppend('4');
+            break;
+        case osaSerialPort::BaudRate115200:
+            CommandAppend('5');
+            break;
+        default:
+            //! \todo Log here
+            return false;
+            break;
+    }
+
+    switch (characterSize) {
+        case osaSerialPort::CharacterSize8:
+            CommandAppend('0');
+            break;
+        case osaSerialPort::CharacterSize7:
+            CommandAppend('1');
+            break;
+        default:
+            //! \todo Log here
+            return false;
+            break;
+    }
+
+    switch (parityChecking) {
+        case osaSerialPort::ParityCheckingNone:
+            CommandAppend('0');
+            break;
+        case osaSerialPort::ParityCheckingOdd:
+            CommandAppend('1');
+            break;
+        case osaSerialPort::ParityCheckingEven:
+            CommandAppend('2');
+            break;
+        default:
+            //! \todo Log here
+            return false;
+            break;
+    }
+
+    switch (stopBits) {
+        case osaSerialPort::StopBitsOne:
+            CommandAppend('0');
+            break;
+        case osaSerialPort::StopBitsTwo:
+            CommandAppend('1');
+            break;
+        default:
+            //! \todo Log here
+            return false;
+            break;
+    }
+
+    switch (flowControl) {
+        case osaSerialPort::FlowControlNone:
+            CommandAppend('0');
+            break;
+        case osaSerialPort::FlowControlHardware:
+            CommandAppend('1');
+            break;
+        default:
+            //! \todo Log here
+            return false;
+            break;
+    }
+
+    if (!CommandSend()) {
+        return false;
+    }
+
+    if (CheckResponse("OKAY")) {
+        osaSleep(200.0 * cmn_ms);
+        SerialPort.SetBaudRate(baudRate);
+        SerialPort.SetCharacterSize(characterSize);
+        SerialPort.SetParityChecking(parityChecking);
+        SerialPort.SetStopBits(stopBits);
+        SerialPort.SetFlowControl(flowControl);
+        SerialPort.Configure();
+        return true;
+    }
+    return false;
+}
+
+
+bool devNDiSerial::Beep(unsigned int numberOfBeeps)
+{
+    //! \todo Check that the value is between 1 and 9. Set if outside the bounds.
+    do {
+        CommandInitialize();
+        CommandAppend("BEEP ");
+        CommandAppend(numberOfBeeps);
+        CommandSend();
+        osaSleep(100.0 * cmn_ms);
+    } while (CheckResponse("0"));  //!< \todo Prints out errors, use a different check response
+    return true;
+}
+
+
+void devNDiSerial::Run(void)
+{
+}
+
+
+
+
+
+
+
+
+
+
+
+#if 0
 
 #if (CISST_OS == CISST_WINDOWS)
 typedef signed char int8_t;
@@ -880,7 +1144,7 @@ void devNDiSerial::ProcessNextCommand() {
         // calls appropriate functions and sets flags, assesses flags etc.
     case ACQUIRE_SERIAL:
         PortIndex = 0;
-        GetSerialNumber(PortHandleResponseBuffer,PortIndex);
+        GetSerialNumber(PortHandlafeResponseBuffer,PortIndex);
         break;
 
     case SERIAL_RESET:
@@ -1426,3 +1690,5 @@ double Tool::GetError(void)
     ToolInformation.GetError(error); 
     return error; 
 }
+
+#endif
