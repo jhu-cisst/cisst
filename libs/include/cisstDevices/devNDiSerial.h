@@ -20,32 +20,18 @@ http://www.cisst.org/cisst/license.txt.
 
 /*!
   \file
-  \brief C++ wrapper for NDI Polaris optical tracker
+  \brief A wrapper for NDI Polaris optical tracker
   \ingroup cisstDevices
 
-  This class is an extension of the mtsTaskPeriodic class. Its goal
-  is to provide an user a nonblocking way to retrieve positional data
-  from a Polaris tracking device.
+  \bug _snprintf in CommandAppend(int) is Windows-dependent
 
-  In discovery mode poll the port handle for its serial and put it into int form.
-  Then Set up the Map like this:
-  int serial;
-  MapPortToTool[portNumber] = MapSerialToTool[serial];
-
-  To Use a Port handle to Set data for an interface:
-  MapPortToTool[portNumber]->SetTranslationAndPosition(x,y,z,a,b,c,d);
-
-  When Freeing a port Number:
-  MapPortToTool[portNumber] = NULL;
-
-  \todo Support for 14400bps, 921600bps and 1228739bps baud rates in osaSerialPort might be required
-  \todo Buffer overflow checking for SendCommand()
-  \todo Handle returning error values?
-  \todo Compare the strings themselves as well as their CRCs
-  \todo Need another CheckResponse(unsigned int n numberOfCharacters), returns true if read n characters and CRCs are good (need a timeout).
-        SerialPortBuffer is populated with return value. The current CheckResponse calls this.
-
-  \bug Don't use _snprintf
+  \todo Missing support for 14400bps, 921600bps and 1228739bps baud rates in osaSerialPort
+  \todo Check for buffer overflow in SendCommand()
+  \todo Handle error values returning from the device
+  \todo Implement a timeout for CheckResponse(), maybe have a CheckTimeout()
+  \todo Handle supported features for different Polaris versions.
+  \todo Check for OKAY, WARNING, ERROR<code>, etc. in CheckRespone()
+  \todo CRC check for CommandSend()
 */
 
 #ifndef _devNDiSerial_h
@@ -62,35 +48,59 @@ class devNDiSerial : public mtsTaskContinuous
 
 public:
     devNDiSerial(const std::string & polarisName, const std::string & serialPort);
+    ~devNDiSerial(void) {};
 
-    void Configure(const std::string & filename) {};
+    void Configure(const std::string & CMN_UNUSED(filename)) {};
     void Startup(void) {};
-    void Run(void);
+    void Run(void) {};
     void Cleanup(void) {};
 
 protected:
-    enum { BUFFER_SIZE = 512 };
+    enum { MAX_BUFFER_SIZE = 512 };
+    enum { CRC_SIZE = 4 };
 
-    bool ResetSerialPort(void);
-    unsigned int ComputeCRC(const char * data);
-    bool CheckResponse(const char * expectedResponse, double timeOut = 3.0 * cmn_s);
+    size_t GetSerialBufferSize(void) const {
+        return SerialBufferPointer - SerialBuffer;
+    }
+    size_t GetSerialBufferAvailableSize(void) const {
+        return MAX_BUFFER_SIZE - GetSerialBufferSize();
+    }
+    size_t GetSerialBufferStringSize(void) const {
+        if (*(SerialBufferPointer - 1) == '\0') {
+            return GetSerialBufferSize() - 1;
+        }
+        CMN_LOG_CLASS_RUN_ERROR << "GetSerialBufferStringSize: string is not null terminated" << std::endl;
+        return 0;
+    }
 
     void CommandInitialize(void);
     void CommandAppend(const char command);
     void CommandAppend(const char * command);
     void CommandAppend(const unsigned int command);
     bool CommandSend(void);
+    bool CommandSend(const char * command) {
+        CommandInitialize();
+        CommandAppend(command);
+        return CommandSend();
+    }
 
+    bool ResponseRead(void);
+    bool ResponseRead(const char * expectedMessage);
+    unsigned int ComputeCRC(const char * data);
+    bool ResponseCheckCRC(void);
+
+    bool ResetSerialPort(void);
     bool SetSerialPortSettings(osaSerialPort::BaudRateType baudRate,
                                osaSerialPort::CharacterSizeType characterSize,
                                osaSerialPort::ParityCheckingType parityChecking,
                                osaSerialPort::StopBitsType stopBits,
                                osaSerialPort::FlowControlType flowControl);
     bool Beep(unsigned int numberOfBeeps);
+    void Discover(void);
 
     osaSerialPort SerialPort;
-    char SerialPortBuffer[BUFFER_SIZE];
-    char * SerialPortBufferPointer;
+    char SerialBuffer[MAX_BUFFER_SIZE];
+    char * SerialBufferPointer;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(devNDiSerial);

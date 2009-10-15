@@ -39,18 +39,19 @@ int main(void)
     mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
 
     // create tasks
-    devNDiSerial * devNDiSerialTask = new devNDiSerial("devNDiSerial", "COM1");
     devKeyboard * devKeyboardTask = new devKeyboard();
+    devNDiSerial * devNDiSerialTask = new devNDiSerial("devNDiSerial", "COM1");
 
     // add tasks to task manager
-    taskManager->AddTask(devNDiSerialTask);
     taskManager->AddTask(devKeyboardTask);
-    devKeyboardTask->SetQuitKey('q');
+    taskManager->AddTask(devNDiSerialTask);
 
     // create and start all tasks
     taskManager->CreateAll();
     taskManager->StartAll();
 
+    devKeyboardTask->SetQuitKey('q');
+    devKeyboardTask->SetDone(true);  // kill the task
     do {
         osaSleep(10.0 * cmn_ms);
     } while (!devKeyboardTask->Done());

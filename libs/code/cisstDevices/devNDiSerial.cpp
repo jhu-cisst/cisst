@@ -29,19 +29,145 @@ CMN_IMPLEMENT_SERVICES(devNDiSerial);
 devNDiSerial::devNDiSerial(const std::string & taskName, const std::string & serialPort) :
     mtsTaskContinuous(taskName, 5000)
 {
+    memset(SerialBuffer, 0, MAX_BUFFER_SIZE);
+    SerialBufferPointer = SerialBuffer;
+
     SerialPort.SetPortName(serialPort);
     if (!SerialPort.Open()) {
-        CMN_LOG_CLASS_INIT_ERROR << "devNDiSerial: sorry, can't open serial port: " << SerialPort.GetPortName() << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "devNDiSerial: failed to open serial port: " << SerialPort.GetPortName() << std::endl;
     }
     ResetSerialPort();
-    Beep(2);
-    Beep(6);
     SetSerialPortSettings(osaSerialPort::BaudRate115200,
                           osaSerialPort::CharacterSize8,
                           osaSerialPort::ParityCheckingNone,
                           osaSerialPort::StopBitsOne,
                           osaSerialPort::FlowControlNone);
-    Beep(8);
+    Beep(5);
+    Discover();
+}
+
+
+void devNDiSerial::CommandInitialize(void)
+{
+    SerialBufferPointer = SerialBuffer;
+}
+
+
+void devNDiSerial::CommandAppend(const char command)
+{
+    *SerialBufferPointer = command;
+    SerialBufferPointer++;
+}
+
+
+void devNDiSerial::CommandAppend(const char * command)
+{
+    const size_t size = strlen(command);
+    strncpy(SerialBufferPointer, command, size);
+    SerialBufferPointer += size;
+}
+
+
+void devNDiSerial::CommandAppend(unsigned int command)
+{
+    SerialBufferPointer += _snprintf(SerialBufferPointer, GetSerialBufferAvailableSize(), "%d", command);
+}
+
+
+bool devNDiSerial::CommandSend(void)
+{
+    CommandAppend('\r');
+    CommandAppend('\0');
+
+    const size_t bytesToSend = strlen(SerialBuffer);
+    const size_t bytesSent = SerialPort.Write(SerialBuffer, bytesToSend);
+    if (bytesSent != bytesToSend) {
+        CMN_LOG_CLASS_RUN_ERROR << "SendCommand: sent only " << bytesSent << " of " << bytesToSend
+                                << " for command \"" << SerialBuffer << "\"" << std::endl;
+        return false;
+    }
+    CMN_LOG_CLASS_RUN_DEBUG << "SendCommand: successfully sent command \"" << SerialBuffer << "\"" << std::endl;
+    return true;
+}
+
+
+unsigned int devNDiSerial::ComputeCRC(const char * data)
+{
+    static unsigned char oddParity[16] = { 0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0 };
+    unsigned char * dataPointer = (unsigned char *)data;
+    unsigned int temp = 0;
+    unsigned int crc = 0;
+
+    while (*dataPointer) {
+        temp = (*dataPointer ^ (crc & 0xff)) & 0xff;
+        crc >>= 8;
+	
+        if (oddParity[temp & 0x0f] ^ oddParity[temp >> 4]) {
+            crc ^= 0xc001;
+        }
+        temp <<= 6;
+        crc ^= temp;
+        temp <<= 1;
+        crc ^= temp;
+        dataPointer++;
+    }
+    return crc;
+}
+
+
+bool devNDiSerial::ResponseRead(void)
+{
+    SerialBufferPointer = SerialBuffer;
+    do {
+        SerialBufferPointer += SerialPort.Read(SerialBufferPointer, GetSerialBufferAvailableSize());
+    } while (*(SerialBufferPointer - 1) != '\r');
+
+    if (!ResponseCheckCRC()) {
+        return false;
+    }
+    return true;
+}
+
+
+bool devNDiSerial::ResponseRead(const char * expectedMessage)
+{
+    ResponseRead();
+
+    if (strncmp(expectedMessage, SerialBuffer, GetSerialBufferStringSize()) != 0) {
+        CMN_LOG_CLASS_RUN_ERROR << "ResponseRead: expected \"" << expectedMessage
+                                << "\", but received \"" << SerialBuffer << "\"" << std::endl;
+        return false;
+    }
+    CMN_LOG_CLASS_RUN_DEBUG << "ResponseRead: received expected response" << std::endl;
+    return true;
+}
+
+
+
+bool devNDiSerial::ResponseCheckCRC(void)
+{
+    char receivedCRC[CRC_SIZE + 1];
+    char computedCRC[CRC_SIZE + 1];
+    char * crcPointer = SerialBufferPointer - (CRC_SIZE + 1);  // +1 for '\r'
+
+    // extract CRC from buffer
+    strncpy(receivedCRC, crcPointer, CRC_SIZE);
+    receivedCRC[CRC_SIZE] = '\0';
+    *crcPointer = '\0';
+    SerialBufferPointer = crcPointer + 1;
+
+    // compute CRC
+    sprintf(computedCRC, "%04X", ComputeCRC(SerialBuffer));
+    computedCRC[CRC_SIZE] = '\0';
+
+    // compare CRCs
+    if (strncmp(receivedCRC, computedCRC, CRC_SIZE) != 0) {
+        CMN_LOG_CLASS_RUN_ERROR << "ResponseCheckCRC: received \"" << SerialBuffer << receivedCRC
+                                << "\", but computed \"" << computedCRC << "\" for CRC" << std::endl;
+        return false;
+    }
+    CMN_LOG_CLASS_RUN_DEBUG << "ResponseCheckCRC: CRC check was successful for \"" << SerialBuffer << "\"" << std::endl;
+    return true;
 }
 
 
@@ -57,118 +183,10 @@ bool devNDiSerial::ResetSerialPort(void)
     SerialPort.SetFlowControl(osaSerialPort::FlowControlNone);
     SerialPort.Configure();
 
-    if (!CheckResponse("RESET")) {
+    if (!ResponseRead("RESET")) {
         CMN_LOG_CLASS_INIT_ERROR << "ResetSerialPort: failed to reset" << std::endl;
         return false;
     }
-    return true;
-}
-
-
-unsigned int devNDiSerial::ComputeCRC(const char * CRCdata)
-{
-    static unsigned char oddparity[16] = { 0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0 };
-    unsigned Data, uCrc = 0;
-    unsigned char *puch = (unsigned char *)CRCdata;
-
-    while (*puch) {
-        Data = (*puch ^ (uCrc & 0xff)) & 0xff;
-        uCrc >>= 8;
-	
-        if (oddparity[Data & 0x0f] ^ oddparity[Data >> 4]) {
-            uCrc ^= 0xc001;
-        }
-        Data <<= 6;
-        uCrc ^= Data;
-        Data <<= 1;
-        uCrc ^= Data;
-        puch++;
-    }
-    return uCrc;
-}
-
-
-bool devNDiSerial::CheckResponse(const char * expectedResponse, double timeOut)
-{
-    const size_t replySize = strlen(expectedResponse) + 5;  // 4 for the CRC + carriage return
-    CMN_ASSERT(replySize <= BUFFER_SIZE);
-    unsigned int bytesRead = 0;
-    do {
-        bytesRead += SerialPort.Read(SerialPortBuffer + bytesRead, replySize);
-    } while (bytesRead < replySize);
-    // save received CRC in a separate string
-    char receivedCRC[5];
-    strncpy(receivedCRC, SerialPortBuffer + (bytesRead - 5), 4);
-    receivedCRC[4] = '\0';
-
-    // terminate response and compute CRC
-    SerialPortBuffer[bytesRead-5] = '\0';
-    char computedCRC[5];
-    sprintf(computedCRC, "%04X", ComputeCRC(SerialPortBuffer));
-    computedCRC[4] = '\0';
-
-    // compare CRCs
-    if (strncmp(receivedCRC, computedCRC, 4) != 0) {
-        CMN_LOG_CLASS_RUN_ERROR << "CheckResponse: expected \"" << expectedResponse
-                                << "\", received \"" << SerialPortBuffer << receivedCRC
-                                << "\", but computed CRC \"" << computedCRC << "\"" << std::endl;
-        return false;
-    }
-
-    // compare Responses
-    if (strncmp(expectedResponse, SerialPortBuffer, replySize) != 0) {
-        CMN_LOG_CLASS_RUN_ERROR << "CheckResponse: expected \"" << expectedResponse
-                                << "\", but received \"" << SerialPortBuffer << "\" (correct CRCs)" << std::endl;
-        return false;
-    }
-
-    CMN_LOG_CLASS_RUN_DEBUG << "CheckResponse: correctly received \"" << SerialPortBuffer << "\"" << std::endl;
-    return true;
-}
-
-
-void devNDiSerial::CommandInitialize(void)
-{
-    SerialPortBufferPointer = SerialPortBuffer;
-}
-
-
-void devNDiSerial::CommandAppend(const char command)
-{
-    *SerialPortBufferPointer = command;
-    SerialPortBufferPointer++;
-}
-
-
-void devNDiSerial::CommandAppend(const char * command)
-{
-    const size_t size = strlen(command);
-    strncpy(SerialPortBufferPointer, command, size);
-    SerialPortBufferPointer += size;
-}
-
-
-void devNDiSerial::CommandAppend(unsigned int command)
-{
-    //! \todo Verify spaceAvailable
-    const int spaceAvailable = BUFFER_SIZE - (SerialPortBufferPointer - SerialPortBuffer);
-    SerialPortBufferPointer += _snprintf(SerialPortBufferPointer, spaceAvailable, "%d", command);
-}
-
-
-bool devNDiSerial::CommandSend(void)
-{
-    CommandAppend('\r');
-    CommandAppend('\0');
-
-    const size_t bytesToSend = strlen(SerialPortBuffer);
-    const size_t bytesSent = SerialPort.Write(SerialPortBuffer, bytesToSend);
-    if (bytesSent != bytesToSend) {
-        CMN_LOG_CLASS_RUN_ERROR << "SendCommand: sent only " << bytesSent << " of " << bytesToSend
-                                << " for command \"" << SerialPortBuffer << "\"" << std::endl;
-        return false;
-    }
-    CMN_LOG_CLASS_RUN_DEBUG << "SendCommand: successfully sent command \"" << SerialPortBuffer << "\"" << std::endl;
     return true;
 }
 
@@ -199,7 +217,7 @@ bool devNDiSerial::SetSerialPortSettings(osaSerialPort::BaudRateType baudRate,
             CommandAppend('5');
             break;
         default:
-            //! \todo Log here
+            //! \todo Log error
             return false;
             break;
     }
@@ -212,7 +230,7 @@ bool devNDiSerial::SetSerialPortSettings(osaSerialPort::BaudRateType baudRate,
             CommandAppend('1');
             break;
         default:
-            //! \todo Log here
+            //! \todo Log error
             return false;
             break;
     }
@@ -228,7 +246,7 @@ bool devNDiSerial::SetSerialPortSettings(osaSerialPort::BaudRateType baudRate,
             CommandAppend('2');
             break;
         default:
-            //! \todo Log here
+            //! \todo Log error
             return false;
             break;
     }
@@ -241,7 +259,7 @@ bool devNDiSerial::SetSerialPortSettings(osaSerialPort::BaudRateType baudRate,
             CommandAppend('1');
             break;
         default:
-            //! \todo Log here
+            //! \todo Log error
             return false;
             break;
     }
@@ -254,7 +272,7 @@ bool devNDiSerial::SetSerialPortSettings(osaSerialPort::BaudRateType baudRate,
             CommandAppend('1');
             break;
         default:
-            //! \todo Log here
+            //! \todo Log error
             return false;
             break;
     }
@@ -263,7 +281,7 @@ bool devNDiSerial::SetSerialPortSettings(osaSerialPort::BaudRateType baudRate,
         return false;
     }
 
-    if (CheckResponse("OKAY")) {
+    if (ResponseRead("OKAY")) {
         osaSleep(200.0 * cmn_ms);
         SerialPort.SetBaudRate(baudRate);
         SerialPort.SetCharacterSize(characterSize);
@@ -279,27 +297,35 @@ bool devNDiSerial::SetSerialPortSettings(osaSerialPort::BaudRateType baudRate,
 
 bool devNDiSerial::Beep(unsigned int numberOfBeeps)
 {
-    //! \todo Check that the value is between 1 and 9. Set if outside the bounds.
+    //! \todo Check that the value is between 1 and 9. Warn and limit to bounds if not.
+
     do {
         CommandInitialize();
         CommandAppend("BEEP ");
         CommandAppend(numberOfBeeps);
         CommandSend();
         osaSleep(100.0 * cmn_ms);
-    } while (CheckResponse("0"));  //!< \todo Prints out errors, use a different check response
+        if (!ResponseRead()) {
+            return false;
+        }
+    } while (strncmp("0", SerialBuffer, 1) == 0);
+
+    if (strncmp("1", SerialBuffer, 1) != 0) {
+        CMN_LOG_CLASS_RUN_ERROR << "Beep: unknown response received: " << SerialBuffer << std::endl;
+        return false;
+    }
     return true;
 }
 
 
-void devNDiSerial::Run(void)
+void devNDiSerial::Discover(void)
 {
+    CommandSend("INIT ");
+    ResponseRead("OKAY");
+    CommandSend("PHSR 02");
+    ResponseRead();
+    CMN_LOG_CLASS_RUN_DEBUG << SerialBuffer << std::endl;
 }
-
-
-
-
-
-
 
 
 
