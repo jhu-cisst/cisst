@@ -32,6 +32,10 @@ http://www.cisst.org/cisst/license.txt.
   \todo Handle supported features for different Polaris versions.
   \todo Check for OKAY, WARNING, ERROR<code>, etc. in CheckRespone()
   \todo CRC check for CommandSend()
+  \todo Pretty print for SerialNumber, to extract date, etc.
+  \todo Probe-SN for unknown tools, otherwise use the interface name provided
+  \todo Check if correct number of items are scanned using sscanf
+  \todo Overload Tool class to have a stream
 */
 
 #ifndef _devNDiSerial_h
@@ -40,11 +44,33 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnUnits.h>
 #include <cisstOSAbstraction/osaSerialPort.h>
 #include <cisstMultiTask/mtsTaskContinuous.h>
+#include <cisstParameterTypes/prmPositionCartesianGet.h>
 
 
 class devNDiSerial : public mtsTaskContinuous
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+
+protected:
+    class Tool
+    {
+        public:
+            Tool(void);
+            ~Tool(void) {};
+
+            std::string Name;
+            mtsProvidedInterface * Interface;
+            prmPositionCartesianGet Position;
+
+            char PortHandle[3];
+            // PHINF 0001
+            char MainType[3];
+            char ManufacturerID[13];
+            char ToolRevision[4];
+            char SerialNumber[9];
+            // PHINF 0004
+            char PartNumber[21];
+    };
 
 public:
     devNDiSerial(const std::string & polarisName, const std::string & serialPort);
@@ -96,11 +122,18 @@ protected:
                                osaSerialPort::StopBitsType stopBits,
                                osaSerialPort::FlowControlType flowControl);
     bool Beep(unsigned int numberOfBeeps);
-    void Discover(void);
+
+    void PortHandlesInitialize(void);
+    void PortHandlesQuery(void);
+    void PortHandlesEnable(void);
 
     osaSerialPort SerialPort;
     char SerialBuffer[MAX_BUFFER_SIZE];
     char * SerialBufferPointer;
+
+    typedef cmnNamedMap<Tool> ToolsMapType;
+    ToolsMapType ToolsMap;
+    cmnNamedMap<Tool> PortToTool;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(devNDiSerial);

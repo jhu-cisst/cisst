@@ -20,6 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstDevices/devNDiSerial.h>
+#include <cisstVector/vctFixedSizeVectorTypes.h>
 
 #include <cstdio>
 
@@ -42,8 +43,12 @@ devNDiSerial::devNDiSerial(const std::string & taskName, const std::string & ser
                           osaSerialPort::ParityCheckingNone,
                           osaSerialPort::StopBitsOne,
                           osaSerialPort::FlowControlNone);
-    Beep(5);
-    Discover();
+
+    CommandSend("INIT ");
+    ResponseRead("OKAY");
+    PortHandlesInitialize();
+    PortHandlesQuery();
+    PortHandlesEnable();
 }
 
 
@@ -157,7 +162,7 @@ bool devNDiSerial::ResponseCheckCRC(void)
     SerialBufferPointer = crcPointer + 1;
 
     // compute CRC
-    sprintf(computedCRC, "%04X", ComputeCRC(SerialBuffer));
+    sprintf(computedCRC, "%4X", ComputeCRC(SerialBuffer));
     computedCRC[CRC_SIZE] = '\0';
 
     // compare CRCs
@@ -318,14 +323,191 @@ bool devNDiSerial::Beep(unsigned int numberOfBeeps)
 }
 
 
-void devNDiSerial::Discover(void)
+void devNDiSerial::PortHandlesInitialize(void)
 {
-    CommandSend("INIT ");
-    ResponseRead("OKAY");
+    char * parsePointer;
+    unsigned int nPortHandles = 0;
+    std::vector<vctChar3> portHandles;
+
+    CommandSend("PHSR 01");
+    ResponseRead();
+    parsePointer = SerialBuffer;
+    sscanf(parsePointer, "%2X", &nPortHandles);
+    parsePointer += 2;
+    portHandles.resize(nPortHandles);
+    for (unsigned int i = 0; i < portHandles.size(); i++) {
+        sscanf(parsePointer, "%2c%*3c", portHandles[i].Pointer());
+        parsePointer += 5;
+        portHandles[i][2] = '\0';
+    }
+    for (unsigned int i = 0; i < portHandles.size(); i++) {
+        CommandInitialize();
+        CommandAppend("PHF ");
+        CommandAppend(portHandles[i].Pointer());
+        CommandSend();
+        ResponseRead("OKAY");
+        CMN_LOG_CLASS_RUN_DEBUG << "PortHandlesInitialize: freed port handle: " << portHandles[i].Pointer() << std::endl;
+    }
+
     CommandSend("PHSR 02");
     ResponseRead();
-    CMN_LOG_CLASS_RUN_DEBUG << SerialBuffer << std::endl;
+    parsePointer = SerialBuffer;
+    sscanf(parsePointer, "%2X", &nPortHandles);
+    parsePointer += 2;
+    portHandles.resize(nPortHandles);
+    for (unsigned int i = 0; i < portHandles.size(); i++) {
+        sscanf(parsePointer, "%2c%*3c", portHandles[i].Pointer());
+        parsePointer += 5;
+        portHandles[i][2] = '\0';
+    }
+    for (unsigned int i = 0; i < portHandles.size(); i++) {
+        CommandInitialize();
+        CommandAppend("PINIT ");
+        CommandAppend(portHandles[i].Pointer());
+        CommandSend();
+        ResponseRead("OKAY");
+        CMN_LOG_CLASS_RUN_DEBUG << "PortHandlesInitialize: initialized port handle: " << portHandles[i].Pointer() << std::endl;
+    }
 }
+
+
+void devNDiSerial::PortHandlesQuery(void)
+{
+    char * parsePointer;
+    unsigned int nPortHandles = 0;
+    std::vector<vctChar3> portHandles;
+
+    CommandSend("PHSR 00");
+    ResponseRead();
+    parsePointer = SerialBuffer;
+    sscanf(parsePointer, "%2X", &nPortHandles);
+    parsePointer += 2;
+    portHandles.resize(nPortHandles);
+    for (unsigned int i = 0; i < portHandles.size(); i++) {
+        sscanf(parsePointer, "%2c%*3c", portHandles[i].Pointer());
+        parsePointer += 5;
+        portHandles[i][2] = '\0';
+    }
+    CMN_LOG_CLASS_INIT_DEBUG << "PortHandlesQuery: " << portHandles.size() << " tools are plugged in" << std::endl;
+
+
+    Tool * tool;
+    std::string toolKey;
+    PortToTool.clear();
+    char mainType[3];
+    mainType[2] = '\0';
+    char serialNumber[9];
+    serialNumber[8] = '\0';
+
+    for (unsigned int i = 0; i < portHandles.size(); i++) {
+        CommandInitialize();
+        CommandAppend("PHINF ");
+        CommandAppend(portHandles[i].Pointer());
+        CommandAppend("0005");
+        CommandSend();
+        ResponseRead();
+        sscanf(SerialBuffer, "%2c%*1X%*1X%*2c%*2c%*12c%*3c%8c%*2c%*20c",
+               mainType, serialNumber);
+
+        // find the tool with this serial number if it exists, or create one
+        tool = 0;
+        const ToolsMapType::const_iterator end = ToolsMap.end();
+        ToolsMapType::const_iterator toolIterator;
+        for (toolIterator = ToolsMap.begin(); toolIterator != end; ++toolIterator) {
+            if (strncmp((toolIterator->second)->SerialNumber, serialNumber, 8) == 0) {
+                tool = toolIterator->second;
+                CMN_LOG_CLASS_INIT_DEBUG << "PortHandlesQuery: found existing tool for serial number: " << serialNumber << std::endl;
+            }
+        }
+        if (!tool) {
+            CMN_LOG_CLASS_INIT_VERBOSE << "PortHandlesQuery: creating tool for serial number: " << serialNumber << std::endl;
+            tool = new Tool();
+            tool->Name.assign(mainType);
+            tool->Name += '-';
+            tool->Name.append(serialNumber);
+            ToolsMap.AddItem(tool->Name, tool, CMN_LOG_LOD_INIT_ERROR);
+        }
+
+        // update tool information
+        sscanf(SerialBuffer, "%2c%*1X%*1X%*2c%*2c%12c%3c%8c%*2c%20c",
+               tool->MainType, tool->ManufacturerID, tool->ToolRevision, tool->SerialNumber, tool->PartNumber);
+        strncpy(tool->PortHandle, portHandles[i].Pointer(), 2);
+
+        // associate the tool to its port handle
+        toolKey = portHandles[i].Pointer();
+        CMN_LOG_CLASS_INIT_VERBOSE << "PortHandlesQuery: associating tool " << tool->Name << " to port handle " << tool->PortHandle << std::endl;
+        PortToTool.AddItem(toolKey, tool, CMN_LOG_LOD_INIT_ERROR);
+
+        CMN_LOG_CLASS_INIT_DEBUG << "PortHandlesQuery:\n"
+                                 << " * Port Handle: " << tool->PortHandle << "\n"
+                                 << " * Main Type: " << tool->MainType << "\n"
+                                 << " * Manufacturer ID: " << tool->ManufacturerID << "\n"
+                                 << " * Tool Revision: " << tool->ToolRevision << "\n"
+                                 << " * Serial Number: " << tool->SerialNumber << "\n"
+                                 << " * Part Number: " << tool->PartNumber << std::endl;
+    }
+}
+
+
+void devNDiSerial::PortHandlesEnable(void)
+{
+    char * parsePointer;
+    unsigned int nPortHandles = 0;
+    std::vector<vctChar3> portHandles;
+
+    CommandSend("PHSR 03");
+    ResponseRead();
+    parsePointer = SerialBuffer;
+    sscanf(parsePointer, "%2X", &nPortHandles);
+    parsePointer += 2;
+    portHandles.resize(nPortHandles);
+    for (unsigned int i = 0; i < portHandles.size(); i++) {
+        sscanf(parsePointer, "%2c%*3c", portHandles[i].Pointer());
+        parsePointer += 5;
+        portHandles[i][2] = '\0';
+    }
+    for (unsigned int i = 0; i < portHandles.size(); i++) {
+        CommandInitialize();
+        CommandAppend("PENA ");
+        CommandAppend(portHandles[i].Pointer());
+
+        Tool * tool;
+        std::string toolKey = portHandles[i].Pointer();
+        tool = PortToTool.GetItem(toolKey);
+        if (!tool) {
+            //! \todo Do error recovery
+            CMN_LOG_CLASS_RUN_ERROR << "PortHandlesEnable: no tool for port handle: " << toolKey << std::endl;
+            return;
+        }
+
+        if (strncpy(tool->MainType, "01", 2) == 0) {
+            CommandAppend("S");
+        } else if (strncpy(tool->MainType, "02", 2) == 0) {
+            CommandAppend("D");
+        } else if (strncpy(tool->MainType, "03", 2) == 0) {
+            CommandAppend("B");
+        } else {
+            //!< \todo Handle other main types of tools
+            CMN_LOG_CLASS_RUN_ERROR << "PortHandlesEnable: unknown tool of main type: " << tool->MainType << std::endl;
+            return;
+        }
+        CommandSend();
+        ResponseRead("OKAY");
+        CMN_LOG_CLASS_RUN_DEBUG << "PortHandlesEnable: enabled port handle: " << portHandles[i].Pointer() << std::endl;
+    }
+}
+
+
+devNDiSerial::Tool::Tool(void)
+{
+    PortHandle[2] = '\0';
+    MainType[2] = '\0';
+    ManufacturerID[12] = '\0';
+    ToolRevision[3] = '\0';
+    SerialNumber[8] = '\0';
+    PartNumber[20] = '\0';
+}
+
 
 
 
