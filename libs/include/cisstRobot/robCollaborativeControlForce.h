@@ -39,8 +39,7 @@ public:
         CMN_DECLARE_MEMBER_AND_ACCESSORS(double, ForceFeedbackRatio); //ForceMasterCoefficient
         CMN_DECLARE_MEMBER_AND_ACCESSORS(double, LinearGainMaster); //ScaleFactor
         CMN_DECLARE_MEMBER_AND_ACCESSORS(double, LinearGainSlave);
-        CMN_DECLARE_MEMBER_AND_ACCESSORS(double, ForceLimit); // FMax
-        CMN_DECLARE_MEMBER_AND_ACCESSORS(double, ErrorLimit);
+        CMN_DECLARE_MEMBER_AND_ACCESSORS(double, PositionLimit); // FMax
         CMN_DECLARE_MEMBER_AND_ACCESSORS(double, MasterToSlaveScale);
     public:
         /*! Human readable output to stream. */
@@ -121,6 +120,7 @@ protected:
     int         ClutchMode;
     double      ForceFeedNormMaster;
     double      ForceFeedNormSlave;
+    vctFrm3 RelativeTransform;
 
     CMN_DECLARE_MEMBER_AND_ACCESSORS(bool, ApplicationMasterClutch);
     CMN_DECLARE_MEMBER_AND_ACCESSORS(bool, ApplicationSlaveClutch);
