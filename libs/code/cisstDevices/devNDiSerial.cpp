@@ -49,6 +49,7 @@ devNDiSerial::devNDiSerial(const std::string & taskName, const std::string & ser
     PortHandlesInitialize();
     PortHandlesQuery();
     PortHandlesEnable();
+    ToggleTracking(true);
 }
 
 
@@ -162,7 +163,7 @@ bool devNDiSerial::ResponseCheckCRC(void)
     SerialBufferPointer = crcPointer + 1;
 
     // compute CRC
-    sprintf(computedCRC, "%4X", ComputeCRC(SerialBuffer));
+    sprintf(computedCRC, "%04X", ComputeCRC(SerialBuffer));
     computedCRC[CRC_SIZE] = '\0';
 
     // compare CRCs
@@ -332,7 +333,7 @@ void devNDiSerial::PortHandlesInitialize(void)
     CommandSend("PHSR 01");
     ResponseRead();
     parsePointer = SerialBuffer;
-    sscanf(parsePointer, "%2X", &nPortHandles);
+    sscanf(parsePointer, "%02X", &nPortHandles);
     parsePointer += 2;
     portHandles.resize(nPortHandles);
     for (unsigned int i = 0; i < portHandles.size(); i++) {
@@ -352,7 +353,7 @@ void devNDiSerial::PortHandlesInitialize(void)
     CommandSend("PHSR 02");
     ResponseRead();
     parsePointer = SerialBuffer;
-    sscanf(parsePointer, "%2X", &nPortHandles);
+    sscanf(parsePointer, "%02X", &nPortHandles);
     parsePointer += 2;
     portHandles.resize(nPortHandles);
     for (unsigned int i = 0; i < portHandles.size(); i++) {
@@ -380,15 +381,15 @@ void devNDiSerial::PortHandlesQuery(void)
     CommandSend("PHSR 00");
     ResponseRead();
     parsePointer = SerialBuffer;
-    sscanf(parsePointer, "%2X", &nPortHandles);
+    sscanf(parsePointer, "%02X", &nPortHandles);
     parsePointer += 2;
+    CMN_LOG_CLASS_INIT_DEBUG << "PortHandlesQuery: " << nPortHandles << " tools are plugged in" << std::endl;
     portHandles.resize(nPortHandles);
     for (unsigned int i = 0; i < portHandles.size(); i++) {
         sscanf(parsePointer, "%2c%*3c", portHandles[i].Pointer());
         parsePointer += 5;
         portHandles[i][2] = '\0';
     }
-    CMN_LOG_CLASS_INIT_DEBUG << "PortHandlesQuery: " << portHandles.size() << " tools are plugged in" << std::endl;
 
 
     Tool * tool;
@@ -458,7 +459,7 @@ void devNDiSerial::PortHandlesEnable(void)
     CommandSend("PHSR 03");
     ResponseRead();
     parsePointer = SerialBuffer;
-    sscanf(parsePointer, "%2X", &nPortHandles);
+    sscanf(parsePointer, "%02X", &nPortHandles);
     parsePointer += 2;
     portHandles.resize(nPortHandles);
     for (unsigned int i = 0; i < portHandles.size(); i++) {
@@ -480,11 +481,11 @@ void devNDiSerial::PortHandlesEnable(void)
             return;
         }
 
-        if (strncpy(tool->MainType, "01", 2) == 0) {
+        if (strncmp(tool->MainType, "01", 2) == 0) {
             CommandAppend("S");
-        } else if (strncpy(tool->MainType, "02", 2) == 0) {
+        } else if (strncmp(tool->MainType, "02", 2) == 0) {
             CommandAppend("D");
-        } else if (strncpy(tool->MainType, "03", 2) == 0) {
+        } else if (strncmp(tool->MainType, "03", 2) == 0) {
             CommandAppend("B");
         } else {
             //!< \todo Handle other main types of tools
@@ -495,6 +496,96 @@ void devNDiSerial::PortHandlesEnable(void)
         ResponseRead("OKAY");
         CMN_LOG_CLASS_RUN_DEBUG << "PortHandlesEnable: enabled port handle: " << portHandles[i].Pointer() << std::endl;
     }
+}
+
+
+void devNDiSerial::ToggleTracking(const bool track)
+{
+    if (track) {
+        CommandSend("TSTART 80");
+    } else {
+        CommandSend("TSTOP ");
+    }
+    ResponseRead("OKAY");
+}
+
+
+void devNDiSerial::Track(void)
+{
+    char * parsePointer;
+    unsigned int nPortHandles = 0;
+    char portHandle[3];
+    portHandle[2] = '\0';
+    std::string toolKey;
+    Tool * tool;
+    vctQuatRot3 toolOrientation;
+    vct3 toolPosition;
+
+    CommandSend("TX 0001");
+    ResponseRead();
+    parsePointer = SerialBuffer;
+    sscanf(parsePointer, "%02X", &nPortHandles);
+    parsePointer += 2;
+    CMN_LOG_CLASS_RUN_DEBUG << "Track: tracking " << nPortHandles << " tools" << std::endl;
+    for (unsigned int i = 0; i < nPortHandles; i++) {
+        sscanf(parsePointer, "%2c", portHandle);
+        parsePointer += 2;
+        toolKey = portHandle;
+        tool = PortToTool.GetItem(toolKey);
+        if (!tool) {
+            //! \todo Do error recovery
+            CMN_LOG_CLASS_RUN_ERROR << "Track: no tool for port handle: " << toolKey << std::endl;
+            return;
+        }
+
+        if (strncmp(parsePointer, "MISSING", 7) == 0) {
+            CMN_LOG_CLASS_RUN_WARNING << parsePointer << std::endl;
+            CMN_LOG_CLASS_RUN_WARNING << "Track: tool " << tool->Name << " is missing" << std::endl;
+            tool->Position.SetValid(false);
+            parsePointer += 7;
+            parsePointer += 8;  // skip Port Status
+        } else if (strncmp(parsePointer, "DISABLED", 8) == 0) {
+            CMN_LOG_CLASS_RUN_WARNING << "Track: tool " << tool->Name << " is disabled" << std::endl;
+            tool->Position.SetValid(false);
+            parsePointer += 8;
+            parsePointer += 8;  // skip Port Status
+        } else if (strncmp(parsePointer, "UNOCCUPIED", 10) == 0) {
+            CMN_LOG_CLASS_RUN_WARNING << "Track: tool " << tool->Name << " is unoccupied" << std::endl;
+            tool->Position.SetValid(false);
+            parsePointer += 10;
+            parsePointer += 8;  // skip Port Status
+        } else {
+            //! \todo Parse Port Status here, to get "partially out of volume", etc.
+            sscanf(parsePointer, "%6lf%6lf%6lf%6lf%7lf%7lf%7lf%6lf%*8X",
+                   &(toolOrientation.W()), &(toolOrientation.X()), &(toolOrientation.Y()), &(toolOrientation.Z()),
+                   &(toolPosition.X()), &(toolPosition.Y()), &(toolPosition.Z()),
+                   &(tool->ErrorRMS));
+            parsePointer += (4 * 6) + (3 * 7) + 6 + 8;
+            toolOrientation.Divide(10000.0);
+            tool->Position.Position().Rotation().FromRaw(toolOrientation);
+            toolPosition.Divide(100.0);
+            tool->Position.Position().Translation().Assign(toolPosition);
+            tool->ErrorRMS /= 10000.0;
+
+            CMN_LOG_CLASS_RUN_DEBUG << "Track: orientation (rad): " << vctAxAnRot3(toolOrientation, VCT_DO_NOT_NORMALIZE) << std::endl;
+            CMN_LOG_CLASS_RUN_DEBUG << "Track: translation (mm): " << toolPosition << std::endl;
+        }
+        sscanf(parsePointer, "%08X", &(tool->FrameNumber));
+        CMN_LOG_CLASS_RUN_DEBUG << "Track: frame number: " << tool->FrameNumber << std::endl;
+        if (*parsePointer != '\n') {
+            CMN_LOG_CLASS_RUN_ERROR << "Track: line feed expected, received: " << *parsePointer << std::endl;
+            return;
+        }
+        parsePointer += 1;  // skip '\n'
+        //! \todo Parse System Status here
+        parsePointer += 4;  // skip System Status
+    }
+}
+
+
+void devNDiSerial::Run(void)
+{
+    Track();
 }
 
 

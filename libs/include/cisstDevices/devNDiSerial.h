@@ -36,6 +36,8 @@ http://www.cisst.org/cisst/license.txt.
   \todo Probe-SN for unknown tools, otherwise use the interface name provided
   \todo Check if correct number of items are scanned using sscanf
   \todo Overload Tool class to have a stream
+  \todo Implement an "adaptive sleep" for the run method
+  \todo Every scanf should have checking of number of items read (a wrapper for sscanf?)
 */
 
 #ifndef _devNDiSerial_h
@@ -59,6 +61,8 @@ protected:
             ~Tool(void) {};
 
             std::string Name;
+            unsigned int FrameNumber;
+            double ErrorRMS;
             mtsProvidedInterface * Interface;
             prmPositionCartesianGet Position;
 
@@ -78,7 +82,7 @@ public:
 
     void Configure(const std::string & CMN_UNUSED(filename)) {};
     void Startup(void) {};
-    void Run(void) {};
+    void Run(void);
     void Cleanup(void) {};
 
 protected:
@@ -126,6 +130,9 @@ protected:
     void PortHandlesInitialize(void);
     void PortHandlesQuery(void);
     void PortHandlesEnable(void);
+
+    void ToggleTracking(const bool track);
+    void Track(void);
 
     osaSerialPort SerialPort;
     char SerialBuffer[MAX_BUFFER_SIZE];

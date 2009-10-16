@@ -51,7 +51,6 @@ int main(void)
     taskManager->StartAll();
 
     devKeyboardTask->SetQuitKey('q');
-    devKeyboardTask->SetDone(true);  // kill the task
     do {
         osaSleep(100.0 * cmn_ms);
     } while (!devKeyboardTask->Done());
