@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):  Eric Lin, Joseph Vidalis
-  Created on: 2008-09-10
+  Author(s):  Anton Deguet, Ali Uneri
+  Created on: 2009-10-13
 
-  (C) Copyright 2008 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -26,18 +26,17 @@ http://www.cisst.org/cisst/license.txt.
   \bug _snprintf in CommandAppend(int) is Windows-dependent
 
   \todo Missing support for 14400bps, 921600bps and 1228739bps baud rates in osaSerialPort
-  \todo Check for buffer overflow in SendCommand()
-  \todo Handle error values returning from the device
-  \todo Implement a timeout for CheckResponse(), maybe have a CheckTimeout()
+  \todo Check for buffer overflow in CommandAppend()
+  \todo Handle error values returned from the device
+  \todo Implement a timeout for CheckResponse(), maybe have a CheckTimeout() method?
   \todo Handle supported features for different Polaris versions.
-  \todo Check for OKAY, WARNING, ERROR<code>, etc. in CheckRespone()
-  \todo CRC check for CommandSend()
+  \todo Implement CRC check for CommandSend()
   \todo Pretty print for SerialNumber, to extract date, etc.
-  \todo Probe-SN for unknown tools, otherwise use the interface name provided
-  \todo Check if correct number of items are scanned using sscanf
   \todo Overload Tool class to have a stream
   \todo Implement an "adaptive sleep" for the run method
-  \todo Every scanf should have checking of number of items read (a wrapper for sscanf?)
+  \todo Every sscanf() should check if valid number of items have been read (wrapper for sscanf?)
+  \todo Main Type to human readable provided method
+  \todo Error handling for all strncpy()
 */
 
 #ifndef _devNDiSerial_h
@@ -88,6 +87,8 @@ public:
 protected:
     enum { MAX_BUFFER_SIZE = 512 };
     enum { CRC_SIZE = 4 };
+
+    Tool * AddTool(const std::string & name, const char * serialNumber);
 
     size_t GetSerialBufferSize(void) const {
         return SerialBufferPointer - SerialBuffer;

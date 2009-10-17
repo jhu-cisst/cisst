@@ -4,8 +4,8 @@
 /*
   $Id$
 
-  Author(s):  Eric Lin, Joseph Vidalis
-  Created on: 2008-09-10
+  Author(s):  Anton Deguet, Ali Uneri
+  Created on: 2009-10-13
 
   (C) Copyright 2008 Johns Hopkins University (JHU), All Rights Reserved.
 
@@ -50,6 +50,29 @@ devNDiSerial::devNDiSerial(const std::string & taskName, const std::string & ser
     PortHandlesQuery();
     PortHandlesEnable();
     ToggleTracking(true);
+}
+
+
+devNDiSerial::Tool * devNDiSerial::AddTool(const std::string & name, const char * serialNumber)
+{
+    Tool * tool = new Tool();
+    tool->Name = name;
+    strncpy(tool->SerialNumber, serialNumber, 8);
+    if (!ToolsMap.AddItem(tool->Name, tool, CMN_LOG_LOD_INIT_ERROR)) {
+        CMN_LOG_CLASS_INIT_ERROR << "AddTool: no tool created, duplicate name exists: " << name << std::endl;
+        delete tool;
+        return 0;
+    }
+    CMN_LOG_CLASS_INIT_VERBOSE << "AddTool: created tool \"" << name << "\" with serial number: " << serialNumber << std::endl;
+
+    // create an interface for tool
+    StateTable.AddData(tool->Position, name + "Position");
+    tool->Interface = AddProvidedInterface(name);
+    if (tool->Interface) {
+        tool->Interface->AddCommandReadState(StateTable, tool->Position, "GetPositionCartesian");
+    }
+
+    return tool;
 }
 
 
@@ -391,7 +414,6 @@ void devNDiSerial::PortHandlesQuery(void)
         portHandles[i][2] = '\0';
     }
 
-
     Tool * tool;
     std::string toolKey;
     PortToTool.clear();
@@ -421,17 +443,14 @@ void devNDiSerial::PortHandlesQuery(void)
             }
         }
         if (!tool) {
-            CMN_LOG_CLASS_INIT_VERBOSE << "PortHandlesQuery: creating tool for serial number: " << serialNumber << std::endl;
-            tool = new Tool();
-            tool->Name.assign(mainType);
-            tool->Name += '-';
-            tool->Name.append(serialNumber);
-            ToolsMap.AddItem(tool->Name, tool, CMN_LOG_LOD_INIT_ERROR);
+            std::string name;
+            name = std::string(mainType) + '-' + std::string(serialNumber);
+            tool = AddTool(name, serialNumber);
         }
 
         // update tool information
-        sscanf(SerialBuffer, "%2c%*1X%*1X%*2c%*2c%12c%3c%8c%*2c%20c",
-               tool->MainType, tool->ManufacturerID, tool->ToolRevision, tool->SerialNumber, tool->PartNumber);
+        sscanf(SerialBuffer, "%2c%*1X%*1X%*2c%*2c%12c%3c%*8c%*2c%20c",
+               tool->MainType, tool->ManufacturerID, tool->ToolRevision, tool->PartNumber);
         strncpy(tool->PortHandle, portHandles[i].Pointer(), 2);
 
         // associate the tool to its port handle

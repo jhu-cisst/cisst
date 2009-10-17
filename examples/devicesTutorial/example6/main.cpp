@@ -57,11 +57,7 @@ int main(void)
 
     // kill all tasks
     taskManager->KillAll();
-    osaSleep(100.0 * cmn_ms);
     taskManager->Cleanup();
-    osaSleep(100.0 * cmn_ms);
-
-    CMN_LOG_INIT_WARNING << "main: end of program" << std::endl;
 
     return 0;
 }
