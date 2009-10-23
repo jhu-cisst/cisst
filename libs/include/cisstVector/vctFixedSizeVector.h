@@ -265,6 +265,40 @@ class vctFixedSizeVector : public vctFixedSizeVectorBase<
         return *this;
     }
 
+    /*! Read from an unformatted text input (e.g., one created by ToStreamRaw).
+      Returns true if successful. */
+    bool FromStreamRaw(std::istream & inputStream, const char delimiter = ' ')
+    {
+        _elementType temp[_size];
+        size_type index;
+        bool valid = true;
+        for (index = 0; index < _size; index++) {
+            inputStream >> temp[index];  // assumes that operator >> is defined for _elementType
+            if (inputStream.fail()) {
+                valid = false;
+                inputStream.clear();
+                break;
+            }
+            // Now, look for the delimiter
+            if (!isspace(delimiter)) {
+                if (index < _size-1) {
+                    char c;
+                    inputStream >> c;
+                    if (c != delimiter) {
+                        valid = false;
+                        break;
+                    }
+                }
+            }
+        }
+        if (valid) {
+            // Only update the object if the parsing was successful for all elements.
+            for (index = 0; index < _size; index++)
+                (*this)[index] = temp[index];
+        }
+        return valid;
+    }
+
     /*! Binary deserialization */
     void DeSerializeRaw(std::istream & inputStream)
     {

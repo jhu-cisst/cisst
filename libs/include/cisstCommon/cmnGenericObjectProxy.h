@@ -136,6 +136,14 @@ public:
         }
     }
 
+    /*! From stream raw data. */
+    inline virtual bool FromStreamRaw(std::istream & inputStream, const char CMN_UNUSED(delimiter) = ' ') {
+        inputStream >> this->Data;  // assumes that operator >> is defined for _elementType
+        bool valid = inputStream.good();
+        if (!valid) inputStream.clear();
+        return valid;
+    }
+
 };
 
 /* Some basic types defined here for now, could move somewhere

@@ -58,6 +58,13 @@ void cmnGenericObject::ToStreamRaw(std::ostream & outputStream, const char CMN_U
 }
 
 
+bool cmnGenericObject::FromStreamRaw(std::istream & CMN_UNUSED(inputStream),
+                                     const char CMN_UNUSED(delimiter))
+{
+    return false;
+}
+
+
 void cmnGenericObject::SerializeRaw(std::ostream & CMN_UNUSED(outputStream)) const {
     CMN_LOG_CLASS_RUN_ERROR << "No serialization implemented for: " << Services()->GetName();
 }

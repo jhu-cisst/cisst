@@ -89,13 +89,17 @@ public:
       This method must be overloaded to provide a useful message. */
     virtual void ToStream(std::ostream & outputStream) const;
 
-    /*! Non formated text output.  Delimiter can be used to create CSV
+    /*! Unformatted text output.  Delimiter can be used to create CSV
       data files if the object requires multiple values (e.g. vector,
       matrix, ).  When headerOnly is set to true, the method should
       create a label for each value (e.g. v1, v2, v3).  The prefix can
       be used to generated a more useful label (e.g. position-v1) */
     virtual void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
                              bool headerOnly = false, const std::string & headerPrefix = "") const;
+
+    /*! Read from an unformatted text input (e.g., one created by ToStreamRaw).
+      Returns true if successful. */
+    virtual bool FromStreamRaw(std::istream & inputStream, const char delimiter = ' ');
 
     /*! Serialize the content of the object without any extra
         information, i.e. no class type nor format version.  The
