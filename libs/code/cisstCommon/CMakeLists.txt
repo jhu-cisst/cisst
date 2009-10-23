@@ -30,6 +30,7 @@ SET(SOURCE_FILES
     cmnPortability.cpp
     cmnRandomSequence.cpp
     cmnSerializer.cpp
+    cmnStreamRawParser.cpp
     cmnPath.cpp
     cmnPrintf.cpp
     cmnTokenizer.cpp
@@ -65,6 +66,7 @@ SET(HEADER_FILES
     cmnPrintf.h
     cmnRandomSequence.h
     cmnSerializer.h
+    cmnStreamRawParser.h
     cmnPath.h
     cmnThrow.h
     cmnTokenizer.h
