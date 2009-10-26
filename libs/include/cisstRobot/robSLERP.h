@@ -1,38 +1,38 @@
 #ifndef _robSLERP_h
 #define _robSLERP_h
 
-#include <cisstRobot/robFunction.h>
-#include <cisstVector/vctDynamicMatrixTypes.h>
 #include <iostream>
-using namespace std;
-namespace cisstRobot{
 
-  //! Define a spherical linear interpolation function 
-  class robSLERP : public robFunction {
+#include <cisstVector/vctQuaternionRotation3.h>
+#include <cisstVector/vctFrame4x4.h>
 
-  protected:
-    
-    Quaternion qinitial;
-    Quaternion qfinal;
-    R3 w;               
-    Real xmin, xmax;
+#include <cisstRobot/robFunction.h>
 
-  public:
+//! Define a spherical linear interpolation function 
+class robSLERP : public robFunction {
 
-    //! hack...
-    Real Duration() const { return xmax-xmin; }
+protected:
     
-    //! Create a SLERP between ti and tf
-    robSLERP( Real ti, const SE3& Ri, Real tf, const SE3& Rf);
-    
-    //! Return true if the function is defined for the given input
-    robDomainAttribute IsDefinedFor( const robDOF& input ) const; 
-    
-    //! Evaluate the function
-    robError Evaluate( const robDOF& input, robDOF& output );  
-    
-  };
-
-}
+  vctQuaternionRotation3<double> qinitial;
+  vctQuaternionRotation3<double> qfinal;
+  vctFixedSizeVector<double,3> w;               
+  double xmin, xmax;
+  
+public:
+  
+  //! hack...
+  double Duration() const { return xmax-xmin; }
+  
+  //! Create a SLERP between ti and tf
+  robSLERP( double ti, const vctFrame4x4<double,VCT_ROW_MAJOR>& Ri, 
+	    double tf, const vctFrame4x4<double,VCT_ROW_MAJOR>& Rf);
+  
+  //! Return true if the function is defined for the given input
+  robDomainAttribute IsDefinedFor( const robVariables& input ) const; 
+  
+  //! Evaluate the function
+  robError Evaluate( const robVariables& input, robVariables& output );  
+  
+};
 
 #endif

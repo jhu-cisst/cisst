@@ -5,7 +5,7 @@ robBodyBase::robBodyBase(){}
 
 robBodyBase::robBodyBase( double mass,
 			  const vctFixedSizeVector<double,3>& com,
-			  const vctMatrixRotation3<double,VCT_ROW_MAJOR>& moit,
+			  const vctFixedSizeMatrix<double,3,3>& moit,
 			  const vctFrame4x4<double,VCT_ROW_MAJOR>& Rt, 
 			  const std::string& filename ){
 
@@ -16,6 +16,7 @@ robBodyBase::robBodyBase( double mass,
   this->moit = moit;
 
   LoadOBJ( filename );
+
 }
 
 robBodyBase::~robBodyBase(){}
@@ -29,11 +30,7 @@ void robBodyBase::glMultMatrix( const vctFrame4x4<double,VCT_ROW_MAJOR>& Rt ) co
   H[2] = Rt[2][0]; H[6] = Rt[2][1]; H[10] =Rt[2][2]; H[14] = Rt[2][3];
   H[3] = 0.0;      H[7] = 0.0;      H[11] =0.0;      H[15] = 1.0;
 
-#ifdef SINGLE_PRECISION
-  glMultMatrixf(H);
-#else
   glMultMatrixd(H);
-#endif
 
 }
 
@@ -42,9 +39,9 @@ void robBodyBase::Draw() const {
   vctFrame4x4<double,VCT_ROW_MAJOR> Rt = this->Rt;
   glMultMatrix( Rt );
 
-  glColor3f(0.8, .8, 0.8);
+  glColor3f(0.8, 0.8, 0.8);
 
-  for( size_t i=0; i<ntriangles; i++ ){
+  for( size_t i=0; i<triangles.size(); i++ ){
 
     glBegin(GL_TRIANGLES);
     glNormal3d( normals[i][0], normals[i][1], normals[i][2] );
@@ -55,26 +52,23 @@ void robBodyBase::Draw() const {
     glEnd();
 
   }
-
+  
   Rt.InverseSelf();
   glMultMatrix( Rt );
 }
 
-bool robBodyBase::LoadOBJ( const string& filename ){
+robError robBodyBase::LoadOBJ( const std::string& filename ){
 
-  string line;
-  ifstream ifs;
-
-  vector< vctFixedSizeVector<double,3> > vertices;
-  vector< vctFixedSizeVector<int,3> > triangles;
+  std::string line;
+  std::ifstream ifs;
 
   ifs.open(filename.data());
   if(!ifs){
-    cout << "robBodyBase::LoadOBJ: " << filename << " not found." << std::endl;
-    return true;
+    std::cout << "robBodyBase::LoadOBJ: " << filename << " not found." << std::endl;
+    return ERROR;
   }
 
-  getline( ifs, line );
+  std::getline( ifs, line );
 
   while(!ifs.eof()){
 
@@ -82,7 +76,7 @@ bool robBodyBase::LoadOBJ( const string& filename ){
     size_t first = line.find_first_not_of(" ");
 
     // ensure the 1st char is found (not an empty line)
-    if( first != string::npos ){
+    if( first != std::string::npos ){
 
       // comment line? skip the rest
       if( line.at( first ) != '#' ){
@@ -96,7 +90,7 @@ bool robBodyBase::LoadOBJ( const string& filename ){
 	  
 	  // Vertex data
 	  if( strcmp( token, "v" ) == 0 ){
-	    istringstream linestream(line);
+	    std::istringstream linestream(line);
 	    double x, y, z, w=1.0;
 	    char v;
 	    linestream >> v >> x >> y >> z >> w;
@@ -154,7 +148,7 @@ bool robBodyBase::LoadOBJ( const string& filename ){
 	      triangles.push_back( triangle );
 	    }
 	    else{
-	      //cout<< "robBodyBase::LoadOBJ: Expected a triangle: " << line << std::endl;
+	      //std::cout<< "robBodyBase::LoadOBJ: Expected a triangle: " << line << std::endl;
 	    }
 
 	  }
@@ -197,7 +191,7 @@ bool robBodyBase::LoadOBJ( const string& filename ){
     }
     getline( ifs, line );
   }
-  
+  /*
   nvertices = vertices.size();
   ntriangles = triangles.size();
   this->vertices  = new vctFixedSizeVector<double,3>[ nvertices ];
@@ -216,6 +210,6 @@ bool robBodyBase::LoadOBJ( const string& filename ){
     vctFixedSizeVector<double,3> n = (v2-v1)%(v3-v1);
     this->normals[i] = n / n.Norm();
   }
-
-  return false;
+  */
+  return SUCCESS;
 }

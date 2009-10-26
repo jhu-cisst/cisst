@@ -3,8 +3,6 @@
 #include <cisstRobot/robFunctionPiecewise.h>
 #include <typeinfo>
 #include <iostream>
-using namespace std;
-using namespace cisstRobot;
 
 /*
  * y(t1) = x1/(1+exp(-x3*t1)) + x2
@@ -15,18 +13,19 @@ using namespace cisstRobot;
  */
 
 
-robSigmoid::robSigmoid( Real t1, Real y1, Real t2, Real y2 ) {
+robSigmoid::robSigmoid( double t1, double y1, double t2, double y2 ) {
   if( t2 < t1 ){
     CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
-		      << ": t initial must be less than t final" << endl;
+		      << ": t initial must be less than t final"
+		      << std::endl;
   }
 
-  Real A[2][2], det;
+  double A[2][2], det;
   
   // Solve the equations for x1 and x3 using t = +-6
   // [  S(t)   1  ] [ x1 ] = [ y1 ]
   // [  S(-t)  1  ] [ x2 ]   [ y2 ]
-  Real t = 6.0;
+  double t = 6.0;
   A[0][0] = 1.0/(1.0+exp( t));   A[0][1] = 1.0;
   A[1][0] = 1.0/(1.0+exp(-t));   A[1][1] = 1.0;
   det = A[0][0]*A[1][1] - A[1][0]*A[0][1];
@@ -49,14 +48,14 @@ robSigmoid::robSigmoid( Real t1, Real y1, Real t2, Real y2 ) {
 
 }
 
-robSigmoid::robSigmoid( Real y1, Real y2, Real ydmax ) {
+robSigmoid::robSigmoid( double y1, double y2, double ydmax ) {
 
-  Real A[2][2], det;
+  double A[2][2], det;
   
   // Solve the equations for x1 and x3 using t = +-6
   // [  S(t)   1  ] [ x1 ] = [ y1 ]
   // [  S(-t)  1  ] [ x2 ]   [ y2 ]
-  Real t = 6.0;
+  double t = 6.0;
   A[0][0] = 1.0/(1.0+exp( t));   A[0][1] = 1.0;
   A[1][0] = 1.0/(1.0+exp(-t));   A[1][1] = 1.0;
   det = A[0][0]*A[1][1] - A[1][0]*A[0][1];
@@ -79,15 +78,15 @@ robSigmoid::robSigmoid( Real y1, Real y2, Real ydmax ) {
 
 }
 
-robDomainAttribute robSigmoid::IsDefinedFor( const robDOF& input ) const{
+robDomainAttribute robSigmoid::IsDefinedFor( const robVariables& input ) const{
 
-  // test the dof are Real numbers
-  if( !input.IsTime() ){
-    CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__ << ": Expected time input" <<endl;
+  // test the dof are double numbers
+  if( !input.IsTimeSet() ){
+    CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__ << ": Expected time input" <<std::endl;
     return UNDEFINED;
   }
 
-  Real t = input.t;
+  double t = input.time;
   if( xmin <= t && t <= xmax )                           return DEFINED;
   if( xmin-robFunctionPiecewise::TAU <= t && t <= xmin ) return INCOMING;
   if( xmax <= t && t <= xmax+robFunctionPiecewise::TAU ) return OUTGOING;
@@ -96,20 +95,23 @@ robDomainAttribute robSigmoid::IsDefinedFor( const robDOF& input ) const{
   return UNDEFINED;
 }
 
-robError robSigmoid::Evaluate( const robDOF& input, robDOF& output ){  
+robError robSigmoid::Evaluate( const robVariables& input, robVariables& output ){  
 
-  if( !input.IsTime() ){
-    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ << ": Expected time input" << endl;
-    return FAILURE;
+  if( !input.IsTimeSet() ){
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+		      << ": Expected time input" << std::endl;
+    return ERROR;
   }
 
-  Real t = input.t;
-  Real term1 = exp( -x3*( t + ts) );
-  Real term2 = 1+term1;
+  double t = input.time;
+  double term1 = exp( -x3*( t + ts) );
+  double term2 = 1+term1;
   
-  output = robDOF( Rn( 1, x1 /(term2) + x2 ), 
-		   Rn( 1,  x1*x3*term1 /(term2*term2) ),
-		   Rn( 1, x1*x3*x3*term1*(term1-1)/(term2*term2*term2) ) );
+  output = robVariables( vctDynamicVector<double>( 1, x1 /(term2) + x2 ), 
+			 vctDynamicVector<double>( 1, (x1*x3*term1 /
+						       (term2*term2)) ),
+			 vctDynamicVector<double>( 1, (x1*x3*x3*term1*(term1-1) /
+						       (term2*term2*term2) ) ) );
   return SUCCESS;
 }
 

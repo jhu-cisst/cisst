@@ -1,32 +1,30 @@
 #ifndef _robClock_h
 #define _robClock_h
 
-#include <cisstRobot/robDevice.h>
-#include <cisstRobot/robDOF.h>
+#include <cisstRobot/robSource.h>
 
-namespace cisstRobot{
+class robClock : robSource {
+private:
 
-  class robClock : robDevice {
-  protected:
+  double time;
+
+protected:
     
-    // Mutex;
-    Real time;
-    Real period;
+  double period;
 
-    virtual Real Time() = 0;
-    
-  public:
-    
-    robClock();
-    virtual ~robClock();
-
-    virtual robError Open();
-    virtual robError Close();
-
-    virtual robError Read( robDOF& dof );
-    virtual robError Write( const robDOF& dof );
-
-  };
-}
+  virtual double Time() = 0;
+  
+public:
+  
+  robClock();
+  virtual ~robClock();
+  
+  virtual robError Open();
+  virtual robError Close();
+  
+  virtual robError Read( robVariables& variables );
+  virtual robError Write( const robVariables& variables );
+  
+};
 
 #endif

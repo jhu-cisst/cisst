@@ -1,21 +1,27 @@
 #include <cisstCommon/cmnLogger.h>
+
+#include <cisstVector/vctMatrixRotation3.h>
+
 #include <cisstRobot/robSLERP.h>
 #include <cisstRobot/robFunctionPiecewise.h>
-#include <typeinfo>
-using namespace std;
-using namespace cisstRobot;
 
-robSLERP::robSLERP( Real ti, const SE3& Rti, Real tf, const SE3& Rtf ){
+#include <typeinfo>
+
+robSLERP::robSLERP( double ti, 
+		    const vctFrame4x4<double,VCT_ROW_MAJOR>& Rti, 
+		    double tf, 
+		    const vctFrame4x4<double,VCT_ROW_MAJOR>& Rtf ){
   if( tf < ti ){
     CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
-		      << ": t initial must be less than t final" << endl;
+		      << ": t initial must be less than t final" 
+		      << std::endl;
   }
 
   xmin = ti;
   xmax = tf;
 
-  SO3 Ri, Rf;                    // Don't know why Rti.Rotation() doesn't work
-  for(size_t r=0; r<3; r++){     // here (linker error)
+  vctMatrixRotation3<double,VCT_ROW_MAJOR> Ri, Rf;
+  for(size_t r=0; r<3; r++){
     for(size_t c=0; c<3; c++){
       Ri[r][c] = Rti[r][c];
       Rf[r][c] = Rtf[r][c];
@@ -25,7 +31,7 @@ robSLERP::robSLERP( Real ti, const SE3& Rti, Real tf, const SE3& Rtf ){
   qinitial.From( Ri );
   qfinal.From( Rf );
 
-  Real ctheta = ( qinitial.X()*qfinal.X() +
+  double ctheta = ( qinitial.X()*qfinal.X() +
 		  qinitial.Y()*qfinal.Y() +
 		  qinitial.Z()*qfinal.Z() +
 		  qinitial.R()*qfinal.R() );
@@ -39,31 +45,33 @@ robSLERP::robSLERP( Real ti, const SE3& Rti, Real tf, const SE3& Rtf ){
 
   // find the angular velocity in the world frame from the angular velocity
   // in the constant velocity in the plane of rotation
-  SO3 Rwi( qinitial );    // initial orientation wrt world frame
-  SO3 Rwf( qfinal );      // final orientation wrt world frame
-  SO3 Riw;                // inverse of Rw1;
+  vctMatrixRotation3<double,VCT_ROW_MAJOR> Rwi( qinitial );
+  vctMatrixRotation3<double,VCT_ROW_MAJOR> Rwf( qfinal );
+  vctMatrixRotation3<double,VCT_ROW_MAJOR> Riw;
   Riw.InverseOf( Rwi );   //
 
-  SO3 Rif;                // relative rotation wrt initial frame
+  vctMatrixRotation3<double,VCT_ROW_MAJOR> Rif;
   Rif = Riw*Rwf;          //
   
-  vctAxisAngleRotation3<Real> utif(Rif); // axis angle of Rif
-  R3 ui = utif.Axis();                   // the axis wrt initial frame
-                                         // this axis remains constant
-  R3 uw = Rwi * ui;                      // the axis wrt world frame
-  Real td = utif.Angle() / (xmax-xmin);  // the angular rate
+  vctAxisAngleRotation3<double> utif(Rif);       // axis angle of Rif
+  vctFixedSizeVector<double,3> ui = utif.Axis(); // the axis wrt initial frame
+                                                 // this axis remains constant
+  vctFixedSizeVector<double,3> uw = Rwi * ui;    // the axis wrt world frame
+  double td = utif.Angle() / (xmax-xmin);        // the angular rate
 
-  w = uw * td;                           // the angular velocity
+  w = uw * td;                                   // the angular velocity
 }
 
-robDomainAttribute robSLERP::IsDefinedFor( const robDOF& input ) const{
+robDomainAttribute robSLERP::IsDefinedFor( const robVariables& input ) const{
 
-  if( !input.IsTime() ){
-    CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__ << ": Expected time input" <<endl;
+  if( !input.IsTimeSet() ){
+    CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__ 
+			<< ": Expected time input" 
+			<< std::endl;
     return UNDEFINED;
   }
 
-  Real x = input.t;
+  double x = input.time;
   if( xmin <= x && x <= xmax )                           return DEFINED;
   if( xmin-robFunctionPiecewise::TAU <= x && x <= xmin ) return INCOMING;
   if( xmax <= x && x <= xmax+robFunctionPiecewise::TAU ) return OUTGOING;
@@ -73,81 +81,83 @@ robDomainAttribute robSLERP::IsDefinedFor( const robDOF& input ) const{
 }
 
 
-robError robSLERP::Evaluate( const robDOF& input, robDOF& output ){
+robError robSLERP::Evaluate( const robVariables& input, robVariables& output ){
 
-  if( !input.IsTime() ){
-    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ << ": Expected time input" << endl;
-    return FAILURE;
+  if( !input.IsTimeSet() ){
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+		      << ": Expected time input" 
+		      << std::endl;
+    return ERROR;
   }
 
-  Real t = input.t;
+  double t = input.time;
   t = (t-xmin) / (xmax-xmin);
   if( t < 0.0 ) t = 0;
   if( 1.0 < t ) t = 1;
     
   // cos theta
-  Real ctheta = ( qinitial.X()*qfinal.X() +
-		  qinitial.Y()*qfinal.Y() +
-		  qinitial.Z()*qfinal.Z() +
-		  qinitial.R()*qfinal.R() );
+  double ctheta = ( qinitial.X()*qfinal.X() +
+		    qinitial.Y()*qfinal.Y() +
+		    qinitial.Z()*qfinal.Z() +
+		    qinitial.R()*qfinal.R() );
   
   // if the dot product is too close, return one of them
   if ( 1.0 <= fabs(ctheta) ){
-    output = robDOF( SE3( qinitial, R3(0.0) ), R6(0.0), R6(0.0) );
+    output = robVariables( vctFrame4x4<double,VCT_ROW_MAJOR>( qinitial, vctFixedSizeVector<double,3>(0.0) ) );
     return SUCCESS;
   }
 
-  Real theta = acos(ctheta);
-  Real stheta = sqrt(1.0 - ctheta*ctheta);
+  double theta = acos(ctheta);
+  double stheta = sqrt(1.0 - ctheta*ctheta);
   
   // if theta = 180 degrees then result is not fully defined
   // we could rotate around any axis normal to qinitial or qfinal
   if (fabs(stheta) < 0.001){ // fabs is floating point absolute
-    SO3 Rwi( Quaternion( qinitial.X()*0.5 + qfinal.X()*0.5,
+    vctMatrixRotation3<double,VCT_ROW_MAJOR> Rwi( vctQuaternionRotation3<double>( qinitial.X()*0.5 + qfinal.X()*0.5,
 			 qinitial.Y()*0.5 + qfinal.Y()*0.5,
 			 qinitial.Z()*0.5 + qfinal.Z()*0.5,
 			 qinitial.R()*0.5 + qfinal.R()*0.5 ) );
-    R6 vw(0.0);
+    vctFixedSizeVector<double,6> vw(0.0);
     vw[3] = w[0];
     vw[4] = w[1];
     vw[5] = w[2];
-    output = robDOF( SE3(Rwi, R3(0.0)), vw, R6(0.0) );
+    output = robVariables( vctFrame4x4<double,VCT_ROW_MAJOR>(Rwi, vctFixedSizeVector<double,3>(0.0)), vw, vctFixedSizeVector<double,6>(0.0) );
     
     return SUCCESS;
   }
     
-  Real ratioA = sin((1 - t) * theta) / stheta;
-  Real ratioB = sin(t * theta) / stheta;
+  double ratioA = sin((1 - t) * theta) / stheta;
+  double ratioB = sin(t * theta) / stheta;
   
-  //calculate Quaternion.
-  SO3 Rwi( Quaternion( qinitial.X()*ratioA + qfinal.X()*ratioB,
+  //calculate vctQuaternionRotation3<double>.
+  vctMatrixRotation3<double,VCT_ROW_MAJOR> Rwi( vctQuaternionRotation3<double>( qinitial.X()*ratioA + qfinal.X()*ratioB,
 		       qinitial.Y()*ratioA + qfinal.Y()*ratioB,
 		       qinitial.Z()*ratioA + qfinal.Z()*ratioB,
 		       qinitial.R()*ratioA + qfinal.R()*ratioB ) );
-  R6 vw(0.0);
+  vctFixedSizeVector<double,6> vw(0.0);
   vw[3] = w[0];
   vw[4] = w[1];
   vw[5] = w[2];
-  output = robDOF( SE3(Rwi, R3(0.0)), vw, R6(0.0) );
+  output = robVariables( vctFrame4x4<double,VCT_ROW_MAJOR>(Rwi, vctFixedSizeVector<double,3>(0.0)), vw, vctFixedSizeVector<double,6>(0.0) );
   /*
-  SO3 R1w(qinitial);
+  vctMatrixRotation3<double,VCT_ROW_MAJOR> R1w(qinitial);
   R1w.InverseSelf();
-  SO3 R1i;
+  vctMatrixRotation3<double,VCT_ROW_MAJOR> R1i;
   R1i = R1w*Rwi;
 
-  vctAxisAngleRotation3<Real> ut(R1i);
-  cout << ut.Angle() << " " << ut.Angle()/t << endl;
+  vctAxisAngleRotation3<double> ut(R1i);
+  cout << ut.Angle() << " " << ut.Angle()/t << std::endl;
 
-  Quaternion q(Quaternion( qinitial.X()*ratioA + qfinal.X()*ratioB,
+  vctQuaternionRotation3<double> q(Quaternion( qinitial.X()*ratioA + qfinal.X()*ratioB,
 			   qinitial.Y()*ratioA + qfinal.Y()*ratioB,
 			   qinitial.Z()*ratioA + qfinal.Z()*ratioB,
 			   qinitial.R()*ratioA + qfinal.R()*ratioB ) );
 
-  Quaternion qs(qinitial);
+  vctQuaternionRotation3<double> qs(qinitial);
   qs.ConjugateSelf();
-  Quaternion qsp;
+  vctQuaternionRotation3<double> qsp;
   qsp = qs*qfinal;
-  cout << q.R() << endl;
+  cout << q.R() << std::endl;
   */  
   return SUCCESS;
 }

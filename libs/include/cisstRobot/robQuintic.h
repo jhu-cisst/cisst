@@ -3,29 +3,25 @@
 
 #include <cisstRobot/robFunction.h>
 
-namespace cisstRobot{
+class robQuintic : public robFunction{
+
+private:
   
-  class robQuintic : public robFunction{
-
-  private:
-    
-    Real xmin;
-    Real xmax;
-    vctFixedSizeVector<Real, 6> b;
-
-  public:
-
-    robQuintic(){}
-    robQuintic( Real t1, Real x1, Real v1, Real a1, 
-		Real t2, Real x2, Real v2, Real a2 );
-
-    robDomainAttribute IsDefinedFor( const robDOF& input ) const;
-
-    robError Evaluate( const robDOF& input, robDOF& output );
-
-  };
-
-}
+  double xmin;
+  double xmax;
+  vctFixedSizeVector<double, 6> b;
+  
+public:
+  
+  robQuintic(){}
+  robQuintic( double t1, double x1, double v1, double a1, 
+	      double t2, double x2, double v2, double a2 );
+  
+  robDomainAttribute IsDefinedFor( const robVariables& input ) const;
+  
+  robError Evaluate( const robVariables& input, robVariables& output );
+  
+};
 
 #endif
 

@@ -1,42 +1,50 @@
 #ifndef _robGUI_h
 #define _robGUI_h
 
-#include <FL/glut.h>
-
 #include <cisstRobot/robBody.h>
 #include <cisstRobot/robManipulator.h>
+
+#include <GL/glut.h>
 
 #include <vector>
 
 namespace cisstRobot{
 
-  class robGUI : public Fl_Glut_Window{
+  class robGUI {
   private:
-    int x, y;
-    int width, height;
+
+    int x, y;           // X, Y positions (top left corner)
+    int width, height;  // width and heiht
     
-    Real azimuth;
-    Real elevation;
-    Real distance;
-    float  perspective;
+    double azimuth;       // rotation about the Z axis
+    double elevation;     // elevation from the X-Y plane
+    double distance;      // distance from the origin
+    float perspective;  // camera FOV
 
-    void draw();
-    void DrawXYZ();
-    void DrawGrid(Real width, int subdivisions);
+    void DrawXYZ();     // draw the X-Y-Z axis
+    void DrawGrid(double width, int subdivisions); // draw the floor
 
-    R3 CameraPosition() const;
+    vctFixedSizeVector<double,3> CameraPosition() const; // compute the camera XYZ coordinates
 
-    std::vector<const robBody*> bodies;
+    std::vector<const robBody*> bodies; // the bodies to be rendered
 
   public:
 
+    //! The pointer to the main GUI object;
     static robGUI* gui;
 
-    robGUI(int X=0, int Y=0, int W=640, int H=480, const char*L=NULL);
+    //! Default constructor
+    robGUI( int argc, char** argv);
     
+    //! Insert a body to display
     void Insert( const robBody* body );
+    //! Insert a manipulator to display
     void Insert( const robManipulator* manipulator );
 
+    //! Draw everything
+    void Draw();
+
+    //! Process the keboard
     void Keyboard( int k, int x, int y );
   };
 }
