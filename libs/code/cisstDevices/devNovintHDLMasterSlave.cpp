@@ -21,6 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 
 // Sensable headers
 #include <cisstDevices/devNovintHDLMasterSlave.h>
+#include <cisstVector/vctTypes.h>
 
 CMN_IMPLEMENT_SERVICES(devNovintHDLMasterSlave);
 
@@ -38,7 +39,7 @@ devNovintHDLMasterSlave::devNovintHDLMasterSlave(const std::string & taskName,
                                                     20.0, 
                                                     robCollaborativeControlForce::ParameterType::ForceModeType::RATCHETED,
                                                     1.0,
-                                                    1.0);;
+                                                    1.0);
     
     // Assign device numbers
     if(DevicesVector[0]->Name == firstDeviceName) {
@@ -73,13 +74,13 @@ devNovintHDLMasterSlave::devNovintHDLMasterSlave(const std::string & taskName,
                                                     20.0, 
                                                     robCollaborativeControlForce::ParameterType::ForceModeType::RATCHETED,
                                                     1.0,
-                                                    1.0);;
+                                                    1.0);
     RobotPair[1] = new robCollaborativeControlForce(0.5, 
                                                     0.5, 
                                                     20.0, 
                                                     robCollaborativeControlForce::ParameterType::ForceModeType::RATCHETED,
                                                     1.0,
-                                                    1.0);;
+                                                    1.0);
 
     // Assign device numbers, * hard coded for now *
     DevicePair[0]->MasterDeviceNo = 0;
@@ -108,7 +109,7 @@ void devNovintHDLMasterSlave::SetupTeleoperationInterfaces(const std::string & f
     // Initialize Values
     DevData * pairData;
     pairData = DevicePair[pair];
-    pairData->Parameter.ForceLimit() = 40.0;
+    pairData->Parameter.PositionLimit() = 40.0;
     pairData->Parameter.LinearGainMaster() = 0.3;
     pairData->Parameter.LinearGainSlave() = 0.3;
     pairData->Parameter.ForceFeedbackRatio() = 1.0;
@@ -185,7 +186,7 @@ void devNovintHDLMasterSlave::SetLinearGainSlave(const mtsDouble & Scale)
 
 void devNovintHDLMasterSlave::SetForceLimit(const mtsDouble& FLimit)
 {
-    DevicePair[PairNumber]->Parameter.ForceLimit() = FLimit.Data;
+    DevicePair[PairNumber]->Parameter.PositionLimit() = FLimit.Data;
 }
 
 void devNovintHDLMasterSlave::SetForceMode(const mtsInt& Mode)

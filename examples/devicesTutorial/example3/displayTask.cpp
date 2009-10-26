@@ -41,7 +41,7 @@ displayTask::displayTask(const std::string & taskName, double period):
         requiredInterface->AddFunction("SetCollaborativeControlParameter", SetCollaborativeControlParameter);
     }
 
-    commandedForceLimit = 0.0;
+    commandedPositionLimit = 0.0;
     commandedLinearGainMaster = 0.0;
     commandedLinearGainSlave = 0.0;
     commandedForceCoeff = 0.0;
@@ -68,14 +68,14 @@ void displayTask::Run(void)
     }
     GetCollaborativeControlParameter(MainTaskParameter);
    
-    UI.ForceLimitVal->value(MainTaskParameter.ForceLimit());
+    UI.PositionLimitVal->value(MainTaskParameter.PositionLimit());
     UI.LinearGainMasterVal->value(MainTaskParameter.LinearGainMaster());
     UI.LinearGainSlaveVal->value(MainTaskParameter.LinearGainSlave());
     UI.ForceCoefficientVal->value(MainTaskParameter.ForceFeedbackRatio());
 
-    commandedForceLimit = UI.ForceLimit->value();
-    if(MainTaskParameter.ForceLimit() != commandedForceLimit) {   
-        MainTaskParameter.SetForceLimit(commandedForceLimit);
+    commandedPositionLimit = UI.PositionLimit->value();
+    if(MainTaskParameter.PositionLimit() != commandedPositionLimit) {   
+        MainTaskParameter.SetPositionLimit(commandedPositionLimit);
         ParameterChanged = true;
     }
 

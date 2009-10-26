@@ -39,7 +39,8 @@ public:
 
     devSensableHDMasterSlave(const std::string & taskName,
                              const std::string & firstDeviceName,
-                             const std::string & secondDeviceName);
+                             const std::string & secondDeviceName,
+                             const vctFrm3 & relativeTransformation = vctFrm3::Identity());
 
     devSensableHDMasterSlave(const std::string & taskName,
                              const std::string & firstDeviceName,

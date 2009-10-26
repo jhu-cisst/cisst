@@ -60,7 +60,7 @@ class displayTask: public mtsTaskPeriodic
 
     mainGUI                 UI;
 
-    mtsDouble               commandedForceLimit;
+    mtsDouble               commandedPositionLimit;
     mtsDouble               commandedLinearGainMaster;
     mtsDouble               commandedLinearGainSlave;
     mtsDouble               commandedForceCoeff;

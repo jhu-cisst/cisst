@@ -26,7 +26,8 @@ CMN_IMPLEMENT_SERVICES(devSensableHDMasterSlave);
 
 devSensableHDMasterSlave::devSensableHDMasterSlave(const std::string & taskName,
                                                    const std::string & firstDeviceName,
-                                                   const std::string & secondDeviceName):
+                                                   const std::string & secondDeviceName,
+                                                   const vctFrm3 & relativeTransform):
     devSensableHD(taskName, firstDeviceName, secondDeviceName, true, true)
 {
     // Initialize the struct and class vectors
@@ -89,17 +90,17 @@ devSensableHDMasterSlave::devSensableHDMasterSlave(const std::string & taskName,
     
     // Pair Number assigns which pair is being used for the GUI. 
     // Change this value to test the other pair, default is the first pair.
-    PairNumber = 0;
+    PairNumber = 1;
     PairCount = 2;
     //Initialize provided interfaces
-    SetupTeleoperationInterfaces(firstDeviceName, secondDeviceName, PairNumber);
+    SetupTeleoperationInterfaces(firstDeviceName, secondDeviceName, 0);
+    SetupTeleoperationInterfaces(thirdDeviceName, fourthDeviceName, 1);
 }
 
 void devSensableHDMasterSlave::SetupTeleoperationInterfaces(const std::string & firstDeviceName, 
                                                             const std::string & secondDeviceName,
                                                             int pair)
-{
-    
+{ 
     // Create the provided interface
     mtsProvidedInterface * providedInterface;
     std::string providedInterfaceName = "TeleoperationParameters" + firstDeviceName + secondDeviceName;
@@ -108,7 +109,7 @@ void devSensableHDMasterSlave::SetupTeleoperationInterfaces(const std::string & 
     // Initialize Values
     DevData * pairData;
     pairData = DevicePair[pair];
-    pairData->Parameter.ForceLimit() = 40.0;
+    pairData->Parameter.PositionLimit() = 40.0;
     pairData->Parameter.LinearGainMaster() = 0.15;
     pairData->Parameter.LinearGainSlave() = 0.15;
     pairData->Parameter.ForceFeedbackRatio() = 1.0;
@@ -118,10 +119,10 @@ void devSensableHDMasterSlave::SetupTeleoperationInterfaces(const std::string & 
     pairData->MasterSlaveClutchGUI = false;
 
     // Add values to the state table
-    StateTable.AddData(pairData->MasterClutchGUI, "MasterClutch");
-    StateTable.AddData(pairData->SlaveClutchGUI, "SlaveClutch");
-    StateTable.AddData(pairData->MasterSlaveClutchGUI, "MasterSlaveClutch");
-    StateTable.AddData(pairData->Parameter, "CollaborativeControlParameter");
+    StateTable.AddData(pairData->MasterClutchGUI, firstDeviceName + secondDeviceName + "MasterClutch");
+    StateTable.AddData(pairData->SlaveClutchGUI, firstDeviceName + secondDeviceName + "SlaveClutch");
+    StateTable.AddData(pairData->MasterSlaveClutchGUI, firstDeviceName + secondDeviceName + "MasterSlaveClutch");
+    StateTable.AddData(pairData->Parameter, firstDeviceName + secondDeviceName + "CollaborativeControlParameter");
 
 
     // Add read functions to the interface
@@ -163,13 +164,13 @@ void devSensableHDMasterSlave::UserControl(void)
                                  DevicesVector(pairData->SlaveDeviceNo)->ForceCartesian.Force());
 
         // If the pair has the GUI attached
-        if(index == PairNumber) {
+        //if(index == PairNumber) {
             // Update the values through the GUI
             RobotPair[index]->SetParameter(pairData->Parameter);
             RobotPair[index]->SetApplicationMasterClutch(pairData->MasterClutchGUI);
             RobotPair[index]->SetApplicationSlaveClutch(pairData->SlaveClutchGUI);
             RobotPair[index]->SetApplicationMasterSlaveClutch(pairData->MasterSlaveClutchGUI);
-        }
+        //}
     }
 }
 
@@ -185,7 +186,7 @@ void devSensableHDMasterSlave::SetLinearGainSlave(const mtsDouble & Scale)
 
 void devSensableHDMasterSlave::SetForceLimit(const mtsDouble& FLimit)
 {
-    DevicePair[PairNumber]->Parameter.ForceLimit() = FLimit.Data;
+    DevicePair[PairNumber]->Parameter.PositionLimit() = FLimit.Data;
 }
 
 void devSensableHDMasterSlave::SetForceMode(const mtsInt& Mode)
