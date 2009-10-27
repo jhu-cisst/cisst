@@ -7,21 +7,21 @@
     <x>0</x>
     <y>0</y>
     <width>500</width>
-    <height>248</height>
+    <height>200</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Client</string>
   </property>
-  <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout" columnstretch="3,1">
-    <item row="0" column="0">
+  <widget class="QWidget" name="CentralWidget">
+   <layout class="QHBoxLayout" name="horizontalLayout" stretch="3,1">
+    <item>
      <widget class="QGroupBox" name="CommandsGroupBox">
       <property name="title">
        <string>Commands</string>
       </property>
-      <layout class="QGridLayout" name="gridLayout_2" columnstretch="0,0,0,0">
-       <item row="0" column="1">
+      <layout class="QGridLayout" name="gridLayout_2" columnstretch="0,1,0,1">
+       <item row="0" column="1" colspan="2">
         <widget class="QPushButton" name="VoidButton">
          <property name="text">
           <string>Trigger</string>
@@ -33,6 +33,9 @@
          <property name="text">
           <string>Write</string>
          </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
         </widget>
        </item>
        <item row="2" column="0">
@@ -40,9 +43,12 @@
          <property name="text">
           <string>Read</string>
          </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
         </widget>
        </item>
-       <item row="2" column="1">
+       <item row="2" column="1" colspan="2">
         <widget class="QPushButton" name="ReadButton">
          <property name="text">
           <string>Trigger</string>
@@ -54,29 +60,45 @@
          <property name="text">
           <string>Qualified Read</string>
          </property>
-        </widget>
-       </item>
-       <item row="3" column="1">
-        <widget class="QSlider" name="QualifiedReadSlider">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
          </property>
         </widget>
        </item>
-       <item row="2" column="2" colspan="2">
+       <item row="2" column="3">
         <widget class="QLineEdit" name="ReadValue">
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
          <property name="readOnly">
           <bool>true</bool>
          </property>
         </widget>
        </item>
        <item row="3" column="3">
-        <widget class="QLineEdit" name="QualifiedReadReadValue"/>
+        <widget class="QLineEdit" name="QualifiedReadReadValue">
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
        </item>
        <item row="0" column="0">
         <widget class="QLabel" name="VoidLabel">
          <property name="text">
           <string>Void</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="2">
+        <widget class="QLabel" name="WriteValue">
+         <property name="text">
+          <string>0</string>
          </property>
         </widget>
        </item>
@@ -87,10 +109,10 @@
          </property>
         </widget>
        </item>
-       <item row="1" column="2" colspan="2">
-        <widget class="QLabel" name="WriteValue">
-         <property name="text">
-          <string>0</string>
+       <item row="3" column="1">
+        <widget class="QSlider" name="QualifiedReadSlider">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
          </property>
         </widget>
        </item>
@@ -104,7 +126,7 @@
       </layout>
      </widget>
     </item>
-    <item row="0" column="1">
+    <item>
      <widget class="QGroupBox" name="EventsGroupBox">
       <property name="title">
        <string>Events</string>

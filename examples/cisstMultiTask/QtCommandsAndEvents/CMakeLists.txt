@@ -12,19 +12,24 @@
 # 
 # --- end cisst license ---
 
-qt4_wrap_ui(cisstMultiTaskQtCommandsAndEvents_QT_UI_SRCS
+qt4_wrap_cpp(QT_WRAPPED_CPP
+             clientTask.h
+             serverTask.h
+             )
+qt4_wrap_ui(QT_WRAPPED_UI
             client.ui
             server.ui
             )
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 add_executable(cisstMultiTaskQtCommandsAndEvents
-               ${cisstMultiTaskQtCommandsAndEvents_QT_UI_SRCS}
-               #clientTask.cpp
-               #clientTask.h
+               ${QT_WRAPPED_CPP}
+               ${QT_WRAPPED_UI}
+               clientTask.cpp
+               clientTask.h
                main.cpp
-               #serverTask.cpp
-               #serverTask.h
+               serverTask.cpp
+               serverTask.h
                )
 
 target_link_libraries(cisstMultiTaskQtCommandsAndEvents

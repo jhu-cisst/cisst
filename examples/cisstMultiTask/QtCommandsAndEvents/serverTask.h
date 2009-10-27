@@ -4,8 +4,8 @@
 /*
   $Id$
 
-  Author(s):  Anton Deguet
-  Created on: 2009-08-10
+  Author(s):  Anton Deguet, Ali Uneri
+  Created on: 2009-10-26
 
   (C) Copyright 2009 Johns Hopkins University (JHU), All Rights Reserved.
 
@@ -26,37 +26,29 @@ http://www.cisst.org/cisst/license.txt.
 #include <QObject>
 
 
-class serverTask : public mtsDevice, public QObject
+class serverTask : public QObject, public mtsDevice
 {
+    Q_OBJECT;
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
 public:
-    // provide a name for the task and define the frequency (time
-    // interval between calls to the periodic Run).  Also used to
-    // populate the interface(s)
-    serverTask(const std::string & taskName, double period);
+    serverTask(const std::string & taskName);
     ~serverTask(void) {};
 
-    // all four methods are pure virtual in mtsTask
     void Configure(const std::string & CMN_UNUSED(filename)) {};
-    void Startup(void);    // set some initial values
-    void Run(void);        // performed periodically
-    void Cleanup(void) {}; // user defined cleanup
-    bool UIOpened(void) const {
-        return UI.Opened;
-    }
 
 protected:
-    mtsFunctionVoid EventVoid;
-    mtsFunctionWrite EventWrite;
-
     void Void(void);
     void Write(const mtsDouble & data);
     void QualifiedRead(const mtsDouble & data, mtsDouble & placeHolder) const;
+    void SendButtonClickEvent() {
+        EventVoid();
+    }
+
+    mtsFunctionVoid EventVoid;
+    mtsFunctionWrite EventWrite;
 
     mtsDouble ReadValue;
-
-    void SendButtonClickEvent() { EventVoid(); }
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(serverTask);

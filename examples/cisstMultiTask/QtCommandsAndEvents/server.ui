@@ -7,131 +7,141 @@
     <x>0</x>
     <y>0</y>
     <width>500</width>
-    <height>158</height>
+    <height>200</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Server</string>
   </property>
-  <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout" columnstretch="1,1">
-    <item row="0" column="0">
-     <widget class="QGroupBox" name="groupBox">
+  <widget class="QWidget" name="CentralWidget">
+   <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,1">
+    <item>
+     <widget class="QGroupBox" name="CommandsGroupBox">
       <property name="title">
        <string>Commands</string>
       </property>
-      <layout class="QGridLayout" name="gridLayout_2" columnstretch="0,1,1">
+      <layout class="QGridLayout" name="gridLayout_2" columnstretch="0,1,0">
        <item row="0" column="0">
-        <widget class="QLabel" name="label_3">
+        <widget class="QLabel" name="VoidLabel">
          <property name="text">
           <string>Void</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
          </property>
         </widget>
        </item>
        <item row="1" column="0">
-        <widget class="QLabel" name="label_4">
+        <widget class="QLabel" name="WriteLabel">
          <property name="text">
           <string>Write</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
          </property>
         </widget>
        </item>
        <item row="2" column="0">
-        <widget class="QLabel" name="label_5">
+        <widget class="QLabel" name="ReadLabel">
          <property name="text">
           <string>Read</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
          </property>
         </widget>
        </item>
        <item row="3" column="0">
-        <widget class="QLabel" name="label_6">
+        <widget class="QLabel" name="QualifiedReadLabel">
          <property name="text">
           <string>Qualified Read</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1" colspan="2">
+        <widget class="QLineEdit" name="WriteValue">
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1" colspan="2">
+        <widget class="QLineEdit" name="VoidValue">
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
          </property>
         </widget>
        </item>
        <item row="2" column="1">
-        <widget class="QSlider" name="horizontalSlider_2">
+        <widget class="QSlider" name="ReadSlider">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
         </widget>
        </item>
        <item row="2" column="2">
-        <widget class="QLineEdit" name="lineEdit_2">
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="2">
-        <widget class="QLineEdit" name="lineEdit_3">
-         <property name="readOnly">
-          <bool>true</bool>
+        <widget class="QLabel" name="ReadValue">
+         <property name="text">
+          <string>0</string>
          </property>
         </widget>
        </item>
        <item row="3" column="1">
-        <widget class="QSlider" name="horizontalSlider">
+        <widget class="QSlider" name="QualifiedReadSlider">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
         </widget>
        </item>
        <item row="3" column="2">
-        <widget class="QLineEdit" name="lineEdit_4">
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="2">
-        <widget class="QLineEdit" name="lineEdit_5">
-         <property name="readOnly">
-          <bool>true</bool>
+        <widget class="QLabel" name="QualifiedReadValue">
+         <property name="text">
+          <string>0</string>
          </property>
         </widget>
        </item>
       </layout>
      </widget>
     </item>
-    <item row="0" column="1">
-     <widget class="QGroupBox" name="groupBox_2">
+    <item>
+     <widget class="QGroupBox" name="EventsGroupBox">
       <property name="title">
        <string>Events</string>
       </property>
-      <layout class="QGridLayout" name="gridLayout_3" columnstretch="0,0,0">
+      <layout class="QGridLayout" name="gridLayout_3" columnstretch="0,1,0">
        <item row="0" column="0">
-        <widget class="QLabel" name="label">
+        <widget class="QLabel" name="VoidEventLabel">
          <property name="text">
           <string>Void</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
          </property>
         </widget>
        </item>
        <item row="1" column="0">
-        <widget class="QLabel" name="label_2">
+        <widget class="QLabel" name="WriteEventLabel">
          <property name="text">
           <string>Write</string>
          </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
         </widget>
        </item>
-       <item row="0" column="1">
-        <widget class="QPushButton" name="pushButton">
+       <item row="0" column="1" colspan="2">
+        <widget class="QPushButton" name="VoidEventButton">
          <property name="text">
           <string>Trigger</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="QSlider" name="horizontalSlider_3">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="2">
-        <widget class="QLineEdit" name="lineEdit">
-         <property name="readOnly">
-          <bool>true</bool>
          </property>
         </widget>
        </item>
@@ -148,6 +158,20 @@
          </property>
         </spacer>
        </item>
+       <item row="1" column="1">
+        <widget class="QSlider" name="WriteEventSlider">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="2">
+        <widget class="QLabel" name="WriteEventValue">
+         <property name="text">
+          <string>0</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
     </item>
@@ -155,5 +179,54 @@
   </widget>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>ReadSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>ReadValue</receiver>
+   <slot>setNum(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>166</x>
+     <y>119</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>222</x>
+     <y>119</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>QualifiedReadSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QualifiedReadValue</receiver>
+   <slot>setNum(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>166</x>
+     <y>156</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>222</x>
+     <y>156</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>WriteEventSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>WriteEventValue</receiver>
+   <slot>setNum(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>386</x>
+     <y>78</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>468</x>
+     <y>78</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

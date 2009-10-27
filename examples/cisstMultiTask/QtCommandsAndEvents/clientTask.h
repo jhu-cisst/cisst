@@ -4,8 +4,8 @@
 /*
   $Id$
 
-  Author(s):  Anton Deguet
-  Created on: 2009-08-10
+  Author(s):  Anton Deguet, Ali Uneri
+  Created on: 2009-10-26
 
   (C) Copyright 2009 Johns Hopkins University (JHU), All Rights Reserved.
 
@@ -26,31 +26,27 @@ http://www.cisst.org/cisst/license.txt.
 #include <QObject>
 
 
-class clientTask : public mtsDevice, public QObject
+class clientTask : public QObject, public mtsDevice
 {
+    Q_OBJECT;
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
 public:
-    // see sineTask.h documentation
-    clientTask(const std::string & taskName, double period);
+    clientTask(const std::string & taskName);
     ~clientTask(void) {};
 
     void Configure(const std::string & CMN_UNUSED(filename)) {};
-    void Startup(void);
-    void Run(void);
-    void Cleanup(void) {};
-    bool UIOpened(void) const {
-        return UI.Opened;
-    }
 
 protected:
-    mtsFunctionVoid VoidServer;
-    mtsFunctionWrite WriteServer;
-    mtsFunctionRead ReadServer;
-    mtsFunctionQualifiedRead QualifiedReadServer;
-
-    void EventWriteHandler(const mtsDouble & value);
     void EventVoidHandler(void);
+    void EventWriteHandler(const mtsDouble & value);
+
+    struct {
+        mtsFunctionVoid Void;
+        mtsFunctionWrite Write;
+        mtsFunctionRead Read;
+        mtsFunctionQualifiedRead QualifiedRead;
+    } Server;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(clientTask);

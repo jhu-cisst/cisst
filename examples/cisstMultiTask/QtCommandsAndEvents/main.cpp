@@ -4,8 +4,8 @@
 /*
   $Id$
 
-  Author(s):  Anton Deguet
-  Created on: 2009-08-10
+  Author(s):  Anton Deguet, Ali Uneri
+  Created on: 2009-10-26
 
   (C) Copyright 2009 Johns Hopkins University (JHU), All Rights Reserved.
 
@@ -27,8 +27,8 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "ui_client.h"
 #include "ui_server.h"
-//#include "clientTask.h"
-//#include "serverTask.h"
+#include "clientTask.h"
+#include "serverTask.h"
 
 
 int main(int argc, char *argv[])
@@ -42,24 +42,21 @@ int main(int argc, char *argv[])
     cmnLogger::GetMultiplexer()->AddChannel(threadedLog, CMN_LOG_LOD_VERY_VERBOSE);
 
     // set the log level of detail on select tasks
-//    cmnClassRegister::SetLoD("clientTask", CMN_LOG_LOD_VERY_VERBOSE);
-//    cmnClassRegister::SetLoD("serverTask", CMN_LOG_LOD_VERY_VERBOSE);
+    cmnClassRegister::SetLoD("clientTask", CMN_LOG_LOD_VERY_VERBOSE);
+    cmnClassRegister::SetLoD("serverTask", CMN_LOG_LOD_VERY_VERBOSE);
 
     // create the tasks
-    const double PeriodClient = 10.0 * cmn_ms;  // in milliseconds
-    const double PeriodServer = 10.0 * cmn_ms;  // in milliseconds
-//    serverTask * server = new serverTask("Server", PeriodServer);
-//    clientTask * client = new clientTask("Client", PeriodClient);
-
+    serverTask * server = new serverTask("Server");
+    clientTask * client = new clientTask("Client");
 
     // add the tasks to the task manager
     mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
-//    taskManager->AddTask(client);
-//    taskManager->AddTask(server);
+    taskManager->AddDevice(client);
+    taskManager->AddDevice(server);
 
     // connect the tasks, e.g. RequiredInterface -> ProvidedInterface
-//    taskManager->Connect("Client", "Required",
-//                         "Server", "Provided");
+    taskManager->Connect("Client", "Required",
+                         "Server", "Provided");
 
     // generate a nice tasks diagram
     std::ofstream dotFile("QtCommandsAndEvents.dot");
@@ -73,18 +70,25 @@ int main(int argc, char *argv[])
     taskManager->StartAll();
 
     // user interface in Qt
-    QApplication application(argc, argv);
+    QApplication application(argc, argv);  // initialize GUI application
+
     QMainWindow clientMainWindow;  // client main window
     Ui::ClientWindow clientWindow;
     clientWindow.setupUi(&clientMainWindow);
     clientMainWindow.setWindowTitle("Client");
+    clientMainWindow.setFixedSize(500, 205);
+    clientMainWindow.move(100, 100);
     clientMainWindow.show();
+
     QMainWindow serverMainWindow;  // server main window
-    Ui::ClientWindow serverWindow;
+    Ui::ServerWindow serverWindow;
     serverWindow.setupUi(&serverMainWindow);
     serverMainWindow.setWindowTitle("Server");
+    serverMainWindow.setFixedSize(500, 205);
+    serverMainWindow.move(100, 350);
     serverMainWindow.show();
-    application.exec();  // run gui
+
+    application.exec();  // run GUI application
 
     // perform cleanup
     taskManager->KillAll();
