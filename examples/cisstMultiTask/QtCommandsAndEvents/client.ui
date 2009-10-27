@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>500</width>
-    <height>158</height>
+    <height>248</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,84 +16,88 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout" columnstretch="3,1">
     <item row="0" column="0">
-     <widget class="QGroupBox" name="groupBox">
+     <widget class="QGroupBox" name="CommandsGroupBox">
       <property name="title">
        <string>Commands</string>
       </property>
-      <layout class="QGridLayout" name="gridLayout_2" columnstretch="0,2,1,1">
+      <layout class="QGridLayout" name="gridLayout_2" columnstretch="0,0,0,0">
        <item row="0" column="1">
-        <widget class="QPushButton" name="pushButton">
+        <widget class="QPushButton" name="VoidButton">
          <property name="text">
           <string>Trigger</string>
          </property>
         </widget>
        </item>
        <item row="1" column="0">
-        <widget class="QLabel" name="label_4">
+        <widget class="QLabel" name="WriteLabel">
          <property name="text">
           <string>Write</string>
          </property>
         </widget>
        </item>
-       <item row="1" column="1">
-        <widget class="QSlider" name="horizontalSlider">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-        </widget>
-       </item>
        <item row="2" column="0">
-        <widget class="QLabel" name="label_5">
+        <widget class="QLabel" name="ReadLabel">
          <property name="text">
           <string>Read</string>
          </property>
         </widget>
        </item>
        <item row="2" column="1">
-        <widget class="QPushButton" name="pushButton_2">
+        <widget class="QPushButton" name="ReadButton">
          <property name="text">
           <string>Trigger</string>
          </property>
         </widget>
        </item>
        <item row="3" column="0">
-        <widget class="QLabel" name="label_6">
+        <widget class="QLabel" name="QualifiedReadLabel">
          <property name="text">
           <string>Qualified Read</string>
          </property>
         </widget>
        </item>
        <item row="3" column="1">
-        <widget class="QSlider" name="horizontalSlider_2">
+        <widget class="QSlider" name="QualifiedReadSlider">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
         </widget>
        </item>
-       <item row="3" column="2">
-        <widget class="QLineEdit" name="lineEdit_2">
+       <item row="2" column="2" colspan="2">
+        <widget class="QLineEdit" name="ReadValue">
          <property name="readOnly">
           <bool>true</bool>
          </property>
         </widget>
        </item>
-       <item row="2" column="2" colspan="2">
-        <widget class="QLineEdit" name="lineEdit_3">
-         <property name="readOnly">
-          <bool>true</bool>
+       <item row="3" column="3">
+        <widget class="QLineEdit" name="QualifiedReadReadValue"/>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="VoidLabel">
+         <property name="text">
+          <string>Void</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QSlider" name="WriteSlider">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
          </property>
         </widget>
        </item>
        <item row="1" column="2" colspan="2">
-        <widget class="QLineEdit" name="lineEdit_4"/>
-       </item>
-       <item row="3" column="3">
-        <widget class="QLineEdit" name="lineEdit_5"/>
-       </item>
-       <item row="0" column="0">
-        <widget class="QLabel" name="label_3">
+        <widget class="QLabel" name="WriteValue">
          <property name="text">
-          <string>Void</string>
+          <string>0</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="2">
+        <widget class="QLabel" name="QualifiedReadQualifierValue">
+         <property name="text">
+          <string>0</string>
          </property>
         </widget>
        </item>
@@ -101,13 +105,13 @@
      </widget>
     </item>
     <item row="0" column="1">
-     <widget class="QGroupBox" name="groupBox_2">
+     <widget class="QGroupBox" name="EventsGroupBox">
       <property name="title">
        <string>Events</string>
       </property>
       <layout class="QGridLayout" name="gridLayout_3">
        <item row="0" column="0">
-        <widget class="QLineEdit" name="lineEdit">
+        <widget class="QLineEdit" name="EventValue">
          <property name="alignment">
           <set>Qt::AlignCenter</set>
          </property>
@@ -136,5 +140,38 @@
   </widget>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>WriteSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>WriteValue</receiver>
+   <slot>setNum(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>198</x>
+     <y>102</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>283</x>
+     <y>99</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>QualifiedReadSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>QualifiedReadQualifierValue</receiver>
+   <slot>setNum(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>170</x>
+     <y>194</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>234</x>
+     <y>193</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>
