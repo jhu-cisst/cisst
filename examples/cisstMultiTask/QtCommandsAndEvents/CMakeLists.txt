@@ -12,24 +12,31 @@
 # 
 # --- end cisst license ---
 
-qt4_wrap_cpp(QT_WRAPPED_CPP
+qt4_wrap_cpp(QT_CLIENT_WRAPPED_CPP
              clientTask.h
-             serverTask.h
              )
-qt4_wrap_ui(QT_WRAPPED_UI
+qt4_wrap_cpp(QT_SERVER_WRAPPED_CPP
+             serverTask.h
+	     )
+qt4_wrap_ui(QT_CLIENT_WRAPPED_UI
             client.ui
+	    )
+qt4_wrap_ui(QT_SERVER_WRAPPED_UI
             server.ui
             )
+
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 add_executable(cisstMultiTaskQtCommandsAndEvents
-               ${QT_WRAPPED_CPP}
-               ${QT_WRAPPED_UI}
+               main.cpp
                clientTask.cpp
                clientTask.h
-               main.cpp
+               ${QT_CLIENT_WRAPPED_CPP}
+               ${QT_CLIENT_WRAPPED_UI}
                serverTask.cpp
                serverTask.h
+               ${QT_SERVER_WRAPPED_CPP}
+               ${QT_SERVER_WRAPPED_UI}
                )
 
 target_link_libraries(cisstMultiTaskQtCommandsAndEvents
@@ -39,3 +46,35 @@ target_link_libraries(cisstMultiTaskQtCommandsAndEvents
 cisst_requires(cisstMultiTaskQtCommandsAndEvents
                "cisstCommon;cisstOSAbstraction;cisstMultiTask"
                )
+
+
+# compile network version if ICE is available
+if (CISST_MTS_HAS_ICE)
+
+  add_executable(cisstMultiTaskQtCommandsAndEventsServer
+                 serverMain.cpp
+                 serverTask.cpp
+                 serverTask.h
+                 ${QT_SERVER_WRAPPED_CPP}
+                 ${QT_SERVER_WRAPPED_UI}
+	         )
+  target_link_libraries(cisstMultiTaskQtCommandsAndEventsServer
+                        ${QT_LIBRARIES}
+                        )
+  cisst_requires(cisstMultiTaskQtCommandsAndEventsServer
+                 "cisstCommon;cisstOSAbstraction;cisstMultiTask")
+
+  add_executable(cisstMultiTaskQtCommandsAndEventsClient
+                 clientMain.cpp
+                 clientTask.cpp
+                 clientTask.h
+                 ${QT_CLIENT_WRAPPED_CPP}
+                 ${QT_CLIENT_WRAPPED_UI}
+                 )
+  target_link_libraries(cisstMultiTaskQtCommandsAndEventsClient
+                        ${QT_LIBRARIES}
+                        )
+  CISST_REQUIRES(cisstMultiTaskQtCommandsAndEventsClient
+                 "cisstCommon;cisstOSAbstraction;cisstMultiTask")
+
+endif (CISST_MTS_HAS_ICE)
