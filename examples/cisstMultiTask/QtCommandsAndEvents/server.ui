@@ -113,7 +113,7 @@
       </property>
       <layout class="QGridLayout" name="gridLayout_3" columnstretch="0,1,0">
        <item row="0" column="0">
-        <widget class="QLabel" name="VoidEventLabel">
+        <widget class="QLabel" name="EventVoidLabel">
          <property name="text">
           <string>Void</string>
          </property>
@@ -123,7 +123,7 @@
         </widget>
        </item>
        <item row="1" column="0">
-        <widget class="QLabel" name="WriteEventLabel">
+        <widget class="QLabel" name="EventWriteLabel">
          <property name="text">
           <string>Write</string>
          </property>
@@ -133,7 +133,7 @@
         </widget>
        </item>
        <item row="0" column="1" colspan="2">
-        <widget class="QPushButton" name="VoidEventButton">
+        <widget class="QPushButton" name="EventVoidButton">
          <property name="text">
           <string>Trigger</string>
          </property>
@@ -153,14 +153,14 @@
         </spacer>
        </item>
        <item row="1" column="1">
-        <widget class="QSlider" name="WriteEventSlider">
+        <widget class="QSlider" name="EventWriteSlider">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
         </widget>
        </item>
        <item row="1" column="2">
-        <widget class="QLabel" name="WriteEventValue">
+        <widget class="QLabel" name="EventWriteValue">
          <property name="text">
           <string>0</string>
          </property>
@@ -207,9 +207,9 @@
    </hints>
   </connection>
   <connection>
-   <sender>WriteEventSlider</sender>
+   <sender>EventWriteSlider</sender>
    <signal>valueChanged(int)</signal>
-   <receiver>WriteEventValue</receiver>
+   <receiver>EventWriteValue</receiver>
    <slot>setNum(int)</slot>
    <hints>
     <hint type="sourcelabel">

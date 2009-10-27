@@ -126,16 +126,6 @@
        <string>Events</string>
       </property>
       <layout class="QGridLayout" name="gridLayout_3">
-       <item row="0" column="0">
-        <widget class="QLineEdit" name="EventValue">
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
        <item row="1" column="0">
         <spacer name="verticalSpacer">
          <property name="orientation">
@@ -148,6 +138,13 @@
           </size>
          </property>
         </spacer>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="EventValue">
+         <property name="text">
+          <string>0</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -164,12 +161,12 @@
    <slot>setNum(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>198</x>
-     <y>102</y>
+     <x>224</x>
+     <y>94</y>
     </hint>
     <hint type="destinationlabel">
-     <x>283</x>
-     <y>99</y>
+     <x>241</x>
+     <y>94</y>
     </hint>
    </hints>
   </connection>
@@ -180,12 +177,12 @@
    <slot>setNum(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>170</x>
-     <y>194</y>
+     <x>224</x>
+     <y>168</y>
     </hint>
     <hint type="destinationlabel">
-     <x>234</x>
-     <y>193</y>
+     <x>241</x>
+     <y>168</y>
     </hint>
    </hints>
   </connection>

@@ -63,8 +63,10 @@ signals:
     void WriteQtSignal(int newValue);
 
 public slots:
-    void SetReadValue(int);
-    void SetQualifiedReadValue(int);
+    void ReadQtSlot(int);
+    void QualifiedReadQtSlot(int);
+    void EventVoidQtSlot(void);
+    void EventWriteQtSlot(int);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(serverTask);

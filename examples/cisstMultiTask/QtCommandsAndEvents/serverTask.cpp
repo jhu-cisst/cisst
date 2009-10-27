@@ -29,6 +29,7 @@ serverTask::serverTask(const std::string & taskName):
     ReadValue(0),
     QualifiedReadValue(0)
 {
+    // create the cisstMultiTask interface with commands and events
     mtsProvidedInterface * provided = AddProvidedInterface("Provided");
     if (provided) {
         provided->AddCommandVoid(&serverTask::Void, this, "Void");
@@ -39,20 +40,26 @@ serverTask::serverTask(const std::string & taskName):
         provided->AddEventWrite(EventWrite, "EventWrite", mtsInt());
     }
 
+    // create the user interface
     ServerWindow.setupUi(&MainWindow);
     MainWindow.setWindowTitle("Server");
     MainWindow.setFixedSize(500, 205);
     MainWindow.move(100, 350);
     MainWindow.show();
 
+    // connect the Qt signals with the cisstMultiTask commands and events
     QObject::connect(this, SIGNAL(VoidQtSignal(int)),
                      ServerWindow.VoidValue, SLOT(setNum(int)));    
     QObject::connect(this, SIGNAL(WriteQtSignal(int)),
                      ServerWindow.WriteValue, SLOT(setNum(int)));
     QObject::connect(ServerWindow.ReadSlider, SIGNAL(valueChanged(int)),
-                     this, SLOT(SetReadValue(int)));
+                     this, SLOT(ReadQtSlot(int)));
     QObject::connect(ServerWindow.QualifiedReadSlider, SIGNAL(valueChanged(int)),
-                     this, SLOT(SetQualifiedReadValue(int)));
+                     this, SLOT(QualifiedReadQtSlot(int)));
+    QObject::connect(ServerWindow.EventVoidButton, SIGNAL(clicked()),
+                     this, SLOT(EventVoidQtSlot()));
+    QObject::connect(ServerWindow.EventWriteSlider, SIGNAL(sliderMoved(int)),
+                     this, SLOT(EventWriteQtSlot(int)));
 }
 
 
@@ -81,13 +88,27 @@ void serverTask::QualifiedRead(const mtsInt & data, mtsInt & placeHolder) const
 }
 
 
-void serverTask::SetReadValue(int newValue)
+void serverTask::ReadQtSlot(int newValue)
 {
     ReadValue = newValue;
 }
 
 
-void serverTask::SetQualifiedReadValue(int newValue)
+void serverTask::QualifiedReadQtSlot(int newValue)
 {
     QualifiedReadValue = newValue;
+}
+
+
+void serverTask::EventVoidQtSlot(void)
+{
+    EventVoid();
+}
+
+
+void serverTask::EventWriteQtSlot(int newValue)
+{
+    mtsInt payload;
+    payload.Data = newValue;
+    EventWrite(payload);
 }

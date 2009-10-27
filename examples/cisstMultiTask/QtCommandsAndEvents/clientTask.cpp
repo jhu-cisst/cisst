@@ -24,7 +24,8 @@ CMN_IMPLEMENT_SERVICES(clientTask);
 
 
 clientTask::clientTask(const std::string & taskName) :
-    mtsDevice(taskName)
+    mtsDevice(taskName),
+    EventCounter(0)
 {
     mtsRequiredInterface * required = AddRequiredInterface("Required");
     if (required) {
@@ -32,8 +33,8 @@ clientTask::clientTask(const std::string & taskName) :
         required->AddFunction("Write", Write);
         required->AddFunction("Read", Read);
         required->AddFunction("QualifiedRead", QualifiedRead);
-        required->AddEventHandlerVoid(&clientTask::EventVoidHandler, this, "EventVoid");
-        required->AddEventHandlerWrite(&clientTask::EventWriteHandler, this, "EventWrite");
+        required->AddEventHandlerVoid(&clientTask::EventVoidHandler, this, "EventVoid", false);
+        required->AddEventHandlerWrite(&clientTask::EventWriteHandler, this, "EventWrite", false);
     }
 
     ClientWindow.setupUi(&MainWindow);
@@ -58,16 +59,23 @@ clientTask::clientTask(const std::string & taskName) :
                      this, SLOT(QualifiedReadQtSlot(int)));
     QObject::connect(this, SIGNAL(QualifiedReadQtSignal(int)),
                      ClientWindow.QualifiedReadReadValue, SLOT(setNum(int)));
+    // refresh event counter when events are received
+    QObject::connect(this, SIGNAL(EventQtSignal(int)),
+                     ClientWindow.EventValue, SLOT(setNum(int)));
 }
 
 
 void clientTask::EventVoidHandler(void)
 {
+    EventCounter = 0;
+    emit EventQtSignal(EventCounter);
 }
 
 
 void clientTask::EventWriteHandler(const mtsInt & value)
 {
+    EventCounter += value.Data;
+    emit EventQtSignal(EventCounter);
 }
 
 

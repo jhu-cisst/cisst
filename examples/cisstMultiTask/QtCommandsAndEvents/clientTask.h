@@ -48,12 +48,15 @@ protected:
     mtsFunctionRead Read;
     mtsFunctionQualifiedRead QualifiedRead;
 
+    int EventCounter;
+
     QMainWindow MainWindow;
     Ui::ClientWindow ClientWindow;
 
 signals:
     void ReadQtSignal(int newValue);
     void QualifiedReadQtSignal(int newValue);
+    void EventQtSignal(int newValue);
 
 public slots:
     void VoidQtSlot(void);
