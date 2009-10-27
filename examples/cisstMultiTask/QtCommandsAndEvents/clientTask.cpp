@@ -28,13 +28,24 @@ clientTask::clientTask(const std::string & taskName) :
 {
     mtsRequiredInterface * required = AddRequiredInterface("Required");
     if (required) {
-        required->AddFunction("Void", Server.Void);
-        required->AddFunction("Write", Server.Write);
-//        required->AddFunction("Read", Server.Read);
-        required->AddFunction("QualifiedRead", Server.QualifiedRead);
+        required->AddFunction("Void", Void);
+        required->AddFunction("Write", Write);
+//        required->AddFunction("Read", Read);
+        required->AddFunction("QualifiedRead", QualifiedRead);
         required->AddEventHandlerVoid(&clientTask::EventVoidHandler, this, "EventVoid");
         required->AddEventHandlerWrite(&clientTask::EventWriteHandler, this, "EventWrite");
     }
+
+    ClientWindow.setupUi(&MainWindow);
+    MainWindow.setWindowTitle("Client");
+    MainWindow.setFixedSize(500, 205);
+    MainWindow.move(100, 100);
+    MainWindow.show();
+
+    QObject::connect(ClientWindow.VoidButton, SIGNAL(clicked()),
+                     this, SLOT(VoidQtSlot()));
+    QObject::connect(ClientWindow.WriteSlider, SIGNAL(valueChanged(int)),
+                     this, SLOT(WriteQtSlot(int)));
 }
 
 
@@ -43,6 +54,19 @@ void clientTask::EventVoidHandler(void)
 }
 
 
-void clientTask::EventWriteHandler(const mtsDouble & value)
+void clientTask::EventWriteHandler(const mtsInt & value)
 {
+}
+
+
+void clientTask::VoidQtSlot(void)
+{
+    Void();
+}
+
+
+void clientTask::WriteQtSlot(int newValue)
+{
+    mtsInt data = newValue;
+    Write(data);
 }

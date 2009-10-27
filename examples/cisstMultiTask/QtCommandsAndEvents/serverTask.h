@@ -23,10 +23,12 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask.h>
 
+#include "ui_server.h"
 #include <QObject>
+#include <QMainWindow>
 
 
-class serverTask : public QObject, public mtsDevice
+class serverTask: public QObject, public mtsDevice
 {
     Q_OBJECT;
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
@@ -39,8 +41,8 @@ public:
 
 protected:
     void Void(void);
-    void Write(const mtsDouble & data);
-    void QualifiedRead(const mtsDouble & data, mtsDouble & placeHolder) const;
+    void Write(const mtsInt & data);
+    void QualifiedRead(const mtsInt & data, mtsInt & placeHolder) const;
     void SendButtonClickEvent() {
         EventVoid();
     }
@@ -48,7 +50,15 @@ protected:
     mtsFunctionVoid EventVoid;
     mtsFunctionWrite EventWrite;
 
-    mtsDouble ReadValue;
+    int VoidCounter;
+    mtsInt ReadValue;
+
+    QMainWindow MainWindow;
+    Ui::ServerWindow ServerWindow;
+
+signals:
+    void VoidQtSignal(int voidCounter);
+    void WriteQtSignal(int newValue);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(serverTask);

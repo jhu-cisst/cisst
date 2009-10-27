@@ -23,7 +23,9 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask.h>
 
+#include "ui_client.h"
 #include <QObject>
+#include <QMainWindow>
 
 
 class clientTask : public QObject, public mtsDevice
@@ -39,14 +41,19 @@ public:
 
 protected:
     void EventVoidHandler(void);
-    void EventWriteHandler(const mtsDouble & value);
+    void EventWriteHandler(const mtsInt & value);
 
-    struct {
-        mtsFunctionVoid Void;
-        mtsFunctionWrite Write;
-        mtsFunctionRead Read;
-        mtsFunctionQualifiedRead QualifiedRead;
-    } Server;
+    mtsFunctionVoid Void;
+    mtsFunctionWrite Write;
+    mtsFunctionRead Read;
+    mtsFunctionQualifiedRead QualifiedRead;
+
+    QMainWindow MainWindow;
+    Ui::ClientWindow ClientWindow;
+
+public slots:
+    void VoidQtSlot(void);
+    void WriteQtSlot(int newValue);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(clientTask);

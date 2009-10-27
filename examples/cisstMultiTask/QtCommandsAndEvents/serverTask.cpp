@@ -23,11 +23,10 @@ http://www.cisst.org/cisst/license.txt.
 CMN_IMPLEMENT_SERVICES(serverTask);
 
 
-serverTask::serverTask(const std::string & taskName) :
-    mtsDevice(taskName)
+serverTask::serverTask(const std::string & taskName):
+    mtsDevice(taskName),
+    VoidCounter(0)
 {
-//    StateTable.AddData(ReadValue, "ReadValue");
-
     mtsProvidedInterface * provided = AddProvidedInterface("Provided");
     if (provided) {
         provided->AddCommandVoid(&serverTask::Void, this, "Void");
@@ -35,21 +34,35 @@ serverTask::serverTask(const std::string & taskName) :
 //        provided->AddCommandReadState(StateTable, ReadValue, "Read");
         provided->AddCommandQualifiedRead(&serverTask::QualifiedRead, this, "QualifiedRead");
         provided->AddEventVoid(EventVoid, "EventVoid");
-        provided->AddEventWrite(EventWrite, "EventWrite", mtsDouble(3.14));
+        provided->AddEventWrite(EventWrite, "EventWrite", mtsInt());
     }
+
+    ServerWindow.setupUi(&MainWindow);
+    MainWindow.setWindowTitle("Server");
+    MainWindow.setFixedSize(500, 205);
+    MainWindow.move(100, 350);
+    MainWindow.show();
+
+    QObject::connect(this, SIGNAL(VoidQtSignal(int)),
+                     ServerWindow.VoidValue, SLOT(setNum(int)));    
+    QObject::connect(this, SIGNAL(WriteQtSignal(int)),
+                     ServerWindow.WriteValue, SLOT(setNum(int)));    
 }
 
 
 void serverTask::Void(void)
 {
+    VoidCounter++;
+    emit VoidQtSignal(VoidCounter);
 }
 
 
-void serverTask::Write(const mtsDouble & data)
+void serverTask::Write(const mtsInt & data)
 {
+    emit WriteQtSignal(data.Data);
 }
 
 
-void serverTask::QualifiedRead(const mtsDouble & data, mtsDouble & placeHolder) const
+void serverTask::QualifiedRead(const mtsInt & data, mtsInt & placeHolder) const
 {
 }

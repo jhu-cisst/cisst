@@ -23,10 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsTaskManager.h>
 
 #include <QApplication>
-#include <QMainWindow>
 
-#include "ui_client.h"
-#include "ui_server.h"
 #include "clientTask.h"
 #include "serverTask.h"
 
@@ -45,7 +42,10 @@ int main(int argc, char *argv[])
     cmnClassRegister::SetLoD("clientTask", CMN_LOG_LOD_VERY_VERBOSE);
     cmnClassRegister::SetLoD("serverTask", CMN_LOG_LOD_VERY_VERBOSE);
 
-    // create the tasks
+    // user interface in Qt
+    QApplication application(argc, argv);  // initialize GUI application
+
+    // create the tasks with their respective UIs
     serverTask * server = new serverTask("Server");
     clientTask * client = new clientTask("Client");
 
@@ -68,25 +68,6 @@ int main(int argc, char *argv[])
 
     // start the tasks
     taskManager->StartAll();
-
-    // user interface in Qt
-    QApplication application(argc, argv);  // initialize GUI application
-
-    QMainWindow clientMainWindow;  // client main window
-    Ui::ClientWindow clientWindow;
-    clientWindow.setupUi(&clientMainWindow);
-    clientMainWindow.setWindowTitle("Client");
-    clientMainWindow.setFixedSize(500, 205);
-    clientMainWindow.move(100, 100);
-    clientMainWindow.show();
-
-    QMainWindow serverMainWindow;  // server main window
-    Ui::ServerWindow serverWindow;
-    serverWindow.setupUi(&serverMainWindow);
-    serverMainWindow.setWindowTitle("Server");
-    serverMainWindow.setFixedSize(500, 205);
-    serverMainWindow.move(100, 350);
-    serverMainWindow.show();
 
     application.exec();  // run GUI application
 
