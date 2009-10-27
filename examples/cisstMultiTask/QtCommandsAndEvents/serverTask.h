@@ -42,6 +42,7 @@ public:
 protected:
     void Void(void);
     void Write(const mtsInt & data);
+    void Read(mtsInt & placeHolder) const;
     void QualifiedRead(const mtsInt & data, mtsInt & placeHolder) const;
     void SendButtonClickEvent() {
         EventVoid();
@@ -51,7 +52,8 @@ protected:
     mtsFunctionWrite EventWrite;
 
     int VoidCounter;
-    mtsInt ReadValue;
+    int ReadValue;
+    int QualifiedReadValue;
 
     QMainWindow MainWindow;
     Ui::ServerWindow ServerWindow;
@@ -59,6 +61,10 @@ protected:
 signals:
     void VoidQtSignal(int voidCounter);
     void WriteQtSignal(int newValue);
+
+public slots:
+    void SetReadValue(int);
+    void SetQualifiedReadValue(int);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(serverTask);

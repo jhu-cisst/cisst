@@ -25,13 +25,15 @@ CMN_IMPLEMENT_SERVICES(serverTask);
 
 serverTask::serverTask(const std::string & taskName):
     mtsDevice(taskName),
-    VoidCounter(0)
+    VoidCounter(0),
+    ReadValue(0),
+    QualifiedReadValue(0)
 {
     mtsProvidedInterface * provided = AddProvidedInterface("Provided");
     if (provided) {
         provided->AddCommandVoid(&serverTask::Void, this, "Void");
         provided->AddCommandWrite(&serverTask::Write, this, "Write");
-//        provided->AddCommandReadState(StateTable, ReadValue, "Read");
+        provided->AddCommandRead(&serverTask::Read, this, "Read");
         provided->AddCommandQualifiedRead(&serverTask::QualifiedRead, this, "QualifiedRead");
         provided->AddEventVoid(EventVoid, "EventVoid");
         provided->AddEventWrite(EventWrite, "EventWrite", mtsInt());
@@ -46,7 +48,11 @@ serverTask::serverTask(const std::string & taskName):
     QObject::connect(this, SIGNAL(VoidQtSignal(int)),
                      ServerWindow.VoidValue, SLOT(setNum(int)));    
     QObject::connect(this, SIGNAL(WriteQtSignal(int)),
-                     ServerWindow.WriteValue, SLOT(setNum(int)));    
+                     ServerWindow.WriteValue, SLOT(setNum(int)));
+    QObject::connect(ServerWindow.ReadSlider, SIGNAL(valueChanged(int)),
+                     this, SLOT(SetReadValue(int)));
+    QObject::connect(ServerWindow.QualifiedReadSlider, SIGNAL(valueChanged(int)),
+                     this, SLOT(SetQualifiedReadValue(int)));
 }
 
 
@@ -63,6 +69,25 @@ void serverTask::Write(const mtsInt & data)
 }
 
 
+void serverTask::Read(mtsInt & placeHolder) const
+{
+    placeHolder.Data = ReadValue;
+}
+
+
 void serverTask::QualifiedRead(const mtsInt & data, mtsInt & placeHolder) const
 {
+    placeHolder.Data = data.Data + QualifiedReadValue;
+}
+
+
+void serverTask::SetReadValue(int newValue)
+{
+    ReadValue = newValue;
+}
+
+
+void serverTask::SetQualifiedReadValue(int newValue)
+{
+    QualifiedReadValue = newValue;
 }

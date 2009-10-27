@@ -51,9 +51,15 @@ protected:
     QMainWindow MainWindow;
     Ui::ClientWindow ClientWindow;
 
+signals:
+    void ReadQtSignal(int newValue);
+    void QualifiedReadQtSignal(int newValue);
+
 public slots:
     void VoidQtSlot(void);
     void WriteQtSlot(int newValue);
+    void ReadQtSlot(void);
+    void QualifiedReadQtSlot(int newValue);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(clientTask);

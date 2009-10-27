@@ -30,7 +30,7 @@ clientTask::clientTask(const std::string & taskName) :
     if (required) {
         required->AddFunction("Void", Void);
         required->AddFunction("Write", Write);
-//        required->AddFunction("Read", Read);
+        required->AddFunction("Read", Read);
         required->AddFunction("QualifiedRead", QualifiedRead);
         required->AddEventHandlerVoid(&clientTask::EventVoidHandler, this, "EventVoid");
         required->AddEventHandlerWrite(&clientTask::EventWriteHandler, this, "EventWrite");
@@ -42,10 +42,22 @@ clientTask::clientTask(const std::string & taskName) :
     MainWindow.move(100, 100);
     MainWindow.show();
 
+    // trigger void command
     QObject::connect(ClientWindow.VoidButton, SIGNAL(clicked()),
                      this, SLOT(VoidQtSlot()));
+    // trigger write command
     QObject::connect(ClientWindow.WriteSlider, SIGNAL(valueChanged(int)),
                      this, SLOT(WriteQtSlot(int)));
+    // trigger read command and then refresh the UI
+    QObject::connect(ClientWindow.ReadButton, SIGNAL(clicked()),
+                     this, SLOT(ReadQtSlot()));
+    QObject::connect(this, SIGNAL(ReadQtSignal(int)),
+                     ClientWindow.ReadValue, SLOT(setNum(int)));
+    // trigger qualified read command and then refresh the UI
+    QObject::connect(ClientWindow.QualifiedReadSlider, SIGNAL(valueChanged(int)),
+                     this, SLOT(QualifiedReadQtSlot(int)));
+    QObject::connect(this, SIGNAL(QualifiedReadQtSignal(int)),
+                     ClientWindow.QualifiedReadReadValue, SLOT(setNum(int)));
 }
 
 
@@ -69,4 +81,21 @@ void clientTask::WriteQtSlot(int newValue)
 {
     mtsInt data = newValue;
     Write(data);
+}
+
+
+void clientTask::ReadQtSlot(void)
+{
+    mtsInt data;
+    Read(data);
+    emit ReadQtSignal(data.Data);
+}
+
+
+void clientTask::QualifiedReadQtSlot(int newValue)
+{
+    mtsInt qualifier, data;
+    qualifier.Data = newValue;
+    QualifiedRead(qualifier, data);
+    emit QualifiedReadQtSignal(data.Data);
 }
