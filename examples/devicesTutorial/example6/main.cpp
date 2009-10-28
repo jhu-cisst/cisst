@@ -18,44 +18,64 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+/*!
+  \file
+  \brief An example for NDI Polaris optical tracker
+  \ingroup devicesTutorial
+
+  \todo Implement the ability to connect to tools on the fly
+*/
+
 #include <cisstOSAbstraction/osaThreadedLogFile.h>
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsTaskManager.h>
-#include <cisstDevices/devKeyboard.h>
 #include <cisstDevices/devNDiSerial.h>
 
+#include <QApplication>
 
-int main(void)
+#include "proxyQt.h"
+
+
+int main(int argc, char *argv[])
 {
     // log configuration
     cmnLogger::SetLoD(CMN_LOG_LOD_VERY_VERBOSE);
     cmnLogger::GetMultiplexer()->AddChannel(std::cout, CMN_LOG_LOD_VERY_VERBOSE);
-    cmnClassRegister::SetLoD("devNDiSerial", CMN_LOG_LOD_VERY_VERBOSE);
 
     // add a log per thread
     osaThreadedLogFile threadedLog("example6-");
     cmnLogger::GetMultiplexer()->AddChannel(threadedLog, CMN_LOG_LOD_VERY_VERBOSE);
 
+    // set the log level of detail on select tasks
+    cmnClassRegister::SetLoD("devNDiSerial", CMN_LOG_LOD_VERY_VERBOSE);
+    //cmnClassRegister::SetLoD("proxyQt", CMN_LOG_LOD_VERY_VERBOSE);
+
+    // create a Qt user interface
+    QApplication application(argc, argv);
+
+    // create the tasks
+    devNDiSerial * devNDiSerialTask = new devNDiSerial("devNDiSerial", "COM3");
+    proxyQt * proxyQtObject = new proxyQt("proxyQt");
+
+    // add the tasks to the task manager
     mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
-
-    // create tasks
-    devKeyboard * devKeyboardTask = new devKeyboard();
-    devNDiSerial * devNDiSerialTask = new devNDiSerial("devNDiSerial", "COM1");
-
-    // add tasks to task manager
-    taskManager->AddTask(devKeyboardTask);
     taskManager->AddTask(devNDiSerialTask);
+    taskManager->AddDevice(proxyQtObject);
+
+    // connect the tasks, i.e. RequiredInterface -> ProvidedInterface
+    taskManager->Connect("proxyQt", "RequiresNDISerial",
+                         "devNDiSerial", "ProvidesNDISerial");
+    taskManager->Connect("proxyQt", "02-34802401",
+                         "devNDiSerial", "02-34802401");
 
     // create and start all tasks
     taskManager->CreateAll();
     taskManager->StartAll();
 
-    devKeyboardTask->SetQuitKey('q');
-    do {
-        osaSleep(100.0 * cmn_ms);
-    } while (!devKeyboardTask->Done());
+    // run Qt user interface
+    application.exec();
 
-    // kill all tasks
+    // kill all tasks and perform cleanup
     taskManager->KillAll();
     taskManager->Cleanup();
 

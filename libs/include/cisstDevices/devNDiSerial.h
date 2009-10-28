@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
   \ingroup cisstDevices
 
   \bug _snprintf in CommandAppend(int) is Windows-dependent
+  \bug LoadToolDefinition requires input definition to be a multiple of 128 characters (via 0 padding)
 
   \todo Missing support for 14400bps, 921600bps and 1228739bps baud rates in osaSerialPort
   \todo Check for buffer overflow in CommandAppend()
@@ -107,7 +108,7 @@ protected:
     void CommandInitialize(void);
     void CommandAppend(const char command);
     void CommandAppend(const char * command);
-    void CommandAppend(const unsigned int command);
+    void CommandAppend(const int command);
     bool CommandSend(void);
     bool CommandSend(const char * command) {
         CommandInitialize();
@@ -126,13 +127,14 @@ protected:
                                osaSerialPort::ParityCheckingType parityChecking,
                                osaSerialPort::StopBitsType stopBits,
                                osaSerialPort::FlowControlType flowControl);
-    bool Beep(unsigned int numberOfBeeps);
+    void Beep(const mtsInt & numberOfBeeps);
 
+    void LoadToolDefinition(const char * portHandle, const char * toolDefinition);
     void PortHandlesInitialize(void);
     void PortHandlesQuery(void);
     void PortHandlesEnable(void);
 
-    void ToggleTracking(const bool track);
+    void ToggleTracking(const mtsBool & track);
     void Track(void);
 
     osaSerialPort SerialPort;
@@ -142,6 +144,8 @@ protected:
     typedef cmnNamedMap<Tool> ToolsMapType;
     ToolsMapType ToolsMap;
     cmnNamedMap<Tool> PortToTool;
+
+    bool IsTracking;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(devNDiSerial);

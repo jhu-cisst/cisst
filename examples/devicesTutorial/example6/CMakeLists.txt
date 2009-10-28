@@ -14,11 +14,25 @@
 #
 # --- end cisst license ---
 
-project(devicesTutorialExample6)
+qt4_wrap_cpp(QT_WRAPPED_CPP
+             proxyQt.h
+             )
+qt4_wrap_ui(QT_WRAPPED_UI
+            devNDISerial.ui
+            )
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 add_executable(devicesTutorialExample6
+               ${QT_WRAPPED_CPP}
+               ${QT_WRAPPED_UI}
                main.cpp
+               proxyQt.cpp
+               proxyQt.h
                )
+
+target_link_libraries(devicesTutorialExample6
+                      ${QT_LIBRARIES}
+                      )
 
 cisst_requires(devicesTutorialExample6
                "cisstCommon;cisstOSAbstraction;cisstMultiTask;cisstDevices"
