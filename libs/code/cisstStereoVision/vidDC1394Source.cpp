@@ -117,6 +117,9 @@ void svlDC1394Context::Enumerate()
     // Re-enumerate camera list
     ReleaseEnumeration();
 
+    // Disable libdc1394 warnings print-outs
+    dc1394_log_register_handler(DC1394_LOG_WARNING, 0, 0);
+
     // Get list of cameras with 'GUID' and 'Unit' identifiers
     if (dc1394_camera_enumerate(Context, &CameraList) != DC1394_SUCCESS || CameraList->num < 1) {
         ReleaseEnumeration();
@@ -344,6 +347,8 @@ svlDC1394Context::svlDC1394Context() :
     Context = dc1394_new();
     Enumerate();
 
+    PixelTypeBitSize[svlFilterSourceVideoCapture::PixelRAW8]    =  8;
+    PixelTypeBitSize[svlFilterSourceVideoCapture::PixelRAW16]   = 16;
     PixelTypeBitSize[svlFilterSourceVideoCapture::PixelRGB8]    = 24;
     PixelTypeBitSize[svlFilterSourceVideoCapture::PixelYUV444]  = 24;
     PixelTypeBitSize[svlFilterSourceVideoCapture::PixelYUV422]  = 16;
@@ -463,10 +468,12 @@ int CDC1394Source::Open()
 
     Close();
 
+    int f7mode;
     double fps;
     unsigned int i, j;
     unsigned int mode = 0, framerate = 0;
-    svlFilterSourceVideoCapture::PixelType colorspace = svlFilterSourceVideoCapture::PixelRGB8;
+    unsigned int f7roileft = 0, f7roitop = 0, f7bpp = 0;
+    svlFilterSourceVideoCapture::PixelType  colorspace = svlFilterSourceVideoCapture::PixelRGB8;
     dc1394video_modes_t modes;
     dc1394framerates_t framerates;
     bool found;
@@ -481,26 +488,39 @@ int CDC1394Source::Open()
 #endif
             goto labError;
         }
+
+        if (Format[i]->colorspace == svlFilterSourceVideoCapture::PixelRAW16) {
+#if (__verbose__ >= 2)
+            cerr << "CDC1394Source::Open - Unsupported color space" << endl;
+#endif
+            goto labError;
+        }
+
         if (Format[i]) {
-            // Finding the best possible camera settings for the
-            // the requested capture format
-            if (GetModeFromFormat(Format[i]->width, Format[i]->height, Format[i]->colorspace, mode) != SVL_OK) {
+            if (Format[i]->custom_mode < 0) {
+                    // Finding the best possible camera settings
+                    // for the requested capture format
+                if (GetModeFromFormat(Format[i]->width, Format[i]->height, Format[i]->colorspace, mode) != SVL_OK) {
 #if (__verbose__ >= 1)
-                cerr << "CDC1394Source::Open - GetModeFromFormat returned error" << endl;
+                    cerr << "CDC1394Source::Open - GetModeFromFormat returned error" << endl;
 #endif
-                goto labError;
-            }
-            if (GetFramerateFromFPS(Format[i]->framerate, framerate) != SVL_OK) {
+                    goto labError;
+                }
+                if (GetFramerateFromFPS(Format[i]->framerate, framerate) != SVL_OK) {
 #if (__verbose__ >= 1)
-                cerr << "CDC1394Source::Open - GetFramerateFromFPS returned error" << endl;
+                    cerr << "CDC1394Source::Open - GetFramerateFromFPS returned error" << endl;
 #endif
-                goto labError;
+                    goto labError;
+                }
             }
 
             Width[i] = static_cast<int>(Format[i]->width);
             Height[i] = static_cast<int>(Format[i]->height);
             colorspace = Format[i]->colorspace;
             fps = Format[i]->framerate;
+            f7mode = Format[i]->custom_mode;
+            f7roileft = Format[i]->custom_roileft;
+            f7roitop = Format[i]->custom_roitop;
         }
         else {
             // Setting default image format
@@ -511,6 +531,7 @@ int CDC1394Source::Open()
             Height[i] = DEFAULT_HEIGHT;
             colorspace = DEFAULT_COLORSPACE;
             fps = DEFAULT_FRAMERATE;
+            f7mode = -1;
         }
 
         // Manually check whether enough ISO bandwidth is
@@ -530,133 +551,167 @@ int CDC1394Source::Open()
         }
 
         OutputBuffer[i] = new svlImageBuffer(Width[i], Height[i]);
-
-        switch (colorspace) {
-            case svlFilterSourceVideoCapture::PixelRGB8:
-                ColorCoding[i] = DC1394_COLOR_CODING_RGB8;
-            break;
-
-            case svlFilterSourceVideoCapture::PixelYUV444:
-                ColorCoding[i] = DC1394_COLOR_CODING_YUV444;
-            break;
-
-            case svlFilterSourceVideoCapture::PixelYUV422:
-                ColorCoding[i] = DC1394_COLOR_CODING_YUV422;
-            break;
-
-            case svlFilterSourceVideoCapture::PixelYUV411:
-                ColorCoding[i] = DC1394_COLOR_CODING_YUV411;
-            break;
-
-            case svlFilterSourceVideoCapture::PixelMONO8:
-                ColorCoding[i] = DC1394_COLOR_CODING_MONO8;
-            break;
-
-            case svlFilterSourceVideoCapture::PixelMONO16:
-                ColorCoding[i] = DC1394_COLOR_CODING_MONO16;
-            break;
-
-            case svlFilterSourceVideoCapture::PixelUnknown:
-            default:
-                ColorCoding[i] = DC1394_COLOR_CODING_MONO8;
-        }
-
-        if (dc1394_video_set_operation_mode(Cameras[DeviceID[i]], BestOpMode[DeviceID[i]]) != DC1394_SUCCESS) {
+        ColorCoding[i] = GetColorCodingFromPixelType(colorspace);
+        
+        if (dc1394_video_set_operation_mode(Cameras[DeviceID[i]],
+                                            BestOpMode[DeviceID[i]]) != DC1394_SUCCESS) {
 #if (__verbose__ >= 2)
             cerr << "CDC1394Source::Open - dc1394_video_set_operation_mode returned error" << endl;
 #endif
             goto labError;
         }
-        if (dc1394_video_set_iso_speed(Cameras[DeviceID[i]], BestISOSpeed[DeviceID[i]]) != DC1394_SUCCESS) {
+        if (dc1394_video_set_iso_speed(Cameras[DeviceID[i]],
+                                       BestISOSpeed[DeviceID[i]]) != DC1394_SUCCESS) {
 #if (__verbose__ >= 2)
             cerr << "CDC1394Source::Open - dc1394_video_set_iso_speed returned error" << endl;
 #endif
             goto labError;
         }
-        if (dc1394_video_get_supported_modes(Cameras[DeviceID[i]], &modes) != DC1394_SUCCESS) {
+
+        if (f7mode < 0) {
+            if (dc1394_video_get_supported_modes(Cameras[DeviceID[i]],
+                                                 &modes) != DC1394_SUCCESS) {
 #if (__verbose__ >= 1)
-            cerr << "CDC1394Source::Open - dc1394_video_get_supported_modes returned error" << endl;
+                cerr << "CDC1394Source::Open - dc1394_video_get_supported_modes returned error" << endl;
 #endif
-            goto labError;
-        }
-        // Check if video mode is supported
+                goto labError;
+            }
+            // Check if video mode is supported
 #if (__verbose__ >= 3)
-        cerr << "CDC1394Source::Open - supported video modes: ";
+            cerr << "CDC1394Source::Open - supported video modes: ";
 #endif
-        found = false;
-        for (j = 0; j < modes.num; j ++) {
+            found = false;
+            for (j = 0; j < modes.num; j ++) {
 #if (__verbose__ >= 3)
-            if (j > 0) cerr << ", ";
-            cerr << modes.modes[j];
-            if (j == (modes.num - 1)) cerr << endl;
+                if (j > 0) cerr << ", ";
+                cerr << modes.modes[j];
+                if (j == (modes.num - 1)) cerr << endl;
 #endif
-            if (modes.modes[j] == static_cast<int>(mode)) found = true;
-        }
-        if (!found) {
-#if (__verbose__ >= 2)
-            cerr << "CDC1394Source::Open - requested video mode " << mode << " is not supported" << endl;
-#endif
-            goto labError;
-        }
-#if (__verbose__ >= 2)
-        cerr << "CDC1394Source::Open - requested video mode " << mode << " is supported" << endl;
-#endif
-        if (dc1394_video_set_mode(Cameras[DeviceID[i]], (dc1394video_mode_t)mode) != DC1394_SUCCESS) {
+                if (modes.modes[j] == static_cast<int>(mode)) found = true;
+            }
+            if (!found) {
 #if (__verbose__ >= 1)
-            cerr << "CDC1394Source::Open - dc1394_video_set_mode returned error" << endl;
+                cerr << "CDC1394Source::Open - requested video mode " << mode << " is not supported" << endl;
+#endif
+                goto labError;
+            }
+#if (__verbose__ >= 2)
+            cerr << "CDC1394Source::Open - requested video mode " << mode << " is supported" << endl;
+#endif
+            if (dc1394_video_set_mode(Cameras[DeviceID[i]],
+                                      (dc1394video_mode_t)mode) != DC1394_SUCCESS) {
+#if (__verbose__ >= 1)
+                cerr << "CDC1394Source::Open - dc1394_video_set_mode returned error" << endl;
+#endif
+                goto labError;
+            }
+        }
+        else if (f7mode <= 7) {
+            if (dc1394_video_set_mode(Cameras[DeviceID[i]],
+                                      (dc1394video_mode_t)(f7mode + DC1394_VIDEO_MODE_FORMAT7_0)) != DC1394_SUCCESS) {
+#if (__verbose__ >= 1)
+                cerr << "CDC1394Source::Open - dc1394_video_set_mode returned error" << endl;
+#endif
+                goto labError;
+            }
+        }
+        else {
+#if (__verbose__ >= 1)
+            cerr << "CDC1394Source::Open - requested Format7 mode " << f7mode << " is not supported" << endl;
 #endif
             goto labError;
         }
 #if (__verbose__ >= 3)
-            cerr << "CDC1394Source::Open - video mode accepted" << endl;
+        cerr << "CDC1394Source::Open - video mode accepted" << endl;
 #endif
 
-        if (dc1394_video_get_supported_framerates(Cameras[DeviceID[i]], (dc1394video_mode_t)mode, &framerates) != DC1394_SUCCESS) {
+        if (f7mode < 0) {
+            if (dc1394_video_get_supported_framerates(Cameras[DeviceID[i]],
+                                                      (dc1394video_mode_t)mode, &framerates) != DC1394_SUCCESS) {
 #if (__verbose__ >= 1)
-            cerr << "CDC1394Source::Open - dc1394_video_get_supported_framerates returned error" << endl;
+                cerr << "CDC1394Source::Open - dc1394_video_get_supported_framerates returned error" << endl;
 #endif
-            goto labError;
-        }
-        // Check if framerate is supported
+                goto labError;
+            }
+            // Check if framerate is supported
 #if (__verbose__ >= 3)
-        cerr << "CDC1394Source::Open - supported framerates: ";
+            cerr << "CDC1394Source::Open - supported framerates: ";
 #endif
-        found = false;
-        for (j = 0; j < framerates.num; j ++) {
+            found = false;
+            for (j = 0; j < framerates.num; j ++) {
 #if (__verbose__ >= 3)
-            if (j > 0) cerr << ", ";
-            cerr << framerates.framerates[j];
-            if (j == (framerates.num - 1)) cerr << endl;
+                if (j > 0) cerr << ", ";
+                cerr << framerates.framerates[j];
+                if (j == (framerates.num - 1)) cerr << endl;
 #endif
-            if (framerates.framerates[j] == static_cast<int>(framerate)) found = true;
-        }
-        if (!found) {
+                if (framerates.framerates[j] == static_cast<int>(framerate)) found = true;
+            }
+            if (!found) {
 #if (__verbose__ >= 2)
-            cerr << "CDC1394Source::Open - requested framerate " << framerate << " is not supported" << endl;
+                cerr << "CDC1394Source::Open - requested framerate " << framerate << " is not supported" << endl;
 #endif
-            if (framerates.num <= 1) goto labError;
-            framerate = framerates.framerates[framerates.num - 1];
+                if (framerates.num <= 1) goto labError;
+                framerate = framerates.framerates[framerates.num - 1];
 #if (__verbose__ >= 2)
-            cerr << "CDC1394Source::Open - setting highest supported framerate: " << framerate << endl;
+                cerr << "CDC1394Source::Open - setting highest supported framerate: " << framerate << endl;
+#endif
+            }
+            else {
+#if (__verbose__ >= 2)
+            cerr << "CDC1394Source::Open - requested framerate " << framerate << " is supported" << endl;
+#endif
+            }
+            if (dc1394_video_set_framerate(Cameras[DeviceID[i]],
+                                           (dc1394framerate_t)framerate) != DC1394_SUCCESS) {
+#if (__verbose__ >= 1)
+                cerr << "CDC1394Source::Open - dc1394_video_set_framerate returned error" << endl;
+#endif
+                goto labError;
+            }
+#if (__verbose__ >= 3)
+            cerr << "CDC1394Source::Open - framerate accepted" << endl;
 #endif
         }
         else {
+            if (dc1394_format7_get_recommended_packet_size(Cameras[DeviceID[i]],
+                                                           (dc1394video_mode_t)(f7mode + DC1394_VIDEO_MODE_FORMAT7_0),
+                                                           &f7bpp) != DC1394_SUCCESS) {
 #if (__verbose__ >= 2)
-        cerr << "CDC1394Source::Open - requested framerate " << framerate << " is supported" << endl;
+                cerr << "CDC1394Source::Open - cannot get recommended bits/pixel; using maximum available" << endl;
 #endif
-        }
-        if (dc1394_video_set_framerate(Cameras[DeviceID[i]], (dc1394framerate_t)framerate) != DC1394_SUCCESS) {
+                f7bpp = DC1394_USE_MAX_AVAIL;
+            }
+            if (dc1394_format7_set_roi(Cameras[DeviceID[i]],
+                                       (dc1394video_mode_t)(f7mode + DC1394_VIDEO_MODE_FORMAT7_0),
+                                       (dc1394color_coding_t)(ColorCoding[i]),
+                                       f7bpp,
+                                       f7roileft, f7roitop,
+                                       Width[i], Height[i]) != DC1394_SUCCESS) {
 #if (__verbose__ >= 1)
-            cerr << "CDC1394Source::Open - dc1394_video_set_framerate returned error" << endl;
+                cerr << "CDC1394Source::Open - dc1394_format7_set_roi returned error" << endl;
 #endif
-            goto labError;
-        }
+                goto labError;
+            }
+            if (dc1394_format7_get_packet_size(Cameras[DeviceID[i]],
+                                               (dc1394video_mode_t)(f7mode + DC1394_VIDEO_MODE_FORMAT7_0),
+                                               &f7bpp) != DC1394_SUCCESS) {
+#if (__verbose__ >= 2)
+                cerr << "CDC1394Source::Open - cannot get bits/pixel" << endl;
+#endif
+            }
+            else {
 #if (__verbose__ >= 3)
-        cerr << "CDC1394Source::Open - framerate accepted" << endl;
+                cerr << "CDC1394Source::Open - bits/pixel = " << f7bpp << endl;
 #endif
+            }
+#if (__verbose__ >= 3)
+            cerr << "CDC1394Source::Open - Format7 setup accepted = " << f7bpp << endl;
+#endif
+        }
 
         if (Trigger[DeviceID[i]].enable) {
-            if (dc1394_external_trigger_set_power(Cameras[DeviceID[i]], DC1394_ON) == DC1394_SUCCESS) {
+            if (dc1394_external_trigger_set_power(Cameras[DeviceID[i]],
+                                                  DC1394_ON) == DC1394_SUCCESS) {
 #if (__verbose__ >= 3)
                 cerr << "CDC1394Source::Open - external trigger enabled" << endl;
 #endif
@@ -669,7 +724,8 @@ int CDC1394Source::Open()
                 }
                 if (ivalue == 14) ivalue = 6;
                 if (ivalue == 15) ivalue = 7;
-                if (dc1394_external_trigger_set_mode(Cameras[DeviceID[i]], static_cast<dc1394trigger_mode_t>(ivalue + DC1394_TRIGGER_MODE_MIN)) == DC1394_SUCCESS) {
+                if (dc1394_external_trigger_set_mode(Cameras[DeviceID[i]],
+                                                     static_cast<dc1394trigger_mode_t>(ivalue + DC1394_TRIGGER_MODE_MIN)) == DC1394_SUCCESS) {
 #if (__verbose__ >= 3)
                     cerr << "CDC1394Source::Open - external trigger mode accepted" << endl;
 #endif
@@ -680,7 +736,8 @@ int CDC1394Source::Open()
                         cerr << "CDC1394Source::Open - unsupported trigger source; using source 0 instead" << endl;
 #endif
                     }
-                    if (dc1394_external_trigger_set_source(Cameras[DeviceID[i]], static_cast<dc1394trigger_source_t>(ivalue + DC1394_TRIGGER_SOURCE_MIN)) == DC1394_SUCCESS) {
+                    if (dc1394_external_trigger_set_source(Cameras[DeviceID[i]],
+                                                           static_cast<dc1394trigger_source_t>(ivalue + DC1394_TRIGGER_SOURCE_MIN)) == DC1394_SUCCESS) {
 #if (__verbose__ >= 3)
                         cerr << "CDC1394Source::Open - external trigger source accepted" << endl;
 #endif
@@ -691,7 +748,8 @@ int CDC1394Source::Open()
                             cerr << "CDC1394Source::Open - unsupported trigger polarity; using high polarity instead" << endl;
 #endif
                         }
-                        if (dc1394_external_trigger_set_polarity(Cameras[DeviceID[i]], static_cast<dc1394trigger_polarity_t>(ivalue)) == DC1394_SUCCESS) {
+                        if (dc1394_external_trigger_set_polarity(Cameras[DeviceID[i]],
+                                                                 static_cast<dc1394trigger_polarity_t>(ivalue)) == DC1394_SUCCESS) {
 #if (__verbose__ >= 3)
                             cerr << "CDC1394Source::Open - external trigger polarity accepted" << endl;
 #endif
@@ -725,13 +783,15 @@ int CDC1394Source::Open()
             }
         }
         else {
-            dc1394_external_trigger_set_power(Cameras[DeviceID[i]], DC1394_OFF);
+            dc1394_external_trigger_set_power(Cameras[DeviceID[i]],
+                                              DC1394_OFF);
 #if (__verbose__ >= 3)
             cerr << "CDC1394Source::Open - external trigger disabled" << endl;
 #endif
         }
 
-        if (dc1394_capture_setup(Cameras[DeviceID[i]], FRAME_BUFFER_SIZE, DC1394_CAPTURE_FLAGS_DEFAULT) != DC1394_SUCCESS) {
+        if (dc1394_capture_setup(Cameras[DeviceID[i]],
+                                 FRAME_BUFFER_SIZE, DC1394_CAPTURE_FLAGS_DEFAULT) != DC1394_SUCCESS) {
 #if (__verbose__ >= 1)
             cerr << "CDC1394Source::Open - dc1394_capture_setup returned error" << endl;
 #endif
@@ -741,15 +801,13 @@ int CDC1394Source::Open()
         CameraFileNo[i] = dc1394_capture_get_fileno(Cameras[DeviceID[i]]);
         CameraNFDS[i] = CameraFileNo[i] + 1;
 
-        if (dc1394_external_trigger_set_mode(Cameras[DeviceID[i]], DC1394_TRIGGER_MODE_0) != DC1394_SUCCESS) {
+        if (dc1394_external_trigger_set_mode(Cameras[DeviceID[i]],
+                                             DC1394_TRIGGER_MODE_0) != DC1394_SUCCESS) {
 #if (__verbose__ >= 1)
             cerr << "CDC1394Source::Open - dc1394_external_trigger_set_mode returned error" << endl;
 #endif
             goto labError;
         }
-
-        // Disable warnings
-        dc1394_log_register_handler(DC1394_LOG_WARNING, 0, 0);
 
         // Setting defualt image properties
         svlFilterSourceVideoCapture::ImageProperties properties;
@@ -990,23 +1048,33 @@ int CDC1394Source::CaptureFrame(unsigned int videoch)
     unsigned int yuvorder, rgborder;
     if (Format[videoch]) {
         rgborder = Format[videoch]->rgb_order;
-
+        
         if (Format[videoch]->yuyv_order)
             yuvorder = DC1394_BYTE_ORDER_YUYV;
         else
             yuvorder = DC1394_BYTE_ORDER_UYVY;
     }
     else {
-        // Default conversion settings
+            // Default conversion settings
         yuvorder = DC1394_BYTE_ORDER_UYVY;
         rgborder = true;
     }
-    dc1394_convert_to_RGB8(Frame[videoch]->image,
-                           OutputBuffer[videoch]->GetPushBuffer(),
-                           Width[videoch], Height[videoch],
-                           yuvorder,
-                           (dc1394color_coding_t)ColorCoding[videoch],
-                           16);
+
+    if (ColorCoding[videoch] == DC1394_COLOR_CODING_RAW8) {
+        dc1394_bayer_decoding_8bit(Frame[videoch]->image,
+                                   OutputBuffer[videoch]->GetPushBuffer(),
+                                   Width[videoch], Height[videoch],
+                                   GetColorFilterFromPatternType(Format[videoch]->custom_pattern),
+                                   DC1394_BAYER_METHOD_BILINEAR);
+    }
+    else {
+        dc1394_convert_to_RGB8(Frame[videoch]->image,
+                               OutputBuffer[videoch]->GetPushBuffer(),
+                               Width[videoch], Height[videoch],
+                               yuvorder,
+                               (dc1394color_coding_t)ColorCoding[videoch],
+                               16);
+    }
 
 #if (__verbose__ >= 4)
     cerr << "CDC1394Source::CaptureFrame - releasing frame buffer" << endl;
@@ -1035,12 +1103,13 @@ int CDC1394Source::GetFormatList(unsigned int deviceid, svlFilterSourceVideoCapt
 
     // Allocate memory for format array
     // CALLER HAS TO FREE UP THIS ARRAY!!!
-    unsigned int listsize = modes.num, validlistsize = modes.num;
+    unsigned int listsize = modes.num + DC1394_VIDEO_MODE_FORMAT7_NUM;
+    unsigned int validlistsize = listsize;
     svlFilterSourceVideoCapture::ImageFormat *templist = new svlFilterSourceVideoCapture::ImageFormat[listsize];
     double *fpslist;
-    unsigned int fpslistsize, i, j;
+    unsigned int fpslistsize, i, j, k, l;
 
-    for (i = 0; i < listsize; i ++) {
+    for (i = 0; i < modes.num; i ++) {
         if (GetFormatFromMode(modes.modes[i], templist[i]) != SVL_OK) {
             templist[i].width = -1;
             templist[i].height = -1;
@@ -1050,12 +1119,66 @@ int CDC1394Source::GetFormatList(unsigned int deviceid, svlFilterSourceVideoCapt
         }
         templist[i].rgb_order = true;
         templist[i].yuyv_order = false;
+        templist[i].custom_mode = -1;
+        templist[i].custom_roileft = 0;
+        templist[i].custom_roitop = 0;
+        templist[i].custom_pattern = svlFilterSourceVideoCapture::PatternUnknown;
+        templist[i].custom_maxwidth = 0;
+        templist[i].custom_maxheight = 0;
+        templist[i].custom_unitwidth = 0;
+        templist[i].custom_unitheight = 0;
+        templist[i].custom_unitleft = 0;
+        templist[i].custom_unittop = 0;
+        templist[i].custom_colorspaces[0] = svlFilterSourceVideoCapture::PixelUnknown;
 
         fpslistsize = 0;
         GetSupportedFrameratesForFormat(deviceid, templist[i], &fpslist, fpslistsize);
         if (fpslistsize > 0) templist[i].framerate = fpslist[fpslistsize - 1];
         else templist[i].framerate = -1.0;
         delete [] fpslist;
+    }
+
+    // Get Format7 modes and parameters
+    dc1394format7modeset_t f7modes;
+    memset(&f7modes, 0, sizeof(dc1394format7modeset_t));
+    dc1394_format7_get_modeset(Cameras[deviceid], &f7modes);
+    svlFilterSourceVideoCapture::PixelType cstype;
+
+    for (j = 0; i < listsize; i ++, j ++) {
+        if (f7modes.mode[j].present) {
+            templist[i].width = f7modes.mode[j].size_x;
+            templist[i].height = f7modes.mode[j].size_y;
+            templist[i].colorspace = GetPixelTypeFromColorCoding(f7modes.mode[j].color_coding);
+            templist[i].rgb_order = true;
+            templist[i].yuyv_order = false;
+            templist[i].custom_mode = j;
+            templist[i].custom_roileft = f7modes.mode[j].pos_x;
+            templist[i].custom_roitop = f7modes.mode[j].pos_y;
+            templist[i].custom_pattern = GetPatternTypeFromColorFilter(f7modes.mode[j].color_filter);
+            templist[i].custom_maxwidth = f7modes.mode[j].max_size_x;
+            templist[i].custom_maxheight = f7modes.mode[j].max_size_y;
+            templist[i].custom_unitwidth = f7modes.mode[j].unit_size_x;
+            templist[i].custom_unitheight = f7modes.mode[j].unit_size_y;
+            templist[i].custom_unitleft = f7modes.mode[j].unit_pos_x;
+            templist[i].custom_unittop = f7modes.mode[j].unit_pos_y;
+            for (l = 0, k = 0; k < f7modes.mode[j].color_codings.num; k ++) {
+                cstype = GetPixelTypeFromColorCoding(f7modes.mode[j].color_codings.codings[k]);
+                if (cstype != svlFilterSourceVideoCapture::PixelUnknown) {
+                    templist[i].custom_colorspaces[l] = cstype;
+                    l ++;
+                }
+            }
+            if (l < svlFilterSourceVideoCapture::PixelUnknown) {
+                templist[i].custom_colorspaces[l] = svlFilterSourceVideoCapture::PixelUnknown;
+            }
+        }
+        else {
+            templist[i].width = -1;
+            templist[i].height = -1;
+            templist[i].colorspace = svlFilterSourceVideoCapture::PixelUnknown;
+            validlistsize --;
+            continue;
+        }
     }
 
     formatlist[0] = new svlFilterSourceVideoCapture::ImageFormat[validlistsize];
@@ -1247,6 +1370,13 @@ void CDC1394Source::Release()
 
 int CDC1394Source::GetModeFromFormat(unsigned int width, unsigned int height, svlFilterSourceVideoCapture::PixelType colspc, unsigned int& mode)
 {
+    if (colspc == svlFilterSourceVideoCapture::PixelRAW8 ||
+        colspc == svlFilterSourceVideoCapture::PixelRAW16) {
+        // No corresponding mode exists
+        // Supported only in Format7
+        return SVL_FAIL;
+    }
+
     if (width == 160 && height == 120) {
         if (colspc == svlFilterSourceVideoCapture::PixelYUV444) mode = DC1394_VIDEO_MODE_160x120_YUV444;
         else return SVL_FAIL;
@@ -1277,6 +1407,8 @@ int CDC1394Source::GetModeFromFormat(unsigned int width, unsigned int height, sv
                 mode = DC1394_VIDEO_MODE_640x480_MONO16;
             break;
 
+            case svlFilterSourceVideoCapture::PixelRAW8:
+            case svlFilterSourceVideoCapture::PixelRAW16:
             case svlFilterSourceVideoCapture::PixelYUV444:
             case svlFilterSourceVideoCapture::PixelUnknown:
             default:
@@ -1301,6 +1433,8 @@ int CDC1394Source::GetModeFromFormat(unsigned int width, unsigned int height, sv
                 mode = DC1394_VIDEO_MODE_800x600_MONO16;
             break;
 
+            case svlFilterSourceVideoCapture::PixelRAW8:
+            case svlFilterSourceVideoCapture::PixelRAW16:
             case svlFilterSourceVideoCapture::PixelYUV411:
             case svlFilterSourceVideoCapture::PixelYUV444:
             case svlFilterSourceVideoCapture::PixelUnknown:
@@ -1326,6 +1460,8 @@ int CDC1394Source::GetModeFromFormat(unsigned int width, unsigned int height, sv
                 mode = DC1394_VIDEO_MODE_1024x768_MONO16;
             break;
 
+            case svlFilterSourceVideoCapture::PixelRAW8:
+            case svlFilterSourceVideoCapture::PixelRAW16:
             case svlFilterSourceVideoCapture::PixelYUV411:
             case svlFilterSourceVideoCapture::PixelYUV444:
             case svlFilterSourceVideoCapture::PixelUnknown:
@@ -1351,6 +1487,8 @@ int CDC1394Source::GetModeFromFormat(unsigned int width, unsigned int height, sv
                 mode = DC1394_VIDEO_MODE_1280x960_MONO16;
             break;
 
+            case svlFilterSourceVideoCapture::PixelRAW8:
+            case svlFilterSourceVideoCapture::PixelRAW16:
             case svlFilterSourceVideoCapture::PixelYUV411:
             case svlFilterSourceVideoCapture::PixelYUV444:
             case svlFilterSourceVideoCapture::PixelUnknown:
@@ -1376,6 +1514,8 @@ int CDC1394Source::GetModeFromFormat(unsigned int width, unsigned int height, sv
                 mode = DC1394_VIDEO_MODE_1600x1200_MONO16;
             break;
 
+            case svlFilterSourceVideoCapture::PixelRAW8:
+            case svlFilterSourceVideoCapture::PixelRAW16:
             case svlFilterSourceVideoCapture::PixelYUV411:
             case svlFilterSourceVideoCapture::PixelYUV444:
             case svlFilterSourceVideoCapture::PixelUnknown:
@@ -1618,6 +1758,116 @@ int CDC1394Source::GetFormatFromMode(unsigned int mode, svlFilterSourceVideoCapt
     }
 
     return SVL_OK;
+}
+
+dc1394color_coding_t CDC1394Source::GetColorCodingFromPixelType(svlFilterSourceVideoCapture::PixelType pixeltype)
+{
+    switch (pixeltype) {
+        case svlFilterSourceVideoCapture::PixelRAW8:
+            return DC1394_COLOR_CODING_RAW8;
+
+        case svlFilterSourceVideoCapture::PixelRAW16:
+            return DC1394_COLOR_CODING_RAW16;
+
+        case svlFilterSourceVideoCapture::PixelRGB8:
+            return DC1394_COLOR_CODING_RGB8;
+
+        case svlFilterSourceVideoCapture::PixelYUV444:
+            return DC1394_COLOR_CODING_YUV444;
+
+        case svlFilterSourceVideoCapture::PixelYUV422:
+            return DC1394_COLOR_CODING_YUV422;
+
+        case svlFilterSourceVideoCapture::PixelYUV411:
+            return DC1394_COLOR_CODING_YUV411;
+
+        case svlFilterSourceVideoCapture::PixelMONO8:
+            return DC1394_COLOR_CODING_MONO8;
+
+        case svlFilterSourceVideoCapture::PixelMONO16:
+            return DC1394_COLOR_CODING_MONO16;
+
+        case svlFilterSourceVideoCapture::PixelUnknown:
+        default:
+        break;
+    }
+    return DC1394_COLOR_CODING_RAW8;
+}
+
+svlFilterSourceVideoCapture::PixelType CDC1394Source::GetPixelTypeFromColorCoding(dc1394color_coding_t colorcoding)
+{
+    switch (colorcoding) {
+        case DC1394_COLOR_CODING_MONO8:
+            return svlFilterSourceVideoCapture::PixelMONO8;
+            
+        case DC1394_COLOR_CODING_YUV411:
+            return svlFilterSourceVideoCapture::PixelYUV411;
+            
+        case DC1394_COLOR_CODING_YUV422:
+            return svlFilterSourceVideoCapture::PixelYUV422;
+            
+        case DC1394_COLOR_CODING_RGB8:
+            return svlFilterSourceVideoCapture::PixelRGB8;
+            
+        case DC1394_COLOR_CODING_MONO16:
+            return svlFilterSourceVideoCapture::PixelMONO16;
+            
+        case DC1394_COLOR_CODING_RAW8:
+            return svlFilterSourceVideoCapture::PixelRAW8;
+            
+        case DC1394_COLOR_CODING_RAW16:
+            return svlFilterSourceVideoCapture::PixelRAW16;
+            
+        case DC1394_COLOR_CODING_RGB16:
+        case DC1394_COLOR_CODING_MONO16S:
+        case DC1394_COLOR_CODING_RGB16S:
+        default:
+        break;
+    }
+    return svlFilterSourceVideoCapture::PixelUnknown;
+}
+
+dc1394color_filter_t CDC1394Source::GetColorFilterFromPatternType(svlFilterSourceVideoCapture::PatternType patterntype)
+{
+    switch (patterntype) {
+        case svlFilterSourceVideoCapture::PatternRGGB:
+            return DC1394_COLOR_FILTER_RGGB;
+
+        case svlFilterSourceVideoCapture::PatternGBRG:
+            return DC1394_COLOR_FILTER_GBRG;
+
+        case svlFilterSourceVideoCapture::PatternGRBG:
+            return DC1394_COLOR_FILTER_GRBG;
+
+        case svlFilterSourceVideoCapture::PatternBGGR:
+            return DC1394_COLOR_FILTER_BGGR;
+    
+        case svlFilterSourceVideoCapture::PatternUnknown:
+        default:
+            break;
+    }
+    return DC1394_COLOR_FILTER_RGGB;
+}
+
+svlFilterSourceVideoCapture::PatternType CDC1394Source::GetPatternTypeFromColorFilter(dc1394color_filter_t colorfilter)
+{
+    switch (colorfilter) {
+        case DC1394_COLOR_FILTER_RGGB:
+            return svlFilterSourceVideoCapture::PatternRGGB;
+            
+        case DC1394_COLOR_FILTER_GBRG:
+            return svlFilterSourceVideoCapture::PatternGBRG;
+            
+        case DC1394_COLOR_FILTER_GRBG:
+            return svlFilterSourceVideoCapture::PatternGRBG;
+            
+        case DC1394_COLOR_FILTER_BGGR:
+            return svlFilterSourceVideoCapture::PatternBGGR;
+
+        default:
+            break;
+    }
+    return svlFilterSourceVideoCapture::PatternUnknown;
 }
 
 void CDC1394Source::SwapRGBBuffer(unsigned char* buffer, const unsigned int numberofpixels)

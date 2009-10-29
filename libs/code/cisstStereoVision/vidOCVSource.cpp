@@ -369,6 +369,7 @@ int COpenCVSource::GetFormatList(unsigned int deviceid, svlFilterSourceVideoCapt
     formatlist[0][0].rgb_order = true;
     formatlist[0][0].yuyv_order = false;
     formatlist[0][0].framerate = -1.0;
+    formatlist[0][0].custom_mode = -1;
 
     return 1;
 }
@@ -383,6 +384,7 @@ int COpenCVSource::GetFormat(svlFilterSourceVideoCapture::ImageFormat& format, u
     format.rgb_order = true;
     format.yuyv_order = false;
     format.framerate = -1.0;
+    format.custom_mode = -1;
 
     return SVL_OK;
 }

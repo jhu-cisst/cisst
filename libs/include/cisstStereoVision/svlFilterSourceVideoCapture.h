@@ -69,23 +69,45 @@ public:
     } DeviceInfo;
 
     typedef enum _PixelType {
-        PixelRGB8    = 0,   // 24 bits per pixel
-        PixelYUV444  = 1,   // 24 bits per pixel
-        PixelYUV422  = 2,   // 16 bits per pixel
-        PixelYUV411  = 3,   // 12 bits per pixel
-        PixelMONO8   = 4,   //  8 bits per pixel
-        PixelMONO16  = 5,   // 16 bits per pixel
-        PixelUnknown = 6,
+        PixelRAW8    = 0,   //  8 bits per pixel
+        PixelRAW16   = 1,   // 16 bits per pixel
+        PixelRGB8    = 2,   // 24 bits per pixel
+        PixelYUV444  = 3,   // 24 bits per pixel
+        PixelYUV422  = 4,   // 16 bits per pixel
+        PixelYUV411  = 5,   // 12 bits per pixel
+        PixelMONO8   = 6,   //  8 bits per pixel
+        PixelMONO16  = 7,   // 16 bits per pixel
+        PixelUnknown = 8,
         PixelTypeCount
     } PixelType;
 
+    typedef enum _PatternType {
+        PatternRGGB    = 0,
+        PatternGBRG    = 1,
+        PatternGRBG    = 2,
+        PatternBGGR    = 3,
+        PatternUnknown = 4,
+        PatternTypeCount
+    } PatternType;
+
     typedef struct _ImageFormat {
-        unsigned int    width;
-        unsigned int    height;
-        PixelType       colorspace;
-        bool            rgb_order;
-        bool            yuyv_order;
-        double          framerate;
+        unsigned int    width;              // read/write
+        unsigned int    height;             // read/write
+        PixelType       colorspace;         // read/write
+        double          framerate;          // read/write
+        bool            rgb_order;          // read/write
+        bool            yuyv_order;         // read/write
+        int             custom_mode;        // read/write
+        unsigned int    custom_roileft;     // read/write
+        unsigned int    custom_roitop;      // read/write
+        unsigned int    custom_maxwidth;    // read only
+        unsigned int    custom_maxheight;   // read only
+        unsigned int    custom_unitwidth;   // read only
+        unsigned int    custom_unitheight;  // read only
+        unsigned int    custom_unitleft;    // read only
+        unsigned int    custom_unittop;     // read only
+        PixelType       custom_colorspaces[PixelTypeCount]; // read only
+        PatternType     custom_pattern;     // read only
     } ImageFormat;
 
     typedef struct _ExternalTrigger {
@@ -146,6 +168,8 @@ public:
     int GetTrigger(ExternalTrigger& trigger, unsigned int videoch = SVL_LEFT);
     int SetImageProperties(ImageProperties& properties, unsigned int videoch = SVL_LEFT);
     int GetImageProperties(ImageProperties& properties, unsigned int videoch = SVL_LEFT);
+    std::string GetPixelTypeName(PixelType pixeltype);
+    std::string GetPatternTypeName(PatternType patterntype);
 
     int SaveSettings(const char* filepath);
     int LoadSettings(const char* filepath);

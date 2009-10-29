@@ -606,16 +606,70 @@ int svlFilterSourceVideoCapture::DialogFormat(unsigned int videoch)
         // No GUI available for other APIs.
         // Ask in command line.
 
-        int formatid, listsize;
+        ImageFormat *formats = 0;
+        int i, formatid, formatcount;
 
-        listsize = PrintFormatList(videoch);
-        if (listsize > 0) {
+        formatcount = PrintFormatList(videoch);
+        if (formatcount > 0) {
             cout << endl << "  # Enter format ID: ";
             cin >> formatid;
-            if (formatid < 0) formatid = 0;
-            if (formatid >= listsize) formatid = listsize - 1;
+            if (formatid < 0 || formatid >= formatcount) {
+                cout << "  -!- Invalid format ID" << endl;
+                return SVL_FAIL;
+            }
 
-            SelectFormat(formatid, videoch);
+            GetFormatList(&formats, videoch);
+            if (formats[formatid].custom_mode < 0) {
+                SelectFormat(formatid, videoch);
+            }
+            else {
+                int roiwidth, roiheight, roileft, roitop, colorspace;
+                cout << "  # Enter ROI width (unit=" << formats[formatid].custom_unitwidth << "): ";
+                cin >> roiwidth;
+                if (roiwidth < 1 || roiwidth >= static_cast<int>(formats[formatid].custom_maxwidth)) {
+                    cout << "  -!- Invalid ROI width" << endl;
+                    return SVL_FAIL;
+                }
+                cout << "  # Enter ROI height (unit=" << formats[formatid].custom_unitheight << "): ";
+                cin >> roiheight;
+                if (roiheight < 1 || roiheight >= static_cast<int>(formats[formatid].custom_maxheight)) {
+                    cout << "  -!- Invalid ROI height" << endl;
+                    return SVL_FAIL;
+                }
+                cout << "  # Enter ROI left (unit=" << formats[formatid].custom_unitleft << "): ";
+                cin >> roileft;
+                if (roileft < 1 || roileft >= (static_cast<int>(formats[formatid].custom_maxwidth) - 1)) {
+                    cout << "  -!- Invalid ROI left" << endl;
+                    return SVL_FAIL;
+                }
+                cout << "  # Enter ROI top (unit=" << formats[formatid].custom_unittop << "): ";
+                cin >> roitop;
+                if (roitop < 1 || roitop >= (static_cast<int>(formats[formatid].custom_maxheight) - 1)) {
+                    cout << "  -!- Invalid ROI top" << endl;
+                    return SVL_FAIL;
+                }
+                cout << "  == Select color space ==" << endl;
+                for (i = 0; i < PixelTypeCount && formats[formatid].custom_colorspaces[i] != PixelUnknown; i ++) {
+                    cout << "  " << i << ") " << GetPixelTypeName(formats[formatid].custom_colorspaces[i]) << endl;
+                }
+                cout << "  # Enter color space ID: ";
+                cin >> colorspace;
+                if (colorspace < 0 || colorspace >= i) {
+                    cout << "  -!- Invalid color space" << endl;
+                    return SVL_FAIL;
+                }
+
+                ImageFormat format;
+                memcpy(&format, &(formats[formatid]), sizeof(ImageFormat));
+                format.width = roiwidth;
+                format.height = roiheight;
+                format.colorspace = formats[formatid].custom_colorspaces[colorspace];
+                format.custom_roileft= roileft;
+                format.custom_roitop = roitop;
+                SetFormat(format, videoch);
+            }
+
+            ReleaseFormatList(formats);
         }
         else {
             cout << "  -!- Format selection not available." << endl;
@@ -1141,46 +1195,32 @@ void svlFilterSourceVideoCapture::ReleaseFormatList(ImageFormat *formatlist)
 
 int svlFilterSourceVideoCapture::PrintFormatList(unsigned int videoch)
 {
+    int i, j;
     ImageFormat *formats = 0;
     int formatcount = GetFormatList(&formats, videoch);
 
-    for (int i = 0; i < formatcount; i ++) {
+    for (i = 0; i < formatcount; i ++) {
         cout << "  " << i << ") " << formats[i].width << "x" << formats[i].height << " ";
-        switch (formats[i].colorspace) {
-            case PixelRGB8:
-                cout << "RGB24";
-            break;
-
-            case PixelYUV444:
-                cout << "YUV444";
-            break;
-
-            case PixelYUV422:
-                cout << "YUV422";
-            break;
-
-            case PixelYUV411:
-                cout << "YUV411";
-            break;
-
-            case PixelMONO8:
-                cout << "Mono8";
-            break;
-
-            case PixelMONO16:
-                cout << "Mono16";
-            break;
-
-            case PixelUnknown:
-            default:
-                cout << "Unknown color space";
-            break;
-        }
+        cout << GetPixelTypeName(formats[i].colorspace);
         if (formats[i].framerate > 0.0) {
             cout << " (<=" << formats[i].framerate << "fps)" << endl;
         }
         else {
             cout << " (unknown framerate)" << endl;
+        }
+        if (formats[i].custom_mode >= 0) {
+            cout << "      [CUSTOM mode=" << formats[i].custom_mode << endl;
+            cout << "              maxsize=(" << formats[i].custom_maxwidth << ", " << formats[i].custom_maxheight << "); ";
+            cout << "unit=(" << formats[i].custom_unitwidth << ", " << formats[i].custom_unitheight << ")" << endl;
+            cout << "              roipos=(" << formats[i].custom_roileft << ", " << formats[i].custom_roitop << "); ";
+            cout << "unit=(" << formats[i].custom_unitleft << ", " << formats[i].custom_unittop << ")" << endl;
+            cout << "              colorspaces=(";
+            for (j = 0; j < PixelTypeCount && formats[i].custom_colorspaces[j] != PixelUnknown; j ++) {
+                if (j > 0) cout << ", ";
+                cout << GetPixelTypeName(formats[i].custom_colorspaces[j]);
+            }
+            cout << ")" << endl;
+            cout << "              pattern=" << GetPatternTypeName(formats[i].custom_pattern) << "]" << endl;
         }
     }
 
@@ -1311,6 +1351,34 @@ int svlFilterSourceVideoCapture::GetImageProperties(unsigned int videoch)
     Properties[videoch]->mask = propShutter & propGain & propWhiteBalance & propBrightness & propGamma & propSaturation;
 
     return DeviceObj[API[videoch]]->GetImageProperties(Properties[videoch][0], APIChannelID[videoch]);
+}
+
+std::string svlFilterSourceVideoCapture::GetPixelTypeName(PixelType pixeltype)
+{
+    switch (pixeltype) {
+        case PixelRAW8:     return "RAW8";
+        case PixelRAW16:    return "RAW16";
+        case PixelRGB8:     return "RGB24";
+        case PixelYUV444:   return "YUV444";
+        case PixelYUV422:   return "YUV422";
+        case PixelYUV411:   return "YUV411";
+        case PixelMONO8:    return "Mono8";
+        case PixelMONO16:   return "Mono16";
+        case PixelUnknown:
+        default:            return "Unknown color space";
+    }
+}
+
+std::string svlFilterSourceVideoCapture::GetPatternTypeName(PatternType patterntype)
+{
+    switch (patterntype) {
+        case PatternRGGB:   return "RGGB";
+        case PatternGBRG:   return "GBRG";
+        case PatternGRBG:   return "GRBG";
+        case PatternBGGR:   return "BGGR";
+        case PatternUnknown:
+        default:            return "Unknown pattern";
+    }
 }
 
 int svlFilterSourceVideoCapture::SaveSettings(const char* filepath)

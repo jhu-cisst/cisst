@@ -32,6 +32,8 @@ http://www.cisst.org/cisst/license.txt.
 **  - compatibility: DC1394 2.0.2+                                  **
 **  - get it from:                                                  **
 **    http://sourceforge.net/project/showfiles.php?group_id=8157    **
+**                                 or                               **
+**                       MacPorts (OS X 10.5+)                      **
 *********************************************************************/
 #include "dc1394/dc1394.h"
 
@@ -72,6 +74,35 @@ typedef enum {
     DC1394_VIDEO_MODE_FORMAT7_6         = 94,
     DC1394_VIDEO_MODE_FORMAT7_7         = 95
 } dc1394video_mode_t;
+*******************************************/
+
+/*******************************************
+** Color codings                          **
+********************************************
+typedef enum {
+    DC1394_COLOR_CODING_MONO8   = 320,
+    DC1394_COLOR_CODING_YUV411  = 321,
+    DC1394_COLOR_CODING_YUV422  = 322,
+    DC1394_COLOR_CODING_YUV444  = 323,
+    DC1394_COLOR_CODING_RGB8    = 324,
+    DC1394_COLOR_CODING_MONO16  = 325,
+    DC1394_COLOR_CODING_RGB16   = 326,
+    DC1394_COLOR_CODING_MONO16S = 327,
+    DC1394_COLOR_CODING_RGB16S  = 328,
+    DC1394_COLOR_CODING_RAW8    = 329,
+    DC1394_COLOR_CODING_RAW16   = 330
+} dc1394color_coding_t;
+*******************************************/
+
+/*******************************************
+** Bayer patterns                         **
+********************************************
+typedef enum {
+    DC1394_COLOR_FILTER_RGGB = 512,
+    DC1394_COLOR_FILTER_GBRG = 513,
+    DC1394_COLOR_FILTER_GRBG = 514,
+    DC1394_COLOR_FILTER_BGGR = 515
+} dc1394color_filter_t;
 *******************************************/
 
 /*******************************************
@@ -247,6 +278,10 @@ private:
     int GetSupportedFrameratesForFormat(unsigned int devid, svlFilterSourceVideoCapture::ImageFormat& format, double **fpslist, unsigned int& listsize);
     int GetFramerateFromFPS(double fps, unsigned int& framerate);
     int GetFormatFromMode(unsigned int mode, svlFilterSourceVideoCapture::ImageFormat& format);
+    dc1394color_coding_t GetColorCodingFromPixelType(svlFilterSourceVideoCapture::PixelType pixeltype);
+    svlFilterSourceVideoCapture::PixelType GetPixelTypeFromColorCoding(dc1394color_coding_t colorcoding);
+    dc1394color_filter_t GetColorFilterFromPatternType(svlFilterSourceVideoCapture::PatternType patterntype);
+    svlFilterSourceVideoCapture::PatternType GetPatternTypeFromColorFilter(dc1394color_filter_t colorfilter);
     void SwapRGBBuffer(unsigned char* buffer, const unsigned int numberofpixels);
 };
 
