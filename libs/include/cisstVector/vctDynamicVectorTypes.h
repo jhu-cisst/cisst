@@ -42,6 +42,7 @@ typedef vctDynamicVector<float> vctFloatVec;
 typedef vctDynamicVector<int> vctIntVec;
 typedef vctDynamicVector<unsigned int> vctUIntVec;
 typedef vctDynamicVector<char> vctCharVec;
+typedef vctDynamicVector<unsigned char> vctUCharVec;
 typedef vctDynamicVector<bool> vctBoolVec;
 //@}
 
