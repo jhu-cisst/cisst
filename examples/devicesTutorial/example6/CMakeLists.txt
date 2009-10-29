@@ -15,10 +15,12 @@
 # --- end cisst license ---
 
 qt4_wrap_cpp(QT_WRAPPED_CPP
-             proxyQt.h
+             devNDISerialControllerQDevice.h
+             devNDISerialToolQDevice.h
              )
 qt4_wrap_ui(QT_WRAPPED_UI
-            devNDISerial.ui
+            devNDISerialController.ui
+            devNDISerialTool.ui
             )
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
@@ -26,8 +28,10 @@ add_executable(devicesTutorialExample6
                ${QT_WRAPPED_CPP}
                ${QT_WRAPPED_UI}
                main.cpp
-               proxyQt.cpp
-               proxyQt.h
+               devNDISerialControllerQDevice.cpp
+               devNDISerialControllerQDevice.h
+               devNDISerialToolQDevice.cpp
+               devNDISerialToolQDevice.h
                )
 
 target_link_libraries(devicesTutorialExample6

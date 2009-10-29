@@ -20,7 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 
 /*!
   \file
-  \brief An example for NDI Polaris optical tracker
+  \brief An example for NDI trackers with serial interface
   \ingroup devicesTutorial
 
   \todo Implement the ability to connect to tools on the fly
@@ -33,7 +33,8 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <QApplication>
 
-#include "proxyQt.h"
+#include "devNDISerialControllerQDevice.h"
+#include "devNDISerialToolQDevice.h"
 
 
 int main(int argc, char *argv[])
@@ -48,25 +49,35 @@ int main(int argc, char *argv[])
 
     // set the log level of detail on select tasks
     cmnClassRegister::SetLoD("devNDiSerial", CMN_LOG_LOD_VERY_VERBOSE);
-    //cmnClassRegister::SetLoD("proxyQt", CMN_LOG_LOD_VERY_VERBOSE);
 
     // create a Qt user interface
     QApplication application(argc, argv);
 
     // create the tasks
-    devNDiSerial * devNDiSerialTask = new devNDiSerial("devNDiSerial", "COM3");
-    proxyQt * proxyQtObject = new proxyQt("proxyQt");
+    devNDiSerial * devNDiSerialTask = new devNDiSerial("devNDiSerial", "COM1");
+    devNDISerialControllerQDevice * controllerQDevice = new devNDISerialControllerQDevice("controllerQDevice");
+
+    // configure the tasks
+    devNDiSerialTask->Configure();
 
     // add the tasks to the task manager
     mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
     taskManager->AddTask(devNDiSerialTask);
-    taskManager->AddDevice(proxyQtObject);
+    taskManager->AddDevice(controllerQDevice);
 
     // connect the tasks, i.e. RequiredInterface -> ProvidedInterface
-    taskManager->Connect("proxyQt", "RequiresNDISerial",
-                         "devNDiSerial", "ProvidesNDISerial");
-    taskManager->Connect("proxyQt", "02-34802401",
-                         "devNDiSerial", "02-34802401");
+    taskManager->Connect("controllerQDevice", "RequiresNDISerialController",
+                         "devNDiSerial", "ProvidesNDISerialController");
+
+    const unsigned int numberOfTools = devNDiSerialTask->GetNumberOfTools();
+    std::string interfaceName;
+    for (unsigned int i = 0; i < numberOfTools; i++) {
+        interfaceName = devNDiSerialTask->GetToolName(i);
+        devNDISerialToolQDevice * toolQDevice = new devNDISerialToolQDevice(interfaceName);
+        taskManager->AddDevice(toolQDevice);
+        taskManager->Connect(interfaceName, interfaceName,
+                             "devNDiSerial", interfaceName);
+    }
 
     // create and start all tasks
     taskManager->CreateAll();

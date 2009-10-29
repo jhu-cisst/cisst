@@ -5,7 +5,7 @@
   $Id$
 
   Author(s):  Ali Uneri
-  Created on: 2009-10-27
+  Created on: 2009-10-29
 
   (C) Copyright 2009 Johns Hopkins University (JHU), All Rights Reserved.
 
@@ -18,8 +18,8 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#ifndef _proxyQt_h
-#define _proxyQt_h
+#ifndef _devNDISerialControllerQDevice_h
+#define _devNDISerialControllerQDevice_h
 
 #include <cisstMultiTask/mtsDevice.h>
 #include <cisstMultiTask/mtsFunctionReadOrWrite.h>
@@ -29,18 +29,19 @@ http://www.cisst.org/cisst/license.txt.
 #include <QMainWindow>
 #include <QObject>
 #include <QTimer>
+#include <QWidget>
 
-#include "ui_devNDISerial.h"
+#include "ui_devNDISerialController.h"
 
 
-class proxyQt : public QObject, public mtsDevice
+class devNDISerialControllerQDevice : public QObject, public mtsDevice
 {
     Q_OBJECT;
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
  public:
-    proxyQt(const std::string & taskName);
-    ~proxyQt(void) {};
+    devNDISerialControllerQDevice(const std::string & taskName);
+    ~devNDISerialControllerQDevice(void) {};
 
     void Configure(const std::string & CMN_UNUSED(filename) = "") {};
 
@@ -52,18 +53,20 @@ class proxyQt : public QObject, public mtsDevice
 
  protected:
     QMainWindow MainWindow;
-    Ui::MainWindow UI;
+    QWidget CentralWidget;
+    Ui::ControllerWidget ControllerWidget;
+
     QTimer UpdateTimer;
 
-    mtsFunctionWrite NDIBeep;
-    mtsFunctionVoid NDIInitialize;
-    mtsFunctionVoid NDIQuery;
-    mtsFunctionVoid NDIEnable;
-    mtsFunctionWrite NDITrack;
-    mtsFunctionRead GetNDIPosition;
-    prmPositionCartesianGet NDIPosition;
+    struct {
+        mtsFunctionWrite Beep;
+        mtsFunctionVoid Initialize;
+        mtsFunctionVoid Query;
+        mtsFunctionVoid Enable;
+        mtsFunctionWrite Track;
+    } NDI;
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(proxyQt);
+CMN_DECLARE_SERVICES_INSTANTIATION(devNDISerialControllerQDevice);
 
-#endif  // _proxyQt_h
+#endif  // _devNDISerialControllerQDevice_h
