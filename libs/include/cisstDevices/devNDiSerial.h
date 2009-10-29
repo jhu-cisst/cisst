@@ -20,7 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 
 /*!
   \file
-  \brief A wrapper for NDI Polaris optical tracker
+  \brief A wrapper for NDI trackers with serial interface
   \ingroup cisstDevices
 
   \bug _snprintf in CommandAppend(int) is Windows-dependent
@@ -38,6 +38,7 @@ http://www.cisst.org/cisst/license.txt.
   \todo Every sscanf() should check if valid number of items have been read (wrapper for sscanf?)
   \todo Main Type to human readable provided method
   \todo Error handling for all strncpy()
+  \todo Check for serial number matching in AddTool(), replace the name if it exists
 */
 
 #ifndef _devNDiSerial_h
@@ -80,10 +81,15 @@ public:
     devNDiSerial(const std::string & polarisName, const std::string & serialPort);
     ~devNDiSerial(void) {};
 
-    void Configure(const std::string & CMN_UNUSED(filename)) {};
+    void Configure(const std::string & CMN_UNUSED(filename) = "");
     void Startup(void) {};
     void Run(void);
     void Cleanup(void) {};
+
+    size_t GetNumberOfTools(void) const {
+        return ToolsMap.size();
+    }
+    std::string GetToolName(const unsigned int index) const;
 
 protected:
     enum { MAX_BUFFER_SIZE = 512 };
