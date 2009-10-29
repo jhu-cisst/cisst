@@ -39,7 +39,8 @@ svlFilterVideoFileWriter::svlFilterVideoFileWriter() :
     CaptureLength(-1), // Continuous saving by default
     Action(false),
     ActionTime(0.0),
-    CompressionLevel(1)
+    CompressionLevel(1),
+    SaveInitialized(false)
 {
     AddSupportedType(svlTypeImageRGB, svlTypeImageRGB);
     AddSupportedType(svlTypeImageRGBStereo, svlTypeImageRGBStereo);
