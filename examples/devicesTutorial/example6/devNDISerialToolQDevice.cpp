@@ -36,9 +36,8 @@ devNDISerialToolQDevice::devNDISerialToolQDevice(const std::string & taskName) :
     }
 
     ToolWidget.setupUi(&CentralWidget);
-    MainWindow.setCentralWidget(&CentralWidget);
-    MainWindow.setWindowTitle(QString::fromStdString(taskName));
-    MainWindow.show();
+    ToolWidget.ToolGroup->setTitle(QString::fromStdString(taskName));
+    CentralWidget.adjustSize();
 
     UpdateTimer.start(20);
 

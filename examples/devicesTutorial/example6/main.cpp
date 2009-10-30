@@ -22,8 +22,6 @@ http://www.cisst.org/cisst/license.txt.
   \file
   \brief An example for NDI trackers with serial interface
   \ingroup devicesTutorial
-
-  \todo Implement the ability to connect to tools on the fly
 */
 
 #include <cisstOSAbstraction/osaThreadedLogFile.h>
@@ -54,7 +52,7 @@ int main(int argc, char *argv[])
     QApplication application(argc, argv);
 
     // create the tasks
-    devNDiSerial * devNDiSerialTask = new devNDiSerial("devNDiSerial", "COM1");
+    devNDiSerial * devNDiSerialTask = new devNDiSerial("devNDiSerial", "COM3");
     devNDISerialControllerQDevice * controllerQDevice = new devNDISerialControllerQDevice("controllerQDevice");
 
     // configure the tasks
@@ -69,14 +67,15 @@ int main(int argc, char *argv[])
     taskManager->Connect("controllerQDevice", "RequiresNDISerialController",
                          "devNDiSerial", "ProvidesNDISerialController");
 
+    // add interfaces for tools and populate controller widget with tool widgets
     const unsigned int numberOfTools = devNDiSerialTask->GetNumberOfTools();
-    std::string interfaceName;
     for (unsigned int i = 0; i < numberOfTools; i++) {
-        interfaceName = devNDiSerialTask->GetToolName(i);
-        devNDISerialToolQDevice * toolQDevice = new devNDISerialToolQDevice(interfaceName);
+        std::string toolName = devNDiSerialTask->GetToolName(i);
+        devNDISerialToolQDevice * toolQDevice = new devNDISerialToolQDevice(toolName);
+        controllerQDevice->AddToolWidget(toolQDevice->GetToolWidget(), i);
         taskManager->AddDevice(toolQDevice);
-        taskManager->Connect(interfaceName, interfaceName,
-                             "devNDiSerial", interfaceName);
+        taskManager->Connect(toolName, toolName,
+                             "devNDiSerial", toolName);
     }
 
     // create and start all tasks

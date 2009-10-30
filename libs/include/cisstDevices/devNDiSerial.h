@@ -24,13 +24,14 @@ http://www.cisst.org/cisst/license.txt.
   \ingroup cisstDevices
 
   \bug _snprintf in CommandAppend(int) is Windows-dependent
-  \bug LoadToolDefinition requires input definition to be a multiple of 128 characters (via 0 padding)
+  \bug LoadToolDefinitionFile() requires input definition to be a multiple of 128 characters (via 0 padding)
 
+  \todo Comment the header file using Doxygen comments.
   \todo Missing support for 14400bps, 921600bps and 1228739bps baud rates in osaSerialPort
   \todo Check for buffer overflow in CommandAppend()
   \todo Handle error values returned from the device
   \todo Implement a timeout for CheckResponse(), maybe have a CheckTimeout() method?
-  \todo Handle supported features for different Polaris versions.
+  \todo Handle supported features for newer Polaris versions.
   \todo Implement CRC check for CommandSend()
   \todo Pretty print for SerialNumber, to extract date, etc.
   \todo Overload Tool class to have a stream
@@ -39,6 +40,8 @@ http://www.cisst.org/cisst/license.txt.
   \todo Main Type to human readable provided method
   \todo Error handling for all strncpy()
   \todo Check for serial number matching in AddTool(), replace the name if it exists
+  \todo Refactor ComputeCRC() and LoadToolDefinitionFile() functions
+  \todo Cartesian position should be "invalid" if the tool is missing or disabled
 */
 
 #ifndef _devNDiSerial_h
@@ -96,6 +99,7 @@ protected:
     enum { CRC_SIZE = 4 };
 
     Tool * AddTool(const std::string & name, const char * serialNumber);
+    Tool * AddTool(const std::string & name, const char * serialNumber, const char * toolDefinitionFile);
 
     size_t GetSerialBufferSize(void) const {
         return SerialBufferPointer - SerialBuffer;
@@ -135,7 +139,7 @@ protected:
                                osaSerialPort::FlowControlType flowControl);
     void Beep(const mtsInt & numberOfBeeps);
 
-    void LoadToolDefinition(const char * portHandle, const char * toolDefinition);
+    void LoadToolDefinitionFile(const char * portHandle, const char * toolDefinitionFile);
     void PortHandlesInitialize(void);
     void PortHandlesQuery(void);
     void PortHandlesEnable(void);
@@ -152,6 +156,8 @@ protected:
     cmnNamedMap<Tool> PortToTool;
 
     bool IsTracking;
+    char * Tool8700338;
+    char * Tool8700340;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(devNDiSerial);

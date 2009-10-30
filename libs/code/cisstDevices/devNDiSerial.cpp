@@ -58,14 +58,18 @@ devNDiSerial::devNDiSerial(const std::string & taskName, const std::string & ser
     // initialize NDI controller
     CommandSend("INIT ");
     ResponseRead("OKAY");
-    //PortHandlesInitialize();
-    //PortHandlesQuery();
 }
 
 
 void devNDiSerial::Configure(const std::string & CMN_UNUSED(filename))
 {
-    AddTool("TraxtalProbe", "3091280C");
+    char * tool8700338 = "C:\\Program Files\\Northern Digital Inc\\Tool Definition Files\\8700338.rom";
+    char * tool8700340 = "C:\\Program Files\\Northern Digital Inc\\Tool Definition Files\\8700340.rom";
+
+    AddTool("01-34801401", "34801401", tool8700338);  // NDI Vicra passive reference (JHMI)
+    AddTool("02-34802401", "34802401", tool8700340);  // NDI Vicra passive probe (JHMI)
+    AddTool("02-32887C02", "32887C02");  // NDI Polaris active probe (Homewood)
+    AddTool("02-3091280C", "3091280C");  // Traxtal Tech active probe (Homewood)
 }
 
 
@@ -89,6 +93,21 @@ devNDiSerial::Tool * devNDiSerial::AddTool(const std::string & name, const char 
     }
 
     return tool;
+}
+
+
+devNDiSerial::Tool * devNDiSerial::AddTool(const std::string & name, const char * serialNumber, const char * toolDefinitionFile)
+{
+    char portHandle[3];
+    portHandle[2] = '\0';
+
+    // request port handle
+    CommandSend("PHRQ *********1****");
+    ResponseRead();
+    sscanf(SerialBuffer, "%2c", portHandle);
+
+    LoadToolDefinitionFile(portHandle, toolDefinitionFile);
+    return AddTool(name, serialNumber);
 }
 
 
@@ -357,8 +376,9 @@ bool devNDiSerial::SetSerialPortSettings(osaSerialPort::BaudRateType baudRate,
 
 void devNDiSerial::Beep(const mtsInt & numberOfBeeps)
 {
-    //! \todo Check that the value is between 1 and 9. Warn and limit to bounds if not.
-
+    if (numberOfBeeps.Data < 1 || numberOfBeeps.Data > 9) {
+        CMN_LOG_CLASS_RUN_ERROR << "Beep: invalid input: " << numberOfBeeps << ", must be between 0-9" << std::endl;
+    }
     CMN_LOG_CLASS_RUN_VERBOSE << "Beep: beeing " << numberOfBeeps << " times" << std::endl;
     do {
         CommandInitialize();
@@ -377,16 +397,28 @@ void devNDiSerial::Beep(const mtsInt & numberOfBeeps)
 }
 
 
-void devNDiSerial::LoadToolDefinition(const char * portHandle, const char * toolDefinition)
+void devNDiSerial::LoadToolDefinitionFile(const char * portHandle, const char * toolDefinitionFile)
 {
-    const unsigned int nChunks = strlen(toolDefinition) / 128;
+    std::ifstream file(toolDefinitionFile, std::ios::binary);
+    std::ostringstream toolDefinition;
+
+    char inputChar;
+    char * outputHex = new char[2];
+    while (!file.eof()) {
+        file.read(&inputChar, 1);
+        sprintf(outputHex, "%02X", static_cast<unsigned char>(inputChar));
+        toolDefinition << outputHex;
+    }
+    file.close();
+
+    const unsigned int nChunks = strlen(toolDefinition.str().c_str()) / 128;
     char data[129];
     data[128] = '\0';
     char address[5];
     address[4] = '\0';
 
     for (unsigned int i = 0; i < nChunks; i++ ) { 
-        sscanf(toolDefinition + (i * 128), "%128c", data);
+        sscanf(toolDefinition.str().c_str() + (i * 128), "%128c", data);
         sprintf(address, "%04X", i * 64);
         CommandInitialize();
         CommandAppend("PVWR ");
@@ -425,18 +457,6 @@ void devNDiSerial::PortHandlesInitialize(void)
         ResponseRead("OKAY");
         CMN_LOG_CLASS_RUN_DEBUG << "PortHandlesInitialize: freed port handle: " << portHandles[i].Pointer() << std::endl;
     }
-
-    // do I need a handle for a port?
-//    CommandSend("PHRQ *********1****");
-//    ResponseRead();
-//    portHandles.resize(1);
-//    sscanf(SerialBuffer, "%2c", portHandles[0].Pointer());
-//    portHandles[0][2] = '\0';
-
-    // do I need to load a tool definition file?
-//    const char * tool8700338 = "4E4449008C110000010000000000000100000000011480345A00000004000000040000000000403F000000000000000000000000000000000000000000000000000020410000000000000000000000000000000000000000713DCA413333814100000000000000000000824200000000333395C148E1EC410000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000803F00000000000000000000803F00000000000000000000803F00000000000000000000803F000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010203000000000000000000000000000000001F1F1F1F090000004E4449000000000000000000383730303333380000000000000000000000000009010101010000000000000000000000000000000001010101000000000000000000000000000000008000290000000000000000000080BF00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
-//    const char * tool8700340 = "4E444900D00D0000010000000100000200000000012480345A00000004000000040000000000403F0000000000000000000000000000000000000000000000000000204100000000000000000000000000000000000000000000000000004842000000000000C8410000C842000000000000C8C1000007430000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000803F00000000000000000000803F00000000000000000000803F00000000000000000000803F000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010203000000000000000000000000000000001F1F1F1F090000004E44490000000000000000003837303033343000000000000000000000000000090101010100000000000000000000000000000000010101010000000000000000000000000000000080002900000000000000000000803F00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
-//    LoadToolDefinition(portHandles[0].Pointer(), tool8700340);
 
     // are there port handles to be initialized?
     CommandSend("PHSR 02");
@@ -667,9 +687,9 @@ void devNDiSerial::Track(void)
             return;
         }
         parsePointer += 1;  // skip '\n'
-        //! \todo Parse System Status here
-        parsePointer += 4;  // skip System Status
     }
+    //! \todo Parse System Status here
+    parsePointer += 4;  // skip System Status
 }
 
 

@@ -31,7 +31,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <QTimer>
 #include <QWidget>
 
-#include "ui_devNDISerialTool.h"
+#include "ui_devNDISerialToolQWidget.h"
 
 
 class devNDISerialToolQDevice : public QObject, public mtsDevice
@@ -44,6 +44,10 @@ class devNDISerialToolQDevice : public QObject, public mtsDevice
     ~devNDISerialToolQDevice(void) {};
 
     void Configure(const std::string & CMN_UNUSED(filename) = "") {};
+
+    QWidget * GetToolWidget(void) {
+        return &CentralWidget;
+    }
 
  public slots:
     void UpdateTimerSlot(void);

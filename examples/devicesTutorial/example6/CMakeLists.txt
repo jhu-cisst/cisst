@@ -19,8 +19,8 @@ qt4_wrap_cpp(QT_WRAPPED_CPP
              devNDISerialToolQDevice.h
              )
 qt4_wrap_ui(QT_WRAPPED_UI
-            devNDISerialController.ui
-            devNDISerialTool.ui
+            devNDISerialControllerQWidget.ui
+            devNDISerialToolQWidget.ui
             )
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
