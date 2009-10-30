@@ -23,13 +23,10 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsDevice.h>
 #include <cisstMultiTask/mtsFunctionReadOrWrite.h>
-#include <cisstMultiTask/mtsFunctionVoid.h>
 #include <cisstParameterTypes/prmPositionCartesianGet.h>
 
 #include <QMainWindow>
-#include <QObject>
 #include <QTimer>
-#include <QWidget>
 
 #include "ui_devNDISerialToolQWidget.h"
 

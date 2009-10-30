@@ -84,6 +84,8 @@ void devNDISerialControllerQDevice::NDIInitializeSlot(void)
     NDI.Initialize();
     NDI.Query();
     NDI.Enable();
+    mtsInt data = 2;
+    NDI.Beep(data);
 }
 
 

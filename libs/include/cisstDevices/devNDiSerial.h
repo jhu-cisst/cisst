@@ -20,28 +20,29 @@ http://www.cisst.org/cisst/license.txt.
 
 /*!
   \file
-  \brief A wrapper for NDI trackers with serial interface
+  \brief A cisst wrapper for NDI trackers with serial interface
   \ingroup cisstDevices
 
   \bug _snprintf in CommandAppend(int) is Windows-dependent
-  \bug LoadToolDefinitionFile() requires input definition to be a multiple of 128 characters (via 0 padding)
+
+  \warning Missing support for 14400bps, 921600bps and 1228739bps baud rates in osaSerialPort
 
   \todo Comment the header file using Doxygen comments.
-  \todo Missing support for 14400bps, 921600bps and 1228739bps baud rates in osaSerialPort
+  \todo Implement CRC check for CommandSend() and refactor ComputeCRC()
+  \todo Every sscanf() should check if valid number of items have been read (wrapper for sscanf?)
+  \todo Error handling for all strncpy()
   \todo Check for buffer overflow in CommandAppend()
-  \todo Handle error values returned from the device
   \todo Implement a timeout for CheckResponse(), maybe have a CheckTimeout() method?
   \todo Handle supported features for newer Polaris versions.
-  \todo Implement CRC check for CommandSend()
   \todo Pretty print for SerialNumber, to extract date, etc.
   \todo Overload Tool class to have a stream
-  \todo Implement an "adaptive sleep" for the run method
-  \todo Every sscanf() should check if valid number of items have been read (wrapper for sscanf?)
+  \todo Use frame number to decide if timestamp should be refreshed
+  \todo Implement an "adaptive sleep" for the run method?
   \todo Main Type to human readable provided method
-  \todo Error handling for all strncpy()
   \todo Check for serial number matching in AddTool(), replace the name if it exists
-  \todo Refactor ComputeCRC() and LoadToolDefinitionFile() functions
   \todo Cartesian position should be "invalid" if the tool is missing or disabled
+  \todo Strategies for error recovery, send an event with a human readable payload, implement in CheckResponse()
+  \todo Have the option for dynamic tool plugging
 */
 
 #ifndef _devNDiSerial_h
@@ -139,7 +140,7 @@ protected:
                                osaSerialPort::FlowControlType flowControl);
     void Beep(const mtsInt & numberOfBeeps);
 
-    void LoadToolDefinitionFile(const char * portHandle, const char * toolDefinitionFile);
+    void LoadToolDefinitionFile(const char * portHandle, const char * filePath);
     void PortHandlesInitialize(void);
     void PortHandlesQuery(void);
     void PortHandlesEnable(void);

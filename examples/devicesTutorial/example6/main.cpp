@@ -20,12 +20,11 @@ http://www.cisst.org/cisst/license.txt.
 
 /*!
   \file
-  \brief An example for NDI trackers with serial interface
+  \brief An example interface for NDI trackers with serial interface
   \ingroup devicesTutorial
 */
 
 #include <cisstOSAbstraction/osaThreadedLogFile.h>
-#include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsTaskManager.h>
 #include <cisstDevices/devNDiSerial.h>
 
@@ -46,13 +45,13 @@ int main(int argc, char *argv[])
     cmnLogger::GetMultiplexer()->AddChannel(threadedLog, CMN_LOG_LOD_VERY_VERBOSE);
 
     // set the log level of detail on select tasks
-    cmnClassRegister::SetLoD("devNDiSerial", CMN_LOG_LOD_VERY_VERBOSE);
+    cmnClassRegister::SetLoD("devNDiSerial", CMN_LOG_LOD_RUN_WARNING);
 
     // create a Qt user interface
     QApplication application(argc, argv);
 
     // create the tasks
-    devNDiSerial * devNDiSerialTask = new devNDiSerial("devNDiSerial", "COM3");
+    devNDiSerial * devNDiSerialTask = new devNDiSerial("devNDiSerial", "COM1");
     devNDISerialControllerQDevice * controllerQDevice = new devNDISerialControllerQDevice("controllerQDevice");
 
     // configure the tasks

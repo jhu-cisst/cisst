@@ -18,11 +18,9 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+#include <cisstVector/vctFixedSizeVectorTypes.h>
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstDevices/devNDiSerial.h>
-#include <cisstVector/vctFixedSizeVectorTypes.h>
-
-#include <cstdio>
 
 CMN_IMPLEMENT_SERVICES(devNDiSerial);
 
@@ -65,11 +63,13 @@ void devNDiSerial::Configure(const std::string & CMN_UNUSED(filename))
 {
     char * tool8700338 = "C:\\Program Files\\Northern Digital Inc\\Tool Definition Files\\8700338.rom";
     char * tool8700340 = "C:\\Program Files\\Northern Digital Inc\\Tool Definition Files\\8700340.rom";
+    char * toolCArmTracker = "C:\\Program Files\\Northern Digital Inc\\Tool Definition Files\\Traxtal_C-Arm_Tracker.rom";
 
-    AddTool("01-34801401", "34801401", tool8700338);  // NDI Vicra passive reference (JHMI)
-    AddTool("02-34802401", "34802401", tool8700340);  // NDI Vicra passive probe (JHMI)
+    //AddTool("01-34801401", "34801401", tool8700338);  // NDI Vicra passive reference (JHMI)
+    //AddTool("02-34802401", "34802401", tool8700340);  // NDI Vicra passive probe (JHMI)
     AddTool("02-32887C02", "32887C02");  // NDI Polaris active probe (Homewood)
-    AddTool("02-3091280C", "3091280C");  // Traxtal Tech active probe (Homewood)
+    AddTool("02-3091280C", "3091280C");  // Traxtal active probe (Homewood)
+    AddTool("0A-3499D401", "3499D401", toolCArmTracker);  // Traxtal passive c-arm tracker (Homewood)
 }
 
 
@@ -397,34 +397,39 @@ void devNDiSerial::Beep(const mtsInt & numberOfBeeps)
 }
 
 
-void devNDiSerial::LoadToolDefinitionFile(const char * portHandle, const char * toolDefinitionFile)
+void devNDiSerial::LoadToolDefinitionFile(const char * portHandle, const char * filePath)
 {
-    std::ifstream file(toolDefinitionFile, std::ios::binary);
-    std::ostringstream toolDefinition;
-
-    char inputChar;
-    char * outputHex = new char[2];
-    while (!file.eof()) {
-        file.read(&inputChar, 1);
-        sprintf(outputHex, "%02X", static_cast<unsigned char>(inputChar));
-        toolDefinition << outputHex;
+    std::ifstream toolDefinitionFile(filePath, std::ios::binary);
+    if (!toolDefinitionFile.is_open()) {
+        CMN_LOG_CLASS_INIT_ERROR << "LoadToolDefinitionFile: could not open " << filePath << std::endl;
+        return;
     }
-    file.close();
 
-    const unsigned int nChunks = strlen(toolDefinition.str().c_str()) / 128;
-    char data[129];
-    data[128] = '\0';
+    toolDefinitionFile.seekg(0, std::ios::end);
+    size_t fileSize = toolDefinitionFile.tellg();
+    size_t definitionSize = fileSize * 2;
+    size_t paddingSize = 128 - (definitionSize % 128);
+    size_t numChunks = (definitionSize + paddingSize) / 128;
+    toolDefinitionFile.seekg(0, std::ios::beg);
+
+    char input[65] = { 0 };
+    input[64] = '\0';
+    char output[129];
+    output[128] = '\0';
     char address[5];
     address[4] = '\0';
 
-    for (unsigned int i = 0; i < nChunks; i++ ) { 
-        sscanf(toolDefinition.str().c_str() + (i * 128), "%128c", data);
+    for (unsigned int i = 0; i < numChunks; i++) {
+        toolDefinitionFile.read(input, 64);
+        for (unsigned int j = 0; j < 64; j++) {
+            sprintf(&output[j*2], "%02X", static_cast<unsigned char>(input[j]));
+        }
         sprintf(address, "%04X", i * 64);
         CommandInitialize();
         CommandAppend("PVWR ");
         CommandAppend(portHandle);
         CommandAppend(address);
-        CommandAppend(data);
+        CommandAppend(output);
         CommandSend();
         ResponseRead("OKAY");
     }
@@ -434,16 +439,16 @@ void devNDiSerial::LoadToolDefinitionFile(const char * portHandle, const char * 
 void devNDiSerial::PortHandlesInitialize(void)
 {
     char * parsePointer;
-    unsigned int nPortHandles = 0;
+    unsigned int numPortHandles = 0;
     std::vector<vctChar3> portHandles;
 
     // are there port handles to be freed?
     CommandSend("PHSR 01");
     ResponseRead();
     parsePointer = SerialBuffer;
-    sscanf(parsePointer, "%02X", &nPortHandles);
+    sscanf(parsePointer, "%02X", &numPortHandles);
     parsePointer += 2;
-    portHandles.resize(nPortHandles);
+    portHandles.resize(numPortHandles);
     for (unsigned int i = 0; i < portHandles.size(); i++) {
         sscanf(parsePointer, "%2c%*3c", portHandles[i].Pointer());
         parsePointer += 5;
@@ -462,9 +467,9 @@ void devNDiSerial::PortHandlesInitialize(void)
     CommandSend("PHSR 02");
     ResponseRead();
     parsePointer = SerialBuffer;
-    sscanf(parsePointer, "%02X", &nPortHandles);
+    sscanf(parsePointer, "%02X", &numPortHandles);
     parsePointer += 2;
-    portHandles.resize(nPortHandles);
+    portHandles.resize(numPortHandles);
     for (unsigned int i = 0; i < portHandles.size(); i++) {
         sscanf(parsePointer, "%2c%*3c", portHandles[i].Pointer());
         parsePointer += 5;
@@ -484,16 +489,16 @@ void devNDiSerial::PortHandlesInitialize(void)
 void devNDiSerial::PortHandlesQuery(void)
 {
     char * parsePointer;
-    unsigned int nPortHandles = 0;
+    unsigned int numPortHandles = 0;
     std::vector<vctChar3> portHandles;
 
     CommandSend("PHSR 00");
     ResponseRead();
     parsePointer = SerialBuffer;
-    sscanf(parsePointer, "%02X", &nPortHandles);
+    sscanf(parsePointer, "%02X", &numPortHandles);
     parsePointer += 2;
-    CMN_LOG_CLASS_INIT_DEBUG << "PortHandlesQuery: " << nPortHandles << " tools are plugged in" << std::endl;
-    portHandles.resize(nPortHandles);
+    CMN_LOG_CLASS_INIT_DEBUG << "PortHandlesQuery: " << numPortHandles << " tools are plugged in" << std::endl;
+    portHandles.resize(numPortHandles);
     for (unsigned int i = 0; i < portHandles.size(); i++) {
         sscanf(parsePointer, "%2c%*3c", portHandles[i].Pointer());
         parsePointer += 5;
@@ -558,15 +563,15 @@ void devNDiSerial::PortHandlesQuery(void)
 void devNDiSerial::PortHandlesEnable(void)
 {
     char * parsePointer;
-    unsigned int nPortHandles = 0;
+    unsigned int numPortHandles = 0;
     std::vector<vctChar3> portHandles;
 
     CommandSend("PHSR 03");
     ResponseRead();
     parsePointer = SerialBuffer;
-    sscanf(parsePointer, "%02X", &nPortHandles);
+    sscanf(parsePointer, "%02X", &numPortHandles);
     parsePointer += 2;
-    portHandles.resize(nPortHandles);
+    portHandles.resize(numPortHandles);
     for (unsigned int i = 0; i < portHandles.size(); i++) {
         sscanf(parsePointer, "%2c%*3c", portHandles[i].Pointer());
         parsePointer += 5;
@@ -592,6 +597,8 @@ void devNDiSerial::PortHandlesEnable(void)
             CommandAppend("D");
         } else if (strncmp(tool->MainType, "03", 2) == 0) {
             CommandAppend("B");
+        } else if (strncmp(tool->MainType, "0A", 2) == 0) {
+            CommandAppend("D");
         } else {
             //!< \todo Handle other main types of tools
             CMN_LOG_CLASS_RUN_ERROR << "PortHandlesEnable: unknown tool of main type: " << tool->MainType << std::endl;
@@ -622,7 +629,7 @@ void devNDiSerial::ToggleTracking(const mtsBool & track)
 void devNDiSerial::Track(void)
 {
     char * parsePointer;
-    unsigned int nPortHandles = 0;
+    unsigned int numPortHandles = 0;
     char portHandle[3];
     portHandle[2] = '\0';
     std::string toolKey;
@@ -633,10 +640,10 @@ void devNDiSerial::Track(void)
     CommandSend("TX 0001");
     ResponseRead();
     parsePointer = SerialBuffer;
-    sscanf(parsePointer, "%02X", &nPortHandles);
+    sscanf(parsePointer, "%02X", &numPortHandles);
     parsePointer += 2;
-    CMN_LOG_CLASS_RUN_DEBUG << "Track: tracking " << nPortHandles << " tools" << std::endl;
-    for (unsigned int i = 0; i < nPortHandles; i++) {
+    CMN_LOG_CLASS_RUN_DEBUG << "Track: tracking " << numPortHandles << " tools" << std::endl;
+    for (unsigned int i = 0; i < numPortHandles; i++) {
         sscanf(parsePointer, "%2c", portHandle);
         parsePointer += 2;
         toolKey = portHandle;
