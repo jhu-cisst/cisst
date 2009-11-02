@@ -51,6 +51,8 @@ class devNDISerialControllerQDevice : public QObject, public mtsDevice
     void NDITrackSlot(bool value);
 
  protected:
+    void CreateMainWindow(void);
+
     QMainWindow MainWindow;
     QWidget CentralWidget;
     Ui::ControllerWidget ControllerWidget;

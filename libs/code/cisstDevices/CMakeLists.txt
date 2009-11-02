@@ -36,8 +36,7 @@ set(DEPENDENCIES
 
 set(HEADER_FILES
     devNull.h
-    devNDiSerial.h
-    devNDiSerialToolInformationGet.h
+    devNDISerial.h
     devSartoriusSerial.h
     devExport.h
 	devKeyboard.h
@@ -45,8 +44,7 @@ set(HEADER_FILES
 
 set(SOURCE_FILES
     devNull.cpp
-    devNDiSerial.cpp
-    devNDiSerialToolInformationGet.cpp
+    devNDISerial.cpp
     devSartoriusSerial.cpp
 	devKeyboard.cpp
     )

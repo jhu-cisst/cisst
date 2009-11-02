@@ -27,8 +27,9 @@ http://www.cisst.org/cisst/license.txt.
 
   \warning Missing support for 14400bps, 921600bps and 1228739bps baud rates in osaSerialPort
 
-  \todo Comment the header file using Doxygen comments.
-  \todo Implement CRC check for CommandSend() and refactor ComputeCRC()
+  \todo Cleanup todos in the cpp
+  \todo Cleanup and comment the header file using Doxygen comments.
+  \todo Refactor ComputeCRC() and implement a CRC check in CommandSend()
   \todo Every sscanf() should check if valid number of items have been read (wrapper for sscanf?)
   \todo Error handling for all strncpy()
   \todo Check for buffer overflow in CommandAppend()
@@ -45,8 +46,8 @@ http://www.cisst.org/cisst/license.txt.
   \todo Have the option for dynamic tool plugging
 */
 
-#ifndef _devNDiSerial_h
-#define _devNDiSerial_h
+#ifndef _devNDISerial_h
+#define _devNDISerial_h
 
 #include <cisstCommon/cmnUnits.h>
 #include <cisstOSAbstraction/osaSerialPort.h>
@@ -54,7 +55,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstParameterTypes/prmPositionCartesianGet.h>
 
 
-class devNDiSerial : public mtsTaskContinuous
+class devNDISerial : public mtsTaskContinuous
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
@@ -82,8 +83,8 @@ protected:
     };
 
 public:
-    devNDiSerial(const std::string & polarisName, const std::string & serialPort);
-    ~devNDiSerial(void) {};
+    devNDISerial(const std::string & polarisName, const std::string & serialPort);
+    ~devNDISerial(void) {};
 
     void Configure(const std::string & CMN_UNUSED(filename) = "");
     void Startup(void) {};
@@ -161,6 +162,6 @@ protected:
     char * Tool8700340;
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(devNDiSerial);
+CMN_DECLARE_SERVICES_INSTANTIATION(devNDISerial);
 
-#endif  //_devNDiSerial_h_
+#endif  //_devNDISerial_h_

@@ -38,11 +38,7 @@ devNDISerialControllerQDevice::devNDISerialControllerQDevice(const std::string &
     }
 
     ControllerWidget.setupUi(&CentralWidget);
-
-    MainWindow.setCentralWidget(&CentralWidget);
-    MainWindow.adjustSize();
-    MainWindow.setWindowTitle("NDI Serial Controller");
-    MainWindow.show();
+    CreateMainWindow();
 
     UpdateTimer.start(20);
 
@@ -57,6 +53,15 @@ devNDISerialControllerQDevice::devNDISerialControllerQDevice(const std::string &
                      this, SLOT(NDITrackSlot(bool)));
     QObject::connect(ControllerWidget.ButtonQuit, SIGNAL(clicked()),
                      &MainWindow, SLOT(close()));
+}
+
+
+void devNDISerialControllerQDevice::CreateMainWindow(void)
+{
+    MainWindow.setCentralWidget(&CentralWidget);
+    MainWindow.adjustSize();
+    MainWindow.setWindowTitle("NDI Serial Controller");
+    MainWindow.show();
 }
 
 

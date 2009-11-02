@@ -26,7 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstOSAbstraction/osaThreadedLogFile.h>
 #include <cisstMultiTask/mtsTaskManager.h>
-#include <cisstDevices/devNDiSerial.h>
+#include <cisstDevices/devNDISerial.h>
 
 #include <QApplication>
 
@@ -45,36 +45,36 @@ int main(int argc, char *argv[])
     cmnLogger::GetMultiplexer()->AddChannel(threadedLog, CMN_LOG_LOD_VERY_VERBOSE);
 
     // set the log level of detail on select tasks
-    cmnClassRegister::SetLoD("devNDiSerial", CMN_LOG_LOD_RUN_WARNING);
+    cmnClassRegister::SetLoD("devNDISerial", CMN_LOG_LOD_RUN_WARNING);
 
     // create a Qt user interface
     QApplication application(argc, argv);
 
     // create the tasks
-    devNDiSerial * devNDiSerialTask = new devNDiSerial("devNDiSerial", "COM1");
+    devNDISerial * devNDISerialTask = new devNDISerial("devNDISerial", "COM3");
     devNDISerialControllerQDevice * controllerQDevice = new devNDISerialControllerQDevice("controllerQDevice");
 
     // configure the tasks
-    devNDiSerialTask->Configure();
+    devNDISerialTask->Configure();
 
     // add the tasks to the task manager
     mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
-    taskManager->AddTask(devNDiSerialTask);
+    taskManager->AddTask(devNDISerialTask);
     taskManager->AddDevice(controllerQDevice);
 
     // connect the tasks, i.e. RequiredInterface -> ProvidedInterface
     taskManager->Connect("controllerQDevice", "RequiresNDISerialController",
-                         "devNDiSerial", "ProvidesNDISerialController");
+                         "devNDISerial", "ProvidesNDISerialController");
 
     // add interfaces for tools and populate controller widget with tool widgets
-    const unsigned int numberOfTools = devNDiSerialTask->GetNumberOfTools();
+    const unsigned int numberOfTools = devNDISerialTask->GetNumberOfTools();
     for (unsigned int i = 0; i < numberOfTools; i++) {
-        std::string toolName = devNDiSerialTask->GetToolName(i);
+        std::string toolName = devNDISerialTask->GetToolName(i);
         devNDISerialToolQDevice * toolQDevice = new devNDISerialToolQDevice(toolName);
         controllerQDevice->AddToolWidget(toolQDevice->GetToolWidget(), i);
         taskManager->AddDevice(toolQDevice);
         taskManager->Connect(toolName, toolName,
-                             "devNDiSerial", toolName);
+                             "devNDISerial", toolName);
     }
 
     // create and start all tasks

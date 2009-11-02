@@ -20,31 +20,30 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstVector/vctFixedSizeVectorTypes.h>
 #include <cisstOSAbstraction/osaSleep.h>
-#include <cisstDevices/devNDiSerial.h>
+#include <cisstDevices/devNDISerial.h>
 
-CMN_IMPLEMENT_SERVICES(devNDiSerial);
+CMN_IMPLEMENT_SERVICES(devNDISerial);
 
 
-devNDiSerial::devNDiSerial(const std::string & taskName, const std::string & serialPort) :
-    mtsTaskContinuous(taskName, 5000)
+devNDISerial::devNDISerial(const std::string & taskName, const std::string & serialPort) :
+    mtsTaskContinuous(taskName, 5000),
+    IsTracking(false)
 {
     mtsProvidedInterface * provided = AddProvidedInterface("ProvidesNDISerialController");
     if (provided) {
-        provided->AddCommandWrite(&devNDiSerial::Beep, this, "Beep");
-        provided->AddCommandVoid(&devNDiSerial::PortHandlesInitialize, this, "PortHandlesInitialize");
-        provided->AddCommandVoid(&devNDiSerial::PortHandlesQuery, this, "PortHandlesQuery");
-        provided->AddCommandVoid(&devNDiSerial::PortHandlesEnable, this, "PortHandlesEnable");
-        provided->AddCommandWrite(&devNDiSerial::ToggleTracking, this, "ToggleTracking");
+        provided->AddCommandWrite(&devNDISerial::Beep, this, "Beep");
+        provided->AddCommandVoid(&devNDISerial::PortHandlesInitialize, this, "PortHandlesInitialize");
+        provided->AddCommandVoid(&devNDISerial::PortHandlesQuery, this, "PortHandlesQuery");
+        provided->AddCommandVoid(&devNDISerial::PortHandlesEnable, this, "PortHandlesEnable");
+        provided->AddCommandWrite(&devNDISerial::ToggleTracking, this, "ToggleTracking");
     }
 
     memset(SerialBuffer, 0, MAX_BUFFER_SIZE);
     SerialBufferPointer = SerialBuffer;
 
-    IsTracking = false;
-
     SerialPort.SetPortName(serialPort);
     if (!SerialPort.Open()) {
-        CMN_LOG_CLASS_INIT_ERROR << "devNDiSerial: failed to open serial port: " << SerialPort.GetPortName() << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "devNDISerial: failed to open serial port: " << SerialPort.GetPortName() << std::endl;
     }
     ResetSerialPort();
     SetSerialPortSettings(osaSerialPort::BaudRate115200,
@@ -59,21 +58,21 @@ devNDiSerial::devNDiSerial(const std::string & taskName, const std::string & ser
 }
 
 
-void devNDiSerial::Configure(const std::string & CMN_UNUSED(filename))
+void devNDISerial::Configure(const std::string & CMN_UNUSED(filename))
 {
     char * tool8700338 = "C:\\Program Files\\Northern Digital Inc\\Tool Definition Files\\8700338.rom";
     char * tool8700340 = "C:\\Program Files\\Northern Digital Inc\\Tool Definition Files\\8700340.rom";
     char * toolCArmTracker = "C:\\Program Files\\Northern Digital Inc\\Tool Definition Files\\Traxtal_C-Arm_Tracker.rom";
 
-    //AddTool("01-34801401", "34801401", tool8700338);  // NDI Vicra passive reference (JHMI)
-    //AddTool("02-34802401", "34802401", tool8700340);  // NDI Vicra passive probe (JHMI)
-    AddTool("02-32887C02", "32887C02");  // NDI Polaris active probe (Homewood)
-    AddTool("02-3091280C", "3091280C");  // Traxtal active probe (Homewood)
-    AddTool("0A-3499D401", "3499D401", toolCArmTracker);  // Traxtal passive c-arm tracker (Homewood)
+    AddTool("01-34801401", "34801401", tool8700338);  // NDI Vicra passive reference (JHMI)
+    AddTool("02-34802401", "34802401", tool8700340);  // NDI Vicra passive probe (JHMI)
+    //AddTool("02-32887C02", "32887C02");  // NDI Polaris active probe (Homewood)
+    //AddTool("02-3091280C", "3091280C");  // Traxtal active probe (Homewood)
+    //AddTool("0A-3499D401", "3499D401", toolCArmTracker);  // Traxtal passive c-arm tracker (Homewood)
 }
 
 
-devNDiSerial::Tool * devNDiSerial::AddTool(const std::string & name, const char * serialNumber)
+devNDISerial::Tool * devNDISerial::AddTool(const std::string & name, const char * serialNumber)
 {
     Tool * tool = new Tool();
     tool->Name = name;
@@ -96,7 +95,7 @@ devNDiSerial::Tool * devNDiSerial::AddTool(const std::string & name, const char 
 }
 
 
-devNDiSerial::Tool * devNDiSerial::AddTool(const std::string & name, const char * serialNumber, const char * toolDefinitionFile)
+devNDISerial::Tool * devNDISerial::AddTool(const std::string & name, const char * serialNumber, const char * toolDefinitionFile)
 {
     char portHandle[3];
     portHandle[2] = '\0';
@@ -111,7 +110,7 @@ devNDiSerial::Tool * devNDiSerial::AddTool(const std::string & name, const char 
 }
 
 
-std::string devNDiSerial::GetToolName(const unsigned int index) const
+std::string devNDISerial::GetToolName(const unsigned int index) const
 {
     const ToolsMapType::const_iterator end = ToolsMap.end();
     ToolsMapType::const_iterator toolIterator = ToolsMap.begin();
@@ -126,20 +125,20 @@ std::string devNDiSerial::GetToolName(const unsigned int index) const
 }
 
 
-void devNDiSerial::CommandInitialize(void)
+void devNDISerial::CommandInitialize(void)
 {
     SerialBufferPointer = SerialBuffer;
 }
 
 
-void devNDiSerial::CommandAppend(const char command)
+void devNDISerial::CommandAppend(const char command)
 {
     *SerialBufferPointer = command;
     SerialBufferPointer++;
 }
 
 
-void devNDiSerial::CommandAppend(const char * command)
+void devNDISerial::CommandAppend(const char * command)
 {
     const size_t size = strlen(command);
     strncpy(SerialBufferPointer, command, size);
@@ -147,13 +146,13 @@ void devNDiSerial::CommandAppend(const char * command)
 }
 
 
-void devNDiSerial::CommandAppend(const int command)
+void devNDISerial::CommandAppend(const int command)
 {
     SerialBufferPointer += _snprintf(SerialBufferPointer, GetSerialBufferAvailableSize(), "%d", command);
 }
 
 
-bool devNDiSerial::CommandSend(void)
+bool devNDISerial::CommandSend(void)
 {
     CommandAppend('\r');
     CommandAppend('\0');
@@ -170,7 +169,7 @@ bool devNDiSerial::CommandSend(void)
 }
 
 
-unsigned int devNDiSerial::ComputeCRC(const char * data)
+unsigned int devNDISerial::ComputeCRC(const char * data)
 {
     static unsigned char oddParity[16] = { 0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0 };
     unsigned char * dataPointer = (unsigned char *)data;
@@ -194,7 +193,7 @@ unsigned int devNDiSerial::ComputeCRC(const char * data)
 }
 
 
-bool devNDiSerial::ResponseRead(void)
+bool devNDISerial::ResponseRead(void)
 {
     SerialBufferPointer = SerialBuffer;
     do {
@@ -208,7 +207,7 @@ bool devNDiSerial::ResponseRead(void)
 }
 
 
-bool devNDiSerial::ResponseRead(const char * expectedMessage)
+bool devNDISerial::ResponseRead(const char * expectedMessage)
 {
     ResponseRead();
 
@@ -223,7 +222,7 @@ bool devNDiSerial::ResponseRead(const char * expectedMessage)
 
 
 
-bool devNDiSerial::ResponseCheckCRC(void)
+bool devNDISerial::ResponseCheckCRC(void)
 {
     char receivedCRC[CRC_SIZE + 1];
     char computedCRC[CRC_SIZE + 1];
@@ -250,7 +249,7 @@ bool devNDiSerial::ResponseCheckCRC(void)
 }
 
 
-bool devNDiSerial::ResetSerialPort(void)
+bool devNDISerial::ResetSerialPort(void)
 {
     SerialPort.WriteBreak(0.5 * cmn_s);
     osaSleep(200.0 * cmn_ms);
@@ -270,7 +269,7 @@ bool devNDiSerial::ResetSerialPort(void)
 }
 
 
-bool devNDiSerial::SetSerialPortSettings(osaSerialPort::BaudRateType baudRate,
+bool devNDISerial::SetSerialPortSettings(osaSerialPort::BaudRateType baudRate,
                                          osaSerialPort::CharacterSizeType characterSize,
                                          osaSerialPort::ParityCheckingType parityChecking,
                                          osaSerialPort::StopBitsType stopBits,
@@ -374,7 +373,7 @@ bool devNDiSerial::SetSerialPortSettings(osaSerialPort::BaudRateType baudRate,
 }
 
 
-void devNDiSerial::Beep(const mtsInt & numberOfBeeps)
+void devNDISerial::Beep(const mtsInt & numberOfBeeps)
 {
     if (numberOfBeeps.Data < 1 || numberOfBeeps.Data > 9) {
         CMN_LOG_CLASS_RUN_ERROR << "Beep: invalid input: " << numberOfBeeps << ", must be between 0-9" << std::endl;
@@ -397,7 +396,7 @@ void devNDiSerial::Beep(const mtsInt & numberOfBeeps)
 }
 
 
-void devNDiSerial::LoadToolDefinitionFile(const char * portHandle, const char * filePath)
+void devNDISerial::LoadToolDefinitionFile(const char * portHandle, const char * filePath)
 {
     std::ifstream toolDefinitionFile(filePath, std::ios::binary);
     if (!toolDefinitionFile.is_open()) {
@@ -424,6 +423,7 @@ void devNDiSerial::LoadToolDefinitionFile(const char * portHandle, const char * 
         for (unsigned int j = 0; j < 64; j++) {
             sprintf(&output[j*2], "%02X", static_cast<unsigned char>(input[j]));
         }
+        //! \todo Validate numChunks
         sprintf(address, "%04X", i * 64);
         CommandInitialize();
         CommandAppend("PVWR ");
@@ -436,7 +436,7 @@ void devNDiSerial::LoadToolDefinitionFile(const char * portHandle, const char * 
 }
 
 
-void devNDiSerial::PortHandlesInitialize(void)
+void devNDISerial::PortHandlesInitialize(void)
 {
     char * parsePointer;
     unsigned int numPortHandles = 0;
@@ -486,7 +486,7 @@ void devNDiSerial::PortHandlesInitialize(void)
 }
 
 
-void devNDiSerial::PortHandlesQuery(void)
+void devNDISerial::PortHandlesQuery(void)
 {
     char * parsePointer;
     unsigned int numPortHandles = 0;
@@ -560,7 +560,7 @@ void devNDiSerial::PortHandlesQuery(void)
 }
 
 
-void devNDiSerial::PortHandlesEnable(void)
+void devNDISerial::PortHandlesEnable(void)
 {
     char * parsePointer;
     unsigned int numPortHandles = 0;
@@ -611,7 +611,7 @@ void devNDiSerial::PortHandlesEnable(void)
 }
 
 
-void devNDiSerial::ToggleTracking(const mtsBool & track)
+void devNDISerial::ToggleTracking(const mtsBool & track)
 {
     if (track.Data) {
         IsTracking = true;
@@ -626,7 +626,7 @@ void devNDiSerial::ToggleTracking(const mtsBool & track)
 }
 
 
-void devNDiSerial::Track(void)
+void devNDISerial::Track(void)
 {
     char * parsePointer;
     unsigned int numPortHandles = 0;
@@ -700,7 +700,7 @@ void devNDiSerial::Track(void)
 }
 
 
-void devNDiSerial::Run(void)
+void devNDISerial::Run(void)
 {
     ProcessQueuedCommands();
 
@@ -710,7 +710,7 @@ void devNDiSerial::Run(void)
 }
 
 
-devNDiSerial::Tool::Tool(void)
+devNDISerial::Tool::Tool(void)
 {
     PortHandle[2] = '\0';
     MainType[2] = '\0';
