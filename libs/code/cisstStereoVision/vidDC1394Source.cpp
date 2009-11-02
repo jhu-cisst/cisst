@@ -117,8 +117,10 @@ void svlDC1394Context::Enumerate()
     // Re-enumerate camera list
     ReleaseEnumeration();
 
+#if (__verbose__ >= 2)
     // Disable libdc1394 warnings print-outs
     dc1394_log_register_handler(DC1394_LOG_WARNING, 0, 0);
+#endif
 
     // Get list of cameras with 'GUID' and 'Unit' identifiers
     if (dc1394_camera_enumerate(Context, &CameraList) != DC1394_SUCCESS || CameraList->num < 1) {
@@ -472,7 +474,7 @@ int CDC1394Source::Open()
     double fps;
     unsigned int i, j;
     unsigned int mode = 0, framerate = 0;
-    unsigned int f7roileft = 0, f7roitop = 0, f7bpp = 0;
+    unsigned int f7roileft = 0, f7roitop = 0, f7framerate = 0, f7framerateunit = 0, f7frameratemax = 0;
     svlFilterSourceVideoCapture::PixelType  colorspace = svlFilterSourceVideoCapture::PixelRGB8;
     dc1394video_modes_t modes;
     dc1394framerates_t framerates;
@@ -521,6 +523,7 @@ int CDC1394Source::Open()
             f7mode = Format[i]->custom_mode;
             f7roileft = Format[i]->custom_roileft;
             f7roitop = Format[i]->custom_roitop;
+            f7framerate = Format[i]->custom_framerate;
         }
         else {
             // Setting default image format
@@ -673,18 +676,26 @@ int CDC1394Source::Open()
 #endif
         }
         else {
-            if (dc1394_format7_get_recommended_packet_size(Cameras[DeviceID[i]],
-                                                           (dc1394video_mode_t)(f7mode + DC1394_VIDEO_MODE_FORMAT7_0),
-                                                           &f7bpp) != DC1394_SUCCESS) {
-#if (__verbose__ >= 2)
-                cerr << "CDC1394Source::Open - cannot get recommended bits/pixel; using maximum available" << endl;
+            if (dc1394_format7_set_color_coding(Cameras[DeviceID[i]],
+                                                (dc1394video_mode_t)(f7mode + DC1394_VIDEO_MODE_FORMAT7_0),
+                                                (dc1394color_coding_t)(ColorCoding[i])) != DC1394_SUCCESS) {
+#if (__verbose__ >= 1)
+                cerr << "CDC1394Source::Open - dc1394_format7_set_color_coding returned error" << endl;
 #endif
-                f7bpp = DC1394_USE_MAX_AVAIL;
+                goto labError;
+            }
+            if (dc1394_format7_get_packet_parameters(Cameras[DeviceID[i]],
+                                                     (dc1394video_mode_t)(f7mode + DC1394_VIDEO_MODE_FORMAT7_0),
+                                                     &f7framerateunit, &f7frameratemax) != DC1394_SUCCESS) {
+#if (__verbose__ >= 1)
+                cerr << "CDC1394Source::Open - dc1394_format7_get_packet_parameters returned error" << endl;
+#endif
+                goto labError;
             }
             if (dc1394_format7_set_roi(Cameras[DeviceID[i]],
                                        (dc1394video_mode_t)(f7mode + DC1394_VIDEO_MODE_FORMAT7_0),
                                        (dc1394color_coding_t)(ColorCoding[i]),
-                                       f7bpp,
+                                       (((f7framerate * f7frameratemax) / f7framerateunit) / 100) * f7framerateunit,
                                        f7roileft, f7roitop,
                                        Width[i], Height[i]) != DC1394_SUCCESS) {
 #if (__verbose__ >= 1)
@@ -692,20 +703,8 @@ int CDC1394Source::Open()
 #endif
                 goto labError;
             }
-            if (dc1394_format7_get_packet_size(Cameras[DeviceID[i]],
-                                               (dc1394video_mode_t)(f7mode + DC1394_VIDEO_MODE_FORMAT7_0),
-                                               &f7bpp) != DC1394_SUCCESS) {
-#if (__verbose__ >= 2)
-                cerr << "CDC1394Source::Open - cannot get bits/pixel" << endl;
-#endif
-            }
-            else {
 #if (__verbose__ >= 3)
-                cerr << "CDC1394Source::Open - bits/pixel = " << f7bpp << endl;
-#endif
-            }
-#if (__verbose__ >= 3)
-            cerr << "CDC1394Source::Open - Format7 setup accepted = " << f7bpp << endl;
+            cerr << "CDC1394Source::Open - Format7 setup accepted" << endl;
 #endif
         }
 
@@ -1040,6 +1039,15 @@ int CDC1394Source::CaptureFrame(unsigned int videoch)
 #endif
         return SVL_FAIL;
     }
+
+    if (dc1394_capture_is_frame_corrupt(Cameras[DeviceID[videoch]], Frame[videoch]) == DC1394_TRUE) {
+#if (__verbose__ >= 2)
+            cerr << "CDC1394Source::CaptureFrame - captured frame is corrupt; skipping to next frame" << endl;
+#endif
+        dc1394_capture_enqueue(Cameras[DeviceID[videoch]], Frame[videoch]);
+        return SVL_OK;
+    }
+
 #if (__verbose__ >= 4)
     cerr << "CDC1394Source::CaptureFrame - video frame dequeued from buffer" << endl;
 #endif
@@ -1122,6 +1130,7 @@ int CDC1394Source::GetFormatList(unsigned int deviceid, svlFilterSourceVideoCapt
         templist[i].custom_mode = -1;
         templist[i].custom_roileft = 0;
         templist[i].custom_roitop = 0;
+        templist[i].custom_framerate = 0;
         templist[i].custom_pattern = svlFilterSourceVideoCapture::PatternUnknown;
         templist[i].custom_maxwidth = 0;
         templist[i].custom_maxheight = 0;
@@ -1154,6 +1163,7 @@ int CDC1394Source::GetFormatList(unsigned int deviceid, svlFilterSourceVideoCapt
             templist[i].custom_mode = j;
             templist[i].custom_roileft = f7modes.mode[j].pos_x;
             templist[i].custom_roitop = f7modes.mode[j].pos_y;
+            templist[i].custom_framerate = 100;
             templist[i].custom_pattern = GetPatternTypeFromColorFilter(f7modes.mode[j].color_filter);
             templist[i].custom_maxwidth = f7modes.mode[j].max_size_x;
             templist[i].custom_maxheight = f7modes.mode[j].max_size_y;
@@ -1901,6 +1911,7 @@ void* CDC1394SourceThread::Proc(CDC1394Source* baseref)
             Error = true;
             break;
         }
+        osaSleep(0.01);
     }
 
 	return this;

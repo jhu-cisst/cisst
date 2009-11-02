@@ -623,29 +623,35 @@ int svlFilterSourceVideoCapture::DialogFormat(unsigned int videoch)
                 SelectFormat(formatid, videoch);
             }
             else {
-                int roiwidth, roiheight, roileft, roitop, colorspace;
-                cout << "  # Enter ROI width (unit=" << formats[formatid].custom_unitwidth << "): ";
+                int roiwidth, roiheight, roileft, roitop, framerate, colorspace;
+                cout << "  # Enter ROI width (max=" << formats[formatid].custom_maxwidth << "; unit=" << formats[formatid].custom_unitwidth << "): ";
                 cin >> roiwidth;
                 if (roiwidth < 1 || roiwidth >= static_cast<int>(formats[formatid].custom_maxwidth)) {
                     cout << "  -!- Invalid ROI width" << endl;
                     return SVL_FAIL;
                 }
-                cout << "  # Enter ROI height (unit=" << formats[formatid].custom_unitheight << "): ";
+                cout << "  # Enter ROI height (max=" << formats[formatid].custom_maxheight << "; unit=" << formats[formatid].custom_unitheight << "): ";
                 cin >> roiheight;
                 if (roiheight < 1 || roiheight >= static_cast<int>(formats[formatid].custom_maxheight)) {
                     cout << "  -!- Invalid ROI height" << endl;
                     return SVL_FAIL;
                 }
-                cout << "  # Enter ROI left (unit=" << formats[formatid].custom_unitleft << "): ";
+                cout << "  # Enter ROI left (max=" << formats[formatid].custom_maxwidth - 1 << "; unit=" << formats[formatid].custom_unitleft << "): ";
                 cin >> roileft;
-                if (roileft < 1 || roileft >= (static_cast<int>(formats[formatid].custom_maxwidth) - 1)) {
+                if (roileft < 0 || roileft >= (static_cast<int>(formats[formatid].custom_maxwidth) - 1)) {
                     cout << "  -!- Invalid ROI left" << endl;
                     return SVL_FAIL;
                 }
-                cout << "  # Enter ROI top (unit=" << formats[formatid].custom_unittop << "): ";
+                cout << "  # Enter ROI top (max=" << formats[formatid].custom_maxheight - 1 << "; unit=" << formats[formatid].custom_unittop << "): ";
                 cin >> roitop;
-                if (roitop < 1 || roitop >= (static_cast<int>(formats[formatid].custom_maxheight) - 1)) {
+                if (roitop < 0 || roitop >= (static_cast<int>(formats[formatid].custom_maxheight) - 1)) {
                     cout << "  -!- Invalid ROI top" << endl;
+                    return SVL_FAIL;
+                }
+                cout << "  # Enter framerate [percentage of maximum available framerate] (min=1; max=100): ";
+                cin >> framerate;
+                if (framerate < 1 || framerate > 100) {
+                    cout << "  -!- Invalid framerate" << endl;
                     return SVL_FAIL;
                 }
                 cout << "  == Select color space ==" << endl;
@@ -666,6 +672,7 @@ int svlFilterSourceVideoCapture::DialogFormat(unsigned int videoch)
                 format.colorspace = formats[formatid].custom_colorspaces[colorspace];
                 format.custom_roileft= roileft;
                 format.custom_roitop = roitop;
+                format.custom_framerate = framerate;
                 SetFormat(format, videoch);
             }
 
