@@ -1,8 +1,12 @@
+#include <cisstCommon/cmnLogger.h>
 #include <cisstRobot/robManipulator.h>
+#include <cisstRobot/robGUI.h>
 
 #include <cisstVector/vctFixedSizeMatrix.h>
 
 #include <vector>
+#include <iostream>
+using namespace std;
 
 #ifdef SINGLE_PRECISION
 
@@ -93,39 +97,55 @@ void free_rmatrix(double** m, long nrl, long ncl){
 
 robManipulator::robManipulator( const std::string& linkfile, 
 				const std::string& toolfile,
-				const vctFrame4x4<double,VCT_ROW_MAJOR>& Rtw0,
-				double G, const vctFixedSizeVector<double,3>& z0 ){
+				const vctFrame4x4<double,VCT_ROW_MAJOR>& Rtw0 ){
   this->Rtw0 = Rtw0;
-  this->G = G;
-  this->z0 = z0;
   tool = NULL;
   
   if( LoadRobot( linkfile ) == ERROR ){
-    std::cout << "robManipulator::robManipulator: failed to load the robot" << std::endl;
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__
+		      << " Failed to load the robot configuration."
+		      << std::endl;
   }
 
   if( LoadTool( toolfile ) == ERROR ){
-    std::cout << "robManipulator::robManipulator: failed to load the tool" << std::endl;
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__
+		      << " Failed to load the tool configuration." 
+		      << std::endl;
   }
 
-  //ForwardKinematics();
+  vctDynamicVector<double> q( joints.size(), 0.0 );
+  ForwardKinematics( q ); // calls the non-const Fkin
+
 }
 				
 robError robManipulator::LoadRobot( const std::string& filename ){
+  if( filename.empty() ){
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__
+		      << " No configuration file!."
+		      << std::endl;
+    return ERROR;
+  }
+
   std::ifstream ifs;
 
   ifs.open( filename.data() );
   if(!ifs){
-    std::cout<<"robManipulator::LoadRobot: couln't open file " << filename << std::endl;
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__
+		      << " Couln't open configuration file " << filename 
+		      << std::endl;
     return ERROR;
   }
 
   size_t N;
   ifs >> N;
+  links.reserve(N);     // This is important to avoid relocation
+                        // since the pointer of each link is passed to robGUI
+                        // Hence reserve N links.
   for( size_t i=0; i<N; i++ ){
     robLink li;
     ifs >> li;
     links.push_back( li );
+    robGUI::Insert( &links[i] );
   }
 
   ifs >> N;
@@ -141,38 +161,73 @@ robError robManipulator::LoadRobot( const std::string& filename ){
   return SUCCESS;
 }
 
-robError robManipulator::LoadTool( const std::string& filename ){
+robError robManipulator::LoadTool( const std::string& ){
   return SUCCESS;
 }
 
 //////////////////////////////////////
-
+//         KINEMATICS
 //////////////////////////////////////
 
-const std::vector<robLink>& robManipulator::Links() const { return links; }
-
 vctFrame4x4<double,VCT_ROW_MAJOR> 
-robManipulator::PositionOrientation( int i ) const {
+robManipulator::ForwardKinematics( const vctDynamicVector<double>& q ) {
 
-  size_t l = ( i < 0 ) ? (links.size()-1) : (size_t)i;
+  if( q.size() != joints.size() ){
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__
+		      << ": Expected " << joints.size() << " joints values. "
+		      << " Got " << q.size() 
+		      << std::endl;
+    return Rtw0;
+  }
 
-  if( l < links.size() )
-    return links[l].PositionOrientation();
-  else 
-    return vctFrame4x4<double,VCT_ROW_MAJOR>();
+  if( links.size() == 0 ){
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__
+		      << ": The manipulator has no links."
+		      << std::endl;
+    return Rtw0;
+  }
+
+  // set the position/orientation of link 0 to the base * its tranformation
+  // setting the link's transformation is necessary in order to render the link
+  // in opengl
+  links[0] = Rtw0 * links[0].ForwardKinematics( q[0] );
+
+  // for link 1 to N
+  for(size_t i=1; i<links.size(); i++){
+    // set the position/orientation of the link
+    links[i] = links[i-1] * links[i].ForwardKinematics( q[i] );
+  }
+
+  return links.back();
 }
 
 vctFrame4x4<double,VCT_ROW_MAJOR> 
 robManipulator::ForwardKinematics( const vctDynamicVector<double>& q ) const {
 
-  // initialise the forward kinematics with the base transform
-  vctFrame4x4<double,VCT_ROW_MAJOR> Rtwi = Rtw0;
+  if( q.size() != joints.size() ){
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__
+		      << ": Expected " << joints.size() << " joints values. "
+		      << " Got " << q.size() 
+		      << std::endl;
+    return Rtw0;
+  }
 
-  // 
-  for(size_t i=0; i<links.size(); i++){
-    //links[i].SetDOF( q[i] );
+  if( links.size() == 0 ){
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__
+		      << ": The manipulator has no links."
+		      << std::endl;
+    return Rtw0;
+  }
+
+  // set the position/orientation of link 0 to the base * its tranformation
+  // setting the link's transformation is necessary in order to render the link
+  // in opengl
+  vctFrame4x4<double,VCT_ROW_MAJOR> Rtwi = Rtw0*links[0].ForwardKinematics(q[0]);
+
+  // for link 1 to N
+  for(size_t i=1; i<links.size(); i++){
+    // set the position/orientation of the link
     Rtwi = Rtwi * links[i].ForwardKinematics( q[i] );
-    //links[i].PositionOrientation( Rtwi );
   }
 
   return Rtwi;
@@ -180,69 +235,97 @@ robManipulator::ForwardKinematics( const vctDynamicVector<double>& q ) const {
 
 robError 
 robManipulator::InverseKinematics( vctDynamicVector<double>& q, 
-				   const vctFrame4x4<double,VCT_ROW_MAJOR>& Rts, 
-				   double tol, 
-				   size_t Niter ){
+				   const vctFrame4x4<double,VCT_ROW_MAJOR>& Rts,
+				   double tolerance, 
+				   size_t Niterations ){
 
-  int M = 6;                    // The number or rows of matrix A
-  int N = joints.size();        // The number of columns of matrix A
-  int NHRS = 1;                 // The number of right hand side vectors
+  if( q.size() != joints.size() ){
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__
+		      << ": Expected " << joints.size() << " joints values. "
+		      << " Got " << q.size() 
+		      << std::endl;
+    return ERROR;
+  }
 
-  double* A = &(Js[0][0]);        // Pointer to the spatial Jacobian
-  int LDA = M;                  // The leading dimension of the array A.
+  if( links.size() == 0 ){
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__
+		      << ": The manipulator has no links."
+		      << std::endl;
+    return ERROR;
+  }
 
-  double* B;                      // The N-by-NRHS matrix of right hand side matrix
-  int LDB = N;                  // The leading dimension of the array B.
+  // A is a pointer to the 6xN spatial Jacobian
+  int M = 6;                  // The number or rows of matrix A
+  int N = joints.size();      // The number of columns of matrix A
+  int NHRS = 1;               // The number of right hand side vectors
 
-  double* S = new double[M];        // The singular values of A in decreasing order
-  double RCOND = -1;              // Use machine precision to determine rank(A)
-  int RANK;                     // The effective rank of A
-  int LWORK = 128;              // The (safe) size of the workspace
-  double WORK[128];               // The workspace
-  int INFO;                     // The info code
-  int INC = 1;                  // The index increment 
+  double* A = &(Js[0][0]);    // Pointer to the spatial Jacobian
+  int LDA = M;                // The leading dimension of the array A.
 
-  double ndq=1;             // norm of the iteration
-  size_t i;               // the iterator
+  // B is a pointer the the N vector containing the solution
+  double* B;                  // The N-by-NRHS matrix of right hand side matrix
+  int LDB = N;                // The leading dimension of the array B.
+
+  // These values are used for the SVD computation
+  double* S = new double[M];  // The singular values of A in decreasing order
+  double RCOND = -1;          // Use machine precision to determine rank(A)
+  int RANK;                   // The effective rank of A
+  int LWORK = 128;            // The (safe) size of the workspace
+  double WORK[128];           // The workspace
+  int INFO;                   // The info code
+  int INC = 1;                // The index increment 
+
+  double ndq=1;               // norm of the iteration error
+  size_t i;                   // the iteration counter
 
   // loop until Niter are executed or the error is bellow the tolerance
-  for( i=0; i<Niter && tol<ndq; i++ ){
+  for( i=0; i<Niterations && tolerance<ndq; i++ ){
 
-    //if(SetJointPosition(q) == ERROR)   // set the joint positions
-      //std::cout<<"robManipulator::InverseKinematics: failed to set the joints."<<std::endl;
-
-    vctFrame4x4<double,VCT_ROW_MAJOR> Rt = ForwardKinematics( q );   // get the forward kinematics
+    // Evaluate the forward kinematics
+    vctFrame4x4<double,VCT_ROW_MAJOR> Rt = ForwardKinematics( q );
+    // Evaluate the spatial Jacobian (also evaluate the forward kin)
+    JacobianSpatial( q );
 
     // compute the translation error
     vctFixedSizeVector<double,3> dt( Rts[0][3]-Rt[0][3],   
 				     Rts[1][3]-Rt[1][3],  
 				     Rts[2][3]-Rt[2][3] );
     
-    // compute the rotation error
-    vctFixedSizeVector<double,3> n1( Rt[0][0], Rt[1][0], Rt[2][0] ), n2( Rts[0][0], Rts[1][0], Rts[2][0] );
-    vctFixedSizeVector<double,3> o1( Rt[0][1], Rt[1][1], Rt[2][1] ), o2( Rts[0][1], Rts[1][1], Rts[2][1] );
-    vctFixedSizeVector<double,3> a1( Rt[0][2], Rt[1][2], Rt[2][2] ), a2( Rts[0][2], Rts[1][2], Rts[2][2] );
+    // compute the orientation error 
+    // first build the [ n o a ] vectors
+    vctFixedSizeVector<double,3> n1( Rt[0][0],  Rt[1][0],  Rt[2][0] );
+    vctFixedSizeVector<double,3> o1( Rt[0][1],  Rt[1][1],  Rt[2][1] );
+    vctFixedSizeVector<double,3> a1( Rt[0][2],  Rt[1][2],  Rt[2][2] );
+    vctFixedSizeVector<double,3> n2( Rts[0][0], Rts[1][0], Rts[2][0] );
+    vctFixedSizeVector<double,3> o2( Rts[0][1], Rts[1][1], Rts[2][1] );
+    vctFixedSizeVector<double,3> a2( Rts[0][2], Rts[1][2], Rts[2][2] );
+
+    // This is the orientation error
     vctFixedSizeVector<double,3> dr = 0.5*( (n1%n2) + (o1%o2) + (a1%a2) );
 
     // combine both errors in one R^6 vector
     double e[6] = { dt[0], dt[1], dt[2], dr[0], dr[1], dr[2] };
+    // get a pointer
     B = &e[0];
 
     // compute the minimum norm solution
-    gelss( &M, &N, &NHRS, 
-	   A, &LDA, 
-	   B, &LDB, 
-	   S, &RCOND, &RANK,
+    gelss( &M, &N, &NHRS,       // 6xN matrix
+	   A, &LDA,             // Jacobian matrix
+	   B, &LDB,             // error vector
+	   S, &RCOND, &RANK,    // SVD parameters
 	   WORK, &LWORK, &INFO );
     
     // process the errors (if any)
     if(INFO < 0)
-      std::cout << "robManipulator::InverseKinematics: " 
-	   << "the i-th argument had an illegal value." << std::endl;
+      CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__
+			<< ": the i-th argument of gelss is illegal." 
+			<< std::endl;
     if(0 < INFO)
-      std::cout << "robManipulator::InverseKinematics: gelss failed." << std::endl;
+      CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__
+			<< ": gelss failed to converge."
+			<< std::endl;
     
-    // compute the L2 norm 
+    // compute the L2 norm of the error
     ndq = nrm2(&N, B, &INC);
 
     // update the solution
@@ -258,11 +341,63 @@ robManipulator::InverseKinematics( vctDynamicVector<double>& q,
 
   delete[] S;
 
-  if( i==Niter ) return ERROR;
+  if( i==Niterations ) return ERROR;
   else return SUCCESS;
 }
 
+/*
+ * Body manipulator Jacobian
+ * Paul IEEE SMC 11(6) 1981
+ * BIG FAT WARNIN': The jacobian is in column major (for Fortran)
+ */
+void robManipulator::JacobianBody( const vctDynamicVector<double>& q ) const {
+
+  vctFrame4x4<double,VCT_ROW_MAJOR> U;  // set identity
+
+  if( tool != NULL ){
+    U = tool->ForwardKinematics( 0.0 ); // set to tool if any
+  }
+
+  for(int j=(int)joints.size()-1; 0<=j; j--){
+
+    if( !links[j].IsModifiedDH() ){     // DH convention
+      U = links[j].ForwardKinematics( q[j] ) * U;
+    }
+
+    if( links[j].IsRevolute() ){        // Revolute joint
+      // Jn is column major
+      Jn[j][0] = U[0][3]*U[1][0] - U[1][3]*U[0][0];
+      Jn[j][1] = U[0][3]*U[1][1] - U[1][3]*U[0][1];
+      Jn[j][2] = U[0][3]*U[1][2] - U[1][3]*U[0][2];
+
+      Jn[j][3] = U[2][0]; // nz
+      Jn[j][4] = U[2][1]; // oz
+      Jn[j][5] = U[2][2]; // az
+
+    }
+
+    if( links[j].IsPrismatic() ){    // Prismatic joint
+      // Jn is column major
+      Jn[j][0] = U[2][0]; // nz
+      Jn[j][1] = U[2][1]; // oz
+      Jn[j][2] = U[2][2]; // az
+
+      Jn[j][3] = 0.0;
+      Jn[j][4] = 0.0;
+      Jn[j][5] = 0.0;
+
+    }
+
+    if( links[j].IsModifiedDH() ){   // Modified DH
+      U = links[j].ForwardKinematics( q[j] ) * U;
+    }
+  }
+}
+
 void robManipulator::JacobianSpatial( const vctDynamicVector<double>& q ) const {
+  
+  JacobianBody( q );
+
   /*
    * Get the adjoint matrix to flip the body jacobian to spatial jacobian
    */
@@ -320,60 +455,17 @@ void robManipulator::JacobianSpatial( const vctDynamicVector<double>& q ) const 
        &BETA,  C, &LDC);
 }
 
-/*
- * Body manipulator Jacobian
- * Paul IEEE SMC 11(6) 1981
- * BIG FAT WARNIN': The jacobian is in column major (for Fortran)
- */
-void robManipulator::JacobianBody( const vctDynamicVector<double>& q ) const {
 
-  vctFrame4x4<double,VCT_ROW_MAJOR> U;   // set identity
-
-  if( tool != NULL ){
-    U = tool->ForwardKinematics( 0.0 ); // set to tool if any
-  }
-
-  for(int j=(int)joints.size()-1; 0<=j; j--){
-
-    if( links[j].IsDH() ){            // DH convention
-      U = links[j].ForwardKinematics( q[j] ) * U;
-    }
-
-    if( links[j].IsRevolute() ){     // Revolute joint
-      // Jn is column major
-      Jn[j][0] = U[0][3]*U[1][0] - U[1][3]*U[0][0];
-      Jn[j][1] = U[0][3]*U[1][1] - U[1][3]*U[0][1];
-      Jn[j][2] = U[0][3]*U[1][2] - U[1][3]*U[0][2];
-
-      Jn[j][3] = U[2][0]; // nz
-      Jn[j][4] = U[2][1]; // oz
-      Jn[j][5] = U[2][2]; // az
-
-    }
-
-    if( links[j].IsPrismatic() ){    // Prismatic joint
-      // Jn is column major
-      Jn[j][0] = U[2][0]; // nz
-      Jn[j][1] = U[2][1]; // oz
-      Jn[j][2] = U[2][2]; // az
-
-      Jn[j][3] = 0.0;
-      Jn[j][4] = 0.0;
-      Jn[j][5] = 0.0;
-
-    }
-
-    if( links[j].IsModifiedDH() ){   // Modified DH
-      U = links[j].ForwardKinematics( q[j] ) * U;
-    }
-  }
-}
+//////////////////////////////////////
+//         DYNAMICS
+//////////////////////////////////////
 
 vctDynamicVector<double> 
 robManipulator::RNE( const vctDynamicVector<double>& q,
 		     const vctDynamicVector<double>& qd,
 		     const vctDynamicVector<double>& qdd,
-		     const vctFixedSizeVector<double,6>& fext ) const{
+		     const vctFixedSizeVector<double,3>& g,
+		     const vctFixedSizeVector<double,6>& fext ) const {
 
   vctFixedSizeVector<double,3> w    (0.0); // angular velocity
   vctFixedSizeVector<double,3> wd   (0.0); // angular acceleration
@@ -390,112 +482,58 @@ robManipulator::RNE( const vctDynamicVector<double>& q,
   // torques
   vctDynamicVector<double>                  tau(joints.size(), 0.0);
   
+  vctFixedSizeVector<double,3> z0(0.0, 0.0, 1.0);
+
   // acceleration of link 0
-  vd = G*z0;
+  vd = g;
 
   // Forward recursion
   for(size_t i=0; i<joints.size(); i++){
 
-    double                                       m=links[i].Mass();      //mass
-    vctFixedSizeVector<double,3>                 s=links[i].COM();       //COM
-    vctFixedSizeMatrix<double,3,3,VCT_ROW_MAJOR> I=links[i].MOI();       //inertia
-    vctMatrixRotation3<double,VCT_ROW_MAJOR>   A=links[i].Rotation(q[i]);//iA(i-1)
-    vctFixedSizeVector<double,3>                ps=links[i].PStar();     //distal
+    double                                       m; // mass
+    vctFixedSizeVector<double,3>                 s; // center of mass
+    vctFixedSizeMatrix<double,3,3,VCT_ROW_MAJOR> I; // moment of inertia
+    vctMatrixRotation3<double,VCT_ROW_MAJOR>     A; // iA(i-1)
+    vctFixedSizeVector<double,3>                ps; // distal link
 
-    A.InverseSelf();                              // (i-1)Ai
+    m  = links[i].Mass();
+    s  = links[i].CenterOfMass();
+    I  = links[i].MomentOfInertia();
 
-    wd = A*( wd + (z0*qdd[i]) + (w%(z0*qd[i])) ); // rotational acceleration wrt i
-    w  = A*( w  + (z0*qd[i]) );                   // rotational velocity
+    A  = links[i].Orientation( q[i] ).InverseSelf();
+    ps = links[i].PStar();
+
+    wd = A*( wd + (z0*qdd[i]) + (w%(z0*qd[i])) ); // angular acceleration wrt i
+    w  = A*( w  + (z0*qd[i]) );                   // angular velocity
     vd = (wd%ps) + (w%(w%ps)) + A*vd;             // linear acceleration
 
     vdhat = (wd%s) + (w%(w%s)) + vd;              // 
-    F[i] = m*vdhat;                               // force
-    N[i] = (I*wd) + (w%(I*w));                    // moment
+    F[i] = m*vdhat;                               // total force
+    N[i] = (I*wd) + (w%(I*w));                    // total moment
   }
 
-  // ext force exerted on last link
+  // external force applied on the TCP
   vctFixedSizeVector<double,3> f( fext[0], fext[1], fext[2] );
-  // ext moment exterted on last link
+  // external moment applied on the TCP 
   vctFixedSizeVector<double,3> n( fext[3], fext[4], fext[5] );
 
   // Backward recursion
   for(int i=(int)joints.size()-1; 0<=i; i--){
     vctMatrixRotation3<double,VCT_ROW_MAJOR> A;
     vctFixedSizeVector<double,3> ps = links[i].PStar();
-    vctFixedSizeVector<double,3> s  = links[i].COM();
+    vctFixedSizeVector<double,3> s  = links[i].CenterOfMass();
 
     if(i != (int)joints.size()-1)              // 
-      A = links[i+1].Rotation(q[i+1]);         // 
+      A = links[i+1].Orientation( q[i+1] );    // 
 
     f = A*f + F[i];                            // force exterted on i by i-1
     n = A*n + (ps%f) + (s%F[i]) + N[i];        // moment externed on i by i-1
-    A = links[i].Rotation(q[i]).InverseSelf(); // 
+    A = links[i].Orientation(q[i]).InverseSelf(); // 
+
     if (links[i].IsRevolute() )
       tau[i] = n*(A*z0);                       // 
     if( links[i].IsPrismatic() )
       tau[i] = f*(A*z0);                       // 
-  }
-
-  return tau;
-}
-
-vctDynamicVector<double> 
-robManipulator::InertiaSubroutine( const vctDynamicVector<double>& q,
-				   size_t idx ) const {
-
-  vctFixedSizeVector<double,3> w    (0.0); // angular velocity
-  vctFixedSizeVector<double,3> wd   (0.0); // angular acceleration
-  vctFixedSizeVector<double,3> v    (0.0); // linear velocity
-  vctFixedSizeVector<double,3> vd   (0.0); // linear acceleration
-  vctFixedSizeVector<double,3> vdhat(0.0);
-  std::vector<vctFixedSizeVector<double,3> > N(joints.size(), 
-					       vctFixedSizeVector<double,3>(0.0));
-  std::vector<vctFixedSizeVector<double,3> > F(joints.size(), 
-					       vctFixedSizeVector<double,3>(0.0));
-
-  // Forward recursion
-  for(size_t i=0; i<joints.size(); i++){
-
-    double                                       m=links[i].Mass();      //mass
-    vctFixedSizeVector<double,3>                 s=links[i].COM();       //com
-    vctFixedSizeMatrix<double,3,3,VCT_ROW_MAJOR> I=links[i].MOI();       //inertia
-    vctMatrixRotation3<double,VCT_ROW_MAJOR>   A=links[i].Rotation(q[i]);//iA(i-1)
-    vctFixedSizeVector<double,3>               ps = links[i].PStar();    //distal
-
-    double qd  = 0.0;                   // 0 velocity
-    double qdd = ( i == idx ) ? 1 : 0;  // 0/1 acceleration
-
-    A.InverseSelf();                    // (i-1)Ai
-
-    wd = A*( wd + (z0*qdd) + (w%(z0*qd)) );  // rotational acceleration
-    w  = A*( w  + (z0*qd) );                 // rotational velocity
-    vd = (wd%ps) + (w%(w%ps)) + A*vd;        // linear acceleration
-
-    vdhat = (wd%s) + (w%(w%s)) + vd;
-    F[i] = m*vdhat;                          // force
-    N[i] = (I*wd) + (w%(I*w));               // moment
-  }
-
-  vctFixedSizeVector<double,3> f(0.0), n(0.0);
-  vctDynamicVector<double> tau( joints.size(), 0.0 );
-
-  // Backward recursion
-  for(int i=(int)joints.size()-1; 0<=i; i--){
-    vctMatrixRotation3<double,VCT_ROW_MAJOR> A;
-    vctFixedSizeVector<double,3> ps = links[i].PStar();
-    vctFixedSizeVector<double,3> s  = links[i].COM();
-
-    if(i != (int)joints.size()-1)
-      A = links[i+1].Rotation( q[i+1] );
-
-    f = A*f + F[i];
-    n = A*n + (ps%f) + (s%F[i]) + N[i];
-    A = links[i].Rotation(q[i]).Inverse();
-
-    if (links[i].IsRevolute() )
-      tau[i] = n*(A*z0);                     // 
-    if( links[i].IsPrismatic() )
-      tau[i] = f*(A*z0);                     // 
 
   }
 
@@ -505,83 +543,16 @@ robManipulator::InertiaSubroutine( const vctDynamicVector<double>& q,
 vctDynamicVector<double> 
 robManipulator::CCG( const vctDynamicVector<double>& q,
 		     const vctDynamicVector<double>& qd ) const {
-  vctFixedSizeVector<double,3> w    (0.0); // angular velocity
-  vctFixedSizeVector<double,3> wd   (0.0); // angular acceleration
-  vctFixedSizeVector<double,3> v    (0.0); // linear velocity
-  vctFixedSizeVector<double,3> vd   (0.0); // linear acceleration
-  vctFixedSizeVector<double,3> vdhat(0.0); 
-  vctFixedSizeVector<double,3> n(0.0), f(0.0);
-  std::vector<vctFixedSizeVector<double,3> > N(joints.size(), 
-					       vctFixedSizeVector<double,3>(0.0));
-  std::vector<vctFixedSizeVector<double,3> > F(joints.size(),
-					       vctFixedSizeVector<double,3>(0.0));
-  vctDynamicVector<double>                  ccg( joints.size(), 0.0 );
-
-  vd = G*z0;
-
-  for(size_t i=0; i<joints.size(); i++){
-    
-    double                                       m=links[i].Mass();      //mass
-    vctFixedSizeVector<double,3>                 s=links[i].COM();       //com
-    vctFixedSizeMatrix<double,3,3,VCT_ROW_MAJOR> I=links[i].MOI();       //inertia
-    vctMatrixRotation3<double,VCT_ROW_MAJOR>   A=links[i].Rotation(q[i]);//iA(i-1)
-    vctFixedSizeVector<double,3>                ps=links[i].PStar();     //distal
-
-    A.InverseSelf();
-
-    wd = A*( wd + (w%(z0*qd[i])) );
-    w  = A*( w  + (   z0*qd[i])  );
-    vd = (wd%ps) + (w%(w%ps)) + A*vd;
-
-    vdhat = (wd%s) + (w%(w%s)) + vd;
-    F[i] =  m*vdhat;
-    N[i] = (I*wd) + (w%(I*w));
+  if( q.size() != qd.size() ){
+    std::cerr << "robManipulator::CCG: vectors must have the same size." 
+	      << std::endl;
+    return vctDynamicVector<double>();
   }
 
-  for(int i=(int)links.size()-1; 0<=i; i--){
-    vctMatrixRotation3<double,VCT_ROW_MAJOR> A;
-    vctFixedSizeVector<double,3> ps = links[i].PStar();
-    vctFixedSizeVector<double,3> s  = links[i].COM();
+  return RNE( q,           // call Newton-Euler with only the joints 
+	      qd,          // positions and the joints velocities
+	      vctDynamicVector<double>( q.size(), 0.0 ) );
 
-    if(i != (int)links.size()-1)
-      A = links[i+1].Rotation(q[i+1]);
-
-    f = A*f + F[i];
-    n = A*n + (ps%f) + (s%F[i]) + N[i];
-    A = links[i].Rotation(q[i]).Inverse();
-
-    if (links[i].IsRevolute() )
-      ccg[i] = n*(A*z0);                     // 
-    if( links[i].IsPrismatic() )
-      ccg[i] = f*(A*z0);                     // 
-  }
-  return ccg;
-}
-
-/*
- * Use to compute the linear anc rotational accelerations
- */
-vctFixedSizeVector<double,6> 
-robManipulator::Acceleration( const vctDynamicVector<double>& q,
-			      const vctDynamicVector<double>& qd,
-			      const vctDynamicVector<double>& qdd) const {
-  vctFixedSizeVector<double,3> w (0.0); // angular velocity
-  vctFixedSizeVector<double,3> wd(0.0); // angular acceleration
-  vctFixedSizeVector<double,3> vd(0.0); // linear acceleration
-
-  for(size_t i=0; i<joints.size(); i++){
-
-    vctMatrixRotation3<double,VCT_ROW_MAJOR> A=links[i].Rotation(q[i]); // iA(i-1)
-    vctFixedSizeVector<double,3>            ps= links[i].PStar();       // distal
-    
-    A.InverseSelf();
-
-    wd = A*( wd + (z0*qdd[i]) + (w%(z0*qd[i])) );
-    w  = A*( w  + (z0*qd[i] ) );
-    vd = (wd%ps) + (w%(w%ps)) + A*vd;
-  }
-
-  return vctFixedSizeVector<double,6>(vd[0], vd[1], vd[2], wd[0], wd[1], wd[2]);
 }
 
 vctFixedSizeVector<double,6> 
@@ -592,12 +563,15 @@ robManipulator::BiasAcceleration( const vctDynamicVector<double>& q,
   vctFixedSizeVector<double,3> wd(0.0); // angular acceleration
   vctFixedSizeVector<double,3> vd(0.0); // linear velocity
 
+  vctFixedSizeVector<double,3> z0(0.0, 0.0, 1.0);
+
   for(size_t i=0; i<joints.size(); i++){
 
-    vctMatrixRotation3<double,VCT_ROW_MAJOR> A=links[i].Rotation(q[i]); // iA(i-1)
-    vctFixedSizeVector<double,3>            ps=links[i].PStar();        // distal
+    vctMatrixRotation3<double,VCT_ROW_MAJOR> A;    // iA(i-1)
+    vctFixedSizeVector<double,3>            ps;
 
-    A.InverseSelf();
+    A  = links[i].Orientation( q[i] ).InverseSelf();
+    ps = links[i].PStar();                         // distal
 
     wd = A*( wd + ( w%(z0*qd[i]) ) );
     w  = A*( w  + (    z0*qd[i]  ) );
@@ -608,13 +582,28 @@ robManipulator::BiasAcceleration( const vctDynamicVector<double>& q,
 }
 
 // A is column major!
-void robManipulator::JSinertia(double **A,
-			       const vctDynamicVector<double>& q) const {
+void 
+robManipulator::JSinertia(double **A,
+			  const vctDynamicVector<double>& q) const{
+
+  if( q.size() != joints.size() ){
+    std::cerr << "robManipulator::JSinertia: Expected " << joints.size()
+	      << " values. Got " << q.size()
+	      << std::endl;
+    return;
+  }
+
   for(size_t c=0; c<joints.size(); c++){
-    vctDynamicVector<double> h = InertiaSubroutine( q, c );
+    vctDynamicVector<double> qd( q.size(), 0.0 ); // velocities to zero
+    vctDynamicVector<double> qdd(q.size(), 0.0 ); // accelerations to zero
+    vctFixedSizeVector<double,3> g(0.0);          // gravity to zero
+    qdd[c] = 1.0;                                 // ith acceleration to 1
+
+    vctDynamicVector<double> h = RNE( q, qd, qdd, g );
     for( size_t r=0; r<joints.size(); r++ )
       A[c][r] = h[r];
   }
+
 }
 
 // Ac is column major!
@@ -647,17 +636,27 @@ void robManipulator::OSinertia(double Ac[6][6],
   // A = L  * L**T
   potrf(&UPLO, &NJOINTS, &A[0][0], &LDA, &INFO);
   if(INFO<0)
-    std::cout<<"OSinertia::dpotrf1: The " << INFO << " argument is illegal.\n";
+    std::cout << __PRETTY_FUNCTION__
+	      << ": The " << INFO << "th argument to potrf(1) is illegal." 
+	      << std::endl;
   else if(0<INFO)
-    std::cout<<"OSinertia::dpotrf1: The matrix A is not positive definite.\n";
+    std::cout << __PRETTY_FUNCTION__
+	      << ": The matrix passed to potrf(1) is not positive definite." 
+	      << std::endl;
 
   // invert A
   //
   potri(&UPLO, &NJOINTS, &A[0][0], &LDA, &INFO);
   if(INFO<0)
-    std::cout<<"OSinertia::dpotri1: The " << INFO << " argument is illegal.\n";
+    std::cout << __PRETTY_FUNCTION__
+	      << ": The " << INFO << "th argument to potri(1) is illegal."
+	      << std::endl;
   else if(0<INFO)
-    std::cout<<"OSinertia::dpotri1: The matrix A is singular.\n";
+    std::cout << __PRETTY_FUNCTION__
+	      << ": The matrix passed to potri(1) is singular."
+	      << std::endl;
+
+  JacobianBody( q );
 
   // J*A^-1 : a 6xN matrix column major
   // C := alpha*B*A + beta*C,
@@ -681,16 +680,24 @@ void robManipulator::OSinertia(double Ac[6][6],
   // A = L  * L**T
   potrf(&UPLO, &NEQS, &Ac[0][0], &LDAc, &INFO);
   if(INFO<0)
-    std::cout<<"OSinertia::dpotrf2: The " << INFO << " argument is illegal.\n";
+    std::cout << __PRETTY_FUNCTION__
+	      << ": The " << INFO << "th argument to potrf(2) is illegal."
+	      << std::endl;
   else if(0<INFO)
-    std::cout<<"OSinertia::dpotrf2: The matrix is not positive definite.\n";
+    std::cout << __PRETTY_FUNCTION__
+	      << ": The matrix passed to potrf is not positive(2) definite."
+	      << std::endl;
 
   // invert
   potri(&UPLO, &NEQS, &Ac[0][0], &LDAc, &INFO);
   if(INFO<0)
-    std::cout<<"OSinertia::dpotri2: The " << INFO << " argument is illegal.\n";
+    std::cout << __PRETTY_FUNCTION__ 
+	      << endl
+	      << "The " << INFO << "th argument to potri(2) is illegal.";
   else if(0<INFO)
-    std::cout<<"OSinertia::dpotri2: The matrix is singular.\n";
+    std::cout << __PRETTY_FUNCTION__
+	      << "The matrix passed to potri(2) is singular."
+	      << std::endl;
 
   //for( size_t i=0; i<6; i++ )
   //for( size_t j=i; j<6; j++ )
@@ -819,61 +826,21 @@ robManipulator::InverseDynamics( const vctDynamicVector<double>& q,
   return trq;
 }
 
-robError robManipulator::ActuatorsPos2JointsPos( double dt ){
-  if( actuators.size() == joints.size() ){
-    for(size_t i=0; i<joints.size(); i++)
-      joints[i].Position( actuators[i]->Position(), dt );
-  }
-  else{
-    std::cout << "robManipulator::ActuatorsPos2JointsPos: "
-	      << "number of actuators must equal the number of joints."
-	      << std::endl;
-  }
+vctDynamicVector<double> 
+robManipulator::ActuatorsPos2JointsPos( const vctDynamicVector<double>& apos ) const 
+{  return apos;  }
 
-  return SUCCESS;
-}
+vctDynamicVector<double>
+robManipulator::ActuatorsFT2JointsFT( const vctDynamicVector<double>& aft) const
+{ return aft;}
 
-robError robManipulator::ActuatorsFT2JointsFT( ){
-  if( actuators.size() == joints.size() ){
-    for(size_t i=0; i<joints.size(); i++)
-      joints[i].ForceTorque( actuators[i]->ForceTorque() );
-  }
-  else{
-    std::cout << "robManipulator::ActuatorsFT2JointsFT: "
-	      << "number of actuators must equal the number of joints." 
-	      << std::endl;
-  }
+vctDynamicVector<double>
+robManipulator::JointsPos2ActuatorsPos( const vctDynamicVector<double>& jpos ) const
+{  return jpos;  }
 
-  return SUCCESS;
-}
-
-robError robManipulator::JointsPos2ActuatorsPos( ){
-  if( actuators.size() == joints.size() ){
-    for(size_t i=0; i<actuators.size(); i++)
-      actuators[i]->Position( joints[i].Position() );
-  }
-  else{
-    std::cout << "robManipulator::Jpos2Apos: "
-	      << "number of actuators must equal the number of joints." 
-	      << std::endl;
-  }
-
-  return SUCCESS;
-}
-
-robError robManipulator::JointsFT2ActuatorsFT( ){
-  if( actuators.size() == joints.size() ){
-    for(size_t i=0; i<actuators.size(); i++)
-      actuators[i]->ForceTorque( joints[i].ForceTorque() );    
-  }
-  else{
-    std::cout << "robManipulator::JointsFT2ActuatorsFT: "
-	      << "number of actuators must equal the number of joints." 
-	      << std::endl;
-  }
-
-  return SUCCESS;
-}
+vctDynamicVector<double>
+robManipulator::JointsFT2ActuatorsFT( const vctDynamicVector<double>& jft ) const
+{  return jft;  }
 
 void robManipulator::Print() const {
 

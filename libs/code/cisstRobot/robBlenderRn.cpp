@@ -1,6 +1,5 @@
 #include <cisstCommon/cmnLogger.h>
 #include <cisstRobot/robBlenderRn.h>
-#include <cisstRobot/robFunctionPiecewise.h>
 
 #include <typeinfo>
 #include <iostream>

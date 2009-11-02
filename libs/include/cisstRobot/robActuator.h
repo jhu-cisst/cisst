@@ -94,28 +94,31 @@ public:
   virtual void ForceTorque(double newft)
   { ft = Saturate( newft, -ForceTorqueMax(), ForceTorqueMax() ); }
   
-  virtual void ISRead( std::istream& is ) {}
-  virtual void OSWrite( std::ostream& os ) const {}
+  virtual void Read( std::istream& is ) {
+    is >> qmin >> qmax >> ftmax;
+  }
+
+  virtual void Write( std::ostream& os ) const {
+    os << std::setw(13) << Position() 
+       << std::setw(13) << Velocity()
+       << std::setw(13) << Acceleration()
+       << std::setw(13) << ForceTorque()
+       << std::setw(13) << PositionMin()
+       << std::setw(13) << PositionMax()
+       << std::setw(13) << ForceTorqueMax();
+  }
 
   //
   friend std::ostream& operator << ( std::ostream& os, 
 				     const robActuator& actuator ){
-    os << std::setw(13) << actuator.Position() 
-       << std::setw(13) << actuator.Velocity()
-       << std::setw(13) << actuator.Acceleration()
-       << std::setw(13) << actuator.ForceTorque()
-       << std::setw(13) << actuator.PositionMin()
-       << std::setw(13) << actuator.PositionMax()
-       << std::setw(13) << actuator.ForceTorqueMax();
-    actuator.OSWrite( os );
+    actuator.Write( os );
     return os;
   }
 
   //
   friend std::istream& operator >> ( std::istream& is, 
 				     robActuator& actuator ){
-    is >> actuator.qmin >> actuator.qmax >> actuator.ftmax;
-    actuator.ISRead( is );
+    actuator.Read( is );
     return is;
   }
 

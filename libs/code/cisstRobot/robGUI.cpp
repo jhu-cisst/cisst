@@ -2,7 +2,6 @@
 
 #include <iostream>
 
-using namespace cisstRobot;
 using namespace std;
 
 robGUI* robGUI::gui = NULL;
@@ -16,10 +15,11 @@ void SpecialFunc(int c, int x, int y)
 { robGUI::gui->Keyboard( c, x, y ); }
 
 // display callback function
-void DisplayFunc(){ robGUI::gui->Draw(); }
+void DisplayFunc()
+{ robGUI::gui->Draw(); }
 
 // process the keyboard input
-void robGUI::Keyboard(int k, int x, int y){
+void robGUI::Keyboard(int k, int, int){
 
   //ESC key (27) quits
   if(k == 27){ exit(0); }
@@ -51,8 +51,8 @@ void robGUI::Keyboard(int k, int x, int y){
 // compute the camera position
 vctFixedSizeVector<double,3> robGUI::CameraPosition() const {
   return vctFixedSizeVector<double,3>( distance*cos(azimuth)*cos(elevation),
-	     distance*sin(azimuth)*cos(elevation),
-	     distance*sin(elevation) );
+				       distance*sin(azimuth)*cos(elevation),
+				       distance*sin(elevation) );
 }
 
 // draw the floor
@@ -116,19 +116,23 @@ void robGUI::Draw(){
   
   DrawGrid(10,10);
   DrawXYZ();
-  for( size_t i=0; i<bodies.size(); i++ )
-    bodies[i]->Draw();
+
+  for( size_t i=0; i<meshes.size(); i++ ){
+    meshes[i]->Draw();
+  }
 
   glutSwapBuffers();
 }
 
 // insert abody
-void robGUI::Insert( const robBody* body ) { bodies.push_back( body ); }
-void robGUI::Insert( const robManipulator* manipulator ) { 
-  vector<robLink>::const_iterator it = manipulator->Links().begin();
-  for(; it!=manipulator->Links().end(); it++ ){
-    bodies.push_back( &(*it) ); 
-  }
+void robGUI::Insert( const robMesh* mesh ) {
+  if( gui != NULL )
+    gui->Register( mesh ); 
+}
+
+void robGUI::Register( const robMesh* mesh ){  
+  if( mesh != NULL )
+    meshes.push_back( mesh );
 }
 
 robGUI::robGUI( int argc, char** argv){
@@ -190,8 +194,10 @@ robGUI::robGUI( int argc, char** argv){
   glEnable(GL_LIGHT1);
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_COLOR_MATERIAL);
-  glEnable(GL_NORMALIZE);
-  
+  //glEnable(GL_NORMALIZE);
+  //glEnable(GL_LINE_SMOOTH);
+  //glEnable(GL_BLEND);
+
   azimuth = 0;
   elevation = 3.14/4.0;
   distance = 3;

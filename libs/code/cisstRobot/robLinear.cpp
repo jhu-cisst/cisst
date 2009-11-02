@@ -1,6 +1,6 @@
 #include <cisstCommon/cmnLogger.h>
 #include <cisstRobot/robLinear.h>
-#include <cisstRobot/robFunctionPiecewise.h>
+#include <cisstRobot/robTrajectory.h>
 #include <iostream>
 #include <typeinfo>
 
@@ -27,7 +27,8 @@ robLinear::robLinear( double x1, const vctFixedSizeVector<double,3>& y1,
 		      double x2, const vctFixedSizeVector<double,3>& y2 ){
   if( x2 < x1 ){
     CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
-		      << ": t initial must be less than t final" << std::endl;
+		      << ": t initial must be less than t final" 
+		      << std::endl;
   }
 
   vctFixedSizeVector<double,3> m = (y2-y1)/(x2-x1);
@@ -47,12 +48,14 @@ robLinear::robLinear( double x1, const vctDynamicVector<double>& y1,
 		      double x2, const vctDynamicVector<double>& y2 ){
   if( x2 < x1 ){
     CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
-		      << ": t initial must be less than t final" << std::endl;
+		      << ": t initial must be less than t final" 
+		      << std::endl;
   }
 
   if( y1.size()!=y2.size() ){
     CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
-		      << ": Vectors must have the same length" << std::endl;
+		      << ": Vectors must have the same length" 
+		      << std::endl;
   }
 
   vctDynamicVector<double> m = (y2-y1)/(x2-x1);
@@ -83,9 +86,9 @@ robDomainAttribute robLinear::IsDefinedFor( const robVariables& input ) const{
   double tmax = xmax.at(0);
   
   if( tmin <= t && t <= tmax )                           return DEFINED;
-  if( tmin-robFunctionPiecewise::TAU <= t && t <= tmin ) return INCOMING;
-  if( tmax <= t && t <= tmax+robFunctionPiecewise::TAU ) return OUTGOING;
-  if( tmax+robFunctionPiecewise::TAU < t )               return EXPIRED;
+  if( tmin-robTrajectory::TAU <= t && t <= tmin ) return INCOMING;
+  if( tmax <= t && t <= tmax+robTrajectory::TAU ) return OUTGOING;
+  if( tmax+robTrajectory::TAU < t )               return EXPIRED;
 
   return UNDEFINED;
 }

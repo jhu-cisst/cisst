@@ -3,7 +3,7 @@
 #include <cisstVector/vctMatrixRotation3.h>
 
 #include <cisstRobot/robSLERP.h>
-#include <cisstRobot/robFunctionPiecewise.h>
+#include <cisstRobot/robTrajectory.h>
 
 #include <typeinfo>
 
@@ -73,9 +73,9 @@ robDomainAttribute robSLERP::IsDefinedFor( const robVariables& input ) const{
 
   double x = input.time;
   if( xmin <= x && x <= xmax )                           return DEFINED;
-  if( xmin-robFunctionPiecewise::TAU <= x && x <= xmin ) return INCOMING;
-  if( xmax <= x && x <= xmax+robFunctionPiecewise::TAU ) return OUTGOING;
-  if( xmax+robFunctionPiecewise::TAU < x )               return EXPIRED;
+  if( xmin-robTrajectory::TAU <= x && x <= xmin ) return INCOMING;
+  if( xmax <= x && x <= xmax+robTrajectory::TAU ) return OUTGOING;
+  if( xmax+robTrajectory::TAU < x )               return EXPIRED;
   
   return UNDEFINED;
 }

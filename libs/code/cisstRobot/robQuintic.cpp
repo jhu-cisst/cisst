@@ -1,6 +1,6 @@
 #include <cisstCommon/cmnLogger.h>
 #include <cisstRobot/robQuintic.h>
-#include <cisstRobot/robFunctionPiecewise.h>
+#include <cisstRobot/robTrajectory.h>
 #include <cisstNumerical/nmrInverse.h>
 #include <iostream>
 
@@ -95,9 +95,9 @@ robDomainAttribute robQuintic::IsDefinedFor( const robVariables& input ) const{
 
   double t = input.time;
   if( xmin <= t && t <= xmax )                           return DEFINED;
-  if( xmin-robFunctionPiecewise::TAU <= t && t <= xmin ) return INCOMING;
-  if( xmax <= t && t <= xmax+robFunctionPiecewise::TAU ) return OUTGOING;
-  if( xmax+robFunctionPiecewise::TAU < t )               return EXPIRED;
+  if( xmin-robTrajectory::TAU <= t && t <= xmin ) return INCOMING;
+  if( xmax <= t && t <= xmax+robTrajectory::TAU ) return OUTGOING;
+  if( xmax+robTrajectory::TAU < t )               return EXPIRED;
   
   return UNDEFINED;
 

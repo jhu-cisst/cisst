@@ -60,8 +60,10 @@ public:
      \param motor The motor to read
      \return the modified input stream
   */
-  virtual void ISRead( std::istream& is )
-  { is >> AmpPerNm; }
+  virtual void Read( std::istream& is ){ 
+    robActuator::Read( is );
+    is >> AmpPerNm; 
+  }
     
   //! Write to an output stream
   /**
@@ -70,8 +72,10 @@ public:
      \param motor The motor to write
      \return the modified output stream
   */
-  virtual void OSWrite( std::ostream& os ) const
-  { os << AmpPerNm; }
+  virtual void Write( std::ostream& os ) const { 
+    robActuator::Write( os );
+    os << AmpPerNm;
+  }
   
 }; 
 

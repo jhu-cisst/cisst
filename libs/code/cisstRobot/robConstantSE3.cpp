@@ -1,6 +1,6 @@
 #include <cisstCommon/cmnLogger.h>
+#include <cisstRobot/robTrajectory.h>
 #include <cisstRobot/robConstantSE3.h>
-#include <cisstRobot/robFunctionPiecewise.h>
 #include <typeinfo>
 #include <iostream>
 
@@ -8,7 +8,8 @@ robConstantSE3::robConstantSE3(const vctFrame4x4<double,VCT_ROW_MAJOR>& Rt,
 			       double x1, double x2){
   if( x2 < x1 ){
     CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
-		      << ": t initial must be less than t final" << std::endl;
+		      << ": t initial must be less than t final" 
+		      << std::endl;
   }
 
   this->Rt = Rt; 
@@ -17,11 +18,14 @@ robConstantSE3::robConstantSE3(const vctFrame4x4<double,VCT_ROW_MAJOR>& Rt,
 
 }
 
-robDomainAttribute robConstantSE3::IsDefinedFor( const robVariables& input ) const{
+robDomainAttribute 
+robConstantSE3::IsDefinedFor( const robVariables& input ) const{
 
   // test the dof are double numbers
   if( !input.IsTimeSet() ){
-    CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__ << ": Expected time input" <<std::endl;
+    CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__ 
+			<< ": Expected time input" 
+			<< std::endl;
     return UNDEFINED;
   }
 
@@ -30,10 +34,10 @@ robDomainAttribute robConstantSE3::IsDefinedFor( const robVariables& input ) con
   double tmin = xmin.at(0);
   double tmax = xmax.at(0);
   
-  if( tmin <= t && t <= tmax )                           return DEFINED;
-  if( tmin-robFunctionPiecewise::TAU <= t && t <= tmin ) return INCOMING;
-  if( tmax <= t && t <= tmax+robFunctionPiecewise::TAU ) return OUTGOING;
-  if( tmax+robFunctionPiecewise::TAU < t )               return EXPIRED;
+  if( tmin <= t && t <= tmax )                    return DEFINED;
+  if( tmin-robTrajectory::TAU <= t && t <= tmin ) return INCOMING;
+  if( tmax <= t && t <= tmax+robTrajectory::TAU ) return OUTGOING;
+  if( tmax+robTrajectory::TAU < t )               return EXPIRED;
 
   return UNDEFINED;
     
@@ -43,7 +47,9 @@ robError robConstantSE3::Evaluate( const robVariables& input,
 				   robVariables& output ){
 
   if( !input.IsTimeSet() ){
-    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ << ": Expected time input" << std::endl;
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+		      << ": Expected time input" 
+		      << std::endl;
     return ERROR;
   }
 

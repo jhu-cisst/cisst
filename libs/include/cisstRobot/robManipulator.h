@@ -11,6 +11,8 @@ class robManipulator{
   
 protected:
   
+public:
+  
   //! Position and orientation of the first link
   /**
      Simply put, this is the position and orientation of the base of the first
@@ -45,7 +47,7 @@ protected:
   
   //! Load the tool of the robot
   robError LoadTool( const std::string& toolfile );
-  
+
   //! Evaluate the body Jacobian
   /**
      Evaluates the geometric body Jacobian. This implements the algorithm of 
@@ -61,33 +63,25 @@ protected:
   */
   void JacobianSpatial( const vctDynamicVector<double>& q ) const;
   
-  //! Gravity
-  /**
-     The gravitational acceleration. Leave this to its default value (9.81) 
-     unless you know what you're doing
-  */
-  double G;
-  
-  //! Gravity vector
-  /**
-     Represents the "Z" axis of the base relative to the direction of the 
-     gravity. For most robots, this vector is (0,0,1) as the Z axis 
-     typically points upwards. 
-  */
-  vctFixedSizeVector<double,3> z0;
-  
   //! Recursive Newton-Euler altorithm
   /**
      Evaluate the inverse dynamics through RNE. The joints positions, 
      velocities and accelerations must be set before calling this method. It
      returns a vector of forces/torques that realize the desired state.
-     \param fext An external force/moment acting on the last link
+     \param q The joints positions
+     \param qd The joints velocities
+     \param qdd The joints accelerations
+     \param g Gravity vector 
+              (default \$ \begin{bmatrix} 0 & 0 & 9.81 \end{bmatrix}\$)
+     \param fext An external force/moment acting on the tool control point
   */
   vctDynamicVector<double> 
   RNE( const vctDynamicVector<double>& q,
        const vctDynamicVector<double>& qd,
        const vctDynamicVector<double>& qdd,
-       const vctFixedSizeVector<double,6>& f=vctFixedSizeVector<double,6>(0.0))const;
+       const vctFixedSizeVector<double,3>& g=vctFixedSizeVector<double,3>(0.0,0.0,9.81),
+       const vctFixedSizeVector<double,6>& fext=vctFixedSizeVector<double,6>(0.0) )
+    const;
   
   //! Coriolis/centrifugal and gravity
   /**
@@ -101,7 +95,6 @@ protected:
   CCG( const vctDynamicVector<double>& q,
        const vctDynamicVector<double>& qd ) const;
 
-  
   //! End-effector accelerations
   /**
      Compute the linear and angular accelerations of the last link. This is 
@@ -111,10 +104,6 @@ protected:
   Acceleration( const vctDynamicVector<double>& q,
 		const vctDynamicVector<double>& qd,
 		const vctDynamicVector<double>& qdd ) const ;
-  
-  //! Used to compute the manipulator's inertia matrix
-  vctDynamicVector<double> InertiaSubroutine( const vctDynamicVector<double>& q, 
-					      size_t idx ) const;
   
   //! Compute the bias acceleration
   /**
@@ -144,34 +133,6 @@ protected:
   void OSinertia(double Ac[6][6],
 		 const vctDynamicVector<double>& q) const;
   
-  //! Inverse dynamics (joint space)
-  /**
-     Compute and return the inverse dynamics of the manipulator in joint space.
-     This method is intended for control purpose, so the joints positions, 
-     velocities must be set prior to calling this method. Then, given a desired
-     joints accelerations qdd, InverseDynamics will return the joint torques
-     that will realize the known positions, velocities and the desired
-     accelerations. Essentially, this evaluates the 
-  */
-  vctDynamicVector<double> 
-  InverseDynamics( const vctDynamicVector<double>& q,
-		   const vctDynamicVector<double>& qd,
-		   const vctDynamicVector<double>& qdd ) const;
-  
-  //! Inverse dynamics (operation space)
-  /**
-     Compute and return the inverse dynamics of the manipulator in operation
-     space. This method is intended for control purpose, so the joints 
-     positions, velocities must be set prior to calling this method. Then, 
-     given a desired linear and angular acceleration vdwd, InverseDynamics will
-     return the joint torques that will realize the known positions, velocities
-     and the desired accelerations. Essentially, this evaluates the 
-  */
-  vctDynamicVector<double> 
-  InverseDynamics( const vctDynamicVector<double>& q,
-		   const vctDynamicVector<double>& qd,
-		   const vctFixedSizeVector<double,6>& vdwd ) const;
-  
   //! Actuator positions to joint positions
   /**
      This is the default behavior for converting actuator positions to 
@@ -180,7 +141,9 @@ protected:
      differential drives) if you need anything more specific.
      \param dt The time increment to compute joint velocities and accelerations
   */
-  virtual robError ActuatorsPos2JointsPos( double dt );
+  virtual
+  vctDynamicVector<double> 
+  ActuatorsPos2JointsPos( const vctDynamicVector<double>& q ) const;
   
   //! Actuator forces/torques to joint forces/torques
   /**
@@ -189,7 +152,9 @@ protected:
      actuators to the joints. You must implement your own behavior (gear 
      ratios, differential drives) if you need anything more specific.
   */
-  virtual robError ActuatorsFT2JointsFT();
+  virtual 
+  vctDynamicVector<double>
+  ActuatorsFT2JointsFT( const vctDynamicVector<double>& ft ) const;
   
   //! Joint positions to actuator positions
   /**
@@ -198,7 +163,9 @@ protected:
      joints to the actuators. You must implement your own behavior (gear 
      ratios, differential drives) if you need anything more specific.
   */
-  virtual robError JointsPos2ActuatorsPos();
+  virtual
+  vctDynamicVector<double>
+  JointsPos2ActuatorsPos( const vctDynamicVector<double>& q ) const;
   
   //! Joint forces/torques to actuators forces/torques
   /**
@@ -207,62 +174,87 @@ protected:
      joints to the actuators. You must implement your own behavior (gear 
      ratios, differential drives) if you need anything more specific.
   */
-  virtual robError JointsFT2ActuatorsFT( );
+  virtual 
+  vctDynamicVector<double> 
+  JointsFT2ActuatorsFT( const vctDynamicVector<double>& ft ) const;
   
 public:
   
-  robManipulator( const std::string& linkfile, 
-		  const std::string& toolfile = std::string(),
-		  const vctFrame4x4<double,VCT_ROW_MAJOR>& Rtw0 = vctFrame4x4<double,VCT_ROW_MAJOR>(),
-		  double G = 9.81,
-		  const vctFixedSizeVector<double,3>& z0 = vctFixedSizeVector<double,3>(0.0, 0.0, 1.0) );
-  
-  
-  //! Return the position and orientation of a link
+  //! Manipulator generic constructor
   /**
-     \param i The index of the link. If no index is specified, the last link
-     is assumed
+     This constructor initializes a manipulator with the kinematics and dynamics
+     contained in a file.
+     \param robotfilename The file with the kinematics and dynamics parameters
+     \param toolfilename The file with the kinmatics and dynamics of a tool
+     \param Rtw0 The offset transformation of the robot base
   */
-  vctFrame4x4<double,VCT_ROW_MAJOR> PositionOrientation( int i = -1 ) const ;
-  
-  //! Set the joint positions
-  //robError SetJointsPositions( const vctDynamicVector<double>& q );
-
-  //! Get the joint positions
-  //vctDynamicVector<double> GetJointsPositions( );
-  
-  //! Set the joint positions
-  //robError SetActuatorsPositions( const vctDynamicVector<double>& q );
-
-  //! Get the joint positions
-  //vctDynamicVector<double>       GetActuatorsPositions( );
-  
-  //! Set the joint forces/torques
-  //robError SetJointsFT( const vctDynamicVector<double>& q );
-
-  //! Get the joint forces/torques
-  //vctDynamicVector<double>       GetJointsFT( ) const;
-  
-  //! Set the actuators forces/torques
-  //robError SetActuatorFT( const vctDynamicVector<double>& q );
-
-  //! Get the actuators forces/torques
-  //vctDynamicVector<double>       GetActuatorFT() const;
-  
-  //! Return a reference to the links (used by the robGUI)
-  const std::vector<robLink>& Links() const ;
+  robManipulator( const std::string& robotfilename,
+		  const std::string& toolfilename = std::string(),
+		  const vctFrame4x4<double,VCT_ROW_MAJOR>& Rtw0 
+		  = vctFrame4x4<double,VCT_ROW_MAJOR>() );
   
   //! Evaluate the forward kinematics
   /**
      Compute the position and orientations of each link wrt to the world frame
+     This method is non-const since it needs to update the position and 
+     orientation of each link in order to render them in OpenGL
   */
   vctFrame4x4<double,VCT_ROW_MAJOR> 
-  ForwardKinematics( const vctDynamicVector<double>& q ) const ;
+  ForwardKinematics( const vctDynamicVector<double>& q );
   
+  vctFrame4x4<double,VCT_ROW_MAJOR> 
+  ForwardKinematics( const vctDynamicVector<double>& q ) const;
+
+  //! Evaluate the inverse kinematics
+  /**
+     Compute the inverse kinematics. The solution is computed with from 
+     Newton's algorithm.
+     \param[input] q An initial guess of the solution
+     \param[output] q The inverse kinematics solution
+     \param Rts The desired position and orientation of the tool control point
+     \param tolerance The error tolerance of the solution
+     \param Niteration The maximum number of iteration allowed to find a solution
+     \return SUCCESS if a solution was found within the given tolerance and 
+                     number of iterations. ERROR otherwise.
+  */
   robError InverseKinematics( vctDynamicVector<double>& q, 
 			      const vctFrame4x4<double,VCT_ROW_MAJOR>& Rts, 
-			      double tol=1e-12, 
-			      size_t Niter=1000 );
+			      double tolerance=1e-12, 
+			      size_t Niteration=1000 );
+  
+  //! Inverse dynamics in joint space
+  /**
+     Compute and return the inverse dynamics of the manipulator in joint space.
+     InverseDynamics returns the joint torques that corresponds to a manipulator
+     with the given the joints positions, velocities and accelerations.
+     \param q A vector of joints positions
+     \param qd A vector of joints velocities
+     \param qdd A vector of joints accelerations
+     \return A vector of joints torques
+  */
+  vctDynamicVector<double> 
+  InverseDynamics( const vctDynamicVector<double>& q,
+		   const vctDynamicVector<double>& qd,
+		   const vctDynamicVector<double>& qdd ) const;
+  
+  //! Inverse dynamics in operation space
+  /**
+     Compute and return the inverse dynamics of the manipulator in operation
+     space. InverseDynamics returns the joint torques that corresponds to a 
+     manipulator with the given the joints positions, velocities and 
+     the tool control point (TCP) accelerations. The reason why joints positions 
+     and velocities are given instead of the position and velocity of the TCP is
+     that the coriolis, centrifugal and gravitational forces are uniquely 
+     determined by the joints positions and velocties.
+     \param q A vector of joints positions
+     \param qd A vector of joints velocities
+     \param vdwd A 6D vector of the TCP linear and angular accelerations
+     \return A vector of joints torques
+  */
+  vctDynamicVector<double> 
+  InverseDynamics( const vctDynamicVector<double>& q,
+		   const vctDynamicVector<double>& qd,
+		   const vctFixedSizeVector<double,6>& vdwd ) const;
   
   void Print() const ;
   
