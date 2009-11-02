@@ -91,23 +91,24 @@ public:
     } PatternType;
 
     typedef struct _ImageFormat {
-        unsigned int    width;              // read/write
-        unsigned int    height;             // read/write
-        PixelType       colorspace;         // read/write
-        double          framerate;          // read/write
-        bool            rgb_order;          // read/write
-        bool            yuyv_order;         // read/write
-        int             custom_mode;        // read/write
-        unsigned int    custom_roileft;     // read/write
-        unsigned int    custom_roitop;      // read/write
-        unsigned int    custom_maxwidth;    // read only
-        unsigned int    custom_maxheight;   // read only
-        unsigned int    custom_unitwidth;   // read only
-        unsigned int    custom_unitheight;  // read only
-        unsigned int    custom_unitleft;    // read only
-        unsigned int    custom_unittop;     // read only
+        unsigned int    width;                  // read/write
+        unsigned int    height;                 // read/write
+        PixelType       colorspace;             // read/write
+        double          framerate;              // read/write
+        bool            rgb_order;              // read/write
+        bool            yuyv_order;             // read/write
+        int             custom_mode;            // read/write
+        unsigned int    custom_roileft;         // read/write
+        unsigned int    custom_roitop;          // read/write
+        unsigned int    custom_framerate;       // write
+        unsigned int    custom_maxwidth;        // read only
+        unsigned int    custom_maxheight;       // read only
+        unsigned int    custom_unitwidth;       // read only
+        unsigned int    custom_unitheight;      // read only
+        unsigned int    custom_unitleft;        // read only
+        unsigned int    custom_unittop;         // read only
         PixelType       custom_colorspaces[PixelTypeCount]; // read only
-        PatternType     custom_pattern;     // read only
+        PatternType     custom_pattern;         // read only
     } ImageFormat;
 
     typedef struct _ExternalTrigger {
