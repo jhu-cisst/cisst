@@ -59,6 +59,7 @@ http://www.cisst.org/cisst/license.txt.
 #define CISST_LINUX_RTAI 6
 #define CISST_CYGWIN 7
 #define CISST_DARWIN 8
+#define CISST_QNX 9
 //@}
 
 /*! \name Testing the compiler */
@@ -109,6 +110,9 @@ http://www.cisst.org/cisst/license.txt.
   #ifdef __APPLE__
     #define CISST_OS CISST_DARWIN
   #endif // __APPLE__
+  #ifdef __QNX__
+    #define CISST_OS CISST_QNX
+  #endif // __QNX__
 #else // __GNUC__
   #ifdef sgi
     #define CISST_OS CISST_IRIX
@@ -335,6 +339,8 @@ extern CISST_EXPORT const std::string cmnCompilersStrings[];
 */
 #ifdef CISST_COMPILER_IS_MSVC
 #define CMN_ISFINITE(x) _finite(x)
+#elif (CISST_OS == CISST_QNX)
+  #define CMN_ISFINITE(x) isfinite(x)
 #else
   #if (CISST_OS == CISST_SOLARIS)
     #include <ieeefp.h>

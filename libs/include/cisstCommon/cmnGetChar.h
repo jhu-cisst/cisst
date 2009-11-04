@@ -36,9 +36,9 @@ http://www.cisst.org/cisst/license.txt.
 class CISST_EXPORT cmnGetCharEnvironment
 {
     /*! Internals that are OS-dependent */
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_QNX)
     enum {INTERNALS_SIZE = 160}; // BALAZS: OS X 10.6 x86_64 requires 152 bytes
-#endif // CISST_LINUX || CISST_DARWIN ||CISST_SOLARIS || CISST_RTAI
+#endif // CISST_LINUX || CISST_DARWIN ||CISST_SOLARIS || CISST_RTAI || CISST_QNX
 #if (CISST_OS == CISST_WINDOWS)
     enum {INTERNALS_SIZE = 1};
 #endif // CISST_WINDOWS

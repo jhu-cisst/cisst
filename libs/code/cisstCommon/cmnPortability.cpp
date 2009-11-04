@@ -31,7 +31,8 @@ const std::string cmnOperatingSystemsStrings[] = {"Undefined",
                                                   "SunOS",
                                                   "Linux-RTAI",
                                                   "CYGWIN",
-                                                  "Darwin"
+                                                  "Darwin",
+                                                  "QNX"
 };
 
 const std::string cmnCompilersStrings[] = {"Undefined",
@@ -42,5 +43,6 @@ const std::string cmnCompilersStrings[] = {"Undefined",
                                            "Sun CC",
                                            "Intel CC",
                                            ".NET 2003",
-                                           ".NET 2005"};
+                                           ".NET 2005",
+                                           ".NET 2008"};
 

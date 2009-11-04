@@ -23,6 +23,8 @@ int main (void) {
     std::cout << "Running Cygwin" << std::endl;
 #elif (CISST_OS == CISST_DARWIN)
     std::cout << "Running Mac OS X" << std::endl;
+#elif (CISST_OS == CISST_QNX)
+    std::cout << "Running QNX" << std::endl;
 #endif
     
 #if (CISST_COMPILER == CISST_GCC)
