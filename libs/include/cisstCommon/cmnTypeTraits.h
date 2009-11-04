@@ -240,6 +240,9 @@ public:
       method is meaningful. */
     static CISST_EXPORT Type NaN();
 
+    /*! Test if the value is nan. */
+    static CISST_EXPORT bool IsNaN(const Type & value);
+
     /*! Check if this type has a meaningful Not A Number. */
     inline static bool HasNaN(void);
 
@@ -408,6 +411,56 @@ inline bool cmnTypeTraits<unsigned char>::HasNaN() {
     return false;
 }
 
+/* Define IsNaN for some basic types */
+template<>
+inline bool cmnTypeTraits<float>::IsNaN(const float & value) {
+    return CMN_ISNAN(value);
+}
+
+template<>
+inline bool cmnTypeTraits<double>::IsNaN(const double & value) {
+    return CMN_ISNAN(value);
+}
+
+template<>
+inline bool cmnTypeTraits<long>::IsNaN(const long & CMN_UNUSED(value)) {
+    return false;
+}
+
+template<>
+inline bool cmnTypeTraits<int>::IsNaN(const int & CMN_UNUSED(value)) {
+    return false;
+}
+
+template<>
+inline bool cmnTypeTraits<short>::IsNaN(const short & CMN_UNUSED(value)) {
+    return false;
+}
+
+template<>
+inline bool cmnTypeTraits<char>::IsNaN(const char & CMN_UNUSED(value)) {
+    return false;
+}
+
+template<>
+inline bool cmnTypeTraits<unsigned long>::IsNaN(const unsigned long & CMN_UNUSED(value)) {
+    return false;
+}
+
+template<>
+inline bool cmnTypeTraits<unsigned int>::IsNaN(const unsigned int & CMN_UNUSED(value)) {
+    return false;
+}
+
+template<>
+inline bool cmnTypeTraits<unsigned short>::IsNaN(const unsigned short & CMN_UNUSED(value)) {
+    return false;
+}
+
+template<>
+inline bool cmnTypeTraits<unsigned char>::IsNaN(const unsigned char & CMN_UNUSED(value)) {
+    return false;
+}
 
 /* Define limits for some types as inline functions */
 
