@@ -43,11 +43,11 @@ devNDISerialToolQDevice::devNDISerialToolQDevice(const std::string & taskName) :
 
     // connect Qt signals to slots
     QObject::connect(&UpdateTimer, SIGNAL(timeout()),
-                     this, SLOT(UpdateTimerSlot()));
+                     this, SLOT(UpdateTimerQSlot()));
 }
 
 
-void devNDISerialToolQDevice::UpdateTimerSlot(void)
+void devNDISerialToolQDevice::UpdateTimerQSlot(void)
 {
     NDI.GetPositionCartesian(NDI.PositionCartesian);
     ToolWidget.PositionX->setNum(NDI.PositionCartesian.Position().Translation().X());

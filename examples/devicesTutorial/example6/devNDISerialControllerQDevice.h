@@ -26,7 +26,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsFunctionVoid.h>
 
 #include <QMainWindow>
-#include <QTimer>
 
 #include "ui_devNDISerialControllerQWidget.h"
 
@@ -45,10 +44,10 @@ class devNDISerialControllerQDevice : public QObject, public mtsDevice
     void AddToolWidget(QWidget * toolWidget, const unsigned int index);
 
  public slots:
-    void UpdateTimerSlot(void);
-    void NDIBeepSlot(void);
-    void NDIInitializeSlot(void);
-    void NDITrackSlot(bool value);
+    void NDIBeepQSlot(void);
+    void NDIInitializeQSlot(void);
+    void NDITrackQSlot(bool value);
+    void CollectQSlot(bool value);
 
  protected:
     void CreateMainWindow(void);
@@ -56,8 +55,6 @@ class devNDISerialControllerQDevice : public QObject, public mtsDevice
     QMainWindow MainWindow;
     QWidget CentralWidget;
     Ui::ControllerWidget ControllerWidget;
-
-    QTimer UpdateTimer;
 
     struct {
         mtsFunctionWrite Beep;

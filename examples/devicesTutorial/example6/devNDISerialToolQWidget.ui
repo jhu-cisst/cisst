@@ -65,7 +65,7 @@
          <enum>QFrame::Sunken</enum>
         </property>
         <property name="text">
-         <string>0.000000</string>
+         <string>+0000.00</string>
         </property>
        </widget>
       </item>
@@ -84,7 +84,7 @@
          <enum>QFrame::Sunken</enum>
         </property>
         <property name="text">
-         <string>0.000000</string>
+         <string>+0000.00</string>
         </property>
        </widget>
       </item>
@@ -103,7 +103,7 @@
          <enum>QFrame::Sunken</enum>
         </property>
         <property name="text">
-         <string>0.000000</string>
+         <string>+0000.00</string>
         </property>
        </widget>
       </item>

@@ -40,17 +40,15 @@ devNDISerialControllerQDevice::devNDISerialControllerQDevice(const std::string &
     ControllerWidget.setupUi(&CentralWidget);
     CreateMainWindow();
 
-    UpdateTimer.start(20);
-
     // connect Qt signals to slots
-    QObject::connect(&UpdateTimer, SIGNAL(timeout()),
-                     this, SLOT(UpdateTimerSlot()));
     QObject::connect(ControllerWidget.ButtonBeep, SIGNAL(clicked()),
-                     this, SLOT(NDIBeepSlot()));
+                     this, SLOT(NDIBeepQSlot()));
     QObject::connect(ControllerWidget.ButtonInitialize, SIGNAL(clicked()),
-                     this, SLOT(NDIInitializeSlot()));
+                     this, SLOT(NDIInitializeQSlot()));
     QObject::connect(ControllerWidget.ButtonTrack, SIGNAL(toggled(bool)),
-                     this, SLOT(NDITrackSlot(bool)));
+                     this, SLOT(NDITrackQSlot(bool)));
+    QObject::connect(ControllerWidget.ButtonCollect, SIGNAL(toggled(bool)),
+                     this, SLOT(CollectQSlot(bool)));
     QObject::connect(ControllerWidget.ButtonQuit, SIGNAL(clicked()),
                      &MainWindow, SLOT(close()));
 }
@@ -67,24 +65,19 @@ void devNDISerialControllerQDevice::CreateMainWindow(void)
 
 void devNDISerialControllerQDevice::AddToolWidget(QWidget * toolWidget, const unsigned int index)
 {
-    ControllerWidget.gridLayout->addWidget(toolWidget, 6 + index, 1, 1, 2);
+    ControllerWidget.gridLayout->addWidget(toolWidget, 7 + index, 1, 1, 2);
     MainWindow.adjustSize();
 }
 
 
-void devNDISerialControllerQDevice::UpdateTimerSlot(void)
-{
-}
-
-
-void devNDISerialControllerQDevice::NDIBeepSlot(void)
+void devNDISerialControllerQDevice::NDIBeepQSlot(void)
 {
     mtsInt data = ControllerWidget.NumberOfBeeps->value();
     NDI.Beep(data);
 }
 
 
-void devNDISerialControllerQDevice::NDIInitializeSlot(void)
+void devNDISerialControllerQDevice::NDIInitializeQSlot(void)
 {
     NDI.Initialize();
     NDI.Query();
@@ -94,8 +87,19 @@ void devNDISerialControllerQDevice::NDIInitializeSlot(void)
 }
 
 
-void devNDISerialControllerQDevice::NDITrackSlot(bool value)
+void devNDISerialControllerQDevice::NDITrackQSlot(bool value)
 {
     mtsBool data = value;
     NDI.Track(data);
+}
+
+void devNDISerialControllerQDevice::CollectQSlot(bool value)
+{
+    if (value) {
+        CMN_LOG_CLASS_RUN_ERROR << "CollectQSlot: data collection is not yet implemented" << std::endl;
+//        mtsTaskManager::GetInstance()->GetTask("devNDISerialCollectorStateTable")->SetSamplingInterval(10);
+//        mtsTaskManager::GetInstance()->GetTask("devNDISerialCollectorStateTable")->StartCollection();
+    } else {
+//        mtsTaskManager::GetInstance()->GetTask("devNDISerialCollectorStateTable")->StopCollection();
+    }
 }

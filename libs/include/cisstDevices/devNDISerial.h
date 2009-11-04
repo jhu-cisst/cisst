@@ -20,30 +20,31 @@ http://www.cisst.org/cisst/license.txt.
 
 /*!
   \file
-  \brief A cisst wrapper for NDI trackers with serial interface
+  \brief A cisst wrapper for NDI trackers with serial interface.
   \ingroup cisstDevices
 
-  \bug _snprintf in CommandAppend(int) is Windows-dependent
+  \bug _snprintf in CommandAppend(int) is Windows-dependent.
 
-  \warning Missing support for 14400bps, 921600bps and 1228739bps baud rates in osaSerialPort
+  \warning Missing support for 14400bps, 921600bps and 1228739bps baud rates in osaSerialPort.
 
-  \todo Cleanup todos in the cpp
+  \todo Implement pivot calibration for probe type tools.
+  \todo Cleanup todos in the cpp.
   \todo Cleanup and comment the header file using Doxygen comments.
-  \todo Refactor ComputeCRC() and implement a CRC check in CommandSend()
-  \todo Every sscanf() should check if valid number of items have been read (wrapper for sscanf?)
-  \todo Error handling for all strncpy()
-  \todo Check for buffer overflow in CommandAppend()
+  \todo Refactor ComputeCRC() and implement a CRC check in CommandSend().
+  \todo Every sscanf() should check if valid number of items have been read (wrapper for sscanf?).
+  \todo Error handling for all strncpy().
+  \todo Check for buffer overflow in CommandAppend().
   \todo Implement a timeout for CheckResponse(), maybe have a CheckTimeout() method?
   \todo Handle supported features for newer Polaris versions.
-  \todo Pretty print for SerialNumber, to extract date, etc.
-  \todo Overload Tool class to have a stream
-  \todo Use frame number to decide if timestamp should be refreshed
+  \todo Pretty print for SerialNumber, to extract date, etc..
+  \todo Overload Tool class to have a stream.
+  \todo Use frame number to decide if timestamp should be refreshed.
   \todo Implement an "adaptive sleep" for the run method?
-  \todo Main Type to human readable provided method
-  \todo Check for serial number matching in AddTool(), replace the name if it exists
-  \todo Cartesian position should be "invalid" if the tool is missing or disabled
-  \todo Strategies for error recovery, send an event with a human readable payload, implement in CheckResponse()
-  \todo Have the option for dynamic tool plugging
+  \todo Main Type to human readable provided method.
+  \todo Check for serial number matching in AddTool(), replace the name if it exists.
+  \todo Cartesian position should be "invalid" if the tool is missing or disabled.
+  \todo Strategies for error recovery, send an event with a human readable payload, implement in CheckResponse().
+  \todo Have the option for dynamic tool plugging.
 */
 
 #ifndef _devNDISerial_h
@@ -92,7 +93,7 @@ public:
     void Cleanup(void) {};
 
     size_t GetNumberOfTools(void) const {
-        return ToolsMap.size();
+        return Tools.size();
     }
     std::string GetToolName(const unsigned int index) const;
 
@@ -146,6 +147,8 @@ protected:
     void PortHandlesQuery(void);
     void PortHandlesEnable(void);
 
+    void CalibratePivot(const std::string & toolName);
+
     void ToggleTracking(const mtsBool & track);
     void Track(void);
 
@@ -153,8 +156,8 @@ protected:
     char SerialBuffer[MAX_BUFFER_SIZE];
     char * SerialBufferPointer;
 
-    typedef cmnNamedMap<Tool> ToolsMapType;
-    ToolsMapType ToolsMap;
+    typedef cmnNamedMap<Tool> ToolsType;
+    ToolsType Tools;
     cmnNamedMap<Tool> PortToTool;
 
     bool IsTracking;

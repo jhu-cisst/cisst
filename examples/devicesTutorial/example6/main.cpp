@@ -20,11 +20,16 @@ http://www.cisst.org/cisst/license.txt.
 
 /*!
   \file
-  \brief An example interface for NDI trackers with serial interface
+  \brief An example interface for NDI trackers with serial interface.
   \ingroup devicesTutorial
+
+  \bug Data collection requires a sleep when not running.
+
+  \todo Implement the option to start/stop data collection from the GUI.
 */
 
 #include <cisstOSAbstraction/osaThreadedLogFile.h>
+//#include <cisstMultiTask/mtsCollectorState.h>
 #include <cisstMultiTask/mtsTaskManager.h>
 #include <cisstDevices/devNDISerial.h>
 
@@ -66,6 +71,8 @@ int main(int argc, char *argv[])
     taskManager->Connect("controllerQDevice", "RequiresNDISerialController",
                          "devNDISerial", "ProvidesNDISerialController");
 
+//    mtsCollectorState * dataCollectionTask = new mtsCollectorState("devNDISerial", mtsCollectorBase::COLLECTOR_LOG_FORMAT_PLAIN_TEXT);
+
     // add interfaces for tools and populate controller widget with tool widgets
     const unsigned int numberOfTools = devNDISerialTask->GetNumberOfTools();
     for (unsigned int i = 0; i < numberOfTools; i++) {
@@ -75,7 +82,10 @@ int main(int argc, char *argv[])
         taskManager->AddDevice(toolQDevice);
         taskManager->Connect(toolName, toolName,
                              "devNDISerial", toolName);
+
+//        dataCollectionTask->AddSignal(toolName + "Position");
     }
+//    taskManager->AddTask(dataCollectionTask);
 
     // create and start all tasks
     taskManager->CreateAll();

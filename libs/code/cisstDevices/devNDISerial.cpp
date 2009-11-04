@@ -61,10 +61,12 @@ devNDISerial::devNDISerial(const std::string & taskName, const std::string & ser
 void devNDISerial::Configure(const std::string & CMN_UNUSED(filename))
 {
     char * tool8700338 = "C:\\Program Files\\Northern Digital Inc\\Tool Definition Files\\8700338.rom";
+    char * tool8700339 = "C:\\Program Files\\Northern Digital Inc\\Tool Definition Files\\8700339.rom";
     char * tool8700340 = "C:\\Program Files\\Northern Digital Inc\\Tool Definition Files\\8700340.rom";
     char * toolCArmTracker = "C:\\Program Files\\Northern Digital Inc\\Tool Definition Files\\Traxtal_C-Arm_Tracker.rom";
 
     AddTool("01-34801401", "34801401", tool8700338);  // NDI Vicra passive reference (JHMI)
+    AddTool("01-34801403", "34801403", tool8700339);  // NDI Vicra passive reference (JHMI)
     AddTool("02-34802401", "34802401", tool8700340);  // NDI Vicra passive probe (JHMI)
     //AddTool("02-32887C02", "32887C02");  // NDI Polaris active probe (Homewood)
     //AddTool("02-3091280C", "3091280C");  // Traxtal active probe (Homewood)
@@ -77,7 +79,7 @@ devNDISerial::Tool * devNDISerial::AddTool(const std::string & name, const char 
     Tool * tool = new Tool();
     tool->Name = name;
     strncpy(tool->SerialNumber, serialNumber, 8);
-    if (!ToolsMap.AddItem(tool->Name, tool, CMN_LOG_LOD_INIT_ERROR)) {
+    if (!Tools.AddItem(tool->Name, tool, CMN_LOG_LOD_INIT_ERROR)) {
         CMN_LOG_CLASS_INIT_ERROR << "AddTool: no tool created, duplicate name exists: " << name << std::endl;
         delete tool;
         return 0;
@@ -112,9 +114,9 @@ devNDISerial::Tool * devNDISerial::AddTool(const std::string & name, const char 
 
 std::string devNDISerial::GetToolName(const unsigned int index) const
 {
-    const ToolsMapType::const_iterator end = ToolsMap.end();
-    ToolsMapType::const_iterator toolIterator = ToolsMap.begin();
-    if (index >= ToolsMap.size()) {
+    const ToolsType::const_iterator end = Tools.end();
+    ToolsType::const_iterator toolIterator = Tools.begin();
+    if (index >= Tools.size()) {
         CMN_LOG_CLASS_RUN_ERROR << "GetToolName: requested index is out of range" << std::endl;
         return "";
     }
@@ -525,9 +527,9 @@ void devNDISerial::PortHandlesQuery(void)
 
         // find the tool with this serial number if it exists, or create one
         tool = 0;
-        const ToolsMapType::const_iterator end = ToolsMap.end();
-        ToolsMapType::const_iterator toolIterator;
-        for (toolIterator = ToolsMap.begin(); toolIterator != end; ++toolIterator) {
+        const ToolsType::const_iterator end = Tools.end();
+        ToolsType::const_iterator toolIterator;
+        for (toolIterator = Tools.begin(); toolIterator != end; ++toolIterator) {
             if (strncmp((toolIterator->second)->SerialNumber, serialNumber, 8) == 0) {
                 tool = toolIterator->second;
                 CMN_LOG_CLASS_INIT_DEBUG << "PortHandlesQuery: found existing tool for serial number: " << serialNumber << std::endl;
@@ -608,6 +610,12 @@ void devNDISerial::PortHandlesEnable(void)
         ResponseRead("OKAY");
         CMN_LOG_CLASS_RUN_DEBUG << "PortHandlesEnable: enabled port handle: " << portHandles[i].Pointer() << std::endl;
     }
+}
+
+
+void devNDISerial::CalibratePivot(const std::string & toolName)
+{
+    Tool * tool = Tools.GetItem(toolName);
 }
 
 

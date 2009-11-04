@@ -47,7 +47,7 @@ class devNDISerialToolQDevice : public QObject, public mtsDevice
     }
 
  public slots:
-    void UpdateTimerSlot(void);
+    void UpdateTimerQSlot(void);
 
  protected:
     QMainWindow MainWindow;
