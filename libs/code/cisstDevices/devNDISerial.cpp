@@ -18,7 +18,8 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include <cisstVector/vctFixedSizeVectorTypes.h>
+#include <cisstVector/vctDynamicMatrixTypes.h>
+#include <cisstNumerical/nmrLSSolver.h>
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstDevices/devNDISerial.h>
 
@@ -27,7 +28,8 @@ CMN_IMPLEMENT_SERVICES(devNDISerial);
 
 devNDISerial::devNDISerial(const std::string & taskName, const std::string & serialPort) :
     mtsTaskContinuous(taskName, 5000),
-    IsTracking(false)
+    IsTracking(false),
+    Tooltip(0.0)
 {
     mtsProvidedInterface * provided = AddProvidedInterface("ProvidesNDISerialController");
     if (provided) {
@@ -35,6 +37,7 @@ devNDISerial::devNDISerial(const std::string & taskName, const std::string & ser
         provided->AddCommandVoid(&devNDISerial::PortHandlesInitialize, this, "PortHandlesInitialize");
         provided->AddCommandVoid(&devNDISerial::PortHandlesQuery, this, "PortHandlesQuery");
         provided->AddCommandVoid(&devNDISerial::PortHandlesEnable, this, "PortHandlesEnable");
+        provided->AddCommandVoid(&devNDISerial::CalibratePivot, this, "CalibratePivot");
         provided->AddCommandWrite(&devNDISerial::ToggleTracking, this, "ToggleTracking");
     }
 
@@ -613,12 +616,6 @@ void devNDISerial::PortHandlesEnable(void)
 }
 
 
-void devNDISerial::CalibratePivot(const std::string & toolName)
-{
-    Tool * tool = Tools.GetItem(toolName);
-}
-
-
 void devNDISerial::ToggleTracking(const mtsBool & track)
 {
     if (track.Data) {
@@ -631,6 +628,7 @@ void devNDISerial::ToggleTracking(const mtsBool & track)
         CommandSend("TSTOP ");
     }
     ResponseRead("OKAY");
+    osaSleep(0.5 * cmn_s);
 }
 
 
@@ -685,9 +683,12 @@ void devNDISerial::Track(void)
                    &(toolPosition.X()), &(toolPosition.Y()), &(toolPosition.Z()),
                    &(tool->ErrorRMS));
             parsePointer += (4 * 6) + (3 * 7) + 6 + 8;
+
             toolOrientation.Divide(10000.0);
             tool->Position.Position().Rotation().FromRaw(toolOrientation);
+
             toolPosition.Divide(100.0);
+            toolPosition -= tool->Position.Position().Rotation() * Tooltip;  // apply tooltip offset
             tool->Position.Position().Translation().Assign(toolPosition);
             tool->ErrorRMS /= 10000.0;
 
@@ -705,6 +706,57 @@ void devNDISerial::Track(void)
     }
     //! \todo Parse System Status here
     parsePointer += 4;  // skip System Status
+}
+
+
+void devNDISerial::CalibratePivot(void)
+{
+    const std::string toolName = "02-32887C02";
+    const unsigned int numPoints = 500;
+
+    Tool * tool = Tools.GetItem(toolName);
+    vctRot3 rotation;
+    vct3 translation;
+    vct3x3 identity = vct3x3::Eye();
+    vctMat A(3 * numPoints, 6, VCT_COL_MAJOR);
+    vctMat b(3 * numPoints, 1, VCT_COL_MAJOR);
+    Tooltip.SetAll(0.0);
+
+    CommandSend("TSTART 80");
+    ResponseRead("OKAY");
+
+    CMN_LOG_CLASS_RUN_WARNING << "CalibratePivot: starting calibration in 5 seconds" << std::endl;
+    osaSleep(5.0 * cmn_s);
+    CMN_LOG_CLASS_RUN_WARNING << "CalibratePivot: starting calibration" << std::endl;
+
+    for (unsigned int i = 0; i < numPoints; i++) {
+        Track();
+        rotation = tool->Position.Position().Rotation();
+        translation = tool->Position.Position().Translation();
+
+        for (unsigned int r = 0; r < 3; r++) {
+            for (unsigned int c = 0; c < 3; c++) {
+                A.at((i * 3) + r, c) = rotation.Element(r,c);
+                A.at((i * 3) + r, 3 + c) = -identity.Element(r,c);
+            }
+            b.at((i * 3) + r, 0) = translation.Element(r);
+        }
+    }
+    CommandSend("TSTOP ");
+    ResponseRead("OKAY");
+
+    nmrLSSolver calibration(A, b);
+    calibration.Solve(A, b);
+
+    vct3 pivot;
+    for (unsigned int i = 0; i < 3; i++) {
+        Tooltip.Element(i) = b.at(i, 0);
+        pivot.Element(i) = b.at(3 + i, 0);
+    }
+
+    CMN_LOG_CLASS_RUN_DEBUG << "CalibratePivot: " << std::endl
+                            << "tooltip offset: " << Tooltip << std::endl
+                            << "pivot position: " << pivot << std::endl;
 }
 
 

@@ -25,7 +25,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsFunctionReadOrWrite.h>
 #include <cisstParameterTypes/prmPositionCartesianGet.h>
 
-#include <QMainWindow>
 #include <QTimer>
 
 #include "ui_devNDISerialToolQWidget.h"
@@ -50,10 +49,8 @@ class devNDISerialToolQDevice : public QObject, public mtsDevice
     void UpdateTimerQSlot(void);
 
  protected:
-    QMainWindow MainWindow;
-    QWidget CentralWidget;
     Ui::ToolWidget ToolWidget;
-
+    QWidget CentralWidget;
     QTimer UpdateTimer;
 
     struct {

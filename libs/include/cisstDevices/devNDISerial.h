@@ -27,7 +27,8 @@ http://www.cisst.org/cisst/license.txt.
 
   \warning Missing support for 14400bps, 921600bps and 1228739bps baud rates in osaSerialPort.
 
-  \todo Implement pivot calibration for probe type tools.
+  \todo Refactor and optimize CalibratePivot().
+  \todo Ability to enable/disable individual tools.
   \todo Cleanup todos in the cpp.
   \todo Cleanup and comment the header file using Doxygen comments.
   \todo Refactor ComputeCRC() and implement a CRC check in CommandSend().
@@ -44,13 +45,15 @@ http://www.cisst.org/cisst/license.txt.
   \todo Check for serial number matching in AddTool(), replace the name if it exists.
   \todo Cartesian position should be "invalid" if the tool is missing or disabled.
   \todo Strategies for error recovery, send an event with a human readable payload, implement in CheckResponse().
-  \todo Have the option for dynamic tool plugging.
+  \todo Have the option for dynamic tool plugging (requires runtime mtsConnect).
+  \todo Verify the need for all sleep times.
 */
 
 #ifndef _devNDISerial_h
 #define _devNDISerial_h
 
 #include <cisstCommon/cmnUnits.h>
+#include <cisstVector/vctFixedSizeVectorTypes.h>
 #include <cisstOSAbstraction/osaSerialPort.h>
 #include <cisstMultiTask/mtsTaskContinuous.h>
 #include <cisstParameterTypes/prmPositionCartesianGet.h>
@@ -147,10 +150,11 @@ protected:
     void PortHandlesQuery(void);
     void PortHandlesEnable(void);
 
-    void CalibratePivot(const std::string & toolName);
-
     void ToggleTracking(const mtsBool & track);
     void Track(void);
+
+    void CalibratePivot(void);
+    vct3 Tooltip;
 
     osaSerialPort SerialPort;
     char SerialBuffer[MAX_BUFFER_SIZE];

@@ -46,21 +46,23 @@ class devNDISerialControllerQDevice : public QObject, public mtsDevice
  public slots:
     void NDIBeepQSlot(void);
     void NDIInitializeQSlot(void);
+    void NDICalibratePivotQSlot(void);
     void NDITrackQSlot(bool value);
     void CollectQSlot(bool value);
 
  protected:
     void CreateMainWindow(void);
 
-    QMainWindow MainWindow;
-    QWidget CentralWidget;
     Ui::ControllerWidget ControllerWidget;
+    QWidget CentralWidget;
+    QMainWindow MainWindow;
 
     struct {
         mtsFunctionWrite Beep;
         mtsFunctionVoid Initialize;
         mtsFunctionVoid Query;
         mtsFunctionVoid Enable;
+        mtsFunctionVoid CalibratePivot;
         mtsFunctionWrite Track;
     } NDI;
 };

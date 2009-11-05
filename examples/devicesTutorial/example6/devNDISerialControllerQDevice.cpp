@@ -34,6 +34,7 @@ devNDISerialControllerQDevice::devNDISerialControllerQDevice(const std::string &
         required->AddFunction("PortHandlesInitialize", NDI.Initialize);
         required->AddFunction("PortHandlesQuery", NDI.Query);
         required->AddFunction("PortHandlesEnable", NDI.Enable);
+        required->AddFunction("CalibratePivot", NDI.CalibratePivot);
         required->AddFunction("ToggleTracking", NDI.Track);
     }
 
@@ -45,6 +46,8 @@ devNDISerialControllerQDevice::devNDISerialControllerQDevice(const std::string &
                      this, SLOT(NDIBeepQSlot()));
     QObject::connect(ControllerWidget.ButtonInitialize, SIGNAL(clicked()),
                      this, SLOT(NDIInitializeQSlot()));
+    QObject::connect(ControllerWidget.ButtonCalibratePivot, SIGNAL(clicked()),
+                     this, SLOT(NDICalibratePivotQSlot()));
     QObject::connect(ControllerWidget.ButtonTrack, SIGNAL(toggled(bool)),
                      this, SLOT(NDITrackQSlot(bool)));
     QObject::connect(ControllerWidget.ButtonCollect, SIGNAL(toggled(bool)),
@@ -65,15 +68,15 @@ void devNDISerialControllerQDevice::CreateMainWindow(void)
 
 void devNDISerialControllerQDevice::AddToolWidget(QWidget * toolWidget, const unsigned int index)
 {
-    ControllerWidget.gridLayout->addWidget(toolWidget, 7 + index, 1, 1, 2);
+    ControllerWidget.gridLayout->addWidget(toolWidget, 8 + index, 1, 1, 4);
     MainWindow.adjustSize();
 }
 
 
 void devNDISerialControllerQDevice::NDIBeepQSlot(void)
 {
-    mtsInt data = ControllerWidget.NumberOfBeeps->value();
-    NDI.Beep(data);
+    mtsInt numberOfBeeps = ControllerWidget.NumberOfBeeps->value();
+    NDI.Beep(numberOfBeeps);
 }
 
 
@@ -82,15 +85,20 @@ void devNDISerialControllerQDevice::NDIInitializeQSlot(void)
     NDI.Initialize();
     NDI.Query();
     NDI.Enable();
-    mtsInt data = 2;
-    NDI.Beep(data);
+    NDI.Beep(mtsInt(2));
+}
+
+
+void devNDISerialControllerQDevice::NDICalibratePivotQSlot(void)
+{
+    NDI.CalibratePivot();
+    NDI.Beep(mtsInt(2));
 }
 
 
 void devNDISerialControllerQDevice::NDITrackQSlot(bool value)
 {
-    mtsBool data = value;
-    NDI.Track(data);
+    NDI.Track(mtsBool(value));
 }
 
 void devNDISerialControllerQDevice::CollectQSlot(bool value)
