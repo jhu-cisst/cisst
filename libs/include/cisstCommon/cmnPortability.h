@@ -311,7 +311,7 @@ extern CISST_EXPORT const std::string cmnCompilersStrings[];
 */
 #ifdef CISST_COMPILER_IS_MSVC
   #include <float.h>
-  #define CMN_ISNAN(x) _isnan(x)
+  #define CMN_ISNAN(x) (_isnan(x) != 0)
 #else
   #if (CISST_OS == CISST_DARWIN)
     #ifndef isnan
