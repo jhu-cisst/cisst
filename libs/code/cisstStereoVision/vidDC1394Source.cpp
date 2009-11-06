@@ -117,7 +117,7 @@ void svlDC1394Context::Enumerate()
     // Re-enumerate camera list
     ReleaseEnumeration();
 
-#if (__verbose__ >= 2)
+#if (__verbose__ < 2)
     // Disable libdc1394 warnings print-outs
     dc1394_log_register_handler(DC1394_LOG_WARNING, 0, 0);
 #endif
@@ -1035,6 +1035,7 @@ int CDC1394Source::CaptureFrame(unsigned int videoch)
         return SVL_FAIL;
     }
 
+#if (CISST_OS != CISST_DARWIN)
     if (dc1394_capture_is_frame_corrupt(Cameras[DeviceID[videoch]], Frame[videoch]) == DC1394_TRUE) {
 #if (__verbose__ >= 2)
             cerr << "CDC1394Source::CaptureFrame - captured frame is corrupt; skipping to next frame" << endl;
@@ -1042,6 +1043,7 @@ int CDC1394Source::CaptureFrame(unsigned int videoch)
         dc1394_capture_enqueue(Cameras[DeviceID[videoch]], Frame[videoch]);
         return SVL_OK;
     }
+#endif // (CISST_OS != CISST_DARWIN)
 
 #if (__verbose__ >= 4)
     cerr << "CDC1394Source::CaptureFrame - video frame dequeued from buffer" << endl;
