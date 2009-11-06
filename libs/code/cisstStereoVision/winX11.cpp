@@ -23,6 +23,9 @@ http://www.cisst.org/cisst/license.txt.
 #include "winX11.h"
 
 #include <cisstOSAbstraction/osaSleep.h>
+#if (CISST_SVL_HAS_XV == ON)
+#include <cisstStereoVision/svlConverters.h>
+#endif // CISST_SVL_HAS_XV
 
 // Motif window hints
 #define MWM_HINTS_FUNCTIONS     (1L << 0)
@@ -60,24 +63,22 @@ CX11WindowManager::CX11WindowManager(unsigned int numofwins) : CWindowManagerBas
     xDisplay = 0;
     xWindows = 0;
     xGCs = 0;
-    xImg = 0;
     Titles = 0;
     CustomTitles = 0;
     CustomTitleEnabled = 0;
-    ImageBuffers = 0;
-
-    // create drawing critical section and counter
-    csImage = new osaCriticalSection[NumOfWins];
-    ImageCounter = new unsigned int[NumOfWins];
+#if (CISST_SVL_HAS_XV == ON)
+    xvImg = 0;
+    xvShmInfo = 0;
+    xvPort = 0;
+#else // CISST_SVL_HAS_XV
+    xImg = 0;
+    xImageBuffers = 0;
+#endif // CISST_SVL_HAS_XV
 }
 
 CX11WindowManager::~CX11WindowManager()
 {
     Destroy();
-
-    // destroy drawing critical section and counter
-    delete [] csImage;
-    delete(ImageCounter);
 }
 
 int CX11WindowManager::DoModal(bool show, bool fullscreen)
@@ -87,10 +88,19 @@ int CX11WindowManager::DoModal(bool show, bool fullscreen)
 
     unsigned int i, atom_count;
     int x, y, prevright, prevbottom;
-    unsigned int *lastimage = new unsigned int[NumOfWins];
+    unsigned int lastimage = 0;
     unsigned long black, white;
-    Atom atoms[2];
     XSizeHints wsh;
+
+#if (CISST_SVL_HAS_XV == ON)
+    Atom atoms[3];
+    unsigned int xvadaptorcount;
+    XvAdaptorInfo *xvai;
+    XVisualInfo xvvinfo;
+    bool xvupdateimage = true;
+#else // CISST_SVL_HAS_XV
+    Atom atoms[2];
+#endif // CISST_SVL_HAS_XV
 
     // setting decoration hints for borderless mode
     struct {
@@ -115,6 +125,11 @@ int CX11WindowManager::DoModal(bool show, bool fullscreen)
     xDisplay = XOpenDisplay(reinterpret_cast<char*>(0));
     xScreen = DefaultScreen(xDisplay);
 
+#if (CISST_SVL_HAS_XV == ON)
+    // check if 24bpp is suppoted by the display
+    if (XMatchVisualInfo(xDisplay, xScreen, 24, TrueColor, &xvvinfo) == 0) goto labError;
+#endif // CISST_SVL_HAS_XV
+
     // pick colors
     black = BlackPixel(xDisplay, xScreen);
     white = WhitePixel(xDisplay, xScreen);
@@ -128,19 +143,29 @@ int CX11WindowManager::DoModal(bool show, bool fullscreen)
     // create atoms for overriding default window behaviours
     atoms[0] = XInternAtom(xDisplay, "WM_DELETE_WINDOW", False);
     atoms[1] = XInternAtom(xDisplay, "_MOTIF_WM_HINTS", False);
+#if (CISST_SVL_HAS_XV == ON)
+    atoms[2] = XInternAtom(xDisplay, "XV_SYNC_TO_VBLANK", False);
+#endif // CISST_SVL_HAS_XV
 
     // create title strings
     Titles = new std::string[NumOfWins];
     CustomTitles = new std::string[NumOfWins];
     CustomTitleEnabled = new int[NumOfWins];
 
+#if (CISST_SVL_HAS_XV == ON)
+    xvImg = new XvImage*[NumOfWins];
+    xvShmInfo = new XShmSegmentInfo[NumOfWins];
+    xvPort = new XvPortID[NumOfWins];
+    if (xvImg == 0 || xvShmInfo == 0 || xvPort == 0) goto labError;
+    memset(xvImg, 0, NumOfWins * sizeof(XvImage*));
+    memset(xvShmInfo, 0, NumOfWins * sizeof(XShmSegmentInfo));
+    memset(xvPort, 0, NumOfWins * sizeof(XvPortID));
+#else // CISST_SVL_HAS_XV
     // create images
-    ImageBuffers = new unsigned char*[NumOfWins];
+    xImageBuffers = new unsigned char*[NumOfWins];
     for (i = 0; i < NumOfWins; i ++) {
-        ImageBuffers[i] = new unsigned char[Width[i] * Height[i] * 4];
-        lastimage[i] = 0;
+        xImageBuffers[i] = new unsigned char[Width[i] * Height[i] * 4];
     }
-
     xImg = new XImage*[NumOfWins];
     memset(xImg, 0, NumOfWins * sizeof(XImage*));
     if (xImg == 0) goto labError;
@@ -150,12 +175,13 @@ int CX11WindowManager::DoModal(bool show, bool fullscreen)
                                24,
                                ZPixmap,
                                0,
-                               reinterpret_cast<char*>(ImageBuffers[i]),
+                               reinterpret_cast<char*>(xImageBuffers[i]),
                                Width[i],
                                Height[i],
                                32,
                                0);
     }
+#endif // CISST_SVL_HAS_XV
 
     prevright = prevbottom = 0;
     for (i = 0; i < NumOfWins; i ++) {
@@ -227,17 +253,39 @@ int CX11WindowManager::DoModal(bool show, bool fullscreen)
                                None, NULL, 0, NULL);
 
         // set even mask
-        XSelectInput(xDisplay, xWindows[i],
-                     ExposureMask|PointerMotionMask|ButtonPressMask|KeyPressMask);
+        XSelectInput(xDisplay, xWindows[i], ExposureMask|PointerMotionMask|ButtonPressMask|KeyPressMask);
+
+        // set window colormap
+        XSetWindowColormap(xDisplay, xWindows[i], DefaultColormapOfScreen(DefaultScreenOfDisplay(xDisplay)));
+
+#if (CISST_SVL_HAS_XV == ON)
+        // query shared memory extension
+        if (!XShmQueryExtension(xDisplay)) goto labError;
+
+        // query video adaptors
+        if (XvQueryAdaptors(xDisplay, DefaultRootWindow(xDisplay), &xvadaptorcount, &xvai) != Success) goto labError;
+        xvPort[i] = xvai->base_id + i;
+        XvFreeAdaptorInfo(xvai);
+
+        // overriding default Xvideo vertical sync behavior
+        XvSetPortAttribute (xDisplay, xvPort[i], atoms[2], 1);
+#endif // CISST_SVL_HAS_XV
 
         // create graphics context
         xGCs[i] = XCreateGC(xDisplay, xWindows[i], 0, 0);
 
-        XSetWindowColormap(xDisplay, xWindows[i], DefaultColormapOfScreen(DefaultScreenOfDisplay(xDisplay)));
-
         // set default colors
         XSetBackground(xDisplay, xGCs[i], white);
         XSetForeground(xDisplay, xGCs[i], black);
+
+#if (CISST_SVL_HAS_XV == ON)
+        // create image in shared memory
+        xvImg[i] = XvShmCreateImage(xDisplay, xvPort[i], 0x32595559/*YUV2*/, 0, Width[i], Height[i], &(xvShmInfo[i]));
+        xvShmInfo[i].shmid = shmget(IPC_PRIVATE, xvImg[i]->data_size, IPC_CREAT | 0777);
+        xvShmInfo[i].shmaddr = xvImg[i]->data = reinterpret_cast<char*>(shmat(xvShmInfo[i].shmid, 0, 0));
+        xvShmInfo[i].readOnly = False;
+        if (!XShmAttach(xDisplay, &(xvShmInfo[i]))) goto labError;
+#endif // CISST_SVL_HAS_XV
 
         // clear window
         XClearWindow(xDisplay, xWindows[i]);
@@ -255,193 +303,248 @@ int CX11WindowManager::DoModal(bool show, bool fullscreen)
     unsigned int winid;
 
     while (1) {
+#if (CISST_SVL_HAS_XV == ON)
+        if (!xvupdateimage) {
+            while (XPending(xDisplay)) {
+#else // CISST_SVL_HAS_XV
         if (XPending(xDisplay)) {
-            XNextEvent(xDisplay, &event);
+#endif // CISST_SVL_HAS_XV
+                XNextEvent(xDisplay, &event);
 
-            // find recipient
-            for (winid = 0; winid < NumOfWins; winid ++) {
-                if (event.xany.window == xWindows[winid]) break;
-            }
-            if (winid == NumOfWins) continue;
-
-            // override default window behaviour
-            if (event.type == ClientMessage) {
-                if (static_cast<unsigned long>(event.xclient.data.l[0]) == atoms[0]) {
-                    // X11 server wants to close window
-                    // Do nothing.... we will destroy it ourselves later
+                // find recipient
+                for (winid = 0; winid < NumOfWins; winid ++) {
+                    if (event.xany.window == xWindows[winid]) break;
                 }
-                continue;
-            }
+                if (winid == NumOfWins) continue;
 
-            // window should be closed
-            if (event.type == UnmapNotify) {
-                printf("destroy\n");
-                if (xGCs[winid]) {
-                    XFreeGC(xDisplay, xGCs[winid]);
-                    xGCs[winid] = 0;
-                }
-                xWindows[winid] = 0;
-                continue;
-            }
-
-            // window should be updated
-            if (event.type == Expose && event.xexpose.count == 0) {
-                XClearWindow(xDisplay, xWindows[winid]);
-                continue;
-            }
-
-            if (event.type == KeyPress) {
-                code = XLookupKeysym(&event.xkey, 0);
-                if (code >= 48 && code <= 57) { // ascii numbers
-                    OnUserEvent(winid, true, code);
+                // override default window behaviour
+                if (event.type == ClientMessage) {
+                    if (static_cast<unsigned long>(event.xclient.data.l[0]) == atoms[0]) {
+                        // X11 server wants to close window
+                        // Do nothing.... we will destroy it ourselves later
+                    }
                     continue;
                 }
-                if (code >= 97 && code <= 122) { // ascii letters
-                    OnUserEvent(winid, true, code);
+
+                // window should be closed
+                if (event.type == UnmapNotify) {
+                    printf("destroy\n");
+                    if (xGCs[winid]) {
+                        XFreeGC(xDisplay, xGCs[winid]);
+                        xGCs[winid] = 0;
+                    }
+                    xWindows[winid] = 0;
                     continue;
                 }
-                if (code == 13 ||
-                    code == 32) { // special characters with correct ascii code
-                    OnUserEvent(winid, true, code);
+
+                // window should be updated
+                if (event.type == Expose && event.xexpose.count == 0) {
+                    XClearWindow(xDisplay, xWindows[winid]);
                     continue;
                 }
-                if (code >= 0xffbe && code <= 0xffc9) { // F1-F12
-                    OnUserEvent(winid, false, winInput_KEY_F1 + (code - 0xffbe));
+
+                if (event.type == KeyPress) {
+                    code = XLookupKeysym(&event.xkey, 0);
+                    if (code >= 48 && code <= 57) { // ascii numbers
+                        OnUserEvent(winid, true, code);
+                        continue;
+                    }
+                    if (code >= 97 && code <= 122) { // ascii letters
+                        OnUserEvent(winid, true, code);
+                        continue;
+                    }
+                    if (code == 13 ||
+                        code == 32) { // special characters with correct ascii code
+                        OnUserEvent(winid, true, code);
+                        continue;
+                    }
+                    if (code >= 0xffbe && code <= 0xffc9) { // F1-F12
+                        OnUserEvent(winid, false, winInput_KEY_F1 + (code - 0xffbe));
+                        continue;
+                    }
+                    switch (code) {
+                        case 0xFF55:
+                            OnUserEvent(winid, false, winInput_KEY_PAGEUP);
+                        break;
+
+                        case 0xFF56:
+                            OnUserEvent(winid, false, winInput_KEY_PAGEDOWN);
+                        break;
+
+                        case 0xFF50:
+                            OnUserEvent(winid, false, winInput_KEY_HOME);
+                        break;
+
+                        case 0xFF57:
+                            OnUserEvent(winid, false, winInput_KEY_END);
+                        break;
+
+                        case 0xFF63:
+                            OnUserEvent(winid, false, winInput_KEY_INSERT);
+                        break;
+
+                        case 0xFFFF:
+                            OnUserEvent(winid, false, winInput_KEY_DELETE);
+                        break;
+
+                        case 0xFF51:
+                            OnUserEvent(winid, false, winInput_KEY_LEFT);
+                        break;
+
+                        case 0xFF53:
+                            OnUserEvent(winid, false, winInput_KEY_RIGHT);
+                        break;
+
+                        case 0xFF52:
+                            OnUserEvent(winid, false, winInput_KEY_UP);
+                        break;
+
+                        case 0xFF54:
+                            OnUserEvent(winid, false, winInput_KEY_DOWN);
+                        break;
+                    }
                     continue;
                 }
-                switch (code) {
-                    case 0xFF55:
-                        OnUserEvent(winid, false, winInput_KEY_PAGEUP);
-                    break;
 
-                    case 0xFF56:
-                        OnUserEvent(winid, false, winInput_KEY_PAGEDOWN);
-                    break;
-
-                    case 0xFF50:
-                        OnUserEvent(winid, false, winInput_KEY_HOME);
-                    break;
-
-                    case 0xFF57:
-                        OnUserEvent(winid, false, winInput_KEY_END);
-                    break;
-
-                    case 0xFF63:
-                        OnUserEvent(winid, false, winInput_KEY_INSERT);
-                    break;
-
-                    case 0xFFFF:
-                        OnUserEvent(winid, false, winInput_KEY_DELETE);
-                    break;
-
-                    case 0xFF51:
-                        OnUserEvent(winid, false, winInput_KEY_LEFT);
-                    break;
-
-                    case 0xFF53:
-                        OnUserEvent(winid, false, winInput_KEY_RIGHT);
-                    break;
-
-                    case 0xFF52:
-                        OnUserEvent(winid, false, winInput_KEY_UP);
-                    break;
-
-                    case 0xFF54:
-                        OnUserEvent(winid, false, winInput_KEY_DOWN);
-                    break;
-                }
-                continue;
-            }
-
-            if (event.type == ButtonPress) {
-                if (event.xbutton.button == Button1) {
-                    if (!LButtonDown && !RButtonDown) {
-                        LButtonDown = true;
-                        XGrabPointer(xDisplay, xWindows[winid], false,
-                                     PointerMotionMask|ButtonReleaseMask,
-                                     GrabModeAsync, GrabModeAsync,
-                                     None,
-                                     None,
-                                     CurrentTime);
+                if (event.type == ButtonPress) {
+                    if (event.xbutton.button == Button1) {
+                        if (!LButtonDown && !RButtonDown) {
+                            LButtonDown = true;
+                            XGrabPointer(xDisplay, xWindows[winid], false,
+                                         PointerMotionMask|ButtonReleaseMask,
+                                         GrabModeAsync, GrabModeAsync,
+                                         None,
+                                         None,
+                                         CurrentTime);
+                        }
+                        OnUserEvent(winid, false, winInput_LBUTTONDOWN);
                     }
-                    OnUserEvent(winid, false, winInput_LBUTTONDOWN);
-                }
-                else if (event.xbutton.button == Button2) {
-                    if (!LButtonDown && !RButtonDown) {
-                        RButtonDown = true;
-                        XGrabPointer(xDisplay, xWindows[winid], false,
-                                     PointerMotionMask|ButtonReleaseMask,
-                                     GrabModeAsync, GrabModeAsync,
-                                     None,
-                                     None,
-                                     CurrentTime);
-                    }
-                    OnUserEvent(winid, false, winInput_RBUTTONDOWN);
-                }
-            }
-            
-            if (event.type == ButtonRelease) {
-                if (event.xbutton.button == Button1) {
-                    OnUserEvent(winid, false, winInput_LBUTTONUP);
-                    if (LButtonDown && !RButtonDown) {
-                        LButtonDown = false;
-                        XUngrabPointer(xDisplay, CurrentTime);
+                    else if (event.xbutton.button == Button2) {
+                        if (!LButtonDown && !RButtonDown) {
+                            RButtonDown = true;
+                            XGrabPointer(xDisplay, xWindows[winid], false,
+                                         PointerMotionMask|ButtonReleaseMask,
+                                         GrabModeAsync, GrabModeAsync,
+                                         None,
+                                         None,
+                                         CurrentTime);
+                        }
+                        OnUserEvent(winid, false, winInput_RBUTTONDOWN);
                     }
                 }
-                else if (event.xbutton.button == Button2) {
-                    OnUserEvent(winid, false, winInput_RBUTTONUP);
-                    if (LButtonDown && !RButtonDown) {
-                        RButtonDown = false;
-                        XUngrabPointer(xDisplay, CurrentTime);
+                
+                if (event.type == ButtonRelease) {
+                    if (event.xbutton.button == Button1) {
+                        OnUserEvent(winid, false, winInput_LBUTTONUP);
+                        if (LButtonDown && !RButtonDown) {
+                            LButtonDown = false;
+                            XUngrabPointer(xDisplay, CurrentTime);
+                        }
+                    }
+                    else if (event.xbutton.button == Button2) {
+                        OnUserEvent(winid, false, winInput_RBUTTONUP);
+                        if (LButtonDown && !RButtonDown) {
+                            RButtonDown = false;
+                            XUngrabPointer(xDisplay, CurrentTime);
+                        }
                     }
                 }
-            }
 
-            if (event.type == MotionNotify) {
-                SetMousePos(static_cast<short>(event.xmotion.x), static_cast<short>(event.xmotion.y));
-                OnUserEvent(winid, false, winInput_MOUSEMOVE);
+                if (event.type == MotionNotify) {
+                    SetMousePos(static_cast<short>(event.xmotion.x), static_cast<short>(event.xmotion.y));
+                    OnUserEvent(winid, false, winInput_MOUSEMOVE);
+                }
+
+#if (CISST_SVL_HAS_XV == ON)
+                // image update complete
+                if (event.type == XShmGetEventBase(xDisplay) + ShmCompletion) {
+                    xvupdateimage = true;
+                    continue;
+                }
             }
+            if (!xvupdateimage) signalImage.Wait(0.01);
+#endif // CISST_SVL_HAS_XV
         }
         else {
             if (DestroyFlag) break;
-            for (winid = 0; winid < NumOfWins; winid ++) {
-                if (ImageCounter[winid] > lastimage[winid]) {
-                    csImage[winid].Enter();
 
-                        lastimage[winid] = ImageCounter[winid];
-                        xImg[winid]->data = reinterpret_cast<char*>(ImageBuffers[winid]);
-                        XPutImage(xDisplay, xWindows[winid], xGCs[winid], xImg[winid], 0, 0, 0, 0, Width[winid], Height[winid]);
+            if (ImageCounter > lastimage) {
+                csImage.Enter();
+                    lastimage = ImageCounter;
 
-                    csImage[winid].Leave();
-
-                    if (CustomTitleEnabled[winid] < 0) {
-                        // Restore original timestamp
-                        XSetStandardProperties(xDisplay, xWindows[winid],
-                                               Titles[winid].c_str(), Titles[winid].c_str(),
-                                               None, NULL, 0, NULL);
+#if (CISST_SVL_HAS_XV == ON)
+                    for (i = 0; i < NumOfWins; i ++) {
+                        XvShmPutImage(xDisplay,
+                                      xvPort[i],
+                                      xWindows[i],
+                                      xGCs[i],
+                                      xvImg[i],
+                                      0, 0, Width[i], Height[i],
+                                      0, 0, Width[i], Height[i], True);
                     }
-                    else if (CustomTitleEnabled[winid] > 0) {
-                        // Set custom timestamp
-                        XSetStandardProperties(xDisplay, xWindows[winid],
-                                               CustomTitles[winid].c_str(), CustomTitles[winid].c_str(),
-                                               None, NULL, 0, NULL);
+                    xvupdateimage = false;
+#else // CISST_SVL_HAS_XV
+                    for (i = 0; i < NumOfWins; i ++) {
+                        xImg[i]->data = reinterpret_cast<char*>(xImageBuffers[i]);
+                        XPutImage(xDisplay,
+                                  xWindows[i],
+                                  xGCs[i],
+                                  xImg[i],
+                                  0, 0, 0, 0,
+                                  Width[i], Height[i]);
                     }
-                }
+#endif // CISST_SVL_HAS_XV
+
+                    for (i = 0; i < NumOfWins; i ++) {
+                        if (CustomTitleEnabled[i] < 0) {
+                            // Restore original timestamp
+                            XSetStandardProperties(xDisplay, xWindows[i],
+                                                   Titles[i].c_str(), Titles[i].c_str(),
+                                                   None, NULL, 0, NULL);
+                        }
+                        else if (CustomTitleEnabled[i] > 0) {
+                            // Set custom timestamp
+                            XSetStandardProperties(xDisplay, xWindows[i],
+                                                   CustomTitles[i].c_str(), CustomTitles[i].c_str(),
+                                                   None, NULL, 0, NULL);
+                        }
+                    }
+                csImage.Leave();
             }
-            osaSleep(0.01);
         }
     }
 
 labError:
 
-    delete(lastimage);
-
+#if (CISST_SVL_HAS_XV == ON)
+    if (xvShmInfo) {
+        for (i = 0; i < NumOfWins; i ++) {
+            XShmDetach(xDisplay, &(xvShmInfo[i]));
+            shmdt(xvShmInfo[i].shmaddr);
+        }
+        delete [] xvShmInfo; 
+        xvShmInfo = 0;
+    }
+#endif // CISST_SVL_HAS_XV
+    XSync(xDisplay, 0);
     for (i = 0; i < NumOfWins; i ++) {
         if (xGCs[i]) XFreeGC(xDisplay, xGCs[i]);
         if (xWindows[i]) XDestroyWindow(xDisplay, xWindows[i]);
     }
     XCloseDisplay(xDisplay);
-
+#if (CISST_SVL_HAS_XV == ON)
+    if (xvImg) {
+        for (i = 0; i < NumOfWins; i ++) {
+            if (xvImg[i]) XFree(xvImg[i]); 
+        }
+        delete [] xvImg; 
+        xvImg = 0;
+    }
+    if (xvPort) {
+        delete [] xvPort; 
+        xvPort = 0;
+    }
+#else // CISST_SVL_HAS_XV
     if (xImg) {
         for (i = 0; i < NumOfWins; i ++) {
             if (xImg[i]) XDestroyImage(xImg[i]); 
@@ -449,6 +552,11 @@ labError:
         delete [] xImg; 
         xImg = 0;
     }
+    if (xImageBuffers) {
+        delete [] xImageBuffers;
+        xImageBuffers = 0;
+    }
+#endif // CISST_SVL_HAS_XV
     if (xGCs) {
         delete [] xGCs;
         xGCs = 0;
@@ -468,10 +576,6 @@ labError:
     if (CustomTitleEnabled) {
         delete [] CustomTitleEnabled;
         CustomTitleEnabled = 0;
-    }
-    if (ImageBuffers) {
-        delete [] ImageBuffers;
-        ImageBuffers = 0;
     }
 
     xScreen = 0;
@@ -497,10 +601,25 @@ void CX11WindowManager::Show(bool show, int winid)
     }
 }
 
-void CX11WindowManager::DrawImageThreadSafe(unsigned char* buffer, unsigned int buffersize, unsigned int winid)
+void CX11WindowManager::LockBuffers()
 {
-    if (xDisplay == 0 || buffer == 0 || winid >= NumOfWins ||
-        ImageBuffers == 0 || ImageBuffers[winid] == 0)  return;
+    csImage.Enter();
+}
+
+void CX11WindowManager::UnlockBuffers()
+{
+    csImage.Leave();
+}
+
+void CX11WindowManager::SetImageBuffer(unsigned char *buffer, unsigned int buffersize, unsigned int winid)
+{
+    if (xDisplay == 0 || buffer == 0 || winid >= NumOfWins) return;
+
+#if (CISST_SVL_HAS_XV == OFF)
+    if (xImageBuffers == 0 || xImageBuffers[winid] == 0)  return;
+    unsigned char *framebuffer = xImageBuffers[winid];
+#endif // CISST_SVL_HAS_XV
+ 
     const unsigned int pixsize = Width[winid] * Height[winid];
     if (buffersize > (pixsize * 3)) return;
 
@@ -516,19 +635,26 @@ void CX11WindowManager::DrawImageThreadSafe(unsigned char* buffer, unsigned int 
         else CustomTitleEnabled[winid] = -1;
     }
 
-    csImage[winid].Enter();
+#if (CISST_SVL_HAS_XV == ON)
+    // convert image to YUV2 directly into the output buffer
+    svlConverter::BGR24toYUV422(buffer,
+                                reinterpret_cast<unsigned char*>(xvImg[winid]->data),
+                                pixsize);
+#else // CISST_SVL_HAS_XV
+    // store image in buffer
+    for (unsigned int i = 0; i < pixsize; i ++) {
+        *framebuffer = *buffer; framebuffer ++; buffer ++;
+        *framebuffer = *buffer; framebuffer ++; buffer ++;
+        *framebuffer = *buffer; framebuffer ++; buffer ++;
+        *framebuffer = 0;  framebuffer ++;
+    }
+#endif // CISST_SVL_HAS_XV
+}
 
-        // store image in buffer
-        unsigned char *framebuffer = ImageBuffers[winid];
-        for (unsigned int i = 0; i < pixsize; i ++) {
-            *framebuffer = *buffer; framebuffer ++; buffer ++;
-            *framebuffer = *buffer; framebuffer ++; buffer ++;
-            *framebuffer = *buffer; framebuffer ++; buffer ++;
-            *framebuffer = 0;  framebuffer ++;
-        }
-        ImageCounter[winid] ++;
-    
-    csImage[winid].Leave();
+void CX11WindowManager::DrawImages()
+{
+    ImageCounter ++;
+    signalImage.Raise();
 }
 
 void CX11WindowManager::Destroy()

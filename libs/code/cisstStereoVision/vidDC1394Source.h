@@ -253,7 +253,6 @@ private:
 
     int* CameraFileNo;
     fd_set* CameraFDSet;
-    int* CameraNFDS;
 
     osaMutex Mutex;
     dc1394_t* Context;

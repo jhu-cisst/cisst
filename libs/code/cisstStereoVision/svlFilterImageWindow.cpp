@@ -22,12 +22,12 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstStereoVision/svlFilterImageWindow.h>
 
-#ifdef __GNUC__
-#include "winX11.h"
-#endif // __GNUC__
-
 #ifdef _WIN32
 #include "winWin32.h"
+#else
+#if (CISST_SVL_HAS_X11 == ON)
+#include "winX11.h"
+#endif // CISST_SVL_HAS_X11
 #endif // _WIN32
 
 #ifdef _MSC_VER
@@ -228,12 +228,12 @@ int svlFilterImageWindow::Initialize(svlSample* inputdata)
     if (GetInputType() == svlTypeImageRGB) {
         svlSampleImageRGB* img = dynamic_cast<svlSampleImageRGB*>(inputdata);
 
-#ifdef __GNUC__
-        WindowManager = new CX11WindowManager(1);
-#endif // __GNUC__
-
 #ifdef _WIN32
         WindowManager = new CWin32WindowManager(1);
+#else
+#if (CISST_SVL_HAS_X11 == ON)
+        WindowManager = new CX11WindowManager(1);
+#endif // CISST_SVL_HAS_X11
 #endif // _WIN32
 
         if (WindowManager == 0) return SVL_FAIL;
@@ -245,12 +245,12 @@ int svlFilterImageWindow::Initialize(svlSample* inputdata)
     else {
         svlSampleImageRGBStereo* stimg = dynamic_cast<svlSampleImageRGBStereo*>(inputdata);
 
-#ifdef __GNUC__
-        WindowManager = new CX11WindowManager(2);
-#endif // __GNUC__
-
 #ifdef _WIN32
         WindowManager = new CWin32WindowManager(2);
+#else
+#if (CISST_SVL_HAS_X11 == ON)
+        WindowManager = new CX11WindowManager(2);
+#endif // CISST_SVL_HAS_X11
 #endif // _WIN32
 
         if (WindowManager == 0) return SVL_FAIL;
@@ -296,20 +296,33 @@ int svlFilterImageWindow::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata)
     unsigned int videochannels = img->GetVideoChannels();
     unsigned int idx;
 
-    _ParallelLoop(procInfo, idx, videochannels)
+    _OnSingleThread(procInfo)
     {
+        WindowManager->LockBuffers();
+
         if (TimestampEnabled == 1) WindowManager->SetTimestamp(inputdata->GetTimestamp());
         else if (TimestampEnabled == -1) {
             WindowManager->SetTimestamp(-1.0);
             TimestampEnabled = 0;
         }
-        WindowManager->DrawImageThreadSafe(img->GetUCharPointer(idx), img->GetDataSize(idx), idx);
+        else {
+            WindowManager->SetTimestamp(0.0);
+        }
+    }
+
+    _SynchronizeThreads(procInfo);
+
+    _ParallelLoop(procInfo, idx, videochannels)
+    {
+        WindowManager->SetImageBuffer(img->GetUCharPointer(idx), img->GetDataSize(idx), idx);
     }
 
     _SynchronizeThreads(procInfo);
 
     _OnSingleThread(procInfo)
     {
+        WindowManager->DrawImages();
+        WindowManager->UnlockBuffers();
         if (Callback) Callback->OnNewFrame(FrameCounter);
     }
 

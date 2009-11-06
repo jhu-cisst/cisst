@@ -564,6 +564,116 @@ void svlConverter::RGB24toYUV444P(unsigned char* input, unsigned char* output, c
     }
 }
 
+void svlConverter::BGR24toYUV422(unsigned char* input, unsigned char* output, const unsigned int pixelcount, bool ch1, bool ch2, bool ch3)
+{
+    int r, g, b, y1, y2, u1, u2, v1, v2;
+    const unsigned int pixelcounthalf = pixelcount >> 1;
+
+    for (unsigned int i = 0; i < pixelcounthalf; i ++) {
+        b = *input; input ++;
+        g = *input; input ++;
+        r = *input; input ++;
+
+        y1 = r * 2104 + g * 4130 + b * 802 + 4096 + 131072;
+        if (y1 < 0) y1 = -y1;
+        y1 >>= 13;
+        if (y1 > 235) y1 = 235;
+
+        u1 = r * -1214 + g * -2384 + b * 3598 + 4096 + 1048576;
+        if (u1 < 0) u1 = -u1;
+        u1 >>= 13;
+        if (u1 > 240) u1 = 240;
+
+        v1 = r * 3598 + g * -3013 + b * -585 + 4096 + 1048576;
+        if (v1 < 0) v1 = -v1;
+        v1 >>= 13;
+        if (v1 > 240) v1 = 240;
+
+        b = *input; input ++;
+        g = *input; input ++;
+        r = *input; input ++;
+
+        y2 = r * 2104 + g * 4130 + b * 802 + 4096 + 131072;
+        if (y2 < 0) y2 = -y2;
+        y2 >>= 13;
+        if (y2 > 235) y2 = 235;
+
+        u2 = r * -1214 + g * -2384 + b * 3598 + 4096 + 1048576;
+        if (u2 < 0) u2 = -u2;
+        u2 >>= 13;
+        if (u2 > 240) u2 = 240;
+
+        v2 = r * 3598 + g * -3013 + b * -585 + 4096 + 1048576;
+        if (v2 < 0) v2 = -v2;
+        v2 >>= 13;
+        if (v2 > 240) v2 = 240;
+
+        if (ch1) *output = static_cast<unsigned char>(y1);
+        output ++;
+        if (ch2) *output = static_cast<unsigned char>((u1 + u2) >> 1);
+        output ++;
+        if (ch1) *output = static_cast<unsigned char>(y2);
+        output ++;
+        if (ch3) *output = static_cast<unsigned char>((v1 + v2) >> 1);
+        output ++;
+    }
+}
+
+void svlConverter::RGB24toYUV422(unsigned char* input, unsigned char* output, const unsigned int pixelcount, bool ch1, bool ch2, bool ch3)
+{
+    int r, g, b, y1, y2, u1, u2, v1, v2;
+    const unsigned int pixelcounthalf = pixelcount >> 1;
+
+    for (unsigned int i = 0; i < pixelcounthalf; i ++) {
+        r = *input; input ++;
+        g = *input; input ++;
+        b = *input; input ++;
+
+        y1 = r * 2104 + g * 4130 + b * 802 + 4096 + 131072;
+        if (y1 < 0) y1 = -y1;
+        y1 >>= 13;
+        if (y1 > 235) y1 = 235;
+
+        u1 = r * -1214 + g * -2384 + b * 3598 + 4096 + 1048576;
+        if (u1 < 0) u1 = -u1;
+        u1 >>= 13;
+        if (u1 > 240) u1 = 240;
+
+        v1 = r * 3598 + g * -3013 + b * -585 + 4096 + 1048576;
+        if (v1 < 0) v1 = -v1;
+        v1 >>= 13;
+        if (v1 > 240) v1 = 240;
+
+        r = *input; input ++;
+        g = *input; input ++;
+        b = *input; input ++;
+
+        y2 = r * 2104 + g * 4130 + b * 802 + 4096 + 131072;
+        if (y2 < 0) y2 = -y2;
+        y2 >>= 13;
+        if (y2 > 235) y2 = 235;
+
+        u2 = r * -1214 + g * -2384 + b * 3598 + 4096 + 1048576;
+        if (u2 < 0) u2 = -u2;
+        u2 >>= 13;
+        if (u2 > 240) u2 = 240;
+
+        v2 = r * 3598 + g * -3013 + b * -585 + 4096 + 1048576;
+        if (v2 < 0) v2 = -v2;
+        v2 >>= 13;
+        if (v2 > 240) v2 = 240;
+
+        if (ch1) *output = static_cast<unsigned char>(y1);
+        output ++;
+        if (ch2) *output = static_cast<unsigned char>((u1 + u2) >> 1);
+        output ++;
+        if (ch1) *output = static_cast<unsigned char>(y2);
+        output ++;
+        if (ch3) *output = static_cast<unsigned char>((v1 + v2) >> 1);
+        output ++;
+    }
+}
+
 void svlConverter::RGB24toYUV422P(unsigned char* input, unsigned char* output, const unsigned int pixelcount, bool ch1, bool ch2, bool ch3)
 {
     int r, g, b, y1, y2, u1, u2, v1, v2;

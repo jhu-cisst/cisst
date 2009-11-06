@@ -380,7 +380,6 @@ CDC1394Source::CDC1394Source() :
     CaptureThread(0),
     CameraFileNo(0),
     CameraFDSet(0),
-    CameraNFDS(0),
     Context(0),
     CameraList(0),
     Cameras(0),
@@ -420,7 +419,6 @@ int CDC1394Source::SetStreamCount(unsigned int numofstreams)
     CaptureThread = new osaThread*[NumOfStreams];
     CameraFileNo = new int[NumOfStreams];
     CameraFDSet = new fd_set[NumOfStreams];
-    CameraNFDS = new int[NumOfStreams];
     DeviceID = new int[NumOfStreams];
     Format = new svlFilterSourceVideoCapture::ImageFormat*[NumOfStreams];
     Trigger = new svlFilterSourceVideoCapture::ExternalTrigger[NumOfStreams];
@@ -435,7 +433,6 @@ int CDC1394Source::SetStreamCount(unsigned int numofstreams)
         CaptureThread[i] = 0;
         CameraFileNo[i] = 0;
         FD_ZERO(&(CameraFDSet[i]));
-        CameraNFDS[i] = 0;
         DeviceID[i] = -1;
         Format[i] = 0;
         memset(&(Trigger[i]), 0, sizeof(svlFilterSourceVideoCapture::ExternalTrigger));
@@ -798,7 +795,7 @@ int CDC1394Source::Open()
         }
         // Get file descriptor for camera
         CameraFileNo[i] = dc1394_capture_get_fileno(Cameras[DeviceID[i]]);
-        CameraNFDS[i] = CameraFileNo[i] + 1;
+        FD_SET(CameraFileNo[i], &(CameraFDSet[i]));
 
         if (dc1394_external_trigger_set_mode(Cameras[DeviceID[i]],
                                              DC1394_TRIGGER_MODE_0) != DC1394_SUCCESS) {
@@ -841,7 +838,6 @@ void CDC1394Source::Close()
 
         if (CameraFileNo[i]) {
             FD_CLR(CameraFileNo[i], &(CameraFDSet[i]));
-            CameraNFDS[i] = 0;
         }
 
         if (OutputBuffer[i]) {
@@ -1009,14 +1005,13 @@ int CDC1394Source::CaptureFrame(unsigned int videoch)
 #if (__verbose__ >= 4)
     cerr << "CDC1394Source::CaptureFrame - waiting for frame" << endl;
 #endif
-    FD_SET(CameraFileNo[videoch], &(CameraFDSet[videoch]));
     timeval tv;
     tv.tv_sec = 2;
     tv.tv_usec = 0;
-    int ret = select(CameraNFDS[videoch], &(CameraFDSet[videoch]), 0, 0, &tv );
+    int ret = select(FD_SETSIZE, &(CameraFDSet[videoch]), 0, 0, &tv );
     if (ret == 0) { // timeout
 #if (__verbose__ >= 1)
-        cerr << "CDC1394Source::CaptureFrame - frame timeout" << endl;
+        cerr << "CDC1394Source::CaptureFrame - frame timeout (channel: " << videoch << ")" << endl;
 #endif
         return SVL_FAIL;
     }
@@ -1345,7 +1340,6 @@ void CDC1394Source::Release()
     if (CaptureThread) delete [] CaptureThread;
     if (CameraFileNo) delete [] CameraFileNo;
     if (CameraFDSet) delete [] CameraFDSet;
-    if (CameraNFDS) delete [] CameraNFDS;
     if (DeviceID) delete [] DeviceID;
     if (Format) {
         for (i = 0; i < NumOfStreams; i ++) {
@@ -1368,7 +1362,6 @@ void CDC1394Source::Release()
     NumOfStreams = 0;
     CameraFileNo = 0;
     CameraFDSet = 0;
-    CameraNFDS = 0;
     DeviceID = 0;
     Format = 0;
     ColorCoding = 0;
@@ -1911,7 +1904,7 @@ void* CDC1394SourceThread::Proc(CDC1394Source* baseref)
             Error = true;
             break;
         }
-        osaSleep(0.01);
+        osaSleep(0.005);
     }
 
 	return this;

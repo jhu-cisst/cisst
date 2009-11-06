@@ -597,40 +597,57 @@ IF(UNIX)
 
 
     IF(CISST_SVL_HAS_X11 OR NOT DEFINED X11_FOUND)
-    FIND_PACKAGE(X11)
-    IF(X11_FOUND)
-        SET(SVL_ADDITIONAL_INCLUDE_DIRECTORIES
-            "${SVL_ADDITIONAL_INCLUDE_DIRECTORIES}"
-            "${X11_INCLUDE_DIR}"
-            )
-        SET(SVL_ADDITIONAL_LIBRARIES
-            "${SVL_ADDITIONAL_LIBRARIES}"
-            "${X11_LIBRARIES}"
-            )
+        FIND_PACKAGE(X11)
+        IF(X11_FOUND)
+            SET(SVL_ADDITIONAL_INCLUDE_DIRECTORIES
+                "${SVL_ADDITIONAL_INCLUDE_DIRECTORIES}"
+                "${X11_INCLUDE_DIR}"
+                )
+            SET(SVL_ADDITIONAL_LIBRARIES
+                "${SVL_ADDITIONAL_LIBRARIES}"
+                "${X11_LIBRARIES}"
+                )
+            SET(SOURCE_FILES
+                ${SOURCE_FILES}
+                winX11.h                 # private header
+                winX11.cpp
+                svlFilterImageWindow.cpp
+                )
+            SET(HEADER_FILES
+                ${HEADER_FILES}
+                svlFilterImageWindow.h
+                )
+            MESSAGE(STATUS "X11 found - Switch to advanced view for details")
+            OPTION(CISST_SVL_HAS_X11 "Compile X11 extensions" ON)
 
-        SET(SOURCE_FILES
-            ${SOURCE_FILES}
-            winX11.h                 # private header
-            winX11.cpp
-            svlFilterImageWindow.cpp
-            )
-        SET(HEADER_FILES
-            ${HEADER_FILES}
-            svlFilterImageWindow.h
-            )
-        MESSAGE(STATUS "X11 found - Switch to advanced view for details")
-        OPTION(CISST_SVL_HAS_X11 "Compile X11 extensions" ON)
+            # Search for Xvideo extensions for fast image drawing
+            IF(X11_Xv_FOUND AND X11_Xext_FOUND)
+                SET(SVL_ADDITIONAL_LIBRARIES
+                    "${SVL_ADDITIONAL_LIBRARIES}"
+                    "${X11_Xext_LIB}"
+                    "${X11_Xv_LIB}"
+                    )
+                MESSAGE(STATUS "X11 libraries Xv and Xext were found")
+                OPTION(CISST_SVL_HAS_XV "Compile Xvideo extensions" ON)
+            ELSE(X11_Xv_FOUND AND X11_Xext_FOUND)
+                IF(CISST_SVL_HAS_XV)
+                    MESSAGE(FATAL_ERROR "X11 libraries Xv and Xext are required. Please specify their location.")
+                ELSE(CISST_SVL_HAS_XV)
+                    OPTION(CISST_SVL_HAS_XV "Compile Xvideo extensions" OFF)
+                ENDIF(CISST_SVL_HAS_XV)
+            ENDIF(X11_Xv_FOUND AND X11_Xext_FOUND)
 
-    ELSE(X11_FOUND)
-        IF(CISST_SVL_HAS_X11)
-            MESSAGE(FATAL_ERROR "X11 required. Please specify its location.")
-        ELSE(CISST_SVL_HAS_X11)
-            OPTION(CISST_SVL_HAS_X11 "Compile X11 extensions" OFF)
-        ENDIF(CISST_SVL_HAS_X11)
-    ENDIF(X11_FOUND)
+        ELSE(X11_FOUND)
+            IF(CISST_SVL_HAS_X11)
+                MESSAGE(FATAL_ERROR "X11 required. Please specify its location.")
+            ELSE(CISST_SVL_HAS_X11)
+                OPTION(CISST_SVL_HAS_X11 "Compile X11 extensions" OFF)
+            ENDIF(CISST_SVL_HAS_X11)
+        ENDIF(X11_FOUND)
 
     ELSE(CISST_SVL_HAS_X11 OR NOT DEFINED X11_FOUND)
         OPTION(CISST_SVL_HAS_X11 "Compile X11 extensions" OFF)
+        SET(CISST_SVL_HAS_XV "OFF" CACHE INTERNAL "SVL Has Xvideo")
     ENDIF(CISST_SVL_HAS_X11 OR NOT DEFINED X11_FOUND)
 
 ELSE(UNIX)
@@ -639,6 +656,7 @@ ELSE(UNIX)
     SET(CISST_SVL_HAS_VIDEO4LINUX2 "OFF" CACHE INTERNAL "SVL Has Video4Linux2")
     SET(CISST_SVL_HAS_DC1394       "OFF" CACHE INTERNAL "SVL Has DC1394")
     SET(CISST_SVL_HAS_X11          "OFF" CACHE INTERNAL "SVL Has X11")
+    SET(CISST_SVL_HAS_XV           "OFF" CACHE INTERNAL "SVL Has Xvideo")
 
 ENDIF(UNIX)
 
