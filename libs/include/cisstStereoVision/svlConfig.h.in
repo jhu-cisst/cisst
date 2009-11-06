@@ -49,5 +49,11 @@ http://www.cisst.org/cisst/license.txt.
 // Support for video4linux2
 #define CISST_SVL_HAS_MIL @CISST_SVL_HAS_MIL@
 
+// Support for X11
+#define CISST_SVL_HAS_X11 @CISST_SVL_HAS_X11@
+
+// Support for Xvideo
+#define CISST_SVL_HAS_XV @CISST_SVL_HAS_XV@
+
 #endif // _svlConfig_h
 

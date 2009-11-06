@@ -101,7 +101,10 @@ public:
     // methods to overwrite
     virtual int DoModal(bool show, bool fullscreen) = 0;
     virtual void Show(bool show, int winid) = 0;
-    virtual void DrawImageThreadSafe(unsigned char *buffer, unsigned int buffersize, unsigned int winid) = 0;
+    virtual void LockBuffers() {}
+    virtual void UnlockBuffers() {}
+    virtual void SetImageBuffer(unsigned char *buffer, unsigned int buffersize, unsigned int winid) = 0;
+    virtual void DrawImages() = 0;
     virtual void Destroy() = 0;
     virtual void DestroyThreadSafe() = 0;
 
