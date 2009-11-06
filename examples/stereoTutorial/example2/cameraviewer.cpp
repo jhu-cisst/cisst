@@ -295,7 +295,7 @@ int CameraViewer(bool interpolation, bool save, int width, int height)
 #endif // CISST_SVL_HAS_ZLIB
     viewer_window.SetCallback(&viewer_window_cb);
     viewer_window.SetTitleText("Camera Viewer");
-    viewer_window.EnableTimestampInTitle();
+//    viewer_window.EnableTimestampInTitle();
 
     // chain filters to pipeline
     if (viewer_stream.Trunk().Append(&viewer_source) != SVL_OK) goto labError;
@@ -310,15 +310,15 @@ int CameraViewer(bool interpolation, bool save, int width, int height)
     if (viewer_stream.Trunk().Append(&viewer_window) != SVL_OK) goto labError;
     if (viewer_stream.Trunk().Append(&viewer_fps) != SVL_OK) goto labError;
 
-    // put the recorder on a branch in order to enable buffering
-    if (width > 0 && height > 0) {
-        viewer_stream.CreateBranchAfterFilter(&viewer_resizer, "Recorder", 200); // Buffer size in frames
-    }
-    else {
-        viewer_stream.CreateBranchAfterFilter(&viewer_source, "Recorder", 200); // Buffer size in frames
-    }
 #if (CISST_SVL_HAS_ZLIB == ON)
     if (save == true) {
+        // put the recorder on a branch in order to enable buffering
+        if (width > 0 && height > 0) {
+            viewer_stream.CreateBranchAfterFilter(&viewer_resizer, "Recorder", 200); // Buffer size in frames
+        }
+        else {
+            viewer_stream.CreateBranchAfterFilter(&viewer_source, "Recorder", 200); // Buffer size in frames
+        }
         if (viewer_stream.Branch("Recorder").Append(&viewer_writer) != SVL_OK) goto labError;
     }
 #endif // CISST_SVL_HAS_ZLIB

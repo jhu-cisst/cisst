@@ -311,7 +311,7 @@ int CameraViewer(bool interpolation, bool save, int width, int height, int fulls
 #endif // CISST_SVL_HAS_ZLIB
     viewer_window.SetCallback(&viewer_window_cb);
     viewer_window.SetTitleText("Camera Viewer");
-    viewer_window.EnableTimestampInTitle();
+//    viewer_window.EnableTimestampInTitle();
 	if (fullscreen >= 0) {
 		viewer_window.SetFullScreen();
 		if (fullscreen == 0) {
@@ -459,7 +459,7 @@ int main(int argc, char** argv)
     bool interpolation, save;
 
     options = argc - 1;
-    save = true;
+    save = false;
     interpolation = false;
     width = -1;
     height = -1;
