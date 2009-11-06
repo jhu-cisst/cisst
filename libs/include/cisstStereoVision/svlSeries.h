@@ -23,7 +23,10 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlSeries_h
 #define _svlSeries_h
 
-class svlSeries
+// Always include last!
+#include <cisstStereoVision/svlExport.h>
+
+class CISST_EXPORT svlSeries
 {
 public:
     svlSeries();

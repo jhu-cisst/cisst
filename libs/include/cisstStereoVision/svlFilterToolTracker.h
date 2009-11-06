@@ -58,7 +58,7 @@ private:
     svlSampleImageBase* WarpedImage;
 };
 
-class svlToolTrackerAlgorithmBase
+class CISST_EXPORT svlToolTrackerAlgorithmBase
 {
 friend class svlFilterToolTracker;
 

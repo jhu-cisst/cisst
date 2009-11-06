@@ -31,7 +31,7 @@ http://www.cisst.org/cisst/license.txt.
 #define SVL_SYNC_TIMEOUT    1
 
 
-class svlSyncPoint
+class CISST_EXPORT svlSyncPoint
 {
 public:
     svlSyncPoint();

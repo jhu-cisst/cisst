@@ -29,7 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlExport.h>
 
 
-class CISST_EXPORT svlStreamBranchSource : public svlFilterSourceBase
+class svlStreamBranchSource : public svlFilterSourceBase
 {
 friend class svlStreamManager;
 friend class svlStreamControlMultiThread;

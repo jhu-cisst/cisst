@@ -26,7 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlFilterPointTracker.h>
 
 
-class svlTrackerOpenCV : public svlPointTrackerAlgoBase
+class CISST_EXPORT svlTrackerOpenCV : public svlPointTrackerAlgoBase
 {
 public:
     svlTrackerOpenCV();

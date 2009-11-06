@@ -127,7 +127,7 @@ inline bool IsTypeUWord<unsigned short>(unsigned short CMN_UNUSED(val)) { return
 // Stream data structure definitions //
 ///////////////////////////////////////
 
-class svlSample
+class CISST_EXPORT svlSample
 {
 public:
     svlSample();
@@ -148,7 +148,7 @@ private:
 };
 
 
-class svlSampleImageBase : public svlSample
+class CISST_EXPORT svlSampleImageBase : public svlSample
 {
 public:
     svlSampleImageBase();
@@ -173,7 +173,7 @@ public:
 
 
 template <class _ValueType, unsigned int _DataChannels, unsigned int _VideoChannels>
-class svlSampleImageCustom : public svlSampleImageBase
+class CISST_EXPORT svlSampleImageCustom : public svlSampleImageBase
 {
 public:
     svlSampleImageCustom() :
@@ -419,7 +419,7 @@ typedef svlSampleImageCustom<unsigned char,  4, 2>   svlSampleImageRGBAStereo;
 typedef svlSampleImageCustom<float,          1, 1>   svlSampleDepthMap;
 
 
-class svlSampleRigidXform : public svlSample
+class CISST_EXPORT svlSampleRigidXform : public svlSample
 {
 public:
     svlSampleRigidXform();
@@ -434,7 +434,7 @@ public:
 };
 
 
-class svlSamplePointCloud : public svlSample
+class CISST_EXPORT svlSamplePointCloud : public svlSample
 {
 public:
     svlSamplePointCloud();

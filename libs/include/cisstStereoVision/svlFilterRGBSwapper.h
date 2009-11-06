@@ -25,7 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstStereoVision/svlStreamManager.h>
 
-class svlFilterRGBSwapper : public svlFilterBase
+class CISST_EXPORT svlFilterRGBSwapper : public svlFilterBase
 {
 public:
     svlFilterRGBSwapper();
