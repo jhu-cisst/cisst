@@ -620,22 +620,27 @@ IF(UNIX)
             MESSAGE(STATUS "X11 found - Switch to advanced view for details")
             OPTION(CISST_SVL_HAS_X11 "Compile X11 extensions" ON)
 
-            # Search for Xvideo extensions for fast image drawing
-            IF(X11_Xv_FOUND AND X11_Xext_FOUND)
-                SET(SVL_ADDITIONAL_LIBRARIES
-                    "${SVL_ADDITIONAL_LIBRARIES}"
-                    "${X11_Xext_LIB}"
-                    "${X11_Xv_LIB}"
-                    )
-                MESSAGE(STATUS "X11 libraries Xv and Xext were found")
-                OPTION(CISST_SVL_HAS_XV "Compile Xvideo extensions" ON)
-            ELSE(X11_Xv_FOUND AND X11_Xext_FOUND)
-                IF(CISST_SVL_HAS_XV)
-                    MESSAGE(FATAL_ERROR "X11 libraries Xv and Xext are required. Please specify their location.")
-                ELSE(CISST_SVL_HAS_XV)
-                    OPTION(CISST_SVL_HAS_XV "Compile Xvideo extensions" OFF)
-                ENDIF(CISST_SVL_HAS_XV)
-            ENDIF(X11_Xv_FOUND AND X11_Xext_FOUND)
+            IF(CMAKE_SYSTEM_NAME MATCHES Linux)
+                # Xv video acceleration is not supported on Darwin (as of yet)
+                # Search for Xvideo extensions for fast image drawing
+                IF(X11_Xv_FOUND AND X11_Xext_FOUND)
+                    SET(SVL_ADDITIONAL_LIBRARIES
+                        "${SVL_ADDITIONAL_LIBRARIES}"
+                        "${X11_Xext_LIB}"
+                        "${X11_Xv_LIB}"
+                        )
+                    MESSAGE(STATUS "X11 libraries Xv and Xext were found")
+                    OPTION(CISST_SVL_HAS_XV "Compile Xvideo extensions" ON)
+                ELSE(X11_Xv_FOUND AND X11_Xext_FOUND)
+                    IF(CISST_SVL_HAS_XV)
+                        MESSAGE(FATAL_ERROR "X11 libraries Xv and Xext are required. Please specify their location.")
+                    ELSE(CISST_SVL_HAS_XV)
+                        OPTION(CISST_SVL_HAS_XV "Compile Xvideo extensions" OFF)
+                    ENDIF(CISST_SVL_HAS_XV)
+                ENDIF(X11_Xv_FOUND AND X11_Xext_FOUND)
+            ELSE(CMAKE_SYSTEM_NAME MATCHES Linux)
+                SET(CISST_SVL_HAS_XV "OFF" CACHE INTERNAL "SVL Has Xvideo")
+            ENDIF(CMAKE_SYSTEM_NAME MATCHES Linux)
 
         ELSE(X11_FOUND)
             IF(CISST_SVL_HAS_X11)
