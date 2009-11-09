@@ -41,14 +41,7 @@ class devNDISerialControllerQDevice : public QObject, public mtsDevice
 
     void Configure(const std::string & CMN_UNUSED(filename) = "") {};
 
-    void AddToolWidget(QWidget * toolWidget, const unsigned int index);
-
- public slots:
-    void NDIBeepQSlot(void);
-    void NDIInitializeQSlot(void);
-    void NDICalibratePivotQSlot(void);
-    void NDITrackQSlot(bool value);
-    void CollectQSlot(bool value);
+    void AddToolWidget(QWidget * toolWidget);
 
  protected:
     void CreateMainWindow(void);
@@ -62,9 +55,16 @@ class devNDISerialControllerQDevice : public QObject, public mtsDevice
         mtsFunctionVoid Initialize;
         mtsFunctionVoid Query;
         mtsFunctionVoid Enable;
-        mtsFunctionVoid CalibratePivot;
+        mtsFunctionWrite CalibratePivot;
         mtsFunctionWrite Track;
     } NDI;
+
+ public slots:
+    void NDIBeepQSlot(void);
+    void NDIInitializeQSlot(void);
+    void NDICalibratePivotQSlot(void);
+    void NDITrackQSlot(bool value);
+    void CollectQSlot(bool value);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(devNDISerialControllerQDevice);

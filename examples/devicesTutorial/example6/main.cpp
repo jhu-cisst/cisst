@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
     taskManager->AddTask(devNDISerialTask);
     taskManager->AddDevice(controllerQDevice);
 
-    // connect the tasks, i.e. RequiredInterface -> ProvidedInterface
+    // connect the tasks, e.g. RequiredInterface -> ProvidedInterface
     taskManager->Connect("controllerQDevice", "RequiresNDISerialController",
                          "devNDISerial", "ProvidesNDISerialController");
 
@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
     for (unsigned int i = 0; i < numberOfTools; i++) {
         std::string toolName = devNDISerialTask->GetToolName(i);
         devNDISerialToolQDevice * toolQDevice = new devNDISerialToolQDevice(toolName);
-        controllerQDevice->AddToolWidget(toolQDevice->GetToolWidget(), i);
+        controllerQDevice->AddToolWidget(toolQDevice->GetToolWidget());
         taskManager->AddDevice(toolQDevice);
         taskManager->Connect(toolName, toolName,
                              "devNDISerial", toolName);

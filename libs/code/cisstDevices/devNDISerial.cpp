@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet, Ali Uneri
   Created on: 2009-10-13
 
-  (C) Copyright 2008 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -29,8 +29,7 @@ CMN_IMPLEMENT_SERVICES(devNDISerial);
 
 devNDISerial::devNDISerial(const std::string & taskName, const std::string & serialPort) :
     mtsTaskContinuous(taskName, 5000),
-    IsTracking(false),
-    Tooltip(0.0)
+    IsTracking(false)
 {
     mtsProvidedInterface * provided = AddProvidedInterface("ProvidesNDISerialController");
     if (provided) {
@@ -38,13 +37,13 @@ devNDISerial::devNDISerial(const std::string & taskName, const std::string & ser
         provided->AddCommandVoid(&devNDISerial::PortHandlesInitialize, this, "PortHandlesInitialize");
         provided->AddCommandVoid(&devNDISerial::PortHandlesQuery, this, "PortHandlesQuery");
         provided->AddCommandVoid(&devNDISerial::PortHandlesEnable, this, "PortHandlesEnable");
-        provided->AddCommandVoid(&devNDISerial::CalibratePivot, this, "CalibratePivot");
+        provided->AddCommandWrite(&devNDISerial::CalibratePivot, this, "CalibratePivot", prmString(512));
         provided->AddCommandWrite(&devNDISerial::ToggleTracking, this, "ToggleTracking");
     }
 
+    // initialize serial port
     memset(SerialBuffer, 0, MAX_BUFFER_SIZE);
     SerialBufferPointer = SerialBuffer;
-
     SerialPort.SetPortName(serialPort);
     if (!SerialPort.Open()) {
         CMN_LOG_CLASS_INIT_ERROR << "devNDISerial: failed to open serial port: " << SerialPort.GetPortName() << std::endl;
@@ -106,7 +105,7 @@ devNDISerial::Tool * devNDISerial::AddTool(const std::string & name, const char 
     char portHandle[3];
     portHandle[2] = '\0';
 
-    // request port handle
+    // request port handle for wireless tool
     CommandSend("PHRQ *********1****");
     ResponseRead();
     sscanf(SerialBuffer, "%2c", portHandle);
@@ -185,7 +184,7 @@ unsigned int devNDISerial::ComputeCRC(const char * data)
     while (*dataPointer) {
         temp = (*dataPointer ^ (crc & 0xff)) & 0xff;
         crc >>= 8;
-	
+
         if (oddParity[temp & 0x0f] ^ oddParity[temp >> 4]) {
             crc ^= 0xc001;
         }
@@ -225,7 +224,6 @@ bool devNDISerial::ResponseRead(const char * expectedMessage)
     CMN_LOG_CLASS_RUN_DEBUG << "ResponseRead: received expected response" << std::endl;
     return true;
 }
-
 
 
 bool devNDISerial::ResponseCheckCRC(void)
@@ -301,7 +299,7 @@ bool devNDISerial::SetSerialPortSettings(osaSerialPort::BaudRateType baudRate,
             CommandAppend('5');
             break;
         default:
-            //! \todo Log error
+            CMN_LOG_CLASS_INIT_ERROR << "SetSerialPortSettings: invalid baud rate" << std::endl;
             return false;
             break;
     }
@@ -314,7 +312,7 @@ bool devNDISerial::SetSerialPortSettings(osaSerialPort::BaudRateType baudRate,
             CommandAppend('1');
             break;
         default:
-            //! \todo Log error
+            CMN_LOG_CLASS_INIT_ERROR << "SetSerialPortSettings: invalid character size" << std::endl;
             return false;
             break;
     }
@@ -330,7 +328,7 @@ bool devNDISerial::SetSerialPortSettings(osaSerialPort::BaudRateType baudRate,
             CommandAppend('2');
             break;
         default:
-            //! \todo Log error
+            CMN_LOG_CLASS_INIT_ERROR << "SetSerialPortSettings: invalid parity checking" << std::endl;
             return false;
             break;
     }
@@ -343,7 +341,7 @@ bool devNDISerial::SetSerialPortSettings(osaSerialPort::BaudRateType baudRate,
             CommandAppend('1');
             break;
         default:
-            //! \todo Log error
+            CMN_LOG_CLASS_INIT_ERROR << "SetSerialPortSettings: invalid stop bits" << std::endl;
             return false;
             break;
     }
@@ -356,7 +354,7 @@ bool devNDISerial::SetSerialPortSettings(osaSerialPort::BaudRateType baudRate,
             CommandAppend('1');
             break;
         default:
-            //! \todo Log error
+            CMN_LOG_CLASS_INIT_ERROR << "SetSerialPortSettings: invalid flow control" << std::endl;
             return false;
             break;
     }
@@ -417,6 +415,12 @@ void devNDISerial::LoadToolDefinitionFile(const char * portHandle, const char * 
     size_t numChunks = (definitionSize + paddingSize) / 128;
     toolDefinitionFile.seekg(0, std::ios::beg);
 
+    if (fileSize > 960) {
+        CMN_LOG_CLASS_INIT_ERROR << "LoadToolDefinitionFile: " << filePath << " of size "
+                                 << fileSize << " bytes exceeds the 960 bytes limit" << std::endl;
+        return;
+    }
+
     char input[65] = { 0 };
     input[64] = '\0';
     char output[129];
@@ -429,7 +433,6 @@ void devNDISerial::LoadToolDefinitionFile(const char * portHandle, const char * 
         for (unsigned int j = 0; j < 64; j++) {
             sprintf(&output[j*2], "%02X", static_cast<unsigned char>(input[j]));
         }
-        //! \todo Validate numChunks
         sprintf(address, "%04X", i * 64);
         CommandInitialize();
         CommandAppend("PVWR ");
@@ -592,7 +595,6 @@ void devNDISerial::PortHandlesEnable(void)
         std::string toolKey = portHandles[i].Pointer();
         tool = PortToTool.GetItem(toolKey);
         if (!tool) {
-            //! \todo Do error recovery
             CMN_LOG_CLASS_RUN_ERROR << "PortHandlesEnable: no tool for port handle: " << toolKey << std::endl;
             return;
         }
@@ -606,7 +608,6 @@ void devNDISerial::PortHandlesEnable(void)
         } else if (strncmp(tool->MainType, "0A", 2) == 0) {
             CommandAppend("D");
         } else {
-            //!< \todo Handle other main types of tools
             CMN_LOG_CLASS_RUN_ERROR << "PortHandlesEnable: unknown tool of main type: " << tool->MainType << std::endl;
             return;
         }
@@ -656,13 +657,11 @@ void devNDISerial::Track(void)
         toolKey = portHandle;
         tool = PortToTool.GetItem(toolKey);
         if (!tool) {
-            //! \todo Do error recovery
             CMN_LOG_CLASS_RUN_ERROR << "Track: no tool for port handle: " << toolKey << std::endl;
             return;
         }
 
         if (strncmp(parsePointer, "MISSING", 7) == 0) {
-            CMN_LOG_CLASS_RUN_WARNING << parsePointer << std::endl;
             CMN_LOG_CLASS_RUN_WARNING << "Track: tool " << tool->Name << " is missing" << std::endl;
             tool->Position.SetValid(false);
             parsePointer += 7;
@@ -678,7 +677,6 @@ void devNDISerial::Track(void)
             parsePointer += 10;
             parsePointer += 8;  // skip Port Status
         } else {
-            //! \todo Parse Port Status here, to get "partially out of volume", etc.
             sscanf(parsePointer, "%6lf%6lf%6lf%6lf%7lf%7lf%7lf%6lf%*8X",
                    &(toolOrientation.W()), &(toolOrientation.X()), &(toolOrientation.Y()), &(toolOrientation.Z()),
                    &(toolPosition.X()), &(toolPosition.Y()), &(toolPosition.Z()),
@@ -689,7 +687,7 @@ void devNDISerial::Track(void)
             tool->Position.Position().Rotation().FromRaw(toolOrientation);
 
             toolPosition.Divide(100.0);
-            toolPosition -= tool->Position.Position().Rotation() * Tooltip;  // apply tooltip offset
+            toolPosition -= tool->Position.Position().Rotation() * tool->TooltipOffset;  // apply tooltip offset
             tool->Position.Position().Translation().Assign(toolPosition);
             tool->ErrorRMS /= 10000.0;
 
@@ -705,23 +703,17 @@ void devNDISerial::Track(void)
         }
         parsePointer += 1;  // skip '\n'
     }
-    //! \todo Parse System Status here
     parsePointer += 4;  // skip System Status
 }
 
 
-void devNDISerial::CalibratePivot(void)
+void devNDISerial::CalibratePivot(const prmString & toolName)
 {
-    const std::string toolName = "02-32887C02";
     const unsigned int numPoints = 500;
 
-    Tool * tool = Tools.GetItem(toolName);
-    vctRot3 rotation;
-    vct3 translation;
-    vct3x3 identity = vct3x3::Eye();
-    vctMat A(3 * numPoints, 6, VCT_COL_MAJOR);
-    vctMat b(3 * numPoints, 1, VCT_COL_MAJOR);
-    Tooltip.SetAll(0.0);
+    CMN_LOG_CLASS_RUN_WARNING << "CalibratePivot: calibrating " << toolName.GetString() << std::endl;
+    Tool * tool = Tools.GetItem(toolName.GetString());
+    tool->TooltipOffset.SetAll(0.0);
 
     CommandSend("TSTART 80");
     ResponseRead("OKAY");
@@ -729,19 +721,22 @@ void devNDISerial::CalibratePivot(void)
     CMN_LOG_CLASS_RUN_WARNING << "CalibratePivot: starting calibration in 5 seconds" << std::endl;
     osaSleep(5.0 * cmn_s);
     CMN_LOG_CLASS_RUN_WARNING << "CalibratePivot: starting calibration" << std::endl;
+    Beep(2);
+
+    vctMat A(3 * numPoints, 6, VCT_COL_MAJOR);
+    vctMat b(3 * numPoints, 1, VCT_COL_MAJOR);
 
     for (unsigned int i = 0; i < numPoints; i++) {
         Track();
-        rotation = tool->Position.Position().Rotation();
-        translation = tool->Position.Position().Translation();
 
-        for (unsigned int r = 0; r < 3; r++) {
-            for (unsigned int c = 0; c < 3; c++) {
-                A.at((i * 3) + r, c) = rotation.Element(r,c);
-                A.at((i * 3) + r, 3 + c) = -identity.Element(r,c);
-            }
-            b.at((i * 3) + r, 0) = translation.Element(r);
-        }
+        vctDynamicMatrixRef<double> rotation(3, 3, 1, numPoints*3, A.Pointer(i*3, 0));
+        rotation.Assign(tool->Position.Position().Rotation());
+
+        vctDynamicMatrixRef<double> identity(3, 3, 1, numPoints*3, A.Pointer(i*3, 3));
+        identity.Assign(-vctRot3::Identity());
+
+        vctDynamicVectorRef<double> translation(3, b.Pointer(i*3, 0));
+        translation.Assign(tool->Position.Position().Translation());
     }
     CommandSend("TSTOP ");
     ResponseRead("OKAY");
@@ -749,15 +744,25 @@ void devNDISerial::CalibratePivot(void)
     nmrLSSolver calibration(A, b);
     calibration.Solve(A, b);
 
+    vct3 tooltip;
     vct3 pivot;
     for (unsigned int i = 0; i < 3; i++) {
-        Tooltip.Element(i) = b.at(i, 0);
-        pivot.Element(i) = b.at(3 + i, 0);
+        tooltip.Element(i) = b.at(i, 0);
+        pivot.Element(i) = b.at(i+3, 0);
     }
+    tool->TooltipOffset = tooltip;
 
-    CMN_LOG_CLASS_RUN_DEBUG << "CalibratePivot: " << std::endl
-                            << "tooltip offset: " << Tooltip << std::endl
-                            << "pivot position: " << pivot << std::endl;
+//    vct3 error;
+//    double errorRMS = 0.0;
+//    for (int i = 0; i < numPoints; i++) {
+//        error = frame[i] * tooltip - pivot;
+//        errorRMS += error.NormSquare();
+//    }
+//    errorRMS = sqrt(error / numPoints);
+
+    CMN_LOG_CLASS_RUN_DEBUG << "CalibratePivot:\n "
+                            << " * tooltip offset: " << tooltip << "\n"
+                            << " * pivot position: " << pivot << std::endl;
 }
 
 
@@ -771,7 +776,8 @@ void devNDISerial::Run(void)
 }
 
 
-devNDISerial::Tool::Tool(void)
+devNDISerial::Tool::Tool(void) :
+    TooltipOffset(0.0)
 {
     PortHandle[2] = '\0';
     MainType[2] = '\0';

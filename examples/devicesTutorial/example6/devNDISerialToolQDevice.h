@@ -45,9 +45,6 @@ class devNDISerialToolQDevice : public QObject, public mtsDevice
         return &CentralWidget;
     }
 
- public slots:
-    void UpdateTimerQSlot(void);
-
  protected:
     Ui::ToolWidget ToolWidget;
     QWidget CentralWidget;
@@ -57,6 +54,9 @@ class devNDISerialToolQDevice : public QObject, public mtsDevice
         mtsFunctionRead GetPositionCartesian;
         prmPositionCartesianGet PositionCartesian;
     } NDI;
+
+ public slots:
+    void UpdateTimerQSlot(void);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(devNDISerialToolQDevice);

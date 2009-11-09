@@ -23,14 +23,13 @@ http://www.cisst.org/cisst/license.txt.
   \brief A cisst wrapper for NDI trackers with serial interface.
   \ingroup cisstDevices
 
-  \bug _snprintf in CommandAppend(int) is Windows-dependent.
-
   \warning Missing support for 14400bps, 921600bps and 1228739bps baud rates in osaSerialPort.
 
-  \todo Refactor and optimize CalibratePivot().
+  \todo Add RMS error to CalibratePivot() (make this a provided command per Tool?).
+  \todo Handle other main types of tools.
+  \todo Parse port/system status, in order to get "partially out of volume", etc.
   \todo Ability to enable/disable individual tools.
-  \todo Cleanup todos in the cpp.
-  \todo Cleanup and comment the header file using Doxygen comments.
+  \todo Cleanup (remove inline functions) and comment the header file.
   \todo Refactor ComputeCRC() and implement a CRC check in CommandSend().
   \todo Every sscanf() should check if valid number of items have been read (wrapper for sscanf?).
   \todo Error handling for all strncpy().
@@ -57,6 +56,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaSerialPort.h>
 #include <cisstMultiTask/mtsTaskContinuous.h>
 #include <cisstParameterTypes/prmPositionCartesianGet.h>
+#include <cisstParameterTypes/prmString.h>
 
 
 class devNDISerial : public mtsTaskContinuous
@@ -84,10 +84,12 @@ protected:
             char SerialNumber[9];
             // PHINF 0004
             char PartNumber[21];
+
+            vct3 TooltipOffset;
     };
 
 public:
-    devNDISerial(const std::string & polarisName, const std::string & serialPort);
+    devNDISerial(const std::string & taskName, const std::string & serialPort);
     ~devNDISerial(void) {};
 
     void Configure(const std::string & CMN_UNUSED(filename) = "");
@@ -152,9 +154,7 @@ protected:
 
     void ToggleTracking(const mtsBool & track);
     void Track(void);
-
-    void CalibratePivot(void);
-    vct3 Tooltip;
+    void CalibratePivot(const prmString & toolName);
 
     osaSerialPort SerialPort;
     char SerialBuffer[MAX_BUFFER_SIZE];

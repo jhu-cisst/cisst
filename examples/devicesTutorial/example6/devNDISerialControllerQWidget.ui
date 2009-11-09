@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>325</width>
-    <height>278</height>
+    <width>272</width>
+    <height>304</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -27,8 +27,8 @@
      </property>
     </spacer>
    </item>
-   <item row="1" column="1" rowspan="6">
-    <spacer name="SpacerInnerLeft">
+   <item row="1" column="0" rowspan="5" colspan="2">
+    <spacer name="SpacerLeft">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
@@ -60,6 +60,19 @@
      </property>
     </widget>
    </item>
+   <item row="1" column="4" rowspan="5" colspan="2">
+    <spacer name="SpacerRight">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>40</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
    <item row="2" column="2" colspan="2">
     <widget class="QPushButton" name="ButtonInitialize">
      <property name="text">
@@ -67,10 +80,13 @@
      </property>
     </widget>
    </item>
-   <item row="3" column="2" colspan="2">
+   <item row="3" column="2">
     <widget class="QPushButton" name="ButtonCalibratePivot">
+     <property name="toolTip">
+      <string>Calibrate the selected tool (starts after 5 seconds, collecting 500 points)</string>
+     </property>
      <property name="text">
-      <string>Calibrate Pivot</string>
+      <string>Calibrate</string>
      </property>
     </widget>
    </item>
@@ -97,14 +113,14 @@
      </property>
     </widget>
    </item>
-   <item row="6" column="2" colspan="2">
+   <item row="7" column="2" colspan="2">
     <widget class="QPushButton" name="ButtonQuit">
      <property name="text">
       <string>Quit</string>
      </property>
     </widget>
    </item>
-   <item row="7" column="2" colspan="2">
+   <item row="8" column="2" colspan="2">
     <spacer name="SpacerBottom">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
@@ -117,8 +133,11 @@
      </property>
     </spacer>
    </item>
-   <item row="1" column="0" rowspan="6">
-    <spacer name="SpacerOuterLeft">
+   <item row="6" column="1" colspan="4">
+    <layout class="QVBoxLayout" name="LayoutTools"/>
+   </item>
+   <item row="6" column="0">
+    <spacer name="horizontalSpacer_2">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
@@ -130,8 +149,8 @@
      </property>
     </spacer>
    </item>
-   <item row="1" column="5" rowspan="6">
-    <spacer name="SpacerOuterRight">
+   <item row="6" column="5">
+    <spacer name="horizontalSpacer">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
@@ -143,18 +162,8 @@
      </property>
     </spacer>
    </item>
-   <item row="1" column="4" rowspan="6">
-    <spacer name="SpacerInnerRight">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>40</width>
-       <height>20</height>
-      </size>
-     </property>
-    </spacer>
+   <item row="3" column="3">
+    <widget class="QComboBox" name="BoxTools"/>
    </item>
   </layout>
  </widget>
