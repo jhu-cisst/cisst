@@ -39,25 +39,13 @@ http://www.cisst.org/cisst/license.txt.
 /*!
   \ingroup cisstCommon
  */
-#if 0
 inline int cmn_snprintf(char * destination, size_t size, const char * format, ...) {
     va_list arguments;
     va_start(arguments, format);
     int result;
-#if (CISST_OS == CISST_WINDOWS)
-    result = _snprintf(destination, size, format, arguments);
-#else
-    result = snprintf(destination, size, format, arguments);
-#endif
+    result = vsnprintf(destination, size, format, arguments);
     va_end(arguments);
     return result;
 }
-#endif
-
-#if (CISST_OS == CISST_WINDOWS)
-    #define cmn_snprintf _snprintf
-#else
-    #define cmn_snprintf snprintf
-#endif
 
 #endif // _cmnStrings_h
