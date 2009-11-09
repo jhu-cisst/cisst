@@ -67,6 +67,7 @@ SET(HEADER_FILES
     cmnRandomSequence.h
     cmnSerializer.h
     cmnStreamRawParser.h
+    cmnStrings.h
     cmnPath.h
     cmnThrow.h
     cmnTokenizer.h

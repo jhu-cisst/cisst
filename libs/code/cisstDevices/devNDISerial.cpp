@@ -18,9 +18,10 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+#include <cisstCommon/cmnStrings.h>
 #include <cisstVector/vctDynamicMatrixTypes.h>
-#include <cisstNumerical/nmrLSSolver.h>
 #include <cisstOSAbstraction/osaSleep.h>
+#include <cisstNumerical/nmrLSSolver.h>
 #include <cisstDevices/devNDISerial.h>
 
 CMN_IMPLEMENT_SERVICES(devNDISerial);
@@ -153,7 +154,7 @@ void devNDISerial::CommandAppend(const char * command)
 
 void devNDISerial::CommandAppend(const int command)
 {
-    SerialBufferPointer += _snprintf(SerialBufferPointer, GetSerialBufferAvailableSize(), "%d", command);
+    SerialBufferPointer += cmn_snprintf(SerialBufferPointer, GetSerialBufferAvailableSize(), "%d", command);
 }
 
 
