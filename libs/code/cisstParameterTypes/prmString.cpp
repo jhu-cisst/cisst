@@ -26,10 +26,14 @@ http://www.cisst.org/cisst/license.txt.
 CMN_IMPLEMENT_SERVICES(prmString);
 
 //it might be a good idea to remove this constructor
-prmString::prmString(): isTruncated(false) {}
+prmString::prmString():
+    mtsGenericObject(),
+    isTruncated(false) {}
 
 //
-prmString::prmString(size_type size) : isTruncated(false)
+prmString::prmString(size_type size) : 
+    mtsGenericObject(),
+    isTruncated(false) 
 {
     DataMember.SetSize(size);
     //set all to null-terminated

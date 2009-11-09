@@ -67,6 +67,16 @@ public:
     //prmString(std::string());
     virtual ~prmString() {};
 
+    //fast way of doing copy constructor:
+
+    prmString(const prmString & other ):
+        mtsGenericObject(other)
+    { 
+        isTruncated=other.isTruncated;
+        DataMember.SetSize(other.Size());
+        DataMember.FastCopyOf(other.DataMember);
+     }
+
     void SetSize(size_type size);
     /*! Set the Data in various ways, 
      *  note that the size can't exceed the size defined in the constructor
@@ -118,6 +128,7 @@ public:
     /*! Human readable output to stream.*/
     void ToStream(std::ostream & outputStream) const;
 
+    friend class prmString;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(prmString);
