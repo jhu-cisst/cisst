@@ -85,7 +85,11 @@ int main(void)
             }
 
             // send
+#ifdef OSA_SOCKET_WITH_STREAM
+            *socket << buffer;
+#else
             socket->Send(buffer);
+#endif // OSA_SOCKET_WITH_STREAM
         }
         osaSleep(100.0 * cmn_ms);
     }

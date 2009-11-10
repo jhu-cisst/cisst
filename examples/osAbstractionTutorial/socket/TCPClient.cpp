@@ -55,12 +55,17 @@ int main(void)
 
     while (isClientConnected) {
         // receive
+#if 1
         do {
             osaSleep(100.0 * cmn_ms);
             bytesRead = socket.Receive(buffer, sizeof(buffer));
         } while (bytesRead <= 0);
         buffer[bytesRead] = 0;
-
+#else
+        std::string rec;
+        // socket >> rec;
+        std::cout << "Received \"" << rec << "\"" << std::endl;
+#endif
         // send
         std::cout << "> Message: ";
         std::cin >> message;
@@ -71,7 +76,11 @@ int main(void)
         } else if (message.compare("exit") == 0) {
             isClientConnected = false;
         }
+#ifdef OSA_SOCKET_WITH_STREAM
+        socket << message;
+#else 
         socket.Send(message);
+#endif // OSA_SOCKET_WITH_STREAM
     }
     socket.Close();
 

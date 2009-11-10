@@ -60,7 +60,95 @@ http://www.cisst.org/cisst/license.txt.
 // Always include last
 #include <cisstOSAbstraction/osaExport.h>
 
+
+#define OSA_SOCKET_WITH_STREAM
+
+#ifdef OSA_SOCKET_WITH_STREAM
+// forward declaration
+class osaSocket;
+
+template <class _element, class _trait = std::char_traits<_element> >
+class osaSocketStreambuf: public std::basic_streambuf<_element, _trait>
+{
+public:
+  
+    typedef std::basic_streambuf<_element, _trait> BaseClassType;
+
+    osaSocketStreambuf(osaSocket * socket):
+        Socket(socket)
+    {
+        CMN_ASSERT(this->Socket);
+    }
+
+protected:
+    typedef typename std::basic_streambuf<_element, _trait>::int_type int_type;
+  
+    /*! Override the basic_streambuf sync for the current file
+      output. */
+    virtual int sync(void);
+  
+    /*! Override the basic_streambuf xsputn for the current file
+      output. */
+    virtual std::streamsize xsputn(const _element * s, std::streamsize n);
+
+    /*! Override the basic_streambuf xsgetn for the current file
+      output. */
+    virtual std::streamsize xsgetn(_element * s, std::streamsize n);
+    
+    /*! Override the basic_streambuf overflow. overflow() is called
+      when sputc() discovers it does not have space in the storage
+      buffer. In our case, it's always. See more on it in the
+      basic_streambuf documentation.
+     */
+    virtual int_type overflow(int_type c = _trait::eof());
+  
+private:
+    osaSocket * Socket;
+};
+
+
+
+template <class _element, class _trait>
+int osaSocketStreambuf<_element, _trait>::sync(void)
+{
+    // do nothing, flush on this->socket? 
+    return 0;
+}
+
+
+template <class _element, class _trait>
+std::streamsize
+osaSocketStreambuf<_element, _trait>::xsputn(const _element *s, std::streamsize n)
+{
+    return this->Socket->Send(s, n);
+}
+
+
+template <class _element, class _trait>
+std::streamsize
+osaSocketStreambuf<_element, _trait>::xsgetn(_element * s, std::streamsize n)
+{
+    return this->Socket->Receive(s, n);
+}
+
+
+template <class _element, class _trait>
+typename osaSocketStreambuf<_element, _trait>::int_type 
+osaSocketStreambuf<_element, _trait>::overflow(int_type c)
+{
+    // follow the basic_streambuf standard
+    if (_trait::eq_int_type(_trait::eof(), c))
+        return (_trait::not_eof(c));
+    char cCopy = _trait::to_char_type(c);
+    return this->Socket->Send(&cCopy, 1);
+}
+
+#endif // OSA_SOCKET_WITH_STREAM
+
 class CISST_EXPORT osaSocket: public cmnGenericObject
+#ifdef OSA_SOCKET_WITH_STREAM
+, public std::iostream
+#endif // OSA_SOCKET_WITH_STREAM
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
@@ -70,6 +158,10 @@ class CISST_EXPORT osaSocket: public cmnGenericObject
     /*! \brief Used for testing
         \return Size of the actual object used by the OS */
     static unsigned int SizeOfInternals(void);
+
+#ifdef OSA_SOCKET_WITH_STREAM
+    osaSocketStreambuf<char> Streambuf;
+#endif // OSA_SOCKET_WITH_STREAM
 
 public:
     enum SocketTypes { UDP, TCP };
@@ -133,6 +225,13 @@ public:
 
     /*! \brief Close the socket */
     void Close(void);
+
+#ifdef OSA_SOCKET_WITH_STREAM
+    /*! Provide a pointer to the stream buffer */
+    virtual std::basic_streambuf<char> * rdbuf(void) {
+        return &Streambuf;
+    }
+#endif // OSA_SOCKET_WITH_STREAM
 
 protected:
     /*! \return IP address (as a number) for the given host */

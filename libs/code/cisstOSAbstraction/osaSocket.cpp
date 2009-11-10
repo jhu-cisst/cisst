@@ -49,6 +49,11 @@ unsigned int osaSocket::SizeOfInternals(void)
 
 
 osaSocket::osaSocket(SocketTypes type)
+#ifdef OSA_SOCKET_WITH_STREAM
+:
+    std::iostream(&Streambuf),
+    Streambuf(this)
+#endif // OSA_SOCKET_WITH_STREAM
 {
     CMN_ASSERT(sizeof(Internals) >= SizeOfInternals());
     memset(&SERVER_ADDR, 0, sizeof(SERVER_ADDR));
@@ -72,6 +77,11 @@ osaSocket::osaSocket(SocketTypes type)
 
 
 osaSocket::osaSocket(int socketFD)
+#ifdef OSA_SOCKET_WITH_STREAM
+:
+    std::iostream(&Streambuf),
+    Streambuf(this)
+#endif // OSA_SOCKET_WITH_STREAM
 {
     SocketType = TCP;
     SocketFD = socketFD;
