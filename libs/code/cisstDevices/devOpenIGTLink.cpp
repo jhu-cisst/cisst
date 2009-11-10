@@ -7,7 +7,7 @@
   Author(s):  Ali Uneri
   Created on: 2009-08-10
 
-  (C) Copyright 2007-2009 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -18,6 +18,7 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+#include <cisstOSAbstraction/osaSleep.h>
 #include <cisstDevices/devOpenIGTLink.h>
 
 CMN_IMPLEMENT_SERVICES(devOpenIGTLink);
@@ -98,8 +99,6 @@ void devOpenIGTLink::Run(void)
 {
     if (!IsConnected) {
         if (ConnectionType == SERVER) {
-            /*! \todo Handle multiple connections by storing the returned
-                      socket pointer in an array */
             do {
                 Socket = SocketServer->Accept();
             } while (Socket == NULL);
@@ -132,7 +131,6 @@ void devOpenIGTLink::Run(void)
                 SkipMessage();
             }
         }
-        //! \todo Handle message types besides TRANSFORM
     }
 }
 
@@ -194,7 +192,6 @@ bool devOpenIGTLink::ReceiveFrame(prmPositionCartesianGet & frameCISST)
         CMN_LOG_CLASS_RUN_ERROR << "ReceiveFrame: size mismatch" << std::endl;
         return false;
     }
-    //! \todo Check for cyclic redundancy (CRC)
 
     igtl_transform_convert_byte_order(FrameIGT);  // convert endian if necessary
     FrameIGTtoCISST(FrameIGT, frameCISST);

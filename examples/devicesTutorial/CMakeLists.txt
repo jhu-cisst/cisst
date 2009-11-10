@@ -34,5 +34,8 @@ if(CISST_HAS_QT)
   include(${QT_USE_FILE})
 
   add_subdirectory(example6)
-  add_subdirectory(example7)
+
+  if(CISST_DEV_HAS_MICRONTRACKER)
+    add_subdirectory(example7)
+  endif(CISST_DEV_HAS_MICRONTRACKER)
 endif(CISST_HAS_QT)

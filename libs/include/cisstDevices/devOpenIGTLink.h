@@ -7,7 +7,7 @@
   Author(s):  Ali Uneri
   Created on: 2009-08-10
 
-  (C) Copyright 2007-2009 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -48,22 +48,20 @@ http://www.cisst.org/cisst/license.txt.
   http://www.na-mic.org/Wiki/index.php/OpenIGTLink/Library/Build
 
   \note Please refer to devicesTutorial/example4 for usage examples.
+
+  \todo Handle multiple connections by storing the returned socket pointer in an array.
+  \todo Check for cyclic redundancy (CRC).
+  \todo Handle message types besides TRANSFORM.
 */
 
 #ifndef _devOpenIGTLink_h
 #define _devOpenIGTLink_h
 
-#include <cisstCommon/cmnUnits.h>
-#include <cisstOSAbstraction/osaSleep.h>
 #include <cisstOSAbstraction/osaSocket.h>
 #include <cisstOSAbstraction/osaSocketServer.h>
 #include <cisstMultiTask/mtsTaskPeriodic.h>
 #include <cisstParameterTypes/prmPositionCartesianGet.h>
-#include <cisstDevices/devConfig.h>
-// always include last
-#include <cisstDevices/devExport.h>
-
-#ifdef CISST_DEV_HAS_OPENIGTLINK
+#include <cisstDevices/devExport.h>  // always include last
 
 #include <igtl_util.h>
 #include <igtl_header.h>
@@ -148,7 +146,5 @@ protected:
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(devOpenIGTLink);
-
-#endif  // CISST_DEV_HAS_OPENIGTLINK
 
 #endif  // _devOpenIGTLink_h
