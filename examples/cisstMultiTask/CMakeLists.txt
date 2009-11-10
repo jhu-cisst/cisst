@@ -19,13 +19,14 @@ if(CISST_HAS_FLTK)
   find_package(FLTK REQUIRED)
   include_directories(${FLTK_INCLUDE_DIR})
 
-  add_subdirectory(FLTKCommandsAndEvents)
+  add_subdirectory(PeriodicTaskFLTK)
+  add_subdirectory(CommandsAndEventsFLTK)
 endif(CISST_HAS_FLTK)
 
 if(CISST_HAS_QT)
   find_package(Qt4 REQUIRED)
   include(${QT_USE_FILE})
 
-  add_subdirectory(QtPeriodicTask)
-  add_subdirectory(QtCommandsAndEvents)
+  add_subdirectory(PeriodicTaskQt)
+  add_subdirectory(CommandsAndEventsQt)
 endif(CISST_HAS_QT)

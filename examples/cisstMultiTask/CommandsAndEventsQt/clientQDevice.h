@@ -18,30 +18,35 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#ifndef _clientTask_h
-#define _clientTask_h
+#ifndef _clientQDevice_h
+#define _clientQDevice_h
 
 #include <cisstMultiTask.h>
 
-#include "ui_client.h"
-#include <QObject>
 #include <QMainWindow>
+#include <QObject>
+
+#include "ui_client.h"
 
 
-class clientTask : public QObject, public mtsDevice
+class clientQDevice : public QObject, public mtsDevice
 {
     Q_OBJECT;
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
-public:
-    clientTask(const std::string & taskName);
-    ~clientTask(void) {};
+ public:
+    clientQDevice(const std::string & taskName);
+    ~clientQDevice(void) {};
 
     void Configure(const std::string & CMN_UNUSED(filename)) {};
 
-protected:
+ protected:
     void EventVoidHandler(void);
     void EventWriteHandler(const mtsInt & value);
+
+    Ui::ClientWidget ClientWidget;
+    QWidget CentralWidget;
+    QMainWindow MainWindow;
 
     mtsFunctionVoid Void;
     mtsFunctionWrite Write;
@@ -50,21 +55,18 @@ protected:
 
     int EventCounter;
 
-    QMainWindow MainWindow;
-    Ui::ClientWindow ClientWindow;
+ signals:
+    void ReadQSignal(int newValue);
+    void QualifiedReadQSignal(int newValue);
+    void EventQSignal(int newValue);
 
-signals:
-    void ReadQtSignal(int newValue);
-    void QualifiedReadQtSignal(int newValue);
-    void EventQtSignal(int newValue);
-
-public slots:
-    void VoidQtSlot(void);
-    void WriteQtSlot(int newValue);
-    void ReadQtSlot(void);
-    void QualifiedReadQtSlot(int newValue);
+ public slots:
+    void VoidQSlot(void);
+    void WriteQSlot(int newValue);
+    void ReadQSlot(void);
+    void QualifiedReadQSlot(int newValue);
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(clientTask);
+CMN_DECLARE_SERVICES_INSTANTIATION(clientQDevice);
 
-#endif  // _clientTask_h
+#endif  // _clientQDevice_h

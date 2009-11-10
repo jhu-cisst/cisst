@@ -20,34 +20,48 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsRequiredInterface.h>
 
-#include "proxyQt.h"
+#include "displayQDevice.h"
 
-CMN_IMPLEMENT_SERVICES(proxyQt);
+CMN_IMPLEMENT_SERVICES(displayQDevice);
 
 
-proxyQt::proxyQt(const std::string & taskName) :
+displayQDevice::displayQDevice(const std::string & taskName) :
     mtsDevice(taskName)
 {
+    // create the cisstMultiTask interface with commands and events
     mtsRequiredInterface * requiredInterface = AddRequiredInterface("DataGenerator");
     if (requiredInterface) {
        requiredInterface->AddFunction("GetData", Generator.GetData);
        requiredInterface->AddFunction("SetAmplitude", Generator.SetAmplitude);
     }
+
+    // create the user interface
+    MainWindow.setCentralWidget(&CentralWidget);
+    MainWindow.adjustSize();
+    MainWindow.setWindowTitle("Periodic Task Example");
+    MainWindow.show();
+
+    UpdateTimer.start(20);
+
+    // connect Qt signals to slots
+    QObject::connect(&UpdateTimer, SIGNAL(timeout()),
+                     this, SLOT(UpdateTimerQSlot()));
+    QObject::connect(CentralWidget.DialAmplitude, SIGNAL(valueChanged(int)),
+                     this, SLOT(SetAmplitudeQSlot(int)));
+    QObject::connect(CentralWidget.ButtonQuit, SIGNAL(clicked()),
+                     &MainWindow, SLOT(close()));
 }
 
 
-void proxyQt::UpdateUI(void)
+void displayQDevice::UpdateTimerQSlot(void)
 {
     Generator.GetData(Data);
-    emit GetData(Data.Data);
-    int value = static_cast<int>(Data.Data * 1000);
-    emit GetData(value);
+    CentralWidget.ValueData->setNum(Data.Data);
 }
 
 
-void proxyQt::SetAmplitude(int value)
+void displayQDevice::SetAmplitudeQSlot(int newValue)
 {
-    AmplitudeData.Data = value;
+    AmplitudeData.Data = newValue;
     Generator.SetAmplitude(AmplitudeData);
-    emit GetRange(value * -1000, value * 1000);
 }

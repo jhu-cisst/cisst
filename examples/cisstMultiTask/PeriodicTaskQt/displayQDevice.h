@@ -18,37 +18,35 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#ifndef _proxyQt_h
-#define _proxyQt_h
+#ifndef _displayQDevice_h
+#define _displayQDevice_h
 
 #include <cisstMultiTask/mtsDevice.h>
 #include <cisstMultiTask/mtsFunctionReadOrWrite.h>
 
+#include <QMainWindow>
 #include <QObject>
+#include <QTimer>
+
+#include "displayQWidget.h"
 
 
-class proxyQt : public QObject, public mtsDevice
+class displayQDevice : public QObject, public mtsDevice
 {
     Q_OBJECT;
-
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
  public:
-    proxyQt(const std::string & taskName);
-    ~proxyQt(void) {};
+    displayQDevice(const std::string & taskName);
+    ~displayQDevice(void) {};
 
     void Configure(const std::string & CMN_UNUSED(filename) = "") {};
 
- public slots:
-    void SetAmplitude(int value);
-    void UpdateUI(void);
-
- signals:
-    void GetData(double value);
-    void GetData(int value);
-    void GetRange(int minimum, int maximum);
-
  protected:
+    displayQWidget CentralWidget;
+    QMainWindow MainWindow;
+    QTimer UpdateTimer;
+
     struct {
        mtsFunctionRead GetData;
        mtsFunctionWrite SetAmplitude;
@@ -56,8 +54,12 @@ class proxyQt : public QObject, public mtsDevice
 
     mtsDouble Data;
     mtsDouble AmplitudeData;
+
+ public slots:
+    void UpdateTimerQSlot(void);
+    void SetAmplitudeQSlot(int newValue);
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(proxyQt);
+CMN_DECLARE_SERVICES_INSTANTIATION(displayQDevice);
 
-#endif  // _proxyQt_h
+#endif  // _displayQDevice_h

@@ -1,8 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2005-2009 Johns Hopkins University (JHU), All Rights
-# Reserved.
+# (C) Copyright 2009 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 # 
@@ -12,23 +11,26 @@
 # 
 # --- end cisst license ---
 
-qt4_wrap_cpp(cisstMultiTaskQtPeriodicTask_QT_UI_SRCS
-             proxyQt.h
+qt4_wrap_cpp(QT_WRAPPED_CPP
+             displayQDevice.h
+             displayQWidget.h
              )
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-add_executable(cisstMultiTaskQtPeriodicTask
-               ${cisstMultiTaskQtPeriodicTask_QT_UI_SRCS}
+add_executable(cisstMultiTaskPeriodicTaskQt
+               ${QT_WRAPPED_CPP}
+               displayQDevice.cpp
+               displayQDevice.h
+               displayQWidget.cpp
+               displayQWidget.h
                main.cpp
-               proxyQt.cpp
-               proxyQt.h
                sineTask.cpp
                sineTask.h
                )
 
-target_link_libraries(cisstMultiTaskQtPeriodicTask
+target_link_libraries(cisstMultiTaskPeriodicTaskQt
                       ${QT_LIBRARIES}
                       )
-cisst_requires(cisstMultiTaskQtPeriodicTask
+cisst_requires(cisstMultiTaskPeriodicTaskQt
                "cisstCommon;cisstOSAbstraction;cisstMultiTask"
                )

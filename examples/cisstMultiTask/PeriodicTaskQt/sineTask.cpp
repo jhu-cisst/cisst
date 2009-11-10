@@ -1,6 +1,6 @@
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
-/* $Id: sineTask.cpp 560 2009-07-18 02:21:22Z adeguet1 $ */
+/* $Id$ */
 
 #include <cisstCommon/cmnConstants.h>
 #include "sineTask.h"
