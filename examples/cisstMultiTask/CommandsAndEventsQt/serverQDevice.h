@@ -26,7 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <QMainWindow>
 #include <QObject>
 
-#include "ui_server.h"
+#include "ui_serverQWidget.h"
 
 
 class serverQDevice: public QObject, public mtsDevice
