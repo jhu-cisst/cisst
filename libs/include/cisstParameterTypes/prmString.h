@@ -127,8 +127,6 @@ public:
 
     /*! Human readable output to stream.*/
     void ToStream(std::ostream & outputStream) const;
-
-    friend class prmString;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(prmString);
