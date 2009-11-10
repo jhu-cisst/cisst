@@ -34,4 +34,5 @@ if(CISST_HAS_QT)
   include(${QT_USE_FILE})
 
   add_subdirectory(example6)
+  add_subdirectory(example7)
 endif(CISST_HAS_QT)

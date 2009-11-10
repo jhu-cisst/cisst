@@ -23,6 +23,7 @@ option(CISST_DEV_HAS_SENSABLEHD "Build Sensable Device using HD library" OFF)
 option(CISST_DEV_HAS_LOPOMOCO "Build LoPoMoCo card extension" OFF)
 option(CISST_DEV_HAS_OPENIGTLINK "Open IGT Link protocol" OFF)
 option(CISST_DEV_HAS_NOVINTHDL "Build Novint Device using HDL library" OFF)
+option(CISST_DEV_HAS_MICRONTRACKER "Claron Micron Tracker libraries" OFF)
 
 # set dependencies
 set(DEPENDENCIES
@@ -31,7 +32,7 @@ set(DEPENDENCIES
     cisstOSAbstraction
     cisstMultiTask
     cisstParameterTypes
-	cisstRobot
+    cisstRobot
     )
 
 set(HEADER_FILES
@@ -39,14 +40,14 @@ set(HEADER_FILES
     devNDISerial.h
     devSartoriusSerial.h
     devExport.h
-	devKeyboard.h
+    devKeyboard.h
     )
 
 set(SOURCE_FILES
     devNull.cpp
     devNDISerial.cpp
     devSartoriusSerial.cpp
-	devKeyboard.cpp
+    devKeyboard.cpp
     )
 
 if(CISST_DEV_HAS_SENSABLEHD)
@@ -72,9 +73,11 @@ endif(CISST_DEV_HAS_LOPOMOCO)
 if(CISST_DEV_HAS_OPENIGTLINK)
   find_package(OpenIGTLink REQUIRED)
   include(${OpenIGTLink_USE_FILE})
-  set(SOURCE_FILES ${SOURCE_FILES}
+  set(SOURCE_FILES
+      ${SOURCE_FILES}
       devOpenIGTLink.cpp)
-  set(HEADER_FILES ${HEADER_FILES}
+  set(HEADER_FILES
+      ${HEADER_FILES}
       devOpenIGTLink.h)
   set(DEV_ADDITIONAL_CMAKE_FILES
       "${DEV_ADDITIONAL_CMAKE_FILES}"
@@ -95,17 +98,41 @@ if(CISST_DEV_HAS_NOVINTHDL)
   include_directories(${NOVINT_INCLUDE_DIR})
   set(SOURCE_FILES ${SOURCE_FILES}
       devNovintHDL.cpp
-	  devNovintHDLMasterSlave.cpp)
+      devNovintHDLMasterSlave.cpp)
   set(HEADER_FILES ${HEADER_FILES}
       devNovintHDL.h
-	  devNovintHDLMasterSlave.h)
+      devNovintHDLMasterSlave.h)
 endif(CISST_DEV_HAS_NOVINTHDL)
+
+if(CISST_DEV_HAS_MICRONTRACKER)
+  find_path(MicronTracker_INCLUDE_DIR
+            NAMES MTC.h
+            HINTS "C:/Program Files/Claron Technology/MicronTracker/Dist")
+  find_library(MicronTracker_LIBRARIES
+               NAMES MTC
+               HINTS ${MicronTracker_INCLUDE_DIR}
+               )
+  include_directories(${MicronTracker_INCLUDE_DIR})
+  set(SOURCE_FILES
+      ${SOURCE_FILES}
+      devMicronTracker.cpp)
+  set(HEADER_FILES
+      ${HEADER_FILES}
+      devMicronTracker.h)
+  set(DEV_ADDITIONAL_INCLUDE_DIR
+      "${DEV_ADDITIONAL_INCLUDE_DIR}"
+      ${MicronTracker_INCLUDE_DIR})
+  set(DEV_ADDITIONAL_LIBRARIES
+      "${DEV_ADDITIONAL_LIBRARIES}"
+      ${MicronTracker_LIBRARIES})
+endif(CISST_DEV_HAS_MICRONTRACKER)
 
 # Exporting settings to applications that link against cisst
 CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_PACKAGES DEV_ADDITIONAL_PACKAGES)
 CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_CMAKE_FILES DEV_ADDITIONAL_CMAKE_FILES)
 CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_LINK_DIRECTORIES DEV_ADDITIONAL_LINK_DIRECTORIES)
 CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_LIBRARIES DEV_ADDITIONAL_LIBRARIES)
+CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_INCLUDE_DIRECTORIES DEV_ADDITIONAL_INCLUDE_DIR)
 
 # Create the config file
 SET(CISST_DEV_CONFIG_FILE ${cisst_BINARY_DIR}/libs/include/cisstDevices/devConfig.h)
@@ -137,3 +164,7 @@ endif(CISST_DEV_HAS_SENSABLEHD)
 if(CISST_DEV_HAS_NOVINTHDL)
   target_link_libraries(cisstDevices ${NOVINT_LIBRARIES})
 endif(CISST_DEV_HAS_NOVINTHDL)
+
+if(CISST_DEV_HAS_MICRONTRACKER)
+  target_link_libraries(cisstDevices ${MicronTracker_LIBRARIES})
+endif(CISST_DEV_HAS_MICRONTRACKER)
