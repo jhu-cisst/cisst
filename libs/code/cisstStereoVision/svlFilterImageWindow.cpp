@@ -321,8 +321,8 @@ int svlFilterImageWindow::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata)
 
     _OnSingleThread(procInfo)
     {
-        WindowManager->DrawImages();
         WindowManager->UnlockBuffers();
+        WindowManager->DrawImages();
         if (Callback) Callback->OnNewFrame(FrameCounter);
     }
 

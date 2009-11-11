@@ -60,7 +60,10 @@ public:
 
     int DoModal(bool show, bool fullscreen);
     void Show(bool show, int winid);
-    void DrawImageThreadSafe(unsigned char* buffer, unsigned int buffersize, unsigned int winid);
+    void LockBuffers();
+    void UnlockBuffers();
+    void SetImageBuffer(unsigned char *buffer, unsigned int buffersize, unsigned int winid);
+    void DrawImages();
     void Destroy();
     void DestroyThreadSafe();
     int FilterMessage(unsigned int winid, MSG* msg);
@@ -75,7 +78,7 @@ private:
     unsigned char** ImageBuffers;
     unsigned int* ImageBufferSizes;
     BITMAPINFO* BitmapInfos;
-    osaCriticalSection* csImage;
+    osaCriticalSection csImage;
 };
 
 #endif // _winWin32_h
