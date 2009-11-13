@@ -13,7 +13,6 @@
 # --- end cisst license ---
 
 option(CISST_HAS_FLTK "cisst has support for FLTK" ON)
-option(CISST_HAS_QT "cisst has support for Qt" ON)
 
 if(CISST_HAS_FLTK)
   find_package(FLTK REQUIRED)
@@ -24,9 +23,6 @@ if(CISST_HAS_FLTK)
 endif(CISST_HAS_FLTK)
 
 if(CISST_HAS_QT)
-  find_package(Qt4 REQUIRED)
-  include(${QT_USE_FILE})
-
   add_subdirectory(PeriodicTaskQt)
   add_subdirectory(CommandsAndEventsQt)
 endif(CISST_HAS_QT)

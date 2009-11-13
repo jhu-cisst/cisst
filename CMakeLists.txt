@@ -112,6 +112,12 @@ IF(CISST_HAS_CISSTNETLIB)
   CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_LIBRARIES CISSTNETLIB_LIBRARIES)
 ENDIF(CISST_HAS_CISSTNETLIB)
 
+# Support for QT
+option(CISST_HAS_QT "Is Qt available.  If not, Qt widgets and some examples won't be compiled" OFF)
+if(CISST_HAS_QT)
+  find_package(Qt4 REQUIRED)
+  include(${QT_USE_FILE})
+endif(CISST_HAS_QT)
 
 # Extra link flag if for Apple
 IF(CISST_HAS_CISSTNETLIB AND APPLE AND CISST_BUILD_SHARED_LIBS)

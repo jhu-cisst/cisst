@@ -27,7 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <QMainWindow>
 
-#include "ui_devNDISerialControllerQWidget.h"
+#include <cisstDevices/devNDISerialControllerQWidget.h>
 
 
 class devNDISerialControllerQDevice : public QObject, public mtsDevice
@@ -46,7 +46,7 @@ class devNDISerialControllerQDevice : public QObject, public mtsDevice
  protected:
     void CreateMainWindow(void);
 
-    Ui::ControllerWidget ControllerWidget;
+    Ui::devNDISerialControllerQWidget ControllerWidget;
     QWidget CentralWidget;
     QMainWindow MainWindow;
 

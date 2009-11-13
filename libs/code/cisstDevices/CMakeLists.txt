@@ -17,6 +17,7 @@
 
 # set the library name
 set(LIBRARY cisstDevices)
+set(LIBRARY_INCLUDE_DIR ${cisstLibs_SOURCE_DIR}/include/${LIBRARY})
 
 # make sure all options are set for all devices to OFF
 option(CISST_DEV_HAS_SENSABLEHD "Build Sensable Device using HD library" OFF)
@@ -126,6 +127,53 @@ if(CISST_DEV_HAS_MICRONTRACKER)
       "${DEV_ADDITIONAL_LIBRARIES}"
       ${MicronTracker_LIBRARIES})
 endif(CISST_DEV_HAS_MICRONTRACKER)
+
+
+  MACRO (CISST_QT4_WRAP_UI outfiles )
+    QT4_EXTRACT_OPTIONS(ui_files ui_options ${ARGN})
+
+    FOREACH (it ${ui_files})
+      GET_FILENAME_COMPONENT(outfile ${it} NAME_WE)
+      GET_FILENAME_COMPONENT(infile ${it} ABSOLUTE)
+# the only thing we modified ... 
+      SET(outfile ${cisst_BINARY_DIR}/libs/include/cisstDevices/${outfile}.h)
+      ADD_CUSTOM_COMMAND(OUTPUT ${outfile}
+        COMMAND ${QT_UIC_EXECUTABLE}
+        ARGS ${ui_options} -o ${outfile} ${infile}
+        MAIN_DEPENDENCY ${infile})
+      SET(${outfiles} ${${outfiles}} ${outfile})
+    ENDFOREACH (it)
+
+  ENDMACRO (CISST_QT4_WRAP_UI)
+
+# Qt widgets
+if(CISST_HAS_QT)
+  include_directories(${CMAKE_CURRENT_BINARY_DIR})
+  qt4_wrap_cpp(CISST_DEV_NDISERIAL_QDEVICES_GENERATED
+               ${LIBRARY_INCLUDE_DIR}/devNDISerialControllerQDevice.h
+               ${LIBRARY_INCLUDE_DIR}/devNDISerialToolQDevice.h
+               )
+  set(CISST_DEV_NDISERIAL_QWIDGETS_UI
+      devNDISerialControllerQWidget.ui
+      devNDISerialToolQWidget.ui)
+  cisst_qt4_wrap_ui(CISST_DEV_NDISERIAL_QWIDGETS_GENERATED
+                    ${CISST_DEV_NDISERIAL_QWIDGETS_UI}
+                    )
+
+  set(ADDITIONAL_SOURCE_FILES
+      ${ADDITIONAL_SOURCE_FILES}
+      ${CISST_DEV_NDISERIAL_QDEVICES_GENERATED}
+      ${CISST_DEV_NDISERIAL_QWIDGETS_GENERATED})
+  set(SOURCE_FILES
+      ${SOURCE_FILES}
+      devNDISerialControllerQDevice.cpp
+      devNDISerialToolQDevice.cpp)
+  set(HEADER_FILES
+      ${HEADER_FILES}
+      devNDISerialControllerQDevice.h
+      devNDISerialToolQDevice.h)
+
+endif(CISST_HAS_QT)
 
 # Exporting settings to applications that link against cisst
 CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_PACKAGES DEV_ADDITIONAL_PACKAGES)

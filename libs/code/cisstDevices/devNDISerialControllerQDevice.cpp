@@ -21,7 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsRequiredInterface.h>
 #include <cisstParameterTypes/prmString.h>
 
-#include "devNDISerialControllerQDevice.h"
+#include <cisstDevices/devNDISerialControllerQDevice.h>
 
 CMN_IMPLEMENT_SERVICES(devNDISerialControllerQDevice);
 

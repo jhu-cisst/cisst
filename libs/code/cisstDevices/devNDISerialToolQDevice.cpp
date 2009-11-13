@@ -22,7 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <QString>
 
-#include "devNDISerialToolQDevice.h"
+#include <cisstDevices/devNDISerialToolQDevice.h>
 
 CMN_IMPLEMENT_SERVICES(devNDISerialToolQDevice);
 

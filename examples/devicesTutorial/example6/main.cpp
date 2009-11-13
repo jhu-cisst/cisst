@@ -35,8 +35,8 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <QApplication>
 
-#include "devNDISerialControllerQDevice.h"
-#include "devNDISerialToolQDevice.h"
+#include <cisstDevices/devNDISerialControllerQDevice.h>
+#include <cisstDevices/devNDISerialToolQDevice.h>
 
 
 int main(int argc, char *argv[])

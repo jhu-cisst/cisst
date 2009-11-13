@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ControllerWidget</class>
- <widget class="QWidget" name="ControllerWidget">
+ <class>devNDISerialControllerQWidget</class>
+ <widget class="QWidget" name="devNDISerialControllerQWidget">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>272</width>
+    <width>279</width>
     <height>304</height>
    </rect>
   </property>

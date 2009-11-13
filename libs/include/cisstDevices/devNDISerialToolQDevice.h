@@ -27,7 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <QTimer>
 
-#include "ui_devNDISerialToolQWidget.h"
+#include <cisstDevices/devNDISerialToolQWidget.h>
 
 
 class devNDISerialToolQDevice : public QObject, public mtsDevice
@@ -46,7 +46,7 @@ class devNDISerialToolQDevice : public QObject, public mtsDevice
     }
 
  protected:
-    Ui::ToolWidget ToolWidget;
+    Ui::devNDISerialToolQWidget ToolWidget;
     QWidget CentralWidget;
     QTimer UpdateTimer;
 
