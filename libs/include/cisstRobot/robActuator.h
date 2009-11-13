@@ -1,67 +1,46 @@
+/*
+
+  Author(s): Simon Leonard
+  Created on: November 11 2009
+
+  (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
+  Reserved.
+
+--- begin cisst license - do not edit ---
+
+This software is provided "as is" under an open source license, with
+no warranty.  The complete license can be found in license.txt and
+http://www.cisst.org/cisst/license.txt.
+
+--- end cisst license ---
+*/
+
 #ifndef _robActuator_h
 #define _robActuator_h
 
 #include <cisstRobot/robDefines.h>
 
 #include <iostream>
+#include <iomanip>
 #include <limits>
+using namespace std;
 
 class robActuator{
 private:
-    
-  double     q;     // actuator position
-  double    qd;     // actuator velocity
-  double   qdd;     // actuator acceleration
-  double    ft;     // force/torque;
-  
+
   double  qmin;     // minimum position
   double  qmax;     // maximum position
   double ftmax;     // (absolute) maximum force/torque 
   
-  //! Set the velocity
-  /**
-     Compute and set the actuator's velocity using a 1st order finite difference
-     \param newq The new joint position
-     \param dt The time increment
-  */
-  void Velocity(double newq, double dt=std::numeric_limits<double>::max()){
-    double newqd=(newq-q)/dt;  // compute the new velocity
-    Acceleration( newqd, dt ); // first compute the acceleration
-    qd = newqd;                // overwrite the velocity
-  }
-  
-  //! Set the acceleration
-  /**
-     Compute and set the actuator's acceleration eusing a 1st order finite 
-     difference
-     \param newq The new joint velocity
-     \param dt The time increment
-  */
-  void Acceleration(double newqd, double dt=std::numeric_limits<double>::max())
-  { qdd = (newqd-qd)/dt; }     // overwrite the acceleration
-  
 public:
   
   robActuator(){ 
-    q = qd = qdd = ft = 0.0;
     qmin = std::numeric_limits<double>::min();
     qmax = std::numeric_limits<double>::max();
     ftmax = std::numeric_limits<double>::max();
   }
   virtual ~robActuator(){}
 
-  //! Return the position
-  virtual double Position()       const { return q; }
-  
-  //! Return the velocity
-  virtual double Velocity()       const { return qd; }
-  
-  //! Return the acceleration
-  virtual double Acceleration()   const { return qdd; }
-
-  //! Return the torque
-  virtual double ForceTorque()    const { return ft; }
-  
   //! Return the minimum position angle
   virtual double PositionMin()    const { return qmin; }
   
@@ -71,53 +50,26 @@ public:
   //! Return the maximum force/torque
   virtual double ForceTorqueMax() const { return ftmax; }
   
-  //! Set the joint position
-  /**
-     Set the position and, subsequently, the velocity and acceleration. The new 
-     position is clipped at the minimum/maximum values
-     \param q The new position
-     \param dt The time increment used to compute the velocity and acceleration
-  */
-  virtual void Position( double newq, 
-			 double dt=std::numeric_limits<double>::max() ){
-    newq = Saturate( newq, PositionMin(), PositionMax() );// clip the position
-    Velocity(newq, dt);                                   // compute the velocity
-    q = newq;                                             // overwrite the pos
-  }
-  
-  //! Set the force/torque
-  /**
-     Set the force/torque. The new value is clipped at the minimum/maximum 
-     force/torque limit.
-     \param t The new torque
-  */
-  virtual void ForceTorque(double newft)
-  { ft = Saturate( newft, -ForceTorqueMax(), ForceTorqueMax() ); }
-  
   virtual void Read( std::istream& is ) {
     is >> qmin >> qmax >> ftmax;
   }
 
   virtual void Write( std::ostream& os ) const {
-    os << std::setw(13) << Position() 
-       << std::setw(13) << Velocity()
-       << std::setw(13) << Acceleration()
-       << std::setw(13) << ForceTorque()
-       << std::setw(13) << PositionMin()
+    os << std::setw(13) << PositionMin()
        << std::setw(13) << PositionMax()
        << std::setw(13) << ForceTorqueMax();
   }
 
   //
-  friend std::ostream& operator << ( std::ostream& os, 
-				     const robActuator& actuator ){
+  friend std::ostream& operator<<( std::ostream& os, 
+				   const robActuator& actuator ){
     actuator.Write( os );
     return os;
   }
 
   //
-  friend std::istream& operator >> ( std::istream& is, 
-				     robActuator& actuator ){
+  friend std::istream& operator>>( std::istream& is, 
+				   robActuator& actuator ){
     actuator.Read( is );
     return is;
   }

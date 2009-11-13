@@ -1,3 +1,20 @@
+/*
+
+  Author(s): Simon Leonard
+  Created on: Nov 11 2009
+
+  (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
+  Reserved.
+
+--- begin cisst license - do not edit ---
+
+This software is provided "as is" under an open source license, with
+no warranty.  The complete license can be found in license.txt and
+http://www.cisst.org/cisst/license.txt.
+
+--- end cisst license ---
+*/
+
 #include <cisstCommon/cmnLogger.h>
 #include <cisstRobot/robManipulator.h>
 #include <cisstRobot/robGUI.h>
@@ -112,10 +129,6 @@ robManipulator::robManipulator( const std::string& linkfile,
 		      << " Failed to load the tool configuration." 
 		      << std::endl;
   }
-
-  vctDynamicVector<double> q( joints.size(), 0.0 );
-  ForwardKinematics( q ); // calls the non-const Fkin
-
 }
 				
 robError robManipulator::LoadRobot( const std::string& filename ){
@@ -138,17 +151,21 @@ robError robManipulator::LoadRobot( const std::string& filename ){
 
   size_t N;
   ifs >> N;
-  links.reserve(N);     // This is important to avoid relocation
-                        // since the pointer of each link is passed to robGUI
-                        // Hence reserve N links.
+
+  // read the links (kinematics+dynamics+geometry) from the input
   for( size_t i=0; i<N; i++ ){
     robLink li;
     ifs >> li;
     links.push_back( li );
-    robGUI::Insert( &links[i] );
+  }
+
+  // Insert the geometry in opengl
+  for( size_t i=0; i<links.size(); i++){
+    robGUI::Insert( &(links[i]) );
   }
 
   ifs >> N;
+  // read the joints 
   for( size_t i=0; i<N; i++ ){
     robJoint ji;
     ifs >> ji;
@@ -157,6 +174,7 @@ robError robManipulator::LoadRobot( const std::string& filename ){
 
   Js = rmatrix(0, joints.size()-1, 0, 5);
   Jn = rmatrix(0, joints.size()-1, 0, 5);
+
 
   return SUCCESS;
 }
@@ -710,7 +728,7 @@ void robManipulator::OSinertia(double Ac[6][6],
 vctDynamicVector<double> 
 robManipulator::InverseDynamics( const vctDynamicVector<double>& q,
 				 const vctDynamicVector<double>& qd,
-				 const vctFixedSizeVector<double,6>& vdwd ) const{
+				 const vctFixedSizeVector<double,6>& vdwd )const{
 
   char UPLO = 'L';
   int NEQS = 6;
@@ -789,8 +807,7 @@ robManipulator::InverseDynamics( const vctDynamicVector<double>& q,
   for( size_t i=0; i<joints.size(); i++ ) 
     Inertterm [i] = 0;
 
-  // make sure there's an acceleration. othewise only consider ccg
-
+  // Ensure there's an acceleration. Orthewise only consider ccg
   if( 0.0 < qdd.Norm() ){
 
     char LOW = 'L';

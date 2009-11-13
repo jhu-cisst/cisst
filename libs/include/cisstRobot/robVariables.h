@@ -1,3 +1,20 @@
+/*
+
+  Author(s): Simon Leonard
+  Created on: Nov 11 2009
+
+  (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
+  Reserved.
+
+--- begin cisst license - do not edit ---
+
+This software is provided "as is" under an open source license, with
+no warranty.  The complete license can be found in license.txt and
+http://www.cisst.org/cisst/license.txt.
+
+--- end cisst license ---
+*/
+
 #ifndef _robVariables_h
 #define _robVariables_h
 
@@ -6,17 +23,19 @@
 #include <iostream>
 #include <bitset>
 
+#include <cisstRobot/robExport.h>
+
 //! Variables of a robot.
 /**
-   robVariables defines the variables used to generate trajectories and control a
-   robot. The variables include joint position, velocities and accelerations
+   robVariables defines the variables used to generate trajectories and control
+   a robot. The variables include joint position, velocities and accelerations
    as well as Cartesian position, velocities and accelerations. Forces and
    torques are also available.
 */
 
 typedef unsigned long long int robVariablesMask;
 
-class robVariables{
+class CISST_EXPORT robVariables{
 private:
 
   // A mask that holds 64 bits variables

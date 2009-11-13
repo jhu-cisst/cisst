@@ -1,15 +1,34 @@
+/*
+
+  Author(s): Simon Leonard
+  Created on: Nov 11 2009
+
+  (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
+  Reserved.
+
+--- begin cisst license - do not edit ---
+
+This software is provided "as is" under an open source license, with
+no warranty.  The complete license can be found in license.txt and
+http://www.cisst.org/cisst/license.txt.
+
+--- end cisst license ---
+*/
+
 #ifndef _robDH_h
 #define _robDH_h
+
+#include <iostream>
 
 #include <cisstVector/vctFixedSizeVector.h>
 #include <cisstVector/vctMatrixRotation3.h>
 #include <cisstVector/vctFrame4x4.h>
 
 #include <cisstRobot/robDefines.h>
-#include <iostream>
+#include <cisstRobot/robExport.h>
 
 //! DH parameters of a link
-class robDH{
+class CISST_EXPORT robDH{
 private:
   
   bool modifiedDH;    // modified DH?
@@ -94,7 +113,8 @@ public:
      a given joint vale.
      \param q The joint value.
      \return The orientation associated with the DH parameters
-  */  vctMatrixRotation3<double,VCT_ROW_MAJOR> Orientation( double q ) const;
+  */
+  vctMatrixRotation3<double,VCT_ROW_MAJOR> Orientation( double q ) const;
 
   //! Read the parameters from an input stream
   /**

@@ -1,3 +1,20 @@
+/*
+
+  Author(s): Simon Leonard
+  Created on: Nov 11 2009
+
+  (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
+  Reserved.
+
+--- begin cisst license - do not edit ---
+
+This software is provided "as is" under an open source license, with
+no warranty.  The complete license can be found in license.txt and
+http://www.cisst.org/cisst/license.txt.
+
+--- end cisst license ---
+*/
+
 #include <cisstCommon/cmnLogger.h>
 
 #include <cisstRobot/robTrajectoryManager.h>
@@ -14,14 +31,16 @@
 #include <iostream>
 
 robMapping::robMapping() {}
+
+
 robMapping::robMapping( const robVariables& from, const robVariables& to ){
-  domain = from;
-  codomain = to;
+  domain = from;      // set the mapping domain
+  codomain = to;      // set the mapping codomain
 }
   
 robTrajectoryManager::robTrajectoryManager(robClock* clock, robSource* source){ 
-  this->clock = clock;
-  this->source = source; 
+  this->clock = clock;     // set the clock
+  this->source = source;   // set the input source
 }
 
 void robTrajectoryManager::Clear(){ trajectories.clear(); }

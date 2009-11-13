@@ -1,20 +1,18 @@
 /*
-  Copyright 2006,2007,2008,2009 Simon Leonard
 
-  This file is part of openman.
+  Author(s): Simon Leonard
+  Created on: Nov 11 2009
 
-  openman is free software; you can redistribute it and/or modify
-  it under the terms of the GNU Lesser General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or (at your
-  option) any later version.
+  (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
+  Reserved.
 
-  openman is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU Lesser General Public License for more details.
+--- begin cisst license - do not edit ---
 
-  You should have received a copy of the GNU Lesser General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+This software is provided "as is" under an open source license, with
+no warranty.  The complete license can be found in license.txt and
+http://www.cisst.org/cisst/license.txt.
+
+--- end cisst license ---
 */
 
 #include <cisstRobot/robWAM.h>

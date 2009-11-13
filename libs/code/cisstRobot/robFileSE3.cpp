@@ -1,3 +1,20 @@
+/*
+
+  Author(s): Simon Leonard
+  Created on: Nov 11 2009
+
+  (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
+  Reserved.
+
+--- begin cisst license - do not edit ---
+
+This software is provided "as is" under an open source license, with
+no warranty.  The complete license can be found in license.txt and
+http://www.cisst.org/cisst/license.txt.
+
+--- end cisst license ---
+*/
+
 #include <cisstCommon/cmnLogger.h>
 #include <cisstRobot/robFileSE3.h>
 #include <typeinfo>
@@ -13,21 +30,21 @@ robError robFileSE3::Open(){
   ifs.open( filename.data() );
   if( !ifs ){
     CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
-		      << ": Could not open " << filename << std::endl;
+		      << ": Could not open " << filename 
+		      << std::endl;
     return ERROR;
   }
   return SUCCESS;
 }
-
 
 robError robFileSE3::Close(){
   ifs.close();
   return SUCCESS;
 }
 
-robError robFileSE3::Write( const robVariables& var ){ return SUCCESS; }
+robError robFileSE3::Write( const robVariables& ){ return SUCCESS; }
 
-robError robFileSE3::Read( robVariables& var ){
+robError robFileSE3::Read( robVariables& var){
 
   std::string line;
 

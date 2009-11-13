@@ -1,3 +1,20 @@
+/*
+
+  Author(s): Simon Leonard
+  Created on: Nov 11 2009
+
+  (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
+  Reserved.
+
+--- begin cisst license - do not edit ---
+
+This software is provided "as is" under an open source license, with
+no warranty.  The complete license can be found in license.txt and
+http://www.cisst.org/cisst/license.txt.
+
+--- end cisst license ---
+*/
+
 #include <cisstCommon/cmnLogger.h>
 
 #include <cisstRobot/robMeshTriangular.h>
@@ -20,58 +37,75 @@ robMeshTriangular::robMeshTriangular(){
 robMeshTriangular::robMeshTriangular( const robMeshTriangular& mesh ){
 
   AllocateMemory( mesh.nvertices, mesh.ntriangles );
+
+  assert( !(0 < mesh.nvertices && mesh.vx == NULL) );
+  assert( !(0 < mesh.nvertices && mesh.vx == NULL) );
+  assert( !(0 < mesh.nvertices && mesh.vx == NULL) );
   memcpy( (void*)vx, (void*)mesh.vx, mesh.nvertices*sizeof(double) );
   memcpy( (void*)vy, (void*)mesh.vy, mesh.nvertices*sizeof(double) );
   memcpy( (void*)vz, (void*)mesh.vz, mesh.nvertices*sizeof(double) );
 
+  assert( !(0 < mesh.ntriangles && mesh.p1 == NULL) );
+  assert( !(0 < mesh.ntriangles && mesh.p2 == NULL) );
+  assert( !(0 < mesh.ntriangles && mesh.p3 == NULL) );
   memcpy( (void*)p1, (void*)mesh.p1, mesh.ntriangles*sizeof(size_t) );
   memcpy( (void*)p2, (void*)mesh.p2, mesh.ntriangles*sizeof(size_t) );
   memcpy( (void*)p3, (void*)mesh.p3, mesh.ntriangles*sizeof(size_t) );
-
+  
+  assert( !(0 < mesh.ntriangles && mesh.nx == NULL) );
+  assert( !(0 < mesh.ntriangles && mesh.ny == NULL) );
+  assert( !(0 < mesh.ntriangles && mesh.nz == NULL) );
   memcpy( (void*)nx, (void*)mesh.nx, mesh.ntriangles*sizeof(double) );
   memcpy( (void*)ny, (void*)mesh.ny, mesh.ntriangles*sizeof(double) );
   memcpy( (void*)nz, (void*)mesh.nz, mesh.ntriangles*sizeof(double) );
-
+  
 }
 
 robMeshTriangular::~robMeshTriangular()
-{  DeallocateMemory();  }
+{ DeallocateMemory(); }
 
 robMeshTriangular& 
-robMeshTriangular::operator= ( const vctFrame4x4<double,VCT_ROW_MAJOR>& Rt ) {
-
-  if( *this != Rt )
-    vctFrame4x4<double,VCT_ROW_MAJOR>::operator=(Rt);
-
-  return *this;
-
-}
-
-robMeshTriangular& robMeshTriangular::operator=(const robMeshTriangular& mesh){
-  if( this != &mesh ){
-    robMeshBase::operator=(mesh);
+robMeshTriangular::operator=( const robMeshTriangular& mesh ){
+  if( mesh != *this ){
 
     DeallocateMemory();
+    AllocateMemory(mesh.nvertices, mesh.ntriangles);
 
-    AllocateMemory( mesh.nvertices, mesh.ntriangles );
+    assert( !(0 < mesh.nvertices && mesh.vx == NULL) );
+    assert( !(0 < mesh.nvertices && mesh.vx == NULL) );
+    assert( !(0 < mesh.nvertices && mesh.vx == NULL) );
     memcpy( (void*)vx, (void*)mesh.vx, mesh.nvertices*sizeof(double) );
     memcpy( (void*)vy, (void*)mesh.vy, mesh.nvertices*sizeof(double) );
     memcpy( (void*)vz, (void*)mesh.vz, mesh.nvertices*sizeof(double) );
     
+    assert( !(0 < mesh.ntriangles && mesh.p1 == NULL) );
+    assert( !(0 < mesh.ntriangles && mesh.p2 == NULL) );
+    assert( !(0 < mesh.ntriangles && mesh.p3 == NULL) );
     memcpy( (void*)p1, (void*)mesh.p1, mesh.ntriangles*sizeof(size_t) );
     memcpy( (void*)p2, (void*)mesh.p2, mesh.ntriangles*sizeof(size_t) );
     memcpy( (void*)p3, (void*)mesh.p3, mesh.ntriangles*sizeof(size_t) );
-    
+
+    assert( !(0 < mesh.ntriangles && mesh.nx == NULL) );
+    assert( !(0 < mesh.ntriangles && mesh.ny == NULL) );
+    assert( !(0 < mesh.ntriangles && mesh.nz == NULL) );
     memcpy( (void*)nx, (void*)mesh.nx, mesh.ntriangles*sizeof(double) );
     memcpy( (void*)ny, (void*)mesh.ny, mesh.ntriangles*sizeof(double) );
     memcpy( (void*)nz, (void*)mesh.nz, mesh.ntriangles*sizeof(double) );
-  }
 
+  }
+  return *this;
+}
+
+robMeshTriangular& 
+robMeshTriangular::operator=(const vctFrame4x4<double,VCT_ROW_MAJOR>& Rt){
+  //cout << __PRETTY_FUNCTION__ << endl;
+  if( Rt != *this )
+    robMeshBase::operator=(Rt);
   return *this;
 }
 
 void robMeshTriangular::AllocateMemory( size_t nv, size_t nt ){
-  
+
   nvertices = nv;
   ntriangles = nt;
 
@@ -93,6 +127,7 @@ void robMeshTriangular::AllocateMemory( size_t nv, size_t nt ){
 }
 
 void robMeshTriangular::DeallocateMemory(){
+
   if( vx != NULL ) delete[] vx;
   if( vy != NULL ) delete[] vy;
   if( vz != NULL ) delete[] vz;
@@ -104,9 +139,11 @@ void robMeshTriangular::DeallocateMemory(){
   if( nx != NULL ) delete[] nx;
   if( ny != NULL ) delete[] ny;
   if( nz != NULL ) delete[] nz;
+
 }
 
 void robMeshTriangular::Draw( ) const{
+
   vctFrame4x4<double,VCT_ROW_MAJOR> Rtcopy = *this;
 
   glMultMatrix( Rtcopy );                // push the transformation
@@ -116,6 +153,7 @@ void robMeshTriangular::Draw( ) const{
   
   for( size_t i=0; i<ntriangles; i++ ){  // draw the mesh
 
+
     glBegin(GL_TRIANGLES);               // draw a triangle
     glNormal3d( nx[i], ny[i], nz[i] );   // set the normal
     glVertex3d( vx[ p1[i] ], vy[ p1[i] ], vz[ p1[i] ] );  // set the vertices
@@ -123,7 +161,6 @@ void robMeshTriangular::Draw( ) const{
     glVertex3d( vx[ p3[i] ], vy[ p3[i] ], vz[ p3[i] ] );
 
     glEnd();                             // done
-
   }
   
   glMultMatrix( Rtcopy.InverseSelf() ); // push the transformation's inverse
@@ -299,7 +336,6 @@ robError robMeshTriangular::Load( const std::string& filename ){
     ny[i] = n[1];
     nz[i] = n[2];
   }
-
   return SUCCESS;
 }
 

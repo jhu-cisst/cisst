@@ -1,5 +1,24 @@
+/*
+
+  Author(s): Simon Leonard
+  Created on: Nov 11 2009
+
+  (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
+  Reserved.
+
+--- begin cisst license - do not edit ---
+
+This software is provided "as is" under an open source license, with
+no warranty.  The complete license can be found in license.txt and
+http://www.cisst.org/cisst/license.txt.
+
+--- end cisst license ---
+*/
+
 #ifndef _robMassBase_h
 #define _robMassBase_h
+
+#include <iostream>
 
 #include <cisstVector/vctFixedSizeVector.h>
 #include <cisstVector/vctFixedSizeMatrix.h>
@@ -12,7 +31,8 @@ protected:
   /**
      Finds the moment of inertia wrt to a parallel axis
   */
-  void ParallelAxis( const vctFixedSizeVector<double,3>& t ) {
+  vctFixedSizeMatrix<double,3,3> 
+  ParallelAxis( const vctFixedSizeVector<double,3>& t ) {
 
     double m = Mass();
     vctFixedSizeVector<double,3> com = CenterOfMass();
@@ -29,9 +49,11 @@ protected:
 					t[2]*t[0], t[2]*t[1], t[2]*t[2] );
 
     It= m * ( tTt * vctFixedSizeMatrix<double,3,3>::Eye() - ttT );
-    SetParameters( m, com, Icm + It );
 
+    return Icm + It;
   }
+
+public:
   
   //! Set the mass parameters
   /**
@@ -48,7 +70,7 @@ protected:
 public:
 
   robMassBase(){}
-  virtual ~robMassBase(){}
+  ~robMassBase(){}
 
   //! Return the mass
   virtual double Mass() const = 0;
@@ -67,9 +89,9 @@ public:
     is >> m >> comx >> comy >> comz >> Ixx >> Iyy >> Izz >> Ixy >> Iyz >> Ixz;
 
     vctFixedSizeVector<double,3>   com(comx, comy, comz);
-    vctFixedSizeMatrix<double,3,3> I (Ixx, Ixy, Ixz,
-				      Ixy, Iyy, Iyz,
-				      Ixz, Iyz, Izz );
+    vctFixedSizeMatrix<double,3,3> I ( Ixx, Ixy, Ixz,
+				       Ixy, Iyy, Iyz,
+				       Ixz, Iyz, Izz );
     SetParameters( m, com, I );
   }
   
@@ -78,16 +100,16 @@ public:
     double m = Mass();
     vctFixedSizeVector<double,3> com = CenterOfMass();
     vctFixedSizeMatrix<double,3,3> moi = MomentOfInertia();
-    os << std::setw(10) << m 
-       << std::setw(10) << com[0] 
-       << std::setw(10) << com[1] 
-       << std::setw(10) << com[2] 
-       << std::setw(10) << moi[0][0] 
-       << std::setw(10) << moi[1][1] 
-       << std::setw(10) << moi[2][2] 
-       << std::setw(10) << moi[0][1] 
-       << std::setw(10) << moi[1][2] 
-       << std::setw(10) << moi[0][2];
+    os << std::setw(13) << m 
+       << std::setw(13) << com[0] 
+       << std::setw(13) << com[1] 
+       << std::setw(13) << com[2] 
+       << std::setw(13) << moi[0][0] 
+       << std::setw(13) << moi[1][1] 
+       << std::setw(13) << moi[2][2] 
+       << std::setw(13) << moi[0][1] 
+       << std::setw(13) << moi[1][2] 
+       << std::setw(13) << moi[0][2];
   }
 
 };

@@ -1,3 +1,20 @@
+/*
+
+  Author(s): Simon Leonard
+  Created on: Nov 11 2009
+
+  (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
+  Reserved.
+
+--- begin cisst license - do not edit ---
+
+This software is provided "as is" under an open source license, with
+no warranty.  The complete license can be found in license.txt and
+http://www.cisst.org/cisst/license.txt.
+
+--- end cisst license ---
+*/
+
 #ifndef _robTrajectoryManager_h
 #define _robTrajectoryManager_h
 
@@ -7,12 +24,14 @@
 
 #include <map>
 
+#include <cisstRobot/robExport.h>
+
 //! robMapping defines the spaces used by a function.
 /** 
     This class defines which DOF are used by a function as input and which 
     DOF are used as output
 */
-class robMapping{
+class CISST_EXPORT robMapping{
 private:
   
   robVariables domain;
@@ -48,7 +67,7 @@ public:
    an input. If the trajectories are "time-based", the the source must be a
    clock
 */
-class robTrajectoryManager {
+class CISST_EXPORT robTrajectoryManager {
   
 protected:
   
