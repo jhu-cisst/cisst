@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s): Anton Deguet
+  Author(s): Anton Deguet, Min Yang Jung
   Created on: 2008-01-30
 
-  (C) Copyright 2004-2008 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -27,19 +27,15 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #if (CISST_OS == CISST_LINUX_RTAI)
-#include <rtai_sem.h>
-#include <rtai_types.h>
-#endif // CISST_LINUX_RTAI
-
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS)
-#include <pthread.h>
-#include <errno.h>
-#include <string.h>
-#endif // CISST_LINUX_RTAI || CISST_LINUX || CISST_DARWIN || CISST_SOLARIS
-
-#if (CISST_OS == CISST_WINDOWS)
-#include <windows.h>
-#endif // CISST_WINDOWS
+    #include <rtai_sem.h>
+    #include <rtai_types.h>
+#elif (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
+    #include <pthread.h>
+    #include <errno.h>
+    #include <string.h>
+#elif (CISST_OS == CISST_WINDOWS)
+    #include <windows.h>
+#endif
 
 
 struct osaMutexInternals {
@@ -47,10 +43,9 @@ struct osaMutexInternals {
 //#if (CISST_OS == CISST_LINUX_RTAI)
 //	SEM* Mutex;
 //#endif // CISST_LINUX_RTAI
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_QNX)
     pthread_mutex_t Mutex;
-#endif // CISST_LINUX || CISST_DARWIN || CISST_SOLARIS || CISST_RTAI
-#if (CISST_OS == CISST_WINDOWS)
+#elif (CISST_OS == CISST_WINDOWS)
 	HANDLE Mutex;
 #endif
 };
@@ -68,26 +63,18 @@ struct osaMutexInternals {
 //}
 //#endif // CISST_LINUX_RTAI
 
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI)
 osaMutex::osaMutex(void)
 {
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_QNX)
     CMN_ASSERT(sizeof(Internals) >= SizeOfInternals());
     if (pthread_mutex_init(&INTERNALS(Mutex), 0) != 0) {
         CMN_LOG_INIT_ERROR << "Class osaMutex: error in constructor \"" << strerror(errno) << "\"" << std::endl;
     }
-}
-#endif // CISST_LINUX || CISST_DARWIN || CISST_SOLARIS || CISST_RTAI
-
-#if (CISST_OS == CISST_WINDOWS)
-osaMutex::osaMutex(void)
-{
+#elif (CISST_OS == CISST_WINDOWS)
     CMN_ASSERT(sizeof(Internals) >= SizeOfInternals());
     INTERNALS(Mutex) = CreateMutex(NULL, FALSE, NULL);
+#endif
 }
-#endif // CISST_WINDOWS
-
-
-
 
 // #if (CISST_OS == CISST_LINUX_RTAI)
 // osaMutex::~osaMutex() {
@@ -95,22 +82,16 @@ osaMutex::osaMutex(void)
 //}
 //#endif // CISST_LINUX_RTAI
 
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI)
-osaMutex::~osaMutex() {
+osaMutex::~osaMutex() 
+{
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_QNX)
     pthread_mutex_destroy(&INTERNALS(Mutex));
-}
-#endif // CISST_LINUX || CISST_DARWIN || CISST_SOLARIS || CISST_LINUX_RTAI
-
-#if (CISST_OS == CISST_WINDOWS)
-osaMutex::~osaMutex() {
+#elif (CISST_OS == CISST_WINDOWS)
     if (INTERNALS(Mutex)) {
         CloseHandle(INTERNALS(Mutex));
     }
+#endif
 }
-#endif // CISST_WINDOWS
-
-
-
 
 unsigned int osaMutex::SizeOfInternals(void) {
     return sizeof(osaMutexInternals);
@@ -123,20 +104,14 @@ unsigned int osaMutex::SizeOfInternals(void) {
 // }
 //#endif // CISST_LINUX_RTAI
 
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI)
-void osaMutex::Lock(void) {
+void osaMutex::Lock(void) 
+{
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_QNX)
     pthread_mutex_lock(&INTERNALS(Mutex));
-}
-#endif // CISST_LINUX || CISST_DARWIN || CISST_SOLARIS || CISST_LINUX_RTAI
-
-#if (CISST_OS == CISST_WINDOWS)
-void osaMutex::Lock(void) {
+#elif (CISST_OS == CISST_WINDOWS)
     WaitForSingleObject(INTERNALS(Mutex), INFINITE);
+#endif
 }
-#endif // CISST_WINDOWS
-
-
-
 
 // #if (CISST_OS == CISST_LINUX_RTAI)
 // void osaMutex::Unlock(void) {
@@ -144,19 +119,14 @@ void osaMutex::Lock(void) {
 // }
 // #endif // CISST_LINUX_RTAI
 
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI)
-void osaMutex::Unlock(void) {
+void osaMutex::Unlock(void) 
+{
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_QNX)
     pthread_mutex_unlock(&INTERNALS(Mutex));
-}
-#endif // CISST_LINUX || CISST_DARWIN || CISST_SOLARIS || CISST_LINUX_RTAI
-
-#if (CISST_OS == CISST_WINDOWS)
-void osaMutex::Unlock(void) {
+#elif (CISST_OS == CISST_WINDOWS)
     ReleaseMutex(INTERNALS(Mutex));
+#endif
 }
-#endif // CISST_WINDOWS
-
-
 
 #if 0
 #if (CISST_OS == CISST_LINUX_RTAI)

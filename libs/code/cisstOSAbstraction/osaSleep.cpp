@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s): Ankur Kapoor
+  Author(s): Ankur Kapoor, Min Yang Jung
   Created on: 2004
 
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -29,26 +29,23 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaSleep.h>
 
 #if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI)
-#include <sys/time.h>
-#include <unistd.h>
-#endif // CISST_LINUX || CISST_DARWIN || CISST_SOLARIS || CISST_LINUX_RTAI
+    #include <sys/time.h>
+    #include <unistd.h>
+#elif (CISST_OS == CISST_WINDOWS)
+    #include <windows.h>
+#elif (CISST_OS == CISST_QNX)
+    #include <time.h>
+#endif
 
-#if (CISST_OS == CISST_WINDOWS)
-#include <windows.h>
-#endif // CISST_WINDOWS
 
-
+void osaSleep(double timeInSeconds) 
+{
 #if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI)
-void osaSleep(double timeInSeconds) {
     // For multi-threaded applications, nanosleep is preferable to usleep (usleep may not be thread-safe).
     // Also, should check that the parameter does not exceed the maximum allowed value of 10^6 microseconds.
     usleep(static_cast<long>(timeInSeconds * 1000000.0));
-}
-#endif // CISST_LINUX || CISST_DARWIN || CISST_SOLARIS || CISST_LINUX_RTAI
 
-    
-#if (CISST_OS == CISST_WINDOWS)
-void osaSleep(double timeInSeconds) {
+#elif (CISST_OS == CISST_WINDOWS)
     // A waitable timer seems to be better than the Windows Sleep().
     HANDLE WaitTimer;
     LARGE_INTEGER dueTime;
@@ -60,6 +57,12 @@ void osaSleep(double timeInSeconds) {
     SetWaitableTimer(WaitTimer, &dueTime, 0, NULL, NULL, 0);
     WaitForSingleObject(WaitTimer, INFINITE);
     CloseHandle(WaitTimer);
+
+#elif (CISST_OS == CISST_QNX)
+    struct timespec ts;
+    _uint64 nsec = (_uint64) timeInSeconds * 1000.0 * 1000.0 * 1000.0;
+    nsec2timespec(&ts, nsec);
+    nanosleep(&ts, NULL);
+#endif
 }
-#endif // CISST_WINDOWS
 

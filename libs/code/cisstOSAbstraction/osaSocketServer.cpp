@@ -32,6 +32,9 @@ CMN_IMPLEMENT_SERVICES(osaSocketServer);
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#if (CISST_OS == CISST_QNX)
+#include <sys/select.h>
+#endif
 #endif
 
 

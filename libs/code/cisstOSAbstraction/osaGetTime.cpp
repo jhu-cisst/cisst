@@ -4,7 +4,7 @@
 /*
   $Id$
 
-  Author(s): Ankur Kapoor, Anton Deguet
+  Author(s): Ankur Kapoor, Anton Deguet, Min Yang Jung
   Created on: 2004
 
   (C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights Reserved.
@@ -40,17 +40,21 @@ http://www.cisst.org/cisst/license.txt.
 #include <time.h>
 #endif // CISST_WINDOWS
 
+#if (CISST_OS == CISST_QNX)
+#include <time.h>
+#endif // CISST_QNX
 
-double osaGetTime(void) {
+double osaGetTime(void)
+{
 #if (CISST_OS == CISST_LINUX_RTAI)
     return rt_get_time_ns() * cmn_ns;
-#endif // CISST_LINUX_RTAI
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS)
+
+#elif (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS)
     struct timeval currentTime;
     gettimeofday(&currentTime, NULL);
-    return ((double) currentTime.tv_sec) + ((double)currentTime.tv_usec) / (1000.0 * 1000.0);
-#endif // CISST_LINUX || CISST_DARWIN || CISST_SOLARIS
-#if (CISST_OS == CISST_WINDOWS)
+    return ((double) currentTime.tv_sec) + ((double)currentTime.tv_usec) * cmn_us;
+
+#elif (CISST_OS == CISST_WINDOWS)
     LARGE_INTEGER liTimerFrequency, liTimeNow;
     double timerFrequency, time;
     if (QueryPerformanceCounter(&liTimeNow) ==0 )    {
@@ -62,7 +66,16 @@ double osaGetTime(void) {
     timerFrequency = (double)liTimerFrequency.QuadPart;
     time = (double)liTimeNow.QuadPart/timerFrequency;
     return time;
-#endif // CISST_WINDOWS
+
+#elif (CISST_OS == CISST_QNX)
+    struct timespec currentTime;
+    if (clock_gettime(CLOCK_REALTIME, &currentTime) == -1) {
+        CMN_LOG_INIT_ERROR << "osaGetTime() failed" << std::endl;
+        return 0;
+    }
+    return ((double)currentTime.tv_sec) + ((double)currentTime.tv_nsec) * cmn_ns;
+
+#endif
 }
 
 void osaGetDateTimeString(std::string & str)

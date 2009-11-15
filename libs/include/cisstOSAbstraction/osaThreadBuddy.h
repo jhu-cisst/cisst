@@ -79,7 +79,7 @@ public:
     \param name Name of thread buddy, the thread will also be referred
     using the same name.
     
-    \param period The period of the thread
+    \param period The period of the thread (in nanosecond)
     
     \param stack_size The stack size allocated to the thread. A
       default value of 8Kb is used. */
@@ -100,12 +100,10 @@ public:
       remainder of the current period. */
     void WaitForRemainingPeriod(void);
     
-    /*! Make a thread hard real time. Always returns false on
-      non-real-time platforms. */
+    /*! Make a thread hard real time. */
     void MakeHardRealTime(void);
 
-    /*! Make a thread soft real time. Always returns true on
-      non-real-time-platforms. */
+    /*! Make a thread soft real time. */
     void MakeSoftRealTime(void);
 
     /*! Resume execution of the thread. */

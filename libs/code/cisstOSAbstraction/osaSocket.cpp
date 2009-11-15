@@ -33,6 +33,9 @@ typedef int socklen_t;
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <string.h>  // for memset
+#if (CISST_OS == CISST_QNX)
+#include <sys/select.h>
+#endif
 #endif
 
 struct osaSocketInternals {

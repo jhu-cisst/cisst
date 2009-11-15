@@ -4,10 +4,10 @@
 /*
   $Id$
   
-  Author(s): Ankur Kapoor
+  Author(s): Ankur Kapoor, Min Yang Jung
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -107,16 +107,14 @@ g
       \returns The result of the callback method which must be of type
       _callBackReturnType type, which is the same as the return type of
       the 'start routine' defined by the platform. */
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS)
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
     static void * CallbackAndDestroy(_callBackArgumentType obj) {
         osaHeapCallBack* _this = (osaHeapCallBack*) obj;
         _callBackReturnType result = (_this->Obj->*_this->CallBackFunction)(_this->UserData);
         delete _this;
         return (void*)result;
     }
-#endif // CISST_LINUX_RTAI || CISST_LINUX || CISST_DARWIN || CISST_SOLARIS
-
-#if (CISST_OS == CISST_WINDOWS)
+#elif (CISST_OS == CISST_WINDOWS)
     // To avoid including <windows.h>, use the unsigned long and __stdcall rather than
     //    DWORD and WINAPI, respectively. This is slightly risky, since <windows.h> could
     //    change, but that is not likely.
@@ -126,7 +124,7 @@ g
         delete _this;
         return (unsigned long)result;
     }
-#endif // CISST_WINDOWS
+#endif
 
 
 protected:

@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s): Anton Deguet
+  Author(s): Anton Deguet, Min Yang Jung
   Created on: 2004-12-10
 
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -34,7 +34,12 @@ http://www.cisst.org/cisst/license.txt.
 #include <string.h>
 #endif
 
+/* MJUNG: For detailed information about serial/paralle devices on QNX, please refer
+   to the following link:
 
+   Connecting Character Devices,
+   http://www.qnx.com/developers/docs/qnx_4.25_docs/qnx4/user_guide/chardev.html
+*/
 
 // implement services with a default log LoD of 3
 CMN_IMPLEMENT_SERVICES(osaSerialPort);
@@ -46,9 +51,10 @@ std::string osaSerialPort::SetPortNumber(unsigned int portNumber) {
     std::stringstream portName;
 #if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_DARWIN)
     portName << "/dev/ttyS" << (portNumber - 1);
-#endif
-#if (CISST_OS == CISST_WINDOWS)
+#elif (CISST_OS == CISST_WINDOWS)
     portName << "COM" << portNumber;
+#elif (CISST_OS == CISST_QNX)
+    portName << "/dev/ser" << portNumber;
 #endif
     PortName = portName.str();
     CMN_LOG_CLASS_INIT_VERBOSE << "Port name set to " << PortName
@@ -105,7 +111,7 @@ bool osaSerialPort::Open(void) {
 }
 #endif
 
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_DARWIN)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_QNX)
 bool osaSerialPort::Open(void) {
     CMN_LOG_CLASS_INIT_VERBOSE << "Start Open for port " << this->PortName << std::endl;
     // check that the port is not already opened
@@ -158,7 +164,7 @@ bool osaSerialPort::Close(void)
 }
 #endif
 
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_DARWIN)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_QNX)
 bool osaSerialPort::Close(void)
 {
     if (this->IsOpenedFlag) {
@@ -257,7 +263,7 @@ bool osaSerialPort::Configure(void) {
 }
 #endif
 
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_DARWIN)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_QNX)
 bool osaSerialPort::Configure(void) { 
     
     CMN_LOG_CLASS_INIT_VERBOSE << "Start Configure for port " << this->PortName << std::endl;
@@ -273,7 +279,9 @@ bool osaSerialPort::Configure(void) {
     tcgetattr(this->FileDescriptor, &portOptions);
 
     // set input and output speed
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_DARWIN)
     cfsetspeed(&portOptions, this->BaudRate); // might be BSD only, if doesn't compile/work on Linux use CISST_DARWIN
+#endif    
     cfsetispeed(&portOptions, this->BaudRate);
     cfsetospeed(&portOptions, this->BaudRate);
     
@@ -314,18 +322,40 @@ bool osaSerialPort::Configure(void) {
     }
 
     // set hardware flow control
+    /* MJUNG: QNX doesn't recognize CRTSCTS.  Instead, setting both IHFLOW and OHFLOW has
+       the same effect as CRTSCTS set.  Refer the following references for details.
+
+       termios (terminal control structure) :
+           http://www.qnx.com/developers/docs/6.3.0SP3/neutrino/lib_ref/t/termios.html
+       Serial Port - hardware flow Control :
+           http://www.openqnx.com/PNphpBB2-viewtopic-t1750-.html
+    */
     switch (this->FlowControl) {
     case FlowControlNone:
         portOptions.c_iflag &= ~(IXOFF | IXON);
+#if (CISST_OS == CISST_QNX)        
+        portOptions.c_cflag &= ~IHFLOW;
+        portOptions.c_cflag &= ~OHFLOW;
+#else
         portOptions.c_cflag &= ~CRTSCTS;
-
+#endif
         break;
     case FlowControlHardware:
         portOptions.c_iflag &= ~(IXOFF | IXON);
+#if (CISST_OS == CISST_QNX)        
+        portOptions.c_cflag |= IHFLOW;
+        portOptions.c_cflag |= OHFLOW;
+#else
         portOptions.c_cflag |= CRTSCTS;
+#endif
         break;
     case FlowControlSoftware:
+#if (CISST_OS == CISST_QNX)        
+        portOptions.c_cflag &= ~IHFLOW;
+        portOptions.c_cflag &= ~OHFLOW;
+#else
         portOptions.c_cflag &= ~CRTSCTS;
+#endif
         portOptions.c_iflag |= (IXON | IXOFF);
         break;
     default:
@@ -405,7 +435,7 @@ int osaSerialPort::Write(const char * data, int nBytes)
 }
 #endif
 
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_DARWIN)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_QNX)
 int osaSerialPort::Write(const char * data, int nBytes)
 {
     // check that the port is opened
@@ -457,7 +487,7 @@ int osaSerialPort::Write(const unsigned char * data, int nBytes)
 }
 #endif
 
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_DARWIN)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_QNX)
 int osaSerialPort::Write(const unsigned char * data, int nBytes)
 {
     // check that the port is opened
@@ -527,7 +557,7 @@ int osaSerialPort::Read(char * data, int nBytes)
 #endif
 
 
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_DARWIN)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_QNX)
 int osaSerialPort::Read(char * data, int nBytes)
 {
     // check that the port is opened
@@ -607,7 +637,7 @@ int osaSerialPort::Read(unsigned char * data, int nBytes)
 #endif
 
 
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_DARWIN)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_QNX)
 int osaSerialPort::Read(unsigned char * data, int nBytes)
 {
     // check that the port is opened
@@ -661,7 +691,7 @@ bool osaSerialPort::WriteBreak(double breakLengthInSeconds)
 #if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_DARWIN)
 bool osaSerialPort::WriteBreak(double breakLengthInSeconds)
 {
-#if (CISST_OS == LINUX) || (CISST_OS == CISST_LINUX_RTAI)
+#if (CISST_OS == LINUX) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_QNX)
     breakLengthInSeconds *= 1000.0; // tcsendbreak on Linux uses milliseconds.
 #endif // CISST_LINUX || CISST_LINUX_RTAI
 
@@ -711,7 +741,7 @@ bool osaSerialPort::Flush(void)
 }
 #endif
 
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_DARWIN)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_QNX)
 bool osaSerialPort::Flush(void)
 {
     // check that the port is opened
