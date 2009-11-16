@@ -306,9 +306,9 @@ bool osaThreadSignal::Wait(double timeoutInSec)
         }
         sec = now.tv_sec + millisec / 1000;
         nsec = now.tv_nsec + (millisec % 1000) * 1000 * 1000;
-        while (nsec >= 1000000000) {
+        while (nsec >= 1000000000L) {
             ++sec;
-            nsec -= 1000000000;
+            nsec -= 1000000000L;
         }
         timeout.tv_sec = sec;
         timeout.tv_nsec = nsec;

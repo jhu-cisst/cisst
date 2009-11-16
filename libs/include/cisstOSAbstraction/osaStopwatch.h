@@ -29,24 +29,37 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnLogger.h>
 
 #if CISST_OS_IS_WINDOWS || (CISST_OS == CISST_CYGWIN)
-#include <Windows.h>
-#elif (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
-#include <sys/time.h>
-
-#if (CISST_OS == CISST_SOLARIS) || (CISST_COMPILER == CISST_GCC) 
-#ifndef timersub
-#define timersub(a, b, res)                           \
-  do {                                                \
-    (res)->tv_sec = (a)->tv_sec - (b)->tv_sec;        \
-    (res)->tv_usec = (a)->tv_usec - (b)->tv_usec;     \
-    if ((res)->tv_usec < 0)                           \
-      {                                               \
-        (res)->tv_sec--;                              \
-        (res)->tv_usec += 1000000;                    \
-      }                                               \
-      } while (0)
+    #include <Windows.h>
+#elif (CISST_OS == CISST_QNX)
+    #include <time.h>
+    #ifndef timersub
+    #define timersub(a, b, res)                         \
+    do {                                                \
+        (res)->tv_sec = (a)->tv_sec - (b)->tv_sec;      \
+        (res)->tv_nsec = (a)->tv_nsec - (b)->tv_nsec;   \
+        if ((res)->tv_nsec < 0)                         \
+        {                                               \
+            (res)->tv_sec--;                            \
+            (res)->tv_nsec += 1000000000L;              \
+        }                                               \
+    } while (0)
     #endif /*timersub*/
-#endif
+#elif (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS)
+    #include <sys/time.h>
+    #if (CISST_OS == CISST_SOLARIS) || (CISST_COMPILER == CISST_GCC) 
+    #ifndef timersub
+    #define timersub(a, b, res)                         \
+    do {                                                \
+        (res)->tv_sec = (a)->tv_sec - (b)->tv_sec;      \
+        (res)->tv_usec = (a)->tv_usec - (b)->tv_usec;   \
+        if ((res)->tv_usec < 0)                         \
+        {                                               \
+            (res)->tv_sec--;                            \
+            (res)->tv_usec += 1000000;                  \
+        }                                               \
+        } while (0)
+    #endif /*timersub*/
+    #endif
 #endif // CISST_OS == CISST_SOLARIS
 
 
@@ -102,9 +115,12 @@ public:
         AccumulatedTime = 0;
 #if (CISST_OS == CISST_WINDOWS) || (CISST_OS == CISST_CYGWIN)
         StartTicks = 0;
-#elif (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
+#elif (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) 
         StartTimeOfDay.tv_sec = 0;
         StartTimeOfDay.tv_usec = 0;
+#elif (CISST_OS == CISST_QNX)
+        StartTimeOfDay.tv_sec = 0;
+        StartTimeOfDay.tv_nsec = 0;
 #endif
     }
 
@@ -125,8 +141,12 @@ public:
         else {
             StartTicks = ::GetTickCount();
         }
-#elif (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
+#elif (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) 
         gettimeofday(&StartTimeOfDay, 0);
+#elif (CISST_OS == CISST_QNX)
+        if (clock_gettime(CLOCK_REALTIME, &StartTimeOfDay) == -1) {
+            CMN_LOG_INIT_ERROR << "Stopwatch start failed" << std::endl;
+        }
 #endif
         RunningFlag = true;
     }
@@ -193,13 +213,20 @@ private:
 #elif (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS)
         timeval endTimeOfDay;
         timeval diffTime;
-#elif (CISST_OS == CISST_QNX)
-        struct timeval endTimeOfDay;
-        struct timeval diffTime;
-#endif
         gettimeofday(&endTimeOfDay, 0);
         timersub(&endTimeOfDay, &StartTimeOfDay, &diffTime);
         SecondsCounter totalSeconds = diffTime.tv_sec + diffTime.tv_usec / 1000000.0;
+#elif (CISST_OS == CISST_QNX)
+        struct timespec endTimeOfDay;
+        struct timespec diffTime;
+        SecondsCounter totalSeconds = 0;
+        if (clock_gettime(CLOCK_REALTIME, &endTimeOfDay) == -1) {
+            CMN_LOG_RUN_ERROR << "GetLastTimeInterval failed" << std::endl;
+        } else {
+            timersub(&endTimeOfDay, &StartTimeOfDay, &diffTime);
+            totalSeconds = diffTime.tv_sec + diffTime.tv_nsec * cmn_ns;
+        }
+#endif
         return totalSeconds;
     }
 
@@ -214,7 +241,7 @@ private:
 #elif (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS)
     timeval StartTimeOfDay;
 #elif (CISST_OS == CISST_QNX)
-    struct timeval StartTimeOfDay;
+    struct timespec StartTimeOfDay;
 #endif
 
 };

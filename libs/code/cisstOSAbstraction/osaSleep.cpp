@@ -60,7 +60,7 @@ void osaSleep(double timeInSeconds)
 
 #elif (CISST_OS == CISST_QNX)
     struct timespec ts;
-    _uint64 nsec = (_uint64) timeInSeconds * 1000.0 * 1000.0 * 1000.0;
+    _uint64 nsec = (_uint64) (timeInSeconds * 1000.0 * 1000.0 * 1000.0);
     nsec2timespec(&ts, nsec);
     nanosleep(&ts, NULL);
 #endif
