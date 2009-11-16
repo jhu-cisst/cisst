@@ -327,8 +327,10 @@ void mtsTaskManager::ToStreamDot(std::ostream & outputStream) const {
 bool mtsTaskManager::Connect(const std::string & userTaskName, const std::string & requiredInterfaceName,
                              const std::string & resourceTaskName, const std::string & providedInterfaceName)
 {
-    // True if the resource task specified is provided by a remote task
-    bool requestServerSideConnect = false;
+#if CISST_MTS_HAS_ICE
+    mtsTask * clientTask = 0;
+    bool requestServerSideConnect = false; // True if the resource task is at remote
+#endif //CISST_MTS_HAS_ICE
 
     const UserType fullUserName(userTaskName, requiredInterfaceName);
     const ResourceType fullResourceName(resourceTaskName, providedInterfaceName);
@@ -361,7 +363,6 @@ bool mtsTaskManager::Connect(const std::string & userTaskName, const std::string
         resourceDevice = TaskMap.GetItem(resourceTaskName, CMN_LOG_LOD_INIT_ERROR);
     }
     // find the interface pointer from the local resource first
-    mtsTask * clientTask = 0;
     mtsDeviceInterface * resourceInterface = 0;
     if (resourceDevice) {
         // Note that a SERVER task has to be able to get resource interface pointer here
