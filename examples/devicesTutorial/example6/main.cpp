@@ -28,15 +28,15 @@ http://www.cisst.org/cisst/license.txt.
   \todo Implement the option to start/stop data collection from the GUI.
 */
 
+#include <cisstCommon/cmnPath.h>
 #include <cisstOSAbstraction/osaThreadedLogFile.h>
 //#include <cisstMultiTask/mtsCollectorState.h>
 #include <cisstMultiTask/mtsTaskManager.h>
 #include <cisstDevices/devNDISerial.h>
-
-#include <QApplication>
-
 #include <cisstDevices/devNDISerialControllerQDevice.h>
 #include <cisstDevices/devNDISerialToolQDevice.h>
+
+#include <QApplication>
 
 
 int main(int argc, char *argv[])
@@ -56,11 +56,17 @@ int main(int argc, char *argv[])
     QApplication application(argc, argv);
 
     // create the tasks
-    devNDISerial * devNDISerialTask = new devNDISerial("devNDISerial", "COM3");
+    devNDISerial * devNDISerialTask = new devNDISerial("devNDISerial");
     devNDISerialControllerQDevice * controllerQDevice = new devNDISerialControllerQDevice("controllerQDevice");
 
     // configure the tasks
-    devNDISerialTask->Configure();
+    cmnPath searchPath;
+    std::string sourcePath;
+    sourcePath.assign(CISST_SOURCE_ROOT);
+    sourcePath.append("/examples/devicesTutorial/example6");
+    searchPath.Add(sourcePath);
+    const std::string filePath = searchPath.Find("config.xml", cmnPath::READ);
+    devNDISerialTask->Configure(filePath);
 
     // add the tasks to the task manager
     mtsTaskManager * taskManager = mtsTaskManager::GetInstance();

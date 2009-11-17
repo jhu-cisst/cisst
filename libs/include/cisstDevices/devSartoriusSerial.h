@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: devNDiSerial.h 192 2009-03-25 22:12:25Z adeguet1 $
+  $Id$
 
   Author(s): Anton Deguet
   Created on: 2009-03-27

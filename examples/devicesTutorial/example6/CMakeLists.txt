@@ -1,10 +1,7 @@
 #
-#   $Id$
+# $Id$
 #
-#   Author(s):  Ali Uneri
-#   Created on: 2009-10-13
-#
-#   (C) Copyright 2009 Johns Hopkins University (JHU), All Rights Reserved.
+# (C) Copyright 2009 Johns Hopkins University (JHU), All Rights Reserved.
 #
 # --- begin cisst license - do not edit ---
 #

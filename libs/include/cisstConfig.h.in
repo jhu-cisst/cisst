@@ -26,6 +26,9 @@ http://www.cisst.org/cisst/license.txt.
 #define ON 1
 #define OFF 0
 
+// Path to source root (to find some configuration files)
+#define CISST_SOURCE_ROOT "@CISST_SOURCE_DIR@"
+
 // Path to build root (to find some configuration files)
 #define CISST_BUILD_ROOT "@CISST_BINARY_DIR@"
 

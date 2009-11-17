@@ -25,10 +25,12 @@ http://www.cisst.org/cisst/license.txt.
 
   \warning Missing support for 14400bps, 921600bps and 1228739bps baud rates in osaSerialPort.
 
+  \todo Verify the need fof all osaSleep() calls.
+  \todo Have the option for dynamic tool plugging (requires runtime mtsConnect).
+  \todo Ability to enable/disable individual tools (or even add/remove tools using dynamic tool plugging).
   \todo Add RMS error to CalibratePivot() (make this a provided command per Tool?).
   \todo Handle other main types of tools.
   \todo Parse port/system status, in order to get "partially out of volume", etc.
-  \todo Ability to enable/disable individual tools.
   \todo Cleanup (remove inline functions) and comment the header file.
   \todo Refactor ComputeCRC() and implement a CRC check in CommandSend().
   \todo Every sscanf() should check if valid number of items have been read (wrapper for sscanf?).
@@ -41,73 +43,66 @@ http://www.cisst.org/cisst/license.txt.
   \todo Use frame number to decide if timestamp should be refreshed.
   \todo Implement an "adaptive sleep" for the run method?
   \todo Main Type to human readable provided method.
-  \todo Check for serial number matching in AddTool(), replace the name if it exists.
-  \todo Cartesian position should be "invalid" if the tool is missing or disabled.
   \todo Strategies for error recovery, send an event with a human readable payload, implement in CheckResponse().
-  \todo Have the option for dynamic tool plugging (requires runtime mtsConnect).
-  \todo Verify the need for all sleep times.
 */
 
 #ifndef _devNDISerial_h
 #define _devNDISerial_h
 
-#include <cisstCommon/cmnUnits.h>
 #include <cisstVector/vctFixedSizeVectorTypes.h>
 #include <cisstOSAbstraction/osaSerialPort.h>
 #include <cisstMultiTask/mtsTaskContinuous.h>
 #include <cisstParameterTypes/prmPositionCartesianGet.h>
 #include <cisstParameterTypes/prmString.h>
+#include <cisstDevices/devExport.h>  // always include last
 
 
-class devNDISerial : public mtsTaskContinuous
+class CISST_EXPORT devNDISerial : public mtsTaskContinuous
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
-protected:
+ protected:
     class Tool
     {
-        public:
-            Tool(void);
-            ~Tool(void) {};
+     public:
+        Tool(void);
+        ~Tool(void) {};
 
-            std::string Name;
-            unsigned int FrameNumber;
-            double ErrorRMS;
-            mtsProvidedInterface * Interface;
-            prmPositionCartesianGet Position;
+        std::string Name;
+        unsigned int FrameNumber;
+        double ErrorRMS;
+        mtsProvidedInterface * Interface;
+        prmPositionCartesianGet Position;
 
-            char PortHandle[3];
-            // PHINF 0001
-            char MainType[3];
-            char ManufacturerID[13];
-            char ToolRevision[4];
-            char SerialNumber[9];
-            // PHINF 0004
-            char PartNumber[21];
+        char PortHandle[3];
+        // PHINF 0001
+        char MainType[3];
+        char ManufacturerID[13];
+        char ToolRevision[4];
+        char SerialNumber[9];
+        // PHINF 0004
+        char PartNumber[21];
 
-            vct3 TooltipOffset;
+        vct3 TooltipOffset;
     };
 
-public:
-    devNDISerial(const std::string & taskName, const std::string & serialPort);
+ public:
+    devNDISerial(const std::string & taskName);
     ~devNDISerial(void) {};
 
-    void Configure(const std::string & CMN_UNUSED(filename) = "");
+    void Configure(const std::string & filename = "");
     void Startup(void) {};
     void Run(void);
-    void Cleanup(void) {};
+    void Cleanup(void);
 
     size_t GetNumberOfTools(void) const {
         return Tools.size();
     }
     std::string GetToolName(const unsigned int index) const;
 
-protected:
+ protected:
     enum { MAX_BUFFER_SIZE = 512 };
     enum { CRC_SIZE = 4 };
-
-    Tool * AddTool(const std::string & name, const char * serialNumber);
-    Tool * AddTool(const std::string & name, const char * serialNumber, const char * toolDefinitionFile);
 
     size_t GetSerialBufferSize(void) const {
         return SerialBufferPointer - SerialBuffer;
@@ -133,7 +128,6 @@ protected:
         CommandAppend(command);
         return CommandSend();
     }
-
     bool ResponseRead(void);
     bool ResponseRead(const char * expectedMessage);
     unsigned int ComputeCRC(const char * data);
@@ -148,6 +142,10 @@ protected:
     void Beep(const mtsInt & numberOfBeeps);
 
     void LoadToolDefinitionFile(const char * portHandle, const char * filePath);
+    Tool * CheckTool(const char * serialNumber);
+    Tool * AddTool(const std::string & name, const char * serialNumber);
+    Tool * AddTool(const std::string & name, const char * serialNumber, const char * toolDefinitionFile);
+
     void PortHandlesInitialize(void);
     void PortHandlesQuery(void);
     void PortHandlesEnable(void);
@@ -165,10 +163,8 @@ protected:
     cmnNamedMap<Tool> PortToTool;
 
     bool IsTracking;
-    char * Tool8700338;
-    char * Tool8700340;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(devNDISerial);
 
-#endif  //_devNDISerial_h_
+#endif  //_devNDISerial_h

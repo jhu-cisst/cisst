@@ -51,7 +51,13 @@ devNDISerialToolQDevice::devNDISerialToolQDevice(const std::string & taskName) :
 void devNDISerialToolQDevice::UpdateTimerQSlot(void)
 {
     NDI.GetPositionCartesian(NDI.PositionCartesian);
-    ToolWidget.PositionX->setNum(NDI.PositionCartesian.Position().Translation().X());
-    ToolWidget.PositionY->setNum(NDI.PositionCartesian.Position().Translation().Y());
-    ToolWidget.PositionZ->setNum(NDI.PositionCartesian.Position().Translation().Z());
+    if (NDI.PositionCartesian.Valid()) {
+        ToolWidget.PositionX->setNum(NDI.PositionCartesian.Position().Translation().X());
+        ToolWidget.PositionY->setNum(NDI.PositionCartesian.Position().Translation().Y());
+        ToolWidget.PositionZ->setNum(NDI.PositionCartesian.Position().Translation().Z());
+    } else {
+        ToolWidget.PositionX->setNum(0.0);
+        ToolWidget.PositionY->setNum(0.0);
+        ToolWidget.PositionZ->setNum(0.0);
+    }
 }

@@ -19,6 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstCommon/cmnStrings.h>
+#include <cisstCommon/cmnXMLPath.h>
 #include <cisstVector/vctDynamicMatrixTypes.h>
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstNumerical/nmrLSSolver.h>
@@ -27,7 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 CMN_IMPLEMENT_SERVICES(devNDISerial);
 
 
-devNDISerial::devNDISerial(const std::string & taskName, const std::string & serialPort) :
+devNDISerial::devNDISerial(const std::string & taskName) :
     mtsTaskContinuous(taskName, 5000),
     IsTracking(false)
 {
@@ -41,12 +42,25 @@ devNDISerial::devNDISerial(const std::string & taskName, const std::string & ser
         provided->AddCommandWrite(&devNDISerial::ToggleTracking, this, "ToggleTracking");
     }
 
-    // initialize serial port
     memset(SerialBuffer, 0, MAX_BUFFER_SIZE);
     SerialBufferPointer = SerialBuffer;
+}
+
+
+void devNDISerial::Configure(const std::string & filename)
+{
+    CMN_LOG_CLASS_INIT_VERBOSE << "Configure: using " << filename << std::endl;
+
+    cmnXMLPath config;
+    config.SetInputSource(filename);
+
+    // initialize serial port
+    std::string serialPort;
+    config.GetXMLValue("/config/device", "@port", serialPort);
+
     SerialPort.SetPortName(serialPort);
     if (!SerialPort.Open()) {
-        CMN_LOG_CLASS_INIT_ERROR << "devNDISerial: failed to open serial port: " << SerialPort.GetPortName() << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "Configure: failed to open serial port: " << SerialPort.GetPortName() << std::endl;
     }
     ResetSerialPort();
     SetSerialPortSettings(osaSerialPort::BaudRate115200,
@@ -58,75 +72,51 @@ devNDISerial::devNDISerial(const std::string & taskName, const std::string & ser
     // initialize NDI controller
     CommandSend("INIT ");
     ResponseRead("OKAY");
+
+    // add tools
+    int maxNumTools = 100;
+    std::string toolName;
+    bool toolEnabled;
+    std::string toolSerial, toolSerialLast;
+    std::string toolDefinition, toolDefinitionLast;
+
+    for (int i = 0; i < maxNumTools; i++) {
+        std::stringstream context;
+        context << "/config/tools/tool[" << i << "]";
+        config.GetXMLValue(context.str().c_str(), "@name", toolName);
+        config.GetXMLValue(context.str().c_str(), "@enabled", toolEnabled);
+        config.GetXMLValue(context.str().c_str(), "@serial", toolSerial);
+        config.GetXMLValue(context.str().c_str(), "@definition", toolDefinition);
+        if (toolSerial != toolSerialLast) {
+            toolSerialLast = toolSerial;
+            if (toolEnabled) {
+                if (toolDefinition != toolDefinitionLast) {
+                    toolDefinitionLast = toolDefinition;
+                    AddTool(toolName, toolSerial.c_str(), toolDefinition.c_str());
+                } else {
+                    AddTool(toolName, toolSerial.c_str());
+                }
+            }
+        }
+    }
 }
 
 
-void devNDISerial::Configure(const std::string & CMN_UNUSED(filename))
+void devNDISerial::Run(void)
 {
-    char * tool8700338 = "C:\\Program Files\\Northern Digital Inc\\Tool Definition Files\\8700338.rom";
-    char * tool8700339 = "C:\\Program Files\\Northern Digital Inc\\Tool Definition Files\\8700339.rom";
-    char * tool8700340 = "C:\\Program Files\\Northern Digital Inc\\Tool Definition Files\\8700340.rom";
-    char * toolCArmTracker = "C:\\Program Files\\Northern Digital Inc\\Tool Definition Files\\Traxtal_C-Arm_Tracker.rom";
+    ProcessQueuedCommands();
 
-    AddTool("01-34801401", "34801401", tool8700338);  // NDI Vicra passive reference (JHMI)
-    AddTool("01-34801403", "34801403", tool8700339);  // NDI Vicra passive reference (JHMI)
-    AddTool("02-34802401", "34802401", tool8700340);  // NDI Vicra passive probe (JHMI)
-    //AddTool("02-32887C02", "32887C02");  // NDI Polaris active probe (Homewood)
-    //AddTool("02-3091280C", "3091280C");  // Traxtal active probe (Homewood)
-    //AddTool("0A-3499D401", "3499D401", toolCArmTracker);  // Traxtal passive c-arm tracker (Homewood)
+    if (IsTracking) {
+        Track();
+    }
 }
 
 
-devNDISerial::Tool * devNDISerial::AddTool(const std::string & name, const char * serialNumber)
+void devNDISerial::Cleanup(void)
 {
-    Tool * tool = new Tool();
-    tool->Name = name;
-    strncpy(tool->SerialNumber, serialNumber, 8);
-    if (!Tools.AddItem(tool->Name, tool, CMN_LOG_LOD_INIT_ERROR)) {
-        CMN_LOG_CLASS_INIT_ERROR << "AddTool: no tool created, duplicate name exists: " << name << std::endl;
-        delete tool;
-        return 0;
+   if (!SerialPort.Close()) {
+        CMN_LOG_CLASS_INIT_ERROR << "Cleanup: failed to close serial port" << std::endl;
     }
-    CMN_LOG_CLASS_INIT_VERBOSE << "AddTool: created tool \"" << name << "\" with serial number: " << serialNumber << std::endl;
-
-    // create an interface for tool
-    StateTable.AddData(tool->Position, name + "Position");
-    tool->Interface = AddProvidedInterface(name);
-    if (tool->Interface) {
-        tool->Interface->AddCommandReadState(StateTable, tool->Position, "GetPositionCartesian");
-    }
-
-    return tool;
-}
-
-
-devNDISerial::Tool * devNDISerial::AddTool(const std::string & name, const char * serialNumber, const char * toolDefinitionFile)
-{
-    char portHandle[3];
-    portHandle[2] = '\0';
-
-    // request port handle for wireless tool
-    CommandSend("PHRQ *********1****");
-    ResponseRead();
-    sscanf(SerialBuffer, "%2c", portHandle);
-
-    LoadToolDefinitionFile(portHandle, toolDefinitionFile);
-    return AddTool(name, serialNumber);
-}
-
-
-std::string devNDISerial::GetToolName(const unsigned int index) const
-{
-    const ToolsType::const_iterator end = Tools.end();
-    ToolsType::const_iterator toolIterator = Tools.begin();
-    if (index >= Tools.size()) {
-        CMN_LOG_CLASS_RUN_ERROR << "GetToolName: requested index is out of range" << std::endl;
-        return "";
-    }
-    for (unsigned int i = 0; i < index; i++) {
-        toolIterator++;
-    }
-    return toolIterator->first;
 }
 
 
@@ -157,23 +147,6 @@ void devNDISerial::CommandAppend(const int command)
 }
 
 
-bool devNDISerial::CommandSend(void)
-{
-    CommandAppend('\r');
-    CommandAppend('\0');
-
-    const size_t bytesToSend = strlen(SerialBuffer);
-    const size_t bytesSent = SerialPort.Write(SerialBuffer, bytesToSend);
-    if (bytesSent != bytesToSend) {
-        CMN_LOG_CLASS_RUN_ERROR << "SendCommand: sent only " << bytesSent << " of " << bytesToSend
-                                << " for command \"" << SerialBuffer << "\"" << std::endl;
-        return false;
-    }
-    CMN_LOG_CLASS_RUN_DEBUG << "SendCommand: successfully sent command \"" << SerialBuffer << "\"" << std::endl;
-    return true;
-}
-
-
 unsigned int devNDISerial::ComputeCRC(const char * data)
 {
     static unsigned char oddParity[16] = { 0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0 };
@@ -195,6 +168,23 @@ unsigned int devNDISerial::ComputeCRC(const char * data)
         dataPointer++;
     }
     return crc;
+}
+
+
+bool devNDISerial::CommandSend(void)
+{
+    CommandAppend('\r');
+    CommandAppend('\0');
+
+    const size_t bytesToSend = strlen(SerialBuffer);
+    const size_t bytesSent = SerialPort.Write(SerialBuffer, bytesToSend);
+    if (bytesSent != bytesToSend) {
+        CMN_LOG_CLASS_RUN_ERROR << "SendCommand: sent only " << bytesSent << " of " << bytesToSend
+                                << " for command \"" << SerialBuffer << "\"" << std::endl;
+        return false;
+    }
+    CMN_LOG_CLASS_RUN_DEBUG << "SendCommand: successfully sent command \"" << SerialBuffer << "\"" << std::endl;
+    return true;
 }
 
 
@@ -445,6 +435,79 @@ void devNDISerial::LoadToolDefinitionFile(const char * portHandle, const char * 
 }
 
 
+devNDISerial::Tool * devNDISerial::CheckTool(const char * serialNumber)
+{
+    const ToolsType::const_iterator end = Tools.end();
+    ToolsType::const_iterator toolIterator;
+    for (toolIterator = Tools.begin(); toolIterator != end; ++toolIterator) {
+        if (strncmp((toolIterator->second)->SerialNumber, serialNumber, 8) == 0) {
+            CMN_LOG_CLASS_INIT_DEBUG << "CheckTool: found existing tool for serial number: " << serialNumber << std::endl;
+            return toolIterator->second;
+        }
+    }
+    return 0;
+}
+
+
+devNDISerial::Tool * devNDISerial::AddTool(const std::string & name, const char * serialNumber)
+{
+    Tool * tool = CheckTool(serialNumber);
+
+    if (tool) {
+        CMN_LOG_CLASS_INIT_WARNING << "AddTool: " << tool->Name << " already exists, renaming it to " << name << " instead" << std::endl;
+        tool->Name = name;
+    } else {
+        tool = new Tool();
+        tool->Name = name;
+        strncpy(tool->SerialNumber, serialNumber, 8);
+
+        if (!Tools.AddItem(tool->Name, tool, CMN_LOG_LOD_INIT_ERROR)) {
+            CMN_LOG_CLASS_INIT_ERROR << "AddTool: no tool created, duplicate name exists: " << name << std::endl;
+            delete tool;
+            return 0;
+        }
+        CMN_LOG_CLASS_INIT_VERBOSE << "AddTool: created tool \"" << name << "\" with serial number: " << serialNumber << std::endl;
+
+        // create an interface for tool
+        StateTable.AddData(tool->Position, name + "Position");
+        tool->Interface = AddProvidedInterface(name);
+        if (tool->Interface) {
+            tool->Interface->AddCommandReadState(StateTable, tool->Position, "GetPositionCartesian");
+        }
+    }
+    return tool;
+}
+
+
+devNDISerial::Tool * devNDISerial::AddTool(const std::string & name, const char * serialNumber, const char * toolDefinitionFile)
+{
+    char portHandle[3];
+    portHandle[2] = '\0';
+
+    // request port handle for wireless tool
+    CommandSend("PHRQ *********1****");
+    ResponseRead();
+    sscanf(SerialBuffer, "%2c", portHandle);
+
+    LoadToolDefinitionFile(portHandle, toolDefinitionFile);
+    return AddTool(name, serialNumber);
+}
+
+
+std::string devNDISerial::GetToolName(const unsigned int index) const
+{
+    ToolsType::const_iterator toolIterator = Tools.begin();
+    if (index >= Tools.size()) {
+        CMN_LOG_CLASS_RUN_ERROR << "GetToolName: requested index is out of range" << std::endl;
+        return "";
+    }
+    for (unsigned int i = 0; i < index; i++) {
+        toolIterator++;
+    }
+    return toolIterator->first;
+}
+
+
 void devNDISerial::PortHandlesInitialize(void)
 {
     char * parsePointer;
@@ -532,16 +595,8 @@ void devNDISerial::PortHandlesQuery(void)
         sscanf(SerialBuffer, "%2c%*1X%*1X%*2c%*2c%*12c%*3c%8c%*2c%*20c",
                mainType, serialNumber);
 
-        // find the tool with this serial number if it exists, or create one
-        tool = 0;
-        const ToolsType::const_iterator end = Tools.end();
-        ToolsType::const_iterator toolIterator;
-        for (toolIterator = Tools.begin(); toolIterator != end; ++toolIterator) {
-            if (strncmp((toolIterator->second)->SerialNumber, serialNumber, 8) == 0) {
-                tool = toolIterator->second;
-                CMN_LOG_CLASS_INIT_DEBUG << "PortHandlesQuery: found existing tool for serial number: " << serialNumber << std::endl;
-            }
-        }
+        // check if tool exists, generate a name and add it otherwise
+        tool = CheckTool(serialNumber);
         if (!tool) {
             std::string name;
             name = std::string(mainType) + '-' + std::string(serialNumber);
@@ -555,7 +610,7 @@ void devNDISerial::PortHandlesQuery(void)
 
         // associate the tool to its port handle
         toolKey = portHandles[i].Pointer();
-        CMN_LOG_CLASS_INIT_VERBOSE << "PortHandlesQuery: associating tool " << tool->Name << " to port handle " << tool->PortHandle << std::endl;
+        CMN_LOG_CLASS_INIT_VERBOSE << "PortHandlesQuery: associating " << tool->Name << " to port handle " << tool->PortHandle << std::endl;
         PortToTool.AddItem(toolKey, tool, CMN_LOG_LOD_INIT_ERROR);
 
         CMN_LOG_CLASS_INIT_DEBUG << "PortHandlesQuery:\n"
@@ -630,7 +685,7 @@ void devNDISerial::ToggleTracking(const mtsBool & track)
         CommandSend("TSTOP ");
     }
     ResponseRead("OKAY");
-    osaSleep(0.5 * cmn_s);
+    osaSleep(500.0 * cmn_ms);
 }
 
 
@@ -662,21 +717,22 @@ void devNDISerial::Track(void)
         }
 
         if (strncmp(parsePointer, "MISSING", 7) == 0) {
-            CMN_LOG_CLASS_RUN_WARNING << "Track: tool " << tool->Name << " is missing" << std::endl;
+            CMN_LOG_CLASS_RUN_WARNING << "Track: " << tool->Name << " is missing" << std::endl;
             tool->Position.SetValid(false);
             parsePointer += 7;
             parsePointer += 8;  // skip Port Status
         } else if (strncmp(parsePointer, "DISABLED", 8) == 0) {
-            CMN_LOG_CLASS_RUN_WARNING << "Track: tool " << tool->Name << " is disabled" << std::endl;
+            CMN_LOG_CLASS_RUN_WARNING << "Track: " << tool->Name << " is disabled" << std::endl;
             tool->Position.SetValid(false);
             parsePointer += 8;
             parsePointer += 8;  // skip Port Status
         } else if (strncmp(parsePointer, "UNOCCUPIED", 10) == 0) {
-            CMN_LOG_CLASS_RUN_WARNING << "Track: tool " << tool->Name << " is unoccupied" << std::endl;
+            CMN_LOG_CLASS_RUN_WARNING << "Track: " << tool->Name << " is unoccupied" << std::endl;
             tool->Position.SetValid(false);
             parsePointer += 10;
             parsePointer += 8;  // skip Port Status
         } else {
+            tool->Position.SetValid(true);
             sscanf(parsePointer, "%6lf%6lf%6lf%6lf%7lf%7lf%7lf%6lf%*8X",
                    &(toolOrientation.W()), &(toolOrientation.X()), &(toolOrientation.Y()), &(toolOrientation.Z()),
                    &(toolPosition.X()), &(toolPosition.Y()), &(toolPosition.Z()),
@@ -689,6 +745,7 @@ void devNDISerial::Track(void)
             toolPosition.Divide(100.0);
             toolPosition -= tool->Position.Position().Rotation() * tool->TooltipOffset;  // apply tooltip offset
             tool->Position.Position().Translation().Assign(toolPosition);
+
             tool->ErrorRMS /= 10000.0;
 
             CMN_LOG_CLASS_RUN_DEBUG << "Track: orientation (rad): " << vctAxAnRot3(toolOrientation, VCT_DO_NOT_NORMALIZE) << std::endl;
@@ -763,16 +820,6 @@ void devNDISerial::CalibratePivot(const prmString & toolName)
     CMN_LOG_CLASS_RUN_DEBUG << "CalibratePivot:\n "
                             << " * tooltip offset: " << tooltip << "\n"
                             << " * pivot position: " << pivot << std::endl;
-}
-
-
-void devNDISerial::Run(void)
-{
-    ProcessQueuedCommands();
-
-    if (IsTracking) {
-        Track();
-    }
 }
 
 

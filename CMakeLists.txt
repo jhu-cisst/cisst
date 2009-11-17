@@ -288,6 +288,7 @@ INSTALL_FILES(/share/cisst/cmake
 
 
 # Configuration file
+SET(CISST_SOURCE_DIR ${cisst_SOURCE_DIR})
 SET(CISST_BINARY_DIR ${cisst_BINARY_DIR})
 CONFIGURE_FILE(${cisst_SOURCE_DIR}/libs/include/cisstConfig.h.in
                ${cisst_BINARY_DIR}/libs/include/cisstConfig.h
