@@ -38,7 +38,6 @@ set(DEPENDENCIES
 
 set(HEADER_FILES
     devNull.h
-    devNDISerial.h
     devSartoriusSerial.h
     devExport.h
     devKeyboard.h
@@ -46,7 +45,6 @@ set(HEADER_FILES
 
 set(SOURCE_FILES
     devNull.cpp
-    devNDISerial.cpp
     devSartoriusSerial.cpp
     devKeyboard.cpp
     )
@@ -104,6 +102,15 @@ if(CISST_DEV_HAS_NOVINTHDL)
       devNovintHDL.h
       devNovintHDLMasterSlave.h)
 endif(CISST_DEV_HAS_NOVINTHDL)
+
+if(CISST_HAS_XML)
+  set(SOURCE_FILES
+      ${SOURCE_FILES}
+      devNDISerial.cpp)
+  set(HEADER_FILES
+      ${HEADER_FILES}
+      devNDISerial.h)
+endif(CISST_HAS_XML)
 
 if(CISST_DEV_HAS_MICRONTRACKER)
   find_path(MicronTracker_INCLUDE_DIR
