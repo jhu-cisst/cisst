@@ -368,8 +368,10 @@ int svlFilterSourceVideoFile::ProcessFrame(ProcInfo* procInfo)
         if (ret == SVL_FAIL) break;
     }
 
+#if (CISST_SVL_HAS_ZLIB == ON)
     // Set timestamp to the one stored in the video file
     OutputData->SetTimestamp(timestamp);
+#endif
 
     return ret;
 }
