@@ -38,6 +38,10 @@ typedef int socklen_t;
 #endif
 #endif
 
+#if (CISST_OS == CISST_QNX)
+#include <sys/select.h>
+#endif
+
 struct osaSocketInternals {
    struct sockaddr_in ServerAddr;
 };
@@ -188,6 +192,16 @@ int osaSocket::Receive(char * bufrecv, unsigned int maxlen)
     FD_SET(SocketFD, &readfds);
     timeval timeout = { 0, 0 };
 
+    /* Notes for QNX from the QNX library reference (Min)
+     *
+     * The select() function is thread safe as long as the fd sets
+     * used by each thread point to memory that is specific to that thread.
+     *
+     * In Neutrino, if multiple threads block in select() on the same
+     * fd for the same condition, all threads may unblock when the
+     * condition is satisfied. This may differ from other implementations
+     * where only one thread may unblock.
+     */
     int retval = select(SocketFD + 1, &readfds, NULL, NULL, &timeout);
     if (retval > 0) {
         struct sockaddr_in fromAddr;
@@ -246,6 +260,7 @@ void osaSocket::Close(void)
     if (SocketFD >= 0) {
 #if (CISST_OS == CISST_WINDOWS)
         closesocket(SocketFD);
+        WSACleanup();
 #else
         close(SocketFD);
 #endif
