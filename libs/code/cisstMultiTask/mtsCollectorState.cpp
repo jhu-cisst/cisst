@@ -25,6 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnGenericObjectProxy.h>
 #include <cisstCommon/cmnThrow.h>
 #include <cisstOSAbstraction/osaGetTime.h>
+#include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsTaskManager.h>
 
 #include <iostream>
@@ -163,7 +164,10 @@ void mtsCollectorState::Run(void)
 {
     mtsCollectorBase::Run();
     
-    if (!IsRunnable) return;
+    if (!IsRunnable) {
+        osaSleep(0.0);
+        return;
+    }
     
     DataCollectionTriggerResetCommand->Execute();
     

@@ -57,6 +57,15 @@ int main(int argc, char *argv[])
     taskManager->Connect("DISP", "DataGenerator",
                          "SIN", "MainInterface");
 
+    // add data collection for sineTask state table
+    mtsCollectorState * collector =
+        new mtsCollectorState("SIN",
+                              mtsCollectorBase::COLLECTOR_LOG_FORMAT_CSV);
+    collector->AddSignal("SineData");
+    taskManager->AddTask(collector);
+    taskManager->Connect("DISP", "DataCollection",
+                         collector->GetName(), "Control");
+
     // generate a nice tasks diagram
     std::ofstream dotFile("PeriodicTaskQt.dot");
     taskManager->ToStreamDot(dotFile);

@@ -35,6 +35,13 @@ displayQDevice::displayQDevice(const std::string & taskName) :
        requiredInterface->AddFunction("SetAmplitude", Generator.SetAmplitude);
     }
 
+    // create the cisstMultiTask interface with commands and events
+    requiredInterface = AddRequiredInterface("DataCollection");
+    if (requiredInterface) {
+       requiredInterface->AddFunction("StartCollection", Collection.Start);
+       requiredInterface->AddFunction("StopCollection", Collection.Stop);
+    }
+
     // create the user interface
     MainWindow.setCentralWidget(&CentralWidget);
     MainWindow.adjustSize();
@@ -48,6 +55,8 @@ displayQDevice::displayQDevice(const std::string & taskName) :
                      this, SLOT(UpdateTimerQSlot()));
     QObject::connect(CentralWidget.DialAmplitude, SIGNAL(valueChanged(int)),
                      this, SLOT(SetAmplitudeQSlot(int)));
+    QObject::connect(CentralWidget.ButtonRecord, SIGNAL(toggled(bool)),
+                     this, SLOT(ToggleCollectionQSlot(bool)));
     QObject::connect(CentralWidget.ButtonQuit, SIGNAL(clicked()),
                      &MainWindow, SLOT(close()));
 }
@@ -64,4 +73,16 @@ void displayQDevice::SetAmplitudeQSlot(int newValue)
 {
     AmplitudeData.Data = newValue;
     Generator.SetAmplitude(AmplitudeData);
+}
+
+
+void displayQDevice::ToggleCollectionQSlot(bool checked)
+{
+    if (checked) {
+        std::cout << "displayQDevice: start data collection" << std::endl;
+        Collection.Start();
+    } else {
+        std::cout << "displayQDevice: stop data collection" << std::endl;
+        Collection.Stop();
+    }
 }

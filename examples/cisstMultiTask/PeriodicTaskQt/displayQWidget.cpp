@@ -29,6 +29,8 @@ displayQWidget::displayQWidget(void)
     ValueAmplitude = new QLabel("1", this);
     LabelData = new QLabel("Data", this);
     ValueData = new QLabel("0.0", this);
+    ButtonRecord = new QPushButton("Record", this);
+    ButtonRecord->setCheckable(true);
     ButtonQuit = new QPushButton("Quit", this);
 
     // configure the widgets
@@ -46,7 +48,8 @@ displayQWidget::displayQWidget(void)
     CentralLayout->addWidget(ValueAmplitude, 1, 1);
     CentralLayout->addWidget(LabelData, 2, 0);
     CentralLayout->addWidget(ValueData, 2, 1);
-    CentralLayout->addWidget(ButtonQuit, 3, 0, 1, 2);
+    CentralLayout->addWidget(ButtonRecord, 3, 0, 1, 2);
+    CentralLayout->addWidget(ButtonQuit, 4, 0, 1, 2);
 
     // connect Qt signals to slots
     QObject::connect(DialAmplitude, SIGNAL(valueChanged(int)),

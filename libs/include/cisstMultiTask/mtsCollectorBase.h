@@ -107,6 +107,21 @@ protected:
     static unsigned int CollectorCount;
     static mtsTaskManager * TaskManager;
 
+    /*! Default control interface and methods used for the provided commands. */
+    mtsProvidedInterface * ControlInterface;
+    inline void StartCollectionCommand(void) {
+        this->StartCollection(0.0);
+    }
+    inline void StartCollectionDelayedCommand(const mtsDouble & delayedStartInSeconds) {
+        this->StartCollection(delayedStartInSeconds.Data);
+    }
+    inline void StopCollectionCommand(void) {
+        this->StopCollection(0.0);
+    }
+    inline void StopCollectionDelayedCommand(const mtsDouble & delayedStopInSeconds) {
+        this->StopCollection(delayedStopInSeconds.Data);
+    }
+
     /*! Initialize this collector instance */
     void Init(void);
 

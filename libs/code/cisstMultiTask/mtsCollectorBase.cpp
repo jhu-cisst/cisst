@@ -43,6 +43,15 @@ mtsCollectorBase::mtsCollectorBase(const std::string & collectorName,
         TaskManager = mtsTaskManager::GetInstance();
     }
 
+    // add a control interface to start and stop the data collection
+    this->ControlInterface = AddProvidedInterface("Control");
+    if (this->ControlInterface) {
+        ControlInterface->AddCommandVoid(&mtsCollectorBase::StartCollectionCommand, this, "StartCollection");
+        ControlInterface->AddCommandWrite(&mtsCollectorBase::StartCollectionDelayedCommand, this, "StartCollectionDelayed");
+        ControlInterface->AddCommandVoid(&mtsCollectorBase::StopCollectionCommand, this, "StopCollection");
+        ControlInterface->AddCommandWrite(&mtsCollectorBase::StopCollectionDelayedCommand, this, "StopCollectionDelayed");
+    }
+
     Init();
 }
 
@@ -69,6 +78,8 @@ void mtsCollectorBase::Init()
 //-------------------------------------------------------
 void mtsCollectorBase::Run()
 {
+    ProcessQueuedCommands();
+
     if (Status == COLLECTOR_STOP) return;
 
     // Check for the state transition
@@ -101,6 +112,7 @@ void mtsCollectorBase::Run()
                 return;
             } else {
                 // Stop collecting
+                Collect(); // collect whatever is left
                 DelayedStop = 0.0;
                 Status = COLLECTOR_STOP;
                 IsRunnable = false;

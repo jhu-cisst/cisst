@@ -22,6 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _displayQDevice_h
 
 #include <cisstMultiTask/mtsDevice.h>
+#include <cisstMultiTask/mtsFunctionVoid.h>
 #include <cisstMultiTask/mtsFunctionReadOrWrite.h>
 
 #include <QMainWindow>
@@ -31,7 +32,7 @@ http://www.cisst.org/cisst/license.txt.
 #include "displayQWidget.h"
 
 
-class displayQDevice : public QObject, public mtsDevice
+class displayQDevice: public QObject, public mtsDevice
 {
     Q_OBJECT;
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
@@ -52,12 +53,18 @@ class displayQDevice : public QObject, public mtsDevice
        mtsFunctionWrite SetAmplitude;
     } Generator;
 
+    struct {
+        mtsFunctionVoid Start;
+        mtsFunctionVoid Stop;
+    } Collection;
+
     mtsDouble Data;
     mtsDouble AmplitudeData;
 
  public slots:
     void UpdateTimerQSlot(void);
     void SetAmplitudeQSlot(int newValue);
+    void ToggleCollectionQSlot(bool checked);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(displayQDevice);

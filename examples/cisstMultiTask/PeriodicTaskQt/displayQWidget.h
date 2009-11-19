@@ -42,6 +42,7 @@ class displayQWidget : public QWidget
     QLabel * ValueAmplitude;
     QLabel * LabelData;
     QLabel * ValueData;
+    QPushButton * ButtonRecord;
     QPushButton * ButtonQuit;
 };
 
