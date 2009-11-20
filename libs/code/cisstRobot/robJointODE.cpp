@@ -43,7 +43,6 @@ void robJointODE::Configure( dWorldID world,
     dJointSetHingeParam(jointid, dParamBounce, 0.2);
     dJointSetHingeParam(jointid, dParamCFM, 0.001);
 
-    /*
     frictionid = dJointCreateAMotor(world, 0);        // create the friction
     dJointAttach(frictionid, body1, body2);           // attach the joint
     dJointSetAMotorMode(frictionid, dAMotorUser);
@@ -51,9 +50,8 @@ void robJointODE::Configure( dWorldID world,
     // set the axis
     dJointSetAMotorAxis(frictionid, 0, 2, axis[0], axis[1], axis[2]);
 
-    //dJointSetAMotorParam( FrictionID(), dParamVel,  0);
-    //dJointSetAMotorParam( FrictionID(), dParamFMax, 0.06);
-    */
+    dJointSetAMotorParam( FrictionID(), dParamVel,  0);
+    dJointSetAMotorParam( FrictionID(), dParamFMax, 0.01);
 
   }
 

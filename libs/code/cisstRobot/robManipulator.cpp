@@ -19,6 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstRobot/robManipulator.h>
 #include <cisstRobot/robGUI.h>
 
+#include <cisstVector/vctQuaternionRotation3.h>
 #include <cisstVector/vctFixedSizeMatrix.h>
 
 #include <vector>
@@ -115,8 +116,8 @@ void free_rmatrix(double** m, long nrl, long ncl){
 robManipulator::robManipulator( const std::string& linkfile, 
 				const std::string& toolfile,
 				const vctFrame4x4<double,VCT_ROW_MAJOR>& Rtw0 ){
+  
   this->Rtw0 = Rtw0;
-  tool = NULL;
   
   if( LoadRobot( linkfile ) == ERROR ){
     CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__
@@ -124,6 +125,7 @@ robManipulator::robManipulator( const std::string& linkfile,
 		      << std::endl;
   }
 
+  this->tool = NULL;
   if( LoadTool( toolfile ) == ERROR ){
     CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__
 		      << " Failed to load the tool configuration." 
@@ -151,7 +153,7 @@ robError robManipulator::LoadRobot( const std::string& filename ){
 
   size_t N;
   ifs >> N;
-
+  
   // read the links (kinematics+dynamics+geometry) from the input
   for( size_t i=0; i<N; i++ ){
     robLink li;
@@ -164,7 +166,6 @@ robError robManipulator::LoadRobot( const std::string& filename ){
     robGUI::Insert( &(links[i]) );
   }
 
-  ifs >> N;
   // read the joints 
   for( size_t i=0; i<N; i++ ){
     robJoint ji;
@@ -175,11 +176,24 @@ robError robManipulator::LoadRobot( const std::string& filename ){
   Js = rmatrix(0, joints.size()-1, 0, 5);
   Jn = rmatrix(0, joints.size()-1, 0, 5);
 
-
   return SUCCESS;
 }
 
-robError robManipulator::LoadTool( const std::string& ){
+robError robManipulator::LoadTool( const std::string& filename ){
+
+  std::ifstream ifs;
+  ifs.open( filename.data() );
+  if(!ifs){
+    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__
+		      << " Couln't open the tool file " << filename 
+		      << std::endl;
+    return ERROR;
+  }
+
+  tool = new robLink;
+  ifs >> *tool; 
+  robGUI::Insert( tool );
+  
   return SUCCESS;
 }
 
@@ -216,12 +230,17 @@ robManipulator::ForwardKinematics( const vctDynamicVector<double>& q ) {
     links[i] = links[i-1] * links[i].ForwardKinematics( q[i] );
   }
 
+  if( tool != NULL ){
+    *tool = links.back() * tool->ForwardKinematics( 0.0 );
+    return *tool;
+  }
+  
   return links.back();
 }
 
 vctFrame4x4<double,VCT_ROW_MAJOR> 
 robManipulator::ForwardKinematics( const vctDynamicVector<double>& q ) const {
-
+  
   if( q.size() != joints.size() ){
     CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__
 		      << ": Expected " << joints.size() << " joints values. "
@@ -248,6 +267,9 @@ robManipulator::ForwardKinematics( const vctDynamicVector<double>& q ) const {
     Rtwi = Rtwi * links[i].ForwardKinematics( q[i] );
   }
 
+  if( tool != NULL )
+    Rtwi = Rtwi * tool->ForwardKinematics( 0.0 );
+  
   return Rtwi;
 }
 
@@ -482,8 +504,8 @@ vctDynamicVector<double>
 robManipulator::RNE( const vctDynamicVector<double>& q,
 		     const vctDynamicVector<double>& qd,
 		     const vctDynamicVector<double>& qdd,
-		     const vctFixedSizeVector<double,3>& g,
-		     const vctFixedSizeVector<double,6>& fext ) const {
+		     const vctFixedSizeVector<double,6>& fext,
+		     double g ) const {
 
   vctFixedSizeVector<double,3> w    (0.0); // angular velocity
   vctFixedSizeVector<double,3> wd   (0.0); // angular acceleration
@@ -499,11 +521,17 @@ robManipulator::RNE( const vctDynamicVector<double>& q,
 					       vctFixedSizeVector<double,3>(0.0));
   // torques
   vctDynamicVector<double>                  tau(joints.size(), 0.0);
-  
+
+  // The axis pointing "up"
   vctFixedSizeVector<double,3> z0(0.0, 0.0, 1.0);
 
   // acceleration of link 0
-  vd = g;
+  // extract the rotation of the base and map the vector [0 0 1] in the robot
+  // coordinate frame
+  vctMatrixRotation3<double,VCT_ROW_MAJOR> R(Rtw0[0][0], Rtw0[0][1], Rtw0[0][2],
+					     Rtw0[1][0], Rtw0[1][1], Rtw0[1][2],
+					     Rtw0[2][0], Rtw0[2][1], Rtw0[2][2]);
+  vd = R.Transpose() * z0 * g;
 
   // Forward recursion
   for(size_t i=0; i<joints.size(); i++){
@@ -570,7 +598,6 @@ robManipulator::CCG( const vctDynamicVector<double>& q,
   return RNE( q,           // call Newton-Euler with only the joints 
 	      qd,          // positions and the joints velocities
 	      vctDynamicVector<double>( q.size(), 0.0 ) );
-
 }
 
 vctFixedSizeVector<double,6> 
@@ -614,10 +641,10 @@ robManipulator::JSinertia(double **A,
   for(size_t c=0; c<joints.size(); c++){
     vctDynamicVector<double> qd( q.size(), 0.0 ); // velocities to zero
     vctDynamicVector<double> qdd(q.size(), 0.0 ); // accelerations to zero
-    vctFixedSizeVector<double,3> g(0.0);          // gravity to zero
+    vctFixedSizeVector<double,6> fext(0.0);
     qdd[c] = 1.0;                                 // ith acceleration to 1
 
-    vctDynamicVector<double> h = RNE( q, qd, qdd, g );
+    vctDynamicVector<double> h = RNE( q, qd, qdd, fext, 0  );
     for( size_t r=0; r<joints.size(); r++ )
       A[c][r] = h[r];
   }
@@ -654,25 +681,25 @@ void robManipulator::OSinertia(double Ac[6][6],
   // A = L  * L**T
   potrf(&UPLO, &NJOINTS, &A[0][0], &LDA, &INFO);
   if(INFO<0)
-    std::cout << __PRETTY_FUNCTION__
-	      << ": The " << INFO << "th argument to potrf(1) is illegal." 
-	      << std::endl;
+    CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__
+			<< ": The " << INFO << "th argument to potrf is illegal."
+			<< std::endl;
   else if(0<INFO)
-    std::cout << __PRETTY_FUNCTION__
-	      << ": The matrix passed to potrf(1) is not positive definite." 
-	      << std::endl;
+    CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__
+			<< ": The matrix for potrf is not positive definite." 
+			<< std::endl;
 
   // invert A
   //
   potri(&UPLO, &NJOINTS, &A[0][0], &LDA, &INFO);
   if(INFO<0)
-    std::cout << __PRETTY_FUNCTION__
-	      << ": The " << INFO << "th argument to potri(1) is illegal."
-	      << std::endl;
+    CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__
+			<< ": The " << INFO << "th argument to potri is illegal."
+			<< std::endl;
   else if(0<INFO)
-    std::cout << __PRETTY_FUNCTION__
-	      << ": The matrix passed to potri(1) is singular."
-	      << std::endl;
+    CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__
+			<< ": The matrix passed to potri is singular."
+			<< std::endl;
 
   JacobianBody( q );
 
@@ -698,28 +725,24 @@ void robManipulator::OSinertia(double Ac[6][6],
   // A = L  * L**T
   potrf(&UPLO, &NEQS, &Ac[0][0], &LDAc, &INFO);
   if(INFO<0)
-    std::cout << __PRETTY_FUNCTION__
-	      << ": The " << INFO << "th argument to potrf(2) is illegal."
-	      << std::endl;
+    CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__
+			<< ": The " << INFO << "th argument to potrf is illegal."
+			<< std::endl;
   else if(0<INFO)
-    std::cout << __PRETTY_FUNCTION__
-	      << ": The matrix passed to potrf is not positive(2) definite."
-	      << std::endl;
+    CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__
+			<< ": The matrix for potrf is not positive definite."
+			<< std::endl;
 
   // invert
   potri(&UPLO, &NEQS, &Ac[0][0], &LDAc, &INFO);
   if(INFO<0)
-    std::cout << __PRETTY_FUNCTION__ 
-	      << endl
-	      << "The " << INFO << "th argument to potri(2) is illegal.";
+    CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__ 
+			<< "The " << INFO << "th argument to potri is illegal."
+			<< std::endl;
   else if(0<INFO)
-    std::cout << __PRETTY_FUNCTION__
-	      << "The matrix passed to potri(2) is singular."
-	      << std::endl;
-
-  //for( size_t i=0; i<6; i++ )
-  //for( size_t j=i; j<6; j++ )
-  //Ac[j][i] = Ac[i][j];
+    CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__
+			<< "The matrix passed to potri is singular."
+			<< std::endl;
 
   free_rmatrix(   A, 0, 0 );
   free_rmatrix( JAi, 0, 0 );

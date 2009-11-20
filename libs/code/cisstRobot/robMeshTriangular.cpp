@@ -98,7 +98,6 @@ robMeshTriangular::operator=( const robMeshTriangular& mesh ){
 
 robMeshTriangular& 
 robMeshTriangular::operator=(const vctFrame4x4<double,VCT_ROW_MAJOR>& Rt){
-  //cout << __PRETTY_FUNCTION__ << endl;
   if( Rt != *this )
     robMeshBase::operator=(Rt);
   return *this;
@@ -336,6 +335,7 @@ robError robMeshTriangular::Load( const std::string& filename ){
     ny[i] = n[1];
     nz[i] = n[2];
   }
+
   return SUCCESS;
 }
 

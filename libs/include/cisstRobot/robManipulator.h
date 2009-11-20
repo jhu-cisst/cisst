@@ -89,17 +89,15 @@ public:
      \param q The joints positions
      \param qd The joints velocities
      \param qdd The joints accelerations
-     \param g Gravity vector 
-              (default \$ \begin{bmatrix} 0 & 0 & 9.81 \end{bmatrix}\$)
      \param fext An external force/moment acting on the tool control point
+     \param g The gravity acceleration
   */
   vctDynamicVector<double> 
   RNE( const vctDynamicVector<double>& q,
        const vctDynamicVector<double>& qd,
        const vctDynamicVector<double>& qdd,
-       const vctFixedSizeVector<double,3>& g=vctFixedSizeVector<double,3>(0.0,0.0,9.81),
-       const vctFixedSizeVector<double,6>& fext=vctFixedSizeVector<double,6>(0.0) )
-    const;
+       const vctFixedSizeVector<double,6>& f=vctFixedSizeVector<double,6>(0.0),
+       double g = 9.81 ) const;
   
   //! Coriolis/centrifugal and gravity
   /**

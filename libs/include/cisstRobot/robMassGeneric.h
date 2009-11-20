@@ -47,40 +47,6 @@ private:
 
 public:
 
-  //! Set the mass parameters
-  /**
-     Set the mass parameters. This copies and transforms the parameters. The
-     mass is simply copied. The center of mass is also copied as it is already
-     expressed in the body's coordinate frame. The inertia, however, is expressed
-     about a coordinate frame coinciding with the center of mass and aligned 
-     with the body's coordinate frame. The reason why the inertia must be 
-     expressed about the center of mass is because it enables to translate the
-     tensor with the parallel axis theorem.
-     \param mass The mass of the body
-     \param COM The center of gravity with respect to the body's coordinate frame
-     \param MOIT The moment of inertia tensor with respect to a coordinate frame 
-                 with the origin at the center of mass and aligned with the 
-		 body's coordinate frame                 
-  */
-  void SetParameters( double mass, 
-		      const vctFixedSizeVector<double,3>& com,
-		      const vctFixedSizeMatrix<double,3,3>& moit,
-		      const vctFrame4x4<double,VCT_ROW_MAJOR>& = 
-		            vctFrame4x4<double,VCT_ROW_MAJOR>()){
-    this->mass = mass;
-    this->com = com;
-    this->moit = moit;
-    //cout << this->moit << endl << endl;
-    this->moit = ParallelAxis( -com ); // shift the moment of inertia from the 
-                                       // center of mass to the body's coordinate
-                                       // frame
-    //cout << this->mass << endl
-    //	 << this->com << endl
-    //	 << this->moit << endl << endl;
-  }
-
-public:
-
   //! Default constructor
   /**
      Set the mass, center of mass and inertia to zero
@@ -117,6 +83,36 @@ public:
   */
   vctFixedSizeMatrix<double,3,3> MomentOfInertia() const { return moit; }
   
+public:
+
+  //! Set the mass parameters
+  /**
+     Set the mass parameters. This copies and transforms the parameters. The
+     mass is simply copied. The center of mass is also copied as it is already
+     expressed in the body's coordinate frame. The inertia, however, is expressed
+     about a coordinate frame coinciding with the center of mass and aligned 
+     with the body's coordinate frame. The reason why the inertia must be 
+     expressed about the center of mass is because it enables to translate the
+     tensor with the parallel axis theorem.
+     \param mass The mass of the body
+     \param COM The center of gravity with respect to the body's coordinate frame
+     \param MOIT The moment of inertia tensor with respect to a coordinate frame 
+                 with the origin at the center of mass and aligned with the 
+		 body's coordinate frame                 
+  */
+  void SetDynamicsParameters( double mass, 
+			      const vctFixedSizeVector<double,3>& com,
+			      const vctFixedSizeMatrix<double,3,3>& moit,
+			      const vctFrame4x4<double,VCT_ROW_MAJOR>& = 
+			      vctFrame4x4<double,VCT_ROW_MAJOR>()){
+    this->mass = mass;
+    this->com = com;
+    this->moit = moit;
+    this->moit = ParallelAxis( -com ); // shift the moment of inertia from the 
+                                       // center of mass to the body's coordinate
+                                       // frame
+  }
+
 };
 
 #endif

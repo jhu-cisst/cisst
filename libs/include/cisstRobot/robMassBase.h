@@ -54,20 +54,6 @@ protected:
   }
 
 public:
-  
-  //! Set the mass parameters
-  /**
-     \param mass The mass of the body
-     \param COM The center of gravity
-     \param MOIT The moment of inertia tensor
-  */
-  virtual void SetParameters( double mass, 
-			      const vctFixedSizeVector<double,3>& COM,
-			      const vctFixedSizeMatrix<double,3,3>& MOIT,
-			      const vctFrame4x4<double,VCT_ROW_MAJOR>& offset = 
-			            vctFrame4x4<double,VCT_ROW_MAJOR>() ) = 0;
-
-public:
 
   robMassBase(){}
   ~robMassBase(){}
@@ -92,9 +78,21 @@ public:
     vctFixedSizeMatrix<double,3,3> I ( Ixx, Ixy, Ixz,
 				       Ixy, Iyy, Iyz,
 				       Ixz, Iyz, Izz );
-    SetParameters( m, com, I );
+    SetDynamicsParameters( m, com, I );
   }
   
+  //! Set the mass parameters
+  /**
+     \param mass The mass of the body
+     \param COM The center of gravity
+     \param MOIT The moment of inertia tensor
+  */
+  virtual void SetDynamicsParameters( double mass, 
+				      const vctFixedSizeVector<double,3>& COM,
+				      const vctFixedSizeMatrix<double,3,3>& MOIT,
+				      const vctFrame4x4<double,VCT_ROW_MAJOR>& offset = 
+				      vctFrame4x4<double,VCT_ROW_MAJOR>() ) = 0;
+
   //! Write the mass to an output stream
   virtual void Write( std::ostream& os ) const {
     double m = Mass();

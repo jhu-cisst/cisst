@@ -44,6 +44,16 @@ private:
   dMass mass;
   
 public:
+
+  //! Default constructor
+  robMassODE(){}
+  //! Default destructor
+  ~robMassODE(){}
+
+  //! Set the mass of the body
+  void Configure( dBodyID bodyid ) { dBodySetMass( bodyid, &mass ); }
+
+public:
   
   //! Set the mass parameters
   /**
@@ -53,17 +63,17 @@ public:
                  with the origin at the center of mass and aligned with the 
 		 body's coordinate frame                 
   */
-  void SetParameters( double mass, 
-		      const vctFixedSizeVector<double,3>& com,
-		      const vctFixedSizeMatrix<double,3,3>& moit,
-		      const vctFrame4x4<double,VCT_ROW_MAJOR>& =
-		            vctFrame4x4<double,VCT_ROW_MAJOR>() ){
+  void SetDynamicsParameters( double mass, 
+			      const vctFixedSizeVector<double,3>& com,
+			      const vctFixedSizeMatrix<double,3,3>& moit,
+			      const vctFrame4x4<double,VCT_ROW_MAJOR>& =
+			      vctFrame4x4<double,VCT_ROW_MAJOR>() ){
 
     // set the mass parameters used for the inverse dynamics of the robot
-    // robMassGeneric::SetParameters will use the opposite of com to find 
+    // robMassGeneric::SetDynamicsParameters will use the opposite of com to find
     // the inertia wrt to the links coordinate frame (as opposed to the to the
     // inertia wrt to the center of mass)
-    robMassGeneric::SetParameters( mass, com, moit );
+    robMassGeneric::SetDynamicsParameters( mass, com, moit );
 
     // Set the mass parameters for ODE the COM must be the body
     // reference (0,0,0) and the MOIT must be centered around the COM
@@ -74,16 +84,6 @@ public:
 			moit[0][1], moit[0][2], moit[1][2] );
   }
   
-public:
-
-  //! Default constructor
-  robMassODE(){}
-  //! Default destructor
-  ~robMassODE(){}
-
-  //! Set the mass of the body
-  void Configure( dBodyID bodyid ) { dBodySetMass( bodyid, &mass ); }
-
 };
 
 

@@ -62,8 +62,7 @@ public:
      \param world The ODE world of the body
      \param space The ODE space in which the geometry will be added
   */
-  void Configure( dWorldID world, 
-		  dSpaceID space ){
+  void Configure( dWorldID world, dSpaceID space ){
     bodyid = dBodyCreate( world );                  // create the body
     robMassODE::Configure( BodyID() );
     robMeshODE::Configure( space );
@@ -80,6 +79,7 @@ public:
                with respect to an inertial coordinate frame.
   */
   robBodyODE& operator=( const vctFrame4x4<double,VCT_ROW_MAJOR>& Rt ) {
+    //std::cout << __PRETTY_FUNCTION__ << std::endl;
 
     // ensures that the reference isn't the same as the current body
     if( *this != Rt ){

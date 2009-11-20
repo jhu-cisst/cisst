@@ -52,6 +52,7 @@ robMeshODE::robMeshODE( const robMeshODE& mesh ) : robMeshTriangular( mesh ){
 robMeshODE& robMeshODE::operator=( const vctFrame4x4<double,VCT_ROW_MAJOR>& Rt ){
   // just call the base class operator
   robMeshTriangular::operator=(Rt);
+
   return *this;
 }
 

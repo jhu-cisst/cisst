@@ -21,11 +21,11 @@ using namespace std;
 robDH::robDH() { alpha = a = theta = d = offset = 0.0; }
 robDH::~robDH(){}
 
-void robDH::SetParameters( double alpha, double a, 
-			   double theta, double d, 
-			   double offset,
-			   const std::string& type,
-			   const std::string& convention ){
+void robDH::SetKinematicsParameters( double alpha, double a, 
+				     double theta, double d, 
+				     double offset,
+				     const std::string& type,
+				     const std::string& convention ){
 
   this->alpha = alpha;
   this->a = a;
@@ -128,7 +128,7 @@ void robDH::Read( std::istream& is ) {
   if( alpha == -1.5708 )   alpha = -M_PI_2;
   if( alpha == 1.5708 )	   alpha =  M_PI_2;
   
-  SetParameters( alpha, a, theta, d, offset, prismatic, convention );
+  SetKinematicsParameters( alpha, a, theta, d, offset, prismatic, convention );
 }
 
 void robDH::Write( std::ostream& os ) const {

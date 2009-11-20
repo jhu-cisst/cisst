@@ -50,11 +50,11 @@ private:
      \param type "REVOLUTE" or "PRISMATIC"
      \param convention "MODIFIED" or "STANDARD"
   */
-  void SetParameters( double alpha, double a, 
-		      double theta, double d, 
-		      double offset,
-		      const std::string& type,
-		      const std::string& convention ); 
+  void SetKinematicsParameters( double alpha, double a, 
+				double theta, double d, 
+				double offset,
+				const std::string& type,
+				const std::string& convention ); 
 
 public:
   

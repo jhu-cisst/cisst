@@ -28,9 +28,13 @@ robManipulatorODE::robManipulatorODE(dWorldID worldid,
   : robManipulator( robotfilename, toolfilename, Rt ){
 
   // Configure and disable all the bodies
-  for( size_t i=0; i<links.size(); i++ ){
+  for( size_t i=0; i<links.size(); i++ ){    
     links[i].Configure( worldid, spaceid );
   }
+  if( tool != NULL ){
+    tool->Configure( worldid, spaceid );
+  }
+
 
   // set the arm in the parking position. This is essential since ODE
   // consider that the the "0" position is position when a joint is created
@@ -63,6 +67,12 @@ robManipulatorODE::robManipulatorODE(dWorldID worldid,
     b1 = b2;
   }
 
+  if( tool != NULL ){
+    dJointID fix = dJointCreateFixed( worldid, 0 );
+    dJointAttach( fix, links.back().BodyID(), tool->BodyID() );
+    dJointSetFixed( fix );
+  }
+
 }
 
 vctDynamicVector<double> robManipulatorODE::GetJointsPositions() const {
@@ -82,6 +92,8 @@ vctDynamicVector<double> robManipulatorODE::GetJointsVelocities() const {
 void robManipulatorODE::Update(){
   for( size_t i=0; i<links.size(); i++ )
     links[i].Update();
+  if( tool != NULL )
+    tool->Update();
 }
 
 void 
