@@ -29,6 +29,10 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstStereoVision/svlConfig.h>
 
+// Always include last!
+#include <cisstStereoVision/svlExport.h>
+
+
 #ifdef _MSC_VER
     // Quick fix for Visual Studio Intellisense:
     // The Intellisense parser can't handle the CMN_UNUSED macro
