@@ -12,7 +12,7 @@
 # 
 # --- end cisst license ---
 
-option(CISST_HAS_FLTK "cisst has support for FLTK" ON)
+option(CISST_HAS_FLTK "cisst has support for FLTK" OFF)
 
 if(CISST_HAS_FLTK)
   find_package(FLTK REQUIRED)

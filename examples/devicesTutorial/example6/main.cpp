@@ -37,6 +37,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstDevices/devNDISerialToolQDevice.h>
 
 #include <QApplication>
+#include <QMainWindow>
 
 
 int main(int argc, char *argv[])
@@ -56,35 +57,30 @@ int main(int argc, char *argv[])
     QApplication application(argc, argv);
 
     // create the tasks
-    devNDISerial * devNDISerialTask = new devNDISerial("devNDISerial");
-    devNDISerialControllerQDevice * controllerQDevice = new devNDISerialControllerQDevice("controllerQDevice");
+    devNDISerial * taskNDISerial = new devNDISerial("devNDISerial");
+    devNDISerialControllerQDevice * taskControllerQDevice = new devNDISerialControllerQDevice("taskControllerQDevice");
 
     // configure the tasks
-    cmnPath searchPath;
-    std::string sourcePath;
-    sourcePath.assign(CISST_SOURCE_ROOT);
-    sourcePath.append("/examples/devicesTutorial/example6");
-    searchPath.Add(sourcePath);
-    const std::string filePath = searchPath.Find("config.xml", cmnPath::READ);
-    devNDISerialTask->Configure(filePath);
+    cmnPath searchPath = std::string(CISST_SOURCE_ROOT) + "/examples/devicesTutorial/example6";
+    taskNDISerial->Configure(searchPath.Find("config.xml"));
 
     // add the tasks to the task manager
     mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
-    taskManager->AddTask(devNDISerialTask);
-    taskManager->AddDevice(controllerQDevice);
+    taskManager->AddTask(taskNDISerial);
+    taskManager->AddDevice(taskControllerQDevice);
 
     // connect the tasks, e.g. RequiredInterface -> ProvidedInterface
-    taskManager->Connect("controllerQDevice", "RequiresNDISerialController",
+    taskManager->Connect("taskControllerQDevice", "RequiresNDISerialController",
                          "devNDISerial", "ProvidesNDISerialController");
 
 //    mtsCollectorState * dataCollectionTask = new mtsCollectorState("devNDISerial", mtsCollectorBase::COLLECTOR_LOG_FORMAT_PLAIN_TEXT);
 
     // add interfaces for tools and populate controller widget with tool widgets
-    const unsigned int numberOfTools = devNDISerialTask->GetNumberOfTools();
+    const unsigned int numberOfTools = taskNDISerial->GetNumberOfTools();
     for (unsigned int i = 0; i < numberOfTools; i++) {
-        std::string toolName = devNDISerialTask->GetToolName(i);
+        std::string toolName = taskNDISerial->GetToolName(i);
         devNDISerialToolQDevice * toolQDevice = new devNDISerialToolQDevice(toolName);
-        controllerQDevice->AddToolWidget(toolQDevice->GetToolWidget());
+        taskControllerQDevice->AddToolWidget(toolQDevice->GetCentralWidget());
         taskManager->AddDevice(toolQDevice);
         taskManager->Connect(toolName, toolName,
                              "devNDISerial", toolName);
@@ -96,6 +92,13 @@ int main(int argc, char *argv[])
     // create and start all tasks
     taskManager->CreateAll();
     taskManager->StartAll();
+
+    // create a main window to hold QWidgets
+    QMainWindow * mainWindow = new QMainWindow();
+    mainWindow->setCentralWidget(taskControllerQDevice->GetCentralWidget());
+    mainWindow->setWindowTitle("NDI Serial Controller");
+    mainWindow->adjustSize();
+    mainWindow->show();
 
     // run Qt user interface
     application.exec();

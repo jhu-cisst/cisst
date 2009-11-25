@@ -40,7 +40,8 @@ devNDISerialControllerQDevice::devNDISerialControllerQDevice(const std::string &
     }
 
     ControllerWidget.setupUi(&CentralWidget);
-    CreateMainWindow();
+    CentralWidget.setWindowTitle(QString::fromStdString(taskName));
+    CentralWidget.adjustSize();
 
     // connect Qt signals to slots
     QObject::connect(ControllerWidget.ButtonBeep, SIGNAL(clicked()),
@@ -53,17 +54,6 @@ devNDISerialControllerQDevice::devNDISerialControllerQDevice(const std::string &
                      this, SLOT(NDITrackQSlot(bool)));
     QObject::connect(ControllerWidget.ButtonCollect, SIGNAL(toggled(bool)),
                      this, SLOT(CollectQSlot(bool)));
-    QObject::connect(ControllerWidget.ButtonQuit, SIGNAL(clicked()),
-                     &MainWindow, SLOT(close()));
-}
-
-
-void devNDISerialControllerQDevice::CreateMainWindow(void)
-{
-    MainWindow.setCentralWidget(&CentralWidget);
-    MainWindow.adjustSize();
-    MainWindow.setWindowTitle("NDI Serial Controller");
-    MainWindow.show();
 }
 
 
@@ -71,7 +61,7 @@ void devNDISerialControllerQDevice::AddToolWidget(QWidget * toolWidget)
 {
     ControllerWidget.LayoutTools->addWidget(toolWidget);
     ControllerWidget.BoxTools->addItem(toolWidget->windowTitle());
-    MainWindow.adjustSize();
+    CentralWidget.adjustSize();
 }
 
 

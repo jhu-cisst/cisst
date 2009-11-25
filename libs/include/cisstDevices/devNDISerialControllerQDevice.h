@@ -25,8 +25,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsFunctionReadOrWrite.h>
 #include <cisstMultiTask/mtsFunctionVoid.h>
 
-#include <QMainWindow>
-
 #include <cisstDevices/devNDISerialControllerQWidget.h>
 
 
@@ -43,12 +41,13 @@ class devNDISerialControllerQDevice : public QObject, public mtsDevice
 
     void AddToolWidget(QWidget * toolWidget);
 
- protected:
-    void CreateMainWindow(void);
+    QWidget * GetCentralWidget(void) {
+        return &CentralWidget;
+    }
 
+ protected:
     Ui::devNDISerialControllerQWidget ControllerWidget;
     QWidget CentralWidget;
-    QMainWindow MainWindow;
 
     struct {
         mtsFunctionWrite Beep;

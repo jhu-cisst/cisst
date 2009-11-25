@@ -25,7 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 
   \warning Missing support for 14400bps, 921600bps and 1228739bps baud rates in osaSerialPort.
 
-  \todo Verify the need fof all osaSleep() calls.
+  \todo Verify the need for all sleep times.
   \todo Have the option for dynamic tool plugging (requires runtime mtsConnect).
   \todo Ability to enable/disable individual tools (or even add/remove tools using dynamic tool plugging).
   \todo Add RMS error to CalibratePivot() (make this a provided command per Tool?).

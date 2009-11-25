@@ -78,7 +78,7 @@ void devNDISerial::Configure(const std::string & filename)
     std::string toolName;
     bool toolEnabled;
     std::string toolSerial, toolSerialLast;
-    std::string toolDefinition, toolDefinitionLast;
+    std::string toolDefinition;
 
     for (int i = 0; i < maxNumTools; i++) {
         std::stringstream context;
@@ -90,11 +90,10 @@ void devNDISerial::Configure(const std::string & filename)
         if (toolSerial != toolSerialLast) {
             toolSerialLast = toolSerial;
             if (toolEnabled) {
-                if (toolDefinition != toolDefinitionLast) {
-                    toolDefinitionLast = toolDefinition;
-                    AddTool(toolName, toolSerial.c_str(), toolDefinition.c_str());
-                } else {
+                if (toolDefinition == "") {
                     AddTool(toolName, toolSerial.c_str());
+                } else {
+                    AddTool(toolName, toolSerial.c_str(), toolDefinition.c_str());
                 }
             }
         }
@@ -469,9 +468,9 @@ devNDISerial::Tool * devNDISerial::AddTool(const std::string & name, const char 
         CMN_LOG_CLASS_INIT_VERBOSE << "AddTool: created tool \"" << name << "\" with serial number: " << serialNumber << std::endl;
 
         // create an interface for tool
-        StateTable.AddData(tool->Position, name + "Position");
         tool->Interface = AddProvidedInterface(name);
         if (tool->Interface) {
+            StateTable.AddData(tool->Position, name + "Position");
             tool->Interface->AddCommandReadState(StateTable, tool->Position, "GetPositionCartesian");
         }
     }
@@ -685,7 +684,7 @@ void devNDISerial::ToggleTracking(const mtsBool & track)
         CommandSend("TSTOP ");
     }
     ResponseRead("OKAY");
-    osaSleep(500.0 * cmn_ms);
+    osaSleep(0.5 * cmn_s);
 }
 
 

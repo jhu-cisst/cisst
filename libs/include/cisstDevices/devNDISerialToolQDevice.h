@@ -41,7 +41,7 @@ class devNDISerialToolQDevice : public QObject, public mtsDevice
 
     void Configure(const std::string & CMN_UNUSED(filename) = "") {};
 
-    QWidget * GetToolWidget(void) {
+    QWidget * GetCentralWidget(void) {
         return &CentralWidget;
     }
 

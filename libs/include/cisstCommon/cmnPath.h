@@ -130,7 +130,7 @@ public:
     /*! Find the full name for a given file.
       \return The full path including the filename or an empty string.
     */
-    std::string Find(const std::string & filename, short mode) const;
+    std::string Find(const std::string & filename, short mode = READ) const;
 
     /*! Remove the first occurence of a directory from the search list. */
     bool Remove(const std::string & directory);

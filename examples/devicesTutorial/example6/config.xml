@@ -13,13 +13,13 @@
           description="NDI Vicra passive probe (at JHMI)" />
 
     <tool name="Vicra Big Reference"
-          enabled="true"
+          enabled="false"
           serial="34801403"
           definition="C:\\Program Files\\Northern Digital Inc\\Tool Definition Files\\8700339.rom"
           description="NDI Vicra passive reference (at JHMI)" />
 
     <tool name="Vicra Small Reference"
-          enabled="true"
+          enabled="false"
           serial="34801401"
           definition="C:\\Program Files\\Northern Digital Inc\\Tool Definition Files\\8700338.rom"
           description="NDI Vicra passive reference (at JHMI)" />
@@ -27,11 +27,13 @@
     <tool name="Polaris Probe"
           enabled="false"
           serial="32887C02"
+          definition=""
           description="NDI Polaris active probe (at Homewood)" />
 
     <tool name="Traxtal Probe"
           enabled="false"
           serial="3091280C"
+          definition=""
           description="Traxtal active probe (at Homewood)" />
 
     <tool name="Traxtal Cross"
@@ -39,5 +41,11 @@
           serial="3499D401"
           definition="C:\\Program Files\\Northern Digital Inc\\Tool Definition Files\\Traxtal_C-Arm_Tracker.rom"
           description="Traxtal passive c-arm tracker (at Homewood)" />
+
+    <tool name="Aurora Probe"
+          enabled="false"
+          serial="36BB5800"
+          definition=""
+          description="NDI Aurora probe (at JHMI)" />
   </tools>
 </config>
