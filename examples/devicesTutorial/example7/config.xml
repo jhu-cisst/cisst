@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<config>
+
+  <device calibration="C:\\Program Files\\Claron Technology\\MicronTracker\\CalibrationFiles"
+          markers="C:\\Program Files\\Claron Technology\\MicronTracker\\Markers" />
+</config>

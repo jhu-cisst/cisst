@@ -24,13 +24,17 @@ http://www.cisst.org/cisst/license.txt.
   \ingroup devicesTutorial
 */
 
+#include <cisstCommon/cmnPath.h>
+#include <cisstCommon/cmnUnits.h>
 #include <cisstOSAbstraction/osaThreadedLogFile.h>
 #include <cisstMultiTask/mtsTaskManager.h>
 #include <cisstDevices/devMicronTracker.h>
 
 #include <QApplication>
+#include <QMainWindow>
 
 #include "devMicronTrackerControllerQDevice.h"
+#include "devMicronTrackerToolQDevice.h"
 
 
 int main(int argc, char *argv[])
@@ -44,27 +48,38 @@ int main(int argc, char *argv[])
     cmnLogger::GetMultiplexer()->AddChannel(threadedLog, CMN_LOG_LOD_VERY_VERBOSE);
 
     // set the log level of detail on select tasks
-    cmnClassRegister::SetLoD("devMicronTracker", CMN_LOG_LOD_VERY_VERBOSE);
+    cmnClassRegister::SetLoD("devMicronTracker", CMN_LOG_LOD_RUN_WARNING);
 
     // create a Qt user interface
     QApplication application(argc, argv);
 
     // create the tasks
-    devMicronTracker * devMicronTrackerTask = new devMicronTracker("devMicronTracker");
-    devMicronTrackerControllerQDevice * controllerQDevice = new devMicronTrackerControllerQDevice("controllerQDevice");
+    devMicronTracker * taskMicronTracker = new devMicronTracker("devMicronTracker", 50.0 * cmn_ms);
+    devMicronTrackerControllerQDevice * taskControllerQDevice = new devMicronTrackerControllerQDevice("taskControllerQDevice");
+
+    // configure the tasks
+    cmnPath searchPath = std::string(CISST_SOURCE_ROOT) + "/examples/devicesTutorial/example7";
+    taskMicronTracker->Configure(searchPath.Find("config.xml"));
 
     // add the tasks to the task manager
     mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
-    taskManager->AddTask(devMicronTrackerTask);
-    taskManager->AddDevice(controllerQDevice);
+    taskManager->AddTask(taskMicronTracker);
+    taskManager->AddDevice(taskControllerQDevice);
 
     // connect the tasks, e.g. RequiredInterface -> ProvidedInterface
-    taskManager->Connect("controllerQDevice", "RequiresMicronTrackerController",
+    taskManager->Connect("taskControllerQDevice", "RequiresMicronTrackerController",
                          "devMicronTracker", "ProvidesMicronTrackerController");
 
     // create and start all tasks
     taskManager->CreateAll();
     taskManager->StartAll();
+
+    // create a main window to hold QWidgets
+    QMainWindow * mainWindow = new QMainWindow();
+    mainWindow->setCentralWidget(taskControllerQDevice->GetCentralWidget());
+    mainWindow->setWindowTitle("MicronTracker Controller");
+    mainWindow->adjustSize();
+    mainWindow->show();
 
     // run Qt user interface
     application.exec();

@@ -24,37 +24,47 @@ http://www.cisst.org/cisst/license.txt.
   \ingroup cisstDevices
 
   \bug Current CMake support is for Windows only.
+  \bug Runtime error when using Markers.ProcessFrame() (only when debugging).
 
+  \todo Add interfaces for all recognized markers.
   \todo Check for mtMeasurementHazardCode using Xform3D_HazardCodeGet().
+  \todo Sleep to prevent Cameras_GrabFrame() timeout?
+  \todo Verify the need for skipping initial 20 auto-adjustment frames.
+  \todo Move Qt widgets to the libs folder once they are mature enough.
+  \todo Verify the need for the use of MTC() macro.
+  \todo Find a suitable State Table size.
 */
 
 #ifndef _devMicronTracker_h
 #define _devMicronTracker_h
 
-#include <cisstMultiTask/mtsTaskContinuous.h>
+#include <cisstMultiTask/mtsTaskPeriodic.h>
+#include <cisstMultiTask/mtsVector.h>
 #include <cisstParameterTypes/prmPositionCartesianGet.h>
 #include <cisstDevices/devExport.h>  // always include last
 
 #include <MTC.h>
 
 
-class CISST_EXPORT devMicronTracker : public mtsTaskContinuous
+class CISST_EXPORT devMicronTracker : public mtsTaskPeriodic
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
  public:
-    devMicronTracker(const std::string & taskName);
+    devMicronTracker(const std::string & taskName, const double period);
     ~devMicronTracker(void) {};
 
-    void Configure(const std::string & CMN_UNUSED(filename) = "") {};
+    void Configure(const std::string & filename = "");
     void Startup(void);
     void Run(void);
     void Cleanup(void);
 
  protected:
-    void ToggleTracking(const mtsBool & track);
+    void ToggleCapturing(const mtsBool & toggle);
+    void ToggleTracking(const mtsBool & toggle);
     void Track(void);
 
+    bool IsCapturing;
     bool IsTracking;
 
     mtHandle CurrentCamera;
@@ -62,6 +72,10 @@ class CISST_EXPORT devMicronTracker : public mtsTaskContinuous
     mtHandle IdentifiedMarkers;
     mtHandle PoseXf;
     prmPositionCartesianGet Position;
+    mtsDoubleVec MarkerProjectionLeft;
+
+    mtsUCharVec CameraFrameLeft;
+    mtsUCharVec CameraFrameRight;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(devMicronTracker);

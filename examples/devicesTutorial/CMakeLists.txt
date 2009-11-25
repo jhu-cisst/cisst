@@ -27,13 +27,9 @@ if(CISST_DEV_HAS_OPENIGTLINK)
   add_subdirectory(example4)
 endif(CISST_DEV_HAS_OPENIGTLINK)
 
-if(CISST_HAS_QT)
-
-  if(CISST_HAS_XML)
-    add_subdirectory(example6)
-  endif(CISST_HAS_XML)
-
+if(CISST_HAS_QT AND CISST_HAS_XML)
+  add_subdirectory(example6)
   if(CISST_DEV_HAS_MICRONTRACKER)
     add_subdirectory(example7)
   endif(CISST_DEV_HAS_MICRONTRACKER)
-endif(CISST_HAS_QT)
+endif(CISST_HAS_QT AND CISST_HAS_XML)

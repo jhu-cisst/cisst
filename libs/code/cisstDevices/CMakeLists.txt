@@ -110,31 +110,30 @@ if(CISST_HAS_XML)
   set(HEADER_FILES
       ${HEADER_FILES}
       devNDISerial.h)
+
+  if(CISST_DEV_HAS_MICRONTRACKER)
+    find_path(MicronTracker_INCLUDE_DIR
+              NAMES MTC.h
+              HINTS "C:/Program Files/Claron Technology/MicronTracker/Dist")
+    find_library(MicronTracker_LIBRARIES
+                 NAMES MTC
+                 HINTS ${MicronTracker_INCLUDE_DIR}
+                 )
+    include_directories(${MicronTracker_INCLUDE_DIR})
+    set(SOURCE_FILES
+        ${SOURCE_FILES}
+        devMicronTracker.cpp)
+    set(HEADER_FILES
+        ${HEADER_FILES}
+        devMicronTracker.h)
+    set(DEV_ADDITIONAL_INCLUDE_DIR
+        "${DEV_ADDITIONAL_INCLUDE_DIR}"
+        ${MicronTracker_INCLUDE_DIR})
+    set(DEV_ADDITIONAL_LIBRARIES
+        "${DEV_ADDITIONAL_LIBRARIES}"
+        ${MicronTracker_LIBRARIES})
+  endif(CISST_DEV_HAS_MICRONTRACKER)
 endif(CISST_HAS_XML)
-
-if(CISST_DEV_HAS_MICRONTRACKER)
-  find_path(MicronTracker_INCLUDE_DIR
-            NAMES MTC.h
-            HINTS "C:/Program Files/Claron Technology/MicronTracker/Dist")
-  find_library(MicronTracker_LIBRARIES
-               NAMES MTC
-               HINTS ${MicronTracker_INCLUDE_DIR}
-               )
-  include_directories(${MicronTracker_INCLUDE_DIR})
-  set(SOURCE_FILES
-      ${SOURCE_FILES}
-      devMicronTracker.cpp)
-  set(HEADER_FILES
-      ${HEADER_FILES}
-      devMicronTracker.h)
-  set(DEV_ADDITIONAL_INCLUDE_DIR
-      "${DEV_ADDITIONAL_INCLUDE_DIR}"
-      ${MicronTracker_INCLUDE_DIR})
-  set(DEV_ADDITIONAL_LIBRARIES
-      "${DEV_ADDITIONAL_LIBRARIES}"
-      ${MicronTracker_LIBRARIES})
-endif(CISST_DEV_HAS_MICRONTRACKER)
-
 
   MACRO (CISST_QT4_WRAP_UI outfiles )
     QT4_EXTRACT_OPTIONS(ui_files ui_options ${ARGN})
