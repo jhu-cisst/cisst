@@ -32,9 +32,20 @@ public:
   ~robBodyGeneric(){}
 
   //! Read the body from an input stream
-  virtual void Read( std::istream& is ){
-    robMass::Read( is );
-    robMesh::Read( is );
+  virtual robError Read( std::istream& is ){
+    if( robMass::Read( is ) == ERROR ){
+      CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__
+			<< ": Failed to read the mass." 
+			<< std::endl;
+      return ERROR;
+    }
+    if( robMesh::Read( is ) == ERROR ){
+      CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__
+			<< ": Failed to read the mesh." 
+			<< std::endl;
+      return ERROR;
+    }
+    return SUCCESS;
   }
 
   //! Write the body to an output stream

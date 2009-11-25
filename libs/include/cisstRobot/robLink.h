@@ -40,9 +40,15 @@ public:
   }
 
   //! Read the DH and body parameters
-  void Read( std::istream& is ){ 
-    robDH::Read( is ); 
-    robBody::Read( is ); 
+  robError Read( std::istream& is ){ 
+    robDH::Read( is );
+    if( robBody::Read( is ) == ERROR ){
+      CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__
+			<< ": Failed to read the body."
+			<< std::endl;
+      return ERROR;
+    }
+   return SUCCESS;
   }
   
   //! Write the DH and body parameters

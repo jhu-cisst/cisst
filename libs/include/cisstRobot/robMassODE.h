@@ -65,15 +65,16 @@ public:
   */
   void SetDynamicsParameters( double mass, 
 			      const vctFixedSizeVector<double,3>& com,
-			      const vctFixedSizeMatrix<double,3,3>& moit,
-			      const vctFrame4x4<double,VCT_ROW_MAJOR>& =
-			      vctFrame4x4<double,VCT_ROW_MAJOR>() ){
+			      const vctFixedSizeVector<double,3>& d,
+			      const vctMatrixRotation3<double>& V ){
 
     // set the mass parameters used for the inverse dynamics of the robot
-    // robMassGeneric::SetDynamicsParameters will use the opposite of com to find
-    // the inertia wrt to the links coordinate frame (as opposed to the to the
-    // inertia wrt to the center of mass)
-    robMassGeneric::SetDynamicsParameters( mass, com, moit );
+    // robMassGeneric::SetDynamicsParameters will use the opposite of com to 
+    // find the inertia wrt to the links coordinate frame (as opposed to the to 
+    // the inertia wrt to the center of mass)
+    robMassGeneric::SetDynamicsParameters( mass, com, d, V );
+
+    vctFixedSizeMatrix<double,3,3,VCT_ROW_MAJOR> moit = V.Transpose() * D * V;
 
     // Set the mass parameters for ODE the COM must be the body
     // reference (0,0,0) and the MOIT must be centered around the COM

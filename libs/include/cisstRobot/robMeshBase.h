@@ -83,10 +83,10 @@ public:
      Read a file name from the input stream and then call Load to load the mesh
      into memory. The implementation of Load is left to a subclass.
   */
-  virtual void Read( std::istream& is ){
+  virtual robError Read( std::istream& is ){
     std::string filename;
     is >> filename;
-    Load( filename );
+    return Load( filename );
   }
 
   //! Load a file

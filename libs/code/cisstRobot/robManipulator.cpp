@@ -190,9 +190,10 @@ robError robManipulator::LoadTool( const std::string& filename ){
     return ERROR;
   }
 
-  tool = new robLink;
-  ifs >> *tool; 
-  robGUI::Insert( tool );
+  //tool = new robLink;
+  robLink tool;
+  ifs >> tool; 
+  //robGUI::Insert( tool );
   
   return SUCCESS;
 }
@@ -515,10 +516,10 @@ robManipulator::RNE( const vctDynamicVector<double>& q,
 
   //total moment exerted on each link
   std::vector<vctFixedSizeVector<double,3> > N(joints.size(),
-					       vctFixedSizeVector<double,3>(0.0));
+					       vctFixedSizeVector<double,3>(0));
   //total force exerted on each link 
   std::vector<vctFixedSizeVector<double,3> > F(joints.size(),
-					       vctFixedSizeVector<double,3>(0.0));
+					       vctFixedSizeVector<double,3>(0));
   // torques
   vctDynamicVector<double>                  tau(joints.size(), 0.0);
 
@@ -528,9 +529,9 @@ robManipulator::RNE( const vctDynamicVector<double>& q,
   // acceleration of link 0
   // extract the rotation of the base and map the vector [0 0 1] in the robot
   // coordinate frame
-  vctMatrixRotation3<double,VCT_ROW_MAJOR> R(Rtw0[0][0], Rtw0[0][1], Rtw0[0][2],
-					     Rtw0[1][0], Rtw0[1][1], Rtw0[1][2],
-					     Rtw0[2][0], Rtw0[2][1], Rtw0[2][2]);
+  vctMatrixRotation3<double,VCT_ROW_MAJOR> R(Rtw0[0][0], Rtw0[0][1],Rtw0[0][2],
+					     Rtw0[1][0], Rtw0[1][1],Rtw0[1][2],
+					     Rtw0[2][0], Rtw0[2][1],Rtw0[2][2]);
   vd = R.Transpose() * z0 * g;
 
   // Forward recursion
