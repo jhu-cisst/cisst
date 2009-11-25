@@ -131,7 +131,8 @@ bool svlStreamBranchSource::IsTypeSupported(svlStreamType type)
         case svlTypeStreamSource:
         case svlTypeStreamSink:
         case svlTypeImageCustom:
-        case svlTypeDepthMap:
+        case svlTypeImageMonoFloat:
+        case svlTypeImage3DMap:
         case svlTypeRigidXform:
         case svlTypePointCloud:
         break;
@@ -142,7 +143,7 @@ bool svlStreamBranchSource::IsTypeSupported(svlStreamType type)
 void svlStreamBranchSource::SetInputSample(svlSample* inputdata)
 {
     for (int i = 0; i < BufferSize; i ++) {
-        dynamic_cast<svlSampleImageBase*>(SampleBuffer[i])->SetSize(*(dynamic_cast<svlSampleImageBase*>(inputdata)));
+        SampleBuffer[i]->SetSize(*inputdata);
     }
 }
 

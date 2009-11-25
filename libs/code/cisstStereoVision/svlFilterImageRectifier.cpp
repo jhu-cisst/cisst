@@ -73,9 +73,9 @@ int svlFilterImageRectifier::Initialize(svlSample* inputdata)
     // Preparing output sample
     if (OutputData) delete OutputData;
     OutputData = input->GetNewInstance();
-    svlSampleImageBase* output = dynamic_cast<svlSampleImageBase*>(OutputData);
-    output->SetSize(*input);
+    OutputData->SetSize(*input);
 
+    svlSampleImageBase* output = dynamic_cast<svlSampleImageBase*>(OutputData);
     channels = output->GetVideoChannels();
     for (i = 0; i < channels; i ++) {
         memset(output->GetUCharPointer(i), 0, output->GetDataSize(i));

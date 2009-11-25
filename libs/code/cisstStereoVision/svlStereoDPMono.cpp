@@ -40,10 +40,7 @@ using namespace std;
 // arguments:
 //           width                  - width of input and output images
 //           height                 - height of input and output images
-//           left                   - left side of the valid area (where computation will be performed)
-//           top                    - top side of the valid area (where computation will be performed)
-//           right                  - right side of the valid area (where computation will be performed)
-//           bottom                 - bottom side of the valid area (where computation will be performed)
+//           roi                    - region of interest (where computation will be performed)
 //           ppoffset               - horizontal principal point difference (from stereo calibration)
 //           mindisparity           - minimum disparity
 //           maxdisparity           - maximum disparity
@@ -53,10 +50,17 @@ using namespace std;
 //           tempfilt               - temporal filtering (0 - off)
 //           disparityinterpolation - disparity interpolation on/off
 // *******************************************************************
-svlStereoDPMono::svlStereoDPMono(int width, int height, int left, int top, int right, int bottom,
-                                 int mindisparity, int maxdisparity, int ppoffset,
-                                 int scale, int blocksize, int searchrad, int smoothness,
-                                 double tempfilt, bool disparityinterpolation) : svlComputationalStereoMethodBase()
+svlStereoDPMono::svlStereoDPMono(int width, int height,
+                                 const svlRect & roi,
+                                 int mindisparity, int maxdisparity,
+                                 int ppoffset,
+                                 int scale,
+                                 int blocksize,
+                                 int searchrad,
+                                 int smoothness,
+                                 double tempfilt,
+                                 bool disparityinterpolation) :
+    svlComputationalStereoMethodBase()
 {
     // ScoreTruncationLevel has been determined
     // experimentally in the Scharstein-Szelinski paper.
@@ -89,10 +93,10 @@ svlStereoDPMono::svlStereoDPMono(int width, int height, int left, int top, int r
     SurfaceHeight = height >> scale;
     ScaleWidth = width;
     ScaleHeight = height >> scale;
-    ValidAreaLeft = left >> scale;
-    ValidAreaRight = (right + (1 << scale)) >> scale;
-    ValidAreaTop = top >> scale;
-    ValidAreaBottom = (bottom + (1 << scale)) >> scale;
+    ValidAreaLeft = roi.left >> scale;
+    ValidAreaRight = (roi.right + (1 << scale)) >> scale;
+    ValidAreaTop = roi.top >> scale;
+    ValidAreaBottom = (roi.bottom + (1 << scale)) >> scale;
     Smoothness = smoothness >> scale;
     PrincipalPointOffset = ppoffset;
     MinDisparity = mindisparity;

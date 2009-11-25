@@ -37,7 +37,7 @@ svlFilterImageCropper::svlFilterImageCropper() : svlFilterBase()
     AddSupportedType(svlTypeImageRGBStereo, svlTypeImageRGBStereo);
     AddSupportedType(svlTypeImageMono8Stereo, svlTypeImageMono8Stereo);
     AddSupportedType(svlTypeImageMono16Stereo, svlTypeImageMono16Stereo);
-    AddSupportedType(svlTypeDepthMap, svlTypeDepthMap);
+    AddSupportedType(svlTypeImageMonoFloat, svlTypeImageMonoFloat);
 
     SetLeft[0] = SetLeft[1] = 0;
     SetRight[0] = SetRight[1] = 639;
@@ -163,11 +163,11 @@ int svlFilterImageCropper::Initialize(svlSample* inputdata)
         }
         break;
 
-        case svlTypeDepthMap:
+        case svlTypeImageMonoFloat:
         {
-            svlSampleDepthMap* input = dynamic_cast<svlSampleDepthMap*>(inputdata);
+            svlSampleImageMonoFloat* input = dynamic_cast<svlSampleImageMonoFloat*>(inputdata);
 
-            svlSampleDepthMap* output = new svlSampleDepthMap;
+            svlSampleImageMonoFloat* output = new svlSampleImageMonoFloat;
             if (output == 0)
                 return SVL_ALLOCATION_ERROR;
             OutputData = output;
@@ -179,6 +179,7 @@ int svlFilterImageCropper::Initialize(svlSample* inputdata)
         // Other types may be added in the future
         case svlTypeImageRGBA:
         case svlTypeImageRGBAStereo:
+        case svlTypeImage3DMap:
         case svlTypeInvalid:
         case svlTypeStreamSource:
         case svlTypeStreamSink:

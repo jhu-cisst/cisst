@@ -68,7 +68,8 @@ int svlFilterUnsharpMask::Initialize(svlSample* inputdata)
         case svlTypeImageMono16:
         case svlTypeImageMono16Stereo:
         case svlTypeImageCustom:
-        case svlTypeDepthMap:
+        case svlTypeImageMonoFloat:
+        case svlTypeImage3DMap:
         case svlTypeRigidXform:
         case svlTypePointCloud:
             return SVL_INVALID_INPUT_TYPE;
@@ -76,8 +77,7 @@ int svlFilterUnsharpMask::Initialize(svlSample* inputdata)
 
     if (OutputData == 0) return SVL_FAIL;
 
-    // Allocating image buffers
-    dynamic_cast<svlSampleImageBase*>(OutputData)->SetSize(*(dynamic_cast<svlSampleImageBase*>(inputdata)));
+    OutputData->SetSize(*inputdata);
 
     return SVL_OK;
 }

@@ -55,7 +55,7 @@ private:
     vctDynamicVector<unsigned char*> CompressedBuffer;
     vctDynamicVector<unsigned int> CompressedBufferSize;
 
-    unsigned int VideoFrameCounter;
+    vctDynamicVector<unsigned int> VideoFrameCounter;
     double AVIFrequency;
     double FirstTimestamp;
     osaStopwatch CVITimer;

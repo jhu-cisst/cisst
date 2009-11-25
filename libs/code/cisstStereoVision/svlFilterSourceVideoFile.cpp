@@ -85,6 +85,7 @@ svlFilterSourceVideoFile::svlFilterSourceVideoFile(bool stereo) :
     CompressedBuffer.SetSize(videochannels);
     CompressedBuffer.SetAll(0);
     CompressedBufferSize.SetSize(videochannels);
+    VideoFrameCounter.SetSize(videochannels);
 
     TargetFrequency = -1.0;
 }
@@ -188,7 +189,7 @@ int svlFilterSourceVideoFile::Initialize()
             CompressedBuffer[i] = new unsigned char[CompressedBufferSize[i]];
 
             // Initialize video frame counter
-            VideoFrameCounter = 0;
+            VideoFrameCounter[i] = 0;
 
             opened = true;
 
@@ -283,7 +284,7 @@ int svlFilterSourceVideoFile::ProcessFrame(ProcInfo* procInfo)
                 if (idx == 0) {
                     if (!IsTargetTimerRunning()) {
                         // Try to keep orignal frame intervals
-                        if (VideoFrameCounter == 0) {
+                        if (VideoFrameCounter[idx] == 0) {
                             FirstTimestamp = timestamp;
                             CVITimer.Reset();
                             CVITimer.Start();
@@ -336,13 +337,13 @@ int svlFilterSourceVideoFile::ProcessFrame(ProcInfo* procInfo)
 
             if (eof) {
                 // End of file reached
-                if (VideoFrameCounter > 0) {
+                if (VideoFrameCounter[idx] > 0) {
 
                     // Go back to the beginning of the file, just after the header
                     if (fseek(VideoFile[idx], 27, SEEK_SET) == 0) {
                         // Play again if needed
                         if (!LoopFlag) return SVL_STOP_REQUEST;
-                        if (idx == 0) VideoFrameCounter = 0;
+                        VideoFrameCounter[idx] = 0;
                         continue;
                     }
                     else {
@@ -359,7 +360,7 @@ int svlFilterSourceVideoFile::ProcessFrame(ProcInfo* procInfo)
                 // Other error, let it fail
             }
 
-            if (idx == 0) VideoFrameCounter ++;
+            VideoFrameCounter[idx] ++;
 
             break;
         }

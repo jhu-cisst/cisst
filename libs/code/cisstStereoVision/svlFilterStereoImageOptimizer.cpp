@@ -28,13 +28,16 @@ using namespace std;
 /*** svlFilterStereoImageOptimizer class ****/
 /********************************************/
 
-svlFilterStereoImageOptimizer::svlFilterStereoImageOptimizer() : svlFilterBase()
+svlFilterStereoImageOptimizer::svlFilterStereoImageOptimizer() :
+    svlFilterBase(),
+    Disparity_Target(0),
+    ROI_Target(0, 0, 0x7FFFFFFF, 0x7FFFFFFF),
+    ColBal_Red(256),
+    ColBal_Green(256),
+    ColBal_Blue(256),
+    RecomputeRatios(1)
 {
     AddSupportedType(svlTypeImageRGBStereo, svlTypeImageRGBStereo);
-
-    ROI_Target.Assign(0, 0, 0x7FFFFFFF, 0x7FFFFFFF);
-    ColBal_Red = ColBal_Green = ColBal_Blue = 256;
-    RecomputeRatios = 1;
 }
 
 svlFilterStereoImageOptimizer::~svlFilterStereoImageOptimizer()
@@ -42,7 +45,14 @@ svlFilterStereoImageOptimizer::~svlFilterStereoImageOptimizer()
     Release();
 }
 
-int svlFilterStereoImageOptimizer::SetRegionOfInterest(svlRect roi)
+int svlFilterStereoImageOptimizer::SetDisparity(int disparity)
+{
+    if (IsInitialized()) return SVL_FAIL;
+    Disparity_Target = disparity;
+    return SVL_OK;
+}
+
+int svlFilterStereoImageOptimizer::SetRegionOfInterest(const svlRect & roi)
 {
     if (IsInitialized()) return SVL_FAIL;
     ROI_Target = roi;
@@ -73,12 +83,34 @@ int svlFilterStereoImageOptimizer::Initialize(svlSample* inputdata)
 
     if (w0 != w1 || h0 != h1) return SVL_FAIL;
 
-    ROI_Actual = ROI_Target;
-    // make sure it's not larger than the image
-    if (ROI_Actual.left >= w0) ROI_Actual.left = w0 - 1;
-    if (ROI_Actual.right >= w0) ROI_Actual.right = w0 - 1;
-    if (ROI_Actual.top >= h0) ROI_Actual.top = h0 - 1;
-    if (ROI_Actual.bottom >= h0) ROI_Actual.bottom = h0 - 1;
+    // store left ROI size
+    ROI[SVL_LEFT].left   = std::min(ROI_Target.left, ROI_Target.right);
+    ROI[SVL_LEFT].right  = std::max(ROI_Target.left, ROI_Target.right);
+    ROI[SVL_LEFT].top    = std::min(ROI_Target.top,  ROI_Target.bottom);
+    ROI[SVL_LEFT].bottom = std::max(ROI_Target.top,  ROI_Target.bottom);
+
+    // make sure it's not reaching out of the image boundaries
+    if (ROI[SVL_LEFT].left   <   0) ROI[SVL_LEFT].left   = 0;
+    if (ROI[SVL_LEFT].right  <   0) ROI[SVL_LEFT].right  = 0;
+    if (ROI[SVL_LEFT].top    <   0) ROI[SVL_LEFT].top    = 0;
+    if (ROI[SVL_LEFT].bottom <   0) ROI[SVL_LEFT].bottom = 0;
+    if (ROI[SVL_LEFT].left   >= w0) ROI[SVL_LEFT].left   = w0 - 1;
+    if (ROI[SVL_LEFT].right  >= w0) ROI[SVL_LEFT].right  = w0 - 1;
+    if (ROI[SVL_LEFT].top    >= h0) ROI[SVL_LEFT].top    = h0 - 1;
+    if (ROI[SVL_LEFT].bottom >= h0) ROI[SVL_LEFT].bottom = h0 - 1;
+
+    // calculate right ROI size
+    Disparity = Disparity_Target;
+    ROI[SVL_RIGHT].left   = ROI[SVL_LEFT].left  + Disparity;
+    ROI[SVL_RIGHT].right  = ROI[SVL_LEFT].right + Disparity;
+    ROI[SVL_RIGHT].top    = ROI[SVL_LEFT].top;
+    ROI[SVL_RIGHT].bottom = ROI[SVL_LEFT].bottom;
+
+    // make sure it's not reaching out of the image boundaries
+    if (ROI[SVL_RIGHT].left   <   0) ROI[SVL_RIGHT].left   = 0;
+    if (ROI[SVL_RIGHT].right  <   0) ROI[SVL_RIGHT].right  = 0;
+    if (ROI[SVL_RIGHT].left   >= w0) ROI[SVL_RIGHT].left   = w0 - 1;
+    if (ROI[SVL_RIGHT].right  >= w0) ROI[SVL_RIGHT].right  = w0 - 1;
 
     OutputData = inputdata;
 
@@ -96,56 +128,52 @@ int svlFilterStereoImageOptimizer::ProcessFrame(ProcInfo* procInfo, svlSample* i
     // Passing the same image for the next filter
     OutputData = inputdata;
 
+    unsigned int idx;
     svlSampleImageBase* img = dynamic_cast<svlSampleImageBase*>(inputdata);
 
     if (FrameCounter == 0 || RecomputeRatios > 0) {
         // Compute color balance between left and right image
 
-        _OnSingleThread(procInfo)
+        const unsigned int videochannels = img->GetVideoChannels();
+        svlRGB *buffer, *pix;
+        int roi_l, roi_r, roi_t, roi_b, r, g, b;
+        int i, j, k, width;
+
+        // Recomputing ratios when requested
+        _ParallelLoop(procInfo, idx, videochannels)
         {
-            // Recomputing ratios when requested
+            width = img->GetWidth(idx);
+            r = g = b = 0;
 
-            svlRGB *leftimg, *rightimg, *leftpix, *rightpix;
-            int roi_l, roi_r, roi_t, roi_b;
-            int l_r, l_g, l_b, r_r, r_g, r_b;
-            int i, j, k, width;
-
-            width = img->GetWidth(SVL_LEFT);
-            roi_l = ROI_Actual.left;
-            roi_r = ROI_Actual.right;
-            roi_t = ROI_Actual.top;
-            roi_b = ROI_Actual.bottom;
-
-            l_r = l_g = l_b = r_r = r_g = r_b = 0;
-
-            leftimg = reinterpret_cast<svlRGB*>(img->GetUCharPointer(SVL_LEFT));
-            rightimg = reinterpret_cast<svlRGB*>(img->GetUCharPointer(SVL_RIGHT));
-
+            // Computing left colors
+            buffer = reinterpret_cast<svlRGB*>(img->GetUCharPointer(idx));
+            roi_l = ROI[idx].left;
+            roi_r = ROI[idx].right;
+            roi_t = ROI[idx].top;
+            roi_b = ROI[idx].bottom;
             for (j = roi_t; j < roi_b; j ++) {
                 k = j * width + roi_l;
                 for (i = roi_l; i < roi_r; i ++) {
-                    leftpix = leftimg + k;
-                    rightpix = rightimg + k;
-
-                    l_r += leftpix->R;
-                    l_g += leftpix->G;
-                    l_b += leftpix->B;
-                    r_r += rightpix->R;
-                    r_g += rightpix->G;
-                    r_b += rightpix->B;
-
+                    pix = buffer + k;
+                    r += pix->R;
+                    g += pix->G;
+                    b += pix->B;
                     k ++;
                 }
             }
-
             k = (roi_r - roi_l) * (roi_b - roi_t);
-            l_r /= k; l_g /= k; l_b /= k;
-            r_r /= k; r_g /= k; r_b /= k;
+            R[idx] = r / k;
+            G[idx] = g / k;
+            B[idx] = b / k;
+        }
 
-            if (l_r > 0) ColBal_Red = 256 * r_r / l_r;
-            if (l_g > 0) ColBal_Green = 256 * r_g / l_g;
-            if (l_b > 0) ColBal_Blue = 256 * r_b / l_b;
+        _SynchronizeThreads(procInfo);
 
+        _OnSingleThread(procInfo)
+        {
+            if (R[SVL_LEFT] > 0) ColBal_Red   = 256 * R[SVL_RIGHT] / R[SVL_LEFT];
+            if (G[SVL_LEFT] > 0) ColBal_Green = 256 * G[SVL_RIGHT] / G[SVL_LEFT];
+            if (B[SVL_LEFT] > 0) ColBal_Blue  = 256 * B[SVL_RIGHT] / B[SVL_LEFT];
             if (RecomputeRatios == 1) RecomputeRatios = 0;
         }
 
@@ -156,10 +184,9 @@ int svlFilterStereoImageOptimizer::ProcessFrame(ProcInfo* procInfo, svlSample* i
     unsigned int pixelcount = img->GetWidth(SVL_LEFT) * img->GetHeight(SVL_LEFT);
     unsigned char *pImg = img->GetUCharPointer(SVL_LEFT);
     unsigned char *ptr;
-    unsigned int idx;
     int k;
 
-    _ParallelInterleavedLoop(procInfo, idx, pixelcount)
+    _ParallelLoop(procInfo, idx, pixelcount)
     {
         ptr = pImg + idx * 3;
 

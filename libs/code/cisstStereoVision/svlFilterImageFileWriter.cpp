@@ -37,7 +37,7 @@ svlFilterImageFileWriter::svlFilterImageFileWriter() :
 {
     AddSupportedType(svlTypeImageRGB, svlTypeImageRGB);
     AddSupportedType(svlTypeImageRGBStereo, svlTypeImageRGBStereo);
-    AddSupportedType(svlTypeDepthMap, svlTypeDepthMap);
+    AddSupportedType(svlTypeImageMonoFloat, svlTypeImageMonoFloat);
 
     DistanceScaling = 1.0f;
 
@@ -59,7 +59,7 @@ svlFilterImageFileWriter::~svlFilterImageFileWriter()
 
 int svlFilterImageFileWriter::Initialize(svlSample* inputdata)
 {
-    svlSampleDepthMap* depth;
+    svlSampleImageMonoFloat* depth;
 
     Release();
 
@@ -78,9 +78,9 @@ int svlFilterImageFileWriter::Initialize(svlSample* inputdata)
                 return SVL_IFW_EXTENSION_NOT_SUPPORTED;
         break;
 
-        case svlTypeDepthMap:
+        case svlTypeImageMonoFloat:
             ImageFile[SVL_LEFT] = ImageTypeList.GetHandlerInstance(Extension[SVL_LEFT]);
-            depth = dynamic_cast<svlSampleDepthMap*>(inputdata);
+            depth = dynamic_cast<svlSampleImageMonoFloat*>(inputdata);
             if (ImageFile[SVL_LEFT] == 0)
                 return SVL_IFW_EXTENSION_NOT_SUPPORTED;
             ImageBuffer.SetSize(*depth);
@@ -88,6 +88,7 @@ int svlFilterImageFileWriter::Initialize(svlSample* inputdata)
 
         case svlTypeImageRGBA:
         case svlTypeImageRGBAStereo:
+        case svlTypeImage3DMap:
         case svlTypeInvalid:
         case svlTypeStreamSource:
         case svlTypeStreamSink:
@@ -122,7 +123,7 @@ int svlFilterImageFileWriter::ProcessFrame(ProcInfo* procInfo, svlSample* inputd
     {
         if (Disabled[idx]) continue;
 
-        if (img->GetType() == svlTypeDepthMap) {
+        if (img->GetType() == svlTypeImageMonoFloat) {
             svlConverter::float32toRGB24(reinterpret_cast<float*>(img->GetUCharPointer(idx)),
                                          ImageBuffer.GetUCharPointer(idx),
                                          img->GetWidth(idx) * img->GetHeight(idx),

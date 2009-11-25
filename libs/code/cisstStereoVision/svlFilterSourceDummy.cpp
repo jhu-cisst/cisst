@@ -76,7 +76,7 @@ int svlFilterSourceDummy::Initialize()
             return SVL_DMYSRC_DATA_NOT_INITIALIZED;
     }
 
-    srand(time(0));
+    srand(static_cast<unsigned int>(time(0)));
 
     return SVL_OK;
 }

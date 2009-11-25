@@ -17,56 +17,41 @@ no warranty.  The complete license can be found in license.txt and
 http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
-
 */
 
 #include <cisstStereoVision/svlFilterComputationalStereo.h>
-#include <string.h>
 
 #include "svlStereoDP.h"
 #include "svlStereoDPMono.h"
 
-using namespace std;
 
 /*******************************************/
 /*** svlFilterComputationalStereo class ****/
 /*******************************************/
 
-svlFilterComputationalStereo::svlFilterComputationalStereo() : svlFilterBase()
+svlFilterComputationalStereo::svlFilterComputationalStereo() :
+    svlFilterBase(),
+    StereoAlgorithm(0),
+    XCheckStereoAlgorithm(0),
+    XCheckImage(0),
+    ROI(0, 0, 0, 0),
+    MinDisparity(0),
+    MaxDisparity(64),
+    ScaleFactor(2),
+    BlockSize(3),
+    NarrowedSearchRadius(10),
+    Smoothness(5),
+    TemporalFilter(0.0),
+    SpatialFilterRadius(0),
+    SubpixelPrecision(false),
+    XCheckEnabled(false),
+    Method(DynamicProgramming)
 {
-    AddSupportedType(svlTypeImageMono8Stereo, svlTypeDepthMap);
-    AddSupportedType(svlTypeImageMono16Stereo, svlTypeDepthMap);
-    AddSupportedType(svlTypeImageRGBStereo, svlTypeDepthMap);
+    AddSupportedType(svlTypeImageMono8Stereo, svlTypeImageMonoFloat);
+    AddSupportedType(svlTypeImageMono16Stereo, svlTypeImageMonoFloat);
+    AddSupportedType(svlTypeImageRGBStereo, svlTypeImageMonoFloat);
 
-    svlSampleDepthMap* depth = new svlSampleDepthMap;
-
-    OutputData = depth;
-
-    StereoAlgorithm = 0;
-    XCheckStereoAlgorithm = 0;
-    XCheckImage = 0;
-
-    XCheckEnabled = false;
-    StereoMethod = svlComputationalStereoMethodDP;
-    DisparityInterpolationEnabled = false;
-    DisparityOutputEnabled = false;
-    FocalLength = 600.0f;
-    Baseline = 10.0f;
-    PPX_Left_flt = 0.0f;
-    PPX_Right_flt = 0.0f;
-    PPY_flt = 0.0f;
-    MinDisparity = 0;
-    MaxDisparity = 64;
-    ScaleFactor = 2;
-    BlockSize = 3;
-    NarrowedSearchRadius = 10;
-    Smoothness = 5;
-    TemporalFilter = 0.0;
-    SpatialFilterRadius = 0;
-    ValidAreaLeft = 0;
-    ValidAreaRight = 0;
-    ValidAreaTop = 0;
-    ValidAreaBottom = 0;
+    OutputData = new svlSampleImageMonoFloat;
 }
 
 svlFilterComputationalStereo::~svlFilterComputationalStereo()
@@ -83,9 +68,6 @@ int svlFilterComputationalStereo::Initialize(svlSample* inputdata)
 
     Release();
 
-    // Mono input is supported only by Dynamic Programming (so far)
-    if (inputtype != svlTypeImageRGBStereo && StereoMethod != svlComputationalStereoMethodDP) return SVL_FAIL;
-
     int w1, w2, h1, h2;
     w1 = stimg->GetWidth(SVL_LEFT);
     h1 = stimg->GetHeight(SVL_LEFT);
@@ -95,73 +77,47 @@ int svlFilterComputationalStereo::Initialize(svlSample* inputdata)
     if (w1 <= 0 || h1 <= 0 || w1 != w2 || h1 != h2)
         return SVL_STEREO_INPUT_MISMATCH;
 
-    // Check and fix valid area
-    int itemp;
-    if (ValidAreaLeft > ValidAreaRight) {
-        itemp = ValidAreaRight;
-        ValidAreaRight = ValidAreaLeft;
-        ValidAreaLeft = itemp;
-    }
-    if (ValidAreaLeft < 0) ValidAreaLeft = 0;
-    if (ValidAreaLeft >= w1) ValidAreaLeft = w1 - 1;
-    if (ValidAreaRight < 0) ValidAreaRight = 0;
-    if (ValidAreaRight >= w1) ValidAreaRight = w1 - 1;
-    if (ValidAreaTop > ValidAreaBottom) {
-        itemp = ValidAreaBottom;
-        ValidAreaBottom = ValidAreaTop;
-        ValidAreaTop = itemp;
-    }
-    if (ValidAreaTop < 0) ValidAreaTop = 0;
-    if (ValidAreaTop >= h1) ValidAreaTop = h1 - 1;
-    if (ValidAreaBottom < 0) ValidAreaBottom = 0;
-    if (ValidAreaBottom >= h1) ValidAreaBottom = h1 - 1;
-
-    // Misc initializations
-    PPX_Left = static_cast<int>(PPX_Left_flt);
-    PPX_Right = static_cast<int>(PPX_Right_flt);
-    PPY = static_cast<int>(PPY_flt);
-
-    svlSampleDepthMap* depth = dynamic_cast<svlSampleDepthMap*>(OutputData);
-    depth->SetSize(w1, h1);
-    depth->MatrixRef().SetAll(0);
-
+    // allocate buffers
+    svlSampleImageMonoFloat* output = dynamic_cast<svlSampleImageMonoFloat*>(OutputData);
+    output->SetSize(w1, h1);
+    output->MatrixRef().SetAll(0);
     DisparityBuffer.SetSize(h1, w1);
     SpatialFilterBuffer.SetSize(h1, w1);
 
+    // normalize and trim ROI
+    ROI.Normalize();
+    ROI.Trim(0, w1 - 1, 0, h1 - 1);
+
     // Creating computational stereo object(s)
-    switch (StereoMethod) {
-        case svlComputationalStereoMethodDP:
+    switch (Method) {
+        case DynamicProgramming:
             if (inputtype == svlTypeImageRGBStereo) { // Color input
                 StereoAlgorithm = new svlStereoDP(w1, h1,
-                                                  ValidAreaLeft,
-                                                  ValidAreaTop,
-                                                  ValidAreaRight,
-                                                  ValidAreaBottom,
+                                                  ROI,
                                                   MinDisparity,
                                                   MaxDisparity,
-                                                  PPX_Right - PPX_Left,
+                                                  static_cast<int>(Geometry.GetIntrinsics(SVL_RIGHT).cc[0] -
+                                                                   Geometry.GetIntrinsics(SVL_LEFT ).cc[0]),
                                                   ScaleFactor,
                                                   BlockSize,
                                                   NarrowedSearchRadius,
                                                   Smoothness,
-                                                  static_cast<int>(TemporalFilter),
-                                                  DisparityInterpolationEnabled);
+                                                  TemporalFilter,
+                                                  SubpixelPrecision);
             }
             else { // Mono input
                 StereoAlgorithm = new svlStereoDPMono(w1, h1,
-                                                      ValidAreaLeft,
-                                                      ValidAreaTop,
-                                                      ValidAreaRight,
-                                                      ValidAreaBottom,
+                                                      ROI,
                                                       MinDisparity,
                                                       MaxDisparity,
-                                                      PPX_Right - PPX_Left,
+                                                      static_cast<int>(Geometry.GetIntrinsics(SVL_RIGHT).cc[0] -
+                                                                       Geometry.GetIntrinsics(SVL_LEFT ).cc[0]),
                                                       ScaleFactor,
                                                       BlockSize,
                                                       NarrowedSearchRadius,
                                                       Smoothness,
                                                       TemporalFilter,
-                                                      DisparityInterpolationEnabled);
+                                                      SubpixelPrecision);
             }
         break;
 
@@ -182,40 +138,38 @@ int svlFilterComputationalStereo::Initialize(svlSample* inputdata)
         XCheckImage->SetSize(w1, h1);
         // allocate cross check disparity buffer
         XCheckDisparityBuffer.SetSize(h1, w1);
+        // calculate reverse ROI
+        svlRect xroi(w1 - ROI.right, h1 - ROI.bottom, w1 - ROI.left, h1 - ROI.top);
 
-        switch (StereoMethod) {
-            case svlComputationalStereoMethodDP:
+        switch (Method) {
+            case DynamicProgramming:
                 if (inputtype == svlTypeImageRGBStereo) { // Color input
                     XCheckStereoAlgorithm = new svlStereoDP(w1, h1,
-                                                            w1 - ValidAreaRight,
-                                                            h1 - ValidAreaBottom,
-                                                            w1 - ValidAreaLeft,
-                                                            h1 - ValidAreaTop,
+                                                            xroi,
                                                             MinDisparity,
                                                             MaxDisparity,
-                                                            PPX_Right - PPX_Left,
+                                                            static_cast<int>(Geometry.GetIntrinsics(SVL_RIGHT).cc[0] -
+                                                                             Geometry.GetIntrinsics(SVL_LEFT ).cc[0]),
                                                             ScaleFactor,
                                                             BlockSize,
                                                             NarrowedSearchRadius,
                                                             Smoothness,
-                                                            static_cast<int>(TemporalFilter),
-                                                            DisparityInterpolationEnabled);
+                                                            TemporalFilter,
+                                                            SubpixelPrecision);
                 }
                 else { // Mono input
                     XCheckStereoAlgorithm = new svlStereoDPMono(w1, h1,
-                                                                w1 - ValidAreaRight,
-                                                                h1 - ValidAreaBottom,
-                                                                w1 - ValidAreaLeft,
-                                                                h1 - ValidAreaTop,
+                                                                xroi,
                                                                 MinDisparity,
                                                                 MaxDisparity,
-                                                                PPX_Right - PPX_Left,
+                                                                static_cast<int>(Geometry.GetIntrinsics(SVL_RIGHT).cc[0] -
+                                                                                 Geometry.GetIntrinsics(SVL_LEFT ).cc[0]),
                                                                 ScaleFactor,
                                                                 BlockSize,
                                                                 NarrowedSearchRadius,
                                                                 Smoothness,
                                                                 TemporalFilter,
-                                                                DisparityInterpolationEnabled);
+                                                                SubpixelPrecision);
                 }
             break;
 
@@ -302,20 +256,20 @@ int svlFilterComputationalStereo::ProcessFrame(ProcInfo* procInfo, svlSample* in
             PerformXCheck();
         }
 
-        // Convert disparity map to depth map
-        svlSampleDepthMap* depth = dynamic_cast<svlSampleDepthMap*>(OutputData);
-        ConvertDisparityToDistance(DisparityBuffer.Pointer(),
-                                   reinterpret_cast<float*>(depth->GetPointer()),
-                                   static_cast<int>(depth->GetWidth()),
-                                   static_cast<int>(depth->GetHeight()));
+        // Store disparity map
+        svlSampleImageMonoFloat* output = dynamic_cast<svlSampleImageMonoFloat*>(OutputData);
+        ConvertDisparitiesToFloat(DisparityBuffer.Pointer(),
+                                  output->GetPointer(),
+                                  static_cast<int>(output->GetWidth()),
+                                  static_cast<int>(output->GetHeight()));
 
-        // Apply spatial filter on depth map if enabled
+        // Apply spatial filter if enabled
         if (SpatialFilterRadius > 0) ApplySpatialFilter(SpatialFilterRadius,
-                                                        reinterpret_cast<float*>(depth->GetPointer(0, ValidAreaLeft, ValidAreaTop)),
-                                                        SpatialFilterBuffer.Pointer(ValidAreaTop, ValidAreaLeft),
-                                                        ValidAreaRight - ValidAreaLeft,
-                                                        ValidAreaBottom - ValidAreaTop,
-                                                        static_cast<int>(depth->GetWidth()));
+                                                        output->GetPointer(0, ROI.left, ROI.top),
+                                                        SpatialFilterBuffer.Pointer(ROI.top, ROI.left),
+                                                        ROI.right - ROI.left,
+                                                        ROI.bottom - ROI.top,
+                                                        static_cast<int>(output->GetWidth()));
     }
 
     return SVL_OK;
@@ -344,64 +298,40 @@ int svlFilterComputationalStereo::Release()
     return SVL_OK;
 }
 
+int svlFilterComputationalStereo::SetCameraGeometry(const svlCameraGeometry & geometry)
+{
+    svlCameraGeometry::Intrinsics intrinsics[2];
+    svlCameraGeometry::Extrinsics extrinsics[2];
+    if (geometry.GetIntrinsics(intrinsics[SVL_LEFT],  SVL_LEFT)  != SVL_OK ||
+        geometry.GetIntrinsics(intrinsics[SVL_RIGHT], SVL_RIGHT) != SVL_OK ||
+        geometry.GetExtrinsics(extrinsics[SVL_LEFT],  SVL_LEFT)  != SVL_OK ||
+        geometry.GetExtrinsics(extrinsics[SVL_RIGHT], SVL_RIGHT) != SVL_OK) return SVL_FAIL;
+    if (geometry.IsCameraPairRectified(SVL_LEFT, SVL_RIGHT) != SVL_YES) return SVL_FAIL;
+    return SVL_OK;
+}
+
+void svlFilterComputationalStereo::SetROI(const svlRect & rect)
+{
+    ROI = rect;
+}
+
+void svlFilterComputationalStereo::SetROI(int left, int top, int right, int bottom)
+{
+    SetROI(svlRect(left, top, right, bottom));
+}
+
+int svlFilterComputationalStereo::SetSubpixelPrecision(bool enabled)
+{
+    if (IsInitialized()) return SVL_FAIL;
+    SubpixelPrecision = enabled;
+    return SVL_OK;
+}
+
 int svlFilterComputationalStereo::SetCrossCheck(bool enabled)
 {
     if (IsInitialized()) return SVL_FAIL;
     XCheckEnabled = enabled;
     return SVL_OK;
-}
-
-bool svlFilterComputationalStereo::GetCrossCheck()
-{
-    return XCheckEnabled;
-}
-
-void svlFilterComputationalStereo::SetMethod(svlComputationalStereoMethod method)
-{
-    StereoMethod = method;
-}
-
-svlComputationalStereoMethod svlFilterComputationalStereo::GetMethod()
-{
-    return StereoMethod;
-}
-
-int svlFilterComputationalStereo::SetFocalLength(double focallength)
-{
-    if (focallength < 1.0) return SVL_FAIL;
-    FocalLength = static_cast<float>(focallength);
-    return SVL_OK;
-}
-
-double svlFilterComputationalStereo::GetFocalLength()
-{
-    return static_cast<double>(FocalLength);
-}
-
-int svlFilterComputationalStereo::SetStereoBaseline(double baseline)
-{
-    if (baseline <= 0.0001) return SVL_FAIL;
-    Baseline = static_cast<float>(baseline);
-    return SVL_OK;
-}
-
-double svlFilterComputationalStereo::GetStereoBaseline()
-{
-    return static_cast<double>(Baseline);
-}
-
-void svlFilterComputationalStereo::SetPrincipalPoints(double ppx_left, double ppx_right, double ppy)
-{
-    PPX_Left_flt = static_cast<float>(ppx_left);
-    PPX_Right_flt = static_cast<float>(ppx_right);
-    PPY_flt = static_cast<float>(ppy);
-}
-
-void svlFilterComputationalStereo::GetPrincipalPoints(double &ppx_left, double &ppx_right, double &ppy)
-{
-    ppx_left = static_cast<double>(PPX_Left_flt);
-    ppx_right = static_cast<double>(PPX_Right_flt);
-    ppy = static_cast<double>(PPY_flt);
 }
 
 void svlFilterComputationalStereo::SetDisparityRange(unsigned int mindisparity, unsigned int maxdisparity)
@@ -410,20 +340,9 @@ void svlFilterComputationalStereo::SetDisparityRange(unsigned int mindisparity, 
     MaxDisparity = maxdisparity;
 }
 
-void svlFilterComputationalStereo::GetDisparityRange(unsigned int& mindisparity, unsigned int& maxdisparity)
-{
-    mindisparity = MinDisparity;
-    maxdisparity = MaxDisparity;
-}
-
 void svlFilterComputationalStereo::SetBlockSize(unsigned int blocksize)
 {
     BlockSize = blocksize;
-}
-
-unsigned int svlFilterComputationalStereo::GetBlockSize()
-{
-    return BlockSize;
 }
 
 void svlFilterComputationalStereo::SetScalingFactor(unsigned int scalefactor)
@@ -431,19 +350,9 @@ void svlFilterComputationalStereo::SetScalingFactor(unsigned int scalefactor)
     ScaleFactor = scalefactor;
 }
 
-unsigned int svlFilterComputationalStereo::GetScalingFactor()
-{
-    return ScaleFactor;
-}
-
 void svlFilterComputationalStereo::SetQuickSearchRadius(unsigned int searchradius)
 {
     NarrowedSearchRadius = searchradius;
-}
-
-unsigned int svlFilterComputationalStereo::GetQuickSearchRadius()
-{
-    return NarrowedSearchRadius;
 }
 
 void svlFilterComputationalStereo::SetSmoothnessFactor(unsigned int smoothness)
@@ -451,19 +360,9 @@ void svlFilterComputationalStereo::SetSmoothnessFactor(unsigned int smoothness)
     Smoothness = smoothness;
 }
 
-unsigned int svlFilterComputationalStereo::GetSmoothnessFactor()
-{
-    return Smoothness;
-}
-
 void svlFilterComputationalStereo::SetTemporalFiltering(double tempfilt)
 {
     TemporalFilter = tempfilt;
-}
-
-double svlFilterComputationalStereo::GetTemporalFiltering()
-{
-    return TemporalFilter;
 }
 
 void svlFilterComputationalStereo::SetSpatialFiltering(unsigned int radius)
@@ -471,20 +370,64 @@ void svlFilterComputationalStereo::SetSpatialFiltering(unsigned int radius)
     SpatialFilterRadius = radius;
 }
 
+bool svlFilterComputationalStereo::GetSubpixelPrecision()
+{
+    return SubpixelPrecision;
+}
+
+bool svlFilterComputationalStereo::GetCrossCheck()
+{
+    return XCheckEnabled;
+}
+
+void svlFilterComputationalStereo::GetDisparityRange(unsigned int& mindisparity, unsigned int& maxdisparity)
+{
+    mindisparity = MinDisparity;
+    maxdisparity = MaxDisparity;
+}
+
+unsigned int svlFilterComputationalStereo::GetBlockSize()
+{
+    return BlockSize;
+}
+
+unsigned int svlFilterComputationalStereo::GetScalingFactor()
+{
+    return ScaleFactor;
+}
+
+unsigned int svlFilterComputationalStereo::GetQuickSearchRadius()
+{
+    return NarrowedSearchRadius;
+}
+
+unsigned int svlFilterComputationalStereo::GetSmoothnessFactor()
+{
+    return Smoothness;
+}
+
+double svlFilterComputationalStereo::GetTemporalFiltering()
+{
+    return TemporalFilter;
+}
+
 unsigned int svlFilterComputationalStereo::GetSpatialFiltering()
 {
     return SpatialFilterRadius;
 }
 
-void svlFilterComputationalStereo::SetValidRect(int left, int top, int right, int bottom)
+void svlFilterComputationalStereo::SetMethod(svlFilterComputationalStereo::StereoMethod method)
 {
-    ValidAreaLeft = left;
-    ValidAreaTop = top;
-    ValidAreaRight = right;
-    ValidAreaBottom = bottom;
+    Method = method;
 }
- 
-void svlFilterComputationalStereo::CreateXCheckImageColor(unsigned char* source, unsigned char* target, const unsigned int width, const unsigned int height)
+
+svlFilterComputationalStereo::StereoMethod svlFilterComputationalStereo::GetMethod()
+{
+    return Method;
+}
+
+void svlFilterComputationalStereo::CreateXCheckImageColor(unsigned char* source, unsigned char* target,
+                                                          const unsigned int width, const unsigned int height)
 {
     unsigned int i, j;
     unsigned char* dst = target + width * height * 3 - 3;
@@ -504,7 +447,7 @@ void svlFilterComputationalStereo::PerformXCheck()
     int i, j, k, r, l, from, to, dispmin, disp, prevdisp;
 
     // find occlusions and inconsistencies
-    if (DisparityInterpolationEnabled) {
+    if (SubpixelPrecision) {
         for (j = 1; j < height; j ++) {
             for (i = 0; i <= width; i ++) {
                 r = DisparityBuffer.Element(j, i);
@@ -523,12 +466,12 @@ void svlFilterComputationalStereo::PerformXCheck()
         }
     }
     // fill holes
-    for (j = ValidAreaTop - 1; j <= ValidAreaBottom; j ++) {
+    for (j = ROI.top - 1; j <= ROI.bottom; j ++) {
         from = 0x7FFFFFFF;
         to = -1;
         prevdisp = 0x7FFFFFFF;
         dispmin = 0x7FFFFFFF;
-        for (i = ValidAreaLeft - 1; i <= ValidAreaRight; i ++) {
+        for (i = ROI.left - 1; i <= ROI.right; i ++) {
             disp = DisparityBuffer.Element(j, i);
             if (disp == 0x7FFFFFFF) {
                 if (from == 0x7FFFFFFF) {
@@ -564,60 +507,34 @@ void svlFilterComputationalStereo::PerformXCheck()
     }
 }
 
-void svlFilterComputationalStereo::ConvertDisparityToDistance(int* disparitymap, float* depthmap, const int mapwidth, const int mapheight)
+void svlFilterComputationalStereo::ConvertDisparitiesToFloat(int* input, float* output, const int width, const int height)
 {
-    int i, j, disp;
-    float dist, udd, maxdist;
+    int i, j;
     const float mltplr = 0.25f;
 
-    if (DisparityOutputEnabled) {
-        // store disparity in depth buffer
-        if (DisparityInterpolationEnabled) {
-            for (j = 0; j < mapheight; j ++) {
-                for (i = 0; i < mapwidth; i ++) {
-                    *depthmap = mltplr * (*disparitymap);
-                    disparitymap ++;
-                    depthmap ++;
-                }
-            }
-        }
-        else {
-            for (j = 0; j < mapheight; j ++) {
-                for (i = 0; i < mapwidth; i ++) {
-                    *depthmap = static_cast<float>(*disparitymap);
-                    disparitymap ++;
-                    depthmap ++;
-                }
+    if (SubpixelPrecision) {
+        for (j = 0; j < height; j ++) {
+            for (i = 0; i < width; i ++) {
+                *output = mltplr * (*input);
+                input ++;
+                output ++;
             }
         }
     }
     else {
-        udd = FocalLength * Baseline;
-        if (DisparityInterpolationEnabled) udd /= mltplr;
-        maxdist = 100000.0f;
-
-        for (j = 0; j < mapheight; j ++) {
-            for (i = 0; i < mapwidth; i ++) {
-                // convert disparity to distance
-                disp = *disparitymap;
-                if (disp > 0) {
-                    dist = udd / static_cast<float>(disp);
-                    *depthmap = dist;
-                }
-                else {
-                    *depthmap = maxdist;
-                }
-
-                disparitymap ++;
-                depthmap ++;
+        for (j = 0; j < height; j ++) {
+            for (i = 0; i < width; i ++) {
+                *output = static_cast<float>(*input);
+                input ++;
+                output ++;
             }
         }
     }
 }
 
 void svlFilterComputationalStereo::ApplySpatialFilter(const int radius,
-                                                float* depthmap, float* tempbuffer,
-                                                const int mapwidth, const int mapheight, const int linestride)
+                                                      float* disparitymap, float* tempbuffer,
+                                                      const int mapwidth, const int mapheight, const int linestride)
 {
     int i, j, k, l, divider;
     int xstart, xend, ystart, yend;
@@ -639,7 +556,7 @@ void svlFilterComputationalStereo::ApplySpatialFilter(const int radius,
 
         // Computing initial sum
         for (l = ystart; l <= yend; l ++) {
-            input = depthmap + l * linestride + xstart;
+            input = disparitymap + l * linestride + xstart;
             for (k = xstart; k <= xend; k ++) {
                 sum += *input;
                 input ++;
@@ -658,7 +575,7 @@ void svlFilterComputationalStereo::ApplySpatialFilter(const int radius,
             // Subtracting previous column
             xstart = i - radius - 1;
             if (xstart >= 0) {
-                input = depthmap + ystart * linestride + xstart;
+                input = disparitymap + ystart * linestride + xstart;
                 for (l = ystart; l <= yend; l ++) {
                     sum -= *input;
                     input += linestride;
@@ -669,7 +586,7 @@ void svlFilterComputationalStereo::ApplySpatialFilter(const int radius,
             // Adding next column
             xend = i + radius;
             if (xend < mapwidth) {
-                input = depthmap + ystart * linestride + xend;
+                input = disparitymap + ystart * linestride + xend;
                 for (l = ystart; l <= yend; l ++) {
                     sum += *input;
                     input += linestride;
@@ -683,9 +600,9 @@ void svlFilterComputationalStereo::ApplySpatialFilter(const int radius,
         }
     }
 
-    // copy temp buffer back to depth map
+    // copy temp buffer back to input buffer
     input = tempbuffer;
-    output = depthmap;
+    output = disparitymap;
     for (j = 0; j < mapheight; j ++) {
         memcpy(output, input, mapwidth * sizeof(float));
         input += linestride;

@@ -84,7 +84,8 @@ int svlFilterImageFlipRotate::Initialize(svlSample* inputdata)
 
         case svlTypeImageRGBA:
         case svlTypeImageRGBAStereo:
-        case svlTypeDepthMap:
+        case svlTypeImageMonoFloat:
+        case svlTypeImage3DMap:
         case svlTypeInvalid:
         case svlTypeStreamSource:
         case svlTypeStreamSink:
@@ -248,7 +249,8 @@ int svlFilterImageFlipRotate::ProcessFrame(ProcInfo* procInfo, svlSample* inputd
 
             case svlTypeImageRGBA:
             case svlTypeImageRGBAStereo:
-            case svlTypeDepthMap:
+            case svlTypeImageMonoFloat:
+            case svlTypeImage3DMap:
             case svlTypeInvalid:
             case svlTypeStreamSource:
             case svlTypeStreamSink:

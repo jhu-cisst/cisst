@@ -71,30 +71,65 @@ void Converter(svlStreamType intype, svlStreamType outtype, unsigned char* input
             }
         break;
 
-        case svlTypeDepthMap:
+        case svlTypeImageMonoFloat:
             if (outtype == svlTypeImageRGB) {
                     svlConverter::float32toRGB24(reinterpret_cast<float*>(inputbuffer),
                                                  outputbuffer,
                                                  partsize,
-                                                 static_cast<float>(0.001 * param));
+                                                 static_cast<float>(0.001 * param),
+                                                 1);
             }
             else if (outtype == svlTypeImageRGBA) {
                     svlConverter::float32toRGBA32(reinterpret_cast<float*>(inputbuffer),
                                                   outputbuffer,
                                                   partsize,
-                                                  static_cast<float>(0.001 * param));
+                                                  static_cast<float>(0.001 * param),
+                                                  1);
             }
             else if (outtype == svlTypeImageMono8) {
                    svlConverter::float32toGray8(reinterpret_cast<float*>(inputbuffer),
                                                 outputbuffer,
                                                 partsize,
-                                                static_cast<float>(0.001 * param));
+                                                static_cast<float>(0.001 * param),
+                                                1);
             }
             else {
                     svlConverter::float32toGray16(reinterpret_cast<float*>(inputbuffer),
                                                   reinterpret_cast<unsigned short*>(outputbuffer),
                                                   partsize,
-                                                  static_cast<float>(0.001 * param));
+                                                  static_cast<float>(0.001 * param),
+                                                  1);
+            }
+        break;
+
+        case svlTypeImage3DMap:
+            if (outtype == svlTypeImageRGB) {
+                    svlConverter::float32toRGB24(reinterpret_cast<float*>(inputbuffer) + 2, // offset to Z coordinates
+                                                 outputbuffer,
+                                                 partsize,
+                                                 static_cast<float>(0.001 * param),
+                                                 3);
+            }
+            else if (outtype == svlTypeImageRGBA) {
+                    svlConverter::float32toRGBA32(reinterpret_cast<float*>(inputbuffer) + 2, // offset to Z coordinates
+                                                  outputbuffer,
+                                                  partsize,
+                                                  static_cast<float>(0.001 * param),
+                                                  3);
+            }
+            else if (outtype == svlTypeImageMono8) {
+                   svlConverter::float32toGray8(reinterpret_cast<float*>(inputbuffer) + 2, // offset to Z coordinates
+                                                outputbuffer,
+                                                partsize,
+                                                static_cast<float>(0.001 * param),
+                                                3);
+            }
+            else {
+                    svlConverter::float32toGray16(reinterpret_cast<float*>(inputbuffer) + 2, // offset to Z coordinates
+                                                  reinterpret_cast<unsigned short*>(outputbuffer),
+                                                  partsize,
+                                                  static_cast<float>(0.001 * param),
+                                                  3);
             }
         break;
 
@@ -247,7 +282,7 @@ void svlConverter::RGB24toGray16(unsigned char* input, unsigned short* output, c
     }
 }
 
-void svlConverter::Gray8toRGB24(unsigned char* input, unsigned char* output, unsigned int pixelcount)
+void svlConverter::Gray8toRGB24(unsigned char* input, unsigned char* output, const unsigned int pixelcount)
 {
     unsigned char chval;
     for (unsigned int i = 0; i < pixelcount; i ++) {
@@ -258,7 +293,7 @@ void svlConverter::Gray8toRGB24(unsigned char* input, unsigned char* output, uns
     }
 }
 
-void svlConverter::Gray8toRGBA32(unsigned char* input, unsigned char* output, unsigned int pixelcount)
+void svlConverter::Gray8toRGBA32(unsigned char* input, unsigned char* output, const unsigned int pixelcount)
 {
     unsigned char chval;
     for (unsigned int i = 0; i < pixelcount; i ++) {
@@ -270,7 +305,7 @@ void svlConverter::Gray8toRGBA32(unsigned char* input, unsigned char* output, un
     }
 }
 
-void svlConverter::Gray8toGray16(unsigned char* input, unsigned short* output, unsigned int pixelcount)
+void svlConverter::Gray8toGray16(unsigned char* input, unsigned short* output, const unsigned int pixelcount)
 {
     for (unsigned int i = 0; i < pixelcount; i ++) {
         *output = *input;
@@ -278,7 +313,7 @@ void svlConverter::Gray8toGray16(unsigned char* input, unsigned short* output, u
     }
 }
 
-void svlConverter::Gray16toRGB24(unsigned short* input, unsigned char* output, unsigned int pixelcount, const unsigned int shiftdown)
+void svlConverter::Gray16toRGB24(unsigned short* input, unsigned char* output, const unsigned int pixelcount, const unsigned int shiftdown)
 {
     unsigned short shval;
     unsigned char chval;
@@ -292,7 +327,7 @@ void svlConverter::Gray16toRGB24(unsigned short* input, unsigned char* output, u
     }
 }
 
-void svlConverter::Gray16toRGBA32(unsigned short* input, unsigned char* output, unsigned int pixelcount, const unsigned int shiftdown)
+void svlConverter::Gray16toRGBA32(unsigned short* input, unsigned char* output, const unsigned int pixelcount, const unsigned int shiftdown)
 {
     unsigned short shval;
     unsigned char chval;
@@ -307,7 +342,7 @@ void svlConverter::Gray16toRGBA32(unsigned short* input, unsigned char* output, 
     }
 }
 
-void svlConverter::Gray16toGray8(unsigned short* input, unsigned char* output, unsigned int pixelcount, const unsigned int shiftdown)
+void svlConverter::Gray16toGray8(unsigned short* input, unsigned char* output, const unsigned int pixelcount, const unsigned int shiftdown)
 {
     unsigned short shval;
     unsigned char chval;
@@ -320,7 +355,7 @@ void svlConverter::Gray16toGray8(unsigned short* input, unsigned char* output, u
     }
 }
 
-void svlConverter::int32toRGB24(int* input, unsigned char* output, unsigned int pixelcount, const int maxinputvalue)
+void svlConverter::int32toRGB24(int* input, unsigned char* output, const unsigned int pixelcount, const int maxinputvalue)
 {
     unsigned int i;
     int ival;
@@ -347,7 +382,7 @@ void svlConverter::int32toRGB24(int* input, unsigned char* output, unsigned int 
     }
 }
 
-void svlConverter::int32toRGBA32(int* input, unsigned char* output, unsigned int pixelcount, const int maxinputvalue)
+void svlConverter::int32toRGBA32(int* input, unsigned char* output, const unsigned int pixelcount, const int maxinputvalue)
 {
     unsigned int i;
     int ival;
@@ -376,7 +411,7 @@ void svlConverter::int32toRGBA32(int* input, unsigned char* output, unsigned int
     }
 }
 
-void svlConverter::int32toGray8(int* input, unsigned char* output, unsigned int pixelcount, const int maxinputvalue)
+void svlConverter::int32toGray8(int* input, unsigned char* output, const unsigned int pixelcount, const int maxinputvalue)
 {
     unsigned int i;
     int ival;
@@ -399,14 +434,14 @@ void svlConverter::int32toGray8(int* input, unsigned char* output, unsigned int 
     }
 }
 
-void svlConverter::float32toRGB24(float* input, unsigned char* output, unsigned int pixelcount, const float scalingratio)
+void svlConverter::float32toRGB24(float* input, unsigned char* output, const unsigned int pixelcount, const float scalingratio, const int elementstride)
 {
     int ival;
     unsigned int i;
     float shadingratio = static_cast<float>(256.0 * scalingratio);
     if (scalingratio == 1.0f) {
         for (i = 0; i < pixelcount; i ++) {
-            ival = static_cast<int>(*input); input ++;
+            ival = static_cast<int>(*input); input += elementstride;
             if (ival > 255) ival = 255;
             else if (ival < 0) ival = 0;
             *output = ival; output ++;
@@ -416,7 +451,7 @@ void svlConverter::float32toRGB24(float* input, unsigned char* output, unsigned 
     }
     else {
         for (i = 0; i < pixelcount; i ++) {
-            ival = static_cast<int>(*input * shadingratio) >> 8; input ++;
+            ival = static_cast<int>(*input * shadingratio) >> 8; input += elementstride;
             if (ival > 255) ival = 255;
             else if (ival < 0) ival = 0;
             *output = ival; output ++;
@@ -426,14 +461,14 @@ void svlConverter::float32toRGB24(float* input, unsigned char* output, unsigned 
     }
 }
 
-void svlConverter::float32toRGBA32(float* input, unsigned char* output, unsigned int pixelcount, const float scalingratio)
+void svlConverter::float32toRGBA32(float* input, unsigned char* output, const unsigned int pixelcount, const float scalingratio, const int elementstride)
 {
     int ival;
     unsigned int i;
     float shadingratio = static_cast<float>(256.0 * scalingratio);
     if (scalingratio == 1.0f) {
         for (i = 0; i < pixelcount; i ++) {
-            ival = static_cast<int>(*input); input ++;
+            ival = static_cast<int>(*input); input += elementstride;
             if (ival > 255) ival = 255;
             else if (ival < 0) ival = 0;
             *output = ival; output ++;
@@ -444,7 +479,7 @@ void svlConverter::float32toRGBA32(float* input, unsigned char* output, unsigned
     }
     else {
         for (i = 0; i < pixelcount; i ++) {
-            ival = static_cast<int>(*input * shadingratio) >> 8; input ++;
+            ival = static_cast<int>(*input * shadingratio) >> 8; input += elementstride;
             if (ival > 255) ival = 255;
             else if (ival < 0) ival = 0;
             *output = ival; output ++;
@@ -455,14 +490,14 @@ void svlConverter::float32toRGBA32(float* input, unsigned char* output, unsigned
     }
 }
 
-void svlConverter::float32toGray8(float* input, unsigned char* output, unsigned int pixelcount, const float scalingratio)
+void svlConverter::float32toGray8(float* input, unsigned char* output, const unsigned int pixelcount, const float scalingratio, const int elementstride)
 {
     int ival;
     unsigned int i;
     float shadingratio = static_cast<float>(256.0 * scalingratio);
     if (scalingratio == 1.0f) {
         for (i = 0; i < pixelcount; i ++) {
-            ival = static_cast<int>(*input); input ++;
+            ival = static_cast<int>(*input); input += elementstride;
             if (ival > 255) ival = 255;
             else if (ival < 0) ival = 0;
             *output = ival; output ++;
@@ -470,7 +505,7 @@ void svlConverter::float32toGray8(float* input, unsigned char* output, unsigned 
     }
     else {
         for (i = 0; i < pixelcount; i ++) {
-            ival = static_cast<int>(*input * shadingratio) >> 8; input ++;
+            ival = static_cast<int>(*input * shadingratio) >> 8; input += elementstride;
             if (ival > 255) ival = 255;
             else if (ival < 0) ival = 0;
             *output = ival; output ++;
@@ -478,14 +513,14 @@ void svlConverter::float32toGray8(float* input, unsigned char* output, unsigned 
     }
 }
 
-void svlConverter::float32toGray16(float* input, unsigned short* output, unsigned int pixelcount, const float scalingratio)
+void svlConverter::float32toGray16(float* input, unsigned short* output, const unsigned int pixelcount, const float scalingratio, const int elementstride)
 {
     int ival;
     unsigned int i;
     float shadingratio = static_cast<float>(256.0 * scalingratio);
     if (scalingratio == 1.0f) {
         for (i = 0; i < pixelcount; i ++) {
-            ival = static_cast<int>(*input); input ++;
+            ival = static_cast<int>(*input); input += elementstride;
             if (ival > 0xFFFF) ival = 0xFFFF;
             else if (ival < 0) ival = 0;
             *output = ival; output ++;
@@ -493,7 +528,7 @@ void svlConverter::float32toGray16(float* input, unsigned short* output, unsigne
     }
     else {
         for (i = 0; i < pixelcount; i ++) {
-            ival = static_cast<int>(*input * shadingratio) >> 8; input ++;
+            ival = static_cast<int>(*input * shadingratio) >> 8; input += elementstride;
             if (ival > 0xFFFF) ival = 0xFFFF;
             else if (ival < 0) ival = 0;
             *output = ival; output ++;

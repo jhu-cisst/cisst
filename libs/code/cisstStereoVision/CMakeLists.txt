@@ -43,8 +43,8 @@ SET(SOURCE_FILES
     svlFilterSourceVideoCapture.cpp
     svlFilterSourceImageFile.cpp
     svlFilterImageFileWriter.cpp
-    svlFilterGeneric.cpp
     svlFilterComputationalStereo.cpp
+    svlFilterDisparityMapToSurface.cpp
     svlFilterStereoImageOptimizer.cpp
     svlFilterImageRectifier.cpp
     svlFilterUnsharpMask.cpp
@@ -96,8 +96,8 @@ SET(HEADER_FILES
     svlFilterSourceVideoCapture.h
     svlFilterSourceImageFile.h
     svlFilterImageFileWriter.h
-    svlFilterGeneric.h
     svlFilterComputationalStereo.h
+    svlFilterDisparityMapToSurface.h
     svlFilterStereoImageOptimizer.h
     svlFilterImageRectifier.h
     svlFilterUnsharpMask.h

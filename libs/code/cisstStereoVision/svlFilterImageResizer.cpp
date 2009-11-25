@@ -101,7 +101,8 @@ int svlFilterImageResizer::Initialize(svlSample* inputdata)
         // Other types may be added in the future
         case svlTypeImageRGBA:
         case svlTypeImageRGBAStereo:
-        case svlTypeDepthMap:
+        case svlTypeImageMonoFloat:
+        case svlTypeImage3DMap:
         case svlTypeInvalid:
         case svlTypeStreamSource:
         case svlTypeStreamSink:

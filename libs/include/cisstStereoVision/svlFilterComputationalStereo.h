@@ -24,17 +24,14 @@ http://www.cisst.org/cisst/license.txt.
 #define _svlFilterComputationalStereo_h
 
 #include <cisstStereoVision/svlStreamManager.h>
+#include <cisstStereoVision/svlCameraGeometry.h>
 
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
 
+
 #define SVL_STEREO_INPUT_MISMATCH       -5000
 #define SVL_STEREO_INIT_ERROR           -5001
-
-enum svlComputationalStereoMethod
-{
-    svlComputationalStereoMethodDP
-};
 
 class CISST_EXPORT svlComputationalStereoMethodBase
 {
@@ -50,42 +47,41 @@ public:
 class CISST_EXPORT svlFilterComputationalStereo : public svlFilterBase
 {
 public:
+    enum StereoMethod {
+        DynamicProgramming
+    };
+
     svlFilterComputationalStereo();
     virtual ~svlFilterComputationalStereo();
 
-    int SetCrossCheck(bool enabled);
-    bool GetCrossCheck();
-    void DisparityOutput(bool enable) { DisparityOutputEnabled  = enable; }
-    bool DisparityOutput() { return DisparityOutputEnabled; }
-    void DisparityInterpolation(bool enable) { DisparityInterpolationEnabled  = enable; }
-    bool DisparityInterpolation() { return DisparityInterpolationEnabled; }
-    int SetFocalLength(double focallength);
-    double GetFocalLength();
-    int SetStereoBaseline(double baseline);
-    double GetStereoBaseline();
-    void SetPrincipalPoints(double ppx_left, double ppx_right, double ppy);
-    void GetPrincipalPoints(double &ppx_left, double &ppx_right, double &ppy);
+    int  SetCameraGeometry(const svlCameraGeometry & geometry);
+    void SetROI(const svlRect & rect);
+    void SetROI(int left, int top, int right, int bottom);
+    int  SetSubpixelPrecision(bool enabled);
+    int  SetCrossCheck(bool enabled);
     void SetDisparityRange(unsigned int mindisparity, unsigned int maxdisparity);
-    void GetDisparityRange(unsigned int& mindisparity, unsigned int& maxdisparity);
     void SetBlockSize(unsigned int blocksize);
-    unsigned int GetBlockSize();
     void SetScalingFactor(unsigned int scalefactor);
-    unsigned int GetScalingFactor();
     void SetQuickSearchRadius(unsigned int searchradius);
-    unsigned int GetQuickSearchRadius();
     void SetSmoothnessFactor(unsigned int smoothness);
-    unsigned int GetSmoothnessFactor();
     void SetTemporalFiltering(double tempfilt);
-    double GetTemporalFiltering();
     void SetSpatialFiltering(unsigned int radius);
+
+    bool         GetSubpixelPrecision();
+    bool         GetCrossCheck();
+    void         GetDisparityRange(unsigned int& mindisparity, unsigned int& maxdisparity);
+    unsigned int GetBlockSize();
+    unsigned int GetScalingFactor();
+    unsigned int GetQuickSearchRadius();
+    unsigned int GetSmoothnessFactor();
+    double       GetTemporalFiltering();
     unsigned int GetSpatialFiltering();
-    void SetValidRect(int left, int top, int right, int bottom);
 
 private:
     // Work in progress...
     // Other methods not available yet.
-    void SetMethod(svlComputationalStereoMethod method);
-    svlComputationalStereoMethod GetMethod();
+    void SetMethod(StereoMethod method);
+    StereoMethod GetMethod();
 
 protected:
     virtual int Initialize(svlSample* inputdata);
@@ -105,37 +101,27 @@ private:
     vctDynamicMatrix<float> UnitSurfaceVectors;
     vctDynamicVector<unsigned int> SurfaceImageMap;
 
-    int ValidAreaLeft;
-    int ValidAreaRight;
-    int ValidAreaTop;
-    int ValidAreaBottom;
-    float FocalLength;
-    float Baseline;
-    float PPX_Left_flt;
-    float PPX_Right_flt;
-    float PPY_flt;
-    int PPX_Left;
-    int PPX_Right;
-    int PPY;
-    int MinDisparity;
-    int MaxDisparity;
-    int ScaleFactor;
-    int BlockSize;
-    int NarrowedSearchRadius;
-    int Smoothness;
+    svlCameraGeometry Geometry;
+    svlRect ROI;
+
+    int    MinDisparity;
+    int    MaxDisparity;
+    int    ScaleFactor;
+    int    BlockSize;
+    int    NarrowedSearchRadius;
+    int    Smoothness;
     double TemporalFilter;
-    int SpatialFilterRadius;
-    bool DisparityOutputEnabled;
-    bool DisparityInterpolationEnabled;
-    svlComputationalStereoMethod StereoMethod;
-    bool XCheckEnabled;
+    int    SpatialFilterRadius;
+    bool   SubpixelPrecision;
+    bool   XCheckEnabled;
+    StereoMethod Method;
 
     template <class _paramType>
     void CreateXCheckImageMono(_paramType* source, _paramType* target, const unsigned int width, const unsigned int height);
     void CreateXCheckImageColor(unsigned char* source, unsigned char* target, const unsigned int width, const unsigned int height);
 
     void PerformXCheck();
-    void ConvertDisparityToDistance(int* disparitymap, float* depthmap, const int mapwidth, const int mapheight);
+    void ConvertDisparitiesToFloat(int* input, float* output, const int width, const int height);
     void ApplySpatialFilter(const int radius,
                             float* depthmap, float* tempbuffer,
                             const int mapwidth, const int mapheight, const int linestride);

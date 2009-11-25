@@ -2,10 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: svlStreamTypeConverter.h 75 2009-02-24 16:47:20Z adeguet1 $
+  $Id: $
   
   Author(s):  Balazs Vagvolgyi
-  Created on: 2007 
+  Created on: 2009 
 
   (C) Copyright 2006-2007 Johns Hopkins University (JHU), All Rights
   Reserved.
@@ -20,24 +20,25 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
-#ifndef _svlFilterStreamTypeConverter_h
-#define _svlFilterStreamTypeConverter_h
+#ifndef _svlFilterDisparityMapToSurface_h
+#define _svlFilterDisparityMapToSurface_h
 
 #include <cisstStereoVision/svlStreamManager.h>
+#include <cisstStereoVision/svlCameraGeometry.h>
 
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
 
-class CISST_EXPORT svlFilterStreamTypeConverter : public svlFilterBase
+
+class CISST_EXPORT svlFilterDisparityMapToSurface : public svlFilterBase
 {
 public:
-    svlFilterStreamTypeConverter(svlStreamType inputtype, svlStreamType outputtype);
-    virtual ~svlFilterStreamTypeConverter();
+    svlFilterDisparityMapToSurface();
+    virtual ~svlFilterDisparityMapToSurface();
 
-    void SetScaling(float ratio) { Scaling = ratio; }
-    float GetScaling() { return Scaling; }
-    void SetMono16ShiftDown(unsigned int shiftdown) { Mono16ShiftDown = shiftdown; }
-    unsigned int GetMono16ShiftDown() { return Mono16ShiftDown; }
+    int SetCameraGeometry(const svlCameraGeometry & geometry);
+    int SetROI(const svlRect & rect);
+    int SetROI(int left, int top, int right, int bottom);
 
 protected:
     virtual int Initialize(svlSample* inputdata);
@@ -45,9 +46,12 @@ protected:
     virtual int Release();
 
 private:
-    float Scaling;
-    unsigned int Mono16ShiftDown;
+    svlRect ROI;
+    float BaseLine;
+    float FocalLength;
+    float PPX;
+    float PPY;
 };
 
-#endif // _svlFilterStreamTypeConverter_h
+#endif // _svlFilterDisparityMapToSurface_h
 
