@@ -23,6 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsDevice.h>
 #include <cisstMultiTask/mtsFunctionReadOrWrite.h>
+#include <cisstMultiTask/mtsVector.h>
 #include <cisstParameterTypes/prmPositionCartesianGet.h>
 
 #include <QTimer>
@@ -41,8 +42,14 @@ class devMicronTrackerToolQDevice : public QObject, public mtsDevice
 
     void Configure(const std::string & CMN_UNUSED(filename) = "") {};
 
-    QWidget * GetToolWidget(void) {
+    QWidget * GetWidget(void) {
         return &CentralWidget;
+    }
+    QPoint * GetMarkerLeft(void) {
+        return &MarkerLeft;
+    }
+    QPoint * GetMarkerRight(void) {
+        return &MarkerRight;
     }
 
  protected:
@@ -52,8 +59,16 @@ class devMicronTrackerToolQDevice : public QObject, public mtsDevice
 
     struct {
         mtsFunctionRead GetPositionCartesian;
+        mtsFunctionRead GetMarkerProjectionLeft;
+        mtsFunctionRead GetMarkerProjectionRight;
+
         prmPositionCartesianGet PositionCartesian;
-    } NDI;
+        mtsDoubleVec MarkerProjectionLeft;
+        mtsDoubleVec MarkerProjectionRight;
+    } MTC;
+
+    QPoint MarkerLeft;
+    QPoint MarkerRight;
 
  public slots:
     void UpdateTimerQSlot(void);

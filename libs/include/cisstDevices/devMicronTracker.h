@@ -26,7 +26,7 @@ http://www.cisst.org/cisst/license.txt.
   \bug Current CMake support is for Windows only.
   \bug Runtime error when using Markers.ProcessFrame() (only when debugging).
 
-  \todo Add interfaces for all recognized markers.
+  \todo Store marker2image projections in tool objects.
   \todo Check for mtMeasurementHazardCode using Xform3D_HazardCodeGet().
   \todo Sleep to prevent Cameras_GrabFrame() timeout?
   \todo Verify the need for skipping initial 20 auto-adjustment frames.
@@ -50,6 +50,21 @@ class CISST_EXPORT devMicronTracker : public mtsTaskPeriodic
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
+ protected:
+    class Tool
+    {
+     public:
+        Tool(void);
+        ~Tool(void) {};
+
+        std::string Name;
+        std::string SerialNumber;
+        mtsProvidedInterface * Interface;
+        prmPositionCartesianGet Position;
+        mtsDoubleVec MarkerProjectionLeft;
+        mtsDoubleVec MarkerProjectionRight;
+    };
+
  public:
     devMicronTracker(const std::string & taskName, const double period);
     ~devMicronTracker(void) {};
@@ -59,10 +74,22 @@ class CISST_EXPORT devMicronTracker : public mtsTaskPeriodic
     void Run(void);
     void Cleanup(void);
 
+    size_t GetNumberOfTools(void) const {
+        return Tools.size();
+    }
+    std::string GetToolName(const unsigned int index) const;
+
  protected:
+    Tool * CheckTool(const std::string & serialNumber);
+    Tool * AddTool(const std::string & name, const std::string & serialNumber);
+
     void ToggleCapturing(const mtsBool & toggle);
     void ToggleTracking(const mtsBool & toggle);
     void Track(void);
+
+    typedef cmnNamedMap<Tool> ToolsType;
+    ToolsType Tools;
+    cmnNamedMap<Tool> PortToTool;
 
     bool IsCapturing;
     bool IsTracking;
@@ -71,7 +98,6 @@ class CISST_EXPORT devMicronTracker : public mtsTaskPeriodic
     mtHandle IdentifyingCamera;
     mtHandle IdentifiedMarkers;
     mtHandle PoseXf;
-    prmPositionCartesianGet Position;
     mtsDoubleVec MarkerProjectionLeft;
 
     mtsUCharVec CameraFrameLeft;

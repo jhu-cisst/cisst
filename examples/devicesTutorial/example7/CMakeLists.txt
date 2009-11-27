@@ -16,9 +16,11 @@
 
 qt4_wrap_cpp(QT_WRAPPED_CPP
              devMicronTrackerControllerQDevice.h
+             devMicronTrackerToolQDevice.h
              )
 qt4_wrap_ui(QT_WRAPPED_UI
             devMicronTrackerControllerQWidget.ui
+            devMicronTrackerToolQWidget.ui
             )
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
@@ -27,6 +29,8 @@ add_executable(devicesTutorialExample7
                ${QT_WRAPPED_UI}
                devMicronTrackerControllerQDevice.cpp
                devMicronTrackerControllerQDevice.h
+               devMicronTrackerToolQDevice.cpp
+               devMicronTrackerToolQDevice.h
                main.cpp
                )
 

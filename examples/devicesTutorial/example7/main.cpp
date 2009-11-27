@@ -70,15 +70,26 @@ int main(int argc, char *argv[])
     taskManager->Connect("taskControllerQDevice", "RequiresMicronTrackerController",
                          "devMicronTracker", "ProvidesMicronTrackerController");
 
+    // add interfaces for tools and populate controller widget with tool widgets
+    const unsigned int numberOfTools = taskMicronTracker->GetNumberOfTools();
+    for (unsigned int i = 0; i < numberOfTools; i++) {
+        std::string toolName = taskMicronTracker->GetToolName(i);
+        devMicronTrackerToolQDevice * taskToolQDevice = new devMicronTrackerToolQDevice(toolName);
+        taskControllerQDevice->AddToolWidget(taskToolQDevice->GetWidget(),
+                                             taskToolQDevice->GetMarkerLeft(), taskToolQDevice->GetMarkerRight());
+        taskManager->AddDevice(taskToolQDevice);
+        taskManager->Connect(toolName, toolName,
+                             "devMicronTracker", toolName);
+    }
+
     // create and start all tasks
     taskManager->CreateAll();
     taskManager->StartAll();
 
     // create a main window to hold QWidgets
     QMainWindow * mainWindow = new QMainWindow();
-    mainWindow->setCentralWidget(taskControllerQDevice->GetCentralWidget());
+    mainWindow->setCentralWidget(taskControllerQDevice->GetWidget());
     mainWindow->setWindowTitle("MicronTracker Controller");
-    mainWindow->adjustSize();
     mainWindow->show();
 
     // run Qt user interface

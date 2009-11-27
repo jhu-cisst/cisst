@@ -35,22 +35,16 @@ devMicronTracker::devMicronTracker(const std::string & taskName, const double pe
 {
     CameraFrameLeft.SetSize(640 * 480);
     CameraFrameRight.SetSize(640 * 480);
-    MarkerProjectionLeft.SetSize(2);
-    MarkerProjectionLeft.SetAll(0.0);
 
     mtsProvidedInterface * provided = AddProvidedInterface("ProvidesMicronTrackerController");
     if (provided) {
         StateTable.AddData(CameraFrameLeft, "CameraFrameLeft");
         StateTable.AddData(CameraFrameRight, "CameraFrameRight");
-        StateTable.AddData(Position, "Position");
-        StateTable.AddData(MarkerProjectionLeft, "MarkerProjectionLeft");
 
         provided->AddCommandWrite(&devMicronTracker::ToggleCapturing, this, "ToggleCapturing");
         provided->AddCommandWrite(&devMicronTracker::ToggleTracking, this, "ToggleTracking");
         provided->AddCommandReadState(StateTable, CameraFrameLeft, "GetCameraFrameLeft");
         provided->AddCommandReadState(StateTable, CameraFrameRight, "GetCameraFrameRight");
-        provided->AddCommandReadState(StateTable, Position, "GetPositionCartesian");
-        provided->AddCommandReadState(StateTable, MarkerProjectionLeft, "GetMarkerProjectionLeft");
     }
 }
 
@@ -79,6 +73,90 @@ void devMicronTracker::Configure(const std::string & filename)
         CMN_LOG_CLASS_INIT_ERROR << "Configure: no marker template found" << std::endl;
     }
     CMN_LOG_CLASS_INIT_VERBOSE << "Configure: loaded " << Markers_TemplatesCount() << " marker template(s)" << std::endl;
+
+    // add tools
+    int maxNumTools = 100;
+    std::string toolName;
+    bool toolEnabled;
+    std::string toolSerial, toolSerialLast;
+    std::string toolDefinition;
+
+    for (int i = 0; i < maxNumTools; i++) {
+        std::stringstream context;
+        context << "/config/tools/tool[" << i << "]";
+        config.GetXMLValue(context.str().c_str(), "@name", toolName);
+        config.GetXMLValue(context.str().c_str(), "@enabled", toolEnabled);
+        config.GetXMLValue(context.str().c_str(), "@serial", toolSerial);
+        if (toolSerial != toolSerialLast) {
+            toolSerialLast = toolSerial;
+            if (toolEnabled) {
+                AddTool(toolName, toolSerial);
+            }
+        }
+    }
+}
+
+
+devMicronTracker::Tool * devMicronTracker::CheckTool(const std::string & serialNumber)
+{
+    const ToolsType::const_iterator end = Tools.end();
+    ToolsType::const_iterator toolIterator;
+    for (toolIterator = Tools.begin(); toolIterator != end; ++toolIterator) {
+        if (toolIterator->second->SerialNumber == serialNumber) {
+            CMN_LOG_CLASS_RUN_DEBUG << "CheckTool: found existing tool for serial number: " << serialNumber << std::endl;
+            return toolIterator->second;
+        }
+    }
+    return 0;
+}
+
+
+devMicronTracker::Tool * devMicronTracker::AddTool(const std::string & name, const std::string & serialNumber)
+{
+    Tool * tool = CheckTool(serialNumber);
+
+    if (tool) {
+        CMN_LOG_CLASS_INIT_WARNING << "AddTool: " << tool->Name << " already exists, renaming it to " << name << " instead" << std::endl;
+        tool->Name = name;
+    } else {
+        tool = new Tool();
+        tool->Name = name;
+        tool->SerialNumber = serialNumber;
+
+        if (!Tools.AddItem(tool->Name, tool, CMN_LOG_LOD_INIT_ERROR)) {
+            CMN_LOG_CLASS_INIT_ERROR << "AddTool: no tool created, duplicate name exists: " << name << std::endl;
+            delete tool;
+            return 0;
+        }
+        CMN_LOG_CLASS_INIT_VERBOSE << "AddTool: created tool \"" << name << "\" with serial number: " << serialNumber << std::endl;
+
+        // create an interface for tool
+        tool->Interface = AddProvidedInterface(name);
+        if (tool->Interface) {
+            StateTable.AddData(tool->Position, name + "Position");
+            StateTable.AddData(tool->MarkerProjectionLeft, name + "MarkerProjectionLeft");
+            StateTable.AddData(tool->MarkerProjectionRight, name + "MarkerProjectionRight");
+
+            tool->Interface->AddCommandReadState(StateTable, tool->Position, "GetPositionCartesian");
+            tool->Interface->AddCommandReadState(StateTable, tool->MarkerProjectionLeft, "GetMarkerProjectionLeft");
+            tool->Interface->AddCommandReadState(StateTable, tool->MarkerProjectionRight, "GetMarkerProjectionRight");
+        }
+    }
+    return tool;
+}
+
+
+std::string devMicronTracker::GetToolName(const unsigned int index) const
+{
+    ToolsType::const_iterator toolIterator = Tools.begin();
+    if (index >= Tools.size()) {
+        CMN_LOG_CLASS_RUN_ERROR << "GetToolName: requested index is out of range" << std::endl;
+        return "";
+    }
+    for (unsigned int i = 0; i < index; i++) {
+        toolIterator++;
+    }
+    return toolIterator->first;
 }
 
 
@@ -166,29 +244,54 @@ void devMicronTracker::Track(void)
     const unsigned int numIdentifiedMarkers = Collection_Count(IdentifiedMarkers);
     CMN_LOG_CLASS_RUN_DEBUG << "Track: identified " << numIdentifiedMarkers << " marker(s)" << std::endl;
 
+    Tool * tool;
+    char markerName[MT_MAX_STRING_LENGTH];
+
     for (unsigned int i = 1; i <= numIdentifiedMarkers; i++) {
         mtHandle marker = Collection_Int(IdentifiedMarkers, i);
         MTC( Marker_Marker2CameraXfGet(marker, CurrentCamera, PoseXf, &IdentifyingCamera) );
+        MTC( Marker_NameGet(marker, markerName, MT_MAX_STRING_LENGTH, 0) );
+
+        // check if tool exists, generate a name and add it otherwise
+        tool = CheckTool(markerName);
+        if (!tool) {
+            std::string name;
+            name = "tool" + '-' + std::string(markerName);
+            tool = AddTool(name, markerName);
+        }
 
         if (IdentifyingCamera == 0) {
-            Position.SetValid(false);
+            tool->Position.SetValid(false);
         } else {
-            Position.SetValid(true);
-
-            char markerName[MT_MAX_STRING_LENGTH];
-            MTC( Marker_NameGet(marker, markerName, MT_MAX_STRING_LENGTH, 0) );
+            tool->Position.SetValid(true);
 
             vct3 toolPosition;
             Xform3D_ShiftGet(PoseXf, toolPosition.Pointer());
-            Position.Position().Translation().Assign(toolPosition);
+            tool->Position.Position().Translation().Assign(toolPosition);
 
             vctQuatRot3 toolOrientation;
             Xform3D_RotQuaternionsGet(PoseXf, toolOrientation.Pointer());
-            Position.Position().Rotation().FromRaw(toolOrientation);
+            tool->Position.Position().Rotation().FromRaw(toolOrientation);
 
-            MTC( Camera_ProjectionOnImage(CurrentCamera, 0, toolPosition.Pointer(), &(MarkerProjectionLeft.X()), &(MarkerProjectionLeft.Y())) );
+            CMN_LOG_CLASS_RUN_DEBUG << "Track: " << markerName << " is at:\n" << tool->Position << std::endl;
 
-            CMN_LOG_CLASS_RUN_DEBUG << "Track: " << markerName << " is at:\n" << Position.Position() << std::endl;
+            MTC( Camera_ProjectionOnImage(CurrentCamera, 0, toolPosition.Pointer(),
+                                          &(tool->MarkerProjectionLeft.X()),
+                                          &(tool->MarkerProjectionLeft.Y())) );
+
+            MTC( Camera_ProjectionOnImage(CurrentCamera, 1, toolPosition.Pointer(),
+                                          &(tool->MarkerProjectionRight.X()),
+                                          &(tool->MarkerProjectionRight.Y())) );
         }
     }
+}
+
+
+devMicronTracker::Tool::Tool(void)
+{
+    MarkerProjectionLeft.SetSize(2);
+    MarkerProjectionRight.SetSize(2);
+
+    MarkerProjectionLeft.SetAll(0.0);
+    MarkerProjectionRight.SetAll(0.0);
 }

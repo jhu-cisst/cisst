@@ -30,7 +30,8 @@ devMicronTrackerControllerQDevice::devMicronTrackerControllerQDevice(const std::
 {
     MTC.FrameLeft.SetSize(FRAME_SIZE);
     MTC.FrameRight.SetSize(FRAME_SIZE);
-    MTC.MarkerProjectionLeft.SetSize(2);
+    FrameTemp = QImage(FRAME_WIDTH, FRAME_HEIGHT, QImage::Format_Indexed8);
+    ControllerWidget.setupUi(&CentralWidget);
 
     mtsRequiredInterface * required = AddRequiredInterface("RequiresMicronTrackerController");
     if (required) {
@@ -38,66 +39,82 @@ devMicronTrackerControllerQDevice::devMicronTrackerControllerQDevice(const std::
         required->AddFunction("ToggleTracking", MTC.Track);
         required->AddFunction("GetCameraFrameLeft", MTC.GetFrameLeft);
         required->AddFunction("GetCameraFrameRight", MTC.GetFrameRight);
-        required->AddFunction("GetPositionCartesian", MTC.GetPositionCartesian);
-        required->AddFunction("GetMarkerProjectionLeft", MTC.GetMarkerProjectionLeft);
     }
-
-    FrameLeft = QImage(FRAME_WIDTH, FRAME_HEIGHT, QImage::Format_Indexed8);
-    FrameRight = QImage(FRAME_WIDTH, FRAME_HEIGHT, QImage::Format_Indexed8);
-    FrameLeft.setNumColors(256);
-    FrameRight.setNumColors(256);
-    for (unsigned int i = 0; i < 256; i++) {
-        FrameLeft.setColor(i, qRgb(i, i, i));
-        FrameRight.setColor(i, qRgb(i, i, i));
-    }
-
-    ControllerWidget.setupUi(&CentralWidget);
-
-    UpdateTimer.start(20);
 
     // connect Qt signals to slots
-    QObject::connect(&UpdateTimer, SIGNAL(timeout()),
-                     this, SLOT(UpdateTimerQSlot()));
     QObject::connect(ControllerWidget.ButtonCapture, SIGNAL(toggled(bool)),
                      this, SLOT(MTCCaptureQSlot(bool)));
     QObject::connect(ControllerWidget.ButtonTrack, SIGNAL(toggled(bool)),
                      this, SLOT(MTCTrackQSlot(bool)));
+
+    UpdateTimer.start(20);
+}
+
+
+void devMicronTrackerControllerQDevice::AddToolWidget(QWidget * toolWidget, QPoint * markerLeft, QPoint * markerRight)
+{
+    ControllerWidget.LayoutTools->addWidget(toolWidget);
+    MarkersLeft.append(markerLeft);
+    MarkersRight.append(markerRight);
 }
 
 
 void devMicronTrackerControllerQDevice::UpdateTimerQSlot(void)
 {
-    // draw left and right camera frames
     MTC.GetFrameLeft(MTC.FrameLeft);
-    //MTC.GetFrameRight(MTC.FrameRight);
+    MTC.GetFrameRight(MTC.FrameRight);
 
-    memcpy(FrameLeft.bits(), MTC.FrameLeft.Pointer(), FRAME_SIZE);
-    //memcpy(FrameRight.bits(), MTC.FrameRight.Pointer(), FRAME_SIZE);
+    memcpy(FrameTemp.bits(), MTC.FrameLeft.Pointer(), FRAME_SIZE);
+    FrameLeft = FrameTemp.convertToFormat(QImage::Format_ARGB32_Premultiplied);
 
-    // draw marker
-    MTC.GetMarkerProjectionLeft(MTC.MarkerProjectionLeft);
+    memcpy(FrameTemp.bits(), MTC.FrameRight.Pointer(), FRAME_SIZE);
+    FrameRight = FrameTemp.convertToFormat(QImage::Format_ARGB32_Premultiplied);
 
-    double x = MTC.MarkerProjectionLeft.X();
-    double y = MTC.MarkerProjectionLeft.Y();
-    int box = 2;
+    PainterTemp.begin(&FrameLeft);
+    PainterTemp.setPen(Qt::red);
+    PainterTemp.setFont(QFont("Courier", 13, QFont::Bold));
+    PainterTemp.drawText(QPoint(5,18), "Left Camera");
+    PainterTemp.end();
 
-    for (int i = -box; i <= box; i++) {
-        for (int j = -box; j <= box; j++) {
-            if (x+i >= 0 && x+i <= FRAME_WIDTH &&
-                y+j >= 0 && y+j <= FRAME_HEIGHT) {
-                FrameLeft.setPixel(x+i, y+j, 255);
-            }
-        }
+    PainterTemp.begin(&FrameRight);
+    PainterTemp.setPen(Qt::red);
+    PainterTemp.setFont(QFont("Courier", 13, QFont::Bold));
+    PainterTemp.drawText(QPoint(5,18), "Right Camera");
+    PainterTemp.end();
+
+    for (int i = 0; i < ControllerWidget.LayoutTools->count(); i++) {
+        PainterTemp.begin(&FrameLeft);
+        PainterTemp.setPen(Qt::red);
+        PainterTemp.setBrush(Qt::red);
+        MarkerTemp = QPoint(MarkersLeft[i]->x(), MarkersLeft[i]->y());
+        PainterTemp.drawEllipse(MarkerTemp, 2, 2);
+        PainterTemp.end();
+
+        PainterTemp.begin(&FrameRight);
+        PainterTemp.setPen(Qt::red);
+        PainterTemp.setBrush(Qt::red);
+        MarkerTemp = QPoint(MarkersRight[i]->x(), MarkersRight[i]->y());
+        PainterTemp.drawEllipse(MarkerTemp, 2, 2);
+        PainterTemp.end();
     }
 
     ControllerWidget.FrameLeft->setPixmap(QPixmap::fromImage(FrameLeft));
-    //ControllerWidget.FrameRight->setPixmap(QPixmap::fromImage(FrameRight));
+    ControllerWidget.FrameRight->setPixmap(QPixmap::fromImage(FrameRight));
 }
 
 
 void devMicronTrackerControllerQDevice::MTCCaptureQSlot(bool value)
 {
     MTC.Capture(mtsBool(value));
+    if (value) {
+        QObject::connect(&UpdateTimer, SIGNAL(timeout()),
+                         this, SLOT(UpdateTimerQSlot()));
+    } else {
+        QObject::disconnect(&UpdateTimer, SIGNAL(timeout()),
+                            this, SLOT(UpdateTimerQSlot()));
+        ControllerWidget.FrameLeft->setPixmap(QPixmap(0,0));
+        ControllerWidget.FrameRight->setPixmap(QPixmap(0,0));
+    }
 }
 
 
