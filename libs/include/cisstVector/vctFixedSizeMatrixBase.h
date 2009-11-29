@@ -1270,6 +1270,44 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
             Type;
     };
 
+    /*! Read from an unformatted text input (e.g., one created by ToStreamRaw).
+      Returns true if successful. */
+    bool FromStreamRaw(std::istream & inputStream, const char delimiter = ' ')
+    {
+        const size_type myRows = rows();
+        const size_type myCols = cols();
+        size_type indexRow, indexCol;
+        char c;
+        bool valid = true;
+        ThisType temp;
+        for (indexRow = 0; (indexRow < myRows) && valid; ++indexRow) {
+            for (indexCol = 0; (indexCol < myCols) && valid; ++indexCol) {
+                inputStream >> temp.Element(indexRow, indexCol);
+                if (inputStream.fail()) {
+                    valid = false;
+                    inputStream.clear();
+                }
+                // Look for the delimiter
+                if (valid && !isspace(delimiter) && (indexCol < myCols-1)) {
+                    inputStream >> c;
+                    if (c != delimiter)
+                        valid = false;
+                }
+            } // end for cols
+            // Look for the delimiter
+            if (valid && !isspace(delimiter) && (indexRow < myRows-1)) {
+                inputStream >> c;
+                if (c != delimiter)
+                    valid = false;
+            }
+        } // end for rows
+        if (valid) {
+            // Only update the object if the parsing was successful for all elements.
+            Assign(temp);
+        }
+        return valid;
+    }
+
     /*! Binary deserialization */
     void DeSerializeRaw(std::istream & inputStream) 
     {

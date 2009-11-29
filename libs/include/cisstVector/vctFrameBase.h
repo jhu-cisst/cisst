@@ -564,6 +564,27 @@ public:
         this->Rotation().ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix);
     }
 
+    /*! Read from an unformatted text input (e.g., one created by ToStreamRaw).
+      Returns true if successful. */
+    bool FromStreamRaw(std::istream & inputStream, const char delimiter = ' ')
+    {
+        TranslationType trans;
+        RotationType rot;
+        bool valid = trans.FromStreamRaw(inputStream, delimiter);
+        if ((valid) && !isspace(delimiter)) {
+            char c;
+            inputStream >> c;
+            valid = (c == delimiter);
+        }
+        if (valid)
+            valid = rot.FromStreamRaw(inputStream, delimiter);
+        if (valid) {
+            TranslationMember = trans;
+            RotationMember = rot;
+        }
+        return valid;
+    }
+
     /*! Binary serialization */
     void SerializeRaw(std::ostream & outputStream) const 
     {
