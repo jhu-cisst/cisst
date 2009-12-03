@@ -51,13 +51,13 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstVector/vctFixedSizeVectorTypes.h>
 #include <cisstOSAbstraction/osaSerialPort.h>
-#include <cisstMultiTask/mtsTaskContinuous.h>
+#include <cisstMultiTask/mtsTaskPeriodic.h>
 #include <cisstParameterTypes/prmPositionCartesianGet.h>
 #include <cisstParameterTypes/prmString.h>
 #include <cisstDevices/devExport.h>  // always include last
 
 
-class CISST_EXPORT devNDISerial : public mtsTaskContinuous
+class CISST_EXPORT devNDISerial : public mtsTaskPeriodic
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
@@ -87,7 +87,7 @@ class CISST_EXPORT devNDISerial : public mtsTaskContinuous
     };
 
  public:
-    devNDISerial(const std::string & taskName);
+    devNDISerial(const std::string & taskName, const double period);
     ~devNDISerial(void) {};
 
     void Configure(const std::string & filename = "");

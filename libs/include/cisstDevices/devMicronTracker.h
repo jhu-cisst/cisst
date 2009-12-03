@@ -25,22 +25,24 @@ http://www.cisst.org/cisst/license.txt.
 
   \bug Current CMake support is for Windows only.
   \bug Runtime error when using Markers.ProcessFrame() (only when debugging).
+  \bug CalibratePivot() does not work as intended.
 
-  \todo Store marker2image projections in tool objects.
+  \todo Refactor the method of obtaining marker projections for the controllerQDevice.
   \todo Check for mtMeasurementHazardCode using Xform3D_HazardCodeGet().
+  \todo Find a suitable State Table size.
   \todo Sleep to prevent Cameras_GrabFrame() timeout?
   \todo Verify the need for skipping initial 20 auto-adjustment frames.
-  \todo Move Qt widgets to the libs folder once they are mature enough.
+  \todo Move Qt widgets to the libs folder (overlaps with devNDISerial?).
   \todo Verify the need for the use of MTC() macro.
-  \todo Find a suitable State Table size.
 */
 
 #ifndef _devMicronTracker_h
 #define _devMicronTracker_h
 
+#include <cisstVector/vctFixedSizeVectorTypes.h>
 #include <cisstMultiTask/mtsTaskPeriodic.h>
-#include <cisstMultiTask/mtsVector.h>
 #include <cisstParameterTypes/prmPositionCartesianGet.h>
+#include <cisstParameterTypes/prmString.h>
 #include <cisstDevices/devExport.h>  // always include last
 
 #include <MTC.h>
@@ -63,6 +65,8 @@ class CISST_EXPORT devMicronTracker : public mtsTaskPeriodic
         prmPositionCartesianGet Position;
         mtsDoubleVec MarkerProjectionLeft;
         mtsDoubleVec MarkerProjectionRight;
+
+        vct3 TooltipOffset;
     };
 
  public:
@@ -86,6 +90,7 @@ class CISST_EXPORT devMicronTracker : public mtsTaskPeriodic
     void ToggleCapturing(const mtsBool & toggle);
     void ToggleTracking(const mtsBool & toggle);
     void Track(void);
+    void CalibratePivot(const prmString & toolName);
 
     typedef cmnNamedMap<Tool> ToolsType;
     ToolsType Tools;

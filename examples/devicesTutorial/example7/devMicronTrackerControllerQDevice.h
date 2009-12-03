@@ -55,11 +55,12 @@ class devMicronTrackerControllerQDevice : public QObject, public mtsDevice
     enum { FRAME_HEIGHT = 480 };
     enum { FRAME_SIZE = FRAME_WIDTH * FRAME_HEIGHT };
 
-    Ui::ControllerWidget ControllerWidget;
+    Ui::devMicronTrackerControllerQWidget ControllerWidget;
     QWidget CentralWidget;
     QTimer UpdateTimer;
 
     struct {
+        mtsFunctionWrite CalibratePivot;
         mtsFunctionWrite Capture;
         mtsFunctionWrite Track;
         mtsFunctionRead GetFrameLeft;
@@ -71,6 +72,7 @@ class devMicronTrackerControllerQDevice : public QObject, public mtsDevice
 
     QImage FrameLeft;
     QImage FrameRight;
+    QList<QString> MarkerNames;
     QList<QPoint *> MarkersLeft;
     QList<QPoint *> MarkersRight;
 
@@ -79,9 +81,12 @@ class devMicronTrackerControllerQDevice : public QObject, public mtsDevice
     QPoint MarkerTemp;
 
  public slots:
-    void UpdateTimerQSlot(void);
-    void MTCCaptureQSlot(bool value);
+    void UpdateFrameLeftQSlot(void);
+    void UpdateFrameRightQSlot(void);
+    void MTCCalibratePivotQSlot(void);
     void MTCTrackQSlot(bool value);
+    void CaptureFrameLeftQSlot(bool value);
+    void CaptureFrameRightQSlot(bool value);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(devMicronTrackerControllerQDevice);

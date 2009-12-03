@@ -28,8 +28,8 @@ http://www.cisst.org/cisst/license.txt.
 CMN_IMPLEMENT_SERVICES(devNDISerial);
 
 
-devNDISerial::devNDISerial(const std::string & taskName) :
-    mtsTaskContinuous(taskName, 5000),
+devNDISerial::devNDISerial(const std::string & taskName, const double period) :
+    mtsTaskPeriodic(taskName, period, false, 5000),
     IsTracking(false)
 {
     mtsProvidedInterface * provided = AddProvidedInterface("ProvidesNDISerialController");
@@ -113,7 +113,8 @@ void devNDISerial::Run(void)
 
 void devNDISerial::Cleanup(void)
 {
-   if (!SerialPort.Close()) {
+    ToggleTracking(false);
+    if (!SerialPort.Close()) {
         CMN_LOG_CLASS_INIT_ERROR << "Cleanup: failed to close serial port" << std::endl;
     }
 }
@@ -439,7 +440,7 @@ devNDISerial::Tool * devNDISerial::CheckTool(const char * serialNumber)
     const ToolsType::const_iterator end = Tools.end();
     ToolsType::const_iterator toolIterator;
     for (toolIterator = Tools.begin(); toolIterator != end; ++toolIterator) {
-        if (strncmp((toolIterator->second)->SerialNumber, serialNumber, 8) == 0) {
+        if (strncmp(toolIterator->second->SerialNumber, serialNumber, 8) == 0) {
             CMN_LOG_CLASS_INIT_DEBUG << "CheckTool: found existing tool for serial number: " << serialNumber << std::endl;
             return toolIterator->second;
         }
@@ -776,7 +777,7 @@ void devNDISerial::CalibratePivot(const prmString & toolName)
 
     CMN_LOG_CLASS_RUN_WARNING << "CalibratePivot: starting calibration in 5 seconds" << std::endl;
     osaSleep(5.0 * cmn_s);
-    CMN_LOG_CLASS_RUN_WARNING << "CalibratePivot: starting calibration" << std::endl;
+    CMN_LOG_CLASS_RUN_WARNING << "CalibratePivot: calibration stopped" << std::endl;
     Beep(2);
 
     vctMat A(3 * numPoints, 6, VCT_COL_MAJOR);
@@ -794,6 +795,8 @@ void devNDISerial::CalibratePivot(const prmString & toolName)
         vctDynamicVectorRef<double> translation(3, b.Pointer(i*3, 0));
         translation.Assign(tool->Position.Position().Translation());
     }
+
+    CMN_LOG_CLASS_RUN_WARNING << "CalibratePivot: calibration started" << std::endl;
     CommandSend("TSTOP ");
     ResponseRead("OKAY");
 

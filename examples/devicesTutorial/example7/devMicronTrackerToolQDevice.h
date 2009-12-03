@@ -45,11 +45,11 @@ class devMicronTrackerToolQDevice : public QObject, public mtsDevice
     QWidget * GetWidget(void) {
         return &CentralWidget;
     }
-    QPoint * GetMarkerLeft(void) {
-        return &MarkerLeft;
+    QPoint * GetMarkerProjectionLeft(void) {
+        return &MarkerProjectionLeft;
     }
-    QPoint * GetMarkerRight(void) {
-        return &MarkerRight;
+    QPoint * GetMarkerProjectionRight(void) {
+        return &MarkerProjectionRight;
     }
 
  protected:
@@ -67,8 +67,8 @@ class devMicronTrackerToolQDevice : public QObject, public mtsDevice
         mtsDoubleVec MarkerProjectionRight;
     } MTC;
 
-    QPoint MarkerLeft;
-    QPoint MarkerRight;
+    QPoint MarkerProjectionLeft;
+    QPoint MarkerProjectionRight;
 
  public slots:
     void UpdateTimerQSlot(void);

@@ -24,7 +24,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsDevice.h>
 #include <cisstMultiTask/mtsFunctionReadOrWrite.h>
 #include <cisstMultiTask/mtsFunctionVoid.h>
-
 #include <cisstDevices/devNDISerialControllerQWidget.h>
 
 
@@ -41,7 +40,7 @@ class devNDISerialControllerQDevice : public QObject, public mtsDevice
 
     void AddToolWidget(QWidget * toolWidget);
 
-    QWidget * GetCentralWidget(void) {
+    QWidget * GetWidget(void) {
         return &CentralWidget;
     }
 
@@ -63,7 +62,7 @@ class devNDISerialControllerQDevice : public QObject, public mtsDevice
     void NDIInitializeQSlot(void);
     void NDICalibratePivotQSlot(void);
     void NDITrackQSlot(bool value);
-    void CollectQSlot(bool value);
+    void RecordQSlot(bool value);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(devNDISerialControllerQDevice);

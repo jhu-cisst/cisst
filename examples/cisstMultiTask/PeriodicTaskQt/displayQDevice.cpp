@@ -44,8 +44,8 @@ displayQDevice::displayQDevice(const std::string & taskName) :
 
     // create the user interface
     MainWindow.setCentralWidget(&CentralWidget);
-    MainWindow.adjustSize();
     MainWindow.setWindowTitle("Periodic Task Example");
+    MainWindow.resize(250, 250);
     MainWindow.show();
 
     UpdateTimer.start(20);

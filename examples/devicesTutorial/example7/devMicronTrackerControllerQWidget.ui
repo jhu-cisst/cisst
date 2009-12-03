@@ -1,30 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ControllerWidget</class>
- <widget class="QWidget" name="ControllerWidget">
+ <class>devMicronTrackerControllerQWidget</class>
+ <widget class="QWidget" name="devMicronTrackerControllerQWidget">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>223</width>
-    <height>188</height>
+    <width>373</width>
+    <height>234</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0" rowspan="5">
-    <widget class="QLabel" name="FrameLeft">
-     <property name="frameShape">
-      <enum>QFrame::Box</enum>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Sunken</enum>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="3">
+   <item row="0" column="2" colspan="3">
     <spacer name="SpacerTop">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
@@ -37,7 +27,7 @@
      </property>
     </spacer>
    </item>
-   <item row="0" column="6" rowspan="5">
+   <item row="0" column="6" rowspan="7">
     <widget class="QLabel" name="FrameRight">
      <property name="frameShape">
       <enum>QFrame::Box</enum>
@@ -47,15 +37,37 @@
      </property>
     </widget>
    </item>
-   <item row="1" column="3">
-    <widget class="QPushButton" name="ButtonCapture">
-     <property name="text">
-      <string>Capture</string>
+   <item row="1" column="2" colspan="3">
+    <widget class="QGroupBox" name="BoxCalibration">
+     <property name="title">
+      <string>Calibration</string>
      </property>
-     <property name="checkable">
-      <bool>true</bool>
-     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QPushButton" name="ButtonCalibratePivot">
+        <property name="text">
+         <string>Calibrate</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="BoxTools"/>
+      </item>
+     </layout>
     </widget>
+   </item>
+   <item row="1" column="1" rowspan="2">
+    <spacer name="SpacerLeftTop">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>40</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
    </item>
    <item row="2" column="3">
     <widget class="QPushButton" name="ButtonTrack">
@@ -67,7 +79,53 @@
      </property>
     </widget>
    </item>
-   <item row="4" column="3">
+   <item row="1" column="5" rowspan="2">
+    <spacer name="SpacerRightTop">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>40</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="5" column="1">
+    <spacer name="SpacerLeftBottom">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>40</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="5" column="2" colspan="3">
+    <layout class="QVBoxLayout" name="LayoutTools">
+     <property name="sizeConstraint">
+      <enum>QLayout::SetFixedSize</enum>
+     </property>
+    </layout>
+   </item>
+   <item row="5" column="5">
+    <spacer name="SpacerRightBottom">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>40</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="6" column="2" colspan="3">
     <spacer name="SpacerBottom">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
@@ -80,60 +138,35 @@
      </property>
     </spacer>
    </item>
-   <item row="3" column="2" colspan="3">
-    <layout class="QVBoxLayout" name="LayoutTools"/>
+   <item row="0" column="0" rowspan="7">
+    <widget class="QLabel" name="FrameLeft">
+     <property name="frameShape">
+      <enum>QFrame::Box</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Sunken</enum>
+     </property>
+    </widget>
    </item>
-   <item row="1" column="1" rowspan="2" colspan="2">
-    <spacer name="SpacerLeft1">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+   <item row="2" column="2">
+    <widget class="QPushButton" name="ButtonCaptureFrameLeft">
+     <property name="text">
+      <string>&lt;</string>
      </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>40</width>
-       <height>20</height>
-      </size>
+     <property name="checkable">
+      <bool>true</bool>
      </property>
-    </spacer>
+    </widget>
    </item>
-   <item row="1" column="4" rowspan="2" colspan="2">
-    <spacer name="SpacerRight1">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+   <item row="2" column="4">
+    <widget class="QPushButton" name="ButtonCaptureFrameRight">
+     <property name="text">
+      <string>&gt;</string>
      </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>40</width>
-       <height>20</height>
-      </size>
+     <property name="checkable">
+      <bool>true</bool>
      </property>
-    </spacer>
-   </item>
-   <item row="3" column="1">
-    <spacer name="SpacerLeft2">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>40</width>
-       <height>20</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item row="3" column="5">
-    <spacer name="SpacerRight2">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>40</width>
-       <height>20</height>
-      </size>
-     </property>
-    </spacer>
+    </widget>
    </item>
   </layout>
  </widget>

@@ -24,10 +24,9 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsDevice.h>
 #include <cisstMultiTask/mtsFunctionReadOrWrite.h>
 #include <cisstParameterTypes/prmPositionCartesianGet.h>
+#include <cisstDevices/devNDISerialToolQWidget.h>
 
 #include <QTimer>
-
-#include <cisstDevices/devNDISerialToolQWidget.h>
 
 
 class devNDISerialToolQDevice : public QObject, public mtsDevice
@@ -41,7 +40,7 @@ class devNDISerialToolQDevice : public QObject, public mtsDevice
 
     void Configure(const std::string & CMN_UNUSED(filename) = "") {};
 
-    QWidget * GetCentralWidget(void) {
+    QWidget * GetWidget(void) {
         return &CentralWidget;
     }
 

@@ -29,6 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstCommon/cmnPath.h>
+#include <cisstCommon/cmnUnits.h>
 #include <cisstOSAbstraction/osaThreadedLogFile.h>
 //#include <cisstMultiTask/mtsCollectorState.h>
 #include <cisstMultiTask/mtsTaskManager.h>
@@ -57,7 +58,7 @@ int main(int argc, char *argv[])
     QApplication application(argc, argv);
 
     // create the tasks
-    devNDISerial * taskNDISerial = new devNDISerial("devNDISerial");
+    devNDISerial * taskNDISerial = new devNDISerial("devNDISerial", 50.0 * cmn_ms);
     devNDISerialControllerQDevice * taskControllerQDevice = new devNDISerialControllerQDevice("taskControllerQDevice");
 
     // configure the tasks
@@ -76,12 +77,11 @@ int main(int argc, char *argv[])
 //    mtsCollectorState * dataCollectionTask = new mtsCollectorState("devNDISerial", mtsCollectorBase::COLLECTOR_LOG_FORMAT_PLAIN_TEXT);
 
     // add interfaces for tools and populate controller widget with tool widgets
-    const unsigned int numberOfTools = taskNDISerial->GetNumberOfTools();
-    for (unsigned int i = 0; i < numberOfTools; i++) {
+    for (unsigned int i = 0; i < taskNDISerial->GetNumberOfTools(); i++) {
         std::string toolName = taskNDISerial->GetToolName(i);
-        devNDISerialToolQDevice * toolQDevice = new devNDISerialToolQDevice(toolName);
-        taskControllerQDevice->AddToolWidget(toolQDevice->GetCentralWidget());
-        taskManager->AddDevice(toolQDevice);
+        devNDISerialToolQDevice * taskToolQDevice = new devNDISerialToolQDevice(toolName);
+        taskControllerQDevice->AddToolWidget(taskToolQDevice->GetWidget());
+        taskManager->AddDevice(taskToolQDevice);
         taskManager->Connect(toolName, toolName,
                              "devNDISerial", toolName);
 
@@ -95,9 +95,9 @@ int main(int argc, char *argv[])
 
     // create a main window to hold QWidgets
     QMainWindow * mainWindow = new QMainWindow();
-    mainWindow->setCentralWidget(taskControllerQDevice->GetCentralWidget());
+    mainWindow->setCentralWidget(taskControllerQDevice->GetWidget());
     mainWindow->setWindowTitle("NDI Serial Controller");
-    mainWindow->adjustSize();
+    mainWindow->resize(0,0);
     mainWindow->show();
 
     // run Qt user interface

@@ -55,6 +55,9 @@ devMicronTrackerToolQDevice::devMicronTrackerToolQDevice(const std::string & tas
 void devMicronTrackerToolQDevice::UpdateTimerQSlot(void)
 {
     MTC.GetPositionCartesian(MTC.PositionCartesian);
+    MTC.GetMarkerProjectionLeft(MTC.MarkerProjectionLeft);
+    MTC.GetMarkerProjectionRight(MTC.MarkerProjectionRight);
+
     if (MTC.PositionCartesian.Valid()) {
         ToolWidget.PositionX->setNum(MTC.PositionCartesian.Position().Translation().X());
         ToolWidget.PositionY->setNum(MTC.PositionCartesian.Position().Translation().Y());
@@ -65,10 +68,8 @@ void devMicronTrackerToolQDevice::UpdateTimerQSlot(void)
         ToolWidget.PositionZ->setNum(0.0);
     }
 
-    MTC.GetMarkerProjectionLeft(MTC.MarkerProjectionLeft);
-    MTC.GetMarkerProjectionRight(MTC.MarkerProjectionRight);
-    MarkerLeft.setX(MTC.MarkerProjectionLeft.X());
-    MarkerLeft.setY(MTC.MarkerProjectionLeft.Y());
-    MarkerRight.setX(MTC.MarkerProjectionRight.X());
-    MarkerRight.setY(MTC.MarkerProjectionRight.Y());
+    MarkerProjectionLeft.setX(MTC.MarkerProjectionLeft.X());
+    MarkerProjectionLeft.setY(MTC.MarkerProjectionLeft.Y());
+    MarkerProjectionRight.setX(MTC.MarkerProjectionRight.X());
+    MarkerProjectionRight.setY(MTC.MarkerProjectionRight.Y());
 }

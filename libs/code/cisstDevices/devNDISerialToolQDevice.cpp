@@ -19,10 +19,9 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstMultiTask/mtsRequiredInterface.h>
+#include <cisstDevices/devNDISerialToolQDevice.h>
 
 #include <QString>
-
-#include <cisstDevices/devNDISerialToolQDevice.h>
 
 CMN_IMPLEMENT_SERVICES(devNDISerialToolQDevice);
 
@@ -30,21 +29,20 @@ CMN_IMPLEMENT_SERVICES(devNDISerialToolQDevice);
 devNDISerialToolQDevice::devNDISerialToolQDevice(const std::string & taskName) :
     mtsDevice(taskName)
 {
+    ToolWidget.setupUi(&CentralWidget);
+    ToolWidget.ToolGroup->setTitle(QString::fromStdString(taskName));
+    CentralWidget.setWindowTitle(QString::fromStdString(taskName));
+
     mtsRequiredInterface * required = AddRequiredInterface(taskName);
     if (required) {
        required->AddFunction("GetPositionCartesian", NDI.GetPositionCartesian);
     }
 
-    ToolWidget.setupUi(&CentralWidget);
-    ToolWidget.ToolGroup->setTitle(QString::fromStdString(taskName));
-    CentralWidget.setWindowTitle(QString::fromStdString(taskName));
-    CentralWidget.adjustSize();
-
-    UpdateTimer.start(20);
-
     // connect Qt signals to slots
     QObject::connect(&UpdateTimer, SIGNAL(timeout()),
                      this, SLOT(UpdateTimerQSlot()));
+
+    UpdateTimer.start(20);
 }
 
 

@@ -20,7 +20,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsRequiredInterface.h>
 #include <cisstParameterTypes/prmString.h>
-
 #include <cisstDevices/devNDISerialControllerQDevice.h>
 
 CMN_IMPLEMENT_SERVICES(devNDISerialControllerQDevice);
@@ -29,6 +28,9 @@ CMN_IMPLEMENT_SERVICES(devNDISerialControllerQDevice);
 devNDISerialControllerQDevice::devNDISerialControllerQDevice(const std::string & taskName) :
     mtsDevice(taskName)
 {
+    ControllerWidget.setupUi(&CentralWidget);
+    CentralWidget.setWindowTitle(QString::fromStdString(taskName));
+
     mtsRequiredInterface * required = AddRequiredInterface("RequiresNDISerialController");
     if (required) {
         required->AddFunction("Beep", NDI.Beep);
@@ -39,10 +41,6 @@ devNDISerialControllerQDevice::devNDISerialControllerQDevice(const std::string &
         required->AddFunction("ToggleTracking", NDI.Track);
     }
 
-    ControllerWidget.setupUi(&CentralWidget);
-    CentralWidget.setWindowTitle(QString::fromStdString(taskName));
-    CentralWidget.adjustSize();
-
     // connect Qt signals to slots
     QObject::connect(ControllerWidget.ButtonBeep, SIGNAL(clicked()),
                      this, SLOT(NDIBeepQSlot()));
@@ -52,8 +50,8 @@ devNDISerialControllerQDevice::devNDISerialControllerQDevice(const std::string &
                      this, SLOT(NDICalibratePivotQSlot()));
     QObject::connect(ControllerWidget.ButtonTrack, SIGNAL(toggled(bool)),
                      this, SLOT(NDITrackQSlot(bool)));
-    QObject::connect(ControllerWidget.ButtonCollect, SIGNAL(toggled(bool)),
-                     this, SLOT(CollectQSlot(bool)));
+    QObject::connect(ControllerWidget.ButtonRecord, SIGNAL(toggled(bool)),
+                     this, SLOT(RecordQSlot(bool)));
 }
 
 
@@ -61,7 +59,6 @@ void devNDISerialControllerQDevice::AddToolWidget(QWidget * toolWidget)
 {
     ControllerWidget.LayoutTools->addWidget(toolWidget);
     ControllerWidget.BoxTools->addItem(toolWidget->windowTitle());
-    CentralWidget.adjustSize();
 }
 
 
@@ -95,10 +92,10 @@ void devNDISerialControllerQDevice::NDITrackQSlot(bool value)
     NDI.Track(mtsBool(value));
 }
 
-void devNDISerialControllerQDevice::CollectQSlot(bool value)
+void devNDISerialControllerQDevice::RecordQSlot(bool value)
 {
     if (value) {
-        CMN_LOG_CLASS_RUN_ERROR << "CollectQSlot: data collection is not yet implemented" << std::endl;
+        CMN_LOG_CLASS_RUN_ERROR << "RecordQSlot: data collection is not yet implemented" << std::endl;
 //        mtsTaskManager::GetInstance()->GetTask("devNDISerialCollectorStateTable")->SetSamplingInterval(10);
 //        mtsTaskManager::GetInstance()->GetTask("devNDISerialCollectorStateTable")->StartCollection();
     } else {

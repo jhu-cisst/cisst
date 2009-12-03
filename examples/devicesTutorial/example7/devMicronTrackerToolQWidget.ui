@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>devMicronTrackerToolWidget</class>
- <widget class="QWidget" name="devMicronTrackerToolWidget">
+ <class>devMicronTrackerToolQWidget</class>
+ <widget class="QWidget" name="devMicronTrackerToolQWidget">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -65,7 +65,7 @@
          <enum>QFrame::Sunken</enum>
         </property>
         <property name="text">
-         <string>+0000.00</string>
+         <string>0</string>
         </property>
        </widget>
       </item>
@@ -84,7 +84,7 @@
          <enum>QFrame::Sunken</enum>
         </property>
         <property name="text">
-         <string>+0000.00</string>
+         <string>0</string>
         </property>
        </widget>
       </item>
@@ -103,7 +103,7 @@
          <enum>QFrame::Sunken</enum>
         </property>
         <property name="text">
-         <string>+0000.00</string>
+         <string>0</string>
         </property>
        </widget>
       </item>
