@@ -1274,8 +1274,8 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
       Returns true if successful. */
     bool FromStreamRaw(std::istream & inputStream, const char delimiter = ' ')
     {
-        const size_type myRows = rows();
-        const size_type myCols = cols();
+        const size_type myRows = this->rows();
+        const size_type myCols = this->cols();
         size_type indexRow, indexCol;
         char c;
         bool valid = true;
