@@ -649,9 +649,9 @@ IBaseFilter* CDirectShowSource::GetCaptureFilter(int devid)
                 break;
             }
             counter ++;
+            filtref->Release();
         }
         moniker->Release();
-        filtref->Release();
         filtref = 0;
     }
     enumcat->Release();
