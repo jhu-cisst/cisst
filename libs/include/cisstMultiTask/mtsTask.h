@@ -188,7 +188,7 @@ protected:
     /*! Helper function to change the task state. */
     void ChangeState(TaskStateType newState);
 
-    /*! Helper function to wait on a state change, with specified timeout. */
+    /*! Helper function to wait on a state change, with specified timeout in seconds. */
     bool WaitForState(TaskStateType desiredState, double timeout);
 
 public:
