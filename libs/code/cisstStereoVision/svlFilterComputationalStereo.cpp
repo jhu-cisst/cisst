@@ -307,6 +307,7 @@ int svlFilterComputationalStereo::SetCameraGeometry(const svlCameraGeometry & ge
         geometry.GetExtrinsics(extrinsics[SVL_LEFT],  SVL_LEFT)  != SVL_OK ||
         geometry.GetExtrinsics(extrinsics[SVL_RIGHT], SVL_RIGHT) != SVL_OK) return SVL_FAIL;
     if (geometry.IsCameraPairRectified(SVL_LEFT, SVL_RIGHT) != SVL_YES) return SVL_FAIL;
+    Geometry = geometry;
     return SVL_OK;
 }
 

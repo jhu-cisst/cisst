@@ -396,8 +396,8 @@ void svlStereoDP::DisparityOptimization()
 
                 // compute ScoreCache (costs from previous diagonal)
                 inputoffset = j * inputrowstride + (i << ScaleFactor);
-                right = reinterpret_cast<unsigned char*>(RightImage + inputoffset + PrincipalPointOffset);
-                left = reinterpret_cast<unsigned char*>(LeftImage + inputoffset + from1 + MinDisparity);
+                right = reinterpret_cast<unsigned char*>(RightImage + inputoffset);
+                left = reinterpret_cast<unsigned char*>(LeftImage + inputoffset + from1 + MinDisparity + PrincipalPointOffset);
 
                 if (BlockSize > 1) {
                     right -= halfbsbytes;
@@ -584,8 +584,8 @@ void svlStereoDP::DisparityOptimization()
 
                 // compute ScoreCache (costs from previous diagonal)
                 inputoffset = j * inputrowstride + (i << ScaleFactor);
-                right = reinterpret_cast<unsigned char*>(RightImage + inputoffset + PrincipalPointOffset);
-                left = reinterpret_cast<unsigned char*>(LeftImage + inputoffset + MinDisparity);
+                right = reinterpret_cast<unsigned char*>(RightImage + inputoffset);
+                left = reinterpret_cast<unsigned char*>(LeftImage + inputoffset + MinDisparity + PrincipalPointOffset);
 
                 if (BlockSize > 1) {
                     right -= halfbsbytes;

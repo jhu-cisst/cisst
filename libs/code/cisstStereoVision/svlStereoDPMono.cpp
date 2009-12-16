@@ -346,8 +346,8 @@ void svlStereoDPMono::DisparityOptimization()
 
                 // compute ScoreCache (costs from previous diagonal)
                 inputoffset = j * inputrowstride + (i << ScaleFactor);
-                right = RightImage + inputoffset + PrincipalPointOffset;
-                left = LeftImage + inputoffset + from1 + MinDisparity;
+                right = RightImage + inputoffset;
+                left = LeftImage + inputoffset + from1 + MinDisparity + PrincipalPointOffset;
 
                 if (BlockSize > 1) {
                     right -= halfblocksize;
@@ -521,8 +521,8 @@ void svlStereoDPMono::DisparityOptimization()
 
                 // compute ScoreCache (costs from previous diagonal)
                 inputoffset = j * inputrowstride + (i << ScaleFactor);
-                right = RightImage + inputoffset + PrincipalPointOffset;
-                left = LeftImage + inputoffset + MinDisparity;
+                right = RightImage + inputoffset;
+                left = LeftImage + inputoffset + MinDisparity + PrincipalPointOffset;
 
                 if (BlockSize > 1) {
                     right -= halfblocksize;

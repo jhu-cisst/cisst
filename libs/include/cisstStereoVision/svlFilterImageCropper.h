@@ -35,6 +35,7 @@ public:
     virtual ~svlFilterImageCropper();
 
     void SetRectangle(unsigned int left, unsigned int top, unsigned int right, unsigned int bottom, unsigned int videoch = SVL_LEFT);
+    void SetRectangle(const svlRect & rect, unsigned int videoch = SVL_LEFT);
 
 protected:
     virtual int Initialize(svlSample* inputdata);

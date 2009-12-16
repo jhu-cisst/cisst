@@ -49,6 +49,12 @@ svlFilterDisparityMapToSurface::~svlFilterDisparityMapToSurface()
 int svlFilterDisparityMapToSurface::Initialize(svlSample* inputdata)
 {
     OutputData->SetSize(*inputdata);
+
+    svlSampleImageBase* image = dynamic_cast<svlSampleImageBase*>(inputdata);
+
+    ROI.Normalize();
+    ROI.Trim(0, image->GetWidth() - 1, 0, image->GetHeight() - 1);
+
     return SVL_OK;
 }
 
@@ -59,16 +65,26 @@ int svlFilterDisparityMapToSurface::ProcessFrame(ProcInfo* procInfo, svlSample* 
         svlSampleImage3DMap *outputmap = dynamic_cast<svlSampleImage3DMap*>(OutputData);
         const unsigned int width = outputmap->GetWidth();
         const unsigned int height = outputmap->GetHeight();
-        const float bl = -BaseLine;
+        const unsigned int vertstride = width - ROI.right + ROI.left - 1;
+        const unsigned int vertstride3 = vertstride * 3;
+        const float bl = BaseLine;
         float *vectors = outputmap->GetPointer();
         float *disparities = dynamic_cast<svlSampleImageMonoFloat*>(inputdata)->GetPointer();
         float fi, fj, disp, ratio;
-        unsigned int i, j;
+        unsigned int i, j, l, t, r, b;
 
-        for (j = 0; j < height; j ++) {
+        l = ROI.left;
+        t = ROI.top;
+        r = ROI.right;
+        b = ROI.bottom;
+
+        disparities += t * width + l;
+        vectors += (t * width + l) * 3;
+
+        for (j = t; j <= b; j ++) {
             fj = static_cast<float>(j);
 
-            for (i = 0; i < width; i ++) {
+            for (i = l; i <= r; i ++) {
                 fi = static_cast<float>(i);
 
                 disp = *disparities; disparities ++;
@@ -79,6 +95,9 @@ int svlFilterDisparityMapToSurface::ProcessFrame(ProcInfo* procInfo, svlSample* 
                 *vectors = (fj - PPY)  * ratio; vectors ++; // Y
                 *vectors = FocalLength * ratio; vectors ++; // Z
             }
+
+            disparities += vertstride;
+            vectors += vertstride3;
         }
     }
 

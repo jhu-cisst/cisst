@@ -103,9 +103,9 @@ int svlFilterImageRectifier::ProcessFrame(ProcInfo* procInfo, svlSample* inputda
         if (SimpleModeEnabled) {
             Translate(id->GetUCharPointer(idx),
                       od->GetUCharPointer(idx),
-                      id->GetWidth(idx) * id->GetDataChannels(),
+                      id->GetWidth(idx) * id->GetBPP(),
                       id->GetHeight(idx),
-                      HorizTranslation[idx] * id->GetDataChannels(),
+                      HorizTranslation[idx] * id->GetBPP(),
                       VertTranslation[idx]);
         }
         else {

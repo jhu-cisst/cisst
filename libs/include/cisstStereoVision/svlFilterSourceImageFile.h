@@ -50,6 +50,7 @@ public:
 
 protected:
     virtual int Initialize();
+    virtual int OnStart(unsigned int procCount);
     virtual int ProcessFrame(ProcInfo* procInfo);
     virtual int Release();
 
@@ -65,6 +66,7 @@ private:
     unsigned int From;
     unsigned int To;
     unsigned int FileCounter;
+    bool StopLoop;
 
     void BuildFilePath(int videoch, unsigned int framecounter = 0);
 };

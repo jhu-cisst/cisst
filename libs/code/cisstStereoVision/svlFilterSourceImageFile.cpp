@@ -147,8 +147,30 @@ int svlFilterSourceImageFile::Initialize()
     return SVL_OK;
 }
 
+int svlFilterSourceImageFile::OnStart(unsigned int procCount)
+{
+    StopLoop = false;
+    return SVL_OK;
+}
+
 int svlFilterSourceImageFile::ProcessFrame(ProcInfo* procInfo)
 {
+    // Increment file counter
+    if (FrameCounter > 0) {
+        _OnSingleThread(procInfo)
+        {
+            FileCounter ++;
+            if (FileCounter > To) {
+                if (LoopFlag) FileCounter = From;
+                else StopLoop = true;
+            }
+        }
+
+        _SynchronizeThreads(procInfo);
+
+        if (StopLoop) return SVL_STOP_REQUEST;
+    }
+
     // Try to keep TargetFrequency
     _OnSingleThread(procInfo) WaitForTargetTimer();
 
@@ -181,14 +203,6 @@ int svlFilterSourceImageFile::ProcessFrame(ProcInfo* procInfo)
         // reading data and closing file
         if (ImageFile[idx]->ReadAndClose(img->GetUCharPointer(idx), img->GetDataSize(idx)) != SVL_OK)
             return SVL_IFS_WRONG_IMAGE_DATA_SIZE;
-    }
-
-    _OnSingleThread(procInfo)
-    {
-        if (NumberOfDigits > 0) {
-            FileCounter ++;
-            if (FileCounter > To) FileCounter = From;
-        }
     }
 
     return SVL_OK;
