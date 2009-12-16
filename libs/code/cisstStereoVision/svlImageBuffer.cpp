@@ -138,7 +138,7 @@ bool svlImageBuffer::PushIplImage(IplImage* image)
 }
 #endif
 
-svlImageRGB* svlImageBuffer::Pull(bool waitfornew)
+svlImageRGB* svlImageBuffer::Pull(bool waitfornew, double timeout)
 {
     if (!waitfornew) return &(Buffer[Latest]);
 
@@ -151,7 +151,7 @@ svlImageRGB* svlImageBuffer::Pull(bool waitfornew)
             osaSleep(0.033);
         }
         else {
-            if (!NewFrameEvent.Wait(5.0)) return 0;
+            if (!NewFrameEvent.Wait(timeout)) return 0;
         }
     }
     else {
@@ -176,9 +176,9 @@ svlImageRGB* svlImageBuffer::Pull(bool waitfornew)
 }
 
 #if (CISST_SVL_HAS_OPENCV == ON)
-IplImage* svlImageBuffer::PullIplImage(bool waitfornew)
+IplImage* svlImageBuffer::PullIplImage(bool waitfornew, double timeout)
 {
-    if (Pull(waitfornew) == 0) return 0;
+    if (Pull(waitfornew, timeout) == 0) return 0;
     return OCVImage[Locked];
 }
 #endif // CISST_SVL_HAS_OPENCV

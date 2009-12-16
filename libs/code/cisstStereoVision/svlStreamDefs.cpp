@@ -132,13 +132,27 @@ bool svlSampleRigidXform::IsInitialized()
 
 int svlSampleRigidXform::SetSize(const svlSample & sample)
 {
-    if (dynamic_cast<const svlSampleRigidXform*>(&sample) == 0) return SVL_FAIL;
+    if (sample.GetType() != svlTypeRigidXform) return SVL_FAIL;
+    return SVL_OK;
+}
+
+int svlSampleRigidXform::CopyOf(const svlSample & sample)
+{
+    if (sample.GetType() != svlTypeRigidXform) return SVL_FAIL;
+
+    const svlSampleRigidXform* samplexform = dynamic_cast<const svlSampleRigidXform*>(&sample);
+    memcpy(GetUCharPointer(), samplexform->GetUCharPointer(), GetDataSize());
     return SVL_OK;
 }
 
 unsigned char* svlSampleRigidXform::GetUCharPointer()
 {
     return reinterpret_cast<unsigned char*>(frame4x4.Pointer());
+}
+
+const unsigned char* svlSampleRigidXform::GetUCharPointer() const
+{
+    return reinterpret_cast<const unsigned char*>(frame4x4.Pointer());
 }
 
 double* svlSampleRigidXform::GetPointer()
@@ -183,6 +197,15 @@ int svlSamplePointCloud::SetSize(const svlSample & sample)
     return SVL_OK;
 }
 
+int svlSamplePointCloud::CopyOf(const svlSample & sample)
+{
+    if (SetSize(sample) != SVL_OK) return SVL_FAIL;
+
+    const svlSamplePointCloud* samplepc = dynamic_cast<const svlSamplePointCloud*>(&sample);
+    memcpy(GetUCharPointer(), samplepc->GetUCharPointer(), GetDataSize());
+    return SVL_OK;
+}
+
 void svlSamplePointCloud::SetSize(unsigned int dimensions, unsigned int size)
 {
     points.SetSize(dimensions, size);
@@ -201,6 +224,11 @@ unsigned int svlSamplePointCloud::GetSize() const
 unsigned char* svlSamplePointCloud::GetUCharPointer()
 {
     return reinterpret_cast<unsigned char*>(points.Pointer());
+}
+
+const unsigned char* svlSamplePointCloud::GetUCharPointer() const
+{
+    return reinterpret_cast<const unsigned char*>(points.Pointer());
 }
 
 double* svlSamplePointCloud::GetPointer()

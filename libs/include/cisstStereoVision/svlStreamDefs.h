@@ -141,6 +141,7 @@ public:
     virtual svlSample* GetNewInstance() = 0;
     virtual svlStreamType GetType() const = 0;
     virtual int SetSize(const svlSample & sample) = 0;
+    virtual int CopyOf(const svlSample & sample) = 0;
     virtual bool IsImage();
     virtual bool IsInitialized();
     void SetTimestamp(double ts);
@@ -175,7 +176,9 @@ public:
     virtual unsigned int GetHeight(const unsigned int videochannel = 0) const = 0;
     virtual unsigned int GetDataSize(const unsigned int videochannel = 0) const = 0;
     virtual unsigned char* GetUCharPointer(const unsigned int videochannel = 0) = 0;
+    virtual const unsigned char* GetUCharPointer(const unsigned int videochannel = 0) const = 0;
     virtual unsigned char* GetUCharPointer(const unsigned int videochannel, const unsigned int x, const unsigned int y) = 0;
+    virtual const unsigned char* GetUCharPointer(const unsigned int videochannel, const unsigned int x, const unsigned int y) const = 0;
 };
 
 
@@ -329,6 +332,17 @@ public:
         return SVL_OK;
     }
 
+    int CopyOf(const svlSample & sample)
+    {
+        if (sample.GetType() != GetType() || SetSize(sample) != SVL_OK) return SVL_FAIL;
+
+        const svlSampleImageBase* sampleimage = dynamic_cast<const svlSampleImageBase*>(&sample);
+        for (unsigned int vch = 0; vch < _VideoChannels; vch ++) {
+            memcpy(GetUCharPointer(vch), sampleimage->GetUCharPointer(vch), GetDataSize(vch));
+        }
+        return SVL_OK;
+    }
+
     void SetSize(const unsigned int width, const unsigned int height)
     {
         for (unsigned int vch = 0; vch < _VideoChannels; vch ++) {
@@ -339,6 +353,8 @@ public:
     void SetSize(const unsigned int videochannel, const unsigned int width, const unsigned int height)
     {
         if (videochannel < _VideoChannels && Image[videochannel]) {
+            if (GetWidth (videochannel) == width &&
+                GetHeight(videochannel) == height) return;
             Image[videochannel]->SetSize(height,  width * _DataChannels);
             ImageRef[videochannel].SetRef(*(Image[videochannel]));
 #if (CISST_SVL_HAS_OPENCV == ON)
@@ -380,9 +396,19 @@ public:
         return reinterpret_cast<unsigned char*>(GetPointer(videochannel));
     }
 
+    const unsigned char* GetUCharPointer(const unsigned int videochannel = 0) const
+    {
+        return reinterpret_cast<const unsigned char*>(GetPointer(videochannel));
+    }
+
     unsigned char* GetUCharPointer(const unsigned int videochannel, const unsigned int x, const unsigned int y)
     {
         return reinterpret_cast<unsigned char*>(GetPointer(videochannel, x, y));
+    }
+
+    const unsigned char* GetUCharPointer(const unsigned int videochannel, const unsigned int x, const unsigned int y) const
+    {
+        return reinterpret_cast<const unsigned char*>(GetPointer(videochannel, x, y));
     }
 
     _ValueType* GetPointer(const unsigned int videochannel = 0)
@@ -391,7 +417,21 @@ public:
         return 0;
     }
 
+    const _ValueType* GetPointer(const unsigned int videochannel = 0) const
+    {
+        if (videochannel < _VideoChannels && Image[videochannel]) return Image[videochannel]->Pointer();
+        return 0;
+    }
+
     _ValueType* GetPointer(const unsigned int videochannel, const unsigned int x, const unsigned int y)
+    {
+        if (videochannel < _VideoChannels && Image[videochannel]) {
+            return Image[videochannel]->Pointer(y, x * _DataChannels);
+        }
+        return 0;
+    }
+
+    const _ValueType* GetPointer(const unsigned int videochannel, const unsigned int x, const unsigned int y) const
     {
         if (videochannel < _VideoChannels && Image[videochannel]) {
             return Image[videochannel]->Pointer(y, x * _DataChannels);
@@ -439,7 +479,9 @@ public:
     svlStreamType GetType() const;
     bool IsInitialized();
     int SetSize(const svlSample & sample);
+    int CopyOf(const svlSample & sample);
     unsigned char* GetUCharPointer();
+    const unsigned char* GetUCharPointer() const;
     double* GetPointer();
     unsigned int GetDataSize() const;
 
@@ -455,10 +497,12 @@ public:
     svlStreamType GetType() const;
     bool IsInitialized();
     int SetSize(const svlSample & sample);
+    int CopyOf(const svlSample & sample);
     void SetSize(unsigned int dimensions, unsigned int size);
     unsigned int GetDimensions() const;
     unsigned int GetSize() const;
     unsigned char* GetUCharPointer();
+    const unsigned char* GetUCharPointer() const;
     double* GetPointer();
     unsigned int GetDataSize() const;
 

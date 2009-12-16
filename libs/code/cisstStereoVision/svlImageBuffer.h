@@ -46,9 +46,9 @@ public:
     bool PushIplImage(IplImage* image);
 #endif // CISST_SVL_HAS_OPENCV
 
-    svlImageRGB* Pull(bool waitfornew);
+    svlImageRGB* Pull(bool waitfornew, double timeout = 5.0);
 #if (CISST_SVL_HAS_OPENCV == ON)
-    IplImage* PullIplImage(bool waitfornew);
+    IplImage* PullIplImage(bool waitfornew, double timeout = 5.0);
 #endif // CISST_SVL_HAS_OPENCV
 
 private:

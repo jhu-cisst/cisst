@@ -61,6 +61,8 @@ SET(SOURCE_FILES
   # Private System API
     svlImageBuffer.h               # private header
     svlImageBuffer.cpp
+    svlSampleBuffer.h              # private header
+    svlSampleBuffer.cpp
     ftImageBMP.h                   # private header
     ftImageBMP.cpp
     ftImagePPM.h                   # private header
