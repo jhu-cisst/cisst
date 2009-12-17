@@ -33,6 +33,7 @@ SET(SOURCE_FILES
     svlSeries.cpp
     svlRenderTargets.cpp
     svlStreamBranchSource.cpp
+    svlSampleBuffer.cpp
     svlFileHandlers.cpp
     svlCameraGeometry.cpp
     svlConverters.cpp
@@ -61,8 +62,6 @@ SET(SOURCE_FILES
   # Private System API
     svlImageBuffer.h               # private header
     svlImageBuffer.cpp
-    svlSampleBuffer.h              # private header
-    svlSampleBuffer.cpp
     ftImageBMP.h                   # private header
     ftImageBMP.cpp
     ftImagePPM.h                   # private header
@@ -87,6 +86,7 @@ SET(HEADER_FILES
     svlSeries.h
     svlRenderTargets.h
     svlStreamBranchSource.h
+    svlSampleBuffer.h
     svlExport.h
     svlFileHandlers.h
     svlCameraGeometry.h
