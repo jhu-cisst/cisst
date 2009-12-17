@@ -142,6 +142,8 @@ int svlSampleRigidXform::CopyOf(const svlSample & sample)
 
     const svlSampleRigidXform* samplexform = dynamic_cast<const svlSampleRigidXform*>(&sample);
     memcpy(GetUCharPointer(), samplexform->GetUCharPointer(), GetDataSize());
+    SetTimestamp(sample.GetTimestamp());
+
     return SVL_OK;
 }
 
@@ -203,6 +205,8 @@ int svlSamplePointCloud::CopyOf(const svlSample & sample)
 
     const svlSamplePointCloud* samplepc = dynamic_cast<const svlSamplePointCloud*>(&sample);
     memcpy(GetUCharPointer(), samplepc->GetUCharPointer(), GetDataSize());
+    SetTimestamp(sample.GetTimestamp());
+
     return SVL_OK;
 }
 

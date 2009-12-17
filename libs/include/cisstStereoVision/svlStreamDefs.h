@@ -340,6 +340,8 @@ public:
         for (unsigned int vch = 0; vch < _VideoChannels; vch ++) {
             memcpy(GetUCharPointer(vch), sampleimage->GetUCharPointer(vch), GetDataSize(vch));
         }
+        SetTimestamp(sample.GetTimestamp());
+
         return SVL_OK;
     }
 

@@ -31,27 +31,36 @@ http://www.cisst.org/cisst/license.txt.
 class svlSampleBuffer
 {
 public:
-    svlSampleBuffer(svlStreamType type);
+    svlSampleBuffer(svlStreamType type, int buffersize);
     ~svlSampleBuffer();
 
     svlStreamType GetType();
+    int GetBufferSize();
+    int GetBufferUsage();
+    double GetBufferUsageRatio();
+    int GetDroppedSampleCount();
+
+    bool PreAllocate(const svlSample & sample);
 
     bool Push(const svlSample & sample);
-    svlSample* Pull(bool waitfornew, double timeout = 5.0);
+    svlSample* Pull(double timeout = 5.0);
 
 private:
     svlSampleBuffer() {}
 
     svlStreamType Type;
-
-#if (CISST_OS == CISST_WINDOWS)
-    LONG Next, Latest, Locked;
-#else
-    unsigned int Next, Latest, Locked;
+    const int BufferSize;
+    vctDynamicVector<bool> Used;
+    vctDynamicVector<int> BackwardPos;
+    vctDynamicVector<int> ForwardPos;
+    int LockedPos;
+    int Tail;
+    int Head;
+    int BufferUsage;
+    int DroppedSamples;
+    vctDynamicVector<svlSample*> Buffer;
     osaCriticalSection CS;
-#endif
     osaThreadSignal NewSampleEvent;
-    svlSample* Buffer[3];
 };
 
 #endif // _svlSampleBuffer_h

@@ -29,22 +29,42 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlSampleBuffer class *******/
 /*********************************/
 
-svlSampleBuffer::svlSampleBuffer(svlStreamType type) :
-    Type(type)
+svlSampleBuffer::svlSampleBuffer(svlStreamType type, int buffersize) :
+    Type(type),
+    BufferSize(std::max(3, buffersize)), // buffer size is greater or equal to 3
+    LockedPos(-1),
+    Tail(-1),
+    Head(0),
+    BufferUsage(0),
+    DroppedSamples(0)
 {
-    for (unsigned int i = 0; i < 3; i ++) {
+    int i;
+
+    Buffer.SetSize(BufferSize);
+    Buffer.SetAll(0);
+    Used.SetSize(BufferSize);
+    Used.SetAll(false);
+    BackwardPos.SetSize(BufferSize);
+    ForwardPos.SetSize(BufferSize);
+
+    // Create samples in the buffer
+    for (i = 0; i < BufferSize; i ++) {
         Buffer[i] = svlSample::GetNewFromType(type);
     }
 
-    Latest = 0;
-    Next = 1;
-    Locked = 2;
+    // Initialize chained list of samples
+    for (i = 1; i < BufferSize; i ++) {
+        BackwardPos[i] = i - 1;
+        ForwardPos[i - 1] = i;
+    }
+    BackwardPos[0] = BufferSize - 1;
+    ForwardPos[BufferSize - 1] = 0;
 }
 
 svlSampleBuffer::~svlSampleBuffer()
 {
-    for (unsigned int i = 0; i < 3; i ++) {
-        delete Buffer[i];
+    for (int i = 0; i < BufferSize; i ++) {
+        if (Buffer[i]) delete Buffer[i];
     }
 }
 
@@ -53,47 +73,75 @@ svlStreamType svlSampleBuffer::GetType()
     return Type;
 }
 
+int svlSampleBuffer::GetBufferSize()
+{
+    return BufferSize;
+}
+
+int svlSampleBuffer::GetBufferUsage()
+{
+    return BufferUsage;
+}
+
+double svlSampleBuffer::GetBufferUsageRatio()
+{
+    return static_cast<double>(BufferUsage) / (BufferSize - 1);
+}
+
+int svlSampleBuffer::GetDroppedSampleCount()
+{
+    return DroppedSamples;
+}
+
+bool svlSampleBuffer::PreAllocate(const svlSample & sample)
+{
+    for (int i = 0; i < BufferSize; i ++) {
+        if (Buffer[i]->SetSize(sample) != SVL_OK) return false;
+    }
+    return true;
+}
+
 bool svlSampleBuffer::Push(const svlSample & sample)
 {
-    if (Buffer[Next]->CopyOf(sample) != SVL_OK) return false;
+    bool dropped = Used[Head];
 
-    // Atomic exchange of values
-#if (CISST_OS == CISST_WINDOWS)
-    Next = InterlockedExchange(&Latest, Next);
-#endif
+    if (Buffer[Head]->CopyOf(sample) != SVL_OK) return false;
 
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS)
     CS.Enter();
-        int ti = Next;
-        Next = Latest;
-        Latest = ti;
+        Head = Tail = ForwardPos[Head];
+        if (dropped) DroppedSamples ++;
+        else BufferUsage ++;
     CS.Leave();
-#endif
 
     NewSampleEvent.Raise();
 
     return true;
 }
 
-svlSample* svlSampleBuffer::Pull(bool waitfornew, double timeout)
+svlSample* svlSampleBuffer::Pull(double timeout)
 {
-    if (!waitfornew) return Buffer[Latest];
+    // Make sure a new frame has arrived since the last call
+    if (BufferUsage < 1 && !NewSampleEvent.Wait(timeout)) return SVL_FAIL;
 
-    if (!NewSampleEvent.Wait(timeout)) return 0;
-
-    // Atomic exchange of values
-#if (CISST_OS == CISST_WINDOWS)
-    Locked = InterlockedExchange(&Latest, Locked);
-#endif
-
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS)
     CS.Enter();
-        int ti = Locked;
-        Locked = Latest;
-        Latest = ti;
-    CS.Leave();
-#endif
+        if (LockedPos >= 0) {
+            ForwardPos[LockedPos] = ForwardPos[Tail];
+            BackwardPos[LockedPos] = BackwardPos[Tail];
+            ForwardPos[BackwardPos[Tail]] = LockedPos;
+            BackwardPos[ForwardPos[Tail]] = LockedPos;
 
-    return Buffer[Locked];
+            LockedPos = Tail;
+            Tail = ForwardPos[Tail];
+            BufferUsage --;
+        }
+        else {
+            // First pulled frame
+            LockedPos = 0;
+            Tail = 1;
+            BufferUsage --;
+        }
+    CS.Leave();
+
+    return Buffer[LockedPos];
 }
 
