@@ -451,18 +451,36 @@ int CVfWAvi::ShowCompressionDialog()
 			if (AVISaveOptions(0, ICMF_CHOOSE_DATARATE|ICMF_CHOOSE_KEYFRAME, 1, &PAviStream,
                                reinterpret_cast<LPAVICOMPRESSOPTIONS*>(&tCompr)) == TRUE) {
 
+
+				   HIC hIC;
+				   ICINFO icinfo;
+
+				   int fccType = ICTYPE_VIDEO; //0 to get all installed codecs
+
+				   hIC = ICOpen(fccType, CompressionOptions.fccHandler, ICMODE_QUERY);
+				   if (hIC) {
+
+					   //Find out the compressor name.
+					   ICGetInfo(hIC, &icinfo, sizeof(icinfo));
+
+					   std::wstring tempname = icinfo.szDescription;
+					   CompressorName.assign(tempname.begin(),tempname.end()); //= tempname.;
+					   ret = 1;
+				   
+
+				   }
                 // Create compressed stream
                 HRESULT error = AVIMakeCompressedStream(&PAviCompressedStream, PAviStream, &CompressionOptions, NULL);
                 if (error == AVIERR_OK) {
 
                     // Store compressor name
-                    AVISTREAMINFO info;
+                    /*AVISTREAMINFO info;
                     if (AVIStreamInfo(PAviCompressedStream, &info, sizeof(AVISTREAMINFO)) == 0) {
                         CompressorName = info.szName;
                     }
 
-                    ret = 1;
-                }
+                    ret = 1;*/
+				}
                 else if (error == AVIERR_NOCOMPRESSOR) {
                 }
                 else if (error == AVIERR_MEMORY) {

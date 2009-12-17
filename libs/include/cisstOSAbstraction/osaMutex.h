@@ -78,7 +78,7 @@ public:
 	~osaMutex(void);
     
 	/*! Mutex lock operation.  This class doesn't use recursive
-        mutexes therefore you ust make sure the mutex is not already
+        mutexes therefore you must make sure the mutex is not already
         locked.  Locking the same mutex twice from the same threads
         leads to undefined results.
     */

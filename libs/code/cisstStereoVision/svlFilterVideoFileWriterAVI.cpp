@@ -213,6 +213,7 @@ int svlFilterVideoFileWriterAVI::DialogCodec()
     }
 
     CVfWAvi tavi;
+	tavi.SetCompressOptions(reinterpret_cast<AVICOMPRESSOPTIONS*>(CompressOptions)[0]);
     if (tavi.ShowCompressionDialog()) {
         tavi.GetCompressOptions(reinterpret_cast<AVICOMPRESSOPTIONS*>(CompressOptions)[0]);
         tavi.GetCompressorName(EncoderName);
