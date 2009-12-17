@@ -33,7 +33,7 @@ SET(SOURCE_FILES
     svlSeries.cpp
     svlRenderTargets.cpp
     svlStreamBranchSource.cpp
-    svlSampleBuffer.cpp
+    svlSampleQueue.cpp
     svlFileHandlers.cpp
     svlCameraGeometry.cpp
     svlConverters.cpp
@@ -86,7 +86,7 @@ SET(HEADER_FILES
     svlSeries.h
     svlRenderTargets.h
     svlStreamBranchSource.h
-    svlSampleBuffer.h
+    svlSampleQueue.h
     svlExport.h
     svlFileHandlers.h
     svlCameraGeometry.h
