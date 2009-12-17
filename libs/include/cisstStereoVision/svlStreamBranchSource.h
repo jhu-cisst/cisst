@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _svlStreamBranchSource_h
 
 #include <cisstStereoVision/svlStreamManager.h>
+#include <cisstStereoVision/svlSampleQueue.h>
 
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
@@ -43,22 +44,11 @@ private:
     int ProcessFrame(ProcInfo* procInfo);
 
     static bool IsTypeSupported(svlStreamType type);
-    void SetInputSample(svlSample* inputdata);
+    void SetInput(svlSample* inputdata);
     void PushSample(svlSample* inputdata);
-    int PullSample();
 
     bool InputBlocked;
-    const int BufferSize;
-    unsigned int DroppedSamples;
-    vctDynamicVector<int> BackwardPos;
-    vctDynamicVector<int> ForwardPos;
-    int LockedPos;
-    int OldestPos;
-    int NewestPos;
-    int BufferUsage;
-    vctDynamicVector<svlSample*> SampleBuffer;
-    osaCriticalSection CS;
-    osaThreadSignal NewFrameEvent;
+    svlSampleQueue SampleQueue;
 
 public:
     int GetBufferUsage();

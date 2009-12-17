@@ -145,9 +145,9 @@ public:
     virtual bool IsImage();
     virtual bool IsInitialized();
     void SetTimestamp(double ts);
-    double GetTimestamp();
+    double GetTimestamp() const;
     void SetModified(bool modified);
-    bool IsModified();
+    bool IsModified() const;
     static svlSample* GetNewFromType(svlStreamType type);
 
 private:

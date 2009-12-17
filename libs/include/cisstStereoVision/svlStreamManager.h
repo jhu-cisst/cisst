@@ -239,8 +239,8 @@ public:
 
     svlStreamEntity& Trunk();
     svlStreamEntity& Branch(const std::string & name);
-    svlStreamEntity* CreateBranchAfterFilter(svlFilterBase* filter, unsigned int buffersize = 3);
-    svlStreamEntity* CreateBranchAfterFilter(svlFilterBase* filter, const std::string & name, unsigned int buffersize = 3);
+    svlStreamEntity* CreateBranchAfterFilter(svlFilterBase* filter, unsigned int threadcount = 1, unsigned int buffersize = 3);
+    svlStreamEntity* CreateBranchAfterFilter(svlFilterBase* filter, const std::string & name, unsigned int threadcount = 1, unsigned int buffersize = 3);
     int RemoveBranch(svlStreamEntity* entity);
     int RemoveBranch(const std::string & name);
     int RemoveFilter(svlFilterBase* filter);
@@ -258,8 +258,6 @@ public:
 private:
     ///////////////////////////////////////////////
     // Methods that may be public in the future
-
-    int SetThreads(unsigned int threadcount);
 
     int AddFilter(svlFilterBase* filter);
     int SetSourceFilter(svlFilterSourceBase* source);
