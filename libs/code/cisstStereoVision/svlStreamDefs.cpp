@@ -50,7 +50,7 @@ void svlSample::SetTimestamp(double ts)
     Timestamp = ts;
 }
 
-double svlSample::GetTimestamp()
+double svlSample::GetTimestamp() const
 {
     return Timestamp;
 }
@@ -60,7 +60,7 @@ void svlSample::SetModified(bool modified)
     ModifiedFlag = modified;
 }
 
-bool svlSample::IsModified()
+bool svlSample::IsModified() const
 {
     return ModifiedFlag;
 }

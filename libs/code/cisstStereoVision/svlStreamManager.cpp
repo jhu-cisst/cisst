@@ -73,13 +73,6 @@ svlStreamManager::~svlStreamManager()
     RemoveAll();
 }
 
-int svlStreamManager::SetThreads(unsigned int threadcount)
-{
-    if (Running || threadcount < 1) return SVL_FAIL;
-    ThreadCount = threadcount;
-    return SVL_OK;
-}
-
 svlStreamEntity& svlStreamManager::Trunk()
 {
     return Entity;
@@ -98,12 +91,12 @@ svlStreamEntity& svlStreamManager::Branch(const std::string & name)
     return *(iterbranch->first->entity);
 }
 
-svlStreamEntity* svlStreamManager::CreateBranchAfterFilter(svlFilterBase* filter, unsigned int buffersize)
+svlStreamEntity* svlStreamManager::CreateBranchAfterFilter(svlFilterBase* filter, unsigned int threadcount, unsigned int buffersize)
 {
-    return CreateBranchAfterFilter(filter, "", buffersize);
+    return CreateBranchAfterFilter(filter, "", threadcount, buffersize);
 }
 
-svlStreamEntity* svlStreamManager::CreateBranchAfterFilter(svlFilterBase* filter, const std::string & name, unsigned int buffersize)
+svlStreamEntity* svlStreamManager::CreateBranchAfterFilter(svlFilterBase* filter, const std::string & name, unsigned int threadcount, unsigned int buffersize)
 {
     if (Initialized ||
         GetBranchEntityOfFilter(filter) == 0 ||
@@ -111,7 +104,7 @@ svlStreamEntity* svlStreamManager::CreateBranchAfterFilter(svlFilterBase* filter
         return 0;
 
     // Create branch stream object
-    svlStreamManager* branchstream = new svlStreamManager();
+    svlStreamManager* branchstream = new svlStreamManager(std::max(1u, threadcount));
     // Create branch structure
     _BranchStruct *branch = new _BranchStruct;
     branchstream->Entity.Root = filter;
@@ -453,7 +446,7 @@ int svlStreamManager::Initialize()
         // Setup input sample
         branchstream = (*iterbranchlist)->Stream;
         svlStreamBranchSource* ptr = dynamic_cast<svlStreamBranchSource*>(branchstream->StreamSource);
-        ptr->SetInputSample(source->OutputData);
+        ptr->SetInput(source->OutputData);
         // Initialize branch stream
         err = branchstream->Initialize();
         if (err != SVL_OK) {
@@ -486,7 +479,7 @@ int svlStreamManager::Initialize()
              iterbranchlist ++) {
             // Setup input sample
             branchstream = (*iterbranchlist)->Stream;
-            dynamic_cast<svlStreamBranchSource*>(branchstream->StreamSource)->SetInputSample(filter->OutputData);
+            dynamic_cast<svlStreamBranchSource*>(branchstream->StreamSource)->SetInput(filter->OutputData);
             // Initialize branch stream
             err = branchstream->Initialize();
             if (err != SVL_OK) {
@@ -624,8 +617,6 @@ int svlStreamManager::Start()
              iterbranchlist ++) {
             // Get branch stream object from handle
             branchstream = (*iterbranchlist)->Stream;
-            // Set thread count in branches
-            branchstream->SetThreads(ThreadCount);
             // Start branch stream
             err = branchstream->Start();
             if (err != SVL_OK) {
