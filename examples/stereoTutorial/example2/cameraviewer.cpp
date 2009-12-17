@@ -241,7 +241,7 @@ int CameraViewer(bool interpolation, bool save, int width, int height)
 #endif // CISST_SVL_HAS_ZLIB
 
     // instantiating SVL stream and filters
-    svlStreamManager viewer_stream(8);
+    svlStreamManager viewer_stream(2);
     svlFilterSourceVideoCapture viewer_source(false);
     svlFilterImageResizer viewer_resizer;
     svlFilterImageWindow viewer_window;
@@ -273,7 +273,7 @@ int CameraViewer(bool interpolation, bool save, int width, int height)
     // setup writer
     if (save == true) {
         viewer_writer.DialogFilePath();
-        viewer_writer.SetCompressionLevel(9); // 0-9
+        viewer_writer.SetCompressionLevel(2); // 0-9
         viewer_writer.Pause();
     }
 #endif // CISST_SVL_HAS_ZLIB
@@ -314,11 +314,12 @@ int CameraViewer(bool interpolation, bool save, int width, int height)
     if (save == true) {
         // put the recorder on a branch in order to enable buffering
         if (width > 0 && height > 0) {
-            viewer_stream.CreateBranchAfterFilter(&viewer_resizer, "Recorder", 200); // Buffer size in frames
+            viewer_stream.CreateBranchAfterFilter(&viewer_resizer, "Recorder", 8, 200); // Buffer size in frames
         }
         else {
-            viewer_stream.CreateBranchAfterFilter(&viewer_source, "Recorder", 200); // Buffer size in frames
+            viewer_stream.CreateBranchAfterFilter(&viewer_source, "Recorder", 8, 200); // Buffer size in frames
         }
+        viewer_stream.Branch("Recorder").BlockInput(true);
         if (viewer_stream.Branch("Recorder").Append(&viewer_writer) != SVL_OK) goto labError;
     }
 #endif // CISST_SVL_HAS_ZLIB

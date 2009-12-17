@@ -29,7 +29,7 @@ using namespace std;
 int main()
 {
     // Creating SVL objects
-    svlStreamManager stream(4); // number of threads per stream
+    svlStreamManager stream(2); // number of threads per stream
 
     svlFilterSourceDummy video_source(svlTypeImageRGB); // try svlTypeImageRGBStereo for stereo image source
     svlFilterImageResizer resizer;
@@ -65,7 +65,7 @@ int main()
         stream.Trunk().Append(&window)       != SVL_OK) goto labError;
 
     // Adding a branch to the stream right after the source filter
-    stream.CreateBranchAfterFilter(&video_source, "mybranch");
+    stream.CreateBranchAfterFilter(&video_source, "mybranch", 2);
     // Chain filters to branch
     if (stream.Branch("mybranch").Append(&unsharpmask) != SVL_OK ||
         stream.Branch("mybranch").Append(&window2)     != SVL_OK) goto labError;
