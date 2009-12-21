@@ -20,14 +20,14 @@ http://www.cisst.org/cisst/license.txt.
 
 #ifdef CISST_ODE_SUPPORT
 
-#include <cisstRobot/robBodyODE.h>
+#include <cisstRobot/ode/robBodyODE.h>
 typedef robBodyODE robBody;
 
 #else
 
-#include <cisstRobot/robBodyGeneric.h>
-typedef robBodyGeneric robBody;
+#include <cisstRobot/robBodyBase.h>
+typedef robBodyBase robBody;
 
-#endif
+#endif // __ODE__
 
 #endif

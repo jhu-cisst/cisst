@@ -198,14 +198,14 @@ void robVariables::Set( robVariablesMask mask,
 	    this->mask |= qimask;           // set the bit
 	  }
 	  else { 
-	    CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__ 
+	    CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS 
 				<< ": Invalid index" 
 				<< std::endl;
 	  }
 
 	}
 	else {
-	  CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__ 
+	  CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS 
 			      << ": Source does not contain the variable"
 			      << std::endl;
 	}
@@ -232,14 +232,14 @@ void robVariables::Set( robVariablesMask mask,
 	    this->mask |= qimask;                // mark the position bit
 	  }
 	  else { 
-	    CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__ 
+	    CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS 
 				<< ": Invalid index" 
 				<< std::endl;
 	  }
 	}
 
 	else {
-	  CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__ 
+	  CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS 
 			      << ": Source does not contain DOF" 
 			      << std::endl;
 	}
@@ -265,14 +265,14 @@ void robVariables::Set( robVariablesMask mask,
 	    this->mask |= qimask;                // mark the position bit
 	  }
 	  else { 
-	    CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__ 
+	    CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS 
 				<< ": Invalid index" 
 				<< std::endl;
 	  }
 	}
 
 	else {
-	  CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__ 
+	  CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS 
 			      << ": Source does not contain DOF" 
 			      << std::endl;
 	}

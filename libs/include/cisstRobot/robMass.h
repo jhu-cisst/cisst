@@ -20,14 +20,14 @@ http://www.cisst.org/cisst/license.txt.
 
 #ifdef CISST_ODE_SUPPORT
 
-#include <cisstRobot/robMassODE.h>
+#include <cisstRobot/ode/robMassODE.h>
 typedef robMassODE robMass;
 
 #else
 
-#include <cisstRobot/robMassGeneric.h>
-typedef robMassGeneric robMass;
+#include <cisstRobot/robMassBase.h>
+typedef robMassBase robMass;
 
 #endif // __ODE__
 
-#endif // _robMass_h
+#endif

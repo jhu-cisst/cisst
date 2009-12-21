@@ -18,12 +18,10 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _robMeshTriangular_h
 #define _robMeshTriangular_h
 
-#include <cisstRobot/robMeshBase.h>
+#include <cisstRobot/robGeomBase.h>
 
-#include <cisstVector/vctFixedSizeVector.h>
-#include <cisstRobot/robExport.h>
+class CISST_EXPORT robMeshTriangular : public robGeomBase {
 
-class CISST_EXPORT robMeshTriangular : public robMeshBase {
 protected:
 
   //! the coordinates of vertices
@@ -44,7 +42,7 @@ protected:
   double* nz;           // normal z
 
   //! The RGB color
-  //vctFixedSizeVector<double,3>  RGB;
+  vctFixedSizeVector<double,3>  RGB;
 
   //! Allocate the arrays for the mesh
   /**
@@ -90,14 +88,6 @@ public:
      \return A reference to the mesh
   */
   robMeshTriangular& operator=( const robMeshTriangular& mesh );
-
-  //! Assignment of the position and orientation
-  /**
-     Assign the position and orientation of the mesh
-     \param Rt The position and orientation of the mesh
-     \return A reference to the mesh
-  */
-  robMeshTriangular& operator=( const vctFrame4x4<double,VCT_ROW_MAJOR>& Rt );
 
   //! Load an (OBJ) file
   /**

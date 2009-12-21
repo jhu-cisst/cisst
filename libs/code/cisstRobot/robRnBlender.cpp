@@ -11,14 +11,14 @@ robRnBlender::robRnBlender(Real xi, const Rn& yi, const Rn& yid, const Rn& yidd,
 			   Real xf, const Rn& yf, const Rn& yfd, const Rn& yfdd){
 
   if( xf < xi ){
-    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
 		      << ": t initial must be less than t final" << endl;
   }
 
   if( yi.size() != yid.size() || yi.size() != yidd.size() ||
       yf.size() != yfd.size() || yf.size() != yfdd.size() || 
       yi.size() != yf.size() ){
-    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
 			<< ": Vectors must have the same length" << endl;
   }
       
@@ -35,7 +35,7 @@ robDomainAttribute robRnBlender::IsDefinedFor( const robDOF& input ) const{
   
   // test the dof are Real numbers
   if( !input.IsTime() ){
-    CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__ << ": Expected time input" <<endl;
+    CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS << ": Expected time input" <<endl;
     return UNDEFINED;
   }
 
@@ -55,7 +55,7 @@ robError robRnBlender::Evaluate( const robDOF& input, robDOF& output ){
     robDOF blenderout;
 
     if( blenders[i]->Evaluate(input, blenderout) == FAILURE ){
-      CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+      CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
 			<< ": Failed to evaluate a blender" << endl;
       return FAILURE;
     }

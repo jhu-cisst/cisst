@@ -40,7 +40,7 @@ robBlenderSO3Bezier::robBlenderSO3Bezier( double t1,
 					  const vctFixedSizeVector<double,3>&              w2,
 					  double ) {
   if( t2 < t1 ){
-    CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__ 
+    CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS 
 			<< ": t initial must be less than t final" 
 			<< std::endl;
   }
@@ -136,7 +136,7 @@ robDomainAttribute
 robBlenderSO3Bezier::IsDefinedFor( const robVariables& input ) const{ 
   // test the dof are double numbers
   if( !input.IsTimeSet() ){
-    CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__ 
+    CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS 
 			<< ": Expected time input" 
 			<<std::endl;
     return UNDEFINED;

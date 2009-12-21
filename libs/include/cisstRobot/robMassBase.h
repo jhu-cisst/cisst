@@ -20,112 +20,103 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <iostream>
 
-#include <cisstVector/vctFixedSizeVector.h>
-#include <cisstVector/vctFixedSizeMatrix.h>
+#include <cisstVector/vctMatrixRotation3.h>
 #include <cisstVector/vctFrame4x4.h>
 
-class robMassBase{
+#include <cisstRobot/robDefines.h>
+#include <cisstRobot/robExport.h>
+
+class CISST_EXPORT robMassBase{
+
 protected:
+
+  //! The mass (kg)
+  double mass; 
+
+  //! The center of mass (m)
+  /**
+     The center of mass is expressed with respect to the coordinate frame
+     of the body. That is, this member represents the translation of the center 
+     of mass with respect to the body's coordinate frame.This implies that the 
+     coordinate frame of the body does not necessarily coincide with the center 
+     of mass. 
+  */
+  vctFixedSizeVector<double,3> com;
+
+  //! The principal moments of inertia (\f$ \textrm{kgm}^2 \f$)
+  /**
+     The principal moments of inertia are defined in a coordinate frame that
+     is centered at the center of mass and with axes aligned with the principal
+     axes. The principal moments are contained in the diagonal matrix 
+     \f$ D = 
+     \begin{bmatrix} I_x & 0 & 0 \\ 0 & I_y & 0 \\ 0 & 0 & I_z \end{bmatrix}
+     \f$
+  */
+  vctFixedSizeMatrix<double,3,3,VCT_ROW_MAJOR> D; 
+
+  //! The principal axes
+  /**
+     This matrix represents the coordinates of the principal axes associated 
+     with the principal moment of inertia. The three axes are defined with 
+     respect to the body's coordinate frame. The axes represent a similarity 
+     transformation that diagonalizes a moment of inertia tensor. Given a moment
+     of inertia tensor \f$ I \$, the principal axes define a similarity 
+     transformation \f$V\f$ that diagonalizes \f$ I \f$ with 
+     \f$ D = V^T I V \f$, where \f$ V\f$ are the eigenvectors of \f$ I\f$ given 
+     by \f$ IV = VD\f$. The matrix \f$ V\f$ refpresents the principal axes as 
+     follow 
+     \f$V=\begin{bmatrix}\mathbf{e}_1&\mathbf{e}_2&\mathbf{e}_3\end{bmatrix}\f$.
+  */
+  vctMatrixRotation3<double,VCT_ROW_MAJOR> V;
 
   //! Parallel Axis Theorem
   /**
-     Finds the moment of inertia wrt to a parallel axis
+     Finds the moment of inertia with respect to a parallel axis
   */
   vctFixedSizeMatrix<double,3,3> 
   ParallelAxis( double m, 
 		const vctFixedSizeVector<double,3>& t, 
-		const vctFixedSizeMatrix<double,3,3,VCT_ROW_MAJOR>& I ) const {
-
-    // inner product
-    double tTt = t[0]*t[0] + t[1]*t[1] + t[2]*t[2];
-
-    // outer product;
-    vctFixedSizeMatrix<double,3,3> ttT( t[0]*t[0], t[0]*t[1], t[0]*t[2],
-					t[1]*t[0], t[1]*t[1], t[1]*t[2],
-					t[2]*t[0], t[2]*t[1], t[2]*t[2] );
-
-    // compute the offset It
-    vctFixedSizeMatrix<double,3,3,VCT_ROW_MAJOR> It;
-    It = m* ( tTt * vctFixedSizeMatrix<double,3,3,VCT_ROW_MAJOR>::Eye() - ttT );
-
-    return I + It;
-  }
+		const vctFixedSizeMatrix<double,3,3,VCT_ROW_MAJOR>& I ) const;
 
 public:
 
-  robMassBase(){}
-  ~robMassBase(){}
+  //! Default constructor
+  /**
+     Set the mass, center of mass and inertia to zero
+  */
+  robMassBase();
+
+  //! Default destructor
+  virtual ~robMassBase();
 
   //! Return the mass
-  virtual double Mass() const = 0;
-  
-  //! Return the center of mass
-  virtual vctFixedSizeVector<double,3> CenterOfMass() const = 0;
-
-  //! Return the moment of inertia tensor
-  virtual vctFixedSizeMatrix<double,3,3> MomentOfInertia() const = 0;
-
-  //! Read the mass from a input stream
-  virtual robError Read( std::istream& is ){
-    double m;                                  // the mass
-    double comx, comy, comz;                   // center of mass
-    double d1, d2, d3;                         // principal moments of inertia
-    double x1, x2, x3, y1, y2, y3, z1, z2, z3; // principal axes
-
-    is >> m                                    // read everything
-       >> comx >> comy >> comz 
-       >> d1 >> d2 >> d3
-       >> x1 >> x2 >> x3
-       >> y1 >> y2 >> y3
-       >> z1 >> z2 >> z3;
-
-    if( d1 < 0.0 || d2 < 0.0 || d3 < 0.0 ){
-      CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__
-			<< ": Principal moments of inertia must be non-negative"
-			<< std::endl;
-      return ERROR;
-    }
-    
-    // build the structures
-    vctFixedSizeVector<double,3>   com(comx, comy, comz);
-    vctFixedSizeVector<double,3>   d(d1, d2, d3);
-    vctDynamicVector<double> e1(3, x1, x2, x3);
-    vctDynamicVector<double> e2(3, y1, y2, y3);
-    vctDynamicVector<double> e3(3, z1, z2, z3);
-    vctMatrixRotation3<double,VCT_ROW_MAJOR> V( e1, e2, e3, true, true );
-
-    // set the masses
-    SetDynamicsParameters( m, com, d, V );
-    return SUCCESS;
-  }
-  
-  //! Set the mass parameters
   /**
-     \param mass The mass of the body
-     \param COM The center of gravity
-     \param MOIT The moment of inertia tensor
+     \return The mass of the body
   */
-  virtual void SetDynamicsParameters( double mass, 
-				      const vctFixedSizeVector<double,3>& COM,
-				      const vctFixedSizeVector<double,3>& d,
-				      const vctMatrixRotation3<double>& V ) = 0;
+  double Mass() const;
 
-  //! Write the mass to an output stream
-  virtual void Write( std::ostream& os ) const {
-    double m = Mass();
-    vctFixedSizeVector<double,3> com = CenterOfMass();
-    vctFixedSizeMatrix<double,3,3> moi = MomentOfInertia();
-    os << std::setw(13) << m 
-       << std::setw(13) << com[0] 
-       << std::setw(13) << com[1] 
-       << std::setw(13) << com[2] 
-       << std::setw(13) << moi[0][0] 
-       << std::setw(13) << moi[1][1] 
-       << std::setw(13) << moi[2][2] 
-       << std::setw(13) << moi[0][1] 
-       << std::setw(13) << moi[1][2] 
-       << std::setw(13) << moi[0][2];
-  }
+  //! Return the center of mass
+  /**
+     Return the center of mass. The center of mass is expressed in the 
+     coordinate frame of the body.
+     \return A 3D vector representing the center of mass
+  */
+  vctFixedSizeVector<double,3> CenterOfMass() const;
+
+  //! Return the moment of inertia tensor in the body frame
+  /**
+     Return the moment of inertia tensor. The tensor is with respect to the
+     coordinate frame of the body which does not necessarily coincide with the
+     center of mass of the body and the principal axes.
+     \return A 3x3 moment of inertia tensor
+  */
+  vctFixedSizeMatrix<double,3,3,VCT_ROW_MAJOR> MomentOfInertia() const;
+  
+  //! Read the mass from a input stream
+  virtual robError Read( std::istream& is );
+
+  //! Write the mass from a output stream
+  virtual robError Write( std::ostream& os ) const;
 
 };
 

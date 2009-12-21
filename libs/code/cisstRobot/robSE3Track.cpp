@@ -131,7 +131,7 @@ robError robSE3Track::Evaluate( const robDOF& input, robDOF& output ){
     t1 = input.t;
     // nothing has been set yet! Rw1, tw1 are empty
     if( numwp == 0 ){
-      CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ << ": Not initialized" << endl;
+      CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS << ": Not initialized" << endl;
       return FAILURE;
     }
 
@@ -160,7 +160,7 @@ robError robSE3Track::Evaluate(const robDOF& input){
   if( txblender->IsDefinedFor( input ) == DEFINED ){ 
     robDOF dof;
     if( txblender->Evaluate( input, dof ) == FAILURE ){
-      CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+      CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
 			<< ": Failed to evaluate TX blender" << endl;
       return FAILURE;
     }
@@ -177,7 +177,7 @@ robError robSE3Track::Evaluate(const robDOF& input){
   if( tyblender->IsDefinedFor( input ) == DEFINED ){ 
     robDOF dof;
     if( tyblender->Evaluate( input, dof ) == FAILURE ){
-      CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+      CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
 			<< ": Failed to evaluate TY blender" << endl;
       return FAILURE;
     }
@@ -194,7 +194,7 @@ robError robSE3Track::Evaluate(const robDOF& input){
   if( tzblender->IsDefinedFor( input ) == DEFINED ){ 
     robDOF dof;
     if( tzblender->Evaluate( input, dof ) == FAILURE ){
-      CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+      CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
 			<< ": Failed to evaluate TZ blender" << endl;
       return FAILURE;
     }
@@ -213,7 +213,7 @@ robError robSE3Track::Evaluate(const robDOF& input){
     robDOF dof;
 
     if( so3blender->Evaluate( input, dof ) == FAILURE ){
-      CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+      CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
 			<< ": Failed to evaluate SO3 blender" << endl;
       return FAILURE;
     }

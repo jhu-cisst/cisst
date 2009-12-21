@@ -15,18 +15,18 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#ifndef _robJoint_h
-#define _robJoint_h
+#ifndef _robGeom_h
+#define _robGeom_h
 
 #ifdef CISST_ODE_SUPPORT
 
-#include <cisstRobot/ode/robJointODE.h>
-typedef robJointODE robJoint;
+#include <cisstRobot/ode/robMeshTriangularODE.h>
+typedef robMeshTriangularODE robGeom;
 
 #else
 
-#include <cisstRobot/robJointBase.h>
-typedef robJointBase robJoint;
+#include <cisstRobot/robMeshTriangularBase.h>
+typedef robMeshTriangular robGeom;
 
 #endif // __ODE__
 

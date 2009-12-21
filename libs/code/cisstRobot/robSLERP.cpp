@@ -29,7 +29,7 @@ robSLERP::robSLERP( double ti,
 		    double tf, 
 		    const vctFrame4x4<double,VCT_ROW_MAJOR>& Rtf ){
   if( tf < ti ){
-    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
 		      << ": t initial must be less than t final" 
 		      << std::endl;
   }
@@ -82,7 +82,7 @@ robSLERP::robSLERP( double ti,
 robDomainAttribute robSLERP::IsDefinedFor( const robVariables& input ) const{
 
   if( !input.IsTimeSet() ){
-    CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__ 
+    CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS 
 			<< ": Expected time input" 
 			<< std::endl;
     return UNDEFINED;
@@ -101,7 +101,7 @@ robDomainAttribute robSLERP::IsDefinedFor( const robVariables& input ) const{
 robError robSLERP::Evaluate( const robVariables& input, robVariables& output ){
 
   if( !input.IsTimeSet() ){
-    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
 		      << ": Expected time input" 
 		      << std::endl;
     return ERROR;

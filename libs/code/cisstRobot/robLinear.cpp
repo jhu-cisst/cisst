@@ -24,7 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 robLinear::robLinear( double x1, double y1, double x2, double y2 ){
 
   if( x2 < x1 ){
-    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
 		      << ": t initial must be less than t final" << std::endl;
   }
 
@@ -43,7 +43,7 @@ robLinear::robLinear( double x1, double y1, double x2, double y2 ){
 robLinear::robLinear( double x1, const vctFixedSizeVector<double,3>& y1, 
 		      double x2, const vctFixedSizeVector<double,3>& y2 ){
   if( x2 < x1 ){
-    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
 		      << ": t initial must be less than t final" 
 		      << std::endl;
   }
@@ -64,13 +64,13 @@ robLinear::robLinear( double x1, const vctFixedSizeVector<double,3>& y1,
 robLinear::robLinear( double x1, const vctDynamicVector<double>& y1,
 		      double x2, const vctDynamicVector<double>& y2 ){
   if( x2 < x1 ){
-    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
 		      << ": t initial must be less than t final" 
 		      << std::endl;
   }
 
   if( y1.size()!=y2.size() ){
-    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
 		      << ": Vectors must have the same length" 
 		      << std::endl;
   }
@@ -92,7 +92,7 @@ robDomainAttribute robLinear::IsDefinedFor( const robVariables& input ) const{
 
   // test the dof are double numbers
   if( !input.IsTimeSet() ) {
-    CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__ 
+    CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS 
 			<< ": Expcected a time input" << std::endl;
     return UNDEFINED;
   }
@@ -114,7 +114,7 @@ robError robLinear::Evaluate( const robVariables& input, robVariables& output ){
 
   // test the dof are double numbers
   if( !input.IsTimeSet() ) {
-    CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__ 
+    CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS 
 			<< ": Expcected a time input" << std::endl;
     return ERROR;
   }

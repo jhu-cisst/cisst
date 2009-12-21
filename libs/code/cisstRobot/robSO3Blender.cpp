@@ -107,7 +107,7 @@ robDomainAttribute robSO3Blender::IsDefinedFor( const robDOF& input ) const{
   
   // test the dof are Real numbers
   if( !input.IsTime() ){
-    CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__ << ": Expected time input" <<endl;
+    CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS << ": Expected time input" <<endl;
     return UNDEFINED;
   }
 
@@ -120,7 +120,7 @@ robError robSO3Blender::Evaluate( const robDOF& input, robDOF& output ){
 
   // test the dof are Real numbers
   if( !input.IsTime() ){
-    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ << ": Expected time input" <<endl;
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS << ": Expected time input" <<endl;
     return FAILURE;
   }
 

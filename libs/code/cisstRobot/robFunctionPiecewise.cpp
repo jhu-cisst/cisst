@@ -15,7 +15,7 @@ robDomainAttribute robFunctionPiecewise::IsDefinedFor(const robDOF& input)const{
 
   // check if there's any function
   if( functions.empty() ) { 
-    CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__ << ": No function defined" <<endl;
+    CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS << ": No function defined" <<endl;
     return UNDEFINED;
   }
   
@@ -31,7 +31,7 @@ robDomainAttribute robFunctionPiecewise::IsDefinedFor(const robDOF& input)const{
 // insert a function in the list
 robError robFunctionPiecewise::Insert( robFunction* function ){
   if(function == NULL) { 
-    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ << ": Function is NULL" << endl;
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS << ": Function is NULL" << endl;
     return FAILURE;
   }
 
@@ -43,7 +43,7 @@ robError robFunctionPiecewise::Evaluate( const robDOF& input, robDOF& output ){
 
   // check if there's any function
   if( functions.empty() ) {
-    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ << ": No function defined" << endl;
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS << ": No function defined" << endl;
     return FAILURE;
   }
 
@@ -76,7 +76,7 @@ robError robFunctionPiecewise::Evaluate( const robDOF& input, robDOF& output ){
 
     case OUTGOING:
       if( outgoing != NULL )
-	CMN_LOG_RUN_VERBOSE << __PRETTY_FUNCTION__ 
+	CMN_LOG_RUN_VERBOSE << CMN_LOG_DETAILS 
 			    << ": Overlapping outgoing functions" << endl;
       else
 	outgoing = *fn;                          // this is the outgoing function
@@ -104,20 +104,20 @@ robError robFunctionPiecewise::Evaluate( const robDOF& input, robDOF& output ){
   if( outgoing == NULL && defined != NULL && incoming != NULL ){ 
     if( output.IsReal() || output.IsTranslation() ){
       if( BlendRn( defined, incoming, input, output ) == FAILURE ){
-	CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+	CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
 			  << ": Failed to blend incomming Real functions" <<endl;
 	return FAILURE;
       }
     }
     else if( output.IsRotation() ){ 
       if( BlendSO3( defined, incoming, input, output ) == FAILURE ){
-	CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+	CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
 			  << ": Failed to blend incomming SO3 functions" << endl;
 	return FAILURE;
       }
     }
     else{ 
-      CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ << ": Unknown output" << endl;
+      CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS << ": Unknown output" << endl;
       return FAILURE;
     }
   }
@@ -126,20 +126,20 @@ robError robFunctionPiecewise::Evaluate( const robDOF& input, robDOF& output ){
   if( outgoing != NULL && defined != NULL && incoming == NULL ){ 
     if( output.IsReal() || output.IsTranslation() ){ 
       if( BlendRn( outgoing, defined, input, output ) == FAILURE ){
-	CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+	CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
 			  << ": Failed to blend outgoing Real functions" << endl;
 	return FAILURE;
       }
     }
     else if( output.IsRotation() ){ 
       if( BlendSO3( outgoing, defined, input, output ) == FAILURE ){
-	CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+	CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
 			  << ": Failed to blend outgoing SO3 functions" << endl;
 	return FAILURE;
       }
     }
     else{
-	CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+	CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
 			  << ": Unknown output" << endl;
       return FAILURE;
     }
@@ -148,7 +148,7 @@ robError robFunctionPiecewise::Evaluate( const robDOF& input, robDOF& output ){
   // this case is when we're cruising
   if( outgoing == NULL && defined != NULL && incoming == NULL ){
     if( defined->Evaluate( input, output ) == FAILURE ){
-	CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+	CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
 			  << ": Failed to evaluate defined function" << endl;
       return FAILURE;
     }
@@ -169,7 +169,7 @@ robError robFunctionPiecewise::BlendSO3( robFunction*  initial,
   
   // is the input time?
   if( !input.IsTime() ){
-    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ << ": Expected time input" << endl;
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS << ": Expected time input" << endl;
     return FAILURE;
   }
 
@@ -202,7 +202,7 @@ robError robFunctionPiecewise::BlendSO3( robFunction*  initial,
 
   // evaluate the blender
   if( blender->Evaluate( input, output ) == FAILURE ){
-    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
 		      << ": Failed to evaluate blender" << endl;
     return FAILURE;
   }
@@ -228,7 +228,7 @@ robError robFunctionPiecewise::PackSO3( const robDOF& input1,
     return SUCCESS;
   }
   else{
-    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ << ": Expected SO3 inputs" << endl;
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS << ": Expected SO3 inputs" << endl;
     return FAILURE;
   }
 }
@@ -239,7 +239,7 @@ robError robFunctionPiecewise::BlendRn( robFunction*  initial,
 					robDOF& output ){
   
   if( !input.IsTime() ){
-    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ << ": Expected time input" << endl;
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS << ": Expected time input" << endl;
     return FAILURE;
   }
 
@@ -260,13 +260,13 @@ robError robFunctionPiecewise::BlendRn( robFunction*  initial,
   
   robDOF blenderout;
   if( blender->Evaluate( input, blenderout ) == FAILURE ){
-    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
 		      << ": Failed to evaluate blender" << endl;
     return FAILURE;
   }
 
   if( PackRn( finalout, blenderout, output ) == FAILURE ){
-    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ << ": Failed to pack output" <<endl;
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS << ": Failed to pack output" <<endl;
     return FAILURE;
   }
 
@@ -287,7 +287,7 @@ robError robFunctionPiecewise::PackRn( const robDOF& input1,
     return SUCCESS;
   }
   else{
-    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ << ": Expected Real inputs" <<endl;
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS << ": Expected Real inputs" <<endl;
     return FAILURE;
   }
 }

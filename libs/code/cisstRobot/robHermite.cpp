@@ -11,7 +11,7 @@ robHermite::robHermite( Real x1, Real y1, Real y1d, Real y1dd,
 			Real x2, Real y2, Real y2d, Real y2dd ){
 
   if( x2 < x1 ){
-    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
 		      << ": t initial must be less than t final" << endl;
   }
 
@@ -50,7 +50,7 @@ robDomainAttribute robHermite::IsDefinedFor( const robDOF& input ) const{
   
   // test the dof are Real numbers
   if( !input.IsTime() ){
-    CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__ << ": Expected time input" <<endl;
+    CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS << ": Expected time input" <<endl;
     return UNDEFINED;
   }
 
@@ -62,7 +62,7 @@ robDomainAttribute robHermite::IsDefinedFor( const robDOF& input ) const{
 robError robHermite::Evaluate( const robDOF& input, robDOF& output ){  
   
   if( !input.IsTime() ){
-    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ << ": Expected time input" << endl;
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS << ": Expected time input" << endl;
     return FAILURE;
   }
 

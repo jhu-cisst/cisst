@@ -24,7 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 robConstantSE3::robConstantSE3(const vctFrame4x4<double,VCT_ROW_MAJOR>& Rt, 
 			       double x1, double x2){
   if( x2 < x1 ){
-    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
 		      << ": t initial must be less than t final" 
 		      << std::endl;
   }
@@ -40,7 +40,7 @@ robConstantSE3::IsDefinedFor( const robVariables& input ) const{
 
   // test the dof are double numbers
   if( !input.IsTimeSet() ){
-    CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__ 
+    CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS 
 			<< ": Expected time input" 
 			<< std::endl;
     return UNDEFINED;
@@ -64,7 +64,7 @@ robError robConstantSE3::Evaluate( const robVariables& input,
 				   robVariables& output ){
 
   if( !input.IsTimeSet() ){
-    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
 		      << ": Expected time input" 
 		      << std::endl;
     return ERROR;

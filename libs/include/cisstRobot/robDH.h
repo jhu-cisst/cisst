@@ -24,77 +24,58 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstVector/vctMatrixRotation3.h>
 #include <cisstVector/vctFrame4x4.h>
 
-#include <cisstRobot/robDefines.h>
+#include <cisstRobot/robJoint.h>
 #include <cisstRobot/robExport.h>
 
+//! The DH convention used by the link
+/**
+   For a kinematic chain, the standard DH defines the coordinate frame of a link   at its distal joint whereas the modified DH defines the coordinate frame at
+   its proximal joint. Modified DH have the advantage of being able to represent
+   open-loop, closed-loop and tree structure robots (Khalil ICRA'86).
+*/
+enum robDHConvention {  
+  robDHStandard,  
+  robDHModified  
+};
+
 //! DH parameters of a link
-class CISST_EXPORT robDH{
+/**
+   The DH class is used for kinematics parameters. It is derived from a joint
+   class to provide joint types and joint limits.
+*/
+class CISST_EXPORT robDH : public robJoint {
+
 private:
-  
-  bool modifiedDH;    // modified DH?
-  double sigma;       // prismatic joint=1.0, revolute=0.0
-  
-  double alpha, a;    // x components
-  double theta, d;    // z components
-  
-  double   offset;    // offset angle (revolute) or length (prismatic)
 
-  //! Set the DH parameters
-  /**
-     \param alpha
-     \param a
-     \param theta
-     \param d
-     \param offset Offset value of the joint. This offset is added to the joint 
-                   "0" value. 
-     \param type "REVOLUTE" or "PRISMATIC"
-     \param convention "MODIFIED" or "STANDARD"
-  */
-  void SetKinematicsParameters( double alpha, double a, 
-				double theta, double d, 
-				double offset,
-				const std::string& type,
-				const std::string& convention ); 
-
+  //! Determine if the link uses DH or modified DH convention
+  robDHConvention convention; // modified DH?
+  
+  //! DH parameters
+  double alpha, a;            // x components
+  double theta, d;            // z components
+  
 public:
   
   //! Default constructor
   robDH();
-
+  
   //! Default destructor
   ~robDH();
   
-  //! Is the link revolute
+  //! Return the DH convention
   /**
-     \return true if the joint is revolute
+     \return The DH convention: robDHStandard or robDHModified
   */
-  bool IsRevolute()  const;
-
-  //! Is the link prismatic
-  /**
-     \return true if the joint is prismatic
-  */
-  bool IsPrismatic() const;
-
-  //! Modified DH convention
-  /**
-     \return true if "modified DH" convention is used
-  */
-  bool IsModifiedDH() const;
+  robDHConvention DHConvention() const;
   
-  //! Sigma (prismatic/revolute)
+  //! Return the position of the next (distal) link coordinate frame
   /**
-     \return 1.0 for a revolute joint. 0.0 for a prismatic joint.
-  */
-  double Sigma() const;
-  
-  //! Return the position of the next link
-  /**
-     This method returns the \$XYZ\$ coordinates of the origin of the distal link
-     in the coordinate frame of the proximal link. "PStar" is not a good name
-     for this but the literature uses \$ \mathbf{p}^* \$ to denote this value.
+     This method returns the \$XYZ\$ coordinates of the origin of the distal 
+     link in the coordinate frame of the proximal link. "PStar" is not a good 
+     name for this but the literature uses \$ \mathbf{p}^* \$ to denote this 
+     value.
      \return The position of the next coordinate frame wrt to the current
-             frame
+              frame
   */
   vctFixedSizeVector<double,3> PStar() const;
 
@@ -102,28 +83,29 @@ public:
   /**
      Returns the position and orientation of the link with respect to the
      proximal link for a given joint vale.
-     \param q The joint value.
+     \param joint The joint associated with the link
      \return The position and orientation associated with the DH parameters
   */
-  vctFrame4x4<double,VCT_ROW_MAJOR> ForwardKinematics( double q ) const;
+  vctFrame4x4<double,VCT_ROW_MAJOR> ForwardKinematics( double ) const;
 
   //! Get the orientation of the link
   /**
      Returns the orientation of the link with respect to the proximal link for 
      a given joint vale.
-     \param q The joint value.
+     \param joint The joint associated with the link
      \return The orientation associated with the DH parameters
   */
-  vctMatrixRotation3<double,VCT_ROW_MAJOR> Orientation( double q ) const;
-
+  vctMatrixRotation3<double,VCT_ROW_MAJOR> Orientation( double ) const;
+  
   //! Read the parameters from an input stream
   /**
      Read the parameters from an input stream. The parameters are in the
-     following order: alpha, a, \f$\theta\f$-offset, d
+     following order: convention, \f$\alpha\f$, a, \f$\theta\f$, d, <joint>
      \param is The input stream
      \param dh The parameters
+     \return SUCCESS if no error occurred. ERROR otherwise.
   */
-  void Read(std::istream& is);
+  robError Read( std::istream& is );
   
   //! Write the parameters to an output stream
   /**
@@ -131,8 +113,9 @@ public:
      following order: alpha, a, theta, d
      \param os The output stream
      \param dh The parameters
+     \return SUCCESS if no error occurred. ERROR otherwise.
   */
-  void Write( std::ostream& os ) const; 
+  robError Write( std::ostream& os ) const; 
 
 };
 

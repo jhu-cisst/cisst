@@ -66,7 +66,8 @@ robMeshTriangular::~robMeshTriangular()
 
 robMeshTriangular& 
 robMeshTriangular::operator=( const robMeshTriangular& mesh ){
-  if( mesh != *this ){
+
+  //if( mesh != *this ){
 
     DeallocateMemory();
     AllocateMemory(mesh.nvertices, mesh.ntriangles);
@@ -92,15 +93,9 @@ robMeshTriangular::operator=( const robMeshTriangular& mesh ){
     memcpy( (void*)ny, (void*)mesh.ny, mesh.ntriangles*sizeof(double) );
     memcpy( (void*)nz, (void*)mesh.nz, mesh.ntriangles*sizeof(double) );
 
-  }
-  return *this;
-}
+    //}
 
-robMeshTriangular& 
-robMeshTriangular::operator=(const vctFrame4x4<double,VCT_ROW_MAJOR>& Rt){
-  if( Rt != *this )
-    robMeshBase::operator=(Rt);
-  return *this;
+    return *this;
 }
 
 void robMeshTriangular::AllocateMemory( size_t nv, size_t nt ){
@@ -143,7 +138,7 @@ void robMeshTriangular::DeallocateMemory(){
 
 void robMeshTriangular::Draw( ) const{
 
-  vctFrame4x4<double,VCT_ROW_MAJOR> Rtcopy = *this;
+  vctFrame4x4<double,VCT_ROW_MAJOR> Rtcopy = Rt;
 
   glMultMatrix( Rtcopy );                // push the transformation
 
@@ -175,7 +170,7 @@ robError robMeshTriangular::Load( const std::string& filename ){
 
   ifs.open(filename.data());
   if(!ifs){
-    std::cout << __PRETTY_FUNCTION__
+    std::cout << CMN_LOG_DETAILS
 	      << ": Couldn't open file " << filename
 	      << std::endl;
     return ERROR;

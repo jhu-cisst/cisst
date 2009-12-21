@@ -29,7 +29,7 @@ robError robFileSE3::Open(){
 
   ifs.open( filename.data() );
   if( !ifs ){
-    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
 		      << ": Could not open " << filename 
 		      << std::endl;
     return ERROR;

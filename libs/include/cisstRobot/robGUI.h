@@ -21,7 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <GL/glut.h>
 #include <vector>
 
-#include <cisstRobot/robMesh.h>
+#include <cisstRobot/robGeom.h>
 #include <cisstRobot/robManipulator.h>
 #include <cisstRobot/robExport.h>
 
@@ -42,7 +42,7 @@ private:
   // compute the camera XYZ coordinates
   vctFixedSizeVector<double,3> CameraPosition() const;
   
-  std::vector<const robMesh*> meshes; // the bodies to be rendered
+  std::vector<const robGeom*> geoms; // the geometries
   
 public:
   
@@ -53,10 +53,10 @@ public:
   robGUI( int argc, char** argv);
   
   //! Insert a body to display
-  static void Insert( const robMesh* mesh );
+  static void Insert( const robGeom* geom );
 
   //! 
-  void Register( const robMesh* mesh );
+  void Register( const robGeom* geom );
 
   //! Draw everything
   void Draw();

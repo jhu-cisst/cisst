@@ -8,7 +8,7 @@ using namespace cisstRobot;
 
 robSE3Constant::robSE3Constant(const SE3& Rt, Real x1, Real x2){
   if( x2 < x1 ){
-    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
 		      << ": t initial must be less than t final" << endl;
   }
 
@@ -22,7 +22,7 @@ robDomainAttribute robSE3Constant::IsDefinedFor( const robDOF& input ) const{
 
   // test the dof are Real numbers
   if( !input.IsTime() ){
-    CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__ << ": Expected time input" <<endl;
+    CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS << ": Expected time input" <<endl;
     return UNDEFINED;
   }
 
@@ -43,7 +43,7 @@ robDomainAttribute robSE3Constant::IsDefinedFor( const robDOF& input ) const{
 robError robSE3Constant::Evaluate( const robDOF& input, robDOF& output ){
 
   if( !input.IsTime() ){
-    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ << ": Expected time input" << endl;
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS << ": Expected time input" << endl;
     return FAILURE;
   }
 

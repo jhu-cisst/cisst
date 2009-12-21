@@ -41,7 +41,7 @@ robDomainAttribute robTrajectory::IsDefinedFor(const robVariables& input)const{
 // insert a function in the list
 robError robTrajectory::Insert( robFunction* function ){
   if(function == NULL) { 
-    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
 		      << ": Function is NULL" 
 		      << std::endl;
     return ERROR;
@@ -57,7 +57,7 @@ robError robTrajectory::Evaluate( const robVariables& input,
 
   // check if there's any function
   if( functions.empty() ) {
-    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
 		      << ": No function defined" 
 		      << std::endl;
     return ERROR;
@@ -122,7 +122,7 @@ robError robTrajectory::Evaluate( const robVariables& input,
     // Do we need to blend joint trajectories or translation?
     if( output.IsJointSet() || output.IsTranslationSet() ){
       if( BlendRn( defined, incoming, input, output ) == ERROR ){
-	CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+	CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
 			  << ": Failed to blend incomming Rn functions" 
 			  << std::endl;
 	return ERROR;
@@ -133,7 +133,7 @@ robError robTrajectory::Evaluate( const robVariables& input,
     // Do we need to blend rotations?
     else if( output.IsOrientationSet() ){ 
       if( BlendSO3( defined, incoming, input, output ) == ERROR ){
-	CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+	CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
 			  << ": Failed to blend incomming SO3 functions" 
 			  << std::endl;
 	return ERROR;
@@ -142,7 +142,7 @@ robError robTrajectory::Evaluate( const robVariables& input,
     
     // Error 
     else{ 
-      CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+      CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
 			<< ": Unknown output" 
 			<< std::endl;
       return ERROR;
@@ -155,7 +155,7 @@ robError robTrajectory::Evaluate( const robVariables& input,
     // Do we need to blend joint trajectories or translation?
     if( output.IsJointSet() || output.IsTranslationSet() ){ 
       if( BlendRn( outgoing, defined, input, output ) == ERROR ){
-	CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+	CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
 			  << ": Failed to blend outgoing Rn functions" 
 			  << std::endl;
 	return ERROR;
@@ -165,7 +165,7 @@ robError robTrajectory::Evaluate( const robVariables& input,
     // Do we need to blend rotations?
     else if( output.IsOrientationSet() ){ 
       if( BlendSO3( outgoing, defined, input, output ) == ERROR ){
-	CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+	CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
 			  << ": Failed to blend outgoing SO3 functions" 
 			  << std::endl;
 	return ERROR;
@@ -174,7 +174,7 @@ robError robTrajectory::Evaluate( const robVariables& input,
 
     // Error
     else{
-	CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+	CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
 			  << ": Unknown output" 
 			  << std::endl;
       return ERROR;
@@ -184,7 +184,7 @@ robError robTrajectory::Evaluate( const robVariables& input,
   // this case is when we're cruising
   if( outgoing == NULL && defined != NULL && incoming == NULL ){
     if( defined->Evaluate( input, output ) == ERROR ){
-	CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+	CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
 			  << ": Failed to evaluate defined function" 
 			  << std::endl;
       return ERROR;
@@ -206,7 +206,7 @@ robError robTrajectory::BlendSO3( robFunction* initial,
   
   // Ensure that the input to both function contains a time variable
   if( !input.IsTimeSet() ){
-    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
 		      << ": Expected time input" 
 		      << std::endl;
     return ERROR;
@@ -244,7 +244,7 @@ robError robTrajectory::BlendSO3( robFunction* initial,
 
   // evaluate the blender
   if( blender->Evaluate( input, output ) == ERROR ){
-    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
 		      << ": Failed to evaluate blender" 
 		      << std::endl;
     return ERROR;
@@ -271,7 +271,7 @@ robError robTrajectory::PackSO3( const robVariables& input1,
     return SUCCESS;
   }
   else{
-    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
 		      << ": Expected SO3 inputs" 
 		      << std::endl;
     return ERROR;
@@ -285,7 +285,7 @@ robError robTrajectory::BlendRn( robFunction*  initial,
 
   // Ensure that the input to both function contains a time variable
   if( !input.IsTimeSet() ){
-    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
 		      << ": Expected time input" 
 		      << std::endl;
     return ERROR;
@@ -313,7 +313,7 @@ robError robTrajectory::BlendRn( robFunction*  initial,
   // Evaluate the blender
   robVariables blenderout;
   if( blender->Evaluate( input, blenderout ) == ERROR ){
-    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
 		      << ": Failed to evaluate blender" 
 		      << std::endl;
     return ERROR;
@@ -321,7 +321,7 @@ robError robTrajectory::BlendRn( robFunction*  initial,
 
   // Pack the output of the blender in a vector
   if( PackRn( finalout, blenderout, output ) == ERROR ){
-    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
 		      << ": Failed to pack output" 
 		      << std::endl;
     return ERROR;
@@ -346,7 +346,7 @@ robError robTrajectory::PackRn( const robVariables& input1,
     return SUCCESS;
   }
   else{
-    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
 		      << ": Expected double inputs" 
 		      << std::endl;
     return ERROR;

@@ -158,13 +158,13 @@ void robDOF::SetPos( uint64_t dof, const Rn& x ){
 	    this->dof |= mask;                   // mark the position bit
 	  }
 	  else { 
-	    CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__ 
+	    CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS 
 				<< ": Invalid index" << endl;
 	  }
 
 	}
 	else {
-	  CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__ 
+	  CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS 
 			      << ": Source does not contain DOF" << endl;
 	}
       }
@@ -210,13 +210,13 @@ void robDOF::SetVel( uint64_t dof, const Rn& xd ){
 	    this->dof |= mask;                   // mark the position bit
 	  }
 	  else { 
-	    CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__ 
+	    CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS 
 				<< ": Invalid index" << endl;
 	  }
 	}
 
 	else {
-	  CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__ 
+	  CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS 
 			      << ": Source does not contain DOF" << endl;
 	}
       }
@@ -262,13 +262,13 @@ void robDOF::SetAcc( uint64_t dof, const Rn& xdd ){
 	    this->dof |= mask;                   // mark the position bit
 	  }
 	  else { 
-	    CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__ 
+	    CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS 
 				<< ": Invalid index" << endl;
 	  }
 
 	}
 	else {
-	  CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__ 
+	  CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS 
 			      << ": Source does not contain DOF" << endl;
 	}
       }

@@ -31,7 +31,7 @@ robBlenderRn::robBlenderRn(double ti,
 			   const vctDynamicVector<double>& yfdd){
 
   if( tf < ti ){
-    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
 		      << ": t initial must be less than t final" 
 		      << std::endl;
   }
@@ -39,7 +39,7 @@ robBlenderRn::robBlenderRn(double ti,
   if( yi.size() != yid.size() || yi.size() != yidd.size() ||
       yf.size() != yfd.size() || yf.size() != yfdd.size() || 
       yi.size() != yf.size() ){
-    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
 		      << ": Vectors must have the same length" 
 		      << std::endl;
   }
@@ -57,7 +57,7 @@ robDomainAttribute robBlenderRn::IsDefinedFor( const robVariables& input ) const
   
   // test the dof are double numbers
   if( !input.IsTimeSet() ){
-    CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__ 
+    CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS 
 			<< ": Expected time input" 
 			<< std::endl;
     return UNDEFINED;
@@ -80,7 +80,7 @@ robError robBlenderRn::Evaluate( const robVariables& input,
     robVariables blenderout;
 
     if( blenders[i]->Evaluate( input, blenderout ) == ERROR ){
-      CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ 
+      CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
 			<< ": Failed to evaluate a blender" 
 			<< std::endl;
       return ERROR;

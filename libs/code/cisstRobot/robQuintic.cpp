@@ -106,7 +106,7 @@ robDomainAttribute robQuintic::IsDefinedFor( const robVariables& input ) const{
   
   // test the dof are double numbers
   if( !input.IsTimeSet() ){
-    CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__ << ": Expected time input" <<std::endl;
+    CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS << ": Expected time input" <<std::endl;
     return UNDEFINED;
   }
 
@@ -125,7 +125,7 @@ robError robQuintic::Evaluate( const robVariables& input,
 
   // test the dof are double numbers
   //if( !input.IsTime() ){
-  //CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__ << ": Expected time input" <<std::endl;
+  //CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS << ": Expected time input" <<std::endl;
   //return UNDEFINED;
   //}
 

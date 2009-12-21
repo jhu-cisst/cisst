@@ -137,22 +137,22 @@ void robGUI::Draw(){
   DrawGrid(10,10);
   DrawXYZ();
 
-  for( size_t i=0; i<meshes.size(); i++ ){
-    meshes[i]->Draw();
+  for( size_t i=0; i<geoms.size(); i++ ){
+    geoms[i]->Draw();
   }
 
   glutSwapBuffers();
 }
 
 // insert abody
-void robGUI::Insert( const robMesh* mesh ) {
+void robGUI::Insert( const robGeom* geom ) {
   if( gui != NULL )
-    gui->Register( mesh ); 
+    gui->Register( geom ); 
 }
 
-void robGUI::Register( const robMesh* mesh ){  
-  if( mesh != NULL )
-    meshes.push_back( mesh );
+void robGUI::Register( const robGeom* geom ){  
+  if( geom != NULL )
+    geoms.push_back( geom );
 }
 
 robGUI::robGUI( int argc, char** argv){

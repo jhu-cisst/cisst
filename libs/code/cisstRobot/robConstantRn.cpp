@@ -23,7 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 
 robConstantRn::robConstantRn( double y, double x1, double x2 ){
   if( x2 < x1 ){
-    CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__ 
+    CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS 
 			<< ": t initial must be less than t final " << std::endl;
   }
   
@@ -52,7 +52,7 @@ robDomainAttribute robConstantRn::IsDefinedFor( const robVariables& input ) cons
     
   // test the dof are double numbers
   if( !input.IsTimeSet() ){
-    CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__ << ": Expected time input" <<std::endl;
+    CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS << ": Expected time input" <<std::endl;
     return UNDEFINED;
   }
   
@@ -78,7 +78,7 @@ robError robConstantRn::Evaluate( const robVariables& input, robVariables& outpu
 
   // test the dof are double numbers
   if( !input.IsTimeSet() ){
-    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ << ": Expected time input" <<std::endl;
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS << ": Expected time input" <<std::endl;
     return ERROR;
   }
   

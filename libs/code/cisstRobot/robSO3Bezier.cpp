@@ -24,7 +24,7 @@ robSO3Bezier::robSO3Bezier( Real t1,
 			    const R3& w2,
 			    Real wmax ) {
   if( t2 < t1 ){
-    CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__ 
+    CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS 
 			<< ": t initial must be less than t final" << endl;
   }
 
@@ -100,7 +100,7 @@ robSO3Bezier::robSO3Bezier( Real t1,
 robDomainAttribute robSO3Bezier::IsDefinedFor( const robDOF& input ) const{ 
   // test the dof are Real numbers
   if( !input.IsTime() ){
-    CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__ << ": Expected time input" <<endl;
+    CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS << ": Expected time input" <<endl;
     return UNDEFINED;
   }
 

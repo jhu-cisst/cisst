@@ -22,40 +22,57 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstRobot/robDH.h>
 #include <cisstRobot/robBody.h>
+#include <cisstRobot/robExport.h>
 
-class robLink : public robBody, public robDH {
+//! A robot link
+/**
+   robLink implements the methods necessary to model a robot link. The class is
+   derived from robBody to store the dynamics parameters of the body and the 
+   link's position and orientation. The link is also derived from robDH to
+   determine the link's position and orientation from joint values
+*/
+class CISST_EXPORT robLink : public robDH,
+			     public robBody {
 
 public:
-
+  
   //! Default constructor
-  robLink(){}
+  robLink();
   
   //! Default destructor
-  ~robLink(){}
+  ~robLink();
   
-  robLink& operator=( const vctFrame4x4<double,VCT_ROW_MAJOR>& Rt ) {
-    if( *this != Rt )
-      robBody::operator=(Rt);
-    return *this;
-  }
+  //! Assign a the position and orientation
+  /**
+     Overload the assignment operator to assign a rigid transformation to the
+     link. This essentially calls robBody::operator=0
+  */
+  robLink& operator=( const vctFrame4x4<double,VCT_ROW_MAJOR>& Rt );
 
   //! Read the DH and body parameters
-  robError Read( std::istream& is ){ 
-    robDH::Read( is );
-    if( robBody::Read( is ) == ERROR ){
-      CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__
-			<< ": Failed to read the body."
-			<< std::endl;
-      return ERROR;
-    }
-   return SUCCESS;
-  }
+  /**
+     First read the DH parameters and then the body's parameters. At the
+     end of the day, the parameters must be in the following order
+     DH convention (string): modified or standard
+     \f$ \alpha \f$ (1 double): DH parameter
+     \f$ a \f$ (1 double): DH parameter
+     \f$ \theta \f$ (1 double): DH parameter
+     \f$ d \f$ (1 double): DH parameter
+     joint type (string): revolute/hinge or prismatic/slider
+     joint mode (string): active or passive
+     joint offset position (1 double): value added to each joint value
+     joint minimum position (1 double): lower joint limit
+     joint maximum position (1 double): upper joint limit
+     joint maximum force/torque (1 double): absolute force/torque limit
+     mass (1 double): The mass of the body
+     center of mass (3 double): \f$ \begin{matrix}x&y&z\end{matrix} \f$
+     principal moment of inertia (3 double): \f$\begin{bmatrix}I_{xx}&I_{yy}&I_{zz}\end{matrix} \f$
+     body principal axis (9 double): 
+  */
+  robError Read( std::istream& is );
   
   //! Write the DH and body parameters
-  void Write( std::ostream& os ) const { 
-    robDH::Write( os );
-    robBody::Write( os ); 
-  }
+  robError Write( std::ostream& os ) const;
   
 };
 
