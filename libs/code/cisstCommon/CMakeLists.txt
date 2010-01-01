@@ -81,5 +81,16 @@ IF(CISST_HAS_XML)
   SET(HEADER_FILES ${HEADER_FILES} cmnXMLPath.h)
 ENDIF(CISST_HAS_XML)
 
+# Qt widgets
+if(CISST_HAS_QT)
+  include_directories(${CMAKE_CURRENT_BINARY_DIR})
+  set(SOURCE_FILES
+      ${SOURCE_FILES}
+      cmnLoggerQWidget.cpp)
+  set(HEADER_FILES
+      ${HEADER_FILES}
+      cmnLoggerQWidget.h)
+endif(CISST_HAS_QT)
+
 CISST_ADD_LIBRARY_TO_PROJECT(cisstLibs)
 
