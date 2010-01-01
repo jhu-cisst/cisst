@@ -65,6 +65,7 @@ SET(HEADER_FILES
     cmnPortability.h
     cmnPrintf.h
     cmnRandomSequence.h
+    cmnRequiresDeepCopy.h
     cmnSerializer.h
     cmnStreamRawParser.h
     cmnStrings.h

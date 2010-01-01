@@ -20,6 +20,7 @@ SET(SOURCE_FILES
     cmnObjectRegisterTest.cpp
     cmnPathTest.cpp
     cmnPortabilityTest.cpp
+    cmnRequiresDeepCopyTest.cpp
     cmnTypeTraitsTest.cpp
     )
 
@@ -30,6 +31,7 @@ SET(HEADER_FILES
     cmnPathTest.h
     cmnPortabilityTest.h
     cmnPortabilityTestCMake.h.in
+    cmnRequiresDeepCopyTest.h
     cmnTypeTraitsTest.h
     )
 
