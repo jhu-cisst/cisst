@@ -53,7 +53,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaSerialPort.h>
 #include <cisstMultiTask/mtsTaskPeriodic.h>
 #include <cisstParameterTypes/prmPositionCartesianGet.h>
-#include <cisstParameterTypes/prmString.h>
 #include <cisstDevices/devExport.h>  // always include last
 
 
@@ -152,7 +151,7 @@ class CISST_EXPORT devNDISerial : public mtsTaskPeriodic
 
     void ToggleTracking(const mtsBool & track);
     void Track(void);
-    void CalibratePivot(const prmString & toolName);
+    void CalibratePivot(const mtsStdString & toolName);
 
     osaSerialPort SerialPort;
     char SerialBuffer[MAX_BUFFER_SIZE];

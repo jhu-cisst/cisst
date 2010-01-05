@@ -85,18 +85,18 @@ public:
         default constructor. */
     inline mtsGenericObjectProxy(void)
     {}
-    
+
     /*! Copy constructor. */
     inline mtsGenericObjectProxy(const ThisType & other) : 
         BaseType(other), Data(other.Data)
     {}
-    
+
     /*! Conversion constructor.  This allows to construct the proxy
         object using an object of the actual type. */
     inline mtsGenericObjectProxy(const value_type & data):
         Data(data)
     {}
-    
+
     inline ~mtsGenericObjectProxy(void) {}
 
     /*! Conversion assignment.  This allows to assign from an object
@@ -178,6 +178,7 @@ CMN_DECLARE_SERVICES_INSTANTIATION(mtsUChar);
 typedef mtsGenericObjectProxy<bool> mtsBool;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsBool);
 
+typedef mtsGenericObjectProxy<std::string> mtsStdString;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsStdString);
 
 #endif
-

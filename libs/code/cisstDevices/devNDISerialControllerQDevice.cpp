@@ -19,7 +19,6 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstMultiTask/mtsRequiredInterface.h>
-#include <cisstParameterTypes/prmString.h>
 #include <cisstDevices/devNDISerialControllerQDevice.h>
 
 CMN_IMPLEMENT_SERVICES(devNDISerialControllerQDevice);
@@ -80,8 +79,7 @@ void devNDISerialControllerQDevice::NDIInitializeQSlot(void)
 
 void devNDISerialControllerQDevice::NDICalibratePivotQSlot(void)
 {
-    prmString toolName(512);
-    toolName.Set(ControllerWidget.BoxTools->currentText().toStdString());
+    mtsStdString toolName = ControllerWidget.BoxTools->currentText().toStdString();
     NDI.CalibratePivot(toolName);
     NDI.Beep(mtsInt(2));
 }

@@ -43,7 +43,7 @@ http://www.cisst.org/cisst/license.txt.
  *  TODO: isTruncated needs to be reviewed 
  *
  */
-class CISST_EXPORT prmString : public mtsGenericObject
+class CISST_EXPORT CISST_DEPRECATED prmString : public mtsGenericObject
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, 5);
 

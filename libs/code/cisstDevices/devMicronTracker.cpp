@@ -43,9 +43,9 @@ devMicronTracker::devMicronTracker(const std::string & taskName, const double pe
         StateTable.AddData(CameraFrameLeft, "CameraFrameLeft");
         StateTable.AddData(CameraFrameRight, "CameraFrameRight");
 
-        provided->AddCommandWrite(&devMicronTracker::CalibratePivot, this, "CalibratePivot", prmString(512));
-        provided->AddCommandWrite(&devMicronTracker::ToggleCapturing, this, "ToggleCapturing");
-        provided->AddCommandWrite(&devMicronTracker::ToggleTracking, this, "ToggleTracking");
+        provided->AddCommandWrite(&devMicronTracker::CalibratePivot, this, "CalibratePivot", mtsStdString());
+        provided->AddCommandWrite(&devMicronTracker::ToggleCapturing, this, "ToggleCapturing", mtsBool());
+        provided->AddCommandWrite(&devMicronTracker::ToggleTracking, this, "ToggleTracking", mtsBool());
         provided->AddCommandReadState(StateTable, CameraFrameLeft, "GetCameraFrameLeft");
         provided->AddCommandReadState(StateTable, CameraFrameRight, "GetCameraFrameRight");
     }
@@ -291,12 +291,12 @@ void devMicronTracker::Track(void)
 }
 
 
-void devMicronTracker::CalibratePivot(const prmString & toolName)
+void devMicronTracker::CalibratePivot(const mtsStdString & toolName)
 {
     const unsigned int numPoints = 500;
 
-    CMN_LOG_CLASS_RUN_WARNING << "CalibratePivot: calibrating " << toolName.GetString() << std::endl;
-    Tool * tool = Tools.GetItem(toolName.GetString());
+    CMN_LOG_CLASS_RUN_WARNING << "CalibratePivot: calibrating " << toolName.Data << std::endl;
+    Tool * tool = Tools.GetItem(toolName.Data);
     tool->TooltipOffset.SetAll(0.0);
 
     CMN_LOG_CLASS_RUN_WARNING << "CalibratePivot: starting calibration in 5 seconds" << std::endl;

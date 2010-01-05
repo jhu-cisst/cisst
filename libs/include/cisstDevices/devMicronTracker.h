@@ -42,7 +42,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstVector/vctFixedSizeVectorTypes.h>
 #include <cisstMultiTask/mtsTaskPeriodic.h>
 #include <cisstParameterTypes/prmPositionCartesianGet.h>
-#include <cisstParameterTypes/prmString.h>
 #include <cisstDevices/devExport.h>  // always include last
 
 #include <MTC.h>
@@ -90,7 +89,7 @@ class CISST_EXPORT devMicronTracker : public mtsTaskPeriodic
     void ToggleCapturing(const mtsBool & toggle);
     void ToggleTracking(const mtsBool & toggle);
     void Track(void);
-    void CalibratePivot(const prmString & toolName);
+    void CalibratePivot(const mtsStdString & toolName);
 
     typedef cmnNamedMap<Tool> ToolsType;
     ToolsType Tools;

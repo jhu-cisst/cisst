@@ -34,12 +34,12 @@ devNDISerial::devNDISerial(const std::string & taskName, const double period) :
 {
     mtsProvidedInterface * provided = AddProvidedInterface("ProvidesNDISerialController");
     if (provided) {
-        provided->AddCommandWrite(&devNDISerial::Beep, this, "Beep");
+        provided->AddCommandWrite(&devNDISerial::Beep, this, "Beep", mtsInt());
         provided->AddCommandVoid(&devNDISerial::PortHandlesInitialize, this, "PortHandlesInitialize");
         provided->AddCommandVoid(&devNDISerial::PortHandlesQuery, this, "PortHandlesQuery");
         provided->AddCommandVoid(&devNDISerial::PortHandlesEnable, this, "PortHandlesEnable");
-        provided->AddCommandWrite(&devNDISerial::CalibratePivot, this, "CalibratePivot", prmString(512));
-        provided->AddCommandWrite(&devNDISerial::ToggleTracking, this, "ToggleTracking");
+        provided->AddCommandWrite(&devNDISerial::CalibratePivot, this, "CalibratePivot", mtsStdString());
+        provided->AddCommandWrite(&devNDISerial::ToggleTracking, this, "ToggleTracking", mtsBool());
     }
 
     memset(SerialBuffer, 0, MAX_BUFFER_SIZE);
@@ -764,12 +764,12 @@ void devNDISerial::Track(void)
 }
 
 
-void devNDISerial::CalibratePivot(const prmString & toolName)
+void devNDISerial::CalibratePivot(const mtsStdString & toolName)
 {
     const unsigned int numPoints = 500;
 
-    CMN_LOG_CLASS_RUN_WARNING << "CalibratePivot: calibrating " << toolName.GetString() << std::endl;
-    Tool * tool = Tools.GetItem(toolName.GetString());
+    CMN_LOG_CLASS_RUN_WARNING << "CalibratePivot: calibrating " << toolName.Data << std::endl;
+    Tool * tool = Tools.GetItem(toolName.Data);
     tool->TooltipOffset.SetAll(0.0);
 
     CommandSend("TSTART 80");

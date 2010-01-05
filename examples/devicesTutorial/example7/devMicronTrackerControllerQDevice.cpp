@@ -19,7 +19,6 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstMultiTask/mtsRequiredInterface.h>
-#include <cisstParameterTypes/prmString.h>
 
 #include "devMicronTrackerControllerQDevice.h"
 
@@ -116,8 +115,7 @@ void devMicronTrackerControllerQDevice::UpdateFrameRightQSlot(void)
 
 void devMicronTrackerControllerQDevice::MTCCalibratePivotQSlot(void)
 {
-    prmString toolName(512);
-    toolName.Set(ControllerWidget.BoxTools->currentText().toStdString());
+    mtsStdString toolName = ControllerWidget.BoxTools->currentText().toStdString();
     MTC.CalibratePivot(toolName);
 }
 
