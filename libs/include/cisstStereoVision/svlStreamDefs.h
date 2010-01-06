@@ -144,6 +144,16 @@ public:
     virtual int CopyOf(const svlSample & sample) = 0;
     virtual bool IsImage();
     virtual bool IsInitialized();
+    
+    /*! Serialize the content of the object without any extra
+        information, i.e. no class type nor format version.  The
+        "receiver" is supposed to already know what to expect. */ 
+    virtual void SerializeRaw(std::ostream & outputStream) const = 0;
+
+    /*! De-serialize the content of the object without any extra
+      information, i.e. no class type nor format version. */
+    virtual void DeSerializeRaw(std::istream & inputStream) = 0;
+
     void SetTimestamp(double ts);
     double GetTimestamp() const;
     void SetModified(bool modified);
@@ -179,6 +189,15 @@ public:
     virtual const unsigned char* GetUCharPointer(const unsigned int videochannel = 0) const = 0;
     virtual unsigned char* GetUCharPointer(const unsigned int videochannel, const unsigned int x, const unsigned int y) = 0;
     virtual const unsigned char* GetUCharPointer(const unsigned int videochannel, const unsigned int x, const unsigned int y) const = 0;
+    
+    /*! Serialize the content of the object without any extra
+        information, i.e. no class type nor format version.  The
+        "receiver" is supposed to already know what to expect. */ 
+    virtual void SerializeRaw(std::ostream & outputStream) const = 0;
+
+    /*! De-serialize the content of the object without any extra
+      information, i.e. no class type nor format version. */
+    virtual void DeSerializeRaw(std::istream & inputStream) = 0 ;
 };
 
 
@@ -441,6 +460,60 @@ public:
         return 0;
     }
 
+    const vctDynamicMatrixRef<_ValueType> & DynamicMatrixRef(const unsigned int videochannel = 0) const
+    {
+        if (videochannel < _VideoChannels && Image[videochannel]) {
+            return *Image[videochannel];
+        }
+        else {
+             vctDynamicMatrixRef<_ValueType> temp;  //this is an empty (invalid) reference
+             return temp;
+        }
+    } 
+
+    
+    /*! Serialize the content of the object without any extra
+        information, i.e. no class type nor format version.  The
+        "receiver" is supposed to already know what to expect. */ 
+    virtual void SerializeRaw(std::ostream & outputStream) const{
+
+        //cmnSerializeRaw(outputStream, GetType );        //probably not required
+        //cmnSerializeRaw(outputStream, GetWidth());
+        //cmnSerializeRaw(outputStream, GetHeight());
+        //cmnSerializeRaw(outputStream, Timestamp());
+        //cmnSerializeRaw(outputStream, GetVideoChannels());
+        //cmnSerializeSizeRaw(outputStream,GetDataSize());
+        ////outputStream.write(static_cast<char*>(GetPointer(0)),GetDataSize());  
+        //outputStream.write(reinterpret_cast<const char *> (GetPointer(0)),GetDataSize());  
+    }
+
+    /*! De-serialize the content of the object without any extra
+      information, i.e. no class type nor format version. */
+    virtual void DeSerializeRaw(std::istream & inputStream){
+
+        ////label?
+        //int type=-1;
+        //cmnDeSerializeRaw(inputStream, type);         
+        //if (type != GetType()) {
+        //    CMN_LOG_CLASS_RUN_ERROR << "Deserialized sample type mismatch " << std::endl;
+        //    return ;
+        //}
+
+        //int w;
+        //int h;
+        //cmnDeSerializeRaw(inputStream, w);
+        //cmnDeSerializeRaw(inputStream, h);
+        //cmnDeSerializeRaw(inputStream, TimestampMember);
+        //SetTimestamp(TimestampMember);
+        //unsigned int ch;
+        //cmnDeSerializeRaw(inputStream, ch);
+        //size_t s;
+        //cmnDeSerializeSizeRaw(inputStream,s);
+        //SetSize(ch,w,h);
+        //inputStream.read(reinterpret_cast<char*>(GetPointer(0)),s);  
+
+    }
+
 private:
     bool OwnData;
     vctDynamicMatrix<_ValueType>* Image[_VideoChannels];
@@ -486,6 +559,17 @@ public:
     const unsigned char* GetUCharPointer() const;
     double* GetPointer();
     unsigned int GetDataSize() const;
+        /*! Serialize the content of the object without any extra
+        information, i.e. no class type nor format version.  The
+        "receiver" is supposed to already know what to expect. */ 
+    virtual void SerializeRaw(std::ostream & outputStream) const{
+    }
+
+    /*! De-serialize the content of the object without any extra
+      information, i.e. no class type nor format version. */
+    virtual void DeSerializeRaw(std::istream & inputStream){
+    }
+
 
     svlRigidXform frame4x4;
 };
@@ -507,6 +591,22 @@ public:
     const unsigned char* GetUCharPointer() const;
     double* GetPointer();
     unsigned int GetDataSize() const;
+
+        /*! Serialize the content of the object without any extra
+        information, i.e. no class type nor format version.  The
+        "receiver" is supposed to already know what to expect. */ 
+    virtual void SerializeRaw(std::ostream & outputStream) const{
+
+
+    }
+
+    /*! De-serialize the content of the object without any extra
+      information, i.e. no class type nor format version. */
+    virtual void DeSerializeRaw(std::istream & inputStream){
+
+
+
+    }
 
     svlPointCloud points;
 };
