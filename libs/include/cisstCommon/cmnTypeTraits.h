@@ -745,5 +745,49 @@ inline bool cmnTypeTraits<bool>::MinNegativeValue()
 
 #endif // DOXYGEN
 
+/*! Check whether class T is derived from class Base
+    Examples:
+       cmnIsDerivedFrom<double, cmnGenericObject>::YES is false
+       cmnIsDerivedFrom<cmnDouble, cmnGenericObject>::YES is true
+*/
+template <typename T, typename Base>
+class cmnIsDerivedFrom {
+private:
+    typedef char One;
+    typedef struct { char a[2]; } Two;
+    static One Test(Base *obj);
+    static One Test(const Base *obj);
+    static Two Test(...);
+public:
+    enum { YES = sizeof(Test(static_cast<T*>(0))) == sizeof(One)};
+    enum { NO = !YES};
+};
+
+/*! Check whether class T is derived from class templated class Base.
+    This is especially convenient when the template argument to the Base class
+    is not known.
+   
+    Examples:
+       cmnIsDerivedFromTemplated<double, cmnGenericObjectProxy>::YES is false
+       cmnIsDerivedFromTemplated<cmnDouble, cmnGenericObjectProxy>::YES is true
+
+    Note that if you know the template argument to the Base class, you can
+    instead use:
+       cmnIsDerivedFrom<cmnDouble, cmnGenericObjectProxy<double> >::YES
+       
+*/
+template <typename T, template <typename> class Base>
+class cmnIsDerivedFromTemplated {
+private:
+    typedef char One;
+    typedef struct { char a[2]; } Two;
+    template <typename C> static One Test(Base<C> *obj);
+    template <typename C> static One Test(const Base<C> *obj);
+    static Two Test(...);
+public:
+    enum { YES = sizeof(Test(static_cast<T*>(0))) == sizeof(One)};
+    enum { NO = !YES};
+};
+
 #endif // _cmnTypeTraits_h
 
