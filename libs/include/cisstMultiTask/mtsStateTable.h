@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):  Ankur Kapoor, Min Yang Jung
+  Author(s):  Ankur Kapoor, Min Yang Jung, Peter Kazanzides
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -28,7 +28,6 @@ http://www.cisst.org/cisst/license.txt.
 #define _mtsStateTable_h
 
 #include <cisstMultiTask/mtsForwardDeclarations.h>
-#include <cisstMultiTask/mtsGenericObject.h>
 #include <cisstMultiTask/mtsGenericObjectProxy.h>
 #include <cisstMultiTask/mtsStateArrayBase.h>
 #include <cisstMultiTask/mtsStateArray.h>
@@ -105,30 +104,49 @@ public:
     
     template <class _elementType>
     class Accessor : public AccessorBase {
-        typedef _elementType value_type;
-        typedef typename mtsStateTable::Accessor<value_type> ThisType;
+        typedef typename mtsGenericTypes<_elementType>::FinalBaseType value_base_type;
+        typedef typename mtsGenericTypes<_elementType>::FinalType value_type;
+        typedef typename mtsGenericTypes<_elementType>::FinalRefType value_ref_type;
+        typedef typename mtsStateTable::Accessor<_elementType> ThisType;
         const mtsStateArray<value_type> &History;
-        value_type * Current;
+        value_ref_type * Current;
 
     public:
         Accessor(const mtsStateTable & table, mtsStateDataId id, 
-                 const mtsStateArray<value_type> * history, value_type * data):
+                 const mtsStateArray<value_type> * history, value_ref_type * data):
             AccessorBase(table, id), History(*history), Current(data) {}
 
         void ToStream(std::ostream & outputStream, const mtsStateIndex & when) const {
             History.Element(when.Index()).ToStream(outputStream);
         }
         
-        bool Get(const mtsStateIndex & when, value_type & data) const { 
-            data = History.Element(when.Index());
+        bool Get(const mtsStateIndex & when, value_base_type & data) const { 
+            // PK: This could be changed to an assignment (see below), once operator overloading is fixed
+            // data = History.Element(when.Index());
+            mtsGenericTypes<_elementType>::Copy(History.Element(when.Index()), data);
             return Table.ValidateReadIndex(when);
         }
 
-        bool GetLatest(value_type & data) const {
+        bool Get(const mtsStateIndex & when, mtsGenericObject & data) const {
+            value_type* pdata = dynamic_cast<value_type*>(&data);
+            if (pdata) {
+                return Get(when, *pdata);
+            }
+            value_ref_type* pref = dynamic_cast<value_ref_type*>(&data);
+            if (pref) {
+                return Get(when, *pref);
+            }
+            return false;
+        }
+
+        bool GetLatest(value_base_type & data) const {
             return Get(Table.GetIndexReader(), data);
         }
-        
-        void SetCurrent(const value_type & data) {
+        bool GetLatest(mtsGenericObject & data) const {
+            return Get(Table.GetIndexReader(), data);
+        }
+
+        void SetCurrent(const value_base_type & data) {
             *Current = data;
         }
         
@@ -176,7 +194,7 @@ public:
       advance.
       */
     std::vector<mtsGenericObject *> StateVectorElements;
-    
+
 	/*! The columns entries can be accessed by name. This vector
 	  stores the names corresponding to the columns. */
 	std::vector<std::string> StateVectorDataNames;
@@ -273,7 +291,8 @@ public:
         \returns Pointer to accessor class (0 if not found)
         \note This method is overloaded to accept the element pointer or string name.
     */
-    mtsStateTable::AccessorBase *GetAccessor(const mtsGenericObject &element) const;
+    template<class _elementType>
+    mtsStateTable::AccessorBase *GetAccessor(const _elementType &element) const;
 
     /*! Return pointer to accessor functions for the state data element.
         \param name Name of state data element
@@ -363,19 +382,31 @@ inline std::string mtsObjectName(const mtsStateTable::Accessor<_elementType> * C
     return "mtsStateTable::Accessor";
 }
 
-
 template <class _elementType>
 mtsStateDataId mtsStateTable::NewElement(const std::string & name, _elementType * element) {
-    mtsStateArray<_elementType> * elementHistory =
-        new mtsStateArray<_elementType>(*element,
-                                        HistoryLength);
+    typedef typename mtsGenericTypes<_elementType>::FinalType FinalType;
+    typedef typename mtsGenericTypes<_elementType>::FinalRefType FinalRefType;
+    mtsStateArray<FinalType> * elementHistory =
+        new mtsStateArray<FinalType>(*element, HistoryLength);
     StateVector.push_back(elementHistory);
     NumberStateData = StateVector.size();
-    StateVectorElements.push_back(element); 
+    FinalRefType *pdata = mtsGenericTypes<_elementType>::ConditionalWrap(*element);
+    StateVectorElements.push_back(pdata); 
+
     StateVectorDataNames.push_back(name);
-    AccessorBase * accessor = new Accessor<_elementType>(*this, NumberStateData-1, elementHistory, element);
+    AccessorBase * accessor = new Accessor<_elementType>(*this, NumberStateData-1, elementHistory, pdata);
     StateVectorAccessors.push_back(accessor);
     return NumberStateData-1;
+}
+
+template <class _elementType>
+mtsStateTable::AccessorBase *mtsStateTable::GetAccessor(const _elementType &element) const
+{
+    for (unsigned int i = 0; i < StateVectorElements.size(); i++) {
+        if (mtsGenericTypes<_elementType>::IsEqual(element, *StateVectorElements[i]))
+            return StateVectorAccessors[i];
+    }
+    return 0;
 }
 
 #endif // _mtsStateTable_h

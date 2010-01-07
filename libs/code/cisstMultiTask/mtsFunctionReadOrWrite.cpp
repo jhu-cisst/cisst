@@ -54,12 +54,14 @@ bool mtsFunctionReadOrWrite<_argumentType>::AddToRequiredInterface(mtsRequiredIn
 }
 
 
+#if 0
+// See also templated member function in class header.
 template <class _argumentType>
 mtsCommandBase::ReturnType mtsFunctionReadOrWrite<_argumentType>::operator()(ArgumentType& argument) const
 {
     return Command ? Command->Execute(argument) : mtsCommandBase::NO_INTERFACE;
 }
-
+#endif
 
 template <class _argumentType>
 const mtsGenericObject * mtsFunctionReadOrWrite<_argumentType>::GetArgumentPrototype(void) const

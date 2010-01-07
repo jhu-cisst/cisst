@@ -29,6 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnLogger.h>
 #include <cisstCommon/cmnClassRegister.h>
+#include <cisstMultiTask/mtsGenericObjectProxy.h>
 #include <cisstMultiTask/mtsStateArrayBase.h>
 #include <cisstMultiTask/mtsHistory.h>
 
@@ -43,6 +44,7 @@ http://www.cisst.org/cisst/license.txt.
   data used by the particular state element. It is assumed that
   _elementType is derived from mtsGenericObject.
  */
+
 template <class _elementType>
 class mtsStateArray :public mtsStateArrayBase
 {
@@ -75,11 +77,12 @@ public:
     const value_type & Element(index_type index) const { return Data[index]; }
     value_type & Element(index_type index) { return Data[index]; }
 
-	/*! Overloaded [] operator. Returns data at index (of type mtsGenericObject). */
+	/*! Overloaded [] operator. Returns data at index (of type mtsGenericObject). 
+        Currently used for data collection (mtsCollectorState). */
 	inline mtsGenericObject & operator[](index_type index){ return Data[index]; }
 	inline const mtsGenericObject & operator[](index_type index) const { return Data[index]; }
-    
-	/* Create the array of data. */
+
+	/* Create the array of data. This is currently unused. */
     inline mtsStateArrayBase * Create(const mtsGenericObject * objectExample,
                                       size_type size) {
         const value_type * typedObjectExample = dynamic_cast<const value_type *>(objectExample);
@@ -127,43 +130,34 @@ public:
 #include <iostream>
 
 template <class _elementType>
-bool mtsStateArray<_elementType>::Set(index_type index,  const mtsGenericObject & object) {
-	//do some typechecking?? should this be an ASSERT?
-	//TODO: check if throw works
-	if (typeid(object) != typeid(_elementType)) {
-		CMN_LOG_RUN_ERROR << "Class mtsStateArray: Set(): The passed object is not of the same kind as array. Expected: "
-                          << typeid(_elementType).name()
-                          << " Got: " << typeid(object).name() << std::endl;
-		return false;
-	}
-	const _elementType* pdata = dynamic_cast<const _elementType*>(&object);
-	//const _elementType* pdata = &object;
-	if (pdata) {
+bool mtsStateArray<_elementType>::Set(index_type index,  const mtsGenericObject & object)
+{
+    // Case 1: The state table entry was derived from mtsGenericObject
+    const _elementType *pdata = dynamic_cast<const _elementType *>(&object);
+    if (pdata) {
 		Data[index] = *pdata;
 		return true;
-	} else {
-		CMN_LOG_RUN_ERROR << "Class mtsStateArray: Set(): Found NULL element in state data array" << std::endl;
+    }
+    // Case 2: The state table entry was not derived from mtsGenericObject, so it was wrapped
+    typedef typename mtsGenericTypesUnwrap<_elementType>::RefType RefType;
+    const RefType* pref = dynamic_cast<const RefType*>(&object);
+	if (pref) {
+		Data[index] = *pref;
+		return true;
 	}
+    CMN_LOG_RUN_ERROR << "mtsStateArray::Set -- type mismatch, expected " << typeid(_elementType).name() << std::endl;
 	return false;
 }
 
+// PK: obsolete: use accessor class instead
 template <class _elementType>
 bool mtsStateArray<_elementType>::Get(index_type index, mtsGenericObject & object) const {
-	//do some typechecking?? should this be an ASSERT?
-	if (typeid(object) != typeid(_elementType)) {
-		CMN_LOG_RUN_ERROR << "Class mtsStateArray: Get(): The passed object is not of the same kind as array. Expected: "
-                          << typeid(_elementType).name() 
-                          << " Got: " << typeid(object).name() << std::endl;
-		return false;
-	}
 	_elementType* pdata = dynamic_cast<_elementType*>(&object);
-	//_elementType* pdata = &object;
 	if (pdata) {
 		*pdata = Data[index];
 		return true;
-	} else {
-		CMN_LOG_RUN_ERROR << "Class mtsStateArray: Get(): Found NULL element in state data array" << std::endl;
-	}
+    }
+    CMN_LOG_RUN_ERROR << "mtsStateArray::Get -- type mismatch, expected " << typeid(_elementType).name() << std::endl;
 	return false;
 }
 
@@ -192,7 +186,6 @@ bool mtsStateArray<_elementType>::GetHistory(index_type indexStart, index_type i
     }
 	return true;
 }
-
 
 #endif // _mtsStateArray_h
 

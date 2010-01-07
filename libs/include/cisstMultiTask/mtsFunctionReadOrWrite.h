@@ -6,7 +6,7 @@
 
   Author(s):  Peter Kazanzides, Anton Deguet
 
-  (C) Copyright 2007-2008 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2010 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -30,6 +30,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsFunctionBase.h>
 #include <cisstMultiTask/mtsCommandReadOrWriteBase.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
+#include <cisstMultiTask/mtsGenericObjectProxy.h>
 
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
@@ -38,7 +39,7 @@ template <class _argumentType>
 class CISST_EXPORT mtsFunctionReadOrWrite: public mtsFunctionBase {
 protected:
     typedef _argumentType ArgumentType;
-    typedef mtsCommandReadOrWriteBase<ArgumentType> CommandType;
+    typedef mtsCommandReadOrWriteBase<_argumentType> CommandType;
     CommandType * Command;
 
 public:
@@ -91,7 +92,25 @@ public:
 
     /*! Overloaded operator to enable more intuitive syntax
       e.g., Command(argument) instead of Command->Execute(argument). */
-    mtsCommandBase::ReturnType operator()(ArgumentType& argument) const;
+#if (CISST_OS == CISST_WINDOWS)
+    // HACK for Windows
+	mtsCommandBase::ReturnType operator()(mtsGenericObject& argument) const
+    { return Command ? Command->Execute(argument) : mtsCommandBase::NO_INTERFACE; }
+	//mtsCommandBase::ReturnType operator()(const mtsGenericObject& argument) const
+    //{ return Command ? Command->Execute(argument) : mtsCommandBase::NO_INTERFACE; }
+#else    
+    mtsCommandBase::ReturnType operator()(ArgumentType& argument) const
+    { return Command ? Command->Execute(argument) : mtsCommandBase::NO_INTERFACE; }
+#endif
+    
+	/*! Overloaded operator that accepts different argument types. */
+    template <class _userType>
+    mtsCommandBase::ReturnType operator()(_userType& argument) const {
+        mtsCommandBase::ReturnType ret = Command ?
+            static_cast<mtsCommandBase::ReturnType>(mtsGenericTypes<_userType>::CallAfterConditionalWrap(Command, argument))
+          : mtsCommandBase::NO_INTERFACE;
+        return ret;
+    }
 
     /*! Access to underlying command object. */
     mtsCommandReadOrWriteBase<ArgumentType> * GetCommand(void) const { return Command; }

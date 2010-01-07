@@ -60,8 +60,8 @@ public:
 
 	/*! Overloaded subscript operator. */
 	virtual const mtsGenericObject & operator[](index_type index) const = 0;
-    
-	/*! Create the array of data. */
+
+	/*! Create the array of data.  This is currently unused. */
 	virtual mtsStateArrayBase * Create(const mtsGenericObject * objectExample, size_type size) = 0;
 
 	/*! Copy data from one index to another. */
