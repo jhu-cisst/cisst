@@ -481,13 +481,14 @@ template <class _elementType>
 mtsCommandWriteBase * mtsTaskInterface::AddCommandWriteState(const mtsStateTable & stateTable,
                                                              const _elementType & stateData, const std::string & commandName)
 {
+    typedef typename mtsGenericTypes<_elementType>::FinalBaseType FinalBaseType;
     typedef typename mtsGenericTypes<_elementType>::FinalType FinalType;
-    typedef typename mtsStateTable::Accessor<FinalType> AccessorType;
+    typedef typename mtsStateTable::Accessor<_elementType> AccessorType;
     mtsCommandWriteBase * writeCommand = 0;
     AccessorType * stateAccessor = dynamic_cast<AccessorType *>(stateTable.GetAccessor(stateData));
     if (stateAccessor) {
-        writeCommand = AddCommandWrite<AccessorType, FinalType>
-            (&AccessorType::SetCurrent, stateAccessor, commandName, stateData);
+        writeCommand = AddCommandWrite<AccessorType, FinalBaseType>
+            (&AccessorType::SetCurrent, stateAccessor, commandName, FinalType(stateData));
     } else {
         CMN_LOG_CLASS_INIT_ERROR << "AddCommandWriteState: invalid parameter for command " << commandName << std::endl;
     }
