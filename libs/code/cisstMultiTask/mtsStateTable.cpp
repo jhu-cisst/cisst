@@ -84,6 +84,11 @@ mtsStateTable::AccessorBase *mtsStateTable::GetAccessor(const std::string &name)
     return 0;
 }
 
+mtsStateTable::AccessorBase *mtsStateTable::GetAccessor(const char *name) const
+{
+    return GetAccessor(std::string(name));
+}
+
 /* All the non-const methods that can be called from writer only */
 
 mtsStateIndex mtsStateTable::GetIndexWriter(void) const {

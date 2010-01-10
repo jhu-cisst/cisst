@@ -300,6 +300,7 @@ public:
         \note This method is overloaded to accept the element pointer or string name.
     */
     mtsStateTable::AccessorBase *GetAccessor(const std::string &name) const;
+    mtsStateTable::AccessorBase *GetAccessor(const char *name) const;
 
     /*! Get a handle for data to be used by a writer */
     mtsStateIndex GetIndexWriter(void) const;
