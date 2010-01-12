@@ -15,11 +15,11 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include <cisstDevices/can/devCAN.hpp>
-#include <cisstDevices/wam/devProperties.hpp>
+#include <cisstDevices/can/devCAN.h>
+#include <cisstDevices/wam/devProperties.h>
 
-#ifndef _devPuck_hpp
-#define _devPuck_hpp
+#ifndef _devPuck_h
+#define _devPuck_h
 
 //! Define the ID of a puck
 /**
@@ -122,6 +122,9 @@ public:
      \param can The CAN device used to communicate with the puck
   */
   devPuck( devPuckID puckid, devCAN* can );
+
+  //! Return the puck ID
+  devPuckID ID() const { return puckid; }  
 
   //! Return the origin ID of the CAN id
   /**

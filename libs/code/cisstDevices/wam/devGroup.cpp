@@ -15,7 +15,7 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include <cisstDevices/wam/devGroup.hpp>
+#include <cisstDevices/wam/devGroup.h>
 #include <cisstCommon/cmnLogger.h>
 
 devGroup::devGroup(devGroupID groupid, devCAN* canbus){
@@ -24,37 +24,48 @@ devGroup::devGroup(devGroupID groupid, devCAN* canbus){
 }
 
 // STATIC return the CAN of a message from the host (00000) to a group ID
+// A group ID is represented by 5 bits whereas a CAN ID has 11
 devCANID devGroup::CANId( devGroupID groupid )
 { return (devCANID)( devGroup::GROUPTAG | (0x1F & groupid) ); }
 
 // STATIC return true of the CAN frame is destined to a group
+// For this we test the CAN ID for the GROUPTAG bit
 bool devGroup::IsForGroup( const devCANFrame canframe )
 {return (canframe.Id() & devGroup::GROUPTAG) == devGroup::GROUPTAG;}
 
-// STATIC return true if the CAN frame contain a "set" command
+// STATIC return true if the CAN frame is a "set" command (a command has a 
+// message of the form
+// [1*** ****][**** ****]...[**** ****]
+// thus we test if the MSB of the first byte is set
 bool devGroup::IsSetCommand( const devCANFrame& canframe ){
   const unsigned char* data = canframe.Data();
   return ( data[0] & 0x80 ) == 0x80;
 }
 
-// return true if the proprety id is valid
+// return true if the property id is valid. This needs a lot of work
+// check if the property ID is within bounds
 bool devGroup::IsValid( devPropertyID propid ) const {
   if( 0 < propid && propid < NUM_PROPERTIES )    return true;
   else    return false;
 }
 
-// return true if the property id/value combination is valud
+// return true if the property id is valid with the value
+// not implemented
 bool devGroup::IsValid( devPropertyID, devPropertyValue )const{return true;}
 
-// STATIC extract the destination group ID
+// STATIC returns the destination of a CAN id. This assumes that the 
+// destination is a group (as opposed to a puck)
+// The destination group ID compose the 5 LSB of a CAN ID
 devGroupID devGroup::Destination( devCANID cid )
 { return (devGroupID) ( cid & 0x001F); }
 
 // STATIC extract the destination group ID
+// just call the above method
 devGroupID devGroup::Destination( const devCANFrame& canframe )
 { return devGroup::Destination( canframe.Id() ); }
 
 // STATIC extract the origin group ID
+// the origin bits are the bits 5 to 9 (zero index) in a CAN ID
 devGroupID devGroup::Origin( devCANID cid )
 { return (devGroupID) ((cid>>5) & 0x001F); }
 
@@ -62,35 +73,37 @@ devGroupID devGroup::Origin( devCANID cid )
 devGroupID devGroup::Origin( const devCANFrame& canframe )
 { return devGroup::Origin( canframe.Id() ); }
 
-// querry a group of puck...for tnow this is only valid for position queries
-// unlike devPuck::get, this doesn't wait for the replies
+// Query a group of puck. For now this is only implemented for position queries.
+// Unlike devPuck::GetProperty, this doesn't process the pucks replies.
 bool devGroup::GetProperty( devPropertyID propid ){ 
 
-  if( propid  == devPropertyMotor::POS && 
-      groupid == devGroup::BROADCAST ){
+  // ensure that the property being queried is motor position and that this
+  // group is the broadcast group
+  if( propid  == devPropertyMotor::POS && groupid == devGroup::BROADCAST ){
 
-    // pack'n send the querry
+    // pack the query in a CAN frame
     devCANFrame canframe;
     if( PackProperty( canframe, propid, 0, false) ){
-      CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__
+      CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
 			<< ": Failed to pack the property " << propid 
 			<< std::endl;
       return true;
     }
 
-    // send the canframe and wait for its completion
+    // send the CAN frame
     if( canbus->Send( canframe, true ) ){
-      CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__
+      CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
 			<< ": Failed to querry puck."
 			<< std::endl;
       return true;
     }
 
+    // wait for the pucks replies somewhere else...
     return false;
   }
 
   else{
-    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
 		      << ": Only position group queries." 
 		      << std::endl;
     return true;
@@ -99,32 +112,34 @@ bool devGroup::GetProperty( devPropertyID propid ){
 }
 
 // Set the properties of a group
-// unlike devPuck::set, this doesn't wait for the replies
+// Unlike devPuck::SetProperty, this doesn't verify the pucks values
 bool devGroup::SetProperty( devPropertyID propid, 
-			    devPropertyValue propval){
+			    devPropertyValue propval ){
 
+  // valid property ID and property value combinaison?
   if( IsValid( propid, propval ) ){
 
-    // pack'n send
+    // pack the "set" command in a CAN frame
     devCANFrame canframe;
     if( PackProperty( canframe, propid, propval, true ) ){
-      CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__
+      CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
 			<< ": Failed to pack the property " << propid 
 			<< std::endl;
       return true;
     }
     
-    if(canbus->Send( canframe, true) ){
-      CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__
+    // Send the CAN frame
+    if( canbus->Send( canframe, true ) ){
+      CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
 			<< ": Failed to set the puck."
 			<< std::endl;
       return true;
     }
-
+    // don't double check the property value
     return false;
   }
   else{
-    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
 		      << ": Illegal property."
 		      << std::endl;
     return true;
@@ -136,7 +151,8 @@ bool devGroup::PackProperty( devCANFrame& canframe,
 			     devPropertyID propid,
 			     devPropertyValue propval,
 			     bool set ){
-  
+
+  // valid property ID and property value combinaison?
   if( IsValid( propid, propval ) ){
     
     unsigned char data[8] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
@@ -159,7 +175,7 @@ bool devGroup::PackProperty( devCANFrame& canframe,
   }
 
   else{
-    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
 		      << ": Invalud property ID/value" 
 		      << std::endl;
     return true;

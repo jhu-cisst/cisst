@@ -1,12 +1,28 @@
+/*
 
-#ifndef _devProperties_hpp
-#define _devProperties_hpp
+  Author(s): Simon Leonard
+  Created on: Dec 02 2009
+
+  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
+  Reserved.
+
+--- begin cisst license - do not edit ---
+
+This software is provided "as is" under an open source license, with
+no warranty.  The complete license can be found in license.txt and
+http://www.cisst.org/cisst/license.txt.
+
+--- end cisst license ---
+*/
+
+#ifndef _devProperties_h
+#define _devProperties_h
 
 //! Define the ID of a property (7 bits)
 typedef unsigned char devPropertyID;
 
 //! Define the value of a property (4-6 bytes)
-typedef int devPropertyValue;
+typedef int32_t devPropertyValue;
 
 struct devPropertyCommon{
   enum{

@@ -15,7 +15,7 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include <cisstDevices/can/devCAN.hpp>
+#include <cisstDevices/can/devCAN.h>
 #include <cisstCommon/cmnLogger.h>
 
 // Default initialization of a CAN frame
@@ -32,14 +32,14 @@ devCANFrame::devCANFrame( devCANID canid,
 
   // A can ID has 11 bits. Ensure that only 11 bits are used
   if( ~0x07FF & ~canid )
-    CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__
+    CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS
 			<< ": Illegal CAN id: " << canid 
 			<< ". Truncating the ID to: " << (0x07FF & canid)
 			<< std::endl;
   this->canid = 0x07FF & canid;
 
   if( 8 < nbytes )
-    CMN_LOG_RUN_WARNING << __PRETTY_FUNCTION__
+    CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS
 			<< ": Illegal message length: " << nbytes
 			<< ". Truncating to 8 bytes"
 			<< std::endl;
@@ -51,5 +51,4 @@ devCANFrame::devCANFrame( devCANID canid,
 
 // default constructor of a can device
 devCAN::devCAN( devCANRate rate ){ this->rate = rate; }
-
 devCAN::~devCAN(){}

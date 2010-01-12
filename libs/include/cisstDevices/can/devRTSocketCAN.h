@@ -17,10 +17,10 @@ http://www.cisst.org/cisst/license.txt.
 
 #if (CISST_OS == CISST_LINUX_XENOMAI)
 
-#ifndef _devRTSocketCAN_hpp
-#define _devRTSocketCAN_hpp
+#ifndef _devRTSocketCAN_h
+#define _devRTSocketCAN_h
 
-#include <cisstDevices/can/devCAN.hpp>
+#include <cisstDevices/can/devCAN.h>
 #include <rtdm/rtcan.h> // Defines for the RT CAN socket
 
 #include <string>       // for device name (can0, can1,...)
@@ -61,6 +61,9 @@ public:
      \param rate The CAN rate (devCAN_150, devCAN_300, devCAN_1000)
   */
   devRTSocketCAN( const std::string& devicename, devCANRate rate );
+  
+  //! Destructor
+  ~devRTSocketCAN();
 
   //! Open and configure the CAN socket
   /**

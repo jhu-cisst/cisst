@@ -15,8 +15,8 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#ifndef _devCAN_hpp
-#define _devCAN_hpp
+#ifndef _devCAN_h
+#define _devCAN_h
 
 #include <iostream>
 #include <iomanip>
@@ -28,10 +28,13 @@ http://www.cisst.org/cisst/license.txt.
 */
 typedef unsigned short devCANID;
 
-//! A frame of the CAN bus
+//! A base frame of the CAN bus
 /**
    This defines a basic CAN frame. It does not support the extended frame format
-   The frame is composed of an identifier, 8 bytes of data and a data length.
+   The frame is composed of an identifier, 8 bytes of data and a data length. A
+   CAN frame contain an 11 bits identifier, 0-8 bytes of data and a data length
+   code (0-8).
+   This class does not support the extended frame format.
 */
 class devCANFrame{
   

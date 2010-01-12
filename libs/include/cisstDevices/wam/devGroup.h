@@ -15,10 +15,10 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#ifndef _devGroup_hpp
-#define _devGroup_hpp
+#ifndef _devGroup_h
+#define _devGroup_h
 
-#include <cisstDevices/wam/devPuck.hpp>
+#include <cisstDevices/wam/devPuck.h>
 #include <vector>
 
 //! Define the ID of a group (5 bits)

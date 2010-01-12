@@ -17,7 +17,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #if (CISST_OS == CISST_LINUX_XENOMAI)
 
-#include <cisstDevices/can/devRTSocketCAN.hpp>
+#include <cisstDevices/can/devRTSocketCAN.h>
 #include <cisstCommon/cmnLogger.h>
 
 #include <stdio.h>
@@ -27,6 +27,8 @@ devRTSocketCAN::devRTSocketCAN( const std::string& devname,
   this->devicename = devname;
 }
 
+devRTSocketCAN::~devRTSocketCAN(){}
+
 bool devRTSocketCAN::Open(){
 
   struct ifreq ifr;
@@ -34,16 +36,18 @@ bool devRTSocketCAN::Open(){
   // create a socket
   canfd = rt_dev_socket(PF_CAN, SOCK_RAW, CAN_RAW);
   if( canfd < 0 ){
-    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ << std::endl;
-    perror("Couldn't create a CAN socket: ");
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+		      << ": Couldn't create a CAN socket."
+		      << std::endl;
     return true;
   }
 
   // Get CAN interface index by name
   strncpy(ifr.ifr_name, devicename.data(), IFNAMSIZ);
   if( rt_dev_ioctl(canfd, SIOCGIFINDEX, &ifr) ){
-    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ << std::endl;
-    perror( "Couldn't get the CAN interface index by name:  " );
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+		      << ": Couldn't get the CAN interface index by name."
+		      << std::endl;
     return true;
   }
 
@@ -64,8 +68,9 @@ bool devRTSocketCAN::Open(){
 			CAN_RAW_FILTER, 
 			filters, 
 			3*sizeof(struct can_filter)) ){
-    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ << std::endl;
-    perror( "Couldn't set the socket filters: " );
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+		      << ": Couldn't set the socket filters." 
+		      << std::endl;
     return true;
   }
 
@@ -75,17 +80,19 @@ bool devRTSocketCAN::Open(){
   addr.can_family = AF_CAN;           // Address Family CAN
 
   if( rt_dev_bind(canfd, (struct sockaddr*)&addr, sizeof(struct sockaddr_can))){
-    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ << std::endl;
-    perror( "Couldn't bind the socket: " );
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+		      << ": Couldn't bind the socket." 
+		      << std::endl;
     return true;
   }
 
   // set the baud rate
-  can_baudrate_t* can_baudrate = (can_baudrate_t *)&ifr.ifr_ifru;
+  can_baudrate_t* can_baudrate = (can_baudrate_t*)&ifr.ifr_ifru;
   *can_baudrate = rate;
   if( rt_dev_ioctl( canfd, SIOCSCANBAUDRATE, &ifr ) ){
-    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ << std::endl;
-    perror( "Couldn't set the rate: " );
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
+		      << ": Couldn't set the rate."
+		      << std::endl;
     return true;
   }
 
@@ -102,8 +109,9 @@ bool devRTSocketCAN::Open(){
   CAN_MODE* mode = (CAN_MODE*)&ifr.ifr_ifru;
   *mode = CAN_MODE_START;
   if( rt_dev_ioctl(canfd, SIOCSCANMODE, &ifr) ){
-    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ << std::endl;
-    perror( "Couldn't set the operation mode: " );
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
+		      << ": Couldn't set the operation mode."
+		      << std::endl;
     return true;
   }
 
@@ -126,8 +134,9 @@ bool devRTSocketCAN::Open(){
 bool devRTSocketCAN::Close(){
   // close the socket
   if( rt_dev_close( canfd ) ){
-    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ << std::endl;
-    perror("devRTSocketCAN::close: Couldn't close the socket: ");
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+		      << "Couldn't close the socket."
+		      << std::endl;
     return true;
   }
   return false;
@@ -155,8 +164,9 @@ bool devRTSocketCAN::Send( const devCANFrame& canframe, bool block ){
 			     sizeof(addr) );
 
   if( error < 0 ){
-    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ << std::endl;
-    perror("Failed to send frame: ");
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
+		      << ": Failed to send CAN frame." 
+		      << std::endl;
     return true;
   }
   
@@ -179,8 +189,9 @@ bool devRTSocketCAN::Recv( devCANFrame& canframe, bool block ){
 				&addrlen );
 
   if( error < 0 ){
-    CMN_LOG_RUN_ERROR << __PRETTY_FUNCTION__ << std::endl;
-    perror("Failed to receive the frame: ");
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+		      << ": Failed to receive the frame." 
+		      << std::endl;
     return true;
   }
 
