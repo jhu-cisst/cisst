@@ -745,6 +745,7 @@ inline bool cmnTypeTraits<bool>::MinNegativeValue()
 
 #endif // DOXYGEN
 
+#ifndef SWIG
 /*! Check whether class T is derived from class Base
     Examples:
        cmnIsDerivedFrom<double, cmnGenericObject>::YES is false
@@ -788,6 +789,7 @@ public:
     enum { YES = sizeof(Test(static_cast<T*>(0))) == sizeof(One)};
     enum { NO = !YES};
 };
+#endif // !SWIG
 
 #endif // _cmnTypeTraits_h
 

@@ -219,6 +219,7 @@ typedef mtsCommandQualifiedReadOrWriteBase<const mtsGenericObject> mtsCommandQua
 %include "cisstMultiTask/mtsGenericObjectProxy.h"
 %define MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(name, elementType)
 // Instantiate the template
+%template(name ## Base) mtsGenericObjectProxyBase<elementType>;
 %template(name) mtsGenericObjectProxy<elementType>;
 // Type addition for dynamic type checking
 %{
