@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id$
+  $Id: $
   
   Author(s):	Ankur Kapoor, Anton Deguet, Peter Kazanzides
   Created on:	2006-05-05
@@ -219,9 +219,14 @@ public:
     /*! Cast operator.  This allows to assign to an object of the
       actual type without explicitly referencing the public data
       member "Data". */
+    //@{
     inline operator value_type & (void) {
         return this->Data;
     }
+    inline operator const value_type & (void) const {
+        return this->Data;
+    }
+    //@}
 
     /*! Serialization.  Relies on the specialization, if any, of cmnSerializeRaw. */
     inline void SerializeRaw(std::ostream & outputStream) const {
@@ -314,9 +319,14 @@ public:
     /*! Cast operator.  This allows to assign to an object of the
       actual type without explicitly referencing the public data
       member "Data". */
+    //@{
     inline operator value_type & (void) {
         return *this->pData;
     }
+    inline operator const value_type & (void) const {
+        return *this->pData;
+    }
+    //@}
 
     /*! Serialization.  Relies on the specialization, if any, of cmnSerializeRaw. */
     inline void SerializeRaw(std::ostream & outputStream) const {
