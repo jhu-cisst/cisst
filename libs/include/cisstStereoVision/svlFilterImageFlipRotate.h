@@ -29,8 +29,10 @@ http://www.cisst.org/cisst/license.txt.
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
 
-class CISST_EXPORT svlFilterImageFlipRotate : public svlFilterBase
+class CISST_EXPORT svlFilterImageFlipRotate : public svlFilterBase, public cmnGenericObject
 {
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+
 public:
     svlFilterImageFlipRotate();
     virtual ~svlFilterImageFlipRotate();
@@ -93,6 +95,8 @@ void svlFilterImageFlipRotate::FlipRotate(_pixelType* input, _pixelType* output,
         }
     }
 }
+
+CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterImageFlipRotate)
 
 #endif // _svlFilterImageFlipRotate_h
 

@@ -31,8 +31,10 @@ http://www.cisst.org/cisst/license.txt.
 #define SVL_RCT_WRONG_LUT_SIZE          -3000
 
 
-class CISST_EXPORT svlFilterImageRectifier : public svlFilterBase
+class CISST_EXPORT svlFilterImageRectifier : public svlFilterBase, public cmnGenericObject
 {
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+
     typedef struct _RectificationLUT {
         int Width;
         int Height;
@@ -86,6 +88,8 @@ private:
 
     void ReleaseLUT(RectificationLUT* lut);
 };
+
+CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterImageRectifier)
 
 #endif // _svlFilterImageRectifier_h
 

@@ -28,12 +28,16 @@ http://www.cisst.org/cisst/license.txt.
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
 
-class CISST_EXPORT svlFilterStreamTypeConverter : public svlFilterBase
+class CISST_EXPORT svlFilterStreamTypeConverter : public svlFilterBase, public cmnGenericObject
 {
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+
 public:
+    svlFilterStreamTypeConverter();
     svlFilterStreamTypeConverter(svlStreamType inputtype, svlStreamType outputtype);
     virtual ~svlFilterStreamTypeConverter();
 
+    int SetType(svlStreamType inputtype, svlStreamType outputtype);
     void SetScaling(float ratio) { Scaling = ratio; }
     float GetScaling() { return Scaling; }
     void SetMono16ShiftDown(unsigned int shiftdown) { Mono16ShiftDown = shiftdown; }
@@ -48,6 +52,8 @@ private:
     float Scaling;
     unsigned int Mono16ShiftDown;
 };
+
+CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterStreamTypeConverter)
 
 #endif // _svlFilterStreamTypeConverter_h
 

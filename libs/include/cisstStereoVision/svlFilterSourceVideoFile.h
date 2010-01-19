@@ -29,12 +29,16 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlExport.h>
 
 
-class CISST_EXPORT svlFilterSourceVideoFile : public svlFilterSourceBase
+class CISST_EXPORT svlFilterSourceVideoFile : public svlFilterSourceBase, public cmnGenericObject
 {
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+
 public:
-    svlFilterSourceVideoFile(bool stereo = false);
+    svlFilterSourceVideoFile();
+    svlFilterSourceVideoFile(unsigned int channelcount);
     ~svlFilterSourceVideoFile();
 
+    int SetChannelCount(unsigned int channelcount);
     int DialogFilePath(unsigned int videoch = SVL_LEFT);
     int SetFilePath(const std::string filepath, unsigned int videoch = SVL_LEFT);
 
@@ -62,6 +66,8 @@ private:
     double CVIStartTime;
     double CVIFrameTime;
 };
+
+CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterSourceVideoFile)
 
 #endif // _svlFilterSourceVideoFile_h
 

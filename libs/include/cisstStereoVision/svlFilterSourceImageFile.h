@@ -39,12 +39,16 @@ http://www.cisst.org/cisst/license.txt.
 #define SVL_IFS_EXTENSION_LENGTH            64
 #define SVL_IFS_FULLPATH_LENGTH             1152
 
-class CISST_EXPORT svlFilterSourceImageFile : public svlFilterSourceBase
+class CISST_EXPORT svlFilterSourceImageFile : public svlFilterSourceBase, public cmnGenericObject
 {
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+
 public:
-    svlFilterSourceImageFile(bool stereo = false);
+    svlFilterSourceImageFile();
+    svlFilterSourceImageFile(unsigned int channelcount);
     virtual ~svlFilterSourceImageFile();
 
+    int SetChannelCount(unsigned int channelcount);
     int SetFilePath(const char* filepathprefix, const char* extension, int videoch = SVL_LEFT);
     int SetSequence(unsigned int numberofdigits = 0, unsigned int from = 0, unsigned int to = 0);
 
@@ -68,8 +72,10 @@ private:
     unsigned int FileCounter;
     bool StopLoop;
 
-    void BuildFilePath(int videoch, unsigned int framecounter = 0);
+    int BuildFilePath(int videoch, unsigned int framecounter = 0);
 };
+
+CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterSourceImageFile)
 
 #endif // _svlFilterSourceImageFile_h
 

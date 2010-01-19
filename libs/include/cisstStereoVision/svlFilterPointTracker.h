@@ -31,8 +31,10 @@ http://www.cisst.org/cisst/license.txt.
 
 class svlPointTrackerAlgoBase;
 
-class CISST_EXPORT svlFilterPointTracker : public svlFilterBase
+class CISST_EXPORT svlFilterPointTracker : public svlFilterBase, public cmnGenericObject
 {
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+
 public:
     typedef struct _TargetType {
         int x;
@@ -113,6 +115,7 @@ private:
     void ReallocateTargetParams(unsigned int targetcount);
 };
 
+CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterPointTracker)
 
 #endif // _svlFilterPointTracker_h
 

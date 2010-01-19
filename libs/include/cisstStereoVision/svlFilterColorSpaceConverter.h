@@ -36,8 +36,10 @@ enum svlColorSpace
     svlColorSpaceYUV
 };
 
-class CISST_EXPORT svlFilterColorSpaceConverter : public svlFilterBase
+class CISST_EXPORT svlFilterColorSpaceConverter : public svlFilterBase, public cmnGenericObject
 {
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+
 public:
     svlFilterColorSpaceConverter();
     virtual ~svlFilterColorSpaceConverter();
@@ -57,6 +59,8 @@ private:
 
     void ConvertColorSpace(unsigned char* buffer, unsigned int numofpixels);
 };
+
+CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterColorSpaceConverter)
 
 #endif // _svlFilterColorSpaceConverter_h
 

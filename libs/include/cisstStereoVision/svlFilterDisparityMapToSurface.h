@@ -30,8 +30,10 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlExport.h>
 
 
-class CISST_EXPORT svlFilterDisparityMapToSurface : public svlFilterBase
+class CISST_EXPORT svlFilterDisparityMapToSurface : public svlFilterBase, public cmnGenericObject
 {
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+
 public:
     svlFilterDisparityMapToSurface();
     virtual ~svlFilterDisparityMapToSurface();
@@ -52,6 +54,8 @@ private:
     float PPX;
     float PPY;
 };
+
+CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterDisparityMapToSurface)
 
 #endif // _svlFilterDisparityMapToSurface_h
 

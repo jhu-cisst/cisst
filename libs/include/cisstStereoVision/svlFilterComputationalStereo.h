@@ -44,8 +44,10 @@ public:
     virtual void Free() = 0;
 };
 
-class CISST_EXPORT svlFilterComputationalStereo : public svlFilterBase
+class CISST_EXPORT svlFilterComputationalStereo : public svlFilterBase, public cmnGenericObject
 {
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+
 public:
     enum StereoMethod {
         DynamicProgramming
@@ -149,6 +151,8 @@ void svlFilterComputationalStereo::CreateXCheckImageMono(_paramType* source, _pa
         }
     }
 }
+
+CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterComputationalStereo)
 
 #endif // _svlFilterComputationalStereo_h
 

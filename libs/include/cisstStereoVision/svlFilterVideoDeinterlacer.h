@@ -37,8 +37,10 @@ enum svlDeinterlacingMethod
     svlDeinterlacingNone
 };
 
-class CISST_EXPORT svlFilterVideoDeinterlacer : public svlFilterBase
+class CISST_EXPORT svlFilterVideoDeinterlacer : public svlFilterBase, public cmnGenericObject
 {
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+
 public:
     svlFilterVideoDeinterlacer();
     virtual ~svlFilterVideoDeinterlacer();
@@ -54,6 +56,8 @@ protected:
 private:
     svlDeinterlacingMethod Method;
 };
+
+CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterVideoDeinterlacer)
 
 #endif // _svlFilterVideoDeinterlacer_h
 

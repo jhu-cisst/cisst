@@ -39,8 +39,10 @@ http://www.cisst.org/cisst/license.txt.
 #define SVL_IFW_EXTENSION_LENGTH            64
 #define SVL_IFW_FULLPATH_LENGTH             1152
 
-class CISST_EXPORT svlFilterImageFileWriter : public svlFilterBase
+class CISST_EXPORT svlFilterImageFileWriter : public svlFilterBase, public cmnGenericObject
 {
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+
 public:
     svlFilterImageFileWriter();
     virtual ~svlFilterImageFileWriter();
@@ -71,6 +73,8 @@ private:
     char FilePath[2][SVL_IFW_FULLPATH_LENGTH];
     unsigned int CaptureLength;
 };
+
+CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterImageFileWriter)
 
 #endif // _svlFilterImageFileWriter_h
 

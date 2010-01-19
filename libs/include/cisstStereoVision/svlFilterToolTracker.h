@@ -32,8 +32,10 @@ http://www.cisst.org/cisst/license.txt.
 
 class svlToolTrackerAlgorithmBase;
 
-class CISST_EXPORT svlFilterToolTracker : public svlFilterBase
+class CISST_EXPORT svlFilterToolTracker : public svlFilterBase, public cmnGenericObject
 {
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+
 public:
     typedef struct _TargetType {
         vct2 tooltipos;
@@ -83,6 +85,7 @@ protected:
     virtual void Release();
 };
 
+CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterToolTracker)
 
 #endif // _svlFilterToolTracker_h
 

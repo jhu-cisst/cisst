@@ -28,8 +28,10 @@ http://www.cisst.org/cisst/license.txt.
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
 
-class CISST_EXPORT svlFilterStereoImageOptimizer : public svlFilterBase
+class CISST_EXPORT svlFilterStereoImageOptimizer : public svlFilterBase, public cmnGenericObject
 {
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+
 public:
     svlFilterStereoImageOptimizer();
     virtual ~svlFilterStereoImageOptimizer();
@@ -58,6 +60,8 @@ private:
     int G[2];
     int B[2];
 };
+
+CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterStereoImageOptimizer)
 
 #endif // _svlFilterStereoImageOptimizer_h
 

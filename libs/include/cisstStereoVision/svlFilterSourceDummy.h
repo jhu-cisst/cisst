@@ -31,12 +31,16 @@ http://www.cisst.org/cisst/license.txt.
 #define SVL_DMYSRC_DISPARITY_CAP            200
 #define SVL_DMYSRC_DATA_NOT_INITIALIZED     -7000
 
-class CISST_EXPORT svlFilterSourceDummy : public svlFilterSourceBase
+class CISST_EXPORT svlFilterSourceDummy : public svlFilterSourceBase, public cmnGenericObject
 {
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+
 public:
+    svlFilterSourceDummy();
     svlFilterSourceDummy(svlStreamType type);
     virtual ~svlFilterSourceDummy();
 
+    int SetType(svlStreamType type);
     int SetDimensions(unsigned int width, unsigned int height);
 
     void EnableNoiseImage(bool noise) { Noise = noise; }
@@ -56,6 +60,9 @@ private:
 
     void Translate(unsigned char* src, unsigned char* dest, const int width, const int height, const int trhoriz, const int trvert);
 };
+
+CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterSourceDummy)
+static svlFilterSourceDummy prototype_svlFilterSourceDummy;
 
 #endif // _svlFilterSourceDummy_h
 

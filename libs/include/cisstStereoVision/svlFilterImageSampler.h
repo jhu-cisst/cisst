@@ -52,8 +52,10 @@ private:
     virtual void PostCallback() { FrameCounter ++; }
 };
 
-class CISST_EXPORT svlFilterImageSampler : public svlFilterBase
+class CISST_EXPORT svlFilterImageSampler : public svlFilterBase, public cmnGenericObject
 {
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+
 public:
     svlFilterImageSampler();
     virtual ~svlFilterImageSampler();
@@ -74,6 +76,8 @@ private:
     svlSampleImageBase* ImageBuffer;
     float DistanceScaling;
 };
+
+CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterImageSampler)
 
 #endif // _svlFilterImageSampler_h
 

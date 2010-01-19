@@ -43,8 +43,10 @@ http://www.cisst.org/cisst/license.txt.
 class CVideoCaptureSourceBase;
 class CVideoCaptureSourceDialogThread;
 
-class CISST_EXPORT svlFilterSourceVideoCapture : public svlFilterSourceBase
+class CISST_EXPORT svlFilterSourceVideoCapture : public svlFilterSourceBase, public cmnGenericObject
 {
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+
 friend class CVideoCaptureSourceDialogThread;
 
 public:
@@ -139,8 +141,11 @@ public:
         unsigned int saturation;
     } ImageProperties;
 
-    svlFilterSourceVideoCapture(bool stereo = false);
+    svlFilterSourceVideoCapture();
+    svlFilterSourceVideoCapture(unsigned int channelcount);
     virtual ~svlFilterSourceVideoCapture();
+
+    int SetChannelCount(unsigned int channelcount);
 
     double GetTargetFrequency();
     int SetTargetFrequency(double hertz);
@@ -183,6 +188,8 @@ protected:
 private:
     unsigned int NumberOfChannels;
     unsigned int NumberOfSupportedAPIs;
+    vctDynamicVector<cmnClassServicesBase*> SupportedAPIs;
+    vctDynamicVector<PlatformType> APIPlatforms;
     DeviceInfo* EnumeratedDevices;
     int NumberOfEnumeratedDevices;
     ImageFormat **FormatList;
@@ -199,6 +206,7 @@ private:
     unsigned char **DevSpecConfigBuffer;
     unsigned int *DevSpecConfigBufferSize;
 
+    void InitializeCaptureAPIs();
     int CreateCaptureAPIHandlers();
     int SetImageProperties(unsigned int videoch = SVL_LEFT);
     int GetImageProperties(unsigned int videoch = SVL_LEFT);
@@ -251,6 +259,7 @@ private:
     bool Stopped;
 };
 
+CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterSourceVideoCapture)
 
 #endif // _svlFilterSourceVideoCapture_h
 

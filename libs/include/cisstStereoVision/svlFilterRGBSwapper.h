@@ -25,8 +25,10 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstStereoVision/svlStreamManager.h>
 
-class CISST_EXPORT svlFilterRGBSwapper : public svlFilterBase
+class CISST_EXPORT svlFilterRGBSwapper : public svlFilterBase, public cmnGenericObject
 {
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+
 public:
     svlFilterRGBSwapper();
     virtual ~svlFilterRGBSwapper();
@@ -39,6 +41,8 @@ protected:
 private:
     void SwapChannels(unsigned char* buffer, unsigned int pixelcount);
 };
+
+CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterRGBSwapper)
 
 #endif // _svlFilterRGBSwapper_h
 

@@ -30,8 +30,10 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlExport.h>
 
 
-class CISST_EXPORT svlFilterVideoFileWriter : public svlFilterBase
+class CISST_EXPORT svlFilterVideoFileWriter : public svlFilterBase, public cmnGenericObject
 {
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+
 public:
     svlFilterVideoFileWriter();
     ~svlFilterVideoFileWriter();
@@ -88,6 +90,8 @@ private:
     bool SaveThreadError;
     void* SaveProc(unsigned int videochannels);
 };
+
+CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterVideoFileWriter)
 
 #endif // _svlFilterVideoFileWriter_h
 

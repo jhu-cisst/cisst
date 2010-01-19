@@ -28,8 +28,10 @@ http://www.cisst.org/cisst/license.txt.
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
 
-class CISST_EXPORT svlFilterImageResizer : public svlFilterBase
+class CISST_EXPORT svlFilterImageResizer : public svlFilterBase, public cmnGenericObject
 {
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+
 public:
     svlFilterImageResizer();
     virtual ~svlFilterImageResizer();
@@ -69,6 +71,8 @@ private:
                                      unsigned char* dst, const unsigned int dstheight,
                                      const unsigned int width);
 };
+
+CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterImageResizer)
 
 #endif // _svlFilterImageResizer_h
 

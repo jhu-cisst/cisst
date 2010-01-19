@@ -148,11 +148,11 @@ public:
     /*! Serialize the content of the object without any extra
         information, i.e. no class type nor format version.  The
         "receiver" is supposed to already know what to expect. */ 
-    virtual void SerializeRaw(std::ostream & outputStream) const = 0;
+//    virtual void SerializeRaw(std::ostream & outputStream) const = 0;
 
     /*! De-serialize the content of the object without any extra
       information, i.e. no class type nor format version. */
-    virtual void DeSerializeRaw(std::istream & inputStream) = 0;
+//    virtual void DeSerializeRaw(std::istream & inputStream) = 0;
 
     void SetTimestamp(double ts);
     double GetTimestamp() const;
@@ -193,11 +193,11 @@ public:
     /*! Serialize the content of the object without any extra
         information, i.e. no class type nor format version.  The
         "receiver" is supposed to already know what to expect. */ 
-    virtual void SerializeRaw(std::ostream & outputStream) const = 0;
+//    virtual void SerializeRaw(std::ostream & outputStream) const = 0;
 
     /*! De-serialize the content of the object without any extra
       information, i.e. no class type nor format version. */
-    virtual void DeSerializeRaw(std::istream & inputStream) = 0 ;
+//    virtual void DeSerializeRaw(std::istream & inputStream) = 0 ;
 };
 
 
@@ -475,7 +475,8 @@ public:
     /*! Serialize the content of the object without any extra
         information, i.e. no class type nor format version.  The
         "receiver" is supposed to already know what to expect. */ 
-    virtual void SerializeRaw(std::ostream & outputStream) const{
+//    virtual void SerializeRaw(std::ostream & outputStream) const
+//    {
 
         //cmnSerializeRaw(outputStream, GetType );        //probably not required
         //cmnSerializeRaw(outputStream, GetWidth());
@@ -485,11 +486,12 @@ public:
         //cmnSerializeSizeRaw(outputStream,GetDataSize());
         ////outputStream.write(static_cast<char*>(GetPointer(0)),GetDataSize());  
         //outputStream.write(reinterpret_cast<const char *> (GetPointer(0)),GetDataSize());  
-    }
+//    }
 
     /*! De-serialize the content of the object without any extra
       information, i.e. no class type nor format version. */
-    virtual void DeSerializeRaw(std::istream & inputStream){
+//    virtual void DeSerializeRaw(std::istream & inputStream)
+//    {
 
         ////label?
         //int type=-1;
@@ -511,8 +513,7 @@ public:
         //cmnDeSerializeSizeRaw(inputStream,s);
         //SetSize(ch,w,h);
         //inputStream.read(reinterpret_cast<char*>(GetPointer(0)),s);  
-
-    }
+//    }
 
 private:
     bool OwnData;
@@ -559,16 +560,19 @@ public:
     const unsigned char* GetUCharPointer() const;
     double* GetPointer();
     unsigned int GetDataSize() const;
-        /*! Serialize the content of the object without any extra
-        information, i.e. no class type nor format version.  The
-        "receiver" is supposed to already know what to expect. */ 
-    virtual void SerializeRaw(std::ostream & outputStream) const{
-    }
+
+    /*! Serialize the content of the object without any extra
+    information, i.e. no class type nor format version.  The
+    "receiver" is supposed to already know what to expect. */ 
+//    virtual void SerializeRaw(std::ostream & outputStream) const
+//    {
+//    }
 
     /*! De-serialize the content of the object without any extra
       information, i.e. no class type nor format version. */
-    virtual void DeSerializeRaw(std::istream & inputStream){
-    }
+//    virtual void DeSerializeRaw(std::istream & inputStream)
+//    {
+//    }
 
 
     svlRigidXform frame4x4;
@@ -592,21 +596,18 @@ public:
     double* GetPointer();
     unsigned int GetDataSize() const;
 
-        /*! Serialize the content of the object without any extra
-        information, i.e. no class type nor format version.  The
-        "receiver" is supposed to already know what to expect. */ 
-    virtual void SerializeRaw(std::ostream & outputStream) const{
-
-
-    }
+    /*! Serialize the content of the object without any extra
+    information, i.e. no class type nor format version.  The
+    "receiver" is supposed to already know what to expect. */ 
+//    virtual void SerializeRaw(std::ostream & outputStream) const
+//    {
+//    }
 
     /*! De-serialize the content of the object without any extra
       information, i.e. no class type nor format version. */
-    virtual void DeSerializeRaw(std::istream & inputStream){
-
-
-
-    }
+//    virtual void DeSerializeRaw(std::istream & inputStream)
+//    {
+//    }
 
     svlPointCloud points;
 };

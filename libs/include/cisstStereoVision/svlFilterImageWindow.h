@@ -127,9 +127,11 @@ protected:
 class CWindowManagerThreadProc;
 
 
-class CISST_EXPORT svlFilterImageWindow : public svlFilterBase
+class CISST_EXPORT svlFilterImageWindow : public svlFilterBase, public cmnGenericObject
 {
-friend class CWindowManagerThreadProc;
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+
+    friend class CWindowManagerThreadProc;
 
 public:
     svlFilterImageWindow();
@@ -170,6 +172,7 @@ public:
     void* Proc(svlFilterImageWindow* obj);
 };
 
+CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterImageWindow)
 
 #endif // _svlFilterImageWindow_h
 

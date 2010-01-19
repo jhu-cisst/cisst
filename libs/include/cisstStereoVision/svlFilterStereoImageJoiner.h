@@ -28,8 +28,10 @@ http://www.cisst.org/cisst/license.txt.
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
 
-class CISST_EXPORT svlFilterStereoImageJoiner : public svlFilterBase
+class CISST_EXPORT svlFilterStereoImageJoiner : public svlFilterBase, public cmnGenericObject
 {
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+
 public:
     typedef enum _Layout {
         VerticalInterlaced,
@@ -51,6 +53,8 @@ protected:
 private:
     Layout ImageLayout;
 };
+
+CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterStereoImageJoiner)
 
 #endif // _svlFilterStereoImageJoiner_h
 

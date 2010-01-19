@@ -28,8 +28,10 @@ http://www.cisst.org/cisst/license.txt.
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
 
-class CISST_EXPORT svlFilterUnsharpMask : public svlFilterBase
+class CISST_EXPORT svlFilterUnsharpMask : public svlFilterBase, public cmnGenericObject
 {
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+
 public:
     svlFilterUnsharpMask();
     virtual ~svlFilterUnsharpMask();
@@ -51,6 +53,8 @@ private:
     void FilterBlur(unsigned char* img_in, unsigned char* img_out, const int width, const int height, int radius);
     void Sharpening(unsigned char* img_in, unsigned char* img_mask, unsigned char* img_out, const int width, const int height);
 };
+
+CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterUnsharpMask)
 
 #endif // _svlFilterUnsharpMask_h
 
