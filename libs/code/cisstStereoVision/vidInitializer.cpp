@@ -27,9 +27,10 @@
 #include "vidSVSSource.h"
 #endif // CISST_SVL_HAS_SVS
 
-#if (CISST_SVL_HAS_DIRECTSHOW == ON)
-#include "vidDirectShowSource.h"
-#endif // CISST_SVL_HAS_DIRECTSHOW
+// See header for details:
+//#if (CISST_SVL_HAS_DIRECTSHOW == ON)
+//#include "vidDirectShowSource.h"
+//#endif // CISST_SVL_HAS_DIRECTSHOW
 
 #if (CISST_SVL_HAS_VIDEO4LINUX2 == ON)
 #include "vidV4L2Source.h"
@@ -43,15 +44,16 @@
 #include "vidOCVSource.h"
 #endif // CISST_SVL_HAS_OPENCV
 
-#if (CISST_SVL_HAS_MIL == ON)
-#include "vidMILDevice.h"
-#endif // CISST_SVL_HAS_MIL
+// See header for details:
+//#if (CISST_SVL_HAS_MIL == ON)
+//#include "vidMILDevice.h"
+//#endif // CISST_SVL_HAS_MIL
 
 
 void svlInitializeVideoCapture()
 {
 #ifdef _vidMILDevice_h
-    delete new CMILDevice;
+    CMILDevice::GetInstance();
 #endif // _vidMILDevice_h
 
 #ifdef _vidDirectShowSource_h

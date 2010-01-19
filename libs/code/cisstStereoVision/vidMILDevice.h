@@ -61,7 +61,7 @@ private:
 
 class CMILDevice : public CVideoCaptureSourceBase, public cmnGenericObject
 {
-    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
 friend class CMILDeviceRenderTarget;
 

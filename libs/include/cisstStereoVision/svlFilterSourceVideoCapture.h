@@ -194,7 +194,8 @@ private:
     int NumberOfEnumeratedDevices;
     ImageFormat **FormatList;
     int *FormatListSize;
-    CVideoCaptureSourceBase **DeviceObj;
+    vctDynamicVector<cmnGenericObject*> DeviceGenObj;
+    vctDynamicVector<CVideoCaptureSourceBase*> DeviceObj;
     int *API;
     int *APIDeviceID;
     int *APIChannelID;

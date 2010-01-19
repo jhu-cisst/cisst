@@ -40,12 +40,14 @@ void PrintFilterList()
     int i = 0;
     svlFilterBase* filter;
     cmnClassRegister::const_iterator iter;
+    cmnGenericObject* go;
     for (iter = cmnClassRegister::begin(); iter != cmnClassRegister::end(); iter ++) {
-        filter = dynamic_cast<svlFilterBase*>((*iter).second->Create());
+        go = (*iter).second->Create();
+        filter = dynamic_cast<svlFilterBase*>(go);
         if (filter) {
             std::cout << ++ i << ") " << (*iter).first << std::endl;
-            delete filter;
         }
+        (*iter).second->Delete(go);
     }
 }
 

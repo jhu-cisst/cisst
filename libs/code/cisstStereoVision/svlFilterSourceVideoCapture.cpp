@@ -53,8 +53,7 @@ svlFilterSourceVideoCapture::svlFilterSourceVideoCapture() :
     EnumeratedDevices(0),
     NumberOfEnumeratedDevices(-1),
     FormatList(0),
-    FormatListSize(0),
-    DeviceObj(0)
+    FormatListSize(0)
 {
     InitializeCaptureAPIs();
 
@@ -68,8 +67,7 @@ svlFilterSourceVideoCapture::svlFilterSourceVideoCapture(unsigned int channelcou
     EnumeratedDevices(0),
     NumberOfEnumeratedDevices(-1),
     FormatList(0),
-    FormatListSize(0),
-    DeviceObj(0)
+    FormatListSize(0)
 {
     InitializeCaptureAPIs();
 
@@ -83,7 +81,6 @@ svlFilterSourceVideoCapture::~svlFilterSourceVideoCapture()
 {
     Release();
 
-    if (DeviceObj) delete [] DeviceObj;
     if (OutputData) {
         delete OutputData;
 
@@ -299,19 +296,22 @@ int svlFilterSourceVideoCapture::ProcessFrame(ProcInfo* procInfo)
 int svlFilterSourceVideoCapture::Release()
 {
     for (unsigned int i = 0; i < NumberOfSupportedAPIs; i ++) {
-        if (DeviceObj[i]) {
-            if (DeviceObj[i]->GetPlatformType() == MatroxImaging) {
+
 #if (CISST_SVL_HAS_MIL == ON)
-                // Object is a singleton, should not be deleted
-                dynamic_cast<CMILDevice*>(DeviceObj[i])->Release();
-#endif // CISST_SVL_HAS_MIL
-            }
-            else {
-                delete DeviceObj[i];
-            }
-            DeviceObj[i] = 0;
+        // MIL device object is a singleton, should not be deleted
+        if (DeviceObj[i] &&
+            DeviceObj[i]->GetPlatformType() == MatroxImaging) {
+            dynamic_cast<CMILDevice*>(DeviceObj[i])->Release();
+            continue;
         }
+#endif // CISST_SVL_HAS_MIL
+
+        // Device object is released through the generic base class
+        SupportedAPIs[i]->Delete(DeviceGenObj[i]);
+        DeviceGenObj[i] = 0;
+        DeviceObj[i] = 0;
     }
+
     return SVL_OK;
 }
 
@@ -322,31 +322,52 @@ void svlFilterSourceVideoCapture::InitializeCaptureAPIs()
     NumberOfSupportedAPIs = 0;
 
     // Enumerate registered APIs
+    cmnGenericObject* go;
     CVideoCaptureSourceBase* api;
     SupportedAPIs.SetSize(256);
     APIPlatforms.SetSize(256);
+
+    // Go through all registered classes
     for (cmnClassRegister::const_iterator iter = cmnClassRegister::begin();
          iter != cmnClassRegister::end();
          iter ++) {
-        if ((*iter).first != "svlFilterSourceVideoCapture") {
-            api = dynamic_cast<CVideoCaptureSourceBase*>((*iter).second->Create());
+
+        // Avoid infinite recursion by skipping self
+        if ((*iter).first != "svlFilterSourceVideoCapture" &&
+            (*iter).second) {
+
+            // Most device objects can be created dynamically
+            go = (*iter).second->Create();
+
+            if (go == 0) {
+#if (CISST_SVL_HAS_MIL == ON)
+                // MIL device object is a singleton, cannot be created dynamically
+                if ((*iter).first == "CMILDevice") {
+                    go = CMILDevice::GetInstance();
+                }
+#endif // CISST_SVL_HAS_MIL
+            }
+
+            api = dynamic_cast<CVideoCaptureSourceBase*>(go);
+
             if (api) {
                 SupportedAPIs[NumberOfSupportedAPIs] = (*iter).second;
                 APIPlatforms[NumberOfSupportedAPIs] = api->GetPlatformType();
                 NumberOfSupportedAPIs ++;
             }
-            delete api;
+
+            // Delete method will release only dynamically created objects
+            (*iter).second->Delete(go);
         }
     }
+
     SupportedAPIs.resize(NumberOfSupportedAPIs);
     APIPlatforms.resize(NumberOfSupportedAPIs);
 
-    // Allocate capture API handler array
-    if (DeviceObj) delete DeviceObj;
-    DeviceObj = new CVideoCaptureSourceBase*[NumberOfSupportedAPIs];
-    for (unsigned int i = 0; i < NumberOfSupportedAPIs; i ++) {
-        DeviceObj[i] = 0;
-    }
+    DeviceGenObj.resize(NumberOfSupportedAPIs);
+    DeviceObj.resize(NumberOfSupportedAPIs);
+    DeviceGenObj.SetAll(0);
+    DeviceObj.SetAll(0);
 }
 
 int svlFilterSourceVideoCapture::CreateCaptureAPIHandlers()
@@ -384,8 +405,23 @@ int svlFilterSourceVideoCapture::CreateCaptureAPIHandlers()
     for (j = 0; j < NumberOfSupportedAPIs; j ++) {
 
         if (chperapi[j] > 0) {
-            DeviceObj[j] = dynamic_cast<CVideoCaptureSourceBase*>(SupportedAPIs[j]->Create());
-            if (DeviceObj[j]->SetStreamCount(chperapi[j]) != SVL_OK) goto labError;
+
+            // Most device objects can be created dynamically
+            DeviceGenObj[j] = SupportedAPIs[j]->Create();
+
+            if (DeviceGenObj[j] == 0) {
+#if (CISST_SVL_HAS_MIL == ON)
+                // MIL device object is a singleton, cannot be created dynamically
+                if (APIPlatforms[j] == MatroxImaging) {
+                    DeviceGenObj[j] = CMILDevice::GetInstance();
+                }
+#endif // CISST_SVL_HAS_MIL
+            }
+
+            DeviceObj[j] = dynamic_cast<CVideoCaptureSourceBase*>(DeviceGenObj[j]);
+
+            if (DeviceObj[j] == 0 ||
+                DeviceObj[j]->SetStreamCount(chperapi[j]) != SVL_OK) goto labError;
         }
     }
 
@@ -394,7 +430,9 @@ int svlFilterSourceVideoCapture::CreateCaptureAPIHandlers()
 labError:
     if (ret != SVL_OK) {
         for (j = 0; j < NumberOfSupportedAPIs; j ++) {
-            if (DeviceObj[j]) delete DeviceObj[j];
+            // Device object is released through the generic base class
+            SupportedAPIs[j]->Delete(DeviceGenObj[j]);
+            DeviceGenObj[j] = 0;
             DeviceObj[j] = 0;
         }
     }
@@ -877,6 +915,7 @@ int svlFilterSourceVideoCapture::GetDeviceList(DeviceInfo **deviceinfolist, bool
         // First enumeration or update
         int i;
         unsigned int j, sum;
+        cmnGenericObject* go;
         CVideoCaptureSourceBase* api;
         DeviceInfo **apideviceinfos = new DeviceInfo*[NumberOfSupportedAPIs];
         int *apidevicecounts = new int[NumberOfSupportedAPIs];
@@ -904,9 +943,21 @@ int svlFilterSourceVideoCapture::GetDeviceList(DeviceInfo **deviceinfolist, bool
         // Enumerate registered APIs and store all results
         for (j = 0; j < NumberOfSupportedAPIs; j ++) {
 
-            api = dynamic_cast<CVideoCaptureSourceBase*>(SupportedAPIs[j]->Create());
-            if (api) {
+            // Most device objects can be created dynamically
+            go = SupportedAPIs[j]->Create();
 
+            if (go == 0) {
+#if (CISST_SVL_HAS_MIL == ON)
+                // MIL device object is a singleton, cannot be created dynamically
+                if (APIPlatforms[j] == MatroxImaging) {
+                    go = CMILDevice::GetInstance();
+                }
+#endif // CISST_SVL_HAS_MIL
+            }
+
+            api = dynamic_cast<CVideoCaptureSourceBase*>(go);
+
+            if (api) {
                 apideviceinfos[j] = 0;
                 apidevicecounts[j] = api->GetDeviceList(&(apideviceinfos[j]));
                 if (apidevicecounts[j] > 0) {
@@ -917,7 +968,9 @@ int svlFilterSourceVideoCapture::GetDeviceList(DeviceInfo **deviceinfolist, bool
                 }
                 if (apidevicecounts[j] > 0) NumberOfEnumeratedDevices += apidevicecounts[j];
             }
-            delete api;
+
+            // Delete method will release only dynamically created objects
+            SupportedAPIs[j]->Delete(go);
         }
 
         if (NumberOfEnumeratedDevices > 0) {
