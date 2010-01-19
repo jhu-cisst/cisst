@@ -213,8 +213,10 @@ private:
 
 class CDC1394SourceThread;
 
-class CDC1394Source : public CVideoCaptureSourceBase
+class CDC1394Source : public CVideoCaptureSourceBase, public cmnGenericObject
 {
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+
 friend class CDC1394SourceThread;
 
 public:
@@ -302,6 +304,7 @@ private:
     bool InitSuccess;
 };
 
+CMN_DECLARE_SERVICES_INSTANTIATION(CDC1394Source)
 
 #endif // _vidDC1394Source_h
 

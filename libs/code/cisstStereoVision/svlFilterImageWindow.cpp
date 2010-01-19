@@ -176,8 +176,11 @@ void* CWindowManagerThreadProc::Proc(svlFilterImageWindow* obj)
 /*** svlFilterImageWindow class ****/
 /***********************************/
 
+CMN_IMPLEMENT_SERVICES(svlFilterImageWindow)
+
 svlFilterImageWindow::svlFilterImageWindow() :
     svlFilterBase(),
+    cmnGenericObject(),
     TimestampEnabled(false),
     FullScreenFlag(false),
     PositionSetFlag(false),

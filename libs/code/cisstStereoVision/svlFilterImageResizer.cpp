@@ -32,7 +32,11 @@ using namespace std;
 /*** svlFilterImageResizer class **********/
 /******************************************/
 
-svlFilterImageResizer::svlFilterImageResizer() : svlFilterBase()
+CMN_IMPLEMENT_SERVICES(svlFilterImageResizer)
+
+svlFilterImageResizer::svlFilterImageResizer() :
+    svlFilterBase(),
+    cmnGenericObject()
 {
     AddSupportedType(svlTypeImageRGB, svlTypeImageRGB);
     AddSupportedType(svlTypeImageMono8, svlTypeImageMono8);

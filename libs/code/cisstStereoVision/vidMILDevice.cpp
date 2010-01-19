@@ -222,8 +222,11 @@ MIL_INT MFTYPE MILProcessingCallback(MIL_INT HookType, MIL_ID HookId, void MPTYP
 /*** CMILDevice class ****************/
 /*************************************/
 
+CMN_IMPLEMENT_SERVICES(CMILDevice)
+
 CMILDevice::CMILDevice() :
     CVideoCaptureSourceBase(),
+    cmnGenericObject(),
     NumOfStreams(0),
     Initialized(false),
     Running(false),

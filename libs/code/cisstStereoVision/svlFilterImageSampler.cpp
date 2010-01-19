@@ -31,7 +31,11 @@ using namespace std;
 /*** svlFilterImageSampler class *********/
 /******************************************/
 
-svlFilterImageSampler::svlFilterImageSampler() : svlFilterBase()
+CMN_IMPLEMENT_SERVICES(svlFilterImageSampler)
+
+svlFilterImageSampler::svlFilterImageSampler() :
+    svlFilterBase(),
+    cmnGenericObject()
 {
     AddSupportedType(svlTypeImageMono8, svlTypeImageMono8);
     AddSupportedType(svlTypeImageMono8Stereo, svlTypeImageMono8Stereo);

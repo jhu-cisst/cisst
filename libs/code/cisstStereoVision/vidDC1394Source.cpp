@@ -371,8 +371,11 @@ svlDC1394Context::~svlDC1394Context()
 /*** CDC1394Source class *************/
 /*************************************/
 
+CMN_IMPLEMENT_SERVICES(CDC1394Source)
+
 CDC1394Source::CDC1394Source() :
     CVideoCaptureSourceBase(),
+    cmnGenericObject(),
     NumOfStreams(0),
     Initialized(false),
     Running(false),

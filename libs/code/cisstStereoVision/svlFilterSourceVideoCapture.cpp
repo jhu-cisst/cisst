@@ -23,30 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon.h>
 #include <cisstStereoVision/svlFilterSourceVideoCapture.h>
 #include <cisstOSAbstraction/osaSleep.h>
-
-#if (CISST_SVL_HAS_SVS == ON)
-#include "vidSVSSource.h"
-#endif // CISST_SVL_HAS_SVS
-
-#if (CISST_SVL_HAS_DIRECTSHOW == ON)
-#include "vidDirectShowSource.h"
-#endif // CISST_SVL_HAS_DIRECTSHOW
-
-#if (CISST_SVL_HAS_VIDEO4LINUX2 == ON)
-#include "vidV4L2Source.h"
-#endif // CISST_SVL_HAS_VIDEO4LINUX2
-
-#if (CISST_SVL_HAS_DC1394 == ON)
-#include "vidDC1394Source.h"
-#endif // CISST_SVL_HAS_DC1394
-
-#if (CISST_SVL_HAS_OPENCV == ON)
-#include "vidOCVSource.h"
-#endif // CISST_SVL_HAS_OPENCV
-
-#if (CISST_SVL_HAS_MIL == ON)
-#include "vidMILDevice.h"
-#endif // CISST_SVL_HAS_MIL
+#include "vidInitializer.h"
 
 #ifdef _MSC_VER
     // Quick fix for Visual Studio Intellisense:
@@ -68,49 +45,104 @@ using namespace std;
 /*** svlFilterSourceVideoCapture class *****/
 /*******************************************/
 
-svlFilterSourceVideoCapture::svlFilterSourceVideoCapture(bool stereo) :
+CMN_IMPLEMENT_SERVICES(svlFilterSourceVideoCapture)
+
+svlFilterSourceVideoCapture::svlFilterSourceVideoCapture() :
     svlFilterSourceBase(),
+    cmnGenericObject(),
     EnumeratedDevices(0),
     NumberOfEnumeratedDevices(-1),
     FormatList(0),
-    FormatListSize(0)
+    FormatListSize(0),
+    DeviceObj(0)
 {
-    if (stereo) {
-        NumberOfChannels = 2;
-        AddSupportedType(svlTypeImageRGBStereo);
-        // forcing output sample to handle external buffers
-        OutputData = new svlSampleImageRGBStereo(false);
+    InitializeCaptureAPIs();
+
+    TargetFrequency = -1.0;
+    OutputData = 0;
+}
+
+svlFilterSourceVideoCapture::svlFilterSourceVideoCapture(unsigned int channelcount) :
+    svlFilterSourceBase(),
+    cmnGenericObject(),
+    EnumeratedDevices(0),
+    NumberOfEnumeratedDevices(-1),
+    FormatList(0),
+    FormatListSize(0),
+    DeviceObj(0)
+{
+    InitializeCaptureAPIs();
+
+    TargetFrequency = -1.0;
+    OutputData = 0;
+
+    SetChannelCount(channelcount);
+}
+
+svlFilterSourceVideoCapture::~svlFilterSourceVideoCapture()
+{
+    Release();
+
+    if (DeviceObj) delete [] DeviceObj;
+    if (OutputData) {
+        delete OutputData;
+
+        unsigned int i;
+
+        if (DeviceID) delete [] DeviceID;
+        if (InputID) delete [] InputID;
+        if (Trigger) delete [] Trigger;
+        if (Format) {
+            for (i = 0; i < NumberOfChannels; i ++) {
+                if (Format[i]) delete Format[i];
+            }
+            delete [] Format;
+        }
+        if (Properties) {
+            for (i = 0; i < NumberOfChannels; i ++) {
+                if (Properties[i]) delete Properties[i];
+            }
+            delete [] Properties;
+        }
+        if (DevSpecConfigBuffer) {
+            for (i = 0; i < NumberOfChannels; i ++) {
+                if (DevSpecConfigBuffer[i]) delete DevSpecConfigBuffer[i];
+            }
+            delete [] DevSpecConfigBuffer;
+        }
+        if (DevSpecConfigBufferSize) delete [] DevSpecConfigBufferSize;
+        if (APIChannelID) delete [] APIChannelID;
+        if (APIDeviceID) delete [] APIDeviceID;
+        if (API) delete [] API;
+        if (EnumeratedDevices) delete [] EnumeratedDevices;
+        if (FormatList) {
+            for (int j = 0; j < NumberOfEnumeratedDevices; j ++) {
+                if (FormatList[j]) delete [] FormatList[j];
+            }
+            delete [] FormatList;
+        }
+        if (FormatListSize) delete [] FormatListSize;
     }
-    else {
-        NumberOfChannels = 1;
+}
+
+int svlFilterSourceVideoCapture::SetChannelCount(unsigned int channelcount)
+{
+    if (OutputData) return SVL_FAIL;
+
+    if (channelcount == 1) {
         AddSupportedType(svlTypeImageRGB);
         // forcing output sample to handle external buffers
         OutputData = new svlSampleImageRGB(false);
     }
+    else if (channelcount == 2) {
+        AddSupportedType(svlTypeImageRGBStereo);
+        // forcing output sample to handle external buffers
+        OutputData = new svlSampleImageRGBStereo(false);
+    }
+    else return SVL_FAIL;
 
-    // Get the number of supported capture APIs
-    NumberOfSupportedAPIs = 0;
-#if (CISST_SVL_HAS_SVS == ON)
-    NumberOfSupportedAPIs ++;
-#endif // CISST_SVL_HAS_SVS
-#if (CISST_SVL_HAS_DIRECTSHOW == ON)
-    NumberOfSupportedAPIs ++;
-#endif // CISST_SVL_HAS_DIRECTSHOW
-#if (CISST_SVL_HAS_VIDEO4LINUX2 == ON)
-    NumberOfSupportedAPIs ++;
-#endif // CISST_SVL_HAS_VIDEO4LINUX2
-#if (CISST_SVL_HAS_DC1394 == ON)
-    NumberOfSupportedAPIs ++;
-#endif // CISST_SVL_HAS_DC1394
-#if (CISST_SVL_HAS_OPENCV == ON)
-    NumberOfSupportedAPIs ++;
-#endif // CISST_SVL_HAS_OPENCV
-#if (CISST_SVL_HAS_MIL == ON)
-    NumberOfSupportedAPIs ++;
-#endif // CISST_SVL_HAS_MIL
+    NumberOfChannels = channelcount;
 
-    // Allocate capture API handler array
-    DeviceObj = new CVideoCaptureSourceBase*[NumberOfSupportedAPIs];
     DeviceID = new int[NumberOfChannels];
     InputID = new int[NumberOfChannels];
     Format = new ImageFormat*[NumberOfChannels];
@@ -122,11 +154,7 @@ svlFilterSourceVideoCapture::svlFilterSourceVideoCapture(bool stereo) :
     APIDeviceID = new int[NumberOfChannels];
     API = new int[NumberOfChannels];
 
-    unsigned int i;
-    for (i = 0; i < NumberOfSupportedAPIs; i ++) {
-        DeviceObj[i] = 0;
-    }
-    for (i = 0; i < NumberOfChannels; i ++) {
+    for (unsigned int i = 0; i < NumberOfChannels; i ++) {
         DeviceID[i] = -1;
         InputID[i] = -1;
         Format[i] = 0;
@@ -139,55 +167,13 @@ svlFilterSourceVideoCapture::svlFilterSourceVideoCapture(bool stereo) :
         API[i] = -1;
     }
 
-    //Disable automatic frame timing
-    TargetFrequency = -1.0;
-}
-
-svlFilterSourceVideoCapture::~svlFilterSourceVideoCapture()
-{
-    unsigned int i;
-
-    Release();
-
-    if (OutputData) delete OutputData;
-    if (DeviceObj) delete [] DeviceObj;
-    if (DeviceID) delete [] DeviceID;
-    if (InputID) delete [] InputID;
-    if (Format) {
-        for (i = 0; i < NumberOfChannels; i ++) {
-            if (Format[i]) delete Format[i];
-        }
-        delete [] Format;
-    }
-    if (Properties) {
-        for (i = 0; i < NumberOfChannels; i ++) {
-            if (Properties[i]) delete Properties[i];
-        }
-        delete [] Properties;
-    }
-    if (Trigger) delete [] Trigger;
-    if (DevSpecConfigBuffer) {
-        for (i = 0; i < NumberOfChannels; i ++) {
-            if (DevSpecConfigBuffer[i]) delete DevSpecConfigBuffer[i];
-        }
-        delete [] DevSpecConfigBuffer;
-    }
-    if (DevSpecConfigBufferSize) delete [] DevSpecConfigBufferSize;
-    if (APIChannelID) delete [] APIChannelID;
-    if (APIDeviceID) delete [] APIDeviceID;
-    if (API) delete [] API;
-    if (EnumeratedDevices) delete [] EnumeratedDevices;
-    if (FormatList) {
-        for (int j = 0; j < NumberOfEnumeratedDevices; j ++) {
-            if (FormatList[j]) delete [] FormatList[j];
-        }
-        delete [] FormatList;
-    }
-    if (FormatListSize) delete [] FormatListSize;
+    return SVL_OK;
 }
 
 int svlFilterSourceVideoCapture::Initialize()
 {
+    if (OutputData == 0) return SVL_FAIL;
+
     PlatformType platform;
     unsigned int i;
     int ret = SVL_FAIL;
@@ -329,6 +315,40 @@ int svlFilterSourceVideoCapture::Release()
     return SVL_OK;
 }
 
+void svlFilterSourceVideoCapture::InitializeCaptureAPIs()
+{
+    svlInitializeVideoCapture();
+
+    NumberOfSupportedAPIs = 0;
+
+    // Enumerate registered APIs
+    CVideoCaptureSourceBase* api;
+    SupportedAPIs.SetSize(256);
+    APIPlatforms.SetSize(256);
+    for (cmnClassRegister::const_iterator iter = cmnClassRegister::begin();
+         iter != cmnClassRegister::end();
+         iter ++) {
+        if ((*iter).first != "svlFilterSourceVideoCapture") {
+            api = dynamic_cast<CVideoCaptureSourceBase*>((*iter).second->Create());
+            if (api) {
+                SupportedAPIs[NumberOfSupportedAPIs] = (*iter).second;
+                APIPlatforms[NumberOfSupportedAPIs] = api->GetPlatformType();
+                NumberOfSupportedAPIs ++;
+            }
+            delete api;
+        }
+    }
+    SupportedAPIs.resize(NumberOfSupportedAPIs);
+    APIPlatforms.resize(NumberOfSupportedAPIs);
+
+    // Allocate capture API handler array
+    if (DeviceObj) delete DeviceObj;
+    DeviceObj = new CVideoCaptureSourceBase*[NumberOfSupportedAPIs];
+    for (unsigned int i = 0; i < NumberOfSupportedAPIs; i ++) {
+        DeviceObj[i] = 0;
+    }
+}
+
 int svlFilterSourceVideoCapture::CreateCaptureAPIHandlers()
 {
     int ret = SVL_FAIL;
@@ -342,121 +362,32 @@ int svlFilterSourceVideoCapture::CreateCaptureAPIHandlers()
     // Count the number of video channels requested from capture APIs
     // and create API look up table for easy device handler access
     for (i = 0; i < NumberOfChannels; i ++) {
+
         if (DeviceID[i] < 0 || DeviceID[i] >= NumberOfEnumeratedDevices) goto labError;
-        j = 0;
-#if (CISST_SVL_HAS_SVS == ON)
-        if (EnumeratedDevices[DeviceID[i]].platform == WinSVS) {
-            // getting API specific device and channel IDs
-            APIDeviceID[i] = EnumeratedDevices[DeviceID[i]].id;
-            APIChannelID[i] = chperapi[j];
 
-            API[i] = j;
-            chperapi[j] ++;
-        }
-        j ++;
-#endif // CISST_SVL_HAS_SVS
-#if (CISST_SVL_HAS_DIRECTSHOW == ON)
-        if (EnumeratedDevices[DeviceID[i]].platform == WinDirectShow) {
-            // getting API specific device and channel IDs
-            APIDeviceID[i] = EnumeratedDevices[DeviceID[i]].id;
-            APIChannelID[i] = chperapi[j];
+        // Enumerate registered APIs and store all results
+        for (j = 0; j < NumberOfSupportedAPIs; j ++) {
 
-            API[i] = j;
-            chperapi[j] ++;
-        }
-        j ++;
-#endif // CISST_SVL_HAS_DIRECTSHOW
-#if (CISST_SVL_HAS_VIDEO4LINUX2 == ON)
-        if (EnumeratedDevices[DeviceID[i]].platform == LinVideo4Linux2) {
-            // getting API specific device and channel IDs
-            APIDeviceID[i] = EnumeratedDevices[DeviceID[i]].id;
-            APIChannelID[i] = chperapi[j];
+            if (EnumeratedDevices[DeviceID[i]].platform == APIPlatforms[j]) {
+                // getting API specific device and channel IDs
+                APIDeviceID[i] = EnumeratedDevices[DeviceID[i]].id;
+                APIChannelID[i] = chperapi[j];
 
-            API[i] = j;
-            chperapi[j] ++;
+                API[i] = j;
+                chperapi[j] ++;
+            }
         }
-        j ++;
-#endif // CISST_SVL_HAS_VIDEO4LINUX2
-#if (CISST_SVL_HAS_DC1394 == ON)
-        if (EnumeratedDevices[DeviceID[i]].platform == LinLibDC1394) {
-            // getting API specific device and channel IDs
-            APIDeviceID[i] = EnumeratedDevices[DeviceID[i]].id;
-            APIChannelID[i] = chperapi[j];
-
-            API[i] = j;
-            chperapi[j] ++;
-        }
-        j ++;
-#endif // CISST_SVL_HAS_DC1394
-#if (CISST_SVL_HAS_OPENCV == ON)
-        if (EnumeratedDevices[DeviceID[i]].platform == OpenCV) {
-            // getting API specific device and channel IDs
-            APIDeviceID[i] = EnumeratedDevices[DeviceID[i]].id;
-            APIChannelID[i] = chperapi[j];
-
-            API[i] = j;
-            chperapi[j] ++;
-        }
-        j ++;
-#endif // CISST_SVL_HAS_OPENCV
-#if (CISST_SVL_HAS_MIL == ON)
-        if (EnumeratedDevices[DeviceID[i]].platform == MatroxImaging) {
-            // getting API specific device and channel IDs
-            APIDeviceID[i] = EnumeratedDevices[DeviceID[i]].id;
-            APIChannelID[i] = chperapi[j];
-
-            API[i] = j;
-            chperapi[j] ++;
-        }
-        j ++;
-#endif // CISST_SVL_HAS_MIL
     }
 
     // Instantiate capture device handlers and
     // set the number of channels requested
-    j = 0;
-#if (CISST_SVL_HAS_SVS == ON)
-    if (chperapi[j] > 0) {
-        DeviceObj[j] = new CSVSSource();
-        if (DeviceObj[j]->SetStreamCount(chperapi[j]) != SVL_OK) goto labError;
+    for (j = 0; j < NumberOfSupportedAPIs; j ++) {
+
+        if (chperapi[j] > 0) {
+            DeviceObj[j] = dynamic_cast<CVideoCaptureSourceBase*>(SupportedAPIs[j]->Create());
+            if (DeviceObj[j]->SetStreamCount(chperapi[j]) != SVL_OK) goto labError;
+        }
     }
-    j ++;
-#endif // CISST_SVL_HAS_SVS
-#if (CISST_SVL_HAS_DIRECTSHOW == ON)
-    if (chperapi[j] > 0) {
-        DeviceObj[j] = new CDirectShowSource();
-        if (DeviceObj[j]->SetStreamCount(chperapi[j]) != SVL_OK) goto labError;
-    }
-    j ++;
-#endif // CISST_SVL_HAS_DIRECTSHOW
-#if (CISST_SVL_HAS_VIDEO4LINUX2 == ON)
-    if (chperapi[j] > 0) {
-        DeviceObj[j] = new CV4L2Source();
-        if (DeviceObj[j]->SetStreamCount(chperapi[j]) != SVL_OK) goto labError;
-    }
-    j ++;
-#endif // CISST_SVL_HAS_VIDEO4LINUX2
-#if (CISST_SVL_HAS_DC1394 == ON)
-    if (chperapi[j] > 0) {
-        DeviceObj[j] = new CDC1394Source();
-        if (DeviceObj[j]->SetStreamCount(chperapi[j]) != SVL_OK) goto labError;
-    }
-    j ++;
-#endif // CISST_SVL_HAS_DC1394
-#if (CISST_SVL_HAS_OPENCV == ON)
-    if (chperapi[j] > 0) {
-        DeviceObj[j] = new COpenCVSource();
-        if (DeviceObj[j]->SetStreamCount(chperapi[j]) != SVL_OK) goto labError;
-    }
-    j ++;
-#endif // CISST_SVL_HAS_OPENCV
-#if (CISST_SVL_HAS_MIL == ON)
-    if (chperapi[j] > 0) {
-        DeviceObj[j] = CMILDevice::GetInstance();
-        if (DeviceObj[j]->SetStreamCount(chperapi[j]) != SVL_OK) goto labError;
-    }
-    j ++;
-#endif // CISST_SVL_HAS_MIL
 
     ret = SVL_OK;
 
@@ -484,6 +415,8 @@ int svlFilterSourceVideoCapture::SetTargetFrequency(double CMN_UNUSED(hertz))
 
 int svlFilterSourceVideoCapture::DialogSetup(unsigned int videoch)
 {
+    if (OutputData == 0)
+        return SVL_FAIL;
     if (IsInitialized() == true)
         return SVL_ALREADY_INITIALIZED;
     if (videoch >= NumberOfChannels)
@@ -518,6 +451,8 @@ int svlFilterSourceVideoCapture::DialogSetup(unsigned int videoch)
 
 int svlFilterSourceVideoCapture::DialogDevice()
 {
+    if (OutputData == 0)
+        return SVL_FAIL;
     if (IsInitialized() == true)
         return SVL_ALREADY_INITIALIZED;
 
@@ -539,6 +474,8 @@ int svlFilterSourceVideoCapture::DialogDevice()
 
 int svlFilterSourceVideoCapture::DialogInput(unsigned int deviceid)
 {
+    if (OutputData == 0)
+        return SVL_FAIL;
     if (IsInitialized() == true)
         return SVL_ALREADY_INITIALIZED;
 
@@ -561,6 +498,8 @@ int svlFilterSourceVideoCapture::DialogInput(unsigned int deviceid)
 
 int svlFilterSourceVideoCapture::DialogFormat(unsigned int videoch)
 {
+    if (OutputData == 0)
+        return SVL_FAIL;
     if (IsInitialized() == true)
         return SVL_ALREADY_INITIALIZED;
     if (videoch >= NumberOfChannels)
@@ -688,6 +627,8 @@ int svlFilterSourceVideoCapture::DialogFormat(unsigned int videoch)
 
 int svlFilterSourceVideoCapture::DialogTrigger(unsigned int videoch)
 {
+    if (OutputData == 0)
+        return SVL_FAIL;
     if (IsInitialized() == true)
         return SVL_ALREADY_INITIALIZED;
     if (videoch >= NumberOfChannels)
@@ -927,6 +868,8 @@ int svlFilterSourceVideoCapture::DialogImageProperties(unsigned int videoch)
 
 int svlFilterSourceVideoCapture::GetDeviceList(DeviceInfo **deviceinfolist, bool update)
 {
+    if (OutputData == 0)
+        return SVL_FAIL;
     if (IsInitialized() == true)
         return SVL_ALREADY_INITIALIZED;
 
@@ -934,6 +877,7 @@ int svlFilterSourceVideoCapture::GetDeviceList(DeviceInfo **deviceinfolist, bool
         // First enumeration or update
         int i;
         unsigned int j, sum;
+        CVideoCaptureSourceBase* api;
         DeviceInfo **apideviceinfos = new DeviceInfo*[NumberOfSupportedAPIs];
         int *apidevicecounts = new int[NumberOfSupportedAPIs];
         ImageFormat ***apiformats = new ImageFormat**[NumberOfSupportedAPIs];
@@ -957,109 +901,24 @@ int svlFilterSourceVideoCapture::GetDeviceList(DeviceInfo **deviceinfolist, bool
         }
         NumberOfEnumeratedDevices = 0;
 
-        // Enumerate API by API and store all results
-        j = 0;
-#if (CISST_SVL_HAS_SVS == ON)
-        apideviceinfos[j] = 0;
-        apidevicecounts[j] = 0;
-        CSVSSource *svsdevice = new CSVSSource();
-        if (svsdevice) {
-            apidevicecounts[j] = svsdevice->GetDeviceList(&(apideviceinfos[j]));
-            if (apidevicecounts[j] > 0) {
-                apiformats[j] = new ImageFormat*[apidevicecounts[j]];
-                apiformatcounts[j] = new int[apidevicecounts[j]];
-                for (i = 0; i < apidevicecounts[j]; i ++)
-                    apiformatcounts[j][i] = svsdevice->GetFormatList(i, &(apiformats[j][i]));
+        // Enumerate registered APIs and store all results
+        for (j = 0; j < NumberOfSupportedAPIs; j ++) {
+
+            api = dynamic_cast<CVideoCaptureSourceBase*>(SupportedAPIs[j]->Create());
+            if (api) {
+
+                apideviceinfos[j] = 0;
+                apidevicecounts[j] = api->GetDeviceList(&(apideviceinfos[j]));
+                if (apidevicecounts[j] > 0) {
+                    apiformats[j] = new ImageFormat*[apidevicecounts[j]];
+                    apiformatcounts[j] = new int[apidevicecounts[j]];
+                    for (i = 0; i < apidevicecounts[j]; i ++)
+                        apiformatcounts[j][i] = api->GetFormatList(i, &(apiformats[j][i]));
+                }
+                if (apidevicecounts[j] > 0) NumberOfEnumeratedDevices += apidevicecounts[j];
             }
-            delete svsdevice;
-            if (apidevicecounts[j] > 0) NumberOfEnumeratedDevices += apidevicecounts[j];
+            delete api;
         }
-        j ++;
-#endif // CISST_SVL_HAS_SVS
-#if (CISST_SVL_HAS_DIRECTSHOW == ON)
-        apideviceinfos[j] = 0;
-        apidevicecounts[j] = 0;
-        CDirectShowSource *dsdevice = new CDirectShowSource();
-        if (dsdevice) {
-            apidevicecounts[j] = dsdevice->GetDeviceList(&(apideviceinfos[j]));
-            if (apidevicecounts[j] > 0) {
-                apiformats[j] = new ImageFormat*[apidevicecounts[j]];
-                apiformatcounts[j] = new int[apidevicecounts[j]];
-                for (i = 0; i < apidevicecounts[j]; i ++)
-                    apiformatcounts[j][i] = dsdevice->GetFormatList(i, &(apiformats[j][i]));
-            }
-            delete dsdevice;
-            if (apidevicecounts[j] > 0) NumberOfEnumeratedDevices += apidevicecounts[j];
-        }
-        j ++;
-#endif // CISST_SVL_HAS_DIRECTSHOW
-#if (CISST_SVL_HAS_VIDEO4LINUX2 == ON)
-        apideviceinfos[j] = 0;
-        apidevicecounts[j] = 0;
-        CV4L2Source *v4l2device = new CV4L2Source();
-        if (v4l2device) {
-            apidevicecounts[j] = v4l2device->GetDeviceList(&(apideviceinfos[j]));
-            if (apidevicecounts[j] > 0) {
-                apiformats[j] = new ImageFormat*[apidevicecounts[j]];
-                apiformatcounts[j] = new int[apidevicecounts[j]];
-                for (i = 0; i < apidevicecounts[j]; i ++)
-                    apiformatcounts[j][i] = v4l2device->GetFormatList(i, &(apiformats[j][i]));
-            }
-            delete v4l2device;
-            if (apidevicecounts[j] > 0) NumberOfEnumeratedDevices += apidevicecounts[j];
-        }
-        j ++;
-#endif // CISST_SVL_HAS_VIDEO4LINUX2
-#if (CISST_SVL_HAS_DC1394 == ON)
-        apideviceinfos[j] = 0;
-        apidevicecounts[j] = 0;
-        CDC1394Source *dc1394device = new CDC1394Source();
-        if (dc1394device) {
-            apidevicecounts[j] = dc1394device->GetDeviceList(&(apideviceinfos[j]));
-            if (apidevicecounts[j] > 0) {
-                apiformats[j] = new ImageFormat*[apidevicecounts[j]];
-                apiformatcounts[j] = new int[apidevicecounts[j]];
-                for (i = 0; i < apidevicecounts[j]; i ++)
-                    apiformatcounts[j][i] = dc1394device->GetFormatList(i, &(apiformats[j][i]));
-            }
-            delete dc1394device;
-            if (apidevicecounts[j] > 0) NumberOfEnumeratedDevices += apidevicecounts[j];
-        }
-        j ++;
-#endif // CISST_SVL_HAS_DC1394
-#if (CISST_SVL_HAS_OPENCV == ON)
-        apideviceinfos[j] = 0;
-        apidevicecounts[j] = 0;
-        COpenCVSource *ocvdevice = new COpenCVSource();
-        if (ocvdevice) {
-            apidevicecounts[j] = ocvdevice->GetDeviceList(&(apideviceinfos[j]));
-            if (apidevicecounts[j] > 0) {
-                apiformats[j] = new ImageFormat*[apidevicecounts[j]];
-                apiformatcounts[j] = new int[apidevicecounts[j]];
-                for (i = 0; i < apidevicecounts[j]; i ++)
-                    apiformatcounts[j][i] = ocvdevice->GetFormatList(i, &(apiformats[j][i]));
-            }
-            delete ocvdevice;
-            if (apidevicecounts[j] > 0) NumberOfEnumeratedDevices += apidevicecounts[j];
-        }
-        j ++;
-#endif // CISST_SVL_HAS_OPENCV
-#if (CISST_SVL_HAS_MIL == ON)
-        apideviceinfos[j] = 0;
-        apidevicecounts[j] = 0;
-        CMILDevice *mildevice = CMILDevice::GetInstance();
-        if (mildevice) {
-            apidevicecounts[j] = mildevice->GetDeviceList(&(apideviceinfos[j]));
-            if (apidevicecounts[j] > 0) {
-                apiformats[j] = new ImageFormat*[apidevicecounts[j]];
-                apiformatcounts[j] = new int[apidevicecounts[j]];
-                for (i = 0; i < apidevicecounts[j]; i ++)
-                    apiformatcounts[j][i] = mildevice->GetFormatList(i, &(apiformats[j][i]));
-            }
-            if (apidevicecounts[j] > 0) NumberOfEnumeratedDevices += apidevicecounts[j];
-        }
-        j ++;
-#endif // CISST_SVL_HAS_MIL
 
         if (NumberOfEnumeratedDevices > 0) {
             // Allocate the ONE device info array
@@ -1119,6 +978,9 @@ void svlFilterSourceVideoCapture::ReleaseDeviceList(DeviceInfo *deviceinfolist)
 
 int svlFilterSourceVideoCapture::PrintDeviceList(bool update)
 {
+    if (OutputData == 0)
+        return SVL_FAIL;
+
     DeviceInfo *devices = 0;
     int devicecount = GetDeviceList(&devices, update);
 
@@ -1133,6 +995,9 @@ int svlFilterSourceVideoCapture::PrintDeviceList(bool update)
 
 int svlFilterSourceVideoCapture::PrintInputList(int deviceid, bool update)
 {
+    if (OutputData == 0)
+        return SVL_FAIL;
+    
     DeviceInfo *devices = 0;
     int devicecount = GetDeviceList(&devices, update);
 
@@ -1153,6 +1018,8 @@ int svlFilterSourceVideoCapture::PrintInputList(int deviceid, bool update)
 
 int svlFilterSourceVideoCapture::SetDevice(int deviceid, int inputid, unsigned int videoch)
 {
+    if (OutputData == 0)
+        return SVL_FAIL;
     if (IsInitialized() == true)
         return SVL_ALREADY_INITIALIZED;
     if (videoch >= NumberOfChannels)
@@ -1166,6 +1033,8 @@ int svlFilterSourceVideoCapture::SetDevice(int deviceid, int inputid, unsigned i
 
 int svlFilterSourceVideoCapture::GetDevice(int & deviceid, int & inputid, unsigned int videoch)
 {
+    if (OutputData == 0)
+        return SVL_FAIL;
     if (videoch >= NumberOfChannels)
         return SVL_WRONG_CHANNEL;
 
@@ -1177,6 +1046,8 @@ int svlFilterSourceVideoCapture::GetDevice(int & deviceid, int & inputid, unsign
 
 int svlFilterSourceVideoCapture::GetFormatList(ImageFormat **formatlist, unsigned int videoch)
 {
+    if (OutputData == 0)
+        return SVL_FAIL;
     if (formatlist == 0)
         return SVL_FAIL;
     if (videoch >= NumberOfChannels)
@@ -1202,6 +1073,9 @@ void svlFilterSourceVideoCapture::ReleaseFormatList(ImageFormat *formatlist)
 
 int svlFilterSourceVideoCapture::PrintFormatList(unsigned int videoch)
 {
+    if (OutputData == 0)
+        return SVL_FAIL;
+    
     int i, j;
     ImageFormat *formats = 0;
     int formatcount = GetFormatList(&formats, videoch);
@@ -1238,6 +1112,9 @@ int svlFilterSourceVideoCapture::PrintFormatList(unsigned int videoch)
 
 int svlFilterSourceVideoCapture::SelectFormat(unsigned int formatid, unsigned int videoch)
 {
+    if (OutputData == 0)
+        return SVL_FAIL;
+    
     ImageFormat *formats = 0;
     int formatcount = GetFormatList(&formats, videoch);
     int ret = SVL_FAIL;
@@ -1253,6 +1130,8 @@ int svlFilterSourceVideoCapture::SelectFormat(unsigned int formatid, unsigned in
 
 int svlFilterSourceVideoCapture::SetFormat(ImageFormat& format, unsigned int videoch)
 {
+    if (OutputData == 0)
+        return SVL_FAIL;
     if (IsInitialized() == true)
         return SVL_ALREADY_INITIALIZED;
     if (videoch >= NumberOfChannels)
@@ -1266,6 +1145,8 @@ int svlFilterSourceVideoCapture::SetFormat(ImageFormat& format, unsigned int vid
 
 int svlFilterSourceVideoCapture::GetFormat(ImageFormat& format, unsigned int videoch)
 {
+    if (OutputData == 0)
+        return SVL_FAIL;
     if (videoch >= NumberOfChannels)
         return SVL_WRONG_CHANNEL;
     if (Format[videoch] == 0)
@@ -1278,6 +1159,8 @@ int svlFilterSourceVideoCapture::GetFormat(ImageFormat& format, unsigned int vid
 
 int svlFilterSourceVideoCapture::SetTrigger(ExternalTrigger& trigger, unsigned int videoch)
 {
+    if (OutputData == 0)
+        return SVL_FAIL;
     if (IsInitialized() == true)
         return SVL_ALREADY_INITIALIZED;
     if (videoch >= NumberOfChannels)
@@ -1290,6 +1173,8 @@ int svlFilterSourceVideoCapture::SetTrigger(ExternalTrigger& trigger, unsigned i
 
 int svlFilterSourceVideoCapture::GetTrigger(ExternalTrigger& trigger, unsigned int videoch)
 {
+    if (OutputData == 0)
+        return SVL_FAIL;
     if (videoch >= NumberOfChannels)
         return SVL_WRONG_CHANNEL;
 
@@ -1390,6 +1275,9 @@ std::string svlFilterSourceVideoCapture::GetPatternTypeName(PatternType patternt
 
 int svlFilterSourceVideoCapture::SaveSettings(const char* filepath)
 {
+    if (OutputData == 0)
+        return SVL_FAIL;
+    
     unsigned int writelen;
     int err, devid, intvalue;
     unsigned char emptybuffer[SVL_VCS_STRING_LENGTH];
@@ -1482,6 +1370,8 @@ labError:
 
 int svlFilterSourceVideoCapture::LoadSettings(const char* filepath)
 {
+    if (OutputData == 0)
+        return SVL_FAIL;
     if (IsInitialized() == true)
         return SVL_ALREADY_INITIALIZED;
 

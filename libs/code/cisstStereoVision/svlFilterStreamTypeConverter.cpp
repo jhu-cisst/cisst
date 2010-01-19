@@ -30,74 +30,26 @@ using namespace std;
 /*** svlFilterStreamTypeConverter class ****/
 /*******************************************/
 
-////////////////////////////////////////////////////
-// Valid input->output mappings are:
-//          svlTypeImageRGB          -> svlTypeImageRGBA
-//          svlTypeImageRGB          -> svlTypeImageMono8
-//          svlTypeImageRGB          -> svlTypeImageMono16
-//          svlTypeImageMono8        -> svlTypeImageRGB
-//          svlTypeImageMono8        -> svlTypeImageRGBA
-//          svlTypeImageMono8        -> svlTypeImage16
-//          svlTypeImageMono16       -> svlTypeImageRGB
-//          svlTypeImageMono16       -> svlTypeImageRGBA
-//          svlTypeImageMono16       -> svlTypeImage8
-//          svlTypeImageRGBStereo    -> svlTypeImageRGBAStereo,
-//          svlTypeImageRGBStereo    -> svlTypeImageMono8Stereo,
-//          svlTypeImageRGBStereo    -> svlTypeImageMono16Stereo,
-//          svlTypeImageMono8Stereo  -> svlTypeImageRGBStereo,
-//          svlTypeImageMono8Stereo  -> svlTypeImageRGBAStereo,
-//          svlTypeImageMono8Stereo  -> svlTypeImageMono16Stereo,
-//          svlTypeImageMono16Stereo -> svlTypeImageRGBStereo,
-//          svlTypeImageMono16Stereo -> svlTypeImageRGBAStereo,
-//          svlTypeImageMono16Stereo -> svlTypeImageMono8Stereo,
-//          svlTypeImageMonoFloat    -> svlTypeImageMono8
-//          svlTypeImageMonoFloat    -> svlTypeImageMono16
-//          svlTypeImageMonoFloat    -> svlTypeImageRGB
-//          svlTypeImageMonoFloat    -> svlTypeImageRGBA
-//          svlTypeImage3DMap        -> svlTypeImageMono8
-//          svlTypeImage3DMap        -> svlTypeImageMono16
-//          svlTypeImage3DMap        -> svlTypeImageRGB
-//          svlTypeImage3DMap        -> svlTypeImageRGBA
-// Otherwise, the filter will fail to initialize.
-//
-svlFilterStreamTypeConverter::svlFilterStreamTypeConverter(svlStreamType inputtype, svlStreamType outputtype) : svlFilterBase()
+CMN_IMPLEMENT_SERVICES(svlFilterStreamTypeConverter)
+
+svlFilterStreamTypeConverter::svlFilterStreamTypeConverter() :
+    svlFilterBase(),
+    cmnGenericObject(),
+    Scaling(1.0f),
+    Mono16ShiftDown(8)
 {
-    if ((inputtype == svlTypeImageRGB          && outputtype == svlTypeImageRGBA) ||
-        (inputtype == svlTypeImageRGB          && outputtype == svlTypeImageMono8) ||
-        (inputtype == svlTypeImageRGB          && outputtype == svlTypeImageMono16) ||
-        (inputtype == svlTypeImageMono8        && outputtype == svlTypeImageRGB) ||
-        (inputtype == svlTypeImageMono8        && outputtype == svlTypeImageRGBA) ||
-        (inputtype == svlTypeImageMono8        && outputtype == svlTypeImageMono16) ||
-        (inputtype == svlTypeImageMono16       && outputtype == svlTypeImageRGB) ||
-        (inputtype == svlTypeImageMono16       && outputtype == svlTypeImageRGBA) ||
-        (inputtype == svlTypeImageMono16       && outputtype == svlTypeImageMono8) ||
-        (inputtype == svlTypeImageRGBStereo    && outputtype == svlTypeImageRGBAStereo) ||
-        (inputtype == svlTypeImageRGBStereo    && outputtype == svlTypeImageMono8Stereo) ||
-        (inputtype == svlTypeImageRGBStereo    && outputtype == svlTypeImageMono16Stereo) ||
-        (inputtype == svlTypeImageMono8Stereo  && outputtype == svlTypeImageRGBStereo) ||
-        (inputtype == svlTypeImageMono8Stereo  && outputtype == svlTypeImageRGBAStereo) ||
-        (inputtype == svlTypeImageMono8Stereo  && outputtype == svlTypeImageMono16Stereo) ||
-        (inputtype == svlTypeImageMono16Stereo && outputtype == svlTypeImageRGBStereo) ||
-        (inputtype == svlTypeImageMono16Stereo && outputtype == svlTypeImageRGBAStereo) ||
-        (inputtype == svlTypeImageMono16Stereo && outputtype == svlTypeImageMono8Stereo) ||
-        (inputtype == svlTypeImageMonoFloat    && outputtype == svlTypeImageMono8) ||
-        (inputtype == svlTypeImageMonoFloat    && outputtype == svlTypeImageMono16) ||
-        (inputtype == svlTypeImageMonoFloat    && outputtype == svlTypeImageRGB) ||
-        (inputtype == svlTypeImageMonoFloat    && outputtype == svlTypeImageRGBA) ||
-        (inputtype == svlTypeImage3DMap        && outputtype == svlTypeImageMono8) ||
-        (inputtype == svlTypeImage3DMap        && outputtype == svlTypeImageMono16) ||
-        (inputtype == svlTypeImage3DMap        && outputtype == svlTypeImageRGB) ||
-        (inputtype == svlTypeImage3DMap        && outputtype == svlTypeImageRGBA)) {
+    OutputData = 0;
+}
 
-        // mapping input type to output type
-        AddSupportedType(inputtype, outputtype);
+svlFilterStreamTypeConverter::svlFilterStreamTypeConverter(svlStreamType inputtype, svlStreamType outputtype) :
+    svlFilterBase(),
+    cmnGenericObject(),
+    Scaling(1.0f),
+    Mono16ShiftDown(8)
+{
+    OutputData = 0;
 
-        // initializing output sample
-        OutputData = svlSample::GetNewFromType(outputtype);
-    }
-
-    Scaling = 1.0f;
-    Mono16ShiftDown = 8;
+    SetType(inputtype, outputtype);
 }
 
 svlFilterStreamTypeConverter::~svlFilterStreamTypeConverter()
@@ -107,8 +59,84 @@ svlFilterStreamTypeConverter::~svlFilterStreamTypeConverter()
     if (OutputData) delete OutputData;
 }
 
+int svlFilterStreamTypeConverter::SetType(svlStreamType inputtype, svlStreamType outputtype)
+{
+    if (OutputData == 0) {
+
+        ////////////////////////////////////////////////////
+        // Valid input->output mappings are:
+        //          svlTypeImageRGB          -> svlTypeImageRGBA
+        //          svlTypeImageRGB          -> svlTypeImageMono8
+        //          svlTypeImageRGB          -> svlTypeImageMono16
+        //          svlTypeImageMono8        -> svlTypeImageRGB
+        //          svlTypeImageMono8        -> svlTypeImageRGBA
+        //          svlTypeImageMono8        -> svlTypeImage16
+        //          svlTypeImageMono16       -> svlTypeImageRGB
+        //          svlTypeImageMono16       -> svlTypeImageRGBA
+        //          svlTypeImageMono16       -> svlTypeImage8
+        //          svlTypeImageRGBStereo    -> svlTypeImageRGBAStereo,
+        //          svlTypeImageRGBStereo    -> svlTypeImageMono8Stereo,
+        //          svlTypeImageRGBStereo    -> svlTypeImageMono16Stereo,
+        //          svlTypeImageMono8Stereo  -> svlTypeImageRGBStereo,
+        //          svlTypeImageMono8Stereo  -> svlTypeImageRGBAStereo,
+        //          svlTypeImageMono8Stereo  -> svlTypeImageMono16Stereo,
+        //          svlTypeImageMono16Stereo -> svlTypeImageRGBStereo,
+        //          svlTypeImageMono16Stereo -> svlTypeImageRGBAStereo,
+        //          svlTypeImageMono16Stereo -> svlTypeImageMono8Stereo,
+        //          svlTypeImageMonoFloat    -> svlTypeImageMono8
+        //          svlTypeImageMonoFloat    -> svlTypeImageMono16
+        //          svlTypeImageMonoFloat    -> svlTypeImageRGB
+        //          svlTypeImageMonoFloat    -> svlTypeImageRGBA
+        //          svlTypeImage3DMap        -> svlTypeImageMono8
+        //          svlTypeImage3DMap        -> svlTypeImageMono16
+        //          svlTypeImage3DMap        -> svlTypeImageRGB
+        //          svlTypeImage3DMap        -> svlTypeImageRGBA
+        // Otherwise, the filter will fail to initialize.
+        //
+        if ((inputtype == svlTypeImageRGB          && outputtype == svlTypeImageRGBA) ||
+            (inputtype == svlTypeImageRGB          && outputtype == svlTypeImageMono8) ||
+            (inputtype == svlTypeImageRGB          && outputtype == svlTypeImageMono16) ||
+            (inputtype == svlTypeImageMono8        && outputtype == svlTypeImageRGB) ||
+            (inputtype == svlTypeImageMono8        && outputtype == svlTypeImageRGBA) ||
+            (inputtype == svlTypeImageMono8        && outputtype == svlTypeImageMono16) ||
+            (inputtype == svlTypeImageMono16       && outputtype == svlTypeImageRGB) ||
+            (inputtype == svlTypeImageMono16       && outputtype == svlTypeImageRGBA) ||
+            (inputtype == svlTypeImageMono16       && outputtype == svlTypeImageMono8) ||
+            (inputtype == svlTypeImageRGBStereo    && outputtype == svlTypeImageRGBAStereo) ||
+            (inputtype == svlTypeImageRGBStereo    && outputtype == svlTypeImageMono8Stereo) ||
+            (inputtype == svlTypeImageRGBStereo    && outputtype == svlTypeImageMono16Stereo) ||
+            (inputtype == svlTypeImageMono8Stereo  && outputtype == svlTypeImageRGBStereo) ||
+            (inputtype == svlTypeImageMono8Stereo  && outputtype == svlTypeImageRGBAStereo) ||
+            (inputtype == svlTypeImageMono8Stereo  && outputtype == svlTypeImageMono16Stereo) ||
+            (inputtype == svlTypeImageMono16Stereo && outputtype == svlTypeImageRGBStereo) ||
+            (inputtype == svlTypeImageMono16Stereo && outputtype == svlTypeImageRGBAStereo) ||
+            (inputtype == svlTypeImageMono16Stereo && outputtype == svlTypeImageMono8Stereo) ||
+            (inputtype == svlTypeImageMonoFloat    && outputtype == svlTypeImageMono8) ||
+            (inputtype == svlTypeImageMonoFloat    && outputtype == svlTypeImageMono16) ||
+            (inputtype == svlTypeImageMonoFloat    && outputtype == svlTypeImageRGB) ||
+            (inputtype == svlTypeImageMonoFloat    && outputtype == svlTypeImageRGBA) ||
+            (inputtype == svlTypeImage3DMap        && outputtype == svlTypeImageMono8) ||
+            (inputtype == svlTypeImage3DMap        && outputtype == svlTypeImageMono16) ||
+            (inputtype == svlTypeImage3DMap        && outputtype == svlTypeImageRGB) ||
+            (inputtype == svlTypeImage3DMap        && outputtype == svlTypeImageRGBA)) {
+
+            // mapping input type to output type
+            AddSupportedType(inputtype, outputtype);
+
+            // initializing output sample
+            OutputData = svlSample::GetNewFromType(outputtype);
+
+            return SVL_OK;
+        }
+    }
+
+    return SVL_FAIL;
+}
+
 int svlFilterStreamTypeConverter::Initialize(svlSample* inputdata)
 {
+    if (OutputData == 0) return SVL_FAIL;
+
     Release();
 
     OutputData->SetSize(*inputdata);

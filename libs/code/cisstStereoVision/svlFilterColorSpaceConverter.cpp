@@ -30,7 +30,11 @@ using namespace std;
 /*** svlFilterColorSpaceConverter class ****/
 /*******************************************/
 
-svlFilterColorSpaceConverter::svlFilterColorSpaceConverter() : svlFilterBase()
+CMN_IMPLEMENT_SERVICES(svlFilterColorSpaceConverter)
+
+svlFilterColorSpaceConverter::svlFilterColorSpaceConverter() :
+    svlFilterBase(),
+    cmnGenericObject()
 {
     AddSupportedType(svlTypeImageRGB, svlTypeImageRGB);
     AddSupportedType(svlTypeImageRGBStereo, svlTypeImageRGBStereo);

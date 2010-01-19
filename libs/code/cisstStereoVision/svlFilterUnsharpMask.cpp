@@ -30,7 +30,11 @@ using namespace std;
 /*** svlFilterUnsharpMask class ***********/
 /******************************************/
 
-svlFilterUnsharpMask::svlFilterUnsharpMask() : svlFilterBase()
+CMN_IMPLEMENT_SERVICES(svlFilterUnsharpMask)
+
+svlFilterUnsharpMask::svlFilterUnsharpMask() :
+    svlFilterBase(),
+    cmnGenericObject()
 {
     AddSupportedType(svlTypeImageRGB, svlTypeImageRGB);
     AddSupportedType(svlTypeImageRGBStereo, svlTypeImageRGBStereo);

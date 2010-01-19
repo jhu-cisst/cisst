@@ -103,8 +103,10 @@ protected:
 };
 
 
-class CDirectShowSource : public CVideoCaptureSourceBase
+class CDirectShowSource : public CVideoCaptureSourceBase, public cmnGenericObject
 {
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+
 public:
 	CDirectShowSource();
 	~CDirectShowSource();
@@ -179,6 +181,8 @@ public:
 	int SetMediaType(unsigned char *mediabuffer, unsigned int length, unsigned int videoch = 0);
     int SetRendererOnOff(bool render, unsigned int videoch = 0);
 };
+
+CMN_DECLARE_SERVICES_INSTANTIATION(CDirectShowSource)
 
 #endif // _vidDirectShowSource_h
 

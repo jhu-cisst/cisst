@@ -28,8 +28,11 @@ using namespace std;
 /*** svlFilterStereoImageOptimizer class ****/
 /********************************************/
 
+CMN_IMPLEMENT_SERVICES(svlFilterStereoImageOptimizer)
+
 svlFilterStereoImageOptimizer::svlFilterStereoImageOptimizer() :
     svlFilterBase(),
+    cmnGenericObject(),
     Disparity_Target(0),
     ROI_Target(0, 0, 0x7FFFFFFF, 0x7FFFFFFF),
     ColBal_Red(256),

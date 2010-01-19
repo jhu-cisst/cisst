@@ -42,27 +42,40 @@ using namespace std;
 /*** svlFilterSourceImageFile class ****/
 /***************************************/
 
-svlFilterSourceImageFile::svlFilterSourceImageFile(bool stereo) :
+CMN_IMPLEMENT_SERVICES(svlFilterSourceImageFile)
+
+svlFilterSourceImageFile::svlFilterSourceImageFile() :
     svlFilterSourceBase(),
+    cmnGenericObject(),
     NumberOfDigits(0),
     From(0),
     To(0)
 {
-    Stereo = stereo;
-    if (Stereo) {
-        AddSupportedType(svlTypeImageRGBStereo);
-        OutputData = new svlSampleImageRGBStereo;
-    }
-    else {
-        AddSupportedType(svlTypeImageRGB);
-        OutputData = new svlSampleImageRGB;
-    }
-
     for (int i = 0; i < 2; i ++) {
         ImageFile[i] = 0;
         FilePathPrefix[i][0] = 0;
         Extension[i][0] = 0;
     }
+    
+    OutputData = 0;
+}
+
+svlFilterSourceImageFile::svlFilterSourceImageFile(unsigned int channelcount) :
+    svlFilterSourceBase(),
+    cmnGenericObject(),
+    NumberOfDigits(0),
+    From(0),
+    To(0)
+{
+    for (int i = 0; i < 2; i ++) {
+        ImageFile[i] = 0;
+        FilePathPrefix[i][0] = 0;
+        Extension[i][0] = 0;
+    }
+
+    OutputData = 0;
+
+    SetChannelCount(channelcount);
 }
 
 svlFilterSourceImageFile::~svlFilterSourceImageFile()
@@ -72,8 +85,29 @@ svlFilterSourceImageFile::~svlFilterSourceImageFile()
     if (OutputData) delete OutputData;
 }
 
+int svlFilterSourceImageFile::SetChannelCount(unsigned int channelcount)
+{
+    if (OutputData) return SVL_FAIL;
+
+    if (channelcount == 1) {
+        Stereo = false;
+        AddSupportedType(svlTypeImageRGB);
+        OutputData = new svlSampleImageRGB;
+    }
+    else if (channelcount == 2) {
+        Stereo = true;
+        AddSupportedType(svlTypeImageRGBStereo);
+        OutputData = new svlSampleImageRGBStereo;
+    }
+    else return SVL_FAIL;
+
+    return SVL_OK;
+}
+
 int svlFilterSourceImageFile::Initialize()
 {
+    if (OutputData == 0) return SVL_FAIL;
+
     Release();
 
     if (Stereo) {
@@ -147,7 +181,7 @@ int svlFilterSourceImageFile::Initialize()
     return SVL_OK;
 }
 
-int svlFilterSourceImageFile::OnStart(unsigned int procCount)
+int svlFilterSourceImageFile::OnStart(unsigned int CMN_UNUSED(procCount))
 {
     StopLoop = false;
     return SVL_OK;
@@ -220,6 +254,8 @@ int svlFilterSourceImageFile::Release()
 
 int svlFilterSourceImageFile::SetFilePath(const char* filepathprefix, const char* extension, int videoch)
 {
+    if (OutputData == 0)
+        return SVL_FAIL;
     if (IsInitialized() == true)
         return SVL_ALREADY_INITIALIZED;
     if (videoch != SVL_LEFT && videoch != SVL_RIGHT)
@@ -266,8 +302,11 @@ int svlFilterSourceImageFile::SetSequence(unsigned int numberofdigits, unsigned 
     return SVL_OK;
 }
 
-void svlFilterSourceImageFile::BuildFilePath(int videoch, unsigned int framecounter)
+int svlFilterSourceImageFile::BuildFilePath(int videoch, unsigned int framecounter)
 {
+    if (OutputData == 0)
+        return SVL_FAIL;
+
     if (NumberOfDigits > 0) {
         int i, inlen, rmnlen;
         char innum[10], outnum[10];
@@ -285,5 +324,7 @@ void svlFilterSourceImageFile::BuildFilePath(int videoch, unsigned int framecoun
     else {
         sprintf(FilePath[videoch], "%s.%s", FilePathPrefix[videoch], Extension[videoch]);
     }
+
+    return SVL_OK;
 }
 

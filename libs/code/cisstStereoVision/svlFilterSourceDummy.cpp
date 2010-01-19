@@ -42,19 +42,28 @@ using namespace std;
 /*** svlFilterSourceDummy class ******/
 /*************************************/
 
-svlFilterSourceDummy::svlFilterSourceDummy(svlStreamType type) :
+CMN_IMPLEMENT_SERVICES(svlFilterSourceDummy)
+
+svlFilterSourceDummy::svlFilterSourceDummy() :
     svlFilterSourceBase(),
+    cmnGenericObject(),
     Noise(false),
     Disparity(0)
 {
-    // Other types may be added in the future
-    if (type == svlTypeImageRGB ||
-        type == svlTypeImageRGBStereo) {
-        AddSupportedType(type);
-        OutputData = svlSample::GetNewFromType(type);
-    }
-
     ImageBuffer[0] = ImageBuffer[1] = 0;
+    OutputData = 0;
+}
+
+svlFilterSourceDummy::svlFilterSourceDummy(svlStreamType type) :
+    svlFilterSourceBase(),
+    cmnGenericObject(),
+    Noise(false),
+    Disparity(0)
+{
+    ImageBuffer[0] = ImageBuffer[1] = 0;
+    OutputData = 0;
+
+    SetType(type);
 }
 
 svlFilterSourceDummy::~svlFilterSourceDummy()
@@ -66,8 +75,28 @@ svlFilterSourceDummy::~svlFilterSourceDummy()
     if (ImageBuffer[1]) delete [] ImageBuffer[1];
 }
 
+int svlFilterSourceDummy::SetType(svlStreamType type)
+{
+    if (OutputData == 0) {
+
+        // Other types may be added in the future
+        if (type == svlTypeImageRGB ||
+            type == svlTypeImageRGBStereo) {
+
+            AddSupportedType(type);
+            OutputData = svlSample::GetNewFromType(type);
+
+            return SVL_OK;
+        }
+    }
+
+    return SVL_FAIL;
+}
+
 int svlFilterSourceDummy::Initialize()
 {
+    if (OutputData == 0) return SVL_FAIL;
+
     Release();
 
     svlSampleImageBase* img = dynamic_cast<svlSampleImageBase*>(OutputData);

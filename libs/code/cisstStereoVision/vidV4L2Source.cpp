@@ -53,8 +53,11 @@ using namespace std;
 /*** CV4L2Source class ***************/
 /*************************************/
 
+CMN_IMPLEMENT_SERVICES(CV4L2Source)
+
 CV4L2Source::CV4L2Source() :
     CVideoCaptureSourceBase(),
+    cmnGenericObject(),
     NumOfStreams(0),
     Initialized(false),
     Running(false),

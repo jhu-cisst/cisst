@@ -29,8 +29,10 @@ http://www.cisst.org/cisst/license.txt.
 
 class COpenCVSourceThread;
 
-class COpenCVSource : public CVideoCaptureSourceBase
+class COpenCVSource : public CVideoCaptureSourceBase, public cmnGenericObject
 {
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+
 friend class COpenCVSourceThread;
 
 public:
@@ -91,6 +93,7 @@ private:
     IplImage *Frame;
 };
 
+CMN_DECLARE_SERVICES_INSTANTIATION(COpenCVSource)
 
 #endif // _vidOCVSource_h
 

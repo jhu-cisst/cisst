@@ -40,8 +40,11 @@ using namespace std;
 /*** COpenCVSource class *************/
 /*************************************/
 
+CMN_IMPLEMENT_SERVICES(COpenCVSource)
+
 COpenCVSource::COpenCVSource() :
     CVideoCaptureSourceBase(),
+    cmnGenericObject(),
     NumOfStreams(0),
     Initialized(false),
     Running(false),

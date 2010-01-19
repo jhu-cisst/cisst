@@ -31,8 +31,11 @@ using namespace std;
 /*** svlFilterImageRectifier class ********/
 /******************************************/
 
+CMN_IMPLEMENT_SERVICES(svlFilterImageRectifier)
+
 svlFilterImageRectifier::svlFilterImageRectifier() :
     svlFilterBase(),
+    cmnGenericObject(),
     SimpleModeEnabled(false),
     InterpolationEnabled(true)
 {

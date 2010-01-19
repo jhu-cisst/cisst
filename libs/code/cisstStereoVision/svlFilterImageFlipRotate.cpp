@@ -29,8 +29,11 @@ using namespace std;
 /*** svlFilterImageFlipRotate class ****/
 /***************************************/
 
+CMN_IMPLEMENT_SERVICES(svlFilterImageFlipRotate)
+
 svlFilterImageFlipRotate::svlFilterImageFlipRotate() :
-    svlFilterBase()
+    svlFilterBase(),
+    cmnGenericObject()
 {
     AddSupportedType(svlTypeImageRGB, svlTypeImageRGB);
     AddSupportedType(svlTypeImageMono8, svlTypeImageMono8);

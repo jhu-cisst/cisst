@@ -40,7 +40,11 @@ using namespace std;
 /*** svlFilterPointTracker class **********/
 /******************************************/
 
-svlFilterPointTracker::svlFilterPointTracker() : svlFilterBase()
+CMN_IMPLEMENT_SERVICES(svlFilterPointTracker)
+
+svlFilterPointTracker::svlFilterPointTracker() :
+    svlFilterBase(),
+    cmnGenericObject()
 {
     AddSupportedType(svlTypeImageRGB, svlTypePointCloud);
     AddSupportedType(svlTypeImageRGBStereo, svlTypePointCloud);

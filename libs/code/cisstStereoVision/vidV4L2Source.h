@@ -29,8 +29,10 @@ http://www.cisst.org/cisst/license.txt.
 
 class CV4L2SourceThread;
 
-class CV4L2Source : public CVideoCaptureSourceBase
+class CV4L2Source : public CVideoCaptureSourceBase, public cmnGenericObject
 {
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+
 friend class CV4L2SourceThread;
 
     typedef struct _FrameBufferType {
@@ -105,6 +107,7 @@ private:
     bool InitSuccess;
 };
 
+CMN_DECLARE_SERVICES_INSTANTIATION(CV4L2Source)
 
 #endif // _vidV4L2Source_h
 

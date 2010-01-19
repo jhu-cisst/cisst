@@ -27,8 +27,11 @@ http://www.cisst.org/cisst/license.txt.
 /*** CSVSSource class *********/
 /******************************/
 
+CMN_IMPLEMENT_SERVICES(CSVSSource)
+
 CSVSSource::CSVSSource() :
     CVideoCaptureSourceBase(),
+    cmnGenericObject(),
     NumOfStreams(0),
     Running(false),
     CaptureProc(0),

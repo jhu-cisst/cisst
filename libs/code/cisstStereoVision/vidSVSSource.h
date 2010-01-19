@@ -30,8 +30,10 @@ http://www.cisst.org/cisst/license.txt.
 
 class CSVSSourceThread;
 
-class CSVSSource : public CVideoCaptureSourceBase
+class CSVSSource : public CVideoCaptureSourceBase, public cmnGenericObject
 {
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+
 friend class CSVSSourceThread;
 
 public:
@@ -86,6 +88,7 @@ private:
     bool InitSuccess;
 };
 
+CMN_DECLARE_SERVICES_INSTANTIATION(CSVSSource)
 
 #endif // _vidSVSSource_h
 

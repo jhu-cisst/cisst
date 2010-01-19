@@ -34,8 +34,11 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlFilterVideoFileWriter class **********/
 /*********************************************/
 
+CMN_IMPLEMENT_SERVICES(svlFilterVideoFileWriter)
+
 svlFilterVideoFileWriter::svlFilterVideoFileWriter() :
     svlFilterBase(),
+    cmnGenericObject(),
     CaptureLength(-1), // Continuous saving by default
     Action(false),
     ActionTime(0.0),

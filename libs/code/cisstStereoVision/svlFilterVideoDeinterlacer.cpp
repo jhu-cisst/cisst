@@ -29,7 +29,11 @@ using namespace std;
 /*** svlFilterVideoDeinterlacer class *****/
 /******************************************/
 
-svlFilterVideoDeinterlacer::svlFilterVideoDeinterlacer() : svlFilterBase()
+CMN_IMPLEMENT_SERVICES(svlFilterVideoDeinterlacer)
+
+svlFilterVideoDeinterlacer::svlFilterVideoDeinterlacer() :
+    svlFilterBase(),
+    cmnGenericObject()
 {
     AddSupportedType(svlTypeImageRGB, svlTypeImageRGB);
     AddSupportedType(svlTypeImageRGBStereo, svlTypeImageRGBStereo);

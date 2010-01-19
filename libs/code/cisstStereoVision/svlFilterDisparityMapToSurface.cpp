@@ -26,8 +26,11 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlFilterDisparityMapToSurface class ***/
 /********************************************/
 
+CMN_IMPLEMENT_SERVICES(svlFilterDisparityMapToSurface)
+
 svlFilterDisparityMapToSurface::svlFilterDisparityMapToSurface() :
     svlFilterBase(),
+    cmnGenericObject(),
     ROI(0, 0, 0, 0),
     BaseLine(-10.0f),
     FocalLength(600.0f),
@@ -64,7 +67,6 @@ int svlFilterDisparityMapToSurface::ProcessFrame(ProcInfo* procInfo, svlSample* 
     {
         svlSampleImage3DMap *outputmap = dynamic_cast<svlSampleImage3DMap*>(OutputData);
         const unsigned int width = outputmap->GetWidth();
-        const unsigned int height = outputmap->GetHeight();
         const unsigned int vertstride = width - ROI.right + ROI.left - 1;
         const unsigned int vertstride3 = vertstride * 3;
         const float bl = BaseLine;

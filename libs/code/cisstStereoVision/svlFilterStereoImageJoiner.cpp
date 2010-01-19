@@ -29,8 +29,11 @@ using namespace std;
 /*** svlFilterStereoImageJoiner class *****/
 /******************************************/
 
+CMN_IMPLEMENT_SERVICES(svlFilterStereoImageJoiner)
+
 svlFilterStereoImageJoiner::svlFilterStereoImageJoiner() :
     svlFilterBase(),
+    cmnGenericObject(),
     ImageLayout(SideBySide)
 {
     AddSupportedType(svlTypeImageRGBStereo, svlTypeImageRGB);

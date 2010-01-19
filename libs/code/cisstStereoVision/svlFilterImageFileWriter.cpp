@@ -31,8 +31,11 @@ using namespace std;
 /*** svlFilterImageFileWriter class ****/
 /***************************************/
 
+CMN_IMPLEMENT_SERVICES(svlFilterImageFileWriter)
+
 svlFilterImageFileWriter::svlFilterImageFileWriter() :
     svlFilterBase(),
+    cmnGenericObject(),
     TimestampsEnabled(false)
 {
     AddSupportedType(svlTypeImageRGB, svlTypeImageRGB);

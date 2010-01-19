@@ -28,7 +28,11 @@ using namespace std;
 /*** svlFilterRGBSwapper class *******/
 /*************************************/
 
-svlFilterRGBSwapper::svlFilterRGBSwapper() : svlFilterBase()
+CMN_IMPLEMENT_SERVICES(svlFilterRGBSwapper)
+
+svlFilterRGBSwapper::svlFilterRGBSwapper() :
+    svlFilterBase(),
+    cmnGenericObject()
 {
     AddSupportedType(svlTypeImageRGB, svlTypeImageRGB);
     AddSupportedType(svlTypeImageRGBStereo, svlTypeImageRGBStereo);

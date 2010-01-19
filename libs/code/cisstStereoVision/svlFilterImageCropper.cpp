@@ -29,7 +29,11 @@ using namespace std;
 /*** svlFilterImageCropper class **********/
 /******************************************/
 
-svlFilterImageCropper::svlFilterImageCropper() : svlFilterBase()
+CMN_IMPLEMENT_SERVICES(svlFilterImageCropper)
+
+svlFilterImageCropper::svlFilterImageCropper() :
+    svlFilterBase(),
+    cmnGenericObject()
 {
     AddSupportedType(svlTypeImageRGB, svlTypeImageRGB);
     AddSupportedType(svlTypeImageMono8, svlTypeImageMono8);
