@@ -76,7 +76,7 @@ int ComputeStereo(const char* filepath1, const char* filepath2,
 
     // 3D reconstruction
     svlStreamManager stereo_stream(2);
-    svlFilterSourceImageFile stereo_source(true);
+    svlFilterSourceImageFile stereo_source(2);
     svlFilterComputationalStereo stereo_stereo;
     svlFilterDisparityMapToSurface stereo_3d;
     svlFilterStreamTypeConverter stereo_converter(svlTypeImageMonoFloat, svlTypeImageRGB);

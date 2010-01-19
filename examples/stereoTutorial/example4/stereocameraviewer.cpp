@@ -243,7 +243,7 @@ int CameraViewer(bool interpolation, bool save, int width, int height, int fulls
 
     // instantiating SVL stream and filters
     svlStreamManager viewer_stream(8);
-    svlFilterSourceVideoCapture viewer_source(true);
+    svlFilterSourceVideoCapture viewer_source(2);
     svlFilterImageRectifier viewer_rectifier;
     svlFilterImageResizer viewer_resizer;
     svlFilterImageWindow viewer_window;
