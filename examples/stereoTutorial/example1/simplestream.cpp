@@ -26,8 +26,37 @@ http://www.cisst.org/cisst/license.txt.
 using namespace std;
 
 
+void PrintAllRegistered()
+{
+    int i = 0;
+    cmnClassRegister::const_iterator iter;
+    for (iter = cmnClassRegister::begin(); iter != cmnClassRegister::end(); iter ++) {
+        std::cout << ++ i << ") " << (*iter).first << std::endl;
+    }
+}
+
+void PrintFilterList()
+{
+    int i = 0;
+    svlFilterBase* filter;
+    cmnClassRegister::const_iterator iter;
+    for (iter = cmnClassRegister::begin(); iter != cmnClassRegister::end(); iter ++) {
+        filter = dynamic_cast<svlFilterBase*>((*iter).second->Create());
+        if (filter) {
+            std::cout << ++ i << ") " << (*iter).first << std::endl;
+            delete filter;
+        }
+    }
+}
+
 int main()
 {
+    svlInitialize();
+    PrintAllRegistered();
+//    PrintFilterList();
+
+
+/*
     // Creating SVL objects
     svlStreamManager stream(2); // number of threads per stream
 
@@ -87,6 +116,7 @@ int main()
 
 labError:
     cout << "Error occured... Quitting." << endl;
+*/
     return 1;
 }
 
