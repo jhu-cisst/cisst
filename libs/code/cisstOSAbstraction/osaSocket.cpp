@@ -185,12 +185,15 @@ int osaSocket::Send(const char * bufsend, unsigned int msglen)
 }
 
 
-int osaSocket::Receive(char * bufrecv, unsigned int maxlen)
+int osaSocket::Receive(char * bufrecv, unsigned int maxlen, const double timeoutSec )
 {
     fd_set readfds;
     FD_ZERO(&readfds);
     FD_SET(SocketFD, &readfds);
-    timeval timeout = { 0, 0 };
+
+    long second = floor (timeoutSec);
+    long usec = floor ( (timeoutSec - second) *1e6);
+    timeval timeout = { second , usec };
 
     /* Notes for QNX from the QNX library reference (Min)
      *

@@ -220,8 +220,9 @@ public:
     /*! \brief Receive a byte array via the socket
         \param bufrecv Buffer to store received data
         \param maxlen Maximum number of bytes to receive
-        \return Number of bytes received */
-    int Receive(char * bufrecv, unsigned int maxlen);
+        \param timeoutSec Timeout in seconds. 
+        \return Number of bytes received. 0 if timeout is reached and/or no data is received. */
+    int Receive(char * bufrecv, unsigned int maxlen, const double timeoutSec = 0.0);
 
     /*! \brief Close the socket */
     void Close(void);
