@@ -49,7 +49,7 @@ class nmrFminSolver {
 protected:
 	struct O8USERFUNC UserFn;
 	struct O8USERCONFIG UserCfg;
-	long int N, NLin, NNonLin, NIter, NStep;
+	CISSTNETLIB_INTEGER N, NLin, NNonLin, NIter, NStep;
     
 public:
     /*! Default constructor.  This constructor doesn't allocate any
@@ -74,7 +74,7 @@ public:
       \param nstep (typ. 20)
       This order will be used for the output as well.
     */
-	nmrFminSolver(long int n, long int nlin, long int nnonlin, long int niter, long int nstep)
+	nmrFminSolver(CISSTNETLIB_INTEGER n, CISSTNETLIB_INTEGER nlin, CISSTNETLIB_INTEGER nnonlin, CISSTNETLIB_INTEGER niter, CISSTNETLIB_INTEGER nstep)
     {
         Allocate(n, nlin, nnonlin, niter, nstep);
     }
@@ -89,7 +89,7 @@ public:
       
       \param n Number of variables
     */
-    inline void Allocate(long int n, long int nlin, long int nnonlin, long int niter, long int nstep)
+    inline void Allocate(CISSTNETLIB_INTEGER n, CISSTNETLIB_INTEGER nlin, CISSTNETLIB_INTEGER nnonlin, CISSTNETLIB_INTEGER niter, CISSTNETLIB_INTEGER nstep)
     {
         memset (&UserFn, 0, sizeof(struct O8USERFUNC));
         donlp2_init_size(n, nlin, nnonlin, niter, nstep);
@@ -112,9 +112,9 @@ public:
     }
 
     template <int __instanceLine, class __elementType>
-    inline void Solve(nmrCallBackFunctionF1<__instanceLine, __elementType> &callBack, vctDynamicVector<double> &X) 
+    inline void Solve(nmrCallBackFunctionF1<__instanceLine, __elementType> &callBack, vctDynamicVector<CISSTNETLIB_DOUBLE> &X) 
 	    throw (std::runtime_error) {
-        if (N+1 != (int) X.size()) {
+        if (N+1 != static_cast<CISSTNETLIB_INTEGER>(X.size())) {
             cmnThrow(std::runtime_error("nmrFminSolver Solve: Size used for Allocate was different"));
         }
         /* set the user functions */
@@ -123,22 +123,22 @@ public:
         donlp2_setuserinit(X.Pointer(), NULL, NULL, NULL);
         /* call the DONLP2 C function */
         donlp2();
-        double fx;
+        CISSTNETLIB_DOUBLE fx;
         donlp2_getresult(X.Pointer(), &fx);
     }
     
     template <int __instanceLine, class __elementType>
-    inline void Solve(nmrCallBackFunctionF1<__instanceLine, __elementType> &callBack, vctDynamicVector<double> &X,
-                      vctDynamicVector<double> &lbound, vctDynamicVector<double> &ubound,
-                      vctDynamicMatrix<double> &alin) 
+    inline void Solve(nmrCallBackFunctionF1<__instanceLine, __elementType> &callBack, vctDynamicVector<CISSTNETLIB_DOUBLE> &X,
+                      vctDynamicVector<CISSTNETLIB_DOUBLE> &lbound, vctDynamicVector<CISSTNETLIB_DOUBLE> &ubound,
+                      vctDynamicMatrix<CISSTNETLIB_DOUBLE> &alin) 
 	    throw (std::runtime_error) {
-        if (N+1 != (int) X.size()) {
+        if (N+1 != static_cast<CISSTNETLIB_INTEGER>(X.size())) {
             cmnThrow(std::runtime_error("nmrFminSolver Solve: Size used for Allocate was different"));
         }
         /* set the user functions */
         UserFn.user_ef = callBack.FunctionFdonlp2;
         donlp2_setuserfunctions(&UserFn);
-        vctDynamicVector<double*> alinRowPointers;
+        vctDynamicVector<CISSTNETLIB_DOUBLE*> alinRowPointers;
         alinRowPointers.SetSize(alin.rows());
         for (unsigned int i = 0; i < alin.rows(); i++) {
             alinRowPointers(i) = alin.Row(i).Pointer();
@@ -146,16 +146,16 @@ public:
         donlp2_setuserinit(X.Pointer(), lbound.Pointer(), ubound.Pointer(), alinRowPointers.Pointer());
         /* call the DONLP2 C function */
         donlp2();
-        double fx;
+        CISSTNETLIB_DOUBLE fx;
         donlp2_getresult(X.Pointer(), &fx);
     }
     
     template <int __instanceLineF, class __elementTypeF, int __instanceLineC, class __elementTypeC>
-    inline void Solve(nmrCallBackFunctionF1<__instanceLineF, __elementTypeF> &callBackF, vctDynamicVector<double> &X,
+    inline void Solve(nmrCallBackFunctionF1<__instanceLineF, __elementTypeF> &callBackF, vctDynamicVector<CISSTNETLIB_DOUBLE> &X,
                       nmrCallBackFunctionC<__instanceLineC, __elementTypeC> &callBackC,
-                      vctDynamicVector<double> &lbound, vctDynamicVector<double> &ubound)
+                      vctDynamicVector<CISSTNETLIB_DOUBLE> &lbound, vctDynamicVector<CISSTNETLIB_DOUBLE> &ubound)
 	    throw (std::runtime_error) {
-        if (N+1 != (int) X.size()) {
+        if (N+1 != static_cast<CISSTNETLIB_INTEGER>(X.size())) {
             cmnThrow(std::runtime_error("nmrFminSolver Solve: Size used for Allocate was different"));
         }
         /* set the user functions */
@@ -165,25 +165,25 @@ public:
         donlp2_setuserinit(X.Pointer(), lbound.Pointer(), ubound.Pointer(), NULL);
         /* call the DONLP2 C function */
         donlp2();
-        double fx;
+        CISSTNETLIB_DOUBLE fx;
         donlp2_getresult(X.Pointer(), &fx);
     }
     
     template <int __instanceLineF, class __elementTypeF, int __instanceLineC, class __elementTypeC>
-    inline void Solve(nmrCallBackFunctionF1<__instanceLineF, __elementTypeF> &callBackF, vctDynamicVector<double> &X,
+    inline void Solve(nmrCallBackFunctionF1<__instanceLineF, __elementTypeF> &callBackF, vctDynamicVector<CISSTNETLIB_DOUBLE> &X,
                       nmrCallBackFunctionC<__instanceLineC, __elementTypeC> &callBackC,
-                      vctDynamicVector<double> &lbound, vctDynamicVector<double> &ubound,
-                      vctDynamicMatrix<double> &alin)
-        //			    vctDynamicMatrix<double> &alin)
+                      vctDynamicVector<CISSTNETLIB_DOUBLE> &lbound, vctDynamicVector<CISSTNETLIB_DOUBLE> &ubound,
+                      vctDynamicMatrix<CISSTNETLIB_DOUBLE> &alin)
+        //			    vctDynamicMatrix<CISSTNETLIB_DOUBLE> &alin)
 	    throw (std::runtime_error) {
-        if (N+1 != (int) X.size()) {
+        if (N+1 != static_cast<CISSTNETLIB_INTEGER>(X.size())) {
             cmnThrow(std::runtime_error("nmrFminSolver Solve: Size used for Allocate was different"));
         }
         /* set the user functions */
         UserFn.user_ef = callBackF.FunctionFdonlp2;
         UserFn.user_econ = callBackC.FunctionFdonlp2;
         donlp2_setuserfunctions(&UserFn);
-        vctDynamicVector<double*> alinRowPointers;
+        vctDynamicVector<CISSTNETLIB_DOUBLE*> alinRowPointers;
         alinRowPointers.SetSize(alin.rows());
         for (unsigned int i = 0; i < alin.rows(); i++) {
             alinRowPointers(i) = alin.Row(i).Pointer();
@@ -192,23 +192,23 @@ public:
         //donlp2_setuserinit(X.Pointer(), lbound.Pointer(), ubound.Pointer(), alina);
         /* call the DONLP2 C function */
         donlp2();
-        double fx;
+        CISSTNETLIB_DOUBLE fx;
         donlp2_getresult(X.Pointer(), &fx);
     }
     
-    inline void Solve(void (*efFunctionPointer)(int,double[],double*),
-                      vctDynamicVector<double> &X, 
-                      void (*econFunctionPointer)(int,int,int,int[],double[],double[],int[]),
-                      vctDynamicVector<double> &lbound,
-                      vctDynamicVector<double> &ubound,
-                      vctDynamicMatrix<double> &alin) throw (std::runtime_error) {
-        if (N+1 != (int) X.size()) {
+    inline void Solve(void (*efFunctionPointer)(CISSTNETLIB_INTEGER,CISSTNETLIB_DOUBLE[],CISSTNETLIB_DOUBLE*),
+                      vctDynamicVector<CISSTNETLIB_DOUBLE> &X, 
+                      void (*econFunctionPointer)(CISSTNETLIB_INTEGER,CISSTNETLIB_INTEGER,CISSTNETLIB_INTEGER,CISSTNETLIB_INTEGER[],CISSTNETLIB_DOUBLE[],CISSTNETLIB_DOUBLE[],CISSTNETLIB_INTEGER[]),
+                      vctDynamicVector<CISSTNETLIB_DOUBLE> &lbound,
+                      vctDynamicVector<CISSTNETLIB_DOUBLE> &ubound,
+                      vctDynamicMatrix<CISSTNETLIB_DOUBLE> &alin) throw (std::runtime_error) {
+        if (N+1 != static_cast<CISSTNETLIB_INTEGER>(X.size())) {
             cmnThrow(std::runtime_error("nmrFminSolver Solve: Size used for Allocate was different"));
         }
         UserFn.user_ef = efFunctionPointer;
         UserFn.user_econ = econFunctionPointer;
         donlp2_setuserfunctions(&UserFn);
-        vctDynamicVector<double*> alinRowPointers;
+        vctDynamicVector<CISSTNETLIB_DOUBLE*> alinRowPointers;
         alinRowPointers.SetSize(alin.rows());
         for (unsigned int i = 0; i < alin.rows(); i++) {
             alinRowPointers(i) = alin.Row(i).Pointer();
@@ -217,22 +217,22 @@ public:
         //donlp2_setuserinit(X.Pointer(), lbound.Pointer(), ubound.Pointer(), NULL);
         /* call the DONLP2 C function */
         donlp2();
-        double fx;
+        CISSTNETLIB_DOUBLE fx;
         donlp2_getresult(X.Pointer(), &fx);
     }
     
 #if 0
     template <int __instanceLineF, class __elementTypeF, int __instanceLineG, class __elementTypeG,
               int __instanceLineC, class __elementTypeC, int __instanceLineCG, class __elementTypeCG>
-    inline void Solve(nmrCallBackFunctionF1<__instanceLineF, __elementTypeF> &callBackF, vctDynamicVector<double> &X,
+    inline void Solve(nmrCallBackFunctionF1<__instanceLineF, __elementTypeF> &callBackF, vctDynamicVector<CISSTNETLIB_DOUBLE> &X,
                       nmrCallBackFunctionF<__instanceLineG, __elementTypeG> &callBackG,
                       nmrCallBackFunctionC<__instanceLineC, __elementTypeC> &callBackC,
                       nmrCallBackFunctionCG<__instanceLineCG, __elementTypeCG> &callBackCG,
-                      vctDynamicVector<double> &Lb,
-                      vctDynamicVector<double> &Ub,
-                      vctDynamicVector<double> &ALin) 
+                      vctDynamicVector<CISSTNETLIB_DOUBLE> &Lb,
+                      vctDynamicVector<CISSTNETLIB_DOUBLE> &Ub,
+                      vctDynamicVector<CISSTNETLIB_DOUBLE> &ALin) 
         throw (std::runtime_error) {
-        if (N != (int) X.size()) {
+        if (N != static_cast<CISSTNETLIB_INTEGER>(X.size())) {
             cmnThrow(std::runtime_error("nmrFminSolver Solve: Size used for Allocate was different"));
         }
         /* set the user functions */

@@ -75,18 +75,18 @@ http://www.cisst.org/cisst/license.txt.
 class nmrHFTISolver {
 
 protected:
-    long int M;
-    long int N;
-    long int NB;
-    vctDynamicMatrix<double> A;
-    vctDynamicMatrix<double> B;
-    double tau;
-    long int krank;
-    vctDynamicMatrix<double> RNORM;
-    vctDynamicMatrix<double> G;
-    vctDynamicMatrix<double> H;
-    vctDynamicMatrix<long int> IP;
-    vctDynamicMatrix<double> X;
+    CISSTNETLIB_INTEGER M;
+    CISSTNETLIB_INTEGER N;
+    CISSTNETLIB_INTEGER NB;
+    vctDynamicMatrix<CISSTNETLIB_DOUBLE> A;
+    vctDynamicMatrix<CISSTNETLIB_DOUBLE> B;
+    CISSTNETLIB_DOUBLE tau;
+    CISSTNETLIB_INTEGER krank;
+    vctDynamicMatrix<CISSTNETLIB_DOUBLE> RNORM;
+    vctDynamicMatrix<CISSTNETLIB_DOUBLE> G;
+    vctDynamicMatrix<CISSTNETLIB_DOUBLE> H;
+    vctDynamicMatrix<CISSTNETLIB_INTEGER> IP;
+    vctDynamicMatrix<CISSTNETLIB_DOUBLE> X;
     
 public:
     /*! Default constructor.  This constructor doesn't allocate any
@@ -111,7 +111,7 @@ public:
       \param n Number of columns of A
       \param nb Number of columns of B
     */
-    nmrHFTISolver(long int m, long int n, long int nb) {
+    nmrHFTISolver(CISSTNETLIB_INTEGER m, CISSTNETLIB_INTEGER n, CISSTNETLIB_INTEGER nb) {
         Allocate(m, n, nb);
     }
     
@@ -121,7 +121,7 @@ public:
       method.  It relies on the method Allocate().  The next call to
       the Solve() method will check that the parameters match the
       dimension. */
-    nmrHFTISolver(vctDynamicMatrix<double> &A, vctDynamicMatrix<double> &B) {
+    nmrHFTISolver(vctDynamicMatrix<CISSTNETLIB_DOUBLE> &A, vctDynamicMatrix<CISSTNETLIB_DOUBLE> &B) {
         Allocate(A, B);
     }
     
@@ -134,14 +134,14 @@ public:
       \param n Number of columns of A
       \param nb Number of columns of B
     */
-    inline void Allocate(long int m, long int n, long int nb) {
+    inline void Allocate(CISSTNETLIB_INTEGER m, CISSTNETLIB_INTEGER n, CISSTNETLIB_INTEGER nb) {
         M = m;
         N = n;
         NB = nb;
-        vctDynamicMatrix<double> RNORM;
-        vctDynamicMatrix<double> G;
-        vctDynamicMatrix<double> H;
-        vctDynamicMatrix<long int> IP;
+        vctDynamicMatrix<CISSTNETLIB_DOUBLE> RNORM;
+        vctDynamicMatrix<CISSTNETLIB_DOUBLE> G;
+        vctDynamicMatrix<CISSTNETLIB_DOUBLE> H;
+        vctDynamicMatrix<CISSTNETLIB_INTEGER> IP;
         A.SetSize(M, N, VCT_COL_MAJOR);
         B.SetSize(M, NB, VCT_COL_MAJOR);
         RNORM.SetSize(NB, 1, VCT_COL_MAJOR);
@@ -156,7 +156,7 @@ public:
       convenient way to extract the required sizes from the input
       containers.  The next call to the Solve() method will check that
       the parameters match the dimension. */
-    inline void Allocate(vctDynamicMatrix<double> &A, vctDynamicMatrix<double> &B) {
+    inline void Allocate(vctDynamicMatrix<CISSTNETLIB_DOUBLE> &A, vctDynamicMatrix<CISSTNETLIB_DOUBLE> &B) {
         Allocate(A.rows(), A.cols(), B.cols());
     }
     
@@ -167,11 +167,11 @@ public:
       If the parameters don't meet all the requirements, an exception
       is thrown (std::runtime_error).
      */
-    inline void Solve(vctDynamicMatrix<double> &A, vctDynamicMatrix<double> &B) throw (std::runtime_error) {
+    inline void Solve(vctDynamicMatrix<CISSTNETLIB_DOUBLE> &A, vctDynamicMatrix<CISSTNETLIB_DOUBLE> &B) throw (std::runtime_error) {
         /* check that the size matches with Allocate() */
-        if ((M != (int) A.rows())
-            || (N != (int) A.cols())
-            || (NB != (int) B.cols())) {
+        if ((M != static_cast<CISSTNETLIB_INTEGER>(A.rows()))
+            || (N != static_cast<CISSTNETLIB_INTEGER>(A.cols()))
+            || (NB != static_cast<CISSTNETLIB_INTEGER>(B.cols()))) {
             cmnThrow(std::runtime_error("nmrHFTISolver Solve: Sizes used for Allocate were different"));
         }
         

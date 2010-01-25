@@ -3,7 +3,7 @@
 #
 # CMakeLists for cisstNumerical
 #
-# (C) Copyright 2003-2007 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2003-2010 Johns Hopkins University (JHU), All Rights
 # Reserved.
 # 
 # --- begin cisst license - do not edit ---
@@ -60,7 +60,8 @@ IF(CISST_HAS_CISSTNETLIB)
   SET(SOURCE_FILES
       ${SOURCE_FILES}
       nmrLDPSolver.cpp
-      nmrLSISolver.cpp
+#      lsi solver is included in nmrLSqLin
+#      nmrLSISolver.cpp
       nmrLSqLin.cpp
       nmrPInverse.cpp
       nmrPInverseEconomy.cpp
@@ -72,11 +73,13 @@ IF(CISST_HAS_CISSTNETLIB)
       nmrNetlib.h
       nmrInverse.h
       nmrLDPSolver.h
-      nmrLSSolver.h
-      nmrLSISolver.h
+#     dgels solver is include in nmrLSqLin
+#      nmrLSSolver.h
+#     lsi solver is include in nmrLSqLin
+#      nmrLSISolver.h
       nmrLSqLin.h
       nmrLU.h
-      nmrLUSolver.h
+#      nmrLUSolver.h
       nmrHFTISolver.h
       nmrNNLSSolver.h
       nmrCallBack.h
@@ -84,26 +87,10 @@ IF(CISST_HAS_CISSTNETLIB)
       nmrPInverseEconomy.h
       nmrSVD.h
       nmrSVDEconomy.h
-      nmrSVDSolver.h
+#      nmrSVDSolver.h
       nmrSVDRSSolver.h
       )
 ENDIF(CISST_HAS_CISSTNETLIB)
-
-# add files if cnetlib is used
-# IF(CISST_HAS_CNETLIB)
-#
-#  SET(HEADER_FILES
-#      ${HEADER_FILES}
-#      nmrFnSolver.h
-#      nmrFminSolver.h
-#      nmrFnJacobianSolver.h
-#      nmrLSEISolver.h
-#      nmrLSNonLinSolver.h
-#      nmrLSNonLinJacobianSolver.h
-#      nmrPInverseSolver.h
-#      )
-#
-#ENDIF(CISST_HAS_CNETLIB)
 
 
 CISST_ADD_LIBRARY_TO_PROJECT(cisstLibs)

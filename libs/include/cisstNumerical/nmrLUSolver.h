@@ -89,15 +89,15 @@ class nmrLUSolver {
     // that doesnt change much is desired.
 
 protected:
-    long int M;
-    long int N;
-    long int Lda;
-    long int MinMN, MaxMN;
-    // vctDynamicMatrix<long int> Ipiv;
-    vctDynamicVector<long int> Ipiv;
-    long int Info;
+    CISSTNETLIB_INTEGER M;
+    CISSTNETLIB_INTEGER N;
+    CISSTNETLIB_INTEGER Lda;
+    CISSTNETLIB_INTEGER MinMN, MaxMN;
+    // vctDynamicMatrix<CISSTNETLIB_INTEGER> Ipiv;
+    vctDynamicVector<CISSTNETLIB_INTEGER> Ipiv;
+    CISSTNETLIB_INTEGER Info;
     bool AllocatePFlag, AllocateLUFlag;
-    vctDynamicMatrix<double> P, L, U;
+    vctDynamicMatrix<CISSTNETLIB_DOUBLE> P, L, U;
 
     /*! Allocates memory for the permutation matrix P. */
     void AllocateP(void) {
@@ -121,7 +121,7 @@ protected:
     /*! Update the content of the optional matrices L and U based on
       the matrix returned by the LAPACK function dgetrf. */
     template <class _matrixOwnerType>
-    void UpdateLU(const vctDynamicConstMatrixBase<_matrixOwnerType, double>& A) {
+    void UpdateLU(const vctDynamicConstMatrixBase<_matrixOwnerType, CISSTNETLIB_DOUBLE>& A) {
         const unsigned int rows = A.rows();
         const unsigned int cols = A.cols();
         unsigned int rowIndex, colIndex;
@@ -141,7 +141,7 @@ protected:
     void UpdateP(void) {
         P.SetAll(0.0);
         P.Diagonal().SetAll(1.0);
-        long int rowIndex, colIndex;
+        CISSTNETLIB_INTEGER rowIndex, colIndex;
         for (rowIndex = 0; rowIndex < MinMN; ++rowIndex) {
             colIndex = Ipiv[rowIndex] - 1;
             P.ExchangeColumns(rowIndex, colIndex);
@@ -174,7 +174,7 @@ public:
       \param allocateLU Allocates memory to maintain a usable copy of L and U
       \param allocateP Allocates memory to maintain a usable copy of P
     */
-    nmrLUSolver(long int m, long int n,
+    nmrLUSolver(CISSTNETLIB_INTEGER m, CISSTNETLIB_INTEGER n,
                 bool allocateLU = false,
                 bool allocateP = false) {
         Allocate(m, n);
@@ -194,13 +194,13 @@ public:
       \param allocateP Allocates memory to maintain a usable copy of P
     */
     //@{
-    nmrLUSolver(const vctDynamicMatrix<double> &A,
+    nmrLUSolver(const vctDynamicMatrix<CISSTNETLIB_DOUBLE> &A,
                 bool allocateLU = false, bool allocateP = false) {
         Allocate(A, allocateLU, allocateP);
     }
 
     template <vct::size_type _rows, vct::size_type _cols>
-    nmrLUSolver(const vctFixedSizeMatrix<double, _rows, _cols, VCT_COL_MAJOR> & A,
+    nmrLUSolver(const vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _rows, _cols, VCT_COL_MAJOR> & A,
                 bool allocateLU = false, bool allocateP = false) {
         Allocate(A, allocateLU, allocateP);
     }
@@ -217,9 +217,9 @@ public:
       \param allocateP Allocates memory to maintain a usable copy of P
       
     */
-    inline void Allocate(long int m, long int n,
+    inline void Allocate(CISSTNETLIB_INTEGER m, CISSTNETLIB_INTEGER n,
                          bool allocateLU = false, bool allocateP = false) {
-        const long int one = 1;
+        const CISSTNETLIB_INTEGER one = 1;
         M = m;
         N = n;
         Lda = std::max(one, M);
@@ -246,13 +246,13 @@ public:
       \param allocateP Allocates memory to maintain a usable copy of P
     */
     //@{
-    inline void Allocate(const vctDynamicMatrix<double> &A,
+    inline void Allocate(const vctDynamicMatrix<CISSTNETLIB_DOUBLE> &A,
                          bool allocateLU = false, bool allocateP = false) {
         Allocate(A.rows(), A.cols(), allocateLU, allocateP);
     }
 
     template <vct::size_type _rows, vct::size_type _cols>
-    inline void Allocate(const vctFixedSizeMatrix<double, _rows, _cols, VCT_COL_MAJOR> & A,
+    inline void Allocate(const vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _rows, _cols, VCT_COL_MAJOR> & A,
                          bool allocateLU = false, bool allocateP = false) {
         Allocate(_rows, _cols, allocateLU, allocateP);
     }
@@ -277,14 +277,14 @@ public:
     */
     //@{
     template <class _matrixOwnerType>
-    inline void Solve(vctDynamicMatrixBase<_matrixOwnerType, double> &A) throw (std::runtime_error) {
+    inline void Solve(vctDynamicMatrixBase<_matrixOwnerType, CISSTNETLIB_DOUBLE> &A) throw (std::runtime_error) {
         /* check that the size and storage order matches with Allocate() */
         if (! A.IsColMajor()) {
             cmnThrow(std::runtime_error("nmrLUSolver Solve: The input must be column major"));
         }
 
         /* check sizes */
-        if ((M != (int) A.rows()) || (N != (int) A.cols())) {
+        if ((M != static_cast<CISSTNETLIB_INTEGER>(A.rows())) || (N != static_cast<CISSTNETLIB_INTEGER>(A.cols()))) {
             cmnThrow(std::runtime_error("nmrLUSolver Solve: Size used for Allocate was different"));
         }
 
@@ -304,8 +304,8 @@ public:
     }
     
     template <vct::size_type _rows, vct::size_type _cols>
-    inline void Solve(vctFixedSizeMatrix<double, _rows, _cols, VCT_COL_MAJOR> & A) {
-        vctDynamicMatrixRef<double> Aref(A);
+    inline void Solve(vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _rows, _cols, VCT_COL_MAJOR> & A) {
+        vctDynamicMatrixRef<CISSTNETLIB_DOUBLE> Aref(A);
         Solve(Aref);
     }
     //@}
@@ -314,17 +314,17 @@ public:
     /*! Get the vector of pivots. Since the pivots are defined in
       Fortran, they go from 1 to \f$min(M, N)\f$ included. To use
       these as C/C++ values, subtract 1. */
-    inline const vctDynamicVector<long int> &GetIpiv(void) const {
+    inline const vctDynamicVector<CISSTNETLIB_INTEGER> &GetIpiv(void) const {
         return Ipiv;
     }
 
     /*! The status returned by the dgetrf function. */
-    inline long int GetInfo(void) const {
+    inline CISSTNETLIB_INTEGER GetInfo(void) const {
         return Info;
     }
 
     /*! Get the permutation matrix calculated based on IPiv. */
-    inline const vctDynamicMatrix<double> &GetP(void) const throw(std::runtime_error) {
+    inline const vctDynamicMatrix<CISSTNETLIB_DOUBLE> &GetP(void) const throw(std::runtime_error) {
         if (!AllocatePFlag) {
             cmnThrow(std::runtime_error("nmrLUSolver GetP: P was not calculated since allocateP is not set"));
         }
@@ -332,7 +332,7 @@ public:
     }
 
     /*! Get the L matrix calculated from the output of the dgetrf function .*/
-    inline const vctDynamicMatrix<double> &GetL(void) const throw(std::runtime_error) {
+    inline const vctDynamicMatrix<CISSTNETLIB_DOUBLE> &GetL(void) const throw(std::runtime_error) {
         if (!AllocateLUFlag) {
             cmnThrow(std::runtime_error("nmrLUSolver GetL: L was not calculated since allocateLU is not set"));
         }
@@ -340,7 +340,7 @@ public:
     }
 
     /*! Get the U matrix calculated from the output of the dgetrf function .*/
-    inline const vctDynamicMatrix<double> &GetU(void) const throw(std::runtime_error) {
+    inline const vctDynamicMatrix<CISSTNETLIB_DOUBLE> &GetU(void) const throw(std::runtime_error) {
         if (!AllocateLUFlag) {
             cmnThrow(std::runtime_error("nmrLUSolver GetU: U was not calculated since allocateLU is not set"));
         }

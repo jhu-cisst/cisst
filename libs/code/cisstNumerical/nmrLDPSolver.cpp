@@ -22,12 +22,12 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstNumerical/nmrLDPSolver.h>
 
-void nmrLDPSolver::Solve(vctDynamicMatrix<double> &G, vctDynamicMatrix<double> &h)
+void nmrLDPSolver::Solve(vctDynamicMatrix<CISSTNETLIB_DOUBLE> &G, vctDynamicMatrix<CISSTNETLIB_DOUBLE> &h)
     throw (std::runtime_error) 
 {
     /* check that the size matches with Allocate() */
-    if ((M != (int) G.rows())
-        || (N != (int) G.cols())) {
+    if ((M != static_cast<CISSTNETLIB_INTEGER>( G.rows()))
+        || (N != static_cast<CISSTNETLIB_INTEGER>( G.cols()))) {
         cmnThrow(std::runtime_error("nmrLDPSolver Solve: Sizes used for Allocate were different"));
     }
 
@@ -50,11 +50,11 @@ void nmrLDPSolver::Solve(vctDynamicMatrix<double> &G, vctDynamicMatrix<double> &
     }
     CopyE = E;
     
-    long int mda = N+1;
-    long int m_nnls = N+1;
-    long int n_nnls = M;
-    long int mode;
-    double rnorm;
+    CISSTNETLIB_INTEGER mda = N+1;
+    CISSTNETLIB_INTEGER m_nnls = N+1;
+    CISSTNETLIB_INTEGER n_nnls = M;
+    CISSTNETLIB_INTEGER mode;
+    CISSTNETLIB_DOUBLE rnorm;
     
     F.SetAll(0.0);
     F(N, 0) = 1.0;
@@ -68,8 +68,8 @@ void nmrLDPSolver::Solve(vctDynamicMatrix<double> &G, vctDynamicMatrix<double> &
         for (j = 0; j < M; j++)
             R(i,0) += CopyE(i,j)*U(j,0);          
     }
-    double one_plus_fac = 1 + R(N,0);
-    double fac =  R(N,0);
+    CISSTNETLIB_DOUBLE one_plus_fac = 1 + R(N,0);
+    CISSTNETLIB_DOUBLE fac =  R(N,0);
     
     if (diff_(&one_plus_fac, &fac) <= 0) return;
     for (int k = 0; k < N; k++) { 

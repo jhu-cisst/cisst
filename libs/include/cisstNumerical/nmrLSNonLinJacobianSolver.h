@@ -99,8 +99,8 @@ http://www.cisst.org/cisst/license.txt.
   - callBack: Is object of type nmrCallBackLSNonLinSolver used to supply the user method.
         The user method which belongs to a user defined class 'Cfoo' has the
         following definition
-          int Cfoo::Mbar (vctDynamicVectorRef<double> &X, vctDynamicVectorRef<double> &F, 
-	      vctDynamicMatrixRef<double> &J, long int &Flag)
+          int Cfoo::Mbar (vctDynamicVectorRef<CISSTNETLIB_DOUBLE> &X, vctDynamicVectorRef<CISSTNETLIB_DOUBLE> &F, 
+	      vctDynamicMatrixRef<CISSTNETLIB_DOUBLE> &J, CISSTNETLIB_INTEGER &Flag)
 	if Flag = 1 calculate the functions at X and
 	return this vector in F. do not alter J.
 	if Flag = 2 calculate the jacobian at X and
@@ -128,14 +128,14 @@ class nmrLSNonLinJacobianSolver {
 	// that doesnt change much is desired.
 
 protected:
-	long int M;
-	long int N;
-	long int Ldfjac;
-	double Tolerance;
-	long int Info;
-	long int Lwork;
-	vctDynamicVector<long int> IWork;
-	vctDynamicVector<double> Work;
+	CISSTNETLIB_INTEGER M;
+	CISSTNETLIB_INTEGER N;
+	CISSTNETLIB_INTEGER Ldfjac;
+	CISSTNETLIB_DOUBLE Tolerance;
+	CISSTNETLIB_INTEGER Info;
+	CISSTNETLIB_INTEGER Lwork;
+	vctDynamicVector<CISSTNETLIB_INTEGER> IWork;
+	vctDynamicVector<CISSTNETLIB_DOUBLE> Work;
 
 public:
     /*! Default constructor.  This constructor doesn't allocate any
@@ -157,7 +157,7 @@ public:
       \param n Number of variables
       This order will be used for the output as well.
     */
-	nmrLSNonLinJacobianSolver(long int m, long int n)
+	nmrLSNonLinJacobianSolver(CISSTNETLIB_INTEGER m, CISSTNETLIB_INTEGER n)
     {
         Allocate(m, n);
     }
@@ -169,7 +169,7 @@ public:
        the Solve() method will check that the parameters match the
        dimension and storage order. */
     //@{
-	nmrLSNonLinJacobianSolver(vctDynamicVector<double> &X, vctDynamicVector<double> &F) {
+	nmrLSNonLinJacobianSolver(vctDynamicVector<CISSTNETLIB_DOUBLE> &X, vctDynamicVector<CISSTNETLIB_DOUBLE> &F) {
         Allocate(X, F);
     }
     //@}
@@ -182,7 +182,7 @@ public:
       \param m Number of nonlinear functions
       \param n Number of variables
     */
-	inline void Allocate(long int m, long int n) {
+	inline void Allocate(CISSTNETLIB_INTEGER m, CISSTNETLIB_INTEGER n) {
         M = m;
         N = n;
 	Lwork = M * N + 5 * N + M;
@@ -198,7 +198,7 @@ public:
       containers.  The next call to the Solve() method will check that
       the parameters match the dimension. */
     //@{
-    inline void Allocate(vctDynamicVector<double> &X, vctDynamicVector<double> &F) {
+    inline void Allocate(vctDynamicVector<CISSTNETLIB_DOUBLE> &X, vctDynamicVector<CISSTNETLIB_DOUBLE> &F) {
         Allocate(X.size(), F.size());
     }
     //@}
@@ -211,13 +211,18 @@ public:
     */
 
     //@{
-    template <int __instanceLineF, class __elementTypeF, int __instanceLineJ, class __elementTypeJ>
+    template <int __instanceLineF, 
+              class __elementTypeF, 
+              int __instanceLineJ, 
+              class __elementTypeJ>
     inline void Solve(nmrCallBackFunctionF<__instanceLineF, __elementTypeF> &callBackF,
-		    nmrCallBackFunctionJ<__instanceLineJ, __elementTypeJ> &callBackJ,
-		    vctDynamicVector<double> &X,
-		    vctDynamicVector<double> &F, vctDynamicVector<double> &J, double tolerance) throw (std::runtime_error) {
-	//if ((N != (int) X.size()) || (M != (int) F.size()) || (Ldfjac != (int) J.rows()) || (N != (int) J.cols())) {
-	if ((N != (int) X.size()) || (M != (int) F.size()) || (Ldfjac*N != (int) J.size())) {
+                      nmrCallBackFunctionJ<__instanceLineJ, __elementTypeJ> &callBackJ,
+                      vctDynamicVector<CISSTNETLIB_DOUBLE> &X,
+                      vctDynamicVector<CISSTNETLIB_DOUBLE> &F, 
+                      vctDynamicVector<CISSTNETLIB_DOUBLE> &J, 
+                      CISSTNETLIB_DOUBLE tolerance) throw (std::runtime_error) {
+	//if ((N != (CISSTNETLIB_INTEGER) X.size()) || (M != (CISSTNETLIB_INTEGER) F.size()) || (Ldfjac != (CISSTNETLIB_INTEGER) J.rows()) || (N != (CISSTNETLIB_INTEGER) J.cols())) {
+        if ((N != static_cast<CISSTNETLIB_INTEGER>(X.size())) || (M != static_cast<CISSTNETLIB_INTEGER>(F.size())) || (Ldfjac*N != static_cast<CISSTNETLIB_INTEGER>(J.size()))) {
 	    cmnThrow(std::runtime_error("nmrLSNonLinJacobianSolver Solve: Size used for Allocate was different"));
 	}
 	Tolerance = tolerance;

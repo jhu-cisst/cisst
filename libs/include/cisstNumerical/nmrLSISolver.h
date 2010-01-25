@@ -74,16 +74,16 @@ class nmrLSISolver {
     /* Uses lawson and hanson's SVD, which gives U^{T}B and V,
        along with singular values */
 protected:
-    long int Ma;
-    long int Na;
-    long int Mg;
-    vctDynamicMatrix<double> VSiUtb; /* V*S^{-1}*U^{T}*b */
-    vctDynamicMatrix<double> GTilde; /* \tilde{G} = G*V*S^{-1} */
-    vctDynamicMatrix<double> HTilde; /* \tilde{H} = h-G*V*S^{-1}*U^{T}*b */
-    vctDynamicMatrix<double> Z;      /* work area */
-    vctDynamicMatrix<double> X;      /* solution */
-    vctDynamicMatrix<double> Si;     /* Dim(n, n) matrix of singular values inverse*/
-    vctDynamicMatrix<double> VSi;    /* matrix of V*S^{-1} */
+    CISSTNETLIB_INTEGER Ma;
+    CISSTNETLIB_INTEGER Na;
+    CISSTNETLIB_INTEGER Mg;
+    vctDynamicMatrix<CISSTNETLIB_DOUBLE> VSiUtb; /* V*S^{-1}*U^{T}*b */
+    vctDynamicMatrix<CISSTNETLIB_DOUBLE> GTilde; /* \tilde{G} = G*V*S^{-1} */
+    vctDynamicMatrix<CISSTNETLIB_DOUBLE> HTilde; /* \tilde{H} = h-G*V*S^{-1}*U^{T}*b */
+    vctDynamicMatrix<CISSTNETLIB_DOUBLE> Z;      /* work area */
+    vctDynamicMatrix<CISSTNETLIB_DOUBLE> X;      /* solution */
+    vctDynamicMatrix<CISSTNETLIB_DOUBLE> Si;     /* Dim(n, n) matrix of singular values inverse*/
+    vctDynamicMatrix<CISSTNETLIB_DOUBLE> VSi;    /* matrix of V*S^{-1} */
     nmrSVDRSSolver SVDRS;
     nmrLDPSolver LDP;
 
@@ -110,7 +110,7 @@ public:
       \param na Number of columns of C
       \param mg Number of rows of A
     */
-    nmrLSISolver(long int ma, long int na, long int mg) {
+    nmrLSISolver(CISSTNETLIB_INTEGER ma, CISSTNETLIB_INTEGER na, CISSTNETLIB_INTEGER mg) {
         Allocate(ma, na, mg);
     }
     
@@ -120,8 +120,8 @@ public:
       method.  It relies on the method Allocate().  The next call to
       the Solve() method will check that the parameters match the
       dimension. */
-    nmrLSISolver(vctDynamicMatrix<double> &C, vctDynamicMatrix<double> &d,
-                 vctDynamicMatrix<double> &A, vctDynamicMatrix<double> &b) {
+    nmrLSISolver(vctDynamicMatrix<CISSTNETLIB_DOUBLE> &C, vctDynamicMatrix<CISSTNETLIB_DOUBLE> &d,
+                 vctDynamicMatrix<CISSTNETLIB_DOUBLE> &A, vctDynamicMatrix<CISSTNETLIB_DOUBLE> &b) {
         Allocate(C, d, A, b);
     }
 
@@ -134,7 +134,7 @@ public:
       \param na Number of columns of C
       \param mg Number of rows of A
     */
-    inline void Allocate(long int ma, long int na, long int mg) {
+    inline void Allocate(CISSTNETLIB_INTEGER ma, CISSTNETLIB_INTEGER na, CISSTNETLIB_INTEGER mg) {
         Ma = ma;
         Na = na;
         Mg = mg;
@@ -154,8 +154,8 @@ public:
       convenient way to extract the required sizes from the input
       containers.  The next call to the Solve() method will check that
       the parameters match the dimension. */
-    inline void Allocate(vctDynamicMatrix<double> &C, vctDynamicMatrix<double> &d,
-                         vctDynamicMatrix<double> &A, vctDynamicMatrix<double> &b) {
+    inline void Allocate(vctDynamicMatrix<CISSTNETLIB_DOUBLE> &C, vctDynamicMatrix<CISSTNETLIB_DOUBLE> &d,
+                         vctDynamicMatrix<CISSTNETLIB_DOUBLE> &A, vctDynamicMatrix<CISSTNETLIB_DOUBLE> &b) {
         Allocate(C.rows(), C.cols(), A.rows());
     }
 
@@ -173,11 +173,11 @@ public:
       the parameters don't meet all the requirements, an exception is
       thrown (std::runtime_error).
     */
-    CISST_EXPORT void Solve(vctDynamicMatrix<double> &C, vctDynamicMatrix<double> &d,
-                            vctDynamicMatrix<double> &A, vctDynamicMatrix<double> &b) throw (std::runtime_error);
+    CISST_EXPORT void Solve(vctDynamicMatrix<CISSTNETLIB_DOUBLE> &C, vctDynamicMatrix<CISSTNETLIB_DOUBLE> &d,
+                            vctDynamicMatrix<CISSTNETLIB_DOUBLE> &A, vctDynamicMatrix<CISSTNETLIB_DOUBLE> &b) throw (std::runtime_error);
     
     /*! Get X.  This method must be used after Solve(). */
-    inline const vctDynamicMatrix<double> &GetX(void) const {
+    inline const vctDynamicMatrix<CISSTNETLIB_DOUBLE> &GetX(void) const {
         return X;
     }
 };

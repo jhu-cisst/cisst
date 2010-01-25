@@ -106,12 +106,12 @@ class nmrFnJacobianSolver {
 	// that doesnt change much is desired.
 
 protected:
-	long int N;
-	long int Ldfjac;
-	double Tolerance;
-	long int Info;
-	long int Lwork;
-	vctDynamicVector<double> Work;
+	CISSTNETLIB_INTEGER N;
+	CISSTNETLIB_INTEGER Ldfjac;
+	CISSTNETLIB_DOUBLE Tolerance;
+	CISSTNETLIB_INTEGER Info;
+	CISSTNETLIB_INTEGER Lwork;
+	vctDynamicVector<CISSTNETLIB_DOUBLE> Work;
 
 public:
     /*! Default constructor.  This constructor doesn't allocate any
@@ -132,7 +132,7 @@ public:
       \param n Number of variables
       This order will be used for the output as well.
     */
-	nmrFnJacobianSolver(long int n)
+	nmrFnJacobianSolver(CISSTNETLIB_INTEGER n)
     {
         Allocate(n);
     }
@@ -144,7 +144,7 @@ public:
        the Solve() method will check that the parameters match the
        dimension and storage order. */
     //@{
-	nmrFnJacobianSolver(vctDynamicVector<double> &X) {
+	nmrFnJacobianSolver(vctDynamicVector<CISSTNETLIB_DOUBLE> &X) {
         Allocate(X);
     }
     //@}
@@ -156,7 +156,7 @@ public:
       
       \param n Number of variables
     */
-	inline void Allocate(long int n) {
+	inline void Allocate(CISSTNETLIB_INTEGER n) {
         N = n;
 	Lwork = N*(N+13)/2;
 	Ldfjac = N;
@@ -170,7 +170,7 @@ public:
       containers.  The next call to the Solve() method will check that
       the parameters match the dimension. */
     //@{
-    inline void Allocate(vctDynamicVector<double> &X) {
+    inline void Allocate(vctDynamicVector<CISSTNETLIB_DOUBLE> &X) {
         Allocate(X.size());
     }
     //@}
@@ -187,9 +187,9 @@ public:
     template <int __instanceLineF, class __elementTypeF, int __instanceLineJ, class __elementTypeJ>
     inline void Solve(nmrCallBackFunctionF<__instanceLineF, __elementTypeF> &callBackF,
                       nmrCallBackFunctionJ<__instanceLineJ, __elementTypeJ> &callBackJ,
-                      vctDynamicVector<double> &X, vctDynamicVector<double> &F,
-                      vctDynamicVector<double> &J, double tolerance) throw (std::runtime_error) {
-        if ((N != (int) X.size()) || (N != (int) F.size()) || (Ldfjac*N != (int) J.size())) {
+                      vctDynamicVector<CISSTNETLIB_DOUBLE> &X, vctDynamicVector<CISSTNETLIB_DOUBLE> &F,
+                      vctDynamicVector<CISSTNETLIB_DOUBLE> &J, CISSTNETLIB_DOUBLE tolerance) throw (std::runtime_error) {
+        if ((N != static_cast<CISSTNETLIB_INTEGER>(X.size())) || (N != static_cast<CISSTNETLIB_INTEGER>(F.size())) || (Ldfjac*N != static_cast<CISSTNETLIB_INTEGER>(J.size()))) {
             cmnThrow(std::runtime_error("nmrFnJacobianSolver Solve: Size used for Allocate was different"));
         }
         Tolerance = tolerance;

@@ -102,8 +102,8 @@ http://www.cisst.org/cisst/license.txt.
   - callBack: Is object of type nmrCallBackLSNonLinSolver used to supply the user method.
   	The user method which belongs to a user defined class 'Cfoo' has the 
 	following definition
-	    int Cfoo::Mbar (vctDynamicVectorRef<double> &X,
-	        vctDynamicVectorRef<double> &F, long int &Flag);
+	    int Cfoo::Mbar (vctDynamicVectorRef<CISSTNETLIB_DOUBLE> &X,
+	        vctDynamicVectorRef<CISSTNETLIB_DOUBLE> &F, CISSTNETLIB_INTEGER &Flag);
 	The solver calls this method when needed to obtain values for F for
 	a given variable values X.
 	the value of Flag should not be changed by Mbar unless
@@ -127,13 +127,13 @@ class nmrLSNonLinSolver {
 	// that doesnt change much is desired.
 
 protected:
-	long int M;
-	long int N;
-	double Tolerance;
-	long int Info;
-	long int Lwork;
-	vctDynamicVector<long int> IWork;
-	vctDynamicVector<double> Work;
+	CISSTNETLIB_INTEGER M;
+	CISSTNETLIB_INTEGER N;
+	CISSTNETLIB_DOUBLE Tolerance;
+	CISSTNETLIB_INTEGER Info;
+	CISSTNETLIB_INTEGER Lwork;
+	vctDynamicVector<CISSTNETLIB_INTEGER> IWork;
+	vctDynamicVector<CISSTNETLIB_DOUBLE> Work;
 
 public:
     /*! Default constructor.  This constructor doesn't allocate any
@@ -155,7 +155,7 @@ public:
       \param n Number of variables
       This order will be used for the output as well.
     */
-	nmrLSNonLinSolver(long int m, long int n)
+	nmrLSNonLinSolver(CISSTNETLIB_INTEGER m, CISSTNETLIB_INTEGER n)
     {
         Allocate(m, n);
     }
@@ -167,7 +167,7 @@ public:
        the Solve() method will check that the parameters match the
        dimension and storage order. */
     //@{
-	nmrLSNonLinSolver(vctDynamicVector<double> &X, vctDynamicVector<double> &F) {
+	nmrLSNonLinSolver(vctDynamicVector<CISSTNETLIB_DOUBLE> &X, vctDynamicVector<CISSTNETLIB_DOUBLE> &F) {
         Allocate(X, F);
     }
     //@}
@@ -180,7 +180,7 @@ public:
       \param m Number of nonlinear functions
       \param n Number of variables
     */
-	inline void Allocate(long int m, long int n) {
+	inline void Allocate(CISSTNETLIB_INTEGER m, CISSTNETLIB_INTEGER n) {
         M = m;
         N = n;
         Lwork = M * N + 5 * N + M;
@@ -195,7 +195,7 @@ public:
       containers.  The next call to the Solve() method will check that
       the parameters match the dimension. */
     //@{
-    inline void Allocate(vctDynamicVector<double> &X, vctDynamicVector<double> &F) {
+    inline void Allocate(vctDynamicVector<CISSTNETLIB_DOUBLE> &X, vctDynamicVector<CISSTNETLIB_DOUBLE> &F) {
         Allocate(X.size(), F.size());
     }
     //@}
@@ -209,9 +209,9 @@ public:
 
     //@{
     template <int __instanceLine, class __elementType>
-    inline void Solve(nmrCallBackFunctionF<__instanceLine, __elementType> &callBack, vctDynamicVector<double> &X,
-                      vctDynamicVector<double> &F, double tolerance) throw (std::runtime_error) {
-        if ((N != (int) X.size()) || (M != (int) F.size())) {
+    inline void Solve(nmrCallBackFunctionF<__instanceLine, __elementType> &callBack, vctDynamicVector<CISSTNETLIB_DOUBLE> &X,
+                      vctDynamicVector<CISSTNETLIB_DOUBLE> &F, CISSTNETLIB_DOUBLE tolerance) throw (std::runtime_error) {
+        if ((N != static_cast<CISSTNETLIB_INTEGER>(X.size())) || (M != static_cast<CISSTNETLIB_INTEGER>(F.size()))) {
             cmnThrow(std::runtime_error("nmrLSNonLinSolver Solve: Size used for Allocate was different"));
         }
         Tolerance = tolerance;

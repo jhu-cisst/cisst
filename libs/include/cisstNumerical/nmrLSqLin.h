@@ -47,8 +47,8 @@ http://www.cisst.org/cisst/license.txt.
   METHOD 1: User provides matrices A and A^{+}
      1) The User allocates memory for these matrices and
      vector.
-     vctDynamicMatrix<double> A(5, 4);
-     vctDynamicMatrix<double> AP(4, 5);
+     vctDynamicMatrix<CISSTNETLIB_DOUBLE> A(5, 4);
+     vctDynamicMatrix<CISSTNETLIB_DOUBLE> AP(4, 5);
      ...
      2) The user calls the LS routine
      nmrLSqLin(A, AP);
@@ -61,7 +61,7 @@ http://www.cisst.org/cisst/license.txt.
 
   METHOD 2: Using a preallocated solution object
      1) The user creates the input matrix
-     vctDynamicMatrix<double> input(rows, cols , VCT_ROW_MAJOR);
+     vctDynamicMatrix<CISSTNETLIB_DOUBLE> input(rows, cols , VCT_ROW_MAJOR);
      2) The user allocats a solution object which could be of
      type nmrLSqLinSolutionFixedSize, nmrLSqLinSolutionDynamic and nmrLSqLinSolutionDynamicRef
      corresponding to fixed size, dynamic matrix or dynamic matrix reference.
@@ -76,8 +76,8 @@ http://www.cisst.org/cisst/license.txt.
   METHOD 3: User provides matrix AP
      with workspace required by pseudo-inverse routine of LAPACK.
      1) User creates matrices and vector
-     vctDynamicMatrix<double> A(5, 4);
-     vctDynamicMatrix<double> AP(4, 5);
+     vctDynamicMatrix<CISSTNETLIB_DOUBLE> A(5, 4);
+     vctDynamicMatrix<CISSTNETLIB_DOUBLE> AP(4, 5);
      2) User also needs to allocate memory for workspace. This method is particularly
      useful when the user is using more than one numerical methods from the library
      and is willing to share the workspace between them. In such as case, the user
@@ -85,7 +85,7 @@ http://www.cisst.org/cisst/license.txt.
      To aid the user determine the minimum workspace required (and not spend time digging
      LAPACK documentation) the library provides helper function
      nmrLSqLinSolutionDynamic::GetWorkspaceSize(input)
-     vctDynamicVector<double> Work(nmrLSqLinSolutionDynamic::GetWorkspaceSize(A));
+     vctDynamicVector<CISSTNETLIB_DOUBLE> Work(nmrLSqLinSolutionDynamic::GetWorkspaceSize(A));
      3) Call the LS function
      nmrLSqLin(A, AP, Work);
      or
@@ -117,13 +117,13 @@ protected:
     /*!
       Memory allocated for Workspace matrices if needed
     */
-    vctDynamicVector<double> WorkspaceMemory;
-    vctDynamicVector<long int> IWorkspaceMemory;
+    vctDynamicVector<CISSTNETLIB_DOUBLE> WorkspaceMemory;
+    vctDynamicVector<CISSTNETLIB_INTEGER> IWorkspaceMemory;
     /*!
       Memory allocated for output X if needed.
     */
-    vctDynamicVector<double> OutputMemory;
-    vctDynamicVector<double> RNorm;
+    vctDynamicVector<CISSTNETLIB_DOUBLE> OutputMemory;
+    vctDynamicVector<CISSTNETLIB_DOUBLE> RNorm;
     /*!
       Memory allocated for input if needed
       The LSEI (constrained least squares) require
@@ -136,22 +136,22 @@ protected:
       arg min || A x - b ||, s.t. E x = f and G x >= h.
       The input for LSI is similar other than Me == 0.
     */
-    vctDynamicMatrix<double> InputMemory;
+    vctDynamicMatrix<CISSTNETLIB_DOUBLE> InputMemory;
     
     /*! References to work or return or input types, these point either
       to user allocated memory or our memory chunks if needed
     */
-    vctDynamicMatrixRef<double> A;
-    vctDynamicMatrixRef<double> E;
-    vctDynamicMatrixRef<double> G;
-    vctDynamicVectorRef<double> b;
-    vctDynamicVectorRef<double> f;
-    vctDynamicVectorRef<double> h;
-    vctDynamicVectorRef<double> X;
-    vctDynamicVectorRef<double> RNormL;
-    vctDynamicVectorRef<double> RNormE;
-    vctDynamicVectorRef<double> Work;
-    vctDynamicVectorRef<long int> IWork;
+    vctDynamicMatrixRef<CISSTNETLIB_DOUBLE> A;
+    vctDynamicMatrixRef<CISSTNETLIB_DOUBLE> E;
+    vctDynamicMatrixRef<CISSTNETLIB_DOUBLE> G;
+    vctDynamicVectorRef<CISSTNETLIB_DOUBLE> b;
+    vctDynamicVectorRef<CISSTNETLIB_DOUBLE> f;
+    vctDynamicVectorRef<CISSTNETLIB_DOUBLE> h;
+    vctDynamicVectorRef<CISSTNETLIB_DOUBLE> X;
+    vctDynamicVectorRef<CISSTNETLIB_DOUBLE> RNormL;
+    vctDynamicVectorRef<CISSTNETLIB_DOUBLE> RNormE;
+    vctDynamicVectorRef<CISSTNETLIB_DOUBLE> Work;
+    vctDynamicVectorRef<CISSTNETLIB_INTEGER> IWork;
     
     /* Just store Ma, Me, Mg, N, and which are needed
        to check if A matrix passed to solve method matches
@@ -159,21 +159,21 @@ protected:
        For LS problem Me == 0 and Mg ==0
        For LSI problem Me == 0
     */
-    long int m_Ma;
-    long int m_Me;
-    long int m_Mg;
-    long int m_N;
+    CISSTNETLIB_INTEGER m_Ma;
+    CISSTNETLIB_INTEGER m_Me;
+    CISSTNETLIB_INTEGER m_Mg;
+    CISSTNETLIB_INTEGER m_N;
     
 public:
     /*! Helper methods for user to set min working space required by LAPACK
       LS routine.
       \param ma, me, mg, n The size of matrix whose LS/LSI/LSEI needs to be computed
     */
-    static inline long int GetWorkspaceSize(long int ma, long int me, long int mg, long int n)
+    static inline CISSTNETLIB_INTEGER GetWorkspaceSize(CISSTNETLIB_INTEGER ma, CISSTNETLIB_INTEGER me, CISSTNETLIB_INTEGER mg, CISSTNETLIB_INTEGER n)
     {
-        long int minmn = -1;
-        long int lwork = -1;
-        long int k = -1;
+        CISSTNETLIB_INTEGER minmn = -1;
+        CISSTNETLIB_INTEGER lwork = -1;
+        CISSTNETLIB_INTEGER k = -1;
         if ((me == 0) && (mg ==0)) {// case LS
             minmn = (ma < n)?ma:n;
             minmn = (1 > minmn)?1:minmn;
@@ -187,7 +187,7 @@ public:
             return 2*(me+n)+k+(mg+2)*(n+7);
         }
     }
-    static inline long int GetIWorkspaceSize(long int ma, long int me, long int mg, long int n)
+    static inline CISSTNETLIB_INTEGER GetIWorkspaceSize(CISSTNETLIB_INTEGER ma, CISSTNETLIB_INTEGER me, CISSTNETLIB_INTEGER mg, CISSTNETLIB_INTEGER n)
     {
         if ((me == 0) && (mg ==0)) {// case LS
             return 0;
@@ -202,7 +202,7 @@ public:
       \param inA The matrix whose LS needs to be computed
     */
     template <typename _matrixOwnerTypeA>
-    static inline long int GetWorkspaceSize(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &inA)
+    static inline CISSTNETLIB_INTEGER GetWorkspaceSize(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> &inA)
     {
         return nmrLSqLinSolutionDynamic::GetWorkspaceSize(inA.rows(), 0, 0, inA.cols());
     }
@@ -211,14 +211,14 @@ public:
       \param inA, inG The input matrices for LSI.
     */
     template <typename _matrixOwnerTypeA, typename _matrixOwnerTypeG>
-    static inline long int GetWorkspaceSize(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &inA,
-                                            vctDynamicMatrixBase<_matrixOwnerTypeG, double> &inG)
+    static inline CISSTNETLIB_INTEGER GetWorkspaceSize(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> &inA,
+                                            vctDynamicMatrixBase<_matrixOwnerTypeG, CISSTNETLIB_DOUBLE> &inG)
     {
         return nmrLSqLinSolutionDynamic::GetWorkspaceSize(inA.rows(), 0, inG.rows(), inA.cols());
     }
     template <typename _matrixOwnerTypeA, typename _matrixOwnerTypeG>
-    static inline long int GetIWorkspaceSize(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &inA,
-                                             vctDynamicMatrixBase<_matrixOwnerTypeG, double> &inG)
+    static inline CISSTNETLIB_INTEGER GetIWorkspaceSize(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> &inA,
+                                             vctDynamicMatrixBase<_matrixOwnerTypeG, CISSTNETLIB_DOUBLE> &inG)
     {
         return nmrLSqLinSolutionDynamic::GetIWorkspaceSize(inA.rows(), 0, inG.rows(), inA.cols());
     }
@@ -227,16 +227,16 @@ public:
       \param inA, inE, inG The input matrices for LSEI.
     */
     template <typename _matrixOwnerTypeA, typename _matrixOwnerTypeE, typename _matrixOwnerTypeG>
-    static inline long int GetWorkspaceSize(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &inA,
-                                            vctDynamicMatrixBase<_matrixOwnerTypeE, double> &inE,
-                                            vctDynamicMatrixBase<_matrixOwnerTypeG, double> &inG)
+    static inline CISSTNETLIB_INTEGER GetWorkspaceSize(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> &inA,
+                                            vctDynamicMatrixBase<_matrixOwnerTypeE, CISSTNETLIB_DOUBLE> &inE,
+                                            vctDynamicMatrixBase<_matrixOwnerTypeG, CISSTNETLIB_DOUBLE> &inG)
     {
         return nmrLSqLinSolutionDynamic::GetWorkspaceSize(inA.rows(), inE.rows(), inG.rows(), inA.cols());
     }
     template <typename _matrixOwnerTypeA, typename _matrixOwnerTypeE, typename _matrixOwnerTypeG>
-    static inline long int GetIWorkspaceSize(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &inA,
-                                             vctDynamicMatrixBase<_matrixOwnerTypeE, double> &inE,
-                                             vctDynamicMatrixBase<_matrixOwnerTypeG, double> &inG)
+    static inline CISSTNETLIB_INTEGER GetIWorkspaceSize(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> &inA,
+                                             vctDynamicMatrixBase<_matrixOwnerTypeE, CISSTNETLIB_DOUBLE> &inE,
+                                             vctDynamicMatrixBase<_matrixOwnerTypeG, CISSTNETLIB_DOUBLE> &inG)
     {
         return nmrLSqLinSolutionDynamic::GetIWorkspaceSize(inA.rows(), inE.rows(), inG.rows(), inA.cols());
     }
@@ -247,11 +247,11 @@ public:
       \param inWork A vector that would be resized to meet the requirements of
       LAPACK LS/LSI/LSEI routine.
     */
-    static inline void AllocateWorkspace(long int ma, long int me, long int mg, long int n, vctDynamicVector<double> &inWork)
+    static inline void AllocateWorkspace(CISSTNETLIB_INTEGER ma, CISSTNETLIB_INTEGER me, CISSTNETLIB_INTEGER mg, CISSTNETLIB_INTEGER n, vctDynamicVector<CISSTNETLIB_DOUBLE> &inWork)
     {
         inWork.SetSize(nmrLSqLinSolutionDynamic::GetWorkspaceSize(ma,me,mg,n));
     }
-    static inline void AllocateIWorkspace(long int ma, long int me, long int mg, long int n, vctDynamicVector<long int> &inIWork)
+    static inline void AllocateIWorkspace(CISSTNETLIB_INTEGER ma, CISSTNETLIB_INTEGER me, CISSTNETLIB_INTEGER mg, CISSTNETLIB_INTEGER n, vctDynamicVector<CISSTNETLIB_INTEGER> &inIWork)
     {
         inIWork.SetSize(nmrLSqLinSolutionDynamic::GetIWorkspaceSize(ma,me,mg,n));
     }
@@ -262,7 +262,7 @@ public:
       LAPACK LS routine.
     */
     template <typename _matrixOwnerTypeA>
-    static inline void AllocateWorkspace(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &inA, vctDynamicVector<double> &inWork)
+    static inline void AllocateWorkspace(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> &inA, vctDynamicVector<CISSTNETLIB_DOUBLE> &inWork)
     {
         inWork.SetSize(nmrLSqLinSolutionDynamic::GetWorkspaceSize(inA));
     }
@@ -273,16 +273,16 @@ public:
       LAPACK LSI routine.
     */
     template <typename _matrixOwnerTypeA, typename _matrixOwnerTypeG>
-    static inline void AllocateWorkspace(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &inA,
-                                         vctDynamicMatrixBase<_matrixOwnerTypeG, double> &inG,
-                                         vctDynamicVector<double> &inWork)
+    static inline void AllocateWorkspace(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> &inA,
+                                         vctDynamicMatrixBase<_matrixOwnerTypeG, CISSTNETLIB_DOUBLE> &inG,
+                                         vctDynamicVector<CISSTNETLIB_DOUBLE> &inWork)
     {
         inWork.SetSize(nmrLSqLinSolutionDynamic::GetWorkspaceSize(inA, inG));
     }
     template <typename _matrixOwnerTypeA, typename _matrixOwnerTypeG>
-    static inline void AllocateIWorkspace(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &inA,
-                                          vctDynamicMatrixBase<_matrixOwnerTypeG, double> &inG,
-                                          vctDynamicVector<long int> &inIWork)
+    static inline void AllocateIWorkspace(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> &inA,
+                                          vctDynamicMatrixBase<_matrixOwnerTypeG, CISSTNETLIB_DOUBLE> &inG,
+                                          vctDynamicVector<CISSTNETLIB_INTEGER> &inIWork)
     {
         inIWork.SetSize(nmrLSqLinSolutionDynamic::GetIWorkspaceSize(inA, inG));
     }
@@ -293,18 +293,18 @@ public:
       LAPACK LSEI routine.
     */
     template <typename _matrixOwnerTypeA,  typename _matrixOwnerTypeE,  typename _matrixOwnerTypeG>
-    static inline void AllocateWorkspace(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &inA,
-                                         vctDynamicMatrixBase<_matrixOwnerTypeE, double> &inE,
-                                         vctDynamicMatrixBase<_matrixOwnerTypeG, double> &inG,
-                                         vctDynamicVector<double> &inWork)
+    static inline void AllocateWorkspace(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> &inA,
+                                         vctDynamicMatrixBase<_matrixOwnerTypeE, CISSTNETLIB_DOUBLE> &inE,
+                                         vctDynamicMatrixBase<_matrixOwnerTypeG, CISSTNETLIB_DOUBLE> &inG,
+                                         vctDynamicVector<CISSTNETLIB_DOUBLE> &inWork)
     {
         inWork.SetSize(nmrLSqLinSolutionDynamic::GetWorkspaceSize(inA, inE, inG));
     }
     template <typename _matrixOwnerTypeA,  typename _matrixOwnerTypeE,  typename _matrixOwnerTypeG>
-    static inline void AllocateIWorkspace(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &inA,
-                                          vctDynamicMatrixBase<_matrixOwnerTypeE, double> &inE,
-                                          vctDynamicMatrixBase<_matrixOwnerTypeG, double> &inG,
-                                          vctDynamicVector<long int> &inIWork)
+    static inline void AllocateIWorkspace(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> &inA,
+                                          vctDynamicMatrixBase<_matrixOwnerTypeE, CISSTNETLIB_DOUBLE> &inE,
+                                          vctDynamicMatrixBase<_matrixOwnerTypeG, CISSTNETLIB_DOUBLE> &inG,
+                                          vctDynamicVector<CISSTNETLIB_INTEGER> &inIWork)
     {
         inIWork.SetSize(nmrLSqLinSolutionDynamic::GetIWorkspaceSize(inA, inE, inG));
     }
@@ -327,49 +327,49 @@ public:
     public:
         Friend(nmrLSqLinSolutionDynamic &insolution):solution(insolution) {
         }
-        inline vctDynamicMatrixRef<double> &GetA(void) {
+        inline vctDynamicMatrixRef<CISSTNETLIB_DOUBLE> &GetA(void) {
             return solution.A;
         }
-        inline vctDynamicMatrixRef<double> &GetE(void) {
+        inline vctDynamicMatrixRef<CISSTNETLIB_DOUBLE> &GetE(void) {
             return solution.E;
         }
-        inline vctDynamicMatrixRef<double> &GetG(void) {
+        inline vctDynamicMatrixRef<CISSTNETLIB_DOUBLE> &GetG(void) {
             return solution.G;
         }
-        inline vctDynamicVectorRef<double> &Getb(void) {
+        inline vctDynamicVectorRef<CISSTNETLIB_DOUBLE> &Getb(void) {
             return solution.b;
         }
-        inline vctDynamicVectorRef<double> &Getf(void) {
+        inline vctDynamicVectorRef<CISSTNETLIB_DOUBLE> &Getf(void) {
             return solution.f;
         }
-        inline vctDynamicVectorRef<double> &Geth(void) {
+        inline vctDynamicVectorRef<CISSTNETLIB_DOUBLE> &Geth(void) {
             return solution.h;
         }
-        inline vctDynamicVectorRef<double> &GetX(void) {
+        inline vctDynamicVectorRef<CISSTNETLIB_DOUBLE> &GetX(void) {
             return solution.X;
         }
-        inline vctDynamicVector<double> &GetRNorm(void) {
+        inline vctDynamicVector<CISSTNETLIB_DOUBLE> &GetRNorm(void) {
             return solution.RNorm;
         }
-        inline vctDynamicMatrix<double> &GetInput(void) {
+        inline vctDynamicMatrix<CISSTNETLIB_DOUBLE> &GetInput(void) {
             return solution.InputMemory;
         }
-        inline vctDynamicVectorRef<double> &GetWork(void) {
+        inline vctDynamicVectorRef<CISSTNETLIB_DOUBLE> &GetWork(void) {
             return solution.Work;
         }
-        inline vctDynamicVectorRef<long int> &GetIWork(void) {
+        inline vctDynamicVectorRef<CISSTNETLIB_INTEGER> &GetIWork(void) {
             return solution.IWork;
         }
-        inline int GetMa(void) {
+        inline CISSTNETLIB_INTEGER GetMa(void) {
             return solution.m_Ma;
         }
-        inline int GetMe(void) {
+        inline CISSTNETLIB_INTEGER GetMe(void) {
             return solution.m_Me;
         }
-        inline int GetMg(void) {
+        inline CISSTNETLIB_INTEGER GetMg(void) {
             return solution.m_Mg;
         }
-        inline int GetN(void) {
+        inline CISSTNETLIB_INTEGER GetN(void) {
             return solution.m_N;
         }
     };
@@ -382,23 +382,23 @@ public:
       nmrLSqLinSolutionDynamic::SetRef)
     */
     nmrLSqLinSolutionDynamic():
-        m_Ma((long int)0),
-        m_Me((long int)0),
-        m_Mg((long int)0),
-        m_N((long int)0) {};
+        m_Ma(static_cast<CISSTNETLIB_INTEGER>(0)),
+        m_Me(static_cast<CISSTNETLIB_INTEGER>(0)),
+        m_Mg(static_cast<CISSTNETLIB_INTEGER>(0)),
+        m_N(static_cast<CISSTNETLIB_INTEGER>(0)) {};
     
     /*! contructor to use with LS */
-    nmrLSqLinSolutionDynamic(long int ma, long int n)
+    nmrLSqLinSolutionDynamic(CISSTNETLIB_INTEGER ma, CISSTNETLIB_INTEGER n)
     {
         this->Allocate(ma, 0, 0, n);
     }
     /*! contructor to use with LSI */
-    nmrLSqLinSolutionDynamic(long int ma, long int mg, long int n)
+    nmrLSqLinSolutionDynamic(CISSTNETLIB_INTEGER ma, CISSTNETLIB_INTEGER mg, CISSTNETLIB_INTEGER n)
     {
         this->Allocate(ma, 0, mg, n);
     }
     /*! contructor to use with LSEI */
-    nmrLSqLinSolutionDynamic(long int ma, long int me, long int mg, long int n)
+    nmrLSqLinSolutionDynamic(CISSTNETLIB_INTEGER ma, CISSTNETLIB_INTEGER me, CISSTNETLIB_INTEGER mg, CISSTNETLIB_INTEGER n)
     {
         this->Allocate(ma, me, mg, n);
     }
@@ -415,7 +415,7 @@ public:
       \param A input matrix
     */
     template <typename _matrixOwnerTypeA>
-    nmrLSqLinSolutionDynamic(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &A)
+    nmrLSqLinSolutionDynamic(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> &A)
     {
         this->Allocate(A.rows(), 0, 0, A.cols());
     }
@@ -429,8 +429,8 @@ public:
       \output inWork workspace for LS
     */
     template <typename _matrixOwnerTypeA, typename _vectorOwnerTypeWork>
-    nmrLSqLinSolutionDynamic(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &A,
-                             vctDynamicVectorBase<_vectorOwnerTypeWork, double> &inWork)
+    nmrLSqLinSolutionDynamic(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> &A,
+                             vctDynamicVectorBase<_vectorOwnerTypeWork, CISSTNETLIB_DOUBLE> &inWork)
     {
         this->Allocate(A.rows(), 0, 0, A.cols(), inWork);
     }
@@ -445,9 +445,9 @@ public:
       \param inWork The workspace for LAPACK.
     */
     template <typename _vectorOwnerTypeX, typename _vectorOwnerTypeWork>
-    nmrLSqLinSolutionDynamic(long int ma, long int n,
-                             vctDynamicVectorBase<_vectorOwnerTypeX, double> &inX,
-                             vctDynamicVectorBase<_vectorOwnerTypeWork, double> &inWork)
+    nmrLSqLinSolutionDynamic(CISSTNETLIB_INTEGER ma, CISSTNETLIB_INTEGER n,
+                             vctDynamicVectorBase<_vectorOwnerTypeX, CISSTNETLIB_DOUBLE> &inX,
+                             vctDynamicVectorBase<_vectorOwnerTypeWork, CISSTNETLIB_DOUBLE> &inWork)
     {
         this->SetRef(ma, 0, 0, n, inX, inWork);
     }
@@ -464,8 +464,8 @@ public:
       \param inX The output vector for LSqLin
     */
     template <typename _vectorOwnerTypeX>
-    nmrLSqLinSolutionDynamic(long int ma, long int n,
-                             vctDynamicVectorBase<_vectorOwnerTypeX, double> &inX)
+    nmrLSqLinSolutionDynamic(CISSTNETLIB_INTEGER ma, CISSTNETLIB_INTEGER n,
+                             vctDynamicVectorBase<_vectorOwnerTypeX, CISSTNETLIB_DOUBLE> &inX)
     {
         this->SetRef(ma, 0, 0, n, inX);
     }
@@ -479,9 +479,9 @@ public:
       \param inWork The workspace for LAPACK.
     */
     template <typename _matrixOwnerTypeA, typename _vectorOwnerTypeX, typename _vectorOwnerTypeWork>
-    nmrLSqLinSolutionDynamic(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &inA,
-                             vctDynamicVectorBase<_vectorOwnerTypeX, double> &inX,
-                             vctDynamicVectorBase<_vectorOwnerTypeWork, double> &inWork)
+    nmrLSqLinSolutionDynamic(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> &inA,
+                             vctDynamicVectorBase<_vectorOwnerTypeX, CISSTNETLIB_DOUBLE> &inX,
+                             vctDynamicVectorBase<_vectorOwnerTypeWork, CISSTNETLIB_DOUBLE> &inWork)
     {
         this->SetRef(inA.rows(), 0, 0, inA.cols(), inX, inWork);
     }
@@ -498,8 +498,8 @@ public:
       \param A, G input matrices
     */
     template <typename _matrixOwnerTypeA, typename _matrixOwnerTypeG>
-    nmrLSqLinSolutionDynamic(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &A,
-                             vctDynamicMatrixBase<_matrixOwnerTypeG, double> &G)
+    nmrLSqLinSolutionDynamic(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> &A,
+                             vctDynamicMatrixBase<_matrixOwnerTypeG, CISSTNETLIB_DOUBLE> &G)
     {
         this->Allocate(A.rows(), 0, G.rows(), A.cols());
     }
@@ -514,10 +514,10 @@ public:
     */
     template <typename _matrixOwnerTypeA, typename _matrixOwnerTypeG,
               typename _vectorOwnerTypeWork, typename _vectorOwnerTypeIWork>
-    nmrLSqLinSolutionDynamic(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &A,
-                             vctDynamicMatrixBase<_matrixOwnerTypeG, double> &G,
-                             vctDynamicVectorBase<_vectorOwnerTypeWork, double> &inWork,
-                             vctDynamicVectorBase<_vectorOwnerTypeIWork, long int> &inIWork)
+    nmrLSqLinSolutionDynamic(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> &A,
+                             vctDynamicMatrixBase<_matrixOwnerTypeG, CISSTNETLIB_DOUBLE> &G,
+                             vctDynamicVectorBase<_vectorOwnerTypeWork, CISSTNETLIB_DOUBLE> &inWork,
+                             vctDynamicVectorBase<_vectorOwnerTypeIWork, CISSTNETLIB_INTEGER> &inIWork)
     {
         this->Allocate(A.rows(), 0, G.rows(), A.cols(), inWork, inIWork);
     }
@@ -531,10 +531,10 @@ public:
       \output inWork, inIWork workspace for LSI
     */
     template <typename _vectorOwnerTypeX, typename _vectorOwnerTypeWork, typename _vectorOwnerTypeIWork>
-    nmrLSqLinSolutionDynamic(long int ma, long int mg, long int n,
-                             vctDynamicVectorBase<_vectorOwnerTypeX, double> &inX,
-                             vctDynamicVectorBase<_vectorOwnerTypeWork, double> &inWork,
-                             vctDynamicVectorBase<_vectorOwnerTypeIWork, long int> &inIWork)
+    nmrLSqLinSolutionDynamic(CISSTNETLIB_INTEGER ma, CISSTNETLIB_INTEGER mg, CISSTNETLIB_INTEGER n,
+                             vctDynamicVectorBase<_vectorOwnerTypeX, CISSTNETLIB_DOUBLE> &inX,
+                             vctDynamicVectorBase<_vectorOwnerTypeWork, CISSTNETLIB_DOUBLE> &inWork,
+                             vctDynamicVectorBase<_vectorOwnerTypeIWork, CISSTNETLIB_INTEGER> &inIWork)
     {
         this->SetRef(ma, 0, mg, n, inX, inWork, inIWork);
     }
@@ -551,8 +551,8 @@ public:
       \param inX The output vector for LSqLin
     */
     template <typename _vectorOwnerTypeX>
-    nmrLSqLinSolutionDynamic(long int ma, long int mg, long int n,
-                             vctDynamicVectorBase<_vectorOwnerTypeX, double> &inX)
+    nmrLSqLinSolutionDynamic(CISSTNETLIB_INTEGER ma, CISSTNETLIB_INTEGER mg, CISSTNETLIB_INTEGER n,
+                             vctDynamicVectorBase<_vectorOwnerTypeX, CISSTNETLIB_DOUBLE> &inX)
     {
         this->SetRef(ma, 0, mg, n, inX);
     }
@@ -568,11 +568,11 @@ public:
     template <typename _matrixOwnerTypeA, typename _matrixOwnerTypeG,
               typename _vectorOwnerTypeX, typename _vectorOwnerTypeWork,
               typename _vectorOwnerTypeIWork>
-    nmrLSqLinSolutionDynamic(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &inA,
-                             vctDynamicMatrixBase<_matrixOwnerTypeG, double> &inG,
-                             vctDynamicVectorBase<_vectorOwnerTypeX, double> &inX,
-                             vctDynamicVectorBase<_vectorOwnerTypeWork, double> &inWork,
-                             vctDynamicVectorBase<_vectorOwnerTypeIWork, long int> &inIWork)
+    nmrLSqLinSolutionDynamic(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> &inA,
+                             vctDynamicMatrixBase<_matrixOwnerTypeG, CISSTNETLIB_DOUBLE> &inG,
+                             vctDynamicVectorBase<_vectorOwnerTypeX, CISSTNETLIB_DOUBLE> &inX,
+                             vctDynamicVectorBase<_vectorOwnerTypeWork, CISSTNETLIB_DOUBLE> &inWork,
+                             vctDynamicVectorBase<_vectorOwnerTypeIWork, CISSTNETLIB_INTEGER> &inIWork)
     {
         this->SetRef(inA.rows(), 0, inG.rows(), inA.cols(), inX, inWork, inIWork);
     }
@@ -589,9 +589,9 @@ public:
       \param A, E, G input matrices
     */
     template <typename _matrixOwnerTypeA, typename _matrixOwnerTypeE, typename _matrixOwnerTypeG>
-    nmrLSqLinSolutionDynamic(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &A,
-                             vctDynamicMatrixBase<_matrixOwnerTypeE, double> &E,
-                             vctDynamicMatrixBase<_matrixOwnerTypeG, double> &G)
+    nmrLSqLinSolutionDynamic(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> &A,
+                             vctDynamicMatrixBase<_matrixOwnerTypeE, CISSTNETLIB_DOUBLE> &E,
+                             vctDynamicMatrixBase<_matrixOwnerTypeG, CISSTNETLIB_DOUBLE> &G)
     {
         this->Allocate(A.rows(), E.rows(), G.rows(), A.cols());
     }
@@ -607,11 +607,11 @@ public:
     template <typename _matrixOwnerTypeA, typename _matrixOwnerTypeE,
               typename _matrixOwnerTypeG, typename _vectorOwnerTypeWork,
               typename _vectorOwnerTypeIWork>
-    nmrLSqLinSolutionDynamic(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &A,
-                             vctDynamicMatrixBase<_matrixOwnerTypeE, double> &E,
-                             vctDynamicMatrixBase<_matrixOwnerTypeG, double> &G,
-                             vctDynamicVectorBase<_vectorOwnerTypeWork, double> &inWork,
-                             vctDynamicVectorBase<_vectorOwnerTypeIWork, long int> &inIWork)
+    nmrLSqLinSolutionDynamic(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> &A,
+                             vctDynamicMatrixBase<_matrixOwnerTypeE, CISSTNETLIB_DOUBLE> &E,
+                             vctDynamicMatrixBase<_matrixOwnerTypeG, CISSTNETLIB_DOUBLE> &G,
+                             vctDynamicVectorBase<_vectorOwnerTypeWork, CISSTNETLIB_DOUBLE> &inWork,
+                             vctDynamicVectorBase<_vectorOwnerTypeIWork, CISSTNETLIB_INTEGER> &inIWork)
     {
         this->Allocate(A.rows(), E.rows(), G.rows(), A.cols(), inWork, inIWork);
     }
@@ -625,10 +625,10 @@ public:
       \output inWork, inIWork workspace for LSI
     */
     template <typename _vectorOwnerTypeX, typename _vectorOwnerTypeWork, typename _vectorOwnerTypeIWork>
-    nmrLSqLinSolutionDynamic(long int ma, long int me, long int mg, long int n,
-                             vctDynamicVectorBase<_vectorOwnerTypeX, double> &inX,
-                             vctDynamicVectorBase<_vectorOwnerTypeWork, double> &inWork,
-                             vctDynamicVectorBase<_vectorOwnerTypeIWork, long int> &inIWork)
+    nmrLSqLinSolutionDynamic(CISSTNETLIB_INTEGER ma, CISSTNETLIB_INTEGER me, CISSTNETLIB_INTEGER mg, CISSTNETLIB_INTEGER n,
+                             vctDynamicVectorBase<_vectorOwnerTypeX, CISSTNETLIB_DOUBLE> &inX,
+                             vctDynamicVectorBase<_vectorOwnerTypeWork, CISSTNETLIB_DOUBLE> &inWork,
+                             vctDynamicVectorBase<_vectorOwnerTypeIWork, CISSTNETLIB_INTEGER> &inIWork)
     {
         this->SetRef(ma, me, mg, n, inX, inWork, inIWork);
     }
@@ -645,8 +645,8 @@ public:
       \param inX The output vector for LSqLin
     */
     template <typename _vectorOwnerTypeX>
-    nmrLSqLinSolutionDynamic(long int ma, long int me, long int mg, long int n,
-                             vctDynamicVectorBase<_vectorOwnerTypeX, double> &inX)
+    nmrLSqLinSolutionDynamic(CISSTNETLIB_INTEGER ma, CISSTNETLIB_INTEGER me, CISSTNETLIB_INTEGER mg, CISSTNETLIB_INTEGER n,
+                             vctDynamicVectorBase<_vectorOwnerTypeX, CISSTNETLIB_DOUBLE> &inX)
     {
         this->SetRef(ma, me, mg, n, inX);
     }
@@ -662,12 +662,12 @@ public:
     template <typename _matrixOwnerTypeA, typename _matrixOwnerTypeE,
               typename _matrixOwnerTypeG, typename _vectorOwnerTypeX,
               typename _vectorOwnerTypeWork, typename _vectorOwnerTypeIWork>
-    nmrLSqLinSolutionDynamic(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &inA,
-                             vctDynamicMatrixBase<_matrixOwnerTypeE, double> &inE,
-                             vctDynamicMatrixBase<_matrixOwnerTypeG, double> &inG,
-                             vctDynamicVectorBase<_vectorOwnerTypeX, double> &inX,
-                             vctDynamicVectorBase<_vectorOwnerTypeWork, double> &inWork,
-                             vctDynamicVectorBase<_vectorOwnerTypeIWork, long int> &inIWork)
+    nmrLSqLinSolutionDynamic(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> &inA,
+                             vctDynamicMatrixBase<_matrixOwnerTypeE, CISSTNETLIB_DOUBLE> &inE,
+                             vctDynamicMatrixBase<_matrixOwnerTypeG, CISSTNETLIB_DOUBLE> &inG,
+                             vctDynamicVectorBase<_vectorOwnerTypeX, CISSTNETLIB_DOUBLE> &inX,
+                             vctDynamicVectorBase<_vectorOwnerTypeWork, CISSTNETLIB_DOUBLE> &inWork,
+                             vctDynamicVectorBase<_vectorOwnerTypeIWork, CISSTNETLIB_INTEGER> &inIWork)
     {
         this->SetRef(inA.rows(), inE.rows(), inG.rows(), inA.cols(), inX, inWork, inIWork);
     }
@@ -688,7 +688,7 @@ public:
       \param A The matrix for which LS needs to be computed, size MxN
     */
     template <typename _matrixOwnerTypeA>
-    inline void Allocate(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &A)
+    inline void Allocate(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> &A)
     {
         this->Allocate(A.rows(), 0, 0, A.cols());
     }
@@ -711,8 +711,8 @@ public:
       \param inWork The vector used for workspace by LS.
     */
     template <typename _matrixOwnerTypeA, typename _vectorOwnerTypeWork>
-    inline void Allocate(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &A,
-                         vctDynamicVectorBase<_vectorOwnerTypeWork, double> &inWork)
+    inline void Allocate(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> &A,
+                         vctDynamicVectorBase<_vectorOwnerTypeWork, CISSTNETLIB_DOUBLE> &inWork)
     {
         this->Allocate(A.rows(), 0, 0, A.cols(), inWork);
     }
@@ -733,9 +733,9 @@ public:
       \param inWork The workspace for LS.
     */
     template <typename _matrixOwnerTypeA, typename _vectorOwnerTypeX, typename _vectorOwnerTypeWork>
-    void SetRef(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &inA,
-                vctDynamicVectorBase<_vectorOwnerTypeX, double> &inX,
-                vctDynamicVectorBase<_vectorOwnerTypeWork, double> &inWork)
+    void SetRef(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> &inA,
+                vctDynamicVectorBase<_vectorOwnerTypeX, CISSTNETLIB_DOUBLE> &inX,
+                vctDynamicVectorBase<_vectorOwnerTypeWork, CISSTNETLIB_DOUBLE> &inWork)
     {
         this->SetRef(inA.rows(), 0, 0, inA.cols(), inX, inWork);
     }
@@ -754,8 +754,8 @@ public:
       \param inX The output matrix for LSqLin
     */
     template <typename _matrixOwnerTypeA, typename _vectorOwnerTypeX>
-    void SetRef(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &inA,
-                vctDynamicVectorBase<_vectorOwnerTypeX, double> &inX)
+    void SetRef(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> &inA,
+                vctDynamicVectorBase<_vectorOwnerTypeX, CISSTNETLIB_DOUBLE> &inX)
     {
         this->SetRef(inA.rows(), 0, 0, inA.cols(), inX, this->WorkspaceMemory);
     }
@@ -777,8 +777,8 @@ public:
       \param G The contraints matrix  for LSI, size Mg x N
     */
     template <typename _matrixOwnerTypeA, typename _matrixOwnerTypeG>
-    inline void Allocate(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &A,
-                         vctDynamicMatrixBase<_matrixOwnerTypeG, double> &G)
+    inline void Allocate(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> &A,
+                         vctDynamicMatrixBase<_matrixOwnerTypeG, CISSTNETLIB_DOUBLE> &G)
     {
         this->Allocate(A.rows(), 0, G.rows(), A.cols());
     }
@@ -803,10 +803,10 @@ public:
     */
     template <typename _matrixOwnerTypeA, typename _matrixOwnerTypeG,
               typename _vectorOwnerTypeWork, typename _vectorOwnerTypeIWork>
-    inline void Allocate(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &A,
-                         vctDynamicMatrixBase<_matrixOwnerTypeG, double> &G,
-                         vctDynamicVectorBase<_vectorOwnerTypeWork, double> &inWork,
-                         vctDynamicVectorBase<_vectorOwnerTypeWork, double> &inIWork)
+    inline void Allocate(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> &A,
+                         vctDynamicMatrixBase<_matrixOwnerTypeG, CISSTNETLIB_DOUBLE> &G,
+                         vctDynamicVectorBase<_vectorOwnerTypeWork, CISSTNETLIB_DOUBLE> &inWork,
+                         vctDynamicVectorBase<_vectorOwnerTypeWork, CISSTNETLIB_DOUBLE> &inIWork)
     {
         this->Allocate(A.rows(), 0, G.rows(), A.cols(), inWork, inIWork);
     }
@@ -829,11 +829,11 @@ public:
     template <typename _matrixOwnerTypeA, typename _matrixOwnerTypeG,
               typename _vectorOwnerTypeX, typename _vectorOwnerTypeWork,
               typename _vectorOwnerTypeIWork>
-    void SetRef(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &inA,
-                vctDynamicMatrixBase<_matrixOwnerTypeG, double> &inG,
-                vctDynamicVectorBase<_vectorOwnerTypeX, double> &inX,
-                vctDynamicVectorBase<_vectorOwnerTypeWork, double> &inWork,
-                vctDynamicVectorBase<_vectorOwnerTypeWork, double> &inIWork)
+    void SetRef(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> &inA,
+                vctDynamicMatrixBase<_matrixOwnerTypeG, CISSTNETLIB_DOUBLE> &inG,
+                vctDynamicVectorBase<_vectorOwnerTypeX, CISSTNETLIB_DOUBLE> &inX,
+                vctDynamicVectorBase<_vectorOwnerTypeWork, CISSTNETLIB_DOUBLE> &inWork,
+                vctDynamicVectorBase<_vectorOwnerTypeWork, CISSTNETLIB_DOUBLE> &inIWork)
     {
         this->SetRef(inA.rows(), 0, inG.rows(), inA.cols(), inX, inWork, inIWork);
     }
@@ -852,9 +852,9 @@ public:
       \param inX The output matrix for LSqLin
     */
     template <typename _matrixOwnerTypeA, typename _matrixOwnerTypeG, typename _vectorOwnerTypeX>
-    void SetRef(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &inA,
-                vctDynamicMatrixBase<_matrixOwnerTypeG, double> &inG,
-                vctDynamicVectorBase<_vectorOwnerTypeX, double> &inX)
+    void SetRef(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> &inA,
+                vctDynamicMatrixBase<_matrixOwnerTypeG, CISSTNETLIB_DOUBLE> &inG,
+                vctDynamicVectorBase<_vectorOwnerTypeX, CISSTNETLIB_DOUBLE> &inX)
     {
         this->SetRef(inA.rows(), 0, inG.rows(), inA.cols(), inX);
     }
@@ -877,9 +877,9 @@ public:
       \param G The contraints matrix  for LSEI, size Mg x N
     */
     template <typename _matrixOwnerTypeA, typename _matrixOwnerTypeE, typename _matrixOwnerTypeG>
-    inline void Allocate(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &A,
-                         vctDynamicMatrixBase<_matrixOwnerTypeE, double> &E,
-                         vctDynamicMatrixBase<_matrixOwnerTypeG, double> &G)
+    inline void Allocate(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> &A,
+                         vctDynamicMatrixBase<_matrixOwnerTypeE, CISSTNETLIB_DOUBLE> &E,
+                         vctDynamicMatrixBase<_matrixOwnerTypeG, CISSTNETLIB_DOUBLE> &G)
     {
         this->Allocate(A.rows(), E.rows(), G.rows(), A.cols());
     }
@@ -905,11 +905,11 @@ public:
     */
     template <typename _matrixOwnerTypeA, typename _matrixOwnerTypeE,
               typename _matrixOwnerTypeG, typename _vectorOwnerTypeWork, typename _vectorOwnerTypeIWork>
-    inline void Allocate(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &A,
-                         vctDynamicMatrixBase<_matrixOwnerTypeE, double> &E,
-                         vctDynamicMatrixBase<_matrixOwnerTypeG, double> &G,
-                         vctDynamicVectorBase<_vectorOwnerTypeWork, double> &inWork,
-                         vctDynamicVectorBase<_vectorOwnerTypeIWork, double> &inIWork)
+    inline void Allocate(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> &A,
+                         vctDynamicMatrixBase<_matrixOwnerTypeE, CISSTNETLIB_DOUBLE> &E,
+                         vctDynamicMatrixBase<_matrixOwnerTypeG, CISSTNETLIB_DOUBLE> &G,
+                         vctDynamicVectorBase<_vectorOwnerTypeWork, CISSTNETLIB_DOUBLE> &inWork,
+                         vctDynamicVectorBase<_vectorOwnerTypeIWork, CISSTNETLIB_DOUBLE> &inIWork)
     {
         this->Allocate(A.rows(), E.rows(), G.rows(), A.cols(), inWork, inIWork);
     }
@@ -932,12 +932,12 @@ public:
     template <typename _matrixOwnerTypeA, typename _matrixOwnerTypeE, typename _matrixOwnerTypeG,
               typename _vectorOwnerTypeX, typename _vectorOwnerTypeWork,
               typename _vectorOwnerTypeIWork>
-    void SetRef(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &inA,
-                vctDynamicMatrixBase<_matrixOwnerTypeE, double> &inE,
-                vctDynamicMatrixBase<_matrixOwnerTypeG, double> &inG,
-                vctDynamicVectorBase<_vectorOwnerTypeX, double> &inX,
-                vctDynamicVectorBase<_vectorOwnerTypeWork, double> &inWork,
-                vctDynamicVectorBase<_vectorOwnerTypeIWork, double> &inIWork)
+    void SetRef(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> &inA,
+                vctDynamicMatrixBase<_matrixOwnerTypeE, CISSTNETLIB_DOUBLE> &inE,
+                vctDynamicMatrixBase<_matrixOwnerTypeG, CISSTNETLIB_DOUBLE> &inG,
+                vctDynamicVectorBase<_vectorOwnerTypeX, CISSTNETLIB_DOUBLE> &inX,
+                vctDynamicVectorBase<_vectorOwnerTypeWork, CISSTNETLIB_DOUBLE> &inWork,
+                vctDynamicVectorBase<_vectorOwnerTypeIWork, CISSTNETLIB_DOUBLE> &inIWork)
     {
         this->SetRef(inA.rows(), inE.rows(), inG.rows(), inA.cols(), inX, inWork, inIWork);
     }
@@ -957,10 +957,10 @@ public:
     */
     template <typename _matrixOwnerTypeA, typename _matrixOwnerTypeE,
               typename _matrixOwnerTypeG, typename _vectorOwnerTypeX>
-    void SetRef(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &inA,
-                vctDynamicMatrixBase<_matrixOwnerTypeE, double> &inE,
-                vctDynamicMatrixBase<_matrixOwnerTypeG, double> &inG,
-                vctDynamicVectorBase<_vectorOwnerTypeX, double> &inX)
+    void SetRef(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> &inA,
+                vctDynamicMatrixBase<_matrixOwnerTypeE, CISSTNETLIB_DOUBLE> &inE,
+                vctDynamicMatrixBase<_matrixOwnerTypeG, CISSTNETLIB_DOUBLE> &inG,
+                vctDynamicVectorBase<_vectorOwnerTypeX, CISSTNETLIB_DOUBLE> &inX)
     {
         this->SetRef(inA.rows(), inE.rows(), inG.rows(), inA.cols(), inX, this->WorkspaceMemory);
     }
@@ -978,7 +978,7 @@ public:
       \param mg Number of rows of input matrix G
       \param n Number of cols of input matrix A
     */
-    inline void Allocate(long int ma, long int me, long int mg, long int n)
+    inline void Allocate(CISSTNETLIB_INTEGER ma, CISSTNETLIB_INTEGER me, CISSTNETLIB_INTEGER mg, CISSTNETLIB_INTEGER n)
     {
         this->Malloc(ma, me, mg, n, true, true, true);
         this->SetRef(ma, me, mg, n, this->WorkspaceMemory, this->InputMemory, this->OutputMemory);
@@ -995,11 +995,11 @@ public:
       \param inWork Workspace provided by user
     */
     template <typename _vectorOwnerTypeWork>
-    inline void Allocate(long int ma, long int me, long int mg, long int n,
-                         vctDynamicVectorBase<_vectorOwnerTypeWork, double> &inWork)
+    inline void Allocate(CISSTNETLIB_INTEGER ma, CISSTNETLIB_INTEGER me, CISSTNETLIB_INTEGER mg, CISSTNETLIB_INTEGER n,
+                         vctDynamicVectorBase<_vectorOwnerTypeWork, CISSTNETLIB_DOUBLE> &inWork)
     {
-        long int lwork = nmrLSqLinSolutionDynamic::GetWorkspaceSize(ma, me, mg, n);
-        if (lwork > (long int)inWork.size()) {
+        CISSTNETLIB_INTEGER lwork = nmrLSqLinSolutionDynamic::GetWorkspaceSize(ma, me, mg, n);
+        if (lwork > static_cast<CISSTNETLIB_INTEGER>(inWork.size())) {
             cmnThrow(std::runtime_error("nmrLSqLin: Incorrect size for Work"));
         }
         this->Malloc(ma, me, mg, n, false, true, true);
@@ -1016,16 +1016,16 @@ public:
       \param inWork, inIWork Workspace provided by user
     */
     template <typename _vectorOwnerTypeWork, typename _vectorOwnerTypeIWork>
-    inline void Allocate(long int ma, long int me, long int mg, long int n,
-                         vctDynamicVectorBase<_vectorOwnerTypeWork, double> &inWork,
-                         vctDynamicVectorBase<_vectorOwnerTypeWork, double> &inIWork)
+    inline void Allocate(CISSTNETLIB_INTEGER ma, CISSTNETLIB_INTEGER me, CISSTNETLIB_INTEGER mg, CISSTNETLIB_INTEGER n,
+                         vctDynamicVectorBase<_vectorOwnerTypeWork, CISSTNETLIB_DOUBLE> &inWork,
+                         vctDynamicVectorBase<_vectorOwnerTypeWork, CISSTNETLIB_DOUBLE> &inIWork)
     {
-        long int lwork = nmrLSqLinSolutionDynamic::GetWorkspaceSize(ma, me, mg, n);
-        if (lwork > (long int)inWork.size()) {
+        CISSTNETLIB_INTEGER lwork = nmrLSqLinSolutionDynamic::GetWorkspaceSize(ma, me, mg, n);
+        if (lwork > static_cast<CISSTNETLIB_INTEGER>(inWork.size())) {
             cmnThrow(std::runtime_error("nmrLSqLin: Incorrect size for Work"));
         }
-        long int liwork = nmrLSqLinSolutionDynamic::GetIWorkspaceSize(ma, me, mg, n);
-        if (liwork > (long int)inIWork.size()) {
+        CISSTNETLIB_INTEGER liwork = nmrLSqLinSolutionDynamic::GetIWorkspaceSize(ma, me, mg, n);
+        if (liwork > static_cast<CISSTNETLIB_INTEGER>(inIWork.size())) {
             cmnThrow(std::runtime_error("nmrLSqLin: Incorrect size for IWork"));
         }
         this->Malloc(ma, me, mg, n, false, true, true);
@@ -1047,14 +1047,14 @@ public:
       \param inWork The workspace for LS.
     */
     template <typename _vectorOwnerTypeX, typename _vectorOwnerTypeWork>
-    void SetRef(long int ma, long int me, long int mg, long int n,
-                vctDynamicVectorBase<_vectorOwnerTypeX, double> &inX, vctDynamicVectorBase<_vectorOwnerTypeWork, double> &inWork)
+    void SetRef(CISSTNETLIB_INTEGER ma, CISSTNETLIB_INTEGER me, CISSTNETLIB_INTEGER mg, CISSTNETLIB_INTEGER n,
+                vctDynamicVectorBase<_vectorOwnerTypeX, CISSTNETLIB_DOUBLE> &inX, vctDynamicVectorBase<_vectorOwnerTypeWork, CISSTNETLIB_DOUBLE> &inWork)
     {
-        long int lwork = nmrLSqLinSolutionDynamic::GetWorkspaceSize(ma, me, mg, n);
-        if (lwork > (long int)inWork.size()) {
+        CISSTNETLIB_INTEGER lwork = nmrLSqLinSolutionDynamic::GetWorkspaceSize(ma, me, mg, n);
+        if (lwork > static_cast<CISSTNETLIB_INTEGER>(inWork.size())) {
             cmnThrow(std::runtime_error("nmrLSqLin: Incorrect size for Work"));
         }
-        if (n > (long int)inX.size()) {
+        if (n > static_cast<CISSTNETLIB_INTEGER>(inX.size())) {
             cmnThrow(std::runtime_error("nmrLSqLin: Incorrect size for X"));
         }
         this->Malloc(ma, me, mg, n, false, true, false);
@@ -1070,20 +1070,20 @@ public:
       \param inWork/inIWork The workspace for LSI/LSEI.
     */
     template <typename _vectorOwnerTypeX, typename _vectorOwnerTypeWork, typename _vectorOwnerTypeIWork>
-    void SetRef(long int ma, long int me, long int mg, long int n,
-                vctDynamicVectorBase<_vectorOwnerTypeX, double> &inX,
-                vctDynamicVectorBase<_vectorOwnerTypeWork, double> &inWork,
-                vctDynamicVectorBase<_vectorOwnerTypeIWork, double> &inIWork)
+    void SetRef(CISSTNETLIB_INTEGER ma, CISSTNETLIB_INTEGER me, CISSTNETLIB_INTEGER mg, CISSTNETLIB_INTEGER n,
+                vctDynamicVectorBase<_vectorOwnerTypeX, CISSTNETLIB_DOUBLE> &inX,
+                vctDynamicVectorBase<_vectorOwnerTypeWork, CISSTNETLIB_DOUBLE> &inWork,
+                vctDynamicVectorBase<_vectorOwnerTypeIWork, CISSTNETLIB_DOUBLE> &inIWork)
     {
-        long int lwork = nmrLSqLinSolutionDynamic::GetWorkspaceSize(ma, me, mg, n);
-        if (lwork > (long int)inWork.size()) {
+        CISSTNETLIB_INTEGER lwork = nmrLSqLinSolutionDynamic::GetWorkspaceSize(ma, me, mg, n);
+        if (lwork > static_cast<CISSTNETLIB_INTEGER>(inWork.size())) {
             cmnThrow(std::runtime_error("nmrLSqLin: Incorrect size for Work"));
         }
-        long int liwork = nmrLSqLinSolutionDynamic::GetIWorkspaceSize(ma, me, mg, n);
-        if (liwork > (long int)inIWork.size()) {
+        CISSTNETLIB_INTEGER liwork = nmrLSqLinSolutionDynamic::GetIWorkspaceSize(ma, me, mg, n);
+        if (liwork > static_cast<CISSTNETLIB_INTEGER>(inIWork.size())) {
             cmnThrow(std::runtime_error("nmrLSqLin: Incorrect size for IWork"));
         }
-        if (n > (long int)inX.size()) {
+        if (n > static_cast<CISSTNETLIB_INTEGER>(inX.size())) {
             cmnThrow(std::runtime_error("nmrLSqLin: Incorrect size for X"));
         }
         this->Malloc(ma, me, mg, n, false, true, false);
@@ -1100,10 +1100,10 @@ public:
       \param inX The output matrix for LSqLin
     */
     template <typename _vectorOwnerTypeX>
-    void SetRef(long int ma, long int me, long int mg, long int n,
-                vctDynamicVectorBase<_vectorOwnerTypeX, double> &inX)
+    void SetRef(CISSTNETLIB_INTEGER ma, CISSTNETLIB_INTEGER me, CISSTNETLIB_INTEGER mg, CISSTNETLIB_INTEGER n,
+                vctDynamicVectorBase<_vectorOwnerTypeX, CISSTNETLIB_DOUBLE> &inX)
     {
-        if (n > (long int)inX.size()) {
+        if (n > static_cast<CISSTNETLIB_INTEGER>(inX.size())) {
             cmnThrow(std::runtime_error("nmrLSqLin: Incorrect size for X"));
         }
         this->Malloc(ma, me, mg, n, true, true, false);
@@ -1125,7 +1125,7 @@ protected:
       \param allocateOutput If true, allocate memory of output as well.
     */
 
-    void Malloc(long int ma, long int me, long int mg, long int n, bool allocateWorkspace, bool allocateInput, bool allocateOutput)
+    void Malloc(CISSTNETLIB_INTEGER ma, CISSTNETLIB_INTEGER me, CISSTNETLIB_INTEGER mg, CISSTNETLIB_INTEGER n, bool allocateWorkspace, bool allocateInput, bool allocateOutput)
     {
         m_Ma = ma; m_N = n;
         m_Me = me; m_Mg = mg;
@@ -1145,10 +1145,10 @@ protected:
         (this->RNormE).SetRef(me, (this->RNorm).Pointer(ma), 1);
     }
     template <typename _vectorOwnerTypeWork, typename _matrixOwnerTypeI, typename _vectorOwnerTypeX>
-    void SetRef(long int ma, long int me, long int mg, long int n,
-                vctDynamicVectorBase<_vectorOwnerTypeWork, double> &work,
-                vctDynamicMatrixBase<_matrixOwnerTypeI, double> &input,
-                vctDynamicVectorBase<_vectorOwnerTypeX, double> &x)
+    void SetRef(CISSTNETLIB_INTEGER ma, CISSTNETLIB_INTEGER me, CISSTNETLIB_INTEGER mg, CISSTNETLIB_INTEGER n,
+                vctDynamicVectorBase<_vectorOwnerTypeWork, CISSTNETLIB_DOUBLE> &work,
+                vctDynamicMatrixBase<_matrixOwnerTypeI, CISSTNETLIB_DOUBLE> &input,
+                vctDynamicVectorBase<_vectorOwnerTypeX, CISSTNETLIB_DOUBLE> &x)
     {
         //workspace
         (this->Work).SetRef(work);
@@ -1179,13 +1179,13 @@ public:
       the have been computed by calling nmrLSqLin function.
       use the following methods.
     */
-    inline const vctDynamicVectorRef<double> &GetX(void) const {
+    inline const vctDynamicVectorRef<CISSTNETLIB_DOUBLE> &GetX(void) const {
         return X;
     }
-    inline const vctDynamicVectorRef<double> &GetRNorm(void) const {
+    inline const vctDynamicVectorRef<CISSTNETLIB_DOUBLE> &GetRNorm(void) const {
         return RNormL;
     }
-    inline const vctDynamicVectorRef<double> &GetRNormE(void) const {
+    inline const vctDynamicVectorRef<CISSTNETLIB_DOUBLE> &GetRNormE(void) const {
         return RNormE;
     }
 };
@@ -1211,30 +1211,30 @@ public:
   nmrLSqLinSolverTest::TestDynamicRowMajorUserAlloc
 */
 template <typename _matrixOwnerType, typename _vectorOwnerType>
-inline long int nmrLSqLin(vctDynamicMatrixBase<_matrixOwnerType, double> &A,
-                          vctDynamicVectorBase<_vectorOwnerType, double> &b,
+inline CISSTNETLIB_INTEGER nmrLSqLin(vctDynamicMatrixBase<_matrixOwnerType, CISSTNETLIB_DOUBLE> &A,
+                          vctDynamicVectorBase<_vectorOwnerType, CISSTNETLIB_DOUBLE> &b,
                           nmrLSqLinSolutionDynamic &solution) throw (std::runtime_error)
 {
     typename nmrLSqLinSolutionDynamic::Friend solutionFriend(solution);
-    long int ret_value;
+    CISSTNETLIB_INTEGER ret_value;
     /* check that the size and storage order matches with Allocate() */
     if (A.IsRowMajor() != VCT_COL_MAJOR) {
         cmnThrow(std::runtime_error("nmrLSqLinSolver Solve: Input must be in Column Major format"));
     }
-    long int rows = (long int)A.rows();
-    long int cols = (long int)A.cols();
+    CISSTNETLIB_INTEGER rows = static_cast<CISSTNETLIB_INTEGER>(A.rows());
+    CISSTNETLIB_INTEGER cols = static_cast<CISSTNETLIB_INTEGER>(A.cols());
     if ((rows != solutionFriend.GetMa()) || (cols != solutionFriend.GetN())) {
         cmnThrow(std::runtime_error("nmrLSqLinSolver Solve: Size used for Allocate was different"));
     }
-    if (rows != (long int)b.size()) {
+    if (rows != static_cast<CISSTNETLIB_INTEGER>(b.size())) {
         cmnThrow(std::runtime_error("nmrLSqLinSolver Solve: Size of b must be same as number of rows of A"));
     }
     char trans = 'N';
-    long int nrhs = 1;
-    long int lda = (1>rows)?1:rows;
-    long int maxmn = (rows > cols)?rows:cols;
+    CISSTNETLIB_INTEGER nrhs = 1;
+    CISSTNETLIB_INTEGER lda = (1>rows)?1:rows;
+    CISSTNETLIB_INTEGER maxmn = (rows > cols)?rows:cols;
     maxmn  = (1>maxmn)?1:maxmn;
-    long int lwork = nmrLSqLinSolutionDynamic::GetWorkspaceSize(rows, 0, 0, cols);
+    CISSTNETLIB_INTEGER lwork = nmrLSqLinSolutionDynamic::GetWorkspaceSize(rows, 0, 0, cols);
     dgels_(&trans, &rows, &cols, &nrhs,
            A.Pointer(), &lda,
            b.Pointer(), &maxmn,
@@ -1267,10 +1267,10 @@ inline long int nmrLSqLin(vctDynamicMatrixBase<_matrixOwnerType, double> &A,
 */
 template <typename _matrixOwnerTypeA, typename _vectorOwnerTypeb,
           typename _matrixOwnerTypeG, typename _vectorOwnerTypeh>
-inline long int nmrLSqLin(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &A,
-                          vctDynamicVectorBase<_vectorOwnerTypeb, double> &b,
-                          vctDynamicMatrixBase<_matrixOwnerTypeG, double> &G,
-                          vctDynamicVectorBase<_vectorOwnerTypeh, double> &h,
+inline CISSTNETLIB_INTEGER nmrLSqLin(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> &A,
+                          vctDynamicVectorBase<_vectorOwnerTypeb, CISSTNETLIB_DOUBLE> &b,
+                          vctDynamicMatrixBase<_matrixOwnerTypeG, CISSTNETLIB_DOUBLE> &G,
+                          vctDynamicVectorBase<_vectorOwnerTypeh, CISSTNETLIB_DOUBLE> &h,
                           nmrLSqLinSolutionDynamic &solution) throw (std::runtime_error)
 {
     typename nmrLSqLinSolutionDynamic::Friend solutionFriend(solution);
@@ -1278,18 +1278,18 @@ inline long int nmrLSqLin(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &A,
     if ((A.IsRowMajor() != VCT_COL_MAJOR) || (G.IsRowMajor() != VCT_COL_MAJOR)) {
         cmnThrow(std::runtime_error("nmrLSqLinSolver Solve: Input must be in Column Major format"));
     }
-    long int ma = (long int)A.rows();
-    long int mg = (long int)G.rows();
-    long int na = (long int)A.cols();
-    long int ng = (long int)G.cols();
+    CISSTNETLIB_INTEGER ma = static_cast<CISSTNETLIB_INTEGER>(A.rows());
+    CISSTNETLIB_INTEGER mg = static_cast<CISSTNETLIB_INTEGER>(G.rows());
+    CISSTNETLIB_INTEGER na = static_cast<CISSTNETLIB_INTEGER>(A.cols());
+    CISSTNETLIB_INTEGER ng = static_cast<CISSTNETLIB_INTEGER>(G.cols());
     if ((ma != solutionFriend.GetMa()) || (mg != solutionFriend.GetMg())
         || (na != solutionFriend.GetN()) || (ng != solutionFriend.GetN())) {
         cmnThrow(std::runtime_error("nmrLSqLinSolver Solve: Size used for Allocate was different"));
     }
-    if (ma != (long int)b.size()) {
+    if (ma != static_cast<CISSTNETLIB_INTEGER>(b.size())) {
         cmnThrow(std::runtime_error("nmrLSqLinSolver Solve: Size of b must be same as number of rows of A"));
     }
-    if (mg != (long int)h.size()) {
+    if (mg != static_cast<CISSTNETLIB_INTEGER>(h.size())) {
         cmnThrow(std::runtime_error("nmrLSqLinSolver Solve: Size of h must be same as number of rows of G"));
     }
     // make a copy of A, b, G, h
@@ -1297,9 +1297,9 @@ inline long int nmrLSqLin(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &A,
     solutionFriend.GetG().Assign(G);
     solutionFriend.Getb().Assign(b);
     solutionFriend.Geth().Assign(h);
-    long int mdw = ma + mg;
-    long int mode = 0;
-    double prgopt = 1.;
+    CISSTNETLIB_INTEGER mdw = ma + mg;
+    CISSTNETLIB_INTEGER mode = 0;
+    CISSTNETLIB_DOUBLE prgopt = 1.;
     solutionFriend.GetIWork()(0) = -1;
     solutionFriend.GetIWork()(1) = -1;
     lsi_(solutionFriend.GetInput().Pointer(), &mdw, &ma, &mg, &na,
@@ -1335,12 +1335,12 @@ inline long int nmrLSqLin(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &A,
 template <typename _matrixOwnerTypeA, typename _vectorOwnerTypeb,
           typename _matrixOwnerTypeE, typename _vectorOwnerTypef,
           typename _matrixOwnerTypeG, typename _vectorOwnerTypeh>
-inline long int nmrLSqLin(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &A,
-                          vctDynamicVectorBase<_vectorOwnerTypeb, double> &b,
-                          vctDynamicMatrixBase<_matrixOwnerTypeE, double> &E,
-                          vctDynamicVectorBase<_vectorOwnerTypef, double> &f,
-                          vctDynamicMatrixBase<_matrixOwnerTypeG, double> &G,
-                          vctDynamicVectorBase<_vectorOwnerTypeh, double> &h,
+inline CISSTNETLIB_INTEGER nmrLSqLin(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> &A,
+                          vctDynamicVectorBase<_vectorOwnerTypeb, CISSTNETLIB_DOUBLE> &b,
+                          vctDynamicMatrixBase<_matrixOwnerTypeE, CISSTNETLIB_DOUBLE> &E,
+                          vctDynamicVectorBase<_vectorOwnerTypef, CISSTNETLIB_DOUBLE> &f,
+                          vctDynamicMatrixBase<_matrixOwnerTypeG, CISSTNETLIB_DOUBLE> &G,
+                          vctDynamicVectorBase<_vectorOwnerTypeh, CISSTNETLIB_DOUBLE> &h,
                           nmrLSqLinSolutionDynamic &solution) throw (std::runtime_error)
 {
     typename nmrLSqLinSolutionDynamic::Friend solutionFriend(solution);
@@ -1348,24 +1348,24 @@ inline long int nmrLSqLin(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &A,
     if ((A.IsRowMajor() != VCT_COL_MAJOR) || (G.IsRowMajor() != VCT_COL_MAJOR) || (E.IsRowMajor() != VCT_COL_MAJOR)) {
         cmnThrow(std::runtime_error("nmrLSqLinSolver Solve: Input must be in Column Major format"));
     }
-    long int ma = (long int)A.rows();
-    long int me = (long int)E.rows();
-    long int mg = (long int)G.rows();
-    long int na = (long int)A.cols();
-    long int ne = (long int)E.cols();
-    long int ng = (long int)G.cols();
+    CISSTNETLIB_INTEGER ma = static_cast<CISSTNETLIB_INTEGER>(A.rows());
+    CISSTNETLIB_INTEGER me = static_cast<CISSTNETLIB_INTEGER>(E.rows());
+    CISSTNETLIB_INTEGER mg = static_cast<CISSTNETLIB_INTEGER>(G.rows());
+    CISSTNETLIB_INTEGER na = static_cast<CISSTNETLIB_INTEGER>(A.cols());
+    CISSTNETLIB_INTEGER ne = static_cast<CISSTNETLIB_INTEGER>(E.cols());
+    CISSTNETLIB_INTEGER ng = static_cast<CISSTNETLIB_INTEGER>(G.cols());
     if ((ma != solutionFriend.GetMa()) || (mg != solutionFriend.GetMg()) || (me != solutionFriend.GetMe())
         || (na != solutionFriend.GetN()) || (ng != solutionFriend.GetN() || (ne != solutionFriend.GetN()))
         ) {
         cmnThrow(std::runtime_error("nmrLSqLinSolver Solve: Size used for Allocate was different"));
     }
-    if (ma != (long int)b.size()) {
+    if (ma != static_cast<CISSTNETLIB_INTEGER>(b.size())) {
         cmnThrow(std::runtime_error("nmrLSqLinSolver Solve: Size of b must be same as number of rows of A"));
     }
-    if (mg != (long int)h.size()) {
+    if (mg != static_cast<CISSTNETLIB_INTEGER>(h.size())) {
         cmnThrow(std::runtime_error("nmrLSqLinSolver Solve: Size of h must be same as number of rows of G"));
     }
-    if (me != (long int)f.size()) {
+    if (me != static_cast<CISSTNETLIB_INTEGER>(f.size())) {
         cmnThrow(std::runtime_error("nmrLSqLinSolver Solve: Size of f must be same as number of rows of E"));
     }
     // make a copy of A, b, E, f, G, h
@@ -1375,9 +1375,9 @@ inline long int nmrLSqLin(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &A,
     solutionFriend.Getb().Assign(b);
     solutionFriend.Getf().Assign(f);
     solutionFriend.Geth().Assign(h);
-    long int mdw = ma + mg + me;
-    long int mode = 0;
-    double prgopt = 1.;
+    CISSTNETLIB_INTEGER mdw = ma + mg + me;
+    CISSTNETLIB_INTEGER mode = 0;
+    CISSTNETLIB_DOUBLE prgopt = 1.;
     solutionFriend.GetIWork()(0) = -1;
     solutionFriend.GetIWork()(1) = -1;
     lsei_(solutionFriend.GetInput().Pointer(), &mdw, &me, &ma, &mg, &na,
@@ -1406,13 +1406,13 @@ inline long int nmrLSqLin(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &A,
   nmrLSqLinSolverTest::TestDynamicRowMajorUserAlloc
 */
 template <typename _matrixOwnerTypeA, typename _vectorOwnerTypeb, typename _vectorOwnerTypeX, typename _vectorOwnerTypeWork>
-inline long int nmrLSqLin(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &A,
-                          vctDynamicVectorBase<_vectorOwnerTypeb, double> &b,
-                          vctDynamicVectorBase<_vectorOwnerTypeX, double> &X,
-                          vctDynamicVectorBase<_vectorOwnerTypeWork, double> &Work)
+inline CISSTNETLIB_INTEGER nmrLSqLin(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> &A,
+                          vctDynamicVectorBase<_vectorOwnerTypeb, CISSTNETLIB_DOUBLE> &b,
+                          vctDynamicVectorBase<_vectorOwnerTypeX, CISSTNETLIB_DOUBLE> &X,
+                          vctDynamicVectorBase<_vectorOwnerTypeWork, CISSTNETLIB_DOUBLE> &Work)
 {
     nmrLSqLinSolutionDynamic lsqLinSolution(A.rows(), A.cols(), X, Work);
-    long int ret_value = nmrLSqLin(A, b, lsqLinSolution);
+    CISSTNETLIB_INTEGER ret_value = nmrLSqLin(A, b, lsqLinSolution);
     return ret_value;
 }
 
@@ -1432,12 +1432,12 @@ inline long int nmrLSqLin(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &A,
   nmrLSqLinSolverTest::TestDynamicRowMajorUserAlloc
 */
 template <typename _matrixOwnerTypeA, typename _vectorOwnerTypeb, typename _vectorOwnerTypeX>
-inline long int nmrLSqLin(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &A,
-                          vctDynamicVectorBase<_vectorOwnerTypeb, double> &b,
-                          vctDynamicVectorBase<_vectorOwnerTypeX, double> &X)
+inline CISSTNETLIB_INTEGER nmrLSqLin(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> &A,
+                          vctDynamicVectorBase<_vectorOwnerTypeb, CISSTNETLIB_DOUBLE> &b,
+                          vctDynamicVectorBase<_vectorOwnerTypeX, CISSTNETLIB_DOUBLE> &X)
 {
     nmrLSqLinSolutionDynamic lsqLinSolution(A.rows(), A.cols(), X);
-    long int ret_value = nmrLSqLin(A, b, lsqLinSolution);
+    CISSTNETLIB_INTEGER ret_value = nmrLSqLin(A, b, lsqLinSolution);
     return ret_value;
 }
 
@@ -1461,15 +1461,15 @@ inline long int nmrLSqLin(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &A,
 */
 template <typename _matrixOwnerTypeA, typename _vectorOwnerTypeb,
           typename _matrixOwnerTypeG, typename _vectorOwnerTypeh,  typename _vectorOwnerTypeX, typename _vectorOwnerTypeWork>
-inline long int nmrLSqLin(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &A,
-                          vctDynamicVectorBase<_vectorOwnerTypeb, double> &b,
-                          vctDynamicMatrixBase<_matrixOwnerTypeG, double> &G,
-                          vctDynamicVectorBase<_vectorOwnerTypeh, double> &h,
-                          vctDynamicVectorBase<_vectorOwnerTypeX, double> &X,
-                          vctDynamicVectorBase<_vectorOwnerTypeWork, double> &Work)
+inline CISSTNETLIB_INTEGER nmrLSqLin(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> &A,
+                          vctDynamicVectorBase<_vectorOwnerTypeb, CISSTNETLIB_DOUBLE> &b,
+                          vctDynamicMatrixBase<_matrixOwnerTypeG, CISSTNETLIB_DOUBLE> &G,
+                          vctDynamicVectorBase<_vectorOwnerTypeh, CISSTNETLIB_DOUBLE> &h,
+                          vctDynamicVectorBase<_vectorOwnerTypeX, CISSTNETLIB_DOUBLE> &X,
+                          vctDynamicVectorBase<_vectorOwnerTypeWork, CISSTNETLIB_DOUBLE> &Work)
 {
     nmrLSqLinSolutionDynamic lsqLinSolution(A.rows(), G.rows(), A.cols(), X, Work);
-    long int ret_value = nmrLSqLin(A, b, G, h, lsqLinSolution);
+    CISSTNETLIB_INTEGER ret_value = nmrLSqLin(A, b, G, h, lsqLinSolution);
     return ret_value;
 }
 
@@ -1492,14 +1492,14 @@ inline long int nmrLSqLin(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &A,
 */
 template <typename _matrixOwnerTypeA, typename _vectorOwnerTypeb,
           typename _matrixOwnerTypeG, typename _vectorOwnerTypeh,  typename _vectorOwnerTypeX>
-inline long int nmrLSqLin(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &A,
-                          vctDynamicVectorBase<_vectorOwnerTypeb, double> &b,
-                          vctDynamicMatrixBase<_matrixOwnerTypeG, double> &G,
-                          vctDynamicVectorBase<_vectorOwnerTypeh, double> &h,
-                          vctDynamicVectorBase<_vectorOwnerTypeX, double> &X)
+inline CISSTNETLIB_INTEGER nmrLSqLin(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> &A,
+                          vctDynamicVectorBase<_vectorOwnerTypeb, CISSTNETLIB_DOUBLE> &b,
+                          vctDynamicMatrixBase<_matrixOwnerTypeG, CISSTNETLIB_DOUBLE> &G,
+                          vctDynamicVectorBase<_vectorOwnerTypeh, CISSTNETLIB_DOUBLE> &h,
+                          vctDynamicVectorBase<_vectorOwnerTypeX, CISSTNETLIB_DOUBLE> &X)
 {
     nmrLSqLinSolutionDynamic lsqLinSolution(A.rows(), G.rows(), A.cols(), X);
-    long int ret_value = nmrLSqLin(A, b, G, h, lsqLinSolution);
+    CISSTNETLIB_INTEGER ret_value = nmrLSqLin(A, b, G, h, lsqLinSolution);
     return ret_value;
 }
 
@@ -1527,17 +1527,17 @@ template <typename _matrixOwnerTypeA, typename _vectorOwnerTypeb,
           typename _matrixOwnerTypeE, typename _vectorOwnerTypef,
           typename _matrixOwnerTypeG, typename _vectorOwnerTypeh,
           typename _vectorOwnerTypeX, typename _vectorOwnerTypeWork>
-inline long int nmrLSqLin(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &A,
-                          vctDynamicVectorBase<_vectorOwnerTypeb, double> &b,
-                          vctDynamicMatrixBase<_matrixOwnerTypeE, double> &E,
-                          vctDynamicVectorBase<_vectorOwnerTypef, double> &f,
-                          vctDynamicMatrixBase<_matrixOwnerTypeG, double> &G,
-                          vctDynamicVectorBase<_vectorOwnerTypeh, double> &h,
-                          vctDynamicVectorBase<_vectorOwnerTypeX, double> &X,
-                          vctDynamicVectorBase<_vectorOwnerTypeWork, double> &Work)
+inline CISSTNETLIB_INTEGER nmrLSqLin(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> &A,
+                          vctDynamicVectorBase<_vectorOwnerTypeb, CISSTNETLIB_DOUBLE> &b,
+                          vctDynamicMatrixBase<_matrixOwnerTypeE, CISSTNETLIB_DOUBLE> &E,
+                          vctDynamicVectorBase<_vectorOwnerTypef, CISSTNETLIB_DOUBLE> &f,
+                          vctDynamicMatrixBase<_matrixOwnerTypeG, CISSTNETLIB_DOUBLE> &G,
+                          vctDynamicVectorBase<_vectorOwnerTypeh, CISSTNETLIB_DOUBLE> &h,
+                          vctDynamicVectorBase<_vectorOwnerTypeX, CISSTNETLIB_DOUBLE> &X,
+                          vctDynamicVectorBase<_vectorOwnerTypeWork, CISSTNETLIB_DOUBLE> &Work)
 {
     nmrLSqLinSolutionDynamic lsqLinSolution(A.rows(), E.rows(), G.rows(), A.cols(), X, Work);
-    long int ret_value = nmrLSqLin(A, b, E, f, G, h, lsqLinSolution);
+    CISSTNETLIB_INTEGER ret_value = nmrLSqLin(A, b, E, f, G, h, lsqLinSolution);
     return ret_value;
 }
 
@@ -1564,16 +1564,16 @@ template <typename _matrixOwnerTypeA, typename _vectorOwnerTypeb,
           typename _matrixOwnerTypeE, typename _vectorOwnerTypef,
           typename _matrixOwnerTypeG, typename _vectorOwnerTypeh,
           typename _vectorOwnerTypeX>
-inline long int nmrLSqLin(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &A,
-                          vctDynamicVectorBase<_vectorOwnerTypeb, double> &b,
-                          vctDynamicMatrixBase<_matrixOwnerTypeE, double> &E,
-                          vctDynamicVectorBase<_vectorOwnerTypef, double> &f,
-                          vctDynamicMatrixBase<_matrixOwnerTypeG, double> &G,
-                          vctDynamicVectorBase<_vectorOwnerTypeh, double> &h,
-                          vctDynamicVectorBase<_vectorOwnerTypeX, double> &X)
+inline CISSTNETLIB_INTEGER nmrLSqLin(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> &A,
+                          vctDynamicVectorBase<_vectorOwnerTypeb, CISSTNETLIB_DOUBLE> &b,
+                          vctDynamicMatrixBase<_matrixOwnerTypeE, CISSTNETLIB_DOUBLE> &E,
+                          vctDynamicVectorBase<_vectorOwnerTypef, CISSTNETLIB_DOUBLE> &f,
+                          vctDynamicMatrixBase<_matrixOwnerTypeG, CISSTNETLIB_DOUBLE> &G,
+                          vctDynamicVectorBase<_vectorOwnerTypeh, CISSTNETLIB_DOUBLE> &h,
+                          vctDynamicVectorBase<_vectorOwnerTypeX, CISSTNETLIB_DOUBLE> &X)
 {
     nmrLSqLinSolutionDynamic lsqLinSolution(A.rows(), E.rows(), G.rows(), A.cols(), X);
-    long int ret_value = nmrLSqLin(A, b, E, f, G, h, lsqLinSolution);
+    CISSTNETLIB_INTEGER ret_value = nmrLSqLin(A, b, E, f, G, h, lsqLinSolution);
     return ret_value;
 }
 
@@ -1601,21 +1601,21 @@ public:
     enum {LWORK_TMP = ((vct::size_type)LWORK_LS > (vct::size_type)LWORK_LSI) ? (vct::size_type)LWORK_LS : (vct::size_type)LWORK_LSI};
     enum {LWORK = ((vct::size_type)LWORK_LSEI > (vct::size_type)LWORK_TMP) ? (vct::size_type)LWORK_LSEI : (vct::size_type)LWORK_TMP};
     enum {LIWORK = _mg + 2*_n + 2};
-    typedef vctFixedSizeMatrixRef<double, _ma, _n, 1, _ma> TypeA;
+    typedef vctFixedSizeMatrixRef<CISSTNETLIB_DOUBLE, _ma, _n, 1, _ma> TypeA;
     //make sizes 1 if 0, it does not effect anything else
-    typedef vctFixedSizeMatrixRef<double, (_me==0)?1:_me, _n, 1, (_me==0)?1:_me> TypeE;
-    typedef vctFixedSizeMatrixRef<double, (_mg==0)?1:_mg, _n, 1, (_mg==0)?1:_mg> TypeG;
-    typedef vctFixedSizeVectorRef<double, _ma, 1> Typeb;
-    typedef vctFixedSizeVectorRef<double, (_me==0)?1:_me, 1> Typef;
-    typedef vctFixedSizeVectorRef<double, (_mg==0)?1:_mg, 1> Typeh;
-    typedef vctFixedSizeVectorRef<double, (_me==0)?1:_me, 1> TypeRNormE;
-    typedef vctFixedSizeVectorRef<double, _ma, 1> TypeRNormL;
+    typedef vctFixedSizeMatrixRef<CISSTNETLIB_DOUBLE, (_me==0)?1:_me, _n, 1, (_me==0)?1:_me> TypeE;
+    typedef vctFixedSizeMatrixRef<CISSTNETLIB_DOUBLE, (_mg==0)?1:_mg, _n, 1, (_mg==0)?1:_mg> TypeG;
+    typedef vctFixedSizeVectorRef<CISSTNETLIB_DOUBLE, _ma, 1> Typeb;
+    typedef vctFixedSizeVectorRef<CISSTNETLIB_DOUBLE, (_me==0)?1:_me, 1> Typef;
+    typedef vctFixedSizeVectorRef<CISSTNETLIB_DOUBLE, (_mg==0)?1:_mg, 1> Typeh;
+    typedef vctFixedSizeVectorRef<CISSTNETLIB_DOUBLE, (_me==0)?1:_me, 1> TypeRNormE;
+    typedef vctFixedSizeVectorRef<CISSTNETLIB_DOUBLE, _ma, 1> TypeRNormL;
 
-    typedef vctFixedSizeVector<double, LWORK> TypeWork;
-    typedef vctFixedSizeVector<long int, LIWORK> TypeIWork;
-    typedef vctFixedSizeVector<double, _n> TypeX;
-    typedef vctFixedSizeVector<double, _ma + _me> TypeRNorm;
-    typedef vctFixedSizeMatrix<double, _ma + _me + _mg, _n + 1, VCT_COL_MAJOR> TypeInput;
+    typedef vctFixedSizeVector<CISSTNETLIB_DOUBLE, LWORK> TypeWork;
+    typedef vctFixedSizeVector<CISSTNETLIB_INTEGER, LIWORK> TypeIWork;
+    typedef vctFixedSizeVector<CISSTNETLIB_DOUBLE, _n> TypeX;
+    typedef vctFixedSizeVector<CISSTNETLIB_DOUBLE, _ma + _me> TypeRNorm;
+    typedef vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _ma + _me + _mg, _n + 1, VCT_COL_MAJOR> TypeInput;
 protected:
     /*!
       Memory allocated for Workspace matrices if needed
@@ -1709,21 +1709,21 @@ public:
 /******************************************************************************/
 
 template <vct::size_type _ma, vct::size_type _n, vct::size_type _work>
-inline long int nmrLSqLin(vctFixedSizeMatrix<double, _ma, _n, VCT_COL_MAJOR> &A,
-                          vctFixedSizeVector<double, _ma> &b,
-                          vctFixedSizeVector<double, _n> &x,
-                          vctFixedSizeVector<double, _work> &Work)
+inline CISSTNETLIB_INTEGER nmrLSqLin(vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _ma, _n, VCT_COL_MAJOR> &A,
+                          vctFixedSizeVector<CISSTNETLIB_DOUBLE, _ma> &b,
+                          vctFixedSizeVector<CISSTNETLIB_DOUBLE, _n> &x,
+                          vctFixedSizeVector<CISSTNETLIB_DOUBLE, _work> &Work)
 {
-    long int ret_value;
+    CISSTNETLIB_INTEGER ret_value;
     char trans = 'N';
-    long int rows = (long int)_ma;
-    long int cols = (long int)_n;
-    long int nrhs = 1;
-    long int lda = (1>_ma)?1:_ma;
-    long int maxmn = (_ma > _n)?_ma:_n;
+    CISSTNETLIB_INTEGER rows = static_cast<CISSTNETLIB_INTEGER>(_ma);
+    CISSTNETLIB_INTEGER cols = static_cast<CISSTNETLIB_INTEGER>(_n);
+    CISSTNETLIB_INTEGER nrhs = 1;
+    CISSTNETLIB_INTEGER lda = (1>_ma)?1:_ma;
+    CISSTNETLIB_INTEGER maxmn = (_ma > _n)?_ma:_n;
     maxmn  = (1>maxmn)?1:maxmn;
-    long int lwork = (long int)nmrLSqLinSolutionFixedSize<_ma, 0, 0, _n>::LWORK;
-    CMN_ASSERT(lwork <= (long int)_work);
+    CISSTNETLIB_INTEGER lwork = static_cast<CISSTNETLIB_INTEGER>(nmrLSqLinSolutionFixedSize<_ma, 0, 0, _n>::LWORK);
+    CMN_ASSERT(lwork <= static_cast<CISSTNETLIB_INTEGER>(_work));
     dgels_(&trans, &rows, &cols, &nrhs,
            A.Pointer(), &lda,
            b.Pointer(), &maxmn,
@@ -1733,22 +1733,22 @@ inline long int nmrLSqLin(vctFixedSizeMatrix<double, _ma, _n, VCT_COL_MAJOR> &A,
 }
 
 template <vct::size_type _ma, vct::size_type _n>
-inline long int nmrLSqLin(vctFixedSizeMatrix<double, _ma, _n, VCT_COL_MAJOR> &A,
-                          vctFixedSizeVector<double, _ma> &b,
-                          vctFixedSizeVector<double, _n> &x)
+inline CISSTNETLIB_INTEGER nmrLSqLin(vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _ma, _n, VCT_COL_MAJOR> &A,
+                          vctFixedSizeVector<CISSTNETLIB_DOUBLE, _ma> &b,
+                          vctFixedSizeVector<CISSTNETLIB_DOUBLE, _n> &x)
 {
-    vctFixedSizeVector<double, nmrLSqLinSolutionFixedSize<_ma, 0, 0, _n>::LWORK> work;
-    long int ret_value = nmrLSqLin(A, b, x, work);
+    vctFixedSizeVector<CISSTNETLIB_DOUBLE, nmrLSqLinSolutionFixedSize<_ma, 0, 0, _n>::LWORK> work;
+    CISSTNETLIB_INTEGER ret_value = nmrLSqLin(A, b, x, work);
     return ret_value;
 }
 
 template <vct::size_type _ma, vct::size_type _n>
-inline long int nmrLSqLin(vctFixedSizeMatrix<double, _ma, _n, VCT_COL_MAJOR> &A,
-                          vctFixedSizeVector<double, _ma> &b,
+inline CISSTNETLIB_INTEGER nmrLSqLin(vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _ma, _n, VCT_COL_MAJOR> &A,
+                          vctFixedSizeVector<CISSTNETLIB_DOUBLE, _ma> &b,
                           nmrLSqLinSolutionFixedSize<_ma, 0, 0, _n> &solution)
 {
     typename nmrLSqLinSolutionFixedSize<_ma, 0, 0, _n>::Friend solutionFriend(solution);
-    long int ret_value = nmrLSqLin(A, b, solutionFriend.GetX(), solutionFriend.GetWork());
+    CISSTNETLIB_INTEGER ret_value = nmrLSqLin(A, b, solutionFriend.GetX(), solutionFriend.GetWork());
     return ret_value;
 }
 
@@ -1757,29 +1757,29 @@ inline long int nmrLSqLin(vctFixedSizeMatrix<double, _ma, _n, VCT_COL_MAJOR> &A,
 /******************************************************************************/
 
 template <vct::size_type _ma, vct::size_type _mg, vct::size_type _n, vct::size_type _work, vct::size_type _iwork>
-inline long int nmrLSqLin(vctFixedSizeMatrix<double, _ma, _n, VCT_COL_MAJOR> &A, vctFixedSizeVector<double, _ma> &b,
-                          vctFixedSizeMatrix<double, _mg, _n, VCT_COL_MAJOR> &G, vctFixedSizeVector<double, _mg> &h,
-                          vctFixedSizeVector<double, _n> &x,
-                          vctFixedSizeMatrix<double, _ma + _mg, _n + 1, VCT_COL_MAJOR> &W,
-                          vctFixedSizeVector<double, _ma> &RNorm,
-                          vctFixedSizeVector<double, _work> &Work, vctFixedSizeVector<long int, _iwork> &IWork)
+inline CISSTNETLIB_INTEGER nmrLSqLin(vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _ma, _n, VCT_COL_MAJOR> &A, vctFixedSizeVector<CISSTNETLIB_DOUBLE, _ma> &b,
+                          vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _mg, _n, VCT_COL_MAJOR> &G, vctFixedSizeVector<CISSTNETLIB_DOUBLE, _mg> &h,
+                          vctFixedSizeVector<CISSTNETLIB_DOUBLE, _n> &x,
+                          vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _ma + _mg, _n + 1, VCT_COL_MAJOR> &W,
+                          vctFixedSizeVector<CISSTNETLIB_DOUBLE, _ma> &RNorm,
+                          vctFixedSizeVector<CISSTNETLIB_DOUBLE, _work> &Work, vctFixedSizeVector<CISSTNETLIB_INTEGER, _iwork> &IWork)
 {
-    typedef vctFixedSizeMatrix<double, _ma + _mg, _n + 1, VCT_COL_MAJOR> InputType;
-    long int ma = (long int)_ma;
-    long int mg = (long int)_mg;
-    long int na = (long int)_n;
-    vctFixedSizeMatrixRef<double, _ma, _n, 1, _ma + _mg> ARef(W, 0, 0);
-    vctFixedSizeMatrixRef<double, _mg, _n, 1, _ma + _mg> GRef(W, _ma, 0);
-    vctFixedSizeVectorRef<double, _ma, 1> bRef(W.Column(_n).Pointer(0));
-    vctFixedSizeVectorRef<double, _mg, 1> hRef(W.Column(_n).Pointer(_ma));
+    typedef vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _ma + _mg, _n + 1, VCT_COL_MAJOR> InputType;
+    CISSTNETLIB_INTEGER ma = static_cast<CISSTNETLIB_INTEGER>(_ma);
+    CISSTNETLIB_INTEGER mg = static_cast<CISSTNETLIB_INTEGER>(_mg);
+    CISSTNETLIB_INTEGER na = static_cast<CISSTNETLIB_INTEGER>(_n);
+    vctFixedSizeMatrixRef<CISSTNETLIB_DOUBLE, _ma, _n, 1, _ma + _mg> ARef(W, 0, 0);
+    vctFixedSizeMatrixRef<CISSTNETLIB_DOUBLE, _mg, _n, 1, _ma + _mg> GRef(W, _ma, 0);
+    vctFixedSizeVectorRef<CISSTNETLIB_DOUBLE, _ma, 1> bRef(W.Column(_n).Pointer(0));
+    vctFixedSizeVectorRef<CISSTNETLIB_DOUBLE, _mg, 1> hRef(W.Column(_n).Pointer(_ma));
     // make a copy of A, b, G, h
     ARef.Assign(A);
     GRef.Assign(G);
     bRef.Assign(b);
     hRef.Assign(h);
-    long int mdw = ma + mg;
-    long int mode = 0;
-    double prgopt = 1.;
+    CISSTNETLIB_INTEGER mdw = ma + mg;
+    CISSTNETLIB_INTEGER mode = 0;
+    CISSTNETLIB_DOUBLE prgopt = 1.;
     IWork(0) = -1;
     IWork(1) = -1;
     lsi_(W.Pointer(), &mdw, &ma, &mg, &na,
@@ -1789,17 +1789,17 @@ inline long int nmrLSqLin(vctFixedSizeMatrix<double, _ma, _n, VCT_COL_MAJOR> &A,
 }
 
 template <vct::size_type _ma, vct::size_type _mg, vct::size_type _n>
-inline long int nmrLSqLin(vctFixedSizeMatrix<double, _ma, _n, VCT_COL_MAJOR> &A,
-                          vctFixedSizeVector<double, _ma> &b,
-                          vctFixedSizeMatrix<double, _mg, _n, VCT_COL_MAJOR> &G,
-                          vctFixedSizeVector<double, _mg> &h,
-                          vctFixedSizeVector<double, _n> &x)
+inline CISSTNETLIB_INTEGER nmrLSqLin(vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _ma, _n, VCT_COL_MAJOR> &A,
+                          vctFixedSizeVector<CISSTNETLIB_DOUBLE, _ma> &b,
+                          vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _mg, _n, VCT_COL_MAJOR> &G,
+                          vctFixedSizeVector<CISSTNETLIB_DOUBLE, _mg> &h,
+                          vctFixedSizeVector<CISSTNETLIB_DOUBLE, _n> &x)
 {
-    vctFixedSizeVector<double, nmrLSqLinSolutionFixedSize<_ma, 0, _mg, _n>::LWORK> work;
-    vctFixedSizeVector<long int, nmrLSqLinSolutionFixedSize<_ma, 0, _mg, _n>::LIWORK> iwork;
-    vctFixedSizeMatrix<double, _ma + _mg, _n + 1, VCT_COL_MAJOR> w;
-    vctFixedSizeVector<double, _ma> rNorm;
-    long int ret_value;
+    vctFixedSizeVector<CISSTNETLIB_DOUBLE, nmrLSqLinSolutionFixedSize<_ma, 0, _mg, _n>::LWORK> work;
+    vctFixedSizeVector<CISSTNETLIB_INTEGER, nmrLSqLinSolutionFixedSize<_ma, 0, _mg, _n>::LIWORK> iwork;
+    vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _ma + _mg, _n + 1, VCT_COL_MAJOR> w;
+    vctFixedSizeVector<CISSTNETLIB_DOUBLE, _ma> rNorm;
+    CISSTNETLIB_INTEGER ret_value;
     // for some reason windows gets confused with the templates to match, so explicitly
     // specifying the template parameters for the functions helps .net
     ret_value = nmrLSqLin<_ma, _mg, _n, nmrLSqLinSolutionFixedSize<_ma, 0, _mg, _n>::LWORK,
@@ -1809,14 +1809,14 @@ inline long int nmrLSqLin(vctFixedSizeMatrix<double, _ma, _n, VCT_COL_MAJOR> &A,
 }
 
 template <vct::size_type _ma, vct::size_type _mg, vct::size_type _n>
-inline long int nmrLSqLin(vctFixedSizeMatrix<double, _ma, _n, VCT_COL_MAJOR> &A,
-                          vctFixedSizeVector<double, _ma> &b,
-                          vctFixedSizeMatrix<double, _mg, _n, VCT_COL_MAJOR> &G,
-                          vctFixedSizeVector<double, _mg> &h,
+inline CISSTNETLIB_INTEGER nmrLSqLin(vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _ma, _n, VCT_COL_MAJOR> &A,
+                          vctFixedSizeVector<CISSTNETLIB_DOUBLE, _ma> &b,
+                          vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _mg, _n, VCT_COL_MAJOR> &G,
+                          vctFixedSizeVector<CISSTNETLIB_DOUBLE, _mg> &h,
                           nmrLSqLinSolutionFixedSize<_ma, 0, _mg, _n> &solution)
 {
     typename nmrLSqLinSolutionFixedSize<_ma, 0, _mg, _n>::Friend solutionFriend(solution);
-    long int ret_value;
+    CISSTNETLIB_INTEGER ret_value;
     // for some reason windows gets confused with the templates to match, so explicitly
     // specifying the template parameters for the functions helps .net
     ret_value = nmrLSqLin<_ma, _mg, _n, nmrLSqLinSolutionFixedSize<_ma, 0, _mg, _n>::LWORK,
@@ -1833,24 +1833,24 @@ inline long int nmrLSqLin(vctFixedSizeMatrix<double, _ma, _n, VCT_COL_MAJOR> &A,
 
 template <vct::size_type _ma, vct::size_type _me, vct::size_type _mg,
           vct::size_type _n, vct::size_type _work, vct::size_type _iwork>
-inline long int nmrLSqLin(vctFixedSizeMatrix<double, _ma, _n, VCT_COL_MAJOR> &A, vctFixedSizeVector<double, _ma> &b,
-                          vctFixedSizeMatrix<double, _me, _n, VCT_COL_MAJOR> &E, vctFixedSizeVector<double, _me> &f,
-                          vctFixedSizeMatrix<double, _mg, _n, VCT_COL_MAJOR> &G, vctFixedSizeVector<double, _mg> &h,
-                          vctFixedSizeVector<double, _n> &x,
-                          vctFixedSizeMatrix<double, _ma + _me + _mg, _n + 1, VCT_COL_MAJOR> &W,
-                          vctFixedSizeVector<double, _ma + _me> &RNorm,
-                          vctFixedSizeVector<double, _work> &Work, vctFixedSizeVector<long int, _iwork> &IWork)
+inline CISSTNETLIB_INTEGER nmrLSqLin(vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _ma, _n, VCT_COL_MAJOR> &A, vctFixedSizeVector<CISSTNETLIB_DOUBLE, _ma> &b,
+                          vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _me, _n, VCT_COL_MAJOR> &E, vctFixedSizeVector<CISSTNETLIB_DOUBLE, _me> &f,
+                          vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _mg, _n, VCT_COL_MAJOR> &G, vctFixedSizeVector<CISSTNETLIB_DOUBLE, _mg> &h,
+                          vctFixedSizeVector<CISSTNETLIB_DOUBLE, _n> &x,
+                          vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _ma + _me + _mg, _n + 1, VCT_COL_MAJOR> &W,
+                          vctFixedSizeVector<CISSTNETLIB_DOUBLE, _ma + _me> &RNorm,
+                          vctFixedSizeVector<CISSTNETLIB_DOUBLE, _work> &Work, vctFixedSizeVector<CISSTNETLIB_INTEGER, _iwork> &IWork)
 {
-    long int me = (long int)_me;
-    long int ma = (long int)_ma;
-    long int mg = (long int)_mg;
-    long int na = (long int)_n;
-    vctFixedSizeMatrixRef<double, _me, _n, 1, _ma + _me + _mg> ERef(W, 0, 0);
-    vctFixedSizeMatrixRef<double, _ma, _n, 1, _ma + _me + _mg> ARef(W, _me, 0);
-    vctFixedSizeMatrixRef<double, _mg, _n, 1, _ma + _me + _mg> GRef(W, _me + _ma, 0);
-    vctFixedSizeVectorRef<double, _me, 1> fRef(W.Column(_n).Pointer(0));
-    vctFixedSizeVectorRef<double, _ma, 1> bRef(W.Column(_n).Pointer(_me));
-    vctFixedSizeVectorRef<double, _mg, 1> hRef(W.Column(_n).Pointer(_me + _ma));
+    CISSTNETLIB_INTEGER me = static_cast<CISSTNETLIB_INTEGER>(_me);
+    CISSTNETLIB_INTEGER ma = static_cast<CISSTNETLIB_INTEGER>(_ma);
+    CISSTNETLIB_INTEGER mg = static_cast<CISSTNETLIB_INTEGER>(_mg);
+    CISSTNETLIB_INTEGER na = static_cast<CISSTNETLIB_INTEGER>(_n);
+    vctFixedSizeMatrixRef<CISSTNETLIB_DOUBLE, _me, _n, 1, _ma + _me + _mg> ERef(W, 0, 0);
+    vctFixedSizeMatrixRef<CISSTNETLIB_DOUBLE, _ma, _n, 1, _ma + _me + _mg> ARef(W, _me, 0);
+    vctFixedSizeMatrixRef<CISSTNETLIB_DOUBLE, _mg, _n, 1, _ma + _me + _mg> GRef(W, _me + _ma, 0);
+    vctFixedSizeVectorRef<CISSTNETLIB_DOUBLE, _me, 1> fRef(W.Column(_n).Pointer(0));
+    vctFixedSizeVectorRef<CISSTNETLIB_DOUBLE, _ma, 1> bRef(W.Column(_n).Pointer(_me));
+    vctFixedSizeVectorRef<CISSTNETLIB_DOUBLE, _mg, 1> hRef(W.Column(_n).Pointer(_me + _ma));
     // make a copy of A, b, G, h
     ARef.Assign(A);
     ERef.Assign(E);
@@ -1858,9 +1858,9 @@ inline long int nmrLSqLin(vctFixedSizeMatrix<double, _ma, _n, VCT_COL_MAJOR> &A,
     bRef.Assign(b);
     fRef.Assign(f);
     hRef.Assign(h);
-    long int mdw = ma + me + mg;
-    long int mode = 0;
-    double prgopt = 1.;
+    CISSTNETLIB_INTEGER mdw = ma + me + mg;
+    CISSTNETLIB_INTEGER mode = 0;
+    CISSTNETLIB_DOUBLE prgopt = 1.;
     IWork(0) = -1;
     IWork(1) = -1;
     lsei_(W.Pointer(), &mdw, &me, &ma, &mg, &na,
@@ -1870,16 +1870,16 @@ inline long int nmrLSqLin(vctFixedSizeMatrix<double, _ma, _n, VCT_COL_MAJOR> &A,
 }
 
 template <vct::size_type _ma, vct::size_type _me, vct::size_type _mg, vct::size_type _n>
-inline long int nmrLSqLin(vctFixedSizeMatrix<double, _ma, _n, VCT_COL_MAJOR> &A, vctFixedSizeVector<double, _ma> &b,
-                          vctFixedSizeMatrix<double, _me, _n, VCT_COL_MAJOR> &E, vctFixedSizeVector<double, _me> &f,
-                          vctFixedSizeMatrix<double, _mg, _n, VCT_COL_MAJOR> &G, vctFixedSizeVector<double, _mg> &h,
-                          vctFixedSizeVector<double, _n> &x)
+inline CISSTNETLIB_INTEGER nmrLSqLin(vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _ma, _n, VCT_COL_MAJOR> &A, vctFixedSizeVector<CISSTNETLIB_DOUBLE, _ma> &b,
+                          vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _me, _n, VCT_COL_MAJOR> &E, vctFixedSizeVector<CISSTNETLIB_DOUBLE, _me> &f,
+                          vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _mg, _n, VCT_COL_MAJOR> &G, vctFixedSizeVector<CISSTNETLIB_DOUBLE, _mg> &h,
+                          vctFixedSizeVector<CISSTNETLIB_DOUBLE, _n> &x)
 {
-    vctFixedSizeVector<double, nmrLSqLinSolutionFixedSize<_ma, _me, _mg, _n>::LWORK> work;
-    vctFixedSizeVector<long int, nmrLSqLinSolutionFixedSize<_ma, _me, _mg, _n>::LIWORK> iwork;
-    vctFixedSizeMatrix<double, _ma + _me + _mg, _n + 1, VCT_COL_MAJOR> w;
-    vctFixedSizeVector<double, _ma + _me> rNorm;
-    long int ret_value;
+    vctFixedSizeVector<CISSTNETLIB_DOUBLE, nmrLSqLinSolutionFixedSize<_ma, _me, _mg, _n>::LWORK> work;
+    vctFixedSizeVector<CISSTNETLIB_INTEGER, nmrLSqLinSolutionFixedSize<_ma, _me, _mg, _n>::LIWORK> iwork;
+    vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _ma + _me + _mg, _n + 1, VCT_COL_MAJOR> w;
+    vctFixedSizeVector<CISSTNETLIB_DOUBLE, _ma + _me> rNorm;
+    CISSTNETLIB_INTEGER ret_value;
     // for some reason windows gets confused with the templates to match, so explicitly
     // specifying the template parameters for the functions helps .net
     ret_value = nmrLSqLin<_ma, _me, _mg, _n, nmrLSqLinSolutionFixedSize<_ma, _me, _mg, _n>::LWORK,
@@ -1889,13 +1889,13 @@ inline long int nmrLSqLin(vctFixedSizeMatrix<double, _ma, _n, VCT_COL_MAJOR> &A,
 }
 
 template <vct::size_type _ma, vct::size_type _me, vct::size_type _mg, vct::size_type _n>
-inline long int nmrLSqLin(vctFixedSizeMatrix<double, _ma, _n, VCT_COL_MAJOR> &A, vctFixedSizeVector<double, _ma> &b,
-                          vctFixedSizeMatrix<double, _me, _n, VCT_COL_MAJOR> &E, vctFixedSizeVector<double, _me> &f,
-                          vctFixedSizeMatrix<double, _mg, _n, VCT_COL_MAJOR> &G, vctFixedSizeVector<double, _mg> &h,
+inline CISSTNETLIB_INTEGER nmrLSqLin(vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _ma, _n, VCT_COL_MAJOR> &A, vctFixedSizeVector<CISSTNETLIB_DOUBLE, _ma> &b,
+                          vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _me, _n, VCT_COL_MAJOR> &E, vctFixedSizeVector<CISSTNETLIB_DOUBLE, _me> &f,
+                          vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _mg, _n, VCT_COL_MAJOR> &G, vctFixedSizeVector<CISSTNETLIB_DOUBLE, _mg> &h,
                           nmrLSqLinSolutionFixedSize<_ma, _me, _mg, _n> &solution)
 {
     typename nmrLSqLinSolutionFixedSize<_ma, _me, _mg, _n>::Friend solutionFriend(solution);
-    long int ret_value;
+    CISSTNETLIB_INTEGER ret_value;
     // for some reason windows gets confused with the templates to match, so explicitly
     // specifying the template parameters for the functions helps .net
     ret_value = nmrLSqLin<_ma, _me, _mg, _n, nmrLSqLinSolutionFixedSize<_ma, _me, _mg, _n>::LWORK,

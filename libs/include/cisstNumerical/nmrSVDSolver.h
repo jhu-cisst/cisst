@@ -91,19 +91,19 @@ class nmrSVDSolver {
     // that doesnt change much is desired.
 
 protected:
-    long int M;
-    long int N;
-    long int Lda;
-    long int Ldu;
-    long int Ldvt;
-    long int Lwork;
+    CISSTNETLIB_INTEGER M;
+    CISSTNETLIB_INTEGER N;
+    CISSTNETLIB_INTEGER Lda;
+    CISSTNETLIB_INTEGER Ldu;
+    CISSTNETLIB_INTEGER Ldvt;
+    CISSTNETLIB_INTEGER Lwork;
     char Jobu;
     char Jobvt;
-    vctDynamicMatrix<double> S;
-    vctDynamicMatrix<double> U;
-    vctDynamicMatrix<double> Vt;
-    vctDynamicMatrix<double> Work;
-    long int Info;
+    vctDynamicMatrix<CISSTNETLIB_DOUBLE> S;
+    vctDynamicMatrix<CISSTNETLIB_DOUBLE> U;
+    vctDynamicMatrix<CISSTNETLIB_DOUBLE> Vt;
+    vctDynamicMatrix<CISSTNETLIB_DOUBLE> Work;
+    CISSTNETLIB_INTEGER Info;
     bool StorageOrder;
 
 public:
@@ -111,13 +111,8 @@ public:
       memory.  If you use this constructor, you will need to use one
       of the Allocate() methods before you can use the Solve
       method.  */
-    nmrSVDSolver(void):
-        M(0),
-        N(0),
-        StorageOrder(VCT_COL_MAJOR)
-    {
-        Allocate(M, N, StorageOrder);
-    }
+    nmrSVDSolver(void): M(0), N(0), StorageOrder(VCT_COL_MAJOR)
+    { Allocate(M, N, StorageOrder); }
 
 
     /*! Constructor with memory allocation.  This constructor
@@ -130,9 +125,10 @@ public:
       \param storageOrder Storage order used for the input matrix.
       This order will be used for the output as well.
     */
-    nmrSVDSolver(long int m, long int n, bool storageOrder) {
-        Allocate(m, n, storageOrder);
-    }
+    nmrSVDSolver( CISSTNETLIB_INTEGER m, 
+                  CISSTNETLIB_INTEGER n, 
+                  bool storageOrder) 
+    { Allocate(m, n, storageOrder); }
 
     
     /*!
@@ -147,13 +143,18 @@ public:
     */
     //@{
     template <class _matrixOwnerType>
-    nmrSVDSolver(const vctDynamicMatrixBase<_matrixOwnerType, double> &A) {
-        Allocate(A);
-    }
-    template <vct::size_type _rows, vct::size_type _cols, bool _storageOrder>
-    nmrSVDSolver(const vctFixedSizeMatrix<double, _rows, _cols, _storageOrder> & A) {
-        Allocate(A);
-    }
+    nmrSVDSolver(const vctDynamicMatrixBase<_matrixOwnerType, 
+                                            CISSTNETLIB_DOUBLE> &A) 
+    { Allocate(A); }
+    
+    template <vct::size_type _rows, 
+              vct::size_type _cols, 
+              bool _storageOrder>
+    nmrSVDSolver(const vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, 
+                                          _rows, 
+                                          _cols, 
+                                         _storageOrder>& A)
+    { Allocate(A); }
     //@}
 
 
@@ -165,8 +166,10 @@ public:
       \param n Number of columns of A
       \param storageOrder Storage order used for all the matrices
     */
-    inline void Allocate(long int m, long int n, bool storageOrder) {
-        const long int one = 1;
+    inline void Allocate( CISSTNETLIB_INTEGER m, 
+                          CISSTNETLIB_INTEGER n, 
+                          bool storageOrder) {
+        const CISSTNETLIB_INTEGER one = 1;
         StorageOrder = storageOrder;
         if (storageOrder == VCT_COL_MAJOR) {
             M = m;
@@ -197,13 +200,20 @@ public:
       method will check that the parameters match the dimension. */
     //@{
     template <class _matrixOwnerType>
-    inline void Allocate(const vctDynamicMatrixBase<_matrixOwnerType, double> &A) {
-        Allocate(A.rows(), A.cols(), A.IsRowMajor());
-    }
-    template <vct::size_type _rows, vct::size_type _cols, bool _storageOrder>
-    inline void Allocate(const vctFixedSizeMatrix<double, _rows, _cols, _storageOrder> & A) {
-        Allocate(_rows, _cols, _storageOrder);
-    }
+    inline void 
+    Allocate(const vctDynamicMatrixBase<_matrixOwnerType, 
+                                        CISSTNETLIB_DOUBLE>& A)
+    { Allocate(A.rows(), A.cols(), A.IsRowMajor()); }
+
+    template <vct::size_type _rows, 
+              vct::size_type _cols, 
+              bool _storageOrder>
+    inline void 
+    Allocate(const vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, 
+                                      _rows, 
+                                      _cols, 
+                                      _storageOrder> & A)
+    { Allocate(_rows, _cols, _storageOrder); }
     //@}
 
 
@@ -219,21 +229,32 @@ public:
     */
     //@{
     template <class _matrixOwnerType>
-    inline void Solve(vctDynamicMatrixBase<_matrixOwnerType, double> &A) throw (std::runtime_error) {
-        /* check that the size and storage order matches with Allocate() */
+    inline void 
+    Solve(vctDynamicMatrixBase<_matrixOwnerType, 
+                               CISSTNETLIB_DOUBLE> &A) 
+        throw (std::runtime_error){
+        /* 
+           check that the size and storage order matches with 
+           Allocate() 
+        */
         if (A.IsRowMajor() != StorageOrder) {
             cmnThrow(std::runtime_error("nmrSVDSolver Solve: Storage order used for Allocate was different"));
         }
 
-        /* check sizes based on storage order, there is a more compact
+        /* 
+           check sizes based on storage order, there is a more compact
            expression for this test but I find this easier to read and
-           debug (Anton) */
+           debug (Anton) 
+        */
         if (A.IsColMajor()) {
-            if ((M != (int) A.rows()) || (N != (int) A.cols())) {
+            if ((M != static_cast<CISSTNETLIB_INTEGER>(A.rows())) || 
+                (N != static_cast<CISSTNETLIB_INTEGER>(A.cols()))) {
                 cmnThrow(std::runtime_error("nmrSVDSolver Solve: Size used for Allocate was different"));
             }
-        } else if (A.IsRowMajor()) {
-            if ((M != (int) A.cols()) || (N != (int) A.rows())) {
+        } 
+        else if (A.IsRowMajor()) {
+            if ((M != static_cast<CISSTNETLIB_INTEGER>(A.cols())) || 
+                (N != static_cast<CISSTNETLIB_INTEGER>(A.rows()))) {
                 cmnThrow(std::runtime_error("nmrSVDSolver Solve: Size used for Allocate was different"));
             }
         }
@@ -243,45 +264,36 @@ public:
             cmnThrow(std::runtime_error("nmrSVDSolver Solve: Requires a compact matrix"));
         }
 
-        /* call the LAPACK C function */
-#if CISST_HAS_CNETLIB
         dgesvd_(&Jobu, &Jobvt, &M, &N,
                 A.Pointer(), &Lda, S.Pointer(),
                 U.Pointer(), &Ldu,
                 Vt.Pointer(), &Ldvt,
-                Work.Pointer(), &Lwork, &Info);
-#elif CISST_HAS_CISSTNETLIB
-        ftnlen jobu_len = (ftnlen)1, jobvt_len = (ftnlen)1;
-        la_dzlapack_MP_sgesvd_nat(&Jobu, &Jobvt, &M, &N,
-                                  A.Pointer(), &Lda, S.Pointer(),
-                                  U.Pointer(), &Ldu,
-                                  Vt.Pointer(), &Ldvt,
-                                  Work.Pointer(), &Lwork, &Info,
-                                  jobu_len, jobvt_len);
-#endif
-
+                Work.Pointer(), &Lwork, &Info );
 	}
     
 
-    template <vct::size_type _rows, vct::size_type _cols, bool _storageOrder>
-    inline void Solve(vctFixedSizeMatrix<double, _rows, _cols, _storageOrder> & A) {
-        vctDynamicMatrixRef<double> Aref(A);
+    template <vct::size_type _rows, 
+              vct::size_type _cols, 
+              bool _storageOrder>
+    inline void 
+    Solve(vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, 
+                             _rows, 
+                             _cols, 
+                             _storageOrder>& A) {
+        vctDynamicMatrixRef<CISSTNETLIB_DOUBLE> Aref(A);
         Solve(Aref);
     }
     //@}
 
     
-    inline const vctDynamicMatrix<double> &GetS(void) const {
-        return S;
-    }
+    inline const vctDynamicMatrix<CISSTNETLIB_DOUBLE> &GetS(void) const
+    { return S; }
 
-    inline const vctDynamicMatrix<double> &GetU(void) const {
-        return (StorageOrder == VCT_COL_MAJOR) ? U : Vt;
-    }
+    inline const vctDynamicMatrix<CISSTNETLIB_DOUBLE> &GetU(void) const
+    { return (StorageOrder == VCT_COL_MAJOR) ? U : Vt; }
 
-    inline const vctDynamicMatrix<double> &GetVt(void) const {
-        return (StorageOrder == VCT_COL_MAJOR) ? Vt : U;
-    }
+    inline const vctDynamicMatrix<CISSTNETLIB_DOUBLE> &GetVt(void)const
+    { return (StorageOrder == VCT_COL_MAJOR) ? Vt : U; }
 };
 
 

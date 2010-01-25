@@ -87,24 +87,24 @@ public:
       is compatible with the cisstVector containers such as
       vctDynamicMatrix and vctDynamicVector (unsigned int).  To call
       the Fortran based routines, these values must be cast to
-      #F_INTEGER. */
+      CISSTNETLIB_INTEGER. */
     typedef vct::size_type size_type;
 
     enum {NB = 64};
  
 protected:
     /*! Memory allocated for pivot indices vector if needed. */
-    vctDynamicVector<F_INTEGER> PivotIndicesMemory;
+    vctDynamicVector<CISSTNETLIB_INTEGER> PivotIndicesMemory;
 
     /*! Memory allocated for the workspace if needed. */
-    vctDynamicVector<double> WorkspaceMemory;
+    vctDynamicVector<CISSTNETLIB_DOUBLE> WorkspaceMemory;
 
     /*! Reference return type, this points either to user allocated
       memory or our memory chunk if needed.
      */
     //@{
-    vctDynamicVectorRef<F_INTEGER> PivotIndicesReference;
-    vctDynamicVectorRef<double> WorkspaceReference;
+    vctDynamicVectorRef<CISSTNETLIB_INTEGER> PivotIndicesReference;
+    vctDynamicVectorRef<CISSTNETLIB_DOUBLE> WorkspaceReference;
     //@}
 
     /*! Store Size and StorageOrder which are needed to check if A
@@ -167,7 +167,7 @@ protected:
       \note The method SetDimension must have been called before.
     */
     template <class _vectorOwnerTypePivotIndices>
-    inline void ThrowUnlessPivotIndicesSizeIsCorrect(vctDynamicVectorBase<_vectorOwnerTypePivotIndices, F_INTEGER> & pivotIndices)
+    inline void ThrowUnlessPivotIndicesSizeIsCorrect(vctDynamicVectorBase<_vectorOwnerTypePivotIndices, CISSTNETLIB_INTEGER> & pivotIndices)
         throw(std::runtime_error)
     {
         // check sizes and compacity
@@ -188,7 +188,7 @@ protected:
       \note The method SetDimension must have been called before.
     */
     template <class _vectorOwnerTypeWorkspace>
-    inline void ThrowUnlessWorkspaceSizeIsCorrect(vctDynamicVectorBase<_vectorOwnerTypeWorkspace, double> & workspace)
+    inline void ThrowUnlessWorkspaceSizeIsCorrect(vctDynamicVectorBase<_vectorOwnerTypeWorkspace, CISSTNETLIB_DOUBLE> & workspace)
         throw(std::runtime_error)
     {
         // check sizes and compacity
@@ -211,7 +211,7 @@ public:
     */
     template <class _matrixOwnerTypeA>
     static inline
-    size_type PivotIndicesSize(const vctDynamicConstMatrixBase<_matrixOwnerTypeA, double> & A)
+    size_type PivotIndicesSize(const vctDynamicConstMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> & A)
     {
         return ((A.rows() > 1) ? A.rows() : 1);
     }
@@ -224,7 +224,7 @@ public:
     */
     template <class _matrixOwnerTypeA>
     static inline
-    size_type WorkspaceSize(const vctDynamicConstMatrixBase<_matrixOwnerTypeA, double> & A)
+    size_type WorkspaceSize(const vctDynamicConstMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> & A)
     {
         return ((A.rows() > 1) ? A.rows() : 1) * NB;
     }
@@ -244,10 +244,10 @@ public:
     public:
         Friend(nmrInverseDynamicData &data): Data(data) {
         }
-        inline vctDynamicVectorRef<F_INTEGER> & PivotIndices(void) {
+        inline vctDynamicVectorRef<CISSTNETLIB_INTEGER> & PivotIndices(void) {
             return Data.PivotIndicesReference;
         }
-        inline vctDynamicVectorRef<double> & Workspace(void) {
+        inline vctDynamicVectorRef<CISSTNETLIB_DOUBLE> & Workspace(void) {
             return Data.WorkspaceReference;
         }
         inline size_type Size(void) {
@@ -300,7 +300,7 @@ public:
       \sa nmrInverseDynamicData::Allocate
     */
     template <class _matrixOwnerTypeA>
-    nmrInverseDynamicData(vctDynamicMatrixBase<_matrixOwnerTypeA, double> & A)
+    nmrInverseDynamicData(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> & A)
     {
         this->Allocate(A);
     }
@@ -320,9 +320,9 @@ public:
     template <class _matrixOwnerTypeA,
               class _vectorOwnerTypePivotIndices,
               class _vectorOwnerTypeWorkspace>
-    nmrInverseDynamicData(vctDynamicMatrixBase<_matrixOwnerTypeA, double> & A,
-                          vctDynamicVectorBase<_vectorOwnerTypePivotIndices, F_INTEGER> & pivotIndices,
-                          vctDynamicVectorBase<_vectorOwnerTypeWorkspace, double> & workspace)
+    nmrInverseDynamicData(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> & A,
+                          vctDynamicVectorBase<_vectorOwnerTypePivotIndices, CISSTNETLIB_INTEGER> & pivotIndices,
+                          vctDynamicVectorBase<_vectorOwnerTypeWorkspace, CISSTNETLIB_DOUBLE> & workspace)
     {
         this->SetRef(A, pivotIndices, workspace);
     }
@@ -338,7 +338,7 @@ public:
       computed.
     */
     template <class _matrixOwnerTypeA>
-    inline void Allocate(vctDynamicMatrixBase<_matrixOwnerTypeA, double> & A)
+    inline void Allocate(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> & A)
     {
         this->Allocate(A.rows(), A.StorageOrder());
     }
@@ -371,9 +371,9 @@ public:
     template <class _matrixOwnerTypeA,
               class _vectorOwnerTypePivotIndices,
               class _vectorOwnerTypeWorkspace>
-    void SetRef(vctDynamicMatrixBase<_matrixOwnerTypeA, double> & A,
-                vctDynamicVectorBase<_vectorOwnerTypePivotIndices, F_INTEGER> & pivotIndices,
-                vctDynamicVectorBase<_vectorOwnerTypeWorkspace, double> & workspace)
+    void SetRef(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> & A,
+                vctDynamicVectorBase<_vectorOwnerTypePivotIndices, CISSTNETLIB_INTEGER> & pivotIndices,
+                vctDynamicVectorBase<_vectorOwnerTypeWorkspace, CISSTNETLIB_DOUBLE> & workspace)
         throw(std::runtime_error)
     {
         this->SetDimension(A.rows(), A.StorageOrder());
@@ -426,13 +426,13 @@ public:
 #endif // DOXYGEN
     /*! Type of the input matrix A (size computed from the data
       template parameters). */
-    typedef vctFixedSizeMatrix<double, _size, _size, _storageOrder> MatrixTypeA;
+    typedef vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _size, _size, _storageOrder> MatrixTypeA;
     /*! Type of the output vector PivotIndices (size computed from the
       template parameters). */
-    typedef vctFixedSizeVector<F_INTEGER, MAX_SIZE_1> VectorTypePivotIndices;
+    typedef vctFixedSizeVector<CISSTNETLIB_INTEGER, MAX_SIZE_1> VectorTypePivotIndices;
     /*! Type used to create the workspace (size computed from the
       template parameters). */
-    typedef vctFixedSizeVector<double, LWORK> VectorTypeWorkspace;
+    typedef vctFixedSizeVector<CISSTNETLIB_DOUBLE, LWORK> VectorTypeWorkspace;
 
 protected:
     VectorTypePivotIndices PivotIndicesMember; /*!< Data member used to store the vector pivotIndices. */
@@ -503,7 +503,7 @@ public:
 
   The user creates the input matrix A:
   \code
-  vctDynamicMatrix<double> A(12, 24 , VCT_COL_MAJOR); // 12 x 24 matrix
+  vctDynamicMatrix<CISSTNETLIB_DOUBLE> A(12, 24 , VCT_COL_MAJOR); // 12 x 24 matrix
   vctRandom(A, -10.0, 10.0);
   \endcode
   The user allocates a data object which could be of
@@ -522,11 +522,11 @@ public:
 
   The User allocates memory for this vector:
   \code
-  vctDynamicMatrix<double> A(5, 5, VCT_COL_MAJOR);
+  vctDynamicMatrix<CISSTNETLIB_DOUBLE> A(5, 5, VCT_COL_MAJOR);
   vctRandom(A, -10.0, 10.0);
-  vctDynamicVector<F_INTEGER>
+  vctDynamicVector<CISSTNETLIB_INTEGER>
       pivotIndices(nmrInverseDynamicData::PivotIndicesSize(A));
-  vctDynamicVector<double>
+  vctDynamicVector<CISSTNETLIB_DOUBLE>
       workspace(nmrInverseDynamicData::WorkspaceSize(A));
   \endcode
   Call the Inverse routine:
@@ -539,7 +539,7 @@ public:
   <li>Using a data for fixed size containers.
 
   \code
-  vctFixedSizeMatrix<double, 5, 5, VCT_COL_MAJOR> A;
+  vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, 5, 5, VCT_COL_MAJOR> A;
   vctRandom(A, -10.0, 10.0);
   typedef nmrInverseFixedSizeData<5, VCT_COL_MAJOR> DataType;
   DataType data;
@@ -572,12 +572,12 @@ public:
         nmrInverseTest::TestDynamicRowMajor
  */
 template <class _matrixOwnerType>
-inline F_INTEGER nmrInverse(vctDynamicMatrixBase<_matrixOwnerType, double> & A,
+inline CISSTNETLIB_INTEGER nmrInverse(vctDynamicMatrixBase<_matrixOwnerType, CISSTNETLIB_DOUBLE> & A,
                             nmrInverseDynamicData & data)
     throw (std::runtime_error)
 {
     typename nmrInverseDynamicData::Friend dataFriend(data);
-    F_INTEGER info;
+    CISSTNETLIB_INTEGER info;
 
     /* check that the matrix is square */
     if (!A.IsSquare()) {
@@ -592,9 +592,9 @@ inline F_INTEGER nmrInverse(vctDynamicMatrixBase<_matrixOwnerType, double> & A,
         cmnThrow(std::runtime_error("nmrInverse: Requires a compact matrix."));
     }
 
-    F_INTEGER size = dataFriend.Size();
-    F_INTEGER lda = (size > 1) ? size : 1;
-    F_INTEGER lwork = dataFriend.Workspace().size();
+    CISSTNETLIB_INTEGER size = dataFriend.Size();
+    CISSTNETLIB_INTEGER lda = (size > 1) ? size : 1;
+    CISSTNETLIB_INTEGER lwork = dataFriend.Workspace().size();
     /* call the LAPACK C function */
     dgetrf_(&size, &size,
             A.Pointer(), &lda,
@@ -629,9 +629,9 @@ inline F_INTEGER nmrInverse(vctDynamicMatrixBase<_matrixOwnerType, double> & A,
 template <class _matrixOwnerTypeA,
           class _vectorOwnerTypePivotIndices,
           class _vectorOwnerTypeWorkspace>
-inline F_INTEGER nmrInverse(vctDynamicMatrixBase<_matrixOwnerTypeA, double> & A,
-                            vctDynamicVectorBase<_vectorOwnerTypePivotIndices, F_INTEGER> & pivotIndices,
-                            vctDynamicVectorBase<_vectorOwnerTypeWorkspace, double> & workspace)
+inline CISSTNETLIB_INTEGER nmrInverse(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> & A,
+                            vctDynamicVectorBase<_vectorOwnerTypePivotIndices, CISSTNETLIB_INTEGER> & pivotIndices,
+                            vctDynamicVectorBase<_vectorOwnerTypeWorkspace, CISSTNETLIB_DOUBLE> & workspace)
 {
     nmrInverseDynamicData data(A, pivotIndices, workspace);
     return nmrInverse(A, data);
@@ -647,7 +647,7 @@ inline F_INTEGER nmrInverse(vctDynamicMatrixBase<_matrixOwnerTypeA, double> & A,
   \param A is a reference to a dynamic square matrix
 */
 template <class _matrixOwnerTypeA>
-inline F_INTEGER nmrInverse(vctDynamicMatrixBase<_matrixOwnerTypeA, double> & A)
+inline CISSTNETLIB_INTEGER nmrInverse(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> & A)
 {
     nmrInverseDynamicData data(A);
     return nmrInverse(A, data);
@@ -679,20 +679,20 @@ inline F_INTEGER nmrInverse(vctDynamicMatrixBase<_matrixOwnerTypeA, double> & A)
         TestFixedSizeRowMajorUserAlloc
  */
 template <vct::size_type _size, vct::size_type _maxSize1, vct::size_type _lWork, bool _storageOrder>
-inline F_INTEGER nmrInverse(vctFixedSizeMatrix<double, _size, _size, _storageOrder> & A, 
-                            vctFixedSizeVector<F_INTEGER, _maxSize1> & pivotIndices,
-                            vctFixedSizeVector<double, _lWork> & workspace)
+inline CISSTNETLIB_INTEGER nmrInverse(vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _size, _size, _storageOrder> & A, 
+                            vctFixedSizeVector<CISSTNETLIB_INTEGER, _maxSize1> & pivotIndices,
+                            vctFixedSizeVector<CISSTNETLIB_DOUBLE, _lWork> & workspace)
 {
-    const F_INTEGER maxSize1 = (F_INTEGER) nmrInverseFixedSizeData<_size, _storageOrder>::MAX_SIZE_1;
-    const F_INTEGER lWork = (F_INTEGER) nmrInverseFixedSizeData<_size, _storageOrder>::LWORK;
+    const CISSTNETLIB_INTEGER maxSize1 = static_cast<CISSTNETLIB_INTEGER>(nmrInverseFixedSizeData<_size, _storageOrder>::MAX_SIZE_1);
+    const CISSTNETLIB_INTEGER lWork = static_cast<CISSTNETLIB_INTEGER>(nmrInverseFixedSizeData<_size, _storageOrder>::LWORK);
     //Assert if requirement is equal to size provided!
-    CMN_ASSERT(maxSize1 == (F_INTEGER) _maxSize1);
-    CMN_ASSERT(lWork <= (F_INTEGER) _lWork);
+    CMN_ASSERT(maxSize1 == static_cast<CISSTNETLIB_INTEGER>(_maxSize1));
+    CMN_ASSERT(lWork <= static_cast<CISSTNETLIB_INTEGER>(_lWork));
 
-    F_INTEGER info;
-    F_INTEGER lda = _maxSize1;
-    F_INTEGER size = _size;
-    F_INTEGER lwork = lWork;
+    CISSTNETLIB_INTEGER info;
+    CISSTNETLIB_INTEGER lda = _maxSize1;
+    CISSTNETLIB_INTEGER size = _size;
+    CISSTNETLIB_INTEGER lwork = lWork;
 
     /* call the LAPACK C function */
     dgetrf_(&size, &size,
@@ -712,7 +712,7 @@ inline F_INTEGER nmrInverse(vctFixedSizeMatrix<double, _size, _size, _storageOrd
 /*! This function solves the Inverse problem for a fixed size matrix using
   nmrInverseFixedSizeData to allocate the memory required for the pivot indices and the workspace:
   \code
-  vctFixedSizeMatrix<double, 7, 7, VCT_ROW_MAJOR> A;
+  vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, 7, 7, VCT_ROW_MAJOR> A;
   vctRandom(A, -10.0, 10.0);
   nmrInverseFixedSizeData<7, VCT_ROW_MAJOR> data;
   nmrInverse(A, data);
@@ -727,7 +727,7 @@ inline F_INTEGER nmrInverse(vctFixedSizeMatrix<double, _size, _size, _storageOrd
         TestFixedSizeRowMajor
  */
 template <vct::size_type _size, bool _storageOrder>
-inline F_INTEGER nmrInverse(vctFixedSizeMatrix<double, _size, _size, _storageOrder> & A,
+inline CISSTNETLIB_INTEGER nmrInverse(vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _size, _size, _storageOrder> & A,
                             nmrInverseFixedSizeData<_size, _storageOrder> & data)
 {
     typename nmrInverseFixedSizeData<_size, _storageOrder>::Friend dataFriend(data);
@@ -744,7 +744,7 @@ inline F_INTEGER nmrInverse(vctFixedSizeMatrix<double, _size, _size, _storageOrd
   \param A A fixed size square matrix.
 */
 template <vct::size_type _size, bool _storageOrder>
-inline F_INTEGER nmrInverse(vctFixedSizeMatrix<double, _size, _size, _storageOrder> & A) 
+inline CISSTNETLIB_INTEGER nmrInverse(vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _size, _size, _storageOrder> & A) 
 {
     nmrInverseFixedSizeData<_size, _storageOrder> data;
     return nmrInverse(A, data);

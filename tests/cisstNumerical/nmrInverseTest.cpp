@@ -87,7 +87,7 @@ void nmrInverseTest::TestDynamicColumnMajorUserAlloc(void) {
     randomSequence.ExtractRandomValue(10, 20, size);
     vctDynamicMatrix<double> input(size, size , VCT_COL_MAJOR);
     vctDynamicMatrix<double> inputOrig(size, size , VCT_COL_MAJOR);
-    vctDynamicVector<F_INTEGER> pivotIndices(nmrInverseDynamicData::PivotIndicesSize(input));
+    vctDynamicVector<CISSTNETLIB_INTEGER> pivotIndices(nmrInverseDynamicData::PivotIndicesSize(input));
     vctDynamicVector<double> workspace(nmrInverseDynamicData::WorkspaceSize(input));
     vctRandom(input, 0.0, 10.0);
     inputOrig.Assign(input);
@@ -101,7 +101,7 @@ void nmrInverseTest::TestDynamicRowMajorUserAlloc(void) {
     randomSequence.ExtractRandomValue(10, 20, size);
     vctDynamicMatrix<double> input(size, size , VCT_ROW_MAJOR);
     vctDynamicMatrix<double> inputOrig(size, size , VCT_ROW_MAJOR);
-    vctDynamicVector<F_INTEGER> pivotIndices(nmrInverseDynamicData::PivotIndicesSize(input));
+    vctDynamicVector<CISSTNETLIB_INTEGER> pivotIndices(nmrInverseDynamicData::PivotIndicesSize(input));
     vctDynamicVector<double> workspace(nmrInverseDynamicData::WorkspaceSize(input));
     vctRandom(input, 0.0, 10.0);
     inputOrig.Assign(input);

@@ -111,7 +111,7 @@ public:
       is compatible with the cisstVector containers such as
       vctDynamicMatrix and vctDynamicVector (unsigned int).  To call
       the Fortran based routines, these values must be cast to
-      #F_INTEGER. */
+      #CISSTNETLIB_INTEGER. */
     typedef unsigned int size_type;
 
     /*! Matrix size type, i.e. vector of two elements: number of rows
@@ -120,23 +120,23 @@ public:
 
 protected:
     /*! Memory allocated for Workspace matrices if needed. */
-    vctDynamicVector<double> WorkspaceMemory;
+    vctDynamicVector<CISSTNETLIB_DOUBLE> WorkspaceMemory;
     
     /*! Memory allocated for U, Vt Matrices and Vector S if needed.
        This method allocates a single block of memory for these 3
        containers; m x m elements of U followed by n x n elements of
        Vt followed by min (m, n) elements of S.
       */
-    vctDynamicVector<double> OutputMemory;
+    vctDynamicVector<CISSTNETLIB_DOUBLE> OutputMemory;
 
     /*! References to workspace or return types, these point either to
       user allocated memory or our memory chunks if needed.
      */
     //@{
-    vctDynamicMatrixRef<double> UReference;
-    vctDynamicMatrixRef<double> VtReference;
-    vctDynamicVectorRef<double> SReference;
-    vctDynamicVectorRef<double> WorkspaceReference;
+    vctDynamicMatrixRef<CISSTNETLIB_DOUBLE> UReference;
+    vctDynamicMatrixRef<CISSTNETLIB_DOUBLE> VtReference;
+    vctDynamicVectorRef<CISSTNETLIB_DOUBLE> SReference;
+    vctDynamicVectorRef<CISSTNETLIB_DOUBLE> WorkspaceReference;
     //@}
 
     /*! Just store M, N, and StorageOrder which are needed
@@ -170,10 +170,10 @@ protected:
       allocate everything and, later on, used with user allocated
       memory (for either the workspace or the output).  For example:
       \code
-      vctDynamicMatrix<double> A(20, 20);
+      vctDynamicMatrix<CISSTNETLIB_DOUBLE> A(20, 20);
       vctRandom(A, 10, 10);
       nmrSVDEconomyDynamicData data(A); // allocate output AND workspace
-      vctDynamicVector<double> workspace(nmrSVDEconomyDynamicData::WorkspaceSize(A));
+      vctDynamicVector<CISSTNETLIB_DOUBLE> workspace(nmrSVDEconomyDynamicData::WorkspaceSize(A));
       data.SetRefWorkspace(workspace); // after all, use my own workspace
       \endcode
       \note The method SetDimension must have been called before.
@@ -218,9 +218,9 @@ protected:
     template <typename _matrixOwnerTypeU,
               typename _vectorOwnerTypeS,
               typename _matrixOwnerTypeVt>
-    inline void ThrowUnlessOutputSizeIsCorrect(vctDynamicMatrixBase<_matrixOwnerTypeU, double> & inU,
-                                               vctDynamicVectorBase<_vectorOwnerTypeS, double> & inS,
-                                               vctDynamicMatrixBase<_matrixOwnerTypeVt, double> & inVt) const
+    inline void ThrowUnlessOutputSizeIsCorrect(vctDynamicMatrixBase<_matrixOwnerTypeU, CISSTNETLIB_DOUBLE> & inU,
+                                               vctDynamicVectorBase<_vectorOwnerTypeS, CISSTNETLIB_DOUBLE> & inS,
+                                               vctDynamicMatrixBase<_matrixOwnerTypeVt, CISSTNETLIB_DOUBLE> & inVt) const
         throw(std::runtime_error)
     {
          // check sizes and storage order
@@ -261,7 +261,7 @@ protected:
     */
     template <typename _vectorOwnerTypeWorkspace>
     inline void
-    ThrowUnlessWorkspaceSizeIsCorrect(vctDynamicVectorBase<_vectorOwnerTypeWorkspace, double> & inWorkspace) const
+    ThrowUnlessWorkspaceSizeIsCorrect(vctDynamicVectorBase<_vectorOwnerTypeWorkspace, CISSTNETLIB_DOUBLE> & inWorkspace) const
         throw(std::runtime_error)
     {
         const size_type lwork = nmrSVDEconomyDynamicData::WorkspaceSize(MMember, NMember);
@@ -296,7 +296,7 @@ public:
       \param inA The matrix whose SVD needs to be computed
     */
     template <class _matrixOwnerTypeA>
-    static inline size_type WorkspaceSize(vctDynamicMatrixBase<_matrixOwnerTypeA, double> & inA)
+    static inline size_type WorkspaceSize(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> & inA)
     {
         return nmrSVDEconomyDynamicData::WorkspaceSize(inA.rows(), inA.cols());
     }
@@ -311,7 +311,7 @@ public:
     */
     template <class _matrixOwnerTypeA>
     static inline
-    nsize_type MatrixSSize(const vctDynamicConstMatrixBase<_matrixOwnerTypeA, double> & A)
+    nsize_type MatrixSSize(const vctDynamicConstMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> & A)
     {
         nsize_type matrixSize(A.rows(), (A.rows() < A.cols()) ? A.row() : A.cols());
         return matrixSize;
@@ -328,10 +328,10 @@ public:
     */
     template <class _matrixOwnerTypeA, class _matrixOwnerTypeS, class _vectorOwnerTypeS>
     static inline
-    vctDynamicMatrixBase<_matrixOwnerTypeS, double> &
-    UpdateMatrixS(const vctDynamicConstMatrixBase<_matrixOwnerTypeA, double> & A,
-                  const vctDynamicConstVectorBase<_vectorOwnerTypeS, double> & vectorS,
-                  vctDynamicMatrixBase<_matrixOwnerTypeS, double> & matrixS)
+    vctDynamicMatrixBase<_matrixOwnerTypeS, CISSTNETLIB_DOUBLE> &
+    UpdateMatrixS(const vctDynamicConstMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> & A,
+                  const vctDynamicConstVectorBase<_vectorOwnerTypeS, CISSTNETLIB_DOUBLE> & vectorS,
+                  vctDynamicMatrixBase<_matrixOwnerTypeS, CISSTNETLIB_DOUBLE> & matrixS)
         throw(std::runtime_error)
     {
         const size_type minmn = (A.rows() < A.cols()) ? A.rows() : A.cols();
@@ -357,16 +357,16 @@ public:
     public:
         Friend(nmrSVDEconomyDynamicData &inData): Data(inData) {
         }
-        inline vctDynamicVectorRef<double> & S(void) {
+        inline vctDynamicVectorRef<CISSTNETLIB_DOUBLE> & S(void) {
             return Data.SReference;
         }
-        inline vctDynamicMatrixRef<double> & U(void) {
+        inline vctDynamicMatrixRef<CISSTNETLIB_DOUBLE> & U(void) {
             return Data.UReference;
         }
-        inline vctDynamicMatrixRef<double> & Vt(void) {
+        inline vctDynamicMatrixRef<CISSTNETLIB_DOUBLE> & Vt(void) {
             return Data.VtReference;
         }
-        inline vctDynamicVectorRef<double> & Workspace(void) {
+        inline vctDynamicVectorRef<CISSTNETLIB_DOUBLE> & Workspace(void) {
             return Data.WorkspaceReference;
         }
         inline size_type M(void) {
@@ -430,7 +430,7 @@ public:
       \sa nmrSVDEconomyDynamicData::Allocate
     */
     template <class _matrixOwnerTypeA>
-    nmrSVDEconomyDynamicData(vctDynamicMatrixBase<_matrixOwnerTypeA, double> & A)
+    nmrSVDEconomyDynamicData(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> & A)
     {
         this->Allocate(A);
     }
@@ -450,8 +450,8 @@ public:
       \sa nmrSVDEconomyDynamicData::SetRefWorkspace
     */
     template <class _matrixOwnerTypeA, class _vectorOwnerTypeWorkspace>
-    nmrSVDEconomyDynamicData(vctDynamicMatrixBase<_matrixOwnerTypeA, double> & A,
-                      vctDynamicVectorBase<_vectorOwnerTypeWorkspace, double> & inWorkspace)
+    nmrSVDEconomyDynamicData(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> & A,
+                      vctDynamicVectorBase<_vectorOwnerTypeWorkspace, CISSTNETLIB_DOUBLE> & inWorkspace)
     {
         this->SetRefWorkspace(A, inWorkspace);
     }
@@ -474,10 +474,10 @@ public:
               typename _vectorOwnerTypeS,
               typename _matrixOwnerTypeVt,
               typename _vectorOwnerTypeWorkspace>
-    nmrSVDEconomyDynamicData(vctDynamicMatrixBase<_matrixOwnerTypeU, double> & inU,
-                      vctDynamicVectorBase<_vectorOwnerTypeS, double> & inS,
-                      vctDynamicMatrixBase<_matrixOwnerTypeVt, double> & inVt,
-                      vctDynamicVectorBase<_vectorOwnerTypeWorkspace, double> & inWorkspace)
+    nmrSVDEconomyDynamicData(vctDynamicMatrixBase<_matrixOwnerTypeU, CISSTNETLIB_DOUBLE> & inU,
+                      vctDynamicVectorBase<_vectorOwnerTypeS, CISSTNETLIB_DOUBLE> & inS,
+                      vctDynamicMatrixBase<_matrixOwnerTypeVt, CISSTNETLIB_DOUBLE> & inVt,
+                      vctDynamicVectorBase<_vectorOwnerTypeWorkspace, CISSTNETLIB_DOUBLE> & inWorkspace)
     {
         this->SetRef(inU, inS, inVt, inWorkspace);
     }
@@ -495,9 +495,9 @@ public:
     template <typename _matrixOwnerTypeU,
               typename _vectorOwnerTypeS,
               typename _matrixOwnerTypeVt>
-    nmrSVDEconomyDynamicData(vctDynamicMatrixBase<_matrixOwnerTypeU, double> & inU,
-                      vctDynamicVectorBase<_vectorOwnerTypeS, double> & inS,
-                      vctDynamicMatrixBase<_matrixOwnerTypeVt, double> & inVt)
+    nmrSVDEconomyDynamicData(vctDynamicMatrixBase<_matrixOwnerTypeU, CISSTNETLIB_DOUBLE> & inU,
+                      vctDynamicVectorBase<_vectorOwnerTypeS, CISSTNETLIB_DOUBLE> & inS,
+                      vctDynamicMatrixBase<_matrixOwnerTypeVt, CISSTNETLIB_DOUBLE> & inVt)
     {
         this->SetRefOutput(inU, inS, inVt);
     }
@@ -514,7 +514,7 @@ public:
       \param A The matrix for which SVD needs to be computed, size MxN
     */
     template <class _matrixOwnerTypeA>
-    inline void Allocate(vctDynamicMatrixBase<_matrixOwnerTypeA, double> & A)
+    inline void Allocate(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> & A)
     {
         this->Allocate(A.rows(), A.cols(), A.StorageOrder());
     }
@@ -531,8 +531,8 @@ public:
       \param inWorkspace The vector used for workspace by LAPACK.
     */
     template <class _matrixOwnerTypeA, class _vectorOwnerTypeWorkspace>
-    inline void SetRefWorkspace(vctDynamicMatrixBase<_matrixOwnerTypeA, double> & A,
-                                vctDynamicVectorBase<_vectorOwnerTypeWorkspace, double> & inWorkspace)
+    inline void SetRefWorkspace(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> & A,
+                                vctDynamicVectorBase<_vectorOwnerTypeWorkspace, CISSTNETLIB_DOUBLE> & inWorkspace)
     {
         this->SetDimension(A.rows(), A.cols(), A.StorageOrder());
         
@@ -576,10 +576,10 @@ public:
               typename _vectorOwnerTypeS,
               typename _matrixOwnerTypeVt,
               typename _vectorOwnerTypeWorkspace>
-    void SetRef(vctDynamicMatrixBase<_matrixOwnerTypeU, double> & inU,
-                vctDynamicVectorBase<_vectorOwnerTypeS, double> & inS,
-                vctDynamicMatrixBase<_matrixOwnerTypeVt, double> & inVt,
-                vctDynamicVectorBase<_vectorOwnerTypeWorkspace, double> & inWorkspace)
+    void SetRef(vctDynamicMatrixBase<_matrixOwnerTypeU, CISSTNETLIB_DOUBLE> & inU,
+                vctDynamicVectorBase<_vectorOwnerTypeS, CISSTNETLIB_DOUBLE> & inS,
+                vctDynamicMatrixBase<_matrixOwnerTypeVt, CISSTNETLIB_DOUBLE> & inVt,
+                vctDynamicVectorBase<_vectorOwnerTypeWorkspace, CISSTNETLIB_DOUBLE> & inWorkspace)
         throw(std::runtime_error)
     {
         this->SetDimension(inU.rows(), inVt.rows(), inU.StorageOrder());
@@ -604,9 +604,9 @@ public:
     */
     template <typename _matrixOwnerTypeU,
               typename _vectorOwnerTypeS, typename _matrixOwnerTypeVt>
-    void SetRefOutput(vctDynamicMatrixBase<_matrixOwnerTypeU, double> & inU,
-                      vctDynamicVectorBase<_vectorOwnerTypeS, double> & inS,
-                      vctDynamicMatrixBase<_matrixOwnerTypeVt, double> & inVt)
+    void SetRefOutput(vctDynamicMatrixBase<_matrixOwnerTypeU, CISSTNETLIB_DOUBLE> & inU,
+                      vctDynamicVectorBase<_vectorOwnerTypeS, CISSTNETLIB_DOUBLE> & inS,
+                      vctDynamicMatrixBase<_matrixOwnerTypeVt, CISSTNETLIB_DOUBLE> & inVt)
         throw(std::runtime_error)
     {
         this->SetDimension(inU.rows(), inVt.rows(), inU.StorageOrder());
@@ -622,20 +622,20 @@ public:
     /*! Const reference to the result vector S.  This method must be
       called after the data has been computed by the nmrSVDEconomy
       function. */
-    inline const vctDynamicVectorRef<double> & S(void) const {
+    inline const vctDynamicVectorRef<CISSTNETLIB_DOUBLE> & S(void) const {
         return SReference;
     }
 
     /*! Const reference to the result matrix U.  This method must be
       called after the data has been computed by the nmrSVDEconomy
       function. */
-    inline const vctDynamicMatrixRef<double> & U(void) const {
+    inline const vctDynamicMatrixRef<CISSTNETLIB_DOUBLE> & U(void) const {
         return UReference;
     }
     /*! Const reference to the result matrix Vt (V transposed).  This
       method must be called after the data has been computed by
       the nmrSVDEconomy function. */
-    inline const vctDynamicMatrixRef<double> & Vt(void) const {
+    inline const vctDynamicMatrixRef<CISSTNETLIB_DOUBLE> & Vt(void) const {
         return VtReference;
     }
 };
@@ -698,7 +698,7 @@ public:
 
   The user creates the input matrix A:
   \code
-  vctDynamicMatrix<double> A(12, 24 , VCT_ROW_MAJOR); // 12 x 24 matrix
+  vctDynamicMatrix<CISSTNETLIB_DOUBLE> A(12, 24 , VCT_ROW_MAJOR); // 12 x 24 matrix
   vctRandom(A, -10.0, 10.0);
   \endcode
   The user allocates a data object which could be of
@@ -724,11 +724,11 @@ public:
 
   The User allocates memory for these matrices and vector:
   \code
-  vctDynamicMatrix<double> A(5, 4);
+  vctDynamicMatrix<CISSTNETLIB_DOUBLE> A(5, 4);
   vctRandom(A, -10.0, 10.0);
-  vctDynamicMatrix<double> U(5, 5);
-  vctDynamicMatrix<double> Vt(4, 4);
-  vctDynamicVector<double> S(4);
+  vctDynamicMatrix<CISSTNETLIB_DOUBLE> U(5, 5);
+  vctDynamicMatrix<CISSTNETLIB_DOUBLE> Vt(4, 4);
+  vctDynamicVector<CISSTNETLIB_DOUBLE> S(4);
   \endcode
   Call the SVD routine:
   \code
@@ -743,11 +743,11 @@ public:
 
   Create matrices and vector:
   \code
-  vctDynamicMatrix<double> A(5, 4);
+  vctDynamicMatrix<CISSTNETLIB_DOUBLE> A(5, 4);
   vctRandom(A, -10.0, 10.0);
-  vctDynamicMatrix<double> U(5, 5);
-  vctDynamicMatrix<double> Vt(4, 4);
-  vctDynamicVector<double> S(4);
+  vctDynamicMatrix<CISSTNETLIB_DOUBLE> U(5, 5);
+  vctDynamicMatrix<CISSTNETLIB_DOUBLE> Vt(4, 4);
+  vctDynamicVector<CISSTNETLIB_DOUBLE> S(4);
   \endcode
   One also needs to allocate memory the for workspace. This approach is
   particularly useful when the user is using more than one numerical
@@ -757,7 +757,7 @@ public:
   user determine the minimum workspace required the library provides
   the helper function nmrSVDEconomyDynamicData::WorkspaceSize().
   \code
-  vctDynamicVector<double> workspace(nmrSVDEconomyDynamicData::WorkspaceSize(A));
+  vctDynamicVector<CISSTNETLIB_DOUBLE> workspace(nmrSVDEconomyDynamicData::WorkspaceSize(A));
   \endcode
   Call the SVD function:
   \code
@@ -800,16 +800,16 @@ public:
         nmrSVDEconomyTest::TestDynamicRowMajorUserAlloc
  */
 template <class _matrixOwnerType>
-inline F_INTEGER nmrSVDEconomy(vctDynamicMatrixBase<_matrixOwnerType, double> & A,
-                               nmrSVDEconomyDynamicData & data)
+inline CISSTNETLIB_INTEGER nmrSVDEconomy(vctDynamicMatrixBase<_matrixOwnerType, CISSTNETLIB_DOUBLE> & A,
+                                         nmrSVDEconomyDynamicData & data)
     throw (std::runtime_error)
 {
     typename nmrSVDEconomyDynamicData::Friend dataFriend(data);
-    F_INTEGER Info;
+    CISSTNETLIB_INTEGER Info;
     char m_Jobu = 'S';
     char m_Jobvt = 'A';
-    F_INTEGER m_Lwork = (F_INTEGER) nmrSVDEconomyDynamicData::WorkspaceSize(dataFriend.M(),
-                                                                            dataFriend.N());
+    CISSTNETLIB_INTEGER m_Lwork = static_cast<CISSTNETLIB_INTEGER>(nmrSVDEconomyDynamicData::WorkspaceSize(dataFriend.M(),
+                                                                                                           dataFriend.N()));
     /* check that storage order matches with Allocate() */
     if (A.StorageOrder() != dataFriend.StorageOrder()) {
         cmnThrow(std::runtime_error("nmrSVDEconomy: Storage order used for Allocate was different"));
@@ -824,8 +824,8 @@ inline F_INTEGER nmrSVDEconomy(vctDynamicMatrixBase<_matrixOwnerType, double> & 
     }
     
     /* Based on storage order, permute U and Vt as well as dimension */
-    double *UPtr, *VtPtr;
-    F_INTEGER m_Lda, m_Ldu, m_Ldvt;
+    CISSTNETLIB_DOUBLE *UPtr, *VtPtr;
+    CISSTNETLIB_INTEGER m_Lda, m_Ldu, m_Ldvt;
     
     if (A.IsColMajor()) {
         m_Lda = (1 > dataFriend.M()) ? 1 : dataFriend.M();
@@ -841,22 +841,12 @@ inline F_INTEGER nmrSVDEconomy(vctDynamicMatrixBase<_matrixOwnerType, double> & 
         VtPtr = dataFriend.U().Pointer();
     }
 
-    /* call the LAPACK C function */
-#if CISST_HAS_CNETLIB
     dgesvd_(&m_Jobu, &m_Jobvt, &m_Ldu, &m_Ldvt,
             A.Pointer(), &m_Lda, dataFriend.S().Pointer(),
             UPtr, &m_Ldu,
             VtPtr, &m_Ldvt,
             dataFriend.Workspace().Pointer(), &m_Lwork, &Info);
-#elif CISST_HAS_CISSTNETLIB
-    ftnlen jobu_len = (ftnlen)1, jobvt_len = (ftnlen)1;
-    la_dzlapack_MP_sgesvd_nat(&m_Jobu, &m_Jobvt, &m_Ldu, &m_Ldvt,
-                              A.Pointer(), &m_Lda, dataFriend.S().Pointer(),
-                              UPtr, &m_Ldu,
-                              VtPtr, &m_Ldvt,
-                              dataFriend.Workspace().Pointer(), &m_Lwork, &Info,
-                              jobu_len, jobvt_len);
-#endif
+
     return Info;
 }
 
@@ -879,14 +869,14 @@ inline F_INTEGER nmrSVDEconomy(vctDynamicMatrixBase<_matrixOwnerType, double> & 
 template <class _matrixOwnerTypeA, class _matrixOwnerTypeU,
           class _vectorOwnerTypeS, class _matrixOwnerTypeVt,
           class _vectorOwnerTypeWorkspace>
-inline F_INTEGER nmrSVDEconomy(vctDynamicMatrixBase<_matrixOwnerTypeA, double> & A,
-                               vctDynamicMatrixBase<_matrixOwnerTypeU, double> & U,
-                               vctDynamicVectorBase<_vectorOwnerTypeS, double> & S,
-                               vctDynamicMatrixBase<_matrixOwnerTypeVt, double> & Vt,
-                               vctDynamicVectorBase<_vectorOwnerTypeWorkspace, double> & Workspace)
+inline CISSTNETLIB_INTEGER nmrSVDEconomy(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> & A,
+                               vctDynamicMatrixBase<_matrixOwnerTypeU, CISSTNETLIB_DOUBLE> & U,
+                               vctDynamicVectorBase<_vectorOwnerTypeS, CISSTNETLIB_DOUBLE> & S,
+                               vctDynamicMatrixBase<_matrixOwnerTypeVt, CISSTNETLIB_DOUBLE> & Vt,
+                               vctDynamicVectorBase<_vectorOwnerTypeWorkspace, CISSTNETLIB_DOUBLE> & Workspace)
 {
     nmrSVDEconomyDynamicData svdData(U, S, Vt, Workspace);
-    F_INTEGER ret_value = nmrSVDEconomy(A, svdData);
+    CISSTNETLIB_INTEGER ret_value = nmrSVDEconomy(A, svdData);
     return ret_value;
 }
 
@@ -912,13 +902,13 @@ inline F_INTEGER nmrSVDEconomy(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &
  */
 template <class _matrixOwnerTypeA, class _matrixOwnerTypeU,
           class _vectorOwnerTypeS, class _matrixOwnerTypeVt>
-inline F_INTEGER nmrSVDEconomy(vctDynamicMatrixBase<_matrixOwnerTypeA, double> & A,
-                               vctDynamicMatrixBase<_matrixOwnerTypeU, double> & U,
-                               vctDynamicVectorBase<_vectorOwnerTypeS, double> & S,
-                               vctDynamicMatrixBase<_matrixOwnerTypeVt, double> & Vt)
+inline CISSTNETLIB_INTEGER nmrSVDEconomy(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> & A,
+                               vctDynamicMatrixBase<_matrixOwnerTypeU, CISSTNETLIB_DOUBLE> & U,
+                               vctDynamicVectorBase<_vectorOwnerTypeS, CISSTNETLIB_DOUBLE> & S,
+                               vctDynamicMatrixBase<_matrixOwnerTypeVt, CISSTNETLIB_DOUBLE> & Vt)
 {
     nmrSVDEconomyDynamicData svdData(U, S, Vt);
-    F_INTEGER ret_value = nmrSVDEconomy(A, svdData);
+    CISSTNETLIB_INTEGER ret_value = nmrSVDEconomy(A, svdData);
     return ret_value;
 }
 

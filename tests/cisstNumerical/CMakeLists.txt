@@ -47,16 +47,16 @@ IF(CISST_HAS_CISSTNETLIB)
       ${SOURCE_FILES}
       nmrInverseTest.cpp
       nmrLDPSolverTest.cpp
-      nmrLSSolverTest.cpp
-      nmrLSISolverTest.cpp
+#      nmrLSSolverTest.cpp
+#      nmrLSISolverTest.cpp
       nmrLSqLinTest.cpp
       nmrLUTest.cpp
-      nmrLUSolverTest.cpp
+#      nmrLUSolverTest.cpp
       nmrNNLSSolverTest.cpp
       nmrPInverseTest.cpp
-      nmrPInverseSolverTest.cpp
+#      nmrPInverseSolverTest.cpp
       nmrSVDTest.cpp
-      nmrSVDSolverTest.cpp
+#      nmrSVDSolverTest.cpp
       nmrSVDRSSolverTest.cpp
       )
 
@@ -64,16 +64,16 @@ IF(CISST_HAS_CISSTNETLIB)
       ${HEADER_FILES}
       nmrInverseTest.h
       nmrLDPSolverTest.h
-      nmrLSSolverTest.h
-      nmrLSISolverTest.h
+#      nmrLSSolverTest.h
+#      nmrLSISolverTest.h
       nmrLSqLinTest.h
       nmrLUTest.h
-      nmrLUSolverTest.h
+#      nmrLUSolverTest.h
       nmrNNLSSolverTest.h
       nmrPInverseTest.h
-      nmrPInverseSolverTest.h
+#      nmrPInverseSolverTest.h
       nmrSVDTest.h
-      nmrSVDSolverTest.h
+#      nmrSVDSolverTest.h
       nmrSVDRSSolverTest.h
       )
 

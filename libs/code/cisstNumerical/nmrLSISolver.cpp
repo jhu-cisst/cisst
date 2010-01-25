@@ -29,14 +29,14 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstNumerical/nmrLSISolver.h>
 
 
-void nmrLSISolver::Solve(vctDynamicMatrix<double> &C, vctDynamicMatrix<double> &d,
-                         vctDynamicMatrix<double> &A, vctDynamicMatrix<double> &b)
+void nmrLSISolver::Solve(vctDynamicMatrix<CISSTNETLIB_DOUBLE> &C, vctDynamicMatrix<CISSTNETLIB_DOUBLE> &d,
+                         vctDynamicMatrix<CISSTNETLIB_DOUBLE> &A, vctDynamicMatrix<CISSTNETLIB_DOUBLE> &b)
     throw (std::runtime_error)
 {
     /* check that the size matches with Allocate() */
-    if ((Ma != (int) C.rows())
-        || (Na != (int) C.cols())
-        || (Mg != (int) A.rows())) {
+    if ((Ma != static_cast<CISSTNETLIB_INTEGER>( C.rows()))
+        || (Na != static_cast<CISSTNETLIB_INTEGER>( C.cols()))
+        || (Mg != static_cast<CISSTNETLIB_INTEGER>( A.rows()))) {
         cmnThrow(std::runtime_error("nmrLSISolver Solve: Sizes used for Allocate were different"));
     }
     
@@ -54,19 +54,19 @@ void nmrLSISolver::Solve(vctDynamicMatrix<double> &C, vctDynamicMatrix<double> &
         cmnThrow(std::runtime_error("nmrLSISolver Solve: All parameters must be Fortran compatible"));
     }
     
-    long int i, j, k;
+    CISSTNETLIB_INTEGER i, j, k;
     SVDRS.Solve(C, d);
     /* C is now replaced by V and d by U^{T}d */
     
     //Change this to ref
-    vctDynamicMatrix<double> singularValues = SVDRS.GetS();
-    long int nS = singularValues.rows();
+    vctDynamicMatrix<CISSTNETLIB_DOUBLE> singularValues = SVDRS.GetS();
+    CISSTNETLIB_INTEGER nS = singularValues.rows();
     
     /***
         Compute V*S^{-1}U^{T}b
     ***/
     
-    double VSiUtbval = 0;
+    CISSTNETLIB_DOUBLE VSiUtbval = 0;
     for (i = 0; i < Na; i++) {
         VSiUtbval = 0;
         for (j = 0; j < nS; j++) 
@@ -77,8 +77,8 @@ void nmrLSISolver::Solve(vctDynamicMatrix<double> &C, vctDynamicMatrix<double> &
     /***
         Compute \tilde G = G*V*S^{-1} and \tilde h = h - \tilde G \tilde f_1
     ***/
-    double htval;
-    double Gtval;
+    CISSTNETLIB_DOUBLE htval;
+    CISSTNETLIB_DOUBLE Gtval;
     for (i = 0; i < Mg; i++) {
         htval = 0;
         for (j = 0; j < nS && j < Mg; j++) { 
@@ -102,7 +102,7 @@ void nmrLSISolver::Solve(vctDynamicMatrix<double> &C, vctDynamicMatrix<double> &
         Z = S*V^{T}*X -  V*S^{-1}*U^{T}*b
         X = V*S^{-1}*Z + V*S^{-1}*U^{T}*b
     ***/
-    double Xval = 0;
+    CISSTNETLIB_DOUBLE Xval = 0;
     for (i = 0; i < Na; i++) {
         Xval = 0;
         for (j = 0; j < nS; j++) {

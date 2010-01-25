@@ -100,11 +100,11 @@ class nmrFnSolver {
 	// that doesnt change much is desired.
 
 protected:
-	long int N;
-	double Tolerance;
-	long int Info;
-	long int Lwork;
-	vctDynamicVector<double> Work;
+	CISSTNETLIB_INTEGER N;
+	CISSTNETLIB_DOUBLE Tolerance;
+	CISSTNETLIB_INTEGER Info;
+	CISSTNETLIB_INTEGER Lwork;
+	vctDynamicVector<CISSTNETLIB_DOUBLE> Work;
 
 public:
     /*! Default constructor.  This constructor doesn't allocate any
@@ -125,7 +125,7 @@ public:
       \param n Number of variables
       This order will be used for the output as well.
     */
-	nmrFnSolver(long int n)
+	nmrFnSolver(CISSTNETLIB_INTEGER n)
     {
         Allocate(n);
     }
@@ -137,7 +137,7 @@ public:
        the Solve() method will check that the parameters match the
        dimension and storage order. */
     //@{
-	nmrFnSolver(vctDynamicVector<double> &X) {
+	nmrFnSolver(vctDynamicVector<CISSTNETLIB_DOUBLE> &X) {
         Allocate(X);
     }
     //@}
@@ -149,7 +149,7 @@ public:
       
       \param n Number of variables
     */
-	inline void Allocate(long int n) {
+	inline void Allocate(CISSTNETLIB_INTEGER n) {
         N = n;
         Lwork = N*(3*3*3*N+13)/2;
         Tolerance = 1e-6;
@@ -162,7 +162,7 @@ public:
       containers.  The next call to the Solve() method will check that
       the parameters match the dimension. */
     //@{
-    inline void Allocate(vctDynamicVector<double> &X) {
+    inline void Allocate(vctDynamicVector<CISSTNETLIB_DOUBLE> &X) {
         Allocate(X.size());
     }
     //@}
@@ -177,9 +177,9 @@ public:
 
     //@{
     template <int __instanceLine, class __elementType>
-    inline void Solve(nmrCallBackFunctionF<__instanceLine, __elementType> &callBack, vctDynamicVector<double> &X,
-                      vctDynamicVector<double> &F, double tolerance) throw (std::runtime_error) {
-        if ((N != (int) X.size()) || (N != (int) F.size())) {
+    inline void Solve(nmrCallBackFunctionF<__instanceLine, __elementType> &callBack, vctDynamicVector<CISSTNETLIB_DOUBLE> &X,
+                      vctDynamicVector<CISSTNETLIB_DOUBLE> &F, CISSTNETLIB_DOUBLE tolerance) throw (std::runtime_error) {
+        if ((N != static_cast<CISSTNETLIB_INTEGER>(X.size())) || (N != static_cast<CISSTNETLIB_INTEGER>(F.size()))) {
             cmnThrow(std::runtime_error("nmrFnSolver Solve: Size used for Allocate was different"));
         }
         Tolerance = tolerance;

@@ -53,7 +53,7 @@ void nmrLUTest::TestDynamicUserOutputColumnMajor(void) {
     output.Assign(input);
 
     const vct::size_type minmn = (rows > cols) ? cols : rows;
-    vctDynamicVector<F_INTEGER> pivotIndices(minmn);
+    vctDynamicVector<CISSTNETLIB_INTEGER> pivotIndices(minmn);
     nmrLU(output, pivotIndices);
     nmrLUTest::GenericTestDynamic(input, output, pivotIndices);
 }
@@ -64,7 +64,7 @@ void nmrLUTest::TestDynamicUserOutputColumnMajor(void) {
 template <vct::size_type _rows, vct::size_type _cols, vct::size_type _minmn> 
 void nmrLUTest::GenericTestFixedSize(const vctFixedSizeMatrix<double, _rows, _cols, VCT_COL_MAJOR> & input,
                                      const vctFixedSizeMatrix<double, _rows, _cols, VCT_COL_MAJOR> & output,
-                                     const vctFixedSizeVector<F_INTEGER, _minmn> & pivotIndices) {
+                                     const vctFixedSizeVector<CISSTNETLIB_INTEGER, _minmn> & pivotIndices) {
     typedef nmrLUFixedSizeData<_rows, _cols> DataType;
     typename DataType::MatrixTypeP P;
     typename DataType::MatrixTypeL L;
@@ -107,7 +107,7 @@ void nmrLUTest::TestFixedSizeUserOutputColumnMajorMLeqN(void) {
     vctFixedSizeMatrix<double, ROWS, COLS, VCT_COL_MAJOR> input, output;
     vctRandom(input, 0.0, 10.0);
     output.Assign(input);
-    vctFixedSizeVector<F_INTEGER, MIN_MN> pivotIndices;
+    vctFixedSizeVector<CISSTNETLIB_INTEGER, MIN_MN> pivotIndices;
     nmrLU(output, pivotIndices);
     nmrLUTest::GenericTestFixedSize(input, output, pivotIndices);
 }
@@ -119,7 +119,7 @@ void nmrLUTest::TestFixedSizeUserOutputColumnMajorMGeqN(void) {
     vctFixedSizeMatrix<double, ROWS, COLS, VCT_COL_MAJOR> input, output;
     vctRandom(input, 0.0, 10.0);
     output.Assign(input);
-    vctFixedSizeVector<F_INTEGER, MIN_MN> pivotIndices;
+    vctFixedSizeVector<CISSTNETLIB_INTEGER, MIN_MN> pivotIndices;
     nmrLU(output, pivotIndices);
     nmrLUTest::GenericTestFixedSize(input, output, pivotIndices);
 }

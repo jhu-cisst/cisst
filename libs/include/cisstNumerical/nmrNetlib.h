@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s): Anton Deguet
+  Author(s): Anton Deguet, Simon Leonard
   Created on: 2005-11-24
 
-  (C) Copyright 2005-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2005-2010 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -29,37 +29,22 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstConfig.h>
 
-// sanity check
-#if CISST_HAS_CNETLIB && CISST_HAS_CISSTNETLIB
-#warning "Can't have both cnetlib and cisstNetlib"
-#endif
+#if CISST_HAS_CISSTNETLIB
 
-// load correct header file
-#if CISST_HAS_CNETLIB
-#define CISST_HAS_NETLIB
-#include <cnetlib.h>
-// f2c.h defines these as macros
-#ifdef max
-#undef max
-#endif
-#ifdef min
-#undef min
-#endif
-
-#elif CISST_HAS_CISSTNETLIB
 #define CISST_HAS_NETLIB
 #include <cisstNetlib.h>
-#endif
 
+/*! Check if cisstNetlib has a version, i.e. it has for versions
+  greater or equal to 2.  In Version 2 we introduced typedefs to make
+  sure we use the correct Fortran types. */
+#ifndef CISSTNETLIB_VERSION
+typedef long int CISSTNETLIB_INTEGER;
+typedef long int CISSTNETLIB_LOGICAL;
+typedef float CISSTNETLIB_FLOAT;
+typedef double CISSTNETLIB_DOUBLE;
+#endif // CISSTNETLIB_VERSION
 
-/*!
-  \var typedef long int F_INTEGER
-
-  Type used for sizes in Fortran routines.  This type differs from the
-  default size_type in cisst (unsigned int) therefore an explicit cast
-  should be used whenever a Fortran routine is called. */ 
-typedef long int F_INTEGER;
-
+#endif // CISST_HAS_CISSTNETLIB
 
 #endif // _nmrNetlib_h
 

@@ -75,17 +75,17 @@ http://www.cisst.org/cisst/license.txt.
 class nmrLDPSolver {
     
 protected:
-    long int M;
-    long int N;
-    vctDynamicMatrix<double> E;
-    vctDynamicMatrix<double> CopyE;
-    vctDynamicMatrix<double> F;
-    vctDynamicMatrix<double> R;
-    vctDynamicMatrix<double> U;
-    vctDynamicMatrix<double> W;
-    vctDynamicMatrix<long int> Index;
-    vctDynamicMatrix<double> Zz;
-    vctDynamicMatrix<double> X;
+    CISSTNETLIB_INTEGER M;
+    CISSTNETLIB_INTEGER N;
+    vctDynamicMatrix<CISSTNETLIB_DOUBLE> E;
+    vctDynamicMatrix<CISSTNETLIB_DOUBLE> CopyE;
+    vctDynamicMatrix<CISSTNETLIB_DOUBLE> F;
+    vctDynamicMatrix<CISSTNETLIB_DOUBLE> R;
+    vctDynamicMatrix<CISSTNETLIB_DOUBLE> U;
+    vctDynamicMatrix<CISSTNETLIB_DOUBLE> W;
+    vctDynamicMatrix<CISSTNETLIB_INTEGER> Index;
+    vctDynamicMatrix<CISSTNETLIB_DOUBLE> Zz;
+    vctDynamicMatrix<CISSTNETLIB_DOUBLE> X;
 
 public:
     /*! Default constructor.  This constructor doesn't allocate any
@@ -108,7 +108,7 @@ public:
       \param m Number of rows of G
       \param n Number of columns of G
     */
-    nmrLDPSolver(long int m, long int n) {
+    nmrLDPSolver(CISSTNETLIB_INTEGER m, CISSTNETLIB_INTEGER n) {
         Allocate(m, n);
     }
 
@@ -118,7 +118,7 @@ public:
       method.  It relies on the method Allocate().  The next call to
       the Solve() method will check that the parameters match the
       dimension. */
-    nmrLDPSolver(vctDynamicMatrix<double> &G, vctDynamicMatrix<double> &h) {
+    nmrLDPSolver(vctDynamicMatrix<CISSTNETLIB_DOUBLE> &G, vctDynamicMatrix<CISSTNETLIB_DOUBLE> &h) {
         Allocate(G, h);
     }
 
@@ -130,7 +130,7 @@ public:
       \param m Number of rows of G
       \param n Number of columns of G
     */
-    inline void Allocate(long int m, long int n) {
+    inline void Allocate(CISSTNETLIB_INTEGER m, CISSTNETLIB_INTEGER n) {
         M = m;
         N = n;
         E.SetSize(N + 1, M, VCT_COL_MAJOR);
@@ -149,7 +149,7 @@ public:
       convenient way to extract the required sizes from the input
       containers.  The next call to the Solve() method will check that
       the parameters match the dimension. */
-    inline void Allocate(vctDynamicMatrix<double> &G, vctDynamicMatrix<double> &h) {
+    inline void Allocate(vctDynamicMatrix<CISSTNETLIB_DOUBLE> &G, vctDynamicMatrix<CISSTNETLIB_DOUBLE> &h) {
         Allocate(G.rows(), G.cols());
     }
     
@@ -166,11 +166,11 @@ public:
       the parameters don't meet all the requirements, an exception is
       thrown (std::runtime_error).
     */
-    CISST_EXPORT void Solve(vctDynamicMatrix<double> &G, vctDynamicMatrix<double> &h) throw (std::runtime_error);
+    CISST_EXPORT void Solve(vctDynamicMatrix<CISSTNETLIB_DOUBLE> &G, vctDynamicMatrix<CISSTNETLIB_DOUBLE> &h) throw (std::runtime_error);
 
 
     /*! Get X.  This method must be used after Solve(). */
-    inline const vctDynamicMatrix<double> &GetX(void) const {
+    inline const vctDynamicMatrix<CISSTNETLIB_DOUBLE> &GetX(void) const {
         return X;
     }
 };

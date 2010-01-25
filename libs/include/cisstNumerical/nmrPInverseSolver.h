@@ -79,15 +79,15 @@ class nmrPInverseSolver {
     // that doesnt change much is desired.
 
 protected:
-    long int M;
-    long int N;
-    long int MaxMN;
-    long int MinMN;
-    double EPS;
-    vctDynamicMatrix<double> S;
-    vctDynamicMatrix<double> U;
-    vctDynamicMatrix<double> V;
-    vctDynamicMatrix<double> PInverseA;
+    CISSTNETLIB_INTEGER M;
+    CISSTNETLIB_INTEGER N;
+    CISSTNETLIB_INTEGER MaxMN;
+    CISSTNETLIB_INTEGER MinMN;
+    CISSTNETLIB_DOUBLE EPS;
+    vctDynamicMatrix<CISSTNETLIB_DOUBLE> S;
+    vctDynamicMatrix<CISSTNETLIB_DOUBLE> U;
+    vctDynamicMatrix<CISSTNETLIB_DOUBLE> V;
+    vctDynamicMatrix<CISSTNETLIB_DOUBLE> PInverseA;
     bool StorageOrder;
 
 #ifdef CISST_COMPILER_IS_MSVC
@@ -126,7 +126,7 @@ public:
       \param storageOrder Storage order used for the input matrix.
       This order will be used for the output as well.
     */
-    nmrPInverseSolver(long int m, long int n, bool storageOrder = VCT_COL_MAJOR) {
+    nmrPInverseSolver(CISSTNETLIB_INTEGER m, CISSTNETLIB_INTEGER n, bool storageOrder = VCT_COL_MAJOR) {
         Allocate(m, n, storageOrder);
     }
 
@@ -137,7 +137,7 @@ public:
        the Solve() method will check that the parameters match the
        dimension and storage order. */
     //@{
-    nmrPInverseSolver(const vctDynamicMatrix<double> &A) {
+    nmrPInverseSolver(const vctDynamicMatrix<CISSTNETLIB_DOUBLE> &A) {
         Allocate(A);
     }
     //@}
@@ -151,7 +151,7 @@ public:
       \param n Number of columns of A
       \param storageOrder Storage order used for all the matrices
     */
-    inline void Allocate(long int m, long int n, bool storageOrder) {
+    inline void Allocate(CISSTNETLIB_INTEGER m, CISSTNETLIB_INTEGER n, bool storageOrder) {
         StorageOrder = storageOrder;
         M = m;
         N = n;
@@ -176,7 +176,7 @@ public:
       containers.  The next call to the Solve() method will check that
       the parameters match the dimension. */
     //@{
-    inline void Allocate(const vctDynamicMatrix<double> &A) {
+    inline void Allocate(const vctDynamicMatrix<CISSTNETLIB_DOUBLE> &A) {
         Allocate(A.rows(), A.cols(), A.IsRowMajor());
     }
     //@}
@@ -194,15 +194,16 @@ public:
     */
     //@{
     template <class _matrixOwnerType>
-    inline void Solve(vctDynamicMatrixBase<_matrixOwnerType, double> &A) throw (std::runtime_error) {
+    inline void Solve(vctDynamicMatrixBase<_matrixOwnerType, CISSTNETLIB_DOUBLE> &A) 
+        throw (std::runtime_error) {
         /* all the checking is done by SVD */
         svd.Solve(A);
         S.Assign(svd.GetS());
         U.Assign(svd.GetU());
         V.Assign(svd.GetVt().Transpose());
-        double eps = EPS * svd.GetS().at(0, 0);
+        CISSTNETLIB_DOUBLE eps = EPS * svd.GetS().at(0, 0);
         PInverseA.SetAll(0);
-        double singularValue;
+        CISSTNETLIB_DOUBLE singularValue;
         for (int irank = 0; irank < MinMN; irank++) {
             if ((singularValue = S(irank, 0)) > eps) {
                 for (int j = 0; j < M; j++) {
@@ -216,19 +217,19 @@ public:
     }
     //@}
     
-    inline const vctDynamicMatrix<double> &GetS(void) const {
+    inline const vctDynamicMatrix<CISSTNETLIB_DOUBLE> &GetS(void) const {
         return S;
     }
 
-    inline const vctDynamicMatrix<double> &GetU(void) const {
+    inline const vctDynamicMatrix<CISSTNETLIB_DOUBLE> &GetU(void) const {
         return U;
     }
 
-    inline const vctDynamicMatrix<double> &GetV(void) const {
+    inline const vctDynamicMatrix<CISSTNETLIB_DOUBLE> &GetV(void) const {
         return V;
     }
 
-    inline const vctDynamicMatrix<double> &GetPInverse(void) const {
+    inline const vctDynamicMatrix<CISSTNETLIB_DOUBLE> &GetPInverse(void) const {
         return PInverseA;
     }
 };

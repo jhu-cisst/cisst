@@ -89,19 +89,19 @@ public:
       compatible with the cisstVector containers such as
       vctDynamicMatrix and vctDynamicVector (unsigned int).  To call
       the Fortran based routines, these values must be cast to
-      #F_INTEGER. */
+      #CISSTNETLIB_INTEGER. */
     typedef vct::size_type size_type;
 
     typedef vctFixedSizeVector<size_type, 2> nsize_type;
 
 protected:
     /*! Memory allocated for pivot indices vector if needed. */
-    vctDynamicVector<F_INTEGER> OutputMemory;
+    vctDynamicVector<CISSTNETLIB_INTEGER> OutputMemory;
 
     /*! Reference return type, this points either to user allocated
       memory or our memory chunk if needed.
      */
-    vctDynamicVectorRef<F_INTEGER> PivotIndicesReference;
+    vctDynamicVectorRef<CISSTNETLIB_INTEGER> PivotIndicesReference;
 
     /*! Just store M, and N which are needed to check if A matrix
        passed to solve method matches the allocated size. */
@@ -152,7 +152,7 @@ protected:
       \note The method SetDimension must have been called before.
     */
     template <class _vectorOwnerTypePivotIndices>
-    inline void ThrowUnlessOutputSizeIsCorrect(vctDynamicVectorBase<_vectorOwnerTypePivotIndices, F_INTEGER> & pivotIndices)
+    inline void ThrowUnlessOutputSizeIsCorrect(vctDynamicVectorBase<_vectorOwnerTypePivotIndices, CISSTNETLIB_INTEGER> & pivotIndices)
         throw(std::runtime_error)
     {
          // check sizes and compacity
@@ -177,7 +177,7 @@ public:
     */
     template <class _matrixOwnerTypeA>
     static inline
-    nsize_type MatrixPSize(const vctDynamicConstMatrixBase<_matrixOwnerTypeA, double> & A)
+    nsize_type MatrixPSize(const vctDynamicConstMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> & A)
     {
         nsize_type matrixSize(A.rows(), A.rows());
         return matrixSize;
@@ -192,7 +192,7 @@ public:
     */
     template <class _matrixOwnerTypeA>
     static inline
-    nsize_type MatrixLSize(const vctDynamicConstMatrixBase<_matrixOwnerTypeA, double> & A)
+    nsize_type MatrixLSize(const vctDynamicConstMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> & A)
     {
         const size_type minmn = (A.rows() < A.cols()) ? A.rows() : A.cols();
         nsize_type matrixSize(A.rows(), minmn);
@@ -208,7 +208,7 @@ public:
     */
     template <class _matrixOwnerTypeA>
     static inline
-    nsize_type MatrixUSize(const vctDynamicConstMatrixBase<_matrixOwnerTypeA, double> & A)
+    nsize_type MatrixUSize(const vctDynamicConstMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> & A)
     {
         const size_type minmn = (A.rows() < A.cols()) ? A.rows() : A.cols();
         nsize_type matrixSize(minmn, A.cols());
@@ -226,10 +226,10 @@ public:
     */
     template <class _matrixOwnerTypeA, class _vectorOwnerTypePivotIndices, class _matrixOwnerTypeP>
     static inline
-    vctDynamicMatrixBase<_matrixOwnerTypeP, double> &
-    UpdateMatrixP(const vctDynamicConstMatrixBase<_matrixOwnerTypeA, double> & A,
-                  const vctDynamicConstVectorBase<_vectorOwnerTypePivotIndices, F_INTEGER> & pivotIndices,
-                  vctDynamicMatrixBase<_matrixOwnerTypeP, double> & P)
+    vctDynamicMatrixBase<_matrixOwnerTypeP, CISSTNETLIB_DOUBLE> &
+    UpdateMatrixP(const vctDynamicConstMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> & A,
+                  const vctDynamicConstVectorBase<_vectorOwnerTypePivotIndices, CISSTNETLIB_INTEGER> & pivotIndices,
+                  vctDynamicMatrixBase<_matrixOwnerTypeP, CISSTNETLIB_DOUBLE> & P)
         throw(std::runtime_error)
     {
         const size_type minmn = (A.rows() < A.cols()) ? A.rows() : A.cols();
@@ -267,9 +267,9 @@ public:
     */
     template <class _matrixOwnerTypeA, class _matrixOwnerTypeL, class _matrixOwnerTypeU>
     static inline 
-    void UpdateMatrixLU(const vctDynamicConstMatrixBase<_matrixOwnerTypeA, double> & A,
-                        vctDynamicMatrixBase<_matrixOwnerTypeL, double> & L,
-                        vctDynamicMatrixBase<_matrixOwnerTypeU, double> & U)
+    void UpdateMatrixLU(const vctDynamicConstMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> & A,
+                        vctDynamicMatrixBase<_matrixOwnerTypeL, CISSTNETLIB_DOUBLE> & L,
+                        vctDynamicMatrixBase<_matrixOwnerTypeU, CISSTNETLIB_DOUBLE> & U)
         throw(std::runtime_error)
     {
         const size_type rows = A.rows();
@@ -305,7 +305,7 @@ public:
     public:
         Friend(nmrLUDynamicData &data): Data(data) {
         }
-        inline vctDynamicVectorRef<F_INTEGER> & PivotIndices(void) {
+        inline vctDynamicVectorRef<CISSTNETLIB_INTEGER> & PivotIndices(void) {
             return Data.PivotIndicesReference;
         }
         inline size_type M(void) {
@@ -357,7 +357,7 @@ public:
       \sa nmrLUDynamicData::Allocate
     */
     template <class _matrixOwnerTypeA>
-    nmrLUDynamicData(vctDynamicMatrixBase<_matrixOwnerTypeA, double> & A)
+    nmrLUDynamicData(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> & A)
     {
         this->Allocate(A);
     }
@@ -375,8 +375,8 @@ public:
     */
     template <class _matrixOwnerTypeA,
               class _vectorOwnerTypePivotIndices>
-    nmrLUDynamicData(vctDynamicMatrixBase<_matrixOwnerTypeA, double> & A,
-                     vctDynamicVectorBase<_vectorOwnerTypePivotIndices, F_INTEGER> & pivotIndices)
+    nmrLUDynamicData(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> & A,
+                     vctDynamicVectorBase<_vectorOwnerTypePivotIndices, CISSTNETLIB_INTEGER> & pivotIndices)
     {
         this->SetRef(A, pivotIndices);
     }
@@ -391,7 +391,7 @@ public:
       \param A The matrix for which LU needs to be computed, size MxN
     */
     template <class _matrixOwnerTypeA>
-    inline void Allocate(vctDynamicMatrixBase<_matrixOwnerTypeA, double> & A)
+    inline void Allocate(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> & A)
     {
         this->Allocate(A.rows(), A.cols());
     }
@@ -422,8 +422,8 @@ public:
     */
     template <class _matrixOwnerTypeA,
               class _vectorOwnerTypePivotIndices>
-    void SetRef(vctDynamicMatrixBase<_matrixOwnerTypeA, double> & A,
-                vctDynamicVectorBase<_vectorOwnerTypePivotIndices, F_INTEGER> & pivotIndices)
+    void SetRef(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> & A,
+                vctDynamicVectorBase<_vectorOwnerTypePivotIndices, CISSTNETLIB_INTEGER> & pivotIndices)
         throw(std::runtime_error)
     {
         this->SetDimension(A.rows(), A.cols());
@@ -435,7 +435,7 @@ public:
     /*! Const reference to the result vector PivotIndices.  This
       method must be called after the data has been computed by
       the nmrLU function. */
-    inline const vctDynamicVectorRef<F_INTEGER> & PivotIndices(void) const {
+    inline const vctDynamicVectorRef<CISSTNETLIB_INTEGER> & PivotIndices(void) const {
         return PivotIndicesReference;
     }
 };
@@ -477,19 +477,19 @@ public:
 #endif // DOXYGEN
     /*! Type of the input matrix A (size computed from the data
       template parameters). */
-    typedef vctFixedSizeMatrix<double, _rows, _cols, VCT_COL_MAJOR> MatrixTypeA;
+    typedef vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _rows, _cols, VCT_COL_MAJOR> MatrixTypeA;
     /*! Type of the output vector PivotIndices (size computed from the
       data template parameters). */
-    typedef vctFixedSizeVector<F_INTEGER, MIN_MN> VectorTypePivotIndices;
+    typedef vctFixedSizeVector<CISSTNETLIB_INTEGER, MIN_MN> VectorTypePivotIndices;
     /*! Type used to create the permutation matrix from the vector
       PivotIndices. */
-    typedef vctFixedSizeMatrix<double, _rows, _rows, VCT_COL_MAJOR> MatrixTypeP;
+    typedef vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _rows, _rows, VCT_COL_MAJOR> MatrixTypeP;
     /*! Type used to create the L matrix from the input matrix (A)
       after nmrLU has been called.  */
-    typedef vctFixedSizeMatrix<double, _rows, MIN_MN, VCT_COL_MAJOR> MatrixTypeL;
+    typedef vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _rows, MIN_MN, VCT_COL_MAJOR> MatrixTypeL;
     /*! Type used to create the U matrix from the input matrix (A)
       after nmrLU has been called.  */
-    typedef vctFixedSizeMatrix<double, MIN_MN, _cols, VCT_COL_MAJOR> MatrixTypeU;
+    typedef vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, MIN_MN, _cols, VCT_COL_MAJOR> MatrixTypeU;
 
 protected:
     VectorTypePivotIndices PivotIndicesMember; /*!< Data member used to store the output vector PivotIndices. */
@@ -632,7 +632,7 @@ public:
 
   The user creates the input matrix A:
   \code
-  vctDynamicMatrix<double> A(12, 24 , VCT_COL_MAJOR); // 12 x 24 matrix
+  vctDynamicMatrix<CISSTNETLIB_DOUBLE> A(12, 24 , VCT_COL_MAJOR); // 12 x 24 matrix
   vctRandom(A, -10.0, 10.0);
   \endcode
   The user allocates a data object which could be of
@@ -650,7 +650,7 @@ public:
   actual matrices P, L and U, he can use the different helper methods
   of the data:
   \code
-  vctDynamicMatrix<double> P, L, U;
+  vctDynamicMatrix<CISSTNETLIB_DOUBLE> P, L, U;
   nmrLUDynamicData::SetSizeP(A, P);
   nmrLUDynamicData::SetSizeLU(A, L, U);
   nmrLUDynamicData::UpdateMatrixP(A, data.PivotIndices(), P);
@@ -664,9 +664,9 @@ public:
 
   The User allocates memory for this vector:
   \code
-  vctDynamicMatrix<double> A(5, 4, VCT_COL_MAJOR);
+  vctDynamicMatrix<CISSTNETLIB_DOUBLE> A(5, 4, VCT_COL_MAJOR);
   vctRandom(A, -10.0, 10.0);
-  vctDynamicVector<F_INTEGER> pivotIndices(4);
+  vctDynamicVector<CISSTNETLIB_INTEGER> pivotIndices(4);
   \endcode
   Call the LU routine:
   \code
@@ -678,7 +678,7 @@ public:
   <li>Using a data for fixed size containers.
 
   \code
-  vctFixedSizeMatrix<double, 5, 4, VCT_COL_MAJOR> A;
+  vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, 5, 4, VCT_COL_MAJOR> A;
   vctRandom(A, -10.0, 10.0);
   typedef nmrLUFixedSizeData<4, 3> DataType;
   DataType data;
@@ -718,12 +718,12 @@ public:
 
  */
 template <class _matrixOwnerType>
-inline F_INTEGER nmrLU(vctDynamicMatrixBase<_matrixOwnerType, double> & A,
+inline CISSTNETLIB_INTEGER nmrLU(vctDynamicMatrixBase<_matrixOwnerType, CISSTNETLIB_DOUBLE> & A,
                        nmrLUDynamicData & data)
     throw (std::runtime_error)
 {
     typename nmrLUDynamicData::Friend dataFriend(data);
-    F_INTEGER info;
+    CISSTNETLIB_INTEGER info;
 
     /* check that storage order is VCT_COL_MAJOR */
     if (!A.IsColMajor()) {
@@ -738,9 +738,9 @@ inline F_INTEGER nmrLU(vctDynamicMatrixBase<_matrixOwnerType, double> & A,
         cmnThrow(std::runtime_error("nmrLU: Requires a compact matrix."));
     }
 
-    F_INTEGER m = dataFriend.M();
-    F_INTEGER n = dataFriend.N();
-    F_INTEGER lda = (m > 1) ? m : 1;
+    CISSTNETLIB_INTEGER m = dataFriend.M();
+    CISSTNETLIB_INTEGER n = dataFriend.N();
+    CISSTNETLIB_INTEGER lda = (m > 1) ? m : 1;
 
     /* call the LAPACK C function */
     dgetrf_(&m, &n,
@@ -765,8 +765,8 @@ inline F_INTEGER nmrLU(vctDynamicMatrixBase<_matrixOwnerType, double> & A,
   \test nmrLUTest::TestDynamicUserOutputColumnMajor
  */
 template <class _matrixOwnerTypeA, class _vectorOwnerTypePivotIndices>
-inline F_INTEGER nmrLU(vctDynamicMatrixBase<_matrixOwnerTypeA, double> & A,
-                       vctDynamicVectorBase<_vectorOwnerTypePivotIndices, F_INTEGER> & pivotIndices)
+inline CISSTNETLIB_INTEGER nmrLU(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> & A,
+                       vctDynamicVectorBase<_vectorOwnerTypePivotIndices, CISSTNETLIB_INTEGER> & pivotIndices)
 {
     nmrLUDynamicData data(A, pivotIndices);
     return nmrLU(A, data);
@@ -801,17 +801,17 @@ inline F_INTEGER nmrLU(vctDynamicMatrixBase<_matrixOwnerTypeA, double> & A,
         nmrLUTest::TestFixedSizeUserOutputColumnMajorMGeqN
  */
 template <vct::size_type _rows, vct::size_type _cols, vct::size_type _minmn>
-inline F_INTEGER nmrLU(vctFixedSizeMatrix<double, _rows, _cols, VCT_COL_MAJOR> & A, 
-                       vctFixedSizeVector<F_INTEGER, _minmn> & pivotIndices)
+inline CISSTNETLIB_INTEGER nmrLU(vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _rows, _cols, VCT_COL_MAJOR> & A, 
+                       vctFixedSizeVector<CISSTNETLIB_INTEGER, _minmn> & pivotIndices)
 {
-    const F_INTEGER minmn = (F_INTEGER)nmrLUFixedSizeData<_rows, _cols>::MIN_MN;
+    const CISSTNETLIB_INTEGER minmn = static_cast<CISSTNETLIB_INTEGER>(nmrLUFixedSizeData<_rows, _cols>::MIN_MN);
     //Assert if requirement is equal to size provided!
-    CMN_ASSERT(minmn == (F_INTEGER)_minmn);
+    CMN_ASSERT(minmn == static_cast<CISSTNETLIB_INTEGER>(_minmn));
 
-    F_INTEGER info;
-    F_INTEGER lda = (_rows> 1) ? _rows : 1;
-    F_INTEGER m = _rows;
-    F_INTEGER n = _cols;
+    CISSTNETLIB_INTEGER info;
+    CISSTNETLIB_INTEGER lda = (_rows> 1) ? _rows : 1;
+    CISSTNETLIB_INTEGER m = _rows;
+    CISSTNETLIB_INTEGER n = _cols;
 
     /* call the LAPACK C function */
     dgetrf_(&m, &n,
@@ -824,7 +824,7 @@ inline F_INTEGER nmrLU(vctFixedSizeMatrix<double, _rows, _cols, VCT_COL_MAJOR> &
 /*! This function solves the LU problem for a fixed size matrix using
   nmrLUFixedSizeData to allocate the memory required for the output:
   \code
-  vctFixedSizeMatrix<double, 12, 7, VCT_COL_MAJOR> A;
+  vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, 12, 7, VCT_COL_MAJOR> A;
   vctRandom(A, -10.0, 10.0);
   nmrLUFixedSizeData<12, 7> data;
   nmrLU(A, data);
@@ -843,7 +843,7 @@ inline F_INTEGER nmrLU(vctFixedSizeMatrix<double, _rows, _cols, VCT_COL_MAJOR> &
         nmrLUTest::TestFixedSizeUserOutputColumnMajorMGeqN
  */
 template <vct::size_type _rows, vct::size_type _cols>
-inline F_INTEGER nmrLU(vctFixedSizeMatrix<double, _rows, _cols, VCT_COL_MAJOR> & A,
+inline CISSTNETLIB_INTEGER nmrLU(vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _rows, _cols, VCT_COL_MAJOR> & A,
                        nmrLUFixedSizeData<_rows, _cols> & data)
 {
     typename nmrLUFixedSizeData<_rows, _cols>::Friend dataFriend(data);

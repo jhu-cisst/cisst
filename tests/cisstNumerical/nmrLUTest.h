@@ -54,7 +54,7 @@ public:
     template <class _pivotIndicesOwner>
     void GenericTestDynamic(const vctDynamicMatrix<double> & input,
                             const vctDynamicMatrix<double> & output,
-                            const vctDynamicConstVectorBase<_pivotIndicesOwner, F_INTEGER> & pivotIndices) {
+                            const vctDynamicConstVectorBase<_pivotIndicesOwner, CISSTNETLIB_INTEGER> & pivotIndices) {
         vctDynamicMatrix<double> P, L, U;
         P.SetSize(nmrLUDynamicData::MatrixPSize(input));
         L.SetSize(nmrLUDynamicData::MatrixLSize(input));
@@ -70,7 +70,7 @@ public:
     template <vct::size_type _rows, vct::size_type _cols, vct::size_type _minmn> 
     void GenericTestFixedSize(const vctFixedSizeMatrix<double, _rows, _cols, VCT_COL_MAJOR> & input,
                               const vctFixedSizeMatrix<double, _rows, _cols, VCT_COL_MAJOR> & output,
-                              const vctFixedSizeVector<F_INTEGER, _minmn> & pivotIndices);
+                              const vctFixedSizeVector<CISSTNETLIB_INTEGER, _minmn> & pivotIndices);
 
 
     /*! Test using column major dynamic matrices. */

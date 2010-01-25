@@ -66,8 +66,8 @@ http://www.cisst.org/cisst/license.txt.
   METHOD 1: User provides matrices A and A^{+}
      1) The User allocates memory for these matrices and
      vector.
-     vctDynamicMatrix<double> A(5, 4);
-     vctDynamicMatrix<double> PInverse(4, 5);
+     vctDynamicMatrix<CISSTNETLIB_DOUBLE> A(5, 4);
+     vctDynamicMatrix<CISSTNETLIB_DOUBLE> PInverse(4, 5);
      ...
      2) The user calls the SVD routine
      nmrPInverseEconomy(A, PInverse);
@@ -80,7 +80,7 @@ http://www.cisst.org/cisst/license.txt.
 
   METHOD 2: Using a preallocated data object
      1) The user creates the input matrix
-     vctDynamicMatrix<double> input(rows, cols , VCT_ROW_MAJOR);
+     vctDynamicMatrix<CISSTNETLIB_DOUBLE> input(rows, cols , VCT_ROW_MAJOR);
      2) The user allocats a data object which could be of
      type nmrPInverseEconomyDynamicData and nmrPInverseEconomyDynamicDataRef
      corresponding to fixed size, dynamic matrix or dynamic matrix reference.
@@ -95,8 +95,8 @@ http://www.cisst.org/cisst/license.txt.
   METHOD 3: User provides matrix PInverse
      with workspace required by pseudo-inverse routine of LAPACK.
      1) User creates matrices and vector
-     vctDynamicMatrix<double> A(5, 4);
-     vctDynamicMatrix<double> PInverse(4, 5);
+     vctDynamicMatrix<CISSTNETLIB_DOUBLE> A(5, 4);
+     vctDynamicMatrix<CISSTNETLIB_DOUBLE> PInverse(4, 5);
      2) User also needs to allocate memory for workspace. This method is particularly
      useful when the user is using more than one numerical methods from the library
      and is willing to share the workspace between them. In such as case, the user
@@ -104,7 +104,7 @@ http://www.cisst.org/cisst/license.txt.
      To aid the user determine the minimum workspace required (and not spend time digging
      LAPACK documentation) the library provides helper function
      nmrPInverseEconomyDynamicData::WorkspaceSize(input)
-     vctDynamicVector<double> Work(nmrPInverseEconomyDynamicData::WorkspaceSize(A));
+     vctDynamicVector<CISSTNETLIB_DOUBLE> Work(nmrPInverseEconomyDynamicData::WorkspaceSize(A));
      3) Call the SVD function
      nmrPInverseEconomy(A, PInverse, Work);
 
@@ -135,7 +135,7 @@ public:
       is compatible with the cisstVector containers such as
       vctDynamicMatrix and vctDynamicVector (unsigned int).  To call
       the Fortran based routines, these values must be cast to
-      #F_INTEGER. */
+      CISSTNETLIB_INTEGER. */
     typedef unsigned int size_type;
 
 protected:
@@ -146,20 +146,20 @@ protected:
       n x n elements of Vt followed by min (m, n) elements of
       S, followed by memory for LAPACK workspace.
      */
-    vctDynamicVector<double> WorkspaceMemory;
+    vctDynamicVector<CISSTNETLIB_DOUBLE> WorkspaceMemory;
     /*!
       Memory allocated for PInverse if needed.
      */
-    vctDynamicVector<double> OutputMemory;
+    vctDynamicVector<CISSTNETLIB_DOUBLE> OutputMemory;
     /*! References to workspace or return types, these point either
       to user allocated memory or our memory chunks if needed
      */
     //@{
-    vctDynamicMatrixRef<double> PInverseReference;
-    vctDynamicMatrixRef<double> UReference;
-    vctDynamicMatrixRef<double> VtReference;
-    vctDynamicVectorRef<double> SReference;
-    vctDynamicVectorRef<double> WorkspaceReference;
+    vctDynamicMatrixRef<CISSTNETLIB_DOUBLE> PInverseReference;
+    vctDynamicMatrixRef<CISSTNETLIB_DOUBLE> UReference;
+    vctDynamicMatrixRef<CISSTNETLIB_DOUBLE> VtReference;
+    vctDynamicVectorRef<CISSTNETLIB_DOUBLE> SReference;
+    vctDynamicVectorRef<CISSTNETLIB_DOUBLE> WorkspaceReference;
     //@}
 
     /* Just store M, N, and StorageOrder which are needed
@@ -223,7 +223,7 @@ protected:
       \note The method SetDimension must have been called before.
     */
     template <class _vectorOwnerTypeWorkspace>
-    inline void SetRefSVD(vctDynamicVectorBase<_vectorOwnerTypeWorkspace, double> & workspace)
+    inline void SetRefSVD(vctDynamicVectorBase<_vectorOwnerTypeWorkspace, CISSTNETLIB_DOUBLE> & workspace)
     {
         const size_type minmn = (MMember < NMember) ? MMember : NMember;
         size_type current = 0;
@@ -255,7 +255,7 @@ protected:
       \note The method SetDimension must have been called before.
     */
     template <typename _matrixOwnerTypePInverse>
-    inline void ThrowUnlessOutputSizeIsCorrect(vctDynamicMatrixBase<_matrixOwnerTypePInverse, double> & pInverse) const
+    inline void ThrowUnlessOutputSizeIsCorrect(vctDynamicMatrixBase<_matrixOwnerTypePInverse, CISSTNETLIB_DOUBLE> & pInverse) const
         throw(std::runtime_error)
     {
         // check sizes and storage order
@@ -276,7 +276,7 @@ protected:
     */
     template <typename _vectorOwnerTypeWorkspace>
     inline void
-    ThrowUnlessWorkspaceSizeIsCorrect(vctDynamicVectorBase<_vectorOwnerTypeWorkspace, double> & workspace) const
+    ThrowUnlessWorkspaceSizeIsCorrect(vctDynamicVectorBase<_vectorOwnerTypeWorkspace, CISSTNETLIB_DOUBLE> & workspace) const
         throw(std::runtime_error)
     {
         const size_type lwork = nmrSVDEconomyDynamicData::WorkspaceSize(MMember, NMember);
@@ -312,7 +312,7 @@ public:
       \param A The matrix whose SVD needs to be computed
      */
     template <class _matrixOwnerTypeA>
-    static inline size_type WorkspaceSize(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &A)
+    static inline size_type WorkspaceSize(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> &A)
     {
         return nmrPInverseEconomyDynamicData::WorkspaceSize(A.rows(), A.cols());
     }
@@ -331,19 +331,19 @@ public:
     public:
         Friend(nmrPInverseEconomyDynamicData &data): Data(data) {
         }
-        inline vctDynamicVectorRef<double> &S(void) {
+        inline vctDynamicVectorRef<CISSTNETLIB_DOUBLE> &S(void) {
             return Data.SReference;
         }
-        inline vctDynamicMatrixRef<double> &PInverse(void) {
+        inline vctDynamicMatrixRef<CISSTNETLIB_DOUBLE> &PInverse(void) {
             return Data.PInverseReference;
         }
-        inline vctDynamicMatrixRef<double> &U(void) {
+        inline vctDynamicMatrixRef<CISSTNETLIB_DOUBLE> &U(void) {
             return Data.UReference;
         }
-        inline vctDynamicMatrixRef<double> &Vt(void) {
+        inline vctDynamicMatrixRef<CISSTNETLIB_DOUBLE> &Vt(void) {
             return Data.VtReference;
         }
-        inline vctDynamicVectorRef<double> &Workspace(void) {
+        inline vctDynamicVectorRef<CISSTNETLIB_DOUBLE> &Workspace(void) {
             return Data.WorkspaceReference;
         }
         inline size_type M(void) {
@@ -384,7 +384,7 @@ public:
       \param A Input matrix
     */
     template <class _matrixOwnerTypeA>
-    nmrPInverseEconomyDynamicData(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &A)
+    nmrPInverseEconomyDynamicData(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> &A)
     {
         this->Allocate(A.rows(), A.cols(), A.StorageOrder());
     }
@@ -401,8 +401,8 @@ public:
       \param workspace Workspace for SVD
     */
     template <class _matrixOwnerTypeA, class _vectorOwnerTypeWorkspace>
-    nmrPInverseEconomyDynamicData(vctDynamicMatrixBase<_matrixOwnerTypeA, double> & A,
-                                  vctDynamicVectorBase<_vectorOwnerTypeWorkspace, double> & workspace)
+    nmrPInverseEconomyDynamicData(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> & A,
+                                  vctDynamicVectorBase<_vectorOwnerTypeWorkspace, CISSTNETLIB_DOUBLE> & workspace)
     {
         this->SetRefWorkspace(A, workspace);
     }
@@ -421,9 +421,9 @@ public:
     template <class _matrixOwnerTypeA,
               class _matrixOwnerTypePInverse,
               class _vectorOwnerTypeWorkspace>
-    nmrPInverseEconomyDynamicData(vctDynamicMatrixBase<_matrixOwnerTypeA, double> & A,
-                                  vctDynamicMatrixBase<_matrixOwnerTypePInverse, double> & pInverse,
-                                  vctDynamicVectorBase<_vectorOwnerTypeWorkspace, double> & workspace)
+    nmrPInverseEconomyDynamicData(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> & A,
+                                  vctDynamicMatrixBase<_matrixOwnerTypePInverse, CISSTNETLIB_DOUBLE> & pInverse,
+                                  vctDynamicVectorBase<_vectorOwnerTypeWorkspace, CISSTNETLIB_DOUBLE> & workspace)
     {
         this->SetRef(pInverse, workspace);
     }
@@ -442,8 +442,8 @@ public:
       \param pInverse The output matrix for PInverse
     */
     template <class _matrixOwnerTypeA, class _matrixOwnerTypePInverse>
-    nmrPInverseEconomyDynamicData(vctDynamicMatrixBase<_matrixOwnerTypeA, double> & A,
-                               vctDynamicMatrixBase<_matrixOwnerTypePInverse, double> & pInverse)
+    nmrPInverseEconomyDynamicData(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> & A,
+                               vctDynamicMatrixBase<_matrixOwnerTypePInverse, CISSTNETLIB_DOUBLE> & pInverse)
     {
         this->SetRefOutput(pInverse);
     }
@@ -461,7 +461,7 @@ public:
       \param A The matrix for which SVD needs to be computed, size MxN
     */
     template <class _matrixOwnerTypeA>
-    inline void Allocate(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &A)
+    inline void Allocate(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> &A)
     {
         this->SetDimension(A.rows(), A.cols(), A.StorageOrder());
         this->AllocateOutputWorkspace(true, true);
@@ -487,8 +487,8 @@ public:
       \param workspace The vector used for workspace by LAPACK.
     */
     template <class _matrixOwnerTypeA, class _vectorOwnerTypeWorkspace>
-    inline void SetRefWorkspace(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &A,
-                                vctDynamicVectorBase<_vectorOwnerTypeWorkspace, double> &workspace)
+    inline void SetRefWorkspace(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> &A,
+                                vctDynamicVectorBase<_vectorOwnerTypeWorkspace, CISSTNETLIB_DOUBLE> &workspace)
     {
         this->SetDimension(A.rows(), A.cols(), A.StorageOrder());
         this->AllocateOutputWorkspace(true, false);
@@ -510,8 +510,8 @@ public:
     */
     template <class _matrixOwnerTypePInverse,
               class _vectorOwnerTypeWorkspace>
-    void SetRef(vctDynamicMatrixBase<_matrixOwnerTypePInverse, double> &pInverse,
-                vctDynamicVectorBase<_vectorOwnerTypeWorkspace, double> &workspace)
+    void SetRef(vctDynamicMatrixBase<_matrixOwnerTypePInverse, CISSTNETLIB_DOUBLE> &pInverse,
+                vctDynamicVectorBase<_vectorOwnerTypeWorkspace, CISSTNETLIB_DOUBLE> &workspace)
     {
         this->SetDimension(pInverse.cols(), pInverse.rows(), pInverse.StorageOrder());
         this->AllocateOutputWorkspace(false, false);
@@ -538,7 +538,7 @@ public:
       \param pInverse The output matrix for PInverse
     */
     template <class _matrixOwnerTypePInverse>
-    void SetRefOutput(vctDynamicMatrixBase<_matrixOwnerTypePInverse, double> &pInverse)
+    void SetRefOutput(vctDynamicMatrixBase<_matrixOwnerTypePInverse, CISSTNETLIB_DOUBLE> &pInverse)
     {
         this->SetDimension(pInverse.cols(), pInverse.rows(), pInverse.StorageOrder());
         this->AllocateOutputWorkspace(false, true);
@@ -557,16 +557,16 @@ public:
       methods.
     */
     //@{
-    inline const vctDynamicVectorRef<double> &S(void) const {
+    inline const vctDynamicVectorRef<CISSTNETLIB_DOUBLE> &S(void) const {
         return SReference;
     }
-    inline const vctDynamicMatrixRef<double> &U(void) const {
+    inline const vctDynamicMatrixRef<CISSTNETLIB_DOUBLE> &U(void) const {
         return UReference;
     }
-    inline const vctDynamicMatrixRef<double> &Vt(void) const {
+    inline const vctDynamicMatrixRef<CISSTNETLIB_DOUBLE> &Vt(void) const {
         return VtReference;
     }
-    inline const vctDynamicMatrixRef<double> &PInverse(void) const {
+    inline const vctDynamicMatrixRef<CISSTNETLIB_DOUBLE> &PInverse(void) const {
         return PInverseReference;
     }
     //@}
@@ -590,13 +590,13 @@ public:
         nmrPInverseEconomyTest::TestDynamicRowMajorUserAlloc
 */
 template <class _matrixOwnerType>
-inline F_INTEGER nmrPInverseEconomy(vctDynamicMatrixBase<_matrixOwnerType, double> &A,
+inline CISSTNETLIB_INTEGER nmrPInverseEconomy(vctDynamicMatrixBase<_matrixOwnerType, CISSTNETLIB_DOUBLE> &A,
                                     nmrPInverseEconomyDynamicData &data) throw (std::runtime_error)
 {
     typedef unsigned int size_type;
     
     typename nmrPInverseEconomyDynamicData::Friend dataFriend(data);
-    F_INTEGER ret_value;
+    CISSTNETLIB_INTEGER ret_value;
     /* check that the size and storage order matches with Allocate() */
     if (A.StorageOrder() != dataFriend.StorageOrder()) {
         cmnThrow(std::runtime_error("nmrPInverseEconomy Solve: Storage order used for Allocate was different"));
@@ -610,10 +610,10 @@ inline F_INTEGER nmrPInverseEconomy(vctDynamicMatrixBase<_matrixOwnerType, doubl
     
     ret_value = nmrSVDEconomy(A, dataFriend.U(), dataFriend.S(),
                        dataFriend.Vt(), dataFriend.Workspace());
-    const double eps = cmnTypeTraits<double>::Tolerance() * dataFriend.S().at(0);
+    const CISSTNETLIB_DOUBLE eps = cmnTypeTraits<CISSTNETLIB_DOUBLE>::Tolerance() * dataFriend.S().at(0);
 
     dataFriend.PInverse().SetAll(0);
-    double singularValue;
+    CISSTNETLIB_DOUBLE singularValue;
     size_type irank, i, j;
     for (irank = 0; irank < minmn; irank++) {
         if ((singularValue = dataFriend.S().at(irank)) > eps) {
@@ -646,12 +646,12 @@ inline F_INTEGER nmrPInverseEconomy(vctDynamicMatrixBase<_matrixOwnerType, doubl
         nmrPInverseEconomyTest::TestDynamicRowMajorUserAlloc
  */
 template <class _matrixOwnerTypeA, class _matrixOwnerTypePInverse, class _vectorOwnerTypeWorkspace>
-inline F_INTEGER nmrPInverseEconomy(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &A,
-                                    vctDynamicMatrixBase<_matrixOwnerTypePInverse, double> &pInverse,
-                                    vctDynamicVectorBase<_vectorOwnerTypeWorkspace, double> &workspace)
+inline CISSTNETLIB_INTEGER nmrPInverseEconomy(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> &A,
+                                    vctDynamicMatrixBase<_matrixOwnerTypePInverse, CISSTNETLIB_DOUBLE> &pInverse,
+                                    vctDynamicVectorBase<_vectorOwnerTypeWorkspace, CISSTNETLIB_DOUBLE> &workspace)
 {
     nmrPInverseEconomyDynamicData svdData(A, pInverse, workspace);
-    F_INTEGER ret_value = nmrPInverseEconomy(A, svdData);
+    CISSTNETLIB_INTEGER ret_value = nmrPInverseEconomy(A, svdData);
     return ret_value;
 }
 
@@ -669,11 +669,11 @@ inline F_INTEGER nmrPInverseEconomy(vctDynamicMatrixBase<_matrixOwnerTypeA, doub
         nmrPInverseEconomyTest::TestDynamicRowMajorUserAlloc
  */
 template <class _matrixOwnerTypeA, class _matrixOwnerTypePInverse>
-inline F_INTEGER nmrPInverseEconomy(vctDynamicMatrixBase<_matrixOwnerTypeA, double> &A,
-                                    vctDynamicMatrixBase<_matrixOwnerTypePInverse, double> &pInverse)
+inline CISSTNETLIB_INTEGER nmrPInverseEconomy(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> &A,
+                                    vctDynamicMatrixBase<_matrixOwnerTypePInverse, CISSTNETLIB_DOUBLE> &pInverse)
 {
     nmrPInverseEconomyDynamicData svdData(A, pInverse);
-    F_INTEGER ret_value = nmrPInverseEconomy(A, svdData);
+    CISSTNETLIB_INTEGER ret_value = nmrPInverseEconomy(A, svdData);
     return ret_value;
 }
 

@@ -96,15 +96,15 @@ class nmrLSSolver {
     // change much is desired.
 
 protected:
-    long int M;
-    long int N;
-    long int NRHS;
-    long int Lda;
-    long int Ldb;
-    long int Lwork;
+    CISSTNETLIB_INTEGER M;
+    CISSTNETLIB_INTEGER N;
+    CISSTNETLIB_INTEGER NRHS;
+    CISSTNETLIB_INTEGER Lda;
+    CISSTNETLIB_INTEGER Ldb;
+    CISSTNETLIB_INTEGER Lwork;
     char Trans;
     vctDynamicMatrix<double> Work;
-    long int Info;
+    CISSTNETLIB_INTEGER Info;
     bool StorageOrder;
 
 public:
@@ -133,7 +133,7 @@ public:
       \param storageOrder Storage order used for the input matrix.
       This order will be used for the output as well.
     */
-    nmrLSSolver(long int m, long int n, long int nrhs, bool storageOrder) {
+    nmrLSSolver(CISSTNETLIB_INTEGER m, CISSTNETLIB_INTEGER n, CISSTNETLIB_INTEGER nrhs, bool storageOrder) {
         Allocate(m, n, nrhs, storageOrder);
     }
 
@@ -159,15 +159,15 @@ public:
       \param nrhs Number of columns of B
       \param storageOrder Storage order used for all the matrices
     */
-    inline void Allocate(long int m, long int n, long int nrhs, bool storageOrder) {
-        const long int one = 1;
+    inline void Allocate(CISSTNETLIB_INTEGER m, CISSTNETLIB_INTEGER n, CISSTNETLIB_INTEGER nrhs, bool storageOrder) {
+        const CISSTNETLIB_INTEGER one = 1;
         StorageOrder = storageOrder;
         M = m;
         N = n;
         NRHS = nrhs;
         Lda = std::max(one, M);
         Ldb = std::max(one, std::max(M, N));
-        long int MN = std::min(M, N);
+        CISSTNETLIB_INTEGER MN = std::min(M, N);
         Lwork = std::max (one, MN + std::max (MN, NRHS));
         Trans = 'N';
         Work.SetSize(Lwork, 1, StorageOrder);
@@ -204,12 +204,12 @@ public:
            expression for this test but I find this easier to read and
            debug (Anton) */
         if (A.IsColMajor()) {
-            if ((M != (int) A.rows()) || (N != (int) A.cols())) {
+            if ((M != static_cast<CISSTNETLIB_INTEGER>(A.rows())) || (N != static_cast<CISSTNETLIB_INTEGER>(A.cols()))) {
                 cmnThrow(std::runtime_error("nmrLSSolver Solve: Size used for Allocate was different"));
             }
         } 
         if (B.IsColMajor()) {
-            if ((M != (int) B.rows()) || (NRHS != (int) B.cols())) {
+            if ((M != static_cast<CISSTNETLIB_INTEGER>(B.rows())) || (NRHS != static_cast<CISSTNETLIB_INTEGER>(B.cols()))) {
                 cmnThrow(std::runtime_error("nmrLSSolver Solve: Size used for Allocate was different"));
             }
         } 

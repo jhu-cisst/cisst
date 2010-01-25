@@ -1,4 +1,4 @@
-/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-off
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
@@ -72,15 +72,15 @@ http://www.cisst.org/cisst/license.txt.
 class nmrNNLSSolver {
 
 protected:
-    long int M;
-    long int N;
-    long int Mda;
-    long int Mode;
-    double RNorm;
-    vctDynamicMatrix<double> X;
-    vctDynamicMatrix<double> W;
-    vctDynamicMatrix<double> Zz;
-    vctDynamicMatrix<long int> Index;
+    CISSTNETLIB_INTEGER M;
+    CISSTNETLIB_INTEGER N;
+    CISSTNETLIB_INTEGER Mda;
+    CISSTNETLIB_INTEGER Mode;
+    CISSTNETLIB_DOUBLE RNorm;
+    vctDynamicMatrix<CISSTNETLIB_DOUBLE> X;
+    vctDynamicMatrix<CISSTNETLIB_DOUBLE> W;
+    vctDynamicMatrix<CISSTNETLIB_DOUBLE> Zz;
+    vctDynamicMatrix<CISSTNETLIB_INTEGER> Index;
 
 public:
     /*! Default constructor.  This constructor doesn't allocate any
@@ -103,7 +103,7 @@ public:
       \param m Number of rows of C
       \param n Number of columns of C
     */
-    nmrNNLSSolver(long int m, long int n) {
+    nmrNNLSSolver(CISSTNETLIB_INTEGER m, CISSTNETLIB_INTEGER n) {
         Allocate(m, n);
     }
 
@@ -113,7 +113,7 @@ public:
        method.  It relies on the method Allocate().  The next call to
        the Solve() method will check that the parameters match the
        dimension. */
-    nmrNNLSSolver(vctDynamicMatrix<double> &C, vctDynamicMatrix<double> &d) {
+    nmrNNLSSolver(vctDynamicMatrix<CISSTNETLIB_DOUBLE> &C, vctDynamicMatrix<CISSTNETLIB_DOUBLE> &d) {
         Allocate(C, d);
     }
 		
@@ -125,7 +125,7 @@ public:
       \param m Number of rows of C
       \param n Number of columns of C
     */
-    inline void Allocate(long int m, long int n) {
+    inline void Allocate(CISSTNETLIB_INTEGER m, CISSTNETLIB_INTEGER n) {
         M = m;
         N = n;
         Mda = M;
@@ -140,7 +140,7 @@ public:
       convenient way to extract the required sizes from the input
       containers.  The next call to the Solve() method will check that
       the parameters match the dimension. */
-    inline void Allocate(vctDynamicMatrix<double> &C, vctDynamicMatrix<double> &d) {
+    inline void Allocate(vctDynamicMatrix<CISSTNETLIB_DOUBLE> &C, vctDynamicMatrix<CISSTNETLIB_DOUBLE> &d) {
         Allocate(C.rows(), C.cols());
     }
 		
@@ -157,12 +157,12 @@ public:
       If the parameters don't meet all the requirements, an exception
       is thrown (std::runtime_error).
     */
-    inline void Solve(vctDynamicMatrix<double> &C, vctDynamicMatrix<double> d) 
+    inline void Solve(vctDynamicMatrix<CISSTNETLIB_DOUBLE> &C, vctDynamicMatrix<CISSTNETLIB_DOUBLE> d) 
         throw (std::runtime_error)
     {
         /* check that the size matches with Allocate() */
-        if ((M != (int) C.rows())
-            || (N != (int) C.cols())) {
+      if ((M != static_cast<CISSTNETLIB_INTEGER>(C.rows()))
+	  || (N != static_cast<CISSTNETLIB_INTEGER>(C.cols()))) {
             cmnThrow(std::runtime_error("nmrNNLSSolver Solve: Sizes used for Allocate were different"));
         }
         
@@ -184,19 +184,19 @@ public:
 
     
     /*! Get X.  This method must be used after Solve(). */
-    inline const vctDynamicMatrix<double> &GetX(void) const {
+    inline const vctDynamicMatrix<CISSTNETLIB_DOUBLE> &GetX(void) const {
         return X;
     }
     
 
     /* Get W.  This method must be used after Solve(). */
-    inline const vctDynamicMatrix<double> &GetDual(void) const {
+    inline const vctDynamicMatrix<CISSTNETLIB_DOUBLE> &GetDual(void) const {
         return W;
     }
     
 
     /* Get RNorm.  This method must be used after Solve(). */
-    inline double GetRNorm(void) const {
+    inline CISSTNETLIB_DOUBLE GetRNorm(void) const {
         return RNorm;
     }
 };

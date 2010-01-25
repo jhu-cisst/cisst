@@ -39,25 +39,25 @@ http://www.cisst.org/cisst/license.txt.
 class nmrLSEISolver {
 
 protected:
-    long int ME;
-    long int MA;
-    long int MG;
-    long int MDW;
-    long int N;
-    long int Mode;
-    double RNormE;
-    double RNormL;
-    vctDynamicMatrix<double> Options;
-    vctDynamicMatrix<double> X;
-    vctDynamicMatrix<double> W;
-    vctDynamicMatrix<double>::Submatrix::Type ERef;
-    vctDynamicMatrix<double>::Submatrix::Type ARef;
-    vctDynamicMatrix<double>::Submatrix::Type GRef;
-    vctDynamicMatrix<double>::Submatrix::Type fRef;
-    vctDynamicMatrix<double>::Submatrix::Type bRef;
-    vctDynamicMatrix<double>::Submatrix::Type hRef;
-    vctDynamicMatrix<double> Work;
-    vctDynamicMatrix<long int> Index;
+    CISSTNETLIB_INTEGER ME;
+    CISSTNETLIB_INTEGER MA;
+    CISSTNETLIB_INTEGER MG;
+    CISSTNETLIB_INTEGER MDW;
+    CISSTNETLIB_INTEGER N;
+    CISSTNETLIB_INTEGER Mode;
+    CISSTNETLIB_DOUBLE RNormE;
+    CISSTNETLIB_DOUBLE RNormL;
+    vctDynamicMatrix<CISSTNETLIB_DOUBLE> Options;
+    vctDynamicMatrix<CISSTNETLIB_DOUBLE> X;
+    vctDynamicMatrix<CISSTNETLIB_DOUBLE> W;
+    vctDynamicMatrix<CISSTNETLIB_DOUBLE>::Submatrix::Type ERef;
+    vctDynamicMatrix<CISSTNETLIB_DOUBLE>::Submatrix::Type ARef;
+    vctDynamicMatrix<CISSTNETLIB_DOUBLE>::Submatrix::Type GRef;
+    vctDynamicMatrix<CISSTNETLIB_DOUBLE>::Submatrix::Type fRef;
+    vctDynamicMatrix<CISSTNETLIB_DOUBLE>::Submatrix::Type bRef;
+    vctDynamicMatrix<CISSTNETLIB_DOUBLE>::Submatrix::Type hRef;
+    vctDynamicMatrix<CISSTNETLIB_DOUBLE> Work;
+    vctDynamicMatrix<CISSTNETLIB_INTEGER> Index;
 
 public:
 
@@ -81,7 +81,7 @@ public:
       method Allocate().  The next call to the Solve() method will
       check that the parameters match the dimension.
     */
-    nmrLSEISolver(long int me, long int ma, long int mg, long int n) {
+    nmrLSEISolver(CISSTNETLIB_INTEGER me, CISSTNETLIB_INTEGER ma, CISSTNETLIB_INTEGER mg, CISSTNETLIB_INTEGER n) {
         Allocate(me, ma, mg, n);
     }
 
@@ -91,8 +91,8 @@ public:
        method.  It relies on the method Allocate().  The next call to
        the Solve() method will check that the parameters match the
        dimension. */
-    nmrLSEISolver(vctDynamicMatrix<double> &E, vctDynamicMatrix<double> &A,
-		    vctDynamicMatrix<double> &G) {
+    nmrLSEISolver(vctDynamicMatrix<CISSTNETLIB_DOUBLE> &E, vctDynamicMatrix<CISSTNETLIB_DOUBLE> &A,
+		    vctDynamicMatrix<CISSTNETLIB_DOUBLE> &G) {
         Allocate(E, A, G);
     }
 		
@@ -106,7 +106,7 @@ public:
       \param mg Number of rows of G
       \param n Number of unknowns 
     */
-    inline void Allocate(long int me, long int ma, long int mg, long int n) {
+    inline void Allocate(CISSTNETLIB_INTEGER me, CISSTNETLIB_INTEGER ma, CISSTNETLIB_INTEGER mg, CISSTNETLIB_INTEGER n) {
         N = n;
         ME = me;
         MA = ma;
@@ -114,12 +114,12 @@ public:
         MDW = ME + MA + MG;
         X.SetSize(N, 1, VCT_COL_MAJOR);
         W.SetSize(MDW,(N+1), VCT_COL_MAJOR);
-        long int K = std::max(MA + MG, N);
+        CISSTNETLIB_INTEGER K = std::max(MA + MG, N);
         Work.SetSize(2 * (ME + N) + K + (MG + 2) * (N + 7), 1, VCT_COL_MAJOR);
         Index.SetSize(MG + 2 * N + 2, 1, VCT_COL_MAJOR);
         Options.SetSize(1, 1, VCT_COL_MAJOR);
-        Index(0, 0) = (long int) Work.rows();
-        Index(1, 0) = (long int) Index.rows();
+        Index(0, 0) = static_cast<CISSTNETLIB_INTEGER>(Work.rows());
+        Index(1, 0) = static_cast<CISSTNETLIB_INTEGER>(Index.rows());
         Options(0, 0) = 1;
         // otherMatrix, startRow, startCol, rows, cols
         ERef.SetRef(W, 0,     0, ME, N);
@@ -135,8 +135,8 @@ public:
       convenient way to extract the required sizes from the input
       containers.  The next call to the Solve() method will check that
       the parameters match the dimension. */
-    inline void Allocate(vctDynamicMatrix<double> &E, vctDynamicMatrix<double> &A,
-                         vctDynamicMatrix<double> &G) {
+    inline void Allocate(vctDynamicMatrix<CISSTNETLIB_DOUBLE> &E, vctDynamicMatrix<CISSTNETLIB_DOUBLE> &A,
+                         vctDynamicMatrix<CISSTNETLIB_DOUBLE> &G) {
 	    Allocate(E.rows(), A.rows(), G.rows(), E.cols());
     }
 
@@ -161,16 +161,16 @@ public:
       The third alternative is to set get refrence to individual
       chunks of this objects W.
     */
-    inline void Solve(vctDynamicMatrix<double> &E, vctDynamicMatrix<double> &f,
-                      vctDynamicMatrix<double> &A, vctDynamicMatrix<double> &b,
-                      vctDynamicMatrix<double> &G, vctDynamicMatrix<double> &h) 
+    inline void Solve(vctDynamicMatrix<CISSTNETLIB_DOUBLE> &E, vctDynamicMatrix<CISSTNETLIB_DOUBLE> &f,
+                      vctDynamicMatrix<CISSTNETLIB_DOUBLE> &A, vctDynamicMatrix<CISSTNETLIB_DOUBLE> &b,
+                      vctDynamicMatrix<CISSTNETLIB_DOUBLE> &G, vctDynamicMatrix<CISSTNETLIB_DOUBLE> &h) 
         throw (std::runtime_error)
     {
         /* check that the size matches with Allocate() */
         if (
-            (MA != (int) A.rows()) || (ME != (int) E.rows()) || (MG != (int) G.rows())
-            || (N != (int) A.cols()) || (N != (int) E.cols()) || (N != (int) G.cols())
-            || (1 != (int) b.cols()) || (1 != (int) f.cols()) || (1 != (int) h.cols())
+            (MA != static_cast<CISSTNETLIB_INTEGER>(A.rows())) || (ME != static_cast<CISSTNETLIB_INTEGER>(E.rows())) || (MG != static_cast<CISSTNETLIB_INTEGER>(G.rows()))
+            || (N != static_cast<CISSTNETLIB_INTEGER>(A.cols())) || (N != static_cast<CISSTNETLIB_INTEGER>(E.cols())) || (N != static_cast<CISSTNETLIB_INTEGER>(G.cols()))
+            || (1 != static_cast<CISSTNETLIB_INTEGER>(b.cols())) || (1 != static_cast<CISSTNETLIB_INTEGER>(f.cols())) || (1 != static_cast<CISSTNETLIB_INTEGER>(h.cols()))
             ) {
             cmnThrow(std::runtime_error("nmrLSEISolver Solve: Sizes used for Allocate were different"));
         }
@@ -186,7 +186,7 @@ public:
             cmnThrow(std::runtime_error("nmrLSEISolver Solve: All parameters must be Fortran compatible"));
         }
        
-	if ((MDW != (int) W.rows() ) || (N+1 != (int)W.cols())) {
+        if ((MDW != static_cast<CISSTNETLIB_INTEGER>(W.rows()) ) || (N+1 != static_cast<CISSTNETLIB_INTEGER>(W.cols()))) {
             cmnThrow(std::runtime_error("nmrLSEISolver Solve: Memory for W was not allocated"));
 	}
 
@@ -205,10 +205,10 @@ public:
     //error handling??
     }
 
-    inline void Solve(vctDynamicMatrix<double> &W)
+    inline void Solve(vctDynamicMatrix<CISSTNETLIB_DOUBLE> &W)
 	    throw (std::runtime_error)
     {
-        if ((MDW != (int) W.rows() ) || (N+1 != (int)W.cols())) {
+        if ((MDW != static_cast<CISSTNETLIB_INTEGER>(W.rows()) ) || (N+1 != static_cast<CISSTNETLIB_INTEGER>(W.cols()))) {
             cmnThrow(std::runtime_error("nmrLSEISolver Solve: Sizes used for Allocate were different"));
         }
         
@@ -217,18 +217,18 @@ public:
     }
     
     /*! Get X.  This method must be used after Solve(). */
-    inline const vctDynamicMatrix<double> &GetX(void) const {
+    inline const vctDynamicMatrix<CISSTNETLIB_DOUBLE> &GetX(void) const {
         return X;
     }
     
 
     /* Get RNormE.  This method must be used after Solve(). */
-    inline double GetRNormE(void) const {
+    inline CISSTNETLIB_DOUBLE GetRNormE(void) const {
         return RNormE;
     }
 
     /* Get RNormL.  This method must be used after Solve(). */
-    inline double GetRNormL(void) const {
+    inline CISSTNETLIB_DOUBLE GetRNormL(void) const {
         return RNormL;
     }
 };
