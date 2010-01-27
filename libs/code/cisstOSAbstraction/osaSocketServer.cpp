@@ -164,8 +164,8 @@ void osaSocketServer::CloseClients(void)
     for (it = Clients.begin(); it != Clients.end(); it++) {
         it->second->Close();
         delete it->second;
-        Clients.erase(it);
     }
+	Clients.clear();
 }
 
 
