@@ -8,7 +8,7 @@
 #
 # The following are set after configuration is done: 
 #  OpenCV_FOUND
-#  OpenCV_INCLUDE_DIR
+#  OpenCV_INCLUDE_DIRS
 #  OpenCV_LIBRARIES
 #  OpenCV_LINK_DIRECTORIES
 #
