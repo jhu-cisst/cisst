@@ -617,7 +617,7 @@ public:
 // Miscellaneous structure type definitions //
 //////////////////////////////////////////////
 
-class svlRect {
+class CISST_EXPORT svlRect {
 public:
     svlRect();
     svlRect(int left, int top, int right, int bottom);
