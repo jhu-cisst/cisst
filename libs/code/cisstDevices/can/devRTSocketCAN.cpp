@@ -20,16 +20,24 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstDevices/can/devRTSocketCAN.h>
 #include <cisstCommon/cmnLogger.h>
 
-#include <stdio.h>
+devRTSocketCAN::devRTSocketCAN( const std::string& devicename, 
+				devCAN::Rate rate ) : 
+  devCAN( rate ){
 
-devRTSocketCAN::devRTSocketCAN( const std::string& devname, 
-				devCANRate rate ) : devCAN( rate ){
-  this->devicename = devname;
+  // Check if the device name is empty
+  if( devicename.empty() ){
+    CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS
+			<< ": No device name." 
+			<< std::endl;
+  }
+  this->devicename = devicename;
+
 }
 
 devRTSocketCAN::~devRTSocketCAN(){}
 
-bool devRTSocketCAN::Open(){
+
+devCAN::Errno devRTSocketCAN::Open(){
 
   struct ifreq ifr;
 
@@ -39,7 +47,7 @@ bool devRTSocketCAN::Open(){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
 		      << ": Couldn't create a CAN socket."
 		      << std::endl;
-    return true;
+    return devCAN::EFAILURE;
   }
 
   // Get CAN interface index by name
@@ -48,11 +56,11 @@ bool devRTSocketCAN::Open(){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
 		      << ": Couldn't get the CAN interface index by name."
 		      << std::endl;
-    return true;
+    return devCAN::EFAILURE;
   }
 
   // Set CAN filters
-  // These are WAM specific filters
+  // These are WAM specific filters and don't belong here
   filters[0].can_mask = 0x0000041F;  // mask broadcast to a group
   filters[0].can_id   = 0x00000403;  // allow group 3
 
@@ -71,7 +79,7 @@ bool devRTSocketCAN::Open(){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
 		      << ": Couldn't set the socket filters." 
 		      << std::endl;
-    return true;
+    return EFAILURE;
   }
 
   // Bind the socket to the local address
@@ -83,7 +91,7 @@ bool devRTSocketCAN::Open(){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
 		      << ": Couldn't bind the socket." 
 		      << std::endl;
-    return true;
+    return EFAILURE;
   }
 
   // set the baud rate
@@ -93,7 +101,7 @@ bool devRTSocketCAN::Open(){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
 		      << ": Couldn't set the rate."
 		      << std::endl;
-    return true;
+    return EFAILURE;
   }
 
   /*
@@ -112,7 +120,7 @@ bool devRTSocketCAN::Open(){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
 		      << ": Couldn't set the operation mode."
 		      << std::endl;
-    return true;
+    return EFAILURE;
   }
 
   /*
@@ -128,59 +136,63 @@ bool devRTSocketCAN::Open(){
   }
   */
 
-  return false;
+  return ESUCCESS;
 }
 
-bool devRTSocketCAN::Close(){
+devCAN::Errno devRTSocketCAN::Close(){
   // close the socket
   if( rt_dev_close( canfd ) ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
 		      << "Couldn't close the socket."
 		      << std::endl;
-    return true;
+    return EFAILURE;
   }
-  return false;
+  return ESUCCESS;
 }
 
 // Send a can frame
 // Note that block is useless for Socket CAN
-bool devRTSocketCAN::Send( const devCANFrame& canframe, bool block ){
+devCAN::Errno devRTSocketCAN::Send( const devCANFrame& canframe, 
+				    devCAN::Flags  ){
 
-  // copy the data in to a RT Socket CAN frame
-  struct can_frame frame;
-  frame.can_id = canframe.Id();
-  frame.can_dlc = canframe.Length();
-  
-  const unsigned char* framedata = canframe.Data();
+  // copy the data in to a RTSocket CAN frame
+  // can_frame_t is defined in xenomai/include/rtdm/rtcan.h
+  can_frame_t frame;
+  frame.can_id = (can_id_t)canframe.GetID();
+  frame.can_dlc = (uint8_t)canframe.GetLength();  
+
+  const uint8_t* data = (const uint8_t*)canframe.GetData();
   for(size_t i=0; i<8; i++)
-    frame.data[i] = framedata[i];
+    { frame.data[i] = data[i]; }
 
   // send the frame
   int error = rt_dev_sendto( canfd, 
 			     (void*)&frame, 
 			     sizeof(can_frame_t), 
 			     0,
-			     (struct sockaddr *)&addr, 
+			     (struct sockaddr*)&addr, 
 			     sizeof(addr) );
 
   if( error < 0 ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
 		      << ": Failed to send CAN frame." 
 		      << std::endl;
-    return true;
+    return EFAILURE;
   }
   
-  return false;
+  return ESUCCESS;
 }
 
 // Receive a CAN frame
-bool devRTSocketCAN::Recv( devCANFrame& canframe, bool block ){
+devCAN::Errno devRTSocketCAN::Recv( devCANFrame& canframe, 
+				    devCAN::Flags ){
 
   struct can_frame frame;            // the RT Socket CAN frame
+  memset(&frame, 0, sizeof(frame));  // clear the frame
+
   struct sockaddr_can addr;          // the source address
   socklen_t addrlen = sizeof(addr);  // the size of the source address
 
-  memset(&frame, 0, sizeof(frame));  // clear the frame
   int error =  rt_dev_recvfrom( canfd, 
 				(void*)&frame, 
 				sizeof(can_frame_t), 
@@ -192,13 +204,13 @@ bool devRTSocketCAN::Recv( devCANFrame& canframe, bool block ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
 		      << ": Failed to receive the frame." 
 		      << std::endl;
-    return true;
+    return EFAILURE;
   }
 
   // create a devCANFrame
   canframe = devCANFrame( frame.can_id, frame.data, frame.can_dlc );
 
-  return false;
+  return ESUCCESS;
 }
 
 #endif

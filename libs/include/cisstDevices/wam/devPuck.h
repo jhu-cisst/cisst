@@ -21,25 +21,6 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _devPuck_h
 #define _devPuck_h
 
-//! Define the ID of a puck
-/**
-   The ID of a puck is at most 5 bits. Hence we use 8 bits of which only the 5
-   LSB are used.
-*/
-typedef unsigned char devPuckID;
-
-//! Define the modes of a puck
-/**
-   Barrett defines the following mode in which a puck can be
-*/
-struct devPuckMode{enum{ IDLE=0, TORQUE=2, PID=3, VELOCITY=4, TRAPEZOIDAL=5};};
-
-//! Define the status of a puck
-/**
-   Barrett defines the following status for a puck
-*/
-struct devPuckStatus{enum{ RESET=0, READY=2 };};
-
 //! Implements a Barrett puck
 /**
    Pucks are the small gizmos that are connected to each motor. They essentially
@@ -51,6 +32,43 @@ struct devPuckStatus{enum{ RESET=0, READY=2 };};
    (\sa devGroup).
 */
 class devPuck {
+
+public:
+
+  //! Define the ID of a puck
+  /**
+     The ID of a puck is at most 5 bits. Hence we use 8 bits of which only the 5
+     LSB are used.
+  */
+  enum ID { PUCK_ID1=1, 
+	    PUCK_ID2=2, 
+	    PUCK_ID3=3,
+	    PUCK_ID4=4, 
+	    PUCK_ID5=5, 
+	    PUCK_ID6=6, 
+	    PUCK_ID7=7,
+	    SAFETY_MODULE_ID=10 };
+
+  //! Define the modes of a puck
+  /**
+     Barrett defines the following mode in which a puck can be
+  */
+  static const devProperty::Value STATUS_RESET = 0;
+  static const devProperty::Value STATUS_READY = 2;  
+
+  //! Define the status of a puck
+  /**
+     Barrett defines the following status for a puck
+  */
+  static const devProperty::Value MODE_IDLE = 0;
+  static const devProperty::Value MODE_TORQUE = 2;
+  static const devProperty::Value MODE_PID = 3;
+  static const devProperty::Value MODE_VELOCITY = 4;
+  static const devProperty::Value MODE_TRAPEZOIDAL = 5;
+
+  //! Error values
+  enum Errno{ ESUCCESS, EFAILURE };
+
 private:
   
   //! The CAN device connected to the puck.
@@ -62,32 +80,33 @@ private:
   devCAN*    canbus;
 
   //! The ID of the puck
-  devPuckID  puckid;
+  devPuck::ID  id;
 
   //! Number of cunts per revolution of the encoder
-  devPropertyValue cntprev;
+  devProperty::Value cntprev;
+
   //! Amps per Newton meter constant of the motor
-  devPropertyValue    ipnm;
+  devProperty::Value ipnm;
+
   //! The index of the puck within its group
-  devPropertyValue  grpidx;
+  devProperty::Value grpidx;
+
   //! The maximum current of the motor
-  devPropertyValue  imax;
+  devProperty::Value imax;
   
   //! The encoder position
-  devPropertyValue   encpos;
-  //! The motor current
-  devPropertyValue mcurrent;
-  
-  //! The number of properties available
-  static const size_t NUM_PROPERTIES = 128;
+  devProperty::Value encpos;
 
+  //! The motor current
+  devProperty::Value mcurrent;
+  
   //! Convert a puck ID to a CAN id (assume origin from host 00000)
   /**
      Convert the ID of a puck to a CAN ID used in a CAN frame
   */
-  static devCANID CANId( devPuckID puckid );
+  static devCANFrame::ID CANID( devPuck::ID id );
 
-  //! Is the data contain a set property command
+  //! Does the data contain a set property command
   /**
      Pucks have properties that can be read/write. To read/write a property, 
      you must send a CAN frame with the proper data format. To write a property,
@@ -96,23 +115,26 @@ private:
      \param canframe A CAN frame with a read/write command
      \return true if the command is a write. false if the command is a read
   */
-  static bool IsSetCommand( const devCANFrame& canframe );
+  static bool IsSetFrame( const devCANFrame& canframe );
   
-  //! Return true if the property is valid
+  //! pack a CAN frame
   /**
-     Call this method to determine if the property ID is valid
-     \param propid The property ID
-     \return true if the property ID is valid. false otherwise
+     Build a CAN frame destined to the puck with the data formated.
+     \param canframe[out] The resulting CAN frame
+     \param propid The property ID to set or get
+     \param propval The property value if the property must be set
+     \param set True of the property must be set. False for a query
+     \return false if no error occurred. true otherwise
   */
-  bool IsValid( devPropertyID propid ) const;
-  
-  //! not implemented yet
-  bool IsValid( devPropertyID propid, devPropertyValue propval ) const;
-  
+  devPuck::Errno PackProperty( devCANFrame& canframe,
+			       devProperty::Command command,
+			       devProperty::ID propid,
+			       devProperty::Value propval = 0 );
+
 public:
   
   //! Default constructor
-  devPuck(){}
+  devPuck();
 
   //! Create a puck with an ID and a CAN device
   /**
@@ -121,10 +143,10 @@ public:
      \param puckid The ID of the puck
      \param can The CAN device used to communicate with the puck
   */
-  devPuck( devPuckID puckid, devCAN* can );
+  devPuck( devPuck::ID id, devCAN* can );
 
   //! Return the puck ID
-  devPuckID ID() const { return puckid; }  
+  devPuck::ID GetID() const;
 
   //! Return the origin ID of the CAN id
   /**
@@ -136,19 +158,7 @@ public:
      \return The origin puck ID of the CAN ID
      \sa Origin( devCANFrame )
   */
-  static devPuckID Origin( devCANID canid );
-
-  //! Return the destination ID of the CAN id
-  /**
-     Each CAN ID consists of 11 bits. For communicating with pucks, this
-     ID is composed of 5 bits representing the ID of the puck at the origin 
-     of the CAN frame and 5 bits representing the ID of the destination puck.
-     Call this method to obtain the destination puck ID in a CAN ID.
-     \param canid The CAN id
-     \return The origin puck ID of the CAN ID
-     \sa Origin( devCANFrame )
-  */
-  static devPuckID Destination( devCANID canid );
+  static devPuck::ID OriginID( devCANFrame::ID id );
 
   //! Return the origin ID of the CAN frame
   /**
@@ -160,7 +170,19 @@ public:
      \return The origin puck ID of the CAN frame
      \sa Origin( devCANID )
   */
-  static devPuckID Origin( const devCANFrame& canframe );
+  static devPuck::ID OriginID( const devCANFrame& canframe );
+
+  //! Return the destination ID of the CAN id
+  /**
+     Each CAN ID consists of 11 bits. For communicating with pucks, this
+     ID is composed of 5 bits representing the ID of the puck at the origin 
+     of the CAN frame and 5 bits representing the ID of the destination puck.
+     Call this method to obtain the destination puck ID in a CAN ID.
+     \param canid The CAN id
+     \return The origin puck ID of the CAN ID
+     \sa Origin( devCANFrame )
+  */
+  static devPuck::ID DestinationID( devCANFrame::ID id );
 
   //! Return the destination ID of the CAN frame
   /**
@@ -172,7 +194,7 @@ public:
      \return The origin puck ID of the CAN frame
      \sa Destination( devCANID )
   */
-  static devPuckID Destination( const devCANFrame& canframe );
+  static devPuck::ID DestinationID( const devCANFrame& canframe );
 
   //! Return the index of the puck within its group
   /**
@@ -183,13 +205,13 @@ public:
      within its group.
      \return The zero index of the puck within its group
   */
-  devPropertyValue Index() const ;
+  devProperty::Value GroupIndex() const ;
 
   //! Return the motor Amp/Nm constant
-  devPropertyValue IpNm() const ;
+  devProperty::Value IpNm() const ;
 
   //! Return the encoder counts/revolution constant
-  devPropertyValue CountsPerRevolution() const ;
+  devProperty::Value CountsPerRevolution() const ;
 
   //! Perform the initial configuration
   /**
@@ -198,7 +220,7 @@ public:
      constant.
      \param false if no error occurred. true otherwise
    */
-  bool Configure();
+  devPuck::Errno Configure();
 
   //! Query the puck for a property ID 
   /**
@@ -206,7 +228,8 @@ public:
      \param propid The ID of the property to query
      \return The value of the property
   */
-  devPropertyValue GetProperty( devPropertyID propid );
+  devPuck::Errno GetProperty( devProperty::ID id,
+			      devProperty::Value& value );
 
   //! Set the puck property ID to a value
   /**
@@ -216,23 +239,10 @@ public:
      \param verify Double check by querying the property of the puck
      \return false is no error occurred. true otherwise
   */
-  bool SetProperty( devPropertyID propid, 
-		    devPropertyValue propval, 
-		    bool verify=true);
+  devPuck::Errno SetProperty( devProperty::ID propid, 
+			      devProperty::Value propval, 
+			      bool verify );
 
-  //! pack a CAN frame
-  /**
-     Build a CAN frame destined to the puck with the data formated.
-     \param canframe[out] The resulting CAN frame
-     \param propid The property ID to set or get
-     \param propval The property value if the property must be set
-     \param set True of the property must be set. False for a query
-     \return false if no error occurred. true otherwise
-  */
-  bool PackProperty( devCANFrame& canframe,
-		     devPropertyID propid,
-		     devPropertyValue propval=0, 
-		     bool set=false );
 
   //! unpack a CAN frame
   /**
@@ -241,11 +251,15 @@ public:
      \param propid[out] The ID of the property in the data
      \param propval[out] The value of the property in the data
    */
-  bool UnpackCANFrame( const devCANFrame& canframe, 
-		       devPropertyID& propid, 
-		       devPropertyValue& propval );
+  devPuck::Errno UnpackCANFrame( const devCANFrame& canframe, 
+				 devProperty::ID& id, 
+				 devProperty::Value& value );
   
 }; 
+
+// Increment operator for pucks id
+devPuck::ID operator++( devPuck::ID& pid, int i );
+
 
 //! Define the safety module
 /**

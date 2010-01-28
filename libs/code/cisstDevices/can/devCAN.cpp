@@ -20,35 +20,62 @@ http://www.cisst.org/cisst/license.txt.
 
 // Default initialization of a CAN frame
 devCANFrame::devCANFrame(){ 
-  canid = 0;                  // default ID 
-  nbytes=0;                   // no data
-  for(size_t i=0; i<8; i++)   // clear the data
-    bytes[i] = 0x00;
+  // Clear up everything
+  this->id = 0;                              // default ID 
+  this->nbytes=0;                            // no data
+  for(devCANFrame::DataLength i=0; i<8; i++) // clear the data
+    { this->data[i] = 0x00; }
 }
 
-devCANFrame::devCANFrame( devCANID canid, 
-			  unsigned char bytes[8], 
-			  size_t nbytes ){
+devCANFrame::devCANFrame( devCANFrame::ID id, 
+			  devCANFrame::DataField data,
+			  devCANFrame::DataLength nbytes ){
+
+  // Clear up everything before starting
+  this->id = 0;                              // default ID 
+  this->nbytes = 0;                          // no data
+  for(devCANFrame::DataLength i=0; i<8; i++) // clear the data
+    { this->data[i] = 0x00; }
 
   // A can ID has 11 bits. Ensure that only 11 bits are used
-  if( ~0x07FF & ~canid )
+  if( (~0x07FF) & id ){
     CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS
-			<< ": Illegal CAN id: " << canid 
-			<< ". Truncating the ID to: " << (0x07FF & canid)
+			<< ": Illegal CAN id: " << id 
 			<< std::endl;
-  this->canid = 0x07FF & canid;
+  }
 
-  if( 8 < nbytes )
-    CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS
-			<< ": Illegal message length: " << nbytes
-			<< ". Truncating to 8 bytes"
-			<< std::endl;
-  this->nbytes = ( nbytes < 8 ) ? nbytes : 8;
+  else{
+    // Now check that no more than 8 bytes are given
+    if( 8 < nbytes ){
+      CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS
+			  << ": Illegal message length: " << nbytes
+			  << std::endl;
+    }
 
-  for(size_t i=0; i<8; i++)
-    this->bytes[i] = bytes[i];
+    else{
+      this->id = (0x07FF & id);                       // Copy the CAN ID
+      this->nbytes = nbytes;                          // Copy the data length
+      for(devCANFrame::DataLength i=0; i<nbytes; i++) // Copy the nbytes of data
+	{ this->data[i] = data[i]; }
+    }
+
+  }
 }
 
 // default constructor of a can device
-devCAN::devCAN( devCANRate rate ){ this->rate = rate; }
+devCAN::devCAN( devCAN::Rate rate ){ 
+
+  // Ensure that the rate is ok
+  if( (rate == devCAN::RATE_150) ||
+      (rate == devCAN::RATE_300) ||
+      (rate == devCAN::RATE_1000) ){
+    this->rate = rate;
+  }
+  else{
+    CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS
+			<< ": Illegal CAN rate " << rate
+			<< std::endl;
+  }
+}
+
 devCAN::~devCAN(){}

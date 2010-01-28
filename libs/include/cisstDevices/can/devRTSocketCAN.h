@@ -21,8 +21,8 @@ http://www.cisst.org/cisst/license.txt.
 #define _devRTSocketCAN_h
 
 #include <cisstDevices/can/devCAN.h>
-#include <rtdm/rtcan.h> // Defines for the RT CAN socket
 
+#include <rtdm/rtcan.h> // Defines for the RT CAN socket
 #include <string>       // for device name (can0, can1,...)
 
 //! A Real Time Socket CAN device
@@ -60,7 +60,7 @@ public:
      \param devicename The name of the device (can0, can1, ...)
      \param rate The CAN rate (devCAN_150, devCAN_300, devCAN_1000)
   */
-  devRTSocketCAN( const std::string& devicename, devCANRate rate );
+  devRTSocketCAN( const std::string& devicename, devCAN::Rate rate );
   
   //! Destructor
   ~devRTSocketCAN();
@@ -69,10 +69,10 @@ public:
   /**
      This method creates and configure a RT CAN socket.
   */
-  bool Open();
+  devCAN::Errno Open();
 
   //! Close the CAN socket
-  bool Close();
+  devCAN::Errno Close();
 
   //! Send a CAN frame on the bus
   /**
@@ -81,7 +81,8 @@ public:
      \param block Block the device until the operation is completed. This
                   parameter is irrelevant for devRTSocketCAN.
   */
-  bool Send( const devCANFrame& frame, bool block=false );
+  devCAN::Errno Send( const devCANFrame& frame, 
+		      devCAN::Flags flags = devCAN::MSG_NOFLAG );
 
   //! Receive a CAN frame
   /**
@@ -90,7 +91,8 @@ public:
      \param block Block the device until a CAN frame is received. This
                   parameter is irrelevant for devRTSocketCAN.
   */
-  bool Recv( devCANFrame& frame, bool block=false );
+  devCAN::Errno Recv( devCANFrame& frame, 
+		      devCAN::Flags flags = devCAN::MSG_NOFLAG );
   
 };
 

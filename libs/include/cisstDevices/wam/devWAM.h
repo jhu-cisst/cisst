@@ -49,12 +49,13 @@ class CISST_EXPORT devWAM : public mtsTaskPeriodic {
   CMN_DECLARE_SERVICES( CMN_NO_DYNAMIC_CREATION , CMN_LOG_LOD_RUN_DEBUG );
 
 private:
-  int firstruns;
+
+  enum Errno{ ESUCCESS, EFAILURE };
 
   //
   // MTS specific members
   //
-
+  
   //! MTS vector of joint positions
   mtsVector<double> jointspositions;
 
@@ -68,35 +69,15 @@ private:
   //! A pointer to a CAN device
   devCAN* candev;
   
-  //! CAN ID of the safety module
-  /**
-     The puck ID for the safety module
-  */
-  static const devPuckID SAFETYMODULE_PID = 10;
-  
   //! A vector of all the pucks
   std::vector<devPuck>   pucks;
  
- //! A vector of all the groups
+  //! A vector of all the groups
   std::vector<devGroup> groups;
-
+  
   //! The safety module
   devSafetyModule safetymodule;
-
-  //! Pack motor currents into a CAN frame.
-  /**
-     Motor currents are sent by group ID. One group represents the 4 pucks of 
-     the upper arm. A second group represents the 3 pucks of the forearm.
-     \param canframe[out] The canframe containing the motor currents
-     \param gid The group ID. This must be either devGroup::UPPERARM or 
-     devGroup::FOREARM
-     \param t A 4 array with the motor currents. The currents must be
-              ordered by puck id. If gid is set to devGroup::FOREARM, 
-	      then only the first 3 currents will be used.
-     \return false if no error occurred. true otherwise.
-  */
-  bool PackCurrents( devCANFrame& canframe, devGroupID gid, const double I[4] );
-
+  
   //! Matrix used to convert motors positions to joints positions
   /**
      When given a vector of motors positions, this matrix us used to transform
@@ -133,7 +114,7 @@ private:
      \sa mpos2jpos
   */
   vctDynamicVector<double> 
-  MotorsPos2JointsPos( const vctDynamicVector<double>& q );
+    MotorsPos2JointsPos( const vctDynamicVector<double>& q );
 
   //! Convert joints positions to motors positions
   /**
@@ -155,7 +136,23 @@ private:
      \sa jtrq2mtrq
   */
   vctDynamicVector<double> 
-  JointsTrq2MotorsTrq( const vctDynamicVector<double>& t );
+    JointsTrq2MotorsTrq( const vctDynamicVector<double>& t );
+
+  //! Pack motor currents into a CAN frame.
+  /**
+     Motor currents are sent by group ID. One group represents the 4 pucks of 
+     the upper arm. A second group represents the 3 pucks of the forearm.
+     \param canframe[out] The canframe containing the motor currents
+     \param gid The group ID. This must be either devGroup::UPPERARM or 
+     devGroup::FOREARM
+     \param t A 4 array with the motor currents. The currents must be
+              ordered by puck id. If gid is set to devGroup::FOREARM, 
+	      then only the first 3 currents will be used.
+     \return false if no error occurred. true otherwise.
+  */
+  devWAM::Errno PackCurrents( devCANFrame& canframe, 
+			      devGroup::ID gid, 
+			      const double I[4] );
 
   //! Receive joints positions
   /**
@@ -165,8 +162,8 @@ private:
      \param q[out] The resulting motor positions in radians
      \return false if no error occurred. true otherwise.
   */
-  bool RecvPositions( vctDynamicVector<double>& q );
-
+  devWAM::Errno RecvPositions( vctDynamicVector<double>& q );
+  
   //! Send joints positions
   /**
      The WAM has relative encoders, which means that you must "zero" the 
@@ -179,8 +176,8 @@ private:
      each puck the absolute position of its encoder.
      \param q[in] The motor positions in radians
      \return false if no error occurred. true otherwise.
-   */
-  void SendPositions( const mtsVector<double>& q );
+  */
+  devWAM::Errno SendPositions( const mtsVector<double>& q );
 
   //! Send joints torques
   /**
@@ -191,8 +188,67 @@ private:
      \param i[in] The motor torques
      \return false if no error occurred. true otherwise
   */
-  void SendTorques( const mtsVector<double>& t );
+  devWAM::Errno SendTorques( const mtsVector<double>& t );
   
+  //! Set velocity warning
+  /**
+     The safety module intercepts joints positions and compute joints velocities
+     from them. After "zeroing" the joints (setting their initial values), the
+     safety module compute the Cartesian velocity of the elbow and the Cartesian
+     velocity of the 4DOF end-effector. If any of these velocities is greater 
+     than the velocity warning limit, the safety module will display a warning 
+     on the 7-segment of the display pendant ("E" for elbow and "A" for arm) and
+     the "Warning Velocity" LED will be on. The warning won't affect anything 
+     other than warn you to slow down before a velocity fault shuts down the 
+     arm.
+  */
+  devWAM::Errno SetVelocityWarning( devProperty::Value velocitywarning );
+
+  //! Set velocity fault
+  /**
+     The safety module intercepts joints positions and compute joints velocities
+     from them. After "zeroing" the joints (setting their initial values), the
+     safety module compute the Cartesian velocity of the elbos and the Cartesian
+     velocity of the 4DOF end-effector. If any of these velocities is greater 
+     than the velocity fault threshold, the safety module will shutdown the arm
+     and display the fault on the 7-segment of the display pendant ("E" for 
+     elbow and "A" for arm) and the "Velocity Fault" LED will be on. 
+  */
+  devWAM::Errno SetVelocityFault( devProperty::Value velocityfault );
+
+  //! Set torque warning
+  /**
+     The safety module intercepts joints currents that are sent to the pucks.
+     If any of these torques is greater than the torque warning limit, the 
+     safety module will display a warning on the 7-segment of the display 
+     pendant (the number of the joint with too much torque) and the "Warning 
+     Torque" LED will be on. The warning won't affect anything other than warn 
+     you to ease down the torque before a torque fault shuts down the arm. Keep
+     in mind that this torque limit is "one size fits all". That is the torque
+     warning limit of motor 1 will apply to motor 7 and vice versa.
+  */
+  devWAM::Errno SetTorqueWarning( devProperty::Value torquewarning );
+
+  //! Set torque fault
+  /**
+     The safety module intercepts joints currents that are sent to the pucks.
+     If any of these torques is greater than the torque fault limit, the 
+     safety module will shutdown the arm and display a warning on the 7-segment 
+     of the display pendant (the number of the joint with too much torque) and 
+     the "Fault Torque" LED will be on. Keep in mind that this torque limit is
+     "one size fits all". That is the torque warning limit of motor 1 will apply
+     to motor 7 and vice versa.
+  */
+  devWAM::Errno SetTorqueFault( devProperty::Value torquefault );
+  
+  devWAM::Errno SetPucksStatus( devProperty::Value puckstatus );
+
+  //! Enable the motors
+  /**
+     This enables the motors of the WAM. This is the equivalent of "activating"
+     the WAM with the display pendant. So be careful. Things can move after.
+  */
+
 public:
 
   //! Default constructor
@@ -211,7 +267,8 @@ public:
   devWAM( const std::string& taskname, 
 	  double period, 
 	  devCAN* candev, 
-	  size_t N=7 );
+	  const vctDynamicVector<double>& qinit=
+                                           vctDynamicVector<double>( 7, 0.0 ) );
 
   ~devWAM(){}
 
@@ -222,7 +279,6 @@ public:
 
   static const std::string PositionInterfaceName;
   static const std::string ReadPositionsCommandName;
-  static const std::string WritePositionsCommandName;
 
   static const std::string TorqueInterfaceName;
   static const std::string ReadTorquesCommandName;

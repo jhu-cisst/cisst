@@ -21,19 +21,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstDevices/wam/devPuck.h>
 #include <vector>
 
-//! Define the ID of a group (5 bits)
-/**
-   The ID of a group is at most 5 bits. Hence we use 8 bits of which only the 5
-   LSB are used.
-*/
-typedef unsigned char devGroupID;
-
-//! Define the status of a group
-/**
-   Barrett defines the following mode in which a puck can be
-*/
-struct devGroupStatus{enum{ RESET=0, READY=2 };};
-
 //! A logical group of pucks
 /**
    Groups are used to communicate with pucks simultaneously. This has the 
@@ -42,20 +29,69 @@ struct devGroupStatus{enum{ RESET=0, READY=2 };};
    all the pucks will process the frame.
 */
 class devGroup {
+public:
+
+  //! The ID used to identify each group
+  enum ID{
+
+    //! The broadcast group
+    /**
+       The broadcast group contains all the pucks in a WAM (with the exception 
+       of the safety module)
+    */
+    BROADCAST    = 0x00,
+
+    //! The upper arm group
+    /**
+       The upper arm group represents the 4 pucks of the upper arm 
+       (shoulder+elbow)
+    */
+    UPPERARM     = 0x01,
+
+    //! The forearm group
+    /**
+       The forearm group represents the 3 pucks of the upper arm (wrist)
+    */
+    FOREARM      = 0x02,
+
+    //! The motor position group
+    /**
+       All pucks belong to the position group. Send a message to this group to 
+       query all the motor positions. Each puck will reply to a message to this
+       group with its motor position
+    */
+    POSITION     = 0x03,
+
+    //! Upper arm property group
+    UPPERARMPROP = 0x04,
+
+    //! Forearm property group
+    FOREARMPROP  = 0x05,
+
+    //! Feedback property group
+    PROPFEEDBACK = 0x06 
+
+  };
+
+  //! Define the status of a group
+  /**
+     Barrett defines the following mode in which a puck can be
+  */
+  enum Status{ RESET=0, READY=2 };
+
+  //! Error codes used by devGroup
+  enum Errno{ ESUCCESS, EFAILURE };
   
 private:
 
   //! The ID of the pucks in the group
-  std::vector<devPuckID> pucksid;
+  std::vector<devPuck::ID> pucksid;
 
   //! The CAN bus that is connected to the group
   devCAN* canbus; 
   
   //! The ID of the group
-  devGroupID groupid;
-
-  // The number of properties
-  static const size_t NUM_PROPERTIES = 128;
+  devGroup::ID id;
 
   //! Is the data contain a set property command
   /**
@@ -66,18 +102,7 @@ private:
      \param canframe A CAN frame with a read/write command
      \return true if the command is a write. false if the command is a read
   */
-  static bool IsSetCommand( const devCANFrame& canframe );
-  
-  //! Return true if the property is valid
-  /**
-     Call this method to determine if the property ID is valid
-     \param propid The property ID
-     \return true if the property ID is valid. false otherwise
-  */
-  bool IsValid( devPropertyID propid ) const;
-  
-  //! not implemented yet
-  bool IsValid( devPropertyID propid, devPropertyValue propval ) const;
+  static bool IsSetFrame( const devCANFrame& canframe );
   
   //! pack a CAN frame
   /**
@@ -88,47 +113,16 @@ private:
      \param set True of the property must be set. False for a query
      \return false if no error occurred. true otherwise
   */
-  bool PackProperty( devCANFrame& canframe,
-		     devPropertyID propid,
-		     devPropertyValue propval=0, 
-		     bool set=false );
+  devGroup::Errno PackProperty( devCANFrame& canframe,
+				devProperty::Command command,
+				devProperty::ID propid,
+				devProperty::Value propval = 0 );
   
   //! The bit of a CAN ID that identicates a group
-  static const devCANID GROUPTAG = 0x0400;
+  static const devCANFrame::ID GROUP_CODE = 0x0400;
   
 public:
 
-  //! The broadcast group
-  /**
-     The broadcast group contains all the pucks in a WAM (with the exception of
-     the safety module)
-  */
-  static const devGroupID BROADCAST    = 0x00; 
-  //! The upper arm group
-  /**
-     The upper arm group represents the 4 pucks of the upper arm 
-     (shoulder+elbow)
-  */
-  static const devGroupID UPPERARM     = 0x01;
-  //! The forearm group
-  /**
-     The forearm group represents the 3 pucks of the upper arm (wrist)
-  */
-  static const devGroupID FOREARM      = 0x02;
-  //! The motor position group
-  /**
-     All pucks belong to the position group. Send a message to this group to 
-     query all the motor positions. Each puck will reply to a message to this
-     group with its motor position
-  */
-  static const devGroupID POSITION     = 0x03;
-  //! Upper arm property group
-  static const devGroupID UPPERARMPROP = 0x04;
-  //! Forearm property group
-  static const devGroupID FOREARMPROP  = 0x05;
-  //! Feedback property group
-  static const devGroupID PROPFEEDBACK = 0x06;
-  
   //! Create a group with an ID and a CAN device
   /**
      Initialize the group to the given ID and give the CAN device connected to
@@ -136,46 +130,56 @@ public:
      \param groupid The ID of the puck
      \param can The CAN device used to communicate with the pucks
   */
-  devGroup( devGroupID groupid, devCAN* canbus );
+  devGroup( devGroup::ID id, devCAN* canbus );
   
   //! Convert a group ID to a CAN id
   /**
      Convert the ID of a group to a CAN ID used in a CAN frame. This assumes 
      that the origin of the CAN ID will be the host (00000)
   */
-  static devCANID CANId( devGroupID puckid );
+  static devCANFrame::ID CANID( devGroup::ID groupid );
   
-  //! Return true if the CAN id's destination is a group
-  static bool IsForGroup( const devCANFrame canframe );
-  
+  //! Return the group ID
+  devGroup::ID GetID() const;
+
   //! Return the origin ID of the CAN id
-  static devGroupID Origin( devCANID canid );
-  
-  //! Return the destination ID of the CAN id
-  static devGroupID Destination( devCANID canid );
+  static devGroup::ID OriginID( devCANFrame::ID canid );
   
   //! Return the origin ID of the CAN frame
-  static devGroupID Origin( const devCANFrame& canframe );
+  static devGroup::ID OriginID( const devCANFrame& canframe );
   
   //! Return the destination ID of the CAN id
-  static devGroupID Destination( const devCANFrame& canframe );
+  static devGroup::ID DestinationID( devCANFrame::ID canid );
+  
+  //! Return the destination ID of the CAN id
+  static devGroup::ID DestinationID( const devCANFrame& canframe );
+  
+  //! Return true if the CAN frame id's destination is a group (any group)
+  static bool IsDestinationAGroup( const devCANFrame canframe );
   
   //! Add the puck ID to the group
-  void AddPuckIDToGroup( devPuckID pid ) { pucksid.push_back(pid); }
-
-  //! Return the puck ID of the first member
-  devPuckID FirstMember() const { return pucksid.front(); }
-  devPuckID LastMember() const { return pucksid.back(); }
+  void AddPuckIDToGroup( devPuck::ID puckid ) { pucksid.push_back(puckid); }
 
   bool Empty() const { return pucksid.empty(); }
 
+  //! Return the puck ID of the first member
+  devPuck::ID FirstMember() const { return pucksid.front(); }
+  devPuck::ID LastMember()  const { return pucksid.back(); }
+
+  bool IsGroupEmpty() const { return pucksid.empty(); }
+
   //! Querry the group. This is only valid for querying
   //  positions on group 3
-  bool GetProperty( devPropertyID propid );
+  devGroup::Errno GetProperty( devProperty::ID id );
   
   //! Set the property of a group
-  bool SetProperty( devPropertyID propid, devPropertyValue propval);
-  
+  devGroup::Errno SetProperty( devProperty::ID id, 
+			       devProperty::Value value,
+			       bool verify );
+
 };
+
+// Increment operator for pucks id
+devGroup::ID operator++( devGroup::ID& gid, int i );
 
 #endif

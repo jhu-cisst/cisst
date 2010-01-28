@@ -21,13 +21,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <iostream>
 #include <iomanip>
 
-//! The id of a CAN frame
-/**
-   A CAN ID has 11 bits so we use 16 bits to represent a CAN id of which only
-   the 11 LSB are used.
-*/
-typedef unsigned short devCANID;
-
 //! A base frame of the CAN bus
 /**
    This defines a basic CAN frame. It does not support the extended frame format
@@ -37,16 +30,35 @@ typedef unsigned short devCANID;
    This class does not support the extended frame format.
 */
 class devCANFrame{
-  
+public:
+
+  //! The id of a CAN frame
+  /**
+     A CAN ID has 11 bits so we use 16 bits to represent a CAN id of which only
+     the 11 LSB are used.
+  */
+  typedef unsigned short ID;
+
+  //! The data type
+  typedef unsigned char Data;
+
+  //! The field of data
+  typedef Data DataField[8];
+
+  //! The data field type
+  typedef unsigned char DataLength;
+
 protected:
 
   //! The ID of the node origin
-  devCANID         canid;
-  //! The lenght of the message in bytes
-  size_t          nbytes;
+  devCANFrame::ID id;
+
   //! The message (8 bytes)
-  unsigned char bytes[8];
+  devCANFrame::DataField data;
   
+  //! The lenght of the message in bytes
+  devCANFrame::DataLength nbytes;
+
 public:
 
   //! Default constructor
@@ -60,19 +72,21 @@ public:
   /**
      Set the id of the CAN frame and the message
   */
-  devCANFrame( devCANID canid, unsigned char bytes[8], size_t nbytes );
+  devCANFrame( devCANFrame::ID canid, 
+	       devCANFrame::DataField data, 
+	       devCANFrame::DataLength nbytes );
   
   //! Return the identifier of the frame
-  devCANID               Id() const { return canid; }
+  devCANFrame::ID GetID() const { return id; }
   
   //! Return the length in bytes of the data
-  size_t             Length() const { return nbytes; }
+  devCANFrame::DataLength GetLength() const { return nbytes; }
 
   //! Return a pointer to the data
-  unsigned char*       Data()       { return bytes;  }
+  devCANFrame::Data* GetData() { return  &(data[0]); }
 
   //! Return a const pointer to the data
-  const unsigned char* Data() const { return bytes;  }
+  const devCANFrame::Data* GetData() const { return  &(data[0]); }
 
   //! Output the can frame
   /**
@@ -81,24 +95,19 @@ public:
      \param cf[in] A CAN frame
   */
   friend std::ostream& operator<<( std::ostream& os, const devCANFrame& cf ){
-    os << "ID: 0x" 
-       << std::hex << std::setfill('0') << std::setw(4) << cf.canid << std::endl
-       << "Length: " << cf.nbytes << std::endl 
+    os <<"ID: 0x" 
+       <<std::hex<<std::setfill('0')<<std::setw(4)<<(int)cf.GetID()<<std::endl
+       << "Length: " << (int)cf.GetLength() << std::endl 
        << "Data: ";
-    for(size_t i=0; i<cf.nbytes; i++)
+    for(devCANFrame::DataLength i=0; i<cf.GetLength(); i++)
       os << "0x" << std::hex << std::setfill('0') << std::setw(2) 
-	 << (int)cf.bytes[i] << " ";
+	 << (int)(cf.data[i]) << " ";
     os << std::dec;
     return os;
   }
   
 };
 
-//! The different CAN rates 
-enum devCANRate{ devCAN_150 =150000, 
-		 devCAN_300 =300000, 
-		 devCAN_1000=1000000 };
-  
 //! Generic CAN bus
 /**
    The only thing this class does is to define the interface that must be
@@ -106,11 +115,25 @@ enum devCANRate{ devCAN_150 =150000,
    actual device driver.
 */
 class devCAN {
+public:
+
+  //! The different CAN rates 
+  enum Rate { RATE_150 =150000, 
+	      RATE_300 =300000, 
+	      RATE_1000=1000000 };
+  
+  //! The different CAN rates 
+  enum Errno { ESUCCESS, 
+	       EFAILURE };
+  
+  enum Flags{ MSG_NOFLAG   = 0x00,
+              MSG_CONFIRM  = 0x01,   // ask for a confirmation 
+	      MSG_DONTWAIT = 0x02 }; // enables non-blocking operation
 
 protected:
 
   //! The rate of the device
-  devCANRate rate;
+  devCAN::Rate rate;
 
 public:
 
@@ -119,16 +142,16 @@ public:
      Initialize a CAN device with the given rate
      \param rate The CAN rate
   */
-  devCAN( devCANRate rate );
+  devCAN( devCAN::Rate rate );
 
   //! Default destructor
   virtual ~devCAN();
 
   //! Open the CAN device
-  virtual bool Open() = 0;
+  virtual devCAN::Errno Open() = 0;
 
   //! Close the CAN device
-  virtual bool Close() = 0;
+  virtual devCAN::Errno Close() = 0;
 
   //! Send a CAN frame on the bus
   /**
@@ -136,7 +159,8 @@ public:
      \param frame[in] The CAN frame to send on the bus
      \param block Block the device until the operation is completed
   */
-  virtual bool Send( const devCANFrame& frame, bool block=false ) = 0;
+  virtual devCAN::Errno Send( const devCANFrame& frame, 
+			      devCAN::Flags flags = devCAN::MSG_NOFLAG ) = 0;
 
   //! Receive a CAN frame
   /**
@@ -144,7 +168,8 @@ public:
      \param frame[out] The CAN frame received from the bus
      \param block Block the device until a CAN frame is received
   */
-  virtual bool Recv( devCANFrame& frame, bool block=false ) = 0;
+  virtual devCAN::Errno Recv( devCANFrame& frame, 
+			      devCAN::Flags flags = devCAN::MSG_NOFLAG ) = 0;
   
 };
 
