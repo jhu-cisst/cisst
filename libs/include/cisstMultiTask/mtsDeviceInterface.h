@@ -81,10 +81,6 @@ class CISST_EXPORT mtsDeviceInterface: public cmnGenericObject
     friend class mtsDevice;
     friend class mtsTask;
     friend class mtsTaskPeriodic;
-    // For ICE proxy objects
-    friend class mtsDeviceProxy;
-    friend class mtsDeviceInterfaceProxyServer;
-    friend class mtsDeviceInterfaceProxyClient;
     
  public:
 

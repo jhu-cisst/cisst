@@ -26,12 +26,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsTask.h>
 #include <cisstMultiTask/mtsTaskInterface.h>
 
-#if CISST_MTS_HAS_ICE
-#include <cisstMultiTask/mtsDeviceProxy.h>
-#include <cisstMultiTask/mtsTaskManagerProxyServer.h>
-#include <cisstMultiTask/mtsTaskManagerProxyClient.h>
-#endif // CISST_MTS_HAS_ICE
-
 CMN_IMPLEMENT_SERVICES(mtsTaskManager);
 
 
@@ -40,13 +34,6 @@ mtsTaskManager::mtsTaskManager():
     DeviceMap("Devices"),
     JGraphSocket(osaSocket::TCP),
     JGraphSocketConnected(false)
-#if CISST_MTS_HAS_ICE
-    ,
-    TaskManagerTypeMember(TASK_MANAGER_LOCAL),
-    TaskManagerCommunicatorID("TaskManagerServerSender"),
-    ProxyGlobalTaskManager(NULL),
-    ProxyTaskManagerClient(NULL)
-#endif
 {
     __os_init();
     TaskMap.SetOwner(*this);
@@ -74,21 +61,6 @@ mtsTaskManager::~mtsTaskManager()
 void mtsTaskManager::Cleanup(void)
 {
     this->Kill();
-
-#if CISST_MTS_HAS_ICE
-    // Clean up resources allocated for proxy objects.
-    if (ProxyGlobalTaskManager) {
-        ProxyGlobalTaskManager->Stop();
-        osaSleep(200 * cmn_ms);
-        delete ProxyGlobalTaskManager;
-    }
-
-    if (ProxyTaskManagerClient) {
-        ProxyTaskManagerClient->Stop();
-        osaSleep(200 * cmn_ms);
-        delete ProxyTaskManagerClient;
-    }
-#endif
 
     JGraphSocket.Close();
     JGraphSocketConnected = false;
@@ -327,11 +299,6 @@ void mtsTaskManager::ToStreamDot(std::ostream & outputStream) const {
 bool mtsTaskManager::Connect(const std::string & userTaskName, const std::string & requiredInterfaceName,
                              const std::string & resourceTaskName, const std::string & providedInterfaceName)
 {
-#if CISST_MTS_HAS_ICE
-    mtsTask * clientTask = 0;
-    bool requestServerSideConnect = false; // True if the resource task is at remote
-#endif //CISST_MTS_HAS_ICE
-
     const UserType fullUserName(userTaskName, requiredInterfaceName);
     const ResourceType fullResourceName(resourceTaskName, providedInterfaceName);
     const AssociationType association(fullUserName, fullResourceName);
@@ -369,44 +336,6 @@ bool mtsTaskManager::Connect(const std::string & userTaskName, const std::string
         // (a SERVER task should not reach here).
         resourceInterface = resourceDevice->GetProvidedInterface(providedInterfaceName);
     }
-#if CISST_MTS_HAS_ICE
-    else {
-        // If we cannot find, the resource interface should be at remote or doesn't exist.
-        switch (GetTaskManagerType()) {
-            case TASK_MANAGER_LOCAL:
-                CMN_LOG_CLASS_INIT_ERROR << "Connect: Cannot find a task or device named " << resourceTaskName << std::endl;
-                return false;
-
-            case TASK_MANAGER_SERVER:
-                CMN_LOG_CLASS_INIT_ERROR << "Connect: Global task manager should not call this method." << std::endl;
-                return false;
-
-            case TASK_MANAGER_CLIENT:
-                // Assume that a user task has to be of mtsTask type.
-                clientTask = dynamic_cast<mtsTask*>(userTask);
-                if (!clientTask) {
-                    CMN_LOG_CLASS_INIT_ERROR << "Connect: ." << std::endl;
-                    return false;
-                }
-
-                // Try to get the information about the provided interface at server side
-                // from the global task manager. If successful, the provided interface proxy
-                // is created and connection across networks is established.
-                // Note that a CLIENT task has to be able to get resource interface pointer 
-                // here (a SERVER task should not reach here).
-                resourceInterface = ProxyTaskManagerClient->GetProvidedInterfaceProxy(
-                    resourceTaskName, providedInterfaceName, 
-                    userTaskName, requiredInterfaceName, 
-                    clientTask);
-                if (!resourceInterface) {
-                    CMN_LOG_CLASS_INIT_ERROR << "Connect through networks: Cannot find the task or device named " << resourceTaskName << std::endl;
-                    return false;
-                }
-
-                requestServerSideConnect = true;
-        }
-    }
-#endif // CISST_MTS_HAS_ICE
 
     // check the interface pointer we got
     if (resourceInterface == 0) {
@@ -431,67 +360,6 @@ bool mtsTaskManager::Connect(const std::string & userTaskName, const std::string
         JGraphSocket.Send(message);
     }
 
-#if CISST_MTS_HAS_ICE
-    if (requestServerSideConnect) {
-        // At client side, if the connection between the actual required interface and 
-        // the provided interface proxy is established successfully, request the server
-        // that it connects the actual provided interface with the required interface proxy.
-        // This server-side connection consists of two steps: 
-        // a. CreateClientProxies() and b. ConnectServerSide()
-
-        // a. CreateClientProxies()
-        // Let the server create client proxy objects (e.g. client task proxy, required 
-        // interface proxy). Note that this command contains the serialized argument 
-        // prototypes of the actual event handlers'.
-
-        //
-        //
-        //  TODO: EXTRACT AND TRANSMIT THE EVENT HANDLER'S ARGUMENT PROTOTYPES
-        //
-        //
-
-        if (!clientTask->SendCreateClientProxies(requiredInterfaceName,
-                                                 userTaskName, requiredInterfaceName,
-                                                 resourceTaskName, providedInterfaceName))
-        {
-            CMN_LOG_CLASS_INIT_ERROR << "Connect: server side proxy creation failed." << std::endl;
-            return false;
-        }
-
-        // b. ConnectServerSide()
-        // Now that we have all the proxy objects for both sides (server and client),
-        // the remaining process is to simply connect two sets of interfaces--actual
-        // provided interface and required interface proxy at the server side and
-        // actual required interface and provided interface proxy at the client side.
-        if (!clientTask->SendConnectServerSide(requiredInterfaceName,
-                                               userTaskName, requiredInterfaceName,
-                                               resourceTaskName, providedInterfaceName))
-        {
-            CMN_LOG_CLASS_INIT_ERROR << "Connect: server side connection failed." << std::endl;
-            return false;
-        }
-
-        const std::string serverTaskProxyName = mtsDeviceProxy::GetServerTaskProxyName(
-            resourceTaskName, providedInterfaceName, userTaskName, requiredInterfaceName);
-        const std::string clientTaskProxyName = mtsDeviceProxy::GetClientTaskProxyName(
-            resourceTaskName, providedInterfaceName, userTaskName, requiredInterfaceName);
-
-        // update the command id.
-        clientTask->SendGetCommandId(requiredInterfaceName, serverTaskProxyName, 
-                                     clientTaskProxyName, providedInterfaceName);
-
-        // If the server side connection is successful, we should update the server-side
-        // event handler proxy id and enable event handler proxies.
-        if (!clientTask->SendUpdateEventHandlerId(requiredInterfaceName,
-                                                  serverTaskProxyName,
-                                                  clientTaskProxyName))
-        {
-            CMN_LOG_CLASS_INIT_ERROR << "Connect: event handler proxy update failed." << std::endl;
-            return false;
-        }
-    }
-#endif // CISST_MTS_HAS_ICE
-
     return true;
 }
 
@@ -501,39 +369,3 @@ bool mtsTaskManager::Disconnect(const std::string & userTaskName, const std::str
     CMN_LOG_CLASS_RUN_ERROR << "Disconnect not implemented!!!" << std::endl;
     return true;
 }
-
-#if CISST_MTS_HAS_ICE
-
-void mtsTaskManager::StartProxies()
-{
-    // Start the task manager proxy
-    if (TaskManagerTypeMember == TASK_MANAGER_SERVER) {        
-        // Convert a number into a string.
-        std::stringstream endpointInfo;
-        endpointInfo << "tcp -p " << BASE_PORT_NUMBER_TASK_MANAGER_LAYER;
-
-        ProxyGlobalTaskManager = new mtsTaskManagerProxyServer(
-            "TaskManagerServerAdapter", endpointInfo.str(), TaskManagerCommunicatorID);
-        ProxyGlobalTaskManager->Start(this);
-    } else {
-        CMN_LOG_CLASS_INIT_DEBUG << "GlobalTaskManagerIP: " << GlobalTaskManagerIP << std::endl;
-        CMN_LOG_CLASS_INIT_DEBUG << "ServerTaskIP: " << ServerTaskIP << std::endl;
-
-        // Convert a number into a string.
-        std::stringstream buffer;
-        buffer << ":default -h " << GlobalTaskManagerIP
-               << " -p " << BASE_PORT_NUMBER_TASK_MANAGER_LAYER;
-
-        ProxyTaskManagerClient = new mtsTaskManagerProxyClient(
-            buffer.str(), TaskManagerCommunicatorID);
-        ProxyTaskManagerClient->Start(this);
-
-        // For all tasks, create and run provided interface proxies.
-        TaskMapType::MapType::const_iterator it = TaskMap.GetMap().begin();
-        const TaskMapType::MapType::const_iterator itEnd = TaskMap.GetMap().end();
-        for (; it != itEnd; ++it) {
-            it->second->RunProvidedInterfaceProxy(ProxyTaskManagerClient, ServerTaskIP);
-        }
-    }
-}
-#endif // CISST_MTS_HAS_ICE

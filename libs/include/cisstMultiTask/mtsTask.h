@@ -44,10 +44,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsFunctionVoid.h>
 #include <cisstMultiTask/mtsTaskInterface.h>
 
-#if CISST_MTS_HAS_ICE
-#include <cisstMultiTask/mtsDeviceInterfaceProxy.h>
-#endif 
-
 #include <set>
 #include <map>
 
@@ -329,93 +325,6 @@ public:
 
     /*! Send a human readable description of the device. */
     void ToStream(std::ostream & outputStream) const;
-
-#if CISST_MTS_HAS_ICE
-    //-------------------------------------------------------------------------
-    //  Proxy Implementation Using ICE
-    //-------------------------------------------------------------------------
-protected:
-    /*! Task interface communicator ID */
-    const std::string TaskInterfaceCommunicatorID;
-
-    /*! Typedef to manage provided interface proxies of which type is 
-        mtsDeviceInterfaceProxyServer. This map is valid only if this task acts 
-        as a server task (or if this task has provided interfaces). */
-    typedef cmnNamedMap<mtsDeviceInterfaceProxyServer> ProvidedInterfaceProxyMapType;
-    ProvidedInterfaceProxyMapType ProvidedInterfaceProxies;
-
-    /*! Typedef to manage required interface proxies of which type is 
-        mtsDeviceInterfaceProxyClient. This map is valid only if this task acts 
-        as a client task (or if this task has required interfaces). */
-    typedef cmnNamedMap<mtsDeviceInterfaceProxyClient> RequiredInterfaceProxyMapType;
-    RequiredInterfaceProxyMapType RequiredInterfaceProxies;
-
-    /*! Assign a new port number for a new device interface proxy (see mtsProxyBaseCommon.h) */
-    const std::string GetNewPortNumberAsString(const unsigned int id);
-
-public:
-    /*! Run proxies for required interfaces. Only a server task can call this method 
-        because a client task has actual required interfaces while a server task has 
-        actual provided interfaces.
-        Note that all provided interface proxy objects in all tasks are created all at 
-        once because they should act as a server; they have to listen the client's
-        connection. */
-    void RunProvidedInterfaceProxy(mtsTaskManagerProxyClient * globalTaskManagerProxy,
-                                   const std::string & serverTaskIP);
-
-    /*! Run proxies for required interfaces. only a server task can call this method 
-        because a client task has actual required interfaces while a server task has 
-        actual provided interfaces.
-        In contrast to RunProvidedInterfaceProxy() method, when this method is called, 
-        only one required interface proxy object is created. Then it connects to the
-        provided interface proxy specified by the two arguments. */
-    void RunRequiredInterfaceProxy(mtsTaskManagerProxyClient * globalTaskManagerProxy,
-                                   const std::string & requiredInterfaceName,
-                                   const std::string & endpointInfo, 
-                                   const std::string & communicatorID);
-
-    /*! Getters */
-    mtsDeviceInterfaceProxyServer * GetProvidedInterfaceProxy(const std::string & providedInterfaceName) const;
-    mtsDeviceInterfaceProxyClient * GetRequiredInterfaceProxy(const std::string & requiredInterfaceName) const;
-
-    //-------------------------------------------
-    //  Send Methods
-    //-------------------------------------------
-    /*! Get the information on the provided interface as a set of string through
-        required interface proxy. */
-    bool SendGetProvidedInterfaceInfo(
-        const std::string & requiredInterfaceProxyName,
-        const std::string & providedInterfaceName,
-        mtsDeviceInterfaceProxy::ProvidedInterfaceInfo & providedInterfaceInfo);
-
-    /*! Create server-side proxy objects. */
-    bool SendCreateClientProxies(
-        const std::string & requiredInterfaceProxyName,
-        const std::string & userTaskName, const std::string & requiredInterfaceName,
-        const std::string & resourceTaskName, const std::string & providedInterfaceName);
-
-    /*! Connect the actual provided interface with the required interface proxy 
-        at server side. */
-    bool SendConnectServerSide(
-        const std::string & requiredInterfaceProxyName,
-        const std::string & userTaskName, const std::string & requiredInterfaceName,
-        const std::string & resourceTaskName, const std::string & providedInterfaceName);
-
-    /*! Update event handler proxy id at server side and enable them if used. 
-        Proxy id is replaced with a pointer to an actual event generator command 
-        object at client side. */
-    bool SendUpdateEventHandlerId(
-        const std::string & requiredInterfaceProxyName,
-        const std::string & serverTaskProxyName,
-        const std::string & clientTaskProxyName);
-
-    /*! Update command id at client side. Command id is replaced with a pointer
-        to a function proxy at server side. */
-    void SendGetCommandId(const std::string & requiredInterfaceName, 
-                          const std::string & serverTaskProxyName,
-                          const std::string & clientTaskProxyName,
-                          const std::string & providedInterfaceName);
-#endif // CISST_MTS_HAS_ICE
 };
 
 
