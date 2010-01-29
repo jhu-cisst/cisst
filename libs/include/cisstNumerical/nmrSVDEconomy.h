@@ -841,11 +841,23 @@ inline CISSTNETLIB_INTEGER nmrSVDEconomy(vctDynamicMatrixBase<_matrixOwnerType, 
         VtPtr = dataFriend.U().Pointer();
     }
 
+    // for versions based on gfortran/lapack, CISSTNETLIB_VERSION is
+    // defined
+#ifdef CISSTNETLIB_VERSION
     dgesvd_(&m_Jobu, &m_Jobvt, &m_Ldu, &m_Ldvt,
             A.Pointer(), &m_Lda, dataFriend.S().Pointer(),
             UPtr, &m_Ldu,
             VtPtr, &m_Ldvt,
             dataFriend.Workspace().Pointer(), &m_Lwork, &Info);
+#else
+   ftnlen jobu_len = (ftnlen)1, jobvt_len = (ftnlen)1;
+   la_dzlapack_MP_sgesvd_nat(&m_Jobu, &m_Jobvt, &m_Ldu, &m_Ldvt,
+                             A.Pointer(), &m_Lda, dataFriend.S().Pointer(),
+                             UPtr, &m_Ldu,
+                             VtPtr, &m_Ldvt,
+                             dataFriend.Workspace().Pointer(), &m_Lwork, &Info,
+                             jobu_len, jobvt_len);
+#endif
 
     return Info;
 }
