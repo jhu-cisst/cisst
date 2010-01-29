@@ -32,10 +32,12 @@ svlFilterDisparityMapToSurface::svlFilterDisparityMapToSurface() :
     svlFilterBase(),
     cmnGenericObject(),
     ROI(0, 0, 0, 0),
-    BaseLine(-10.0f),
+    BaseLine(10.0f),
+	RightCameraPosX(10.0f),
     FocalLength(600.0f),
     PPX(320.0f),
-    PPY(240.0f)
+    PPY(240.0f),
+	DisparityCorrection(0.0f)
 {
     AddSupportedType(svlTypeImageMonoFloat, svlTypeImage3DMap);
 
@@ -89,13 +91,14 @@ int svlFilterDisparityMapToSurface::ProcessFrame(ProcInfo* procInfo, svlSample* 
             for (i = l; i <= r; i ++) {
                 fi = static_cast<float>(i);
 
-                disp = *disparities; disparities ++;
+                disp = (*disparities) - DisparityCorrection; disparities ++;
                 if (disp < 0.01f) disp = 0.01f;
                 ratio = bl / disp;
 
-                *vectors = (fi - PPX)  * ratio; vectors ++; // X
-                *vectors = (fj - PPY)  * ratio; vectors ++; // Y
-                *vectors = FocalLength * ratio; vectors ++; // Z
+				// Disparity map corresponds to right camera
+                *vectors = (fi - PPX)  * ratio - RightCameraPosX; vectors ++; // X
+                *vectors = (fj - PPY)  * ratio;					  vectors ++; // Y
+                *vectors = FocalLength * ratio;					  vectors ++; // Z
             }
 
             disparities += vertstride;
@@ -122,10 +125,12 @@ int svlFilterDisparityMapToSurface::SetCameraGeometry(const svlCameraGeometry & 
         geometry.GetExtrinsics(extrinsics[SVL_RIGHT], SVL_RIGHT) != SVL_OK) return SVL_FAIL;
     if (geometry.IsCameraPairRectified(SVL_LEFT, SVL_RIGHT) != SVL_YES) return SVL_FAIL;
 
-    BaseLine =    static_cast<float>(extrinsics[SVL_LEFT].T.X() - extrinsics[SVL_RIGHT].T.X());
-    FocalLength = static_cast<float>(intrinsics[SVL_RIGHT].fc[0]);
-    PPX =         static_cast<float>(intrinsics[SVL_RIGHT].cc[0]);
-    PPY =         static_cast<float>(intrinsics[SVL_RIGHT].cc[1]);
+    BaseLine =			  static_cast<float>(extrinsics[SVL_LEFT].T.X() - extrinsics[SVL_RIGHT].T.X());
+	RightCameraPosX =	  static_cast<float>(extrinsics[SVL_RIGHT].T.X());
+    FocalLength =		  static_cast<float>(intrinsics[SVL_RIGHT].fc[0]);
+    PPX =                 static_cast<float>(intrinsics[SVL_RIGHT].cc[0]);
+    PPY =                 static_cast<float>(intrinsics[SVL_RIGHT].cc[1]);
+	DisparityCorrection = static_cast<float>(intrinsics[SVL_LEFT].cc[0]) - PPX;
 
     return SVL_OK;
 }

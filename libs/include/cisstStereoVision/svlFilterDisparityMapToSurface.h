@@ -50,9 +50,11 @@ protected:
 private:
     svlRect ROI;
     float BaseLine;
+    float RightCameraPosX;
     float FocalLength;
     float PPX;
     float PPY;
+    float DisparityCorrection;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterDisparityMapToSurface)

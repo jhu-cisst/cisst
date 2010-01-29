@@ -814,14 +814,14 @@ void svlStereoDPMono::RenderDisparityMap(int *disparitymap)
 
     int *output;
     unsigned short *dmap = DisparityMap;
-    int i, j, k, l, val, mindisp;
+    int i, j, k, l, val, dispoffset;
 
-    if (DisparityInterpolation) mindisp = MinDisparity << 2;
-    else mindisp = MinDisparity;
+    if (DisparityInterpolation) dispoffset = (MinDisparity + PrincipalPointOffset) << 2;
+    else dispoffset = MinDisparity + PrincipalPointOffset;
 
     for (j = 0; j < SurfaceHeight; j ++) {
         for (i = 0; i < SurfaceWidth; i ++) {
-            val = *dmap + mindisp;
+            val = *dmap + dispoffset;
             output = disparitymap;
             for (l = 0; l < scale; l ++) {
                 for (k = 0; k < scale; k ++) {
