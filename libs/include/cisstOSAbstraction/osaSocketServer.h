@@ -34,7 +34,7 @@ http://www.cisst.org/cisst/license.txt.
     osaSocket *server;
     do {
         server = socketServer.Accept();
-    } while (server != NULL);
+    } while (server != 0);
     \endcode
 
   \note Please refer to osAbstractionTutorial/sockets for usage examples.
@@ -79,8 +79,9 @@ public:
         \return true if connected */
     bool IsConnected(osaSocket * socket);
 
-    /*! \return A socket to read from or 0 on failure */
-    osaSocket * Select(void);
+    /*! \param timeoutSec Timeout in seconds.
+        \return A socket to read from or 0 on failure */
+    osaSocket * Select(const double timeoutSec = 0);
 
     /*! \brief Close the socket */
     void Close(void);

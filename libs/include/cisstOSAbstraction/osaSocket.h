@@ -61,7 +61,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaExport.h>
 
 
-#define OSA_SOCKET_WITH_STREAM
+//#define OSA_SOCKET_WITH_STREAM
 
 #ifdef OSA_SOCKET_WITH_STREAM
 // forward declaration
@@ -220,7 +220,7 @@ public:
     /*! \brief Receive a byte array via the socket
         \param bufrecv Buffer to store received data
         \param maxlen Maximum number of bytes to receive
-        \param timeoutSec Timeout in seconds. 
+        \param timeoutSec Timeout in seconds.
         \return Number of bytes received. 0 if timeout is reached and/or no data is received. */
     int Receive(char * bufrecv, unsigned int maxlen, const double timeoutSec = 0.0);
 

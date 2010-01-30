@@ -185,15 +185,15 @@ int osaSocket::Send(const char * bufsend, unsigned int msglen)
 }
 
 
-int osaSocket::Receive(char * bufrecv, unsigned int maxlen, const double timeoutSec )
+int osaSocket::Receive(char * bufrecv, unsigned int maxlen, const double timeoutSec)
 {
     fd_set readfds;
     FD_ZERO(&readfds);
     FD_SET(SocketFD, &readfds);
 
-    long second = floor (timeoutSec);
-    long usec = floor ( (timeoutSec - second) *1e6);
-    timeval timeout = { second , usec };
+    long sec = static_cast<long>(floor(timeoutSec));
+    long usec = static_cast<long>((timeoutSec - sec) * 1e6);
+    timeval timeout = { sec, usec };
 
     /* Notes for QNX from the QNX library reference (Min)
      *
@@ -205,7 +205,7 @@ int osaSocket::Receive(char * bufrecv, unsigned int maxlen, const double timeout
      * condition is satisfied. This may differ from other implementations
      * where only one thread may unblock.
      */
-    int retval = select(SocketFD + 1, &readfds, NULL, NULL, &timeout);
+    int retval = select(SocketFD + 1, &readfds, 0, 0, &timeout);
     if (retval > 0) {
         struct sockaddr_in fromAddr;
 
@@ -217,7 +217,7 @@ int osaSocket::Receive(char * bufrecv, unsigned int maxlen, const double timeout
         }
         if (retval > 0) {
             if (static_cast<unsigned int>(retval) < maxlen - 1) {
-                bufrecv[retval] = 0;  // NULL terminate the string
+                bufrecv[retval] = '\0';  // terminate the string
                 CMN_LOG_CLASS_RUN_DEBUG << "Receive: received " << retval << " bytes: " << bufrecv << std::endl;
             } else {
                 CMN_LOG_CLASS_RUN_WARNING << "Receive: received more than maximum length" << std::endl;

@@ -122,37 +122,44 @@ bool osaSocketServer::IsConnected(osaSocket * socket)
 }
 
 
-osaSocket * osaSocketServer::Select(void)
+osaSocket * osaSocketServer::Select(const double timeoutSec)
 {
     fd_set readfds;
     FD_ZERO(&readfds);
-    timeval timeout = { 0, 0 };
+    int retval;
     char buffer;
+
+    long sec = static_cast<long>(floor(timeoutSec));
+    long usec = static_cast<long>((timeoutSec - sec) * 1e6);
+    timeval timeout = { sec, usec };
 
     std::map<int, osaSocket *>::iterator it;
     for (it = Clients.begin(); it != Clients.end(); it++) {
-        if (send(it->first, &buffer, 0, 0) == -1) {
-            it->second->Close();
-            delete it->second;
-            Clients.erase(it);
-            if (!Clients.size()) {
-                return 0;
-            }
-        } else {
+        // should use select to check for writability
+//        retval = send(it->first, &buffer, 0, 0);
+//        if (retval == -1) {
+//            it->second->Close();
+//            delete it->second;
+//            Clients.erase(it);
+//            if (Clients.size() == 0) {
+//                return 0;
+//            }
+//        } else {
             FD_SET(it->first, &readfds);
-            int retval = select(it->first + 1, &readfds, NULL, NULL, &timeout);
+            retval = select(it->first + 1, &readfds, 0, 0, &timeout);
             if (retval > 0) {
-                if (recv(it->first, &buffer, 1, MSG_PEEK) == -1) {
+                retval = recv(it->first, &buffer, 1, MSG_PEEK);
+                if (retval == -1) {
                     it->second->Close();
                     delete it->second;
                     Clients.erase(it);
-                    if (!Clients.size()) {
+                    if (Clients.size() == 0) {
                         return 0;
                     }
                 }
                 return it->second;
             }
-        }
+//        }
     }
     return 0;
 }
@@ -164,8 +171,11 @@ void osaSocketServer::CloseClients(void)
     for (it = Clients.begin(); it != Clients.end(); it++) {
         it->second->Close();
         delete it->second;
+        Clients.erase(it);
+        if (Clients.size() == 0) {
+            return;
+        }
     }
-	Clients.clear();
 }
 
 

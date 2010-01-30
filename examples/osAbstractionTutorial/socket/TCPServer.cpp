@@ -58,12 +58,12 @@ int main(void)
 
     while (isServerConnected) {
         socket = socketServer.Accept();
-        if (socket != NULL) {
+        if (socket != 0) {
             socket->Send("Server has accepted your request");
         }
 
         socket = socketServer.Select();
-        if (socket == NULL) {
+        if (socket == 0) {
             continue;
         }
 
