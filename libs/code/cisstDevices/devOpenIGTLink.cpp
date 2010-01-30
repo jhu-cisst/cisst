@@ -34,7 +34,7 @@ devOpenIGTLink::devOpenIGTLink(const std::string & taskName, const double period
     Port = port;
     IsConnected = false;
     SocketServer = new osaSocketServer();
-    Socket = NULL;
+    Socket = 0;
     Initialize();
 }
 
@@ -49,6 +49,7 @@ devOpenIGTLink::devOpenIGTLink(const std::string & taskName, const double period
     Host = host;
     Port = port;
     IsConnected = false;
+    SocketServer = 0;
     Socket = new osaSocket();
     Initialize();
 }
@@ -57,9 +58,9 @@ devOpenIGTLink::devOpenIGTLink(const std::string & taskName, const double period
 devOpenIGTLink::~devOpenIGTLink(void)
 {
     CMN_LOG_CLASS_INIT_VERBOSE << "~devOpenIGTLink: closing hanging connections" << std::endl;
-    Socket->Close();
+    if (Socket) Socket->Close();
     delete Socket;
-    SocketServer->Close();
+    if (SocketServer) SocketServer->Close();
     delete SocketServer;
 }
 
