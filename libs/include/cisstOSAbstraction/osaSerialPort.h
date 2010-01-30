@@ -195,7 +195,7 @@ public:
       based on the parameters previously set (either the defaults of
       those defined by SetBaudRate, SetCharacterSize,
       SetParityChecking, SetHardwareFlowControl, ...). */
-    bool Open(void);
+    bool Open(bool blocking = false);
 
     bool Configure(void);
 
@@ -207,16 +207,18 @@ public:
     }
 
     /*! Send raw data. */
+    // PK: why overload for char and uchar?
     int Write(const char * data, int nBytes);
     int Write(const unsigned char * data, int nBytes);
     inline int Write(const std::string & data) {
         return this->Write(data.c_str(), data.size());
     }
     
-    /*! Receive raw data, non blocking. */
+    /*! Receive raw data. */
+    // PK: why overload for char and uchar?
     int Read(char * data, int nBytes);
     int Read(unsigned char * data, int nBytes);
-  
+
     /*! Sends a serial break for a given duration in seconds.
       
      * On Linux, if the break duration is set to 0, the actual
@@ -252,6 +254,7 @@ private:
     HANDLE PortHandle;
     OVERLAPPED OverlappedStructureRead, OverlappedStructureWrite;
     COMMTIMEOUTS TimeOuts;
+    bool isBlocking;
 #else // Unix
     int FileDescriptor;
 #endif  

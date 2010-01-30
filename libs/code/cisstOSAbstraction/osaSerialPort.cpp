@@ -66,20 +66,21 @@ std::string osaSerialPort::SetPortNumber(unsigned int portNumber) {
 
 
 #if (CISST_OS == CISST_WINDOWS)
-bool osaSerialPort::Open(void) {
+bool osaSerialPort::Open(bool blocking) {
     CMN_LOG_CLASS_INIT_VERBOSE << "Start Open for port " << PortName << std::endl;
     // check that the port is not already opened
     if (IsOpenedFlag) {
         CMN_LOG_CLASS_INIT_ERROR << "Can not re-open an opened port " << PortName << std::endl;
         return false;
     }
+    isBlocking = blocking;
     // create the port handle
     PortHandle = CreateFile(PortName.c_str(),
                             GENERIC_READ | GENERIC_WRITE,
                             0, // do not share access
                             0, // handle cannot be inherited
                             OPEN_EXISTING,
-                            FILE_FLAG_OVERLAPPED,
+                            isBlocking?NULL:FILE_FLAG_OVERLAPPED,
                             NULL // always for serial port
                             );
     if (PortHandle == INVALID_HANDLE_VALUE) {
@@ -90,19 +91,21 @@ bool osaSerialPort::Open(void) {
     }
 
     // create the overlapped events, remember to close them
-    OverlappedStructureRead.hEvent = CreateEvent(NULL, true, false, NULL);
-    if (OverlappedStructureRead.hEvent == NULL) {
-        CMN_LOG_CLASS_INIT_ERROR << "Error creating overlapped read event handle for " << PortName << std::endl;
-        return false;
-    } else {
-        CMN_LOG_CLASS_INIT_VERBOSE << "Correct overlapped read event handle for " << PortName << std::endl;
-    }
-    OverlappedStructureWrite.hEvent = CreateEvent(NULL, true, false, NULL);
-    if (OverlappedStructureWrite.hEvent == NULL) {
-        CMN_LOG_CLASS_INIT_ERROR << "Error creating overlapped write event handle for " << PortName << std::endl;
-        return false;
-    } else {
-        CMN_LOG_CLASS_INIT_VERBOSE << "Correct overlapped write event handle for " << PortName << std::endl;
+    if (!isBlocking) {
+        OverlappedStructureRead.hEvent = CreateEvent(NULL, true, false, NULL);
+        if (OverlappedStructureRead.hEvent == NULL) {
+            CMN_LOG_CLASS_INIT_ERROR << "Error creating overlapped read event handle for " << PortName << std::endl;
+             return false;
+        } else {
+            CMN_LOG_CLASS_INIT_VERBOSE << "Correct overlapped read event handle for " << PortName << std::endl;
+        }
+        OverlappedStructureWrite.hEvent = CreateEvent(NULL, true, false, NULL);
+        if (OverlappedStructureWrite.hEvent == NULL) {
+            CMN_LOG_CLASS_INIT_ERROR << "Error creating overlapped write event handle for " << PortName << std::endl;
+            return false;
+        } else {
+            CMN_LOG_CLASS_INIT_VERBOSE << "Correct overlapped write event handle for " << PortName << std::endl;
+        }
     }
     // configure using the current parameters (baud rate, etc.)
     IsOpenedFlag = true;
@@ -112,7 +115,7 @@ bool osaSerialPort::Open(void) {
 #endif
 
 #if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_QNX)
-bool osaSerialPort::Open(void) {
+bool osaSerialPort::Open(bool) {
     CMN_LOG_CLASS_INIT_VERBOSE << "Start Open for port " << this->PortName << std::endl;
     // check that the port is not already opened
     if (this->IsOpenedFlag) {
@@ -145,12 +148,14 @@ bool osaSerialPort::Open(void) {
 bool osaSerialPort::Close(void)
 {
     if (IsOpenedFlag) {
-        // close event to avoid leak
-        if (OverlappedStructureRead.hEvent != NULL) {
-            CloseHandle(OverlappedStructureRead.hEvent);
-        }
-        if (OverlappedStructureWrite.hEvent != NULL) {
-            CloseHandle(OverlappedStructureWrite.hEvent);
+        if (!isBlocking) {
+            // close event to avoid leak
+            if (OverlappedStructureRead.hEvent != NULL) {
+                CloseHandle(OverlappedStructureRead.hEvent);
+            }
+            if (OverlappedStructureWrite.hEvent != NULL) {
+                CloseHandle(OverlappedStructureWrite.hEvent);
+            }
         }
         // close port handle
         CloseHandle(PortHandle);
@@ -240,18 +245,34 @@ bool osaSerialPort::Configure(void) {
             CMN_LOG_CLASS_INIT_ERROR << CMN_LOG_DETAILS << "Unable to apply current settings for " << PortName << std::endl;
             return false;
         }
-        
-        // set up for overlapped I/O
-        TimeOuts.ReadIntervalTimeout = MAXDWORD ;
-        TimeOuts.ReadTotalTimeoutMultiplier = 0;
-        TimeOuts.ReadTotalTimeoutConstant = 0;
-        TimeOuts.WriteTotalTimeoutMultiplier = 0;
+
+        if (isBlocking) {
+            // some reasonable values for non-overlapped (blocking) I/O, values in milliseconds
+            // Allow 20 msec between consecutive characters
+            TimeOuts.ReadIntervalTimeout = 20;
+            // Read timeout = 2*NBytes + 10
+            TimeOuts.ReadTotalTimeoutMultiplier = 2;
+            TimeOuts.ReadTotalTimeoutConstant = 10;
+            // Write timeout = 2*NBytes + 10
+            TimeOuts.WriteTotalTimeoutMultiplier = 2;
+            TimeOuts.WriteTotalTimeoutConstant = 10;
+        }
+        else {
+            // set up for overlapped (non-blocking) I/O
+            // Read operation returns immediately
+            TimeOuts.ReadIntervalTimeout = MAXDWORD ;
+            TimeOuts.ReadTotalTimeoutMultiplier = 0;
+            TimeOuts.ReadTotalTimeoutConstant = 0;
+            // Total timeouts not used for writes
+            TimeOuts.WriteTotalTimeoutMultiplier = 0;
+            TimeOuts.WriteTotalTimeoutConstant = 0;
+        }
         SetCommTimeouts(PortHandle, &TimeOuts);
 
         // get any early notifications
-        SetCommMask(PortHandle, EV_RXCHAR);
+        //SetCommMask(PortHandle, EV_RXCHAR);
   
-        // set comm buffer sizes
+        // set comm buffer sizes (input buffer = 2048, output buffer = 1024)
         SetupComm(PortHandle, 2048, 1024);
 
         // purge
@@ -413,6 +434,15 @@ int osaSerialPort::Write(const char * data, int nBytes)
         return 0;
     }
 
+    if (isBlocking) {
+        if (!WriteFile(PortHandle, data, nBytes, &numBytes, NULL)) {
+            // an error occurred
+            CMN_LOG_CLASS_RUN_ERROR << "Write error = " << GetLastError() << std::endl;
+            ClearCommError(PortHandle, NULL, NULL);
+        }
+        return numBytes;
+    }
+
     // Issue write.
     if (!WriteFile(PortHandle, data, nBytes, &numBytes, &OverlappedStructureWrite)) {
         if (GetLastError() != ERROR_IO_PENDING) {
@@ -463,6 +493,15 @@ int osaSerialPort::Write(const unsigned char * data, int nBytes)
     if (!this->IsOpenedFlag) {
         CMN_LOG_CLASS_RUN_ERROR << CMN_LOG_DETAILS << "Can not Write on a closed port " << this->PortName << std::endl;
         return 0;
+    }
+
+    if (isBlocking) {
+        if (!WriteFile(PortHandle, data, nBytes, &numBytes, NULL)) {
+            // an error occurred
+            CMN_LOG_CLASS_RUN_ERROR << "Write error = " << GetLastError() << std::endl;
+            ClearCommError(PortHandle, NULL, NULL);
+        }
+        return numBytes;
     }
 
     // Issue write.
@@ -519,6 +558,16 @@ int osaSerialPort::Read(char * data, int nBytes)
     if (!IsOpenedFlag) {
         CMN_LOG_CLASS_RUN_ERROR << CMN_LOG_DETAILS << "Can not Read from a closed port " << PortName << std::endl;
         return 0;
+    }
+
+    if (isBlocking) {
+        if (!ReadFile(PortHandle, data, nBytes, &dwLength, &OverlappedStructureRead)) {
+            // an error occurred
+            CMN_LOG_CLASS_RUN_ERROR << "Read error = " << GetLastError() << std::endl;
+            dwLength = -1;
+            ClearCommError(PortHandle, NULL, NULL);
+        }
+        return dwLength;
     }
 
     // only try to read number of bytes in queue 
@@ -599,6 +648,16 @@ int osaSerialPort::Read(unsigned char * data, int nBytes)
     if (!IsOpenedFlag) {
         CMN_LOG_CLASS_RUN_ERROR << CMN_LOG_DETAILS << "Can not Read from a closed port " << PortName << std::endl;
         return 0;
+    }
+
+    if (isBlocking) {
+        if (!ReadFile(PortHandle, data, nBytes, &dwLength, &OverlappedStructureRead)) {
+            // an error occurred
+            CMN_LOG_CLASS_RUN_ERROR << "Read error = " << GetLastError() << std::endl;
+            dwLength = -1;
+            ClearCommError(PortHandle, NULL, NULL);
+        }
+        return dwLength;
     }
 
     // only try to read number of bytes in queue 
