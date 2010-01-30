@@ -18,12 +18,14 @@
 # all source files
 SET(SOURCE_FILES
     osaMutexTest.cpp
+    osaSocketTest.cpp
     osaThreadTest.cpp
     )
 
 # all header files
 SET(HEADER_FILES
     osaMutexTest.h
+    osaSocketTest.h
     osaThreadTest.h
     )
 
@@ -38,4 +40,3 @@ TARGET_LINK_LIBRARIES(cisstOSAbstractionTests ${CMAKE_THREAD_LIBS_INIT})
 
 # To generate a CTest list of tests
 CISST_ADD_TESTS(cisstOSAbstractionTests)
-
