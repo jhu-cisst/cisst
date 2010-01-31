@@ -113,7 +113,7 @@ public:
     cmnPath(void);
 
     /*! Create a search path from a string. */
-    cmnPath(const std::string& path);
+    cmnPath(const std::string & path);
 
     /*! Destructor */
     virtual ~cmnPath(void) {}
