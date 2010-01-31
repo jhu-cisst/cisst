@@ -13,8 +13,6 @@
 # --- end cisst license ---
 
 
-# Backward compatibility
-CMAKE_MINIMUM_REQUIRED(VERSION 2.0)
 PROJECT(cisstLibs)
 
 
