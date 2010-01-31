@@ -35,7 +35,7 @@ class ClassRegisterTest(unittest.TestCase):
         
     def TestToString(self):
         """Test ToString."""
-        content = self.classRegister.ToString()
+        content = self.classRegister.__str__()
         print "Class register: ", content
 
     def TestIterator(self):

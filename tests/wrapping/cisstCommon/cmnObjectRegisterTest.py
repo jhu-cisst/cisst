@@ -41,7 +41,7 @@ class ObjectRegisterTest(unittest.TestCase):
         
     def TestToString(self):
         """Test ToString."""
-        content = self.objectRegister.ToString()
+        content = self.objectRegister.__str__()
         print "Object register: ", content
 
     def TestIterator(self):
