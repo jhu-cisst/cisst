@@ -27,7 +27,7 @@ To launch the IRE without the CISST Object Register, call:
 >>>ireMain.launchIrePython( False )
 
 Authors: Chris Abidin, Andrew LaMora, Peter Kazanzides
-Copyright 2004-2005
+Copyright 2004-2010
 ERC CISST
 Johns Hopkins University
 Baltimore, MD 21218
@@ -121,6 +121,7 @@ class ireMain(wx.Frame):
     ID_TESTINPUTBOX = wx.NewId()
     ID_OSCILLOSCOPE = wx.NewId()
     ID_LOAD_CISSTCOMMON = wx.NewId()
+    ID_LOAD_CISSTOSABSTRACTION = wx.NewId()
     ID_LOAD_CISSTVECTOR = wx.NewId()
     ID_LOAD_CISSTNUMERICAL = wx.NewId()
     ID_LOAD_CISSTMULTITASK = wx.NewId()
@@ -204,6 +205,7 @@ class ireMain(wx.Frame):
         
         menu = self.ImportMenu = wx.Menu()
         menu.Append(self.ID_LOAD_CISSTCOMMON, "Import cisst&Common", "Import cisstCommon")
+        menu.Append(self.ID_LOAD_CISSTCOMMON, "Import cisst&OSAbstraction", "Import cisstOSAbstraction")
         menu.Append(self.ID_LOAD_CISSTVECTOR, "Import cisst&Vector", "Import cisstVector")
         menu.Append(self.ID_LOAD_CISSTNUMERICAL, "Import cisst&Numerical", "Import cisstNumerical")
         menu.Append(self.ID_LOAD_CISSTMULTITASK, "Import cisst&MultiTask", "Import cisstMultiTask")
@@ -252,6 +254,7 @@ class ireMain(wx.Frame):
         wx.EVT_MENU(self, self.ID_TESTINPUTBOX, self.OnTestInputBox)
         wx.EVT_MENU(self, self.ID_OSCILLOSCOPE, self.OnOscilloscope)
         wx.EVT_MENU(self, self.ID_LOAD_CISSTCOMMON,  self.OnImportCisstCommon)
+        wx.EVT_MENU(self, self.ID_LOAD_CISSTOSABSTRACTION,  self.OnImportCisstOSAbstraction)
         wx.EVT_MENU(self, self.ID_LOAD_CISSTVECTOR,  self.OnImportCisstVector)
         wx.EVT_MENU(self, self.ID_LOAD_CISSTNUMERICAL,  self.OnImportCisstNumerical)
         wx.EVT_MENU(self, self.ID_LOAD_CISSTMULTITASK,  self.OnImportCisstMultiTask)
@@ -449,6 +452,12 @@ class ireMain(wx.Frame):
     def ImportCisstCommon(self):
         print "importing cisstCommon"
 		self.Shell.push("from cisstCommonPython import *")
+
+    def OnImportCisstOSAbstraction(self, event):
+        self.ImportCisstOSAbstraction()
+    def ImportCisstOSAbstraction(self):
+        print "importing cisstOSAbstraction"
+		self.Shell.push("from cisstOSAbstractionPython import *")
             
     def OnImportCisstVector(self, event):
         self.ImportCisstVector()
@@ -508,7 +517,7 @@ class ireMain(wx.Frame):
         if not self.ObjectRegister:
             if sys.modules.has_key('cisstCommonPython'):
                 import cisstCommonPython
-                self.ObjectRegister = cisstCommonPython.cmnObjectRegister
+                self.ObjectRegister = cisstCommonPython.cmnObjectRegister_Instance()
         if self.ObjectRegister:
             self.CheckRegisterContents()
         self.CheckScopeVariables()
@@ -516,7 +525,7 @@ class ireMain(wx.Frame):
 
 
     def CheckRegisterContents(self):
-        CurrentRegister = String.split(self.ObjectRegister.ToString())
+        CurrentRegister = String.split(self.ObjectRegister.__str__())
         if CurrentRegister != self.Register:
             self.UpdateList(self.RegisterContentsListCtrl, self.GetRegisterContents(self.TYPES_TO_EXCLUDE))
             self.Register = CurrentRegister
@@ -539,7 +548,7 @@ class ireMain(wx.Frame):
         Contents = {}
         VariableName = ""
         VariableType = ""
-        for tok in String.split(self.ObjectRegister.ToString(), " "):
+        for tok in String.split(self.ObjectRegister.__str__(), " "):
             #if starts with lparen, is type, else is name
             if tok.find('(')==0:  #this is a variabletype
                 VariableType = tok[1:tok.rfind(')')]
@@ -960,6 +969,8 @@ class ireMain(wx.Frame):
                 event.Enable(ireEmbedded)  # Really, should check for existence of TaskManager
             elif id == self.ID_LOAD_CISSTCOMMON:
                 event.Enable(ModuleAvailable('cisstCommonPython'))
+            elif id == self.ID_LOAD_CISSTOSABSTRACTION:
+                event.Enable(ModuleAvailable('cisstOSAbstractionPython'))
             elif id == self.ID_LOAD_CISSTVECTOR:
                 event.Enable(ModuleAvailable('cisstVectorPython'))
             elif id == self.ID_LOAD_CISSTNUMERICAL:
