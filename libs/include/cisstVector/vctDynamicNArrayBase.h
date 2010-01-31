@@ -414,7 +414,7 @@ public:
     inline ThisType & Assign(const value_type * elements)
     {
         nstride_type strides;
-        typename nsize_type::const_reverse_iterator sizesIter = this->Sizes().rbegin();
+        typename nsize_type::const_reverse_iterator sizesIter = this->sizes().rbegin();
         typename nstride_type::reverse_iterator stridesIter = strides.rbegin();
         const typename nstride_type::const_reverse_iterator stridesEnd = strides.rend();
         size_type sizesIter_value;
@@ -436,7 +436,7 @@ public:
         }
 
         const vctDynamicConstNArrayRef<value_type, DIMENSION> tmpRef(elements,
-                                                                      this->Sizes(),
+                                                                      this->sizes(),
                                                                       strides);
         this->Assign(tmpRef);
         return *this;

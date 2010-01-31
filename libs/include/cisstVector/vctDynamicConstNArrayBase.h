@@ -76,7 +76,7 @@ inline const _elementType &
 vctDynamicNArrayConstElementSlice(const vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, 1> & input,
                                   vct::index_type index);
 
-
+#ifndef SWIG
 /* Class used to specify the type of a slice based on the dimension.
    The class also provides a static method to select the right
    function to call.  Code couldn't be inline since it requires a full
@@ -133,7 +133,7 @@ public:
         }
     };
 };
-
+#endif // SWIG
 
 
 /*!
@@ -193,7 +193,9 @@ public:
     /*! \name The type of the object representing a slice of this
       nArray. Access is by (const and non const) reference. */
     //@{
+#ifndef SWIG
     typedef typename vctDynamicNArrayTypes<DIMENSION>::template SlicesTypes<_elementType> SlicesTypes;
+#endif // SWIG
     typedef typename SlicesTypes::ConstSliceRefType ConstSliceRefType;
     typedef typename SlicesTypes::SliceRefType SliceRefType;
     //@}

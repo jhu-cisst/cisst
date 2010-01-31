@@ -281,7 +281,8 @@ public:
     template <class __vectorOwnerType, typename __elementType>
     inline ThisType & ForceAssign(const vctDynamicConstVectorBase<__vectorOwnerType, __elementType> & other) {
         this->SetSize(other.size());
-        return this->Assign(other);
+        this->Assign(other);
+        return *this;
     }
 
     // documented in base class
@@ -289,7 +290,8 @@ public:
     inline ThisType & ForceAssign(const vctFixedSizeConstVectorBase<__size, __stride, __elementType, __dataPtrType>
                                   & other) {
         this->SetSize(other.size());
-        return this->Assign(other);
+        this->Assign(other);
+        return *this;
     }
 
     /*! Non-destructive size change.  Change the size to the specified
