@@ -183,15 +183,20 @@ public:
     {}
 
     /*! Conversion constructor.  This allows to construct the proxy
-        object using an object of the actual type. */
+      object using an object of the actual type.  This method will
+      set the Valid flag to true. */
     inline mtsGenericObjectProxy(const value_type & data):
         Data(data)
-    { this->SetValid(true); }
+    {
+        this->SetValid(true);
+    }
 
     inline ~mtsGenericObjectProxy(void) {}
 
     /*! Assignment from same type (DeRefType and ThisType are the same). */
-    void Assign(const DeRefType & other) { *this = other; }
+    void Assign(const DeRefType & other) {
+        *this = other;
+    }
 
     /*! Conversion assignment.  This allows to assign from a proxy ref object. */
     void Assign(const RefType & other)
