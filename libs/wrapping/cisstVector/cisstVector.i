@@ -36,36 +36,17 @@ http://www.cisst.org/cisst/license.txt.
 %ignore *::operator[]; // We define __setitem__ and __getitem__
 %ignore *::operator=; // Just to avoid warnings
 
-// We don't use iterators in Python, so far.
-%ignore *::begin;
-%ignore *::end;
-%ignore *::rbegin;
-%ignore *::rend;
-%ignore *::at;
-
 // Generate parameter documentation for IRE
 %feature("autodoc", "1");
-
-// General approach for Python print
-%rename(__str__) ToString;
-%ignore *::ToStream;
 
 // The traits are used everywhere
 %include "cisstVector/vctContainerTraits.h"
 
-// Define some basic flags
-%include "cisstVector/vctForwardDeclarations.h" 
+%include "cisstVector/vctDynamicVectorTypemaps.i"
+%include "cisstVector/vctDynamicMatrixTypemaps.i"
+%include "cisstVector/vctDynamicNArrayTypemaps.i"
 
-// Include per type of container
-%include "cisstVector/vctDynamicVector.i"
-%include "cisstVector/vctFixedSizeVector.i"
+%include "cisstVector/vctFixedSizeVectorTypemaps.i"
+%include "cisstVector/vctFixedSizeMatrixTypemaps.i"
 
-%include "cisstVector/vctDynamicMatrix.i"
-%include "cisstVector/vctFixedSizeMatrix.i"
-
-// %include "cisstVector/vctQuaternion.i"
-// %include "cisstVector/vctQuaternionRotation3.i"
-// %include "cisstVector/vctMatrixRotation3.i"
-// %include "cisstVector/vctAxisAngleRotation3.i"
-// %include "cisstVector/vctFrame.i"
-
+%include "cisstVector/vctFrame.i"

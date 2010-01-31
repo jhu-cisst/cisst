@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id$
+  $Id: cisstDevices.i.h 1018 2010-01-05 16:51:35Z adeguet1 $
 
   Author(s):	Anton Deguet
   Created on:   2008-01-17
@@ -25,35 +25,21 @@ http://www.cisst.org/cisst/license.txt.
    It includes all the regular header files from the libraries as well
    as some header files created only for the wrapping process
 
-   For any wrapper using %import "cisstMultiTask.i", the file
-   cisstMultiTask.i.h should be included in the %header %{ ... %} section
+   For any wrapper using %import "cisstDevices.i", the file
+   cisstDevices.i.h should be included in the %header %{ ... %} section
    of the interface file. */
 
 
-#ifndef _cisstMultiTask_i_h
-#define _cisstMultiTask_i_h
+#ifndef _cisstDevices_i_h
+#define _cisstDevices_i_h
 
 
 /* Put header files here */
 #include "cisstCommon/cisstCommon.i.h"
 #include "cisstVector/cisstVector.i.h"
-#include "cisstOSAbstraction/cisstOSAbstraction.i.h"
+#include "cisstMultiTask/cisstMultiTask.i.h"
+#include "cisstParameterTypes/cisstParameterTypes.i.h"
 
-#include "cisstMultiTask/mtsCommandBase.h"
-#include "cisstMultiTask/mtsCommandVoidBase.h"
-#include "cisstMultiTask/mtsCommandReadOrWriteBase.h"
-#include "cisstMultiTask/mtsDevice.h"
-#include "cisstMultiTask/mtsDeviceInterface.h"
-#include "cisstMultiTask/mtsTask.h"
-#include "cisstMultiTask/mtsTaskInterface.h"
-#include "cisstMultiTask/mtsRequiredInterface.h"
-#include "cisstMultiTask/mtsTaskManager.h"
-#include "cisstMultiTask/mtsStateIndex.h"
-#include "cisstMultiTask/mtsCollectorBase.h"
-#include "cisstMultiTask/mtsCollectorState.h"
+#include "cisstDevices/devNDISerial.h"
 
-#include "cisstMultiTask/mtsVector.h"
-#include "cisstMultiTask/mtsMatrix.h"
-
-#endif // _cisstMultiTask_i_h
-
+#endif // _cisstDevices_i_h

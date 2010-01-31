@@ -7,7 +7,7 @@
   Author(s):	Anton Deguet
   Created on:   2008-01-17
 
-  (C) Copyright 2006-2008 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2006-2010 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -37,29 +37,24 @@ http://www.cisst.org/cisst/license.txt.
 
 %import "cisstCommon/cisstCommon.i"
 %import "cisstVector/cisstVector.i"
+%import "cisstOSAbstraction/cisstOSAbstraction.i"
 
-// use class type to create the correct Python type
-%apply cmnGenericObject * {mtsGenericObject *};
-
-// It is useful to wrap osaTimeServer. This can be removed
-// if cisstOSAbstraction is wrapped.
-%include "cisstOSAbstraction/osaTimeServer.h"
-
-%template(mtsStringVector) std::vector<std::string>;
+%init %{
+    import_array() // numpy initialization
+%}
 
 %header %{
     // Put header files here
     #include "cisstMultiTask/cisstMultiTask.i.h"
 %}
 
+// use class type to create the correct Python type
+%apply cmnGenericObject * {mtsGenericObject *};
+
+%template(mtsStringVector) std::vector<std::string>;
+
 // Generate parameter documentation for IRE
 %feature("autodoc", "1");
-
-%rename(__str__) ToString;
-%ignore *::ToStream;
-%ignore operator<<;
-
-%ignore *::operator[]; // We define __setitem__ and __getitem__
 
 %ignore *::AddCommandVoid;
 %ignore *::AddEventVoid;
@@ -161,9 +156,10 @@ typedef mtsCommandQualifiedReadOrWriteBase<const mtsGenericObject> mtsCommandQua
         def UpdateFromC(self):
             interfaces = mtsDevice.GetNamesOfProvidedInterfaces(self)
             for interface in interfaces:
-                self.__dict__[interface] = mtsDevice.GetProvidedInterface(self, interface)
-                userId = self.__dict__[interface].AllocateResources('Python')
-                self.__dict__[interface].UpdateFromC(userId)
+                interfaceNoSpace = interface.replace(' ', '')
+                self.__dict__[interfaceNoSpace] = mtsDevice.GetProvidedInterface(self, interface)
+                userId = self.__dict__[interfaceNoSpace].AllocateResources('Python')
+                self.__dict__[interfaceNoSpace].UpdateFromC(userId)
     }
 }
 
@@ -190,6 +186,8 @@ typedef mtsCommandQualifiedReadOrWriteBase<const mtsGenericObject> mtsCommandQua
 }
 
 %include "cisstMultiTask/mtsTask.h"
+%include "cisstMultiTask/mtsTaskContinuous.h"
+%include "cisstMultiTask/mtsTaskPeriodic.h"
 %include "cisstMultiTask/mtsTaskInterface.h"
 
 %include "cisstMultiTask/mtsRequiredInterface.h"
@@ -218,15 +216,18 @@ typedef mtsCommandQualifiedReadOrWriteBase<const mtsGenericObject> mtsCommandQua
 // Wrap some basic types
 %include "cisstMultiTask/mtsGenericObjectProxy.h"
 %define MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(name, elementType)
-// Instantiate the template
-%template(name ## Base) mtsGenericObjectProxyBase<elementType>;
-%template(name) mtsGenericObjectProxy<elementType>;
-// Type addition for dynamic type checking
-%{
+    // ignore the operator &
+    %ignore mtsGenericObjectProxy<elementType>::operator value_type&;
+    %ignore mtsGenericObjectProxyBase<elementType>::operator value_type&;
+    // Instantiate the template
+    %template(name ## Base) mtsGenericObjectProxyBase<elementType>;
+    %template(name) mtsGenericObjectProxy<elementType>;
+    // Type addition for dynamic type checking
+    %{
+        typedef mtsGenericObjectProxy<elementType> name;
+    %}
     typedef mtsGenericObjectProxy<elementType> name;
-%}
-typedef mtsGenericObjectProxy<elementType> name;
-%types(name *);
+    %types(name *);
 %enddef
 
 MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsDouble, double);
@@ -237,18 +238,31 @@ MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsUShort, unsigned short);
 MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsLong, long);
 MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsULong, unsigned long);
 MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsBool, bool);
+MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsStdString, std::string);
 
 // Wrap mtsVector
 %import "cisstMultiTask/mtsVector.h"
 
 // define macro
 %define MTS_INSTANTIATE_VECTOR(name, elementType)
-%template(name) mtsVector<elementType>;
-%{
+    // suppress warning about base class not known
+    %warnfilter(401) mtsVector<elementType>;
+    // force instantiation and define name for SWIG
+    %template(name) mtsVector<elementType>;
+    %{
+         typedef mtsVector<elementType> name;
+    %}
     typedef mtsVector<elementType> name;
-%}
-typedef mtsVector<elementType> name;
-%types(name *);
+    %types(name *);
+    // add two methods to retrieve the vector
+    %extend mtsVector<elementType>{
+        inline VectorType & Data(void) {
+            return *self;
+        }
+        inline const VectorType & Data(void) const {
+            return *self;
+        }
+   }
 %enddef
 
 // instantiate for types also instantiated in cisstVector wrappers
@@ -256,19 +270,30 @@ MTS_INSTANTIATE_VECTOR(mtsDoubleVec, double);
 MTS_INSTANTIATE_VECTOR(mtsIntVec, int); 
 MTS_INSTANTIATE_VECTOR(mtsShortVec, short); 
 MTS_INSTANTIATE_VECTOR(mtsLongVec, long); 
-MTS_INSTANTIATE_VECTOR(mtsBoolVec, bool); 
 
 // Wrap mtsMatrix
 %import "cisstMultiTask/mtsMatrix.h"
 
 // define macro
 %define MTS_INSTANTIATE_MATRIX(name, elementType)
-%template(name) mtsMatrix<elementType>;
-%{
+    // suppress warning about base class not known
+    %warnfilter(401) mtsMatrix<elementType>;
+    // force instantiation and define name for SWIG
+    %template(name) mtsMatrix<elementType>;
+    %{
+        typedef mtsMatrix<elementType> name;
+    %}
     typedef mtsMatrix<elementType> name;
-%}
-typedef mtsMatrix<elementType> name;
-%types(name *);
+    %types(name *);
+    // add two methods to retrieve the matrix
+    %extend mtsMatrix<elementType>{
+        inline MatrixType & Data(void) {
+            return *self;
+        }
+        inline const MatrixType & Data(void) const {
+            return *self;
+        }
+    }
 %enddef
 
 // instantiate for types also instantiated in cisstVector wrappers
@@ -276,7 +301,6 @@ MTS_INSTANTIATE_MATRIX(mtsDoubleMat, double);
 MTS_INSTANTIATE_MATRIX(mtsIntMat, int); 
 MTS_INSTANTIATE_MATRIX(mtsShortMat, short); 
 MTS_INSTANTIATE_MATRIX(mtsLongMat, long); 
-MTS_INSTANTIATE_MATRIX(mtsBoolMat, bool); 
 
 // Wrap mtsStateIndex
 %include "cisstMultiTask/mtsStateIndex.h"

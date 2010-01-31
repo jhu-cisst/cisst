@@ -54,7 +54,16 @@ http://www.cisst.org/cisst/license.txt.
 // Generate parameter documentation for IRE
 %feature("autodoc", "1");
 
+%rename (__str__) *::ToString;
 %ignore *::ToStream;
+%ignore *::ToStreamRaw;
+%ignore *::FromStreamRaw;
+%ignore *::Serialize;
+%ignore *::DeSerialize;
+%ignore *::SerializeRaw;
+%ignore *::DeSerializeRaw;
+
+
 %ignore operator<<;
 
 #define CISST_EXPORT
@@ -79,7 +88,7 @@ http://www.cisst.org/cisst/license.txt.
         } else {
             // fail, maybe a better fall back would be to return the base type, but this is really useless
             char buffer[256];
-            sprintf(buffer, "Sorry, can't create a python object of type %s",
+            sprintf(buffer, "cisstCommonPython.i: sorry, can't create a python object of type %s.  Make sure the python module which defines this type has been imported",
             className.c_str());
             PyErr_SetString(PyExc_TypeError, buffer);
             SWIG_fail;
@@ -139,14 +148,16 @@ http://www.cisst.org/cisst/license.txt.
 // Wrap some basic types
 %include "cisstCommon/cmnGenericObjectProxy.h"
 %define CMN_GENERIC_OBJECT_PROXY_INSTANTIATE(name, elementType)
-// Instantiate the template
-%template(name) cmnGenericObjectProxy<elementType>;
-// Type addition for dynamic type checking
-%{
+    // ignore the operator &
+    %ignore cmnGenericObjectProxy<elementType>::operator value_type&;
+    // Instantiate the template
+    %template(name) cmnGenericObjectProxy<elementType>;
+    // Type addition for dynamic type checking
+    %{
+        typedef cmnGenericObjectProxy<elementType> name;
+    %}
     typedef cmnGenericObjectProxy<elementType> name;
-%}
-typedef cmnGenericObjectProxy<elementType> name;
-%types(name *);
+    %types(name *);
 %enddef
 
 CMN_GENERIC_OBJECT_PROXY_INSTANTIATE(cmnDouble, double);

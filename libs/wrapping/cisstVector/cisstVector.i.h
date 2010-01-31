@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2005-08-21
 
-  (C) Copyright 2005-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2005-2010 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -36,30 +36,411 @@ http://www.cisst.org/cisst/license.txt.
 
 
 /* Put header files here */
-#include "cisstVector/vctFixedSizeVector.h"
-#include "cisstVector/vctFixedSizeMatrix.h"
+#include <Python.h>
+#include <arrayobject.h>
+#include <cisstCommon/cmnAssert.h>
+#include <cisstCommon/cmnPortability.h>
+#include <cisstVector/vctFixedSizeConstVectorBase.h>
+#include <cisstVector/vctDynamicConstVectorBase.h>
+#include <cisstVector/vctFixedSizeConstMatrixBase.h>
+#include <cisstVector/vctDynamicConstMatrixBase.h>
+#include <cisstVector/vctDynamicConstNArrayBase.h>
+#include <cisstVector/vctTransformationTypes.h>
 
-#include "cisstVector/vctDynamicVector.h"
-#include "cisstVector/vctDynamicMatrix.h"
 
-#include "cisstVector/vctRandom.h"
+bool vctThrowUnlessIsPyArray(PyObject * input)
+{
+    if (!PyArray_Check(input)) {
+        PyErr_SetString(PyExc_TypeError, "Object must be a NumPy array");
+        return false;
+    }
+    return true;
+}
 
-// #include "cisstVector/vctQuaternionBase.h"
 
-// #include "cisstVector/vctAxisAngleRotation3.h"
+template <class _elementType>
+bool vctThrowUnlessIsSameTypeArray(PyObject * CMN_UNUSED(input))
+{
+    PyErr_SetString(PyExc_ValueError, "Unsupported data type");
+    return false;
+}
 
-// #include "cisstVector/vctFrameBase.h"
 
-#include "cisstVector/vctFixedSizeVectorTypes.h"
-#include "cisstVector/vctFixedSizeMatrixTypes.h"
+template <>
+bool vctThrowUnlessIsSameTypeArray<char>(PyObject * input)
+{
+    if (PyArray_ObjectType(input, 0) != NPY_INT8) {
+        PyErr_SetString(PyExc_ValueError, "Array must be of type char (int8)");
+        return false;
+    }
+    return true;
+}
 
-// Hack for Swig 1.3.35 - 1.3.40(and probably 1.3.34)
-#if (SWIG_VERSION == 0x010334) || (SWIG_VERSION == 0x010335) || (SWIG_VERSION == 0x010336) || (SWIG_VERSION == 0x010337) || (SWIG_VERSION == 0x010338) || (SWIG_VERSION == 0x010339) || (SWIG_VERSION == 0x010340)
-#define SWIGTYPE_p_vctDynamicMatrixTdouble_t  SWIGTYPE_p_vctDynamicMatrixT_double_t
-#define SWIGTYPE_p_vctDynamicMatrixTint_t  SWIGTYPE_p_vctDynamicMatrixT_int_t
-#define SWIGTYPE_p_vctDynamicMatrixTlong_t  SWIGTYPE_p_vctDynamicMatrixT_long_t
-#define SWIGTYPE_p_vctDynamicMatrixTshort_t  SWIGTYPE_p_vctDynamicMatrixT_short_t
-#endif
+
+template <>
+bool vctThrowUnlessIsSameTypeArray<unsigned char>(PyObject * input)
+{
+    if (PyArray_ObjectType(input, 0) != NPY_UINT8) {
+        PyErr_SetString(PyExc_ValueError, "Array must be of type unsigned char (uint8)");
+        return false;
+    }
+    return true;
+}
+
+
+template <>
+bool vctThrowUnlessIsSameTypeArray<short>(PyObject * input)
+{
+    if (PyArray_ObjectType(input, 0) != NPY_INT16) {
+        PyErr_SetString(PyExc_ValueError, "Array must be of type short (int16)");
+        return false;
+    }
+    return true;
+}
+
+
+template <>
+bool vctThrowUnlessIsSameTypeArray<unsigned short>(PyObject * input)
+{
+    if (PyArray_ObjectType(input, 0) != NPY_UINT16) {
+        PyErr_SetString(PyExc_ValueError, "Array must be of type unsigned short (uint16)");
+        return false;
+    }
+    return true;
+}
+
+
+template <>
+bool vctThrowUnlessIsSameTypeArray<int>(PyObject * input)
+{
+    if (PyArray_ObjectType(input, 0) != NPY_INT32) {
+        PyErr_SetString(PyExc_ValueError, "Array must be of type int (int32)");
+        return false;
+    }
+    return true;
+}
+
+
+template <>
+bool vctThrowUnlessIsSameTypeArray<unsigned int>(PyObject * input)
+{
+    if (PyArray_ObjectType(input, 0) != NPY_UINT32) {
+        PyErr_SetString(PyExc_ValueError, "Array must be of type unsigned int (uint32)");
+        return false;
+    }
+    return true;
+}
+
+
+template <>
+bool vctThrowUnlessIsSameTypeArray<long int>(PyObject * input)
+{
+    if (PyArray_ObjectType(input, 0) != NPY_INT64) {
+        PyErr_SetString(PyExc_ValueError, "Array must be of type long int (int64)");
+        return false;
+    }
+    return true;
+}
+
+
+template <>
+bool vctThrowUnlessIsSameTypeArray<unsigned long int>(PyObject * input)
+{
+    if (PyArray_ObjectType(input, 0) != NPY_UINT64) {
+        PyErr_SetString(PyExc_ValueError, "Array must be of type unsigned long int (uint64)");
+        return false;
+    }
+    return true;
+}
+
+
+template <>
+bool vctThrowUnlessIsSameTypeArray<double>(PyObject * input)
+{
+    if (PyArray_ObjectType(input, 0) != NPY_DOUBLE) {
+        PyErr_SetString(PyExc_ValueError, "Array must be of type double ()");
+        return false;
+    }
+    return true;
+}
+
+
+template <class _elementType>
+int vctPythonType(void)
+{
+    return NPY_NOTYPE; // unsupported type
+}
+
+
+template <>
+int vctPythonType<char>(void)
+{
+    return NPY_INT8;
+}
+
+
+template <>
+int vctPythonType<unsigned char>(void)
+{
+    return NPY_UINT8;
+}
+
+
+template <>
+int vctPythonType<short>(void)
+{
+    return NPY_INT16;
+}
+
+
+template <>
+int vctPythonType<unsigned short>(void)
+{
+    return NPY_UINT16;
+}
+
+
+template <>
+int vctPythonType<int>(void)
+{
+    return NPY_INT32;
+}
+
+
+template <>
+int vctPythonType<unsigned int>(void)
+{
+    return NPY_UINT32;
+}
+
+
+template <>
+int vctPythonType<long int>(void)
+{
+    return NPY_INT64;
+}
+
+
+template <>
+int vctPythonType<unsigned long int>(void)
+{
+    return NPY_UINT64;
+}
+
+
+template <>
+int vctPythonType<double>(void)
+{
+    return NPY_DOUBLE;
+}
+
+
+bool vctThrowUnlessDimension1(PyObject * input)
+{
+    if (PyArray_NDIM(input) != 1) {
+        PyErr_SetString(PyExc_ValueError, "Array must be 1D (vector)");
+        return false;
+    }
+    return true;
+}
+
+
+bool vctThrowUnlessDimension2(PyObject * input)
+{
+    if (PyArray_NDIM(input) != 2) {
+        PyErr_SetString(PyExc_ValueError, "Array must be 2D (matrix)");
+        return false;
+    }
+    return true;
+}
+
+
+template <vct::size_type _dimension>
+bool vctThrowUnlessDimensionN(PyObject * input)
+{
+    if (PyArray_NDIM(input) != _dimension) {
+        std::stringstream stream;
+        stream << "Array must have " << _dimension << " dimension(s)";
+        std::string msg = stream.str();
+        PyErr_SetString(PyExc_ValueError, msg.c_str());
+        return false;
+    }
+    return true;
+}
+
+
+bool vctThrowUnlessIsWritable(PyObject * input)
+{
+    const int flags = PyArray_FLAGS(input);
+    if(!(flags & NPY_WRITEABLE)) {
+        PyErr_SetString(PyExc_ValueError, "Array must be writable");
+        return false;
+    }
+    return true;
+}
+
+
+template <vct::size_type _size, vct::stride_type _stride, class _elementType, class _dataPtrType>
+bool vctThrowUnlessCorrectVectorSize(PyObject * input,
+                                     const vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType> & target)
+{
+    const vct::size_type inputSize = PyArray_DIM(input, 0);
+    const vct::size_type targetSize = target.size();
+    if (inputSize != targetSize) {
+        std::stringstream stream;
+        stream << "Input vector's size must be " << targetSize;
+        std::string msg = stream.str();
+        PyErr_SetString(PyExc_ValueError, msg.c_str());
+        return false;
+    }
+    return true;
+}
+
+
+template <class _vectorOwnerType, typename _elementType>
+bool vctThrowUnlessCorrectVectorSize(PyObject * CMN_UNUSED(input),
+                                     const vctDynamicConstVectorBase<_vectorOwnerType, _elementType> & CMN_UNUSED(target))
+{
+    return true;
+}
+
+
+template <vct::size_type _rows, vct::size_type _cols,
+          vct::stride_type _rowStride, vct::stride_type _colStride,
+          class _elementType, class _dataPtrType>
+bool vctThrowUnlessCorrectMatrixSize(PyObject * input,
+                                     const vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStride, _elementType, _dataPtrType> & target)
+{
+    const vct::size_type inputRows = PyArray_DIM(input, 0);
+    const vct::size_type inputCols = PyArray_DIM(input, 1);
+    const vct::size_type targetRows = target.rows();
+    const vct::size_type targetCols = target.cols();
+    if (   inputRows != targetRows
+        || inputCols != targetCols) {
+        std::stringstream stream;
+        stream << "Input matrix's size must be " << targetRows << " rows by " << targetCols << " columns";
+        std::string msg = stream.str();
+        PyErr_SetString(PyExc_ValueError, msg.c_str());
+        return false;
+    }
+    return true;
+}
+
+
+template <class _matrixOwnerType, typename _elementType>
+bool vctThrowUnlessCorrectMatrixSize(PyObject * CMN_UNUSED(input),
+                                     const vctDynamicConstMatrixBase<_matrixOwnerType, _elementType> & CMN_UNUSED(target))
+{
+    return true;
+}
+
+
+bool vctThrowUnlessOwnsData(PyObject * input)
+{
+    const int flags = PyArray_FLAGS(input);
+    if(!(flags & NPY_OWNDATA)) {
+        PyErr_SetString(PyExc_ValueError, "Array must own its data");
+        return false;
+    }
+    return true;
+}
+
+
+template <vct::size_type _size, vct::stride_type _stride, class _elementType, class _dataPtrType>
+bool vctThrowUnlessOwnsData(PyObject * CMN_UNUSED(input),
+                            const vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType> & CMN_UNUSED(target))
+{
+    return true;
+}
+
+
+template <class _vectorOwnerType, typename _elementType>
+bool vctThrowUnlessOwnsData(PyObject * input,
+                            const vctDynamicConstVectorBase<_vectorOwnerType, _elementType> & CMN_UNUSED(target))
+{
+    const int flags = PyArray_FLAGS(input);
+    if(!(flags & NPY_OWNDATA)) {
+        PyErr_SetString(PyExc_ValueError, "Array must own its data");
+        return false;
+    }
+    return true;
+}
+
+
+template <vct::size_type _rows, vct::size_type _cols,
+	  vct::stride_type _rowStride, vct::stride_type _colStride,
+	  class _elementType, class _dataPtrType>
+bool vctThrowUnlessOwnsData(PyObject * CMN_UNUSED(input),
+                            const vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStride, _elementType, _dataPtrType> & CMN_UNUSED(target))
+{
+    return true;
+}
+
+
+template <class _matrixOwnerType, typename _elementType>
+bool vctThrowUnlessOwnsData(PyObject * input,
+                            const vctDynamicConstMatrixBase<_matrixOwnerType, _elementType> & CMN_UNUSED(target))
+{
+    const int flags = PyArray_FLAGS(input);
+    if(!(flags & NPY_OWNDATA)) {
+        PyErr_SetString(PyExc_ValueError, "Array must own its data");
+        return false;
+    }
+    return true;
+}
+
+
+bool vctThrowUnlessNotReferenced(PyObject * input)
+{
+    if (PyArray_REFCOUNT(input) > 4) {
+        PyErr_SetString(PyExc_ValueError, "Array must not be referenced by other objects.  Try making a deep copy of the array and call the function again.");
+        return false;
+    }
+    return true;
+}
+
+
+template <vct::size_type _size, vct::stride_type _stride, class _elementType, class _dataPtrType>
+bool vctThrowUnlessNotReferenced(PyObject * CMN_UNUSED(input),
+                                 const vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType> & CMN_UNUSED(target))
+{
+    return true;
+}
+
+
+template <class _vectorOwnerType, typename _elementType>
+bool vctThrowUnlessNotReferenced(PyObject * input,
+                                 const vctDynamicConstVectorBase<_vectorOwnerType, _elementType> & CMN_UNUSED(target))
+{
+    if (PyArray_REFCOUNT(input) > 4) {
+        PyErr_SetString(PyExc_ValueError, "Array must not be referenced by other objects.  Try making a deep copy of the array and call the function again.");
+        return false;
+    }
+    return true;
+}
+
+
+template <vct::size_type _rows, vct::size_type _cols,
+	  vct::stride_type _rowStride, vct::stride_type _colStride,
+	  class _elementType, class _dataPtrType>
+bool vctThrowUnlessNotReferenced(PyObject * CMN_UNUSED(input),
+                                 const vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStride, _elementType, _dataPtrType> & CMN_UNUSED(target))
+{
+    return true;
+}
+
+
+template <class _matrixOwnerType, typename _elementType>
+bool vctThrowUnlessNotReferenced(PyObject * input,
+                                 const vctDynamicConstMatrixBase<_matrixOwnerType, _elementType> & CMN_UNUSED(target))
+{
+    if (PyArray_REFCOUNT(input) > 4) {
+        PyErr_SetString(PyExc_ValueError, "Array must not be referenced by other objects.  Try making a deep copy of the array and call the function again.");
+        return false;
+    }
+    return true;
+}
+
+
 
 #endif // _cisstVector_i_h
-

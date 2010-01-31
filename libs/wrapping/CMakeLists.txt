@@ -17,9 +17,6 @@
 
 PROJECT(cisstWrapping)
 
-# SWIG macro has been updated to handle outdir correctly
-CMAKE_MINIMUM_REQUIRED(VERSION 2.4.7 FATAL_ERROR)
-
 # We define some new inline classes for the wrappers only
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 
