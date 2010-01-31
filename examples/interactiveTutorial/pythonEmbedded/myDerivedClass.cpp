@@ -23,3 +23,10 @@ http://www.cisst.org/cisst/license.txt.
 #include "myDerivedClass.h"
 
 CMN_IMPLEMENT_SERVICES(myDerivedClass);
+
+
+myDerivedClass::myDerivedClass(void) {
+    vctRandom(this->FixedSizeVectorMember, 5.0, 10.0);
+    this->DynamicVectorMember.SetSize(5);
+    vctRandom(this->DynamicVectorMember, 0.0, 5.0);
+}

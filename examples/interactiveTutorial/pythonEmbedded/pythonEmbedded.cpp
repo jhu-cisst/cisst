@@ -35,13 +35,13 @@ int main(void) {
     std::cout << "*** Start" << std::endl;
     std::cout << "*** List of registered classes: " << cmnClassRegister::ToString() << std::endl;
     myDerivedClass derived1;
-    derived1.FixedVector().SetAll(10);
+    derived1.FixedSizeVector().SetAll(10);
     derived1.DynamicVector().SetSize(5);
     derived1.DynamicVector().SetAll(-10);
-    std::cout << "*** Fixed vector of derived1 before python: " << derived1.FixedVector() << std::endl;
+    std::cout << "*** Fixed size vector of derived1 before python: " << derived1.FixedSizeVector() << std::endl;
     
     myReDerivedClass rederived1;
-    rederived1.FixedVector().SetAll(1000);
+    rederived1.FixedSizeVector().SetAll(1000);
     
     cmnObjectRegister::Register("derived1", &derived1);
     cmnObjectRegister::Register("rederived1", &rederived1);
@@ -96,14 +96,17 @@ int main(void) {
     }
 
     std::cout << "*** Run some Python commands from C" << std::endl;
-    PyRun_SimpleString("derived1 = cmnObjectRegister.FindObject(\"derived1\"); print derived1.__class__; print derived1.FixedVector()");
+    PyRun_SimpleString("derived1 = cmnObjectRegister.FindObject(\"derived1\"); print derived1.__class__; print derived1.FixedSizeVector()");
     PyRun_SimpleString("rederived1 = cmnObjectRegister.FindObject(\"rederived1\"); print rederived1.__class__; print rederived1.Services().GetName()");
     PyRun_SimpleString("rederived2 = myReDerivedClass(); cmnObjectRegister.Register(\"rederived2\", rederived2);");
 
     std::cout << "*** Load a Python script and execute it" << std::endl;
     bool FileFound = true;
     FILE *fp = NULL;
-    fp = fopen("pythonEmbedded.py", "r");
+    cmnPath path;
+    path.Add(std::string(CISST_SOURCE_ROOT) + "/examples/interactiveTutorial/pythonEmbedded");
+    std::string fullName = path.Find("pythonEmbedded.py");
+    fp = fopen(fullName.c_str(), "r");
     if (fp == NULL) {
         std::cout << "*** Can't open pythonEmbedded.py" << std::endl;
 		FileFound = false;
@@ -117,7 +120,7 @@ int main(void) {
         fclose(fp);
     }
     std::cout << "*** List from C: " << cmnObjectRegister::ToString() << std::endl;
-    std::cout << "*** Fixed vector of derived1 after python: " << derived1.FixedVector() << std::endl;
+    std::cout << "*** Fixed size vector of derived1 after python: " << derived1.FixedSizeVector() << std::endl;
     Py_Finalize();
 
     return 0;

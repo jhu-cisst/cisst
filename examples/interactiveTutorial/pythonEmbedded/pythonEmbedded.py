@@ -9,7 +9,7 @@
 #  Author(s): Anton Deguet
 #  Created on: 2004-10-05
 
-# (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights
 # Reserved.
 
 # --- begin cisst license - do not edit ---
@@ -22,23 +22,25 @@
 
 print ">>>> In python script"
 
-print cmnObjectRegister.ToString()
+objectRegister = cmnObjectRegister_Instance()
 
-derived1 = cmnObjectRegister.FindObject("derived1")
+print objectRegister
+
+derived1 = objectRegister.FindObject("derived1")
 print "Class of derived1: ", derived1.__class__
 
-rederived1 = cmnObjectRegister.FindObject("rederived1")
+rederived1 = objectRegister.FindObject("rederived1")
 print "Class of rederived1: ", rederived1.__class__
 
 print "Create and register derived2"
 derived2 = myDerivedClass()
-cmnObjectRegister.Register("derived2", derived2)
+objectRegister.Register("derived2", derived2)
 
-print "modifying derived1.FixedVector()"
-fixedVector1 = derived1.FixedVector()
-fixedVector1.Divide(derived1.FixedVector().Norm())
+print "modifying derived1.FixedSizeVector()"
+fixedVector1 = derived1.FixedSizeVector()
+fixedVector1 / 100
 
-print cmnObjectRegister.ToString()
+print objectRegister
 
 print "<<<< Out of python script"
 

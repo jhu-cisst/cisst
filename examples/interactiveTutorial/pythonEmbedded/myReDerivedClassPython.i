@@ -28,6 +28,9 @@ http://www.cisst.org/cisst/license.txt.
     #include "myReDerivedClass.h"
 %}
 
+%init %{
+    import_array() // numpy initialization
+%}
 
 %include "std_string.i"
 

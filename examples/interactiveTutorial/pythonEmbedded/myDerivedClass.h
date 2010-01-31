@@ -44,31 +44,35 @@ class CISST_EXPORT myDerivedClass: public cmnGenericObject {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
     
 protected:
-    vctDouble3 fixedVector;
-    vctDoubleVec dynamicVector;
+    vctDouble3 FixedSizeVectorMember;
+    vctDoubleVec DynamicVectorMember;
     
 public:
+
+    myDerivedClass(void);
+
     virtual ~myDerivedClass() {}
 
-    inline void CommonMethod(void) {
-        std::cout << "CommonMethod from derived (+=3)" << std::endl;
-        fixedVector += 3;
+    inline virtual void CommonMethod(void) {
+        std::cout << "CommonMethod from derived (+= 5.0)" << std::endl;
+        this->FixedSizeVectorMember += 5.0;
+        this->DynamicVectorMember += 5.0;
     }
 
-    inline vctDouble3& FixedVector(void) {
-        return fixedVector;
+    inline vctDouble3 & FixedSizeVector(void) {
+        return this->FixedSizeVectorMember;
     }
 
-    inline const vctDouble3& FixedVector(void) const {
-        return fixedVector;
+    inline const vctDouble3 & FixedSizeVector(void) const {
+        return this->FixedSizeVectorMember;
     }
 
-    inline vctDoubleVec& DynamicVector(void) {
-        return dynamicVector;
+    inline vctDoubleVec & DynamicVector(void) {
+        return this->DynamicVectorMember;
     }
 
-    inline const vctDoubleVec& DynamicVector(void) const {
-        return dynamicVector;
+    inline const vctDoubleVec & DynamicVector(void) const {
+        return this->DynamicVectorMember;
     }
 
 };
