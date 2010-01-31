@@ -18,7 +18,6 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 PROJECT(cisst)
 
 
-
 # Function to expend a list without repetitions, forces the list to be internal
 FUNCTION(CISST_ADD_TO_INTERNAL list newElements)
   SET(TEMP_${list} ${${list}} ${${newElements}})
@@ -66,33 +65,46 @@ ENDIF(CISST_BUILD_SHARED_LIBS)
 # Wrapping with swig for Python and/or Java
 OPTION(CISST_HAS_SWIG_PYTHON "Build the Python wrappers for cisst with Swig." OFF)
 
-IF(CISST_HAS_SWIG_PYTHON)
-  # Find Swig
-  FIND_PACKAGE(SWIG REQUIRED)
-  INCLUDE(${SWIG_USE_FILE})
+if(CISST_HAS_SWIG_PYTHON)
+    # Find Swig
+    set(CISST_SWIG_REQUIRED_VERSION 1.3.36)
+    find_package(SWIG ${CISST_SWIG_REQUIRED_VERSION} REQUIRED)
+    # It looks like version is not yet supported by CMake for SWIG so we are checking manually
+    if(${SWIG_VERSION} VERSION_LESS ${CISST_SWIG_REQUIRED_VERSION})
+        message("SWIG version ${SWIG_VERSION} is to low, cisst requires ${CISST_SWIG_REQUIRED_VERSION}")  
+    else(${SWIG_VERSION} VERSION_LESS ${CISST_SWIG_REQUIRED_VERSION})
+        include(${SWIG_USE_FILE})
+    endif(${SWIG_VERSION} VERSION_LESS ${CISST_SWIG_REQUIRED_VERSION})
 
-  # Check that the main libraries are compiled shared
-  VARIABLE_REQUIRES(CISST_HAS_SWIG_PYTHON REQUIREMENT_MET CISST_BUILD_SHARED_LIBS)
+    # Check that the main libraries are compiled shared
+    variable_requires(CISST_HAS_SWIG_PYTHON REQUIREMENT_MET CISST_BUILD_SHARED_LIBS)
 
-  # Define the include directory for interface files
-  SET(CISST_SWIG_INCLUDE_DIR ${cisst_SOURCE_DIR}/libs/wrapping)
+    # Define the include directory for interface files
+    set(CISST_SWIG_INCLUDE_DIR ${cisst_SOURCE_DIR}/libs/wrapping)
 
-  # Force to use exceptions
-  SET(CMN_THROW_DOES_ABORT OFF CACHE BOOL "cmnThrow uses abort() instead of throw" FORCE)
-  SET(CMN_ASSERT_THROWS_EXCEPTION ON CACHE BOOL "CMN_ASSERT throws an exception instead of abort" FORCE)
+    # Force to use exceptions
+    set(CMN_THROW_DOES_ABORT OFF CACHE BOOL "cmnThrow uses abort() instead of throw" FORCE)
+    set(CMN_ASSERT_THROWS_EXCEPTION ON CACHE BOOL "CMN_ASSERT throws an exception instead of abort" FORCE)
 
-ENDIF(CISST_HAS_SWIG_PYTHON)
+endif(CISST_HAS_SWIG_PYTHON)
 
-IF(CISST_HAS_SWIG_PYTHON)
-  # Find Python
-  FIND_PACKAGE(PythonLibs REQUIRED)
-  # Some older CMake don't define the debug library
-  IF(NOT PYTHON_DEBUG_LIBRARIES)
-    SET(PYTHON_DEBUG_LIBRARIES ${PYTHON_LIBRARIES})
-  ENDIF(NOT PYTHON_DEBUG_LIBRARIES)
-  FIND_PACKAGE(PythonInterp REQUIRED)
-  INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
-ENDIF(CISST_HAS_SWIG_PYTHON)
+if(CISST_HAS_SWIG_PYTHON)
+    # Find Python
+    find_package(PythonLibs REQUIRED)
+    # Some older CMake don't define the debug library
+    if(NOT PYTHON_DEBUG_LIBRARIES)
+	set(PYTHON_DEBUG_LIBRARIES ${PYTHON_LIBRARIES})
+    endif(NOT PYTHON_DEBUG_LIBRARIES)
+    find_package(PythonInterp REQUIRED)
+    include_directories(${PYTHON_INCLUDE_PATH})
+    # We also need numpy if we have cisstVector
+    if(BUILD_LIBS_cisstVector)
+	find_package(Numpy REQUIRED)
+	if(PYTHON_NUMPY_FOUND)
+	    include_directories(${PYTHON_NUMPY_INCLUDE_DIR})
+	endif(PYTHON_NUMPY_FOUND)
+    endif(BUILD_LIBS_cisstVector)
+endif(CISST_HAS_SWIG_PYTHON)
 
 
 # Use XML or not
