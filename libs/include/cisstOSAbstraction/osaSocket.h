@@ -63,9 +63,10 @@ http://www.cisst.org/cisst/license.txt.
 #if (CISST_OS != CISST_WINDOWS)
 #define INVALID_SOCKET -1
 #define SOCKET_ERROR -1
+#define SOCKET int
 #endif
 
-#define OSA_SOCKET_WITH_STREAM
+//#define OSA_SOCKET_WITH_STREAM
 
 #ifdef OSA_SOCKET_WITH_STREAM
 // forward declaration
@@ -197,7 +198,7 @@ public:
                used after SetDestination()
         \return true if the connection was successful */
     bool Connect(void);
- 
+
     /*! \brief Connect to the server; required for TCP sockets; includes call
                to SetDestination()
         \param host Server's hostname or IP address (e.g. localhost, 127.0.0.1)
@@ -231,7 +232,7 @@ public:
 
     /*! \ brief Connection state (only works for TCP)
         \return Returns true if the soceket thinks it is connected */
-    bool IsConnected(void) { return Connected; };
+    bool IsConnected(void) { return Connected; }
 
 #ifdef OSA_SOCKET_WITH_STREAM
     /*! Provide a pointer to the stream buffer */

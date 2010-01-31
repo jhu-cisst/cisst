@@ -20,8 +20,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstOSAbstraction/osaSocket.h>
 
-CMN_IMPLEMENT_SERVICES(osaSocket);
-
 #if (CISST_OS == CISST_WINDOWS)
 #define WIN32_LEAN_AND_MEAN
 #include <winsock2.h>
@@ -39,9 +37,7 @@ CMN_IMPLEMENT_SERVICES(osaSocket);
 #endif
 #endif
 
-#if (CISST_OS == CISST_QNX)
-#include <sys/select.h>
-#endif
+CMN_IMPLEMENT_SERVICES(osaSocket);
 
 struct osaSocketInternals {
     struct sockaddr_in ServerAddr;
@@ -102,11 +98,15 @@ Streambuf(this)
     CMN_LOG_CLASS_RUN_VERBOSE << "osaSocket: created socket " << SocketFD << std::endl;
 }
 
+
 osaSocket::~osaSocket(void)
 {
     Close();
+#if (CISST_OS == CISST_WINDOWS)
     WSACleanup();
+#endif
 }
+
 
 std::string osaSocket::GetLocalhostIP(void)
 {
@@ -152,6 +152,7 @@ void osaSocket::SetDestination(const std::string & host, unsigned short port)
         << host << ":" << port << std::endl;
 }
 
+
 bool osaSocket::Connect(void)
 {
     if (SocketType == UDP) {
@@ -179,33 +180,36 @@ bool osaSocket::Connect(void)
     return true;
 }
 
+
 bool osaSocket::Connect(const std::string & host, unsigned short port)
 {
     SetDestination(host, port);
     return Connect();
 }
 
+
 int osaSocket::Send(const char * bufsend, unsigned int msglen)
 {
     int retval = 0;
+
     if (SocketType == UDP) {
         socklen_t length = sizeof(SERVER_ADDR);
         retval = sendto(SocketFD, bufsend, msglen, 0, reinterpret_cast<struct sockaddr *>(&SERVER_ADDR), length);
     } else if (SocketType == TCP) {
         retval = send(SocketFD, bufsend, msglen, 0);
     }
+
     if (retval == SOCKET_ERROR) {
         CMN_LOG_CLASS_RUN_ERROR << "Send: failed to send" << std::endl;
         Connected = false;
         return -1;
-    }
-
-    if (retval != msglen) {
+    } else if (retval != static_cast<int>(msglen)) {
         CMN_LOG_CLASS_RUN_WARNING << "Send: failed to send the whole message" << std::endl;
     }
 
-    //TODO: fix - what if it does not have a null character!
-    CMN_LOG_CLASS_RUN_DEBUG << "Send: sent " << retval << " bytes: " << std::endl;
+    //! \todo fix - what if it does not have a null character!
+    CMN_LOG_CLASS_RUN_DEBUG << "Send: sent " << retval << " bytes" << std::endl;
+
     return retval;
 }
 
@@ -279,7 +283,9 @@ int osaSocket::Receive(char * bufrecv, unsigned int maxlen, const double timeout
     return retval;
 }
 
-// This could be static or external to the osaSocket class
+
+
+//! This could be static or external to the osaSocket class
 unsigned long osaSocket::GetIP(const std::string & host) const
 {
     hostent * he = gethostbyname(host.c_str());
@@ -292,24 +298,23 @@ unsigned long osaSocket::GetIP(const std::string & host) const
     return 0;
 }
 
+
 bool osaSocket::Close(void)
 {
     if (SocketFD != INVALID_SOCKET) {
-        int retval=0;
+        int retval = 0;
 #if (CISST_OS == CISST_WINDOWS)
-        retval=closesocket(SocketFD);
+        retval = closesocket(SocketFD);
 #else
-        retval=close(SocketFD); 
+        retval = close(SocketFD);
 #endif
-        if (retval == 0) {
-            CMN_LOG_CLASS_RUN_VERBOSE<< "Close: closed socket " << SocketFD << std::endl;
-            SocketFD = INVALID_SOCKET;
-            Connected = false;
-            return true;
-        }
-        else {
+        if (retval != 0) {
             CMN_LOG_CLASS_RUN_ERROR << "Close: failed to clos socket " << SocketFD << std::endl;
             return false;
         }
     }
+    CMN_LOG_CLASS_RUN_VERBOSE<< "Close: closed socket " << SocketFD << std::endl;
+    SocketFD = INVALID_SOCKET;
+    Connected = false;
+    return true;
 }

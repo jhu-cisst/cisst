@@ -62,10 +62,10 @@ int main(void)
             socket->Send("Server has accepted your request");
         }
 
-        socket = socketServer.Select();
-        if (socket == 0) {
-            continue;
-        }
+//        socket = socketServer.Select();
+//        if (socket == 0) {
+//            continue;
+//        }
 
         // receive
         bytesRead = socket->Receive(buffer, sizeof(buffer));

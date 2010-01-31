@@ -75,7 +75,9 @@ osaSocketServer::osaSocketServer(void)
 osaSocketServer::~osaSocketServer(void)
 {
     Close();
+#if (CISST_OS == CISST_WINDOWS)
     WSACleanup();
+#endif
 }
 
 
@@ -105,8 +107,8 @@ bool osaSocketServer::Listen(int backlog)
 osaSocket * osaSocketServer::Accept(void)
 {
     struct sockaddr_in serverAddr;
-    int s= sizeof(serverAddr);
-    int newSocketFD = accept(ServerSocketFD,(struct sockaddr *)&serverAddr,&s);
+    socklen_t s = sizeof(serverAddr);
+    int newSocketFD = accept(ServerSocketFD, (struct sockaddr *)&serverAddr, &s);
     if (newSocketFD == INVALID_SOCKET) {
         return 0;
     }
