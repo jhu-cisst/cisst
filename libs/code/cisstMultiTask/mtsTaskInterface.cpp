@@ -128,7 +128,7 @@ mtsCommandWriteBase * mtsTaskInterface::GetCommandWrite(const std::string & comm
     if (found) {
         CMN_LOG_CLASS_INIT_VERBOSE << this->GetName()
                                    << " found user resource to look for write command \""
-                                   << commandName << "\""
+                                   << commandName << "\" for user [" << userId << "]"
                                    << std::endl;
         return iterator->second->GetCommandWrite(commandName);
     } else {

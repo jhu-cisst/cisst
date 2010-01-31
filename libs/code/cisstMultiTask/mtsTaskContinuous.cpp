@@ -19,7 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstMultiTask/mtsTaskContinuous.h>
-
+#include <cisstCommon/cmnUnits.h>
 
 CMN_IMPLEMENT_SERVICES(mtsTaskContinuous)
 
@@ -111,7 +111,7 @@ void mtsTaskContinuous::Create(void *data)
 void mtsTaskContinuous::Start(void)
 {
     if (TaskState == INITIALIZING) {
-        WaitToStart(3.0);   // 3 seconds
+        WaitToStart(3.0 * cmn_s);   // 3 seconds
     }
     if (TaskState == READY) {
         CMN_LOG_CLASS_INIT_VERBOSE << "Start: starting task " << this->GetName() << std::endl;
@@ -128,8 +128,11 @@ void mtsTaskContinuous::Start(void)
         StartInternal();
         CMN_LOG_CLASS_INIT_VERBOSE << "Start: started task " << this->GetName() << std::endl;
     }
-    else
-        CMN_LOG_CLASS_INIT_ERROR << "Start: could not start task " << this->GetName() << ", state = " << GetTaskStateName() << std::endl;
+    else {
+        CMN_LOG_CLASS_INIT_ERROR << "Start: could not start task " << this->GetName()
+                                 << ", state = " << GetTaskStateName()
+                                 << "(" << CMN_LOG_DETAILS << ")" << std::endl;
+    }
 }
 
 void mtsTaskContinuous::Suspend(void)

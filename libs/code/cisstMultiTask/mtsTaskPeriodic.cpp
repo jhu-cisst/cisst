@@ -109,7 +109,7 @@ mtsTaskPeriodic::mtsTaskPeriodic(const std::string & name, double periodicityInS
 
 
 mtsTaskPeriodic::~mtsTaskPeriodic() {
-    CMN_LOG_CLASS_RUN_ERROR << "mtsTaskPeriodic destructor: deleting task " << Name << std::endl;
+    CMN_LOG_CLASS_RUN_DEBUG << "mtsTaskPeriodic destructor: deleting task " << Name << std::endl;
     //If the task was waiting on a queue, i.e. semaphore, mailbox,
     //etc, it is removed from such a queue and messaging tasks
     //pending on its message queue are unblocked with an error return.
