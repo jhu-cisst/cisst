@@ -173,8 +173,8 @@ class vctGenericContainerTest
         for (iter1 = container1.begin(); iter1 != end1; ++iter1) {
             goal += ((*iter1) * (*iter1));
         }
-        CPPUNIT_ASSERT(!cmnTypeTraits<value_type>::IsNaN(norm));
-	CPPUNIT_ASSERT_DOUBLES_EQUAL(sqrt((double)goal), norm, tolerance * goal);
+        CPPUNIT_ASSERT(!cmnTypeTraits<double>::IsNaN(norm));
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(sqrt((double)goal), norm, tolerance * goal);
 
         container2.Zeros();
         CPPUNIT_ASSERT_DOUBLES_EQUAL(value_type(0), container2.Norm(), cmnTypeTraits<double>::Tolerance());
