@@ -95,3 +95,6 @@ endif(CISST_HAS_QT)
 
 CISST_ADD_LIBRARY_TO_PROJECT(cisstLibs)
 
+if(CISST_HAS_QT)
+  target_link_libraries(cisstCommon ${QT_LIBRARIES})
+endif(CISST_HAS_QT)
