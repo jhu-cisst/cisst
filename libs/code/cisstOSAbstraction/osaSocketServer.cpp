@@ -112,7 +112,7 @@ osaSocket * osaSocketServer::Accept(void)
     if (newSocketFD == INVALID_SOCKET) {
         return 0;
     }
-    CMN_LOG_CLASS_RUN_VERBOSE << "Accept: connection request accepted " <<  inet_ntoa (serverAddr.sin_addr)<<":"<<ntohs(serverAddr.sin_port)<<std::endl;
+    CMN_LOG_CLASS_INIT_DEBUG << "Accept: connection request accepted " <<  inet_ntoa (serverAddr.sin_addr)<<":"<<ntohs(serverAddr.sin_port)<<std::endl;
     osaSocket * newSocket = new osaSocket(&newSocketFD);
     //connected so set the sockets state to true;
     newSocket->Connected = true;

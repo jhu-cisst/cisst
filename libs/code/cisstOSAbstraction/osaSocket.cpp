@@ -31,6 +31,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <errno.h>
 #include <string.h>  // for memset
 #if (CISST_OS == CISST_QNX)
 #include <sys/select.h>
@@ -90,6 +91,16 @@ Streambuf(this)
 #endif // OSA_SOCKET_WITH_STREAM
 {
 
+
+#if (CISST_OS == CISST_WINDOWS)
+    WSADATA wsaData;
+    int retval = WSAStartup(WINSOCKVERSION, &wsaData);
+    if (retval != 0) {
+        CMN_LOG_CLASS_RUN_ERROR << "osaSocket: WSAStartup() failed with error code " << retval << std::endl;
+        return;
+    }
+#endif
+
     SocketType = TCP;
     SocketFD = *(reinterpret_cast<SOCKET *> (socketFDPtr));
     if (SocketFD == INVALID_SOCKET) {
@@ -134,7 +145,7 @@ bool osaSocket::AssignPort(unsigned short port)
 
     int retval = bind(SocketFD, reinterpret_cast<struct sockaddr *>(&serverAddr), sizeof(serverAddr));
     if (retval == SOCKET_ERROR) {
-        CMN_LOG_CLASS_INIT_ERROR << "AssignPort: failed to bind socket" << std::endl;
+        CMN_LOG_CLASS_RUN_ERROR << "AssignPort: failed to bind socket" << std::endl;
         Close();
         return false;
     }
@@ -161,6 +172,10 @@ bool osaSocket::Connect(void)
         return false;      
     }
 
+    if (Connected){
+        Close();
+    }
+
     //create a new one just in case we closed it.
     if (SocketFD == INVALID_SOCKET ) {   
         SocketFD = socket(PF_INET, SOCK_STREAM, 0);
@@ -172,7 +187,7 @@ bool osaSocket::Connect(void)
 
     int retval = connect(SocketFD, reinterpret_cast<struct sockaddr *>(&SERVER_ADDR), sizeof(SERVER_ADDR));
     if (retval == SOCKET_ERROR) {
-        Close();
+        Connected=false;
         CMN_LOG_CLASS_RUN_ERROR << "Connect: failed to connect" << std::endl;
         return false;
     }
@@ -189,34 +204,117 @@ bool osaSocket::Connect(const std::string & host, unsigned short port)
 }
 
 
-int osaSocket::Send(const char * bufsend, unsigned int msglen)
+int osaSocket::Send(const char * bufsend, unsigned int msglen, const double timeoutSec )
 {
-    int retval = 0;
+   
+    //TCP Socket
+    if (SocketType == TCP && !Connected) {
+        CMN_LOG_CLASS_RUN_WARNING << "Send: Not Connected " << std::endl;
+        return -1;
+    }
 
+    int retval = 0;
+    int err    = 0;
+
+    fd_set writefds;
+    FD_ZERO(&writefds);
+    FD_SET(SocketFD, &writefds);
+
+    long sec = static_cast<long>(floor(timeoutSec));
+    long usec = static_cast<long>((timeoutSec - sec) * 1e6);
+    timeval timeout = { sec, usec };
+
+    //see if the socket is available for writing
+    //timeout is useful here if lots of data is to be sent.
+    retval = select(SocketFD + 1, &writefds, NULL, NULL, &timeout);
+
+    if (retval == SOCKET_ERROR) {
+
+#if (CISST_OS == CISST_WINDOWS)
+        err = WSAGetLastError();
+#else
+        err = errno;
+#endif
+        //! \Todo : some of the errors here might be soft errors, EAGAIN/EWOULDBLOCK and we might be able to recover from those.
+        CMN_LOG_CLASS_RUN_ERROR << "Send: failed to send because socket is not ready " << SocketFD << " Error: " <<err<<std::endl;
+
+        if (SocketType == TCP)
+            Close();
+        return -1;
+    }
+
+    //UDP
     if (SocketType == UDP) {
         socklen_t length = sizeof(SERVER_ADDR);
         retval = sendto(SocketFD, bufsend, msglen, 0, reinterpret_cast<struct sockaddr *>(&SERVER_ADDR), length);
-    } else if (SocketType == TCP) {
-        retval = send(SocketFD, bufsend, msglen, 0);
+
+        if (retval == SOCKET_ERROR) {
+            CMN_LOG_CLASS_RUN_ERROR << "Send: failed to send" << std::endl;
+            return -1;
+        } 
+        else if (retval != static_cast<int>(msglen)) {
+            CMN_LOG_CLASS_RUN_WARNING << "Send: failed to send the whole message" << std::endl;
+        }   
+
+        CMN_LOG_CLASS_RUN_DEBUG << "Send: sent " << retval << " bytes" << std::endl;
+
+        return retval;
     }
+
+    //TCP
+    if (!Connected) {
+        CMN_LOG_CLASS_RUN_DEBUG << "Send: Not Connected " << std::endl;
+        return -1;
+    }
+
+    //no errors so send 
+    retval = send(SocketFD, bufsend, msglen, 0);
 
     if (retval == SOCKET_ERROR) {
-        CMN_LOG_CLASS_RUN_ERROR << "Send: failed to send" << std::endl;
+        
+        //! \Todo : some of the errors here might be soft errors, EAGAIN/EWOULDBLOCK and we might be able to recover from those. This was an attempt to test it.
+        //This error is returned from operations on nonblocking sockets that cannot be completed immediately,
+        //for example recv when no data is queued to be read from the socket. It is a nonfatal error, and the 
+        //operation should be retried later. It is normal for WSAEWOULDBLOCK to be reported as the result from
+        //calling connect on a nonblocking SOCK_STREAM socket, since some time must elapse for the connection to be established.
+
+#if (CISST_OS == CISST_WINDOWS)
+        err = WSAGetLastError();
+        if (err == WSAEWOULDBLOCK) {
+            CMN_LOG_CLASS_RUN_WARNING << "Send: failed to send the whole message, missing " <<msglen<< " bytes"<<std::endl;
+            return 0;
+        }
+#else
+        err = errno;
+        if (err == EWOULDBLOCK) {
+            CMN_LOG_CLASS_RUN_WARNING << "Send: failed to send the whole message, missing " <<msglen<< " bytes"<<std::endl;
+            return 0;
+        }
+#endif
+        //other error:
+        CMN_LOG_CLASS_RUN_ERROR << "Send: failed to send with Error: " <<err<<std::endl;
         Close();
         return -1;
-    } else if (retval != static_cast<int>(msglen)) {
-        CMN_LOG_CLASS_RUN_WARNING << "Send: failed to send the whole message" << std::endl;
+    } 
+    else if (retval != static_cast<int>(msglen)) {
+        CMN_LOG_CLASS_RUN_WARNING << "Send: failed to send the whole message, missing " <<msglen - retval<< " bytes"<<std::endl;
     }
-
-    //! \todo fix - what if it does not have a null character!
     CMN_LOG_CLASS_RUN_DEBUG << "Send: sent " << retval << " bytes" << std::endl;
-
     return retval;
 }
 
 
 int osaSocket::Receive(char * bufrecv, unsigned int maxlen, const double timeoutSec )
 {
+    
+    //TCP Socket
+    if (SocketType == TCP && !Connected) {
+        CMN_LOG_CLASS_RUN_WARNING << "Receive: Not Connected " << std::endl;
+        return -1;
+    }
+
+    int retval = 0;
+    int err    = 0;
     fd_set readfds;
     FD_ZERO(&readfds);
     FD_SET(SocketFD, &readfds);
@@ -236,33 +334,41 @@ int osaSocket::Receive(char * bufrecv, unsigned int maxlen, const double timeout
     * where only one thread may unblock.
     */
 
-    /*
-    http://www.perlmonks.org/?node_id=280876
-    //notes on connection.
-    1) select on socket as poll (no wait)
-    2) if no recv data waiting, then client still connected
-    3) if recv data waiting, the read one char using PEEK flag 
-    4) if PEEK data len=0, then client has disconnected, otherwise its connected.
-    */
-    int retval = select(SocketFD + 1, &readfds, NULL, NULL, &timeout);
-    if (retval > 0) {
-        struct sockaddr_in fromAddr;
+    retval = select(SocketFD + 1, &readfds, NULL, NULL, &timeout);
 
-        if (SocketType == UDP) {
+    if (retval == SOCKET_ERROR) {
+
+#if (CISST_OS == CISST_WINDOWS)
+        err = WSAGetLastError();
+#else
+        err = errno;
+#endif
+        //! \Todo : some of the errors here might be soft errors, EAGAIN/EWOULDBLOCK and we might be able to recover from those.
+        CMN_LOG_CLASS_RUN_ERROR << "Receive: failed to receive because socket is not ready " << SocketFD << " Error: " <<err<<std::endl;
+
+        if (SocketType == TCP)
+            Close();
+        return -1;
+    }
+
+
+    //Manage UDP Sockets first:
+    if (SocketType == UDP) {
+
+        if (retval > 0) {
+            struct sockaddr_in fromAddr;
+
             socklen_t length = sizeof(fromAddr);
             retval = recvfrom(SocketFD, bufrecv, maxlen, 0, reinterpret_cast<struct sockaddr *>(&fromAddr), &length);
-        } else if (SocketType == TCP) {
-            retval = recv(SocketFD, bufrecv, maxlen, 0);
-        }
-        if (retval > 0) {
-            if (static_cast<unsigned int>(retval) < maxlen - 1) {
-                bufrecv[retval] = 0;  // NULL terminate the string for convenience if there is room
-                CMN_LOG_CLASS_RUN_DEBUG << "Receive: received " << retval << " bytes: " << bufrecv << std::endl;
-            } 
-            else { 
-                CMN_LOG_CLASS_RUN_DEBUG << "Receive: received " << retval << " bytes: " << std::endl;
-            }
-            if (SocketType == UDP) {
+
+            if (retval > 0) {
+                if (static_cast<unsigned int>(retval) < maxlen - 1) {
+                    bufrecv[retval] = 0;  // NULL terminate the string for convenience if there is room
+                    CMN_LOG_CLASS_RUN_DEBUG << "Receive: received " << retval << " bytes: " << std::endl;
+                } 
+                else { 
+                    CMN_LOG_CLASS_RUN_DEBUG << "Receive: received " << retval << " bytes: " << std::endl;
+                }
                 if (SERVER_ADDR.sin_addr.s_addr == 0) {
                     CMN_LOG_CLASS_RUN_VERBOSE << "Receive: setting destination address to "
                         << inet_ntoa(fromAddr.sin_addr) << ":" << ntohs(fromAddr.sin_port) << std::endl;
@@ -277,14 +383,29 @@ int osaSocket::Receive(char * bufrecv, unsigned int maxlen, const double timeout
                 }
             }
         }
+        return retval;
+    }
+
+ 
+
+    if (retval > 0) {
+        retval = recv(SocketFD, bufrecv, maxlen, 0);
+        if (retval > 0) {
+            if (static_cast<unsigned int>(retval) < maxlen - 1) {
+                bufrecv[retval] = 0;  // NULL terminate the string for convenience if there is room
+                CMN_LOG_CLASS_RUN_DEBUG << "Receive: received " << retval << " bytes: " << bufrecv << std::endl;
+            } 
+            else { 
+                // Should not print the whole msg, because it might not be null terminated.
+                CMN_LOG_CLASS_RUN_DEBUG << "Receive: received " << retval << " bytes " << std::endl;
+            }
+        }
     } else if (retval == SOCKET_ERROR) {
         Close();
         CMN_LOG_CLASS_RUN_ERROR << "Receive: failed to receive" << std::endl;
     }
     return retval;
 }
-
-
 
 //! This could be static or external to the osaSocket class
 unsigned long osaSocket::GetIP(const std::string & host) const
@@ -299,23 +420,96 @@ unsigned long osaSocket::GetIP(const std::string & host) const
     return 0;
 }
 
-
 bool osaSocket::Close(void)
 {
     if (SocketFD != INVALID_SOCKET) {
         int retval = 0;
+
 #if (CISST_OS == CISST_WINDOWS)
         retval = closesocket(SocketFD);
-#else
-        retval = close(SocketFD);
-#endif
         if (retval != 0) {
-            CMN_LOG_CLASS_RUN_ERROR << "Close: failed to clos socket " << SocketFD << std::endl;
+            CMN_LOG_CLASS_RUN_ERROR << "Close: failed to close socket " << SocketFD << " Error: " <<WSAGetLastError()<<std::endl;
             return false;
         }
+#else
+        retval = close(SocketFD);
+        if (retval != 0) {
+            CMN_LOG_CLASS_RUN_ERROR << "Close: failed to close socket " << SocketFD << "Error: " <<errno<< std::endl;
+            return false;
+        }
+#endif
+        CMN_LOG_CLASS_RUN_ERROR<< "Close: closed socket " << SocketFD << std::endl;
+        SocketFD = INVALID_SOCKET;
     }
-    CMN_LOG_CLASS_RUN_VERBOSE<< "Close: closed socket " << SocketFD << std::endl;
-    SocketFD = INVALID_SOCKET;
     Connected = false;
+    return true;
+}
+
+
+/*! \ brief Connection state (only works for TCP)
+\return Returns true if the socket thinks it is connected */
+bool osaSocket::IsConnected(void) { 
+
+    if (SocketType == UDP) {
+        CMN_LOG_CLASS_RUN_WARNING<< "IsConnected: Not implemented for UDP packets"<< std::endl;
+        return false;
+    }
+
+    if (!Connected){
+        return false;
+    }
+
+    //see if socket is ready to be used?
+    int retval = 0;
+    int err    = 0;
+
+    fd_set readfds;
+    fd_set writefds;
+    FD_ZERO(&readfds);
+    FD_ZERO(&writefds);
+    FD_SET(SocketFD, &readfds);
+    FD_SET(SocketFD, &writefds);
+
+    double timeoutSec = 0.000;
+    long second = floor (timeoutSec);
+    long usec = floor ( (timeoutSec - second) *1e6);
+    timeval timeout = { second , usec };
+
+    retval = select(SocketFD + 1, &readfds, &writefds, NULL, &timeout);
+
+    if (retval == SOCKET_ERROR) {
+
+#if (CISST_OS == CISST_WINDOWS)
+        err = WSAGetLastError();
+        //! \Todo : some of the errors here might be soft errors, EAGAIN/EWOULDBLOCK and we might be able to recover from those.
+#else
+        err = errno;
+#endif
+        CMN_LOG_CLASS_RUN_DEBUG << "IsConnected: check failed on socket " << SocketFD << " Error: " <<err<<std::endl;
+        Close();
+        return false;
+    }
+
+    //Send a dummy message to see if the socket is alive?
+    retval = send(SocketFD, 0, 0, 0);
+    
+    if (retval == SOCKET_ERROR) {
+#if (CISST_OS == CISST_WINDOWS)
+        err = WSAGetLastError();
+        if (err == WSAEWOULDBLOCK) {
+            return true;
+        }
+        //! \Todo : some of the errors here might be soft errors, EAGAIN/EWOULDBLOCK and we might be able to recover from those.
+#else
+        err = errno;
+        if (err == EWOULDBLOCK) {
+            return true;
+        }
+
+#endif
+        CMN_LOG_CLASS_RUN_DEBUG << "IsConnected: check failed on socket " << SocketFD << " Error: " <<err<<std::endl;
+        Close();
+        return false;
+    }
     return true;
 }

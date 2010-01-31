@@ -2,12 +2,12 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id$
+$Id$
 
-  Author(s):  Peter Kazanzides
-  Created on: 2009
+Author(s):  Peter Kazanzides
+Created on: 2009
 
-  (C) Copyright 2007-2009 Johns Hopkins University (JHU), All Rights Reserved.
+(C) Copyright 2007-2009 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -32,7 +32,7 @@ int main(void)
     cmnClassRegister::SetLoD("osaSocketServer", CMN_LOG_LOD_VERY_VERBOSE);
 
     osaSocketServer socketServer;
-    osaSocket * socket;
+    osaSocket * socket = 0;
     unsigned short port = 1234;
     std::string response;
     bool isServerConnected = false;
@@ -49,50 +49,72 @@ int main(void)
         std::cout << "Will try again in 5 seconds" << std::endl;
         osaSleep(5.0 * cmn_s);
     }
-    isServerConnected = socketServer.Listen();
+    isServerConnected=socketServer.Listen();
+
+    if (!isServerConnected) {
+        std::cout << "Could not set socketserver to listen mode" << std::endl;
+        exit (0);
+    }
 
     std::cout << std::endl
-              << "Started server on "
-              << osaSocket::GetLocalhostIP() << ":" << port << std::endl
-              << std::endl;
+        << "Started server on "
+        << osaSocket::GetLocalhostIP() << ":" << port << std::endl
+        << std::endl;
+
 
     while (isServerConnected) {
         socket = socketServer.Accept();
+        osaSleep(100.0 * cmn_ms);
         if (socket != 0) {
             socket->Send("Server has accepted your request");
         }
 
-//        socket = socketServer.Select();
-//        if (socket == 0) {
-//            continue;
-//        }
-
-        // receive
-        bytesRead = socket->Receive(buffer, sizeof(buffer));
-        if (bytesRead > 0) {
-            for (int i = 0; i < bytesRead; i++) {
-                buffer[i] = toupper(buffer[i]);
-            }
-            buffer[bytesRead] = 0;
-
-            if (strcmp(buffer, "EXITCLIENT") == 0) {
-                socket->Close();
-                continue;
-            } else if (strcmp(buffer, "EXIT") == 0) {
-                socket->Close();
-                isServerConnected = false;
-                continue;
-            }
-
-            // send
-#ifdef OSA_SOCKET_WITH_STREAM
-            *socket << buffer;
-#else
-            socket->Send(buffer);
-#endif // OSA_SOCKET_WITH_STREAM
+        //nothing connected yet.
+        if (socket == 0) {
+            continue;
         }
-        osaSleep(100.0 * cmn_ms);
+
+        //if we are connected that send back whatever we get
+        while (socket->IsConnected()) {
+
+            // receive
+            bytesRead = socket->Receive(buffer, sizeof(buffer));
+            if (bytesRead > 0) {
+                for (int i = 0; i < bytesRead; i++) {
+                    buffer[i] = toupper(buffer[i]);
+                }
+                buffer[bytesRead] = 0;
+
+                if (strcmp(buffer, "EXITCLIENT") == 0) {
+                    socket->Close();
+
+                } else if (strcmp(buffer, "EXIT") == 0) {
+                    socket->Close();
+                    isServerConnected = false;
+                }
+                else { 
+                    // send
+#ifdef OSA_SOCKET_WITH_STREAM
+                    *socket << buffer;
+#else
+                    socket->Send(buffer);
+#endif // OSA_SOCKET_WITH_STREAM
+                }
+            }
+            osaSleep(100.0 * cmn_ms);
+            //socket->Send("");
+        }
+        //No connection so there is no need for this socket anymore.
+        delete socket;
+        socket=0;
+       
     }
+
+    if (socket != 0) {
+        delete socket; //this closes the socket.
+        socket = 0;
+    }
+
     socketServer.Close();
 
     return 0;

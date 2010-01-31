@@ -156,7 +156,7 @@ class CISST_EXPORT osaSocket: public cmnGenericObject
 , public std::iostream
 #endif // OSA_SOCKET_WITH_STREAM
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_VERBOSE);
 
     enum { INTERNALS_SIZE = 16 };
     char Internals[INTERNALS_SIZE];
@@ -210,8 +210,13 @@ public:
     /*! \brief Send a byte array via the socket
         \param bufsend Buffer holding bytes to be sent
         \param msglen Number of bytes to send
-        \return Number of bytes sent (-1 if error) */
-    int Send(const char * bufsend, unsigned int msglen);
+        \param timeoutSec is the longest time we should wait to send something (NA for UDP)
+        \return Number of bytes sent (-1 if error) 
+        \note  Since this is a nonblocking call the socket might not be ready to send right away
+               so a short timeout will help in cases when large amount of data is sent 
+               around. If the socket is not ready within the timeout then the connection will be closed
+    */
+    int Send(const char * bufsend, unsigned int msglen, const double timeoutSec = 0.0 );
 
     /*! \brief Send a string via the socket
         \param bufsend String to be sent
@@ -223,7 +228,7 @@ public:
     /*! \brief Receive a byte array via the socket
         \param bufrecv Buffer to store received data
         \param maxlen Maximum number of bytes to receive
-        \param timeoutSec Timeout in seconds. 
+        \param timeoutSec Timeout in seconds. (NA for UDP)
         \return Number of bytes received. 0 if timeout is reached and/or no data is received. */
     int Receive(char * bufrecv, unsigned int maxlen, const double timeoutSec = 0.0);
 
@@ -232,8 +237,8 @@ public:
     bool Close(void);
 
     /*! \ brief Connection state (only works for TCP)
-        \return Returns true if the soceket thinks it is connected */
-    bool IsConnected(void) { return Connected; }
+        \return Returns true if the socket thinks it is connected */
+    bool IsConnected(void);
 
 #ifdef OSA_SOCKET_WITH_STREAM
     /*! Provide a pointer to the stream buffer */
