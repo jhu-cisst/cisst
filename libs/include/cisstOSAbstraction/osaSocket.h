@@ -48,6 +48,7 @@ http://www.cisst.org/cisst/license.txt.
   osaSocket constructor upon accepting a connection (see osaSocketServer class).
 
   \note Please refer to osAbstractionTutorial/sockets for usage examples.
+  \note Disconnection is detected when a socket attempts to write to another socket and does not received an ACK.
 */
 
 #ifndef _osaSocket_h

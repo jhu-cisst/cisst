@@ -135,6 +135,7 @@ bool osaSocket::AssignPort(unsigned short port)
     int retval = bind(SocketFD, reinterpret_cast<struct sockaddr *>(&serverAddr), sizeof(serverAddr));
     if (retval == SOCKET_ERROR) {
         CMN_LOG_CLASS_INIT_ERROR << "AssignPort: failed to bind socket" << std::endl;
+        Close();
         return false;
     }
     return true;
@@ -171,7 +172,7 @@ bool osaSocket::Connect(void)
 
     int retval = connect(SocketFD, reinterpret_cast<struct sockaddr *>(&SERVER_ADDR), sizeof(SERVER_ADDR));
     if (retval == SOCKET_ERROR) {
-        Connected = false;
+        Close();
         CMN_LOG_CLASS_RUN_ERROR << "Connect: failed to connect" << std::endl;
         return false;
     }
@@ -201,7 +202,7 @@ int osaSocket::Send(const char * bufsend, unsigned int msglen)
 
     if (retval == SOCKET_ERROR) {
         CMN_LOG_CLASS_RUN_ERROR << "Send: failed to send" << std::endl;
-        Connected = false;
+        Close();
         return -1;
     } else if (retval != static_cast<int>(msglen)) {
         CMN_LOG_CLASS_RUN_WARNING << "Send: failed to send the whole message" << std::endl;
@@ -277,7 +278,7 @@ int osaSocket::Receive(char * bufrecv, unsigned int maxlen, const double timeout
             }
         }
     } else if (retval == SOCKET_ERROR) {
-        Connected = false;
+        Close();
         CMN_LOG_CLASS_RUN_ERROR << "Receive: failed to receive" << std::endl;
     }
     return retval;
