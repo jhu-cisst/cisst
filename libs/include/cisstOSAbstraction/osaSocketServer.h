@@ -74,24 +74,12 @@ public:
         \return Pointer to the accepted socket or 0 on failure */
     osaSocket * Accept(void);
 
-    /*! \brief Check if a particular socket is still connected
-        \param socket Pointer to the socket to be checked
-        \return true if connected */
-    bool IsConnected(osaSocket * socket);
-
-    /*! \param timeoutSec Timeout in seconds.
-        \return A socket to read from or 0 on failure */
-    osaSocket * Select(const double timeoutSec = 0);
-
-    /*! \brief Close the socket */
+    /*! \brief Close the listening socket  */
     void Close(void);
 
 protected:
-    /*! \brief Iteratively close all client sockets */
-    void CloseClients(void);
 
-    int SocketFD;
-    std::map<int, osaSocket *> Clients;
+    int ServerSocketFD;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(osaSocketServer);

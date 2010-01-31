@@ -2,12 +2,12 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id$
+$Id$
 
-  Author(s):  Mark Finkelstein, Ali Uneri
-  Created on: 2009-08-17
+Author(s):  Mark Finkelstein, Ali Uneri
+Created on: 2009-08-17
 
-  (C) Copyright 2007-2009 Johns Hopkins University (JHU), All Rights Reserved.
+(C) Copyright 2007-2009 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -23,7 +23,9 @@ http://www.cisst.org/cisst/license.txt.
 CMN_IMPLEMENT_SERVICES(osaSocketServer);
 
 #if (CISST_OS == CISST_WINDOWS)
-#include <Winsock2.h>
+#define WIN32_LEAN_AND_MEAN
+#include <winsock2.h>
+#include <ws2tcpip.h>
 #define WINSOCKVERSION MAKEWORD(2,2)
 #else
 #include <arpa/inet.h>
@@ -44,24 +46,28 @@ osaSocketServer::osaSocketServer(void)
     WSADATA wsaData;
     int retval = WSAStartup(WINSOCKVERSION, &wsaData);
     if (retval != 0) {
-        CMN_LOG_CLASS_INIT_ERROR << "osaSocketServer: WSAStartup failed with error code " << retval << std::endl;
+        CMN_LOG_CLASS_RUN_ERROR << "osaSocketServer: WSAStartup failed with error code " << retval << std::endl;
         return;
     }
 #endif
 
-    SocketFD = socket(PF_INET, SOCK_STREAM, 0);
-    if (SocketFD == -1) {
-        CMN_LOG_CLASS_INIT_ERROR << "osaSocketServer: failed to create a socket" << std::endl;
+    ServerSocketFD = socket(PF_INET, SOCK_STREAM, 0);
+    if (ServerSocketFD == INVALID_SOCKET) {
+        CMN_LOG_CLASS_RUN_ERROR << "osaSocketServer: failed to create a socket" << std::endl;
     }
-    CMN_LOG_CLASS_INIT_VERBOSE << "osaSocketServer: created socket server " << SocketFD << std::endl;
+    CMN_LOG_CLASS_RUN_VERBOSE << "osaSocketServer: created socket server " << ServerSocketFD << std::endl;
 
     // Change to non-blocking socket
 #if (CISST_OS == CISST_WINDOWS)
     unsigned long arg = 1L;
-    ioctlsocket(SocketFD, FIONBIO, &arg);
+    if (ioctlsocket(ServerSocketFD, FIONBIO, &arg) == SOCKET_ERROR) {
+        CMN_LOG_CLASS_RUN_ERROR << "osaSocketServer: failed to set socket to non-blocking mode" << std::endl;
+    }
 #else
     char arg;
-    ioctl(SocketFD, FIONBIO, &arg);
+    if (ioctl(ServerSocketFD, FIONBIO, &arg) == -1 ) {
+        CMN_LOG_CLASS_RUN_ERROR << "osaSocketServer: failed to set socket to non-blocking mode" << std::endl;
+    }
 #endif
 }
 
@@ -69,6 +75,7 @@ osaSocketServer::osaSocketServer(void)
 osaSocketServer::~osaSocketServer(void)
 {
     Close();
+    WSACleanup();
 }
 
 
@@ -79,116 +86,49 @@ bool osaSocketServer::AssignPort(unsigned short port)
     serverAddr.sin_port = htons(port);
     serverAddr.sin_addr.s_addr = htonl(INADDR_ANY);
 
-    int retval = bind(SocketFD, reinterpret_cast<struct sockaddr *>(&serverAddr), sizeof(serverAddr));
-    if (retval == -1) {
-        CMN_LOG_CLASS_INIT_ERROR << "AssignPort: failed to bind socket" << std::endl;
+    int retval = bind(ServerSocketFD, reinterpret_cast<struct sockaddr *>(&serverAddr), sizeof(serverAddr));
+    if (retval == SOCKET_ERROR) {
+        CMN_LOG_CLASS_RUN_ERROR << "AssignPort: failed to bind socket" << std::endl;
         return false;
     }
     return true;
 }
-
-
 bool osaSocketServer::Listen(int backlog)
 {
-    int retval = listen(SocketFD, backlog);
-    if (retval == -1) {
-        CMN_LOG_CLASS_INIT_ERROR << "Listen: failed to listen" << std::endl;
+    int retval = listen(ServerSocketFD, backlog);
+    if (retval == SOCKET_ERROR) {
+        CMN_LOG_CLASS_RUN_ERROR << "Listen: failed to listen" << std::endl;
         return false;
     }
     return true;
 }
-
-
 osaSocket * osaSocketServer::Accept(void)
 {
-    int newSocketFD = accept(SocketFD, 0, 0);
-    if (newSocketFD == -1) {
+    struct sockaddr_in serverAddr;
+    int s= sizeof(serverAddr);
+    int newSocketFD = accept(ServerSocketFD,(struct sockaddr *)&serverAddr,&s);
+    if (newSocketFD == INVALID_SOCKET) {
         return 0;
     }
-    CMN_LOG_CLASS_RUN_VERBOSE << "Accept: connection request accepted" << std::endl;
-    osaSocket * newSocket = new osaSocket(newSocketFD);
-    Clients.insert(std::pair<int, osaSocket *>(newSocketFD, newSocket));
+    CMN_LOG_CLASS_RUN_VERBOSE << "Accept: connection request accepted " <<  inet_ntoa (serverAddr.sin_addr)<<":"<<ntohs(serverAddr.sin_port)<<std::endl;
+    osaSocket * newSocket = new osaSocket(&newSocketFD);
+    //connected so set the sockets state to true;
+    newSocket->Connected = true;
+    //Clients.insert(std::pair<int, osaSocket *>(newSocketFD, newSocket));
     return newSocket;
 }
 
-
-bool osaSocketServer::IsConnected(osaSocket * socket)
-{
-    CMN_LOG_CLASS_RUN_WARNING << "IsConnected: not yet fully reliable" << std::endl;
-    if (Clients.find(socket->GetIdentifier()) != Clients.end()) {
-        return true;
-    }
-    return false;
-}
-
-
-osaSocket * osaSocketServer::Select(const double timeoutSec)
-{
-    fd_set readfds;
-    FD_ZERO(&readfds);
-    int retval;
-    char buffer;
-
-    long sec = static_cast<long>(floor(timeoutSec));
-    long usec = static_cast<long>((timeoutSec - sec) * 1e6);
-    timeval timeout = { sec, usec };
-
-    std::map<int, osaSocket *>::iterator it;
-    for (it = Clients.begin(); it != Clients.end(); it++) {
-        // should use select to check for writability
-//        retval = send(it->first, &buffer, 0, 0);
-//        if (retval == -1) {
-//            it->second->Close();
-//            delete it->second;
-//            Clients.erase(it);
-//            if (Clients.size() == 0) {
-//                return 0;
-//            }
-//        } else {
-            FD_SET(it->first, &readfds);
-            retval = select(it->first + 1, &readfds, 0, 0, &timeout);
-            if (retval > 0) {
-                retval = recv(it->first, &buffer, 1, MSG_PEEK);
-                if (retval == -1) {
-                    it->second->Close();
-                    delete it->second;
-                    Clients.erase(it);
-                    if (Clients.size() == 0) {
-                        return 0;
-                    }
-                }
-                return it->second;
-            }
-//        }
-    }
-    return 0;
-}
-
-
-void osaSocketServer::CloseClients(void)
-{
-    std::map<int, osaSocket *>::iterator it;
-    for (it = Clients.begin(); it != Clients.end(); it++) {
-        it->second->Close();
-        delete it->second;
-        Clients.erase(it);
-        if (Clients.size() == 0) {
-            return;
-        }
-    }
-}
-
-
 void osaSocketServer::Close(void)
 {
-    if (SocketFD >= 0) {
-        CloseClients();
+    if (ServerSocketFD >= 0) {
 #if (CISST_OS == CISST_WINDOWS)
-        closesocket(SocketFD);
+        closesocket(ServerSocketFD);
 #else
-        close(SocketFD);
+        close(ServerSocketFD);
 #endif
-        CMN_LOG_CLASS_INIT_VERBOSE << "Close: closed socket server " << SocketFD << std::endl;
-        SocketFD = -1;
+        CMN_LOG_CLASS_RUN_VERBOSE << "Close: closed socket server " << ServerSocketFD << std::endl;
+        ServerSocketFD = -1;
     }
 }
+
+

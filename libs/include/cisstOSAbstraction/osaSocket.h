@@ -60,8 +60,12 @@ http://www.cisst.org/cisst/license.txt.
 // Always include last
 #include <cisstOSAbstraction/osaExport.h>
 
+#if (CISST_OS != CISST_WINDOWS)
+#define INVALID_SOCKET -1
+#define SOCKET_ERROR -1
+#endif
 
-//#define OSA_SOCKET_WITH_STREAM
+#define OSA_SOCKET_WITH_STREAM
 
 #ifdef OSA_SOCKET_WITH_STREAM
 // forward declaration
@@ -169,9 +173,6 @@ public:
     /*! \brief Default constructor */
     osaSocket(SocketTypes type = TCP);
 
-    /*! \brief osaSocketServer constructor (for use by osaSocketServer) */
-    osaSocket(int socketFD);
-
     /*! \brief Destructor */
     ~osaSocket(void);
 
@@ -220,12 +221,17 @@ public:
     /*! \brief Receive a byte array via the socket
         \param bufrecv Buffer to store received data
         \param maxlen Maximum number of bytes to receive
-        \param timeoutSec Timeout in seconds.
+        \param timeoutSec Timeout in seconds. 
         \return Number of bytes received. 0 if timeout is reached and/or no data is received. */
     int Receive(char * bufrecv, unsigned int maxlen, const double timeoutSec = 0.0);
 
-    /*! \brief Close the socket */
-    void Close(void);
+    /*! \brief Close the socket 
+        \return False if close fails*/
+    bool Close(void);
+
+    /*! \ brief Connection state (only works for TCP)
+        \return Returns true if the soceket thinks it is connected */
+    bool IsConnected(void) { return Connected; };
 
 #ifdef OSA_SOCKET_WITH_STREAM
     /*! Provide a pointer to the stream buffer */
@@ -235,11 +241,22 @@ public:
 #endif // OSA_SOCKET_WITH_STREAM
 
 protected:
+
+    
+    /*! \brief osaSocketServer constructor (for use by osaSocketServer) 
+        \param Void pointer is used to her avoid including WinSock2.h, the pointer is cast to proper socket in cpp file.
+        
+        */
+    osaSocket(void * socketFDPtr);
+
     /*! \return IP address (as a number) for the given host */
     unsigned long GetIP(const std::string & host) const;
 
     SocketTypes SocketType;
     int SocketFD;
+    bool Connected;
+  
+    friend class osaSocketServer;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(osaSocket);
