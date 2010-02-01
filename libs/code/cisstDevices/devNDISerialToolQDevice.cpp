@@ -39,14 +39,14 @@ devNDISerialToolQDevice::devNDISerialToolQDevice(const std::string & taskName) :
     }
 
     // connect Qt signals to slots
-    QObject::connect(&UpdateTimer, SIGNAL(timeout()),
-                     this, SLOT(UpdateTimerQSlot()));
+    QObject::connect(ToolWidget.ButtonRecord, SIGNAL(clicked()),
+                     this, SLOT(RecordQSlot()));
 
-    UpdateTimer.start(20);
+    startTimer(20);
 }
 
 
-void devNDISerialToolQDevice::UpdateTimerQSlot(void)
+void devNDISerialToolQDevice::timerEvent(QTimerEvent * event)
 {
     NDI.GetPositionCartesian(NDI.PositionCartesian);
     if (NDI.PositionCartesian.Valid()) {
@@ -58,4 +58,15 @@ void devNDISerialToolQDevice::UpdateTimerQSlot(void)
         ToolWidget.PositionY->setNum(0.0);
         ToolWidget.PositionZ->setNum(0.0);
     }
+}
+
+void devNDISerialToolQDevice::RecordQSlot(void)
+{
+    std::ofstream file;
+    file.open("C:\\development\\Data\\devNDISerialFiducials.csv", std::ios::app);
+    file << NDI.PositionCartesian.Position() << std::endl;
+//    file << NDI.PositionCartesian.Position().Translation().X() << ", "
+//         << NDI.PositionCartesian.Position().Translation().Y() << ", "
+//         << NDI.PositionCartesian.Position().Translation().Z() << std::endl;
+    file.close();
 }

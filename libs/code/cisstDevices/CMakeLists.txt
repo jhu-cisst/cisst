@@ -222,3 +222,7 @@ endif(CISST_DEV_HAS_NOVINTHDL)
 if(CISST_DEV_HAS_MICRONTRACKER)
   target_link_libraries(cisstDevices ${MicronTracker_LIBRARIES})
 endif(CISST_DEV_HAS_MICRONTRACKER)
+
+if(CISST_HAS_QT)
+  target_link_libraries(cisstDevices ${QT_LIBRARIES})
+endif(CISST_HAS_QT)

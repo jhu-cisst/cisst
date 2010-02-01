@@ -471,8 +471,8 @@ devNDISerial::Tool * devNDISerial::AddTool(const std::string & name, const char 
         // create an interface for tool
         tool->Interface = AddProvidedInterface(name);
         if (tool->Interface) {
-            StateTable.AddData(tool->Position, name + "Position");
-            tool->Interface->AddCommandReadState(StateTable, tool->Position, "GetPositionCartesian");
+            StateTable.AddData(tool->TooltipPosition, name + "Position");
+            tool->Interface->AddCommandReadState(StateTable, tool->TooltipPosition, "GetPositionCartesian");
         }
     }
     return tool;
@@ -598,8 +598,7 @@ void devNDISerial::PortHandlesQuery(void)
         // check if tool exists, generate a name and add it otherwise
         tool = CheckTool(serialNumber);
         if (!tool) {
-            std::string name;
-            name = std::string(mainType) + '-' + std::string(serialNumber);
+            std::string name = std::string(mainType) + '-' + std::string(serialNumber);
             tool = AddTool(name, serialNumber);
         }
 
@@ -699,6 +698,7 @@ void devNDISerial::Track(void)
     Tool * tool;
     vctQuatRot3 toolOrientation;
     vct3 toolPosition;
+    vctFrm3 tooltipPosition;
 
     CommandSend("TX 0001");
     ResponseRead();
@@ -718,21 +718,20 @@ void devNDISerial::Track(void)
 
         if (strncmp(parsePointer, "MISSING", 7) == 0) {
             CMN_LOG_CLASS_RUN_WARNING << "Track: " << tool->Name << " is missing" << std::endl;
-            tool->Position.SetValid(false);
+            tool->TooltipPosition.SetValid(false);
             parsePointer += 7;
             parsePointer += 8;  // skip Port Status
         } else if (strncmp(parsePointer, "DISABLED", 8) == 0) {
             CMN_LOG_CLASS_RUN_WARNING << "Track: " << tool->Name << " is disabled" << std::endl;
-            tool->Position.SetValid(false);
+            tool->TooltipPosition.SetValid(false);
             parsePointer += 8;
             parsePointer += 8;  // skip Port Status
         } else if (strncmp(parsePointer, "UNOCCUPIED", 10) == 0) {
             CMN_LOG_CLASS_RUN_WARNING << "Track: " << tool->Name << " is unoccupied" << std::endl;
-            tool->Position.SetValid(false);
+            tool->TooltipPosition.SetValid(false);
             parsePointer += 10;
             parsePointer += 8;  // skip Port Status
         } else {
-            tool->Position.SetValid(true);
             sscanf(parsePointer, "%6lf%6lf%6lf%6lf%7lf%7lf%7lf%6lf%*8X",
                    &(toolOrientation.W()), &(toolOrientation.X()), &(toolOrientation.Y()), &(toolOrientation.Z()),
                    &(toolPosition.X()), &(toolPosition.Y()), &(toolPosition.Z()),
@@ -740,16 +739,17 @@ void devNDISerial::Track(void)
             parsePointer += (4 * 6) + (3 * 7) + 6 + 8;
 
             toolOrientation.Divide(10000.0);
-            tool->Position.Position().Rotation().FromRaw(toolOrientation);
-
+            tooltipPosition.Rotation().FromRaw(toolOrientation);
             toolPosition.Divide(100.0);
-            toolPosition -= tool->Position.Position().Rotation() * tool->TooltipOffset;  // apply tooltip offset
-            tool->Position.Position().Translation().Assign(toolPosition);
-
+            tooltipPosition.Translation() = toolPosition;
             tool->ErrorRMS /= 10000.0;
+            tool->MarkerPosition.Position() = tooltipPosition;
 
-            CMN_LOG_CLASS_RUN_DEBUG << "Track: orientation (rad): " << vctAxAnRot3(toolOrientation, VCT_DO_NOT_NORMALIZE) << std::endl;
-            CMN_LOG_CLASS_RUN_DEBUG << "Track: translation (mm): " << toolPosition << std::endl;
+            tooltipPosition.Translation() += tooltipPosition.Rotation() * tool->TooltipOffset;  // apply tooltip offset
+            tool->TooltipPosition.Position() = tooltipPosition;
+            tool->TooltipPosition.SetValid(true);
+
+            CMN_LOG_CLASS_RUN_DEBUG << "Track: " << tool->Name << " is at:\n" << tooltipPosition << std::endl;
         }
         sscanf(parsePointer, "%08X", &(tool->FrameNumber));
         parsePointer += 8;
@@ -782,18 +782,20 @@ void devNDISerial::CalibratePivot(const mtsStdString & toolName)
 
     vctMat A(3 * numPoints, 6, VCT_COL_MAJOR);
     vctMat b(3 * numPoints, 1, VCT_COL_MAJOR);
+    std::vector<vctFrm3> frames(numPoints);
 
     for (unsigned int i = 0; i < numPoints; i++) {
         Track();
+        frames[i] = tool->MarkerPosition.Position();
 
         vctDynamicMatrixRef<double> rotation(3, 3, 1, numPoints*3, A.Pointer(i*3, 0));
-        rotation.Assign(tool->Position.Position().Rotation());
+        rotation.Assign(tool->MarkerPosition.Position().Rotation());
 
         vctDynamicMatrixRef<double> identity(3, 3, 1, numPoints*3, A.Pointer(i*3, 3));
         identity.Assign(-vctRot3::Identity());
 
         vctDynamicVectorRef<double> translation(3, b.Pointer(i*3, 0));
-        translation.Assign(tool->Position.Position().Translation());
+        translation.Assign(tool->MarkerPosition.Position().Translation());
     }
 
     CMN_LOG_CLASS_RUN_WARNING << "CalibratePivot: calibration started" << std::endl;
@@ -806,22 +808,24 @@ void devNDISerial::CalibratePivot(const mtsStdString & toolName)
     vct3 tooltip;
     vct3 pivot;
     for (unsigned int i = 0; i < 3; i++) {
-        tooltip.Element(i) = b.at(i, 0);
-        pivot.Element(i) = b.at(i+3, 0);
+        tooltip.Element(i) = -b.at(i, 0);
+        pivot.Element(i) = -b.at(i+3, 0);
     }
     tool->TooltipOffset = tooltip;
 
-//    vct3 error;
-//    double errorRMS = 0.0;
-//    for (int i = 0; i < numPoints; i++) {
-//        error = frame[i] * tooltip - pivot;
-//        errorRMS += error.NormSquare();
-//    }
-//    errorRMS = sqrt(error / numPoints);
+    vct3 error;
+    double errorSquareSum = 0.0;
+    for (int i = 0; i < numPoints; i++) {
+        error = (frames[i] * tooltip) - pivot;
+        CMN_LOG_CLASS_RUN_DEBUG << error << std::endl;
+        errorSquareSum += error.NormSquare();
+    }
+    double errorRMS = sqrt(errorSquareSum / numPoints);
 
-    CMN_LOG_CLASS_RUN_DEBUG << "CalibratePivot:\n "
-                            << " * tooltip offset: " << tooltip << "\n"
-                            << " * pivot position: " << pivot << std::endl;
+    CMN_LOG_CLASS_RUN_WARNING << "CalibratePivot:\n"
+                              << " * tooltip offset: " << tooltip << "\n"
+                              << " * pivot position: " << pivot << "\n"
+                              << " * error RMS: " << errorRMS << std::endl;
 }
 
 

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>250</width>
-    <height>108</height>
+    <width>230</width>
+    <height>116</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -104,6 +104,13 @@
         </property>
         <property name="text">
          <string>0</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0" colspan="3">
+       <widget class="QPushButton" name="ButtonRecord">
+        <property name="text">
+         <string>Record</string>
         </property>
        </widget>
       </item>

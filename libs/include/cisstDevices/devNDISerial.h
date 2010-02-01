@@ -71,7 +71,8 @@ class CISST_EXPORT devNDISerial : public mtsTaskPeriodic
         unsigned int FrameNumber;
         double ErrorRMS;
         mtsProvidedInterface * Interface;
-        prmPositionCartesianGet Position;
+        prmPositionCartesianGet TooltipPosition;
+        prmPositionCartesianGet MarkerPosition;
 
         char PortHandle[3];
         // PHINF 0001

@@ -25,9 +25,10 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsFunctionReadOrWrite.h>
 #include <cisstMultiTask/mtsFunctionVoid.h>
 #include <cisstDevices/devNDISerialControllerQWidget.h>
+#include <cisstDevices/devExport.h>  // always include last
 
 
-class devNDISerialControllerQDevice : public QObject, public mtsDevice
+class CISST_EXPORT devNDISerialControllerQDevice : public QObject, public mtsDevice
 {
     Q_OBJECT;
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
