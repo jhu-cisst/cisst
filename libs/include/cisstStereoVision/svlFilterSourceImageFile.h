@@ -24,20 +24,11 @@ http://www.cisst.org/cisst/license.txt.
 #define _svlFilterSourceImageFile_h
 
 #include <cisstStereoVision/svlStreamManager.h>
-#include <cisstStereoVision/svlFileHandlers.h>
+#include <cisstStereoVision/svlImageIO.h>
 
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
 
-#define SVL_IFS_EXTENSION_NOT_SUPPORTED     -9000
-#define SVL_IFS_INVALID_FILEPATH            -9001
-#define SVL_IFS_UNABLE_TO_OPEN              -9002
-#define SVL_IFS_WRONG_IMAGE_SIZE            -9003
-#define SVL_IFS_WRONG_IMAGE_DATA_SIZE       -9004
-
-#define SVL_IFS_FILEPATH_LENGTH             1024
-#define SVL_IFS_EXTENSION_LENGTH            64
-#define SVL_IFS_FULLPATH_LENGTH             1152
 
 class CISST_EXPORT svlFilterSourceImageFile : public svlFilterSourceBase, public cmnGenericObject
 {
@@ -49,7 +40,7 @@ public:
     virtual ~svlFilterSourceImageFile();
 
     int SetChannelCount(unsigned int channelcount);
-    int SetFilePath(const char* filepathprefix, const char* extension, int videoch = SVL_LEFT);
+    int SetFilePath(const std::string & filepathprefix, const std::string & extension, int videoch = SVL_LEFT);
     int SetSequence(unsigned int numberofdigits = 0, unsigned int from = 0, unsigned int to = 0);
 
 protected:
@@ -59,13 +50,10 @@ protected:
     virtual int Release();
 
 private:
-    bool Stereo;
-    svlImageFileTypeList ImageTypeList;
-    svlImageFile* ImageFile[2];
-    svlImageProperties ImageProps[2];
-    char FilePathPrefix[2][SVL_IFS_FILEPATH_LENGTH];
-    char Extension[2][SVL_IFS_EXTENSION_LENGTH];
-    char FilePath[2][SVL_IFS_FULLPATH_LENGTH];
+    vctDynamicVector<svlImageCodec*> ImageCodec;
+    vctDynamicVector<std::string> FilePathPrefix;
+    vctDynamicVector<std::string> Extension;
+    vctDynamicVector<std::string> FilePath;
     unsigned int NumberOfDigits;
     unsigned int From;
     unsigned int To;

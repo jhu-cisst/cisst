@@ -24,20 +24,11 @@ http://www.cisst.org/cisst/license.txt.
 #define _svlFilterImageFileWriter_h
 
 #include <cisstStereoVision/svlStreamManager.h>
-#include <cisstStereoVision/svlFileHandlers.h>
+#include <cisstStereoVision/svlImageIO.h>
 
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
 
-#define SVL_IFW_EXTENSION_NOT_SUPPORTED     -10000
-#define SVL_IFW_INVALID_FILEPATH            -10001
-#define SVL_IFW_UNABLE_TO_OPEN              -10002
-#define SVL_IFW_WRONG_IMAGE_SIZE            -10003
-#define SVL_IFW_WRONG_IMAGE_DATA_SIZE       -10004
-
-#define SVL_IFW_FILEPATH_LENGTH             1024
-#define SVL_IFW_EXTENSION_LENGTH            64
-#define SVL_IFW_FULLPATH_LENGTH             1152
 
 class CISST_EXPORT svlFilterImageFileWriter : public svlFilterBase, public cmnGenericObject
 {
@@ -48,7 +39,7 @@ public:
     virtual ~svlFilterImageFileWriter();
 
     int Disable(bool disable, int videoch = SVL_LEFT);
-    int SetFilePath(const char* filepathprefix, const char* extension, int videoch = SVL_LEFT);
+    int SetFilePath(const std::string & filepathprefix, const std::string & extension, int videoch = SVL_LEFT);
     void EnableTimestamps(bool enable = true) { TimestampsEnabled = enable; }
     void Pause() { CaptureLength = 0; }
     void Record(int frames = -1) { CaptureLength = frames; }
@@ -61,16 +52,13 @@ protected:
     virtual int Release();
 
 private:
+    vctDynamicVector<svlImageCodec*> ImageCodec;
+    vctDynamicVector<std::string> FilePathPrefix;
+    vctDynamicVector<std::string> Extension;
+    vctDynamicVector<bool> Disabled;
     bool TimestampsEnabled;
     svlSampleImageRGB ImageBuffer;
     float DistanceScaling;
-    svlImageFileTypeList ImageTypeList;
-    svlImageFile* ImageFile[2];
-    svlImageProperties ImageProps[2];
-    bool Disabled[2];
-    char FilePathPrefix[2][SVL_IFW_FILEPATH_LENGTH];
-    char Extension[2][SVL_IFW_EXTENSION_LENGTH];
-    char FilePath[2][SVL_IFW_FULLPATH_LENGTH];
     unsigned int CaptureLength;
 };
 

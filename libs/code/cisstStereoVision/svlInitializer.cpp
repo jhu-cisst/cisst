@@ -20,12 +20,17 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
-#include <cisstStereoVision/svlInitializer.h>
 #include <cisstStereoVision.h>
+#include <cisstStereoVision/svlInitializer.h>
+#include "ftInitializer.h"
+#include "vidInitializer.h"
 
 
 void svlInitialize()
 {
+    svlInitializeImageCodecs();
+    svlInitializeVideoCapture();
+
 #ifdef _svlFilterSourceDummy_h
     delete new svlFilterSourceDummy;
 #endif // _svlFilterSourceDummy_h

@@ -18,265 +18,391 @@ http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
 
+Original code courtesy of Ben Mitchell.
 */
 
-#include <iostream>
 #include "ftImagePPM.h"
 
-#ifdef _MSC_VER
-    // Quick fix for Visual Studio Intellisense:
-    // The Intellisense parser can't handle the CMN_UNUSED macro
-    // correctly if defined in cmnPortability.h, thus
-    // we should redefine it here for it.
-    // Removing this part of the code will not effect compilation
-    // in any way, on any platforms.
-    #undef CMN_UNUSED
-    #define CMN_UNUSED(argument) argument
-#endif
-
-using namespace std;
 
 /*************************************/
 /*** ftImagePPM class ****************/
 /*************************************/
 
-ftImagePPM::ftImagePPM()
+#define MAX_DIMENISION  8192
+
+CMN_IMPLEMENT_SERVICES(ftImagePPM)
+
+ftImagePPM::ftImagePPM() :
+    svlImageCodec(),
+    cmnGenericObject(),
+    ppmBuffer(0),
+    ppmBufferSize(0)
 {
-    myrows = mycols = mycolors = mysize = 0;
-    pgm = false;
+    ExtensionList = ".ppm;.pgm;";
 }
 
 ftImagePPM::~ftImagePPM()
 {
-    Close();
+    if (ppmBuffer) delete [] ppmBuffer;
 }
 
-svlImageFile* ftImagePPM::GetInstance()
+int ftImagePPM::ReadDimensions(const std::string &filename, unsigned int &width, unsigned int &height)
 {
-    ftImagePPM* instance = new ftImagePPM();
-    return instance;
+    std::ifstream stream(filename.c_str(), std::ios_base::in | std::ios_base::binary);
+    return ReadDimensions(stream, width, height);
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// ftImagePPM::ExtractDimensions
-// Limitations:
-int ftImagePPM::ExtractDimensions(const char* CMN_UNUSED(filepath), int & CMN_UNUSED(width), int & CMN_UNUSED(height))
+int ftImagePPM::ReadDimensions(std::istream &stream, unsigned int &width, unsigned int &height)
 {
-    // TODO
-    return -1;
+    int magicnumber = ppmOpen(stream, width, height);
+    if (magicnumber < 0) return SVL_FAIL;
+    return SVL_OK;
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// ftImagePPM::Open
-// Limitations:
-//             - only 24bpp PPMs and 8bpp PGMs are supported
-//             - maximal image size: IMAGEPPM_MAX_DIMENISION x IMAGEPPM_MAX_DIMENISION (could be anything)
-int ftImagePPM::Open(const char* filepath, svlImageProperties& properties)
+int ftImagePPM::ReadDimensions(const unsigned char *buffer, const size_t buffersize, unsigned int &width, unsigned int &height)
 {
-    Close();
+    int magicnumber = ppmOpen(buffer, buffersize, width, height);
+    if (magicnumber < 0) return SVL_FAIL;
+    return SVL_OK;
+}
 
-  string magic;
+int ftImagePPM::Read(svlSampleImageBase &image, const unsigned int videoch, const std::string &filename, bool noresize)
+{
+    std::ifstream stream(filename.c_str(), std::ios_base::in | std::ios_base::binary);
+    return Read(image, videoch, stream, noresize);
+}
 
-  myfile.open (filepath, fstream::in | fstream::binary);
-  if (!myfile.is_open ()) {
-    cerr << "Error opening file " << filepath << endl;
-    goto labError;
-  }
+int ftImagePPM::Read(svlSampleImageBase &image, const unsigned int videoch, std::istream &stream, bool noresize)
+{
+    if (videoch >= image.GetVideoChannels()) return SVL_FAIL;
 
-  // In this for loop, we read the header
-  for (int i = 0; i < 4; i++) {
-    while (myfile.peek() == '\n' ||  
-           myfile.peek() == ' ' || 
-           myfile.peek() == '#') { 
-      if((myfile.peek() == '#')) //ignore comments
-        myfile.ignore(1024, '\n');
-      else
-        myfile.get(); //ignore extra whitespace and endlines
+    unsigned int width, height;
+
+    int magicnumber = ppmOpen(stream, width, height);
+    if (magicnumber < 0) return SVL_FAIL;
+
+    if (width  < 1 || width  > MAX_DIMENISION ||
+        height < 1 || height > MAX_DIMENISION) return SVL_FAIL;
+
+    if (width  != image.GetWidth(videoch) ||
+        height != image.GetHeight(videoch)) {
+        if (noresize) return SVL_FAIL;
+        image.SetSize(videoch, width, height);
     }
-    switch(i) {
-      case 0: //first real block of data = magic number
-        myfile >> magic;
-        break;
-      case 1: //second is X size
-        myfile >> mycols;
-        break;
-      case 2: //third is Y size
-        myfile >> myrows;
-        break;
-      case 3: //fourth is the max. allowed value of a color 
-              //component of a pixel (should be 255)
-        myfile >> mycolors;
-        break;
-    }
-  }
 
-  //make sure we don't have extra junk before the actual data
-  while (myfile.peek() == '\n' || 
-         myfile.peek() == ' ' || 
-         myfile.peek() == '#') {
-    if((myfile.peek() == '#')) //ignore comments
-      myfile.ignore(1024, '\n');
-    else
-      myfile.get(); //ignore extra whitespace and endlines
-  }
-
-
-  if( magic != "P5" && magic != "P6") {
-    cerr << "Error reading file " << filepath << "; unknown magic number\n";
-    goto labError;
-  }
-
-
-  mysize = myrows * mycols;
-
-  if(magic == "P5") {
-    tmpBuffer = new unsigned char[mysize];
-    if(tmpBuffer == 0) 
-      goto labError;
-    pgm = true;
-  }
-
-  if (mycolors != 255) {
-    cerr << "Colors wasn't 255 in file " << filepath << endl;
-    goto labError;
-  }
-
-
-  properties.DataType = svlTypeImageRGB;
-  properties.DataSize = mysize * sizeof(svlRGB);
-  properties.Width = mycols;
-  properties.Height = myrows;
-  properties.Padding = 0;
-
-  return SVL_OK;
-
-    
-labError:
-    Close();
-    return SVL_FAIL;
+    return ppmRead(stream, image.GetUCharPointer(videoch), width * height, magicnumber);
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// ftImagePPM::ReadAndClose
-// Limitations:
-//             - only 24bpp PPMs and 8bpp PGMs are supported
-//             - maximal image size: IMAGEPPM_MAX_DIMENISION x IMAGEPPM_MAX_DIMENISION (could be anything)
-int ftImagePPM::ReadAndClose(unsigned char* buffer, unsigned int size)
+int ftImagePPM::Read(svlSampleImageBase &image, const unsigned int videoch, const unsigned char *buffer, const size_t buffersize, bool noresize)
 {
-  if( ! myfile.is_open() ) {
-    cerr << "ftImagePPM::ReadAndClose() called without an open file handle\n";
-    Close();
-    return SVL_FAIL;
-  }
+    if (videoch >= image.GetVideoChannels()) return SVL_FAIL;
+
+    unsigned int width, height;
+
+    int magicnumber = ppmOpen(buffer, buffersize, width, height);
+    if (magicnumber < 0) return SVL_FAIL;
+
+    if (width  < 1 || width  > MAX_DIMENISION ||
+        height < 1 || height > MAX_DIMENISION) return SVL_FAIL;
+
+    if (width  != image.GetWidth(videoch) ||
+        height != image.GetHeight(videoch)) {
+        if (noresize) return SVL_FAIL;
+        image.SetSize(videoch, width, height);
+    }
+
+    return ppmRead(buffer, buffersize, image.GetUCharPointer(videoch), width * height, magicnumber);
+}
+
+int ftImagePPM::Write(const svlSampleImageBase &image, const unsigned int videoch, const std::string &filename)
+{
+    std::ofstream stream(filename.c_str(), std::ios_base::out | std::ios_base::binary);
+
+    // Get codec (lowercase extension)
+    std::string codec;
+    svlImageIO::GetExtension(filename, codec);
+
+    return Write(image, videoch, stream, codec);
+}
+
+int ftImagePPM::Write(const svlSampleImageBase &image, const unsigned int videoch, std::ostream &stream)
+{
+    return Write(image, videoch, stream, "ppm");
+}
+
+int ftImagePPM::Write(const svlSampleImageBase &image, const unsigned int videoch, std::ostream &stream, const std::string &codec)
+{
+    if (videoch >= image.GetVideoChannels()) return SVL_FAIL;
   
-  if (size < mysize * sizeof(svlRGB) ) {
-    cerr << "ftImagePPM::ReadAndClose() given a buffer that was too small\n";
-    Close();
-    return SVL_FAIL;
-  }
+    const unsigned char *imagebuf = image.GetUCharPointer(videoch);
+    unsigned int width, height;
 
-  svlRGB* data = reinterpret_cast<svlRGB*>(buffer);
-  if (pgm) { //it's a pgm
-    myfile.read (reinterpret_cast<char*>(tmpBuffer), (sizeof(char) * mysize));
+    width = image.GetWidth(videoch);
+    height = image.GetHeight(videoch);
 
-    for (unsigned int i = 0; i < mysize; i++) {
-      data[i].R = data[i].G = data[i].B = tmpBuffer[i];
-    }
-  } else { //it's a ppm
-    myfile.read (reinterpret_cast<char*>(data), (sizeof(svlRGB) * mysize));
+    if (image.GetBPP() != 3 ||
+        width  < 1 || width  > MAX_DIMENISION ||
+        height < 1 || height > MAX_DIMENISION) return SVL_FAIL;
 
-    //Balazs - swapping R and B
-    unsigned char colval;
-    for (unsigned int i = 0; i < mysize; i++) {
-      colval = data[i].R;
-      data[i].R = data[i].B;
-      data[i].B = colval;
-    }
-  }
+    int magicnumber = 6;
+    if (codec == "pgm") magicnumber = 5;
 
-  Close();
-  return SVL_OK;
+    return ppmWrite(imagebuf, width, height, magicnumber, stream);
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// ftImagePPM::Create
-// Limitations:
-//             - only 24bpp PPMs are supported
-//             - maximal image size: IMAGEPPM_MAX_DIMENISION x IMAGEPPM_MAX_DIMENISION (could be anything)
-int ftImagePPM::Create(const char* filepath, svlImageProperties* properties, unsigned char* buffer)
+int ftImagePPM::Write(const svlSampleImageBase &image, const unsigned int videoch, unsigned char *buffer, size_t &buffersize)
 {
-  int remlen;
-  unsigned int currlen, i;
-  unsigned long buflen;
+    return Write(image, videoch, buffer, buffersize, "ppm");
+}
 
-    if (!filepath || !properties || !buffer) goto labError;
+int ftImagePPM::Write(const svlSampleImageBase &image, const unsigned int videoch, unsigned char *buffer, size_t &buffersize, const std::string &codec)
+{
+    if (videoch >= image.GetVideoChannels()) return SVL_FAIL;
+  
+    const unsigned char *imagebuf = image.GetUCharPointer(videoch);
+    unsigned int width, height;
 
-    mycols = properties->Width;
-    myrows = properties->Height;
-    mycolors = 255;
+    width = image.GetWidth(videoch);
+    height = image.GetHeight(videoch);
 
-    if (properties->DataType != svlTypeImageRGB ||
-        mycols < 1 ||
-        mycols > IMAGEPPM_MAX_DIMENISION ||
-        myrows < 1 ||
-        myrows > IMAGEPPM_MAX_DIMENISION) goto labError;
+    if (image.GetBPP() != 3 ||
+        width  < 1 || width  > MAX_DIMENISION ||
+        height < 1 || height > MAX_DIMENISION) return SVL_FAIL;
 
+    int magicnumber = 6;
+    if (codec == "pgm") magicnumber = 5;
 
-    mysize = myrows * mycols;
-    buflen = mysize * sizeof(svlRGB);
+    return ppmWrite(imagebuf, width, height, magicnumber, buffer, buffersize);
+}
 
-    if (properties->Padding) {
-        cerr << "ftImagePPM:Create() called with properties->Padding != 0\n";
-        goto labError;
+int ftImagePPM::ppmOpen(std::istream &stream, unsigned int &width, unsigned int &height)
+{
+    // Only 24bpp PPMs and 8bpp PGMs are supported
+
+    std::string magicword;
+    unsigned int colors;
+    char ch;
+
+    for (int i = 0; i < 4; i ++) {
+
+        ch = stream.peek();
+        while (ch == '\n' || ch == ' ' || ch == '#') {
+            if (ch == '#') stream.ignore(1024, '\n');
+            else stream.get();
+            ch = stream.peek();
+        }
+
+        if (stream.fail()) return -1;
+
+        switch (i) {
+            case 0: // first real block of data = magic number
+                stream >> magicword;
+            break;
+
+            case 1: // second is width
+                stream >> width;
+            break;
+
+            case 2: // third is height
+                stream >> height;
+            break;
+
+            case 3: // fourth is the max. allowed value of a color 
+                stream >> colors;
+            break;
+        }
+    }
+
+    if (stream.fail() ||
+        colors != 255 ||
+        (magicword != "P5" && magicword != "P6")) return -1;
+
+    ch = stream.peek();
+    while (ch == '\n' || ch == ' ' || ch == '#') {
+        if (ch == '#') stream.ignore(1024, '\n');
+        else stream.get();
+        ch = stream.peek();
+    }
+
+    if (magicword == "P5") {
+        return 5;
+    }
+
+    return 6;
+}
+
+int ftImagePPM::ppmOpen(const unsigned char *source, const size_t sourcesize, unsigned int &width, unsigned int &height)
+{
+    if (!source) return SVL_FAIL;
+
+    // The header shall be shorter than 256 bytes
+    std::string str(reinterpret_cast<const char*>(source), std::min(static_cast<unsigned int>(sourcesize), 256u));
+    std::istringstream stream(str);
+
+    return ppmOpen(stream, width, height);
+}
+
+int ftImagePPM::ppmRead(std::istream &stream, unsigned char* buffer, unsigned int pixelcount, int magicnumber)
+{
+    if (!buffer) return SVL_FAIL;
+
+    unsigned int i;
+    unsigned char uch;
+
+    if (magicnumber == 5) {
+        unsigned char *source = buffer + (pixelcount << 1);
+
+        if (stream.read(reinterpret_cast<char*>(source), pixelcount).fail()) return SVL_FAIL;
+
+        for (i = 0; i < pixelcount; i ++) {
+            uch = *source; source ++;
+            *buffer = uch; buffer ++;
+            *buffer = uch; buffer ++;
+            *buffer = uch; buffer ++;
+        }
     }
     else {
-        if (properties->DataSize != buflen) goto labError;
-    }
+        if (stream.read(reinterpret_cast<char*>(buffer), pixelcount * 3).fail()) return SVL_FAIL;
 
-    // opening file
-    myfile.open (filepath, fstream::out | fstream::binary);
-    if (!myfile.is_open ()) {
-      cerr << "Could not open " << filepath << " for writing.\n";
-      goto labError;
-    }
-    //cerr << "Writing to file " << filename << "...\n";
-
-    //write header
-    myfile << "P6\n" << mycols << " " << myrows << endl << mycolors << endl;
-
-    //Balazs - swapping R and B and saving
-    //write data
-    remlen = buflen;
-    while (remlen > 0) {
-        currlen = std::min(remlen, 12288);
-        for (i = 0; i < currlen; i += 3) {
-            tmpSwapBuffer[i] = buffer[2];
-            tmpSwapBuffer[i + 1] = buffer[1];
-            tmpSwapBuffer[i + 2] = buffer[0];
+        // BGR >> RGB
+        for (unsigned int i = 0; i < pixelcount; i++) {
+            uch = buffer[0];
+            buffer[0] = buffer[2];
+            buffer[2] = uch;
             buffer += 3;
         }
-        myfile.write(reinterpret_cast<char*>(tmpSwapBuffer), currlen);
-        remlen -= 12288;
     }
 
-    myfile.close ();
     return SVL_OK;
-
-labError:
-    if (myfile.is_open()) myfile.close();
-    return SVL_FAIL;
 }
 
-void ftImagePPM::Close()
+int ftImagePPM::ppmRead(const unsigned char *source, const size_t sourcesize, unsigned char* buffer, unsigned int pixelcount, int magicnumber)
 {
-    if(myfile.is_open()) myfile.close();
-    if(pgm) {
-      delete [] tmpBuffer;
+    if (!buffer || !source || sourcesize < pixelcount) return SVL_FAIL;
+
+    unsigned int i, j;
+    unsigned char uch;
+
+    if (magicnumber == 5) {
+        for (i = 0; i < pixelcount; i ++) {
+            uch = source[i];
+            *buffer = uch; buffer ++;
+            *buffer = uch; buffer ++;
+            *buffer = uch; buffer ++;
+        }
     }
-    myrows = mycols = mycolors = mysize = 0;
-    pgm = false;
+    else {
+        // BGR >> RGB
+        j = 0;
+        for (unsigned int i = 0; i < pixelcount; i++) {
+            buffer[2] = source[j]; j ++;
+            buffer[1] = source[j]; j ++;
+            buffer[0] = source[j]; j ++;
+            buffer += 3;
+        }
+    }
+
+    return SVL_OK;
+}
+
+int ftImagePPM::ppmWrite(const unsigned char* buffer, const unsigned int width, const unsigned int height, const int magicnumber, std::ostream &stream)
+{
+    if (!buffer) return SVL_FAIL;
+
+    const unsigned int pixelcount = width * height;
+    unsigned int size = pixelcount;
+    unsigned char *target;
+    unsigned int i, j = 0, sum;
+
+    if (magicnumber == 6) size *= 3;
+
+    if (!ppmBuffer) {
+        ppmBuffer = new unsigned char[size];
+    }
+    else if (ppmBuffer && ppmBufferSize < size) {
+        delete [] ppmBuffer;
+        ppmBuffer = new unsigned char[size];
+    }
+    target = ppmBuffer;
+
+    if (magicnumber == 5) {
+        for (i = 0; i < pixelcount; i ++) {
+            sum  = buffer[j]; j ++;
+            sum += buffer[j]; j ++;
+            sum += buffer[j]; j ++;
+            *target = sum / 3; target ++;
+        }
+    }
+    else {
+        // RGB >> BGR
+        for (unsigned int i = 0; i < pixelcount; i++) {
+            target[2] = buffer[j]; j ++;
+            target[1] = buffer[j]; j ++;
+            target[0] = buffer[j]; j ++;
+            target += 3;
+        }
+    }
+
+    stream << "P" << magicnumber << "\n"
+           << width << "\n"
+           << height << "\n"
+           << 255 << "\n";
+    if (stream.fail()) return SVL_FAIL;
+
+    if (stream.write(reinterpret_cast<char*>(ppmBuffer), size).fail()) return SVL_FAIL;
+
+    return SVL_OK;
+}
+
+int ftImagePPM::ppmWrite(const unsigned char* buffer, const unsigned int width, const unsigned int height, const int magicnumber, unsigned char *target, size_t &targetsize)
+{
+    if (!buffer || !target) return SVL_FAIL;
+
+    const unsigned int pixelcount = width * height;
+    unsigned int headersize, size = pixelcount;
+    unsigned int i, j = 0, sum;
+    std::ostringstream stream;
+
+    // Build header in string stream
+    stream << "P" << magicnumber << "\n"
+           << width << "\n"
+           << height << "\n"
+           << 255 << "\n";
+    headersize = stream.str().size();
+
+    if (magicnumber == 6) size *= 3;
+
+    if (targetsize < (headersize + size)) {
+        // Let caller know what size of memory is needed
+        targetsize = headersize + size;
+        return SVL_FAIL;
+    }
+    // Return buffer size in 'targetsize'
+    targetsize = headersize + size;
+
+    // Store header
+    memcpy(target, stream.str().c_str(), headersize);
+    target += headersize;
+
+    // Store pixel data
+    if (magicnumber == 5) {
+        for (i = 0; i < pixelcount; i ++) {
+            sum  = buffer[j]; j ++;
+            sum += buffer[j]; j ++;
+            sum += buffer[j]; j ++;
+            *target = sum / 3; target ++;
+        }
+    }
+    else {
+        // RGB >> BGR
+        for (unsigned int i = 0; i < pixelcount; i++) {
+            target[2] = buffer[j]; j ++;
+            target[1] = buffer[j]; j ++;
+            target[0] = buffer[j]; j ++;
+            target += 3;
+        }
+    }
+
+    return SVL_OK;
 }
 

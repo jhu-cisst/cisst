@@ -317,8 +317,6 @@ int svlFilterSourceVideoCapture::Release()
 
 void svlFilterSourceVideoCapture::InitializeCaptureAPIs()
 {
-    svlInitializeVideoCapture();
-
     NumberOfSupportedAPIs = 0;
 
     // Enumerate registered APIs

@@ -237,6 +237,8 @@ public:
 
 int CameraViewer(bool interpolation, bool save, int width, int height, int fullscreen, int offsetx)
 {
+    svlInitialize();
+
 #if (CISST_SVL_HAS_ZLIB == OFF)
     save = false;
 #endif // CISST_SVL_HAS_ZLIB

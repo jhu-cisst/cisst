@@ -23,35 +23,34 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _ftImageBMP_h
 #define _ftImageBMP_h
 
-#include <cisstStereoVision/svlFileHandlers.h>
+#include <cisstStereoVision/svlImageIO.h>
 
-#define IMAGEBMP_MAX_DIMENISION     8192
 
-class ftImageBMP : public svlImageFile
+class ftImageBMP : public svlImageCodec, public cmnGenericObject
 {
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+
 public:
     ftImageBMP();
-    ~ftImageBMP();
-    svlImageFile* GetInstance();
 
-    int ExtractDimensions(const char* filepath, int & width, int & height);
-    int Open(const char* filepath, svlImageProperties& properties);
-    int ReadAndClose(unsigned char* buffer, unsigned int size);
-    int Create(const char* filepath, svlImageProperties* properties, unsigned char* buffer);
+    virtual int ReadDimensions(const std::string &filename, unsigned int &width, unsigned int &height);
+    virtual int ReadDimensions(std::istream &stream, unsigned int &width, unsigned int &height);
+    virtual int ReadDimensions(const unsigned char *buffer, const size_t buffersize, unsigned int &width, unsigned int &height);
+
+    virtual int Read(svlSampleImageBase &image, const unsigned int videoch, const std::string &filename, bool noresize = false);
+    virtual int Read(svlSampleImageBase &image, const unsigned int videoch, std::istream &stream, bool noresize = false);
+    virtual int Read(svlSampleImageBase &image, const unsigned int videoch, const unsigned char *buffer, const size_t buffersize, bool noresize = false);
+
+    virtual int Write(const svlSampleImageBase &image, const unsigned int videoch, const std::string &filename);
+    virtual int Write(const svlSampleImageBase &image, const unsigned int videoch, std::ostream &stream);
+    virtual int Write(const svlSampleImageBase &image, const unsigned int videoch, unsigned char *buffer, size_t &buffersize);
 
 protected:
-    FILE* FileHandle;
-    bool BufferPadded;
-    unsigned int BufferSize;
-    unsigned int LineSize;
-    unsigned int Padding;
-    unsigned int Height;
-    bool UpsideDown;
     svlBMPFileHeader FileHeader;
     svlDIBHeader DIBHeader;
-
-    void Close();
 };
+
+CMN_DECLARE_SERVICES_INSTANTIATION(ftImageBMP)
 
 #endif // _ftImageBMP_h
 

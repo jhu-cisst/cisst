@@ -22,10 +22,9 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstStereoVision/svlFilterImageFileWriter.h>
 #include <cisstStereoVision/svlConverters.h>
+
 #include <string.h>
 
-
-using namespace std;
 
 /***************************************/
 /*** svlFilterImageFileWriter class ****/
@@ -42,15 +41,14 @@ svlFilterImageFileWriter::svlFilterImageFileWriter() :
     AddSupportedType(svlTypeImageRGBStereo, svlTypeImageRGBStereo);
     AddSupportedType(svlTypeImageMonoFloat, svlTypeImageMonoFloat);
 
+    ImageCodec.SetSize(2);
+    FilePathPrefix.SetSize(2);
+    Extension.SetSize(2);
+    Disabled.SetSize(2);
+    ImageCodec.SetAll(0);
+    Disabled.SetAll(false);
+
     DistanceScaling = 1.0f;
-
-    for (int i = 0; i < 2; i ++) {
-        Disabled[i] = false;
-        ImageFile[i] = 0;
-        FilePathPrefix[i][0] = 0;
-        Extension[i][0] = 0;
-    }
-
     // Continuous saving by default
     CaptureLength = -1;
 }
@@ -62,47 +60,23 @@ svlFilterImageFileWriter::~svlFilterImageFileWriter()
 
 int svlFilterImageFileWriter::Initialize(svlSample* inputdata)
 {
-    svlSampleImageMonoFloat* depth;
-
     Release();
 
-    // stream type specific initialization
-    switch (GetInputType()) {
-        case svlTypeImageRGB:
-            ImageFile[SVL_LEFT] = ImageTypeList.GetHandlerInstance(Extension[SVL_LEFT]);
-            if (ImageFile[SVL_LEFT] == 0)
-                return SVL_IFW_EXTENSION_NOT_SUPPORTED;
-        break;
+    svlSampleImageBase* img = dynamic_cast<svlSampleImageBase*>(inputdata);
+    unsigned int videochannels = img->GetVideoChannels();
 
-        case svlTypeImageRGBStereo:
-            ImageFile[SVL_LEFT] = ImageTypeList.GetHandlerInstance(Extension[SVL_LEFT]);
-            ImageFile[SVL_RIGHT] = ImageTypeList.GetHandlerInstance(Extension[SVL_RIGHT]);
-            if (ImageFile[SVL_LEFT] == 0 || ImageFile[SVL_RIGHT] == 0)
-                return SVL_IFW_EXTENSION_NOT_SUPPORTED;
-        break;
+    for (unsigned int i = 0; i < videochannels; i ++) {
+        // checking extensions
+        // creating image file objects
+        ImageCodec[i] = svlImageIO::GetCodec("." + Extension[i]);
+        if (ImageCodec[i] == 0) {
+            Release();
+            return SVL_FAIL;
+        }
+    }
 
-        case svlTypeImageMonoFloat:
-            ImageFile[SVL_LEFT] = ImageTypeList.GetHandlerInstance(Extension[SVL_LEFT]);
-            depth = dynamic_cast<svlSampleImageMonoFloat*>(inputdata);
-            if (ImageFile[SVL_LEFT] == 0)
-                return SVL_IFW_EXTENSION_NOT_SUPPORTED;
-            ImageBuffer.SetSize(*depth);
-        break;
-
-        case svlTypeImageRGBA:
-        case svlTypeImageRGBAStereo:
-        case svlTypeImage3DMap:
-        case svlTypeInvalid:
-        case svlTypeStreamSource:
-        case svlTypeStreamSink:
-        case svlTypeImageMono8:
-        case svlTypeImageMono8Stereo:
-        case svlTypeImageMono16:
-        case svlTypeImageMono16Stereo:
-        case svlTypeImageCustom:
-        case svlTypeRigidXform:
-        case svlTypePointCloud:
-            return SVL_INVALID_INPUT_TYPE;
+    if (inputdata->GetType() == svlTypeImageMonoFloat) {
+        ImageBuffer.SetSize(*inputdata);
     }
 
     OutputData = inputdata;
@@ -117,10 +91,11 @@ int svlFilterImageFileWriter::ProcessFrame(ProcInfo* procInfo, svlSample* inputd
 
     if (CaptureLength == 0) return SVL_OK;
 
+    svlSampleImageBase* tosave = 0;
     svlSampleImageBase* img = dynamic_cast<svlSampleImageBase*>(OutputData);
     unsigned int videochannels = img->GetVideoChannels();
-    unsigned int idx, buffersize;
-    unsigned char* buffer;
+    std::stringstream path;
+    unsigned int idx;
 
     _ParallelLoop(procInfo, idx, videochannels)
     {
@@ -131,28 +106,26 @@ int svlFilterImageFileWriter::ProcessFrame(ProcInfo* procInfo, svlSample* inputd
                                          ImageBuffer.GetUCharPointer(idx),
                                          img->GetWidth(idx) * img->GetHeight(idx),
                                          DistanceScaling);
-            buffer = ImageBuffer.GetUCharPointer(idx);
-            buffersize = ImageBuffer.GetDataSize(idx);
+            tosave = &ImageBuffer;
         }
         else {
-            buffer = img->GetUCharPointer(idx);
-            buffersize = img->GetDataSize(idx);
+            tosave = img;
         }
+
+        path << FilePathPrefix[idx];
 
         if (TimestampsEnabled) {
-            sprintf(FilePath[idx], "%s%.3f.%s", FilePathPrefix[idx], inputdata->GetTimestamp(), Extension[idx]);
+            path.precision(3);
+            path << std::fixed << inputdata->GetTimestamp();
         }
         else {
-            sprintf(FilePath[idx], "%s%07d.%s", FilePathPrefix[idx], FrameCounter, Extension[idx]);
+            path.fill('0');
+            path << std::setw(7) << FrameCounter << std::setw(1);
         }
 
-        ImageProps[idx].DataType = svlTypeImageRGB;
-        ImageProps[idx].DataSize = buffersize;
-        ImageProps[idx].Width = img->GetWidth(idx);
-        ImageProps[idx].Height = img->GetHeight(idx);
-        ImageProps[idx].Padding = false;
+        path << "." << Extension[idx];
 
-        if (ImageFile[idx]->Create(FilePath[idx], &(ImageProps[idx]), buffer) != SVL_OK) return SVL_FAIL;
+        if (ImageCodec[idx]->Write(*tosave, idx, path.str()) != SVL_OK) return SVL_FAIL;
     }
 
     _SynchronizeThreads(procInfo);
@@ -167,9 +140,9 @@ int svlFilterImageFileWriter::ProcessFrame(ProcInfo* procInfo, svlSample* inputd
 
 int svlFilterImageFileWriter::Release()
 {
-    for (int i = 0; i < 2; i ++) {
-        if (ImageFile[0] != 0) delete ImageFile[0];
-        ImageFile[i] = 0;
+    for (unsigned int i = 0; i < ImageCodec.size(); i ++) {
+        if (ImageCodec[i]) delete ImageCodec[i];
+        ImageCodec[i] = 0;
     }
 
     return SVL_OK;
@@ -179,7 +152,7 @@ int svlFilterImageFileWriter::Disable(bool disable, int videoch)
 {
     if (IsInitialized() == true)
         return SVL_FAIL;
-    if (videoch != SVL_LEFT && videoch != SVL_RIGHT)
+    if (videoch >= static_cast<int>(Disabled.size()))
         return SVL_WRONG_CHANNEL;
 
     Disabled[videoch] = disable;
@@ -187,43 +160,22 @@ int svlFilterImageFileWriter::Disable(bool disable, int videoch)
     return SVL_OK;
 }
 
-int svlFilterImageFileWriter::SetFilePath(const char* filepathprefix, const char* extension, int videoch)
+int svlFilterImageFileWriter::SetFilePath(const std::string & filepathprefix, const std::string & extension, int videoch)
 {
     if (IsInitialized() == true)
         return SVL_ALREADY_INITIALIZED;
-    if (videoch != SVL_LEFT && videoch != SVL_RIGHT)
+    if (videoch >= static_cast<int>(ImageCodec.size()))
         return SVL_WRONG_CHANNEL;
-    if (filepathprefix == 0 || extension == 0)
-        return SVL_FAIL;
-
-    int len;
-
-    // checking path prefix length
-    len = static_cast<int>(strlen(filepathprefix));
-    if (len < 1 || len >= SVL_IFW_FILEPATH_LENGTH)
-        return SVL_IFW_INVALID_FILEPATH;
-
-    // storing path prefix
-    memset(FilePathPrefix[videoch], 0, SVL_IFW_FILEPATH_LENGTH);
-    memcpy(FilePathPrefix[videoch], filepathprefix, len);
-
-    // checking extension length
-    len = static_cast<int>(strlen(extension));
-    if (len < 1 || len >= SVL_IFW_EXTENSION_LENGTH)
-        return SVL_IFW_INVALID_FILEPATH;
 
     // checking if file extension is supported
-    if (ImageFile[videoch])
-        delete ImageFile[videoch];
-    ImageFile[videoch] = ImageTypeList.GetHandlerInstance(extension);
-    if (ImageFile[videoch] == 0)
-        return SVL_IFW_EXTENSION_NOT_SUPPORTED;
-    delete ImageFile[videoch];
-    ImageFile[videoch] = 0;
+    if (ImageCodec[videoch]) delete ImageCodec[videoch];
+    ImageCodec[videoch] = svlImageIO::GetCodec("." + extension);
+    if (ImageCodec[videoch] == 0) return SVL_FAIL;
+    delete ImageCodec[videoch];
+    ImageCodec[videoch] = 0;
 
-    // storing extension
-    memset(Extension[videoch], 0, SVL_IFW_EXTENSION_LENGTH);
-    memcpy(Extension[videoch], extension, len);
+    FilePathPrefix[videoch] = filepathprefix;
+    Extension[videoch] = extension;
 
     return SVL_OK;
 }

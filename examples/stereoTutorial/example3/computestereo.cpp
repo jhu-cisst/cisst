@@ -63,13 +63,13 @@ int ComputeStereo(const char* filepath1, const char* filepath2,
 {
     cerr << "Please wait while initializing... ";
 
-    int srcwidth, srcheight;
+    svlInitialize();
+
+    unsigned int srcwidth, srcheight;
     char filestr[1024];
     svlCameraGeometry geometry;
     svlRect roi;
 
-    svlImageFileTypeList filetype;
-    svlImageFile* bmphandler = filetype.GetHandlerInstance("bmp");
 
 //////////////////////////////////////////////////////////////
 // instantiating SVL streams and filters
@@ -92,8 +92,7 @@ int ComputeStereo(const char* filepath1, const char* filepath2,
     stereo_source.SetTargetFrequency(10.0);
 
     sprintf(filestr, "%s.bmp", filepath1);
-    bmphandler->ExtractDimensions((char*)filestr, srcwidth, srcheight);
-    delete(bmphandler);
+    svlImageIO::ReadDimensions(filestr, srcwidth, srcheight);
 
     // setup stereo
     geometry.SetIntrinsics((double)srcwidth, (double)srcwidth,

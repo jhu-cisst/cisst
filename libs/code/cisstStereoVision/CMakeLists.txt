@@ -34,7 +34,7 @@ SET(SOURCE_FILES
     svlRenderTargets.cpp
     svlStreamBranchSource.cpp
     svlSampleQueue.cpp
-    svlFileHandlers.cpp
+    svlImageIO.cpp
     svlCameraGeometry.cpp
     svlConverters.cpp
 
@@ -88,7 +88,7 @@ SET(HEADER_FILES
     svlStreamBranchSource.h
     svlSampleQueue.h
     svlExport.h
-    svlFileHandlers.h
+    svlImageIO.h
     svlCameraGeometry.h
     svlConverters.h
 
@@ -700,9 +700,17 @@ CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_LINK_DIRECTORIES SVL_ADDITIONAL_LINK_DIRE
 CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_LIBRARIES SVL_ADDITIONAL_LIBRARIES)
 SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}${SVL_ADDITIONAL_EXE_LINKER_FLAGS}")
 
-SET(SOURCE_FILES ${SOURCE_FILES} vidInitializer.h vidInitializer.cpp)
-SET(SOURCE_FILES ${SOURCE_FILES} svlInitializer.cpp)
-SET(HEADER_FILES ${HEADER_FILES} svlInitializer.h)
+SET(SOURCE_FILES
+    ${SOURCE_FILES}
+    svlInitializer.cpp
+    vidInitializer.h
+    vidInitializer.cpp
+    ftInitializer.h
+    ftInitializer.cpp
+    )
+SET(HEADER_FILES
+    ${HEADER_FILES}
+    svlInitializer.h)
 
 # Create the config file
 SET(CISST_SVL_CONFIG_FILE ${cisst_BINARY_DIR}/libs/include/cisstStereoVision/svlConfig.h)

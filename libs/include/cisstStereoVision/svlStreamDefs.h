@@ -144,7 +144,7 @@ public:
     virtual int CopyOf(const svlSample & sample) = 0;
     virtual bool IsImage();
     virtual bool IsInitialized();
-    
+
     /*! Serialize the content of the object without any extra
         information, i.e. no class type nor format version.  The
         "receiver" is supposed to already know what to expect. */ 

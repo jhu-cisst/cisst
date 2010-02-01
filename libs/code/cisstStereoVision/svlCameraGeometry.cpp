@@ -426,7 +426,7 @@ void svlCameraGeometry::Wrld2Cam(const unsigned int cam_id, vctDouble2 & point2D
     point2D = Wrld2Cam(cam_id, point3D);
 }
 
-vctDouble2 svlCameraGeometry::Wrld2Cam(const unsigned int cam_id, const vctDouble3 & point3D)
+vctDouble2 svlCameraGeometry::Wrld2Cam(const unsigned int CMN_UNUSED(cam_id), const vctDouble3 & CMN_UNUSED(point3D))
 {
     vctDouble2 result;
     result.SetAll(0.0);
@@ -440,8 +440,8 @@ void svlCameraGeometry::Cam2Wrld(vctDouble3 & point3D,
     point3D = Cam2Wrld(cam_id1, point2D_1, cam_id2, point2D_2);
 }
 
-vctDouble3 svlCameraGeometry::Cam2Wrld(const unsigned int cam_id1, const vctDouble2 & point2D_1,
-                                       const unsigned int cam_id2, const vctDouble2 & point2D_2)
+vctDouble3 svlCameraGeometry::Cam2Wrld(const unsigned int CMN_UNUSED(cam_id1), const vctDouble2 & CMN_UNUSED(point2D_1),
+                                       const unsigned int CMN_UNUSED(cam_id2), const vctDouble2 & CMN_UNUSED(point2D_2))
 {
     vctDouble3 result;
     result.SetAll(0.0);
@@ -498,13 +498,16 @@ std::ostream & operator << (std::ostream & stream, const svlCameraGeometry & obj
     i = 0;
     while (objref.GetExtrinsics(extrinsics, i) == SVL_OK) {
         stream << "Camera #" << i << " - Extrinsic Parameters:" << std::endl << extrinsics;
-        objref.GetPositionAxisViewUp(position, axis, viewup, i);
-        stream << "Position:                = [ " << position[0] << "  " << position[1] << "  " << position[2] << " ]" << std::endl
-               << "ViewUp:                  = [ " << viewup[0] << "  " << viewup[1] << "  " << viewup[2] << " ]" << std::endl
-               << "Axis:                    = [ " << axis[0] << "  " << axis[1] << "  " << axis[2] << " ]" << std::endl << std::endl;
+        if (objref.GetPositionAxisViewUp(position, axis, viewup, i) == SVL_OK) {
+            stream << "Position:                = [ " << position[0] << "  " << position[1] << "  " << position[2] << " ]" << std::endl
+                   << "ViewUp:                  = [ " << viewup[0] << "  " << viewup[1] << "  " << viewup[2] << " ]" << std::endl
+                   << "Axis:                    = [ " << axis[0] << "  " << axis[1] << "  " << axis[2] << " ]" << std::endl << std::endl;
+        }
+        else {
+            stream << "Error: invalid parameters" << std::endl << std::endl;
+        }
         i ++;
     }
     return stream;
 }
-
 

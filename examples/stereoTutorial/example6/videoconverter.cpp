@@ -41,6 +41,8 @@ using namespace std;
 
 int VideoConverter(const std::string source, const std::string destination)
 {
+    svlInitialize();
+
     // instantiating SVL stream and filters
     svlStreamManager converter_stream(1);
     svlFilterSourceVideoFile converter_source(false);
