@@ -40,11 +40,12 @@ public:
 
     int Disable(bool disable, int videoch = SVL_LEFT);
     int SetFilePath(const std::string & filepathprefix, const std::string & extension, int videoch = SVL_LEFT);
-    void EnableTimestamps(bool enable = true) { TimestampsEnabled = enable; }
-    void Pause() { CaptureLength = 0; }
-    void Record(int frames = -1) { CaptureLength = frames; }
-    void SetDistanceIntensityRatio(float ratio) { DistanceScaling = ratio; }
-    float GetDistanceIntensityRatio() { return DistanceScaling; }
+    int SetCompression(int compression, int videoch = SVL_LEFT);
+    void EnableTimestamps(bool enable = true);
+    void Pause();
+    void Record(int frames = -1);
+    void SetDistanceIntensityRatio(float ratio);
+    float GetDistanceIntensityRatio();
 
 protected:
     virtual int Initialize(svlSample* inputdata);
@@ -56,6 +57,7 @@ private:
     vctDynamicVector<std::string> FilePathPrefix;
     vctDynamicVector<std::string> Extension;
     vctDynamicVector<bool> Disabled;
+    vctDynamicVector<int> Compression;
     bool TimestampsEnabled;
     svlSampleImageRGB ImageBuffer;
     float DistanceScaling;

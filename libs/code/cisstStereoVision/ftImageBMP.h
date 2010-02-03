@@ -41,9 +41,9 @@ public:
     virtual int Read(svlSampleImageBase &image, const unsigned int videoch, std::istream &stream, bool noresize = false);
     virtual int Read(svlSampleImageBase &image, const unsigned int videoch, const unsigned char *buffer, const size_t buffersize, bool noresize = false);
 
-    virtual int Write(const svlSampleImageBase &image, const unsigned int videoch, const std::string &filename);
-    virtual int Write(const svlSampleImageBase &image, const unsigned int videoch, std::ostream &stream);
-    virtual int Write(const svlSampleImageBase &image, const unsigned int videoch, unsigned char *buffer, size_t &buffersize);
+    virtual int Write(const svlSampleImageBase &image, const unsigned int videoch, const std::string &filename, const int compression = -1);
+    virtual int Write(const svlSampleImageBase &image, const unsigned int videoch, std::ostream &stream, const int compression = -1);
+    virtual int Write(const svlSampleImageBase &image, const unsigned int videoch, unsigned char *buffer, size_t &buffersize, const int compression = -1);
 
 protected:
     svlBMPFileHeader FileHeader;

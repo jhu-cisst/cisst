@@ -142,31 +142,31 @@ IF(BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB)
 ENDIF(BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB)
 
 
-# WebGUI
-IF(SWIG_FOUND AND CISST_HAS_XML)
-    SET(SOURCE_FILES
-        ${SOURCE_FILES}
-        svlWebPublisher.cpp
-        svlWebObjectBase.cpp
-        svlWebXMLObject.cpp
-        svlWebFileObject.cpp
-        )
-    SET(HEADER_FILES
-        ${HEADER_FILES}
-        svlWebPublisher.h
-        svlWebObjectBase.h
-        svlWebXMLObject.h
-        svlWebFileObject.h
-        )
-    SET(SVL_ADDITIONAL_LIBRARIES
-        "${SVL_ADDITIONAL_LIBRARIES}"
-        "${CMAKE_THREAD_LIBS_INIT}"
-        "${PYTHON_LIBRARIES}"
-#        "debug ${PYTHON_DEBUG_LIBRARIES}"
-#        "optimized ${PYTHON_LIBRARIES}"
-        )
-    SET(CISST_SVL_HAS_WEBGUI "ON" CACHE INTERNAL "WebGUI switch")
-ENDIF(SWIG_FOUND AND CISST_HAS_XML)
+## WebGUI
+#IF(SWIG_FOUND AND CISST_HAS_XML)
+#    SET(SOURCE_FILES
+#        ${SOURCE_FILES}
+#        svlWebPublisher.cpp
+#        svlWebObjectBase.cpp
+#        svlWebXMLObject.cpp
+#        svlWebFileObject.cpp
+#        )
+#    SET(HEADER_FILES
+#        ${HEADER_FILES}
+#        svlWebPublisher.h
+#        svlWebObjectBase.h
+#        svlWebXMLObject.h
+#        svlWebFileObject.h
+#        )
+#    SET(SVL_ADDITIONAL_LIBRARIES
+#        "${SVL_ADDITIONAL_LIBRARIES}"
+#        "${CMAKE_THREAD_LIBS_INIT}"
+#        "${PYTHON_LIBRARIES}"
+##        "debug ${PYTHON_DEBUG_LIBRARIES}"
+##        "optimized ${PYTHON_LIBRARIES}"
+#        )
+#    SET(CISST_SVL_HAS_WEBGUI "ON" CACHE INTERNAL "WebGUI switch")
+#ENDIF(SWIG_FOUND AND CISST_HAS_XML)
 
 
 # OpenCV
@@ -240,6 +240,50 @@ ELSE(CISST_SVL_HAS_OPENCV OR NOT OpenCV_OPTIONS)
 ENDIF(CISST_SVL_HAS_OPENCV OR NOT OpenCV_OPTIONS)
 
 
+# JPEG
+IF(CISST_SVL_HAS_JPEG OR NOT JPEG_OPTIONS)
+    SET(JPEG_OPTIONS
+        JPEG_INCLUDE_DIR
+        JPEG_LIBRARY
+        CACHE INTERNAL "List of JPEG options"
+        )
+
+    FIND_PACKAGE(JPEG)
+    IF(JPEG_FOUND)
+        MARK_AS_ADVANCED(FORCE ${JPEG_OPTIONS})
+
+        SET(SVL_ADDITIONAL_INCLUDE_DIRECTORIES
+            "${SVL_ADDITIONAL_INCLUDE_DIRECTORIES}"
+            "${JPEG_INCLUDE_DIR}"
+            )
+        SET(SVL_ADDITIONAL_LIBRARIES
+            "${SVL_ADDITIONAL_LIBRARIES}"
+            "${JPEG_LIBRARY}"
+            )
+        SET(SOURCE_FILES
+            ${SOURCE_FILES}
+            ftImageJPEG.h           # private header
+            ftImageJPEG.cpp
+            )
+        MESSAGE(STATUS "JPEG found - Switch to advanced view for details")
+        OPTION(CISST_SVL_HAS_JPEG "Use JPEG extensions" ON)
+
+    ELSE(JPEG_FOUND)
+        IF(CISST_SVL_HAS_JPEG)
+            MARK_AS_ADVANCED(CLEAR ${JPEG_OPTIONS})
+            MESSAGE(FATAL_ERROR "JPEG required. Please specify its location.")
+        ELSE(CISST_SVL_HAS_JPEG)
+            MARK_AS_ADVANCED(FORCE ${JPEG_OPTIONS})
+            OPTION(CISST_SVL_HAS_JPEG "Compile JPEG extensions" OFF)
+        ENDIF(CISST_SVL_HAS_JPEG)
+    ENDIF(JPEG_FOUND)
+
+ELSE(CISST_SVL_HAS_JPEG OR NOT JPEG_OPTIONS)
+    MARK_AS_ADVANCED(FORCE ${JPEG_OPTIONS})
+    OPTION(CISST_SVL_HAS_JPEG "Use JPEG extensions" OFF)
+ENDIF(CISST_SVL_HAS_JPEG OR NOT JPEG_OPTIONS)
+
+
 # ZLIB
 IF(CISST_SVL_HAS_ZLIB OR NOT ZLIB_OPTIONS)
     SET(ZLIB_OPTIONS
@@ -297,6 +341,64 @@ ELSE(CISST_SVL_HAS_ZLIB OR NOT ZLIB_OPTIONS)
     MARK_AS_ADVANCED(FORCE ${ZLIB_OPTIONS})
     OPTION(CISST_SVL_HAS_ZLIB "Use ZLIB extensions" OFF)
 ENDIF(CISST_SVL_HAS_ZLIB OR NOT ZLIB_OPTIONS)
+
+
+# PNG
+IF(CISST_SVL_HAS_ZLIB AND ZLIB_FOUND)
+    MARK_AS_ADVANCED(CLEAR CISST_SVL_HAS_PNG)
+
+    IF(CISST_SVL_HAS_PNG OR NOT PNG_OPTIONS)
+        SET(PNG_OPTIONS
+            PNG_DEFINITIONS	
+            PNG_PNG_INCLUDE_DIR
+            PNG_INCLUDE_DIR
+            PNG_LIBRARY
+            PNG_LIBRARIES
+            CACHE INTERNAL "List of PNG options"
+            )
+
+        FIND_PACKAGE(PNG)
+        IF(PNG_FOUND)
+            MARK_AS_ADVANCED(FORCE ${PNG_OPTIONS})
+
+            ADD_DEFINITIONS(${PNG_DEFINITIONS})
+            SET(SVL_ADDITIONAL_INCLUDE_DIRECTORIES
+                "${SVL_ADDITIONAL_INCLUDE_DIRECTORIES}"
+                "${PNG_PNG_INCLUDE_DIR}"
+                )
+            SET(SVL_ADDITIONAL_LIBRARIES
+                "${SVL_ADDITIONAL_LIBRARIES}"
+                "${PNG_LIBRARY}"
+                )
+            SET(SOURCE_FILES
+                ${SOURCE_FILES}
+                ftImagePNG.h            # private header
+                ftImagePNG.cpp
+                )
+            MESSAGE(STATUS "PNG found - Switch to advanced view for details")
+            OPTION(CISST_SVL_HAS_PNG "Use PNG extensions" ON)
+
+        ELSE(PNG_FOUND)
+            IF(CISST_SVL_HAS_PNG)
+                MARK_AS_ADVANCED(CLEAR ${PNG_OPTIONS})
+                MESSAGE(FATAL_ERROR "PNG required. Please specify its location.")
+            ELSE(CISST_SVL_HAS_PNG)
+                MARK_AS_ADVANCED(FORCE ${PNG_OPTIONS})
+                OPTION(CISST_SVL_HAS_PNG "Compile PNG extensions" OFF)
+            ENDIF(CISST_SVL_HAS_PNG)
+        ENDIF(PNG_FOUND)
+
+    ELSE(CISST_SVL_HAS_PNG OR NOT PNG_OPTIONS)
+        MARK_AS_ADVANCED(FORCE ${PNG_OPTIONS})
+        OPTION(CISST_SVL_HAS_PNG "Use PNG extensions" OFF)
+    ENDIF(CISST_SVL_HAS_PNG OR NOT PNG_OPTIONS)
+
+ELSE(CISST_SVL_HAS_ZLIB AND ZLIB_FOUND)
+    MARK_AS_ADVANCED(FORCE ${PNG_OPTIONS})
+    OPTION(CISST_SVL_HAS_PNG "Use PNG extensions" OFF)
+    SET(CISST_SVL_HAS_PNG OFF CACHE BOOL "PNG disabled" FORCE)
+    MARK_AS_ADVANCED(FORCE CISST_SVL_HAS_PNG)
+ENDIF(CISST_SVL_HAS_ZLIB AND ZLIB_FOUND)
 
 
 # Matrox Imaging Library

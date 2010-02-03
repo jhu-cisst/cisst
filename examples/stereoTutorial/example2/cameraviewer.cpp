@@ -180,18 +180,17 @@ class CViewerWindowCallback : public svlImageWindowCallbackBase
 {
 public:
     CViewerWindowCallback() :
-        svlImageWindowCallbackBase(),
-        ImageWriterFilter(0)
-    {
+        svlImageWindowCallbackBase()
+        ,ImageWriterFilter(0)
 #if (CISST_SVL_HAS_ZLIB == ON)
-        IconDrawerFilter = 0;
-        RecorderFilter = 0;
-        Manager = 0;
-        Recording = false;
+        ,IconDrawerFilter(0)
+        ,RecorderFilter(0)
+        ,Manager(0)
+        ,Recording(false)
 #endif // CISST_SVL_HAS_ZLIB
+    {
     }
 
-#if (CISST_SVL_HAS_ZLIB == ON)
     void OnUserEvent(unsigned int CMN_UNUSED(winid), bool ascii, unsigned int eventid)
     {
         // handling user inputs
@@ -206,6 +205,7 @@ public:
                 }
                 break;
 
+#if (CISST_SVL_HAS_ZLIB == ON)
                 case ' ':
                     if (RecorderFilter && IconDrawerFilter) {
                         if (Recording) {
@@ -224,19 +224,19 @@ public:
                         }
                     }
                 break;
+#endif // CISST_SVL_HAS_ZLIB
 
                 default:
                     return;
             }
         }
     }
-#endif // CISST_SVL_HAS_ZLIB
 
+    svlFilterImageFileWriter* ImageWriterFilter;
 #if (CISST_SVL_HAS_ZLIB == ON)
-    svlStreamManager* Manager;
     CViewerIconDrawerCallback* IconDrawerFilter;
     svlFilterBase* RecorderFilter;
-    svlFilterImageFileWriter* ImageWriterFilter;
+    svlStreamManager* Manager;
     bool Recording;
 #endif // CISST_SVL_HAS_ZLIB
 };

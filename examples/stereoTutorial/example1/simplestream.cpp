@@ -53,30 +53,39 @@ void PrintFilterList()
 
 int main()
 {
+    bool noise = false;
+
     svlInitialize();
-    PrintAllRegistered();
+//    PrintAllRegistered();
 //    PrintFilterList();
 
-
-/*
     // Creating SVL objects
     svlStreamManager stream(2); // number of threads per stream
 
-    svlFilterSourceDummy video_source(svlTypeImageRGB); // try svlTypeImageRGBStereo for stereo image source
+    svlFilterSourceDummy video_source;
     svlFilterImageResizer resizer;
     svlFilterImageWindow window;
     svlFilterUnsharpMask unsharpmask;
     svlFilterImageWindow window2;
 
     // Setup dummy video source
-    video_source.SetDimensions(320, 240);
-    video_source.SetTargetFrequency(30.0);
-    video_source.EnableNoiseImage(true);
+    video_source.SetTargetFrequency(10.0);
+
+    if (noise) {
+        video_source.SetType(svlTypeImageRGB);
+        video_source.SetDimensions(320, 240);
+        video_source.EnableNoiseImage(true);
+    }
+    else {
+        svlSampleImageRGB image;
+        svlImageIO::Read(image, 0, "Winter.ppm");
+        video_source.SetImage(image);
+    }
 
     // Setup image resizer
     // (Tip: enable OpenCV in CMake for higher performance)
-    resizer.SetOutputRatio(2.0, 2.0, SVL_LEFT);
-    resizer.SetOutputRatio(2.0, 2.0, SVL_RIGHT);
+    resizer.SetOutputRatio(0.5, 0.5, SVL_LEFT);
+    resizer.SetOutputRatio(0.5, 0.5, SVL_RIGHT);
     resizer.EnableInterpolation();
 
     // Setup window
@@ -118,7 +127,7 @@ int main()
 
 labError:
     cout << "Error occured... Quitting." << endl;
-*/
+
     return 1;
 }
 

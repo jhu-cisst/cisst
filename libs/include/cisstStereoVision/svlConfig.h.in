@@ -55,5 +55,11 @@ http://www.cisst.org/cisst/license.txt.
 // Support for Xvideo
 #define CISST_SVL_HAS_XV @CISST_SVL_HAS_XV@
 
+// Support for JPEG
+#define CISST_SVL_HAS_JPEG @CISST_SVL_HAS_JPEG@
+
+// Support for PNG
+#define CISST_SVL_HAS_PNG @CISST_SVL_HAS_PNG@
+
 #endif // _svlConfig_h
 

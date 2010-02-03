@@ -213,13 +213,13 @@ int ftImageBMP::Read(svlSampleImageBase &image, const unsigned int videoch, cons
     return SVL_OK;
 }
 
-int ftImageBMP::Write(const svlSampleImageBase &image, const unsigned int videoch, const std::string &filename)
+int ftImageBMP::Write(const svlSampleImageBase &image, const unsigned int videoch, const std::string &filename, const int compression)
 {
     std::ofstream stream(filename.c_str(), std::ios_base::out | std::ios_base::binary);
-    return Write(image, videoch, stream);
+    return Write(image, videoch, stream, compression);
 }
 
-int ftImageBMP::Write(const svlSampleImageBase &image, const unsigned int videoch, std::ostream &stream)
+int ftImageBMP::Write(const svlSampleImageBase &image, const unsigned int videoch, std::ostream &stream, const int CMN_UNUSED(compression))
 {
     if (videoch >= image.GetVideoChannels()) return SVL_FAIL;
 
@@ -275,7 +275,7 @@ int ftImageBMP::Write(const svlSampleImageBase &image, const unsigned int videoc
     return SVL_OK;
 }
 
-int ftImageBMP::Write(const svlSampleImageBase &image, const unsigned int videoch, unsigned char *buffer, size_t &buffersize)
+int ftImageBMP::Write(const svlSampleImageBase &image, const unsigned int videoch, unsigned char *buffer, size_t &buffersize, const int CMN_UNUSED(compression))
 {
     if (videoch >= image.GetVideoChannels()) return SVL_FAIL;
     if (buffer == 0) return SVL_FAIL;

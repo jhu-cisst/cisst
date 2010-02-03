@@ -22,21 +22,8 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstStereoVision/svlFilterSourceDummy.h>
 #include <string.h>
-
-#ifdef _MSC_VER
-    // Quick fix for Visual Studio Intellisense:
-    // The Intellisense parser can't handle the CMN_UNUSED macro
-    // correctly if defined in cmnPortability.h, thus
-    // we should redefine it here for it.
-    // Removing this part of the code will not effect compilation
-    // in any way, on any platforms.
-    #undef CMN_UNUSED
-    #define CMN_UNUSED(argument) argument
-#endif
-
-using namespace std;
-
 #include "time.h"
+
 
 /*************************************/
 /*** svlFilterSourceDummy class ******/
@@ -47,63 +34,106 @@ CMN_IMPLEMENT_SERVICES(svlFilterSourceDummy)
 svlFilterSourceDummy::svlFilterSourceDummy() :
     svlFilterSourceBase(),
     cmnGenericObject(),
-    Noise(false),
-    Disparity(0)
+    Width(0),
+    Height(0),
+    Noise(false)
 {
-    ImageBuffer[0] = ImageBuffer[1] = 0;
     OutputData = 0;
 }
 
 svlFilterSourceDummy::svlFilterSourceDummy(svlStreamType type) :
     svlFilterSourceBase(),
     cmnGenericObject(),
-    Noise(false),
-    Disparity(0)
+    Width(0),
+    Height(0),
+    Noise(false)
 {
-    ImageBuffer[0] = ImageBuffer[1] = 0;
     OutputData = 0;
-
     SetType(type);
+}
+
+svlFilterSourceDummy::svlFilterSourceDummy(const svlSampleImageBase & image) :
+    svlFilterSourceBase(),
+    cmnGenericObject(),
+    Width(0),
+    Height(0),
+    Noise(false)
+{
+    OutputData = 0;
+    SetImage(image);
 }
 
 svlFilterSourceDummy::~svlFilterSourceDummy()
 {
-    Release();
-
     if (OutputData) delete OutputData;
-    if (ImageBuffer[0]) delete [] ImageBuffer[0];
-    if (ImageBuffer[1]) delete [] ImageBuffer[1];
 }
 
 int svlFilterSourceDummy::SetType(svlStreamType type)
 {
-    if (OutputData == 0) {
+    if (IsInitialized() == true)
+        return SVL_ALREADY_INITIALIZED;
 
-        // Other types may be added in the future
-        if (type == svlTypeImageRGB ||
-            type == svlTypeImageRGBStereo) {
+    // Other types may be added in the future
+    if (type != svlTypeImageRGB && type != svlTypeImageRGBStereo) return SVL_FAIL;
 
-            AddSupportedType(type);
-            OutputData = svlSample::GetNewFromType(type);
+    if (OutputData && OutputData->GetType() != type) {
+        delete OutputData;
+        OutputData = svlSample::GetNewFromType(type);
+    }
+    else if (!OutputData) OutputData = svlSample::GetNewFromType(type);
 
-            return SVL_OK;
-        }
+    if (Width > 0 && Height > 0) dynamic_cast<svlSampleImageBase*>(OutputData)->SetSize(Width, Height);
+    AddSupportedType(type);
+
+    return SVL_OK;
+}
+
+int svlFilterSourceDummy::SetImage(const svlSampleImageBase & image)
+{
+    if (IsInitialized() == true)
+        return SVL_ALREADY_INITIALIZED;
+
+    svlStreamType type = image.GetType();
+
+    // Other types may be added in the future
+    if (type != svlTypeImageRGB && type != svlTypeImageRGBStereo) return SVL_FAIL;
+
+    if (OutputData && OutputData->GetType() != type) {
+        delete OutputData;
+        OutputData = svlSample::GetNewFromType(type);
+    }
+    else if (!OutputData) OutputData = svlSample::GetNewFromType(type);
+
+    OutputData->CopyOf(image);
+    AddSupportedType(type);
+    Noise = false;
+
+    return SVL_OK;
+}
+
+int svlFilterSourceDummy::SetDimensions(unsigned int width, unsigned int height)
+{
+    if (IsInitialized() == true)
+        return SVL_ALREADY_INITIALIZED;
+
+    Width = width;
+    Height = height;
+
+    if (OutputData) {
+        dynamic_cast<svlSampleImageBase*>(OutputData)->SetSize(width, height);
     }
 
-    return SVL_FAIL;
+    return SVL_OK;
+}
+
+void svlFilterSourceDummy::EnableNoiseImage(bool noise)
+{
+    Noise = noise;
 }
 
 int svlFilterSourceDummy::Initialize()
 {
     if (OutputData == 0) return SVL_FAIL;
-
-    Release();
-
-    svlSampleImageBase* img = dynamic_cast<svlSampleImageBase*>(OutputData);
-    for (unsigned int i = 0; i < img->GetVideoChannels(); i ++) {
-        if (img->GetWidth(i) <= 0 || img->GetHeight(i) <= 0)
-            return SVL_DMYSRC_DATA_NOT_INITIALIZED;
-    }
 
     srand(static_cast<unsigned int>(time(0)));
 
@@ -115,12 +145,12 @@ int svlFilterSourceDummy::ProcessFrame(ProcInfo* procInfo)
     // Try to keep TargetFrequency
     _OnSingleThread(procInfo) WaitForTargetTimer();
 
-    svlSampleImageBase* img = dynamic_cast<svlSampleImageBase*>(OutputData);
-    const unsigned int videochannels = img->GetVideoChannels();
-    unsigned int channel, idx;
-    unsigned char* ptr;
-
     if (Noise) {
+
+        svlSampleImageBase* img = dynamic_cast<svlSampleImageBase*>(OutputData);
+        const unsigned int videochannels = img->GetVideoChannels();
+        unsigned int channel, idx;
+        unsigned char* ptr;
 
         for (channel = 0; channel < videochannels; channel ++) {
 
@@ -132,132 +162,7 @@ int svlFilterSourceDummy::ProcessFrame(ProcInfo* procInfo)
             }
         }
     }
-    else {
-
-        _ParallelLoop(procInfo, idx, videochannels)
-        {
-            if (ImageBuffer[idx]) {
-                memcpy(img->GetUCharPointer(idx), ImageBuffer[idx], img->GetDataSize(idx));
-            }
-            else {
-                memset(img->GetUCharPointer(idx), 0, img->GetDataSize(idx));
-            }
-        }
-    }
 
     return SVL_OK;
-}
-
-int svlFilterSourceDummy::SetImage(unsigned char* buffer, unsigned int size)
-{
-    if (GetOutputType() != svlTypeImageRGB || OutputData == 0) return SVL_FAIL;
-
-    svlSampleImageRGB* img = dynamic_cast<svlSampleImageRGB*>(OutputData);
-    if (buffer == 0) {
-        if (ImageBuffer[0]) {
-            delete [] ImageBuffer[0];
-            ImageBuffer[0] = 0;
-        }
-        memset(img->GetUCharPointer(), 0, img->GetDataSize());
-    }
-    else {
-        if (size != img->GetDataSize()) return SVL_FAIL;
-        if (ImageBuffer[0]) delete [] ImageBuffer[0];
-        ImageBuffer[0] = new unsigned char[size];
-        memcpy(ImageBuffer[0], buffer, size);
-    }
-
-    return SVL_OK;
-}
-
-int svlFilterSourceDummy::SetImage(unsigned char* buffer_left, unsigned int size_left, unsigned char* buffer_right, unsigned int size_right)
-{
-    if (GetOutputType() != svlTypeImageRGBStereo || OutputData == 0) return SVL_FAIL;
-
-    svlSampleImageRGBStereo* img = dynamic_cast<svlSampleImageRGBStereo*>(OutputData);
-    if (buffer_left == 0) {
-        if (ImageBuffer[0]) {
-            delete [] ImageBuffer[0];
-            ImageBuffer[0] = 0;
-        }
-        memset(img->GetUCharPointer(SVL_LEFT), 0, img->GetDataSize(SVL_LEFT));
-    }
-    else {
-        if (size_left == img->GetDataSize(SVL_LEFT)) {
-            if (ImageBuffer[0]) delete [] ImageBuffer[0];
-            ImageBuffer[0] = new unsigned char[size_left];
-            memcpy(ImageBuffer[0], buffer_left, size_left);
-        }
-    }
-    if (buffer_right == 0) {
-        if (ImageBuffer[1]) {
-            delete [] ImageBuffer[1];
-            ImageBuffer[1] = 0;
-        }
-        memset(img->GetUCharPointer(SVL_RIGHT), 0, img->GetDataSize(SVL_RIGHT));
-    }
-    else {
-        if (size_right == img->GetDataSize(SVL_RIGHT)) {
-            if (ImageBuffer[1]) delete [] ImageBuffer[1];
-            ImageBuffer[1] = new unsigned char[size_right];
-            memcpy(ImageBuffer[1], buffer_right, size_right);
-        }
-    }
-
-    return SVL_OK;
-}
-
-int svlFilterSourceDummy::SetDimensions(unsigned int width, unsigned int height)
-{
-    if (IsInitialized() == true)
-        return SVL_ALREADY_INITIALIZED;
-    if (OutputData == 0)
-        return SVL_FAIL;
-
-    if (OutputData->IsImage()) {
-        dynamic_cast<svlSampleImageBase*>(OutputData)->SetSize(width, height);
-    }
-
-    return SVL_OK;
-}
-
-void svlFilterSourceDummy::SetStereoNoiseDisparity(int disparity)
-{
-    if (disparity > SVL_DMYSRC_DISPARITY_CAP) disparity = SVL_DMYSRC_DISPARITY_CAP;
-    if (disparity < -SVL_DMYSRC_DISPARITY_CAP) disparity = -SVL_DMYSRC_DISPARITY_CAP;
-    Disparity = disparity;
-}
-
-void svlFilterSourceDummy::Translate(unsigned char* src, unsigned char* dest, const int width, const int height, const int trhoriz, const int trvert)
-{
-    int abs_h = abs(trhoriz);
-    int abs_v = abs(trvert);
-
-    if (width <= abs_h || height <= abs_v) {
-        memset(dest, 0, width * height);
-        return;
-    }
-
-    if (trhoriz == 0) {
-        memcpy(dest + max(0, trvert) * width,
-               src + max(0, -trvert) * width,
-               width * (height - abs_v));
-        return;
-    }
-
-    int linecopysize = width - abs_h;
-    int xfrom = max(0, trhoriz);
-    int yfrom = max(0, trvert);
-    int yto = height + min(0, trvert);
-    int copyxoffset = max(0, -trhoriz);
-    int copyyoffset = max(0, -trvert);
-
-    src += width * copyyoffset + copyxoffset;
-    dest += width * yfrom + xfrom;
-    for (int j = yfrom; j < yto; j ++) {
-        memcpy(dest, src, linecopysize);
-        src += width;
-        dest += width;
-    }
 }
 

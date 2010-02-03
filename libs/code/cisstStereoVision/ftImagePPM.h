@@ -43,20 +43,13 @@ public:
     virtual int Read(svlSampleImageBase &image, const unsigned int videoch, std::istream &stream, bool noresize = false);
     virtual int Read(svlSampleImageBase &image, const unsigned int videoch, const unsigned char *buffer, const size_t buffersize, bool noresize = false);
 
-    virtual int Write(const svlSampleImageBase &image, const unsigned int videoch, const std::string &filename);
-    virtual int Write(const svlSampleImageBase &image, const unsigned int videoch, std::ostream &stream);
-    virtual int Write(const svlSampleImageBase &image, const unsigned int videoch, std::ostream &stream, const std::string &codec);
-    virtual int Write(const svlSampleImageBase &image, const unsigned int videoch, unsigned char *buffer, size_t &buffersize);
-    virtual int Write(const svlSampleImageBase &image, const unsigned int videoch, unsigned char *buffer, size_t &buffersize, const std::string &codec);
+    virtual int Write(const svlSampleImageBase &image, const unsigned int videoch, const std::string &filename, const int compression = -1);
+    virtual int Write(const svlSampleImageBase &image, const unsigned int videoch, std::ostream &stream, const int compression = -1);
+    virtual int Write(const svlSampleImageBase &image, const unsigned int videoch, std::ostream &stream, const std::string &codec, const int compression = -1);
+    virtual int Write(const svlSampleImageBase &image, const unsigned int videoch, unsigned char *buffer, size_t &buffersize, const int compression = -1);
+    virtual int Write(const svlSampleImageBase &image, const unsigned int videoch, unsigned char *buffer, size_t &buffersize, const std::string &codec, const int compression = -1);
 
 protected:
-    int ppmOpen(std::istream &stream, unsigned int &width, unsigned int &height);
-    int ppmOpen(const unsigned char *source, const size_t sourcesize, unsigned int &width, unsigned int &height);
-    int ppmRead(std::istream &stream, unsigned char* buffer, unsigned int pixelcount, int magicnumber);
-    int ppmRead(const unsigned char *source, const size_t sourcesize, unsigned char* buffer, unsigned int pixelcount, int magicnumber);
-    int ppmWrite(const unsigned char* buffer, const unsigned int width, const unsigned int height, const int magicnumber, std::ostream &stream);
-    int ppmWrite(const unsigned char* buffer, const unsigned int width, const unsigned int height, const int magicnumber, unsigned char *target, size_t &targetsize);
-
     unsigned char* ppmBuffer;
     unsigned int ppmBufferSize;
 };

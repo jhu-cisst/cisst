@@ -119,17 +119,19 @@ private:
 class CViewerWindowCallback : public svlImageWindowCallbackBase
 {
 public:
-    CViewerWindowCallback() : svlImageWindowCallbackBase()
-    {
-		AdjustmentsEnabled = false;
-		MousePressed = false;
-		OffsetX = OffsetY = 0;
-		ImageRectifier = 0;
-        ImageWriterFilter = 0;
+    CViewerWindowCallback() :
+        svlImageWindowCallbackBase()
+		,AdjustmentsEnabled(false)
+		,MousePressed(false)
+		,OffsetX(0)
+        ,OffsetY(0)
+		,ImageRectifier(0)
+        ,ImageWriterFilter(0)
 #if (CISST_SVL_HAS_ZLIB == ON)
-        VideoWriterFilter = 0;
-        Recording = false;
+        ,VideoWriterFilter(0)
+        ,Recording(false)
 #endif // CISST_SVL_HAS_ZLIB
+    {
     }
 
     void OnUserEvent(unsigned int CMN_UNUSED(winid), bool ascii, unsigned int eventid)
@@ -137,6 +139,15 @@ public:
         // handling user inputs
         if (ascii) {
             switch (eventid) {
+                case 's':
+                {
+                    if (ImageWriterFilter) {
+                        ImageWriterFilter->Record(1);
+                        cout << endl << " >>> Snapshots saved <<<" << endl;
+                    }
+                }
+                break;
+
 #if (CISST_SVL_HAS_ZLIB == ON)
                 case ' ':
                 {
@@ -155,15 +166,6 @@ public:
                 }
                 break;
 #endif // CISST_SVL_HAS_ZLIB
-
-                case 's':
-                {
-                    if (ImageWriterFilter) {
-                        ImageWriterFilter->Record(1);
-                        cout << endl << " >>> Snapshots saved <<<" << endl;
-                    }
-                }
-                break;
 
                 case 'a':
                 {
@@ -364,12 +366,12 @@ int CameraViewer(bool interpolation, bool save, int width, int height, int fulls
         cerr << endl << "Keyboard commands:" << endl << endl;
         cerr << "  In image window:" << endl;
         cerr << "    'a'   - Enable/disable adjustments" << endl;
+        cerr << "    's'   - Take image snapshots" << endl;
 #if (CISST_SVL_HAS_ZLIB == ON)
         if (save == true) {
             cerr << "    SPACE - Video recorder control: Record/Pause" << endl;
         }
 #endif // CISST_SVL_HAS_ZLIB
-        cerr << "    's'   - Take image snapshots" << endl;
         cerr << "  In command window:" << endl;
         cerr << "    '1'   - Adjust LEFT image properties" << endl;
         cerr << "    '2'   - Adjust RIGHT image properties" << endl;

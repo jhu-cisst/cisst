@@ -51,7 +51,8 @@ svlImageIO::svlImageIO()
     Extensions.resize(handlers);
 }
 
-int svlImageIO::GetExtension(const std::string &filename, std::string &extension)
+int svlImageIO::GetExtension(const std::string &filename,
+                             std::string &extension)
 {
     size_t dotpos = filename.find_last_of('.');
     // If no '.' is found, then take the whole string as extension
@@ -102,7 +103,9 @@ svlImageCodec* svlImageIO::GetCodec(const std::string &filename)
     return 0;
 }
 
-int svlImageIO::ReadDimensions(const std::string &filename, unsigned int &width, unsigned int &height)
+int svlImageIO::ReadDimensions(const std::string &filename,
+                               unsigned int &width,
+                               unsigned int &height)
 {
     svlImageCodec* decoder = GetCodec(filename);
     if (decoder == 0) return SVL_FAIL;
@@ -113,7 +116,10 @@ int svlImageIO::ReadDimensions(const std::string &filename, unsigned int &width,
     return ret;
 }
 
-int svlImageIO::ReadDimensions(const std::string &codec, std::istream &stream, unsigned int &width, unsigned int &height)
+int svlImageIO::ReadDimensions(const std::string &codec,
+                               std::istream &stream,
+                               unsigned int &width,
+                               unsigned int &height)
 {
     svlImageCodec* decoder = GetCodec("." + codec);
     if (decoder == 0) return SVL_FAIL;
@@ -130,7 +136,11 @@ int svlImageIO::ReadDimensions(const std::string &codec, std::istream &stream, u
     return ret;
 }
 
-int svlImageIO::ReadDimensions(const std::string &codec, const unsigned char *buffer, const size_t buffersize, unsigned int &width, unsigned int &height)
+int svlImageIO::ReadDimensions(const std::string &codec,
+                               const unsigned char *buffer,
+                               const size_t buffersize,
+                               unsigned int &width,
+                               unsigned int &height)
 {
     svlImageCodec* decoder = GetCodec("." + codec);
     if (decoder == 0) return SVL_FAIL;
@@ -141,7 +151,10 @@ int svlImageIO::ReadDimensions(const std::string &codec, const unsigned char *bu
     return ret;
 }
 
-int svlImageIO::Read(svlSampleImageBase &image, const unsigned int videoch, const std::string &filename, bool noresize)
+int svlImageIO::Read(svlSampleImageBase &image,
+                     const unsigned int videoch,
+                     const std::string &filename,
+                     bool noresize)
 {
     svlImageCodec* decoder = GetCodec(filename);
     if (decoder == 0) return SVL_FAIL;
@@ -152,7 +165,11 @@ int svlImageIO::Read(svlSampleImageBase &image, const unsigned int videoch, cons
     return ret;
 }
 
-int svlImageIO::Read(svlSampleImageBase &image, const unsigned int videoch, const std::string &codec, std::istream &stream, bool noresize)
+int svlImageIO::Read(svlSampleImageBase &image,
+                     const unsigned int videoch,
+                     const std::string &codec,
+                     std::istream &stream,
+                     bool noresize)
 {
     svlImageCodec* decoder = GetCodec("." + codec);
     if (decoder == 0) return SVL_FAIL;
@@ -172,7 +189,12 @@ int svlImageIO::Read(svlSampleImageBase &image, const unsigned int videoch, cons
     return ret;
 }
 
-int svlImageIO::Read(svlSampleImageBase &image, const unsigned int videoch, const std::string &codec, const unsigned char *buffer, const size_t buffersize, bool noresize)
+int svlImageIO::Read(svlSampleImageBase &image,
+                     const unsigned int videoch,
+                     const std::string &codec,
+                     const unsigned char *buffer,
+                     const size_t buffersize,
+                     bool noresize)
 {
     svlImageCodec* decoder = GetCodec("." + codec);
     if (decoder == 0) return SVL_FAIL;
@@ -183,18 +205,25 @@ int svlImageIO::Read(svlSampleImageBase &image, const unsigned int videoch, cons
     return ret;
 }
 
-int svlImageIO::Write(const svlSampleImageBase &image, const unsigned int videoch, const std::string &filename)
+int svlImageIO::Write(const svlSampleImageBase &image,
+                      const unsigned int videoch,
+                      const std::string &filename,
+                      const int compression)
 {
     svlImageCodec* encoder = GetCodec(filename);
     if (encoder == 0) return SVL_FAIL;
 
-    int ret = encoder->Write(image, videoch, filename);
+    int ret = encoder->Write(image, videoch, filename, compression);
     delete encoder;
 
     return ret;
 }
 
-int svlImageIO::Write(const svlSampleImageBase &image, const unsigned int videoch, const std::string &codec, std::ostream &stream)
+int svlImageIO::Write(const svlSampleImageBase &image,
+                      const unsigned int videoch,
+                      const std::string &codec,
+                      std::ostream &stream,
+                      const int compression)
 {
     svlImageCodec* encoder = GetCodec("." + codec);
     if (encoder == 0) return SVL_FAIL;
@@ -203,13 +232,18 @@ int svlImageIO::Write(const svlSampleImageBase &image, const unsigned int videoc
     std::string lwrcodec;
     GetExtension(codec, lwrcodec);
 
-    int ret = encoder->Write(image, videoch, stream, lwrcodec);
+    int ret = encoder->Write(image, videoch, stream, lwrcodec, compression);
     delete encoder;
 
     return ret;
 }
 
-int svlImageIO::Write(const svlSampleImageBase &image, const unsigned int videoch, const std::string &codec, unsigned char *buffer, size_t &buffersize)
+int svlImageIO::Write(const svlSampleImageBase &image,
+                      const unsigned int videoch,
+                      const std::string &codec,
+                      unsigned char *buffer,
+                      size_t &buffersize,
+                      const int compression)
 {
     svlImageCodec* encoder = GetCodec("." + codec);
     if (encoder == 0) return SVL_FAIL;
@@ -218,7 +252,7 @@ int svlImageIO::Write(const svlSampleImageBase &image, const unsigned int videoc
     std::string lwrcodec;
     GetExtension(codec, lwrcodec);
 
-    int ret = encoder->Write(image, videoch, buffer, buffersize, lwrcodec);
+    int ret = encoder->Write(image, videoch, buffer, buffersize, lwrcodec, compression);
     delete encoder;
 
     return ret;
@@ -242,57 +276,93 @@ const std::string& svlImageCodec::GetExtensions() const
     return ExtensionList;
 }
 
-int svlImageCodec::ReadDimensions(const std::string & CMN_UNUSED(filename), unsigned int & CMN_UNUSED(width), unsigned int & CMN_UNUSED(height))
+int svlImageCodec::ReadDimensions(const std::string & CMN_UNUSED(filename),
+                                  unsigned int & CMN_UNUSED(width),
+                                  unsigned int & CMN_UNUSED(height))
 {
     return SVL_FAIL;
 }
 
-int svlImageCodec::ReadDimensions(std::istream & CMN_UNUSED(stream), unsigned int & CMN_UNUSED(width), unsigned int & CMN_UNUSED(height))
+int svlImageCodec::ReadDimensions(std::istream & CMN_UNUSED(stream),
+                                  unsigned int & CMN_UNUSED(width),
+                                  unsigned int & CMN_UNUSED(height))
 {
     return SVL_FAIL;
 }
 
-int svlImageCodec::ReadDimensions(const unsigned char * CMN_UNUSED(buffer), const size_t CMN_UNUSED(buffersize), unsigned int & CMN_UNUSED(width), unsigned int & CMN_UNUSED(height))
+int svlImageCodec::ReadDimensions(const unsigned char * CMN_UNUSED(buffer),
+                                  const size_t CMN_UNUSED(buffersize),
+                                  unsigned int & CMN_UNUSED(width),
+                                  unsigned int & CMN_UNUSED(height))
 {
     return SVL_FAIL;
 }
 
-int svlImageCodec::Read(svlSampleImageBase & CMN_UNUSED(image), const unsigned int CMN_UNUSED(videoch), const std::string & CMN_UNUSED(filename), bool CMN_UNUSED(noresize))
+int svlImageCodec::Read(svlSampleImageBase & CMN_UNUSED(image),
+                        const unsigned int CMN_UNUSED(videoch),
+                        const std::string & CMN_UNUSED(filename),
+                        bool CMN_UNUSED(noresize))
 {
     return SVL_FAIL;
 }
 
-int svlImageCodec::Read(svlSampleImageBase & CMN_UNUSED(image), const unsigned int CMN_UNUSED(videoch), std::istream & CMN_UNUSED(stream), bool CMN_UNUSED(noresize))
+int svlImageCodec::Read(svlSampleImageBase & CMN_UNUSED(image),
+                        const unsigned int CMN_UNUSED(videoch),
+                        std::istream & CMN_UNUSED(stream),
+                        bool CMN_UNUSED(noresize))
 {
     return SVL_FAIL;
 }
 
-int svlImageCodec::Read(svlSampleImageBase & CMN_UNUSED(image), const unsigned int CMN_UNUSED(videoch), const unsigned char * CMN_UNUSED(buffer), const size_t CMN_UNUSED(buffersize), bool CMN_UNUSED(noresize))
+int svlImageCodec::Read(svlSampleImageBase & CMN_UNUSED(image),
+                        const unsigned int CMN_UNUSED(videoch),
+                        const unsigned char * CMN_UNUSED(buffer),
+                        const size_t CMN_UNUSED(buffersize),
+                        bool CMN_UNUSED(noresize))
 {
     return SVL_FAIL;
 }
 
-int svlImageCodec::Write(const svlSampleImageBase & CMN_UNUSED(image), const unsigned int CMN_UNUSED(videoch), const std::string & CMN_UNUSED(filename))
+int svlImageCodec::Write(const svlSampleImageBase & CMN_UNUSED(image),
+                         const unsigned int CMN_UNUSED(videoch),
+                         const std::string & CMN_UNUSED(filename),
+                         const int CMN_UNUSED(compression))
 {
     return SVL_FAIL;
 }
 
-int svlImageCodec::Write(const svlSampleImageBase & CMN_UNUSED(image), const unsigned int CMN_UNUSED(videoch), std::ostream & CMN_UNUSED(stream))
+int svlImageCodec::Write(const svlSampleImageBase & CMN_UNUSED(image),
+                         const unsigned int CMN_UNUSED(videoch),
+                         std::ostream & CMN_UNUSED(stream),
+                         const int CMN_UNUSED(compression))
 {
     return SVL_FAIL;
 }
 
-int svlImageCodec::Write(const svlSampleImageBase & image, const unsigned int videoch, std::ostream & stream, const std::string & CMN_UNUSED(codec))
+int svlImageCodec::Write(const svlSampleImageBase & image,
+                         const unsigned int videoch,
+                         std::ostream & stream,
+                         const std::string & CMN_UNUSED(codec),
+                         const int compression)
 {
-    return Write(image, videoch, stream);
+    return Write(image, videoch, stream, compression);
 }
 
-int svlImageCodec::Write(const svlSampleImageBase & CMN_UNUSED(image), const unsigned int CMN_UNUSED(videoch), unsigned char * CMN_UNUSED(buffer), size_t & CMN_UNUSED(buffersize))
+int svlImageCodec::Write(const svlSampleImageBase & CMN_UNUSED(image),
+                         const unsigned int CMN_UNUSED(videoch),
+                         unsigned char * CMN_UNUSED(buffer),
+                         size_t & CMN_UNUSED(buffersize),
+                         const int CMN_UNUSED(compression))
 {
     return SVL_FAIL;
 }
-int svlImageCodec::Write(const svlSampleImageBase & image, const unsigned int videoch, unsigned char * buffer, size_t & buffersize, const std::string & CMN_UNUSED(codec))
+int svlImageCodec::Write(const svlSampleImageBase & image,
+                         const unsigned int videoch,
+                         unsigned char * buffer,
+                         size_t & buffersize,
+                         const std::string & CMN_UNUSED(codec),
+                         const int compression)
 {
-    return Write(image, videoch, buffer, buffersize);
+    return Write(image, videoch, buffer, buffersize, compression);
 }
 

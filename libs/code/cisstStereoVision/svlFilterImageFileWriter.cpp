@@ -45,6 +45,7 @@ svlFilterImageFileWriter::svlFilterImageFileWriter() :
     FilePathPrefix.SetSize(2);
     Extension.SetSize(2);
     Disabled.SetSize(2);
+    Compression.SetSize(2);
     ImageCodec.SetAll(0);
     Disabled.SetAll(false);
 
@@ -125,7 +126,7 @@ int svlFilterImageFileWriter::ProcessFrame(ProcInfo* procInfo, svlSample* inputd
 
         path << "." << Extension[idx];
 
-        if (ImageCodec[idx]->Write(*tosave, idx, path.str()) != SVL_OK) return SVL_FAIL;
+        if (ImageCodec[idx]->Write(*tosave, idx, path.str(), Compression[idx]) != SVL_OK) return SVL_FAIL;
     }
 
     _SynchronizeThreads(procInfo);
@@ -178,5 +179,40 @@ int svlFilterImageFileWriter::SetFilePath(const std::string & filepathprefix, co
     Extension[videoch] = extension;
 
     return SVL_OK;
+}
+
+int svlFilterImageFileWriter::SetCompression(int compression, int videoch)
+{
+    if (videoch >= static_cast<int>(ImageCodec.size()))
+        return SVL_WRONG_CHANNEL;
+
+    Compression[videoch] = compression;
+
+    return SVL_OK;
+}
+
+void svlFilterImageFileWriter::EnableTimestamps(bool enable)
+{
+    TimestampsEnabled = enable;
+}
+
+void svlFilterImageFileWriter::Pause()
+{
+    CaptureLength = 0;
+}
+
+void svlFilterImageFileWriter::Record(int frames)
+{
+    CaptureLength = frames;
+}
+
+void svlFilterImageFileWriter::SetDistanceIntensityRatio(float ratio)
+{
+    DistanceScaling = ratio;
+}
+
+float svlFilterImageFileWriter::GetDistanceIntensityRatio()
+{
+    return DistanceScaling;
 }
 

@@ -26,6 +26,14 @@
 #include "ftImageBMP.h"
 #include "ftImagePPM.h"
 
+#if (CISST_SVL_HAS_JPEG == ON)
+#include "ftImageJPEG.h"
+#endif // CISST_SVL_HAS_JPEG
+
+#if (CISST_SVL_HAS_PNG == ON)
+#include "ftImagePNG.h"
+#endif // CISST_SVL_HAS_PNG
+
 
 void svlInitializeImageCodecs()
 {
@@ -36,5 +44,13 @@ void svlInitializeImageCodecs()
 #ifdef _ftImagePPM_h
     delete new ftImagePPM;
 #endif // _ftImagePPM_h
+
+#ifdef _ftImageJPEG_h
+    delete new ftImageJPEG;
+#endif // _ftImageJPEG_h
+
+#ifdef _ftImagePNG_h
+    delete new ftImagePNG;
+#endif // _ftImagePNG_h
 }
 
