@@ -22,6 +22,7 @@ Original code courtesy of Ben Mitchell.
 */
 
 #include "ftImagePPM.h"
+#include <cisstStereoVision/svlStreamDefs.h>
 
 
 /*************************************/

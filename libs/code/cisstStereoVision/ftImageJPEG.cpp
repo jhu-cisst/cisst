@@ -21,6 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include "ftImageJPEG.h"
+#include <cisstStereoVision/svlStreamDefs.h>
 #include <setjmp.h>
 #include "jpeglib.h"
 
@@ -530,7 +531,7 @@ int ftImageJPEG::Write(const svlSampleImageBase &image, const unsigned int video
     unsigned char *src = const_cast<unsigned char*>(image.GetUCharPointer(videoch));
     unsigned char *buff_bgr;
     JSAMPROW row_pointer[1];
-    int i, offset, quality = (compression >= 0) ? compression : JPEG_DEFAULT_QUALITY;
+    int i, offset, quality = (compression >= 0) ? std::min(compression, 100) : JPEG_DEFAULT_QUALITY;
 
     // Allocate row buffer if not done yet
     if (!jpegRowBuffer) {

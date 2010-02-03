@@ -27,7 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstVector/vctDynamicMatrix.h>
 #include <cisstVector/vctFixedSizeMatrix.h>
 #include <cisstVector/vctFixedSizeVectorTypes.h>
-
+#include <cisstStereoVision/svlImageIO.h>
 #include <cisstStereoVision/svlConfig.h>
 
 // Always include last!
@@ -144,25 +144,21 @@ public:
     virtual int CopyOf(const svlSample & sample) = 0;
     virtual bool IsImage();
     virtual bool IsInitialized();
-
-    /*! Serialize the content of the object without any extra
-        information, i.e. no class type nor format version.  The
-        "receiver" is supposed to already know what to expect. */ 
-//    virtual void SerializeRaw(std::ostream & outputStream) const = 0;
-
-    /*! De-serialize the content of the object without any extra
-      information, i.e. no class type nor format version. */
-//    virtual void DeSerializeRaw(std::istream & inputStream) = 0;
-
+    virtual void SerializeRaw(std::ostream & outputStream) const = 0;
+    virtual void DeSerializeRaw(std::istream & inputStream) = 0;
     void SetTimestamp(double ts);
     double GetTimestamp() const;
     void SetModified(bool modified);
     bool IsModified() const;
     static svlSample* GetNewFromType(svlStreamType type);
+    void SetEncoder(const std::string & codec, const int parameter);
+    void GetEncoder(std::string & codec, int & parameter) const;
 
 private:
     double Timestamp; // [seconds]
     bool ModifiedFlag;
+    std::string Encoder;
+    int EncoderParameter;
 };
 
 
@@ -189,24 +185,20 @@ public:
     virtual const unsigned char* GetUCharPointer(const unsigned int videochannel = 0) const = 0;
     virtual unsigned char* GetUCharPointer(const unsigned int videochannel, const unsigned int x, const unsigned int y) = 0;
     virtual const unsigned char* GetUCharPointer(const unsigned int videochannel, const unsigned int x, const unsigned int y) const = 0;
-    
-    /*! Serialize the content of the object without any extra
-        information, i.e. no class type nor format version.  The
-        "receiver" is supposed to already know what to expect. */ 
-//    virtual void SerializeRaw(std::ostream & outputStream) const = 0;
-
-    /*! De-serialize the content of the object without any extra
-      information, i.e. no class type nor format version. */
-//    virtual void DeSerializeRaw(std::istream & inputStream) = 0 ;
+    virtual void SerializeRaw(std::ostream & outputStream) const = 0;
+    virtual void DeSerializeRaw(std::istream & inputStream) = 0 ;
 };
 
 
 template <class _ValueType, unsigned int _DataChannels, unsigned int _VideoChannels>
-class CISST_EXPORT svlSampleImageCustom : public svlSampleImageBase
+class CISST_EXPORT svlSampleImageCustom : public svlSampleImageBase, public cmnGenericObject
 {
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+
 public:
     svlSampleImageCustom() :
         svlSampleImageBase(),
+        cmnGenericObject(),
         OwnData(true)
     {
         for (unsigned int vch = 0; vch < _VideoChannels; vch ++) {
@@ -222,6 +214,7 @@ public:
 
     svlSampleImageCustom(bool owndata) :
         svlSampleImageBase(),
+        cmnGenericObject(),
         OwnData(owndata)
     {
         for (unsigned int vch = 0; vch < _VideoChannels; vch ++) {
@@ -471,49 +464,40 @@ public:
         }
     } 
 
-    
-    /*! Serialize the content of the object without any extra
-        information, i.e. no class type nor format version.  The
-        "receiver" is supposed to already know what to expect. */ 
-//    virtual void SerializeRaw(std::ostream & outputStream) const
-//    {
+    virtual void SerializeRaw(std::ostream & outputStream) const
+    {
+        std::string codec;
+        int compression;
+        GetEncoder(codec, compression);
+        cmnSerializeRaw(outputStream, GetType());
+        cmnSerializeRaw(outputStream, GetTimestamp());
+        cmnSerializeRaw(outputStream, codec);
+        for (unsigned int vch = 0; vch < _VideoChannels; vch ++) {
+            if (svlImageIO::Write(*this, vch, codec, outputStream, compression) != SVL_OK) {
+                cmnThrow("svlSampleImageCustom::SerializeRaw(): Error occured with svlImageIO::Write");
+            }
+        }
+    }
 
-        //cmnSerializeRaw(outputStream, GetType );        //probably not required
-        //cmnSerializeRaw(outputStream, GetWidth());
-        //cmnSerializeRaw(outputStream, GetHeight());
-        //cmnSerializeRaw(outputStream, Timestamp());
-        //cmnSerializeRaw(outputStream, GetVideoChannels());
-        //cmnSerializeSizeRaw(outputStream,GetDataSize());
-        ////outputStream.write(static_cast<char*>(GetPointer(0)),GetDataSize());  
-        //outputStream.write(reinterpret_cast<const char *> (GetPointer(0)),GetDataSize());  
-//    }
-
-    /*! De-serialize the content of the object without any extra
-      information, i.e. no class type nor format version. */
-//    virtual void DeSerializeRaw(std::istream & inputStream)
-//    {
-
-        ////label?
-        //int type=-1;
-        //cmnDeSerializeRaw(inputStream, type);         
-        //if (type != GetType()) {
-        //    CMN_LOG_CLASS_RUN_ERROR << "Deserialized sample type mismatch " << std::endl;
-        //    return ;
-        //}
-
-        //int w;
-        //int h;
-        //cmnDeSerializeRaw(inputStream, w);
-        //cmnDeSerializeRaw(inputStream, h);
-        //cmnDeSerializeRaw(inputStream, TimestampMember);
-        //SetTimestamp(TimestampMember);
-        //unsigned int ch;
-        //cmnDeSerializeRaw(inputStream, ch);
-        //size_t s;
-        //cmnDeSerializeSizeRaw(inputStream,s);
-        //SetSize(ch,w,h);
-        //inputStream.read(reinterpret_cast<char*>(GetPointer(0)),s);  
-//    }
+    virtual void DeSerializeRaw(std::istream & inputStream)
+    {
+        int type = -1;
+        double timestamp;
+        std::string codec;
+        cmnDeSerializeRaw(inputStream, type);
+        if (type != GetType()) {
+            CMN_LOG_CLASS_RUN_ERROR << "Deserialized sample type mismatch " << std::endl;
+            return;
+        }
+        cmnDeSerializeRaw(inputStream, timestamp);
+        SetTimestamp(timestamp);
+        cmnDeSerializeRaw(inputStream, codec);
+        for (unsigned int vch = 0; vch < _VideoChannels; vch ++) {
+            if (svlImageIO::Read(*this, vch, codec, inputStream, false) != SVL_OK) {
+                cmnThrow("svlSampleImageCustom::DeSerializeRaw(): Error occured with svlImageIO::Read");
+            }
+        }
+    }
 
 private:
     bool OwnData;
@@ -534,7 +518,6 @@ private:
 #endif // CISST_SVL_HAS_OPENCV
 };
 
-
 typedef svlSampleImageCustom<unsigned char,  1, 1>   svlSampleImageMono8;
 typedef svlSampleImageCustom<unsigned char,  1, 2>   svlSampleImageMono8Stereo;
 typedef svlSampleImageCustom<unsigned short, 1, 1>   svlSampleImageMono16;
@@ -546,9 +529,22 @@ typedef svlSampleImageCustom<unsigned char,  4, 2>   svlSampleImageRGBAStereo;
 typedef svlSampleImageCustom<float,          1, 1>   svlSampleImageMonoFloat;
 typedef svlSampleImageCustom<float,          3, 1>   svlSampleImage3DMap;
 
+CMN_DECLARE_SERVICES_INSTANTIATION(svlSampleImageMono8)
+CMN_DECLARE_SERVICES_INSTANTIATION(svlSampleImageMono8Stereo)
+CMN_DECLARE_SERVICES_INSTANTIATION(svlSampleImageMono16)
+CMN_DECLARE_SERVICES_INSTANTIATION(svlSampleImageMono16Stereo)
+CMN_DECLARE_SERVICES_INSTANTIATION(svlSampleImageRGB)
+CMN_DECLARE_SERVICES_INSTANTIATION(svlSampleImageRGBA)
+CMN_DECLARE_SERVICES_INSTANTIATION(svlSampleImageRGBStereo)
+CMN_DECLARE_SERVICES_INSTANTIATION(svlSampleImageRGBAStereo)
+CMN_DECLARE_SERVICES_INSTANTIATION(svlSampleImageMonoFloat)
+CMN_DECLARE_SERVICES_INSTANTIATION(svlSampleImage3DMap)
 
-class CISST_EXPORT svlSampleRigidXform : public svlSample
+
+class CISST_EXPORT svlSampleRigidXform : public svlSample, public cmnGenericObject
 {
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+
 public:
     svlSampleRigidXform();
     svlSample* GetNewInstance();
@@ -560,27 +556,19 @@ public:
     const unsigned char* GetUCharPointer() const;
     double* GetPointer();
     unsigned int GetDataSize() const;
-
-    /*! Serialize the content of the object without any extra
-    information, i.e. no class type nor format version.  The
-    "receiver" is supposed to already know what to expect. */ 
-//    virtual void SerializeRaw(std::ostream & outputStream) const
-//    {
-//    }
-
-    /*! De-serialize the content of the object without any extra
-      information, i.e. no class type nor format version. */
-//    virtual void DeSerializeRaw(std::istream & inputStream)
-//    {
-//    }
-
+    void SerializeRaw(std::ostream & outputStream) const;
+    void DeSerializeRaw(std::istream & inputStream);
 
     svlRigidXform frame4x4;
 };
 
+CMN_DECLARE_SERVICES_INSTANTIATION(svlSampleRigidXform)
 
-class CISST_EXPORT svlSamplePointCloud : public svlSample
+
+class CISST_EXPORT svlSamplePointCloud : public svlSample, public cmnGenericObject
 {
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+
 public:
     svlSamplePointCloud();
     svlSample* GetNewInstance();
@@ -595,22 +583,13 @@ public:
     const unsigned char* GetUCharPointer() const;
     double* GetPointer();
     unsigned int GetDataSize() const;
-
-    /*! Serialize the content of the object without any extra
-    information, i.e. no class type nor format version.  The
-    "receiver" is supposed to already know what to expect. */ 
-//    virtual void SerializeRaw(std::ostream & outputStream) const
-//    {
-//    }
-
-    /*! De-serialize the content of the object without any extra
-      information, i.e. no class type nor format version. */
-//    virtual void DeSerializeRaw(std::istream & inputStream)
-//    {
-//    }
+    void SerializeRaw(std::ostream & outputStream) const;
+    void DeSerializeRaw(std::istream & inputStream);
 
     svlPointCloud points;
 };
+
+CMN_DECLARE_SERVICES_INSTANTIATION(svlSamplePointCloud)
 
 
 //////////////////////////////////////////////
@@ -638,14 +617,6 @@ public:
 /////////////////////////////////
 
 #pragma pack(1)
-
-typedef struct _svlImageProperties {
-    svlStreamType DataType;
-    unsigned int DataSize;
-    unsigned int Width;
-    unsigned int Height;
-    bool Padding;
-} svlImageProperties;
 
 typedef struct _svlBMPFileHeader {
     unsigned short bfType;

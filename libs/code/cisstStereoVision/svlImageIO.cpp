@@ -21,6 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstStereoVision/svlImageIO.h>
+#include <cisstStereoVision/svlStreamDefs.h>
 #include "ftInitializer.h"
 
 

@@ -27,7 +27,9 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlSample class **********/
 /******************************/
 
-svlSample::svlSample() : ModifiedFlag(true)
+svlSample::svlSample() :
+    ModifiedFlag(true),
+    EncoderParameter(-1)
 {
 }
 
@@ -88,13 +90,27 @@ svlSample* svlSample::GetNewFromType(svlStreamType type)
     return 0;
 }
 
+void svlSample::SetEncoder(const std::string & codec, const int parameter)
+{
+    Encoder = codec;
+    EncoderParameter = parameter;
+}
+
+void svlSample::GetEncoder(std::string & codec, int & parameter) const
+{
+    codec = Encoder;
+    parameter = EncoderParameter;
+}
+
 
 /*********************************/
 /*** svlSampleImageBase class ****/
 /*********************************/
 
-svlSampleImageBase::svlSampleImageBase() : svlSample()
+svlSampleImageBase::svlSampleImageBase() :
+    svlSample()
 {
+    SetEncoder("bmp", 0);
 }
 
 svlSampleImageBase::~svlSampleImageBase()
@@ -107,11 +123,31 @@ bool svlSampleImageBase::IsImage()
 }
 
 
+/***********************************/
+/*** svlSampleImageCustom class ****/
+/***********************************/
+
+CMN_IMPLEMENT_SERVICES_TEMPLATED(svlSampleImageMono8)
+CMN_IMPLEMENT_SERVICES_TEMPLATED(svlSampleImageMono8Stereo)
+CMN_IMPLEMENT_SERVICES_TEMPLATED(svlSampleImageMono16)
+CMN_IMPLEMENT_SERVICES_TEMPLATED(svlSampleImageMono16Stereo)
+CMN_IMPLEMENT_SERVICES_TEMPLATED(svlSampleImageRGB)
+CMN_IMPLEMENT_SERVICES_TEMPLATED(svlSampleImageRGBA)
+CMN_IMPLEMENT_SERVICES_TEMPLATED(svlSampleImageRGBStereo)
+CMN_IMPLEMENT_SERVICES_TEMPLATED(svlSampleImageRGBAStereo)
+CMN_IMPLEMENT_SERVICES_TEMPLATED(svlSampleImageMonoFloat)
+CMN_IMPLEMENT_SERVICES_TEMPLATED(svlSampleImage3DMap)
+
+
 /*********************************/
 /*** svlSampleRigidXform class ***/
 /*********************************/
 
-svlSampleRigidXform::svlSampleRigidXform() : svlSample()
+CMN_IMPLEMENT_SERVICES(svlSampleRigidXform)
+
+svlSampleRigidXform::svlSampleRigidXform() :
+    svlSample(),
+    cmnGenericObject()
 {
 }
 
@@ -167,12 +203,24 @@ unsigned int svlSampleRigidXform::GetDataSize() const
     return (frame4x4.size() * sizeof(double));
 }
 
+void svlSampleRigidXform::SerializeRaw(std::ostream & outputStream) const
+{
+}
+
+void svlSampleRigidXform::DeSerializeRaw(std::istream & inputStream)
+{
+}
+
 
 /*********************************/
 /*** svlSamplePointCloud class ***/
 /*********************************/
 
-svlSamplePointCloud::svlSamplePointCloud() : svlSample()
+CMN_IMPLEMENT_SERVICES(svlSamplePointCloud)
+
+svlSamplePointCloud::svlSamplePointCloud() :
+    svlSample(),
+    cmnGenericObject()
 {
 }
 
@@ -243,6 +291,14 @@ double* svlSamplePointCloud::GetPointer()
 unsigned int svlSamplePointCloud::GetDataSize() const
 {
     return (points.size() * sizeof(double));
+}
+
+void svlSamplePointCloud::SerializeRaw(std::ostream & outputStream) const
+{
+}
+
+void svlSamplePointCloud::DeSerializeRaw(std::istream & inputStream)
+{
 }
 
 

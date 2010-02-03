@@ -23,11 +23,15 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlImageIO_h
 #define _svlImageIO_h
 
-#include <cisstStereoVision/svlStreamManager.h>
+#include <cisstVector/vctDynamicMatrixTypes.h>
+#include <string>
 
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
 
+
+// Forward declarations
+class svlSampleImageBase;
 
 /*************************************/
 /*** svlImageCodec class *************/

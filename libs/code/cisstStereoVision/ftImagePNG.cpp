@@ -21,6 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include "ftImagePNG.h"
+#include <cisstStereoVision/svlStreamDefs.h>
 #include "png.h"
 
 

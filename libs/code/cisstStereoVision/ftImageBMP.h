@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _ftImageBMP_h
 
 #include <cisstStereoVision/svlImageIO.h>
+#include <cisstStereoVision/svlStreamDefs.h>
 
 
 class ftImageBMP : public svlImageCodec, public cmnGenericObject
