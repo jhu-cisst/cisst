@@ -205,7 +205,7 @@ class ireMain(wx.Frame):
         
         menu = self.ImportMenu = wx.Menu()
         menu.Append(self.ID_LOAD_CISSTCOMMON, "Import cisst&Common", "Import cisstCommon")
-        menu.Append(self.ID_LOAD_CISSTCOMMON, "Import cisst&OSAbstraction", "Import cisstOSAbstraction")
+        menu.Append(self.ID_LOAD_CISSTOSABSTRACTION, "Import cisst&OSAbstraction", "Import cisstOSAbstraction")
         menu.Append(self.ID_LOAD_CISSTVECTOR, "Import cisst&Vector", "Import cisstVector")
         menu.Append(self.ID_LOAD_CISSTNUMERICAL, "Import cisst&Numerical", "Import cisstNumerical")
         menu.Append(self.ID_LOAD_CISSTMULTITASK, "Import cisst&MultiTask", "Import cisstMultiTask")
