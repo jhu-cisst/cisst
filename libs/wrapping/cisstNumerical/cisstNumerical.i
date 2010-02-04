@@ -36,6 +36,8 @@ http://www.cisst.org/cisst/license.txt.
 // Generate parameter documentation for IRE
 %feature("autodoc", "1");
 
+%include "cisstNumerical/nmrNetlib.h"
 
+#if CISST_HAS_CISSTNETLIB
 %include "cisstNumerical/nmrSVD.i"
-
+#endif

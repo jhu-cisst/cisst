@@ -25,6 +25,10 @@ http://www.cisst.org/cisst/license.txt.
 
 /* Put header files here */
 #include "cisstVector/cisstVector.i.h"
+
+#include "cisstNumerical/nmrNetlib.h"
+#if CISST_HAS_CISSTNETLIB
 #include "cisstNumerical/nmrSVD.h"
 
+#endif
 #endif // _cisstNumerical_i_h

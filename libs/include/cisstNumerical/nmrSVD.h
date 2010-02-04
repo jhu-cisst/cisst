@@ -1264,6 +1264,5 @@ CISSTNETLIB_INTEGER nmrSVD(vctFixedSizeMatrix<CISSTNETLIB_DOUBLE, _rows, _cols, 
 
 //@}
 
-
 #endif
 

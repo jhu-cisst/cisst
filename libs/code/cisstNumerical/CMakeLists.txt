@@ -32,7 +32,6 @@ SET(SOURCE_FILES
     nmrMultiVariablePowerBasis.cpp
     nmrPolynomialBase.cpp
     nmrPolynomialTermPowerIndex.cpp
-    nmrRegistrationRigid.cpp
     nmrSingleVariablePowerBasis.cpp
     nmrStandardPolynomial.cpp
     )
@@ -51,7 +50,6 @@ SET(HEADER_FILES
     nmrPolynomialBase.h
     nmrPolynomialContainer.h
     nmrPolynomialTermPowerIndex.h
-    nmrRegistrationRigid.h
     nmrSingleVariablePowerBasis.h
     nmrStandardPolynomial.h
     )
@@ -65,6 +63,7 @@ IF(CISST_HAS_CISSTNETLIB)
       nmrLSqLin.cpp
       nmrPInverse.cpp
       nmrPInverseEconomy.cpp
+      nmrRegistrationRigid.cpp
       nmrSVD.cpp
       nmrSVDEconomy.cpp
       )
@@ -85,6 +84,7 @@ IF(CISST_HAS_CISSTNETLIB)
       nmrCallBack.h
       nmrPInverse.h
       nmrPInverseEconomy.h
+      nmrRegistrationRigid.h
       nmrSVD.h
       nmrSVDEconomy.h
 #      nmrSVDSolver.h
