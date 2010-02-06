@@ -42,12 +42,14 @@ http://www.cisst.org/cisst/license.txt.
      \code
      cmnDouble s;
      vct3 v1, v2;
+     double d;
      \endcode
 
      These variables can be initialized from the following input file (called "test.txt"):
 
      \code
      S 10
+     D 5
      V1 1,2,3
      V2 4,5,6
      \endcode
@@ -59,11 +61,12 @@ http://www.cisst.org/cisst/license.txt.
      Config.AddEntry("S", s);
      Config.AddEntry("V1", v1, ',');
      Config.AddEntry("V2", v2, ',');   
+     Config.AddEntryStreamable("D", d);
      std::ifstream file("test.txt");
      bool success = Config.Parse(file);
      \endcode
 
-     If successful, the variables S, V1, and V2 will be assigned the
+     If successful, the variables S, V1, V2, and D will be assigned the
      values from the file.  Note that the variable names in the code
      do not have to be the same as the string names (in this example,
      the variables names are lower case and the strings are upper case).
@@ -76,6 +79,8 @@ http://www.cisst.org/cisst/license.txt.
 
      Note that the AddEntry method is templated, so that any data type can
      be used, as long as it contains the FromStreamRaw and ToStreamRaw methods.
+     Similarly, the AddEntryStreamable method is templated, so that any data
+     type can be used that defines the stream in (>>) and stream out (<<) operators.
 
      Current limitations:
 
