@@ -65,7 +65,6 @@ class CISST_EXPORT mtsTask: public mtsDevice
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
     friend class mtsTaskManager;
-    //friend class mtsCollectorState;
 
 public:
     typedef mtsDevice BaseType;
@@ -123,7 +122,7 @@ protected:
     bool OverranPeriod;
 
     /*! The data passed to the thread. */
-    void *ThreadStartData;
+    void * ThreadStartData;
 
     /*! The return value for RunInternal. */
     void * ReturnValue;
@@ -132,7 +131,7 @@ protected:
 
 	/*! The member function that is passed as 'start routine' argument for
 	  thread creation. */
-	virtual void *RunInternal(void* argument) = 0;
+	virtual void * RunInternal(void * argument) = 0;
 
     /*! The main part of the Run loop that is the same for all derived classes.
         This should not be overloaded. */
@@ -267,26 +266,35 @@ public:
     inline TaskStateType GetTaskState(void) const { return TaskState; }
 
     /*! Convert tasks state to string representation. */
-    const char *TaskStateName(TaskStateType state) const;
+    const char * TaskStateName(TaskStateType state) const;
 
     /*! Return task state as a string. */
-    inline const char *GetTaskStateName(void) const { return TaskStateName(TaskState); }
+    inline const char * GetTaskStateName(void) const { return TaskStateName(TaskState); }
 
     /*! Return the average period. */
     double GetAveragePeriod(void) const { return StateTable.GetAveragePeriod(); }
 
     /*! Return the name of this state table. */
-    const std::string GetDefaultStateTableName(void) const { return StateTable.GetName(); }
+    inline const std::string GetDefaultStateTableName(void) const {
+        return StateTable.GetName();
+    }
 
     /*! Return the pointer to the default state table or a specific one if a name is provided. */
-    mtsStateTable * GetStateTable(const std::string & stateTableName = MTS_STATE_TABLE_DEFAULT_NAME) {
+    mtsStateTable * GetStateTable(const std::string & stateTableName) {
         return this->StateTables.GetItem(stateTableName, CMN_LOG_LOD_INIT_ERROR);
     }
+
+    /*! Add an existing state table to the list of known state tables
+      in this task.  This method will add an interface for the state
+      table using the name "StateTable" +
+      existingStateTable->GetName() unless the caller specifies that
+      no interface should be created. */
+    bool AddStateTable(mtsStateTable * existingStateTable, bool addProvidedInterface = true);
 
     /********************* Methods to manage interfaces *******************/
 	
     /* documented in base class */
-    mtsDeviceInterface * AddProvidedInterface(const std::string & newInterfaceName);
+    virtual mtsDeviceInterface * AddProvidedInterface(const std::string & newInterfaceName);
 
     
     /********************* Methods for task synchronization ***************/
@@ -305,23 +313,33 @@ public:
     virtual bool WaitToTerminate(double timeout);
 
     /*! Suspend this task until the Wakeup method is called. */
-    virtual void WaitForWakeup() { Thread.WaitForWakeup(); }
+    inline virtual void WaitForWakeup(void) {
+        Thread.WaitForWakeup();
+    }
 
     /*! Wakeup the task. */
-    virtual void Wakeup() { Thread.Wakeup(); }
+    inline virtual void Wakeup(void) {
+        Thread.Wakeup();
+    }
 
     /********************* Methods for task period and overrun ************/
 	
     /*! Return true if thread is periodic. */
-    virtual bool IsPeriodic(void) const { return false; }
+    inline virtual bool IsPeriodic(void) const {
+        return false;
+    }
 
 	/*! Return true if task overran allocated period. Note that this is not
         restricted to mtsTaskPeriodic.  For example, an mtsTaskFromCallback
         can overrun if a second callback occurs before the first is finished. */
-    virtual bool IsOverranPeriod(void) const { return OverranPeriod; }
+    inline virtual bool IsOverranPeriod(void) const {
+        return OverranPeriod;
+    }
 
 	/*! Reset overran period flag. */
-    virtual void ResetOverranPeriod(void) { OverranPeriod = false; }
+    inline virtual void ResetOverranPeriod(void) {
+        OverranPeriod = false;
+    }
 
     /*! Send a human readable description of the device. */
     void ToStream(std::ostream & outputStream) const;

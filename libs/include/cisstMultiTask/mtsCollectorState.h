@@ -2,9 +2,9 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: mtsCollectorState.h 2009-03-20 mjung5
+  $Id: mtsCollectorState.h 2009-03-20 mjung5 $
 
-  Author(s):  Min Yang Jung
+  Author(s):  Min Yang Jung, Anton Deguet
   Created on: 2009-03-20
 
   (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
@@ -31,6 +31,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <string>
 
+// Always include last
 #include <cisstMultiTask/mtsExport.h>
 
 /*!
@@ -80,9 +81,6 @@ class CISST_EXPORT mtsCollectorState : public mtsCollectorBase
     /*! Output file name. */
     std::string LogFileName;
 
-    /*! Void command to enable the target task's trigger. */
-    mtsCommandVoidBase * DataCollectionTriggerResetCommand;
-
     /*! Delimiter used in a log file. Set by the constructor according to 
         mtsCollectorBase::CollectorLogFormat. */
     char Delimiter;
@@ -110,14 +108,15 @@ class CISST_EXPORT mtsCollectorState : public mtsCollectorBase
     /*! Initialization */
     void Initialize(void);
 
+    mtsFunctionWrite StateTableStartCollection; 
+    mtsFunctionWrite StateTableStopCollection;
+
     /*! Check if the signal specified by a user has been already registered. 
         This is to avoid duplicate signal registration. */
     bool IsRegisteredSignal(const std::string & signalName) const;
 
     /*! Add a signal element. Called internally by mtsCollectorState::AddSignal(). */
     bool AddSignalElement(const std::string & signalName, const unsigned int signalID);
-
-    void SetDataCollectionTriggerResetCommand();
 
     /*! Fetch state table data */
     bool FetchStateTableData(const mtsStateTable * table, 
@@ -135,27 +134,33 @@ class CISST_EXPORT mtsCollectorState : public mtsCollectorBase
     
     /*! When this function is called (called by the data thread as a form of an event),
         bulk-fetch is performed and data is dumped to a log fie. */
-    void DataCollectionEventHandler();
+    // void DataCollectionEventHandler(); // performs thread wake up
+    void BatchReadyHandler(const mtsStateTable::IndexRange & range); // performs collect, for implementation as continuous, no sleep
 
     /*! Fetch bulk data from StateTable. */
-    void Collect(void);
+    void BatchCollect(const mtsStateTable::IndexRange & range);
 
 public:
+    /*! Constructor using the task name and table name. */
     mtsCollectorState(const std::string & targetTaskName,
-                      const mtsCollectorBase::CollectorLogFormat collectorLogFormat = mtsCollectorBase::COLLECTOR_LOG_FORMAT_PLAIN_TEXT,
-                      const std::string & targetStateTableName = MTS_STATE_TABLE_DEFAULT_NAME);
+                      const std::string & targetStateTableName,
+                      const mtsCollectorBase::CollectorLogFormat collectorLogFormat);
+
+
+    /*! Constructor using a task pointer and table name. */
     mtsCollectorState(mtsTask * targetTask,
-                      const mtsCollectorBase::CollectorLogFormat collectorLogFormat = mtsCollectorBase::COLLECTOR_LOG_FORMAT_PLAIN_TEXT,
-                      const std::string & targetStateTableName = MTS_STATE_TABLE_DEFAULT_NAME);
+                      const std::string & targetStateTableName,
+                      const mtsCollectorBase::CollectorLogFormat collectorLogFormat);
+    
+
     ~mtsCollectorState(void);
 
-    /*! Add the signal specified to a list of registered signals. 
-        Currently, 'format' argument is reserved. */
+    /*! Add the signal specified to a list of registered signals. */
     bool AddSignal(const std::string & signalName = "");
 
-    /*! Set a sampling interval so that data collector can skip several values. 
-        This is useful when a frequency of the task is somewhat high and you don't want
-        to collect ALL data from it. */
+    /*! Set a sampling interval so that data collector can skip
+      several values.  This is useful when a frequency of the task is
+      somewhat high and you don't want to collect ALL data from it. */
     void SetSamplingInterval(const unsigned int samplingInterval) {
         SamplingInterval = (samplingInterval > 0 ? samplingInterval : 1);
     }
@@ -166,8 +171,18 @@ public:
                                     const char delimiter = ',');
 
     /*! Get the name of log file currently being written. */
-    const std::string & GetLogFileName() { return LogFileName; }
+    inline const std::string & GetLogFileName(void) const {
+        return this->LogFileName;
+    }
 
+    /*! Methods defined as virtual in base class to control stop/start
+      collection with delay.  For the state table collection, these
+      methods are mainly pass through, i.e. they call the
+      corresponding commands from the state table task.  */
+    //@{
+    void StartCollection(const mtsDouble & delayInSeconds);
+    void StopCollection(const mtsDouble & delayInSeconds);
+    //@}
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsCollectorState)

@@ -27,9 +27,12 @@ http://www.cisst.org/cisst/license.txt.
 #include <iostream>
 #include <string>
 
+CMN_IMPLEMENT_SERVICES(mtsStateTable);
+CMN_IMPLEMENT_SERVICES(mtsStateTable::IndexRange);
+
 int mtsStateTable::StateVectorBaseIDForUser;
 
-mtsStateTable::mtsStateTable(int size, const std::string & stateTableName):
+mtsStateTable::mtsStateTable(int size, const std::string & name):
     HistoryLength(size),
     NumberStateData(0),
     IndexWriter(0),
@@ -41,10 +44,17 @@ mtsStateTable::mtsStateTable(int size, const std::string & stateTableName):
     Toc(0.0),
     Period(0.0),
     SumOfPeriods(0.0),
-    AvgPeriod(0.0),
-    StateTableName(stateTableName), 
-    DataCollectionEventHandler(NULL)
+    AveragePeriod(0.0),
+    Name(name)
 {
+    // make sure history length is at least 3
+    if (this->HistoryLength < 3) {
+        CMN_LOG_CLASS_INIT_VERBOSE << "constructor: history lenght sets to 3 (minimum required)" << std::endl;
+        this->HistoryLength = 3;
+    }
+
+    // set the default number of elements for data collection batch
+    this->DataCollection.BatchSize = this->HistoryLength / 3;
 
     // Get a pointer to the time server
     TimeServer = &mtsTaskManager::GetInstance()->GetTimeServer();
@@ -62,20 +72,20 @@ mtsStateTable::mtsStateTable(int size, const std::string & stateTableName):
     StateVectorBaseIDForUser = StateVector.size();
 }
 
+
 mtsStateTable::~mtsStateTable()
 {
-    if (DataCollectionEventHandler) {
-        delete DataCollectionEventHandler;
-    }
 }
-/* All the const methods that can be called from reader or writer */
 
+
+/* All the const methods that can be called from reader or writer */
 mtsStateIndex mtsStateTable::GetIndexReader(void) const {
     int tmp = IndexReader;
     return mtsStateIndex(tmp, Ticks[tmp], HistoryLength);
 }
 
-mtsStateTable::AccessorBase *mtsStateTable::GetAccessor(const std::string &name) const
+
+mtsStateTable::AccessorBase * mtsStateTable::GetAccessor(const std::string & name) const
 {
     for (unsigned int i = 0; i < StateVectorDataNames.size(); i++) {
         if (name == StateVectorDataNames[i])
@@ -84,35 +94,37 @@ mtsStateTable::AccessorBase *mtsStateTable::GetAccessor(const std::string &name)
     return 0;
 }
 
-mtsStateTable::AccessorBase *mtsStateTable::GetAccessor(const char *name) const
+
+mtsStateTable::AccessorBase * mtsStateTable::GetAccessor(const char * name) const
 {
     return GetAccessor(std::string(name));
 }
 
-/* All the non-const methods that can be called from writer only */
 
+/* All the non-const methods that can be called from writer only */
 mtsStateIndex mtsStateTable::GetIndexWriter(void) const {
     return mtsStateIndex(IndexWriter, Ticks[IndexWriter], HistoryLength);
 }
 
 
-bool mtsStateTable::Write(mtsStateDataId id, const mtsGenericObject &obj) {
+bool mtsStateTable::Write(mtsStateDataId id, const mtsGenericObject & object) {
     bool result;
     CMN_ASSERT(id != -1);
     if (id == -1) {
-        CMN_LOG_INIT_ERROR << "Class mtsStateTable: Write: obj must be created using NewElement " << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "Write: object must be created using NewElement " << std::endl;
         return false;
     }
     if (!StateVector[id]) {
-        CMN_LOG_INIT_ERROR << "Class mtsStateTable: Write: No state data array corresponding to given id: " << id << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "Write: no state data array corresponding to given id: " << id << std::endl;
         return false;
     }
-    result = StateVector[id]->Set(IndexWriter, obj);
+    result = StateVector[id]->Set(IndexWriter, object);
     if (!result) {
-        CMN_LOG_INIT_ERROR << "Class mtsStateTable: Error setting data array value in id: " << id << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "Write: error setting data array value in id: " << id << std::endl;
     }
     return result;
 }
+
 
 void mtsStateTable::Start(void) {
     if (TimeServer) {
@@ -125,6 +137,7 @@ void mtsStateTable::Start(void) {
     }
 }
 
+
 void mtsStateTable::Advance(void) {
     unsigned int i;
     unsigned int tmpIndex;
@@ -135,14 +148,15 @@ void mtsStateTable::Advance(void) {
     // Update SumOfPeriods (add newest and subtract oldest)
     SumOfPeriods += Period;
     // If the table is full (all entries valid), subtract the oldest one
-    if (Ticks[IndexWriter] == Ticks[newIndexWriter]+HistoryLength-1) {
+    if (Ticks[IndexWriter] == (Ticks[newIndexWriter] + HistoryLength - 1)) {
         mtsDouble oldPeriod;
         StateVector[PeriodId]->Get(newIndexWriter, oldPeriod);
         SumOfPeriods -= oldPeriod;
-        AvgPeriod = SumOfPeriods/(HistoryLength-1);
+        AveragePeriod = SumOfPeriods / (HistoryLength-1);
     }
-    else if (Ticks[IndexWriter] > 0)
-        AvgPeriod = SumOfPeriods/Ticks[IndexWriter];
+    else if (Ticks[IndexWriter] > 0) {
+        AveragePeriod = SumOfPeriods / Ticks[IndexWriter];
+    }
 
     /* If for all cases, IndexReader is behind IndexWriter, we don't
        need critical sections. This is based on the assumption that
@@ -160,7 +174,7 @@ void mtsStateTable::Advance(void) {
     // Write data in the state table from the different state data objects.
     // Note that we start at TicId, which should correspond to the second
     // element in the array (after Toc).
-    for(i = TicId; i < StateVector.size(); i++) {
+    for (i = TicId; i < StateVector.size(); i++) {
         if (StateVectorElements[i]) {
             StateVectorElements[i]->SetTimestampIfAutomatic(Tic.Data);
             Write(i, *(StateVectorElements[i]));
@@ -169,10 +183,6 @@ void mtsStateTable::Advance(void) {
     // Get the Toc value and write it to the state table.
     if (TimeServer) {
     	Toc = TimeServer->GetRelativeTime(); // in seconds
-#ifdef TASK_TIMING_ANALYSIS
-        mtsDouble executionTime = Toc - Tic;
-        ExecutionTimingHistory.push_back(executionTime);
-#endif
     }
     Write(TocId, Toc);
     // now increment the IndexWriter and set its Tick value
@@ -181,21 +191,52 @@ void mtsStateTable::Advance(void) {
     // move index reader to recently written data
     IndexReader = tmpIndex;
 
-    // Check if data collection event should be generated.
-    if (DataCollectionEventHandler) {
-        ++DataCollectionInfo.NewDataCount;
-
-        if (DataCollectionInfo.TriggerEnabled) {
-            // Check if the event for data collection should be triggered.
-            if (DataCollectionInfo.NewDataCount > DataCollectionInfo.EventTriggeringLimit) {
-                DataCollectionEventHandler->Execute();
-
-                DataCollectionInfo.NewDataCount = 0;
-                DataCollectionInfo.TriggerEnabled = false;
+    // data collection, test if we are currently collecting
+    if (!this->DataCollection.Collecting) {
+        // check if a start time is set and has arrived
+        if ((this->DataCollection.StartTime != 0.0)
+            && (this->Tic >= this->DataCollection.StartTime)) {
+            // start collection
+            CMN_LOG_CLASS_RUN_DEBUG << "Advance: data collection started at " << this->Tic << std::endl;
+            // reset start time
+            this->DataCollection.StartTime = 0.0;
+            this->DataCollection.BatchRange.First = this->GetIndexReader();
+            this->DataCollection.BatchCounter = 0;
+            this->DataCollection.Collecting = true;
+        }
+    }
+    // are we collecting?
+    if (this->DataCollection.Collecting) {
+        // check if a stop time is set and has arrived
+        if ((this->DataCollection.StopTime != 0.0)
+            && (this->Tic >= this->DataCollection.StopTime)) {
+            // stop collection
+            CMN_LOG_CLASS_RUN_DEBUG << "Advance: data collection stopped at " << this->Tic << std::endl;
+            // reset start time
+            this->DataCollection.StopTime = 0.0;
+            this->DataCollection.BatchRange.Last = this->GetIndexReader();
+            // request data actual for range collection
+            this->DataCollection.BatchReady(this->DataCollection.BatchRange);
+            // stop collecting
+            this->DataCollection.Collecting = false;
+        } else {
+            // still collecting
+            this->DataCollection.BatchCounter++;
+            // check if we have collected enough element for actual collection
+            if (this->DataCollection.BatchCounter >= this->DataCollection.BatchSize) {
+                CMN_LOG_CLASS_RUN_DEBUG << "Advance: " << this->DataCollection.BatchCounter
+                                        << " element(s) available for data collection" << std::endl;
+                this->DataCollection.BatchRange.Last = this->GetIndexReader();
+                // request data actual for range collection
+                this->DataCollection.BatchReady(this->DataCollection.BatchRange);
+                this->DataCollection.BatchCounter = 0;
+                this->DataCollection.BatchRange.First = this->GetIndexWriter();
             }
         }
     }
+
 }
+
 
 void mtsStateTable::ToStream(std::ostream & outputStream) const {
     outputStream << "State Table: " << this->GetName() << std::endl;
@@ -230,7 +271,7 @@ void mtsStateTable::ToStream(std::ostream & outputStream) const {
 }
 
 
-void mtsStateTable::Debug(std::ostream& out, unsigned int *listColumn, unsigned int number) const {
+void mtsStateTable::Debug(std::ostream & out, unsigned int * listColumn, unsigned int number) const {
     unsigned int i, j;
 
     for (i = 0; i < number; i++) {
@@ -315,6 +356,7 @@ void mtsStateTable::CSVWrite(std::ostream& out, mtsGenericObject ** listColumn, 
     delete [] listColumnId;
 }
 
+
 int mtsStateTable::GetStateVectorID(const std::string & dataName) const
 {
 	for (unsigned int i = 0; i < StateVectorDataNames.size(); i++) {
@@ -325,26 +367,93 @@ int mtsStateTable::GetStateVectorID(const std::string & dataName) const
     return -1;
 }
 
+
+#if 0 // adeguet1, this should be handled by an interface provided/required connect
 void mtsStateTable::SetDataCollectionEventHandler(mtsCollectorState * collector)
 {
     DataCollectionEventHandler = new mtsCommandVoidMethod<mtsCollectorState>(
         &mtsCollectorState::DataCollectionEventHandler, collector, collector->GetName());
-    
     CMN_ASSERT(DataCollectionEventHandler);
 }
+#endif
 
+#if 0
 void mtsStateTable::SetDataCollectionEventTriggeringRatio(const double eventTriggeringRatio)
 {
     DataCollectionInfo.EventTriggeringLimit = 
         (unsigned int) (HistoryLength * eventTriggeringRatio);
 }
+#endif
 
-void mtsStateTable::GenerateDataCollectionEvent() 
+
+void mtsStateTable::DataCollectionStart(const mtsDouble & delay)
 {
-    if (DataCollectionEventHandler) {
-        //
-        //  TODO: REPLACE THE FOLLOWING LINE WITH mtsVoidFunction.
-        //
-        DataCollectionEventHandler->Execute();
+    CMN_LOG_CLASS_RUN_DEBUG << "DataCollectionStart: received request to start data collection in "
+                            << delay.Data << " seconds" << std::endl;
+    const double startTime = this->Tic + delay.Data;
+    // if we are not yet collection
+    if (!this->DataCollection.Collecting) {
+        // is there is no collection scheduled
+        if (this->DataCollection.StartTime == 0) {
+            // set time to start
+            CMN_LOG_CLASS_RUN_DEBUG << "DataCollectionStart: data collection scheduled to start at "
+                                    << startTime << std::endl; 
+            this->DataCollection.StartTime = startTime;
+        } else {
+            // we are set to collect but later, advance the collection
+            // time.  this is a conservative approach, if we have 2
+            // different start times, we take the earliest of both to
+            // collect more data.
+            if (this->DataCollection.StartTime > startTime) {
+                CMN_LOG_CLASS_RUN_DEBUG << "DataCollectionStart: data collection scheduled to start at "
+                                        << startTime << " (moved forward)" << std::endl;
+                this->DataCollection.StartTime = startTime;
+            } else {
+                CMN_LOG_CLASS_RUN_WARNING << "DataCollectionStart: received a new request to start data collection after previous request, ignored"
+                                          << std::endl;
+            } 
+        }
+    } else {
+        // we are already collecting, see if a time to stop has been set
+        if (this->DataCollection.StopTime == 0) {
+            CMN_LOG_CLASS_RUN_WARNING << "DataCollectionStart: received request to start collection while still set to collect, ignored" << std::endl;
+        } else {
+            // make sure the request to start comes after the next scheduled stop
+            if (startTime <= this->DataCollection.StartTime) {
+                CMN_LOG_CLASS_RUN_WARNING << "DataCollectionStart: received request to start collection before next scheduled stop, ignored" << std::endl;
+            } else {
+                // this will schedule a start after the scheduled stop
+                CMN_LOG_CLASS_RUN_DEBUG << "DataCollectionStart: data collection scheduled to start at "
+                                        << startTime << " (after a scheduled stop)" << std::endl; 
+                this->DataCollection.StartTime = startTime;
+            }
+        }
+    }
+}
+
+
+void mtsStateTable::DataCollectionStop(const mtsDouble & delay)
+{
+    CMN_LOG_CLASS_RUN_DEBUG << "DataCollectionStop: received request to stop data collection in "
+                            << delay.Data << " seconds" << std::endl;
+    double stopTime = this->Tic + delay.Data;
+    // check is there is already a stop time scheduled
+    if (this->DataCollection.StopTime == 0) {
+        CMN_LOG_CLASS_RUN_DEBUG << "DataCollectionStop: data collection scheduled to stop at "
+                                << stopTime << std::endl; 
+        DataCollection.StopTime = stopTime;
+    } else {
+        // we are set to stop but earlier, delay the collection stop
+        // time.  this is a conservative approach, if we have 2
+        // different stop times, we take the latest of both to collect
+        // more data.
+        if (this->DataCollection.StopTime < stopTime) {
+            CMN_LOG_CLASS_RUN_DEBUG << "DataCollectionStop: data collection scheduled to stop at "
+                                    << stopTime << " (moved back)" << std::endl; 
+            DataCollection.StopTime = stopTime;
+        } else {
+            CMN_LOG_CLASS_RUN_WARNING << "DataCollectionStop: received a new request to stop data collection before previous request, ignored"
+                                      << std::endl;
+        }
     }
 }

@@ -44,8 +44,8 @@ CMN_IMPLEMENT_SERVICES(mtsCollectorState)
 //	Constructor, Destructor, and Initializer
 //-------------------------------------------------------
 mtsCollectorState::mtsCollectorState(const std::string & targetTaskName,
-                                     const mtsCollectorBase::CollectorLogFormat collectorLogFormat,
-                                     const std::string & targetStateTableName): 
+                                     const std::string & targetStateTableName,
+                                     const mtsCollectorBase::CollectorLogFormat collectorLogFormat):
     mtsCollectorBase(targetTaskName + "Collector" + targetStateTableName, collectorLogFormat),
     TargetTaskName(targetTaskName),
     TargetStateTableName(targetStateTableName),
@@ -53,10 +53,10 @@ mtsCollectorState::mtsCollectorState(const std::string & targetTaskName,
     TargetStateTable(0),
     Serializer(0)
 {
-    // Check if there is the specified task and the specified state table.    
+    // check if there is the specified task and the specified state table.
     TargetTask = TaskManager->GetTask(TargetTaskName);
     if (!TargetTask) {
-        cmnThrow(std::runtime_error("mtsCollectorState::Initialize(): No such task exists."));
+        cmnThrow(std::runtime_error("mtsCollectorState constructor: task \"" + TargetTaskName + "\" not found in task manager."));
     }
 
     Initialize();
@@ -64,8 +64,8 @@ mtsCollectorState::mtsCollectorState(const std::string & targetTaskName,
 
 
 mtsCollectorState::mtsCollectorState(mtsTask * targetTask,
-                                     const mtsCollectorBase::CollectorLogFormat collectorLogFormat,
-                                     const std::string & targetStateTableName):
+                                     const std::string & targetStateTableName,
+                                     const mtsCollectorBase::CollectorLogFormat collectorLogFormat):
     mtsCollectorBase(targetTask->GetName() + "Collector" + targetStateTableName, collectorLogFormat),
     TargetTaskName(TargetTask->GetName()),
     TargetStateTableName(targetStateTableName),
@@ -78,17 +78,15 @@ mtsCollectorState::mtsCollectorState(mtsTask * targetTask,
 
 mtsCollectorState::~mtsCollectorState()
 {
-    if (DataCollectionTriggerResetCommand) {
-        delete DataCollectionTriggerResetCommand;
-    }
     if (Serializer) {
         delete Serializer;
     }
 }
 
 
-void mtsCollectorState::Initialize()
+void mtsCollectorState::Initialize(void)
 {
+    CMN_LOG_CLASS_INIT_DEBUG << "Initialize: for \"" << this->GetName() << "\"" << std::endl;
     LastReadIndex = -1;
     TableHistoryLength = 0;
     SamplingInterval = 1;
@@ -97,23 +95,35 @@ void mtsCollectorState::Initialize()
     WaitingForTrigger = true;
     FirstRunningFlag = true;
 
-    TargetStateTable = TargetTask->GetStateTable(TargetStateTableName);
+    // this task needs a pointer on the state table to perform a fast copy
+    this->TargetStateTable = this->TargetTask->GetStateTable(this->TargetStateTableName);
     if (!TargetStateTable) {
-        cmnThrow(std::runtime_error("mtsCollectorState::Initialize(): No such state table exists."));
+        CMN_LOG_CLASS_INIT_ERROR << "Initialize: can not find state table \""
+                                 << TargetStateTableName << "\" in task \""
+                                 << TargetTaskName << "\" for collector \""
+                                 << this->GetName() << "\"" << std::endl;
+        cmnThrow(std::runtime_error("mtsCollectorState::Initialize(): can not find state table."));
     }
 
-    // Bind a command and an event.
-    // Command (Collector -> Target task) : Create a void command to enable the state table's data collection trigger.
-    SetDataCollectionTriggerResetCommand();
-
-    // Event (Target task -> Collector) : Create an event handler to wake up this thread.
-    TargetStateTable->SetDataCollectionEventHandler(this);
-
-    // Determine a ratio to generate a data collection event.
-    //
-    // TODO: to determine the size of a state table adaptively considering an adaptive scaling feature according to 'sizeStateTable' might be useful.
-    //
-    TargetStateTable->SetDataCollectionEventTriggeringRatio(0.3);
+    // add a required interface to the collector task to communicate with the task containing the state table
+    mtsRequiredInterface * requiredInterface = this->AddRequiredInterface("StateTable");
+    if (requiredInterface) {
+        // functions to stop/start collection
+        requiredInterface->AddFunction("StartCollection", StateTableStartCollection);
+        requiredInterface->AddFunction("StopCollection", StateTableStopCollection);
+        // event received when the state table fills up and needs to be collected
+        requiredInterface->AddEventHandlerWrite(&mtsCollectorState::BatchReadyHandler,
+                                                this,
+                                                "BatchReady");
+    } else {
+        CMN_LOG_CLASS_INIT_ERROR << "Initialize: unable to add required interface to communicate with state table for \""
+                                 << this->GetName() << "\"" << std::endl;
+        cmnThrow(std::runtime_error("mtsCollectorState::Initialize(): unable to add required interface"));
+    }
+    // add the task to the task manager and then connect the interface
+    this->TaskManager->AddTask(this);
+    this->TaskManager->Connect(this->GetName(), "StateTable",
+                               this->TargetTaskName, "StateTable" + this->TargetStateTableName);
 
     // Initialize serializer
     if (LogFormat == COLLECTOR_LOG_FORMAT_BINARY) {
@@ -134,50 +144,42 @@ void mtsCollectorState::Initialize()
     }
 }
 
-
-void mtsCollectorState::SetDataCollectionTriggerResetCommand()
-{
-    DataCollectionTriggerResetCommand =
-        new mtsCommandVoidMethod<mtsStateTable>(&mtsStateTable::ResetDataCollectionTrigger,
-                                                TargetStateTable,
-                                                TargetStateTable->GetName());
-}
-
-
-void mtsCollectorState::DataCollectionEventHandler()
-{
-    WaitingForTrigger = false;
-    Wakeup();
-}
-
-
 //-------------------------------------------------------
 //	Thread Management
 //-------------------------------------------------------
 void mtsCollectorState::Startup(void)
 {
-    DataCollectionTriggerResetCommand->Execute();
+    CMN_LOG_CLASS_INIT_DEBUG << "Startup() for collector \"" << this->GetName() << "\"" << std::endl;
 }
 
 
 void mtsCollectorState::Run(void)
 {
+    ProcessQueuedCommands();
+    ProcessQueuedEvents();
     mtsCollectorBase::Run();
-    
-    if (!IsRunnable) {
-        osaSleep(0.0);
-        return;
-    }
-    
-    DataCollectionTriggerResetCommand->Execute();
-    
-    WaitingForTrigger = true;
-    while (WaitingForTrigger) {
-        WaitForWakeup();
-    }
-    
-    // Collect data
-    Collect();
+}
+
+
+void mtsCollectorState::StartCollection(const mtsDouble & delay)
+{
+    // maybe check that the function is usable?
+    this->StateTableStartCollection(delay);
+}
+
+
+void mtsCollectorState::StopCollection(const mtsDouble & delay)
+{
+    // maybe check that the function is usable?
+    this->StateTableStopCollection(delay);
+}
+
+
+void mtsCollectorState::BatchReadyHandler(const mtsStateTable::IndexRange & range)
+{    
+    CMN_LOG_CLASS_RUN_DEBUG << "DataCollectionNeededHandler called for batch ["
+                            << range.First << ", " << range.Last << "]" << std::endl;
+    BatchCollect(range);
 }
 
 
@@ -257,25 +259,17 @@ bool mtsCollectorState::AddSignalElement(const std::string & signalName, const u
 //-------------------------------------------------------
 //	Collecting Data
 //-------------------------------------------------------
-void mtsCollectorState::Collect(void)
+void mtsCollectorState::BatchCollect(const mtsStateTable::IndexRange & range)
 {
     if (RegisteredSignalElements.size() == 0) return;
-
+    
     // If this method is called for the first time, print out some information.
     if (FirstRunningFlag) {
         PrintHeader(this->LogFormat);
     }
 
-    const unsigned int StartIndex = (LastReadIndex + 1) % TableHistoryLength;
-    {    
-        // state data validity check
-        if (TargetStateTable->Ticks[(StartIndex + 1) % TableHistoryLength] - 
-            TargetStateTable->Ticks[StartIndex] != 1) 
-            {
-                return;
-            }
-    }
-    const unsigned int EndIndex = TargetStateTable->IndexReader;
+    const unsigned int StartIndex = range.First.Ticks()  % TableHistoryLength;
+    const unsigned int EndIndex = range.Last.Ticks() % TableHistoryLength;
    
     if (StartIndex < EndIndex) {
         // normal case
@@ -326,9 +320,9 @@ void mtsCollectorState::PrintHeader(const CollectorLogFormat & logFormat)
         
         // All lines in the header should be preceded by '#' which represents 
         // the line contains header information rather than collected data.
-        outputStream << "#------------------------------------------------------------------------------" << std::endl;
-        outputStream << "# Task Name          : " << TargetTask->GetName() << std::endl;
-        outputStream << "# Date & Time        : " << currentDateTime << std::endl;
+        outputStream << "# Task name          : " << TargetTask->GetName() << std::endl;
+        outputStream << "# Table name         : " << TargetStateTable->GetName() << std::endl;
+        outputStream << "# Date & time        : " << currentDateTime << std::endl;
         outputStream << "# Total signal count : " << RegisteredSignalElements.size() << std::endl;
         outputStream << "# Data format        : ";
         if (logFormat == COLLECTOR_LOG_FORMAT_PLAIN_TEXT) {
@@ -339,7 +333,6 @@ void mtsCollectorState::PrintHeader(const CollectorLogFormat & logFormat)
             outputStream << "Binary";
         }
         outputStream << std::endl;
-        outputStream << "#------------------------------------------------------------------------------" << std::endl;
         outputStream << "#" << std::endl;
         
         outputStream << "# Ticks";
@@ -351,7 +344,6 @@ void mtsCollectorState::PrintHeader(const CollectorLogFormat & logFormat)
         }
 
         outputStream << std::endl;
-        outputStream << "#-------------------------------------------------------------------------------" << std::endl;
 
         // In case of using binary format
         if (logFormat == COLLECTOR_LOG_FORMAT_BINARY) {
@@ -442,14 +434,14 @@ bool mtsCollectorState::ConvertBinaryToText(const std::string sourceBinaryLogFil
     // Try to open a binary log file (source).
     std::ifstream inFile(sourceBinaryLogFileName.c_str(), std::ios::in | std::ios::binary | std::ios::ate);
     if (!inFile.is_open()) {
-        CMN_LOG_INIT_ERROR << "ConvertBinaryToText: unable to open binary log file: " << sourceBinaryLogFileName << std::endl;
+        CMN_LOG_INIT_ERROR << "Class mtsCollectorState: ConvertBinaryToText: unable to open binary log file: " << sourceBinaryLogFileName << std::endl;
         return false;
     }
 
     // Prepare output log file with plain text format.
     std::ofstream outFile(targetPlainTextLogFileName.c_str(), std::ios::out);
     if (!outFile.is_open()) {
-        CMN_LOG_INIT_ERROR << "ConvertBinaryToText: unable to create text log file: " << targetPlainTextLogFileName << std::endl;
+        CMN_LOG_INIT_ERROR << "Class mtsCollectorState: ConvertBinaryToText: unable to create text log file: " << targetPlainTextLogFileName << std::endl;
         inFile.close();
         return false;
     }
@@ -472,7 +464,7 @@ bool mtsCollectorState::ConvertBinaryToText(const std::string sourceBinaryLogFil
 
     // Check the end of header.
     if (!IsHeaderEndMark(line)) {
-        CMN_LOG_INIT_ERROR << "ConvertBinaryToText: corrupted header." << std::endl;
+        CMN_LOG_INIT_ERROR << "Class mtsCollectorState: ConvertBinaryToText: corrupted header." << std::endl;
         inFile.close();
         outFile.close();
         return false;
@@ -484,7 +476,7 @@ bool mtsCollectorState::ConvertBinaryToText(const std::string sourceBinaryLogFil
     cmnGenericObject * element = DeSerializer.DeSerialize();
     cmnULong * totalSignalCountObject = dynamic_cast<cmnULong *>(element);
     if (!totalSignalCountObject) {
-        CMN_LOG_INIT_ERROR << "ConvertBinaryToText: corrupted header." << std::endl;
+        CMN_LOG_INIT_ERROR << "Class mtsCollectorState: ConvertBinaryToText: corrupted header." << std::endl;
         inFile.close();
         outFile.close();
         return false;
@@ -498,7 +490,7 @@ bool mtsCollectorState::ConvertBinaryToText(const std::string sourceBinaryLogFil
     while (currentPos < inFileTotalSize) {
         element = DeSerializer.DeSerialize();
         if (!element) {
-            CMN_LOG_INIT_ERROR << "ConvertBinaryToText: unexpected termination: "
+            CMN_LOG_INIT_ERROR << "Class mtsCollectorState: ConvertBinaryToText: unexpected termination: "
                                << currentPos << " / " << inFileTotalSize << std::endl;
             break;
         }
@@ -514,7 +506,7 @@ bool mtsCollectorState::ConvertBinaryToText(const std::string sourceBinaryLogFil
         currentPos = inFile.tellg();
     }
     
-    CMN_LOG_INIT_VERBOSE << "ConvertBinaryToText: conversion completed: " << targetPlainTextLogFileName << std::endl;
+    CMN_LOG_INIT_VERBOSE << "Class mtsCollectorState: ConvertBinaryToText: conversion completed: " << targetPlainTextLogFileName << std::endl;
     
     outFile.close();
     inFile.close();

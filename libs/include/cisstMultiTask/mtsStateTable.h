@@ -27,20 +27,21 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsStateTable_h
 #define _mtsStateTable_h
 
+#include <cisstCommon/cmnGenericObject.h>
+#include <cisstCommon/cmnClassRegisterMacros.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsGenericObjectProxy.h>
 #include <cisstMultiTask/mtsStateArrayBase.h>
 #include <cisstMultiTask/mtsStateArray.h>
 #include <cisstMultiTask/mtsStateIndex.h>
 #include <cisstMultiTask/mtsHistory.h>
+#include <cisstMultiTask/mtsFunctionVoid.h>
 
 #include <vector>
 #include <iostream>
 
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
-
-#define MTS_STATE_TABLE_DEFAULT_NAME "StateTable"
 
 // Forward declaration
 class osaTimeServer;
@@ -63,32 +64,70 @@ typedef int mtsStateDataId;
   multiple readers. State Data Table is also refered as Data Table or
   State Table elsewhere in the documentation.
  */
-class CISST_EXPORT mtsStateTable {
+class CISST_EXPORT mtsStateTable: public cmnGenericObject {
+
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
     friend class mtsCollectorState;
+    friend class mtsTask;
     friend class mtsTaskTest;
     friend class mtsStateTableTest;
     friend class mtsCollectorBaseTest;
 
-    class DataCollectionInfoStruct {
+ public:
+    /*! Collection is performed by batches, this requires to save
+      the state indices for begin/end. */
+    class IndexRange: public mtsGenericObject
+    {
+        CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
     public:
-        /* True if data collection event can be triggered (false by default). */
-        bool TriggerEnabled;
+        mtsStateIndex First;
+        mtsStateIndex Last;
+    };
 
-        /*! Number of data that are newly generated and are to be fetched by the 
-        data collection tool. */
-        unsigned int NewDataCount;
+    /*! Data structure used for state table data collection.  Stores
+      information related to data collection as well as methods for
+      callbacks */
+    class DataCollectionInfo {
+    public:
+        /*! True if data collection event can be triggered, this state
+          table is currently collecting data (false by default). */
+        bool Collecting;
 
-        /*! If NewDataCount becomes greater than this vaule, an event for data collection
-            is generated. Though this value is redundant in some respect (because
-            EventTriggeringRatio is already defined), this value is kept for the purpose 
-            of efficiency. */
-        unsigned int EventTriggeringLimit;
+        /*! Delay in second before data collection should start.  This
+          is measured in seconds based on the state table Tic and Toc.
+          0 means that there is no defined start time. */
+        double StartTime;
 
-        DataCollectionInfoStruct() : TriggerEnabled(false), NewDataCount(0), EventTriggeringLimit(0)
+        /*! Delay in second before data collection should stop.  This
+          is measured in seconds based on the state table Tic and
+          Toc. 0 means that there is no defined stop time. */
+        double StopTime;
+
+        /*! Range for the batch */
+        mtsStateTable::IndexRange BatchRange;
+
+        /*! Maximum number of elements to collect in one batch. */
+        size_t BatchSize;
+
+        /*! Number of elements to be collected so far. */
+        size_t BatchCounter;
+
+        /*! Function used to trigger event sent to state collector
+          when the data collection is needed.  The payload is the
+          range defined by state indices. */ 
+        mtsFunctionWrite BatchReady;
+
+        /*! Default constructors */ 
+        inline DataCollectionInfo(void):
+            Collecting(false),
+            StartTime(0.0),
+            StopTime(0.0),
+            BatchSize(0),
+            BatchCounter(0)
         {}
 
-        ~DataCollectionInfoStruct() {}
+        inline ~DataCollectionInfo() {}
     };
 
 public:
@@ -229,23 +268,22 @@ public:
     double SumOfPeriods;
 
     /*! The average period over the last HistoryLength samples. */
-    double AvgPeriod;
+    double AveragePeriod;
 
     /*! The name of this state table. */
-    std::string StateTableName;
+    std::string Name;
 
-    /*! Data collection event handler. */
-    mtsCommandVoidBase * DataCollectionEventHandler;
-
-    DataCollectionInfoStruct DataCollectionInfo;
+    /*! Information used for the state table data collection, see also
+      mtsCollectorState. */
+    DataCollectionInfo DataCollection;
 
 	/*! Write specified data. */
-	bool Write(mtsStateDataId id, const mtsGenericObject &obj);
+	bool Write(mtsStateDataId id, const mtsGenericObject & obj);
 
  public:
     /*! Constructor. Constructs a state table with a default
       size of 256 rows. */
-    mtsStateTable(int size = 256, const std::string & stateTableName = MTS_STATE_TABLE_DEFAULT_NAME);
+    mtsStateTable(int size, const std::string & name);
     
     /*! Default destructor. */
     ~mtsStateTable();
@@ -315,20 +353,26 @@ public:
     */
     void Advance(void);
 
-    double GetTic(void) const { return Tic.Data; }
-    double GetToc(void) const { return Toc.Data; }
+    inline double GetTic(void) const {
+        return Tic.Data;
+    }
+    inline double GetToc(void) const {
+        return Toc.Data;
+    }
 
     /*! Return the moving average of the measured period (i.e., average of last
       HistoryLength values). */
-    double GetAveragePeriod(void) const { return AvgPeriod; }
+    inline double GetAveragePeriod(void) const {
+        return AveragePeriod;
+    }
 
     /*! For debugging, dumps the current data table to output
       stream. */
-    void ToStream(std::ostream& out) const;
+    void ToStream(std::ostream & out) const;
 
     /*! For debugging, dumps some values of the current data table to
       output stream. */
-    void Debug(std::ostream& out, unsigned int * listColumn, unsigned int number) const;
+    void Debug(std::ostream & out, unsigned int * listColumn, unsigned int number) const;
 
     /*! This method is to dump the state data table in the csv format, 
         allowing easy import into matlab.
@@ -336,10 +380,10 @@ public:
      By default print all rows, if nonZeroOnly == true then print only those rows which have a nonzero Ticks
      value i.e, those rows that have been written to at least once.
      */
-    void CSVWrite(std::ostream& out, bool nonZeroOnly = false);
-    void CSVWrite(std::ostream& out, unsigned int * listColumn, unsigned int number, bool nonZeroOnly = false);
+    void CSVWrite(std::ostream & out, bool nonZeroOnly = false);
+    void CSVWrite(std::ostream & out, unsigned int * listColumn, unsigned int number, bool nonZeroOnly = false);
 
-    void CSVWrite(std::ostream& out, mtsGenericObject ** listColumn, unsigned int number, bool nonZeroOnly = false);
+    void CSVWrite(std::ostream & out, mtsGenericObject ** listColumn, unsigned int number, bool nonZeroOnly = false);
     
     /*! A base column index of StateTable for a signal registered by user. */
     static int StateVectorBaseIDForUser;
@@ -353,22 +397,20 @@ public:
     //                          const unsigned int lastFetchIndex);
     
     /*! Return the name of this state table. */
-    const std::string GetName(void) const { return StateTableName; }
-    
-    /*! Enable data collection event trigger. */
-    void ResetDataCollectionTrigger(void) { 
-        DataCollectionInfo.TriggerEnabled = true;
-    }
-    
-    /*! Set an event handler to inform the data collector about the
-      event that data in this state table is populated. */
-    void SetDataCollectionEventHandler(mtsCollectorState * collector);
+    inline const std::string GetName(void) const { return Name; }
     
     /*! Determine a ratio to generate a data collection event. */
-    void SetDataCollectionEventTriggeringRatio(const double eventTriggeringRatio);
-    
-    void GenerateDataCollectionEvent(void);
+    void DataCollectionEventTriggeringRatio(const mtsDouble & eventTriggeringRatio);
+
+    /*! Methods used to control the data collection start/stop */
+    //@{
+    void DataCollectionStart(const mtsDouble & delay);
+    void DataCollectionStop(const mtsDouble & delay);
+    //@}
 };
+
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsStateTable);
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsStateTable::IndexRange);
 
 
 // overload mtsObjectName to provide the class name

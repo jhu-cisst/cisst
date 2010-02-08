@@ -165,13 +165,14 @@ bool mtsTask::WaitForState(TaskStateType desiredState, double timeout)
                 break;
             timeout = endTime - curTime;
          }
-        if (TaskState == desiredState)
+        if (TaskState == desiredState) {
             CMN_LOG_CLASS_INIT_VERBOSE << "WaitForState: waited for " << curTime-startTime
                                        << " seconds." << std::endl;
-        else
+        } else {
             CMN_LOG_CLASS_INIT_ERROR << "WaitForState: task " << this->GetName()
                                      << " did not reach state " << TaskStateName(desiredState)
                                      << ", current state = " << GetTaskStateName() << std::endl;
+        }
     }
     return (TaskState == desiredState);
 }
@@ -185,16 +186,14 @@ mtsTask::mtsTask(const std::string & name,
     TaskState(CONSTRUCTED),
     StateChange(),
     StateChangeSignal(),
-    StateTable(sizeStateTable),
+    StateTable(sizeStateTable, "StateTable"),
     StateTables("StateTables"),
     OverranPeriod(false),
     ThreadStartData(0),
     ReturnValue(0)
 {
     this->StateTables.SetOwner(*this);
-    this->StateTables.AddItem(this->StateTable.GetName(),
-                              &(this->StateTable),
-                              CMN_LOG_LOD_INIT_ERROR);
+    this->AddStateTable(&this->StateTable);
 }
 
 
@@ -216,27 +215,64 @@ void mtsTask::Kill(void)
     CMN_LOG_CLASS_INIT_VERBOSE << "Kill: " << this->GetName() << ", current state = " << GetTaskStateName() << std::endl;
 
     // Generate a data collection event not to lose any data when killing a thread.
-    StateTable.GenerateDataCollectionEvent();
+    // StateTable.GenerateDataCollectionEvent();
+    std::cerr << "This needs to be fixed, we need to collect whatever is left in the state table" << std::endl;
 
     // If the task has only been constructed (i.e., no thread created), then we just enter the FINISHED state directly.
     // Otherwise, we set the state to FINISHING and let the thread (RunInternal) set it to FINISHED.
-    if (TaskState == CONSTRUCTED)
+    if (TaskState == CONSTRUCTED) {
         ChangeState(FINISHED);
-    else
+    } else {
         ChangeState(FINISHING);
+    }
 }
 
 
 /********************* Methods to query the task state ****************/
 
-const char *mtsTask::TaskStateName(TaskStateType state) const
+const char * mtsTask::TaskStateName(TaskStateType state) const
 {
-    static const char * taskStateNames[] = { "constructed", "initializing", "ready", "active", "finishing", "finished" };
-    if ((state < CONSTRUCTED) || (state > FINISHED))
+    static const char * const taskStateNames[] = { "constructed", "initializing", "ready", "active", "finishing", "finished" };
+    if ((state < CONSTRUCTED) || (state > FINISHED)) {
         return "unknown";
-    else
+    } else {
         return taskStateNames[state];
+    }
 }
+
+
+bool mtsTask::AddStateTable(mtsStateTable * existingStateTable, bool addProvidedInterface) {
+    const std::string tableName = existingStateTable->GetName();
+    const std::string interfaceName = "StateTable" + tableName;
+    if (!this->StateTables.AddItem(tableName,
+                                   existingStateTable,
+                                   CMN_LOG_LOD_INIT_ERROR)) {
+        CMN_LOG_CLASS_INIT_ERROR << "AddStateTable: can not add state table \"" << tableName
+                                 << "\" to task \"" << this->GetName() << "\"" << std::endl;
+        return false;
+    }
+    if (addProvidedInterface) {
+        mtsProvidedInterface * providedInterface = this->AddProvidedInterface(interfaceName);
+        if (!providedInterface) {
+            CMN_LOG_CLASS_INIT_ERROR << "AddStateTable: can no add provided interface \"" << interfaceName
+                                 << "\" to task \"" << this->GetName() << "\"" << std::endl;
+            return false;
+        }
+        providedInterface->AddCommandWrite(&mtsStateTable::DataCollectionStart,
+                                           existingStateTable,
+                                           "StartCollection");
+        providedInterface->AddCommandWrite(&mtsStateTable::DataCollectionStop,
+                                           existingStateTable,
+                                           "StopCollection");
+        providedInterface->AddEventWrite(existingStateTable->DataCollection.BatchReady,
+                                         "BatchReady", mtsStateTable::IndexRange());
+    }
+    CMN_LOG_CLASS_INIT_DEBUG << "AddStateTable: added state table \"" << tableName 
+                             << "\" and corresponding interface \"" << interfaceName
+                             << "\" to task \"" << this->GetName() << "\"" << std::endl;
+    return true;
+}
+
 
 /********************* Methods to manage interfaces *******************/
     
@@ -261,8 +297,9 @@ mtsDeviceInterface * mtsTask::AddProvidedInterface(const std::string & newInterf
 
 bool mtsTask::WaitToStart(double timeout)
 {
-    if (TaskState == INITIALIZING)
+    if (TaskState == INITIALIZING) {
         WaitForState(READY, timeout);
+    }
     return (TaskState >= READY);
 }
 
@@ -273,8 +310,9 @@ bool mtsTask::WaitToTerminate(double timeout)
         CMN_LOG_CLASS_INIT_WARNING << "WaitToTerminate: not finishing task " << this->GetName() << std::endl;
         ret = false;
     }
-    else if (TaskState == FINISHING)
+    else if (TaskState == FINISHING) {
         ret = WaitForState(FINISHED, timeout);
+    }
 
     // If task state is finished, we wait for the thread to be destroyed
     if ((TaskState == FINISHED) && Thread.IsValid()) {

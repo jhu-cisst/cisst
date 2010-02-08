@@ -2,9 +2,9 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: mtsCollectorBase.h 2009-03-02 mjung5
+  $Id: mtsCollectorBase.h 2009-03-02 mjung5 $
 
-  Author(s):  Min Yang Jung
+  Author(s):  Min Yang Jung, Anton Deguet
   Created on: 2009-02-25
 
   (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
@@ -31,14 +31,14 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnUnits.h>
 #include <cisstCommon/cmnNamedMap.h>
 #include <cisstOSAbstraction/osaStopwatch.h>
-#include <cisstMultiTask/mtsTaskPeriodic.h>
+#include <cisstMultiTask/mtsTaskFromSignal.h>
 #include <cisstMultiTask/mtsTaskManager.h>
 #include <cisstMultiTask/mtsHistory.h>
 
 #include <string>
 #include <stdexcept>
 
-// If the following line is commented out, C2491 error is generated.
+// Always include last
 #include <cisstMultiTask/mtsExport.h>
 
 /*!
@@ -47,7 +47,7 @@ http://www.cisst.org/cisst/license.txt.
 This class provides a way to collect data from state table in real-time.
 Collected data can be either saved as a log file or displayed in GUI like an oscilloscope.
 */
-class CISST_EXPORT mtsCollectorBase : public mtsTaskContinuous
+class CISST_EXPORT mtsCollectorBase: public mtsTaskFromSignal
 {
     friend class mtsCollectorBaseTest;
 
@@ -92,17 +92,6 @@ protected:
     typedef cmnNamedMap<SignalMapType> TaskMapType;
     TaskMapType TaskMap;
 
-    /*! If this flag is set, start time is subtracted from each time measurement. */
-    bool TimeOffsetToZero;    
-
-    /*! A child collector class can run only if this flag is set. */
-    bool IsRunnable;
-
-    /*! For delayed start(void) end stop(void) */
-    double DelayedStart;
-    double DelayedStop;
-    osaStopwatch Stopwatch;
-
     /*! Static member variables */
     static unsigned int CollectorCount;
     static mtsTaskManager * TaskManager;
@@ -110,16 +99,16 @@ protected:
     /*! Default control interface and methods used for the provided commands. */
     mtsProvidedInterface * ControlInterface;
     inline void StartCollectionCommand(void) {
-        this->StartCollection(0.0);
+        this->StartCollection(mtsDouble(0.0));
     }
-    inline void StartCollectionDelayedCommand(const mtsDouble & delayedStartInSeconds) {
-        this->StartCollection(delayedStartInSeconds.Data);
+    inline void StartCollectionInCommand(const mtsDouble & delayInSeconds) {
+        this->StartCollection(delayInSeconds);
     }
     inline void StopCollectionCommand(void) {
-        this->StopCollection(0.0);
+        this->StopCollection(mtsDouble(0.0));
     }
-    inline void StopCollectionDelayedCommand(const mtsDouble & delayedStopInSeconds) {
-        this->StopCollection(delayedStopInSeconds.Data);
+    inline void StopCollectionInCommand(const mtsDouble & delayInSeconds) {
+        this->StopCollection(delayInSeconds);
     }
 
     /*! Initialize this collector instance */
@@ -134,9 +123,6 @@ protected:
     /*! Set some initial values */
     virtual void Startup(void) = 0;
 
-    /*! Collect data */
-    virtual void Collect(void) = 0;
-
     /*! Performed periodically */
     virtual void Run(void);
 
@@ -147,11 +133,11 @@ public:
 
     /*! Begin collecting data. Data collection will begin after delayedStart 
     second(s). If it is zero (by default), it means 'start now'. */
-    void StartCollection(const double delayedStartInSeconds = 0.0);
+    virtual void StartCollection(const mtsDouble & delayInSeconds) = 0;
 
     /*! End collecting data. Data collection will end after delayedStop
     second(s). If it is zero (by default), it means 'stop now'. */
-    void StopCollection(const double delayedStopInSeconds = 0.0);
+    virtual void StopCollection(const mtsDouble & delayInSeconds) = 0;
 
     //---------------------- Miscellaneous functions ------------------------//
     inline static unsigned int GetCollectorCount(void) { return CollectorCount; }
