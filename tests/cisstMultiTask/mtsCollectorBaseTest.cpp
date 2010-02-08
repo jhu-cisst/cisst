@@ -31,9 +31,9 @@ http://www.cisst.org/cisst/license.txt.
 CMN_IMPLEMENT_SERVICES(mtsCollectorBaseTestTask);
 
 //-----------------------------------------------------------------------------
-mtsCollectorBaseTestTask::mtsCollectorBaseTestTask(const std::string & collectorName, 
-                                                   double period) :
-    mtsTaskPeriodic(collectorName, period, false, 5000)
+mtsCollectorBaseTestTask::mtsCollectorBaseTestTask(const std::string & collectorName)
+    :
+    mtsTaskFromSignal(collectorName, 5000)
 {
 }
 

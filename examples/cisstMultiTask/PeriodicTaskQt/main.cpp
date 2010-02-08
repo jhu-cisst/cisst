@@ -40,6 +40,8 @@ int main(int argc, char *argv[])
     // set the log level of detail on select tasks
     cmnClassRegister::SetLoD("sineTask", CMN_LOG_LOD_VERY_VERBOSE);
     cmnClassRegister::SetLoD("displayQDevice", CMN_LOG_LOD_VERY_VERBOSE);
+    cmnClassRegister::SetLoD("mtsCollectorState", CMN_LOG_LOD_VERY_VERBOSE);
+    cmnClassRegister::SetLoD("mtsStateTable", CMN_LOG_LOD_VERY_VERBOSE);
 
     // create a Qt user interface
     QApplication application(argc, argv);
@@ -60,9 +62,9 @@ int main(int argc, char *argv[])
     // add data collection for sineTask state table
     mtsCollectorState * collector =
         new mtsCollectorState("SIN",
+                              sine->GetDefaultStateTableName(),
                               mtsCollectorBase::COLLECTOR_LOG_FORMAT_CSV);
     collector->AddSignal("SineData");
-    taskManager->AddTask(collector);
     taskManager->Connect("DISP", "DataCollection",
                          collector->GetName(), "Control");
 

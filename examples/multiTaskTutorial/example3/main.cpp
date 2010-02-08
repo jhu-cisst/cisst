@@ -57,7 +57,9 @@ int main(void)
 
     // collect all state data in csv file
     mtsCollectorState * collector =
-        new mtsCollectorState("RobotControl", mtsCollectorBase::COLLECTOR_LOG_FORMAT_CSV);
+        new mtsCollectorState("RobotControl",
+                              robotTask->GetDefaultStateTableName(),
+                              mtsCollectorBase::COLLECTOR_LOG_FORMAT_CSV);
     collector->AddSignal(); // all signals
     taskManager->AddTask(collector);
 

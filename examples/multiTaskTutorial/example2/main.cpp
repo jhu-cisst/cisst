@@ -30,8 +30,8 @@ int main(void)
         choice = cmnGetChar();
     }
     // create our two tasks
-    const double PeriodSine = 1 * cmn_ms; // in milliseconds
-    const double PeriodDisplay = 50 * cmn_ms; // in milliseconds
+    const double PeriodSine = 1.0 * cmn_ms; // in milliseconds
+    const double PeriodDisplay = 50.0 * cmn_ms; // in milliseconds
     // create the task manager and the tasks/devices
     mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
     sineTask * sineTaskObject = new sineTask("SIN", PeriodSine);
@@ -53,14 +53,17 @@ int main(void)
     if (choice == 'b') {
         collector =
             new mtsCollectorState("SIN",
+                                  sineTaskObject->GetDefaultStateTableName(),
                                   mtsCollectorBase::COLLECTOR_LOG_FORMAT_BINARY);
     } else if (choice == 't') {
         collector =
             new mtsCollectorState("SIN",
+                                  sineTaskObject->GetDefaultStateTableName(),
                                   mtsCollectorBase::COLLECTOR_LOG_FORMAT_PLAIN_TEXT);
     } else if (choice == 'c') {
         collector =
             new mtsCollectorState("SIN",
+                                  sineTaskObject->GetDefaultStateTableName(),
                                   mtsCollectorBase::COLLECTOR_LOG_FORMAT_CSV);
     }
     // specify which signal (aka state data) to collect

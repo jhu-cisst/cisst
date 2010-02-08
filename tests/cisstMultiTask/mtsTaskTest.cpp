@@ -55,7 +55,7 @@ void mtsTaskTest::TestGetStateVectorID(void)
 		"Data2" };	
 	
 	mtsTaskTestTask task("task", 10 * cmn_ms);
-    mtsStateTable StateTable;
+    mtsStateTable StateTable(20, "Test");
 	
 	CPPUNIT_ASSERT(default_column_count == StateTable.StateVectorDataNames.size());
 	{

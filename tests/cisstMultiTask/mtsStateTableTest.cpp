@@ -161,7 +161,7 @@ void mtsTaskTest::TestGetSignalCount(void)
 //-----------------------------------------------------------------------------
 void mtsStateTableTest::TestGetStateVectorID(void)
 {
-    mtsStateTable StateTable;
+    mtsStateTable StateTable(20, "Test");
 
     const int default_column_count = mtsStateTable::StateVectorBaseIDForUser;
 	const int user_column_count = 2;	// Data1, Data2

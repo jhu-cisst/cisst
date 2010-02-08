@@ -27,14 +27,13 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <string>
 
-class mtsCollectorBaseTestTask : public mtsTaskPeriodic {
+class mtsCollectorBaseTestTask : public mtsTaskFromSignal {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 5);
 protected:    
     mtsStateData<mtsDouble> TestData;
 
 public:
-    mtsCollectorBaseTestTask(const std::string & collectorName, 
-                             double period = 10 * cmn_ms);
+    mtsCollectorBaseTestTask(const std::string & collectorName);
     virtual ~mtsCollectorBaseTestTask() {}
 
     // implementation of four methods that are pure virtual in mtsTask
