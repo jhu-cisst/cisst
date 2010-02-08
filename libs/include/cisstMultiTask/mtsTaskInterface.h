@@ -69,10 +69,10 @@ class CISST_EXPORT mtsTaskInterface: public mtsDeviceInterface {
     protected:
         mtsMailBox * MailBox;
     public:
-        inline ThreadResources(const std::string name, unsigned int size):
+        inline ThreadResources(const std::string name, unsigned int size, mtsCommandVoidBase * postCommandQueuedCommand):
             mtsDeviceInterface(name, 0)
         {
-            MailBox = new mtsMailBox(name, size);
+            MailBox = new mtsMailBox(name, size, postCommandQueuedCommand);
         }
         inline ~ThreadResources() {}
         inline mtsMailBox * GetMailBox(void) {
@@ -127,6 +127,9 @@ public:
 
 private:
 
+    /*! Post command queued command */
+    mtsCommandVoidBase * PostCommandQueuedCommand;
+
     /*! Semaphore used internally */
     osaMutex Mutex;
 
@@ -141,7 +144,12 @@ private:
     // virtual unsigned int AllocateResourcesForCurrentThread(void);
     unsigned int AllocateResources(const std::string & userName);
  
-    mtsTaskInterface(const std::string & name, mtsTask * task);
+    /*! Constructor with a post queued command.  This constructor is
+      used by mtsTaskFromSignal to provide the command used everytime
+      one uses a queued command of this interface (write and void
+      commands).  The post command queued command in this case perform
+      a wakeup (signal) on the task's thread. */
+    mtsTaskInterface(const std::string & name, mtsTask * task, mtsCommandVoidBase * postCommandQueuedCommand = 0);
 
     /*! Default Destructor. */
     virtual ~mtsTaskInterface();
@@ -211,7 +219,7 @@ inline mtsCommandVoidBase * mtsTaskInterface::AddCommandVoid(void (__classType::
                 } else {
                     delete command;
                     delete queuedCommand;
-                    CMN_LOG_CLASS_INIT_ERROR << "AddCommandVoid: unable to add command \""
+                    CMN_LOG_CLASS_INIT_ERROR << "AddCommandVoid: unable to add queued command \""
                                              << commandName << "\"" << std::endl;
                     return 0;
                 }

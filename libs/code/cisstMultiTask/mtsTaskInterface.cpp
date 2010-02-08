@@ -34,16 +34,17 @@ CMN_IMPLEMENT_SERVICES(mtsTaskInterface)
 CMN_IMPLEMENT_SERVICES(mtsTaskInterface::ThreadResources)
 
 
-mtsTaskInterface::mtsTaskInterface(const std::string & name, mtsTask * task):
+mtsTaskInterface::mtsTaskInterface(const std::string & name, mtsTask * task,
+                                   mtsCommandVoidBase * postCommandQueuedCommand):
     BaseType(name, task),
     CommandsQueuedVoid("CommandsQueuedVoid"),
     CommandsQueuedWrite("CommandsQueuedWrite"),
+    PostCommandQueuedCommand(postCommandQueuedCommand),
     Mutex()
 {
     CommandsQueuedVoid.SetOwner(*this);
     CommandsQueuedWrite.SetOwner(*this);
 }
-
 
 
 mtsTaskInterface::~mtsTaskInterface() {
@@ -76,7 +77,7 @@ unsigned int mtsTaskInterface::ProcessMailBoxes(void)
     for (;
          iterator != end;
          ++iterator) {
-        mtsMailBox *mailBox = iterator->second->GetMailBox();
+        mtsMailBox * mailBox = iterator->second->GetMailBox();
         while (mailBox->ExecuteNext()) {
             numberOfCommands++;
         }
@@ -198,7 +199,8 @@ unsigned int mtsTaskInterface::AllocateResources(const std::string & userName)
     std::stringstream mailBoxName;
     mailBoxName << this->GetName() << "-" << userId << "-" << userName;
     ThreadResources * newThreadResources = new ThreadResources(mailBoxName.str(),
-                                                               DEFAULT_ARG_BUFFER_LEN);
+                                                               DEFAULT_ARG_BUFFER_LEN,
+                                                               this->PostCommandQueuedCommand);
     CMN_LOG_CLASS_INIT_VERBOSE << "AllocateResources: created mailbox " << newThreadResources->GetMailBox()->GetName()
                                << std::endl;
     newThreadResources->CloneCommands(*this);
@@ -207,3 +209,4 @@ unsigned int mtsTaskInterface::AllocateResources(const std::string & userName)
     Mutex.Unlock();
     return userId;
 }
+

@@ -61,24 +61,29 @@ mtsDeviceInterface * mtsDevice::GetProvidedInterface(const std::string & interfa
     return ProvidedInterfaces.GetItem(interfaceName, CMN_LOG_LOD_INIT_ERROR);
 }
 
-
+#if 0 // adeguet1, is this needed, dangerous now when using mtsTaskFromSignal ...
 mtsRequiredInterface * mtsDevice::AddRequiredInterface(const std::string & requiredInterfaceName,
-                                                    mtsRequiredInterface *requiredInterface) {
-    return RequiredInterfaces.AddItem(requiredInterfaceName, requiredInterface)?requiredInterface:0;
+                                                       mtsRequiredInterface * requiredInterface) {
+    return RequiredInterfaces.AddItem(requiredInterfaceName, requiredInterface) ? requiredInterface : 0;
 }
-
+#endif
 
 mtsRequiredInterface * mtsDevice::AddRequiredInterface(const std::string & requiredInterfaceName) {
     // PK: move DEFAULT_EVENT_QUEUE_LEN somewhere else (not in mtsTaskInterface)
-    mtsMailBox * mbox = new mtsMailBox(requiredInterfaceName + "Events", mtsTaskInterface::DEFAULT_EVENT_QUEUE_LEN);
-    mtsRequiredInterface * requiredInterface = new mtsRequiredInterface(requiredInterfaceName, mbox);
-    if (mbox && requiredInterface) {
+    mtsMailBox * mailBox = new mtsMailBox(requiredInterfaceName + "Events", mtsTaskInterface::DEFAULT_EVENT_QUEUE_LEN);
+    mtsRequiredInterface * requiredInterface = new mtsRequiredInterface(requiredInterfaceName, mailBox);
+    if (mailBox && requiredInterface) {
         if (RequiredInterfaces.AddItem(requiredInterfaceName, requiredInterface)) {
             return requiredInterface;
         }
         CMN_LOG_CLASS_INIT_ERROR << "AddRequiredInterface: unable to add interface \""
                                  << requiredInterfaceName << "\"" << std::endl;
-        delete requiredInterface;
+        if (requiredInterface) {
+            delete requiredInterface;
+        }
+        if (mailBox) {
+            delete mailBox;
+        }
         return 0;
     }
     CMN_LOG_CLASS_INIT_ERROR << "AddRequiredInterface: unable to create interface or mailbox for \""

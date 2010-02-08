@@ -38,11 +38,13 @@ class CISST_EXPORT mtsMailBox
 {
     mtsQueue<mtsCommandBase *> CommandQueue;
     std::string Name;  // for debugging output
+    mtsCommandVoidBase * PostCommandQueuedCommand; // command to execute a command is queued
 
 public:
-    inline mtsMailBox(const std::string & name, unsigned int size):
+    inline mtsMailBox(const std::string & name, unsigned int size, mtsCommandVoidBase * postCommandQueuedCommand = 0):
         CommandQueue(size, 0),
-        Name(name)
+        Name(name),
+        PostCommandQueuedCommand(postCommandQueuedCommand)
     {}
 
 
@@ -55,7 +57,12 @@ public:
 
 
     inline bool Write(mtsCommandBase * command) {
-        return (CommandQueue.Put(command) != 0);
+        bool result;
+        result = (CommandQueue.Put(command) != 0);
+        if (this->PostCommandQueuedCommand) {
+            this->PostCommandQueuedCommand->Execute();
+        }
+        return result;
     }
 
     
