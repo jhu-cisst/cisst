@@ -53,6 +53,7 @@ SET(SOURCE_FILES
     mtsTaskContinuous.cpp
     mtsTaskPeriodic.cpp
     mtsTaskFromCallback.cpp
+    mtsTaskFromSignal.cpp
 
     mtsTaskManager.cpp # to be deleted
     
@@ -117,6 +118,7 @@ SET(HEADER_FILES
     mtsTaskContinuous.h
     mtsTaskPeriodic.h
     mtsTaskFromCallback.h
+    mtsTaskFromSignal.h
     
     mtsTaskManager.h    # to be deleted
         

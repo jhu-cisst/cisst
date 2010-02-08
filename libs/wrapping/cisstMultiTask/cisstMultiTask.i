@@ -188,6 +188,7 @@ typedef mtsCommandQualifiedReadOrWriteBase<const mtsGenericObject> mtsCommandQua
 %include "cisstMultiTask/mtsTask.h"
 %include "cisstMultiTask/mtsTaskContinuous.h"
 %include "cisstMultiTask/mtsTaskPeriodic.h"
+%include "cisstMultiTask/mtsTaskFromSignal.h"
 %include "cisstMultiTask/mtsTaskInterface.h"
 
 %include "cisstMultiTask/mtsRequiredInterface.h"
