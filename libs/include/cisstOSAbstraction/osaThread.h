@@ -199,7 +199,7 @@ public:
 
     /*! Creates a new thread that will execute the specified function, with no parameters. */
     void Create(void * (*threadStart)(void),
-                const char *name = 0, int priority = 0, int policy = SCHED_FIFO)
+                const char * name = 0, int priority = 0, int policy = SCHED_FIFO)
     {
         Priority = priority;
         Policy = policy;
@@ -207,10 +207,10 @@ public:
     }
 
     /*! Creates a new thread that will execute the specified function, taking a single parameter. */
-    template<class _userDataType>
+    template <class _userDataType>
     void Create(void * (*threadStart)(_userDataType),
                 _userDataType userData = _userDataType(),
-                const char *name = 0, int priority = 0, int policy = SCHED_FIFO)
+                const char * name = 0, int priority = 0, int policy = SCHED_FIFO)
     {
         Priority = priority;
         Policy = policy;
@@ -220,10 +220,10 @@ public:
     /*! Creates a new thread that will execute the specified class member function.
         Note that the object is copied to the heap so it remains valid, even if the
         original object is destroyed. */
-    template<class _entryType, class _userDataType>
-    void Create(_entryType* obj, void * (_entryType::*threadStart)(_userDataType),
+    template <class _entryType, class _userDataType>
+    void Create(_entryType * obj, void * (_entryType::*threadStart)(_userDataType),
                 _userDataType userData = _userDataType(),
-                const char *name = 0, int priority = 0, int policy = SCHED_FIFO)
+                const char * name = 0, int priority = 0, int policy = SCHED_FIFO)
     {
         Priority = priority;
         Policy = policy;
@@ -237,7 +237,7 @@ public:
 
     /*! Initialize the thread object so that it refers to the calling thread, rather than
         creating a new thread. This allows existing threads to intermix with newly created threads. */
-    void CreateFromCurrentThread(const char *name = 0, int priority = 0, int policy = SCHED_FIFO)
+    void CreateFromCurrentThread(const char * name = 0, int priority = 0, int policy = SCHED_FIFO)
     {
         Priority = priority;
         Policy = policy;
@@ -255,16 +255,16 @@ public:
     void Wait(void);
 
     /*! Wait for thread to receive a "wakeup" signal/event. */
-    void WaitForWakeup() { Signal.Wait(); }
+    inline void WaitForWakeup(void) { Signal.Wait(); }
 
     /*! Signal the thread to wake up. */
-    void Wakeup() { Signal.Raise(); }
+    inline void Wakeup(void) { Signal.Raise(); }
 
     /*! Return the thread name. */
-    const char* GetName() const { return Name; }
+    inline const char * GetName(void) const { return Name; }
 
     /*! Return the thread id. */
-    osaThreadId GetId(void) const {return ThreadId; }
+    inline osaThreadId GetId(void) const { return ThreadId; }
 
     /*! Get the OS *independent* priority of the thread. */
     PriorityType GetPriority(void) const;
@@ -293,7 +293,7 @@ public:
     void Sleep(double timeInSeconds);
 
     /*! Returns whether the thread exists (is valid). */
-    bool IsValid(void) const { return Valid; }
+    inline bool IsValid(void) const { return Valid; }
 
 };
 
