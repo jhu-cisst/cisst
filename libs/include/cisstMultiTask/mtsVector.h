@@ -61,7 +61,8 @@ public:
     /*! Assignment from vector base class.  This operator assign the
       data from one vector to another, it doesn't replace the object
       itself, i.e. it doesn't release and allocate any new memory. */
-    inline ThisType & operator=(const VectorType & data) {
+    inline ThisType & operator = (const VectorType & data) {
+        VectorType::SetSize(data.size());
         VectorType::Assign(data);
         return *this;
     }
