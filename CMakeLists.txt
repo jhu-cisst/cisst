@@ -27,7 +27,17 @@ FUNCTION(CISST_ADD_TO_INTERNAL list newElements)
   SET(${list} ${TEMP_${list}} CACHE INTERNAL "CISST Internal variable")
 ENDFUNCTION(CISST_ADD_TO_INTERNAL)
 
-
+# The cisst Internal values/cache tend to accumulate junk, option to clean them
+option(CISST_CLEAR_INTERNALS "Clear cisst cache" OFF)
+mark_as_advanced(FORCE CISST_CLEAR_INTERNALS)
+if(CISST_CLEAR_INTERNALS)
+  set(CISST_ADDITIONAL_INCLUDE_DIRECTORIES "")
+  set(CISST_ADDITIONAL_LIBRARIES "")
+  set(CISST_ADDITIONAL_LINK_DIRECTORIES "")
+  set(CISST_ADDITIONAL_PACKAGES "")
+  set(CISST_ADDITIONAL_CMAKE_FILES "")
+  set(CISST_CLEAR_INTERNALS OFF CACHE BOOL "Clear cisst cache" FORCE)
+endif(CISST_CLEAR_INTERNALS)
 
 # Output directories.
 SET(LIBRARY_OUTPUT_PATH ${cisst_BINARY_DIR}/libs/lib)
