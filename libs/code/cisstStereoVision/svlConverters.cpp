@@ -285,11 +285,14 @@ void svlConverter::RGB24toGray16(unsigned char* input, unsigned short* output, c
 void svlConverter::Gray8toRGB24(unsigned char* input, unsigned char* output, const unsigned int pixelcount)
 {
     unsigned char chval;
+    // Process in reverse order, to enable in-place conversion
+    input += pixelcount - 1;
+    output += pixelcount * 3 - 1;
     for (unsigned int i = 0; i < pixelcount; i ++) {
-        chval   = *input; input ++;
-        *output =  chval; output ++;
-        *output =  chval; output ++;
-        *output =  chval; output ++;
+        chval   = *input; input --;
+        *output =  chval; output --;
+        *output =  chval; output --;
+        *output =  chval; output --;
     }
 }
 
