@@ -133,7 +133,7 @@ inline bool IsTypeUWord<unsigned short>(unsigned short CMN_UNUSED(val)) { return
 // Stream data structure definitions //
 ///////////////////////////////////////
 
-class CISST_EXPORT svlSample
+class CISST_EXPORT svlSample : public cmnGenericObject
 {
 public:
     svlSample();
@@ -146,6 +146,8 @@ public:
     virtual bool IsInitialized();
     virtual void SerializeRaw(std::ostream & outputStream) const = 0;
     virtual void DeSerializeRaw(std::istream & inputStream) = 0;
+
+public:
     void SetTimestamp(double ts);
     double GetTimestamp() const;
     void SetModified(bool modified);
@@ -191,14 +193,13 @@ public:
 
 
 template <class _ValueType, unsigned int _DataChannels, unsigned int _VideoChannels>
-class CISST_EXPORT svlSampleImageCustom : public svlSampleImageBase, public cmnGenericObject
+class CISST_EXPORT svlSampleImageCustom : public svlSampleImageBase
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
 public:
     svlSampleImageCustom() :
         svlSampleImageBase(),
-        cmnGenericObject(),
         OwnData(true)
     {
         for (unsigned int vch = 0; vch < _VideoChannels; vch ++) {
@@ -214,7 +215,6 @@ public:
 
     svlSampleImageCustom(bool owndata) :
         svlSampleImageBase(),
-        cmnGenericObject(),
         OwnData(owndata)
     {
         for (unsigned int vch = 0; vch < _VideoChannels; vch ++) {
@@ -541,7 +541,7 @@ CMN_DECLARE_SERVICES_INSTANTIATION(svlSampleImageMonoFloat)
 CMN_DECLARE_SERVICES_INSTANTIATION(svlSampleImage3DMap)
 
 
-class CISST_EXPORT svlSampleRigidXform : public svlSample, public cmnGenericObject
+class CISST_EXPORT svlSampleRigidXform : public svlSample
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
@@ -565,7 +565,7 @@ public:
 CMN_DECLARE_SERVICES_INSTANTIATION(svlSampleRigidXform)
 
 
-class CISST_EXPORT svlSamplePointCloud : public svlSample, public cmnGenericObject
+class CISST_EXPORT svlSamplePointCloud : public svlSample
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 

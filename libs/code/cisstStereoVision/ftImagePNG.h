@@ -32,6 +32,7 @@ class ftImagePNG : public svlImageCodec, public cmnGenericObject
 
 public:
     ftImagePNG();
+    virtual ~ftImagePNG();
 
     virtual int ReadDimensions(const std::string &filename, unsigned int &width, unsigned int &height);
     virtual int ReadDimensions(std::istream &stream, unsigned int &width, unsigned int &height);
@@ -44,6 +45,12 @@ public:
     virtual int Write(const svlSampleImageBase &image, const unsigned int videoch, const std::string &filename, const int compression = -1);
     virtual int Write(const svlSampleImageBase &image, const unsigned int videoch, std::ostream &stream, const int compression = -1);
     virtual int Write(const svlSampleImageBase &image, const unsigned int videoch, unsigned char *buffer, size_t &buffersize, const int compression = -1);
+
+protected:
+    unsigned char* pngBuffer;
+    unsigned char** pngRows;
+    size_t pngBufferSize;
+    size_t pngRowsSize;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(ftImagePNG)

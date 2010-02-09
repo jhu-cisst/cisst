@@ -229,6 +229,9 @@ int ftImageJPEG::ReadDimensions(std::istream &stream, unsigned int &width, unsig
     source_manager.pub.next_input_byte = 0;
     source_manager.pub.bytes_in_buffer = 0;
 
+    width = 0;
+    height = 0;
+
     // Setup error handling: failure without crashing
     jpeg_decompress_struct cinfo;
     JPEG_custom_error_mgr jerr;
@@ -236,7 +239,7 @@ int ftImageJPEG::ReadDimensions(std::istream &stream, unsigned int &width, unsig
     jerr.pub.error_exit = JPEG_error_exit_proc;
     if (setjmp(jerr.setjmp_buffer)) {
         jpeg_destroy_decompress(&cinfo);
-        return SVL_FAIL;
+        return SVL_OK;
     }
 
     // Setup decompression and source manager
@@ -271,6 +274,9 @@ int ftImageJPEG::ReadDimensions(const unsigned char *buffer, const size_t buffer
     source_manager.pub.next_input_byte = buffer;
     source_manager.pub.bytes_in_buffer = buffersize;
 
+    width = 0;
+    height = 0;
+
     // Setup error handling: failure without crashing
     jpeg_decompress_struct cinfo;
     JPEG_custom_error_mgr jerr;
@@ -278,7 +284,7 @@ int ftImageJPEG::ReadDimensions(const unsigned char *buffer, const size_t buffer
     jerr.pub.error_exit = JPEG_error_exit_proc;
     if (setjmp(jerr.setjmp_buffer)) {
         jpeg_destroy_decompress(&cinfo);
-        return SVL_FAIL;
+        return SVL_OK;
     }
 
     // Setup decompression and source manager

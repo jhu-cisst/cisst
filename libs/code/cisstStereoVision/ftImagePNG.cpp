@@ -25,111 +25,37 @@ http://www.cisst.org/cisst/license.txt.
 #include "png.h"
 
 
-typedef struct _PNGTargetMemInfo {
+const static int PNG_DEFAULT_QUALITY = 4;
+
+/*****************************************/
+/*** Callbacks for direct memory write ***/
+/*****************************************/
+
+typedef struct _PNG_target_mem_info {
     unsigned char* ptr;
     unsigned int size;
     unsigned int comprsize;
-} PNGTargetMemInfo;
+    bool error;
+} PNG_target_mem_info;
 
 void PNG_user_write_data_proc(png_structp png_ptr, png_bytep data, png_size_t length)
 {
     if (png_ptr && png_ptr->io_ptr && data && length) {
-        PNGTargetMemInfo* targetinfo = reinterpret_cast<PNGTargetMemInfo*>(png_ptr->io_ptr);
-        if (targetinfo->ptr && targetinfo->size && (targetinfo->size - targetinfo->comprsize) >= length) {
+        PNG_target_mem_info* targetinfo = reinterpret_cast<PNG_target_mem_info*>(png_ptr->io_ptr);
+        if (!targetinfo->error && targetinfo->ptr && targetinfo->size && (targetinfo->size - targetinfo->comprsize) >= length) {
             memcpy(targetinfo->ptr + targetinfo->comprsize, data, length);
             targetinfo->comprsize += length;
+            targetinfo->error = false;
             return;
         }
+        targetinfo->error = true;
     }
-
-    png_error(png_ptr, "PNG_user_write_data_proc: Write error");
+    // TO DO: Some 'Fatal Error' handling
 }
 
 void PNG_user_flush_data_proc(png_structp png_ptr)
 {
     // NOP
-}
-
-int RGB24_to_PNG_mem(unsigned char* src, unsigned int width, unsigned int height, unsigned char* dest, unsigned int destsize)
-{
-    if (!src || !width || !height || !dest || !destsize) return -1;
-
-    png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);
-    if (!png_ptr) return -2;
-
-    png_infop info_ptr = png_create_info_struct(png_ptr);
-    if (!info_ptr) {
-        png_destroy_write_struct(&png_ptr, (png_infopp)0);
-        return -3;
-    }
-
-    PNGTargetMemInfo targetinfo;
-    targetinfo.ptr = dest;
-    targetinfo.size = destsize;
-    targetinfo.comprsize = 0; // Important!!!
-
-    // error handling for the following calls
-    if (setjmp(png_jmpbuf(png_ptr))) {
-        png_destroy_write_struct(&png_ptr, &info_ptr);
-        return -4;
-    }
-    png_set_write_fn(png_ptr,
-                     &targetinfo,
-                     PNG_user_write_data_proc,
-                     PNG_user_flush_data_proc);
-
-    // error handling for the following calls
-    if (setjmp(png_jmpbuf(png_ptr))) {
-        png_destroy_write_struct(&png_ptr, &info_ptr);
-        return -5;
-    }
-    // set compression options
-    png_set_compression_level(png_ptr, Z_BEST_COMPRESSION);
-    png_set_IHDR(png_ptr,
-                 info_ptr,
-                 width,
-                 height,
-                 8,
-                 PNG_COLOR_TYPE_RGB,
-                 PNG_INTERLACE_NONE,
-                 PNG_COMPRESSION_TYPE_BASE,
-                 PNG_FILTER_TYPE_DEFAULT);
-    // write header
-    png_write_info(png_ptr, info_ptr);
-
-    // generate row pointer array
-    const unsigned int linesize = width * 3;
-    png_byte *rawsrc = reinterpret_cast<png_byte*>(src);
-    png_byte **rowptrs = new png_byte*[height];
-    for (unsigned int i = 0; i < height; i ++) {
-        rowptrs[i] = rawsrc;
-        rawsrc += linesize;
-    }
-
-    // error handling for the following call
-    if (setjmp(png_jmpbuf(png_ptr))) {
-        png_destroy_write_struct(&png_ptr, &info_ptr);
-        delete [] rowptrs;
-        return -6;
-    }
-    // write image data
-    png_write_image(png_ptr, rowptrs);
-
-    // release row pointer array
-    delete [] rowptrs;
-
-    // error handling for the following call
-    if (setjmp(png_jmpbuf(png_ptr))) {
-        png_destroy_write_struct(&png_ptr, &info_ptr);
-        return -7;
-    }
-    // write ending
-    png_write_end(png_ptr, 0);
-
-    // clean up
-    png_destroy_write_struct(&png_ptr, &info_ptr);
-
-    return static_cast<int>(targetinfo.comprsize);
 }
 
 
@@ -141,9 +67,19 @@ CMN_IMPLEMENT_SERVICES(ftImagePNG)
 
 ftImagePNG::ftImagePNG() :
     svlImageCodec(),
-    cmnGenericObject()
+    cmnGenericObject(),
+    pngBuffer(0),
+    pngRows(0),
+    pngBufferSize(0),
+    pngRowsSize(0)
 {
     ExtensionList = ".png;";
+}
+
+ftImagePNG::~ftImagePNG()
+{
+    if (pngBuffer) delete [] pngBuffer;
+    if (pngRows) delete [] pngRows;
 }
 
 int ftImagePNG::ReadDimensions(const std::string &filename, unsigned int &width, unsigned int &height)
@@ -178,16 +114,139 @@ int ftImagePNG::Read(svlSampleImageBase &image, const unsigned int videoch, cons
 
 int ftImagePNG::Write(const svlSampleImageBase &image, const unsigned int videoch, const std::string &filename, const int compression)
 {
-    return SVL_FAIL;
+    std::ofstream stream(filename.c_str(), std::ios_base::out | std::ios_base::binary);
+    return Write(image, videoch, stream, compression);
 }
 
 int ftImagePNG::Write(const svlSampleImageBase &image, const unsigned int videoch, std::ostream &stream, const int compression)
 {
+    if (videoch >= image.GetVideoChannels()) return SVL_FAIL;
+
+    size_t size = image.GetDataSize(videoch) + 1024;
+    if (!pngBuffer) {
+        pngBuffer = new unsigned char[size];
+        pngBufferSize = size;
+    }
+    else if (pngBuffer && pngBufferSize < size) {
+        delete [] pngBuffer;
+        pngBuffer = new unsigned char[size];
+        pngBufferSize = size;
+    }
+
+    if (Write(image, videoch, pngBuffer, size, compression) == SVL_OK) {
+        stream.write(reinterpret_cast<char*>(pngBuffer), size);
+        return SVL_OK;
+    }
+
     return SVL_FAIL;
 }
 
 int ftImagePNG::Write(const svlSampleImageBase &image, const unsigned int videoch, unsigned char *buffer, size_t &buffersize, const int compression)
 {
-    return SVL_FAIL;
+    if (videoch >= image.GetVideoChannels()) return SVL_FAIL;
+    if (!buffer) return SVL_FAIL;
+
+    const int width = static_cast<int>(image.GetWidth(videoch));
+    const int height = static_cast<int>(image.GetHeight(videoch));
+    const int row_stride = width * 3;
+    unsigned char *src = const_cast<unsigned char*>(image.GetUCharPointer(videoch));
+    int i, compr = (compression >= 0) ? std::min(compression, 9) : PNG_DEFAULT_QUALITY;
+
+    // Allocate row buffer if not done yet
+    if (!pngRows) {
+        pngRows = new unsigned char*[height];
+        pngRowsSize = height;
+    }
+    else if (pngRows && pngRowsSize < static_cast<unsigned int>(height)) {
+        delete [] pngRows;
+        pngRows = new unsigned char*[height];
+        pngRowsSize = height;
+    }
+
+    PNG_target_mem_info targetinfo;
+    targetinfo.ptr = buffer;
+    targetinfo.size = buffersize;
+    targetinfo.comprsize = 0;
+    targetinfo.error = false;
+
+    png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);
+    if (!png_ptr) return SVL_FAIL;
+
+    png_infop info_ptr = png_create_info_struct(png_ptr);
+    if (!info_ptr) {
+        png_destroy_write_struct(&png_ptr, reinterpret_cast<png_infopp>(0));
+        return SVL_FAIL;
+    }
+
+    // error handling for the following calls
+    if (setjmp(png_jmpbuf(png_ptr))) {
+        png_destroy_write_struct(&png_ptr, &info_ptr);
+        return SVL_FAIL;
+    }
+    png_set_write_fn(png_ptr,
+                     &targetinfo,
+                     PNG_user_write_data_proc,
+                     PNG_user_flush_data_proc);
+    if (targetinfo.error) {
+        png_destroy_write_struct(&png_ptr, &info_ptr);
+        return SVL_FAIL;
+    }
+
+    // error handling for the following calls
+    if (setjmp(png_jmpbuf(png_ptr))) {
+        png_destroy_write_struct(&png_ptr, &info_ptr);
+        return SVL_FAIL;
+    }
+    // set compression options
+    png_set_compression_level(png_ptr, compr);
+    png_set_IHDR(png_ptr,
+                 info_ptr,
+                 width,
+                 height,
+                 8,
+                 PNG_COLOR_TYPE_RGB,
+                 PNG_INTERLACE_NONE,
+                 PNG_COMPRESSION_TYPE_BASE,
+                 PNG_FILTER_TYPE_DEFAULT);
+    png_set_bgr(png_ptr);
+    // write header
+    png_write_info(png_ptr, info_ptr);
+    if (targetinfo.error) {
+        png_destroy_write_struct(&png_ptr, &info_ptr);
+        return SVL_FAIL;
+    }
+
+    // generate row pointer array
+    for (i = 0; i < height; i ++) {
+        pngRows[i] = src;
+        src += row_stride;
+    }
+
+    // error handling for the following call
+    if (setjmp(png_jmpbuf(png_ptr))) {
+        png_destroy_write_struct(&png_ptr, &info_ptr);
+        return SVL_FAIL;
+    }
+    // write image data
+    png_write_image(png_ptr, pngRows);
+    if (targetinfo.error) {
+        png_destroy_write_struct(&png_ptr, &info_ptr);
+        return SVL_FAIL;
+    }
+
+    // error handling for the following call
+    if (setjmp(png_jmpbuf(png_ptr))) {
+        png_destroy_write_struct(&png_ptr, &info_ptr);
+        return SVL_FAIL;
+    }
+    // write ending
+    png_write_end(png_ptr, 0);
+
+    // clean up
+    png_destroy_write_struct(&png_ptr, &info_ptr);
+
+    buffersize = static_cast<int>(targetinfo.comprsize);
+
+    return SVL_OK;
 }
 
