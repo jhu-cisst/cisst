@@ -78,11 +78,8 @@ int main()
     }
     else {
         svlSampleImageRGB image;
-        svlImageIO::Read(image, 0, "Winter.ppm");
-        video_source.SetImage(image);
-
-        svlImageIO::Write(image, 0, "Winter.png", 9);
         svlImageIO::Read(image, 0, "Winter.png");
+        video_source.SetImage(image);
     }
 
     // Setup image resizer

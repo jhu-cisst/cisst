@@ -22,10 +22,36 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "ftImagePNG.h"
 #include <cisstStereoVision/svlStreamDefs.h>
+#include <cisstStereoVision/svlConverters.h>
 #include "png.h"
 
 
 const static int PNG_DEFAULT_QUALITY = 4;
+const static int PNG_SIG_SIZE = 8;
+
+/*****************************************/
+/*** Callbacks for reading from stream ***/
+/*****************************************/
+
+typedef struct _PNG_source_stream {
+    std::istream* stream;
+    bool error;
+} PNG_source_stream;
+
+void PNG_read_data(png_structp png_ptr, png_bytep data, png_size_t length)
+{
+    PNG_source_stream* source = reinterpret_cast<PNG_source_stream*>(png_get_io_ptr(png_ptr));
+    if (source && source->error == false) {
+        if (source->stream) {
+            if (source->stream->read(reinterpret_cast<char*>(data), length).good()) {
+                source->error = false;
+                return;
+            }
+        }
+        source->error = true;
+    }
+}
+
 
 /*****************************************/
 /*** Callbacks for direct memory write ***/
@@ -84,12 +110,54 @@ ftImagePNG::~ftImagePNG()
 
 int ftImagePNG::ReadDimensions(const std::string &filename, unsigned int &width, unsigned int &height)
 {
-    return SVL_FAIL;
+    std::ifstream stream(filename.c_str(), std::ios_base::in | std::ios_base::binary);
+    return ReadDimensions(stream, width, height);
 }
 
 int ftImagePNG::ReadDimensions(std::istream &stream, unsigned int &width, unsigned int &height)
 {
-    return SVL_FAIL;
+    // check file for signature
+    png_byte pngsig[PNG_SIG_SIZE];
+    if (stream.read(reinterpret_cast<char*>(pngsig), PNG_SIG_SIZE).fail() ||
+        png_sig_cmp(pngsig, 0, PNG_SIG_SIZE) != 0) {
+        return SVL_FAIL;
+    }
+
+    // create read structure
+    png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);
+    if (png_ptr == 0) return SVL_FAIL;
+
+    // create info structure
+    png_infop info_ptr = png_create_info_struct(png_ptr);
+    if (info_ptr == 0) {
+        png_destroy_read_struct(&png_ptr, reinterpret_cast<png_infopp>(0), reinterpret_cast<png_infopp>(0));
+        return SVL_FAIL;
+    }
+
+    width = 0;
+    height = 0;
+
+    // setup error handling
+    if (setjmp(png_jmpbuf(png_ptr))) {
+        png_destroy_read_struct(&png_ptr, &info_ptr, reinterpret_cast<png_infopp>(0));
+        return SVL_OK;
+    }
+    PNG_source_stream source;
+    source.stream = &stream;
+    source.error = false;
+    png_set_read_fn(png_ptr, &source, PNG_read_data);
+
+    png_set_sig_bytes(png_ptr, PNG_SIG_SIZE);
+    png_read_info(png_ptr, info_ptr);
+
+    // check file header
+    width = static_cast<unsigned int>(png_get_image_width(png_ptr, info_ptr));
+    height = static_cast<unsigned int>(png_get_image_height(png_ptr, info_ptr));
+
+    // clean up
+    png_destroy_read_struct(&png_ptr, &info_ptr,reinterpret_cast<png_infopp>(0));
+
+    return SVL_OK;
 }
 
 int ftImagePNG::ReadDimensions(const unsigned char *buffer, const size_t buffersize, unsigned int &width, unsigned int &height)
@@ -99,12 +167,110 @@ int ftImagePNG::ReadDimensions(const unsigned char *buffer, const size_t buffers
 
 int ftImagePNG::Read(svlSampleImageBase &image, const unsigned int videoch, const std::string &filename, bool noresize)
 {
-    return SVL_FAIL;
+    std::ifstream stream(filename.c_str(), std::ios_base::in | std::ios_base::binary);
+    return Read(image, videoch, stream, noresize);
 }
 
 int ftImagePNG::Read(svlSampleImageBase &image, const unsigned int videoch, std::istream &stream, bool noresize)
 {
-    return SVL_FAIL;
+    if (videoch >= image.GetVideoChannels()) return SVL_FAIL;
+
+    // check file for signature
+    png_byte pngsig[PNG_SIG_SIZE];
+    if (stream.read(reinterpret_cast<char*>(pngsig), PNG_SIG_SIZE).fail() ||
+        png_sig_cmp(pngsig, 0, PNG_SIG_SIZE) != 0) {
+        return SVL_FAIL;
+    }
+
+    // create read structure
+    png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);
+    if (png_ptr == 0) return SVL_FAIL;
+
+    // create info structure
+    png_infop info_ptr = png_create_info_struct(png_ptr);
+    if (info_ptr == 0) {
+        png_destroy_read_struct(&png_ptr, reinterpret_cast<png_infopp>(0), reinterpret_cast<png_infopp>(0));
+        return SVL_FAIL;
+    }
+
+    // setup error handling
+    if (setjmp(png_jmpbuf(png_ptr))) {
+        png_destroy_read_struct(&png_ptr, &info_ptr, reinterpret_cast<png_infopp>(0));
+        return SVL_FAIL;
+    }
+    PNG_source_stream source;
+    source.stream = &stream;
+    source.error = false;
+    png_set_read_fn(png_ptr, &source, PNG_read_data);
+
+    png_set_sig_bytes(png_ptr, PNG_SIG_SIZE);
+    png_read_info(png_ptr, info_ptr);
+
+    // check file header
+    const unsigned int width = static_cast<unsigned int>(png_get_image_width(png_ptr, info_ptr));
+    const unsigned int height = static_cast<unsigned int>(png_get_image_height(png_ptr, info_ptr));
+    const unsigned int row_stride = width * 3;
+
+    if (width  < 1 || height < 1) return SVL_FAIL;
+
+    // Allocate image buffer if not done yet
+    if (static_cast<unsigned int>(width)  != image.GetWidth(videoch) ||
+        static_cast<unsigned int>(height) != image.GetHeight(videoch)) {
+        if (noresize) return SVL_FAIL;
+        image.SetSize(videoch, static_cast<unsigned int>(width), static_cast<unsigned int>(height));
+    }
+
+    // allocate row buffer if not done yet
+    if (!pngRows) {
+        pngRows = new unsigned char*[height];
+        pngRowsSize = height;
+    }
+    else if (pngRows && pngRowsSize < static_cast<unsigned int>(height)) {
+        delete [] pngRows;
+        pngRows = new unsigned char*[height];
+        pngRowsSize = height;
+    }
+
+    // generate row pointer array
+    unsigned char *dest = image.GetUCharPointer(videoch);
+    for (unsigned int i = 0; i < height; i ++) {
+        pngRows[i] = dest;
+        dest += row_stride;
+    }
+
+    const unsigned int bitdepth = static_cast<unsigned int>(png_get_bit_depth(png_ptr, info_ptr));
+    const unsigned int channels = static_cast<unsigned int>(png_get_channels(png_ptr, info_ptr));
+    const unsigned int color_type = static_cast<unsigned int>(png_get_color_type(png_ptr, info_ptr));
+
+    switch (color_type) {
+        case PNG_COLOR_TYPE_PALETTE:
+            png_set_palette_to_rgb(png_ptr);
+        break;
+
+        case PNG_COLOR_TYPE_GRAY:
+            if (bitdepth < 8) png_set_gray_1_2_4_to_8(png_ptr);
+        break;
+    }
+    if (png_get_valid(png_ptr, info_ptr, PNG_INFO_tRNS)) {
+        png_set_tRNS_to_alpha(png_ptr);
+    }
+    if (bitdepth == 16) {
+        png_set_strip_16(png_ptr);
+    }
+    png_set_bgr(png_ptr);
+
+    // read image
+    png_read_image(png_ptr, pngRows);
+
+    if (color_type == PNG_COLOR_TYPE_GRAY) {
+        // Gray8toRGB24 can do in-place conversion
+        svlConverter::Gray8toRGB24(dest, dest, width * height);
+    }
+
+    // clean up
+    png_destroy_read_struct(&png_ptr, &info_ptr,reinterpret_cast<png_infopp>(0));
+
+    return SVL_OK;
 }
 
 int ftImagePNG::Read(svlSampleImageBase &image, const unsigned int videoch, const unsigned char *buffer, const size_t buffersize, bool noresize)
