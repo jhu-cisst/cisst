@@ -537,7 +537,7 @@ int ftImageJPEG::Write(const svlSampleImageBase &image, const unsigned int video
     unsigned char *src = const_cast<unsigned char*>(image.GetUCharPointer(videoch));
     unsigned char *buff_bgr;
     JSAMPROW row_pointer[1];
-    int i, offset, quality = (compression >= 0) ? std::min(compression, 100) : JPEG_DEFAULT_QUALITY;
+    int i, offset;
 
     // Allocate row buffer if not done yet
     if (!jpegRowBuffer) {
@@ -576,7 +576,7 @@ int ftImageJPEG::Write(const svlSampleImageBase &image, const unsigned int video
     cinfo.input_components = 3;
     cinfo.in_color_space = JCS_RGB;
     jpeg_set_defaults(&cinfo);
-    jpeg_set_quality(&cinfo, quality, TRUE);
+    jpeg_set_quality(&cinfo, (compression >= 0) ? std::min(compression, 100) : JPEG_DEFAULT_QUALITY, TRUE);
 
     // Proceed with compression
     jpeg_start_compress(&cinfo, TRUE);

@@ -38,7 +38,7 @@ typedef struct _PNG_source_stream {
     bool error;
 } PNG_source_stream;
 
-void PNG_read_data(png_structp png_ptr, png_bytep data, png_size_t length)
+void PNG_read_data_stream(png_structp png_ptr, png_bytep data, png_size_t length)
 {
     PNG_source_stream* source = reinterpret_cast<PNG_source_stream*>(png_get_io_ptr(png_ptr));
     if (source && source->error == false) {
@@ -47,6 +47,32 @@ void PNG_read_data(png_structp png_ptr, png_bytep data, png_size_t length)
                 source->error = false;
                 return;
             }
+        }
+        source->error = true;
+    }
+}
+
+
+/*****************************************/
+/*** Callbacks for reading from memory ***/
+/*****************************************/
+
+typedef struct _PNG_source_memory {
+    unsigned char* buffer;
+    unsigned int buffersize;
+    bool error;
+} _PNG_source_memory;
+
+void PNG_read_data_memory(png_structp png_ptr, png_bytep data, png_size_t length)
+{
+    _PNG_source_memory* source = reinterpret_cast<_PNG_source_memory*>(png_get_io_ptr(png_ptr));
+    if (source && source->error == false) {
+        if (source->buffer && source->buffersize >= length) {
+            memcpy(data, source->buffer, length);
+            source->buffer += length;
+            source->buffersize -= length;
+            source->error = false;
+            return;
         }
         source->error = true;
     }
@@ -79,7 +105,7 @@ void PNG_user_write_data_proc(png_structp png_ptr, png_bytep data, png_size_t le
     // TO DO: Some 'Fatal Error' handling
 }
 
-void PNG_user_flush_data_proc(png_structp png_ptr)
+void PNG_user_flush_data_proc(png_structp CMN_UNUSED(png_ptr))
 {
     // NOP
 }
@@ -145,7 +171,7 @@ int ftImagePNG::ReadDimensions(std::istream &stream, unsigned int &width, unsign
     PNG_source_stream source;
     source.stream = &stream;
     source.error = false;
-    png_set_read_fn(png_ptr, &source, PNG_read_data);
+    png_set_read_fn(png_ptr, &source, PNG_read_data_stream);
 
     png_set_sig_bytes(png_ptr, PNG_SIG_SIZE);
     png_read_info(png_ptr, info_ptr);
@@ -162,7 +188,47 @@ int ftImagePNG::ReadDimensions(std::istream &stream, unsigned int &width, unsign
 
 int ftImagePNG::ReadDimensions(const unsigned char *buffer, const size_t buffersize, unsigned int &width, unsigned int &height)
 {
-    return SVL_FAIL;
+    if (!buffer || buffersize < static_cast<unsigned int>(PNG_SIG_SIZE)) return SVL_FAIL;
+
+    // check file for signature
+    if (png_sig_cmp(const_cast<unsigned char*>(buffer), 0, PNG_SIG_SIZE) != 0) return SVL_FAIL;
+
+    // create read structure
+    png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);
+    if (png_ptr == 0) return SVL_FAIL;
+
+    // create info structure
+    png_infop info_ptr = png_create_info_struct(png_ptr);
+    if (info_ptr == 0) {
+        png_destroy_read_struct(&png_ptr, reinterpret_cast<png_infopp>(0), reinterpret_cast<png_infopp>(0));
+        return SVL_FAIL;
+    }
+
+    width = 0;
+    height = 0;
+
+    // setup error handling
+    if (setjmp(png_jmpbuf(png_ptr))) {
+        png_destroy_read_struct(&png_ptr, &info_ptr, reinterpret_cast<png_infopp>(0));
+        return SVL_OK;
+    }
+    _PNG_source_memory source;
+    source.buffer = const_cast<unsigned char*>(buffer + PNG_SIG_SIZE);
+    source.buffersize = buffersize - PNG_SIG_SIZE;
+    source.error = false;
+    png_set_read_fn(png_ptr, &source, PNG_read_data_memory);
+
+    png_set_sig_bytes(png_ptr, PNG_SIG_SIZE);
+    png_read_info(png_ptr, info_ptr);
+
+    // check file header
+    width = static_cast<unsigned int>(png_get_image_width(png_ptr, info_ptr));
+    height = static_cast<unsigned int>(png_get_image_height(png_ptr, info_ptr));
+
+    // clean up
+    png_destroy_read_struct(&png_ptr, &info_ptr,reinterpret_cast<png_infopp>(0));
+
+    return SVL_OK;
 }
 
 int ftImagePNG::Read(svlSampleImageBase &image, const unsigned int videoch, const std::string &filename, bool noresize)
@@ -201,7 +267,7 @@ int ftImagePNG::Read(svlSampleImageBase &image, const unsigned int videoch, std:
     PNG_source_stream source;
     source.stream = &stream;
     source.error = false;
-    png_set_read_fn(png_ptr, &source, PNG_read_data);
+    png_set_read_fn(png_ptr, &source, PNG_read_data_stream);
 
     png_set_sig_bytes(png_ptr, PNG_SIG_SIZE);
     png_read_info(png_ptr, info_ptr);
@@ -239,7 +305,6 @@ int ftImagePNG::Read(svlSampleImageBase &image, const unsigned int videoch, std:
     }
 
     const unsigned int bitdepth = static_cast<unsigned int>(png_get_bit_depth(png_ptr, info_ptr));
-    const unsigned int channels = static_cast<unsigned int>(png_get_channels(png_ptr, info_ptr));
     const unsigned int color_type = static_cast<unsigned int>(png_get_color_type(png_ptr, info_ptr));
 
     switch (color_type) {
@@ -275,7 +340,101 @@ int ftImagePNG::Read(svlSampleImageBase &image, const unsigned int videoch, std:
 
 int ftImagePNG::Read(svlSampleImageBase &image, const unsigned int videoch, const unsigned char *buffer, const size_t buffersize, bool noresize)
 {
-    return SVL_FAIL;
+    if (videoch >= image.GetVideoChannels()) return SVL_FAIL;
+    if (!buffer || buffersize < static_cast<unsigned int>(PNG_SIG_SIZE)) return SVL_FAIL;
+
+    // check file for signature
+    if (png_sig_cmp(const_cast<unsigned char*>(buffer), 0, PNG_SIG_SIZE) != 0) return SVL_FAIL;
+
+    // create read structure
+    png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);
+    if (png_ptr == 0) return SVL_FAIL;
+
+    // create info structure
+    png_infop info_ptr = png_create_info_struct(png_ptr);
+    if (info_ptr == 0) {
+        png_destroy_read_struct(&png_ptr, reinterpret_cast<png_infopp>(0), reinterpret_cast<png_infopp>(0));
+        return SVL_FAIL;
+    }
+
+    // setup error handling
+    if (setjmp(png_jmpbuf(png_ptr))) {
+        png_destroy_read_struct(&png_ptr, &info_ptr, reinterpret_cast<png_infopp>(0));
+        return SVL_FAIL;
+    }
+    _PNG_source_memory source;
+    source.buffer = const_cast<unsigned char*>(buffer + PNG_SIG_SIZE);
+    source.buffersize = buffersize - PNG_SIG_SIZE;
+    source.error = false;
+    png_set_read_fn(png_ptr, &source, PNG_read_data_memory);
+
+    png_set_sig_bytes(png_ptr, PNG_SIG_SIZE);
+    png_read_info(png_ptr, info_ptr);
+
+    // check file header
+    const unsigned int width = static_cast<unsigned int>(png_get_image_width(png_ptr, info_ptr));
+    const unsigned int height = static_cast<unsigned int>(png_get_image_height(png_ptr, info_ptr));
+    const unsigned int row_stride = width * 3;
+
+    if (width  < 1 || height < 1) return SVL_FAIL;
+
+    // Allocate image buffer if not done yet
+    if (static_cast<unsigned int>(width)  != image.GetWidth(videoch) ||
+        static_cast<unsigned int>(height) != image.GetHeight(videoch)) {
+        if (noresize) return SVL_FAIL;
+        image.SetSize(videoch, static_cast<unsigned int>(width), static_cast<unsigned int>(height));
+    }
+
+    // allocate row buffer if not done yet
+    if (!pngRows) {
+        pngRows = new unsigned char*[height];
+        pngRowsSize = height;
+    }
+    else if (pngRows && pngRowsSize < static_cast<unsigned int>(height)) {
+        delete [] pngRows;
+        pngRows = new unsigned char*[height];
+        pngRowsSize = height;
+    }
+
+    // generate row pointer array
+    unsigned char *dest = image.GetUCharPointer(videoch);
+    for (unsigned int i = 0; i < height; i ++) {
+        pngRows[i] = dest;
+        dest += row_stride;
+    }
+
+    const unsigned int bitdepth = static_cast<unsigned int>(png_get_bit_depth(png_ptr, info_ptr));
+    const unsigned int color_type = static_cast<unsigned int>(png_get_color_type(png_ptr, info_ptr));
+
+    switch (color_type) {
+        case PNG_COLOR_TYPE_PALETTE:
+            png_set_palette_to_rgb(png_ptr);
+        break;
+
+        case PNG_COLOR_TYPE_GRAY:
+            if (bitdepth < 8) png_set_gray_1_2_4_to_8(png_ptr);
+        break;
+    }
+    if (png_get_valid(png_ptr, info_ptr, PNG_INFO_tRNS)) {
+        png_set_tRNS_to_alpha(png_ptr);
+    }
+    if (bitdepth == 16) {
+        png_set_strip_16(png_ptr);
+    }
+    png_set_bgr(png_ptr);
+
+    // read image
+    png_read_image(png_ptr, pngRows);
+
+    if (color_type == PNG_COLOR_TYPE_GRAY) {
+        // Gray8toRGB24 can do in-place conversion
+        svlConverter::Gray8toRGB24(dest, dest, width * height);
+    }
+
+    // clean up
+    png_destroy_read_struct(&png_ptr, &info_ptr,reinterpret_cast<png_infopp>(0));
+
+    return SVL_OK;
 }
 
 int ftImagePNG::Write(const svlSampleImageBase &image, const unsigned int videoch, const std::string &filename, const int compression)
@@ -315,8 +474,8 @@ int ftImagePNG::Write(const svlSampleImageBase &image, const unsigned int videoc
     const int width = static_cast<int>(image.GetWidth(videoch));
     const int height = static_cast<int>(image.GetHeight(videoch));
     const int row_stride = width * 3;
-    unsigned char *src = const_cast<unsigned char*>(image.GetUCharPointer(videoch));
-    int i, compr = (compression >= 0) ? std::min(compression, 9) : PNG_DEFAULT_QUALITY;
+    unsigned char *src;
+    int i;
 
     // Allocate row buffer if not done yet
     if (!pngRows) {
@@ -364,7 +523,7 @@ int ftImagePNG::Write(const svlSampleImageBase &image, const unsigned int videoc
         return SVL_FAIL;
     }
     // set compression options
-    png_set_compression_level(png_ptr, compr);
+    png_set_compression_level(png_ptr, (compression >= 0) ? std::min(compression, 9) : PNG_DEFAULT_QUALITY);
     png_set_IHDR(png_ptr,
                  info_ptr,
                  width,
@@ -383,6 +542,7 @@ int ftImagePNG::Write(const svlSampleImageBase &image, const unsigned int videoc
     }
 
     // generate row pointer array
+    src = const_cast<unsigned char*>(image.GetUCharPointer(videoch));
     for (i = 0; i < height; i ++) {
         pngRows[i] = src;
         src += row_stride;
