@@ -102,7 +102,7 @@ public:
 
     /*! Destructor.  Relies on std::map destructor. */
     ~cmnNamedMap() {
-        DeleteAll();
+        //DeleteAll();
     }
 
     /*! Set the map owner */
