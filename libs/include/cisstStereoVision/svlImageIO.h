@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _svlImageIO_h
 
 #include <cisstVector/vctDynamicMatrixTypes.h>
+#include <cisstOSAbstraction/osaCriticalSection.h>
 #include <string>
 
 // Always include last!
@@ -84,6 +85,7 @@ private:
     _ExtensionList Extensions;
     vctDynamicVector<_CodecCacheList> CodecCache;
     vctDynamicVector<_CodecCacheUsedList> CodecCacheUsed;
+    osaCriticalSection CS;
 
 public:
     ~svlImageIO();

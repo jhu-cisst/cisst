@@ -126,6 +126,10 @@ svlImageCodec* svlImageIO::GetCodec(const std::string &filename)
     for (i = 0; i < size; i ++) {
         if (instance->Extensions[i].find(extension) != std::string::npos) {
 
+            ///////////////////////////
+            // Enter critical section
+            instance->CS.Enter();
+
             // check if we have any unused image handlers in the cache
             cacheitem = 0;
             cachesize = static_cast<int>(instance->CodecCacheUsed[i].size());
@@ -145,6 +149,11 @@ svlImageCodec* svlImageIO::GetCodec(const std::string &filename)
             }
 
             instance->CodecCacheUsed[i][cacheitem] = true;
+
+            instance->CS.Leave();
+            // Leave critical section
+            ///////////////////////////
+
             return instance->CodecCache[i][cacheitem];
         }
     }
@@ -155,7 +164,13 @@ svlImageCodec* svlImageIO::GetCodec(const std::string &filename)
 void svlImageIO::ReleaseCodec(svlImageCodec* codec)
 {
     if (!codec) return;
+
     svlImageIO* instance = GetInstance();
+
+    ///////////////////////////
+    // Enter critical section
+    instance->CS.Enter();
+
     const unsigned int size = instance->CodecCache.size();
     unsigned int i, j, cachesize;
     for (i = 0; i < size; i ++) {
@@ -163,10 +178,19 @@ void svlImageIO::ReleaseCodec(svlImageCodec* codec)
         for (j = 0; j < cachesize; j ++) {
             if (codec == instance->CodecCache[i][j]) {
                 instance->CodecCacheUsed[i][j] = false;
+
+                instance->CS.Leave();
+                // Leave critical section
+                ///////////////////////////
+
                 return;
             }
         }
     }
+
+    instance->CS.Leave();
+    // Leave critical section
+    ///////////////////////////
 }
 
 int svlImageIO::ReadDimensions(const std::string &filename,
