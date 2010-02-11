@@ -336,6 +336,7 @@ int CDirectShowSource::Open()
 
     for (i = 0; i < NumOfStreams; i ++) {
 
+        CMN_LOG_CLASS_INIT_VERBOSE << "Open called for stream " << i << endl;
         pCaptureFilter[i] = GetCaptureFilter(DeviceID[i]);
         if (pCaptureFilter[i] == 0) goto labError;
 
@@ -350,7 +351,7 @@ int CDirectShowSource::Open()
             if (pCaptureFilterOut[i] == 0) goto labError;
         }
 
-        if (pMediaType[i] != 0) SetupMediaType(i);
+        if (pMediaType && (pMediaType[i] != 0)) SetupMediaType(i);
     }
 
     if (AssembleGraph() != SVL_OK) goto labError;
@@ -385,6 +386,12 @@ int CDirectShowSource::AssembleGraph()
 
     for (unsigned int i = 0; i < NumOfStreams; i ++) {
 
+        FILTER_INFO fInfo;
+        char fName[MAX_FILTER_NAME];
+		pCaptureFilter[i]->QueryFilterInfo(&fInfo);
+        WideCharToMultiByte(CP_ACP, 0, fInfo.achName, -1, fName, MAX_FILTER_NAME, 0, 0);
+        CMN_LOG_CLASS_INIT_VERBOSE << "AssembleGraph for stream " << i << ": capture device = " << fName << std::endl;
+
         hr = CoCreateInstance(CLSID_AVIDec, 0, CLSCTX_INPROC, IID_IBaseFilter, reinterpret_cast<void**>(&(pAviDecomprFilter[i])));
         if (hr != S_OK) goto labError;
 
@@ -412,9 +419,19 @@ int CDirectShowSource::AssembleGraph()
         hr = pGraph->AddFilter(pSampleGrabFilter[i], 0);
         if (hr != S_OK) goto labError;
 
+		bool usingAVI = true;
         hr = pGraphBuilder->RenderStream(&(PinCategory[i]), &MEDIATYPE_Video, pCaptureFilter[i], 0, pAviDecomprFilter[i]);
+        if (hr == VFW_E_CANNOT_CONNECT) {
+            CMN_LOG_CLASS_INIT_VERBOSE << "AssembleGraph: Cannot connect to AVI decompression filter." << endl;
+            hr = pGraphBuilder->RenderStream(&(PinCategory[i]), &MEDIATYPE_Video, pCaptureFilter[i], 0, pColorConvFilter[i]);
+            if (hr == S_OK) {
+                CMN_LOG_CLASS_INIT_VERBOSE << "AssembleGraph: Connected directly to colour space convertor." << endl;
+                hr = pGraphBuilder->RenderStream(0, 0, pColorConvFilter[i], 0, pSampleGrabFilter[i]);
+                if (hr == S_OK) usingAVI = false;
+            }
+        }
         if (hr != S_OK) {
-        // Cannot directly connect Capture Filter to Avi Decompressor Filter
+        // Cannot directly connect Capture Filter to Avi Decompressor Filter or Colour conversion filter,
         // so start searching with brute force for an appropriate intermediate filter
 
             IFilterMapper2 *mapper;
@@ -423,6 +440,7 @@ int CDirectShowSource::AssembleGraph()
             IMoniker *moniker;
             ULONG fetched;
 
+            CMN_LOG_CLASS_INIT_VERBOSE << "AssembleGraph: Searching for intermediate filters." << endl;
             // Searching for matching filters
             hr = CoCreateInstance(CLSID_FilterMapper2, 0, CLSCTX_INPROC, IID_IFilterMapper2, reinterpret_cast<void**>(&mapper));
             if (hr != S_OK) goto labError;
@@ -451,7 +469,6 @@ int CDirectShowSource::AssembleGraph()
 
             // Enumerating the monikers
             while (enumcat->Next(1, &moniker, &fetched) == S_OK) {
-
                 // Getting a reference to the enumerated filter
                 hr = moniker->BindToObject(0, 0, IID_IBaseFilter, reinterpret_cast<void**>(&(pIntermediatePreviewFilter[i])));
                 if (hr == S_OK) {
@@ -463,6 +480,22 @@ int CDirectShowSource::AssembleGraph()
                                                          pIntermediatePreviewFilter[i],
                                                          pAviDecomprFilter[i]);
                         if (hr == S_OK) {
+                            // Display the filter name
+                            IPropertyBag *pPropBag = NULL;
+                            hr = moniker->BindToStorage(0, 0, IID_IPropertyBag, (void **)&pPropBag);
+                            if (hr == S_OK) {
+                                VARIANT varName;
+                                VariantInit(&varName);
+                                hr = pPropBag->Read(L"FriendlyName", &varName, 0);
+                                if (hr == S_OK) {
+                                    char mbstr[256];
+                                    memset(mbstr, 0, 256);
+                                    WideCharToMultiByte(CP_ACP, 0, varName.bstrVal, -1, mbstr, 256, 0, 0);
+                                    CMN_LOG_CLASS_INIT_VERBOSE << "AssembleGraph: using filter: " << mbstr << endl;
+                                }
+                                VariantClear(&varName);
+                                pPropBag->Release();
+                            }
                             // FOUND, so exit from the loop
                             moniker->Release();
                             break;
@@ -487,8 +520,11 @@ int CDirectShowSource::AssembleGraph()
             if (pIntermediatePreviewFilter[i] == 0) goto labError;
         }
 
-        hr = pGraphBuilder->RenderStream(0, 0, pAviDecomprFilter[i], pColorConvFilter[i], pSampleGrabFilter[i]);
-        if (hr != S_OK) goto labError;
+        if (usingAVI) {
+            hr = pGraphBuilder->RenderStream(0, 0, pAviDecomprFilter[i], pColorConvFilter[i], pSampleGrabFilter[i]);
+            if (hr != S_OK) goto labError;
+            CMN_LOG_CLASS_INIT_VERBOSE << "AssembleGraph: connected AVI decompressor to grab filter." << endl;
+        }
 
         hr = pCaptureFilterOut[i]->ConnectionMediaType(&mediatype);
         if (hr != S_OK) goto labError;
@@ -512,6 +548,7 @@ int CDirectShowSource::AssembleGraph()
     return SVL_OK;
 
 labError:
+    CMN_LOG_CLASS_INIT_ERROR << "AssembleGraph returning error (SVL_FAIL)." << endl;
     DisassembleGraph();
     return SVL_FAIL;
 }
@@ -855,6 +892,7 @@ svlImageRGB* CDirectShowSource::GetLatestFrame(bool waitfornew, unsigned int vid
 
 int CDirectShowSource::ShowFormatDialog(HWND hwnd, unsigned int videoch)
 {
+    CMN_LOG_CLASS_INIT_VERBOSE << "ShowFormatDialog called for channel " << videoch << endl;
     if (!Initialized ||
         videoch >= NumOfStreams ||
         pCaptureFilterOut[videoch] == 0) return SVL_FAIL;
