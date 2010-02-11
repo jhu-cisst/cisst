@@ -51,7 +51,7 @@ protected:
     svlDIBHeader DIBHeader;
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(ftImageBMP)
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(ftImageBMP)
 
 #endif // _ftImageBMP_h
 

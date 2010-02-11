@@ -89,7 +89,7 @@ private:
     void ReleaseLUT(RectificationLUT* lut);
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterImageRectifier)
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterImageRectifier)
 
 #endif // _svlFilterImageRectifier_h
 

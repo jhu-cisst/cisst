@@ -142,7 +142,7 @@ int svlFilterImageFileWriter::ProcessFrame(ProcInfo* procInfo, svlSample* inputd
 int svlFilterImageFileWriter::Release()
 {
     for (unsigned int i = 0; i < ImageCodec.size(); i ++) {
-        if (ImageCodec[i]) delete ImageCodec[i];
+        svlImageIO::ReleaseCodec(ImageCodec[i]);
         ImageCodec[i] = 0;
     }
 
@@ -169,10 +169,10 @@ int svlFilterImageFileWriter::SetFilePath(const std::string & filepathprefix, co
         return SVL_WRONG_CHANNEL;
 
     // checking if file extension is supported
-    if (ImageCodec[videoch]) delete ImageCodec[videoch];
+    svlImageIO::ReleaseCodec(ImageCodec[videoch]);
     ImageCodec[videoch] = svlImageIO::GetCodec("." + extension);
     if (ImageCodec[videoch] == 0) return SVL_FAIL;
-    delete ImageCodec[videoch];
+    svlImageIO::ReleaseCodec(ImageCodec[videoch]);
     ImageCodec[videoch] = 0;
 
     FilePathPrefix[videoch] = filepathprefix;

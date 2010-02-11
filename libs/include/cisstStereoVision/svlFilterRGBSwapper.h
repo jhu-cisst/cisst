@@ -42,7 +42,7 @@ private:
     void SwapChannels(unsigned char* buffer, unsigned int pixelcount);
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterRGBSwapper)
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterRGBSwapper)
 
 #endif // _svlFilterRGBSwapper_h
 

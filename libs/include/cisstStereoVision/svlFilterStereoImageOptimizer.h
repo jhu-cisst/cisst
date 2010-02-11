@@ -61,7 +61,7 @@ private:
     int B[2];
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterStereoImageOptimizer)
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterStereoImageOptimizer)
 
 #endif // _svlFilterStereoImageOptimizer_h
 

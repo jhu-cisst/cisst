@@ -57,7 +57,7 @@ private:
     svlDeinterlacingMethod Method;
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterVideoDeinterlacer)
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterVideoDeinterlacer)
 
 #endif // _svlFilterVideoDeinterlacer_h
 

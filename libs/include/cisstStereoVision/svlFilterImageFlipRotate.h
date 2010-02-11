@@ -96,7 +96,7 @@ void svlFilterImageFlipRotate::FlipRotate(_pixelType* input, _pixelType* output,
     }
 }
 
-CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterImageFlipRotate)
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterImageFlipRotate)
 
 #endif // _svlFilterImageFlipRotate_h
 

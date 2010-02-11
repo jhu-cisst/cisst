@@ -54,7 +54,7 @@ protected:
     unsigned int ppmBufferSize;
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(ftImagePPM)
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(ftImagePPM)
 
 #endif // _ftImagePPM_h
 

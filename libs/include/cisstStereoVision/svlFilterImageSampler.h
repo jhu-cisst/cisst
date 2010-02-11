@@ -77,7 +77,7 @@ private:
     float DistanceScaling;
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterImageSampler)
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterImageSampler)
 
 #endif // _svlFilterImageSampler_h
 

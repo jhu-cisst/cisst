@@ -53,10 +53,10 @@ void PrintFilterList()
 
 int main()
 {
-    bool noise = false;
+    bool noise = true;
 
     svlInitialize();
-//    PrintAllRegistered();
+    PrintAllRegistered();
 //    PrintFilterList();
 
     // Creating SVL objects

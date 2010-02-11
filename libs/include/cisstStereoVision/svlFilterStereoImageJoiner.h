@@ -54,7 +54,7 @@ private:
     Layout ImageLayout;
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterStereoImageJoiner)
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterStereoImageJoiner)
 
 #endif // _svlFilterStereoImageJoiner_h
 

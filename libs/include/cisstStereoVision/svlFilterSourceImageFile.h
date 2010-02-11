@@ -63,7 +63,7 @@ private:
     int BuildFilePath(int videoch, unsigned int framecounter = 0);
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterSourceImageFile)
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterSourceImageFile)
 
 #endif // _svlFilterSourceImageFile_h
 

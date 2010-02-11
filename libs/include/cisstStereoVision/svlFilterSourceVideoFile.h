@@ -67,7 +67,7 @@ private:
     double CVIFrameTime;
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterSourceVideoFile)
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterSourceVideoFile)
 
 #endif // _svlFilterSourceVideoFile_h
 

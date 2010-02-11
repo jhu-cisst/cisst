@@ -260,7 +260,7 @@ private:
     bool Stopped;
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterSourceVideoCapture)
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterSourceVideoCapture)
 
 #endif // _svlFilterSourceVideoCapture_h
 

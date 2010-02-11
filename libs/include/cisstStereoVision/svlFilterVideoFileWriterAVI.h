@@ -79,7 +79,7 @@ private:
     int UpdateStreamCount(unsigned int count);
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterVideoFileWriterAVI)
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterVideoFileWriterAVI)
 
 #endif // _svlFilterVideoFileWriterAVI_h
 

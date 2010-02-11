@@ -91,7 +91,7 @@ private:
     void* SaveProc(unsigned int videochannels);
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterVideoFileWriter)
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterVideoFileWriter)
 
 #endif // _svlFilterVideoFileWriter_h
 

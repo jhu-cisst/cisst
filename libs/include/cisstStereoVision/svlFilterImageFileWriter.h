@@ -64,7 +64,7 @@ private:
     unsigned int CaptureLength;
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterImageFileWriter)
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterImageFileWriter)
 
 #endif // _svlFilterImageFileWriter_h
 

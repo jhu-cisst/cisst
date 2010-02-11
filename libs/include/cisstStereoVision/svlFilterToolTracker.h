@@ -85,7 +85,7 @@ protected:
     virtual void Release();
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterToolTracker)
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterToolTracker)
 
 #endif // _svlFilterToolTracker_h
 

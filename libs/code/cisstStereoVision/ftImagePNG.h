@@ -53,7 +53,7 @@ protected:
     size_t pngRowsSize;
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(ftImagePNG)
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(ftImagePNG)
 
 #endif // _ftImagePNG_h
 

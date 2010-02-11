@@ -57,7 +57,7 @@ private:
     float DisparityCorrection;
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterDisparityMapToSurface)
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterDisparityMapToSurface)
 
 #endif // _svlFilterDisparityMapToSurface_h
 

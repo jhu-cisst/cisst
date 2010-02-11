@@ -72,18 +72,26 @@ class CISST_EXPORT svlImageIO
 {
 private:
     typedef vctDynamicVector<cmnClassServicesBase*> _CodecList;
+    typedef vctDynamicVector<svlImageCodec*> _CodecCacheList;
+    typedef vctDynamicVector<bool> _CodecCacheUsedList;
     typedef vctDynamicVector<std::string> _ExtensionList;
 
     svlImageIO();
     svlImageIO(const svlImageIO &);
+    static svlImageIO* GetInstance();
 
     _CodecList Codecs;
     _ExtensionList Extensions;
+    vctDynamicVector<_CodecCacheList> CodecCache;
+    vctDynamicVector<_CodecCacheUsedList> CodecCacheUsed;
 
 public:
+    ~svlImageIO();
+
     static int GetExtension(const std::string &filename, std::string &extension);
 
     static svlImageCodec* GetCodec(const std::string &filename);
+    static void ReleaseCodec(svlImageCodec* codec);
 
     static int ReadDimensions(const std::string &filename, unsigned int &width, unsigned int &height);
     static int ReadDimensions(const std::string &codec, std::istream &stream, unsigned int &width, unsigned int &height);

@@ -529,16 +529,16 @@ typedef svlSampleImageCustom<unsigned char,  4, 2>   svlSampleImageRGBAStereo;
 typedef svlSampleImageCustom<float,          1, 1>   svlSampleImageMonoFloat;
 typedef svlSampleImageCustom<float,          3, 1>   svlSampleImage3DMap;
 
-CMN_DECLARE_SERVICES_INSTANTIATION(svlSampleImageMono8)
-CMN_DECLARE_SERVICES_INSTANTIATION(svlSampleImageMono8Stereo)
-CMN_DECLARE_SERVICES_INSTANTIATION(svlSampleImageMono16)
-CMN_DECLARE_SERVICES_INSTANTIATION(svlSampleImageMono16Stereo)
-CMN_DECLARE_SERVICES_INSTANTIATION(svlSampleImageRGB)
-CMN_DECLARE_SERVICES_INSTANTIATION(svlSampleImageRGBA)
-CMN_DECLARE_SERVICES_INSTANTIATION(svlSampleImageRGBStereo)
-CMN_DECLARE_SERVICES_INSTANTIATION(svlSampleImageRGBAStereo)
-CMN_DECLARE_SERVICES_INSTANTIATION(svlSampleImageMonoFloat)
-CMN_DECLARE_SERVICES_INSTANTIATION(svlSampleImage3DMap)
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlSampleImageMono8)
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlSampleImageMono8Stereo)
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlSampleImageMono16)
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlSampleImageMono16Stereo)
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlSampleImageRGB)
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlSampleImageRGBA)
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlSampleImageRGBStereo)
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlSampleImageRGBAStereo)
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlSampleImageMonoFloat)
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlSampleImage3DMap)
 
 
 class CISST_EXPORT svlSampleRigidXform : public svlSample
@@ -562,7 +562,7 @@ public:
     svlRigidXform frame4x4;
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(svlSampleRigidXform)
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlSampleRigidXform)
 
 
 class CISST_EXPORT svlSamplePointCloud : public svlSample
@@ -589,7 +589,7 @@ public:
     svlPointCloud points;
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(svlSamplePointCloud)
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlSamplePointCloud)
 
 
 //////////////////////////////////////////////

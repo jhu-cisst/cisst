@@ -93,7 +93,7 @@ private:
     IplImage *Frame;
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(COpenCVSource)
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(COpenCVSource)
 
 #endif // _vidOCVSource_h
 

@@ -182,7 +182,7 @@ public:
     int SetRendererOnOff(bool render, unsigned int videoch = 0);
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(CDirectShowSource)
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(CDirectShowSource)
 
 #endif // _vidDirectShowSource_h
 

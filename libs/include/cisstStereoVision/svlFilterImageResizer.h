@@ -72,7 +72,7 @@ private:
                                      const unsigned int width);
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterImageResizer)
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterImageResizer)
 
 #endif // _svlFilterImageResizer_h
 

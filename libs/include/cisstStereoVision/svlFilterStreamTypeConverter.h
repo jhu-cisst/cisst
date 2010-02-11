@@ -53,7 +53,7 @@ private:
     unsigned int Mono16ShiftDown;
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterStreamTypeConverter)
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterStreamTypeConverter)
 
 #endif // _svlFilterStreamTypeConverter_h
 

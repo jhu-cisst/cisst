@@ -54,7 +54,7 @@ private:
     void Sharpening(unsigned char* img_in, unsigned char* img_mask, unsigned char* img_out, const int width, const int height);
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterUnsharpMask)
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterUnsharpMask)
 
 #endif // _svlFilterUnsharpMask_h
 

@@ -193,7 +193,7 @@ int svlFilterSourceImageFile::ProcessFrame(ProcInfo* procInfo)
 int svlFilterSourceImageFile::Release()
 {
     for (unsigned int i = 0; i < ImageCodec.size(); i ++) {
-        if (ImageCodec[i]) delete ImageCodec[i];
+        svlImageIO::ReleaseCodec(ImageCodec[i]);
         ImageCodec[i] = 0;
     }
 

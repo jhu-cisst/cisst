@@ -115,7 +115,7 @@ private:
     void ReallocateTargetParams(unsigned int targetcount);
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterPointTracker)
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterPointTracker)
 
 #endif // _svlFilterPointTracker_h
 

@@ -60,7 +60,7 @@ private:
     void ConvertColorSpace(unsigned char* buffer, unsigned int numofpixels);
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterColorSpaceConverter)
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterColorSpaceConverter)
 
 #endif // _svlFilterColorSpaceConverter_h
 

@@ -172,7 +172,7 @@ public:
     void* Proc(svlFilterImageWindow* obj);
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterImageWindow)
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterImageWindow)
 
 #endif // _svlFilterImageWindow_h
 

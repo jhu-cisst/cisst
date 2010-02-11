@@ -57,7 +57,7 @@ private:
     void CheckAndFixRectangle(unsigned int videoch, unsigned int width, unsigned int height);
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterImageCropper)
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterImageCropper)
 
 #endif // _svlFilterImageCropper_h
 

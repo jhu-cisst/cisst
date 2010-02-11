@@ -152,7 +152,7 @@ void svlFilterComputationalStereo::CreateXCheckImageMono(_paramType* source, _pa
     }
 }
 
-CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterComputationalStereo)
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterComputationalStereo)
 
 #endif // _svlFilterComputationalStereo_h
 

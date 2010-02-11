@@ -56,7 +56,7 @@ private:
     bool Noise;
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(svlFilterSourceDummy)
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterSourceDummy)
 
 #endif // _svlFilterSourceDummy_h
 

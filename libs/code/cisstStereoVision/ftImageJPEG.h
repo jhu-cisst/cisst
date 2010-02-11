@@ -53,7 +53,7 @@ protected:
     size_t jpegRowBufferSize;
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(ftImageJPEG)
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(ftImageJPEG)
 
 #endif // _ftImageJPEG_h
 
