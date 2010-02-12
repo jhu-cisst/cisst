@@ -48,7 +48,7 @@ class CISST_EXPORT mtsCollectorState : public mtsCollectorBase
     friend class mtsCollectorStateTest;
     friend class mtsStateTable;
 
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 5);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
     /*! Structure and container definition to manage the list of signals to be
         collected by this collector. */

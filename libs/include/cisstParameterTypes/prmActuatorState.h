@@ -40,7 +40,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 class CISST_EXPORT prmActuatorState: public mtsGenericObject
 {
-    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, 5);
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
 public:
     typedef prmActuatorState ThisType;

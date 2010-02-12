@@ -35,7 +35,7 @@ http://www.cisst.org/cisst/license.txt.
 
 class MeasurementBehaviorVisibleObject: public ui3VisibleObject
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 5);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 public:
     inline MeasurementBehaviorVisibleObject(vctFrm3 position, const std::string & name = "Text"):
         ui3VisibleObject(name),

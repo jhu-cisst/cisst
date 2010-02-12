@@ -62,7 +62,7 @@ This class creates the VTK object from a STL file of the ultrasound probe head
 #if 1
 class BehaviorLUSProbeHead: public ui3VisibleObject
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 5);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 public:
       inline BehaviorLUSProbeHead(vctFrm3 position, const std::string & name = "ProbeHead"):
         ui3VisibleObject(name),
@@ -133,7 +133,7 @@ This class creates the VTK object that will become the joints of the probe
 
 class BehaviorLUSProbeJoint: public ui3VisibleObject
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 5);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
     public:
     inline BehaviorLUSProbeJoint(vctFrm3 position,const std::string & name = "ProbeJoint"):
     ui3VisibleObject(name),
@@ -203,7 +203,7 @@ This class creates the VTK object that will become the shaft of the probe
 
 class BehaviorLUSProbeShaft: public ui3VisibleObject
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 5);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
     public:
     inline BehaviorLUSProbeShaft(vctFrm3 position, const std::string & name = "Probe Shaft"):
         ui3VisibleObject(name),
@@ -277,7 +277,7 @@ This class creates the VTK text object that will create text in the scene
  */
 class BehaviorLUSText: public ui3VisibleObject
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 5);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 public:
     inline BehaviorLUSText(vctFrm3 position, const std::string & name = "Text"):
         ui3VisibleObject(name),
@@ -353,7 +353,7 @@ This class creates the VTK objects that will become the background for the map
  */
 class BehaviorLUSBackground: public ui3VisibleObject
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 5);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
     public:
     inline BehaviorLUSBackground(vctFrm3 position, const std::string & name = "Background"):
         ui3VisibleObject(name),
@@ -422,7 +422,7 @@ This class creates the VTK object that will become the outline for the probe gra
 
 class BehaviorLUSOutline: public ui3VisibleObject
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 5);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 public:
     inline BehaviorLUSOutline(vctFrm3 position, const std::string & name = "Outline"):
         ui3VisibleObject(name),
@@ -483,7 +483,7 @@ This class creates the VTK object that will become the cursor and markers of the
  */
 class BehaviorLUSMarker: public ui3VisibleObject
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 5);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
     public:
     inline BehaviorLUSMarker(const std::string & name):
     ui3VisibleObject(name),

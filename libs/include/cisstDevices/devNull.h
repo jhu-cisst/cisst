@@ -37,7 +37,7 @@ http://www.cisst.org/cisst/license.txt.
   This class provides a null device.
 */
 class CISST_EXPORT devNull: public mtsDevice {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 10);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
 public:
     devNull(const std::string & name) : mtsDevice(name) {}
