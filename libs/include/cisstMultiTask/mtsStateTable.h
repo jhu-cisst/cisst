@@ -353,6 +353,9 @@ public:
     */
     void Advance(void);
 
+    /*! Kill, called when the task is being stopped.  Used for cleanup. */
+    void Kill(void);
+
     inline double GetTic(void) const {
         return Tic.Data;
     }

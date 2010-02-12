@@ -238,6 +238,16 @@ void mtsStateTable::Advance(void) {
 }
 
 
+void mtsStateTable::Kill(void) {
+    CMN_LOG_CLASS_INIT_DEBUG << "Kill: state table \"" << this->Name << "\"" << std::endl;    
+    // if the state table is still set to collect data, send error message, should have been stopped
+    if (this->DataCollection.Collecting) {
+        CMN_LOG_CLASS_INIT_ERROR << "Kill: data collection for state table \"" << this->Name
+                                 << "\" has not been stopped.  It is possible that the state collector will look for this state table after it has been deleted." << std::endl; 
+    }
+}
+
+
 void mtsStateTable::ToStream(std::ostream & outputStream) const {
     outputStream << "State Table: " << this->GetName() << std::endl;
     unsigned int i;
