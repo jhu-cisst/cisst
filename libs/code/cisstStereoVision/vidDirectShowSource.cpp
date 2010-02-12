@@ -419,130 +419,167 @@ int CDirectShowSource::AssembleGraph()
         hr = pGraph->AddFilter(pSampleGrabFilter[i], 0);
         if (hr != S_OK) goto labError;
 
-		bool usingAVI = true;
-        hr = pGraphBuilder->RenderStream(&(PinCategory[i]), &MEDIATYPE_Video, pCaptureFilter[i], 0, pAviDecomprFilter[i]);
-        if (hr == VFW_E_CANNOT_CONNECT) {
-            CMN_LOG_CLASS_INIT_VERBOSE << "AssembleGraph: Cannot connect to AVI decompression filter." << endl;
-            hr = pGraphBuilder->RenderStream(&(PinCategory[i]), &MEDIATYPE_Video, pCaptureFilter[i], 0, pColorConvFilter[i]);
+        // Try to directly connect source filter to color space converter, then to sample grabber
+        hr = pGraphBuilder->RenderStream(&(PinCategory[i]), &MEDIATYPE_Video, pCaptureFilter[i], pColorConvFilter[i], pSampleGrabFilter[i]);
+        if (hr == S_OK || hr == VFW_S_NOPREVIEWPIN) {
             if (hr == S_OK) {
-                CMN_LOG_CLASS_INIT_VERBOSE << "AssembleGraph: Connected directly to colour space convertor." << endl;
-                hr = pGraphBuilder->RenderStream(0, 0, pColorConvFilter[i], 0, pSampleGrabFilter[i]);
-                if (hr == S_OK) usingAVI = false;
+                CMN_LOG_CLASS_INIT_VERBOSE << "AssembleGraph: Connected to colour space converter, then to sample grabber." << endl;
+            }
+            else {
+                CMN_LOG_CLASS_INIT_VERBOSE << "AssembleGraph: Connected (through a smart tee) to colour space converter, then to sample grabber." << endl;
             }
         }
-        if (hr != S_OK) {
-        // Cannot directly connect Capture Filter to Avi Decompressor Filter or Colour conversion filter,
-        // so start searching with brute force for an appropriate intermediate filter
+        else {
+            CMN_LOG_CLASS_INIT_VERBOSE << "AssembleGraph: Cannot directly connect to colour space converter, then to sample grabber." << endl;
 
-            IFilterMapper2 *mapper;
-            GUID typesarray[2];
-            IEnumMoniker *enumcat;
-            IMoniker *moniker;
-            ULONG fetched;
+            // Try connecting source filter to AVI decompressor
+            hr = pGraphBuilder->RenderStream(&(PinCategory[i]), &MEDIATYPE_Video, pCaptureFilter[i], 0, pAviDecomprFilter[i]);
+            if (hr == S_OK) {
+                CMN_LOG_CLASS_INIT_VERBOSE << "AssembleGraph: Connected to AVI decompressor." << endl;
 
-            CMN_LOG_CLASS_INIT_VERBOSE << "AssembleGraph: Searching for intermediate filters." << endl;
-            // Searching for matching filters
-            hr = CoCreateInstance(CLSID_FilterMapper2, 0, CLSCTX_INPROC, IID_IFilterMapper2, reinterpret_cast<void**>(&mapper));
-            if (hr != S_OK) goto labError;
+                hr = pGraphBuilder->RenderStream(0, 0, pAviDecomprFilter[i], pColorConvFilter[i], pSampleGrabFilter[i]);
+                if (hr != S_OK) goto labError;
 
-            typesarray[0] = MEDIATYPE_Video;
-            typesarray[1] = GUID_NULL;
-            hr = mapper->EnumMatchingFilters(&enumcat,
-                                             0,                     // Reserved.
-                                             TRUE,                  // Use exact match?
-                                             MERIT_DO_NOT_USE + 1,  // Minimum merit.
-                                             TRUE,                  // At least one input pin?
-                                             1,                     // Number of major type/subtype pairs for input.
-                                             typesarray,            // Array of major type/subtype pairs for input.
-                                             0,                  // Input medium.
-                                             0,                  // Input pin category.
-                                             FALSE,                 // Must be a renderer?
-                                             TRUE,                  // At least one output pin?
-                                             0,                     // Number of major type/subtype pairs for output.
-                                             0,                  // Array of major type/subtype pairs for output.
-                                             0,                  // Output medium.
-                                             0);                 // Output pin category.
-            if (hr != S_OK) {
-                mapper->Release();
-                goto labError;
+                CMN_LOG_CLASS_INIT_VERBOSE << "AssembleGraph: AVI decompressor connected to colour space converter, then to sample grabber filter." << endl;
             }
+            else {
+                CMN_LOG_CLASS_INIT_VERBOSE << "AssembleGraph: Cannot connect to AVI decompression filter." << endl;
 
-            // Enumerating the monikers
-            while (enumcat->Next(1, &moniker, &fetched) == S_OK) {
-                // Getting a reference to the enumerated filter
-                hr = moniker->BindToObject(0, 0, IID_IBaseFilter, reinterpret_cast<void**>(&(pIntermediatePreviewFilter[i])));
-                if (hr == S_OK) {
-                    hr = pGraph->AddFilter(pIntermediatePreviewFilter[i], 0);
-                    if (hr == S_OK) {
-                        hr = pGraphBuilder->RenderStream(&(PinCategory[i]),
-                                                         &MEDIATYPE_Video,
-                                                         pCaptureFilter[i],
-                                                         pIntermediatePreviewFilter[i],
-                                                         pAviDecomprFilter[i]);
-                        if (hr == S_OK) {
-                            // Display the filter name
-                            IPropertyBag *pPropBag = NULL;
-                            hr = moniker->BindToStorage(0, 0, IID_IPropertyBag, (void **)&pPropBag);
-                            if (hr == S_OK) {
-                                VARIANT varName;
-                                VariantInit(&varName);
-                                hr = pPropBag->Read(L"FriendlyName", &varName, 0);
-                                if (hr == S_OK) {
-                                    char mbstr[256];
-                                    memset(mbstr, 0, 256);
-                                    WideCharToMultiByte(CP_ACP, 0, varName.bstrVal, -1, mbstr, 256, 0, 0);
-                                    CMN_LOG_CLASS_INIT_VERBOSE << "AssembleGraph: using filter: " << mbstr << endl;
+                // Cannot directly connect Capture Filter to Avi Decompressor Filter or Colour conversion filter,
+                // so start searching with brute force for an appropriate intermediate filter
+
+                IFilterMapper2 *mapper = 0;
+                IEnumMoniker *enumcat = 0;
+                IMoniker *moniker = 0;
+                GUID typesarray[2];
+                ULONG fetched;
+
+                CMN_LOG_CLASS_INIT_VERBOSE << "AssembleGraph: Searching for intermediate filters." << endl;
+
+                // Searching for matching filters
+                hr = CoCreateInstance(CLSID_FilterMapper2, 0, CLSCTX_INPROC, IID_IFilterMapper2, reinterpret_cast<void**>(&mapper));
+                if (hr != S_OK || !mapper) goto labError;
+
+                typesarray[0] = MEDIATYPE_Video;
+                typesarray[1] = GUID_NULL;
+                hr = mapper->EnumMatchingFilters(&enumcat,
+                                                 0,                     // Reserved.
+                                                 TRUE,                  // Use exact match?
+                                                 MERIT_DO_NOT_USE + 1,  // Minimum merit.
+                                                 TRUE,                  // At least one input pin?
+                                                 1,                     // Number of major type/subtype pairs for input.
+                                                 typesarray,            // Array of major type/subtype pairs for input.
+                                                 0,                     // Input medium.
+                                                 0,                     // Input pin category.
+                                                 FALSE,                 // Must be a renderer?
+                                                 TRUE,                  // At least one output pin?
+                                                 0,                     // Number of major type/subtype pairs for output.
+                                                 0,                     // Array of major type/subtype pairs for output.
+                                                 0,                     // Output medium.
+                                                 0);                    // Output pin category.
+                if (hr != S_OK || !enumcat) {
+                    mapper->Release();
+                    goto labError;
+                }
+
+                // Enumerating the monikers
+                while (enumcat->Next(1, &moniker, &fetched) == S_OK) {
+
+                    // Getting a reference to the enumerated filter
+                    if (moniker->BindToObject(0, 0, IID_IBaseFilter, reinterpret_cast<void**>(&(pIntermediatePreviewFilter[i]))) == S_OK) {
+
+                        if (pGraph->AddFilter(pIntermediatePreviewFilter[i], 0) == S_OK) {
+
+                            // First try to connect to color space converter
+                            if (pGraphBuilder->RenderStream(&(PinCategory[i]), &MEDIATYPE_Video,
+                                                            pCaptureFilter[i], pIntermediatePreviewFilter[i], pColorConvFilter[i]) == S_OK) {
+                                hr = pGraphBuilder->RenderStream(0, 0,
+                                                                 pColorConvFilter[i], 0, pSampleGrabFilter[i]);
+                                if (hr != S_OK) {
+                                    // Disconnect source and color space renderer from all other filters
+                                    pCaptureFilterOut[i]->Disconnect();
+                                    pGraph->RemoveFilter(pColorConvFilter[i]);
+                                    pGraph->AddFilter(pColorConvFilter[i], 0);
                                 }
-                                VariantClear(&varName);
-                                pPropBag->Release();
                             }
-                            // FOUND, so exit from the loop
-                            moniker->Release();
-                            break;
+                            // Then try to build through AVI decompressor
+                            else if (pGraphBuilder->RenderStream(&(PinCategory[i]), &MEDIATYPE_Video,
+                                                                 pCaptureFilter[i], pIntermediatePreviewFilter[i], pAviDecomprFilter[i]) == S_OK) {
+                                hr = pGraphBuilder->RenderStream(0, 0,
+                                                                 pAviDecomprFilter[i], pColorConvFilter[i], pSampleGrabFilter[i]);
+                                if (hr != S_OK) {
+                                    // Disconnect source and AVI decompressor from all other filters
+                                    pCaptureFilterOut[i]->Disconnect();
+                                    pGraph->RemoveFilter(pAviDecomprFilter[i]);
+                                    pGraph->AddFilter(pAviDecomprFilter[i], 0);
+                                }
+                            }
+                            // All failed
+                            else {
+                                hr = S_FALSE;
+                            }
+
+                            if (hr == S_OK) {
+
+                                // Display the filter name
+                                stringstream str;
+                                IPropertyBag *pPropBag = NULL;
+                                hr = moniker->BindToStorage(0, 0, IID_IPropertyBag, (void **)&pPropBag);
+                                if (hr == S_OK) {
+                                    VARIANT varName;
+                                    VariantInit(&varName);
+                                    hr = pPropBag->Read(L"FriendlyName", &varName, 0);
+                                    if (hr == S_OK)
+                                        str << varName.bstrVal;
+                                    VariantClear(&varName);
+                                    pPropBag->Release();
+                                }
+                                if (hr != S_OK)
+                                    str << "Unknown";
+                                CMN_LOG_CLASS_INIT_VERBOSE << "AssembleGraph: Using intermediate filter: " << str.str() << endl;
+
+                                // Intermediate filter found, so exit from loop
+                                break;
+                            }
                         }
+
+                        // Mismatch, so remove and release filter
+                        if (pIntermediatePreviewFilter[i] != 0) {
+                            pGraph->RemoveFilter(pIntermediatePreviewFilter[i]);
+                            pIntermediatePreviewFilter[i]->Release();
+                            pIntermediatePreviewFilter[i] = 0;
+                        }
+                    }
+
+                    if (moniker) {
+                        moniker->Release();
+                        moniker = 0;
                     }
                 }
 
-                // Mismatch, so remove and release filter
-                if (pIntermediatePreviewFilter[i] != 0) {
-                    pGraph->RemoveFilter(pIntermediatePreviewFilter[i]);
-                    pIntermediatePreviewFilter[i]->Release();
-                    pIntermediatePreviewFilter[i] = 0;
-                }
+                enumcat->Release();
+                mapper->Release();
 
-                moniker->Release();
+                // No intermediate filter found
+                if (pIntermediatePreviewFilter[i] == 0) goto labError;
             }
-
-            enumcat->Release();
-            mapper->Release();
-
-            // No intermediate filter found
-            if (pIntermediatePreviewFilter[i] == 0) goto labError;
         }
 
-        if (usingAVI) {
-            hr = pGraphBuilder->RenderStream(0, 0, pAviDecomprFilter[i], pColorConvFilter[i], pSampleGrabFilter[i]);
-            if (hr != S_OK) goto labError;
-            CMN_LOG_CLASS_INIT_VERBOSE << "AssembleGraph: connected AVI decompressor to grab filter." << endl;
-        }
-
-        hr = pCaptureFilterOut[i]->ConnectionMediaType(&mediatype);
-        if (hr != S_OK) goto labError;
-
+        // Get image capture dimensions
+        if (pCaptureFilterOut[i]->ConnectionMediaType(&mediatype) != S_OK) goto labError;
         videoinfo = reinterpret_cast<VIDEOINFOHEADER*>(mediatype.pbFormat);
         CapWidth[i] = videoinfo->bmiHeader.biWidth;
         CapHeight[i] = videoinfo->bmiHeader.biHeight;
         CoTaskMemFree(mediatype.pbFormat);
 
+        // Setup output buffer and frame callback
         OutputBuffer[i] = new svlImageBuffer(CapWidth[i], CapHeight[i]);
         pCallBack[i] = new CDirectShowSourceCB(OutputBuffer[i]);
-        hr = pSampleGrabber[i]->SetCallback(pCallBack[i], 1);
-        if (hr != S_OK) goto labError;
+        if (pSampleGrabber[i]->SetCallback(pCallBack[i], 1) != S_OK) goto labError;
 
-        if (EnableRenderer[i] != 0) {
-            hr = pGraphBuilder->RenderStream(0, 0, pSampleGrabFilter[i], 0, 0);
-            if (hr != S_OK) goto labError;
-        }
+        // Add DirectShow video renderer if requested
+        if (EnableRenderer[i] != 0 &&
+            pGraphBuilder->RenderStream(0, 0, pSampleGrabFilter[i], 0, 0) != S_OK) goto labError;
     }
 
     return SVL_OK;
