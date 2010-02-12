@@ -204,15 +204,15 @@ int svlFilterSourceVideoCapture::Initialize()
             }
 #endif // CISST_SVL_HAS_DIRECTSHOW
         }
-        else if (platform == MatroxImaging) {
 #if (CISST_SVL_HAS_MIL == ON)
+        else if (platform == MatroxImaging) {
             // Check if Matrox device supports capture
             if (dynamic_cast<CMILDevice*>(DeviceObj[API[i]])->EnableCapture(APIDeviceID[i]) == false) {
                 ret = SVL_VCS_UNABLE_TO_OPEN;
                 goto labError;
             }
-#endif // CISST_SVL_HAS_MIL
         }
+#endif // CISST_SVL_HAS_MIL
         else {
             if (Format[i]) DeviceObj[API[i]]->SetFormat(Format[i][0], APIChannelID[i]);
         }

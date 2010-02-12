@@ -214,7 +214,7 @@ private:
 };
 
 
-class CVideoCaptureSourceBase
+class CISST_EXPORT CVideoCaptureSourceBase
 {
 public:
     CVideoCaptureSourceBase() {}
