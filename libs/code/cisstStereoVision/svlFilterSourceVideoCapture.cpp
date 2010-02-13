@@ -23,7 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon.h>
 #include <cisstStereoVision/svlFilterSourceVideoCapture.h>
 #include <cisstOSAbstraction/osaSleep.h>
-#include "vidInitializer.h"
+#include "svlVidCapSrcInitializer.h"
 
 #ifdef _MSC_VER
     // Quick fix for Visual Studio Intellisense:
@@ -200,14 +200,14 @@ int svlFilterSourceVideoCapture::Initialize()
             // DirectShow does not use the Format structure.
             // Instead, it has its own custom configuration format.
             if (DevSpecConfigBuffer[i] && DevSpecConfigBufferSize[i] > 0) {
-                dynamic_cast<CDirectShowSource*>(DeviceObj[API[i]])->SetMediaType(DevSpecConfigBuffer[i], DevSpecConfigBufferSize[i], APIChannelID[i]);
+                dynamic_cast<svlVidCapSrcDirectShow*>(DeviceObj[API[i]])->SetMediaType(DevSpecConfigBuffer[i], DevSpecConfigBufferSize[i], APIChannelID[i]);
             }
 #endif // CISST_SVL_HAS_DIRECTSHOW
         }
 #if (CISST_SVL_HAS_MIL == ON)
         else if (platform == MatroxImaging) {
             // Check if Matrox device supports capture
-            if (dynamic_cast<CMILDevice*>(DeviceObj[API[i]])->EnableCapture(APIDeviceID[i]) == false) {
+            if (dynamic_cast<svlVidCapSrcMIL*>(DeviceObj[API[i]])->EnableCapture(APIDeviceID[i]) == false) {
                 ret = SVL_VCS_UNABLE_TO_OPEN;
                 goto labError;
             }
@@ -301,7 +301,7 @@ int svlFilterSourceVideoCapture::Release()
         // MIL device object is a singleton, should not be deleted
         if (DeviceObj[i] &&
             DeviceObj[i]->GetPlatformType() == MatroxImaging) {
-            dynamic_cast<CMILDevice*>(DeviceObj[i])->Release();
+            dynamic_cast<svlVidCapSrcMIL*>(DeviceObj[i])->Release();
             continue;
         }
 #endif // CISST_SVL_HAS_MIL
@@ -321,7 +321,7 @@ void svlFilterSourceVideoCapture::InitializeCaptureAPIs()
 
     // Enumerate registered APIs
     cmnGenericObject* go;
-    CVideoCaptureSourceBase* api;
+    svlVidCapSrcBase* api;
     SupportedAPIs.SetSize(256);
     APIPlatforms.SetSize(256);
 
@@ -340,13 +340,13 @@ void svlFilterSourceVideoCapture::InitializeCaptureAPIs()
             if (go == 0) {
 #if (CISST_SVL_HAS_MIL == ON)
                 // MIL device object is a singleton, cannot be created dynamically
-                if ((*iter).first == "CMILDevice") {
-                    go = CMILDevice::GetInstance();
+                if ((*iter).first == "svlVidCapSrcMIL") {
+                    go = svlVidCapSrcMIL::GetInstance();
                 }
 #endif // CISST_SVL_HAS_MIL
             }
 
-            api = dynamic_cast<CVideoCaptureSourceBase*>(go);
+            api = dynamic_cast<svlVidCapSrcBase*>(go);
 
             if (api) {
                 SupportedAPIs[NumberOfSupportedAPIs] = (*iter).second;
@@ -411,12 +411,12 @@ int svlFilterSourceVideoCapture::CreateCaptureAPIHandlers()
 #if (CISST_SVL_HAS_MIL == ON)
                 // MIL device object is a singleton, cannot be created dynamically
                 if (APIPlatforms[j] == MatroxImaging) {
-                    DeviceGenObj[j] = CMILDevice::GetInstance();
+                    DeviceGenObj[j] = svlVidCapSrcMIL::GetInstance();
                 }
 #endif // CISST_SVL_HAS_MIL
             }
 
-            DeviceObj[j] = dynamic_cast<CVideoCaptureSourceBase*>(DeviceGenObj[j]);
+            DeviceObj[j] = dynamic_cast<svlVidCapSrcBase*>(DeviceGenObj[j]);
 
             if (DeviceObj[j] == 0 ||
                 DeviceObj[j]->SetStreamCount(chperapi[j]) != SVL_OK) goto labError;
@@ -556,7 +556,7 @@ int svlFilterSourceVideoCapture::DialogFormat(unsigned int videoch)
     if (platform == WinDirectShow) {
 #if (CISST_SVL_HAS_DIRECTSHOW == ON)
         // Create temporary DirectShow capture module and initialize it
-        CDirectShowSource device;
+        svlVidCapSrcDirectShow device;
         device.SetStreamCount(1);
         if (device.SetDevice(EnumeratedDevices[DeviceID[videoch]].id,
                              InputID[videoch]) != SVL_OK) return SVL_VCS_UNABLE_TO_OPEN;
@@ -738,7 +738,7 @@ int svlFilterSourceVideoCapture::DialogImageProperties(unsigned int videoch)
 
     if (platform == WinDirectShow) {
 #if (CISST_SVL_HAS_DIRECTSHOW == ON)
-        CDirectShowSource* device = dynamic_cast<CDirectShowSource*>(DeviceObj[API[videoch]]);
+        svlVidCapSrcDirectShow* device = dynamic_cast<svlVidCapSrcDirectShow*>(DeviceObj[API[videoch]]);
         if (device->ShowImageDialog(0, APIChannelID[videoch]) == SVL_OK) {
             // Store, whatever changes have been made
             device->RequestMediaType();
@@ -760,13 +760,13 @@ int svlFilterSourceVideoCapture::DialogImageProperties(unsigned int videoch)
         printf("  |    <1 2> |   <3 4> |  <5 6> |  <7 8> |      <9 0> |    <i o> |    <k l> |\r\n");
 
         int ret = SVL_FAIL;
-        CVideoCaptureSourceDialogThread* proc;
+        svlVidCapSrcDialogThread* proc;
         osaThread* thread;
 
-        proc = new CVideoCaptureSourceDialogThread(videoch);
+        proc = new svlVidCapSrcDialogThread(videoch);
         thread = new osaThread;
-        thread->Create<CVideoCaptureSourceDialogThread, svlFilterSourceVideoCapture*>(proc,
-                                                                                  &CVideoCaptureSourceDialogThread::Proc,
+        thread->Create<svlVidCapSrcDialogThread, svlFilterSourceVideoCapture*>(proc,
+                                                                                  &svlVidCapSrcDialogThread::Proc,
                                                                                   this);
         if (proc->WaitForInit()) {
             GetImageProperties(videoch);
@@ -914,7 +914,7 @@ int svlFilterSourceVideoCapture::GetDeviceList(DeviceInfo **deviceinfolist, bool
         int i;
         unsigned int j, sum;
         cmnGenericObject* go;
-        CVideoCaptureSourceBase* api;
+        svlVidCapSrcBase* api;
         DeviceInfo **apideviceinfos = new DeviceInfo*[NumberOfSupportedAPIs];
         int *apidevicecounts = new int[NumberOfSupportedAPIs];
         ImageFormat ***apiformats = new ImageFormat**[NumberOfSupportedAPIs];
@@ -948,12 +948,12 @@ int svlFilterSourceVideoCapture::GetDeviceList(DeviceInfo **deviceinfolist, bool
 #if (CISST_SVL_HAS_MIL == ON)
                 // MIL device object is a singleton, cannot be created dynamically
                 if (APIPlatforms[j] == MatroxImaging) {
-                    go = CMILDevice::GetInstance();
+                    go = svlVidCapSrcMIL::GetInstance();
                 }
 #endif // CISST_SVL_HAS_MIL
             }
 
-            api = dynamic_cast<CVideoCaptureSourceBase*>(go);
+            api = dynamic_cast<svlVidCapSrcBase*>(go);
 
             if (api) {
                 apideviceinfos[j] = 0;
@@ -1546,50 +1546,50 @@ labError:
 
 
 /***************************************/
-/*** CVideoCaptureSourceBase class *****/
+/*** svlVidCapSrcBase class ************/
 /***************************************/
 
-int CVideoCaptureSourceBase::GetFormatList(unsigned int CMN_UNUSED(deviceid), svlFilterSourceVideoCapture::ImageFormat ** CMN_UNUSED(formatlist))
+int svlVidCapSrcBase::GetFormatList(unsigned int CMN_UNUSED(deviceid), svlFilterSourceVideoCapture::ImageFormat ** CMN_UNUSED(formatlist))
 {
     return SVL_FAIL;
 }
 
-int CVideoCaptureSourceBase::SetFormat(svlFilterSourceVideoCapture::ImageFormat & CMN_UNUSED(format), unsigned int CMN_UNUSED(videoch))
+int svlVidCapSrcBase::SetFormat(svlFilterSourceVideoCapture::ImageFormat & CMN_UNUSED(format), unsigned int CMN_UNUSED(videoch))
 {
     return SVL_FAIL;
 }
 
-int CVideoCaptureSourceBase::GetFormat(svlFilterSourceVideoCapture::ImageFormat & CMN_UNUSED(format), unsigned int CMN_UNUSED(videoch))
+int svlVidCapSrcBase::GetFormat(svlFilterSourceVideoCapture::ImageFormat & CMN_UNUSED(format), unsigned int CMN_UNUSED(videoch))
 {
     return SVL_FAIL;
 }
 
-int CVideoCaptureSourceBase::SetImageProperties(svlFilterSourceVideoCapture::ImageProperties & CMN_UNUSED(properties), unsigned int CMN_UNUSED(videoch))
+int svlVidCapSrcBase::SetImageProperties(svlFilterSourceVideoCapture::ImageProperties & CMN_UNUSED(properties), unsigned int CMN_UNUSED(videoch))
 {
     return SVL_FAIL;
 }
 
-int CVideoCaptureSourceBase::GetImageProperties(svlFilterSourceVideoCapture::ImageProperties & CMN_UNUSED(properties), unsigned int CMN_UNUSED(videoch))
+int svlVidCapSrcBase::GetImageProperties(svlFilterSourceVideoCapture::ImageProperties & CMN_UNUSED(properties), unsigned int CMN_UNUSED(videoch))
 {
     return SVL_FAIL;
 }
 
-int CVideoCaptureSourceBase::SetTrigger(svlFilterSourceVideoCapture::ExternalTrigger & CMN_UNUSED(trigger), unsigned int CMN_UNUSED(videoch))
+int svlVidCapSrcBase::SetTrigger(svlFilterSourceVideoCapture::ExternalTrigger & CMN_UNUSED(trigger), unsigned int CMN_UNUSED(videoch))
 {
     return SVL_FAIL;
 }
 
-int CVideoCaptureSourceBase::GetTrigger(svlFilterSourceVideoCapture::ExternalTrigger & CMN_UNUSED(trigger), unsigned int CMN_UNUSED(videoch))
+int svlVidCapSrcBase::GetTrigger(svlFilterSourceVideoCapture::ExternalTrigger & CMN_UNUSED(trigger), unsigned int CMN_UNUSED(videoch))
 {
     return SVL_FAIL;
 }
 
 
 /***********************************************/
-/*** CVideoCaptureSourceDialogThread class *****/
+/*** svlVidCapSrcDialogThread class ************/
 /***********************************************/
 
-void* CVideoCaptureSourceDialogThread::Proc(svlFilterSourceVideoCapture* baseref)
+void* svlVidCapSrcDialogThread::Proc(svlFilterSourceVideoCapture* baseref)
 {
     // signal success to main thread
     InitSuccess = true;

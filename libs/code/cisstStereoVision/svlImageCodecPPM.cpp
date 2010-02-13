@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id$
+  $Id: svlImageCodecPPM.cpp 1140 2010-02-03 21:08:09Z bvagvol1 $
   
   Author(s):  Ben Mitchell
   Created on: 2006 
@@ -21,7 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 Original code courtesy of Ben Mitchell.
 */
 
-#include "ftImagePPM.h"
+#include "svlImageCodecPPM.h"
 #include <cisstStereoVision/svlStreamDefs.h>
 
 
@@ -255,15 +255,15 @@ int ppmWrite(const unsigned char* buffer, const unsigned int width, const unsign
 
 
 /*************************************/
-/*** ftImagePPM class ****************/
+/*** svlImageCodecPPM class **********/
 /*************************************/
 
 #define MAX_DIMENISION  8192
 
-CMN_IMPLEMENT_SERVICES(ftImagePPM)
+CMN_IMPLEMENT_SERVICES(svlImageCodecPPM)
 
-ftImagePPM::ftImagePPM() :
-    svlImageCodec(),
+svlImageCodecPPM::svlImageCodecPPM() :
+    svlImageCodecBase(),
     cmnGenericObject(),
     ppmBuffer(0),
     ppmBufferSize(0)
@@ -271,38 +271,38 @@ ftImagePPM::ftImagePPM() :
     ExtensionList = ".ppm;.pgm;";
 }
 
-ftImagePPM::~ftImagePPM()
+svlImageCodecPPM::~svlImageCodecPPM()
 {
     if (ppmBuffer) delete [] ppmBuffer;
 }
 
-int ftImagePPM::ReadDimensions(const std::string &filename, unsigned int &width, unsigned int &height)
+int svlImageCodecPPM::ReadDimensions(const std::string &filename, unsigned int &width, unsigned int &height)
 {
     std::ifstream stream(filename.c_str(), std::ios_base::in | std::ios_base::binary);
     return ReadDimensions(stream, width, height);
 }
 
-int ftImagePPM::ReadDimensions(std::istream &stream, unsigned int &width, unsigned int &height)
+int svlImageCodecPPM::ReadDimensions(std::istream &stream, unsigned int &width, unsigned int &height)
 {
     int magicnumber = ppmOpen(stream, width, height);
     if (magicnumber < 0) return SVL_FAIL;
     return SVL_OK;
 }
 
-int ftImagePPM::ReadDimensions(const unsigned char *buffer, const size_t buffersize, unsigned int &width, unsigned int &height)
+int svlImageCodecPPM::ReadDimensions(const unsigned char *buffer, const size_t buffersize, unsigned int &width, unsigned int &height)
 {
     int magicnumber = ppmOpen(buffer, buffersize, width, height);
     if (magicnumber < 0) return SVL_FAIL;
     return SVL_OK;
 }
 
-int ftImagePPM::Read(svlSampleImageBase &image, const unsigned int videoch, const std::string &filename, bool noresize)
+int svlImageCodecPPM::Read(svlSampleImageBase &image, const unsigned int videoch, const std::string &filename, bool noresize)
 {
     std::ifstream stream(filename.c_str(), std::ios_base::in | std::ios_base::binary);
     return Read(image, videoch, stream, noresize);
 }
 
-int ftImagePPM::Read(svlSampleImageBase &image, const unsigned int videoch, std::istream &stream, bool noresize)
+int svlImageCodecPPM::Read(svlSampleImageBase &image, const unsigned int videoch, std::istream &stream, bool noresize)
 {
     if (videoch >= image.GetVideoChannels()) return SVL_FAIL;
 
@@ -323,7 +323,7 @@ int ftImagePPM::Read(svlSampleImageBase &image, const unsigned int videoch, std:
     return ppmRead(stream, image.GetUCharPointer(videoch), width * height, magicnumber);
 }
 
-int ftImagePPM::Read(svlSampleImageBase &image, const unsigned int videoch, const unsigned char *buffer, const size_t buffersize, bool noresize)
+int svlImageCodecPPM::Read(svlSampleImageBase &image, const unsigned int videoch, const unsigned char *buffer, const size_t buffersize, bool noresize)
 {
     if (videoch >= image.GetVideoChannels()) return SVL_FAIL;
 
@@ -344,7 +344,7 @@ int ftImagePPM::Read(svlSampleImageBase &image, const unsigned int videoch, cons
     return ppmRead(buffer, buffersize, image.GetUCharPointer(videoch), width * height, magicnumber);
 }
 
-int ftImagePPM::Write(const svlSampleImageBase &image, const unsigned int videoch, const std::string &filename, const int compression)
+int svlImageCodecPPM::Write(const svlSampleImageBase &image, const unsigned int videoch, const std::string &filename, const int compression)
 {
     std::ofstream stream(filename.c_str(), std::ios_base::out | std::ios_base::binary);
 
@@ -355,12 +355,12 @@ int ftImagePPM::Write(const svlSampleImageBase &image, const unsigned int videoc
     return Write(image, videoch, stream, codec, compression);
 }
 
-int ftImagePPM::Write(const svlSampleImageBase &image, const unsigned int videoch, std::ostream &stream, const int compression)
+int svlImageCodecPPM::Write(const svlSampleImageBase &image, const unsigned int videoch, std::ostream &stream, const int compression)
 {
     return Write(image, videoch, stream, "ppm", compression);
 }
 
-int ftImagePPM::Write(const svlSampleImageBase &image, const unsigned int videoch, std::ostream &stream, const std::string &codec, const int CMN_UNUSED(compression))
+int svlImageCodecPPM::Write(const svlSampleImageBase &image, const unsigned int videoch, std::ostream &stream, const std::string &codec, const int CMN_UNUSED(compression))
 {
     if (videoch >= image.GetVideoChannels()) return SVL_FAIL;
   
@@ -398,12 +398,12 @@ int ftImagePPM::Write(const svlSampleImageBase &image, const unsigned int videoc
     return ppmWrite(imagebuf, ppmBuffer, width, height, magicnumber, stream);
 }
 
-int ftImagePPM::Write(const svlSampleImageBase &image, const unsigned int videoch, unsigned char *buffer, size_t &buffersize, const int compression)
+int svlImageCodecPPM::Write(const svlSampleImageBase &image, const unsigned int videoch, unsigned char *buffer, size_t &buffersize, const int compression)
 {
     return Write(image, videoch, buffer, buffersize, "ppm", compression);
 }
 
-int ftImagePPM::Write(const svlSampleImageBase &image, const unsigned int videoch, unsigned char *buffer, size_t &buffersize, const std::string &codec, const int CMN_UNUSED(compression))
+int svlImageCodecPPM::Write(const svlSampleImageBase &image, const unsigned int videoch, unsigned char *buffer, size_t &buffersize, const std::string &codec, const int CMN_UNUSED(compression))
 {
     if (videoch >= image.GetVideoChannels()) return SVL_FAIL;
   

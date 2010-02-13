@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id$
+  $Id: svlImageCodecBMP.cpp 1137 2010-02-03 06:10:24Z bvagvol1 $
   
   Author(s):  Balazs Vagvolgyi
   Created on: 2006 
@@ -20,31 +20,31 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
-#include "ftImageBMP.h"
+#include "svlImageCodecBMP.h"
 
 
 /*************************************/
-/*** ftImageBMP class ****************/
+/*** svlImageCodecBMP class **********/
 /*************************************/
 
 #define MAX_DIMENISION  8192
 
-CMN_IMPLEMENT_SERVICES(ftImageBMP)
+CMN_IMPLEMENT_SERVICES(svlImageCodecBMP)
 
-ftImageBMP::ftImageBMP() :
-    svlImageCodec(),
+svlImageCodecBMP::svlImageCodecBMP() :
+    svlImageCodecBase(),
     cmnGenericObject()
 {
     ExtensionList = ".bmp;";
 }
 
-int ftImageBMP::ReadDimensions(const std::string &filename, unsigned int &width, unsigned int &height)
+int svlImageCodecBMP::ReadDimensions(const std::string &filename, unsigned int &width, unsigned int &height)
 {
     std::ifstream stream(filename.c_str(), std::ios_base::in | std::ios_base::binary);
     return ReadDimensions(stream, width, height);
 }
 
-int ftImageBMP::ReadDimensions(std::istream &stream, unsigned int &width, unsigned int &height)
+int svlImageCodecBMP::ReadDimensions(std::istream &stream, unsigned int &width, unsigned int &height)
 {
     if (stream.read(reinterpret_cast<char*>(&FileHeader), sizeof(svlBMPFileHeader)).fail() ||
         FileHeader.bfType != 0x4D42 ||
@@ -58,7 +58,7 @@ int ftImageBMP::ReadDimensions(std::istream &stream, unsigned int &width, unsign
     return SVL_OK;
 }
 
-int ftImageBMP::ReadDimensions(const unsigned char *buffer, const size_t buffersize, unsigned int &width, unsigned int &height)
+int svlImageCodecBMP::ReadDimensions(const unsigned char *buffer, const size_t buffersize, unsigned int &width, unsigned int &height)
 {
     if (buffer == 0 ||
         buffersize <= (sizeof(svlBMPFileHeader) + sizeof(svlDIBHeader))) return SVL_FAIL;
@@ -76,13 +76,13 @@ int ftImageBMP::ReadDimensions(const unsigned char *buffer, const size_t buffers
     return SVL_OK;
 }
 
-int ftImageBMP::Read(svlSampleImageBase &image, const unsigned int videoch, const std::string &filename, bool noresize)
+int svlImageCodecBMP::Read(svlSampleImageBase &image, const unsigned int videoch, const std::string &filename, bool noresize)
 {
     std::ifstream stream(filename.c_str(), std::ios_base::in | std::ios_base::binary);
     return Read(image, videoch, stream, noresize);
 }
 
-int ftImageBMP::Read(svlSampleImageBase &image, const unsigned int videoch, std::istream &stream, bool noresize)
+int svlImageCodecBMP::Read(svlSampleImageBase &image, const unsigned int videoch, std::istream &stream, bool noresize)
 {
     if (videoch >= image.GetVideoChannels()) return SVL_FAIL;
 
@@ -144,7 +144,7 @@ int ftImageBMP::Read(svlSampleImageBase &image, const unsigned int videoch, std:
     return SVL_OK;
 }
 
-int ftImageBMP::Read(svlSampleImageBase &image, const unsigned int videoch, const unsigned char *buffer, const size_t buffersize, bool noresize)
+int svlImageCodecBMP::Read(svlSampleImageBase &image, const unsigned int videoch, const unsigned char *buffer, const size_t buffersize, bool noresize)
 {
     if (videoch >= image.GetVideoChannels()) return SVL_FAIL;
 
@@ -213,13 +213,13 @@ int ftImageBMP::Read(svlSampleImageBase &image, const unsigned int videoch, cons
     return SVL_OK;
 }
 
-int ftImageBMP::Write(const svlSampleImageBase &image, const unsigned int videoch, const std::string &filename, const int compression)
+int svlImageCodecBMP::Write(const svlSampleImageBase &image, const unsigned int videoch, const std::string &filename, const int compression)
 {
     std::ofstream stream(filename.c_str(), std::ios_base::out | std::ios_base::binary);
     return Write(image, videoch, stream, compression);
 }
 
-int ftImageBMP::Write(const svlSampleImageBase &image, const unsigned int videoch, std::ostream &stream, const int CMN_UNUSED(compression))
+int svlImageCodecBMP::Write(const svlSampleImageBase &image, const unsigned int videoch, std::ostream &stream, const int CMN_UNUSED(compression))
 {
     if (videoch >= image.GetVideoChannels()) return SVL_FAIL;
 
@@ -275,7 +275,7 @@ int ftImageBMP::Write(const svlSampleImageBase &image, const unsigned int videoc
     return SVL_OK;
 }
 
-int ftImageBMP::Write(const svlSampleImageBase &image, const unsigned int videoch, unsigned char *buffer, size_t &buffersize, const int CMN_UNUSED(compression))
+int svlImageCodecBMP::Write(const svlSampleImageBase &image, const unsigned int videoch, unsigned char *buffer, size_t &buffersize, const int CMN_UNUSED(compression))
 {
     if (videoch >= image.GetVideoChannels()) return SVL_FAIL;
     if (buffer == 0) return SVL_FAIL;

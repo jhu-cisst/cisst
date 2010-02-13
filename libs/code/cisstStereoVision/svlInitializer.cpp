@@ -22,8 +22,8 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstStereoVision.h>
 #include <cisstStereoVision/svlInitializer.h>
-#include "ftInitializer.h"
-#include "vidInitializer.h"
+#include "svlImageCodecInitializer.h"
+#include "svlVidCapSrcInitializer.h"
 
 
 void svlInitialize()

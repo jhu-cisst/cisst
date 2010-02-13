@@ -37,6 +37,7 @@ SET(SOURCE_FILES
     svlImageIO.cpp
     svlCameraGeometry.cpp
     svlConverters.cpp
+    svlBufferImage.cpp
 
   # Filter API
     svlFilterSourceDummy.cpp
@@ -60,12 +61,10 @@ SET(SOURCE_FILES
     svlFilterImageFlipRotate.cpp
 
   # Private System API
-    svlImageBuffer.h               # private header
-    svlImageBuffer.cpp
-    ftImageBMP.h                   # private header
-    ftImageBMP.cpp
-    ftImagePPM.h                   # private header
-    ftImagePPM.cpp
+    svlImageCodecBMP.h                   # private header
+    svlImageCodecBMP.cpp
+    svlImageCodecPPM.h                   # private header
+    svlImageCodecPPM.cpp
     ipDeinterlacing.h              # private header
     ipDeinterlacing.cpp
     svlStereoDP.h                  # private header 
@@ -91,6 +90,7 @@ SET(HEADER_FILES
     svlImageIO.h
     svlCameraGeometry.h
     svlConverters.h
+    svlBufferImage.h
 
   # Filter API
     svlFilterSourceDummy.h
@@ -208,8 +208,8 @@ IF(CISST_SVL_HAS_OPENCV OR NOT OpenCV_OPTIONS)
         SET(SOURCE_FILES
             ${SOURCE_FILES}
             svlFilterToolTracker.cpp
-            vidOCVSource.h        # private header
-            vidOCVSource.cpp
+            svlVidCapSrcOpenCV.h        # private header
+            svlVidCapSrcOpenCV.cpp
             # Trackers
             trackers/opencv/svlTrackerOpenCV.cpp
             trackers/opencv/trkOCVColor.h        # private header
@@ -262,8 +262,8 @@ IF(CISST_SVL_HAS_JPEG OR NOT JPEG_OPTIONS)
             )
         SET(SOURCE_FILES
             ${SOURCE_FILES}
-            ftImageJPEG.h           # private header
-            ftImageJPEG.cpp
+            svlImageCodecJPEG.h           # private header
+            svlImageCodecJPEG.cpp
             )
         MESSAGE(STATUS "JPEG found - Switch to advanced view for details")
         OPTION(CISST_SVL_HAS_JPEG "Use JPEG extensions" ON)
@@ -372,8 +372,8 @@ IF(CISST_SVL_HAS_ZLIB AND ZLIB_FOUND)
                 )
             SET(SOURCE_FILES
                 ${SOURCE_FILES}
-                ftImagePNG.h            # private header
-                ftImagePNG.cpp
+                svlImageCodecPNG.h            # private header
+                svlImageCodecPNG.cpp
                 )
             MESSAGE(STATUS "PNG found - Switch to advanced view for details")
             OPTION(CISST_SVL_HAS_PNG "Use PNG extensions" ON)
@@ -441,8 +441,8 @@ IF(CISST_SVL_HAS_MIL OR NOT MIL_OPTIONS)
             )
         SET(SOURCE_FILES
             ${SOURCE_FILES}
-            vidMILDevice.h      # private header
-            vidMILDevice.cpp
+            svlVidCapSrcMIL.h      # private header
+            svlVidCapSrcMIL.cpp
             )
         MESSAGE(STATUS "Matrox Imaging Library (MIL) found - Switch to advanced view for details")
         OPTION(CISST_SVL_HAS_MIL "Compile MIL extensions" ON)
@@ -519,10 +519,10 @@ IF(WIN32)
 
             SET(SOURCE_FILES
                 ${SOURCE_FILES}
-                vidDirectShowInputSelector.h    # private header
-                vidDirectShowInputSelector.cpp
-                vidDirectShowSource.h           # private header
-                vidDirectShowSource.cpp
+                svlVidCapSrcDirectShowInputSelector.h    # private header
+                svlVidCapSrcDirectShowInputSelector.cpp
+                svlVidCapSrcDirectShow.h           # private header
+                svlVidCapSrcDirectShow.cpp
                 )
             MESSAGE(STATUS "DirectShow found - Switch to advanced view for details")
             OPTION(CISST_SVL_HAS_DIRECTSHOW "Compile DirectShow extensions" ON)
@@ -602,8 +602,8 @@ IF(WIN32)
 
             SET(SOURCE_FILES
                 ${SOURCE_FILES}
-                vidSVSSource.h      # private header
-                vidSVSSource.cpp
+                svlVidCapSrcSVS.h      # private header
+                svlVidCapSrcSVS.cpp
                 )
             MESSAGE(STATUS "Videre Design SVS (SVS) found - Switch to advanced view for details")
             OPTION(CISST_SVL_HAS_SVS "Compile Videre Design (SVS) extensions" ON)
@@ -644,8 +644,8 @@ IF(UNIX)
         IF(CISST_SVL_HAS_VIDEO4LINUX2)
             SET(SOURCE_FILES
                 ${SOURCE_FILES}
-                vidV4L2Source.h           # private header
-                vidV4L2Source.cpp
+                svlVidCapSrcV4L2.h           # private header
+                svlVidCapSrcV4L2.cpp
                 )
         ENDIF(CISST_SVL_HAS_VIDEO4LINUX2)
 
@@ -698,8 +698,8 @@ IF(UNIX)
                 )
             SET(SOURCE_FILES
                 ${SOURCE_FILES}
-                vidDC1394Source.h         # private header
-                vidDC1394Source.cpp
+                svlVidCapSrcDC1394.h         # private header
+                svlVidCapSrcDC1394.cpp
                 )
             MESSAGE(STATUS "DC1394 found - Switch to advanced view for details")
             OPTION(CISST_SVL_HAS_DC1394 "Compile DC1394 extensions" ON)
@@ -805,10 +805,10 @@ SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}${SVL_ADDITIONAL_EXE_LINKER
 SET(SOURCE_FILES
     ${SOURCE_FILES}
     svlInitializer.cpp
-    vidInitializer.h
-    vidInitializer.cpp
-    ftInitializer.h
-    ftInitializer.cpp
+    svlVidCapSrcInitializer.h
+    svlVidCapSrcInitializer.cpp
+    svlImageCodecInitializer.h
+    svlImageCodecInitializer.cpp
     )
 SET(HEADER_FILES
     ${HEADER_FILES}

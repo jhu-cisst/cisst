@@ -21,36 +21,36 @@
  */
 
 #include <cisstStereoVision/svlStreamManager.h>
-#include "ftInitializer.h"
+#include "svlImageCodecInitializer.h"
 
-#include "ftImageBMP.h"
-#include "ftImagePPM.h"
+#include "svlImageCodecBMP.h"
+#include "svlImageCodecPPM.h"
 
 #if (CISST_SVL_HAS_JPEG == ON)
-#include "ftImageJPEG.h"
+#include "svlImageCodecJPEG.h"
 #endif // CISST_SVL_HAS_JPEG
 
 #if (CISST_SVL_HAS_PNG == ON)
-#include "ftImagePNG.h"
+#include "svlImageCodecPNG.h"
 #endif // CISST_SVL_HAS_PNG
 
 
 void svlInitializeImageCodecs()
 {
-#ifdef _ftImageBMP_h
-    delete new ftImageBMP;
-#endif // _ftImageBMP_h
+#ifdef _svlImageCodecBMP_h
+    delete new svlImageCodecBMP;
+#endif // _svlImageCodecBMP_h
 
-#ifdef _ftImagePPM_h
-    delete new ftImagePPM;
-#endif // _ftImagePPM_h
+#ifdef _svlImageCodecPPM_h
+    delete new svlImageCodecPPM;
+#endif // _svlImageCodecPPM_h
 
-#ifdef _ftImageJPEG_h
-    delete new ftImageJPEG;
-#endif // _ftImageJPEG_h
+#ifdef _svlImageCodecJPEG_h
+    delete new svlImageCodecJPEG;
+#endif // _svlImageCodecJPEG_h
 
-#ifdef _ftImagePNG_h
-    delete new ftImagePNG;
-#endif // _ftImagePNG_h
+#ifdef _svlImageCodecPNG_h
+    delete new svlImageCodecPNG;
+#endif // _svlImageCodecPNG_h
 }
 

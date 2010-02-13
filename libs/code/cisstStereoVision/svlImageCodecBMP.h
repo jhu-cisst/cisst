@@ -2,9 +2,9 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id$
+  $Id: svlImageCodecBMP.h 1185 2010-02-11 02:05:25Z bvagvol1 $
   
-  Author(s):  Ben Mitchell
+  Author(s):  Balazs Vagvolgyi
   Created on: 2006 
 
   (C) Copyright 2006-2007 Johns Hopkins University (JHU), All Rights
@@ -18,22 +18,21 @@ http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
 
-Original code courtesy of Ben Mitchell.
 */
 
-#ifndef _ftImagePPM_h
-#define _ftImagePPM_h
+#ifndef _svlImageCodecBMP_h
+#define _svlImageCodecBMP_h
 
 #include <cisstStereoVision/svlImageIO.h>
+#include <cisstStereoVision/svlStreamDefs.h>
 
 
-class ftImagePPM : public svlImageCodec, public cmnGenericObject
+class svlImageCodecBMP : public svlImageCodecBase, public cmnGenericObject
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
 public:
-    ftImagePPM();
-    virtual ~ftImagePPM();
+    svlImageCodecBMP();
 
     virtual int ReadDimensions(const std::string &filename, unsigned int &width, unsigned int &height);
     virtual int ReadDimensions(std::istream &stream, unsigned int &width, unsigned int &height);
@@ -45,16 +44,14 @@ public:
 
     virtual int Write(const svlSampleImageBase &image, const unsigned int videoch, const std::string &filename, const int compression = -1);
     virtual int Write(const svlSampleImageBase &image, const unsigned int videoch, std::ostream &stream, const int compression = -1);
-    virtual int Write(const svlSampleImageBase &image, const unsigned int videoch, std::ostream &stream, const std::string &codec, const int compression = -1);
     virtual int Write(const svlSampleImageBase &image, const unsigned int videoch, unsigned char *buffer, size_t &buffersize, const int compression = -1);
-    virtual int Write(const svlSampleImageBase &image, const unsigned int videoch, unsigned char *buffer, size_t &buffersize, const std::string &codec, const int compression = -1);
 
 protected:
-    unsigned char* ppmBuffer;
-    unsigned int ppmBufferSize;
+    svlBMPFileHeader FileHeader;
+    svlDIBHeader DIBHeader;
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(ftImagePPM)
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlImageCodecBMP)
 
-#endif // _ftImagePPM_h
+#endif // _svlImageCodecBMP_h
 

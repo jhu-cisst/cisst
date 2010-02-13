@@ -20,15 +20,15 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
-#include "svlImageBuffer.h"
+#include <cisstStereoVision/svlBufferImage.h>
 #include <cisstOSAbstraction/osaSleep.h>
 #include <string.h> // for memcpy
 
 /*********************************/
-/*** svlImageBuffer class ********/
+/*** svlBufferImage class ********/
 /*********************************/
 
-svlImageBuffer::svlImageBuffer(unsigned int width, unsigned int height)
+svlBufferImage::svlBufferImage(unsigned int width, unsigned int height)
 {
     Buffer[0].SetSize(height, width * 3);
     Buffer[1].SetSize(height, width * 3);
@@ -49,7 +49,7 @@ svlImageBuffer::svlImageBuffer(unsigned int width, unsigned int height)
     InitializationCounter = 60;
 }
 
-svlImageBuffer::~svlImageBuffer()
+svlBufferImage::~svlBufferImage()
 {
 #if (CISST_SVL_HAS_OPENCV == ON)
     cvReleaseImageHeader(&(OCVImage[0]));
@@ -58,33 +58,33 @@ svlImageBuffer::~svlImageBuffer()
 #endif // CISST_SVL_HAS_OPENCV
 }
 
-unsigned int svlImageBuffer::GetWidth()
+unsigned int svlBufferImage::GetWidth()
 {
     return (Buffer[0].width() / 3);
 }
 
-unsigned int svlImageBuffer::GetHeight()
+unsigned int svlBufferImage::GetHeight()
 {
     return Buffer[0].height();
 }
 
-unsigned int svlImageBuffer::GetDataSize()
+unsigned int svlBufferImage::GetDataSize()
 {
     return (Buffer[0].width() * Buffer[0].height());
 }
 
-unsigned char* svlImageBuffer::GetPushBuffer()
+unsigned char* svlBufferImage::GetPushBuffer()
 {
     return Buffer[Next].Pointer();
 }
 
-unsigned char* svlImageBuffer::GetPushBuffer(unsigned int& size)
+unsigned char* svlBufferImage::GetPushBuffer(unsigned int& size)
 {
     size = GetDataSize();
     return Buffer[Next].Pointer();
 }
 
-void svlImageBuffer::Push()
+void svlBufferImage::Push()
 {
     // Atomic exchange of values
 #if (CISST_OS == CISST_WINDOWS)
@@ -102,7 +102,7 @@ void svlImageBuffer::Push()
     NewFrameEvent.Raise();
 }
 
-bool svlImageBuffer::Push(unsigned char* buffer, unsigned int size, bool topdown)
+bool svlBufferImage::Push(unsigned char* buffer, unsigned int size, bool topdown)
 {
     unsigned int datasize = Buffer[0].width() * Buffer[0].height();
     if (buffer == 0 || size < datasize) return false;
@@ -132,13 +132,13 @@ bool svlImageBuffer::Push(unsigned char* buffer, unsigned int size, bool topdown
 }
 
 #if (CISST_SVL_HAS_OPENCV == ON)
-bool svlImageBuffer::PushIplImage(IplImage* image)
+bool svlBufferImage::PushIplImage(IplImage* image)
 {
     return Push(reinterpret_cast<unsigned char*>(image->imageData), GetDataSize(), (image->origin != IPL_ORIGIN_TL));
 }
 #endif
 
-svlImageRGB* svlImageBuffer::Pull(bool waitfornew, double timeout)
+svlImageRGB* svlBufferImage::Pull(bool waitfornew, double timeout)
 {
     if (!waitfornew) return &(Buffer[Latest]);
 
@@ -176,14 +176,14 @@ svlImageRGB* svlImageBuffer::Pull(bool waitfornew, double timeout)
 }
 
 #if (CISST_SVL_HAS_OPENCV == ON)
-IplImage* svlImageBuffer::PullIplImage(bool waitfornew, double timeout)
+IplImage* svlBufferImage::PullIplImage(bool waitfornew, double timeout)
 {
     if (Pull(waitfornew, timeout) == 0) return 0;
     return OCVImage[Locked];
 }
 #endif // CISST_SVL_HAS_OPENCV
 
-bool svlImageBuffer::TopDownCopy(unsigned char *targetbuffer, unsigned char *sourcebuffer)
+bool svlBufferImage::TopDownCopy(unsigned char *targetbuffer, unsigned char *sourcebuffer)
 {
     if (targetbuffer == 0 ||
         sourcebuffer == 0) return false;

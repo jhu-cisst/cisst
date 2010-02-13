@@ -20,12 +20,12 @@
  
  */
 
-#ifndef _ftInitializer_h
-#define _ftInitializer_h
+#ifndef _svlImageCodecInitializer_h
+#define _svlImageCodecInitializer_h
 
 
 void svlInitializeImageCodecs();
 
 
-#endif // _ftInitializer_h
+#endif // _svlImageCodecInitializer_h
 

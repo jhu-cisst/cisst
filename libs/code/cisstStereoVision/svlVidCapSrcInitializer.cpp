@@ -1,0 +1,79 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
+/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
+
+/*
+ $Id: $
+ 
+ Author(s):  Balazs Vagvolgyi
+ Created on: 2010
+ 
+ (C) Copyright 2006-2010 Johns Hopkins University (JHU), All Rights
+ Reserved.
+ 
+ --- begin cisst license - do not edit ---
+ 
+ This software is provided "as is" under an open source license, with
+ no warranty.  The complete license can be found in license.txt and
+ http://www.cisst.org/cisst/license.txt.
+ 
+ --- end cisst license ---
+ 
+ */
+
+#include <cisstStereoVision/svlStreamManager.h>
+#include "svlVidCapSrcInitializer.h"
+
+#if (CISST_SVL_HAS_SVS == ON)
+#include "svlVidCapSrcSVS.h"
+#endif // CISST_SVL_HAS_SVS
+
+// See header for details:
+//#if (CISST_SVL_HAS_DIRECTSHOW == ON)
+//#include "svlVidCapSrcDirectShow.h"
+//#endif // CISST_SVL_HAS_DIRECTSHOW
+
+#if (CISST_SVL_HAS_VIDEO4LINUX2 == ON)
+#include "svlVidCapSrcV4L2.h"
+#endif // CISST_SVL_HAS_VIDEO4LINUX2
+
+#if (CISST_SVL_HAS_DC1394 == ON)
+#include "svlVidCapSrcDC1394.h"
+#endif // CISST_SVL_HAS_DC1394
+
+#if (CISST_SVL_HAS_OPENCV == ON)
+#include "svlVidCapSrcOpenCV.h"
+#endif // CISST_SVL_HAS_OPENCV
+
+// See header for details:
+//#if (CISST_SVL_HAS_MIL == ON)
+//#include "svlVidCapSrcMIL.h"
+//#endif // CISST_SVL_HAS_MIL
+
+
+void svlInitializeVideoCapture()
+{
+#ifdef _svlVidCapSrcMIL_h
+    svlVidCapSrcMIL::GetInstance();
+#endif // _svlVidCapSrcMIL_h
+
+#ifdef _svlVidCapSrcDirectShow_h
+    delete new svlVidCapSrcDirectShow;
+#endif // _svlVidCapSrcDirectShow_h
+
+#ifdef _svlVidCapSrcSVS_h
+    delete new svlVidCapSrcSVS;
+#endif // _svlVidCapSrcSVS_h
+
+#ifdef _svlVidCapSrcV4L2_h
+    delete new svlVidCapSrcV4L2;
+#endif // _svlVidCapSrcV4L2_h
+
+#ifdef _svlVidCapSrcOpenCV_h
+    delete new svlVidCapSrcOpenCV;
+#endif // _svlVidCapSrcOpenCV_h
+
+#ifdef _svlVidCapSrcDC1394_h
+    delete new svlVidCapSrcDC1394;
+#endif // _svlVidCapSrcDC1394_h
+}
+

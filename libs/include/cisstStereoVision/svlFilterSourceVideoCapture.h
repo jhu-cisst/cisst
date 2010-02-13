@@ -40,14 +40,14 @@ http://www.cisst.org/cisst/license.txt.
 #define SVL_VCS_STRING_LENGTH               128
 
 
-class CVideoCaptureSourceBase;
-class CVideoCaptureSourceDialogThread;
+class svlVidCapSrcBase;
+class svlVidCapSrcDialogThread;
 
 class CISST_EXPORT svlFilterSourceVideoCapture : public svlFilterSourceBase, public cmnGenericObject
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
-friend class CVideoCaptureSourceDialogThread;
+friend class svlVidCapSrcDialogThread;
 
 public:
     enum PlatformType {
@@ -195,7 +195,7 @@ private:
     ImageFormat **FormatList;
     int *FormatListSize;
     vctDynamicVector<cmnGenericObject*> DeviceGenObj;
-    vctDynamicVector<CVideoCaptureSourceBase*> DeviceObj;
+    vctDynamicVector<svlVidCapSrcBase*> DeviceObj;
     int *API;
     int *APIDeviceID;
     int *APIChannelID;
@@ -214,11 +214,11 @@ private:
 };
 
 
-class CISST_EXPORT CVideoCaptureSourceBase
+class CISST_EXPORT svlVidCapSrcBase
 {
 public:
-    CVideoCaptureSourceBase() {}
-    virtual ~CVideoCaptureSourceBase() {}
+    svlVidCapSrcBase() {}
+    virtual ~svlVidCapSrcBase() {}
 
     virtual svlFilterSourceVideoCapture::PlatformType GetPlatformType() = 0;
     virtual int SetStreamCount(unsigned int numofstreams) = 0;
@@ -243,11 +243,11 @@ public:
 };
 
 
-class CVideoCaptureSourceDialogThread
+class svlVidCapSrcDialogThread
 {
 public:
-    CVideoCaptureSourceDialogThread(unsigned int videoch) { VideoChannel = videoch; InitSuccess = false; Stopped = false; }
-    ~CVideoCaptureSourceDialogThread() {}
+    svlVidCapSrcDialogThread(unsigned int videoch) { VideoChannel = videoch; InitSuccess = false; Stopped = false; }
+    ~svlVidCapSrcDialogThread() {}
     void* Proc(svlFilterSourceVideoCapture* baseref);
 
     bool WaitForInit() { InitEvent.Wait(); return InitSuccess; }

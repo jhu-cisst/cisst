@@ -20,7 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
-#include "ftImagePNG.h"
+#include "svlImageCodecPNG.h"
 #include <cisstStereoVision/svlStreamDefs.h>
 #include <cisstStereoVision/svlConverters.h>
 #include "png.h"
@@ -112,13 +112,13 @@ void PNG_user_flush_data_proc(png_structp CMN_UNUSED(png_ptr))
 
 
 /*************************************/
-/*** ftImagePNG class ****************/
+/*** svlImageCodecPNG class **********/
 /*************************************/
 
-CMN_IMPLEMENT_SERVICES(ftImagePNG)
+CMN_IMPLEMENT_SERVICES(svlImageCodecPNG)
 
-ftImagePNG::ftImagePNG() :
-    svlImageCodec(),
+svlImageCodecPNG::svlImageCodecPNG() :
+    svlImageCodecBase(),
     cmnGenericObject(),
     pngBuffer(0),
     pngRows(0),
@@ -128,19 +128,19 @@ ftImagePNG::ftImagePNG() :
     ExtensionList = ".png;";
 }
 
-ftImagePNG::~ftImagePNG()
+svlImageCodecPNG::~svlImageCodecPNG()
 {
     if (pngBuffer) delete [] pngBuffer;
     if (pngRows) delete [] pngRows;
 }
 
-int ftImagePNG::ReadDimensions(const std::string &filename, unsigned int &width, unsigned int &height)
+int svlImageCodecPNG::ReadDimensions(const std::string &filename, unsigned int &width, unsigned int &height)
 {
     std::ifstream stream(filename.c_str(), std::ios_base::in | std::ios_base::binary);
     return ReadDimensions(stream, width, height);
 }
 
-int ftImagePNG::ReadDimensions(std::istream &stream, unsigned int &width, unsigned int &height)
+int svlImageCodecPNG::ReadDimensions(std::istream &stream, unsigned int &width, unsigned int &height)
 {
     // check file for signature
     png_byte pngsig[PNG_SIG_SIZE];
@@ -186,7 +186,7 @@ int ftImagePNG::ReadDimensions(std::istream &stream, unsigned int &width, unsign
     return SVL_OK;
 }
 
-int ftImagePNG::ReadDimensions(const unsigned char *buffer, const size_t buffersize, unsigned int &width, unsigned int &height)
+int svlImageCodecPNG::ReadDimensions(const unsigned char *buffer, const size_t buffersize, unsigned int &width, unsigned int &height)
 {
     if (!buffer || buffersize < static_cast<unsigned int>(PNG_SIG_SIZE)) return SVL_FAIL;
 
@@ -231,13 +231,13 @@ int ftImagePNG::ReadDimensions(const unsigned char *buffer, const size_t buffers
     return SVL_OK;
 }
 
-int ftImagePNG::Read(svlSampleImageBase &image, const unsigned int videoch, const std::string &filename, bool noresize)
+int svlImageCodecPNG::Read(svlSampleImageBase &image, const unsigned int videoch, const std::string &filename, bool noresize)
 {
     std::ifstream stream(filename.c_str(), std::ios_base::in | std::ios_base::binary);
     return Read(image, videoch, stream, noresize);
 }
 
-int ftImagePNG::Read(svlSampleImageBase &image, const unsigned int videoch, std::istream &stream, bool noresize)
+int svlImageCodecPNG::Read(svlSampleImageBase &image, const unsigned int videoch, std::istream &stream, bool noresize)
 {
     if (videoch >= image.GetVideoChannels()) return SVL_FAIL;
 
@@ -338,7 +338,7 @@ int ftImagePNG::Read(svlSampleImageBase &image, const unsigned int videoch, std:
     return SVL_OK;
 }
 
-int ftImagePNG::Read(svlSampleImageBase &image, const unsigned int videoch, const unsigned char *buffer, const size_t buffersize, bool noresize)
+int svlImageCodecPNG::Read(svlSampleImageBase &image, const unsigned int videoch, const unsigned char *buffer, const size_t buffersize, bool noresize)
 {
     if (videoch >= image.GetVideoChannels()) return SVL_FAIL;
     if (!buffer || buffersize < static_cast<unsigned int>(PNG_SIG_SIZE)) return SVL_FAIL;
@@ -437,13 +437,13 @@ int ftImagePNG::Read(svlSampleImageBase &image, const unsigned int videoch, cons
     return SVL_OK;
 }
 
-int ftImagePNG::Write(const svlSampleImageBase &image, const unsigned int videoch, const std::string &filename, const int compression)
+int svlImageCodecPNG::Write(const svlSampleImageBase &image, const unsigned int videoch, const std::string &filename, const int compression)
 {
     std::ofstream stream(filename.c_str(), std::ios_base::out | std::ios_base::binary);
     return Write(image, videoch, stream, compression);
 }
 
-int ftImagePNG::Write(const svlSampleImageBase &image, const unsigned int videoch, std::ostream &stream, const int compression)
+int svlImageCodecPNG::Write(const svlSampleImageBase &image, const unsigned int videoch, std::ostream &stream, const int compression)
 {
     if (videoch >= image.GetVideoChannels()) return SVL_FAIL;
 
@@ -466,7 +466,7 @@ int ftImagePNG::Write(const svlSampleImageBase &image, const unsigned int videoc
     return SVL_FAIL;
 }
 
-int ftImagePNG::Write(const svlSampleImageBase &image, const unsigned int videoch, unsigned char *buffer, size_t &buffersize, const int compression)
+int svlImageCodecPNG::Write(const svlSampleImageBase &image, const unsigned int videoch, unsigned char *buffer, size_t &buffersize, const int compression)
 {
     if (videoch >= image.GetVideoChannels()) return SVL_FAIL;
     if (!buffer) return SVL_FAIL;

@@ -35,14 +35,14 @@ http://www.cisst.org/cisst/license.txt.
 class svlSampleImageBase;
 
 /*************************************/
-/*** svlImageCodec class *************/
+/*** svlImageCodecBase class *********/
 /*************************************/
 
-class CISST_EXPORT svlImageCodec
+class CISST_EXPORT svlImageCodecBase
 {
 public:
-    svlImageCodec();
-    virtual ~svlImageCodec();
+    svlImageCodecBase();
+    virtual ~svlImageCodecBase();
 
     const std::string& GetExtensions() const;
 
@@ -73,7 +73,7 @@ class CISST_EXPORT svlImageIO
 {
 private:
     typedef vctDynamicVector<cmnClassServicesBase*> _CodecList;
-    typedef vctDynamicVector<svlImageCodec*> _CodecCacheList;
+    typedef vctDynamicVector<svlImageCodecBase*> _CodecCacheList;
     typedef vctDynamicVector<bool> _CodecCacheUsedList;
     typedef vctDynamicVector<std::string> _ExtensionList;
 
@@ -92,8 +92,8 @@ public:
 
     static int GetExtension(const std::string &filename, std::string &extension);
 
-    static svlImageCodec* GetCodec(const std::string &filename);
-    static void ReleaseCodec(svlImageCodec* codec);
+    static svlImageCodecBase* GetCodec(const std::string &filename);
+    static void ReleaseCodec(svlImageCodecBase* codec);
 
     static int ReadDimensions(const std::string &filename, unsigned int &width, unsigned int &height);
     static int ReadDimensions(const std::string &codec, std::istream &stream, unsigned int &width, unsigned int &height);

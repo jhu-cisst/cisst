@@ -53,7 +53,7 @@ protected:
     virtual int Release();
 
 private:
-    vctDynamicVector<svlImageCodec*> ImageCodec;
+    vctDynamicVector<svlImageCodecBase*> ImageCodec;
     vctDynamicVector<std::string> FilePathPrefix;
     vctDynamicVector<std::string> Extension;
     vctDynamicVector<bool> Disabled;

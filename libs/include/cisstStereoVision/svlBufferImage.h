@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id$
+  $Id: svlBufferImage.h 1002 2009-12-16 23:11:09Z bvagvol1 $
   
   Author(s):  Balazs Vagvolgyi
   Created on: 2008 
@@ -20,19 +20,19 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
-#ifndef _svlImageBuffer_h
-#define _svlImageBuffer_h
+#ifndef _svlBufferImage_h
+#define _svlBufferImage_h
 
 #include <cisstOSAbstraction/osaThreadSignal.h>
 #include <cisstOSAbstraction/osaCriticalSection.h>
 #include <cisstStereoVision/svlStreamDefs.h>
 
 
-class svlImageBuffer
+class CISST_EXPORT svlBufferImage
 {
 public:
-    svlImageBuffer(unsigned int width, unsigned int height);
-    ~svlImageBuffer();
+    svlBufferImage(unsigned int width, unsigned int height);
+    ~svlBufferImage();
 
     unsigned int GetWidth();
     unsigned int GetHeight();
@@ -52,7 +52,7 @@ public:
 #endif // CISST_SVL_HAS_OPENCV
 
 private:
-    svlImageBuffer() {}
+    svlBufferImage() {}
 
 #if (CISST_OS == CISST_WINDOWS)
     LONG Next, Latest, Locked;
@@ -74,5 +74,5 @@ private:
 };
 
 
-#endif // _svlImageBuffer_h
+#endif // _svlBufferImage_h
 
