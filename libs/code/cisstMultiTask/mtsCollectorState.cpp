@@ -464,7 +464,7 @@ bool mtsCollectorState::ConvertBinaryToText(const std::string sourceBinaryLogFil
 
     // Check the end of header.
     if (!IsHeaderEndMark(line)) {
-        CMN_LOG_INIT_ERROR << "Class mtsCollectorState: ConvertBinaryToText: corrupted header." << std::endl;
+        CMN_LOG_INIT_ERROR << "Class mtsCollectorState: ConvertBinaryToText: corrupted header (invalid end mark)." << std::endl;
         inFile.close();
         outFile.close();
         return false;
@@ -474,9 +474,10 @@ bool mtsCollectorState::ConvertBinaryToText(const std::string sourceBinaryLogFil
 
     // Deserialize to get the total number of recorded signals.
     cmnGenericObject * element = DeSerializer.DeSerialize();
+    // Should we check that element is not 0?
     cmnULong * totalSignalCountObject = dynamic_cast<cmnULong *>(element);
     if (!totalSignalCountObject) {
-        CMN_LOG_INIT_ERROR << "Class mtsCollectorState: ConvertBinaryToText: corrupted header." << std::endl;
+        CMN_LOG_INIT_ERROR << "Class mtsCollectorState: ConvertBinaryToText: corrupted header (missing number of signals)." << std::endl;
         inFile.close();
         outFile.close();
         return false;
