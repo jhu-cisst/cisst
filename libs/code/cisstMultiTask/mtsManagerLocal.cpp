@@ -50,9 +50,10 @@ bool mtsManagerLocal::UnitTestNetworkProxyEnabled = false;
 
 #define DEFAULT_PROCESS_NAME "LCM"
 
-#if !CISST_MTS_HAS_ICE
 mtsManagerLocal::mtsManagerLocal(void)
-//    JGraphSocket(osaSocket::TCP),
+#if 0
+    , JGraphSocket(osaSocket::TCP)
+#endif
 {
     Initialize();
 
@@ -60,9 +61,9 @@ mtsManagerLocal::mtsManagerLocal(void)
         TimeServer.SetTimeOrigin();
     }
 
-    //JGraphSocketConnected = false;
+#if 0
+    JGraphSocketConnected = false;
 
-    /*
     // Try to connect to the JGraph application software (Java program).
     // Note that the JGraph application also sends event messages back via the socket,
     // though we don't currently read them. To do this, it would be best to implement
@@ -73,7 +74,7 @@ mtsManagerLocal::mtsManagerLocal(void)
     } else {
         CMN_LOG_CLASS_INIT_WARNING << "Failed to connect to JGraph server" << std::endl;
     }
-    */
+#endif
 
     // In standalone mode, process name is set as DEFAULT_PROCESS_NAME by 
     // default since there is only one instance of local task manager.
@@ -98,7 +99,8 @@ mtsManagerLocal::mtsManagerLocal(void)
 
     ManagerGlobal = globalManager;
 }
-#else
+
+#if CISST_MTS_HAS_ICE
 mtsManagerLocal::mtsManagerLocal(const std::string & globalComponentManagerIP,
                                  const std::string & thisProcessName,
                                  const std::string & thisProcessIP)
@@ -112,9 +114,9 @@ mtsManagerLocal::mtsManagerLocal(const std::string & globalComponentManagerIP,
         TimeServer.SetTimeOrigin();
     }
 
-    //JGraphSocketConnected = false;
+#if 0
+    JGraphSocketConnected = false;
 
-    /*
     // Try to connect to the JGraph application software (Java program).
     // Note that the JGraph application also sends event messages back via the socket,
     // though we don't currently read them. To do this, it would be best to implement
@@ -125,8 +127,7 @@ mtsManagerLocal::mtsManagerLocal(const std::string & globalComponentManagerIP,
     } else {
         CMN_LOG_CLASS_INIT_WARNING << "Failed to connect to JGraph server" << std::endl;
     }
-    */
-
+#endif
     // If process ip is not specified (""), the first ip address detected is used as this process ip
     if (ProcessIP == "") {
         std::vector<std::string> ipAddresses;
@@ -217,7 +218,13 @@ mtsManagerLocal * mtsManagerLocal::GetInstance(const std::string & globalCompone
                                                const std::string & thisProcessIP)
 {
     if (!Instance) {
-        Instance = new mtsManagerLocal(globalComponentManagerIP, thisProcessName, thisProcessIP);
+        // If no argument is specified, this local component manager runs in standalone mode.
+        if (globalComponentManagerIP == "" && thisProcessName == "" && thisProcessIP == "") {
+            Instance = new mtsManagerLocal;
+            CMN_LOG_INIT_WARNING << "WARNING: Inter-process communication support is disabled" << std::endl;
+        } else {
+            Instance = new mtsManagerLocal(globalComponentManagerIP, thisProcessName, thisProcessIP);
+        }
     }
 
     return Instance;

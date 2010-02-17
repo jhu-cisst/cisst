@@ -32,7 +32,6 @@ private:
 
     CPPUNIT_TEST_SUITE(mtsManagerGlobalTest);
     {
-        /*
         CPPUNIT_TEST(TestConstructor);
         CPPUNIT_TEST(TestDestructor);
         CPPUNIT_TEST(TestCleanup);
@@ -68,7 +67,6 @@ private:
 #endif
         CPPUNIT_TEST(TestIsAlreadyConnected);
         CPPUNIT_TEST(TestAddConnectedInterface);
-        */
 	}
     CPPUNIT_TEST_SUITE_END();
 

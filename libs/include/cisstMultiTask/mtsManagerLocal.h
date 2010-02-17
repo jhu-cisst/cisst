@@ -115,9 +115,10 @@ protected:
 #if !CISST_MTS_HAS_ICE
     mtsManagerLocal(void);
 #else
-    mtsManagerLocal(const std::string & globalComponentManagerIP = "localhost", 
-                    const std::string & thisProcessName = "",
-                    const std::string & thisProcessIP = "localhost");
+    mtsManagerLocal(void);
+    mtsManagerLocal(const std::string & globalComponentManagerIP,
+                    const std::string & thisProcessName,
+                    const std::string & thisProcessIP);
 #endif
 
     /*! Destructor. Includes OS-specific cleanup. */
@@ -207,7 +208,7 @@ public:
     /*! Get an instance of local component manager.
         If process ip is not specified, the first ip address detected is used.
         If process name is not given, the ip address is used instead. */
-    static mtsManagerLocal * GetInstance(const std::string & globalComponentManagerIP = "localhost",
+    static mtsManagerLocal * GetInstance(const std::string & globalComponentManagerIP = "",
                                          const std::string & thisProcessName = "",
                                          const std::string & thisProcessIP = "");
 
