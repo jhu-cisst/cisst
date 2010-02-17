@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet, Min Yang Jung
+  Author(s):  Anton Deguet, Min Yang Jung
   Created on: 2004-04-30
 
-  (C) Copyright 2004 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -29,13 +29,13 @@ http://www.cisst.org/cisst/license.txt.
 
 int main(int argc, char * argv[])
 {
-    if (argc != 3) {
-        std::cerr << "Usage: " << argv[0] << " GlobalManagerIP ServerTaskIP" << std::endl;
-        exit(-1);
+    if (argc != 2) {
+        std::cerr << "Usage: " << argv[0] << " (global component manager IP)" << std::endl;
+        return 1;
     }
 
-    std::string globalTaskManagerIP(argv[1]);
-    std::string serverTaskIP(argv[2]);
+    // Set global component manager IP
+    const std::string globalComponentManagerIP(argv[1]);
 
     // log configuration
     cmnLogger::SetLoD(CMN_LOG_LOD_VERY_VERBOSE);
@@ -57,15 +57,15 @@ int main(int argc, char * argv[])
     serverQDevice * server = new serverQDevice("Server");
 
     // Get the TaskManager instance and set operation mode
-    mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
-    taskManager->AddDevice(server);
-    taskManager->SetGlobalTaskManagerIP(globalTaskManagerIP);
-    taskManager->SetServerTaskIP(serverTaskIP);
-
-    // Set the type of task manager either as a server or as a client.
-    // mtsTaskManager::SetTaskManagerType() should be called before
-    // mtsTaskManager::Connect()
-    taskManager->SetTaskManagerType(mtsTaskManager::TASK_MANAGER_CLIENT);
+    // Get the local component manager
+    mtsManagerLocal * localManager;
+    try {
+        localManager = mtsManagerLocal::GetInstance(globalComponentManagerIP, "cisstMultiTaskCommandsAndEventsQtServer");
+    } catch (...) {
+        CMN_LOG_INIT_ERROR << "Failed to initialize local component manager" << std::endl;
+        return 1;
+    }
+    localManager->AddComponent(server);
 
     //
     // TODO: Hide this waiting routine inside mtsTaskManager using events or other things.
@@ -73,15 +73,15 @@ int main(int argc, char * argv[])
     osaSleep(0.5 * cmn_s);
 
     // create and start all tasks
-    taskManager->CreateAll();
-    taskManager->StartAll();
+    localManager->CreateAll();
+    localManager->StartAll();
 
     // run Qt user interface
     application.exec();
 
     // kill all tasks and perform cleanup
-    taskManager->KillAll();
-    taskManager->Cleanup();
+    localManager->KillAll();
+    localManager->Cleanup();
 
     return 0;
 }

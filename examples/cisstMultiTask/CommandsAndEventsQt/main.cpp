@@ -50,8 +50,8 @@ int main(int argc, char *argv[])
 
     // add the tasks to the task manager
     mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
-    taskManager->AddDevice(client);
-    taskManager->AddDevice(server);
+    taskManager->AddComponent(client);
+    taskManager->AddComponent(server);
 
     // connect the tasks, e.g. RequiredInterface -> ProvidedInterface
     taskManager->Connect("Client", "Required",
