@@ -2,7 +2,7 @@
 # $Id$
 #
 
-# (C) Copyright 2003-2007 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2003-2010 Johns Hopkins University (JHU), All Rights
 # Reserved.
  
 # --- begin cisst license - do not edit ---
@@ -13,8 +13,7 @@
 # 
 # --- end cisst license ---
 
-# backward compatibility
-CMAKE_MINIMUM_REQUIRED(VERSION 2.0)
+
 PROJECT(cisstTests)
 
 
