@@ -54,9 +54,13 @@ mtsCollectorState::mtsCollectorState(const std::string & targetTaskName,
     Serializer(0)
 {
     // check if there is the specified task and the specified state table.
-    TargetTask = TaskManager->GetTask(TargetTaskName);
+    mtsComponent * componentPointer = TaskManager->GetComponent(TargetTaskName);
+    if (!componentPointer) {
+        cmnThrow(std::runtime_error("mtsCollectorState constructor: component \"" + TargetTaskName + "\" not found in task manager."));
+    }
+    TargetTask = dynamic_cast<mtsTask *>(componentPointer);
     if (!TargetTask) {
-        cmnThrow(std::runtime_error("mtsCollectorState constructor: task \"" + TargetTaskName + "\" not found in task manager."));
+        cmnThrow(std::runtime_error("mtsCollectorState constructor: component \"" + TargetTaskName + "\" found in task manager seems to be an mtsDevice, not mtsTask therefore it has no state table."));
     }
 
     Initialize();
@@ -121,7 +125,7 @@ void mtsCollectorState::Initialize(void)
         cmnThrow(std::runtime_error("mtsCollectorState::Initialize(): unable to add required interface"));
     }
     // add the task to the task manager and then connect the interface
-    this->TaskManager->AddTask(this);
+    this->TaskManager->AddComponent(this);
     this->TaskManager->Connect(this->GetName(), "StateTable",
                                this->TargetTaskName, "StateTable" + this->TargetStateTableName);
 
