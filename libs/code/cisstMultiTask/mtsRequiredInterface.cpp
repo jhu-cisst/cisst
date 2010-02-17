@@ -19,6 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstMultiTask/mtsRequiredInterface.h>
+#include <cisstCommon/cmnSerializer.h>
 
 CMN_IMPLEMENT_SERVICES(mtsRequiredInterface)
 
@@ -245,4 +246,3 @@ void mtsRequiredInterface::ToStream(std::ostream & outputStream) const
     EventHandlersVoid.ToStream(outputStream);
     EventHandlersWrite.ToStream(outputStream);
 }
-

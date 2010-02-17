@@ -26,10 +26,17 @@
 # CPPUNIT_LIBRARY, where to find the CppUnit library.
 # CPPUNIT_DEBUG_LIBRARY, where to find the CppUnit library in debug mode.
 
-FIND_PATH(CPPUNIT_INCLUDE_DIR cppunit/TestCase.h
-  /home/erc/include
-  /usr/local/include
-  /usr/include
+FIND_PATH(CPPUNIT_INCLUDE_DIR
+          NAMES cppunit/TestCase.h
+          PATHS
+              # standard unix
+              /usr/local/include
+              /usr/include
+              # MacPorts
+              /opt/local/include
+              # Windows, many options
+              C:/cppunit-1.12.1/include
+              C:/cppunit-1.12.0/include
 )
 
 # With Win32, important to have both

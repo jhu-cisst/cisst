@@ -4,7 +4,7 @@
 /*
   $Id: cmnNamedMap.h 271 2009-04-23 03:14:21Z adeguet1 $
 
-  Author(s):  Peter Kazanzides, Anton Deguet
+  Author(s):  Peter Kazanzides, Anton Deguet, Min Yang Jung
   Created on: 2008-11-15
 
   (C) Copyright 2008-2009 Johns Hopkins University (JHU), All Rights Reserved.
@@ -121,6 +121,9 @@ public:
     /*! Get an item by name */
     _elementType * GetItem(const std::string & name, cmnLogLoD lod = CMN_LOG_LOD_RUN_ERROR) const;
 
+    /*! Find an item by name */
+    bool FindItem(const std::string & itemName) const;
+
     /*! Remove an item from the internal map.  The log level of
       details is used to determine the lod of a message if the item
       can not be removed. */ 
@@ -224,6 +227,13 @@ _elementType * cmnNamedMap<_elementType>::GetItem(const std::string & itemName, 
 }
 
 template <class _elementType>
+bool cmnNamedMap<_elementType>::FindItem(const std::string & itemName) const {
+    const typename MapType::const_iterator iter = Map.find(itemName);
+
+    return (iter != Map.end());
+}
+
+template <class _elementType>
 bool cmnNamedMap<_elementType>::RemoveItem(const std::string & itemName, cmnLogLoD lod)
 {
     // check if this name already exists
@@ -290,6 +300,8 @@ void cmnNamedMap<_elementType>::ToStream(std::ostream & outputStream) const
 
 template <class _elementType>
 void cmnNamedMap<_elementType>::DeleteAll(void) {
+    if (Map.empty()) return;
+
     typename MapType::iterator iterator = Map.begin();
     const typename MapType::iterator end = Map.end();
     for (;

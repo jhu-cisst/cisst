@@ -68,7 +68,6 @@ class mtsTaskInterface;
 class mtsRequiredInterface;
 class mtsTask;
 class mtsTaskPeriodic;
-class mtsTaskManager;
 
 // containers
 class mtsMailBox;
@@ -93,6 +92,25 @@ inline std::string mtsObjectName(const mtsGenericObject * object) {
 // flag for required interfaces lists of commands
 const bool mtsRequired = true;
 const bool mtsOptional = false;
+
+
+// classes defined when ICE is used
+#if CISST_MTS_HAS_ICE
+class mtsComponentProxy;
+class mtsProxySerializer;
+class mtsManagerProxyServer;
+class mtsManagerProxyClient;
+class mtsComponentInterfaceProxyServer;
+class mtsComponentInterfaceProxyClient;
+class mtsManagerProxyServer;
+class mtsManagerProxyClient;
+#endif // CISST_MTS_HAS_ICE
+
+
+class mtsManagerLocal;
+class mtsManagerLocalInterface;
+class mtsManagerGlobal;
+class mtsManagerGlobalInterface;
 
 #endif  // _mtsForwardDeclarations_h
 

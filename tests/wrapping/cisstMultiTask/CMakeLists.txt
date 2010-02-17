@@ -55,7 +55,7 @@ foreach(proxyTest ${PROXY_TESTS})
                             cisstMultiTask cisstVector cisstCommon
                             debug ${PYTHON_DEBUG_LIBRARIES}
                             optimized ${PYTHON_LIBRARIES})
-	set_source_files_properties(_${module} PROPERTIES SUFFIX .pyd)
+    set_target_properties(_${module} PROPERTIES SUFFIX .pyd)
     else(WIN32)
 	swig_link_libraries(${module}
 	                    cisstMultiTaskPythonTest

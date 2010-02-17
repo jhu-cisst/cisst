@@ -61,12 +61,12 @@ mtsDeviceInterface * mtsDevice::GetProvidedInterface(const std::string & interfa
     return ProvidedInterfaces.GetItem(interfaceName, CMN_LOG_LOD_INIT_ERROR);
 }
 
-#if 0 // adeguet1, is this needed, dangerous now when using mtsTaskFromSignal ...
+//#if 0 // adeguet1, is this needed, dangerous now when using mtsTaskFromSignal ...
 mtsRequiredInterface * mtsDevice::AddRequiredInterface(const std::string & requiredInterfaceName,
                                                        mtsRequiredInterface * requiredInterface) {
     return RequiredInterfaces.AddItem(requiredInterfaceName, requiredInterface) ? requiredInterface : 0;
 }
-#endif
+//#endif
 
 mtsRequiredInterface * mtsDevice::AddRequiredInterface(const std::string & requiredInterfaceName) {
     // PK: move DEFAULT_EVENT_QUEUE_LEN somewhere else (not in mtsTaskInterface)

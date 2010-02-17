@@ -66,4 +66,6 @@ http://www.cisst.org/cisst/license.txt.
 #define CISST_DEPRECATED
 
 // Wrap devices
+#if CISST_HAS_XML
 %include "cisstDevices/devNDISerial.h"
+#endif

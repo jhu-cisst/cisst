@@ -31,6 +31,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsCommandQueuedVoid.h>
 #include <cisstMultiTask/mtsCommandQueuedWrite.h>
 
+#include <cisstMultiTask/mtsInterfaceCommon.h>
+
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
 
@@ -76,6 +78,11 @@ http://www.cisst.org/cisst/license.txt.
 class CISST_EXPORT mtsRequiredInterface: public cmnGenericObject
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+
+    friend class mtsComponentProxy;
+    friend class mtsComponentInterfaceProxyClient;
+    friend class mtsManagerLocal;
+    friend class mtsManagerLocalTest;
 
 protected:
 
@@ -193,15 +200,6 @@ protected:
             } else {
                 outputStream << " (required)";
             }
-        }
-        unsigned int GetCommandID(void) const
-        {
-            return (*CommandPointer)->GetCommandID();
-        }
-
-        std::string GetName(void) const
-        {
-            return (*CommandPointer)->GetName();
         }
     };
     

@@ -183,9 +183,16 @@ public:
         return SocketFD;
     };
 
-    /*! \return IP address of the localhost as a string */
+    /*! \return The first IP address of the localhost as a string */
     // Perhaps this should be outside the class
     static std::string GetLocalhostIP(void);
+
+    /*! \brief Retrieve IP address of the localhost as string from each network
+               interface (which may be more than two)
+        \param IPaddresses container for IP address as string
+        \return Number of IP address retrieved with IPaddresses filled */
+    // Perhaps this should be outside the class
+    static int GetLocalhostIP(std::vector<std::string> & IPaddress);
 
     /*! \brief Sets the port of a UDP server */
     bool AssignPort(unsigned short port);

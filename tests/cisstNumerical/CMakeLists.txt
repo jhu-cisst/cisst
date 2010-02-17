@@ -21,7 +21,6 @@ SET(SOURCE_FILES
     nmrBernsteinPolynomialLineIntegralTest.cpp
     nmrDynAllocPolynomialContainerTest.cpp
     nmrGaussJordanInverseTest.cpp
-    nmrIsOrthonormalTest.cpp
     nmrMultiIndexCounterTest.cpp
     nmrPolynomialBaseTest.cpp
     nmrPolynomialTermPowerIndexTest.cpp
@@ -34,7 +33,6 @@ SET(HEADER_FILES
     nmrBernsteinPolynomialLineIntegralTest.h
     nmrDynAllocPolynomialContainerTest.h
     nmrGaussJordanInverseTest.h
-    nmrIsOrthonormalTest.h
     nmrMultiIndexCounterTest.h
     nmrPolynomialBaseTest.h
     nmrPolynomialTermPowerIndexTest.h
@@ -46,6 +44,7 @@ IF(CISST_HAS_CISSTNETLIB)
   SET(SOURCE_FILES
       ${SOURCE_FILES}
       nmrInverseTest.cpp
+      nmrIsOrthonormalTest.cpp
       nmrLDPSolverTest.cpp
 #      nmrLSSolverTest.cpp
 #      nmrLSISolverTest.cpp
@@ -63,6 +62,7 @@ IF(CISST_HAS_CISSTNETLIB)
   SET(HEADER_FILES
       ${HEADER_FILES}
       nmrInverseTest.h
+      nmrIsOrthonormalTest.h
       nmrLDPSolverTest.h
 #      nmrLSSolverTest.h
 #      nmrLSISolverTest.h

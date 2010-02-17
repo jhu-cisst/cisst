@@ -25,24 +25,28 @@ CISST_REQUIRES(cisstMultiTasksTestsLib "cisstCommon;cisstVector;cisstOSAbstracti
 SET(SOURCE_FILES
     mtsCollectorBaseTest.cpp
     mtsStateTableTest.cpp
-    mtsTaskManagerTest.cpp
     mtsTaskTest.cpp
     mtsVectorTest.cpp
     mtsMacrosTest.cpp
     mtsMatrixTest.cpp
     mtsTransformationTypesTest.cpp
+    mtsManagerGlobalTest.cpp
+    mtsManagerLocalTest.cpp
     )
 
 # all header files
 SET(HEADER_FILES
     mtsCollectorBaseTest.h
     mtsStateTableTest.h
-    mtsTaskManagerTest.h
     mtsTaskTest.h
     mtsVectorTest.h
     mtsMacrosTest.h
     mtsMatrixTest.h
     mtsTransformationTypesTest.h
+	
+	mtsManagerTestClasses.h
+    mtsManagerGlobalTest.h
+    mtsManagerLocalTest.h    
     )
 
 # Add executable for C++ tests

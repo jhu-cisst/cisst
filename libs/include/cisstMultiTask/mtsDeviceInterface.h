@@ -81,6 +81,8 @@ class CISST_EXPORT mtsDeviceInterface: public cmnGenericObject
     friend class mtsDevice;
     friend class mtsTask;
     friend class mtsTaskPeriodic;
+    friend class mtsManagerLocal;
+    friend class mtsComponentProxy;
     
  public:
 

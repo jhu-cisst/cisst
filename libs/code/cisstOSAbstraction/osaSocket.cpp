@@ -121,6 +121,15 @@ osaSocket::~osaSocket(void)
 
 std::string osaSocket::GetLocalhostIP(void)
 {
+#if (CISST_OS == CISST_WINDOWS)
+    WSADATA wsaData;
+    int retval = WSAStartup(WINSOCKVERSION, &wsaData);
+    if (retval != 0) {
+        CMN_LOG_RUN_ERROR << "osaSocket: WSAStartup() failed with error code " << retval << std::endl;
+        return 0;
+    }
+#endif
+
     char hostname[256] = { 0 };
     gethostname(hostname, 255);
     CMN_LOG_RUN_VERBOSE << "GetLocalhostIP: hostname is " << hostname << std::endl;
@@ -128,11 +137,66 @@ std::string osaSocket::GetLocalhostIP(void)
     struct hostent * he = gethostbyname(hostname);
     if (!he) {
         CMN_LOG_RUN_ERROR << "GetLocalhostIP: invalid host" << std::endl;
+#if (CISST_OS == CISST_WINDOWS)
+        WSACleanup();
+#endif
         return "";
     }
     struct in_addr localAddr;
     memcpy(&localAddr, he->h_addr_list[0], sizeof(struct in_addr));
+
+#if (CISST_OS == CISST_WINDOWS)
+    WSACleanup();
+#endif
     return inet_ntoa(localAddr);
+}
+
+int osaSocket::GetLocalhostIP(std::vector<std::string> & IPaddress)
+{    
+#if (CISST_OS == CISST_WINDOWS)
+    WSADATA wsaData;
+    int retval = WSAStartup(WINSOCKVERSION, &wsaData);
+    if (retval != 0) {
+        CMN_LOG_RUN_ERROR << "osaSocket: WSAStartup() failed with error code " << retval << std::endl;
+        return 0;
+    }
+#endif
+
+    char hostname[256] = { 0 };
+    if (gethostname(hostname, 255) != 0) {
+        CMN_LOG_RUN_ERROR << "osaSocket: failed to get host name" << std::endl;
+#if (CISST_OS == CISST_WINDOWS)
+        WSACleanup();
+#endif
+        return 0;
+    }
+
+    CMN_LOG_RUN_VERBOSE << "GetLocalhostIP: hostname is " << hostname << std::endl;
+
+    struct hostent * he = gethostbyname(hostname);
+    if (!he) {
+        CMN_LOG_RUN_ERROR << "GetLocalhostIP: invalid host" << std::endl;
+#if (CISST_OS == CISST_WINDOWS)
+        WSACleanup();
+#endif
+        return 0;
+    }
+
+    int i;
+    struct in_addr localAddr;
+    std::string s;
+    for (i = 0; he->h_addr_list[i] != 0; ++i) {
+        memcpy(&localAddr, he->h_addr_list[i], sizeof(struct in_addr));
+        s = inet_ntoa(localAddr);        
+        IPaddress.push_back(s);
+        CMN_LOG_RUN_VERBOSE << "Localhost IP (" << i << ") : " << s << std::endl;
+    }
+
+#if (CISST_OS == CISST_WINDOWS)
+    WSACleanup();
+#endif
+
+    return i;
 }
 
 
@@ -431,6 +495,7 @@ bool osaSocket::Close(void)
             CMN_LOG_CLASS_RUN_ERROR << "Close: failed to close socket " << SocketFD << " Error: " <<WSAGetLastError()<<std::endl;
             return false;
         }
+        WSACleanup();
 #else
         retval = close(SocketFD);
         if (retval != 0) {
