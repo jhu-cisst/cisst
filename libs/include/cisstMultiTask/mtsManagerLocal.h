@@ -219,8 +219,8 @@ public:
     //-------------------------------------------------------------------------    
     /*! Add a component to this local component manager. */
     bool AddComponent(mtsDevice * component);
-    bool CISST_DEPRECATED AddTask(mtsTask * component); // For backward compatibility
-    bool CISST_DEPRECATED AddDevice(mtsDevice * component); // For backward compatibility
+    bool /*CISST_DEPRECATED*/ AddTask(mtsTask * component); // For backward compatibility
+    bool /*CISST_DEPRECATED*/ AddDevice(mtsDevice * component); // For backward compatibility
 
     /*! Remove a component from this local component manager. */
     bool RemoveComponent(mtsDevice * component);
@@ -230,8 +230,8 @@ public:
     mtsDevice * GetComponent(const std::string & componentName) const;
     mtsTask * GetComponentAsTask(const std::string & componentName) const;
 
-    mtsDevice CISST_DEPRECATED * GetDevice(const std::string & deviceName); // For backward compatibility
-    mtsTask CISST_DEPRECATED * GetTask(const std::string & taskName); // For backward compatibility
+    mtsDevice /*CISST_DEPRECATED*/ * GetDevice(const std::string & deviceName); // For backward compatibility
+    mtsTask /*CISST_DEPRECATED*/ * GetTask(const std::string & taskName); // For backward compatibility
 
     /*! Check if a component exists by its name */
     bool FindComponent(const std::string & componentName) const;
@@ -281,12 +281,12 @@ public:
     //-------------------------------------------------------------------------
     /*! Enumerate all the names of components added */
     std::vector<std::string> GetNamesOfComponents(void) const;
-    std::vector<std::string> CISST_DEPRECATED GetNamesOfDevices(void) const;  // For backward compatibility
-    std::vector<std::string> CISST_DEPRECATED GetNamesOfTasks(void) const;  // For backward compatibility    
+    std::vector<std::string> /*CISST_DEPRECATED*/ GetNamesOfDevices(void) const;  // For backward compatibility
+    std::vector<std::string> /*CISST_DEPRECATED*/ GetNamesOfTasks(void) const;  // For backward compatibility    
 
     void GetNamesOfComponents(std::vector<std::string>& namesOfComponents) const;
-    void CISST_DEPRECATED GetNamesOfDevices(std::vector<std::string>& namesOfDevices) const; // For backward compatibility
-    void CISST_DEPRECATED GetNamesOfTasks(std::vector<std::string>& namesOfTasks) const; // For backward compatibility
+    void /*CISST_DEPRECATED*/ GetNamesOfDevices(std::vector<std::string>& namesOfDevices) const; // For backward compatibility
+    void /*CISST_DEPRECATED*/ GetNamesOfTasks(std::vector<std::string>& namesOfTasks) const; // For backward compatibility
     
     /*! Return a reference to the time server. */
     inline const osaTimeServer & GetTimeServer(void) {
@@ -313,11 +313,11 @@ public:
 #endif
 
     /*! For debugging. Dumps to stream the maps maintained by the manager. */
-    void CISST_DEPRECATED ToStream(std::ostream & outputStream) const;
+    void /*CISST_DEPRECATED*/ ToStream(std::ostream & outputStream) const;
 
     /*! Create a dot file to be used by graphviz to generate a nice
       graph of connections between tasks/interfaces. */
-    void CISST_DEPRECATED ToStreamDot(std::ostream & outputStream) const;
+    void /*CISST_DEPRECATED*/ ToStreamDot(std::ostream & outputStream) const;
 
     //-------------------------------------------------------------------------
     //  Networking
