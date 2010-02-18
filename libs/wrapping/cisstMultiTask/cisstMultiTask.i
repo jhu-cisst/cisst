@@ -193,18 +193,14 @@ typedef mtsCommandQualifiedReadOrWriteBase<const mtsGenericObject> mtsCommandQua
 
 %include "cisstMultiTask/mtsRequiredInterface.h"
 
-%include "cisstMultiTask/mtsTaskManager.h"
-%extend mtsTaskManager {
+%include "cisstMultiTask/mtsManagerLocal.h"
+%extend mtsManagerLocal {
     %pythoncode {
         def UpdateFromC(self):
-            tasks = mtsTaskManager.GetNamesOfTasks(self)
-            for task in tasks:
-                self.__dict__[task] = mtsTaskManager.GetTask(self, task)
-                self.__dict__[task].UpdateFromC()
-            devices = mtsTaskManager.GetNamesOfDevices(self)
-            for device in devices:
-                self.__dict__[device] = mtsTaskManager.GetDevice(self, device)
-                self.__dict__[device].UpdateFromC()
+            comps = mtsManagerLocal.GetNamesOfComponents(self)
+            for comp in comps:
+                self.__dict__[comp] = mtsManagerLocal.GetComponent(self, comp)
+                self.__dict__[comp].UpdateFromC()
     }
 }
 

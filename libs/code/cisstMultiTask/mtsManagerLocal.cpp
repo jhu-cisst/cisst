@@ -207,7 +207,7 @@ void mtsManagerLocal::Cleanup(void)
 mtsManagerLocal * mtsManagerLocal::GetInstance(void)
 {
     if (!Instance) {
-        Instance = new mtsManagerLocal();
+        Instance = new mtsManagerLocal;
     }
 
     return Instance;

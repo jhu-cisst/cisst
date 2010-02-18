@@ -58,7 +58,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsExport.h>
 
-class CISST_EXPORT mtsManagerLocal: public mtsManagerLocalInterface, public cmnGenericObject 
+class CISST_EXPORT mtsManagerLocal: public cmnGenericObject, public mtsManagerLocalInterface
 {
     friend class mtsManagerLocalTest;
     friend class mtsManagerGlobalTest;
