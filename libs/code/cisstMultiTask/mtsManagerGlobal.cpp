@@ -28,6 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 #endif // CISST_MTS_HAS_ICE
 
 CMN_IMPLEMENT_SERVICES(mtsManagerGlobal);
+CMN_IMPLEMENT_SERVICES(mtsManagerGlobalInterface);
 
 mtsManagerGlobal::mtsManagerGlobal() : LocalManagerConnected(0)
 {

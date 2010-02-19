@@ -31,6 +31,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsTaskContinuous.h>
 #include <cisstMultiTask/mtsTaskPeriodic.h>
 #include <cisstMultiTask/mtsTaskFromCallback.h>
+#include <cisstMultiTask/mtsTaskFromSignal.h>
 
 #if CISST_MTS_HAS_ICE
 #include <cisstMultiTask/mtsComponentProxy.h>
@@ -39,6 +40,7 @@ http://www.cisst.org/cisst/license.txt.
 #endif
 
 CMN_IMPLEMENT_SERVICES(mtsManagerLocal);
+CMN_IMPLEMENT_SERVICES(mtsManagerLocalInterface);
 
 // Typedef to use 'component' instead of 'device'
 typedef mtsDevice mtsComponent;
@@ -458,12 +460,18 @@ void mtsManagerLocal::CreateAll(void)
         componentTask = dynamic_cast<mtsTask*>(it->second);
         if (!componentTask) continue;
 
-        // Note that the order of dynamic casts does matter to figure out
-        // a type of an original task since there are multiple inheritance 
-        // relationships between task-type components.
+        // Note that the order of dynamic casts matters to figure out
+        // a type of an original task since tasks have multiple inheritance.
 
         // mtsTaskPeriodic type component
         componentTask = dynamic_cast<mtsTaskPeriodic*>(it->second);
+        if (componentTask) {
+            componentTask->Create();
+            continue;
+        }
+
+        // mtsTaskFromSignal type component
+        componentTask = dynamic_cast<mtsTaskFromSignal*>(it->second);
         if (componentTask) {
             componentTask->Create();
             continue;
@@ -506,28 +514,33 @@ void mtsManagerLocal::StartAll(void)
         componentTaskTemp = dynamic_cast<mtsTask*>(it->second);
         if (!componentTaskTemp) continue;
 
-        // Note that the order of dynamic casts does matter to figure out
-        // a type of an original task since there are multiple inheritance 
-        // relationships between task-type components.
+        // Note that the order of dynamic casts matters to figure out
+        // a type of an original task since tasks have multiple inheritances.
         
         // mtsTaskPeriodic type component
         componentTaskTemp = dynamic_cast<mtsTaskPeriodic*>(it->second);
         if (componentTaskTemp) {
             componentTask = componentTaskTemp;
         } else {
-            // mtsTaskContinuous type component
-            componentTaskTemp = dynamic_cast<mtsTaskContinuous*>(it->second);            
-            if (componentTaskTemp) {
+            // mtsTaskFromSignal type component
+            componentTask = dynamic_cast<mtsTaskFromSignal*>(it->second);
+            if (componentTask) {
                 componentTask = componentTaskTemp;
             } else {
-                // mtsTaskFromCallback type component
-                componentTaskTemp = dynamic_cast<mtsTaskFromCallback*>(it->second);
+                // mtsTaskContinuous type component
+                componentTaskTemp = dynamic_cast<mtsTaskContinuous*>(it->second);            
                 if (componentTaskTemp) {
                     componentTask = componentTaskTemp;
                 } else {
-                    componentTask = NULL;
-                    CMN_LOG_CLASS_RUN_ERROR << "StartAll: invalid component: unknown mtsTask type" << std::endl;
-                    continue;
+                    // mtsTaskFromCallback type component
+                    componentTaskTemp = dynamic_cast<mtsTaskFromCallback*>(it->second);
+                    if (componentTaskTemp) {
+                        componentTask = componentTaskTemp;
+                    } else {
+                        componentTask = NULL;
+                        CMN_LOG_CLASS_RUN_ERROR << "StartAll: invalid component: unknown mtsTask type" << std::endl;
+                        continue;
+                    }
                 }
             }
         }
@@ -552,18 +565,24 @@ void mtsManagerLocal::StartAll(void)
         if (componentTaskTemp) {
             componentTask = componentTaskTemp;
         } else {
-            // mtsTaskContinuous type component
-            componentTaskTemp = dynamic_cast<mtsTaskContinuous*>(itLastTask->second);            
+            // mtsTaskFromSignal type component
+            componentTaskTemp = dynamic_cast<mtsTaskFromSignal*>(itLastTask->second);            
             if (componentTaskTemp) {
                 componentTask = componentTaskTemp;
             } else {
-                // mtsTaskFromCallback type component
-                componentTaskTemp = dynamic_cast<mtsTaskFromCallback*>(itLastTask->second);
+                // mtsTaskContinuous type component
+                componentTaskTemp = dynamic_cast<mtsTaskContinuous*>(itLastTask->second);            
                 if (componentTaskTemp) {
                     componentTask = componentTaskTemp;
                 } else {
-                    componentTask = NULL;
-                    CMN_LOG_CLASS_RUN_ERROR << "StartAll: invalid component: unknown mtsTask type (last component)" << std::endl;
+                    // mtsTaskFromCallback type component
+                    componentTaskTemp = dynamic_cast<mtsTaskFromCallback*>(itLastTask->second);
+                    if (componentTaskTemp) {
+                        componentTask = componentTaskTemp;
+                    } else {
+                        componentTask = NULL;
+                        CMN_LOG_CLASS_RUN_ERROR << "StartAll: invalid component: unknown mtsTask type (last component)" << std::endl;
+                    }
                 }
             }
         }
@@ -590,19 +609,25 @@ void mtsManagerLocal::KillAll(void)
         if (componentTaskTemp) {
             componentTask = componentTaskTemp;
         } else {
-            // mtsTaskContinuous type component
-            componentTaskTemp = dynamic_cast<mtsTaskContinuous*>(it->second);            
+            // mtsTaskFromSignal type component
+            componentTaskTemp = dynamic_cast<mtsTaskFromSignal*>(it->second);
             if (componentTaskTemp) {
                 componentTask = componentTaskTemp;
             } else {
-                // mtsTaskFromCallback type component
-                componentTaskTemp = dynamic_cast<mtsTaskFromCallback*>(it->second);
+                // mtsTaskContinuous type component
+                componentTaskTemp = dynamic_cast<mtsTaskContinuous*>(it->second);            
                 if (componentTaskTemp) {
                     componentTask = componentTaskTemp;
                 } else {
-                    componentTask = NULL;
-                    CMN_LOG_CLASS_RUN_ERROR << "KillAll: invalid component: unknown mtsTask type" << std::endl;
-                    continue;
+                    // mtsTaskFromCallback type component
+                    componentTaskTemp = dynamic_cast<mtsTaskFromCallback*>(it->second);
+                    if (componentTaskTemp) {
+                        componentTask = componentTaskTemp;
+                    } else {
+                        componentTask = NULL;
+                        CMN_LOG_CLASS_RUN_ERROR << "KillAll: invalid component: unknown mtsTask type" << std::endl;
+                        continue;
+                    }
                 }
             }
         }

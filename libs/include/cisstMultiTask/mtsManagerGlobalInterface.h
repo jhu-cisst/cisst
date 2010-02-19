@@ -36,11 +36,14 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsManagerGlobalInterface_h
 #define _mtsManagerGlobalInterface_h
 
+#include <cisstCommon/cmnClassRegister.h>
 #include <cisstMultiTask/mtsConfig.h>
 #include <cisstMultiTask/mtsInterfaceCommon.h>
 
-class CISST_EXPORT mtsManagerGlobalInterface
+class CISST_EXPORT mtsManagerGlobalInterface : public cmnGenericObject
 {
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+
 public:
     /* Typedef for the state of connection. See comments on Connect() for details. */
     typedef enum {
@@ -156,6 +159,8 @@ public:
         std::string & endpointInfo) = 0;
 #endif
 };
+
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsManagerGlobalInterface)
 
 #endif // _mtsManagerGlobalInterface_h
 

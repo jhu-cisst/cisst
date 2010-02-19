@@ -44,21 +44,17 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsManagerLocal_h
 #define _mtsManagerLocal_h
 
-#include <cisstCommon/cmnGenericObject.h>
-#include <cisstCommon/cmnClassRegister.h>
 #include <cisstCommon/cmnNamedMap.h>
-
 #include <cisstOSAbstraction/osaThreadBuddy.h>
 #include <cisstOSAbstraction/osaTimeServer.h>
 #include <cisstOSAbstraction/osaMutex.h>
-
 #include <cisstMultiTask/mtsManagerLocalInterface.h>
 #include <cisstMultiTask/mtsManagerGlobalInterface.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 
 #include <cisstMultiTask/mtsExport.h>
 
-class CISST_EXPORT mtsManagerLocal: public cmnGenericObject, public mtsManagerLocalInterface
+class CISST_EXPORT mtsManagerLocal: public mtsManagerLocalInterface
 {
     friend class mtsManagerLocalTest;
     friend class mtsManagerGlobalTest;

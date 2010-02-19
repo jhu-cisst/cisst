@@ -43,13 +43,17 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsManagerLocalInterface_h
 #define _mtsManagerLocalInterface_h
 
+#include <cisstCommon/cmnClassRegister.h>
+#include <cisstCommon/cmnGenericObject.h>
 #include <cisstMultiTask/mtsConfig.h>
 #include <cisstMultiTask/mtsInterfaceCommon.h>
 
 #include <cisstMultiTask/mtsExport.h>
 
-class CISST_EXPORT mtsManagerLocalInterface 
+class CISST_EXPORT mtsManagerLocalInterface : public cmnGenericObject 
 {
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+
 public:
 #if CISST_MTS_HAS_ICE
     //-------------------------------------------------------------------------
@@ -128,5 +132,6 @@ public:
 #endif
 };
 
-#endif // _mtsManagerLocalInterface_h
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsManagerLocalInterface)
 
+#endif // _mtsManagerLocalInterface_h
