@@ -144,7 +144,7 @@ int svlFilterStreamTypeConverter::Initialize(svlSample* inputdata)
     return SVL_OK;
 }
 
-int svlFilterStreamTypeConverter::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata)
+int svlFilterStreamTypeConverter::ProcessFrame(svlProcInfo* procInfo, svlSample* inputdata)
 {
     ///////////////////////////////////////////
     // Check if the input sample has changed //

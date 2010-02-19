@@ -125,7 +125,7 @@ svlImageCodecPNG::svlImageCodecPNG() :
     pngBufferSize(0),
     pngRowsSize(0)
 {
-    ExtensionList = ".png;";
+    SetExtensionList(".png;");
 }
 
 svlImageCodecPNG::~svlImageCodecPNG()

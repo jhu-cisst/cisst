@@ -116,14 +116,6 @@ friend class svlStreamControlMultiThread;
     typedef std::vector<svlStreamEntity*> _OutputBranchList;
 
 public:
-    typedef struct _ProcInfo {
-        unsigned int  count;
-        unsigned int  id;
-        svlSyncPoint* sync;
-        osaCriticalSection* cs;
-    } ProcInfo;
-
-public:
     svlFilterBase();
     virtual ~svlFilterBase();
 
@@ -139,7 +131,7 @@ protected:
 
     virtual int Initialize(svlSample* inputdata);
     virtual int OnStart(unsigned int procCount);
-    virtual int ProcessFrame(ProcInfo* procInfo, svlSample* inputdata) = 0;
+    virtual int ProcessFrame(svlProcInfo* procInfo, svlSample* inputdata) = 0;
     virtual void OnStop();
     virtual int Release();
 
@@ -189,7 +181,7 @@ protected:
 
     virtual int Initialize();
     virtual int OnStart(unsigned int procCount);
-    virtual int ProcessFrame(ProcInfo* procInfo) = 0;
+    virtual int ProcessFrame(svlProcInfo* procInfo) = 0;
     virtual void OnStop();
     virtual int Release();
 
@@ -204,7 +196,7 @@ protected:
 private:
     // Dispatched to source specific methods declared above
     int Initialize(svlSample* inputdata);
-    int ProcessFrame(ProcInfo* procInfo, svlSample* inputdata);
+    int ProcessFrame(svlProcInfo* procInfo, svlSample* inputdata);
 
     // Hidden from derived classes
     int AddSupportedType(svlStreamType input, svlStreamType output);

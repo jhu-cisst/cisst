@@ -120,7 +120,7 @@ int svlFilterStereoImageOptimizer::Initialize(svlSample* inputdata)
     return SVL_OK;
 }
 
-int svlFilterStereoImageOptimizer::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata)
+int svlFilterStereoImageOptimizer::ProcessFrame(svlProcInfo* procInfo, svlSample* inputdata)
 {
     ///////////////////////////////////////////
     // Check if the input sample has changed //

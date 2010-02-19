@@ -61,6 +61,9 @@ public:
     virtual int Write(const svlSampleImageBase &image, const unsigned int videoch, unsigned char *buffer, size_t &buffersize, const std::string &codec, const int compression = -1);
 
 protected:
+    void SetExtensionList(const std::string &list);
+
+private:
     std::string ExtensionList;
 };
 

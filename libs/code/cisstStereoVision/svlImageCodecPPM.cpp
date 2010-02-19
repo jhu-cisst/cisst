@@ -268,7 +268,7 @@ svlImageCodecPPM::svlImageCodecPPM() :
     ppmBuffer(0),
     ppmBufferSize(0)
 {
-    ExtensionList = ".ppm;.pgm;";
+    SetExtensionList(".ppm;.pgm;");
 }
 
 svlImageCodecPPM::~svlImageCodecPPM()

@@ -54,7 +54,7 @@ int VideoPlayer(const std::string pathname)
     }
     else {
         if (viewer_source.SetFilePath(pathname) != SVL_OK) {
-            cerr << endl << "Error while opening file... " << endl;
+            cerr << endl << "Wrong file name... " << endl;
             goto labError;
         }
     }

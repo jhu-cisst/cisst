@@ -31,7 +31,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction.h>
 #include <cisstStereoVision.h>
 
-
 using namespace std;
 
 
@@ -58,7 +57,7 @@ protected:
         return SVL_OK;
     }
 
-    int ProcessFrame(ProcInfo* procInfo, svlSample* CMN_UNUSED(inputdata) = 0)
+    int ProcessFrame(svlProcInfo* procInfo, svlSample* CMN_UNUSED(inputdata) = 0)
     {
 		if (!Show) return SVL_OK;
 
@@ -127,10 +126,8 @@ public:
         ,OffsetY(0)
 		,ImageRectifier(0)
         ,ImageWriterFilter(0)
-#if (CISST_SVL_HAS_ZLIB == ON)
         ,VideoWriterFilter(0)
         ,Recording(false)
-#endif // CISST_SVL_HAS_ZLIB
     {
     }
 
@@ -148,7 +145,6 @@ public:
                 }
                 break;
 
-#if (CISST_SVL_HAS_ZLIB == ON)
                 case ' ':
                 {
                     if (VideoWriterFilter) {
@@ -165,7 +161,6 @@ public:
                     }
                 }
                 break;
-#endif // CISST_SVL_HAS_ZLIB
 
                 case 'a':
                 {
@@ -226,10 +221,8 @@ public:
 	int MouseOriginY;
     svlFilterImageRectifier* ImageRectifier;
     svlFilterImageFileWriter* ImageWriterFilter;
-#if (CISST_SVL_HAS_ZLIB == ON)
     svlFilterVideoFileWriter* VideoWriterFilter;
     bool Recording;
-#endif // CISST_SVL_HAS_ZLIB
 };
 
 
@@ -241,10 +234,6 @@ int CameraViewer(bool interpolation, bool save, int width, int height, int fulls
 {
     svlInitialize();
 
-#if (CISST_SVL_HAS_ZLIB == OFF)
-    save = false;
-#endif // CISST_SVL_HAS_ZLIB
-
     // instantiating SVL stream and filters
     svlStreamManager viewer_stream(8);
     svlFilterSourceVideoCapture viewer_source(2);
@@ -254,9 +243,7 @@ int CameraViewer(bool interpolation, bool save, int width, int height, int fulls
     svlFilterStereoImageJoiner viewer_joiner;
     CViewerWindowCallback viewer_window_cb;
     svlFilterImageFileWriter viewer_imagewriter;
-#if (CISST_SVL_HAS_ZLIB == ON)
     svlFilterVideoFileWriter viewer_videowriter;
-#endif // CISST_SVL_HAS_ZLIB
     CFPSFilter viewer_fps;
 
     // setup source
@@ -267,15 +254,14 @@ int CameraViewer(bool interpolation, bool save, int width, int height, int fulls
         viewer_source.DialogSetup(SVL_RIGHT);
     }
 
-#if (CISST_SVL_HAS_ZLIB == ON)
     // setup video writer
     if (save == true) {
         viewer_videowriter.DialogFilePath(SVL_LEFT);
+        viewer_videowriter.DialogCodec(SVL_LEFT);
         viewer_videowriter.DialogFilePath(SVL_RIGHT);
-        viewer_videowriter.SetCompressionLevel(1); // 0-9
+        viewer_videowriter.DialogCodec(SVL_RIGHT);
         viewer_videowriter.Pause();
     }
-#endif // CISST_SVL_HAS_ZLIB
 
     // setup image writer
     viewer_imagewriter.SetFilePath("left_", "bmp", SVL_LEFT);
@@ -308,11 +294,9 @@ int CameraViewer(bool interpolation, bool save, int width, int height, int fulls
     // setup image window
     viewer_window_cb.ImageWriterFilter = &viewer_imagewriter;
 	viewer_window_cb.ImageRectifier = &viewer_rectifier;
-#if (CISST_SVL_HAS_ZLIB == ON)
     if (save == true) {
         viewer_window_cb.VideoWriterFilter = &viewer_videowriter;
     }
-#endif // CISST_SVL_HAS_ZLIB
     viewer_window.SetCallback(&viewer_window_cb);
     viewer_window.SetTitleText("Camera Viewer");
 //    viewer_window.EnableTimestampInTitle();
@@ -334,11 +318,9 @@ int CameraViewer(bool interpolation, bool save, int width, int height, int fulls
 
     // chain filters to pipeline
     if (viewer_stream.Trunk().Append(&viewer_source) != SVL_OK) goto labError;
-#if (CISST_SVL_HAS_ZLIB == ON)
     if (save == true) {
         if (viewer_stream.Trunk().Append(&viewer_videowriter) != SVL_OK) goto labError;
     }
-#endif // CISST_SVL_HAS_ZLIB
     if (viewer_stream.Trunk().Append(&viewer_imagewriter) != SVL_OK) goto labError;
 	if (fullscreen >= 0) {
         if (viewer_stream.Trunk().Append(&viewer_rectifier) != SVL_OK) goto labError;
@@ -367,11 +349,9 @@ int CameraViewer(bool interpolation, bool save, int width, int height, int fulls
         cerr << "  In image window:" << endl;
         cerr << "    'a'   - Enable/disable adjustments" << endl;
         cerr << "    's'   - Take image snapshots" << endl;
-#if (CISST_SVL_HAS_ZLIB == ON)
         if (save == true) {
             cerr << "    SPACE - Video recorder control: Record/Pause" << endl;
         }
-#endif // CISST_SVL_HAS_ZLIB
         cerr << "  In command window:" << endl;
         cerr << "    '1'   - Adjust LEFT image properties" << endl;
         cerr << "    '2'   - Adjust RIGHT image properties" << endl;
@@ -478,9 +458,7 @@ int main(int argc, char** argv)
                 cerr << "Command line format:" << endl;
                 cerr << "     stereoTutorialStereoCameraViewer [options]" << endl;
                 cerr << "Options:" << endl;
-#if (CISST_SVL_HAS_ZLIB == ON)
                 cerr << "     -v        Save video files" << endl;
-#endif // CISST_SVL_HAS_ZLIB
                 cerr << "     -i        Interpolation ON [default: OFF]" << endl;
                 cerr << "     -w#       Displayed image width" << endl;
                 cerr << "     -h#       Displayed image height" << endl;
@@ -492,12 +470,7 @@ int main(int argc, char** argv)
                 cerr << "     -x#       Horizontal window position [used only with -f]" << endl;
                 cerr << "Examples:" << endl;
                 cerr << "     stereoTutorialStereoCameraViewer" << endl;
-#if (CISST_SVL_HAS_ZLIB == ON)
                 cerr << "     stereoTutorialStereoCameraViewer -v -i -w800 -h600" << endl;
-#else // CISST_SVL_HAS_ZLIB
-                cerr << "     stereoTutorialStereoCameraViewer -i -w1024 -h768" << endl;
-                cerr << "     stereoTutorialStereoCameraViewer -i -w1600 -h1200 -f2 -x160" << endl;
-#endif // CISST_SVL_HAS_ZLIB
                 return 1;
             break;
 
@@ -505,11 +478,9 @@ int main(int argc, char** argv)
                 interpolation = true;
             break;
 
-#if (CISST_SVL_HAS_ZLIB == ON)
             case 'v':
                 save = true;
             break;
-#endif // CISST_SVL_HAS_ZLIB
 
             case 'w':
                 ivalue = ParseNumber(argv[i] + 2, 4);

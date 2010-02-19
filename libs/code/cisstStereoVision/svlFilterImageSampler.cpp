@@ -270,7 +270,7 @@ int svlFilterImageSampler::Initialize(svlSample* inputdata)
     return SVL_OK;
 }
 
-int svlFilterImageSampler::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata)
+int svlFilterImageSampler::ProcessFrame(svlProcInfo* procInfo, svlSample* inputdata)
 {
     _OnSingleThread(procInfo)
     {

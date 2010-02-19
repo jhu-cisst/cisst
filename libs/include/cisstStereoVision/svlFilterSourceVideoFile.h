@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _svlFilterSourceVideoFile_h
 
 #include <cisstStereoVision/svlStreamManager.h>
+#include <cisstStereoVision/svlVideoIO.h>
 
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
@@ -40,31 +41,22 @@ public:
 
     int SetChannelCount(unsigned int channelcount);
     int DialogFilePath(unsigned int videoch = SVL_LEFT);
-    int SetFilePath(const std::string filepath, unsigned int videoch = SVL_LEFT);
+    int SetFilePath(const std::string &filepath, unsigned int videoch = SVL_LEFT);
+    int GetFilePath(std::string &filepath, unsigned int videoch = SVL_LEFT) const;
 
 protected:
     virtual int Initialize();
     virtual int OnStart(unsigned int procCount);
-    virtual int ProcessFrame(ProcInfo* procInfo);
+    virtual int ProcessFrame(svlProcInfo* procInfo);
     virtual int Release();
 
 private:
-    vctDynamicVector<void*> VideoObj;
-    vctDynamicVector<FILE*> VideoFile;
+    vctDynamicVector<svlVideoCodecBase*> Codec;
     vctDynamicVector<std::string> FilePath;
-    vctDynamicVector<unsigned int> FilePartCount;
 
-    vctDynamicVector<unsigned char*> YUVBuffer;
-    vctDynamicVector<unsigned int> YUVBufferSize;
-    vctDynamicVector<unsigned char*> CompressedBuffer;
-    vctDynamicVector<unsigned int> CompressedBufferSize;
-
-    vctDynamicVector<unsigned int> VideoFrameCounter;
-    double AVIFrequency;
+    double Framerate;
     double FirstTimestamp;
-    osaStopwatch CVITimer;
-    double CVIStartTime;
-    double CVIFrameTime;
+    osaStopwatch Timer;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterSourceVideoFile)

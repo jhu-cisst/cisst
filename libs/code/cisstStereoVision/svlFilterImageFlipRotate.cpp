@@ -210,7 +210,7 @@ int svlFilterImageFlipRotate::Initialize(svlSample* inputdata)
     return SVL_OK;
 }
 
-int svlFilterImageFlipRotate::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata)
+int svlFilterImageFlipRotate::ProcessFrame(svlProcInfo* procInfo, svlSample* inputdata)
 {
     ///////////////////////////////////////////
     // Check if the input sample has changed //

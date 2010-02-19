@@ -63,7 +63,7 @@ int svlFilterDisparityMapToSurface::Initialize(svlSample* inputdata)
     return SVL_OK;
 }
 
-int svlFilterDisparityMapToSurface::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata)
+int svlFilterDisparityMapToSurface::ProcessFrame(svlProcInfo* procInfo, svlSample* inputdata)
 {
     _OnSingleThread(procInfo)
     {

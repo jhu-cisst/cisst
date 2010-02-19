@@ -86,7 +86,7 @@ int svlFilterUnsharpMask::Initialize(svlSample* inputdata)
     return SVL_OK;
 }
 
-int svlFilterUnsharpMask::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata)
+int svlFilterUnsharpMask::ProcessFrame(svlProcInfo* procInfo, svlSample* inputdata)
 {
     ///////////////////////////////////////////
     // Check if the input sample has changed //

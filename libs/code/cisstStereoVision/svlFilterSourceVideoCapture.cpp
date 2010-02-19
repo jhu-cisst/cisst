@@ -272,7 +272,7 @@ labError:
     return ret;
 }
 
-int svlFilterSourceVideoCapture::ProcessFrame(ProcInfo* procInfo)
+int svlFilterSourceVideoCapture::ProcessFrame(svlProcInfo* procInfo)
 {
     svlImageRGB* image;
     unsigned int idx;

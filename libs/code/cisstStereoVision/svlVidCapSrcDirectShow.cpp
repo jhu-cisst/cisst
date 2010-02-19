@@ -24,8 +24,6 @@ http://www.cisst.org/cisst/license.txt.
 
 using namespace std;
 
-static int OleInitCounter = 0;
-
 #define DS_INIT_TIMEOUT_INTV                500
 #define INITIAL_TOLERANCE_WAIT_LENGTH       100     // [frames]
 
@@ -65,20 +63,11 @@ svlVidCapSrcDirectShow::svlVidCapSrcDirectShow() :
 	PinCategory(0),
 	OutputBuffer(0)
 {
-    if (OleInitCounter < 1) {
-        CoInitialize(NULL);
-        OleInitCounter = 1;
-    }
 }
 
 svlVidCapSrcDirectShow::~svlVidCapSrcDirectShow()
 {
     Release();
-
-	if (OleInitCounter > 0) {
-        CoUninitialize();
-        OleInitCounter = 0;
-    }
 }
 
 svlFilterSourceVideoCapture::PlatformType svlVidCapSrcDirectShow::GetPlatformType()

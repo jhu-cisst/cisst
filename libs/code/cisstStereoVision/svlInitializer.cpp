@@ -20,24 +20,45 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
+#include <cisstCommon/cmnPortability.h>
 #include <cisstStereoVision.h>
 #include <cisstStereoVision/svlInitializer.h>
 #include "svlImageCodecInitializer.h"
+#include "svlVideoCodecInitializer.h"
 #include "svlVidCapSrcInitializer.h"
+
+
+// Initialize COM environment on Windows.
+// COM is used by video capture devices
+// and AVI file handlers.
+#if (CISST_OS == CISST_WINDOWS)
+#define _WIN32_DCOM
+class svlOleInit
+{
+public:
+    svlOleInit()  { CoInitializeEx(0, COINIT_APARTMENTTHREADED); }
+    ~svlOleInit() { CoUninitialize(); }
+};
+#endif // CISST_WINDOWS
 
 
 void svlInitialize()
 {
+#if (CISST_OS == CISST_WINDOWS)
+    static svlOleInit OleInstance;
+#endif // CISST_WINDOWS
+
     svlInitializeImageCodecs();
+    svlInitializeVideoCodecs();
     svlInitializeVideoCapture();
 
 #ifdef _svlFilterSourceDummy_h
     delete new svlFilterSourceDummy;
 #endif // _svlFilterSourceDummy_h
 
-#ifdef _svlFilterVideoDeinterlacer_h
-    delete new svlFilterVideoDeinterlacer;
-#endif // _svlFilterVideoDeinterlacer_h
+#ifdef _svlFilterImageDeinterlacer_h
+    delete new svlFilterImageDeinterlacer;
+#endif // _svlFilterImageDeinterlacer_h
 
 #ifdef _svlFilterSourceVideoCapture_h
     delete new svlFilterSourceVideoCapture;
@@ -122,9 +143,5 @@ void svlInitialize()
 #ifdef _svlFilterImageWindow_h
     delete new svlFilterImageWindow;
 #endif // _svlFilterImageWindow_h
-    
-#ifdef _svlFilterVideoFileWriterAVI_h
-    delete new svlFilterVideoFileWriterAVI;
-#endif // _svlFilterVideoFileWriterAVI_h
 }
 

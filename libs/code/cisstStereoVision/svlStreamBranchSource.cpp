@@ -72,7 +72,7 @@ int svlStreamBranchSource::Initialize()
     return SVL_OK;
 }
 
-int svlStreamBranchSource::ProcessFrame(ProcInfo* procInfo)
+int svlStreamBranchSource::ProcessFrame(svlProcInfo* procInfo)
 {
     _OnSingleThread(procInfo)
     {

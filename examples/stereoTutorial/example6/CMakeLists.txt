@@ -12,10 +12,8 @@
 # 
 # --- end cisst license ---
 
-IF(WIN32)
 
-    ADD_EXECUTABLE(stereoTutorialVideoConverter videoconverter.cpp)
+ADD_EXECUTABLE(stereoTutorialVideoConverter videoconverter.cpp)
 
-    CISST_REQUIRES("stereoTutorialVideoConverter" "cisstCommon;cisstVector;cisstOSAbstraction;cisstStereoVision")
+CISST_REQUIRES("stereoTutorialVideoConverter" "cisstCommon;cisstVector;cisstOSAbstraction;cisstStereoVision")
 
-ENDIF(WIN32)

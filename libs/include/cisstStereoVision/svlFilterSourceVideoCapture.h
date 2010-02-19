@@ -182,7 +182,7 @@ public:
 
 protected:
     virtual int Initialize();
-    virtual int ProcessFrame(ProcInfo* procInfo);
+    virtual int ProcessFrame(svlProcInfo* procInfo);
     virtual int Release();
 
 private:

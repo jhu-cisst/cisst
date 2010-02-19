@@ -465,3 +465,8 @@ int svlImageCodecBase::Write(const svlSampleImageBase & image,
     return Write(image, videoch, buffer, buffersize, compression);
 }
 
+void svlImageCodecBase::SetExtensionList(const std::string &list)
+{
+    ExtensionList = list;
+}
+

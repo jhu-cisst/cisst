@@ -145,7 +145,7 @@ int svlFilterSourceImageFile::OnStart(unsigned int CMN_UNUSED(procCount))
     return SVL_OK;
 }
 
-int svlFilterSourceImageFile::ProcessFrame(ProcInfo* procInfo)
+int svlFilterSourceImageFile::ProcessFrame(svlProcInfo* procInfo)
 {
     // Increment file counter
     if (FrameCounter > 0) {

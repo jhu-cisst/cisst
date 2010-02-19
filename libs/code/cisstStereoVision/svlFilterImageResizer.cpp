@@ -138,7 +138,7 @@ int svlFilterImageResizer::Initialize(svlSample* inputdata)
     return SVL_OK;
 }
 
-int svlFilterImageResizer::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata)
+int svlFilterImageResizer::ProcessFrame(svlProcInfo* procInfo, svlSample* inputdata)
 {
     ///////////////////////////////////////////
     // Check if the input sample has changed //

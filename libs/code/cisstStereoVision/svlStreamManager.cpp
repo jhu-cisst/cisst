@@ -935,7 +935,7 @@ void* svlStreamControlMultiThread::Proc(svlStreamManager* baseref)
     svlFilterBase *filter, *prevfilter;
     svlFilterSourceBase *source;
     svlFilterBase::_OutputBranchList::iterator iterbranchlist;
-    svlFilterBase::ProcInfo info;
+    svlProcInfo info;
     svlSyncPoint *sync = baseref->SyncPoint;
     unsigned int counter = 0;
     osaTimeServer* timeserver = 0;
@@ -970,7 +970,7 @@ void* svlStreamControlMultiThread::Proc(svlStreamManager* baseref)
         if (ThreadID == 0) {
         // Execute only on one thread - BEGIN
 
-            if (source->OutputData && source->AutoTimestamp) {
+            if (source->OutputData && (source->AutoTimestamp || source->OutputData->GetTimestamp() < 0.0)) {
                 // Get fresh timestamp and assign it to the output sample
                 source->OutputData->SetTimestamp(GetAbsoluteTime(timeserver));
             }
@@ -1137,8 +1137,7 @@ int svlFilterBase::OnStart(unsigned int CMN_UNUSED(procCount))
     return SVL_OK;
 }
 
-int svlFilterBase::ProcessFrame(svlFilterBase::ProcInfo* CMN_UNUSED(procInfo),
-                                svlSample* CMN_UNUSED(inputdata))
+int svlFilterBase::ProcessFrame(svlProcInfo* CMN_UNUSED(procInfo), svlSample* CMN_UNUSED(inputdata))
 {
     return SVL_OK;
 }
@@ -1364,7 +1363,7 @@ int svlFilterSourceBase::Initialize(svlSample* CMN_UNUSED(inputdata))
     return Initialize();
 }
 
-int svlFilterSourceBase::ProcessFrame(ProcInfo* procInfo, svlSample* CMN_UNUSED(inputdata))
+int svlFilterSourceBase::ProcessFrame(svlProcInfo* procInfo, svlSample* CMN_UNUSED(inputdata))
 {
     return ProcessFrame(procInfo);
 }

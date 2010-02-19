@@ -35,7 +35,7 @@ svlImageCodecBMP::svlImageCodecBMP() :
     svlImageCodecBase(),
     cmnGenericObject()
 {
-    ExtensionList = ".bmp;";
+    SetExtensionList(".bmp;");
 }
 
 int svlImageCodecBMP::ReadDimensions(const std::string &filename, unsigned int &width, unsigned int &height)

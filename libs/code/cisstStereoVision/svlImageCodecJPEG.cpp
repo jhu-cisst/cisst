@@ -189,7 +189,7 @@ svlImageCodecJPEG::svlImageCodecJPEG() :
     jpegBufferSize(0),
     jpegRowBufferSize(0)
 {
-    ExtensionList = ".jpg;.jpeg;";
+    SetExtensionList(".jpg;.jpeg;");
 }
 
 svlImageCodecJPEG::~svlImageCodecJPEG()

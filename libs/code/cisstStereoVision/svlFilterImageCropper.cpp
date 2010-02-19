@@ -214,7 +214,7 @@ int svlFilterImageCropper::Initialize(svlSample* inputdata)
     return SVL_OK;
 }
 
-int svlFilterImageCropper::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata)
+int svlFilterImageCropper::ProcessFrame(svlProcInfo* procInfo, svlSample* inputdata)
 {
     ///////////////////////////////////////////
     // Check if the input sample has changed //

@@ -2,8 +2,8 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: svlVideoFileWriter.h 327 2009-05-07 21:46:49Z bvagvol1 $
-  
+  $Id: $
+
   Author(s):  Balazs Vagvolgyi
   Created on: 2006 
 
@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _svlFilterVideoFileWriter_h
 
 #include <cisstStereoVision/svlStreamManager.h>
+#include <cisstStereoVision/svlVideoIO.h>
 #include <string>
 
 // Always include last!
@@ -38,11 +39,18 @@ public:
     svlFilterVideoFileWriter();
     ~svlFilterVideoFileWriter();
 
-    int DialogFilePath(unsigned int videoch = SVL_LEFT);
-
     int Disable(bool disable, unsigned int videoch = SVL_LEFT);
-    int SetFilePath(const std::string filepath, unsigned int videoch = SVL_LEFT);
-    void SetCompressionLevel(unsigned int level); // 0 (no compression) - 9 (maximum compression)
+    int DialogFilePath(unsigned int videoch = SVL_LEFT);
+    int SetFilePath(const std::string &filepath, unsigned int videoch = SVL_LEFT);
+    int GetFilePath(std::string &filepath, unsigned int videoch = SVL_LEFT) const;
+    int SetFramerate(double framerate);
+
+    int DialogCodec(unsigned int videoch = SVL_LEFT);
+    int GetCodecName(std::string &name, unsigned int videoch = SVL_LEFT) const;
+    int GetCodec(svlVideoIO::Compression **compression, unsigned int videoch = SVL_LEFT) const;
+    int SetCodec(const svlVideoIO::Compression *compression, unsigned int videoch = SVL_LEFT);
+    int SaveCodec(const std::string &filepath, unsigned int videoch = SVL_LEFT) const;
+    int LoadCodec(const std::string &filepath, unsigned int videoch = SVL_LEFT);
 
     void Pause();
     void Record(int frames = -1);
@@ -50,49 +58,29 @@ public:
 protected:
     virtual int Initialize(svlSample* inputdata);
     virtual int OnStart(unsigned int procCount);
-    virtual int ProcessFrame(ProcInfo* procInfo, svlSample* inputdata);
+    virtual int ProcessFrame(svlProcInfo* procInfo, svlSample* inputdata);
     virtual int Release();
 
 private:
-    unsigned int VideoFrameCounter;
-    unsigned int CaptureLength;
-    vctDynamicVector<FILE*> VideoFile;
-    vctDynamicVector<bool> Disabled;
-    vctDynamicVector<std::string> FilePath;
-
     bool Action;
     double ActionTime;
     double TargetActionTime;
     osaTimeServer* TimeServer;
     unsigned int TargetCaptureLength;
 
-    unsigned int CompressionLevel;
-    vctDynamicVector<unsigned char*> YUVBuffer;
-    vctDynamicVector<unsigned int> YUVBufferSize;
-    vctDynamicVector<unsigned char*> CompressedBuffer;
-    vctDynamicVector<unsigned int> CompressedBufferSize;
-    vctDynamicVector<unsigned int*> CompressedPartOffset;
-    vctDynamicVector<unsigned int*> CompressedPartSize;
+    unsigned int VideoFrameCounter;
+    unsigned int CaptureLength;
+    double Framerate;
+    bool CodecsMultithreaded;
+    vctDynamicVector<svlVideoIO::Compression*> CodecParams;
+    vctDynamicVector<svlVideoCodecBase*> Codec;
+    vctDynamicVector<bool> Disabled;
+    vctDynamicVector<std::string> FilePath;
 
     int UpdateStreamCount(unsigned int count);
-
-    unsigned char* SaveBuffer[2];
-    unsigned int SaveBufferSize;
-    vctDynamicVector<unsigned int> SaveBufferOffset;
-    vctDynamicVector<unsigned int> SaveBufferUsed;
-    unsigned int SaveBufferUsedID;
-    osaThread SaveThread;
-    osaThreadSignal SaveInitEvent;
-    osaThreadSignal NewFrameEvent;
-    osaThreadSignal WriteDoneEvent;
-    bool SaveInitialized;
-    bool KillSaveThread;
-    bool SaveThreadError;
-    void* SaveProc(unsigned int videochannels);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterVideoFileWriter)
 
 #endif // _svlFilterVideoFileWriter_h
-
 

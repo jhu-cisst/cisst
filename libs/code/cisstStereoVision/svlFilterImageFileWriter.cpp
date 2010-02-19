@@ -85,7 +85,7 @@ int svlFilterImageFileWriter::Initialize(svlSample* inputdata)
     return SVL_OK;
 }
 
-int svlFilterImageFileWriter::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata)
+int svlFilterImageFileWriter::ProcessFrame(svlProcInfo* procInfo, svlSample* inputdata)
 {
     // Passing the same image for the next filter
     OutputData = inputdata;

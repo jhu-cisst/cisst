@@ -23,17 +23,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlFilterSourceVideoFile.h>
 #include <cisstOSAbstraction/osaSleep.h>
 
-#if (CISST_OS == CISST_WINDOWS)
-    #include "VfWAvi.h"
-    #include "commdlg.h"
-
-    static int VFS_OleInitCounter = 0;
-#endif
-
-#if (CISST_SVL_HAS_ZLIB == ON)
-    #include "zlib.h"
-    #include <cisstStereoVision/svlConverters.h>
-#endif // CISST_SVL_HAS_ZLIB
 
 #ifdef _MSC_VER
     // Quick fix for Visual Studio Intellisense:
@@ -56,16 +45,9 @@ CMN_IMPLEMENT_SERVICES(svlFilterSourceVideoFile)
 svlFilterSourceVideoFile::svlFilterSourceVideoFile() :
     svlFilterSourceBase(false),  // manual timestamp management
     cmnGenericObject(),
-    AVIFrequency(-1.0),
+    Framerate(-1.0),
     FirstTimestamp(-1.0)
 {
-#if (CISST_OS == CISST_WINDOWS)
-    if (VFS_OleInitCounter < 1) {
-        CoInitialize(0);
-        VFS_OleInitCounter = 1;
-    }
-#endif
-
     TargetFrequency = -1.0;
     OutputData = 0;
 }
@@ -73,16 +55,9 @@ svlFilterSourceVideoFile::svlFilterSourceVideoFile() :
 svlFilterSourceVideoFile::svlFilterSourceVideoFile(unsigned int channelcount) :
     svlFilterSourceBase(false),  // manual timestamp management
     cmnGenericObject(),
-    AVIFrequency(-1.0),
+    Framerate(-1.0),
     FirstTimestamp(-1.0)
 {
-#if (CISST_OS == CISST_WINDOWS)
-    if (VFS_OleInitCounter < 1) {
-        CoInitialize(0);
-        VFS_OleInitCounter = 1;
-    }
-#endif
-
     TargetFrequency = -1.0;
     OutputData = 0;
 
@@ -94,13 +69,6 @@ svlFilterSourceVideoFile::~svlFilterSourceVideoFile()
     Release();
 
     if (OutputData) delete OutputData;
-
-#if (CISST_OS == CISST_WINDOWS)
-    if (VFS_OleInitCounter > 0) {
-        CoUninitialize();
-        VFS_OleInitCounter = 0;
-    }
-#endif
 }
 
 int svlFilterSourceVideoFile::SetChannelCount(unsigned int channelcount)
@@ -117,19 +85,9 @@ int svlFilterSourceVideoFile::SetChannelCount(unsigned int channelcount)
     }
     else return SVL_FAIL;
 
-    VideoObj.SetSize(channelcount);
-    VideoObj.SetAll(0);
-    VideoFile.SetSize(channelcount);
-    VideoFile.SetAll(0);
+    Codec.SetSize(channelcount);
+    Codec.SetAll(0);
     FilePath.SetSize(channelcount);
-    FilePartCount.SetSize(channelcount);
-    YUVBuffer.SetSize(channelcount);
-    YUVBuffer.SetAll(0);
-    YUVBufferSize.SetSize(channelcount);
-    CompressedBuffer.SetSize(channelcount);
-    CompressedBuffer.SetAll(0);
-    CompressedBufferSize.SetSize(channelcount);
-    VideoFrameCounter.SetSize(channelcount);
 
     return SVL_OK;
 }
@@ -140,309 +98,113 @@ int svlFilterSourceVideoFile::Initialize()
 
     Release();
 
-    svlSampleImageBase* img = dynamic_cast<svlSampleImageBase*>(OutputData);
+    svlSampleImageBase* image = dynamic_cast<svlSampleImageBase*>(OutputData);
+    unsigned int width, height;
+    double framerate;
+    int ret = SVL_OK;
 
-#if (CISST_OS == CISST_WINDOWS)
-    CVfWAvi* tavi;
-    unsigned int avicounter = 0;
-    AVIFrequency = 0.0;
-#endif
-#if (CISST_SVL_HAS_ZLIB == ON)
-    int readlen;
-    unsigned int uivalue;
-    const std::string filestartmarker = "CisstSVLVideo\r\n";
-    char strbuffer[32];
-#endif
+    for (unsigned int i = 0; i < image->GetVideoChannels(); i ++) {
 
-    bool opened;
-    unsigned int i, width, height;
-
-    for (i = 0; i < img->GetVideoChannels(); i ++) {
-        if (FilePath[i].empty()) return SVL_FAIL;
-    }
-
-    for (i = 0; i < img->GetVideoChannels(); i ++) {
-        opened = false;
-
-#if (CISST_OS == CISST_WINDOWS)
-    // Try to open as an AVI first
-        VideoObj[i] = tavi = new CVfWAvi;
-        if (tavi->InitPlaying(FilePath[i].c_str()) > 0) {
-            AVIFrequency += std::max(0.1, tavi->GetFramerate());
-            width = tavi->GetWidth();
-            height = tavi->GetHeight();
-            avicounter ++;
-            opened = true;
-        }
-        else {
-            delete tavi;
-            VideoObj[i] = 0;
-        }
-#endif
-#if (CISST_SVL_HAS_ZLIB == ON)
-    // Try to open as a CISST video
-        while (opened == false) {
-            VideoFile[i] = fopen(FilePath[i].c_str(), "rb");
-            if (VideoFile[i] == 0) {
-                // Try adding the "cvi" extension
-                if (FilePath[i].at(FilePath[i].length() - 1) == '.') FilePath[i] += "cvi";
-                else FilePath[i] += ".cvi";
-                VideoFile[i] = fopen(FilePath[i].c_str(), "rb");
-                if (VideoFile[i] == 0) break;
-            }
-
-	        // Read "file start marker"
-            readlen = static_cast<int>(fread(strbuffer, filestartmarker.length(), 1, VideoFile[i]));
-            if (readlen < 1) break;
-            strbuffer[filestartmarker.length()] = 0;
-            if (filestartmarker.compare(strbuffer) != 0) break;
-
-	        // Read "width"
-            readlen = static_cast<int>(fread(&width, sizeof(unsigned int), 1, VideoFile[i]));
-            if (readlen < 1 || width < 1 || width > 4096) break;
-
-            // Read "height"
-            readlen = static_cast<int>(fread(&height, sizeof(unsigned int), 1, VideoFile[i]));
-            if (readlen < 1 || height < 1 || height > 4096) break;
-
-            // Read "part count"
-            readlen = static_cast<int>(fread(&uivalue, sizeof(unsigned int), 1, VideoFile[i]));
-            if (readlen < 1 || uivalue < 1 || uivalue > 256) break;
-            FilePartCount[i] = uivalue;
-
-            // Compute YUV buffer size
-            YUVBufferSize[i] = width * height * 2;
-            // Allocate YUV buffer
-            YUVBuffer[i] = new unsigned char[YUVBufferSize[i]];
-
-            // Compute data size and add some additional room for the compressor
-            CompressedBufferSize[i] = YUVBufferSize[i] + YUVBufferSize[i] / 100 + 4096;
-            // Allocate compression buffer
-            CompressedBuffer[i] = new unsigned char[CompressedBufferSize[i]];
-
-            // Initialize video frame counter
-            VideoFrameCounter[i] = 0;
-
-            opened = true;
-
+        // Get video codec for file extension
+        Codec[i] = svlVideoIO::GetCodec(FilePath[i]);
+        // Open video file
+        if (!Codec[i] || Codec[i]->Open(FilePath[i], width, height, framerate) != SVL_OK) {
+            ret = SVL_FAIL;
             break;
         }
-#endif
 
-        // If either channel fails to open, return error
-        if (opened == false) {
-            Release();
-            return SVL_FAIL;
+        if (i == 0) {
+            // The first video channel defines the video
+            // framerate of all channels in the stream
+            Framerate = framerate;
         }
 
-        img->SetSize(i, width, height);
+        // Create image sample of matching dimensions
+        image->SetSize(i, width, height);
     }
 
-#if (CISST_OS == CISST_WINDOWS)
-    if (avicounter > 0) {
-        // Averaging framerates
-        AVIFrequency /= avicounter;
-    }
-#endif
+    // Initialize timestamp for case of timestamp errors
+    OutputData->SetTimestamp(0.0);
 
-    return SVL_OK;
+    if (ret != SVL_OK) Release();
+    return ret;
 }
 
 int svlFilterSourceVideoFile::OnStart(unsigned int CMN_UNUSED(procCount))
 {
-    if (TargetFrequency < 0.1) TargetFrequency = AVIFrequency;
+    if (TargetFrequency < 0.1) TargetFrequency = Framerate;
     RestartTargetTimer();
 
     return SVL_OK;
 }
 
-int svlFilterSourceVideoFile::ProcessFrame(ProcInfo* procInfo)
+int svlFilterSourceVideoFile::ProcessFrame(svlProcInfo* procInfo)
 {
     // Try to keep TargetFrequency
     _OnSingleThread(procInfo) WaitForTargetTimer();
 
     svlSampleImageBase* img = dynamic_cast<svlSampleImageBase*>(OutputData);
-    unsigned int videochannels = img->GetVideoChannels();
-    unsigned char* imptr;
-    unsigned int idx, datasize;
-    int ret = SVL_OK;
-
-#if (CISST_SVL_HAS_ZLIB == ON)
-    const std::string framestartmarker = "\r\nFrame\r\n";
-    char strbuffer[16];
+    unsigned int idx, videochannels = img->GetVideoChannels();
     double timestamp, timespan;
-    unsigned int i, compressedpartsize, offset;
-    unsigned long longsize;
-    int readlen, err;
-    bool eof;
-#endif
+    int ret = SVL_OK;
 
     _ParallelLoop(procInfo, idx, videochannels)
     {
-        imptr = img->GetUCharPointer(idx);
-        datasize = img->GetDataSize(idx);
-        ret = SVL_FAIL;
-
-#if (CISST_OS == CISST_WINDOWS)
-        if (VideoObj[idx]) {
-            if (reinterpret_cast<CVfWAvi*>(VideoObj[idx])->CopyNextAVIFrame(imptr, datasize) == 1) {
-                ret = SVL_OK;
+        if (Codec[idx]) {
+            ret = Codec[idx]->Read(0, *img, idx, true);
+            if (ret == SVL_VID_END_REACHED) {
+                if (!LoopFlag) ret = SVL_STOP_REQUEST;
+                else {
+                    // Loop around
+                    ret = Codec[idx]->Read(0, *img, idx, true);
+                }
             }
-        }
-#endif
-#if (CISST_SVL_HAS_ZLIB == ON)
-        while (VideoFile[idx]) {
-            eof = false;
+            if (ret != SVL_OK) break;
 
-            while (1) {
-                // Read "frame start marker"
-                readlen = static_cast<int>(fread(strbuffer, framestartmarker.length(), 1, VideoFile[idx]));
-                if (readlen < 1) {
-                    eof = true;
-                    break;
-                }
-                strbuffer[framestartmarker.length()] = 0;
-                if (framestartmarker.compare(strbuffer) != 0) break;
+            if (idx == 0) {
+                if (!IsTargetTimerRunning()) {
 
-                // Read "time stamp"
-                readlen = static_cast<int>(fread(&timestamp, sizeof(double), 1, VideoFile[idx]));
-                if (readlen < 1) {
-                    eof = true;
-                    break;
-                }
-                if (timestamp < 0.0) break;
+                    // Synchronizing all channels to channel #0
+                    timestamp = Codec[idx]->GetTimestamp();
+                    if (timestamp > 0.0) {
 
-                // Synchronizing all channels to channel #0
-                if (idx == 0) {
-                    if (!IsTargetTimerRunning()) {
                         // Try to keep orignal frame intervals
-                        if (VideoFrameCounter[idx] == 0) {
+                        if (Codec[idx]->GetPos() == 1) {
                             FirstTimestamp = timestamp;
-                            CVITimer.Reset();
-                            CVITimer.Start();
+                            Timer.Reset();
+                            Timer.Start();
                         }
                         else {
-                            timespan = (timestamp - FirstTimestamp) - CVITimer.GetElapsedTime();
+                            timespan = (timestamp - FirstTimestamp) - Timer.GetElapsedTime();
                             if (timespan > 0.0) osaSleep(timespan);
                         }
-                    }
-                }
 
-                offset = 0;
-                for (i = 0; i < FilePartCount[idx]; i ++) {
-                    // Read "compressed part size"
-                    readlen = static_cast<int>(fread(&compressedpartsize, sizeof(unsigned int), 1, VideoFile[idx]));
-                    if (readlen < 1) {
-                        eof = true;
-                        break;
-                    }
-                    if (compressedpartsize == 0 || compressedpartsize > CompressedBufferSize[idx]) break;
+                        // Set timestamp to the one stored in the video file
+                        OutputData->SetTimestamp(timestamp);
 
-                    // Read compressed frame part
-                    readlen = static_cast<int>(fread(CompressedBuffer[idx], 1, compressedpartsize, VideoFile[idx]));
-                    if (readlen < static_cast<int>(compressedpartsize)) {
-                        eof = true;
-                        break;
-                    }
-
-                    // Decompress frame part
-                    longsize = YUVBufferSize[idx] - offset;
-                    err = uncompress(YUVBuffer[idx] + offset,
-                                     &longsize,
-                                     CompressedBuffer[idx],
-                                     compressedpartsize);
-                    if (err != Z_OK) break;
-
-                    // Convert YUV422 planar to RGB format
-                    svlConverter::YUV422PtoRGB24(YUVBuffer[idx] + offset,
-                                                 imptr + offset * 3 / 2,
-                                                 longsize >> 1);
-
-                    offset += longsize;
-                }
-                if (i < FilePartCount[idx]) break;
-
-                if (eof == false) ret = SVL_OK;
-
-                break;
-            }
-
-            if (eof) {
-                // End of file reached
-                if (VideoFrameCounter[idx] > 0) {
-
-                    // Go back to the beginning of the file, just after the header
-                    if (fseek(VideoFile[idx], 27, SEEK_SET) == 0) {
-                        // Play again if needed
-                        if (!LoopFlag) return SVL_STOP_REQUEST;
-                        VideoFrameCounter[idx] = 0;
                         continue;
                     }
-                    else {
-                        // Can't seek back to the beginning
-                        ret = SVL_FAIL;
-                    }
                 }
-                else {
-                    // If it was the first frame, then file is invalid
-                    ret = SVL_FAIL;
-                }
-            }
-            else {
-                // Other error, let it fail
-            }
 
-            VideoFrameCounter[idx] ++;
-
-            break;
+                // Ask Stream Manager for current timestamp
+                OutputData->SetTimestamp(-1.0);
+            }
         }
-#endif
-
-        if (ret == SVL_FAIL) break;
     }
-
-#if (CISST_SVL_HAS_ZLIB == ON)
-    // Set timestamp to the one stored in the video file
-    OutputData->SetTimestamp(timestamp);
-#endif
 
     return ret;
 }
 
 int svlFilterSourceVideoFile::Release()
 {
-    unsigned int i;
-
-    for (i = 0; i < VideoObj.size(); i ++) {
-#if (CISST_OS == CISST_WINDOWS)
-        if (VideoObj[i]) {
-            reinterpret_cast<CVfWAvi*>(VideoObj[i])->Close();
-            VideoObj[i] = 0;
-        }
-#endif
-    }
-    for (i = 0; i < VideoFile.size(); i ++) {
-#if (CISST_SVL_HAS_ZLIB == ON)
-        if (VideoFile[i]) {
-            fclose(VideoFile[i]);
-            VideoFile[i] = 0;
-        }
-        if (YUVBuffer[i]) {
-            delete [] YUVBuffer[i];
-            YUVBuffer[i] = 0;
-        }
-        if (CompressedBuffer[i]) {
-            delete [] CompressedBuffer[i];
-            CompressedBuffer[i] = 0;
-        }
-#endif
+    for (unsigned int i = 0; i < Codec.size(); i ++) {
+        svlVideoIO::ReleaseCodec(Codec[i]);
+        Codec[i] = 0;
     }
 
-    if (CVITimer.IsRunning()) CVITimer.Stop();
+    if (Timer.IsRunning()) Timer.Stop();
 
-#if (CISST_OS == CISST_WINDOWS)
-    AVIFrequency = -1.0;
-#endif
+    Framerate = -1.0;
 
     return SVL_OK;
 }
@@ -456,41 +218,14 @@ int svlFilterSourceVideoFile::DialogFilePath(unsigned int videoch)
     svlSampleImageBase* img = dynamic_cast<svlSampleImageBase*>(OutputData);
     if (videoch >= img->GetVideoChannels()) return SVL_WRONG_CHANNEL;
 
-#if (CISST_OS == CISST_WINDOWS)
-    OPENFILENAME ofn;
-    char path[2048], title[256];
-    char filter[] = "All Video Files (*.cvi; *.avi) *.cvi;*.avi CISST Video Files (*.cvi) *.cvi AVI Files (*.avi) *.avi All Files (*.*) *.* ";
+    std::ostringstream out;
+    out << "Open video file [channel #" << videoch << "]";
+    std::string title(out.str());
 
-    memset(path, 0, 2048);
-    sprintf(title, "Open Video File for [channel #%d]", videoch);
-    filter[30] = filter[42] = filter[68] = filter[74] = filter[92] = filter[98] = filter[114] = filter[118] = 0;
-
-    memset(&ofn, 0, sizeof(OPENFILENAME));
-    ofn.lStructSize = sizeof(OPENFILENAME);
-    ofn.hwndOwner = GetForegroundWindow();
-    ofn.lpstrFilter = filter;
-    ofn.nFilterIndex = 1;
-    ofn.lpstrFile= path;
-    ofn.nMaxFile = 2048;
-    ofn.Flags = OFN_ENABLESIZING | OFN_NOCHANGEDIR | OFN_FILEMUSTEXIST;
-    ofn.lpstrTitle = title;
-
-    // Removing the keyboard focus from the parent window
-    SetForegroundWindow(GetDesktopWindow());
-
-    if (GetOpenFileName(&ofn)) {
-        FilePath[videoch] = path;
-        return SVL_OK;
-    }
-#else
-    std::cout << "Enter filename for [channel #" << videoch << "]: ";
-    std::cin >> FilePath[videoch];
-#endif
-
-    return SVL_OK;
+    return svlVideoIO::DialogFilePath(false, title, FilePath[videoch]);
 }
 
-int svlFilterSourceVideoFile::SetFilePath(const std::string filepath, unsigned int videoch)
+int svlFilterSourceVideoFile::SetFilePath(const std::string &filepath, unsigned int videoch)
 {
     if (OutputData == 0) return SVL_FAIL;
     if (IsInitialized() == true)
@@ -501,6 +236,13 @@ int svlFilterSourceVideoFile::SetFilePath(const std::string filepath, unsigned i
 
     FilePath[videoch] = filepath;
 
+    return SVL_OK;
+}
+
+int svlFilterSourceVideoFile::GetFilePath(std::string &filepath, unsigned int videoch) const
+{
+    if (FilePath.size() <= videoch) return SVL_FAIL;
+    filepath = FilePath[videoch];
     return SVL_OK;
 }
 

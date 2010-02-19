@@ -52,7 +52,7 @@ int svlFilterRGBSwapper::Initialize(svlSample* inputdata)
     return SVL_OK;
 }
 
-int svlFilterRGBSwapper::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata)
+int svlFilterRGBSwapper::ProcessFrame(svlProcInfo* procInfo, svlSample* inputdata)
 {
     ///////////////////////////////////////////
     // Check if the input sample has changed //

@@ -41,7 +41,7 @@ private:
     ~svlStreamBranchSource();
 
     int Initialize();
-    int ProcessFrame(ProcInfo* procInfo);
+    int ProcessFrame(svlProcInfo* procInfo);
 
     static bool IsTypeSupported(svlStreamType type);
     void SetInput(svlSample* inputdata);

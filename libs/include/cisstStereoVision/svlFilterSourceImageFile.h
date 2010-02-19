@@ -46,7 +46,7 @@ public:
 protected:
     virtual int Initialize();
     virtual int OnStart(unsigned int procCount);
-    virtual int ProcessFrame(ProcInfo* procInfo);
+    virtual int ProcessFrame(svlProcInfo* procInfo);
     virtual int Release();
 
 private:

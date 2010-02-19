@@ -83,7 +83,7 @@ int svlFilterStereoImageJoiner::Initialize(svlSample* inputdata)
     return SVL_OK;
 }
 
-int svlFilterStereoImageJoiner::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata)
+int svlFilterStereoImageJoiner::ProcessFrame(svlProcInfo* procInfo, svlSample* inputdata)
 {
     ///////////////////////////////////////////
     // Check if the input sample has changed //

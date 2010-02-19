@@ -20,44 +20,44 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
-#ifndef _svlFilterVideoDeinterlacer_h
-#define _svlFilterVideoDeinterlacer_h
+#ifndef _svlFilterImageDeinterlacer_h
+#define _svlFilterImageDeinterlacer_h
 
 #include <cisstStereoVision/svlStreamManager.h>
 
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
 
-enum svlDeinterlacingMethod
-{
-    svlDeinterlacingBlending,
-    svlDeinterlacingDiscarding,
-    svlDeinterlacingAdaptiveBlending,
-    svlDeinterlacingAdaptiveDiscarding,
-    svlDeinterlacingNone
-};
-
-class CISST_EXPORT svlFilterVideoDeinterlacer : public svlFilterBase, public cmnGenericObject
+class CISST_EXPORT svlFilterImageDeinterlacer : public svlFilterBase, public cmnGenericObject
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
-public:
-    svlFilterVideoDeinterlacer();
-    virtual ~svlFilterVideoDeinterlacer();
+    enum Method
+    {
+        MethodBlending,
+        MethodDiscarding,
+        MethodAdaptiveBlending,
+        MethodAdaptiveDiscarding,
+        MethodNone
+    };
 
-    void SetMethod(svlDeinterlacingMethod method) { Method = method; }
-    svlDeinterlacingMethod GetMethod() { return Method; }
+public:
+    svlFilterImageDeinterlacer();
+    virtual ~svlFilterImageDeinterlacer();
+
+    void SetMethod(Method method);
+    Method GetMethod();
 
 protected:
     virtual int Initialize(svlSample* inputdata);
-    virtual int ProcessFrame(ProcInfo* procInfo, svlSample* inputdata);
+    virtual int ProcessFrame(svlProcInfo* procInfo, svlSample* inputdata);
     virtual int Release();
 
 private:
-    svlDeinterlacingMethod Method;
+    Method MethodToUse;
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterVideoDeinterlacer)
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterImageDeinterlacer)
 
-#endif // _svlFilterVideoDeinterlacer_h
+#endif // _svlFilterImageDeinterlacer_h
 

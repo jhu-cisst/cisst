@@ -65,6 +65,14 @@ http://www.cisst.org/cisst/license.txt.
 #define SVL_YES                     1
 
 
+//////////////////////////
+// Forward declarations //
+//////////////////////////
+
+class osaCriticalSection;
+class svlSyncPoint;
+
+
 //////////////////////////////
 // Stream type enumerations //
 //////////////////////////////
@@ -596,6 +604,15 @@ CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlSamplePointCloud)
 // Miscellaneous structure type definitions //
 //////////////////////////////////////////////
 
+class CISST_EXPORT svlProcInfo
+{
+public:
+    unsigned int        count;
+    unsigned int        id;
+    svlSyncPoint*       sync;
+    osaCriticalSection* cs;
+};
+
 class CISST_EXPORT svlRect {
 public:
     svlRect();
@@ -654,6 +671,13 @@ typedef struct _svlRGBA {
 } svlRGBA;
 
 #pragma pack()
+
+///////////////////
+// Helper macros //
+///////////////////
+
+#define STR2FOURCC(fcc_string) (reinterpret_cast<const unsigned int*>(fcc_string)[0])
+
 
 #endif // _svlStreamDefs_h
 

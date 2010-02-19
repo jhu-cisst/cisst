@@ -213,7 +213,7 @@ int svlFilterPointTracker::Initialize(svlSample* inputdata)
     return SVL_OK;
 }
 
-int svlFilterPointTracker::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata)
+int svlFilterPointTracker::ProcessFrame(svlProcInfo* procInfo, svlSample* inputdata)
 {
     svlSampleImageBase* img = dynamic_cast<svlSampleImageBase*>(inputdata);
     unsigned int videochannels = img->GetVideoChannels();

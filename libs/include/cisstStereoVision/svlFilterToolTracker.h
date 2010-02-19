@@ -51,7 +51,7 @@ public:
 
 protected:
     virtual int Initialize(svlSample* inputdata);
-    virtual int ProcessFrame(ProcInfo* procInfo, svlSample* inputdata);
+    virtual int ProcessFrame(svlProcInfo* procInfo, svlSample* inputdata);
     virtual int Release();
 
 private:
@@ -81,7 +81,7 @@ protected:
     svlFilterToolTracker::TargetType Target[2];
 
     virtual int Initialize();
-    virtual int Process(svlFilterBase::ProcInfo* procInfo, svlSampleImageBase* input) = 0;
+    virtual int Process(svlProcInfo* procInfo, svlSampleImageBase* input) = 0;
     virtual void Release();
 };
 

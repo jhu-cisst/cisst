@@ -48,7 +48,7 @@ public:
 
 protected:
     virtual int Initialize();
-    virtual int ProcessFrame(ProcInfo* procInfo);
+    virtual int ProcessFrame(svlProcInfo* procInfo);
 
 private:
     unsigned int Width;

@@ -146,7 +146,7 @@ public:
 
 protected:
     virtual int Initialize(svlSample* inputdata);
-    virtual int ProcessFrame(ProcInfo* procInfo, svlSample* inputdata);
+    virtual int ProcessFrame(svlProcInfo* procInfo, svlSample* inputdata);
     virtual int Release();
 
 private:

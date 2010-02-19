@@ -12,18 +12,10 @@
 # 
 # --- end cisst license ---
 
-IF(WIN32)
+IF(CISST_SVL_HAS_X11 OR WIN32)
 
     ADD_EXECUTABLE(stereoTutorialVideoPlayer videoplayer.cpp)
 
     CISST_REQUIRES("stereoTutorialVideoPlayer" "cisstCommon;cisstVector;cisstOSAbstraction;cisstStereoVision")
 
-ENDIF(WIN32)
-
-IF(CISST_SVL_HAS_X11 AND CISST_SVL_HAS_ZLIB)
-
-    ADD_EXECUTABLE(stereoTutorialVideoPlayer videoplayer.cpp)
-
-    CISST_REQUIRES("stereoTutorialVideoPlayer" "cisstCommon;cisstVector;cisstOSAbstraction;cisstStereoVision")
-
-ENDIF(CISST_SVL_HAS_X11 AND CISST_SVL_HAS_ZLIB)
+ENDIF(CISST_SVL_HAS_X11 OR WIN32)

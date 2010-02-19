@@ -140,7 +140,7 @@ int svlFilterSourceDummy::Initialize()
     return SVL_OK;
 }
 
-int svlFilterSourceDummy::ProcessFrame(ProcInfo* procInfo)
+int svlFilterSourceDummy::ProcessFrame(svlProcInfo* procInfo)
 {
     // Try to keep TargetFrequency
     _OnSingleThread(procInfo) WaitForTargetTimer();

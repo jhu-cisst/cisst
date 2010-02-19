@@ -283,7 +283,7 @@ int svlFilterImageWindow::Initialize(svlSample* inputdata)
     return SVL_OK;
 }
 
-int svlFilterImageWindow::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata)
+int svlFilterImageWindow::ProcessFrame(svlProcInfo* procInfo, svlSample* inputdata)
 {
     ///////////////////////////////////////////
     // Check if the input sample has changed //

@@ -112,7 +112,7 @@ int svlFilterToolTracker::Initialize(svlSample* inputdata)
     return SVL_OK;
 }
 
-int svlFilterToolTracker::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata)
+int svlFilterToolTracker::ProcessFrame(svlProcInfo* procInfo, svlSample* inputdata)
 {
     svlSampleImageBase* img = dynamic_cast<svlSampleImageBase*>(inputdata);
     svlSamplePointCloud* points = dynamic_cast<svlSamplePointCloud*>(OutputData);

@@ -35,16 +35,19 @@ SET(SOURCE_FILES
     svlStreamBranchSource.cpp
     svlSampleQueue.cpp
     svlImageIO.cpp
+    svlVideoIO.cpp
     svlCameraGeometry.cpp
     svlConverters.cpp
     svlBufferImage.cpp
 
   # Filter API
     svlFilterSourceDummy.cpp
-    svlFilterVideoDeinterlacer.cpp
+    svlFilterImageDeinterlacer.cpp
     svlFilterSourceVideoCapture.cpp
     svlFilterSourceImageFile.cpp
+    svlFilterSourceVideoFile.cpp
     svlFilterImageFileWriter.cpp
+    svlFilterVideoFileWriter.cpp
     svlFilterComputationalStereo.cpp
     svlFilterDisparityMapToSurface.cpp
     svlFilterStereoImageOptimizer.cpp
@@ -61,9 +64,9 @@ SET(SOURCE_FILES
     svlFilterImageFlipRotate.cpp
 
   # Private System API
-    svlImageCodecBMP.h                   # private header
+    svlImageCodecBMP.h             # private header
     svlImageCodecBMP.cpp
-    svlImageCodecPPM.h                   # private header
+    svlImageCodecPPM.h             # private header
     svlImageCodecPPM.cpp
     ipDeinterlacing.h              # private header
     ipDeinterlacing.cpp
@@ -88,16 +91,19 @@ SET(HEADER_FILES
     svlSampleQueue.h
     svlExport.h
     svlImageIO.h
+    svlVideoIO.h
     svlCameraGeometry.h
     svlConverters.h
     svlBufferImage.h
 
   # Filter API
     svlFilterSourceDummy.h
-    svlFilterVideoDeinterlacer.h
+    svlFilterImageDeinterlacer.h
     svlFilterSourceVideoCapture.h
     svlFilterSourceImageFile.h
+    svlFilterSourceVideoFile.h
     svlFilterImageFileWriter.h
+    svlFilterVideoFileWriter.h
     svlFilterComputationalStereo.h
     svlFilterDisparityMapToSurface.h
     svlFilterStereoImageOptimizer.h
@@ -304,25 +310,10 @@ IF(CISST_SVL_HAS_ZLIB OR NOT ZLIB_OPTIONS)
             "${SVL_ADDITIONAL_LIBRARIES}"
             "${ZLIB_LIBRARIES}"
             )
-
-        IF(NOT WIN32)
-            SET(SOURCE_FILES
-                ${SOURCE_FILES}
-                svlFilterSourceVideoFile.cpp
-                )
-            SET(HEADER_FILES
-                ${HEADER_FILES}
-                svlFilterSourceVideoFile.h
-                )
-        ENDIF(NOT WIN32)
-
         SET(SOURCE_FILES
             ${SOURCE_FILES}
-            svlFilterVideoFileWriter.cpp
-            )
-        SET(HEADER_FILES
-            ${HEADER_FILES}
-            svlFilterVideoFileWriter.h
+            svlVideoCodecCVI.h              # private header
+            svlVideoCodecCVI.cpp
             )
         MESSAGE(STATUS "ZLIB found - Switch to advanced view for details")
         OPTION(CISST_SVL_HAS_ZLIB "Use ZLIB extensions" ON)
@@ -468,19 +459,15 @@ IF(WIN32)
     # generic windows specific files
     SET(SOURCE_FILES
         ${SOURCE_FILES}
-        winWin32.h               # private header
+        winWin32.h              # private header
         winWin32.cpp
-        VfWAvi.h                 # private header
-        VfWAvi.cpp
+        svlVideoCodecVfW32.h    # private header
+        svlVideoCodecVfW32.cpp
         svlFilterImageWindow.cpp
-        svlFilterSourceVideoFile.cpp
-        svlFilterVideoFileWriterAVI.cpp
         )
     SET(HEADER_FILES
         ${HEADER_FILES}
         svlFilterImageWindow.h
-        svlFilterSourceVideoFile.h
-        svlFilterVideoFileWriterAVI.h
         )
     SET(SVL_ADDITIONAL_LIBRARIES
         "${SVL_ADDITIONAL_LIBRARIES}"
@@ -809,6 +796,8 @@ SET(SOURCE_FILES
     svlVidCapSrcInitializer.cpp
     svlImageCodecInitializer.h
     svlImageCodecInitializer.cpp
+    svlVideoCodecInitializer.h
+    svlVideoCodecInitializer.cpp
     )
 SET(HEADER_FILES
     ${HEADER_FILES}

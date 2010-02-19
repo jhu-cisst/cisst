@@ -87,7 +87,7 @@ int svlFilterImageRectifier::Initialize(svlSample* inputdata)
     return SVL_OK;
 }
 
-int svlFilterImageRectifier::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata)
+int svlFilterImageRectifier::ProcessFrame(svlProcInfo* procInfo, svlSample* inputdata)
 {
     ///////////////////////////////////////////
     // Check if the input sample has changed //

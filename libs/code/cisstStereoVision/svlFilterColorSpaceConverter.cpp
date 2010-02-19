@@ -56,7 +56,7 @@ int svlFilterColorSpaceConverter::Initialize(svlSample* inputdata)
     return SVL_OK;
 }
 
-int svlFilterColorSpaceConverter::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata)
+int svlFilterColorSpaceConverter::ProcessFrame(svlProcInfo* procInfo, svlSample* inputdata)
 {
     ///////////////////////////////////////////
     // Check if the input sample has changed //
