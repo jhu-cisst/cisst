@@ -89,7 +89,6 @@ int svlSyncPoint::Sync(unsigned int id)
     CS.Enter();
         CheckedInCounter --;
         LastChanged = static_cast<int>(id);
-    CS.Leave();
 
     if (CheckedInCounter == 0 && LastChanged == static_cast<int>(id)) {
         // It will happen only in exactly one time,
@@ -104,8 +103,12 @@ int svlSyncPoint::Sync(unsigned int id)
         for (unsigned int i = 0; i < ThreadCount; i ++) {
             if (i != id) ReleaseEvent[i].Raise();
         }
+
+        CS.Leave();
     }
     else {
+        CS.Leave();
+
         // We have to wait until all other threads
         // check in.
 
@@ -122,8 +125,13 @@ int svlSyncPoint::Sync(unsigned int id)
 // *******************************************************************
 void svlSyncPoint::ReleaseAll()
 {
-    for (unsigned int i = 0; i < ThreadCount; i ++) {
-        ReleaseEvent[i].Raise();
-    }
+    CS.Enter();
+        for (unsigned int i = 0; i < ThreadCount; i ++) {
+            ReleaseEvent[i].Raise();
+        }
+        
+        CheckedInCounter = ThreadCount;
+        LastChanged = -1;
+    CS.Leave();
 }
 
