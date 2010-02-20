@@ -523,8 +523,8 @@ void mtsManagerLocal::StartAll(void)
             componentTask = componentTaskTemp;
         } else {
             // mtsTaskFromSignal type component
-            componentTask = dynamic_cast<mtsTaskFromSignal*>(it->second);
-            if (componentTask) {
+            componentTaskTemp = dynamic_cast<mtsTaskFromSignal*>(it->second);
+            if (componentTaskTemp) {
                 componentTask = componentTaskTemp;
             } else {
                 // mtsTaskContinuous type component
@@ -537,7 +537,7 @@ void mtsManagerLocal::StartAll(void)
                     if (componentTaskTemp) {
                         componentTask = componentTaskTemp;
                     } else {
-                        componentTask = NULL;
+                        componentTask = 0;
                         CMN_LOG_CLASS_RUN_ERROR << "StartAll: invalid component: unknown mtsTask type" << std::endl;
                         continue;
                     }
