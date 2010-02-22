@@ -348,7 +348,7 @@ private:
     void OnStreamSample(svlSample* sample, int streamindex);
 
     /*! Keep a pointer on singleton task manager to make it easier to access */
-    mtsTaskManager * TaskManager;
+    mtsManagerLocal * TaskManager;
 
     // event handlers
     void MaMModeEventHandler(const prmEventButton & payload);

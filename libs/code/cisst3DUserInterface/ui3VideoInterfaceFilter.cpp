@@ -42,7 +42,7 @@ int ui3VideoInterfaceFilter::Initialize(svlSample* inputdata)
     return SVL_OK;
 }
 
-int ui3VideoInterfaceFilter::ProcessFrame(ProcInfo* procInfo, svlSample* inputdata)
+int ui3VideoInterfaceFilter::ProcessFrame(svlProcInfo* procInfo, svlSample* inputdata)
 {
     // for now, ui3BehaviorBase::OnStreamSample remains single threaded for the
     // sake of simplicity but we can make it multithreaded later by simply
