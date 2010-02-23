@@ -65,12 +65,17 @@ class CISST_EXPORT osaTimeServer: public cmnGenericObject
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
     /*! Internals that are OS-dependent in some way */
-    enum {INTERNALS_SIZE = 64};
+    enum {INTERNALS_SIZE = 32};
     char Internals[INTERNALS_SIZE];
 
     /*! Return the size of the actual object used by the OS.  This is
         used for testing only. */
     static unsigned int SizeOfInternals(void);
+
+    /*! Synchronize, method used to synchronize high performance
+        counter with time of day. */
+    void Synchronize(void);
+
 public:
     /*! Default constructor. */
     osaTimeServer();

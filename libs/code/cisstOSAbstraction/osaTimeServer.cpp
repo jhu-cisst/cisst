@@ -79,7 +79,6 @@ struct osaTimeServerInternals {
 #if (CISST_OS == CISST_LINUX_RTAI)
     struct timespec TimeOrigin;
     RTIME CounterOrigin;
-    void Synchronize(void);
 #elif (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
     struct timespec TimeOrigin;
 #elif (CISST_OS == CISST_DARWIN)
@@ -89,21 +88,17 @@ struct osaTimeServerInternals {
     ULONGLONG CounterOrigin;
     unsigned long CounterFrequency;
     double CounterResolution;    // 1/CounterFrequency (resolution in seconds)
-    void Synchronize(void);
-    const cmnClassServicesBase * Services(void);
-    const cmnClassServicesBase * ServicesPointer;
 #endif
 };
 
+#define INTERNALS(A) (reinterpret_cast<osaTimeServerInternals*>((this)->Internals)->A)
+
+#define INTERNALS_CONST(A) (reinterpret_cast<osaTimeServerInternals*>(const_cast<osaTimeServer *>(this)->Internals)->A)
+
 #if (CISST_OS == CISST_WINDOWS)
-// provided for LOG_CLASS compatibility
-const cmnClassServicesBase * osaTimeServerInternals::Services(void)
-{
-    return ServicesPointer;
-}
 // This function is called if the performance counter exists (i.e., non-zero frequency).
 // It synchronizes the performance counter with the result from GetSystemTimeAsFileTime.
-void osaTimeServerInternals::Synchronize(void)
+void osaTimeServer::Synchronize(void)
 {
     int i;
     LARGE_INTEGER counterPre, counterPost;
@@ -140,7 +135,7 @@ void osaTimeServerInternals::Synchronize(void)
         // It is only necessary to check whether the lower 32 bits have changed.
         if (ftimes[i].LowPart != ftimes[i-1].LowPart) {
             long delta = (long) (counterPost.QuadPart-counterPre.QuadPart);
-            if (delta < 3*min_delta) {
+            if (delta <= (3 * min_delta)) {
                 counterAvg[i] = counterPre.QuadPart + (delta+1)/2;
                 counterDelta[i] = delta;
                 sumDelta += delta;
@@ -155,9 +150,9 @@ void osaTimeServerInternals::Synchronize(void)
     //    offset = counter - CounterFrequency*(ftime-TimeOrigin)/OSA_100NSEC_PER_SEC
     // To improve accuracy, we compute an average value.
     for (i = 1; i < NUM_SAMPLES; i++) {
-         ULONGLONG ftime_delta = ftimes[i].QuadPart - TimeOrigin;
+         ULONGLONG ftime_delta = ftimes[i].QuadPart - INTERNALS(TimeOrigin);
          // Note that overflow should not be a problem because ftime_delta should be relatively small.
-         offset[i] = counterAvg[i] - (CounterFrequency*ftime_delta+OSA_100NSEC_PER_SEC/2)/OSA_100NSEC_PER_SEC;
+         offset[i] = counterAvg[i] - (INTERNALS(CounterFrequency) * ftime_delta + OSA_100NSEC_PER_SEC / 2) / OSA_100NSEC_PER_SEC;
          sumOffset += offset[i];
          CMN_LOG_CLASS_INIT_VERBOSE << "Synchronize: data " << i << ": delta = " << counterDelta[i]
                                     << ", offset = " << offset[i] << std::endl;
@@ -191,13 +186,13 @@ void osaTimeServerInternals::Synchronize(void)
                                    << numValid << std::endl;
     }
     // Now, set the offset in the internal data structure.
-    CounterOrigin = meanOffset;
+    INTERNALS(CounterOrigin) = meanOffset;
 
-    CMN_LOG_CLASS_INIT_VERBOSE << "Synchronize: synchronization offset = " << CounterOrigin << std::endl;
+    CMN_LOG_CLASS_INIT_VERBOSE << "Synchronize: synchronization offset = " << INTERNALS(CounterOrigin) << std::endl;
     CMN_LOG_CLASS_INIT_DEBUG << "Synchronize: checking result:" << std::endl;
     for (i = 1; i < NUM_SAMPLES; i++) {
-        double tCounter = (counterAvg[i] - CounterOrigin)*CounterResolution;
-        double tFtime = (ftimes[i].QuadPart - TimeOrigin)/((double)OSA_100NSEC_PER_SEC);
+        double tCounter = (counterAvg[i] - INTERNALS(CounterOrigin)) * INTERNALS(CounterResolution);
+        double tFtime = (ftimes[i].QuadPart - INTERNALS(TimeOrigin))/(static_cast<double>(OSA_100NSEC_PER_SEC));
         CMN_LOG_CLASS_INIT_DEBUG << "    ftime = " << tFtime << ", counter = " << tCounter
                                  << "    (diff = " << (tFtime - tCounter)*1e6 << " usec)" << std::endl;
     }
@@ -208,7 +203,7 @@ void osaTimeServerInternals::Synchronize(void)
 // PK: although this synchronization seems to work, on some machines it seems that the CPU
 //     time-stamp counter (TSC) is poorly calibrated and so the reading (from rt_get_time_ns)
 //     will drift significantly with respect to the absolute time returned by clock_gettime.
-void osaTimeServerInternals::Synchronize(void)
+void osaTimeServer::Synchronize(void)
 {
     RTIME counterPre, counterPost, counterAvg, timediff;
     struct timespec curTime;
@@ -217,22 +212,26 @@ void osaTimeServerInternals::Synchronize(void)
     int rc = clock_gettime(CLOCK_REALTIME, &curTime);
     counterPost = rt_get_time_ns();
     counterAvg = (counterPost + counterPre + 1)/2;
-    if (rc == 0)
+    if (rc == 0) {
         timediff = (curTime.tv_sec - TimeOrigin.tv_sec)*1000000000LL +
                    (curTime.tv_nsec - TimeOrigin.tv_nsec);
-    else {
+    } else {
         CMN_LOG_CLASS_INIT_ERROR << "Synchronize: error return from clock_gettime" << std::endl;
         timediff = 0LL;
     }
-    CounterOrigin = counterAvg - timediff;
+    INTERNALS(CounterOrigin) = counterAvg - timediff;
     CMN_LOG_CLASS_INIT_VERBOSE << "Synchronize: counterAvg = " << counterAvg
                                << ", timediff = " << timediff << std::endl;
 }
 #endif // CISST_LINUX_RTAI
 
-#define INTERNALS(A) (reinterpret_cast<osaTimeServerInternals*>(Internals)->A)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_DARWIN)
+void osaTimeServer::Synchronize(void)
+{
+    CMN_LOG_CLASS_INIT_VERBOSE << "Synchronize: no synchronization provided/required for this OS" << std::endl;
+}
+#endif
 
-#define INTERNALS_CONST(A) (reinterpret_cast<osaTimeServerInternals*>(const_cast<osaTimeServer *>(this)->Internals)->A)
 
 osaTimeServer::osaTimeServer()
 {
@@ -254,7 +253,6 @@ osaTimeServer::osaTimeServer()
     INTERNALS(TimeOrigin).tv_usec = 0L;
     CMN_LOG_CLASS_INIT_VERBOSE << "constructor: clock resolution not available on Darwin (clock_getres not supported)" << std::endl;
 #elif (CISST_OS == CISST_WINDOWS)
-    INTERNALS(ServicesPointer) = this->Services();
     INTERNALS(TimeOrigin) = 0LL;
     INTERNALS(CounterFrequency) = 0L;
     INTERNALS(CounterResolution) = 0.0;
@@ -305,7 +303,7 @@ void osaTimeServer::SetTimeOrigin(void)
 #if (CISST_OS == CISST_LINUX_RTAI)
     if (clock_gettime(CLOCK_REALTIME, &INTERNALS(TimeOrigin)) == 0) {
         // On RTAI, synchronize rt_get_time_ns with clock_gettime
-        INTERNALS(Synchronize());
+        this->Synchronize();
     } else {
         CMN_LOG_CLASS_INIT_ERROR << "SetTimeOrigin: error return from clock_gettime." << std::endl;
     }
@@ -325,7 +323,7 @@ void osaTimeServer::SetTimeOrigin(void)
     if (INTERNALS(CounterFrequency)) {
         // On Windows, we need to synchronize QueryPerformanceCounter (if it exists) with
         // GetSystemTimeAsFileTime
-        INTERNALS(Synchronize());
+        this->Synchronize();
     }
 #endif
 }
