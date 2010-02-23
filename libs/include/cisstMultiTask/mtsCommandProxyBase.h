@@ -40,7 +40,7 @@ protected:
         mtsComponentInterfaceProxyClient or mtsComponentInterfaceProxyServer */
     mtsProxyBaseCommon<mtsComponentProxy> * NetworkProxy;
 
-    /*! Actual pointer to network proxy. Either one of them should be set and 
+    /*! Actual pointer to network proxy. Either one of them should be set and
         the other one should be NULL. */
     mtsComponentInterfaceProxyClient * NetworkProxyClient;
     mtsComponentInterfaceProxyServer * NetworkProxyServer;
@@ -56,7 +56,7 @@ public:
 
         NetworkProxyClient = dynamic_cast<mtsComponentInterfaceProxyClient*>(networkProxy);
         NetworkProxyServer = dynamic_cast<mtsComponentInterfaceProxyServer*>(networkProxy);
-        
+
         return ((!NetworkProxyClient && NetworkProxyServer) || (NetworkProxyClient && !NetworkProxyServer));
     }
 

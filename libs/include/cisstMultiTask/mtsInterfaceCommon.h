@@ -35,28 +35,28 @@ public:
 	struct CommandVoidElement {
         std::string Name;
 	};
-	
+
 	struct CommandWriteElement {
 		std::string Name;
         std::string ArgumentPrototypeSerialized;
 	};
-	
+
 	struct CommandReadElement {
 		std::string Name;
         std::string ArgumentPrototypeSerialized;
 	};
-	
+
 	struct CommandQualifiedReadElement {
 		std::string Name;
         std::string Argument1PrototypeSerialized;
         std::string Argument2PrototypeSerialized;
 	};
-	
+
     /* Event object definition */
 	struct EventVoidElement {
 		std::string Name;
 	};
-	
+
 	struct EventWriteElement {
         std::string Name;
         std::string ArgumentPrototypeSerialized;
@@ -68,18 +68,18 @@ public:
 	typedef std::vector<CommandQualifiedReadElement> CommandQualifiedReadVector;
     typedef std::vector<EventVoidElement>            EventVoidVector;
     typedef std::vector<EventWriteElement>           EventWriteVector;
-	
+
 	class ProvidedInterfaceDescription {
     public:
 		// Interface name
         std::string ProvidedInterfaceName;
-		
+
 		// Commands
 		CommandVoidVector          CommandsVoid;
 		CommandWriteVector         CommandsWrite;
 		CommandReadVector          CommandsRead;
 		CommandQualifiedReadVector CommandsQualifiedRead;
-        
+
         // Events
 		EventVoidVector  EventsVoid;
 		EventWriteVector EventsWrite;
@@ -106,7 +106,7 @@ public:
         // Event handlers
         EventHandlerVoidVector  EventHandlersVoid;
 		EventHandlerWriteVector EventHandlersWrite;
-    };    
+    };
 };
 
 /* Typedefs for easy access to internal classes */

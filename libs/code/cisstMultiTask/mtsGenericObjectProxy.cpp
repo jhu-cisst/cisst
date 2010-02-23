@@ -4,7 +4,7 @@
 
 /*
   $Id: mtsGenericObjectProxy.cpp 75 2009-02-24 16:47:20Z adeguet1 $
-  
+
   Author(s):	Anton Deguet
   Created on:	2009-04-14
 

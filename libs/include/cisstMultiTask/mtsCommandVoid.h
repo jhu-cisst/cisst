@@ -35,7 +35,7 @@ http://www.cisst.org/cisst/license.txt.
 
 /*!
   \ingroup cisstMultiTask
-  
+
   A templated version of command object with zero arguments for
   execute. The template argument is the class type whose method is
   contained in the command object.  This command is based on a void
@@ -44,10 +44,10 @@ http://www.cisst.org/cisst/license.txt.
   method. */
 template <class _classType>
 class mtsCommandVoidMethod: public mtsCommandVoidBase {
-    
+
 public:
     typedef mtsCommandVoidBase BaseType;
-    
+
     /*! Typedef for the specific interface. */
     typedef _classType ClassType;
 
@@ -87,7 +87,7 @@ public:
 
     /*! The destructor. Does nothing */
     virtual ~mtsCommandVoidMethod() {}
-    
+
     /*! The execute method. Calling the execute method from the
       invoker applies the operation on the receiver.
     */
@@ -115,15 +115,15 @@ public:
 
 /*!
   \ingroup cisstMultiTask
-  
+
   A templated version of command object with zero arguments for
   execute.  This command is based on a void function, i.e. it only
   requires a pointer on a void function. */
 class mtsCommandVoidFunction: public mtsCommandVoidBase {
-    
+
 public:
     typedef mtsCommandVoidBase BaseType;
-    
+
     /*! This type. */
     typedef mtsCommandVoidFunction ThisType;
 
@@ -153,9 +153,9 @@ public:
 
     /*! The destructor. Does nothing */
     virtual ~mtsCommandVoidFunction() {}
-    
+
     /*! The execute method. Calling the execute method from the invoker
-      applies the operation on the receiver. 
+      applies the operation on the receiver.
       \param from The data passed to the conversion operation
       \param to The result obtained from the conversion operation
     */

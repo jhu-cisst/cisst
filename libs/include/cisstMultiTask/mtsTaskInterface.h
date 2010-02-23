@@ -58,7 +58,7 @@ http://www.cisst.org/cisst/license.txt.
   are not polymorphic; obj->AddCommandVoid will invoke
   the member function that corresponds to the static type of
   'obj', rather than its dynamic type.
-  
+
 */
 class CISST_EXPORT mtsTaskInterface: public mtsDeviceInterface {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
@@ -143,7 +143,7 @@ private:
  public:
     // virtual unsigned int AllocateResourcesForCurrentThread(void);
     unsigned int AllocateResources(const std::string & userName);
- 
+
     /*! Constructor with a post queued command.  This constructor is
       used by mtsTaskFromSignal to provide the command used everytime
       one uses a queued command of this interface (write and void
@@ -160,7 +160,7 @@ private:
 
     virtual mtsCommandVoidBase * GetCommandVoid(const std::string & commandName,
                                                 unsigned int userId) const;
-    
+
     virtual mtsCommandWriteBase * GetCommandWrite(const std::string & commandName,
                                                   unsigned int userId) const;
 
@@ -171,7 +171,7 @@ private:
 
     inline mtsCommandVoidBase * AddCommandVoid(void (*function)(void),
                                                const std::string & commandName);
-    
+
     template <class __classType, class __argumentType>
     inline mtsCommandWriteBase * AddCommandWrite(void (__classType::*method)(const __argumentType &),
                                                  __classType * classInstantiation, const std::string & commandName,
@@ -278,7 +278,7 @@ inline mtsCommandVoidBase * mtsTaskInterface::AddCommandVoid(void (*function)(vo
     }
 }
 
-   
+
 template <class __classType, class __argumentType>
 inline mtsCommandWriteBase * mtsTaskInterface::AddCommandWrite(void (__classType::*method)(const __argumentType &),
                                                                __classType * classInstantiation, const std::string & commandName,

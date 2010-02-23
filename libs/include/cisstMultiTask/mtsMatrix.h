@@ -113,14 +113,14 @@ public:
     }
 
     /*! Binary serialization */
-    void SerializeRaw(std::ostream & outputStream) const 
+    void SerializeRaw(std::ostream & outputStream) const
     {
         mtsGenericObject::SerializeRaw(outputStream);
         MatrixType::SerializeRaw(outputStream);
     }
 
     /*! Binary deserialization */
-    void DeSerializeRaw(std::istream & inputStream) 
+    void DeSerializeRaw(std::istream & inputStream)
     {
         mtsGenericObject::DeSerializeRaw(inputStream);
         MatrixType::DeSerializeRaw(inputStream);

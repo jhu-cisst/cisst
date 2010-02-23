@@ -193,7 +193,7 @@ unsigned int mtsTaskInterface::AllocateResources(const std::string & userName)
     Mutex.Lock();
     this->UserCounter++;
     unsigned int userId = this->UserCounter;
-    CMN_LOG_CLASS_INIT_VERBOSE << "AllocateResources: interface \"" << this->Name 
+    CMN_LOG_CLASS_INIT_VERBOSE << "AllocateResources: interface \"" << this->Name
                                << "\" created new Id [" << userId
                                << "] for user \"" << userName << "\"" << std::endl;
     std::stringstream mailBoxName;

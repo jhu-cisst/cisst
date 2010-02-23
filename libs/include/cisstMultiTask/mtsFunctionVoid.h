@@ -39,7 +39,7 @@ class CISST_EXPORT mtsFunctionVoid: public mtsFunctionBase {
  protected:
     typedef mtsCommandVoidBase CommandType;
     CommandType * Command;
-    
+
  public:
     /*! Default constructor.  Does nothing, use Instantiate before
       using. */
@@ -50,10 +50,10 @@ class CISST_EXPORT mtsFunctionVoid: public mtsFunctionBase {
     mtsFunctionVoid(const mtsDeviceInterface * associatedInterface, const std::string & commandName) {
         this->Bind(associatedInterface, commandName);
     }
-    
+
     /*! Destructor. */
     ~mtsFunctionVoid() {}
-    
+
     /*! Return whether function is valid (i.e., command pointer is non-zero) */
     bool IsValid(void) const { return (Command != 0); }
 
@@ -91,7 +91,7 @@ class CISST_EXPORT mtsFunctionVoid: public mtsFunctionBase {
     /*! Overloaded operator to enable more intuitive syntax
       e.g., Command() instead of Command->Execute(). */
     mtsCommandBase::ReturnType operator()() const;
-    
+
     /*! Access to underlying command object. */
     mtsCommandVoidBase * GetCommand(void) const { return Command; }
 

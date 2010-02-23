@@ -65,7 +65,7 @@ public:
 protected:
 
     /*! State definition of the collector */
-    typedef enum { 
+    typedef enum {
         COLLECTOR_STOP,         // nothing happens.
         COLLECTOR_WAIT_START,   // Start(void) has been called. Wait for some time elapsed.
         COLLECTOR_COLLECTING,   // Currently collecting data
@@ -79,7 +79,7 @@ protected:
     public:
         mtsTask * Task;
         mtsHistoryBase * History;
-    
+
         SignalMapElement(void) {}
         ~SignalMapElement(void) {}
     };
@@ -131,7 +131,7 @@ public:
 
     virtual ~mtsCollectorBase(void);
 
-    /*! Begin collecting data. Data collection will begin after delayedStart 
+    /*! Begin collecting data. Data collection will begin after delayedStart
     second(s). If it is zero (by default), it means 'start now'. */
     virtual void StartCollection(const mtsDouble & delayInSeconds) = 0;
 

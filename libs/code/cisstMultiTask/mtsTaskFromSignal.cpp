@@ -25,7 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 CMN_IMPLEMENT_SERVICES(mtsTaskFromSignal)
 
 
-mtsTaskFromSignal::mtsTaskFromSignal(const std::string & name, 
+mtsTaskFromSignal::mtsTaskFromSignal(const std::string & name,
                                      unsigned int sizeStateTable):
     mtsTaskContinuous(name, sizeStateTable),
     PostCommandQueuedCommand(0)

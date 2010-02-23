@@ -3,10 +3,10 @@
 
 /*
   $Id: $
-  
+
   Author(s):	Ankur Kapoor, Anton Deguet, Peter Kazanzides
   Created on:	2006-05-05
-  
+
   (C) Copyright 2006-2010 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
@@ -33,25 +33,25 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsExport.h>
 
 
-// Forward declarations                                                                  
+// Forward declarations
 template <class _elementType> class mtsGenericObjectProxy;
 template <class _elementType> class mtsGenericObjectProxyRef;
 
 /*!  Proxy class used to create a simple mtsGenericObject, i.e. data
   object with a registered type, dynamic creation, serialization and
   de-serialization.  Note that there are really three classes defined
-  here:  mtsGenericObjectProxyBase, mtsGenericObjectProxy, and 
+  here:  mtsGenericObjectProxyBase, mtsGenericObjectProxy, and
   mtsGenericObjectProxyRef (henceforth called ProxyBase, Proxy, and
   ProxyRef for brevity).  ProxyBase provides a common base class.
   Proxy contains one data member of the actual type provided as the
   template parameter.  ProxyRef contains a pointer to a data member
   of the actual type provided as the template parameter.
- 
+
   ProxyRef is used internally by the library to enable arbitrary data types T
   (not just ones derived from mtsGenericObject) to be added to the State Table.
   In this case, the StateVector (State Table history) will be an array of
   Proxy<T> and the StateVectorElements (pointers to working copy) will be of
-  type ProxyRef<T>. 
+  type ProxyRef<T>.
 
   To create an mtsGenericObject from an existing type, one
   would have to specialize mtsGenericObjectProxy as follows in the
@@ -65,7 +65,7 @@ template <class _elementType> class mtsGenericObjectProxyRef;
   typedef mtsGenericObjectProxy<UserType> UserTypeProxy;
   CMN_DECLARE_SERVICES_INSTANTIATION(UserTypeProxy);
   \endcode
-  
+
   It is also required to instantiate the associated services in the
   compiled code (.cpp) file with:
   \code
@@ -79,7 +79,7 @@ template <class _elementType> class mtsGenericObjectProxyRef;
   to serialize and deserialize, the user will also have to overload
   the functions cmnSerializeRaw and cmnDeSerializeRaw.
 
-  \note As it is, this class cannot be used in libraries other than 
+  \note As it is, this class cannot be used in libraries other than
   cisstCommon if a DLL is to be created.   The issue is that the class
   will be declared as imported in the header file because it is part of
   cisstCommon.  (PK: OBSOLETE COMMENT?)
@@ -95,10 +95,10 @@ template <class _elementType> class mtsGenericObjectProxyRef;
   via the ProxyBase class.
 
   \sa mtsGenericObject, cmnClassServices, cmnSerializer, cmnDeSerializer
-  
+
   \param _elementType The actual type for which we want to provide a
   proxy object.
-*/ 
+*/
 template <class _elementType>
 class mtsGenericObjectProxyBase: public mtsGenericObject
 {
@@ -126,12 +126,12 @@ public:
         default constructor. */
     inline mtsGenericObjectProxyBase(void)
     {}
-    
+
     /*! Copy constructor. */
-    inline mtsGenericObjectProxyBase(const ThisType & other) : 
+    inline mtsGenericObjectProxyBase(const ThisType & other) :
         BaseType(other)
     {}
-    
+
     inline ~mtsGenericObjectProxyBase(void) {}
 
     /*! Assignment from DeRef and Ref classes. */
@@ -178,7 +178,7 @@ public:
     {}
 
     /*! Copy constructor. */
-    inline mtsGenericObjectProxy(const ThisType & other) : 
+    inline mtsGenericObjectProxy(const ThisType & other) :
         BaseType(other), Data(other.Data)
     {}
 
@@ -270,7 +270,7 @@ class mtsGenericObjectProxyRef: public mtsGenericObjectProxyBase<_elementType>
     /*! Default constructor.  Should not get called!! */
     inline mtsGenericObjectProxyRef(void) : pData(0)
     {}
-    
+
 public:
     typedef mtsGenericObjectProxyRef<_elementType> ThisType;
     typedef mtsGenericObjectProxyBase<_elementType> BaseType;
@@ -281,10 +281,10 @@ public:
     value_type *pData;   // Could instead use: value_type &Data
 
     /*! Copy constructor. */
-    inline mtsGenericObjectProxyRef(const ThisType & other) : 
+    inline mtsGenericObjectProxyRef(const ThisType & other) :
         BaseType(other), pData(other.pData)
     {}
-    
+
     /*! Conversion constructor.  This allows to construct the proxy
       object using an object of the actual type. */
     // PK: should figure out a way to avoid the const_cast.
@@ -378,7 +378,7 @@ public:
     static FinalRefType *ConditionalWrap(T &obj) { return new FinalRefType(obj); }
     template <typename C> static int CallAfterConditionalWrap(C* cmd, T &obj)
         { FinalRefType arg(obj); return static_cast<int>(cmd->Execute(arg)); }
-    static bool IsEqual(const T &obj1, const mtsGenericObject &obj2) { 
+    static bool IsEqual(const T &obj1, const mtsGenericObject &obj2) {
         const FinalRefType *p2 = dynamic_cast<const FinalRefType *>(&obj2);
         return (p2?(&obj1 == p2->pData):false); }
     static void ConditionalFree(const FinalRefType *obj) { delete obj;}
@@ -411,13 +411,13 @@ public:
     typedef typename mtsGenericTypesImpl<T, cmnIsDerivedFrom<T, mtsGenericObject>::YES>::FinalRefType  FinalRefType;
     static FinalRefType *ConditionalWrap(T &obj) { return impl::ConditionalWrap(obj); }
     // PK TODO: The return type should be mtsCommandBase::ReturnType, but getting this to compile was problematic.
-    template <typename C> static int CallAfterConditionalWrap(C* cmd, T &obj) 
+    template <typename C> static int CallAfterConditionalWrap(C* cmd, T &obj)
         { return impl::CallAfterConditionalWrap(cmd, obj); }
     static bool IsEqual(const T &obj1, const mtsGenericObject &obj2) { return impl::IsEqual(obj1, obj2); }
     static void ConditionalFree(const FinalRefType *obj) { impl::ConditionalFree(obj); }
     // PK TODO: Copy can probably be eliminated if the assignment operators are properly defined.
     static void Copy(const FinalType &from, FinalBaseType &to) { impl::Copy(from,to); }
-}; 
+};
 
 template<typename T, bool>
 class mtsGenericTypesUnwrapImpl
@@ -441,7 +441,7 @@ class mtsGenericTypesUnwrap
     typedef mtsGenericTypesUnwrapImpl<T, cmnIsDerivedFromTemplated<T, mtsGenericObjectProxy >::YES> impl;
 public:
     typedef typename mtsGenericTypesUnwrapImpl<T, cmnIsDerivedFromTemplated<T, mtsGenericObjectProxy >::YES>::RefType RefType;
-}; 
+};
 #endif
 
 /* Some basic types defined here for now, could move somewhere else. */

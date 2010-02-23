@@ -36,7 +36,7 @@ http://www.cisst.org/cisst/license.txt.
 /*!
   \ingroup cisstMultiTask
 
-  mtsMulticastCommandWriteProxy is a proxy for mtsMulticastCommandWrite.  
+  mtsMulticastCommandWriteProxy is a proxy for mtsMulticastCommandWrite.
  */
 class mtsMulticastCommandWriteProxy : public mtsMulticastCommandWriteBase, public mtsCommandProxyBase
 {
@@ -54,7 +54,7 @@ protected:
 public:
     /*! Execute all the commands in the composite. */
     virtual mtsCommandBase::ReturnType Execute(const mtsGenericObject & argument) {
-        unsigned int index;        
+        unsigned int index;
         for (index = 0; index < Commands.size(); ++index) {
             Commands[index]->Execute(argument);
         }
@@ -67,8 +67,8 @@ public:
     }
 
     /*! Getter */
-    inline mtsProxySerializer * GetSerializer() { 
-        return &Serializer; 
+    inline mtsProxySerializer * GetSerializer() {
+        return &Serializer;
     }
 };
 

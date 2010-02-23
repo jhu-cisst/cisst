@@ -45,9 +45,9 @@ http://www.cisst.org/cisst/license.txt.
 
 /*!
   \brief Base class for data object in cisstMultiTask.
-  
+
   \ingroup cisstMultiTask
-  
+
   \sa cmnGenericObject
 */
 class mtsGenericObject: public cmnGenericObject {
@@ -135,7 +135,7 @@ public:
             outputStream << this->Timestamp() << delimiter
                          << this->AutomaticTimestamp() << delimiter
                          << this->Valid();
-        } 
+        }
     }
 
     /*! Binary serialization */

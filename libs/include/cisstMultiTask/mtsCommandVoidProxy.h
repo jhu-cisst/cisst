@@ -34,8 +34,8 @@ http://www.cisst.org/cisst/license.txt.
 /*!
   \ingroup cisstMultiTask
 
-  mtsCommandVoidProxy is a proxy for mtsCommandVoid. When Execute() method is 
-  called, CommandID is sent to a connected required interface proxy across a 
+  mtsCommandVoidProxy is a proxy for mtsCommandVoid. When Execute() method is
+  called, CommandID is sent to a connected required interface proxy across a
   network without payload.
 */
 class mtsCommandVoidProxy: public mtsCommandVoidBase, public mtsCommandProxyBase
@@ -44,7 +44,7 @@ public:
     typedef mtsCommandVoidBase BaseType;
 
 public:
-    /*! Constructor. Command proxy is disabled by defaultand is enabled when 
+    /*! Constructor. Command proxy is disabled by defaultand is enabled when
         command id and network proxy are set. */
     mtsCommandVoidProxy(const std::string & commandName) : BaseType(commandName) {
         Disable();

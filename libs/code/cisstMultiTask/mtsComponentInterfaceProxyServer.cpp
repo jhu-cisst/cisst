@@ -50,7 +50,7 @@ bool mtsComponentInterfaceProxyServer::Start(mtsComponentProxy * proxyOwner)
 {
     // Initialize Ice object.
     IceInitialize();
-    
+
     if (!InitSuccessFlag) {
         LogError(mtsComponentInterfaceProxyServer, "ICE proxy server Initialization failed");
         return false;
@@ -66,7 +66,7 @@ bool mtsComponentInterfaceProxyServer::Start(mtsComponentProxy * proxyOwner)
     ThreadArgumentsInfo.Proxy = this;
     ThreadArgumentsInfo.Runner = mtsComponentInterfaceProxyServer::Runner;
 
-    // Set a short name of this thread as CIPS which means "Component Interface 
+    // Set a short name of this thread as CIPS which means "Component Interface
     // Proxy Server." Such a condensed naming rule is required because a total
     // number of characters in a thread name is sometimes limited to a small
     // number (e.g. LINUX RTAI).
@@ -91,7 +91,7 @@ void mtsComponentInterfaceProxyServer::StartServer()
 
 void mtsComponentInterfaceProxyServer::Runner(ThreadArguments<mtsComponentProxy> * arguments)
 {
-    mtsComponentInterfaceProxyServer * ProxyServer = 
+    mtsComponentInterfaceProxyServer * ProxyServer =
         dynamic_cast<mtsComponentInterfaceProxyServer*>(arguments->Proxy);
     if (!ProxyServer) {
         CMN_LOG_RUN_ERROR << "mtsComponentInterfaceProxyServer: failed to create a proxy server." << std::endl;
@@ -138,14 +138,14 @@ bool mtsComponentInterfaceProxyServer::OnClientDisconnect(const ClientIDType cli
         return false;
     }
 
-    // Remove client from client list. This will prevent further network 
+    // Remove client from client list. This will prevent further network
     // processings from being executed.
     if (!BaseServerType::RemoveClientByClientID(clientID)) {
         LogError(mtsComponentInterfaceProxyServer, "OnClientDisconnect: failed to remove client from client map: " << clientID);
         return false;
     }
 
-    // Get a set of strings that represent a connection that the network proxy 
+    // Get a set of strings that represent a connection that the network proxy
     // client has been serving.
     ConnectionStringMapType::iterator it = ConnectionStringMap.find(clientID);
     if (it == ConnectionStringMap.end()) {
@@ -201,7 +201,7 @@ void mtsComponentInterfaceProxyServer::ReceiveTestMessageFromClientToServer(cons
 
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
     LogPrint(mtsComponentInterfaceProxyServer,
-             "ReceiveTestMessageFromClientToServer: " 
+             "ReceiveTestMessageFromClientToServer: "
              << "\n..... ConnectionID: " << connectionID
              << "\n..... Message: " << str);
 #endif
@@ -220,9 +220,9 @@ bool mtsComponentInterfaceProxyServer::ReceiveAddClient(
 
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
     LogPrint(mtsComponentInterfaceProxyServer,
-             "ReceiveAddClient: added proxy client: " 
-             << "\n..... ConnectionID: " << connectionID 
-             << "\n..... Proxy Name: " << connectingProxyName 
+             "ReceiveAddClient: added proxy client: "
+             << "\n..... ConnectionID: " << connectionID
+             << "\n..... Proxy Name: " << connectingProxyName
              << "\n..... ClientID: " << providedInterfaceProxyInstanceID);
 #endif
 
@@ -238,8 +238,8 @@ bool mtsComponentInterfaceProxyServer::ReceiveFetchEventGeneratorProxyPointers(
 
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
     LogPrint(mtsComponentInterfaceProxyServer,
-             "ReceiveFetchEventGeneratorProxyPointers: " 
-             << "\n..... ConnectionID: " << connectionID 
+             "ReceiveFetchEventGeneratorProxyPointers: "
+             << "\n..... ConnectionID: " << connectionID
              << "\n..... Client component name: " << clientComponentName
              << "\n..... Required interface name: " << requiredInterfaceName);
 #endif
@@ -503,7 +503,7 @@ bool mtsComponentInterfaceProxyServer::SendExecuteCommandQualifiedReadSerialized
 
     // Deserialize
     serializer->DeSerialize(serializedArgumentOut, argumentOut);
-    
+
     return true;
 }
 
@@ -541,7 +541,7 @@ void mtsComponentInterfaceProxyServer::ComponentInterfaceServerI::Run()
 #ifdef _COMMUNICATION_TEST_
     int count = 0;
 
-    while (IsActiveProxy()) 
+    while (IsActiveProxy())
     {
         osaSleep(1 * cmn_s);
         std::cout << "\tServer [" << ComponentInterfaceProxyServer->GetProxyName() << "] running (" << ++count << ")" << std::endl;
@@ -552,7 +552,7 @@ void mtsComponentInterfaceProxyServer::ComponentInterfaceServerI::Run()
         ComponentInterfaceProxyServer->SendTestMessageFromServerToClient(ss.str());
     }
 #else
-    while(IsActiveProxy()) 
+    while(IsActiveProxy())
     {
         // Check all connections at every 1 second
         ComponentInterfaceProxyServer->MonitorConnections();
@@ -594,7 +594,7 @@ void mtsComponentInterfaceProxyServer::ComponentInterfaceServerI::TestMessageFro
 }
 
 bool mtsComponentInterfaceProxyServer::ComponentInterfaceServerI::AddClient(
-    const std::string & connectingProxyName, ::Ice::Int providedInterfaceProxyInstanceID, 
+    const std::string & connectingProxyName, ::Ice::Int providedInterfaceProxyInstanceID,
     const ::Ice::Identity & identity, const ::Ice::Current& current)
 {
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
@@ -605,9 +605,9 @@ bool mtsComponentInterfaceProxyServer::ComponentInterfaceServerI::AddClient(
 
     IceUtil::Monitor<IceUtil::Mutex>::Lock lock(*this);
 
-    ComponentInterfaceClientProxyType clientProxy = 
+    ComponentInterfaceClientProxyType clientProxy =
         ComponentInterfaceClientProxyType::uncheckedCast(current.con->createProxy(identity));
-    
+
     return ComponentInterfaceProxyServer->ReceiveAddClient(connectionID,
         connectingProxyName, (unsigned int) providedInterfaceProxyInstanceID, clientProxy);
 }

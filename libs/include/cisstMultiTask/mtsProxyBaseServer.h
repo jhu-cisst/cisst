@@ -30,8 +30,8 @@ http://www.cisst.org/cisst/license.txt.
 /*!
   \ingroup cisstMultiTask
 
-  This class inherits mtsProxyBaseCommon and implements the basic structure and 
-  common functionalities of ICE proxy server. They include proxy server setup, 
+  This class inherits mtsProxyBaseCommon and implements the basic structure and
+  common functionalities of ICE proxy server. They include proxy server setup,
   proxy initialization, multiple client manage, and connection management.
   Note that this proxy server manages multiple clients regardless of its type
   since the type is templated.
@@ -64,7 +64,7 @@ public:
 
         ChangeProxyState(BaseType::PROXY_FINISHING);
 
-        if (this->IceCommunicator) {                
+        if (this->IceCommunicator) {
             try {
                 this->IceCommunicator->destroy();
                 this->ChangeProxyState(BaseType::PROXY_FINISHED);
@@ -113,7 +113,7 @@ protected:
             // Determine a port number and generate an endpoint string
             std::string endpoint(":default");
             if (!DynamicPortAllocation) {
-                // Fetch a port number from ice property file. Currently, only 
+                // Fetch a port number from ice property file. Currently, only
                 // the GCM uses this feature.
                 const std::string portNumber = this->IceInitData.properties->getProperty("GCM.Port");
                 endpoint += " -p ";
@@ -134,13 +134,13 @@ protected:
             // Inform the object adapter of the presence of a new servant
             IceAdapter->add(Servant, this->IceCommunicator->stringToIdentity(CommunicatorID));
 
-            // Activate the adapter. The adapter is initially created in a 
+            // Activate the adapter. The adapter is initially created in a
             // holding state. The server starts to process incoming requests
             // from clients as soon as the adapter is activated.
             IceAdapter->activate();
 
             this->InitSuccessFlag = true;
-            
+
             ChangeProxyState(BaseType::PROXY_READY);
 
             this->IceLogger->trace("mtsProxyBaseServer", "Server proxy initialization success.");
@@ -206,10 +206,10 @@ protected:
     osaMutex ClientIDMapChange;
     osaMutex ConnectionIDMapChange;
 
-    /*! When a client proxy is connected to this server proxy, add it to client 
+    /*! When a client proxy is connected to this server proxy, add it to client
         proxy map with a key of connection id */
-    bool AddProxyClient(const std::string & clientName, const ClientIDType & clientID, 
-        const ConnectionIDType & connectionID, ClientProxyType & clientProxy) 
+    bool AddProxyClient(const std::string & clientName, const ClientIDType & clientID,
+        const ConnectionIDType & connectionID, ClientProxyType & clientProxy)
     {
         // Check the uniqueness of clientID
         if (FindClientByClientID(clientID)) {
@@ -381,8 +381,8 @@ public:
         If it is true by default, a port number is randomly chosen by OS. This
         guarantees there is no overlap among multiple server instances' ports. */
     mtsProxyBaseServer(const std::string & propertyFileName,
-                       const std::string & adapterName, 
-                       const std::string & communicatorID, 
+                       const std::string & adapterName,
+                       const std::string & communicatorID,
                        const bool useDynamicPortAllocation = true)
                        : BaseType(propertyFileName, BaseType::PROXY_SERVER),
                          AdapterName(adapterName),

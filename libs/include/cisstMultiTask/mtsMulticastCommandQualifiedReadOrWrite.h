@@ -52,27 +52,27 @@ class mtsMulticastCommandQualifiedReadOrWrite: public mtsCommandQualifiedReadOrW
 public:
     typedef _argumentType ArgumentType;
     typedef mtsCommandQualifiedReadOrWriteBase<ArgumentType> BaseType;
-    
+
 protected:
     /*! Vector to commands that constitute the composite command. */
     std::vector<BaseType *> Commands;
-    
+
 public:
     /*! Default constructor. Does nothing. */
     mtsMulticastCommandQualifiedReadOrWrite(void): BaseType("", 0, 0) {}
-    
+
     /*! Default destructor. Does nothing. */
     ~mtsMulticastCommandQualifiedReadOrWrite() {}
-    
+
     /*! Add a command to the composite. */
     void AddCommand(BaseType * command);
-    
+
     /*! Get command (should use iterator instead) */
-    
-    
+
+
     /*! Execute all the commands in the composite. */
     virtual mtsCommandBase::ReturnType Execute(const cmnGenericObject & qualifier, ArgumentType argument);
-    
+
     /* documented in base class */
     virtual void ToStream(std::ostream & out) const;
 };

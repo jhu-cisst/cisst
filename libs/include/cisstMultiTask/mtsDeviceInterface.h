@@ -77,13 +77,13 @@ class mtsStateTable;
 class CISST_EXPORT mtsDeviceInterface: public cmnGenericObject
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
-    
+
     friend class mtsDevice;
     friend class mtsTask;
     friend class mtsTaskPeriodic;
     friend class mtsManagerLocal;
     friend class mtsComponentProxy;
-    
+
  public:
 
     /*! Typedef for a map of name of zero argument command and name of
@@ -177,7 +177,7 @@ class CISST_EXPORT mtsDeviceInterface: public cmnGenericObject
     template <class __argumentType>
     bool AddEventWrite(mtsFunctionWrite & eventTrigger, const std::string & eventName,
                        const __argumentType & argumentPrototype);
-    
+
     /*! Add an observer for the specified event.
       \param name Name of event
       \param handler command object that implements event handler

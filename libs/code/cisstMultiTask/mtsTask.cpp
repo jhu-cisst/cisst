@@ -39,7 +39,7 @@ void mtsTask::DoRunInternal(void)
     this->Run();
     StateTable.Advance();
 }
-  
+
 void mtsTask::StartupInternal(void) {
     CMN_LOG_CLASS_INIT_VERBOSE << "Starting StartupInternal for " << Name << std::endl;
 
@@ -179,7 +179,7 @@ bool mtsTask::WaitForState(TaskStateType desiredState, double timeout)
 
 /********************* Task constructor and destructor *****************/
 
-mtsTask::mtsTask(const std::string & name, 
+mtsTask::mtsTask(const std::string & name,
                  unsigned int sizeStateTable) :
     mtsDevice(name),
     Thread(),
@@ -266,7 +266,7 @@ bool mtsTask::AddStateTable(mtsStateTable * existingStateTable, bool addProvided
         providedInterface->AddEventWrite(existingStateTable->DataCollection.BatchReady,
                                          "BatchReady", mtsStateTable::IndexRange());
     }
-    CMN_LOG_CLASS_INIT_DEBUG << "AddStateTable: added state table \"" << tableName 
+    CMN_LOG_CLASS_INIT_DEBUG << "AddStateTable: added state table \"" << tableName
                              << "\" and corresponding interface \"" << interfaceName
                              << "\" to task \"" << this->GetName() << "\"" << std::endl;
     return true;
@@ -274,7 +274,7 @@ bool mtsTask::AddStateTable(mtsStateTable * existingStateTable, bool addProvided
 
 
 /********************* Methods to manage interfaces *******************/
-    
+
 mtsDeviceInterface * mtsTask::AddProvidedInterface(const std::string & newInterfaceName) {
     mtsTaskInterface * newInterface = new mtsTaskInterface(newInterfaceName, this);
     if (newInterface) {

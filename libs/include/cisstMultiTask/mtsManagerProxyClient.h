@@ -29,10 +29,10 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsExport.h>
 
-class CISST_EXPORT mtsManagerProxyClient : 
+class CISST_EXPORT mtsManagerProxyClient :
     public mtsProxyBaseClient<mtsManagerLocal>, public mtsManagerGlobalInterface
 {
-    
+
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
     /*! Typedef for base type. */
@@ -56,7 +56,7 @@ protected:
     //-------------------------------------------------------------------------
     /*! Create a proxy object and a send thread. */
     void CreateProxy() {
-        ManagerServerProxy = 
+        ManagerServerProxy =
             mtsManagerProxy::ManagerServerPrx::checkedCast(ProxyObject);
         if (!ManagerServerProxy) {
             throw "mtsManagerProxyClient: Invalid proxy";
@@ -69,7 +69,7 @@ protected:
     void RemoveProxy() {
         Sender->Stop();
     }
-    
+
     /*! Start a send thread and wait for shutdown (blocking call). */
     void StartClient();
 
@@ -210,7 +210,7 @@ public:
     //  Definition by mtsDeviceInterfaceProxy.ice
     //-------------------------------------------------------------------------
 protected:
-    class ManagerClientI : 
+    class ManagerClientI :
         public mtsManagerProxy::ManagerClient, public IceUtil::Monitor<IceUtil::Mutex>
     {
     private:
@@ -228,7 +228,7 @@ protected:
     public:
         /*! Constructor and destructor */
         ManagerClientI(
-            const Ice::CommunicatorPtr& communicator,                           
+            const Ice::CommunicatorPtr& communicator,
             const Ice::LoggerPtr& logger,
             const mtsManagerProxy::ManagerServerPrx& server,
             mtsManagerProxyClient * ManagerClient);
@@ -268,7 +268,7 @@ protected:
 
         /*! Getters */
         bool GetProvidedInterfaceDescription(const std::string & componentName, const std::string & providedInterfaceName, ::mtsManagerProxy::ProvidedInterfaceDescription & providedInterfaceDescription, const ::Ice::Current &) const;
-        bool GetRequiredInterfaceDescription(const std::string & componentName, const std::string & requiredInterfaceName, ::mtsManagerProxy::RequiredInterfaceDescription & requiredInterfaceDescription, const ::Ice::Current &) const;        
+        bool GetRequiredInterfaceDescription(const std::string & componentName, const std::string & requiredInterfaceName, ::mtsManagerProxy::RequiredInterfaceDescription & requiredInterfaceDescription, const ::Ice::Current &) const;
         std::string GetProcessName(const ::Ice::Current &) const;
         ::Ice::Int GetCurrentInterfaceCount(const std::string & componentName, const ::Ice::Current &) const;
     };

@@ -46,19 +46,19 @@ class CISST_EXPORT mtsEventWriteGeneratorProxy: public mtsMulticastCommandWriteB
 {
 public:
     typedef mtsMulticastCommandWriteBase BaseType;
-      
+
 public:
     /*! Default constructor. Does nothing. */
     mtsEventWriteGeneratorProxy(const std::string & name):
         BaseType(name)
     {}
-    
+
     /*! Default destructor. Does nothing. */
     ~mtsEventWriteGeneratorProxy() {}
 
     /*! Add a command to the composite. */
     // virtual void AddCommand(BaseType * command);
-    
+
     /*! Execute all the commands in the composite. */
     virtual mtsCommandBase::ReturnType Execute(const mtsGenericObject & argument) {
         if (this->Commands[0]) {

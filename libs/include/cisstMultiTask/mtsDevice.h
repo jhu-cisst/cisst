@@ -52,7 +52,7 @@ http://www.cisst.org/cisst/license.txt.
   as one would interact with a task (as in mtsTask and
   mtsTaskPeriodic).  To do so, the device maintains a list of provided
   interfaces (of type mtsDeviceInterface) which contains commands.
-  
+
   The main differences are that the device class doesn't have a thread
   and is stateless.  Since the device doesn't have any thread, the
   commands are not queued and the class doesn't add any thread safety
@@ -77,20 +77,20 @@ class CISST_EXPORT mtsDevice: public cmnGenericObject
     mtsDevice(void) {}
 
     mtsRequiredInterface * AddRequiredInterface(const std::string & requiredInterfaceName, mtsRequiredInterface * requiredInterface);
-    
+
  public:
-    
+
     /*! Default constructor. Sets the name. */
     mtsDevice(const std::string & deviceName);
-    
+
     /*! Default destructor. Does nothing. */
     virtual ~mtsDevice() {}
-    
+
     /*! Returns the name of the device. */
     virtual std::string GetName(void) const {
         return Name;
     }
-    
+
     /*! The virtual method so that the interface or tasks can
       configure themselves */
     virtual void Configure(const std::string & filename = "") = 0;
@@ -100,12 +100,12 @@ class CISST_EXPORT mtsDevice: public cmnGenericObject
       appropriate type of interface, i.e. mtsTaskInterface as opposed
       to mtsDeviceInterface for mtsDevice. */
     virtual mtsDeviceInterface * AddProvidedInterface(const std::string & newInterfaceName);
-    
+
     /*! Return the list of provided interfaces.  This returns a list
       of names.  To retrieve the actual interface, use
       GetProvidedInterface with the provided interface name. */
     virtual std::vector<std::string> GetNamesOfProvidedInterfaces(void) const;
-    
+
     /*! Get a pointer on a provided interface defined by its name.
       This can be used by a "user" task to find out which interfaces
       are provided and then retrieve commands/events from that
@@ -118,7 +118,7 @@ class CISST_EXPORT mtsDevice: public cmnGenericObject
       of event handlers to be used as observers. */
     virtual mtsRequiredInterface * AddRequiredInterface(const std::string & requiredInterfaceName);
 
-    /*! Provide a list of existing required interfaces (by names) */ 
+    /*! Provide a list of existing required interfaces (by names) */
     std::vector<std::string> GetNamesOfRequiredInterfaces(void) const;
 
     /*! Get a pointer on the provided interface that has been
@@ -126,7 +126,7 @@ class CISST_EXPORT mtsDevice: public cmnGenericObject
       This method will return a null pointer if the required interface
       has not been connected.  See mtsTaskManager::Connect. */
     mtsDeviceInterface * GetProvidedInterfaceFor(const std::string & requiredInterfaceName);
-    
+
     /*! Get the required interface */
     mtsRequiredInterface * GetRequiredInterface(const std::string & requiredInterfaceName) {
         return RequiredInterfaces.GetItem(requiredInterfaceName);
@@ -145,7 +145,7 @@ class CISST_EXPORT mtsDevice: public cmnGenericObject
     typedef std::vector<ThreadIdCounterPairType> ThreadIdCountersType;
     ThreadIdCountersType ThreadIdCounters;
     //@}
-    
+
     /*! Map of provided interfaces.  Used to store pointers on all
       provided interfaces. */
     //@{

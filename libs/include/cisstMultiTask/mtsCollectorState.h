@@ -81,7 +81,7 @@ class CISST_EXPORT mtsCollectorState : public mtsCollectorBase
     /*! Output file name. */
     std::string LogFileName;
 
-    /*! Delimiter used in a log file. Set by the constructor according to 
+    /*! Delimiter used in a log file. Set by the constructor according to
         mtsCollectorBase::CollectorLogFormat. */
     char Delimiter;
 
@@ -96,7 +96,7 @@ class CISST_EXPORT mtsCollectorState : public mtsCollectorBase
     /*! String stream buffer for serialization. */
     std::stringstream StringStreamBufferForSerialization;
 
-    /*! Serializer for binary logging. DeSerializer is used only at  
+    /*! Serializer for binary logging. DeSerializer is used only at
         ConvertBinaryToText() method so we don't define it here. */
     cmnSerializer * Serializer;
 
@@ -108,10 +108,10 @@ class CISST_EXPORT mtsCollectorState : public mtsCollectorBase
     /*! Initialization */
     void Initialize(void);
 
-    mtsFunctionWrite StateTableStartCollection; 
+    mtsFunctionWrite StateTableStartCollection;
     mtsFunctionWrite StateTableStopCollection;
 
-    /*! Check if the signal specified by a user has been already registered. 
+    /*! Check if the signal specified by a user has been already registered.
         This is to avoid duplicate signal registration. */
     bool IsRegisteredSignal(const std::string & signalName) const;
 
@@ -119,8 +119,8 @@ class CISST_EXPORT mtsCollectorState : public mtsCollectorBase
     bool AddSignalElement(const std::string & signalName, const unsigned int signalID);
 
     /*! Fetch state table data */
-    bool FetchStateTableData(const mtsStateTable * table, 
-                             const unsigned int startIdx, 
+    bool FetchStateTableData(const mtsStateTable * table,
+                             const unsigned int startIdx,
                              const unsigned int endIdx);
 
     /*! Print out the signal names which are being collected. */
@@ -131,7 +131,7 @@ class CISST_EXPORT mtsCollectorState : public mtsCollectorBase
 
     /*! Check if the given buffer contains the header mark. */
     static bool IsHeaderEndMark(const char * buffer);
-    
+
     /*! When this function is called (called by the data thread as a form of an event),
         bulk-fetch is performed and data is dumped to a log fie. */
     // void DataCollectionEventHandler(); // performs thread wake up
@@ -151,7 +151,7 @@ public:
     mtsCollectorState(mtsTask * targetTask,
                       const std::string & targetStateTableName,
                       const mtsCollectorBase::CollectorLogFormat collectorLogFormat);
-    
+
 
     ~mtsCollectorState(void);
 

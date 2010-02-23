@@ -65,9 +65,9 @@ public:
         \note See note in mtsTask regarding length of string name.
 
         \sa mtsTask, mtsTaskContinuous, mtsTaskPeriodic
-        
+
     */
-    mtsTaskFromSignal(const std::string & name, 
+    mtsTaskFromSignal(const std::string & name,
                       unsigned int sizeStateTable = 256);
 
     /*! Default Destructor. */

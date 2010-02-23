@@ -57,7 +57,7 @@ protected:
         IceCleanup();
 
         if (this->IceCommunicator) {
-            try {                    
+            try {
                 this->IceCommunicator->destroy();
                 this->IceCommunicator = NULL;
                 this->IceLogger->trace("mtsProxyBaseClient", "Proxy client clean-up success.");
@@ -104,7 +104,7 @@ protected:
             CreateProxy();
 
             this->InitSuccessFlag = true;
-            
+
             ChangeProxyState(BaseType::PROXY_READY);
 
             this->IceLogger->trace("mtsProxyBaseClient", "Client proxy initialization success.");

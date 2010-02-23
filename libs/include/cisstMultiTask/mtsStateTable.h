@@ -115,10 +115,10 @@ class CISST_EXPORT mtsStateTable: public cmnGenericObject {
 
         /*! Function used to trigger event sent to state collector
           when the data collection is needed.  The payload is the
-          range defined by state indices. */ 
+          range defined by state indices. */
         mtsFunctionWrite BatchReady;
 
-        /*! Default constructors */ 
+        /*! Default constructors */
         inline DataCollectionInfo(void):
             Collecting(false),
             StartTime(0.0),
@@ -140,7 +140,7 @@ public:
         virtual ~AccessorBase() {}
         virtual void ToStream(std::ostream & outputStream, const mtsStateIndex & when) const = 0;
     };
-    
+
     template <class _elementType>
     class Accessor : public AccessorBase {
         typedef typename mtsGenericTypes<_elementType>::FinalBaseType value_base_type;
@@ -151,15 +151,15 @@ public:
         value_ref_type * Current;
 
     public:
-        Accessor(const mtsStateTable & table, mtsStateDataId id, 
+        Accessor(const mtsStateTable & table, mtsStateDataId id,
                  const mtsStateArray<value_type> * history, value_ref_type * data):
             AccessorBase(table, id), History(*history), Current(data) {}
 
         void ToStream(std::ostream & outputStream, const mtsStateIndex & when) const {
             History.Element(when.Index()).ToStream(outputStream);
         }
-        
-        bool Get(const mtsStateIndex & when, value_base_type & data) const { 
+
+        bool Get(const mtsStateIndex & when, value_base_type & data) const {
             // PK: This could be changed to an assignment (see below), once operator overloading is fixed
             // data = History.Element(when.Index());
             mtsGenericTypes<_elementType>::Copy(History.Element(when.Index()), data);
@@ -188,7 +188,7 @@ public:
         void SetCurrent(const value_base_type & data) {
             *Current = data;
         }
-        
+
         // Get a vector of data, starting and ending at the specified time indices (inclusive).
         // For now, set the start index based on the vector size. In the future, we
         // should define a new parameter type that consists of a pair of mtsStateIndex.
@@ -215,16 +215,16 @@ public:
 
 	/*! The number of rows of the state data table. */
 	unsigned int HistoryLength;
-	
+
 	/*! The number of columns of the data table. */
 	unsigned int NumberStateData;
-	
+
 	/*! The index of the writer in the data table. */
 	unsigned int IndexWriter;
-	
+
 	/*! The index of the reader in the table. */
 	unsigned int IndexReader;
-	
+
 	/*! The vector contains pointers to individual columns. */
 	std::vector<mtsStateArrayBase *> StateVector;
 
@@ -284,7 +284,7 @@ public:
     /*! Constructor. Constructs a state table with a default
       size of 256 rows. */
     mtsStateTable(int size, const std::string & name);
-    
+
     /*! Default destructor. */
     ~mtsStateTable();
 
@@ -300,7 +300,7 @@ public:
     inline bool ValidateReadIndex(const mtsStateIndex &timeIndex) const {
         return (Ticks[timeIndex.Index()] == timeIndex.Ticks());
     }
-    
+
     /*! Check if the signal has been registered. */
     int GetStateVectorID(const std::string & dataName) const;
 
@@ -377,7 +377,7 @@ public:
       output stream. */
     void Debug(std::ostream & out, unsigned int * listColumn, unsigned int number) const;
 
-    /*! This method is to dump the state data table in the csv format, 
+    /*! This method is to dump the state data table in the csv format,
         allowing easy import into matlab.
         Assumes that individual columns are also printed in csv format.
      By default print all rows, if nonZeroOnly == true then print only those rows which have a nonzero Ticks
@@ -387,10 +387,10 @@ public:
     void CSVWrite(std::ostream & out, unsigned int * listColumn, unsigned int number, bool nonZeroOnly = false);
 
     void CSVWrite(std::ostream & out, mtsGenericObject ** listColumn, unsigned int number, bool nonZeroOnly = false);
-    
+
     /*! A base column index of StateTable for a signal registered by user. */
     static int StateVectorBaseIDForUser;
-    
+
     //-------------------------------------------------------------------------
     //  Data Collection
     //-------------------------------------------------------------------------
@@ -398,10 +398,10 @@ public:
     //void GetStateTableHistory(mtsDoubleVecHistory & history,
     //                          const unsigned int signalIndex,
     //                          const unsigned int lastFetchIndex);
-    
+
     /*! Return the name of this state table. */
     inline const std::string GetName(void) const { return Name; }
-    
+
     /*! Determine a ratio to generate a data collection event. */
     void DataCollectionEventTriggeringRatio(const mtsDouble & eventTriggeringRatio);
 
@@ -437,7 +437,7 @@ mtsStateDataId mtsStateTable::NewElement(const std::string & name, _elementType 
     StateVector.push_back(elementHistory);
     NumberStateData = StateVector.size();
     FinalRefType *pdata = mtsGenericTypes<_elementType>::ConditionalWrap(*element);
-    StateVectorElements.push_back(pdata); 
+    StateVectorElements.push_back(pdata);
 
     StateVectorDataNames.push_back(name);
     AccessorBase * accessor = new Accessor<_elementType>(*this, NumberStateData-1, elementHistory, pdata);

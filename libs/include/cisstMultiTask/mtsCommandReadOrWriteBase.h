@@ -51,7 +51,7 @@ class mtsCommandReadOrWriteBase : public mtsCommandBase {
 public:
     typedef mtsCommandBase BaseType;
     typedef _argumentType ArgumentType;
-    
+
     /*! The constructor. Does nothing */
     mtsCommandReadOrWriteBase(void):
         BaseType(),
@@ -94,9 +94,9 @@ public:
         return this->GetArgumentPrototype()->Services();
     }
 
-    
+
 protected:
-    
+
     inline virtual void SetArgumentPrototype(const mtsGenericObject * argumentPrototype) {
         this->ArgumentPrototype = argumentPrototype;
     }

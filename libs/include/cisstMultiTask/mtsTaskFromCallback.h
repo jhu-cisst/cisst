@@ -110,7 +110,7 @@ public:
         \sa mtsTask, mtsTaskContinuous, mtsTaskPeriodic
 
      */
-    mtsTaskFromCallback(const std::string & name, 
+    mtsTaskFromCallback(const std::string & name,
                         unsigned int sizeStateTable = 256):
         mtsTask(name, sizeStateTable), inRunInternal(false) {}
 

@@ -101,10 +101,10 @@ public:
         itself as a callback.
 
         \sa mtsTask, mtsTaskPeriodic, mtsTaskFromCallback
-       
+
 	 */
-    mtsTaskContinuous(const std::string & name, 
-                      unsigned int sizeStateTable = 256, 
+    mtsTaskContinuous(const std::string & name,
+                      unsigned int sizeStateTable = 256,
                       bool newThread = true);
 
     /*! Default Destructor. */

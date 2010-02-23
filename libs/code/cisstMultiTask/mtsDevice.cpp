@@ -31,9 +31,9 @@ mtsDevice::mtsDevice(const std::string & deviceName):
     RequiredInterfaces("RequiredInterfaces")
 {
     ProvidedInterfaces.SetOwner(*this);
-    RequiredInterfaces.SetOwner(*this);   
+    RequiredInterfaces.SetOwner(*this);
 }
-  
+
 
 std::vector<std::string> mtsDevice::GetNamesOfProvidedInterfaces(void) const {
     return ProvidedInterfaces.GetNames();
@@ -114,7 +114,7 @@ bool mtsDevice::ConnectRequiredInterface(const std::string & requiredInterfaceNa
         CMN_LOG_CLASS_INIT_VERBOSE << "Binding commands and events with user Id " << userId << std::endl;
         return requiredInterface->BindCommandsAndEvents(userId);
     }
-    return false;            
+    return false;
 }
 
 

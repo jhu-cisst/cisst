@@ -28,8 +28,8 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsExport.h>
 
-class CISST_EXPORT mtsComponentInterfaceProxyServer : 
-    public mtsProxyBaseServer<mtsComponentProxy, 
+class CISST_EXPORT mtsComponentInterfaceProxyServer :
+    public mtsProxyBaseServer<mtsComponentProxy,
                               mtsComponentInterfaceProxy::ComponentInterfaceClientPrx,
                               unsigned int>
 {
@@ -72,8 +72,8 @@ protected:
 
     /*! Map to fetch a ConnectionStrings instance by client id.
         key=(client id defined as provided interface instance id)
-        value=(an instance of ConnectionStrings) 
-        
+        value=(an instance of ConnectionStrings)
+
         This map is used to disconnect currently established connection when a
         network proxy client is detected as disconnected. */
     typedef std::map<ClientIDType, ConnectionStrings> ConnectionStringMapType;
@@ -82,8 +82,8 @@ protected:
     /*! String key to set an implicit per-proxy context for connection id */
     static std::string ConnectionIDKey;
 
-    /*! Communicator (proxy) ID to initialize mtsComponentInterfaceProxyServer. 
-        A component interface proxy client uses this ID to connect to a proxy 
+    /*! Communicator (proxy) ID to initialize mtsComponentInterfaceProxyServer.
+        A component interface proxy client uses this ID to connect to a proxy
         server. */
     static std::string InterfaceCommunicatorID;
 
@@ -98,14 +98,14 @@ protected:
         Sender = new ComponentInterfaceServerI(IceCommunicator, IceLogger, this);
         return Sender;
     }
-    
+
     /*! Start a send thread and wait for shutdown (this is a blocking method). */
     void StartServer();
 
     /*! Thread runner */
     static void Runner(ThreadArguments<mtsComponentProxy> * arguments);
 
-    /*! Get a network proxy client object using clientID. If no network proxy 
+    /*! Get a network proxy client object using clientID. If no network proxy
         client with the clientID is not connected or the proxy is inactive,
         this method returns NULL. */
     ComponentInterfaceClientProxyType * GetNetworkProxyClient(const ClientIDType clientID);
@@ -124,9 +124,9 @@ protected:
     void ReceiveTestMessageFromClientToServer(const ConnectionIDType &connectionID, const std::string & str);
 
     /*! When a new client connects, add it to the client management list. */
-    bool ReceiveAddClient(const ConnectionIDType & connectionID, 
-                          const std::string & connectingProxyName, 
-                          const unsigned int providedInterfaceProxyInstanceID, 
+    bool ReceiveAddClient(const ConnectionIDType & connectionID,
+                          const std::string & connectingProxyName,
+                          const unsigned int providedInterfaceProxyInstanceID,
                           ComponentInterfaceClientProxyType & clientProxy);
 
     bool ReceiveFetchEventGeneratorProxyPointers(const ConnectionIDType & connectionID,
@@ -164,15 +164,15 @@ public:
     /*! Test method: broadcast string to all clients connected */
     void SendTestMessageFromServerToClient(const std::string & str);
 
-    /*! Fetch function proxy pointers from the connected required interface 
+    /*! Fetch function proxy pointers from the connected required interface
         proxy at server process. */
     bool SendFetchFunctionProxyPointers(
-        const ClientIDType clientID, const std::string & requiredInterfaceName, 
+        const ClientIDType clientID, const std::string & requiredInterfaceName,
         mtsComponentInterfaceProxy::FunctionProxyPointerSet & functionProxyPointers);
 
-    /*! Execute commands and events. This will call function proxies in the required 
-        interface proxy at server process. 
-        clientID designates which network proxy client should execute a command 
+    /*! Execute commands and events. This will call function proxies in the required
+        interface proxy at server process.
+        clientID designates which network proxy client should execute a command
         and commandID represents which function proxy object should be called. */
     bool SendExecuteCommandVoid(const ClientIDType clientID, const CommandIDType commandID);
     bool SendExecuteCommandWriteSerialized(const ClientIDType clientID, const CommandIDType commandID, const mtsGenericObject & argument);
@@ -196,7 +196,7 @@ public:
     //  Interface Implementation (refer to mtsComponentInterfaceProxy.ice)
     //-------------------------------------------------------------------------
 protected:
-    class ComponentInterfaceServerI : 
+    class ComponentInterfaceServerI :
         public mtsComponentInterfaceProxy::ComponentInterfaceServer, public IceUtil::Monitor<IceUtil::Mutex>
     {
     private:
@@ -207,10 +207,10 @@ protected:
 
         /*! Network event handler */
         mtsComponentInterfaceProxyServer * ComponentInterfaceProxyServer;
-        
+
     public:
         ComponentInterfaceServerI(
-            const Ice::CommunicatorPtr& communicator, 
+            const Ice::CommunicatorPtr& communicator,
             const Ice::LoggerPtr& logger,
             mtsComponentInterfaceProxyServer * componentInterfaceProxyServer);
         ~ComponentInterfaceServerI();

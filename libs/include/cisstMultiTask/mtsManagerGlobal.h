@@ -43,7 +43,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsExport.h>
 
-class CISST_EXPORT mtsManagerGlobal : public mtsManagerGlobalInterface 
+class CISST_EXPORT mtsManagerGlobal : public mtsManagerGlobalInterface
 {
     friend class mtsManagerGlobalTest;
     friend class mtsManagerLocalTest;
@@ -91,7 +91,7 @@ protected:
         {}
 
     public:
-        ConnectedInterfaceInfo(const std::string & processName, const std::string & componentName, 
+        ConnectedInterfaceInfo(const std::string & processName, const std::string & componentName,
                                const std::string & interfaceName, const bool isRemoteConnection)
             : ProcessName(processName), ComponentName(componentName), InterfaceName(interfaceName), RemoteConnection(isRemoteConnection)
         {}
@@ -163,7 +163,7 @@ protected:
         Map name: a name of component that has these interfaces. */
     typedef cmnNamedMap<mtsManagerGlobal::ConnectedInterfaceInfo> ConnectionMapType;
 
-    // Interface map consists of two pairs of containers: 
+    // Interface map consists of two pairs of containers:
     // containers for connection map (provided/required interface maps) and
     // containers for interface type flag map (provided/required interface maps)
 
@@ -175,9 +175,9 @@ protected:
     /*! Interface type flag map: a map of registered interfaces in a component
         key=(interface name), value=(bool)
         value is false if an interface is an original interface
-                 true  if an interface is a proxy interface 
-        This information is used to determine if an interface should be removed 
-        (cleaned up) when a connection is disconnected. See 
+                 true  if an interface is a proxy interface
+        This information is used to determine if an interface should be removed
+        (cleaned up) when a connection is disconnected. See
         mtsManagerGlobal::Disconnect() for more details. */
     typedef std::map<std::string, bool> InterfaceTypeMapType;
 
@@ -189,7 +189,7 @@ protected:
     } InterfaceMapType;
 
     /*! Component map: a map of registered components in a process
-        key=(component name), value=(interface map) 
+        key=(component name), value=(interface map)
         value can be null if a component does not have any interface. */
     typedef cmnNamedMap<InterfaceMapType> ComponentMapType;
 
@@ -201,16 +201,16 @@ protected:
 
     /*! Connection element map: a map of strings that defines a connection
         key=(connection id), value=(an instance of ConnectionElement)
-        When a local component manager requests estbalishing a connection, an 
-        element is created and added. If a connection is not established before 
+        When a local component manager requests estbalishing a connection, an
+        element is created and added. If a connection is not established before
         timeout, the element is removed. When a local component manager notifies
-        that a connection is successfully established, the element is marked 
+        that a connection is successfully established, the element is marked
         as connected. */
     typedef std::map<unsigned int, mtsManagerGlobal::ConnectionElement*> ConnectionElementMapType;
     ConnectionElementMapType ConnectionElementMap;
 
-    /*! Instance of connected local component manager. Note that the global 
-        component manager communicates with the only one instance of 
+    /*! Instance of connected local component manager. Note that the global
+        component manager communicates with the only one instance of
         mtsManagerLocalInterface regardless of connection type (standalone
         or network mode) */
     mtsManagerLocalInterface * LocalManagerConnected;
@@ -235,23 +235,23 @@ protected:
 
     /*! Get a map containing connection information for a provided interface */
     ConnectionMapType * GetConnectionsOfProvidedInterface(
-        const std::string & serverProcessName, const std::string & serverComponentName, 
+        const std::string & serverProcessName, const std::string & serverComponentName,
         const std::string & providedInterfaceName, InterfaceMapType ** interfaceMap);
     ConnectionMapType * GetConnectionsOfProvidedInterface(
-        const std::string & serverProcessName, const std::string & serverComponentName, 
+        const std::string & serverProcessName, const std::string & serverComponentName,
         const std::string & providedInterfaceName) const;
 
     /*! Get a map containing connection information for a required interface */
     ConnectionMapType * GetConnectionsOfRequiredInterface(
-        const std::string & clientProcessName, const std::string & clientComponentName, 
+        const std::string & clientProcessName, const std::string & clientComponentName,
         const std::string & requiredInterfaceName, InterfaceMapType ** interfaceMap);
-    
+
     ConnectionMapType * GetConnectionsOfRequiredInterface(
-        const std::string & clientProcessName, const std::string & clientComponentName, 
+        const std::string & clientProcessName, const std::string & clientComponentName,
         const std::string & requiredInterfaceName) const;
-    
+
     /*! Add this interface to connectionMap as connected interface */
-    bool AddConnectedInterface(ConnectionMapType * connectionMap, 
+    bool AddConnectedInterface(ConnectionMapType * connectionMap,
         const std::string & processName, const std::string & componentName,
         const std::string & interfaceName, const bool isRemoteConnection = false);
 
@@ -265,7 +265,7 @@ public:
     mtsManagerGlobal();
 
     ~mtsManagerGlobal();
-    
+
     //-------------------------------------------------------------------------
     //  Process Management
     //-------------------------------------------------------------------------

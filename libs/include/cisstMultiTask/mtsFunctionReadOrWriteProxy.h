@@ -46,13 +46,13 @@ public:
     mtsFunctionReadOrWriteProxy(const mtsDeviceInterface * associatedInterface, const std::string & commandName)
         : BaseFunctionType(associatedInterface, commandName)
     {}
-    
+
     ~mtsFunctionReadOrWriteProxy()
     {}
 
     /*! Getter */
-    inline mtsProxySerializer * GetSerializer() { 
-        return &Serializer; 
+    inline mtsProxySerializer * GetSerializer() {
+        return &Serializer;
     }
 };
 

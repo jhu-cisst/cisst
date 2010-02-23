@@ -66,7 +66,7 @@ public:
         ArgumentsQueue(0, ArgumentType())
     {}
 
-    
+
     inline mtsCommandQueuedWrite(mtsMailBox * mailBox, mtsCommandWriteBase * actualCommand, unsigned int size):
         BaseType(mailBox, actualCommand),
         ArgumentsQueue(0, ArgumentType())
@@ -80,7 +80,7 @@ public:
         }
     }
 
-    
+
     // ArgumentsQueue destructor should get called
     inline virtual ~mtsCommandQueuedWrite() {}
 
@@ -89,7 +89,7 @@ public:
         return new mtsCommandQueuedWrite(mailBox, this->ActualCommand, size);
     }
 
-    
+
     // Allocate should be called when a task calls GetMethodXXX().
     inline virtual void Allocate(unsigned int size) {
         if (ArgumentsQueue.GetSize() != size) {
@@ -107,8 +107,8 @@ public:
             }
         }
     }
-    
-    
+
+
     virtual mtsCommandBase::ReturnType Execute(const mtsGenericObject & argument) {
         if (this->IsEnabled()) {
             const ArgumentType * argumentTyped = dynamic_cast<const ArgumentType*>(&argument);
@@ -120,7 +120,7 @@ public:
                 if (MailBox->Write(this)) {
                     return mtsCommandBase::DEV_OK;
                 } else {
-                    CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWrite: Execute(): Mailbox full for \"" 
+                    CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWrite: Execute(): Mailbox full for \""
                                       << this->Name << "\"" << std::endl;
                     ArgumentsQueue.Get();  // Pop argument from local storage
                 }
@@ -136,12 +136,12 @@ public:
     /* commented in base class */
     const mtsGenericObject * GetArgumentPrototype(void) const {
         return this->ActualCommand->GetArgumentPrototype();
-    }    
+    }
 
     inline virtual const mtsGenericObject * ArgumentPeek(void) const {
         return ArgumentsQueue.Peek();
     }
-    
+
 
     inline virtual mtsGenericObject * ArgumentGet(void) {
         return ArgumentsQueue.Get();

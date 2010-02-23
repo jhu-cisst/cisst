@@ -25,18 +25,18 @@ http://www.cisst.org/cisst/license.txt.
   \brief Definition of Local Component Manager
   \ingroup cisstMultiTask
 
-  This class defines the local component manager (LCM) which replaces the 
+  This class defines the local component manager (LCM) which replaces the
   previous task manager (mtsTaskManager) and is implemented as a singleton.
-  
+
   Major differences between the two are:
-  
-  1) The LCM manages tasks and devices as a unified object, a component, which 
-  is of type mtsDevice. For this, task map and device map in the task manager 
+
+  1) The LCM manages tasks and devices as a unified object, a component, which
+  is of type mtsDevice. For this, task map and device map in the task manager
   has been consolidated into a single data structure, component map.
 
   2) The LCM does not keep the connection information; All connection information
   are now maintained and managed by the global component manager (GCM).
-  
+
   \note Related classes: mtsManagerLocalInterface, mtsManagerGlobalInterface, mtsManagerGlobal
 */
 
@@ -82,7 +82,7 @@ protected:
     /*! Time server used by all tasks. */
     osaTimeServer TimeServer;
 
-    /*! Process name of this local component manager. Should be globally unique 
+    /*! Process name of this local component manager. Should be globally unique
         across a system. */
     std::string ProcessName;
 
@@ -100,10 +100,10 @@ protected:
 
     /*! A pointer to the global component manager.
         Depending on configurations, this points to two different objects:
-        - In standalone mode, this is an instance of the GCM (of type 
+        - In standalone mode, this is an instance of the GCM (of type
           mtsManagerGlobal) running in the same process.
         - In network mode, this is a pointer to a proxy object for the GCM
-          (of type mtsManagerGlobalProxyClient) that links this LCM with the 
+          (of type mtsManagerGlobalProxyClient) that links this LCM with the
           GCM. In this case, the GCM normally runs in a different process. */
     mtsManagerGlobalInterface * ManagerGlobal;
 
@@ -128,9 +128,9 @@ protected:
     void SetIPAddress(void);
 #endif
 
-    /*! Connect two local interfaces. This method assumes two interfaces are in 
+    /*! Connect two local interfaces. This method assumes two interfaces are in
         the same process.
-        
+
         Returns: provided interface proxy instance id, if remote connection
                  zero, if local connection
                  -1,   if error occurs */
@@ -143,7 +143,7 @@ protected:
     //-------------------------------------------------------------------------
 public:
 #if CISST_MTS_HAS_ICE
-    /*! Create a component proxy. This should be called before an interface 
+    /*! Create a component proxy. This should be called before an interface
         proxy is created. */
     bool CreateComponentProxy(const std::string & componentProxyName, const std::string & listenerID = "");
 
@@ -169,18 +169,18 @@ public:
     bool RemoveRequiredInterfaceProxy(
         const std::string & serverComponentProxyName, const std::string & requiredInterfaceProxyName, const std::string & listenerID = "");
 
-    /*! Extract all the information on a provided interface such as command 
+    /*! Extract all the information on a provided interface such as command
         objects and events with arguments serialized */
     bool GetProvidedInterfaceDescription(
         const std::string & componentName,
-        const std::string & providedInterfaceName, 
+        const std::string & providedInterfaceName,
         ProvidedInterfaceDescription & providedInterfaceDescription, const std::string & listenerID = "");
 
     /*! Extract all the information on a required interface such as function
         objects and event handlers with arguments serialized */
     bool GetRequiredInterfaceDescription(
         const std::string & componentName,
-        const std::string & requiredInterfaceName, 
+        const std::string & requiredInterfaceName,
         RequiredInterfaceDescription & requiredInterfaceDescription, const std::string & listenerID = "");
 
     /*! Returns a total number of interfaces that are running on a component */
@@ -212,7 +212,7 @@ public:
 
     //-------------------------------------------------------------------------
     //  Component Management
-    //-------------------------------------------------------------------------    
+    //-------------------------------------------------------------------------
     /*! Add a component to this local component manager. */
     bool AddComponent(mtsDevice * component);
     bool /*CISST_DEPRECATED*/ AddTask(mtsTask * component); // For backward compatibility
@@ -258,7 +258,7 @@ public:
         is called internally. */
     void CreateAll(void);
 
-    /*! Start all components. If a component is of type mtsTask, mtsTask::Start() 
+    /*! Start all components. If a component is of type mtsTask, mtsTask::Start()
         is called internally. */
     void StartAll(void);
 
@@ -268,7 +268,7 @@ public:
 
     /*! Cleanup.  Since a local component manager is a singleton, the
       destructor will be called when the program exits but a library user
-      is not capable of handling the timing. Thus, for safe termination, this 
+      is not capable of handling the timing. Thus, for safe termination, this
       method should be called before an application quits. */
     void Cleanup(void);
 
@@ -278,12 +278,12 @@ public:
     /*! Enumerate all the names of components added */
     std::vector<std::string> GetNamesOfComponents(void) const;
     std::vector<std::string> /*CISST_DEPRECATED*/ GetNamesOfDevices(void) const;  // For backward compatibility
-    std::vector<std::string> /*CISST_DEPRECATED*/ GetNamesOfTasks(void) const;  // For backward compatibility    
+    std::vector<std::string> /*CISST_DEPRECATED*/ GetNamesOfTasks(void) const;  // For backward compatibility
 
     void GetNamesOfComponents(std::vector<std::string>& namesOfComponents) const;
     void /*CISST_DEPRECATED*/ GetNamesOfDevices(std::vector<std::string>& namesOfDevices) const; // For backward compatibility
     void /*CISST_DEPRECATED*/ GetNamesOfTasks(std::vector<std::string>& namesOfTasks) const; // For backward compatibility
-    
+
     /*! Return a reference to the time server. */
     inline const osaTimeServer & GetTimeServer(void) {
         return TimeServer;

@@ -35,7 +35,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsExport.h>
 
 
-/*!  
+/*!
   \ingroup cisstMultiTask
 
   The time indexing of state data is provided by the mtsStateIndex
@@ -56,7 +56,7 @@ class CISST_EXPORT mtsStateIndex : public mtsGenericObject {
  public:
     /*! TimeTicks are typedef'ed as unsigned long long (64 bits)*/
     typedef unsigned long long int TimeTicksType;
-    
+
  private:
 	/*! The index into the set of circular buffers corresponding to
       the time */
@@ -71,11 +71,11 @@ class CISST_EXPORT mtsStateIndex : public mtsGenericObject {
 public:
 	/*! Default constructor. Does nothing. */
 	mtsStateIndex(): TimeIndex(0), TimeTicks(0), BufferLength(0) {}
-    
+
 	/*! Default constructor. Does nothing. */
 	mtsStateIndex(int index, TimeTicksType ticks, int Length):
         TimeIndex(index), TimeTicks(ticks), BufferLength(Length) {}
-    
+
 	/*! Default destructor. Does nothing. */
 	~mtsStateIndex() {}
 
@@ -99,7 +99,7 @@ public:
         return TimeTicks;
     }
 
-	/*! 
+	/*!
 	    Note that the increment operators are not defined for
 	    this class, since we dont want future times.
 	 */
@@ -137,7 +137,7 @@ public:
 
     /*! Serialize the content of the object without any extra
       information, i.e. no class type nor format version.  The
-      "receiver" is supposed to already know what to expect. */ 
+      "receiver" is supposed to already know what to expect. */
     virtual void SerializeRaw(std::ostream & outputStream) const {
         cmnSerializeRaw(outputStream, this->TimeIndex);
         cmnSerializeRaw(outputStream, this->TimeTicks);

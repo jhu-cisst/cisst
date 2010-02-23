@@ -4,7 +4,7 @@
 /*
   $Id$
 
-  Author(s):  Ankur Kapoor, Anton Deguet 
+  Author(s):  Ankur Kapoor, Anton Deguet
   Created on: 2006-05-02
 
   (C) Copyright 2006-2009 Johns Hopkins University (JHU), All Rights
@@ -76,7 +76,7 @@ public:
         DISABLED = 17,
         COMMAND_FAILED = 18  // Read or QualifiedRead returned 'false'
     };
-    
+
     /*! The constructor. Does nothing */
     inline mtsCommandBase(void):
         Name("??"),
@@ -88,10 +88,10 @@ public:
         Name(name),
         EnableFlag(true)
     {}
-    
+
     /*! The destructor. Does nothing */
     virtual ~mtsCommandBase() {}
-    
+
     /*! For debugging. Generate a human readable output for the
       command object */
     //@{
@@ -130,7 +130,7 @@ public:
 
     /*! Get the command name.  This method doesn't allow to change the
       command name. */
-    inline const std::string & GetName(void) const {        
+    inline const std::string & GetName(void) const {
         return this->Name;
     }
 };

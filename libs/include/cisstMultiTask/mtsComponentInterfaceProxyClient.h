@@ -28,7 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsExport.h>
 
-class CISST_EXPORT mtsComponentInterfaceProxyClient : public mtsProxyBaseClient<mtsComponentProxy> 
+class CISST_EXPORT mtsComponentInterfaceProxyClient : public mtsProxyBaseClient<mtsComponentProxy>
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
@@ -50,7 +50,7 @@ protected:
     PerEventSerializerMapType PerEventSerializerMap;
 
     /*! ID of this proxy. mtsComponentInterfaceProxyServer handles multiple
-        network proxy clients (as a provided interface can be connected to 
+        network proxy clients (as a provided interface can be connected to
         multiple required interfaces) and it uses this ID as unique client ID. */
     const unsigned int ProvidedInterfaceProxyInstanceID;
 
@@ -62,7 +62,7 @@ protected:
     //-------------------------------------------------------------------------
     /*! Create a proxy object and a send thread. */
     void CreateProxy() {
-        ComponentInterfaceServerProxy = 
+        ComponentInterfaceServerProxy =
             mtsComponentInterfaceProxy::ComponentInterfaceServerPrx::checkedCast(ProxyObject);
         if (!ComponentInterfaceServerProxy) {
             throw "mtsComponentInterfaceProxyClient: Invalid proxy";
@@ -75,7 +75,7 @@ protected:
     void RemoveProxy() {
         Sender->Stop();
     }
-    
+
     /*! Start a send thread and wait for shutdown (blocking call). */
     void StartClient();
 
@@ -91,7 +91,7 @@ protected:
     /*! Test method */
     void ReceiveTestMessageFromServerToClient(const std::string & str) const;
 
-    /*! Fetch pointers of function proxies from a required interface proxy at 
+    /*! Fetch pointers of function proxies from a required interface proxy at
         server side */
     bool ReceiveFetchFunctionProxyPointers(const std::string & requiredInterfaceName,
         mtsComponentInterfaceProxy::FunctionProxyPointerSet & functionProxyPointers) const;
@@ -123,7 +123,7 @@ public:
     /*! Register per-command (de)serializer */
     bool AddPerEventSerializer(const CommandIDType commandID, mtsProxySerializer * serializer);
 
-    /*! Fetch pointers of event generator proxies from a provided interface 
+    /*! Fetch pointers of event generator proxies from a provided interface
         proxy at server side */
     bool SendFetchEventGeneratorProxyPointers(
         const std::string & requiredInterfaceName, const std::string & providedInterfaceName,
@@ -137,7 +137,7 @@ public:
     //  Interface Implementation (refer to mtsComponentInterfaceProxy.ice)
     //-------------------------------------------------------------------------
 protected:
-    class ComponentInterfaceClientI : 
+    class ComponentInterfaceClientI :
         public mtsComponentInterfaceProxy::ComponentInterfaceClient, public IceUtil::Monitor<IceUtil::Mutex>
     {
     private:
@@ -154,7 +154,7 @@ protected:
 
     public:
         ComponentInterfaceClientI(
-            const Ice::CommunicatorPtr& communicator,                           
+            const Ice::CommunicatorPtr& communicator,
             const Ice::LoggerPtr& logger,
             const mtsComponentInterfaceProxy::ComponentInterfaceServerPrx& server,
             mtsComponentInterfaceProxyClient * ComponentInterfaceClient);
@@ -180,7 +180,7 @@ protected:
         /*! Test method */
         void TestMessageFromServerToClient(const std::string & str, const ::Ice::Current & current);
 
-        /*! Fetch pointers of function proxies from a required interface proxy at 
+        /*! Fetch pointers of function proxies from a required interface proxy at
             server side */
         bool FetchFunctionProxyPointers(const std::string &, mtsComponentInterfaceProxy::FunctionProxyPointerSet &, const ::Ice::Current & current) const;
 

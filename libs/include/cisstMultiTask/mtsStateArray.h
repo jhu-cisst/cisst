@@ -66,8 +66,8 @@ public:
                          size_type size = 0):
         Data(size, objectExample)
     {}
-    
-    
+
+
 	/*! Default destructor. */
 	virtual ~mtsStateArray() {}
 
@@ -77,7 +77,7 @@ public:
     const value_type & Element(index_type index) const { return Data[index]; }
     value_type & Element(index_type index) { return Data[index]; }
 
-	/*! Overloaded [] operator. Returns data at index (of type mtsGenericObject). 
+	/*! Overloaded [] operator. Returns data at index (of type mtsGenericObject).
         Currently used for data collection (mtsCollectorState). */
 	inline mtsGenericObject & operator[](index_type index){ return Data[index]; }
 	inline const mtsGenericObject & operator[](index_type index) const { return Data[index]; }
@@ -101,12 +101,12 @@ public:
         return this;
     }
 
-    
+
 	/*! Copy data from one index to another within the same array.  */
 	inline void Copy(index_type indexTo, index_type indexFrom) {
         this->Data[indexTo] = this->Data[indexFrom];
     }
-    
+
 
 	/*! Get and Set data from array.  The Get and Set member functions
 	  deserve special mention because they must overcome a limitation

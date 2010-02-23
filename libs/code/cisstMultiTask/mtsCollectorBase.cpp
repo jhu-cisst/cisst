@@ -31,7 +31,7 @@ mtsTaskManager * mtsCollectorBase::TaskManager;
 //-------------------------------------------------------
 //	Constructor, Destructor, and Initializer
 //-------------------------------------------------------
-mtsCollectorBase::mtsCollectorBase(const std::string & collectorName, 
+mtsCollectorBase::mtsCollectorBase(const std::string & collectorName,
                                    const CollectorLogFormat logFormat)
     :
     mtsTaskFromSignal(collectorName),
@@ -92,7 +92,7 @@ void mtsCollectorBase::Cleanup(void)
 //-------------------------------------------------------
 void mtsCollectorBase::ClearTaskMap(void)
 {
-    if (!TaskMap.empty()) {        
+    if (!TaskMap.empty()) {
         TaskMapType::iterator itr = TaskMap.begin();
         SignalMapType::iterator _itr;
         for (; itr != TaskMap.end(); ++itr) {

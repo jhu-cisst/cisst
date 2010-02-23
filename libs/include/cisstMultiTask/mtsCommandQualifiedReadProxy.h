@@ -35,8 +35,8 @@ http://www.cisst.org/cisst/license.txt.
 /*!
   \ingroup cisstMultiTask
 
-  mtsCommandQualifiedReadProxy is a proxy for mtsCommandQualifiedRead. 
-  When Execute() method is called, the command id with two payloads is sent to 
+  mtsCommandQualifiedReadProxy is a proxy for mtsCommandQualifiedRead.
+  When Execute() method is called, the command id with two payloads is sent to
   the connected peer interface across a network.
 */
 class mtsCommandQualifiedReadProxy : public mtsCommandQualifiedReadBase, public mtsCommandProxyBase
@@ -54,8 +54,8 @@ protected:
 public:
     /*! Typedef for base type */
     typedef mtsCommandQualifiedReadBase BaseType;
-    
-    /*! Constructor. Command proxy is disabled by defaultand is enabled when 
+
+    /*! Constructor. Command proxy is disabled by defaultand is enabled when
         command id and network proxy are set. */
     mtsCommandQualifiedReadProxy(const std::string & commandName) : BaseType(commandName) {
         Disable();
@@ -96,7 +96,7 @@ public:
     void ToStream(std::ostream & outputStream) const {
         ToStreamBase("mtsCommandQualifiedReadProxy", Name, CommandID, IsEnabled(), outputStream);
     }
-    
+
     /*! Return a pointer on the argument prototype */
     const mtsGenericObject * GetArgument1Prototype(void) const {
         return Argument1Prototype;

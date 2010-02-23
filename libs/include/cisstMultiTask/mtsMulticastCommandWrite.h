@@ -56,14 +56,14 @@ public:
     {
         this->ArgumentPrototype = new ArgumentType(argumentPrototype);
     }
-    
+
     /*! Default destructor. Does nothing. */
     ~mtsMulticastCommandWrite() {
         if (this->ArgumentPrototype) {
             delete this->ArgumentPrototype;
         }
     }
-    
+
     /*! Execute all the commands in the composite. */
     virtual mtsCommandBase::ReturnType Execute(const mtsGenericObject & argument) {
         // cast argument first

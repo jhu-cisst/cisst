@@ -68,7 +68,7 @@ public:
             CMN_LOG_RUN_ERROR << "Serialization failed: " << originalObject.ToString() << std::endl;
             CMN_LOG_RUN_ERROR << e.what() << std::endl;
             serializedObject = "";
-        }        
+        }
     }
 
     void DeSerialize(const std::string & serializedObject, mtsGenericObject & originalObject) {
@@ -88,7 +88,7 @@ public:
             DeSerializationBuffer.str("");
             DeSerializationBuffer << serializedObject;
             deserializedObject = DeSerializer->DeSerialize();
-        }  catch (std::runtime_error e) {            
+        }  catch (std::runtime_error e) {
             CMN_LOG_RUN_ERROR << "DeSerialization failed: " << e.what() << std::endl;
             return 0;
         }

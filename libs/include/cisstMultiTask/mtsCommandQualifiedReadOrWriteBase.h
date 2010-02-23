@@ -49,7 +49,7 @@ public:
     typedef mtsCommandBase BaseType;
     typedef const mtsGenericObject Argument1Type;
     typedef _argument2Type Argument2Type;
-    
+
     /*! The constructor. Does nothing */
     mtsCommandQualifiedReadOrWriteBase(void):
         BaseType()

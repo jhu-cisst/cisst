@@ -22,7 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 
 /*!
   \file
-  \brief Defines a command with one argument 
+  \brief Defines a command with one argument
 */
 
 #ifndef _mtsCommandQualifiedRead_h
@@ -44,10 +44,10 @@ public:
     typedef const _argument1Type Argument1Type;
     typedef _argument2Type Argument2Type;
     typedef mtsCommandQualifiedReadBase BaseType;
-    
+
     /*! Typedef for the specific interface. */
     typedef _classType ClassType;
-    
+
     /*! This type. */
     typedef mtsCommandQualifiedRead<ClassType, Argument1Type, Argument2Type> ThisType;
 
@@ -79,8 +79,8 @@ protected:
 public:
     /*! The constructor. Does nothing */
     mtsCommandQualifiedRead(void): BaseType() {}
-    
-    
+
+
     /*! The constructor.
       \param action Pointer to the member function that is to be called
       by the invoker of the command
@@ -106,14 +106,14 @@ public:
         Argument1Prototype(argument1Prototype),
         Argument2Prototype(argument2Prototype)
     {}
-    
-    
+
+
     /*! The destructor. Does nothing */
     virtual ~mtsCommandQualifiedRead() {}
 
-    
+
     /*! The execute method. Calling the execute method from the invoker
-      applies the operation on the receiver. 
+      applies the operation on the receiver.
       \param obj The data passed to the operation method
     */
     virtual mtsCommandBase::ReturnType Execute(const mtsGenericObject & argument1,
@@ -148,7 +148,7 @@ public:
     const mtsGenericObject * GetArgument2Prototype(void) const {
         return &Argument2Prototype;
     }
-        
+
     /* commented in base class */
     virtual void ToStream(std::ostream & outputStream) const {
         outputStream << "mtsCommandQualifiedRead: ";

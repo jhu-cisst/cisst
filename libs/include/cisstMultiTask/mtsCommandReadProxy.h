@@ -22,7 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 
 /*!
   \file
-  \brief Defines a command proxy class with one argument 
+  \brief Defines a command proxy class with one argument
 */
 
 #ifndef _mtsCommandReadProxy_h
@@ -35,11 +35,11 @@ http://www.cisst.org/cisst/license.txt.
 /*!
   \ingroup cisstMultiTask
 
-  mtsCommandReadProxy is a proxy for mtsCommandRead. When Execute() 
-  method is called, the command id with payload is sent to the connected peer 
+  mtsCommandReadProxy is a proxy for mtsCommandRead. When Execute()
+  method is called, the command id with payload is sent to the connected peer
   interface across a network.
 */
-class mtsCommandReadProxy : public mtsCommandReadBase, public mtsCommandProxyBase 
+class mtsCommandReadProxy : public mtsCommandReadBase, public mtsCommandProxyBase
 {
     friend class mtsComponentProxy;
 
@@ -51,7 +51,7 @@ public:
     /*! Typedef for base type */
     typedef mtsCommandReadBase BaseType;
 
-    /*! Constructor. Command proxy is disabled by defaultand is enabled when 
+    /*! Constructor. Command proxy is disabled by defaultand is enabled when
         command id and network proxy are set. */
     mtsCommandReadProxy(const std::string & commandName) : BaseType(commandName) {
         Disable();
@@ -71,7 +71,7 @@ public:
     void SetArgumentPrototype(mtsGenericObject * argumentPrototype) {
         ArgumentPrototype = argumentPrototype;
     }
-    
+
     /*! The execute method. */
     virtual mtsCommandBase::ReturnType Execute(mtsGenericObject & argument) {
         if (IsDisabled()) {
@@ -85,7 +85,7 @@ public:
         }
         return mtsCommandBase::DEV_OK;
     }
-    
+
     /*! Generate human readable description of this object */
     void ToStream(std::ostream & outputStream) const {
         ToStreamBase("mtsCommandReadProxy", Name, CommandID, IsEnabled(), outputStream);

@@ -55,7 +55,7 @@ void * mtsTaskPeriodic::RunInternal(void *data)
 
 void mtsTaskPeriodic::StartupInternal(void) {
     CMN_LOG_CLASS_INIT_VERBOSE << "Starting StartupInternal (periodic) for " << Name << std::endl;
-    // user defined initialization, find commands from associated resource interfaces 
+    // user defined initialization, find commands from associated resource interfaces
     ThreadBuddy.Create(GetName().c_str(), cmnInternalTo_ns(Period)); // convert to nano seconds
 
     // Call base class StartupInternal, which also calls user-supplied Startup.
@@ -97,7 +97,7 @@ void mtsTaskPeriodic::StartInternal(void)
 /********************* Task constructor and destructor *****************/
 
 mtsTaskPeriodic::mtsTaskPeriodic(const std::string & name, double periodicityInSeconds,
-                                 bool isHardRealTime, unsigned int sizeStateTable, 
+                                 bool isHardRealTime, unsigned int sizeStateTable,
                                  bool newThread):
     mtsTaskContinuous(name, sizeStateTable, newThread),
     ThreadBuddy(),
@@ -113,7 +113,7 @@ mtsTaskPeriodic::~mtsTaskPeriodic() {
     //If the task was waiting on a queue, i.e. semaphore, mailbox,
     //etc, it is removed from such a queue and messaging tasks
     //pending on its message queue are unblocked with an error return.
-    
+
     Kill();
     // Now, wait for 2 periods to see if it was killed
     osaSleep(2.0 * this->Period); // all expressed in seconds

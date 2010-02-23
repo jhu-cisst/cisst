@@ -30,7 +30,7 @@ http://www.cisst.org/cisst/license.txt.
 
 /*!
   \ingroup cisstMultiTask
-  
+
   Defines a queue that can be accessed in a thread-safe manner,
   assuming that there is only one reader and one writer and that
   pointer updates are atomic.
@@ -62,7 +62,7 @@ protected:
             index_type index;
             pointer dummyPointer;
             for (index = 0; index < this->Size; index++) {
-                dummyPointer = new(&this->Data[index]) value_type(value); 
+                dummyPointer = new(&this->Data[index]) value_type(value);
             }
         } else {
             this->Data = 0;
@@ -74,7 +74,7 @@ protected:
     }
 
 public:
-    
+
     inline mtsQueue(void):
         Data(0),
         Head(0),
@@ -82,32 +82,32 @@ public:
         Sentinel(0),
         Size(0)
     {}
-    
+
 
     inline mtsQueue(size_type size, const_reference value) {
         Allocate(size, value);
     }
 
-    
+
     inline ~mtsQueue() {
         delete [] Data;
     }
 
-    
+
     /*! Sets the size of the queue (destructive, i.e. won't preserve
         previously queued elements). */
-    inline void SetSize(size_type size, const_reference value) { 
+    inline void SetSize(size_type size, const_reference value) {
         delete [] Data;
         this->Allocate(size, value);
     }
 
-    
+
     /*! Returns size of queue. */
     inline size_type GetSize(void) const {
         return Size;
     }
 
-    
+
     /*! Returns number of slots available in queue. */
     inline size_type GetAvailable(void) const
     {
@@ -118,19 +118,19 @@ public:
         return available;
     }
 
-    
+
     /*! Returns true if queue is full. */
     inline bool IsFull(void) const {
         return this->GetAvailable() >= this->Size;
     }
 
-    
+
     /*! Returns true if queue is empty. */
     inline bool IsEmpty(void) const {
         return Head == Tail;
     }
 
-    
+
     /*! Copy an object to the queue.
       \param in reference to the object to be copied
       \result Pointer to element in queue (use iterator instead?)

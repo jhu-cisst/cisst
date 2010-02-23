@@ -57,13 +57,13 @@ public:
 
 
     inline virtual ~mtsCommandQueuedWriteBase() {}
-    
-    
+
+
     inline virtual mtsCommandWriteBase * GetActualCommand(void) {
         return ActualCommand;
     }
 
-    
+
     virtual void ToStream(std::ostream & outputStream) const;
 
 
@@ -76,7 +76,7 @@ public:
 
     virtual mtsCommandBase::ReturnType Execute(const mtsGenericObject & argument) = 0;
 
-    
+
     virtual const mtsGenericObject * ArgumentPeek(void) const = 0;
 
 

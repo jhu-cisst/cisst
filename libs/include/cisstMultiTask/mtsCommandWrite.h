@@ -22,7 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 
 /*!
   \file
-  \brief Defines a command with one argument 
+  \brief Defines a command with one argument
 */
 
 #ifndef _mtsCommandWrite_h
@@ -71,7 +71,7 @@ protected:
 private:
     /*! The constructor. Does nothing */
     mtsCommandWrite(void): BaseType() {}
-    
+
 public:
     /*! The constructor.
     //
@@ -98,9 +98,9 @@ public:
         }
     }
 
-    
+
     /*! The execute method. Calling the execute method from the invoker
-      applies the operation on the receiver. 
+      applies the operation on the receiver.
       \param obj The data passed to the operation method
     */
     virtual mtsCommandBase::ReturnType Execute(const mtsGenericObject & argument) {
@@ -121,7 +121,7 @@ public:
             (ClassInstantiation->*Action)(argument);
             return mtsCommandBase::DEV_OK;
         }
-        return mtsCommandBase::DISABLED; 
+        return mtsCommandBase::DISABLED;
     }
 
     /* commented in base class */
@@ -135,7 +135,7 @@ public:
             outputStream << "Not initialized properly";
         }
     }
-    
+
 };
 
 

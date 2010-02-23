@@ -24,12 +24,12 @@ http://www.cisst.org/cisst/license.txt.
   \brief Definition of mtsManagerGlobalInterface
   \ingroup cisstMultiTask
 
-  This class defines an interface used by local component managers to communicate 
-  with the global component manager.  The interface is defined as a pure abstract 
+  This class defines an interface used by local component managers to communicate
+  with the global component manager.  The interface is defined as a pure abstract
   class to support two different scenarios that the interface is used for:
-     
+
      Standalone vs. Network mode.
-  
+
   See mtsManagerLocalInteface.h for further comments.
 */
 
@@ -107,7 +107,7 @@ public:
         const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientRequiredInterfaceName,
         const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverProvidedInterfaceName) = 0;
 
-    /*! Local component manager confirms that connection has been successfully 
+    /*! Local component manager confirms that connection has been successfully
         established.
         Return true if the global component manager acknowledged the connection. */
     virtual bool ConnectConfirm(unsigned int connectionSessionID) = 0;
@@ -118,18 +118,18 @@ public:
         const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverProvidedInterfaceName) = 0;
 
     /*! Let a client process initiate connection process. When LCM::Connect()
-        is called at server side, the server process internally calls this 
+        is called at server side, the server process internally calls this
         method to start connection process at client side. */
 #if CISST_MTS_HAS_ICE
     virtual bool InitiateConnect(const unsigned int connectionID,
         const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientRequiredInterfaceName,
         const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverProvidedInterfaceName) = 0;
 
-    /*! Let a server process connect components. Internally, a required 
+    /*! Let a server process connect components. Internally, a required
         interface network proxy (of type mtsComponentInterfaceProxyClient)
         is created, run, and connects to a provided interface network proxy
-        (of type mtsComponentInterfaceProxyServer). 
-        A network proxy server uses providedInterfaceProxyInstanceID to 
+        (of type mtsComponentInterfaceProxyServer).
+        A network proxy server uses providedInterfaceProxyInstanceID to
         a proxy client object . */
     virtual bool ConnectServerSideInterface(const unsigned int providedInterfaceProxyInstanceID,
         const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientRequiredInterfaceName,
@@ -147,7 +147,7 @@ public:
         const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverProvidedInterfaceName,
         const std::string & endpointInfo) = 0;
 
-    /*! Fetch endpoint information of a server proxy (i.e., provided interface 
+    /*! Fetch endpoint information of a server proxy (i.e., provided interface
         proxy) with connection information. A server component uses this method
         to get endpoint information of proxy server so that a proxy client can
         connect to proxy server. A client component uses this to duplicate the

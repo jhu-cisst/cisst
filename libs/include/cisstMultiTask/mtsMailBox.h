@@ -50,7 +50,7 @@ public:
 
     inline ~mtsMailBox(void) {}
 
-    
+
     inline const std::string & GetName(void) const {
         return Name;
     }
@@ -65,7 +65,7 @@ public:
         return result;
     }
 
-    
+
     bool ExecuteNext(void);
 };
 

@@ -3,7 +3,7 @@
 
 /*
   $Id: vctTransformationTypes.h 75 2009-02-24 16:47:20Z adeguet1 $
-  
+
   Author(s):	Anton Deguet
   Created on:	2009-07-16
 
@@ -20,8 +20,8 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
-/*! 
-  \file 
+/*!
+  \file
   \brief Typedef for different transformations
 */
 

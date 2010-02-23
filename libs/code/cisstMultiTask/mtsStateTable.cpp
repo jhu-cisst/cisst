@@ -67,7 +67,7 @@ mtsStateTable::mtsStateTable(int size, const std::string & name):
     PeriodId = NewElement("Period", &Period);
 
     // Currently there are three signals maintained internally at StateTable.
-    // : "Toc", "Tic", "Period". So the value of StateVectorBaseIDForUser is 
+    // : "Toc", "Tic", "Period". So the value of StateVectorBaseIDForUser is
     // set to 3.
     StateVectorBaseIDForUser = StateVector.size();
 }
@@ -170,7 +170,7 @@ void mtsStateTable::Advance(void) {
        so the above condition still holds.
      */
     tmpIndex = IndexWriter;
-    
+
     // Write data in the state table from the different state data objects.
     // Note that we start at TicId, which should correspond to the second
     // element in the array (after Toc).
@@ -239,11 +239,11 @@ void mtsStateTable::Advance(void) {
 
 
 void mtsStateTable::Kill(void) {
-    CMN_LOG_CLASS_INIT_DEBUG << "Kill: state table \"" << this->Name << "\"" << std::endl;    
+    CMN_LOG_CLASS_INIT_DEBUG << "Kill: state table \"" << this->Name << "\"" << std::endl;
     // if the state table is still set to collect data, send error message, should have been stopped
     if (this->DataCollection.Collecting) {
         CMN_LOG_CLASS_INIT_ERROR << "Kill: data collection for state table \"" << this->Name
-                                 << "\" has not been stopped.  It is possible that the state collector will look for this state table after it has been deleted." << std::endl; 
+                                 << "\" has not been stopped.  It is possible that the state collector will look for this state table after it has been deleted." << std::endl;
     }
 }
 
@@ -266,7 +266,7 @@ void mtsStateTable::ToStream(std::ostream & outputStream) const {
         out << Ticks[i] << ": ";
         for (unsigned int j = 0; j < StateVector.size(); j++)  {
             if (StateVector[j]) {
-                out << " [" << j << "] " 
+                out << " [" << j << "] "
                     << (*StateVector[j])[i]
                     << " : ";
             }
@@ -287,7 +287,7 @@ void mtsStateTable::Debug(std::ostream & out, unsigned int * listColumn, unsigne
     for (i = 0; i < number; i++) {
         if (!StateVectorDataNames[listColumn[i]].empty()) {
             out << "["
-                << listColumn[i] << "]" << 
+                << listColumn[i] << "]" <<
                 StateVectorDataNames[listColumn[i]].c_str() << " : ";
         }
     }
@@ -390,7 +390,7 @@ void mtsStateTable::SetDataCollectionEventHandler(mtsCollectorState * collector)
 #if 0
 void mtsStateTable::SetDataCollectionEventTriggeringRatio(const double eventTriggeringRatio)
 {
-    DataCollectionInfo.EventTriggeringLimit = 
+    DataCollectionInfo.EventTriggeringLimit =
         (unsigned int) (HistoryLength * eventTriggeringRatio);
 }
 #endif
@@ -407,7 +407,7 @@ void mtsStateTable::DataCollectionStart(const mtsDouble & delay)
         if (this->DataCollection.StartTime == 0) {
             // set time to start
             CMN_LOG_CLASS_RUN_DEBUG << "DataCollectionStart: data collection scheduled to start at "
-                                    << startTime << std::endl; 
+                                    << startTime << std::endl;
             this->DataCollection.StartTime = startTime;
         } else {
             // we are set to collect but later, advance the collection
@@ -421,7 +421,7 @@ void mtsStateTable::DataCollectionStart(const mtsDouble & delay)
             } else {
                 CMN_LOG_CLASS_RUN_WARNING << "DataCollectionStart: received a new request to start data collection after previous request, ignored"
                                           << std::endl;
-            } 
+            }
         }
     } else {
         // we are already collecting, see if a time to stop has been set
@@ -434,7 +434,7 @@ void mtsStateTable::DataCollectionStart(const mtsDouble & delay)
             } else {
                 // this will schedule a start after the scheduled stop
                 CMN_LOG_CLASS_RUN_DEBUG << "DataCollectionStart: data collection scheduled to start at "
-                                        << startTime << " (after a scheduled stop)" << std::endl; 
+                                        << startTime << " (after a scheduled stop)" << std::endl;
                 this->DataCollection.StartTime = startTime;
             }
         }
@@ -450,7 +450,7 @@ void mtsStateTable::DataCollectionStop(const mtsDouble & delay)
     // check is there is already a stop time scheduled
     if (this->DataCollection.StopTime == 0) {
         CMN_LOG_CLASS_RUN_DEBUG << "DataCollectionStop: data collection scheduled to stop at "
-                                << stopTime << std::endl; 
+                                << stopTime << std::endl;
         DataCollection.StopTime = stopTime;
     } else {
         // we are set to stop but earlier, delay the collection stop
@@ -459,7 +459,7 @@ void mtsStateTable::DataCollectionStop(const mtsDouble & delay)
         // more data.
         if (this->DataCollection.StopTime < stopTime) {
             CMN_LOG_CLASS_RUN_DEBUG << "DataCollectionStop: data collection scheduled to stop at "
-                                    << stopTime << " (moved back)" << std::endl; 
+                                    << stopTime << " (moved back)" << std::endl;
             DataCollection.StopTime = stopTime;
         } else {
             CMN_LOG_CLASS_RUN_WARNING << "DataCollectionStop: received a new request to stop data collection before previous request, ignored"

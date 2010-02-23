@@ -57,7 +57,7 @@ protected:
     mtsStateDataId Id;
     mtsStateTable * Table;
     const AccessorType * Accessor;
-    
+
 public:  // PKAZ (was protected, but needed access for daVinci example)
     void Get(const mtsStateIndex & when, value_type & data) const {
         //if (!Table) return mtsCommandBase::DEV_NOT_OK;
@@ -91,10 +91,10 @@ public:  // PKAZ (was protected, but needed access for daVinci example)
 
 public:
     value_type Data;
-    
+
     mtsStateData() : Id(-1), Table(0), Accessor(0) {}
     ~mtsStateData() {}
-    
+
     /*! Conversion assignment.  This allows to assign from an object
       of the actual type without explicitly referencing the public
       member "Data". */

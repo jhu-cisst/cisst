@@ -131,15 +131,15 @@ void mtsCollectorState::Initialize(void)
 
     // Initialize serializer
     if (LogFormat == COLLECTOR_LOG_FORMAT_BINARY) {
-        Serializer = new cmnSerializer(StringStreamBufferForSerialization);        
+        Serializer = new cmnSerializer(StringStreamBufferForSerialization);
     }
-    
+
     // Set an appropriate delimiter according to the log file format.
     switch (LogFormat) {
     case COLLECTOR_LOG_FORMAT_CSV:
         Delimiter = ',';
         break;
-        
+
     case COLLECTOR_LOG_FORMAT_PLAIN_TEXT:
     case COLLECTOR_LOG_FORMAT_BINARY:
     default:
@@ -180,7 +180,7 @@ void mtsCollectorState::StopCollection(const mtsDouble & delay)
 
 
 void mtsCollectorState::BatchReadyHandler(const mtsStateTable::IndexRange & range)
-{    
+{
     CMN_LOG_CLASS_RUN_DEBUG << "DataCollectionNeededHandler called for batch ["
                             << range.First << ", " << range.Last << "]" << std::endl;
     BatchCollect(range);
@@ -191,42 +191,42 @@ void mtsCollectorState::BatchReadyHandler(const mtsStateTable::IndexRange & rang
 //	Signal Management
 //-------------------------------------------------------
 bool mtsCollectorState::AddSignal(const std::string & signalName)
-{	
+{
     // Check if a user wants to collect all signals
     bool collectAllSignal = (signalName.length() == 0);
-    
+
     if (!collectAllSignal) {
         // Check if the specified signal does exist in the state table.
         int StateVectorID = TargetStateTable->GetStateVectorID(signalName); // 0: Toc, 1: Tic, 2: Period, >=3: user
         if (StateVectorID == -1) {  // 0: Toc, 1: Tic, 2: Period, >3: user
             CMN_LOG_CLASS_INIT_ERROR << "AddSignal: cannot find: " << signalName << std::endl;
-            
+
             //throw mtsCollectorState::mtsCollectorBaseException(
             //    "Cannot find: signal name = " + signalName);
             return false;
         }
-        
+
         // Add a signal
         if (!AddSignalElement(signalName, StateVectorID)) {
             CMN_LOG_CLASS_INIT_ERROR << "AddSignal: already registered signal: " << signalName << std::endl;
-            
+
             //throw mtsCollectorState::mtsCollectorBaseException(
             //    "Already collecting signal: " + signalName);
             return false;
         }
-    } else {        
+    } else {
         // Add all signals in the state table
         for (unsigned int i = 0; i < TargetStateTable->StateVectorDataNames.size(); ++i) {
             if (!AddSignalElement(TargetStateTable->StateVectorDataNames[i], i)) {
                 CMN_LOG_CLASS_INIT_ERROR << "AddSignal: already registered signal: " << TargetStateTable->StateVectorDataNames[i] << std::endl;
                 return false;
             }
-        }   
+        }
     }
-    
+
     // To reduce reference counter in the mtsCollectorState::Collect() method.
     TableHistoryLength = TargetStateTable->HistoryLength;
-    
+
     return true;
 }
 
@@ -247,13 +247,13 @@ bool mtsCollectorState::AddSignalElement(const std::string & signalName, const u
     if (IsRegisteredSignal(signalName)) {
         return false;
     }
-    
+
     SignalElement element;
     element.Name = signalName;
     element.ID = signalID;
 
     RegisteredSignalElements.push_back(element);
-    
+
     CMN_LOG_CLASS_INIT_VERBOSE << "AddSignalElement: signal added: " << signalName << std::endl;
 
     return true;
@@ -266,7 +266,7 @@ bool mtsCollectorState::AddSignalElement(const std::string & signalName, const u
 void mtsCollectorState::BatchCollect(const mtsStateTable::IndexRange & range)
 {
     if (RegisteredSignalElements.size() == 0) return;
-    
+
     // If this method is called for the first time, print out some information.
     if (FirstRunningFlag) {
         PrintHeader(this->LogFormat);
@@ -274,7 +274,7 @@ void mtsCollectorState::BatchCollect(const mtsStateTable::IndexRange & range)
 
     const unsigned int StartIndex = range.First.Ticks()  % TableHistoryLength;
     const unsigned int EndIndex = range.Last.Ticks() % TableHistoryLength;
-   
+
     if (StartIndex < EndIndex) {
         // normal case
         if (FetchStateTableData(TargetStateTable, StartIndex, EndIndex)) {
@@ -313,16 +313,16 @@ void mtsCollectorState::PrintHeader(const CollectorLogFormat & logFormat)
         suffix = "cdat"; // for cisst dat
         delimiter = ' ';
     }
-    
-    LogFileName = "StateDataCollection-" + TargetTask->GetName() + "-" + 
+
+    LogFileName = "StateDataCollection-" + TargetTask->GetName() + "-" +
         TargetStateTable->GetName() + "-" + currentDateTime + "." + suffix;
-    
+
     std::ofstream outputStream;
     outputStream.open(LogFileName.c_str(), std::ios::out);
     {
         // Print out some information on the state table.
-        
-        // All lines in the header should be preceded by '#' which represents 
+
+        // All lines in the header should be preceded by '#' which represents
         // the line contains header information rather than collected data.
         outputStream << "# Task name          : " << TargetTask->GetName() << std::endl;
         outputStream << "# Table name         : " << TargetStateTable->GetName() << std::endl;
@@ -338,7 +338,7 @@ void mtsCollectorState::PrintHeader(const CollectorLogFormat & logFormat)
         }
         outputStream << std::endl;
         outputStream << "#" << std::endl;
-        
+
         outputStream << "# Ticks";
         RegisteredSignalElementType::const_iterator it = RegisteredSignalElements.begin();
         for (; it != RegisteredSignalElements.end(); ++it) {
@@ -353,7 +353,7 @@ void mtsCollectorState::PrintHeader(const CollectorLogFormat & logFormat)
         if (logFormat == COLLECTOR_LOG_FORMAT_BINARY) {
             // Mark the end of the header.
             MarkHeaderEnd(outputStream);
-            
+
             // Remember the number of registered signals.
             cmnULong cmnULongTotalSignalCount;
             cmnULongTotalSignalCount.Data = RegisteredSignalElements.size();
@@ -363,7 +363,7 @@ void mtsCollectorState::PrintHeader(const CollectorLogFormat & logFormat)
         }
     }
     outputStream.close();
-    
+
     FirstRunningFlag = false;
 }
 
@@ -373,7 +373,7 @@ void mtsCollectorState::MarkHeaderEnd(std::ofstream & logFile)
     for (int i = 0; i < END_OF_HEADER_SIZE; ++i) {
         logFile << EndOfHeader[i];
     }
-    logFile << std::endl;    
+    logFile << std::endl;
 }
 
 
@@ -386,22 +386,22 @@ bool mtsCollectorState::IsHeaderEndMark(const char * buffer)
 }
 
 
-bool mtsCollectorState::FetchStateTableData(const mtsStateTable * table, 
-                                            const unsigned int startIndex, 
+bool mtsCollectorState::FetchStateTableData(const mtsStateTable * table,
+                                            const unsigned int startIndex,
                                             const unsigned int endIndex)
 {
     std::ofstream outputStream;
     if (LogFormat == COLLECTOR_LOG_FORMAT_BINARY) {
         cmnULongLong timeTick;
         outputStream.open(LogFileName.c_str(), std::ios::binary | std::ios::app);
-        {            
+        {
             unsigned int i;
             for (i = startIndex; i <= endIndex; i += SamplingInterval) {
                 StringStreamBufferForSerialization.str("");
                 timeTick.Data = TargetStateTable->Ticks[i];
                 Serializer->Serialize(timeTick);
                 outputStream << StringStreamBufferForSerialization.str();
-                
+
                 for (unsigned int j = 0; j < RegisteredSignalElements.size(); ++j) {
                     StringStreamBufferForSerialization.str("");
                     Serializer->Serialize((*table->StateVector[RegisteredSignalElements[j].ID])[i]);
@@ -453,7 +453,7 @@ bool mtsCollectorState::ConvertBinaryToText(const std::string sourceBinaryLogFil
     // Get the total size of the log file in bytes.
     std::ifstream::pos_type inFileTotalSize = inFile.tellg();
     inFile.seekg(0, std::ios::beg);
-    
+
     // Read the first character in a line. If it is '#', it is a part of header.
     char line[2048];
     while (true) {
@@ -499,7 +499,7 @@ bool mtsCollectorState::ConvertBinaryToText(const std::string sourceBinaryLogFil
                                << currentPos << " / " << inFileTotalSize << std::endl;
             break;
         }
-        
+
         element->ToStreamRaw(outFile, delimiter);
         if (++columnCount == totalSignalCount + 1) { // +1 due to 'Ticks' field.
             outFile << std::endl;
@@ -507,14 +507,14 @@ bool mtsCollectorState::ConvertBinaryToText(const std::string sourceBinaryLogFil
         } else {
             outFile << delimiter;
         }
-        
+
         currentPos = inFile.tellg();
     }
-    
+
     CMN_LOG_INIT_VERBOSE << "Class mtsCollectorState: ConvertBinaryToText: conversion completed: " << targetPlainTextLogFileName << std::endl;
-    
+
     outFile.close();
     inFile.close();
-    
+
     return true;
 }

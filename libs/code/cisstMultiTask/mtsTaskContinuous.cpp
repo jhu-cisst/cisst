@@ -56,8 +56,8 @@ void mtsTaskContinuous::StartInternal(void)
 
 /********************* Task constructor and destructor *****************/
 
-mtsTaskContinuous::mtsTaskContinuous(const std::string & name, 
-                                     unsigned int sizeStateTable, 
+mtsTaskContinuous::mtsTaskContinuous(const std::string & name,
+                                     unsigned int sizeStateTable,
                                      bool newThread):
     mtsTask(name, sizeStateTable),
     NewThread(newThread),
@@ -71,7 +71,7 @@ mtsTaskContinuous::~mtsTaskContinuous() {
     //If the task was waiting on a queue, i.e. semaphore, mailbox,
     //etc, it is removed from such a queue and messaging tasks
     //pending on its message queue are unblocked with an error return.
-    
+
     Kill();
     WaitToTerminate(1.0);   // Wait 1 second for it to terminate
     if (!IsTerminated()) {

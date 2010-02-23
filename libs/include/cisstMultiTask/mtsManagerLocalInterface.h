@@ -24,17 +24,17 @@ http://www.cisst.org/cisst/license.txt.
   \brief Definition of mtsManagerLocalInterface
   \ingroup cisstMultiTask
 
-  This class defines an interface used by the global component manager to 
-  communicate with local component managers. The interface is defined as a pure 
+  This class defines an interface used by the global component manager to
+  communicate with local component managers. The interface is defined as a pure
   abstract class to support two different configurations that this interface
   is used for:
 
-  Standalone mode: Inter-thread communication, no ICE.  A local component manager 
-    directly connects to the global component manager that runs in the same process. 
+  Standalone mode: Inter-thread communication, no ICE.  A local component manager
+    directly connects to the global component manager that runs in the same process.
     In this case, the global component manager keeps an instance of type
     mtsManagerLocal.
 
-  Network mode: Inter-process communication, ICE enabled.  Local component 
+  Network mode: Inter-process communication, ICE enabled.  Local component
     managers connect to the global component manager via a network proxy.
     In this case, the global component manager keeps an instance of type
     mtsManagerProxyServer.
@@ -50,7 +50,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsExport.h>
 
-class CISST_EXPORT mtsManagerLocalInterface : public cmnGenericObject 
+class CISST_EXPORT mtsManagerLocalInterface : public cmnGenericObject
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
@@ -59,11 +59,11 @@ public:
     //-------------------------------------------------------------------------
     //  Proxy Object Control (Creation, Removal)
     //-------------------------------------------------------------------------
-    /*! Create a component proxy. This should be called before an interface 
+    /*! Create a component proxy. This should be called before an interface
         proxy is created. */
     virtual bool CreateComponentProxy(const std::string & componentProxyName, const std::string & listenerID = "") = 0;
 
-    /*! Remove a component proxy. All the interface proxies that the proxy 
+    /*! Remove a component proxy. All the interface proxies that the proxy
         manages should be automatically removed when removing a component proxy. */
     virtual bool RemoveComponentProxy(const std::string & componentProxyName, const std::string & listenerID = "") = 0;
 
@@ -92,7 +92,7 @@ public:
     //  Connection Management
     //-------------------------------------------------------------------------
     /*! Connect two local interfaces at server side. After LCM at client side
-        connects two interfaces, it lets LCM at server side connect two local 
+        connects two interfaces, it lets LCM at server side connect two local
         interfaces via the GCM. Internally, a network proxy client (of type
         mtsComponentInterfaceProxyClient) is created and connects to a network
         proxy server (of type mtsComponentInterfaceProxyClient). */
@@ -113,18 +113,18 @@ public:
     virtual const std::string GetProcessName(const std::string & listenerID = "") = 0;
 
 #if CISST_MTS_HAS_ICE
-    /*! Extract all the information on a provided interface (command objects 
+    /*! Extract all the information on a provided interface (command objects
         and event generators with arguments serialized) */
     virtual bool GetProvidedInterfaceDescription(
         const std::string & componentName,
-        const std::string & providedInterfaceName, 
+        const std::string & providedInterfaceName,
         ProvidedInterfaceDescription & providedInterfaceDescription, const std::string & listenerID = "") = 0;
 
     /*! Extract all the information on a required interface (function objects
         and event handlers with arguments serialized) */
     virtual bool GetRequiredInterfaceDescription(
         const std::string & componentName,
-        const std::string & requiredInterfaceName, 
+        const std::string & requiredInterfaceName,
         RequiredInterfaceDescription & requiredInterfaceDescription, const std::string & listenerID = "") = 0;
 
     /*! Returns a total number of interfaces that are running on a component */

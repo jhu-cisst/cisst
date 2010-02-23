@@ -58,7 +58,7 @@ bool mtsManagerProxyClient::Start(mtsManagerLocal * proxyOwner)
     ident.name = GetGUID();
     ident.category = "";
 
-    mtsManagerProxy::ManagerClientPtr client = 
+    mtsManagerProxy::ManagerClientPtr client =
         new ManagerClientI(IceCommunicator, IceLogger, ManagerServerProxy, this);
     adapter->add(client, ident);
     adapter->activate();
@@ -78,12 +78,12 @@ bool mtsManagerProxyClient::Start(mtsManagerLocal * proxyOwner)
     }
 
     // Create a worker thread here but is not running yet.
-    ThreadArgumentsInfo.Proxy = this;        
+    ThreadArgumentsInfo.Proxy = this;
     ThreadArgumentsInfo.Runner = mtsManagerProxyClient::Runner;
 
     // Set a short name of this thread as MPC which means "Manager Proxy Client."
-    // Such a condensed naming rule is required because a total number of 
-    // characters in a thread name is sometimes limited to a small number (e.g. 
+    // Such a condensed naming rule is required because a total number of
+    // characters in a thread name is sometimes limited to a small number (e.g.
     // LINUX RTAI).
     std::stringstream ss;
     ss << "MPC" << mtsManagerProxyClient::InstanceCounter++;
@@ -106,7 +106,7 @@ void mtsManagerProxyClient::StartClient()
 
 void mtsManagerProxyClient::Runner(ThreadArguments<mtsManagerLocal> * arguments)
 {
-    mtsManagerProxyClient * ProxyClient = 
+    mtsManagerProxyClient * ProxyClient =
         dynamic_cast<mtsManagerProxyClient*>(arguments->Proxy);
     if (!ProxyClient) {
         CMN_LOG_RUN_ERROR << "mtsManagerProxyClient: failed to create a proxy client." << std::endl;
@@ -157,7 +157,7 @@ void mtsManagerProxyClient::GetConnectionStringSet(mtsManagerProxy::ConnectionSt
     const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientRequiredInterfaceName,
     const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverProvidedInterfaceName,
     const std::string & requestProcessName)
-{    
+{
     connectionStringSet.ClientProcessName = clientProcessName;
     connectionStringSet.ClientComponentName = clientComponentName;
     connectionStringSet.ClientRequiredInterfaceName = clientRequiredInterfaceName;
@@ -308,7 +308,7 @@ bool mtsManagerProxyClient::ConnectServerSideInterface(const unsigned int provid
     const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverProvidedInterfaceName)
 {
     ::Ice::Int thisProvidedInterfaceProxyInstanceID = providedInterfaceProxyInstanceID;
-    
+
     mtsManagerProxy::ConnectionStringSet connectionStringSet;
     GetConnectionStringSet(connectionStringSet,
                            clientProcessName, clientComponentName, clientRequiredInterfaceName,
@@ -365,7 +365,7 @@ bool mtsManagerProxyClient::ReceiveRemoveRequiredInterfaceProxy(const std::strin
 
 bool mtsManagerProxyClient::ReceiveConnectServerSideInterface(::Ice::Int providedInterfaceProxyInstanceID, const ::mtsManagerProxy::ConnectionStringSet & connectionStringSet)
 {
-    return ProxyOwner->ConnectServerSideInterface(providedInterfaceProxyInstanceID, 
+    return ProxyOwner->ConnectServerSideInterface(providedInterfaceProxyInstanceID,
         connectionStringSet.ClientProcessName, connectionStringSet.ClientComponentName, connectionStringSet.ClientRequiredInterfaceName,
         connectionStringSet.ServerProcessName, connectionStringSet.ServerComponentName, connectionStringSet.ServerProvidedInterfaceName);
 }
@@ -718,7 +718,7 @@ bool mtsManagerProxyClient::SendConnectServerSideInterface(::Ice::Int providedIn
 //  Definition by mtsManagerProxy.ice
 //-------------------------------------------------------------------------
 mtsManagerProxyClient::ManagerClientI::ManagerClientI(
-    const Ice::CommunicatorPtr& communicator, 
+    const Ice::CommunicatorPtr& communicator,
     const Ice::LoggerPtr& logger,
     const mtsManagerProxy::ManagerServerPrx& server,
     mtsManagerProxyClient * ManagerClient)

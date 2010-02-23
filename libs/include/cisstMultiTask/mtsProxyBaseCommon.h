@@ -64,36 +64,36 @@ public:
     /*! Typedef for proxy type. */
     enum ProxyType { PROXY_SERVER, PROXY_CLIENT };
 
-    /*! The proxy status definition. This definition is adopted from mtsTask.h 
+    /*! The proxy status definition. This definition is adopted from mtsTask.h
         with slight modification.
 
-        PROXY_CONSTRUCTED  -- Set by mtsProxyBaseCommon constructor. 
+        PROXY_CONSTRUCTED  -- Set by mtsProxyBaseCommon constructor.
                               Initial state.
         PROXY_INITIALIZING -- Set by either mtsProxyBaseServer::IceInitialize() or
                               mtsProxyBaseClient::IceInitialize().
-                              This state means a proxy object is created but not 
+                              This state means a proxy object is created but not
                               yet successfully initialized.
         PROXY_READY        -- Set by either mtsProxyBaseServer::IceInitialize() or
                               mtsProxyBaseClient::IceInitialize().
-                              This state represents that a proxy object is 
+                              This state represents that a proxy object is
                               successfully initialized and is ready to run.
-        PROXY_ACTIVE       -- Set by either mtsProxyBaseServer::SetAsActiveProxy() 
+        PROXY_ACTIVE       -- Set by either mtsProxyBaseServer::SetAsActiveProxy()
                               or mtsProxyBaseClient::SetAsActiveProxy().
-                              If a proxy is in this state, it is running and can 
+                              If a proxy is in this state, it is running and can
                               process events.
         PROXY_FINISHING    -- Set by either mtsProxyBaseServer::Stop() or
-                              mtsProxyBaseClient::Stop() before trying to stop ICE 
+                              mtsProxyBaseClient::Stop() before trying to stop ICE
                               proxy processing.
         PROXY_FINISHED     -- Set by either mtsProxyBaseServer::Stop() or
                               mtsProxyBaseClient::Stop() after successful clean-up.
     */
-    enum ProxyStateType { 
-        PROXY_CONSTRUCTED, 
-        PROXY_INITIALIZING, 
+    enum ProxyStateType {
+        PROXY_CONSTRUCTED,
+        PROXY_INITIALIZING,
         PROXY_READY,
-        PROXY_ACTIVE, 
-        PROXY_FINISHING, 
-        PROXY_FINISHED 
+        PROXY_ACTIVE,
+        PROXY_FINISHING,
+        PROXY_FINISHED
     };
 
 protected:
@@ -105,7 +105,7 @@ protected:
 
     /*! Proxy Name. Internally set as the name of this proxy owner's */
     std::string ProxyName;
-    
+
     //-----------------------------------------------------
     //  Proxy State Management
     //-----------------------------------------------------
@@ -143,8 +143,8 @@ protected:
     class WindowLogger : public Ice::Logger
     {
     public:
-        void print(const ::std::string & message) { 
-            Log(message); 
+        void print(const ::std::string & message) {
+            Log(message);
         }
         void trace(const ::std::string & category, const ::std::string & message) {
             std::string s;
@@ -164,7 +164,7 @@ protected:
         void Log(const std::string& log)
         {
             OutputDebugString(log.c_str());
-        }        
+        }
     };
 #else
     typedef CisstLogger WindowLogger;
@@ -199,7 +199,7 @@ protected:
         const _SenderType Sender;
 
     public:
-        SenderThread(const _SenderType& sender) : Sender(sender) {}          
+        SenderThread(const _SenderType& sender) : Sender(sender) {}
         virtual void run() { Sender->Run(); }
     };
 
@@ -300,7 +300,7 @@ public:
 
     /*! Initialize and start the proxy (returns immediately). */
     virtual bool Start(_proxyOwner * proxyOwner) = 0;
-    
+
     /*! Deactivate this proxy */
     void Deactivate(void) {
         ProxyState = PROXY_FINISHING;
@@ -320,7 +320,7 @@ public:
     //  Getters
     //-----------------------------------------------------
     inline const Ice::LoggerPtr GetLogger(void) const {
-        return IceLogger; 
+        return IceLogger;
     }
 
     /*! Check if this proxy is active */
@@ -358,6 +358,6 @@ public:
 #endif // _mtsProxyBaseCommon_h
 
 /* TODO MEMO
-   
+
    Connection closure: http://www.zeroc.com/doc/Ice-3.3.1/manual/Connections.38.6.html
 */

@@ -41,7 +41,7 @@ protected:
     typedef _argumentType ArgumentType;
     typedef mtsCommandQualifiedReadOrWriteBase<ArgumentType> CommandType;
     CommandType * Command;
-    
+
  public:
     /*! Default constructor.  Does nothing, use Bind before
       using. */
@@ -52,7 +52,7 @@ protected:
     mtsFunctionQualifiedReadOrWrite(const mtsDeviceInterface * associatedInterface, const std::string & commandName) {
         this->Bind(associatedInterface, commandName);
     }
-    
+
     /*! Destructor. */
     ~mtsFunctionQualifiedReadOrWrite() {}
 

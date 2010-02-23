@@ -29,7 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 
 CMN_IMPLEMENT_SERVICES(mtsComponentProxy);
 
-mtsComponentProxy::mtsComponentProxy(const std::string & componentProxyName) 
+mtsComponentProxy::mtsComponentProxy(const std::string & componentProxyName)
 : mtsDevice(componentProxyName), ProvidedInterfaceProxyInstanceID(0)
 {
 }
@@ -68,7 +68,7 @@ mtsComponentProxy::~mtsComponentProxy()
 //  Methods for Server Components
 //-----------------------------------------------------------------------------
 bool mtsComponentProxy::CreateRequiredInterfaceProxy(const RequiredInterfaceDescription & requiredInterfaceDescription)
-{    
+{
     const std::string requiredInterfaceName = requiredInterfaceDescription.RequiredInterfaceName;
 
     // Check if the interface name is unique
@@ -251,21 +251,21 @@ bool mtsComponentProxy::CreateProvidedInterfaceProxy(const ProvidedInterfaceDesc
     const std::string providedInterfaceName = providedInterfaceDescription.ProvidedInterfaceName;
 
     // Create a local provided interface (a provided interface proxy) but it
-    // is not immediately added to the component. It can be added only after 
-    // all proxy objects (command proxies and event proxies) are confirmed to 
+    // is not immediately added to the component. It can be added only after
+    // all proxy objects (command proxies and event proxies) are confirmed to
     // be successfully created.
     mtsProvidedInterface * providedInterfaceProxy = new mtsDeviceInterface(providedInterfaceName, this);
 
     // Create command proxies according to the information about the original
-    // provided interface. CommandId is initially set to zero and will be 
+    // provided interface. CommandId is initially set to zero and will be
     // updated later by GetCommandId().
 
     // Because argument prototypes in the interface description was serialized,
-    // they should be deserialized in order to be used to recover orignial argument 
+    // they should be deserialized in order to be used to recover orignial argument
     // prototypes.
     std::string commandName;
     mtsGenericObject * argumentPrototype = NULL,
-                     * argument1Prototype = NULL, 
+                     * argument1Prototype = NULL,
                      * argument2Prototype = NULL;
 
     std::stringstream streamBuffer;
@@ -295,7 +295,7 @@ bool mtsComponentProxy::CreateProvidedInterfaceProxy(const ProvidedInterfaceDesc
         newCommandWrite = new mtsCommandWriteProxy(commandName);
         if (!providedInterfaceProxy->GetCommandWriteMap().AddItem(commandName, newCommandWrite)) {
             delete newCommandWrite;
-            delete providedInterfaceProxy;            
+            delete providedInterfaceProxy;
             CMN_LOG_CLASS_RUN_ERROR << "CreateProvidedInterfaceProxy: failed to add write command proxy: " << commandName << std::endl;
             return false;
         }
@@ -393,7 +393,7 @@ bool mtsComponentProxy::CreateProvidedInterfaceProxy(const ProvidedInterfaceDesc
 
     // Create event generator proxies
     std::string eventName;
-    
+
     FunctionProxyAndEventHandlerProxyMapElement * mapElement
         = FunctionProxyAndEventHandlerProxyMap.GetItem(providedInterfaceName);
     if (!mapElement) {
@@ -438,7 +438,7 @@ bool mtsComponentProxy::CreateProvidedInterfaceProxy(const ProvidedInterfaceDesc
         }
 
         eventMulticastCommandWriteProxy = new mtsMulticastCommandWriteProxy(eventName);
-        
+
         // event argument deserialization
         streamBuffer.str("");
         streamBuffer << itEventWrite->ArgumentPrototypeSerialized;
@@ -559,7 +559,7 @@ bool mtsComponentProxy::CreateInterfaceProxyClient(const std::string & requiredI
                                                    const unsigned int providedInterfaceProxyInstanceID)
 {
     // Create an instance of mtsComponentInterfaceProxyClient
-    mtsComponentInterfaceProxyClient * requiredInterfaceProxy = 
+    mtsComponentInterfaceProxyClient * requiredInterfaceProxy =
         new mtsComponentInterfaceProxyClient(serverEndpointInfo, providedInterfaceProxyInstanceID);
 
     // Add it to required interface proxy object map
@@ -604,7 +604,7 @@ bool mtsComponentProxy::UpdateEventHandlerProxyID(const std::string & clientComp
 {
     // Note that this method is only called by a server process.
 
-    // Get network proxy client connected to the required interface proxy 
+    // Get network proxy client connected to the required interface proxy
     // of which name is 'requiredInterfaceName.'
     mtsComponentInterfaceProxyClient * interfaceProxyClient = RequiredInterfaceNetworkProxies.GetItem(requiredInterfaceName);
     if (!interfaceProxyClient) {
@@ -612,7 +612,7 @@ bool mtsComponentProxy::UpdateEventHandlerProxyID(const std::string & clientComp
         return false;
     }
 
-    // Fetch pointers of event generator proxies from the connected provided 
+    // Fetch pointers of event generator proxies from the connected provided
     // interface proxy at the client side.
     mtsComponentInterfaceProxy::EventGeneratorProxyPointerSet eventGeneratorProxyPointers;
     if (!interfaceProxyClient->SendFetchEventGeneratorProxyPointers(clientComponentName, requiredInterfaceName, eventGeneratorProxyPointers))
@@ -640,7 +640,7 @@ bool mtsComponentProxy::UpdateEventHandlerProxyID(const std::string & clientComp
             CMN_LOG_CLASS_RUN_ERROR << "UpdateEventHandlerProxyID: cannot find event void handler proxy: " << it->Name << std::endl;
             return false;
         }
-        // Set client ID and network proxy. Note that SetNetworkProxy() should 
+        // Set client ID and network proxy. Note that SetNetworkProxy() should
         // be called before SetCommandID().
         if (!eventHandlerVoid->SetNetworkProxy(interfaceProxyClient)) {
             CMN_LOG_CLASS_RUN_ERROR << "UpdateEventHandlerProxyID:: failed to set network proxy: " << it->Name << std::endl;
@@ -660,7 +660,7 @@ bool mtsComponentProxy::UpdateEventHandlerProxyID(const std::string & clientComp
             CMN_LOG_CLASS_RUN_ERROR << "UpdateEventHandlerProxyID: cannot find event Write handler proxy: " << it->Name << std::endl;
             return false;
         }
-        // Set client ID and network proxy. Note that SetNetworkProxy() should 
+        // Set client ID and network proxy. Note that SetNetworkProxy() should
         // be called before SetCommandID().
         if (!eventHandlerWrite->SetNetworkProxy(interfaceProxyClient)) {
             CMN_LOG_CLASS_RUN_ERROR << "UpdateEventHandlerProxyID:: failed to set network proxy: " << it->Name << std::endl;
@@ -674,7 +674,7 @@ bool mtsComponentProxy::UpdateEventHandlerProxyID(const std::string & clientComp
 }
 
 bool mtsComponentProxy::UpdateCommandProxyID(
-    const std::string & serverProvidedInterfaceName, const std::string & clientComponentName, 
+    const std::string & serverProvidedInterfaceName, const std::string & clientComponentName,
     const std::string & clientRequiredInterfaceName, const unsigned int providedInterfaceProxyInstanceID)
 {
     const unsigned int clientID = providedInterfaceProxyInstanceID;
@@ -682,7 +682,7 @@ bool mtsComponentProxy::UpdateCommandProxyID(
     // Note that this method is only called by a client process.
 
     // Get a network proxy server that corresponds to 'serverProvidedInterfaceName'
-    mtsComponentInterfaceProxyServer * interfaceProxyServer = 
+    mtsComponentInterfaceProxyServer * interfaceProxyServer =
         ProvidedInterfaceNetworkProxies.GetItem(serverProvidedInterfaceName);
     if (!interfaceProxyServer) {
         CMN_LOG_CLASS_RUN_ERROR << "UpdateCommandProxyID: no interface proxy server found: " << serverProvidedInterfaceName << std::endl;
@@ -695,22 +695,22 @@ bool mtsComponentProxy::UpdateCommandProxyID(
     if (!interfaceProxyServer->SendFetchFunctionProxyPointers(
             providedInterfaceProxyInstanceID, clientRequiredInterfaceName, functionProxyPointers))
     {
-        CMN_LOG_CLASS_RUN_ERROR << "UpdateCommandProxyID: failed to fetch function proxy pointers: " 
+        CMN_LOG_CLASS_RUN_ERROR << "UpdateCommandProxyID: failed to fetch function proxy pointers: "
             << clientRequiredInterfaceName << " @ " << providedInterfaceProxyInstanceID << std::endl;
         return false;
     }
-    
+
     // Get a provided interface proxy instance of which command proxies are updated.
-    ProvidedInterfaceProxyInstanceMapType::const_iterator it = 
+    ProvidedInterfaceProxyInstanceMapType::const_iterator it =
         ProvidedInterfaceProxyInstanceMap.find(providedInterfaceProxyInstanceID);
     if (it == ProvidedInterfaceProxyInstanceMap.end()) {
-        CMN_LOG_CLASS_RUN_ERROR << "UpdateCommandProxyID: failed to fetch provided interface proxy instance: " 
+        CMN_LOG_CLASS_RUN_ERROR << "UpdateCommandProxyID: failed to fetch provided interface proxy instance: "
             << providedInterfaceProxyInstanceID << std::endl;
         return false;
     }
     mtsProvidedInterface * instance = it->second;
 
-    // Set command proxy IDs in the provided interface proxy instance as the 
+    // Set command proxy IDs in the provided interface proxy instance as the
     // function proxies' pointers fetched from server process.
 
     // Void command
@@ -723,7 +723,7 @@ bool mtsComponentProxy::UpdateCommandProxyID(
             CMN_LOG_CLASS_RUN_ERROR << "UpdateCommandProxyID:: failed to update command void proxy id: " << itVoid->Name << std::endl;
             return false;
         }
-        // Set client ID and network proxy. Note that SetNetworkProxy() should 
+        // Set client ID and network proxy. Note that SetNetworkProxy() should
         // be called before SetCommandID().
         if (!commandVoid->SetNetworkProxy(interfaceProxyServer, clientID)) {
             CMN_LOG_CLASS_RUN_ERROR << "UpdateCommandProxyID:: failed to set network proxy: " << itVoid->Name << std::endl;
@@ -828,15 +828,15 @@ mtsProvidedInterface * mtsComponentProxy::CreateProvidedInterfaceInstance(
         providedInterfaceProxy->CommandsQualifiedRead.end();
     providedInterfaceInstance->CommandsQualifiedRead.GetMap().insert(itQualifiedReadBegin, itQualifiedReadEnd);
 
-    mtsDeviceInterface::EventVoidMapType::const_iterator itEventVoidGeneratorBegin = 
+    mtsDeviceInterface::EventVoidMapType::const_iterator itEventVoidGeneratorBegin =
         providedInterfaceProxy->EventVoidGenerators.begin();
-    mtsDeviceInterface::EventVoidMapType::const_iterator itEventVoidGeneratorEnd = 
+    mtsDeviceInterface::EventVoidMapType::const_iterator itEventVoidGeneratorEnd =
         providedInterfaceProxy->EventVoidGenerators.end();
     providedInterfaceInstance->EventVoidGenerators.GetMap().insert(itEventVoidGeneratorBegin, itEventVoidGeneratorEnd);
 
-    mtsDeviceInterface::EventWriteMapType::const_iterator itEventWriteGeneratorBegin = 
+    mtsDeviceInterface::EventWriteMapType::const_iterator itEventWriteGeneratorBegin =
         providedInterfaceProxy->EventWriteGenerators.begin();
-    mtsDeviceInterface::EventWriteMapType::const_iterator itEventWriteGeneratorEnd = 
+    mtsDeviceInterface::EventWriteMapType::const_iterator itEventWriteGeneratorEnd =
         providedInterfaceProxy->EventWriteGenerators.end();
     providedInterfaceInstance->EventWriteGenerators.GetMap().insert(itEventWriteGeneratorBegin, itEventWriteGeneratorEnd);
 
@@ -847,7 +847,7 @@ mtsProvidedInterface * mtsComponentProxy::CreateProvidedInterfaceInstance(
     return providedInterfaceInstance;
 }
 
-bool mtsComponentProxy::GetFunctionProxyPointers(const std::string & requiredInterfaceName, 
+bool mtsComponentProxy::GetFunctionProxyPointers(const std::string & requiredInterfaceName,
     mtsComponentInterfaceProxy::FunctionProxyPointerSet & functionProxyPointers)
 {
     // Get required interface proxy
@@ -926,7 +926,7 @@ bool mtsComponentProxy::GetEventGeneratorProxyPointer(
         CMN_LOG_CLASS_RUN_ERROR << "GetEventGeneratorProxyPointer: no connected provided interface found" << std::endl;
         return false;
     }
-    
+
     mtsComponentInterfaceProxy::EventGeneratorProxyElement element;
     mtsCommandBase * eventGenerator = NULL;
 

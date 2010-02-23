@@ -103,7 +103,7 @@ protected:
     /*! The task state. */
     TaskStateType TaskState;
 
-    /*! Mutex used when changing task states. Do not change this directly, use the 
+    /*! Mutex used when changing task states. Do not change this directly, use the
         ChangeState method instead. */
     osaMutex StateChange;
 
@@ -112,7 +112,7 @@ protected:
 
 	/*! The state data table object to store the states of the task. */
 	mtsStateTable StateTable;
-    
+
     /*! Map of state tables, includes the default StateTable under the
       name "StateTable" */
     typedef cmnNamedMap<mtsStateTable> StateTableMapType;
@@ -153,10 +153,10 @@ protected:
 
     /*! Process all queued commands. Returns number of events processed.
         These are the commands provided by all interfaces of the task. */
-    inline unsigned int ProcessQueuedCommands(void) 
+    inline unsigned int ProcessQueuedCommands(void)
         { return ProcessMailBoxes(ProvidedInterfaces); }
 
-    
+
     /*! Process all queued events. Returns number of events processed.
         These are the commands queued following events currently observed
         via the required interfaces. */
@@ -206,7 +206,7 @@ public:
 
         \sa mtsDevice, mtsTaskContinuous, mtsTaskPeriodic, mtsTaskFromCallback
 	 */
-    mtsTask(const std::string & name, 
+    mtsTask(const std::string & name,
             unsigned int sizeStateTable = 256);
 
     /*! Default Destructor. */
@@ -250,7 +250,7 @@ public:
 	virtual void Kill(void);
 
     /********************* Methods to query the task state ****************/
-	
+
 	/*! Return true if task is active. */
     inline bool Running(void) const { return (TaskState == ACTIVE); }
 
@@ -293,11 +293,11 @@ public:
     bool AddStateTable(mtsStateTable * existingStateTable, bool addProvidedInterface = true);
 
     /********************* Methods to manage interfaces *******************/
-	
+
     /* documented in base class */
     virtual mtsDeviceInterface * AddProvidedInterface(const std::string & newInterfaceName);
 
-    
+
     /********************* Methods for task synchronization ***************/
 
 	/*! Wait for task to start.
@@ -324,7 +324,7 @@ public:
     }
 
     /********************* Methods for task period and overrun ************/
-	
+
     /*! Return true if thread is periodic. */
     inline virtual bool IsPeriodic(void) const {
         return false;

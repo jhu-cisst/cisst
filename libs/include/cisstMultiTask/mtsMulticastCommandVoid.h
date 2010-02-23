@@ -49,27 +49,27 @@ class mtsMulticastCommandVoid: public mtsCommandVoidBase
 {
 public:
     typedef mtsCommandVoidBase BaseType;
-    
+
 protected:
     /*! Vector to commands that constitute the composite command. */
     std::vector<BaseType *> Commands;
-    
+
 public:
     /*! Default constructor. Does nothing. */
     mtsMulticastCommandVoid(const std::string & name): BaseType(name) {}
-    
+
     /*! Default destructor. Does nothing. */
     ~mtsMulticastCommandVoid() {}
-    
+
     /*! Add a command to the composite. */
     void AddCommand(BaseType * command);
-    
+
     /*! Get command (should use iterator instead) */
-    
-    
+
+
     /*! Execute all the commands in the composite. */
     virtual mtsCommandBase::ReturnType Execute(void);
-    
+
     /* documented in base class */
     virtual void ToStream(std::ostream & outputStream) const;
 };

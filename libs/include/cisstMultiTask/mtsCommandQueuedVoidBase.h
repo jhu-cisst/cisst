@@ -40,7 +40,7 @@ class CISST_EXPORT mtsCommandQueuedVoidBase: public mtsCommandVoidBase
     typedef mtsCommandVoidBase BaseType;
 
     /*! This type. */
-    typedef mtsCommandQueuedVoidBase ThisType; 
+    typedef mtsCommandQueuedVoidBase ThisType;
 
  protected:
     /*! Mailboxe used to queue the commands */
@@ -51,7 +51,7 @@ class CISST_EXPORT mtsCommandQueuedVoidBase: public mtsCommandVoidBase
  private:
     /*! Private copy constructor to prevent copies */
     inline mtsCommandQueuedVoidBase(const ThisType & CMN_UNUSED(other));
-    
+
  public:
     inline mtsCommandQueuedVoidBase(void):
         BaseType(),
@@ -59,7 +59,7 @@ class CISST_EXPORT mtsCommandQueuedVoidBase: public mtsCommandVoidBase
         ActualCommand(0)
     {}
 
-    
+
     inline mtsCommandQueuedVoidBase(mtsMailBox * mailBox, mtsCommandVoidBase * actualCommand):
         BaseType(actualCommand->GetName()),
         MailBox(mailBox),
@@ -69,12 +69,12 @@ class CISST_EXPORT mtsCommandQueuedVoidBase: public mtsCommandVoidBase
 
     inline virtual ~mtsCommandQueuedVoidBase() {}
 
-    
+
     virtual mtsCommandQueuedVoidBase * Clone(mtsMailBox * mailBox) const {
         return new mtsCommandQueuedVoidBase(mailBox, this->ActualCommand);
     }
 
-    
+
     inline virtual void Allocate(unsigned int CMN_UNUSED(size)) {}
 
 
@@ -94,7 +94,7 @@ class CISST_EXPORT mtsCommandQueuedVoidBase: public mtsCommandVoidBase
             if (MailBox->Write(this)) {
                 return mtsCommandBase::DEV_OK;
             }
-            CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedVoid: Execute(): Mailbox full for \"" 
+            CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedVoid: Execute(): Mailbox full for \""
                               << this->Name << "\"" <<  std::endl;
             return mtsCommandBase::MAILBOX_FULL;
         }

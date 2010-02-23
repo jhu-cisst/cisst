@@ -35,20 +35,20 @@ http://www.cisst.org/cisst/license.txt.
 
 /*!
   \ingroup cisstMultiTask
-  
+
   A base class command object with an execute method that takes no
   arguments.  To be used to contain 0*Methods. */
 class mtsCommandVoidBase: public mtsCommandBase
 {
 public:
     typedef mtsCommandBase BaseType;
-    
+
     /*! The constructor. Does nothing */
     mtsCommandVoidBase(void): BaseType() {}
-    
+
     /*! Constructor with a name. */
     mtsCommandVoidBase(const std::string & name): BaseType(name) {}
-    
+
     /*! The destructor. Does nothing */
     virtual ~mtsCommandVoidBase() {}
 

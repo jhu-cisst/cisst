@@ -62,7 +62,7 @@ bool mtsComponentInterfaceProxyClient::Start(mtsComponentProxy * proxyOwner)
     ident.name = GetGUID();
     ident.category = "";
 
-    mtsComponentInterfaceProxy::ComponentInterfaceClientPtr client = 
+    mtsComponentInterfaceProxy::ComponentInterfaceClientPtr client =
         new ComponentInterfaceClientI(IceCommunicator, IceLogger, ComponentInterfaceServerProxy, this);
     adapter->add(client, ident);
     adapter->activate();
@@ -86,10 +86,10 @@ bool mtsComponentInterfaceProxyClient::Start(mtsComponentProxy * proxyOwner)
     }
 
     // Create a worker thread here but is not running yet.
-    ThreadArgumentsInfo.Proxy = this;        
+    ThreadArgumentsInfo.Proxy = this;
     ThreadArgumentsInfo.Runner = mtsComponentInterfaceProxyClient::Runner;
 
-    // Set a short name of this thread as CIPC which means "Component Interface 
+    // Set a short name of this thread as CIPC which means "Component Interface
     // Proxy Client." Such a condensed naming rule is required because a total
     // number of characters in a thread name is sometimes limited to a small
     // number (e.g. LINUX RTAI).
@@ -114,7 +114,7 @@ void mtsComponentInterfaceProxyClient::StartClient()
 
 void mtsComponentInterfaceProxyClient::Runner(ThreadArguments<mtsComponentProxy> * arguments)
 {
-    mtsComponentInterfaceProxyClient * ProxyClient = 
+    mtsComponentInterfaceProxyClient * ProxyClient =
         dynamic_cast<mtsComponentInterfaceProxyClient*>(arguments->Proxy);
     if (!ProxyClient) {
         CMN_LOG_RUN_ERROR << "mtsComponentInterfaceProxyClient: failed to create a proxy client." << std::endl;
@@ -125,7 +125,7 @@ void mtsComponentInterfaceProxyClient::Runner(ThreadArguments<mtsComponentProxy>
 
     try {
         ProxyClient->SetAsActiveProxy();
-        ProxyClient->StartClient();        
+        ProxyClient->StartClient();
     } catch (const Ice::Exception& e) {
         std::string error("mtsComponentInterfaceProxyClient: ");
         error += e.what();
@@ -216,7 +216,7 @@ void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandWriteSerialized(cons
     }
 
     // Deserialize
-    mtsProxySerializer * deserializer = functionWriteProxy->GetSerializer();    
+    mtsProxySerializer * deserializer = functionWriteProxy->GetSerializer();
     mtsGenericObject * argument = deserializer->DeSerialize(serializedArgument);
     if (!argument) {
         LogError(mtsComponentInterfaceProxyClient, "ReceiveExecuteCommandWriteSerialized: Deserialization failed");
@@ -268,7 +268,7 @@ void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandQualifiedReadSeriali
     }
 
     // Deserialize
-    mtsProxySerializer * deserializer = functionQualifiedReadProxy->GetSerializer();    
+    mtsProxySerializer * deserializer = functionQualifiedReadProxy->GetSerializer();
     mtsGenericObject * argumentIn = deserializer->DeSerialize(serializedArgumentIn);
     if (!argumentIn) {
         LogError(mtsComponentInterfaceProxyClient, "ReceiveExecuteCommandQualifiedReadSerialized: Deserialization failed");
@@ -381,7 +381,7 @@ bool mtsComponentInterfaceProxyClient::SendExecuteEventWriteSerialized(const Com
 //  Definition by mtsComponentInterfaceProxy.ice
 //-------------------------------------------------------------------------
 mtsComponentInterfaceProxyClient::ComponentInterfaceClientI::ComponentInterfaceClientI(
-    const Ice::CommunicatorPtr& communicator, 
+    const Ice::CommunicatorPtr& communicator,
     const Ice::LoggerPtr& logger,
     const mtsComponentInterfaceProxy::ComponentInterfaceServerPrx& server,
     mtsComponentInterfaceProxyClient * componentInterfaceClient)
@@ -474,7 +474,7 @@ void mtsComponentInterfaceProxyClient::ComponentInterfaceClientI::TestMessageFro
 }
 
 bool mtsComponentInterfaceProxyClient::ComponentInterfaceClientI::FetchFunctionProxyPointers(
-    const std::string & requiredInterfaceName, mtsComponentInterfaceProxy::FunctionProxyPointerSet & functionProxyPointers, 
+    const std::string & requiredInterfaceName, mtsComponentInterfaceProxy::FunctionProxyPointerSet & functionProxyPointers,
     const ::Ice::Current & current) const
 {
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG

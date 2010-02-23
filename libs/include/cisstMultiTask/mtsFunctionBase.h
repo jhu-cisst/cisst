@@ -30,11 +30,11 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 
 class mtsFunctionBase {
-    
+
 protected:
     /*! Default constructor. */
     mtsFunctionBase(void) {}
-    
+
     /*! Destructor. */
     virtual ~mtsFunctionBase() {}
 

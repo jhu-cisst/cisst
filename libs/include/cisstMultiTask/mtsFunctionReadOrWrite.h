@@ -55,7 +55,7 @@ public:
     mtsFunctionReadOrWrite(const mtsDeviceInterface * associatedInterface, const std::string & commandName) {
         this->Bind(associatedInterface, commandName);
     }
-    
+
     /*! Destructor. */
     virtual ~mtsFunctionReadOrWrite() {}
 
@@ -98,11 +98,11 @@ public:
     { return Command ? Command->Execute(argument) : mtsCommandBase::NO_INTERFACE; }
 	//mtsCommandBase::ReturnType operator()(const mtsGenericObject& argument) const
     //{ return Command ? Command->Execute(argument) : mtsCommandBase::NO_INTERFACE; }
-#else    
+#else
     mtsCommandBase::ReturnType operator()(ArgumentType& argument) const
     { return Command ? Command->Execute(argument) : mtsCommandBase::NO_INTERFACE; }
 #endif
-    
+
 	/*! Overloaded operator that accepts different argument types. */
     template <class _userType>
     mtsCommandBase::ReturnType operator()(_userType& argument) const {

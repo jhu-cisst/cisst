@@ -22,7 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 
 /*!
   \file
-  \brief Defines a command proxy class with one argument 
+  \brief Defines a command proxy class with one argument
 */
 
 #ifndef _mtsCommandWriteProxy_h
@@ -35,15 +35,15 @@ http://www.cisst.org/cisst/license.txt.
 /*!
   \ingroup cisstMultiTask
 
-  mtsCommandWriteProxy is a proxy class for mtsCommandWrite. When Execute() 
-  method is called, the command id with payload is sent to the connected peer 
+  mtsCommandWriteProxy is a proxy class for mtsCommandWrite. When Execute()
+  method is called, the command id with payload is sent to the connected peer
   interface across a network.
 */
-class mtsCommandWriteProxy : public mtsCommandWriteBase, public mtsCommandProxyBase 
+class mtsCommandWriteProxy : public mtsCommandWriteBase, public mtsCommandProxyBase
 {
     friend class mtsComponentProxy;
     friend class mtsMulticastCommandWriteBase;
-    
+
 protected:
     /*! Per-command (de)serializer */
     mtsProxySerializer Serializer;
@@ -52,7 +52,7 @@ public:
     /*! Typedef for base type */
     typedef mtsCommandWriteBase BaseType;
 
-    /*! Constructor. Command proxy is disabled by defaultand is enabled when 
+    /*! Constructor. Command proxy is disabled by defaultand is enabled when
         command id and network proxy are set. */
     mtsCommandWriteProxy(const std::string & commandName) : BaseType(commandName) {
         Disable();

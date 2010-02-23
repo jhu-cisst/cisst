@@ -22,7 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 
 /*!
   \file
-  \brief Defines a command with one argument 
+  \brief Defines a command with one argument
 */
 
 #ifndef _mtsCommandRead_h
@@ -73,8 +73,8 @@ protected:
 public:
     /*! The constructor. Does nothing */
     mtsCommandRead(void): BaseType(), ClassInstantiation(0) {}
-    
-    
+
+
     /*! The constructor.
       \param action Pointer to the member function that is to be called
       by the invoker of the command
@@ -108,9 +108,9 @@ public:
         }
     }
 
-    
+
     /*! The execute method. Calling the execute method from the invoker
-      applies the operation on the receiver. 
+      applies the operation on the receiver.
       \param obj The data passed to the operation method
     */
     virtual mtsCommandBase::ReturnType Execute(mtsGenericObject & argument) {
@@ -142,7 +142,7 @@ public:
             outputStream << "Not initialized properly";
         }
     }
-    
+
 };
 
 
