@@ -65,7 +65,7 @@ class CISST_EXPORT osaTimeServer: public cmnGenericObject
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
     /*! Internals that are OS-dependent in some way */
-    enum {INTERNALS_SIZE = 32};
+    enum {INTERNALS_SIZE = 64};
     char Internals[INTERNALS_SIZE];
 
     /*! Return the size of the actual object used by the OS.  This is

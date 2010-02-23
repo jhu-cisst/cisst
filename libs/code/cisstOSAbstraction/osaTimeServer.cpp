@@ -90,10 +90,17 @@ struct osaTimeServerInternals {
     unsigned long CounterFrequency;
     double CounterResolution;    // 1/CounterFrequency (resolution in seconds)
     void Synchronize(void);
+    const cmnClassServicesBase * Services(void);
+    const cmnClassServicesBase * ServicesPointer;
 #endif
 };
 
 #if (CISST_OS == CISST_WINDOWS)
+// provided for LOG_CLASS compatibility
+const cmnClassServicesBase * osaTimeServerInternals::Services(void)
+{
+    return ServicesPointer;
+}
 // This function is called if the performance counter exists (i.e., non-zero frequency).
 // It synchronizes the performance counter with the result from GetSystemTimeAsFileTime.
 void osaTimeServerInternals::Synchronize(void)
@@ -247,6 +254,7 @@ osaTimeServer::osaTimeServer()
     INTERNALS(TimeOrigin).tv_usec = 0L;
     CMN_LOG_CLASS_INIT_VERBOSE << "constructor: clock resolution not available on Darwin (clock_getres not supported)" << std::endl;
 #elif (CISST_OS == CISST_WINDOWS)
+    INTERNALS(ServicesPointer) = this->Services();
     INTERNALS(TimeOrigin) = 0LL;
     INTERNALS(CounterFrequency) = 0L;
     INTERNALS(CounterResolution) = 0.0;
