@@ -27,6 +27,10 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _osaTimeServer_h
 #define _osaTimeServer_h
 
+#include <cisstCommon/cmnGenericObject.h>
+#include <cisstCommon/cmnClassRegister.h>
+
+// Always include last
 #include <cisstOSAbstraction/osaExport.h>
 
 // PKAZ: move this to osaGetTime.h
@@ -56,8 +60,10 @@ struct osaAbsoluteTime {
   This class has significant overlap with osaStopwatch.
 */
 
-class CISST_EXPORT osaTimeServer
+class CISST_EXPORT osaTimeServer: public cmnGenericObject
 {
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+
     /*! Internals that are OS-dependent in some way */
     enum {INTERNALS_SIZE = 32};
     char Internals[INTERNALS_SIZE];
@@ -103,7 +109,9 @@ public:
     double AbsoluteToRelative(const osaAbsoluteTime & absolute) const;
 };
 
-   
+
+CMN_DECLARE_SERVICES_INSTANTIATION(osaTimeServer)
+
 
 #endif // _osaTimeServer_h
 
