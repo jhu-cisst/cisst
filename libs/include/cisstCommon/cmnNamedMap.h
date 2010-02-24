@@ -63,10 +63,27 @@ public:
     typedef typename MapType::const_reverse_iterator const_reverse_iterator;
 
 protected:
+    /*! Map data member, uses an std::map */
     MapType Map;
+
+    /*! Flag set to determine if the map "takes ownership" of data.
+      If the map takes ownership it will perform the required `delete`
+      on its data when necessary.  The default is true, i.e. the map
+      destructor will attempt to delete its objects (as does
+      std::map). */
+    bool TakesOwnership;
+
+    /*! Name of the map, mostly for logging purposes. */
     std::string MapName;
+
+    /*! Pointer on existing services.  This allows to use the class
+      name and level of detail of another class, e.g. the class that
+      owns this map.  To set the "Owner", use the method SetOwner
+      after the cmnNamedMap is constructed. */
     const cmnClassServicesBase * OwnerServices;
 
+    /*! Method use to emulate the cmnGenericObject interface used by
+      CMN_LOG_CLASS macros. */
     inline const cmnClassServicesBase * Services(void) const {
         return this->OwnerServices;
     }
@@ -74,8 +91,9 @@ protected:
 public:
     /*! Default constructor, initialize the internal map and set the
       map name to "undefined" */
-    cmnNamedMap(void):
+    cmnNamedMap(bool takesOwnership = true):
         Map(),
+        TakesOwnership(takesOwnership),
         MapName("undefined"),
         OwnerServices(0)
     {}
@@ -83,8 +101,9 @@ public:
     /*! Constructor with a map name.  The map name is useful for all
       human readable log messages as well as string streaming
       (e.g. std::cout) */
-    cmnNamedMap(const std::string & mapName):
+    cmnNamedMap(const std::string & mapName, bool takesOwnership = true):
         Map(),
+        TakesOwnership(takesOwnership),
         MapName(mapName),
         OwnerServices(0)
     {}
@@ -94,8 +113,10 @@ public:
       human readable log messages as well as string streaming
       (e.g. std::cout).  The cmnGenericObject level of detail will be
       used to filter the messages. */
-    cmnNamedMap(const std::string & mapName, const cmnGenericObject & owner):
+    cmnNamedMap(const std::string & mapName, const cmnGenericObject & owner,
+                bool takesOwnership = true):
         Map(),
+        TakesOwnership(takesOwnership),
         MapName(mapName),
         OwnerServices(owner.Services())
     {}
@@ -246,6 +267,10 @@ bool cmnNamedMap<_elementType>::RemoveItem(const std::string & itemName, cmnLogL
         }
         return false;
     }
+    // free memory if needed
+    if (this->TakesOwnership) {
+        delete iterator->second;
+    }
     Map.erase(iterator);
     return true;
 }
@@ -301,13 +326,15 @@ void cmnNamedMap<_elementType>::ToStream(std::ostream & outputStream) const
 template <class _elementType>
 void cmnNamedMap<_elementType>::DeleteAll(void) {
     if (Map.empty()) return;
-
-    typename MapType::iterator iterator = Map.begin();
-    const typename MapType::iterator end = Map.end();
-    for (;
-         iterator != end;
-         ++iterator) {
-        delete iterator->second;
+    // free memory if needed
+    if (this->TakesOwnership) {
+        typename MapType::iterator iterator = Map.begin();
+        const typename MapType::iterator end = Map.end();
+        for (;
+             iterator != end;
+             ++iterator) {
+            delete iterator->second;
+        }
     }
     Map.clear();
 }
