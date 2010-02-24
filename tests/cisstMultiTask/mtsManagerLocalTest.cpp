@@ -98,12 +98,12 @@ void mtsManagerLocalTest::TestCleanup(void)
     CPPUNIT_ASSERT(managerLocal.ManagerGlobal);
     mtsManagerTestC1Device * dummy = new mtsManagerTestC1Device;
     CPPUNIT_ASSERT(managerLocal.ComponentMap.AddItem("dummy", dummy));
-    CPPUNIT_ASSERT(managerLocal.ComponentMap.size() == 1);
-
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), managerLocal.ComponentMap.size());
+    
     managerLocal.Cleanup();
 
     CPPUNIT_ASSERT(managerLocal.ManagerGlobal == NULL);
-    CPPUNIT_ASSERT_EQUAL((unsigned int) 0, managerLocal.ComponentMap.size());
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(0), managerLocal.ComponentMap.size());
 
     // Add __os_exit() test if needed.
 }
@@ -254,7 +254,7 @@ void mtsManagerLocalTest::TestGetNamesOfComponents(void)
     CPPUNIT_ASSERT(localManager.AddComponent(c3Device));
 
     std::vector<std::string> namesOfComponents1 = localManager.GetNamesOfComponents();
-    CPPUNIT_ASSERT_EQUAL((unsigned int) 3, namesOfComponents1.size());
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(3), namesOfComponents1.size());
     for (int i = 0; i < 3; ++i) {
         CPPUNIT_ASSERT(namesOfComponents1[i] == c1Device->GetName() ||
                        namesOfComponents1[i] == c2Device->GetName() ||
@@ -263,7 +263,7 @@ void mtsManagerLocalTest::TestGetNamesOfComponents(void)
 
     std::vector<std::string> namesOfComponents2;
     localManager.GetNamesOfComponents(namesOfComponents2);
-    CPPUNIT_ASSERT_EQUAL((unsigned int) 3, namesOfComponents2.size());
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(3), namesOfComponents2.size());
     for (int i = 0; i < 3; ++i) {
         CPPUNIT_ASSERT(namesOfComponents2[i] == c1Device->GetName() ||
                        namesOfComponents2[i] == c2Device->GetName() ||
@@ -285,7 +285,7 @@ void mtsManagerLocalTest::TestGetNamesOfTasks(void)
     CPPUNIT_ASSERT(localManager.AddComponent(c2Task));
 
     std::vector<std::string> namesOfTasks1 = localManager.GetNamesOfTasks();
-    CPPUNIT_ASSERT_EQUAL((unsigned int) 2, namesOfTasks1.size());
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(2), namesOfTasks1.size());
     for (int i = 0; i < 2; ++i) {
         CPPUNIT_ASSERT(namesOfTasks1[i] == c1Task->GetName() ||
                        namesOfTasks1[i] == c2Task->GetName());
@@ -293,7 +293,7 @@ void mtsManagerLocalTest::TestGetNamesOfTasks(void)
 
     std::vector<std::string> namesOfTasks2;
     localManager.GetNamesOfTasks(namesOfTasks2);
-    CPPUNIT_ASSERT_EQUAL((unsigned int) 2, namesOfTasks2.size());
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(2), namesOfTasks2.size());
     for (int i = 0; i < 2; ++i) {
         CPPUNIT_ASSERT(namesOfTasks2[i] == c1Task->GetName() ||
                        namesOfTasks2[i] == c2Task->GetName());
@@ -314,7 +314,7 @@ void mtsManagerLocalTest::TestGetNamesOfDevices(void)
     CPPUNIT_ASSERT(localManager.AddComponent(c2Task));
 
     std::vector<std::string> namesOfDevices1 = localManager.GetNamesOfDevices();
-    CPPUNIT_ASSERT_EQUAL((unsigned int) 2, namesOfDevices1.size());
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(2), namesOfDevices1.size());
     for (int i = 0; i < 2; ++i) {
         CPPUNIT_ASSERT(namesOfDevices1[i] == c1Device->GetName() ||
                        namesOfDevices1[i] == c2Device->GetName());
@@ -322,7 +322,7 @@ void mtsManagerLocalTest::TestGetNamesOfDevices(void)
 
     std::vector<std::string> namesOfDevices2;
     localManager.GetNamesOfDevices(namesOfDevices2);
-    CPPUNIT_ASSERT_EQUAL((unsigned int) 2, namesOfDevices2.size());
+                         CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(2), namesOfDevices2.size());
     for (int i = 0; i < 2; ++i) {
         CPPUNIT_ASSERT(namesOfDevices2[i] == c1Device->GetName() ||
                        namesOfDevices2[i] == c2Device->GetName());
