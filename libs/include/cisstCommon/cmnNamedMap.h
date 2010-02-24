@@ -62,6 +62,8 @@ public:
     typedef typename MapType::reverse_iterator reverse_iterator;
     typedef typename MapType::const_reverse_iterator const_reverse_iterator;
 
+    typedef typename MapType::size_type size_type;
+
 protected:
     /*! Map data member, uses an std::map */
     MapType Map;
@@ -182,7 +184,7 @@ public:
     void DeleteAll(void);
 
     /*! STL compatible size */
-    inline unsigned int size(void) const {
+    inline size_type size(void) const {
         return this->Map.size();
     }
 
