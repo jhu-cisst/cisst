@@ -108,10 +108,9 @@ protected:
     mtsManagerGlobalInterface * ManagerGlobal;
 
     /*! Protected constructor (singleton) */
-#if !CISST_MTS_HAS_ICE
     mtsManagerLocal(void);
-#else
-    mtsManagerLocal(void);
+
+#if CISST_MTS_HAS_ICE
     mtsManagerLocal(const std::string & globalComponentManagerIP,
                     const std::string & thisProcessName,
                     const std::string & thisProcessIP);

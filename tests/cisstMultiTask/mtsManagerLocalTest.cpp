@@ -322,7 +322,7 @@ void mtsManagerLocalTest::TestGetNamesOfDevices(void)
 
     std::vector<std::string> namesOfDevices2;
     localManager.GetNamesOfDevices(namesOfDevices2);
-                         CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(2), namesOfDevices2.size());
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(2), namesOfDevices2.size());
     for (int i = 0; i < 2; ++i) {
         CPPUNIT_ASSERT(namesOfDevices2[i] == c1Device->GetName() ||
                        namesOfDevices2[i] == c2Device->GetName());

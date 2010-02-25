@@ -93,7 +93,7 @@ protected:
 public:
     /*! Default constructor, initialize the internal map and set the
       map name to "undefined" */
-    cmnNamedMap(bool takesOwnership = true):
+    cmnNamedMap(bool takesOwnership = false):
         Map(),
         TakesOwnership(takesOwnership),
         MapName("undefined"),
@@ -103,7 +103,7 @@ public:
     /*! Constructor with a map name.  The map name is useful for all
       human readable log messages as well as string streaming
       (e.g. std::cout) */
-    cmnNamedMap(const std::string & mapName, bool takesOwnership = true):
+    cmnNamedMap(const std::string & mapName, bool takesOwnership = false):
         Map(),
         TakesOwnership(takesOwnership),
         MapName(mapName),
@@ -116,7 +116,7 @@ public:
       (e.g. std::cout).  The cmnGenericObject level of detail will be
       used to filter the messages. */
     cmnNamedMap(const std::string & mapName, const cmnGenericObject & owner,
-                bool takesOwnership = true):
+                bool takesOwnership = false):
         Map(),
         TakesOwnership(takesOwnership),
         MapName(mapName),
