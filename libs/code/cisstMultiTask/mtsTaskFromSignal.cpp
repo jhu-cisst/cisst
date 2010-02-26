@@ -39,7 +39,7 @@ mtsTaskFromSignal::mtsTaskFromSignal(const std::string & name,
 
 
 void mtsTaskFromSignal::PostCommandQueuedMethod(void) {
-    CMN_LOG_CLASS_RUN_DEBUG << "PostCommandQueuedMethod: about to wake up thread" << std::endl;
+    CMN_LOG_CLASS_RUN_DEBUG << "PostCommandQueuedMethod: about to wake up thread for task \"" << this->GetName() << "\"" << std::endl;
     this->Thread.Wakeup();
 }
 
@@ -51,16 +51,21 @@ void * mtsTaskFromSignal::RunInternal(void * CMN_UNUSED(data)) {
     }
 
 	while ((TaskState == ACTIVE) || (TaskState == READY)) {
+        while (TaskState == READY) {
+            // Suspend the task until there is a call to Start().
+            CMN_LOG_CLASS_INIT_VERBOSE << "RunInternal: wait to start task \"" << this->GetName() << "\"" << std::endl;
+            WaitForWakeup();
+        }
         if (TaskState == ACTIVE) {
             DoRunInternal();
             // put the task to sleep until next signal
-            CMN_LOG_CLASS_RUN_DEBUG << "RunInternal: about to put thread to sleep" << std::endl;
+            CMN_LOG_CLASS_RUN_DEBUG << "RunInternal: about to put thread to sleep for task \"" << this->GetName() << "\"" << std::endl;
             Thread.WaitForWakeup();
         }
     }
 
     if (TaskState == FINISHING) {
-    	CMN_LOG_CLASS_INIT_VERBOSE << "RunInternal: end of task " << this->GetName() << std::endl;
+    	CMN_LOG_CLASS_INIT_VERBOSE << "RunInternal: end of task \"" << this->GetName() << "\"" << std::endl;
         this->CleanupInternal();
     }
     void * returnValue = this->ReturnValue;
@@ -103,12 +108,12 @@ mtsDeviceInterface * mtsTaskFromSignal::AddProvidedInterface(const std::string &
         if (ProvidedInterfaces.AddItem(newInterfaceName, newInterface)) {
             return newInterface;
         }
-        CMN_LOG_CLASS_INIT_ERROR << "AddProvidedInterface: task " << this->GetName() << " unable to add interface \""
+        CMN_LOG_CLASS_INIT_ERROR << "AddProvidedInterface: task \"" << this->GetName() << "\" unable to add interface \""
                                  << newInterfaceName << "\"" << std::endl;
         delete newInterface;
         return 0;
     }
-    CMN_LOG_CLASS_INIT_ERROR << "AddProvidedInterface: task " << this->GetName() << " unable to create interface \""
+    CMN_LOG_CLASS_INIT_ERROR << "AddProvidedInterface: task \"" << this->GetName() << "\" unable to create interface \""
                              << newInterfaceName << "\"" << std::endl;
     return 0;
 }
