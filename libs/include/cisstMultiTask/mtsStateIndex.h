@@ -81,7 +81,7 @@ public:
 
     virtual void ToStream(std::ostream &out) const {
         out << "Index = " << TimeIndex << ", Ticks = " << Ticks()
-            << ", Length = " << BufferLength << std::endl;
+            << ", Length = " << BufferLength;
     }
 
     /*! The length of the circular buffer. */
