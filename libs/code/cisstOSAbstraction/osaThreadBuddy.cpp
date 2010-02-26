@@ -382,8 +382,6 @@ void osaThreadBuddy::Resume(void)
 {
 #if (CISST_OS == CISST_LINUX_RTAI)
     rt_task_resume(Data->RTTask);
-#elif (CISST_OS == CISST_WINDOWS)
-    Data->IsSuspended = false;
 #else
     Data->IsSuspended = false;
 #endif
@@ -393,8 +391,6 @@ void osaThreadBuddy::Suspend(void)
 {
 #if (CISST_OS == CISST_LINUX_RTAI)
     rt_task_suspend(Data->RTTask);
-#elif (CISST_OS == CISST_WINDOWS)
-    Data->IsSuspended = true;
 #else 
     Data->IsSuspended = true;
 #endif
