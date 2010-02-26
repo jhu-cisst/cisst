@@ -1,5 +1,5 @@
 #
-# $Id: FindNOVINT.cmake 252 2009-04-15 02:47:00Z adeguet1 $
+# $Id$
 #
 # Author(s):  Anton Deguet
 # Created on: 2008-04-04

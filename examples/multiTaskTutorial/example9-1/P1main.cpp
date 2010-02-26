@@ -1,6 +1,6 @@
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
-/* $Id: clientMain.cpp 1087 2010-01-28 00:52:13Z mjung5 $ */
+/* $Id$ */
 
 #include <cisstCommon.h>
 #include <cisstOSAbstraction.h>

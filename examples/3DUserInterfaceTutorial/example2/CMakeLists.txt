@@ -1,5 +1,5 @@
 #
-# $Id: CMakeLists.txt 665 2009-08-12 17:21:59Z adeguet1 $
+# $Id$
 #
 
 project(3DUserInterfaceTutorialExample2)

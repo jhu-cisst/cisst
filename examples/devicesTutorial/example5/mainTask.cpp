@@ -1,6 +1,6 @@
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
-/* $Id: mainTask.cpp 679 2009-08-13 23:09:12Z gsevinc1 $ */
+/* $Id$ */
 
 
 #include "mainTask.h"

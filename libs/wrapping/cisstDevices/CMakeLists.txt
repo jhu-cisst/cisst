@@ -1,5 +1,5 @@
 #
-# $Id: CMakeLists.txt 1018 2010-01-05 16:51:35Z adeguet1 $
+# $Id$
 #
 # CMakeLists for cisstDevices wrapping
 #

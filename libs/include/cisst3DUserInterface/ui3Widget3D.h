@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: ui3VisibleObject.h 227 2009-04-03 21:39:16Z adeguet1 $
+  $Id$
 
   Author(s):	Anton Deguet
   Created on:	2009-09-13

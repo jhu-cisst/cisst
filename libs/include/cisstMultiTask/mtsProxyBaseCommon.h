@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: mtsProxyBaseCommon.h 142 2009-03-11 23:02:34Z mjung5 $
+  $Id$
 
   Author(s):  Min Yang Jung
   Created on: 2009-04-10

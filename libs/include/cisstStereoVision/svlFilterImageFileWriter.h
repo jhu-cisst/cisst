@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: svlImageFileWriter.h 326 2009-05-07 20:05:44Z bvagvol1 $
+  $Id$
   
   Author(s):  Balazs Vagvolgyi
   Created on: 2006 

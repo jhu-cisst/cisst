@@ -1,5 +1,5 @@
 #
-# $Id: $
+# $Id$
 #
 # Author(s):  Anton Deguet
 # Created on: 2010-01-20

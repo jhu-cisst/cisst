@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: cs3DObjectViewer.cpp 714 2009-08-21 20:11:35Z adeguet1 $
+  $Id$
 
   Author(s):	Anton Deguet
   Created on:	2009-02-04

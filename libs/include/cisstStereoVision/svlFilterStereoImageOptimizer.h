@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: svlStereoColorMatching.h 75 2009-02-24 16:47:20Z adeguet1 $
+  $Id$
   
   Author(s):  Balazs Vagvolgyi
   Created on: 2006 

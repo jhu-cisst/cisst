@@ -1,5 +1,5 @@
 #
-# $Id: CMakeLists.txt 682 2009-08-14 03:18:33Z adeguet1 $
+# $Id$
 #
 # (C) Copyright 2005-2010 Johns Hopkins University (JHU), All Rights
 # Reserved.

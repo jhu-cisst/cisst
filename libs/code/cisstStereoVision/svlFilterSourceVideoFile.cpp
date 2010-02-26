@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: svlVideoFileSource.cpp 596 2009-07-27 17:01:59Z bvagvol1 $
+  $Id$
   
   Author(s):  Balazs Vagvolgyi
   Created on: 2006 

@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: robCollaborativeControlForce.h 683 2009-08-14 21:40:14Z gsevinc1 $
+  $Id$
 
   Author(s): Gorkem Sevinc, Anton Deguet
   Created on: 2009-08-20

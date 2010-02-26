@@ -1,5 +1,5 @@
 #
-# $Id: cisstTestsBuild.cmake.in,v 1.3 2007/04/26 20:12:05 anton Exp $
+# $Id$
 #
 # Cmake configuration file for the CISST library test packages
 #

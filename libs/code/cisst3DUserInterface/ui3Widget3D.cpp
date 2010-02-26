@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: ui3Widget3D.cpp 137 2009-03-11 18:51:15Z adeguet1 $
+  $Id$
 
   Author(s):	Anton Deguet
   Created on:	2008-06-10

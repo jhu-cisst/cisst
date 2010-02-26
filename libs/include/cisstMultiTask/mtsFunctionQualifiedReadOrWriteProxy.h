@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: mtsFunctionQualifiedReadOrWriteProxy.h 456 2009-06-13 03:11:44Z adeguet1 $
+  $Id$
 
   Author(s):  Min Yang Jung
   Created on: 2009-09-03

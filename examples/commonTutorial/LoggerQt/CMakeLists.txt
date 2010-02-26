@@ -1,5 +1,5 @@
 #
-#   $Id: CMakeLists.txt 963 2009-11-13 18:55:48Z adeguet1 $
+#   $Id$
 #
 #   Author(s):  Anton Deguet
 #   Created on: 2009-11-16

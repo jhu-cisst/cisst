@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: svlImageCodecPPM.cpp 1140 2010-02-03 21:08:09Z bvagvol1 $
+  $Id$
   
   Author(s):  Ben Mitchell
   Created on: 2006 

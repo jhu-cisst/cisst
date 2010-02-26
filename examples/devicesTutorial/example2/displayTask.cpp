@@ -1,6 +1,6 @@
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
-/* $Id: displayTask.cpp 163 2009-03-17 16:27:35Z adeguet1 $ */
+/* $Id$ */
 
 
 #include "displayTask.h"

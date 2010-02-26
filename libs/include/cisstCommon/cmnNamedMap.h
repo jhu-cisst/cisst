@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: cmnNamedMap.h 271 2009-04-23 03:14:21Z adeguet1 $
+  $Id$
 
   Author(s):  Peter Kazanzides, Anton Deguet, Min Yang Jung
   Created on: 2008-11-15

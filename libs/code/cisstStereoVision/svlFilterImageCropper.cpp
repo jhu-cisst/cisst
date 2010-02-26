@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: svlImageCropper.cpp 545 2009-07-14 08:38:33Z adeguet1 $
+  $Id$
   
   Author(s):  Balazs Vagvolgyi
   Created on: 2007 

@@ -1,5 +1,5 @@
 #
-# $Id: CMakeLists.txt mjung5 $
+# $Id$
 #
 # CMakeLists for cisstMultiTask tests
 #

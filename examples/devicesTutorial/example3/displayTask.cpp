@@ -1,6 +1,6 @@
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
-/* $Id: displayTask.cpp 433 2009-06-09 22:10:24Z adeguet1 $ */
+/* $Id$ */
 
 /*
   Author(s):  Gorkem Sevinc, Anton Deguet 
