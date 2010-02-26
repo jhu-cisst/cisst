@@ -3,7 +3,7 @@
 
 /*
   $Id: $
-  
+
   Author(s):	Anton Deguet
   Created on:	2009-11-08
 
@@ -21,8 +21,8 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
-/*! 
-  \file 
+/*!
+  \file
   \brief Portability layer for strings related function using underscore as prefix
  */
 
@@ -35,7 +35,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <stdarg.h>
 #include <stdio.h>
 
-
 /*!
   \ingroup cisstCommon
  */
@@ -43,7 +42,11 @@ inline int cmn_snprintf(char * destination, size_t size, const char * format, ..
     va_list arguments;
     va_start(arguments, format);
     int result;
+#if (CISST_COMPILER == CISST_DOTNET2003)
+    result = _vsnprintf(destination, size, format, arguments);
+#else
     result = vsnprintf(destination, size, format, arguments);
+#endif
     va_end(arguments);
     return result;
 }
