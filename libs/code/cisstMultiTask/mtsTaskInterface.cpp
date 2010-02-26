@@ -144,47 +144,6 @@ mtsCommandWriteBase * mtsTaskInterface::GetCommandWrite(const std::string & comm
 }
 
 
-#if 0
-unsigned int mtsTaskInterface::AllocateResourcesForCurrentThread(void)
-{
-    // keep track of threads using this and create a thread resource
-    // per "user thread", i.e. create/clone of mailboxes for queued
-    // commands.
-    Mutex.Lock();
-    const osaThreadId consumerId = osaGetCurrentThreadId();
-    ThreadIdCountersType::iterator iterator = ThreadIdCounters.begin();
-    bool found = false;
-    while (!found && iterator != ThreadIdCounters.end()) {
-        if ((iterator->first).Equal(consumerId)) {
-            found = true;
-        } else {
-            iterator++;
-        }
-    }
-    if (!found) {
-        CMN_LOG_CLASS_INIT_VERBOSE << "AllocateResourcesForCurrentThread: found new thread Id [" << consumerId << "]" << std::endl;
-        ThreadIdCounters.resize(ThreadIdCounters.size() + 1,
-                                ThreadIdCounterPairType(consumerId, 1));
-        std::stringstream mailBoxName;
-        mailBoxName << this->GetName() << ThreadIdCounters.size();
-        ThreadResources * newThreadResources = new ThreadResources(mailBoxName.str(),
-                                                                   DEFAULT_ARG_BUFFER_LEN);
-        CMN_LOG_CLASS_INIT_VERBOSE << "AllocateResourcesForCurrentThread: created mailbox " << newThreadResources->GetMailBox()->GetName()
-                                   << std::endl;
-        newThreadResources->CloneCommands(*this);
-        ThreadResourcesMap.resize(ThreadResourcesMap.size() + 1,
-                                  ThreadResourcesPairType(consumerId, newThreadResources));
-        Mutex.Unlock();
-        return 1;
-    } else {
-        CMN_LOG_CLASS_INIT_VERBOSE << "AllocateResourcesForCurrentThread: already registered thread Id (" << consumerId << ")" << std::endl;
-        Mutex.Unlock();
-        return (iterator->second)++;
-    }
-}
-#endif
-
-
 unsigned int mtsTaskInterface::AllocateResources(const std::string & userName)
 {
     // keep track of threads using this and create a thread resource
