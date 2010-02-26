@@ -79,8 +79,8 @@ class PeriodicTaskTest(unittest.TestCase):
         periodicTask = cisstMultiTaskPythonTest.mtsPeriodicTaskTest(period)
         periodicTask.UpdateFromC()
         # get the task manager
-        taskManager = cisstMultiTask.mtsTaskManager_GetInstance()
-        self.failUnless(isinstance(taskManager, cisstMultiTask.mtsTaskManager))
+        taskManager = cisstMultiTask.mtsManagerLocal_GetInstance()
+        self.failUnless(isinstance(taskManager, cisstMultiTask.mtsManagerLocal))
         # add the task
         self.failUnless(taskManager.AddTask(periodicTask))
         # create and start the task(s)
