@@ -12,20 +12,21 @@
 # --- end cisst license ---
 
 qt4_wrap_cpp(QT_WRAPPED_CPP
-             displayQDevice.h
+             displayQComponent.h
              displayQWidget.h
+             mtsCollectorQComponent.h
+             mtsCollectorQWidget.h
              )
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 add_executable(cisstMultiTaskPeriodicTaskQt
                ${QT_WRAPPED_CPP}
-               displayQDevice.cpp
-               displayQDevice.h
+               displayQComponent.cpp
                displayQWidget.cpp
-               displayQWidget.h
                main.cpp
+               mtsCollectorQComponent.cpp
+               mtsCollectorQWidget.cpp
                sineTask.cpp
-               sineTask.h
                )
 
 target_link_libraries(cisstMultiTaskPeriodicTaskQt

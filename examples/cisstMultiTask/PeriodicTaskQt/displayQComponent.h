@@ -18,55 +18,49 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#ifndef _displayQDevice_h
-#define _displayQDevice_h
+#ifndef _displayQComponent_h
+#define _displayQComponent_h
 
 #include <cisstMultiTask/mtsDevice.h>
 #include <cisstMultiTask/mtsFunctionVoid.h>
 #include <cisstMultiTask/mtsFunctionReadOrWrite.h>
 
-#include <QMainWindow>
 #include <QObject>
-#include <QTimer>
 
 #include "displayQWidget.h"
 
 
-class displayQDevice: public QObject, public mtsDevice
+class displayQComponent : public QObject, public mtsDevice
 {
     Q_OBJECT;
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
  public:
-    displayQDevice(const std::string & taskName);
-    ~displayQDevice(void) {};
+    displayQComponent(const std::string & taskName);
+    ~displayQComponent(void) {};
 
     void Configure(const std::string & CMN_UNUSED(filename) = "") {};
 
+    QWidget * GetWidget(void) {
+        return &CentralWidget;
+    }
+
  protected:
     displayQWidget CentralWidget;
-    QMainWindow MainWindow;
-    QTimer UpdateTimer;
 
     struct {
        mtsFunctionRead GetData;
        mtsFunctionWrite SetAmplitude;
     } Generator;
 
-    struct {
-        mtsFunctionVoid Start;
-        mtsFunctionVoid Stop;
-    } Collection;
-
     mtsDouble Data;
     mtsDouble AmplitudeData;
 
  public slots:
-    void UpdateTimerQSlot(void);
+    void timerEvent(QTimerEvent * event);
     void SetAmplitudeQSlot(int newValue);
-    void ToggleCollectionQSlot(bool checked);
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(displayQDevice);
+CMN_DECLARE_SERVICES_INSTANTIATION(displayQComponent);
 
-#endif  // _displayQDevice_h
+#endif  // _displayQComponent_h

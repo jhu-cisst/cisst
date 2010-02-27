@@ -75,7 +75,7 @@ class mtsMailBox;
 class mtsStateTable;
 
 // data collection class
-class tsCollectorBase;
+class mtsCollectorBase;
 class mtsCollectorState;
 
 

@@ -5,9 +5,9 @@
   $Id$
 
   Author(s):  Anton Deguet, Ali Uneri
-  Created on: 2009-11-09
+  Created on: 2010-02-26
 
-  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -18,31 +18,24 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#ifndef _displayQWidget_h
-#define _displayQWidget_h
+#ifndef _mtsCollectorQWidget_h
+#define _mtsCollectorQWidget_h
 
-#include <QDial>
 #include <QGridLayout>
-#include <QLabel>
 #include <QPushButton>
 #include <QWidget>
 
 
-class displayQWidget : public QWidget
+class mtsCollectorQWidget : public QWidget
 {
     Q_OBJECT;
 
  public:
-    displayQWidget(void);
-    ~displayQWidget(void) {};
+    mtsCollectorQWidget(void);
+    ~mtsCollectorQWidget(void) {};
 
-    QDial * DialAmplitude;
     QGridLayout * CentralLayout;
-    QLabel * LabelAmplitude;
-    QLabel * ValueAmplitude;
-    QLabel * LabelData;
-    QLabel * ValueData;
-    QPushButton * ButtonQuit;
+    QPushButton * ButtonRecord;
 };
 
-#endif  // _displayQWidget_h
+#endif  // _mtsCollectorQWidget_h
