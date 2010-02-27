@@ -38,7 +38,7 @@ void GCMUITask::Configure(const std::string & CMN_UNUSED(filename))
     CurrentIndexClicked.Reset();
 
     // HostIP
-    buf = new Fl_Text_Buffer();
+    Fl_Text_Buffer * buf = new Fl_Text_Buffer();
     UI.TextDisplayHostIP->buffer(buf);
     
     StringVector ipAddresses;
@@ -54,7 +54,6 @@ void GCMUITask::Configure(const std::string & CMN_UNUSED(filename))
             ipString += ipAddresses[i];
         }
     }
-
     buf->text(ipString.c_str());
 }
 
@@ -69,21 +68,28 @@ void GCMUITask::Run(void)
     // Check if there is any user's input
     CheckUserInput();
 
-    if (UI.ButtonRefresh->value() == 0) {
-        goto UpdateUIandReturn;
+    if (UI.ButtonAutoRefresh->value() == 0) {
+        goto ReturnWithUpdate;
+    }
+
+    // Refresh immediately
+    if (UI.ButtonRefreshClicked) {
+        UpdateUI();
+        UI.ButtonRefreshClicked = false;
+        return;
     }
     
     // Auto refresh period: 5 secs
     static int cnt = 0;
     if (++cnt < 20 * 5) {
-        goto UpdateUIandReturn;
+        goto ReturnWithUpdate;
     } else {
         cnt = 0;
     }
 
     UpdateUI();
 
-UpdateUIandReturn:
+ReturnWithUpdate:
     if (Fl::check() == 0) {
         Kill();
     }
@@ -111,11 +117,17 @@ void GCMUITask::CheckUserInput(void)
             UI.BrowserRequiredInterfaces->clear();
             UI.BrowserFunctions->clear();
             UI.BrowserEventHandlers->clear();
+            UI.OutputCommandDescription->value("");
+            UI.OutputEventGeneratorDescription->value("");
+            UI.OutputFunctionDescription->value("");
+            UI.OutputEventHandlerDescription->value("");
 
             LastIndexClicked.Reset();
 
-            // Get all component names of the selected process
+            // Get a name of the selected process
+            // If the component is a proxy. strip format control characters from it.
             const std::string processName = StripOffFormatCharacters(UI.BrowserProcesses->text(CurrentIndexClicked.Process));
+
             PopulateComponents(processName);
 
             LastIndexClicked.Process = CurrentIndexClicked.Process;
@@ -134,6 +146,10 @@ void GCMUITask::CheckUserInput(void)
             UI.BrowserRequiredInterfaces->clear();
             UI.BrowserFunctions->clear();
             UI.BrowserEventHandlers->clear();
+            UI.OutputCommandDescription->value("");
+            UI.OutputEventGeneratorDescription->value("");
+            UI.OutputFunctionDescription->value("");
+            UI.OutputEventHandlerDescription->value("");
 
             LastIndexClicked.ProvidedInterface = -1;
             LastIndexClicked.Command = -1;
@@ -142,10 +158,8 @@ void GCMUITask::CheckUserInput(void)
             LastIndexClicked.Function = -1;
             LastIndexClicked.EventHandler = -1;
 
-            // Get all interface names of the selected component
+            // Get a name of the selected process and component
             const std::string processName = StripOffFormatCharacters(UI.BrowserProcesses->text(CurrentIndexClicked.Process));
-
-            // Check if component is a proxy one. If yes, strip format control characters from it.
             const std::string componentName = StripOffFormatCharacters(UI.BrowserComponents->text(CurrentIndexClicked.Component));
             
             PopulateProvidedInterfaces(processName, componentName);
@@ -163,11 +177,13 @@ void GCMUITask::CheckUserInput(void)
             // clear all subsequent browsers
             UI.BrowserCommands->clear();
             UI.BrowserEventGenerators->clear();
+            UI.OutputCommandDescription->value("");
+            UI.OutputEventGeneratorDescription->value("");
 
             LastIndexClicked.Command = -1;
             LastIndexClicked.EventGenerator = -1;
 
-            // Get all interface names of the selected component
+            // Get a name of the selected process, component, and provided interface
             const std::string processName = StripOffFormatCharacters(UI.BrowserProcesses->text(CurrentIndexClicked.Process));
             const std::string componentName = StripOffFormatCharacters(UI.BrowserComponents->text(CurrentIndexClicked.Component));
             const std::string providedInterfaceName = StripOffFormatCharacters(UI.BrowserProvidedInterfaces->text(CurrentIndexClicked.ProvidedInterface));
@@ -181,17 +197,58 @@ void GCMUITask::CheckUserInput(void)
         }
     }
 
+    // Check if an user clicked command browser
+    if (CurrentIndexClicked.Command) {
+        if (LastIndexClicked.Command != CurrentIndexClicked.Command) {
+            // clear related widget
+            UI.OutputCommandDescription->value("");
+
+            // Get a name of the selected process, component, provided interface, and command
+            const std::string processName = StripOffFormatCharacters(UI.BrowserProcesses->text(CurrentIndexClicked.Process));
+            const std::string componentName = StripOffFormatCharacters(UI.BrowserComponents->text(CurrentIndexClicked.Component));
+            const std::string providedInterfaceName = StripOffFormatCharacters(UI.BrowserProvidedInterfaces->text(CurrentIndexClicked.ProvidedInterface));
+            const std::string commandName = StripOffFormatCharacters(UI.BrowserCommands->text(CurrentIndexClicked.Command));
+            
+            ShowCommandDescription(processName, componentName, providedInterfaceName, commandName);
+
+            LastIndexClicked.Command = CurrentIndexClicked.Command;
+
+            return;
+        }
+    }
+
+    // Check if an user clicked event generator browser
+    if (CurrentIndexClicked.EventGenerator) {
+        if (LastIndexClicked.EventGenerator != CurrentIndexClicked.EventGenerator) {
+            // clear related widget
+            UI.OutputEventGeneratorDescription->value("");
+
+            // Get a name of the selected process, component, provided interface, and command
+            const std::string processName = StripOffFormatCharacters(UI.BrowserProcesses->text(CurrentIndexClicked.Process));
+            const std::string componentName = StripOffFormatCharacters(UI.BrowserComponents->text(CurrentIndexClicked.Component));
+            const std::string providedInterfaceName = StripOffFormatCharacters(UI.BrowserProvidedInterfaces->text(CurrentIndexClicked.ProvidedInterface));
+            const std::string eventGeneratorName = StripOffFormatCharacters(UI.BrowserEventGenerators->text(CurrentIndexClicked.EventGenerator));
+            
+            ShowEventGeneratorDescription(processName, componentName, providedInterfaceName, eventGeneratorName);
+
+            LastIndexClicked.EventGenerator = CurrentIndexClicked.EventGenerator;
+
+            return;
+        }
+    }
+
     // Check if an user clicked required interface browser
     if (CurrentIndexClicked.RequiredInterface) {
         if (LastIndexClicked.RequiredInterface != CurrentIndexClicked.RequiredInterface) {
             // clear all subsequent browsers
             UI.BrowserFunctions->clear();
             UI.BrowserEventHandlers->clear();
-
+            UI.OutputFunctionDescription->value("");
+            UI.OutputEventHandlerDescription->value("");
             LastIndexClicked.Function = -1;
             LastIndexClicked.EventHandler = -1;
 
-            // Get all interface names of the selected component
+            // Get a name of the selected process, component, and required interface
             const std::string processName = StripOffFormatCharacters(UI.BrowserProcesses->text(CurrentIndexClicked.Process));
             const std::string componentName = StripOffFormatCharacters(UI.BrowserComponents->text(CurrentIndexClicked.Component));
             const std::string requiredInterfaceName = StripOffFormatCharacters(UI.BrowserRequiredInterfaces->text(CurrentIndexClicked.RequiredInterface));
@@ -200,6 +257,46 @@ void GCMUITask::CheckUserInput(void)
             PopulateEventHandlers(processName, componentName, requiredInterfaceName);
 
             LastIndexClicked.RequiredInterface = CurrentIndexClicked.RequiredInterface;
+
+            return;
+        }
+    }
+
+    // Check if an user clicked function browser
+    if (CurrentIndexClicked.Function) {
+        if (LastIndexClicked.Function != CurrentIndexClicked.Function) {
+            // clear related widget
+            UI.OutputFunctionDescription->value("");
+
+            // Get a name of the selected process, component, provided interface, and command
+            const std::string processName = StripOffFormatCharacters(UI.BrowserProcesses->text(CurrentIndexClicked.Process));
+            const std::string componentName = StripOffFormatCharacters(UI.BrowserComponents->text(CurrentIndexClicked.Component));
+            const std::string requiredInterfaceName = StripOffFormatCharacters(UI.BrowserRequiredInterfaces->text(CurrentIndexClicked.RequiredInterface));
+            const std::string functionName = StripOffFormatCharacters(UI.BrowserFunctions->text(CurrentIndexClicked.Function));
+            
+            ShowFunctionDescription(processName, componentName, requiredInterfaceName, functionName);
+
+            LastIndexClicked.Function = CurrentIndexClicked.Function;
+
+            return;
+        }
+    }
+
+    // Check if an user clicked event handler browser
+    if (CurrentIndexClicked.EventHandler) {
+        if (LastIndexClicked.EventHandler != CurrentIndexClicked.EventHandler) {
+            // clear related widget
+            UI.OutputEventHandlerDescription->value("");
+
+            // Get a name of the selected process, component, provided interface, and command
+            const std::string processName = StripOffFormatCharacters(UI.BrowserProcesses->text(CurrentIndexClicked.Process));
+            const std::string componentName = StripOffFormatCharacters(UI.BrowserComponents->text(CurrentIndexClicked.Component));
+            const std::string requiredInterfaceName = StripOffFormatCharacters(UI.BrowserRequiredInterfaces->text(CurrentIndexClicked.RequiredInterface));
+            const std::string eventHandlerName = StripOffFormatCharacters(UI.BrowserEventHandlers->text(CurrentIndexClicked.EventHandler));
+            
+            ShowEventHandlerDescription(processName, componentName, requiredInterfaceName, eventHandlerName);
+
+            LastIndexClicked.EventHandler = CurrentIndexClicked.EventHandler;
 
             return;
         }
@@ -237,6 +334,15 @@ void GCMUITask::AddLineToBrowser(Fl_Browser * browser, const char * line, const 
         sprintf(buf, "@B%d@C%d@%c@.%s", bg, fg, style, line);
     }
     browser->add(buf);
+}
+
+void GCMUITask::AddLineToDescription(Fl_Output * output, const char * msg)
+{
+    char *cat = new char[strlen(output->value()) + strlen(msg) + 1];
+    strcpy(cat, output->value());
+    strcat(cat, msg);
+    output->value(cat);
+    delete [] cat;
 }
 
 std::string GCMUITask::StripOffFormatCharacters(const std::string & text)
@@ -349,4 +455,64 @@ void GCMUITask::PopulateEventHandlers(const std::string & processName, const std
     for (StringVector::size_type i = 0; i < names.size(); ++i) {
         AddLineToBrowser(UI.BrowserEventHandlers, names[i].c_str());
     }
+}
+
+void GCMUITask::ShowCommandDescription(const std::string & processName, 
+                                       const std::string & componentName, 
+                                       const std::string & providedInterfaceName, 
+                                       const std::string & commandName)
+{
+    char buf[100] = "";
+    sprintf(buf, "Command: %s\n", commandName.substr(3, commandName.size() - 2).c_str());
+    UI.OutputCommandDescription->value(buf);
+    
+    std::string description;
+    GlobalComponentManager.GetDescriptionOfCommand(processName, componentName, providedInterfaceName, commandName, description);
+
+    AddLineToDescription(UI.OutputCommandDescription, description.c_str());
+}
+
+void GCMUITask::ShowEventGeneratorDescription(const std::string & processName, 
+                                              const std::string & componentName, 
+                                              const std::string & providedInterfaceName, 
+                                              const std::string & eventGeneratorName)
+{
+    char buf[100] = "";
+    sprintf(buf, "Event generator: %s\n", eventGeneratorName.substr(3, eventGeneratorName.size() - 2).c_str());
+    UI.OutputEventGeneratorDescription->value(buf);
+
+    std::string description;
+    GlobalComponentManager.GetDescriptionOfEventGenerator(processName, componentName, providedInterfaceName, eventGeneratorName, description);
+
+    AddLineToDescription(UI.OutputEventGeneratorDescription, description.c_str());
+}
+
+void GCMUITask::ShowFunctionDescription(const std::string & processName, 
+                                        const std::string & componentName, 
+                                        const std::string & requiredInterfaceName, 
+                                        const std::string & functionName)
+{
+    char buf[100] = "";
+    sprintf(buf, "Function: %s\n", functionName.substr(3, functionName.size() - 2).c_str());
+    UI.OutputFunctionDescription->value(buf);
+
+    std::string description;
+    GlobalComponentManager.GetDescriptionOfFunction(processName, componentName, requiredInterfaceName, functionName, description);
+
+    AddLineToDescription(UI.OutputFunctionDescription, description.c_str());
+}
+
+void GCMUITask::ShowEventHandlerDescription(const std::string & processName, 
+                                            const std::string & componentName, 
+                                            const std::string & requiredInterfaceName, 
+                                            const std::string & eventHandlerName)
+{
+    char buf[100] = "";
+    sprintf(buf, "Event handler: %s\n", eventHandlerName.substr(3, eventHandlerName.size() - 2).c_str());
+    UI.OutputEventHandlerDescription->value(buf);
+
+    std::string description;
+    GlobalComponentManager.GetDescriptionOfEventHandler(processName, componentName, requiredInterfaceName, eventHandlerName, description);
+
+    AddLineToDescription(UI.OutputEventHandlerDescription, description.c_str());
 }

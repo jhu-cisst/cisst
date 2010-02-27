@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask.h>
 
 #include "GCMUITask.h"
+#include "oscilloscopeTask.h"
 
 using namespace std;
 
@@ -57,12 +58,19 @@ int main(void)
         return 1;
     }
 
-    // Create GCM UI task
+    // Create oscilloscope task
     const double period = 50 * cmn_ms;
+    //oscilloscopeTask * oscilloscopeTaskObject = new oscilloscopeTask("Oscilloscope", period);
+    //localManager->AddComponent(oscilloscopeTaskObject);
+
+    // Create GCM UI task
     GCMUITask * GCMUITaskObject = new GCMUITask("GCMUI", period, globalComponentManager);
     GCMUITaskObject->Configure();
     localManager->AddComponent(GCMUITaskObject);
 
+    //oscilloscopeTaskObject->GraphPane = GCMUITaskObject->UI.GraphPane;
+    //oscilloscopeTaskObject->Configure();
+    
     // Create task and start local component manager
     localManager->CreateAll();
     localManager->StartAll();

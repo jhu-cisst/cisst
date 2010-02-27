@@ -318,6 +318,34 @@ public:
                                  const std::string & requiredInterfaceName, 
                                  const std::string & CMN_UNUSED(listenerID) = "");
 
+    /*! Get description of a command in a provided interface */
+    void GetDescriptionOfCommand(std::string & description,
+                                 const std::string & componentName, 
+                                 const std::string & providedInterfaceName, 
+                                 const std::string & commandName,
+                                 const std::string & CMN_UNUSED(listenerID) = "");
+
+    /*! Get description of a event generator in a provided interface */
+    void GetDescriptionOfEventGenerator(std::string & description,
+                                        const std::string & componentName, 
+                                        const std::string & providedInterfaceName, 
+                                        const std::string & eventGeneratorName,
+                                        const std::string & CMN_UNUSED(listenerID) = "");
+
+    /*! Get description of a function in a required interface */
+    void GetDescriptionOfFunction(std::string & description,
+                                  const std::string & componentName, 
+                                  const std::string & requiredInterfaceName, 
+                                  const std::string & functionName,
+                                  const std::string & CMN_UNUSED(listenerID) = "");
+
+    /*! Get description of a function in a required  interface */
+    void GetDescriptionOfEventHandler(std::string & description,
+                                      const std::string & componentName, 
+                                      const std::string & requiredInterfaceName, 
+                                      const std::string & eventHandlerName,
+                                      const std::string & CMN_UNUSED(listenerID) = "");
+
     /*! Return IP address of this process */
     inline std::string GetIPAddress() const { return ProcessIP; }
 

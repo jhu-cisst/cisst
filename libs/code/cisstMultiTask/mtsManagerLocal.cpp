@@ -425,17 +425,26 @@ void mtsManagerLocal::GetNamesOfCommands(std::vector<std::string>& namesOfComman
         return;
     }
 
+    std::string name;
     for (unsigned int i = 0; i < desc.CommandsVoid.size(); ++i) {
-        namesOfCommands.push_back(desc.CommandsVoid[i].Name);
+        name = "V) ";
+        name += desc.CommandsVoid[i].Name;
+        namesOfCommands.push_back(name);
     }
     for (unsigned int i = 0; i < desc.CommandsWrite.size(); ++i) {
-        namesOfCommands.push_back(desc.CommandsWrite[i].Name);
+        name = "W) ";
+        name += desc.CommandsWrite[i].Name;
+        namesOfCommands.push_back(name);
     }
     for (unsigned int i = 0; i < desc.CommandsRead.size(); ++i) {
-        namesOfCommands.push_back(desc.CommandsRead[i].Name);
+        name = "R) ";
+        name += desc.CommandsRead[i].Name;
+        namesOfCommands.push_back(name);
     }
     for (unsigned int i = 0; i < desc.CommandsQualifiedRead.size(); ++i) {
-        namesOfCommands.push_back(desc.CommandsQualifiedRead[i].Name);
+        name = "Q) ";
+        name += desc.CommandsQualifiedRead[i].Name;
+        namesOfCommands.push_back(name);
     }
 }
 
@@ -449,11 +458,16 @@ void mtsManagerLocal::GetNamesOfEventGenerators(std::vector<std::string>& namesO
         return;
     }
 
+    std::string name;
     for (unsigned int i = 0; i < desc.EventsVoid.size(); ++i) {
-        namesOfEventGenerators.push_back(desc.EventsVoid[i].Name);
+        name = "V) ";
+        name += desc.EventsVoid[i].Name;
+        namesOfEventGenerators.push_back(name);
     }
     for (unsigned int i = 0; i < desc.EventsWrite.size(); ++i) {
-        namesOfEventGenerators.push_back(desc.EventsWrite[i].Name);
+        name = "W) ";
+        name += desc.EventsWrite[i].Name;
+        namesOfEventGenerators.push_back(name);
     }
 }
 
@@ -467,10 +481,27 @@ void mtsManagerLocal::GetNamesOfFunctions(std::vector<std::string>& namesOfFunct
         return;
     }
 
-    namesOfFunctions.insert(namesOfFunctions.end(), desc.FunctionVoidNames.begin(), desc.FunctionVoidNames.end());
-    namesOfFunctions.insert(namesOfFunctions.end(), desc.FunctionWriteNames.begin(), desc.FunctionWriteNames.end());
-    namesOfFunctions.insert(namesOfFunctions.end(), desc.FunctionReadNames.begin(), desc.FunctionReadNames.end());
-    namesOfFunctions.insert(namesOfFunctions.end(), desc.FunctionQualifiedReadNames.begin(), desc.FunctionQualifiedReadNames.end());
+    std::string name;
+    for (unsigned int i = 0; i < desc.FunctionVoidNames.size(); ++i) {
+        name = "V) ";
+        name += desc.FunctionVoidNames[i];
+        namesOfFunctions.push_back(name);
+    }
+    for (unsigned int i = 0; i < desc.FunctionWriteNames.size(); ++i) {
+        name = "W) ";
+        name += desc.FunctionWriteNames[i];
+        namesOfFunctions.push_back(name);
+    }
+    for (unsigned int i = 0; i < desc.FunctionReadNames.size(); ++i) {
+        name = "R) ";
+        name += desc.FunctionReadNames[i];
+        namesOfFunctions.push_back(name);
+    }
+    for (unsigned int i = 0; i < desc.FunctionQualifiedReadNames.size(); ++i) {
+        name = "Q) ";
+        name += desc.FunctionQualifiedReadNames[i];
+        namesOfFunctions.push_back(name);
+    }
 }
 
 void mtsManagerLocal::GetNamesOfEventHandlers(std::vector<std::string>& namesOfEventHandlers,
@@ -483,13 +514,257 @@ void mtsManagerLocal::GetNamesOfEventHandlers(std::vector<std::string>& namesOfE
         return;
     }
 
+    std::string name;
     for (unsigned int i = 0; i < desc.EventHandlersVoid.size(); ++i) {
-        namesOfEventHandlers.push_back(desc.EventHandlersVoid[i].Name);
+        name = "V) ";
+        name += desc.EventHandlersVoid[i].Name;
+        namesOfEventHandlers.push_back(name);
     }
     for (unsigned int i = 0; i < desc.EventHandlersWrite.size(); ++i) {
-        namesOfEventHandlers.push_back(desc.EventHandlersWrite[i].Name);
+        name = "W) ";
+        name += desc.EventHandlersWrite[i].Name;
+        namesOfEventHandlers.push_back(name);
     }
 }
+
+void mtsManagerLocal::GetDescriptionOfCommand(std::string & description,
+                                              const std::string & componentName, 
+                                              const std::string & providedInterfaceName, 
+                                              const std::string & commandName,
+                                              const std::string & listenerID)
+{
+    mtsComponent * component = GetComponent(componentName);
+    if (!component) return;
+
+    mtsProvidedInterface * providedInterface = component->GetProvidedInterface(providedInterfaceName);
+    if (!providedInterface) return;
+
+    // Get command type
+    char commandType = *commandName.c_str();
+    std::string actualCommandName = commandName.substr(3, commandName.size() - 2);
+
+    description = "Parameter type: ";
+    switch (commandType) {
+        case 'V':
+            {
+                mtsCommandVoidBase * command = providedInterface->GetCommandVoidMap().GetItem(actualCommandName);
+                if (!command) {
+                    description = "No void command found";
+                    return;
+                }
+                description += "(none)";
+            }
+            break;
+        case 'W':
+            {
+                mtsCommandWriteBase * command = providedInterface->GetCommandWriteMap().GetItem(actualCommandName);
+                if (!command) {
+                    description = "No write command found";
+                    return;
+                }
+                description += command->GetArgumentClassServices()->GetName();
+            }
+            break;
+        case 'R':
+            {
+                mtsCommandReadBase * command = providedInterface->GetCommandRead(actualCommandName);
+                if (!command) {
+                    description = "No read command found";
+                    return;
+                }
+                description += command->GetArgumentClassServices()->GetName();
+            }
+            break;
+        case 'Q':
+            {
+                mtsCommandQualifiedReadBase * command = providedInterface->GetCommandQualifiedRead(actualCommandName);
+                if (!command) {
+                    description = "No qualified read command found";
+                    return;
+                }
+                description = "Parameter1 type: ";
+                description += command->GetArgument1ClassServices()->GetName();
+                description += "\nParameter2 type: ";
+                description += command->GetArgument2ClassServices()->GetName();
+            }
+            break;
+        default:
+            description = "Failed to get command description";
+            return;
+    }
+}
+
+void mtsManagerLocal::GetDescriptionOfEventGenerator(std::string & description,
+                                                     const std::string & componentName, 
+                                                     const std::string & providedInterfaceName, 
+                                                     const std::string & eventGeneratorName,
+                                                     const std::string & listenerID)
+{
+    mtsComponent * component = GetComponent(componentName);
+    if (!component) return;
+
+    mtsProvidedInterface * providedInterface = component->GetProvidedInterface(providedInterfaceName);
+    if (!providedInterface) return;
+
+    // Get event generator type
+    char eventGeneratorType = *eventGeneratorName.c_str();
+    std::string actualEventGeneratorName = eventGeneratorName.substr(3, eventGeneratorName.size() - 2);
+
+    description = "Parameter type: ";
+    switch (eventGeneratorType) {
+        case 'V':
+            {
+                mtsCommandVoidBase * eventGenerator = providedInterface->EventVoidGenerators.GetItem(actualEventGeneratorName);
+                if (!eventGenerator) {
+                    description = "No void event generator found";
+                    return;
+                }
+                description += "(none)";
+            }
+            break;
+        case 'W':
+            {
+                mtsCommandWriteBase * eventGenerator = providedInterface->EventWriteGenerators.GetItem(actualEventGeneratorName);
+                if (!eventGenerator) {
+                    description = "No write event generator found";
+                    return;
+                }
+                description += eventGenerator->GetArgumentClassServices()->GetName();
+            }
+            break;
+        default:
+            description = "Failed to get event generator description";
+            return;
+    }
+}
+
+void mtsManagerLocal::GetDescriptionOfFunction(std::string & description,
+                                               const std::string & componentName, 
+                                               const std::string & requiredInterfaceName, 
+                                               const std::string & functionName,
+                                               const std::string & listenerID)
+{
+    mtsComponent * component = GetComponent(componentName);
+    if (!component) return;
+
+    mtsRequiredInterface * requiredInterface = component->GetRequiredInterface(requiredInterfaceName);
+    if (!requiredInterface) return;
+
+    // Get function type
+    char functionType = *functionName.c_str();
+    std::string actualFunctionName = functionName.substr(3, functionName.size() - 2);
+
+    description = "Resource parameter type: ";
+    switch (functionType) {
+        case 'V':
+            {
+                mtsRequiredInterface::CommandInfo<mtsCommandVoidBase> * function = requiredInterface->CommandPointersVoid.GetItem(actualFunctionName);
+                if (!function) {
+                    description = "No void function found";
+                    return;
+                }
+                description += "(none)";
+            }
+            break;
+        case 'W':
+            {
+                mtsRequiredInterface::CommandInfo<mtsCommandWriteBase> * function = requiredInterface->CommandPointersWrite.GetItem(actualFunctionName);
+                if (!function) {
+                    description = "No write function found";
+                    return;
+                }
+                if (*function->CommandPointer) {
+                    description += (*function->CommandPointer)->GetArgumentClassServices()->GetName();
+                } else {
+                    description += "(unbounded write function)";
+                }
+            }
+            break;
+        case 'R':
+            {
+                mtsRequiredInterface::CommandInfo<mtsCommandReadBase> * function = requiredInterface->CommandPointersRead.GetItem(actualFunctionName);
+                if (!function) {
+                    description = "No read function found";
+                    return;
+                }
+                if (*function->CommandPointer) {
+                    description += (*function->CommandPointer)->GetArgumentClassServices()->GetName();
+                } else {
+                    description += "(unbounded read function)";
+                }
+            }
+            break;
+        case 'Q':
+            {
+                mtsRequiredInterface::CommandInfo<mtsCommandQualifiedReadBase> * function = requiredInterface->CommandPointersQualifiedRead.GetItem(actualFunctionName);
+                if (!function) {
+                    description = "No qualified read function found";
+                    return;
+                }
+                if (*function->CommandPointer) {
+                    description = "Resource parameter1 type: ";
+                    description += (*function->CommandPointer)->GetArgument1ClassServices()->GetName();
+                    description += "\nResource parameter2 type: ";
+                    description += (*function->CommandPointer)->GetArgument2ClassServices()->GetName();
+                } else {
+                    description = "Resource parameter1 type: ";
+                    description += "(unbounded qualified read function)";
+                    description += "\nResource parameter2 type: ";
+                    description += "(unbounded qualified read function)";
+                }
+                
+            }
+            break;
+        default:
+            description = "Failed to get function description";
+            return;
+    }
+}
+
+void mtsManagerLocal::GetDescriptionOfEventHandler(std::string & description,
+                                                   const std::string & componentName, 
+                                                   const std::string & requiredInterfaceName, 
+                                                   const std::string & eventHandlerName,
+                                                   const std::string & listenerID)
+{
+    mtsComponent * component = GetComponent(componentName);
+    if (!component) return;
+
+    mtsRequiredInterface * requiredInterface = component->GetRequiredInterface(requiredInterfaceName);
+    if (!requiredInterface) return;
+
+    // Get event handler type
+    char eventHandlerType = *eventHandlerName.c_str();
+    std::string actualEventHandlerName = eventHandlerName.substr(3, eventHandlerName.size() - 2);
+
+    description = "Parameter type: ";
+    switch (eventHandlerType) {
+        case 'V':
+            {
+                mtsCommandVoidBase * command = requiredInterface->EventHandlersVoid.GetItem(actualEventHandlerName);
+                if (!command) {
+                    description = "No void event handler found";
+                    return;
+                }
+                description += "(none)";
+            }
+            break;
+        case 'W':
+            {
+                mtsCommandWriteBase * command = requiredInterface->EventHandlersWrite.GetItem(actualEventHandlerName);
+                if (!command) {
+                    description = "No write event handler found";
+                    return;
+                }
+                description += command->GetArgumentClassServices()->GetName();
+            }
+            break;
+        default:
+            description = "Failed to get event handler description";
+            return;
+    }
+}
+
 #endif
 
 mtsComponent * mtsManagerLocal::GetComponent(const std::string & componentName) const

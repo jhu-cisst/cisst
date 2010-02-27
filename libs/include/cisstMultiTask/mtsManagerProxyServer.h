@@ -221,6 +221,29 @@ public:
                                  const std::string & requiredInterfaceName, 
                                  const std::string & listenerID = "");
 
+    void GetDescriptionOfCommand(std::string & description,
+                                 const std::string & componentName, 
+                                 const std::string & providedInterfaceName, 
+                                 const std::string & commandName,
+                                 const std::string & listenerID = "");
+
+    void GetDescriptionOfEventGenerator(std::string & description,
+                                        const std::string & componentName, 
+                                        const std::string & providedInterfaceName, 
+                                        const std::string & eventGeneratorName,
+                                        const std::string & listenerID = "");
+
+    void GetDescriptionOfFunction(std::string & description,
+                                  const std::string & componentName, 
+                                  const std::string & requiredInterfaceName, 
+                                  const std::string & functionName,
+                                  const std::string & listenerID = "");
+
+    void GetDescriptionOfEventHandler(std::string & description,
+                                      const std::string & componentName, 
+                                      const std::string & requiredInterfaceName, 
+                                      const std::string & eventHandlerName,
+                                      const std::string & listenerID = "");
 
     const int GetCurrentInterfaceCount(const std::string & componentName, const std::string & listenerID = "");
 
@@ -298,6 +321,30 @@ public:
                                      const std::string & componentName, 
                                      const std::string & requiredInterfaceName, 
                                      const std::string & clientID);
+
+    void SendGetDescriptionOfCommand(std::string & description, 
+                                     const std::string & componentName, 
+                                     const std::string & providedInterfaceName, 
+                                     const std::string & commandName, 
+                                     const std::string & clientID);
+
+    void SendGetDescriptionOfEventGenerator(std::string & description, 
+                                            const std::string & componentName, 
+                                            const std::string & providedInterfaceName, 
+                                            const std::string & eventGeneratorName, 
+                                            const std::string & clientID);
+
+    void SendGetDescriptionOfFunction(std::string & description, 
+                                      const std::string & componentName, 
+                                      const std::string & requiredInterfaceName, 
+                                      const std::string & functionName, 
+                                      const std::string & clientID);
+
+    void SendGetDescriptionOfEventHandler(std::string & description, 
+                                          const std::string & componentName, 
+                                          const std::string & requiredInterfaceName, 
+                                          const std::string & eventHandlerName, 
+                                          const std::string & clientID);
 
     std::string SendGetProcessName(const std::string & clientID);
 

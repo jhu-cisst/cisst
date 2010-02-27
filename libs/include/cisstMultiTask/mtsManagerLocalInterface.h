@@ -137,6 +137,34 @@ public:
                                          const std::string & requiredInterfaceName, 
                                          const std::string & listenerID = "") = 0;
 
+    /*! Get description of a command in a provided interface */
+    virtual void GetDescriptionOfCommand(std::string & description,
+                                         const std::string & componentName, 
+                                         const std::string & providedInterfaceName, 
+                                         const std::string & commandName,
+                                         const std::string & listenerID = "") = 0;
+
+    /*! Get description of a event generator in a provided interface */
+    virtual void GetDescriptionOfEventGenerator(std::string & description,
+                                                const std::string & componentName,
+                                                const std::string & providedInterfaceName, 
+                                                const std::string & eventGeneratorName,
+                                                const std::string & listenerID = "") = 0;
+
+    /*! Get description of a function in a required interface */
+    virtual void GetDescriptionOfFunction(std::string & description,
+                                          const std::string & componentName, 
+                                          const std::string & requiredInterfaceName, 
+                                          const std::string & functionName,
+                                          const std::string & listenerID = "") = 0;
+
+    /*! Get description of a function in a required  interface */
+    virtual void GetDescriptionOfEventHandler(std::string & description,
+                                              const std::string & componentName, 
+                                              const std::string & requiredInterfaceName, 
+                                              const std::string & eventHandlerName,
+                                              const std::string & listenerID = "") = 0;
+
     /*! Extract all the information on a provided interface (command objects
         and event generators with arguments serialized) */
     virtual bool GetProvidedInterfaceDescription(

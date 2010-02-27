@@ -583,6 +583,30 @@ void mtsManagerProxyServer::GetNamesOfEventHandlers(std::vector<std::string>& na
     SendGetNamesOfEventHandlers(namesOfEventHandlers, componentName, requiredInterfaceName, listenerID);
 }
 
+void mtsManagerProxyServer::GetDescriptionOfCommand(std::string & description,
+    const std::string & componentName, const std::string & providedInterfaceName, const std::string & commandName, const std::string & listenerID)
+{
+    SendGetDescriptionOfCommand(description, componentName, providedInterfaceName, commandName, listenerID);
+}
+
+void mtsManagerProxyServer::GetDescriptionOfEventGenerator(std::string & description,
+    const std::string & componentName, const std::string & providedInterfaceName, const std::string & eventGeneratorName, const std::string & listenerID)
+{
+    SendGetDescriptionOfEventGenerator(description, componentName, providedInterfaceName, eventGeneratorName, listenerID);
+}
+
+void mtsManagerProxyServer::GetDescriptionOfFunction(std::string & description,
+    const std::string & componentName, const std::string & requiredInterfaceName, const std::string & functionName, const std::string & listenerID)
+{
+    SendGetDescriptionOfFunction(description, componentName, requiredInterfaceName, functionName, listenerID);
+}
+
+void mtsManagerProxyServer::GetDescriptionOfEventHandler(std::string & description,
+    const std::string & componentName, const std::string & requiredInterfaceName, const std::string & eventHandlerName, const std::string & listenerID)
+{
+    SendGetDescriptionOfEventHandler(description, componentName, requiredInterfaceName, eventHandlerName, listenerID);
+}
+
 const int mtsManagerProxyServer::GetCurrentInterfaceCount(const std::string & componentName, const std::string & listenerID)
 {
     return SendGetCurrentInterfaceCount(componentName, listenerID);
@@ -1049,6 +1073,70 @@ void mtsManagerProxyServer::SendGetNamesOfEventHandlers(std::vector<std::string>
 #endif
 
     (*clientProxy)->GetNamesOfEventHandlers(componentName, requiredInterfaceName, namesOfEventHandlers);
+}
+
+void mtsManagerProxyServer::SendGetDescriptionOfCommand(std::string & description, 
+    const std::string & componentName, const std::string & providedInterfaceName, const std::string & commandName, const std::string & clientID)
+{
+    ManagerClientProxyType * clientProxy = GetNetworkProxyClient(clientID);
+    if (!clientProxy) {
+        LogError(mtsManagerProxyServer, "SendGetDescriptionOfCommand: invalid listenerID (" << clientID << ") or inactive server proxy");
+        return;
+    }
+
+#ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
+    LogPrint(mtsManagerProxyServer, ">>>>> SEND: SendGetDescriptionOfCommand: " << componentName << ", " << providedInterfaceName << ", " << commandName << ", " << clientID);
+#endif
+
+    (*clientProxy)->GetDescriptionOfCommand(componentName, providedInterfaceName, commandName, description);
+}
+
+void mtsManagerProxyServer::SendGetDescriptionOfEventGenerator(std::string & description, 
+    const std::string & componentName, const std::string & providedInterfaceName, const std::string & eventGeneratorName, const std::string & clientID)
+{
+    ManagerClientProxyType * clientProxy = GetNetworkProxyClient(clientID);
+    if (!clientProxy) {
+        LogError(mtsManagerProxyServer, "SendGetDescriptionOfEventGenerator: invalid listenerID (" << clientID << ") or inactive server proxy");
+        return;
+    }
+
+#ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
+    LogPrint(mtsManagerProxyServer, ">>>>> SEND: SendGetDescriptionOfEventGenerator: " << componentName << ", " << providedInterfaceName << ", " << eventGeneratorName << ", " << clientID);
+#endif
+
+    (*clientProxy)->GetDescriptionOfEventGenerator(componentName, providedInterfaceName, eventGeneratorName, description);
+}
+
+void mtsManagerProxyServer::SendGetDescriptionOfFunction(std::string & description, 
+    const std::string & componentName, const std::string & requiredInterfaceName, const std::string & functionName, const std::string & clientID)
+{
+    ManagerClientProxyType * clientProxy = GetNetworkProxyClient(clientID);
+    if (!clientProxy) {
+        LogError(mtsManagerProxyServer, "SendGetDescriptionOfFunction: invalid listenerID (" << clientID << ") or inactive server proxy");
+        return;
+    }
+
+#ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
+    LogPrint(mtsManagerProxyServer, ">>>>> SEND: SendGetDescriptionOfFunction: " << componentName << ", " << requiredInterfaceName << ", " << functionName << ", " << clientID);
+#endif
+
+    (*clientProxy)->GetDescriptionOfFunction(componentName, requiredInterfaceName, functionName, description);
+}
+
+void mtsManagerProxyServer::SendGetDescriptionOfEventHandler(std::string & description, 
+    const std::string & componentName, const std::string & requiredInterfaceName, const std::string & eventHandlerName, const std::string & clientID)
+{
+    ManagerClientProxyType * clientProxy = GetNetworkProxyClient(clientID);
+    if (!clientProxy) {
+        LogError(mtsManagerProxyServer, "SendGetDescriptionOfEventHandler: invalid listenerID (" << clientID << ") or inactive server proxy");
+        return;
+    }
+
+#ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
+    LogPrint(mtsManagerProxyServer, ">>>>> SEND: SendGetDescriptionOfEventHandler: " << componentName << ", " << requiredInterfaceName << ", " << eventHandlerName << ", " << clientID);
+#endif
+
+    (*clientProxy)->GetDescriptionOfEventHandler(componentName, requiredInterfaceName, eventHandlerName, description);
 }
 
 std::string mtsManagerProxyServer::SendGetProcessName(const std::string & clientID)

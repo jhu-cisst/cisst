@@ -174,6 +174,9 @@ protected:
 #ifndef SWIG  // SWIG cannot deal with this
     template <class _commandType>
     class CommandInfo {
+        // For GCM UI
+        friend class mtsManagerLocal;
+
         _commandType **CommandPointer;
         bool IsRequired;
     public:

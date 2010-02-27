@@ -1112,6 +1112,50 @@ void mtsManagerGlobal::GetNamesOfEventHandlers(const std::string & processName,
 
     LocalManagerConnected->GetNamesOfEventHandlers(namesOfEventHandlers, componentName, requiredInterfaceName, processName);
 }
+
+void mtsManagerGlobal::GetDescriptionOfCommand(const std::string & processName, 
+                                               const std::string & componentName, 
+                                               const std::string & providedInterfaceName, 
+                                               const std::string & commandName,
+                                               std::string & description)
+{
+    if (!LocalManagerConnected) return;
+
+    LocalManagerConnected->GetDescriptionOfCommand(description, componentName, providedInterfaceName, commandName, processName);
+}
+
+void mtsManagerGlobal::GetDescriptionOfEventGenerator(const std::string & processName, 
+                                                      const std::string & componentName, 
+                                                      const std::string & providedInterfaceName, 
+                                                      const std::string & eventGeneratorName,
+                                                      std::string & description)
+{
+    if (!LocalManagerConnected) return;
+
+    LocalManagerConnected->GetDescriptionOfEventGenerator(description, componentName, providedInterfaceName, eventGeneratorName, processName);
+}
+
+void mtsManagerGlobal::GetDescriptionOfFunction(const std::string & processName, 
+                                                const std::string & componentName, 
+                                                const std::string & requiredInterfaceName, 
+                                                const std::string & functionName,
+                                                std::string & description)
+{
+    if (!LocalManagerConnected) return;
+
+    LocalManagerConnected->GetDescriptionOfFunction(description, componentName, requiredInterfaceName, functionName, processName);
+}
+
+void mtsManagerGlobal::GetDescriptionOfEventHandler(const std::string & processName, 
+                                                    const std::string & componentName, 
+                                                    const std::string & requiredInterfaceName, 
+                                                    const std::string & eventHandlerName,
+                                                    std::string & description)
+{
+    if (!LocalManagerConnected) return;
+
+    LocalManagerConnected->GetDescriptionOfEventHandler(description, componentName, requiredInterfaceName, eventHandlerName, processName);
+}
 #endif
 
 //-------------------------------------------------------------------------

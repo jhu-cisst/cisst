@@ -428,6 +428,26 @@ void mtsManagerProxyClient::ReceiveGetNamesOfEventHandlers(const std::string & c
     ProxyOwner->GetNamesOfEventHandlers(names, componentName, requiredInterfaceName);
 }
 
+void mtsManagerProxyClient::ReceiveGetDescriptionOfCommand(const std::string & componentName, const std::string & providedInterfaceName, const std::string & commandName, std::string & description) const
+{
+    ProxyOwner->GetDescriptionOfCommand(description, componentName, providedInterfaceName, commandName);
+}
+
+void mtsManagerProxyClient::ReceiveGetDescriptionOfEventGenerator(const std::string & componentName, const std::string & providedInterfaceName, const std::string & eventGeneratorName, std::string & description) const
+{
+    ProxyOwner->GetDescriptionOfEventGenerator(description, componentName, providedInterfaceName, eventGeneratorName);
+}
+
+void mtsManagerProxyClient::ReceiveGetDescriptionOfFunction(const std::string & componentName, const std::string & requiredInterfaceName, const std::string & functionName, std::string & description) const
+{
+    ProxyOwner->GetDescriptionOfFunction(description, componentName, requiredInterfaceName, functionName);
+}
+
+void mtsManagerProxyClient::ReceiveGetDescriptionOfEventHandler(const std::string & componentName, const std::string & requiredInterfaceName, const std::string & eventHandlerName, std::string & description) const
+{
+    ProxyOwner->GetDescriptionOfEventHandler(description, componentName, requiredInterfaceName, eventHandlerName);
+}
+
 std::string mtsManagerProxyClient::ReceiveGetProcessName()
 {
     return ProxyOwner->GetProcessName();
@@ -974,4 +994,40 @@ void mtsManagerProxyClient::ManagerClientI::GetNamesOfEventHandlers(const std::s
 #endif
 
     return ManagerProxyClient->ReceiveGetNamesOfEventHandlers(componentName, requiredInterfaceName, names);
+}
+
+void mtsManagerProxyClient::ManagerClientI::GetDescriptionOfCommand(const std::string & componentName, const std::string & providedInterfaceName, const std::string & commandName, std::string & description, const ::Ice::Current & current) const
+{
+#ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
+    LogPrint(ManagerClientI, "<<<<< RECV: GetDescriptionOfCommand: " << componentName << ", " << providedInterfaceName << ", " << commandName);
+#endif
+
+    return ManagerProxyClient->ReceiveGetDescriptionOfCommand(componentName, providedInterfaceName, commandName, description);
+}
+
+void mtsManagerProxyClient::ManagerClientI::GetDescriptionOfEventGenerator(const std::string & componentName, const std::string & providedInterfaceName, const std::string & eventGeneratorName, std::string & description, const ::Ice::Current & current) const
+{
+#ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
+    LogPrint(ManagerClientI, "<<<<< RECV: GetDescriptionOfEventGenerator: " << componentName << ", " << providedInterfaceName << ", " << eventGeneratorName);
+#endif
+
+    return ManagerProxyClient->ReceiveGetDescriptionOfEventGenerator(componentName, providedInterfaceName, eventGeneratorName, description);
+}
+
+void mtsManagerProxyClient::ManagerClientI::GetDescriptionOfFunction(const std::string & componentName, const std::string & requiredInterfaceName, const std::string & functionName, std::string & description, const ::Ice::Current & current) const
+{
+#ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
+    LogPrint(ManagerClientI, "<<<<< RECV: GetDescriptionOfFunction: " << componentName << ", " << requiredInterfaceName << ", " << functionName);
+#endif
+
+    return ManagerProxyClient->ReceiveGetDescriptionOfFunction(componentName, requiredInterfaceName, functionName, description);
+}
+
+void mtsManagerProxyClient::ManagerClientI::GetDescriptionOfEventHandler(const std::string & componentName, const std::string & requiredInterfaceName, const std::string & eventHandlerName, std::string & description, const ::Ice::Current & current) const
+{
+#ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
+    LogPrint(ManagerClientI, "<<<<< RECV: GetDescriptionOfEventHandler: " << componentName << ", " << requiredInterfaceName << ", " << eventHandlerName);
+#endif
+
+    return ManagerProxyClient->ReceiveGetDescriptionOfEventHandler(componentName, requiredInterfaceName, eventHandlerName, description);
 }

@@ -8,75 +8,101 @@ class GlobalComponentManagerUI {open
   } {
     Fl_Window DisplayWindow {
       label {Global Component Manager} open
-      xywh {600 194 659 586} type Double box THIN_UP_BOX align 80 visible
+      xywh {515 167 686 579} type Double box THIN_UP_BOX align 80 visible
     } {
       Fl_Tabs {} {open
-        xywh {10 55 635 475} box UP_BOX color 46 labelsize 12
+        xywh {10 55 665 475} box UP_BOX color 46 labelsize 12
       } {
         Fl_Group {} {
           label {Component Inspector} open selected
-          xywh {20 80 625 450} labelfont 1 labelsize 13
+          xywh {20 80 655 450} labelfont 1 labelsize 13
         } {
-          Fl_Group {} {open
-            xywh {165 90 470 145} box BORDER_BOX
+          Fl_Group {} {
+            label {Provided Interface} open
+            xywh {20 220 645 145} box UP_BOX labelfont 1 labelsize 12 align 21
           } {
-            Fl_Browser BrowserProvidedInterfaces {
-              label {Provided Interfaces}
-              xywh {175 110 130 115} type Hold box DOWN_BOX selection_color 4 labelfont 1 labelsize 12 align 5 textsize 12
-            }
             Fl_Browser BrowserCommands {
               label Commands
-              xywh {315 110 150 115} type Hold box DOWN_BOX selection_color 4 labelfont 1 labelsize 12 align 5 textsize 12
+              xywh {30 255 120 100} type Hold box DOWN_BOX selection_color 4 labelfont 1 labelsize 12 align 5 textsize 12
             }
             Fl_Browser BrowserEventGenerators {
               label {Event Generators}
-              xywh {475 110 150 115} type Hold box DOWN_BOX selection_color 4 labelfont 1 labelsize 12 align 5 textsize 12
+              xywh {160 255 115 100} type Hold box DOWN_BOX selection_color 4 labelfont 1 labelsize 12 align 5 textsize 12
+            }
+            Fl_Output OutputCommandDescription {
+              label {Command Description}
+              xywh {285 240 370 49} type Multiline labelfont 1 labelsize 12 align 5 textfont 4 textsize 12
+            }
+            Fl_Output OutputEventGeneratorDescription {
+              label {Event Generator Description}
+              xywh {285 308 370 49} type Multiline labelfont 1 labelsize 12 align 5 textfont 4 textsize 12
             }
           }
           Fl_Browser BrowserProcesses {
             label Processes
             callback {BrowserProcessClicked = true;}
-            xywh {20 105 135 105} type Hold box DOWN_BOX selection_color 4 labelfont 1 labelsize 12 align 5 textsize 12
+            xywh {20 105 110 105} type Hold box DOWN_BOX selection_color 4 labelfont 1 labelsize 12 align 5 textsize 12
           }
           Fl_Browser BrowserComponents {
             label Components
             callback {BrowserComponentClicked = true;}
-            xywh {20 230 135 130} type Hold box DOWN_BOX selection_color 4 labelfont 1 labelsize 12 align 5 textsize 12
+            xywh {140 105 110 105} type Hold box DOWN_BOX selection_color 4 labelfont 1 labelsize 12 align 5 textsize 12
           }
-          Fl_Group {} {open
-            xywh {165 240 470 150} box BORDER_BOX
+          Fl_Group {} {
+            label {Required Interface} open
+            xywh {20 375 645 145} box UP_BOX labelfont 1 labelsize 12 align 21
           } {
-            Fl_Browser BrowserRequiredInterfaces {
-              label {Required Interfaces}
-              xywh {175 265 130 115} type Hold box DOWN_BOX selection_color 4 labelfont 1 labelsize 12 align 5 textsize 12
-            }
             Fl_Browser BrowserFunctions {
               label Functions
-              xywh {315 265 150 115} type Hold box DOWN_BOX selection_color 4 labelfont 1 labelsize 12 align 5 textsize 12
+              xywh {30 410 120 100} type Hold box DOWN_BOX selection_color 4 labelfont 1 labelsize 12 align 5 textsize 12
             }
             Fl_Browser BrowserEventHandlers {
               label {Event Handlers}
-              xywh {475 265 150 115} type Hold box DOWN_BOX selection_color 4 labelfont 1 labelsize 12 align 5 textsize 12
+              xywh {160 410 115 100} type Hold box DOWN_BOX selection_color 4 labelfont 1 labelsize 12 align 5 textsize 12
+            }
+            Fl_Output OutputFunctionDescription {
+              label {Function Description}
+              xywh {285 397 370 47} type Multiline labelfont 1 labelsize 12 align 5 textfont 4 textsize 12
+            }
+            Fl_Output OutputEventHandlerDescription {
+              label {Event Handler Description}
+              xywh {285 463 370 47} type Multiline labelfont 1 labelsize 12 align 5 textfont 4 textsize 12
             }
           }
-          Fl_Light_Button ButtonRefresh {
+          Fl_Light_Button ButtonAutoRefresh {
             label {Auto Refresh}
             callback {ButtonAutoRefreshClicked = true;}
-            xywh {20 365 135 25} value 1 labelfont 1 labelsize 12 align 16
+            xywh {560 160 105 50} value 1 labelfont 1 labelsize 12 align 16
           }
-          Fl_Output TextOutputLog {
-            xywh {20 400 615 120} type Multiline labelfont 13 labelsize 10 align 37 textsize 12
+          Fl_Browser BrowserProvidedInterfaces {
+            label {Provided Interfaces}
+            xywh {260 105 140 105} type Hold box DOWN_BOX selection_color 4 labelfont 1 labelsize 12 align 5 textsize 12
+          }
+          Fl_Browser BrowserRequiredInterfaces {
+            label {Required Interfaces}
+            xywh {410 105 140 105} type Hold box DOWN_BOX selection_color 4 labelfont 1 labelsize 12 align 5 textsize 12
+          }
+          Fl_Button ButtonRefresh {
+            label Refresh
+            callback {ButtonRefreshClicked = true;}
+            xywh {560 105 105 45} labelfont 1 labelsize 12
           }
         }
-        Fl_Group {} {
+        Fl_Group DataVisualizer {
           label {Data Visualizer} open
-          xywh {20 80 625 450} labelfont 1 labelsize 13 hide
-        } {}
+          xywh {20 80 650 450} labelfont 1 labelsize 13 hide
+        } {
+          Fl_Box GraphPane {
+            label {Graph Region}
+            xywh {20 90 645 320} box BORDER_BOX labelfont 1 labelsize 12
+            code0 {\#include "MULTIPLOT.h"}
+          }
+        }
       }
       Fl_Return_Button Close {
         label Close
         callback {DisplayWindow->hide();}
-        xywh {10 545 635 30} box GTK_THIN_UP_BOX color 48
+        xywh {10 540 665 30} box GTK_THIN_UP_BOX color 48
       }
       Fl_Text_Display TextDisplayHostIP {
         label {Host IP: }
@@ -89,6 +115,8 @@ class GlobalComponentManagerUI {open
     code {DisplayWindow->show();} {}
   }
   decl {bool ButtonAutoRefreshClicked;} {public
+  }
+  decl {bool ButtonRefreshClicked;} {public
   }
   decl {bool BrowserProcessClicked;} {public
   }

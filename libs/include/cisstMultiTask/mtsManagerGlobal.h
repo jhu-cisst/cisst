@@ -383,6 +383,34 @@ public:
                                  const std::string & componentName, 
                                  const std::string & requiredInterfaceName, 
                                  std::vector<std::string>& namesOfEventHandlers);
+
+    /*! Get description of a command in a provided interface */
+    void GetDescriptionOfCommand(const std::string & processName, 
+                                 const std::string & componentName, 
+                                 const std::string & providedInterfaceName, 
+                                 const std::string & commandName,
+                                 std::string & description);
+
+    /*! Get description of a event generator in a provided interface */
+    void GetDescriptionOfEventGenerator(const std::string & processName, 
+                                        const std::string & componentName, 
+                                        const std::string & providedInterfaceName, 
+                                        const std::string & eventGeneratorName,
+                                        std::string & description);
+
+    /*! Get description of a function in a required interface */
+    void GetDescriptionOfFunction(const std::string & processName, 
+                                  const std::string & componentName, 
+                                  const std::string & requiredInterfaceName, 
+                                  const std::string & functionName,
+                                  std::string & description);
+
+    /*! Get description of a function in a required  interface */
+    void GetDescriptionOfEventHandler(const std::string & processName, 
+                                      const std::string & componentName, 
+                                      const std::string & requiredInterfaceName, 
+                                      const std::string & eventHandlerName,
+                                      std::string & description);
 #endif
 
     /*! Get a process object (local component manager object) */

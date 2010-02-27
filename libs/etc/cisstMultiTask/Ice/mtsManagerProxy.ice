@@ -175,6 +175,19 @@ module mtsManagerProxy
 
         ["cpp:const"] idempotent
         void GetNamesOfEventHandlers(string componentName, string requiredInterfaceName, out NamesOfEventHandlersSequence names);
+
+        ["cpp:const"] idempotent
+        void GetDescriptionOfCommand(string componentName, string providedInterfaceName, string commandName, out string description);
+
+        ["cpp:const"] idempotent
+        void GetDescriptionOfEventGenerator(string componentName, string providedInterfaceName, string eventGeneratorName, out string description);
+
+        ["cpp:const"] idempotent
+        void GetDescriptionOfFunction(string componentName, string requiredInterfaceName, string functionName, out string description);
+
+        ["cpp:const"] idempotent
+        void GetDescriptionOfEventHandler(string componentName, string requiredInterfaceName, string eventHandlerName, out string description);
+
 	};
 
 	interface ManagerServer
