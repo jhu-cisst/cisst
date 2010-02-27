@@ -45,10 +45,6 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
     }
     CMN_LOG_INIT_VERBOSE << "Global component manager started..." << std::endl;
 
-    //
-    // TODO: instead of 1, it would be good if mtsManagerGlobal::StartServer() 
-    // works as in a blocking function such that main() does not need while loop.
-    //
     while (1) {
         osaSleep(10 * cmn_ms);
     }

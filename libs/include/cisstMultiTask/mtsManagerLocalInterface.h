@@ -113,6 +113,30 @@ public:
     virtual const std::string GetProcessName(const std::string & listenerID = "") = 0;
 
 #if CISST_MTS_HAS_ICE
+    /*! Get names of all commands in a provided interface */
+    virtual void GetNamesOfCommands(std::vector<std::string>& namesOfCommands,
+                                    const std::string & componentName, 
+                                    const std::string & providedInterfaceName, 
+                                    const std::string & listenerID = "") = 0;
+
+    /*! Get names of all event generators in a provided interface */
+    virtual void GetNamesOfEventGenerators(std::vector<std::string>& namesOfEventGenerators,
+                                           const std::string & componentName, 
+                                           const std::string & providedInterfaceName, 
+                                           const std::string & listenerID = "") = 0;
+
+    /*! Get names of all functions in a required interface */
+    virtual void GetNamesOfFunctions(std::vector<std::string>& namesOfFunctions,
+                                     const std::string & componentName, 
+                                     const std::string & requiredInterfaceName, 
+                                     const std::string & listenerID = "") = 0;
+
+    /*! Get names of all event handlers in a required interface */
+    virtual void GetNamesOfEventHandlers(std::vector<std::string>& namesOfEventHandlers,
+                                         const std::string & componentName, 
+                                         const std::string & requiredInterfaceName, 
+                                         const std::string & listenerID = "") = 0;
+
     /*! Extract all the information on a provided interface (command objects
         and event generators with arguments serialized) */
     virtual bool GetProvidedInterfaceDescription(

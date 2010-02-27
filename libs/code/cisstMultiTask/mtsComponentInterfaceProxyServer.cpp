@@ -36,6 +36,7 @@ mtsComponentInterfaceProxyServer::mtsComponentInterfaceProxyServer(
     const std::string & adapterName, const std::string & communicatorID)
     : BaseServerType(ICE_PROPERTY_FILE_ROOT"config.server", adapterName, communicatorID)
 {
+    ProxyName = "ComponentInterfaceProxyClient";
 }
 
 mtsComponentInterfaceProxyServer::~mtsComponentInterfaceProxyServer()

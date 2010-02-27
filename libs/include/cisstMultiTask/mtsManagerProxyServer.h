@@ -201,6 +201,27 @@ public:
 
     const std::string GetProcessName(const std::string & listenerID = "");
 
+    void GetNamesOfCommands(std::vector<std::string>& namesOfCommands,
+                            const std::string & componentName, 
+                            const std::string & providedInterfaceName, 
+                            const std::string & listenerID = "");
+
+    void GetNamesOfEventGenerators(std::vector<std::string>& namesOfEventGenerators,
+                                   const std::string & componentName, 
+                                   const std::string & providedInterfaceName, 
+                                   const std::string & listenerID = "");
+
+    void GetNamesOfFunctions(std::vector<std::string>& namesOfFunctions,
+                             const std::string & componentName, 
+                             const std::string & requiredInterfaceName, 
+                             const std::string & listenerID = "");
+
+    void GetNamesOfEventHandlers(std::vector<std::string>& namesOfEventHandlers,
+                                 const std::string & componentName, 
+                                 const std::string & requiredInterfaceName, 
+                                 const std::string & listenerID = "");
+
+
     const int GetCurrentInterfaceCount(const std::string & componentName, const std::string & listenerID = "");
 
     //-------------------------------------------------------------------------
@@ -257,6 +278,26 @@ public:
         const std::string & requiredInterfaceName,
         ::mtsManagerProxy::RequiredInterfaceDescription & requiredInterfaceDescription,
         const std::string & clientID);
+
+    void SendGetNamesOfCommands(std::vector<std::string>& namesOfCommands,
+                                const std::string & componentName, 
+                                const std::string & providedInterfaceName, 
+                                const std::string & clientID);
+
+    void SendGetNamesOfEventGenerators(std::vector<std::string>& namesOfEventGenerators,
+                                       const std::string & componentName, 
+                                       const std::string & providedInterfaceName, 
+                                       const std::string & clientID);
+
+    void SendGetNamesOfFunctions(std::vector<std::string>& namesOfFunctions,
+                                 const std::string & componentName, 
+                                 const std::string & requiredInterfaceName, 
+                                 const std::string & clientID);
+
+    void SendGetNamesOfEventHandlers(std::vector<std::string>& namesOfEventHandlers,
+                                     const std::string & componentName, 
+                                     const std::string & requiredInterfaceName, 
+                                     const std::string & clientID);
 
     std::string SendGetProcessName(const std::string & clientID);
 

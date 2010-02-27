@@ -48,6 +48,13 @@ module mtsManagerProxy
         string ServerProvidedInterfaceName;
 	};
 
+    /*! String vector that contains names of objects (e.g. commands, event generators,
+        functions, and event handlers) */
+    sequence<string> NamesOfCommandsSequence;
+    sequence<string> NamesOfEventGeneratorsSequence;
+    sequence<string> NamesOfFunctionsSequence;
+    sequence<string> NamesOfEventHandlersSequence;
+
     //-------------------------------------------
     //  Command and Event Objects
     //-------------------------------------------
@@ -147,12 +154,27 @@ module mtsManagerProxy
         //  Getters
         ["cpp:const"] idempotent
         bool GetProvidedInterfaceDescription(string componentName, string providedInterfaceName, out ProvidedInterfaceDescription providedInterface);
+
         ["cpp:const"] idempotent
         bool GetRequiredInterfaceDescription(string componentName, string requiredInterfaceName, out RequiredInterfaceDescription requiredInterface);
+
         ["cpp:const"] idempotent
         string GetProcessName();
+
         ["cpp:const"] idempotent
         int GetCurrentInterfaceCount(string componentName);
+
+        ["cpp:const"] idempotent
+        void GetNamesOfCommands(string componentName, string providedInterfaceName, out NamesOfCommandsSequence names);
+
+        ["cpp:const"] idempotent
+        void GetNamesOfEventGenerators(string componentName, string providedInterfaceName, out NamesOfEventGeneratorsSequence names);
+
+        ["cpp:const"] idempotent
+        void GetNamesOfFunctions(string componentName, string requiredInterfaceName, out NamesOfFunctionsSequence names);
+
+        ["cpp:const"] idempotent
+        void GetNamesOfEventHandlers(string componentName, string requiredInterfaceName, out NamesOfEventHandlersSequence names);
 	};
 
 	interface ManagerServer

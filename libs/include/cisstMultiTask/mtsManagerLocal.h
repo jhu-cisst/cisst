@@ -294,6 +294,30 @@ public:
     }
 
 #if CISST_MTS_HAS_ICE
+    /*! Get names of all commands in a provided interface */
+    void GetNamesOfCommands(std::vector<std::string>& namesOfCommands,
+                            const std::string & componentName, 
+                            const std::string & providedInterfaceName, 
+                            const std::string & CMN_UNUSED(listenerID) = "");
+
+    /*! Get names of all event generators in a provided interface */
+    void GetNamesOfEventGenerators(std::vector<std::string>& namesOfEventGenerators,
+                                   const std::string & componentName, 
+                                   const std::string & providedInterfaceName, 
+                                   const std::string & CMN_UNUSED(listenerID) = "");
+
+    /*! Get names of all functions in a required interface */
+    void GetNamesOfFunctions(std::vector<std::string>& namesOfFunctions,
+                             const std::string & componentName, 
+                             const std::string & requiredInterfaceName, 
+                             const std::string & CMN_UNUSED(listenerID) = "");
+
+    /*! Get names of all event handlers in a required interface */
+    void GetNamesOfEventHandlers(std::vector<std::string>& namesOfEventHandlers,
+                                 const std::string & componentName, 
+                                 const std::string & requiredInterfaceName, 
+                                 const std::string & CMN_UNUSED(listenerID) = "");
+
     /*! Return IP address of this process */
     inline std::string GetIPAddress() const { return ProcessIP; }
 
@@ -319,7 +343,7 @@ public:
     //-------------------------------------------------------------------------
 #if CISST_MTS_HAS_ICE
     /*! Check if a component is a proxy object based on its name */
-    const bool IsProxyComponent(const std::string & componentName) const {
+    static bool IsProxyComponent(const std::string & componentName) {
         const std::string proxyStr = "Proxy";
         size_t found = componentName.find(proxyStr);
         return found != std::string::npos;

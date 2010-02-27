@@ -1,0 +1,97 @@
+# data file for the Fltk User Interface Designer (fluid)
+version 1.0109 
+header_name {.h} 
+code_name {.cxx}
+class GlobalComponentManagerUI {open
+} {
+  Function {GlobalComponentManagerUI()} {open
+  } {
+    Fl_Window DisplayWindow {
+      label {Global Component Manager} open
+      xywh {600 194 659 586} type Double box THIN_UP_BOX align 80 visible
+    } {
+      Fl_Tabs {} {open
+        xywh {10 55 635 475} box UP_BOX color 46 labelsize 12
+      } {
+        Fl_Group {} {
+          label {Component Inspector} open selected
+          xywh {20 80 625 450} labelfont 1 labelsize 13
+        } {
+          Fl_Group {} {open
+            xywh {165 90 470 145} box BORDER_BOX
+          } {
+            Fl_Browser BrowserProvidedInterfaces {
+              label {Provided Interfaces}
+              xywh {175 110 130 115} type Hold box DOWN_BOX selection_color 4 labelfont 1 labelsize 12 align 5 textsize 12
+            }
+            Fl_Browser BrowserCommands {
+              label Commands
+              xywh {315 110 150 115} type Hold box DOWN_BOX selection_color 4 labelfont 1 labelsize 12 align 5 textsize 12
+            }
+            Fl_Browser BrowserEventGenerators {
+              label {Event Generators}
+              xywh {475 110 150 115} type Hold box DOWN_BOX selection_color 4 labelfont 1 labelsize 12 align 5 textsize 12
+            }
+          }
+          Fl_Browser BrowserProcesses {
+            label Processes
+            callback {BrowserProcessClicked = true;}
+            xywh {20 105 135 105} type Hold box DOWN_BOX selection_color 4 labelfont 1 labelsize 12 align 5 textsize 12
+          }
+          Fl_Browser BrowserComponents {
+            label Components
+            callback {BrowserComponentClicked = true;}
+            xywh {20 230 135 130} type Hold box DOWN_BOX selection_color 4 labelfont 1 labelsize 12 align 5 textsize 12
+          }
+          Fl_Group {} {open
+            xywh {165 240 470 150} box BORDER_BOX
+          } {
+            Fl_Browser BrowserRequiredInterfaces {
+              label {Required Interfaces}
+              xywh {175 265 130 115} type Hold box DOWN_BOX selection_color 4 labelfont 1 labelsize 12 align 5 textsize 12
+            }
+            Fl_Browser BrowserFunctions {
+              label Functions
+              xywh {315 265 150 115} type Hold box DOWN_BOX selection_color 4 labelfont 1 labelsize 12 align 5 textsize 12
+            }
+            Fl_Browser BrowserEventHandlers {
+              label {Event Handlers}
+              xywh {475 265 150 115} type Hold box DOWN_BOX selection_color 4 labelfont 1 labelsize 12 align 5 textsize 12
+            }
+          }
+          Fl_Light_Button ButtonRefresh {
+            label {Auto Refresh}
+            callback {ButtonAutoRefreshClicked = true;}
+            xywh {20 365 135 25} value 1 labelfont 1 labelsize 12 align 16
+          }
+          Fl_Output TextOutputLog {
+            xywh {20 400 615 120} type Multiline labelfont 13 labelsize 10 align 37 textsize 12
+          }
+        }
+        Fl_Group {} {
+          label {Data Visualizer} open
+          xywh {20 80 625 450} labelfont 1 labelsize 13 hide
+        } {}
+      }
+      Fl_Return_Button Close {
+        label Close
+        callback {DisplayWindow->hide();}
+        xywh {10 545 635 30} box GTK_THIN_UP_BOX color 48
+      }
+      Fl_Text_Display TextDisplayHostIP {
+        label {Host IP: }
+        xywh {75 15 570 20} box BORDER_BOX selection_color 7 labelfont 1 align 4
+      }
+    }
+  }
+  Function {show(int argc, char**argv)} {open
+  } {
+    code {DisplayWindow->show();} {}
+  }
+  decl {bool ButtonAutoRefreshClicked;} {public
+  }
+  decl {bool BrowserProcessClicked;} {public
+  }
+  decl {bool BrowserComponentClicked;} {public
+  }
+} 

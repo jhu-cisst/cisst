@@ -342,6 +342,47 @@ public:
     std::vector<std::string> GetIPAddress(void) const;
     void GetIPAddress(std::vector<std::string> & ipAddresses) const;
 
+    /*! Get names of all processes */
+    void GetNamesOfProcesses(std::vector<std::string>& namesOfProcesses);
+
+    /*! Get names of all components in a process */
+    void GetNamesOfComponents(const std::string & processName, 
+                              std::vector<std::string>& namesOfComponents);
+
+    /*! Get names of all provided interfaces in a component */
+    void GetNamesOfProvidedInterfaces(const std::string & processName, 
+                                      const std::string & componentName, 
+                                      std::vector<std::string>& namesOfProvidedInterfaces);
+
+    /*! Get names of all required interfaces in a component */
+    void GetNamesOfRequiredInterfaces(const std::string & processName, 
+                                      const std::string & componentName, 
+                                      std::vector<std::string>& namesOfRequiredInterfaces);
+
+    /*! Get names of all commands in a provided interface */
+    void GetNamesOfCommands(const std::string & processName, 
+                            const std::string & componentName, 
+                            const std::string & providedInterfaceName, 
+                            std::vector<std::string>& namesOfCommands);
+
+    /*! Get names of all event generators in a provided interface */
+    void GetNamesOfEventGenerators(const std::string & processName, 
+                                   const std::string & componentName, 
+                                   const std::string & providedInterfaceName, 
+                                   std::vector<std::string>& namesOfEventGenerators);
+
+    /*! Get names of all functions in a required interface */
+    void GetNamesOfFunctions(const std::string & processName, 
+                             const std::string & componentName, 
+                             const std::string & requiredInterfaceName, 
+                             std::vector<std::string>& namesOfFunctions);
+
+    /*! Get names of all event handlers in a required interface */
+    void GetNamesOfEventHandlers(const std::string & processName, 
+                                 const std::string & componentName, 
+                                 const std::string & requiredInterfaceName, 
+                                 std::vector<std::string>& namesOfEventHandlers);
+
     /*! Get a process object (local component manager object) */
     mtsManagerLocalInterface * GetProcessObject(const std::string & processName);
 
@@ -364,6 +405,9 @@ public:
     /*! Start network proxy server. The server's listening port number is
     fetched from config.server file. (default port number: 10705) */
     bool StartServer();
+
+    /*! Stop network proxy server */
+    bool StopServer();
 
     bool SetProvidedInterfaceProxyAccessInfo(
         const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientRequiredInterfaceName,

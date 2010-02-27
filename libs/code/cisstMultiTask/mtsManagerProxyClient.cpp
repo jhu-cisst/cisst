@@ -32,6 +32,7 @@ unsigned int mtsManagerProxyClient::InstanceCounter = 0;
 mtsManagerProxyClient::mtsManagerProxyClient(const std::string & serverEndpointInfo)
     : BaseClientType(ICE_PROPERTY_FILE_ROOT"config.LCM", serverEndpointInfo)
 {
+    ProxyName = "ManagerProxyClient";
 }
 
 mtsManagerProxyClient::~mtsManagerProxyClient()
@@ -405,6 +406,26 @@ bool mtsManagerProxyClient::ReceiveGetRequiredInterfaceDescription(const std::st
     mtsManagerProxyServer::ConstructRequiredInterfaceDescriptionFrom(src, requiredInterfaceDescription);
 
     return true;
+}
+
+void mtsManagerProxyClient::ReceiveGetNamesOfCommands(const std::string & componentName, const std::string & providedInterfaceName, ::mtsManagerProxy::NamesOfCommandsSequence & names) const
+{
+    ProxyOwner->GetNamesOfCommands(names, componentName, providedInterfaceName);
+}
+
+void mtsManagerProxyClient::ReceiveGetNamesOfEventGenerators(const std::string & componentName, const std::string & providedInterfaceName, ::mtsManagerProxy::NamesOfEventGeneratorsSequence & names) const
+{
+    ProxyOwner->GetNamesOfEventGenerators(names, componentName, providedInterfaceName);
+}
+
+void mtsManagerProxyClient::ReceiveGetNamesOfFunctions(const std::string & componentName, const std::string & requiredInterfaceName, ::mtsManagerProxy::NamesOfFunctionsSequence & names) const
+{
+    ProxyOwner->GetNamesOfFunctions(names, componentName, requiredInterfaceName);
+}
+
+void mtsManagerProxyClient::ReceiveGetNamesOfEventHandlers(const std::string & componentName, const std::string & requiredInterfaceName, ::mtsManagerProxy::NamesOfEventHandlersSequence & names) const
+{
+    ProxyOwner->GetNamesOfEventHandlers(names, componentName, requiredInterfaceName);
 }
 
 std::string mtsManagerProxyClient::ReceiveGetProcessName()
@@ -916,4 +937,41 @@ std::string mtsManagerProxyClient::ManagerClientI::GetProcessName(const ::Ice::C
 #endif
 
     return ManagerProxyClient->ReceiveGetCurrentInterfaceCount(componentName);
+}
+
+
+void mtsManagerProxyClient::ManagerClientI::GetNamesOfCommands(const std::string & componentName, const std::string & providedInterfaceName, ::mtsManagerProxy::NamesOfCommandsSequence & names, const ::Ice::Current & current) const
+{
+#ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
+    LogPrint(ManagerClientI, "<<<<< RECV: GetNamesOfCommands: " << componentName << ", " << providedInterfaceName);
+#endif
+
+    return ManagerProxyClient->ReceiveGetNamesOfCommands(componentName, providedInterfaceName, names);
+}
+
+void mtsManagerProxyClient::ManagerClientI::GetNamesOfEventGenerators(const std::string & componentName, const std::string & providedInterfaceName, ::mtsManagerProxy::NamesOfEventGeneratorsSequence & names, const ::Ice::Current & current) const
+{
+#ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
+    LogPrint(ManagerClientI, "<<<<< RECV: GetNamesOfEventGenerators: " << componentName << ", " << providedInterfaceName);
+#endif
+
+    return ManagerProxyClient->ReceiveGetNamesOfEventGenerators(componentName, providedInterfaceName, names);
+}
+
+void mtsManagerProxyClient::ManagerClientI::GetNamesOfFunctions(const std::string & componentName, const std::string & requiredInterfaceName, ::mtsManagerProxy::NamesOfFunctionsSequence & names, const ::Ice::Current & current) const
+{
+#ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
+    LogPrint(ManagerClientI, "<<<<< RECV: GetNamesOfFunctions: " << componentName << ", " << requiredInterfaceName);
+#endif
+
+    return ManagerProxyClient->ReceiveGetNamesOfFunctions(componentName, requiredInterfaceName, names);
+}
+
+void mtsManagerProxyClient::ManagerClientI::GetNamesOfEventHandlers(const std::string & componentName, const std::string & requiredInterfaceName, ::mtsManagerProxy::NamesOfEventHandlersSequence & names, const ::Ice::Current & current) const
+{
+#ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
+    LogPrint(ManagerClientI, "<<<<< RECV: GetNamesOfEventHandlers: " << componentName << ", " << requiredInterfaceName);
+#endif
+
+    return ManagerProxyClient->ReceiveGetNamesOfEventHandlers(componentName, requiredInterfaceName, names);
 }

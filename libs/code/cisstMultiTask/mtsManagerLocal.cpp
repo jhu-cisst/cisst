@@ -414,6 +414,84 @@ void CISST_DEPRECATED mtsManagerLocal::GetNamesOfTasks(std::vector<std::string>&
     }
 }
 
+#if CISST_MTS_HAS_ICE
+void mtsManagerLocal::GetNamesOfCommands(std::vector<std::string>& namesOfCommands,
+                                         const std::string & componentName, 
+                                         const std::string & providedInterfaceName,
+                                         const std::string & listenerID)
+{
+    ProvidedInterfaceDescription desc;
+    if (!GetProvidedInterfaceDescription(componentName, providedInterfaceName, desc)) {
+        return;
+    }
+
+    for (unsigned int i = 0; i < desc.CommandsVoid.size(); ++i) {
+        namesOfCommands.push_back(desc.CommandsVoid[i].Name);
+    }
+    for (unsigned int i = 0; i < desc.CommandsWrite.size(); ++i) {
+        namesOfCommands.push_back(desc.CommandsWrite[i].Name);
+    }
+    for (unsigned int i = 0; i < desc.CommandsRead.size(); ++i) {
+        namesOfCommands.push_back(desc.CommandsRead[i].Name);
+    }
+    for (unsigned int i = 0; i < desc.CommandsQualifiedRead.size(); ++i) {
+        namesOfCommands.push_back(desc.CommandsQualifiedRead[i].Name);
+    }
+}
+
+void mtsManagerLocal::GetNamesOfEventGenerators(std::vector<std::string>& namesOfEventGenerators,
+                                                const std::string & componentName, 
+                                                const std::string & providedInterfaceName,
+                                                const std::string & listenerID)
+{
+    ProvidedInterfaceDescription desc;
+    if (!GetProvidedInterfaceDescription(componentName, providedInterfaceName, desc)) {
+        return;
+    }
+
+    for (unsigned int i = 0; i < desc.EventsVoid.size(); ++i) {
+        namesOfEventGenerators.push_back(desc.EventsVoid[i].Name);
+    }
+    for (unsigned int i = 0; i < desc.EventsWrite.size(); ++i) {
+        namesOfEventGenerators.push_back(desc.EventsWrite[i].Name);
+    }
+}
+
+void mtsManagerLocal::GetNamesOfFunctions(std::vector<std::string>& namesOfFunctions,
+                                          const std::string & componentName, 
+                                          const std::string & requiredInterfaceName,
+                                          const std::string & listenerID)
+{
+    RequiredInterfaceDescription desc;
+    if (!GetRequiredInterfaceDescription(componentName, requiredInterfaceName, desc)) {
+        return;
+    }
+
+    namesOfFunctions.insert(namesOfFunctions.end(), desc.FunctionVoidNames.begin(), desc.FunctionVoidNames.end());
+    namesOfFunctions.insert(namesOfFunctions.end(), desc.FunctionWriteNames.begin(), desc.FunctionWriteNames.end());
+    namesOfFunctions.insert(namesOfFunctions.end(), desc.FunctionReadNames.begin(), desc.FunctionReadNames.end());
+    namesOfFunctions.insert(namesOfFunctions.end(), desc.FunctionQualifiedReadNames.begin(), desc.FunctionQualifiedReadNames.end());
+}
+
+void mtsManagerLocal::GetNamesOfEventHandlers(std::vector<std::string>& namesOfEventHandlers,
+                                              const std::string & componentName, 
+                                              const std::string & requiredInterfaceName,
+                                              const std::string & listenerID)
+{
+    RequiredInterfaceDescription desc;
+    if (!GetRequiredInterfaceDescription(componentName, requiredInterfaceName, desc)) {
+        return;
+    }
+
+    for (unsigned int i = 0; i < desc.EventHandlersVoid.size(); ++i) {
+        namesOfEventHandlers.push_back(desc.EventHandlersVoid[i].Name);
+    }
+    for (unsigned int i = 0; i < desc.EventHandlersWrite.size(); ++i) {
+        namesOfEventHandlers.push_back(desc.EventHandlersWrite[i].Name);
+    }
+}
+#endif
+
 mtsComponent * mtsManagerLocal::GetComponent(const std::string & componentName) const
 {
     return ComponentMap.GetItem(componentName);

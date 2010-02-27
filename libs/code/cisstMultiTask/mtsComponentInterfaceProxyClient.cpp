@@ -36,6 +36,7 @@ mtsComponentInterfaceProxyClient::mtsComponentInterfaceProxyClient(
     : BaseClientType(ICE_PROPERTY_FILE_ROOT"config.client", serverEndpointInfo),
       ProvidedInterfaceProxyInstanceID(providedInterfaceProxyInstanceID)
 {
+    ProxyName = "ComponentInterfaceProxyServer";
 }
 
 mtsComponentInterfaceProxyClient::~mtsComponentInterfaceProxyClient()

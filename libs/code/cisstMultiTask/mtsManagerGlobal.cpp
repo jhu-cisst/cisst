@@ -31,6 +31,9 @@ CMN_IMPLEMENT_SERVICES(mtsManagerGlobal);
 CMN_IMPLEMENT_SERVICES(mtsManagerGlobalInterface);
 
 mtsManagerGlobal::mtsManagerGlobal() : LocalManagerConnected(0)
+#if CISST_MTS_HAS_ICE
+    , ProxyServer(0)
+#endif
 {
     ConnectionID = static_cast<unsigned int>(mtsManagerGlobalInterface::CONNECT_ID_BASE);
 }
@@ -63,6 +66,25 @@ bool mtsManagerGlobal::Cleanup(void)
     ConnectionElementMap.clear();
 
     return ret;
+}
+
+bool mtsManagerGlobal::AddConnectedInterface(ConnectionMapType * connectionMap,
+    const std::string & processName, const std::string & componentName,
+    const std::string & interfaceName, const bool isRemoteConnection)
+{
+    if (!connectionMap) return false;
+
+    ConnectedInterfaceInfo * connectedInterfaceInfo =
+        new ConnectedInterfaceInfo(processName, componentName, interfaceName, isRemoteConnection);
+
+    std::string interfaceUID = GetInterfaceUID(processName, componentName, interfaceName);
+    if (!connectionMap->AddItem(interfaceUID, connectedInterfaceInfo)) {
+        CMN_LOG_CLASS_RUN_ERROR << "Cannot add peer interface's information: "
+            << GetInterfaceUID(processName, componentName, interfaceName) << std::endl;
+        return false;
+    }
+
+    return true;
 }
 
 //-------------------------------------------------------------------------
@@ -617,12 +639,6 @@ unsigned int mtsManagerGlobal::Connect(const std::string & requestProcessName,
                 return false;
             }
         }
-
-        // TODO:
-        // 4. let two LCMs create proxy components
-        // 5. wait for responses from LCMs
-        //    - if timeouts, call disconnect to break and clean current connection
-        //    - if success at both sides, update command id and event handler id
     }
 #endif
 
@@ -833,22 +849,24 @@ bool mtsManagerGlobal::Disconnect(
                 // a local manager server is disconnected due to crashes or any
                 // other reason. This check prevents redundant error messages.
                 mtsManagerProxyServer * proxyClient = dynamic_cast<mtsManagerProxyServer *>(localManagerServer);
-                if (proxyClient->GetNetworkProxyClient(serverProcessName)) {
-                    if (localManagerServer->RemoveRequiredInterfaceProxy(clientComponentProxyName, clientRequiredInterfaceName, serverProcessName)) {
-                        // If no interface exists on the component proxy, it should be removed.
-                        const int interfaceCount = localManagerServer->GetCurrentInterfaceCount(clientComponentProxyName, serverProcessName);
-                        if (interfaceCount != -1) {
-                            if (interfaceCount == 0) {
-                                CMN_LOG_CLASS_RUN_VERBOSE <<"Disconnect: remove client component proxy with no active interface: " << clientComponentProxyName << std::endl;
-                                if (!localManagerServer->RemoveComponentProxy(clientComponentProxyName, serverProcessName)) {
-                                    CMN_LOG_CLASS_RUN_ERROR << "Disconnect: failed to remove client component proxy: "
-                                        << clientComponentProxyName << " on " << serverProcessName << std::endl;
-                                    return false;
+                if (proxyClient) {
+                    if (proxyClient->GetNetworkProxyClient(serverProcessName)) {
+                        if (localManagerServer->RemoveRequiredInterfaceProxy(clientComponentProxyName, clientRequiredInterfaceName, serverProcessName)) {
+                            // If no interface exists on the component proxy, it should be removed.
+                            const int interfaceCount = localManagerServer->GetCurrentInterfaceCount(clientComponentProxyName, serverProcessName);
+                            if (interfaceCount != -1) {
+                                if (interfaceCount == 0) {
+                                    CMN_LOG_CLASS_RUN_VERBOSE <<"Disconnect: remove client component proxy with no active interface: " << clientComponentProxyName << std::endl;
+                                    if (!localManagerServer->RemoveComponentProxy(clientComponentProxyName, serverProcessName)) {
+                                        CMN_LOG_CLASS_RUN_ERROR << "Disconnect: failed to remove client component proxy: "
+                                            << clientComponentProxyName << " on " << serverProcessName << std::endl;
+                                        return false;
+                                    }
                                 }
                             }
+                        } else {
+                            CMN_LOG_CLASS_RUN_WARNING << "Disconnect: failed to update local component manager at server side" << std::endl;
                         }
-                    } else {
-                        CMN_LOG_CLASS_RUN_WARNING << "Disconnect: failed to update local component manager at server side" << std::endl;
                     }
                 }
             }
@@ -885,22 +903,24 @@ bool mtsManagerGlobal::Disconnect(
                 // a local manager server is disconnected due to crashes or any
                 // other reason. This check prevents redundant error messages.
                 mtsManagerProxyServer * proxyClient = dynamic_cast<mtsManagerProxyServer *>(localManagerClient);
-                if (proxyClient->GetNetworkProxyClient(clientProcessName)) {
-                    if (localManagerClient->RemoveProvidedInterfaceProxy(serverComponentProxyName, serverProvidedInterfaceName, clientProcessName)) {
-                        // If no interface exists on the component proxy, it should be removed.
-                        const int interfaceCount = localManagerClient->GetCurrentInterfaceCount(serverComponentProxyName, clientProcessName);
-                        if (interfaceCount != -1) {
-                            if (interfaceCount == 0) {
-                                CMN_LOG_CLASS_RUN_VERBOSE <<"Disconnect: remove server component proxy with no active interface: " << serverComponentProxyName << std::endl;
-                                if (!localManagerClient->RemoveComponentProxy(serverComponentProxyName, clientProcessName)) {
-                                    CMN_LOG_CLASS_RUN_ERROR << "Disconnect: failed to remove server component proxy: "
-                                        << serverComponentProxyName << " on " << clientProcessName << std::endl;
-                                    return false;
+                if (proxyClient) {
+                    if (proxyClient->GetNetworkProxyClient(clientProcessName)) {
+                        if (localManagerClient->RemoveProvidedInterfaceProxy(serverComponentProxyName, serverProvidedInterfaceName, clientProcessName)) {
+                            // If no interface exists on the component proxy, it should be removed.
+                            const int interfaceCount = localManagerClient->GetCurrentInterfaceCount(serverComponentProxyName, clientProcessName);
+                            if (interfaceCount != -1) {
+                                if (interfaceCount == 0) {
+                                    CMN_LOG_CLASS_RUN_VERBOSE <<"Disconnect: remove server component proxy with no active interface: " << serverComponentProxyName << std::endl;
+                                    if (!localManagerClient->RemoveComponentProxy(serverComponentProxyName, clientProcessName)) {
+                                        CMN_LOG_CLASS_RUN_ERROR << "Disconnect: failed to remove server component proxy: "
+                                            << serverComponentProxyName << " on " << clientProcessName << std::endl;
+                                        return false;
+                                    }
                                 }
                             }
+                        } else {
+                            CMN_LOG_CLASS_RUN_WARNING << "Disconnect: failed to update local component manager at client side" << std::endl;
                         }
-                    } else {
-                        CMN_LOG_CLASS_RUN_WARNING << "Disconnect: failed to update local component manager at client side" << std::endl;
                     }
                 }
             }
@@ -943,6 +963,9 @@ bool mtsManagerGlobal::Disconnect(
     return true;
 }
 
+//-------------------------------------------------------------------------
+//  Getters
+//-------------------------------------------------------------------------
 mtsManagerGlobal::ConnectionMapType * mtsManagerGlobal::GetConnectionsOfProvidedInterface(
     const std::string & severProcessName, const std::string & serverComponentName,
     const std::string & providedInterfaceName, InterfaceMapType ** interfaceMap)
@@ -1003,23 +1026,90 @@ mtsManagerGlobal::ConnectionMapType * mtsManagerGlobal::GetConnectionsOfRequired
     return connectionMap;
 }
 
-bool mtsManagerGlobal::AddConnectedInterface(ConnectionMapType * connectionMap,
-    const std::string & processName, const std::string & componentName,
-    const std::string & interfaceName, const bool isRemoteConnection)
+void mtsManagerGlobal::GetNamesOfProcesses(std::vector<std::string>& namesOfProcesses)
 {
-    if (!connectionMap) return false;
+    std::vector<std::string> temp;
+    ProcessMap.GetNames(temp);
 
-    ConnectedInterfaceInfo * connectedInterfaceInfo =
-        new ConnectedInterfaceInfo(processName, componentName, interfaceName, isRemoteConnection);
+    // Filter out mtsManagerProxyServer process which has an ICE proxy that serves
+    // local component managers.
+    namesOfProcesses.insert(namesOfProcesses.begin(), temp.begin() + 1, temp.end());
+}
 
-    std::string interfaceUID = GetInterfaceUID(processName, componentName, interfaceName);
-    if (!connectionMap->AddItem(interfaceUID, connectedInterfaceInfo)) {
-        CMN_LOG_CLASS_RUN_ERROR << "Cannot add peer interface's information: "
-            << GetInterfaceUID(processName, componentName, interfaceName) << std::endl;
-        return false;
-    }
+void mtsManagerGlobal::GetNamesOfComponents(const std::string & processName, 
+                                            std::vector<std::string>& namesOfComponents)
+{
+    ComponentMapType * components = ProcessMap.GetItem(processName);
+    if (!components) return;
 
-    return true;
+    components->GetNames(namesOfComponents);
+}
+
+void mtsManagerGlobal::GetNamesOfProvidedInterfaces(const std::string & processName, 
+                                                    const std::string & componentName, 
+                                                    std::vector<std::string>& namesOfProvidedInterfaces)
+{
+    ComponentMapType * components = ProcessMap.GetItem(processName);
+    if (!components) return;
+
+    InterfaceMapType * interfaces = components->GetItem(componentName);
+    if (!interfaces) return;
+
+    interfaces->ProvidedInterfaceMap.GetNames(namesOfProvidedInterfaces);
+}
+
+void mtsManagerGlobal::GetNamesOfRequiredInterfaces(const std::string & processName, 
+                                                    const std::string & componentName, 
+                                                    std::vector<std::string>& namesOfRequiredInterfaces)
+{
+    ComponentMapType * components = ProcessMap.GetItem(processName);
+    if (!components) return;
+
+    InterfaceMapType * interfaces = components->GetItem(componentName);
+    if (!interfaces) return;
+
+    interfaces->RequiredInterfaceMap.GetNames(namesOfRequiredInterfaces);
+
+}
+
+void mtsManagerGlobal::GetNamesOfCommands(const std::string & processName, 
+                                          const std::string & componentName, 
+                                          const std::string & providedInterfaceName, 
+                                          std::vector<std::string>& namesOfCommands)
+{
+    if (!LocalManagerConnected) return;
+
+    LocalManagerConnected->GetNamesOfCommands(namesOfCommands, componentName, providedInterfaceName, processName);
+}
+
+void mtsManagerGlobal::GetNamesOfEventGenerators(const std::string & processName, 
+                                                 const std::string & componentName, 
+                                                 const std::string & providedInterfaceName, 
+                                                 std::vector<std::string>& namesOfEventGenerators)
+{
+    if (!LocalManagerConnected) return;
+
+    LocalManagerConnected->GetNamesOfEventGenerators(namesOfEventGenerators, componentName, providedInterfaceName, processName);
+}
+
+void mtsManagerGlobal::GetNamesOfFunctions(const std::string & processName, 
+                                           const std::string & componentName, 
+                                           const std::string & requiredInterfaceName, 
+                                           std::vector<std::string>& namesOfFunctions)
+{
+    if (!LocalManagerConnected) return;
+
+    LocalManagerConnected->GetNamesOfFunctions(namesOfFunctions, componentName, requiredInterfaceName, processName);
+}
+
+void mtsManagerGlobal::GetNamesOfEventHandlers(const std::string & processName, 
+                                               const std::string & componentName, 
+                                               const std::string & requiredInterfaceName, 
+                                               std::vector<std::string>& namesOfEventHandlers)
+{
+    if (!LocalManagerConnected) return;
+
+    LocalManagerConnected->GetNamesOfEventHandlers(namesOfEventHandlers, componentName, requiredInterfaceName, processName);
 }
 
 //-------------------------------------------------------------------------
@@ -1041,6 +1131,29 @@ bool mtsManagerGlobal::StartServer()
 
     // Register an instance of mtsComponentInterfaceProxyServer
     LocalManagerConnected = ProxyServer;
+
+    return true;
+}
+
+bool mtsManagerGlobal::StopServer()
+{
+    if (!ProxyServer) {
+        CMN_LOG_CLASS_RUN_ERROR << "StopServer: Proxy is not initialized" << std::endl;
+        return false;
+    }
+
+    if (!ProxyServer->IsActiveProxy()) {
+        CMN_LOG_CLASS_RUN_ERROR << "StopServer: Proxy is not running: " << GetName() << std::endl;
+        return false;
+    }
+
+    LocalManagerConnected = 0;
+
+    // Stop proxy server
+    ProxyServer->Stop();
+    ProxyServer->GetLogger()->trace("mtsManagerGlobal", "Global component manager stopped.");
+
+    delete ProxyServer;
 
     return true;
 }
