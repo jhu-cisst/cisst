@@ -1072,6 +1072,7 @@ void mtsManagerGlobal::GetNamesOfRequiredInterfaces(const std::string & processN
 
 }
 
+#if CISST_MTS_HAS_ICE
 void mtsManagerGlobal::GetNamesOfCommands(const std::string & processName, 
                                           const std::string & componentName, 
                                           const std::string & providedInterfaceName, 
@@ -1111,6 +1112,7 @@ void mtsManagerGlobal::GetNamesOfEventHandlers(const std::string & processName,
 
     LocalManagerConnected->GetNamesOfEventHandlers(namesOfEventHandlers, componentName, requiredInterfaceName, processName);
 }
+#endif
 
 //-------------------------------------------------------------------------
 //  Networking

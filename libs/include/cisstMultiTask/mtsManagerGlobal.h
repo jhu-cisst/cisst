@@ -359,6 +359,7 @@ public:
                                       const std::string & componentName, 
                                       std::vector<std::string>& namesOfRequiredInterfaces);
 
+#if CISST_MTS_HAS_ICE
     /*! Get names of all commands in a provided interface */
     void GetNamesOfCommands(const std::string & processName, 
                             const std::string & componentName, 
@@ -382,6 +383,7 @@ public:
                                  const std::string & componentName, 
                                  const std::string & requiredInterfaceName, 
                                  std::vector<std::string>& namesOfEventHandlers);
+#endif
 
     /*! Get a process object (local component manager object) */
     mtsManagerLocalInterface * GetProcessObject(const std::string & processName);
