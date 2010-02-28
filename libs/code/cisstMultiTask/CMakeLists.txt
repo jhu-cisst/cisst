@@ -26,9 +26,11 @@ SET(DEPENDENCIES
 
 # all source files
 SET(SOURCE_FILES
+    mtsGenericObjectProxy.cpp
+
+    mtsFixedSizeVectorTypes.cpp
     mtsVector.cpp
     mtsMatrix.cpp
-    mtsGenericObjectProxy.cpp
     mtsTransformationTypes.cpp
 
     mtsMulticastCommandVoid.cpp
@@ -69,10 +71,13 @@ SET(SOURCE_FILES
 # all header files
 SET(HEADER_FILES
     mtsMacros.h
-    mtsVector.h
-    mtsMatrix.h
     mtsGenericObject.h
     mtsGenericObjectProxy.h
+
+    mtsFixedSizeVector.h
+    mtsFixedSizeVectorTypes.h
+    mtsVector.h
+    mtsMatrix.h
     mtsTransformationTypes.h
 
     mtsCommandBase.h

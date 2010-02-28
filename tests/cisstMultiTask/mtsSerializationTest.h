@@ -24,11 +24,12 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsVector.h>
 #include <cisstMultiTask/mtsMatrix.h>
+#include <cisstMultiTask/mtsFixedSizeVectorTypes.h>
 #include <cisstMultiTask/mtsTransformationTypes.h>
 
-class mtsTransformationTypesTest: public CppUnit::TestFixture
+class mtsSerializationTest: public CppUnit::TestFixture
 {
-    CPPUNIT_TEST_SUITE(mtsTransformationTypesTest);
+    CPPUNIT_TEST_SUITE(mtsSerializationTest);
 
     CPPUNIT_TEST(TestSerializeRawDoubleQuat);
     CPPUNIT_TEST(TestSerializeRawDoubleQuatRot3);
@@ -40,6 +41,9 @@ class mtsTransformationTypesTest: public CppUnit::TestFixture
 
     CPPUNIT_TEST(TestSerializeRawDoubleVec);
     CPPUNIT_TEST(TestSerializeRawDoubleMat);
+
+    CPPUNIT_TEST(TestSerializeRawFixedSizeDouble6);
+    CPPUNIT_TEST(TestSerializeRawFixedSizeInt6);
 
     CPPUNIT_TEST_SUITE_END();
     
@@ -60,8 +64,12 @@ public:
 
     void TestSerializeRawDoubleVec(void);
     void TestSerializeRawDoubleMat(void);
+
+    void TestSerializeRawFixedSizeDouble6(void);
+    void TestSerializeRawFixedSizeInt6(void);
+
 };
 
 
-CPPUNIT_TEST_SUITE_REGISTRATION(mtsTransformationTypesTest);
+CPPUNIT_TEST_SUITE_REGISTRATION(mtsSerializationTest);
 

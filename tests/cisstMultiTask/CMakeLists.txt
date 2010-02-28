@@ -27,9 +27,10 @@ SET(SOURCE_FILES
     mtsStateTableTest.cpp
     mtsTaskTest.cpp
     mtsVectorTest.cpp
+    mtsFixedSizeVectorTest.cpp
     mtsMacrosTest.cpp
     mtsMatrixTest.cpp
-    mtsTransformationTypesTest.cpp
+    mtsSerializationTest.cpp
     mtsManagerGlobalTest.cpp
     mtsManagerLocalTest.cpp
     )
@@ -40,11 +41,11 @@ SET(HEADER_FILES
     mtsStateTableTest.h
     mtsTaskTest.h
     mtsVectorTest.h
+    mtsFixedSizeVectorTest.h
     mtsMacrosTest.h
     mtsMatrixTest.h
-    mtsTransformationTypesTest.h
-	
-	mtsManagerTestClasses.h
+    mtsSerializationTest.h
+    mtsManagerTestClasses.h
     mtsManagerGlobalTest.h
     mtsManagerLocalTest.h    
     )
