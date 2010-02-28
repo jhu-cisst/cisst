@@ -1,0 +1,102 @@
+# data file for the Fltk User Interface Designer (fluid)
+version 1.0109 
+header_name {.h} 
+code_name {.cxx}
+class OscilloscopeUI {open
+} {
+  Function {OscilloscopeUI()} {open
+  } {
+    Fl_Window OscilloscopeWindow {open selected
+      xywh {480 148 574 750} type Double box BORDER_BOX labelsize 12 visible
+    } {
+      Fl_Group {} {
+        label Graph open
+        xywh {10 10 555 350} labelsize 12 align 0
+      } {
+        Fl_Box GraphPane {
+          label {Graph Region}
+          xywh {10 10 555 350} box BORDER_BOX labelfont 1 labelsize 12
+          code0 {\#include "MULTIPLOT.h"}
+          class MULTIPLOT
+        }
+      }
+      Fl_Group {} {
+        label Source
+        xywh {10 368 270 374} labelsize 12 align 0
+      } {
+        Fl_Box {} {
+          label Source
+          xywh {10 370 270 370} box BORDER_BOX labelfont 1 labelsize 12 align 17
+        }
+        Fl_Choice {} {
+          label Task open
+          xywh {20 410 250 20} down_box BORDER_BOX labelfont 1 labelsize 12 align 5
+        } {}
+        Fl_Return_Button {} {
+          label Filter
+          xywh {20 435 120 25} labelsize 12
+        }
+        Fl_Return_Button {} {
+          label {Remove Filter}
+          xywh {150 435 120 25} labelsize 12
+        }
+        Fl_Check_Browser {} {
+          xywh {41 490 229 170} labelsize 12 textsize 12
+        }
+        Fl_Progress {} {
+          xywh {20 494 18 9} box FLAT_BOX selection_color 1 labelsize 12
+        }
+        Fl_Progress {} {
+          xywh {20 508 18 9} box FLAT_BOX selection_color 2 labelsize 12
+        }
+        Fl_Progress {} {
+          xywh {20 522 18 9} box FLAT_BOX selection_color 3 labelsize 12
+        }
+        Fl_Progress {} {
+          xywh {20 536 18 9} box FLAT_BOX selection_color 4 labelsize 12
+        }
+        Fl_Progress {} {
+          xywh {20 550 18 9} box FLAT_BOX selection_color 5 labelsize 12
+        }
+        Fl_Progress {} {
+          xywh {20 564 18 9} box FLAT_BOX selection_color 6 labelsize 12
+        }
+        Fl_Progress {} {
+          xywh {20 577 18 9} box FLAT_BOX selection_color 9 labelsize 12
+        }
+        Fl_Progress {} {
+          xywh {20 591 18 9} box FLAT_BOX selection_color 10 labelsize 12
+        }
+        Fl_Progress {} {
+          xywh {20 605 18 9} box FLAT_BOX selection_color 11 labelsize 12
+        }
+        Fl_Progress {} {
+          xywh {20 618 18 9} box FLAT_BOX selection_color 12 labelsize 12
+        }
+        Fl_Progress {} {
+          xywh {20 633 18 9} box FLAT_BOX selection_color 13 labelsize 12
+        }
+        Fl_Progress {} {
+          xywh {20 647 18 9} box FLAT_BOX selection_color 14 labelsize 12
+        }
+        Fl_Output {} {
+          label {Total source count: }
+          xywh {210 465 60 20} labelfont 1 labelsize 12 textsize 12
+        }
+        Fl_Output {} {
+          label {Selected Signal}
+          xywh {20 710 250 20} labelfont 1 labelsize 12 align 5 textsize 12
+        }
+      }
+      Fl_Return_Button Close {
+        label CLOSE
+        callback {OscilloscopeWindow->hide();}
+        xywh {290 715 275 25} labelsize 12
+      }
+    }
+  }
+  Function {show(int argc, char** argv)} {open
+  } {
+    code {OscilloscopeWindow->show();} {}
+  }
+} 
