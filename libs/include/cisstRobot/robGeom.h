@@ -25,7 +25,7 @@ typedef robMeshTriangularODE robGeom;
 
 #else
 
-#include <cisstRobot/robMeshTriangularBase.h>
+#include <cisstRobot/robMeshTriangular.h>
 typedef robMeshTriangular robGeom;
 
 #endif // __ODE__

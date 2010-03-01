@@ -18,40 +18,49 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _robFunction_h
 #define _robFunction_h
 
-#include <cisstRobot/robDefines.h>
-#include <cisstRobot/robVariables.h>
+#include <cisstRobot/robMapping.h>
+#include <cisstRobot/robVariable.h>
 
-enum robDomainAttribute{
-  UNDEFINED = 0,
-  DEFINED, 
-  INCOMING,
-  OUTGOING,
-  EXPIRED
-};
-  
-class robFunction {
+class robFunction : public robMapping {
   
 public:
+
+  enum Errno { ESUCCESS, EFAILURE, EUNDEFINED };
+
+  //! The attribute of a function
+  /** 
+      The attribute of a function indicates wheter the function is define for 
+      a given input. This is used to determine which function, in a piecewise 
+      function, is defined for a given input.
+  */
+  enum Context{
+    CUNDEFINED = 0,
+    CDEFINED, 
+    //INCOMING,
+    //OUTGOING,
+    //EXPIRED
+  };
   
-  virtual double Duration() const { return 0.0; }
+  robFunction( robSpace input, robSpace output ) :  
+    robMapping( input, output ){}
+
+  //virtual double Duration() const { return 0.0; }
   
   //! Is the function defined for the input
   /**
      \param[in] in An element drawn from a space
-     \return true if the function is define for in. false otherwise
+     \return The context of the function 
   */
-  virtual robDomainAttribute IsDefinedFor( const robVariables& input ) const=0;
+  virtual robFunction::Context GetContext( const robVariable& input ) const=0;
   
   //! Evaluate the function 
   /**
      Evaluate the function and its 1st and 2nd derivative
-     \param[in] in The element of the domain
-     \param[out] out The the output of the function
-     \param[out] outd The output's first derivative
-     \param[out] outdd The output's second derivative
+     \param[in] input The element of the domain
+     \param[out] output The the output of the function
   */
-  virtual robError Evaluate( const robVariables& input, 
-			     robVariables& output ) = 0;  
+  virtual robFunction::Errno Evaluate( const robVariable& input, 
+				       robVariable& output ) = 0;  
   
 };
 

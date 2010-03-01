@@ -15,166 +15,159 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+#include <cisstRobot/robSLERP.h>
 #include <cisstCommon/cmnLogger.h>
 
-#include <cisstVector/vctMatrixRotation3.h>
+robSLERP::robSLERP( double ti, const vctMatrixRotation3<double>& Rwi, 
+		    double tf, const vctMatrixRotation3<double>& Rwf ) : 
+  robFunction( robSpace::TIME, robSpace::ORIENTATION ) {
 
-#include <cisstRobot/robSLERP.h>
-#include <cisstRobot/robTrajectory.h>
-
-#include <typeinfo>
-
-robSLERP::robSLERP( double ti, 
-		    const vctFrame4x4<double,VCT_ROW_MAJOR>& Rti, 
-		    double tf, 
-		    const vctFrame4x4<double,VCT_ROW_MAJOR>& Rtf ){
-  if( tf < ti ){
+  // Check that the time values are greater than zero and that t1 < t2
+  if( (ti < 0) || (tf < 0) || (tf <= ti) ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
-		      << ": t initial must be less than t final" 
+		      << ": " << ti << " must be less than " << tf << "." 
 		      << std::endl;
   }
 
-  xmin = ti;
-  xmax = tf;
+  this->ti = ti;
+  this->tf = tf;
 
-  vctMatrixRotation3<double,VCT_ROW_MAJOR> Ri, Rf;
-  for(size_t r=0; r<3; r++){
-    for(size_t c=0; c<3; c++){
-      Ri[r][c] = Rti[r][c];
-      Rf[r][c] = Rtf[r][c];
-    }
-  }
+  // set the quaternions
+  this->qwi.From( Rwi );
+  this->qwf.From( Rwf );
 
-  qinitial.From( Ri );
-  qfinal.From( Rf );
+  // cos(theta/2)
+  double ctheta = ( this->qwi.X()*this->qwf.X() + 
+		    this->qwi.Y()*this->qwf.Y() + 
+		    this->qwi.Z()*this->qwf.Z() + 
+		    this->qwi.R()*this->qwf.R() );
 
-  double ctheta = ( qinitial.X()*qfinal.X() +
-		  qinitial.Y()*qfinal.Y() +
-		  qinitial.Z()*qfinal.Z() +
-		  qinitial.R()*qfinal.R() );
-
-  if( ctheta < 0 ){
-    qfinal.X() = -qfinal.X();
-    qfinal.Y() = -qfinal.Y();
-    qfinal.Z() = -qfinal.Z();
-    qfinal.R() = -qfinal.R();
+  // if negative, invert qf
+  if( ctheta < 0.0 ){
+    this->qwf.X() = -this->qwf.X();
+    this->qwf.Y() = -this->qwf.Y();
+    this->qwf.Z() = -this->qwf.Z();
+    this->qwf.R() = -this->qwf.R();
   }  
 
-  // find the angular velocity in the world frame from the angular velocity
-  // in the constant velocity in the plane of rotation
-  vctMatrixRotation3<double,VCT_ROW_MAJOR> Rwi( qinitial );
-  vctMatrixRotation3<double,VCT_ROW_MAJOR> Rwf( qfinal );
-  vctMatrixRotation3<double,VCT_ROW_MAJOR> Riw;
-  Riw.InverseOf( Rwi );   //
+  // relative rotation
+  vctMatrixRotation3<double> Riw;
+  Riw.InverseOf( Rwi );
+  vctMatrixRotation3<double> Rif;
+  Rif = Riw * Rwf;
 
-  vctMatrixRotation3<double,VCT_ROW_MAJOR> Rif;
-  Rif = Riw*Rwf;          //
+  // 
+  vctAxisAngleRotation3<double> rif( Rif );
+  this->w = Rwi * (rif.Axis() * rif.Angle() / (tf-ti));
   
-  vctAxisAngleRotation3<double> utif(Rif);       // axis angle of Rif
-  vctFixedSizeVector<double,3> ui = utif.Axis(); // the axis wrt initial frame
-                                                 // this axis remains constant
-  vctFixedSizeVector<double,3> uw = Rwi * ui;    // the axis wrt world frame
-  double td = utif.Angle() / (xmax-xmin);        // the angular rate
-
-  w = uw * td;                                   // the angular velocity
 }
 
-robDomainAttribute robSLERP::IsDefinedFor( const robVariables& input ) const{
+robFunction::Context robSLERP::GetContext( const robVariable& input ) const{
 
-  if( !input.IsTimeSet() ){
-    CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS 
-			<< ": Expected time input" 
-			<< std::endl;
-    return UNDEFINED;
-  }
-
-  double x = input.time;
-  if( xmin <= x && x <= xmax )                           return DEFINED;
-  if( xmin-robTrajectory::TAU <= x && x <= xmin ) return INCOMING;
-  if( xmax <= x && x <= xmax+robTrajectory::TAU ) return OUTGOING;
-  if( xmax+robTrajectory::TAU < x )               return EXPIRED;
-  
-  return UNDEFINED;
-}
-
-
-robError robSLERP::Evaluate( const robVariables& input, robVariables& output ){
-
-  if( !input.IsTimeSet() ){
+  // Test the input is time
+  if( !input.IsTimeEnabled() ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
-		      << ": Expected time input" 
+		      << ": Expected time input." 
 		      << std::endl;
-    return ERROR;
+    return robFunction::CUNDEFINED;
   }
 
+  // Check the context
   double t = input.time;
-  t = (t-xmin) / (xmax-xmin);
+  if( this->ti <= t && t <= this->tf ) { return robFunction::CDEFINED; }
+  else                                 { return robFunction::CUNDEFINED; }
+
+}
+
+robFunction::Errno robSLERP::Evaluate( const robVariable& input, 
+				       robVariable& output ){
+
+  // Test the context
+  if( GetContext( input ) != robFunction::CDEFINED ){
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
+		      << ": Function is undefined for the input: " <<input.time 
+		      << std::endl;
+    return robFunction::EUNDEFINED;
+  }
+
+  // normalize the time
+  double t = input.time;
+  t = (t-ti) / (tf-ti);
   if( t < 0.0 ) t = 0;
   if( 1.0 < t ) t = 1;
     
-  // cos theta
-  double ctheta = ( qinitial.X()*qfinal.X() +
-		    qinitial.Y()*qfinal.Y() +
-		    qinitial.Z()*qfinal.Z() +
-		    qinitial.R()*qfinal.R() );
+  // cos(theta)
+  double ctheta = ( this->qwi.X()*this->qwf.X() + 
+		    this->qwi.Y()*this->qwf.Y() +
+		    this->qwi.Z()*this->qwf.Z() +
+		    this->qwi.R()*this->qwf.R() );
   
-  // if the dot product is too close, return one of them
+  // if qwi~=qwf, then theta~=0, then cos(theta)~=1 and return qwf
   if ( 1.0 <= fabs(ctheta) ){
-    output = robVariables( vctFrame4x4<double,VCT_ROW_MAJOR>( qinitial, vctFixedSizeVector<double,3>(0.0) ) );
-    return SUCCESS;
+    vctMatrixRotation3<double> R( this->qwf );
+    vctFixedSizeVector<double,3> w(0.0), wd(0.0);       // velocity+acceleration
+    output = robVariable( robSpace::ORIENTATION, R, w, wd );
+    return robFunction::ESUCCESS;
   }
 
-  double theta = acos(ctheta);
+  // sin(theta)
   double stheta = sqrt(1.0 - ctheta*ctheta);
   
-  // if theta = 180 degrees then result is not fully defined
-  // we could rotate around any axis normal to qinitial or qfinal
-  if (fabs(stheta) < 0.001){ // fabs is floating point absolute
-    vctMatrixRotation3<double,VCT_ROW_MAJOR> Rwi( vctQuaternionRotation3<double>( qinitial.X()*0.5 + qfinal.X()*0.5,
-			 qinitial.Y()*0.5 + qfinal.Y()*0.5,
-			 qinitial.Z()*0.5 + qfinal.Z()*0.5,
-			 qinitial.R()*0.5 + qfinal.R()*0.5 ) );
-    vctFixedSizeVector<double,6> vw(0.0);
-    vw[3] = w[0];
-    vw[4] = w[1];
-    vw[5] = w[2];
-    output = robVariables( vctFrame4x4<double,VCT_ROW_MAJOR>(Rwi, vctFixedSizeVector<double,3>(0.0)), vw, vctFixedSizeVector<double,6>(0.0) );
-    
-    return SUCCESS;
+  // if theta ~= Kpi, then sin(theta) ~= 0, then result is not fully defined
+  // we could rotate around any axis normal to qi or qf
+  if( fabs(stheta) < 0.001 ){
+    vctQuaternionRotation3<double> q( (this->qwi.X() + this->qwf.X())*0.5,
+				      (this->qwi.Y() + this->qwf.Y())*0.5,    
+				      (this->qwi.Z() + this->qwf.Z())*0.5,
+				      (this->qwi.R() + this->qwf.R())*0.5,
+				      VCT_NORMALIZE );
+    vctMatrixRotation3<double> R( q );            // orientation
+    vctFixedSizeVector<double,3> w(0.0), wd(0.0); // zero angular acceleration
+    output = robVariable( robSpace::ORIENTATION, R, w, wd );
+
+    return robFunction::ESUCCESS;
   }
     
-  double ratioA = sin((1 - t) * theta) / stheta;
-  double ratioB = sin(t * theta) / stheta;
+  // general case starts here
+  double theta = acos(ctheta);
+  double A = sin((1.0 - t) * theta) / stheta;
+  double B = sin(       t  * theta) / stheta;
   
-  //calculate vctQuaternionRotation3<double>.
-  vctMatrixRotation3<double,VCT_ROW_MAJOR> Rwi( vctQuaternionRotation3<double>( qinitial.X()*ratioA + qfinal.X()*ratioB,
-		       qinitial.Y()*ratioA + qfinal.Y()*ratioB,
-		       qinitial.Z()*ratioA + qfinal.Z()*ratioB,
-		       qinitial.R()*ratioA + qfinal.R()*ratioB ) );
-  vctFixedSizeVector<double,6> vw(0.0);
-  vw[3] = w[0];
-  vw[4] = w[1];
-  vw[5] = w[2];
-  output = robVariables( vctFrame4x4<double,VCT_ROW_MAJOR>(Rwi, vctFixedSizeVector<double,3>(0.0)), vw, vctFixedSizeVector<double,6>(0.0) );
-  /*
-  vctMatrixRotation3<double,VCT_ROW_MAJOR> R1w(qinitial);
-  R1w.InverseSelf();
-  vctMatrixRotation3<double,VCT_ROW_MAJOR> R1i;
-  R1i = R1w*Rwi;
+  // Interpolate the slerp between qi and qf.
+  vctQuaternionRotation3<double> qwk( this->qwi.X()*A + this->qwf.X()*B,
+				      this->qwi.Y()*A + this->qwf.Y()*B,
+				      this->qwi.Z()*A + this->qwf.Z()*B,
+				      this->qwi.R()*A + this->qwf.R()*B,
+				      VCT_NORMALIZE );
+  vctMatrixRotation3<double> Rwk(qwk);
 
-  vctAxisAngleRotation3<double> ut(R1i);
-  cout << ut.Angle() << " " << ut.Angle()/t << std::endl;
+  vctFixedSizeVector<double,3> wd(0.0);
 
-  vctQuaternionRotation3<double> q(Quaternion( qinitial.X()*ratioA + qfinal.X()*ratioB,
-			   qinitial.Y()*ratioA + qfinal.Y()*ratioB,
-			   qinitial.Z()*ratioA + qfinal.Z()*ratioB,
-			   qinitial.R()*ratioA + qfinal.R()*ratioB ) );
+  output.IncludeBasis( Codomain().GetBasis(), Rwk, w, wd );
 
-  vctQuaternionRotation3<double> qs(qinitial);
-  qs.ConjugateSelf();
-  vctQuaternionRotation3<double> qsp;
-  qsp = qs*qfinal;
-  cout << q.R() << std::endl;
-  */  
-  return SUCCESS;
+  return robFunction::ESUCCESS;
 }
+
+  /*
+  // compute the angular velocity from slerp(q0,q1,t) = (q1 q0^-1)^t q0
+  // slerp' = ln(q1q0^-1) slerp(q0,q1,t)
+  // and ln(q) = v theta ( q = [v sin(theta), cos(theta) ] )
+  vctQuaternionRotation3<double> q, q1, q0i;
+  q0i.InverseOf( this->qwi );
+  q1 = this->qwf;
+  q = q1 * q0i;        // q = q1 q0^-1 = [v sin(Omega); cos(Omega)]
+  
+
+  double Omega = acos( q.R() );
+  w[0] = q.X() * Omega/sin(Omega);
+  w[1] = q.Y() * Omega/sin(Omega);
+  w[2] = q.Z() * Omega/sin(Omega);
+  
+  //w[0] = w[0]*2/(tf-ti);
+  //w[1] = w[1]*2/(tf-ti);
+  //w[2] = w[2]*2/(tf-ti);
+
+  vctMatrixRotation3<double> Rwi(this->qwi);
+  vctMatrixRotation3<double> Rwk;
+  Rwk = Rwi*Rik;
+  */

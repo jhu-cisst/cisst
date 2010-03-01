@@ -25,19 +25,19 @@ class CISST_EXPORT robQuintic : public robFunction{
 
 private:
   
-  double xmin;
-  double xmax;
-  vctFixedSizeVector<double, 6> b;
+  double tmin;                        // Lower time bound
+  double tmax;                        // Higher time bound
+  vctFixedSizeVector<double,6> x;     // the quintic parameters
   
 public:
   
-  robQuintic(){}
-  robQuintic( double t1, double x1, double v1, double a1, 
-	      double t2, double x2, double v2, double a2 );
+  robQuintic( robSpace::Basis codomain,
+	      double t1, double y1, double y1d, double y1dd, 
+	      double t2, double y2, double y2d, double y2dd );
   
-  robDomainAttribute IsDefinedFor( const robVariables& input ) const;
+  robFunction::Context GetContext( const robVariable& input ) const;
   
-  robError Evaluate( const robVariables& input, robVariables& output );
+  robFunction::Errno Evaluate( const robVariable& input, robVariable& output );
   
 };
 

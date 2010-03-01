@@ -15,683 +15,595 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include <cisstCommon/cmnLogger.h>
-
 #include <cisstRobot/robTrajectoryManager.h>
-#include <cisstRobot/robTrajectory.h>
+
+#include <cisstRobot/robTrajectoryR1.h>
+#include <cisstRobot/robTrajectorySO3.h>
 
 #include <cisstRobot/robLinear.h>
-#include <cisstRobot/robSigmoid.h>
+#include <cisstRobot/robConstantR1.h>
+#include <cisstRobot/robConstantSO3.h>
 #include <cisstRobot/robSLERP.h>
-#include <cisstRobot/robConstantRn.h>
-#include <cisstRobot/robConstantSE3.h>
-#include <cisstRobot/robTrackSE3.h>
+#include <cisstRobot/robSigmoid.h>
+
+#include <cisstCommon/cmnLogger.h>
 
 #include <typeinfo>
 #include <iostream>
 
-robMapping::robMapping() {}
+// Initialize the trajectory manager
+// This initialize the start time for all trajectory and it also sets
+// each initial joint position and each joint maximum velocity and acceleration
+// This creates a robTrajectoryR1 for each joint position that is enabled in 
+// space and inserts a robConstantR1 function in each of them 
+robTrajectoryManager::robTrajectoryManager( const robSpace& space,
+					    double t,
+					    const vctDynamicVector<double>& q,
+					    const vctDynamicVector<double>& qdmax,
+					    const vctDynamicVector<double>& qddmax):
+  // the domain/codomain of robFunction is not used by the manager
+  robFunction(0, 0){
 
+  // Size matters
+  if( q.size() != qdmax.size() || q.size() != qddmax.size() ){
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+		      << ": Vectors have different size. The vectors have:"
+		      << " size(q)=" << q.size() 
+		      << " size(qd)=" << qdmax.size()
+		      << " size(qdd)=" << qddmax.size()
+		      << std::endl;
+  }
 
-robMapping::robMapping( const robVariables& from, const robVariables& to ){
-  domain = from;      // set the mapping domain
-  codomain = to;      // set the mapping codomain
+  // Check each joint position basis in the given space
+  robSpace::Basis bi = robSpace::Q1;
+  for( size_t i=0; i<9; i++ ){
+
+    // if bi is in the space
+    if( space.IsEnabled( bi ) ){
+
+      // then create a R1trajectory for bi
+      robTrajectoryR1* traj = new robTrajectoryR1( bi, t, qdmax[i], qddmax[i] );
+
+      // and insert a constant value for the trajectory
+      robConstantR1* constant = new robConstantR1( bi, q[i], t, FLT_MAX );
+      if( traj->Insert( constant, t, FLT_MAX ) != robFunction::ESUCCESS ){
+	CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+			  << ": Failed to insert an constant function."
+			  << std::endl;
+      }
+      // insert the trajectory in the list
+      trajectories.push_back( traj );
+    }
+    // next position basis
+    bi <<= 1;
+  }
 }
-  
-robTrajectoryManager::robTrajectoryManager(robClock* clock, robSource* source){ 
-  this->clock = clock;     // set the clock
-  this->source = source;   // set the input source
+
+robTrajectoryManager::robTrajectoryManager( const robSpace& space,
+					    double t,
+					    const vctFrame4x4<double>& Rt,
+					    double vmax, double vdmax,
+					    double wmax, double wdmax ) :
+  // the domain/codomain of robFunction is not used by the manager
+  robFunction(0,0) {
+
+  // list of translation basis
+  robSpace::Basis b[3] = {robSpace::TX, robSpace::TY, robSpace::TZ};
+  for( size_t i=0; i<3; i++ ){
+
+    // if b[i] is in the space
+    if( space.IsEnabled( b[i] ) ){
+
+      // then create a R1 trajectory for b[i]
+      robTrajectoryR1* traj = new robTrajectoryR1( b[i], t, vmax, vdmax );
+      
+      // and initialize the trajectory for b[i] by inserting a constant function
+      robConstantR1* constant = new robConstantR1( b[i], Rt[i][3], t, FLT_MAX );
+      if( traj->Insert( constant, t, FLT_MAX ) != robFunction::ESUCCESS ){
+	CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+			  << ": Failed to insert an constant function."
+			  << std::endl;
+      }
+      // insert the trajectory in the list
+      trajectories.push_back( traj );
+    }
+  }
+
+  // if the space involves orientation
+  if( space.IsEnabled( robSpace::ORIENTATION ) ){
+
+    // then create a SO3 trajectory
+    robTrajectorySO3* traj = new robTrajectorySO3( t, wmax, wdmax );
+    // I hate having to do this...
+    vctMatrixRotation3<double> R( Rt[0][0], Rt[0][1], Rt[0][2],
+				  Rt[1][0], Rt[1][1], Rt[1][2],
+				  Rt[2][0], Rt[2][1], Rt[2][2] );
+
+    // and initialize the trajectory by inserting a constant orientation
+    robConstantSO3* cte=new robConstantSO3(robSpace::ORIENTATION, t, R,FLT_MAX);
+    if( traj->Insert( cte, t, FLT_MAX ) != robFunction::ESUCCESS ){
+      CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+			<< ": Failed to insert an constant function."
+			<< std::endl;
+    }
+    // insert the trajectory in the list
+    trajectories.push_back( traj );
+  }
 }
+
 
 void robTrajectoryManager::Clear(){ trajectories.clear(); }
 
-robError robTrajectoryManager::Insert( robFunction* function, 
-				       robVariablesMask inputmask, 
-				       robVariablesMask outputmask ){
+robTrajectory* 
+robTrajectoryManager::FindTrajectory( const robMapping& mapping ){
+  // Search of an existing trajectory in the list that matches the mapping
+  std::list<robTrajectory*>::iterator traj;
+  for( traj=trajectories.begin(); traj!=trajectories.end(); traj++ ){
+    if( (**traj) == mapping )
+      { return *traj; }
+  }
+  return NULL;
+}
 
-  // create the variables
-  robVariables inputvars(inputmask), outputvars(outputmask);
+////// CONSTANT VECTOR
 
-  // create a mapping M:inputvars->outputvars
-  robMapping mapping( inputvars, outputvars );
+robFunction::Errno robTrajectoryManager::Constant( const robSpace& space ){
 
-  // see if a mapping is already in the table
-  std::map<robMapping,robTrajectory*>::iterator iter = trajectories.find(mapping);
+  // list all the individual basis of the input space into a vector
+  // this way we can go through the basis one-by-one
+  std::vector<robSpace::Basis> b = space.ListBasis();
 
-  // nope...the mapping is not in the table...then add a new one
-  if( iter == trajectories.end() ) { 
+  // for each basis in the input space
+  for( size_t i=0; i<b.size(); i++ ){
+
+    // search for an existing joint trajectory in the list of trajectories
+    // Note: there *must* be a trajectory in the list otherwise the manager
+    // was not initialized properly
+    robSpace domain( robSpace::TIME );
+    // Ensure we only deal with joint positions or Cartesian positions
+    robSpace codomain( ( robSpace::JOINTS_POS | robSpace::TRANSLATION ) & b[i] );
+    robTrajectory* traj = FindTrajectory( robMapping( domain, codomain ) );
     
-    // create a new trajectory
-    robTrajectory* trajectory = new robTrajectory();
-    
-    // insert the function in the piecewise function
-    trajectory->Insert( function );
-    
-    // this holds the result from the insertion
-    std::pair< std::map<robMapping, robTrajectory*>::iterator, bool > result;
+    // Ensure the trajectory was found
+    if( traj != NULL ){
+	
+      // Evalute that trajectory at its last point
+      robVariable input, output;
+      traj->EvaluateLastSegment( input, output );
 
-    // insert the pair
-    result = trajectories.insert( std::make_pair( mapping, trajectory ) );
+      double ti, tf, y;
+      ti = input.time;                                       // initial time
+      tf = FLT_MAX;                                          // final time
 
-    // if the insertion happened return right away
-    if( result.second == true ){  return SUCCESS;  }
-    
-    // the insertion didn't work
-    else{ 
-      CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
-			<< ": Failed to insert the function" 
-			<< std::endl;
-      return ERROR;
+      // parse the codomain
+      if( b[i] & robSpace::JOINTS_POS )
+	{ y = output.q[codomain.JointBasis2ArrayIndex()]; }  // joint position qi
+      if( b[i] & robSpace::TX )
+	{ y = output.t[0]; }                                 // X position
+      if( b[i] & robSpace::TY )
+	{ y = output.t[1]; }                                 // Y position
+      if( b[i] & robSpace::TZ )
+	{ y = output.t[2]; }                                 // Z position
+      
+      // Evalute that trajectory at its last point
+      robConstantR1* constant = new robConstantR1( b[i], ti, y, tf );
+      if( traj->Insert( constant, ti, tf ) != robFunction::ESUCCESS ){
+	CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+			  << ": Failed to insert a insert constant."
+			  << std::endl;
+      }
     }
   }
-  
-  // the mapping is already in the map
-  else{
-    iter->second->Insert( function );
-    return SUCCESS;
-  }
+  return robFunction::ESUCCESS;
 }
 
-robError robTrajectoryManager::Linear( double ti, // initial time
-				       double qi, // initial value
-				       double tf, // final time
-				       double qf, // final value
-				       robVariablesMask variables, 
-				       bool sticky ){
-  // should check that only one vctDynamicVector<double> dof is set
-  return Linear( ti,
-		 vctDynamicVector<double>(1,qi), 
-		 tf, 
-		 vctDynamicVector<double>(1,qf), 
-		 variables, 
-		 sticky );
+////// LINEAR VECTOR
+
+robFunction::Errno robTrajectoryManager::Linear( const robSpace& space,
+						 const double y, 
+						 const double ydmax ){
+
+  return Linear( space, 
+		 vctDynamicVector<double>(1,y),
+		 vctDynamicVector<double>(1,ydmax) );
 }
 
-robError robTrajectoryManager::Linear( double qi,                 // initial value
-				       double qf,                 // final value
-				       double vmax,               // max velocity
-				       robVariablesMask variables, 
-				       bool sticky ){
-  if(clock==NULL){
+robFunction::Errno 
+robTrajectoryManager::Linear( const robSpace& space,
+			      const vctDynamicVector<double>& y, 
+			      const vctDynamicVector<double>& ydmax ){
+
+  // Size matters
+  if( y.size() != ydmax.size() ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
-		      << ": No clock is defined" 
+		      << ": Vectors have different size. The vectors have:"
+		      << " size(y)=" << y.size() 
+		      << " size(ydmax)=" << ydmax.size()
 		      << std::endl;
-    return ERROR;
-  }
-  
-  robVariables time;
-  if( clock->Read( time ) == ERROR ){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
-		      << ": Failed to query the clock" 
-		      << std::endl;
-    return ERROR;
+    return robFunction::EFAILURE;
   }
 
-  double ti = time.time;                   // initial time
-  double tf = ti + fabs(qf-qi)/fabs(vmax); // final time
+  // list all the individual basis of the input space into a vector
+  // this way we can go through the basis one-by-one
+  std::vector<robSpace::Basis> b = space.ListBasis();
 
-  if( Linear( ti, qi, tf, qf, variables, sticky ) == ERROR ){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
-		      << ": Failed to create the trajectory"
-		      << std::endl;
-    return ERROR;
-  }
+  // for each basis of the input space
+  for( size_t i=0; i<b.size(); i++ ){
 
-  return SUCCESS;
-}
-
-robError robTrajectoryManager::Linear( const vctDynamicVector<double>& qi, 
-				       const vctDynamicVector<double>& qf, 
-				       double vmax, 
-				       robVariablesMask variables,
-				       bool sticky ){
-  // test for vector size
-  if( qi.size() != qf.size() ){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
-		      << ": vectors must have the same length" 
-		      << std::endl;
-    return ERROR;
-  }
-
-  // get the current time
-  robVariables time;
-  if( clock->Read(time) == ERROR ){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
-		      << ": Failed to query the clock" 
-		      << std::endl;
-    return ERROR;
-  }
-  double ti=time.time;
-  
-  // find the longuest time
-  double tf = -1;
-  for(size_t i=0; i<qi.size(); i++){
-    double t = ti + fabs(qf[i]-qi[i])/fabs(vmax);
-    if( tf < t ) tf = t;
-  }
-
-  if( Linear( ti, qi, tf, qf, variables, sticky ) == ERROR ){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
-		      << ": Failed to create the trajectory" 
-		      << std::endl;
-    return ERROR;
-  }
-
-  return SUCCESS;
-}
+    // search for an existing trajectory in the list of trajectories
+    // Note: there *must* be a trajectory in the list otherwise the manager
+    // was not initialized properly
+    robSpace domain( robSpace::TIME );
+    // Ensure we only deal with joint positions or Cartesian positions
+    robSpace codomain( ( robSpace::JOINTS_POS | robSpace::TRANSLATION ) & b[i] );
+    robTrajectory* traj = FindTrajectory( robMapping( domain, codomain ) );
     
-robError robTrajectoryManager::Linear( double ti,
-				       const vctDynamicVector<double>& qi, 
-				       double tf, 
-				       const vctDynamicVector<double>& qf, 
-				       robVariablesMask variables, 
-				       bool sticky ){
+    // Ensure the trajectory was found
+    if( traj != NULL ){
+      
+      // Evalute that trajectory at its last point
+      robVariable input, output;
+      traj->EvaluateLastSegment( input, output );
+      
+      double ti, tf, yi, yf, yd;// initial and final time, values and velocity
+      ti = input.time;          // initial time
+      
+      // if the codomain is joint position, read the output from q
+      if( b[i] & robSpace::JOINTS_POS ){
+	yi = output.q[codomain.JointBasis2ArrayIndex()];  // initial position
+	yf = y[ codomain.JointBasis2ArrayIndex() ];       // final position
+	yd = ydmax[ codomain.JointBasis2ArrayIndex() ];   // max joint vel
+      }
+      // if the codomain is joint position, read the output from t
+      if( b[i] & robSpace::TX ){
+	yi = output.t[0];                                 // initial position
+	yf = y[0];                                        // final position
+	yd = ydmax[0];                                    // max linear vel
+      }
+      if( b[i] & robSpace::TY ){
+	yi = output.t[1];                                 // initial position
+	yf = y[1];                                        // final position
+	yd = ydmax[1];                                    // max linear vel
+      }
+      if( b[i] & robSpace::TZ ){
+	yi = output.t[2];                                 // initial position
+	yf = y[2];                                        // final position
+	yd = ydmax[2];                                    // max linear vel
+      }
+      
+      tf = ti + fabs( (yf - yi) / yd );                   // final time
 
-  // check that the time make sense
-  if( tf < ti ){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
-		      << ": t initial must be less than t final" 
-		      << std::endl;
-    return ERROR;
+      robLinear* linear = new robLinear( b[i], ti, yi, tf, yf );
+      if( traj->Insert( linear, ti, tf ) != robFunction::ESUCCESS ){
+	CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+			  << ": Failed to insert a function in the trajectory"
+			  << std::endl;
+      }
+    }
   }
 
-  // check that the vector size match
-  if( qi.size() != qf.size() ){
+  // hold the position
+  //ConstantR1( space );
+
+  return robFunction::ESUCCESS;
+}
+
+robFunction::Errno 
+robTrajectoryManager::Linear(const robSpace& space,
+			     const std::vector<vctDynamicVector<double> >& y, 
+			     const std::vector<vctDynamicVector<double> >& ydmax){
+  // size matters
+  if( y.size() != ydmax.size() ){
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
+		      << ": Vectors have different size. The vectors have:"
+		      << " size(y)=" << y.size() 
+		      << " size(ydmax)=" << ydmax.size()
+		      << std::endl;
+    return robFunction::EFAILURE;
+  }
+
+  // for each trajectory segment, insert a linear segment
+  for( size_t i=0; i<y.size(); i++ )
+    { Linear( space, y[i], ydmax[i] ); }
+
+  return robFunction::ESUCCESS;
+}
+
+////// SIGMOID VECTOR
+
+robFunction::Errno robTrajectoryManager::Sigmoid( const robSpace& space,
+						  const double y, 
+						  const double ydmax ){
+  return Linear( space, 
+		 vctDynamicVector<double>(1,y),
+		 vctDynamicVector<double>(1,ydmax) );
+}
+
+robFunction::Errno
+robTrajectoryManager::Sigmoid( const robSpace& space,
+			       const vctDynamicVector<double>& y, 
+			       const vctDynamicVector<double>& ydmax ){
+  // Size matters
+  if( y.size() != ydmax.size() ){
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
+		      << ": Vectors have different size. The vectors have:"
+		      << " size(y)=" << y.size() 
+		      << " size(ydmax)=" << ydmax.size()
+		      << std::endl;
+    return robFunction::EFAILURE;
+  }
+
+  // list all the individual basis of the input space into a vector
+  // this way we can go through the basis one-by-one
+  std::vector<robSpace::Basis> b = space.ListBasis();
+
+  // for each basis of the input space
+  for( size_t i=0; i<b.size(); i++ ){
+
+    // search for an existing trajectory in the list of trajectories
+    // Note: there *must* be a trajectory in the list otherwise the manager
+    // was not initialized properly
+    robSpace domain( robSpace::TIME );
+    // Ensure we only deal with joint positions or Cartesian positions
+    robSpace codomain( ( robSpace::JOINTS_POS | robSpace::TRANSLATION ) & b[i] );
+    robTrajectory* traj = FindTrajectory( robMapping( domain, codomain ) );
+    
+    // Ensure the trajectory was found
+    if( traj != NULL ){
+      
+      // Evalute that trajectory at its last point
+      robVariable input, output;
+      traj->EvaluateLastSegment( input, output );
+      
+      double ti, tf, yi, yf, yd;// initial and final time, values and velocity
+      ti = input.time;          // initial time
+      
+      // if the codomain is joint position, read the output from q
+      if( b[i] & robSpace::JOINTS_POS ){
+	yi = output.q[codomain.JointBasis2ArrayIndex()];  // initial position
+	yf = y[ codomain.JointBasis2ArrayIndex() ];       // final position
+	yd = ydmax[ codomain.JointBasis2ArrayIndex() ];   // max joint vel
+      }
+      // if the codomain is joint position, read the output from t
+      if( b[i] & robSpace::TX ){
+	yi = output.t[0];                                 // initial position
+	yf = y[0];                                        // final position
+	yd = ydmax[0];                                    // max linear vel
+      }
+      if( b[i] & robSpace::TY ){
+	yi = output.t[1];                                 // initial position
+	yf = y[1];                                        // final position
+	yd = ydmax[0];                                    // max linear vel
+      }
+      if( b[i] & robSpace::TZ ){
+	yi = output.t[2];                                 // initial position
+	yf = y[2];                                        // final position
+	yd = ydmax[0];                                    // max linear vel
+      }
+      
+      robSigmoid* sigmoid = new robSigmoid( b[i], ti, yi, tf, yd );
+      tf = sigmoid->FinalTime();                          // final time
+      
+      if( traj->Insert( sigmoid, ti, tf ) != robFunction::ESUCCESS ){
+	CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+			  << ": Failed to insert a function in the trajectory"
+			  << std::endl;
+      }
+    }
+  }
+
+  // hold the position
+  //ConstantR1( space );
+
+  return robFunction::ESUCCESS;
+}
+
+robFunction::Errno 
+robTrajectoryManager::Sigmoid(const robSpace& space,
+			      const std::vector<vctDynamicVector<double> >& y, 
+			      const std::vector<vctDynamicVector<double> >& ydmax){
+  // size matters
+  if( y.size() != ydmax.size() ){
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
+		      << ": Vectors have different size. The vectors have:"
+		      << " size(y)=" << y.size() 
+		      << " size(ydmax)=" << ydmax.size()
+		      << std::endl;
+    return robFunction::EFAILURE;
+  }
+  // for each trajectory segment, insert a linear segment
+  for( size_t i=0; i<y.size(); i++ )
+    { Sigmoid( space, y[i], ydmax[i] ); }
+
+  return robFunction::ESUCCESS;
+}
+
+
+/////// LINEAR CARTESIAN
+
+robFunction::Errno robTrajectoryManager::Linear( const robSpace& space,
+						 const vctFrame4x4<double>& Rt, 
+						 double vmax, 
+						 double wmax ){
+  // if translation is enable...insert a linear translation
+  if( space.IsEnabled( robSpace::TRANSLATION ) )
+    {  Linear( space, Rt.Translation(), vmax ); }
+  // if orientation is enabled...insert a linear rotation
+  if( space.IsEnabled( robSpace::ORIENTATION ) ){
+    vctMatrixRotation3<double> R( Rt[0][0], Rt[0][1], Rt[0][2],
+				  Rt[1][0], Rt[1][1], Rt[1][2],
+				  Rt[2][0], Rt[2][1], Rt[2][2] );
+    Linear( space, R, wmax );
+  }
+  return robFunction::ESUCCESS;
+}
+
+robFunction::Errno 
+robTrajectoryManager::Linear( const robSpace& space,
+			      const vctFixedSizeVector<double,3>& t,
+			      double vmax ){
+  // if translation along x is enable...insert a linear translation along x
+  if( space.IsEnabled( robSpace::TX ) )
+    {  Linear( robSpace( robSpace::TX ), 
+	       vctDynamicVector<double>(3,t[0]),
+	       vctDynamicVector<double>(3,vmax) ); }
+  // if translation along y is enable...insert a linear translation along y
+  if( space.IsEnabled( robSpace::TY ) )
+    {  Linear( robSpace( robSpace::TY ),
+	       vctDynamicVector<double>(3,t[1]),
+	       vctDynamicVector<double>(3,vmax) ); }
+  // if translation along z is enable...insert a linear translation along z
+  if( space.IsEnabled( robSpace::TZ ) )
+    {  Linear( robSpace( robSpace::TZ ),
+	       vctDynamicVector<double>(3,t[2]),
+	       vctDynamicVector<double>(3,vmax) ); }
+  return robFunction::ESUCCESS;
+}
+
+robFunction::Errno 
+robTrajectoryManager::Linear( const robSpace& space,
+			      const vctMatrixRotation3<double>& R,
+			      double wmax ){
+
+  if( space.IsEnabled( robSpace::ORIENTATION ) ){ 
+
+    // search for an existing trajectory in the list of trajectories
+    // Note: there *must* be a trajectory in the list otherwise the manager
+    // was not initialized properly
+    robSpace domain( robSpace::TIME );
+    robSpace codomain( robSpace::ORIENTATION );
+    robTrajectory* traj = FindTrajectory( robMapping( domain, codomain ) );
+
+    // Ensure the trajectory was found
+    if( traj != NULL ){
+      
+      // Evalute that trajectory at its last point
+      robVariable input, output;
+      traj->EvaluateLastSegment( input, output );
+
+      double ti = input.time;                     // initial time
+      vctMatrixRotation3<double> Rwi = output.R;  // initial orientation
+      
+      vctMatrixRotation3<double> Rwf = R;         // final orientation
+      vctMatrixRotation3<double> Riw, Rif;        // relative orientations
+      Riw.InverseOf( Rwi );
+      Rif = Riw * Rwf;
+      vctAxisAngleRotation3<double> rif( Rif );
+      double tf = ti + rif.Angle() / wmax;        // final time
+
+      robSLERP* slerp = new robSLERP( ti, Rwi, tf, Rwf );
+      if( traj->Insert( slerp, ti, tf ) != robFunction::ESUCCESS ){
+	CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+			  << ": Failed to insert a function in the trajectory"
+			  << std::endl;
+      }
+    }
+  }
+  return robFunction::ESUCCESS;  
+}
+
+robFunction::Errno 
+robTrajectoryManager::Linear( const robSpace& space,
+			      const std::vector< vctFrame4x4<double> >& Rt, 
+			      const std::vector<double>& vmax, 
+			      const std::vector<double>& wmax ){
+  
+  if( Rt.size() != vmax.size() || Rt.size() != wmax.size() ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
 		      << ": Vectors must have the same length" 
 		      << std::endl;
-    return ERROR;
+    return robFunction::EFAILURE;
   }
 
-  // Ensures that we need joints positions or a translation
-  variables &= ( robVariables::JOINTS_POS | robVariables::TRANSLATION );
+  for( size_t i=0; i<Rt.size(); i++ )
+    {  Linear( space, Rt[i], vmax[i], wmax[i] );  }
 
-  if( !variables ){ 
-    CMN_LOG_RUN_VERBOSE << CMN_LOG_DETAILS 
-			<< ": No variable!" 
-			<< std::endl;
-    return ERROR;
-  }
-
-  // create a linear function
-  robLinear* linear = new robLinear( ti, qi, tf, qf );
-
-  // insert the linear function as a mapping F:R1->Rn
-  if( Insert( linear, robVariables::TIME, variables ) == ERROR ){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
-		      << ": Failed to insert the function" 
-		      << std::endl;
-    return ERROR;
-  }
-
-  // do we want to hold the position at the end
-  if(sticky){
-    // create a constant function at time tf
-    robConstantRn* constant = new robConstantRn( qf, tf );
-    
-    // insert the constant function as a mapping F:R1->Rn
-    if( Insert( constant, robVariables::TIME, variables) == ERROR ){
-      CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
-			<< ": Failed to insert the sticky function" 
-			<< std::endl;
-      return ERROR;
-    }
-  }
-  return SUCCESS;
+  return robFunction::ESUCCESS;
 }
 
-robError robTrajectoryManager::Sigmoid( double ti,                // initial time
-					double qi,                // initial value
-					double tf,                // final time
-					double qf,                // final value
-					robVariablesMask variables, // variables
-					bool sticky ){
-  // check the time make sense
-  if( tf < ti ){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
-		      << ": t initial must be less than t final" 
-		      << std::endl;
-    return ERROR;
+/////// SIGMOID CARTESIAN
+
+robFunction::Errno robTrajectoryManager::Sigmoid( const robSpace& space,
+						  const vctFrame4x4<double>& Rt, 
+						  double vmax, 
+						  double wmax ){
+
+  // if translation is enable...insert a sigmoid translation
+  if( space.IsEnabled( robSpace::TRANSLATION ) )
+    {  Sigmoid( space, Rt.Translation(), vmax ); }
+
+  // if orientation is enabled...insert a linear rotation
+  if( space.IsEnabled( robSpace::ORIENTATION ) ){ 
+    vctMatrixRotation3<double> R( Rt[0][0], Rt[0][1], Rt[0][2],
+				  Rt[1][0], Rt[1][1], Rt[1][2],
+				  Rt[2][0], Rt[2][1], Rt[2][2] );
+    Linear( space, R, wmax );
   }
 
-  // Ensures that we need joints positions or a translation
-  variables &= ( robVariables::JOINTS_POS | robVariables::TRANSLATION );
-
-  if( !variables ){
-    CMN_LOG_RUN_VERBOSE << CMN_LOG_DETAILS 
-			<< ": No variable!" 
-			<< std::endl;
-    return ERROR; 
-  }
-
-  // create the linear function
-  robSigmoid* sigmoid = new robSigmoid( ti, qi, tf, qf );
-
-  // insert the linear function as a mapping F:R1->vctDynamicVector<double>
-  if( Insert( sigmoid, robVariables::TIME, variables ) == ERROR ){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
-		      << ": Failed to insert the function" 
-		      << std::endl;
-    return ERROR;
-  }
-
-  // do we want to hold the position at the end
-  if(sticky){
-    // create a constant function at time tf
-    robConstantRn* constant = new robConstantRn( qf, tf );
-    
-    // insert the constant function as a mapping F:R1->vctDynamicVector<double>
-    if( Insert( constant, robVariables::TIME, variables ) == ERROR ){
-      CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
-			<< ": Failed to insert the sticky function" 
-			<< std::endl;
-      return ERROR;
-    }
-  }
-  return SUCCESS;
+  return robFunction::ESUCCESS;
 }
 
-robError robTrajectoryManager::Sigmoid( double ti, 
-					const vctDynamicVector<double>& qi,
-					double tf, 
-					const vctDynamicVector<double>& qf, 
-					robVariablesMask variables, 
-					bool sticky ){
-
-  // check that the vector size match
-  if( qi.size() != qf.size() ){
-      CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
-			<< ": Vectors must have the same length"
-			<< std::endl;
-    return ERROR;
-  }
-
-  // scan all the joints Q1...Q9
-  // initial mask at Q1
-  robVariablesMask mask= robVariables::Q1;
-
-  for( size_t i=0; i<qi.size(); i++ ){
-
-    while( mask != robVariables::Q9 ){
-      if( mask & variables ){
-	if( Sigmoid( ti, qi[i], tf, qf[i], variables & mask, sticky ) == ERROR ){
-	  CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
-			    << ": Failed to create the trajectory" 
-			    << std::endl;
-	  return ERROR;
-	}
-	mask <<= 1;
-	break;
-      }
-      mask <<= 1;
-    }
-  }
-  return SUCCESS;
+robFunction::Errno 
+robTrajectoryManager::Sigmoid( const robSpace& space,
+			       const vctFixedSizeVector<double,3>& t,
+			       double vmax ){
+  // if translation along x is enable...insert a linear translation along x
+  if( space.IsEnabled( robSpace::TX ) )
+    {  Sigmoid( robSpace( robSpace::TX ), 
+	       vctDynamicVector<double>(3,t[0]),
+	       vctDynamicVector<double>(3,vmax) ); }
+  // if translation along y is enable...insert a linear translation along y
+  if( space.IsEnabled( robSpace::TY ) )
+    {  Sigmoid( robSpace( robSpace::TY ), 
+	       vctDynamicVector<double>(3,t[1]),
+	       vctDynamicVector<double>(3,vmax) ); }
+  // if translation along z is enable...insert a linear translation along z
+  if( space.IsEnabled( robSpace::TZ ) )
+    {  Sigmoid( robSpace( robSpace::TZ ), 
+	       vctDynamicVector<double>(3,t[2]),
+	       vctDynamicVector<double>(3,vmax) ); }
+  return robFunction::ESUCCESS;
 }
 
-robError 
-robTrajectoryManager::Translation( double ti, 
-				   const vctFrame4x4<double,VCT_ROW_MAJOR>& Rti,
-				   double tf, 
-				   const vctFrame4x4<double,VCT_ROW_MAJOR>& Rtf,
-				   robVariablesMask variables,
-				   bool sticky ){
-  // check the time make sense
-  if( tf < ti ){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
-		      << ": t initial must be less than t final" 
-		      << std::endl;
-    return ERROR;
-  }
 
-  // check the DOF are for translation and/or derivatives
-  variables &= robVariables::TRANSLATION;
-
-  if( !variables ){ 
-    CMN_LOG_RUN_VERBOSE << CMN_LOG_DETAILS 
-			<< ": No DOF!" 
-			<< std::endl;
-    return ERROR;
-  }
+robFunction::Errno 
+robTrajectoryManager::Sigmoid( const robSpace& space,
+			       const std::vector< vctFrame4x4<double> >& Rt, 
+			       const std::vector<double>& vmax, 
+			       const std::vector<double>& wmax ){
   
-  vctDynamicVector<double> Ti(3, Rti[0][3], Rti[1][3], Rti[2][3] );
-  vctDynamicVector<double> Tf(3, Rtf[0][3], Rtf[1][3], Rtf[2][3] );
-
-  if( Linear( ti, Ti, tf, Tf, variables, sticky ) == ERROR ){
+  if( Rt.size() != vmax.size() || Rt.size() != wmax.size() ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
-		      << ": Failed to create the trajectory" 
+		      << ": Vectors must have the same length" 
 		      << std::endl;
-    return ERROR;
+    return robFunction::EFAILURE;
   }
-  return SUCCESS;
+
+  for( size_t i=0; i<Rt.size(); i++ )
+    {  Sigmoid( space, Rt[i], vmax[i], wmax[i] );  }
+
+  return robFunction::ESUCCESS;
 }
 
-robError 
-robTrajectoryManager::Rotation( double ti, 
-				const vctFrame4x4<double,VCT_ROW_MAJOR>& Rti,
-				double tf, 
-				const vctFrame4x4<double,VCT_ROW_MAJOR>& Rtf,
-				robVariablesMask variables,
-				bool sticky ){
-  // check the time make sense
-  if( tf < ti ){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
-		      << ": t initial must be less than t final" 
-		      << std::endl;
-    return ERROR;
-  }
+/////// EVALUATE
 
-  // check the DOF are for rotation and/or velocities and/or accelerations
-  variables &= robVariables::ROTATION;
+robFunction::Context 
+robTrajectoryManager::GetContext( const robVariable& ) const
+{ return robFunction::CDEFINED; }
 
-  if( !variables ){
-    CMN_LOG_RUN_VERBOSE << CMN_LOG_DETAILS 
-			<< ": No DOF!" 
-			<< std::endl;
-    return ERROR;
-  }
-  
-  // create slerp
-  robSLERP* slerp = new robSLERP( ti, Rti, tf, Rtf );
 
-  // insert the linear function as a mapping F:R1->vctDynamicVector<double>
-  if( Insert( slerp, robVariables::TIME, variables ) == ERROR ){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
-		      << ": Failed to insert the function" 
-		      << std::endl;
-    return ERROR;
-  }
+robFunction::Errno robTrajectoryManager::Evaluate( const robVariable& input,
+						   robVariable& output ){
 
-  // do we want to hold the position at the end
-  if(sticky){
-
-    // create a constant function at time tf
-    robConstantSE3* constant = new robConstantSE3( Rtf, tf );
-    
-    // insert the constant function as a mapping F:R1->vctDynamicVector<double>
-    if( Insert( constant, robVariables::TIME, variables ) == ERROR ){
-      CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
-			<< ": Failed to insert the sticky function" 
-			<< std::endl;
-      return ERROR;
-    }
-  }
-  return SUCCESS;
-}
-				      
-robError 
-robTrajectoryManager::Linear( double ti, 
-			      const vctFrame4x4<double,VCT_ROW_MAJOR>& Rti,
-			      double tf, 
-			      const vctFrame4x4<double,VCT_ROW_MAJOR>& Rtf,
-			      robVariablesMask variables, 
-			      bool sticky ){
-
-  Translation( ti, Rti, tf, Rtf, variables, sticky );
-  Rotation( ti, Rti, tf, Rtf, variables, sticky );
-  
-  return SUCCESS;
-}
-
-robError 
-robTrajectoryManager::Linear( const vctFrame4x4<double,VCT_ROW_MAJOR>& Rtwi, 
-			      const vctFrame4x4<double,VCT_ROW_MAJOR>& Rtwf, 
-			      double vmax, 
-			      double wmax,
-			      robVariablesMask variables, 
-			      bool sticky ){
-
-  // ensure the clock is there
-  if(clock==NULL){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
-		      << ": No clock defined" 
-		      << std::endl;
-    return ERROR;
-  }
-
-  robVariables time;
-  if( clock->Read( time ) == ERROR ){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
-		      << ": Failed to query the clock" 
-		      << std::endl;
-    return ERROR;
-  }
-  double ti=time.time;
-
-  // compute the translation time: timet
-  vctFixedSizeVector<double,3> twi = Rtwi.Translation();
-  vctFixedSizeVector<double,3> twf = Rtwf.Translation();
-  vctFixedSizeVector<double,3> tif = twf - twi;
-  double timet = tif.Norm() / fabs(vmax);               // time for translation
-
-  // compute the rotation time: timeR
-  vctFrame4x4<double,VCT_ROW_MAJOR> Rtiw(Rtwi);
-  Rtiw.InverseSelf();
-  vctFrame4x4<double,VCT_ROW_MAJOR> Rtif = Rtiw * Rtwf; // relative rotation
-  vctMatrixRotation3<double,VCT_ROW_MAJOR> Rif;         // the 3x3 rotation
-  for(int r=0; r<3; r++) for(int c=0; c<3; c++) Rif[r][c] = Rtif[r][c];
-  vctAxisAngleRotation3<double> ut(Rif);                // axis angle
-  double timeR = fabs(ut.Angle()) / fabs(wmax);         // time for rotation
-
-  // compute the final time
-  double tf = ti+timet;
-  if( timet < timeR )
-    tf = ti+timeR;
-
-  // create the motion
-  if( Linear( ti, Rtwi, tf, Rtwf, variables, sticky) == ERROR ){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
-		      << ": Failed to create a trajectory" 
-		      << std::endl;
-    return ERROR;
-  }
-
-  return SUCCESS;
-}
-
-robError 
-robTrajectoryManager::Linear( const std::vector< vctFrame4x4<double,VCT_ROW_MAJOR> >& Rt, 
-			      double vmax, 
-			      double wmax,
-			      robVariablesMask variables, 
-			      bool sticky){
-
-  // ensure the clock is there
-  if(clock==NULL){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
-		      << ": No clock defined" 
-		      << std::endl;
-    return ERROR;
-  }
-
-  robVariables time;
-  if( clock->Read( time ) == ERROR ){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
-		      << ": Failed to query the clock" 
-		      << std::endl;
-    return ERROR;
-  }
-  double ti = time.time;
-
-  for(size_t i=0; i<Rt.size()-1; i++){
-    vctFrame4x4<double,VCT_ROW_MAJOR> Rtwi = Rt[i];
-    vctFrame4x4<double,VCT_ROW_MAJOR> Rtwf = Rt[i+1];
-
-    // compute the translation time: timet
-    vctFixedSizeVector<double,3> twi = Rtwi.Translation();
-    vctFixedSizeVector<double,3> twf = Rtwf.Translation();
-    vctFixedSizeVector<double,3> tif = twf - twi;
-    double timet = tif.Norm() / fabs(vmax);
-    
-    // compute the rotation time: clock
-    vctFrame4x4<double,VCT_ROW_MAJOR> Rtiw(Rtwi);
-    Rtiw.InverseSelf();
-    vctFrame4x4<double,VCT_ROW_MAJOR> Rtif = Rtiw * Rtwf;
-    vctMatrixRotation3<double,VCT_ROW_MAJOR> Rif;
-    for(int r=0; r<3; r++) for(int c=0; c<3; c++) Rif[r][c] = Rtif[r][c];
-    vctAxisAngleRotation3<double> ut(Rif);
-    double timeR = fabs(ut.Angle()) / fabs(wmax);
-
-    // compute the final time
-    double tf = ti+timet;
-    if( timet < timeR )
-      tf = ti+timeR;
-
-    // create the motion
-    if( Linear( ti, Rtwi, tf, Rtwf, variables, sticky ) == ERROR ){
-      CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
-			<< ": Failed to create the trajectory" 
-			<< std::endl;
-      return ERROR;
-    }
-    ti=tf;
-  }
-  return SUCCESS;
-}
-
-robError robTrajectoryManager::TrackSE3( robVariablesMask variables, 
-					 double vmax, 
-					 double wmax, 
-					 double vdmax ){
-
-  // check the DOF are for rotation and/or velocities and/or accelerations
-  variables &= robVariables::CARTESIAN_POS;
-
-  if( !variables ){ 
-    CMN_LOG_RUN_VERBOSE << CMN_LOG_DETAILS 
-			<< ": No DOF!" 
-			<< std::endl;
-    return ERROR;
-  }
-
-  // create slerp
-  robTrackSE3* track = new robTrackSE3( vmax, wmax, vdmax );
-  
-  // insert the linear function as a mapping F:R1->vctDynamicVector<double>
-  if( Insert( track, 
-	      robVariables::TIME | robVariables::CARTESIAN_POS,
-	      variables ) == ERROR ){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
-		      << ": Failed to insert the function" 
-		      << std::endl;
-    return ERROR;
-  }
-  return SUCCESS;
-}
-
-robError robTrajectoryManager::Evaluate( robVariables& output ){
-
-  // make sure that the domain is there
-  if( clock == NULL ){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
-		      << ": No clock defined" 
-		      << std::endl;
-    return ERROR;
-  }
-
-  robVariables input;
-  if( clock->Read( input ) == ERROR ){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
-		      << ": Failed to query the clock" 
-		      << std::endl;
-    return ERROR;
-  }
-
-  if( source != NULL ){
-    if( source->Read( input ) == ERROR ){
-      CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS 
-			  << ": Failed to query the source" 
-			  << std::endl;
-    }
-  }
+  // clean slate
+  output.Clear();
 
   // evaluate each function in the maps
-  std::map<robMapping, robTrajectory*>::iterator iter;
-  
-  for( iter=trajectories.begin(); iter!=trajectories.end(); iter++ ){
-    
-    robMapping mapping = iter->first;          // the dof mask
-    robTrajectory* trajectory = iter->second;  // the function
-
-    // Handle SE3->SE3 trajectory 
-    if( mapping.From().IsCartesianSet() && 
-	mapping.From().IsTimeSet()      &&
-	mapping.To().IsCartesianSet()   ){
-
-      // create a variable for the trajectory
-      robVariables outputSE3( mapping.To().GetVariables() );
-
-      // evaluate the trajectory
-      if( trajectory->Evaluate( input, outputSE3 ) == SUCCESS ){
-	// set the output variable to the output of the trajectory
-	output.Set( mapping.To().GetVariables() & robVariables::CARTESIAN_POS, 
-		    outputSE3.Rt, 
-		    outputSE3.vw,
-		    outputSE3.vdwd );
-      }
-    }
-
-    // this else is necessary because the following mappings also depend
-    // on time
-    else{
-
-      // Handle a t->Rn for joint trajectories
-      if( mapping.From().IsTimeSet() && 
-	  mapping.To().IsJointSet()  ){
-
-	// create an output variable for the trajectory
-	robVariables outputRn( mapping.To().GetVariables() );
-
-	// evaluat the trajectory
-	if( trajectory->Evaluate( input, outputRn ) == SUCCESS ){
-	  // set the output variable to the output of the trajectory
-	  output.Set( mapping.To().GetVariables() & robVariables::JOINTS_POS, 
-		      outputRn.q, 
-		      outputRn.qd, 
-		      outputRn.qdd );
-	}
-      }
-      
-      // Handle t->SO3 trajectory
-      if( mapping.From().IsTimeSet()      && 
-	  mapping.To().IsOrientationSet() ){
-	
-	// create an output variable for the trajectory
-	robVariables outputSE3( mapping.To().GetVariables() );
-
-	// evaluate the trajectory
-	if( trajectory->Evaluate( input, outputSE3 ) == SUCCESS ){
-	  output.Set( mapping.To().GetVariables() & robVariables::ROTATION, 
-		      outputSE3.Rt, 
-		      outputSE3.vw, 
-		      outputSE3.vdwd );
-	}
-      }
-      
-      // Handle a t->R3 trajectory
-      if(mapping.From().IsTimeSet()      && 
-	 mapping.To().IsTranslationSet() ){
-
-	// create an output variable for the trajectorye
-	robVariables outputRn( mapping.To().GetVariables() );
-
-	// evaluate the trajectory
-	if( trajectory->Evaluate( input, outputRn ) == SUCCESS ){
-	  // Translations are handled as t->Rn so copy the output in a SE3
-	  robVariables outputSE3( robVariables::TRANSLATION );
-	  outputSE3.Rt[0][3] = outputRn.q[0]; 
-	  outputSE3.Rt[1][3] = outputRn.q[1]; 
-	  outputSE3.Rt[2][3] = outputRn.q[2];
-	  // copy the velocity and accelerations
-
-	  // set the output variable to the output of the trajectory
-	  output.Set( mapping.To().GetVariables() & robVariables::TRANSLATION,
-		      outputSE3.Rt, 
-		      outputSE3.vw, 
-		      outputSE3.vdwd );
-	}
-      }
+  std::list<robTrajectory*>::iterator traj;
+  for( traj=trajectories.begin(); traj!=trajectories.end(); traj++ ){
+    if( (*traj)->Evaluate( input, output ) != robFunction::ESUCCESS ){
     }
   }
-  return SUCCESS;
+
+  return robFunction::ESUCCESS;
 }

@@ -21,10 +21,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <iostream>
 
 #include <cisstVector/vctQuaternionRotation3.h>
-#include <cisstVector/vctFrame4x4.h>
-
+#include <cisstVector/vctMatrixRotation3.h>
 #include <cisstRobot/robFunction.h>
-
 #include <cisstRobot/robExport.h>
 
 //! Define a spherical linear interpolation function 
@@ -32,25 +30,24 @@ class CISST_EXPORT robSLERP : public robFunction {
 
 protected:
     
-  vctQuaternionRotation3<double> qinitial;
-  vctQuaternionRotation3<double> qfinal;
-  vctFixedSizeVector<double,3> w;               
-  double xmin, xmax;
+  vctQuaternionRotation3<double> qwi;   // initial orientation
+  vctQuaternionRotation3<double> qwf;   // final orientation
+  double ti;                            // initial time
+  double tf;                            // final time
+
+  vctFixedSizeVector<double,3>  w;
   
 public:
   
-  //! hack...
-  double Duration() const { return xmax-xmin; }
-  
   //! Create a SLERP between ti and tf
-  robSLERP( double ti, const vctFrame4x4<double,VCT_ROW_MAJOR>& Ri, 
-	    double tf, const vctFrame4x4<double,VCT_ROW_MAJOR>& Rf);
+  robSLERP( double ti, const vctMatrixRotation3<double>& Ri, 
+	    double tf, const vctMatrixRotation3<double>& Rf);
   
   //! Return true if the function is defined for the given input
-  robDomainAttribute IsDefinedFor( const robVariables& input ) const; 
+  robFunction::Context GetContext( const robVariable& input ) const; 
   
   //! Evaluate the function
-  robError Evaluate( const robVariables& input, robVariables& output );  
+  robFunction::Errno Evaluate( const robVariable& input, robVariable& output );  
   
 };
 

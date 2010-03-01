@@ -21,125 +21,95 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstNumerical/nmrInverse.h>
 #include <iostream>
 
-extern "C" {
+robQuintic::robQuintic( robSpace::Basis codomain,
+		        double t1, double y1, double y1d, double y1dd, 
+			double t2, double y2, double y2d, double y2dd ) :
+  // initialize the base class R^1->R^1
+  robFunction( robSpace::TIME, 
+	       codomain & ( robSpace::JOINTS_POS | robSpace::TRANSLATION ) ) {
 
-  void dgetrf_(F_INTEGER* M, F_INTEGER* N, double* A, 
-	       F_INTEGER* LDA, F_INTEGER* IPIV, F_INTEGER* INFO);
-
-  void dgetri_(F_INTEGER* M, double* A, 
-	       F_INTEGER* LDA, F_INTEGER* IPIV, 
-	       double* WORK, F_INTEGER* LWORK,  F_INTEGER* INFO);
-
-  void  dgesv_(int *N, int *NRHS,
-	       double *A, int *LDA, int *IPIV,
-	       double *B, int *LDB, int *INFO);
-}
-
-robQuintic::robQuintic( double t1, double x1, double v1, double a1, 
-			double t2, double x2, double v2, double a2 ){
-
-  xmin = t1;
-  xmax = t2;
+  // Check that the time values are greater than zero and that t1 < t2
+  if( (t1 < 0) || (t2 < 0) || (t2 <= t1) ){
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
+		      << ": " << tmin << " must be less than " << tmax << "." 
+		      << std::endl;
+  }
+  
+  tmin = t1;
+  tmax = t2;
   t2 = t2-t1;
   t1 = 0;
-  double t11 = t1;
+
+  double t10 = 1.0;
+  double t11 = t10*t1;
   double t12 = t11*t11;
   double t13 = t12*t11;
   double t14 = t13*t11;
   double t15 = t14*t11;
   
-  double t21 = t2;
+  double t20 = 1.0;
+  double t21 = t20*t2;
   double t22 = t21*t21;
   double t23 = t22*t21;
   double t24 = t23*t21;
   double t25 = t24*t21;
   
-  vctFixedSizeMatrix<double, 6, 6, VCT_ROW_MAJOR> A;
-  //double A[6][6];
+  vctFixedSizeMatrix<double,6,6,VCT_ROW_MAJOR> A;
 
-  A[0][0]=1;A[0][1]= t11;A[0][2]=  t12;A[0][3]=  t13;A[0][4]=   t14;A[0][5]= t15;
-  A[1][0]=0;A[1][1]=1 ;A[1][2]=2*t11;A[1][3]=3*t12;A[1][4]= 4*t13;A[1][5]= 5*t14;
-  A[2][0]=0;A[2][1]=0 ;A[2][2]=2    ;A[2][3]=6*t11;A[2][4]=12*t12;A[2][5]=20*t13;
-  A[3][0]=1;A[3][1]= t21;A[3][2]=  t22;A[3][3]=  t23;A[3][4]=   t24;A[3][5]= t25;
-  A[4][0]=0;A[4][1]=1 ;A[4][2]=2*t21;A[4][3]=3*t22;A[4][4]= 4*t23;A[4][5]= 5*t24;
-  A[5][0]=0;A[5][1]=0 ;A[5][2]=2    ;A[5][3]=6*t21;A[5][4]=12*t22;A[5][5]=20*t23;
+  A[0][0]=t10; A[0][1]=t11; A[0][2]=1.0*t12; A[0][3]=1.0*t13; A[0][4]= 1.0*t14; A[0][5]= 1.0*t15;
+  A[1][0]=0.0; A[1][1]=t10; A[1][2]=2.0*t11; A[1][3]=3.0*t12; A[1][4]= 4.0*t13; A[1][5]= 5.0*t14;
+  A[2][0]=0.0; A[2][1]=0.0; A[2][2]=2.0*t10; A[2][3]=6.0*t11; A[2][4]=12.0*t12; A[2][5]=20.0*t13;
+  A[3][0]=t20; A[3][1]=t21; A[3][2]=1.0*t22; A[3][3]=1.0*t23; A[3][4]= 1.0*t24; A[3][5]= 1.0*t25;
+  A[4][0]=0.0; A[4][1]=t20; A[4][2]=2.0*t21; A[4][3]=3.0*t22; A[4][4]= 4.0*t23; A[4][5]= 5.0*t24;
+  A[5][0]=0.0; A[5][1]=0.0; A[5][2]=2.0*t20; A[5][3]=6.0*t21; A[5][4]=12.0*t22; A[5][5]=20.0*t23;
   
-  vctFixedSizeVector<double, 6> y;
-  //double y[6];
-  y[0] = x1; 
-  y[1] = v1; 
-  y[2] = a1; 
-  y[3] = x2; 
-  y[4] = v2; 
-  y[5] = a2;
+  vctFixedSizeVector<double,6> b;
+  b[0] = y1;   b[1] = y1d;   b[2] = y1dd; 
+  b[3] = y2;   b[4] = y2d;   b[5] = y2dd;
 
-  //cout << A << std::endl << std::endl;
-  nmrInverseFixedSizeData<6, VCT_ROW_MAJOR> data;
-  nmrInverse(A, data);
-  /*
-  int N = 6;        // The number of linear equations,
-  int NHRS = 1;     // The number of right hand sides
-                    // factors L and U from the  factorization
-  int LDA = 6;      // The leading dimension of the array A.  LDA >= max(1,N)
-  int IPIV[6];      // The  pivot  indices  that  define the permutation matrix
-                    // P; row i of the matrix was interchanged  with row
-                    // IPIV(i).
-  int LDB = 6;      // The leading dimension of the array B.  LDB >= max(1,N).
-  int INFO;         //  = 0:  successful exit
+  nmrInverseFixedSizeData<6,VCT_ROW_MAJOR> data;
+  nmrInverse( A, data );
 
-  dgesv_(&N, &NHRS,
-	 &(A[0][0]), &LDA,
-	 &IPIV[0],
-	 &(y[0]), &LDB,
-	 &INFO);
+  x = A*b;
 
-  for(int i=0; i<6; i++){
-    cout << y[i] << " ";
-  }
-  cout << std::endl << INFO << std::endl;
-  */
-  b = A*y;
-  //cout << b << std::endl;
 }
 
-robDomainAttribute robQuintic::IsDefinedFor( const robVariables& input ) const{
-  
-  // test the dof are double numbers
-  if( !input.IsTimeSet() ){
-    CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS << ": Expected time input" <<std::endl;
-    return UNDEFINED;
+robFunction::Context robQuintic::GetContext( const robVariable& input ) const{
+  // Test the input is time
+  if( !input.IsTimeEnabled() ){
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
+		      << ": Expected time input." 
+		      << std::endl;
+    return robFunction::CUNDEFINED;
   }
-
+  
+  // Check the context
   double t = input.time;
-  if( xmin <= t && t <= xmax )                           return DEFINED;
-  if( xmin-robTrajectory::TAU <= t && t <= xmin ) return INCOMING;
-  if( xmax <= t && t <= xmax+robTrajectory::TAU ) return OUTGOING;
-  if( xmax+robTrajectory::TAU < t )               return EXPIRED;
-  
-  return UNDEFINED;
-
+  if( this->tmin <= t && t <= this->tmax ) { return robFunction::CDEFINED; }
+  else                                     { return robFunction::CUNDEFINED; }
 }
 
-robError robQuintic::Evaluate( const robVariables& input, 
-			       robVariables& output ){
+robFunction::Errno robQuintic::Evaluate( const robVariable& input, 
+					 robVariable& output ){
 
-  // test the dof are double numbers
-  //if( !input.IsTime() ){
-  //CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS << ": Expected time input" <<std::endl;
-  //return UNDEFINED;
-  //}
+  // Test the context
+  if( GetContext( input ) != robFunction::CDEFINED ){
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
+		      << ": Function is undefined for the input." 
+		      << std::endl;
+    return robFunction::EUNDEFINED;
+  }
 
-  double t1 = input.time-xmin;
+  double t1 = input.time-tmin;
   double t2 = t1*t1;
   double t3 = t2*t1;
   double t4 = t3*t1;
   double t5 = t4*t1;
-  double y   =    b[5]*t5 +    b[4]*t4 +   b[3]*t3 +   b[2]*t2 + b[1]*t1 + b[0];
-  double yd  =  5*b[5]*t4 +  4*b[4]*t3 + 3*b[3]*t2 + 2*b[2]*t1 + b[1];
-  double ydd = 20*b[5]*t3 + 12*b[4]*t2 + 6*b[3]*t1 + 2*b[2];
+  double y   =    x[5]*t5 +    x[4]*t4 +   x[3]*t3 +   x[2]*t2 + x[1]*t1 + x[0];
+  double yd  =  5*x[5]*t4 +  4*x[4]*t3 + 3*x[3]*t2 + 2*x[2]*t1 + x[1];
+  double ydd = 20*x[5]*t3 + 12*x[4]*t2 + 6*x[3]*t1 + 2*x[2];
 
-  output = robVariables( vctDynamicVector<double>(1,y), 
-			 vctDynamicVector<double>(1,yd),
-			 vctDynamicVector<double>(1,ydd) );
-  return SUCCESS;
+  output.IncludeBasis( Codomain().GetBasis(), y, yd, ydd );
+
+  return robFunction::ESUCCESS;
 }

@@ -16,34 +16,29 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstCommon/cmnLogger.h>
-#include <cisstRobot/robLinear.h>
-#include <cisstRobot/robTrajectory.h>
-#include <iostream>
-#include <typeinfo>
+#include <cisstRobot/robConstantSO3.h>
 
-robLinear::robLinear( robSpace::Basis codomain,
-		      double t1, double y1, double t2, double y2 ) :
-  // initialize the base class R^1->R^n
-  robFunction( robSpace::TIME, 
-	       codomain & ( robSpace::JOINTS_POS | robSpace::TRANSLATION ) ) {
+robConstantSO3::robConstantSO3( robSpace::Basis codomain,
+				double tmin, 
+				const vctMatrixRotation3<double>& R,
+				double tmax) :
+  // initialize the base class R^1->SO3
+  robFunction( robSpace::TIME, codomain & robSpace::ORIENTATION ){
 
   // Check that the time values are greater than zero and that t1 < t2
-  if( (t1 < 0) || (t2 < 0) || (t2 < t1) ){
+  if( (tmin < 0) || (tmax < 0) || (tmax <= tmin) ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
-		      << ": " << t1 << " must be less than " << t2 << "." 
+		      << ": " << tmin << " must be less than " << tmax << "." 
 		      << std::endl;
   }
   
-  this->m = (y2-y1)/(t2-t1); // compute the slope
-  this->b = y1 - m*t1;       // compute the 0-offset
-
-  this->tmin = t1;           // copy the domain
-  this->tmax = t2;
+  this->R = R; 
+  this->tmin = tmin;
+  this->tmax = tmax;
 
 }
 
-robFunction::Context robLinear::GetContext( const robVariable& input ) const{
- 
+robFunction::Context robConstantSO3::GetContext(const robVariable& input)const{
   // Test the input is time
   if( !input.IsTimeEnabled() ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
@@ -58,8 +53,8 @@ robFunction::Context robLinear::GetContext( const robVariable& input ) const{
   else                                     { return robFunction::CUNDEFINED; }
 }
 
-robFunction::Errno robLinear::Evaluate( const robVariable& input, 
-					robVariable& output ){
+robFunction::Errno robConstantSO3::Evaluate( const robVariable& input, 
+					     robVariable& output ){
 
   // Test the context
   if( GetContext( input ) != robFunction::CDEFINED ){
@@ -69,12 +64,12 @@ robFunction::Errno robLinear::Evaluate( const robVariable& input,
     return robFunction::EUNDEFINED;
   }
 
-  double t = input.time;
-  double y = m*t+b;
-  double yd = m;
-  double ydd = 0.0;
-  
-  output.IncludeBasis( Codomain().GetBasis(), y, yd, ydd );
+  // Set the output of the function along with the 1st and 2nd derivatives
+  // Since the function is constant, its derivatives are zero
+  vctFixedSizeVector<double,3> w(0.0), wd(0.0);
+  output.IncludeBasis( Codomain().GetBasis(), R, w, wd );
 
   return robFunction::ESUCCESS;
+
 }
+

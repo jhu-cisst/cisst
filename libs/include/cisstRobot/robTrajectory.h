@@ -18,56 +18,82 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _robTrajectory_h
 #define _robTrajectory_h
 
-#include <cisstRobot/robFunction.h>
-#include <vector>
+#include <list>
 
+#include <cisstRobot/robFunction.h>
 #include <cisstRobot/robExport.h>
 
-class robDomainLimit {};
-
+//! A trajectory interface
+/**
+   robTrajectory is an abstract function defining a common interface for time-
+   based trajectories. This class must be overloaded and specialized to a given 
+   codomain. As mentioned, the domain of a trajectory is time and the codomain
+   must be defined by the overloaded class. For exmaple, robTrajectoryRn defines
+   time-based joint trajectories and robTrajectorySE3 defines time-based 
+   Cartesian trajectories. The main service provided by robTrajectory is to 
+   manages a list of motion segments that can be evaluated. Each motion segment
+   must be consistend with the codomain of the trajectory. For example, if you 
+   define a trajectory for Q1, then every motion segment must contain a function
+   with Q1 as its codomain. Every class derived from robTrajectory must implement
+   a method to generate a motion segment, a method to determine the transition
+   time between two motion segments and a blending method.
+*/
 class CISST_EXPORT robTrajectory : public robFunction {
 
-protected:
-  
-  std::vector< robFunction* > functions;
-  robFunction* blender;
-  
-  robError PackRn( const robVariables& input1, 
-		   const robVariables& input2,
-		   robVariables& output );
+ protected:
 
-  robError PackSO3( const robVariables& input1, 
-		    const robVariables& input2,
-		    robVariables& output ) ;
-  
-  robError BlendRn( robFunction* initial, 
-		    robFunction* final,
-		    const robVariables& input, 
-		    robVariables& output );
+  //! Define a motion segment.
+  struct Segment{
+    double ti;                        // Initial time of the segment
+    double tf;                        // Final time of the segment
+    robFunction* function;            // The function used by the segment
 
-  robError BlendSO3( robFunction* initial, 
-		     robFunction* final,
-		     const robVariables& input, 
-		     robVariables& output );
+    Segment( double ti, double tf, robFunction* function ) :
+      ti(ti), tf(tf), function(function) {}
+  };
   
+ private:
+
+  double t; // the time of the last evaluation of the trajectory
+
+  //! The trajectory segments
+  std::list< robTrajectory::Segment > segments;
+
+ protected:
+
+  virtual 
+    robTrajectory::Segment  GenerateBlender(const robTrajectory::Segment& si,
+					    const robTrajectory::Segment& sj)=0;
   
-public:
+ public:
   
-  static const double TAU;
+  //! Default constructor
+  robTrajectory( robSpace::Basis codomain, double t );
   
-  robTrajectory(){blender=NULL;}
-  
+  //
+  robFunction::Errno EvaluateLastSegment( robVariable& input,
+					  robVariable& output ) const;
+
   //! Insert a function
   /**
      This inserts a new function in the piecewise function. The function is
      inserted at the begining of a queue and thus its domain has higher priority
      than the functions after.
+     \param ti The initial time for which the function is defined
+     \param tf The final time for which the function is defined
      \param function The new function to be added
   */
-  robError Insert( robFunction* function );
-  
-  //! Is function defined for the given input
-  robDomainAttribute IsDefinedFor( const robVariables& input ) const ;
+  robFunction::Errno Insert( robFunction* function, double ti, double tf );
+
+  //! Return the context of the function
+  /**
+     Call this method to find if the trajectory has a function defined for an
+     input.
+     \param[in] input The input variable
+     \return CDEFINED if the function is defined for the input. CUNDEFINED if 
+             the function is undefined.
+  */
+  robFunction::Context GetContext( const robVariable& input ) const ;
     
   //! Evaluate the function for the given input
   /**
@@ -76,10 +102,14 @@ public:
      perform blending if it determines that an other function is ramping up
      or ramping down. Finally, this method performs cleaning of the functions.
      Functions that are expired or that have a lower priority are removed.
-     \param [in] input The input to the function
-     \param [out] output The output of the function
+     \param[in] input The input to the function. The input domain must be 
+                      robSpace::TIME
+     \param[out] output The output of the function. The domain of the output
+                        will be set to the codomain of the function
+     \return robFunction::ESUCCESS if no error occured. robFunction::EUNDEFINED
+             if the function is not defined for the input.
   */
-  robError Evaluate( const robVariables& input, robVariables& output );  
+  robFunction::Errno Evaluate( const robVariable& input, robVariable& output );
   
 };
 
