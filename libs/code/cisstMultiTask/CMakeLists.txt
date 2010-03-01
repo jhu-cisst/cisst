@@ -252,6 +252,10 @@ SET_SOURCE_FILES_PROPERTIES("${CISST_MTS_CONFIG_FILE}"
                             PROPERTIES GENERATED TRUE)
 SET(ADDITIONAL_HEADER_FILES ${CISST_MTS_CONFIG_FILE})
 
+# Create the CMake config file
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/cisstMultiTaskBuild.cmake.in
+               ${cisst_BINARY_DIR}/cisstMultiTaskBuild.cmake
+               @ONLY)
 
 # Finally add the library
 CISST_ADD_LIBRARY_TO_PROJECT(cisstLibs)

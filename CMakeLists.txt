@@ -143,6 +143,10 @@ option(CISST_HAS_QT "Is Qt available.  If not, Qt widgets and some examples won'
 if(CISST_HAS_QT)
   find_package(Qt4 REQUIRED)
   include(${QT_USE_FILE})
+  set(CISST_QT_PACKAGE "Qt4" CACHE STRING "Qt Package Name")
+  mark_as_advanced(CISST_QT_PACKAGE)
+  CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_PACKAGES CISST_QT_PACKAGE)
+  CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_CMAKE_FILES QT_USE_FILE)
 endif(CISST_HAS_QT)
 
 # Extra link flag if for Apple
