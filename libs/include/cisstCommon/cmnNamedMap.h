@@ -103,6 +103,13 @@ public:
     /*! Constructor with a map name.  The map name is useful for all
       human readable log messages as well as string streaming
       (e.g. std::cout) */
+    cmnNamedMap(const char * mapName, bool takesOwnership = false):
+        Map(),
+        TakesOwnership(takesOwnership),
+        MapName(mapName),
+        OwnerServices(0)
+    {}
+
     cmnNamedMap(const std::string & mapName, bool takesOwnership = false):
         Map(),
         TakesOwnership(takesOwnership),
