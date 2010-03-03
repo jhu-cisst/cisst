@@ -19,7 +19,6 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include "GCMUITask.h"
-#include "GCM_UI.h"
 
 CMN_IMPLEMENT_SERVICES(GCMUITask);
 
