@@ -59,7 +59,7 @@ inline void cmnDeSerializeRaw(std::istream & inputStream, _elementType & data)
 {
     inputStream.read(reinterpret_cast<char *>(&data), sizeof(_elementType));
     if (inputStream.fail()) {
-        cmnThrow("cmnDeSerializer::DeSerializeRaw(_elementType): Error occured with std::istream::read");
+        cmnThrow("cmnDeSerializeRaw(_elementType): Error occured with std::istream::read");
     }
 }
 
@@ -97,7 +97,7 @@ inline void cmnDeSerializeRaw(std::istream & inputStream, std::string & data)
     data.resize(size);
     inputStream.read(const_cast<char *>(data.c_str()), size * sizeof(std::string::value_type));
     if (inputStream.fail()) {
-        cmnThrow("cmnDeSerializer::DeSerializeRaw(std::string): Error occured with std::istream::read");
+        cmnThrow("cmnDeSerializeRaw(std::string): Error occured with std::istream::read");
     }
 }
 
