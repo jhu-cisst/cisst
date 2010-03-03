@@ -235,11 +235,13 @@ public:
 
     /*! Serialization.  Relies on the specialization, if any, of cmnSerializeRaw. */
     inline void SerializeRaw(std::ostream & outputStream) const {
+        mtsGenericObject::SerializeRaw(outputStream);
         cmnSerializeRaw(outputStream, this->Data);
     }
 
     /*! DeSerialization.  Relies on the specialization, if any, of cmnDeSerializeRaw. */
     inline void DeSerializeRaw(std::istream & inputStream) {
+        mtsGenericObject::DeSerializeRaw(inputStream);
         cmnDeSerializeRaw(inputStream, this->Data);
     }
 
@@ -335,11 +337,13 @@ public:
 
     /*! Serialization.  Relies on the specialization, if any, of cmnSerializeRaw. */
     inline void SerializeRaw(std::ostream & outputStream) const {
+        mtsGenericObject::SerializeRaw(outputStream);
         cmnSerializeRaw(outputStream, *this->pData);
     }
 
     /*! DeSerialization.  Relies on the specialization, if any, of cmnDeSerializeRaw. */
     inline void DeSerializeRaw(std::istream & inputStream) {
+        mtsGenericObject::DeSerializeRaw(inputStream);
         cmnDeSerializeRaw(inputStream, *this->pData);
     }
 
