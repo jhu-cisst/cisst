@@ -432,13 +432,15 @@ bool mtsManagerGlobal::RemoveProvidedInterface(
     bool ret = true;
     ConnectionMapType * connectionMap = interfaceMap->ProvidedInterfaceMap.GetItem(interfaceName);
     if (connectionMap) {
-        ConnectionMapType::iterator it = connectionMap->begin();
-        while (it != connectionMap->end()) {
-            Disconnect(it->second->GetProcessName(), it->second->GetComponentName(), it->second->GetInterfaceName(),
-                processName, componentName, interfaceName);
-            it = connectionMap->begin();
+        if (connectionMap->size()) {
+            ConnectionMapType::iterator it = connectionMap->begin();
+            while (it != connectionMap->end()) {
+                Disconnect(it->second->GetProcessName(), it->second->GetComponentName(), it->second->GetInterfaceName(),
+                    processName, componentName, interfaceName);
+                it = connectionMap->begin();
+            }
+            delete connectionMap;
         }
-        delete connectionMap;
     }
 
     // Remove the provided interface from provided interface map
@@ -471,13 +473,15 @@ bool mtsManagerGlobal::RemoveRequiredInterface(
     bool ret = true;
     ConnectionMapType * connectionMap = interfaceMap->RequiredInterfaceMap.GetItem(interfaceName);
     if (connectionMap) {
-        ConnectionMapType::iterator it = connectionMap->begin();
-        while (it != connectionMap->end()) {
-            Disconnect(processName, componentName, interfaceName,
-                it->second->GetProcessName(), it->second->GetComponentName(), it->second->GetInterfaceName());
-            it = connectionMap->begin();
+        if (connectionMap->size()) {
+            ConnectionMapType::iterator it = connectionMap->begin();
+            while (it != connectionMap->end()) {
+                Disconnect(processName, componentName, interfaceName,
+                    it->second->GetProcessName(), it->second->GetComponentName(), it->second->GetInterfaceName());
+                it = connectionMap->begin();
+            }
+            delete connectionMap;
         }
-        delete connectionMap;
     }
 
     // Remove the required interface from provided interface map

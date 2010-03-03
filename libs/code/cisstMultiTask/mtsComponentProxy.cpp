@@ -219,27 +219,33 @@ bool mtsComponentProxy::CreateRequiredInterfaceProxy(const RequiredInterfaceDesc
 
 bool mtsComponentProxy::RemoveRequiredInterfaceProxy(const std::string & requiredInterfaceProxyName)
 {
+    // Get network objects to remove
+    mtsComponentInterfaceProxyClient * clientProxy = RequiredInterfaceNetworkProxies.GetItem(requiredInterfaceProxyName);
+    if (!clientProxy) {
+        CMN_LOG_CLASS_RUN_ERROR << "RemoveRequiredInterfaceProxy: cannot find proxy client: " << requiredInterfaceProxyName << std::endl;
+        return false;
+    } else {
+        // Network server deactivation and resource clean up
+        delete clientProxy;
+        RequiredInterfaceNetworkProxies.RemoveItem(requiredInterfaceProxyName);
+    }
+
+    // Get logical objects to remove
     if (!RequiredInterfaces.FindItem(requiredInterfaceProxyName)) {
         CMN_LOG_CLASS_RUN_ERROR << "RemoveRequiredInterfaceProxy: cannot find required interface proxy: " << requiredInterfaceProxyName << std::endl;
         return false;
     }
-
-    // Get a pointer to the provided interface proxy
     mtsRequiredInterface * requiredInterfaceProxy = RequiredInterfaces.GetItem(requiredInterfaceProxyName);
     if (!requiredInterfaceProxy) {
         CMN_LOG_CLASS_RUN_ERROR << "RemoveRequiredInterfaceProxy: This should not happen" << std::endl;
         return false;
+    } else {
+        delete requiredInterfaceProxy;
+        RequiredInterfaces.RemoveItem(requiredInterfaceProxyName);
     }
-
-    // Remove the provided interface proxy from map
-    if (!RequiredInterfaces.RemoveItem(requiredInterfaceProxyName)) {
-        CMN_LOG_CLASS_RUN_ERROR << "RemoveRequiredInterfaceProxy: cannot remove required interface proxy: " << requiredInterfaceProxyName << std::endl;
-        return false;
-    }
-
-    delete requiredInterfaceProxy;
 
     CMN_LOG_CLASS_RUN_VERBOSE << "RemoveRequiredInterfaceProxy: removed required interface proxy: " << requiredInterfaceProxyName << std::endl;
+
     return true;
 }
 
