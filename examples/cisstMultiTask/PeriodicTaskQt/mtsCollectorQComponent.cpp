@@ -43,7 +43,7 @@ mtsCollectorQComponent::~mtsCollectorQComponent(void)
 }
 
 
-void mtsCollectorQComponent::ConnectToWidget(mtsCollectorQWidget * widget)
+void mtsCollectorQComponent::ConnectToWidget(QWidget * widget)
 {
     QObject::connect(widget, SIGNAL(StartCollection()),
                      this, SLOT(StartCollectionQSlot()));

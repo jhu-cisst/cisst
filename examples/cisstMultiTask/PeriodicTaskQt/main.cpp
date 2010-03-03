@@ -29,6 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "displayQComponent.h"
 #include "mtsCollectorQComponent.h"
+#include "mtsCollectorQWidget.h"
 #include "sineTask.h"
 
 const unsigned int NumSineTasks = 3;
@@ -59,40 +60,43 @@ int main(int argc, char *argv[])
 
     // configure Qt widgets
     mainWindow->setWindowTitle("Periodic Task Example");
+    // add one collection widget for all sine generators
     layout->addWidget(collectorQWidget, 0, 0, 1, NumSineTasks);
+    // one large quit button
     layout->addWidget(buttonQuit, 3, 0, 1, NumSineTasks);
     QObject::connect(buttonQuit, SIGNAL(clicked()),
-                     qApp, SLOT(quit()));
+                     QApplication::instance(), SLOT(quit()));
 
-    //
+    // get the component manager to add multiple sine generator tasks
     mtsManagerLocal * taskManager = mtsManagerLocal::GetInstance();
     sineTask * sine;
     displayQComponent * display;
     mtsCollectorState * collector;
     mtsCollectorQComponent * collectorQComponent;
 
-    //
     for (unsigned int i = 0; i < NumSineTasks; i++) {
         std::ostringstream index;
         index << i;
 
+        // create the generator and its widget
         sine = new sineTask("SIN" + index.str(), 1.0 * cmn_ms);
-        display = new displayQComponent("DISP" + index.str());
-        collectorQComponent = new mtsCollectorQComponent("DataCollection" + index.str());
-
         taskManager->AddComponent(sine);
+        display = new displayQComponent("DISP" + index.str());
         taskManager->AddComponent(display);
-        taskManager->AddComponent(collectorQComponent);
-
         layout->addWidget(display->GetWidget(), 1, i);
+        taskManager->Connect(display->GetName(), "DataGenerator",
+                             sine->GetName(), "MainInterface");
+
+        // create the state collector and connect it to the generator
         collector = new mtsCollectorState(sine->GetName(),
                                           sine->GetDefaultStateTableName(),
                                           mtsCollectorBase::COLLECTOR_LOG_FORMAT_CSV);
         collector->AddSignal("SineData");
-        collectorQComponent->ConnectToWidget(collectorQWidget);
 
-        taskManager->Connect(display->GetName(), "DataGenerator",
-                             sine->GetName(), "MainInterface");
+        // create the QComponent to bridge between the collection widget and the collector
+        collectorQComponent = new mtsCollectorQComponent("DataCollection" + index.str());
+        taskManager->AddComponent(collectorQComponent);
+        collectorQComponent->ConnectToWidget(collectorQWidget);
         taskManager->Connect(collectorQComponent->GetName(), "DataCollection",
                              collector->GetName(), "Control");
     }

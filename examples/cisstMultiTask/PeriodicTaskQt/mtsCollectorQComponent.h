@@ -26,9 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsFunctionReadOrWrite.h>
 
 #include <QObject>
-
-#include "mtsCollectorQWidget.h"
-
+#include <QWidget>
 
 class mtsCollectorQComponent: public QObject, public mtsDevice
 {
@@ -41,7 +39,7 @@ class mtsCollectorQComponent: public QObject, public mtsDevice
 
     void Configure(const std::string & CMN_UNUSED(filename) = "") {};
 
-    void ConnectToWidget(mtsCollectorQWidget * widget);
+    void ConnectToWidget(QWidget * widget);
 
  protected:
     struct {
