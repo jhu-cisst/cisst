@@ -71,10 +71,10 @@ protected:
     ClassType * ClassInstantiation;
 
     /*! Argument 1 prototype */
-    Argument1Type Argument1Prototype;
+    mtsGenericObject * Argument1Prototype;
 
     /*! Argument 2 prototype */
-    Argument2Type Argument2Prototype;
+    mtsGenericObject * Argument2Prototype;
 
 public:
     /*! The constructor. Does nothing */
@@ -92,20 +92,43 @@ public:
         BaseType(name),
         Action(action),
         ActionOld(0),
-        ClassInstantiation(classInstantiation),
-        Argument1Prototype(argument1Prototype),
-        Argument2Prototype(argument2Prototype)
-    {}
+        ClassInstantiation(classInstantiation)
+    {
+        this->Argument1Prototype = dynamic_cast<mtsGenericObject*>(argument1Prototype.Services()->Create());
+        this->Argument2Prototype = dynamic_cast<mtsGenericObject*>(argument2Prototype.Services()->Create());
+        if (&typeid(Argument1Prototype) != &typeid(argument1Prototype)) {
+            CMN_LOG_INIT_ERROR << "mtsCommandQualifiedRead: argument 1 prototype is wrong type for command \"" << name << "\" (expected \""
+                               << typeid(Argument1Type).name() << "\", got \"" 
+                               << typeid(argument1Prototype).name() << "\"" << std::endl;
+        }
+        if (&typeid(Argument2Prototype) != &typeid(argument2Prototype)) {
+            CMN_LOG_INIT_ERROR << "mtsCommandQualifiedRead: argument 2 prototype is wrong type for command \"" << name << "\" (expected \""
+                               << typeid(Argument2Type).name() << "\", got \"" 
+                               << typeid(argument2Prototype).name() << "\"" << std::endl;
+        }
+    }
+
     mtsCommandQualifiedRead(ActionTypeOld action, ClassType * classInstantiation, const std::string & name,
                             const Argument1Type & argument1Prototype,
                             const Argument2Type & argument2Prototype):
         BaseType(name),
         Action(0),
         ActionOld(action),
-        ClassInstantiation(classInstantiation),
-        Argument1Prototype(argument1Prototype),
-        Argument2Prototype(argument2Prototype)
-    {}
+        ClassInstantiation(classInstantiation)
+    {
+        this->Argument1Prototype = dynamic_cast<mtsGenericObject*>(argument1Prototype.Services()->Create());
+        this->Argument2Prototype = dynamic_cast<mtsGenericObject*>(argument2Prototype.Services()->Create());
+        if (&typeid(Argument1Prototype) != &typeid(argument1Prototype)) {
+            CMN_LOG_INIT_ERROR << "mtsCommandQualifiedRead: argument 1 prototype is wrong type for command \"" << name << "\" (expected \""
+                               << typeid(Argument1Type).name() << "\", got \"" 
+                               << typeid(argument1Prototype).name() << "\"" << std::endl;
+        }
+        if (&typeid(Argument2Prototype) != &typeid(argument2Prototype)) {
+            CMN_LOG_INIT_ERROR << "mtsCommandQualifiedRead: argument 2 prototype is wrong type for command \"" << name << "\" (expected \""
+                               << typeid(Argument2Type).name() << "\", got \"" 
+                               << typeid(argument2Prototype).name() << "\"" << std::endl;
+        }
+    }
 
 
     /*! The destructor. Does nothing */
@@ -141,12 +164,12 @@ public:
 
     /* commented in base class */
     const mtsGenericObject * GetArgument1Prototype(void) const {
-        return &Argument1Prototype;
+        return Argument1Prototype;
     }
 
     /* commented in base class */
     const mtsGenericObject * GetArgument2Prototype(void) const {
-        return &Argument2Prototype;
+        return Argument2Prototype;
     }
 
     /* commented in base class */
@@ -154,8 +177,8 @@ public:
         outputStream << "mtsCommandQualifiedRead: ";
         if (this->ClassInstantiation) {
             outputStream << this->Name << "(const "
-                         << this->Argument1Prototype.ClassServices()->GetName() << "&, "
-                         << this->Argument2Prototype.ClassServices()->GetName() << "&) using class/object \""
+                         << this->Argument1Prototype->Services()->GetName() << "&, "
+                         << this->Argument2Prototype->Services()->GetName() << "&) using class/object \""
                          << mtsObjectName(this->ClassInstantiation) << "\" currently "
                          << (this->IsEnabled() ? "enabled" : "disabled");
         } else {

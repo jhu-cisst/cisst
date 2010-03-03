@@ -78,8 +78,8 @@ public:
     /*! The constructor.
       \param action Pointer to the member function that is to be called
       by the invoker of the command
-      \param interface Pointer to the receiver of the command
-      \param name A string to identify the command. */
+      \param name A string to identify the command
+      \param argumentPrototype An instance of the argument being used */
     mtsCommandRead(ActionType action, ClassType * classInstantiation, const std::string & name,
                    const ArgumentType & argumentPrototype):
         BaseType(name),
@@ -87,7 +87,13 @@ public:
         ActionOld(0),
         ClassInstantiation(classInstantiation)
     {
-        this->ArgumentPrototype = new ArgumentType(argumentPrototype);
+        //this->ArgumentPrototype = new ArgumentType(argumentPrototype);
+        this->ArgumentPrototype = dynamic_cast<mtsGenericObject*>(argumentPrototype.Services()->Create());
+        if (&typeid(ArgumentType) != &typeid(argumentPrototype)) {
+            CMN_LOG_INIT_ERROR << "mtsCommandRead: argument prototype is wrong type for command \"" << name << "\" (expected \""
+                               << typeid(ArgumentType).name() << "\", got \"" 
+                               << typeid(argumentPrototype).name() << "\"" << std::endl;
+        }
     }
 
     mtsCommandRead(ActionTypeOld action, ClassType * classInstantiation, const std::string & name,
@@ -97,7 +103,13 @@ public:
         ActionOld(action),
         ClassInstantiation(classInstantiation)
     {
-        this->ArgumentPrototype = new ArgumentType(argumentPrototype);
+        //this->ArgumentPrototype = new ArgumentType(argumentPrototype);
+        this->ArgumentPrototype = dynamic_cast<mtsGenericObject*>(argumentPrototype.Services()->Create());
+        if (ArgumentType::ClassServices()->TypeInfoPointer() != &typeid(argumentPrototype)) {
+            CMN_LOG_INIT_ERROR << "mtsCommandRead: argument prototype is wrong type for command \"" << name << "\" (expected \""
+                               << typeid(ArgumentType).name() << "\", got \"" 
+                               << typeid(argumentPrototype).name() << "\"" << std::endl;
+        }
     }
 
 
