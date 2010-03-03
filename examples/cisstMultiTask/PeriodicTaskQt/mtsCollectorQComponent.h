@@ -50,7 +50,8 @@ class mtsCollectorQComponent: public QObject, public mtsDevice
     } Collection;
 
  public slots:
-    void ToggleCollectionQSlot(bool checked);
+    void StartCollectionQSlot(void);
+    void StopCollectionQSlot(void);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsCollectorQComponent);

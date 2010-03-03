@@ -26,16 +26,26 @@ http://www.cisst.org/cisst/license.txt.
 #include <QWidget>
 
 
-class mtsCollectorQWidget : public QWidget
+class mtsCollectorQWidget: public QWidget
 {
     Q_OBJECT;
 
- public:
+public:
     mtsCollectorQWidget(void);
     ~mtsCollectorQWidget(void) {};
 
+protected:
     QGridLayout * CentralLayout;
     QPushButton * ButtonRecord;
+
+public slots:
+    void ToggleRecordSlot(bool checked);
+
+public:
+signals:
+    void StartCollection(void);
+    void StopCollection(void);
+
 };
 
 #endif  // _mtsCollectorQWidget_h

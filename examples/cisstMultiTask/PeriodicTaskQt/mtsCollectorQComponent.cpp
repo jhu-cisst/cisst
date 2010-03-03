@@ -45,18 +45,23 @@ mtsCollectorQComponent::~mtsCollectorQComponent(void)
 
 void mtsCollectorQComponent::ConnectToWidget(mtsCollectorQWidget * widget)
 {
-    QObject::connect(widget->ButtonRecord, SIGNAL(toggled(bool)),
-                     this, SLOT(ToggleCollectionQSlot(bool)));
+    QObject::connect(widget, SIGNAL(StartCollection()),
+                     this, SLOT(StartCollectionQSlot()));
+    QObject::connect(widget, SIGNAL(StopCollection()),
+                     this, SLOT(StopCollectionQSlot()));
 }
 
 
-void mtsCollectorQComponent::ToggleCollectionQSlot(bool checked)
+void mtsCollectorQComponent::StartCollectionQSlot(void)
 {
-    if (checked) {
-        CMN_LOG_CLASS_RUN_VERBOSE << "ToggleCollectionQSlot: starting data collection" << std::endl;
-        Collection.Start();
-    } else {
-        CMN_LOG_CLASS_RUN_VERBOSE << "ToggleCollectionQSlot: stopping data collection" << std::endl;
-        Collection.Stop();
-    }
+    CMN_LOG_CLASS_RUN_VERBOSE << "StartCollectionQSlot: starting data collection" << std::endl;
+    Collection.Start();
+
+}
+
+
+void mtsCollectorQComponent::StopCollectionQSlot(void)
+{
+    CMN_LOG_CLASS_RUN_VERBOSE << "StopCollectionQSlot: stopping data collection" << std::endl;
+    Collection.Stop();
 }

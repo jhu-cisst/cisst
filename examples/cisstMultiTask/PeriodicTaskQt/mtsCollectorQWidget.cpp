@@ -30,4 +30,17 @@ mtsCollectorQWidget::mtsCollectorQWidget(void)
     // create a layout for the widgets
     CentralLayout = new QGridLayout(this);
     CentralLayout->addWidget(ButtonRecord);
+
+    QObject::connect(this->ButtonRecord, SIGNAL(toggled(bool)),
+                     this, SLOT(ToggleRecordSlot(bool)));
+}
+
+
+void mtsCollectorQWidget::ToggleRecordSlot(bool checked)
+{
+    if (checked) {
+        emit StartCollection();
+    } else {
+        emit StopCollection();
+    }
 }

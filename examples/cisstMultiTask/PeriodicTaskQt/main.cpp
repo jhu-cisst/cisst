@@ -31,7 +31,7 @@ http://www.cisst.org/cisst/license.txt.
 #include "mtsCollectorQComponent.h"
 #include "sineTask.h"
 
-const unsigned int NumSineTasks = 2;
+const unsigned int NumSineTasks = 3;
 
 
 int main(int argc, char *argv[])

@@ -10,8 +10,8 @@ CMN_IMPLEMENT_SERVICES(sineTask);
 
 sineTask::sineTask(const std::string & taskName, double period):
     // base constructor, same task name and period.  Set the length of
-    // state table to 100
-    mtsTaskPeriodic(taskName, period, false, 100)
+    // state table to 1000
+    mtsTaskPeriodic(taskName, period, false, 1000)
 {
     // add SineData to the StateTable defined in mtsTask
     StateTable.AddData(SineData, "SineData");
