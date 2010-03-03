@@ -92,7 +92,7 @@ public:
         if (&typeid(ArgumentType) != &typeid(argumentPrototype)) {
             CMN_LOG_INIT_ERROR << "mtsCommandRead: argument prototype is wrong type for command \"" << name << "\" (expected \""
                                << typeid(ArgumentType).name() << "\", got \"" 
-                               << typeid(argumentPrototype).name() << "\"" << std::endl;
+                               << typeid(argumentPrototype).name() << "\")" << std::endl;
         }
     }
 
@@ -105,10 +105,10 @@ public:
     {
         //this->ArgumentPrototype = new ArgumentType(argumentPrototype);
         this->ArgumentPrototype = dynamic_cast<mtsGenericObject*>(argumentPrototype.Services()->Create());
-        if (ArgumentType::ClassServices()->TypeInfoPointer() != &typeid(argumentPrototype)) {
+        if (&typeid(ArgumentType) != &typeid(argumentPrototype)) {
             CMN_LOG_INIT_ERROR << "mtsCommandRead: argument prototype is wrong type for command \"" << name << "\" (expected \""
                                << typeid(ArgumentType).name() << "\", got \"" 
-                               << typeid(argumentPrototype).name() << "\"" << std::endl;
+                               << typeid(argumentPrototype).name() << "\")" << std::endl;
         }
     }
 
