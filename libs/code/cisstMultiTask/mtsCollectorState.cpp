@@ -394,7 +394,7 @@ bool mtsCollectorState::FetchStateTableData(const mtsStateTable * table,
     if (LogFormat == COLLECTOR_LOG_FORMAT_BINARY) {
         cmnULongLong timeTick;
         outputStream.open(LogFileName.c_str(), std::ios::binary | std::ios::app);
-        {
+        if (outputStream.good()) {
             unsigned int i;
             for (i = startIndex; i <= endIndex; i += SamplingInterval) {
                 StringStreamBufferForSerialization.str("");
@@ -409,11 +409,14 @@ bool mtsCollectorState::FetchStateTableData(const mtsStateTable * table,
                 }
             }
             OffsetForNextRead = (i - endIndex == 0 ? SamplingInterval : i - endIndex);
+        } else {
+            CMN_LOG_CLASS_RUN_ERROR << "FetchStateTableData: encountered problem on output stream for collector \""
+                                    << this->GetName() << "\"" << std::endl;
         }
         outputStream.close();
     } else {
         outputStream.open(LogFileName.c_str(), std::ios::app);
-        {
+        if (outputStream.good()) {
             unsigned int i;
             for (i = startIndex; i <= endIndex; i += SamplingInterval) {
                 outputStream << TargetStateTable->Ticks[i];
@@ -424,6 +427,9 @@ bool mtsCollectorState::FetchStateTableData(const mtsStateTable * table,
                 outputStream << std::endl;
             }
             OffsetForNextRead = (i - endIndex == 0 ? SamplingInterval : i - endIndex);
+        } else {
+            CMN_LOG_CLASS_RUN_ERROR << "FetchStateTableData: encountered problem on output stream for collector \""
+                                    << this->GetName() << "\"" << std::endl;
         }
         outputStream.close();
     }
