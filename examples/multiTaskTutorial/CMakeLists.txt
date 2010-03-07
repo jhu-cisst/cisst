@@ -26,7 +26,6 @@ endif (CISST_HAS_SWIG_PYTHON)
 
 if (CISST_MTS_HAS_ICE)
   add_subdirectory(example7)
-  add_subdirectory(example8)
   add_subdirectory(example9-1)
 endif (CISST_MTS_HAS_ICE)
 

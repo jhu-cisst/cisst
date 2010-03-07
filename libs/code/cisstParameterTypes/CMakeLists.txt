@@ -45,7 +45,6 @@ SET(SOURCE_FILES
     prmTransformationDynamic.cpp
     prmTransformationManager.cpp
 	
-	prmString.cpp
 	prmMaskedVector.cpp
     prmActuatorState.cpp
     prmRobotState.cpp
@@ -79,7 +78,6 @@ SET(HEADER_FILES
     prmTransformationDynamic.h
     prmTransformationManager.h
 	
-	prmString.h
 	prmMaskedVector.h
     prmActuatorState.h
     prmRobotState.h
