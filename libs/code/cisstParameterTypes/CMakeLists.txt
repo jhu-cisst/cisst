@@ -2,13 +2,13 @@
 #
 # (C) Copyright 2003-2008 Johns Hopkins University (JHU), All Rights
 # Reserved.
-# 
+#
 # --- begin cisst license - do not edit ---
-# 
+#
 # This software is provided "as is" under an open source license, with
 # no warranty.  The complete license can be found in license.txt and
 # http://www.cisst.org/cisst/license.txt.
-# 
+#
 # --- end cisst license ---
 
 # set the library name
@@ -44,14 +44,14 @@ SET(SOURCE_FILES
     prmTransformationFixed.cpp
     prmTransformationDynamic.cpp
     prmTransformationManager.cpp
-	
-	prmMaskedVector.cpp
+
+    prmMaskedVector.cpp
     prmActuatorState.cpp
     prmRobotState.cpp
     prmActuatorParameters.cpp
     prmGainParameters.cpp
-	
-	prmCollaborativeControlForce.cpp
+
+    prmCollaborativeControlForce.cpp
     )
 
 # all header files
@@ -77,14 +77,14 @@ SET(HEADER_FILES
     prmTransformationFixed.h
     prmTransformationDynamic.h
     prmTransformationManager.h
-	
-	prmMaskedVector.h
+
+    prmMaskedVector.h
     prmActuatorState.h
     prmRobotState.h
     prmActuatorParameters.h
     prmGainParameters.h
-	
-	prmCollaborativeControlForce.h
+
+    prmCollaborativeControlForce.h
     )
 
 CISST_ADD_LIBRARY_TO_PROJECT(cisstLibs)
