@@ -24,7 +24,7 @@ bool IsServerTask = false;
 string GlobalTaskManagerIP;
 string ServerTaskIP;
 
-void help(const char * programName)
+void help()
 {
     cerr << endl 
          << "Usage: multiTaskTutorialExample1-2 [OPTIONS] [ServerIP_1] [ServerIP_2]" << endl 
@@ -72,7 +72,7 @@ int main(int argc, char * argv[])
         if (strcmp(argv[1], "-s") == 0) {
             ParseOption(argv[1]);
         } else {
-            help(argv[0]);
+            help();
             return 1;
         }
     } else if (argc == 4) {
@@ -80,11 +80,11 @@ int main(int argc, char * argv[])
             ParseOption(argv[1]);
             ParseIP(argv[2], argv[3]);
         } else {
-            help(argv[0]);
+            help();
             return 1;
         }
     } else {
-        help(argv[0]);
+        help();
         return 1;
     }
 
@@ -117,8 +117,6 @@ int main(int argc, char * argv[])
         UITaskObject->Configure();
 
         taskManager->AddTask(UITaskObject);
-
-        taskManager->SetTaskManagerType(mtsTaskManager::TASK_MANAGER_SERVER);
     } else {
         //-------------------------------------------------------------------------
         // Create a task which works over networks
@@ -138,19 +136,6 @@ int main(int argc, char * argv[])
 
             taskManager->AddTask(displayTaskObject);        
         }
-
-        taskManager->SetGlobalTaskManagerIP(GlobalTaskManagerIP);
-        taskManager->SetServerTaskIP(ServerTaskIP);
-
-        // Set the type of task manager either as a server or as a client.
-        // mtsTaskManager::SetTaskManagerType() should be called before
-        // mtsTaskManager::Connect()
-        taskManager->SetTaskManagerType(mtsTaskManager::TASK_MANAGER_CLIENT);
-
-        //
-        // TODO: Hide this waiting routine inside mtsTaskManager using events or other things.
-        //
-        osaSleep(0.5 * cmn_s);
 
         // Connect the tasks across networks
         if (!IsServerTask) {

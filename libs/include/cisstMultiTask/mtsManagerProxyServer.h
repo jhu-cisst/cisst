@@ -245,7 +245,7 @@ public:
                                       const std::string & eventHandlerName,
                                       const std::string & listenerID = "");
 
-    const int GetCurrentInterfaceCount(const std::string & componentName, const std::string & listenerID = "");
+    int GetCurrentInterfaceCount(const std::string & componentName, const std::string & listenerID = "");
 
     //-------------------------------------------------------------------------
     //  Event Generators (Event Sender) : Server -> Client
@@ -418,18 +418,18 @@ protected:
         void Shutdown(const ::Ice::Current&);
 
         /*! Process Management */
-        bool AddProcess(const std::string & processName, const ::Ice::Current & current);
-        bool FindProcess(const std::string & processName, const ::Ice::Current &) const;
-        bool RemoveProcess(const std::string & processName, const ::Ice::Current & current);
+        bool AddProcess(const std::string & processName, const ::Ice::Current & CMN_UNUSED(current));
+        bool FindProcess(const std::string & processName, const ::Ice::Current & CMN_UNUSED(current)) const;
+        bool RemoveProcess(const std::string & processName, const ::Ice::Current & CMN_UNUSED(current));
 
         /*! Component Management */
-        bool AddComponent(const std::string & processName, const std::string & componentName, const ::Ice::Current & current);
-        bool FindComponent(const std::string & processName, const std::string & componentName, const ::Ice::Current &) const;
-        bool RemoveComponent(const std::string & processName, const std::string & componentName, const ::Ice::Current & current);
+        bool AddComponent(const std::string & processName, const std::string & componentName, const ::Ice::Current & CMN_UNUSED(current));
+        bool FindComponent(const std::string & processName, const std::string & componentName, const ::Ice::Current & CMN_UNUSED(current)) const;
+        bool RemoveComponent(const std::string & processName, const std::string & componentName, const ::Ice::Current & CMN_UNUSED(current));
 
-        bool AddProvidedInterface(const std::string & processName, const std::string & componentName, const std::string & interfaceName, bool isProxyInterface, const ::Ice::Current & current);
-        bool FindProvidedInterface(const std::string & processName, const std::string & componentName, const std::string & interfaceName, const ::Ice::Current & current);
-        bool RemoveProvidedInterface(const std::string & processName, const std::string & componentName, const std::string & interfaceName, const ::Ice::Current & current);
+        bool AddProvidedInterface(const std::string & processName, const std::string & componentName, const std::string & interfaceName, bool isProxyInterface, const ::Ice::Current & CMN_UNUSED(current));
+        bool FindProvidedInterface(const std::string & processName, const std::string & componentName, const std::string & interfaceName, const ::Ice::Current & CMN_UNUSED(current));
+        bool RemoveProvidedInterface(const std::string & processName, const std::string & componentName, const std::string & interfaceName, const ::Ice::Current & CMN_UNUSED(current));
 
         bool AddRequiredInterface(const std::string & processName, const std::string & componentName, const std::string & interfaceName, bool isProxyInterface, const ::Ice::Current & current);
         bool FindRequiredInterface(const std::string & processName, const std::string & componentName, const std::string & interfaceName, const ::Ice::Current &) const;

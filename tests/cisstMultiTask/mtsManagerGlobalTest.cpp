@@ -654,9 +654,6 @@ void mtsManagerGlobalTest::TestConnectLocal(void)
 {
     mtsManagerGlobal managerGlobal;
 
-    mtsManagerGlobal::ConnectionMapType * connectionMap;
-    mtsManagerGlobal::ConnectedInterfaceInfo * connectedInterfaceInfo;
-
     // Test if invalid arguments are handled properly
     CPPUNIT_ASSERT(!managerGlobal.Connect(P1, P1, C1, r1, P2, C2, p1));
 
@@ -939,7 +936,6 @@ void mtsManagerGlobalTest::TestDisconnect(void)
     }
     CPPUNIT_ASSERT(!managerGlobal.Disconnect(P2, C3, r1, P2, C2, p2));
 
-    /*
     // Prepare components
     CPPUNIT_ASSERT(managerGlobal.AddProcess(P1));
     CPPUNIT_ASSERT(managerGlobal.AddComponent(P1, C1));

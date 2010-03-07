@@ -163,7 +163,7 @@ public:
     /*! Create a network proxy client which serves a required interface proxy. */
     bool CreateInterfaceProxyClient(const std::string & requiredInterfaceProxyName,
                                     const std::string & serverEndpointInfo,
-                                    const std::string & communicatorID,
+                                    const std::string & CMN_UNUSED(communicatorID),
                                     const unsigned int providedInterfaceProxyInstanceID);
 
     /*! Check if a network proxy server for the provided interface proxy has
@@ -182,7 +182,7 @@ public:
         function proxy IDs fetched from a required interface proxy at server
         side. */
     bool UpdateCommandProxyID(
-        const std::string & serverProvidedInterfaceName, const std::string & clientComponentName,
+        const std::string & serverProvidedInterfaceName, const std::string & CMN_UNUSED(clientComponentName),
         const std::string & clientRequiredInterfaceName, const unsigned int providedInterfaceProxyInstanceId);
 
     /*! Assign event handler IDs in a required interface proxy at server side

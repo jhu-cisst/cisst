@@ -418,7 +418,7 @@ void CISST_DEPRECATED mtsManagerLocal::GetNamesOfTasks(std::vector<std::string>&
 void mtsManagerLocal::GetNamesOfCommands(std::vector<std::string>& namesOfCommands,
                                          const std::string & componentName, 
                                          const std::string & providedInterfaceName,
-                                         const std::string & listenerID)
+                                         const std::string & CMN_UNUSED(listenerID))
 {
     ProvidedInterfaceDescription desc;
     if (!GetProvidedInterfaceDescription(componentName, providedInterfaceName, desc)) {
@@ -451,7 +451,7 @@ void mtsManagerLocal::GetNamesOfCommands(std::vector<std::string>& namesOfComman
 void mtsManagerLocal::GetNamesOfEventGenerators(std::vector<std::string>& namesOfEventGenerators,
                                                 const std::string & componentName, 
                                                 const std::string & providedInterfaceName,
-                                                const std::string & listenerID)
+                                                const std::string & CMN_UNUSED(listenerID))
 {
     ProvidedInterfaceDescription desc;
     if (!GetProvidedInterfaceDescription(componentName, providedInterfaceName, desc)) {
@@ -474,7 +474,7 @@ void mtsManagerLocal::GetNamesOfEventGenerators(std::vector<std::string>& namesO
 void mtsManagerLocal::GetNamesOfFunctions(std::vector<std::string>& namesOfFunctions,
                                           const std::string & componentName, 
                                           const std::string & requiredInterfaceName,
-                                          const std::string & listenerID)
+                                          const std::string & CMN_UNUSED(listenerID))
 {
     RequiredInterfaceDescription desc;
     if (!GetRequiredInterfaceDescription(componentName, requiredInterfaceName, desc)) {
@@ -507,7 +507,7 @@ void mtsManagerLocal::GetNamesOfFunctions(std::vector<std::string>& namesOfFunct
 void mtsManagerLocal::GetNamesOfEventHandlers(std::vector<std::string>& namesOfEventHandlers,
                                               const std::string & componentName, 
                                               const std::string & requiredInterfaceName,
-                                              const std::string & listenerID)
+                                              const std::string & CMN_UNUSED(listenerID))
 {
     RequiredInterfaceDescription desc;
     if (!GetRequiredInterfaceDescription(componentName, requiredInterfaceName, desc)) {
@@ -531,7 +531,7 @@ void mtsManagerLocal::GetDescriptionOfCommand(std::string & description,
                                               const std::string & componentName, 
                                               const std::string & providedInterfaceName, 
                                               const std::string & commandName,
-                                              const std::string & listenerID)
+                                              const std::string & CMN_UNUSED(listenerID))
 {
     mtsComponent * component = GetComponent(componentName);
     if (!component) return;
@@ -598,7 +598,7 @@ void mtsManagerLocal::GetDescriptionOfEventGenerator(std::string & description,
                                                      const std::string & componentName, 
                                                      const std::string & providedInterfaceName, 
                                                      const std::string & eventGeneratorName,
-                                                     const std::string & listenerID)
+                                                     const std::string & CMN_UNUSED(listenerID))
 {
     mtsComponent * component = GetComponent(componentName);
     if (!component) return;
@@ -642,7 +642,7 @@ void mtsManagerLocal::GetDescriptionOfFunction(std::string & description,
                                                const std::string & componentName, 
                                                const std::string & requiredInterfaceName, 
                                                const std::string & functionName,
-                                               const std::string & listenerID)
+                                               const std::string & CMN_UNUSED(listenerID))
 {
     mtsComponent * component = GetComponent(componentName);
     if (!component) return;
@@ -725,7 +725,7 @@ void mtsManagerLocal::GetDescriptionOfEventHandler(std::string & description,
                                                    const std::string & componentName, 
                                                    const std::string & requiredInterfaceName, 
                                                    const std::string & eventHandlerName,
-                                                   const std::string & listenerID)
+                                                   const std::string & CMN_UNUSED(listenerID))
 {
     mtsComponent * component = GetComponent(componentName);
     if (!component) return;
@@ -1379,7 +1379,7 @@ bool mtsManagerLocal::Disconnect(
 
 bool mtsManagerLocal::GetProvidedInterfaceDescription(
     const std::string & componentName, const std::string & providedInterfaceName,
-    ProvidedInterfaceDescription & providedInterfaceDescription, const std::string & listenerID)
+    ProvidedInterfaceDescription & providedInterfaceDescription, const std::string & CMN_UNUSED(listenerID))
 {
     // Get component specified
     mtsComponent * component = GetComponent(componentName);
@@ -1408,7 +1408,7 @@ bool mtsManagerLocal::GetProvidedInterfaceDescription(
 
 bool mtsManagerLocal::GetRequiredInterfaceDescription(
     const std::string & componentName, const std::string & requiredInterfaceName,
-    RequiredInterfaceDescription & requiredInterfaceDescription, const std::string & listenerID)
+    RequiredInterfaceDescription & requiredInterfaceDescription, const std::string & CMN_UNUSED(listenerID))
 {
     // Get the component instance specified
     mtsComponent * component = GetComponent(componentName);
@@ -1435,7 +1435,7 @@ bool mtsManagerLocal::GetRequiredInterfaceDescription(
     return true;
 }
 
-bool mtsManagerLocal::CreateComponentProxy(const std::string & componentProxyName, const std::string & listenerID)
+bool mtsManagerLocal::CreateComponentProxy(const std::string & componentProxyName, const std::string & CMN_UNUSED(listenerID))
 {
     // Create a component proxy
     mtsComponent * newComponent = new mtsComponentProxy(componentProxyName);
@@ -1449,14 +1449,14 @@ bool mtsManagerLocal::CreateComponentProxy(const std::string & componentProxyNam
     return true;
 }
 
-bool mtsManagerLocal::RemoveComponentProxy(const std::string & componentProxyName, const std::string & listenerID)
+bool mtsManagerLocal::RemoveComponentProxy(const std::string & componentProxyName, const std::string & CMN_UNUSED(listenerID))
 {
     return RemoveComponent(componentProxyName);
 }
 
 bool mtsManagerLocal::CreateProvidedInterfaceProxy(
     const std::string & serverComponentProxyName,
-    const ProvidedInterfaceDescription & providedInterfaceDescription, const std::string & listenerID)
+    const ProvidedInterfaceDescription & providedInterfaceDescription, const std::string & CMN_UNUSED(listenerID))
 {
     const std::string providedInterfaceName = providedInterfaceDescription.ProvidedInterfaceName;
 
@@ -1502,7 +1502,7 @@ bool mtsManagerLocal::CreateProvidedInterfaceProxy(
 }
 
 bool mtsManagerLocal::CreateRequiredInterfaceProxy(
-    const std::string & clientComponentProxyName, const RequiredInterfaceDescription & requiredInterfaceDescription, const std::string & listenerID)
+    const std::string & clientComponentProxyName, const RequiredInterfaceDescription & requiredInterfaceDescription, const std::string & CMN_UNUSED(listenerID))
 {
     const std::string requiredInterfaceName = requiredInterfaceDescription.RequiredInterfaceName;
 
@@ -1548,7 +1548,7 @@ bool mtsManagerLocal::CreateRequiredInterfaceProxy(
 }
 
 bool mtsManagerLocal::RemoveProvidedInterfaceProxy(
-    const std::string & clientComponentProxyName, const std::string & providedInterfaceProxyName, const std::string & listenerID)
+    const std::string & clientComponentProxyName, const std::string & providedInterfaceProxyName, const std::string & CMN_UNUSED(listenerID))
 {
     mtsComponent * clientComponent = GetComponent(clientComponentProxyName);
     if (!clientComponent) {
@@ -1588,7 +1588,7 @@ bool mtsManagerLocal::RemoveProvidedInterfaceProxy(
 }
 
 bool mtsManagerLocal::RemoveRequiredInterfaceProxy(
-    const std::string & serverComponentProxyName, const std::string & requiredInterfaceProxyName, const std::string & listenerID)
+    const std::string & serverComponentProxyName, const std::string & requiredInterfaceProxyName, const std::string & CMN_UNUSED(listenerID))
 {
     mtsComponent * serverComponent = GetComponent(serverComponentProxyName);
     if (!serverComponent) {
@@ -1614,7 +1614,7 @@ bool mtsManagerLocal::RemoveRequiredInterfaceProxy(
     return true;
 }
 
-const int mtsManagerLocal::GetCurrentInterfaceCount(const std::string & componentName, const std::string & listenerID)
+int mtsManagerLocal::GetCurrentInterfaceCount(const std::string & componentName, const std::string & CMN_UNUSED(listenerID))
 {
     // Check if the component specified exists
     mtsComponent * component = GetComponent(componentName);
@@ -1655,7 +1655,7 @@ bool mtsManagerLocal::SetProvidedInterfaceProxyAccessInfo(
 
 bool mtsManagerLocal::ConnectServerSideInterface(const unsigned int providedInterfaceProxyInstanceID,
     const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientRequiredInterfaceName,
-    const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverProvidedInterfaceName, const std::string & listenerID)
+    const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverProvidedInterfaceName, const std::string & CMN_UNUSED(listenerID))
 {
     // This method is called only by the GCM to connect two local interfaces
     // at server side. In this case, one inteface is an original interface and
@@ -1798,7 +1798,7 @@ ConnectServerSideInterfaceError:
 
 bool mtsManagerLocal::ConnectClientSideInterface(const unsigned int connectionID,
     const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientRequiredInterfaceName,
-    const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverProvidedInterfaceName, const std::string & listenerID)
+    const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverProvidedInterfaceName, const std::string & CMN_UNUSED(listenerID))
 {
     std::string endpointAccessInfo, communicatorId;
 

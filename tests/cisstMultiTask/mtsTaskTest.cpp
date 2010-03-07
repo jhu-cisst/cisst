@@ -45,6 +45,7 @@ void mtsTaskTest::TestGetStateVectorID(void)
 	const size_t user_column_count = 2;	// Data1, Data2
 	const size_t total_column_count = default_column_count + user_column_count;
 	
+    /*
 	const std::string names[total_column_count] = { 
 		// added by default
 		"Toc", 
@@ -53,6 +54,7 @@ void mtsTaskTest::TestGetStateVectorID(void)
 		// user items
 		"Data1", 
 		"Data2" };	
+    */
 	
 	mtsTaskTestTask task("task", 10 * cmn_ms);
     mtsStateTable StateTable(20, "Test");

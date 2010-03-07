@@ -95,7 +95,7 @@ class GlobalComponentManagerUI {open
           Fl_Box GraphPane {
             label {Graph Region}
             xywh {20 90 645 320} box BORDER_BOX labelfont 1 labelsize 12
-            code0 {\#include "MULTIPLOT.h"}
+            code0 {\#include "multiplot.h"}
           }
         }
       }

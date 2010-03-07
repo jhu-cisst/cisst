@@ -235,8 +235,6 @@ bool mtsComponentInterfaceProxyServer::ReceiveFetchEventGeneratorProxyPointers(
     const std::string & requiredInterfaceName,
     mtsComponentInterfaceProxy::EventGeneratorProxyPointerSet & eventGeneratorProxyPointers)
 {
-    const ClientIDType clientID = GetClientID(connectionID);
-
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
     LogPrint(mtsComponentInterfaceProxyServer,
              "ReceiveFetchEventGeneratorProxyPointers: "
@@ -654,7 +652,7 @@ bool mtsComponentInterfaceProxyServer::ComponentInterfaceServerI::FetchEventGene
 }
 
 void mtsComponentInterfaceProxyServer::ComponentInterfaceServerI::ExecuteEventVoid(
-    ::Ice::Long commandID, const ::Ice::Current & current)
+    ::Ice::Long commandID, const ::Ice::Current & CMN_UNUSED(current))
 {
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
     LogPrint(ComponentInterfaceServerI, "<<<<< RECV: ExecuteEventVoid: " << commandID);
@@ -664,7 +662,7 @@ void mtsComponentInterfaceProxyServer::ComponentInterfaceServerI::ExecuteEventVo
 }
 
 void mtsComponentInterfaceProxyServer::ComponentInterfaceServerI::ExecuteEventWriteSerialized(
-    ::Ice::Long commandID, const ::std::string & argument, const ::Ice::Current & current)
+    ::Ice::Long commandID, const ::std::string & argument, const ::Ice::Current & CMN_UNUSED(current))
 {
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
     LogPrint(ComponentInterfaceServerI, "<<<<< RECV: ExecuteEventWriteSerialized: " << commandID);

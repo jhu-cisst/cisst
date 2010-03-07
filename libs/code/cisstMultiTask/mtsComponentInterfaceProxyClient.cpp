@@ -465,7 +465,7 @@ void mtsComponentInterfaceProxyClient::ComponentInterfaceClientI::Stop()
 //  Network Event handlers (Server -> Client)
 //-----------------------------------------------------------------------------
 void mtsComponentInterfaceProxyClient::ComponentInterfaceClientI::TestMessageFromServerToClient(
-    const std::string & str, const ::Ice::Current & current)
+    const std::string & str, const ::Ice::Current & CMN_UNUSED(current))
 {
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
     LogPrint(mtsComponentInterfaceProxyClient, "<<<<< RECV: TestMessageFromServerToClient");
@@ -476,7 +476,7 @@ void mtsComponentInterfaceProxyClient::ComponentInterfaceClientI::TestMessageFro
 
 bool mtsComponentInterfaceProxyClient::ComponentInterfaceClientI::FetchFunctionProxyPointers(
     const std::string & requiredInterfaceName, mtsComponentInterfaceProxy::FunctionProxyPointerSet & functionProxyPointers,
-    const ::Ice::Current & current) const
+    const ::Ice::Current & CMN_UNUSED(current)) const
 {
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
     LogPrint(mtsComponentInterfaceProxyClient, "<<<<< RECV: FetchFunctionProxyPointers: " << requiredInterfaceName);
@@ -486,7 +486,7 @@ bool mtsComponentInterfaceProxyClient::ComponentInterfaceClientI::FetchFunctionP
 }
 
 void mtsComponentInterfaceProxyClient::ComponentInterfaceClientI::ExecuteCommandVoid(
-    ::Ice::Long commandID, const ::Ice::Current & current)
+    ::Ice::Long commandID, const ::Ice::Current & CMN_UNUSED(current))
 {
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
     LogPrint(mtsComponentInterfaceProxyClient, "<<<<< RECV: ExecuteCommandVoid: " << commandID);
@@ -496,7 +496,7 @@ void mtsComponentInterfaceProxyClient::ComponentInterfaceClientI::ExecuteCommand
 }
 
 void mtsComponentInterfaceProxyClient::ComponentInterfaceClientI::ExecuteCommandWriteSerialized(
-    ::Ice::Long commandID, const ::std::string & argument, const ::Ice::Current & current)
+    ::Ice::Long commandID, const ::std::string & argument, const ::Ice::Current & CMN_UNUSED(current))
 {
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
     LogPrint(mtsComponentInterfaceProxyClient, "<<<<< RECV: ExecuteCommandWriteSerialized: " << commandID << ", " << argument.size());
@@ -506,7 +506,7 @@ void mtsComponentInterfaceProxyClient::ComponentInterfaceClientI::ExecuteCommand
 }
 
 void mtsComponentInterfaceProxyClient::ComponentInterfaceClientI::ExecuteCommandReadSerialized(
-    ::Ice::Long commandID, ::std::string & argument, const ::Ice::Current & current)
+    ::Ice::Long commandID, ::std::string & argument, const ::Ice::Current & CMN_UNUSED(current))
 {
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
     LogPrint(mtsComponentInterfaceProxyClient, "<<<<< RECV: ExecuteCommandReadSerialized: " << commandID << ", " << argument.size());
@@ -516,7 +516,7 @@ void mtsComponentInterfaceProxyClient::ComponentInterfaceClientI::ExecuteCommand
 }
 
 void mtsComponentInterfaceProxyClient::ComponentInterfaceClientI::ExecuteCommandQualifiedReadSerialized(
-    ::Ice::Long commandID, const ::std::string & argumentIn, ::std::string & argumentOut, const ::Ice::Current & current)
+    ::Ice::Long commandID, const ::std::string & argumentIn, ::std::string & argumentOut, const ::Ice::Current & CMN_UNUSED(current))
 {
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
     LogPrint(mtsComponentInterfaceProxyClient, "<<<<< RECV: ExecuteCommandQualifiedReadSerialized: " << commandID << ", " << argumentIn.size());

@@ -16,7 +16,7 @@ class OscilloscopeUI {open
         Fl_Box GraphPane {
           label {Graph Region}
           xywh {10 10 555 350} box BORDER_BOX labelfont 1 labelsize 12
-          code0 {\#include "MULTIPLOT.h"}
+          code0 {\#include "multiplot.h"}
           class MULTIPLOT
         }
       }

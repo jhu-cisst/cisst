@@ -138,7 +138,7 @@ bool mtsComponentProxy::CreateRequiredInterfaceProxy(const RequiredInterfaceDesc
     for (unsigned int i = 0; i < namesOfFunctionQualifiedRead.size(); ++i) {
         functionQualifiedReadProxy = new mtsFunctionQualifiedReadProxy();
         success = requiredInterfaceProxy->AddFunction(namesOfFunctionQualifiedRead[i], *functionQualifiedReadProxy);
-        success &= success &= mapElement->FunctionQualifiedReadProxyMap.AddItem(namesOfFunctionQualifiedRead[i], functionQualifiedReadProxy);
+        success &= mapElement->FunctionQualifiedReadProxyMap.AddItem(namesOfFunctionQualifiedRead[i], functionQualifiedReadProxy);
         if (!success) {
             delete requiredInterfaceProxy;
             CMN_LOG_CLASS_RUN_ERROR << "CreateRequiredInterfaceProxy: failed to add qualified read function proxy: " << namesOfFunctionQualifiedRead[i] << std::endl;
@@ -525,8 +525,6 @@ bool mtsComponentProxy::CreateInterfaceProxyServer(const std::string & providedI
                                                    std::string & endpointAccessInfo,
                                                    std::string & communicatorID)
 {
-    mtsManagerLocal * managerLocal = mtsManagerLocal::GetInstance();
-
     // Generate parameters to initialize server proxy
     std::string adapterName("ComponentInterfaceServerAdapter");
     adapterName += "_";
@@ -561,7 +559,7 @@ bool mtsComponentProxy::CreateInterfaceProxyServer(const std::string & providedI
 
 bool mtsComponentProxy::CreateInterfaceProxyClient(const std::string & requiredInterfaceProxyName,
                                                    const std::string & serverEndpointInfo,
-                                                   const std::string & communicatorID,
+                                                   const std::string & CMN_UNUSED(communicatorID),
                                                    const unsigned int providedInterfaceProxyInstanceID)
 {
     // Create an instance of mtsComponentInterfaceProxyClient
@@ -680,7 +678,7 @@ bool mtsComponentProxy::UpdateEventHandlerProxyID(const std::string & clientComp
 }
 
 bool mtsComponentProxy::UpdateCommandProxyID(
-    const std::string & serverProvidedInterfaceName, const std::string & clientComponentName,
+    const std::string & serverProvidedInterfaceName, const std::string & CMN_UNUSED(clientComponentName),
     const std::string & clientRequiredInterfaceName, const unsigned int providedInterfaceProxyInstanceID)
 {
     const unsigned int clientID = providedInterfaceProxyInstanceID;

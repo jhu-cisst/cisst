@@ -18,7 +18,7 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 #include <math.h>
-#include "oscilloscopeTask.h"
+#include "OscilloscopeTask.h"
 
 CMN_IMPLEMENT_SERVICES(oscilloscopeTask);
 
@@ -78,7 +78,7 @@ void oscilloscopeTask::Run(void)
 
     if (clock() - LastUpdateTime > 20) {
         LastUpdateTime = clock();
-        UpdateUI(Data.Data);
+        UpdateUI();
     }    
     
     // update the UI, process UI events 
@@ -89,7 +89,7 @@ void oscilloscopeTask::Run(void)
 
 #define _UI_TEST_CODE_
 
-void oscilloscopeTask::UpdateUI(const double newValue)
+void oscilloscopeTask::UpdateUI()
 {
 #ifdef _UI_TEST_CODE_
     static unsigned int x = 0;

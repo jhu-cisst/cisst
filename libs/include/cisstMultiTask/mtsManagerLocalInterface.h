@@ -180,7 +180,7 @@ public:
         RequiredInterfaceDescription & requiredInterfaceDescription, const std::string & listenerID = "") = 0;
 
     /*! Returns a total number of interfaces that are running on a component */
-    virtual const int GetCurrentInterfaceCount(const std::string & componentName, const std::string & listenerID = "") = 0;
+    virtual int GetCurrentInterfaceCount(const std::string & componentName, const std::string & listenerID = "") = 0;
 #endif
 };
 

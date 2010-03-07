@@ -24,7 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask.h>
 
 #include "GCMUITask.h"
-#include "oscilloscopeTask.h"
+#include "OscilloscopeTask.h"
 
 using namespace std;
 

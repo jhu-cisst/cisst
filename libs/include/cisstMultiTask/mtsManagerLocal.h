@@ -183,7 +183,7 @@ public:
         RequiredInterfaceDescription & requiredInterfaceDescription, const std::string & listenerID = "");
 
     /*! Returns a total number of interfaces that are running on a component */
-    const int GetCurrentInterfaceCount(const std::string & componentName, const std::string & listenerID = "");
+    int GetCurrentInterfaceCount(const std::string & componentName, const std::string & listenerID = "");
 
     /*! Connect interfaces at server side */
     bool ConnectServerSideInterface(const unsigned int providedInterfaceProxyInstanceID,

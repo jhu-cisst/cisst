@@ -32,19 +32,7 @@ int main(int argc, char * argv[])
     // Get the TaskManager instance and set operation mode
     mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
     taskManager->AddTask(server);
-    taskManager->SetGlobalTaskManagerIP(globalTaskManagerIP);
-    taskManager->SetServerTaskIP(serverTaskIP);
-    
-    // Set the type of task manager either as a server or as a client.
-    // mtsTaskManager::SetTaskManagerType() should be called before
-    // mtsTaskManager::Connect()
-    taskManager->SetTaskManagerType(mtsTaskManager::TASK_MANAGER_CLIENT);
-    
-    //
-    // TODO: Hide this waiting routine inside mtsTaskManager using events or other things.
-    //
-    osaSleep(0.5 * cmn_s);
-    
+
     // create the tasks, i.e. find the commands
     taskManager->CreateAll();
     // start the periodic Run

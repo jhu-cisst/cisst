@@ -45,7 +45,7 @@ protected:
     // timer to control refresh rate
     clock_t LastUpdateTime;
 
-    void UpdateUI(const double newValue);
+    void UpdateUI();
 
 public:
     // see sineTask.h documentation
