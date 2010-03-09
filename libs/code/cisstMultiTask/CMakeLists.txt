@@ -176,7 +176,6 @@ if(CISST_MTS_HAS_ICE)
       mtsFunctionReadOrWriteProxy.h
       mtsFunctionQualifiedReadOrWriteProxy.h
       mtsMulticastCommandWriteProxy.h
-      mtsEventWriteGeneratorProxy.h
       )
 
   SET(ICE_RESOURCE_FILES
