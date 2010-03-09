@@ -33,6 +33,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsManagerLocal.h>
 
 #define mtsTaskManager mtsManagerLocal
+#define mtsComponentManager mtsManagerLocal
 
 #endif // _mtsTaskManager_h
 
