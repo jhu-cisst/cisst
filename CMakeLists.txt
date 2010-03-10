@@ -20,11 +20,16 @@ PROJECT(cisst)
 
 # Function to expend a list without repetitions, forces the list to be internal
 FUNCTION(CISST_ADD_TO_INTERNAL list newElements)
-  SET(TEMP_${list} ${${list}} ${${newElements}})
-  IF(TEMP_${list})
-    LIST(REMOVE_DUPLICATES TEMP_${list})
-  ENDIF(TEMP_${list})
-  SET(${list} ${TEMP_${list}} CACHE INTERNAL "CISST Internal variable")
+  # Make sure the variable is defined (test also for NOT-FOUND)
+  IF(${newElements})
+    # Create the new list
+    SET(TEMP_${list} ${${list}} ${${newElements}})
+    # Remove duplicates
+    IF(TEMP_${list})
+      LIST(REMOVE_DUPLICATES TEMP_${list})
+    ENDIF(TEMP_${list})
+    SET(${list} ${TEMP_${list}} CACHE INTERNAL "CISST Internal variable")
+  ENDIF(${newElements})
 ENDFUNCTION(CISST_ADD_TO_INTERNAL)
 
 # The cisst Internal values/cache tend to accumulate junk, option to clean them
