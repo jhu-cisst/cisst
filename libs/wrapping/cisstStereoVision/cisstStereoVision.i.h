@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: cisstStereoVision.i.h 894 2009-09-23 10:37:57Z pkazanz1 $
+  $Id$
 
   Author(s):	Anton Deguet
   Created on:   2009-01-26
@@ -42,8 +42,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "cisstStereoVision/svlStreamManager.h"
 
-
-//#include "cisstStereoVision/svlFilterSourceVideoCapture.h"
+// #include "cisstStereoVision/svlFilterSourceVideoCapture.h"
 #include "cisstStereoVision/svlFilterImageRectifier.h"
 #include "cisstStereoVision/svlFilterSourceVideoFile.h"
 #include "cisstStereoVision/svlFilterVideoFileWriter.h"

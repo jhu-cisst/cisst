@@ -1,5 +1,5 @@
 #
-# $Id: CMakeLists.txt 416 2009-06-06 03:45:00Z adeguet1 $
+# $Id$
 #
 # CMakeLists for cisstStereoVision wrapping
 #
