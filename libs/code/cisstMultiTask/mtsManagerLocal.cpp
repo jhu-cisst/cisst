@@ -249,23 +249,10 @@ bool mtsManagerLocal::AddComponent(mtsComponent * component)
     }
 
     // Register all the existing required interfaces and provided interfaces to
-    // the global component manager.
-    std::vector<std::string> interfaceNames = component->GetNamesOfRequiredInterfaces();
-    for (unsigned int i = 0; i < interfaceNames.size(); ++i) {
-        if (!ManagerGlobal->AddRequiredInterface(ProcessName, componentName, interfaceNames[i], false)) {
-            CMN_LOG_CLASS_RUN_ERROR << "AddComponent: failed to add required interface: "
-                << componentName << ":" << interfaceNames[i] << std::endl;
-            return false;
-        }
-    }
-
-    interfaceNames = component->GetNamesOfProvidedInterfaces();
-    for (unsigned int i = 0; i < interfaceNames.size(); ++i) {
-        if (!ManagerGlobal->AddProvidedInterface(ProcessName, componentName, interfaceNames[i], false)) {
-            CMN_LOG_CLASS_RUN_ERROR << "AddComponent: failed to add provided interface: "
-                << componentName << ":" << interfaceNames[i] << std::endl;
-            return false;
-        }
+    // the global component manager and mart them as registered.
+    if (!RegisterInterfaces(component)) {
+        CMN_LOG_CLASS_RUN_ERROR << "AddComponent: failed to register interfaces" << std::endl;
+        return false;
     }
 
     CMN_LOG_CLASS_RUN_VERBOSE << "AddComponent: "
@@ -993,6 +980,16 @@ void mtsManagerLocal::KillAll(void)
 bool mtsManagerLocal::Connect(const std::string & clientComponentName, const std::string & clientRequiredInterfaceName,
                               const std::string & serverComponentName, const std::string & serverProvidedInterfaceName)
 {
+    // Make sure all interfaces created so far are registered to the GCM.
+    if (!RegisterInterfaces(clientComponentName)) {
+        CMN_LOG_CLASS_RUN_ERROR << "Connect: failed to register interfaces: " << clientComponentName << std::endl;
+        return false;
+    }
+    if (!RegisterInterfaces(serverComponentName)) {
+        CMN_LOG_CLASS_RUN_ERROR << "Connect: failed to register interfaces: " << serverComponentName << std::endl;
+        return false;
+    }
+
     unsigned int connectionID = ManagerGlobal->Connect(ProcessName,
         ProcessName, clientComponentName, clientRequiredInterfaceName,
         ProcessName, serverComponentName, serverProvidedInterfaceName);
@@ -1046,6 +1043,16 @@ bool mtsManagerLocal::Connect(
     // Prevent this method from being used to connect two local interfaces
     if (clientProcessName == serverProcessName) {
         return Connect(clientComponentName, clientRequiredInterfaceName, serverComponentName, serverProvidedInterfaceName);
+    }
+
+    // Make sure all interfaces created so far are registered to the GCM.
+    if (!RegisterInterfaces(clientComponentName)) {
+        CMN_LOG_CLASS_RUN_ERROR << "Connect: failed to register interfaces: " << clientComponentName << std::endl;
+        return false;
+    }
+    if (!RegisterInterfaces(serverComponentName)) {
+        CMN_LOG_CLASS_RUN_ERROR << "Connect: failed to register interfaces: " << serverComponentName << std::endl;
+        return false;
     }
 
     // Inform the global component manager of the fact that a new connection is
@@ -1640,6 +1647,72 @@ void mtsManagerLocal::SetIPAddress(void)
     }
 
     ProcessIPList.insert(ProcessIPList.begin(), ipAddresses.begin(), ipAddresses.end());
+}
+
+bool mtsManagerLocal::RegisterInterfaces(mtsDevice * component)
+{
+    if (!component) {
+        return false;
+    }
+
+    const std::string componentName = component->GetName();
+
+    mtsRequiredInterface * requiredInterface;
+    std::vector<std::string> interfaceNames = component->GetNamesOfRequiredInterfaces();
+    for (unsigned int i = 0; i < interfaceNames.size(); ++i) {
+        requiredInterface = component->GetRequiredInterface(interfaceNames[i]);
+        if (!requiredInterface) {
+            CMN_LOG_CLASS_RUN_ERROR << "RegisterInterfaces: NULL required interface detected: " << interfaceNames[i] << std::endl;
+            return false;
+        } else {
+            if (requiredInterface->GetRegistered()) {
+                continue;
+            }
+        }
+
+        if (!ManagerGlobal->AddRequiredInterface(ProcessName, componentName, interfaceNames[i], false)) {
+            CMN_LOG_CLASS_RUN_ERROR << "RegisterInterfaces: failed to add required interface: "
+                << componentName << ":" << interfaceNames[i] << std::endl;
+            return false;
+        }
+
+        requiredInterface->SetRegistered();
+    }
+
+    mtsProvidedInterface * providedInterface;
+    interfaceNames = component->GetNamesOfProvidedInterfaces();
+    for (unsigned int i = 0; i < interfaceNames.size(); ++i) {
+        providedInterface = component->GetProvidedInterface(interfaceNames[i]);
+        if (!providedInterface) {
+            CMN_LOG_CLASS_RUN_ERROR << "RegisterInterfaces: NULL provided interface detected: " << interfaceNames[i] << std::endl;
+            return false;
+        } else {
+            if (providedInterface->GetRegistered()) {
+                continue;
+            }
+        }
+
+        if (!ManagerGlobal->AddProvidedInterface(ProcessName, componentName, interfaceNames[i], false)) {
+            CMN_LOG_CLASS_RUN_ERROR << "RegisterInterfaces: failed to add provided interface: "
+                << componentName << ":" << interfaceNames[i] << std::endl;
+            return false;
+        }
+
+        providedInterface->SetRegistered();
+    }
+
+    return true;
+}
+
+bool mtsManagerLocal::RegisterInterfaces(const std::string & componentName)
+{
+    mtsComponent * component = GetComponent(componentName);
+    if (!component) {
+        CMN_LOG_CLASS_RUN_ERROR << "RegistereInterfaces: invalid component name: " << componentName << std::endl;
+        return false;
+    }
+
+    return RegisterInterfaces(component);
 }
 
 bool mtsManagerLocal::SetProvidedInterfaceProxyAccessInfo(

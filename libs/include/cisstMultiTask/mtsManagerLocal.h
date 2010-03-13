@@ -127,6 +127,10 @@ protected:
     void SetIPAddress(void);
 #endif
 
+    /*! Register all interfaces that a component has to the global component manager */
+    bool RegisterInterfaces(mtsDevice * component);
+    bool RegisterInterfaces(const std::string & componentName);
+
     /*! Connect two local interfaces. This method assumes two interfaces are in
         the same process.
 

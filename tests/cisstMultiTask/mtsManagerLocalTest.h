@@ -39,6 +39,7 @@ private:
         CPPUNIT_TEST(TestAddComponent);
         CPPUNIT_TEST(TestFindComponent);
         CPPUNIT_TEST(TestRemoveComponent);
+        CPPUNIT_TEST(TestRegisterInterfaces);
         
         CPPUNIT_TEST(TestGetInstance);
         CPPUNIT_TEST(TestGetComponent);
@@ -84,6 +85,7 @@ public:
     void TestAddComponent(void);
     void TestFindComponent(void);
     void TestRemoveComponent(void);
+    void TestRegisterInterfaces(void);
     
     void TestGetInstance(void);
     void TestGetComponent(void);

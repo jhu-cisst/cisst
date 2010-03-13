@@ -98,9 +98,12 @@ protected:
     /*! Pointer to provided interface that we are connected to. */
     mtsDeviceInterface * OtherInterface;
 
+    /*! Set as true when this interface is registered to the globalcomponent manager */
+    bool Registered;
+
     /*! Default constructor. Does nothing, should not be used. */
     mtsRequiredInterface(void) {}
-
+    
  public:
     /*! Constructor. Sets the name, device pointer, and mailbox for queued events.
         \param interfaceName Name of required interface
@@ -169,6 +172,15 @@ protected:
 
     /*! Send a human readable description of the interface. */
     void ToStream(std::ostream & outputStream) const;
+
+    /*! Getter and setter for 'Registered' flag */
+    void SetRegistered(void) {
+        Registered = true;
+    }
+
+    bool GetRegistered(void) const {
+        return Registered;
+    }
 
 protected:
 #ifndef SWIG  // SWIG cannot deal with this
