@@ -1357,6 +1357,78 @@ void CISST_DEPRECATED mtsManagerLocal::ToStreamDot(std::ostream & CMN_UNUSED(out
 #endif
 }
 
+
+
+
+bool mtsManagerLocal::RegisterInterfaces(mtsDevice * component)
+{
+    if (!component) {
+        return false;
+    }
+
+    const std::string componentName = component->GetName();
+
+    mtsRequiredInterface * requiredInterface;
+    std::vector<std::string> interfaceNames = component->GetNamesOfRequiredInterfaces();
+    for (unsigned int i = 0; i < interfaceNames.size(); ++i) {
+        requiredInterface = component->GetRequiredInterface(interfaceNames[i]);
+        if (!requiredInterface) {
+            CMN_LOG_CLASS_RUN_ERROR << "RegisterInterfaces: NULL required interface detected: " << interfaceNames[i] << std::endl;
+            return false;
+        } else {
+            if (requiredInterface->GetRegistered()) {
+                continue;
+            }
+        }
+
+        if (!ManagerGlobal->AddRequiredInterface(ProcessName, componentName, interfaceNames[i], false)) {
+            CMN_LOG_CLASS_RUN_ERROR << "RegisterInterfaces: failed to add required interface: "
+                << componentName << ":" << interfaceNames[i] << std::endl;
+            return false;
+        }
+
+        requiredInterface->SetRegistered();
+    }
+
+    mtsProvidedInterface * providedInterface;
+    interfaceNames = component->GetNamesOfProvidedInterfaces();
+    for (unsigned int i = 0; i < interfaceNames.size(); ++i) {
+        providedInterface = component->GetProvidedInterface(interfaceNames[i]);
+        if (!providedInterface) {
+            CMN_LOG_CLASS_RUN_ERROR << "RegisterInterfaces: NULL provided interface detected: " << interfaceNames[i] << std::endl;
+            return false;
+        } else {
+            if (providedInterface->GetRegistered()) {
+                continue;
+            }
+        }
+
+        if (!ManagerGlobal->AddProvidedInterface(ProcessName, componentName, interfaceNames[i], false)) {
+            CMN_LOG_CLASS_RUN_ERROR << "RegisterInterfaces: failed to add provided interface: "
+                << componentName << ":" << interfaceNames[i] << std::endl;
+            return false;
+        }
+
+        providedInterface->SetRegistered();
+    }
+
+    return true;
+}
+
+
+bool mtsManagerLocal::RegisterInterfaces(const std::string & componentName)
+{
+    mtsComponent * component = GetComponent(componentName);
+    if (!component) {
+        CMN_LOG_CLASS_RUN_ERROR << "RegistereInterfaces: invalid component name: " << componentName << std::endl;
+        return false;
+    }
+
+    return RegisterInterfaces(component);
+}
+
+
+
 #if CISST_MTS_HAS_ICE
 bool mtsManagerLocal::Disconnect(
     const std::string & clientProcessName,
@@ -1647,72 +1719,6 @@ void mtsManagerLocal::SetIPAddress(void)
     }
 
     ProcessIPList.insert(ProcessIPList.begin(), ipAddresses.begin(), ipAddresses.end());
-}
-
-bool mtsManagerLocal::RegisterInterfaces(mtsDevice * component)
-{
-    if (!component) {
-        return false;
-    }
-
-    const std::string componentName = component->GetName();
-
-    mtsRequiredInterface * requiredInterface;
-    std::vector<std::string> interfaceNames = component->GetNamesOfRequiredInterfaces();
-    for (unsigned int i = 0; i < interfaceNames.size(); ++i) {
-        requiredInterface = component->GetRequiredInterface(interfaceNames[i]);
-        if (!requiredInterface) {
-            CMN_LOG_CLASS_RUN_ERROR << "RegisterInterfaces: NULL required interface detected: " << interfaceNames[i] << std::endl;
-            return false;
-        } else {
-            if (requiredInterface->GetRegistered()) {
-                continue;
-            }
-        }
-
-        if (!ManagerGlobal->AddRequiredInterface(ProcessName, componentName, interfaceNames[i], false)) {
-            CMN_LOG_CLASS_RUN_ERROR << "RegisterInterfaces: failed to add required interface: "
-                << componentName << ":" << interfaceNames[i] << std::endl;
-            return false;
-        }
-
-        requiredInterface->SetRegistered();
-    }
-
-    mtsProvidedInterface * providedInterface;
-    interfaceNames = component->GetNamesOfProvidedInterfaces();
-    for (unsigned int i = 0; i < interfaceNames.size(); ++i) {
-        providedInterface = component->GetProvidedInterface(interfaceNames[i]);
-        if (!providedInterface) {
-            CMN_LOG_CLASS_RUN_ERROR << "RegisterInterfaces: NULL provided interface detected: " << interfaceNames[i] << std::endl;
-            return false;
-        } else {
-            if (providedInterface->GetRegistered()) {
-                continue;
-            }
-        }
-
-        if (!ManagerGlobal->AddProvidedInterface(ProcessName, componentName, interfaceNames[i], false)) {
-            CMN_LOG_CLASS_RUN_ERROR << "RegisterInterfaces: failed to add provided interface: "
-                << componentName << ":" << interfaceNames[i] << std::endl;
-            return false;
-        }
-
-        providedInterface->SetRegistered();
-    }
-
-    return true;
-}
-
-bool mtsManagerLocal::RegisterInterfaces(const std::string & componentName)
-{
-    mtsComponent * component = GetComponent(componentName);
-    if (!component) {
-        CMN_LOG_CLASS_RUN_ERROR << "RegistereInterfaces: invalid component name: " << componentName << std::endl;
-        return false;
-    }
-
-    return RegisterInterfaces(component);
 }
 
 bool mtsManagerLocal::SetProvidedInterfaceProxyAccessInfo(
