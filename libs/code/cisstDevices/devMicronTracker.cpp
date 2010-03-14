@@ -21,7 +21,9 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnXMLPath.h>
 #include <cisstVector/vctDynamicMatrixTypes.h>
 #include <cisstOSAbstraction/osaSleep.h>
-#include <cisstNumerical/nmrLSSolver.h>
+#if CISST_HAS_CISSTNETLIB
+    #include <cisstNumerical/nmrLSSolver.h>
+#endif
 #include <cisstDevices/devMicronTracker.h>
 
 CMN_IMPLEMENT_SERVICES(devMicronTracker);
@@ -31,14 +33,15 @@ CMN_IMPLEMENT_SERVICES(devMicronTracker);
 
 
 devMicronTracker::devMicronTracker(const std::string & taskName, const double period) :
-    mtsTaskPeriodic(taskName, period, false, 1),
+    mtsTaskPeriodic(taskName, period, false, 100),
     IsCapturing(false),
     IsTracking(false)
 {
+    HDRToggle = false;
     CameraFrameLeft.SetSize(640 * 480);
     CameraFrameRight.SetSize(640 * 480);
 
-    mtsProvidedInterface * provided = AddProvidedInterface("ProvidesMicronTrackerController");
+    mtsProvidedInterface * provided = AddProvidedInterface("Controller");
     if (provided) {
         StateTable.AddData(CameraFrameLeft, "CameraFrameLeft");
         StateTable.AddData(CameraFrameRight, "CameraFrameRight");
@@ -136,11 +139,11 @@ devMicronTracker::Tool * devMicronTracker::AddTool(const std::string & name, con
         // create an interface for tool
         tool->Interface = AddProvidedInterface(name);
         if (tool->Interface) {
-            StateTable.AddData(tool->Position, name + "Position");
+            StateTable.AddData(tool->TooltipPosition, name + "Position");
             StateTable.AddData(tool->MarkerProjectionLeft, name + "MarkerProjectionLeft");
             StateTable.AddData(tool->MarkerProjectionRight, name + "MarkerProjectionRight");
 
-            tool->Interface->AddCommandReadState(StateTable, tool->Position, "GetPositionCartesian");
+            tool->Interface->AddCommandReadState(StateTable, tool->TooltipPosition, "GetPositionCartesian");
             tool->Interface->AddCommandReadState(StateTable, tool->MarkerProjectionLeft, "GetMarkerProjectionLeft");
             tool->Interface->AddCommandReadState(StateTable, tool->MarkerProjectionRight, "GetMarkerProjectionRight");
         }
@@ -167,6 +170,7 @@ void devMicronTracker::Startup(void)
 {
     IdentifiedMarkers = Collection_New();
     PoseXf = Xform3D_New();
+    Path = Persistence_New();
 
     // get serial number
     MTC( Cameras_ItemGet(0, &CurrentCamera) );  // select current camera
@@ -178,11 +182,8 @@ void devMicronTracker::Startup(void)
     MTC( Camera_ResolutionGet(CurrentCamera, &resolutionX, &resolutionY) );
     CMN_LOG_CLASS_INIT_VERBOSE << "Startup: resolution of the current camera is " << resolutionX << "x" << resolutionY << std::endl;
 
-//    CMN_LOG_CLASS_INIT_VERBOSE << "Startup: skipping initial auto-adjustment frames" << std::endl;
-//    for (unsigned int i = 0; i < 20; i++) {
-//        Cameras_GrabFrame(CurrentCamera);
-//        Markers_ProcessFrame(CurrentCamera);
-//    }
+    Camera_HdrEnabledSet(CurrentCamera, true);
+    Camera_LightCoolnessSet(CurrentCamera, 0.56);  // obtain this value using CoolCard
 }
 
 
@@ -190,12 +191,16 @@ void devMicronTracker::Run(void)
 {
     ProcessQueuedCommands();
 
-    MTC( Cameras_GrabFrame(CurrentCamera) );
+    int retval = Cameras_GrabFrame(CurrentCamera);
+    if (retval != mtOK) {
+        return;
+    }
 
     if (IsCapturing) {
         int numFramesGrabbed;
         MTC( Camera_FramesGrabbedGet(CurrentCamera, &numFramesGrabbed) );
-        if (numFramesGrabbed > 0) {
+        HDRToggle = !HDRToggle;
+        if (numFramesGrabbed > 0 && HDRToggle) {
             MTC( Camera_ImagesGet(CurrentCamera,
                                   CameraFrameLeft.Pointer(),
                                   CameraFrameRight.Pointer()) );
@@ -209,9 +214,29 @@ void devMicronTracker::Run(void)
 
 void devMicronTracker::Cleanup(void)
 {
-    Collection_Free(IdentifiedMarkers);
-    Xform3D_Free(PoseXf);
+    MTC( Collection_Free(IdentifiedMarkers) );
+    MTC( Xform3D_Free(PoseXf) );
+    MTC( Persistence_Free(Path) );
     Cameras_Detach();
+}
+
+
+vctFrm3 devMicronTracker::XfHandleToFrame(mtHandle & xfHandle)
+{
+    vctFrm3 frame;
+    MTC( Xform3D_RotMatGet(xfHandle, frame.Rotation().Pointer()) );
+    frame.Rotation() = frame.Rotation().Transpose();  // MTC matrices are COL_MAJOR
+    MTC( Xform3D_ShiftGet(xfHandle, frame.Translation().Pointer()) );
+    return frame;
+}
+
+
+mtHandle devMicronTracker::FrameToXfHandle(vctFrm3 & frame)
+{
+    frame.Rotation() = frame.Rotation().Transpose();  // MTC matrices are COL_MAJOR
+    MTC( Xform3D_RotMatSet(PoseXf, frame.Rotation().Pointer()) );
+    MTC( Xform3D_ShiftSet(PoseXf, frame.Translation().Pointer()) );
+    return PoseXf;
 }
 
 
@@ -241,49 +266,71 @@ void devMicronTracker::ToggleTracking(const mtsBool & toggle)
 
 void devMicronTracker::Track(void)
 {
-    MTC( Markers_ProcessFrame(CurrentCamera) );
+    Tool * tool;
+    mtHandle markerHandle;
+    char markerName[MT_MAX_STRING_LENGTH];
+    vctFrm3 markerPosition;
+    vctFrm3 tooltipPosition;
+    vctFrm3 tooltipCalibration;
 
+    // initialize all marker positions to invalid
+    const ToolsType::const_iterator end = Tools.end();
+    ToolsType::const_iterator toolIterator;
+    for (toolIterator = Tools.begin(); toolIterator != end; ++toolIterator) {
+        toolIterator->second->TooltipPosition.SetValid(false);
+    }
+
+    MTC( Markers_ProcessFrame(CurrentCamera) );
     MTC( Markers_IdentifiedMarkersGet(CurrentCamera, IdentifiedMarkers) );
     const unsigned int numIdentifiedMarkers = Collection_Count(IdentifiedMarkers);
     CMN_LOG_CLASS_RUN_DEBUG << "Track: identified " << numIdentifiedMarkers << " marker(s)" << std::endl;
 
-    Tool * tool;
-    char markerName[MT_MAX_STRING_LENGTH];
-
     for (unsigned int i = 1; i <= numIdentifiedMarkers; i++) {
-        mtHandle marker = Collection_Int(IdentifiedMarkers, i);
-        MTC( Marker_Marker2CameraXfGet(marker, CurrentCamera, PoseXf, &IdentifyingCamera) );
-        MTC( Marker_NameGet(marker, markerName, MT_MAX_STRING_LENGTH, 0) );
+        markerHandle = Collection_Int(IdentifiedMarkers, i);
+        MTC( Marker_NameGet(markerHandle, markerName, MT_MAX_STRING_LENGTH, 0) );
 
         // check if tool exists, generate a name and add it otherwise
         tool = CheckTool(markerName);
         if (!tool) {
-            std::string name;
-            name = "tool" + '-' + std::string(markerName);
+            std::string name = "tool" + '-' + std::string(markerName);
             tool = AddTool(name, markerName);
         }
 
-        if (IdentifyingCamera == 0) {
-            tool->Position.SetValid(false);
-        } else {
-            tool->Position.SetValid(true);
+        MTC( Marker_Marker2CameraXfGet(markerHandle, CurrentCamera, PoseXf, &IdentifyingCamera) );
+        if (IdentifyingCamera != 0) {
+            markerPosition = XfHandleToFrame(PoseXf);
+            tool->MarkerPosition.Position() = markerPosition;
 
-            vctQuatRot3 toolOrientation;
-            Xform3D_RotQuaternionsGet(PoseXf, toolOrientation.Pointer());
-            tool->Position.Position().Rotation().FromRaw(toolOrientation);
+            // get the calibration from marker template
+            MTC( Marker_Tooltip2MarkerXfGet(markerHandle, PoseXf) );
+            tooltipCalibration = XfHandleToFrame(PoseXf);
 
-            vct3 toolPosition;
-            Xform3D_ShiftGet(PoseXf, toolPosition.Pointer());
-            toolPosition -= tool->Position.Position().Rotation() * tool->TooltipOffset;  // apply tooltip offset
-            tool->Position.Position().Translation().Assign(toolPosition);
+            // update the calibration in marker template
+            if (tool->TooltipOffset.All()) {
+                tooltipCalibration.Translation() = tool->TooltipOffset;
+                PoseXf = FrameToXfHandle(tooltipCalibration);
+                MTC( Marker_Tooltip2MarkerXfSet(markerHandle, PoseXf) );
+                std::string markerPath = "C:\\Program Files\\Claron Technology\\MicronTracker\\Markers\\" + tool->SerialNumber + "_custom";
+                MTC( Persistence_PathSet(Path, markerPath.c_str()) );
+                MTC( Marker_StoreTemplate(markerHandle, Path, "") );
+                tool->TooltipOffset.SetAll(0.0);
+            }
 
-            CMN_LOG_CLASS_RUN_DEBUG << "Track: " << markerName << " is at:\n" << tool->Position << std::endl;
+            tooltipPosition = markerPosition * tooltipCalibration;
+            if (tool->Name == "Probe" && Tools.size() == 2) {
+                tool->TooltipPosition.Position() = Tools.GetItem("Reference")->TooltipPosition.Position().ApplyInverseTo(tooltipPosition);
+            } else {
+              tool->TooltipPosition.Position() = tooltipPosition;
+            }
+            tool->TooltipPosition.SetValid(true);
 
-            MTC( Camera_ProjectionOnImage(CurrentCamera, 0, toolPosition.Pointer(),
+            CMN_LOG_CLASS_RUN_DEBUG << "Track: " << markerName << " is at:\n" << tooltipPosition << std::endl;
+
+            MTC( Camera_ProjectionOnImage(CurrentCamera, 0, tooltipPosition.Translation().Pointer(),
                                           &(tool->MarkerProjectionLeft.X()),
                                           &(tool->MarkerProjectionLeft.Y())) );
 
-            MTC( Camera_ProjectionOnImage(CurrentCamera, 1, toolPosition.Pointer(),
+            MTC( Camera_ProjectionOnImage(CurrentCamera, 1, tooltipPosition.Translation().Pointer(),
                                           &(tool->MarkerProjectionRight.X()),
                                           &(tool->MarkerProjectionRight.Y())) );
         }
@@ -293,7 +340,8 @@ void devMicronTracker::Track(void)
 
 void devMicronTracker::CalibratePivot(const mtsStdString & toolName)
 {
-    const unsigned int numPoints = 500;
+#if CISST_HAS_CISSTNETLIB
+    const unsigned int numPoints = 250;
 
     CMN_LOG_CLASS_RUN_WARNING << "CalibratePivot: calibrating " << toolName.Data << std::endl;
     Tool * tool = Tools.GetItem(toolName.Data);
@@ -305,20 +353,23 @@ void devMicronTracker::CalibratePivot(const mtsStdString & toolName)
 
     vctMat A(3 * numPoints, 6, VCT_COL_MAJOR);
     vctMat b(3 * numPoints, 1, VCT_COL_MAJOR);
+    std::vector<vctFrm3> frames(numPoints);
 
     for (unsigned int i = 0; i < numPoints; i++) {
         MTC( Cameras_GrabFrame(CurrentCamera) );
-        osaSleep(20.0 * cmn_ms);
         Track();
+        frames[i] = tool->MarkerPosition.Position();
 
         vctDynamicMatrixRef<double> rotation(3, 3, 1, numPoints*3, A.Pointer(i*3, 0));
-        rotation.Assign(tool->Position.Position().Rotation());
+        rotation.Assign(tool->MarkerPosition.Position().Rotation());
 
         vctDynamicMatrixRef<double> identity(3, 3, 1, numPoints*3, A.Pointer(i*3, 3));
         identity.Assign(-vctRot3::Identity());
 
         vctDynamicVectorRef<double> translation(3, b.Pointer(i*3, 0));
-        translation.Assign(tool->Position.Position().Translation());
+        translation.Assign(tool->MarkerPosition.Position().Translation());
+
+        osaSleep(50.0 * cmn_ms);  // to prevent frame grab timeout
     }
 
     CMN_LOG_CLASS_RUN_WARNING << "CalibratePivot: calibration stopped" << std::endl;
@@ -329,31 +380,36 @@ void devMicronTracker::CalibratePivot(const mtsStdString & toolName)
     vct3 tooltip;
     vct3 pivot;
     for (unsigned int i = 0; i < 3; i++) {
-        tooltip.Element(i) = b.at(i, 0);
-        pivot.Element(i) = b.at(i+3, 0);
+        tooltip[i] = -b.at(i, 0);
+        pivot[i] = -b.at(i+3, 0);
     }
     tool->TooltipOffset = tooltip;
 
-//    vct3 error;
-//    double errorRMS = 0.0;
-//    for (int i = 0; i < numPoints; i++) {
-//        error = frame[i] * tooltip - pivot;
-//        errorRMS += error.NormSquare();
-//    }
-//    errorRMS = sqrt(error / numPoints);
+    vct3 error;
+    double errorSquareSum = 0.0;
+    for (int i = 0; i < numPoints; i++) {
+        error = (frames[i] * tooltip) - pivot;
+        CMN_LOG_CLASS_RUN_ERROR << "CalibratePivot: error " << i << ": " << error << std::endl;
+        errorSquareSum += error.NormSquare();
+    }
+    double errorRMS = sqrt(errorSquareSum / numPoints);
 
-    CMN_LOG_CLASS_RUN_ERROR << "CalibratePivot:\n "
-                            << " * tooltip offset: " << tooltip << "\n"
-                            << " * pivot position: " << pivot << std::endl;
+    CMN_LOG_CLASS_RUN_WARNING << "CalibratePivot:\n"
+                              << " * tooltip offset: " << tooltip << "\n"
+                              << " * pivot position: " << pivot << "\n"
+                              << " * error RMS: " << errorRMS << std::endl;
+#else
+    CMN_LOG_CLASS_RUN_WARNING << "CalibratePivot: requires cisstNetlib" << std::endl;
+#endif
 }
 
 
 devMicronTracker::Tool::Tool(void) :
     TooltipOffset(0.0)
 {
+    TooltipPosition.SetValid(false);
     MarkerProjectionLeft.SetSize(2);
-    MarkerProjectionRight.SetSize(2);
-
     MarkerProjectionLeft.SetAll(0.0);
+    MarkerProjectionRight.SetSize(2);
     MarkerProjectionRight.SetAll(0.0);
 }

@@ -33,13 +33,19 @@ devMicronTrackerControllerQDevice::devMicronTrackerControllerQDevice(const std::
     FrameTemp = QImage(FRAME_WIDTH, FRAME_HEIGHT, QImage::Format_Indexed8);
     ControllerWidget.setupUi(&CentralWidget);
 
-    mtsRequiredInterface * required = AddRequiredInterface("RequiresMicronTrackerController");
+    mtsRequiredInterface * required = AddRequiredInterface("Controller");
     if (required) {
         required->AddFunction("CalibratePivot", MTC.CalibratePivot);
         required->AddFunction("ToggleCapturing", MTC.Capture);
         required->AddFunction("ToggleTracking", MTC.Track);
         required->AddFunction("GetCameraFrameLeft", MTC.GetFrameLeft);
         required->AddFunction("GetCameraFrameRight", MTC.GetFrameRight);
+    }
+
+    required = AddRequiredInterface("DataCollector");
+    if (required) {
+        required->AddFunction("StartCollection", Collector.Start);
+        required->AddFunction("StopCollection", Collector.Stop);
     }
 
     // connect Qt signals to slots
@@ -120,16 +126,16 @@ void devMicronTrackerControllerQDevice::MTCCalibratePivotQSlot(void)
 }
 
 
-void devMicronTrackerControllerQDevice::MTCTrackQSlot(bool value)
+void devMicronTrackerControllerQDevice::MTCTrackQSlot(bool toggled)
 {
-    MTC.Capture(mtsBool(value));
-    MTC.Track(mtsBool(value));
+    MTC.Capture(mtsBool(toggled));
+    MTC.Track(mtsBool(toggled));
 }
 
 
-void devMicronTrackerControllerQDevice::CaptureFrameLeftQSlot(bool value)
+void devMicronTrackerControllerQDevice::CaptureFrameLeftQSlot(bool toggled)
 {
-    if (value) {
+    if (toggled) {
         QObject::connect(&UpdateTimer, SIGNAL(timeout()),
                          this, SLOT(UpdateFrameLeftQSlot()));
     } else {
@@ -141,9 +147,9 @@ void devMicronTrackerControllerQDevice::CaptureFrameLeftQSlot(bool value)
 }
 
 
-void devMicronTrackerControllerQDevice::CaptureFrameRightQSlot(bool value)
+void devMicronTrackerControllerQDevice::CaptureFrameRightQSlot(bool toggled)
 {
-    if (value) {
+    if (toggled) {
         QObject::connect(&UpdateTimer, SIGNAL(timeout()),
                          this, SLOT(UpdateFrameRightQSlot()));
     } else {
@@ -151,5 +157,17 @@ void devMicronTrackerControllerQDevice::CaptureFrameRightQSlot(bool value)
                             this, SLOT(UpdateFrameRightQSlot()));
         ControllerWidget.FrameRight->clear();
         CentralWidget.parentWidget()->resize(0,0);
+    }
+}
+
+
+void devMicronTrackerControllerQDevice::RecordQSlot(bool toggled)
+{
+    if (toggled) {
+        CMN_LOG_CLASS_RUN_VERBOSE << "RecordQSlot: starting data collection" << std::endl;
+        Collector.Start();
+    } else {
+        CMN_LOG_CLASS_RUN_VERBOSE << "RecordQSlot: stopping data collection" << std::endl;
+        Collector.Stop();
     }
 }

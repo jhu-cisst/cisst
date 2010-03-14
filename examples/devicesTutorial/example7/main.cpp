@@ -27,6 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnPath.h>
 #include <cisstCommon/cmnUnits.h>
 #include <cisstOSAbstraction/osaThreadedLogFile.h>
+#include <cisstMultiTask/mtsCollectorState.h>
 #include <cisstMultiTask/mtsTaskManager.h>
 #include <cisstDevices/devMicronTracker.h>
 
@@ -41,20 +42,22 @@ int main(int argc, char *argv[])
 {
     // log configuration
     cmnLogger::SetLoD(CMN_LOG_LOD_VERY_VERBOSE);
-    cmnLogger::GetMultiplexer()->AddChannel(std::cout, CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::AddChannel(std::cout, CMN_LOG_LOD_VERY_VERBOSE);
 
     // add a log per thread
     osaThreadedLogFile threadedLog("example7-");
-    cmnLogger::GetMultiplexer()->AddChannel(threadedLog, CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::AddChannel(threadedLog, CMN_LOG_LOD_VERY_VERBOSE);
 
     // set the log level of detail on select tasks
     cmnClassRegister::SetLoD("devMicronTracker", CMN_LOG_LOD_RUN_WARNING);
+    cmnClassRegister::SetLoD("devMicronTrackerControllerQDevice", CMN_LOG_LOD_VERY_VERBOSE);
+    cmnClassRegister::SetLoD("devMicronTrackerToolQDevice", CMN_LOG_LOD_VERY_VERBOSE);
 
     // create a Qt user interface
     QApplication application(argc, argv);
 
     // create the tasks
-    devMicronTracker * taskMicronTracker = new devMicronTracker("devMicronTracker", 50.0 * cmn_ms);
+    devMicronTracker * taskMicronTracker = new devMicronTracker("taskMicronTracker", 50.0 * cmn_ms);
     devMicronTrackerControllerQDevice * taskControllerQDevice = new devMicronTrackerControllerQDevice("taskControllerQDevice");
 
     // configure the tasks
@@ -62,13 +65,19 @@ int main(int argc, char *argv[])
     taskMicronTracker->Configure(searchPath.Find("config.xml"));
 
     // add the tasks to the task manager
-    mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
-    taskManager->AddTask(taskMicronTracker);
-    taskManager->AddDevice(taskControllerQDevice);
+    mtsManagerLocal * taskManager = mtsTaskManager::GetInstance();
+    taskManager->AddComponent(taskMicronTracker);
+    taskManager->AddComponent(taskControllerQDevice);
 
     // connect the tasks, e.g. RequiredInterface -> ProvidedInterface
-    taskManager->Connect("taskControllerQDevice", "RequiresMicronTrackerController",
-                         "devMicronTracker", "ProvidesMicronTrackerController");
+    taskManager->Connect(taskControllerQDevice->GetName(), "Controller",
+                         taskMicronTracker->GetName(), "Controller");
+
+    // add data collection for devMicronTracker state table
+    mtsCollectorState * taskCollector =
+            new mtsCollectorState(taskMicronTracker->GetName(),
+                                  taskMicronTracker->GetDefaultStateTableName(),
+                                  mtsCollectorBase::COLLECTOR_LOG_FORMAT_CSV);
 
     // add interfaces for tools and populate controller widget with tool widgets
     for (unsigned int i = 0; i < taskMicronTracker->GetNumberOfTools(); i++) {
@@ -77,10 +86,14 @@ int main(int argc, char *argv[])
         taskControllerQDevice->AddToolWidget(taskToolQDevice->GetWidget(),
                                              taskToolQDevice->GetMarkerProjectionLeft(),
                                              taskToolQDevice->GetMarkerProjectionRight());
-        taskManager->AddDevice(taskToolQDevice);
+        taskManager->AddComponent(taskToolQDevice);
         taskManager->Connect(toolName, toolName,
-                             "devMicronTracker", toolName);
+                             taskMicronTracker->GetName(), toolName);
+
+        taskCollector->AddSignal(toolName + "Position");
     }
+    taskManager->Connect(taskControllerQDevice->GetName(), "DataCollector",
+                         taskCollector->GetName(), "Control");
 
     // create and start all tasks
     taskManager->CreateAll();

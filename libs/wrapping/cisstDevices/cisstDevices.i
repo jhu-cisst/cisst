@@ -67,5 +67,8 @@ http://www.cisst.org/cisst/license.txt.
 
 // Wrap devices
 #if CISST_HAS_XML
-%include "cisstDevices/devNDISerial.h"
+    %include "cisstDevices/devNDISerial.h"
+    #if CISST_DEV_HAS_MICRONTRACKER
+        %include "cisstDevices/devMicronTracker.h"
+    #endif
 #endif

@@ -22,16 +22,12 @@ http://www.cisst.org/cisst/license.txt.
   \file
   \brief An example interface for NDI trackers with serial interface.
   \ingroup devicesTutorial
-
-  \bug Data collection requires a sleep when not running.
-
-  \todo Implement the option to start/stop data collection from the GUI.
 */
 
 #include <cisstCommon/cmnPath.h>
 #include <cisstCommon/cmnUnits.h>
 #include <cisstOSAbstraction/osaThreadedLogFile.h>
-//#include <cisstMultiTask/mtsCollectorState.h>
+#include <cisstMultiTask/mtsCollectorState.h>
 #include <cisstMultiTask/mtsTaskManager.h>
 #include <cisstDevices/devNDISerial.h>
 #include <cisstDevices/devNDISerialControllerQDevice.h>
@@ -45,20 +41,22 @@ int main(int argc, char *argv[])
 {
     // log configuration
     cmnLogger::SetLoD(CMN_LOG_LOD_VERY_VERBOSE);
-    cmnLogger::GetMultiplexer()->AddChannel(std::cout, CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::AddChannel(std::cout, CMN_LOG_LOD_VERY_VERBOSE);
 
     // add a log per thread
     osaThreadedLogFile threadedLog("example6-");
-    cmnLogger::GetMultiplexer()->AddChannel(threadedLog, CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::AddChannel(threadedLog, CMN_LOG_LOD_VERY_VERBOSE);
 
     // set the log level of detail on select tasks
     cmnClassRegister::SetLoD("devNDISerial", CMN_LOG_LOD_RUN_WARNING);
+    cmnClassRegister::SetLoD("devNDISerialControllerQDevice", CMN_LOG_LOD_VERY_VERBOSE);
+    cmnClassRegister::SetLoD("devNDISerialToolQDevice", CMN_LOG_LOD_VERY_VERBOSE);
 
     // create a Qt user interface
     QApplication application(argc, argv);
 
     // create the tasks
-    devNDISerial * taskNDISerial = new devNDISerial("devNDISerial", 50.0 * cmn_ms);
+    devNDISerial * taskNDISerial = new devNDISerial("taskNDISerial", 50.0 * cmn_ms);
     devNDISerialControllerQDevice * taskControllerQDevice = new devNDISerialControllerQDevice("taskControllerQDevice");
 
     // configure the tasks
@@ -66,28 +64,33 @@ int main(int argc, char *argv[])
     taskNDISerial->Configure(searchPath.Find("config.xml"));
 
     // add the tasks to the task manager
-    mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
-    taskManager->AddTask(taskNDISerial);
-    taskManager->AddDevice(taskControllerQDevice);
+    mtsManagerLocal * taskManager = mtsTaskManager::GetInstance();
+    taskManager->AddComponent(taskNDISerial);
+    taskManager->AddComponent(taskControllerQDevice);
 
     // connect the tasks, e.g. RequiredInterface -> ProvidedInterface
-    taskManager->Connect("taskControllerQDevice", "RequiresNDISerialController",
-                         "devNDISerial", "ProvidesNDISerialController");
+    taskManager->Connect(taskControllerQDevice->GetName(), "Controller",
+                         taskNDISerial->GetName(), "Controller");
 
-//    mtsCollectorState * dataCollectionTask = new mtsCollectorState("devNDISerial", mtsCollectorBase::COLLECTOR_LOG_FORMAT_PLAIN_TEXT);
+    // add data collection for devNDISerial state table
+    mtsCollectorState * taskCollector =
+            new mtsCollectorState(taskNDISerial->GetName(),
+                                  taskNDISerial->GetDefaultStateTableName(),
+                                  mtsCollectorBase::COLLECTOR_LOG_FORMAT_CSV);
 
     // add interfaces for tools and populate controller widget with tool widgets
     for (unsigned int i = 0; i < taskNDISerial->GetNumberOfTools(); i++) {
         std::string toolName = taskNDISerial->GetToolName(i);
         devNDISerialToolQDevice * taskToolQDevice = new devNDISerialToolQDevice(toolName);
         taskControllerQDevice->AddToolWidget(taskToolQDevice->GetWidget());
-        taskManager->AddDevice(taskToolQDevice);
+        taskManager->AddComponent(taskToolQDevice);
         taskManager->Connect(toolName, toolName,
-                             "devNDISerial", toolName);
+                             taskNDISerial->GetName(), toolName);
 
-//        dataCollectionTask->AddSignal(toolName + "Position");
+        taskCollector->AddSignal(toolName + "Position");
     }
-//    taskManager->AddTask(dataCollectionTask);
+    taskManager->Connect(taskControllerQDevice->GetName(), "DataCollector",
+                         taskCollector->GetName(), "Control");
 
     // create and start all tasks
     taskManager->CreateAll();

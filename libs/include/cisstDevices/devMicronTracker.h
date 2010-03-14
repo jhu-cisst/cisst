@@ -24,16 +24,15 @@ http://www.cisst.org/cisst/license.txt.
   \ingroup cisstDevices
 
   \bug Current CMake support is for Windows only.
-  \bug Runtime error when using Markers.ProcessFrame() (only when debugging).
-  \bug CalibratePivot() does not work as intended.
 
+  \todo Make this device an mtsTaskContinuous.
+  \todo Add IsTracking() and IsCapturing() methods.
+  \todo Mapping from markerName to markerHandle is needed.
   \todo Refactor the method of obtaining marker projections for the controllerQDevice.
   \todo Check for mtMeasurementHazardCode using Xform3D_HazardCodeGet().
   \todo Find a suitable State Table size.
-  \todo Sleep to prevent Cameras_GrabFrame() timeout?
-  \todo Verify the need for skipping initial 20 auto-adjustment frames.
   \todo Move Qt widgets to the libs folder (overlaps with devNDISerial?).
-  \todo Verify the need for the use of MTC() macro.
+  \todo Verify the need for use of MTC() macro.
 */
 
 #ifndef _devMicronTracker_h
@@ -61,7 +60,8 @@ class CISST_EXPORT devMicronTracker : public mtsTaskPeriodic
         std::string Name;
         std::string SerialNumber;
         mtsProvidedInterface * Interface;
-        prmPositionCartesianGet Position;
+        prmPositionCartesianGet TooltipPosition;
+        prmPositionCartesianGet MarkerPosition;
         mtsDoubleVec MarkerProjectionLeft;
         mtsDoubleVec MarkerProjectionRight;
 
@@ -86,6 +86,9 @@ class CISST_EXPORT devMicronTracker : public mtsTaskPeriodic
     Tool * CheckTool(const std::string & serialNumber);
     Tool * AddTool(const std::string & name, const std::string & serialNumber);
 
+    vctFrm3 XfHandleToFrame(mtHandle & xfHandle);
+    mtHandle FrameToXfHandle(vctFrm3 & frame);
+
     void ToggleCapturing(const mtsBool & toggle);
     void ToggleTracking(const mtsBool & toggle);
     void Track(void);
@@ -93,15 +96,16 @@ class CISST_EXPORT devMicronTracker : public mtsTaskPeriodic
 
     typedef cmnNamedMap<Tool> ToolsType;
     ToolsType Tools;
-    cmnNamedMap<Tool> PortToTool;
 
     bool IsCapturing;
     bool IsTracking;
+    bool HDRToggle;
 
     mtHandle CurrentCamera;
     mtHandle IdentifyingCamera;
     mtHandle IdentifiedMarkers;
     mtHandle PoseXf;
+    mtHandle Path;
     mtsDoubleVec MarkerProjectionLeft;
 
     mtsUCharVec CameraFrameLeft;

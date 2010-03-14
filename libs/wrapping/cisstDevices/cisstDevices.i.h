@@ -40,6 +40,12 @@ http://www.cisst.org/cisst/license.txt.
 #include "cisstMultiTask/cisstMultiTask.i.h"
 #include "cisstParameterTypes/cisstParameterTypes.i.h"
 
-#include "cisstDevices/devNDISerial.h"
+// Wrap devices
+#if CISST_HAS_XML
+    #include "cisstDevices/devNDISerial.h"
+    #if CISST_DEV_HAS_MICRONTRACKER
+        #include "cisstDevices/devMicronTracker.h"
+    #endif
+#endif
 
 #endif // _cisstDevices_i_h

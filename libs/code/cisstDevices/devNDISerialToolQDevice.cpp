@@ -60,13 +60,14 @@ void devNDISerialToolQDevice::timerEvent(QTimerEvent * event)
     }
 }
 
+
 void devNDISerialToolQDevice::RecordQSlot(void)
 {
+    CMN_LOG_CLASS_RUN_VERBOSE << "RecordQSlot: recorded point" << std::endl;
     std::ofstream file;
-    file.open("C:\\development\\Data\\devNDISerialFiducials.csv", std::ios::app);
-    file << NDI.PositionCartesian.Position() << std::endl;
-//    file << NDI.PositionCartesian.Position().Translation().X() << ", "
-//         << NDI.PositionCartesian.Position().Translation().Y() << ", "
-//         << NDI.PositionCartesian.Position().Translation().Z() << std::endl;
+    file.open("CollectedPoints.csv", std::ios::app);
+    file << NDI.PositionCartesian.Position().Translation().X() << ", "
+         << NDI.PositionCartesian.Position().Translation().Y() << ", "
+         << NDI.PositionCartesian.Position().Translation().Z() << std::endl;
     file.close();
 }

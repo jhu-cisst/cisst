@@ -58,12 +58,17 @@ class CISST_EXPORT devNDISerialControllerQDevice : public QObject, public mtsDev
         mtsFunctionWrite Track;
     } NDI;
 
+    struct {
+        mtsFunctionVoid Start;
+        mtsFunctionVoid Stop;
+    } Collector;
+
  public slots:
     void NDIBeepQSlot(void);
     void NDIInitializeQSlot(void);
     void NDICalibratePivotQSlot(void);
-    void NDITrackQSlot(bool value);
-    void RecordQSlot(bool value);
+    void NDITrackQSlot(bool toggled);
+    void RecordQSlot(bool toggled);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(devNDISerialControllerQDevice);

@@ -26,9 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsVector.h>
 #include <cisstParameterTypes/prmPositionCartesianGet.h>
 
-#include <QTimer>
-
-#include <cisstDevices/devNDISerialToolQWidget.h>
+#include "ui_devMicronTrackerToolQWidget.h"
 
 
 class devMicronTrackerToolQDevice : public QObject, public mtsDevice
@@ -53,9 +51,8 @@ class devMicronTrackerToolQDevice : public QObject, public mtsDevice
     }
 
  protected:
-    Ui::devNDISerialToolQWidget ToolWidget;
+    Ui::devMicronTrackerToolQWidget ToolWidget;
     QWidget CentralWidget;
-    QTimer UpdateTimer;
 
     struct {
         mtsFunctionRead GetPositionCartesian;
@@ -71,7 +68,8 @@ class devMicronTrackerToolQDevice : public QObject, public mtsDevice
     QPoint MarkerProjectionRight;
 
  public slots:
-    void UpdateTimerQSlot(void);
+    void timerEvent(QTimerEvent * event);
+    void RecordQSlot(void);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(devMicronTrackerToolQDevice);

@@ -267,6 +267,7 @@ MTS_INSTANTIATE_VECTOR(mtsDoubleVec, double);
 MTS_INSTANTIATE_VECTOR(mtsIntVec, int); 
 MTS_INSTANTIATE_VECTOR(mtsShortVec, short); 
 MTS_INSTANTIATE_VECTOR(mtsLongVec, long); 
+MTS_INSTANTIATE_VECTOR(mtsUCharVec, unsigned char);
 
 // Wrap mtsMatrix
 %import "cisstMultiTask/mtsMatrix.h"

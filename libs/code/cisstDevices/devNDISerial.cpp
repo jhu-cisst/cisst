@@ -22,7 +22,9 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnXMLPath.h>
 #include <cisstVector/vctDynamicMatrixTypes.h>
 #include <cisstOSAbstraction/osaSleep.h>
-#include <cisstNumerical/nmrLSSolver.h>
+#if CISST_HAS_CISSTNETLIB
+    #include <cisstNumerical/nmrLSSolver.h>
+#endif
 #include <cisstDevices/devNDISerial.h>
 
 CMN_IMPLEMENT_SERVICES(devNDISerial);
@@ -32,7 +34,7 @@ devNDISerial::devNDISerial(const std::string & taskName, const double period) :
     mtsTaskPeriodic(taskName, period, false, 5000),
     IsTracking(false)
 {
-    mtsProvidedInterface * provided = AddProvidedInterface("ProvidesNDISerialController");
+    mtsProvidedInterface * provided = AddProvidedInterface("Controller");
     if (provided) {
         provided->AddCommandWrite(&devNDISerial::Beep, this, "Beep", mtsInt());
         provided->AddCommandVoid(&devNDISerial::PortHandlesInitialize, this, "PortHandlesInitialize");
@@ -766,6 +768,7 @@ void devNDISerial::Track(void)
 
 void devNDISerial::CalibratePivot(const mtsStdString & toolName)
 {
+#if CISST_HAS_CISSTNETLIB
     const unsigned int numPoints = 500;
 
     CMN_LOG_CLASS_RUN_WARNING << "CalibratePivot: calibrating " << toolName.Data << std::endl;
@@ -826,6 +829,9 @@ void devNDISerial::CalibratePivot(const mtsStdString & toolName)
                               << " * tooltip offset: " << tooltip << "\n"
                               << " * pivot position: " << pivot << "\n"
                               << " * error RMS: " << errorRMS << std::endl;
+#else
+    CMN_LOG_CLASS_RUN_WARNING << "CalibratePivot: requires cisstNetlib" << std::endl;
+#endif
 }
 
 

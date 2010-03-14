@@ -45,14 +45,14 @@ devMicronTrackerToolQDevice::devMicronTrackerToolQDevice(const std::string & tas
     }
 
     // connect Qt signals to slots
-    QObject::connect(&UpdateTimer, SIGNAL(timeout()),
-                     this, SLOT(UpdateTimerQSlot()));
+    QObject::connect(ToolWidget.ButtonRecord, SIGNAL(clicked()),
+                     this, SLOT(RecordQSlot()));
 
-    UpdateTimer.start(20);
+    startTimer(20);
 }
 
 
-void devMicronTrackerToolQDevice::UpdateTimerQSlot(void)
+void devMicronTrackerToolQDevice::timerEvent(QTimerEvent * event)
 {
     MTC.GetPositionCartesian(MTC.PositionCartesian);
     MTC.GetMarkerProjectionLeft(MTC.MarkerProjectionLeft);
@@ -62,14 +62,29 @@ void devMicronTrackerToolQDevice::UpdateTimerQSlot(void)
         ToolWidget.PositionX->setNum(MTC.PositionCartesian.Position().Translation().X());
         ToolWidget.PositionY->setNum(MTC.PositionCartesian.Position().Translation().Y());
         ToolWidget.PositionZ->setNum(MTC.PositionCartesian.Position().Translation().Z());
+        MarkerProjectionLeft.setX(MTC.MarkerProjectionLeft.X());
+        MarkerProjectionLeft.setY(MTC.MarkerProjectionLeft.Y());
+        MarkerProjectionRight.setX(MTC.MarkerProjectionRight.X());
+        MarkerProjectionRight.setY(MTC.MarkerProjectionRight.Y());
     } else {
         ToolWidget.PositionX->setNum(0.0);
         ToolWidget.PositionY->setNum(0.0);
         ToolWidget.PositionZ->setNum(0.0);
+        MarkerProjectionLeft.setX(0.0);
+        MarkerProjectionLeft.setY(0.0);
+        MarkerProjectionRight.setX(0.0);
+        MarkerProjectionRight.setY(0.0);
     }
+}
 
-    MarkerProjectionLeft.setX(MTC.MarkerProjectionLeft.X());
-    MarkerProjectionLeft.setY(MTC.MarkerProjectionLeft.Y());
-    MarkerProjectionRight.setX(MTC.MarkerProjectionRight.X());
-    MarkerProjectionRight.setY(MTC.MarkerProjectionRight.Y());
+
+void devMicronTrackerToolQDevice::RecordQSlot(void)
+{
+    CMN_LOG_CLASS_RUN_VERBOSE << "RecordQSlot: recorded point" << std::endl;
+    std::ofstream file;
+    file.open("CollectedPoints.csv", std::ios::app);
+    file << MTC.PositionCartesian.Position().Translation().X() << ", "
+         << MTC.PositionCartesian.Position().Translation().Y() << ", "
+         << MTC.PositionCartesian.Position().Translation().Z() << std::endl;
+    file.close();
 }

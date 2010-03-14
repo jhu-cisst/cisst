@@ -23,6 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsDevice.h>
 #include <cisstMultiTask/mtsFunctionReadOrWrite.h>
+#include <cisstMultiTask/mtsFunctionVoid.h>
 #include <cisstMultiTask/mtsVector.h>
 
 #include <QImage>
@@ -70,6 +71,11 @@ class devMicronTrackerControllerQDevice : public QObject, public mtsDevice
         mtsUCharVec FrameRight;
     } MTC;
 
+    struct {
+        mtsFunctionVoid Start;
+        mtsFunctionVoid Stop;
+    } Collector;
+
     QImage FrameLeft;
     QImage FrameRight;
     QList<QString> MarkerNames;
@@ -84,9 +90,10 @@ class devMicronTrackerControllerQDevice : public QObject, public mtsDevice
     void UpdateFrameLeftQSlot(void);
     void UpdateFrameRightQSlot(void);
     void MTCCalibratePivotQSlot(void);
-    void MTCTrackQSlot(bool value);
-    void CaptureFrameLeftQSlot(bool value);
-    void CaptureFrameRightQSlot(bool value);
+    void MTCTrackQSlot(bool toggled);
+    void CaptureFrameLeftQSlot(bool toggled);
+    void CaptureFrameRightQSlot(bool toggled);
+    void RecordQSlot(bool toggled);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(devMicronTrackerControllerQDevice);

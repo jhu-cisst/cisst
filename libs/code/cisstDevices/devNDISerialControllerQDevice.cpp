@@ -30,7 +30,7 @@ devNDISerialControllerQDevice::devNDISerialControllerQDevice(const std::string &
     ControllerWidget.setupUi(&CentralWidget);
     CentralWidget.setWindowTitle(QString::fromStdString(taskName));
 
-    mtsRequiredInterface * required = AddRequiredInterface("RequiresNDISerialController");
+    mtsRequiredInterface * required = AddRequiredInterface("Controller");
     if (required) {
         required->AddFunction("Beep", NDI.Beep);
         required->AddFunction("PortHandlesInitialize", NDI.Initialize);
@@ -38,6 +38,12 @@ devNDISerialControllerQDevice::devNDISerialControllerQDevice(const std::string &
         required->AddFunction("PortHandlesEnable", NDI.Enable);
         required->AddFunction("CalibratePivot", NDI.CalibratePivot);
         required->AddFunction("ToggleTracking", NDI.Track);
+    }
+
+    required = AddRequiredInterface("DataCollector");
+    if (required) {
+        required->AddFunction("StartCollection", Collector.Start);
+        required->AddFunction("StopCollection", Collector.Stop);
     }
 
     // connect Qt signals to slots
@@ -85,18 +91,18 @@ void devNDISerialControllerQDevice::NDICalibratePivotQSlot(void)
 }
 
 
-void devNDISerialControllerQDevice::NDITrackQSlot(bool value)
+void devNDISerialControllerQDevice::NDITrackQSlot(bool toggled)
 {
-    NDI.Track(mtsBool(value));
+    NDI.Track(mtsBool(toggled));
 }
 
-void devNDISerialControllerQDevice::RecordQSlot(bool value)
+void devNDISerialControllerQDevice::RecordQSlot(bool toggled)
 {
-    if (value) {
-        CMN_LOG_CLASS_RUN_ERROR << "RecordQSlot: data collection is not yet implemented" << std::endl;
-//        mtsTaskManager::GetInstance()->GetTask("devNDISerialCollectorStateTable")->SetSamplingInterval(10);
-//        mtsTaskManager::GetInstance()->GetTask("devNDISerialCollectorStateTable")->StartCollection();
+    if (toggled) {
+        CMN_LOG_CLASS_RUN_VERBOSE << "RecordQSlot: starting data collection" << std::endl;
+        Collector.Start();
     } else {
-//        mtsTaskManager::GetInstance()->GetTask("devNDISerialCollectorStateTable")->StopCollection();
+        CMN_LOG_CLASS_RUN_VERBOSE << "RecordQSlot: stopping data collection" << std::endl;
+        Collector.Stop();
     }
 }
