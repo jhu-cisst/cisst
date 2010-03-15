@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):  Anton Deguet
   Created on: 2003-09-08
 
@@ -158,7 +158,7 @@ http://www.cisst.org/cisst/license.txt.
     #endif
   #endif
 
-#endif // _WIN32 
+#endif // _WIN32
 
 
 // Intel compiler
@@ -216,19 +216,19 @@ http://www.cisst.org/cisst/license.txt.
   other interfaces (e.g., function, and sometimes class, type or
   variable) can be declared as deprecated by adding specific
   nonstandard qualifier in the declaration of the object.
-  
+
   We have unified these qualifiers into a single macro.  Here's a usage example.
-  
+
   \code
   void CISST_DEPRECATED f();
   \endcode
-  
+
   After this declaration, when a programmer uses a call to f() inside
   any other block, a compiler warning is generated on those compilers
   which support deprecation qualifiers.
-  
+
   The macro is defined as blank if the compiler does not support deprecation.
-  
+
   \note More work needs to be done on how to declare a deprecated class
 */
 //@{
@@ -307,7 +307,7 @@ extern CISST_EXPORT const std::string cmnCompilersStrings[];
   }
   \endcode
 
-  \param x The number to be tested.  
+  \param x The number to be tested.
 */
 #ifdef CISST_COMPILER_IS_MSVC
   #include <float.h>
@@ -335,7 +335,7 @@ extern CISST_EXPORT const std::string cmnCompilersStrings[];
   }
   \endcode
 
-  \param x The number to be tested.  
+  \param x The number to be tested.
 */
 #ifdef CISST_COMPILER_IS_MSVC
 #define CMN_ISFINITE(x) _finite(x)
@@ -344,7 +344,7 @@ extern CISST_EXPORT const std::string cmnCompilersStrings[];
 #else
   #if (CISST_OS == CISST_SOLARIS)
     #include <ieeefp.h>
-  #endif 
+  #endif
 #define CMN_ISFINITE(x) finite(x)
 #endif
 
@@ -354,28 +354,28 @@ extern CISST_EXPORT const std::string cmnCompilersStrings[];
   For whatever reason, there is a syntactic incompatiblity between .NET and gcc
   on the issue of member function template specialization.  .NET requires a strict
   declaration of the specialized member:
-  
+
   template returnType foo::bar<templateArgs>(parameters);
-  
+
   followed by the definition
-  
+
   returnType foo::bar(parameters) { ... }
-  
+
   Whereas gcc can deduce the template arguments by simply looking at the definition
-  
+
   template<> returnType foo::bar(parameters) { ... }
-  
-  
+
+
   To provide specialization of template functions, we unify these two structures
-  by mandating the explicit declaration preceded by the macro 
+  by mandating the explicit declaration preceded by the macro
   CISST_DECLARE_TEMPLATE_FUNCTION_SPECIALIZATION , then writing the definition preceded
-  by the macro CISST_DEFINE_TEMPLATE_FUNCTION_SPECIALIZATION. 
-  
+  by the macro CISST_DEFINE_TEMPLATE_FUNCTION_SPECIALIZATION.
+
   For example:
-  
+
   CISST_DECLARE_TEMPLATE_FUNCTION_SPECIALIZATION
   void foo::bar<templateArgs>(parameters);
-  
+
   CISST_DEFINE_TEMPLATE_FUNCTION_SPECIALIZATION
   void foo::bar(parameters) { ... }
 */
@@ -402,18 +402,18 @@ extern CISST_EXPORT const std::string cmnCompilersStrings[];
   template specialization, passing an argument to resolve template
   inference, arguments provided for API consistency with others
   classes/methods.
-  
+
   \note This macro is only required where the method is defined.  If
   the declaration and the definition are in two different places
   (e.g. header file and code file), it is not technically required to
   use the macro in the header file.  Nervertheless, we recommend to
   use it in both places.
- */ 
+ */
 #if (CISST_COMPILER == CISST_GCC)
 #define CMN_UNUSED(argument) MARKED_AS_UNUSED ## argument __attribute__((unused))
 #else
 #define CMN_UNUSED(argument) MARKED_AS_UNUSED ## argument
-#endif 
+#endif
 
 
 
@@ -441,6 +441,20 @@ extern CISST_EXPORT const std::string cmnCompilersStrings[];
 #define CMN_DEFAULT_TEMPLATED_CONSTRUCTOR(type) type::type()
 #else
 #define CMN_DEFAULT_TEMPLATED_CONSTRUCTOR(type) type()
+#endif
+
+
+/*! \brief Somewhat portable compilation warning message.  This works
+  with very recent versions of gcc (4.5) and with Microsoft
+  compilers.  This macro has not been ported to other compilers. */
+#if (CISST_COMPILER == CISST_GCC)
+    // gcc 4.5 and above will support this, for lower versions there is a warning about the pragma itself
+    #define CMN_DO_PRAGMA(x) _Pragma (#x)
+    #define CMN_COMPILATION_WARNING(warningMessage) CMN_DO_PRAGMA(warning("Warning: " #warningMessage))
+#else
+    #ifdef CISST_COMPILER_IS_MSVC
+        #define CMN_COMPILATION_WARNING(warningMessage) __pragma(message("Warning: " ## warningMessage))
+    #endif
 #endif
 
 
