@@ -89,7 +89,8 @@ class CISST_EXPORT mtsTaskInterface: public mtsDeviceInterface {
                  iterVoid++) {
                 commandVoid = iterVoid->second->Clone(this->MailBox);
                 CommandsVoid.AddItem(iterVoid->first, commandVoid, CMN_LOG_LOD_INIT_ERROR);
-                CMN_LOG_CLASS_INIT_VERBOSE << "Cloned command " << iterVoid->first << std::endl;
+                CMN_LOG_CLASS_INIT_VERBOSE << "CloneCommands: cloned void command \"" << iterVoid->first
+                                           << "\" for \"" << this->GetName() << "\"" << std::endl;
             }
             // clone write commands
             mtsTaskInterface::CommandQueuedWriteMapType::const_iterator iterWrite;
@@ -100,7 +101,8 @@ class CISST_EXPORT mtsTaskInterface: public mtsDeviceInterface {
                 iterWrite++) {
                 commandWrite = iterWrite->second->Clone(this->MailBox, DEFAULT_ARG_BUFFER_LEN);
                 CommandsWrite.AddItem(iterWrite->first, commandWrite, CMN_LOG_LOD_INIT_ERROR);
-                CMN_LOG_CLASS_INIT_VERBOSE << "Cloned command " << iterWrite->first << std::endl;
+                CMN_LOG_CLASS_INIT_VERBOSE << "CloneCommands: cloned write command " << iterWrite->first
+                                           << "\" for \"" << this->GetName() << "\"" << std::endl;
             }
         }
     };
@@ -141,7 +143,13 @@ private:
     unsigned int ProcessMailBoxes();
 
  public:
-    // virtual unsigned int AllocateResourcesForCurrentThread(void);
+    /*! This method need to called to create a unique Id and queues
+      for a potential user.  When using the methods "GetCommandXyz"
+      later on, the unique Id should be used to define which queues to
+      use.  To avoid any issue, each potential thread should require a
+      unique Id and then use it.  If two or more tasks are running
+      from the same thread, they can use different Ids but this is not
+      required. */
     unsigned int AllocateResources(const std::string & userName);
 
     /*! Constructor with a post queued command.  This constructor is
