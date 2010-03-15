@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2004-08-18
 
-  (C) Copyright 2004-2008 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -41,7 +41,7 @@ http://www.cisst.org/cisst/license.txt.
   (null pointer).  The later means that dynamic creation is disabled.
 */
 template <bool _hasDynamicCreation>
-class cmnConditionalObjectFactory; 
+class cmnConditionalObjectFactory;
 
 
 /*! Specialization of cmnConditionalObjectFactory with disabled
@@ -57,7 +57,12 @@ public:
         /*! Specialization of create when dynamic creation is
           disabled.  Returns 0 (null pointer). */
         inline static cmnGenericObject * Create(void) {
-            /* may be throw an exception instead */
+            return 0;
+        }
+
+        /*! Specialization of create when dynamic creation is
+          disabled.  Returns 0 (null pointer). */
+        inline static cmnGenericObject * CreateArray(size_t CMN_UNUSED(size)) {
             return 0;
         }
 
@@ -99,6 +104,16 @@ public:
         inline static cmnGenericObject * Create(void) {
             return new value_type;
         }
+
+
+        /*! Specialization of create when dynamic creation is
+          enabled.  Call new[size] for the given class.  This method
+          requires a default constructor for the aforementioned
+          class. */
+        inline static cmnGenericObject * CreateArray(size_t size) {
+            return new value_type[size];
+        }
+
 
         /*! Specialization of create(other) when dynamic creation is
           enabled.  Call new for the given class.  This method
@@ -157,7 +172,7 @@ class cmnClassServices: public cmnClassServicesBase {
 
     /*!  Constructor. Sets the name of the class and the Level of Detail
       setting for the class.
-      
+
       \param className The name to be associated with the class.
       \param typeInfo Type information as defined by typeid() (see
       C++ RTTI)
@@ -169,28 +184,35 @@ class cmnClassServices: public cmnClassServicesBase {
 
     /* documented in base class */
     virtual cmnGenericObject * Create(void) const {
-        typedef cmnConditionalObjectFactory<_hasDynamicCreation> FactoryType; 
+        typedef cmnConditionalObjectFactory<_hasDynamicCreation> FactoryType;
         typedef typename FactoryType::template ClassSpecialization<_class> CreatorType;
         return CreatorType::Create();
     }
 
     /* documented in base class */
+    virtual cmnGenericObject * CreateArray(size_t size) const {
+        typedef cmnConditionalObjectFactory<_hasDynamicCreation> FactoryType;
+        typedef typename FactoryType::template ClassSpecialization<_class> CreatorType;
+        return CreatorType::CreateArray(size);
+    }
+
+    /* documented in base class */
     virtual cmnGenericObject * Create(const cmnGenericObject & other) const {
-        typedef cmnConditionalObjectFactory<_hasDynamicCreation> FactoryType; 
+        typedef cmnConditionalObjectFactory<_hasDynamicCreation> FactoryType;
         typedef typename FactoryType::template ClassSpecialization<_class> CreatorType;
         return CreatorType::Create(other);
     }
 
     /* documented in base class */
     virtual bool Create(cmnGenericObject * existing, const cmnGenericObject & other) const {
-        typedef cmnConditionalObjectFactory<_hasDynamicCreation> FactoryType; 
+        typedef cmnConditionalObjectFactory<_hasDynamicCreation> FactoryType;
         typedef typename FactoryType::template ClassSpecialization<_class> CreatorType;
         return CreatorType::Create(existing, other);
     }
 
     /* documented in base class */
     virtual bool Delete(cmnGenericObject * existing) const {
-        typedef cmnConditionalObjectFactory<_hasDynamicCreation> FactoryType; 
+        typedef cmnConditionalObjectFactory<_hasDynamicCreation> FactoryType;
         typedef typename FactoryType::template ClassSpecialization<_class> CreatorType;
         return CreatorType::Delete(existing);
     }
