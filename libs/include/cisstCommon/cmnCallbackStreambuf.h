@@ -69,7 +69,7 @@ public:
 	/*! Type of the array, e.g., char. */
 	typedef _element ElementType;
 	/*! Type of the callback function, e.g., void func(char *line, int len). */
-    typedef void (*CallbackType)(ElementType *, int len);
+    typedef void (*CallbackType)(const ElementType *, int len);
 
     /*! 
      * Constructor: Sets the callback function.

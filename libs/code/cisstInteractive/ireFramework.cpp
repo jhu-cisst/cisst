@@ -100,10 +100,10 @@ public:
     static PyObject* SetLoD(PyObject* self, PyObject* args);
 
     // The C++ callback function that is passed to cmnCallbackStreambuf
-    static void PrintLog(char *str, int len);
+    static void PrintLog(const char * str, int len);
 
     // Initialize the Python module
-    static void InitModule(char* name);
+    static void InitModule(const char * name);
 
     // Cleanup
     static void Cleanup();
@@ -189,7 +189,7 @@ PyObject* PyTextCtrlHook::SetLoD(PyObject* CMN_UNUSED(self), PyObject* args)
 // Parameters:
 //     str:  a null-terminated string
 //     len:  the length of the string
-void PyTextCtrlHook::PrintLog(char *str, int len)
+void PyTextCtrlHook::PrintLog(const char * str, int len)
 {
     PyObject* result;
 
@@ -283,7 +283,7 @@ PyMethodDef PyTextCtrlHook::Methods[] = {
     { NULL, NULL, 0, NULL }
 };
 
-void PyTextCtrlHook::InitModule(char* name)
+void PyTextCtrlHook::InitModule(const char * name)
 {
     Py_InitModule(name, Methods);
 }
@@ -350,9 +350,9 @@ void ireFramework::FinalizeShellInstance(void)
 // Developers should take care to DECREF (decrease the reference counts)
 // of any PyObject s that use hard references.
 //
-void ireFramework::LaunchIREShellInstance(char *startup, bool newPythonThread, bool useIPython) {
+void ireFramework::LaunchIREShellInstance(const char * startup, bool newPythonThread, bool useIPython) {
     //start python
-    char* python_args[] = { "IRE", startup };
+    const char * python_args[] = { "IRE", startup };
 
     if (IRE_State != IRE_INITIALIZED) {
         CMN_LOG_INIT_ERROR << "LaunchIREShellInstance:  IRE state is " << IRE_State << "." << std::endl;
@@ -362,7 +362,7 @@ void ireFramework::LaunchIREShellInstance(char *startup, bool newPythonThread, b
 
     // Initialize ireLogger module, which is used for the cmnLogger output window
     PyTextCtrlHook::InitModule("ireLogger");
-    PySys_SetArgv(2, python_args);
+    PySys_SetArgv(2, const_cast<char **>(python_args));
 
     if (useIPython) {
         PyRun_SimpleString(startup);

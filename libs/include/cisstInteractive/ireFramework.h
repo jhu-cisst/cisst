@@ -95,7 +95,7 @@ private:
     void InitShellInstance(void);
 
     void FinalizeShellInstance(void);
-    void LaunchIREShellInstance(char *startup, bool newPythonThread, bool useIPython);
+    void LaunchIREShellInstance(const char * startup, bool newPythonThread, bool useIPython);
 
 	void JoinIREShellInstance(double timeout);
 
