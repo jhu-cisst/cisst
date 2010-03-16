@@ -219,7 +219,9 @@ void ui3ImagePlane::SetImage(svlSampleImageBase* image, unsigned int channel)
         image->GetWidth(channel) == this->BitmapWidth &&
         image->GetHeight(channel) == this->BitmapHeight) {
 
-        // Copy RGB image to RGBA texture buffer
+        const unsigned int  datachannels = image->GetDataChannels();
+        const unsigned int  bpp = image->GetBPP();
+
         const unsigned int  bmpwidth = this->BitmapWidth;
         const unsigned int  bmpheight = this->BitmapHeight;
         const unsigned int  rightborder = (this->TextureWidth - bmpwidth) << 2;
@@ -227,26 +229,63 @@ void ui3ImagePlane::SetImage(svlSampleImageBase* image, unsigned int channel)
         unsigned char *imagebuf = image->GetUCharPointer(channel);
         unsigned char *texture = this->TextureBuffer;
         unsigned int i, j;
+
+        if (datachannels == 3 && bpp == 3) {
+            // Copy RGB image to RGBA texture buffer
+
 #ifdef USE_BGR
-        unsigned char r, g, b;
+            unsigned char r, g, b;
 #endif
 
-        for (j = 0; j < bmpheight; j ++) {
-            for (i = 0; i < bmpwidth; i ++) {
+            for (j = 0; j < bmpheight; j ++) {
+                for (i = 0; i < bmpwidth; i ++) {
 #ifdef USE_BGR
-                r = *imagebuf; imagebuf ++;
-                g = *imagebuf; imagebuf ++;
-                b = *imagebuf; imagebuf ++;
-                *texture = b; texture ++;
-                *texture = g; texture ++;
-                *texture = r; texture += 2;
+                    r = *imagebuf; imagebuf ++;
+                    g = *imagebuf; imagebuf ++;
+                    b = *imagebuf; imagebuf ++;
+                    *texture = b; texture ++;
+                    *texture = g; texture ++;
+                    *texture = r; texture += 2;
 #else
-                *texture = *imagebuf; imagebuf ++; texture ++;
-                *texture = *imagebuf; imagebuf ++; texture ++;
-                *texture = *imagebuf; imagebuf ++; texture += 2;
+                    *texture = *imagebuf; imagebuf ++; texture ++;
+                    *texture = *imagebuf; imagebuf ++; texture ++;
+                    *texture = *imagebuf; imagebuf ++; texture += 2;
 #endif
+                }
+                texture += rightborder;
             }
-            texture += rightborder;
+        }
+        else if (datachannels == 4 && bpp == 4) {
+            // Copy RGBA image to RGBA texture buffer
+
+#ifdef USE_BGR
+            unsigned char r, g, b, a;
+#else
+            i = bmpwidth << 2;
+#endif
+
+            for (j = 0; j < bmpheight; j ++) {
+#ifdef USE_BGR
+                for (i = 0; i < bmpwidth; i ++) {
+                    r = *imagebuf; imagebuf ++;
+                    g = *imagebuf; imagebuf ++;
+                    b = *imagebuf; imagebuf ++;
+                    a = *imagebuf; imagebuf ++;
+                    *texture = b; texture ++;
+                    *texture = g; texture ++;
+                    *texture = r; texture ++;
+                    *texture = a; texture ++;
+                }
+#else
+                memcpy(texture, imagebuf, i);
+                texture += i; imagebuf += i;
+#endif
+                texture += rightborder;
+            }
+        }
+        else {
+            // Other image formats not supported (as of now)
+            return;
         }
 
         // Signal VTK that the texture has been modified
