@@ -280,9 +280,15 @@ public:
         return StateTable.GetName();
     }
 
-    /*! Return the pointer to the default state table or a specific one if a name is provided. */
+    /*! Return a pointer to state table with the given name. */
     mtsStateTable * GetStateTable(const std::string & stateTableName) {
         return this->StateTables.GetItem(stateTableName, CMN_LOG_LOD_INIT_ERROR);
+    }
+
+    /*! Return a pointer to the default state table.  See
+      GetStateTable and GetDefaultStateTableName. */
+    inline mtsStateTable * GetDefaultStateTable(void) {
+        return this->StateTables.GetItem(this->GetDefaultStateTableName(), CMN_LOG_LOD_INIT_ERROR);
     }
 
     /*! Add an existing state table to the list of known state tables
