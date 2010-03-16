@@ -19,10 +19,30 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include "GCMUITask.h"
+#include <time.h>
+#include <qmath.h>
 
 CMN_IMPLEMENT_SERVICES(GCMUITask);
 
-typedef std::vector<std::string> StringVector;
+// FLTK color code definition
+#define AQUA    0, 1, 1
+#define BLACK   0, 0, 0
+#define BLUE    0, 0, 1
+#define FUCHSIA 1, 0, 1
+#define GRAY    0.5, 0.5, 0.5
+#define GREEN   0, 0.5, 0
+#define LIME    0, 1, 0
+#define MAROON  0.5, 0, 0
+#define NAVY    0, 0, 0.5
+#define OLIVE   0.5, 0.5, 0
+#define PURPLE  0.5, 0, 0.5
+#define RED     1,  0, 0
+#define SILVER  0.75, 0.75, 0.75
+#define TEAL    0, 0.5, 0.5
+#define WHITE   1, 1, 1
+#define YELLOW  1, 1, 0
+
+#define MAX_ARGUMENT_PARAMETER_COUNT 12
 
 GCMUITask::GCMUITask(const std::string & taskName, const double period, 
                      mtsManagerGlobal& globalComponentManager) :
@@ -33,8 +53,28 @@ GCMUITask::GCMUITask(const std::string & taskName, const double period,
 
 void GCMUITask::Configure(const std::string & CMN_UNUSED(filename))
 {
+    //
+    // Component Inspector
+    //
     LastIndexClicked.Reset();
     CurrentIndexClicked.Reset();
+
+    ProgressBars[0] = UI.Progress1;
+    ProgressBars[1] = UI.Progress2;
+    ProgressBars[2] = UI.Progress3;
+    ProgressBars[3] = UI.Progress4;
+    ProgressBars[4] = UI.Progress5;
+    ProgressBars[5] = UI.Progress6;
+    ProgressBars[6] = UI.Progress7;
+    ProgressBars[7] = UI.Progress8;
+    ProgressBars[8] = UI.Progress9;
+    ProgressBars[9] = UI.Progress10;
+    ProgressBars[10] = UI.Progress11;
+    ProgressBars[11] = UI.Progress12;
+
+    for (int i = 0; i < MAX_CHANNEL_COUNT; ++i) {
+        ProgressBars[i]->maximum(1.0);
+    }
 
     // HostIP
     Fl_Text_Buffer * buf = new Fl_Text_Buffer();
@@ -54,6 +94,25 @@ void GCMUITask::Configure(const std::string & CMN_UNUSED(filename))
         }
     }
     buf->text(ipString.c_str());
+
+    //
+    // Data Visualizer
+    //
+    XAxisScaleFactor = 150;
+
+    GraphPane = UI.GraphPane;
+    GraphPane->set_scrolling(100);
+    GraphPane->SetAutoScale(false);
+    GraphPane->set_grid(MP_LINEAR_GRID, MP_LINEAR_GRID, true);
+    GraphPane->set_grid_color(GRAY);
+
+    LastUpdateTime = clock();
+
+    ResetDataVisualizerUI();
+
+    UI.SliderSamplingRate->range(1.0, 100.0);
+    UI.SliderSamplingRate->step(10);
+    UI.SliderSamplingRate->value(10.0);
 }
 
 void GCMUITask::Startup(void) 
@@ -64,8 +123,17 @@ void GCMUITask::Startup(void)
 
 void GCMUITask::Run(void)
 {
-    // Check if there is any user's input
-    CheckUserInput();
+    // TEST CODE
+    if (clock() - LastUpdateTime > 20) {
+        LastUpdateTime = clock();
+        PlotGraph();
+    }
+
+    // Check user's input on the 'Data Inspector' tab
+    CheckDataInspectorInput();
+
+    // Check user's input on the 'Data Visualizer' tab
+    CheckDataVisualizerInput();
 
     if (UI.ButtonAutoRefresh->value() == 0) {
         goto ReturnWithUpdate;
@@ -73,11 +141,11 @@ void GCMUITask::Run(void)
 
     // Refresh immediately
     if (UI.ButtonRefreshClicked) {
-        UpdateUI();
+        OnButtonRefreshClicked();
         UI.ButtonRefreshClicked = false;
         return;
     }
-    
+
     // Auto refresh period: 5 secs
     static int cnt = 0;
     if (++cnt < 20 * 5) {
@@ -94,7 +162,71 @@ ReturnWithUpdate:
     }
 }
 
-void GCMUITask::CheckUserInput(void)
+#define BASIC_PLOTTING_TEST
+//#define SIGNAL_CONTROL_TEST
+void GCMUITask::PlotGraph(void)
+{
+    // Show min/max Y values
+    const float Ymin = GraphPane->GetYMin();
+    const float Ymax = GraphPane->GetYMax();
+
+    char buf[100] = "";
+    sprintf(buf, "%.2f", Ymax); UI.OutputMaxValue->value(buf);
+    sprintf(buf, "%.2f", Ymin); UI.OutputMinValue->value(buf);
+    
+#ifdef BASIC_PLOTTING_TEST
+    static unsigned int x = 0;
+    
+    for (int i=0; i<=12; ++i) {
+        if (i <= 7) {
+            GraphPane->set_pointsize(i, 2.0);
+            GraphPane->set_linewidth(i, 1.0);
+        } else {
+            GraphPane->set_pointsize(i, 2.0);
+            GraphPane->set_linewidth(i, 1.0);
+        }
+    }
+
+    float value = sin(x/6.0f) * 10.0f;
+
+    GraphPane->add(0, PLOT_POINT((float)x, value * 1.0f, AQUA));
+    GraphPane->add(1, PLOT_POINT((float)x, value * 1.1f, BLUE));
+    GraphPane->add(2, PLOT_POINT((float)x, value * 1.2f, FUCHSIA));
+    GraphPane->add(3, PLOT_POINT((float)x, value * 1.3f, GREEN));
+    GraphPane->add(4, PLOT_POINT((float)x, value * 1.4f, LIME));
+    GraphPane->add(5, PLOT_POINT((float)x, value * 1.5f, MAROON));
+    GraphPane->add(6, PLOT_POINT((float)x, value * 1.6f, NAVY));
+    GraphPane->add(7, PLOT_POINT((float)x, value * 1.7f, OLIVE));
+    GraphPane->add(8, PLOT_POINT((float)x, value * 1.8f, PURPLE));
+    GraphPane->add(9, PLOT_POINT((float)x, value * 1.9f, RED));
+    GraphPane->add(10, PLOT_POINT((float)x, value * 2.0f, TEAL));
+    GraphPane->add(11, PLOT_POINT((float)x, value * 2.1f, WHITE));
+    GraphPane->add(12, PLOT_POINT((float)x, value * 2.2f, YELLOW));
+
+    ++x;
+#endif
+
+#ifdef SIGNAL_CONTROL_TEST
+    static unsigned int x = 0;
+    
+    GraphPane->set_pointsize(1, 3.0);
+    GraphPane->set_linewidth(1, 1.0);
+    GraphPane->set_pointsize(2, 1.0);
+    GraphPane->set_linewidth(2, 1.0);
+
+    float value1 = sin(x/6.0f) * 10.0f;
+    float value2 = cos(x/6.0f + M_PI/2) * 7.0f;
+
+    GraphPane->add(0, PLOT_POINT((float)x, value1, YELLOW));
+    GraphPane->add(1, PLOT_POINT((float)x, value2, RED));
+
+    ++x;
+#endif
+
+    GraphPane->redraw();
+}
+
+void GCMUITask::CheckDataInspectorInput(void)
 {
     CurrentIndexClicked.Process           = UI.BrowserProcesses->value();
     CurrentIndexClicked.Component         = UI.BrowserComponents->value();
@@ -300,6 +432,12 @@ void GCMUITask::CheckUserInput(void)
             return;
         }
     }
+
+    // Visualize Button Click
+    if (UI.ButtonVisualizeClicked) {
+        OnButtonVisualizeClicked(CurrentIndexClicked.Command);
+        UI.ButtonVisualizeClicked = false;
+    }
 }
 
 void GCMUITask::UpdateUI(void)
@@ -312,6 +450,11 @@ void GCMUITask::UpdateUI(void)
     UI.BrowserRequiredInterfaces->clear();
     UI.BrowserFunctions->clear();
     UI.BrowserEventHandlers->clear();
+
+    UI.OutputCommandDescription->value("");
+    UI.OutputEventGeneratorDescription->value("");
+    UI.OutputFunctionDescription->value("");
+    UI.OutputEventHandlerDescription->value("");
 
     // Periodically fetch process list from GCM
     StringVector names;
@@ -514,4 +657,367 @@ void GCMUITask::ShowEventHandlerDescription(const std::string & processName,
     GlobalComponentManager.GetDescriptionOfEventHandler(processName, componentName, requiredInterfaceName, eventHandlerName, description);
 
     AddLineToDescription(UI.OutputEventHandlerDescription, description.c_str());
+}
+
+void GCMUITask::CheckDataVisualizerInput(void)
+{
+    if (UI.BrowserVisualizeCommandNameClicked) {
+        OnBrowserVisualizeCommandNameClicked();
+        UI.BrowserVisualizeCommandNameClicked = false;
+        return;
+    }
+
+    if (UI.BrowserVisualizeSignalsClicked) {
+        OnBrowserVisualizeSignalsClicked();
+        UI.BrowserVisualizeSignalsClicked = false;
+        return;
+    }
+
+    if (UI.ButtonRemoveClicked) {
+        OnButtonRemoveClicked();
+        UI.ButtonRemoveClicked = false;
+        return;
+    }
+
+    if (UI.ButtonRemoveAllClicked) {
+        OnButtonRemoveAllClicked();
+        UI.ButtonRemoveAllClicked = false;
+        return;
+    }
+
+    if (UI.ButtonUpdateClicked) {
+        OnButtonUpdateClicked();
+        UI.ButtonUpdateClicked = false;
+        return;
+    }
+
+    // Scale Buttons
+    if (UI.ButtonYScaleUpClicked) {
+        OnButtonYScaleUpClicked();
+        UI.ButtonYScaleUpClicked = false;
+        return;
+    }
+
+    if (UI.ButtonYScaleDownClicked) {
+        OnButtonYScaleDownClicked();
+        UI.ButtonYScaleDownClicked = false;
+        return;
+    }
+
+    if (UI.ButtonXScaleUpClicked) {
+        OnButtonXScaleUpClicked();
+        UI.ButtonXScaleUpClicked = false;
+        return;
+    }
+
+    if (UI.ButtonXScaleDownClicked) {
+        OnButtonXScaleDownClicked();
+        UI.ButtonXScaleDownClicked = false;
+        return;
+    }
+
+    // Auto scale button
+    if (UI.ButtonAutoScaleClicked) {
+        OnButtonAutoScaleClicked();
+        UI.ButtonAutoScaleClicked = false;
+    }
+
+    // Hide button
+    if (UI.ButtonHideClicked) {
+        OnButtonHideClicked();
+        UI.ButtonHideClicked = false;
+    }
+}
+
+void GCMUITask::ResetDataVisualizerUI(const bool exceptCommandNameBrowser)
+{;
+    ResetBrowserVisualizeSignals();
+    if (!exceptCommandNameBrowser) {
+        ResetBrowserVisualizeCommandName();
+    }
+
+    for (int i = 0; i < MAX_CHANNEL_COUNT; ++i) {
+        ProgressBars[i]->value(0.0);
+    }
+
+    UI.OutputProcessName->value("");
+    UI.OutputComponentName->value("");
+    UI.OutputInterfaceName->value("");
+    UI.OutputArgumentName->value("");
+
+    UI.CheckButtonHide->clear();
+    UI.CheckButtonAutoScale->clear();
+
+    UI.OutputMaxValue->value("0.0");
+    UI.OutputMinValue->value("0.0");
+}
+
+void GCMUITask::AddCommandSelected(const CommandSelected& commandSelected)
+{
+    CommandSelected * newCommandSelected = new CommandSelected(commandSelected);
+
+    AddLineToBrowser(UI.BrowserVisualizeCommandName, commandSelected.CommandName.c_str());
+
+    const int lastIndex = UI.BrowserVisualizeCommandName->size();
+    UI.BrowserVisualizeCommandName->data(lastIndex, (void*)newCommandSelected);
+
+    CommandsBeingPlotted.push_back(newCommandSelected);
+}
+
+void GCMUITask::ResetBrowserVisualizeCommandName(void)
+{
+    if (UI.BrowserVisualizeCommandName->size() == 0) {
+        return;
+    }
+
+    void * data;
+    CommandSelected * command;
+    for (int i = 1; i <= UI.BrowserVisualizeCommandName->size(); ++i) {
+        data = UI.BrowserVisualizeCommandName->data(i);
+        command = reinterpret_cast<CommandSelected*>(data);
+        delete command;
+    }
+
+    UI.BrowserVisualizeCommandName->clear();
+}
+
+void GCMUITask::ResetBrowserVisualizeSignals(void)
+{
+    if (UI.BrowserVisualizeSignals->size() == 0) {
+        return;
+    }
+
+    UI.BrowserVisualizeSignals->clear();
+
+    for (int i = 0; i < MAX_CHANNEL_COUNT; ++i) {
+        ProgressBars[i]->value(0.0);
+    }
+}
+
+void GCMUITask::OnBrowserVisualizeCommandNameClicked(void)
+{
+    if (UI.BrowserVisualizeCommandName->size() == 0) {
+        return;
+    }
+
+    const int currentIndex = UI.BrowserVisualizeCommandName->value();
+    if (currentIndex == 0) {
+        return;
+    }
+
+    ResetBrowserVisualizeSignals();
+
+    CommandSelected * data = reinterpret_cast<CommandSelected *>(UI.BrowserVisualizeCommandName->data(currentIndex));
+    if (!data) {
+        return;
+    }
+
+    int count = 0;
+    std::vector<SignalState>::const_iterator it = data->Signals.begin();
+    const std::vector<SignalState>::const_iterator itEnd = data->Signals.end();
+    for (; it != itEnd; ++it) {
+        AddLineToBrowser(UI.BrowserVisualizeSignals, it->SignalName.c_str());
+        UI.BrowserVisualizeSignals->data(count + 1, (void*) &(*it));
+        ProgressBars[count++]->value(1.0);
+    }
+
+    UI.OutputProcessName->value(data->ProcessName.c_str());
+    UI.OutputComponentName->value(data->ComponentName.c_str());
+    UI.OutputInterfaceName->value(data->InterfaceName.c_str());
+    UI.OutputArgumentName->value(data->ArgumentName.c_str());
+    UI.SliderSamplingRate->value(data->SamplingRate);
+}
+
+void GCMUITask::OnBrowserVisualizeSignalsClicked(void)
+{
+    if (UI.BrowserVisualizeSignals->size() == 0) {
+        return;
+    }
+
+    const int currentIndex = UI.BrowserVisualizeSignals->value();
+    SignalState * data = reinterpret_cast<SignalState *>(UI.BrowserVisualizeSignals->data(currentIndex));
+    if (!data) {
+        return;
+    }
+
+    UI.CheckButtonHide->value((data->Hide ? 1 : 0));
+    UI.CheckButtonAutoScale->value((data->AutoScale? 1 : 0));
+
+    char buf[10] = "";
+    UI.OutputMinValue->value(itoa( ((int) data->Min) + 1, buf, 10));
+    UI.OutputMaxValue->value(itoa( ((int) data->Max) + 1, buf, 10));
+}
+
+void GCMUITask::OnButtonRefreshClicked(void)
+{
+    UpdateUI();
+}
+
+void GCMUITask::OnButtonVisualizeClicked(const int idxClicked)
+{
+    if (idxClicked == 0) {
+        return;
+    }
+
+    const std::string processName = StripOffFormatCharacters(UI.BrowserProcesses->text(UI.BrowserProcesses->value()));
+    const std::string componentName = StripOffFormatCharacters(UI.BrowserComponents->text(UI.BrowserComponents->value()));
+    const std::string interfaceName = StripOffFormatCharacters(UI.BrowserProvidedInterfaces->text(UI.BrowserProvidedInterfaces->value()));
+    const std::string commandName = StripOffFormatCharacters(UI.BrowserCommands->text(idxClicked));
+
+    // Get argument information
+    std::string argumentName = "TODO"; // Fetch from LCM
+    std::vector<std::string> argumentParameterNames;
+    GlobalComponentManager.GetArgumentInformation(processName, componentName, 
+        interfaceName, commandName, argumentName, argumentParameterNames);
+    const int argumentParameterCount = argumentParameterNames.size();
+
+    CommandSelected command;
+    command.ProcessName = processName;
+    command.ComponentName = componentName;
+    command.InterfaceName = interfaceName;
+    command.CommandName = commandName;
+    command.ArgumentName = argumentName;
+    command.SamplingRate = 10;
+
+    SignalState signalState;
+    signalState.AutoScale = true;
+    signalState.Hide = false;
+    signalState.Min = -1.0;
+    signalState.Max = 1.0;
+
+    for (int i = 0; i < min(argumentParameterCount, MAX_ARGUMENT_PARAMETER_COUNT); ++i) {
+        signalState.SignalName = argumentParameterNames[i];
+        command.Signals.push_back(signalState);
+    }
+
+    AddCommandSelected(command);
+}
+
+void GCMUITask::OnButtonRemoveAllClicked(void)
+{
+    if (UI.BrowserVisualizeCommandName->size() == 0) {
+        return;
+    }
+
+    ResetDataVisualizerUI();
+}
+
+void GCMUITask::OnButtonRemoveClicked(void)
+{
+    if (UI.BrowserVisualizeCommandName->size() == 0) {
+        return;
+    }
+
+    const int idx = UI.BrowserVisualizeCommandName->value();
+    if (idx == 0) return;
+
+    CommandSelected * data = reinterpret_cast<CommandSelected*>(UI.BrowserVisualizeCommandName->data(idx));
+    delete data;
+    UI.BrowserVisualizeCommandName->remove(idx);
+
+    ResetDataVisualizerUI(true);
+
+    // TODO:
+    // If the command being drawn is to be removed, visualization UI 
+    // should be reset and wait for a user to select a new command to
+    // visualize.
+}
+
+void GCMUITask::OnButtonUpdateClicked(void)
+{
+    // TODO: implement this
+
+    /*
+    char buf[50];
+    CommandSelected command;
+    SignalState signalState;
+
+    for (int i = 1; i <= 4; ++i) {
+        sprintf(buf, "Command %d", i); command.CommandName = buf;
+        sprintf(buf, "Process %d", i); command.ProcessName = buf;
+        sprintf(buf, "Component %d", i); command.ComponentName = buf;
+        sprintf(buf, "Interface %d", i); command.InterfaceName = buf;
+        sprintf(buf, "Parameter %d", i); command.ArgumentName = buf;
+        command.SamplingRate = i * 10;
+
+        for (int j = 1; j <= i * 3; ++j) {
+            signalState.AutoScale = (i % 2 == 0);
+            signalState.Hide = (i % 2 == 1);
+            signalState.Min = i + j;
+            signalState.Max = i * 10 + j;
+            sprintf(buf, "Signal %d-%d", j, i); signalState.SignalName = buf;
+            command.Signals.push_back(signalState);
+        }
+
+        AddCommandSelected(command);
+        
+        command.Signals.clear();
+    }
+
+    UI.GraphPane->clear();
+    */
+}
+
+void GCMUITask::OnButtonYScaleUpClicked(void)
+{
+    GraphPane->AdjustYScale(2.0);
+
+    GraphPane->SetAutoScale(false);
+    UI.CheckButtonAutoScale->value(0);
+}
+
+void GCMUITask::OnButtonYScaleDownClicked(void)
+{
+    GraphPane->AdjustYScale(0.5);
+
+    GraphPane->SetAutoScale(false);
+    UI.CheckButtonAutoScale->value(0);
+}
+
+void GCMUITask::OnButtonXScaleUpClicked(void)
+{
+    if (XAxisScaleFactor <= 60) {
+        return;
+    }
+
+    XAxisScaleFactor -= 30;
+    GraphPane->set_scrolling(XAxisScaleFactor);
+    GraphPane->clear(true);
+
+    GraphPane->SetAutoScale(false);
+    UI.CheckButtonAutoScale->value(0);
+}
+
+void GCMUITask::OnButtonXScaleDownClicked(void)
+{
+    if (XAxisScaleFactor >= 240) {
+        return;
+    }
+
+    XAxisScaleFactor += 30;
+    GraphPane->set_scrolling(XAxisScaleFactor);
+    GraphPane->clear(true);
+
+    GraphPane->SetAutoScale(false);
+    UI.CheckButtonAutoScale->value(0);
+}
+
+void GCMUITask::OnButtonAutoScaleClicked(void)
+{
+    /* TODO: enable this later
+    if (UI.BrowserVisualizeSignals->value() == 0) {
+        return;
+    }
+    */
+
+    bool autoScaleOn = (UI.CheckButtonAutoScale->value() == 1 ? true : false);
+    GraphPane->SetAutoScale(autoScaleOn);
+}
+
+void GCMUITask::OnButtonHideClicked(void)
+{
+    // TODO: this are test codes
+    static bool a = true;
+    GraphPane->ShowSignal(4, a);
+    a = !a;
 }

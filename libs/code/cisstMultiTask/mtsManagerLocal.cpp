@@ -530,7 +530,7 @@ void mtsManagerLocal::GetDescriptionOfCommand(std::string & description,
     char commandType = *commandName.c_str();
     std::string actualCommandName = commandName.substr(3, commandName.size() - 2);
 
-    description = "Parameter type: ";
+    description = "Argument type: ";
     switch (commandType) {
         case 'V':
             {
@@ -569,9 +569,9 @@ void mtsManagerLocal::GetDescriptionOfCommand(std::string & description,
                     description = "No qualified read command found";
                     return;
                 }
-                description = "Parameter1 type: ";
+                description = "Argument1 type: ";
                 description += command->GetArgument1ClassServices()->GetName();
-                description += "\nParameter2 type: ";
+                description += "\nArgument2 type: ";
                 description += command->GetArgument2ClassServices()->GetName();
             }
             break;
@@ -597,7 +597,7 @@ void mtsManagerLocal::GetDescriptionOfEventGenerator(std::string & description,
     char eventGeneratorType = *eventGeneratorName.c_str();
     std::string actualEventGeneratorName = eventGeneratorName.substr(3, eventGeneratorName.size() - 2);
 
-    description = "Parameter type: ";
+    description = "Argument type: ";
     switch (eventGeneratorType) {
         case 'V':
             {
@@ -641,7 +641,7 @@ void mtsManagerLocal::GetDescriptionOfFunction(std::string & description,
     char functionType = *functionName.c_str();
     std::string actualFunctionName = functionName.substr(3, functionName.size() - 2);
 
-    description = "Resource parameter type: ";
+    description = "Resource argument type: ";
     switch (functionType) {
         case 'V':
             {
@@ -689,14 +689,14 @@ void mtsManagerLocal::GetDescriptionOfFunction(std::string & description,
                     return;
                 }
                 if (*function->CommandPointer) {
-                    description = "Resource parameter1 type: ";
+                    description = "Resource argument1 type: ";
                     description += (*function->CommandPointer)->GetArgument1ClassServices()->GetName();
-                    description += "\nResource parameter2 type: ";
+                    description += "\nResource argument2 type: ";
                     description += (*function->CommandPointer)->GetArgument2ClassServices()->GetName();
                 } else {
-                    description = "Resource parameter1 type: ";
+                    description = "Resource argument1 type: ";
                     description += "(unbounded qualified read function)";
-                    description += "\nResource parameter2 type: ";
+                    description += "\nResource argument2 type: ";
                     description += "(unbounded qualified read function)";
                 }
                 
@@ -724,7 +724,7 @@ void mtsManagerLocal::GetDescriptionOfEventHandler(std::string & description,
     char eventHandlerType = *eventHandlerName.c_str();
     std::string actualEventHandlerName = eventHandlerName.substr(3, eventHandlerName.size() - 2);
 
-    description = "Parameter type: ";
+    description = "Argument type: ";
     switch (eventHandlerType) {
         case 'V':
             {
@@ -751,6 +751,57 @@ void mtsManagerLocal::GetDescriptionOfEventHandler(std::string & description,
             return;
     }
 }
+
+void mtsManagerLocal::GetArgumentInformation(std::string & argumentName,
+                                             std::vector<std::string> & argumentParameterNames,
+                                             const std::string & componentName, 
+                                             const std::string & providedInterfaceName, 
+                                             const std::string & commandName,
+                                             const std::string & listenerID)
+{
+    mtsComponent * component = GetComponent(componentName);
+    if (!component) return;
+
+    //
+    // TODO
+    //
+    /*
+    mtsRequiredInterface * requiredInterface = component->GetRequiredInterface(requiredInterfaceName);
+    if (!requiredInterface) return;
+
+    // Get event handler type
+    char eventHandlerType = *eventHandlerName.c_str();
+    std::string actualEventHandlerName = eventHandlerName.substr(3, eventHandlerName.size() - 2);
+
+    description = "Argument type: ";
+    switch (eventHandlerType) {
+        case 'V':
+            {
+                mtsCommandVoidBase * command = requiredInterface->EventHandlersVoid.GetItem(actualEventHandlerName);
+                if (!command) {
+                    description = "No void event handler found";
+                    return;
+                }
+                description += "(none)";
+            }
+            break;
+        case 'W':
+            {
+                mtsCommandWriteBase * command = requiredInterface->EventHandlersWrite.GetItem(actualEventHandlerName);
+                if (!command) {
+                    description = "No write event handler found";
+                    return;
+                }
+                description += command->GetArgumentClassServices()->GetName();
+            }
+            break;
+        default:
+            description = "Failed to get event handler description";
+            return;
+    }
+    */
+}
+
 
 #endif
 

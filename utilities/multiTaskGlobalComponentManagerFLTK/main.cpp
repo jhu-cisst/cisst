@@ -24,15 +24,12 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask.h>
 
 #include "GCMUITask.h"
-#include "OscilloscopeTask.h"
-
-using namespace std;
 
 int main(void)
 {
     // log configuration
     cmnLogger::SetLoD(CMN_LOG_LOD_VERY_VERBOSE);
-    cmnLogger::GetMultiplexer()->AddChannel(cout, CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::GetMultiplexer()->AddChannel(std::cout, CMN_LOG_LOD_VERY_VERBOSE);
     // add a log per thread
     osaThreadedLogFile threadedLog("GlobalComponentManagerFLTK");
     cmnLogger::GetMultiplexer()->AddChannel(threadedLog, CMN_LOG_LOD_VERY_VERBOSE);
@@ -50,30 +47,23 @@ int main(void)
     CMN_LOG_INIT_VERBOSE << "Global component manager started successfully." << std::endl;
 
     // Get the local component manager as standalone mode
-    mtsManagerLocal * localManager;
+    mtsTaskManager * taskManager;
     try {
-        localManager = mtsManagerLocal::GetInstance();
+        taskManager = mtsTaskManager::GetInstance();
     } catch (...) {
         CMN_LOG_INIT_ERROR << "Failed to initialize local component manager" << std::endl;
         return 1;
     }
 
-    // Create oscilloscope task
-    const double period = 50 * cmn_ms;
-    //oscilloscopeTask * oscilloscopeTaskObject = new oscilloscopeTask("Oscilloscope", period);
-    //localManager->AddComponent(oscilloscopeTaskObject);
-
     // Create GCM UI task
+    const double period = 50 * cmn_ms;
     GCMUITask * GCMUITaskObject = new GCMUITask("GCMUI", period, globalComponentManager);
     GCMUITaskObject->Configure();
-    localManager->AddComponent(GCMUITaskObject);
+    taskManager->AddComponent(GCMUITaskObject);
 
-    //oscilloscopeTaskObject->GraphPane = GCMUITaskObject->UI.GraphPane;
-    //oscilloscopeTaskObject->Configure();
-    
     // Create task and start local component manager
-    localManager->CreateAll();
-    localManager->StartAll();
+    taskManager->CreateAll();
+    taskManager->StartAll();
 
 
     // Wait until the close button of the UI is pressed
@@ -82,12 +72,12 @@ int main(void)
     }
 
     // Cleanup local component manager
-    localManager->KillAll();
-    localManager->Cleanup();
+    taskManager->KillAll();
+    taskManager->Cleanup();
 
     // Cleanup global component manager
     if (!globalComponentManager.StopServer()) {
-        CMN_LOG_RUN_ERROR << "Failed to stop server" << std::endl;
+        CMN_LOG_RUN_ERROR << "Failed to stop global component manager." << std::endl;
     }
 
     return 0;

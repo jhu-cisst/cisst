@@ -411,6 +411,14 @@ public:
                                       const std::string & requiredInterfaceName, 
                                       const std::string & eventHandlerName,
                                       std::string & description);
+
+    /*! Get parameter information (name, argument count, argument type) */
+    void GetArgumentInformation(const std::string & processName, 
+                                const std::string & componentName, 
+                                const std::string & providedInterfaceName, 
+                                const std::string & commandName,
+                                std::string & argumentName,
+                                std::vector<std::string> & argumentParameterNames);
 #endif
 
     /*! Get a process object (local component manager object) */

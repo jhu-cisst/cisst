@@ -21,10 +21,32 @@
  * New versions and bug-fixes under http://www.andre-krause.net
  *	
  */
-#ifndef __MULTIPLOT__
-#define __MULTIPLOT__
 
-//#define DISABLE_AUTOSCALE
+/*
+ * multiplot_cisst.h
+ *
+ * This is a modified version of the original MULTIPLOT.h to support the real-time
+ * data visualizer of the Global Component Manager User Interface (FLTK) which is
+ * a part of the cisst library. 
+ * Please visit the cisst library (http://www.cisst.org/cisst) for more details.
+ *
+ * Author: Min Yang Jung (myj@jhu.edu)
+ * Last updated: March 16, 2010
+ * 
+ * This modified version includes additional features that the original version
+ * didn't support:
+ * 
+ * - Oscilloscope-like UI
+ * - Pre-defined FLTK color samples
+ * - Axis scaling (both x-axis and y-axis)
+ * - Autoscaling
+ * - Show or hide a signal selectively
+ * 
+ * If there is any question, please contact to the author.
+ */
+
+#ifndef __MULTIPLOT_CISST__
+#define __MULTIPLOT_CISST__
 
 #include <sstream>
 #include <float.h>
@@ -38,7 +60,7 @@
 
 
 #ifndef min
-	#define min(a,b)( (a) < (b) ) ? (a) : (b) )
+	#define min(a,b) ( (a) < (b) ? (a) : (b) )
 #endif
 
 enum MULTIPLOT_GRIDSTYLE
@@ -127,14 +149,47 @@ class MULTIPLOT_BASE : public Fl_Gl_Window
 		void set_grid_color(float r, float g, float b);
 
 		/**
-		 *	this function call simply clears all traces
+		 *	clears all traces if keepPreviousData is false.
+         *  If keepPreviousData is true, it preserves current trace data up to maxpoints
 		 */
-		void clear();
+		void clear(const bool keepPreviousData = false);
 		
 		/**
 		*	this function call clears trace number t
 		*/
 		void clear(unsigned int t);
+
+        /**
+        *   Adjust y range
+        */
+        inline void AdjustYScale(const float ratio) {
+            maximum.y *= ratio;
+            minimum.y *= ratio;
+        }
+
+        /**
+        *   Autoscale on/off
+        */
+        inline void SetAutoScale(const bool isAutoScaleOn) {
+            AutoScaleOn = isAutoScaleOn;
+        }
+
+        /**
+        *   Get min y and max y values
+        */
+        inline const float GetYMax(void) const { return maximum.y; }
+        inline const float GetYMin(void) const { return minimum.y; }
+
+        /**
+        *   Show or hide a signal
+        */
+        inline void ShowSignal(const unsigned int signalIndex, const bool show = true) {
+            if (signalIndex >= tsettings.size()) {
+                return;
+            }
+            tsettings[signalIndex].show = show;
+        }
+
 	protected:
 		unsigned int width; // window - width
 		unsigned int height; // window - height
@@ -148,6 +203,7 @@ class MULTIPLOT_BASE : public Fl_Gl_Window
 		unsigned int max_points;
 		bool scroll;
         bool fixedGrid;
+        bool AutoScaleOn;
 
 		// this struct stores information
 		// about the traces like line_width, the current pos 
@@ -158,7 +214,8 @@ class MULTIPLOT_BASE : public Fl_Gl_Window
 				unsigned int pos;
 				float point_size;
 				float line_width;
-				TRACE(){ pos=0; point_size=0.0; line_width=1; }
+                bool show;
+				TRACE(){ pos=0; point_size=0.0; line_width=1; show=true; }
 		};
 		std::vector< TRACE > tsettings;
 
@@ -182,7 +239,6 @@ class MULTIPLOT_BASE : public Fl_Gl_Window
 
 
 
-//#ifdef __USE_FLTK_FOR_MULTIPLOT__
 class MULTIPLOT : public MULTIPLOT_BASE
 {
 public:
@@ -205,19 +261,21 @@ inline MULTIPLOT_BASE::MULTIPLOT_BASE(const int x, const int y, const int w, con
 	width=w;
 	height=h;
 	title=std::string(ttitle);
-	//max.x=max.y=-FLT_MAX;
-#ifndef DISABLE_AUTOSCALE
-	maximum.x=maximum.y=-FLT_MAX;
-	minimum.x=minimum.y=FLT_MAX;
-#else
-    maximum.x=maximum.y=2;
-	minimum.x=minimum.y=-2;
-#endif
 	max_points=max(w,h);
 	traces.push_back( std::vector<PLOT_POINT>() ); // create one trace
 	tsettings.push_back(TRACE());
 
 	scroll=false;
+    AutoScaleOn=false;
+
+	//max.x=max.y=-FLT_MAX;
+    if (AutoScaleOn) {
+        maximum.x=maximum.y=-FLT_MAX;
+        minimum.x=minimum.y=FLT_MAX;
+    } else {
+        maximum.x=maximum.y=2;
+        minimum.x=minimum.y=-2;
+    }
 
 	gridx=MP_NO_GRID;
 	gridy=MP_NO_GRID;
@@ -290,19 +348,45 @@ inline void MULTIPLOT_BASE::set_linewidth(unsigned int trace, float width)
 	tsettings[trace].line_width=width;
 }
 
-inline void MULTIPLOT_BASE::clear()
+inline void MULTIPLOT_BASE::clear(const bool keepPreviousData)
 {
-	for(unsigned int a=0;a<traces.size();a++)
-	{
-		traces[a].clear();
-		tsettings[a].pos=0;
-	}	
+    //if (!keepPreviousData) {
+        for(unsigned int a=0;a<traces.size();a++)
+        {
+            traces[a].clear();
+            tsettings[a].pos=0;
+        }
+        /*
+    } else {
+        std::vector<PLOT_POINT> temp;
+        for(unsigned int i = 0; i < traces.size(); ++i) {
+            // Shift all data towards vector's end()
+            if (max_points > traces[i].size()) {
+                temp.clear();
+                temp.insert(temp.begin(), traces[i].begin(), traces[i].begin() + traces[i].size());
+                traces[i].clear();
+                //traces[i].insert(traces[i].begin() + (max_points - traces[i].size()), temp.begin(), temp.end());
+                traces[i].insert(traces[i].begin(), temp.begin(), temp.end());
+                tsettings[i].pos = max_points - traces[i].size();
+            } else if (max_points == traces[i].size()) {
+                // NOP
+            } else { // max_points < traces[i].size()
+                temp.clear();
+                temp.insert(temp.begin(), traces[i].end() - traces[i].size(), traces[i].end());
+                traces[i].clear();
+                traces[i].insert(traces[i].begin(), temp.begin(), temp.end());
+                tsettings[i].pos = traces[i].size();
+            }
+        }
+    }
+    */
 }
 
 inline void MULTIPLOT_BASE::clear(unsigned int trace)
 {
-		traces[trace].clear();
-		tsettings[trace].pos=0;
+    // TODO: apply keepPreviousData flag
+        traces[trace].clear();
+        tsettings[trace].pos=0;
 }
 
 
@@ -461,14 +545,16 @@ inline PLOT_POINT MULTIPLOT_BASE::draw_grid()
 		glBegin(GL_LINES);
 		unsigned int bailout=0; // bailout is a safety to avoid endless recursions caused maybe through numerical errors..
         if (!fixedGrid) {
-		while(y<maximum.y && bailout<100)
-        {
-            y+=ystep;
-            bailout++;
-            glVertex2f(0.0f					,(GLfloat)(y-offset.y)*scale.y);
-            glVertex2f((float)width			,(GLfloat)(y-offset.y)*scale.y);
-        }
+            while(y<maximum.y && bailout<100)
+            {
+                y+=ystep;
+                bailout++;
+                glVertex2f(0.0f					,(GLfloat)(y-offset.y)*scale.y);
+                glVertex2f((float)width			,(GLfloat)(y-offset.y)*scale.y);
+
+            }
         } else {
+            int cnt=0;
             unsigned int ypos = 0;
             while(ypos <= height && ++bailout<100)
             {
@@ -476,6 +562,12 @@ inline PLOT_POINT MULTIPLOT_BASE::draw_grid()
                 ypos+=height/10;
                 glVertex2f(0.0f, (GLfloat)ypos);
                 glVertex2f((float)width, (GLfloat)ypos);
+                if (cnt++ == 4) {
+                    glVertex2f(0.0f, (GLfloat)ypos + 1.0f);
+                    glVertex2f((float)width, (GLfloat)ypos + 1.0f);
+                    glVertex2f(0.0f, (GLfloat)ypos - 1.0f);
+                    glVertex2f((float)width, (GLfloat)ypos - 1.0f);
+                }
             }
         }
 		glEnd();
@@ -507,16 +599,13 @@ inline void MULTIPLOT_BASE::draw()
 
 
 
-#ifndef DISABLE_AUTOSCALE
-	maximum.x=maximum.y=-FLT_MAX;
-	minimum.x=minimum.y=FLT_MAX;
-#else
-    minimum.y=-2;
-    maximum.y=2;
-
-    maximum.x=-FLT_MAX;
-	minimum.x=FLT_MAX;
-#endif
+    if (AutoScaleOn) {
+        maximum.x=maximum.y=-FLT_MAX;
+        minimum.x=minimum.y=FLT_MAX;
+    } else {
+        maximum.x=-FLT_MAX;
+        minimum.x=FLT_MAX;
+    }
 
 
 	if(scroll)
@@ -524,6 +613,9 @@ inline void MULTIPLOT_BASE::draw()
 		PLOT_POINT p;
 		for(unsigned int t=0;t<traces.size();t++)
 		{
+            if (!tsettings[t].show) {
+                continue;
+            }
 			glLineWidth(tsettings[t].line_width);
 			glBegin(GL_LINE_STRIP);
 			unsigned int ps=tsettings[t].pos;
@@ -539,15 +631,15 @@ inline void MULTIPLOT_BASE::draw()
 					glColor3f(p.r,p.g,p.b);
 					glVertex2f((p.x-offset.x)*scale.x,(p.y-offset.y)*scale.y);
 				}
-#ifndef DISABLE_AUTOSCALE
-				if(p.x>maximum.x)maximum.x=p.x;
-				if(p.x<minimum.x)minimum.x=p.x;
-				if(p.y>maximum.y)maximum.y=p.y;
-				if(p.y<minimum.y)minimum.y=p.y;
-#else
-				if(p.x>maximum.x)maximum.x=p.x;
-				if(p.x<minimum.x)minimum.x=p.x;
-#endif
+                if (AutoScaleOn) {
+                    if(p.x>maximum.x)maximum.x=p.x;
+                    if(p.x<minimum.x)minimum.x=p.x;
+                    if(p.y>maximum.y)maximum.y=p.y;
+                    if(p.y<minimum.y)minimum.y=p.y;
+                } else {
+                    if(p.x>maximum.x)maximum.x=p.x;
+                    if(p.x<minimum.x)minimum.x=p.x;
+                }
 	
 				ps++;
 			}
@@ -596,15 +688,15 @@ inline void MULTIPLOT_BASE::draw()
 					glColor3f(p.r,p.g,p.b);
 					glVertex2f((p.x-offset.x)*scale.x,(p.y-offset.y)*scale.y);
 				}
-#ifndef DISABLE_AUTOSCALE
-				if(p.x>maximum.x)maximum.x=p.x;
-				if(p.x<minimum.x)minimum.x=p.x;
-				if(p.y>maximum.y)maximum.y=p.y;
-				if(p.y<minimum.y)minimum.y=p.y;
-#else
-				if(p.x>maximum.x)maximum.x=p.x;
-				if(p.x<minimum.x)minimum.x=p.x;
-#endif
+                if (AutoScaleOn) {
+                    if(p.x>maximum.x)maximum.x=p.x;
+                    if(p.x<minimum.x)minimum.x=p.x;
+                    if(p.y>maximum.y)maximum.y=p.y;
+                    if(p.y<minimum.y)minimum.y=p.y;
+                } else {
+                    if(p.x>maximum.x)maximum.x=p.x;
+                    if(p.x<minimum.x)minimum.x=p.x;
+                }
 			}
 			glEnd();
 			

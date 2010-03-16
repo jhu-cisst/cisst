@@ -165,6 +165,14 @@ public:
                                               const std::string & eventHandlerName,
                                               const std::string & listenerID = "") = 0;
 
+    /*! Get parameter information (name, argument count, argument type) */
+    virtual void GetArgumentInformation(std::string & argumentName,
+                                        std::vector<std::string> & argumentParameterNames,
+                                        const std::string & componentName, 
+                                        const std::string & providedInterfaceName, 
+                                        const std::string & commandName,
+                                        const std::string & listenerID = "") = 0;
+
     /*! Extract all the information on a provided interface (command objects
         and event generators with arguments serialized) */
     virtual bool GetProvidedInterfaceDescription(

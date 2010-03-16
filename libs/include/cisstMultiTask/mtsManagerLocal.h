@@ -350,6 +350,14 @@ public:
                                       const std::string & eventHandlerName,
                                       const std::string & CMN_UNUSED(listenerID) = "");
 
+    /*! Get parameter information (name, argument count, argument type) */
+    void GetArgumentInformation(std::string & argumentName,
+                                std::vector<std::string> & argumentParameterNames,
+                                const std::string & componentName, 
+                                const std::string & providedInterfaceName, 
+                                const std::string & commandName,
+                                const std::string & CMN_UNUSED(listenerID) = "");
+
     /*! Return IP address of this process */
     inline std::string GetIPAddress() const { return ProcessIP; }
 

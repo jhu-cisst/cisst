@@ -245,6 +245,13 @@ public:
                                       const std::string & eventHandlerName,
                                       const std::string & listenerID = "");
 
+    void GetArgumentInformation(std::string & argumentName,
+                                std::vector<std::string> & argumentParameterNames,
+                                const std::string & componentName, 
+                                const std::string & providedInterfaceName, 
+                                const std::string & commandName,
+                                const std::string & listenerID = "");
+
     int GetCurrentInterfaceCount(const std::string & componentName, const std::string & listenerID = "");
 
     //-------------------------------------------------------------------------

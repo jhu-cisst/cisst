@@ -8,105 +8,238 @@ class GlobalComponentManagerUI {open
   } {
     Fl_Window DisplayWindow {
       label {Global Component Manager} open
-      xywh {515 167 686 579} type Double box PLASTIC_UP_BOX align 80 visible
+      xywh {322 108 682 617} type Double box GTK_UP_BOX align 80 visible
     } {
-      Fl_Tabs {} {open selected
-        xywh {10 55 665 475} box PLASTIC_UP_BOX color 46 labelsize 12
+      Fl_Tabs {} {open
+        xywh {10 55 665 510} box GTK_UP_BOX color 46 labelsize 12
       } {
         Fl_Group {} {
           label {Component Inspector} open
-          xywh {20 80 655 450} labelfont 1 labelsize 13
+          xywh {20 80 655 485} labelfont 1 labelsize 13 hide
         } {
           Fl_Group {} {
             label {Provided Interface} open
-            xywh {20 220 645 145} box PLASTIC_UP_BOX labelfont 1 labelsize 12 align 21
+            xywh {20 220 645 180} box GTK_UP_BOX labelfont 1 labelsize 12 align 21
           } {
             Fl_Browser BrowserCommands {
               label Commands
-              xywh {30 255 140 100} type Hold box DOWN_BOX selection_color 4 labelfont 1 labelsize 12 align 5 textsize 12
+              xywh {30 255 135 100} type Hold box GTK_DOWN_BOX selection_color 4 labelfont 1 labelsize 12 align 5 textsize 12
             }
             Fl_Browser BrowserEventGenerators {
               label {Event Generators}
-              xywh {175 255 135 100} type Hold box DOWN_BOX selection_color 4 labelfont 1 labelsize 12 align 5 textsize 12
+              xywh {170 255 130 100} type Hold box GTK_DOWN_BOX selection_color 4 labelfont 1 labelsize 12 align 5 textsize 12
             }
             Fl_Output OutputCommandDescription {
               label {Command Description}
-              xywh {315 240 340 49} type Multiline box BORDER_BOX labelfont 1 labelsize 12 align 5 textfont 4 textsize 12
+              xywh {305 240 350 49} type Multiline box GTK_DOWN_BOX labelfont 1 labelsize 12 align 5 textfont 4 textsize 12
             }
             Fl_Output OutputEventGeneratorDescription {
               label {Event Generator Description}
-              xywh {315 308 340 49} type Multiline box BORDER_BOX labelfont 1 labelsize 12 align 5 textfont 4 textsize 12
+              xywh {305 308 350 51} type Multiline box GTK_DOWN_BOX labelfont 1 labelsize 12 align 5 textfont 4 textsize 12
+            }
+            Fl_Button {} {
+              label Visualize
+              callback {ButtonVisualizeClicked = true;}
+              xywh {30 360 135 30} box GTK_UP_BOX color 7 labelfont 1 labelsize 12
+              code0 {ButtonVisualizeClicked = false;}
             }
           }
           Fl_Browser BrowserProcesses {
             label Processes
             callback {BrowserProcessClicked = true;}
-            xywh {20 105 110 105} type Hold box DOWN_BOX selection_color 4 labelfont 1 labelsize 12 align 5 textsize 12
+            xywh {20 105 110 105} type Hold box GTK_DOWN_BOX selection_color 4 labelfont 1 labelsize 12 align 5 textsize 12
           }
           Fl_Browser BrowserComponents {
             label Components
             callback {BrowserComponentClicked = true;}
-            xywh {140 105 110 105} type Hold box DOWN_BOX selection_color 4 labelfont 1 labelsize 12 align 5 textsize 12
+            xywh {140 105 110 105} type Hold box GTK_DOWN_BOX selection_color 4 labelfont 1 labelsize 12 align 5 textsize 12
           }
           Fl_Group {} {
             label {Required Interface} open
-            xywh {20 375 645 145} box PLASTIC_UP_BOX labelfont 1 labelsize 12 align 21
+            xywh {20 410 645 145} box GTK_UP_BOX labelfont 1 labelsize 12 align 21
           } {
             Fl_Browser BrowserFunctions {
               label Functions
-              xywh {30 410 140 100} type Hold box DOWN_BOX selection_color 4 labelfont 1 labelsize 12 align 5 textsize 12
+              xywh {30 445 135 100} type Hold box GTK_DOWN_BOX selection_color 4 labelfont 1 labelsize 12 align 5 textsize 12
             }
             Fl_Browser BrowserEventHandlers {
               label {Event Handlers}
-              xywh {175 410 135 100} type Hold box DOWN_BOX selection_color 4 labelfont 1 labelsize 12 align 5 textsize 12
+              xywh {170 445 130 100} type Hold box GTK_DOWN_BOX selection_color 4 labelfont 1 labelsize 12 align 5 textsize 12
             }
             Fl_Output OutputFunctionDescription {
               label {Function Description}
-              xywh {315 397 340 47} type Multiline box BORDER_BOX labelfont 1 labelsize 12 align 5 textfont 4 textsize 12
+              xywh {305 432 350 47} type Multiline box GTK_DOWN_BOX labelfont 1 labelsize 12 align 5 textfont 4 textsize 12
             }
             Fl_Output OutputEventHandlerDescription {
               label {Event Handler Description}
-              xywh {315 463 340 47} type Multiline box BORDER_BOX labelfont 1 labelsize 12 align 5 textfont 4 textsize 12
+              xywh {305 498 350 47} type Multiline box GTK_DOWN_BOX labelfont 1 labelsize 12 align 5 textfont 4 textsize 12
             }
           }
           Fl_Light_Button ButtonAutoRefresh {
             label {Auto Refresh}
-            callback {ButtonAutoRefreshClicked = true;}
-            xywh {560 160 105 50} value 1 labelfont 1 labelsize 12 align 16
+            xywh {560 160 105 50} box GTK_UP_BOX value 1 color 7 labelfont 1 labelsize 12 align 16
           }
           Fl_Browser BrowserProvidedInterfaces {
             label {Provided Interfaces}
-            xywh {260 105 140 105} type Hold box DOWN_BOX selection_color 4 labelfont 1 labelsize 12 align 5 textsize 12
+            xywh {260 105 140 105} type Hold box GTK_DOWN_BOX selection_color 4 labelfont 1 labelsize 12 align 5 textsize 12
           }
           Fl_Browser BrowserRequiredInterfaces {
             label {Required Interfaces}
-            xywh {410 105 140 105} type Hold box DOWN_BOX selection_color 4 labelfont 1 labelsize 12 align 5 textsize 12
+            xywh {410 105 140 105} type Hold box GTK_DOWN_BOX selection_color 4 labelfont 1 labelsize 12 align 5 textsize 12
           }
           Fl_Button ButtonRefresh {
             label Refresh
             callback {ButtonRefreshClicked = true;}
-            xywh {560 105 105 45} labelfont 1 labelsize 12
+            xywh {560 105 105 45} box GTK_UP_BOX color 7 labelfont 1 labelsize 12
+            code0 {ButtonRefreshClicked = false;}
           }
         }
         Fl_Group DataVisualizer {
           label {Data Visualizer} open
-          xywh {20 80 650 450} labelfont 1 labelsize 13 hide
+          xywh {20 80 655 485} labelfont 1 labelsize 13
         } {
           Fl_Box GraphPane {
-            label {Graph Region}
-            xywh {20 90 645 320} box BORDER_BOX labelfont 1 labelsize 12
-            code0 {\#include "multiplot.h"}
+            label {Graph Region} selected
+            xywh {20 90 580 290} box BORDER_BOX labelfont 1 labelsize 12
+            code0 {\#include "multiplot_cisst.h"}
+            class MULTIPLOT
+          }
+          Fl_Progress Progress1 {
+            xywh {170 390 18 9} box FLAT_BOX color 49 selection_color 1 labelsize 12
+          }
+          Fl_Progress Progress2 {
+            xywh {170 404 18 9} box FLAT_BOX color 49 selection_color 2 labelsize 12
+          }
+          Fl_Progress Progress3 {
+            xywh {170 418 18 9} box FLAT_BOX color 49 selection_color 3 labelsize 12
+          }
+          Fl_Progress Progress4 {
+            xywh {170 432 18 9} box FLAT_BOX color 49 selection_color 4 labelsize 12
+          }
+          Fl_Progress Progress5 {
+            xywh {170 447 18 9} box FLAT_BOX color 49 selection_color 5 labelsize 12
+          }
+          Fl_Progress Progress6 {
+            xywh {170 460 18 9} box FLAT_BOX color 49 selection_color 6 labelsize 12
+          }
+          Fl_Progress Progress7 {
+            xywh {170 474 18 9} box FLAT_BOX color 49 selection_color 9 labelsize 12
+          }
+          Fl_Progress Progress8 {
+            xywh {170 488 18 9} box FLAT_BOX color 49 selection_color 10 labelsize 12
+          }
+          Fl_Progress Progress9 {
+            xywh {170 502 18 9} box FLAT_BOX color 49 selection_color 11 labelsize 12
+          }
+          Fl_Progress Progress10 {
+            xywh {170 516 18 9} box FLAT_BOX color 49 selection_color 12 labelsize 12
+          }
+          Fl_Progress Progress11 {
+            xywh {170 529 18 9} box FLAT_BOX color 49 selection_color 13 labelsize 12
+          }
+          Fl_Progress Progress12 {
+            xywh {170 543 18 9} box FLAT_BOX color 49 selection_color 14 labelsize 12
+          }
+          Fl_Browser BrowserVisualizeSignals {
+            label Processes
+            callback {BrowserVisualizeSignalsClicked = true;}
+            xywh {190 385 135 173} type Hold box GTK_DOWN_BOX selection_color 4 labeltype NO_LABEL labelfont 1 labelsize 12 align 0 textfont 4 textsize 11
+          }
+          Fl_Browser BrowserVisualizeCommandName {
+            label {Command Name}
+            callback {BrowserVisualizeCommandNameClicked = true;}
+            xywh {20 402 140 94} type Hold box GTK_DOWN_BOX selection_color 4 labelfont 1 labelsize 12 align 5 textsize 12
+          }
+          Fl_Output OutputProcessName {
+            label {Process :}
+            xywh {405 385 160 20} box GTK_DOWN_BOX labelfont 1 labelsize 12 textsize 12
+          }
+          Fl_Output OutputComponentName {
+            label {Component :}
+            xywh {405 410 160 20} box GTK_DOWN_BOX labelfont 1 labelsize 12 textsize 12
+          }
+          Fl_Output OutputInterfaceName {
+            label {Interface :}
+            xywh {405 435 160 20} box GTK_DOWN_BOX labelfont 1 labelsize 12 textsize 12
+          }
+          Fl_Output OutputArgumentName {
+            label {Argument :}
+            xywh {405 460 265 20} box GTK_DOWN_BOX labelfont 1 labelsize 12 textfont 4 textsize 12
+          }
+          Fl_Check_Button CheckButtonHide {
+            label {: Hide}
+            callback {ButtonHideClicked = true;}
+            xywh {580 410 15 20} down_box GTK_DOWN_BOX color 7 labelfont 1 labelsize 12 align 8
+          }
+          Fl_Output OutputMaxValue {
+            xywh {600 84 65 20} box FLAT_BOX color 49 labeltype NO_LABEL labelfont 1 labelsize 12 align 0 textsize 12
+          }
+          Fl_Output OutputMinValue {
+            xywh {601 370 65 20} box FLAT_BOX color 49 labeltype NO_LABEL labelfont 1 labelsize 12 align 0 textsize 12
+          }
+          Fl_Button {} {
+            label x2
+            callback {ButtonYScaleUpClicked = true;}
+            xywh {620 192 30 25} box GTK_UP_BOX color 7 align 17
+            code0 {ButtonYScaleUpClicked = false;}
+          }
+          Fl_Button {} {
+            label {/2}
+            callback {ButtonYScaleDownClicked = true;}
+            xywh {620 248 30 25} box GTK_UP_BOX color 7
+            code0 {ButtonYScaleDownClicked = false;}
+          }
+          Fl_Button {} {
+            label {/2}
+            callback {ButtonXScaleDownClicked = true;}
+            xywh {605 220 30 25} box GTK_UP_BOX color 7
+            code0 {ButtonXScaleDownClicked = false;}
+          }
+          Fl_Button {} {
+            label x2
+            callback {ButtonXScaleUpClicked = true;}
+            xywh {637 220 30 25} box GTK_UP_BOX color 7
+            code0 {ButtonXScaleUpClicked = false;}
+          }
+          Fl_Check_Button CheckButtonAutoScale {
+            label {: Auto Scale}
+            callback {ButtonAutoScaleClicked = true;}
+            xywh {580 435 15 20} down_box GTK_DOWN_BOX color 7 labelfont 1 labelsize 12 align 8
+          }
+          Fl_Slider SliderSamplingRate {
+            label {Sampling :}
+            xywh {405 486 180 23} type {Horz Knob} box GTK_UP_BOX color 7 labelfont 1 labelsize 12 align 4
+            code0 {\#include <FL/Fl_Value_Slider.H>}
+            class Fl_Value_Slider
+          }
+          Fl_Button {} {
+            label {Remove Command}
+            callback {ButtonRemoveClicked = true;}
+            xywh {20 500 140 25} box GTK_UP_BOX color 7 labelfont 1 labelsize 12 align 17
+            code0 {ButtonRemoveClicked = false;}
+          }
+          Fl_Button ButtonUpdate {
+            label Update
+            callback {ButtonUpdateClicked = true;}
+            xywh {590 485 80 25} box GTK_UP_BOX color 7 labelfont 1 labelsize 12 align 17
+            code0 {ButtonUpdateClicked = false;}
+          }
+          Fl_Button {} {
+            label {Remove ALL}
+            callback {ButtonRemoveAllClicked = true;}
+            xywh {20 530 140 25} box GTK_UP_BOX color 7 labelfont 1 labelsize 12 align 17
+            code0 {ButtonRemoveAllClicked = false;}
           }
         }
       }
       Fl_Return_Button Close {
         label Close
         callback {DisplayWindow->hide();}
-        xywh {10 540 665 30} color 48
+        xywh {10 575 665 30} box GTK_UP_BOX color 7
       }
       Fl_Text_Display TextDisplayHostIP {
         label {Host IP: }
-        xywh {75 15 600 20} box BORDER_BOX selection_color 7 labelfont 1 align 4
+        xywh {75 15 600 20} box GTK_DOWN_BOX selection_color 7 labelfont 1 labelsize 13 align 4 textsize 12
       }
     }
   }
@@ -116,10 +249,34 @@ class GlobalComponentManagerUI {open
   }
   decl {bool ButtonAutoRefreshClicked;} {public
   }
+  decl {bool ButtonAutoScaleClicked;} {public
+  }
+  decl {bool ButtonHideClicked;} {public
+  }
   decl {bool ButtonRefreshClicked;} {public
+  }
+  decl {bool ButtonRemoveClicked;} {public
+  }
+  decl {bool ButtonRemoveAllClicked;} {public
+  }
+  decl {bool ButtonUpdateClicked;} {public
+  }
+  decl {bool ButtonVisualizeClicked;} {public
+  }
+  decl {bool ButtonYScaleUpClicked;} {public
+  }
+  decl {bool ButtonYScaleDownClicked;} {public
+  }
+  decl {bool ButtonXScaleUpClicked;} {public
+  }
+  decl {bool ButtonXScaleDownClicked;} {public
+  }
+  decl {bool BrowserComponentClicked;} {public
   }
   decl {bool BrowserProcessClicked;} {public
   }
-  decl {bool BrowserComponentClicked;} {public
+  decl {bool BrowserVisualizeCommandNameClicked;} {public
+  }
+  decl {bool BrowserVisualizeSignalsClicked;} {public
   }
 } 
