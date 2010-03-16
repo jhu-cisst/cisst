@@ -19,6 +19,8 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include "GCMUITask.h"
+
+#include <cisstCommon/cmnStrings.h>
 #include <time.h>
 #include <qmath.h>
 
@@ -46,8 +48,8 @@ CMN_IMPLEMENT_SERVICES(GCMUITask);
 
 GCMUITask::GCMUITask(const std::string & taskName, const double period, 
                      mtsManagerGlobal& globalComponentManager) :
-    GlobalComponentManager(globalComponentManager), 
-    mtsTaskPeriodic(taskName, period, false, 5000)
+    mtsTaskPeriodic(taskName, period, false, 5000),
+    GlobalComponentManager(globalComponentManager)
 {
 }
 
@@ -842,10 +844,11 @@ void GCMUITask::OnBrowserVisualizeSignalsClicked(void)
 
     UI.CheckButtonHide->value((data->Hide ? 1 : 0));
     UI.CheckButtonAutoScale->value((data->AutoScale? 1 : 0));
-
     char buf[10] = "";
-    UI.OutputMinValue->value(itoa( ((int) data->Min) + 1, buf, 10));
-    UI.OutputMaxValue->value(itoa( ((int) data->Max) + 1, buf, 10));
+    cmn_snprintf(buf, sizeof(buf), "%d", static_cast<int>(data->Min) + 1);
+    UI.OutputMinValue->value(buf);
+    cmn_snprintf(buf, sizeof(buf), "%d", static_cast<int>(data->Max) + 1);
+    UI.OutputMaxValue->value(buf);
 }
 
 void GCMUITask::OnButtonRefreshClicked(void)

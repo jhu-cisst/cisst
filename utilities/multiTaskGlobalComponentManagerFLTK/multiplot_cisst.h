@@ -177,8 +177,8 @@ class MULTIPLOT_BASE : public Fl_Gl_Window
         /**
         *   Get min y and max y values
         */
-        inline const float GetYMax(void) const { return maximum.y; }
-        inline const float GetYMin(void) const { return minimum.y; }
+        inline float GetYMax(void) const { return maximum.y; }
+        inline float GetYMin(void) const { return minimum.y; }
 
         /**
         *   Show or hide a signal

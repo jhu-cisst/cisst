@@ -54,7 +54,7 @@ protected:
     typedef std::vector<std::string> StringVector;
 
     // Global Component Manager instance that this UI attaches to
-    mtsManagerGlobal& GlobalComponentManager;
+    mtsManagerGlobal & GlobalComponentManager;
 
     //-------------------------------------------------------------------------
     //  Component Inspector
