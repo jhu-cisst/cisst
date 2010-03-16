@@ -22,7 +22,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnStrings.h>
 #include <time.h>
-#include <qmath.h>
 
 CMN_IMPLEMENT_SERVICES(GCMUITask);
 
@@ -131,8 +130,8 @@ void GCMUITask::Run(void)
         PlotGraph();
     }
 
-    // Check user's input on the 'Data Inspector' tab
-    CheckDataInspectorInput();
+    // Check user's input on the 'Component Inspector' tab
+    CheckComponentInspectorInput();
 
     // Check user's input on the 'Data Visualizer' tab
     CheckDataVisualizerInput();
@@ -228,7 +227,7 @@ void GCMUITask::PlotGraph(void)
     GraphPane->redraw();
 }
 
-void GCMUITask::CheckDataInspectorInput(void)
+void GCMUITask::CheckComponentInspectorInput(void)
 {
     CurrentIndexClicked.Process           = UI.BrowserProcesses->value();
     CurrentIndexClicked.Component         = UI.BrowserComponents->value();
@@ -868,11 +867,12 @@ void GCMUITask::OnButtonVisualizeClicked(const int idxClicked)
     const std::string commandName = StripOffFormatCharacters(UI.BrowserCommands->text(idxClicked));
 
     // Get argument information
-    std::string argumentName = "TODO"; // Fetch from LCM
-    std::vector<std::string> argumentParameterNames;
-    GlobalComponentManager.GetArgumentInformation(processName, componentName, 
-        interfaceName, commandName, argumentName, argumentParameterNames);
-    const int argumentParameterCount = argumentParameterNames.size();
+    std::string argumentName;
+    std::vector<std::string> signalNames;
+    GlobalComponentManager.GetArgumentInformation(
+        processName, componentName, interfaceName, commandName, argumentName, signalNames);
+
+    const int signalCount = signalNames.size();
 
     CommandSelected command;
     command.ProcessName = processName;
@@ -888,8 +888,8 @@ void GCMUITask::OnButtonVisualizeClicked(const int idxClicked)
     signalState.Min = -1.0;
     signalState.Max = 1.0;
 
-    for (int i = 0; i < min(argumentParameterCount, MAX_ARGUMENT_PARAMETER_COUNT); ++i) {
-        signalState.SignalName = argumentParameterNames[i];
+    for (int i = 0; i < min(signalCount, MAX_ARGUMENT_PARAMETER_COUNT); ++i) {
+        signalState.SignalName = signalNames[i];
         command.Signals.push_back(signalState);
     }
 

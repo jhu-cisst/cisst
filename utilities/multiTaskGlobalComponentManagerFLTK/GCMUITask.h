@@ -132,8 +132,8 @@ protected:
     //-------------------------------------------------------------------------
     // Update overall UI
     void UpdateUI(void);
-    // Check user's input on the 'Data Inspector' tab
-    void CheckDataInspectorInput(void);
+    // Check user's input on the 'Component Inspector' tab
+    void CheckComponentInspectorInput(void);
     // Check user's input on the 'Data Visualizer' tab
     void CheckDataVisualizerInput(void);
 

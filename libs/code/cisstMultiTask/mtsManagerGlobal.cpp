@@ -1166,11 +1166,11 @@ void mtsManagerGlobal::GetArgumentInformation(const std::string & processName,
                                               const std::string & providedInterfaceName, 
                                               const std::string & commandName,
                                               std::string & argumentName,
-                                              std::vector<std::string> & argumentParameterNames)
+                                              std::vector<std::string> & signalNames)
 {
     if (!LocalManagerConnected) return;
 
-    //LocalManagerConnected->GetArgumentInformation(argumentName, argumentParameterNames, componentName, providedInterfaceName, commandName, processName);
+    LocalManagerConnected->GetArgumentInformation(argumentName, signalNames, componentName, providedInterfaceName, commandName, processName);
 }
 #endif
 

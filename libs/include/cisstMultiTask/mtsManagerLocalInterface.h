@@ -167,7 +167,7 @@ public:
 
     /*! Get parameter information (name, argument count, argument type) */
     virtual void GetArgumentInformation(std::string & argumentName,
-                                        std::vector<std::string> & argumentParameterNames,
+                                        std::vector<std::string> & signalNames,
                                         const std::string & componentName, 
                                         const std::string & providedInterfaceName, 
                                         const std::string & commandName,

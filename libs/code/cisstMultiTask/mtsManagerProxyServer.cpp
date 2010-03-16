@@ -607,7 +607,7 @@ void mtsManagerProxyServer::GetDescriptionOfEventHandler(std::string & descripti
     SendGetDescriptionOfEventHandler(description, componentName, requiredInterfaceName, eventHandlerName, listenerID);
 }
 
-void mtsManagerProxyServer::GetArgumentInformation(std::string & argumentName, std::vector<std::string> & argumentParameterNames,
+void mtsManagerProxyServer::GetArgumentInformation(std::string & argumentName, std::vector<std::string> & signalNames,
     const std::string & componentName, const std::string & providedInterfaceName, const std::string & commandName, const std::string & listenerID)
 {
     // TODO:

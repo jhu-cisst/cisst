@@ -22,7 +22,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnConstants.h>
 #include <cisstVector.h>
 #include "SignalGeneratorTask.h"
-#include <qmath.h>
 
 // required to implement the class services, see cisstCommon
 CMN_IMPLEMENT_SERVICES(SignalGenerator);
@@ -59,7 +58,7 @@ void SignalGenerator::Run(void)
 
     ReadDouble = sin((double)x) * 10.0;
     for (int i = 0; i < 12; i++) {
-        ReadVector(i) = cos((double)x - M_PI/2) * 15.0;
+        ReadVector(i) = cos((double)x - cmnPI/2) * 15.0;
     }
     x++;
 
