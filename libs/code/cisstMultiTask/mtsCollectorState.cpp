@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):  Min Yang Jung
+  Author(s):  Min Yang Jung, Anton Deguet
   Created on: 2009-03-20
 
-  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2009-2010 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -43,48 +43,239 @@ CMN_IMPLEMENT_SERVICES(mtsCollectorState)
 //-------------------------------------------------------
 //	Constructor, Destructor, and Initializer
 //-------------------------------------------------------
+mtsCollectorState::mtsCollectorState(const std::string & collectorName):
+    mtsCollectorBase(collectorName,
+                     COLLECTOR_FILE_FORMAT_UNDEFINED),
+    ConnectedFlag(false),
+    OutputStream(0),
+    OutputFile(0),
+    TargetTask(0),
+    TargetStateTable(0),
+    Serializer(0)
+{}
+
+
 mtsCollectorState::mtsCollectorState(const std::string & targetTaskName,
                                      const std::string & targetStateTableName,
-                                     const mtsCollectorBase::CollectorLogFormat collectorLogFormat):
-    mtsCollectorBase(targetTaskName + "Collector" + targetStateTableName, collectorLogFormat),
-    TargetTaskName(targetTaskName),
-    TargetStateTableName(targetStateTableName),
+                                     const mtsCollectorBase::CollectorFileFormat fileFormat):
+    mtsCollectorBase(std::string("StateCollectorFor") + targetTaskName + targetStateTableName,
+                     fileFormat),
+    ConnectedFlag(false),
+    OutputStream(0),
+    OutputFile(0),
     TargetTask(0),
     TargetStateTable(0),
     Serializer(0)
 {
-    // check if there is the specified task and the specified state table.
-    mtsComponent * componentPointer = TaskManager->GetComponent(TargetTaskName);
-    if (!componentPointer) {
-        cmnThrow(std::runtime_error("mtsCollectorState constructor: component \"" + TargetTaskName + "\" not found in task manager."));
-    }
-    TargetTask = dynamic_cast<mtsTask *>(componentPointer);
-    if (!TargetTask) {
-        cmnThrow(std::runtime_error("mtsCollectorState constructor: component \"" + TargetTaskName + "\" found in task manager seems to be an mtsDevice, not mtsTask therefore it has no state table."));
-    }
-
-    Initialize();
-}
-
-
-mtsCollectorState::mtsCollectorState(mtsTask * targetTask,
-                                     const std::string & targetStateTableName,
-                                     const mtsCollectorBase::CollectorLogFormat collectorLogFormat):
-    mtsCollectorBase(targetTask->GetName() + "Collector" + targetStateTableName, collectorLogFormat),
-    TargetTaskName(TargetTask->GetName()),
-    TargetStateTableName(targetStateTableName),
-    TargetTask(targetTask),
-    TargetStateTable(0)
-{
-    Initialize();
+    this->SetStateTable(targetTaskName, targetStateTableName);
+    this->SetOutputToDefault(fileFormat);
+    this->Initialize();
 }
 
 
 mtsCollectorState::~mtsCollectorState()
 {
-    if (Serializer) {
-        delete Serializer;
+    // serializer was created for a binary output
+    if (this->Serializer) {
+        delete this->Serializer;
     }
+    // this is a stream created internally, we should clean it
+    if (this->OutputFile) {
+        CMN_LOG_CLASS_INIT_VERBOSE << "desctructor: closing file \"" << this->OutputFileName << "\"" << std::endl;
+        this->OutputFile->close();
+        delete this->OutputFile;
+    }
+}
+
+
+bool mtsCollectorState::SetStateTable(const std::string & taskName,
+                                      const std::string & stateTableName)
+{
+    // check if this task has already been connected
+    if (this->ConnectedFlag) {
+        CMN_LOG_CLASS_INIT_ERROR << "SetStateTable: collector \"" << this->GetName()
+                                 << "\" is already connected, you can not modify the state table to collect" << std::endl;
+        return false;
+    }
+    // check if there is the specified task and the specified state table.
+    mtsComponent * componentPointer = TaskManager->GetComponent(taskName);
+    if (!componentPointer) {
+        cmnThrow(std::runtime_error("mtsCollectorState constructor: component \"" + taskName
+                                    + "\" not found in task manager."));
+    }
+    TargetTask = dynamic_cast<mtsTask *>(componentPointer);
+    if (!this->TargetTask) {
+        cmnThrow(std::runtime_error("mtsCollectorState constructor: task \"" + taskName
+                                    + "\" found in task manager seems to be an mtsDevice, not mtsTask therefore it has no state table."));
+    }
+
+    // this task needs a pointer on the state table to perform a fast copy
+    this->TargetStateTable = this->TargetTask->GetStateTable(stateTableName);
+    if (!this->TargetStateTable) {
+        CMN_LOG_CLASS_INIT_ERROR << "Initialize: can not find state table \""
+                                 << stateTableName << "\" in task \""
+                                 << taskName << "\" for collector \""
+                                 << this->GetName() << "\"" << std::endl;
+        this->TargetTask = 0;
+        cmnThrow(std::runtime_error("mtsCollectorState::Initialize(): can not find state table."));
+    }
+    return true;
+}
+
+
+void mtsCollectorState::SetOutput(const std::string & fileName,
+                                  const CollectorFileFormat fileFormat)
+{
+    CMN_LOG_CLASS_INIT_DEBUG << "SetOutput: file \"" << fileName
+                             << "\" using file format \"" << fileFormat << "\"" << std::endl;
+    // test if there was a file opened before
+    if (this->OutputFile) {
+        CMN_LOG_CLASS_INIT_VERBOSE << "SetOutput: closing file \"" << this->OutputFileName << "\"" << std::endl;
+        this->OutputFile->close();
+    } else {
+        // create the output file
+        this->OutputFile = new std::ofstream;
+        // uses the oftream as our ostream
+        this->OutputStream = this->OutputFile;
+    }
+
+    this->FileFormat = fileFormat;
+    this->SetDelimiter();
+    this->OutputFileName = fileName;
+    this->FirstRunningFlag = true;
+
+    // initialize serializer
+    if (FileFormat == COLLECTOR_FILE_FORMAT_BINARY) {
+        // we need to create a serializer for each new file to
+        // serialize the type info
+        if (this->Serializer) {
+            delete this->Serializer;
+        }
+        Serializer = new cmnSerializer(StringStreamBufferForSerialization);
+    }
+
+    // set an appropriate delimiter according to the log file format.
+    switch (FileFormat) {
+    case COLLECTOR_FILE_FORMAT_CSV:
+        Delimiter = ',';
+        break;
+
+    case COLLECTOR_FILE_FORMAT_PLAIN_TEXT:
+    case COLLECTOR_FILE_FORMAT_BINARY:
+    default:
+        Delimiter = ' ';
+        break;
+    }
+
+    // open the output file and update the internal stream pointer
+    switch (FileFormat) {
+    case COLLECTOR_FILE_FORMAT_CSV:
+    case COLLECTOR_FILE_FORMAT_PLAIN_TEXT:
+        CMN_LOG_CLASS_INIT_VERBOSE << "SetOutput: opening file \"" << this->OutputFileName << "\" in text/append mode" << std::endl;
+        this->OutputFile->open(this->OutputFileName.c_str(), std::ios::app);
+        break;
+    case COLLECTOR_FILE_FORMAT_BINARY:
+        CMN_LOG_CLASS_INIT_VERBOSE << "SetOutput: opening file \"" << this->OutputFileName << "\" in binary/append mode" << std::endl;
+        this->OutputFile->open(this->OutputFileName.c_str(), std::ios::binary | std::ios::app);
+        break;
+    default:
+        CMN_LOG_CLASS_INIT_ERROR << "SetOutput: unexpected file format.";
+        break;
+    }
+
+    if (!this->OutputStream->good()) {
+        CMN_LOG_CLASS_INIT_ERROR << "SetOutput: output stream is no good" << std::endl;
+    }
+}
+
+
+void mtsCollectorState::SetOutputToDefault(const CollectorFileFormat fileFormat)
+{
+    CMN_LOG_CLASS_INIT_DEBUG << "SetOutputDefault: using file format \"" << fileFormat << "\"" << std::endl;
+    std::string currentDateTime;
+    osaGetDateTimeString(currentDateTime);
+    std::string suffix;
+
+    if (fileFormat == COLLECTOR_FILE_FORMAT_PLAIN_TEXT) {
+        suffix = "txt";
+    } else if (fileFormat == COLLECTOR_FILE_FORMAT_CSV) {
+        suffix = "csv";
+    } else {
+        suffix = "cdat"; // for cisst dat
+    }
+
+    std::string fileName =
+        "StateDataCollection-" + TargetTask->GetName() + "-"
+        + TargetStateTable->GetName() + "-" + currentDateTime + "." + suffix;
+
+    this->SetOutput(fileName, fileFormat);
+}
+
+
+void mtsCollectorState::SetOutputToDefault(void)
+{
+    CollectorFileFormat fileFormat;
+    // if the format has never been defined use CSV as default
+    if (this->FileFormat == COLLECTOR_FILE_FORMAT_UNDEFINED) {
+        fileFormat = COLLECTOR_FILE_FORMAT_CSV;
+    } else {
+        // use whatever format was used before
+        fileFormat = this->FileFormat;
+    }
+    this->SetOutputToDefault(fileFormat);
+}
+
+
+void mtsCollectorState::SetOutput(std::ostream & outputStream, const CollectorFileFormat fileFormat)
+{
+    CMN_LOG_CLASS_INIT_DEBUG << "SetOutput: using user provided output stream with file format \"" << fileFormat << "\"" << std::endl;
+    // test if there was a file opened before
+    if (this->OutputFile) {
+        CMN_LOG_CLASS_INIT_VERBOSE << "SetOutput: closing file \"" << this->OutputFileName << "\"" << std::endl;
+        this->OutputFile->close();
+    }
+
+    // use whatever format was used before
+    this->FileFormat = fileFormat;
+    this->SetDelimiter();
+    this->FirstRunningFlag = true;
+
+    // we are not using our own file
+    this->OutputFile = 0;
+    this->OutputFileName = std::string("using a stream");
+    this->OutputStream = &outputStream;
+}
+
+
+void mtsCollectorState::SetOutput(std::ostream & outputStream)
+{
+    CollectorFileFormat fileFormat;
+    // if the format has never been defined use CSV as default
+    if (this->FileFormat == COLLECTOR_FILE_FORMAT_UNDEFINED) {
+        fileFormat = COLLECTOR_FILE_FORMAT_CSV;
+    } else {
+        // use whatever format was used before
+        fileFormat = this->FileFormat;
+    }
+    this->SetOutput(outputStream, fileFormat);
+}
+
+
+bool mtsCollectorState::Connect(void)
+{
+    // check that a task/state table has been set properly
+    if (!(this->TargetTask && this->TargetStateTable)) {
+        CMN_LOG_CLASS_INIT_ERROR << "Connect: state table has not been set for collector \""
+                                 << this->GetName() << "\"" << std::endl;
+        return false;
+    }
+    // then connect the interface
+    CMN_LOG_CLASS_INIT_DEBUG << "Connect: connecting required interface \"" << this->GetName() << "::StateTable\" to provided interface \""
+                             << this->TargetTask->GetName() << "::StateTable" << this->TargetStateTable->GetName() << "\"" << std::endl;
+    this->TaskManager->Connect(this->GetName(), "StateTable",
+                               this->TargetTask->GetName(), "StateTable" + this->TargetStateTable->GetName());
+    this->ConnectedFlag = true;
+    return true;
 }
 
 
@@ -95,19 +286,6 @@ void mtsCollectorState::Initialize(void)
     TableHistoryLength = 0;
     SamplingInterval = 1;
     OffsetForNextRead = 0;
-
-    WaitingForTrigger = true;
-    FirstRunningFlag = true;
-
-    // this task needs a pointer on the state table to perform a fast copy
-    this->TargetStateTable = this->TargetTask->GetStateTable(this->TargetStateTableName);
-    if (!TargetStateTable) {
-        CMN_LOG_CLASS_INIT_ERROR << "Initialize: can not find state table \""
-                                 << TargetStateTableName << "\" in task \""
-                                 << TargetTaskName << "\" for collector \""
-                                 << this->GetName() << "\"" << std::endl;
-        cmnThrow(std::runtime_error("mtsCollectorState::Initialize(): can not find state table."));
-    }
 
     // add a required interface to the collector task to communicate with the task containing the state table
     mtsRequiredInterface * requiredInterface = this->AddRequiredInterface("StateTable");
@@ -120,48 +298,27 @@ void mtsCollectorState::Initialize(void)
                                                 this,
                                                 "BatchReady");
     } else {
-        CMN_LOG_CLASS_INIT_ERROR << "Initialize: unable to add required interface to communicate with state table for \""
+        CMN_LOG_CLASS_INIT_ERROR << "Connect: unable to add required interface to communicate with state table for \""
                                  << this->GetName() << "\"" << std::endl;
-        cmnThrow(std::runtime_error("mtsCollectorState::Initialize(): unable to add required interface"));
-    }
-    // add the task to the task manager and then connect the interface
-    this->TaskManager->AddComponent(this);
-    this->TaskManager->Connect(this->GetName(), "StateTable",
-                               this->TargetTaskName, "StateTable" + this->TargetStateTableName);
-
-    // Initialize serializer
-    if (LogFormat == COLLECTOR_LOG_FORMAT_BINARY) {
-        Serializer = new cmnSerializer(StringStreamBufferForSerialization);
-    }
-
-    // Set an appropriate delimiter according to the log file format.
-    switch (LogFormat) {
-    case COLLECTOR_LOG_FORMAT_CSV:
-        Delimiter = ',';
-        break;
-
-    case COLLECTOR_LOG_FORMAT_PLAIN_TEXT:
-    case COLLECTOR_LOG_FORMAT_BINARY:
-    default:
-        Delimiter = ' ';
-        break;
+        cmnThrow(std::runtime_error("mtsCollectorState::Connect: unable to add required interface"));
     }
 }
+
 
 //-------------------------------------------------------
 //	Thread Management
 //-------------------------------------------------------
 void mtsCollectorState::Startup(void)
 {
-    CMN_LOG_CLASS_INIT_DEBUG << "Startup() for collector \"" << this->GetName() << "\"" << std::endl;
+    CMN_LOG_CLASS_INIT_DEBUG << "Startup: collector \"" << this->GetName() << "\"" << std::endl;
 }
 
 
 void mtsCollectorState::Run(void)
 {
+    CMN_LOG_CLASS_RUN_DEBUG << "Run: collector \"" << this->GetName() << "\"" << std::endl;
     ProcessQueuedCommands();
     ProcessQueuedEvents();
-    mtsCollectorBase::Run();
 }
 
 
@@ -181,7 +338,7 @@ void mtsCollectorState::StopCollection(const mtsDouble & delay)
 
 void mtsCollectorState::BatchReadyHandler(const mtsStateTable::IndexRange & range)
 {
-    CMN_LOG_CLASS_RUN_DEBUG << "DataCollectionNeededHandler called for batch ["
+    CMN_LOG_CLASS_RUN_DEBUG << "BatchReadyHandler: called for batch ["
                             << range.First << ", " << range.Last << "]" << std::endl;
     BatchCollect(range);
 }
@@ -199,7 +356,8 @@ bool mtsCollectorState::AddSignal(const std::string & signalName)
         // Check if the specified signal does exist in the state table.
         int StateVectorID = TargetStateTable->GetStateVectorID(signalName); // 0: Toc, 1: Tic, 2: Period, >=3: user
         if (StateVectorID == -1) {  // 0: Toc, 1: Tic, 2: Period, >3: user
-            CMN_LOG_CLASS_INIT_ERROR << "AddSignal: cannot find: " << signalName << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "AddSignal: collector \"" << this->GetName()
+                                     << "\", cannot find signal \"" << signalName << "\"" << std::endl;
 
             //throw mtsCollectorState::mtsCollectorBaseException(
             //    "Cannot find: signal name = " + signalName);
@@ -208,7 +366,8 @@ bool mtsCollectorState::AddSignal(const std::string & signalName)
 
         // Add a signal
         if (!AddSignalElement(signalName, StateVectorID)) {
-            CMN_LOG_CLASS_INIT_ERROR << "AddSignal: already registered signal: " << signalName << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "AddSignal: collector \"" << this->GetName()
+                                     << "\", already registered signal \"" << signalName << "\"" << std::endl;
 
             //throw mtsCollectorState::mtsCollectorBaseException(
             //    "Already collecting signal: " + signalName);
@@ -218,7 +377,8 @@ bool mtsCollectorState::AddSignal(const std::string & signalName)
         // Add all signals in the state table
         for (unsigned int i = 0; i < TargetStateTable->StateVectorDataNames.size(); ++i) {
             if (!AddSignalElement(TargetStateTable->StateVectorDataNames[i], i)) {
-                CMN_LOG_CLASS_INIT_ERROR << "AddSignal: already registered signal: " << TargetStateTable->StateVectorDataNames[i] << std::endl;
+                CMN_LOG_CLASS_INIT_ERROR << "AddSignal: collector \"" << this->GetName()
+                                         << "\", already registered signal \"" << TargetStateTable->StateVectorDataNames[i] << "\"" << std::endl;
                 return false;
             }
         }
@@ -254,7 +414,8 @@ bool mtsCollectorState::AddSignalElement(const std::string & signalName, const u
 
     RegisteredSignalElements.push_back(element);
 
-    CMN_LOG_CLASS_INIT_VERBOSE << "AddSignalElement: signal added: " << signalName << std::endl;
+    CMN_LOG_CLASS_INIT_VERBOSE << "AddSignalElement: collector \"" << this->GetName()
+                               << "\", signal added \"" << signalName << "\"" << std::endl;
 
     return true;
 }
@@ -269,7 +430,7 @@ void mtsCollectorState::BatchCollect(const mtsStateTable::IndexRange & range)
 
     // If this method is called for the first time, print out some information.
     if (FirstRunningFlag) {
-        PrintHeader(this->LogFormat);
+        PrintHeader(this->FileFormat);
     }
 
     const unsigned int StartIndex = range.First.Ticks()  % TableHistoryLength;
@@ -296,91 +457,87 @@ void mtsCollectorState::BatchCollect(const mtsStateTable::IndexRange & range)
 }
 
 
-void mtsCollectorState::PrintHeader(const CollectorLogFormat & logFormat)
+void mtsCollectorState::SetDelimiter(void)
+{
+    if (this->FileFormat == COLLECTOR_FILE_FORMAT_PLAIN_TEXT) {
+        this->Delimiter = ' ';
+    } else if (this->FileFormat == COLLECTOR_FILE_FORMAT_CSV) {
+        this->Delimiter = ',';
+    } else {
+        this->Delimiter = ' ';
+    }
+}
+
+
+void mtsCollectorState::PrintHeader(const CollectorFileFormat & fileFormat)
 {
     std::string currentDateTime;
     osaGetDateTimeString(currentDateTime);
-    char delimiter;
-    std::string suffix;
 
-    if (logFormat == COLLECTOR_LOG_FORMAT_PLAIN_TEXT) {
-        suffix = "txt";
-        delimiter = ' ';
-    } else if (logFormat == COLLECTOR_LOG_FORMAT_CSV) {
-        suffix = "csv";
-        delimiter = ',';
-    } else {
-        suffix = "cdat"; // for cisst dat
-        delimiter = ' ';
-    }
-
-    LogFileName = "StateDataCollection-" + TargetTask->GetName() + "-" +
-        TargetStateTable->GetName() + "-" + currentDateTime + "." + suffix;
-
-    std::ofstream outputStream;
-    outputStream.open(LogFileName.c_str(), std::ios::out);
-    {
+    if (this->OutputStream) {
         // Print out some information on the state table.
 
         // All lines in the header should be preceded by '#' which represents
         // the line contains header information rather than collected data.
-        outputStream << "# Task name          : " << TargetTask->GetName() << std::endl;
-        outputStream << "# Table name         : " << TargetStateTable->GetName() << std::endl;
-        outputStream << "# Date & time        : " << currentDateTime << std::endl;
-        outputStream << "# Total signal count : " << RegisteredSignalElements.size() << std::endl;
-        outputStream << "# Data format        : ";
-        if (logFormat == COLLECTOR_LOG_FORMAT_PLAIN_TEXT) {
-            outputStream << "Text";
-        } else if (logFormat == COLLECTOR_LOG_FORMAT_CSV) {
-            outputStream << "Text (CSV)";
+        *(this->OutputStream) << "# Task name          : " << TargetTask->GetName() << std::endl;
+        *(this->OutputStream) << "# Table name         : " << TargetStateTable->GetName() << std::endl;
+        *(this->OutputStream) << "# Date & time        : " << currentDateTime << std::endl;
+        *(this->OutputStream) << "# Total signal count : " << RegisteredSignalElements.size() << std::endl;
+        *(this->OutputStream) << "# Data format        : ";
+        if (fileFormat == COLLECTOR_FILE_FORMAT_PLAIN_TEXT) {
+            *(this->OutputStream) << "Text";
+        } else if (fileFormat == COLLECTOR_FILE_FORMAT_CSV) {
+            *(this->OutputStream) << "Text (CSV)";
         } else {
-            outputStream << "Binary";
+            *(this->OutputStream) << "Binary";
         }
-        outputStream << std::endl;
-        outputStream << "#" << std::endl;
+        *(this->OutputStream) << std::endl;
+        *(this->OutputStream) << "#" << std::endl;
 
-        outputStream << "# Ticks";
+        *(this->OutputStream) << "# Ticks";
         RegisteredSignalElementType::const_iterator it = RegisteredSignalElements.begin();
         for (; it != RegisteredSignalElements.end(); ++it) {
-            outputStream << delimiter;
-            (*(TargetStateTable->StateVector[it->ID]))[0].ToStreamRaw(outputStream, delimiter, true,
+            *(this->OutputStream) << this->Delimiter;
+            (*(TargetStateTable->StateVector[it->ID]))[0].ToStreamRaw(*(this->OutputStream), this->Delimiter, true,
                                                                       TargetStateTable->StateVectorDataNames[it->ID]);
         }
 
-        outputStream << std::endl;
+        *(this->OutputStream) << std::endl;
 
         // In case of using binary format
-        if (logFormat == COLLECTOR_LOG_FORMAT_BINARY) {
+        if (fileFormat == COLLECTOR_FILE_FORMAT_BINARY) {
             // Mark the end of the header.
-            MarkHeaderEnd(outputStream);
+            MarkHeaderEnd(*(this->OutputStream));
 
             // Remember the number of registered signals.
             cmnULong cmnULongTotalSignalCount;
             cmnULongTotalSignalCount.Data = RegisteredSignalElements.size();
             StringStreamBufferForSerialization.str("");
             Serializer->Serialize(cmnULongTotalSignalCount);
-            outputStream << StringStreamBufferForSerialization.str();
+            *(this->OutputStream) << StringStreamBufferForSerialization.str();
         }
+    } else {
+        CMN_LOG_CLASS_RUN_ERROR << "PrintHeader: output stream for collector \"" << this->GetName() << "\" is not available." << std::endl;
     }
-    outputStream.close();
-
     FirstRunningFlag = false;
 }
 
 
-void mtsCollectorState::MarkHeaderEnd(std::ofstream & logFile)
+void mtsCollectorState::MarkHeaderEnd(std::ostream & output)
 {
     for (int i = 0; i < END_OF_HEADER_SIZE; ++i) {
-        logFile << EndOfHeader[i];
+        output << EndOfHeader[i];
     }
-    logFile << std::endl;
+    output << std::endl;
 }
 
 
 bool mtsCollectorState::IsHeaderEndMark(const char * buffer)
 {
     for (int i = 0; i < END_OF_HEADER_SIZE; ++i) {
-        if (buffer[i] != EndOfHeader[i]) return false;
+        if (buffer[i] != EndOfHeader[i]) {
+            return false;
+        }
     }
     return true;
 }
@@ -390,73 +547,67 @@ bool mtsCollectorState::FetchStateTableData(const mtsStateTable * table,
                                             const unsigned int startIndex,
                                             const unsigned int endIndex)
 {
-    std::ofstream outputStream;
-    if (LogFormat == COLLECTOR_LOG_FORMAT_BINARY) {
-        cmnULongLong timeTick;
-        outputStream.open(LogFileName.c_str(), std::ios::binary | std::ios::app);
-        if (outputStream.good()) {
-            unsigned int i;
-            for (i = startIndex; i <= endIndex; i += SamplingInterval) {
-                StringStreamBufferForSerialization.str("");
-                timeTick.Data = TargetStateTable->Ticks[i];
-                Serializer->Serialize(timeTick);
-                outputStream << StringStreamBufferForSerialization.str();
-
-                for (unsigned int j = 0; j < RegisteredSignalElements.size(); ++j) {
+    if (this->OutputStream) {
+        if (this->OutputStream->good()) {
+            if (FileFormat == COLLECTOR_FILE_FORMAT_BINARY) {
+                cmnULongLong timeTick;
+                unsigned int i;
+                for (i = startIndex; i <= endIndex; i += SamplingInterval) {
                     StringStreamBufferForSerialization.str("");
-                    Serializer->Serialize((*table->StateVector[RegisteredSignalElements[j].ID])[i]);
-                    outputStream << StringStreamBufferForSerialization.str();
+                    timeTick.Data = TargetStateTable->Ticks[i];
+                    Serializer->Serialize(timeTick);
+                    *(this->OutputStream) << StringStreamBufferForSerialization.str();
+
+                    for (unsigned int j = 0; j < RegisteredSignalElements.size(); ++j) {
+                        StringStreamBufferForSerialization.str("");
+                        Serializer->Serialize((*table->StateVector[RegisteredSignalElements[j].ID])[i]);
+                        *(this->OutputStream) << StringStreamBufferForSerialization.str();
+                    }
                 }
+                OffsetForNextRead = (i - endIndex == 0 ? SamplingInterval : i - endIndex);
+            } else {
+                unsigned int i;
+                for (i = startIndex; i <= endIndex; i += SamplingInterval) {
+                    *(this->OutputStream) << TargetStateTable->Ticks[i];
+                    for (unsigned int j = 0; j < RegisteredSignalElements.size(); ++j) {
+                        *(this->OutputStream) << this->Delimiter;
+                        (*table->StateVector[RegisteredSignalElements[j].ID])[i].ToStreamRaw(*(this->OutputStream), this->Delimiter);
+                    }
+                    *(this->OutputStream) << std::endl;
+                }
+                OffsetForNextRead = (i - endIndex == 0 ? SamplingInterval : i - endIndex);
             }
-            OffsetForNextRead = (i - endIndex == 0 ? SamplingInterval : i - endIndex);
         } else {
             CMN_LOG_CLASS_RUN_ERROR << "FetchStateTableData: encountered problem on output stream for collector \""
                                     << this->GetName() << "\"" << std::endl;
         }
-        outputStream.close();
     } else {
-        outputStream.open(LogFileName.c_str(), std::ios::app);
-        if (outputStream.good()) {
-            unsigned int i;
-            for (i = startIndex; i <= endIndex; i += SamplingInterval) {
-                outputStream << TargetStateTable->Ticks[i];
-                for (unsigned int j = 0; j < RegisteredSignalElements.size(); ++j) {
-                    outputStream << this->Delimiter;
-                    (*table->StateVector[RegisteredSignalElements[j].ID])[i].ToStreamRaw(outputStream, this->Delimiter);
-                }
-                outputStream << std::endl;
-            }
-            OffsetForNextRead = (i - endIndex == 0 ? SamplingInterval : i - endIndex);
-        } else {
-            CMN_LOG_CLASS_RUN_ERROR << "FetchStateTableData: encountered problem on output stream for collector \""
-                                    << this->GetName() << "\"" << std::endl;
-        }
-        outputStream.close();
+        CMN_LOG_CLASS_RUN_ERROR << "FetchStateTableData: output stream for collector \"" << this->GetName() << "\" is not available." << std::endl;
     }
     return true;
 }
 
 
-bool mtsCollectorState::ConvertBinaryToText(const std::string sourceBinaryLogFileName,
-                                            const std::string targetPlainTextLogFileName,
+bool mtsCollectorState::ConvertBinaryToText(const std::string sourceBinaryFileName,
+                                            const std::string targetPlainTextFileName,
                                             const char delimiter)
 {
-    // Try to open a binary log file (source).
-    std::ifstream inFile(sourceBinaryLogFileName.c_str(), std::ios::in | std::ios::binary | std::ios::ate);
+    // Try to open a binary file (source).
+    std::ifstream inFile(sourceBinaryFileName.c_str(), std::ios::in | std::ios::binary | std::ios::ate);
     if (!inFile.is_open()) {
-        CMN_LOG_INIT_ERROR << "Class mtsCollectorState: ConvertBinaryToText: unable to open binary log file: " << sourceBinaryLogFileName << std::endl;
+        CMN_LOG_INIT_ERROR << "Class mtsCollectorState: ConvertBinaryToText: unable to open binary file: " << sourceBinaryFileName << std::endl;
         return false;
     }
 
-    // Prepare output log file with plain text format.
-    std::ofstream outFile(targetPlainTextLogFileName.c_str(), std::ios::out);
+    // Prepare output file with plain text format.
+    std::ofstream outFile(targetPlainTextFileName.c_str(), std::ios::out);
     if (!outFile.is_open()) {
-        CMN_LOG_INIT_ERROR << "Class mtsCollectorState: ConvertBinaryToText: unable to create text log file: " << targetPlainTextLogFileName << std::endl;
+        CMN_LOG_INIT_ERROR << "Class mtsCollectorState: ConvertBinaryToText: unable to create text file: " << targetPlainTextFileName << std::endl;
         inFile.close();
         return false;
     }
 
-    // Get the total size of the log file in bytes.
+    // Get the total size of the file in bytes.
     std::ifstream::pos_type inFileTotalSize = inFile.tellg();
     inFile.seekg(0, std::ios::beg);
 
@@ -517,7 +668,7 @@ bool mtsCollectorState::ConvertBinaryToText(const std::string sourceBinaryLogFil
         currentPos = inFile.tellg();
     }
 
-    CMN_LOG_INIT_VERBOSE << "Class mtsCollectorState: ConvertBinaryToText: conversion completed: " << targetPlainTextLogFileName << std::endl;
+    CMN_LOG_INIT_VERBOSE << "Class mtsCollectorState: ConvertBinaryToText: conversion completed: " << targetPlainTextFileName << std::endl;
 
     outFile.close();
     inFile.close();

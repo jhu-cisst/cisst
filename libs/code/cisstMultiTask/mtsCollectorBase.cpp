@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):  Min Yang Jung
+  Author(s):  Min Yang Jung, Anton Deguet
   Created on: 2009-03-20
 
-  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2009-2010 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -32,10 +32,10 @@ mtsTaskManager * mtsCollectorBase::TaskManager;
 //	Constructor, Destructor, and Initializer
 //-------------------------------------------------------
 mtsCollectorBase::mtsCollectorBase(const std::string & collectorName,
-                                   const CollectorLogFormat logFormat)
+                                   const CollectorFileFormat fileFormat)
     :
     mtsTaskFromSignal(collectorName),
-    LogFormat(logFormat)
+    FileFormat(fileFormat)
 {
     ++CollectorCount;
 
@@ -46,12 +46,14 @@ mtsCollectorBase::mtsCollectorBase(const std::string & collectorName,
     // add a control interface to start and stop the data collection
     this->ControlInterface = AddProvidedInterface("Control");
     if (this->ControlInterface) {
+        // commands controlling the output
+        ControlInterface->AddCommandVoid(&mtsCollectorBase::SetOutputToDefault, this, "SetOutputToDefault");
+        // start/stop commands
         ControlInterface->AddCommandVoid(&mtsCollectorBase::StartCollectionCommand, this, "StartCollection");
         ControlInterface->AddCommandWrite(&mtsCollectorBase::StartCollectionInCommand, this, "StartCollectionIn");
         ControlInterface->AddCommandVoid(&mtsCollectorBase::StopCollectionCommand, this, "StopCollection");
         ControlInterface->AddCommandWrite(&mtsCollectorBase::StopCollectionInCommand, this, "StopCollectionIn");
     }
-
     Init();
 }
 
@@ -67,17 +69,6 @@ void mtsCollectorBase::Init()
 {
     Status = COLLECTOR_STOP;
     ClearTaskMap();
-}
-
-
-//-------------------------------------------------------
-//	Thread management functions (called internally)
-//-------------------------------------------------------
-void mtsCollectorBase::Run()
-{
-    CMN_LOG_CLASS_RUN_DEBUG << "Run: started for collector \"" << this->GetName() << "\"" << std::endl;
-    ProcessQueuedCommands();
-    ProcessQueuedEvents();
 }
 
 

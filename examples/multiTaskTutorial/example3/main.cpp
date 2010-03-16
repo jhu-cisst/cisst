@@ -59,9 +59,10 @@ int main(void)
     mtsCollectorState * collector =
         new mtsCollectorState("RobotControl",
                               robotTask->GetDefaultStateTableName(),
-                              mtsCollectorBase::COLLECTOR_LOG_FORMAT_CSV);
+                              mtsCollectorBase::COLLECTOR_FILE_FORMAT_CSV);
     collector->AddSignal(); // all signals
     taskManager->AddTask(collector);
+    collector->Connect(); // collector knows what to connect to
 
     taskManager->CreateAll();
     taskManager->StartAll();

@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung, Anton Deguet
   Created on: 2009-03-20
 
-  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2009-2010 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -69,25 +69,28 @@ class CISST_EXPORT mtsCollectorState : public mtsCollectorBase
     /*! Local copy to reduce the number of reference in Collect() method. */
     unsigned int TableHistoryLength;
 
+    /*! Flag to determine is the state collector is connected.  Once
+      the state collector is connected, it becomes impossible to
+      change to task/state table being collected. */
+    bool ConnectedFlag;
+
     /*! Flag for PrintHeader() method. */
     bool FirstRunningFlag;
-
-    /*! When this flag is unset, this collector thread wakes up. */
-    bool WaitingForTrigger;
 
     /*! A stride value for data collector to skip several records. */
     unsigned int SamplingInterval;
 
     /*! Output file name. */
-    std::string LogFileName;
+    std::string OutputFileName;
 
-    /*! Delimiter used in a log file. Set by the constructor according to
-        mtsCollectorBase::CollectorLogFormat. */
+    /*! Pointer on output stream, can be create and managed by this
+      class or provided by a user. */
+    std::ostream * OutputStream;
+    std::ofstream * OutputFile;
+
+    /*! Delimiter used in a log file. Set by the constructor according
+      to mtsCollectorBase::CollectorLogFormat. */
     char Delimiter;
-
-    /*! Names of the target task and the target state table. */
-    const std::string TargetTaskName;
-    const std::string TargetStateTableName;
 
     /*! Pointers to the target task and the target state table. */
     mtsTask * TargetTask;
@@ -97,7 +100,7 @@ class CISST_EXPORT mtsCollectorState : public mtsCollectorBase
     std::stringstream StringStreamBufferForSerialization;
 
     /*! Serializer for binary logging. DeSerializer is used only at
-        ConvertBinaryToText() method so we don't define it here. */
+      ConvertBinaryToText() method so we don't define it here. */
     cmnSerializer * Serializer;
 
     /*! Thread-related methods */
@@ -123,11 +126,15 @@ class CISST_EXPORT mtsCollectorState : public mtsCollectorBase
                              const unsigned int startIdx,
                              const unsigned int endIdx);
 
+    /*! Update the delimiter used in output files based on file
+      format.  Should be used everytime FileFormat is set. */
+    void SetDelimiter(void);
+
     /*! Print out the signal names which are being collected. */
-    void PrintHeader(const CollectorLogFormat & logFormat);
+    void PrintHeader(const CollectorFileFormat & fileFormat);
 
     /*! Mark the end of the header. Called in case of binary log file. */
-    void MarkHeaderEnd(std::ofstream & logFile);
+    void MarkHeaderEnd(std::ostream & logFile);
 
     /*! Check if the given buffer contains the header mark. */
     static bool IsHeaderEndMark(const char * buffer);
@@ -142,18 +149,46 @@ class CISST_EXPORT mtsCollectorState : public mtsCollectorBase
 
 public:
     /*! Constructor using the task name and table name. */
-    mtsCollectorState(const std::string & targetTaskName,
-                      const std::string & targetStateTableName,
-                      const mtsCollectorBase::CollectorLogFormat collectorLogFormat);
-
+    mtsCollectorState(const std::string & collectorName);
 
     /*! Constructor using a task pointer and table name. */
-    mtsCollectorState(mtsTask * targetTask,
+    mtsCollectorState(const std::string & targetTaskName,
                       const std::string & targetStateTableName,
-                      const mtsCollectorBase::CollectorLogFormat collectorLogFormat);
-
+                      const CollectorFileFormat fileFormat);
 
     ~mtsCollectorState(void);
+
+    /*! Define the output file and format.  If a file is already in
+      use, this method will close the current one. */
+    void SetOutput(const std::string & fileName, const CollectorFileFormat fileFormat);
+
+    /*! Define the output using an existing ostream, the collector
+      will not open nor close the stream. */
+    void SetOutput(std::ostream & outputStream, const CollectorFileFormat fileFormat);
+
+    /*! Define the output using an existing ostream, the collector
+      will not open nor close the stream.  If this method is called
+      for the first time, the format will be
+      COLLECTOR_FILE_FORMAT_CSV, otherwise it will use the previously
+      used format. */
+    void SetOutput(std::ostream & outputStream);
+
+    /*! Creates a default file name using the task name, table name
+      and date.  The suffix depends on the file format. */
+    void SetOutputToDefault(const CollectorFileFormat fileFormat);
+
+    /*! Creates a default file name using the task name, table name
+      and date.  If this method is called for the first time, the
+      format will be COLLECTOR_FILE_FORMAT_CSV, otherwise it will use
+      the previously used format. */
+    void SetOutputToDefault(void);
+
+    /*! Defines which table to collect data from.  This is defined by
+        the task name and the table name.  If the table name is not
+        provided, the collector will use the default task's state
+        table. */
+    bool SetStateTable(const std::string & taskName,
+                       const std::string & stateTableName = "");
 
     /*! Add the signal specified to a list of registered signals. */
     bool AddSignal(const std::string & signalName = "");
@@ -165,14 +200,20 @@ public:
         SamplingInterval = (samplingInterval > 0 ? samplingInterval : 1);
     }
 
+    /*! Connect.  Once the state collector has been configured,
+      i.e. the methods SetStateTable and SetOutput have been use,
+      the collector should be added to the manager and then the
+      Connect method should be called. */
+    bool Connect(void);
+
     /*! Convert a binary log file into a plain text one. */
     static bool ConvertBinaryToText(const std::string sourceBinaryLogFileName,
                                     const std::string targetPlainTextLogFileName,
                                     const char delimiter = ',');
 
     /*! Get the name of log file currently being written. */
-    inline const std::string & GetLogFileName(void) const {
-        return this->LogFileName;
+    inline const std::string & GetOutputFileName(void) const {
+        return this->OutputFileName;
     }
 
     /*! Methods defined as virtual in base class to control stop/start

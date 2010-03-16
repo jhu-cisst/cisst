@@ -54,23 +54,24 @@ int main(void)
         collector =
             new mtsCollectorState("SIN",
                                   sineTaskObject->GetDefaultStateTableName(),
-                                  mtsCollectorBase::COLLECTOR_LOG_FORMAT_BINARY);
+                                  mtsCollectorBase::COLLECTOR_FILE_FORMAT_BINARY);
     } else if (choice == 't') {
         collector =
             new mtsCollectorState("SIN",
                                   sineTaskObject->GetDefaultStateTableName(),
-                                  mtsCollectorBase::COLLECTOR_LOG_FORMAT_PLAIN_TEXT);
+                                  mtsCollectorBase::COLLECTOR_FILE_FORMAT_PLAIN_TEXT);
     } else if (choice == 'c') {
         collector =
             new mtsCollectorState("SIN",
                                   sineTaskObject->GetDefaultStateTableName(),
-                                  mtsCollectorBase::COLLECTOR_LOG_FORMAT_CSV);
+                                  mtsCollectorBase::COLLECTOR_FILE_FORMAT_CSV);
     }
     // specify which signal (aka state data) to collect
     if (!collector->AddSignal("SineData")) {
         std::cerr << "Can't find signal named \"SineData\"" << std::endl;
     }
     taskManager->AddTask(collector);
+    collector->Connect(); // collector knows what to connect to
 
     taskManager->CreateAll();
     taskManager->StartAll();
@@ -89,8 +90,8 @@ int main(void)
 
     // perform conversion from binary to text (csv)
     if (choice == 'b') {
-        mtsCollectorState::ConvertBinaryToText(collector->GetLogFileName(),
-                                               collector->GetLogFileName() + ".csv",
+        mtsCollectorState::ConvertBinaryToText(collector->GetOutputFileName(),
+                                               collector->GetOutputFileName() + ".csv",
                                                ','); // comma separated
     }
     taskManager->Cleanup();

@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung, Anton Deguet
   Created on: 2009-02-25
 
-  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2009-2010 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -42,10 +42,11 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsExport.h>
 
 /*!
-\ingroup cisstMultiTask
+  \ingroup cisstMultiTask
 
-This class provides a way to collect data from state table in real-time.
-Collected data can be either saved as a log file or displayed in GUI like an oscilloscope.
+  This class provides a way to collect data from state table in
+  real-time.  Collected data can be either saved as a log file or
+  displayed in GUI like an oscilloscope.
 */
 class CISST_EXPORT mtsCollectorBase: public mtsTaskFromSignal
 {
@@ -56,10 +57,11 @@ class CISST_EXPORT mtsCollectorBase: public mtsTaskFromSignal
     //-------------------- Auxiliary class definition -----------------------//
 public:
     typedef enum {
-        COLLECTOR_LOG_FORMAT_PLAIN_TEXT,
-        COLLECTOR_LOG_FORMAT_BINARY,
-        COLLECTOR_LOG_FORMAT_CSV
-    } CollectorLogFormat;
+        COLLECTOR_FILE_FORMAT_PLAIN_TEXT,
+        COLLECTOR_FILE_FORMAT_BINARY,
+        COLLECTOR_FILE_FORMAT_CSV,
+        COLLECTOR_FILE_FORMAT_UNDEFINED
+    } CollectorFileFormat;
 
     //------------------------- Protected Members ---------------------------//
 protected:
@@ -73,7 +75,7 @@ protected:
     } CollectorStatus;
 
     CollectorStatus Status;
-    CollectorLogFormat LogFormat;
+    CollectorFileFormat FileFormat;
 
     class SignalMapElement {
     public:
@@ -98,6 +100,8 @@ protected:
 
     /*! Default control interface and methods used for the provided commands. */
     mtsProvidedInterface * ControlInterface;
+
+    /*! Methods used to populate the component provided interface. */
     inline void StartCollectionCommand(void) {
         this->StartCollection(mtsDouble(0.0));
     }
@@ -110,6 +114,7 @@ protected:
     inline void StopCollectionInCommand(const mtsDouble & delayInSeconds) {
         this->StopCollection(delayInSeconds);
     }
+    //@}
 
     /*! Initialize this collector instance */
     void Init(void);
@@ -123,11 +128,8 @@ protected:
     /*! Set some initial values */
     virtual void Startup(void) = 0;
 
-    /*! Performed periodically */
-    virtual void Run(void);
-
 public:
-    mtsCollectorBase(const std::string & collectorName, const CollectorLogFormat logFormat);
+    mtsCollectorBase(const std::string & collectorName, const CollectorFileFormat fileFormat);
 
     virtual ~mtsCollectorBase(void);
 
@@ -138,6 +140,9 @@ public:
     /*! End collecting data. Data collection will end after delayedStop
     second(s). If it is zero (by default), it means 'stop now'. */
     virtual void StopCollection(const mtsDouble & delayInSeconds) = 0;
+
+    /*! Set output file names */
+    virtual void SetOutputToDefault(void) = 0;
 
     //---------------------- Miscellaneous functions ------------------------//
     inline static unsigned int GetCollectorCount(void) { return CollectorCount; }
