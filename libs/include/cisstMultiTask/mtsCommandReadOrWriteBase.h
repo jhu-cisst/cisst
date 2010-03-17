@@ -114,7 +114,7 @@ protected:
 class mtsCommandWriteGenericBase : public mtsCommandBase {
 
     friend class mtsMulticastCommandWriteBase;
-    friend class mtsCommandQueuedWriteGeneric;
+    friend class mtsCommandQueuedWriteGenericBase;
 
 public:
     typedef mtsCommandBase BaseType;
