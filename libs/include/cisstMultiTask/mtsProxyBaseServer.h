@@ -93,13 +93,13 @@ protected:
     Ice::ObjectAdapterPtr IceAdapter;
     Ice::ObjectPtr Servant;
 
-    /*! Set as true when using dynamic port allocation (true by default) */
-    bool DynamicPortAllocation;
-
     /*! Endpoint information that clients uses to connect to this server */
     const std::string AdapterName;
     const std::string CommunicatorID;
     std::string EndpointInfo;
+
+    /*! Set as true when using dynamic port allocation (true by default) */
+    bool DynamicPortAllocation;
 
     /*! Create ICE servant object */
     virtual Ice::ObjectPtr CreateServant() = 0;

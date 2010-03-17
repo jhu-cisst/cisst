@@ -106,8 +106,8 @@ mtsManagerLocal::mtsManagerLocal(void)
 mtsManagerLocal::mtsManagerLocal(const std::string & globalComponentManagerIP,
                                  const std::string & thisProcessName,
                                  const std::string & thisProcessIP)
-                                 : GlobalComponentManagerIP(globalComponentManagerIP),
-                                   ProcessName(thisProcessName),
+                                 : ProcessName(thisProcessName),
+                                   GlobalComponentManagerIP(globalComponentManagerIP),
                                    ProcessIP(thisProcessIP)
 {
     Initialize();
