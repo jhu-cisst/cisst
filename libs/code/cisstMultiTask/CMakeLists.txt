@@ -61,7 +61,7 @@ SET(SOURCE_FILES
 
     mtsCollectorBase.cpp
     mtsCollectorState.cpp
-#    mtsCollectorEvent.cpp
+    mtsCollectorEvent.cpp
     
     mtsManagerLocal.cpp
     mtsManagerGlobal.cpp
@@ -134,7 +134,7 @@ SET(HEADER_FILES
 
     mtsCollectorBase.h
     mtsCollectorState.h
-#    mtsCollectorEvent.h
+    mtsCollectorEvent.h
 
     mtsManagerLocalInterface.h
     mtsManagerLocal.h
