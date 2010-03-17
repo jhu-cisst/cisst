@@ -160,8 +160,8 @@ unsigned int mtsTaskInterface::AllocateResources(const std::string & userName)
     ThreadResources * newThreadResources = new ThreadResources(mailBoxName.str(),
                                                                DEFAULT_ARG_BUFFER_LEN,
                                                                this->PostCommandQueuedCommand);
-    CMN_LOG_CLASS_INIT_VERBOSE << "AllocateResources: created mailbox " << newThreadResources->GetMailBox()->GetName()
-                               << std::endl;
+    CMN_LOG_CLASS_INIT_VERBOSE << "AllocateResources: created mailbox \"" << newThreadResources->GetMailBox()->GetName()
+                               << "\"" << std::endl;
     newThreadResources->CloneCommands(*this);
     ThreadResourcesMap.resize(ThreadResourcesMap.size() + 1,
                               ThreadResourcesPairType(userId, newThreadResources));

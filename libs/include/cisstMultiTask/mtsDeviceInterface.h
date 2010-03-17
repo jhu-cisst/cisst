@@ -198,6 +198,7 @@ class CISST_EXPORT mtsDeviceInterface: public cmnGenericObject
     //@{
     virtual bool AddObserver(const std::string & eventName, mtsCommandVoidBase * handler);
     virtual bool AddObserver(const std::string & eventName, mtsCommandWriteBase * handler);
+    virtual bool AddObserver(const std::string & eventName, mtsCommandWriteGenericBase * handler);
     //@}
 
     /*! Get the names of events coming from this interface */

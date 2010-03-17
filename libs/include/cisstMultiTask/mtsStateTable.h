@@ -79,7 +79,7 @@ class CISST_EXPORT mtsStateTable: public cmnGenericObject {
       the state indices for begin/end. */
     class IndexRange: public mtsGenericObject
     {
-        CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+        CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
     public:
         mtsStateIndex First;
         mtsStateIndex Last;

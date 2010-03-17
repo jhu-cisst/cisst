@@ -96,7 +96,7 @@ protected:
     mtsMailBox * MailBox;
 
     /*! Pointer to provided interface that we are connected to. */
-    mtsDeviceInterface * OtherInterface;
+    mtsDeviceInterface * ProvidedInterface;
 
     /*! Set as true when this interface is registered to the globalcomponent manager */
     bool Registered;
@@ -121,8 +121,8 @@ protected:
         return Name;
     }
 
-    virtual mtsDeviceInterface *GetConnectedInterface(void) const {
-        return OtherInterface;
+    virtual mtsDeviceInterface * GetConnectedInterface(void) const {
+        return ProvidedInterface;
     }
 
     /*! Get the names of commands required by this interface. */
@@ -138,16 +138,18 @@ protected:
     //@{
     virtual std::vector<std::string> GetNamesOfEventHandlersVoid(void) const;
     virtual std::vector<std::string> GetNamesOfEventHandlersWrite(void) const;
+    virtual std::vector<std::string> GetNamesOfEventHandlersWriteGeneric(void) const;
     //@}
 
     /*! Find an event handler based on its name. */
     //@{
     virtual mtsCommandVoidBase * GetEventHandlerVoid(const std::string & eventName) const;
     virtual mtsCommandWriteBase * GetEventHandlerWrite(const std::string & eventName) const;
+    virtual mtsCommandWriteGenericBase * GetEventHandlerWriteGeneric(const std::string & eventName) const;
     //@}
 
     void ConnectTo(mtsDeviceInterface * other) {
-        OtherInterface = other;
+        ProvidedInterface = other;
     }
     void Disconnect(void);  // this could work if we use function objects rather than ptrs, or have special NOP command object
 
@@ -160,11 +162,13 @@ protected:
     inline void DisableAllEvents(void) {
         EventHandlersVoid.ForEachVoid(&mtsCommandBase::Disable);
         EventHandlersWrite.ForEachVoid(&mtsCommandBase::Disable);
+        EventHandlersWriteGeneric.ForEachVoid(&mtsCommandBase::Disable);
     }
 
     inline void EnableAllEvents(void) {
         EventHandlersVoid.ForEachVoid(&mtsCommandBase::Enable);
         EventHandlersWrite.ForEachVoid(&mtsCommandBase::Enable);
+        EventHandlersWriteGeneric.ForEachVoid(&mtsCommandBase::Enable);
     }
 
     /*! Process any queued events. */
@@ -241,6 +245,8 @@ protected:
     typedef cmnNamedMap<mtsCommandWriteBase> EventHandlerWriteMapType;
     EventHandlerVoidMapType EventHandlersVoid;
     EventHandlerWriteMapType EventHandlersWrite;
+    typedef cmnNamedMap<mtsCommandWriteGenericBase> EventHandlerWriteGenericMapType;
+    EventHandlerWriteGenericMapType EventHandlersWriteGeneric;
 
 public:
 
@@ -287,6 +293,11 @@ public:
                                                       const std::string & eventName,
                                                       bool queued = true);
 
+    template <class __classType>
+    inline mtsCommandWriteGenericBase * AddEventHandlerWriteGeneric(void (__classType::*method)(const mtsGenericObject *),
+                                                                    __classType * classInstantiation,
+                                                                    const std::string & eventName,
+                                                                    bool queued = true);
 };
 
 
@@ -301,7 +312,7 @@ inline mtsCommandVoidBase * mtsRequiredInterface::AddEventHandlerVoid(void (__cl
         if (MailBox)
             EventHandlersVoid.AddItem(eventName, new mtsCommandQueuedVoid(MailBox, actualCommand));
         else
-            CMN_LOG_CLASS_INIT_ERROR << "No mailbox for queued event handler void " << eventName << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "No mailbox for queued event handler void \"" << eventName << "\"" << std::endl;
     } else {
         EventHandlersVoid.AddItem(eventName, actualCommand);
     }
@@ -317,7 +328,7 @@ inline mtsCommandVoidBase * mtsRequiredInterface::AddEventHandlerVoid(void (*fun
         if (MailBox)
             EventHandlersVoid.AddItem(eventName, new mtsCommandQueuedVoid(MailBox, actualCommand));
         else
-            CMN_LOG_CLASS_INIT_ERROR << "No mailbox for queued event handler void(func) " << eventName << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "No mailbox for queued event handler void (func) \"" << eventName << "\"" << std::endl;
     } else {
         EventHandlersVoid.AddItem(eventName, actualCommand);
     }
@@ -336,11 +347,31 @@ inline mtsCommandWriteBase * mtsRequiredInterface::AddEventHandlerWrite(void (__
         if (MailBox)
             EventHandlersWrite.AddItem(eventName,  new mtsCommandQueuedWrite<__argumentType>(MailBox, actualCommand, DEFAULT_ARG_BUFFER_LEN));
         else
-            CMN_LOG_CLASS_INIT_ERROR << "No mailbox for queued event handler write " << eventName << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "No mailbox for queued event handler write \"" << eventName << "\"" << std::endl;
     } else {
         EventHandlersWrite.AddItem(eventName, actualCommand);
     }
     return EventHandlersWrite.GetItem(eventName);
+}
+
+
+template <class __classType>
+inline mtsCommandWriteGenericBase * mtsRequiredInterface::AddEventHandlerWriteGeneric(void (__classType::*method)(const mtsGenericObject *),
+                                                                                      __classType * classInstantiation,
+                                                                                      const std::string & eventName,
+                                                                                      bool queued) {
+    mtsCommandWriteGenericBase * actualCommand =
+        new mtsCommandWriteGeneric<__classType>(method, classInstantiation, eventName, 0);
+    if (queued) {
+        if (MailBox) {
+            EventHandlersWriteGeneric.AddItem(eventName,  new mtsCommandQueuedWriteGeneric(MailBox, actualCommand, DEFAULT_ARG_BUFFER_LEN));
+        } else {
+            CMN_LOG_CLASS_INIT_ERROR << "No mailbox for queued event handler write \"" << eventName << "\"" << std::endl;
+        }
+    } else {
+        EventHandlersWriteGeneric.AddItem(eventName, actualCommand);
+    }
+    return EventHandlersWriteGeneric.GetItem(eventName);
 }
 #endif  // !SWIG
 

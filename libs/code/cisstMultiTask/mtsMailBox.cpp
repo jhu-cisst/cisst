@@ -37,6 +37,7 @@ bool mtsMailBox::ExecuteNext(void)
 
    mtsCommandQueuedVoidBase * commandVoid;
    mtsCommandQueuedWriteBase * commandWrite;
+   mtsCommandQueuedWriteGenericBase * commandWriteGeneric;
 
    switch ((*command)->NumberOfArguments()) {
    case 0:
@@ -46,9 +47,15 @@ bool mtsMailBox::ExecuteNext(void)
        break;
    case 1:
        commandWrite = dynamic_cast<mtsCommandQueuedWriteBase *>(*command);
-       CMN_ASSERT(commandWrite);
-       commandWrite->GetActualCommand()->Execute(*(commandWrite->ArgumentPeek()));
-       commandWrite->ArgumentGet();  // Remove from parameter queue
+       if (commandWrite) {
+           commandWrite->GetActualCommand()->Execute(*(commandWrite->ArgumentPeek()));
+           commandWrite->ArgumentGet();  // Remove from parameter queue
+       } else {
+           commandWriteGeneric = dynamic_cast<mtsCommandQueuedWriteGenericBase *>(*command);
+           CMN_ASSERT(commandWriteGeneric);
+           commandWriteGeneric->GetActualCommand()->Execute(commandWriteGeneric->ArgumentPeek());
+           commandWriteGeneric->ArgumentGet();  // Remove from parameter queue
+       }
        break;
    default:
        CMN_LOG_RUN_ERROR << "Class mtsMailBox: Invalid parameter in ExecuteNext" << std::endl;

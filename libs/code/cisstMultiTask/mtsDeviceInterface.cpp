@@ -207,32 +207,19 @@ bool mtsDeviceInterface::AddObserver(const std::string & eventName, mtsCommandWr
 }
 
 
-#if 0
-unsigned int mtsDeviceInterface::AllocateResourcesForCurrentThread(void)
+bool mtsDeviceInterface::AddObserver(const std::string & eventName, mtsCommandWriteGenericBase * handler)
 {
-    // no queued commands in this interface, we just keep track of the
-    // requests
-    const osaThreadId consumerId = osaGetCurrentThreadId();
-    ThreadIdCountersType::iterator iterator = ThreadIdCounters.begin();
-    bool found = false;
-    while (!found && iterator != ThreadIdCounters.end()) {
-        if ((iterator->first).Equal(consumerId)) {
-            found = true;
-        } else {
-            iterator++;
-        }
-    }
-    if (!found) {
-        CMN_LOG_CLASS_INIT_VERBOSE << "AllocateResourcesForCurrentThread: new thread Id (" << consumerId << ")" << std::endl;
-        ThreadIdCounters.resize(ThreadIdCounters.size() + 1,
-                                ThreadIdCounterPairType(consumerId, 1));
-        return 1;
+    mtsMulticastCommandWriteBase * multicastCommand = EventWriteGenerators.GetItem(eventName);
+    if (multicastCommand) {
+        // should probably check for duplicates (have AddCommand return bool?)
+        multicastCommand->AddCommand(handler);
+        return true;
     } else {
-        CMN_LOG_CLASS_INIT_VERBOSE << "AllocateResourcesForCurrentThread: already registered thread Id (" << consumerId << ")" << std::endl;
-        return (iterator->second)++;
+        CMN_LOG_CLASS_INIT_ERROR << "AddObserver (write): cannot find event named \"" << eventName << "\"" << std::endl;
+        return false;
     }
 }
-#endif
+
 
 unsigned int mtsDeviceInterface::AllocateResources(const std::string & userName)
 {

@@ -67,11 +67,11 @@ public:
     virtual void ToStream(std::ostream & outputStream) const;
 
 
-    virtual mtsCommandQueuedWriteBase * Clone(mtsMailBox* mailBox, unsigned int size) const = 0;
+    virtual mtsCommandQueuedWriteBase * Clone(mtsMailBox* mailBox, size_t size) const = 0;
 
 
     // Allocate should be called when a task calls GetMethodXXX().
-    virtual void Allocate(unsigned int size) = 0;
+    virtual void Allocate(size_t size) = 0;
 
 
     virtual mtsCommandBase::ReturnType Execute(const mtsGenericObject & argument) = 0;
@@ -87,6 +87,65 @@ public:
         return MailBox->GetName();
     }
 };
+
+
+
+
+class CISST_EXPORT mtsCommandQueuedWriteGenericBase: public mtsCommandWriteGenericBase {
+protected:
+    typedef mtsCommandWriteGenericBase BaseType;
+    mtsMailBox * MailBox;
+    mtsCommandWriteGenericBase * ActualCommand;
+
+private:
+    inline mtsCommandQueuedWriteGenericBase(void):
+        BaseType("??"),
+        MailBox(0),
+        ActualCommand(0)
+    {}
+
+public:
+    inline mtsCommandQueuedWriteGenericBase(mtsMailBox * mailBox, mtsCommandWriteGenericBase * actualCommand):
+        BaseType(actualCommand->GetName()),
+        MailBox(mailBox),
+        ActualCommand(actualCommand)
+    {
+        this->SetArgumentPrototype(ActualCommand->GetArgumentPrototype());
+    }
+
+
+    inline virtual ~mtsCommandQueuedWriteGenericBase() {}
+
+
+    inline virtual mtsCommandWriteGenericBase * GetActualCommand(void) {
+        return ActualCommand;
+    }
+
+
+    virtual void ToStream(std::ostream & outputStream) const;
+
+
+    virtual mtsCommandQueuedWriteGenericBase * Clone(mtsMailBox* mailBox, size_t size) const = 0;
+
+
+    // Allocate should be called when a task calls GetMethodXXX().
+    virtual void Allocate(size_t size) = 0;
+
+
+    virtual mtsCommandBase::ReturnType Execute(const mtsGenericObject * argument) = 0;
+
+
+    virtual const mtsGenericObject * ArgumentPeek(void) const = 0;
+
+
+    virtual mtsGenericObject * ArgumentGet(void) = 0;
+
+
+    inline virtual const std::string & GetMailBoxName(void) const {
+        return MailBox->GetName();
+    }
+};
+
 
 #endif // _mtsCommandQueuedWrite_h
 

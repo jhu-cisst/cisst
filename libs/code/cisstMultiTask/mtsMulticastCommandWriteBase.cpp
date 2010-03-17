@@ -21,6 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include <cisstMultiTask/mtsMulticastCommandWriteBase.h>
+#include <cisstMultiTask/mtsCommandWrite.h>
 
 void mtsMulticastCommandWriteBase::AddCommand(BaseType * command) {
     if (command) {
@@ -46,12 +47,40 @@ void mtsMulticastCommandWriteBase::AddCommand(BaseType * command) {
 }
 
 
+void mtsMulticastCommandWriteBase::AddCommand(mtsCommandWriteGenericBase * command) {
+    if (command) {
+        // check if the command already has an argument prototype
+        if (command->GetArgumentPrototype()) {
+            CMN_ASSERT(this->GetArgumentPrototype());
+            if (command->GetArgumentPrototype()->Services() != this->GetArgumentPrototype()->Services()) {
+                CMN_LOG_INIT_ERROR << "Class mtsMulticastCommandWriteBase: AddCommand: command argument type don't match" << std::endl;
+                exit(0);
+            } else {
+                // copy the multicast command prototype to each added command using in place new
+                this->GetArgumentPrototype()->Services()->Create(const_cast<mtsGenericObject *>(command->GetArgumentPrototype()), *(this->GetArgumentPrototype()));
+                // Add the command to the list
+                this->CommandsGeneric.push_back(command);
+            }
+        } else {
+            // create a new object
+            command->SetArgumentPrototype(reinterpret_cast<const mtsGenericObject *>(this->GetArgumentPrototype()->Services()->Create(*(this->GetArgumentPrototype()))));
+            // Add the command to the list
+            this->CommandsGeneric.push_back(command);
+        }
+    }
+}
+
+
 void mtsMulticastCommandWriteBase::ToStream(std::ostream & outputStream) const {
-    outputStream << "mtsMulticastCommandWrite: " << this->Name;
-    if (Commands.size() != 0) {
+    outputStream << "mtsMulticastCommandWrite: \"" << this->Name << "\"";
+    if ((Commands.size() + CommandsGeneric.size()) != 0) {
         outputStream << "\n  Registered observers:" << std::endl;
-        for (unsigned int i = 0; i < Commands.size(); i++) {
+        size_t i;
+        for (i = 0; i < Commands.size(); i++) {
             outputStream << "  . CallBack [" << i << "]: " << *(Commands[i]);
+        }
+        for (i = 0; i < CommandsGeneric.size(); i++) {
+            outputStream << "  . CallBack [" << i << "]: " << *(CommandsGeneric[i]);
         }
     } else {
         outputStream << " with no registered observers";

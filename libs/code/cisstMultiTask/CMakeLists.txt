@@ -5,13 +5,13 @@
 #
 # (C) Copyright 2003-2010 Johns Hopkins University (JHU), All Rights
 # Reserved.
-# 
+#
 # --- begin cisst license - do not edit ---
-# 
+#
 # This software is provided "as is" under an open source license, with
 # no warranty.  The complete license can be found in license.txt and
 # http://www.cisst.org/cisst/license.txt.
-# 
+#
 # --- end cisst license ---
 
 # set the library name
@@ -60,7 +60,8 @@ SET(SOURCE_FILES
     mtsDeviceInterface.cpp
 
     mtsCollectorBase.cpp
-    mtsCollectorState.cpp    
+    mtsCollectorState.cpp
+#    mtsCollectorEvent.cpp
     
     mtsManagerLocal.cpp
     mtsManagerGlobal.cpp
@@ -106,7 +107,7 @@ SET(HEADER_FILES
 
     mtsExport.h
     mtsForwardDeclarations.h
-    
+
     mtsDevice.h
 
     mtsQueue.h
@@ -125,15 +126,16 @@ SET(HEADER_FILES
     mtsTaskPeriodic.h
     mtsTaskFromCallback.h
     mtsTaskFromSignal.h
-    
+
     mtsTaskManager.h    # to be deleted
-        
+
     mtsDeviceInterface.h
     mtsInterfaceCommon.h
 
-    mtsCollectorBase.h    
+    mtsCollectorBase.h
     mtsCollectorState.h
-    
+#    mtsCollectorEvent.h
+
     mtsManagerLocalInterface.h
     mtsManagerLocal.h
     mtsManagerGlobalInterface.h    
@@ -206,7 +208,7 @@ if(CISST_MTS_HAS_ICE)
   foreach(ice_include_dir ${ICE_INCLUDE_DIR})
     set(SLICE_OPTIONS ${SLICE_OPTIONS} -I ${ice_include_dir})
   endforeach(ice_include_dir ${ICE_INCLUDE_DIR})
- 
+
   foreach(slice_file ${SLICE_FILES})
     set(GENERATED_CPP_FILE "${CMAKE_CURRENT_BINARY_DIR}/${slice_file}.cpp")
     set(GENERATED_H_FILE "${CMAKE_CURRENT_BINARY_DIR}/${slice_file}.h")
@@ -215,7 +217,7 @@ if(CISST_MTS_HAS_ICE)
       OUTPUT ${GENERATED_CPP_FILE} ${GENERATED_H_FILE} ${cisst_BINARY_DIR}/libs/include/cisstMultiTask/${slice_file}.h
       WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
       # first run slice2cpp
-      COMMAND ${ICE_HOME}/bin/slice2cpp    
+      COMMAND ${ICE_HOME}/bin/slice2cpp
       ARGS    -I ${ICE_SLICE_DIR} ${SLICE_OPTIONS} ${cisst_SOURCE_DIR}/libs/etc/cisstMultiTask/Ice/${slice_file}.ice
       # then create a directory to copy the header file
       COMMAND ${CMAKE_COMMAND}
@@ -227,7 +229,7 @@ if(CISST_MTS_HAS_ICE)
     )
 
     include_directories(${CMAKE_CURRENT_BINARY_DIR})
-    
+
     set(ADDITIONAL_SOURCE_FILES ${ADDITIONAL_SOURCE_FILES} ${GENERATED_CPP_FILE})
 
   endforeach(slice_file ${SLICE_FILES})
@@ -276,6 +278,6 @@ if(CISST_MTS_HAS_ICE)
                           ${ICE_LIBRARIES})
     CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_LIBRARIES ICE_LIBRARIES)
   endif(WIN32)
-  
+
 endif(CISST_MTS_HAS_ICE)
 

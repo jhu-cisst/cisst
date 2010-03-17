@@ -139,5 +139,105 @@ public:
 };
 
 
+
+
+
+
+
+template <class _classType>
+class mtsCommandWriteGeneric: public mtsCommandWriteGenericBase {
+
+public:
+    typedef mtsCommandWriteGenericBase BaseType;
+
+    /*! Typedef for the specific interface. */
+    typedef _classType ClassType;
+
+    /*! This type. */
+    typedef mtsCommandWriteGeneric<ClassType> ThisType;
+
+    /*! Typedef for pointer to member function of the specific interface
+      class. */
+    typedef void(_classType::*ActionType)(const mtsGenericObject *);
+
+private:
+    /*! Private copy constructor to prevent copies */
+    inline mtsCommandWriteGeneric(const ThisType & CMN_UNUSED(other));
+
+protected:
+    /*! The pointer to member function of the receiver class that
+      is to be invoked for a particular instance of the command*/
+    ActionType Action;
+
+    /*! Stores the receiver object of the command */
+    ClassType * ClassInstantiation;
+
+private:
+    /*! The constructor. Does nothing */
+    mtsCommandWriteGeneric(void): BaseType() {}
+
+public:
+    /*! The constructor.
+    //
+    // FIXME: this needs to be updated.
+    //
+      \param action Pointer to the member function that is to be called
+      by the invoker of the command
+      \param interface Pointer to the receiver of the command
+      \param name A string to identify the command. */
+    mtsCommandWriteGeneric(ActionType action, ClassType * classInstantiation, const std::string & name,
+                           const mtsGenericObject * argumentPrototype):
+        BaseType(name),
+        Action(action),
+        ClassInstantiation(classInstantiation)
+    {
+        // use dynamic creation with copy constructor if argument prototype has been provided
+        if (ArgumentPrototype) {
+            cmnGenericObject * prototypePointer = argumentPrototype->Services()->Create(*argumentPrototype);
+            CMN_ASSERT(prototypePointer);
+            this->ArgumentPrototype = dynamic_cast<mtsGenericObject *>(prototypePointer);
+            CMN_ASSERT(this->ArgumentPrototype);
+        } else {
+            this->ArgumentPrototype = 0;
+        }
+    }
+
+
+    /*! The destructor. Does nothing */
+    virtual ~mtsCommandWriteGeneric() {
+        if (this->ArgumentPrototype) {
+            delete this->ArgumentPrototype;
+        }
+    }
+
+
+    /*! The execute method. Calling the execute method from the invoker
+      applies the operation on the receiver.
+      \param obj The data passed to the operation method
+    */
+    virtual mtsCommandBase::ReturnType Execute(const mtsGenericObject * argument) {
+        if (this->IsEnabled()) {
+            CMN_ASSERT(argument);
+            (ClassInstantiation->*Action)(argument);
+            return mtsCommandBase::DEV_OK;
+        }
+        return mtsCommandBase::DISABLED;
+    }
+
+    /* commented in base class */
+    virtual void ToStream(std::ostream & outputStream) const {
+        outputStream << "mtsCommandWriteGeneric: ";
+        if (this->ClassInstantiation) {
+            outputStream << this->Name << "(const mtsGenericObject *) using class/object \""
+                         << mtsObjectName(this->ClassInstantiation) << "\" currently "
+                         << (this->IsEnabled() ? "enabled" : "disabled");
+        } else {
+            outputStream << "Not initialized properly";
+        }
+    }
+
+};
+
+
 #endif // _mtsCommandWrite_h
 

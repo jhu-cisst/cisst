@@ -34,3 +34,15 @@ void mtsCommandQueuedWriteBase::ToStream(std::ostream & outputStream) const {
                  << " currently " << (this->IsEnabled() ? "enabled" : "disabled");
 }
 
+
+void mtsCommandQueuedWriteGenericBase::ToStream(std::ostream & outputStream) const {
+    outputStream << "mtsCommandQueuedWrite: MailBox \"";
+    if (this->MailBox) {
+        outputStream << this->MailBox->GetName();
+    } else {
+        outputStream << "Undefined";
+    }
+    outputStream << "\" for command " << *(this->ActualCommand)
+                 << " currently " << (this->IsEnabled() ? "enabled" : "disabled");
+}
+

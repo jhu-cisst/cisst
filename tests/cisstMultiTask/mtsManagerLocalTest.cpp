@@ -570,9 +570,9 @@ void mtsManagerLocalTest::TestConnectLocally(void)
 
     CPPUNIT_ASSERT_EQUAL(FAIL, localManager.ConnectLocally(client->GetName(), "", server->GetName(), p1));
 
-    CPPUNIT_ASSERT(client->GetRequiredInterface(r1)->OtherInterface == NULL);
+    CPPUNIT_ASSERT(client->GetRequiredInterface(r1)->ProvidedInterface == NULL);
     CPPUNIT_ASSERT_EQUAL(SUCCESS, localManager.ConnectLocally(client->GetName(), r1, server->GetName(), p1));
-    CPPUNIT_ASSERT(client->GetRequiredInterface(r1)->OtherInterface == server->GetProvidedInterface(p1));
+    CPPUNIT_ASSERT(client->GetRequiredInterface(r1)->ProvidedInterface == server->GetProvidedInterface(p1));
 }
 
 #if CISST_MTS_HAS_ICE

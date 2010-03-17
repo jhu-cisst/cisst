@@ -68,12 +68,19 @@ public:
     virtual mtsCommandBase::ReturnType Execute(const mtsGenericObject & argument) {
         // cast argument first
         const ArgumentType * data = dynamic_cast< const ArgumentType * >(&argument);
-        if (data == NULL)
+        if (data == 0) {
             return mtsCommandBase::BAD_INPUT;
+        }
         // if cast succeeded call using actual type
-        unsigned int index;
-        for (index = 0; index < Commands.size(); index++) {
+        size_t index;
+        const size_t commandsSize = Commands.size();
+        for (index = 0; index < commandsSize; index++) {
             Commands[index]->Execute(*data);
+        }
+        // then call generic callbacks
+        const size_t commandsGenericSize = CommandsGeneric.size();
+        for (index = 0; index < commandsGenericSize; index++) {
+            CommandsGeneric[index]->Execute(data);
         }
         return mtsCommandBase::DEV_OK;
     }
