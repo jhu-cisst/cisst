@@ -5,9 +5,9 @@
   $Id$
 
   Author(s):  Anton Deguet, Ali Uneri
-  Created on: 2010-02-26
+  Created on: 2009-10-22
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -18,42 +18,55 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#ifndef _mtsCollectorQComponent_h
-#define _mtsCollectorQComponent_h
+#ifndef _displayQDevice_h
+#define _displayQDevice_h
 
 #include <cisstMultiTask/mtsDevice.h>
 #include <cisstMultiTask/mtsFunctionVoid.h>
 #include <cisstMultiTask/mtsFunctionReadOrWrite.h>
 
+#include <QMainWindow>
 #include <QObject>
-#include <QWidget>
+#include <QTimer>
 
-class mtsCollectorQComponent: public QObject, public mtsDevice
+#include "displayQWidget.h"
+
+
+class displayQDevice: public QObject, public mtsDevice
 {
     Q_OBJECT;
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
  public:
-    mtsCollectorQComponent(const std::string & taskName);
-    ~mtsCollectorQComponent(void);
+    displayQDevice(const std::string & taskName);
+    ~displayQDevice(void);
 
     void Configure(const std::string & CMN_UNUSED(filename) = "") {};
 
-    void ConnectToWidget(QWidget * widget);
-
  protected:
+    displayQWidget CentralWidget;
+    QMainWindow MainWindow;
+    QTimer UpdateTimer;
+
     struct {
-        mtsFunctionVoid StartCollection;
-        mtsFunctionVoid StopCollection;
-        mtsFunctionVoid SetOutputToDefault;
+       mtsFunctionRead GetData;
+       mtsFunctionWrite SetAmplitude;
+    } Generator;
+
+    struct {
+        mtsFunctionVoid Start;
+        mtsFunctionVoid Stop;
     } Collection;
 
+    mtsDouble Data;
+    mtsDouble AmplitudeData;
+
  public slots:
-    void StartCollectionQSlot(void);
-    void StopCollectionQSlot(void);
-    void SetOutputToDefaultQSlot(void);
+    void UpdateTimerQSlot(void);
+    void SetAmplitudeQSlot(int newValue);
+    void ToggleCollectionQSlot(bool checked);
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsCollectorQComponent);
+CMN_DECLARE_SERVICES_INSTANTIATION(displayQDevice);
 
-#endif  // _mtsCollectorQComponent_h
+#endif  // _displayQDevice_h

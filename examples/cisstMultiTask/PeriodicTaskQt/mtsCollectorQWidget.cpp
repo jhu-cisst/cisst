@@ -26,13 +26,17 @@ mtsCollectorQWidget::mtsCollectorQWidget(void)
     // create the widgets
     ButtonRecord = new QPushButton("Record", this);
     ButtonRecord->setCheckable(true);
+    ButtonNewFile = new QPushButton("New file", this);
 
     // create a layout for the widgets
     CentralLayout = new QGridLayout(this);
     CentralLayout->addWidget(ButtonRecord);
+    CentralLayout->addWidget(ButtonNewFile);
 
     QObject::connect(this->ButtonRecord, SIGNAL(toggled(bool)),
                      this, SLOT(ToggleRecordSlot(bool)));
+    QObject::connect(this->ButtonNewFile, SIGNAL(clicked()),
+                     this, SLOT(ButtonNewFileSlot()));
 }
 
 
@@ -43,4 +47,11 @@ void mtsCollectorQWidget::ToggleRecordSlot(bool checked)
     } else {
         emit StopCollection();
     }
+}
+
+#include <iostream>
+
+void mtsCollectorQWidget::ButtonNewFileSlot(void)
+{
+    emit SetOutputToDefault();
 }

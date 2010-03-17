@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet, Ali Uneri
   Created on: 2009-10-22
 
-  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2010 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -21,6 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnLoggerQWidget.h>
 #include <cisstOSAbstraction/osaThreadedLogFile.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
+#include <cisstMultiTask/mtsCollectorEvent.h>
 
 #include <QApplication>
 #include <QGridLayout>
@@ -32,8 +33,7 @@ http://www.cisst.org/cisst/license.txt.
 #include "mtsCollectorQWidget.h"
 #include "sineTask.h"
 
-const unsigned int NumSineTasks = 3;
-
+const unsigned int NumSineTasks = 2;
 
 int main(int argc, char *argv[])
 {
@@ -48,7 +48,11 @@ int main(int argc, char *argv[])
     // set the log level of detail on select tasks
     cmnClassRegister::SetLoD("sineTask", CMN_LOG_LOD_VERY_VERBOSE);
     cmnClassRegister::SetLoD("displayQComponent", CMN_LOG_LOD_VERY_VERBOSE);
+    cmnClassRegister::SetLoD("mtsManagerLocal", CMN_LOG_LOD_VERY_VERBOSE);
+    cmnClassRegister::SetLoD("mtsManagerGlobal", CMN_LOG_LOD_VERY_VERBOSE);
+    cmnClassRegister::SetLoD("mtsCollectorQComponent", CMN_LOG_LOD_VERY_VERBOSE);
     cmnClassRegister::SetLoD("mtsCollectorState", CMN_LOG_LOD_VERY_VERBOSE);
+    cmnClassRegister::SetLoD("mtsCollectorEvent", CMN_LOG_LOD_VERY_VERBOSE);
     cmnClassRegister::SetLoD("mtsStateTable", CMN_LOG_LOD_VERY_VERBOSE);
 
     // create Qt user interface
@@ -71,16 +75,32 @@ int main(int argc, char *argv[])
     mtsManagerLocal * taskManager = mtsManagerLocal::GetInstance();
     sineTask * sine;
     displayQComponent * display;
-    mtsCollectorState * collector;
+    mtsCollectorState * stateCollector;
     mtsCollectorQComponent * collectorQComponent;
 
+    // create an event collector
+    mtsCollectorEvent * eventCollector =
+        new mtsCollectorEvent("EventCollector",
+                              mtsCollectorBase::COLLECTOR_FILE_FORMAT_CSV);
+    taskManager->AddComponent(eventCollector);
+    // add QComponent to control the event collector
+    collectorQComponent = new mtsCollectorQComponent("EventCollectorQComponent");
+    taskManager->AddComponent(collectorQComponent);
+    // connect to the existing widget
+    collectorQComponent->ConnectToWidget(collectorQWidget);
+    taskManager->Connect(collectorQComponent->GetName(), "DataCollection",
+                         eventCollector->GetName(), "Control");
+
+    // create multiple sine generators along with their widget and
+    // state collectors
     for (unsigned int i = 0; i < NumSineTasks; i++) {
         std::ostringstream index;
         index << i;
 
         // create the generator and its widget
-        sine = new sineTask("SIN" + index.str(), 1.0 * cmn_ms);
+        sine = new sineTask("SIN" + index.str(), 5.0 * cmn_ms);
         taskManager->AddComponent(sine);
+        std::cout << *sine << std::endl;
         display = new displayQComponent("DISP" + index.str());
         taskManager->AddComponent(display);
         layout->addWidget(display->GetWidget(), 1, i);
@@ -88,18 +108,25 @@ int main(int argc, char *argv[])
                              sine->GetName(), "MainInterface");
 
         // create the state collector and connect it to the generator
-        collector = new mtsCollectorState(sine->GetName(),
-                                          sine->GetDefaultStateTableName(),
-                                          mtsCollectorBase::COLLECTOR_LOG_FORMAT_CSV);
-        collector->AddSignal("SineData");
-
+        stateCollector = new mtsCollectorState(sine->GetName(),
+                                               sine->GetDefaultStateTableName(),
+                                               mtsCollectorBase::COLLECTOR_FILE_FORMAT_CSV);
+        stateCollector->AddSignal("SineData");
+        taskManager->AddComponent(stateCollector);
+        stateCollector->Connect();
         // create the QComponent to bridge between the collection widget and the collector
-        collectorQComponent = new mtsCollectorQComponent("DataCollection" + index.str());
+        collectorQComponent = new mtsCollectorQComponent(sine->GetName() + "StateCollectorQComponent");
         taskManager->AddComponent(collectorQComponent);
         collectorQComponent->ConnectToWidget(collectorQWidget);
         taskManager->Connect(collectorQComponent->GetName(), "DataCollection",
-                             collector->GetName(), "Control");
+                             stateCollector->GetName(), "Control");
+
+        // add events to observe
+        eventCollector->AddObservedComponent(sine);
     }
+
+    // connect all interfaces for event collector
+    eventCollector->Connect();
 
     // generate a nice tasks diagram
     std::ofstream dotFile("PeriodicTaskQt.dot");
@@ -109,7 +136,7 @@ int main(int argc, char *argv[])
     // create and start all tasks
     taskManager->CreateAll();
     taskManager->StartAll();
-
+    
     // run Qt user interface
     mainWindow->resize(NumSineTasks * 220, 360);
     mainWindow->show();

@@ -31,8 +31,9 @@ mtsCollectorQComponent::mtsCollectorQComponent(const std::string & taskName) :
     // create the cisstMultiTask interface with commands and events
     mtsRequiredInterface * requiredInterface = AddRequiredInterface("DataCollection");
     if (requiredInterface) {
-       requiredInterface->AddFunction("StartCollection", Collection.Start);
-       requiredInterface->AddFunction("StopCollection", Collection.Stop);
+       requiredInterface->AddFunction("StartCollection", Collection.StartCollection);
+       requiredInterface->AddFunction("StopCollection", Collection.StopCollection);
+       requiredInterface->AddFunction("SetOutputToDefault", Collection.SetOutputToDefault);
     }
 }
 
@@ -49,19 +50,27 @@ void mtsCollectorQComponent::ConnectToWidget(QWidget * widget)
                      this, SLOT(StartCollectionQSlot()));
     QObject::connect(widget, SIGNAL(StopCollection()),
                      this, SLOT(StopCollectionQSlot()));
+    QObject::connect(widget, SIGNAL(SetOutputToDefault()),
+                     this, SLOT(SetOutputToDefaultQSlot()));
 }
 
 
 void mtsCollectorQComponent::StartCollectionQSlot(void)
 {
     CMN_LOG_CLASS_RUN_VERBOSE << "StartCollectionQSlot: starting data collection" << std::endl;
-    Collection.Start();
-
+    Collection.StartCollection();
 }
 
 
 void mtsCollectorQComponent::StopCollectionQSlot(void)
 {
     CMN_LOG_CLASS_RUN_VERBOSE << "StopCollectionQSlot: stopping data collection" << std::endl;
-    Collection.Stop();
+    Collection.StopCollection();
+}
+
+
+void mtsCollectorQComponent::SetOutputToDefaultQSlot(void)
+{
+    CMN_LOG_CLASS_RUN_VERBOSE << "StopCollectionQSlot: set output to default" << std::endl;
+    Collection.SetOutputToDefault();
 }

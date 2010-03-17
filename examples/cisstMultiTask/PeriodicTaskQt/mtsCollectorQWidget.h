@@ -37,14 +37,17 @@ public:
 protected:
     QGridLayout * CentralLayout;
     QPushButton * ButtonRecord;
+    QPushButton * ButtonNewFile;
 
 public slots:
     void ToggleRecordSlot(bool checked);
+    void ButtonNewFileSlot(void);
 
 public:
 signals:
     void StartCollection(void);
     void StopCollection(void);
+    void SetOutputToDefault(void);
 
 };
 
