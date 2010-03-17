@@ -37,7 +37,8 @@ void mtsTask::DoRunInternal(void)
 {
     StateTable.Start();
     this->Run();
-    StateTable.Advance();
+    // advance all state tables (if automatic) 
+    StateTables.ForEachVoid(&mtsStateTable::AdvanceIfAutomatic);
 }
 
 void mtsTask::StartupInternal(void) {

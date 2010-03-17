@@ -292,10 +292,14 @@ public:
     }
 
     /*! Add an existing state table to the list of known state tables
-      in this task.  This method will add an interface for the state
-      table using the name "StateTable" +
+      in this task.  This method will add a provided interface for the
+      state table using the name "StateTable" +
       existingStateTable->GetName() unless the caller specifies that
-      no interface should be created. */
+      no interface should be created.
+
+      By default, all state tables added will advance at each call of
+      the Run method.  To avoid the automatic advance, use the method
+      mtsStateTable::SetAutomaticAdvance(false). */
     bool AddStateTable(mtsStateTable * existingStateTable, bool addProvidedInterface = true);
 
     /********************* Methods to manage interfaces *******************/

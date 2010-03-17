@@ -37,6 +37,7 @@ mtsStateTable::mtsStateTable(int size, const std::string & name):
     NumberStateData(0),
     IndexWriter(0),
     IndexReader(0),
+    AutomaticAdvanceFlag(true),
     StateVector(NumberStateData),
     StateVectorDataNames(NumberStateData),
     Ticks(size, mtsStateIndex::TimeTicksType(0)),
@@ -235,6 +236,13 @@ void mtsStateTable::Advance(void) {
         }
     }
 
+}
+
+
+void mtsStateTable::AdvanceIfAutomatic(void) {
+    if (this->AutomaticAdvanceFlag) {
+        this->Advance();
+    }
 }
 
 

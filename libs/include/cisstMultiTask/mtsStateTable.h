@@ -225,6 +225,15 @@ public:
 	/*! The index of the reader in the table. */
 	unsigned int IndexReader;
 
+    /*! Automatic advance flag.  This flag is used by the method
+      AdvanceIfAutomatic to decide if this state table should advance
+      or not.  The method AdvanceIsAutomatic is used by mtsTask on all
+      the registered state tables.  If a user wishes to Advance the
+      state table manually, he or she will have to set this flag to
+      false (see SetAutomaticAdvance).  This flag is set to true by
+      default. */
+    bool AutomaticAdvanceFlag;
+
 	/*! The vector contains pointers to individual columns. */
 	std::vector<mtsStateArrayBase *> StateVector;
 
@@ -301,6 +310,16 @@ public:
         return (Ticks[timeIndex.Index()] == timeIndex.Ticks());
     }
 
+    /*! Get method for auto advance flag. See AutomaticAdvanceFlag */
+    inline const bool & AutomaticAdvance(void) const {
+        return this->AutomaticAdvanceFlag;
+    }
+
+    /*! Set method for auto advance flag.  See AutoAdvanceFlag. */
+    inline void SetAutomaticAdvance(bool automaticAdvance) {
+        this->AutomaticAdvanceFlag = automaticAdvance;
+    }
+
     /*! Check if the signal has been registered. */
     int GetStateVectorID(const std::string & dataName) const;
 
@@ -352,6 +371,9 @@ public:
       updating (incrementing) the write index before the read index.
     */
     void Advance(void);
+
+    /*! Advance if automatic advance is set and does nothing otherwise. */
+    void AdvanceIfAutomatic(void);
 
     /*! Kill, called when the task is being stopped.  Used for cleanup. */
     void Kill(void);
