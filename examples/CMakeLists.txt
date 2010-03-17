@@ -44,6 +44,8 @@ FOREACH(example ${CISST_EXAMPLES})
   OPTION(BUILD_EXAMPLES_${example} "Build ${example}." OFF)
 ENDFOREACH(example)
 
+# Set requirements per example, user will be prompt if these requirements are not met
+variable_requires(BUILD_EXAMPLES_multiTaskTutorial REQUIREMENT_MET CISST_HAS_FLTK)
 
 # Don't offer packages based on dependencies
 IF(NOT CISST_HAS_SWIG_PYTHON)

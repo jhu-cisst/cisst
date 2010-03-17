@@ -18,21 +18,24 @@ project (cisstUtilities)
 set (LIBRARY_OUTPUT_PATH ${cisstUtilities_BINARY_DIR}/lib)
 set (EXECUTABLE_OUTPUT_PATH ${cisstUtilities_BINARY_DIR}/bin)
 
-# Lists all utilities (one per subdirectory)
-# SET(CISST_UTILITIES
-#    )
-
-# Utilities provided based on existing settings
-if (BUILD_LIBS_cisstMultiTask AND CISST_MTS_HAS_ICE)
-  set (CISST_UTILITIES ${CISST_UTILITIES} multiTaskGlobalComponentManager)
-  set (CISST_UTILITIES ${CISST_UTILITIES} multiTaskGlobalComponentManagerFLTK)
-endif (BUILD_LIBS_cisstMultiTask AND CISST_MTS_HAS_ICE)
+# List all utilities
+set (CISST_UTILITIES 
+     multiTaskGlobalComponentManager
+     multiTaskGlobalComponentManagerFLTK)
 
 # Which utilities to build
 foreach (utility ${CISST_UTILITIES})
   # Build by default
   option (BUILD_UTILITIES_${utility} "Build ${utility}." OFF)
 endforeach (utility)
+
+# Set requirements per utility, user will be prompt if these requirements are not met
+variable_requires(BUILD_UTILITIES_multiTaskGlobalComponentManager REQUIREMENT_MET BUILD_LIBS_cisstMultiTask)
+variable_requires(BUILD_UTILITIES_multiTaskGlobalComponentManager REQUIREMENT_MET CISST_MTS_HAS_ICE)
+
+variable_requires(BUILD_UTILITIES_multiTaskGlobalComponentManagerFLTK REQUIREMENT_MET BUILD_LIBS_cisstMultiTask)
+variable_requires(BUILD_UTILITIES_multiTaskGlobalComponentManagerFLTK REQUIREMENT_MET CISST_MTS_HAS_ICE)
+variable_requires(BUILD_UTILITIES_multiTaskGlobalComponentManagerFLTK REQUIREMENT_MET CISST_HAS_FLTK)
 
 # Create targets for each utility
 foreach (utility ${CISST_UTILITIES})

@@ -15,12 +15,8 @@
 # name of project and executable
 PROJECT(multiTaskTutorialExample6)
 
-# use CMake provided script to locate FLTK
-FIND_PACKAGE(FLTK REQUIRED)
-
 # add include paths
-INCLUDE_DIRECTORIES(${multiTaskTutorialExample6_SOURCE_DIR}
-                    ${FLTK_INCLUDE_DIR})
+INCLUDE_DIRECTORIES(${multiTaskTutorialExample6_SOURCE_DIR})
 
 # name the main executable and specifies with source files to use
 ADD_EXECUTABLE(multiTaskTutorialExample6
@@ -32,9 +28,6 @@ ADD_EXECUTABLE(multiTaskTutorialExample6
                userInterface.h
 	       robotLowLevel.h
 	       )
-
-# this program 
-TARGET_LINK_LIBRARIES(multiTaskTutorialExample6 ${FLTK_LIBRARIES})
 
 # link with the cisst libraries
 CISST_REQUIRES("multiTaskTutorialExample6" "cisstCommon;cisstOSAbstraction;cisstMultiTask")

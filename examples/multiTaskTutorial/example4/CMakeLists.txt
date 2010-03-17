@@ -15,12 +15,8 @@
 # name of project and executable
 PROJECT(multiTaskTutorialExample4)
 
-# use CMake provided script to locate FLTK
-FIND_PACKAGE(FLTK REQUIRED)
-
 # add include paths
-INCLUDE_DIRECTORIES(${multiTaskTutorialExample4_SOURCE_DIR}
-                    ${FLTK_INCLUDE_DIR})
+INCLUDE_DIRECTORIES(${multiTaskTutorialExample4_SOURCE_DIR})
 
 # magic CMake command, generate .cxx and .h from .fl files
 # then compile them and link them with the executable
@@ -41,9 +37,6 @@ ADD_EXECUTABLE(multiTaskTutorialExample4
 	       ${multiTaskTutorialExample4_FLTK_UI_SRCS}
 	       displayUIstatic.cpp
 	       )
-
-# this program 
-TARGET_LINK_LIBRARIES(multiTaskTutorialExample4 ${FLTK_LIBRARIES})
 
 # link with the cisst libraries
 CISST_REQUIRES("multiTaskTutorialExample4" "cisstCommon;cisstOSAbstraction;cisstMultiTask;cisstInteractive")
