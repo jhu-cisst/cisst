@@ -75,4 +75,6 @@ if (CISST_MTS_HAS_ICE)
   CISST_REQUIRES(cisstMultiTaskCommandsAndEventsQtClient
                  "cisstCommon;cisstOSAbstraction;cisstMultiTask"
                  )
+else (CISST_MTS_HAS_ICE)
+  message(WARNING " cisstMultiTask example CommandsAndEventsQt will be compiled as single process only, client/server version requires CISST_MTS_HAS_ICE")
 endif (CISST_MTS_HAS_ICE)

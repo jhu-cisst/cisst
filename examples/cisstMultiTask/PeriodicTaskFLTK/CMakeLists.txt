@@ -28,8 +28,5 @@ ADD_EXECUTABLE(cisstMultiTaskPeriodicTaskFLTK
                ${cisstMultiTaskPeriodicTaskFLTK_FLTK_UI_SRCS}
                )
 
-# this program 
-TARGET_LINK_LIBRARIES(cisstMultiTaskPeriodicTaskFLTK ${FLTK_LIBRARIES})
-
 # link with the cisst libraries
 CISST_REQUIRES("cisstMultiTaskPeriodicTaskFLTK" "cisstCommon;cisstOSAbstraction;cisstMultiTask")

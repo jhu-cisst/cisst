@@ -12,17 +12,16 @@
 # 
 # --- end cisst license ---
 
-option(CISST_HAS_FLTK "cisst has support for FLTK" OFF)
-
 if(CISST_HAS_FLTK)
-  find_package(FLTK REQUIRED)
-  include_directories(${FLTK_INCLUDE_DIR})
-
   add_subdirectory(PeriodicTaskFLTK)
   add_subdirectory(CommandsAndEventsFLTK)
+else(CISST_HAS_FLTK)
+  message(WARNING " cisstMultiTask examples PeriodicTaskFLTK and CommandsAndEventsFLTK will not be compiled since they require CISST_HAS_FLTK")
 endif(CISST_HAS_FLTK)
 
 if(CISST_HAS_QT)
   add_subdirectory(PeriodicTaskQt)
   add_subdirectory(CommandsAndEventsQt)
+else(CISST_HAS_QT)
+  message(WARNING " cisstMultiTask examples PeriodicTaskQt and CommandsAndEventsQt will not be compiled since they require CISST_HAS_QT")
 endif(CISST_HAS_QT)
