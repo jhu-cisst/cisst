@@ -24,8 +24,13 @@
 // the following macro is now part of cisstCommon, cmnAccessorMacros.h
 #define MTS_DECLARE_MEMBER_AND_ACCESSORS CMN_DECLARE_MEMBER_AND_ACCESSORS
 
-// macro to create simple multiple inheritance with mtsGenericObject
-#define MTS_PROXY_CLASS_DECLARATION_FROM(className, newName)                 \
+// deprecated macro
+#define MTS_PROXY_CLASS_DECLARATION_FROM(className, newName) You_should_use__MTS_MULTIPLE_INHERITANCE_FROM_MTS_GENERIC__instead
+
+/*! macro to create multiple inheritance with mtsGenericObject.  This
+  macro should not be used with classes having a virtual table,
+  including any class derived from cmnGenericObject. */
+#define MTS_MULTIPLE_INHERITANCE_FROM_MTS_GENERIC(className, newName)        \
 class newName: public mtsGenericObject, public className                     \
 {                                                                            \
     CMN_DECLARE_SERVICES_EXPORT(CMN_DYNAMIC_CREATION, CMN_LOG_DEFAULT_LOD);  \

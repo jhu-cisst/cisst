@@ -36,7 +36,7 @@ void mtsMacrosTest::TestMTS_DECLARE_MEMBER_AND_ACCESSORS(void)
 }
 
 
-void mtsMacrosTest::TestMTS_PROXY_CLASS_DECLARATION_FROM(void)
+void mtsMacrosTest::TestMTS_MULTIPLE_INHERITANCE_FROM_MTS_GENERIC(void)
 {
     mtsMacrosTestClassBProxy objectB;
     // verify that is has the properties from mtsGenericObject

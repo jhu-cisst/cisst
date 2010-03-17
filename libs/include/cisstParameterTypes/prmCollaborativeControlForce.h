@@ -26,6 +26,6 @@ http://www.cisst.org/cisst/license.txt.
 // Always include last
 #include <cisstParameterTypes/prmExport.h>
 
-MTS_PROXY_CLASS_DECLARATION_FROM(robCollaborativeControlForce::ParameterType, prmCollaborativeControlForce);
+MTS_MULTIPLE_INHERITANCE_FROM_MTS_GENERIC(robCollaborativeControlForce::ParameterType, prmCollaborativeControlForce);
 
 #endif

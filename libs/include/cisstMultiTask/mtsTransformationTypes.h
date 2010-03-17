@@ -34,49 +34,49 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsGenericObject.h>
 #include <cisstMultiTask/mtsMacros.h>
 
-MTS_PROXY_CLASS_DECLARATION_FROM(vctDoubleQuat, mtsDoubleQuat);
+MTS_MULTIPLE_INHERITANCE_FROM_MTS_GENERIC(vctDoubleQuat, mtsDoubleQuat);
 typedef mtsDoubleQuat mtsQuat;
-MTS_PROXY_CLASS_DECLARATION_FROM(vctFloatQuat, mtsFloatQuat);
+MTS_MULTIPLE_INHERITANCE_FROM_MTS_GENERIC(vctFloatQuat, mtsFloatQuat);
 
-MTS_PROXY_CLASS_DECLARATION_FROM(vctDoubleQuatRot3, mtsDoubleQuatRot3);
+MTS_MULTIPLE_INHERITANCE_FROM_MTS_GENERIC(vctDoubleQuatRot3, mtsDoubleQuatRot3);
 typedef mtsDoubleQuatRot3 mtsQuatRot3;
-MTS_PROXY_CLASS_DECLARATION_FROM(vctFloatQuatRot3, mtsFloatQuatRot3);
+MTS_MULTIPLE_INHERITANCE_FROM_MTS_GENERIC(vctFloatQuatRot3, mtsFloatQuatRot3);
 
-MTS_PROXY_CLASS_DECLARATION_FROM(vctDoubleAxAnRot3, mtsDoubleAxAnRot3);
+MTS_MULTIPLE_INHERITANCE_FROM_MTS_GENERIC(vctDoubleAxAnRot3, mtsDoubleAxAnRot3);
 typedef mtsDoubleAxAnRot3 mtsAxAnRot3;
-MTS_PROXY_CLASS_DECLARATION_FROM(vctFloatAxAnRot3, mtsFloatAxAnRot3);
+MTS_MULTIPLE_INHERITANCE_FROM_MTS_GENERIC(vctFloatAxAnRot3, mtsFloatAxAnRot3);
 
-MTS_PROXY_CLASS_DECLARATION_FROM(vctDoubleRodRot3, mtsDoubleRodRot3);
+MTS_MULTIPLE_INHERITANCE_FROM_MTS_GENERIC(vctDoubleRodRot3, mtsDoubleRodRot3);
 typedef mtsDoubleRodRot3 mtsRodRot3;
-MTS_PROXY_CLASS_DECLARATION_FROM(vctFloatRodRot3, mtsFloatRodRot3);
+MTS_MULTIPLE_INHERITANCE_FROM_MTS_GENERIC(vctFloatRodRot3, mtsFloatRodRot3);
 
-MTS_PROXY_CLASS_DECLARATION_FROM(vctDoubleMatRot3, mtsDoubleMatRot3);
+MTS_MULTIPLE_INHERITANCE_FROM_MTS_GENERIC(vctDoubleMatRot3, mtsDoubleMatRot3);
 typedef mtsDoubleMatRot3 mtsMatRot3;
 typedef mtsDoubleMatRot3 mtsDoubleRot3;
 typedef mtsDoubleMatRot3 mtsRot3;
-MTS_PROXY_CLASS_DECLARATION_FROM(vctFloatMatRot3, mtsFloatMatRot3);
+MTS_MULTIPLE_INHERITANCE_FROM_MTS_GENERIC(vctFloatMatRot3, mtsFloatMatRot3);
 
-MTS_PROXY_CLASS_DECLARATION_FROM(vctDoubleQuatFrm3, mtsDoubleQuatFrm3);
+MTS_MULTIPLE_INHERITANCE_FROM_MTS_GENERIC(vctDoubleQuatFrm3, mtsDoubleQuatFrm3);
 typedef mtsDoubleQuatFrm3 mtsQuatFrm3;
-MTS_PROXY_CLASS_DECLARATION_FROM(vctFloatQuatFrm3, mtsFloatQuatFrm3);
+MTS_MULTIPLE_INHERITANCE_FROM_MTS_GENERIC(vctFloatQuatFrm3, mtsFloatQuatFrm3);
 
-MTS_PROXY_CLASS_DECLARATION_FROM(vctDoubleMatFrm3, mtsDoubleMatFrm3);
+MTS_MULTIPLE_INHERITANCE_FROM_MTS_GENERIC(vctDoubleMatFrm3, mtsDoubleMatFrm3);
 typedef mtsDoubleMatFrm3 mtsMatFrm3;
 typedef mtsDoubleMatFrm3 mtsDoubleFrm3;
 typedef mtsDoubleMatFrm3 mtsFrm3;
-MTS_PROXY_CLASS_DECLARATION_FROM(vctFloatMatFrm3, mtsFloatMatFrm3);
+MTS_MULTIPLE_INHERITANCE_FROM_MTS_GENERIC(vctFloatMatFrm3, mtsFloatMatFrm3);
 
-MTS_PROXY_CLASS_DECLARATION_FROM(vctDoubleFrm4x4, mtsDoubleFrm4x4);
+MTS_MULTIPLE_INHERITANCE_FROM_MTS_GENERIC(vctDoubleFrm4x4, mtsDoubleFrm4x4);
 typedef mtsDoubleFrm4x4 mtsFrm4x4;
-MTS_PROXY_CLASS_DECLARATION_FROM(vctFloatFrm4x4, mtsFloatFrm4x4);
+MTS_MULTIPLE_INHERITANCE_FROM_MTS_GENERIC(vctFloatFrm4x4, mtsFloatFrm4x4);
 
-MTS_PROXY_CLASS_DECLARATION_FROM(vctDoubleAnRot2, mtsDoubleAnRot2);
+MTS_MULTIPLE_INHERITANCE_FROM_MTS_GENERIC(vctDoubleAnRot2, mtsDoubleAnRot2);
 typedef mtsDoubleAnRot2 mtsAnRot2;
-MTS_PROXY_CLASS_DECLARATION_FROM(vctFloatAnRot2, mtsFloatAnRot2);
+MTS_MULTIPLE_INHERITANCE_FROM_MTS_GENERIC(vctFloatAnRot2, mtsFloatAnRot2);
 
-MTS_PROXY_CLASS_DECLARATION_FROM(vctDoubleMatRot2, mtsDoubleMatRot2);
+MTS_MULTIPLE_INHERITANCE_FROM_MTS_GENERIC(vctDoubleMatRot2, mtsDoubleMatRot2);
 typedef mtsDoubleAnRot2 mtsAnRot2;
-MTS_PROXY_CLASS_DECLARATION_FROM(vctFloatMatRot2, mtsFloatMatRot2);
+MTS_MULTIPLE_INHERITANCE_FROM_MTS_GENERIC(vctFloatMatRot2, mtsFloatMatRot2);
 
 #endif  // _mtsTransformationTypes_h
 

@@ -62,7 +62,7 @@ public:
 
 };
 
-MTS_PROXY_CLASS_DECLARATION_FROM(mtsMacrosTestClassB, mtsMacrosTestClassBProxy);
+MTS_MULTIPLE_INHERITANCE_FROM_MTS_GENERIC(mtsMacrosTestClassB, mtsMacrosTestClassBProxy);
 
 
 #endif // _mtsMacrosTestClasses_h
