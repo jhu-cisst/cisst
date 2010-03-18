@@ -108,7 +108,7 @@ cmnClassServicesBase * cmnClassRegister::FindClassServicesInstance(const std::ty
     cmnClassServicesBase * result = NULL;
     iterator = ServicesContainer.begin();
     while ((iterator != end) && (result == NULL)) {
-        if ((iterator->second)->TypeInfoPointer() == &typeInfo) {
+        if (*((iterator->second)->TypeInfoPointer()) == typeInfo) {
             result = iterator->second;
             CMN_LOG_RUN_VERBOSE << "Class cmnClassRegister::FindClassServicesInstance(): found class info for the given type_info"
                                 << std::endl;

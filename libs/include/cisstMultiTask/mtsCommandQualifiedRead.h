@@ -96,12 +96,12 @@ public:
     {
         this->Argument1Prototype = dynamic_cast<mtsGenericObject*>(argument1Prototype.Services()->Create());
         this->Argument2Prototype = dynamic_cast<mtsGenericObject*>(argument2Prototype.Services()->Create());
-        if (&typeid(Argument1Type) != &typeid(argument1Prototype)) {
+        if (typeid(Argument1Type) != typeid(argument1Prototype)) {
             CMN_LOG_INIT_ERROR << "mtsCommandQualifiedRead: argument 1 prototype is wrong type for command \"" << name << "\" (expected \""
                                << typeid(Argument1Type).name() << "\", got \"" 
                                << typeid(argument1Prototype).name() << "\")" << std::endl;
         }
-        if (&typeid(Argument2Type) != &typeid(argument2Prototype)) {
+        if (typeid(Argument2Type) != typeid(argument2Prototype)) {
             CMN_LOG_INIT_ERROR << "mtsCommandQualifiedRead: argument 2 prototype is wrong type for command \"" << name << "\" (expected \""
                                << typeid(Argument2Type).name() << "\", got \"" 
                                << typeid(argument2Prototype).name() << "\")" << std::endl;
@@ -118,12 +118,12 @@ public:
     {
         this->Argument1Prototype = dynamic_cast<mtsGenericObject*>(argument1Prototype.Services()->Create());
         this->Argument2Prototype = dynamic_cast<mtsGenericObject*>(argument2Prototype.Services()->Create());
-        if (&typeid(Argument1Type) != &typeid(argument1Prototype)) {
+        if (typeid(Argument1Type) != typeid(argument1Prototype)) {
             CMN_LOG_INIT_ERROR << "mtsCommandQualifiedRead: argument 1 prototype is wrong type for command \"" << name << "\" (expected \""
                                << typeid(Argument1Type).name() << "\", got \"" 
                                << typeid(argument1Prototype).name() << "\")" << std::endl;
         }
-        if (&typeid(Argument2Type) != &typeid(argument2Prototype)) {
+        if (typeid(Argument2Type) != typeid(argument2Prototype)) {
             CMN_LOG_INIT_ERROR << "mtsCommandQualifiedRead: argument 2 prototype is wrong type for command \"" << name << "\" (expected \""
                                << typeid(Argument2Type).name() << "\", got \"" 
                                << typeid(argument2Prototype).name() << "\")" << std::endl;
