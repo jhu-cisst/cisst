@@ -158,17 +158,17 @@ public:
 
     /*! Return a number of data (which can be visualized, i.e., type-casted 
         to double) */
-    virtual unsigned int GetNumberOfData(const bool visualizable = true) const {
+    virtual unsigned int GetNumberOfData(const bool CMN_UNUSED(visualizable) = true) const {
         return 0;
     }
 
     /*! Return the index-th (zero-based) value of data typecasted to double. */
-    virtual double GetDataAsDouble(const unsigned int index) const {
+    virtual double GetDataAsDouble(const unsigned int CMN_UNUSED(index)) const {
         return 0.0;
     }
 
     /*! Return the name of index-th (zero-based) data typecasted to double. */
-    virtual std::string GetDataName(const unsigned int index) const {
+    virtual std::string GetDataName(const unsigned int CMN_UNUSED(index)) const {
         return "N/A";
     }
 };
