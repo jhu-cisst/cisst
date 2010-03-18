@@ -70,12 +70,36 @@ class CISST_EXPORT mtsCollectorEvent : public mtsCollectorBase
     mtsRequiredInterface * GetRequiredInterfaceFor(const mtsComponent * componentPointer,
                                                    const mtsProvidedInterface * interfacePointer);
 
-    class CollectorEventWrite {
-        std::string EventName;
+    /*! Class holding information for each event void as well as
+      callback method */
+    class CollectorEventVoid {
     public:
-        CollectorEventWrite(const std::string & eventName);
+        std::string EventName;
+        size_t EventId;
+        mtsCollectorEvent * Collector;
+        CollectorEventVoid(const std::string & eventName, size_t eventId, mtsCollectorEvent * collector);
+        void EventHandler(void);
+    };
+
+    /*! Save the event information */
+    void SaveEventVoid(const CollectorEventVoid * event);
+
+    /*! Class holding information for each event write as well as
+      callback method */
+    class CollectorEventWrite {
+    public:
+        std::string EventName;
+        size_t EventId;
+        mtsCollectorEvent * Collector;
+        CollectorEventWrite(const std::string & eventName, size_t eventId, mtsCollectorEvent * collector);
         void EventHandler(const mtsGenericObject * payload);
     };
+
+    /*! Save the event information and payload */
+    void SaveEventWrite(const CollectorEventWrite * event, const mtsGenericObject * payload);
+
+    /*! Counter used to give a unique Id to each event, starts at 1 */
+    size_t EventCounter;
 
  public:
     /*! Thread-related methods */
@@ -86,15 +110,14 @@ class CISST_EXPORT mtsCollectorEvent : public mtsCollectorBase
     /*! Initialization */
     void Initialize(void);
 
+    // documented in base class
+    virtual std::string GetDefaultOutputName(void);
+
     /*! Constructor, requires to name the collector task. */
     mtsCollectorEvent(const std::string & collectorName,
                       const CollectorFileFormat fileFormat);
 
     ~mtsCollectorEvent(void);
-
-    /*! Set output file name to default
-      \todo move documentation for mtsCollectorState to Base */
-    void SetOutputToDefault(void);
 
     /*! Tells the collector to collect all events coming from a given
       component (all interfaces and all events). */

@@ -25,7 +25,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnGenericObjectProxy.h>
 #include <cisstCommon/cmnThrow.h>
 #include <cisstOSAbstraction/osaGetTime.h>
-#include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsTaskManager.h>
 
 #include <iostream>
@@ -46,12 +45,8 @@ CMN_IMPLEMENT_SERVICES(mtsCollectorState)
 mtsCollectorState::mtsCollectorState(const std::string & collectorName):
     mtsCollectorBase(collectorName,
                      COLLECTOR_FILE_FORMAT_UNDEFINED),
-    ConnectedFlag(false),
-    OutputStream(0),
-    OutputFile(0),
     TargetTask(0),
-    TargetStateTable(0),
-    Serializer(0)
+    TargetStateTable(0)
 {}
 
 
@@ -60,12 +55,8 @@ mtsCollectorState::mtsCollectorState(const std::string & targetTaskName,
                                      const mtsCollectorBase::CollectorFileFormat fileFormat):
     mtsCollectorBase(std::string("StateCollectorFor") + targetTaskName + targetStateTableName,
                      fileFormat),
-    ConnectedFlag(false),
-    OutputStream(0),
-    OutputFile(0),
     TargetTask(0),
-    TargetStateTable(0),
-    Serializer(0)
+    TargetStateTable(0)
 {
     this->SetStateTable(targetTaskName, targetStateTableName);
     this->SetOutputToDefault(fileFormat);
@@ -123,143 +114,6 @@ bool mtsCollectorState::SetStateTable(const std::string & taskName,
 }
 
 
-void mtsCollectorState::SetOutput(const std::string & fileName,
-                                  const CollectorFileFormat fileFormat)
-{
-    CMN_LOG_CLASS_INIT_DEBUG << "SetOutput: file \"" << fileName
-                             << "\" using file format \"" << fileFormat << "\"" << std::endl;
-    // test if there was a file opened before
-    if (this->OutputFile) {
-        CMN_LOG_CLASS_INIT_VERBOSE << "SetOutput: closing file \"" << this->OutputFileName << "\"" << std::endl;
-        this->OutputFile->close();
-    } else {
-        // create the output file
-        this->OutputFile = new std::ofstream;
-        // uses the oftream as our ostream
-        this->OutputStream = this->OutputFile;
-    }
-
-    this->FileFormat = fileFormat;
-    this->SetDelimiter();
-    this->OutputFileName = fileName;
-    this->FirstRunningFlag = true;
-
-    // initialize serializer
-    if (FileFormat == COLLECTOR_FILE_FORMAT_BINARY) {
-        // we need to create a serializer for each new file to
-        // serialize the type info
-        if (this->Serializer) {
-            delete this->Serializer;
-        }
-        Serializer = new cmnSerializer(StringStreamBufferForSerialization);
-    }
-
-    // set an appropriate delimiter according to the log file format.
-    switch (FileFormat) {
-    case COLLECTOR_FILE_FORMAT_CSV:
-        Delimiter = ',';
-        break;
-
-    case COLLECTOR_FILE_FORMAT_PLAIN_TEXT:
-    case COLLECTOR_FILE_FORMAT_BINARY:
-    default:
-        Delimiter = ' ';
-        break;
-    }
-
-    // open the output file and update the internal stream pointer
-    switch (FileFormat) {
-    case COLLECTOR_FILE_FORMAT_CSV:
-    case COLLECTOR_FILE_FORMAT_PLAIN_TEXT:
-        CMN_LOG_CLASS_INIT_VERBOSE << "SetOutput: opening file \"" << this->OutputFileName << "\" in text/append mode" << std::endl;
-        this->OutputFile->open(this->OutputFileName.c_str(), std::ios::app);
-        break;
-    case COLLECTOR_FILE_FORMAT_BINARY:
-        CMN_LOG_CLASS_INIT_VERBOSE << "SetOutput: opening file \"" << this->OutputFileName << "\" in binary/append mode" << std::endl;
-        this->OutputFile->open(this->OutputFileName.c_str(), std::ios::binary | std::ios::app);
-        break;
-    default:
-        CMN_LOG_CLASS_INIT_ERROR << "SetOutput: unexpected file format.";
-        break;
-    }
-
-    if (!this->OutputStream->good()) {
-        CMN_LOG_CLASS_INIT_ERROR << "SetOutput: output stream is no good" << std::endl;
-    }
-}
-
-
-void mtsCollectorState::SetOutputToDefault(const CollectorFileFormat fileFormat)
-{
-    CMN_LOG_CLASS_INIT_DEBUG << "SetOutputDefault: using file format \"" << fileFormat << "\"" << std::endl;
-    std::string currentDateTime;
-    osaGetDateTimeString(currentDateTime);
-    std::string suffix;
-
-    if (fileFormat == COLLECTOR_FILE_FORMAT_PLAIN_TEXT) {
-        suffix = "txt";
-    } else if (fileFormat == COLLECTOR_FILE_FORMAT_CSV) {
-        suffix = "csv";
-    } else {
-        suffix = "cdat"; // for cisst dat
-    }
-
-    std::string fileName =
-        "StateDataCollection-" + TargetTask->GetName() + "-"
-        + TargetStateTable->GetName() + "-" + currentDateTime + "." + suffix;
-
-    this->SetOutput(fileName, fileFormat);
-}
-
-
-void mtsCollectorState::SetOutputToDefault(void)
-{
-    CollectorFileFormat fileFormat;
-    // if the format has never been defined use CSV as default
-    if (this->FileFormat == COLLECTOR_FILE_FORMAT_UNDEFINED) {
-        fileFormat = COLLECTOR_FILE_FORMAT_CSV;
-    } else {
-        // use whatever format was used before
-        fileFormat = this->FileFormat;
-    }
-    this->SetOutputToDefault(fileFormat);
-}
-
-
-void mtsCollectorState::SetOutput(std::ostream & outputStream, const CollectorFileFormat fileFormat)
-{
-    CMN_LOG_CLASS_INIT_DEBUG << "SetOutput: using user provided output stream with file format \"" << fileFormat << "\"" << std::endl;
-    // test if there was a file opened before
-    if (this->OutputFile) {
-        CMN_LOG_CLASS_INIT_VERBOSE << "SetOutput: closing file \"" << this->OutputFileName << "\"" << std::endl;
-        this->OutputFile->close();
-    }
-
-    // use whatever format was used before
-    this->FileFormat = fileFormat;
-    this->SetDelimiter();
-    this->FirstRunningFlag = true;
-
-    // we are not using our own file
-    this->OutputFile = 0;
-    this->OutputFileName = std::string("using a stream");
-    this->OutputStream = &outputStream;
-}
-
-
-void mtsCollectorState::SetOutput(std::ostream & outputStream)
-{
-    CollectorFileFormat fileFormat;
-    // if the format has never been defined use CSV as default
-    if (this->FileFormat == COLLECTOR_FILE_FORMAT_UNDEFINED) {
-        fileFormat = COLLECTOR_FILE_FORMAT_CSV;
-    } else {
-        // use whatever format was used before
-        fileFormat = this->FileFormat;
-    }
-    this->SetOutput(outputStream, fileFormat);
-}
-
 
 bool mtsCollectorState::Connect(void)
 {
@@ -302,6 +156,17 @@ void mtsCollectorState::Initialize(void)
                                  << this->GetName() << "\"" << std::endl;
         cmnThrow(std::runtime_error("mtsCollectorState::Connect: unable to add required interface"));
     }
+}
+
+
+std::string mtsCollectorState::GetDefaultOutputName(void)
+{
+    std::string currentDateTime;
+    osaGetDateTimeString(currentDateTime);
+    std::string fileName =
+        "StateDataCollection-" + TargetTask->GetName() + "-"
+        + TargetStateTable->GetName() + "-" + currentDateTime;
+    return fileName;
 }
 
 
@@ -453,18 +318,6 @@ void mtsCollectorState::BatchCollect(const mtsStateTable::IndexRange & range)
                 LastReadIndex = (indexReader + (OffsetForNextRead - 1)) % TableHistoryLength;
             }
         }
-    }
-}
-
-
-void mtsCollectorState::SetDelimiter(void)
-{
-    if (this->FileFormat == COLLECTOR_FILE_FORMAT_PLAIN_TEXT) {
-        this->Delimiter = ' ';
-    } else if (this->FileFormat == COLLECTOR_FILE_FORMAT_CSV) {
-        this->Delimiter = ',';
-    } else {
-        this->Delimiter = ' ';
     }
 }
 

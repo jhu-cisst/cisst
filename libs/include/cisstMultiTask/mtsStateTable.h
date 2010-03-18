@@ -83,6 +83,9 @@ class CISST_EXPORT mtsStateTable: public cmnGenericObject {
     public:
         mtsStateIndex First;
         mtsStateIndex Last;
+        
+        void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
+                         bool headerOnly = false, const std::string & headerPrefix = "") const;
     };
 
     /*! Data structure used for state table data collection.  Stores

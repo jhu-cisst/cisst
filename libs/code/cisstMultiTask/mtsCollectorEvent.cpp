@@ -24,7 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnGenericObjectProxy.h>
 #include <cisstCommon/cmnThrow.h>
-#include <cisstOSAbstraction/osaSleep.h>
+#include <cisstOSAbstraction/osaGetTime.h>
 #include <cisstMultiTask/mtsTaskManager.h>
 
 #include <iostream>
@@ -34,37 +34,51 @@ http://www.cisst.org/cisst/license.txt.
 CMN_IMPLEMENT_SERVICES(mtsCollectorEvent)
 
 
+mtsCollectorEvent::CollectorEventVoid::CollectorEventVoid(const std::string & eventName,
+                                                          size_t eventId,
+                                                          mtsCollectorEvent * collector):
+    EventName(eventName),
+    EventId(eventId),
+    Collector(collector)
+{
+}
 
-mtsCollectorEvent::CollectorEventWrite::CollectorEventWrite(const std::string & eventName):
-    EventName(eventName)
+
+void mtsCollectorEvent::CollectorEventVoid::EventHandler(void)
+{
+    this->Collector->SaveEventVoid(this);
+}
+
+
+mtsCollectorEvent::CollectorEventWrite::CollectorEventWrite(const std::string & eventName,
+                                                            size_t eventId,
+                                                            mtsCollectorEvent * collector):
+    EventName(eventName),
+    EventId(eventId),
+    Collector(collector)
 {
 }
 
 
 void mtsCollectorEvent::CollectorEventWrite::EventHandler(const mtsGenericObject * payload)
 {
-    std::cout << "------------ Success, handler has been called with : \"" << *payload << "\"" << std::endl;
-    std::cout << "------------ Success, handler has been called with : \"" << payload->Services()->GetName() << "\"" << std::endl;
+    this->Collector->SaveEventWrite(this, payload);
 }
 
 
 mtsCollectorEvent::mtsCollectorEvent(const std::string & collectorName,
                                      const CollectorFileFormat fileFormat):
     mtsCollectorBase(collectorName, fileFormat),
-    ObservedComponents("ObservedComponents")
+    ObservedComponents("ObservedComponents"),
+    EventCounter(1)
 {
+    this->SetOutputToDefault(fileFormat);
     this->ObservedComponents.SetOwner(*this);
 }
 
 
 mtsCollectorEvent::~mtsCollectorEvent()
 {
-}
-
-
-void mtsCollectorEvent::SetOutputToDefault(void)
-{
-    std::cerr << "----------------------------- this needs to be implemented ----------------\n";
 }
 
 
@@ -119,6 +133,16 @@ void mtsCollectorEvent::Run(void)
     CMN_LOG_CLASS_RUN_DEBUG << "Run for collector \"" << this->GetName() << "\"" << std::endl;
     ProcessQueuedCommands();
     ProcessQueuedEvents();
+}
+
+
+std::string mtsCollectorEvent::GetDefaultOutputName(void)
+{
+    std::string currentDateTime;
+    osaGetDateTimeString(currentDateTime);
+    std::string fileName =
+        "EventCollection-" + this->GetName() + "-" + currentDateTime;
+    return fileName;
 }
 
 
@@ -277,6 +301,12 @@ bool mtsCollectorEvent::AddObservedEventVoid(const mtsComponent * componentPoint
                              << componentPointer->GetName() << "."
                              << interfacePointer->GetName() << "."
                              << eventName << "\"" << std::endl;
+    // create a CollectorEventvoid object
+    CollectorEventVoid * collector = new CollectorEventVoid(eventName, this->EventCounter, this);
+    this->EventCounter++;
+    // get the required interface to add an observer
+    mtsRequiredInterface * requiredInterface = GetRequiredInterfaceFor(componentPointer, interfacePointer);
+    requiredInterface->AddEventHandlerVoid(&CollectorEventVoid::EventHandler, collector, eventName);
     return true;
 }
 
@@ -292,7 +322,8 @@ bool mtsCollectorEvent::AddObservedEventWrite(const mtsComponent * componentPoin
                              << interfacePointer->GetName() << "."
                              << eventName << "\"" << std::endl;
     // create a CollectorEventWrite object
-    CollectorEventWrite * collector = new CollectorEventWrite(eventName);
+    CollectorEventWrite * collector = new CollectorEventWrite(eventName, this->EventCounter, this);
+    this->EventCounter++;
     // get the required interface to add an observer
     mtsRequiredInterface * requiredInterface = GetRequiredInterfaceFor(componentPointer, interfacePointer);
     requiredInterface->AddEventHandlerWriteGeneric(&CollectorEventWrite::EventHandler, collector, eventName);
@@ -324,6 +355,20 @@ void mtsCollectorEvent::Connect(void)
                                  iterComponents->first, iterInterfaces->first);
         }
     }
+}
+
+
+void mtsCollectorEvent::SaveEventVoid(const CollectorEventVoid * event)
+{
+    *(this->OutputStream) << event->EventId << std::endl;
+}
+
+
+void mtsCollectorEvent::SaveEventWrite(const CollectorEventWrite * event, const mtsGenericObject * payload)
+{
+    *(this->OutputStream) << event->EventId << this->Delimiter;
+    payload->ToStreamRaw(*(this->OutputStream), this->Delimiter);
+    *(this->OutputStream) << std::endl;
 }
 
 

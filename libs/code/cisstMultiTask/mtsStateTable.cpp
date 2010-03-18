@@ -30,6 +30,19 @@ http://www.cisst.org/cisst/license.txt.
 CMN_IMPLEMENT_SERVICES(mtsStateTable);
 CMN_IMPLEMENT_SERVICES(mtsStateTable::IndexRange);
 
+
+void mtsStateTable::IndexRange::ToStreamRaw(std::ostream & outputStream, const char delimiter,
+                                            bool headerOnly, const std::string & headerPrefix) const
+{
+    mtsGenericObject::ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix);
+    outputStream << delimiter;
+    First.ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix + "_first");
+    outputStream << delimiter;
+    Last.ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix + "_last");
+}
+
+
+
 int mtsStateTable::StateVectorBaseIDForUser;
 
 mtsStateTable::mtsStateTable(int size, const std::string & name):

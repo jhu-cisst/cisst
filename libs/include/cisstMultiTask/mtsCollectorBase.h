@@ -98,6 +98,37 @@ protected:
     static unsigned int CollectorCount;
     static mtsTaskManager * TaskManager;
 
+    /*! Flag to determine if the collector is connected.  Once the
+      collector is connected, it becomes impossible to change the
+      observed state table, components, ... */
+    bool ConnectedFlag;
+
+    /*! Flag for PrintHeader() method. */
+    bool FirstRunningFlag;
+
+    /*! Output file name. */
+    std::string OutputFileName;
+
+    /*! Pointer on output stream, can be create and managed by this
+      class or provided by a user. */
+    std::ostream * OutputStream;
+    std::ofstream * OutputFile;
+
+    /*! Delimiter used in a log file. Set by the constructor according
+      to mtsCollectorBase::CollectorLogFormat. */
+    char Delimiter;
+
+    /*! String stream buffer for serialization. */
+    std::stringstream StringStreamBufferForSerialization;
+
+    /*! Serializer for binary logging. DeSerializer is used only at
+      ConvertBinaryToText() method so we don't define it here. */
+    cmnSerializer * Serializer;
+
+    /*! Update the delimiter used in output files based on file
+      format.  Should be used everytime FileFormat is set. */
+    void SetDelimiter(void);
+
     /*! Default control interface and methods used for the provided commands. */
     mtsProvidedInterface * ControlInterface;
 
@@ -133,6 +164,34 @@ public:
 
     virtual ~mtsCollectorBase(void);
 
+    /*! Generate default file name, without the prefix (txt, csv, cdat) */
+    virtual std::string GetDefaultOutputName(void) = 0;
+
+    /*! Define the output file and format.  If a file is already in
+      use, this method will close the current one. */
+    void SetOutput(const std::string & fileName, const CollectorFileFormat fileFormat);
+
+    /*! Define the output using an existing ostream, the collector
+      will not open nor close the stream. */
+    void SetOutput(std::ostream & outputStream, const CollectorFileFormat fileFormat);
+
+    /*! Define the output using an existing ostream, the collector
+      will not open nor close the stream.  If this method is called
+      for the first time, the format will be
+      COLLECTOR_FILE_FORMAT_CSV, otherwise it will use the previously
+      used format. */
+    void SetOutput(std::ostream & outputStream);
+
+    /*! Creates a default file name using the task name, table name
+      and date.  The suffix depends on the file format. */
+    void SetOutputToDefault(const CollectorFileFormat fileFormat);
+
+    /*! Creates a default file name using the task name, table name
+      and date.  If this method is called for the first time, the
+      format will be COLLECTOR_FILE_FORMAT_CSV, otherwise it will use
+      the previously used format. */
+    void SetOutputToDefault(void);
+
     /*! Begin collecting data. Data collection will begin after delayedStart
     second(s). If it is zero (by default), it means 'start now'. */
     virtual void StartCollection(const mtsDouble & delayInSeconds) = 0;
@@ -141,8 +200,6 @@ public:
     second(s). If it is zero (by default), it means 'stop now'. */
     virtual void StopCollection(const mtsDouble & delayInSeconds) = 0;
 
-    /*! Set output file names */
-    virtual void SetOutputToDefault(void) = 0;
 
     //---------------------- Miscellaneous functions ------------------------//
     inline static unsigned int GetCollectorCount(void) { return CollectorCount; }
