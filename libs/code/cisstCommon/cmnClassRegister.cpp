@@ -146,8 +146,10 @@ std::string cmnClassRegister::ToString(void) {
 void cmnClassRegister::ToStreamInstance(std::ostream & outputStream) const {
     const_iterator iterator;
     const const_iterator end = ServicesContainer.end();
-    outputStream << "Registered classes:";
+    outputStream << "Registered classes:" << std::endl;
     for (iterator = ServicesContainer.begin(); iterator != end; iterator++) {
-        outputStream << " " << iterator->first;
+        outputStream << " - " << iterator->first
+                     << " (typeid name \"" << iterator->second->TypeInfoPointer()->name()
+                     << "\", LoD \"" << cmnLogLoDString[iterator->second->GetLoD()] << "\")" << std::endl;
     }
 }

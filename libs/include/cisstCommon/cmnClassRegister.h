@@ -301,6 +301,15 @@ protected:
 }; 
 
 
+/*! Stream out operator. */
+inline
+std::ostream & operator << (std::ostream & output,
+                            const cmnClassRegister & classRegister) {
+    classRegister.ToStream(output);
+    return output;
+}
+
+
 #include <cisstCommon/cmnClassRegisterMacros.h>
 #include <cisstCommon/cmnClassServices.h>
 
