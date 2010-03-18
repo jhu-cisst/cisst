@@ -358,6 +358,13 @@ public:
                                 const std::string & commandName,
                                 const std::string & CMN_UNUSED(listenerID) = "");
 
+    /*! Get a set of current values with timestamp for data visualization */
+    void GetValuesOfCommand(SetOfValues & values,
+                            const std::string & componentName,
+                            const std::string & providedInterfaceName, 
+                            const std::string & commandName,
+                            const std::string & CMN_UNUSED(listenerID) = "");
+
     /*! Return IP address of this process */
     inline std::string GetIPAddress() const { return ProcessIP; }
 

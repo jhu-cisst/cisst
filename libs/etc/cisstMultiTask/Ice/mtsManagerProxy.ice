@@ -49,12 +49,37 @@ module mtsManagerProxy
 	};
 
     /*! String vector that contains names of objects (e.g. commands, event generators,
-        functions, and event handlers) */
+        functions, event handlers, and signals in a parameter) */
     sequence<string> NamesOfCommandsSequence;
     sequence<string> NamesOfEventGeneratorsSequence;
     sequence<string> NamesOfFunctionsSequence;
     sequence<string> NamesOfEventHandlersSequence;
 
+
+    //
+    // Data visualization
+    //
+    /*! String vector that contains names of signals in read command argument */
+    sequence<string> NamesOfSignals;
+
+    /*! osaAbsoluteTime. Please see osaTimeServer.h for original definition */
+    struct AbsoluteTime {
+        long sec;   // seconds
+        long nsec;  // nano-seconds
+    };
+
+    /*! List of sampled values of signals */
+    struct ValuePair {
+        double Value;
+        AbsoluteTime Timestamp;
+    };
+    sequence<ValuePair> Values;
+
+    // A set of Values. To minimize data exchange between LCM and GCM,
+    // several Values are packed together when trasmitted. The size of this 
+    // sequence is equal to data sampling count.
+    sequence<Values> SetOfValues;
+    
     //-------------------------------------------
     //  Command and Event Objects
     //-------------------------------------------
@@ -164,6 +189,7 @@ module mtsManagerProxy
         ["cpp:const"] idempotent
         int GetCurrentInterfaceCount(string componentName);
 
+        // Getters for component inspector
         ["cpp:const"] idempotent
         void GetNamesOfCommands(string componentName, string providedInterfaceName, out NamesOfCommandsSequence names);
 
@@ -187,7 +213,13 @@ module mtsManagerProxy
 
         ["cpp:const"] idempotent
         void GetDescriptionOfEventHandler(string componentName, string requiredInterfaceName, string eventHandlerName, out string description);
+        
+        // Getters for data visualization
+        ["cpp:const"] idempotent
+        void GetArgumentInformation(string componentName, string providedInterfaceName, string commandName, out string argumentName, out NamesOfSignals signalNames);
 
+        ["cpp:const"] idempotent
+        void GetValuesOfCommand(string componentName, string providedInterfaceName, string commandName, out SetOfValues signalValues);
 	};
 
 	interface ManagerServer

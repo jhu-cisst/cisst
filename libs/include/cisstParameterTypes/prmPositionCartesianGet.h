@@ -112,6 +112,16 @@ class CISST_EXPORT prmPositionCartesianGet: public mtsGenericObject
     /*! Binary deserialization */
     void DeSerializeRaw(std::istream & inputStream);
 
+    /*! Return a number of data (which can be visualized, i.e., type-casted 
+        to double). */
+    unsigned int GetNumberOfData(const bool visualizable = true) const;
+
+    /*! Return the index-th (zero-based) value of data typecasted to double. */
+    double GetDataAsDouble(const unsigned int index) const;
+
+    /*! Return the name of index-th (zero-based) data typecasted to double. */
+    std::string GetDataName(const unsigned int index) const;
+
 }; // _prmPositionCartesianGet_h
 
 

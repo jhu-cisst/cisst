@@ -263,7 +263,6 @@ protected:
 public:
     /*! Constructor and destructor */
     mtsManagerGlobal();
-
     ~mtsManagerGlobal();
 
     //-------------------------------------------------------------------------
@@ -419,6 +418,13 @@ public:
                                 const std::string & commandName,
                                 std::string & argumentName,
                                 std::vector<std::string> & argumentParameterNames);
+
+    /*! Get current values of read commands */
+    void GetValuesOfCommand(const std::string & processName, 
+                            const std::string & componentName, 
+                            const std::string & providedInterfaceName, 
+                            const std::string & commandName,
+                            mtsManagerLocalInterface::SetOfValues & values);
 #endif
 
     /*! Get a process object (local component manager object) */

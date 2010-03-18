@@ -44,4 +44,4 @@ ADD_EXECUTABLE(TestSignalGenerator
 
 # link with the cisst libraries
 CISST_REQUIRES("multiTaskGlobalComponentManagerFLTK" "cisstCommon;cisstOSAbstraction;cisstMultiTask")
-CISST_REQUIRES("TestSignalGenerator" "cisstCommon;cisstOSAbstraction;cisstMultiTask")
+CISST_REQUIRES("TestSignalGenerator" "cisstCommon;cisstOSAbstraction;cisstMultiTask;cisstParameterTypes")

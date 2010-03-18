@@ -45,6 +45,16 @@ CMN_IMPLEMENT_SERVICES(GCMUITask);
 
 #define MAX_ARGUMENT_PARAMETER_COUNT 12
 
+/////////////////////////////////////////////////////////////////////////////
+//
+// TODO:
+// - Replace autorefresh/refresh buttons with callback mechanism
+// - Clear CommandsBeingPlotted when a process disconnects 
+// - If a command being visualized is removed, visualization UI should be reset 
+//   and wait for a user to choose a new command to visualize.
+// - Clear the current oscilloscope screen and refresh it so that a newly selected 
+//   signal can be visualized.
+
 GCMUITask::GCMUITask(const std::string & taskName, const double period, 
                      mtsManagerGlobal& globalComponentManager) :
     mtsTaskPeriodic(taskName, period, false, 5000),
@@ -136,6 +146,10 @@ void GCMUITask::Run(void)
     // Check user's input on the 'Data Visualizer' tab
     CheckDataVisualizerInput();
 
+    // Fetch/sample current values that user has chosen to visualize.
+    FetchCurrentValues();
+
+    // TODO: Replace autorefresh/refresh buttons with callback mechanism
     if (UI.ButtonAutoRefresh->value() == 0) {
         goto ReturnWithUpdate;
     }
@@ -188,6 +202,7 @@ void GCMUITask::PlotGraph(void)
         }
     }
 
+    /*
     float value = sin(x/6.0f) * 10.0f;
 
     GraphPane->add(0, PLOT_POINT((float)x, value * 1.0f, AQUA));
@@ -205,6 +220,7 @@ void GCMUITask::PlotGraph(void)
     GraphPane->add(12, PLOT_POINT((float)x, value * 2.2f, YELLOW));
 
     ++x;
+    */
 #endif
 
 #ifdef SIGNAL_CONTROL_TEST
@@ -762,6 +778,7 @@ void GCMUITask::AddCommandSelected(const CommandSelected& commandSelected)
     const int lastIndex = UI.BrowserVisualizeCommandName->size();
     UI.BrowserVisualizeCommandName->data(lastIndex, (void*)newCommandSelected);
 
+    newCommandSelected->SetTimeout(0); // Fetch new values immediately
     CommandsBeingPlotted.push_back(newCommandSelected);
 }
 
@@ -827,6 +844,9 @@ void GCMUITask::OnBrowserVisualizeCommandNameClicked(void)
     UI.OutputInterfaceName->value(data->InterfaceName.c_str());
     UI.OutputArgumentName->value(data->ArgumentName.c_str());
     UI.SliderSamplingRate->value(data->SamplingRate);
+    
+    // TODO: Clear the current oscilloscope screen and refresh it so that a
+    // newly selected signal can be visualized.
 }
 
 void GCMUITask::OnBrowserVisualizeSignalsClicked(void)
@@ -1019,8 +1039,73 @@ void GCMUITask::OnButtonAutoScaleClicked(void)
 
 void GCMUITask::OnButtonHideClicked(void)
 {
-    // TODO: this are test codes
+    // TODO: these are test codes
     static bool a = true;
     GraphPane->ShowSignal(4, a);
     a = !a;
+}
+
+void GCMUITask::FetchCurrentValues(void)
+{
+    if (CommandsBeingPlotted.size() == 0) return;
+
+    CommandSelected * c;
+    for (unsigned int i = 0; i < CommandsBeingPlotted.size(); ++i) {
+        // Check timeout. Fetch new values only if timer expires.
+        //if (CommandsBeingPlotted[i]->IsExpired()) {
+            c = CommandsBeingPlotted[i];
+
+            // Fetch new values
+            mtsManagerLocalInterface::SetOfValues values; 
+            GlobalComponentManager.GetValuesOfCommand(c->ProcessName, c->ComponentName, c->InterfaceName, c->CommandName, values);
+            c->Refresh();
+            c->SetTimeout(500 * cmn_ms);
+                
+            // Draw graph
+            DrawGraph(values);
+        //}
+    }
+}
+
+void GCMUITask::DrawGraph(const mtsManagerLocalInterface::SetOfValues & values)
+{
+    static int x = 0;
+
+    // timestamp
+    double t;
+    double value;
+
+    for (int i=0; i<=12; ++i) {
+        if (i <= 7) {
+            GraphPane->set_pointsize(i, 2.0);
+            GraphPane->set_linewidth(i, 1.0);
+        } else {
+            GraphPane->set_pointsize(i, 2.0);
+            GraphPane->set_linewidth(i, 1.0);
+        }
+    }
+
+    for (unsigned int t = 0; t < values.size(); ++t) {
+        for (unsigned int i = 0; i < values[i].size(); ++i) {
+            t = values[i][t].Timestamp.sec + values[i][t].Timestamp.nsec / 1000000000.0;
+            value = values[i][t].Value;
+            std::cout << "(" << i << ") t: " << t << ", v: " << value << std::endl;
+
+            if (i == 0) GraphPane->add(i, PLOT_POINT((float)x, value, AQUA));
+            if (i == 1) GraphPane->add(i, PLOT_POINT((float)x, value, BLUE));
+            if (i == 2) GraphPane->add(i, PLOT_POINT((float)x, value, FUCHSIA));
+            if (i == 3) GraphPane->add(i, PLOT_POINT((float)x, value, GREEN));
+            if (i == 4) GraphPane->add(i, PLOT_POINT((float)x, value, LIME));
+            if (i == 5) GraphPane->add(i, PLOT_POINT((float)x, value, MAROON));
+            if (i == 6) GraphPane->add(i, PLOT_POINT((float)x, value, NAVY));
+            if (i == 7) GraphPane->add(i, PLOT_POINT((float)x, value, OLIVE));
+            if (i == 8) GraphPane->add(i, PLOT_POINT((float)x, value, PURPLE));
+            if (i == 9) GraphPane->add(i, PLOT_POINT((float)x, value, RED));
+            if (i == 10) GraphPane->add(i, PLOT_POINT((float)x, value, TEAL));
+            if (i == 11) GraphPane->add(i, PLOT_POINT((float)x, value, YELLOW));
+        }
+        x++;
+    }
+
+    GraphPane->redraw();
 }

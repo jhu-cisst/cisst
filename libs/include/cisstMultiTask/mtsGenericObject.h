@@ -151,6 +151,26 @@ public:
         cmnDeSerializeRaw(inputStream, this->AutomaticTimestamp());
         cmnDeSerializeRaw(inputStream, this->Valid());
     }
+
+    /*! Methods for data visualization.  Derived classes should override 
+        the following methods in order to be properly processed by the data 
+        visualizer of the global component manager. */
+
+    /*! Return a number of data (which can be visualized, i.e., type-casted 
+        to double) */
+    virtual unsigned int GetNumberOfData(const bool visualizable = true) const {
+        return 0;
+    }
+
+    /*! Return the index-th (zero-based) value of data typecasted to double. */
+    virtual double GetDataAsDouble(const unsigned int index) const {
+        return 0.0;
+    }
+
+    /*! Return the name of index-th (zero-based) data typecasted to double. */
+    virtual std::string GetDataName(const unsigned int index) const {
+        return "N/A";
+    }
 };
 
 

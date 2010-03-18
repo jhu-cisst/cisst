@@ -328,6 +328,42 @@ void mtsManagerProxyServer::ConvertRequiredInterfaceDescription(
     }
 }
 
+void mtsManagerProxyServer::ConvertValuesOfCommand(
+    const ::mtsManagerProxy::SetOfValues & src, mtsManagerLocalInterface::SetOfValues & dest)
+{
+    ValuePair value;
+    Values valueSet;
+
+    for (unsigned int i = 0; i < src.size(); ++i) {
+        valueSet.clear();
+        for (unsigned int j = 0; j < src.size(); ++j) {
+            value.Timestamp.sec = static_cast<long>(src[i][j].Timestamp.sec);
+            value.Timestamp.nsec = static_cast<long>(src[i][j].Timestamp.nsec);
+            value.Value = src[i][j].Value;
+            valueSet.push_back(value);
+        }
+        dest.push_back(valueSet);
+    }
+}
+
+void mtsManagerProxyServer::ConstructValuesOfCommand(
+    const mtsManagerLocalInterface::SetOfValues & src, ::mtsManagerProxy::SetOfValues & dest)
+{
+    ::mtsManagerProxy::ValuePair value;
+    ::mtsManagerProxy::Values valueSet;
+
+    for (unsigned int i = 0; i < src.size(); ++i) {
+        valueSet.clear();
+        for (unsigned int j = 0; j < src.size(); ++j) {
+            value.Timestamp.sec = src[i][j].Timestamp.sec;
+            value.Timestamp.nsec = src[i][j].Timestamp.nsec;
+            value.Value = src[i][j].Value;
+            valueSet.push_back(value);
+        }
+        dest.push_back(valueSet);
+    }
+}
+
 void mtsManagerProxyServer::ConstructProvidedInterfaceDescriptionFrom(
     const ProvidedInterfaceDescription & src, ::mtsManagerProxy::ProvidedInterfaceDescription & dest)
 {
@@ -610,8 +646,13 @@ void mtsManagerProxyServer::GetDescriptionOfEventHandler(std::string & descripti
 void mtsManagerProxyServer::GetArgumentInformation(std::string & argumentName, std::vector<std::string> & signalNames,
     const std::string & componentName, const std::string & providedInterfaceName, const std::string & commandName, const std::string & listenerID)
 {
-    // TODO:
-    //SendGetDescriptionOfEventHandler(description, componentName, requiredInterfaceName, eventHandlerName, listenerID);
+    SendGetArgumentInformation(argumentName, signalNames, componentName, providedInterfaceName, commandName, listenerID);
+}
+
+void mtsManagerProxyServer::GetValuesOfCommand(SetOfValues & values,
+    const std::string & componentName, const std::string & providedInterfaceName, const std::string & commandName, const std::string & listenerID)
+{
+    SendGetValuesOfCommand(values, componentName, providedInterfaceName, commandName, listenerID);
 }
 
 int mtsManagerProxyServer::GetCurrentInterfaceCount(const std::string & componentName, const std::string & listenerID)
@@ -1146,12 +1187,48 @@ void mtsManagerProxyServer::SendGetDescriptionOfEventHandler(std::string & descr
     (*clientProxy)->GetDescriptionOfEventHandler(componentName, requiredInterfaceName, eventHandlerName, description);
 }
 
+void mtsManagerProxyServer::SendGetArgumentInformation(std::string & argumentName, std::vector<std::string> & signalNames,
+    const std::string & componentName, const std::string & providedInterfaceName, const std::string & commandName, const std::string & clientID)
+{
+    ManagerClientProxyType * clientProxy = GetNetworkProxyClient(clientID);
+    if (!clientProxy) {
+        LogError(mtsManagerProxyServer, "SendGetArgumentInformation: invalid listenerID (" << clientID << ") or inactive server proxy");
+        return;
+    }
+
+#ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
+    LogPrint(mtsManagerProxyServer, ">>>>> SEND: SendGetArgumentInformation: " << componentName << ", " << providedInterfaceName << ", " << commandName << ", " << clientID);
+#endif
+
+    (*clientProxy)->GetArgumentInformation(componentName, providedInterfaceName, commandName, argumentName, signalNames);
+}
+
+void mtsManagerProxyServer::SendGetValuesOfCommand(SetOfValues & values,
+    const std::string & componentName, const std::string & providedInterfaceName, const std::string & commandName, const std::string & clientID)
+{
+    ManagerClientProxyType * clientProxy = GetNetworkProxyClient(clientID);
+    if (!clientProxy) {
+        LogError(mtsManagerProxyServer, "SendGetValuesOfCommand: invalid listenerID (" << clientID << ") or inactive server proxy");
+        return;
+    }
+
+#ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
+    LogPrint(mtsManagerProxyServer, ">>>>> SEND: SendGetValuesOfCommand: " << componentName << ", " << providedInterfaceName << ", " << commandName << ", " << clientID);
+#endif
+
+    ::mtsManagerProxy::SetOfValues valuesICEtype;
+
+    (*clientProxy)->GetValuesOfCommand(componentName, providedInterfaceName, commandName, valuesICEtype);
+
+    ConvertValuesOfCommand(valuesICEtype, values);
+}
+
 std::string mtsManagerProxyServer::SendGetProcessName(const std::string & clientID)
 {
     ManagerClientProxyType * clientProxy = GetNetworkProxyClient(clientID);
     if (!clientProxy) {
         LogError(mtsManagerProxyServer, "SendGetProcessName: invalid listenerID (" << clientID << ") or inactive server proxy");
-        return false;
+        return "";
     }
 
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
@@ -1163,7 +1240,7 @@ std::string mtsManagerProxyServer::SendGetProcessName(const std::string & client
     } catch (const ::Ice::Exception & ex) {
         LogError(mtsManagerProxyServer, "SendGetProcessName: network exception: " << ex);
         OnClientDisconnect(clientID);
-        return false;
+        return "";
     }
 }
 

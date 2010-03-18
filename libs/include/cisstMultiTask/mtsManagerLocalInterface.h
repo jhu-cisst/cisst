@@ -47,6 +47,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnGenericObject.h>
 #include <cisstMultiTask/mtsConfig.h>
 #include <cisstMultiTask/mtsInterfaceCommon.h>
+#include <cisstOSAbstraction/osaTimeServer.h> // for osaAbsoluteTime
+
 
 #include <cisstMultiTask/mtsExport.h>
 
@@ -55,6 +57,17 @@ class CISST_EXPORT mtsManagerLocalInterface : public cmnGenericObject
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
 public:
+    //-------------------------------------------------------------------------
+    //  Data Structure of Visualization
+    //-------------------------------------------------------------------------
+    /*! List of sampled values of signals */
+    struct ValuePair {
+        double Value;
+        osaAbsoluteTime Timestamp;
+    };
+    typedef std::vector<ValuePair> Values;
+    typedef std::vector<Values> SetOfValues;
+
 #if CISST_MTS_HAS_ICE
     //-------------------------------------------------------------------------
     //  Proxy Object Control (Creation, Removal)
@@ -172,6 +185,13 @@ public:
                                         const std::string & providedInterfaceName, 
                                         const std::string & commandName,
                                         const std::string & listenerID = "") = 0;
+
+    /*! Get a set of current values with timestamp for data visualization */
+    virtual void GetValuesOfCommand(SetOfValues & values,
+                                    const std::string & componentName,
+                                    const std::string & providedInterfaceName, 
+                                    const std::string & commandName,
+                                    const std::string & listenerID = "") = 0;
 
     /*! Extract all the information on a provided interface (command objects
         and event generators with arguments serialized) */

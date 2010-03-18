@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 
 // include for the whole cisstMultiTask library
 #include <cisstMultiTask.h>
+#include <cisstParameterTypes.h>
 
 class SignalGenerator: public mtsTaskPeriodic {
 
@@ -32,6 +33,7 @@ class SignalGenerator: public mtsTaskPeriodic {
 protected:
     mtsDouble ReadDouble;
     mtsDoubleVec ReadVector;
+    prmPositionCartesianGet PosGet;
 
 public:
     // provide a name for the task and define the frequency (time

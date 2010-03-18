@@ -757,51 +757,101 @@ void mtsManagerLocal::GetArgumentInformation(std::string & argumentName,
                                              const std::string & componentName, 
                                              const std::string & providedInterfaceName, 
                                              const std::string & commandName,
-                                             const std::string & listenerID)
+                                             const std::string & CMN_UNUSED(listenerID))
 {
     mtsComponent * component = GetComponent(componentName);
     if (!component) return;
 
-    //
-    // TODO
-    //
-    /*
-    mtsRequiredInterface * requiredInterface = component->GetRequiredInterface(requiredInterfaceName);
-    if (!requiredInterface) return;
+    mtsProvidedInterface * providedInterface = component->GetProvidedInterface(providedInterfaceName);
+    if (!providedInterface) return;
 
-    // Get event handler type
-    char eventHandlerType = *eventHandlerName.c_str();
-    std::string actualEventHandlerName = eventHandlerName.substr(3, eventHandlerName.size() - 2);
+    // Get argument name
+    mtsCommandReadBase * command;
+    char commandType = *commandName.c_str();
+    std::string actualCommandName = commandName.substr(3, commandName.size() - 2);
 
-    description = "Argument type: ";
-    switch (eventHandlerType) {
+    switch (commandType) {
         case 'V':
-            {
-                mtsCommandVoidBase * command = requiredInterface->EventHandlersVoid.GetItem(actualEventHandlerName);
-                if (!command) {
-                    description = "No void event handler found";
-                    return;
-                }
-                description += "(none)";
-            }
-            break;
+            argumentName = "Cannot visualize void command";
+            return;
         case 'W':
-            {
-                mtsCommandWriteBase * command = requiredInterface->EventHandlersWrite.GetItem(actualEventHandlerName);
-                if (!command) {
-                    description = "No write event handler found";
-                    return;
-                }
-                description += command->GetArgumentClassServices()->GetName();
+            argumentName = "Cannot visualize write command";
+            return;
+        case 'Q':
+            argumentName = "Cannot visualize q.read command";
+            return;
+        case 'R':
+            command = providedInterface->GetCommandRead(actualCommandName);
+            if (!command) {
+                argumentName = "No read command found";
+                return;
             }
+            argumentName = command->GetArgumentClassServices()->GetName();
             break;
         default:
-            description = "Failed to get event handler description";
+            argumentName = "Failed to get argument information";
             return;
     }
-    */
+
+    // Get argument prototype
+    const mtsGenericObject * argument = command->GetArgumentPrototype();
+    if (!argument) {
+        argumentName = "Failed to get argument";
+        return;
+    }
+
+    // Get signal information
+    const int signalCount = argument->GetNumberOfData();
+    for (unsigned int i = 0; i < argument->GetNumberOfData(); ++i) {
+        signalNames.push_back(argument->GetDataName(i));
+    }
 }
 
+void mtsManagerLocal::GetValuesOfCommand(SetOfValues & values,
+                                         const std::string & componentName,
+                                         const std::string & providedInterfaceName, 
+                                         const std::string & commandName,
+                                         const std::string & CMN_UNUSED(listenerID))
+{
+    mtsComponent * component = GetComponent(componentName);
+    if (!component) return;
+
+    mtsProvidedInterface * providedInterface = component->GetProvidedInterface(providedInterfaceName);
+    if (!providedInterface) return;
+
+    // Get argument name
+    char commandType = *commandName.c_str();
+    std::string actualCommandName = commandName.substr(3, commandName.size() - 2);
+    mtsCommandReadBase * command = providedInterface->GetCommandRead(actualCommandName);
+    if (!command) {
+        CMN_LOG_CLASS_RUN_ERROR << "GetValuesOfCommand: no command found: " << actualCommandName << std::endl;
+        return;
+    };
+
+    // Get argument prototype
+    mtsGenericObject * argument = dynamic_cast<mtsGenericObject*>(command->GetArgumentClassServices()->Create());
+    if (!argument) {
+        CMN_LOG_CLASS_RUN_ERROR << "GetValuesOfCommand: failed to create temporary argument" << std::endl;
+        return;
+    }
+    
+    // Execute read command
+    command->Execute(*argument);
+
+    // Get current values with timestamps
+    ValuePair value;
+    Values valueSet;
+    double relativeTime;
+    const int signalCount = argument->GetNumberOfData();
+    for (unsigned int i = 0; i < argument->GetNumberOfData(); ++i) {
+        value.Value = argument->GetDataAsDouble(i);
+        argument->GetTimestamp(relativeTime);
+        TimeServer.RelativeToAbsolute(relativeTime, value.Timestamp);
+        valueSet.push_back(value);
+    }
+
+    delete argument;
+}
 
 #endif
 

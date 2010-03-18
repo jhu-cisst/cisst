@@ -22,6 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _GCMUITask_h
 
 #include <cisstMultiTask.h>
+#include <cisstOSAbstraction.h>
 #include "GlobalComponentManagerUI.h"
 #include "multiplot_cisst.h"
 
@@ -99,7 +100,8 @@ protected:
 
     // Typedef of an element that contains information about a command that user 
     // picks up for visualization.
-    typedef struct {
+    class CommandSelected {
+    public:
         std::string CommandName;
         std::vector<SignalState> Signals;
         std::string ProcessName;
@@ -107,16 +109,32 @@ protected:
         std::string InterfaceName;
         std::string ArgumentName;
         int SamplingRate;
-    } CommandSelected;
+
+        double Timeout;
+        double LastTimeFetched;
+
+        void Refresh() {
+            LastTimeFetched = osaGetTime(); // current tick in sec (double) 
+        }
+
+        // Set timer timeout in sec
+        void SetTimeout(const double timeout) {
+            Timeout = osaGetTime() + timeout;
+        }
+
+        bool IsExpired() const {
+            return (osaGetTime() > Timeout);
+        }
+    };
+
+    // List of commands which are currently plotted
+    std::vector<CommandSelected*> CommandsBeingPlotted;
 
     // X-axis scaling factor
     int XAxisScaleFactor;
 
     // Timer to control refresh rate
     clock_t LastUpdateTime;
-
-    // List of commands which are currently plotted
-    std::vector<CommandSelected*> CommandsBeingPlotted;
 
     // FLTK UI resources
     Fl_Progress * ProgressBars[MAX_CHANNEL_COUNT];
@@ -206,6 +224,12 @@ protected:
 
     // Add command selected to the CommandsSelected list
     void AddCommandSelected(const CommandSelected& commandSelected);
+
+    // Fetch/sample current values that user has chosen to visualize
+    void FetchCurrentValues(void);
+
+    // Draw graph
+    void DrawGraph(const mtsManagerLocalInterface::SetOfValues & values);
 
     //-------------------------------------------------------------------------
     //  Utilities

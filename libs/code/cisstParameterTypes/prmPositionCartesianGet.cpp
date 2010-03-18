@@ -52,3 +52,45 @@ void prmPositionCartesianGet::DeSerializeRaw(std::istream & inputStream)
     BaseType::DeSerializeRaw(inputStream);
     this->PositionMember.DeSerializeRaw(inputStream);
 }
+
+unsigned int prmPositionCartesianGet::GetNumberOfData(const bool CMN_UNUSED(visualizable)) const 
+{
+    return 12; // 3 for 3D position, 9 for 3x3 rotation matrix
+}
+
+double prmPositionCartesianGet::GetDataAsDouble(const unsigned int index) const 
+{
+    if (index >= GetNumberOfData()) {
+        return 0.0;
+    }
+
+    if (0 <= index && index <= 2) {
+        return static_cast<double>(this->PositionMember.Translation().at(index));
+    } else {
+        return static_cast<double>(this->PositionMember.Rotation().at(index - 3));
+    }
+}
+
+std::string prmPositionCartesianGet::GetDataName(const unsigned int index) const 
+{
+    if (index >= GetNumberOfData()) {
+        return "N/A";
+    }
+
+    std::string signalName;
+    switch (index) {
+        case 0:  signalName = "translation x";  break;
+        case 1:  signalName = "translation y";  break;
+        case 2:  signalName = "translation z";  break;
+        case 3:  signalName = "rotation (1,1)"; break;
+        case 4:  signalName = "rotation (1,2)"; break;
+        case 5:  signalName = "rotation (1,3)"; break;
+        case 6:  signalName = "rotation (2,1)"; break;
+        case 7:  signalName = "rotation (2,2)"; break;
+        case 8:  signalName = "rotation (2,3)"; break;
+        case 9:  signalName = "rotation (3,1)"; break;
+        case 10: signalName = "rotation (3,2)"; break;
+        case 11: signalName = "rotation (3,3)"; break;
+    }
+    return signalName;
+}

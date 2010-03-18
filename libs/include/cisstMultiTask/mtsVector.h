@@ -118,7 +118,6 @@ public:
         mtsGenericObject::DeSerializeRaw(inputStream);
         VectorType::DeSerializeRaw(inputStream);
     }
-
 };
 
 

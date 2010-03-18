@@ -94,7 +94,6 @@ public:
         return this->GetArgumentPrototype()->Services();
     }
 
-
 protected:
 
     inline virtual void SetArgumentPrototype(const mtsGenericObject * argumentPrototype) {

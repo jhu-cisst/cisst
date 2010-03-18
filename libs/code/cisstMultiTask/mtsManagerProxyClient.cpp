@@ -444,6 +444,20 @@ void mtsManagerProxyClient::ReceiveGetDescriptionOfEventHandler(const std::strin
     ProxyOwner->GetDescriptionOfEventHandler(description, componentName, requiredInterfaceName, eventHandlerName);
 }
 
+void mtsManagerProxyClient::ReceiveGetArgumentInformation(const std::string & componentName, const std::string & providedInterfaceName, const std::string & commandName, std::string & argumentName, ::mtsManagerProxy::NamesOfSignals & signalNames) const
+{
+    ProxyOwner->GetArgumentInformation(argumentName, signalNames, componentName, providedInterfaceName, commandName);
+}
+
+void mtsManagerProxyClient::ReceiveGetValuesOfCommand(const std::string & componentName, const std::string & providedInterfaceName, const std::string & commandName, ::mtsManagerProxy::SetOfValues & values) const
+{
+    mtsManagerLocalInterface::SetOfValues valuesCISSTtype;
+
+    ProxyOwner->GetValuesOfCommand(valuesCISSTtype, componentName, providedInterfaceName, commandName);
+
+    mtsManagerProxyServer::ConstructValuesOfCommand(valuesCISSTtype, values);
+}
+
 std::string mtsManagerProxyClient::ReceiveGetProcessName()
 {
     return ProxyOwner->GetProcessName();
@@ -962,7 +976,7 @@ void mtsManagerProxyClient::ManagerClientI::GetNamesOfCommands(const std::string
     LogPrint(ManagerClientI, "<<<<< RECV: GetNamesOfCommands: " << componentName << ", " << providedInterfaceName);
 #endif
 
-    return ManagerProxyClient->ReceiveGetNamesOfCommands(componentName, providedInterfaceName, names);
+    ManagerProxyClient->ReceiveGetNamesOfCommands(componentName, providedInterfaceName, names);
 }
 
 void mtsManagerProxyClient::ManagerClientI::GetNamesOfEventGenerators(const std::string & componentName, const std::string & providedInterfaceName, ::mtsManagerProxy::NamesOfEventGeneratorsSequence & names, const ::Ice::Current & CMN_UNUSED(current)) const
@@ -971,7 +985,7 @@ void mtsManagerProxyClient::ManagerClientI::GetNamesOfEventGenerators(const std:
     LogPrint(ManagerClientI, "<<<<< RECV: GetNamesOfEventGenerators: " << componentName << ", " << providedInterfaceName);
 #endif
 
-    return ManagerProxyClient->ReceiveGetNamesOfEventGenerators(componentName, providedInterfaceName, names);
+    ManagerProxyClient->ReceiveGetNamesOfEventGenerators(componentName, providedInterfaceName, names);
 }
 
 void mtsManagerProxyClient::ManagerClientI::GetNamesOfFunctions(const std::string & componentName, const std::string & requiredInterfaceName, ::mtsManagerProxy::NamesOfFunctionsSequence & names, const ::Ice::Current & CMN_UNUSED(current)) const
@@ -980,7 +994,7 @@ void mtsManagerProxyClient::ManagerClientI::GetNamesOfFunctions(const std::strin
     LogPrint(ManagerClientI, "<<<<< RECV: GetNamesOfFunctions: " << componentName << ", " << requiredInterfaceName);
 #endif
 
-    return ManagerProxyClient->ReceiveGetNamesOfFunctions(componentName, requiredInterfaceName, names);
+    ManagerProxyClient->ReceiveGetNamesOfFunctions(componentName, requiredInterfaceName, names);
 }
 
 void mtsManagerProxyClient::ManagerClientI::GetNamesOfEventHandlers(const std::string & componentName, const std::string & requiredInterfaceName, ::mtsManagerProxy::NamesOfEventHandlersSequence & names, const ::Ice::Current & CMN_UNUSED(current)) const
@@ -989,7 +1003,7 @@ void mtsManagerProxyClient::ManagerClientI::GetNamesOfEventHandlers(const std::s
     LogPrint(ManagerClientI, "<<<<< RECV: GetNamesOfEventHandlers: " << componentName << ", " << requiredInterfaceName);
 #endif
 
-    return ManagerProxyClient->ReceiveGetNamesOfEventHandlers(componentName, requiredInterfaceName, names);
+    ManagerProxyClient->ReceiveGetNamesOfEventHandlers(componentName, requiredInterfaceName, names);
 }
 
 void mtsManagerProxyClient::ManagerClientI::GetDescriptionOfCommand(const std::string & componentName, const std::string & providedInterfaceName, const std::string & commandName, std::string & description, const ::Ice::Current & CMN_UNUSED(current)) const
@@ -998,7 +1012,7 @@ void mtsManagerProxyClient::ManagerClientI::GetDescriptionOfCommand(const std::s
     LogPrint(ManagerClientI, "<<<<< RECV: GetDescriptionOfCommand: " << componentName << ", " << providedInterfaceName << ", " << commandName);
 #endif
 
-    return ManagerProxyClient->ReceiveGetDescriptionOfCommand(componentName, providedInterfaceName, commandName, description);
+    ManagerProxyClient->ReceiveGetDescriptionOfCommand(componentName, providedInterfaceName, commandName, description);
 }
 
 void mtsManagerProxyClient::ManagerClientI::GetDescriptionOfEventGenerator(const std::string & componentName, const std::string & providedInterfaceName, const std::string & eventGeneratorName, std::string & description, const ::Ice::Current & CMN_UNUSED(current)) const
@@ -1007,7 +1021,7 @@ void mtsManagerProxyClient::ManagerClientI::GetDescriptionOfEventGenerator(const
     LogPrint(ManagerClientI, "<<<<< RECV: GetDescriptionOfEventGenerator: " << componentName << ", " << providedInterfaceName << ", " << eventGeneratorName);
 #endif
 
-    return ManagerProxyClient->ReceiveGetDescriptionOfEventGenerator(componentName, providedInterfaceName, eventGeneratorName, description);
+    ManagerProxyClient->ReceiveGetDescriptionOfEventGenerator(componentName, providedInterfaceName, eventGeneratorName, description);
 }
 
 void mtsManagerProxyClient::ManagerClientI::GetDescriptionOfFunction(const std::string & componentName, const std::string & requiredInterfaceName, const std::string & functionName, std::string & description, const ::Ice::Current & CMN_UNUSED(current)) const
@@ -1016,7 +1030,7 @@ void mtsManagerProxyClient::ManagerClientI::GetDescriptionOfFunction(const std::
     LogPrint(ManagerClientI, "<<<<< RECV: GetDescriptionOfFunction: " << componentName << ", " << requiredInterfaceName << ", " << functionName);
 #endif
 
-    return ManagerProxyClient->ReceiveGetDescriptionOfFunction(componentName, requiredInterfaceName, functionName, description);
+    ManagerProxyClient->ReceiveGetDescriptionOfFunction(componentName, requiredInterfaceName, functionName, description);
 }
 
 void mtsManagerProxyClient::ManagerClientI::GetDescriptionOfEventHandler(const std::string & componentName, const std::string & requiredInterfaceName, const std::string & eventHandlerName, std::string & description, const ::Ice::Current & CMN_UNUSED(current)) const
@@ -1025,5 +1039,25 @@ void mtsManagerProxyClient::ManagerClientI::GetDescriptionOfEventHandler(const s
     LogPrint(ManagerClientI, "<<<<< RECV: GetDescriptionOfEventHandler: " << componentName << ", " << requiredInterfaceName << ", " << eventHandlerName);
 #endif
 
-    return ManagerProxyClient->ReceiveGetDescriptionOfEventHandler(componentName, requiredInterfaceName, eventHandlerName, description);
+    ManagerProxyClient->ReceiveGetDescriptionOfEventHandler(componentName, requiredInterfaceName, eventHandlerName, description);
+}
+
+void mtsManagerProxyClient::ManagerClientI::GetArgumentInformation(const std::string & componentName, const std::string & providedInterfaceName,
+        const std::string & commandName, std::string & argumentName, ::mtsManagerProxy::NamesOfSignals & signalNames, const ::Ice::Current & CMN_UNUSED(current)) const
+{
+#ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
+    LogPrint(ManagerClientI, "<<<<< RECV: GetArgumentInformation: " << componentName << ", " << providedInterfaceName << ", " << commandName);
+#endif
+
+    ManagerProxyClient->ReceiveGetArgumentInformation(componentName, providedInterfaceName, commandName, argumentName, signalNames);
+}
+
+void mtsManagerProxyClient::ManagerClientI::GetValuesOfCommand(const std::string & componentName, const std::string & providedInterfaceName, 
+        const std::string & commandName, ::mtsManagerProxy::SetOfValues & values, const ::Ice::Current & CMN_UNUSED(current)) const
+{
+#ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
+    LogPrint(ManagerClientI, "<<<<< RECV: GetValuesOfCommand: " << componentName << ", " << providedInterfaceName << ", " << commandName);
+#endif
+
+    ManagerProxyClient->ReceiveGetValuesOfCommand(componentName, providedInterfaceName, commandName, values);
 }

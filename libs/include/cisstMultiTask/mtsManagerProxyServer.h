@@ -156,11 +156,17 @@ public:
     static void ConvertRequiredInterfaceDescription(
         const ::mtsManagerProxy::RequiredInterfaceDescription & src, RequiredInterfaceDescription & dest);
 
+    static void ConvertValuesOfCommand(
+        const ::mtsManagerProxy::SetOfValues & src, mtsManagerLocalInterface::SetOfValues & dest);
+
     static void ConstructProvidedInterfaceDescriptionFrom(
         const ProvidedInterfaceDescription & src, ::mtsManagerProxy::ProvidedInterfaceDescription & dest);
 
     static void ConstructRequiredInterfaceDescriptionFrom(
         const RequiredInterfaceDescription & src, ::mtsManagerProxy::RequiredInterfaceDescription & dest);
+
+    static void ConstructValuesOfCommand(
+        const mtsManagerLocalInterface::SetOfValues & src, ::mtsManagerProxy::SetOfValues & dest);
 
     //-------------------------------------------------------------------------
     //  Implementation of mtsManagerLocalInterface
@@ -251,6 +257,12 @@ public:
                                 const std::string & providedInterfaceName, 
                                 const std::string & commandName,
                                 const std::string & listenerID = "");
+
+    void GetValuesOfCommand(SetOfValues & values,
+                            const std::string & componentName, 
+                            const std::string & providedInterfaceName, 
+                            const std::string & commandName, 
+                            const std::string & listenerID = "");
 
     int GetCurrentInterfaceCount(const std::string & componentName, const std::string & listenerID = "");
 
@@ -352,6 +364,19 @@ public:
                                           const std::string & requiredInterfaceName, 
                                           const std::string & eventHandlerName, 
                                           const std::string & clientID);
+
+    void SendGetArgumentInformation(std::string & argumentName, 
+                                    std::vector<std::string> & signalNames,
+                                    const std::string & componentName, 
+                                    const std::string & providedInterfaceName, 
+                                    const std::string & commandName, 
+                                    const std::string & clientID);
+
+    void SendGetValuesOfCommand(SetOfValues & values,
+                                const std::string & componentName,
+                                const std::string & providedInterfaceName, 
+                                const std::string & commandName, 
+                                const std::string & clientID);
 
     std::string SendGetProcessName(const std::string & clientID);
 

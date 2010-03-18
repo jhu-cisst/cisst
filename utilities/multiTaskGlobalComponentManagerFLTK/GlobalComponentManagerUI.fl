@@ -8,7 +8,7 @@ class GlobalComponentManagerUI {open
   } {
     Fl_Window DisplayWindow {
       label {Global Component Manager} open
-      xywh {322 108 682 617} type Double box GTK_UP_BOX align 80 visible
+      xywh {321 153 682 617} type Double box GTK_UP_BOX align 80 visible
     } {
       Fl_Tabs {} {open
         xywh {10 55 665 510} box GTK_UP_BOX color 46 labelsize 12
@@ -99,7 +99,7 @@ class GlobalComponentManagerUI {open
           xywh {20 80 655 485} labelfont 1 labelsize 13
         } {
           Fl_Box GraphPane {
-            label {Graph Region} selected
+            label {Graph Region}
             xywh {20 90 580 290} box BORDER_BOX labelfont 1 labelsize 12
             code0 {\#include "multiplot_cisst.h"}
             class MULTIPLOT
@@ -168,7 +168,7 @@ class GlobalComponentManagerUI {open
           }
           Fl_Check_Button CheckButtonHide {
             label {: Hide}
-            callback {ButtonHideClicked = true;}
+            callback {ButtonHideClicked = true;} selected
             xywh {580 410 15 20} down_box GTK_DOWN_BOX color 7 labelfont 1 labelsize 12 align 8
           }
           Fl_Output OutputMaxValue {

@@ -1172,6 +1172,18 @@ void mtsManagerGlobal::GetArgumentInformation(const std::string & processName,
 
     LocalManagerConnected->GetArgumentInformation(argumentName, signalNames, componentName, providedInterfaceName, commandName, processName);
 }
+
+void mtsManagerGlobal::GetValuesOfCommand(const std::string & processName,
+                                          const std::string & componentName,
+                                          const std::string & providedInterfaceName, 
+                                          const std::string & commandName,
+                                          mtsManagerLocalInterface::SetOfValues & values)
+{
+    if (!LocalManagerConnected) return;
+
+    LocalManagerConnected->GetValuesOfCommand(values, componentName, providedInterfaceName, commandName, processName);
+}
+
 #endif
 
 //-------------------------------------------------------------------------

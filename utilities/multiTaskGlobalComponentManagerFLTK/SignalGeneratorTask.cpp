@@ -28,55 +28,43 @@ CMN_IMPLEMENT_SERVICES(SignalGenerator);
 
 SignalGenerator::SignalGenerator(const std::string & taskName, double period) : mtsTaskPeriodic(taskName, period)
 {
-    ReadDouble = 10.0;
-
-    ReadVector.SetSize(12);
-    for (int i = 0; i < 12; i++) {
-        ReadVector(i) = 1.0 * (double) (i + 1);
-    }
-
-    this->StateTable.AddData(ReadDouble, "Double");
-    this->StateTable.AddData(ReadVector, "Vector");
+    this->StateTable.AddData(PosGet, "PosData");
 
     // add one interface, this will create an mtsTaskInterface
     mtsProvidedInterface * provided = AddProvidedInterface("p1");
     if (provided) {
-        provided->AddCommandReadState(this->StateTable, this->ReadDouble, "ReadDouble");
-        provided->AddCommandReadState(this->StateTable, this->ReadVector, "ReadVector");
+        provided->AddCommandReadState(this->StateTable, this->PosGet, "ReadPos");
     }
 }
 
 void SignalGenerator::Startup(void)
 {
+    // To test
+    std::cout << "Number of data: " << PosGet.GetNumberOfData() << std::endl;
+    for (unsigned int i = 0; i < PosGet.GetNumberOfData(); ++i) {
+        std::cout << "Data names: " << PosGet.GetDataName(i) << std::endl;
+    }
 }
 
-void SignalGenerator::Run(void) 
+void SignalGenerator::Run(void)
 {
     ProcessQueuedCommands();
 
     static int x = 0;
 
-    ReadDouble = sin((double)x) * 10.0;
-    for (int i = 0; i < 12; i++) {
-        ReadVector(i) = cos((double)x - cmnPI/2) * 15.0;
+    // Read and print out current data
+    //for (unsigned int i = 0; i < PosGet.GetNumberOfData(); ++i) {
+    //    std::cout << PosGet.GetDataName(i) << ": " << PosGet.GetDataAsDouble(i) << std::endl;
+    //}
+
+    // Update the current values
+    double newValue;
+    std::stringstream ss;
+    for (unsigned int i = 0; i < PosGet.GetNumberOfData(); ++i) {
+        newValue = sin((double)x++) * (100.0 + 10.0 * (double)i) / 100.0;
+        ss << newValue << " ";
     }
-    x++;
-
-    // Fetch new values from state table
-    mtsProvidedInterface * provided = GetProvidedInterface("p1");
-    mtsCommandReadBase * readDoubleCommand = provided->GetCommandRead("ReadDouble");
-    mtsCommandReadBase * readVectorCommand = provided->GetCommandRead("ReadVector");
-
-    mtsDouble readDouble;
-    mtsDoubleVec readVector;
-
-    readDoubleCommand->Execute(readDouble);
-    readVectorCommand->Execute(readVector);
-
-    std::cout << "Double: " << readDouble.Data << std::endl;
-    std::cout << "\tVector: ";
-    for (int i = 0; i < 12; i++) {
-        std::cout << " " << readVector[i];
-    }
-    std::cout << std::endl;
+    vctFrm3 newPosition;
+    newPosition.FromStreamRaw(ss);
+    PosGet.SetPosition(newPosition);
 }
