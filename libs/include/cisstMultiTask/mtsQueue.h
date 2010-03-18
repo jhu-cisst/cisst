@@ -295,7 +295,8 @@ public:
             return 0;    // queue full
         }
         // queue new object and move head
-        *(this->Head) = newObject;
+        // using in place new to make sure copy constructor is used
+        newObject.Services()->Create(this->Head, newObject);
         this->Head = newHead;
         return this->Head;
     }
