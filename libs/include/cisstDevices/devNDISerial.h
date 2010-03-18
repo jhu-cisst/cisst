@@ -23,15 +23,15 @@ http://www.cisst.org/cisst/license.txt.
   \brief A cisst wrapper for NDI trackers with serial interface.
   \ingroup cisstDevices
 
-  \warning Missing support for 14400bps, 921600bps and 1228739bps baud rates in osaSerialPort.
+  \bug Does not work with some RS232-to-USB converters.
+  \bug Missing support for 14400bps, 921600bps and 1228739bps baud rates in osaSerialPort.
 
+  \todo Make this device an mtsTaskContinuous.
   \todo Verify the need for all sleep times.
-  \todo Have the option for dynamic tool plugging (requires runtime mtsConnect).
-  \todo Ability to enable/disable individual tools (or even add/remove tools using dynamic tool plugging).
+  \todo Ability to enable/disable individual tools.
   \todo Add RMS error to CalibratePivot() (make this a provided command per Tool?).
   \todo Handle other main types of tools.
   \todo Parse port/system status, in order to get "partially out of volume", etc.
-  \todo Cleanup (remove inline functions) and comment the header file.
   \todo Refactor ComputeCRC() and implement a CRC check in CommandSend().
   \todo Every sscanf() should check if valid number of items have been read (wrapper for sscanf?).
   \todo Error handling for all strncpy().

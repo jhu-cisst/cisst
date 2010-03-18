@@ -41,16 +41,16 @@ int main(int argc, char *argv[])
 {
     // log configuration
     cmnLogger::SetLoD(CMN_LOG_LOD_VERY_VERBOSE);
-    cmnLogger::AddChannel(std::cout, CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::AddChannel(std::cout, CMN_LOG_LOD_RUN_VERBOSE);
 
     // add a log per thread
     osaThreadedLogFile threadedLog("example6-");
     cmnLogger::AddChannel(threadedLog, CMN_LOG_LOD_VERY_VERBOSE);
 
     // set the log level of detail on select tasks
-    cmnClassRegister::SetLoD("devNDISerial", CMN_LOG_LOD_RUN_WARNING);
-    cmnClassRegister::SetLoD("devNDISerialControllerQDevice", CMN_LOG_LOD_VERY_VERBOSE);
-    cmnClassRegister::SetLoD("devNDISerialToolQDevice", CMN_LOG_LOD_VERY_VERBOSE);
+    cmnClassRegister::SetLoD("devNDISerial", CMN_LOG_LOD_RUN_VERBOSE);
+    cmnClassRegister::SetLoD("devNDISerialControllerQDevice", CMN_LOG_LOD_RUN_VERBOSE);
+    cmnClassRegister::SetLoD("devNDISerialToolQDevice", CMN_LOG_LOD_RUN_VERBOSE);
 
     // create a Qt user interface
     QApplication application(argc, argv);
@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
     mtsCollectorState * taskCollector =
             new mtsCollectorState(taskNDISerial->GetName(),
                                   taskNDISerial->GetDefaultStateTableName(),
-                                  mtsCollectorBase::COLLECTOR_LOG_FORMAT_CSV);
+                                  mtsCollectorBase::COLLECTOR_FILE_FORMAT_CSV);
 
     // add interfaces for tools and populate controller widget with tool widgets
     for (unsigned int i = 0; i < taskNDISerial->GetNumberOfTools(); i++) {
@@ -89,6 +89,8 @@ int main(int argc, char *argv[])
 
         taskCollector->AddSignal(toolName + "Position");
     }
+    taskManager->AddComponent(taskCollector);
+    taskCollector->Connect();
     taskManager->Connect(taskControllerQDevice->GetName(), "DataCollector",
                          taskCollector->GetName(), "Control");
 

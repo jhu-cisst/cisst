@@ -82,9 +82,9 @@ class devMicronTrackerControllerQDevice : public QObject, public mtsDevice
     QList<QPoint *> MarkersLeft;
     QList<QPoint *> MarkersRight;
 
-    QImage FrameTemp;
-    QPainter PainterTemp;
-    QPoint MarkerTemp;
+    QImage FrameIndexed8;
+    QPainter MarkerPainter;
+    QPoint MarkerLabel;
 
  public slots:
     void UpdateFrameLeftQSlot(void);

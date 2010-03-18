@@ -30,7 +30,7 @@ devMicronTrackerControllerQDevice::devMicronTrackerControllerQDevice(const std::
 {
     MTC.FrameLeft.SetSize(FRAME_SIZE);
     MTC.FrameRight.SetSize(FRAME_SIZE);
-    FrameTemp = QImage(FRAME_WIDTH, FRAME_HEIGHT, QImage::Format_Indexed8);
+    FrameIndexed8 = QImage(FRAME_WIDTH, FRAME_HEIGHT, QImage::Format_Indexed8);
     ControllerWidget.setupUi(&CentralWidget);
 
     mtsRequiredInterface * required = AddRequiredInterface("Controller");
@@ -78,20 +78,20 @@ void devMicronTrackerControllerQDevice::AddToolWidget(QWidget * toolWidget, QPoi
 void devMicronTrackerControllerQDevice::UpdateFrameLeftQSlot(void)
 {
     MTC.GetFrameLeft(MTC.FrameLeft);
-    memcpy(FrameTemp.bits(), MTC.FrameLeft.Pointer(), FRAME_SIZE);
-    FrameLeft = FrameTemp.convertToFormat(QImage::Format_ARGB32_Premultiplied);
+    memcpy(FrameIndexed8.bits(), MTC.FrameLeft.Pointer(), FRAME_SIZE);
+    FrameLeft = FrameIndexed8.convertToFormat(QImage::Format_ARGB32_Premultiplied);
 
     const size_t numTools = ControllerWidget.LayoutTools->count();
     for (unsigned int i = 0; i < numTools; i++) {
-        PainterTemp.begin(&FrameLeft);
-        PainterTemp.setPen(Qt::red);
-        PainterTemp.setBrush(Qt::red);  // paint inside the ellipse
-        MarkerTemp = QPoint(MarkersLeft[i]->x(), MarkersLeft[i]->y());
-        PainterTemp.drawEllipse(MarkerTemp, 2, 2);
-        MarkerTemp += QPoint(3, -3);  // offset marker label
-        PainterTemp.setFont(QFont(PainterTemp.font().family(), 8));
-        PainterTemp.drawText(MarkerTemp, MarkerNames[i]);
-        PainterTemp.end();
+        MarkerPainter.begin(&FrameLeft);
+        MarkerPainter.setPen(Qt::red);
+        MarkerPainter.setBrush(Qt::red);  // paint inside the ellipse
+        MarkerLabel = QPoint(MarkersLeft[i]->x(), MarkersLeft[i]->y());
+        MarkerPainter.drawEllipse(MarkerLabel, 2, 2);
+        MarkerLabel += QPoint(3, -3);  // label offset
+        MarkerPainter.setFont(QFont(MarkerPainter.font().family(), 10, QFont::DemiBold));
+        MarkerPainter.drawText(MarkerLabel, MarkerNames[i]);
+        MarkerPainter.end();
     }
     ControllerWidget.FrameLeft->setPixmap(QPixmap::fromImage(FrameLeft));
 }
@@ -100,20 +100,20 @@ void devMicronTrackerControllerQDevice::UpdateFrameLeftQSlot(void)
 void devMicronTrackerControllerQDevice::UpdateFrameRightQSlot(void)
 {
     MTC.GetFrameRight(MTC.FrameRight);
-    memcpy(FrameTemp.bits(), MTC.FrameRight.Pointer(), FRAME_SIZE);
-    FrameRight = FrameTemp.convertToFormat(QImage::Format_ARGB32_Premultiplied);
+    memcpy(FrameIndexed8.bits(), MTC.FrameRight.Pointer(), FRAME_SIZE);
+    FrameRight = FrameIndexed8.convertToFormat(QImage::Format_ARGB32_Premultiplied);
 
     const size_t numTools = ControllerWidget.LayoutTools->count();
     for (unsigned int i = 0; i < numTools; i++) {
-        PainterTemp.begin(&FrameRight);
-        PainterTemp.setPen(Qt::red);
-        PainterTemp.setBrush(Qt::red);  // paint inside the ellipse
-        MarkerTemp = QPoint(MarkersRight[i]->x(), MarkersRight[i]->y());
-        PainterTemp.drawEllipse(MarkerTemp, 2, 2);
-        MarkerTemp += QPoint(3, -3);  // offset marker label
-        PainterTemp.setFont(QFont(PainterTemp.font().family(), 8));
-        PainterTemp.drawText(MarkerTemp, MarkerNames[i]);
-        PainterTemp.end();
+        MarkerPainter.begin(&FrameRight);
+        MarkerPainter.setPen(Qt::red);
+        MarkerPainter.setBrush(Qt::red);  // paint inside the ellipse
+        MarkerLabel = QPoint(MarkersRight[i]->x(), MarkersRight[i]->y());
+        MarkerPainter.drawEllipse(MarkerLabel, 2, 2);
+        MarkerLabel += QPoint(3, -3);  // label offset
+        MarkerPainter.setFont(QFont(MarkerPainter.font().family(), 10, QFont::DemiBold));
+        MarkerPainter.drawText(MarkerLabel, MarkerNames[i]);
+        MarkerPainter.end();
     }
     ControllerWidget.FrameRight->setPixmap(QPixmap::fromImage(FrameRight));
 }
@@ -130,6 +130,7 @@ void devMicronTrackerControllerQDevice::MTCTrackQSlot(bool toggled)
 {
     MTC.Capture(mtsBool(toggled));
     MTC.Track(mtsBool(toggled));
+    qApp->beep();
 }
 
 

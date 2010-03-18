@@ -22,11 +22,16 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 add_executable(cisstMultiTaskPeriodicTaskQt
                ${QT_WRAPPED_CPP}
                displayQComponent.cpp
+               displayQComponent.h
                displayQWidget.cpp
+               displayQWidget.h
                main.cpp
                mtsCollectorQComponent.cpp
+               mtsCollectorQComponent.h
                mtsCollectorQWidget.cpp
+               mtsCollectorQWidget.h
                sineTask.cpp
+               sineTask.h
                )
 
 target_link_libraries(cisstMultiTaskPeriodicTaskQt

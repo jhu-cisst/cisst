@@ -21,6 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsRequiredInterface.h>
 #include <cisstDevices/devNDISerialToolQDevice.h>
 
+#include <QDir>
 #include <QString>
 
 CMN_IMPLEMENT_SERVICES(devNDISerialToolQDevice);
@@ -63,11 +64,15 @@ void devNDISerialToolQDevice::timerEvent(QTimerEvent * event)
 
 void devNDISerialToolQDevice::RecordQSlot(void)
 {
-    CMN_LOG_CLASS_RUN_VERBOSE << "RecordQSlot: recorded point" << std::endl;
+    QString path = QDir::currentPath() + "/CollectedPoints.csv";
     std::ofstream file;
-    file.open("CollectedPoints.csv", std::ios::app);
-    file << NDI.PositionCartesian.Position().Translation().X() << ", "
+    file.open(path.toAscii(), std::ios::app);
+    file << NDI.PositionCartesian.Timestamp() << ", "
+         << NDI.PositionCartesian.Position().Translation().X() << ", "
          << NDI.PositionCartesian.Position().Translation().Y() << ", "
          << NDI.PositionCartesian.Position().Translation().Z() << std::endl;
     file.close();
+
+    CMN_LOG_CLASS_RUN_VERBOSE << "RecordQSlot: point collected" << std::endl;
+    qApp->beep();
 }

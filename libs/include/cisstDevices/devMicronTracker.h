@@ -24,9 +24,9 @@ http://www.cisst.org/cisst/license.txt.
   \ingroup cisstDevices
 
   \bug Current CMake support is for Windows only.
+  \bug Automatic light coolness adjustment using CoolCard is not working.
 
   \todo Make this device an mtsTaskContinuous.
-  \todo Add IsTracking() and IsCapturing() methods.
   \todo Mapping from markerName to markerHandle is needed.
   \todo Refactor the method of obtaining marker projections for the controllerQDevice.
   \todo Check for mtMeasurementHazardCode using Xform3D_HazardCodeGet().
@@ -99,7 +99,6 @@ class CISST_EXPORT devMicronTracker : public mtsTaskPeriodic
 
     bool IsCapturing;
     bool IsTracking;
-    bool HDRToggle;
 
     mtHandle CurrentCamera;
     mtHandle IdentifyingCamera;

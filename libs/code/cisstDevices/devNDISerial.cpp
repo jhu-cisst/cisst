@@ -36,12 +36,15 @@ devNDISerial::devNDISerial(const std::string & taskName, const double period) :
 {
     mtsProvidedInterface * provided = AddProvidedInterface("Controller");
     if (provided) {
+        StateTable.AddData(IsTracking, "IsTracking");
+
         provided->AddCommandWrite(&devNDISerial::Beep, this, "Beep", mtsInt());
         provided->AddCommandVoid(&devNDISerial::PortHandlesInitialize, this, "PortHandlesInitialize");
         provided->AddCommandVoid(&devNDISerial::PortHandlesQuery, this, "PortHandlesQuery");
         provided->AddCommandVoid(&devNDISerial::PortHandlesEnable, this, "PortHandlesEnable");
         provided->AddCommandWrite(&devNDISerial::CalibratePivot, this, "CalibratePivot", mtsStdString());
         provided->AddCommandWrite(&devNDISerial::ToggleTracking, this, "ToggleTracking", mtsBool());
+        provided->AddCommandReadState(StateTable, IsTracking, "IsTracking");
     }
 
     memset(SerialBuffer, 0, MAX_BUFFER_SIZE);

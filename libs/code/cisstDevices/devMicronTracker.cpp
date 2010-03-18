@@ -37,7 +37,6 @@ devMicronTracker::devMicronTracker(const std::string & taskName, const double pe
     IsCapturing(false),
     IsTracking(false)
 {
-    HDRToggle = false;
     CameraFrameLeft.SetSize(640 * 480);
     CameraFrameRight.SetSize(640 * 480);
 
@@ -45,12 +44,16 @@ devMicronTracker::devMicronTracker(const std::string & taskName, const double pe
     if (provided) {
         StateTable.AddData(CameraFrameLeft, "CameraFrameLeft");
         StateTable.AddData(CameraFrameRight, "CameraFrameRight");
+        StateTable.AddData(IsCapturing, "IsCapturing");
+        StateTable.AddData(IsTracking, "IsTracking");
 
         provided->AddCommandWrite(&devMicronTracker::CalibratePivot, this, "CalibratePivot", mtsStdString());
         provided->AddCommandWrite(&devMicronTracker::ToggleCapturing, this, "ToggleCapturing", mtsBool());
         provided->AddCommandWrite(&devMicronTracker::ToggleTracking, this, "ToggleTracking", mtsBool());
         provided->AddCommandReadState(StateTable, CameraFrameLeft, "GetCameraFrameLeft");
         provided->AddCommandReadState(StateTable, CameraFrameRight, "GetCameraFrameRight");
+        provided->AddCommandReadState(StateTable, IsCapturing, "IsCapturing");
+        provided->AddCommandReadState(StateTable, IsTracking, "IsTracking");
     }
 }
 
@@ -183,6 +186,7 @@ void devMicronTracker::Startup(void)
     CMN_LOG_CLASS_INIT_VERBOSE << "Startup: resolution of the current camera is " << resolutionX << "x" << resolutionY << std::endl;
 
     Camera_HdrEnabledSet(CurrentCamera, true);
+    Camera_HistogramEqualizeImagesSet(CurrentCamera, true);
     Camera_LightCoolnessSet(CurrentCamera, 0.56);  // obtain this value using CoolCard
 }
 
@@ -193,14 +197,16 @@ void devMicronTracker::Run(void)
 
     int retval = Cameras_GrabFrame(CurrentCamera);
     if (retval != mtOK) {
+        if (retval == mtGrabFrameError) {
+            CMN_LOG_CLASS_RUN_ERROR << "Run: camera is not connected" << std::endl;
+        }
         return;
     }
 
     if (IsCapturing) {
         int numFramesGrabbed;
         MTC( Camera_FramesGrabbedGet(CurrentCamera, &numFramesGrabbed) );
-        HDRToggle = !HDRToggle;
-        if (numFramesGrabbed > 0 && HDRToggle) {
+        if (numFramesGrabbed > 0) {
             MTC( Camera_ImagesGet(CurrentCamera,
                                   CameraFrameLeft.Pointer(),
                                   CameraFrameRight.Pointer()) );
@@ -292,12 +298,28 @@ void devMicronTracker::Track(void)
         // check if tool exists, generate a name and add it otherwise
         tool = CheckTool(markerName);
         if (!tool) {
-            std::string name = "tool" + '-' + std::string(markerName);
+            std::string name = "tool-" + std::string(markerName);
             tool = AddTool(name, markerName);
         }
 
         MTC( Marker_Marker2CameraXfGet(markerHandle, CurrentCamera, PoseXf, &IdentifyingCamera) );
         if (IdentifyingCamera != 0) {
+            if (tool->Name == "tool-COOLCARD") {
+                mtHandle identifiedFacets = Collection_New();
+                MTC( Marker_IdentifiedFacetsGet(markerHandle, CurrentCamera, false, identifiedFacets) );
+                mtHandle longVectorHandle = Vector_New();
+                mtHandle shortVectorHandle = Vector_New();
+                MTC( Facet_IdentifiedVectorsGet(Collection_Int(identifiedFacets, 1), longVectorHandle, shortVectorHandle) );
+                if (longVectorHandle != 0) {
+                    MTC( Camera_LightCoolnessAdjustFromColorVector(CurrentCamera, longVectorHandle, 0) );
+                    CMN_LOG_CLASS_RUN_VERBOSE << "Track: light coolness set to " << Cameras_LightCoolness() << std::endl;
+                }
+                MTC( Collection_Free(identifiedFacets) );
+                MTC( Vector_Free(longVectorHandle) );
+                MTC( Vector_Free(shortVectorHandle) );
+                continue;
+            }
+
             markerPosition = XfHandleToFrame(PoseXf);
             tool->MarkerPosition.Position() = markerPosition;
 
@@ -305,23 +327,23 @@ void devMicronTracker::Track(void)
             MTC( Marker_Tooltip2MarkerXfGet(markerHandle, PoseXf) );
             tooltipCalibration = XfHandleToFrame(PoseXf);
 
-            // update the calibration in marker template
-            if (tool->TooltipOffset.All()) {
-                tooltipCalibration.Translation() = tool->TooltipOffset;
-                PoseXf = FrameToXfHandle(tooltipCalibration);
-                MTC( Marker_Tooltip2MarkerXfSet(markerHandle, PoseXf) );
-                std::string markerPath = "C:\\Program Files\\Claron Technology\\MicronTracker\\Markers\\" + tool->SerialNumber + "_custom";
-                MTC( Persistence_PathSet(Path, markerPath.c_str()) );
-                MTC( Marker_StoreTemplate(markerHandle, Path, "") );
-                tool->TooltipOffset.SetAll(0.0);
-            }
+//            // update the calibration in marker template
+//            if (tool->TooltipOffset.All()) {
+//                tooltipCalibration.Translation() = tool->TooltipOffset;
+//                PoseXf = FrameToXfHandle(tooltipCalibration);
+//                MTC( Marker_Tooltip2MarkerXfSet(markerHandle, PoseXf) );
+//                std::string markerPath = "C:\\Program Files\\Claron Technology\\MicronTracker\\Markers\\" + tool->SerialNumber + "_custom";
+//                MTC( Persistence_PathSet(Path, markerPath.c_str()) );
+//                MTC( Marker_StoreTemplate(markerHandle, Path, "") );
+//                tool->TooltipOffset.SetAll(0.0);
+//            }
 
             tooltipPosition = markerPosition * tooltipCalibration;
-            if (tool->Name == "Probe" && Tools.size() == 2) {
-                tool->TooltipPosition.Position() = Tools.GetItem("Reference")->TooltipPosition.Position().ApplyInverseTo(tooltipPosition);
-            } else {
-              tool->TooltipPosition.Position() = tooltipPosition;
-            }
+//            if (tool->Name == "Probe" && Tools.size() == 2) {
+//                tool->TooltipPosition.Position() = Tools.GetItem("Reference")->TooltipPosition.Position().ApplyInverseTo(tooltipPosition);
+//            } else {
+                tool->TooltipPosition.Position() = tooltipPosition;
+//            }
             tool->TooltipPosition.SetValid(true);
 
             CMN_LOG_CLASS_RUN_DEBUG << "Track: " << markerName << " is at:\n" << tooltipPosition << std::endl;

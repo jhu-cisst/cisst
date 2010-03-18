@@ -19,7 +19,9 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstMultiTask/mtsRequiredInterface.h>
+#include <cisstOSAbstraction/osaGetTime.h>
 
+#include <QDir>
 #include <QString>
 
 #include "devMicronTrackerToolQDevice.h"
@@ -80,11 +82,23 @@ void devMicronTrackerToolQDevice::timerEvent(QTimerEvent * event)
 
 void devMicronTrackerToolQDevice::RecordQSlot(void)
 {
-    CMN_LOG_CLASS_RUN_VERBOSE << "RecordQSlot: recorded point" << std::endl;
+    QString path = QDir::currentPath() + "/CollectedPoints.csv";
     std::ofstream file;
-    file.open("CollectedPoints.csv", std::ios::app);
-    file << MTC.PositionCartesian.Position().Translation().X() << ", "
+    file.open(path.toAscii(), std::ios::app);
+    file << MTC.PositionCartesian.Timestamp() << ", "
+         << MTC.PositionCartesian.Position().Translation().X() << ", "
          << MTC.PositionCartesian.Position().Translation().Y() << ", "
          << MTC.PositionCartesian.Position().Translation().Z() << std::endl;
     file.close();
+    QPixmap originalPixmap = QPixmap::grabWindow(qApp->activeWindow()->winId());
+
+    CMN_LOG_CLASS_RUN_VERBOSE << "RecordQSlot: point collected" << std::endl;
+    qApp->beep();
+
+    std::string dateTime;
+    osaGetDateTimeString(dateTime);
+    path = QDir::currentPath() + "/Screenshot-" + dateTime.c_str() + ".png";
+    if (!path.isEmpty()) {
+        originalPixmap.save(path, "png");
+    }
 }

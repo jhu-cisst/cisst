@@ -79,7 +79,7 @@ void devNDISerialControllerQDevice::NDIInitializeQSlot(void)
     NDI.Initialize();
     NDI.Query();
     NDI.Enable();
-    NDI.Beep(mtsInt(2));
+    qApp->beep();
 }
 
 
@@ -87,14 +87,15 @@ void devNDISerialControllerQDevice::NDICalibratePivotQSlot(void)
 {
     mtsStdString toolName = ControllerWidget.BoxTools->currentText().toStdString();
     NDI.CalibratePivot(toolName);
-    NDI.Beep(mtsInt(2));
 }
 
 
 void devNDISerialControllerQDevice::NDITrackQSlot(bool toggled)
 {
     NDI.Track(mtsBool(toggled));
+    qApp->beep();
 }
+
 
 void devNDISerialControllerQDevice::RecordQSlot(bool toggled)
 {
