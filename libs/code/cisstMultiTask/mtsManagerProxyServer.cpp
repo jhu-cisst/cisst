@@ -336,7 +336,7 @@ void mtsManagerProxyServer::ConvertValuesOfCommand(
 
     for (unsigned int i = 0; i < src.size(); ++i) {
         valueSet.clear();
-        for (unsigned int j = 0; j < src.size(); ++j) {
+        for (unsigned int j = 0; j < src[i].size(); ++j) {
             value.Timestamp.sec = static_cast<long>(src[i][j].Timestamp.sec);
             value.Timestamp.nsec = static_cast<long>(src[i][j].Timestamp.nsec);
             value.Value = src[i][j].Value;
@@ -354,7 +354,7 @@ void mtsManagerProxyServer::ConstructValuesOfCommand(
 
     for (unsigned int i = 0; i < src.size(); ++i) {
         valueSet.clear();
-        for (unsigned int j = 0; j < src.size(); ++j) {
+        for (unsigned int j = 0; j < src[i].size(); ++j) {
             value.Timestamp.sec = src[i][j].Timestamp.sec;
             value.Timestamp.nsec = src[i][j].Timestamp.nsec;
             value.Value = src[i][j].Value;

@@ -842,13 +842,16 @@ void mtsManagerLocal::GetValuesOfCommand(SetOfValues & values,
     ValuePair value;
     Values valueSet;
     double relativeTime;
+    values.clear();
     const int signalCount = argument->GetNumberOfData();
     for (unsigned int i = 0; i < argument->GetNumberOfData(); ++i) {
         value.Value = argument->GetDataAsDouble(i);
         argument->GetTimestamp(relativeTime);
         TimeServer.RelativeToAbsolute(relativeTime, value.Timestamp);
+
         valueSet.push_back(value);
     }
+    values.push_back(valueSet);
 
     delete argument;
 }

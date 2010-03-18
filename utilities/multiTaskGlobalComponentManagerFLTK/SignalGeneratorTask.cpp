@@ -61,9 +61,13 @@ void SignalGenerator::Run(void)
     double newValue;
     std::stringstream ss;
     for (unsigned int i = 0; i < PosGet.GetNumberOfData(); ++i) {
-        newValue = sin((double)x++) * (100.0 + 10.0 * (double)i) / 100.0;
+        //newValue = sin((double)x) * (100.0 + 10.0 * (double)i) / 100.0;
+        newValue = sin(2 * cmnPI * static_cast<double>(this->GetTick()) * Period / 2.0) 
+            * (100.0 + 10.0 * (double)i) / 100.0;
         ss << newValue << " ";
     }
+    x++;
+
     vctFrm3 newPosition;
     newPosition.FromStreamRaw(ss);
     PosGet.SetPosition(newPosition);

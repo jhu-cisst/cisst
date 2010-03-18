@@ -60,7 +60,7 @@ int main(int argc, char * argv[])
     }
 
     // create signal generator component
-    const double PeriodClient = 100 * cmn_ms;
+    const double PeriodClient = 50 * cmn_ms;
     SignalGenerator * signalGenerator = new SignalGenerator("SignalGenerator", PeriodClient);
     taskManager->AddComponent(signalGenerator);
 

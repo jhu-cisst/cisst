@@ -117,12 +117,17 @@ void GCMUITask::Configure(const std::string & CMN_UNUSED(filename))
     GraphPane->set_grid(MP_LINEAR_GRID, MP_LINEAR_GRID, true);
     GraphPane->set_grid_color(GRAY);
 
+    for (int i=0; i<=12; ++i) {
+        GraphPane->set_pointsize(i, 1.0);
+        GraphPane->set_linewidth(i, 1.0);
+    }
+
     LastUpdateTime = clock();
 
     ResetDataVisualizerUI();
 
-    UI.SliderSamplingRate->range(1.0, 100.0);
-    UI.SliderSamplingRate->step(10);
+    UI.SliderSamplingRate->range(10.0, 100.0);
+    UI.SliderSamplingRate->step(10.0);
     UI.SliderSamplingRate->value(10.0);
 }
 
@@ -844,6 +849,8 @@ void GCMUITask::OnBrowserVisualizeCommandNameClicked(void)
     UI.OutputInterfaceName->value(data->InterfaceName.c_str());
     UI.OutputArgumentName->value(data->ArgumentName.c_str());
     UI.SliderSamplingRate->value(data->SamplingRate);
+
+    TimeVisualizationStarted = osaGetTime();
     
     // TODO: Clear the current oscilloscope screen and refresh it so that a
     // newly selected signal can be visualized.
@@ -1052,60 +1059,50 @@ void GCMUITask::FetchCurrentValues(void)
     CommandSelected * c;
     for (unsigned int i = 0; i < CommandsBeingPlotted.size(); ++i) {
         // Check timeout. Fetch new values only if timer expires.
-        //if (CommandsBeingPlotted[i]->IsExpired()) {
+        if (CommandsBeingPlotted[i]->IsExpired()) {
             c = CommandsBeingPlotted[i];
 
             // Fetch new values
             mtsManagerLocalInterface::SetOfValues values; 
             GlobalComponentManager.GetValuesOfCommand(c->ProcessName, c->ComponentName, c->InterfaceName, c->CommandName, values);
             c->Refresh();
-            c->SetTimeout(500 * cmn_ms);
-                
+            c->SetTimeout(20 * cmn_ms);
+
             // Draw graph
             DrawGraph(values);
-        //}
+        }
     }
+
+    GraphPane->redraw();
 }
 
 void GCMUITask::DrawGraph(const mtsManagerLocalInterface::SetOfValues & values)
 {
     static int x = 0;
 
-    // timestamp
-    double t;
     double value;
 
-    for (int i=0; i<=12; ++i) {
-        if (i <= 7) {
-            GraphPane->set_pointsize(i, 2.0);
-            GraphPane->set_linewidth(i, 1.0);
-        } else {
-            GraphPane->set_pointsize(i, 2.0);
-            GraphPane->set_linewidth(i, 1.0);
-        }
-    }
+    for (unsigned int j = 0; j < values.size(); ++j) {
+        std::cout << values.size() <<": ";
+        for (unsigned int i = 0; i < values[j].size(); ++i) {
+            value = values[j][i].Value;
+            //t = values[j][i].Timestamp.sec + values[j][i].Timestamp.nsec / 1000000000.0;
+            //x = t - TimeVisualizationStarted;
+            //printf("t: %f, Time: %f, x: %f\n", t, TimeVisualizationStarted, x);
 
-    for (unsigned int t = 0; t < values.size(); ++t) {
-        for (unsigned int i = 0; i < values[i].size(); ++i) {
-            t = values[i][t].Timestamp.sec + values[i][t].Timestamp.nsec / 1000000000.0;
-            value = values[i][t].Value;
-            std::cout << "(" << i << ") t: " << t << ", v: " << value << std::endl;
-
-            if (i == 0) GraphPane->add(i, PLOT_POINT((float)x, value, AQUA));
-            if (i == 1) GraphPane->add(i, PLOT_POINT((float)x, value, BLUE));
-            if (i == 2) GraphPane->add(i, PLOT_POINT((float)x, value, FUCHSIA));
-            if (i == 3) GraphPane->add(i, PLOT_POINT((float)x, value, GREEN));
-            if (i == 4) GraphPane->add(i, PLOT_POINT((float)x, value, LIME));
-            if (i == 5) GraphPane->add(i, PLOT_POINT((float)x, value, MAROON));
-            if (i == 6) GraphPane->add(i, PLOT_POINT((float)x, value, NAVY));
-            if (i == 7) GraphPane->add(i, PLOT_POINT((float)x, value, OLIVE));
-            if (i == 8) GraphPane->add(i, PLOT_POINT((float)x, value, PURPLE));
-            if (i == 9) GraphPane->add(i, PLOT_POINT((float)x, value, RED));
-            if (i == 10) GraphPane->add(i, PLOT_POINT((float)x, value, TEAL));
-            if (i == 11) GraphPane->add(i, PLOT_POINT((float)x, value, YELLOW));
+            if (i == 0)  GraphPane->add(0, PLOT_POINT((float)x, value, RED));
+            if (i == 1)  GraphPane->add(1, PLOT_POINT((float)x, value, YELLOW));
+            if (i == 2)  GraphPane->add(2, PLOT_POINT((float)x, value, BLUE));
+            if (i == 3)  GraphPane->add(3, PLOT_POINT((float)x, value, LIME));
+            if (i == 4)  GraphPane->add(4, PLOT_POINT((float)x, value, PURPLE));
+            if (i == 5)  GraphPane->add(5, PLOT_POINT((float)x, value, TEAL));
+            if (i == 6)  GraphPane->add(6, PLOT_POINT((float)x, value, FUCHSIA));
+            if (i == 7)  GraphPane->add(7, PLOT_POINT((float)x, value, AQUA));
+            if (i == 8)  GraphPane->add(8, PLOT_POINT((float)x, value, GREEN));
+            if (i == 9)  GraphPane->add(9, PLOT_POINT((float)x, value, NAVY));
+            if (i == 10) GraphPane->add(10, PLOT_POINT((float)x, value, WHITE));
+            if (i == 11) GraphPane->add(11, PLOT_POINT((float)x, value, OLIVE));
         }
         x++;
     }
-
-    GraphPane->redraw();
 }
