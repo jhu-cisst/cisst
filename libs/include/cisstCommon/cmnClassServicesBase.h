@@ -56,9 +56,9 @@ public:
       \param lod The Log Level of Detail setting to be used with this class.
     */
     cmnClassServicesBase(const std::string & className, const std::type_info * typeInfo, LogLoDType lod = CMN_LOG_LOD_RUN_ERROR):
-        TypeInfoMember(typeInfo),
-        LoDMember(lod)
+        TypeInfoMember(typeInfo)
     {
+        this->SetLoD(lod);
         NameMember = cmnClassRegister::Register(this, className);
     }
 
@@ -150,6 +150,11 @@ public:
     \param newLoD The log Level of Detail setting.
     */
     inline void SetLoD(LogLoDType newLoD) {
+        if (newLoD < CMN_LOG_LOD_NONE) {
+            newLoD = CMN_LOG_LOD_NONE;
+        } else if (newLoD > CMN_LOG_LOD_VERY_VERBOSE) {
+            newLoD = CMN_LOG_LOD_VERY_VERBOSE;
+        }
         LoDMember = newLoD;
     }
 

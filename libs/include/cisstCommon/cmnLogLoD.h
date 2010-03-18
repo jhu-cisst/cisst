@@ -59,7 +59,7 @@ typedef enum {
 /*! Human readable strings used to indicate the level of detail of a
   message.  See also cmnLogger. */
 const char * const cmnLogLoDString[CMN_LOG_LOD_NOT_USED] = {
-    "Unexpected",
+    "No log",
     "Error (init)",
     "Warning (init)",
     "Message (init)",

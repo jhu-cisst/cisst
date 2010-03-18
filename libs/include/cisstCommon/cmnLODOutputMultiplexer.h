@@ -57,10 +57,10 @@ http://www.cisst.org/cisst/license.txt.
        ofstream log("logfile.txt");
        windowoutputstream display;  // hypothetical class
  
-       cmnLODOutputMultiplexer multiplexerOutput(&lodMultiplexetStreambuf, 3);
+       cmnLODOutputMultiplexer multiplexerOutput(&lodMultiplexetStreambuf, CMN_LOG_LOD_RUN_ERROR);
  
-       lodMultiplexerStreambuf.AddChannel(log.rdbuf(), 5);
-       lodMultiplexerStreambuf.AddChannel(windowoutputstream.rdbuf(), 2);
+       lodMultiplexerStreambuf.AddChannel(log, CMN_LOG_LOD_RUN_ERROR;
+       lodMultiplexerStreambuf.AddChannel(windowoutputstream, CMN_LOG_LOD_INIT_WARNING);
  
        multiplexerStreambuf << "Hello, world" << endl;  // channel the message only to 'log'
      \endcode

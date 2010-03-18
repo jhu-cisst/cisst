@@ -112,7 +112,7 @@ http://www.cisst.org/cisst/license.txt.
   any other output stream:
 
   \code
-  CMN_LOG_INIT_ERROR << "This is a message of LoD 1" << argc << std::endl;
+  CMN_LOG_INIT_ERROR << "This is a message of LoD CMN_LOG_LOD_INIT_ERROR" << argc << std::endl;
   \endcode
 
   \param lod The log level of detail of the message.
@@ -215,27 +215,21 @@ class CISST_EXPORT cmnLogger {
  private:
     /*! Global Level of Detail used to filter all messages.
 
-      As for the signification of the different level of details, they
-      depend on each class implementation.  Nevertheless, it's
-      recommended to use some values between 0 and 10, 10 being the
-      highest level of detail which corresponds to the maximum amount
-      of logging.  Also, for the programmers of new classes, we
-      recommend the following levels:
-
-      - 1: Errors during the initialization.
-      - 2: Warnings during the initialization.
-      - 3 and 4: Extra messages during the initialization.
-      - 5: Errors during normal operations (also defined as #CMN_LOG_DEFAULT_LOD).
-      - 6: Warnings during normal operations.
-      - 7 and above: Verbose to very verbose.
+      - CMN_LOG_LOD_INIT_ERROR: Errors during the initialization.
+      - CMN_LOG_LOD_INIT_WARNING: Warnings during the initialization.
+      - CMN_LOG_LOD_INIT_VERBOSE and CMN_LOG_LOD_INIT_DEBUG: Extra messages during the initialization.
+      - CMN_LOG_LOD_RUN_ERROR: Errors during normal operations (also defined as #CMN_LOG_DEFAULT_LOD).
+      - CMN_LOG_LOD_RUN_WARNING: Warnings during normal operations.
+      - CMN_LOG_LOD_RUN_VERBOSE and CMN_LOG_LOD_RUN_DEBUG: Extra messages during normal operations.
+      - CMN_LOG_LOD_VERY_VERBOSE: Very verbose.
 
       The idea is that for most classes, important errors happens
       during the initialization (constructor, opening a serial port,
       configuring some hardware device, open a grapical context, etc.)
       and during the normal operations, time can become critical.
-      Therefore a level 5 would log a lot of information at the
-      beginning and only the critical messages during the normal
-      operations.
+      Therefore a level CMN_LOG_LOD_RUN_ERROR would log a lot of
+      information at the beginning and only the critical messages
+      during the normal operations.
     */
     LogLoDType LoD;
 
@@ -244,7 +238,12 @@ class CISST_EXPORT cmnLogger {
 
     /*! Instance specific implementation of SetLoD.  \sa SetLoD */
     inline void SetLoDInstance(LogLoDType lod) {
-        CMN_LOG(CMN_LOG_LOD_INIT_WARNING) << "Class cmnLogger: Level of Detail set to " << lod << std::endl;
+        if (lod < CMN_LOG_LOD_NONE) {
+            lod = CMN_LOG_LOD_NONE;
+        } else if (lod > CMN_LOG_LOD_VERY_VERBOSE) {
+            lod = CMN_LOG_LOD_VERY_VERBOSE;
+        }
+        CMN_LOG(CMN_LOG_LOD_INIT_WARNING) << "Class cmnLogger: level of Detail set to \"" << cmnLogLoDString[lod] << "\"" << std::endl;
         LoD = lod;
     }
 

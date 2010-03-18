@@ -84,10 +84,10 @@ class cmnMultiplexerStreambufProxy;
        ofstream log("logfile.txt");
        windowoutputstream display;    // hypothesized class
  
-       lodMultiplexerStreambuf.AddChannel(&log.rdbuf(), 5);
-       lodMultiplexerStreambuf.AddChannel(&windowoutputstream.rdbuf(), 2);
+       lodMultiplexerStreambuf.AddChannel(&log.rdbuf(), CMN_LOG_LOD_RUN_ERROR);
+       lodMultiplexerStreambuf.AddChannel(&windowoutputstream.rdbuf(), CMN_LOG_LOD_INIT_WARNING);
  
-       cmnLODOutputMultiplexer multiplexerOutput(&lodMultiplexetStreambuf, 3);
+       cmnLODOutputMultiplexer multiplexerOutput(&lodMultiplexetStreambuf, CMN_LOG_LOD_INIT_VERBOSE);
  
        multiplexerStreambuf << "Hello, world" << endl;  // channel the message only to 'log'
      \endcode
