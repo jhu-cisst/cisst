@@ -19,10 +19,6 @@ project(devicesTutorialExample4)
 find_package(OpenIGTLink REQUIRED)
 include(${OpenIGTLink_USE_FILE})
 
-find_package(FLTK REQUIRED)
-include_directories(${devicesTutorialExample4_SOURCE_DIR}
-                    ${FLTK_INCLUDE_DIR}
-                    )
 fltk_wrap_ui(devicesTutorialExample4Simulator
              trackerUI.fl
              )
@@ -36,13 +32,11 @@ add_executable(devicesTutorialExample4Simulator
 
 target_link_libraries(devicesTutorialExample4Simulator
                       OpenIGTLink
-                      ${FLTK_LIBRARIES}
                       )
 
 cisst_requires(devicesTutorialExample4Simulator
                "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstParameterTypes;cisstDevices"
                )
-
 
 if(CISST_DEV_HAS_SENSABLEHD)
   find_package(Sensable REQUIRED)

@@ -20,11 +20,6 @@ include_directories(${SENSABLE_INCLUDE_DIR})
 
 OPTION(DEV_EXAMPLE_USE_IRE "Use IRE in devicesTutorial example." OFF)
 
-find_package (FLTK REQUIRED)
-# add include paths
-include_directories(${devicesTutorialExample3_SOURCE_DIR}
-                    ${FLTK_INCLUDE_DIR})
-
 fltk_wrap_ui(devicesTutorialExample3
              mainGUI.fl
 )
@@ -38,8 +33,7 @@ add_executable(devicesTutorialExample3
 	       ${devicesTutorialExample3_FLTK_UI_SRCS}
 	       )
 
-
-target_link_libraries(devicesTutorialExample3 ${SENSABLE_LIBRARIES} ${FLTK_LIBRARIES})
+target_link_libraries(devicesTutorialExample3 ${SENSABLE_LIBRARIES})
 
 # link with the cisst libraries
 IF(DEV_EXAMPLE_USE_IRE)

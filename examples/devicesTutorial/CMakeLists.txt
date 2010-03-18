@@ -12,24 +12,33 @@
 # 
 # --- end cisst license ---
 
-add_subdirectory(example2)
+if(CISST_HAS_FLTK)
+  add_subdirectory(example2)
 
-if(CISST_DEV_HAS_SENSABLEHD OR CISST_MTS_HAS_ICE)
-  add_subdirectory(example1)
-endif(CISST_DEV_HAS_SENSABLEHD OR CISST_MTS_HAS_ICE)
+  if(CISST_DEV_HAS_SENSABLEHD OR CISST_MTS_HAS_ICE)
+    add_subdirectory(example1)
+  endif(CISST_DEV_HAS_SENSABLEHD OR CISST_MTS_HAS_ICE)
 
-if(CISST_DEV_HAS_SENSABLEHD)
-  add_subdirectory(example3)
-  add_subdirectory(example5)
-endif(CISST_DEV_HAS_SENSABLEHD)
+  if(CISST_DEV_HAS_SENSABLEHD)
+    add_subdirectory(example3)
+    add_subdirectory(example5)
+  endif(CISST_DEV_HAS_SENSABLEHD)
 
-if(CISST_DEV_HAS_OPENIGTLINK)
-  add_subdirectory(example4)
-endif(CISST_DEV_HAS_OPENIGTLINK)
+  if(CISST_DEV_HAS_OPENIGTLINK)
+    add_subdirectory(example4)
+  endif(CISST_DEV_HAS_OPENIGTLINK)
 
-if(CISST_HAS_QT AND CISST_HAS_XML)
-  add_subdirectory(example6)
-  if(CISST_DEV_HAS_MICRONTRACKER)
-    add_subdirectory(example7)
-  endif(CISST_DEV_HAS_MICRONTRACKER)
-endif(CISST_HAS_QT AND CISST_HAS_XML)
+else(CISST_HAS_FLTK)
+  message(WARNING " cisstDevices example example2 will not be compiled since it requires CISST_HAS_FLTK")
+endif(CISST_HAS_FLTK)
+
+if(CISST_HAS_QT)
+
+  if (CISST_HAS_XML)
+    add_subdirectory(example6)
+
+    if(CISST_DEV_HAS_MICRONTRACKER)
+      add_subdirectory(example7)
+    endif(CISST_DEV_HAS_MICRONTRACKER)
+  endif(CISST_HAS_XML)
+endif(CISST_HAS_QT)
