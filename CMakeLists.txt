@@ -344,6 +344,7 @@ INSTALL_FILES(/include
 # Environment variables for Windows
 IF(WIN32)
   # Script to set cisst environment variables
+  FILE(TO_NATIVE_PATH ${cisst_BINARY_DIR} cisst_BINARY_DIR_NATIVE)
   CONFIGURE_FILE(${cisst_SOURCE_DIR}/libs/utils/cisstvars.bat.in
                  ${cisst_BINARY_DIR}/cisstvars.bat)
   # Script to set Microsoft compiler environment variables
