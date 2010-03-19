@@ -7,7 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -79,11 +79,6 @@ public:
 	/*! Default destructor. Does nothing. */
 	~mtsStateIndex() {}
 
-    virtual void ToStream(std::ostream &out) const {
-        out << "Index = " << TimeIndex << ", Ticks = " << Ticks()
-            << ", Length = " << BufferLength;
-    }
-
     /*! The length of the circular buffer. */
     int Length(void) const {
         return BufferLength;
@@ -135,22 +130,21 @@ public:
 		return !(*this == that);
 	}
 
+    /*! Human readable text output */
+    virtual void ToStream(std::ostream & outputStream) const;
+
+    /*! Machine reabable text output */
+    virtual void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
+                             bool headerOnly = false, const std::string & headerPrefix = "") const;
+
     /*! Serialize the content of the object without any extra
       information, i.e. no class type nor format version.  The
       "receiver" is supposed to already know what to expect. */
-    virtual void SerializeRaw(std::ostream & outputStream) const {
-        cmnSerializeRaw(outputStream, this->TimeIndex);
-        cmnSerializeRaw(outputStream, this->TimeTicks);
-        cmnSerializeRaw(outputStream, this->BufferLength);
-    }
+    void SerializeRaw(std::ostream & outputStream) const;
 
     /*! De-serialize the content of the object without any extra
       information, i.e. no class type nor format version. */
-    virtual void DeSerializeRaw(std::istream & inputStream) {
-        cmnDeSerializeRaw(inputStream, this->TimeIndex);
-        cmnDeSerializeRaw(inputStream, this->TimeTicks);
-        cmnDeSerializeRaw(inputStream, this->BufferLength);
-    }
+    virtual void DeSerializeRaw(std::istream & inputStream);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsStateIndex)
