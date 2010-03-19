@@ -26,6 +26,7 @@ SET(DEPENDENCIES
 
 # all source files
 SET(SOURCE_FILES
+    mtsGenericObject.cpp
     mtsGenericObjectProxy.cpp
 
     mtsFixedSizeVectorTypes.cpp

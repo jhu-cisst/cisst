@@ -7,7 +7,7 @@
   Author(s):	Anton Deguet
   Created on:	2009-04-13
 
-  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2009-2010 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -50,7 +50,7 @@ http://www.cisst.org/cisst/license.txt.
 
   \sa cmnGenericObject
 */
-class mtsGenericObject: public cmnGenericObject {
+class CISST_EXPORT mtsGenericObject: public cmnGenericObject {
 
 
     /*! Time stamp.  When used in conjunction with mtsStateTable, the
@@ -97,66 +97,29 @@ public:
       overrides this method.
       \param timeStamp time stamp in seconds
       \returns true if time stamp was set. */
-    inline bool SetTimestampIfAutomatic(double timestamp) {
-        if (this->AutomaticTimestampMember) {
-            this->TimestampMember = timestamp;
-            return true;
-        }
-        return false;
-    }
+    bool SetTimestampIfAutomatic(double timestamp);
 
     /*! Human readable text output.  This method only streams the data
       members of mtsGenericObject, i.e. the Timestamp and Valid flag.
       It should be called by any derived class re-implementing
       ToStream. */
-    virtual void ToStream(std::ostream & outputStream) const {
-        outputStream << "Timestamp (";
-        if (this->AutomaticTimestamp()) {
-            outputStream << "automatic";
-        } else {
-            outputStream << "manual";
-        }
-        outputStream << "): " << this->Timestamp();
-        if (this->Valid()) {
-            outputStream << " (valid)";
-        } else {
-            outputStream << " (invalid)";
-        }
-    }
+    virtual void ToStream(std::ostream & outputStream) const;
 
     /*! Raw text output to stream */
     virtual void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
-                             bool headerOnly = false, const std::string & headerPrefix = "") const {
-        if (headerOnly) {
-            outputStream << headerPrefix << "-timestamp" << delimiter
-                         << headerPrefix << "-automatic-timestamp" << delimiter
-                         << headerPrefix << "-valid";
-        } else {
-            outputStream << this->Timestamp() << delimiter
-                         << this->AutomaticTimestamp() << delimiter
-                         << this->Valid();
-        }
-    }
+                             bool headerOnly = false, const std::string & headerPrefix = "") const;
 
     /*! Binary serialization */
-    virtual void SerializeRaw(std::ostream & outputStream) const {
-        cmnSerializeRaw(outputStream, this->Timestamp());
-        cmnSerializeRaw(outputStream, this->AutomaticTimestamp());
-        cmnSerializeRaw(outputStream, this->Valid());
-    }
+    virtual void SerializeRaw(std::ostream & outputStream) const;
 
     /*! Binary deserialization */
-    virtual void DeSerializeRaw(std::istream & inputStream) {
-        cmnDeSerializeRaw(inputStream, this->Timestamp());
-        cmnDeSerializeRaw(inputStream, this->AutomaticTimestamp());
-        cmnDeSerializeRaw(inputStream, this->Valid());
-    }
+    virtual void DeSerializeRaw(std::istream & inputStream);
 
-    /*! Methods for data visualization.  Derived classes should override 
-        the following methods in order to be properly processed by the data 
+    /*! Methods for data visualization.  Derived classes should override
+        the following methods in order to be properly processed by the data
         visualizer of the global component manager. */
 
-    /*! Return a number of data (which can be visualized, i.e., type-casted 
+    /*! Return a number of data (which can be visualized, i.e., type-casted
         to double) */
     virtual unsigned int GetNumberOfData(const bool CMN_UNUSED(visualizable) = true) const {
         return 0;
