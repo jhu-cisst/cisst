@@ -19,9 +19,13 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include "GCMUITask.h"
+#include "PopupBrowser.h"
 
 #include <cisstCommon/cmnStrings.h>
-#include <time.h>
+#include <FL/fl_ask.H>
+#include <FL/Fl_Window.H>
+#include <FL/Fl_Button.H>
+#include <FL/Fl_Menu.H>
 
 CMN_IMPLEMENT_SERVICES(GCMUITask);
 
@@ -45,6 +49,93 @@ CMN_IMPLEMENT_SERVICES(GCMUITask);
 
 #define MAX_ARGUMENT_PARAMETER_COUNT 12
 
+// GCMUITask object
+GCMUITask * GCMUI;
+
+//-------------------------------------------------------------------------
+//  Callback Functions
+//-------------------------------------------------------------------------
+// Callback invoked when menu item selected
+void callbackSignalSelect(Fl_Widget * w, void * v) 
+{
+    //if (!w || !v) {
+    //    return;
+    //}
+
+    switch((int)v) {
+        case 0: fl_choice("Thing 0 happened", "OK", NULL, NULL); break;
+        case 1: fl_choice("Thing 1 happened", "OK", NULL, NULL); break;
+        case 2: fl_choice("Thing 2 happened", "OK", NULL, NULL); break;
+        case 3: fl_choice("Thing 3 happened", "OK", NULL, NULL); break;
+    }
+
+    GCMUI->UI.TabControl->value(GCMUI->UI.DataVisualizer);
+}
+
+void callbackPopupSignalSelectionMenu(Fl_Widget * w, void *userdata)
+{
+    const int idxClicked = (int) userdata;
+    if (idxClicked == 0) {
+        return;
+    }
+
+    const std::string processName = GCMUI->StripOffFormatCharacters(
+        GCMUI->UI.BrowserProcesses->text(GCMUI->UI.BrowserProcesses->value()));
+    const std::string componentName = GCMUI->StripOffFormatCharacters(
+        GCMUI->UI.BrowserComponents->text(GCMUI->UI.BrowserComponents->value()));
+    const std::string interfaceName = GCMUI->StripOffFormatCharacters(
+        GCMUI->UI.BrowserProvidedInterfaces->text(GCMUI->UI.BrowserProvidedInterfaces->value()));
+    const std::string commandName = GCMUI->StripOffFormatCharacters(
+        GCMUI->UI.BrowserCommands->text(idxClicked));
+
+    // Get argument information
+    std::string argumentName;
+    std::vector<std::string> signalNames;
+    GCMUI->GetArgumentInformation(processName, componentName, interfaceName, commandName, argumentName, signalNames);
+    
+    if (signalNames.size() == 0) {
+        return;
+    }
+
+    // Popup signal selection menu
+    // http://www.fltk.org/doc-1.0/Fl_Menu_Item.html#Fl_Menu_Item.popup
+    Fl_Menu_Item * popupMenus = new Fl_Menu_Item[signalNames.size() + 1];
+    for (unsigned int i = 0; i < signalNames.size(); ++i) {
+        memset(&popupMenus[i], 0, sizeof(Fl_Menu_Item));
+        popupMenus[i].text = signalNames[i].c_str();
+        popupMenus[i].shortcut_ = 0;
+        popupMenus[i].callback_ = callbackSignalSelect;
+        popupMenus[i].user_data_ = (void*) i;
+    }
+    memset(&popupMenus[signalNames.size()], 0, sizeof(Fl_Menu_Item));
+
+    const Fl_Menu_Item * m = popupMenus->popup(Fl::event_x(), Fl::event_y(), 0, 0, 0);
+    if (m) {
+        m->do_callback(w, m->user_data());
+    }
+
+    delete [] popupMenus;
+}
+
+void callbackVisualize(Fl_Widget * w, void *userdata)
+{
+    PopupBrowser * browser = (PopupBrowser*) userdata;
+    if (browser->value() == 0) {
+        return;
+    }
+
+    const int idxClicked = browser->value();
+    const std::string commandName = GCMUI->StripOffFormatCharacters(browser->text(idxClicked));
+    std::cout << "Visualize command: (" << idxClicked << ") " << commandName << std::endl;
+
+    //GCMUI->PopupSignalSelectionMenu(idxClicked);
+    //GCMUI->VisualizeCommand(idxClicked);
+    callbackPopupSignalSelectionMenu(w, (void*)idxClicked);
+}
+
+//-------------------------------------------------------------------------
+//  GCMUITask
+//-------------------------------------------------------------------------
 /////////////////////////////////////////////////////////////////////////////
 //
 // TODO:
@@ -54,12 +145,21 @@ CMN_IMPLEMENT_SERVICES(GCMUITask);
 //   and wait for a user to choose a new command to visualize.
 // - Clear the current oscilloscope screen and refresh it so that a newly selected 
 //   signal can be visualized.
+//
+// Improvements:
+// - Instead of showing all the signals simultaneously, let users choose what to visualize
+// - (two types of) offset controller -> associated with the channel / for global
+// - freeze (+export to file) / trigger / hold
+//
+// - higher quality oscilloscope -> support stop & zoom => requires more and more data 
+//   to be collected???
 
 GCMUITask::GCMUITask(const std::string & taskName, const double period, 
                      mtsManagerGlobal& globalComponentManager) :
     mtsTaskPeriodic(taskName, period, false, 5000),
     GlobalComponentManager(globalComponentManager)
 {
+    GCMUI = this;
 }
 
 void GCMUITask::Configure(const std::string & CMN_UNUSED(filename))
@@ -139,11 +239,12 @@ void GCMUITask::Startup(void)
 
 void GCMUITask::Run(void)
 {
-    // TEST CODE
+#if 0
     if (clock() - LastUpdateTime > 20) {
         LastUpdateTime = clock();
         PlotGraph();
     }
+#endif
 
     // Check user's input on the 'Component Inspector' tab
     CheckComponentInspectorInput();
@@ -182,6 +283,7 @@ ReturnWithUpdate:
     }
 }
 
+/*
 #define BASIC_PLOTTING_TEST
 //#define SIGNAL_CONTROL_TEST
 void GCMUITask::PlotGraph(void)
@@ -207,7 +309,6 @@ void GCMUITask::PlotGraph(void)
         }
     }
 
-    /*
     float value = sin(x/6.0f) * 10.0f;
 
     GraphPane->add(0, PLOT_POINT((float)x, value * 1.0f, AQUA));
@@ -225,7 +326,6 @@ void GCMUITask::PlotGraph(void)
     GraphPane->add(12, PLOT_POINT((float)x, value * 2.2f, YELLOW));
 
     ++x;
-    */
 #endif
 
 #ifdef SIGNAL_CONTROL_TEST
@@ -247,6 +347,7 @@ void GCMUITask::PlotGraph(void)
 
     GraphPane->redraw();
 }
+*/
 
 void GCMUITask::CheckComponentInspectorInput(void)
 {
@@ -453,12 +554,6 @@ void GCMUITask::CheckComponentInspectorInput(void)
 
             return;
         }
-    }
-
-    // Visualize Button Click
-    if (UI.ButtonVisualizeClicked) {
-        OnButtonVisualizeClicked(CurrentIndexClicked.Command);
-        UI.ButtonVisualizeClicked = false;
     }
 }
 
@@ -882,23 +977,24 @@ void GCMUITask::OnButtonRefreshClicked(void)
     UpdateUI();
 }
 
-void GCMUITask::OnButtonVisualizeClicked(const int idxClicked)
+void GCMUITask::VisualizeCommand(const int idxClicked)
 {
     if (idxClicked == 0) {
         return;
     }
 
-    const std::string processName = StripOffFormatCharacters(UI.BrowserProcesses->text(UI.BrowserProcesses->value()));
-    const std::string componentName = StripOffFormatCharacters(UI.BrowserComponents->text(UI.BrowserComponents->value()));
-    const std::string interfaceName = StripOffFormatCharacters(UI.BrowserProvidedInterfaces->text(UI.BrowserProvidedInterfaces->value()));
-    const std::string commandName = StripOffFormatCharacters(UI.BrowserCommands->text(idxClicked));
+    //const std::string processName = StripOffFormatCharacters(UI.BrowserProcesses->text(UI.BrowserProcesses->value()));
+    //const std::string componentName = StripOffFormatCharacters(UI.BrowserComponents->text(UI.BrowserComponents->value()));
+    //const std::string interfaceName = StripOffFormatCharacters(UI.BrowserProvidedInterfaces->text(UI.BrowserProvidedInterfaces->value()));
+    //const std::string commandName = StripOffFormatCharacters(UI.BrowserCommands->text(idxClicked));
 
-    // Get argument information
-    std::string argumentName;
-    std::vector<std::string> signalNames;
-    GlobalComponentManager.GetArgumentInformation(
-        processName, componentName, interfaceName, commandName, argumentName, signalNames);
+    //// Get argument information
+    //std::string argumentName;
+    //std::vector<std::string> signalNames;
+    //GlobalComponentManager.GetArgumentInformation(
+    //    processName, componentName, interfaceName, commandName, argumentName, signalNames);
 
+    /*
     const int signalCount = signalNames.size();
 
     CommandSelected command;
@@ -921,6 +1017,7 @@ void GCMUITask::OnButtonVisualizeClicked(const int idxClicked)
     }
 
     AddCommandSelected(command);
+    */
 }
 
 void GCMUITask::OnButtonRemoveAllClicked(void)
@@ -1083,26 +1180,44 @@ void GCMUITask::DrawGraph(const mtsManagerLocalInterface::SetOfValues & values)
     double value;
 
     for (unsigned int j = 0; j < values.size(); ++j) {
-        std::cout << values.size() <<": ";
         for (unsigned int i = 0; i < values[j].size(); ++i) {
             value = values[j][i].Value;
             //t = values[j][i].Timestamp.sec + values[j][i].Timestamp.nsec / 1000000000.0;
             //x = t - TimeVisualizationStarted;
             //printf("t: %f, Time: %f, x: %f\n", t, TimeVisualizationStarted, x);
 
-            if (i == 0)  GraphPane->add(0, PLOT_POINT((float)x, value, RED));
-            if (i == 1)  GraphPane->add(1, PLOT_POINT((float)x, value, YELLOW));
-            if (i == 2)  GraphPane->add(2, PLOT_POINT((float)x, value, BLUE));
-            if (i == 3)  GraphPane->add(3, PLOT_POINT((float)x, value, LIME));
-            if (i == 4)  GraphPane->add(4, PLOT_POINT((float)x, value, PURPLE));
-            if (i == 5)  GraphPane->add(5, PLOT_POINT((float)x, value, TEAL));
-            if (i == 6)  GraphPane->add(6, PLOT_POINT((float)x, value, FUCHSIA));
-            if (i == 7)  GraphPane->add(7, PLOT_POINT((float)x, value, AQUA));
-            if (i == 8)  GraphPane->add(8, PLOT_POINT((float)x, value, GREEN));
-            if (i == 9)  GraphPane->add(9, PLOT_POINT((float)x, value, NAVY));
-            if (i == 10) GraphPane->add(10, PLOT_POINT((float)x, value, WHITE));
-            if (i == 11) GraphPane->add(11, PLOT_POINT((float)x, value, OLIVE));
+            if (i == 0)  GraphPane->add(0, PLOT_POINT((float)x, static_cast<float>(value), RED));
+            if (i == 1)  GraphPane->add(1, PLOT_POINT((float)x, static_cast<float>(value), YELLOW));
+            if (i == 2)  GraphPane->add(2, PLOT_POINT((float)x, static_cast<float>(value), BLUE));
+            if (i == 3)  GraphPane->add(3, PLOT_POINT((float)x, static_cast<float>(value), LIME));
+            if (i == 4)  GraphPane->add(4, PLOT_POINT((float)x, static_cast<float>(value), PURPLE));
+            if (i == 5)  GraphPane->add(5, PLOT_POINT((float)x, static_cast<float>(value), TEAL));
+            if (i == 6)  GraphPane->add(6, PLOT_POINT((float)x, static_cast<float>(value), FUCHSIA));
+            if (i == 7)  GraphPane->add(7, PLOT_POINT((float)x, static_cast<float>(value), AQUA));
+            if (i == 8)  GraphPane->add(8, PLOT_POINT((float)x, static_cast<float>(value), GREEN));
+            if (i == 9)  GraphPane->add(9, PLOT_POINT((float)x, static_cast<float>(value), NAVY));
+            if (i == 10) GraphPane->add(10, PLOT_POINT((float)x, static_cast<float>(value), WHITE));
+            if (i == 11) GraphPane->add(11, PLOT_POINT((float)x, static_cast<float>(value), OLIVE));
         }
         x++;
     }
+
+    // Show min/max Y values
+    const float Ymin = GraphPane->GetYMin();
+    const float Ymax = GraphPane->GetYMax();
+
+    char buf[100] = "";
+    sprintf(buf, "%.2f", Ymax); UI.OutputMaxValue->value(buf);
+    sprintf(buf, "%.2f", Ymin); UI.OutputMinValue->value(buf);
+}
+
+void GCMUITask::GetArgumentInformation(const std::string & processName, 
+                                       const std::string & componentName, 
+                                       const std::string & providedInterfaceName, 
+                                       const std::string & commandName,
+                                       std::string & argumentName,
+                                       std::vector<std::string> & argumentParameterNames)
+{
+    GlobalComponentManager.GetArgumentInformation(
+        processName, componentName, providedInterfaceName, commandName, argumentName, argumentParameterNames);
 }

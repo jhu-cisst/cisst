@@ -40,9 +40,9 @@ SignalGenerator::SignalGenerator(const std::string & taskName, double period) : 
 void SignalGenerator::Startup(void)
 {
     // To test
-    std::cout << "Number of data: " << PosGet.GetNumberOfData() << std::endl;
-    for (unsigned int i = 0; i < PosGet.GetNumberOfData(); ++i) {
-        std::cout << "Data names: " << PosGet.GetDataName(i) << std::endl;
+    std::cout << "Number of data: " << PosGet.GetNumberOfScalar() << std::endl;
+    for (unsigned int i = 0; i < PosGet.GetNumberOfScalar(); ++i) {
+        std::cout << "Data names: " << PosGet.GetScalarName(i) << std::endl;
     }
 }
 
@@ -53,14 +53,14 @@ void SignalGenerator::Run(void)
     static int x = 0;
 
     // Read and print out current data
-    //for (unsigned int i = 0; i < PosGet.GetNumberOfData(); ++i) {
-    //    std::cout << PosGet.GetDataName(i) << ": " << PosGet.GetDataAsDouble(i) << std::endl;
+    //for (unsigned int i = 0; i < PosGet.GetNumberOfScalar(); ++i) {
+    //    std::cout << PosGet.GetScalarName(i) << ": " << PosGet.GetDataAsDouble(i) << std::endl;
     //}
 
     // Update the current values
     double newValue;
     std::stringstream ss;
-    for (unsigned int i = 0; i < PosGet.GetNumberOfData(); ++i) {
+    for (unsigned int i = 0; i < PosGet.GetNumberOfScalar(); ++i) {
         //newValue = sin((double)x) * (100.0 + 10.0 * (double)i) / 100.0;
         newValue = sin(2 * cmnPI * static_cast<double>(this->GetTick()) * Period / 2.0) 
             * (100.0 + 10.0 * (double)i) / 100.0;

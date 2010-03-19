@@ -8,40 +8,36 @@ class GlobalComponentManagerUI {open
   } {
     Fl_Window DisplayWindow {
       label {Global Component Manager} open
-      xywh {321 153 682 617} type Double box GTK_UP_BOX align 80 visible
+      xywh {-763 447 682 617} type Double box GTK_UP_BOX align 80 visible
     } {
-      Fl_Tabs {} {open
+      Fl_Tabs TabControl {open selected
         xywh {10 55 665 510} box GTK_UP_BOX color 46 labelsize 12
       } {
         Fl_Group {} {
           label {Component Inspector} open
-          xywh {20 80 655 485} labelfont 1 labelsize 13 hide
+          xywh {20 80 655 485} labelfont 1 labelsize 13
         } {
           Fl_Group {} {
             label {Provided Interface} open
-            xywh {20 220 645 180} box GTK_UP_BOX labelfont 1 labelsize 12 align 21
+            xywh {20 217 645 166} box GTK_UP_BOX labelfont 1 labelsize 12 align 21
           } {
             Fl_Browser BrowserCommands {
               label Commands
-              xywh {30 255 135 100} type Hold box GTK_DOWN_BOX selection_color 4 labelfont 1 labelsize 12 align 5 textsize 12
+              xywh {30 252 135 121} type Hold box GTK_DOWN_BOX selection_color 4 labelfont 1 labelsize 12 align 5 textsize 12
+              code0 {\#include "PopupBrowser.h"}
+              class PopupBrowser
             }
             Fl_Browser BrowserEventGenerators {
               label {Event Generators}
-              xywh {170 255 130 100} type Hold box GTK_DOWN_BOX selection_color 4 labelfont 1 labelsize 12 align 5 textsize 12
+              xywh {170 252 130 122} type Hold box GTK_DOWN_BOX selection_color 4 labelfont 1 labelsize 12 align 5 textsize 12
             }
             Fl_Output OutputCommandDescription {
               label {Command Description}
-              xywh {305 240 350 49} type Multiline box GTK_DOWN_BOX labelfont 1 labelsize 12 align 5 textfont 4 textsize 12
+              xywh {305 251 350 49} type Multiline box GTK_DOWN_BOX labelfont 1 labelsize 12 align 5 textfont 4 textsize 12
             }
             Fl_Output OutputEventGeneratorDescription {
               label {Event Generator Description}
-              xywh {305 308 350 51} type Multiline box GTK_DOWN_BOX labelfont 1 labelsize 12 align 5 textfont 4 textsize 12
-            }
-            Fl_Button {} {
-              label Visualize
-              callback {ButtonVisualizeClicked = true;}
-              xywh {30 360 135 30} box GTK_UP_BOX color 7 labelfont 1 labelsize 12
-              code0 {ButtonVisualizeClicked = false;}
+              xywh {305 319 350 54} type Multiline box GTK_DOWN_BOX labelfont 1 labelsize 12 align 5 textfont 4 textsize 12
             }
           }
           Fl_Browser BrowserProcesses {
@@ -56,23 +52,23 @@ class GlobalComponentManagerUI {open
           }
           Fl_Group {} {
             label {Required Interface} open
-            xywh {20 410 645 145} box GTK_UP_BOX labelfont 1 labelsize 12 align 21
+            xywh {20 390 645 165} box GTK_UP_BOX labelfont 1 labelsize 12 align 21
           } {
             Fl_Browser BrowserFunctions {
               label Functions
-              xywh {30 445 135 100} type Hold box GTK_DOWN_BOX selection_color 4 labelfont 1 labelsize 12 align 5 textsize 12
+              xywh {30 425 135 120} type Hold box GTK_DOWN_BOX selection_color 4 labelfont 1 labelsize 12 align 5 textsize 12
             }
             Fl_Browser BrowserEventHandlers {
               label {Event Handlers}
-              xywh {170 445 130 100} type Hold box GTK_DOWN_BOX selection_color 4 labelfont 1 labelsize 12 align 5 textsize 12
+              xywh {170 425 130 120} type Hold box GTK_DOWN_BOX selection_color 4 labelfont 1 labelsize 12 align 5 textsize 12
             }
             Fl_Output OutputFunctionDescription {
               label {Function Description}
-              xywh {305 432 350 47} type Multiline box GTK_DOWN_BOX labelfont 1 labelsize 12 align 5 textfont 4 textsize 12
+              xywh {305 428 350 47} type Multiline box GTK_DOWN_BOX labelfont 1 labelsize 12 align 5 textfont 4 textsize 12
             }
             Fl_Output OutputEventHandlerDescription {
               label {Event Handler Description}
-              xywh {305 498 350 47} type Multiline box GTK_DOWN_BOX labelfont 1 labelsize 12 align 5 textfont 4 textsize 12
+              xywh {305 493 350 52} type Multiline box GTK_DOWN_BOX labelfont 1 labelsize 12 align 5 textfont 4 textsize 12
             }
           }
           Fl_Light_Button ButtonAutoRefresh {
@@ -96,7 +92,7 @@ class GlobalComponentManagerUI {open
         }
         Fl_Group DataVisualizer {
           label {Data Visualizer} open
-          xywh {20 80 655 485} labelfont 1 labelsize 13
+          xywh {20 80 655 485} labelfont 1 labelsize 13 hide
         } {
           Fl_Box GraphPane {
             label {Graph Region}
@@ -168,7 +164,7 @@ class GlobalComponentManagerUI {open
           }
           Fl_Check_Button CheckButtonHide {
             label {: Hide}
-            callback {ButtonHideClicked = true;} selected
+            callback {ButtonHideClicked = true;}
             xywh {580 410 15 20} down_box GTK_DOWN_BOX color 7 labelfont 1 labelsize 12 align 8
           }
           Fl_Output OutputMaxValue {

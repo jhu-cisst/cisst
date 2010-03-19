@@ -128,17 +128,19 @@ public:
 
     /*! Return a number of data (which can be visualized, i.e., type-casted
         to double) */
-    virtual unsigned int GetNumberOfData(const bool CMN_UNUSED(visualizable) = true) const {
+    virtual unsigned int GetNumberOfScalar(const bool CMN_UNUSED(visualizable) = true) const {
         return 0;
     }
 
-    /*! Return the index-th (zero-based) value of data typecasted to double. */
-    virtual double GetDataAsDouble(const unsigned int CMN_UNUSED(index)) const {
+    /*! Return the index-th (zero-based) value of data typecasted to double. 
+        Note that an index has to be defined such that all indicies are continuous.
+        (This is required by the data visualizer of the GCM UI) */
+    virtual double GetScalarAsDouble(const size_t CMN_UNUSED(index)) const {
         return 0.0;
     }
 
     /*! Return the name of index-th (zero-based) data typecasted to double. */
-    virtual std::string GetDataName(const unsigned int CMN_UNUSED(index)) const {
+    virtual std::string GetScalarName(const size_t CMN_UNUSED(index)) const {
         return "N/A";
     }
 };

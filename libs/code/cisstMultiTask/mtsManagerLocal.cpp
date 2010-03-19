@@ -801,9 +801,9 @@ void mtsManagerLocal::GetArgumentInformation(std::string & argumentName,
     }
 
     // Get signal information
-    const int signalCount = argument->GetNumberOfData();
-    for (unsigned int i = 0; i < argument->GetNumberOfData(); ++i) {
-        signalNames.push_back(argument->GetDataName(i));
+    const int signalCount = argument->GetNumberOfScalar();
+    for (unsigned int i = 0; i < argument->GetNumberOfScalar(); ++i) {
+        signalNames.push_back(argument->GetScalarName(i));
     }
 }
 
@@ -843,9 +843,9 @@ void mtsManagerLocal::GetValuesOfCommand(SetOfValues & values,
     Values valueSet;
     double relativeTime;
     values.clear();
-    const int signalCount = argument->GetNumberOfData();
-    for (unsigned int i = 0; i < argument->GetNumberOfData(); ++i) {
-        value.Value = argument->GetDataAsDouble(i);
+    const int signalCount = argument->GetNumberOfScalar();
+    for (unsigned int i = 0; i < argument->GetNumberOfScalar(); ++i) {
+        value.Value = argument->GetScalarAsDouble(i);
         argument->GetTimestamp(relativeTime);
         TimeServer.RelativeToAbsolute(relativeTime, value.Timestamp);
 

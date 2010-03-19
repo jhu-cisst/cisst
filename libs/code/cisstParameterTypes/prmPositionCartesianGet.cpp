@@ -53,14 +53,14 @@ void prmPositionCartesianGet::DeSerializeRaw(std::istream & inputStream)
     this->PositionMember.DeSerializeRaw(inputStream);
 }
 
-unsigned int prmPositionCartesianGet::GetNumberOfData(const bool CMN_UNUSED(visualizable)) const 
+unsigned int prmPositionCartesianGet::GetNumberOfScalar(const bool CMN_UNUSED(visualizable)) const 
 {
     return 12; // 3 for 3D position, 9 for 3x3 rotation matrix
 }
 
-double prmPositionCartesianGet::GetDataAsDouble(const unsigned int index) const 
+double prmPositionCartesianGet::GetScalarAsDouble(const size_t index) const 
 {
-    if (index >= GetNumberOfData()) {
+    if (index >= GetNumberOfScalar()) {
         return 0.0;
     }
 
@@ -71,9 +71,9 @@ double prmPositionCartesianGet::GetDataAsDouble(const unsigned int index) const
     }
 }
 
-std::string prmPositionCartesianGet::GetDataName(const unsigned int index) const 
+std::string prmPositionCartesianGet::GetScalarName(const size_t index) const 
 {
-    if (index >= GetNumberOfData()) {
+    if (index >= GetNumberOfScalar()) {
         return "N/A";
     }
 

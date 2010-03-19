@@ -147,7 +147,6 @@ protected:
 public:
     GlobalComponentManagerUI UI;
 
-protected:
     //-------------------------------------------------------------------------
     //  Update UI Check
     //-------------------------------------------------------------------------
@@ -204,9 +203,7 @@ protected:
     //-------------------------------------------------------------------------
     //  Data Visualizer
     //-------------------------------------------------------------------------
-    void PlotGraph(void);
-    // UI Event Handler
-    void OnButtonVisualizeClicked(const int idxClicked);
+    /*! UI Event Handler */
     void OnButtonYScaleUpClicked(void);
     void OnButtonYScaleDownClicked(void);
     void OnButtonXScaleUpClicked(void);
@@ -216,22 +213,31 @@ protected:
     void OnButtonUpdateClicked(void);
     void OnButtonAutoScaleClicked(void);
     void OnButtonHideClicked(void);
-
     void OnBrowserVisualizeCommandNameClicked(void);
     void OnBrowserVisualizeSignalsClicked(void);
 
-    // Reset UI
+    void VisualizeCommand(const int idxClicked);
+
+    /*! Reset UI */
     void ResetBrowserVisualizeCommandName(void);
     void ResetBrowserVisualizeSignals(void);
     void ResetDataVisualizerUI(const bool exceptCommandNameBrowser = false);
 
-    // Add command selected to the CommandsSelected list
+    void GetArgumentInformation(const std::string & processName, 
+                                const std::string & componentName, 
+                                const std::string & providedInterfaceName, 
+                                const std::string & commandName,
+                                std::string & argumentName,
+                                std::vector<std::string> & argumentParameterNames);
+
+    /*! Add command selected to the CommandsSelected list */
     void AddCommandSelected(const CommandSelected& commandSelected);
 
-    // Fetch/sample current values that user has chosen to visualize
+    /*! Fetch/sample current values that user has chosen to visualize */
     void FetchCurrentValues(void);
 
-    // Draw graph
+    /*! Draw graph */
+    //void PlotGraph(void);
     void DrawGraph(const mtsManagerLocalInterface::SetOfValues & values);
 
     //-------------------------------------------------------------------------
@@ -247,7 +253,7 @@ protected:
     void AddLineToDescription(Fl_Output * output, const char * msg);
 
 public:
-    // Constructor and destructor
+    /*! Constructor and destructor */
     GCMUITask(const std::string & taskName, const double period, mtsManagerGlobal& globalComponentManager);
     ~GCMUITask() {};
 
