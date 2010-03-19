@@ -80,6 +80,13 @@ public:
         ValidMember(false)
     {}
 
+    /*! Constructor with initialization for each member */
+    inline mtsGenericObject(double timestamp, bool automaticTimestamp, bool valid):
+        TimestampMember(timestamp),
+        AutomaticTimestampMember(automaticTimestamp),
+        ValidMember(valid)
+    {}
+        
     /*! Copy constructor */
     inline mtsGenericObject(const mtsGenericObject & other):
         cmnGenericObject(),

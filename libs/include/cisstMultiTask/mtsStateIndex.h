@@ -57,6 +57,9 @@ class CISST_EXPORT mtsStateIndex : public mtsGenericObject {
     /*! TimeTicks are typedef'ed as unsigned long long (64 bits)*/
     typedef unsigned long long int TimeTicksType;
 
+    /*! Base type */
+    typedef mtsGenericObject BaseType;
+
  private:
 	/*! The index into the set of circular buffers corresponding to
       the time */
@@ -69,12 +72,16 @@ class CISST_EXPORT mtsStateIndex : public mtsGenericObject {
 	int BufferLength;
 
 public:
-	/*! Default constructor. Does nothing. */
-	mtsStateIndex(): TimeIndex(0), TimeTicks(0), BufferLength(0) {}
+    /*! Default constructor. Does nothing. */
+    inline mtsStateIndex():
+        BaseType(), TimeIndex(0), TimeTicks(0), BufferLength(0)
+    {}
 
-	/*! Default constructor. Does nothing. */
-	mtsStateIndex(int index, TimeTicksType ticks, int Length):
-        TimeIndex(index), TimeTicks(ticks), BufferLength(Length) {}
+    /*! Default constructor. Does nothing. */
+    inline mtsStateIndex(double timestamp, int index, TimeTicksType ticks, int Length):
+        BaseType(timestamp, false /* automatic timestamp */, true /* valid */),
+        TimeIndex(index), TimeTicks(ticks), BufferLength(Length)
+    {}
 
 	/*! Default destructor. Does nothing. */
 	~mtsStateIndex() {}

@@ -69,6 +69,8 @@ mtsStateTable::mtsStateTable(int size, const std::string & name):
 
     // set the default number of elements for data collection batch
     this->DataCollection.BatchSize = this->HistoryLength / 3;
+    this->DataCollection.BatchRange.SetValid(true);
+    this->DataCollection.BatchRange.SetAutomaticTimestamp(false);
 
     // Get a pointer to the time server
     TimeServer = &mtsTaskManager::GetInstance()->GetTimeServer();
@@ -95,7 +97,7 @@ mtsStateTable::~mtsStateTable()
 /* All the const methods that can be called from reader or writer */
 mtsStateIndex mtsStateTable::GetIndexReader(void) const {
     int tmp = IndexReader;
-    return mtsStateIndex(tmp, Ticks[tmp], HistoryLength);
+    return mtsStateIndex(this->Tic, tmp, Ticks[tmp], HistoryLength);
 }
 
 
@@ -117,7 +119,7 @@ mtsStateTable::AccessorBase * mtsStateTable::GetAccessor(const char * name) cons
 
 /* All the non-const methods that can be called from writer only */
 mtsStateIndex mtsStateTable::GetIndexWriter(void) const {
-    return mtsStateIndex(IndexWriter, Ticks[IndexWriter], HistoryLength);
+    return mtsStateIndex(this->Tic, IndexWriter, Ticks[IndexWriter], HistoryLength);
 }
 
 
@@ -230,6 +232,7 @@ void mtsStateTable::Advance(void) {
             this->DataCollection.StopTime = 0.0;
             this->DataCollection.BatchRange.Last = this->GetIndexReader();
             // request data actual for range collection
+            this->DataCollection.BatchRange.SetTimestamp(this->Tic);
             this->DataCollection.BatchReady(this->DataCollection.BatchRange);
             // stop collecting
             this->DataCollection.Collecting = false;
@@ -242,6 +245,7 @@ void mtsStateTable::Advance(void) {
                                         << " element(s) available for data collection" << std::endl;
                 this->DataCollection.BatchRange.Last = this->GetIndexReader();
                 // request data actual for range collection
+                this->DataCollection.BatchRange.SetTimestamp(this->Tic);
                 this->DataCollection.BatchReady(this->DataCollection.BatchRange);
                 this->DataCollection.BatchCounter = 0;
                 this->DataCollection.BatchRange.First = this->GetIndexWriter();
