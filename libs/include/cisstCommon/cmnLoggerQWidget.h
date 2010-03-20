@@ -1,10 +1,19 @@
+#pragma once
+
 #ifndef _cmnLoggerQWidget_h
 #define _cmnLoggerQWidget_h
 
 #include <QtGui>
 
-class cmnLoggerQWidget
+#include <cisstCommon/cmnGenericObject.h>
+
+// Always include last
+#include <cisstCommon/cmnExport.h>
+
+class CISST_EXPORT cmnLoggerQWidget: public cmnGenericObject
 {
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+
  public:
 
     /*! Model class used for class register entries */
@@ -43,5 +52,7 @@ class cmnLoggerQWidget
     QTableView View;
 
 };
+
+CMN_DECLARE_SERVICES_INSTANTIATION(cmnLoggerQWidget);
 
 #endif // _cmnLoggerQWidget_h

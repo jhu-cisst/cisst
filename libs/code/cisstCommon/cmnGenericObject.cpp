@@ -24,7 +24,9 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnPortability.h>
 #include <cisstCommon/cmnGenericObject.h>
 #include <cisstCommon/cmnClassServices.h>
+#include <cisstCommon/cmnLogger.h>
 
+#include <sstream>
 
 bool cmnGenericObject::ReconstructFrom(const cmnGenericObject & other) {
     const cmnClassServicesBase * services = this->Services();
@@ -46,7 +48,7 @@ std::string cmnGenericObject::ToString(void) const {
     return outputStream.str();
 }
 
-  
+
 void cmnGenericObject::ToStream(std::ostream & outputStream) const {
     outputStream << "Default output for class: " << Services()->GetName();
 }

@@ -25,13 +25,14 @@ http://www.cisst.org/cisst/license.txt.
   \file
   \brief Defines cmnClassServices
 */
+#pragma once
 
 #ifndef _cmnClassServices_h
 #define _cmnClassServices_h
 
 #include <cisstCommon/cmnPortability.h>
+#include <cisstCommon/cmnForwardDeclarations.h>
 #include <cisstCommon/cmnClassServicesBase.h>
-#include <cisstCommon/cmnClassRegisterMacros.h>
 
 
 /*! This class is a helper for cmnClassServices.  Its goal is to

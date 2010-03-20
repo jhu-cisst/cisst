@@ -23,6 +23,7 @@ http://www.cisst.org/cisst/license.txt.
   \file
   \brief Defines cmnStreamRawParser
 */
+#pragma once
 
 #ifndef _cmnStreamRawParser_h
 #define _cmnStreamRawParser_h
@@ -60,7 +61,7 @@ http://www.cisst.org/cisst/license.txt.
      cmnStreamRawParser Config;
      Config.AddEntry("S", s);
      Config.AddEntry("V1", v1, ',');
-     Config.AddEntry("V2", v2, ',');   
+     Config.AddEntry("V2", v2, ',');
      Config.AddEntryStreamable("D", d);
      std::ifstream file("test.txt");
      bool success = Config.Parse(file);
@@ -87,7 +88,7 @@ http://www.cisst.org/cisst/license.txt.
        - the # character indicates a comment line (hard-coded).
 
        - the code does not support a delimiter (other than whitespace) between the keyword and data.
-*/     
+*/
 
 class CISST_EXPORT cmnStreamRawParser
 {
@@ -203,7 +204,7 @@ public:
        return result;
    }
 
-   /*! Set all entries valid or invalid. */       
+   /*! Set all entries valid or invalid. */
    void SetAllValid(bool val = true);
 
    /*! Parse the input stream, extracting the data for all keywords that are found.

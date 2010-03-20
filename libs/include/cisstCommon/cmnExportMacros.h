@@ -97,7 +97,7 @@ http://www.cisst.org/cisst/license.txt.
      for the class declaration
 
    - For a class mixing inlined and non inlined code, use CISST_EXPORT
-     for the declarations of the non inlined code only 
+     for the declarations of the non inlined code only
 
    When one needs to use an existing Dll, the macro must expand as
    _declspec(dllimport).  To do so, the preprocessor must have

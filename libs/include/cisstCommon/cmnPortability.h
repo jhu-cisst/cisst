@@ -20,6 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
+#pragma once
 
 #ifndef _cmnPortability_h
 #define _cmnPortability_h

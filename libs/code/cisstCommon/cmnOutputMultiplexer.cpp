@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):  Ofri Sadowsky
   Created on: 2002-04-18
 
@@ -34,7 +34,7 @@ http://www.cisst.org/cisst/license.txt.
 // Return value: *this
 std::ostream & cmnOutputMultiplexer::AddChannel(ChannelType * channel)
 {
-	ChannelContainerType::iterator it = std::find(m_ChannelContainer.begin(), m_ChannelContainer.end(), 
+	ChannelContainerType::iterator it = std::find(m_ChannelContainer.begin(), m_ChannelContainer.end(),
                                                   channel);
 
     if (it == m_ChannelContainer.end()) {

@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):  Anton Deguet
   Created on: 2009-04-13
 
@@ -26,6 +26,7 @@ http://www.cisst.org/cisst/license.txt.
   \brief Declaration of Levels of Detail for cmnLogger (human readable logging)
   \ingroup cisstCommon
 */
+#pragma once
 
 #ifndef _cmnLogLoD_h
 #define _cmnLogLoD_h
@@ -49,7 +50,7 @@ typedef enum {
     CMN_LOG_LOD_RUN_DEBUG,
     CMN_LOG_LOD_VERY_VERBOSE,
     CMN_LOG_LOD_NOT_USED // used only to determine number of possible LoDs
-} cmnLogLoD;  
+} cmnLogLoD;
 
 
 /*! Default Level of details */

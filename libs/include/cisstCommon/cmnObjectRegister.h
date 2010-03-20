@@ -20,6 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
+#pragma once
 
 #ifndef _cmnObjectRegister_h
 #define _cmnObjectRegister_h
@@ -77,7 +78,7 @@ private:
     /*! Map of class pointers registered. */
     ContainerType ObjectContainer;
 
-    
+
     /*! Instance specific implementation of Register.
       \sa Register */
     bool RegisterInstance(const std::string & objectName,
@@ -135,7 +136,7 @@ protected:
       the unique instantiation, one needs to use this static method.
       The instantiated object register is created at the first call of
       this method since it is a static variable declared in this
-      method's scope. 
+      method's scope.
 
       \return A pointer to the object register. */
     static cmnObjectRegister * Instance(void);
@@ -143,12 +144,12 @@ protected:
 
     /*!  The Register method registers an object pointer with a given
       name in the static register.
-   
+
       \param objectName The name given to the soon registered object.
 
       \param objectPointer The pointer to the cmnGenericObject object
       (or any derived class).
-    
+
       \return True if successful, false if the object has already been
       registered or the name has already been used.
     */
@@ -156,13 +157,13 @@ protected:
                                 cmnGenericObject * objectPointer) {
         return Instance()->RegisterInstance(objectName, objectPointer);
     }
-    
+
 
     /*! The remove method allows to "un-register" a registered object.
       It doesn't affect the object itself.
 
       \param objectName The name given to the object when it was registered.
-      
+
       \return True if the object was actually registered, false if the
       object was not registered. */
     static inline bool Remove(const std::string & objectName) {
@@ -172,7 +173,7 @@ protected:
 
     /*! Get the object by name. Returns null if the object is
       not registered.
-    
+
       \param objectName The name to look up.
 
       \return The pointer to the cmnGenericObject object
@@ -185,7 +186,7 @@ protected:
 
     /*! Get the name of an object. Returns "undefined" if the object is
       not registered.
-    
+
       \param objectPointer The object to look up.
     */
     static inline std::string FindName(cmnGenericObject * objectPointer) {

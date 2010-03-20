@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):  Ankur Kapoor
   Created on: 2004-04-30
 
@@ -25,10 +25,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnPrintf.h>
 #include <limits>
 #include <string.h> // for strncmp
-
-// required to register the class.  default level of detail is 1 as
-// mentioned in header file
-CMN_IMPLEMENT_SERVICES(cmnXMLPath);
 
 
 cmnXMLPath::cmnXMLPath()
@@ -53,7 +49,7 @@ void cmnXMLPath::SetInputSource(const char *filename)
 	XPathContext = xmlXPathNewContext(Document);
 	if(XPathContext == NULL) {
 		CMN_LOG_CLASS_INIT_ERROR << "SetInputSource: an error occured while parsing \"" << filename << "\"" << std::endl;
-		xmlFreeDoc(Document); 
+		xmlFreeDoc(Document);
 	}
 	CMN_ASSERT(XPathContext != 0);
 }
@@ -74,7 +70,7 @@ void cmnXMLPath::PrintValue(std::ostream &out, const char *context, const char *
 bool cmnXMLPath::GetXMLValue(const char * context, const char * XPath, xmlChar **storage)
 {
 	/* Evaluate xpath expression */
-	/* first we need to concat the context and Xpath to fit libxml standard. context is fixed at 
+	/* first we need to concat the context and Xpath to fit libxml standard. context is fixed at
 	document root in libxml2 */
 	std::string xpathlibxml("/");
 	xpathlibxml += context;
@@ -92,10 +88,10 @@ bool cmnXMLPath::GetXMLValue(const char * context, const char * XPath, xmlChar *
 			if (nodes->nodeTab[i]->type == XML_ATTRIBUTE_NODE) {
 				cur = nodes->nodeTab[i];
 				*storage = xmlNodeGetContent(cur);
-				CMN_LOG_INIT_VERBOSE << "GetXMLValue: read Xpath: " << XPath << " Node name: " 
+				CMN_LOG_INIT_VERBOSE << "GetXMLValue: read Xpath: " << XPath << " Node name: "
                                      << cur->name << " Content: " << *storage << std::endl;
 			} else {
-				cur = nodes->nodeTab[i];    
+				cur = nodes->nodeTab[i];
 				CMN_LOG_CLASS_INIT_WARNING << "GetXMLValue: node is not attribute node \"" << XPath
                                            << "\" Node name: " << cur->name << std::endl;
 			}
@@ -111,7 +107,7 @@ bool cmnXMLPath::GetXMLValue(const char * context, const char * XPath, xmlChar *
 bool cmnXMLPath::SetXMLValue(const char * context, const char * XPath, const xmlChar *storage)
 {
 	/* Evaluate xpath expression */
-	/* first we need to concat the context and Xpath to fit libxml standard. context is fixed at 
+	/* first we need to concat the context and Xpath to fit libxml standard. context is fixed at
 	document root in libxml2 */
 	std::string xpathlibxml("/");
 	xpathlibxml += context;
@@ -136,7 +132,7 @@ bool cmnXMLPath::SetXMLValue(const char * context, const char * XPath, const xml
 			CMN_ASSERT(nodes->nodeTab[i] != 0);
 			if (nodes->nodeTab[i]->type == XML_ATTRIBUTE_NODE) {
 				xmlNodeSetContent(nodes->nodeTab[i], storage);
-				CMN_LOG_INIT_VERBOSE << "SetXMLValue: write Xpath: " << XPath << " Node name: " 
+				CMN_LOG_INIT_VERBOSE << "SetXMLValue: write Xpath: " << XPath << " Node name: "
                                      << nodes->nodeTab[i]->name << " Content: " << storage << std::endl;
 			}
 			/*
@@ -150,7 +146,7 @@ bool cmnXMLPath::SetXMLValue(const char * context, const char * XPath, const xml
 			* This can be exercised by running
 			*       valgrind xpath2 test3.xml '//discarded' discarded
 			* There is 2 ways around it:
-			*   - make a copy of the pointers to the nodes from the result set 
+			*   - make a copy of the pointers to the nodes from the result set
 			*     then call xmlXPathFreeObject() and then modify the nodes
 			* or
 			*   - remove the reference to the modified nodes from the node set
@@ -162,7 +158,7 @@ bool cmnXMLPath::SetXMLValue(const char * context, const char * XPath, const xml
 			}
 			else
 			{
-				cur = nodes->nodeTab[i];    
+				cur = nodes->nodeTab[i];
 				CMN_LOG_CLASS_INIT_WARNING << "SetXMLValue: node is not attribute node \"" << XPath
                                            << "\" Node name: " << cur->name << std::endl;
 			}
@@ -298,7 +294,7 @@ bool cmnXMLPath::SetXMLValue(const char *context, const char *XPath, bool value)
 
 bool cmnXMLPath::GetXMLValue(const char * context, const char * XPath, bool &value, const bool &valueifmissing)
 {
-	bool ret_value; 
+	bool ret_value;
 	bool tmp_value;
 	ret_value = GetXMLValue(context, XPath, tmp_value);
 	if (ret_value) value = tmp_value;
@@ -309,7 +305,7 @@ bool cmnXMLPath::GetXMLValue(const char * context, const char * XPath, bool &val
 
 bool cmnXMLPath::GetXMLValue(const char * context, const char * XPath, int &value, const int &valueifmissing)
 {
-	bool ret_value; 
+	bool ret_value;
 	int tmp_value;
 	ret_value = GetXMLValue(context, XPath, tmp_value);
 	if (ret_value) value = tmp_value;
@@ -320,7 +316,7 @@ bool cmnXMLPath::GetXMLValue(const char * context, const char * XPath, int &valu
 
 bool cmnXMLPath::GetXMLValue(const char * context, const char * XPath, double &value, const double &valueifmissing)
 {
-	bool ret_value; 
+	bool ret_value;
 	double tmp_value;
 	ret_value = GetXMLValue(context, XPath, tmp_value);
 	if (ret_value) value = tmp_value;
@@ -331,7 +327,7 @@ bool cmnXMLPath::GetXMLValue(const char * context, const char * XPath, double &v
 
 bool cmnXMLPath::GetXMLValue(const char * context, const char * XPath, std::string &value, const std::string &valueifmissing)
 {
-	bool ret_value; 
+	bool ret_value;
 	std::string tmp_value;
 	ret_value = GetXMLValue(context, XPath, tmp_value);
 	if (ret_value) value = tmp_value;

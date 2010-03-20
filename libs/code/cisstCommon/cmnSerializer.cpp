@@ -23,6 +23,44 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnSerializer.h>
 
+cmnSerializer::cmnSerializer(std::ostream & outputStream):
+    OutputStream(outputStream)
+{
+    if (!OutputStream) {
+        CMN_LOG_CLASS_INIT_ERROR << "Output stream provided is not valid" << std::endl;
+    }
+}
 
-CMN_IMPLEMENT_SERVICES(cmnSerializer);
+
+void cmnSerializer::Serialize(const cmnGenericObject & object) {
+    // get object services and send information if needed
+    const cmnClassServicesBase * servicesPointer = object.Services();
+    this->SerializeServices(servicesPointer);
+    // serialize the object preceeded by its type Id
+    TypeId typeId = reinterpret_cast<TypeId>(servicesPointer);
+    cmnSerializeRaw(this->OutputStream, typeId);
+    object.SerializeRaw(this->OutputStream);
+}
+
+
+void cmnSerializer::SerializeServices(const cmnClassServicesBase * servicesPointer) {
+    // search for services pointer to see if the information has
+    // been sent
+    const const_iterator begin = ServicesContainer.begin();
+    const const_iterator end = ServicesContainer.end();
+    const_iterator found = std::find(begin, end, servicesPointer);
+    // this "services" has not been sent
+    if (found == end) {
+        CMN_LOG_CLASS_RUN_VERBOSE << "Sending information related to class " << servicesPointer->GetName() << std::endl;
+        // sent the info with null pointer so that reader can
+        // differentiate from other services pointers
+        TypeId invalidClassServices = 0;
+        cmnSerializeRaw(this->OutputStream, invalidClassServices);
+        cmnSerializeRaw(this->OutputStream, servicesPointer->GetName());
+        TypeId typeId = reinterpret_cast<TypeId>(servicesPointer);
+        cmnSerializeRaw(this->OutputStream, typeId);
+        ServicesContainer.push_back(servicesPointer);
+    }
+}
+
 

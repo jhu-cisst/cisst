@@ -25,13 +25,13 @@ http://www.cisst.org/cisst/license.txt.
   \file
   \brief Defines the cmnClassServicesBase
 */
+#pragma once
 
 #ifndef _cmnClassServicesBase_h
 #define _cmnClassServicesBase_h
 
-#include <cisstCommon/cmnLogger.h>
-#include <cisstCommon/cmnClassRegister.h>
-#include <cisstCommon/cmnGenericObject.h>
+#include <cisstCommon/cmnForwardDeclarations.h>
+#include <cisstCommon/cmnLogLoD.h>
 
 #include <string>
 #include <typeinfo>
@@ -46,7 +46,7 @@ http://www.cisst.org/cisst/license.txt.
 class CISST_EXPORT cmnClassServicesBase {
 public:
     /*! Type used to define the logging level of detail. */
-    typedef cmnLogger::LogLoDType LogLoDType;
+    typedef cmnLogLoD LogLoDType;
 
     /*!  Constructor. Sets the name of the class and the Level of Detail
       setting for the class.
@@ -55,12 +55,7 @@ public:
       \param typeInfo Runtime type as defined by C++ RTTI
       \param lod The Log Level of Detail setting to be used with this class.
     */
-    cmnClassServicesBase(const std::string & className, const std::type_info * typeInfo, LogLoDType lod = CMN_LOG_LOD_RUN_ERROR):
-        TypeInfoMember(typeInfo)
-    {
-        this->SetLoD(lod);
-        NameMember = cmnClassRegister::Register(this, className);
-    }
+    cmnClassServicesBase(const std::string & className, const std::type_info * typeInfo, LogLoDType lod = CMN_LOG_LOD_RUN_ERROR);
 
 
     /*! Virtual destructor.  Does nothing. */
@@ -149,14 +144,7 @@ public:
 
     \param newLoD The log Level of Detail setting.
     */
-    inline void SetLoD(LogLoDType newLoD) {
-        if (newLoD < CMN_LOG_LOD_NONE) {
-            newLoD = CMN_LOG_LOD_NONE;
-        } else if (newLoD > CMN_LOG_LOD_VERY_VERBOSE) {
-            newLoD = CMN_LOG_LOD_VERY_VERBOSE;
-        }
-        LoDMember = newLoD;
-    }
+    void SetLoD(LogLoDType newLoD);
 
 
 private:

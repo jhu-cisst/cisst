@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):  Anton Deguet
   Created on: 2007-04-08
 
@@ -25,6 +25,7 @@ http://www.cisst.org/cisst/license.txt.
   \file
   \brief Declaration of cmnSerializer and functions cmnSerializeRaw
 */
+#pragma once
 
 #ifndef _cmnSerializer_h
 #define _cmnSerializer_h
@@ -52,7 +53,7 @@ http://www.cisst.org/cisst/license.txt.
   classes derived from cmnGenericObject. */
 template <class _elementType>
 inline void cmnSerializeRaw(std::ostream & outputStream, const _elementType & data)
-    throw (std::runtime_error) 
+    throw (std::runtime_error)
 {
     outputStream.write(reinterpret_cast<const char *>(&data), sizeof(_elementType));
     if (outputStream.fail()) {
@@ -65,11 +66,11 @@ inline void cmnSerializeRaw(std::ostream & outputStream, const _elementType & da
   converts a size_t object to an unsigned long long int before using
   cmnSerializeRaw.  This operation is required for all size_t as the
   writer/reader can be both 32 bits or 64 bits programs.
-  
+
   This function should be use to implement the SerializeRaw method of
   classes derived from cmnGenericObject. */
 inline void cmnSerializeSizeRaw(std::ostream & outputStream, const size_t & data)
-    throw (std::runtime_error) 
+    throw (std::runtime_error)
 {
     unsigned long long int dataToSend = data;
     cmnSerializeRaw(outputStream, dataToSend);
@@ -89,7 +90,7 @@ inline void cmnSerializeRaw(std::ostream & outputStream, const std::string & dat
     outputStream.write(data.c_str(), size * sizeof(std::string::value_type));
     if (outputStream.fail()) {
         cmnThrow("cmnSerializeRaw(std::string): Error occured with std::ostream::write");
-    }        
+    }
 }
 
 
@@ -125,7 +126,7 @@ public:
 
     /*! Type used to identify objects over the network.  It uses the
       services pointer but as the sender or receiver could be a 32
-      or 64 bits OS, we use a data type that can handle both. */   
+      or 64 bits OS, we use a data type that can handle both. */
     typedef unsigned long long int TypeId;
 
     /*! Constructor.
@@ -134,14 +135,8 @@ public:
       <code>std::ostream</code>.  The output stream must be created
       with the open flag <code>std::ostream::binary</code>.
      */
-    inline cmnSerializer(std::ostream & outputStream):
-        OutputStream(outputStream)
-    {
-        if (!OutputStream) {
-            CMN_LOG_CLASS_INIT_ERROR << "Output stream provided is not valid" << std::endl;
-        } 
-    }
-    
+    cmnSerializer(std::ostream & outputStream);
+
 
     /*! Serialize an object.  This method will first verify that the
       information (cmnClassServices) related to the class of the
@@ -149,7 +144,7 @@ public:
       is done, it will serialize the class identifier (pointer on the
       class information, see cmnClassServices and cmnClassRegister)
       and finally call the object's method <code>SerializeRaw</code>.
-      
+
       \param object An object of a class derived from cmnGenericObject.  The
       class of the object must have the virtual method
       <code>SerializeRaw</code> re-defined to properly serialize the
@@ -158,15 +153,7 @@ public:
       \note As this method relies on cmnSerializeRaw, it might throw
       an exception.
      */
-    inline void Serialize(const cmnGenericObject & object) {
-        // get object services and send information if needed
-        const cmnClassServicesBase * servicesPointer = object.Services();
-        this->SerializeServices(servicesPointer);
-        // serialize the object preceeded by its type Id
-        TypeId typeId = reinterpret_cast<TypeId>(servicesPointer);
-        cmnSerializeRaw(this->OutputStream, typeId);
-        object.SerializeRaw(this->OutputStream);
-    }
+    void Serialize(const cmnGenericObject & object);
 
 
     /*! Serialize the class information if needed.  This method will
@@ -192,25 +179,7 @@ public:
       \note As this method relies on cmnSerializeRaw, it might throw
       an exception.
     */
-    inline void SerializeServices(const cmnClassServicesBase * servicesPointer) {
-        // search for services pointer to see if the information has
-        // been sent
-        const const_iterator begin = ServicesContainer.begin();
-        const const_iterator end = ServicesContainer.end();
-        const_iterator found = std::find(begin, end, servicesPointer);
-        // this "services" has not been sent 
-        if (found == end) {
-            CMN_LOG_CLASS_RUN_VERBOSE << "Sending information related to class " << servicesPointer->GetName() << std::endl; 
-            // sent the info with null pointer so that reader can
-            // differentiate from other services pointers
-            TypeId invalidClassServices = 0;
-            cmnSerializeRaw(this->OutputStream, invalidClassServices);
-            cmnSerializeRaw(this->OutputStream, servicesPointer->GetName());
-            TypeId typeId = reinterpret_cast<TypeId>(servicesPointer);
-            cmnSerializeRaw(this->OutputStream, typeId);
-            ServicesContainer.push_back(servicesPointer);
-        }
-    }
+    void SerializeServices(const cmnClassServicesBase * servicesPointer);
 
 
  private:

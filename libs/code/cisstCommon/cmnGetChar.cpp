@@ -30,7 +30,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <termios.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>
-#include <unistd.h> 
+#include <unistd.h>
 #endif // CISST_LINUX || CISST_DARWIN || CISST_SOLARIS || CISST_RTAI || CISST_QNX
 
 #if (CISST_OS == CISST_WINDOWS)

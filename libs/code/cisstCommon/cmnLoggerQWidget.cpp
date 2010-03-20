@@ -86,7 +86,7 @@ Qt::ItemFlags cmnLoggerQWidget::ClassServicesModel::flags(const QModelIndex & in
 
 bool cmnLoggerQWidget::ClassServicesModel::setData(const QModelIndex & index, const QVariant & value, int role)
 {
-    if (index.isValid() && (role == Qt::EditRole || 
+    if (index.isValid() && (role == Qt::EditRole ||
 			    role == Qt::DisplayRole)) {
 	// add 1 to the row index to skip over the header
 	// addressBook[index.row()+1][index.column()] = value.toString();
@@ -95,7 +95,7 @@ bool cmnLoggerQWidget::ClassServicesModel::setData(const QModelIndex & index, co
 	cmnClassRegister::SetLoD(iterator->first.c_str(),
 				 static_cast<cmnLogLoD>(value.toInt() + 1));
 
-	std::cout << "class: " << index.row() 
+	std::cout << "class: " << index.row()
 		  << " : " << iterator->first.c_str()
 		  << " changed to " << value.toString().toStdString() << std::endl;
     }
@@ -166,5 +166,5 @@ void cmnLoggerQWidget::setupUi(void)
 
 void cmnLoggerQWidget::retranslateUi(void)
 {
- 
+
 }

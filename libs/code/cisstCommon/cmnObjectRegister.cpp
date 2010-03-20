@@ -70,7 +70,7 @@ bool cmnObjectRegister::RegisterInstance(const std::string & objectName,
 bool cmnObjectRegister::RemoveInstance(const std::string & objectName) {
     if (ObjectContainer.erase(objectName) == 0) {
         CMN_LOG_INIT_ERROR << "class cmnObjectRegister: " << objectName
-                           << " can not be removed from the register since it is not registered" 
+                           << " can not be removed from the register since it is not registered"
                            << std::endl;
         return false;
     }

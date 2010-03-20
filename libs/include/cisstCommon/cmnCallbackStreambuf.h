@@ -23,6 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 /*! \file
     \brief Declaration of the class cmnCallbackStreambuf
 */
+#pragma once
 
 #ifndef _cmnCallbackStreambuf_h
 #define _cmnCallbackStreambuf_h
@@ -37,11 +38,11 @@ http://www.cisst.org/cisst/license.txt.
   additional feature that it outputs to a user-specified callback function.
   This is implemented by overriding the basic_streambuf output functions
   xsputn(), overflow() and sync().
- 
+
   Usage:
   Include the module in your application with:
-  \#include "cmnCallbackStreambuf.h"
-     
+  \#include <cisstCommon/cmnCallbackStreambuf.h>
+
   Specify the callback function in the constructor.  Note that the callback
   function should accept two parameters:
      -# an array of elements to be printed (e.g., a character array)
@@ -71,7 +72,7 @@ public:
 	/*! Type of the callback function, e.g., void func(char *line, int len). */
     typedef void (*CallbackType)(const ElementType *, int len);
 
-    /*! 
+    /*!
      * Constructor: Sets the callback function.
      *
 	 * \param func The callback function.
@@ -89,7 +90,7 @@ protected:
 
     /*! Override the basic_streambuf overflow to store the character in the buffer.
 	    The buffer is printed if the character is a newline or if it is full. */
-	virtual int_type overflow( int_type c) 
+	virtual int_type overflow( int_type c)
     {
         // follow the basic_streambuf standard
         if (_trait::eq_int_type(_trait::eof(), c))
@@ -130,7 +131,7 @@ protected:
             PrintLine();
         return n;
     }
-    
+
     /*! Override the basic_streambuf sync to flush (print) the buffer. */
     virtual int sync()
     {

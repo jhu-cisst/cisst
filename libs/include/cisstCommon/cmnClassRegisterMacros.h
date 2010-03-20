@@ -20,6 +20,10 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
+#pragma once
+
+#ifndef _cmnClassRegisterMacros_h
+#define _cmnClassRegisterMacros_h
 
 /*!
   \file
@@ -55,14 +59,14 @@ http://www.cisst.org/cisst/license.txt.
 
 
 
-/*! 
+/*!
   \name Methods declaration
-  
+
   These macros are used to declare the required methods and data
   members for the class registration (see also cmnClassRegister).
   Every class which needs to be registered should include one of these
   macros within its declaration AND be derived from cmnGenericObject.
-  
+
   To declare a registered class without dynamic creation, the header
   file myClass.h should have:
 
@@ -167,7 +171,7 @@ http://www.cisst.org/cisst/license.txt.
     public:
         ...
     };
-    
+
     typedef myClass<double> myClassDouble;
     CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(myClassDouble)
   \endcode
@@ -184,18 +188,16 @@ http://www.cisst.org/cisst/license.txt.
 template<> \
 cmnClassServicesBase * cmnClassServicesInstantiate<className>(void);
 
-
 #ifdef CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT
 #undef CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT
 #endif
 #define CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(className) \
 template<> CISST_EXPORT \
 cmnClassServicesBase * cmnClassServicesInstantiate<className>(void);
-
 //@}
 
 
-   
+
 /*!
   \name Methods and function implementation
 
@@ -236,7 +238,8 @@ cmnClassServicesBase * cmnClassServicesInstantiate<className>(void) \
                                                                                       &typeid(className), \
                                                                                       static_cast<cmnLogLoD>(className::InitialLoD)); \
     return static_cast<cmnClassServicesBase *>(&classServices); \
-}
+} \
+static cmnClassServicesBase * className##ClassServicesPointer = className::ClassServices();
 
 
 #ifdef CMN_IMPLEMENT_SERVICES_TEMPLATED
@@ -263,7 +266,8 @@ cmnClassServicesBase * cmnClassServicesInstantiate<className>(void) \
                                                                                       &typeid(className), \
                                                                                       static_cast<cmnLogLoD>(className::InitialLoD)); \
     return static_cast<cmnClassServicesBase *>(&classServices); \
-}
+} \
+static cmnClassServicesBase * className##ClassServicesPointer = className::ClassServices();
 //@}
 
 
@@ -277,7 +281,7 @@ cmnClassServicesBase * cmnClassServicesInstantiate<className>(void) \
   available, mostly for "data" objects).  Dynamic creation can be used
   to create an object of a given type based on its name provided as a
   string.
-  
+
   It is important to note that a class registered to allow dynamic
   creation must provide a default constructor.  The C++ compiler will
   not be able to compile the code generated if the default constructor
@@ -294,4 +298,6 @@ cmnClassServicesBase * cmnClassServicesInstantiate<className>(void) \
 #endif
 #define CMN_NO_DYNAMIC_CREATION false
 //@}
+
+#endif // _cmnClassRegisterMacros_h
 

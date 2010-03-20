@@ -24,9 +24,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnPath.h>
 
 
-CMN_IMPLEMENT_SERVICES(cmnPath);
-
-
 cmnPath::cmnPath() {
     ConfigureTokenizer();
     Path.clear();
@@ -46,9 +43,9 @@ void cmnPath::ConfigureTokenizer(void) {
 
 
 std::string cmnPath::FromNative(const std::string & nativePath) {
-    std::string internalPath = nativePath; 
+    std::string internalPath = nativePath;
 #if (CISST_OS == CISST_WINDOWS)
-    
+
 #else
     const std::string::iterator end = internalPath.end();
     std::string::iterator iterator;
@@ -74,7 +71,7 @@ void cmnPath::Add(const std::string & path, bool head) {
     CMN_LOG_CLASS_INIT_VERBOSE << "Adding the following \""
                                << path << "\" at the "
                                << (head ? "beginning" : "end") << std::endl;
-    const char* const* tokens = Tokenizer.GetTokensArray(); 
+    const char* const* tokens = Tokenizer.GetTokensArray();
     iterator position = head ? Path.begin() : Path.end();
     while (*tokens != NULL) {
         Path.insert(position, std::string(*tokens));
@@ -100,12 +97,12 @@ void cmnPath::AddFromEnvironment(const std::string & variableName, bool head) {
         return;
     }
 }
-    
+
 
 std::string cmnPath::Find(const std::string & filename, short mode) const {
     std::string fullName("");
     const_iterator iter = Path.begin();
-    const const_iterator end = Path.end(); 
+    const const_iterator end = Path.end();
     while (iter != end) {
         fullName = (*iter) + "/" + filename;
         if (access(fullName.c_str(), mode) == 0) {
@@ -132,7 +129,7 @@ bool cmnPath::Remove(const std::string & directory) {
         return true;
     }
     CMN_LOG_CLASS_INIT_VERBOSE << "Directory " << directory << " not found in current path." << std::endl;
-    return false;	
+    return false;
 }
 
 
@@ -147,8 +144,8 @@ bool cmnPath::Has(const std::string & directory) const {
 
 
 void cmnPath::ToStream(std::ostream & outputStream) const {
-    const unsigned int size = Path.size();
-    unsigned int index;
+    const size_t size = Path.size();
+    size_t index;
     const_iterator iter = Path.begin();
     for (index = 0; index < size; index++) {
         outputStream << *iter;

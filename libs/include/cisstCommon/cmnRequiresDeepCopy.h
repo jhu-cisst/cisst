@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):  Anton Deguet
   Created on: 2009-11-17
 
@@ -26,6 +26,7 @@ http://www.cisst.org/cisst/license.txt.
   \brief Declaration of cmnRequiresDeepCopy
   \ingroup cisstCommon
 */
+#pragma once
 
 #ifndef _cmnRequiresDeepCopy_h
 #define _cmnRequiresDeepCopy_h

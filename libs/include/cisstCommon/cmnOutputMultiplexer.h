@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):	Ofri Sadowsky
   Created on:	2002-04-18
 
@@ -21,10 +21,11 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
-/*! 
-  \file 
-  \brief Declaration of cmnOutputMultiplexer class. 
+/*!
+  \file
+  \brief Declaration of cmnOutputMultiplexer class.
  */
+#pragma once
 
 #ifndef _cmnOutputMultiplexer_h
 #define _cmnOutputMultiplexer_h
@@ -35,7 +36,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <list>
 #include <iostream>
 
-#include <cisstCommon/cmnExport.h> 
+#include <cisstCommon/cmnExport.h>
 
 
 /*!
@@ -46,27 +47,27 @@ http://www.cisst.org/cisst/license.txt.
   file declares *class cmnOutputMultiplexer*. a cmnOutputMultiplexer
   inherits the public interface of a generic ostream, and channels the
   output to multiple sinks.
- 
- 
+
+
   Usage:
  	  Include the module in your application with:
  	  \#include "cmnOutputMultiplexer.h"
-     
+
      Create a collection of ostream objects, and attach them to a cmnOutputMultiplexer.
      Use the standrard ostream syntax (operator <<) to stream objects to the multiplexer.
 
      \code
        ofstream log("logfile.txt");
        windowoutputstream display;  // hypothetical class
- 
+
        cmnOutputMultiplexer multiplexer;
        multiplexer.AddChannel(&log);
        multiplexer.AddChannel(&windowoutputstream);
- 
+
        multiplexer << "Hello, world" << endl;  // channel the message ot all streams.
      \endcode
 
-     Notes: 
+     Notes:
      -# cmnOutputMultiplexer does not OWN the output streams. They are created
      and destroyed externally.
      -# The initial implementation uses a list to store the addresses of the output channels.
@@ -82,25 +83,25 @@ class CISST_EXPORT cmnOutputMultiplexer : public std::ostream
  public:
     typedef char char_type;
     typedef std::ostream ChannelType;
-  
+
     /*! Type of internal data structure storing the channels. */
     typedef std::list<ChannelType *> ChannelContainerType;
-  
-    /*! Default constructor - initialize base class. */ 
+
+    /*! Default constructor - initialize base class. */
     cmnOutputMultiplexer() : ChannelType(&m_Streambuf) {}
-  
+
     /*! Add an output channel. See notes above.
       \param channel A pointer to the output channel to be added.
      */
     ChannelType & AddChannel(ChannelType * channel);
-  
+
     /*! Remove an output channel.
       \param channel A pointer to the output channel to be removed. No change occurs if
       the pointer is not on the list of channels for this multiplexer.
       \return channel Returns *this, The output channel.
      */
     ChannelType & RemoveChannel(ChannelType * channel);
-  
+
 
     /*! Enable access to the channel storage, without addition or removal of channels.
       Elements of the container can be accessed using the standard const_iterator
@@ -110,10 +111,10 @@ class CISST_EXPORT cmnOutputMultiplexer : public std::ostream
     const ChannelContainerType & GetChannels() const {
         return m_ChannelContainer;
     }
-  
+
  protected:
     ChannelContainerType m_ChannelContainer;
-  
+
     cmnLODMultiplexerStreambuf<char_type> m_Streambuf;
 };
 

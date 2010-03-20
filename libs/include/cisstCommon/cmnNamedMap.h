@@ -18,6 +18,7 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+#pragma once
 
 #ifndef _cmnNamedMap_h
 #define _cmnNamedMap_h
@@ -143,7 +144,7 @@ public:
 
     /*! Add an item to the internal map.  The log level of details is
       used to determine the lod of a message if the item can not be
-      added. */ 
+      added. */
     bool AddItem(const std::string & name,
                  _elementType * item,
                  cmnLogLoD lod = CMN_LOG_LOD_RUN_ERROR);
@@ -156,7 +157,7 @@ public:
 
     /*! Remove an item from the internal map.  The log level of
       details is used to determine the lod of a message if the item
-      can not be removed. */ 
+      can not be removed. */
     bool RemoveItem(const std::string & name, cmnLogLoD lod = CMN_LOG_LOD_RUN_ERROR);
 
     /*! List of names used, i.e. list of keys in the map */
@@ -185,7 +186,7 @@ public:
     void ToStream(std::ostream & outputStream) const;
 
     // void Cleanup(void) { ForEachVoid(&_elementType::Cleanup); }  // needed?
-  
+
     /*! Delete all content while preserving keys, i.e. the map
       contains pairs of names and null pointers. */
     void DeleteAll(void);

@@ -5,13 +5,13 @@
 #
 # (C) Copyright 2003-2009 Johns Hopkins University (JHU), All Rights
 # Reserved.
-# 
+#
 # --- begin cisst license - do not edit ---
-# 
+#
 # This software is provided "as is" under an open source license, with
 # no warranty.  The complete license can be found in license.txt and
 # http://www.cisst.org/cisst/license.txt.
-# 
+#
 # --- end cisst license ---
 
 # set the library name
@@ -20,9 +20,10 @@ SET(LIBRARY cisstCommon)
 # all source files
 SET(SOURCE_FILES
     cmnClassRegister.cpp
+    cmnClassServicesBase.cpp
+    cmnClassServices.cpp
     cmnDeSerializer.cpp
     cmnGenericObject.cpp
-    cmnGenericObjectProxy.cpp
     cmnGetChar.cpp
     cmnLogger.cpp
     cmnObjectRegister.cpp
@@ -50,6 +51,7 @@ SET(HEADER_FILES
     cmnDeSerializer.h
     cmnExport.h
     cmnExportMacros.h
+    cmnForwardDeclarations.h
     cmnGenericObject.h
     cmnGenericObjectProxy.h
     cmnGetChar.h

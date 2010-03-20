@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):	Ofri Sadowsky
   Created on:	2003-06-09
 
@@ -19,7 +19,6 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 
 */
-
 
 #include <cisstCommon/cmnTokenizer.h>
 #include <string.h>
@@ -125,7 +124,7 @@ void cmnTokenizer::Parse(const char * string) throw(std::runtime_error)
 
 void cmnTokenizer::GetArgvTokens(std::vector<const char *> & argvTokens) const
 {
-    const unsigned int numTokens = GetNumTokens();
+    const size_type numTokens = GetNumTokens();
     argvTokens.resize(numTokens+1);
     argvTokens[0] = 0;
     std::copy( &(Tokens[0]), &(Tokens[0]) + numTokens, &(argvTokens[1]) );

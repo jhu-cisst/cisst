@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):  Ofri Sadowsky
   Created on: 2002-05-17
 
@@ -21,9 +21,10 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
-/*! \file 
+/*! \file
   \brief Type Definitions for dynamic control of output messages.
 */
+#pragma once
 
 #ifndef _cmnLODMultiplexerStreambuf_h
 #define _cmnLODMultiplexerStreambuf_h
@@ -42,7 +43,7 @@ class cmnMultiplexerStreambufProxy;
 
 /*! \brief A Streambuffer class that allows output to multiple
   streambuf objects for Level of Detail information.
-  
+
   Types for dynamic control of output messages. This includes
   debugging information, error reporting, state logging etc.  This
   file declares *class cmnLODMultiplexerStreambuf*. It is a templated
@@ -58,71 +59,71 @@ class cmnMultiplexerStreambufProxy;
   Note that the cmnLODMultiplexerStreambuf can be used independently
   as an output multiplexer withoud LOD, using the standard
   basic_streambuf interface.
- 
- 
+
+
   Usage:
      Include the module in your application with:
      \#include <cmnLODMultiplexerStreambuf.h>
-     
+
      Add output streambuf channels to the multiplexer using the AddChannel() method.
- 
+
      Remove output channels from the multiplexer using the RemoveChannel() method.
- 
+
      Set the output LOD of a channel using the SetChannelLOD() method.
- 
+
      Create proxy streambuf objects that store their LOD, and pass it to the
      cmnLODMultiplexerStreambuf to do the actual multiplexing.
      The proxy streambufs should be attached to an ostream object, which is then
      used by the client module.
-     
+
      Example of using a cmnLODOutputMultiplexer, which is an ostream that is
      attached to a proxy.  Assume that the object lodMultiplexerStreambuf is
      a cmnLODMultiplexerStreambuf.
- 
+
      \code
         // The multiple output channels
        ofstream log("logfile.txt");
        windowoutputstream display;    // hypothesized class
- 
+
        lodMultiplexerStreambuf.AddChannel(&log.rdbuf(), CMN_LOG_LOD_RUN_ERROR);
        lodMultiplexerStreambuf.AddChannel(&windowoutputstream.rdbuf(), CMN_LOG_LOD_INIT_WARNING);
- 
+
        cmnLODOutputMultiplexer multiplexerOutput(&lodMultiplexetStreambuf, CMN_LOG_LOD_INIT_VERBOSE);
- 
+
        multiplexerStreambuf << "Hello, world" << endl;  // channel the message only to 'log'
      \endcode
 
-     Notes: 
+     Notes:
      -# cmnLODMultiplexerStreambuf does not OWN the output channels. They are created
      and destroyed externally.
      -# The initial implementation uses a list to store the addresses of the output channels.
      There is no guarantee on the order of storage or the order of output channelling.
      -# It is assumed that none of the output channels modifies the data arguments.
-     -# It is guaranteed that unique streambuf instances are stored in a single 
+     -# It is guaranteed that unique streambuf instances are stored in a single
      cmnLODMultiplexerStreambuf. The AddChannel() function checks for uniqueness.
      -# cmnLODMultiplexerStreambuf does not buffer data. Instead, whenever at attempt is made
-        to use stream::put() on a stream with a multiplexer streambuf, the 
+        to use stream::put() on a stream with a multiplexer streambuf, the
         cmnLODMultiplexerStreambuf::overflow() is called automatically, and it forwards the
         character to the output channels.
-  
+
    \sa C++ manual on basic_ostream and basic_streambuf. cmnOutputMultiplexer.h
  */
 template<class _element, class _trait = std::char_traits<_element> >
 class cmnLODMultiplexerStreambuf : public std::basic_streambuf<_element, _trait>
 {
     friend class cmnMultiplexerStreambufProxy<_element, _trait>;
-  
+
     public:
-  
+
     typedef std::basic_streambuf<_element, _trait> BaseClassType;
     typedef std::basic_streambuf<_element, _trait> ChannelType;
-    /*! 
+    /*!
       The type of Level of Detail
      */
     typedef cmnLogLoD LogLoDType;
 
     typedef std::pair<ChannelType *, LogLoDType> ElementType;
-  
+
     /*! Type of internal data structure storing the channels.
       I chose to use a list for efficiency in output iteration over the
       channels, rather than, for example, a map.
@@ -130,8 +131,8 @@ class cmnLODMultiplexerStreambuf : public std::basic_streambuf<_element, _trait>
     typedef std::list<ElementType> ChannelContainerType;
 	typedef typename ChannelContainerType::iterator IteratorType;
 	typedef typename ChannelContainerType::const_iterator ConstIteratorType;
-  
-    /*! 
+
+    /*!
       Create Multiplexer with a default output filestream
       \param fileStream Default Filestream
      */
@@ -158,18 +159,18 @@ class cmnLODMultiplexerStreambuf : public std::basic_streambuf<_element, _trait>
     /*! Add a channel defined by an output stream.  This methods
       relies on the existence of a rdbuf() method and calls
       AddChannel(ChannelType, LoDtype).
-      
+
       \param outstream Output stream providing the rdbuf.
       \param lod Level of Detail for the stream.
     */
     inline bool AddChannel(std::ostream & outstream, LogLoDType lod) {
         return AddChannel(outstream.rdbuf(), lod);
     }
-  
-  
+
+
     /*!
       Remove an output channel.
-      
+
       \param channel A pointer to the output channel to be removed. No
       change occurs if the pointer is not on the list of channels for
       this multiplexer.
@@ -180,89 +181,89 @@ class cmnLODMultiplexerStreambuf : public std::basic_streambuf<_element, _trait>
     /*! Remove an output channel.  This methods relies on the
       existence of a rdbuf() method and calls
       RemoveChannel(ChannelType).
-      
+
       \param outstream Output stream providing the rdbuf.
     */
     inline void RemoveChannel(std::ostream& outstream) {
         RemoveChannel(outstream.rdbuf());
     }
-  
+
 
     /*!
-      Set the output LOD of a channel 
+      Set the output LOD of a channel
       \param channel A pointer to the output channel to be added.
       \param lod Level Of Detail for the channel
-      \return true: if the LOD value was changed successfully; false:  otherwise, e.g. if the 
+      \return true: if the LOD value was changed successfully; false:  otherwise, e.g. if the
       channel is not in the container.
     */
     bool SetChannelLOD(ChannelType * channel, LogLoDType lod);
 
-  
+
     /*!
       Find the output LOD of a channel
       \param channel: a pointer to the output channel to be added.
       \param lod: Level Of Detail for the channel
-      \return true: if the channel was found in the container; false: if the channel is not 
+      \return true: if the channel was found in the container; false: if the channel is not
       in the container.
     */
     bool GetChannelLOD(const ChannelType * channel, LogLoDType & lod) const;
-  
+
     /*!  Enable access to the channel storage, without addition or
       removal of channels.  Elements of the container can be accessed
       using the standard const_iterator interfaces.  Note that the
       channels themselves are non-const, so individual manipulation of
       each is enabled.
-      
-      \return ChannelContainerType 
+
+      \return ChannelContainerType
     */
     const ChannelContainerType & GetChannels() const {
         return m_ChannelContainer;
     }
-  
+
     // Here we provide basic_streambuf namesame methods for multiplexing.
-    // This part is declared 'protected' following the declarations of 
+    // This part is declared 'protected' following the declarations of
     // basic_streambuf. See basic_streambuf documentation for more
     // details.
     protected:
     typedef typename std::basic_streambuf<_element, _trait>::int_type int_type;
-  
-    /*! 
+
+    /*!
       Multiplexed and LODed version of basic_streambuf xsputn.
      */
     virtual std::streamsize xsputn(const _element * s, std::streamsize n, LogLoDType lod);
-  
+
     /*! Override the basic_streambuf sync for multiplexing. Note that in this
       one we sync() all the channels, regardless of the LOD.
      */
     virtual int sync();
-  
-    /*! Multiplexed and LODed version of basic_streambuf overflow for multiplexing. 
-      overflow() is called when sputc() discovers it does not have space in the 
-      storage buffer. In our case, it's always. See more on it in the 
+
+    /*! Multiplexed and LODed version of basic_streambuf overflow for multiplexing.
+      overflow() is called when sputc() discovers it does not have space in the
+      storage buffer. In our case, it's always. See more on it in the
       basic_streambuf documentation.
      */
     virtual int_type overflow(int_type c, LogLoDType lod);
-  
+
     /*! Override the basic_streambuf xsputn to do the multiplexing
      */
     virtual std::streamsize xsputn(const _element *s, std::streamsize n);
-  
+
     /*! Override the basic_streambuf overflow for multiplexing. overflow() is called when
-      sputc() discovers it does not have space in the storage buffer. In our case, 
+      sputc() discovers it does not have space in the storage buffer. In our case,
       it's always. See more on it in the basic_streambuf documentation.
      */
     virtual int_type overflow(int_type c = _trait::eof());
-  
+
     private:
     /*! The actual container that stores channel addresses.
      */
     ChannelContainerType m_ChannelContainer;
-  
+
     /*! Find a channel in the container and return the container's iterator
       for the element with that channel.
      */
     IteratorType FindChannel(const ChannelType *channel);
-  
+
     /*! Find a channel in the container and return the container's iterator
       for the element with that channel.
      */
@@ -350,7 +351,7 @@ int cmnLODMultiplexerStreambuf<_element, _trait>::sync()
 
 
 template<class _element, class _trait>
-typename cmnLODMultiplexerStreambuf<_element, _trait>::int_type 
+typename cmnLODMultiplexerStreambuf<_element, _trait>::int_type
 cmnLODMultiplexerStreambuf<_element, _trait>::overflow(int_type c, LogLoDType lod)
 {
     // follow the basic_streambuf standard
@@ -383,7 +384,7 @@ std::streamsize cmnLODMultiplexerStreambuf<_element, _trait>::xsputn(const _elem
 
 
 template<class _element, class _trait>
-typename cmnLODMultiplexerStreambuf<_element, _trait>::int_type 
+typename cmnLODMultiplexerStreambuf<_element, _trait>::int_type
 cmnLODMultiplexerStreambuf<_element, _trait>::overflow(int_type c)
 {
     // follow the basic_streambuf standard
@@ -417,7 +418,7 @@ cmnLODMultiplexerStreambuf<_element, _trait>::FindChannel(const ChannelType *cha
 
 
 template<class _element, class _trait>
-typename cmnLODMultiplexerStreambuf<_element, _trait>::ConstIteratorType 
+typename cmnLODMultiplexerStreambuf<_element, _trait>::ConstIteratorType
 cmnLODMultiplexerStreambuf<_element, _trait>::FindChannel(const ChannelType *channel) const
 {
     ConstIteratorType it = m_ChannelContainer.begin();
@@ -430,5 +431,5 @@ cmnLODMultiplexerStreambuf<_element, _trait>::FindChannel(const ChannelType *cha
 }
 
 
-#endif 
+#endif
 

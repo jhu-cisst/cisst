@@ -25,25 +25,26 @@ http://www.cisst.org/cisst/license.txt.
   \file
   \brief Defines cmnGenericObject
 */
+#pragma once
 
 #ifndef _cmnGenericObject_h
 #define _cmnGenericObject_h
 
 #include <cisstCommon/cmnPortability.h>
+#include <cisstCommon/cmnForwardDeclarations.h>
 
 #include <string>
 #include <iostream>
 
+
+// Always include last
 #include <cisstCommon/cmnExport.h>
-
-
-class cmnClassServicesBase;
 
 /*!
   \brief Base class for high level objects.
-  
+
   \ingroup cisstCommon
-  
+
   \sa cmnClassRegister cmnClassServiceBase
 */
 class CISST_EXPORT cmnGenericObject {
@@ -58,21 +59,21 @@ public:
       #CMN_DECLARE_SERVICES_INSTANTIATION and #CMN_IMPLEMENT_SERVICES.
       In NO WAY, a user should redefine/overload this method
       otherwise.
-       
+
       \return A pointer on the class services.  This points to the
       unique instance of cmnClassServiceBase for a given class.
 
       \sa cmnClassRegister cmnClassServiceBase
-    */  
+    */
     virtual const cmnClassServicesBase * Services(void) const = 0;
-    
+
     /*! Use the placement new with the copy constructor to
       re-construct this object based on an existing one.  This method
       will call the destructor to free any memory allocated by the
       previous constructor. It is important to note that the memory
       allocated for the object itself is not freed/re-allocated and
       therefore the object's address remains valid.
-      
+
       \other An object of the same type, if the types (class derived
       from cmnGenericObject) don't correspond the method will return
       false and will not call the destructor and copy constructor.
@@ -82,9 +83,9 @@ public:
     bool ReconstructFrom(const cmnGenericObject & other);
 
     /*! Formatted IO to a string.  This method relies on ToStream
-      which should be overloaded for each class. */ 
+      which should be overloaded for each class. */
     std::string ToString(void) const;
-  
+
     /*! The default ToStream method returns the name of the class.
       This method must be overloaded to provide a useful message. */
     virtual void ToStream(std::ostream & outputStream) const;
@@ -103,7 +104,7 @@ public:
 
     /*! Serialize the content of the object without any extra
         information, i.e. no class type nor format version.  The
-        "receiver" is supposed to already know what to expect. */ 
+        "receiver" is supposed to already know what to expect. */
     virtual void SerializeRaw(std::ostream & outputStream) const;
 
     /*! De-serialize the content of the object without any extra
@@ -119,6 +120,12 @@ std::ostream & operator << (std::ostream & output,
     object.ToStream(output);
     return output;
 }
+
+
+// the following header files are usually needed with cmnGenericObject
+#include <cisstCommon/cmnClassServices.h>
+#include <cisstCommon/cmnClassRegister.h>
+#include <cisstCommon/cmnClassRegisterMacros.h>
 
 
 #endif // _cmnGenericObject_h

@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):	Ofri Sadowsky
   Created on:	2003-06-09
 
@@ -34,7 +34,7 @@ void cmnRandomSequence::ExtractRandomPermutation(const size_t length, unsigned i
     size_t i;
     for (i = 0; i < length; ++i)
         array[i] = ExtractRandomInt(0, length);
-    
+
     unsigned int next;
     unsigned int tmp;
     for (i = 0; i < length; ++i) {
@@ -51,7 +51,7 @@ void cmnRandomSequence::ExtractRandomPermutation(const size_t length, unsigned l
     size_t i;
     for (i = 0; i < length; ++i)
         array[i] = ExtractRandomUnsignedLong(0, length);
-    
+
     unsigned long long next;
     unsigned long long tmp;
     for (i = 0; i < length; ++i) {

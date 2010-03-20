@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):	Anton Deguet
   Created on:	2003-09-08
 
@@ -23,7 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnPortability.h>
 
-const std::string cmnOperatingSystemsStrings[] = {"Undefined", 
+const std::string cmnOperatingSystemsStrings[] = {"Undefined",
                                                   "Windows",
                                                   "Linux",
                                                   "RT-Linux",

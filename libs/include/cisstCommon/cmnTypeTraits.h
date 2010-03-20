@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):	Anton Deguet
   Created on: 2004-01-13
 
@@ -24,7 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 /*! \file
     \brief Declaration of the class cmnTypeTraits
 */
-
+#pragma once
 
 #ifndef _cmnTypeTraits_h
 #define _cmnTypeTraits_h
@@ -182,8 +182,8 @@ public:
     /*! The name of the type. */
     static CISST_EXPORT std::string TypeName(void);
 
-    /*! Return a positive number which is infinity, if available, or the 
-      greatest possible positive value otherwise.  This function is useful 
+    /*! Return a positive number which is infinity, if available, or the
+      greatest possible positive value otherwise.  This function is useful
       for ``idempotent min'' operation.
     */
     inline static Type PlusInfinityOrMax(void)
@@ -191,8 +191,8 @@ public:
         return (HasInfinity()) ? PlusInfinity() : MaxPositiveValue();
     }
 
-    /*! Return a negative number which is infinity, if available, or the 
-      smallest possible negative value otherwise.  This function is useful 
+    /*! Return a negative number which is infinity, if available, or the
+      smallest possible negative value otherwise.  This function is useful
       for ``idempotent max'' operation.
     */
     inline static Type MinusInfinityOrMin(void)
@@ -234,7 +234,7 @@ public:
     /*! Check if this type has a meaningful positive infinity and
       negative infinity. */
     inline static bool HasInfinity(void);
-    
+
     /*! Special Not a Number value, defined for floating point types.
       For templated code, one can use HasNaN to check if this
       method is meaningful. */
@@ -767,7 +767,7 @@ public:
 /*! Check whether class T is derived from class templated class Base.
     This is especially convenient when the template argument to the Base class
     is not known.
-   
+
     Examples:
        cmnIsDerivedFromTemplated<double, cmnGenericObjectProxy>::YES is false
        cmnIsDerivedFromTemplated<cmnDouble, cmnGenericObjectProxy>::YES is true
@@ -775,7 +775,7 @@ public:
     Note that if you know the template argument to the Base class, you can
     instead use:
        cmnIsDerivedFrom<cmnDouble, cmnGenericObjectProxy<double> >::YES
-       
+
 */
 template <typename T, template <typename> class Base>
 class cmnIsDerivedFromTemplated {

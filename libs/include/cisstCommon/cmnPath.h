@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):  Anton Deguet
   Created on: 2005-04-18
 
@@ -26,12 +26,13 @@ http://www.cisst.org/cisst/license.txt.
   \brief Declaration of cmnPath
   \ingroup cisstCommon
 */
+#pragma once
 
 #ifndef _cmnPath_h
 #define _cmnPath_h
 
 #include <cisstCommon/cmnPortability.h>
-#include <cisstCommon/cmnClassRegister.h>
+#include <cisstCommon/cmnGenericObject.h>
 #include <cisstCommon/cmnTokenizer.h>
 
 #include <string>
@@ -81,7 +82,7 @@ public:
 private:
     ContainerType Path;
     cmnTokenizer Tokenizer;
-    
+
     /*! Private method called by each constructor to configure the
       tokenizer. */
     void ConfigureTokenizer(void);
@@ -94,7 +95,7 @@ public:
     enum {HEAD = true,
           TAIL = false
     };
-    
+
     /*! Defines the mode to be used for a given file. */
 #if (CISST_OS == CISST_WINDOWS)
     enum {EXIST = 00,
@@ -126,7 +127,7 @@ public:
 
     /*! Add one or more directories to the path using an environment variable. */
     void AddFromEnvironment(const std::string & variableName, bool head = HEAD);
-    
+
     /*! Find the full name for a given file.
       \return The full path including the filename or an empty string.
     */

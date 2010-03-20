@@ -25,6 +25,7 @@ http://www.cisst.org/cisst/license.txt.
   \file cmnTokenizer.h
   \brief Break strings into tokens.
 */
+#pragma once
 
 #ifndef _cmnTokenizer_h
 #define _cmnTokenizer_h
@@ -62,52 +63,58 @@ http://www.cisst.org/cisst/license.txt.
   \note It is important to note that the stored tokens have the life
   span of the tokenizer.  If the tokenizer is destroyed, the user
   cannot access any of the tokens. */
-class  CISST_EXPORT  cmnTokenizer { public:
-  cmnTokenizer();
+class CISST_EXPORT cmnTokenizer
+{
+ public:
+
+    typedef std::vector<const char *> TokensContainer;
+    typedef TokensContainer::size_type size_type;
+
+    cmnTokenizer();
 
     ~cmnTokenizer();
 
-    void SetDelimiters(const char * delimiters)
+    inline void SetDelimiters(const char * delimiters)
     {
         Delimiters = delimiters;
     }
 
-    void SetQuoteMarkers(const char * markers)
+    inline void SetQuoteMarkers(const char * markers)
     {
         QuoteMarkers = markers;
     }
 
-    void SetEscapeMarkers(const char * markers)
+    inline void SetEscapeMarkers(const char * markers)
     {
         EscapeMarkers = markers;
     }
 
-    const char * GetDelimiters() const
+    inline const char * GetDelimiters(void) const
     {
         return Delimiters;
     }
 
-    const char * GetQuoteMarkers() const
+    inline const char * GetQuoteMarkers(void) const
     {
         return QuoteMarkers;
     }
 
-    const char * GetEscapeMarkers() const
+    inline const char * GetEscapeMarkers(void) const
     {
         return EscapeMarkers;
     }
 
-    static const char * GetDefaultDelimiters()
+    static const char * GetDefaultDelimiters(void)
     {
         return DefaultDelimiters;
     }
 
-    static const char * GetDefaultQuoteMarkers()
+    static const char * GetDefaultQuoteMarkers(void)
     {
         return DefaultQuoteMarkers;
     }
 
-    static const char * GetDefaultEscapeMarkers()
+    static const char * GetDefaultEscapeMarkers(void)
     {
         return DefaultEscapeMarkers;
     }
@@ -120,13 +127,13 @@ class  CISST_EXPORT  cmnTokenizer { public:
     void Parse(const char * string) throw(std::runtime_error);
 
 
-    void Parse(const std::string& string) throw(std::runtime_error) {
+    inline void Parse(const std::string & string) throw(std::runtime_error) {
         Parse(string.c_str());
     }
 
 
     /*! Return the number of tokens stored. */
-    int GetNumTokens() const
+    size_type GetNumTokens(void) const
     {
         return Tokens.size();
     }
@@ -141,13 +148,14 @@ class  CISST_EXPORT  cmnTokenizer { public:
       starting at index 1.  Use the method GetArgvTokens() for
       that.
     */
-    const char * const * GetTokensArray() const
+    const char * const * GetTokensArray(void) const
     {
-        if (Tokens.empty())
-            return NULL;
+        if (Tokens.empty()) {
+            return 0;
+        }
         return &(Tokens[0]);
     }
-
+    
     /*! This method will fill the input vector with the tokens, but
       first set the 0-index element to NULL, to follow the argv
       convention, where argv[0] contains the "name of the program". */
@@ -162,9 +170,8 @@ private:
     static const char * const DefaultQuoteMarkers;
     static const char * const DefaultEscapeMarkers;
 
-
     std::vector<char> StringBuffer;
-    std::vector<const char *> Tokens;
+    TokensContainer Tokens;
 };
 
 #endif  // _cmnTokenizer_h

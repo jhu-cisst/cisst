@@ -25,11 +25,13 @@ http://www.cisst.org/cisst/license.txt.
   \file
   \brief Class register definitions and log macros.
 */
+#pragma once
 
 #ifndef _cmnClassRegister_h
 #define _cmnClassRegister_h
 
 #include <cisstCommon/cmnPortability.h>
+#include <cisstCommon/cmnForwardDeclarations.h>
 #include <cisstCommon/cmnLogger.h>
 
 #include <iostream>
@@ -41,16 +43,12 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnExport.h>
 
-/* forward declarations */
-class cmnClassServicesBase;
-class cmnGenericObject;
-
 
 /*!
   \brief Main register for classes.
 
   \ingroup cisstCommon
- 
+
   This class handles the registration of classes.  The registration
   process allows to retrieve by name some information about a specific
   class from a centralized point.  The current version of the class
@@ -71,7 +69,7 @@ class cmnGenericObject;
   #CMN_DECLARE_SERVICES_INSTANTIATION (or
   #CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT) and
   #CMN_IMPLEMENT_SERVICES (or #CMN_IMPLEMENT_SERVICES_TEMPLATED).
- 
+
   Here are the details of the implementation. The macro
   #CMN_DECLARE_SERVICES defines a method called Services() for each
   registered class. This method returns a pointer on a static data
@@ -82,7 +80,7 @@ class cmnGenericObject;
   data member is initialized the first time it is used. This is done
   to avoid problems related to the order of instantiation of the
   static data members when used before <code>main()</code>.
- 
+
   When the Services() method defined in the #CMN_IMPLEMENT_SERVICES
   macro is called, the cmnClassServices object registers itself within
   static class register. This allows us to keep a single list of all
@@ -123,14 +121,14 @@ class CISST_EXPORT cmnClassRegister {
  public:
     /*!
       Instance specific implementation of FindClassServices.
-      
+
       \sa FindClassServices
     */
     cmnClassServicesBase * FindClassServicesInstance(const std::string & className);
 
     /*!
       Instance specific implementation of FindClassServices.
-      
+
       \sa FindClassServices
     */
     cmnClassServicesBase * FindClassServicesInstance(const std::type_info & typeInfo);
@@ -178,7 +176,7 @@ protected:
       the unique instantiation, one needs to use this static method.
       The instantiated class register is created at the first call of
       this method since it is a static variable declared in this
-      method's scope. 
+      method's scope.
 
       \return A pointer to the class register. */
     static cmnClassRegister * Instance(void);
@@ -187,14 +185,14 @@ protected:
     /*!  The Register method registers a class pointer in the static
       register. It MUST NOT be used directly.  It is used by the
       #CMN_DECLARE_SERVICES macro.
-   
+
       \param classServicesPointer The pointer to the cmnClassServices
       object.
 
       \param className The name given to the class as a string.  To
       enforce the consistency, we use the macro string conversion
       (#).
-    
+
       \return bool True if successful, false if the class has not been
       registered (e.g. one can not register twice).  This might happen
       if a programmer doesn't give the right string name for the class
@@ -214,10 +212,10 @@ protected:
       specific class. It checks to see if the class is registered. If
       so, it updates the cmnClassServices object directly. Otherwise,
       it log a warning message.
-    
+
       \param className The name of the class.
       \param lod The level of detail.
-    
+
       \return bool True if the class is registered.
     */
     static bool SetLoD(const std::string & className, LogLoDType lod);
@@ -225,7 +223,7 @@ protected:
 
     /*! Get the class services by name. Returns null if the class is
       not registered.
-    
+
       \param className The name to look up.
 
       \return The pointer to the cmnClassServicesBase object
@@ -249,12 +247,12 @@ protected:
     static inline cmnClassServicesBase * FindClassServices(const std::type_info & typeInfo) {
         return Instance()->FindClassServicesInstance(typeInfo);
     }
-    
+
 
     /*! Dynamic creation of objects using the default constructor.
 
     \param className The name of the class of the object to be created.
-    
+
     \return A pointer on cmnGenericObject, NULL if the register
     doesn't have this class registered. */
     static cmnGenericObject * Create(const std::string & className);
@@ -263,7 +261,7 @@ protected:
 
     \param className The name of the class of the object to be created.
     \param other The object to be copied
-    
+
     \return A pointer on cmnGenericObject, NULL if the register
     doesn't have this class registered or if the object provided is
     not of the right class type. */
@@ -286,7 +284,7 @@ protected:
     static size_type size(void) {
         return Instance()->sizeInstance();
     }
- 
+
     /*! Begin const iterator. */
     static const_iterator begin(void) {
         return Instance()->beginInstance();
@@ -298,7 +296,7 @@ protected:
         return Instance()->endInstance();
     }
 
-}; 
+};
 
 
 /*! Stream out operator. */
@@ -308,10 +306,6 @@ std::ostream & operator << (std::ostream & output,
     classRegister.ToStream(output);
     return output;
 }
-
-
-#include <cisstCommon/cmnClassRegisterMacros.h>
-#include <cisstCommon/cmnClassServices.h>
 
 
 #endif // _cmnClassRegister_h

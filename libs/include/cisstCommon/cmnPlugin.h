@@ -5,7 +5,7 @@
   $Id$
 
   Author(s): Peter Kazanzides
-  Created on: 2007-01-16  
+  Created on: 2007-01-16
 
   (C) Copyright 2007-2007 Johns Hopkins University (JHU), All Rights
   Reserved.
@@ -20,8 +20,8 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
-/*! 
-  \file 
+/*!
+  \file
   \brief Macro for generating plugin wrappers (factory methods).
 
   This macro should be used if the base class is NOT derived from
@@ -39,6 +39,7 @@ http://www.cisst.org/cisst/license.txt.
 
   \sa osaDynamicLoader, osaDynamicLoaderAndFactory
 */
+#pragma once
 
 #ifndef _cmnPlugin_h
 #define _cmnPlugin_h

@@ -3,10 +3,10 @@
 
 /*
   $Id$
-  
+
   Author(s):	Ankur Kapoor, Anton Deguet
   Created on:	2006-05-05
-  
+
   (C) Copyright 2006-2007 Johns Hopkins University (JHU), All Rights
   Reserved.
 
@@ -18,6 +18,8 @@ http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
 */
+
+#pragma once
 
 #ifndef _cmnGenericObjectProxy_h
 #define _cmnGenericObjectProxy_h
@@ -44,7 +46,7 @@ http://www.cisst.org/cisst/license.txt.
   typedef cmnGenericObjectProxy<UserType> UserTypeProxy;
   CMN_DECLARE_SERVICES_INSTANTIATION(UserTypeProxy);
   \endcode
-  
+
   It is also required to instantiate the associated services in the
   compiled code (.cpp) file with:
   \code
@@ -58,16 +60,16 @@ http://www.cisst.org/cisst/license.txt.
   to serialize and deserialize, the user will also have to overload
   the functions cmnSerializeRaw and cmnDeSerializeRaw.
 
-  \note As it is, this class can not be used in libraries other than 
+  \note As it is, this class can not be used in libraries other than
   cisstCommon if a DLL is to be created.   The issue is that the class
   will be declared as imported in the header file because it is part of
   cisstCommon.
 
   \sa cmnGenericObject, cmnClassServices, cmnSerializer, cmnDeSerializer
-  
+
   \param _elementType The actual type for which we want to provide a
   proxy object.
-*/ 
+*/
 template <class _elementType>
 class cmnGenericObjectProxy: public cmnGenericObject
 {
@@ -82,13 +84,13 @@ public:
         default constructor. */
     inline cmnGenericObjectProxy(void)
     {}
-    
+
     /*! Conversion constructor.  This allows to construct the proxy
         object using an object of the actual type. */
     inline cmnGenericObjectProxy(const value_type & data):
         Data(data)
     {}
-    
+
     inline ~cmnGenericObjectProxy(void) {}
 
     /*! Conversion assignment.  This allows to assign from an object

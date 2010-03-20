@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):  Anton Deguet
   Created on: 2008-08-21
 
@@ -46,6 +46,7 @@ http://www.cisst.org/cisst/license.txt.
   \note The use of underscore in symbol names is an exception to the
   cisst naming conventions.
 */
+#pragma once
 
 #ifndef _cmnUnits_h
 #define _cmnUnits_h

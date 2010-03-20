@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):  Anton Deguet
   Created on: 2005-10-17
 
@@ -26,6 +26,7 @@ http://www.cisst.org/cisst/license.txt.
   \brief Declaration of various constants
   \ingroup cisstCommon
 */
+#pragma once
 
 #ifndef _cmnConstants_h
 #define _cmnConstants_h

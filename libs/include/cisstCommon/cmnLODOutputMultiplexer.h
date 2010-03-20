@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):  Ofri Sadowsky
   Created on: 2002-05-20
 
@@ -21,9 +21,10 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
-/*! \file 
+/*! \file
   \brief Types for dynamic control of output messages.
 */
+#pragma once
 
 #ifndef _cmnLODOutputMultiplexer_h
 #define _cmnLODOutputMultiplexer_h
@@ -34,7 +35,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <list>
 #include <iostream>
 
-/*! \brief  Types for dynamic control of output messages. 
+/*! \brief  Types for dynamic control of output messages.
 
    This includes debugging information, error reporting, state logging etc.
    This file declares class cmnLODOutputMultiplexer. A cmnLODOutputMultiplexer
@@ -42,26 +43,26 @@ http://www.cisst.org/cisst/license.txt.
    message with a Level Of Detail (LOD) descriptor.  The LOD descriptor is
    forwarded through a cmnMultiplexerStreambufProxy to a cmnLODMultiplexerStreambuf
    that performs the actual multiplexing.
- 
+
    Create a collection of ostream objects, and attach them to a
    cmnLODMultiplexerStreambuf.
    Create a cmnLODOutputMultiplexer and assign it with the LOD value and
    the cmnLODMultiplexerStreambuf address.
    Use the standard ostream syntax (operator <<) to stream objects to the multiplexer.
- 
+
    Example (assume that the object lodMultiplexerStreambuf is
    a cmnLODMultiplexerStreambuf):
- 
+
      \code
        // The multiple output channels
        ofstream log("logfile.txt");
        windowoutputstream display;  // hypothetical class
- 
+
        cmnLODOutputMultiplexer multiplexerOutput(&lodMultiplexetStreambuf, CMN_LOG_LOD_RUN_ERROR);
- 
+
        lodMultiplexerStreambuf.AddChannel(log, CMN_LOG_LOD_RUN_ERROR;
        lodMultiplexerStreambuf.AddChannel(windowoutputstream, CMN_LOG_LOD_INIT_WARNING);
- 
+
        multiplexerStreambuf << "Hello, world" << endl;  // channel the message only to 'log'
      \endcode
 
@@ -79,16 +80,16 @@ private:
     typedef char char_type;
 
     typedef cmnLODMultiplexerStreambuf<char_type> SinkType;
-  
+
     typedef std::ostream BaseType;
 
     typedef SinkType::LogLoDType LogLoDType;
-  
-    /*! 
+
+    /*!
       Constructor that initializes base class and stores LOD.
     */
     cmnLODOutputMultiplexer(SinkType * multiplexer, LogLoDType lod)
-        : BaseType(NULL), m_StreambufProxy(multiplexer, lod) {          
+        : BaseType(NULL), m_StreambufProxy(multiplexer, lod) {
         if (multiplexer != NULL) {
             init(&m_StreambufProxy);
         }
@@ -107,20 +108,20 @@ private:
         return *this;
     }
 
-    /*! 
+    /*!
       Returns the Level of Detail.
      */
     LogLoDType GetLOD(void) const {
         return m_StreambufProxy.GetLOD();
     }
 
-    /*! 
+    /*!
       Sets the Level of Detail.
-     */  
+     */
     void SetLOD(LogLoDType lod) {
         m_StreambufProxy.SetLOD(lod);
     }
-  
+
 
  private:
     cmnMultiplexerStreambufProxy<char_type> m_StreambufProxy;

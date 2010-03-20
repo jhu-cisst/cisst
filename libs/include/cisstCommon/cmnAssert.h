@@ -25,6 +25,7 @@ http://www.cisst.org/cisst/license.txt.
   \file
   \brief Assert macros definitions.
 */
+#pragma once
 
 #ifndef _cmnAssert_h
 #define _cmnAssert_h

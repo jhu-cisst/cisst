@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):  Anton Deguet
   Created on: 2004-08-31
 
@@ -26,6 +26,7 @@ http://www.cisst.org/cisst/license.txt.
   \brief Declaration of cmnLogger amd macros for human readable logging
   \ingroup cisstCommon
 */
+#pragma once
 
 #ifndef _cmnLogger_h
 #define _cmnLogger_h
@@ -79,7 +80,7 @@ http://www.cisst.org/cisst/license.txt.
     ((lod > cmnLogger::GetLoD()) || (lod > Services()->GetLoD()))?\
         (void*)0:\
     ((cmnLODOutputMultiplexer(cmnLogger::GetMultiplexer(), lod).Ref()) << cmnLogLoDString[lod] << " - Class " << Services()->GetName() << ": ")
- 
+
 
 /*! Macros defined to use #CMN_LOG_CLASS for a given level of detail. */
 //@{
@@ -202,7 +203,7 @@ http://www.cisst.org/cisst/license.txt.
     std::cout.  To set the level of detail of an output stream, use
     cmnLogger::GetMultiplexer()->AddChannel(newStream, newLoD).
 
-  \sa cmnClassRegister cmnClassServicesBase cmnLODOutputMultiplexer 
+  \sa cmnClassRegister cmnClassServicesBase cmnLODOutputMultiplexer
 */
 class CISST_EXPORT cmnLogger {
 
@@ -233,19 +234,11 @@ class CISST_EXPORT cmnLogger {
     */
     LogLoDType LoD;
 
-    /*! Single multiplexer used to stream the log out */    
+    /*! Single multiplexer used to stream the log out */
     cmnLODMultiplexerStreambuf<char> LoDMultiplexerStreambuf;
 
     /*! Instance specific implementation of SetLoD.  \sa SetLoD */
-    inline void SetLoDInstance(LogLoDType lod) {
-        if (lod < CMN_LOG_LOD_NONE) {
-            lod = CMN_LOG_LOD_NONE;
-        } else if (lod > CMN_LOG_LOD_VERY_VERBOSE) {
-            lod = CMN_LOG_LOD_VERY_VERBOSE;
-        }
-        CMN_LOG(CMN_LOG_LOD_INIT_WARNING) << "Class cmnLogger: level of Detail set to \"" << cmnLogLoDString[lod] << "\"" << std::endl;
-        LoD = lod;
-    }
+    void SetLoDInstance(LogLoDType lod);
 
     /*! Instance specific implementation of GetLoD.  \sa GetLoD */
     inline LogLoDType GetLoDInstance(void) const {
@@ -286,14 +279,14 @@ class CISST_EXPORT cmnLogger {
       the unique instantiation, one needs to use this static method.
       The instantiated log is created at the first call of
       this method since it is a static variable declared in this
-      method's scope. 
+      method's scope.
 
       \return A pointer to the log. */
     static cmnLogger * Instance(void);
 
 
     /*! Set the global Level of Detail to filter the log messages.
-     
+
       \param lod The global level of detail used to filter the log.
 
       \sa SetLoDInstance */
@@ -303,9 +296,9 @@ class CISST_EXPORT cmnLogger {
 
     /*! Get the global Level of Detail used to filter the log
       messages.
-      
+
       \return The global level of detail used to filter the log.
-      
+
       \sa GetLoDInstance */
     static LogLoDType GetLoD(void) {
         return Instance()->GetLoDInstance();
@@ -314,7 +307,7 @@ class CISST_EXPORT cmnLogger {
     /*! Returns the cmnLODMultiplexerStreambuf directly. This allows
       manipulation of the streambuffer for operations such as adding or
       deleting channels for the stream..
-   
+
       \return cmnLODMultiplexerStreambuf<char>* The Streambuffer.
 
       \sa GetMultiplexerInstance
@@ -322,16 +315,16 @@ class CISST_EXPORT cmnLogger {
     static StreamBufType * GetMultiplexer(void) {
         return Instance()->GetMultiplexerInstance();
     }
- 
+
 
     /*! Disable the default log file "cisstLog.txt".  This method
       removes the default log from the output list of the multiplexer
-      but doesn't close the default log file. */ 
+      but doesn't close the default log file. */
     static void HaltDefaultLog(void) {
         Instance()->HaltDefaultLogInstance();
     }
 
-    
+
     /*! Resume the default log file.  By default, the log is enabled
       (this is the default behavior of the cmnLogger constructor) but
       this can be halted by using HaltDefaultLog().  Using

@@ -27,6 +27,7 @@ http://www.cisst.org/cisst/license.txt.
   \brief Declaration of cmnPrintf and cmnPrintfParser
   \ingroup cisstCommon
 */
+#pragma once
 
 #ifndef _cmnPrintf_h
 #define _cmnPrintf_h
@@ -58,7 +59,7 @@ CISST_EXPORT bool cmnTypePrintf(cmnPrintfParser & parser, const char * text);
   \brief printf-like formatted output for streams
 
   \ingroup cisstCommon
-  
+
   This is the user interface for output formatting with C++ streams
   after the fashion of printf.
 
@@ -67,13 +68,13 @@ CISST_EXPORT bool cmnTypePrintf(cmnPrintfParser & parser, const char * text);
   \code
   std::cout << cmnPrintf("Hello %.4f World\n") << 12.345;
   \endcode
-  
+
   prints the text (followed by a \n newline)
-  
+
   \verbatim
   Hello 12.3450 World
   \endverbatim
-  
+
   cmnPrintf can be "streamed" into any object derived from the
   std::ostream base class.  The formatting rules are the same as in
   the standard C routines printf, sprintf, etc.  Note that if a
@@ -94,11 +95,11 @@ CISST_EXPORT bool cmnTypePrintf(cmnPrintfParser & parser, const char * text);
   \endcode
 
   will print:
-  
+
   \verbatim
   One (1), two and a half (2.5), text (text-input)
   \endverbatim
-  
+
   and ignore the input 10.
 
   If there are fewer inputs in the '<<' sequence, then the formatting
@@ -115,7 +116,7 @@ CISST_EXPORT bool cmnTypePrintf(cmnPrintfParser & parser, const char * text);
   \verbatim
   One (1), two and a half (2.5), text(
   \endverbatim
-  
+
   Default formatting is provided for the types double ("%f"), int
   ("%d") and const char * ("%s").  Other basic types are automatically
   converted by the compiler to one of these and printed.  However, the
@@ -147,7 +148,7 @@ CISST_EXPORT bool cmnTypePrintf(cmnPrintfParser & parser, const char * text);
   of the format string.  The real work is done by a cmnPrintfParser
   object which is returned from operator <<.
 
-  The expression 
+  The expression
   \code
   std::cout << cmnPrintf("something")
   \endcode
@@ -292,7 +293,7 @@ public:
         AdvanceToNextFormat();
         return *this;
     }
-    
+
     /*! Overload operator void * to allow similar evaluations of
       "success" as are available for ostream.  E.g.,
       \code
@@ -304,7 +305,7 @@ public:
       A similar test can be performed for a cmnPrintfParser object,
       and tests the status of the output channel.
     */
-    inline operator void *()
+    inline operator void *(void)
     {
         return (void *)(OutputStream);
     }
@@ -318,11 +319,11 @@ public:
 private:
     /*! Dump all the text in the format string to the output stream,
       until a percent sign is encountered, and stop there */
-    void DumpUntilPercent();
+    void DumpUntilPercent(void);
 
     /*! Process the character following a percent sign in the format
       string */
-    void ProcessPercent();
+    void ProcessPercent(void);
 
     /*! The actual output stream */
     std::ostream & OutputStream;
@@ -351,7 +352,7 @@ private:
       between the current sequence and the next one, then stopping
       there and waiting for input.
     */
-    void AdvanceToNextFormat()
+    void AdvanceToNextFormat(void)
     {
         FormatSequence = 0;
         DumpUntilPercent();
@@ -451,7 +452,7 @@ public:
     */
     bool NextTypeIdCharIsOneOf(const char * typeIdCharset) const;
 
-    void SuspendOutput()
+    void SuspendOutput(void)
     {
         NextFormatTextPosition = 0;
     }
@@ -459,13 +460,13 @@ public:
     /*! Returns the next format sequence, i.e., '%' sequence, which is
       to be processed next.
     */
-    const char * GetNextFormatSequence() const
+    const char * GetNextFormatSequence(void) const
     {
         return FormatSequence;
     }
 
     /*! Returns the type identifying character to be processed next */
-    char GetNextTypeIdCharacter() const
+    char GetNextTypeIdCharacter(void) const
     {
         return NextTypeIdCharacter;
     }

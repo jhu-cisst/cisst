@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):  Anton Deguet, Balazs Vagvolgyi
   Created on: 2009-03-26
 
@@ -20,6 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
+#pragma once
 
 #ifndef _cmnGetChar_h
 #define _cmnGetChar_h
@@ -46,10 +47,10 @@ class CISST_EXPORT cmnGetCharEnvironment
     char Internals[INTERNALS_SIZE];
 
     /*! Return the size of the actual object used by the OS.  This is
-      used for testing only. */ 
+      used for testing only. */
     static unsigned int SizeOfInternals(void);
     friend class cmnGetCharEnvironmentTest;
-    
+
     /*! Keep a flag status to make sure the environment is activated only once */
     bool Activated;
 

@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):	Ankur Kapoor
   Created on: 2004-04-30
 
@@ -23,8 +23,10 @@ http://www.cisst.org/cisst/license.txt.
 
 /*!
   \file
-  \brief Defines XMLPath 
+  \brief Defines XMLPath
 */
+
+#pragma once
 
 #ifndef _cmnXMLPath_h
 #define _cmnXMLPath_h
@@ -35,7 +37,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnPortability.h>
 #include <cisstCommon/cmnTokenizer.h>
-#include <cisstCommon/cmnClassRegister.h>
+#include <cisstCommon/cmnGenericObject.h>
 #include <cisstCommon/cmnAssert.h>
 
 
@@ -55,7 +57,7 @@ http://www.cisst.org/cisst/license.txt.
 
 // At some point, windows.h is going to be included (OS abstraction).
 // This instructs the compiler to include only the bare minimum of
-// Windows header files.  Specifically, it prevents namespace 
+// Windows header files.  Specifically, it prevents namespace
 // collisions between MsXml and Xerces/Xalan.
 // #define WIN32_LEAN_AND_MEAN
 
@@ -65,17 +67,17 @@ http://www.cisst.org/cisst/license.txt.
   This class provides a simple but somewhat powerful XPath implementation
   for parsing and validating XML.  Validation is handed via XML Schemas.
   XPath query expressions are passed to a processor method (GetXMLValue),
-  along with a context and typed output param reference, which processes 
+  along with a context and typed output param reference, which processes
   the query and returns results as the output parameter type.
-  Error checking is limited:  
+  Error checking is limited:
   ** SetInputSource() tries to catch as many exceptions as possible,
   and does no error checking whatsoever.  Data may be missing and
-  misformated. Generates a GENERAL PROTECTION FAULT (via assertions) 
+  misformated. Generates a GENERAL PROTECTION FAULT (via assertions)
   on error.
-  ** SetInputSourceWithValidation() reports parsing error/warning 
+  ** SetInputSourceWithValidation() reports parsing error/warning
   events through the ParseErrorHandler object.  Data is verified
   against an XML Schema named in the XML source; no other data
-  checking is necessary (if the schema is complete).  Also 
+  checking is necessary (if the schema is complete).  Also
   generates a GPF, until a new error policy is decided.
   This is very easy to use - set the input XML file to parse using
   SetInputSource, and Get any attribute value of a tag using
@@ -119,14 +121,14 @@ class CISST_EXPORT cmnXMLPath: public cmnGenericObject {
 	xmlDocPtr Document;
 
 	/*! Xpath context used by libxml2 */
-	xmlXPathContextPtr XPathContext; 
+	xmlXPathContextPtr XPathContext;
 
 protected:
-	
+
 	/*! Get the XPath result and cast it as internal storage type based on the library */
 	bool GetXMLValue(const char * context, const char * XPath, xmlChar **storage);
 
-	/*! set the value of attribute returned by XPath expression to value help by 
+	/*! set the value of attribute returned by XPath expression to value help by
 	internal storage type based on the library*/
 	bool SetXMLValue(const char * context, const char * XPath, const xmlChar *storage);
 
@@ -134,10 +136,10 @@ protected:
 public:
     /*! Constructor */
     cmnXMLPath();
-    
+
     /*! Destructor */
     virtual ~cmnXMLPath();
-	
+
     /*! Set the input source file2 */
     //@{
     void SetInputSource(const char *filename);
@@ -145,10 +147,10 @@ public:
         this->SetInputSource(fileName.c_str());
     }
     //@}
-	
+
     /*! For debugging. Print the attribute value as a string on stream */
     void PrintValue(std::ostream &out, const char *context, const char *XPath);
-    
+
 	/*! Get/Set the XPath result and cast it as bool */
     bool GetXMLValue(const char * context, const char * XPath, bool &value);
 	bool GetXMLValue(const char * context, const char * XPath, bool &value, const bool &valueifmissing);
@@ -158,7 +160,7 @@ public:
     bool GetXMLValue(const char * context, const char * XPath, int &value);
 	bool GetXMLValue(const char * context, const char * XPath, int &value, const int &valueifmissing);
 	bool SetXMLValue(const char * context, const char * XPath, int value);
-    
+
     /*! Get/Set the XPath result and cast it as double */
     bool GetXMLValue(const char * context, const char * XPath, double &value);
 	bool GetXMLValue(const char * context, const char * XPath, double &value, const double &valueifmissing);

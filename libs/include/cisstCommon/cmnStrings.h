@@ -25,7 +25,7 @@ http://www.cisst.org/cisst/license.txt.
   \file
   \brief Portability layer for strings related function using underscore as prefix
  */
-
+#pragma once
 
 #ifndef _cmnStrings_h
 #define _cmnStrings_h
@@ -44,6 +44,8 @@ inline int cmn_snprintf(char * destination, size_t size, const char * format, ..
     int result;
 #if (CISST_COMPILER == CISST_DOTNET2003)
     result = _vsnprintf(destination, size, format, arguments);
+#elsif (CISST_COMPILER == CISST_DOTNET2005) || (CISST_COMPILER == CISST_DOTNET2008)
+ result = vsnprintf_s(destination, size, _TRUNCATE, format, arguments);
 #else
     result = vsnprintf(destination, size, format, arguments);
 #endif

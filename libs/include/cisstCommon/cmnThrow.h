@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):	Anton Deguet
   Created on:	2005-09-22
 
@@ -21,11 +21,11 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
-/*! 
-  \file 
+/*!
+  \file
   \brief Declaration of the template function cmnThrow
  */
-
+#pragma once
 
 #ifndef _cmnThrow_h
 #define _cmnThrow_h

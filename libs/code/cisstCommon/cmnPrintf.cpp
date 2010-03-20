@@ -21,6 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstCommon/cmnPrintf.h>
+#include <cisstCommon/cmnLogger.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -46,7 +47,7 @@ cmnPrintfParser::cmnPrintfParser(std::ostream & output, const cmnPrintf & output
     ProcessPercent();
 }
 
-void cmnPrintfParser::DumpUntilPercent()
+void cmnPrintfParser::DumpUntilPercent(void)
 {
     if (NextFormatTextPosition == 0)
         return;
@@ -60,7 +61,7 @@ void cmnPrintfParser::DumpUntilPercent()
     OutputStream << firstPosition;
 }
 
-void cmnPrintfParser::ProcessPercent()
+void cmnPrintfParser::ProcessPercent(void)
 {
     if (NextFormatTextPosition == 0)
         return;
@@ -104,10 +105,10 @@ bool cmnTypePrintfForIntegers(cmnPrintfParser & parser, const _intType number)
     }
 
     if (!parser.NextTypeIdCharIsOneOf(cmnPrintfParser::IntegerTypeIds)) {
-        std::cerr << "cmnTypePrintf : Expected type identified by <" 
-            << parser.GetNextTypeIdCharacter()
-            << ">, received int instead.  Suspending output"
-            << std::endl;
+        CMN_LOG_RUN_ERROR << "cmnTypePrintfForIntegers: expected type identified by <"
+                          << parser.GetNextTypeIdCharacter()
+                          << ">, received int instead.  Suspending output"
+                          << std::endl;
         parser.SuspendOutput();
         return false;
     }
@@ -115,7 +116,7 @@ bool cmnTypePrintfForIntegers(cmnPrintfParser & parser, const _intType number)
     char formatBuffer[cmnPrintfParser::BUFFER_SIZE + 1];
     formatBuffer[cmnPrintfParser::BUFFER_SIZE] = 0;
     const int printLength = snprintf(formatBuffer, cmnPrintfParser::BUFFER_SIZE,
-        parser.GetNextFormatSequence(), number);
+                                     parser.GetNextFormatSequence(), number);
     parser.RawOutput(formatBuffer);
 
     if ( (printLength < 0) || (printLength > cmnPrintfParser::BUFFER_SIZE) ) {
@@ -165,10 +166,10 @@ bool cmnTypePrintf(cmnPrintfParser & parser, const unsigned long number)
 bool cmnTypePrintf(cmnPrintfParser & parser, const double number)
 {
     if (!parser.NextTypeIdCharIsOneOf(cmnPrintfParser::FloatTypeIds)) {
-        std::cerr << "FormatterStream::Format : Expected type identified by <"
-            << parser.GetNextTypeIdCharacter()
-            << ">, received double instead.  Suspending output"
-            << std::endl;
+        CMN_LOG_RUN_ERROR << "cmnTypePrintf: expected type identified by <"
+                          << parser.GetNextTypeIdCharacter()
+                          << ">, received double instead.  Suspending output"
+                          << std::endl;
         parser.SuspendOutput();
         return false;
     }
@@ -176,7 +177,7 @@ bool cmnTypePrintf(cmnPrintfParser & parser, const double number)
     char formatBuffer[cmnPrintfParser::BUFFER_SIZE + 1];
     formatBuffer[cmnPrintfParser::BUFFER_SIZE] = 0;
     const int printLength = snprintf(formatBuffer, cmnPrintfParser::BUFFER_SIZE,
-        parser.GetNextFormatSequence(), number);
+                                     parser.GetNextFormatSequence(), number);
     parser.RawOutput(formatBuffer);
 
     if ( (printLength < 0) || (printLength > cmnPrintfParser::BUFFER_SIZE) ) {
@@ -190,10 +191,10 @@ bool cmnTypePrintf(cmnPrintfParser & parser, const double number)
 bool cmnTypePrintf(cmnPrintfParser & parser, const char * text)
 {
     if (!parser.NextTypeIdCharIsOneOf(cmnPrintfParser::StringTypeIds)) {
-        std::cerr << "FormatterStream::Format : Expected type identified by <"
-            << parser.GetNextTypeIdCharacter()
-            << ">, received char * instead.  Suspending output"
-            << std::endl;
+        CMN_LOG_RUN_ERROR << "cmnTypePrintf: expected type identified by <"
+                          << parser.GetNextTypeIdCharacter()
+                          << ">, received char * instead.  Suspending output"
+                          << std::endl;
         parser.SuspendOutput();
         return false;
     }
@@ -201,7 +202,7 @@ bool cmnTypePrintf(cmnPrintfParser & parser, const char * text)
     char formatBuffer[cmnPrintfParser::BUFFER_SIZE + 1];
     formatBuffer[cmnPrintfParser::BUFFER_SIZE] = 0;
     const int printLength = snprintf(formatBuffer, cmnPrintfParser::BUFFER_SIZE,
-        parser.GetNextFormatSequence(), text);
+                                     parser.GetNextFormatSequence(), text);
     parser.RawOutput(formatBuffer);
 
     if ( (printLength < 0) || (printLength > cmnPrintfParser::BUFFER_SIZE) ) {

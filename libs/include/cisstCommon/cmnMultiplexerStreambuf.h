@@ -21,9 +21,10 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
-/*! \file 
+/*! \file
    \brief Types for dynamic control of output messages
  */
+#pragma once
 
 #ifndef _cmnMultiplexerStreambuf_h
 #define _cmnMultiplexerStreambuf_h
@@ -44,71 +45,71 @@ http://www.cisst.org/cisst/license.txt.
   multiple other streambuf objects.  The multiplexing is implemented
   by overriding basic_streambuf output functions xsputn(), overflow()
   and sync().
- 
- 
+
+
   Usage:
   Include the module in your application with:
   \#include "cmnMultiplexerStreambuf.h"
-     
+
   Add output streambuf channels to the multiplexer using the
   AddChannel() method.
- 
+
   Remove output channels from the multiplexer using the
   RemoveChannel() method.
- 
+
   Attach a cmnMultiplexerStreambuf object with an ostream. The output
   functions << , put(), write() etc will operate directly on the
   cmnMultiplexerStreambuf.
-     
+
   Example of using a cmnOutputMultiplexer, which is an ostream using a
   cmnMultiplexerStrembuf (an output stream with multiplexer
   streambuf):
-     
+
   \code
   ofstream log("logfile.txt");
   windowoutputstream display;   // hypothesized class
-  
+
   cmnOutputMultiplexer multiplexer;
   multiplexer.AddChannel(&log);
   multiplexer.AddChannel(&windowoutputstream);
-  
+
   multiplexer << "Hello, world" << endl;  // channel the message to all streams.
-  \endcode   
-  
-  Notes: 
+  \endcode
+
+  Notes:
   -# cmnMultiplexerStreambuf does not OWN the output channels. They are created
   and destroyed externally.
   -# The initial implementation uses a list to store the addresses of the output channels.
   There is no guarantee on the order of storage or the order of output channelling.
   -# It is assumed that none of the output channels modifies the data arguments.
-  -# It is guaranteed that unique streambuf instances are stored in a single 
+  -# It is guaranteed that unique streambuf instances are stored in a single
   cmnMultiplexerStreambuf. The AddChannel() function checks for uniqueness.
   -# cmnMultiplexerStreambuf does not buffer data. Instead, whenever at attempt is made
-  to use stream::put() on a stream with a multiplexer streambuf, the 
+  to use stream::put() on a stream with a multiplexer streambuf, the
   cmnMultiplexerStreambuf::overflow() is called automatically, and it forwards the
   character to the output channels.
-  
+
    \sa C++ manual on basic_ostream and basic_streambuf. cmnOutputMultiplexer.h
 */
 template<class _element, class _trait = std::char_traits<_element> >
 class cmnMultiplexerStreambuf : public std::basic_streambuf<_element, _trait>
 {
     public:
-    
+
     typedef std::basic_streambuf<_element, _trait> ChannelType;
     typedef typename std::basic_streambuf<_element, _trait>::int_type int_type;
-    
-    /*! 
+
+    /*!
      * Type of internal data structure storing the channels.
      */
     typedef std::list<ChannelType *> ChannelContainerType;
 
-    /*! 
+    /*!
      * Constructor: currently empty.
      */
     cmnMultiplexerStreambuf()
     {}
-    
+
     /*! Add an output channel. See notes above.
      * \param channel A pointer to the output channel to be added.
      */
@@ -130,22 +131,22 @@ class cmnMultiplexerStreambuf : public std::basic_streambuf<_element, _trait>
     {
         return m_ChannelContainer;
     }
-    
-    
+
+
     // Here we override the basic_streambuf methods for multiplexing.
-    // This part is declared 'protected' following the declarations of 
+    // This part is declared 'protected' following the declarations of
     // basic_streambuf. See basic_streambuf documentation for more
     // details.
     protected:
-    
+
     /*! Override the basic_streambuf xsputn to do the multiplexing. */
     virtual std::streamsize xsputn(const _element *s, std::streamsize n);
-    
+
     /*! Override the basic_streambuf sync for multiplexing. */
     virtual int sync();
-    
+
     /*! Override the basic_streambuf overflow for multiplexing. overflow() is called when
-      sputc() discovers it does not have space in the storage buffer. In our case, 
+      sputc() discovers it does not have space in the storage buffer. In our case,
       it's always. See more on it in the basic_streambuf documentation.
     */
     virtual int_type overflow(int_type c = _trait::eof());
@@ -165,7 +166,7 @@ class cmnMultiplexerStreambuf : public std::basic_streambuf<_element, _trait>
 template<class _element, class _trait>
 void cmnMultiplexerStreambuf<_element, _trait>::AddChannel(ChannelType * channel)
 {
-    typename ChannelContainerType::iterator it = find(m_ChannelContainer.begin(), m_ChannelContainer.end(), 
+    typename ChannelContainerType::iterator it = find(m_ChannelContainer.begin(), m_ChannelContainer.end(),
                                                       channel);
 
     if (it == m_ChannelContainer.end()) {
@@ -206,7 +207,7 @@ int cmnMultiplexerStreambuf<_element, _trait>::sync()
 
 
 template<class _element, class _trait>
-typename cmnMultiplexerStreambuf<_element, _trait>::int_type 
+typename cmnMultiplexerStreambuf<_element, _trait>::int_type
 cmnMultiplexerStreambuf<_element, _trait>::overflow(int_type c)
 {
     // follow the basic_streambuf standard
