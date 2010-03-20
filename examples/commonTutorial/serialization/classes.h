@@ -24,7 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _serializationClasses_h
 
 #include <cisstCommon/cmnPortability.h>
-#include <cisstCommon/cmnClassRegister.h>
+#include <cisstCommon/cmnGenericObject.h>
 
 class classA: public cmnGenericObject {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);

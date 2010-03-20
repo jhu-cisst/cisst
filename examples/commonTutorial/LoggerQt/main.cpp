@@ -21,19 +21,11 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnLogger.h>
 #include <cisstCommon/cmnLoggerQWidget.h>
 
-#include <cisstCommon/cmnPath.h>
-#include <cisstCommon/cmnGenericObjectProxy.h>
-
 #include <QApplication>
 
 
 int main(int argc, char *argv[])
 {
-    // create a couple of dummy objects with LoD to force linker to use these symbols
-    cmnPath path;
-    cmnInt anInt;
-    cmnDouble aDouble;
-
     // log configuration
     cmnLogger::SetLoD(CMN_LOG_LOD_VERY_VERBOSE);
     cmnLogger::GetMultiplexer()->AddChannel(std::cout, CMN_LOG_LOD_VERY_VERBOSE);
