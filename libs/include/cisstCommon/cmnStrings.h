@@ -44,7 +44,7 @@ inline int cmn_snprintf(char * destination, size_t size, const char * format, ..
     int result;
 #if (CISST_COMPILER == CISST_DOTNET2003)
     result = _vsnprintf(destination, size, format, arguments);
-#elsif (CISST_COMPILER == CISST_DOTNET2005) || (CISST_COMPILER == CISST_DOTNET2008)
+#elif (CISST_COMPILER == CISST_DOTNET2005) || (CISST_COMPILER == CISST_DOTNET2008)
  result = vsnprintf_s(destination, size, _TRUNCATE, format, arguments);
 #else
     result = vsnprintf(destination, size, format, arguments);
