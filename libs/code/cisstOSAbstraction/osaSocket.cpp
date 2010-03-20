@@ -38,7 +38,6 @@ http://www.cisst.org/cisst/license.txt.
 #endif
 #endif
 
-CMN_IMPLEMENT_SERVICES(osaSocket);
 
 struct osaSocketInternals {
     struct sockaddr_in ServerAddr;

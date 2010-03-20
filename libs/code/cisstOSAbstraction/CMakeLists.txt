@@ -23,6 +23,7 @@ SET(DEPENDENCIES
 
 # all source files
 SET(SOURCE_FILES
+    osaClassServices.cpp
     osaCriticalSection.cpp
     osaDynamicLoader.cpp
     osaDynamicLoaderAndFactory.cpp

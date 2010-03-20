@@ -26,8 +26,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstOSAbstraction/osaTimeServer.h>
 
-CMN_IMPLEMENT_SERVICES(osaTimeServer);
-
 #if (CISST_OS == CISST_LINUX_RTAI)
 #include <rtai_lxrt.h>
 #include <unistd.h>

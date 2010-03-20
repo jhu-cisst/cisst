@@ -20,7 +20,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstOSAbstraction/osaSocketServer.h>
 
-CMN_IMPLEMENT_SERVICES(osaSocketServer);
 
 #if (CISST_OS == CISST_WINDOWS)
 #define WIN32_LEAN_AND_MEAN

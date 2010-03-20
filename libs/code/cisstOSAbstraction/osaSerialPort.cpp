@@ -41,10 +41,6 @@ http://www.cisst.org/cisst/license.txt.
    http://www.qnx.com/developers/docs/qnx_4.25_docs/qnx4/user_guide/chardev.html
 */
 
-// implement services with a default log LoD of 3
-CMN_IMPLEMENT_SERVICES(osaSerialPort);
-
-
 
 
 std::string osaSerialPort::SetPortNumber(unsigned int portNumber) {
