@@ -3,13 +3,13 @@
 
 /*
   $Id$
-  
+
   Author(s):	Anton Deguet
   Created on: 2004-02-18
 
-  (C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights
   Reserved.
-  
+
 --- begin cisst license - do not edit ---
 
 This software is provided "as is" under an open source license, with
@@ -19,6 +19,8 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 
 */
+
+#pragma once
 
 #ifndef _cisstConfig_h
 #define _cisstConfig_h
@@ -36,7 +38,7 @@ http://www.cisst.org/cisst/license.txt.
 #define CISST_BUILD_LINK_DIRECTORIES "@CISST_BUILD_LINK_DIRECTORIES@"
 
 // Was cisst compiled as shared libraries or static
-#define CISST_BUILD_SHARED_LIBS @CISST_BUILD_SHARED_LIBS@ 
+#define CISST_BUILD_SHARED_LIBS @CISST_BUILD_SHARED_LIBS@
 
 // LAPACK3E, erc-cisst distribution of code from netlib.org
 #define CISST_HAS_CISSTNETLIB @CISST_HAS_CISSTNETLIB@
@@ -49,6 +51,12 @@ http://www.cisst.org/cisst/license.txt.
 
 // Using XML or not
 #define CISST_HAS_XML @CISST_HAS_XML@
+
+// Using FLTK or not
+#define CISST_HAS_FLTK @CISST_HAS_FLTK@
+
+// Using Qt or not
+#define CISST_HAS_QT @CISST_HAS_QT@
 
 
 #endif // _cisstConfig_h
