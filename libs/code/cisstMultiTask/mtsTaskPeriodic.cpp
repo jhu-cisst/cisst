@@ -25,8 +25,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaSleep.h>
 
 
-CMN_IMPLEMENT_SERVICES(mtsTaskPeriodic)
-
 /********************* Methods that call user methods *****************/
 
 void * mtsTaskPeriodic::RunInternal(void *data)

@@ -34,6 +34,9 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsGenericObject.h>
 #include <cisstMultiTask/mtsMacros.h>
 
+// Always include last
+#include <cisstMultiTask/mtsExport.h>
+
 MTS_MULTIPLE_INHERITANCE_FROM_MTS_GENERIC(vctDoubleQuat, mtsDoubleQuat);
 typedef mtsDoubleQuat mtsQuat;
 MTS_MULTIPLE_INHERITANCE_FROM_MTS_GENERIC(vctFloatQuat, mtsFloatQuat);

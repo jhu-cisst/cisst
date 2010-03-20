@@ -26,13 +26,9 @@ SET(DEPENDENCIES
 
 # all source files
 SET(SOURCE_FILES
-    mtsGenericObject.cpp
-    mtsGenericObjectProxy.cpp
+    mtsClassServices.cpp
 
-    mtsFixedSizeVectorTypes.cpp
-    mtsVector.cpp
-    mtsMatrix.cpp
-    mtsTransformationTypes.cpp
+    mtsGenericObject.cpp
 
     mtsMulticastCommandVoid.cpp
     mtsMulticastCommandWriteBase.cpp

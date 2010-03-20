@@ -30,10 +30,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <string>
 
 
-CMN_IMPLEMENT_SERVICES(mtsTaskInterface)
-CMN_IMPLEMENT_SERVICES(mtsTaskInterfaceThreadResources)
-
-
 mtsTaskInterface::mtsTaskInterface(const std::string & name, mtsTask * task,
                                    mtsCommandVoidBase * postCommandQueuedCommand):
     BaseType(name, task),

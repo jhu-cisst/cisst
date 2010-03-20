@@ -23,7 +23,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsCollectorBase.h>
 #include <cisstOSAbstraction/osaSleep.h>
 
-CMN_IMPLEMENT_SERVICES(mtsCollectorBase)
 
 unsigned int mtsCollectorBase::CollectorCount;
 mtsTaskManager * mtsCollectorBase::TaskManager;

@@ -22,9 +22,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsStateIndex.h>
 
 
-CMN_IMPLEMENT_SERVICES(mtsStateIndex)
-
-
 void mtsStateIndex::ToStream(std::ostream & outputStream) const
 {
     outputStream << "Index = " << TimeIndex << ", Ticks = " << Ticks()

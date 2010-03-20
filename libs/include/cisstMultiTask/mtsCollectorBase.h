@@ -52,8 +52,6 @@ class CISST_EXPORT mtsCollectorBase: public mtsTaskFromSignal
 {
     friend class mtsCollectorBaseTest;
 
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
-
     //-------------------- Auxiliary class definition -----------------------//
 public:
     typedef enum {

@@ -29,7 +29,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <iostream>
 
-CMN_IMPLEMENT_SERVICES(mtsTask)
 
 /********************* Methods that call user methods *****************/
 

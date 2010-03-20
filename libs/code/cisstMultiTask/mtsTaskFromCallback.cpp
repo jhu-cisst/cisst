@@ -21,8 +21,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnPortability.h>
 #include <cisstMultiTask/mtsTaskFromCallback.h>
 
-CMN_IMPLEMENT_SERVICES(mtsTaskFromCallback)
-CMN_IMPLEMENT_SERVICES(mtsTaskFromCallbackAdapter)
 
 /********************* Methods that call user methods *****************/
 

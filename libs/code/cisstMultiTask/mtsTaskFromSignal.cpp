@@ -22,8 +22,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsTaskFromSignal.h>
 #include <cisstMultiTask/mtsCommandVoid.h>
 
-CMN_IMPLEMENT_SERVICES(mtsTaskFromSignal)
-
 
 mtsTaskFromSignal::mtsTaskFromSignal(const std::string & name,
                                      unsigned int sizeStateTable):

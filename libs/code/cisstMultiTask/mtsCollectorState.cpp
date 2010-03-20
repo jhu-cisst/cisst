@@ -37,7 +37,6 @@ http://www.cisst.org/cisst/license.txt.
 
 static char EndOfHeader[END_OF_HEADER_SIZE] = END_OF_HEADER;
 
-CMN_IMPLEMENT_SERVICES(mtsCollectorState)
 
 //-------------------------------------------------------
 //	Constructor, Destructor, and Initializer

@@ -21,7 +21,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsTaskContinuous.h>
 #include <cisstCommon/cmnUnits.h>
 
-CMN_IMPLEMENT_SERVICES(mtsTaskContinuous)
 
 /********************* Methods that call user methods *****************/
 

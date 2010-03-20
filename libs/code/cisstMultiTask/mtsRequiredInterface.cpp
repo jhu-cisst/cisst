@@ -21,8 +21,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsRequiredInterface.h>
 #include <cisstCommon/cmnSerializer.h>
 
-CMN_IMPLEMENT_SERVICES(mtsRequiredInterface)
-
 
 mtsRequiredInterface::mtsRequiredInterface(const std::string & interfaceName, mtsMailBox * mailBox) :
     Name(interfaceName),

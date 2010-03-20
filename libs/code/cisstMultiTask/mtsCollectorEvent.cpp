@@ -31,9 +31,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <fstream>
 
 
-CMN_IMPLEMENT_SERVICES(mtsCollectorEvent)
-
-
 mtsCollectorEvent::CollectorEventVoid::CollectorEventVoid(const std::string & eventName,
                                                           size_t eventId,
                                                           mtsCollectorEvent * collector):

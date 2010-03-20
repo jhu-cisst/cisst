@@ -23,7 +23,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsDeviceInterface.h>
 #include <cisstMultiTask/mtsFunctionVoid.h>
 
-CMN_IMPLEMENT_SERVICES(mtsDeviceInterface)
 
 mtsDeviceInterface::mtsDeviceInterface(const std::string & interfaceName,
                                        mtsDevice * device):
