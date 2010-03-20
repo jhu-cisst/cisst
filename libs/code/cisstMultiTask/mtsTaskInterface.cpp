@@ -31,7 +31,7 @@ http://www.cisst.org/cisst/license.txt.
 
 
 CMN_IMPLEMENT_SERVICES(mtsTaskInterface)
-CMN_IMPLEMENT_SERVICES(mtsTaskInterface::ThreadResources)
+CMN_IMPLEMENT_SERVICES(mtsTaskInterfaceThreadResources)
 
 
 mtsTaskInterface::mtsTaskInterface(const std::string & name, mtsTask * task,

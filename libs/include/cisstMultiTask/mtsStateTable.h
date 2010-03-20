@@ -438,7 +438,8 @@ public:
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsStateTable);
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsStateTable::IndexRange);
+typedef mtsStateTable::IndexRange mtsStateTableIndexRange;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsStateTableIndexRange);
 
 
 // overload mtsObjectName to provide the class name

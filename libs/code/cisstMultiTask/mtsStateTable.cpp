@@ -28,7 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <string>
 
 CMN_IMPLEMENT_SERVICES(mtsStateTable);
-CMN_IMPLEMENT_SERVICES(mtsStateTable::IndexRange);
+CMN_IMPLEMENT_SERVICES(mtsStateTableIndexRange);
 
 
 void mtsStateTable::IndexRange::ToStreamRaw(std::ostream & outputStream, const char delimiter,

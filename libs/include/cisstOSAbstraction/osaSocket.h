@@ -55,7 +55,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _osaSocket_h
 
 #include <cisstCommon/cmnAssert.h>
-#include <cisstCommon/cmnClassRegister.h>
+#include <cisstCommon/cmnGenericObject.h>
 #include <cisstCommon/cmnLogger.h>
 #include <cisstCommon/cmnPortability.h>
 // Always include last

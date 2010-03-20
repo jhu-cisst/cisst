@@ -209,7 +209,8 @@ private:
 
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsTaskInterface)
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsTaskInterface::ThreadResources)
+typedef mtsTaskInterface::ThreadResources mtsTaskInterfaceThreadResources;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsTaskInterfaceThreadResources)
 
 
 

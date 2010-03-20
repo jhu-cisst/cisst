@@ -30,7 +30,6 @@ http://www.cisst.org/cisst/license.txt.
 #define _mtsGenericObject_h
 
 #include <cisstCommon/cmnGenericObject.h>
-#include <cisstCommon/cmnClassServices.h>
 #include <cisstCommon/cmnSerializer.h>
 #include <cisstCommon/cmnDeSerializer.h>
 

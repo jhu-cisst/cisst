@@ -30,7 +30,7 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include <cisstCommon/cmnPortability.h>
-#include <cisstCommon/cmnClassRegister.h>
+#include <cisstCommon/cmnGenericObject.h>
 #include <cisstOSAbstraction/osaExport.h>
 
 #if (CISST_OS == CISST_WINDOWS)
