@@ -62,8 +62,6 @@ SET(SOURCE_FILES
     
     mtsManagerLocal.cpp
     mtsManagerGlobal.cpp
-
-    mtsHistory.cpp
     )
 
 # all header files

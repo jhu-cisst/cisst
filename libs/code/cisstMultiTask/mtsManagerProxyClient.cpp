@@ -25,8 +25,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstOSAbstraction/osaSleep.h>
 
-CMN_IMPLEMENT_SERVICES(mtsManagerProxyClient);
-
 unsigned int mtsManagerProxyClient::InstanceCounter = 0;
 
 mtsManagerProxyClient::mtsManagerProxyClient(const std::string & serverEndpointInfo)

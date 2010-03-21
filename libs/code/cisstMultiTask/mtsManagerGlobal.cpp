@@ -27,8 +27,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsManagerProxyServer.h>
 #endif // CISST_MTS_HAS_ICE
 
-CMN_IMPLEMENT_SERVICES(mtsManagerGlobal);
-CMN_IMPLEMENT_SERVICES(mtsManagerGlobalInterface);
 
 mtsManagerGlobal::mtsManagerGlobal() : LocalManagerConnected(0)
 #if CISST_MTS_HAS_ICE

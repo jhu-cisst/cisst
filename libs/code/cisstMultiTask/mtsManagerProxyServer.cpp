@@ -23,8 +23,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsManagerProxyServer.h>
 #include <cisstMultiTask/mtsManagerGlobal.h>
 
-CMN_IMPLEMENT_SERVICES(mtsManagerProxyServer);
-
 std::string mtsManagerProxyServer::ManagerCommunicatorID = "ManagerServerCommunicator";
 std::string mtsManagerProxyServer::ConnectionIDKey = "ManagerConnectionID";
 unsigned int mtsManagerProxyServer::InstanceCounter = 0;

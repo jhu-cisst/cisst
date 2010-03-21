@@ -27,8 +27,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsFunctionReadOrWriteProxy.h>
 #include <cisstMultiTask/mtsFunctionQualifiedReadOrWriteProxy.h>
 
-CMN_IMPLEMENT_SERVICES(mtsComponentProxy);
-
 mtsComponentProxy::mtsComponentProxy(const std::string & componentProxyName)
 : mtsDevice(componentProxyName), ProvidedInterfaceProxyInstanceID(0)
 {

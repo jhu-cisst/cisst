@@ -39,12 +39,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsManagerProxyServer.h>
 #endif
 
-CMN_IMPLEMENT_SERVICES(mtsManagerLocal);
-CMN_IMPLEMENT_SERVICES(mtsManagerLocalInterface);
-
-// Typedef to use 'component' instead of 'device'
-typedef mtsDevice mtsComponent;
-
 // Static variable definition
 mtsManagerLocal * mtsManagerLocal::Instance;
 bool mtsManagerLocal::UnitTestEnabled = false;

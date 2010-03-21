@@ -27,8 +27,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstOSAbstraction/osaSleep.h>
 
-CMN_IMPLEMENT_SERVICES(mtsComponentInterfaceProxyClient);
-
 unsigned int mtsComponentInterfaceProxyClient::InstanceCounter = 0;
 
 mtsComponentInterfaceProxyClient::mtsComponentInterfaceProxyClient(

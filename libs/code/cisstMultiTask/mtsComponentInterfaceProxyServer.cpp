@@ -26,8 +26,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsManagerGlobal.h>
 #include <cisstOSAbstraction/osaSleep.h>
 
-CMN_IMPLEMENT_SERVICES(mtsComponentInterfaceProxyServer);
-
 std::string mtsComponentInterfaceProxyServer::InterfaceCommunicatorID = "InterfaceCommunicator";
 std::string mtsComponentInterfaceProxyServer::ConnectionIDKey = "InterfaceConnectionID";
 unsigned int mtsComponentInterfaceProxyServer::InstanceCounter = 0;
