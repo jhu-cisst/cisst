@@ -56,7 +56,7 @@ int main(void)
     }
 
     // Create GCM UI task
-    const double period = 50 * cmn_ms;
+    const double period = 1 * cmn_ms;
     GCMUITask * GCMUITaskObject = new GCMUITask("GCMUI", period, globalComponentManager);
     GCMUITaskObject->Configure();
     taskManager->AddComponent(GCMUITaskObject);

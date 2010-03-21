@@ -27,8 +27,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <FL/Fl_Button.H>
 #include <FL/Fl_Menu.H>
 
-CMN_IMPLEMENT_SERVICES(GCMUITask);
-
 // FLTK color code definition
 #define AQUA    0, 1, 1
 #define BLACK   0, 0, 0
@@ -58,11 +56,12 @@ GCMUITask * GCMUI;
 // Callback invoked when menu item selected
 void callbackSignalSelect(Fl_Widget * w, void * v) 
 {
-    //if (!w || !v) {
-    //    return;
-    //}
+    if (!w) {// || !v) {
+        return;
+    }
 
-    switch((int)v) {
+    size_t menuId = reinterpret_cast<size_t>(v);
+    switch(menuId) {
         case 0: fl_choice("Thing 0 happened", "OK", NULL, NULL); break;
         case 1: fl_choice("Thing 1 happened", "OK", NULL, NULL); break;
         case 2: fl_choice("Thing 2 happened", "OK", NULL, NULL); break;
@@ -74,7 +73,7 @@ void callbackSignalSelect(Fl_Widget * w, void * v)
 
 void callbackPopupSignalSelectionMenu(Fl_Widget * w, void *userdata)
 {
-    const int idxClicked = (int) userdata;
+    const size_t idxClicked = reinterpret_cast<size_t>(userdata);
     if (idxClicked == 0) {
         return;
     }

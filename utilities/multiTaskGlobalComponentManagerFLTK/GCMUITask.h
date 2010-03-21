@@ -49,8 +49,6 @@ http://www.cisst.org/cisst/license.txt.
 
 class GCMUITask: public mtsTaskPeriodic {
 
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
-
 protected:
     typedef std::vector<std::string> StringVector;
 
@@ -262,7 +260,5 @@ public:
     void Run(void);
     void Cleanup(void) {};
 };
-
-CMN_DECLARE_SERVICES_INSTANTIATION(GCMUITask);
 
 #endif // _GCMUITask_h
