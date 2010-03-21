@@ -19,16 +19,14 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
-/*! 
-  \file 
-  \brief Declaration of vctMatrixRotation3
- */
-
-
+#pragma once
 #ifndef _vctMatrixRotation3_h
 #define _vctMatrixRotation3_h
 
+/*!
+  \file
+  \brief Declaration of vctMatrixRotation3
+ */
 
 #include <cisstVector/vctFixedSizeMatrix.h>
 #include <cisstVector/vctMatrixRotation3Base.h>
@@ -70,13 +68,13 @@ class vctMatrixRotation3: public vctMatrixRotation3Base<vctFixedSizeMatrix<_elem
     {
         this->Assign(this->Identity());
     }
-    
+
     inline vctMatrixRotation3(const ThisType & other):
         BaseType()
     {
         this->Assign(other);
     }
-    
+
     inline vctMatrixRotation3(const BaseType & other):
         BaseType()
     {
@@ -88,7 +86,7 @@ class vctMatrixRotation3: public vctMatrixRotation3Base<vctFixedSizeMatrix<_elem
       operator uses the Assign() method inherited from the BaseType.
       This operator (as well as the Assign method) allows to set a
       rotation matrix to whatever value without any further validity
-      checking.  It is recommended to use it with caution. */ 
+      checking.  It is recommended to use it with caution. */
     inline ThisType & operator = (const ContainerType & other) {
         return reinterpret_cast<ThisType &>(this->Assign(other));
     }
@@ -104,21 +102,21 @@ class vctMatrixRotation3: public vctMatrixRotation3Base<vctFixedSizeMatrix<_elem
 
     /*!
       \name Constructors with normalization test.
-      
+
       These constructors will check that the input is valid,
       i.e. normalized.  If the input is not normalized, an exception
       (of type \c std::runtime_error) will be thrown.  Each
       constructor uses the corresponding From() method based on the
       input type.
-      
+
       \note See the cmnThrow() function if an \c abort is better than
       an exception for your application.
     */
     //@{
-    
-    
+
+
     /*! Constructor from 9 elements.
-      
+
       The parameters are given row first so that the code remains
       human readable:
 
@@ -158,7 +156,7 @@ class vctMatrixRotation3: public vctMatrixRotation3Base<vctFixedSizeMatrix<_elem
 
     /*!
       Constructor from 3 dynamic vectors.
-      
+
       By default the vectors represents the columns of the matrix. If
       the parameter vectorsAreColumns is set to false, the vectors
       provided will be used to set the matrix row by row. */
@@ -185,8 +183,8 @@ class vctMatrixRotation3: public vctMatrixRotation3Base<vctFixedSizeMatrix<_elem
       note that this constructor doesn't normalize the rotation
       quaternion but asserts that it is normalized (in debug mode
       only).  See also the method From(quaternion).
-      
-      \param quaternionRotation A unit quaternion 
+
+      \param quaternionRotation A unit quaternion
     */
     template <class __containerType>
     inline vctMatrixRotation3(const vctQuaternionRotation3Base<__containerType> & quaternionRotation)
@@ -194,7 +192,7 @@ class vctMatrixRotation3: public vctMatrixRotation3Base<vctFixedSizeMatrix<_elem
     {
         this->From(quaternionRotation);
     }
-    
+
     /*! Constructor from a vctRodriguezRotation3. */
     template <class __containerType>
     inline vctMatrixRotation3(const vctRodriguezRotation3Base<__containerType> & rodriguezRotation)
@@ -202,10 +200,10 @@ class vctMatrixRotation3: public vctMatrixRotation3Base<vctFixedSizeMatrix<_elem
     {
         this->From(rodriguezRotation);
     }
-    
+
     /*!
       \name Constructors without normalization test
-      
+
       These constructors will either assume that the input is
       normalized or normalize the input (a copy of it, if required)
       based on the last parameter provided.
@@ -255,7 +253,7 @@ class vctMatrixRotation3: public vctMatrixRotation3Base<vctFixedSizeMatrix<_elem
 
     /*!
       Constructor from 3 fixed size vectors.
-      
+
       By default the vectors represents the columns of the matrix. If
       the parameter vectorsAreColumns is set to false, the vectors
       provided will be used to set the matrix row by row. */
@@ -310,8 +308,8 @@ class vctMatrixRotation3: public vctMatrixRotation3Base<vctFixedSizeMatrix<_elem
       note that this constructor doesn't normalize the rotation
       quaternion but asserts that it is normalized (in debug mode
       only).  See also the method From(quaternion).
-      
-      \param quaternionRotation A unit quaternion 
+
+      \param quaternionRotation A unit quaternion
       \param normalizeInput Normalize the input or convert as is (#VCT_NORMALIZE or #VCT_DO_NOT_NORMALIZE)
     */
     template <class __containerType>

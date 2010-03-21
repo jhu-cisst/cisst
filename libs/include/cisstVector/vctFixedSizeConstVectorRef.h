@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):	Ofri Sadowsky, Anton Deguet
   Created on:	2003-09-30
 
@@ -19,16 +19,14 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
-/*! 
-  \file 
-  \brief Declaration of vctFixedSizeConstVectorRef
- */
-
-
+#pragma once
 #ifndef _vctFixedSizeConstVectorRef_h
 #define _vctFixedSizeConstVectorRef_h
 
+/*!
+  \file
+  \brief Declaration of vctFixedSizeConstVectorRef
+ */
 
 #include <cisstVector/vctFixedSizeVectorBase.h>
 
@@ -45,13 +43,13 @@ http://www.cisst.org/cisst/license.txt.
   Note that the class provides only const operations, except for
   assigning the vector start, which does not affect the vector.
   This is despite the fact that the stored pointer is non-const.
- 
+
   See the base class (vctFixedSizeConstVectorBase) for template
   parameter details.
 */
 template <class _elementType, vct::size_type _size, vct::stride_type _stride>
 class vctFixedSizeConstVectorRef : public vctFixedSizeConstVectorBase<
-    _size, _stride, _elementType, 
+    _size, _stride, _elementType,
     typename vctFixedSizeVectorTraits<_elementType, _size, _stride>::pointer >
 {
  public:
@@ -60,7 +58,7 @@ class vctFixedSizeConstVectorRef : public vctFixedSizeConstVectorBase<
     typedef vctFixedSizeConstVectorRef<value_type, _size, _stride> ThisType;
     typedef vctFixedSizeConstVectorBase<_size, _stride, value_type, pointer> BaseType;
     typedef typename BaseType::CopyType CopyType;
-    
+
 
     /*! Default constructor: create an uninitialized vector */
     vctFixedSizeConstVectorRef() {}
@@ -69,7 +67,7 @@ class vctFixedSizeConstVectorRef : public vctFixedSizeConstVectorBase<
     vctFixedSizeConstVectorRef(pointer p) {
         SetRef(p);
     }
-    
+
     /*! Initialize the vector with a const pointer.  This requires
       const_cast. */
     vctFixedSizeConstVectorRef(const_pointer p) {
@@ -99,13 +97,13 @@ class vctFixedSizeConstVectorRef : public vctFixedSizeConstVectorBase<
         SetRef(otherVector, startPosition);
     }
 
-    
+
     /*! Assign the vector start with a (non-const) pointer */
     void SetRef(pointer p) {
         this->Data = p;
     }
 
-    
+
     /*! Assign the vector start with a const pointer.  This requires const_cast. */
     void SetRef(const_pointer p) {
         this->Data = const_cast<pointer>(p);

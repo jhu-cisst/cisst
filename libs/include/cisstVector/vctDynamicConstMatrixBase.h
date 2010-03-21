@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):	Ofri Sadowsky, Anton Deguet
   Created on: 2004-07-01
 
@@ -19,7 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
+#pragma once
 #ifndef _vctDynamicConstMatrixBase_h
 #define _vctDynamicConstMatrixBase_h
 
@@ -61,11 +61,11 @@ vctDynamicMatrixElementwiseCompareScalar(const vctDynamicConstMatrixBase<_matrix
 #endif // DOXYGEN
 
 
-/*! 
+/*!
   This class is templated with the ``matrix owner type'', which may
   be a vctDynamicMatrixOwner or a vctMatrixRefOwner.  It provides
   const operations on the dynamic matrix, such as SumOfElements etc.
-  
+
   Matrix indexing is zero-based.
 
   The method provided for the compatibility with the STL containers
@@ -91,22 +91,22 @@ public:
     /*! Type of the data owner (dynamic array or pointer) */
     typedef _matrixOwnerType OwnerType;
 
-    /*! Iterator on the elements of the matrix. */   
+    /*! Iterator on the elements of the matrix. */
     typedef typename OwnerType::iterator iterator;
 
-    /*! Const iterator on the elements of the matrix. */    
-    typedef typename OwnerType::const_iterator const_iterator; 
+    /*! Const iterator on the elements of the matrix. */
+    typedef typename OwnerType::const_iterator const_iterator;
 
-    /*! Reverse iterator on the elements of the matrix. */   
+    /*! Reverse iterator on the elements of the matrix. */
     typedef typename OwnerType::reverse_iterator reverse_iterator;
 
-    /*! Const reverse iterator on the elements of the matrix. */   
-    typedef typename OwnerType::const_reverse_iterator const_reverse_iterator; 
+    /*! Const reverse iterator on the elements of the matrix. */
+    typedef typename OwnerType::const_reverse_iterator const_reverse_iterator;
 
     /*! The type indicating a row of this matrix accessed by (const)
       reference */
     typedef vctDynamicConstVectorRef<_elementType> ConstRowRefType;
-    
+
     /*! The type indicating a row of this matrix accessed by
       (non-const) reference */
     typedef vctDynamicVectorRef<_elementType> RowRefType;
@@ -114,7 +114,7 @@ public:
     /*! The type indicating a column of this matrix accessed by (const)
       reference */
     typedef vctDynamicConstVectorRef<_elementType> ConstColumnRefType;
-    
+
     /*! The type indicating a column of this matrix accessed by
       (non-const) reference */
     typedef vctDynamicVectorRef<_elementType> ColumnRefType;
@@ -122,7 +122,7 @@ public:
     /*! The type indicating the main diagonal of this matrix accessed
       by (const) reference */
     typedef vctDynamicConstVectorRef<_elementType> ConstDiagonalRefType;
-    
+
     /*! The type indicating the main diagonal of this matrix accessed
       by (non-const) reference */
     typedef vctDynamicVectorRef<_elementType> DiagonalRefType;
@@ -176,7 +176,7 @@ protected:
             cmnThrow(std::out_of_range("vctDynamicMatrix: Invalid index"));
         }
     }
-    
+
 
     /*! Check the validity of the row and column indices. */
     inline void ThrowUnlessValidIndex(size_type rowIndex, size_type colIndex) const throw(std::out_of_range) {
@@ -204,25 +204,25 @@ public:
     /*! Returns a const iterator on the first element (STL
       compatibility). */
     const_iterator begin(void) const {
-        return Matrix.begin(); 
+        return Matrix.begin();
     }
 
     /*! Returns a const iterator on the last element (STL
       compatibility). */
     const_iterator end(void) const {
-        return Matrix.end(); 
+        return Matrix.end();
     }
 
     /*! Returns a reverse const iterator on the last element (STL
-      compatibility). */ 
+      compatibility). */
     const_reverse_iterator rbegin(void) const {
-        return Matrix.rbegin(); 
+        return Matrix.rbegin();
     }
 
     /*! Returns a reverse const iterator on the element before first
-      (STL compatibility). */ 
+      (STL compatibility). */
     const_reverse_iterator rend(void) const {
-        return Matrix.rend(); 
+        return Matrix.rend();
     }
 
     /*! Return the number of elements in the matrix.  This is not
@@ -297,7 +297,7 @@ public:
 
     /*! Access the matrix owner.  This method should be used only to
         access some extra information related to the memory layout.
-        It is used by the engines (vctDynamicMatrixLoopEngines). */ 
+        It is used by the engines (vctDynamicMatrixLoopEngines). */
     const OwnerType & Owner(void) const {
         return this->Matrix;
     }
@@ -330,12 +330,12 @@ public:
         return ((rowIndex < rows())
                 && (colIndex < cols()));
     }
-    
+
     /*! Returns true if rowIndex is a valid row index. */
     inline bool ValidRowIndex(size_type rowIndex) const {
         return (rowIndex < rows());
     }
-    
+
     /*! Returns true if colIndex is a valid column index. */
     inline bool ValidColIndex(size_type colIndex) const {
         return (colIndex < cols());
@@ -371,7 +371,7 @@ public:
         ThrowUnlessValidRowIndex(index);
         return ConstRowRefType(cols(), Pointer(index, 0), col_stride());
     }
-    
+
     ConstColumnRefType Column(size_type index) const throw(std::out_of_range) {
         ThrowUnlessValidColIndex(index);
         return ConstColumnRefType(rows(), Pointer(0, index), row_stride());
@@ -383,7 +383,7 @@ public:
 
     /*! Resize and fill a vector of const pointers on the rows of the
       matrix.  This method is provided to ease the interfacing with C
-      libraries using matrices stored as value_type**. 
+      libraries using matrices stored as value_type**.
 
       To use this method, one must first create a dynamic vector of
       pointers, update it with the RowPointers method and then call
@@ -398,10 +398,10 @@ public:
 
       \note This method will throw an exception if the rows are not
       compact, i.e. if the column stride is not equal to 1.
-    */ 
+    */
     ConstVectorPointerType & RowPointers(ConstVectorPointerType & rowPointers) const throw(std::runtime_error) {
         if (! this->col_stride() == 1) {
-            cmnThrow(std::runtime_error("vctDynamicMatrix: RowPointers requires compact rows")); 
+            cmnThrow(std::runtime_error("vctDynamicMatrix: RowPointers requires compact rows"));
         }
         const size_type rows = this->rows();
         // resize the vector
@@ -425,7 +425,7 @@ public:
             SoMi<typename vctBinaryOperations<value_type>::Addition,
             typename vctUnaryOperations<value_type>::Identity>::
             Run(*this);
-    } 
+    }
 
     /*! Return the product of the elements of the matrix.
       \return The product of all the elements */
@@ -461,7 +461,7 @@ public:
 
     /*! Return the L1 norm of the matrix, i.e. the sum of the absolute
       values of all the elements.
- 
+
       \return The L1 norm. */
     inline value_type L1Norm(void) const {
         return vctDynamicMatrixLoopEngines::
@@ -472,7 +472,7 @@ public:
 
     /*! Return the Linf norm of the matrix, i.e. the maximum of the
       absolute values of all the elements.
- 
+
       \sa MaxAbsElement
 
       \return The Linf norm. */
@@ -502,7 +502,7 @@ public:
       values of all the elements.
 
       \sa LinfNorm.
- 
+
       \return The maximum of the absolute values. */
     inline value_type MaxAbsElement(void) const {
         return vctDynamicMatrixLoopEngines::
@@ -513,7 +513,7 @@ public:
 
     /*! Return the minimum of the absolute
       values of all the elements.
- 
+
       \return The minimum of the absolute values. */
     inline value_type MinAbsElement(void) const {
         return vctDynamicMatrixLoopEngines::
@@ -533,8 +533,8 @@ public:
     {
         vctDynamicMatrixLoopEngines::MinAndMax::Run((*this), minElement, maxElement);
     }
-    
-    /*! Return true if all the elements of this matrix are strictly positive, 
+
+    /*! Return true if all the elements of this matrix are strictly positive,
       false otherwise */
     inline bool IsPositive(void) const {
         return vctDynamicMatrixLoopEngines::
@@ -543,7 +543,7 @@ public:
             Run(*this);
     }
 
-    /*! Return true if all the elements of this matrix are non-negative, 
+    /*! Return true if all the elements of this matrix are non-negative,
       false otherwise */
     inline bool IsNonNegative(void) const {
         return vctDynamicMatrixLoopEngines::
@@ -552,7 +552,7 @@ public:
             Run(*this);
     }
 
-    /*! Return true if all the elements of this matrix are non-positive, 
+    /*! Return true if all the elements of this matrix are non-positive,
       false otherwise */
     inline bool IsNonPositive(void) const {
         return vctDynamicMatrixLoopEngines::
@@ -561,7 +561,7 @@ public:
             Run(*this);
     }
 
-    /*! Return true if all the elements of this matrix are strictly negative, 
+    /*! Return true if all the elements of this matrix are strictly negative,
       false otherwise */
     inline bool IsNegative (void) const {
         return vctDynamicMatrixLoopEngines::
@@ -608,7 +608,7 @@ public:
     inline bool IsRowMajor(void) const {
         return Matrix.IsRowMajor();
     }
-    
+
     /*! Test if the matrix is compact, i.e. a m by n matrix actually
       uses a contiguous block of memory or size m by n. */
     inline bool IsCompact(void) const {
@@ -617,7 +617,7 @@ public:
 
     /*! Test if the matrix is "Fortran" compatible, i.e. is compact
       and uses a column major storage order.
-      
+
       \sa IsColMajor IsCompact
     */
     inline bool IsFortran(void) const {
@@ -651,7 +651,7 @@ public:
     {
         return vctFastCopy::MatrixCopyCompatible(*this, source);
     }
-    
+
     template <size_type __rows, size_type __cols, stride_type __rowStride, stride_type __colStride, class __dataPtrType>
     inline bool FastCopyCompatible(const vctFixedSizeConstMatrixBase<__rows, __cols, __rowStride, __colStride, value_type, __dataPtrType> & source) const
     {
@@ -682,7 +682,7 @@ public:
             typename vctBinaryOperations<bool, value_type, value_type>::Equal>::
             Run(*this, otherMatrix);
     }
-    
+
     /* documented above */
     template <class __matrixOwnerType>
     inline bool operator == (const vctDynamicConstMatrixBase<__matrixOwnerType, _elementType> & otherMatrix) const {
@@ -710,7 +710,7 @@ public:
             typename vctBinaryOperations<bool, value_type, value_type>::NotEqual>::
             Run(*this, otherMatrix);
     }
-    
+
     /* documented above */
     template <class __matrixOwnerType>
     inline bool operator != (const vctDynamicConstMatrixBase<__matrixOwnerType, _elementType> & otherMatrix) const {
@@ -743,7 +743,7 @@ public:
             typename vctBinaryOperations<bool, value_type, value_type>::Greater>::
             Run(*this, otherMatrix);
     }
-    
+
     /* documented above */
     template <class __matrixOwnerType>
     inline bool GreaterOrEqual(const vctDynamicConstMatrixBase<__matrixOwnerType, _elementType> & otherMatrix) const {
@@ -840,7 +840,7 @@ public:
             typename vctBinaryOperations<bool, value_type, value_type>::Equal>::
             Run(*this, scalar);
     }
-    
+
     /* documented above */
     inline bool operator == (const value_type & scalar) const {
         return Equal(scalar);
@@ -932,17 +932,17 @@ public:
       the matrix "this", performs \f$ this[i] \leftarrow
       op(otherMatrix[i])\f$ where \f$op\f$ can calculate the absolute
       value (Abs) or the opposite (Negation).
-      
+
       \return A new matrix.
     */
     inline MatrixReturnType Abs(void) const;
-    
+
     /* documented above */
     inline MatrixReturnType Negation(void) const;
-    
+
     /* documented above */
     inline MatrixReturnType Floor(void) const;
-    
+
     /* documented above */
     inline MatrixReturnType Ceil(void) const;
     //@}
@@ -1019,11 +1019,11 @@ public:
         const size_type myRows = rows();
         const size_type myCols = cols();
         size_type indexRow, indexCol;
-        
+
         if (headerOnly) {
             for (indexRow = 0; indexRow < myRows; ++indexRow) {
                 for (indexCol = 0; indexCol < myCols; ++indexCol) {
-                    outputStream << headerPrefix << "-m" << indexRow << "_" << indexCol; 
+                    outputStream << headerPrefix << "-m" << indexRow << "_" << indexCol;
                     // delimiter between elements
                     if (indexCol < (myCols - 1)) {
                         outputStream << delimiter;
@@ -1077,12 +1077,12 @@ public:
 #endif // SWIG
 
     /*! Binary serialization */
-    void SerializeRaw(std::ostream & outputStream) const 
+    void SerializeRaw(std::ostream & outputStream) const
     {
         const size_type myRows = rows();
         const size_type myCols = cols();
         size_type indexRow, indexCol;
-        
+
         cmnSerializeSizeRaw(outputStream, myRows);
         cmnSerializeSizeRaw(outputStream, myCols);
         for (indexRow = 0; indexRow < myRows; ++indexRow) {

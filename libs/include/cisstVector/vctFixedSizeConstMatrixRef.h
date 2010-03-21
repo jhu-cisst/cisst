@@ -19,18 +19,16 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
-/*! 
-  \file 
-  \brief Declaration of vctFixedSizeConstMatrixRef
- */
-
+#pragma once
 #ifndef _vctFixedSizeConstMatrixRef_h
 #define _vctFixedSizeConstMatrixRef_h
 
+/*!
+  \file
+  \brief Declaration of vctFixedSizeConstMatrixRef
+ */
 
 #include <cisstVector/vctFixedSizeMatrixBase.h>
-
 
 /*!  \brief An implementation of the ``abstract''
   vctFixedSizeConstMatrixBase.
@@ -44,7 +42,7 @@ http://www.cisst.org/cisst/license.txt.
   Note that the class provides only const operations, except for
   assigning the matrix start, which does not affect the matrix.
   This is despite the fact that the stored pointer is non-const.
- 
+
   See the base class (vctFixedSizeConstMatrixBase) for template
   parameter details.
 */
@@ -65,16 +63,16 @@ class vctFixedSizeConstMatrixRef : public vctFixedSizeConstMatrixBase
     typedef typename MatrixTraits::const_iterator const_iterator;
     typedef typename MatrixTraits::reverse_iterator reverse_iterator;
     typedef typename MatrixTraits::const_reverse_iterator const_reverse_iterator;
-    
+
     typedef vctFixedSizeConstMatrixRef<value_type, _rows, _cols,
                                        _rowStride, _colStride> ThisType;
-    typedef vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStride, value_type, 
+    typedef vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStride, value_type,
                                         typename MatrixTraits::pointer> BaseType;
-    
+
     /*! Default constructor: create an uninitialized matrix */
-    inline vctFixedSizeConstMatrixRef() 
+    inline vctFixedSizeConstMatrixRef()
     {}
-    
+
     /*! Initialize the matrix with a (non-const) pointer */
     inline vctFixedSizeConstMatrixRef(pointer p) {
         SetRef(p);
@@ -112,12 +110,12 @@ class vctFixedSizeConstMatrixRef : public vctFixedSizeConstMatrixBase
     inline vctFixedSizeConstMatrixRef(const_pointer p) {
         SetRef(p);
     }
-    
+
     /*! Assign the matrix start with a (non-const) pointer */
     inline void SetRef(pointer p) {
         this->Data = p;
     }
-    
+
     /*! Assign the matrix start with a const pointer.  This requires const_cast. */
     inline void SetRef(const_pointer p) {
         this->Data = const_cast<pointer>(p);

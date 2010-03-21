@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):	Ofri Sadowsky
   Created on:	2003-08-18
 
@@ -19,14 +19,14 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
-/*! 
-  \file 
-  \brief Declaration of vctBinaryOperations.
- */
-
+#pragma once
 #ifndef _vctBinaryOperations_h
 #define _vctBinaryOperations_h
+
+/*!
+  \file
+  \brief Declaration of vctBinaryOperations.
+ */
 
 #include <cisstCommon/cmnTypeTraits.h>
 
@@ -65,7 +65,7 @@ class vctBinaryOperations {
     typedef _outputType OutputType;
     typedef _input1Type Input1Type;
     typedef _input2Type Input2Type;
-    
+
     /*!
       \brief Returns the sum of the two InputType object.
       \sa vctBinaryOperations
@@ -87,7 +87,7 @@ class vctBinaryOperations {
             return OutputType(0);
         }
     };
-    
+
     /*!
       \brief Returns the difference of the two InputType object.
       \sa vctBinaryOperations
@@ -109,7 +109,7 @@ class vctBinaryOperations {
             return OutputType(0);
         }
     };
-    
+
     /*!
       \brief Returns the product of the two InputType object.
       \sa vctBinaryOperations
@@ -131,7 +131,7 @@ class vctBinaryOperations {
             return OutputType(1);
         }
     };
-    
+
     /*!
       \brief Returns the ratio of the two InputType object.
       \sa vctBinaryOperations
@@ -143,7 +143,7 @@ class vctBinaryOperations {
           Execute the operation.
           \param input1 First operand.
           \param input2 Second operand.
-        */ 
+        */
         static inline OutputType Operate(const Input1Type & input1, const Input2Type & input2) {
             return OutputType(input1 / input2);
         }
@@ -153,8 +153,8 @@ class vctBinaryOperations {
             return OutputType(1);
         }
     };
-    
-    
+
+
     /*!
       \brief Return the first operand of (input1, input2), i.e., input1.
       \sa vctBinaryOperations
@@ -171,7 +171,7 @@ class vctBinaryOperations {
             return OutputType(input1);
         }
     };
-    
+
     /*!
       \brief Return the second operand of (input1, input2), i.e., input2.
       \sa vctBinaryOperations
@@ -190,7 +190,7 @@ class vctBinaryOperations {
             return OutputType(input2);
         }
     };
-    
+
     /*!
       \brief Return the greater of (input1, input2).
       \sa vctBinaryOperations
@@ -215,7 +215,7 @@ class vctBinaryOperations {
             return cmnTypeTraits<OutputType>::MinNegativeValue();
         }
     };
-    
+
     /*!
       \brief Return the lesser of (input1, input2).
       \sa vctBinaryOperations
@@ -240,7 +240,7 @@ class vctBinaryOperations {
             return cmnTypeTraits<OutputType>::MaxPositiveValue();
         }
     };
- 
+
     /*!
       \brief Test for equality between input1 and input2
       \sa vctBinaryOperations
@@ -414,7 +414,7 @@ class vctBinaryOperations {
     /*!
       \brief Test if the first argument is bound by the second argument.
       \sa vctBinaryOperations
-      
+
       Tests if if abs(input1) <= input2.  The test does not use the
       abs function, but tests if (-input2 <= input1) && (input1 <=
       input2).  Note that if input2 is negative, the result is always

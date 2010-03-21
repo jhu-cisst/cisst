@@ -19,7 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
+#pragma once
 #ifndef _vctFixedSizeVectorRecursiveEngines_h
 #define _vctFixedSizeVectorRecursiveEngines_h
 

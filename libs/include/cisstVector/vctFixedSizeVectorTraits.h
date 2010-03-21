@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):	Ofri Sadowsky, Anton Deguet
   Created on:	2003-09-30
 
@@ -19,16 +19,14 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
-/*! 
-  \file 
-  \brief Declaration of vctFixedSizeVectorTraits
- */
-
-
+#pragma once
 #ifndef _vctFixedSizeVectorTraits_h
 #define _vctFixedSizeVectorTraits_h
 
+/*!
+  \file
+  \brief Declaration of vctFixedSizeVectorTraits
+ */
 
 #include <cisstVector/vctFixedStrideVectorIterator.h>
 

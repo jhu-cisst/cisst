@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):	Anton Deguet
   Created on:	2005-08-24
 
@@ -19,16 +19,14 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
-/*! 
-  \file 
-  \brief Declaration of vctQuaternionRotation3Base
- */
-
-
+#pragma once
 #ifndef _vctQuaternionRotation3Base_h
 #define _vctQuaternionRotation3Base_h
 
+/*!
+  \file
+  \brief Declaration of vctQuaternionRotation3Base
+ */
 
 #include <cisstVector/vctQuaternionBase.h>
 #include <cisstVector/vctAxisAngleRotation3.h>
@@ -79,7 +77,7 @@ class vctQuaternionRotation3Base: public vctQuaternionBase<_containerType>
 public:
     enum {SIZE = 4};
     enum {DIMENSION = 3};
-    
+
     /*! Type of base class. */
     typedef vctQuaternionBase<_containerType> BaseType;
 
@@ -118,7 +116,7 @@ protected:
       a memory allocation, it is necessary to specialize this
       method. */
     inline void Allocate(void) {}
-    
+
 public:
 
 
@@ -143,7 +141,7 @@ public:
 
     /*!
       \name Constructors with normalization test.
-      
+
       These constructors will check that the input is valid,
       i.e. normalized.  If the input is not normalized, an exception
       (of type \c std::runtime_error) will be thrown.  Each
@@ -211,7 +209,7 @@ public:
 
     /*!
       \name Constructors without normalization test
-      
+
       These constructors will either assume that the input is
       normalized or normalize the input (a copy of it, if required)
       based on the last parameter provided.
@@ -305,7 +303,7 @@ public:
         }
     }
 
-    
+
     /*!
       Constructor from a Rodriguez rotation.
       \param rodriguezRotation A Rodriguez rotation.
@@ -363,7 +361,7 @@ public:
 
     /*! Conversion from a Rodriguez rotation. */
     template <class __containerType>
-    inline ThisType & 
+    inline ThisType &
     From(const vctRodriguezRotation3Base<__containerType> & rodriguezRotation) throw(std::runtime_error) {
         this->ThrowUnlessIsNormalized(rodriguezRotation);
         return this->FromRaw(rodriguezRotation);
@@ -390,7 +388,7 @@ public:
       type of input.
     */
     //@{
-    
+
     /*! Conversion from 4 numbers.  This method actually performs an
       assignement and then normalize the quaternion (\c this). */
     inline ThisType &
@@ -408,14 +406,14 @@ public:
 
     /*! Conversion from a Rodriguez rotation. */
     template <class __containerType>
-    inline ThisType & 
+    inline ThisType &
     FromNormalized(const vctRodriguezRotation3Base<__containerType> & rodriguezRotation) {
         return this->FromRaw(rodriguezRotation.Normalized());
     }
 
     /*!
       Conversion from a rotation matrix.
-    
+
       This method could normalize the input first, but the rotation
       matrix normalization relies on -1- a conversion to quaternion,
       -2- normalization and -3- a conversion back to rotation matrix.
@@ -443,7 +441,7 @@ public:
       normalized.
     */
     //@{
-    
+
     inline ThisType &
     FromRaw(value_type x, value_type y, value_type z, value_type r) {
         this->Assign(x, y, z, r);
@@ -461,14 +459,14 @@ public:
         const AngleType halfAngle = angle * 0.5;
         const value_type s = (value_type) sin(halfAngle);
         const value_type c = (value_type) cos(halfAngle);
-        
-        this->Assign(s * axis[0], s * axis[1], s * axis[2], c); 
+
+        this->Assign(s * axis[0], s * axis[1], s * axis[2], c);
         return *this;
     }
 
     /*! Conversion from a Rodriguez rotation. */
     template <class __containerType>
-    inline ThisType & 
+    inline ThisType &
     FromRaw(const vctRodriguezRotation3Base<__containerType> & rodriguezRotation) {
         return this->FromRaw(vctAxisAngleRotation3<value_type>(rodriguezRotation, VCT_DO_NOT_NORMALIZE));
     }
@@ -480,7 +478,7 @@ public:
       used since it asserts that the input matrix is already
       normalized.
 
-      \param matrixRotation A rotation matrix 
+      \param matrixRotation A rotation matrix
     */
     template <class __containerType>
     inline ThisType & FromRaw(const vctMatrixRotation3Base<__containerType> & matrixRotation) {
@@ -498,9 +496,9 @@ public:
     inline ThisType & From(const ThisType & otherRotation) {
         return reinterpret_cast<ThisType &>(this->Assign(otherRotation));
     }
-    
 
-    /*! Sets this rotation quaternion as the normalized version of another one.    
+
+    /*! Sets this rotation quaternion as the normalized version of another one.
       \param otherQuaternion rotation quaternion used to compute the normalized quaternion. */
     inline ThisType & NormalizedOf(const ThisType & otherQuaternion) {
         CMN_ASSERT(otherQuaternion.Pointer() != this->Pointer());
@@ -648,7 +646,7 @@ public:
     /*! Apply the rotation to another rotation.  The result is stored
       into a vctQuaternionRotation3Base (ThisType) provided by the caller and
       passed by reference.
-      
+
       \param input The input rotation
       \param output The output rotation
     */
@@ -740,7 +738,7 @@ public:
         this->ApplyInverseTo(input, result);
         return result;
     }
-    
+
     template <class __vectorOwnerType>
     inline vctFixedSizeVector<value_type, DIMENSION>
     ApplyInverseTo(const vctDynamicConstVectorBase<__vectorOwnerType, value_type> & input) const
@@ -772,7 +770,7 @@ public:
     /*! Apply the inverse of the rotation to another rotation.  The
       result is stored into a vctQuaternionRotation3Base (ThisType) provided
       by the caller and passed by reference.
-      
+
       \param input The input rotation
       \param output The output rotation
     */
@@ -780,13 +778,13 @@ public:
         CMN_ASSERT(input.Pointer() != output.Pointer());
         output.ProductOf(this->Conjugate(), input);
     }
-    
+
 
     /*! Apply the inverse of the rotation to another rotation.  The
       result is returned by copy.  This interface might be more
       convenient for some but one should note that it is less
       efficient since it requires a copy.
-      
+
       \param input The input rotation
       \return The output rotation
     */
@@ -795,7 +793,7 @@ public:
         this->ApplyInverseTo(input, result);
         return result;
     }
-    
+
 
     /*! Apply the the inverse of the rotation to a dynamic vector.
       The result is stored into another dynamic vector passed by
@@ -891,7 +889,7 @@ public:
 
       \note This method is deprecated.  Use
       From(vctAxisAngleRotation3) instead.
-   
+
     */
     template <stride_type __stride, class __dataPtrType>
     inline CISST_DEPRECATED const ThisType &
@@ -902,7 +900,7 @@ public:
         const double halfAngle = angle * 0.5;
         const value_type s = value_type(sin(halfAngle));
         const value_type c = value_type(cos(halfAngle));
-        this->ConcatenationOf(s * axis, c); 
+        this->ConcatenationOf(s * axis, c);
         return *this;
     }
 
@@ -921,7 +919,7 @@ public:
       From(vctRodriguezRotation3Base) instead.
     */
     template <stride_type __stride, class __dataPtrType>
-    inline CISST_DEPRECATED const ThisType & 
+    inline CISST_DEPRECATED const ThisType &
     From(const vctFixedSizeConstVectorBase<3, __stride, value_type, __dataPtrType> & rodriguezRotation) {
 	const value_type axisLength = rodriguezRotation.Norm();
 	const value_type axisTolerance = cmnTypeTraits<value_type>::Tolerance();
@@ -937,7 +935,7 @@ public:
       quaternion is normalized or not.
 
       \param axis The axis of the rotation
-      
+
       \param angle The angle around the axis to match the rotation
 
       \note This method is deprecated.  Use vctAxisAngleRotation3.From() instead.
@@ -957,7 +955,7 @@ public:
             axis.Y() = this->Y();
             axis.Z() = this->Z();
         }
-    }    
+    }
     //@}
 };
 
@@ -1009,7 +1007,7 @@ inline void vctQuaternionVectorProductByElements(
     // vector.
     output.X() = - qR * tX - qX * tR - qY * tZ + qZ * tY;
     output.Y() = - qR * tY - qY * tR - qZ * tX + qX * tZ;
-    output.Z() = - qR * tZ - qZ * tR - qX * tY + qY * tX;        
+    output.Z() = - qR * tZ - qZ * tR - qX * tY + qY * tX;
 }
 
 #endif  // _vctQuaternionRotation3Base_h

@@ -19,16 +19,14 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
-/*! 
-  \file 
-  \brief Declaration of vctStoreBackBinaryOperations
- */
-
-
+#pragma once
 #ifndef _vctStoreBackBinaryOperations_h
 #define _vctStoreBackBinaryOperations_h
 
+/*!
+  \file
+  \brief Declaration of vctStoreBackBinaryOperations
+ */
 
 /*!
   \brief Define binary operations between objects as classes.
@@ -88,8 +86,8 @@ class vctStoreBackBinaryOperations {
             return input1;
         }
     };
-    
-    
+
+
     /*!
       \brief Returns the difference of the two InputType object.
       \sa vctStoreBackBinaryOperations
@@ -103,10 +101,10 @@ class vctStoreBackBinaryOperations {
         */
         static inline InputOutputType & Operate(InputOutputType & input1, const Input2Type & input2) {
             input1 -= input2;
-            return input1; 
+            return input1;
         }
     };
-    
+
 
     /*!
       \brief Returns the product of the two InputType object.
@@ -124,12 +122,12 @@ class vctStoreBackBinaryOperations {
             return input1;
         }
     };
-    
+
 
     /*!
       \brief Returns the ratio of the two InputType object.
       \sa vctStoreBackBinaryOperations
-    */    
+    */
     class Division {
     public:
         /*!
@@ -142,8 +140,8 @@ class vctStoreBackBinaryOperations {
             return input1;
         }
     };
-    
-    
+
+
     /*!
       \brief Return the first operand of (input1, input2), i.e., input1.
       \sa vctStoreBackBinaryOperations
@@ -159,8 +157,8 @@ class vctStoreBackBinaryOperations {
             return (input1);
         }
     };
-    
-    
+
+
     /*!
       \brief Return the first operand of (input1, input2), i.e., input2.
       \sa vctStoreBackBinaryOperations

@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):	Ofri Sadowsky, Anton Deguet
   Created on: 2004-07-01
 
@@ -19,22 +19,19 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
+#pragma once
 #ifndef _vctDynamicMatrix_h
 #define _vctDynamicMatrix_h
-
 
 /*!
   \file
   \brief Declaration of vctDynamicMatrix
 */
 
-
 #include <cisstVector/vctDynamicVector.h>
 #include <cisstVector/vctDynamicMatrixBase.h>
 #include <cisstVector/vctDynamicMatrixRef.h>
 #include <cisstVector/vctDynamicMatrixOwner.h>
-
 
 /*!
   \ingroup cisstVector
@@ -67,10 +64,10 @@ http://www.cisst.org/cisst/license.txt.
   // any time before creating the matrix.
   size_t matrixRows = 12;
   size_t matrixCols = 9;
-  
+
   // constructor allocation
   vctDynamicMatrix<ElementType> m1(matrixRows, matrixCols);
-  
+
   // Create an empty matrix and later allocate memory.
   vctDynamicMatrix<ElementType> m2;
   m2.SetSize(matrixRows, matrixCols);
@@ -80,10 +77,10 @@ http://www.cisst.org/cisst/license.txt.
   // matrix
   vctDynamicMatrix<Elements> m3(3 * matrixRows, 3 * matrixCols);
   m3.SetSize(2 * matrixRows, 2 * matrixCols);
-  
+
   // resize a matrix and keep as many elements as possible.
   m3.resize(matrixRows, matrixCols);
-  
+
   // Store an algebraic result to a new matrix.  In this case,
   // memory is allocated by the algebraic operation, and then
   // attached to the matrix object.
@@ -105,7 +102,7 @@ http://www.cisst.org/cisst/license.txt.
   \code
   // Initialize all elements to the same value
   vctDynamicMatrix<ElementType> v5(matrixRows, matrixCols, 2.0);
-  
+
   // Initialize the elements by specific values.  NOTE: All the
   // arguments MUST be of type ElementType
   vctDynamicMatrix<ElementType> matrix(2, 4);
@@ -113,7 +110,7 @@ http://www.cisst.org/cisst/license.txt.
                 4.0, 5.0, 6.0, 7.0); // correct
   matrix.Assign(7, 1, 2, 3,
                 4, 5, 6, 7); // WRONG, missing dot
-  
+
   // Assign one matrix to another.
   vctDynamicMatrix<int> matrixInt;
   matrixInt.Assign(matrix);
@@ -191,7 +188,7 @@ public:
     */
     vctDynamicMatrix(const vctReturnDynamicMatrix<value_type> & otherMatrix);
 
-    
+
     /*! Copy constructor: Allocate memory to store a copy of the other
       matrix, and copy the elements of the other matrix to this
       matrix.
@@ -203,7 +200,7 @@ public:
         this->Assign(otherMatrix);
     }
 
-    
+
     /*! Copy constructor: Allocate memory and copy all the elements
       from the other matrix. The storage order can be either
       #VCT_ROW_MAJOR or #VCT_COL_MAJOR.*/
@@ -287,7 +284,7 @@ public:
         this->Assign(other);
         return *this;
     }
-    
+
     // documented in base class
     template <size_type __rows, size_type __cols,
               stride_type __rowStride, stride_type __colStride,
@@ -358,7 +355,7 @@ public:
     //@}
 
     /*! Binary deserialization */
-    void DeSerializeRaw(std::istream & inputStream) 
+    void DeSerializeRaw(std::istream & inputStream)
     {
         // get and set size
         size_type myRows;
@@ -366,7 +363,7 @@ public:
         cmnDeSerializeSizeRaw(inputStream, myRows);
         cmnDeSerializeSizeRaw(inputStream, myCols);
         this->SetSize(myRows, myCols);
-        
+
         // get data
         size_type indexRow, indexCol;
         for (indexRow = 0; indexRow < myRows; ++indexRow) {

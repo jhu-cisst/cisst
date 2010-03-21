@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):	Anton Deguet
   Created on:	2005-01-13
 
@@ -19,16 +19,14 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
-/*! 
-  \file 
-  \brief Declaration of vctRodriguezRotation3
- */
-
-
+#pragma once
 #ifndef _vctRodriguezRotation3_h
 #define _vctRodriguezRotation3_h
 
+/*!
+  \file
+  \brief Declaration of vctRodriguezRotation3
+ */
 
 #include <cisstVector/vctRodriguezRotation3Base.h>
 #include <cisstVector/vctExport.h>
@@ -78,7 +76,7 @@ public:
 
     /*!
       \name Constructors with normalization test.
-      
+
       These constructors will check that the input is valid,
       i.e. normalized.  If the input is not normalized, an exception
       (of type \c std::runtime_error) will be thrown.  Each
@@ -125,7 +123,7 @@ public:
     {
         From(matrixRotation);
     }
-    
+
     /*! Constructor from a vctAxisAngleRotation3. */
     inline vctRodriguezRotation3(const vctAxisAngleRotation3<value_type> & axisAngleRotation)
         throw(std::runtime_error)
@@ -139,7 +137,7 @@ public:
 
     /*!
       \name Constructors without normalization test
-      
+
       These constructors will either assume that the input is
       normalized or normalize the input (a copy of it, if required)
       based on the last parameter provided.
@@ -212,7 +210,7 @@ public:
             FromRaw(matrixRotation);
         }
     }
-    
+
     /*! Constructor from a vctAxisAngleRotation3. */
     inline vctRodriguezRotation3(const vctAxisAngleRotation3<value_type> & axisAngleRotation,
                                  bool normalizeInput)

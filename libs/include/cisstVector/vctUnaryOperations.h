@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):	Ofri Sadowsky
   Created on:	2003-08-18
 
@@ -19,16 +19,14 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
-/*! 
-  \file 
-  \brief Declaration of vctUnaryOperations.
- */
-
-
+#pragma once
 #ifndef _vctUnaryOperations_h
 #define _vctUnaryOperations_h
 
+/*!
+  \file
+  \brief Declaration of vctUnaryOperations.
+ */
 
 /*!
   \brief Define unary operations on an object as classes.
@@ -62,7 +60,7 @@ class vctUnaryOperations
     public:
     typedef _outputElementType OutputElementType;
     typedef _inputElementType InputElementType;
-    
+
     /*!
       \brief Returns the input as an OutputType object.
       \sa vctUnaryOperations
@@ -77,7 +75,7 @@ class vctUnaryOperations
             return OutputElementType(input);
         }
     };
-    
+
     /*!
       \brief Returns the absolute value of the input as an OutputType object.
       \sa vctUnaryOperations
@@ -114,9 +112,9 @@ class vctUnaryOperations
             return OutputElementType( ceil((double)input) );
         }
     };
-    
 
-    
+
+
     /*!
       \brief Returns the square of the input as an OutputType object.
       \sa vctUnaryOperations
@@ -131,7 +129,7 @@ class vctUnaryOperations
             return OutputElementType(input * input);
         }
     };
-    
+
     /*!
       \brief Returns the negative of the input as an OutputType object.
       \sa vctUnaryOperations
@@ -162,7 +160,7 @@ class vctUnaryOperations
             return OutputElementType(input >= InputElementType(0));
         }
     };
-    
+
     /*! Return true if the input element is non-positive, false otherwise */
     class IsNonPositive {
     public:
@@ -170,7 +168,7 @@ class vctUnaryOperations
             return OutputElementType(input <= InputElementType(0));
         }
     };
-    
+
     /*! Return true if the input element is strictly negative, false otherwise */
     class IsNegative {
     public:
@@ -192,8 +190,8 @@ class vctUnaryOperations
     public:
         static inline OutputElementType Operate(const InputElementType & input) {
             OutputElementType rootOfPower = Power<EXPONENT / 2>::OperationType(input);
-            return ((EXPONENT % 2 == 0) 
-                    ? (rootOfPower * rootOfPower) 
+            return ((EXPONENT % 2 == 0)
+                    ? (rootOfPower * rootOfPower)
                     : (rootOfPower * rootOfPower * input));
         }
     };
@@ -203,8 +201,8 @@ class vctUnaryOperations
         static inline OutputElementType Operate(const InputElementType & input) {
             return OutputElementType(1);
         }
-    }; 
-    */ 
+    };
+    */
 };
 
 

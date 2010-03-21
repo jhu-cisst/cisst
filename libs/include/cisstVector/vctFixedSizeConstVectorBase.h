@@ -19,14 +19,14 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
-/*! 
-  \file 
-  \brief Declaration of vctFixedSizeConstVectorBase
- */
-
+#pragma once
 #ifndef _vctFixedSizeConstVectorBase_h
 #define _vctFixedSizeConstVectorBase_h
+
+/*!
+  \file
+  \brief Declaration of vctFixedSizeConstVectorBase
+ */
 
 #include <iostream>
 #include <iomanip>
@@ -113,25 +113,25 @@ class vctFixedSizeConstVectorBase
 
     /* define most types from vctContainerTraits */
     VCT_CONTAINER_TRAITS_TYPEDEFS(_elementType);
-    
+
     /*! Type of the vector itself. */
     typedef vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType> ThisType;
-    
+
     /*! Traits used for all useful types related to a vctFixedSizeVector. */
     typedef vctFixedSizeVectorTraits<_elementType, _size, _stride> VectorTraits;
-    
-    /*! Iterator on the elements of the vector. */   
+
+    /*! Iterator on the elements of the vector. */
     typedef typename VectorTraits::iterator iterator;
-    
-    /*! Const iterator on the elements of the vector. */   
+
+    /*! Const iterator on the elements of the vector. */
     typedef typename VectorTraits::const_iterator const_iterator;
-    
-    /*! Reverse iterator on the elements of the vector. */   
+
+    /*! Reverse iterator on the elements of the vector. */
     typedef typename VectorTraits::reverse_iterator reverse_iterator;
-    
-    /*! Const reverse iterator on the elements of the vector. */   
+
+    /*! Const reverse iterator on the elements of the vector. */
     typedef typename VectorTraits::const_reverse_iterator const_reverse_iterator;
-    
+
     /*! type of overlay row matrix over this sequence */
     //@{
     typedef vctFixedSizeConstMatrixRef<_elementType, 1, _size, _stride*_size,_stride> RowConstMatrixRefType;
@@ -142,24 +142,24 @@ class vctFixedSizeConstVectorBase
     typedef vctFixedSizeConstMatrixRef<_elementType, _size, 1, _stride, _stride*_size> ColConstMatrixRefType;
     typedef vctFixedSizeMatrixRef<_elementType, _size, 1, _stride, _stride*_size> ColMatrixRefType;
     //@}
-    
+
     /* Size of the vector. */
     enum {SIZE = VectorTraits::SIZE};
-    
+
     /* Stride between the elements of a sub vector. */
     enum {STRIDE = VectorTraits::STRIDE};
-    
+
     /*! The type of a vector returned by value from operations on this object */
     typedef vctFixedSizeVector<_elementType, _size> VectorValueType;
-    
+
     /*! The type used to create a copy. */
     typedef vctFixedSizeVector<_elementType, _size> CopyType;
-    
+
     /*! The type of a vector of booleans returned from operations on this object, e.g.,
       ElementwiseEqual. */
     typedef vctFixedSizeVector<bool, _size> BoolVectorValueType;
-    
-    
+
+
  protected:
     /*! A declaration of the vector-defining member object */
     _dataPtrType Data;
@@ -171,62 +171,62 @@ class vctFixedSizeConstVectorBase
             cmnThrow(std::out_of_range("vctFixedSizeVector: Invalid index"));
         }
     }
-    
+
  public:
     /*! Returns a const iterator on the first element (STL
       compatibility). */
     const_iterator begin() const {
         return const_iterator(Data);
     }
-    
+
 
     /*! Returns a const iterator on the last element (STL
       compatibility). */
     const_iterator end() const {
         return const_iterator(Data + STRIDE * SIZE);
     }
-    
-    
+
+
     /*! Returns a reverse const iterator on the last element (STL
-      compatibility). */ 
+      compatibility). */
     const_reverse_iterator rbegin() const {
         return const_reverse_iterator(Data + STRIDE * (SIZE - 1));
     }
-    
+
 
     /*! Returns a reverse const iterator on the element before first
-      (STL compatibility). */ 
+      (STL compatibility). */
     const_reverse_iterator rend() const {
         return const_reverse_iterator(Data - STRIDE);
     }
-    
+
 
     /*! Returns the size of the vector (STL
       compatibility). */
     size_type size() const {
         return SIZE;
     }
-    
+
 
     /*! Returns the maximum size of the vector (STL compatibility).
       For a fixed size vector, same as the size(). */
     size_type max_size() const {
         return SIZE;
     }
-    
+
 
     /*! Not required by STL but provided for completeness */
     difference_type stride() const {
         return STRIDE;
     }
-    
-    
+
+
     /*! Tell is the vector is empty (STL compatibility).  False unless
       SIZE is zero. */
     bool empty() const {
         return (SIZE == 0);
     }
-    
+
 
     /*! Access an element by index (const).
       \return a const reference to the element[index] */
@@ -262,7 +262,7 @@ class vctFixedSizeConstVectorBase
         return *(Pointer(index));
     }
 
-    
+
     /*! Returns a const pointer to an element of the container,
       specified by its index. Addition to the STL requirements.
     */
@@ -278,7 +278,7 @@ class vctFixedSizeConstVectorBase
 
 
     /*! \name Size dependant methods.
-      
+
       The following methods are size dependant, i.e. don't necessarily
       mean anything for all sizes of vector.  For example, using the
       Z() method on a vector of size 2 shouldn't be allowed.  It would
@@ -287,11 +287,11 @@ class vctFixedSizeConstVectorBase
       execution time which is not worth it.  Therefore, we are using
       and #CMN_ASSERT() to check that the template parameter _size is
       valid
-      
+
       \note Using #CMN_ASSERT on a template parameter still allows the
       compiler to perform some optimization, which would be harder if
       #CMN_ASSERT was testing a method paramater. */
-    
+
     //@{
 
     /*! Returns the first element of the vector.  This method uses
@@ -415,17 +415,17 @@ class vctFixedSizeConstVectorBase
     /*! Return the sum of the elements of the vector.
       \return The sum of all the elements */
     inline value_type SumOfElements() const {
-        return vctFixedSizeVectorRecursiveEngines<_size>::template 
+        return vctFixedSizeVectorRecursiveEngines<_size>::template
             SoVi<typename vctBinaryOperations<value_type>::Addition,
             typename vctUnaryOperations<value_type>::Identity>::
             Unfold(*this);
-    } 
+    }
 
 
     /*! Return the product of the elements of the vector.
       \return The product of all the elements */
     inline value_type ProductOfElements() const {
-        return vctFixedSizeVectorRecursiveEngines<_size>::template 
+        return vctFixedSizeVectorRecursiveEngines<_size>::template
             SoVi<typename vctBinaryOperations<value_type>::Multiplication,
             typename vctUnaryOperations<value_type>::Identity>::
             Unfold(*this);
@@ -461,7 +461,7 @@ class vctFixedSizeConstVectorBase
 
     /*! Return the L1 norm of the vector, i.e. the sum of the absolute
       values of all the elements.
- 
+
       \return The L1 norm. */
     inline value_type L1Norm(void) const {
         return vctFixedSizeVectorRecursiveEngines<_size>::template
@@ -502,7 +502,7 @@ class vctFixedSizeConstVectorBase
       values of all the elements.
 
       \sa LinfNorm.
- 
+
       \return The maximum of the absolute values. */
     inline value_type MaxAbsElement(void) const {
         return vctFixedSizeVectorRecursiveEngines<_size>::template
@@ -513,7 +513,7 @@ class vctFixedSizeConstVectorBase
 
     /*! Return the minimum of the absolute
       values of all the elements.
- 
+
       \return The minimum of the absolute values. */
     inline value_type MinAbsElement(void) const {
         return vctFixedSizeVectorRecursiveEngines<_size>::template
@@ -521,7 +521,7 @@ class vctFixedSizeConstVectorBase
             typename vctUnaryOperations<value_type>::AbsValue>::
             Unfold(*this);
     }
-    
+
     /*! Compute the minimum AND maximum elements of the vector.
       This method is more runtime-efficient than computing them
       separately.
@@ -533,7 +533,7 @@ class vctFixedSizeConstVectorBase
         vctFixedSizeVectorRecursiveEngines<_size>::MinAndMax::
             Unfold((*this), minElement, maxElement);
     }
-    
+
     /*! Return true if all the elements of this vector are strictly
       positive, false otherwise */
     inline bool IsPositive(void) const {
@@ -628,7 +628,7 @@ class vctFixedSizeConstVectorBase
 
 
     /*! Dot product with another vector <em>of the same type and size</em>
-     
+
     \param otherVector second operand of the dot product ("this" is the first operand)
     \return The dot product of this and otherVector.
     */
@@ -686,7 +686,7 @@ class vctFixedSizeConstVectorBase
                             value_type, __dataPtrType> & otherVector) const {
         return ((*this - otherVector).LinfNorm() <= cmnTypeTraits<_elementType>::Tolerance());
     }
-    
+
     /* documented above */
     template <stride_type __stride, class __dataPtrType>
     inline bool NotEqual(const vctFixedSizeConstVectorBase<_size, __stride,
@@ -696,7 +696,7 @@ class vctFixedSizeConstVectorBase
             typename vctBinaryOperations<bool, value_type, value_type>::NotEqual>::
             Unfold(*this, otherVector);
     }
-    
+
     /* documented above */
     template <stride_type __stride, class __dataPtrType>
     inline bool operator != (const vctFixedSizeConstVectorBase<_size, __stride,
@@ -713,7 +713,7 @@ class vctFixedSizeConstVectorBase
             typename vctBinaryOperations<bool, value_type, value_type>::Lesser>::
             Unfold(*this, otherVector);
     }
-    
+
     /* documented above */
     template <stride_type __stride, class __dataPtrType>
     inline bool LesserOrEqual(const vctFixedSizeConstVectorBase<_size, __stride,
@@ -837,12 +837,12 @@ class vctFixedSizeConstVectorBase
             typename vctBinaryOperations<bool, value_type, value_type>::Equal>::
             Unfold(*this, scalar);
     }
-    
+
     /* documented above */
     inline bool operator == (const value_type & scalar) const {
         return Equal(scalar);
     }
-    
+
     /* documented above */
     inline bool NotEqual(const value_type & scalar) const {
         return vctFixedSizeVectorRecursiveEngines<_size>::template
@@ -850,7 +850,7 @@ class vctFixedSizeConstVectorBase
             typename vctBinaryOperations<bool, value_type, value_type>::NotEqual>::
             Unfold(*this, scalar);
     }
-    
+
     /* documented above */
     inline bool operator != (const value_type & scalar) const {
         return NotEqual(scalar);
@@ -863,7 +863,7 @@ class vctFixedSizeConstVectorBase
             typename vctBinaryOperations<bool, value_type, value_type>::Lesser>::
             Unfold(*this, scalar);
     }
-    
+
     /* documented above */
     inline bool LesserOrEqual(const value_type & scalar) const {
         return vctFixedSizeVectorRecursiveEngines<_size>::template
@@ -879,7 +879,7 @@ class vctFixedSizeConstVectorBase
             typename vctBinaryOperations<bool, value_type, value_type>::Greater>::
             Unfold(*this, scalar);
     }
-    
+
     /* documented above */
     inline bool GreaterOrEqual(const value_type & scalar) const {
         return vctFixedSizeVectorRecursiveEngines<_size>::template
@@ -901,7 +901,7 @@ class vctFixedSizeConstVectorBase
       elementwise between the vector and the scalar and stored in a
       newly created vector.  There is no operator provided since the
       semantic would be ambiguous.
-      
+
       \return A vector of booleans.
     */
     inline BoolVectorValueType ElementwiseEqual(const value_type & scalar) const {
@@ -954,7 +954,7 @@ class vctFixedSizeConstVectorBase
       \return A new vector.
     */
     inline VectorValueType Abs(void) const;
-    
+
     /* documented above */
     inline VectorValueType Negation(void) const;
 
@@ -985,11 +985,11 @@ class vctFixedSizeConstVectorBase
     template<class _subsequenceType>
     void GetConstSubsequence(size_type position, _subsequenceType & result) const {
         assert( (_subsequenceType::STRIDE % ThisType::STRIDE) == 0 );
-        assert( position + 
-                ((_subsequenceType::SIZE-1) * (_subsequenceType::STRIDE / ThisType::STRIDE)) 
+        assert( position +
+                ((_subsequenceType::SIZE-1) * (_subsequenceType::STRIDE / ThisType::STRIDE))
                 <= (ThisType::SIZE-1) );
-        assert( position + 
-                ((_subsequenceType::SIZE-1) * (_subsequenceType::STRIDE / ThisType::STRIDE)) 
+        assert( position +
+                ((_subsequenceType::SIZE-1) * (_subsequenceType::STRIDE / ThisType::STRIDE))
                 >= 0 );
         result.SetRef( Pointer(position) );
     }
@@ -1010,19 +1010,19 @@ class vctFixedSizeConstVectorBase
      // Now initialize a subsequence object
      Subsequence1Type subsequence;
      vector.GetConstSubsequence(SUBSEQUENCE_START, subsequence);
-        
+
      \param _subPosition the starting index (zero-based) of the subsequence
      inside its containing vector.
      \param _subStride the stride of the subsequence inside its containing
      vector
 
-     \note The position and the stride must be given relative to the 
+     \note The position and the stride must be given relative to the
      immediately containing vector.  That is, regardless of the underlying
      memory structure.  If the containing vector is itself a subsequence of
      a third vector, the stride and the position will be scaled by the code,
-     and the user need not know about any super-container except for the 
+     and the user need not know about any super-container except for the
      immediate one.
-    
+
     */
 #ifndef SWIG // SWIG 1.3.21 doesn't handle sub-classes
     template<size_type _subPosition, stride_type _subStride>
@@ -1068,7 +1068,7 @@ class vctFixedSizeConstVectorBase
         return outputStream.str();
     }
 
-    /*!  Print the matrix in a human readable format */    
+    /*!  Print the matrix in a human readable format */
     void ToStream(std::ostream & outputStream) const {
         size_type index;
         const size_type mySize = size();
@@ -1080,7 +1080,7 @@ class vctFixedSizeConstVectorBase
         for (index = 0; index < mySize; ++index) {
             outputStream << std::setw(12) << (*this)[index];
             if (index < (mySize-1)) {
-                outputStream << " "; 
+                outputStream << " ";
             }
         }
         // resume the formatting flags
@@ -1089,7 +1089,7 @@ class vctFixedSizeConstVectorBase
             outputStream << std::noshowpoint;
         }
     }
-  
+
     /*! Print data only with optional separator */
     void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
                      bool headerOnly = false, const std::string & headerPrefix = "") const
@@ -1098,23 +1098,23 @@ class vctFixedSizeConstVectorBase
         const size_type mySize = size();
         if (headerOnly) {
             for (index = 0; index < mySize; ++index) {
-                outputStream << headerPrefix << "-v" << index; 
+                outputStream << headerPrefix << "-v" << index;
                 if (index < (mySize-1)) {
-                    outputStream << delimiter; 
+                    outputStream << delimiter;
                 }
             }
         } else {
             for (index = 0; index < mySize; ++index) {
-                outputStream << (*this)[index]; 
+                outputStream << (*this)[index];
                 if (index < (mySize-1)) {
-                    outputStream << delimiter; 
+                    outputStream << delimiter;
                 }
             }
         }
     }
-  
+
     /*! Binary serialization */
-    void SerializeRaw(std::ostream & outputStream) const 
+    void SerializeRaw(std::ostream & outputStream) const
     {
         size_type index;
         const size_type mySize = this->size();
@@ -1129,7 +1129,7 @@ class vctFixedSizeConstVectorBase
 
 /*!
   Dot product of two vectors <em>of the same type and size</em>.
-  
+
   \param vector1 first operand of the dot product.
   \param vector2 second operand of the dot product.
   \return The dot product of vector1 and vector2.
@@ -1145,7 +1145,7 @@ vctDotProduct(const vctFixedSizeConstVectorBase<_size, _vector1Stride, _elementT
 
 /*!
   Dot product of two vectors <em>of the same type and size</em>.
-  
+
   \param vector1 first operand of the dot product.
   \param vector2 second operand of the dot product.
   \return The dot product of vector1 and vector2.

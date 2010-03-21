@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):	Ofri Sadowsky
   Created on:	2003-12-02
 
@@ -19,7 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
+#pragma once
 #ifndef _vctBarycentricVector_h
 #define _vctBarycentricVector_h
 
@@ -27,7 +27,6 @@ http://www.cisst.org/cisst/license.txt.
   \file
   \brief Defines vctBarycentricVector
 */
-
 
 #include <cisstCommon/cmnTypeTraits.h>
 #include <cisstVector/vctFixedSizeVector.h>
@@ -151,7 +150,7 @@ public:
         return result;
     }
 
-    /*! return true iff all the coodinates are greater than 
+    /*! return true iff all the coodinates are greater than
       -tolerance. See class documentation. */
     bool IsMember(const _elementType tolerance = TypeTraits::Tolerance()) const
     {
@@ -167,7 +166,7 @@ public:
     {
         return
             vctFixedSizeVectorRecursiveEngines<_size>::template
-            SoViSi< typename vctBinaryOperations<bool>::Or, 
+            SoViSi< typename vctBinaryOperations<bool>::Or,
             typename vctBinaryOperations<bool, value_type, value_type>::Bound>::
             Unfold( (*this), tolerance );
     }
@@ -178,7 +177,7 @@ public:
         return (IsMember(tolerance) && HasZero(tolerance));
     }
 
-    /*! return true iff a the vector is a member and a coordinate is equal to 
+    /*! return true iff a the vector is a member and a coordinate is equal to
       1 up to a given tolerance */
     bool IsVertex(const _elementType tolerance = TypeTraits::Tolerance()) const
     {

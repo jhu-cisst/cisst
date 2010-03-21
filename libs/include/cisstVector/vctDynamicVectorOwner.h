@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):	Ofri Sadowsky, Anton Deguet
   Created on: 2004-07-01
 
@@ -19,19 +19,16 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
+#pragma once
 #ifndef _vctDynamicVectorOwner_h
 #define _vctDynamicVectorOwner_h
-
 
 /*!
   \file
   \brief Declaration of vctDynamicVectorOwner
 */
 
-
 #include <cisstVector/vctFixedStrideVectorIterator.h>
-
 
 /*!
   This templated class owns a dynamically allocated array, but does
@@ -46,7 +43,7 @@ public:
     /*! The type of this owner. */
     typedef vctDynamicVectorOwner<_elementType> ThisType;
 
-    /* iterators are container specific */    
+    /* iterators are container specific */
     enum { DEFAULT_STRIDE = 1 };
 #ifndef SWIG
     typedef vctFixedStrideVectorConstIterator<value_type, DEFAULT_STRIDE> const_iterator;
@@ -59,17 +56,17 @@ public:
         : Size(0)
         , Data(0)
     {}
-    
+
     vctDynamicVectorOwner(size_type size):
         Size(0)
     {
         SetSize(size);
     }
-    
+
     ~vctDynamicVectorOwner() {
         Disown();
     }
-    
+
     size_type size(void) const {
         return Size;
     }
@@ -78,15 +75,15 @@ public:
     {
         return DEFAULT_STRIDE;
     }
-    
+
     pointer Pointer(index_type index = 0) {
         return Data + index;
     }
-    
+
     const_pointer Pointer(index_type index = 0) const {
         return Data + index;
     }
-    
+
     const_iterator begin(void) const {
         return const_iterator(Data);
     }
@@ -164,7 +161,7 @@ public:
         Size = 0;
         Data = 0;
     }
-    
+
 
 protected:
     size_type Size;

@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):	Ofri Sadowsky
   Created on:	2004-04-16
 
@@ -19,19 +19,20 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
+#pragma once
 #ifndef _vctDeterminant_h
 #define _vctDeterminant_h
 
-#include <cisstVector/vctFixedSizeConstMatrixBase.h>
 /*!
   \file
   \brief Defines vctDeterminant
 */
 
+#include <cisstVector/vctFixedSizeConstMatrixBase.h>
+
 /*!
   \brief Determinant function for fixed size matrices
-  
+
   Compute the determinant of a fixed size square matrix.  This
   templated class is currently specialized for matrices of size 1 by
   1, 2 by 2 or 3 by 3.

@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):	Daniel Li
   Created on:	2006-07-13
 
@@ -19,16 +19,14 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
+#pragma once
 #ifndef _vctDynamicNArrayRef_h
 #define _vctDynamicNArrayRef_h
-
 
 /*!
   \file
   \brief Declaration of vctDynamicNArrayRef
 */
-
 
 #include <cisstVector/vctDynamicNArrayBase.h>
 #include <cisstVector/vctDynamicNArrayRefOwner.h>
@@ -61,7 +59,7 @@ http://www.cisst.org/cisst/license.txt.
   first5x5.SetRef(wholeNArray, size_type(0, 0), size_type(5, 5));
   first5x5.SetAll(5.0);
   \endcode
-  
+
   \note On top of the SetRef methods provided for the cisst vectors
   and matrices (see vctDynamicVectorRef and vctDynamicMatrixRef), the
   ref classes for nArrays provides the methods SubarrayOf (re-size,
@@ -235,7 +233,7 @@ public:
             *sizesIter = otherNArray.size(*dimensionsIter);
             *stridesIter = otherNArray.stride(*dimensionsIter);
         }
-        
+
         this->SetRef(otherNArray.Pointer(), sizes, strides);
     }
 
@@ -286,7 +284,7 @@ public:
             } else {
                 *sizesIter = *otherSizesIter;
                 *stridesIter = *otherStridesIter;
-                
+
                 ++otherSizesIter;
                 ++otherStridesIter;
                 ++sizesIter;
@@ -294,7 +292,7 @@ public:
                 ++i;
             }
         }
-        
+
         // set start position
         other_nsize_type startPosition(static_cast<size_type>(0));
         startPosition[dimension] = index;

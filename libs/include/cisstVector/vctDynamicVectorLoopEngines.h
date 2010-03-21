@@ -19,24 +19,22 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
-#ifndef _vctDynamicVectorLoopEngines_h 
+#pragma once
+#ifndef _vctDynamicVectorLoopEngines_h
 #define _vctDynamicVectorLoopEngines_h
 
 /*!
-  \file 
+  \file
   \brief Declaration of vctDynamicVectorLoopEngines
  */
-
 
 #include <cisstCommon/cmnPortability.h>
 #include <cisstCommon/cmnThrow.h>
 #include <cisstVector/vctDynamicCompactLoopEngines.h>
 
-
 /*!
   \brief Container class for the vector loop based engines.
-  
+
   Loop engines can be used for dynamic vectors (see vctDynamicVector)
   to apply similar operations (see vctBinaryOperations,
   vctUnaryOperations, vctStoreBackBinaryOperations,
@@ -81,11 +79,11 @@ class vctDynamicVectorLoopEngines {
       v_{i2})\f$ for dynamic vectors.
 
       This class uses a loop to perform binary vector operations
-      of the form 
+      of the form
       \f[
       v_o = \mathrm{op}(v_{i1}, v_{i2})
       \f]
-      
+
       where \f$v_o\f$ is the output vector, and \f$v_{i1}, v_{i2}\f$
       are input vectors, all of the same size, \em op stands for the a
       binary operation performed elementwise between
@@ -106,7 +104,7 @@ class vctDynamicVectorLoopEngines {
         */
         template<class _outputVectorType, class _input1VectorType, class _input2VectorType>
         static inline void Run(_outputVectorType & outputVector,
-                               const _input1VectorType & input1Vector, 
+                               const _input1VectorType & input1Vector,
                                const _input2VectorType & input2Vector) {
             // check sizes
             typedef _outputVectorType OutputVectorType;
@@ -148,10 +146,10 @@ class vctDynamicVectorLoopEngines {
 
                 Input1PointerType input1Pointer = input1Owner.Pointer();
                 Input2PointerType input2Pointer = input2Owner.Pointer();
-                
+
                 for (;
                      outputPointer != outputEnd;
-                     outputPointer += outputStride, 
+                     outputPointer += outputStride,
                          input1Pointer += input1Stride,
                          input2Pointer += input2Stride) {
                     *outputPointer = _elementOperationType::Operate(*input1Pointer, *input2Pointer);
@@ -165,11 +163,11 @@ class vctDynamicVectorLoopEngines {
       v_i)\f$ for dynamic vectors
 
       This class uses a loop to perform binary vector operations
-      of the form 
+      of the form
       \f[
       v_{io} = \mathrm{op}(v_{io}, v_{i})
       \f]
-      
+
       where \f$v_{io}\f$ is the input output vector, and \f$v_{i}\f$
       is the second input vector, all of same size, \em op stands for
       the a binary operation performed elementwise between
@@ -184,7 +182,7 @@ class vctDynamicVectorLoopEngines {
     class VioVi {
     public:
         /*! Unroll the loop
-          
+
         \param inputOutputVector The input output vector.
         \param inputVector The second input vector.
         */
@@ -213,43 +211,43 @@ class vctDynamicVectorLoopEngines {
 
             const stride_type inputOutputStride = inputOutputOwner.stride();
             const stride_type inputStride = inputOwner.stride();
-            
+
             if ((inputOutputStride == 1) && (inputStride == 1)) {
                 vctDynamicCompactLoopEngines::CioCi<_elementOperationType>::Run(inputOutputOwner, inputOwner);
             } else {
                 // otherwise
                 InputOutputPointerType inputOutputPointer = inputOutputOwner.Pointer();
                 const InputOutputPointerType inputOutputEnd = inputOutputPointer + size * inputOutputStride;
-   
+
                 InputPointerType inputPointer = inputOwner.Pointer();
-                
+
                 for (;
-                     inputOutputPointer != inputOutputEnd; 
-                     inputOutputPointer += inputOutputStride, 
+                     inputOutputPointer != inputOutputEnd;
+                     inputOutputPointer += inputOutputStride,
                          inputPointer += inputStride) {
                     *inputOutputPointer = _elementOperationType::Operate(*inputOutputPointer, *inputPointer);
                 }
             }
         }
     };
-    
+
 
     /*!  \brief Implement operation of the form \f$(v_{1}, v_{2}) = op(v_{1},
       v_{2})\f$ for dynamic vectors
 
       This class uses a loop to perform binary vector operations
-      of the form 
+      of the form
       \f[
       (v_{1}, v_{2}) = \mathrm{op}(v_{1}, v_{2})
       \f]
-      
+
       where both \f$v_{1}, v_{2}\f$ are input and output vectors of an
       equal size.  The operation is evaluated elementwise, that is,
       \f$(v_{1}[i], v_{2}[i] = \mathrm{op}(v_{1}[i], v_{2}[i])\f$.
       The typical operation in this case is swapping the elements of
       the two vectors.
-      
-      \param _elementOperationType The type of the binary operation that inputs and 
+
+      \param _elementOperationType The type of the binary operation that inputs and
       rewrites corresponding elements in both vectors.
 
       \sa vctDynamicVectorLoopEngines
@@ -258,7 +256,7 @@ class vctDynamicVectorLoopEngines {
     class VioVio {
     public:
         /*! Unroll the loop
-          
+
         \param inputOutput1Vector The input output vector.
         \param inputOutput2Vector The second input vector.
         */
@@ -294,29 +292,29 @@ class vctDynamicVectorLoopEngines {
                 // otherwise
                 InputOutput1PointerType inputOutput1Pointer = inputOutput1Owner.Pointer();
                 const InputOutput1PointerType inputOutput1End = inputOutput1Pointer + size * inputOutput1Stride;
-                
+
                 InputOutput2PointerType inputOutput2Pointer = inputOutput2Owner.Pointer();
-                
+
                 for (;
-                     inputOutput1Pointer != inputOutput1End; 
-                     inputOutput1Pointer += inputOutput1Stride, 
+                     inputOutput1Pointer != inputOutput1End;
+                     inputOutput1Pointer += inputOutput1Stride,
                          inputOutput2Pointer += inputOutput2Stride) {
                     _elementOperationType::Operate(*inputOutput1Pointer, *inputOutput2Pointer);
                 }
             }
         }
     };
-    
+
 
     /*!  \brief Implement operation of the form \f$vo = op(vi, si)\f$
       for dynamic vectors
-      
+
       This class uses a loop to perform binary vector operations
-      of the form 
+      of the form
       \f[
       v_o = \mathrm{op}(v_i, s_i)
       \f]
-      
+
       where \f$v_o\f$ is the output vector, and \f$v_i, s_i\f$ are
       input vector and scalar, all vectors are of same size, \em op
       stands for the a binary operation performed elementwise
@@ -331,14 +329,14 @@ class vctDynamicVectorLoopEngines {
         class VoViSi {
         public:
         /*! Unroll the loop
-          
+
         \param outputVector The output vector.
         \param inputVector The input vector (first operand).
         \param inputScalar The input scalar (second operand).
         */
         template<class _outputVectorType, class _inputVectorType, class _inputScalarType>
         static inline void Run(_outputVectorType & outputVector,
-                               const _inputVectorType & inputVector, 
+                               const _inputVectorType & inputVector,
                                const _inputScalarType inputScalar) {
             // check sizes
             typedef _outputVectorType OutputVectorType;
@@ -371,10 +369,10 @@ class vctDynamicVectorLoopEngines {
                 const OutputPointerType outputEnd = outputPointer + size * outputStride;
 
                 InputPointerType inputPointer = inputOwner.Pointer();
-                
+
                 for (;
-                     outputPointer != outputEnd; 
-                     outputPointer += outputStride, 
+                     outputPointer != outputEnd;
+                     outputPointer += outputStride,
                          inputPointer += inputStride) {
                     *outputPointer = _elementOperationType::Operate(*inputPointer, inputScalar);
                 }
@@ -385,13 +383,13 @@ class vctDynamicVectorLoopEngines {
 
     /*!  \brief Implement operation of the form \f$vo = op(si, vi)\f$ for
       dynamic vectors
-            
+
       This class uses a loop to perform binary vector operations
-      of the form 
+      of the form
       \f[
       v_o = \mathrm{op}(s_i, v_i)
       \f]
-      
+
       where \f$v_o\f$ is the output vector, and \f$s_i, v_i\f$ are
       input scalar and vector, all vectors are of same size, \em op
       stands for the a binary operation performed elementwise between
@@ -406,14 +404,14 @@ class vctDynamicVectorLoopEngines {
         class VoSiVi {
         public:
         /*! Unroll the loop
-          
+
         \param outputVector The output vector.
         \param inputScalar The input scalar (first operand).
         \param inputVector The input vector (second operand).
         */
         template<class _outputVectorType, class _inputScalarType, class _inputVectorType>
             static inline void Run(_outputVectorType & outputVector,
-                                   const _inputScalarType inputScalar, 
+                                   const _inputScalarType inputScalar,
                                    const _inputVectorType & inputVector) {
             // check sizes
             typedef _outputVectorType OutputVectorType;
@@ -446,10 +444,10 @@ class vctDynamicVectorLoopEngines {
                 const OutputPointerType outputEnd = outputPointer + size * outputStride;
 
                 InputPointerType inputPointer = inputOwner.Pointer();
-                
+
                 for (;
-                     outputPointer != outputEnd; 
-                     outputPointer += outputStride, 
+                     outputPointer != outputEnd;
+                     outputPointer += outputStride,
                          inputPointer += inputStride) {
                     *outputPointer = _elementOperationType::Operate(inputScalar, *inputPointer);
                 }
@@ -467,7 +465,7 @@ class vctDynamicVectorLoopEngines {
       \f[
       v_{io} = \mathrm{op}(v_{io}, s_{i})
       \f]
-      
+
       where \f$v_{io}\f$ is the input output vector, and \f$s_{i}\f$
       is the scalar input.  \em op stands for the binary operation
       performed elementwise between \f$v_{io}[index]\f$ and
@@ -505,9 +503,9 @@ class vctDynamicVectorLoopEngines {
             } else {
                 InputOutputPointerType inputOutputPointer = inputOutputOwner.Pointer();
                 const InputOutputPointerType inputOutputEnd = inputOutputPointer + size * inputOutputStride;
-                
+
                 for (;
-                     inputOutputPointer != inputOutputEnd; 
+                     inputOutputPointer != inputOutputEnd;
                      inputOutputPointer += inputOutputStride) {
                     _elementOperationType::Operate(*inputOutputPointer, inputScalar);
                 }
@@ -518,13 +516,13 @@ class vctDynamicVectorLoopEngines {
 
     /*!  \brief Implement operation of the form \f$v_o = op(v_i)\f$
       for dynamic vectors.
-      
+
       This class uses a loop to perform unary vector operations
-      of the form 
+      of the form
       \f[
       v_{o} = \mathrm{op}(v_{i})
       \f]
-      
+
       where \f$v_{o}\f$ is the output vector, and \f$v_{i}\f$ is the
       input vector both of same size, \em op stands for the a unary
       operation performed elementwise on \f$v_{i}\f$, and whose result
@@ -543,7 +541,7 @@ class vctDynamicVectorLoopEngines {
         \param inputVector The input vector.
         */
         template<class _outputVectorType, class _inputVectorType>
-        static inline void Run(_outputVectorType & outputVector, 
+        static inline void Run(_outputVectorType & outputVector,
                                const _inputVectorType & inputVector) {
             // check sizes
             typedef _outputVectorType OutputVectorType;
@@ -575,31 +573,31 @@ class vctDynamicVectorLoopEngines {
                 // otherwise
                 OutputPointerType outputPointer = outputOwner.Pointer();
                 const OutputPointerType outputEnd = outputPointer + size * outputStride;
-                
+
                 InputPointerType inputPointer = inputOwner.Pointer();
-                
+
                 for (;
-                     outputPointer != outputEnd; 
-                     outputPointer += outputStride, 
+                     outputPointer != outputEnd;
+                     outputPointer += outputStride,
                          inputPointer += inputStride) {
                     *outputPointer = _elementOperationType::Operate(*inputPointer);
                 }
             }
         }
     };
-    
+
 
 
     /*!  \brief Implement operation of the form \f$v_{io} =
       op(v_{io})\f$ for dynamic vectors
-      
+
       This class uses a loop to perform unary store back vector
       operations of the form
 
       \f[
       v_{io} = \mathrm{op}(v_{io})
       \f]
-      
+
       where \f$v_{io}\f$ is the input output vector.  \em op stands
       for the unary operation performed elementwise on \f$v_{io}\f$
       and whose result is stored elementwise into \f$v_{io}[index]\f$.
@@ -612,7 +610,7 @@ class vctDynamicVectorLoopEngines {
     class Vio {
     public:
         /*! Unroll the loop
-          
+
         \param inputOutputVector The input output vector.
         */
         template<class _inputOutputVectorType>
@@ -627,22 +625,22 @@ class vctDynamicVectorLoopEngines {
             InputOutputOwnerType & inputOutputOwner = inputOutputVector.Owner();
             const size_type size = inputOutputOwner.size();
             const stride_type inputOutputStride = inputOutputOwner.stride();
-            
+
             if (inputOutputStride == 1) {
                 vctDynamicCompactLoopEngines::Cio<_elementOperationType>::Run(inputOutputOwner);
             } else {
                 InputOutputPointerType inputOutputPointer = inputOutputOwner.Pointer();
                 const InputOutputPointerType inputOutputEnd = inputOutputPointer + size * inputOutputStride;
-                
+
                 for (;
-                     inputOutputPointer != inputOutputEnd; 
+                     inputOutputPointer != inputOutputEnd;
                      inputOutputPointer += inputOutputStride) {
                     _elementOperationType::Operate(*inputOutputPointer);
                 }
             }
         }
     };
-    
+
 
 
     /*!  \brief Implement operation of the form \f$s_o =
@@ -654,16 +652,16 @@ class vctDynamicVectorLoopEngines {
       \f[
       s_o = \mathrm{op_{incr}(\mathrm{op}(v_i))}
       \f]
-      
+
       where \f$v_i\f$ is the input vector and \f$s_o\f$ is the scalar
       output.  \em op stands for the unary operation performed
       elementwise on \f$v_i\f$ and whose result are used incrementally
       as input for \f$op_{incr}\f$.  For a vector of size 3, the
       result is \f$s_o = op_{incr}(op_{incr}(op(v[1]), op(v[0])),
       op(v[2])) \f$.
-      
+
       \param _elementOperationType The type of the unary operation.
-      
+
       \sa vctDynamicVectorLoopEngines
     */
     template<class _incrementalOperationType, class _elementOperationType>
@@ -671,12 +669,12 @@ class vctDynamicVectorLoopEngines {
     public:
         typedef typename _incrementalOperationType::OutputType OutputType;
         /*! Unroll the loop
-          
+
         \param inputVector The input vector.
         */
         template<class _inputVectorType>
         static OutputType Run(const _inputVectorType & inputVector) {
-            
+
             typedef _inputVectorType InputVectorType;
             typedef typename InputVectorType::OwnerType InputOwnerType;
             typedef typename InputOwnerType::const_pointer InputPointerType;
@@ -693,9 +691,9 @@ class vctDynamicVectorLoopEngines {
                 OutputType incrementalResult = _incrementalOperationType::NeutralElement();
                 InputPointerType inputPointer = inputOwner.Pointer();
                 const InputPointerType inputEnd = inputPointer + size * inputStride;
-                
+
                 for (;
-                     inputPointer != inputEnd; 
+                     inputPointer != inputEnd;
                      inputPointer += inputStride) {
                     incrementalResult = _incrementalOperationType::Operate(incrementalResult,
                                                                            _elementOperationType::Operate(*inputPointer));
@@ -708,14 +706,14 @@ class vctDynamicVectorLoopEngines {
 
     /*!  \brief Implement operation of the form \f$s_o =
       op_{incr}(op(v_{i1}, v_{i2}))\f$ for dynamic vectors
-      
+
       This class uses a loop to perform incremental
       binary vector operations of the form
-      
+
       \f[
       s_o = \mathrm{op_{incr}(\mathrm{op}(v_{i1}, v_{i2}))}
       \f]
-      
+
       where \f$v_{i1}\f$ and \f$v_{i2}\f$ are the input vectors and
       \f$s_o\f$ is the scalar output.  The vectors have the same size,
       \em op stands for the unary operation performed elementwise on
@@ -726,9 +724,9 @@ class vctDynamicVectorLoopEngines {
 
       \param _incrementalOperationType The type of the incremental
       operation.
-      
+
       \param _elementOperationType The type of the unary operation.
-      
+
       \sa vctFixedSizeVectorRecursiveEngines
     */
     template<class _incrementalOperationType, class _elementOperationType>
@@ -736,10 +734,10 @@ class vctDynamicVectorLoopEngines {
     public:
         typedef typename _incrementalOperationType::OutputType OutputType;
         /*! Unroll the loop
-          
+
         \param input1Vector The first input vector (first operand for
         _elementOperationType).
-        
+
         \param input2Vector The second input vector (second operand
         for _elementOperationType).
         */
@@ -768,7 +766,7 @@ class vctDynamicVectorLoopEngines {
 
             const stride_type input1Stride = input1Owner.stride();
             const stride_type input2Stride = input2Owner.stride();
-            
+
             if ((input1Stride == 1) && (input2Stride == 1)) {
                 return vctDynamicCompactLoopEngines::SoCiCi<_incrementalOperationType, _elementOperationType>::Run(input1Owner, input2Owner);
             } else {
@@ -776,9 +774,9 @@ class vctDynamicVectorLoopEngines {
                 OutputType incrementalResult = _incrementalOperationType::NeutralElement();
                 Input1PointerType input1Pointer = input1Owner.Pointer();
                 const Input1PointerType input1End = input1Pointer + size * input1Stride;
-                
+
                 Input2PointerType input2Pointer = input2Owner.Pointer();
-                
+
                 for (;
                      input1Pointer != input1End;
                      input1Pointer += input1Stride,
@@ -787,34 +785,34 @@ class vctDynamicVectorLoopEngines {
                                                                            _elementOperationType::Operate(*input1Pointer,
                                                                                                           *input2Pointer));
                 }
-                return incrementalResult;            
+                return incrementalResult;
             }
             // last return added to avoid buggy warning with gcc 4.0,
             // this should never be evaluated
             return _incrementalOperationType::NeutralElement();
         }
     };
-    
+
 
     /*!  \brief Implement operation of the form \f$v_{io} =
       op_{io}(v_{io}, op_{sv}(s, v_i))\f$ for dynamic vectors
-      
+
       This class uses template specialization to perform store-back
       vector-scalar-vector operations
 
       \f[
       v_{io} = \mathrm{op_{io}}(V_{io}, \mathrm{op_{sv}}(s, v_i))
       \f]
-      
+
       where \f$v_{io}\f$ is an input-output (store-back) vector;
 	  \f$s\f$ is a scalar; and \f$v_i\f$ is an input vector.  A
 	  typical example is: \f$v_{io} += s \cdot v_i\f$.  \f$op_{sv}\f$
 	  is an operation between \f$s\f$ and the elements of \f$v_i\f$;
 	  \f$op_{io}\f$ is an operation between the output of
 	  \f$op_{sv}\f$ and the elements of \f$v_{io}\f$.
-      
+
       \param _ioOperationType The type of the store-back operation.
-      
+
       \param _scalarVectorElementOperationType The type of the
 	  operation between scalar and input vector.
 
@@ -855,9 +853,9 @@ class vctDynamicVectorLoopEngines {
             } else {
                 IoPointerType ioPointer = ioOwner.Pointer();
                 const IoPointerType ioEnd = ioPointer + size * ioStride;
-                
+
                 InputPointerType inputPointer = inputOwner.Pointer();
-                
+
                 for (;
                      ioPointer != ioEnd;
                      ioPointer += ioStride,
@@ -873,14 +871,14 @@ class vctDynamicVectorLoopEngines {
 
     /*!  \brief Implement operation of the form \f$s_o =
       op_{incr}(op(v_i, s_i))\f$ for dynamic vectors
-      
+
       This class uses a loop to perform incremental
       binary vector operations of the form
 
       \f[
       s_o = \mathrm{op_{incr}(\mathrm{op}(v_i, s_i))}
       \f]
-      
+
       where \f$v_i\f$ and \f$s_i\f$ are the input vector and scalar
       and \f$s_o\f$ is the scalar output. \em op stands for the
       unary operation performed elementwise on \f$v_i\f$
@@ -888,10 +886,10 @@ class vctDynamicVectorLoopEngines {
       input for \f$op_{incr}\f$.  For a vector of size 3, the result
       is \f$s_o = op_{incr}(op_{incr}(op(v[1], s), op(v[0],
       s)), op(v, s))\f$.
-      
+
       \param _incrementalOperationType The type of the incremental
       operation.
-      
+
       \param _elementOperationType The type of the unary operation.
 
       \sa vctDynamicVectorLoopEngines
@@ -901,10 +899,10 @@ class vctDynamicVectorLoopEngines {
     public:
         typedef typename _incrementalOperationType::OutputType OutputType;
         /*! Unroll the loop.
-          
+
         \param inputVector The input vector (first operand for
         _elementOperationType).
-        
+
         \param inputScalar The input scalar (second operand
         for _elementOperationType).
         */
@@ -921,7 +919,7 @@ class vctDynamicVectorLoopEngines {
             const InputOwnerType & inputOwner = inputVector.Owner();
             const size_type size = inputOwner.size();
             OutputType incrementalResult = _incrementalOperationType::NeutralElement();
-            
+
             const stride_type inputStride = inputOwner.stride();
 
             if (inputStride == 1) {
@@ -930,9 +928,9 @@ class vctDynamicVectorLoopEngines {
             } else {
                 InputPointerType inputPointer = inputOwner.Pointer();
                 const InputPointerType inputEnd = inputPointer + size * inputStride;
-                
+
                 for (;
-                     inputPointer != inputEnd; 
+                     inputPointer != inputEnd;
                      inputPointer += inputStride) {
                     incrementalResult = _incrementalOperationType::Operate(incrementalResult,
                                                                            _elementOperationType::Operate(*inputPointer, inputScalar));
@@ -975,12 +973,12 @@ class vctDynamicVectorLoopEngines {
             } else {
                 const size_type size = inputOwner.size();
                 const InputPointerType inputEnd = inputPointer + size * inputStride;
-                
+
                 value_type minElement, maxElement;
                 maxElement = minElement = *inputPointer;
-                
+
                 for (;
-                     inputPointer != inputEnd; 
+                     inputPointer != inputEnd;
                      inputPointer += inputStride)
                     {
                         const value_type element = *inputPointer;
@@ -991,7 +989,7 @@ class vctDynamicVectorLoopEngines {
                             maxElement = element;
                         }
                     }
-                
+
                 minValue = minElement;
                 maxValue = maxElement;
             }
@@ -1011,30 +1009,30 @@ class vctDynamicVectorLoopEngines {
             typedef typename OutputVectorType::pointer OutputPointerType;
             typedef typename OutputVectorType::size_type size_type;
             typedef typename OutputVectorType::stride_type stride_type;
-            
+
             typedef _inputVectorType InputVectorType;
             typedef typename InputVectorType::const_pointer InputPointerType;
-            
+
             typedef _indexVectorType IndexVectorType;
             typedef typename IndexVectorType::const_pointer IndexPointerType;
-            
+
             const size_type size = output.size();
             if (size != index.size()) {
                 ThrowException();
             }
-            
+
             const stride_type outputStride = output.stride();
             const stride_type indexStride = index.stride();
-            
+
             OutputPointerType outputPointer = output.Pointer();
             const OutputPointerType outputEnd = outputPointer + size * outputStride;
-            
+
             IndexPointerType indexPointer = index.Pointer();
             InputPointerType inputPointer;
-            
+
             for (;
                  outputPointer != outputEnd;
-                 outputPointer += outputStride, 
+                 outputPointer += outputStride,
                      indexPointer += indexStride) {
                 inputPointer = input.Pointer(*indexPointer);
                 *outputPointer = *inputPointer;

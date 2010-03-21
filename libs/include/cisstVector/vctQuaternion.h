@@ -19,16 +19,14 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
-/*! 
-  \file 
-  \brief Declaration of vctQuaternion
- */
-
-
+#pragma once
 #ifndef _vctQuaternion_h
 #define _vctQuaternion_h
 
+/*!
+  \file
+  \brief Declaration of vctQuaternion
+ */
 
 #include <cisstVector/vctQuaternionBase.h>
 #include <cisstVector/vctFixedSizeVector.h>
@@ -63,7 +61,7 @@ public:
     typedef vctFixedSizeVector<value_type, SIZE> ContainerType;
     typedef vctQuaternionBase<ContainerType> BaseType;
     typedef cmnTypeTraits<value_type> TypeTraits;
-    
+
     /*! Default constructor.  Does nothing. */
     inline vctQuaternion():
         BaseType()

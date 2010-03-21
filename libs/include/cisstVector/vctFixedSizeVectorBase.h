@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):	Ofri Sadowsky, Anton Deguet
   Created on:	2003-09-30
 
@@ -19,14 +19,14 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
-/*! 
-  \file 
-  \brief Declaration of vctFixedSizeVectorBase
- */
-
+#pragma once
 #ifndef _vctFixedSizeVectorBase_h
 #define _vctFixedSizeVectorBase_h
+
+/*!
+  \file
+  \brief Declaration of vctFixedSizeVectorBase
+ */
 
 #include <cisstCommon/cmnDeSerializer.h>
 #include <cisstVector/vctFixedSizeConstVectorBase.h>
@@ -42,7 +42,7 @@ template <vct::size_type _resultSize, vct::stride_type _resultStride, class _res
           vct::stride_type _vectorStride, class _vectorDataPtrType>
 inline void MultiplyMatrixVector(
     vctFixedSizeVectorBase<_resultSize, _resultStride, _resultElementType, _resultDataPtrType> & result,
-    const vctFixedSizeConstMatrixBase<_resultSize, _matrixCols, _matrixRowStride, _matrixColStride, 
+    const vctFixedSizeConstMatrixBase<_resultSize, _matrixCols, _matrixRowStride, _matrixColStride,
     _resultElementType, _matrixDataPtrType> & matrix,
     const vctFixedSizeConstVectorBase<_matrixCols, _vectorStride, _resultElementType, _vectorDataPtrType> & vector);
 
@@ -53,7 +53,7 @@ template <vct::size_type _resultSize, vct::stride_type _resultStride, class _res
 inline void MultiplyVectorMatrix(
     vctFixedSizeVectorBase<_resultSize, _resultStride, _resultElementType, _resultDataPtrType> & result,
     const vctFixedSizeConstVectorBase<_vectorSize, _vectorStride, _resultElementType, _vectorDataPtrType> & vector,
-    const vctFixedSizeConstMatrixBase<_vectorSize, _resultSize, _matrixRowStride, _matrixColStride, 
+    const vctFixedSizeConstMatrixBase<_vectorSize, _resultSize, _matrixRowStride, _matrixColStride,
     _resultElementType, _matrixDataPtrType> & matrix);
 
 // forward declaration of Assign method from dynamic vector to fixed size
@@ -65,7 +65,7 @@ inline void vctFixedSizeVectorBaseAssignDynamicConstVectorBase(
 #endif // DOXYGEN
 
 
-/*! 
+/*!
   \brief A template for a fixed length vector with fixed spacing in
   memory.
 
@@ -121,13 +121,13 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
         return iterator(this->Data);
     }
 
-    
+
     /* documented in base class */
     inline const_iterator begin() const {
         return BaseType::begin();
     }
-    
-    
+
+
     /*! Returns an iterator on the last element (STL
       compatibility). */
     iterator end() {
@@ -142,20 +142,20 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
 
 
     /*! Returns a reverse iterator on the last element (STL
-      compatibility). */ 
+      compatibility). */
     reverse_iterator rbegin() {
         return reverse_iterator(this->Data + STRIDE * (SIZE - 1));
     }
 
-    
+
     /* documented in base class */
     const_reverse_iterator rbegin() const {
         return BaseType::rbegin();
     }
 
-    
+
     /*! Returns a reverse iterator on the element before first
-      (STL compatibility). */ 
+      (STL compatibility). */
     reverse_iterator rend() {
         return reverse_iterator(this->Data - STRIDE);
     }
@@ -165,15 +165,15 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
     const_reverse_iterator rend() const {
         return BaseType::rend();
     }
-    
+
 
     /*! Access an element by index.
-      \return a reference to the element[index] */    
+      \return a reference to the element[index] */
     reference operator[](size_type index) {
         return *(Pointer(index));
     }
 
-    
+
     /* documented in base class */
     const_reference operator[](size_type index) const {
         return BaseType::operator[](index);
@@ -183,7 +183,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
       std::vector::at.  This method can be a handy substitute for the
       overloaded operator [] when operator overloading is unavailable
       or inconvenient.
-      
+
       \return a non-const reference to element[index] */
     reference at(size_type index) throw(std::out_of_range) {
         this->ThrowUnlessValidIndex(index);
@@ -253,7 +253,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
       memset(0).  If the vector is not compact this method will use
       SetAll(0) and memset otherwise.  This provides a slightly more
       efficent way to set all elements to zero.
-    
+
       \return true if the vector is compact and memset was used, false
       otherwise. */
     inline bool Zeros(void) {
@@ -269,7 +269,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
 
     /*!
       \name Assignment operation between vectors of different types.
-      
+
       \param other The vector to be copied.
     */
     //@{
@@ -357,7 +357,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
 
       \return a reference to this vector.
     */
-    inline ThisType & Assign(const value_type element0, const value_type element1, 
+    inline ThisType & Assign(const value_type element0, const value_type element1,
                              const value_type element2, const value_type element3, const value_type element4, ...)
     {
         (*this)[0] = element0;
@@ -410,7 +410,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
 	template <class __vectorOwnerType>
     inline ThisType & Assign(const vctDynamicConstVectorBase<__vectorOwnerType, value_type> & other) {
         vctFixedSizeVectorBaseAssignDynamicConstVectorBase(*this, other);
-        return *this;   
+        return *this;
 	}
 
 
@@ -420,7 +420,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
 
       \note For a non-reallocating Assign, it is recommended to use
       the Assign() methods.
-      
+
       \note This method is provided for both fixed size and dynamic
       vectors for API consistency (usable in templated code).  There
       is obviously not resize involved on fixed size vectors.
@@ -439,7 +439,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
 
 	template <class __vectorOwnerType>
     inline ThisType & ForceAssign(const vctDynamicConstVectorBase<__vectorOwnerType, value_type> & other) {
-        return this->Assign(other);   
+        return this->Assign(other);
 	}
     //@}
 
@@ -541,7 +541,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
 
 
     /*! \name Size dependant methods.
-      
+
       The following methods are size dependant, i.e. don't necessarily
       mean anything for all sizes of vector.  For example, using the
       Z() method on a vector of size 2 shouldn't be allowed.  It would
@@ -550,11 +550,11 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
       execution time which is not worth it.  Therefore, we are using
       and #CMN_ASSERT() to check that the template parameter _size is
       valid
-      
+
       \note Using #CMN_ASSERT on a template parameter still allows the
       compiler to perform some optimization, which would be harder if
       #CMN_ASSERT was testing a method paramater. */
-    
+
     //@{
 
     /*! Returns the first element of the vector.  This method uses
@@ -767,12 +767,12 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
     */
     template <stride_type __stride1, class __dataPtr1Type, stride_type __stride2, class __dataPtr2Type>
     inline void CrossProductOf(const vctFixedSizeConstVectorBase<3, __stride1, _elementType, __dataPtr1Type> & inputVector1,
-                               const vctFixedSizeConstVectorBase<3, __stride2, _elementType, __dataPtr2Type> & inputVector2) 
+                               const vctFixedSizeConstVectorBase<3, __stride2, _elementType, __dataPtr2Type> & inputVector2)
     {
         CMN_ASSERT(SIZE == 3);
         (*this)[0] = inputVector1[1] *  inputVector2[2] - inputVector1[2] * inputVector2[1];
         (*this)[1] = inputVector1[2] *  inputVector2[0] - inputVector1[0] * inputVector2[2];
-        (*this)[2] = inputVector1[0] *  inputVector2[1] - inputVector1[1] * inputVector2[0];    
+        (*this)[2] = inputVector1[0] *  inputVector2[1] - inputVector1[1] * inputVector2[0];
     }
 
 
@@ -789,42 +789,42 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
       \param vector1 The first operand of the binary operation
 
       \param vector2 The second operand of the binary operation
-      
+
       \return The vector "this" modified.
     */
     template <stride_type __stride1, class __dataPtrType1, stride_type __stride2, class __dataPtrType2>
-    inline ThisType & SumOf(const vctFixedSizeConstVectorBase<_size, __stride1, value_type, __dataPtrType1> & vector1, 
+    inline ThisType & SumOf(const vctFixedSizeConstVectorBase<_size, __stride1, value_type, __dataPtrType1> & vector1,
                             const vctFixedSizeConstVectorBase<_size, __stride2, value_type, __dataPtrType2> & vector2) {
         vctFixedSizeVectorRecursiveEngines<_size>::template
             VoViVi< typename vctBinaryOperations<value_type>::Addition >
             ::Unfold(*this, vector1, vector2);
         return *this;
     }
-    
-    
+
+
     /* documented above */
     template <stride_type __stride1, class __dataPtrType1, stride_type __stride2, class __dataPtrType2>
-    inline ThisType & DifferenceOf(const vctFixedSizeConstVectorBase<_size, __stride1, value_type, __dataPtrType1> & vector1, 
+    inline ThisType & DifferenceOf(const vctFixedSizeConstVectorBase<_size, __stride1, value_type, __dataPtrType1> & vector1,
                                    const vctFixedSizeConstVectorBase<_size, __stride2, value_type, __dataPtrType2> & vector2) {
         vctFixedSizeVectorRecursiveEngines<_size>::template
             VoViVi< typename vctBinaryOperations<value_type>::Subtraction >
             ::Unfold(*this, vector1, vector2);
         return *this;
     }
-    
+
     /* documented above */
     template <stride_type __stride1, class __dataPtrType1, stride_type __stride2, class __dataPtrType2>
-    inline ThisType & ElementwiseProductOf(const vctFixedSizeConstVectorBase<_size, __stride1, value_type, __dataPtrType1> & vector1, 
+    inline ThisType & ElementwiseProductOf(const vctFixedSizeConstVectorBase<_size, __stride1, value_type, __dataPtrType1> & vector1,
                                            const vctFixedSizeConstVectorBase<_size, __stride2, value_type, __dataPtrType2> & vector2) {
         vctFixedSizeVectorRecursiveEngines<_size>::template
             VoViVi< typename vctBinaryOperations<value_type>::Multiplication >
             ::Unfold(*this, vector1, vector2);
         return *this;
     }
-    
+
     /* documented above */
     template <stride_type __stride1, class __dataPtrType1, stride_type __stride2, class __dataPtrType2>
-    inline ThisType & ElementwiseRatioOf(const vctFixedSizeConstVectorBase<_size, __stride1, value_type, __dataPtrType1> & vector1, 
+    inline ThisType & ElementwiseRatioOf(const vctFixedSizeConstVectorBase<_size, __stride1, value_type, __dataPtrType1> & vector1,
                                          const vctFixedSizeConstVectorBase<_size, __stride2, value_type, __dataPtrType2> & vector2) {
         vctFixedSizeVectorRecursiveEngines<_size>::template
             VoViVi< typename vctBinaryOperations<value_type>::Division >
@@ -834,7 +834,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
 
     /* documented above */
     template <stride_type __stride1, class __dataPtrType1, stride_type __stride2, class __dataPtrType2>
-    inline ThisType & ElementwiseMinOf(const vctFixedSizeConstVectorBase<_size, __stride1, value_type, __dataPtrType1> & vector1, 
+    inline ThisType & ElementwiseMinOf(const vctFixedSizeConstVectorBase<_size, __stride1, value_type, __dataPtrType1> & vector1,
                                        const vctFixedSizeConstVectorBase<_size, __stride2, value_type, __dataPtrType2> & vector2) {
         vctFixedSizeVectorRecursiveEngines<_size>::template
             VoViVi< typename vctBinaryOperations<value_type>::Minimum >
@@ -844,7 +844,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
 
     /* documented above */
     template <stride_type __stride1, class __dataPtrType1, stride_type __stride2, class __dataPtrType2>
-    inline ThisType & ElementwiseMaxOf(const vctFixedSizeConstVectorBase<_size, __stride1, value_type, __dataPtrType1> & vector1, 
+    inline ThisType & ElementwiseMaxOf(const vctFixedSizeConstVectorBase<_size, __stride1, value_type, __dataPtrType1> & vector1,
                                        const vctFixedSizeConstVectorBase<_size, __stride2, value_type, __dataPtrType2> & vector2) {
         vctFixedSizeVectorRecursiveEngines<_size>::template
             VoViVi< typename vctBinaryOperations<value_type>::Maximum >
@@ -852,7 +852,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
         return *this;
     }
     //@}
-    
+
     /*! \name Binary elementwise operations between two vectors.
       Store the result of op(this, otherVector) back to this vector. */
     //@{
@@ -863,10 +863,10 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
       (Subtraction), a multiplication (ElementwiseMultiply) a division
       (ElementwiseDivide), a minimization (ElementwiseMin) or a
       maximisation (ElementwiseMax).
-      
+
       \param otherVector The second operand of the binary operation
       (this[i] is the first operand)
-      
+
       \return The vector "this" modified.
     */
     template <stride_type __stride, class __dataPtrType>
@@ -876,7 +876,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
             Unfold(*this, otherVector);
         return *this;
     }
-    
+
     /* documented above */
     template <stride_type __stride, class __dataPtrType>
     inline ThisType & Subtract(const vctFixedSizeConstVectorBase<_size, __stride, value_type, __dataPtrType> & otherVector) {
@@ -885,7 +885,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
             Unfold(*this, otherVector);
         return *this;
     }
-    
+
     /* documented above */
     template <stride_type __stride, class __dataPtrType>
     inline ThisType & ElementwiseMultiply(const vctFixedSizeConstVectorBase<_size, __stride, value_type, __dataPtrType> & otherVector) {
@@ -894,7 +894,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
             Unfold(*this, otherVector);
         return *this;
     }
-    
+
     /* documented above */
     template <stride_type __stride, class __dataPtrType>
     inline ThisType & ElementwiseDivide(const vctFixedSizeConstVectorBase<_size, __stride, value_type, __dataPtrType> & otherVector) {
@@ -903,7 +903,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
             Unfold(*this, otherVector);
         return *this;
     }
-    
+
     /* documented above */
     template <stride_type __stride, class __dataPtrType>
     inline ThisType & ElementwiseMin(const vctFixedSizeConstVectorBase<_size, __stride, value_type, __dataPtrType> & otherVector) {
@@ -927,7 +927,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
     inline ThisType & operator += (const vctFixedSizeConstVectorBase<_size, __stride, value_type, __dataPtrType> & otherVector) {
         return this->Add(otherVector);
     }
-    
+
     /* documented above */
     template <stride_type __stride, class __dataPtrType>
     inline ThisType & operator -= (const vctFixedSizeConstVectorBase<_size, __stride, value_type, __dataPtrType> & otherVector) {
@@ -963,18 +963,18 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
 
       \param vector The first operand of the binary operation.
       \param scalar The second operand of the binary operation.
-      
+
       \return The vector "this" modified.
     */
     template <stride_type __stride, class __dataPtrType>
-    inline ThisType & SumOf(const vctFixedSizeConstVectorBase<_size, __stride, value_type, __dataPtrType> & vector, 
+    inline ThisType & SumOf(const vctFixedSizeConstVectorBase<_size, __stride, value_type, __dataPtrType> & vector,
                             const value_type scalar) {
         vctFixedSizeVectorRecursiveEngines<_size>::template
             VoViSi< typename vctBinaryOperations<value_type>::Addition >::
             Unfold(*this, vector, scalar);
         return *this;
     }
-    
+
     /* documented above */
     template <stride_type __stride, class __dataPtrType>
     inline ThisType & DifferenceOf(const vctFixedSizeConstVectorBase<_size, __stride, value_type, __dataPtrType> & vector,
@@ -984,8 +984,8 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
             Unfold(*this, vector, scalar);
         return *this;
     }
-    
-    /* documented above */    
+
+    /* documented above */
     template <stride_type __stride, class __dataPtrType>
     inline ThisType & ProductOf(const vctFixedSizeConstVectorBase<_size, __stride, value_type, __dataPtrType> & vector,
                                 const value_type scalar) {
@@ -994,7 +994,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
             Unfold(*this, vector, scalar);
         return *this;
     }
-    
+
     /* documented above */
     template <stride_type __stride, class __dataPtrType>
     inline ThisType & RatioOf(const vctFixedSizeConstVectorBase<_size, __stride, value_type, __dataPtrType> & vector,
@@ -1025,7 +1025,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
         return *this;
     }
     //@}
-    
+
 
 
     /*! \name Binary elementwise operations a scalar and a vector.
@@ -1040,7 +1040,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
 
       \param scalar The first operand of the binary operation.
       \param vector The second operand of the binary operation.
-      
+
       \return The vector "this" modified.
     */
     template <stride_type __stride, class __dataPtrType>
@@ -1051,7 +1051,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
             Unfold(*this, scalar, vector);
         return *this;
     }
-    
+
     /* documented above */
     template <stride_type __stride, class __dataPtrType>
     inline ThisType & DifferenceOf(const value_type scalar,
@@ -1061,7 +1061,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
             Unfold(*this, scalar, vector);
         return *this;
     }
-    
+
     /* documented above */
     template <stride_type __stride, class __dataPtrType>
     inline ThisType & ProductOf(const value_type scalar,
@@ -1071,7 +1071,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
             Unfold(*this, scalar, vector);
         return *this;
     }
-    
+
     /* documented above */
     template <stride_type __stride, class __dataPtrType>
     inline ThisType & RatioOf(const value_type scalar,
@@ -1116,7 +1116,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
 
       \param scalar The second operand of the binary operation
       (this[i] is the first operand.
-      
+
       \return The vector "this" modified.
     */
     inline ThisType & Add(const value_type scalar) {
@@ -1170,7 +1170,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
     inline ThisType & operator += (const value_type scalar) {
         return this->Add(scalar);
     }
-    
+
     /* documented above */
     inline ThisType & operator -= (const value_type scalar) {
         return this->Subtract(scalar);
@@ -1205,11 +1205,11 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
     //@{
     /*!
       Product of a matrix and a vector.
-      
+
       \param inputMatrix The first operand of the binary operation
-      
+
       \param inputVector The second operand of the binary operation
-      
+
       \return The vector "this" modified.
     */
     template <size_type __matrixCols, stride_type __matrixRowStride, stride_type __matrixColStride, class __matrixDataPtrType,
@@ -1243,7 +1243,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
       version (NormalizedOf).
 
       \param otherVector The operand of the unary operation.
-      
+
       \return The vector "this" modified.
     */
     template <stride_type __stride, class __dataPtrType>
@@ -1298,7 +1298,7 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
       op(this[i])\f$ where \f$op\f$ can calculate the absolute value
       (AbsSelf), the opposite (NegationSelf) or the normalized version
       (NormalizedSelf).
-      
+
       \return The vector "this" modified.
     */
     inline ThisType & AbsSelf(void) {
@@ -1356,8 +1356,8 @@ class vctFixedSizeVectorBase : public vctFixedSizeConstVectorBase<_size, _stride
     template <class _subsequenceType>
     void GetSubsequence(size_type position, _subsequenceType & result) {
         CMN_ASSERT( (_subsequenceType::STRIDE % ThisType::STRIDE) == 0 );
-        CMN_ASSERT( position + 
-                    ((_subsequenceType::SIZE-1) * (_subsequenceType::STRIDE / ThisType::STRIDE)) 
+        CMN_ASSERT( position +
+                    ((_subsequenceType::SIZE-1) * (_subsequenceType::STRIDE / ThisType::STRIDE))
                     <= (ThisType::SIZE-1) );
         result.SetRef( Pointer(position) );
     }

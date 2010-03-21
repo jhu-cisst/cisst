@@ -19,16 +19,14 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
-/*! 
-  \file 
-  \brief Declaration of vctMatrixRotation3Ref
- */
-
-
+#pragma once
 #ifndef _vctMatrixRotation3ConstRef_h
 #define _vctMatrixRotation3ConstRef_h
 
+/*!
+  \file
+  \brief Declaration of vctMatrixRotation3Ref
+ */
 
 #include <cisstVector/vctFixedSizeMatrix.h>
 #include <cisstVector/vctMatrixRotation3Base.h>
@@ -67,14 +65,14 @@ class vctMatrixRotation3ConstRef: public vctMatrixRotation3Base<vctFixedSizeCons
     /*! Default constructor. Sets the rotation matrix to identity. */
     inline vctMatrixRotation3ConstRef(void)
     {}
-    
+
 
     // #if 0 // default one works?
     // inline vctMatrixRotation3ConstRef(const ThisType & other) {
     //     this->SetRef(other);
     // }
     // #endif
-    
+
     inline vctMatrixRotation3ConstRef(const BaseType & other) {
         this->SetRef(other);
     }
@@ -89,7 +87,7 @@ class vctMatrixRotation3ConstRef: public vctMatrixRotation3Base<vctFixedSizeCons
       operator uses the Assign() method inherited from the BaseType.
       This operator (as well as the Assign method) allows to set a
       rotation matrix to whatever value without any further validity
-      checking.  It is recommended to use it with caution. */ 
+      checking.  It is recommended to use it with caution. */
     inline ThisType & operator = (const ContainerType & other) {
         return reinterpret_cast<ThisType &>(this->Assign(other));
     }

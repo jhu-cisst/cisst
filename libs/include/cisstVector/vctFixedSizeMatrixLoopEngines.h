@@ -19,25 +19,23 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
+#pragma once
 #ifndef _vctFixedSizeMatrixLoopEngines_h
 #define _vctFixedSizeMatrixLoopEngines_h
 
 /*!
-  \file 
+  \file
   \brief Declaration of vctFixedSizeMatrixLoopEngines
  */
 
-
-
 /*!
   \brief Container class for the matrix engines.
-  
+
   \sa MoMiMi MioMi MoMiSi MoSiMi MioSi MoMi Mio SoMi SoMiMi
 */
 class vctFixedSizeMatrixLoopEngines {
 
-public:    
+public:
 
 	/*! Helper function to throw an exception whenever the output has
       the same base pointer as the output.  This enforces that a
@@ -61,7 +59,7 @@ public:
       the functions calling this engine, which have to declare
       their arguments as matrices templated over stride etc.
 
-      To use the engine, assume that Mout, Mi1, and Mi2 are matrix 
+      To use the engine, assume that Mout, Mi1, and Mi2 are matrix
       types; that mout, mi1, and mi2 are objects of corresponding
       types; and that OP is a valid operation in the form
       \f[ value\_type \times value\_type \rightarrow value\_type \f]
@@ -70,7 +68,7 @@ public:
       MoMiMi<OP>::Run(mout, mi1, mi2);
       \endcode
 
-      \param _elementOperationType a binary operation class. 
+      \param _elementOperationType a binary operation class.
       _elementOperationType must have a static method with the
       signature
       \code
@@ -120,7 +118,7 @@ public:
 
             size_type rowIndex, colIndex;
             for (rowIndex = 0; rowIndex < ROWS; ++rowIndex,
-                outputPointer += OUTPUT_STRIDE_TO_NEXT_ROW, 
+                outputPointer += OUTPUT_STRIDE_TO_NEXT_ROW,
                 input1Pointer += INPUT1_STRIDE_TO_NEXT_ROW,
                 input2Pointer += INPUT2_STRIDE_TO_NEXT_ROW)
             {
@@ -140,7 +138,7 @@ public:
     class MoMi {
     public:
         template<class _outputMatrixType, class _inputMatrixType>
-            static inline void Run(_outputMatrixType & outputMatrix, 
+            static inline void Run(_outputMatrixType & outputMatrix,
             const _inputMatrixType & inputMatrix)
         {
             typedef _outputMatrixType OutputMatrixType;
@@ -170,7 +168,7 @@ public:
 
             size_type rowIndex, colIndex;
             for (rowIndex = 0; rowIndex < ROWS; ++rowIndex,
-                outputPointer += OUTPUT_STRIDE_TO_NEXT_ROW, 
+                outputPointer += OUTPUT_STRIDE_TO_NEXT_ROW,
                 inputPointer += INPUT_STRIDE_TO_NEXT_ROW)
             {
                 for (colIndex = 0; colIndex < COLS; ++colIndex,
@@ -222,7 +220,7 @@ public:
     class MioMi {
     public:
         template<class _inputOutputMatrixType, class _inputMatrixType>
-            static inline void Run(_inputOutputMatrixType & inputOutputMatrix, 
+            static inline void Run(_inputOutputMatrixType & inputOutputMatrix,
             const _inputMatrixType & inputMatrix)
         {
             typedef _inputOutputMatrixType InputOutputMatrixType;
@@ -252,7 +250,7 @@ public:
 
             size_type rowIndex, colIndex;
             for (rowIndex = 0; rowIndex < ROWS; ++rowIndex,
-                inputOutputPointer += INPUT_OUTPUT_STRIDE_TO_NEXT_ROW, 
+                inputOutputPointer += INPUT_OUTPUT_STRIDE_TO_NEXT_ROW,
                 inputPointer += INPUT_STRIDE_TO_NEXT_ROW)
             {
                 for (colIndex = 0; colIndex < COLS; ++colIndex,
@@ -301,7 +299,7 @@ public:
 
             size_type rowIndex, colIndex;
             for (rowIndex = 0; rowIndex < ROWS; ++rowIndex,
-                outputPointer += OUTPUT_STRIDE_TO_NEXT_ROW, 
+                outputPointer += OUTPUT_STRIDE_TO_NEXT_ROW,
                 inputPointer += INPUT_STRIDE_TO_NEXT_ROW)
             {
                 for (colIndex = 0; colIndex < COLS; ++colIndex,
@@ -350,7 +348,7 @@ public:
 
             size_type rowIndex, colIndex;
             for (rowIndex = 0; rowIndex < ROWS; ++rowIndex,
-                outputPointer += OUTPUT_STRIDE_TO_NEXT_ROW, 
+                outputPointer += OUTPUT_STRIDE_TO_NEXT_ROW,
                 inputPointer += INPUT_STRIDE_TO_NEXT_ROW)
             {
                 for (colIndex = 0; colIndex < COLS; ++colIndex,
@@ -443,7 +441,7 @@ public:
     class SoMiMi {
     public:
         typedef typename _incrementalOperationType::OutputType OutputType;
-        
+
         template<class _input1MatrixType, class _input2MatrixType>
         static OutputType Run(const _input1MatrixType & input1Matrix,
                               const _input2MatrixType & input2Matrix)
@@ -489,18 +487,18 @@ public:
             return incrementalResult;
         }  // Run method
     };  // SoMiMi class
-    
-    
+
+
     /*!  \brief Implement operation of the form \f$m_{io} =
       op_{io}(m_{io}, op_{sm}(s, m_i))\f$ for fixed size matrices
-      
+
       This class uses template specialization to perform store-back
       matrix-scalar-matrix operations
 
       \f[
       m_{io} = \mathrm{op_{io}}(m_{io}, \mathrm{op_{sm}}(s, m_i))
       \f]
-      
+
       where \f$m_{io}\f$ is an input-output (store-back) matrix;
 	  \f$s\f$ is a scalar; and \f$m_i\f$ is an input matrix.  A
 	  typical example is: \f$m_{io} += s \cdot m_i\f$.  The matrices
@@ -508,21 +506,21 @@ public:
 	  is an operation between \f$s\f$ and the elements of \f$m_i\f$;
 	  \f$op_{io}\f$ is an operation between the output of
 	  \f$op_{sm}\f$ and the elements of \f$m_{io}\f$.
-      
+
       \param _ioOperationType The type of the store-back operation.
-      
+
       \param _scalarMatrixElementOperationType The type of the
 	  operation between scalar and input matrix.
 
       \sa vctFixedSizeMatrixRecursiveEngines
     */
 	template<class _ioElementOperationType, class _scalarMatrixElementOperationType>
-	class 
+	class
 		MioSiMi {
 	public:
 
         template<class _ioMatrixType, class _inputScalarType, class _inputMatrixType>
-            static inline void Run(_ioMatrixType & ioMatrix, 
+            static inline void Run(_ioMatrixType & ioMatrix,
 			const _inputScalarType & inputScalar, const _inputMatrixType & inputMatrix)
 		{
             typedef _ioMatrixType IoMatrixType;
@@ -564,12 +562,12 @@ public:
 
 	};
 
-    
+
     template<class _incrementalOperationType, class _elementOperationType>
     class SoMiSi {
     public:
         typedef typename _incrementalOperationType::OutputType OutputType;
-        
+
         template<class _inputMatrixType, class _inputScalarType>
         static OutputType Run(const _inputMatrixType & inputMatrix,
                               const _inputScalarType & inputScalar)
@@ -657,8 +655,8 @@ public:
             }
 
             size_type rowIndex, colIndex;
-            for (rowIndex = 0; rowIndex < ROWS; ++rowIndex, 
-                outputPointer += OUTPUT_STRIDE_TO_NEXT_ROW, 
+            for (rowIndex = 0; rowIndex < ROWS; ++rowIndex,
+                outputPointer += OUTPUT_STRIDE_TO_NEXT_ROW,
                 input1Pointer += INPUT1_ROW_STRIDE,
                 input2Pointer = input2Matrix.Pointer())
             {
@@ -767,7 +765,7 @@ public:
 
             size_type rowIndex, colIndex;
             for (rowIndex = 0; rowIndex < ROWS; ++rowIndex,
-                outputPointer += OUTPUT_STRIDE_TO_NEXT_ROW, 
+                outputPointer += OUTPUT_STRIDE_TO_NEXT_ROW,
                 indexPointer += INDEX_STRIDE)
             {
                 inputPointer = inputMatrix.Pointer(*indexPointer, 0);

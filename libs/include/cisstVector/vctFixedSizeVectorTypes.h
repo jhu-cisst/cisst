@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):	Anton Deguet
   Created on:	2003-09-12
 
@@ -19,40 +19,39 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
-/*! 
-  \file 
-  \brief Typedef for fixed size vectors
-*/
-
-
+#pragma once
 #ifndef _vctFixedSizeVectorTypes_h
 #define _vctFixedSizeVectorTypes_h
+
+/*!
+  \file
+  \brief Typedef for fixed size vectors
+*/
 
 #include <cisstVector/vctFixedSizeVector.h>
 
 /*! Define a fixed size vector of size 1 containing doubles. */
-//@{ 
+//@{
 typedef vctFixedSizeVector<double, 1> vctDouble1;
 typedef vctFixedSizeVector<double, 1> vct1;
 //@}
 /*! Define a fixed size vector of size 2 containing doubles. */
-//@{ 
+//@{
 typedef vctFixedSizeVector<double, 2> vctDouble2;
 typedef vctFixedSizeVector<double, 2> vct2;
 //@}
 /*! Define a fixed size vector of size 3 containing doubles. */
-//@{ 
+//@{
 typedef vctFixedSizeVector<double, 3> vctDouble3;
 typedef vctFixedSizeVector<double, 3> vct3;
 //@}
 /*! Define a fixed size vector of size 4 containing doubles. */
-//@{ 
+//@{
 typedef vctFixedSizeVector<double, 4> vctDouble4;
 typedef vctFixedSizeVector<double, 4> vct4;
 //@}
 /*! Define a fixed size vector of size 5 containing doubles. */
-//@{ 
+//@{
 typedef vctFixedSizeVector<double, 5> vctDouble5;
 typedef vctFixedSizeVector<double, 5> vct5;
 //@}

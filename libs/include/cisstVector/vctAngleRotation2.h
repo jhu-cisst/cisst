@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):	Anton Deguet
   Created on:	2005-01-13
 
@@ -19,23 +19,20 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
-/*! 
-  \file 
-  \brief Declaration of vctAngleRotation2
- */
-
-
+#pragma once
 #ifndef _vctAngleRotation2_h
 #define _vctAngleRotation2_h
 
+/*!
+  \file
+  \brief Declaration of vctAngleRotation2
+ */
 
 #include <cisstCommon/cmnConstants.h>
 #include <cisstCommon/cmnSerializer.h>
 
 #include <cisstVector/vctFixedSizeVector.h>
 #include <cisstVector/vctExport.h>
-
 
 /*!  \brief Define a rotation based on an angle for a
   space of dimension 2
@@ -54,18 +51,18 @@ public:
     enum {DIMENSION = 2};
     typedef vctAngleRotation2 ThisType;
     typedef cmnTypeTraits<AngleType> TypeTraits;
-    
+
 protected:
     AngleType AngleMember;
-    
-    
+
+
     /*! Throw an exception unless this rotation is normalized. */
     inline void ThrowUnlessIsNormalized(void) const throw(std::runtime_error) {
         if (! IsNormalized()) {
             cmnThrow(std::runtime_error("vctAngleRotation2: This rotation is not normalized"));
         }
     }
-    
+
     /*!
       Throw an exception unless the input is normalized.
       \param input An object with \c IsNormalized method.
@@ -76,25 +73,25 @@ protected:
             cmnThrow(std::runtime_error("vctAngleRotation2: Input is not normalized"));
         }
     }
-    
+
 
  public:
-    
+
     /*! Default constructor. Sets the angle to zero. */
     inline vctAngleRotation2():
         AngleMember(0.0)
     {}
-    
-    
+
+
     /*!
       \name Constructors with normalization test.
-      
+
       These constructors will check that the input is valid,
       i.e. normalized.  If the input is not normalized, an exception
       (of type \c std::runtime_error) will be thrown.  Each
       constructor uses the corresponding From() method based on the
       input type.
-      
+
       \note See the cmnThrow() function if an \c abort is better than
       an exception for your application.
     */
@@ -106,7 +103,7 @@ protected:
     {
         From(angle);
     }
-    
+
     /*! Constructor from a rotation matrix. */
     template <class _containerType>
     inline vctAngleRotation2(const vctMatrixRotation2Base<_containerType> & matrixRotation)
@@ -119,7 +116,7 @@ protected:
 
     /*!
       \name Constructors without normalization test
-      
+
       These constructors will either assume that the input is
       normalized or normalize the input (a copy of it, if required)
       based on the last parameter provided.
@@ -148,7 +145,7 @@ protected:
             FromRaw(angle);
         }
     }
-    
+
     /*! Constructor from a rotation matrix. */
     template <class _containerType>
     inline vctAngleRotation2(const vctMatrixRotation2Base<_containerType> & matrixRotation,
@@ -173,7 +170,7 @@ protected:
 
     inline AngleType & Angle(void) {
         return this->AngleMember;
-    }    
+    }
 
 
 
@@ -200,7 +197,7 @@ protected:
         // this->ThrowUnlessIsNormalized();
         return *this;
     }
-    
+
     /*! Conversion from a rotation matrix. */
     template <class _containerType>
     inline ThisType &
@@ -232,7 +229,7 @@ protected:
         this->NormalizedSelf();
         return *this;
     }
-    
+
     /*! Conversion from a rotation matrix. */
     template <class _containerType>
     inline ThisType &
@@ -251,8 +248,8 @@ protected:
       normalized.
     */
     //@{
-    
-    /*! Conversion from an angle (in radians). */ 
+
+    /*! Conversion from an angle (in radians). */
     inline ThisType &
     FromRaw(const AngleType angle)
     {
@@ -274,7 +271,7 @@ protected:
     /*! Inverse this angle rotation.  This methods assumes that the
         angle is betweem 0 and 2 * PI.  The angle is set to 2 * PI
         minus the previous value. */
-    
+
     inline ThisType & InverseSelf(void) {
         AngleMember = 2 * cmnPI - AngleMember;
         return *this;
@@ -308,7 +305,7 @@ protected:
     }
 
     /*!
-      Sets this rotation as the normalized version of another one.    
+      Sets this rotation as the normalized version of another one.
 
       \param otherRotation Angle rotation used to compute the
       normalized rotation. */
@@ -345,7 +342,7 @@ protected:
         ToStream(outputStream);
         return outputStream.str();
     }
-    
+
     /*!  Print the matrix in a human readable format */
     inline void ToStream(std::ostream & outputStream) const {
         outputStream << "Angle: "
@@ -354,7 +351,7 @@ protected:
     }
 
     /*! Binary serialization */
-    void SerializeRaw(std::ostream & outputStream) const 
+    void SerializeRaw(std::ostream & outputStream) const
     {
         cmnSerializeRaw(outputStream, this->Angle());
     }

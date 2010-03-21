@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):	Anton Deguet
   Created on:	2007-02-11
 
@@ -19,9 +19,14 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
+#pragma once
 #ifndef _vctRandomTransformations_h
 #define _vctRandomTransformations_h
+
+/*!
+  \file
+  \brief Definition of vctRandom for transformations.
+*/
 
 #include <cisstCommon/cmnRandomSequence.h>
 #include <cisstCommon/cmnPortability.h>
@@ -30,17 +35,13 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstVector/vctForwardDeclarations.h>
 
 #include <cisstVector/vctExport.h>
-/*!
-  \file
-  \brief Definition of vctRandom for transformations.
-*/
 
 /*!
   \ingroup cisstVector
 
   Define the global function vctRandom to initialize different
   types of transformation with a random value.
-  
+
   \note The function uses the global instance of cmnRandomSequence to
   extract random values.  As we have a vague plan to allow for
   multiple random sequence objects to coexist, these interfaces may

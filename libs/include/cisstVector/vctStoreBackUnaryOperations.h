@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):	Ofri Sadowsky, Anton Deguet
   Created on:	2003-08-18
 
@@ -19,16 +19,14 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
-/*! 
-  \file 
-  \brief Declaration of vctStoreBackUnaryOperations.
- */
-
-
+#pragma once
 #ifndef _vctStoreBackUnaryOperations_h
 #define _vctStoreBackUnaryOperations_h
 
+/*!
+  \file
+  \brief Declaration of vctStoreBackUnaryOperations.
+ */
 
 /*!  \brief Define store back unary operations on an object as
   classes.
@@ -79,7 +77,7 @@ class vctStoreBackUnaryOperations
                     InputOutputElementType(-inputOutput));
         }
     };
-    
+
     /*!
       \brief Returns the negation of the input as an OutputType object.
       \sa vctStoreBackUnaryOperations

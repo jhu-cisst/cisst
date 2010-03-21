@@ -19,22 +19,19 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
-/*! 
-  \file 
-  \brief Declaration of vctMatrixRotation2
- */
-
-
+#pragma once
 #ifndef _vctMatrixRotation2_h
 #define _vctMatrixRotation2_h
 
+/*!
+  \file
+  \brief Declaration of vctMatrixRotation2
+ */
 
 #include <cisstVector/vctFixedSizeMatrix.h>
 #include <cisstVector/vctMatrixRotation2Base.h>
 
 #include <cisstVector/vctExport.h>
-
 
 /*!
   \brief Define a rotation matrix for a space of dimension 2
@@ -83,7 +80,7 @@ public:
       operator uses the Assign() method inherited from the BaseType.
       This operator (as well as the Assign method) allows to set a
       rotation matrix to whatever value without any further validity
-      checking.  It is recommended to use it with caution. */ 
+      checking.  It is recommended to use it with caution. */
     inline ThisType & operator = (const ContainerType & other) {
         return reinterpret_cast<ThisType &>(this->Assign(other));
     }
@@ -140,7 +137,7 @@ public:
     inline vctMatrixRotation2(const vctFixedSizeConstVectorBase<DIMENSION, __stride1, value_type, __dataPtrType1>& v1,
                               const vctFixedSizeConstVectorBase<DIMENSION, __stride2, value_type, __dataPtrType2>& v2,
                               bool vectorsAreColumns, bool normalizeInput):
-        
+
         BaseType(v1, v2, vectorsAreColumns, normalizeInput)
     {}
 

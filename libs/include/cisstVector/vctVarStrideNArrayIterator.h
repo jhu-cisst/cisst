@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):	Daniel Li
   Created on:	2006-07-11
 
@@ -19,14 +19,14 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-/*! 
-  \file 
-  \brief Declaration of vctNArrayConstIterator and vctVarStrideNArrayIterator
- */
-
-
+#pragma once
 #ifndef _vctVarStrideNArrayIterator_h
 #define _vctVarStrideNArrayIterator_h
+
+/*!
+  \file
+  \brief Declaration of vctNArrayConstIterator and vctVarStrideNArrayIterator
+ */
 
 #include <iterator>
 #include <cisstVector/vctContainerTraits.h>
@@ -54,29 +54,29 @@ public:
     typedef typename _ownerType::value_type _elementType;
     VCT_CONTAINER_TRAITS_TYPEDEFS(_elementType);
     VCT_NARRAY_TRAITS_TYPEDEFS(DIMENSION);
-    
+
     /*! Define DIRECTION */
     enum {DIRECTION = _forward ? +1 : -1};
-    
+
     /*! The type of the iterator itself. */
     typedef vctVarStrideNArrayConstIterator<_ownerType, _forward> ThisType;
-    
+
     /*! The type of the owner of the container to which this
       iterator points. */
     typedef _ownerType OwnerType;
-    
+
     /*! Base type for this iterator, i.e. std::iterator. */
     typedef std::iterator<std::random_access_iterator_tag, value_type> BaseType;
-    
+
     /*! Type (i.e. category) of iterator,
       i.e. std::random_access_iterator_tag. */
     typedef typename BaseType::iterator_category iterator_category;
-    
+
 protected:
     /*! Pointer to the address of the container being referred to
       by this iterator. */
     const OwnerType * ContainerOwner;
-    
+
     /*! Pseudo-index for the iterator. See complete documentation
       for a thorough discussion of this "meta index". */
     int MetaIndex;
@@ -109,14 +109,14 @@ protected:
             offset += modulus * (*stridesBegin);
             metaindex /= static_cast<int>(sizes_value);
         }
-        
+
         offset += metaindex * ContainerOwner->sizes()[0] * ContainerOwner->strides()[0];
-        
+
         value_type * pointer = const_cast<value_type *>( ContainerOwner->Pointer() );
         ElementPointer = pointer + offset;
     }
-    
-    
+
+
 public:
     /*! Default constructor: create an uninitialized object. */
     vctVarStrideNArrayConstIterator(void):
@@ -124,8 +124,8 @@ public:
         MetaIndex(0),
         ElementPointer(0)
     {}
-    
-    
+
+
     /*! Constructor taking a non const element pointer; the
       starting position will be the first element of the nArray.
       Note that only read operations will be performed! */
@@ -135,16 +135,16 @@ public:
     {
         UpdateElementPointer();
     }
-    
-    
+
+
     /*! Copy constructor */
     vctVarStrideNArrayConstIterator(const ThisType & other):
         ContainerOwner(other.ContainerOwner),
         MetaIndex(other.MetaIndex),
         ElementPointer(other.ElementPointer)
     {}
-    
-    
+
+
     /*! Assignment */
     ThisType & operator = (const ThisType & other)
     {
@@ -153,8 +153,8 @@ public:
         this->ElementPointer = other.ElementPointer;
         return *this;
     }
-    
-    
+
+
     /*! Pre-increment. */
     ThisType & operator ++ (void)
     {
@@ -162,8 +162,8 @@ public:
         UpdateElementPointer();
         return *this;
     }
-    
-    
+
+
     /*! Post-increment. */
     ThisType operator ++ (int)
     {
@@ -171,8 +171,8 @@ public:
         ++(*this);
         return tmp;
     }
-    
-    
+
+
     /*! Pre-decrement. */
     ThisType & operator -- (void)
     {
@@ -180,8 +180,8 @@ public:
         UpdateElementPointer();
         return *this;
     }
-    
-    
+
+
     /*! Post-decrement. */
     ThisType operator -- (int)
     {
@@ -189,8 +189,8 @@ public:
         --(*this);
         return tmp;
     }
-    
-    
+
+
     /*! Increment by offset.
       \param difference offset to increment by
     */
@@ -200,8 +200,8 @@ public:
         UpdateElementPointer();
         return *this;
     }
-    
-    
+
+
     /*! Decrement by offset.
       \param difference offset to decrement by
     */
@@ -211,8 +211,8 @@ public:
         UpdateElementPointer();
         return *this;
     }
-    
-    
+
+
     /*! Subtraction between iterators returns the number of increments needed
       for the second operand to reach the first operand, if it is reachable.
       \note this operation assumes reachability and does not test for it.
@@ -221,15 +221,15 @@ public:
     {
         return ( this->MetaIndex - other.MetaIndex );
     }
-    
-    
+
+
     /*! Random access (return const reference). */
     const value_type & operator [] (difference_type index) const
     {
         int metaindex = MetaIndex + index;
         int offset = 0;
         int modulus;
-        
+
         typename nstride_type::const_reverse_iterator stridesBegin = ContainerOwner->strides().rbegin();
         typename nsize_type::const_reverse_iterator sizesBegin = ContainerOwner->sizes().rbegin();
         typename nsize_type::const_reverse_iterator sizesEnd = ContainerOwner->sizes().rend();
@@ -241,21 +241,21 @@ public:
             offset += modulus * (*stridesBegin);
             metaindex /= static_cast<int>(sizes_value);
         }
-        
+
         value_type * pointer = const_cast<value_type *>( ContainerOwner->Pointer() );
         value_type * elementPointer = pointer + offset;
-        
+
         return *elementPointer;
     }
-    
-    
+
+
     /*! Dereference (const). */
     const value_type & operator * (void) const
     {
         return *ElementPointer;
     }
-    
-    
+
+
     /*! Equality of iterators, required by STL. */
     bool operator == (const ThisType & other) const
     {
@@ -264,17 +264,17 @@ public:
             ( this->MetaIndex == other.MetaIndex ) &&
             ( this->ElementPointer == other.ElementPointer );
     }
-    
-    
+
+
     /*! Complementary operation to operator==. */
     bool operator != (const ThisType & other) const
     {
         return !( *this == other );
     }
-    
-    
+
+
     /*! Order relation between iterators, required by STL.
-      
+
       \note The STL manual states that "if j is reachable from i then
       i<j".  This does not imply the converse: "if i<j then j is
       reachable from i".  In the case here, the converse does not
@@ -284,8 +284,8 @@ public:
     {
         return ((*this) - other) < 0;
     }
-    
-    
+
+
     /*! Complementary operation to operator <. */
     bool operator > (const ThisType & other) const
     {
@@ -314,20 +314,20 @@ public:
     typedef vctVarStrideNArrayConstIterator<_ownerType, _forward> BaseType;
     typedef typename BaseType::iterator_category iterator_category;
 
-    
+
     /*! Default constructor: create an uninitialized object. */
     vctVarStrideNArrayIterator():
         BaseType()
     {}
-    
-    
+
+
     /*! Constructor taking a non const element pointer; the
       starting position will be the first element of the nArray.
       Note that only read operations will be performed! */
     vctVarStrideNArrayIterator(const OwnerType * container, int index = 0):
         BaseType(container, index)
     {}
-    
+
 
     /*! Copy constructor */
     vctVarStrideNArrayIterator(const ThisType & other):
@@ -343,7 +343,7 @@ public:
         this->ElementPointer = other.ElementPointer;
         return *this;
     }
-    
+
 
     /*! Redefine operator++ to return vctVarStrideNArrayIterator
       instead of vctVarStrideNArrayConstIterator */
@@ -353,8 +353,8 @@ public:
         this->UpdateElementPointer();
         return *this;
     }
-    
-    
+
+
     /*! Redefine operator++ to return vctVarStrideNArrayIterator
       instead of vctVarStrideNArrayConstIterator */
     ThisType operator ++ (int)
@@ -363,8 +363,8 @@ public:
         ++(*this);
         return tmp;
     }
-    
-    
+
+
     /*! Redefine operator-- to return vctVarStrideNArrayIterator
       instead of vctVarStrideNArrayConstIterator */
     ThisType & operator -- (void)
@@ -373,8 +373,8 @@ public:
         this->UpdateElementPointer();
         return *this;
     }
-    
-    
+
+
     /*! Redefine operator-- to return vctVarStrideNArrayIterator
         instead of vctVarStrideNArrayConstIterator */
     ThisType operator -- (int)
@@ -423,7 +423,7 @@ public:
             offset += modulus * (*stridesBegin);
             metaindex /= static_cast<int>(sizes_value);
         }
-        
+
         value_type * pointer = const_cast<value_type *>(this->ContainerOwner->Pointer());
         value_type * elementPointer = pointer + offset;
 

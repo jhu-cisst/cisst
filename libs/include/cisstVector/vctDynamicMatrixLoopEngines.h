@@ -19,24 +19,22 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
+#pragma once
 #ifndef _vctDynamicMatrixLoopEngines_h
 #define _vctDynamicMatrixLoopEngines_h
 
 /*!
-  \file 
+  \file
   \brief Declaration of vctDynamicMatrixLoopEngines
- */
-
+*/
 
 #include <cisstCommon/cmnPortability.h>
 #include <cisstCommon/cmnThrow.h>
 #include <cisstVector/vctDynamicCompactLoopEngines.h>
 
-
 /*!
   \brief Container class for the dynamic matrix engines.
-  
+
   \sa MoMiMi MioMi MoMiSi MoSiMi MioSi MoMi Mio SoMi SoMiMi
 */
 class vctDynamicMatrixLoopEngines {
@@ -72,7 +70,7 @@ public:
       the functions calling this engine, which have to declare
       their arguments as matrices templated over stride etc.
 
-      To use the engine, assume that Mout, Mi1, and Mi2 are matrix 
+      To use the engine, assume that Mout, Mi1, and Mi2 are matrix
       types; that mout, mi1, and mi2 are objects of corresponding
       types; and that OP is a valid operation in the form
       \f[ value\_type \times value\_type \rightarrow value\_type \f]
@@ -81,7 +79,7 @@ public:
       MoMiMi<OP>::Run(mout, mi1, mi2);
       \endcode
 
-      \param _elementOperationType a binary operation class. 
+      \param _elementOperationType a binary operation class.
       _elementOperationType must have a static method with the
       signature
       \code
@@ -117,7 +115,7 @@ public:
 
             const size_type rows = outputOwner.rows();
             const size_type cols = outputOwner.cols();
-            
+
             // check sizes
             if ((rows != input1Owner.rows())
                 || (cols != input1Owner.cols())
@@ -136,24 +134,24 @@ public:
                 const stride_type outputColStride = outputOwner.col_stride();
                 const stride_type outputRowStride = outputOwner.row_stride();
                 const stride_type outputStrideToNextRow = outputRowStride - cols * outputColStride;
-                
+
                 const stride_type input1ColStride = input1Owner.col_stride();
                 const stride_type input1RowStride = input1Owner.row_stride();
                 const stride_type input1StrideToNextRow = input1RowStride - cols * input1ColStride;
-                
+
                 const stride_type input2ColStride = input2Owner.col_stride();
                 const stride_type input2RowStride = input2Owner.row_stride();
                 const stride_type input2StrideToNextRow = input2RowStride - cols * input2ColStride;
-                
+
                 OutputPointerType outputPointer = outputOwner.Pointer();
                 const OutputPointerType outputRowEnd = outputPointer + rows * outputRowStride;
                 OutputPointerType outputColEnd = outputPointer + cols * outputColStride;
-                
+
                 Input1PointerType input1Pointer = input1Owner.Pointer();
                 Input2PointerType input2Pointer = input2Owner.Pointer();
-                
+
                 for (;
-                     outputPointer != outputRowEnd; 
+                     outputPointer != outputRowEnd;
                      outputPointer += outputStrideToNextRow, input1Pointer += input1StrideToNextRow, input2Pointer += input2StrideToNextRow,
                          outputColEnd += outputRowStride) {
                     for (;
@@ -171,7 +169,7 @@ public:
     class MoMi {
     public:
         template<class _outputMatrixType, class _inputMatrixType>
-        static inline void Run(_outputMatrixType & outputMatrix, 
+        static inline void Run(_outputMatrixType & outputMatrix,
                                const _inputMatrixType & inputMatrix)
         {
             typedef _outputMatrixType OutputMatrixType;
@@ -205,19 +203,19 @@ public:
                 const stride_type outputColStride = outputOwner.col_stride();
                 const stride_type outputRowStride = outputOwner.row_stride();
                 const stride_type outputStrideToNextRow = outputRowStride - cols * outputColStride;
-                
+
                 const stride_type inputColStride = inputOwner.col_stride();
                 const stride_type inputRowStride = inputOwner.row_stride();
                 const stride_type inputStrideToNextRow = inputRowStride - cols * inputColStride;
-                
+
                 OutputPointerType outputPointer = outputOwner.Pointer();
                 const OutputPointerType outputRowEnd = outputPointer + rows * outputRowStride;
                 OutputPointerType outputColEnd = outputPointer + cols * outputColStride;
-                
+
                 InputPointerType inputPointer = inputOwner.Pointer();
-                
+
                 for (;
-                     outputPointer != outputRowEnd; 
+                     outputPointer != outputRowEnd;
                      outputPointer += outputStrideToNextRow, inputPointer += inputStrideToNextRow,
                          outputColEnd += outputRowStride) {
                     for (;
@@ -252,17 +250,17 @@ public:
             } else {
                 const size_type rows = inputOutputOwner.rows();
                 const size_type cols = inputOutputOwner.cols();
-                
+
                 const stride_type colStride = inputOutputOwner.col_stride();
                 const stride_type rowStride = inputOutputOwner.row_stride();
                 const stride_type strideToNextRow = rowStride - cols * colStride;
-                
+
                 PointerType inputOutputPointer = inputOutputOwner.Pointer();
                 const PointerType rowEnd = inputOutputPointer + rows * rowStride;
                 PointerType colEnd = inputOutputPointer + cols * colStride;
-                
+
                 for (;
-                     inputOutputPointer != rowEnd; 
+                     inputOutputPointer != rowEnd;
                      inputOutputPointer += strideToNextRow, colEnd += rowStride) {
                     for (;
                          inputOutputPointer != colEnd;
@@ -279,7 +277,7 @@ public:
     class MioMi {
     public:
         template<class _inputOutputMatrixType, class _inputMatrixType>
-        static inline void Run(_inputOutputMatrixType & inputOutputMatrix, 
+        static inline void Run(_inputOutputMatrixType & inputOutputMatrix,
                                const _inputMatrixType & inputMatrix)
         {
             typedef _inputOutputMatrixType InputOutputMatrixType;
@@ -313,19 +311,19 @@ public:
                 const stride_type inputOutputColStride = inputOutputOwner.col_stride();
                 const stride_type inputOutputRowStride = inputOutputOwner.row_stride();
                 const stride_type inputOutputStrideToNextRow = inputOutputRowStride - cols * inputOutputColStride;
-                
+
                 const stride_type inputColStride = inputOwner.col_stride();
                 const stride_type inputRowStride = inputOwner.row_stride();
                 const stride_type inputStrideToNextRow = inputRowStride - cols * inputColStride;
-                
+
                 InputOutputPointerType inputOutputPointer = inputOutputOwner.Pointer();
                 const InputOutputPointerType inputOutputRowEnd = inputOutputPointer + rows * inputOutputRowStride;
                 InputOutputPointerType inputOutputColEnd = inputOutputPointer + cols * inputOutputColStride;
-                
+
                 InputPointerType inputPointer = inputOwner.Pointer();
-                
+
                 for (;
-                     inputOutputPointer != inputOutputRowEnd; 
+                     inputOutputPointer != inputOutputRowEnd;
                      inputOutputPointer += inputOutputStrideToNextRow, inputPointer += inputStrideToNextRow,
                          inputOutputColEnd += inputOutputRowStride) {
                     for (;
@@ -379,19 +377,19 @@ public:
                 const stride_type outputColStride = outputOwner.col_stride();
                 const stride_type outputRowStride = outputOwner.row_stride();
                 const stride_type outputStrideToNextRow = outputRowStride - cols * outputColStride;
-                
+
                 const stride_type inputColStride = inputOwner.col_stride();
                 const stride_type inputRowStride = inputOwner.row_stride();
                 const stride_type inputStrideToNextRow = inputRowStride - cols * inputColStride;
-                
+
                 OutputPointerType outputPointer = outputOwner.Pointer();
                 const OutputPointerType outputRowEnd = outputPointer + rows * outputRowStride;
                 OutputPointerType outputColEnd = outputPointer + cols * outputColStride;
-                
+
                 InputPointerType inputPointer = inputOwner.Pointer();
-                
+
                 for (;
-                     outputPointer != outputRowEnd; 
+                     outputPointer != outputRowEnd;
                      outputPointer += outputStrideToNextRow, inputPointer += inputStrideToNextRow,
                          outputColEnd += outputRowStride) {
                     for (;
@@ -445,19 +443,19 @@ public:
                 const stride_type outputColStride = outputOwner.col_stride();
                 const stride_type outputRowStride = outputOwner.row_stride();
                 const stride_type outputStrideToNextRow = outputRowStride - cols * outputColStride;
-                
+
                 const stride_type inputColStride = inputOwner.col_stride();
                 const stride_type inputRowStride = inputOwner.row_stride();
                 const stride_type inputStrideToNextRow = inputRowStride - cols * inputColStride;
-                
+
                 OutputPointerType outputPointer = outputOwner.Pointer();
                 const OutputPointerType outputRowEnd = outputPointer + rows * outputRowStride;
                 OutputPointerType outputColEnd = outputPointer + cols * outputColStride;
-                
+
                 InputPointerType inputPointer = inputOwner.Pointer();
-                
+
                 for (;
-                     outputPointer != outputRowEnd; 
+                     outputPointer != outputRowEnd;
                      outputPointer += outputStrideToNextRow, inputPointer += inputStrideToNextRow,
                          outputColEnd += outputRowStride) {
                     for (;
@@ -492,17 +490,17 @@ public:
             } else {
                 const size_type rows = inputOutputOwner.rows();
                 const size_type cols = inputOutputOwner.cols();
-                
+
                 const stride_type colStride = inputOutputOwner.col_stride();
                 const stride_type rowStride = inputOutputOwner.row_stride();
                 const stride_type strideToNextRow = rowStride - cols * colStride;
-                
+
                 InputOutputPointerType inputOutputPointer = inputOutputOwner.Pointer();
                 const InputOutputPointerType rowEnd = inputOutputPointer + rows * rowStride;
                 InputOutputPointerType colEnd = inputOutputPointer + cols * colStride;
-                
+
                 for (;
-                     inputOutputPointer != rowEnd; 
+                     inputOutputPointer != rowEnd;
                      inputOutputPointer += strideToNextRow, colEnd += rowStride) {
                     for (;
                          inputOutputPointer != colEnd;
@@ -519,7 +517,7 @@ public:
     class SoMi {
     public:
         typedef typename _incrementalOperationType::OutputType OutputType;
-        
+
         template<class _inputMatrixType>
         static OutputType Run(const _inputMatrixType & inputMatrix)
         {
@@ -538,9 +536,9 @@ public:
             } else {
                 const size_type rows = inputOwner.rows();
                 const size_type cols = inputOwner.cols();
-                
+
                 OutputType incrementalResult = _incrementalOperationType::NeutralElement();
-                
+
                 const stride_type inputColStride = inputOwner.col_stride();
                 const stride_type inputRowStride = inputOwner.row_stride();
                 const stride_type inputStrideToNextRow = inputRowStride - cols * inputColStride;
@@ -549,7 +547,7 @@ public:
                 InputPointerType inputColEnd = inputPointer + cols * inputColStride;
 
                 for (;
-                     inputPointer != inputRowEnd; 
+                     inputPointer != inputRowEnd;
                      inputPointer += inputStrideToNextRow, inputColEnd += inputRowStride) {
                     for (;
                          inputPointer != inputColEnd;
@@ -604,19 +602,19 @@ public:
                 const stride_type input1ColStride = input1Owner.col_stride();
                 const stride_type input1RowStride = input1Owner.row_stride();
                 const stride_type input1StrideToNextRow = input1RowStride - cols * input1ColStride;
-                
+
                 const stride_type input2ColStride = input2Owner.col_stride();
                 const stride_type input2RowStride = input2Owner.row_stride();
                 const stride_type input2StrideToNextRow = input2RowStride - cols * input2ColStride;
-                
+
                 Input1PointerType input1Pointer = input1Owner.Pointer();
                 const Input1PointerType input1RowEnd = input1Pointer + rows * input1RowStride;
                 Input1PointerType input1ColEnd = input1Pointer + cols * input1ColStride;
-                
+
                 Input2PointerType input2Pointer = input2Owner.Pointer();
-                
+
                 for (;
-                     input1Pointer != input1RowEnd; 
+                     input1Pointer != input1RowEnd;
                      input1Pointer += input1StrideToNextRow, input2Pointer += input2StrideToNextRow,
                          input1ColEnd += input1RowStride) {
                     for (;
@@ -630,18 +628,18 @@ public:
             }
         }
     };
-    
+
 
     /*!  \brief Implement operation of the form \f$m_{io} =
       op_{io}(m_{io}, op_{sm}(s, m_i))\f$ for fixed size matrices
-      
+
       This class uses template specialization to perform store-back
       matrix-scalar-matrix operations
 
       \f[
       m_{io} = \mathrm{op_{io}}(m_{io}, \mathrm{op_{sm}}(s, m_i))
       \f]
-      
+
       where \f$m_{io}\f$ is an input-output (store-back) matrix;
 	  \f$s\f$ is a scalar; and \f$m_i\f$ is an input matrix.  A
 	  typical example is: \f$m_{io} += s \cdot m_i\f$.  The matrices
@@ -649,9 +647,9 @@ public:
 	  is an operation between \f$s\f$ and the elements of \f$m_i\f$;
 	  \f$op_{io}\f$ is an operation between the output of
 	  \f$op_{sm}\f$ and the elements of \f$m_{io}\f$.
-      
+
       \param _ioOperationType The type of the store-back operation.
-      
+
       \param _scalarMatrixElementOperationType The type of the
 	  operation between scalar and input matrix.
 
@@ -661,9 +659,9 @@ public:
 	class MioSiMi
     {
 	public:
-        
+
         template<class _ioMatrixType, class _inputScalarType, class _inputMatrixType>
-        static inline void Run(_ioMatrixType & ioMatrix, 
+        static inline void Run(_ioMatrixType & ioMatrix,
                                const _inputScalarType & inputScalar,
                                const _inputMatrixType & inputMatrix)
 		{
@@ -672,18 +670,18 @@ public:
             typedef typename IoOwnerType::size_type size_type;
             typedef typename IoOwnerType::stride_type stride_type;
 			typedef typename IoOwnerType::pointer IoPointerType;
-			
+
             typedef _inputMatrixType InputMatrixType;
             typedef typename InputMatrixType::OwnerType InputOwnerType;
             typedef typename InputOwnerType::const_pointer InputPointerType;
-            
+
             // retrieve owners
             IoOwnerType & ioOwner = ioMatrix.Owner();
             const InputOwnerType & inputOwner = inputMatrix.Owner();
 
             const size_type rows = ioOwner.rows();
             const size_type cols = ioOwner.cols();
-            
+
             // check sizes
             if ((rows != inputOwner.rows()) || (cols != inputOwner.cols())) {
                 ThrowSizeMismatchException();
@@ -698,14 +696,14 @@ public:
                 const stride_type ioColStride = ioOwner.col_stride();
                 const stride_type ioRowStride = ioOwner.row_stride();
                 const stride_type ioStrideToNextRow = ioRowStride - cols * ioColStride;
-                
+
                 const stride_type inputColStride = inputOwner.col_stride();
                 const stride_type inputRowStride = inputOwner.row_stride();
                 const stride_type inputStrideToNextRow = inputRowStride - cols * inputColStride;
-                
+
                 IoPointerType ioPointer = ioOwner.Pointer();
                 InputPointerType inputPointer = inputOwner.Pointer();
-                
+
                 size_type rowIndex, colIndex;
                 for (rowIndex = 0;
                      rowIndex < rows;
@@ -727,7 +725,7 @@ public:
     class SoMiSi {
     public:
         typedef typename _incrementalOperationType::OutputType OutputType;
-        
+
         template<class _inputMatrixType, class _inputScalarType>
         static OutputType Run(const _inputMatrixType & inputMatrix,
                               const _inputScalarType & inputScalar)
@@ -737,10 +735,10 @@ public:
             typedef typename InputOwnerType::size_type size_type;
             typedef typename InputOwnerType::stride_type stride_type;
             typedef typename InputOwnerType::const_pointer InputPointerType;
-         
+
             // retrieve owners
             const InputOwnerType & inputOwner = inputMatrix.Owner();
-   
+
             const size_type rows = inputOwner.rows();
             const size_type cols = inputOwner.cols();
 
@@ -750,16 +748,16 @@ public:
             } else {
                 // otherwise
                 OutputType incrementalResult = _incrementalOperationType::NeutralElement();
-                
+
                 const stride_type inputColStride = inputOwner.col_stride();
                 const stride_type inputRowStride = inputOwner.row_stride();
                 const stride_type inputStrideToNextRow = inputRowStride - cols * inputColStride;
                 InputPointerType inputPointer = inputOwner.Pointer();
                 const InputPointerType inputRowEnd = inputPointer + rows * inputRowStride;
                 InputPointerType inputColEnd = inputPointer + cols * inputColStride;
-                
+
                 for (;
-                     inputPointer != inputRowEnd; 
+                     inputPointer != inputRowEnd;
                      inputPointer += inputStrideToNextRow, inputColEnd += inputRowStride) {
                     for (;
                          inputPointer != inputColEnd;
@@ -832,8 +830,8 @@ public:
                 ThrowSharedPointersException();
             }
 
-            for (; outputPointer != outputRowEnd; 
-                outputPointer += outputStrideToNextRow, 
+            for (; outputPointer != outputRowEnd;
+                outputPointer += outputStrideToNextRow,
                 input1Pointer += input1RowStride,
                 input2Pointer = input2Matrix.Pointer(),
                 outputColEnd += outputRowStride)
@@ -875,25 +873,25 @@ public:
 
             if (inputPointer == 0)
                 return;
-                
+
             if (inputOwner.IsCompact()) {
                 vctDynamicCompactLoopEngines::MinAndMax::Run(inputOwner, minValue, maxValue);
             } else {
                 // otherwise
                 const size_type rows = inputOwner.rows();
                 const size_type cols = inputOwner.cols();
-                
+
                 const stride_type inputColStride = inputOwner.col_stride();
                 const stride_type inputRowStride = inputOwner.row_stride();
                 const stride_type inputStrideToNextRow = inputRowStride - cols * inputColStride;
                 const InputPointerType inputRowEnd = inputPointer + rows * inputRowStride;
                 InputPointerType inputColEnd = inputPointer + cols * inputColStride;
-                
+
                 value_type minElement, maxElement;
                 maxElement = minElement = *inputPointer;
-                
+
                 for (;
-                     inputPointer != inputRowEnd; 
+                     inputPointer != inputRowEnd;
                      inputPointer += inputStrideToNextRow, inputColEnd += inputRowStride) {
                     for (;
                          inputPointer != inputColEnd;
@@ -905,7 +903,7 @@ public:
                             maxElement = element;
                         }
                     }
-                }   
+                }
                 minValue = minElement;
                 maxValue = maxElement;
             }
@@ -955,8 +953,8 @@ public:
             InputPointerType inputPointer;
             IndexPointerType indexPointer = indexVector.Pointer();
 
-            for (; outputPointer != outputRowEnd; 
-                outputPointer += outputStrideToNextRow, 
+            for (; outputPointer != outputRowEnd;
+                outputPointer += outputStrideToNextRow,
                 indexPointer += indexStride,
                 outputColEnd += outputRowStride)
             {

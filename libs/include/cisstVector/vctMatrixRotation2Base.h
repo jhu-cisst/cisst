@@ -19,16 +19,14 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
-/*! 
-  \File 
-  \brief Declaration of vctMatrixRotation2Base
- */
-
-
+#pragma once
 #ifndef _vctMatrixRotation2Base_h
 #define _vctMatrixRotation2Base_h
 
+/*!
+  \File
+  \brief Declaration of vctMatrixRotation2Base
+ */
 
 #include <cisstVector/vctFixedSizeMatrix.h>
 #include <cisstVector/vctDynamicMatrix.h>
@@ -115,7 +113,7 @@ public:
       operator uses the Assign() method inherited from the BaseType.
       This operator (as well as the Assign method) allows to set a
       rotation matrix to whatever value without any further validity
-      checking.  It is recommended to use it with caution. */ 
+      checking.  It is recommended to use it with caution. */
     inline ThisType & operator = (const ContainerType & other) {
         return reinterpret_cast<ThisType &>(this->Assign(other));
     }
@@ -141,7 +139,7 @@ public:
 
     /*!
       \name Constructors with normalization test.
-      
+
       These constructors will check that the input is valid,
       i.e. normalized.  If the input is not normalized, an exception
       (of type \c std::runtime_error) will be thrown.  Each
@@ -223,7 +221,7 @@ public:
 
     /*!
       \name Constructors without normalization test
-      
+
       These constructors will either assume that the input is
       normalized or normalize the input (a copy of it, if required)
       based on the last parameter provided.
@@ -292,7 +290,7 @@ public:
 
     /*!
       Constructor from 2 dynamic vectors.
-      
+
       By default the vectors represents the columns of the matrix. If
       the parameter vectorsAreColumns is set to false, the vectors
       provided will be used to set the matrix row by row. */
@@ -488,7 +486,7 @@ public:
         this->NormalizedSelf();
         return *this;
     }
-    
+
     /*! Conversion from an angle rotation. */
     inline ThisType &
     FromNormalized(const vctAngleRotation2 & angleRotation)
@@ -545,10 +543,10 @@ public:
         }
         return *this;
     }
-    
+
     /*!
       Conversion from 2 dynamic vectors.
-      
+
       By default the vectors represents the columns of the matrix. If
       the parameter vectorsAreColumns is set to false, the vectors
       provided will be used to set the matrix row by row. */
@@ -608,7 +606,7 @@ public:
       angle and convert back to a matrix. */
     CISST_EXPORT ThisType & NormalizedSelf(void);
 
-    /*! Sets this rotation matrix as the normalized version of another one.    
+    /*! Sets this rotation matrix as the normalized version of another one.
       \param otherMatrix Matrix used to compute the normalized matrix. */
     inline ThisType & NormalizedOf(const ThisType & otherMatrix) {
         *this = otherMatrix;
@@ -624,7 +622,7 @@ public:
         result.NormalizedSelf();
         return result;
     }
-    
+
 
     /*! Test if this matrix is normalized.  This methods checks that
       all the columns are normalized (within a margin of tolerance)
@@ -638,13 +636,13 @@ public:
         if ((vctUnaryOperations<value_type>::AbsValue::Operate(value_type(this->Column(0).Norm() - 1)) > tolerance)
             || (vctUnaryOperations<value_type>::AbsValue::Operate(value_type(this->Column(1).Norm() - 1)) > tolerance)
             || (vctUnaryOperations<value_type>::AbsValue::Operate(this->Column(0).DotProduct(this->Column(1))) > tolerance)) {
-            return false; 
+            return false;
         } else {
             return true;
         }
     }
 
-    
+
     /*! Inverse this rotation matrix.  This methods assumes that the
       matrix is normalized and sets this matrix as its transposed. */
     inline ThisType & InverseSelf(void) {
@@ -673,7 +671,7 @@ public:
         result.InverseOf(*this);
         return result;
     }
-    
+
 
     /*! Apply the rotation to a vector of fixed size 2. The result is
       stored into another vector of size 2 provided by the caller and
@@ -712,7 +710,7 @@ public:
     /*! Apply the rotation to another rotation.  The result is stored
       into a vctMatrixRotation2Base (ThisType) provided by the caller and
       passed by reference.
-      
+
       \param input The input rotation
       \param output The output rotation
     */
@@ -738,7 +736,7 @@ public:
         return result;
     }
 
-    
+
     /*! Apply the rotation to a dynamic vector.  The result is stored
       into another dynamic vector passed by reference by the caller.
       It is assumed that both are of size 2.
@@ -859,7 +857,7 @@ public:
     /*! Return true if this rotation is effectively equivalent to the
       other rotation, up to the given tolerance.  For a rotation
       matrix, this method is strictly the same as AlmostEqual.
-      
+
       \sa AlmostEqual
     */
     inline bool AlmostEquivalent(const ThisType & other,

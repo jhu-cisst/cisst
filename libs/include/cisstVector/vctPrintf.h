@@ -6,7 +6,7 @@
 
   Author(s):  Ofri Sadowsky
   Created on: 2006-02-15
-  
+
   (C) Copyright 2006-2007 Johns Hopkins University (JHU), All Rights
   Reserved.
 
@@ -20,6 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
+#pragma once
 #ifndef _vctPrintf_h
 #define _vctPrintf_h
 
@@ -31,7 +32,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstVector/vctDynamicConstMatrixBase.h>
 
 template <vct::size_type _size, vct::stride_type _stride, class _elementType, class _dataPtrType>
-bool cmnTypePrintf(cmnPrintfParser & parser, 
+bool cmnTypePrintf(cmnPrintfParser & parser,
                    const vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType> & vector)
 {
     if (!parser.MatchOutputWithFormatChar(vector[0]) ) {
@@ -49,7 +50,7 @@ bool cmnTypePrintf(cmnPrintfParser & parser,
 }
 
 template <class _vectorOwnerType, class _elementType>
-bool cmnTypePrintf(cmnPrintfParser & parser, 
+bool cmnTypePrintf(cmnPrintfParser & parser,
                    const vctDynamicConstVectorBase<_vectorOwnerType, _elementType> & vector)
 {
     const vct::size_type vectorSize = vector.size();
@@ -74,7 +75,7 @@ bool cmnTypePrintf(cmnPrintfParser & parser,
 
 template <vct::size_type _rows, vct::size_type _cols, vct::stride_type _rowStride, vct::stride_type _colStride,
 class _elementType, class _dataPtrType>
-    inline bool cmnTypePrintf(cmnPrintfParser & parser, 
+    inline bool cmnTypePrintf(cmnPrintfParser & parser,
     const vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStride,
     _elementType, _dataPtrType> & matrix)
 {
@@ -98,7 +99,7 @@ class _elementType, class _dataPtrType>
 
 
 template <class _matrixOwnerType, class _elementType>
-bool cmnTypePrintf(cmnPrintfParser & parser, 
+bool cmnTypePrintf(cmnPrintfParser & parser,
                    const vctDynamicConstMatrixBase<_matrixOwnerType, _elementType> & matrix)
 {
     const vct::size_type rows = matrix.rows();

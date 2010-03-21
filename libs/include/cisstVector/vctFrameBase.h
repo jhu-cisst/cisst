@@ -19,15 +19,14 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
-/*! 
-  \file 
-  \brief Declaration of vctFrameBase
- */
-
-
+#pragma once
 #ifndef _vctFrameBase_h
 #define _vctFrameBase_h
+
+/*!
+  \file
+  \brief Declaration of vctFrameBase
+ */
 
 #include <cisstVector/vctFixedSizeMatrixBase.h>
 #include <cisstVector/vctExport.h>
@@ -62,7 +61,7 @@ public:
 protected:
     RotationType RotationMember;
     TranslationType TranslationMember;
-    
+
 public:
 
 
@@ -70,7 +69,7 @@ public:
     vctFrameBase(void) {
         Assign(Identity());
     }
-    
+
     /*! Constructor from a translation and a rotation. */
     template <stride_type __stride, class __dataPtrType>
     vctFrameBase(const RotationType & rotation,
@@ -78,14 +77,14 @@ public:
         RotationMember(rotation),
         TranslationMember(translation)
     {}
-    
+
     /*! Const reference to the identity.  In this case, the
         translation is set to <tt>(0, 0, 0)</tt> and the rotation is
         set to identity using its own method
         <tt>RotationType::Identity()</tt>. */
     static CISST_EXPORT const ThisType & Identity();
-    
-    
+
+
     inline ThisType & Assign(const ThisType & otherFrame) {
         RotationMember.Assign(otherFrame.Rotation());
         TranslationMember.Assign(otherFrame.Translation());
@@ -127,7 +126,7 @@ public:
         return *this;
     }
 
-    
+
     inline ThisType & InverseOf(const ThisType & otherFrame) {
         TranslationMember = otherFrame.Translation();
         RotationMember = otherFrame.Rotation();
@@ -191,7 +190,7 @@ public:
     /*! Compose this transform over the input transform to obtain a
       new output transform passed by reference by the caller.  The
       semantics of the operation are:
-      
+
       output = (*this) * input
 
       if (*this) is [R1 | p1], input is [R2 | p2], then output will be
@@ -272,7 +271,7 @@ public:
 
     /*! Apply this transform to a matrix of three rows */
     template <size_type __cols,
-              stride_type __rowStride1, stride_type __colStride1, class __dataPtrType1, 
+              stride_type __rowStride1, stride_type __colStride1, class __dataPtrType1,
               stride_type __rowStride2, stride_type __colStride2, class __dataPtrType2>
     inline void ApplyTo(const vctFixedSizeConstMatrixBase<DIMENSION, __cols, __rowStride1, __colStride1, value_type, __dataPtrType1> & input,
                         vctFixedSizeMatrixBase<DIMENSION, __cols, __rowStride2, __colStride2, value_type, __dataPtrType2> & output) const
@@ -410,7 +409,7 @@ public:
         return result;
     }
 
-    inline void ApplyInverseTo(const ThisType & input, ThisType & output) const {  
+    inline void ApplyInverseTo(const ThisType & input, ThisType & output) const {
         ThisType inverse;
         inverse.InverseOf(*this);
         inverse.ApplyTo(input, output);
@@ -425,7 +424,7 @@ public:
 
     /*! Apply the inverse transform to a fixed-size matrix of three rows */
     template <size_type __cols,
-              stride_type __rowStride1, stride_type __colStride1, class __dataPtrType1, 
+              stride_type __rowStride1, stride_type __colStride1, class __dataPtrType1,
               stride_type __rowStride2, stride_type __colStride2, class __dataPtrType2>
     inline void ApplyInverseTo(const vctFixedSizeConstMatrixBase<DIMENSION, __cols, __rowStride1, __colStride1, value_type, __dataPtrType1> & input,
                         vctFixedSizeMatrixBase<DIMENSION, __cols, __rowStride2, __colStride2, value_type, __dataPtrType2> & output) const
@@ -489,7 +488,7 @@ public:
       methods provided by the different rotation representations
       (vctQuaternionRotation3, vctMatrixRotation3, ...) and the
       translation.
-      
+
       \sa AlmostEqual
     */
     //@{
@@ -509,10 +508,10 @@ public:
       on the AllowsEqual() methods provided by the different rotation
       representations (vctQuaternionRotation3, vctMatrixRotation3,
       ...) and the translation.
-      
+
       The tolerance factor is used to compare both the translations
       and rotations.
-      
+
       \sa AlmostEquivalent
     */
     inline bool AlmostEqual(const ThisType & other,
@@ -521,7 +520,7 @@ public:
                 && TranslationMember.AlmostEqual(other.Translation(), tolerance));
     }
 
-    
+
     /*! Return true if this transformation is equivalent to the other
       transformation, up to the given tolerance.  The result is based
       on the AlmostEquivalent() methods provided by the different
@@ -545,8 +544,8 @@ public:
         ToStream(outputStream);
         return outputStream.str();
     }
-    
-    /*!  Print the matrix in a human readable format */    
+
+    /*!  Print the matrix in a human readable format */
     void ToStream(std::ostream & outputStream) const {
         outputStream << "translation: "
                      << std::endl
@@ -586,7 +585,7 @@ public:
     }
 
     /*! Binary serialization */
-    void SerializeRaw(std::ostream & outputStream) const 
+    void SerializeRaw(std::ostream & outputStream) const
     {
         this->Translation().SerializeRaw(outputStream);
         this->Rotation().SerializeRaw(outputStream);

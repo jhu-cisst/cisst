@@ -19,10 +19,9 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
+#pragma once
 #ifndef _vctDynamicVector_h
 #define _vctDynamicVector_h
-
 
 /*!
   \file
@@ -67,10 +66,10 @@ http://www.cisst.org/cisst/license.txt.
   // the vectorSize variable can be set to any value at any time
   // before creating the vector.
   unsigned int vectorSize = 12;
-  
+
   // constructor allocation
   vctDynamicVector<ElementType> v1(vectorSize);
-  
+
   // Create an empty vector and later allocate memory.
   vctDynamicVector<ElementType> v2;
   v2.SetSize(vectorSize);
@@ -80,10 +79,10 @@ http://www.cisst.org/cisst/license.txt.
   // vector
   vctDynamicVector<Elements> v3(3 * vectorSize);
   v3.SetSize(2 * vectorSize);
-  
+
   // resize a vector and keep as many elements as possible.
   v3.resize(vectorSize);
-  
+
   // Store an algebraic result to a new vector.  In this case,
   // memory is allocated by the algebraic operation, and then
   // attached to the vector object.
@@ -94,12 +93,12 @@ http://www.cisst.org/cisst/license.txt.
   \code
   // Initialize all elements to the same value
   vctDynamicVector<ElementType> v5(vectorSize, 2.0);
-  
+
   // Initialize the elements by specific value.  NOTE: All the
   // arguments MUST be of type ElementType
   vctDynamicVector<ElementType> sequence(7,
                                          1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0);
-  
+
   // Assign one vector to another.  This operation reallocates
   // space for the target vector.  Note that the right-hand-side
   // object can be any ``dynamic'' vector of any element type,
@@ -135,9 +134,9 @@ public:
     VCT_CONTAINER_TRAITS_TYPEDEFS(_elementType);
     typedef vctDynamicVector<_elementType> ThisType;
     typedef vctDynamicVectorBase<vctDynamicVectorOwner<_elementType>, _elementType> BaseType;
-    typedef typename BaseType::CopyType CopyType; 
-    typedef typename BaseType::TypeTraits TypeTraits; 
-    typedef typename BaseType::ElementVaArgPromotion ElementVaArgPromotion; 
+    typedef typename BaseType::CopyType CopyType;
+    typedef typename BaseType::TypeTraits TypeTraits;
+    typedef typename BaseType::ElementVaArgPromotion ElementVaArgPromotion;
 
     /*! Default constructor. Initialize an empty vector. */
     vctDynamicVector()
@@ -198,7 +197,7 @@ public:
     */
     vctDynamicVector(const vctReturnDynamicVector<value_type> & otherVector);
 
-    
+
     /*! Copy constructor: Allocate memory to store a copy of the other
       vector, and copy the elements of the other vector to this
       vector.
@@ -210,7 +209,7 @@ public:
         this->Assign(otherVector);
     }
 
-     
+
     /*! Copy constructor: Allocate memory and copy all the elements
       from the other vector.
     */
@@ -356,13 +355,13 @@ public:
     }
 
     /*! Binary deserialization */
-    void DeSerializeRaw(std::istream & inputStream) 
+    void DeSerializeRaw(std::istream & inputStream)
     {
         // get and set size
         size_type mySize;
         cmnDeSerializeSizeRaw(inputStream, mySize);
         this->SetSize(mySize);
-        
+
         // get data
         size_type index;
         for (index = 0; index < mySize; ++index) {
@@ -375,7 +374,7 @@ public:
 
 /*!
   \ingroup cisstVector
-  
+
   Class vctReturnDynamicVector is specialized to store a temporary
   vector object by transfering ownership.  An object of this class has
   all the methods inherited from vctDynamicVector, but can only be

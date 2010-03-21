@@ -19,16 +19,14 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
-/*! 
-  \file 
-  \brief Declaration of vctFixedStrideMatrixConstIterator and vctFixedStrideMatrixIterator
-*/
-
-
+#pragma once
 #ifndef _vctFixedStrideMatrixIterator_h
 #define _vctFixedStrideMatrixIterator_h
 
+/*!
+  \file
+  \brief Declaration of vctFixedStrideMatrixConstIterator and vctFixedStrideMatrixIterator
+*/
 
 #include <iterator>
 
@@ -156,7 +154,7 @@ public:
       \param dataPtr data pointer
       \param initialColumn column index where the iterator is initialized
     */
-    explicit vctFixedStrideMatrixConstIterator(value_type * dataPtr, 
+    explicit vctFixedStrideMatrixConstIterator(value_type * dataPtr,
                                                index_type initialColumn = 0)
         : DataPtr(dataPtr)
         , CurrentColumn(initialColumn) {
@@ -254,8 +252,8 @@ public:
 
       The number of increments is found by the following equations:
       DataPtr - (difference / NUM_COLUMNS) * ROW_STRIDE + (difference % NUM_COLUMNS) * COL_STRIDE == other.DataPtr
-      DataPtr - other.DataPtr == (difference / NUM_COLUMNS) * ROW_STRIDE + (difference % NUM_COLUMNS) * COL_STRIDE 
-      
+      DataPtr - other.DataPtr == (difference / NUM_COLUMNS) * ROW_STRIDE + (difference % NUM_COLUMNS) * COL_STRIDE
+
       if (ROW_STRIDE >= NUM_COLUMNS * COL_STRIDE) {
       (DataPtr - other.DataPtr) / ROW_STRIDE == row_diff == (difference / NUM_COLUMNS)
       DataPtr - other.DataPtr - row_diff * ROW_STRIDE == (difference % NUM_COLUMNS) * COL_STRIDE
@@ -364,10 +362,10 @@ public:
     typedef vctFixedStrideMatrixIterator<_elementType, _columnStride, _numColumns, _rowStride> ThisType;
     typedef vctFixedStrideMatrixConstIterator<_elementType, _columnStride, _numColumns, _rowStride> BaseType;
     typedef typename BaseType::iterator_category iterator_category;
-    
+
     /*! Default constructor: create an uninitialized object */
     vctFixedStrideMatrixIterator()
-        : BaseType() 
+        : BaseType()
     {}
 
 

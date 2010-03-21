@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):	Daniel Li
   Created on:	2006-06-27
 
@@ -19,23 +19,16 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
+#pragma once
 #ifndef _vctDynamicNArrayOwner_h
 #define _vctDynamicNArrayOwner_h
-
 
 /*!
   \file
   \brief Declaration of vctDynamicNArrayOwner
 */
 
-
-template <class _ownerType, bool _forward>
-class vctVarStrideNArrayIterator;
-
-template <class _ownerType, bool _forward>
-class vctVarStrideNArrayConstIterator;
-
+#include <cisstVector/vctForwardDeclarations.h>
 
 /*!
   This templated class owns a dynamically allocated array, but does
@@ -52,13 +45,13 @@ public:
 
     /*! The type of this owner. */
     typedef vctDynamicNArrayOwner<_elementType, _dimension> ThisType;
-    
+
     /* iterators are container specific */
     typedef vctVarStrideNArrayIterator<ThisType, true> iterator;
     typedef vctVarStrideNArrayConstIterator<ThisType, true> const_iterator;
     typedef vctVarStrideNArrayIterator<ThisType, false> reverse_iterator;
     typedef vctVarStrideNArrayConstIterator<ThisType, false> const_reverse_iterator;
-    
+
 
     vctDynamicNArrayOwner():
         SizesMember(0),
@@ -85,18 +78,18 @@ public:
     {
         return DIMENSION;
     }
-    
+
     /*! Return the size of each dimension.
       \return a vector containing the size of the nArray in each dimension */
     const nsize_type & sizes(void) const
     {
         return SizesMember;
     }
-    
+
     /*! Return the size of a dimension.
       \param dimension the dimension of interest
       \return the size of the nArray in the given dimension
-      
+
       \note the dimension is zero-based
     */
     size_type size(dimension_type dimension) const
@@ -106,10 +99,10 @@ public:
         else
             return 1;
     }
-    
+
     /*! Return the size of the nArray.
       \return the number of elements
-      
+
       \note This method returns 0 if the dimension
       of the nArray is zero.
     */
@@ -120,14 +113,14 @@ public:
         else
             return SizesMember.ProductOfElements();
     }
-    
+
     /*! Return the strides of each dimension.
       \return a vector containing the strides of the nArray in each dimension */
     const nstride_type & strides(void) const
     {
         return StridesMember;
     }
-    
+
     /*! Return the stride of a dimension.
       \param dimension the dimension of interest
       \return the stride of the nArray in the given dimension */
@@ -138,14 +131,14 @@ public:
         else
             return 1;
     }
-    
+
     /*! Return a pointer to the nArray's data.
       \return a pointer to this nArray's data */
     pointer Pointer(void)
     {
         return Data;
     }
-    
+
     /*! Return a pointer to the nArray's data at the specified element.
       \return a pointer to this nArray's data at the specified element */
     pointer Pointer(const nsize_type & indices)
@@ -154,14 +147,14 @@ public:
             indicesRef(reinterpret_cast<stride_type *>(const_cast<size_type *>(indices.Pointer())));
         return (Data + StridesMember.DotProduct(indicesRef));
     }
-    
+
     /*! Return a const pointer to the nArray's data.
       \return a const pointer to this nArray's data */
     const_pointer Pointer(void) const
     {
         return Data;
     }
-    
+
     /*! Return a const pointer to the nArray's data at the specified element.
       \return a const pointer to this nArray's data at the specified element */
     const_pointer Pointer(const nsize_type & indices) const
@@ -170,17 +163,17 @@ public:
             indicesRef(reinterpret_cast<stride_type *>(const_cast<size_type *>(indices.Pointer())));
         return (Data + StridesMember.DotProduct(indicesRef));
     }
-    
+
     iterator begin(void)
     {
         return iterator(this, 0);
     }
-    
+
     iterator end(void)
     {
         return iterator(this, 0) + size();
     }
-    
+
     const_iterator begin(void) const
     {
         return const_iterator(this, 0);

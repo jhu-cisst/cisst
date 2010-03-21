@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):	Ofri Sadowsky, Anton Deguet
   Created on: 2004-07-01
 
@@ -19,15 +19,14 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
-#ifndef _vctDynamicMatrixBase_h 
+#pragma once
+#ifndef _vctDynamicMatrixBase_h
 #define _vctDynamicMatrixBase_h
 
 /*!
   \file
   \brief Declaration of vctDynamicMatrixBase
 */
-
 
 #include <cstdarg>
 #include <cisstVector/vctDynamicConstMatrixBase.h>
@@ -52,13 +51,13 @@ public:
     typedef vctDynamicMatrixBase ThisType;
     /*! Type of the base class. */
     typedef vctDynamicConstMatrixBase<_matrixOwnerType, _elementType> BaseType;
-    
+
     typedef _matrixOwnerType OwnerType;
 
-    typedef typename BaseType::iterator iterator; 
-    typedef typename BaseType::reverse_iterator reverse_iterator; 
-    typedef typename BaseType::const_iterator const_iterator; 
-    typedef typename BaseType::const_reverse_iterator const_reverse_iterator; 
+    typedef typename BaseType::iterator iterator;
+    typedef typename BaseType::reverse_iterator reverse_iterator;
+    typedef typename BaseType::const_iterator const_iterator;
+    typedef typename BaseType::const_reverse_iterator const_reverse_iterator;
 
     typedef typename BaseType::ConstRowRefType ConstRowRefType;
     typedef typename BaseType::RowRefType RowRefType;
@@ -79,47 +78,47 @@ public:
     /*! Returns an iterator on the first element (STL
       compatibility). */
     iterator begin(void) {
-        return this->Matrix.begin(); 
+        return this->Matrix.begin();
     }
 
     /*! Returns an iterator on the last element (STL
       compatibility). */
     iterator end(void) {
-        return this->Matrix.end(); 
+        return this->Matrix.end();
     }
 
     /*! Returns a reverse iterator on the last element (STL
-      compatibility). */ 
+      compatibility). */
     reverse_iterator rbegin(void) {
-        return this->Matrix.rbegin(); 
+        return this->Matrix.rbegin();
     }
 
     /*! Returns a reverse iterator on the element before first
-      (STL compatibility). */ 
+      (STL compatibility). */
     reverse_iterator rend(void) {
-        return this->Matrix.rend(); 
+        return this->Matrix.rend();
     }
 
     /* documented in base class */
     const_iterator begin(void) const {
-        return BaseType::begin(); 
+        return BaseType::begin();
     }
 
     /* documented in base class */
     const_iterator end(void) const {
-        return BaseType::end(); 
+        return BaseType::end();
     }
 
     /* documented in base class */
     const_reverse_iterator rbegin(void) const {
-        return BaseType::rbegin(); 
+        return BaseType::rbegin();
     }
 
     /* documented in base class */
     const_reverse_iterator rend(void) const {
-        return BaseType::rend(); 
+        return BaseType::rend();
     }
-    
+
     /*! Reference a row of this matrix by index.
       \return a reference to the element[index] */
     RowRefType operator[](size_type index) {
@@ -140,7 +139,7 @@ public:
         return this->Matrix;
     }
 
-    
+
     /*! Return a non const pointer to an element of the container,
       specified by its indices. Addition to the STL requirements.
     */
@@ -177,7 +176,7 @@ public:
         return (begin())[index];
     }
 
-    
+
     /* documented in base class */
     const_reference at(size_type index) const throw(std::out_of_range) {
         return BaseType::at(index);
@@ -227,13 +226,13 @@ public:
 
     /*! \name Row and column references. */
     //@{
-    /*! Create a row reference. */  
+    /*! Create a row reference. */
     RowRefType Row(size_type index) throw(std::out_of_range) {
         this->ThrowUnlessValidRowIndex(index);
         return RowRefType(this->cols(), Pointer(index, 0), this->col_stride());
     }
-    
-    /*! Create a column reference. */  
+
+    /*! Create a column reference. */
     ColumnRefType Column(size_type index) throw(std::out_of_range) {
         this->ThrowUnlessValidColIndex(index);
         return ColumnRefType(this->rows(), Pointer(0, index), this->row_stride());
@@ -261,10 +260,10 @@ public:
 
       \note This method will throw an exception if the rows are not
       compact, i.e. if the column stride is not equal to 1.
-    */ 
+    */
     VectorPointerType & RowPointers(VectorPointerType & rowPointers) throw(std::runtime_error) {
         if (! this->col_stride() == 1) {
-            cmnThrow(std::runtime_error("vctDynamicMatrix: RowPointers requires compact rows")); 
+            cmnThrow(std::runtime_error("vctDynamicMatrix: RowPointers requires compact rows"));
         }
         const size_type rows = this->rows();
         // resize the vector
@@ -277,17 +276,17 @@ public:
     }
 
 
-    /* documented in base class */  
+    /* documented in base class */
     ConstRowRefType Row(size_type index) const throw(std::out_of_range) {
         return BaseType::Row(index);
     }
-    
+
     /* documented in base class */
     ConstColumnRefType Column(size_type index) const throw(std::out_of_range) {
         return BaseType::Column(index);
     }
 
-    /* documented in base class */  
+    /* documented in base class */
     ConstDiagonalRefType Diagonal(void) const {
         return BaseType::Diagonal();
     }
@@ -298,7 +297,7 @@ public:
     }
 
     //@}
-    
+
     //@{ Methods to change the order of rows and columns of a matrix
     /*! Exchange two rows of the matrix */
     void ExchangeRows(const size_type row1Index, const size_type row2Index) {
@@ -445,7 +444,7 @@ public:
       memset(0).  If the matrix is not compact this method will use
       SetAll(0) and memset otherwise.  This provides a slightly more
       efficent way to set all elements to zero.
-      
+
       \return true if the matrix is compact and memset was used, false
       otherwise. */
     inline bool Zeros(void) {
@@ -476,7 +475,7 @@ public:
                 memset(currentPointer, 0, sizeOfCol);
             }
             return true;
-        } else { 
+        } else {
             this->SetAll(static_cast<value_type>(0));
             return false;
         }
@@ -485,7 +484,7 @@ public:
 
     /*!
       \name Assignment operation between matrices of different types.
-      
+
       \param other The matrix to be copied.
     */
     //@{
@@ -527,7 +526,7 @@ public:
 
       \note For a non-reallocating Assign, it is recommended to use
       the Assign() methods.
-      
+
       \note If the destination matrix doesn't have the same size as
       the source and can not be resized, an exception will be thrown
       by the Assign method called internally.
@@ -543,7 +542,7 @@ public:
     inline ThisType & ForceAssign(const vctDynamicConstMatrixBase<__matrixOwnerType, __elementType> & other) {
         return this->Assign(other);
     }
-    
+
     template <size_type __rows, size_type __cols,
               stride_type __rowStride, stride_type __colStride,
               class __elementType, class __dataPtrType>
@@ -654,7 +653,7 @@ public:
     }
     //@}
 
-    
+
     /*! Assign to this matrix values from a C array given as a
       pointer to value_type.  The purpose of this method is to simplify
       the syntax by not necessitating the creation of an explicit matrix
@@ -747,7 +746,7 @@ public:
       \param matrix1 The first operand of the binary operation
 
       \param matrix2 The second operand of the binary operation
-      
+
       \return The matrix "this" modified.
     */
     template <class __matrixOwnerType1, class __matrixOwnerType2>
@@ -757,8 +756,8 @@ public:
             MoMiMi< typename vctBinaryOperations<value_type>::Addition >
             ::Run(*this, matrix1, matrix2);
         return *this;
-    }    
-    
+    }
+
     /* documented above */
     template <class __matrixOwnerType1, class __matrixOwnerType2>
     inline ThisType & DifferenceOf(const vctDynamicConstMatrixBase<__matrixOwnerType1, _elementType> & matrix1,
@@ -768,7 +767,7 @@ public:
             ::Run(*this, matrix1, matrix2);
         return *this;
     }
-    
+
     /* documented above */
     template <class __matrixOwnerType1, class __matrixOwnerType2>
     inline ThisType & ElementwiseProductOf(const vctDynamicConstMatrixBase<__matrixOwnerType1, _elementType> & matrix1,
@@ -778,7 +777,7 @@ public:
             ::Run(*this, matrix1, matrix2);
         return *this;
     }
-    
+
     /* documented above */
     template <class __matrixOwnerType1, class __matrixOwnerType2>
     inline ThisType & ElementwiseRatioOf(const vctDynamicConstMatrixBase<__matrixOwnerType1, _elementType> & matrix1,
@@ -822,10 +821,10 @@ public:
       (Subtraction), a multiplication (ElementwiseMultiply) a division
       (ElementwiseDivide), a minimization (ElementwiseMin) or a
       maximisation (ElementwiseMax).
-      
+
       \param otherMatrix The second operand of the binary operation
       (this[i] is the first operand)
-      
+
       \return The matrix "this" modified.
     */
     template <class __matrixOwnerType>
@@ -844,7 +843,7 @@ public:
             Run(*this, otherMatrix);
         return *this;
     }
-    
+
     /* documented above */
     template <class __matrixOwnerType>
     inline ThisType & ElementwiseMultiply(const vctDynamicConstMatrixBase<__matrixOwnerType, _elementType> & otherMatrix) {
@@ -853,7 +852,7 @@ public:
             Run(*this, otherMatrix);
         return *this;
     }
-    
+
     /* documented above */
     template <class __matrixOwnerType>
     inline ThisType & ElementwiseDivide(const vctDynamicConstMatrixBase<__matrixOwnerType, _elementType> & otherMatrix) {
@@ -862,7 +861,7 @@ public:
             Run(*this, otherMatrix);
         return *this;
     }
-    
+
     /* documented above */
     template <class __matrixOwnerType>
     inline ThisType & ElementwiseMin(const vctDynamicConstMatrixBase<__matrixOwnerType, _elementType> & otherMatrix) {
@@ -886,7 +885,7 @@ public:
     inline ThisType & operator += (const vctDynamicConstMatrixBase<__matrixOwnerType, _elementType> & otherMatrix) {
         return this->Add(otherMatrix);
     }
-    
+
     /* documented above */
     template <class __matrixOwnerType>
     inline ThisType & operator -= (const vctDynamicConstMatrixBase<__matrixOwnerType, _elementType> & otherMatrix) {
@@ -894,7 +893,7 @@ public:
     }
     //@}
 
-   
+
     /*! \name Binary elementwise operations a matrix and a scalar.
       Store the result of op(matrix, scalar) to a third matrix. */
     //@{
@@ -907,18 +906,18 @@ public:
 
       \param matrix The first operand of the binary operation.
       \param scalar The second operand of the binary operation.
-      
+
       \return The matrix "this" modified.
     */
     template <class __matrixOwnerType>
-    inline ThisType & SumOf(const vctDynamicConstMatrixBase<__matrixOwnerType, _elementType> & matrix, 
+    inline ThisType & SumOf(const vctDynamicConstMatrixBase<__matrixOwnerType, _elementType> & matrix,
                             const value_type scalar) {
         vctDynamicMatrixLoopEngines::
             MoMiSi< typename vctBinaryOperations<value_type>::Addition >::
             Run(*this, matrix, scalar);
         return *this;
     }
-    
+
     /* documented above */
     template <class __matrixOwnerType>
     inline ThisType & DifferenceOf(const vctDynamicConstMatrixBase<__matrixOwnerType, _elementType> & matrix,
@@ -928,8 +927,8 @@ public:
             Run(*this, matrix, scalar);
         return *this;
     }
-    
-    /* documented above */    
+
+    /* documented above */
     template <class __matrixOwnerType>
     inline ThisType & ProductOf(const vctDynamicConstMatrixBase<__matrixOwnerType, _elementType> & matrix,
                                 const value_type scalar) {
@@ -938,7 +937,7 @@ public:
             Run(*this, matrix, scalar);
         return *this;
     }
-    
+
     /* documented above */
     template <class __matrixOwnerType>
     inline ThisType & RatioOf(const vctDynamicConstMatrixBase<__matrixOwnerType, _elementType> & matrix,
@@ -969,7 +968,7 @@ public:
         return *this;
     }
     //@}
-    
+
 
 
     /*! \name Binary elementwise operations a scalar and a matrix.
@@ -984,7 +983,7 @@ public:
 
       \param scalar The first operand of the binary operation.
       \param matrix The second operand of the binary operation.
-      
+
       \return The matrix "this" modified.
     */
     template <class __matrixOwnerType>
@@ -995,7 +994,7 @@ public:
             Run(*this, scalar, matrix);
         return *this;
     }
-    
+
     /* documented above */
     template <class __matrixOwnerType>
     inline ThisType & DifferenceOf(const value_type scalar,
@@ -1005,7 +1004,7 @@ public:
             Run(*this, scalar, matrix);
         return *this;
     }
-    
+
     /* documented above */
     template <class __matrixOwnerType>
     inline ThisType & ProductOf(const value_type scalar,
@@ -1015,7 +1014,7 @@ public:
             Run(*this, scalar, matrix);
         return *this;
     }
-    
+
     /* documented above */
     template <class __matrixOwnerType>
     inline ThisType & RatioOf(const value_type scalar,
@@ -1061,7 +1060,7 @@ public:
 
       \param scalar The second operand of the binary operation
       (this[i] is the first operand.
-      
+
       \return The matrix "this" modified.
     */
     inline ThisType & Add(const value_type scalar) {
@@ -1070,7 +1069,7 @@ public:
             Run(*this, scalar);
         return *this;
     }
-    
+
     /* documented above */
     inline ThisType & Subtract(const value_type scalar) {
         vctDynamicMatrixLoopEngines::
@@ -1078,7 +1077,7 @@ public:
             Run(*this, scalar);
         return *this;
     }
-    
+
     /* documented above */
     inline ThisType & Multiply(const value_type scalar) {
         vctDynamicMatrixLoopEngines::
@@ -1086,7 +1085,7 @@ public:
             Run(*this, scalar);
         return *this;
     }
-    
+
     /* documented above */
     inline ThisType & Divide(const value_type scalar) {
         vctDynamicMatrixLoopEngines::
@@ -1094,7 +1093,7 @@ public:
             Run(*this, scalar);
         return *this;
     }
-    
+
     /* documented above */
     inline ThisType & ClipAbove(const value_type upperBound) {
         vctDynamicMatrixLoopEngines::
@@ -1115,7 +1114,7 @@ public:
     inline ThisType & operator += (const value_type scalar) {
         return this->Add(scalar);
     }
-    
+
     /* documented above */
     inline ThisType & operator -= (const value_type scalar) {
         return this->Subtract(scalar);
@@ -1156,7 +1155,7 @@ public:
       (TransposeOf).
 
       \param otherMatrix The operand of the unary operation.
-      
+
       \return The matrix "this" modified.
     */
     template <class __matrixOwnerType>
@@ -1209,7 +1208,7 @@ public:
       the matrix "this", performs \f$ this[i] \leftarrow
       op(this[i])\f$ where \f$op\f$ can calculate the absolute
       value (AbsSelf) or the opposite (NegationSelf).
-      
+
       \return The matrix "this" modified.
     */
     inline ThisType & AbsSelf(void) {
@@ -1247,11 +1246,11 @@ public:
 
     /*! Product of two matrices.  If the sizes of the matrices don't
       match, an exception is thrown.
-      
+
     \param matrix1 The left operand of the binary operation.
 
     \param matrix2 The right operand of the binary operation.
-    
+
     \return The matrix "this" modified. */
     template <class __matrixOwnerType1, class __matrixOwnerType2>
     void ProductOf(const vctDynamicConstMatrixBase<__matrixOwnerType1, _elementType> & matrix1,
@@ -1262,7 +1261,7 @@ public:
         typedef typename Input2MatrixType::ConstColumnRefType Input2ColumnRefType;
         vctDynamicMatrixLoopEngines::
             Product<typename vctBinaryOperations<value_type, Input1RowRefType, Input2ColumnRefType>::DotProduct>::
-            Run((*this), matrix1, matrix2);   
+            Run((*this), matrix1, matrix2);
     }
 
 

@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):	Ofri Sadowsky
   Created on:	2003-11-04
 
@@ -19,14 +19,14 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
-/*! 
-  \file 
-  \brief Declaration of vctFixedSizeConstMatrixBase
- */
-
+#pragma once
 #ifndef _vctFixedSizeConstMatrixBase_h
 #define _vctFixedSizeConstMatrixBase_h
+
+/*!
+  \file
+  \brief Declaration of vctFixedSizeConstMatrixBase
+ */
 
 #include <cisstCommon/cmnSerializer.h>
 
@@ -115,13 +115,13 @@ class vctFixedSizeConstMatrixBase
     VCT_NARRAY_TRAITS_TYPEDEFS(DIMENSION);
 
     /*! Type of the matrix itself. */
-    typedef vctFixedSizeConstMatrixBase<_rows, _cols, 
+    typedef vctFixedSizeConstMatrixBase<_rows, _cols,
         _rowStride, _colStride, _elementType, _dataPtrType> ThisType;
 
     /*! Traits used for all useful types related to a vctFixedSizeMatrix */
-    typedef vctFixedSizeMatrixTraits<_elementType, _rows, _cols, 
+    typedef vctFixedSizeMatrixTraits<_elementType, _rows, _cols,
         _rowStride, _colStride> MatrixTraits;
-    
+
     /*! Iterator on the elements of the matrix. */
     typedef typename MatrixTraits::iterator iterator;
 
@@ -138,18 +138,18 @@ class vctFixedSizeConstMatrixBase
     enum {ROWS = MatrixTraits::ROWS, COLS = MatrixTraits::COLS,
           LENGTH = MatrixTraits::LENGTH};
     /*! Define the strides between rows and columns of the matrix */
-    enum {ROWSTRIDE = MatrixTraits::ROWSTRIDE, 
+    enum {ROWSTRIDE = MatrixTraits::ROWSTRIDE,
           COLSTRIDE = MatrixTraits::COLSTRIDE};
 
     /*! Define properties of the main diagonal of the matrix */
     enum {DIAGONAL_LENGTH = (ROWS <= COLS) ? ROWS : COLS,
           DIAGONAL_STRIDE = ROWSTRIDE + COLSTRIDE};
-    
-    /*! The type indicating a row of this matrix accessed by (const) reference 
+
+    /*! The type indicating a row of this matrix accessed by (const) reference
      */
     typedef vctFixedSizeConstVectorRef<_elementType, COLS, COLSTRIDE>
         ConstRowRefType;
-    /*! The type indicating a row of this matrix accessed by (non-const) 
+    /*! The type indicating a row of this matrix accessed by (non-const)
       reference */
     typedef vctFixedSizeVectorRef<_elementType, COLS, COLSTRIDE>
         RowRefType;
@@ -157,7 +157,7 @@ class vctFixedSizeConstMatrixBase
       reference */
     typedef vctFixedSizeConstVectorRef<_elementType, ROWS, ROWSTRIDE>
         ConstColumnRefType;
-    /*! The type indicating a column of this matrix accessed by (non-const) 
+    /*! The type indicating a column of this matrix accessed by (non-const)
       reference */
     typedef vctFixedSizeVectorRef<_elementType, ROWS, ROWSTRIDE>
     ColumnRefType;
@@ -176,36 +176,36 @@ class vctFixedSizeConstMatrixBase
     /*! The type of vector object required to store a copy of a column of this
       matrix */
     typedef vctFixedSizeVector<_elementType, ROWS> ColumnValueType;
-    
+
     /*! The type of const reference to this matrix. */
     typedef vctFixedSizeConstMatrixRef<_elementType, _rows, _cols, _rowStride, _colStride> ConstRefType;
-    
+
     /*! The type of reference to this matrix. */
     typedef vctFixedSizeMatrixRef<_elementType, _rows, _cols, _rowStride, _colStride> RefType;
-    
-    
+
+
     /*! The type of object representing this matrix accessed in transposed
       order.  Access is by (const) reference */
     typedef vctFixedSizeConstMatrixRef<_elementType, _cols, _rows,
                                        _colStride, _rowStride> ConstRefTransposeType;
-    
+
     /*! The type of object representing this matrix accessed in transposed
       order.  Access is by (non-const) reference */
     typedef vctFixedSizeMatrixRef<_elementType, _cols, _rows,
                                   _colStride, _rowStride> RefTransposeType;
-    
+
     /*! The type of object required to store a transposed copy of this
         matrix.  The storage order is determined by comparing the
         strides. */
     typedef vctFixedSizeMatrix<_elementType, COLS, ROWS,
                                COLSTRIDE <= ROWSTRIDE> TransposeValueType;
-    
+
     /*! The type of a matrix returned by value from operations on this
         object.  The storage order is determined by comparing the
         strides. */
     typedef vctFixedSizeMatrix<_elementType, ROWS, COLS,
                                COLSTRIDE <= ROWSTRIDE> MatrixValueType;
-    
+
     /*! The type of a matrix of booleans returned from operations on
       this object, e.g., ElementwiseEqual.  The storage order is
       determined by comparing the strides. */
@@ -225,51 +225,51 @@ class vctFixedSizeConstMatrixBase
             cmnThrow(std::out_of_range("vctFixedSizeMatrix: Invalid index"));
         }
     }
-    
-    
+
+
     /*! Check the validity of the row and column indices. */
     inline void ThrowUnlessValidIndex(size_type rowIndex, size_type colIndex) const throw(std::out_of_range) {
         if (! ValidIndex(rowIndex, colIndex)) {
             cmnThrow(std::out_of_range("vctFixedSizeMatrix: Invalid indices"));
         }
     }
-    
-    
+
+
  public:
     /*! Returns a const iterator on the first element (STL
       compatibility). */
     const_iterator begin() const {
         return const_iterator(Data, 0);
     }
-    
-    
+
+
     /*! Returns a const iterator on the past-the-last element (STL
       compatibility). */
     const_iterator end() const {
         return const_iterator(Data) + LENGTH;
     }
-    
-    
+
+
     /*! Returns a reverse const iterator on the last element (STL
-      compatibility). */ 
+      compatibility). */
     const_reverse_iterator rbegin() const {
         return const_reverse_iterator(Pointer(ROWS - 1, COLS - 1), 0);
     }
-    
-    
+
+
     /*! Returns a reverse const iterator on the element before first
-      (STL compatibility). */ 
+      (STL compatibility). */
     const_reverse_iterator rend() const {
-        return const_reverse_iterator(Data - ROWSTRIDE + 
+        return const_reverse_iterator(Data - ROWSTRIDE +
                                       COLSTRIDE * (COLS - 1), 0);
     }
-    
+
     /*! Returns the size of the matrix or vector (STL
       compatibility). */
     size_type size() const {
         return LENGTH;
     }
-    
+
     /*! Return a fixed size vector containing the number of rows and columns. */
     const nsize_type & sizes(void) const {
         static nsize_type staticSizes(ROWS, COLS);
@@ -285,7 +285,7 @@ class vctFixedSizeConstMatrixBase
     size_type cols() const {
       return COLS;
     }
-    
+
 
     /*! Returns the maximum size of the matrix or vector (STL
       compatibility).  For a fixed size matrix or vector, same as
@@ -293,8 +293,8 @@ class vctFixedSizeConstMatrixBase
     size_type max_size() const {
         return LENGTH;
     }
-    
-    
+
+
     /*! Return a fixed size vector containing the row and column strides. */
     const nstride_type & strides(void) const {
         static nstride_type staticStrides(ROWSTRIDE, COLSTRIDE);
@@ -306,26 +306,26 @@ class vctFixedSizeConstMatrixBase
     difference_type row_stride() const {
         return ROWSTRIDE;
     }
-    
+
     /*! Returns the column stride. Not required by STL but provided
       for completeness. */
     difference_type col_stride() const {
         return COLSTRIDE;
     }
-    
+
     /*! Tell is the vector is empty (STL compatibility).  False unless
       SIZE is zero. */
     bool empty() const {
         return (LENGTH == 0);
     }
-    
+
     /*! Reference a row of this matrix by index (const).
       \return a const reference to the element[index] */
     ConstRowRefType operator[](size_type index) const {
         return ConstRowRefType(Data + ROWSTRIDE * index);
     }
 
-    
+
     /*! Returns a const pointer to an element of the container,
       specified by its index. Addition to the STL requirements.
     */
@@ -352,18 +352,18 @@ class vctFixedSizeConstMatrixBase
         return ((rowIndex < rows())
                 && (colIndex < cols()));
     }
-    
+
     /*! Returns true if rowIndex is a valid row index. */
     inline bool ValidRowIndex(size_type rowIndex) const {
         return (rowIndex < rows());
     }
-    
+
     /*! Returns true if colIndex is a valid column index. */
     inline bool ValidColIndex(size_type colIndex) const {
         return (colIndex < cols());
     }
-    
-    
+
+
     /*! Access an element by index (const).  Compare with std::vector::at().
       This method can be a handy substitute for the overloaded operator () when
       operator overloading is unavailable or inconvenient.
@@ -373,7 +373,7 @@ class vctFixedSizeConstMatrixBase
         return (begin())[index];
     }
 
-    
+
     /*! Access an element by index (const).  Compare with std::vector::at().
       This method can be a handy substitute for the overloaded operator () when
       operator overloading is unavailable or inconvenient.
@@ -382,7 +382,7 @@ class vctFixedSizeConstMatrixBase
         ThrowUnlessValidIndex(rowIndex, colIndex);
         return *(Pointer(rowIndex, colIndex));
     }
-    
+
 #ifndef SWIG
     /*! Access an element by index (const).  See method at().
       \return a const reference to element[rowIndex, colIndex] */
@@ -405,7 +405,7 @@ class vctFixedSizeConstMatrixBase
     ConstRowRefType Row(size_type index) const {
         return ConstRowRefType(Data + ROWSTRIDE * index);
     }
-    
+
     ConstColumnRefType Column(size_type index) const {
         return ConstColumnRefType(Data + COLSTRIDE * index);
     }
@@ -427,7 +427,7 @@ class vctFixedSizeConstMatrixBase
             SoMi<typename vctBinaryOperations<value_type>::Addition,
             typename vctUnaryOperations<value_type>::Identity>::
             Run(*this);
-    } 
+    }
 
     /*! Return the product of the elements of the matrix.
       \return The product of all the elements */
@@ -463,7 +463,7 @@ class vctFixedSizeConstMatrixBase
 
     /*! Return the L1 norm of the matrix, i.e. the sum of the absolute
       values of all the elements.
- 
+
       \return The L1 norm. */
     inline value_type L1Norm(void) const {
         return vctFixedSizeMatrixLoopEngines::
@@ -504,7 +504,7 @@ class vctFixedSizeConstMatrixBase
       values of all the elements.
 
       \sa LinfNorm.
- 
+
       \return The maximum of the absolute values. */
     inline value_type MaxAbsElement(void) const {
         return vctFixedSizeMatrixLoopEngines::
@@ -515,7 +515,7 @@ class vctFixedSizeConstMatrixBase
 
     /*! Return the minimum of the absolute
       values of all the elements.
- 
+
       \return The minimum of the absolute values. */
     inline value_type MinAbsElement(void) const {
         return vctFixedSizeMatrixLoopEngines::
@@ -611,7 +611,7 @@ class vctFixedSizeConstMatrixBase
     inline bool IsRowMajor(void) const {
         return (col_stride() <= row_stride());
     }
-    
+
     /*! Test if the matrix is compact, i.e. a m by n matrix actually
       uses a contiguous block of memory or size m by n. */
     inline bool IsCompact(void) const {
@@ -644,7 +644,7 @@ class vctFixedSizeConstMatrixBase
         return ((this->rows() == size)
                 && (this->cols() == size));
     }
-    
+
     /*! Test if the method FastCopyOf can be used instead of Assign.
       See FastCopyOf for more details. */
     template <size_type __rows, size_type __cols, stride_type __rowStride, stride_type __colStride, class __dataPtrType>
@@ -820,7 +820,7 @@ class vctFixedSizeConstMatrixBase
             value_type,
             typename vctBinaryOperations<bool, value_type, value_type>::Lesser>(*this, otherMatrix);
     }
-    
+
     /* documented above */
     template <stride_type __rowStride, stride_type __colStride, class __dataPtrType>
     inline BoolMatrixValueType
@@ -907,7 +907,7 @@ class vctFixedSizeConstMatrixBase
             typename vctBinaryOperations<bool, value_type, value_type>::Lesser>::
             Run(*this, scalar);
     }
-    
+
     /* documented above */
     inline bool LesserOrEqual(const value_type & scalar) const {
         return vctFixedSizeMatrixLoopEngines::
@@ -1015,7 +1015,7 @@ class vctFixedSizeConstMatrixBase
       \return A new matrix.
     */
     inline MatrixValueType Abs(void) const;
-    
+
     /* documented above */
     inline MatrixValueType Negation(void) const;
 
@@ -1117,11 +1117,11 @@ class vctFixedSizeConstMatrixBase
         const size_type myRows = rows();
         const size_type myCols = cols();
         size_type indexRow, indexCol;
-        
+
         if (headerOnly) {
             for (indexRow = 0; indexRow < myRows; ++indexRow) {
                 for (indexCol = 0; indexCol < myCols; ++indexCol) {
-                    outputStream << headerPrefix << "-m" << indexRow << "_" << indexCol; 
+                    outputStream << headerPrefix << "-m" << indexRow << "_" << indexCol;
                     // delimiter between elements
                     if (indexCol < (myCols - 1)) {
                         outputStream << delimiter;
@@ -1150,12 +1150,12 @@ class vctFixedSizeConstMatrixBase
     }
 
     /*! Binary serialization */
-    void SerializeRaw(std::ostream & outputStream) const 
+    void SerializeRaw(std::ostream & outputStream) const
     {
         const size_type myRows = rows();
         const size_type myCols = cols();
         size_type indexRow, indexCol;
-        
+
         for (indexRow = 0; indexRow < myRows; ++indexRow) {
             for (indexCol = 0; indexCol < myCols; ++indexCol) {
                 cmnSerializeRaw(outputStream, this->Element(indexRow, indexCol));

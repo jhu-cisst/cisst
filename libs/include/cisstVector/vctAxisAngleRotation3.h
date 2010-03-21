@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):	Anton Deguet
   Created on:	2005-01-13
 
@@ -19,15 +19,14 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
-/*! 
-  \file 
-  \brief Declaration of vctAxisAngleRotation3
- */
-
-
+#pragma once
 #ifndef _vctAxisAngleRotation3_h
 #define _vctAxisAngleRotation3_h
+
+/*!
+  \file
+  \brief Declaration of vctAxisAngleRotation3
+ */
 
 #include <cisstCommon/cmnConstants.h>
 
@@ -37,7 +36,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstVector/vctMatrixRotation3Base.h>
 #include <cisstVector/vctRodriguezRotation3Base.h>
 #include <cisstVector/vctExport.h>
-
 
 #ifndef DOXYGEN
 #ifndef SWIG
@@ -108,7 +106,7 @@ protected:
     AxisType AxisMember;
     AngleType AngleMember;
 
-    
+
     /*! Throw an exception unless this rotation is normalized. */
     inline void ThrowUnlessIsNormalized(void) const throw(std::runtime_error) {
         if (! IsNormalized()) {
@@ -128,13 +126,13 @@ protected:
     }
 
 public:
-    
+
     /*! Default constructor. Sets the axis to (1, 0, 0) and the angle to zero. */
     inline vctAxisAngleRotation3():
         AxisMember(1.0, 0.0, 0.0),
         AngleMember(0.0)
     {}
-    
+
 
     /*! Assignement method.  This method doesn't perform any test on the input. */
     inline ThisType & Assign(const ThisType & other) {
@@ -142,11 +140,11 @@ public:
         AngleMember = other.Angle();
         return *this;
     }
-    
+
 
     /*!
       \name Constructors with normalization test.
-      
+
       These constructors will check that the input is valid,
       i.e. normalized.  If the input is not normalized, an exception
       (of type \c std::runtime_error) will be thrown.  Each
@@ -170,7 +168,7 @@ public:
     {
         From(axis, angle);
     }
-    
+
     /*! Constructor from an axis and an angle.
       \param axis A unit vector of size 3.
       \param angle The angle in radian
@@ -182,7 +180,7 @@ public:
     {
         From(axis, angle);
     }
-    
+
     /*! Constructor from a vctQuaternionRotation3. */
     template <class _containerType>
     inline vctAxisAngleRotation3(const vctQuaternionRotation3Base<_containerType> & quaternionRotation)
@@ -190,7 +188,7 @@ public:
     {
         From(quaternionRotation);
     }
-    
+
     /*! Constructor from a vctMatrixRotation3. */
     template <class _containerType>
     inline vctAxisAngleRotation3(const vctMatrixRotation3Base<_containerType> & matrixRotation)
@@ -198,7 +196,7 @@ public:
     {
         From(matrixRotation);
     }
-    
+
     /*! Constructor from a vctRodriguezRotation3. */
     template <class _containerType>
     inline vctAxisAngleRotation3(const vctRodriguezRotation3Base<_containerType> & rodriguezRotation)
@@ -212,7 +210,7 @@ public:
 
     /*!
       \name Constructors without normalization test
-      
+
       These constructors will either assume that the input is
       normalized or normalize the input (a copy of it, if required)
       based on the last parameter provided:
@@ -265,7 +263,7 @@ public:
             FromRaw(axis, angle);
         }
     }
-    
+
     /*! Constructor from a vctQuaternionRotation3. */
     template <class _containerType>
     inline vctAxisAngleRotation3(const vctQuaternionRotation3Base<_containerType> & quaternionRotation,
@@ -277,7 +275,7 @@ public:
             FromRaw(quaternionRotation);
         }
     }
-    
+
     /*! Constructor from a vctMatrixRotation3. */
     template <class _containerType>
     inline vctAxisAngleRotation3(const vctMatrixRotation3Base<_containerType> & matrixRotation,
@@ -289,7 +287,7 @@ public:
             FromRaw(matrixRotation);
         }
     }
-    
+
     /*! Constructor from a vctRodriguezRotation3. */
     template <class _containerType>
     inline vctAxisAngleRotation3(const vctRodriguezRotation3Base<_containerType> & rodriguezRotation,
@@ -301,10 +299,10 @@ public:
             FromRaw(rodriguezRotation);
         }
     }
-    
+
     //@}
 
-    
+
 
     /*! Const reference to the identity.  In this case, the axis is
         set to <tt>(1, 0, 0)</tt> and the angle is set to zero. */
@@ -314,22 +312,22 @@ public:
     inline const AxisType & Axis(void) const {
         return AxisMember;
     }
-    
+
     /*! Reference to the rotation axis data member. */
     inline AxisType & Axis(void) {
         return AxisMember;
     }
-    
+
     /*! Const reference to the rotation angle data member (in radians). */
     inline const AngleType & Angle(void) const {
         return AngleMember;
     }
-    
+
     /*! Reference to the rotation angle data member (in radians). */
     inline AngleType & Angle(void) {
         return AngleMember;
-    }    
-    
+    }
+
 
     /*!
       \name Conversion from normalized input.
@@ -378,7 +376,7 @@ public:
         ThrowUnlessIsNormalized(quaternionRotation);
         return FromRaw(quaternionRotation);
     }
-    
+
     /*! Conversion from a vctMatrixRotation3. */
     template <class _containerType>
     inline ThisType & From(const vctMatrixRotation3Base<_containerType> & matrixRotation)
@@ -432,7 +430,7 @@ public:
     inline ThisType & FromNormalized(const vctMatrixRotation3Base<_containerType> & matrixRotation) {
         return FromRaw(matrixRotation.Normalized());
     }
-    
+
     /*! Conversion from a vctRodriguezRotation3. */
     template <class _containerType>
     inline ThisType & FromNormalized(const vctRodriguezRotation3Base<_containerType> & rodriguezRotation) {
@@ -475,14 +473,14 @@ public:
         vctAxisAngleRotation3FromRaw(*this, matrixRotation);
         return *this;
     }
-    
+
     /*! Conversion from a vctRodriguezRotation3. */
     template <class _containerType>
     inline ThisType & FromRaw(const vctRodriguezRotation3Base<_containerType> & rodriguezRotation) {
         vctAxisAngleRotation3FromRaw(*this, rodriguezRotation);
         return *this;
     }
-    
+
     //@}
 
 
@@ -525,7 +523,7 @@ public:
     }
 
     /*!
-      Sets this rotation as the normalized version of another one.    
+      Sets this rotation as the normalized version of another one.
 
       \param otherRotation Axis angle rotation used to compute the
       normalized rotation. */
@@ -554,7 +552,7 @@ public:
     inline bool IsNormalized(value_type tolerance = TypeTraits::Tolerance()) const {
         return AxisMember.IsNormalized(tolerance);
     }
-    
+
 
     /*! Return true if this rotation is exactly equal to the other
       rotation, without any tolerance error.  Rotations may be
@@ -643,8 +641,8 @@ public:
         ToStream(outputStream);
         return outputStream.str();
     }
-    
-    /*!  Print the matrix in a human readable format */    
+
+    /*!  Print the matrix in a human readable format */
     void ToStream(std::ostream & outputStream) const {
         outputStream << "axis: "
                      << std::endl
@@ -656,14 +654,14 @@ public:
     }
 
     /*! Binary serialization */
-    void SerializeRaw(std::ostream & outputStream) const 
+    void SerializeRaw(std::ostream & outputStream) const
     {
         this->Axis().SerializeRaw(outputStream);
         cmnSerializeRaw(outputStream, this->Angle());
     }
 
     /*! Binary deserialization */
-    void DeSerializeRaw(std::istream & inputStream) 
+    void DeSerializeRaw(std::istream & inputStream)
     {
         this->Axis().DeSerializeRaw(inputStream);
         cmnDeSerializeRaw(inputStream, this->Angle());

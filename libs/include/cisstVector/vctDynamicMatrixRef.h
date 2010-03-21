@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):	Ofri Sadowsky, Anton Deguet
   Created on: 2004-07-01
 
@@ -19,20 +19,17 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
+#pragma once
 #ifndef _vctDynamicMatrixRef_h
 #define _vctDynamicMatrixRef_h
-
 
 /*!
   \file
   \brief Declaration of vctDynamicMatrixRef
 */
 
-
 #include<cisstVector/vctDynamicMatrixBase.h>
 #include<cisstVector/vctDynamicConstMatrixRef.h>
-
 
 /*!
   \ingroup cisstVector
@@ -61,7 +58,7 @@ http://www.cisst.org/cisst/license.txt.
   first5x5.SetRef(wholeMatrix, 0, 0, 5, 5);
   first5x5.SetAll(5.0);
   \endcode
-  
+
   \note Make sure the underlying memory is not freed after the Ref
   object is created and before it is used.  This would lead to faulty
   memory access and potential bugs.
@@ -153,7 +150,7 @@ public:
 
     /*! Construct a dynamic reference to a fixed-size matrix.
       \note the strides of this reference will be identical to the strides of
-      the input matrix.  For a more advanced access, customize the parameters 
+      the input matrix.  For a more advanced access, customize the parameters
       yourself (see the other ctors).
     */
     template <size_type __rows, size_type __cols, stride_type __rowStride, stride_type __colStride, typename __dataPtrType>
@@ -169,7 +166,7 @@ public:
       \param rows the number of rows being referenced
       \param cols the number of columns being referenced
       \note the strides of this reference will be identical to the strides of
-      the input matrix.  For a more advanced access, customize the parameters 
+      the input matrix.  For a more advanced access, customize the parameters
       yourself (see the other ctors).
     */
     template <size_type __rows, size_type __cols, stride_type __rowStride, stride_type __colStride, typename __dataPtrType>
@@ -181,7 +178,7 @@ public:
 
     /*! Construct a dynamic reference to a dynamic matrix.
       \note the strides of this reference will be identical to the strides of
-      the input matrix.  For a more advanced access, customize the parameters 
+      the input matrix.  For a more advanced access, customize the parameters
       yourself (see the other ctors).
     */
     template <class __ownerType>
@@ -197,7 +194,7 @@ public:
       \param rows the number of rows being referenced
       \param cols the number of columns being referenced
       \note the strides of this reference will be identical to the strides of
-      the input matrix.  For a more advanced access, customize the parameters 
+      the input matrix.  For a more advanced access, customize the parameters
       yourself (see the other ctors).
     */
     //@
@@ -274,7 +271,7 @@ public:
       \param rows the number of rows being referenced
       \param cols the number of columns being referenced
       \note the strides of this reference will be identical to the strides of
-      the input matrix.  For a more advanced access, customize the parameters 
+      the input matrix.  For a more advanced access, customize the parameters
       yourself (see the SetRef methods).
       \note This method verifies that the size of this matrix does not exceed the
       size of the input matrix (otherwise cmnThrow is used to throw std::out_of_range).
@@ -306,7 +303,7 @@ public:
       \param rows the number of rows being referenced
       \param cols the number of columns being referenced
       \note the strides of this reference will be identical to the strides of
-      the input matrix.  For a more advanced access, customize the parameters 
+      the input matrix.  For a more advanced access, customize the parameters
       yourself (see the other SetRef methods).
       \note This method verifies that the size of this matrix does not exceed the
       size of the input matrix (otherwise cmnThrow is used to throw std::out_of_range).
@@ -372,7 +369,7 @@ public:
         if ((myRows != this->rows()) || (myCols != this->cols())) {
             cmnThrow(std::runtime_error("vctDynamicMatrixRef::DeSerializeRaw: Sizes of matrices don't match"));
         }
-        
+
         // get data
         size_type indexRow, indexCol;
         for (indexRow = 0; indexRow < myRows; ++indexRow) {

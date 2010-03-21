@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):	Ofri Sadowsky, Anton Deguet
   Created on: 2004-07-01
 
@@ -19,11 +19,9 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
-
+#pragma once
 #ifndef _vctDynamicVectorRef_h
 #define _vctDynamicVectorRef_h
-
 
 /*!
   \file
@@ -35,7 +33,6 @@ http://www.cisst.org/cisst/license.txt.
 #include<cisstVector/vctDynamicVectorBase.h>
 #include<cisstVector/vctDynamicVectorRefOwner.h>
 #include<cisstVector/vctDynamicConstVectorRef.h>
-
 
 /*!
   \ingroup cisstVector
@@ -64,7 +61,7 @@ http://www.cisst.org/cisst/license.txt.
   first5.SetRef(wholeVector, 0, 5);
   first5.SetAll(5.0);
   \endcode
-  
+
   \note Make sure the underlying memory is not freed after the Ref
   object is created and before it is used.  This would lead to faulty
   memory access and potential bugs.
@@ -108,7 +105,7 @@ public:
     {
         this->SetRef(other.size(), const_cast<pointer>(other.Pointer()), other.stride());
     }
-    
+
     vctDynamicVectorRef(size_type size, value_type* data, stride_type stride = 1)
     {
         this->SetRef(size, data, stride);
@@ -129,7 +126,7 @@ public:
     /*! Initialize a dynamic reference to specified subvector of a fixed-size vector.
       \note This constructor allows automatic conversion
       from a fixed-size vector to a dynamic vector representation.
-      \note The stride values are taken from the fixed size vector, but the starting point and 
+      \note The stride values are taken from the fixed size vector, but the starting point and
       length must be specified.
     */
     template <size_type __size, stride_type __stride, class __dataPtrType>
@@ -270,7 +267,7 @@ public:
         if (mySize != this->size()) {
             cmnThrow(std::runtime_error("vctDynamicVectorRef::DeSerializeRaw: Sizes of vectors don't match"));
         }
-        
+
         // get data
         size_type index;
         for (index = 0; index < mySize; ++index) {

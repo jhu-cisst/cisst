@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):	Daniel Li
   Created on:	2006-07-10
 
@@ -19,8 +19,8 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
-#ifndef _vctDynamicNArrayBase_h 
+#pragma once
+#ifndef _vctDynamicNArrayBase_h
 #define _vctDynamicNArrayBase_h
 
 /*!
@@ -28,11 +28,9 @@ http://www.cisst.org/cisst/license.txt.
   \brief Declaration of vctDynamicNArrayBase
 */
 
-
 #include <cisstVector/vctDynamicConstNArrayBase.h>
 #include <cisstVector/vctStoreBackUnaryOperations.h>
 #include <cisstVector/vctStoreBackBinaryOperations.h>
-
 
 /*!
   This class provides all the const methods inherited from
@@ -95,7 +93,7 @@ public:
       compatibility). */
     iterator begin(void)
     {
-        return this->NArray.begin(); 
+        return this->NArray.begin();
     }
 
     /* documented in base class */
@@ -118,7 +116,7 @@ public:
     }
 
     /*! Returns a reverse iterator on the last element (STL
-      compatibility). */ 
+      compatibility). */
     reverse_iterator rbegin(void)
     {
         return this->NArray.rbegin();
@@ -131,7 +129,7 @@ public:
     }
 
     /*! Returns a reverse iterator on the element before first
-      (STL compatibility). */ 
+      (STL compatibility). */
     reverse_iterator rend(void)
     {
         return this->NArray.rend();
@@ -355,7 +353,7 @@ public:
       memset(0).  If the nArray is not compact this method will use
       SetAll(0) and memset otherwise.  This provides a slightly more
       efficent way to set all elements to zero.
-      
+
       \return true if the nArray is compact and memset was used, false
       otherwise. */
     inline bool Zeros(void) {
@@ -371,7 +369,7 @@ public:
 
     /*!
       \name Assignment operation between nArrays of different types.
-      
+
       \param other The nArray to be copied.
     */
     //@{
@@ -454,11 +452,11 @@ public:
 
       \note For a non-reallocating Assign, it is recommended to use
       the Assign() methods.
-     
+
       \note If the destination array doesn't have the same size as
       the source and can not be resized, an exception will be thrown
       by the Assign method called internally.
- 
+
       \param other The array to be copied.
     */
     template <class __nArrayOwnerType, typename __elementType>
@@ -550,7 +548,7 @@ public:
       \param nArray1 The first operand of the binary operation
 
       \param nArray2 The second operand of the binary operation
-      
+
       \return The nArray "this" modified.
     */
     template <class __nArrayOwnerType1, class __nArrayOwnerType2>
@@ -561,8 +559,8 @@ public:
             NoNiNi< typename vctBinaryOperations<value_type>::Addition >
             ::Run(*this, nArray1, nArray2);
         return *this;
-    }    
-    
+    }
+
     /* documented above */
     template <class __nArrayOwnerType1, class __nArrayOwnerType2>
     inline ThisType & DifferenceOf(const vctDynamicConstNArrayBase<__nArrayOwnerType1, value_type, DIMENSION> & nArray1,
@@ -573,7 +571,7 @@ public:
             ::Run(*this, nArray1, nArray2);
         return *this;
     }
-    
+
     /* documented above */
     template <class __nArrayOwnerType1, class __nArrayOwnerType2>
     inline ThisType & ElementwiseProductOf(const vctDynamicConstNArrayBase<__nArrayOwnerType1, value_type, DIMENSION> & nArray1,
@@ -584,7 +582,7 @@ public:
             ::Run(*this, nArray1, nArray2);
         return *this;
     }
-    
+
     /* documented above */
     template <class __nArrayOwnerType1, class __nArrayOwnerType2>
     inline ThisType & ElementwiseRatioOf(const vctDynamicConstNArrayBase<__nArrayOwnerType1, value_type, DIMENSION> & nArray1,
@@ -631,10 +629,10 @@ public:
       (Subtraction), a multiplication (ElementwiseMultiply) a division
       (ElementwiseDivide), a minimization (ElementwiseMin) or a
       maximisation (ElementwiseMax).
-      
+
       \param otherNArray The second operand of the binary operation
       (this[i] is the first operand)
-      
+
       \return The nArray "this" modified.
     */
     template <class __nArrayOwnerType>
@@ -655,7 +653,7 @@ public:
             Run(*this, otherNArray);
         return *this;
     }
-    
+
     /* documented above */
     template <class __nArrayOwnerType>
     inline ThisType & ElementwiseMultiply(const vctDynamicConstNArrayBase<__nArrayOwnerType, value_type, DIMENSION> & otherNArray)
@@ -665,7 +663,7 @@ public:
             Run(*this, otherNArray);
         return *this;
     }
-    
+
     /* documented above */
     template <class __nArrayOwnerType>
     inline ThisType & ElementwiseDivide(const vctDynamicConstNArrayBase<__nArrayOwnerType, value_type, DIMENSION> & otherNArray)
@@ -675,7 +673,7 @@ public:
             Run(*this, otherNArray);
         return *this;
     }
-    
+
     /* documented above */
     template <class __nArrayOwnerType>
     inline ThisType & ElementwiseMin(const vctDynamicConstNArrayBase<__nArrayOwnerType, value_type, DIMENSION> & otherNArray)
@@ -702,7 +700,7 @@ public:
     {
         return this->Add(otherNArray);
     }
-    
+
     /* documented above */
     template <class __nArrayOwnerType>
     inline ThisType & operator -= (const vctDynamicConstNArrayBase<__nArrayOwnerType, value_type, DIMENSION> & otherNArray)
@@ -711,7 +709,7 @@ public:
     }
     //@}
 
-   
+
     /*! \name Binary elementwise operations an nArray and a scalar.
       Store the result of op(nArray, scalar) to a third nArray. */
     //@{
@@ -724,11 +722,11 @@ public:
 
       \param nArray The first operand of the binary operation.
       \param scalar The second operand of the binary operation.
-      
+
       \return The nArray "this" modified.
     */
     template <class __nArrayOwnerType>
-    inline ThisType & SumOf(const vctDynamicConstNArrayBase<__nArrayOwnerType, value_type, DIMENSION> & nArray, 
+    inline ThisType & SumOf(const vctDynamicConstNArrayBase<__nArrayOwnerType, value_type, DIMENSION> & nArray,
                             const value_type scalar)
     {
         vctDynamicNArrayLoopEngines<DIMENSION>::template
@@ -736,7 +734,7 @@ public:
             Run(*this, nArray, scalar);
         return *this;
     }
-    
+
     /* documented above */
     template <class __nArrayOwnerType>
     inline ThisType & DifferenceOf(const vctDynamicConstNArrayBase<__nArrayOwnerType, value_type, DIMENSION> & nArray,
@@ -747,8 +745,8 @@ public:
             Run(*this, nArray, scalar);
         return *this;
     }
-    
-    /* documented above */    
+
+    /* documented above */
     template <class __nArrayOwnerType>
     inline ThisType & ProductOf(const vctDynamicConstNArrayBase<__nArrayOwnerType, value_type, DIMENSION> & nArray,
                                 const value_type scalar)
@@ -758,7 +756,7 @@ public:
             Run(*this, nArray, scalar);
         return *this;
     }
-    
+
     /* documented above */
     template <class __nArrayOwnerType>
     inline ThisType & RatioOf(const vctDynamicConstNArrayBase<__nArrayOwnerType, value_type, DIMENSION> & nArray,
@@ -807,7 +805,7 @@ public:
 
       \param scalar The first operand of the binary operation.
       \param nArray The second operand of the binary operation.
-      
+
       \return The nArray "this" modified.
     */
     template <class __nArrayOwnerType>
@@ -819,7 +817,7 @@ public:
             Run(*this, scalar, nArray);
         return *this;
     }
-    
+
     /* documented above */
     template <class __nArrayOwnerType>
     inline ThisType & DifferenceOf(const value_type scalar,
@@ -830,7 +828,7 @@ public:
             Run(*this, scalar, nArray);
         return *this;
     }
-    
+
     /* documented above */
     template <class __nArrayOwnerType>
     inline ThisType & ProductOf(const value_type scalar,
@@ -841,7 +839,7 @@ public:
             Run(*this, scalar, nArray);
         return *this;
     }
-    
+
     /* documented above */
     template <class __nArrayOwnerType>
     inline ThisType & RatioOf(const value_type scalar,
@@ -889,7 +887,7 @@ public:
 
       \param scalar The second operand of the binary operation
         (this[i] is the first operand).
-      
+
       \return The nArray "this" modified.
     */
     inline ThisType & Add(const value_type scalar)
@@ -899,7 +897,7 @@ public:
             Run(*this, scalar);
         return *this;
     }
-    
+
     /* documented above */
     inline ThisType & Subtract(const value_type scalar)
     {
@@ -908,7 +906,7 @@ public:
             Run(*this, scalar);
         return *this;
     }
-    
+
     /* documented above */
     inline ThisType & Multiply(const value_type scalar)
     {
@@ -917,7 +915,7 @@ public:
             Run(*this, scalar);
         return *this;
     }
-    
+
     /* documented above */
     inline ThisType & Divide(const value_type scalar)
     {
@@ -926,7 +924,7 @@ public:
             Run(*this, scalar);
         return *this;
     }
-    
+
     /* documented above */
     inline ThisType & ClipAbove(const value_type upperBound)
     {
@@ -950,7 +948,7 @@ public:
     {
         return this->Add(scalar);
     }
-    
+
     /* documented above */
     inline ThisType & operator -= (const value_type scalar)
     {
@@ -993,7 +991,7 @@ public:
       value (AbsOf) or the opposite (NegationOf).
 
       \param otherNArray The operand of the unary operation.
-      
+
       \return The nArray "this" modified.
     */
     template <class __nArrayOwnerType>
@@ -1044,7 +1042,7 @@ public:
       the nArray "this", performs \f$ this[i] \leftarrow
       op(this[i])\f$ where \f$op\f$ can calculate the absolute
       value (AbsSelf) or the opposite (NegationSelf).
-      
+
       \return The nArray "this" modified.
     */
     inline ThisType & AbsSelf(void)

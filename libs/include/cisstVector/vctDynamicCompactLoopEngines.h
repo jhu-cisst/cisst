@@ -19,23 +19,21 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
-#ifndef _vctDynamicCompactLoopEngines_h 
+#pragma once
+#ifndef _vctDynamicCompactLoopEngines_h
 #define _vctDynamicCompactLoopEngines_h
 
 /*!
-  \file 
+  \file
   \brief Declaration of vctDynamicCompactLoopEngines
  */
-
 
 #include <cisstCommon/cmnPortability.h>
 #include <cisstCommon/cmnThrow.h>
 
-
 /*!  \brief Container class for the loop based engines for compact
   containers.
-  
+
   These engines are a simplified version of those found in
   vctDynamicVectorLoopEngines, vctDynamicMatrixLoopEngines and
   vctDynamicNArrayLoopEngines.  They can only operate on compact
@@ -64,7 +62,7 @@ class vctDynamicCompactLoopEngines {
       v_{i2})\f$ for compact containers.
 
       This class uses a loop to perform binary vector operations
-      of the form 
+      of the form
       \f[
       v_o = \mathrm{op}(v_{i1}, v_{i2})
       \f]
@@ -76,7 +74,7 @@ class vctDynamicCompactLoopEngines {
     public:
         template<class _outputOwnerType, class _input1OwnerType, class _input2OwnerType>
         static inline void Run(_outputOwnerType & outputOwner,
-                               const _input1OwnerType & input1Owner, 
+                               const _input1OwnerType & input1Owner,
                                const _input2OwnerType & input2Owner) {
 
             typedef _outputOwnerType OutputOwnerType;
@@ -110,11 +108,11 @@ class vctDynamicCompactLoopEngines {
       v_i)\f$ for compact containers.
 
       This class uses a loop to perform binary vector operations
-      of the form 
+      of the form
       \f[
       v_{io} = \mathrm{op}(v_{io}, v_{i})
       \f]
-      
+
       \param _elementOperationType The type of the binary operation.
     */
     template<class _elementOperationType>
@@ -135,28 +133,28 @@ class vctDynamicCompactLoopEngines {
 
             InputOutputPointerType inputOutputPointer = inputOutputOwner.Pointer();
             const InputOutputPointerType inputOutputEnd = inputOutputPointer + size;
-            
+
             InputPointerType inputPointer = inputOwner.Pointer();
-            
+
             for (;
-                 inputOutputPointer != inputOutputEnd; 
+                 inputOutputPointer != inputOutputEnd;
                  inputOutputPointer++, inputPointer++) {
                 *inputOutputPointer = _elementOperationType::Operate(*inputOutputPointer, *inputPointer);
             }
         }
     };
-    
+
 
     /*!  \brief Implement operation of the form \f$(v_{1}, v_{2}) =
       op(v_{1}, v_{2})\f$ for compact containers.
 
       This class uses a loop to perform binary vector operations
-      of the form 
+      of the form
       \f[
       (v_{1}, v_{2}) = \mathrm{op}(v_{1}, v_{2})
       \f]
-      
-      \param _elementOperationType The type of the binary operation that inputs and 
+
+      \param _elementOperationType The type of the binary operation that inputs and
       rewrites corresponding elements in both vectors.
     */
     template<class _elementOperationType>
@@ -165,7 +163,7 @@ class vctDynamicCompactLoopEngines {
         template<class _inputOutput1OwnerType, class _inputOutput2OwnerType>
         static void Run(_inputOutput1OwnerType & inputOutput1Owner,
                         _inputOutput2OwnerType & inputOutput2Owner) {
-            
+
             typedef _inputOutput1OwnerType InputOutput1OwnerType;
             typedef typename InputOutput1OwnerType::pointer InputOutput1PointerType;
             typedef typename InputOutput1OwnerType::size_type size_type;
@@ -181,19 +179,19 @@ class vctDynamicCompactLoopEngines {
             InputOutput2PointerType inputOutput2Pointer = inputOutput2Owner.Pointer();
 
             for (;
-                 inputOutput1Pointer != inputOutput1End; 
+                 inputOutput1Pointer != inputOutput1End;
                  inputOutput1Pointer++, inputOutput2Pointer++) {
                 _elementOperationType::Operate(*inputOutput1Pointer, *inputOutput2Pointer);
             }
         }
     };
-    
+
 
     /*!  \brief Implement operation of the form \f$vo = op(vi, si)\f$
       for compact containers.
-      
+
       This class uses a loop to perform binary vector operations
-      of the form 
+      of the form
       \f[
       v_o = \mathrm{op}(v_i, s_i)
       \f]
@@ -205,9 +203,9 @@ class vctDynamicCompactLoopEngines {
     public:
         template<class _outputOwnerType, class _inputOwnerType, class _inputScalarType>
         static inline void Run(_outputOwnerType & outputOwner,
-                               const _inputOwnerType & inputOwner, 
+                               const _inputOwnerType & inputOwner,
                                const _inputScalarType inputScalar) {
-            
+
             typedef _outputOwnerType OutputOwnerType;
             typedef typename OutputOwnerType::pointer OutputPointerType;
             typedef typename OutputOwnerType::size_type size_type;
@@ -223,7 +221,7 @@ class vctDynamicCompactLoopEngines {
             InputPointerType inputPointer = inputOwner.Pointer();
 
             for (;
-                 outputPointer != outputEnd; 
+                 outputPointer != outputEnd;
                  outputPointer++, inputPointer++) {
                 *outputPointer = _elementOperationType::Operate(*inputPointer, inputScalar);
             }
@@ -233,9 +231,9 @@ class vctDynamicCompactLoopEngines {
 
     /*!  \brief Implement operation of the form \f$vo = op(si, vi)\f$ for
       compact containers.
-            
+
       This class uses a loop to perform binary vector operations
-      of the form 
+      of the form
       \f[
       v_o = \mathrm{op}(s_i, v_i)
       \f]
@@ -247,9 +245,9 @@ class vctDynamicCompactLoopEngines {
     public:
         template<class _outputOwnerType, class _inputScalarType, class _inputOwnerType>
         static inline void Run(_outputOwnerType & outputOwner,
-                               const _inputScalarType inputScalar, 
+                               const _inputScalarType inputScalar,
                                const _inputOwnerType & inputOwner) {
-            
+
             typedef _outputOwnerType OutputOwnerType;
             typedef typename OutputOwnerType::pointer OutputPointerType;
             typedef typename OutputOwnerType::size_type size_type;
@@ -265,7 +263,7 @@ class vctDynamicCompactLoopEngines {
             InputPointerType inputPointer = inputOwner.Pointer();
 
             for (;
-                 outputPointer != outputEnd; 
+                 outputPointer != outputEnd;
                  outputPointer++, inputPointer++) {
                 *outputPointer = _elementOperationType::Operate(inputScalar, *inputPointer);
             }
@@ -291,18 +289,18 @@ class vctDynamicCompactLoopEngines {
         template<class _inputOutputOwnerType, class _inputScalarType>
         static void Run(_inputOutputOwnerType & inputOutputOwner,
                         const _inputScalarType inputScalar) {
-            
+
             typedef _inputOutputOwnerType InputOutputOwnerType;
             typedef typename InputOutputOwnerType::pointer InputOutputPointerType;
             typedef typename InputOutputOwnerType::size_type size_type;
 
             const size_type size = inputOutputOwner.size();
-            
+
             InputOutputPointerType inputOutputPointer = inputOutputOwner.Pointer();
             const InputOutputPointerType inputOutputEnd = inputOutputPointer + size;;
 
             for (;
-                 inputOutputPointer != inputOutputEnd; 
+                 inputOutputPointer != inputOutputEnd;
                  inputOutputPointer++) {
                 _elementOperationType::Operate(*inputOutputPointer, inputScalar);
             }
@@ -312,9 +310,9 @@ class vctDynamicCompactLoopEngines {
 
     /*!  \brief Implement operation of the form \f$v_o = op(v_i)\f$ for
       compact containers.
-      
+
       This class uses a loop to perform unary vector operations
-      of the form 
+      of the form
       \f[
       v_{o} = \mathrm{op}(v_{i})
       \f]
@@ -327,14 +325,14 @@ class vctDynamicCompactLoopEngines {
         template<class _outputOwnerType, class _inputOwnerType>
         static inline void Run(_outputOwnerType & outputOwner,
                                const _inputOwnerType & inputOwner) {
-            
+
             typedef _outputOwnerType OutputOwnerType;
             typedef typename OutputOwnerType::pointer OutputPointerType;
             typedef typename OutputOwnerType::size_type size_type;
-            
+
             typedef _inputOwnerType InputOwnerType;
             typedef typename InputOwnerType::const_pointer InputPointerType;
-            
+
             OutputPointerType outputPointer = outputOwner.Pointer();
             const size_type size = outputOwner.size();
             const OutputPointerType outputEnd = outputPointer + size;
@@ -342,18 +340,18 @@ class vctDynamicCompactLoopEngines {
             InputPointerType inputPointer = inputOwner.Pointer();
 
             for (;
-                 outputPointer != outputEnd; 
+                 outputPointer != outputEnd;
                  outputPointer++, inputPointer++) {
                 *outputPointer = _elementOperationType::Operate(*inputPointer);
             }
         }
     };
-    
+
 
 
     /*!  \brief Implement operation of the form \f$v_{io} =
       op(v_{io})\f$ for compact containers
-      
+
       This class uses a loop to perform unary store back vector
       operations of the form
 
@@ -368,46 +366,46 @@ class vctDynamicCompactLoopEngines {
     public:
         template<class _inputOutputOwnerType>
         static inline void Run(_inputOutputOwnerType & inputOutputOwner) {
-            
+
             typedef _inputOutputOwnerType InputOutputOwnerType;
             typedef typename InputOutputOwnerType::pointer InputOutputPointerType;
             typedef typename InputOutputOwnerType::size_type size_type;
 
             const size_type size = inputOutputOwner.size();
-            
+
             InputOutputPointerType inputOutputPointer = inputOutputOwner.Pointer();
             const InputOutputPointerType inputOutputEnd = inputOutputPointer + size;
 
             for (;
-                 inputOutputPointer != inputOutputEnd; 
+                 inputOutputPointer != inputOutputEnd;
                  inputOutputPointer++) {
                 _elementOperationType::Operate(*inputOutputPointer);
             }
         }
     };
-    
+
 
 
     /*!  \brief Implement operation of the form \f$s_o =
       op_{incr}(op(v_i))\f$ for compact containers
-      
+
       This class uses a loop to perform incremental
       unary vector operations of the form
 
       \f[
       s_o = \mathrm{op_{incr}(\mathrm{op}(v_i))}
       \f]
-      
+
       \param _elementOperationType The type of the unary operation.
     */
     template<class _incrementalOperationType, class _elementOperationType>
     class SoCi {
     public:
         typedef typename _incrementalOperationType::OutputType OutputType;
-        
+
         template<class _inputOwnerType>
         static OutputType Run(const _inputOwnerType & inputOwner) {
-            
+
             typedef _inputOwnerType InputOwnerType;
             typedef typename InputOwnerType::const_pointer InputPointerType;
             typedef typename InputOwnerType::size_type size_type;
@@ -417,9 +415,9 @@ class vctDynamicCompactLoopEngines {
 
             InputPointerType inputPointer = inputOwner.Pointer();
             const InputPointerType inputEnd = inputPointer + size;
-            
+
             for (;
-                 inputPointer != inputEnd; 
+                 inputPointer != inputEnd;
                  inputPointer++) {
                 incrementalResult = _incrementalOperationType::Operate(incrementalResult,
                                                                        _elementOperationType::Operate(*inputPointer));
@@ -431,17 +429,17 @@ class vctDynamicCompactLoopEngines {
 
     /*!  \brief Implement operation of the form \f$s_o =
       op_{incr}(op(v_{i1}, v_{i2}))\f$ for compact containers.
-      
+
       This class uses a loop to perform incremental binary vector
       operations of the form
-      
+
       \f[
       s_o = \mathrm{op_{incr}(\mathrm{op}(v_{i1}, v_{i2}))}
       \f]
-      
+
       \param _incrementalOperationType The type of the incremental
       operation.
-      
+
       \param _elementOperationType The type of the unary operation.
     */
     template<class _incrementalOperationType, class _elementOperationType>
@@ -452,11 +450,11 @@ class vctDynamicCompactLoopEngines {
         template<class _input1OwnerType, class _input2OwnerType>
         static inline OutputType Run(const _input1OwnerType & input1Owner,
                                      const _input2OwnerType & input2Owner) {
-            
+
             typedef _input1OwnerType Input1OwnerType;
             typedef typename Input1OwnerType::const_pointer Input1PointerType;
             typedef typename Input1OwnerType::size_type size_type;
-            
+
             typedef _input2OwnerType Input2OwnerType;
             typedef typename Input2OwnerType::const_pointer Input2PointerType;
 
@@ -468,7 +466,7 @@ class vctDynamicCompactLoopEngines {
             const Input1PointerType input1End = input1Pointer + size;
 
             Input2PointerType input2Pointer = input2Owner.Pointer();
-            
+
             for (;
                  input1Pointer != input1End;
                  input1Pointer++, input2Pointer++) {
@@ -476,23 +474,23 @@ class vctDynamicCompactLoopEngines {
                                                                        _elementOperationType::Operate(*input1Pointer,
                                                                                                       *input2Pointer));
             }
-            return incrementalResult;            
+            return incrementalResult;
         }
     };
-    
+
 
     /*!  \brief Implement operation of the form \f$v_{io} =
       op_{io}(v_{io}, op_{sv}(s, v_i))\f$ for compact containers.
-      
+
       This class uses template specialization to perform store-back
       vector-scalar-vector operations
 
       \f[
       v_{io} = \mathrm{op_{io}}(V_{io}, \mathrm{op_{sv}}(s, v_i))
       \f]
-      
+
       \param _ioOperationType The type of the store-back operation.
-      
+
       \param _scalarOwnerElementOperationType The type of the
 	  operation between scalar and input vector.
     */
@@ -509,9 +507,9 @@ class vctDynamicCompactLoopEngines {
 
             typedef _inputOwnerType InputOwnerType;
             typedef typename InputOwnerType::const_pointer InputPointerType;
-            
+
             const size_type size = ioOwner.size();
-            
+
             IoPointerType ioPointer = ioOwner.Pointer();
             const IoPointerType ioEnd = ioPointer + size;
 
@@ -531,17 +529,17 @@ class vctDynamicCompactLoopEngines {
 
     /*!  \brief Implement operation of the form \f$s_o =
       op_{incr}(op(v_i, s_i))\f$ for compact containers.
-      
+
       This class uses a loop to perform incremental
       binary vector operations of the form
 
       \f[
       s_o = \mathrm{op_{incr}(\mathrm{op}(v_i, s_i))}
       \f]
-      
+
       \param _incrementalOperationType The type of the incremental
       operation.
-      
+
       \param _elementOperationType The type of the unary operation.
     */
     template<class _incrementalOperationType, class _elementOperationType>
@@ -552,19 +550,19 @@ class vctDynamicCompactLoopEngines {
         template<class _inputOwnerType, class _inputScalarType>
         static inline OutputType Run(const _inputOwnerType & inputOwner,
                                      const _inputScalarType & inputScalar) {
-            
+
             typedef _inputOwnerType InputOwnerType;
             typedef typename InputOwnerType::const_pointer InputPointerType;
             typedef typename InputOwnerType::size_type size_type;
-            
+
             const size_type size = inputOwner.size();
             OutputType incrementalResult = _incrementalOperationType::NeutralElement();
-            
+
             InputPointerType inputPointer = inputOwner.Pointer();
             const InputPointerType inputEnd = inputPointer + size;
 
             for (;
-                 inputPointer != inputEnd; 
+                 inputPointer != inputEnd;
                  inputPointer++) {
                 incrementalResult = _incrementalOperationType::Operate(incrementalResult,
                                                                        _elementOperationType::Operate(*inputPointer, inputScalar));
@@ -572,8 +570,8 @@ class vctDynamicCompactLoopEngines {
             return incrementalResult;
         }
     };
-    
-    
+
+
     class MinAndMax {
     public:
         template<class _inputOwnerType>
@@ -584,17 +582,17 @@ class vctDynamicCompactLoopEngines {
             typedef typename InputOwnerType::const_pointer InputPointerType;
             typedef typename InputOwnerType::size_type size_type;
             typedef typename InputOwnerType::value_type value_type;
-            
+
             InputPointerType inputPointer = inputOwner.Pointer();
-            
+
             const size_type size = inputOwner.size();
             const InputPointerType inputEnd = inputPointer + size;
-            
+
             value_type minElement, maxElement;
             maxElement = minElement = *inputPointer;
-            
+
             for (;
-                 inputPointer != inputEnd; 
+                 inputPointer != inputEnd;
                  inputPointer++) {
                 const value_type element = *inputPointer;
                 if (element < minElement) {

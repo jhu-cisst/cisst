@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):	Daniel Li
   Created on:	2006-07-03
 
@@ -19,7 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
+#pragma once
 #ifndef _vctDynamicConstNArrayRef_h
 #define _vctDynamicConstNArrayRef_h
 
@@ -28,12 +28,10 @@ http://www.cisst.org/cisst/license.txt.
   \brief Declaration of vctDynamicConstNArrayRef
 */
 
-
 #include <cisstVector/vctDynamicConstNArrayBase.h>
 #include <cisstVector/vctDynamicNArrayRefOwner.h>
 
-
-/*! 
+/*!
   \ingroup cisstVector
   \brief Dynamic nArray referencing existing memory (const)
 
@@ -63,7 +61,7 @@ http://www.cisst.org/cisst/license.txt.
   first5x5.SetRef(wholeNArray, size_type(0, 0), size_type(5, 5));
   std::cout << first5x5 << " " << first5x5.SumOfElements() << std::endl;
   \endcode
-  
+
   \note On top of the SetRef methods provided for the cisst vectors
   and matrices (see vctDynamicVectorRef and vctDynamicMatrixRef), the
   ref classes for nArrays provides the methods SubarrayOf (re-size,
@@ -294,7 +292,7 @@ public:
             } else {
                 *sizesIter = *otherSizesIter;
                 *stridesIter = *otherStridesIter;
-                
+
                 ++otherSizesIter;
                 ++otherStridesIter;
                 ++sizesIter;
@@ -302,7 +300,7 @@ public:
                 ++i;
             }
         }
-        
+
         // set start position
         other_nsize_type startPosition(static_cast<size_type>(0));
         startPosition[dimension] = index;

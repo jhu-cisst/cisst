@@ -19,16 +19,14 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
-/*! 
-  \file 
-  \brief Declaration of vctQuaternionBase
- */
-
-
+#pragma once
 #ifndef _vctQuaternionBase_h
 #define _vctQuaternionBase_h
 
+/*!
+  \file
+  \brief Declaration of vctQuaternionBase
+ */
 
 #include <cisstCommon/cmnTypeTraits.h>
 #include <cisstVector/vctContainerTraits.h>
@@ -75,9 +73,9 @@ protected:
         this->Allocate();
     }
 
-    
+
     /*! Constructor from 4 elements.
-      
+
       \param x The first imaginary component
       \param y The second imaginary component
       \param z The third imaginary component
@@ -104,14 +102,14 @@ protected:
     const_reference R(void) const {
         return *(this->Pointer(3));
     }
-    
+
     /*! Access the last element of the quaternion, i.e. the real part.
       This method is not const. The methods X(), Y() and Z() are
       inherited from the base class. */
     reference R(void) {
         return *(this->Pointer(3));
     }
-    
+
 
     /*! Sets this quaternion as the conjugate of another one.
       \param otherQuaternion Quaternion used to compute the conjugate. */
@@ -144,8 +142,8 @@ protected:
 
 
     /*! Set this quaternion as the product of two other ones.
-      \param quat1 Left operand 
-      \param quat2 Right operand 
+      \param quat1 Left operand
+      \param quat2 Right operand
       \note Quaternion product in non-commutative.
     */
     template <class __containerType1, class __containerType2>
@@ -172,7 +170,7 @@ protected:
         this->R() = quat1.R() * quat2.R() -  quat1.X() * quat2I.X() -  quat1.Y() * quat2I.Y() -  quat1.Z() * quat2I.Z();
         return *this;
     }
-    
+
     /*! Post-multiply this quaternion by another, i.e., this = this * other.
       \note Quaternion product is non-commutative.
     */
@@ -194,7 +192,7 @@ protected:
         *this = result;
         return *this;
     }
-    
+
     /*! Divide this quaternion by another, i.e., this = this / other. */
     template <class __containerTypeOther>
     inline ThisType & Divide(const vctQuaternionBase<__containerTypeOther> & other) {
@@ -203,7 +201,7 @@ protected:
         *this = result;
         return *this;
     }
-    
+
     /*! Divide this quaternion by a scalar: equal to elementwise division.
       The method re-implements vector elementwise division, which is otherwise
       shadowed by the Divide(ThisType) method.

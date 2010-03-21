@@ -19,28 +19,21 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
+#pragma once
 #ifndef _vctDynamicNArrayLoopEngines_h
 #define _vctDynamicNArrayLoopEngines_h
-
-
-#include <cisstCommon/cmnPortability.h>
-#include <cisstCommon/cmnThrow.h>
-#include <cisstVector/vctDynamicCompactLoopEngines.h>
-
 
 /*!
   \file
   \brief Declaration of vctDynamicNArrayLoopEngines
  */
 
-
 #include <cisstCommon/cmnPortability.h>
 #include <cisstCommon/cmnThrow.h>
 
 #include <cisstVector/vctFixedSizeVector.h>
 #include <cisstVector/vctContainerTraits.h>
-
+#include <cisstVector/vctDynamicCompactLoopEngines.h>
 
 /*!
   \brief Container class for the dynamic nArray engines.
@@ -213,10 +206,10 @@ public:
             if (numberOfWrappedDimensions == _dimension)
                 return numberOfWrappedDimensions;
         }
-        
+
         if (numberOfWrappedDimensions == 0)
             return numberOfWrappedDimensions;
-        
+
         stridesIter += numberOfWrappedDimensions;
         difference_type targetOffset;
         do {
@@ -245,7 +238,7 @@ public:
 
             // retrieve owners
             const InputOwnerType & inputOwner = inputNArray.Owner();
-            
+
             // if compact
             if (inputOwner.IsCompact()) {
                 return vctDynamicCompactLoopEngines::SoCi<_incrementalOperationType, _elementOperationType>::Run(inputOwner);
@@ -256,15 +249,15 @@ public:
                 nstride_type inputSTND;
                 vctFixedSizeVector<InputPointerType, _dimension> inputTargets;
                 InputPointerType inputPointer = inputOwner.Pointer();
-                
+
                 dimension_type numberOfWrappedDimensions = 0;
                 const dimension_type maxWrappedDimensions = inputOwner.dimension();
-                
+
                 CalculateSTND(inputSTND, inputSizes, inputStrides);
                 InitializeTargets(inputTargets, inputSizes, inputStrides, inputPointer);
-                
+
                 OutputType incrementalResult = _incrementalOperationType::NeutralElement();
-                
+
                 while (numberOfWrappedDimensions != maxWrappedDimensions) {
                     incrementalResult =
                         _incrementalOperationType::Operate(incrementalResult,
@@ -321,30 +314,30 @@ public:
                 nstride_type input1STND;
                 vctFixedSizeVector<Input1PointerType, _dimension> input1Targets;
                 Input1PointerType input1Pointer = input1Owner.Pointer();
-                
+
                 // declare all variables used for input2Owner
                 nstride_type input2STND;
                 nstride_type input2OTND;
                 Input2PointerType input2Pointer = input2Owner.Pointer();
-                
+
                 dimension_type numberOfWrappedDimensions = 0;
                 const dimension_type maxWrappedDimensions = input1Owner.dimension();
-                
+
                 CalculateSTND(input1STND, input1Sizes, input1Strides);
                 CalculateSTND(input2STND, input2Sizes, input2Strides);
                 CalculateOTND(input2OTND, input2Strides, input2STND);
                 InitializeTargets(input1Targets, input1Sizes, input1Strides, input1Pointer);
-                
+
                 OutputType incrementalResult = _incrementalOperationType::NeutralElement();
-                
+
                 while (numberOfWrappedDimensions != maxWrappedDimensions) {
                     incrementalResult =
                         _incrementalOperationType::Operate(incrementalResult,
                                                            _elementOperationType::Operate(*input1Pointer, *input2Pointer) );
-                    
+
                     numberOfWrappedDimensions =
                         IncrementPointers(input1Targets, input1Pointer, input1Strides, input1STND);
-                    
+
                     SyncCurrentPointer(input2Pointer, input2OTND, numberOfWrappedDimensions);
                 }
                 return incrementalResult;
@@ -369,7 +362,7 @@ public:
 
             // retrieve owners
             const InputOwnerType & inputOwner = inputNArray.Owner();
-            
+
             // if compact
             if (inputOwner.IsCompact()) {
                 return vctDynamicCompactLoopEngines::SoCiSi<_incrementalOperationType, _elementOperationType>::Run(inputOwner, inputScalar);
@@ -380,20 +373,20 @@ public:
                 nstride_type inputSTND;
                 vctFixedSizeVector<InputPointerType, _dimension> inputTargets;
                 InputPointerType inputPointer = inputOwner.Pointer();
-                
+
                 dimension_type numberOfWrappedDimensions = 0;
                 const dimension_type maxWrappedDimensions = inputOwner.dimension();
-                
+
                 CalculateSTND(inputSTND, inputSizes, inputStrides);
                 InitializeTargets(inputTargets, inputSizes, inputStrides, inputPointer);
-                
+
                 OutputType incrementalResult = _incrementalOperationType::NeutralElement();
-                
+
                 while (numberOfWrappedDimensions != maxWrappedDimensions) {
                     incrementalResult =
                         _incrementalOperationType::Operate(incrementalResult,
                                                            _elementOperationType::Operate(*inputPointer, inputScalar) );
-                    
+
                     numberOfWrappedDimensions =
                         IncrementPointers(inputTargets, inputPointer, inputStrides, inputSTND);
                 }
@@ -453,28 +446,28 @@ public:
                 nstride_type outputSTND;
                 vctFixedSizeVector<OutputConstPointerType, _dimension> outputTargets;
                 OutputPointerType outputPointer = outputOwner.Pointer();
-                
+
                 // declare all variables used for input1Owner
                 nstride_type input1STND;
                 nstride_type input1OTND;
                 Input1PointerType input1Pointer = input1Owner.Pointer();
-                
+
                 // declare all variables used for input2Owner
                 const nsize_type & input2Sizes = input2Owner.sizes();
                 nstride_type input2STND;
                 nstride_type input2OTND;
                 Input2PointerType input2Pointer = input2Owner.Pointer();
-                
+
                 dimension_type numberOfWrappedDimensions = 0;
                 const dimension_type maxWrappedDimensions = outputOwner.dimension();
-                
+
                 CalculateSTND(outputSTND, outputSizes, outputStrides);
                 CalculateSTND(input1STND, input1Sizes, input1Strides);
                 CalculateSTND(input2STND, input2Sizes, input2Strides);
                 CalculateOTND(input1OTND, input1Strides, input1STND);
                 CalculateOTND(input2OTND, input2Strides, input2STND);
                 InitializeTargets(outputTargets, outputSizes, outputStrides, outputPointer);
-                
+
                 while (numberOfWrappedDimensions != maxWrappedDimensions) {
                     *outputPointer = _elementOperationType::Operate(*input1Pointer, *input2Pointer);
 
@@ -531,26 +524,26 @@ public:
                 nstride_type outputSTND;
                 vctFixedSizeVector<OutputConstPointerType, _dimension> outputTargets;
                 OutputPointerType outputPointer = outputOwner.Pointer();
-                
+
                 // declare all variables used for inputOwner
                 nstride_type inputSTND;
                 nstride_type inputOTND;
                 InputPointerType inputPointer = inputOwner.Pointer();
-                
+
                 dimension_type numberOfWrappedDimensions = 0;
                 const dimension_type maxWrappedDimensions = outputOwner.dimension();
-                
+
                 CalculateSTND(outputSTND, outputSizes, outputStrides);
                 CalculateSTND(inputSTND, inputSizes, inputStrides);
                 CalculateOTND(inputOTND, inputStrides, inputSTND);
                 InitializeTargets(outputTargets, outputSizes, outputStrides, outputPointer);
-                
+
                 while (numberOfWrappedDimensions != maxWrappedDimensions) {
                     *outputPointer = _elementOperationType::Operate(*inputPointer, inputScalar);
 
                     numberOfWrappedDimensions =
                         IncrementPointers(outputTargets, outputPointer, outputStrides, outputSTND);
-                    
+
                     SyncCurrentPointer(inputPointer, inputOTND, numberOfWrappedDimensions);
                 }
             }
@@ -590,7 +583,7 @@ public:
             // if compact and same strides
             const nstride_type & outputStrides = outputOwner.strides();
             const nstride_type & inputStrides = inputOwner.strides();
-            
+
             if (outputOwner.IsCompact() && inputOwner.IsCompact()
                 && (outputOwner.strides() == inputOwner.strides())) {
                 vctDynamicCompactLoopEngines::CoSiCi<_elementOperationType>::Run(outputOwner, inputScalar, inputOwner);
@@ -605,21 +598,21 @@ public:
                 nstride_type inputSTND;
                 nstride_type inputOTND;
                 InputPointerType inputPointer = inputNArray.Pointer();
-                
+
                 dimension_type numberOfWrappedDimensions = 0;
                 const dimension_type maxWrappedDimensions = outputNArray.dimension();
-                
+
                 CalculateSTND(outputSTND, outputSizes, outputStrides);
                 CalculateSTND(inputSTND, inputSizes, inputStrides);
                 CalculateOTND(inputOTND, inputStrides, inputSTND);
                 InitializeTargets(outputTargets, outputSizes, outputStrides, outputPointer);
-                
+
                 while (numberOfWrappedDimensions != maxWrappedDimensions) {
                     *outputPointer = _elementOperationType::Operate(inputScalar, *inputPointer);
-                    
+
                     numberOfWrappedDimensions =
                         IncrementPointers(outputTargets, outputPointer, outputStrides, outputSTND);
-                    
+
                     SyncCurrentPointer(inputPointer, inputOTND, numberOfWrappedDimensions);
                 }
             }
@@ -639,10 +632,10 @@ public:
             typedef typename InputOutputNArrayType::OwnerType InputOutputOwnerType;
             typedef typename InputOutputOwnerType::const_pointer InputOutputConstPointerType;
             typedef typename InputOutputOwnerType::pointer InputOutputPointerType;
-            
+
             // retrieve owners
             InputOutputOwnerType & inputOutputOwner = inputOutputNArray.Owner();
-            
+
             // if compact
             if (inputOutputOwner.IsCompact()) {
                 vctDynamicCompactLoopEngines::CioSi<_elementOperationType>::Run(inputOutputOwner, inputScalar);
@@ -653,16 +646,16 @@ public:
                 nstride_type inputOutputSTND;
                 vctFixedSizeVector<InputOutputConstPointerType, _dimension> inputOutputTargets;
                 InputOutputPointerType inputOutputPointer = inputOutputOwner.Pointer();
-                
+
                 dimension_type numberOfWrappedDimensions = 0;
                 const dimension_type maxWrappedDimensions = inputOutputOwner.dimension();
-                
+
                 CalculateSTND(inputOutputSTND, inputOutputSizes, inputOutputStrides);
                 InitializeTargets(inputOutputTargets, inputOutputSizes, inputOutputStrides, inputOutputPointer);
-                
+
                 while (numberOfWrappedDimensions != maxWrappedDimensions) {
                     _elementOperationType::Operate(*inputOutputPointer, inputScalar);
-                    
+
                     numberOfWrappedDimensions =
                         IncrementPointers(inputOutputTargets, inputOutputPointer, inputOutputStrides, inputOutputSTND);
                 }
@@ -683,7 +676,7 @@ public:
             typedef typename InputOutputNArrayType::OwnerType InputOutputOwnerType;
             typedef typename InputOutputOwnerType::const_pointer InputOutputConstPointerType;
             typedef typename InputOutputOwnerType::pointer InputOutputPointerType;
-            
+
             typedef _inputNArrayType InputNArrayType;
             typedef typename InputNArrayType::OwnerType InputOwnerType;
             typedef typename InputOwnerType::const_pointer InputPointerType;
@@ -702,7 +695,7 @@ public:
             // if compact and same strides
             const nstride_type & inputOutputStrides = inputOutputOwner.strides();
             const nstride_type & inputStrides = inputOwner.strides();
-            
+
             if (inputOutputOwner.IsCompact() && inputOwner.IsCompact()
                 && (inputOutputOwner.strides() == inputOwner.strides())) {
                 vctDynamicCompactLoopEngines::CioCi<_elementOperationType>::Run(inputOutputOwner, inputOwner);
@@ -717,21 +710,21 @@ public:
                 nstride_type inputSTND;
                 nstride_type inputOTND;
                 InputPointerType inputPointer = inputOwner.Pointer();
-                
+
                 dimension_type numberOfWrappedDimensions = 0;
                 const dimension_type maxWrappedDimensions = inputOutputOwner.dimension();
-                
+
                 CalculateSTND(inputOutputSTND, inputOutputSizes, inputOutputStrides);
                 CalculateSTND(inputSTND, inputSizes, inputStrides);
                 CalculateOTND(inputOTND, inputStrides, inputSTND);
                 InitializeTargets(inputOutputTargets, inputOutputSizes, inputOutputStrides, inputOutputPointer);
-                
+
                 while (numberOfWrappedDimensions != maxWrappedDimensions) {
                     _elementOperationType::Operate(*inputOutputPointer, *inputPointer);
-                    
+
                     numberOfWrappedDimensions =
                         IncrementPointers(inputOutputTargets, inputOutputPointer, inputOutputStrides, inputOutputSTND);
-                    
+
                     SyncCurrentPointer(inputPointer, inputOTND, numberOfWrappedDimensions);
                 }
             }
@@ -759,7 +752,7 @@ public:
             // retrieve owners
             OutputOwnerType & outputOwner = outputNArray.Owner();
             const InputOwnerType & inputOwner = inputNArray.Owner();
-            
+
             // check sizes
             const nsize_type & outputSizes = outputOwner.sizes();
             const nsize_type & inputSizes = inputOwner.sizes();
@@ -780,26 +773,26 @@ public:
                 nstride_type outputSTND;
                 vctFixedSizeVector<OutputConstPointerType, _dimension> outputTargets;
                 OutputPointerType outputPointer = outputOwner.Pointer();
-                
+
                 // declare all variables used for inputNArray
                 nstride_type inputSTND;
                 nstride_type inputOTND;
                 InputPointerType inputPointer = inputOwner.Pointer();
-                
+
                 dimension_type numberOfWrappedDimensions = 0;
                 const dimension_type maxWrappedDimensions = outputOwner.dimension();
-                
+
                 CalculateSTND(outputSTND, outputSizes, outputStrides);
                 CalculateSTND(inputSTND, inputSizes, inputStrides);
                 CalculateOTND(inputOTND, inputStrides, inputSTND);
                 InitializeTargets(outputTargets, outputSizes, outputStrides, outputPointer);
-                
+
                 while (numberOfWrappedDimensions != maxWrappedDimensions) {
                     *outputPointer = _elementOperationType::Operate(*inputPointer);
-                    
+
                     numberOfWrappedDimensions =
                         IncrementPointers(outputTargets, outputPointer, outputStrides, outputSTND);
-                    
+
                     SyncCurrentPointer(inputPointer, inputOTND, numberOfWrappedDimensions);
                 }
             }
@@ -824,7 +817,7 @@ public:
 
             // if compact and same strides
             const nstride_type & inputOutputStrides = inputOutputOwner.strides();
-            
+
             if (inputOutputOwner.IsCompact()) {
                 vctDynamicCompactLoopEngines::Cio<_elementOperationType>::Run(inputOutputOwner);
             } else {
@@ -864,26 +857,26 @@ public:
             typedef typename InputOutputNArrayType::OwnerType InputOutputOwnerType;
             typedef typename InputOutputOwnerType::const_pointer InputOutputConstPointerType;
             typedef typename InputOutputOwnerType::pointer InputOutputPointerType;
-            
+
             typedef _inputNArrayType InputNArrayType;
             typedef typename InputNArrayType::OwnerType InputOwnerType;
             typedef typename InputOwnerType::const_pointer InputPointerType;
-            
+
             // retrieve owners
             InputOutputOwnerType & inputOutputOwner = inputOutputNArray.Owner();
             const InputOwnerType & inputOwner = inputNArray.Owner();
-            
+
             // check sizes
             const nsize_type & inputOutputSizes = inputOutputOwner.sizes();
             const nsize_type & inputSizes = inputOwner.sizes();
             if (inputOutputSizes.NotEqual(inputSizes)) {
                 ThrowSizeMismatchException();
             }
-            
+
             // if compact and same strides
             const nstride_type & inputOutputStrides = inputOutputOwner.strides();
             const nstride_type & inputStrides = inputOwner.strides();
-            
+
             if (inputOutputOwner.IsCompact() && inputOwner.IsCompact()
                 && (inputOutputOwner.strides() == inputOwner.strides())) {
                 vctDynamicCompactLoopEngines::CioSiCi<_inputOutputElementOperationType, _scalarNArrayElementOperationType>::Run(inputOutputOwner, inputScalar, inputOwner);
@@ -893,27 +886,27 @@ public:
                 nstride_type inputOutputSTND;
                 vctFixedSizeVector<InputOutputConstPointerType, _dimension> inputOutputTargets;
                 InputOutputPointerType inputOutputPointer = inputOutputNArray.Pointer();
-                
+
                 // declare all variables used for inputNArray
                 nstride_type inputSTND;
                 nstride_type inputOTND;
                 InputPointerType inputPointer = inputNArray.Pointer();
-                
+
                 dimension_type numberOfWrappedDimensions = 0;
                 const dimension_type maxWrappedDimensions = inputOutputNArray.dimension();
-                
+
                 CalculateSTND(inputOutputSTND, inputOutputSizes, inputOutputStrides);
                 CalculateSTND(inputSTND, inputSizes, inputStrides);
                 CalculateOTND(inputOTND, inputStrides, inputSTND);
                 InitializeTargets(inputOutputTargets, inputOutputSizes, inputOutputStrides, inputOutputPointer);
-                
+
                 while (numberOfWrappedDimensions != maxWrappedDimensions) {
                     _inputOutputElementOperationType::Operate(*inputOutputPointer,
                                                               _scalarNArrayElementOperationType::Operate(inputScalar, *inputPointer) );
 
                     numberOfWrappedDimensions =
                         IncrementPointers(inputOutputTargets, inputOutputPointer, inputOutputStrides, inputOutputSTND);
-                    
+
                     SyncCurrentPointer(inputPointer, inputOTND, numberOfWrappedDimensions);
                 }
             }
@@ -938,10 +931,10 @@ public:
             // retrieve owner
             const InputOwnerType & inputOwner = inputNArray.Owner();
             InputPointerType inputPointer = inputOwner.Pointer();
-            
+
             if (inputPointer == 0)
                 return;
-            
+
             // if compact
             if (inputOwner.IsCompact()) {
                 vctDynamicCompactLoopEngines::MinAndMax::Run(inputOwner, minValue, maxValue);
@@ -951,16 +944,16 @@ public:
                 const nstride_type & inputStrides = inputOwner.strides();
                 nstride_type inputSTND;
                 vctFixedSizeVector<InputPointerType, _dimension> inputTargets;
-                
+
                 dimension_type numberOfWrappedDimensions = 0;
                 const dimension_type maxWrappedDimensions = inputOwner.dimension();
-                
+
                 CalculateSTND(inputSTND, inputSizes, inputStrides);
                 InitializeTargets(inputTargets, inputSizes, inputStrides, inputPointer);
-                
+
                 value_type minElement, maxElement, inputElement;
                 minElement = maxElement = *inputPointer;
-                
+
                 while (numberOfWrappedDimensions != maxWrappedDimensions) {
                     inputElement = *inputPointer;
 
@@ -969,7 +962,7 @@ public:
                     } else if (inputElement > maxElement) {
                         maxElement = inputElement;
                     }
-                    
+
                     numberOfWrappedDimensions =
                         IncrementPointers(inputTargets, inputPointer, inputStrides, inputSTND);
                 }

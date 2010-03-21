@@ -19,16 +19,14 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+#pragma once
+#ifndef _vctMatrixRotation3Ref_h
+#define _vctMatrixRotation3Ref_h
 
 /*! 
   \file 
   \brief Declaration of vctMatrixRotation3Ref
  */
-
-
-#ifndef _vctMatrixRotation3Ref_h
-#define _vctMatrixRotation3Ref_h
-
 
 #include <cisstVector/vctFixedSizeMatrix.h>
 #include <cisstVector/vctMatrixRotation3Base.h>

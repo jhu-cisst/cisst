@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):	Ofri Sadowsky, Anton Deguet
   Created on:	2004-07-02
 
@@ -19,15 +19,14 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
-/*! 
-  \file 
-  \brief Declaration of vctVarStrideVectorConstIterator and vctVarStrideVectorIterator
- */
-
-
+#pragma once
 #ifndef _vctVarStrideVectorIterator_h
 #define _vctVarStrideVectorIterator_h
+
+/*!
+  \file
+  \brief Declaration of vctVarStrideVectorConstIterator and vctVarStrideVectorIterator
+ */
 
 #include <iterator>
 #include <cisstVector/vctContainerTraits.h>
@@ -92,15 +91,15 @@ public:
         DataPtr(0),
         Stride(1)
         {}
-    
+
 
     /*! Constructor taking a non-const element pointer.  Note that
       only read operations will be performed! */
     explicit vctVarStrideVectorConstIterator(value_type * dataPtr, difference_type stride = 1)
         : DataPtr(dataPtr), Stride(stride)
         {}
-    
-    
+
+
     /*! Constructor taking a const element pointer.  We need it in
       order to deal with const containers being refered by this
       iterator.  We have to perform const_cast to convert back to the
@@ -226,7 +225,7 @@ public:
 
     /*! Default constructor: create an uninitialized object */
     vctVarStrideVectorIterator()
-        : BaseType() 
+        : BaseType()
         {}
 
 
@@ -235,7 +234,7 @@ public:
       there is no constructor that takes a const element pointer.
     */
     explicit vctVarStrideVectorIterator(value_type * dataPtr, difference_type stride = 1)
-        : BaseType(dataPtr, stride) 
+        : BaseType(dataPtr, stride)
         {}
 
 
@@ -317,7 +316,7 @@ operator+(const vctVarStrideVectorConstIterator<_elementType> & iterator,
 
 /*! difference_type + const_iterator required by STL */
 template<class _elementType>
-vctVarStrideVectorConstIterator<_elementType> 
+vctVarStrideVectorConstIterator<_elementType>
 operator+(typename vctVarStrideVectorConstIterator<_elementType>::difference_type difference,
           const vctVarStrideVectorConstIterator<_elementType> & iterator)
 {
@@ -328,7 +327,7 @@ operator+(typename vctVarStrideVectorConstIterator<_elementType>::difference_typ
 
 /*! const_iterator - difference_type required by STL */
 template<class _elementType>
-vctVarStrideVectorConstIterator<_elementType> 
+vctVarStrideVectorConstIterator<_elementType>
 operator-(const vctVarStrideVectorConstIterator<_elementType> & iterator,
           typename vctVarStrideVectorConstIterator<_elementType>::difference_type difference)
 {
@@ -353,7 +352,7 @@ operator+(const vctVarStrideVectorIterator<_elementType> & iterator,
 
 /*! difference_type + iterator required by STL */
 template<class _elementType>
-vctVarStrideVectorIterator<_elementType> 
+vctVarStrideVectorIterator<_elementType>
 operator+(typename vctVarStrideVectorIterator<_elementType>::difference_type difference,
           const vctVarStrideVectorIterator<_elementType> & iterator)
 {
@@ -364,7 +363,7 @@ operator+(typename vctVarStrideVectorIterator<_elementType>::difference_type dif
 
 /*! iterator - difference_type required by STL */
 template<class _elementType>
-vctVarStrideVectorIterator<_elementType> 
+vctVarStrideVectorIterator<_elementType>
 operator-(const vctVarStrideVectorIterator<_elementType> & iterator,
           typename vctVarStrideVectorIterator<_elementType>::difference_type difference)
 {

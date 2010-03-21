@@ -19,15 +19,14 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
-/*! 
-  \file 
-  \brief Declaration of vctFrame4x4Base
- */
-
-
+#pragma once
 #ifndef _vctFrame4x4Base_h
 #define _vctFrame4x4Base_h
+
+/*!
+  \file
+  \brief Declaration of vctFrame4x4Base
+ */
 
 #include <cisstVector/vctFrame4x4ConstBase.h>
 #include <cisstVector/vctExport.h>
@@ -47,7 +46,7 @@ http://www.cisst.org/cisst/license.txt.
   \sa vctDynamicMatrix, vctFixedSizeMatrix, vctFrameBase
 */
 template<class _containerType>
-class vctFrame4x4Base: 
+class vctFrame4x4Base:
     public vctFrame4x4ConstBase<_containerType>
 {
 public:
@@ -87,15 +86,15 @@ public:
         BaseType()
     {}
 
-    
+
     inline ConstTranslationRefType Translation(void) const {
         return this->TranslationRef;
     }
-    
+
     inline ConstRotationRefType Rotation(void) const {
         return this->RotationRef;
     }
-    
+
     inline ConstPerspectiveRefType Perspective(void) const {
         return this->PerspectiveRef;
     }
@@ -103,11 +102,11 @@ public:
     inline TranslationRefType Translation(void) {
         return this->TranslationRef;
     }
-    
+
     inline RotationRefType Rotation(void) {
         return this->RotationRef;
     }
-    
+
     inline PerspectiveRefType Perspective(void) {
         return this->PerspectiveRef;
     }
@@ -137,7 +136,7 @@ public:
         return *this;
     }
 
-    
+
     template <class __containerType>
     inline ThisType & InverseOf(const vctFrame4x4ConstBase<__containerType> & otherFrame) {
         this->TranslationRef.Assign(otherFrame.Translation());

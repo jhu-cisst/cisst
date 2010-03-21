@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):	Ofri Sadowsky
   Created on:	2003-11-04
 
@@ -19,19 +19,16 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
-/*! 
-  \file 
-  \brief Declaration of vctFixedSizeMatrixRef
- */
-
-
+#pragma once
 #ifndef _vctFixedSizeMatrixRef_h
 #define _vctFixedSizeMatrixRef_h
 
+/*!
+  \file
+  \brief Declaration of vctFixedSizeMatrixRef
+ */
 
 #include <cisstVector/vctFixedSizeMatrixBase.h>
-
 
 /*!  \brief An implementation of the ``abstract''
   vctFixedSizeMatrixBase.
@@ -41,10 +38,10 @@ http://www.cisst.org/cisst/license.txt.
   This implementations uses a pointer to the matrix beginning as the
   matrix defining data member.  An instantiation of this type can be
   used as a matrix reference with TransposeRef().
-  
+
   See the base class (vctFixedSizeMatrixBase) for template
   parameter details.
-  
+
   \sa vctFixedSizeConstMatrixRef
 */
 template <class _elementType, vct::size_type _rows, vct::size_type _cols,
@@ -67,13 +64,13 @@ class vctFixedSizeMatrixRef : public vctFixedSizeMatrixBase
 
     typedef vctFixedSizeMatrixRef<value_type, _rows, _cols,
                                   _rowStride, _colStride> ThisType;
-    typedef vctFixedSizeMatrixBase<_rows, _cols, _rowStride, _colStride, value_type, 
+    typedef vctFixedSizeMatrixBase<_rows, _cols, _rowStride, _colStride, value_type,
                                    typename MatrixTraits::pointer> BaseType;
-    
+
     /*! Default constructor: create an uninitialized matrix */
-    vctFixedSizeMatrixRef() 
+    vctFixedSizeMatrixRef()
         {}
-    
+
     /*! Initialize the matrix with a (non-const) pointer */
     vctFixedSizeMatrixRef(pointer p) {
         SetRef(p);
@@ -114,7 +111,7 @@ class vctFixedSizeMatrixRef : public vctFixedSizeMatrixBase
     void SetRef(pointer p) {
         this->Data = p;
     }
-    
+
     void SetRef(const ThisType & other) {
         this->SetRef(other.Data);
     }
@@ -208,11 +205,11 @@ template <vct::size_type _resultSize, vct::stride_type _resultStride, class _res
 inline void MultiplyMatrixVector(
                                  // create matrix references to both vectors and use the matrix product
                                  vctFixedSizeVectorBase<_resultSize, _resultStride, _resultElementType, _resultDataPtrType> & result,
-                                 const vctFixedSizeConstMatrixBase<_resultSize, _matrixCols, _matrixRowStride, _matrixColStride, 
+                                 const vctFixedSizeConstMatrixBase<_resultSize, _matrixCols, _matrixRowStride, _matrixColStride,
                                  _resultElementType, _matrixDataPtrType> & matrix,
                                  const vctFixedSizeConstVectorBase<_matrixCols, _vectorStride, _resultElementType, _vectorDataPtrType> & vector)
 {
-    const vctFixedSizeConstMatrixRef<_resultElementType, _matrixCols, 1, _vectorStride, 1> 
+    const vctFixedSizeConstMatrixRef<_resultElementType, _matrixCols, 1, _vectorStride, 1>
         inputVectorRef(vector.Pointer());
     vctFixedSizeMatrixRef<_resultElementType, _resultSize, 1, _resultStride, 1> resultRef(result.Pointer());
     resultRef.ProductOf(matrix, inputVectorRef);
@@ -228,14 +225,14 @@ template <vct::size_type _resultSize, vct::stride_type _resultStride, class _res
 inline void MultiplyVectorMatrix(
                                  vctFixedSizeVectorBase<_resultSize, _resultStride, _resultElementType, _resultDataPtrType> & result,
                                  const vctFixedSizeConstVectorBase<_vectorSize, _vectorStride, _resultElementType, _vectorDataPtrType> & vector,
-                                 const vctFixedSizeConstMatrixBase<_vectorSize, _resultSize, _matrixRowStride, _matrixColStride, 
+                                 const vctFixedSizeConstMatrixBase<_vectorSize, _resultSize, _matrixRowStride, _matrixColStride,
                                  _resultElementType, _matrixDataPtrType> & matrix
                                  )
 {
     // create matrix references to both vectors and use the matrix product
-    const vctFixedSizeConstMatrixRef<_resultElementType, 1, _vectorSize, (_vectorStride*_vectorSize), _vectorStride> 
+    const vctFixedSizeConstMatrixRef<_resultElementType, 1, _vectorSize, (_vectorStride*_vectorSize), _vectorStride>
         inputVectorRef(vector.Pointer());
-    vctFixedSizeMatrixRef<_resultElementType, 1, _resultSize, (_resultStride*_resultSize), _resultStride> 
+    vctFixedSizeMatrixRef<_resultElementType, 1, _resultSize, (_resultStride*_resultSize), _resultStride>
         resultRef(result.Pointer());
     resultRef.ProductOf(inputVectorRef, matrix);
 }

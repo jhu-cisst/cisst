@@ -19,19 +19,16 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
-/*! 
-  \file 
-  \brief Declaration of vctFixedSizeVector
- */
-
+#pragma once
 #ifndef _vctFixedSizeVector_h
 #define _vctFixedSizeVector_h
 
+/*!
+  \file
+  \brief Declaration of vctFixedSizeVector
+ */
 
 #include <cisstVector/vctFixedSizeVectorRef.h>
-
-
 
 /*! \brief Implementation of a fixed-size vector using template
   metaprogramming.
@@ -55,7 +52,7 @@ http://www.cisst.org/cisst/license.txt.
 template <class _elementType, vct::size_type _size>
 class vctFixedSizeVector : public vctFixedSizeVectorBase<
     _size, 1, _elementType,
-    typename vctFixedSizeVectorTraits<_elementType, _size, 1>::array 
+    typename vctFixedSizeVectorTraits<_elementType, _size, 1>::array
     >
 {
  public:
@@ -88,7 +85,7 @@ class vctFixedSizeVector : public vctFixedSizeVectorBase<
     explicit inline vctFixedSizeVector(const value_type & value) {
         SetAll(value);
     }
-    
+
     /*! Initialize the elements of this vector with values from another
       vector.  The other vector can include elements of any type,
       which will be converted using standard conversion to elements of this
@@ -144,17 +141,17 @@ class vctFixedSizeVector : public vctFixedSizeVectorBase<
       \note Since the size of the dynamic vector might not match the
       size of the fixed size one, this constructor can throw an
       exception.
-      
+
       \sa Corresponding Assign()
-    */ 
+    */
     template <class __vectorOwnerType>
     inline vctFixedSizeVector(const vctDynamicConstVectorBase<__vectorOwnerType, value_type> & vector)
     {
         this->Assign(vector);
     }
-    
+
     /*! \name Size dependant constructors.
-      
+
       The following methods are size dependant, i.e. don't necessarily
       mean anything for all sizes of vector.  For example, using the
       constructor vctFixedSizeVector(value, value, value) on a vector
@@ -163,7 +160,7 @@ class vctFixedSizeVector : public vctFixedSizeVectorBase<
       an overhead of code and therefore execution time which is not
       worth it.  Therefore, we are using #CMN_ASSERT to check that
       the template parameter _size is valid
-      
+
       \note Using #CMN_ASSERT on a template parameter still allows the
       compiler to perform some optimization, which would be harder if
       assert was testing a method paramater.
@@ -171,7 +168,7 @@ class vctFixedSizeVector : public vctFixedSizeVectorBase<
       \note The constructor with one argument is reserved for a
       SetAll semantics.
       */
-    
+
     //@{
 
     /*! Constructor for a vector of size 2. */
@@ -246,7 +243,7 @@ class vctFixedSizeVector : public vctFixedSizeVectorBase<
     inline ThisType & operator = (const vctFixedSizeConstVectorBase<_size, __stride, __elementType,__dataPtrType> & other) {
         return reinterpret_cast<ThisType &>(this->Assign(other));
 	}
-	
+
 	template <stride_type __stride>
     inline ThisType & operator = (const vctFixedSizeConstVectorRef<value_type, _size, __stride> & other) {
 		return reinterpret_cast<ThisType &>(this->Assign(other));
@@ -326,7 +323,7 @@ operator + (const vctFixedSizeConstVectorBase<_size, _vector1Stride, _elementTyp
 {
     vctFixedSizeVector<_elementType, _size> result;
     result.SumOf(vector1, vector2);
-    return result; 
+    return result;
 }
 
 /* documented above */
@@ -356,7 +353,7 @@ vctCrossProduct(const vctFixedSizeConstVectorBase<3, _vector1Stride, _elementTyp
 {
     vctFixedSizeVector<_elementType, 3> result;
     result.CrossProductOf(vector1, vector2);
-    return result; 
+    return result;
 }
 
 
@@ -372,7 +369,7 @@ operator % (const vctFixedSizeConstVectorBase<3, _vector1Stride, _elementType, _
 {
     vctFixedSizeVector<_elementType, 3> result;
     result.CrossProductOf(vector1, vector2);
-    return result; 
+    return result;
 }
 
 
@@ -383,7 +380,7 @@ operator % (const vctFixedSizeConstVectorBase<3, _vector1Stride, _elementType, _
  \param scalar The second operand of the binary operation.
  \return The vector result of \f$op(vector, scalar)\f$. */
 template <vct::size_type _size, vct::stride_type _stride, class _elementType, class _dataPtrType>
-inline vctFixedSizeVector<_elementType, _size> 
+inline vctFixedSizeVector<_elementType, _size>
 operator + (const vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType> & vector,
             const _elementType & scalar)
 {
@@ -394,7 +391,7 @@ operator + (const vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dat
 
 /* documented above */
 template <vct::size_type _size, vct::stride_type _stride, class _elementType, class _dataPtrType>
-inline vctFixedSizeVector<_elementType, _size> 
+inline vctFixedSizeVector<_elementType, _size>
 operator - (const vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType> & vector,
             const _elementType & scalar)
 {
@@ -405,7 +402,7 @@ operator - (const vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dat
 
 /* documented above */
 template <vct::size_type _size, vct::stride_type _stride, class _elementType, class _dataPtrType>
-inline vctFixedSizeVector<_elementType, _size> 
+inline vctFixedSizeVector<_elementType, _size>
 operator * (const vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType> & vector,
             const _elementType & scalar)
 {
@@ -416,7 +413,7 @@ operator * (const vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dat
 
 /* documented above */
 template <vct::size_type _size, vct::stride_type _stride, class _elementType, class _dataPtrType>
-inline vctFixedSizeVector<_elementType, _size> 
+inline vctFixedSizeVector<_elementType, _size>
 operator / (const vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType> & vector,
             const _elementType & scalar)
 {
@@ -434,7 +431,7 @@ operator / (const vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dat
  \param vector The second operand of the binary operation.
  \return The vector result of \f$op(scalar, vector)\f$. */
 template <vct::size_type _size, vct::stride_type _stride, class _elementType, class _dataPtrType>
-inline vctFixedSizeVector<_elementType, _size> 
+inline vctFixedSizeVector<_elementType, _size>
 operator + (const _elementType & scalar,
             const vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType> & vector)
 
@@ -446,7 +443,7 @@ operator + (const _elementType & scalar,
 
 /* documented above */
 template <vct::size_type _size, vct::stride_type _stride, class _elementType, class _dataPtrType>
-inline vctFixedSizeVector<_elementType, _size> 
+inline vctFixedSizeVector<_elementType, _size>
 operator - (const _elementType & scalar,
             const vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType> & vector)
 {
@@ -457,7 +454,7 @@ operator - (const _elementType & scalar,
 
 /* documented above */
 template <vct::size_type _size, vct::stride_type _stride, class _elementType, class _dataPtrType>
-inline vctFixedSizeVector<_elementType, _size> 
+inline vctFixedSizeVector<_elementType, _size>
 operator * (const _elementType & scalar,
             const vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType> & vector)
 {
@@ -468,7 +465,7 @@ operator * (const _elementType & scalar,
 
 /* documented above */
 template <vct::size_type _size, vct::stride_type _stride, class _elementType, class _dataPtrType>
-inline vctFixedSizeVector<_elementType, _size> 
+inline vctFixedSizeVector<_elementType, _size>
 operator / (const _elementType & scalar,
             const vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType> & vector)
 {
@@ -486,7 +483,7 @@ operator / (const _elementType & scalar,
   \return The vector result of \f$op(vector)\f$.
 */
 template <vct::size_type _size, vct::stride_type _stride, class _elementType, class _dataPtrType>
-inline vctFixedSizeVector<_elementType, _size> 
+inline vctFixedSizeVector<_elementType, _size>
 operator - (const vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType> & vector)
 {
     vctFixedSizeVector<_elementType, _size> result;
@@ -497,7 +494,7 @@ operator - (const vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dat
 
 
 /*! Concatenation operator between vectors.  The operands may be any two fixed-size
-  vectors.  The result is a vector of a size equal to the sum of sizes, that 
+  vectors.  The result is a vector of a size equal to the sum of sizes, that
   contains the concatenated elements.*/
 #ifndef SWIG // SWIG 1.3.22 doesn't like _size1 + _size2 for the template "instantiation" of vector
 template <vct::size_type _size1, vct::stride_type _stride1, class _elementType, class _dataPtr1,
@@ -525,7 +522,7 @@ operator & (const vctFixedSizeConstVectorBase<_size1, _stride1, _elementType, _d
 
 /* documented in class vctFixedSizeConstVectorBase */
 template <vct::size_type _size, vct::stride_type _stride, class _elementType, class _dataPtrType>
-inline typename vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType>::VectorValueType 
+inline typename vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType>::VectorValueType
 vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType>::Abs(void) const {
     vctFixedSizeVector<_elementType, _size> result;
     vctFixedSizeVectorRecursiveEngines<_size>::template
@@ -536,7 +533,7 @@ vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType>::Abs(voi
 
 /* documented in class vctFixedSizeConstVectorBase */
 template <vct::size_type _size, vct::stride_type _stride, class _elementType, class _dataPtrType>
-inline typename vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType>::VectorValueType 
+inline typename vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType>::VectorValueType
 vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType>::Negation(void) const {
     vctFixedSizeVector<_elementType, _size> result;
     vctFixedSizeVectorRecursiveEngines<_size>::template
@@ -547,7 +544,7 @@ vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType>::Negatio
 
 /* documented in class vctFixedSizeConstVectorBase */
 template <vct::size_type _size, vct::stride_type _stride, class _elementType, class _dataPtrType>
-inline typename vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType>::VectorValueType 
+inline typename vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType>::VectorValueType
 vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType>::Floor(void) const {
     vctFixedSizeVector<_elementType, _size> result;
     vctFixedSizeVectorRecursiveEngines<_size>::template
@@ -558,7 +555,7 @@ vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType>::Floor(v
 
 /* documented in class vctFixedSizeConstVectorBase */
 template <vct::size_type _size, vct::stride_type _stride, class _elementType, class _dataPtrType>
-inline typename vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType>::VectorValueType 
+inline typename vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType>::VectorValueType
 vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType>::Ceil(void) const {
     vctFixedSizeVector<_elementType, _size> result;
     vctFixedSizeVectorRecursiveEngines<_size>::template
@@ -569,7 +566,7 @@ vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType>::Ceil(vo
 
 /* documented in class vctFixedSizeConstVectorBase */
 template <vct::size_type _size, vct::stride_type _stride, class _elementType, class _dataPtrType>
-inline typename vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType>::VectorValueType 
+inline typename vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType>::VectorValueType
 vctFixedSizeConstVectorBase<_size, _stride, _elementType, _dataPtrType>::Normalized(void) const throw(std::runtime_error) {
     vctFixedSizeVector<_elementType, _size> result(*this);
     result.NormalizedSelf();

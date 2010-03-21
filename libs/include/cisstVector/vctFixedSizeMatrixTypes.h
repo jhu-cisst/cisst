@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):	Anton Deguet
   Created on:	2003-09-12
 
@@ -19,15 +19,14 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
-/*! 
-  \file 
-  \brief Typedef for fixed size matrices
-*/
-
-
+#pragma once
 #ifndef _vctFixedSizeMatrixTypes_h
 #define _vctFixedSizeMatrixTypes_h
+
+/*!
+  \file
+  \brief Typedef for fixed size matrices
+*/
 
 #include <cisstVector/vctFixedSizeMatrix.h>
 

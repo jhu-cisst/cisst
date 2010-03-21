@@ -19,11 +19,9 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
+#pragma once
 #ifndef _vctFastCopy_h
 #define _vctFastCopy_h
-
-
 
 #include <cisstCommon/cmnPortability.h>
 #include <cisstCommon/cmnThrow.h>
@@ -50,21 +48,21 @@ protected:
     {
         return (vector1.size() == vector2.size());
     }
-    
+
     template <class _container1Type, class _container2Type>
     inline static bool ContainerSizesCompatible(const _container1Type & container1,
                                                 const _container2Type & container2)
     {
         return (container1.sizes() == container2.sizes());
     }
-    
+
     template <class _vector1Type, class _vector2Type>
     inline static bool VectorStrideCompatible(const _vector1Type & vector1,
                                               const _vector2Type & vector2)
     {
         return ((vector1.stride() == 1) && (vector2.stride() == 1));
     }
-    
+
 
     template <class _matrix1Type, class _matrix2Type>
     inline static bool MatrixStridesCompatible(const _matrix1Type & matrix1,
@@ -72,7 +70,7 @@ protected:
     {
         return (
                 /* compact and same storage order */
-                (matrix1.IsCompact() && matrix2.IsCompact() 
+                (matrix1.IsCompact() && matrix2.IsCompact()
                  && (matrix1.strides() == matrix2.strides()))
                 ||
                 /* or row compact */
@@ -81,17 +79,17 @@ protected:
                 /* or column compact */
                 ((matrix1.col_stride() == 1) && matrix2.col_stride() == 1));
     }
-    
+
     template <class _nArray1Type, class _nArray2Type>
     inline static bool NArrayStridesCompatible(const _nArray1Type & nArray1,
                                                const _nArray2Type & nArray2)
     {
-        return (nArray1.IsCompact() && nArray2.IsCompact() 
+        return (nArray1.IsCompact() && nArray2.IsCompact()
                 && (nArray1.strides() == nArray2.strides()));
-    }    
+    }
     //@}
-    
-    
+
+
 	/*! Helper function to throw an exception whenever sizes mismatch.
       This enforces that a standard message is sent. */
     //@{
@@ -113,9 +111,9 @@ protected:
         if (!ContainerSizesCompatible(container1, container2)) {
             cmnThrow(std::runtime_error("vctFastCopy: Container sizes mismatch"));
         }
-    }    
+    }
     //@}
-    
+
 public:
 
     /*! Flags used to skip or perform safety checks in FastCopy. */
@@ -141,7 +139,7 @@ public:
         return (ContainerSizesCompatible(matrix1, matrix2)
                 && MatrixStridesCompatible(matrix1, matrix2));
     }
-    
+
     template <class _nArray1Type, class _nArray2Type>
     inline static bool NArrayCopyCompatible(const _nArray1Type & nArray1,
                                             const _nArray2Type & nArray2)
@@ -162,12 +160,12 @@ public:
                                   bool performSafetyChecks)
     {
         typedef _sourceVectorType SourceVectorType;
-        typedef typename SourceVectorType::value_type value_type;            
-        
+        typedef typename SourceVectorType::value_type value_type;
+
         if (performSafetyChecks) {
             // test size
             ThrowUnlessValidVectorSizes(source, destination);
-            
+
             // test layout
             if (! VectorStrideCompatible(destination, source)) {
                 return false;
@@ -209,12 +207,12 @@ public:
                                   bool performSafetyChecks)
     {
         typedef _sourceMatrixType SourceMatrixType;
-        typedef typename SourceMatrixType::value_type value_type;            
-        
+        typedef typename SourceMatrixType::value_type value_type;
+
         if (performSafetyChecks) {
             // test size
             ThrowUnlessValidContainerSizes(source, destination);
-            
+
             // test layout
             if (! MatrixStridesCompatible(destination, source)) {
                 return false;
@@ -230,7 +228,7 @@ public:
 
             typedef typename DestinationMatrixType::size_type size_type;
             typedef typename DestinationMatrixType::stride_type stride_type;
-            
+
             typedef typename DestinationMatrixType::pointer DestinationPointerType;
             typedef typename SourceMatrixType::const_pointer SourcePointerType;
 
@@ -251,7 +249,7 @@ public:
                 const size_type sizeOfRow = cols * sizeof(value_type);
 
                 const DestinationPointerType destinationRowEnd = destinationPointer + rows * destinationRowStride;
-                
+
                 for (;
                      destinationPointer != destinationRowEnd;
                      destinationPointer += destinationRowStride, sourcePointer += sourceRowStride) {
@@ -262,7 +260,7 @@ public:
                 /* copy column by column */
                 const size_type sizeOfCol = rows * sizeof(value_type);
                 const DestinationPointerType destinationColEnd = destinationPointer + cols * destinationColStride;
-                
+
                 for (;
                      destinationPointer != destinationColEnd;
                      destinationPointer += destinationColStride, sourcePointer += sourceColStride) {
@@ -272,7 +270,7 @@ public:
             }
         }
     }
-    
+
 
     /*! Function to use memcpy whenever possible.  This is not really
       and engine since it has no loop nor plugable operation, but it
@@ -285,12 +283,12 @@ public:
                                   bool performSafetyChecks)
     {
         typedef _sourceNArrayType SourceNArrayType;
-        typedef typename SourceNArrayType::value_type value_type;            
-        
+        typedef typename SourceNArrayType::value_type value_type;
+
         if (performSafetyChecks) {
             // test size
             ThrowUnlessValidContainerSizes(source, destination);
-            
+
             // test layout
             if (! NArrayStridesCompatible(destination, source)) {
                 return false;

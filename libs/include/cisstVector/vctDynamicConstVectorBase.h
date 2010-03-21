@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):	Ofri Sadowsky, Anton Deguet
   Created on: 2004-07-01
 
@@ -19,7 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
+#pragma once
 #ifndef _vctDynamicConstVectorBase_h
 #define _vctDynamicConstVectorBase_h
 
@@ -27,7 +27,6 @@ http://www.cisst.org/cisst/license.txt.
   \file
   \brief Declaration of vctDynamicConstVectorBase
 */
-
 
 #include <cisstCommon/cmnPortability.h>
 #include <cisstCommon/cmnTypeTraits.h>
@@ -62,11 +61,11 @@ vctDynamicVectorElementwiseCompareScalar(const vctDynamicConstVectorBase<_vector
 #endif // DOXYGEN
 
 
-/*! 
+/*!
   This class is templated with the ``vector owner type'', which may
   be a vctDynamicVectorOwner or a vctVectorRefOwner.  It provides
   const operations on the dynamic vector, such as SumOfElements etc.
-  
+
   Vector indexing is zero-based.
 
   The method provided for the compatibility with the STL containers
@@ -90,17 +89,17 @@ public:
     /*! Type of the data owner (dynamic array or pointer) */
     typedef _vectorOwnerType OwnerType;
 
-    /*! Iterator on the elements of the vector. */   
+    /*! Iterator on the elements of the vector. */
     typedef typename OwnerType::iterator iterator;
 
-    /*! Const iterator on the elements of the vector. */    
-    typedef typename OwnerType::const_iterator const_iterator; 
+    /*! Const iterator on the elements of the vector. */
+    typedef typename OwnerType::const_iterator const_iterator;
 
-    /*! Reverse iterator on the elements of the vector. */   
+    /*! Reverse iterator on the elements of the vector. */
     typedef typename OwnerType::reverse_iterator reverse_iterator;
 
-    /*! Const reverse iterator on the elements of the vector. */   
-    typedef typename OwnerType::const_reverse_iterator const_reverse_iterator; 
+    /*! Const reverse iterator on the elements of the vector. */
+    typedef typename OwnerType::const_reverse_iterator const_reverse_iterator;
 
     /*! The type used to create a copy. */
     typedef vctDynamicVector<_elementType> CopyType;
@@ -141,25 +140,25 @@ public:
     /*! Returns a const iterator on the first element (STL
       compatibility). */
     const_iterator begin(void) const {
-        return Vector.begin(); 
+        return Vector.begin();
     }
 
     /*! Returns a const iterator on the last element (STL
       compatibility). */
     const_iterator end(void) const {
-        return Vector.end(); 
+        return Vector.end();
     }
 
     /*! Returns a reverse const iterator on the last element (STL
-      compatibility). */ 
+      compatibility). */
     const_reverse_iterator rbegin(void) const {
-        return Vector.rbegin(); 
+        return Vector.rbegin();
     }
 
     /*! Returns a reverse const iterator on the element before first
-      (STL compatibility). */ 
+      (STL compatibility). */
     const_reverse_iterator rend(void) const {
-        return Vector.rend(); 
+        return Vector.rend();
     }
 
     /*! Return the number of elements in the vector.  This is not
@@ -201,7 +200,7 @@ public:
         return this->at(index);
     }
 
-    
+
     /*! Access an element by index (const). This method allows
       to access an element without any bounds checking.
 
@@ -213,7 +212,7 @@ public:
 
     /*! Access the vector owner.  This method should be used only to
         access some extra information related to the memory layout.
-        It is used by the engines (vctDynamicVectorLoopEngines). */ 
+        It is used by the engines (vctDynamicVectorLoopEngines). */
     const OwnerType & Owner(void) const {
         return this->Vector;
     }
@@ -234,12 +233,12 @@ public:
 
 
     /*! \name Size dependant methods.
-      
+
     The following methods are size dependant, i.e. don't necessarily
     mean anything for all sizes of vector.  For example, using the Z()
     method on a vector of size 2 shouldn't be allowed.  Therefore, we
     are using #CMN_ASSERT to check that the size is valid. */
-    
+
     //@{
 
     /*! Returns the first element of the vector.  This method uses
@@ -358,7 +357,7 @@ public:
             SoVi<typename vctBinaryOperations<value_type>::Addition,
             typename vctUnaryOperations<value_type>::Identity>::
             Run(*this);
-    } 
+    }
 
     /*! Return the product of the elements of the vector.
       \return The product of all the elements */
@@ -419,7 +418,7 @@ public:
 
     /*! Return the L1 norm of the vector, i.e. the sum of the absolute
       values of all the elements.
- 
+
       \return The L1 norm. */
     inline value_type L1Norm(void) const {
         return vctDynamicVectorLoopEngines::
@@ -460,7 +459,7 @@ public:
       values of all the elements.
 
       \sa LinfNorm.
- 
+
       \return The maximum of the absolute values. */
     inline value_type MaxAbsElement(void) const {
         return vctDynamicVectorLoopEngines::
@@ -471,7 +470,7 @@ public:
 
     /*! Return the minimum of the absolute
       values of all the elements.
- 
+
       \return The minimum of the absolute values. */
     inline value_type MinAbsElement(void) const {
         return vctDynamicVectorLoopEngines::
@@ -492,7 +491,7 @@ public:
         vctDynamicVectorLoopEngines::MinAndMax::Run((*this), minElement, maxElement);
     }
 
-    /*! Return true if all the elements of this vector are strictly positive, 
+    /*! Return true if all the elements of this vector are strictly positive,
       false otherwise */
     inline bool IsPositive(void) const {
         return vctDynamicVectorLoopEngines::
@@ -501,7 +500,7 @@ public:
             Run(*this);
     }
 
-    /*! Return true if all the elements of this vector are non-negative, 
+    /*! Return true if all the elements of this vector are non-negative,
       false otherwise */
     inline bool IsNonNegative(void) const {
         return vctDynamicVectorLoopEngines::
@@ -510,7 +509,7 @@ public:
             Run(*this);
     }
 
-    /*! Return true if all the elements of this vector are non-positive, 
+    /*! Return true if all the elements of this vector are non-positive,
       false otherwise */
     inline bool IsNonPositive(void) const {
         return vctDynamicVectorLoopEngines::
@@ -519,7 +518,7 @@ public:
             Run(*this);
     }
 
-    /*! Return true if all the elements of this vector are strictly negative, 
+    /*! Return true if all the elements of this vector are strictly negative,
       false otherwise */
     inline bool IsNegative (void) const {
         return vctDynamicVectorLoopEngines::
@@ -585,7 +584,7 @@ public:
 
 
     /*! Dot product with another vector <em>of the same type and size</em>
-     
+
     \param otherVector second operand of the dot product ("this" is the first operand)
     \return The dot product of this and otherVector.
     */
@@ -681,7 +680,7 @@ public:
             typename vctBinaryOperations<bool, value_type, value_type>::Greater>::
             Run(*this, otherVector);
     }
-    
+
     /* documented above */
     template <class __vectorOwnerType>
     inline bool GreaterOrEqual(const vctDynamicConstVectorBase<__vectorOwnerType, _elementType> & otherVector) const {
@@ -705,7 +704,7 @@ public:
       ElementwiseGreaterOrEqual() is performed elementwise between the
       two vectors and stored in a newly created vector.  There is no
       operator provided since the semantic would be ambiguous.
-      
+
       \return A vector of booleans.
     */
     template <class __vectorOwnerType>
@@ -725,7 +724,7 @@ public:
             _vectorOwnerType, __vectorOwnerType, value_type,
             typename vctBinaryOperations<bool, value_type, value_type>::NotEqual>(*this, otherVector);
     }
-    
+
     /* documented above */
     template <class __vectorOwnerType>
     BoolVectorReturnType
@@ -785,7 +784,7 @@ public:
             typename vctBinaryOperations<bool, value_type, value_type>::Equal>::
             Run(*this, scalar);
     }
-    
+
     /* documented above */
     inline bool operator == (const value_type & scalar) const {
         return Equal(scalar);
@@ -848,14 +847,14 @@ public:
       elementwise between the vector and the scalar and stored in a
       newly created vector.  There is no operator provided since the
       semantic would be ambiguous.
-      
+
       \return A vector of booleans.
     */
     BoolVectorReturnType ElementwiseEqual(const value_type & scalar) const;
-    
+
     /* documented above */
     BoolVectorReturnType ElementwiseNotEqual(const value_type & scalar) const;
-    
+
     /* documented above */
     BoolVectorReturnType ElementwiseLesser(const value_type & scalar) const;
 
@@ -902,7 +901,7 @@ public:
       op(otherVector[i])\f$ where \f$op\f$ can calculate the absolute
       value (Abs), the opposite (Negation) or the normalized version
       (Normalized).
-      
+
       \return A new vector.
     */
     inline VectorReturnType Abs(void) const;
@@ -926,7 +925,7 @@ public:
         ToStream(outputStream);
         return outputStream.str();
     }
-    
+
     void ToStream(std::ostream & outputStream) const
     {
         size_type index;
@@ -937,9 +936,9 @@ public:
         bool showpoint = ((outputStream.flags() & std::ios_base::showpoint) != 0);
         outputStream << std::setprecision(6) << std::showpoint;
         for (index = 0; index < mySize; ++index) {
-            outputStream << std::setw(12) << (*this)[index]; 
+            outputStream << std::setw(12) << (*this)[index];
             if (index < (mySize-1)) {
-                outputStream << " "; 
+                outputStream << " ";
             }
         }
         // resume the formatting flags
@@ -949,7 +948,7 @@ public:
         }
     }
 
-    
+
     void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
                      bool headerOnly = false, const std::string & headerPrefix = "") const
     {
@@ -957,27 +956,27 @@ public:
         const size_type mySize = size();
         if (headerOnly) {
             for (index = 0; index < mySize; ++index) {
-                outputStream << headerPrefix << "-v" << index; 
+                outputStream << headerPrefix << "-v" << index;
                 if (index < (mySize-1)) {
-                    outputStream << delimiter; 
+                    outputStream << delimiter;
                 }
             }
         } else {
             for (index = 0; index < mySize; ++index) {
-                outputStream << (*this)[index]; 
+                outputStream << (*this)[index];
                 if (index < (mySize-1)) {
-                    outputStream << delimiter; 
+                    outputStream << delimiter;
                 }
             }
         }
     }
 
     /*! Binary serialization */
-    void SerializeRaw(std::ostream & outputStream) const 
+    void SerializeRaw(std::ostream & outputStream) const
     {
         const size_type mySize = size();
         size_type index;
-        
+
         cmnSerializeSizeRaw(outputStream, mySize);
         for (index = 0; index < mySize; ++index) {
             cmnSerializeRaw(outputStream, this->Element(index));
@@ -1039,7 +1038,7 @@ vctDynamicConstVectorBase<_vectorOwnerType, _elementType>::ElementwiseGreaterOrE
 
 /*!
   Dot product of two vectors <em>of the same type and size</em>.
-  
+
   \param vector1 first operand of the dot product.
   \param vector2 second operand of the dot product.
   \return The dot product of vector1 and vector2.
@@ -1052,7 +1051,7 @@ inline _elementType vctDotProduct(const vctDynamicConstVectorBase<_vector1OwnerT
 
 /*!
   Dot product of two vectors <em>of the same type and size</em>.
-  
+
   \param vector1 first operand of the dot product.
   \param vector2 second operand of the dot product.
   \return The dot product of vector1 and vector2.

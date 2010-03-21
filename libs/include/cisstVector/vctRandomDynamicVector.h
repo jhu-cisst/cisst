@@ -19,19 +19,20 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
+#pragma once
 #ifndef _vctRandomDynamicVector_h
 #define _vctRandomDynamicVector_h
+
+/*!
+  \file
+  \brief Definition of vctRandom for dynamic vectors.
+*/
 
 #include <cisstCommon/cmnRandomSequence.h>
 #include <cisstCommon/cmnPortability.h>
 
 #include <cisstVector/vctForwardDeclarations.h>
 #include <cisstVector/vctDynamicVector.h>
-/*!
-  \file
-  \brief Definition of vctRandom for dynamic vectors.
-*/
 
 /*!
   \ingroup cisstVector

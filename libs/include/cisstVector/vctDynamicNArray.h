@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):	Daniel Li
   Created on:	2006-07-10
 
@@ -19,16 +19,14 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
+#pragma once
 #ifndef _vctDynamicNArray_h
 #define _vctDynamicNArray_h
-
 
 /*!
   \file
   \brief Declaration of vctDynamicNArray
 */
-
 
 #include <cisstVector/vctDynamicNArrayBase.h>
 #include <cisstVector/vctDynamicNArrayOwner.h>
@@ -73,7 +71,7 @@ http://www.cisst.org/cisst/license.txt.
 
   // constructor allocation, empty array
   ArrayType a1;
-  
+
   // Create an empty nArray and later allocate memory.
   ArrayType a2;
   a2.SetSize(SizeType(5, 7, 8));
@@ -85,7 +83,7 @@ http://www.cisst.org/cisst/license.txt.
   ArrayType a3(SizeType(7, 8, 9));
   a3.SetSize(a2.sizes());
   vctRandom(a3, ElementType(-10), ElementType(0));
-  
+
   // Store an algebraic result to a new nArray.  In this case,
   // memory is allocated by the algebraic operation, and then
   // attached to the nArray object.
@@ -96,7 +94,7 @@ http://www.cisst.org/cisst/license.txt.
   \code
   // Initialize all elements to the same value
   ArrayType a5(a3.sizes(), 2.0);
-  
+
   // Assign one matrix to another.
   vctDynamicNArray<int, DIMENSION> nArrayInt;
   nArrayInt.Assign(a5); // preferred syntax

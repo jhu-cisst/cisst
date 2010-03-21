@@ -19,19 +19,16 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
-/*! 
-  \file 
-  \brief Declaration of vctFixedSizeMatrixTraits
- */
-
-
+#pragma once
 #ifndef _vctFixedSizeMatrixTraits_h
 #define _vctFixedSizeMatrixTraits_h
 
+/*!
+  \file
+  \brief Declaration of vctFixedSizeMatrixTraits
+ */
 
 #include <cisstVector/vctFixedStrideMatrixIterator.h>
-
 
 /*!  \brief Define common container related types based on the
   properties of a fixed size container.

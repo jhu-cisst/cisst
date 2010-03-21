@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):	Anton Deguet
   Created on:	2004-01-15
 
@@ -19,16 +19,14 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
-/*! 
-  \file 
-  \brief Declaration of vctQuaternionRotation3
- */
-
-
+#pragma once
 #ifndef _vctQuaternionRotation3_h
 #define _vctQuaternionRotation3_h
 
+/*!
+  \file
+  \brief Declaration of vctQuaternionRotation3
+ */
 
 #include <cisstVector/vctQuaternionRotation3Base.h>
 #include <cisstVector/vctFixedSizeVector.h>
@@ -153,7 +151,7 @@ class vctQuaternionRotation3: public vctQuaternionRotation3Base<vctFixedSizeVect
       inherited from the ContainerType.  This operator (as well as the
       Assign method) allows to set a rotation quaternion to whatever
       value without any further validity checking.  It is recommended
-      to use it with caution. */ 
+      to use it with caution. */
     inline ThisType & operator = (const BaseType & other) {
         return reinterpret_cast<ThisType &>(this->Assign(other));
     }

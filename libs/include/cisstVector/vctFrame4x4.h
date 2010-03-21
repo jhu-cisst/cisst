@@ -19,15 +19,14 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
-/*! 
-  \file 
-  \brief Declaration of vctFrame4x4
- */
-
-
+#pragma once
 #ifndef _vctFrame4x4_h
 #define _vctFrame4x4_h
+
+/*!
+  \file
+  \brief Declaration of vctFrame4x4
+ */
 
 #include <cisstVector/vctFixedSizeMatrix.h>
 #include <cisstVector/vctFrame4x4Base.h>
@@ -48,7 +47,7 @@ http://www.cisst.org/cisst/license.txt.
   \sa vctDynamicMatrix, vctFixedSizeMatrix, vctFrameBase
 */
 template <class _elementType, bool _rowMajor>
-class vctFrame4x4: 
+class vctFrame4x4:
     public vctFrame4x4Base<vctFixedSizeMatrix<_elementType, 4, 4, _rowMajor> >
 {
 public:
@@ -126,7 +125,7 @@ public:
     inline ThisType & operator = (const ContainerType & other) {
         return reinterpret_cast<ThisType &>(this->Assign(other));
     }
-    
+
 
     /*! Constructor from a translation and a rotation. */
     template <class _rotationType, class _translationType>

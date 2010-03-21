@@ -19,15 +19,14 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
-/*! 
-  \file 
-  \brief Declaration of vctFixedStrideVectorConstIterator and vctFixedStrideVectorIterator
- */
-
-
+#pragma once
 #ifndef _vctFixedStrideVectorIterator_h
 #define _vctFixedStrideVectorIterator_h
+
+/*!
+  \file
+  \brief Declaration of vctFixedStrideVectorConstIterator and vctFixedStrideVectorIterator
+ */
 
 #include <cisstCommon/cmnPortability.h>
 #include <cisstVector/vctContainerTraits.h>
@@ -67,7 +66,7 @@ class vctFixedStrideVectorConstIterator:
 public:
     /* define most types from vctContainerTraits */
     VCT_CONTAINER_TRAITS_TYPEDEFS(_elementType);
-    
+
     /*! This of the iterator itself. */
     typedef vctFixedStrideVectorConstIterator<_elementType, _stride> ThisType;
 
@@ -228,7 +227,7 @@ public:
 
     /*! Default constructor: create an uninitialized object */
     vctFixedStrideVectorIterator()
-        : BaseType() 
+        : BaseType()
         {}
 
 
@@ -237,7 +236,7 @@ public:
       there is no constructor that takes a const element pointer.
     */
     explicit vctFixedStrideVectorIterator(value_type * dataPtr)
-        : BaseType(dataPtr) 
+        : BaseType(dataPtr)
         {}
 
 
@@ -318,7 +317,7 @@ operator+(const vctFixedStrideVectorConstIterator<_elementType, _stride> & itera
 
 /*! difference_type + const_iterator required by STL */
 template<class _elementType, int _stride>
-vctFixedStrideVectorConstIterator<_elementType, _stride> 
+vctFixedStrideVectorConstIterator<_elementType, _stride>
 operator+(typename vctFixedStrideVectorConstIterator<_elementType, _stride>::difference_type difference,
           const vctFixedStrideVectorConstIterator<_elementType, _stride> & iterator)
 {
@@ -329,7 +328,7 @@ operator+(typename vctFixedStrideVectorConstIterator<_elementType, _stride>::dif
 
 /*! const_iterator - difference_type required by STL */
 template<class _elementType, int _stride>
-vctFixedStrideVectorConstIterator<_elementType, _stride> 
+vctFixedStrideVectorConstIterator<_elementType, _stride>
 operator-(const vctFixedStrideVectorConstIterator<_elementType, _stride> & iterator,
           typename vctFixedStrideVectorConstIterator<_elementType,_stride>::difference_type difference)
 {
@@ -354,7 +353,7 @@ operator+(const vctFixedStrideVectorIterator<_elementType, _stride> & iterator,
 
 /*! difference_type + iterator required by STL */
 template<class _elementType, int _stride>
-vctFixedStrideVectorIterator<_elementType, _stride> 
+vctFixedStrideVectorIterator<_elementType, _stride>
 operator+(typename vctFixedStrideVectorIterator<_elementType, _stride>::difference_type difference,
           const vctFixedStrideVectorIterator<_elementType, _stride> & iterator)
 {
@@ -365,7 +364,7 @@ operator+(typename vctFixedStrideVectorIterator<_elementType, _stride>::differen
 
 /*! iterator - difference_type required by STL */
 template<class _elementType, int _stride>
-vctFixedStrideVectorIterator<_elementType, _stride> 
+vctFixedStrideVectorIterator<_elementType, _stride>
 operator-(const vctFixedStrideVectorIterator<_elementType, _stride> & iterator,
           typename vctFixedStrideVectorIterator<_elementType, _stride>::difference_type difference)
 {

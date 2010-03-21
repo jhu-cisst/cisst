@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):	Anton Deguet
   Created on:	2007-02-11
 
@@ -19,19 +19,20 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
+#pragma once
 #ifndef _vctRandomFixedSizeVector_h
 #define _vctRandomFixedSizeVector_h
+
+/*!
+  \file
+  \brief Definition of vctRandom for fixed size vectors.
+*/
 
 #include <cisstCommon/cmnRandomSequence.h>
 #include <cisstCommon/cmnPortability.h>
 
 #include <cisstVector/vctForwardDeclarations.h>
 #include <cisstVector/vctFixedSizeVector.h>
-/*!
-  \file
-  \brief Definition of vctRandom for fixed size vectors.
-*/
 
 /*!
   \ingroup cisstVector
@@ -54,7 +55,7 @@ void vctRandom(vctFixedSizeVectorBase<_size, _stride, _elementType, _dataPtrType
     vct::index_type index;
     for (index = 0; index < size; ++index) {
         randomSequence.ExtractRandomValue(min, max,
-                                          vector[index]);    
+                                          vector[index]);
     }
 }
 

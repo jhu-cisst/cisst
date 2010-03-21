@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):	Daniel Li
   Created on:	2006-06-23
 
@@ -19,7 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
+#pragma once
 #ifndef _vctDynamicConstNArrayBase_h
 #define _vctDynamicConstNArrayBase_h
 
@@ -93,13 +93,13 @@ public:
         typedef vctDynamicConstNArrayRef<_elementType, _dimension - 1> ConstSliceRefType;
         typedef vctDynamicNArrayRef<_elementType, _dimension - 1> SliceRefType;
 
-        template <class _nArrayOwnerType> 
+        template <class _nArrayOwnerType>
         static ConstSliceRefType ConstSliceOf(const vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, _dimension> & input,
                                               vct::size_type dimension, vct::index_type index) {
             return vctDynamicNArrayConstNArraySlice(input, dimension, index);
         }
 
-        template <class _nArrayOwnerType> 
+        template <class _nArrayOwnerType>
         static SliceRefType SliceOf(vctDynamicNArrayBase<_nArrayOwnerType, _elementType, _dimension> & input,
                                     vct::size_type dimension, vct::index_type index) {
             return vctDynamicNArrayNArraySlice(input, dimension, index);
@@ -120,13 +120,13 @@ public:
         typedef const _elementType & ConstSliceRefType;
         typedef _elementType & SliceRefType;
 
-        template <class _nArrayOwnerType> 
+        template <class _nArrayOwnerType>
         static ConstSliceRefType ConstSliceOf(const vctDynamicConstNArrayBase<_nArrayOwnerType, _elementType, 1> & input,
                                               vct::size_type CMN_UNUSED(dimension), vct::index_type index) {
             return vctDynamicNArrayConstElementSlice(input, index);
         }
 
-        template <class _nArrayOwnerType> 
+        template <class _nArrayOwnerType>
         static SliceRefType SliceOf(vctDynamicNArrayBase<_nArrayOwnerType, _elementType, 1> & input,
                                     vct::size_type CMN_UNUSED(dimension), vct::index_type index) {
             return vctDynamicNArrayElementSlice(input, index);
@@ -140,7 +140,7 @@ public:
   This class is templated with the ``nArray owner type'', which may
   be a vctDynamicNArrayOwner or a vctDynamicNArrayRefOwner.  It provides
   const operations on the nArray, such as SumOfElements etc.
-  
+
   nArray indexing is zero-based.
 
   nArray dimensions are zero-based.
@@ -275,7 +275,7 @@ public:
       compatibility). */
     const_iterator begin(void) const
     {
-        return NArray.begin(); 
+        return NArray.begin();
     }
 
     /*! Returns a const iterator on the last element (STL
@@ -286,17 +286,17 @@ public:
     }
 
     /*! Returns a reverse const iterator on the last element (STL
-      compatibility). */ 
+      compatibility). */
     const_reverse_iterator rbegin(void) const
     {
         return NArray.rbegin();
     }
 
     /*! Returns a reverse const iterator on the element before first
-      (STL compatibility). */ 
+      (STL compatibility). */
     const_reverse_iterator rend(void) const
     {
-        return NArray.rend(); 
+        return NArray.rend();
     }
 
     /*! Return the number of elements in the nArray.  This is not
@@ -397,7 +397,7 @@ public:
       std::matrix::at().  This method can be a handy substitute for
       the overloaded operator [] when operator overloading is
       unavailable or inconvenient.
-      
+
       \return a const reference to element[index] */
     const_reference at(size_type metaIndex) const
         throw(std::out_of_range)
@@ -411,7 +411,7 @@ public:
       operator overloading is unavailable or inconvenient.
       \return a const reference to the element at indices */
     const_reference at(const nsize_type & coordinates) const
-        throw(std::out_of_range) 
+        throw(std::out_of_range)
     {
         ThrowUnlessValidIndex(coordinates);
         return *(Pointer(coordinates));
@@ -427,7 +427,7 @@ public:
 
     /*! Access the NArray owner.  This method should be used only to
         access some extra information related to the memory layout.
-        It is used by the engines (vctDynamicNArrayLoopEngines). */ 
+        It is used by the engines (vctDynamicNArrayLoopEngines). */
     const OwnerType & Owner(void) const {
         return this->NArray;
     }
@@ -558,7 +558,7 @@ public:
 
     /*! Return the L1 norm of the nArray, i.e. the sum of the absolute
       values of all the elements.
- 
+
       \return The L1 norm. */
     inline value_type L1Norm(void) const
     {
@@ -570,7 +570,7 @@ public:
 
     /*! Return the Linf norm of the nArray, i.e. the maximum of the absolute
       values of all the elements.
- 
+
       \return The Linf norm. */
     inline value_type LinfNorm(void) const
     {
@@ -601,7 +601,7 @@ public:
       values of all the elements.
 
       \sa LinfNorm.
- 
+
       \return The maximum of the absolute values. */
     inline value_type MaxAbsElement(void) const
     {
@@ -613,7 +613,7 @@ public:
 
     /*! Return the minimum of the absolute
       values of all the elements.
- 
+
       \return The minimum of the absolute values. */
     inline value_type MinAbsElement(void) const
     {
@@ -637,7 +637,7 @@ public:
     }
 
 
-    /*! Return true if all the elements of this nArray are strictly positive, 
+    /*! Return true if all the elements of this nArray are strictly positive,
       false otherwise */
     inline bool IsPositive(void) const
     {
@@ -647,7 +647,7 @@ public:
             Run(*this);
     }
 
-    /*! Return true if all the elements of this nArray are non-negative, 
+    /*! Return true if all the elements of this nArray are non-negative,
       false otherwise */
     inline bool IsNonNegative(void) const
     {
@@ -657,7 +657,7 @@ public:
             Run(*this);
     }
 
-    /*! Return true if all the elements of this nArray are non-positive, 
+    /*! Return true if all the elements of this nArray are non-positive,
       false otherwise */
     inline bool IsNonPositive(void) const
     {
@@ -667,7 +667,7 @@ public:
             Run(*this);
     }
 
-    /*! Return true if all the elements of this nArray are strictly negative, 
+    /*! Return true if all the elements of this nArray are strictly negative,
       false otherwise */
     inline bool IsNegative (void) const
     {
@@ -746,7 +746,7 @@ public:
             typename vctBinaryOperations<bool, value_type, value_type>::Equal>::
             Run(*this, otherNArray);
     }
-    
+
     /* documented above */
     template <class __nArrayOwnerType>
     inline bool operator == (const vctDynamicConstNArrayBase<__nArrayOwnerType, value_type, DIMENSION> & otherNArray) const
@@ -778,7 +778,7 @@ public:
             typename vctBinaryOperations<bool, value_type, value_type>::NotEqual>::
             Run(*this, otherNArray);
     }
-    
+
     /* documented above */
     template <class __nArrayOwnerType>
     inline bool operator != (const vctDynamicConstNArrayBase<__nArrayOwnerType, value_type, DIMENSION> & otherNArray) const
@@ -815,7 +815,7 @@ public:
             typename vctBinaryOperations<bool, value_type, value_type>::Greater>::
             Run(*this, otherNArray);
     }
-    
+
     /* documented above */
     template <class __nArrayOwnerType>
     inline bool GreaterOrEqual(const vctDynamicConstNArrayBase<__nArrayOwnerType, value_type, DIMENSION> & otherNArray) const
@@ -921,7 +921,7 @@ public:
             typename vctBinaryOperations<bool, value_type, value_type>::Equal>::
             Run(*this, scalar);
     }
-    
+
     /* documented above */
     inline bool operator == (const value_type & scalar) const
     {
@@ -1021,17 +1021,17 @@ public:
       the nArray "this", performs \f$ this[i] \leftarrow
       op(otherNArray[i])\f$ where \f$op\f$ can calculate the absolute
       value (Abs) or the opposite (Negation).
-      
+
       \return A new nArray.
     */
     inline NArrayReturnType Abs(void) const;
-    
+
     /* documented above */
     inline NArrayReturnType Negation(void) const;
-    
+
     /* documented above */
     inline NArrayReturnType Floor(void) const;
-    
+
     /* documented above */
     inline NArrayReturnType Ceil(void) const;
     //@}

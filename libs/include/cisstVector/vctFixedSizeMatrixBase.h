@@ -19,14 +19,14 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
-/*! 
-  \file 
-  \brief Declaration of vctFixedSizeMatrixBase
- */
-
+#pragma once
 #ifndef _vctFixedSizeMatrixBase_h
 #define _vctFixedSizeMatrixBase_h
+
+/*!
+  \file
+  \brief Declaration of vctFixedSizeMatrixBase
+ */
 
 #include <cisstCommon/cmnPortability.h>
 #include <cisstCommon/cmnTypeTraits.h>
@@ -45,14 +45,14 @@ inline void vctFixedSizeMatrixBaseAssignDynamicConstMatrixBase(
 
 
 
-/*! 
+/*!
   \brief A template for a fixed size matrix with fixed spacings in
   memory.
 
   This class defines a matrix with read/write operations.  It
   extends vctFixedSizeConstMatrixBase with non-const methods.  See
   the base class for more documentation.
-  
+
   \sa vctFixedSizeConstMatrixBase
 */
 template <vct::size_type _rows, vct::size_type _cols,
@@ -64,26 +64,26 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
  public:
     /* Declare the container-defined typed required by STL, plus the
        types completed by our traits class */
-    
+
     /* define most types from vctContainerTraits */
     VCT_CONTAINER_TRAITS_TYPEDEFS(_elementType);
 
     /* documented in base class */
-    typedef vctFixedSizeMatrixBase<_rows, _cols, 
+    typedef vctFixedSizeMatrixBase<_rows, _cols,
         _rowStride, _colStride, _elementType, _dataPtrType> ThisType;
-    
+
     /*! Type of the base class. */
-    typedef vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStride, 
+    typedef vctFixedSizeConstMatrixBase<_rows, _cols, _rowStride, _colStride,
                                         _elementType, _dataPtrType> BaseType;
-    
-    typedef vctFixedSizeMatrixTraits<_elementType, _rows, _cols, 
+
+    typedef vctFixedSizeMatrixTraits<_elementType, _rows, _cols,
                                      _rowStride, _colStride> MatrixTraits;
 
     typedef typename MatrixTraits::iterator iterator;
     typedef typename MatrixTraits::const_iterator const_iterator;
     typedef typename MatrixTraits::reverse_iterator reverse_iterator;
     typedef typename MatrixTraits::const_reverse_iterator const_reverse_iterator;
-    
+
     typedef typename BaseType::RowRefType RowRefType;
     typedef typename BaseType::ColumnRefType ColumnRefType;
     typedef typename BaseType::ConstRowRefType ConstRowRefType;
@@ -94,49 +94,49 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
     typedef typename BaseType::ConstRefTransposeType ConstRefTransposeType;
     typedef typename BaseType::RowValueType RowValueType;
     typedef typename BaseType::ColumnValueType ColumnValueType;
-    
+
     /*! Define the dimensions of the matrix */
     enum {ROWS = MatrixTraits::ROWS, COLS = MatrixTraits::COLS,
           LENGTH = MatrixTraits::LENGTH};
     /*! Define the strides between rows and columns of the matrix */
-    enum {ROWSTRIDE = MatrixTraits::ROWSTRIDE, 
+    enum {ROWSTRIDE = MatrixTraits::ROWSTRIDE,
           COLSTRIDE = MatrixTraits::COLSTRIDE};
-    
+
  public:
     /*! Returns an iterator on the first element (STL compatibility). */
     inline iterator begin() {
         return iterator(this->Data, 0);
     }
-    
+
     /* documented in base class */
     inline const_iterator begin() const {
         return BaseType::begin();
     }
-    
+
     /*! Returns an iterator on the last element (STL compatibility). */
     inline iterator end() {
         return iterator(this->Data) + LENGTH;
     }
-    
+
     /* documented in base class */
     inline const_iterator end() const {
         return BaseType::end();
     }
-    
-    /*! Returns a reverse iterator on the last element (STL compatibility). */ 
+
+    /*! Returns a reverse iterator on the last element (STL compatibility). */
     reverse_iterator rbegin() {
         return reverse_iterator(Pointer(ROWS - 1, COLS - 1), 0);
     }
-    
+
     /* documented in base class */
     const_reverse_iterator rbegin() const {
         return BaseType::rbegin();
     }
 
-    /*! Returns a reverse iterator on the element before first 
-      (STL compatibility). */ 
+    /*! Returns a reverse iterator on the element before first
+      (STL compatibility). */
     reverse_iterator rend() {
-        return reverse_iterator(this->Data - ROWSTRIDE + 
+        return reverse_iterator(this->Data - ROWSTRIDE +
                                 COLSTRIDE * (COLS - 1), 0);
     }
 
@@ -172,7 +172,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
         return this->Data;
     }
 
-    /* documented in base class */ 
+    /* documented in base class */
     const_pointer Pointer(size_type rowIndex, size_type colIndex) const {
         return BaseType::Pointer(rowIndex, colIndex);
     }
@@ -191,12 +191,12 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
         this->ThrowUnlessValidIndex(index);
         return (begin())[index];
     }
-    
+
     /* documented in base class */
     const_reference at(size_type index) const throw(std::out_of_range) {
         return BaseType::at(index);
     }
-    
+
 
     /*! Access an element by index.  Compare with std::vector::at().
       This method can be a handy substitute for the overloaded operator () when
@@ -243,12 +243,12 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
 
     /*! \name Row, column, and main diagonal references. */
     //@{
-    /*! Create a row reference. */  
+    /*! Create a row reference. */
     RowRefType Row(size_type index) {
         return RowRefType(this->Data + ROWSTRIDE * index);
     }
 
-    /*! Create a column reference. */  
+    /*! Create a column reference. */
     ColumnRefType Column(size_type index) {
         return ColumnRefType(this->Data + COLSTRIDE * index);
     }
@@ -419,7 +419,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
       memset(0).  If the matrix is not compact this method will use
       SetAll(0) and memset otherwise.  This provides a slightly more
       efficent way to set all elements to zero.
-      
+
       \return true if the matrix is compact and memset was used, false
       otherwise. */
     inline bool Zeros(void) {
@@ -450,7 +450,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
                 memset(currentPointer, 0, sizeOfCol);
             }
             return true;
-        } else { 
+        } else {
             this->SetAll(static_cast<value_type>(0));
             return false;
         }
@@ -464,7 +464,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
         vctFixedSizeMatrixLoopEngines::
             MoMi<typename vctUnaryOperations<value_type, __elementType>::Identity>::
             Run(*this, other);
-        return *this;  
+        return *this;
     }
 
 
@@ -550,7 +550,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
 	template <class __matrixOwnerType>
     inline ThisType & Assign(const vctDynamicConstMatrixBase<__matrixOwnerType, value_type> & other) {
         vctFixedSizeMatrixBaseAssignDynamicConstMatrixBase(*this, other);
-        return *this;   
+        return *this;
 	}
 
 
@@ -560,7 +560,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
 
       \note For a non-reallocating Assign, it is recommended to use
       the Assign() methods.
-      
+
       \note This method is provided for both fixed size and dynamic
       matrices for API consistency (usable in templated code).  There
       is obviously not resize involved on fixed size matrices.
@@ -580,7 +580,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
 
 	template <class __matrixOwnerType>
     inline ThisType & ForceAssign(const vctDynamicConstMatrixBase<__matrixOwnerType, value_type> & other) {
-        return this->Assign(other);   
+        return this->Assign(other);
 	}
     //@}
 
@@ -697,7 +697,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
       \param input1Matrix The first operand of the binary operation
 
       \param input2Matrix The second operand of the binary operation
-      
+
       \return The vector "this" modified.
     */
     template <stride_type __input1RowStride, stride_type __input1ColStride, class __input1DataPtrType,
@@ -710,7 +710,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
             ::Run(*this, input1Matrix, input2Matrix);
         return *this;
     }
-    
+
     /* documented above */
     template <stride_type __input1RowStride, stride_type __input1ColStride, class __input1DataPtrType,
               stride_type __input2RowStride, stride_type __input2ColStride, class __input2DataPtrType>
@@ -733,8 +733,8 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
         vctFixedSizeMatrixLoopEngines::MoMiMi<typename vctBinaryOperations<value_type>::Multiplication>
             ::Run(*this, input1Matrix, input2Matrix);
         return *this;
-    }    
-    
+    }
+
     /* documented above */
     template <stride_type __input1RowStride, stride_type __input1ColStride, class __input1DataPtrType,
               stride_type __input2RowStride, stride_type __input2ColStride, class __input2DataPtrType>
@@ -773,7 +773,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
     //@}
 
 
-    
+
     /*! \name Binary elementwise operations between two matrices.
       Store the result of op(this, otherMatrix) back to this matrix. */
     //@{
@@ -784,10 +784,10 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
       multiplication (ElementwiseMultiply) or a division
       (ElementwiseDivide), a minimization (ElementwiseMin) or a
       maximisation (ElementwiseMax).
-      
+
       \param otherMatrix The second operand of the binary operation
       (this[i] is the first operand)
-      
+
       \return The vector "this" modified.
     */
     template <stride_type __rowStride, stride_type __colStride, class __dataPtrType>
@@ -806,7 +806,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
             Run(*this, otherMatrix);
         return *this;
     }
-    
+
     /* documented above */
     template <stride_type __rowStride, stride_type __colStride, class __dataPtrType>
     inline ThisType & ElementwiseMultiply(const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride, __colStride, value_type, __dataPtrType> & otherMatrix) {
@@ -833,7 +833,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
             Run(*this, otherMatrix);
         return *this;
     }
-    
+
     /* documented above */
     template <stride_type __rowStride, stride_type __colStride, class __dataPtrType>
     inline ThisType & ElementwiseMax(const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride, __colStride, value_type, __dataPtrType> & otherMatrix) {
@@ -848,16 +848,16 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
     inline ThisType & operator += (const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride, __colStride, value_type, __dataPtrType> & otherMatrix) {
         return this->Add(otherMatrix);
     }
-    
+
     /* documented above */
     template <stride_type __rowStride, stride_type __colStride, class __dataPtrType>
     inline ThisType & operator -= (const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride, __colStride, value_type, __dataPtrType> & otherMatrix) {
         return this->Subtract(otherMatrix);
     }
     //@}
-    
 
-    
+
+
     /*! \name Binary elementwise operations a matrix and a scalar.
       Store the result of op(matrix, scalar) to a third matrix. */
     //@{
@@ -870,41 +870,41 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
 
       \param matrix The first operand of the binary operation.
       \param scalar The second operand of the binary operation.
-      
+
       \return The matrix "this" modified.
     */
     template <stride_type __rowStride, stride_type __colStride, class __dataPtrType>
-    inline ThisType & SumOf(const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride, __colStride, value_type, __dataPtrType> & matrix, 
+    inline ThisType & SumOf(const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride, __colStride, value_type, __dataPtrType> & matrix,
                             const value_type scalar) {
         vctFixedSizeMatrixLoopEngines::
             MoMiSi<typename vctBinaryOperations<value_type>::Addition>::
             Run(*this, matrix, scalar);
         return *this;
     }
-    
+
     /* documented above */
     template <stride_type __rowStride, stride_type __colStride, class __dataPtrType>
-    inline ThisType & DifferenceOf(const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride, __colStride, value_type, __dataPtrType> & matrix, 
+    inline ThisType & DifferenceOf(const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride, __colStride, value_type, __dataPtrType> & matrix,
                                    const value_type scalar) {
         vctFixedSizeMatrixLoopEngines::
             MoMiSi<typename vctBinaryOperations<value_type>::Subtraction>::
             Run(*this, matrix, scalar);
         return *this;
     }
-    
-    /* documented above */    
+
+    /* documented above */
     template <stride_type __rowStride, stride_type __colStride, class __dataPtrType>
-    inline ThisType & ProductOf(const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride, __colStride, value_type, __dataPtrType> & matrix, 
+    inline ThisType & ProductOf(const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride, __colStride, value_type, __dataPtrType> & matrix,
                                 const value_type scalar) {
         vctFixedSizeMatrixLoopEngines::
             MoMiSi<typename vctBinaryOperations<value_type>::Multiplication>::
             Run(*this, matrix, scalar);
         return *this;
     }
-    
+
     /* documented above */
     template <stride_type __rowStride, stride_type __colStride, class __dataPtrType>
-    inline ThisType & RatioOf(const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride, __colStride, value_type, __dataPtrType> & matrix, 
+    inline ThisType & RatioOf(const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride, __colStride, value_type, __dataPtrType> & matrix,
                               const value_type scalar) {
         vctFixedSizeMatrixLoopEngines::
             MoMiSi<typename vctBinaryOperations<value_type>::Division>::
@@ -914,7 +914,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
 
     /* documented above */
     template <stride_type __rowStride, stride_type __colStride, class __dataPtrType>
-    inline ThisType & ClippedAboveOf(const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride, __colStride, value_type, __dataPtrType> & matrix, 
+    inline ThisType & ClippedAboveOf(const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride, __colStride, value_type, __dataPtrType> & matrix,
                                      const value_type upperBound) {
         vctFixedSizeMatrixLoopEngines::
             MoMiSi<typename vctBinaryOperations<value_type>::Minimum>::
@@ -924,7 +924,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
 
     /* documented above */
     template <stride_type __rowStride, stride_type __colStride, class __dataPtrType>
-    inline ThisType & ClippedBelowOf(const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride, __colStride, value_type, __dataPtrType> & matrix, 
+    inline ThisType & ClippedBelowOf(const vctFixedSizeConstMatrixBase<_rows, _cols, __rowStride, __colStride, value_type, __dataPtrType> & matrix,
                                      const value_type lowerBound) {
         vctFixedSizeMatrixLoopEngines::
             MoMiSi<typename vctBinaryOperations<value_type>::Maximum>::
@@ -932,7 +932,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
         return *this;
     }
     //@}
-    
+
 
 
     /*! \name Binary elementwise operations a scalar and a matrix.
@@ -947,7 +947,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
 
       \param scalar The first operand of the binary operation.
       \param matrix The second operand of the binary operation.
-      
+
       \return The matrix "this" modified.
     */
     template <stride_type __rowStride, stride_type __colStride, class __dataPtrType>
@@ -958,7 +958,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
             Run(*this, scalar, matrix);
         return *this;
     }
-    
+
     /* documented above */
     template <stride_type __rowStride, stride_type __colStride, class __dataPtrType>
     inline ThisType & DifferenceOf(const value_type scalar,
@@ -968,7 +968,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
             Run(*this, scalar, matrix);
         return *this;
     }
-    
+
     /* documented above */
     template <stride_type __rowStride, stride_type __colStride, class __dataPtrType>
     inline ThisType & ProductOf(const value_type scalar,
@@ -978,7 +978,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
             Run(*this, scalar, matrix);
         return *this;
     }
-    
+
     /* documented above */
     template <stride_type __rowStride, stride_type __colStride, class __dataPtrType>
     inline ThisType & RatioOf(const value_type scalar,
@@ -1022,7 +1022,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
 
       \param scalar The second operand of the binary operation
       (this[i] is the first operand.
-      
+
       \return The matrix "this" modified.
     */
     inline ThisType & Add(const value_type scalar) {
@@ -1076,7 +1076,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
     inline ThisType & operator += (const value_type scalar) {
         return this->Add(scalar);
     }
-    
+
     /* documented above */
     inline ThisType & operator -= (const value_type scalar) {
         return this->Subtract(scalar);
@@ -1105,7 +1105,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
             Run(*this, scalar,  otherMatrix);
         return *this;
     }
-    
+
     /*! \name Unary elementwise operations.
       Store the result of op(matrix) to another matrix. */
     //@{
@@ -1116,7 +1116,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
       (TransposeOf).
 
       \param otherMatrix The operand of the unary operation.
-      
+
       \return The matrix "this" modified.
     */
     template <stride_type __rowStride, stride_type __colStride, class __dataPtrType>
@@ -1172,7 +1172,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
       the matrix "this", performs \f$ this[i] \leftarrow
       op(this[i])\f$ where \f$op\f$ can calculate the absolute
       value (AbsSelf) or the opposite (NegationSelf).
-      
+
       \return The matrix "this" modified.
     */
     inline ThisType & AbsSelf(void) {
@@ -1210,13 +1210,13 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
 
     /*! Product of two matrices.  The template parameters insure that
       the size of the matrices match.
-      
+
     \param input1Matrix The left operand of the binary operation.
 
     \param input2Matrix The right operand of the binary operation.
-    
+
     \return The matrix "this" modified. */
-    template <size_type __input1Cols, stride_type __input1RowStride, stride_type __input1ColStride, class __input1DataPtrType, 
+    template <size_type __input1Cols, stride_type __input1RowStride, stride_type __input1ColStride, class __input1DataPtrType,
               stride_type __input2RowStride, stride_type __input2ColStride, class __input2DataPtrType>
         void ProductOf(const vctFixedSizeConstMatrixBase<_rows, __input1Cols, __input1RowStride, __input1ColStride,
                        _elementType, __input1DataPtrType> & input1Matrix,
@@ -1230,7 +1230,7 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
         typedef typename Input2MatrixType::ConstColumnRefType Input2ColumnRefType;
         vctFixedSizeMatrixLoopEngines::
             Product<typename vctBinaryOperations<value_type, Input1RowRefType, Input2ColumnRefType>::DotProduct>::
-            Run((*this), input1Matrix, input2Matrix);   
+            Run((*this), input1Matrix, input2Matrix);
     }
 
     /*! Compute the outer product of two vectors and store the result to
@@ -1309,19 +1309,19 @@ class vctFixedSizeMatrixBase : public vctFixedSizeConstMatrixBase
     }
 
     /*! Binary deserialization */
-    void DeSerializeRaw(std::istream & inputStream) 
+    void DeSerializeRaw(std::istream & inputStream)
     {
         const size_type myRows = this->rows();
         const size_type myCols = this->cols();
         size_type indexRow, indexCol;
-        
+
         for (indexRow = 0; indexRow < myRows; ++indexRow) {
             for (indexCol = 0; indexCol < myCols; ++indexCol) {
                 cmnDeSerializeRaw(inputStream, this->Element(indexRow, indexCol));
             }
         }
     }
-        
+
 };
 
 

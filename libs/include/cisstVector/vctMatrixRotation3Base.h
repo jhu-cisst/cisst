@@ -19,16 +19,14 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
-/*! 
-  \file 
-  \brief Declaration of vctMatrixRotation3Base
- */
-
-
+#pragma once
 #ifndef _vctMatrixRotation3Base_h
 #define _vctMatrixRotation3Base_h
 
+/*!
+  \file
+  \brief Declaration of vctMatrixRotation3Base
+ */
 
 #include <cisstVector/vctMatrixRotation3ConstBase.h>
 #include <cisstVector/vctAxisAngleRotation3.h>
@@ -186,7 +184,7 @@ public:
     template <class __containerType>
     inline ThisType &
     From(const vctQuaternionRotation3Base<__containerType> & quaternionRotation)
-        throw(std::runtime_error) 
+        throw(std::runtime_error)
     {
         this->ThrowUnlessIsNormalized(quaternionRotation);
         return this->FromRaw(quaternionRotation);
@@ -274,7 +272,7 @@ public:
         this->NormalizedSelf();
         return *this;
     }
-    
+
     /*! Conversion from an axis/angle rotation. */
     inline ThisType &
     FromNormalized(const vctAxisAngleRotation3<value_type> & axisAngleRotation)
@@ -284,8 +282,8 @@ public:
 
     /*!
       Conversion from a rotation quaternion.
-      
-      \param quaternionRotation A rotation quaternion 
+
+      \param quaternionRotation A rotation quaternion
     */
     template <class __containerType>
     inline ThisType &
@@ -359,11 +357,11 @@ public:
         }
         return *this;
     }
-    
-    
+
+
     /*!
       Conversion from 3 dynamic vectors.
-      
+
       By default the vectors represents the columns of the matrix. If
       the parameter vectorsAreColumns is set to false, the vectors
       provided will be used to set the matrix row by row. */
@@ -406,14 +404,14 @@ public:
         return *this;
     }
 
-    
+
     /*! Conversion from a Rodriguez rotation. */
     template <class __containerType>
     inline ThisType &
     FromRaw(const vctRodriguezRotation3Base<__containerType> & rodriguezRotation) {
         return this->FromRaw(vctAxisAngleRotation3<value_type>(rodriguezRotation, VCT_DO_NOT_NORMALIZE));
     }
-    
+
     /*! A complementary form of assigning one matrix rotation to
       another.  The method is provided mostly for generic programming
       interfaces and for testing various operations on rotations */
@@ -452,7 +450,7 @@ public:
     }
 
 
-    /*! Set this rotation matrix as the normalized version of another one.    
+    /*! Set this rotation matrix as the normalized version of another one.
       \param otherMatrix Matrix used to compute the normalized matrix. */
     inline ThisType & NormalizedOf(ThisType & otherMatrix) {
         CMN_ASSERT(otherMatrix.Pointer() != this->Pointer());
@@ -461,7 +459,7 @@ public:
         return *this;
     }
 
-    
+
     /*! Inverse this rotation matrix.  This methods assumes that the
       matrix is normalized and sets this matrix as its transposed. */
     inline ThisType &
@@ -473,8 +471,8 @@ public:
         tmp = this->Element(1, 2); this->Element(1, 2) = this->Element(2, 1); this->Element(2, 1) = tmp;
         return *this;
     }
-    
-    
+
+
     /*! Set this rotation as the inverse of another one.  See also
         InverseSelf(). */
     inline ThisType &

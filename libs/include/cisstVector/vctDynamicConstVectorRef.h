@@ -19,7 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
+#pragma once
 #ifndef _vctDynamicConstVectorRef_h
 #define _vctDynamicConstVectorRef_h
 
@@ -28,12 +28,10 @@ http://www.cisst.org/cisst/license.txt.
   \brief Declaration of vctDynamicConstVectorRef
 */
 
-
 #include <cisstVector/vctDynamicConstVectorBase.h>
 #include <cisstVector/vctDynamicVectorRefOwner.h>
 
-
-/*! 
+/*!
   \ingroup cisstVector
   \brief Dynamic vector referencing existing memory (const)
 
@@ -63,7 +61,7 @@ http://www.cisst.org/cisst/license.txt.
   first5.SetRef(wholeVector, 0, 5);
   std::cout << first5 << " " << first5.SumOfElements() << std::endl;
   \endcode
-  
+
   \note Make sure the underlying memory is not freed after the Ref
   object is created and before it is used.  This would lead to faulty
   memory access and potential bugs.
@@ -92,7 +90,7 @@ public:
     typedef typename VectorOwnerType::const_iterator const_iterator;
     typedef typename VectorOwnerType::reverse_iterator reverse_iterator;
     typedef typename VectorOwnerType::const_reverse_iterator const_reverse_iterator;
-    
+
     /*! Default constructor initializes the vector reference to NULL */
     vctDynamicConstVectorRef()
     {}
@@ -126,7 +124,7 @@ public:
     /*! Initialize a dynamic reference to specified subvector of a fixed-size vector.
       \note This constructor allows automatic conversion
       from a fixed-size vector to a dynamic vector representation.
-      \note The stride values are taken from the fixed size vector, but the starting point and 
+      \note The stride values are taken from the fixed size vector, but the starting point and
       length must be specified.
     */
     template <size_type __size, stride_type __stride, class __dataPtrType>

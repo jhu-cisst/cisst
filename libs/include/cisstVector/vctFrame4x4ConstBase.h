@@ -19,15 +19,14 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
-/*! 
-  \file 
-  \brief Declaration of vctFrame4x4Base
- */
-
-
+#pragma once
 #ifndef _vctFrame4x4ConstBase_h
 #define _vctFrame4x4ConstBase_h
+
+/*!
+  \file
+  \brief Declaration of vctFrame4x4Base
+ */
 
 #include <cisstVector/vctFixedSizeVectorRef.h>
 #include <cisstVector/vctMatrixRotation3Ref.h>
@@ -83,13 +82,13 @@ public:
     typedef vctMatrixRotation3Ref<value_type, ROWSTRIDE, COLSTRIDE> RotationRefType;
     typedef vctMatrixRotation3ConstRef<value_type, ROWSTRIDE, COLSTRIDE> ConstRotationRefType;
 
-protected:    
+protected:
     /* Internal references to rotation matrix, translation vector and
        first 3 element of last row. */
     RotationRefType RotationRef;
     TranslationRefType TranslationRef;
     PerspectiveRefType PerspectiveRef;
-    
+
     /*! Update internal references to rotation matrix, translation
         vector and first 3 elements of last row.  This method is
         called by allocate, so make sure that any specialization of
@@ -102,7 +101,7 @@ protected:
         // Perspective is a vector 3, row starting a 3, 0
         PerspectiveRef.SetRef(this->Pointer(DIMENSION, 0));
     }
-    
+
 public:
 
 
@@ -116,15 +115,15 @@ public:
         set to identity using its own method
         <tt>RotationType::Identity()</tt>. */
     static CISST_EXPORT const FrameValueType & Identity(void);
-    
+
     inline ConstTranslationRefType Translation(void) const {
         return this->TranslationRef;
     }
-    
+
     inline ConstRotationRefType Rotation(void) const {
         return this->RotationRef;
     }
-    
+
     inline ConstPerspectiveRefType Perspective(void) const {
         return this->PerspectiveRef;
     }
@@ -181,7 +180,7 @@ public:
     /*! Compose this transform over the input transform to obtain a
       new output transform passed by reference by the caller.  The
       semantics of the operation are:
-      
+
       output = (*this) * input
 
       if (*this) is [R1 | p1], input is [R2 | p2], then output will be
@@ -230,7 +229,7 @@ public:
 
 
     /*! Apply this transform to a matrix of three rows */
-    template <size_type __cols, stride_type __rowStride1, stride_type __colStride1, class __dataPtrType1, 
+    template <size_type __cols, stride_type __rowStride1, stride_type __colStride1, class __dataPtrType1,
               stride_type __rowStride2, stride_type __colStride2, class __dataPtrType2>
     inline void
     ApplyTo(const vctFixedSizeConstMatrixBase<DIMENSION, __cols, __rowStride1, __colStride1, value_type, __dataPtrType1> & input,
@@ -255,7 +254,7 @@ public:
       dataPtrType.  For simplicity, this version is writtend for a
       DIMENSION-vector object.
     */
-    inline void 
+    inline void
     ApplyTo(size_type inputSize, const vctFixedSizeVector<value_type, DIMENSION> * input,
             vctFixedSizeVector<value_type, DIMENSION> * output) const
     {
@@ -316,7 +315,7 @@ public:
 
     template <class __containerType1, class __containerType2>
     inline void ApplyInverseTo(const vctFrame4x4ConstBase<__containerType1> & input,
-                               vctFrame4x4Base<__containerType2> & output) const {  
+                               vctFrame4x4Base<__containerType2> & output) const {
         FrameValueType inverse;
         inverse.InverseOf(*this);
         inverse.ApplyTo(input, output);
@@ -334,7 +333,7 @@ public:
       methods provided by the different rotation representations
       (vctQuaternionRotation3, vctMatrixRotation3, ...) and the
       translation.
-      
+
       \sa AlmostEqual
     */
     //@{
@@ -342,7 +341,7 @@ public:
         return (this->RotationRef.Equal(other.Rotation())
                 && this->TranslationRef.Equal(other.Translation()));
     }
-    
+
     inline bool operator == (const ThisType & other) const {
         return this->Equal(other);
     }
@@ -354,10 +353,10 @@ public:
       on the AllowsEqual() methods provided by the different rotation
       representations (vctQuaternionRotation3, vctMatrixRotation3,
       ...) and the translation.
-      
+
       The tolerance factor is used to compare both the translations
       and rotations.
-      
+
       \sa AlmostEquivalent
     */
     inline bool AlmostEqual(const ThisType & other,
@@ -366,7 +365,7 @@ public:
                 && this->TranslationRef.AlmostEqual(other.Translation(), tolerance));
     }
 
-    
+
     /*! Return true if this frame is effectively equivalent to the
       other frame, up to the given tolerance.  For an homogeneous
       frame, this method uses AlmostEqual.

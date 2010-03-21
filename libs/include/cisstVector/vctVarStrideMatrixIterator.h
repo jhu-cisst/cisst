@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):	Ofri Sadowsky, Anton Deguet
   Created on:	2004-07-02
 
@@ -19,14 +19,14 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-/*! 
-  \file 
-  \brief Declaration of vctVarStrideMatrixConstIterator and vctVarStrideMatrixIterator
- */
-
-
+#pragma once
 #ifndef _vctVarStrideMatrixIterator_h
 #define _vctVarStrideMatrixIterator_h
+
+/*!
+  \file
+  \brief Declaration of vctVarStrideMatrixConstIterator and vctVarStrideMatrixIterator
+ */
 
 #include <iterator>
 #include <cisstVector/vctContainerTraits.h>
@@ -44,10 +44,10 @@ class vctVarStrideMatrixConstIterator:
 public:
     /* define most types from vctContainerTraits */
     VCT_CONTAINER_TRAITS_TYPEDEFS(_elementType);
-    
+
     /*! The type of the iterator itself. */
     typedef vctVarStrideMatrixConstIterator<_elementType> ThisType;
-    
+
     /*! Base type for this iterator, i.e. std::iterator. */
     typedef std::iterator<std::random_access_iterator_tag, _elementType> BaseType;
 
@@ -108,7 +108,7 @@ public:
 
     /*! Constructor taking a non-const element pointer.  Note that
       only read operations will be performed! */
-    vctVarStrideMatrixConstIterator(value_type * dataPtr, difference_type columnStride, 
+    vctVarStrideMatrixConstIterator(value_type * dataPtr, difference_type columnStride,
         int numColumns, difference_type rowStride, int initialColumn = 0):
         DataPtr(dataPtr),
         ColumnStride(columnStride),
@@ -116,8 +116,8 @@ public:
         RowStride(rowStride),
         CurrentColumn(initialColumn)
         {}
-    
-    
+
+
     /*! Constructor taking a const element pointer.  We need it in
       order to deal with const containers being refered by this
       iterator.  We have to perform const_cast to convert back to the
@@ -203,8 +203,8 @@ public:
 
       The number of increments is found by the following equations:
       DataPtr - (difference / NumColumns) * RowStride + (difference % NumColumns) * ColumnStride == other.DataPtr
-      DataPtr - other.DataPtr == (difference / NumColumns) * RowStride + (difference % NumColumns) * ColumnStride 
-      
+      DataPtr - other.DataPtr == (difference / NumColumns) * RowStride + (difference % NumColumns) * ColumnStride
+
       if (RowStride >= NumColumns * ColumnStride) {
       (DataPtr - other.DataPtr) / RowStride == row_diff == (difference / NumColumns)
       DataPtr - other.DataPtr - row_diff * RowStride == (difference % NumColumns) * ColumnStride
@@ -404,7 +404,7 @@ operator+(const vctVarStrideMatrixConstIterator<_elementType> & iterator,
 
 /*! difference_type + const_iterator required by STL */
 template<class _elementType>
-vctVarStrideMatrixConstIterator<_elementType> 
+vctVarStrideMatrixConstIterator<_elementType>
 operator+(typename vctVarStrideMatrixConstIterator<_elementType>::difference_type difference,
           const vctVarStrideMatrixConstIterator<_elementType> & iterator)
 {
@@ -415,7 +415,7 @@ operator+(typename vctVarStrideMatrixConstIterator<_elementType>::difference_typ
 
 /*! const_iterator - difference_type required by STL */
 template<class _elementType>
-vctVarStrideMatrixConstIterator<_elementType> 
+vctVarStrideMatrixConstIterator<_elementType>
 operator-(const vctVarStrideMatrixConstIterator<_elementType> & iterator,
           typename vctVarStrideMatrixConstIterator<_elementType>::difference_type difference)
 {
@@ -440,7 +440,7 @@ operator+(const vctVarStrideMatrixIterator<_elementType> & iterator,
 
 /*! difference_type + iterator required by STL */
 template<class _elementType>
-vctVarStrideMatrixIterator<_elementType> 
+vctVarStrideMatrixIterator<_elementType>
 operator+(typename vctVarStrideMatrixIterator<_elementType>::difference_type difference,
           const vctVarStrideMatrixIterator<_elementType> & iterator)
 {
@@ -451,7 +451,7 @@ operator+(typename vctVarStrideMatrixIterator<_elementType>::difference_type dif
 
 /*! iterator - difference_type required by STL */
 template<class _elementType>
-vctVarStrideMatrixIterator<_elementType> 
+vctVarStrideMatrixIterator<_elementType>
 operator-(const vctVarStrideMatrixIterator<_elementType> & iterator,
           typename vctVarStrideMatrixIterator<_elementType>::difference_type difference)
 {

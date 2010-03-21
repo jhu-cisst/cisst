@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):	Anton Deguet
   Created on:	2007-02-11
 
@@ -19,19 +19,20 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
+#pragma once
 #ifndef _vctRandomDynamicMatrix_h
 #define _vctRandomDynamicMatrix_h
+
+/*!
+  \file
+  \brief Definition of vctRandom for dynamic matrices.
+*/
 
 #include <cisstCommon/cmnRandomSequence.h>
 #include <cisstCommon/cmnPortability.h>
 
 #include <cisstVector/vctForwardDeclarations.h>
 #include <cisstVector/vctDynamicMatrix.h>
-/*!
-  \file
-  \brief Definition of vctRandom for dynamic matrices.
-*/
 
 /*!
   \ingroup cisstVector
@@ -57,7 +58,7 @@ void vctRandom(vctDynamicMatrixBase<_matrixOwnerType, _elementType> & matrix,
     for (rowIndex = 0; rowIndex < rows; ++rowIndex) {
         for (colIndex = 0; colIndex < cols; ++colIndex) {
             randomSequence.ExtractRandomValue(min, max,
-                                              matrix.Element(rowIndex, colIndex));    
+                                              matrix.Element(rowIndex, colIndex));
         }
     }
 }

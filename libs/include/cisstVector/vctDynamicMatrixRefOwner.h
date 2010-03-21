@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):	Ofri Sadowsky, Anton Deguet
   Created on: 2004-07-01
 
@@ -19,7 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
+#pragma once
 #ifndef _vctDynamicMatrixRefOwner_h
 #define _vctDynamicMatrixRefOwner_h
 
@@ -28,13 +28,11 @@ http://www.cisst.org/cisst/license.txt.
   \brief Declaration of vctDynamicMatrixRefOwner
 */
 
-
 #include <cisstVector/vctForwardDeclarations.h>
 #include <cisstVector/vctVarStrideMatrixIterator.h>
 #include <cisstVector/vctDynamicMatrixOwner.h>
 
-
-/*! 
+/*!
   This templated class stores a pointer, a size, and a stride, and
   allows element access, but does not provide any other operations,
   and does not own the data */
@@ -49,7 +47,7 @@ public:
 
     typedef vctDynamicMatrixRefOwner<value_type> ThisType;
 
-    /* iterators are container specific */    
+    /* iterators are container specific */
     typedef vctVarStrideMatrixConstIterator<value_type> const_iterator;
     typedef vctVarStrideMatrixConstIterator<value_type> const_reverse_iterator;
     typedef vctVarStrideMatrixIterator<value_type> iterator;
@@ -91,7 +89,7 @@ public:
                      storageOrder == VCT_ROW_MAJOR ? 1 : sizes.Element(0),
                      dataPointer);
     }
-        
+
     void SetRef(size_type rows, size_type cols,
                 stride_type rowStride, stride_type colStride,
                 pointer data) {
@@ -146,7 +144,7 @@ public:
     pointer Pointer(void) {
         return Data;
     }
-    
+
     const_pointer Pointer(index_type rowIndex, index_type colIndex) const {
         return Data +  rowIndex * row_stride() + colIndex * col_stride();
     }
@@ -154,7 +152,7 @@ public:
     const_pointer Pointer(void) const {
         return Data;
     }
-    
+
     const_iterator begin(void) const {
         return const_iterator(Data, col_stride(), cols(), row_stride());
     }
@@ -196,7 +194,7 @@ public:
     inline bool IsColMajor(void) const {
         return (this->row_stride() <= this->col_stride());
     }
-    
+
     inline bool IsRowMajor(void) const {
         return (this->col_stride() <= this->row_stride());
     }

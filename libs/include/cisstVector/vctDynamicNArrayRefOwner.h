@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):	Daniel Li
   Created on:	2006-07-06
 
@@ -19,19 +19,16 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
+#pragma once
 #ifndef _vctDynamicNArrayRefOwner_h
 #define _vctDynamicNArrayRefOwner_h
-
 
 /*!
   \file
   \brief Declaration of vctDynamicNArrayRefOwner
 */
 
-
 #include <cisstVector/vctVarStrideNArrayIterator.h>
-
 
 /*!
   This templated class owns a dynamically allocated array, but does
@@ -230,7 +227,7 @@ protected:
            wikipedia and www.cs.vu.nl/~dick/gnomesort.html */
         nsize_type sorted_sizes(SizesMember);
         nstride_type sorted_strides(StridesMember);
-        
+
         index_type i = 0;
         bool swap;
         while (i < this->dimension()) {

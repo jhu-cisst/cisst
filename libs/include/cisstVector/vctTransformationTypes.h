@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):	Anton Deguet
   Created on:	2003-09-12
 
@@ -19,16 +19,14 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
-/*! 
-  \file 
-  \brief Typedef for different transformations
-*/
-
-
+#pragma once
 #ifndef _vctTransformationTypes_h
 #define _vctTransformationTypes_h
 
+/*!
+  \file
+  \brief Typedef for different transformations
+*/
 
 #include <cisstVector/vctFixedSizeMatrixTypes.h>
 #include <cisstVector/vctBarycentricVector.h>
@@ -82,7 +80,7 @@ typedef vctAxisAngleRotation3<double> vctDoubleAxAnRot3;
 typedef vctAxisAngleRotation3<double> vctAxAnRot3;
 //@}
 /*! Define a rotation in dimension 3 using an axis of doubles and an
-  angle (of type NormType). */ 
+  angle (of type NormType). */
 //@{
 typedef vctAxisAngleRotation3<float> vctFloatAxAnRot3;
 //@}
@@ -169,7 +167,7 @@ typedef vctAngleRotation2 vctDoubleAnRot2;
 typedef vctAngleRotation2 vctAnRot2;
 //@}
 /*! Define a rotation in dimension 2 using an
-  angle (of type AngleType). */ 
+  angle (of type AngleType). */
 //@{
 typedef vctAngleRotation2 vctFloatAnRot2;
 //@}

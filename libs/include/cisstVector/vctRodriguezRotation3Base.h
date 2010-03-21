@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):	Anton Deguet
   Created on:	2005-08-25
 
@@ -19,15 +19,14 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
-/*! 
-  \file 
-  \brief Declaration of vctRodriguezRotation3Base
- */
-
-
+#pragma once
 #ifndef _vctRodriguezRotation3Base_h
 #define _vctRodriguezRotation3Base_h
+
+/*!
+  \file
+  \brief Declaration of vctRodriguezRotation3Base
+ */
 
 #include <cisstCommon/cmnConstants.h>
 
@@ -134,7 +133,7 @@ public:
     inline vctRodriguezRotation3Base(value_type x, value_type y, value_type z) {
         this->Assign(x, y, z);
     }
-    
+
     /*! Const reference to the identity.  In this case, a null
         vector. */
     static CISST_EXPORT const ThisType & Identity();
@@ -175,7 +174,7 @@ public:
         return FromRaw(quaternionRotation);
     }
 
-    
+
     template <class __containerType>
     inline ThisType & From(const vctMatrixRotation3Base<__containerType> & matrixRotation) {
         ThrowUnlessIsNormalized(matrixRotation);
@@ -221,7 +220,7 @@ public:
         return FromRaw(quaternionRotation.Normalized());
     }
 
-    
+
     template <class __containerType>
     inline ThisType & FromNormalized(const vctMatrixRotation3Base<__containerType> & matrixRotation) {
         return FromRaw(matrixRotation.Normalized());
@@ -268,7 +267,7 @@ public:
         return *this;
     }
 
-    
+
     template <class __containerType>
     inline ThisType & FromRaw(const vctMatrixRotation3Base<__containerType> & matrixRotation) {
         vctRodriguezRotation3BaseFromRaw(*this, matrixRotation);

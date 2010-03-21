@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):	Ofri Sadowsky, Anton Deguet
   Created on: 2004-07-01
 
@@ -19,7 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
+#pragma once
 #ifndef _vctDynamicVectorRefOwner_h
 #define _vctDynamicVectorRefOwner_h
 
@@ -28,10 +28,9 @@ http://www.cisst.org/cisst/license.txt.
   \brief Declaration of vctDynamicVectorRefOwner
 */
 
-
 #include <cisstVector/vctVarStrideVectorIterator.h>
 
-/*! 
+/*!
   \ingroup cisstVector
 
   This templated class stores a pointer, a size, and a stride, and
@@ -47,7 +46,7 @@ public:
     /*! The type of this owner. */
     typedef vctDynamicVectorRefOwner<_elementType> ThisType;
 
-    /* iterators are container specific */    
+    /* iterators are container specific */
     typedef vctVarStrideVectorConstIterator<value_type> const_iterator;
     typedef vctVarStrideVectorIterator<value_type> iterator;
     typedef vctVarStrideVectorConstIterator<value_type> const_reverse_iterator;
@@ -80,7 +79,7 @@ public:
     stride_type stride(void) const {
         return Stride;
     }
-    
+
     pointer Pointer(index_type index = 0) {
         return Data + Stride * index;
     }
@@ -88,11 +87,11 @@ public:
     const_pointer Pointer(index_type index = 0) const {
         return Data + Stride * index;
     }
-    
+
     const_iterator begin(void) const {
         return const_iterator(Data, Stride);
     }
-     
+
     const_iterator end(void) const {
         return const_iterator(Data + Size * Stride, Stride);
     }
@@ -100,7 +99,7 @@ public:
     iterator begin(void) {
         return iterator(Data, Stride);
     }
-     
+
     iterator end(void) {
         return iterator(Data + Size * Stride, Stride);
     }
@@ -108,7 +107,7 @@ public:
     const_reverse_iterator rbegin(void) const {
       return const_reverse_iterator(Data + (Size-1) * Stride, -Stride);
     }
-     
+
     const_reverse_iterator rend(void) const {
       return const_reverse_iterator(Data - Stride, -Stride);
     }
@@ -116,7 +115,7 @@ public:
     reverse_iterator rbegin(void) {
       return reverse_iterator(Data + (Size-1) * Stride, -Stride);
     }
-     
+
     reverse_iterator rend(void) {
       return reverse_iterator(Data - Stride, -Stride);
     }
@@ -125,7 +124,7 @@ protected:
     size_type Size;
     stride_type Stride;
     value_type* Data;
-    
+
 private:
     // copy constructor private to prevent any call
     vctDynamicVectorRefOwner(const ThisType & other) {};

@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):	Ofri Sadowsky, Anton Deguet
   Created on:	2003-09-30
 
@@ -19,16 +19,14 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
-/*! 
-  \file 
-  \brief Declaration of vctFixedSizeVectorRef
- */
-
-
+#pragma once
 #ifndef _vctFixedSizeVectorRef_h
 #define _vctFixedSizeVectorRef_h
 
+/*!
+  \file
+  \brief Declaration of vctFixedSizeVectorRef
+ */
 
 #include <cisstVector/vctFixedSizeConstVectorRef.h>
 
@@ -41,7 +39,7 @@ http://www.cisst.org/cisst/license.txt.
   This implementations uses a pointer to the vector beginning as the
   vector defining data member.  An instantiation of this type can be
   used as a subsequence with GetSubsequence().
- 
+
   See the base class (vctFixedSizeVectorBase) for template
   parameter details.
 
@@ -49,7 +47,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 template <class _elementType, vct::size_type _size, vct::stride_type _stride>
 class vctFixedSizeVectorRef : public vctFixedSizeVectorBase<
-    _size, _stride, _elementType, 
+    _size, _stride, _elementType,
     typename vctFixedSizeVectorTraits<_elementType, _size, _stride>::pointer >
 {
  public:
@@ -62,7 +60,7 @@ class vctFixedSizeVectorRef : public vctFixedSizeVectorBase<
 
     /*! Default constructor: create an uninitialized vector */
     vctFixedSizeVectorRef() {}
-    
+
 
     /*! Initialize the vector with a (non-const) pointer */
     vctFixedSizeVectorRef(pointer p) {

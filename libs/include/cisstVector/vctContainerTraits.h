@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):	Anton Deguet
   Created on:	2004-11-11
 
@@ -19,16 +19,15 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+#pragma once
+#ifndef _vctContainerTraits_h
+#define _vctContainerTraits_h
 
-/*! 
-  \file 
+/*!
+  \file
   \brief Basic traits for the cisstVector containers
   \ingroup cisstVector
  */
-
-
-#ifndef _vctContainerTraits_h
-#define _vctContainerTraits_h
 
 #include <cstddef>
 

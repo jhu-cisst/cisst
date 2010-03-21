@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):	Ofri Sadowsky, Anton Deguet
   Created on: 2004-07-01
 
@@ -19,21 +19,18 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
+#pragma once
 #ifndef _vctDynamicMatrixOwner_h
 #define _vctDynamicMatrixOwner_h
-
 
 /*!
   \file
   \brief Declaration of vctDynamicMatrixOwner
 */
 
-
 #include <cisstVector/vctForwardDeclarations.h>
 #include <cisstVector/vctVarStrideMatrixIterator.h>
 #include <cisstVector/vctDynamicMatrixRefOwner.h>
-
 
 /*!
   This templated class owns a dynamically allocated array, but does
@@ -61,7 +58,7 @@ public:
         RowMajor(VCT_DEFAULT_STORAGE),
         Data(0)
     {}
-    
+
     vctDynamicMatrixOwner(const nsize_type & newSizes, bool rowMajor = VCT_DEFAULT_STORAGE):
         SizesMember(0, 0),
         StridesMember(0, 1),
@@ -79,11 +76,11 @@ public:
     {
         SetSize(nsize_type(rows, cols), rowMajor);
     }
-    
+
     ~vctDynamicMatrixOwner() {
         Disown();
     }
-    
+
     size_type size(void) const {
         return SizesMember.ProductOfElements();
     }
@@ -119,7 +116,7 @@ public:
     pointer Pointer(void) {
         return Data;
     }
-    
+
     const_pointer Pointer(index_type rowIndex, index_type colIndex) const {
         return Data + rowIndex * row_stride() + colIndex * col_stride();
     }
@@ -127,7 +124,7 @@ public:
     const_pointer Pointer(void) const {
         return Data;
     }
-    
+
     const_iterator begin(void) const {
         return const_iterator(Data, col_stride(), cols(), row_stride());
     }
@@ -150,12 +147,12 @@ public:
         return const_reverse_iterator(Data + row_stride() * (rows() - 1) + col_stride() * (cols() - 1),
                                       -col_stride(), cols(), -row_stride());
     }
-    
+
     const_reverse_iterator rend(void) const {
         return const_reverse_iterator(Data - row_stride() + col_stride() * (cols() - 1),
                                       -col_stride(), cols(), -row_stride());
     }
-    
+
     reverse_iterator rbegin(void) {
         return reverse_iterator(Data + row_stride() * (rows() - 1) + col_stride() * (cols() - 1),
                                 -col_stride(), cols(), -row_stride());
@@ -203,7 +200,7 @@ public:
 
     /*! Have this owner take ownership of a new data pointer. Return
       the old data pointer without freeing memory.
- 
+
       \note This method returns a pointer to the previously owned
       memory block but doesn't tell if the old block was row or column
       major nor the size of the block.
@@ -238,7 +235,7 @@ public:
     inline bool IsColMajor(void) const {
         return !RowMajor;
     }
-    
+
     inline bool IsRowMajor(void) const {
         return RowMajor;
     }

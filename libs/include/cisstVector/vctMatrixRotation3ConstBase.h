@@ -19,16 +19,14 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
-/*! 
-  \file 
-  \brief Declaration of vctMatrixRotation3ConstBase
- */
-
-
+#pragma once
 #ifndef _vctMatrixRotation3ConstBase_h
 #define _vctMatrixRotation3ConstBase_h
 
+/*!
+  \file
+  \brief Declaration of vctMatrixRotation3ConstBase
+ */
 
 #include <cisstVector/vctFixedSizeMatrix.h>
 #include <cisstVector/vctDynamicMatrix.h>
@@ -69,7 +67,7 @@ public:
     /* no need to document, inherit doxygen documentation from base class */
     VCT_CONTAINER_TRAITS_TYPEDEFS(typename ContainerType::value_type);
 
-    /*! Type used to return by copy */ 
+    /*! Type used to return by copy */
     typedef vctMatrixRotation3<value_type> RotationValueType;
 
     /*! Traits used for all useful types and values related to the element type. */
@@ -110,7 +108,7 @@ public:
       returns a copy of the normalized rotation and does not modify
       this rotation.  See also NormalizedSelf(). */
     RotationValueType Normalized(void) const; // implemented in vctMatrixRotation3.h
-    
+
     /*! Test if this matrix is normalized.  This methods checks that
       all the columns are normalized (within a margin of tolerance)
       and then checks that the three vectors are orthogonal to each
@@ -146,12 +144,12 @@ public:
       method is not the most efficient since it requires a copy.  See
       also InverseSelf().  */
     RotationValueType Inverse(void) const; // implemented in vctMatrixRotation3.h
-    
+
 
     /*! Apply the rotation to a vector of fixed size 3. The result is
       stored into a vector of size 3 provided by the caller and passed
       by reference.
-      
+
       \param input The input vector
       \param output The output vector
     */
@@ -314,7 +312,7 @@ public:
         CMN_ASSERT(input.Pointer() != output.Pointer());
         output.ProductOf(this->TransposeRef(), input);
     }
-    
+
 
     /*! Apply the inverse of the rotation to another rotation.  The
       result is returned by copy.  This interface might be more
@@ -330,7 +328,7 @@ public:
         this->ApplyInverseTo(input, result);
         return result;
     }
-    
+
 
     /*! Apply the the inverse of the rotation to a dynamic vector.
       The result is stored into another dynamic vector passed by
@@ -438,7 +436,7 @@ public:
     {
         return this->ApplyTo(input);
     }
-    
+
     /*! Implement operator * for MatrixRotatin * DynamicVector.  Return type
       is set to fixed-size vector of length 3.  It is the caller's responsibility
       to convert the return value to a dynamic vector, if so desired.
@@ -449,7 +447,7 @@ public:
     {
         return this->ApplyTo(input);
     }
-    
+
 
 
     /*! Return true if this rotation is effectively equivalent to the

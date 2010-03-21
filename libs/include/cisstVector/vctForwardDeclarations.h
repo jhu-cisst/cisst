@@ -19,17 +19,17 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
+#pragma once
 #ifndef _vctForwardDeclarations_h
 #define _vctForwardDeclarations_h
-
-#include <cisstVector/vctContainerTraits.h>
 
 /*!
   \file
   \brief Forward declarations and \#define for cisstVector
   \ingroup cisstVector
 */
+
+#include <cisstVector/vctContainerTraits.h>
 
 /*!
   \name Definition of the storage order used for the matrices.
@@ -70,6 +70,14 @@ const bool VCT_NORMALIZE = true;
 const bool VCT_DO_NOT_NORMALIZE = false;
 
 
+// iterators
+template <class _ownerType, bool _forward>
+class vctVarStrideNArrayIterator;
+
+template <class _ownerType, bool _forward>
+class vctVarStrideNArrayConstIterator;
+
+
 // fixed size vectors
 template <vct::size_type _size, vct::stride_type _stride, class _elementType, class _dataPtrType>
 class vctFixedSizeConstVectorBase;
@@ -88,11 +96,11 @@ class vctFixedSizeVector;
 
 
 // fixed size matrices
-template <vct::size_type _rows, vct::size_type _cols, vct::stride_type _rowStride, 
+template <vct::size_type _rows, vct::size_type _cols, vct::stride_type _rowStride,
           vct::stride_type _colStride, class _elementType, class _dataPtrType>
 class vctFixedSizeConstMatrixBase;
 
-template <vct::size_type _rows, vct::size_type _cols, vct::stride_type _rowStride, 
+template <vct::size_type _rows, vct::size_type _cols, vct::stride_type _rowStride,
           vct::stride_type _colStride, class _elementType, class _dataPtrType>
 class vctFixedSizeMatrixBase;
 

@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):	Ofri Sadowsky, Anton Deguet
   Created on: 2004-07-01
 
@@ -19,15 +19,14 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-
-#ifndef _vctDynamicVectorBase_h 
+#pragma once
+#ifndef _vctDynamicVectorBase_h
 #define _vctDynamicVectorBase_h
 
 /*!
   \file
   \brief Declaration of vctDynamicVectorBase
 */
-
 
 #include <cstdarg>
 
@@ -72,16 +71,16 @@ public:
     typedef vctDynamicVectorBase ThisType;
     /*! Type of the base class. */
     typedef vctDynamicConstVectorBase<_vectorOwnerType, _elementType> BaseType;
-    
+
     typedef _vectorOwnerType VectorOwnerType;
 
-    typedef typename BaseType::iterator iterator; 
-    typedef typename BaseType::reverse_iterator reverse_iterator; 
-    typedef typename BaseType::const_iterator const_iterator; 
-    typedef typename BaseType::const_reverse_iterator const_reverse_iterator; 
+    typedef typename BaseType::iterator iterator;
+    typedef typename BaseType::reverse_iterator reverse_iterator;
+    typedef typename BaseType::const_iterator const_iterator;
+    typedef typename BaseType::const_reverse_iterator const_reverse_iterator;
 
-    typedef typename BaseType::CopyType CopyType; 
-    typedef typename BaseType::VectorValueType VectorValueType; 
+    typedef typename BaseType::CopyType CopyType;
+    typedef typename BaseType::VectorValueType VectorValueType;
 
 
     /*! Type traits for the elements of the vector. */
@@ -93,49 +92,49 @@ public:
     /*! Returns an iterator on the first element (STL
       compatibility). */
     iterator begin(void) {
-        return this->Vector.begin(); 
+        return this->Vector.begin();
     }
 
     /*! Returns an iterator on the last element (STL
       compatibility). */
     iterator end(void) {
-        return this->Vector.end(); 
+        return this->Vector.end();
     }
 
     /*! Returns a reverse iterator on the last element (STL
-      compatibility). */ 
+      compatibility). */
     reverse_iterator rbegin(void) {
-        return this->Vector.rbegin(); 
+        return this->Vector.rbegin();
     }
 
     /*! Returns a reverse iterator on the element before first
-      (STL compatibility). */ 
+      (STL compatibility). */
     reverse_iterator rend(void) {
-        return this->Vector.rend(); 
+        return this->Vector.rend();
     }
 
     /* documented in base class */
     const_iterator begin(void) const {
-        return BaseType::begin(); 
+        return BaseType::begin();
     }
 
     /* documented in base class */
     const_iterator end(void) const {
-        return BaseType::end(); 
+        return BaseType::end();
     }
 
     /* documented in base class */
     const_reverse_iterator rbegin(void) const {
-        return BaseType::rbegin(); 
+        return BaseType::rbegin();
     }
 
     /* documented in base class */
     const_reverse_iterator rend(void) const {
-        return BaseType::rend(); 
+        return BaseType::rend();
     }
-    
+
     /*! Access an element by index.
-      \return a reference to the element[index] */    
+      \return a reference to the element[index] */
     reference operator[](index_type index) {
         return *Pointer(index);
     }
@@ -144,7 +143,7 @@ public:
     const_reference operator[](index_type index) const {
         return BaseType::operator[](index);
     }
-    
+
     /* documented in base class */
     const VectorOwnerType & Owner(void) const {
         return BaseType::Owner();
@@ -205,7 +204,7 @@ public:
         return BaseType::Element(index);
     }
 
-    
+
     /*! Assign the given value to all the elements.
       \param value the value used to set all the elements of the vector
       \return The value used to set all the elements
@@ -223,7 +222,7 @@ public:
       memset(0).  If the vector is not compact this method will use
       SetAll(0) and memset otherwise.  This provides a slightly more
       efficent way to set all elements to zero.
-    
+
       \return true if the vector is compact and memset was used, false
       otherwise. */
     inline bool Zeros(void) {
@@ -239,7 +238,7 @@ public:
 
     /*!
       \name Assignment operation between vectors of different types.
-      
+
       \param other The vector to be copied.
     */
     //@{
@@ -279,7 +278,7 @@ public:
 
       \note For a non-reallocating Assign, it is recommended to use
       the Assign() methods.
-      
+
       \note This method is provided for both fixed size and dynamic
       vectors for API consistency (usable in templated code).  There
       is obviously not resize involved on fixed size vectors.
@@ -295,7 +294,7 @@ public:
     inline ThisType & ForceAssign(const vctDynamicConstVectorBase<__vectorOwnerType, __elementType> & other) {
         return this->Assign(other);
     }
-    
+
     template <size_type __size, stride_type __stride, class __elementType, class __dataPtrType>
     inline ThisType & ForceAssign(const vctFixedSizeConstVectorBase<__size, __stride, __elementType, __dataPtrType>
                                   & other) {
@@ -451,13 +450,13 @@ public:
 
 
     /*! \name Size dependant methods.
-      
+
       The following methods are size dependant, i.e. don't necessarily
       mean anything for all sizes of vector.  For example, using the
       Z() method on a vector of size 2 shouldn't be allowed.
       Therefore, we are using #CMN_ASSERT to check that the size is
       valid */
-    
+
     //@{
 
     /*! Returns the first element of the vector.  This method uses
@@ -646,14 +645,14 @@ public:
     template <class __vectorOwnerType1, class __vectorOwnerType2>
     inline void CrossProductOf(
             const vctDynamicConstVectorBase<__vectorOwnerType1, _elementType> & inputVector1,
-            const vctDynamicConstVectorBase<__vectorOwnerType2, _elementType> & inputVector2) 
+            const vctDynamicConstVectorBase<__vectorOwnerType2, _elementType> & inputVector2)
     {
         CMN_ASSERT(this->size() == 3);
         CMN_ASSERT(inputVector1.size() == 3);
         CMN_ASSERT(inputVector2.size() == 3);
         (*this)[0] = inputVector1[1] *  inputVector2[2] - inputVector1[2] * inputVector2[1];
         (*this)[1] = inputVector1[2] *  inputVector2[0] - inputVector1[0] * inputVector2[2];
-        (*this)[2] = inputVector1[0] *  inputVector2[1] - inputVector1[1] * inputVector2[0];    
+        (*this)[2] = inputVector1[0] *  inputVector2[1] - inputVector1[1] * inputVector2[0];
     }
 
     //@}
@@ -673,7 +672,7 @@ public:
       \param vector1 The first operand of the binary operation
 
       \param vector2 The second operand of the binary operation
-      
+
       \return The vector "this" modified.
     */
     template <class __vectorOwnerType1, class __vectorOwnerType2>
@@ -683,8 +682,8 @@ public:
             VoViVi< typename vctBinaryOperations<value_type>::Addition >
             ::Run(*this, vector1, vector2);
         return *this;
-    }    
-    
+    }
+
     /* documented above */
     template <class __vectorOwnerType1, class __vectorOwnerType2>
     inline ThisType & DifferenceOf(const vctDynamicConstVectorBase<__vectorOwnerType1, _elementType> & vector1,
@@ -694,7 +693,7 @@ public:
             ::Run(*this, vector1, vector2);
         return *this;
     }
-    
+
     /* documented above */
     template <class __vectorOwnerType1, class __vectorOwnerType2>
     inline ThisType & ElementwiseProductOf(const vctDynamicConstVectorBase<__vectorOwnerType1, _elementType> & vector1,
@@ -704,7 +703,7 @@ public:
             ::Run(*this, vector1, vector2);
         return *this;
     }
-    
+
     /* documented above */
     template <class __vectorOwnerType1, class __vectorOwnerType2>
     inline ThisType & ElementwiseRatioOf(const vctDynamicConstVectorBase<__vectorOwnerType1, _elementType> & vector1,
@@ -748,10 +747,10 @@ public:
       (Subtraction), a multiplication (ElementwiseMultiply) a division
       (ElementwiseDivide), a minimization (ElementwiseMin) or a
       maximisation (ElementwiseMax).
-      
+
       \param otherVector The second operand of the binary operation
       (this[i] is the first operand)
-      
+
       \return The vector "this" modified.
     */
     template <class __vectorOwnerType>
@@ -770,7 +769,7 @@ public:
             Run(*this, otherVector);
         return *this;
     }
-    
+
     /* documented above */
     template <class __vectorOwnerType>
     inline ThisType & ElementwiseMultiply(const vctDynamicConstVectorBase<__vectorOwnerType, _elementType> & otherVector) {
@@ -779,7 +778,7 @@ public:
             Run(*this, otherVector);
         return *this;
     }
-    
+
     /* documented above */
     template <class __vectorOwnerType>
     inline ThisType & ElementwiseDivide(const vctDynamicConstVectorBase<__vectorOwnerType, _elementType> & otherVector) {
@@ -788,7 +787,7 @@ public:
             Run(*this, otherVector);
         return *this;
     }
-    
+
     /* documented above */
     template <class __vectorOwnerType>
     inline ThisType & ElementwiseMin(const vctDynamicConstVectorBase<__vectorOwnerType, _elementType> & otherVector) {
@@ -812,7 +811,7 @@ public:
     inline ThisType & operator += (const vctDynamicConstVectorBase<__vectorOwnerType, _elementType> & otherVector) {
         return this->Add(otherVector);
     }
-    
+
     /* documented above */
     template <class __vectorOwnerType>
     inline ThisType & operator -= (const vctDynamicConstVectorBase<__vectorOwnerType, _elementType> & otherVector) {
@@ -834,7 +833,7 @@ public:
         return *this;
     }
     //@}
-   
+
     /*! \name Binary elementwise operations a vector and a scalar.
       Store the result of op(vector, scalar) to a third vector. */
     //@{
@@ -847,18 +846,18 @@ public:
 
       \param vector The first operand of the binary operation.
       \param scalar The second operand of the binary operation.
-      
+
       \return The vector "this" modified.
     */
     template <class __vectorOwnerType>
-    inline ThisType & SumOf(const vctDynamicConstVectorBase<__vectorOwnerType, _elementType> & vector, 
+    inline ThisType & SumOf(const vctDynamicConstVectorBase<__vectorOwnerType, _elementType> & vector,
                             const value_type scalar) {
         vctDynamicVectorLoopEngines::
             VoViSi< typename vctBinaryOperations<value_type>::Addition >::
             Run(*this, vector, scalar);
         return *this;
     }
-    
+
     /* documented above */
     template <class __vectorOwnerType>
     inline ThisType & DifferenceOf(const vctDynamicConstVectorBase<__vectorOwnerType, _elementType> & vector,
@@ -868,8 +867,8 @@ public:
             Run(*this, vector, scalar);
         return *this;
     }
-    
-    /* documented above */    
+
+    /* documented above */
     template <class __vectorOwnerType>
     inline ThisType & ProductOf(const vctDynamicConstVectorBase<__vectorOwnerType, _elementType> & vector,
                                 const value_type scalar) {
@@ -878,7 +877,7 @@ public:
             Run(*this, vector, scalar);
         return *this;
     }
-    
+
     /* documented above */
     template <class __vectorOwnerType>
     inline ThisType & RatioOf(const vctDynamicConstVectorBase<__vectorOwnerType, _elementType> & vector,
@@ -909,7 +908,7 @@ public:
         return *this;
     }
     //@}
-    
+
 
 
     /*! \name Binary elementwise operations a scalar and a vector.
@@ -924,7 +923,7 @@ public:
 
       \param scalar The first operand of the binary operation.
       \param vector The second operand of the binary operation.
-      
+
       \return The vector "this" modified.
     */
     template <class __vectorOwnerType>
@@ -935,7 +934,7 @@ public:
             Run(*this, scalar, vector);
         return *this;
     }
-    
+
     /* documented above */
     template <class __vectorOwnerType>
     inline ThisType & DifferenceOf(const value_type scalar,
@@ -945,7 +944,7 @@ public:
             Run(*this, scalar, vector);
         return *this;
     }
-    
+
     /* documented above */
     template <class __vectorOwnerType>
     inline ThisType & ProductOf(const value_type scalar,
@@ -955,7 +954,7 @@ public:
             Run(*this, scalar, vector);
         return *this;
     }
-    
+
     /* documented above */
     template <class __vectorOwnerType>
     inline ThisType & RatioOf(const value_type scalar,
@@ -1001,7 +1000,7 @@ public:
 
       \param scalar The second operand of the binary operation
       (this[i] is the first operand.
-      
+
       \return The vector "this" modified.
     */
     inline ThisType & Add(const value_type scalar) {
@@ -1010,7 +1009,7 @@ public:
             Run(*this, scalar);
         return *this;
     }
-    
+
     /* documented above */
     inline ThisType & Subtract(const value_type scalar) {
         vctDynamicVectorLoopEngines::
@@ -1018,7 +1017,7 @@ public:
             Run(*this, scalar);
         return *this;
     }
-    
+
     /* documented above */
     inline ThisType & Multiply(const value_type scalar) {
         vctDynamicVectorLoopEngines::
@@ -1026,7 +1025,7 @@ public:
             Run(*this, scalar);
         return *this;
     }
-    
+
     /* documented above */
     inline ThisType & Divide(const value_type scalar) {
         vctDynamicVectorLoopEngines::
@@ -1034,7 +1033,7 @@ public:
             Run(*this, scalar);
         return *this;
     }
-    
+
     /* documented above */
     inline ThisType & ClipAbove(const value_type upperBound) {
         vctDynamicVectorLoopEngines::
@@ -1055,7 +1054,7 @@ public:
     inline ThisType & operator += (const value_type scalar) {
         return this->Add(scalar);
     }
-    
+
     /* documented above */
     inline ThisType & operator -= (const value_type scalar) {
         return this->Subtract(scalar);
@@ -1093,11 +1092,11 @@ public:
 
     /*!
       Product of a matrix and a vector.
-      
+
       \param inputMatrix The first operand of the binary operation
-      
+
       \param inputVector The second operand of the binary operation
-      
+
       \return The vector "this" modified.
     */
     template <class __matrixOwnerType, class __vectorOwnerType>
@@ -1110,11 +1109,11 @@ public:
 
     /*!
       Product of a vector and a matrix.
-      
+
       \param inputVector The first operand of the binary operation
-      
+
       \param inputMatrix The second operand of the binary operation
-      
+
       \return The vector "this" modified.
     */
     template <class __vectorOwnerType, class __matrixOwnerType>
@@ -1162,7 +1161,7 @@ public:
       version (NormalizedOf).
 
       \param otherVector The operand of the unary operation.
-      
+
       \return The vector "this" modified.
     */
     template <class __vectorOwnerType>
@@ -1217,7 +1216,7 @@ public:
       op(this[i])\f$ where \f$op\f$ can calculate the absolute value
       (AbsSelf), the opposite (NegationSelf) or the normalized version
       (NormalizedSelf).
-      
+
       \return The vector "this" modified.
     */
     inline ThisType & AbsSelf(void) {
