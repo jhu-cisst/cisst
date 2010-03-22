@@ -71,7 +71,7 @@ int VideoConverter(std::string &source, std::string &destination)
     else {
         converter_writer.SetFilePath(destination);
     }
-/*
+
     if (converter_writer.LoadCodec("codec.dat") != SVL_OK) {
         if (converter_writer.DialogCodec() != SVL_OK) {
             cerr << " -!- Unable to set up compression." << endl;
@@ -82,12 +82,12 @@ int VideoConverter(std::string &source, std::string &destination)
 
     std::string encoder;
     converter_writer.GetCodecName(encoder);
-*/
+
     // chain filters to pipeline
     converter_stream.Trunk().Append(&converter_source);
     converter_stream.Trunk().Append(&converter_writer);
 
-    //cerr << "Converting: '" << source << "' to '" << destination <<"' using codec: '" << encoder << "'" << endl;
+    cerr << "Converting: '" << source << "' to '" << destination <<"' using codec: '" << encoder << "'" << endl;
 
     // initialize and start stream
     if (converter_stream.Start() != SVL_OK) goto labError;

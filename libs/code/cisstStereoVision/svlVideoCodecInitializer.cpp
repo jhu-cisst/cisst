@@ -23,7 +23,6 @@
 #include <cisstCommon/cmnPortability.h>
 #include <cisstStereoVision/svlStreamManager.h>
 #include "svlVideoCodecInitializer.h"
-#include "svlVideoCodecUDP.h"
 
 #if (CISST_OS == CISST_WINDOWS)
 #include "svlVideoCodecVfW32.h"
@@ -43,7 +42,5 @@ void svlInitializeVideoCodecs()
 #ifdef _svlVideoCodecCVI_h
     delete new svlVideoCodecCVI;
 #endif // _svlVideoCodecCVI_h
-
-    delete new svlVideoCodecUDP;
 }
 
