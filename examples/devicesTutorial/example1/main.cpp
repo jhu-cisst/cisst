@@ -51,7 +51,9 @@ int main(void)
 
     // collect all state data in csv file
     mtsCollectorState * collector =
-        new mtsCollectorState("Omni", mtsCollectorBase::COLLECTOR_LOG_FORMAT_CSV);
+        new mtsCollectorState(robotObject->GetName(),
+                              robotObject->GetDefaultStateTableName(),
+                              mtsCollectorBase::COLLECTOR_FILE_FORMAT_CSV);
     collector->AddSignal(); // all signals
     taskManager->AddTask(collector);
 
@@ -60,7 +62,7 @@ int main(void)
     // start the periodic Run
     taskManager->StartAll();
 
-    collector->Start(0.0 * cmn_s);
+    collector->Start();
 
     // wait until the close button of the UI is pressed
     while (true) {
