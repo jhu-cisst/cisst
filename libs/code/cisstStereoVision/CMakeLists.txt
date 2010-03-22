@@ -464,6 +464,13 @@ IF(WIN32)
         svlVideoCodecVfW32.h    # private header
         svlVideoCodecVfW32.cpp
         svlFilterImageWindow.cpp
+        # UDP test files 
+        #svlVideoCodecUDPSender.h
+        #svlVideoCodecUDPSender.cpp
+        #svlVideoCodecUDPReceiver.h
+        #svlVideoCodecUDPReceiver.cpp
+        svlVideoCodecUDP.h
+        svlVideoCodecUDP.cpp
         )
     SET(HEADER_FILES
         ${HEADER_FILES}
