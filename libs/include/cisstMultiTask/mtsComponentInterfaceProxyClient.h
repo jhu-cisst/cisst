@@ -52,7 +52,7 @@ protected:
     /*! ID of this proxy. mtsComponentInterfaceProxyServer handles multiple
         network proxy clients (as a provided interface can be connected to
         multiple required interfaces) and it uses this ID as unique client ID. */
-    const unsigned int ProvidedInterfaceProxyInstanceID;
+    unsigned int ProvidedInterfaceProxyInstanceID;
 
     /*! Instance counter used to set a short name of this thread */
     static unsigned int InstanceCounter;
