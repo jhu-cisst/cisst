@@ -39,7 +39,6 @@ mtsCollectorBase::mtsCollectorBase(const std::string & collectorName,
     OutputStream(0),
     OutputFile(0),
     Serializer(0)
-
 {
     ++CollectorCount;
 

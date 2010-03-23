@@ -74,11 +74,15 @@ class CISST_EXPORT mtsCollectorEvent : public mtsCollectorBase
       callback method */
     class CollectorEventVoid {
     public:
+        std::string ComponentName;
+        std::string InterfaceName;
         std::string EventName;
         size_t EventId;
         mtsCollectorEvent * Collector;
-        CollectorEventVoid(const std::string & eventName, size_t eventId, mtsCollectorEvent * collector);
+        CollectorEventVoid(const std::string & componentName, const std::string & interfaceName, const std::string & eventName,
+                           size_t eventId, mtsCollectorEvent * collector);
         void EventHandler(void);
+        void PrintHeader(std::ostream & outputStream, const CollectorFileFormat fileFormat);
     };
 
     /*! Save the event information */
@@ -88,11 +92,17 @@ class CISST_EXPORT mtsCollectorEvent : public mtsCollectorBase
       callback method */
     class CollectorEventWrite {
     public:
+        std::string ComponentName;
+        std::string InterfaceName;
         std::string EventName;
+        mtsRequiredInterface * RequiredInterface;
+        const mtsGenericObject * ArgumentPrototype;
         size_t EventId;
         mtsCollectorEvent * Collector;
-        CollectorEventWrite(const std::string & eventName, size_t eventId, mtsCollectorEvent * collector);
+        CollectorEventWrite(const std::string & componentName, const std::string & interfaceName, const std::string & eventName,
+                            size_t eventId, mtsCollectorEvent * collector);
         void EventHandler(const mtsGenericObject * payload);
+        void PrintHeader(std::ostream & outputStream, const CollectorFileFormat fileFormat);
     };
 
     /*! Save the event information and payload */
@@ -100,6 +110,12 @@ class CISST_EXPORT mtsCollectorEvent : public mtsCollectorBase
 
     /*! Counter used to give a unique Id to each event, starts at 1 */
     size_t EventCounter;
+
+    /*! Lists of event handlers */
+    //@{
+    std::vector<CollectorEventVoid *> EventsVoid;
+    std::vector<CollectorEventWrite *> EventsWrite;
+    //@}
 
  public:
     /*! Thread-related methods */
@@ -164,9 +180,12 @@ class CISST_EXPORT mtsCollectorEvent : public mtsCollectorBase
                                const std::string & eventName);
     //@}
 
+    /*! Print out the event names which are being collected. */
+    void PrintHeader(const CollectorFileFormat & fileFormat);
+
  public:
     /*! \todo copy documentation for mtsCollectorState */
-    void Connect(void);
+    bool Connect(void);
 
     /*! Methods defined as virtual in base class to control stop/start
       collection with delay.  For the event collector, these methods

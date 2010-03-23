@@ -31,9 +31,13 @@ http://www.cisst.org/cisst/license.txt.
 #include <fstream>
 
 
-mtsCollectorEvent::CollectorEventVoid::CollectorEventVoid(const std::string & eventName,
+mtsCollectorEvent::CollectorEventVoid::CollectorEventVoid(const std::string & componentName,
+                                                          const std::string & interfaceName,
+                                                          const std::string & eventName,
                                                           size_t eventId,
                                                           mtsCollectorEvent * collector):
+    ComponentName(componentName),
+    InterfaceName(interfaceName),
     EventName(eventName),
     EventId(eventId),
     Collector(collector)
@@ -47,10 +51,24 @@ void mtsCollectorEvent::CollectorEventVoid::EventHandler(void)
 }
 
 
-mtsCollectorEvent::CollectorEventWrite::CollectorEventWrite(const std::string & eventName,
+void mtsCollectorEvent::CollectorEventVoid::PrintHeader(std::ostream & outputStream, const CollectorFileFormat fileFormat)
+{
+    outputStream << "# Id: " << this->EventId
+                 << " Event void: \"" << this->ComponentName << "::" << this->InterfaceName << "::" << this->EventName << "\""
+                 << std::endl; 
+}
+
+
+mtsCollectorEvent::CollectorEventWrite::CollectorEventWrite(const std::string & componentName,
+                                                            const std::string & interfaceName,
+                                                            const std::string & eventName,
                                                             size_t eventId,
                                                             mtsCollectorEvent * collector):
+    ComponentName(componentName),
+    InterfaceName(interfaceName),
     EventName(eventName),
+    RequiredInterface(0),
+    ArgumentPrototype(0),
     EventId(eventId),
     Collector(collector)
 {
@@ -60,6 +78,17 @@ mtsCollectorEvent::CollectorEventWrite::CollectorEventWrite(const std::string & 
 void mtsCollectorEvent::CollectorEventWrite::EventHandler(const mtsGenericObject * payload)
 {
     this->Collector->SaveEventWrite(this, payload);
+}
+
+
+void mtsCollectorEvent::CollectorEventWrite::PrintHeader(std::ostream & outputStream, const CollectorFileFormat fileFormat)
+{
+    CMN_ASSERT(this->ArgumentPrototype);
+    outputStream << "# Id: " << this->EventId
+                 << " Event write: \"" << this->ComponentName << "::" << this->InterfaceName << "::" << this->EventName 
+                 << "(" << this->ArgumentPrototype->Services()->GetName() << ")\", ";
+    this->ArgumentPrototype->ToStreamRaw(outputStream, ',', true);
+    outputStream << std::endl; 
 }
 
 
@@ -122,6 +151,20 @@ mtsRequiredInterface * mtsCollectorEvent::GetRequiredInterfaceFor(const mtsCompo
 void mtsCollectorEvent::Startup(void)
 {
     CMN_LOG_CLASS_INIT_DEBUG << "Startup() for collector \"" << this->GetName() << "\"" << std::endl;
+    size_t index;
+    CollectorEventWrite * collectorEvent;
+    mtsCommandWriteGenericBase * eventHandler;
+    const mtsGenericObject * argumentPrototype;
+    for (index = 0; index < this->EventsWrite.size(); index++) {
+        collectorEvent = this->EventsWrite[index];
+        CMN_ASSERT(collectorEvent->RequiredInterface);
+        eventHandler = collectorEvent->RequiredInterface->GetEventHandlerWriteGeneric(collectorEvent->EventName);
+        CMN_ASSERT(eventHandler);
+        argumentPrototype = eventHandler->GetArgumentPrototype();
+        CMN_ASSERT(argumentPrototype);
+        collectorEvent->ArgumentPrototype = dynamic_cast<const mtsGenericObject *>(argumentPrototype->Services()->Create());
+        CMN_ASSERT(collectorEvent->ArgumentPrototype);
+    }
 }
 
 
@@ -184,6 +227,12 @@ bool mtsCollectorEvent::AddObservedComponent(const std::string & componentName)
 bool mtsCollectorEvent::AddObservedComponent(const mtsComponent * componentPointer)
 {
     CMN_ASSERT(componentPointer);
+    // check if this task has already been connected
+    if (this->ConnectedFlag) {
+        CMN_LOG_CLASS_INIT_ERROR << "AddObservedComponent: collector \"" << this->GetName()
+                                 << "\" is already connected, you can not add an observed component" << std::endl;
+        return false;
+    }
     CMN_LOG_CLASS_INIT_DEBUG << "AddObservedComponent: adding component \""
                              << componentPointer->GetName() << "\"" << std::endl;
     // get all provided interface names
@@ -223,6 +272,12 @@ bool mtsCollectorEvent::AddObservedInterface(const std::string & componentName,
 bool mtsCollectorEvent::AddObservedInterface(const mtsComponent * componentPointer,
                                              const mtsProvidedInterface * interfacePointer)
 {
+    // check if this task has already been connected
+    if (this->ConnectedFlag) {
+        CMN_LOG_CLASS_INIT_ERROR << "AddObservedInterface: collector \"" << this->GetName()
+                                 << "\" is already connected, you can not add an observed interface" << std::endl;
+        return false;
+    }
     CMN_ASSERT(componentPointer);
     CMN_ASSERT(interfacePointer);
     CMN_LOG_CLASS_INIT_DEBUG << "AddObservedInterface: adding interface \""
@@ -292,6 +347,12 @@ bool mtsCollectorEvent::AddObservedEventVoid(const mtsComponent * componentPoint
                                              const mtsProvidedInterface * interfacePointer,
                                              const std::string & eventName)
 {
+    // check if this task has already been connected
+    if (this->ConnectedFlag) {
+        CMN_LOG_CLASS_INIT_ERROR << "AddObservedEventVoid: collector \"" << this->GetName()
+                                 << "\" is already connected, you can not add an observed event" << std::endl;
+        return false;
+    }
     CMN_ASSERT(componentPointer);
     CMN_ASSERT(interfacePointer);
     CMN_LOG_CLASS_INIT_DEBUG << "AddObservedEventVoid: adding event     \"" // extra spaces added for alignment
@@ -299,7 +360,9 @@ bool mtsCollectorEvent::AddObservedEventVoid(const mtsComponent * componentPoint
                              << interfacePointer->GetName() << "."
                              << eventName << "\"" << std::endl;
     // create a CollectorEventvoid object
-    CollectorEventVoid * collector = new CollectorEventVoid(eventName, this->EventCounter, this);
+    CollectorEventVoid * collector = new CollectorEventVoid(componentPointer->GetName(), interfacePointer->GetName(), eventName,
+                                                            this->EventCounter, this);
+    this->EventsVoid.push_back(collector);
     this->EventCounter++;
     // get the required interface to add an observer
     mtsRequiredInterface * requiredInterface = GetRequiredInterfaceFor(componentPointer, interfacePointer);
@@ -312,6 +375,12 @@ bool mtsCollectorEvent::AddObservedEventWrite(const mtsComponent * componentPoin
                                               const mtsProvidedInterface * interfacePointer,
                                               const std::string & eventName)
 {
+    // check if this task has already been connected
+    if (this->ConnectedFlag) {
+        CMN_LOG_CLASS_INIT_ERROR << "AddObservedEventWrite: collector \"" << this->GetName()
+                                 << "\" is already connected, you can not add an observed event" << std::endl;
+        return false;
+    }
     CMN_ASSERT(componentPointer);
     CMN_ASSERT(interfacePointer);
     CMN_LOG_CLASS_INIT_DEBUG << "AddObservedEventWrite: adding event    \"" // extra spaces added for alignment
@@ -319,16 +388,20 @@ bool mtsCollectorEvent::AddObservedEventWrite(const mtsComponent * componentPoin
                              << interfacePointer->GetName() << "."
                              << eventName << "\"" << std::endl;
     // create a CollectorEventWrite object
-    CollectorEventWrite * collector = new CollectorEventWrite(eventName, this->EventCounter, this);
+    CollectorEventWrite * collector = new CollectorEventWrite(componentPointer->GetName(), interfacePointer->GetName(), eventName,
+                                                              this->EventCounter, this);
+    this->EventsWrite.push_back(collector);
     this->EventCounter++;
     // get the required interface to add an observer
     mtsRequiredInterface * requiredInterface = GetRequiredInterfaceFor(componentPointer, interfacePointer);
     requiredInterface->AddEventHandlerWriteGeneric(&CollectorEventWrite::EventHandler, collector, eventName);
+    // collector needs to have the required interface to find out the argument prototype at Startup
+    collector->RequiredInterface = requiredInterface;
     return true;
 }
 
 
-void mtsCollectorEvent::Connect(void)
+bool mtsCollectorEvent::Connect(void)
 {
     // iterate all components and interfaces to connect all
     const ComponentsMap::const_iterator endComponents = this->ObservedComponents.end();
@@ -348,34 +421,101 @@ void mtsCollectorEvent::Connect(void)
                                      << "\" to \""
                                      << iterComponents->first << "::" << iterInterfaces->first
                                      << "\"" << std::endl;
-            TaskManager->Connect(this->GetName(), iterInterfaces->second->GetName(),
-                                 iterComponents->first, iterInterfaces->first);
+            if (!TaskManager->Connect(this->GetName(), iterInterfaces->second->GetName(),
+                                      iterComponents->first, iterInterfaces->first)) {
+                CMN_LOG_CLASS_INIT_ERROR << "Connect: connect failed for required interface \""
+                                         << this->GetName() << "::" << iterInterfaces->second->GetName()
+                                         << "\" to \""
+                                         << iterComponents->first << "::" << iterInterfaces->first
+                                         << "\"" << std::endl;
+                return false;
+            }
         }
     }
+    this->ConnectedFlag = true;
+    return true;
 }
 
 
 void mtsCollectorEvent::SaveEventVoid(const CollectorEventVoid * event)
 {
+    // if this method is called for the first time, print out some information.
+    if (this->FirstRunningFlag) {
+        this->PrintHeader(this->FileFormat);
+    }
     *(this->OutputStream) << event->EventId << std::endl;
 }
 
 
 void mtsCollectorEvent::SaveEventWrite(const CollectorEventWrite * event, const mtsGenericObject * payload)
 {
+    // if this method is called for the first time, print out some information.
+    if (this->FirstRunningFlag) {
+        this->PrintHeader(this->FileFormat);
+    }
     *(this->OutputStream) << event->EventId << this->Delimiter;
     payload->ToStreamRaw(*(this->OutputStream), this->Delimiter);
     *(this->OutputStream) << std::endl;
 }
 
 
+void mtsCollectorEvent::PrintHeader(const CollectorFileFormat & fileFormat)
+{
+    std::string currentDateTime;
+    osaGetDateTimeString(currentDateTime);
+
+    if (this->OutputStream) {
+        // Print out some information on the state table.
+
+        // All lines in the header should be preceded by '#' which represents
+        // the line contains header information rather than collected data.
+        *(this->OutputStream) << "# Date & time        : " << currentDateTime << std::endl;
+        *(this->OutputStream) << "# Total event count : " << (this->EventCounter - 1) << std::endl;
+        *(this->OutputStream) << "# Data format        : ";
+        if (fileFormat == COLLECTOR_FILE_FORMAT_PLAIN_TEXT) {
+            *(this->OutputStream) << "Text";
+        } else if (fileFormat == COLLECTOR_FILE_FORMAT_CSV) {
+            *(this->OutputStream) << "Text (CSV)";
+        } else {
+            *(this->OutputStream) << "Binary";
+        }
+        *(this->OutputStream) << std::endl;
+        *(this->OutputStream) << "#" << std::endl;
+
+        size_t index;
+        for (index = 0; index < this->EventsVoid.size(); index++) {
+            (this->EventsVoid[index])->PrintHeader(*(this->OutputStream), fileFormat);
+        }
+        for (index = 0; index < this->EventsWrite.size(); index++) {
+            (this->EventsWrite[index])->PrintHeader(*(this->OutputStream), fileFormat);
+        }
+
+        // In case of using binary format
+        if (fileFormat == COLLECTOR_FILE_FORMAT_BINARY) {
+            CMN_LOG_CLASS_INIT_ERROR << "PrintHeader: binary format not supported yet" << std::endl;
+        }
+    } else {
+        CMN_LOG_CLASS_RUN_ERROR << "PrintHeader: output stream for collector \"" << this->GetName() << "\" is not available." << std::endl;
+    }
+    this->FirstRunningFlag = false;
+}
+
+
 void mtsCollectorEvent::StartCollection(const mtsDouble & delay)
 {
-    // enable all event observers
+    // enable all event observers delay is not supported yet.  If the
+    // collector is already collecting, we could ignore the request.
+    // If the collector is not collecting, we could add a sleep but
+    // this seems dangerous as other events would potentially wake up
+    // the thread.  Ideally, we need a scheduled event, i.e. the task
+    // manager could have a special task who can create events at a
+    // given time.
+    RequiredInterfaces.ForEachVoid(&mtsRequiredInterface::EnableAllEvents);
 }
 
 
 void mtsCollectorEvent::StopCollection(const mtsDouble & delay)
 {
     // disable all event observers
+    RequiredInterfaces.ForEachVoid(&mtsRequiredInterface::DisableAllEvents);
 }

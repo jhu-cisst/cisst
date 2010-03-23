@@ -33,11 +33,10 @@ void mtsStateTable::IndexRange::ToStreamRaw(std::ostream & outputStream, const c
 {
     mtsGenericObject::ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix);
     outputStream << delimiter;
-    First.ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix + "_first");
+    First.ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix + "first-");
     outputStream << delimiter;
-    Last.ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix + "_last");
+    Last.ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix + "last-");
 }
-
 
 
 int mtsStateTable::StateVectorBaseIDForUser;

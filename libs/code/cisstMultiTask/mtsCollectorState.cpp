@@ -125,8 +125,12 @@ bool mtsCollectorState::Connect(void)
     // then connect the interface
     CMN_LOG_CLASS_INIT_DEBUG << "Connect: connecting required interface \"" << this->GetName() << "::StateTable\" to provided interface \""
                              << this->TargetTask->GetName() << "::StateTable" << this->TargetStateTable->GetName() << "\"" << std::endl;
-    this->TaskManager->Connect(this->GetName(), "StateTable",
-                               this->TargetTask->GetName(), "StateTable" + this->TargetStateTable->GetName());
+    if (!this->TaskManager->Connect(this->GetName(), "StateTable",
+                                    this->TargetTask->GetName(), "StateTable" + this->TargetStateTable->GetName())) {
+        CMN_LOG_CLASS_INIT_ERROR << "Connect: connect failed for required interface \"" << this->GetName() << "::StateTable\" to provided interface \""
+                                 << this->TargetTask->GetName() << "::StateTable" << this->TargetStateTable->GetName() << "\"" << std::endl;
+        return false;
+    }
     this->ConnectedFlag = true;
     return true;
 }
