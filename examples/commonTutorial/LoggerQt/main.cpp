@@ -22,7 +22,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnLoggerQWidget.h>
 
 #include <QApplication>
-
+#include <QPushButton>
+#include <QVBoxLayout>
 
 int main(int argc, char *argv[])
 {
@@ -32,13 +33,23 @@ int main(int argc, char *argv[])
 
     // create a Qt user interface
     QApplication application(argc, argv);
-
+    
     // create a widget to control the logger
-    cmnLoggerQWidget loggerQWidget;
-
-    loggerQWidget.setupUi();
-
+    QWidget * mainWidget = new QWidget();
+    mainWidget->setWindowTitle("commonTutorial Logget Qt");
+    QVBoxLayout * mainLayout = new QVBoxLayout(mainWidget);
+    
+    cmnLoggerQWidget * loggerWidget = new cmnLoggerQWidget(mainWidget);
+    mainLayout->addWidget(loggerWidget->GetWidget());
+    
+    // add a quit buttom
+    QPushButton * buttonQuit = new QPushButton("Quit", mainWidget);
+    mainLayout->addWidget(buttonQuit);
+    QObject::connect(buttonQuit, SIGNAL(clicked()),
+                     QApplication::instance(), SLOT(quit()));
+  
     // run Qt user interface
+    mainWidget->show();
     application.exec();
 
     return 0;

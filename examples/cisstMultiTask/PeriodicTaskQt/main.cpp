@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsCollectorEvent.h>
 
 #include <QApplication>
+#include <QTabWidget>
 #include <QGridLayout>
 #include <QPushButton>
 #include <QWidget>
@@ -57,19 +58,21 @@ int main(int argc, char *argv[])
 
     // create Qt user interface
     QApplication application(argc, argv);
-    QWidget * mainWindow = new QWidget();
-    QGridLayout * layout = new QGridLayout(mainWindow);
-    mtsCollectorQWidget * collectorQWidget = new mtsCollectorQWidget();
-    QPushButton * buttonQuit = new QPushButton("Quit", mainWindow);
 
-    // configure Qt widgets
-    mainWindow->setWindowTitle("Periodic Task Example");
+    // create a vertical widget for quit button and tabs
+    QWidget * mainWidget = new QWidget();
+    mainWidget->setWindowTitle("Periodic Task Example");
+    QVBoxLayout * mainLayout = new QVBoxLayout(mainWidget);
+    mainLayout->setContentsMargins(0, 0, 0, 0);
+
+    // create a tab with all the sine wave controllers
+    QWidget * tab1Widget = new QWidget();
+    QGridLayout * tab1Layout= new QGridLayout(tab1Widget);
+    tab1Layout->setContentsMargins(0, 0, 0, 0);
+
     // add one collection widget for all sine generators
-    layout->addWidget(collectorQWidget, 0, 0, 1, NumSineTasks);
-    // one large quit button
-    layout->addWidget(buttonQuit, 3, 0, 1, NumSineTasks);
-    QObject::connect(buttonQuit, SIGNAL(clicked()),
-                     QApplication::instance(), SLOT(quit()));
+    mtsCollectorQWidget * collectorQWidget = new mtsCollectorQWidget();
+    tab1Layout->addWidget(collectorQWidget, 0, 0, 1, NumSineTasks);
 
     // get the component manager to add multiple sine generator tasks
     mtsManagerLocal * taskManager = mtsManagerLocal::GetInstance();
@@ -103,7 +106,7 @@ int main(int argc, char *argv[])
         std::cout << *sine << std::endl;
         display = new displayQComponent("DISP" + index.str());
         taskManager->AddComponent(display);
-        layout->addWidget(display->GetWidget(), 1, i);
+        tab1Layout->addWidget(display->GetWidget(), 1, i);
         taskManager->Connect(display->GetName(), "DataGenerator",
                              sine->GetName(), "MainInterface");
 
@@ -128,6 +131,24 @@ int main(int argc, char *argv[])
     // connect all interfaces for event collector
     eventCollector->Connect();
 
+    // tabs
+    QTabWidget * tabs = new QTabWidget(mainWidget);
+    mainLayout->addWidget(tabs);
+    tabs->addTab(tab1Widget, "Main");
+
+    QWidget * tab2Widget = new QWidget();
+    QGridLayout * tab2Layout= new QGridLayout(tab2Widget);
+    cmnLoggerQWidget * loggerWidget = new cmnLoggerQWidget(tab2Widget);
+    tab2Layout->addWidget(loggerWidget->GetWidget());
+    
+    tabs->addTab(tab2Widget, "Logger");
+
+    // one large quit button under all tabs
+    QPushButton * buttonQuit = new QPushButton("Quit", mainWidget);
+    mainLayout->addWidget(buttonQuit);
+    QObject::connect(buttonQuit, SIGNAL(clicked()),
+                     QApplication::instance(), SLOT(quit()));
+
     // generate a nice tasks diagram
     std::ofstream dotFile("PeriodicTaskQt.dot");
     taskManager->ToStreamDot(dotFile);
@@ -138,8 +159,8 @@ int main(int argc, char *argv[])
     taskManager->StartAll();
     
     // run Qt user interface
-    mainWindow->resize(NumSineTasks * 220, 360);
-    mainWindow->show();
+    mainWidget->resize(NumSineTasks * 220, 360);
+    mainWidget->show();
     application.exec();
 
     // kill all tasks and perform cleanup
