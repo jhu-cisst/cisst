@@ -40,7 +40,9 @@
  * - Pre-defined FLTK color samples
  * - Axis scaling (both x-axis and y-axis)
  * - Autoscaling
+ * - Y-axis Offset
  * - Show or hide a signal selectively
+ * - Stop/resume
  * 
  * If there is any question, please contact to the author.
  */
@@ -168,6 +170,16 @@ class MULTIPLOT_BASE : public Fl_Gl_Window
         }
 
         /**
+        *   Y-Axis Offset
+        */
+        inline void SetYOffset(const float offsetY) {
+            OffsetY = offsetY;
+        }
+        inline float GetYOffset(void) const {
+            return OffsetY;
+        }
+
+        /**
         *   Autoscale on/off
         */
         inline void SetAutoScale(const bool isAutoScaleOn) {
@@ -177,8 +189,8 @@ class MULTIPLOT_BASE : public Fl_Gl_Window
         /**
         *   Get min y and max y values
         */
-        inline float GetYMax(void) const { return maximum.y; }
-        inline float GetYMin(void) const { return minimum.y; }
+        inline float GetYMax(void) const { return maximum.y + OffsetY; }
+        inline float GetYMin(void) const { return minimum.y + OffsetY; }
 
         /**
         *   Show or hide a signal
@@ -188,6 +200,16 @@ class MULTIPLOT_BASE : public Fl_Gl_Window
                 return;
             }
             tsettings[signalIndex].show = show;
+        }
+
+        /**
+        *   Hold (stop)
+        */
+        inline void SetHoldDrawing(const bool hold = true) {
+            HoldDrawing = hold;
+        }
+        inline bool GetHoldDrawing(void) const {
+            return HoldDrawing;
         }
 
 	protected:
@@ -204,6 +226,8 @@ class MULTIPLOT_BASE : public Fl_Gl_Window
 		bool scroll;
         bool fixedGrid;
         bool AutoScaleOn;
+        bool HoldDrawing;
+        float OffsetY;
 
 		// this struct stores information
 		// about the traces like line_width, the current pos 
@@ -267,6 +291,8 @@ inline MULTIPLOT_BASE::MULTIPLOT_BASE(const int x, const int y, const int w, con
 
 	scroll=false;
     AutoScaleOn=false;
+    OffsetY = 0.0f;
+    HoldDrawing = false;
 
 	//max.x=max.y=-FLT_MAX;
     if (AutoScaleOn) {
@@ -578,6 +604,9 @@ inline PLOT_POINT MULTIPLOT_BASE::draw_grid()
 
 inline void MULTIPLOT_BASE::draw()
 {
+    if (HoldDrawing) {
+        return;
+    }
 
 	glClear(GL_COLOR_BUFFER_BIT);// | GL_DEPTH_BUFFER_BIT);			// Clear The Screen And Depth Buffer
 
@@ -626,6 +655,10 @@ inline void MULTIPLOT_BASE::draw()
 				if(ps>=traces[t].size())
 					ps=0;
 				p=traces[t][ps];
+                
+                // apply Y-axis offset
+                p.y += OffsetY;
+
 				if(tsettings[t].line_width>0)
 				{
 					glColor3f(p.r,p.g,p.b);
@@ -656,6 +689,10 @@ inline void MULTIPLOT_BASE::draw()
 				if(ps>=traces[t].size())
 					ps=0;
 				p=traces[t][ps];
+
+                // apply Y-axis offset
+                p.y += OffsetY;
+
 				if(tsettings[t].point_size>0)
 				{
 					glColor3f(p.r,p.g,p.b);
@@ -683,6 +720,10 @@ inline void MULTIPLOT_BASE::draw()
 			for(float a=0;a<traces[t].size();a+=step)
 			{
 				p=traces[t][int(a)];
+
+                // apply Y-axis offset
+                p.y += OffsetY;
+
 				if(tsettings[t].line_width>0)
 				{
 					glColor3f(p.r,p.g,p.b);
@@ -707,6 +748,10 @@ inline void MULTIPLOT_BASE::draw()
 				for(float a=0;a<traces[t].size();a+=step)
 				{
 					p=traces[t][int(a)];
+
+                    // apply Y-axis offset
+                    p.y += OffsetY;
+
 					glColor3f(p.r,p.g,p.b);
 					glVertex2f((p.x-offset.x)*scale.x,(p.y-offset.y)*scale.y);
 				}

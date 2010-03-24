@@ -447,11 +447,11 @@ void mtsManagerProxyClient::ReceiveGetArgumentInformation(const std::string & co
     ProxyOwner->GetArgumentInformation(argumentName, signalNames, componentName, providedInterfaceName, commandName);
 }
 
-void mtsManagerProxyClient::ReceiveGetValuesOfCommand(const std::string & componentName, const std::string & providedInterfaceName, const std::string & commandName, ::mtsManagerProxy::SetOfValues & values) const
+void mtsManagerProxyClient::ReceiveGetValuesOfCommand(const std::string & componentName, const std::string & providedInterfaceName, const std::string & commandName, const int scalarIndex, ::mtsManagerProxy::SetOfValues & values) const
 {
     mtsManagerLocalInterface::SetOfValues valuesCISSTtype;
 
-    ProxyOwner->GetValuesOfCommand(valuesCISSTtype, componentName, providedInterfaceName, commandName);
+    ProxyOwner->GetValuesOfCommand(valuesCISSTtype, componentName, providedInterfaceName, commandName, scalarIndex);
 
     mtsManagerProxyServer::ConstructValuesOfCommand(valuesCISSTtype, values);
 }
@@ -1051,11 +1051,11 @@ void mtsManagerProxyClient::ManagerClientI::GetArgumentInformation(const std::st
 }
 
 void mtsManagerProxyClient::ManagerClientI::GetValuesOfCommand(const std::string & componentName, const std::string & providedInterfaceName, 
-        const std::string & commandName, ::mtsManagerProxy::SetOfValues & values, const ::Ice::Current & CMN_UNUSED(current)) const
+    const std::string & commandName, ::Ice::Int scalarIndex, ::mtsManagerProxy::SetOfValues & values, const ::Ice::Current & CMN_UNUSED(current)) const
 {
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
-    LogPrint(ManagerClientI, "<<<<< RECV: GetValuesOfCommand: " << componentName << ", " << providedInterfaceName << ", " << commandName);
+    LogPrint(ManagerClientI, "<<<<< RECV: GetValuesOfCommand: " << componentName << ", " << providedInterfaceName << ", " << commandName << ", " << scalarIndex);
 #endif
 
-    ManagerProxyClient->ReceiveGetValuesOfCommand(componentName, providedInterfaceName, commandName, values);
+    ManagerProxyClient->ReceiveGetValuesOfCommand(componentName, providedInterfaceName, commandName, scalarIndex, values);
 }

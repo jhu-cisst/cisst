@@ -219,7 +219,7 @@ module mtsManagerProxy
         void GetArgumentInformation(string componentName, string providedInterfaceName, string commandName, out string argumentName, out NamesOfSignals signalNames);
 
         ["cpp:const"] idempotent
-        void GetValuesOfCommand(string componentName, string providedInterfaceName, string commandName, out SetOfValues signalValues);
+        void GetValuesOfCommand(string componentName, string providedInterfaceName, string commandName, int scalarIndex, out SetOfValues signalValues);
 	};
 
 	interface ManagerServer

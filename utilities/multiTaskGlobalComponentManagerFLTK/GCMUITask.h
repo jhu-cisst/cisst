@@ -49,16 +49,13 @@ http://www.cisst.org/cisst/license.txt.
 
 class GCMUITask: public mtsTaskPeriodic {
 
-protected:
+public:
     typedef std::vector<std::string> StringVector;
-
-    // Global Component Manager instance that this UI attaches to
-    mtsManagerGlobal & GlobalComponentManager;
 
     //-------------------------------------------------------------------------
     //  Component Inspector
     //-------------------------------------------------------------------------
-    // Typedef to remember the last index selected by user. Used for component inspector
+    // Typedef to remember the last index selected by user (used by component inspector)
     typedef struct {
     public:
         int Process;
@@ -81,32 +78,32 @@ protected:
             EventHandler = -1;
         }
     } SelectedIndexType;
-    SelectedIndexType LastIndexClicked;
-    SelectedIndexType CurrentIndexClicked;
 
     //-------------------------------------------------------------------------
     //  Data Visualizer 
     //-------------------------------------------------------------------------
     // Typedef of an element that contains information about a signal(value) in a parameter 
     typedef struct {
-        std::string SignalName;
-        bool Hide;
+        bool Show;
         bool AutoScale;
         double Min;
         double Max;
+        double Offset;
     } SignalState;
 
-    // Typedef of an element that contains information about a command that user 
+    // Typedef of an element that contains information about a signal that user 
     // picks up for visualization.
-    class CommandSelected {
+    class SignalSelected {
     public:
-        std::string CommandName;
-        std::vector<SignalState> Signals;
+        int Index; // scalar index in arguments of read command
+        int PlotIndex; // index in the 'selected signal(s)' browser
         std::string ProcessName;
         std::string ComponentName;
         std::string InterfaceName;
+        std::string CommandName;
         std::string ArgumentName;
-        int SamplingRate;
+        std::string SignalName;
+        SignalState State;
 
         double Timeout;
         double LastTimeFetched;
@@ -125,8 +122,26 @@ protected:
         }
     };
 
-    // List of commands which are currently plotted
-    std::vector<CommandSelected*> CommandsBeingPlotted;
+    // Typedef of per-process time origin information (the time when the first sample is fetched)
+    //typedef std::map<std::string, double> TimeOriginMapType;
+
+protected:
+    // Time server object
+    const osaTimeServer * TimeServer;
+
+    // Remember time origin (the time when the first sample is fetched) per process
+    //TimeOriginMapType TimeOriginMap;
+    double TimeOrigin;
+
+    // Global Component Manager instance that this UI attaches to
+    mtsManagerGlobal & GlobalComponentManager;
+
+    // Remember the last index selected by user (used by component inspector)
+    SelectedIndexType LastIndexClicked;
+    SelectedIndexType CurrentIndexClicked;
+
+    // List of signals which are currently being plotted
+    std::vector<SignalSelected*> SignalsBeingPlotted;
 
     // X-axis scaling factor
     int XAxisScaleFactor;
@@ -201,26 +216,7 @@ public:
     //-------------------------------------------------------------------------
     //  Data Visualizer
     //-------------------------------------------------------------------------
-    /*! UI Event Handler */
-    void OnButtonYScaleUpClicked(void);
-    void OnButtonYScaleDownClicked(void);
-    void OnButtonXScaleUpClicked(void);
-    void OnButtonXScaleDownClicked(void);
-    void OnButtonRemoveClicked(void);
-    void OnButtonRemoveAllClicked(void);
-    void OnButtonUpdateClicked(void);
-    void OnButtonAutoScaleClicked(void);
-    void OnButtonHideClicked(void);
-    void OnBrowserVisualizeCommandNameClicked(void);
-    void OnBrowserVisualizeSignalsClicked(void);
-
-    void VisualizeCommand(const int idxClicked);
-
-    /*! Reset UI */
-    void ResetBrowserVisualizeCommandName(void);
-    void ResetBrowserVisualizeSignals(void);
-    void ResetDataVisualizerUI(const bool exceptCommandNameBrowser = false);
-
+    /*! Get detailed information on a selected read command */
     void GetArgumentInformation(const std::string & processName, 
                                 const std::string & componentName, 
                                 const std::string & providedInterfaceName, 
@@ -228,15 +224,61 @@ public:
                                 std::string & argumentName,
                                 std::vector<std::string> & argumentParameterNames);
 
-    /*! Add command selected to the CommandsSelected list */
-    void AddCommandSelected(const CommandSelected& commandSelected);
+    /*! Add the signal that a user selected to visualization list */
+    void VisualizeSignal(SignalSelected & newSignal);
 
     /*! Fetch/sample current values that user has chosen to visualize */
     void FetchCurrentValues(void);
 
+    /*! Set time origin (the time when the first sample is fetched) per process */
+    void SetTimeOrigin(const std::string & processName, const double firstTimeStamp);
+
+    /*! Get time origin */
+    double GetTimeOrigin(const std::string & processName);
+
+    /*! UI Event Handler */
+    //
+    // Global Control
+    // 
+    // Scale Buttons
+    void OnButtonYScaleUpClicked(void);
+    void OnButtonYScaleDownClicked(void);
+    void OnButtonXScaleUpClicked(void);
+    void OnButtonXScaleDownClicked(void);
+    // Offset Buttons
+    void OnButtonAllSignalOffsetIncreaseClicked(void);
+    void OnButtonAllSignalOffsetDecreaseClicked(void);
+    // Hold Button
+    void OnButtonHoldClicked(void);
+    // Capture Button
+    void OnButtonCaptureClicked(void) {}
+    //
+    // Per Signal Control
+    //
+    void OnBrowserSelectedSignalsClicked(void);
+    // Remove/Remove all buttons
+    void OnButtonRemoveClicked(void);
+    void OnButtonRemoveAllClicked(void);
+    // Hide button
+    void OnButtonHideClicked(void);
+    // Autoscale button
+    void OnButtonAutoScaleClicked(void);
+    // Offset buttons
+    void OnButtonSignalOffsetIncreaseClicked(void);
+    void OnButtonSignalOffsetDecreaseClicked(void);
+
+    /*! Reset UI */
+    //void ResetBrowserVisualizeSignals(void);
+    void ResetDataVisualizerUI(void);
+
     /*! Draw graph */
     //void PlotGraph(void);
-    void DrawGraph(const mtsManagerLocalInterface::SetOfValues & values);
+    void DrawGraph(const mtsManagerLocalInterface::SetOfValues & values, const int plotIndex, const double timeOrigin);
+
+    // Update output windows for current min/max values
+    void UpdateMinMaxUI(void);
+    // Update Hide/Show button
+    void UpdateButtonHide(const bool isShow = true);
 
     //-------------------------------------------------------------------------
     //  Utilities
@@ -249,6 +291,8 @@ public:
                           const int bg = FLTK_COLOR_WHITE, 
                           const char style = '0');
     void AddLineToDescription(Fl_Output * output, const char * msg);
+
+    SignalSelected * GetCurrentSignal(void) const;
 
 public:
     /*! Constructor and destructor */

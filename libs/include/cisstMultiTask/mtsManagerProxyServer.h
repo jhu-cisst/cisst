@@ -262,6 +262,7 @@ public:
                             const std::string & componentName, 
                             const std::string & providedInterfaceName, 
                             const std::string & commandName, 
+                            const int scalarIndex,
                             const std::string & listenerID = "");
 
     int GetCurrentInterfaceCount(const std::string & componentName, const std::string & listenerID = "");
@@ -376,6 +377,7 @@ public:
                                 const std::string & componentName,
                                 const std::string & providedInterfaceName, 
                                 const std::string & commandName, 
+                                const int scalarIndex,
                                 const std::string & clientID);
 
     std::string SendGetProcessName(const std::string & clientID);

@@ -29,38 +29,49 @@ http://www.cisst.org/cisst/license.txt.
 
 int main(int argc, char * argv[])
 {
-    // Set global component manager IP
+    // Set global component manager IP and signal generator id
     std::string globalComponentManagerIP;
+    int id;
 
     if (argc == 1) {
         globalComponentManagerIP = "localhost";
+        id = 1;
     } else if (argc == 2) {
         globalComponentManagerIP = argv[1];
+        id = 1;
+    } else if (argc == 3) {
+        globalComponentManagerIP = argv[1];
+        id = atoi(argv[2]);
     } else {
         std::cerr << "Usage: " << argv[0] << " (global component manager IP)" << std::endl;
         return 1;
     }
 
     std::cout << "Global component manager IP: " << globalComponentManagerIP << std::endl;
+    std::cout << "ID of this signal generator: " << id << std::endl;
+
+    // Get process name with signal generator id
+    char processName[20] = "";
+    sprintf(processName, "SignalGenerator%d", id);
 
     // log configuration
     cmnLogger::SetLoD(CMN_LOG_LOD_VERY_VERBOSE);
     cmnLogger::GetMultiplexer()->AddChannel(std::cout, CMN_LOG_LOD_VERY_VERBOSE);
     // add a log per thread
-    osaThreadedLogFile threadedLog("SignalGenerator");
+    osaThreadedLogFile threadedLog(processName);
     cmnLogger::GetMultiplexer()->AddChannel(threadedLog, CMN_LOG_LOD_VERY_VERBOSE);
 
     // Get local component manager instance
     mtsTaskManager * taskManager;
     try {
-        taskManager = mtsTaskManager::GetInstance(globalComponentManagerIP, "SignalGenerator");
+        taskManager = mtsTaskManager::GetInstance(globalComponentManagerIP, processName);
     } catch (...) {
         CMN_LOG_INIT_ERROR << "Failed to initialize local component manager" << std::endl;
         return 1;
     }
 
     // create signal generator component
-    const double PeriodClient = 50 * cmn_ms;
+    const double PeriodClient = 10 * cmn_ms;
     SignalGenerator * signalGenerator = new SignalGenerator("SignalGenerator", PeriodClient);
     taskManager->AddComponent(signalGenerator);
 

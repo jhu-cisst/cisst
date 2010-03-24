@@ -8,14 +8,14 @@ class GlobalComponentManagerUI {open
   } {
     Fl_Window DisplayWindow {
       label {Global Component Manager} open
-      xywh {-763 447 682 617} type Double box GTK_UP_BOX align 80 visible
+      xywh {563 161 682 617} type Double box GTK_UP_BOX align 80 visible
     } {
-      Fl_Tabs TabControl {open selected
+      Fl_Tabs TabControl {open
         xywh {10 55 665 510} box GTK_UP_BOX color 46 labelsize 12
       } {
         Fl_Group {} {
           label {Component Inspector} open
-          xywh {20 80 655 485} labelfont 1 labelsize 13
+          xywh {20 80 655 485} labelfont 1 labelsize 13 hide
         } {
           Fl_Group {} {
             label {Provided Interface} open
@@ -91,140 +91,168 @@ class GlobalComponentManagerUI {open
           }
         }
         Fl_Group DataVisualizer {
-          label {Data Visualizer} open
-          xywh {20 80 655 485} labelfont 1 labelsize 13 hide
+          label {Data Visualizer} open selected
+          xywh {20 80 655 485} labelfont 1 labelsize 13
         } {
           Fl_Box GraphPane {
             label {Graph Region}
-            xywh {20 90 580 290} box BORDER_BOX labelfont 1 labelsize 12
+            xywh {20 90 580 280} box BORDER_BOX labelfont 1 labelsize 12
             code0 {\#include "multiplot_cisst.h"}
             class MULTIPLOT
           }
           Fl_Progress Progress1 {
-            xywh {170 390 18 9} box FLAT_BOX color 49 selection_color 1 labelsize 12
+            xywh {20 390 18 9} box FLAT_BOX color 49 selection_color 1 labelsize 12
           }
           Fl_Progress Progress2 {
-            xywh {170 404 18 9} box FLAT_BOX color 49 selection_color 2 labelsize 12
+            xywh {20 404 18 9} box FLAT_BOX color 49 selection_color 2 labelsize 12
           }
           Fl_Progress Progress3 {
-            xywh {170 418 18 9} box FLAT_BOX color 49 selection_color 3 labelsize 12
+            xywh {20 418 18 9} box FLAT_BOX color 49 selection_color 3 labelsize 12
           }
           Fl_Progress Progress4 {
-            xywh {170 432 18 9} box FLAT_BOX color 49 selection_color 4 labelsize 12
+            xywh {20 432 18 9} box FLAT_BOX color 49 selection_color 4 labelsize 12
           }
           Fl_Progress Progress5 {
-            xywh {170 447 18 9} box FLAT_BOX color 49 selection_color 5 labelsize 12
+            xywh {20 447 18 9} box FLAT_BOX color 49 selection_color 5 labelsize 12
           }
           Fl_Progress Progress6 {
-            xywh {170 460 18 9} box FLAT_BOX color 49 selection_color 6 labelsize 12
+            xywh {20 460 18 9} box FLAT_BOX color 49 selection_color 6 labelsize 12
           }
           Fl_Progress Progress7 {
-            xywh {170 474 18 9} box FLAT_BOX color 49 selection_color 9 labelsize 12
+            xywh {20 474 18 9} box FLAT_BOX color 49 selection_color 9 labelsize 12
           }
           Fl_Progress Progress8 {
-            xywh {170 488 18 9} box FLAT_BOX color 49 selection_color 10 labelsize 12
+            xywh {20 488 18 9} box FLAT_BOX color 49 selection_color 10 labelsize 12
           }
           Fl_Progress Progress9 {
-            xywh {170 502 18 9} box FLAT_BOX color 49 selection_color 11 labelsize 12
+            xywh {20 502 18 9} box FLAT_BOX color 49 selection_color 11 labelsize 12
           }
           Fl_Progress Progress10 {
-            xywh {170 516 18 9} box FLAT_BOX color 49 selection_color 12 labelsize 12
+            xywh {20 516 18 9} box FLAT_BOX color 49 selection_color 12 labelsize 12
           }
           Fl_Progress Progress11 {
-            xywh {170 529 18 9} box FLAT_BOX color 49 selection_color 13 labelsize 12
+            xywh {20 529 18 9} box FLAT_BOX color 49 selection_color 13 labelsize 12
           }
           Fl_Progress Progress12 {
-            xywh {170 543 18 9} box FLAT_BOX color 49 selection_color 14 labelsize 12
+            xywh {20 543 18 9} box FLAT_BOX color 49 selection_color 14 labelsize 12
           }
-          Fl_Browser BrowserVisualizeSignals {
-            label Processes
-            callback {BrowserVisualizeSignalsClicked = true;}
-            xywh {190 385 135 173} type Hold box GTK_DOWN_BOX selection_color 4 labeltype NO_LABEL labelfont 1 labelsize 12 align 0 textfont 4 textsize 11
-          }
-          Fl_Browser BrowserVisualizeCommandName {
-            label {Command Name}
-            callback {BrowserVisualizeCommandNameClicked = true;}
-            xywh {20 402 140 94} type Hold box GTK_DOWN_BOX selection_color 4 labelfont 1 labelsize 12 align 5 textsize 12
+          Fl_Browser BrowserSelectedSignals {
+            label {Selected Signal(s) :}
+            callback {BrowserSelectedSignalsClicked = true;}
+            xywh {40 385 135 173} type Hold box GTK_DOWN_BOX selection_color 4 labelfont 1 labelsize 12 align 5 textfont 4 textsize 11 deactivate
           }
           Fl_Output OutputProcessName {
             label {Process :}
-            xywh {405 385 160 20} box GTK_DOWN_BOX labelfont 1 labelsize 12 textsize 12
+            xywh {255 385 160 20} box GTK_DOWN_BOX labelfont 1 labelsize 12 textsize 12 deactivate
           }
           Fl_Output OutputComponentName {
             label {Component :}
-            xywh {405 410 160 20} box GTK_DOWN_BOX labelfont 1 labelsize 12 textsize 12
+            xywh {255 410 160 20} box GTK_DOWN_BOX labelfont 1 labelsize 12 textsize 12 deactivate
           }
           Fl_Output OutputInterfaceName {
             label {Interface :}
-            xywh {405 435 160 20} box GTK_DOWN_BOX labelfont 1 labelsize 12 textsize 12
+            xywh {255 435 160 20} box GTK_DOWN_BOX labelfont 1 labelsize 12 textsize 12 deactivate
           }
-          Fl_Output OutputArgumentName {
-            label {Argument :}
-            xywh {405 460 265 20} box GTK_DOWN_BOX labelfont 1 labelsize 12 textfont 4 textsize 12
-          }
-          Fl_Check_Button CheckButtonHide {
-            label {: Hide}
-            callback {ButtonHideClicked = true;}
-            xywh {580 410 15 20} down_box GTK_DOWN_BOX color 7 labelfont 1 labelsize 12 align 8
+          Fl_Output OutputCommandName {
+            label {Command :}
+            xywh {255 460 160 20} box GTK_DOWN_BOX labelfont 1 labelsize 12 textfont 4 textsize 12 deactivate
           }
           Fl_Output OutputMaxValue {
             xywh {600 84 65 20} box FLAT_BOX color 49 labeltype NO_LABEL labelfont 1 labelsize 12 align 0 textsize 12
           }
           Fl_Output OutputMinValue {
-            xywh {601 370 65 20} box FLAT_BOX color 49 labeltype NO_LABEL labelfont 1 labelsize 12 align 0 textsize 12
+            xywh {600 359 65 20} box FLAT_BOX color 49 labeltype NO_LABEL labelfont 1 labelsize 12 align 0 textsize 12
           }
-          Fl_Button {} {
+          Fl_Button ButtonYScaleUp {
             label x2
             callback {ButtonYScaleUpClicked = true;}
-            xywh {620 192 30 25} box GTK_UP_BOX color 7 align 17
+            xywh {620 114 30 25} box GTK_UP_BOX color 7 align 17 deactivate
             code0 {ButtonYScaleUpClicked = false;}
           }
-          Fl_Button {} {
+          Fl_Button ButtonYScaleDown {
             label {/2}
             callback {ButtonYScaleDownClicked = true;}
-            xywh {620 248 30 25} box GTK_UP_BOX color 7
+            xywh {620 170 30 25} box GTK_UP_BOX color 7 deactivate
             code0 {ButtonYScaleDownClicked = false;}
           }
-          Fl_Button {} {
+          Fl_Button ButtonXScaleDown {
             label {/2}
             callback {ButtonXScaleDownClicked = true;}
-            xywh {605 220 30 25} box GTK_UP_BOX color 7
+            xywh {605 142 30 25} box GTK_UP_BOX color 7 deactivate
             code0 {ButtonXScaleDownClicked = false;}
           }
-          Fl_Button {} {
+          Fl_Button ButtonXScaleUp {
             label x2
             callback {ButtonXScaleUpClicked = true;}
-            xywh {637 220 30 25} box GTK_UP_BOX color 7
+            xywh {637 142 30 25} box GTK_UP_BOX color 7 deactivate
             code0 {ButtonXScaleUpClicked = false;}
           }
-          Fl_Check_Button CheckButtonAutoScale {
-            label {: Auto Scale}
-            callback {ButtonAutoScaleClicked = true;}
-            xywh {580 435 15 20} down_box GTK_DOWN_BOX color 7 labelfont 1 labelsize 12 align 8
-          }
-          Fl_Slider SliderSamplingRate {
-            label {Sampling :}
-            xywh {405 486 180 23} type {Horz Knob} box GTK_UP_BOX color 7 labelfont 1 labelsize 12 align 4
-            code0 {\#include <FL/Fl_Value_Slider.H>}
-            class Fl_Value_Slider
-          }
-          Fl_Button {} {
-            label {Remove Command}
+          Fl_Button ButtonRemove {
+            label Remove
             callback {ButtonRemoveClicked = true;}
-            xywh {20 500 140 25} box GTK_UP_BOX color 7 labelfont 1 labelsize 12 align 17
+            xywh {180 510 85 22} box GTK_UP_BOX color 7 labelsize 12 align 16 deactivate
             code0 {ButtonRemoveClicked = false;}
           }
-          Fl_Button ButtonUpdate {
-            label Update
-            callback {ButtonUpdateClicked = true;}
-            xywh {590 485 80 25} box GTK_UP_BOX color 7 labelfont 1 labelsize 12 align 17
-            code0 {ButtonUpdateClicked = false;}
-          }
-          Fl_Button {} {
+          Fl_Button ButtonRemoveAll {
             label {Remove ALL}
             callback {ButtonRemoveAllClicked = true;}
-            xywh {20 530 140 25} box GTK_UP_BOX color 7 labelfont 1 labelsize 12 align 17
+            xywh {180 535 85 22} box GTK_UP_BOX color 7 labelsize 12 align 144 deactivate
             code0 {ButtonRemoveAllClicked = false;}
+          }
+          Fl_Output OutputArgumentName {
+            label {Argument :}
+            xywh {255 485 220 20} box GTK_DOWN_BOX labelfont 1 labelsize 12 textfont 4 textsize 12 deactivate
+          }
+          Fl_Button ButtonHide {
+            label Hide
+            callback {ButtonHideClicked = true;}
+            xywh {270 510 60 47} box GTK_UP_BOX color 7 labelsize 12 align 16 deactivate
+            code0 {ButtonHideClicked = false;}
+          }
+          Fl_Button ButtonAutoscale {
+            label Autoscale
+            callback {ButtonAutoScaleClicked = true;}
+            xywh {335 510 70 47} box GTK_UP_BOX color 7 labelsize 12 align 144 deactivate
+            code0 {ButtonAutoScaleClicked = false;}
+          }
+          Fl_Button ButtonAllSignalOffsetIncrease {
+            label {Offset +}
+            callback {ButtonAllSignalOffsetIncreaseClicked = true;}
+            xywh {605 230 65 20} box GTK_UP_BOX color 7 labelsize 12 align 17 deactivate
+            code0 {ButtonAllSignalOffsetIncreaseClicked = false;}
+          }
+          Fl_Button ButtonAllSignalOffsetDecrease {
+            label {Offset -}
+            callback {ButtonAllSignalOffsetDecreaseClicked = true;}
+            xywh {605 250 65 20} box GTK_UP_BOX color 7 labelsize 12 align 17 deactivate
+            code0 {ButtonAllSignalOffsetDecreaseClicked = false;}
+          }
+          Fl_Button ButtonHold {
+            label Hold
+            callback {ButtonHoldClicked = true;}
+            xywh {605 295 65 20} box GTK_UP_BOX color 7 labelsize 12 align 17 deactivate
+            code0 {ButtonHoldClicked = false;}
+          }
+          Fl_Button ButtonCapture {
+            label Capture
+            callback {ButtonCaptureClicked = true;}
+            xywh {605 320 65 20} box GTK_UP_BOX color 7 labelsize 12 align 17 deactivate
+            code0 {ButtonCaptureClicked = false;}
+          }
+          Fl_Button ButtonSignalOffsetIncrease {
+            label {Offset +}
+            callback {ButtonSignalOffsetIncreaseClicked = true;}
+            xywh {410 510 65 22} box GTK_UP_BOX color 7 labelsize 12 align 17 deactivate
+            code0 {ButtonSignalOffsetIncreaseClicked = false;}
+          }
+          Fl_Button ButtonSignalOffsetDecrease {
+            label {Offset -}
+            callback {ButtonSignalOffsetDecreaseClicked = true;}
+            xywh {410 535 65 22} box GTK_UP_BOX color 7 labelsize 12 align 17 deactivate
+            code0 {ButtonSignalOffsetDecreaseClicked = false;}
+          }
+          Fl_Output OutputYOffset {
+            xywh {605 210 65 20} box THIN_DOWN_BOX color 49 labeltype NO_LABEL labelfont 1 labelsize 12 align 0 textsize 12
           }
         }
       }
@@ -239,15 +267,18 @@ class GlobalComponentManagerUI {open
       }
     }
   }
-  Function {show(int argc, char**argv)} {open
-  } {
+  Function {show(int argc, char**argv)} {} {
     code {DisplayWindow->show();} {}
   }
+  decl {bool BrowserComponentClicked;} {public
+  }
+  decl {bool BrowserProcessClicked;} {public
+  }
+  decl {bool BrowserVisualizeCommandNameClicked;} {public
+  }
+  decl {bool BrowserSelectedSignalsClicked;} {public
+  }
   decl {bool ButtonAutoRefreshClicked;} {public
-  }
-  decl {bool ButtonAutoScaleClicked;} {public
-  }
-  decl {bool ButtonHideClicked;} {public
   }
   decl {bool ButtonRefreshClicked;} {public
   }
@@ -255,9 +286,9 @@ class GlobalComponentManagerUI {open
   }
   decl {bool ButtonRemoveAllClicked;} {public
   }
-  decl {bool ButtonUpdateClicked;} {public
+  decl {bool ButtonAutoScaleClicked;} {public
   }
-  decl {bool ButtonVisualizeClicked;} {public
+  decl {bool ButtonHideClicked;} {public
   }
   decl {bool ButtonYScaleUpClicked;} {public
   }
@@ -267,12 +298,16 @@ class GlobalComponentManagerUI {open
   }
   decl {bool ButtonXScaleDownClicked;} {public
   }
-  decl {bool BrowserComponentClicked;} {public
+  decl {bool ButtonSignalOffsetIncreaseClicked;} {public
   }
-  decl {bool BrowserProcessClicked;} {public
+  decl {bool ButtonSignalOffsetDecreaseClicked;} {public
   }
-  decl {bool BrowserVisualizeCommandNameClicked;} {public
+  decl {bool ButtonAllSignalOffsetIncreaseClicked;} {public
   }
-  decl {bool BrowserVisualizeSignalsClicked;} {public
+  decl {bool ButtonAllSignalOffsetDecreaseClicked;} {public
+  }
+  decl {bool ButtonHoldClicked;} {public
+  }
+  decl {bool ButtonCaptureClicked;} {public
   }
 } 

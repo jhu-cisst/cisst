@@ -47,7 +47,7 @@ public:
                     }
 
                     Fl_Menu_Item popupMenu[] = {
-                        { "Visualize this command", 0, callbackVisualize, (void*)this},
+                        { "Visualize this", 0, callbackVisualize, (void*)this},
                         { 0 }
                     };
                     const Fl_Menu_Item * m = popupMenu->popup(Fl::event_x(), Fl::event_y(), 0, 0, 0);

@@ -648,9 +648,9 @@ void mtsManagerProxyServer::GetArgumentInformation(std::string & argumentName, s
 }
 
 void mtsManagerProxyServer::GetValuesOfCommand(SetOfValues & values,
-    const std::string & componentName, const std::string & providedInterfaceName, const std::string & commandName, const std::string & listenerID)
+    const std::string & componentName, const std::string & providedInterfaceName, const std::string & commandName, const int scalarIndex, const std::string & listenerID)
 {
-    SendGetValuesOfCommand(values, componentName, providedInterfaceName, commandName, listenerID);
+    SendGetValuesOfCommand(values, componentName, providedInterfaceName, commandName, scalarIndex, listenerID);
 }
 
 int mtsManagerProxyServer::GetCurrentInterfaceCount(const std::string & componentName, const std::string & listenerID)
@@ -1202,7 +1202,7 @@ void mtsManagerProxyServer::SendGetArgumentInformation(std::string & argumentNam
 }
 
 void mtsManagerProxyServer::SendGetValuesOfCommand(SetOfValues & values,
-    const std::string & componentName, const std::string & providedInterfaceName, const std::string & commandName, const std::string & clientID)
+    const std::string & componentName, const std::string & providedInterfaceName, const std::string & commandName, const int scalarIndex, const std::string & clientID)
 {
     ManagerClientProxyType * clientProxy = GetNetworkProxyClient(clientID);
     if (!clientProxy) {
@@ -1211,12 +1211,12 @@ void mtsManagerProxyServer::SendGetValuesOfCommand(SetOfValues & values,
     }
 
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
-    LogPrint(mtsManagerProxyServer, ">>>>> SEND: SendGetValuesOfCommand: " << componentName << ", " << providedInterfaceName << ", " << commandName << ", " << clientID);
+    LogPrint(mtsManagerProxyServer, ">>>>> SEND: SendGetValuesOfCommand: " << componentName << ", " << providedInterfaceName << ", " << commandName << ", " << scalarIndex << ", " << clientID);
 #endif
 
     ::mtsManagerProxy::SetOfValues valuesICEtype;
 
-    (*clientProxy)->GetValuesOfCommand(componentName, providedInterfaceName, commandName, valuesICEtype);
+    (*clientProxy)->GetValuesOfCommand(componentName, providedInterfaceName, commandName, scalarIndex, valuesICEtype);
 
     ConvertValuesOfCommand(valuesICEtype, values);
 }

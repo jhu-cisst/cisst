@@ -191,6 +191,7 @@ public:
                                     const std::string & componentName,
                                     const std::string & providedInterfaceName, 
                                     const std::string & commandName,
+                                    const int scalarIndex,
                                     const std::string & listenerID = "") = 0;
 
     /*! Extract all the information on a provided interface (command objects

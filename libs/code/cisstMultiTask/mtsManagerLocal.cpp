@@ -805,6 +805,7 @@ void mtsManagerLocal::GetValuesOfCommand(SetOfValues & values,
                                          const std::string & componentName,
                                          const std::string & providedInterfaceName, 
                                          const std::string & commandName,
+                                         const int scalarIndex,
                                          const std::string & CMN_UNUSED(listenerID))
 {
     mtsComponent * component = GetComponent(componentName);
@@ -837,7 +838,7 @@ void mtsManagerLocal::GetValuesOfCommand(SetOfValues & values,
     Values valueSet;
     double relativeTime;
     values.clear();
-    const int signalCount = argument->GetNumberOfScalar();
+    /*
     for (unsigned int i = 0; i < argument->GetNumberOfScalar(); ++i) {
         value.Value = argument->GetScalarAsDouble(i);
         argument->GetTimestamp(relativeTime);
@@ -845,6 +846,11 @@ void mtsManagerLocal::GetValuesOfCommand(SetOfValues & values,
 
         valueSet.push_back(value);
     }
+    */
+    value.Value = argument->GetScalarAsDouble(scalarIndex);
+    argument->GetTimestamp(relativeTime);
+    TimeServer.RelativeToAbsolute(relativeTime, value.Timestamp);
+    valueSet.push_back(value);
     values.push_back(valueSet);
 
     delete argument;

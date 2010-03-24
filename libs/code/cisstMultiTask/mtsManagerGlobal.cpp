@@ -1175,11 +1175,12 @@ void mtsManagerGlobal::GetValuesOfCommand(const std::string & processName,
                                           const std::string & componentName,
                                           const std::string & providedInterfaceName, 
                                           const std::string & commandName,
+                                          const int scalarIndex,
                                           mtsManagerLocalInterface::SetOfValues & values)
 {
     if (!LocalManagerConnected) return;
 
-    LocalManagerConnected->GetValuesOfCommand(values, componentName, providedInterfaceName, commandName, processName);
+    LocalManagerConnected->GetValuesOfCommand(values, componentName, providedInterfaceName, commandName, scalarIndex, processName);
 }
 
 #endif

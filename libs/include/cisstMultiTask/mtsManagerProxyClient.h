@@ -119,7 +119,7 @@ protected:
 
     // Getters for data visualization
     void ReceiveGetArgumentInformation(const std::string & componentName, const std::string & providedInterfaceName, const std::string & commandName, std::string & argumentName, ::mtsManagerProxy::NamesOfSignals & signalNames) const;
-    void ReceiveGetValuesOfCommand(const std::string & componentName, const std::string & providedInterfaceName, const std::string & commandName, ::mtsManagerProxy::SetOfValues & values) const;
+    void ReceiveGetValuesOfCommand(const std::string & componentName, const std::string & providedInterfaceName, const std::string & commandName, const int scalarIndex, ::mtsManagerProxy::SetOfValues & values) const;
 
     std::string ReceiveGetProcessName();
     ::Ice::Int ReceiveGetCurrentInterfaceCount(const std::string & componentName);
@@ -299,7 +299,7 @@ protected:
 
         /*! Getters for data visualiation */
         void GetArgumentInformation(const std::string & componentName, const std::string & providedInterfaceName, const std::string & commandName, std::string & argumentName, ::mtsManagerProxy::NamesOfSignals & signalNames, const ::Ice::Current & current) const;
-        void GetValuesOfCommand(const std::string & componentName, const std::string & providedInterfaceName, const std::string & commandName, ::mtsManagerProxy::SetOfValues & values, const ::Ice::Current & current) const;
+        void GetValuesOfCommand(const std::string & componentName, const std::string & providedInterfaceName, const std::string & commandName, int scalarIndex, ::mtsManagerProxy::SetOfValues & values, const ::Ice::Current & current) const;
 
         std::string GetProcessName(const ::Ice::Current &) const;
         ::Ice::Int GetCurrentInterfaceCount(const std::string & componentName, const ::Ice::Current &) const;

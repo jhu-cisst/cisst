@@ -363,6 +363,7 @@ public:
                             const std::string & componentName,
                             const std::string & providedInterfaceName, 
                             const std::string & commandName,
+                            const int scalarIndex,
                             const std::string & CMN_UNUSED(listenerID) = "");
 
     /*! Return IP address of this process */

@@ -424,6 +424,7 @@ public:
                             const std::string & componentName, 
                             const std::string & providedInterfaceName, 
                             const std::string & commandName,
+                            const int scalarIndex,
                             mtsManagerLocalInterface::SetOfValues & values);
 #endif
 

@@ -26,29 +26,49 @@ http://www.cisst.org/cisst/license.txt.
 #include <FL/Fl_Window.H>
 #include <FL/Fl_Button.H>
 #include <FL/Fl_Menu.H>
+#include <FL/Fl_Color_Chooser.H>
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// TODO:
+// - Replace autorefresh/refresh buttons with callback mechanism
+// - Clear SignalsBeingPlotted when a process disconnects 
+// - If a command being visualized is removed, visualization UI should be reset 
+//   and wait for a user to choose a new command to visualize.
+// - Clear the current oscilloscope screen and refresh it so that a newly selected 
+//   signal can be visualized.
+//
+// Improvements:
+// - (two types of) offset controller -> associated with the channel / for global
+// - freeze (+export to file) / trigger / hold
+// - higher quality oscilloscope -> support stop & zoom => requires more and more data 
+//   to be collected???
 
 // FLTK color code definition
-#define AQUA    0, 1, 1
-#define BLACK   0, 0, 0
-#define BLUE    0, 0, 1
-#define FUCHSIA 1, 0, 1
-#define GRAY    0.5, 0.5, 0.5
-#define GREEN   0, 0.5, 0
-#define LIME    0, 1, 0
-#define MAROON  0.5, 0, 0
-#define NAVY    0, 0, 0.5
-#define OLIVE   0.5, 0.5, 0
-#define PURPLE  0.5, 0, 0.5
-#define RED     1,  0, 0
-#define SILVER  0.75, 0.75, 0.75
-#define TEAL    0, 0.5, 0.5
-#define WHITE   1, 1, 1
-#define YELLOW  1, 1, 0
+#define RED          255.0f/255.0f, 0.0f,          0.0f
+#define GREEN        0.0f,          255.0f/255.0f, 0.0f
+#define YELLOW       255.0f/255.0f, 255.0f/255.0f, 0.0f
+#define BLUE         0.0f,          0.0f,          255.0f/255.0f
+#define FUCHSIA      255.0f/255.0f, 0.0f,          255.0f/255.0f
+#define AQUA         0.0f,          255.0f/255.0f, 255.0f/255.0f
+#define GRAY         192.0f/255.0f, 192.0f/255.0f, 192.0f/255.0f
+#define DARK_RED     128.0f/255.0f, 0.0f,          0.0f
+#define DARK_GREEN   0.0f,          128.0f/255.0f, 0.0f
+#define DARK_YELLOW  128.0f/255.0f, 128.0f/255.0f, 0.0f 
+#define LIGHT_PURPLE 153.0f/255.0f, 153.0f/255.0f, 204.0f/255.0f
+#define DARK_PURPLE  128.0f/255.0f, 0.0f,          128.0f/255.0f
+#define DARK_AQUA    0.0f,          128.0f/255.0f, 128.0f/255.0f
+#define DARK_GRAY    128.0f/255.0f, 128.0f/255.0f, 128.0f/255.0f
 
 #define MAX_ARGUMENT_PARAMETER_COUNT 12
+#define STRING_CANCEL "Cancel"
+
+#define ENABLE_UI( _uiName )  UI._uiName->activate();
+#define DISABLE_UI( _uiName ) UI._uiName->deactivate();
 
 // GCMUITask object
 GCMUITask * GCMUI;
+
 
 //-------------------------------------------------------------------------
 //  Callback Functions
@@ -56,19 +76,30 @@ GCMUITask * GCMUI;
 // Callback invoked when menu item selected
 void callbackSignalSelect(Fl_Widget * w, void * v) 
 {
-    if (!w) {// || !v) {
+    if (!v) return;
+    
+    GCMUITask::SignalSelected * signal = reinterpret_cast<GCMUITask::SignalSelected *>(v);
+    
+    // If 'cancel' is selected
+    if (signal->SignalName == STRING_CANCEL) {
         return;
     }
 
-    size_t menuId = reinterpret_cast<size_t>(v);
-    switch(menuId) {
-        case 0: fl_choice("Thing 0 happened", "OK", NULL, NULL); break;
-        case 1: fl_choice("Thing 1 happened", "OK", NULL, NULL); break;
-        case 2: fl_choice("Thing 2 happened", "OK", NULL, NULL); break;
-        case 3: fl_choice("Thing 3 happened", "OK", NULL, NULL); break;
-    }
+    // Get actual command name
+    const std::string actualCommandName = signal->CommandName.substr(3, signal->CommandName.size() - 2);
 
+    std::stringstream ss;
+    ss << "The following signal is added for visualization:\n";
+    ss << "   Signal \"" << signal->SignalName << "\" of command \"" << actualCommandName << "\"";
+    fl_choice(ss.str().c_str(), "Confirm", NULL, NULL);
+    std::cout << ss.str() << std::endl;
+
+    // Switch the current focus to the data visualization tab
     GCMUI->UI.TabControl->value(GCMUI->UI.DataVisualizer);
+    // Start collecting data for visualization
+    GCMUI->VisualizeSignal(*signal);
+
+    delete signal;
 }
 
 void callbackPopupSignalSelectionMenu(Fl_Widget * w, void *userdata)
@@ -87,30 +118,67 @@ void callbackPopupSignalSelectionMenu(Fl_Widget * w, void *userdata)
     const std::string commandName = GCMUI->StripOffFormatCharacters(
         GCMUI->UI.BrowserCommands->text(idxClicked));
 
-    // Get argument information
+    // Allow only read commands to be selected
+    const char commandType = *commandName.c_str();
+    if (commandType != 'R') {
+        return;
+    }
+
+    // Get argument information from LCM
     std::string argumentName;
     std::vector<std::string> signalNames;
     GCMUI->GetArgumentInformation(processName, componentName, interfaceName, commandName, argumentName, signalNames);
-    
     if (signalNames.size() == 0) {
         return;
     }
 
     // Popup signal selection menu
     // http://www.fltk.org/doc-1.0/Fl_Menu_Item.html#Fl_Menu_Item.popup
-    Fl_Menu_Item * popupMenus = new Fl_Menu_Item[signalNames.size() + 1];
+    Fl_Menu_Item * popupMenus = new Fl_Menu_Item[signalNames.size() + 2];
     for (unsigned int i = 0; i < signalNames.size(); ++i) {
         memset(&popupMenus[i], 0, sizeof(Fl_Menu_Item));
         popupMenus[i].text = signalNames[i].c_str();
-        popupMenus[i].shortcut_ = 0;
-        popupMenus[i].callback_ = callbackSignalSelect;
-        popupMenus[i].user_data_ = (void*) i;
+        /*
+        if (i < 9) {
+            popupMenus[i].shortcut(FL_ALT + '1' + i);
+        } else {
+            popupMenus[i].shortcut(0);
+        }
+        */
+        popupMenus[i].shortcut(0);
+        popupMenus[i].callback(callbackSignalSelect);
+        popupMenus[i].user_data((void*) i);
+        popupMenus[i].flags = (i == signalNames.size() - 1 ? FL_MENU_DIVIDER : 0);
+        popupMenus[i].labeltype(FL_NORMAL_LABEL);
+        popupMenus[i].labelfont(FL_COURIER);
+        popupMenus[i].labelsize(12);
     }
-    memset(&popupMenus[signalNames.size()], 0, sizeof(Fl_Menu_Item));
+    // Add cancel menu at the end
+    unsigned int i = signalNames.size();
+    memset(&popupMenus[i], 0, sizeof(Fl_Menu_Item));
+    popupMenus[i].text = STRING_CANCEL;
+    popupMenus[i].shortcut(FL_ALT + 'c');
+    popupMenus[i].callback(callbackSignalSelect);
+    popupMenus[i].user_data((void*) i);
+    popupMenus[i].flags = 0;
+    popupMenus[i].labeltype(FL_NORMAL_LABEL);
+    popupMenus[i].labelfont(FL_HELVETICA);
+    popupMenus[i].labelsize(12);
+    // Add end mark
+    memset(&popupMenus[signalNames.size() + 1], 0, sizeof(Fl_Menu_Item));
 
     const Fl_Menu_Item * m = popupMenus->popup(Fl::event_x(), Fl::event_y(), 0, 0, 0);
     if (m) {
-        m->do_callback(w, m->user_data());
+        GCMUITask::SignalSelected * signal = new GCMUITask::SignalSelected;
+        signal->Index = (int) m->user_data();
+        signal->ProcessName = processName;
+        signal->ComponentName = componentName;
+        signal->InterfaceName = interfaceName;
+        signal->CommandName = commandName;
+        signal->ArgumentName = argumentName;
+        signal->SignalName = (signal->Index == signalNames.size() ? STRING_CANCEL : signalNames[signal->Index]); // If cancel is selected
+
+        m->do_callback(w, (void*)signal);
     }
 
     delete [] popupMenus;
@@ -127,38 +195,21 @@ void callbackVisualize(Fl_Widget * w, void *userdata)
     const std::string commandName = GCMUI->StripOffFormatCharacters(browser->text(idxClicked));
     std::cout << "Visualize command: (" << idxClicked << ") " << commandName << std::endl;
 
-    //GCMUI->PopupSignalSelectionMenu(idxClicked);
-    //GCMUI->VisualizeCommand(idxClicked);
     callbackPopupSignalSelectionMenu(w, (void*)idxClicked);
 }
 
 //-------------------------------------------------------------------------
 //  GCMUITask
 //-------------------------------------------------------------------------
-/////////////////////////////////////////////////////////////////////////////
-//
-// TODO:
-// - Replace autorefresh/refresh buttons with callback mechanism
-// - Clear CommandsBeingPlotted when a process disconnects 
-// - If a command being visualized is removed, visualization UI should be reset 
-//   and wait for a user to choose a new command to visualize.
-// - Clear the current oscilloscope screen and refresh it so that a newly selected 
-//   signal can be visualized.
-//
-// Improvements:
-// - Instead of showing all the signals simultaneously, let users choose what to visualize
-// - (two types of) offset controller -> associated with the channel / for global
-// - freeze (+export to file) / trigger / hold
-//
-// - higher quality oscilloscope -> support stop & zoom => requires more and more data 
-//   to be collected???
-
 GCMUITask::GCMUITask(const std::string & taskName, const double period, 
                      mtsManagerGlobal& globalComponentManager) :
     mtsTaskPeriodic(taskName, period, false, 5000),
     GlobalComponentManager(globalComponentManager)
 {
     GCMUI = this;
+    TimeOrigin = 0.0;
+
+    TimeServer = &mtsManagerLocal::GetInstance()->GetTimeServer();
 }
 
 void GCMUITask::Configure(const std::string & CMN_UNUSED(filename))
@@ -169,6 +220,7 @@ void GCMUITask::Configure(const std::string & CMN_UNUSED(filename))
     LastIndexClicked.Reset();
     CurrentIndexClicked.Reset();
 
+    // Setup for progress bars
     ProgressBars[0] = UI.Progress1;
     ProgressBars[1] = UI.Progress2;
     ProgressBars[2] = UI.Progress3;
@@ -224,10 +276,6 @@ void GCMUITask::Configure(const std::string & CMN_UNUSED(filename))
     LastUpdateTime = clock();
 
     ResetDataVisualizerUI();
-
-    UI.SliderSamplingRate->range(10.0, 100.0);
-    UI.SliderSamplingRate->step(10.0);
-    UI.SliderSamplingRate->value(10.0);
 }
 
 void GCMUITask::Startup(void) 
@@ -308,21 +356,20 @@ void GCMUITask::PlotGraph(void)
         }
     }
 
-    float value = sin(x/6.0f) * 10.0f;
-
-    GraphPane->add(0, PLOT_POINT((float)x, value * 1.0f, AQUA));
-    GraphPane->add(1, PLOT_POINT((float)x, value * 1.1f, BLUE));
-    GraphPane->add(2, PLOT_POINT((float)x, value * 1.2f, FUCHSIA));
-    GraphPane->add(3, PLOT_POINT((float)x, value * 1.3f, GREEN));
-    GraphPane->add(4, PLOT_POINT((float)x, value * 1.4f, LIME));
-    GraphPane->add(5, PLOT_POINT((float)x, value * 1.5f, MAROON));
-    GraphPane->add(6, PLOT_POINT((float)x, value * 1.6f, NAVY));
-    GraphPane->add(7, PLOT_POINT((float)x, value * 1.7f, OLIVE));
-    GraphPane->add(8, PLOT_POINT((float)x, value * 1.8f, PURPLE));
-    GraphPane->add(9, PLOT_POINT((float)x, value * 1.9f, RED));
-    GraphPane->add(10, PLOT_POINT((float)x, value * 2.0f, TEAL));
-    GraphPane->add(11, PLOT_POINT((float)x, value * 2.1f, WHITE));
-    GraphPane->add(12, PLOT_POINT((float)x, value * 2.2f, YELLOW));
+    float value = sin(x/6.0f);
+    
+    GraphPane->add(0, PLOT_POINT((float)x, value * 1.0f,  RED));
+    GraphPane->add(1, PLOT_POINT((float)x, value * 1.1f,  GREEN));
+    GraphPane->add(2, PLOT_POINT((float)x, value * 1.2f,  YELLOW));
+    GraphPane->add(3, PLOT_POINT((float)x, value * 1.3f,  BLUE));
+    GraphPane->add(4, PLOT_POINT((float)x, value * 1.4f,  FUCHSIA));
+    GraphPane->add(5, PLOT_POINT((float)x, value * 1.5f,  AQUA));
+    GraphPane->add(6, PLOT_POINT((float)x, value * 1.6f,  DARK_RED));
+    GraphPane->add(7, PLOT_POINT((float)x, value * 1.7f,  DARK_GREEN));
+    GraphPane->add(8, PLOT_POINT((float)x, value * 1.8f,  DARK_YELLOW));
+    GraphPane->add(9, PLOT_POINT((float)x, value * 1.9f,  LIGHT_PURPLE));
+    GraphPane->add(10, PLOT_POINT((float)x, value * 2.0f, DARK_PURPLE));
+    GraphPane->add(11, PLOT_POINT((float)x, value * 2.1f, DARK_AQUA));
 
     ++x;
 #endif
@@ -346,7 +393,7 @@ void GCMUITask::PlotGraph(void)
 
     GraphPane->redraw();
 }
-*/
+//*/
 
 void GCMUITask::CheckComponentInspectorInput(void)
 {
@@ -777,80 +824,54 @@ void GCMUITask::ShowEventHandlerDescription(const std::string & processName,
 
 void GCMUITask::CheckDataVisualizerInput(void)
 {
-    if (UI.BrowserVisualizeCommandNameClicked) {
-        OnBrowserVisualizeCommandNameClicked();
-        UI.BrowserVisualizeCommandNameClicked = false;
-        return;
+#define SET_CALLBACK_FUNCTION( _uiName )\
+    if (UI._uiName##Clicked) {\
+        On##_uiName##Clicked();\
+        UI._uiName##Clicked = false;\
+        return;\
     }
 
-    if (UI.BrowserVisualizeSignalsClicked) {
-        OnBrowserVisualizeSignalsClicked();
-        UI.BrowserVisualizeSignalsClicked = false;
-        return;
-    }
+    //
+    // Component Inspector
+    //
+    
+    // NOP
 
-    if (UI.ButtonRemoveClicked) {
-        OnButtonRemoveClicked();
-        UI.ButtonRemoveClicked = false;
-        return;
-    }
-
-    if (UI.ButtonRemoveAllClicked) {
-        OnButtonRemoveAllClicked();
-        UI.ButtonRemoveAllClicked = false;
-        return;
-    }
-
-    if (UI.ButtonUpdateClicked) {
-        OnButtonUpdateClicked();
-        UI.ButtonUpdateClicked = false;
-        return;
-    }
-
+    //
+    // Data Visualizer - Global Control
+    // 
+    SET_CALLBACK_FUNCTION(BrowserSelectedSignals);
     // Scale Buttons
-    if (UI.ButtonYScaleUpClicked) {
-        OnButtonYScaleUpClicked();
-        UI.ButtonYScaleUpClicked = false;
-        return;
-    }
-
-    if (UI.ButtonYScaleDownClicked) {
-        OnButtonYScaleDownClicked();
-        UI.ButtonYScaleDownClicked = false;
-        return;
-    }
-
-    if (UI.ButtonXScaleUpClicked) {
-        OnButtonXScaleUpClicked();
-        UI.ButtonXScaleUpClicked = false;
-        return;
-    }
-
-    if (UI.ButtonXScaleDownClicked) {
-        OnButtonXScaleDownClicked();
-        UI.ButtonXScaleDownClicked = false;
-        return;
-    }
-
-    // Auto scale button
-    if (UI.ButtonAutoScaleClicked) {
-        OnButtonAutoScaleClicked();
-        UI.ButtonAutoScaleClicked = false;
-    }
-
+    SET_CALLBACK_FUNCTION(ButtonYScaleUp);
+    SET_CALLBACK_FUNCTION(ButtonYScaleDown);
+    SET_CALLBACK_FUNCTION(ButtonXScaleUp);
+    SET_CALLBACK_FUNCTION(ButtonXScaleDown);
+    // Offset Buttons
+    SET_CALLBACK_FUNCTION(ButtonAllSignalOffsetIncrease);
+    SET_CALLBACK_FUNCTION(ButtonAllSignalOffsetDecrease);
+    // Hold Button
+    SET_CALLBACK_FUNCTION(ButtonHold);
+    // Capture Button
+    SET_CALLBACK_FUNCTION(ButtonCapture);
+    //
+    // Data Visualizer - Per Signal Control
+    //
+    // Remove/Remove all buttons
+    SET_CALLBACK_FUNCTION(ButtonRemove);
+    SET_CALLBACK_FUNCTION(ButtonRemoveAll);
     // Hide button
-    if (UI.ButtonHideClicked) {
-        OnButtonHideClicked();
-        UI.ButtonHideClicked = false;
-    }
+    SET_CALLBACK_FUNCTION(ButtonHide);
+    // Autoscale button
+    SET_CALLBACK_FUNCTION(ButtonAutoScale);
+    // Offset buttons
+    SET_CALLBACK_FUNCTION(ButtonSignalOffsetIncrease);
+    SET_CALLBACK_FUNCTION(ButtonSignalOffsetDecrease);
 }
 
-void GCMUITask::ResetDataVisualizerUI(const bool exceptCommandNameBrowser)
-{;
-    ResetBrowserVisualizeSignals();
-    if (!exceptCommandNameBrowser) {
-        ResetBrowserVisualizeCommandName();
-    }
+void GCMUITask::ResetDataVisualizerUI(void)
+{
+    // TODO: smmy
+    //ResetBrowserVisualizeSignals();
 
     for (int i = 0; i < MAX_CHANNEL_COUNT; ++i) {
         ProgressBars[i]->value(0.0);
@@ -861,114 +882,35 @@ void GCMUITask::ResetDataVisualizerUI(const bool exceptCommandNameBrowser)
     UI.OutputInterfaceName->value("");
     UI.OutputArgumentName->value("");
 
-    UI.CheckButtonHide->clear();
-    UI.CheckButtonAutoScale->clear();
-
     UI.OutputMaxValue->value("0.0");
     UI.OutputMinValue->value("0.0");
 }
 
-void GCMUITask::AddCommandSelected(const CommandSelected& commandSelected)
+void GCMUITask::OnBrowserSelectedSignalsClicked(void)
 {
-    CommandSelected * newCommandSelected = new CommandSelected(commandSelected);
-
-    AddLineToBrowser(UI.BrowserVisualizeCommandName, commandSelected.CommandName.c_str());
-
-    const int lastIndex = UI.BrowserVisualizeCommandName->size();
-    UI.BrowserVisualizeCommandName->data(lastIndex, (void*)newCommandSelected);
-
-    newCommandSelected->SetTimeout(0); // Fetch new values immediately
-    CommandsBeingPlotted.push_back(newCommandSelected);
-}
-
-void GCMUITask::ResetBrowserVisualizeCommandName(void)
-{
-    if (UI.BrowserVisualizeCommandName->size() == 0) {
+    SignalSelected * signal = GetCurrentSignal();
+    if (!signal) {
         return;
     }
 
-    void * data;
-    CommandSelected * command;
-    for (int i = 1; i <= UI.BrowserVisualizeCommandName->size(); ++i) {
-        data = UI.BrowserVisualizeCommandName->data(i);
-        command = reinterpret_cast<CommandSelected*>(data);
-        delete command;
-    }
-
-    UI.BrowserVisualizeCommandName->clear();
-}
-
-void GCMUITask::ResetBrowserVisualizeSignals(void)
-{
-    if (UI.BrowserVisualizeSignals->size() == 0) {
-        return;
-    }
-
-    UI.BrowserVisualizeSignals->clear();
-
-    for (int i = 0; i < MAX_CHANNEL_COUNT; ++i) {
-        ProgressBars[i]->value(0.0);
-    }
-}
-
-void GCMUITask::OnBrowserVisualizeCommandNameClicked(void)
-{
-    if (UI.BrowserVisualizeCommandName->size() == 0) {
-        return;
-    }
-
-    const int currentIndex = UI.BrowserVisualizeCommandName->value();
-    if (currentIndex == 0) {
-        return;
-    }
-
-    ResetBrowserVisualizeSignals();
-
-    CommandSelected * data = reinterpret_cast<CommandSelected *>(UI.BrowserVisualizeCommandName->data(currentIndex));
-    if (!data) {
-        return;
-    }
-
-    int count = 0;
-    std::vector<SignalState>::const_iterator it = data->Signals.begin();
-    const std::vector<SignalState>::const_iterator itEnd = data->Signals.end();
-    for (; it != itEnd; ++it) {
-        AddLineToBrowser(UI.BrowserVisualizeSignals, it->SignalName.c_str());
-        UI.BrowserVisualizeSignals->data(count + 1, (void*) &(*it));
-        ProgressBars[count++]->value(1.0);
-    }
-
-    UI.OutputProcessName->value(data->ProcessName.c_str());
-    UI.OutputComponentName->value(data->ComponentName.c_str());
-    UI.OutputInterfaceName->value(data->InterfaceName.c_str());
-    UI.OutputArgumentName->value(data->ArgumentName.c_str());
-    UI.SliderSamplingRate->value(data->SamplingRate);
-
-    TimeVisualizationStarted = osaGetTime();
-    
-    // TODO: Clear the current oscilloscope screen and refresh it so that a
-    // newly selected signal can be visualized.
-}
-
-void GCMUITask::OnBrowserVisualizeSignalsClicked(void)
-{
-    if (UI.BrowserVisualizeSignals->size() == 0) {
-        return;
-    }
-
-    const int currentIndex = UI.BrowserVisualizeSignals->value();
-    SignalState * data = reinterpret_cast<SignalState *>(UI.BrowserVisualizeSignals->data(currentIndex));
-    if (!data) {
-        return;
-    }
-
-    UI.CheckButtonHide->value((data->Hide ? 1 : 0));
-    UI.CheckButtonAutoScale->value((data->AutoScale? 1 : 0));
+    // Update UI
+    /*
     char buf[10] = "";
-    cmn_snprintf(buf, sizeof(buf), "%d", static_cast<int>(data->Min) + 1);
+    cmn_snprintf(buf, sizeof(buf), "%d", static_cast<int>(signal->State.Min) + 1);
     UI.OutputMinValue->value(buf);
-    cmn_snprintf(buf, sizeof(buf), "%d", static_cast<int>(data->Max) + 1);
+    cmn_snprintf(buf, sizeof(buf), "%d", static_cast<int>(signal->State.Max) + 1);
     UI.OutputMaxValue->value(buf);
+    */
+
+    const std::string actualCommandName = signal->CommandName.substr(3, signal->CommandName.size() - 2);
+
+    UI.OutputProcessName->value(signal->ProcessName.c_str());
+    UI.OutputComponentName->value(signal->ComponentName.c_str());
+    UI.OutputInterfaceName->value(signal->InterfaceName.c_str());
+    UI.OutputCommandName->value(actualCommandName.c_str());
+    UI.OutputArgumentName->value(signal->ArgumentName.c_str());
+
+    UpdateButtonHide(signal->State.Show);
 }
 
 void GCMUITask::OnButtonRefreshClicked(void)
@@ -976,111 +918,100 @@ void GCMUITask::OnButtonRefreshClicked(void)
     UpdateUI();
 }
 
-void GCMUITask::VisualizeCommand(const int idxClicked)
+void GCMUITask::VisualizeSignal(SignalSelected & newSignal)
 {
-    if (idxClicked == 0) {
-        return;
-    }
+    // Initialize signal states
+    newSignal.State.AutoScale = true;
+    newSignal.State.Show = true;
+    newSignal.State.Min = -1.0;
+    newSignal.State.Max = 1.0;
+    newSignal.State.Offset = 0.0;
 
-    //const std::string processName = StripOffFormatCharacters(UI.BrowserProcesses->text(UI.BrowserProcesses->value()));
-    //const std::string componentName = StripOffFormatCharacters(UI.BrowserComponents->text(UI.BrowserComponents->value()));
-    //const std::string interfaceName = StripOffFormatCharacters(UI.BrowserProvidedInterfaces->text(UI.BrowserProvidedInterfaces->value()));
-    //const std::string commandName = StripOffFormatCharacters(UI.BrowserCommands->text(idxClicked));
+    // Add to UI
+    AddLineToBrowser(UI.BrowserSelectedSignals, newSignal.SignalName.c_str());
 
-    //// Get argument information
-    //std::string argumentName;
-    //std::vector<std::string> signalNames;
-    //GlobalComponentManager.GetArgumentInformation(
-    //    processName, componentName, interfaceName, commandName, argumentName, signalNames);
+    SignalSelected * newSignalCopy = new SignalSelected(newSignal);
+    SignalsBeingPlotted.push_back(newSignalCopy);
 
-    /*
-    const int signalCount = signalNames.size();
+    const int lastIndex = UI.BrowserSelectedSignals->size();
+    UI.BrowserSelectedSignals->data(lastIndex, (void*)newSignalCopy);
 
-    CommandSelected command;
-    command.ProcessName = processName;
-    command.ComponentName = componentName;
-    command.InterfaceName = interfaceName;
-    command.CommandName = commandName;
-    command.ArgumentName = argumentName;
-    command.SamplingRate = 10;
+    ProgressBars[lastIndex - 1]->value(1.0);
+    newSignalCopy->PlotIndex = lastIndex - 1;
 
-    SignalState signalState;
-    signalState.AutoScale = true;
-    signalState.Hide = false;
-    signalState.Min = -1.0;
-    signalState.Max = 1.0;
+    // Initialize UI: enable UI components, fill in initial values
+    // Update per-signal UI
+    ENABLE_UI(BrowserSelectedSignals);
+    ENABLE_UI(OutputProcessName);
+    ENABLE_UI(OutputComponentName);
+    ENABLE_UI(OutputInterfaceName);
+    ENABLE_UI(OutputCommandName);
+    ENABLE_UI(OutputArgumentName);
+    ENABLE_UI(ButtonRemove);
+    ENABLE_UI(ButtonRemoveAll);
+    ENABLE_UI(ButtonHide);
+    ENABLE_UI(ButtonAutoscale);
+    ENABLE_UI(ButtonSignalOffsetIncrease);
+    ENABLE_UI(ButtonSignalOffsetDecrease);
+    // Update global UI
+    ENABLE_UI(ButtonXScaleUp);
+    ENABLE_UI(ButtonXScaleDown);
+    ENABLE_UI(ButtonYScaleUp);
+    ENABLE_UI(ButtonYScaleDown);
+    ENABLE_UI(ButtonAllSignalOffsetIncrease);
+    ENABLE_UI(ButtonAllSignalOffsetDecrease);
+    ENABLE_UI(ButtonHold);
+    //ENABLE_UI(ButtonCapture);
 
-    for (int i = 0; i < min(signalCount, MAX_ARGUMENT_PARAMETER_COUNT); ++i) {
-        signalState.SignalName = signalNames[i];
-        command.Signals.push_back(signalState);
-    }
+    //UI.OutputYOffset->value("0.0");
 
-    AddCommandSelected(command);
-    */
+    // Clear all previous history
+    GraphPane->clear(true);
+
+    // Fetch new values immediately
+    newSignalCopy->SetTimeout(0);
+
+    // If the first element is added
+    UI.BrowserSelectedSignals->value(1);
+    OnBrowserSelectedSignalsClicked();
 }
 
 void GCMUITask::OnButtonRemoveAllClicked(void)
 {
-    if (UI.BrowserVisualizeCommandName->size() == 0) {
+    GCMUITask::SignalSelected * signal = GetCurrentSignal();
+    if (!signal) {
         return;
     }
 
-    ResetDataVisualizerUI();
+    // TODO
 }
 
 void GCMUITask::OnButtonRemoveClicked(void)
 {
-    if (UI.BrowserVisualizeCommandName->size() == 0) {
+    GCMUITask::SignalSelected * signal = GetCurrentSignal();
+    if (!signal) {
         return;
     }
 
-    const int idx = UI.BrowserVisualizeCommandName->value();
-    if (idx == 0) return;
-
-    CommandSelected * data = reinterpret_cast<CommandSelected*>(UI.BrowserVisualizeCommandName->data(idx));
-    delete data;
-    UI.BrowserVisualizeCommandName->remove(idx);
-
-    ResetDataVisualizerUI(true);
-
-    // TODO:
-    // If the command being drawn is to be removed, visualization UI 
-    // should be reset and wait for a user to select a new command to
-    // visualize.
-}
-
-void GCMUITask::OnButtonUpdateClicked(void)
-{
-    // TODO: implement this
-
+    // TODO
     /*
-    char buf[50];
-    CommandSelected command;
-    SignalState signalState;
-
-    for (int i = 1; i <= 4; ++i) {
-        sprintf(buf, "Command %d", i); command.CommandName = buf;
-        sprintf(buf, "Process %d", i); command.ProcessName = buf;
-        sprintf(buf, "Component %d", i); command.ComponentName = buf;
-        sprintf(buf, "Interface %d", i); command.InterfaceName = buf;
-        sprintf(buf, "Parameter %d", i); command.ArgumentName = buf;
-        command.SamplingRate = i * 10;
-
-        for (int j = 1; j <= i * 3; ++j) {
-            signalState.AutoScale = (i % 2 == 0);
-            signalState.Hide = (i % 2 == 1);
-            signalState.Min = i + j;
-            signalState.Max = i * 10 + j;
-            sprintf(buf, "Signal %d-%d", j, i); signalState.SignalName = buf;
-            command.Signals.push_back(signalState);
-        }
-
-        AddCommandSelected(command);
-        
-        command.Signals.clear();
+    // If there is only one signal being plotted
+    if (UI.BrowserSelectedSignals->size() == 1) {
+        OnButtonRemoveAllClicked();
+        return;
     }
 
-    UI.GraphPane->clear();
+    // Get the index of the selected signal
+    const int index = UI.BrowserSelectedSignals->value();
+    // Remove the signal
+    for (size_t i = 0; i < SignalsBeingPlotted.size(); ++i) {
+        if (SignalsBeingPlotted[i]->PlotIndex == index) {
+        }
+    }
+    UI.BrowserSelectedSignals->remove(index);
+
+    // Set the active signal as the first signal in the list
+    UI.BrowserSelectedSignals->value(1);
     */
 }
 
@@ -1089,7 +1020,8 @@ void GCMUITask::OnButtonYScaleUpClicked(void)
     GraphPane->AdjustYScale(2.0);
 
     GraphPane->SetAutoScale(false);
-    UI.CheckButtonAutoScale->value(0);
+
+    UpdateMinMaxUI();
 }
 
 void GCMUITask::OnButtonYScaleDownClicked(void)
@@ -1097,7 +1029,8 @@ void GCMUITask::OnButtonYScaleDownClicked(void)
     GraphPane->AdjustYScale(0.5);
 
     GraphPane->SetAutoScale(false);
-    UI.CheckButtonAutoScale->value(0);
+
+    UpdateMinMaxUI();
 }
 
 void GCMUITask::OnButtonXScaleUpClicked(void)
@@ -1109,9 +1042,6 @@ void GCMUITask::OnButtonXScaleUpClicked(void)
     XAxisScaleFactor -= 30;
     GraphPane->set_scrolling(XAxisScaleFactor);
     GraphPane->clear(true);
-
-    GraphPane->SetAutoScale(false);
-    UI.CheckButtonAutoScale->value(0);
 }
 
 void GCMUITask::OnButtonXScaleDownClicked(void)
@@ -1123,91 +1053,276 @@ void GCMUITask::OnButtonXScaleDownClicked(void)
     XAxisScaleFactor += 30;
     GraphPane->set_scrolling(XAxisScaleFactor);
     GraphPane->clear(true);
+}
+
+void GCMUITask::OnButtonAllSignalOffsetIncreaseClicked(void)
+{
+    const float delta = 1.0;
 
     GraphPane->SetAutoScale(false);
-    UI.CheckButtonAutoScale->value(0);
+    GraphPane->SetYOffset(GraphPane->GetYOffset() + delta);
+
+    // Update offset value output window
+    char buf[10] = "";
+    cmn_snprintf(buf, sizeof(buf), "%2.2f", GraphPane->GetYOffset());
+    UI.OutputYOffset->value(buf);
+
+    UpdateMinMaxUI();
+}
+
+void GCMUITask::OnButtonAllSignalOffsetDecreaseClicked(void)
+{
+    const float delta = -1.0;
+
+    GraphPane->SetAutoScale(false);
+    GraphPane->SetYOffset(GraphPane->GetYOffset() + delta);
+
+    // Update offset value output window
+    char buf[10] = "";
+    cmn_snprintf(buf, sizeof(buf), "%2.2f", GraphPane->GetYOffset());
+    UI.OutputYOffset->value(buf);
+
+    UpdateMinMaxUI();
+}
+
+void GCMUITask::OnButtonHoldClicked(void)
+{
+    GraphPane->SetHoldDrawing(!GraphPane->GetHoldDrawing());
+
+    if (GraphPane->GetHoldDrawing()) {
+        UI.ButtonHold->label("Resume");
+        // Disable all the other control buttons
+        DISABLE_UI(BrowserSelectedSignals);
+        DISABLE_UI(OutputProcessName);
+        DISABLE_UI(OutputComponentName);
+        DISABLE_UI(OutputInterfaceName);
+        DISABLE_UI(OutputCommandName);
+        DISABLE_UI(OutputArgumentName);
+        DISABLE_UI(ButtonRemove);
+        DISABLE_UI(ButtonRemoveAll);
+        DISABLE_UI(ButtonHide);
+        DISABLE_UI(ButtonAutoscale);
+        DISABLE_UI(ButtonSignalOffsetIncrease);
+        DISABLE_UI(ButtonSignalOffsetDecrease);
+        // Update global UI
+        DISABLE_UI(ButtonXScaleUp);
+        DISABLE_UI(ButtonXScaleDown);
+        DISABLE_UI(ButtonYScaleUp);
+        DISABLE_UI(ButtonYScaleDown);
+        DISABLE_UI(ButtonAllSignalOffsetIncrease);
+        DISABLE_UI(ButtonAllSignalOffsetDecrease);
+        //DISABLE_UI(ButtonCapture);
+    } else {
+        UI.ButtonHold->label("Hold");
+        // Enable all the other control buttons
+        ENABLE_UI(BrowserSelectedSignals);
+        ENABLE_UI(OutputProcessName);
+        ENABLE_UI(OutputComponentName);
+        ENABLE_UI(OutputInterfaceName);
+        ENABLE_UI(OutputCommandName);
+        ENABLE_UI(OutputArgumentName);
+        ENABLE_UI(ButtonRemove);
+        ENABLE_UI(ButtonRemoveAll);
+        ENABLE_UI(ButtonHide);
+        ENABLE_UI(ButtonAutoscale);
+        ENABLE_UI(ButtonSignalOffsetIncrease);
+        ENABLE_UI(ButtonSignalOffsetDecrease);
+        // Update global UI
+        ENABLE_UI(ButtonXScaleUp);
+        ENABLE_UI(ButtonXScaleDown);
+        ENABLE_UI(ButtonYScaleUp);
+        ENABLE_UI(ButtonYScaleDown);
+        ENABLE_UI(ButtonAllSignalOffsetIncrease);
+        ENABLE_UI(ButtonAllSignalOffsetDecrease);
+        //ENABLE_UI(ButtonCapture);
+    }
 }
 
 void GCMUITask::OnButtonAutoScaleClicked(void)
 {
-    /* TODO: enable this later
-    if (UI.BrowserVisualizeSignals->value() == 0) {
+    GCMUITask::SignalSelected * signal = GetCurrentSignal();
+    if (!signal) {
         return;
+    } else {
+        if (!signal->State.Show) {
+            return;
+        }
     }
-    */
 
-    bool autoScaleOn = (UI.CheckButtonAutoScale->value() == 1 ? true : false);
-    GraphPane->SetAutoScale(autoScaleOn);
+    GraphPane->SetAutoScale(true);
+    GraphPane->SetYOffset(0.0f);
+
+    // Update offset value output window
+    char buf[10] = "";
+    cmn_snprintf(buf, sizeof(buf), "%2.2f", GraphPane->GetYOffset());
+    UI.OutputYOffset->value(buf);
+
+    UpdateMinMaxUI();
 }
 
 void GCMUITask::OnButtonHideClicked(void)
 {
-    // TODO: these are test codes
-    static bool a = true;
-    GraphPane->ShowSignal(4, a);
-    a = !a;
+    GCMUITask::SignalSelected * signal = GetCurrentSignal();
+    if (!signal) {
+        return;
+    } else {
+        if (!signal->State.Show) {
+            return;
+        }
+    }
+
+    signal->State.Show = !signal->State.Show;
+
+    GraphPane->ShowSignal(signal->PlotIndex, signal->State.Show);
+
+    UpdateButtonHide(signal->State.Show);
+}
+
+void GCMUITask::OnButtonSignalOffsetIncreaseClicked(void)
+{
+    // TODO
+    GCMUITask::SignalSelected * signal = GetCurrentSignal();
+    if (!signal) {
+        return;
+    } else {
+        if (!signal->State.Show) {
+            return;
+        }
+    }
+}
+
+void GCMUITask::OnButtonSignalOffsetDecreaseClicked(void)
+{
+    // TODO
+    GCMUITask::SignalSelected * signal = GetCurrentSignal();
+    if (!signal) {
+        return;
+    } else {
+        if (!signal->State.Show) {
+            return;
+        }
+    }
 }
 
 void GCMUITask::FetchCurrentValues(void)
 {
-    if (CommandsBeingPlotted.size() == 0) return;
+    if (SignalsBeingPlotted.size() == 0) return;
 
-    CommandSelected * c;
-    for (unsigned int i = 0; i < CommandsBeingPlotted.size(); ++i) {
+    int activeSignalCount = 0;
+    SignalSelected * signal;
+    for (unsigned int i = 0; i < SignalsBeingPlotted.size(); ++i) {
+        // Check if this signal is hidden
+        if (!SignalsBeingPlotted[i]->State.Show) {
+            continue;
+        } else {
+            activeSignalCount++;
+        }
+
         // Check timeout. Fetch new values only if timer expires.
-        if (CommandsBeingPlotted[i]->IsExpired()) {
-            c = CommandsBeingPlotted[i];
+        if (SignalsBeingPlotted[i]->IsExpired()) {
+            signal = SignalsBeingPlotted[i];
 
             // Fetch new values
             mtsManagerLocalInterface::SetOfValues values; 
-            GlobalComponentManager.GetValuesOfCommand(c->ProcessName, c->ComponentName, c->InterfaceName, c->CommandName, values);
-            c->Refresh();
-            c->SetTimeout(20 * cmn_ms);
+            GlobalComponentManager.GetValuesOfCommand(
+                signal->ProcessName, signal->ComponentName, signal->InterfaceName, 
+                signal->CommandName, signal->Index, values);
 
-            // Draw graph
-            DrawGraph(values);
+            if (values.size() > 0) {
+                // Draw graph                
+                const double relativeTime = TimeServer->AbsoluteToRelative(values[0][0].Timestamp);
+                SetTimeOrigin(signal->ProcessName, relativeTime);
+                DrawGraph(values, signal->PlotIndex, GetTimeOrigin(signal->ProcessName));
+
+                // Set timer
+                signal->Refresh();
+                signal->SetTimeout(20 * cmn_ms);
+            }
         }
     }
 
-    GraphPane->redraw();
+    if (activeSignalCount == 0) {
+        GraphPane->clear();
+    } else {
+        GraphPane->redraw();
+    }
 }
 
-void GCMUITask::DrawGraph(const mtsManagerLocalInterface::SetOfValues & values)
+void GCMUITask::SetTimeOrigin(const std::string & processName, const double firstTimeStamp)
 {
-    static int x = 0;
+    /*
+    TimeOriginMapType::const_iterator it = TimeOriginMap.find(processName);
+    if (it == TimeOriginMap.end()) {
+        TimeOriginMap.insert(std::make_pair(processName, firstTimeStamp));
+    }
+    */
+    if (TimeOrigin == 0.0) {
+        TimeOrigin = firstTimeStamp;
+    }
+}
 
+double GCMUITask::GetTimeOrigin(const std::string & processName)
+{
+    /*
+    TimeOriginMapType::const_iterator it = TimeOriginMap.find(processName);
+
+    return (it == TimeOriginMap.end() ? 0.0 : it->second);
+    */
+    return TimeOrigin;
+}
+
+void GCMUITask::DrawGraph(const mtsManagerLocalInterface::SetOfValues & values, const int plotIndex, const double timeOrigin)
+{
     double value;
+    double relativeTime;
+    float x, y;
 
     for (unsigned int j = 0; j < values.size(); ++j) {
         for (unsigned int i = 0; i < values[j].size(); ++i) {
             value = values[j][i].Value;
-            //t = values[j][i].Timestamp.sec + values[j][i].Timestamp.nsec / 1000000000.0;
-            //x = t - TimeVisualizationStarted;
-            //printf("t: %f, Time: %f, x: %f\n", t, TimeVisualizationStarted, x);
+            relativeTime = TimeServer->AbsoluteToRelative(values[j][i].Timestamp) - timeOrigin;
 
-            if (i == 0)  GraphPane->add(0, PLOT_POINT((float)x, static_cast<float>(value), RED));
-            if (i == 1)  GraphPane->add(1, PLOT_POINT((float)x, static_cast<float>(value), YELLOW));
-            if (i == 2)  GraphPane->add(2, PLOT_POINT((float)x, static_cast<float>(value), BLUE));
-            if (i == 3)  GraphPane->add(3, PLOT_POINT((float)x, static_cast<float>(value), LIME));
-            if (i == 4)  GraphPane->add(4, PLOT_POINT((float)x, static_cast<float>(value), PURPLE));
-            if (i == 5)  GraphPane->add(5, PLOT_POINT((float)x, static_cast<float>(value), TEAL));
-            if (i == 6)  GraphPane->add(6, PLOT_POINT((float)x, static_cast<float>(value), FUCHSIA));
-            if (i == 7)  GraphPane->add(7, PLOT_POINT((float)x, static_cast<float>(value), AQUA));
-            if (i == 8)  GraphPane->add(8, PLOT_POINT((float)x, static_cast<float>(value), GREEN));
-            if (i == 9)  GraphPane->add(9, PLOT_POINT((float)x, static_cast<float>(value), NAVY));
-            if (i == 10) GraphPane->add(10, PLOT_POINT((float)x, static_cast<float>(value), WHITE));
-            if (i == 11) GraphPane->add(11, PLOT_POINT((float)x, static_cast<float>(value), OLIVE));
+            x = static_cast<float>(relativeTime);
+            y = static_cast<float>(value);
+
+            if (plotIndex == 0)  GraphPane->add( 0, PLOT_POINT(x, y, RED));
+            if (plotIndex == 1)  GraphPane->add( 1, PLOT_POINT(x, y, GREEN));
+            if (plotIndex == 2)  GraphPane->add( 2, PLOT_POINT(x, y, YELLOW));
+            if (plotIndex == 3)  GraphPane->add( 3, PLOT_POINT(x, y, BLUE));
+            if (plotIndex == 4)  GraphPane->add( 4, PLOT_POINT(x, y, FUCHSIA));
+            if (plotIndex == 5)  GraphPane->add( 5, PLOT_POINT(x, y, AQUA));
+            if (plotIndex == 6)  GraphPane->add( 6, PLOT_POINT(x, y, DARK_RED));
+            if (plotIndex == 7)  GraphPane->add( 7, PLOT_POINT(x, y, DARK_GREEN));
+            if (plotIndex == 8)  GraphPane->add( 8, PLOT_POINT(x, y, DARK_YELLOW));
+            if (plotIndex == 9)  GraphPane->add( 9, PLOT_POINT(x, y, LIGHT_PURPLE));
+            if (plotIndex == 10) GraphPane->add(10, PLOT_POINT(x, y, DARK_PURPLE));
+            if (plotIndex == 11) GraphPane->add(11, PLOT_POINT(x, y, DARK_AQUA));
         }
-        x++;
     }
 
+    UpdateMinMaxUI();
+}
+
+void GCMUITask::UpdateMinMaxUI(void)
+{
     // Show min/max Y values
     const float Ymin = GraphPane->GetYMin();
     const float Ymax = GraphPane->GetYMax();
 
-    char buf[100] = "";
-    sprintf(buf, "%.2f", Ymax); UI.OutputMaxValue->value(buf);
-    sprintf(buf, "%.2f", Ymin); UI.OutputMinValue->value(buf);
+    char buf[10] = "";
+    cmn_snprintf(buf, sizeof(buf), "%2.2f", Ymin);
+    UI.OutputMinValue->value(buf);
+    cmn_snprintf(buf, sizeof(buf), "%2.2f", Ymax);
+    UI.OutputMaxValue->value(buf);
+}
+
+void GCMUITask::UpdateButtonHide(const bool isShow)
+{
+    if (isShow) {
+        UI.ButtonHide->label("Hide");
+    } else {
+        UI.ButtonHide->label("Show");
+    }
 }
 
 void GCMUITask::GetArgumentInformation(const std::string & processName, 
@@ -1219,4 +1334,14 @@ void GCMUITask::GetArgumentInformation(const std::string & processName,
 {
     GlobalComponentManager.GetArgumentInformation(
         processName, componentName, providedInterfaceName, commandName, argumentName, argumentParameterNames);
+}
+
+GCMUITask::SignalSelected * GCMUITask::GetCurrentSignal(void) const
+{
+    if (UI.BrowserSelectedSignals->size() == 0 || UI.BrowserSelectedSignals->value() == 0) {
+        return 0;
+    }
+
+    const int currentIndex = UI.BrowserSelectedSignals->value();
+    return reinterpret_cast<SignalSelected *>(UI.BrowserSelectedSignals->data(currentIndex));
 }
