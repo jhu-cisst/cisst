@@ -29,7 +29,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <QImage>
 #include <QList>
 #include <QPainter>
-#include <QTimer>
 
 #include "ui_devMicronTrackerControllerQWidget.h"
 
@@ -58,7 +57,6 @@ class devMicronTrackerControllerQDevice : public QObject, public mtsDevice
 
     Ui::devMicronTrackerControllerQWidget ControllerWidget;
     QWidget CentralWidget;
-    QTimer UpdateTimer;
 
     struct {
         mtsFunctionWrite CalibratePivot;
@@ -76,23 +74,19 @@ class devMicronTrackerControllerQDevice : public QObject, public mtsDevice
         mtsFunctionVoid Stop;
     } Collector;
 
-    QImage FrameLeft;
-    QImage FrameRight;
+    QImage FrameIndexed8;
+    QImage FrameRGB;
+    QPainter MarkerPainter;
+    QPoint MarkerPosition;
     QList<QString> MarkerNames;
     QList<QPoint *> MarkersLeft;
     QList<QPoint *> MarkersRight;
 
-    QImage FrameIndexed8;
-    QPainter MarkerPainter;
-    QPoint MarkerLabel;
-
  public slots:
-    void UpdateFrameLeftQSlot(void);
-    void UpdateFrameRightQSlot(void);
+    void timerEvent(QTimerEvent * event);
+    void PaintImage(QImage & frameIndexed8, QList<QPoint *> & markers);
     void MTCCalibratePivotQSlot(void);
     void MTCTrackQSlot(bool toggled);
-    void CaptureFrameLeftQSlot(bool toggled);
-    void CaptureFrameRightQSlot(bool toggled);
     void RecordQSlot(bool toggled);
 };
 
