@@ -185,6 +185,9 @@ class MULTIPLOT_BASE : public Fl_Gl_Window
         inline void SetAutoScale(const bool isAutoScaleOn) {
             AutoScaleOn = isAutoScaleOn;
         }
+        inline bool GetAutoScale(void) const {
+            return AutoScaleOn;
+        }
 
         /**
         *   Get min y and max y values

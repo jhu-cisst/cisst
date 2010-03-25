@@ -1165,10 +1165,19 @@ void GCMUITask::OnButtonHideClicked(void)
     GCMUITask::SignalSelected * signal = GetCurrentSignal();
     if (!signal) {
         return;
+    }
+
+    // If no signal is being plotted, disable global offset buttons
+    bool isAnySignalShown = false;
+    for (size_t i = 0; i < SignalsBeingPlotted.size(); ++i) {
+        isAnySignalShown |= SignalsBeingPlotted[i]->State.Show;
+    }
+    if (!isAnySignalShown) {
+        UI.ButtonAllSignalOffsetIncrease->deactivate();
+        UI.ButtonAllSignalOffsetDecrease->deactivate();
     } else {
-        if (!signal->State.Show) {
-            return;
-        }
+        UI.ButtonAllSignalOffsetIncrease->activate();
+        UI.ButtonAllSignalOffsetDecrease->activate();
     }
 
     signal->State.Show = !signal->State.Show;
@@ -1208,16 +1217,8 @@ void GCMUITask::FetchCurrentValues(void)
 {
     if (SignalsBeingPlotted.size() == 0) return;
 
-    int activeSignalCount = 0;
     SignalSelected * signal;
     for (unsigned int i = 0; i < SignalsBeingPlotted.size(); ++i) {
-        // Check if this signal is hidden
-        if (!SignalsBeingPlotted[i]->State.Show) {
-            continue;
-        } else {
-            activeSignalCount++;
-        }
-
         // Check timeout. Fetch new values only if timer expires.
         if (SignalsBeingPlotted[i]->IsExpired()) {
             signal = SignalsBeingPlotted[i];
@@ -1241,11 +1242,7 @@ void GCMUITask::FetchCurrentValues(void)
         }
     }
 
-    if (activeSignalCount == 0) {
-        GraphPane->clear();
-    } else {
-        GraphPane->redraw();
-    }
+    GraphPane->redraw();
 }
 
 void GCMUITask::SetTimeOrigin(const std::string & processName, const double firstTimeStamp)
@@ -1305,10 +1302,22 @@ void GCMUITask::DrawGraph(const mtsManagerLocalInterface::SetOfValues & values, 
 
 void GCMUITask::UpdateMinMaxUI(void)
 {
-    // Show min/max Y values
-    const float Ymin = GraphPane->GetYMin();
-    const float Ymax = GraphPane->GetYMax();
+    float Ymin, Ymax;
+    
+    bool isAnySignalShown = false;
+    for (size_t i = 0; i < SignalsBeingPlotted.size(); ++i) {
+        isAnySignalShown |= SignalsBeingPlotted[i]->State.Show;
+    }
+    // If all signals are hidden
+    if (!isAnySignalShown) {
+        Ymin = 0.0f;
+        Ymax = 0.0f;
+    } else {
+        Ymin = GraphPane->GetYMin();
+        Ymax = GraphPane->GetYMax();
+    }
 
+    // Show min/max Y values
     char buf[10] = "";
     cmn_snprintf(buf, sizeof(buf), "%2.2f", Ymin);
     UI.OutputMinValue->value(buf);
