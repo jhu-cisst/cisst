@@ -15,6 +15,7 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+#include <cisstCommon/cmnConstants.h>
 #include <cisstDevices/glut/devGLUT.h>
 #include <cisstDevices/glut/devMeshTriangular.h>
 
@@ -46,20 +47,20 @@ void devGLUT::Keyboard(int k, int, int){
   //left arrow
   if(k == GLUT_KEY_LEFT){
     azimuth -= 0.005;
-    if(azimuth <0) {azimuth += 2*M_PI;}
+    if(azimuth <0) {azimuth += 2*cmnPI;}
   }
 
   //up arrow
-  if(k == GLUT_KEY_UP) {if(elevation <= M_PI/2)  {elevation +=0.005;}}
+  if(k == GLUT_KEY_UP) {if(elevation <= cmnPI/2)  {elevation +=0.005;}}
 
   //right arrow
   if(k == GLUT_KEY_RIGHT){
     azimuth += 0.005;
-    if(azimuth > 2*M_PI) {azimuth -= 2*M_PI;}
+    if(azimuth > 2*cmnPI) {azimuth -= 2*cmnPI;}
   }
 
   //down arrow
-  if(k == GLUT_KEY_DOWN) {if(elevation >= -M_PI/2) {elevation -=0.005;}}
+  if(k == GLUT_KEY_DOWN) {if(elevation >= -cmnPI/2) {elevation -=0.005;}}
 
   if(k == 'z') { distance *= 0.995; }
   if(k == 'x') { distance *= 1.005; }

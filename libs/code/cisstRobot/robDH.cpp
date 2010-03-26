@@ -115,8 +115,8 @@ robDH::Errno robDH::ReadDH( std::istream& is ) {
   }
 
   // just make sure we're accureate
-  if( this->alpha == -1.5708 ) this->alpha = -M_PI_2;
-  if( this->alpha ==  1.5708 ) this->alpha =  M_PI_2;
+  if( this->alpha == -1.5708 ) this->alpha = -cmnPI_2;
+  if( this->alpha ==  1.5708 ) this->alpha =  cmnPI_2;
 
   // Read the joint parameters
   ReadJoint( is );

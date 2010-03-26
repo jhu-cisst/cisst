@@ -44,6 +44,10 @@ robMass::Errno robMass::ReadMass( std::istream& is ) {
 
   double x1, x2, x3, y1, y2, y3, z1, z2, z3; // principal axes
 
+  D[0][0] = 0.0;  D[0][1] = 0.0; D[0][2] = 0.0; 
+  D[1][0] = 0.0;  D[1][1] = 0.0; D[1][2] = 0.0; 
+  D[2][0] = 0.0;  D[2][1] = 0.0; D[2][2] = 0.0; 
+
   is >> mass                                 // read everything
      >> com[0] >> com[1] >> com[2] 
      >> D[0][0] >> D[1][1] >> D[2][2]

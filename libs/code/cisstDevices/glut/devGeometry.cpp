@@ -1,4 +1,5 @@
-#include <GL/gl.h>
+#include <stdlib.h>
+#include <GL/glut.h>
 #include <cisstDevices/glut/devGeometry.h>
 
 

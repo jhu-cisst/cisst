@@ -16,6 +16,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstCommon/cmnLogger.h>
+#include <cisstCommon/cmnConstants.h>
 #include <cisstRobot/robManipulator.h>
 
 #include <cisstVector/vctQuaternionRotation3.h>
@@ -302,9 +303,9 @@ robManipulator::InverseKinematics( vctDynamicVector<double>& q,
   
   // copy the joint values and 
   for(size_t j=0; j<links.size(); j++){
-    q[j] = fmod((double)q[j], (double)2.0*M_PI);
-    if(M_PI < q[j])
-      q[j] = q[j] - 2.0*M_PI;
+    q[j] = fmod((double)q[j], (double)2.0*cmnPI);
+    if(cmnPI < q[j])
+      q[j] = q[j] - 2.0*cmnPI;
   }
 
   delete[] S;

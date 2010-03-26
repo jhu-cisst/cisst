@@ -17,7 +17,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <exception> // for bad_alloc
 
-#include <values.h>  // FLT_MAX
+//#include <values.h>  // FLT_MAX
 #include <cisstCommon/cmnLogger.h>
 #include <cisstRobot/robTrajectory.h>
 

@@ -78,9 +78,9 @@ public:
     ProcessQueuedCommands();
 
     // meh, increment the position of each joint
-    for( int i=0; i<7; i++ ) q[i] += dq/10.0;
-    for( int i=0; i<7; i++ ) qd[i] += 1/10.0;
-    for( int i=0; i<7; i++ ) qdd[i] = 0.0;
+    for( int i=0; i<q.size(); i++ ) q[i] += dq/10.0;
+    for( int i=0; i<qd.size(); i++ ) qd[i] = 1/10.0;
+    for( int i=0; i<qdd.size(); i++ ) qdd[i] = 0.0;
 
   }
   void Cleanup(){}
@@ -115,7 +115,7 @@ int main(int argc, char** argv){
   taskManager->AddTask(&trajectory);
 
   /*** Create the ODE world ***/
-  devODEWorld world( 0.001 , vctFixedSizeVector<double,3>(0.0,0.0,-9.81) );
+  devODEWorld world( 0.0001 , vctFixedSizeVector<double,3>(0.0,0.0,-9.81) );
   world.Configure();
   taskManager->AddTask(&world);
 
@@ -124,15 +124,15 @@ int main(int argc, char** argv){
   vctFrame4x4<double> Rtwb;
   // controller gains
   vctDynamicMatrix<double> Kp(7,7,0.0), Kd(7,7,0.0);
-  Kp[0][0] = 20.0;  Kp[1][1] = 20.0;  Kp[2][2] = 20.0;  Kp[3][3] = 10.0;
+  Kp[0][0] = 150.0;  Kp[1][1] = 150.0;  Kp[2][2] = 150.0;  Kp[3][3] = 20.0;
   Kp[4][4] = 2.0;   Kp[5][5] = 2.0;   Kp[6][6] = .5;
  
-  Kd[0][0] = 3.5;   Kd[1][1] = 3.5;   Kd[2][2] = 3.5;  Kd[3][3] = 1.5;
+  Kd[0][0] = 5.5;   Kd[1][1] = 5.5;   Kd[2][2] = 5.5;  Kd[3][3] = 4.5;
   Kd[4][4] = 0.01;  Kd[5][5] = 0.01;  Kd[6][6] = 0.001;
 
   // the controller
   devJointsPD ctrl(Kp, Kd, "controller", 0.001, "wam7.rob", qinit, Rtwb, geoms);
-  //devGravityCompensation ctrl( "ctrl", 0.001, "wam7.rob", Rtinit, geoms );
+  //devGravityCompensation ctrl( "controller", 0.001, "wam7.rob", Rtwb, geoms );
   ctrl.Configure();
   taskManager->AddTask(&ctrl);
 

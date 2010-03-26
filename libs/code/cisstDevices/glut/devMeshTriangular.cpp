@@ -15,14 +15,14 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include <GL/gl.h>
+#include <stdlib.h>
+#include <GL/glut.h>
 
 #include <vector>
 #include <string.h>
 
 #include <cisstDevices/glut/devMeshTriangular.h>
 #include <cisstCommon/cmnLogger.h>
-
 
 devMeshTriangular::devMeshTriangular() :
   vx(NULL),  vy(NULL),  vz(NULL), nvertices(0),

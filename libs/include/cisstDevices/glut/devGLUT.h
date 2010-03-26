@@ -18,6 +18,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _robGUI_h
 #define _robGUI_h
 
+#include <stdlib.h>
 #include <GL/glut.h>
 #include <vector>
 
