@@ -21,10 +21,14 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsCollectorQWidget_h
 #define _mtsCollectorQWidget_h
 
-#include <QGridLayout>
-#include <QPushButton>
 #include <QWidget>
 
+class QGroupBox;
+class QGridLayout;
+class QVBoxLayout;
+class QHBoxLayout;
+class QPushButton;
+class QSpinBox;
 
 class mtsCollectorQWidget: public QWidget
 {
@@ -35,18 +39,33 @@ public:
     ~mtsCollectorQWidget(void) {};
 
 protected:
-    QGridLayout * CentralLayout;
-    QPushButton * ButtonRecord;
-    QPushButton * ButtonNewFile;
+    QVBoxLayout * CentralLayout;
+
+    QGroupBox * ManualBox;
+    QVBoxLayout * ManualLayout;
+    QPushButton * ManualStartStop;
+
+    QGroupBox * ScheduledBox;
+    QHBoxLayout * ScheduledLayout;
+    QSpinBox * ScheduledBegin;
+    QSpinBox * ScheduledDuration;
+    QPushButton * ScheduledStart;
+
+    QGroupBox * FileBox;
+    QVBoxLayout * FileLayout;
+    QPushButton * FileNew;
 
 public slots:
-    void ToggleRecordSlot(bool checked);
-    void ButtonNewFileSlot(void);
+    void ManualStartStopSlot(bool checked);
+    void ScheduledStartSlot(void);
+    void FileNewSlot(void);
 
 public:
 signals:
     void StartCollection(void);
     void StopCollection(void);
+    void StartCollectionIn(double delay);
+    void StopCollectionIn(double delay);
     void SetOutputToDefault(void);
 
 };

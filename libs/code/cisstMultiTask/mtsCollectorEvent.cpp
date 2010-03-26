@@ -96,15 +96,43 @@ mtsCollectorEvent::mtsCollectorEvent(const std::string & collectorName,
                                      const CollectorFileFormat fileFormat):
     mtsCollectorBase(collectorName, fileFormat),
     ObservedComponents("ObservedComponents"),
-    EventCounter(1)
+    EventCounter(1),
+    Collecting(false),
+    ScheduledStartTime(0.0),
+    ScheduledStopTime(0.0),
+    TimeServer(0)
 {
     this->SetOutputToDefault(fileFormat);
     this->ObservedComponents.SetOwner(*this);
+    this->TimeServer = &(mtsManagerLocal::GetInstance()->GetTimeServer());
 }
 
 
 mtsCollectorEvent::~mtsCollectorEvent()
 {
+}
+
+
+bool mtsCollectorEvent::CheckCollectingStatus(void)
+{
+    // get the current time and check agains scheduled start/stop time
+    const double currentTime = this->TimeServer->GetRelativeTime();
+    if (this->Collecting
+        && (this->ScheduledStopTime != 0.0) // stop time is set
+        && (currentTime >= this->ScheduledStopTime)) {
+        this->Collecting = false;
+        this->ScheduledStopTime = 0.0; // we stop it
+        CMN_LOG_CLASS_RUN_DEBUG << "CheckCollectingStatus: stopping collection at: " << currentTime << std::endl;
+    } else {
+        if ((!this->Collecting)
+            && (this->ScheduledStartTime != 0.0)
+            && (currentTime >= this->ScheduledStartTime)) {
+            this->Collecting = true;
+            this->ScheduledStartTime = 0.0; // we stop it
+            CMN_LOG_CLASS_RUN_DEBUG << "CheckCollectingStatus: starting collection at: " << currentTime << std::endl;
+        }
+    }
+    return this->Collecting;
 }
 
 
@@ -439,23 +467,29 @@ bool mtsCollectorEvent::Connect(void)
 
 void mtsCollectorEvent::SaveEventVoid(const CollectorEventVoid * event)
 {
-    // if this method is called for the first time, print out some information.
-    if (this->FirstRunningFlag) {
-        this->PrintHeader(this->FileFormat);
+    // check if collection is turned on
+    if (this->CheckCollectingStatus()) {
+        // if this method is called for the first time, print out some information.
+        if (this->FirstRunningFlag) {
+            this->PrintHeader(this->FileFormat);
+        }
+        *(this->OutputStream) << event->EventId << std::endl;
     }
-    *(this->OutputStream) << event->EventId << std::endl;
 }
 
 
 void mtsCollectorEvent::SaveEventWrite(const CollectorEventWrite * event, const mtsGenericObject * payload)
 {
-    // if this method is called for the first time, print out some information.
-    if (this->FirstRunningFlag) {
-        this->PrintHeader(this->FileFormat);
+    // check if collection is turned on
+    if (this->CheckCollectingStatus()) {
+        // if this method is called for the first time, print out some information.
+        if (this->FirstRunningFlag) {
+            this->PrintHeader(this->FileFormat);
+        }
+        *(this->OutputStream) << event->EventId << this->Delimiter;
+        payload->ToStreamRaw(*(this->OutputStream), this->Delimiter);
+        *(this->OutputStream) << std::endl;
     }
-    *(this->OutputStream) << event->EventId << this->Delimiter;
-    payload->ToStreamRaw(*(this->OutputStream), this->Delimiter);
-    *(this->OutputStream) << std::endl;
 }
 
 
@@ -495,7 +529,8 @@ void mtsCollectorEvent::PrintHeader(const CollectorFileFormat & fileFormat)
             CMN_LOG_CLASS_INIT_ERROR << "PrintHeader: binary format not supported yet" << std::endl;
         }
     } else {
-        CMN_LOG_CLASS_RUN_ERROR << "PrintHeader: output stream for collector \"" << this->GetName() << "\" is not available." << std::endl;
+        CMN_LOG_CLASS_RUN_ERROR << "PrintHeader: output stream for collector \""
+                                << this->GetName() << "\" is not available." << std::endl;
     }
     this->FirstRunningFlag = false;
 }
@@ -503,19 +538,27 @@ void mtsCollectorEvent::PrintHeader(const CollectorFileFormat & fileFormat)
 
 void mtsCollectorEvent::StartCollection(const mtsDouble & delay)
 {
-    // enable all event observers delay is not supported yet.  If the
-    // collector is already collecting, we could ignore the request.
-    // If the collector is not collecting, we could add a sleep but
-    // this seems dangerous as other events would potentially wake up
-    // the thread.  Ideally, we need a scheduled event, i.e. the task
-    // manager could have a special task who can create events at a
-    // given time.
-    RequiredInterfaces.ForEachVoid(&mtsRequiredInterface::EnableAllEvents);
+    const double currentTime = this->TimeServer->GetRelativeTime();
+    if (delay.Data == 0.0) {
+        this->Collecting = true;
+        this->ScheduledStartTime = 0.0;
+        CMN_LOG_CLASS_RUN_DEBUG << "StartCollection: starting collection now (" << currentTime << ")" << std::endl;
+    } else {
+        this->ScheduledStartTime = currentTime + delay.Data;
+        CMN_LOG_CLASS_RUN_DEBUG << "StartCollection: collection scheduled to start at " << this->ScheduledStartTime << std::endl;
+    }
 }
 
 
 void mtsCollectorEvent::StopCollection(const mtsDouble & delay)
 {
-    // disable all event observers
-    RequiredInterfaces.ForEachVoid(&mtsRequiredInterface::DisableAllEvents);
+    const double currentTime = this->TimeServer->GetRelativeTime();
+    if (delay.Data == 0.0) {
+        this->Collecting = false;
+        this->ScheduledStopTime = 0.0;
+        CMN_LOG_CLASS_RUN_DEBUG << "StopCollection: stopping collection now (" << currentTime << ")" << std::endl;
+    } else {
+        this->ScheduledStopTime = currentTime + delay.Data;
+        CMN_LOG_CLASS_RUN_DEBUG << "StopCollection: collection scheduled to stop at " << this->ScheduledStopTime << std::endl;
+    }
 }

@@ -33,6 +33,8 @@ mtsCollectorQComponent::mtsCollectorQComponent(const std::string & taskName) :
     if (requiredInterface) {
        requiredInterface->AddFunction("StartCollection", Collection.StartCollection);
        requiredInterface->AddFunction("StopCollection", Collection.StopCollection);
+       requiredInterface->AddFunction("StartCollectionIn", Collection.StartCollectionIn);
+       requiredInterface->AddFunction("StopCollectionIn", Collection.StopCollectionIn);
        requiredInterface->AddFunction("SetOutputToDefault", Collection.SetOutputToDefault);
     }
 }
@@ -50,6 +52,10 @@ void mtsCollectorQComponent::ConnectToWidget(QWidget * widget)
                      this, SLOT(StartCollectionQSlot()));
     QObject::connect(widget, SIGNAL(StopCollection()),
                      this, SLOT(StopCollectionQSlot()));
+    QObject::connect(widget, SIGNAL(StartCollectionIn(double)),
+                     this, SLOT(StartCollectionInQSlot(double)));
+    QObject::connect(widget, SIGNAL(StopCollectionIn(double)),
+                     this, SLOT(StopCollectionInQSlot(double)));
     QObject::connect(widget, SIGNAL(SetOutputToDefault()),
                      this, SLOT(SetOutputToDefaultQSlot()));
 }
@@ -66,6 +72,21 @@ void mtsCollectorQComponent::StopCollectionQSlot(void)
 {
     CMN_LOG_CLASS_RUN_VERBOSE << "StopCollectionQSlot: stopping data collection" << std::endl;
     Collection.StopCollection();
+}
+
+
+void mtsCollectorQComponent::StartCollectionInQSlot(double delay)
+{
+    std::cerr << "-----------------" << std::endl;
+    CMN_LOG_CLASS_RUN_VERBOSE << "StartCollectionInQSlot: starting data collection in " << delay << "s" << std::endl;
+    Collection.StartCollectionIn(mtsDouble(delay));
+}
+
+
+void mtsCollectorQComponent::StopCollectionInQSlot(double delay)
+{
+    CMN_LOG_CLASS_RUN_VERBOSE << "StopCollectionInQSlot: stopping data collection in " << delay << "s" << std::endl;
+    Collection.StopCollectionIn(mtsDouble(delay));
 }
 
 

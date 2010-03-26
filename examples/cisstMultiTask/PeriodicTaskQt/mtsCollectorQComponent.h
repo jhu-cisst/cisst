@@ -45,12 +45,16 @@ class mtsCollectorQComponent: public QObject, public mtsDevice
     struct {
         mtsFunctionVoid StartCollection;
         mtsFunctionVoid StopCollection;
+        mtsFunctionWrite StartCollectionIn;
+        mtsFunctionWrite StopCollectionIn;
         mtsFunctionVoid SetOutputToDefault;
     } Collection;
 
  public slots:
     void StartCollectionQSlot(void);
     void StopCollectionQSlot(void);
+    void StartCollectionInQSlot(double);
+    void StopCollectionInQSlot(double);
     void SetOutputToDefaultQSlot(void);
 };
 

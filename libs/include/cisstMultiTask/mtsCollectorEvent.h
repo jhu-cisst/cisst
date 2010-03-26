@@ -117,6 +117,24 @@ class CISST_EXPORT mtsCollectorEvent : public mtsCollectorBase
     std::vector<CollectorEventWrite *> EventsWrite;
     //@}
 
+    /*! Flag indicating if the collector is started */
+    bool Collecting;
+    
+    /*! Scheduled start.  If time is set to zero, there is no
+      scheduled start */
+    double ScheduledStartTime;
+
+    /*! Scheduled start.  If time is set to zero, there is no
+      scheduled start */
+    double ScheduledStopTime;
+
+    /*! Update and return the collecting status based on the scheduled
+      start/stop time and current time. */
+    bool CheckCollectingStatus(void);
+
+    /*! Pointer on manager's time server */
+    const osaTimeServer * TimeServer;
+
  public:
     /*! Thread-related methods */
     void Run(void);

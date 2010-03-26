@@ -65,14 +65,23 @@ int main(int argc, char *argv[])
     QVBoxLayout * mainLayout = new QVBoxLayout(mainWidget);
     mainLayout->setContentsMargins(0, 0, 0, 0);
 
+    // tabs
+    QTabWidget * tabs = new QTabWidget(mainWidget);
+    mainLayout->addWidget(tabs);
+
     // create a tab with all the sine wave controllers
     QWidget * tab1Widget = new QWidget();
     QGridLayout * tab1Layout= new QGridLayout(tab1Widget);
     tab1Layout->setContentsMargins(0, 0, 0, 0);
+    tabs->addTab(tab1Widget, "Main");
 
-    // add one collection widget for all sine generators
+
+    // second tab for data collection
+    QWidget * tab2Widget = new QWidget();
+    QGridLayout * tab2Layout= new QGridLayout(tab2Widget);
     mtsCollectorQWidget * collectorQWidget = new mtsCollectorQWidget();
-    tab1Layout->addWidget(collectorQWidget, 0, 0, 1, NumSineTasks);
+    tab2Layout->addWidget(collectorQWidget);
+    tabs->addTab(tab2Widget, "Collection");
 
     // get the component manager to add multiple sine generator tasks
     mtsManagerLocal * taskManager = mtsManagerLocal::GetInstance();
@@ -131,17 +140,12 @@ int main(int argc, char *argv[])
     // connect all interfaces for event collector
     eventCollector->Connect();
 
-    // tabs
-    QTabWidget * tabs = new QTabWidget(mainWidget);
-    mainLayout->addWidget(tabs);
-    tabs->addTab(tab1Widget, "Main");
-
-    QWidget * tab2Widget = new QWidget();
-    QGridLayout * tab2Layout= new QGridLayout(tab2Widget);
-    cmnLoggerQWidget * loggerWidget = new cmnLoggerQWidget(tab2Widget);
-    tab2Layout->addWidget(loggerWidget->GetWidget());
-    
-    tabs->addTab(tab2Widget, "Logger");
+    // third tab for logger widget
+    QWidget * tab3Widget = new QWidget();
+    QGridLayout * tab3Layout= new QGridLayout(tab3Widget);
+    cmnLoggerQWidget * loggerWidget = new cmnLoggerQWidget(tab3Widget);
+    tab3Layout->addWidget(loggerWidget->GetWidget());    
+    tabs->addTab(tab3Widget, "Logger");
 
     // one large quit button under all tabs
     QPushButton * buttonQuit = new QPushButton("Quit", mainWidget);
