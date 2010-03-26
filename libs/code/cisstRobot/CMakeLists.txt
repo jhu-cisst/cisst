@@ -23,40 +23,73 @@ SET(DEPENDENCIES
 
 # all source files
 SET(SOURCE_FILES
-#	robRnBlender.cpp
-#	robSO3Blender.cpp
-#	robRnConstant.cpp
-#	robSE3Constant.cpp
-#	robSE3Track.cpp
-#	robDOF.cpp
-#	robFunctionPiecewise.cpp
-#	robHermite.cpp
-#	robLinear.cpp
-#	robSigmoid.cpp
-#	robQuintic.cpp
-#	robSLERP.cpp
-#	robTrajectory.cpp
-	robCollaborativeControlForce.cpp
-    )
+  robConstantR1.cpp
+  robConstantSO3.cpp
+  robLinear.cpp
+  robMapping.cpp
+  robQuintic.cpp
+  robSigmoid.cpp
+  robSLERP.cpp
+  robCasteljauSO3.cpp
+  robSpace.cpp
+#  robTrackSE3.cpp
+  robTrajectory.cpp
+  robTrajectoryR1.cpp
+  robTrajectorySO3.cpp
+  robTrajectoryManager.cpp
+  robVariable.cpp
+  
+  robJoint.cpp
+  robMass.cpp
+  
+  robDH.cpp
+  robLink.cpp
+  robManipulator.cpp
+  robControlLoop.cpp  
+  )
 
 # all header files
 SET(HEADER_FILES
-#	robRnBlender.h
-#	robSO3Blender.h
-#	robRnConstant.h
-#	robSE3Constant.h
-#	robSE3Track.h
-#	robDOF.h
-#	robFunction.h	
-#	robFunctionPiecewise.h
-#	robHermite.h
-#	robLinear.h
-#	robSigmoid.h
-#	robQuintic.h
-#	robSLERP.h
-#	robTrajectory.h
-	robCollaborativeControlForce.h
-	robExport.h
-    )
+  robConstantR1.h
+  robConstantSO3.h
+  robFunction.h
+  robLinear.h
+  robMapping.h
+  robQuintic.h
+  robSigmoid.h
+  robSLERP.h
+  robCasteljauSO3.h
+  robSpace.h
+  robTrackSE3.h
+  robTrajectory.h
+  robTrajectoryR1.h
+  robTrajectorySO3.h
+  robTrajectoryManager.h
+  robVariable.h
+  
+  robMass.h
+  robJoint.h
+  
+  robDH.h
+  robLink.h
+  robManipulator.h
+  robControlLoop.h  
+  )
+
+# use for findblas and findlapack
+enable_language( Fortran )
+
+include( FindBLAS )
+if( BLAS_FOUND )
+    cisst_add_to_internal( CISST_ADDITIONAL_LIBRARIES BLAS_LIBRARIES )
+endif( BLAS_FOUND )
+  
+include( FindLAPACK )
+if( LAPACK_FOUND )
+    cisst_add_to_internal( CISST_ADDITIONAL_LIBRARIES LAPACK_LIBRARIES )
+endif( LAPACK_FOUND )
+  
 
 CISST_ADD_LIBRARY_TO_PROJECT(cisstLibs)
+
+

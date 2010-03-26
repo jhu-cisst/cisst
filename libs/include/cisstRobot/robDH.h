@@ -27,17 +27,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstRobot/robJoint.h>
 #include <cisstRobot/robExport.h>
 
-//! The DH convention used by the link
-/**
-   For a kinematic chain, the standard DH defines the coordinate frame of a link   at its distal joint whereas the modified DH defines the coordinate frame at
-   its proximal joint. Modified DH have the advantage of being able to represent
-   open-loop, closed-loop and tree structure robots (Khalil ICRA'86).
-*/
-enum robDHConvention {  
-  robDHStandard,  
-  robDHModified  
-};
-
 //! DH parameters of a link
 /**
    The DH class is used for kinematics parameters. It is derived from a joint
@@ -45,10 +34,25 @@ enum robDHConvention {
 */
 class CISST_EXPORT robDH : public robJoint {
 
+ public:
+  //! The DH convention used by the link
+  /**
+     For a kinematic chain, the standard DH defines the coordinate frame of a 
+     link at its distal joint whereas the modified DH defines the coordinate 
+     frame atits proximal joint. Modified DH have the advantage of being able to 
+     represent open-loop, closed-loop and tree structure robots (Khalil ICRA'86).
+  */
+  enum Convention {  
+    STANDARD,
+    MODIFIED
+  };
+
+  enum Errno{ ESUCCESS, EFAILURE };
+
 private:
 
   //! Determine if the link uses DH or modified DH convention
-  robDHConvention convention; // modified DH?
+  robDH::Convention convention; // modified DH?
   
   //! DH parameters
   double alpha, a;            // x components
@@ -66,7 +70,7 @@ public:
   /**
      \return The DH convention: robDHStandard or robDHModified
   */
-  robDHConvention DHConvention() const;
+  robDH::Convention GetConvention() const;
   
   //! Return the position of the next (distal) link coordinate frame
   /**
@@ -86,7 +90,7 @@ public:
      \param joint The joint associated with the link
      \return The position and orientation associated with the DH parameters
   */
-  vctFrame4x4<double,VCT_ROW_MAJOR> ForwardKinematics( double ) const;
+  vctFrame4x4<double> ForwardKinematics( double ) const;
 
   //! Get the orientation of the link
   /**
@@ -95,7 +99,7 @@ public:
      \param joint The joint associated with the link
      \return The orientation associated with the DH parameters
   */
-  vctMatrixRotation3<double,VCT_ROW_MAJOR> Orientation( double ) const;
+  vctMatrixRotation3<double> Orientation( double ) const;
   
   //! Read the parameters from an input stream
   /**
@@ -105,7 +109,7 @@ public:
      \param dh The parameters
      \return SUCCESS if no error occurred. ERROR otherwise.
   */
-  robError Read( std::istream& is );
+  robDH::Errno ReadDH( std::istream& is );
   
   //! Write the parameters to an output stream
   /**
@@ -115,7 +119,7 @@ public:
      \param dh The parameters
      \return SUCCESS if no error occurred. ERROR otherwise.
   */
-  robError Write( std::ostream& os ) const; 
+  robDH::Errno WriteDH( std::ostream& os ) const; 
 
 };
 

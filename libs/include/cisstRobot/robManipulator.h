@@ -25,16 +25,16 @@ http://www.cisst.org/cisst/license.txt.
 
 class CISST_EXPORT robManipulator{
   
-protected:
-  
 public:
   
+  enum Errno{ ESUCCESS, EFAILURE };
+
   //! Position and orientation of the first link
   /**
      Simply put, this is the position and orientation of the base of the first
      link with respect to a known world frame
   */
-  vctFrame4x4<double,VCT_ROW_MAJOR> Rtw0;
+  vctFrame4x4<double> Rtw0;
   
   //! Body Jacobian
   /**
@@ -55,10 +55,10 @@ public:
   std::vector<robLink> links;
 
   //! Load the kinematics and the dynamics of the robot
-  robError LoadRobot( const std::string& linkfile );
+  robManipulator::Errno LoadRobot( const std::string& linkfile );
   
   //! Load the tool of the robot
-  robError LoadTool( const std::string& toolfile );
+  robManipulator::Errno LoadTool( const std::string& toolfile );
 
   //! Evaluate the body Jacobian
   /**
@@ -152,8 +152,7 @@ public:
      \param Rtw0 The offset transformation of the robot base
   */
   robManipulator( const std::string& robotfilename,
-		  const vctFrame4x4<double,VCT_ROW_MAJOR>& Rtw0 
-		  = vctFrame4x4<double,VCT_ROW_MAJOR>() );
+		  const vctFrame4x4<double>& Rtw0 = vctFrame4x4<double>() );
   
   //! Evaluate the forward kinematics
   /**
@@ -161,12 +160,9 @@ public:
      This method is non-const since it needs to update the position and 
      orientation of each link in order to render them in OpenGL
   */
-  vctFrame4x4<double,VCT_ROW_MAJOR> 
-  ForwardKinematics( const vctDynamicVector<double>& q );
+  vctFrame4x4<double>
+    ForwardKinematics( const vctDynamicVector<double>& q, int N = -1 )const;
   
-  vctFrame4x4<double,VCT_ROW_MAJOR> 
-  ForwardKinematics( const vctDynamicVector<double>& q ) const;
-
   //! Evaluate the inverse kinematics
   /**
      Compute the inverse kinematics. The solution is computed with from 
@@ -179,10 +175,10 @@ public:
      \return SUCCESS if a solution was found within the given tolerance and 
                      number of iterations. ERROR otherwise.
   */
-  robError InverseKinematics( vctDynamicVector<double>& q, 
-			      const vctFrame4x4<double,VCT_ROW_MAJOR>& Rts, 
-			      double tolerance=1e-12, 
-			      size_t Niteration=1000 );
+  robManipulator::Errno InverseKinematics( vctDynamicVector<double>& q, 
+					   const vctFrame4x4<double>& Rts, 
+					   double tolerance=1e-12, 
+					   size_t Niteration=1000 );
   
   //! Inverse dynamics in joint space
   /**

@@ -18,16 +18,104 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _robMass_h
 #define _robMass_h
 
-#ifdef CISST_ODE_SUPPORT
+#include <iostream>
 
-#include <cisstRobot/ode/robMassODE.h>
-typedef robMassODE robMass;
+#include <cisstVector/vctMatrixRotation3.h>
+#include <cisstVector/vctFrame4x4.h>
+#include <cisstRobot/robExport.h>
 
-#else
+class CISST_EXPORT robMass{
+ public:
 
-#include <cisstRobot/robMassBase.h>
-typedef robMassBase robMass;
+  enum Errno{ ESUCCESS, EFAILURE };
 
-#endif // __ODE__
+ private:
+
+  //! The mass (kg)
+  double mass; 
+
+  //! The center of mass (m)
+  /**
+     The center of mass is expressed with respect to the coordinate frame
+     of the body. That is, this member represents the translation of the center 
+     of mass with respect to the body's coordinate frame.This implies that the 
+     coordinate frame of the body does not necessarily coincide with the center 
+     of mass. 
+  */
+  vctFixedSizeVector<double,3> com;
+
+  //! The principal moments of inertia (\f$ \textrm{kgm}^2 \f$)
+  /**
+     The principal moments of inertia are defined in a coordinate frame that
+     is centered at the center of mass and with axes aligned with the principal
+     axes. The principal moments are contained in the diagonal matrix 
+     \f$ D = 
+     \begin{bmatrix} I_x & 0 & 0 \\ 0 & I_y & 0 \\ 0 & 0 & I_z \end{bmatrix}
+     \f$
+  */
+  vctFixedSizeMatrix<double,3,3> D; 
+
+  //! The principal axes
+  /**
+     This matrix represents the coordinates of the principal axes associated 
+     with the principal moment of inertia. The three axes are defined with 
+     respect to the body's coordinate frame. The axes represent a similarity 
+     transformation that diagonalizes a moment of inertia tensor. Given a moment
+     of inertia tensor \f$ I \$, the principal axes define a similarity 
+     transformation \f$V\f$ that diagonalizes \f$ I \f$ with 
+     \f$ D = V^T I V \f$, where \f$ V\f$ are the eigenvectors of \f$ I\f$ given 
+     by \f$ IV = VD\f$. The matrix \f$ V\f$ refpresents the principal axes as 
+     follow 
+     \f$V=\begin{bmatrix}\mathbf{e}_1&\mathbf{e}_2&\mathbf{e}_3\end{bmatrix}\f$.
+  */
+  vctMatrixRotation3<double> V;
+
+  //! Parallel Axis Theorem
+  /**
+     Finds the moment of inertia with respect to a parallel axis
+  */
+  vctFixedSizeMatrix<double,3,3> 
+  ParallelAxis( double m, 
+		const vctFixedSizeVector<double,3>& t, 
+		const vctFixedSizeMatrix<double,3,3>& I ) const;
+
+public:
+
+  //! Default constructor
+  /**
+     Set the mass, center of mass and inertia to zero
+  */
+  robMass();
+
+  //! Return the mass
+  /**
+     \return The mass of the body
+  */
+  double Mass() const;
+
+  //! Return the center of mass
+  /**
+     Return the center of mass. The center of mass is expressed in the 
+     coordinate frame of the body.
+     \return A 3D vector representing the center of mass
+  */
+  vctFixedSizeVector<double,3> CenterOfMass() const;
+
+  //! Return the moment of inertia tensor in the body frame
+  /**
+     Return the moment of inertia tensor. The tensor is with respect to the
+     coordinate frame of the body which does not necessarily coincide with the
+     center of mass of the body and the principal axes.
+     \return A 3x3 moment of inertia tensor
+  */
+  vctFixedSizeMatrix<double,3,3> MomentOfInertia() const;
+  
+  //! Read the mass from a input stream
+  robMass::Errno ReadMass( std::istream& is );
+  
+  //! Write the mass from a output stream
+  robMass::Errno WriteMass( std::ostream& os ) const;
+
+};
 
 #endif

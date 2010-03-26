@@ -18,49 +18,43 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstRobot/robLink.h>
 
 robLink::robLink(){}
-robLink::~robLink(){}
 
-robLink& robLink::operator=( const vctFrame4x4<double,VCT_ROW_MAJOR>& Rt ){
-  if( *this != Rt )
-    robBody::operator=( Rt );
-  return *this;
-}
+robLink::Errno robLink::ReadLink( std::istream& is ){ 
 
-robError robLink::Read( std::istream& is ){ 
-  if( robDH::Read( is ) == ERROR ){
+  if( ReadDH( is ) != robDH::ESUCCESS ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
 		      << "Failed to read the DH parameters."
 		      << std::endl;
-    return ERROR;
+    return robLink::EFAILURE;
   }
   
-  if( robBody::Read( is ) == ERROR ){
+  if( ReadMass( is ) != robMass::ESUCCESS ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
 		      << "Failed to read the body parameters."
 		      << std::endl;
-    return ERROR;
+    return robLink::EFAILURE;
   }
   
-  return SUCCESS;
+  return robLink::ESUCCESS;
 }
 
-robError robLink::Write( std::ostream& os ) const { 
+robLink::Errno robLink::WriteLink( std::ostream& os ) const { 
 
-  if( robDH::Write( os ) == ERROR ){
+  if( WriteDH( os ) != robDH::ESUCCESS ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
 		      << "Failed to write the DH parameters."
 		      << std::endl;
-    return ERROR;
+    return robLink::EFAILURE;
   }
 
-  if( robBody::Write( os ) == ERROR ){
+  if( WriteMass( os ) != robMass::ESUCCESS ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
 		      << "Failed to write the body parameters."
 		      << std::endl;
-    return ERROR;
+    return robLink::EFAILURE;
   }
   
-  return SUCCESS;
+  return robLink::ESUCCESS;
 
 }
 

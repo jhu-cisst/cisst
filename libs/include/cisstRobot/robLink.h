@@ -21,7 +21,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <iostream>
 
 #include <cisstRobot/robDH.h>
-#include <cisstRobot/robBody.h>
+#include <cisstRobot/robMass.h>
+
 #include <cisstRobot/robExport.h>
 
 //! A robot link
@@ -31,24 +32,15 @@ http://www.cisst.org/cisst/license.txt.
    link's position and orientation. The link is also derived from robDH to
    determine the link's position and orientation from joint values
 */
-class CISST_EXPORT robLink : public robDH,
-			     public robBody {
+class CISST_EXPORT robLink : public robDH, public robMass {
 
 public:
+
+  enum Errno { ESUCCESS, EFAILURE };
   
   //! Default constructor
   robLink();
   
-  //! Default destructor
-  ~robLink();
-  
-  //! Assign a the position and orientation
-  /**
-     Overload the assignment operator to assign a rigid transformation to the
-     link. This essentially calls robBody::operator=0
-  */
-  robLink& operator=( const vctFrame4x4<double,VCT_ROW_MAJOR>& Rt );
-
   //! Read the DH and body parameters
   /**
      First read the DH parameters and then the body's parameters. At the
@@ -69,10 +61,10 @@ public:
      principal moment of inertia (3 double): \f$\begin{bmatrix}I_{xx}&I_{yy}&I_{zz}\end{matrix} \f$
      body principal axis (9 double): 
   */
-  robError Read( std::istream& is );
+  robLink::Errno ReadLink( std::istream& is );
   
   //! Write the DH and body parameters
-  robError Write( std::ostream& os ) const;
+  robLink::Errno WriteLink( std::ostream& os ) const;
   
 };
 

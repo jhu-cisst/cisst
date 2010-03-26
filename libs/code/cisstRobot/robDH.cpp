@@ -26,22 +26,22 @@ http://www.cisst.org/cisst/license.txt.
 robDH::robDH() { alpha = a = theta = d = 0.0; }
 robDH::~robDH(){}
 
-robDHConvention robDH::DHConvention() const { return convention; }
+robDH::Convention robDH::GetConvention() const { return convention; }
 
 vctFixedSizeVector<double,3> robDH::PStar() const
 { return vctFixedSizeVector<double,3>( a, d*sin(alpha), d*cos(alpha) ); }
   
-vctFrame4x4<double,VCT_ROW_MAJOR> robDH::ForwardKinematics( double q ) const { 
+vctFrame4x4<double> robDH::ForwardKinematics( double q ) const { 
 
   double d = this->d;           // copy the prismatic value
   double theta = this->theta;   // copy the revolute value
 
   // Add the position offset to the joint value
-  switch( JointType() ){
-  case robJointHinge:
+  switch( GetType() ){
+  case robJoint::HINGE:
     theta = PositionOffset() + q; // add the joint offset to the joint angle
     break;
-  case robJointSlider:
+  case robJoint::SLIDER:
     d = PositionOffset() + q;     // add the joint offset to the joint length
     break;
   default:
@@ -53,39 +53,39 @@ vctFrame4x4<double,VCT_ROW_MAJOR> robDH::ForwardKinematics( double q ) const {
   // should be computed once
   double ca = cos(this->alpha); double sa = sin(this->alpha);	
   double ct = cos(theta);       double st = sin(theta);
-    
-  switch( DHConvention() ){
+
+  switch( GetConvention() ){
     
     // modified DH transformation
-  case robDHModified:
+  case robDH::MODIFIED:
     {
-      vctMatrixRotation3<double,VCT_ROW_MAJOR> R( ct,    -st,     0,
-						  st*ca,  ct*ca, -sa,
-						  st*sa,  ct*sa,  ca );
+      vctMatrixRotation3<double> R( ct,    -st,     0,
+				    st*ca,  ct*ca, -sa,
+				    st*sa,  ct*sa,  ca );
       vctFixedSizeVector<double,3> t( a, -sa*d, ca*d );
-      return vctFrame4x4<double,VCT_ROW_MAJOR>( R, t );
+      return vctFrame4x4<double>( R, t );
     }
     // standard DH transformation
-  case robDHStandard:
+  case robDH::STANDARD:
     {
-      vctMatrixRotation3<double,VCT_ROW_MAJOR> R( ct, -st*ca,  st*sa,
-						  st,  ct*ca, -ct*sa,
-						  0,     sa,     ca );
+      vctMatrixRotation3<double> R( ct, -st*ca,  st*sa,
+				    st,  ct*ca, -ct*sa,
+				     0,     sa,     ca );
       
       vctFixedSizeVector<double,3> t(a*ct, a*st, d);
-      return vctFrame4x4<double,VCT_ROW_MAJOR>( R, t );
+      return vctFrame4x4<double>( R, t );
     }
   }
 }
 
-vctMatrixRotation3<double,VCT_ROW_MAJOR> robDH::Orientation( double q ) const {
-  vctFrame4x4<double,VCT_ROW_MAJOR> Rt = ForwardKinematics( q );
-  return vctMatrixRotation3<double,VCT_ROW_MAJOR>(Rt[0][0], Rt[0][1], Rt[0][2],
-						  Rt[1][0], Rt[1][1], Rt[1][2],
-						  Rt[2][0], Rt[2][1], Rt[2][2]);
+vctMatrixRotation3<double> robDH::Orientation( double q ) const {
+  vctFrame4x4<double> Rt = ForwardKinematics( q );
+  return vctMatrixRotation3<double>( Rt[0][0], Rt[0][1], Rt[0][2],
+				     Rt[1][0], Rt[1][1], Rt[1][2],
+				     Rt[2][0], Rt[2][1], Rt[2][2] );
 }
 
-robError robDH::Read( std::istream& is ) {
+robDH::Errno robDH::ReadDH( std::istream& is ) {
   std::string convention;
 
   is >> convention
@@ -102,16 +102,16 @@ robError robDH::Read( std::istream& is ) {
 
   // match the mode string to a joint mode
   if( convention.compare( "STANDARD" ) == 0 )
-    this->convention = robDHStandard;
+    this->convention = robDH::STANDARD;
   
   else if( convention.compare( "MODIFIED" ) == 0 )
-    this->convention = robDHModified;
+    this->convention = robDH::MODIFIED;
   
   else{
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
 		      << ": Expected a DH convention. Got " << convention << "."
 		      << std::endl;
-    return ERROR;
+    return robDH::EFAILURE;
   }
 
   // just make sure we're accureate
@@ -119,12 +119,12 @@ robError robDH::Read( std::istream& is ) {
   if( this->alpha ==  1.5708 ) this->alpha =  M_PI_2;
 
   // Read the joint parameters
-  return robJoint::Read( is );
-  
+  ReadJoint( is );
+  return robDH::ESUCCESS;
 }
 
-robError robDH::Write( std::ostream& os ) const {
-  if( DHConvention() == robDHModified )
+robDH::Errno robDH::WriteDH( std::ostream& os ) const {
+  if( GetConvention() == robDH::MODIFIED )
     os << std::setw(10) << "modified";
   else
     os << std::setw(10) << "standard";
@@ -134,6 +134,6 @@ robError robDH::Write( std::ostream& os ) const {
      << std::setw(10) << theta
      << std::setw(10) << d;
 
-  robJoint::Write( os );
-  return SUCCESS;
+  WriteJoint( os );
+  return robDH::ESUCCESS;
 }

@@ -17,7 +17,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnLogger.h>
 #include <cisstRobot/robManipulator.h>
-#include <cisstRobot/robGUI.h>
 
 #include <cisstVector/vctQuaternionRotation3.h>
 #include <cisstVector/vctFixedSizeMatrix.h>
@@ -114,25 +113,25 @@ void free_rmatrix(double** m, long nrl, long ncl){
 }
 
 robManipulator::robManipulator( const std::string& linkfile, 
-				const vctFrame4x4<double,VCT_ROW_MAJOR>& Rtw0 ){
+				const vctFrame4x4<double>& Rtw0 ){
   
   this->tool = NULL;
   this->Rtw0 = Rtw0;
   
-  if( LoadRobot( linkfile ) == ERROR ){
+  if( LoadRobot( linkfile ) == robManipulator::EFAILURE ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
 		      << " Failed to load the robot configuration."
 		      << std::endl;
   }
 }
 				
-robError robManipulator::LoadRobot( const std::string& filename ){
+robManipulator::Errno robManipulator::LoadRobot( const std::string& filename ){
 
   if( filename.empty() ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
 		      << " No configuration file!."
 		      << std::endl;
-    return ERROR;
+    return robManipulator::EFAILURE;
   }
 
   std::ifstream ifs;
@@ -141,27 +140,23 @@ robError robManipulator::LoadRobot( const std::string& filename ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
 		      << " Couln't open configuration file " << filename 
 		      << std::endl;
-    return ERROR;
+    return robManipulator::EFAILURE;
   }
 
   size_t N;       // the number of links
   ifs >> N;
-  
+
   // read the links (kinematics+dynamics+geometry) from the input
   for( size_t i=0; i<N; i++ ){
     robLink li;
-    li.Read( ifs );
+    li.ReadLink( ifs );
     links.push_back( li );
   }
-
-  // Insert the geometry in opengl
-  for( size_t i=0; i<links.size(); i++)
-    robGUI::Insert( &(links[i]) );
 
   Js = rmatrix(0, links.size()-1, 0, 5);
   Jn = rmatrix(0, links.size()-1, 0, 5);
 
-  return SUCCESS;
+  return robManipulator::ESUCCESS;;
 }
 
 
@@ -169,25 +164,19 @@ robError robManipulator::LoadRobot( const std::string& filename ){
 //         KINEMATICS
 //////////////////////////////////////
 
-vctFrame4x4<double,VCT_ROW_MAJOR> 
-robManipulator::ForwardKinematics( const vctDynamicVector<double>& q ) {
+vctFrame4x4<double> 
+robManipulator::ForwardKinematics( const vctDynamicVector<double>& q, 
+				   int N ) const {
 
-  // q must have at least links.size() values. If q has more values they will
-  // be passed to the tool
-  if( q.size() < links.size() ){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-		      << ": Expected at least " << links.size() << " values. "
-		      << "Got " << q.size()
-		      << std::endl;
-    return Rtw0;
-  }
+  if( N == 0 ) return Rtw0;
 
-  // If there no tool (possibly with joint), then the number of values
-  // must match the number of joints
-  if( tool == NULL && (links.size() < q.size()) ){
+  // if N < 0 then we want the end-effector
+  if( N < 0 ) N = links.size();
+
+  if( ((int)q.size()) < N ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-		      << ": Expected exactly " << links.size() << " values. "
-		      << " Got " << q.size()
+		      << ": Expected " << N 
+		      << " joint positions. Got " << q.size() << "."
 		      << std::endl;
     return Rtw0;
   }
@@ -195,60 +184,7 @@ robManipulator::ForwardKinematics( const vctDynamicVector<double>& q ) {
   // no link? then return the transformation of the base
   if( links.empty() ){
     CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS
-			<< ": Manipulator with no link."
-			<< std::endl;
-    return Rtw0;
-  }
-
-  // set the position/orientation of link 0 to the base x its tranformation
-  // setting the link's transformation is necessary in order to render the link
-  // in opengl
-  links[0] = Rtw0 * links[0].ForwardKinematics( q[0] );
-
-  // for link 1 to N
-  for(size_t i=1; i<links.size(); i++){
-    // set the position/orientation of the link
-    links[i] = links[i-1] * links[i].ForwardKinematics( q[i] );
-  }
-
-  if( tool != NULL ){
-    // copy the remaining joints values and give them to the tool
-    vctDynamicVector<double> toolq( q.size() - links.size() );
-    for( size_t i=0; i<q.size()-links.size(); i++ )
-      toolq[i] = q[ links.size() + i ];
-    return links.back() * tool->ForwardKinematics( toolq );
-  }
-  else
-    return links.back();
-}
-
-vctFrame4x4<double,VCT_ROW_MAJOR> 
-robManipulator::ForwardKinematics( const vctDynamicVector<double>& q ) const {
-
-  // q must have at least links.size() values. If q has more values they will
-  // be passed to the tool
-  if( q.size() < links.size() ){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-		      << ": Expected at least " << links.size() << " values. "
-		      << "Got " << q.size()
-		      << std::endl;
-    return Rtw0;
-  }
-
-  // If there's no tool, then the number of values must match the number of 
-  // joints
-  if( tool == NULL && (links.size() < q.size()) ){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-		      << ": Expected exactly " << links.size() << " values. "
-		      << " Got " << q.size()
-		      << std::endl;
-    return Rtw0;
-  }
-
-  // no link? then return the transformation of the base
-  if( links.empty() ){
-    CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS
-			<< ": Manipulator with no link."
+			<< ": Manipulator has no link."
 			<< std::endl;
     return Rtw0;
   }
@@ -256,26 +192,18 @@ robManipulator::ForwardKinematics( const vctDynamicVector<double>& q ) const {
   // set the position/orientation of link 0 to the base * its tranformation
   // setting the link's transformation is necessary in order to render the link
   // in opengl
-  vctFrame4x4<double,VCT_ROW_MAJOR> Rtwi =Rtw0*links[0].ForwardKinematics(q[0]);
+  vctFrame4x4<double> Rtwi =Rtw0*links[0].ForwardKinematics(q[0]);
 
   // for link 1 to N
-  for(size_t i=1; i<links.size(); i++)
+  for(int i=1; i<N; i++)
     Rtwi = Rtwi * links[i].ForwardKinematics( q[i] );
 
-  if( tool != NULL ){
-    // copy the remaining joints values and give them to the tool
-    vctDynamicVector<double> toolq( q.size() - links.size() );
-    for( size_t i=0; i<q.size()-links.size(); i++ )
-      toolq[i] = q[ links.size() + i ];
-    return links.back() * tool->ForwardKinematics( toolq );
-  }
-  
   return Rtwi;
 }
 
-robError 
+robManipulator::Errno 
 robManipulator::InverseKinematics( vctDynamicVector<double>& q, 
-				   const vctFrame4x4<double,VCT_ROW_MAJOR>& Rts,
+				   const vctFrame4x4<double>& Rts,
 				   double tolerance, 
 				   size_t Niterations ){
 
@@ -284,14 +212,14 @@ robManipulator::InverseKinematics( vctDynamicVector<double>& q,
 		      << ": Expected " << links.size() << " joints values. "
 		      << " Got " << q.size() 
 		      << std::endl;
-    return ERROR;
+    return robManipulator::EFAILURE;
   }
 
   if( links.size() == 0 ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
 		      << ": The manipulator has no links."
 		      << std::endl;
-    return ERROR;
+    return robManipulator::EFAILURE;
   }
 
   // A is a pointer to the 6xN spatial Jacobian
@@ -381,8 +309,8 @@ robManipulator::InverseKinematics( vctDynamicVector<double>& q,
 
   delete[] S;
 
-  if( i==Niterations ) return ERROR;
-  else return SUCCESS;
+  if( i==Niterations ) return robManipulator::EFAILURE;
+  else return robManipulator::ESUCCESS;;
 }
 
 /*
@@ -392,7 +320,7 @@ robManipulator::InverseKinematics( vctDynamicVector<double>& q,
  */
 void robManipulator::JacobianBody( const vctDynamicVector<double>& q ) const {
 
-  vctFrame4x4<double,VCT_ROW_MAJOR> U;  // set identity
+  vctFrame4x4<double> U;  // set identity
 
   if( tool != NULL ){
     //U = tool->ForwardKinematics( 0.0 ); // set to tool if any
@@ -400,11 +328,11 @@ void robManipulator::JacobianBody( const vctDynamicVector<double>& q ) const {
 
   for(int j=(int)links.size()-1; 0<=j; j--){
 
-    if( links[j].DHConvention() == robDHStandard ){      // DH convention
+    if( links[j].GetConvention() == robDH::STANDARD ){      // DH convention
       U = links[j].ForwardKinematics( q[j] ) * U;
     }
 
-    if( links[j].JointType() == robJointHinge ){         // Revolute joint
+    if( links[j].GetType() == robJoint::HINGE ){         // Revolute joint
       // Jn is column major
       Jn[j][0] = U[0][3]*U[1][0] - U[1][3]*U[0][0];
       Jn[j][1] = U[0][3]*U[1][1] - U[1][3]*U[0][1];
@@ -416,7 +344,7 @@ void robManipulator::JacobianBody( const vctDynamicVector<double>& q ) const {
 
     }
 
-    if( links[j].JointType() == robJointSlider ){   // Prismatic joint
+    if( links[j].GetType() == robJoint::SLIDER ){   // Prismatic joint
       // Jn is column major
       Jn[j][0] = U[2][0]; // nz
       Jn[j][1] = U[2][1]; // oz
@@ -428,7 +356,7 @@ void robManipulator::JacobianBody( const vctDynamicVector<double>& q ) const {
 
     }
 
-    if( links[j].DHConvention() == robDHModified){  // Modified DH
+    if( links[j].GetConvention() == robDH::MODIFIED ){  // Modified DH
       U = links[j].ForwardKinematics( q[j] ) * U;
     }
   }
@@ -441,7 +369,7 @@ void robManipulator::JacobianSpatial( const vctDynamicVector<double>& q ) const 
   /*
    * Get the adjoint matrix to flip the body jacobian to spatial jacobian
    */
-  vctFrame4x4<double,VCT_ROW_MAJOR> Rt0n = ForwardKinematics( q );
+  vctFrame4x4<double> Rt0n = ForwardKinematics( q );
   double Ad[6][6];//( this->FK() );
 
   // Build the adjoint matrix
@@ -528,19 +456,19 @@ robManipulator::RNE( const vctDynamicVector<double>& q,
   // acceleration of link 0
   // extract the rotation of the base and map the vector [0 0 1] in the robot
   // coordinate frame
-  vctMatrixRotation3<double,VCT_ROW_MAJOR> R(Rtw0[0][0], Rtw0[0][1],Rtw0[0][2],
-					     Rtw0[1][0], Rtw0[1][1],Rtw0[1][2],
-					     Rtw0[2][0], Rtw0[2][1],Rtw0[2][2]);
+  vctMatrixRotation3<double> R( Rtw0[0][0], Rtw0[0][1],Rtw0[0][2],
+				Rtw0[1][0], Rtw0[1][1],Rtw0[1][2],
+				Rtw0[2][0], Rtw0[2][1],Rtw0[2][2] );
   vd = R.Transpose() * z0 * g;
 
   // Forward recursion
   for(size_t i=0; i<links.size(); i++){
 
-    double                                       m; // mass
-    vctFixedSizeVector<double,3>                 s; // center of mass
-    vctFixedSizeMatrix<double,3,3,VCT_ROW_MAJOR> I; // moment of inertia
-    vctMatrixRotation3<double,VCT_ROW_MAJOR>     A; // iA(i-1)
-    vctFixedSizeVector<double,3>                ps; // distal link
+    double                          m; // mass
+    vctFixedSizeVector<double,3>    s; // center of mass
+    vctFixedSizeMatrix<double,3,3>  I; // moment of inertia
+    vctMatrixRotation3<double>      A; // iA(i-1)
+    vctFixedSizeVector<double,3>   ps; // distal link
 
     m  = links[i].Mass();
     s  = links[i].CenterOfMass();
@@ -565,7 +493,7 @@ robManipulator::RNE( const vctDynamicVector<double>& q,
 
   // Backward recursion
   for(int i=(int)links.size()-1; 0<=i; i--){
-    vctMatrixRotation3<double,VCT_ROW_MAJOR> A;
+    vctMatrixRotation3<double>   A;
     vctFixedSizeVector<double,3> ps = links[i].PStar();
     vctFixedSizeVector<double,3> s  = links[i].CenterOfMass();
 
@@ -576,9 +504,9 @@ robManipulator::RNE( const vctDynamicVector<double>& q,
     n = A*n + (ps%f) + (s%F[i]) + N[i];        // moment externed on i by i-1
     A = links[i].Orientation(q[i]).InverseSelf(); // 
 
-    if (links[i].JointType() == robJointHinge )
+    if (links[i].GetType() == robJoint::HINGE )
       tau[i] = n*(A*z0);                       // 
-    if( links[i].JointType() == robJointSlider )
+    if( links[i].GetType() == robJoint::SLIDER )
       tau[i] = f*(A*z0);                       // 
 
   }
@@ -612,8 +540,8 @@ robManipulator::BiasAcceleration( const vctDynamicVector<double>& q,
 
   for(size_t i=0; i<links.size(); i++){
 
-    vctMatrixRotation3<double,VCT_ROW_MAJOR> A;    // iA(i-1)
-    vctFixedSizeVector<double,3>            ps;
+    vctMatrixRotation3<double>     A;    // iA(i-1)
+    vctFixedSizeVector<double,3>  ps;
 
     A  = links[i].Orientation( q[i] ).InverseSelf();
     ps = links[i].PStar();                         // distal
@@ -627,9 +555,8 @@ robManipulator::BiasAcceleration( const vctDynamicVector<double>& q,
 }
 
 // A is column major!
-void 
-robManipulator::JSinertia(double **A,
-			  const vctDynamicVector<double>& q) const{
+void robManipulator::JSinertia( double **A,
+				const vctDynamicVector<double>& q ) const {
 
   if( q.size() != links.size() ){
     std::cerr << "robManipulator::JSinertia: Expected " << links.size()
@@ -652,8 +579,8 @@ robManipulator::JSinertia(double **A,
 }
 
 // Ac is column major!
-void robManipulator::OSinertia(double Ac[6][6], 
-			       const vctDynamicVector<double>& q) const {
+void robManipulator::OSinertia( double Ac[6][6], 
+				const vctDynamicVector<double>& q ) const {
   char SIDE = 'R';                // dsymm C := alpha*B*A + beta*C,
   char UPLO = 'L';                // lower triangular (upper triangular for CM)
   char TRANST = 'T';
@@ -867,26 +794,24 @@ robManipulator::InverseDynamics( const vctDynamicVector<double>& q,
 }
 
 void robManipulator::Print() const {
-
-  for(size_t i=0; i<links.size(); i++){
-    std::cout << "Link " << i << ": " << std::endl << links[i] << std::endl;
-  }
-
+  //for(size_t i=0; i<links.size(); i++){
+  //std::cout << "Link " << i << ": " << std::endl << links[i].WriteLink() << std::endl;
+  //}
 }
 
 /*
-robError robManipulator::JointPosition( const vctDynamicVector<double>& q ){
+robManipulator::Errno robManipulator::JointPosition( const vctDynamicVector<double>& q ){
   
   if( q.size() == links.size() ){
     for(size_t i=0; i<links.size(); i++)
       joints[i].Position( q[i] );
     ForwardKinematics();
-    return SUCCESS;
+    return robManipulator::ESUCCESS;;
   }
   else{
     std::cout << "robManipulator::JointPosition: Got " << q.size() 
 	 << " joints, expected " << links.size() << std::endl;
-    return ERROR;
+    return robManipulator::EFAILURE;
   }
 }
 */
@@ -899,9 +824,9 @@ vctDynamicVector<double>       robManipulator::JointPosition( ) {
 }
 */
 /*
-robError JointForceTorque( const vctDynamicVector<double>& q );
+robManipulator::Errno JointForceTorque( const vctDynamicVector<double>& q );
 vctDynamicVector<double>       JointForceTorque( ) const;
 
-robError ActuatorForceTorque( const vctDynamicVector<double>& q );
+robManipulator::Errno ActuatorForceTorque( const vctDynamicVector<double>& q );
 vctDynamicVector<double>       ActuatorForceTorque( ) const;
 */

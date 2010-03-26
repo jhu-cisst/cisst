@@ -1,28 +1,31 @@
-#include <cisstRobot/robJointBase.h>
+#include <cisstRobot/robJoint.h>
 #include <cisstCommon/cmnLogger.h>
 
 #include <algorithm>  // transform
 #include <iomanip>    // setw
 #include <ctype.h>    // toupper
 
-robJointBase::robJointBase(){
-  this->type = robJointHinge;
-  this->mode = robJointActive;
+robJoint::robJoint(){
+  this->type = robJoint::HINGE;
+  this->mode = robJoint::ACTIVE;
   this->qoffset = 0.0;
   this->qmin = 0.0;
   this->qmax = 0.0;
   this->ftmax = 0.0;
 }
 
-robJointBase::~robJointBase(){}
+robJoint::Type robJoint::GetType() const { return type; }
 
-robJointType robJointBase::JointType() const { return type; }
+robJoint::Mode robJoint::GetMode() const { return mode; }
 
-robJointMode robJointBase::JointMode() const { return mode; }
+double robJoint::GetPosition() const {
+  CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS
+		      << "Not implemented"
+		      << std::endl;
+  return 0.0;
+}
 
-double 
-robJointBase::GetJointPosition() const {
-
+double robJoint::GetVelocity() const {
   CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS
 		      << "Not implemented"
 		      << std::endl;
@@ -30,64 +33,40 @@ robJointBase::GetJointPosition() const {
   return 0.0;
 }
 
-double 
-robJointBase::GetJointVelocity() const {
-
+double robJoint::GetForceTorque() const {
   CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS
 		      << "Not implemented"
 		      << std::endl;
-
   return 0.0;
 }
 
-double 
-robJointBase::GetJointForceTorque() const {
-
+void robJoint::SetPosition(double){
   CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS
 		      << "Not implemented"
 		      << std::endl;
-
-  return 0.0;
-
 }
 
-void 
-robJointBase::SetJointPosition(double){
-
+void robJoint::SetVelocity(double){
   CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS
 		      << "Not implemented"
 		      << std::endl;
-
 }
 
-void 
-robJointBase::SetJointVelocity(double){
-
+void robJoint::SetForceTorque( double ){
   CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS
 		      << "Not implemented"
 		      << std::endl;
-
 }
 
-void 
-robJointBase::SetJointForceTorque(double){
+double robJoint::PositionOffset() const { return qoffset; }
 
-  CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS
-		      << "Not implemented"
-		      << std::endl;
+double robJoint::PositionMin()    const { return qmin; }
 
-}
+double robJoint::PositionMax()    const { return qmax; }
 
-double robJointBase::PositionOffset() const { return qoffset; }
+double robJoint::ForceTorqueMax() const { return ftmax; }
 
-double robJointBase::PositionMin()    const { return qmin; }
-
-double robJointBase::PositionMax()    const { return qmax; }
-
-double robJointBase::ForceTorqueMax() const { return ftmax; }
-
-robError 
-robJointBase::Read( std::istream& is ){ 
+robJoint::Errno robJoint::ReadJoint( std::istream& is ){ 
 
   std::string type, mode;
   
@@ -104,60 +83,59 @@ robJointBase::Read( std::istream& is ){
   
   // match to string to a joint type
   if( (type.compare("REVOLUTE") == 0) || (type.compare("HINGE") == 0) )
-    this->type = robJointHinge;
+    this->type = robJoint::HINGE;
       
   else if( (type.compare("PRISMATIC") == 0) || (type.compare("SLIDER") == 0) )
-    this->type = robJointSlider;
+    this->type = robJoint::SLIDER;
 
   else if( type.compare("UNIVERSAL") == 0 )
-    this->type = robJointUniversal;
+    this->type = robJoint::UNIVERSAL;
 
   else if( type.compare("BALLSOCKET") == 0 )
-    this->type = robJointBallSocket;
+    this->type = robJoint::BALLSOCKET;
 
   else{
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
 		      << ": Expected a joint type. Got " << type << "."
 		      << std::endl;
-    return ERROR;
+    return robJoint::EFAILURE;
   }
 
   // match the mode string to a joint mode
   if( mode.compare( "PASSIVE" ) == 0 )
-    this->mode = robJointPassive;
+    this->mode = robJoint::PASSIVE;
   
   else if( mode.compare( "ACTIVE" ) == 0 )
-    this->mode = robJointActive;
+    this->mode = robJoint::ACTIVE;
   
   else{
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
 		      << ": Expected a joint mode. Got " << mode << "."
 		      << std::endl;
-    return ERROR;
+    return robJoint::EFAILURE;
   }
 
-  return SUCCESS;
+  return robJoint::ESUCCESS;
 }
 
-robError 
-robJointBase::Write( std::ostream& os ) const {
+robJoint::Errno robJoint::WriteJoint( std::ostream& os ) const {
 
-  switch( JointType() ){
-  case robJointHinge:
+  switch( GetType() ){
+  case robJoint::HINGE:
     os <<  std::setw(10) << "hinge ";
     break;
-  case robJointSlider:
+  case robJoint::SLIDER:
     os <<  std::setw(10) << "slider ";
     break;
-  case robJointUniversal:
+  case robJoint::UNIVERSAL:
     os << std::setw(10) << "universal ";
     break;
-  case robJointBallSocket:
+  case robJoint::BALLSOCKET:
     os << std::setw(10) << "ballsocket ";
     break;
   }
 
-  if( JointMode() == robJointActive )
+  if( GetMode() == robJoint::ACTIVE )
     os << "active ";
   else
     os << "passive ";
@@ -167,7 +145,7 @@ robJointBase::Write( std::ostream& os ) const {
      << std::setw(13) << PositionMax()
      << std::setw(13) << ForceTorqueMax();
 
-  return SUCCESS;
+  return robJoint::ESUCCESS;
 
 }
 
