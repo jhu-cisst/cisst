@@ -25,6 +25,11 @@ option(CISST_DEV_HAS_LOPOMOCO "Build LoPoMoCo card extension" OFF)
 option(CISST_DEV_HAS_OPENIGTLINK "Open IGT Link protocol" OFF)
 option(CISST_DEV_HAS_NOVINTHDL "Build Novint Device using HDL library" OFF)
 option(CISST_DEV_HAS_MICRONTRACKER "Claron Micron Tracker libraries" OFF)
+option( CISST_DEV_HAS_PEAKCAN "Use support PEAKCAN." OFF )
+option( CISST_DEV_HAS_RTSOCKETCAN "Use support RT Socket CAN." OFF )
+option( CISST_DEV_HAS_ACCELEGLOVE "Use support for AcceleGlove." OFF )
+option( CISST_DEV_HAS_ODE "Use support for ODE." OFF )
+option( CISST_DEV_HAS_GLUT "Use support for GLUT." OFF )
 
 # set dependencies
 set(DEPENDENCIES
@@ -41,13 +46,84 @@ set(HEADER_FILES
     devSartoriusSerial.h
     devExport.h
     devKeyboard.h
+    controlloops/devControlLoop.h
+    controlloops/devGravityCompensation.h
+    controlloops/devJointsPD.h
+#     can/devCAN.hpp
+#     wam/devGroup.hpp
+#     wam/devPuck.hpp
+#     wam/devWAM.hpp
     )
 
 set(SOURCE_FILES
     devNull.cpp
     devSartoriusSerial.cpp
     devKeyboard.cpp
+    controlloops/devControlLoop.cpp
+    controlloops/devGravityCompensation.cpp
+    controlloops/devJointsPD.cpp
+#    can/devCAN.cpp
+#    wam/devGroup.cpp
+#    wam/devPuck.cpp
+#    wam/devWAM.cpp
     )
+
+# Check for GLUT
+if( CISST_DEV_HAS_GLUT )
+
+  include( FindOpenGL )
+  if( OPENGL_FOUND )
+    cisst_add_to_internal( CISST_ADDITIONAL_LIBRARIES OPENGL_LIBRARIES )
+  endif( OPENGL_FOUND )
+
+  include( FindGLUT )
+  if( GLUT_FOUND )
+    cisst_add_to_internal( CISST_ADDITIONAL_LIBRARIES GLUT_LIBRARIES )
+  endif( GLUT_FOUND )
+
+  SET( HEADER_FILES 
+    ${HEADER_FILES}
+    glut/devGeometry.h
+    glut/devGLUT.h
+    glut/devMeshTriangular.h
+    )
+
+    SET( SOURCE_FILES 
+      ${SOURCE_FILES}
+      glut/devGeometry.cpp
+      glut/devGLUT.cpp
+      glut/devMeshTriangular.cpp
+      )
+
+endif( CISST_DEV_HAS_GLUT )
+
+# Check for ODE
+if( CISST_DEV_HAS_ODE )
+  find_package( ODE )
+  if( ODE_FOUND )
+    
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DCISST_ODE_SUPPORT -DdDOUBLE")
+    cisst_add_to_internal( CISST_ADDITIONAL_LIBRARIES ODE_LIBRARIES )
+    
+    SET( HEADER_FILES 
+      ${HEADER_FILES}
+      ode/devODEBody.h
+      ode/devODEJoint.h
+      ode/devODEManipulator.h
+      ode/devODEWorld.h
+      )
+    
+    SET( SOURCE_FILES 
+      ${SOURCE_FILES}
+      ode/devODEBody.cpp
+      ode/devODEJoint.cpp
+      ode/devODEManipulator.cpp
+      ode/devODEWorld.cpp 
+      )
+    
+    endif( ODE_FOUND )
+    
+endif( CISST_DEV_HAS_ODE )
 
 if(CISST_DEV_HAS_SENSABLEHD)
   find_package(Sensable REQUIRED)
@@ -59,6 +135,24 @@ if(CISST_DEV_HAS_SENSABLEHD)
       devSensableHD.h
       devSensableHDMasterSlave.h)
 endif(CISST_DEV_HAS_SENSABLEHD)
+
+# Check for PEAK CAN
+if( CISST_DEV_HAS_PEAKCAN )
+  find_package( PEAKCAN )
+  set( SOURCE_FILES ${SOURCE_FILES} can/devPEAKCAN.cpp )
+  set( HEADER_FILES ${HEADER_FILES} can/devPEAKCAN.hpp )
+endif( CISST_DEV_HAS_PEAKCAN )
+
+# Check for RT Socket CAN
+if( CISST_DEV_HAS_RTSOCKETCAN )
+  set( SOURCE_FILES ${SOURCE_FILES} can/devRTSocketCAN.cpp )
+  set( HEADER_FILES ${HEADER_FILES} can/devRTSocketCAN.hpp )
+endif( CISST_DEV_HAS_RTSOCKETCAN )
+
+if( CISST_DEV_HAS_ACCELEGLOVE )
+  set(SOURCE_FILES ${SOURCE_FILES} devAcceleGlove.cpp)
+  set(HEADER_FILES ${HEADER_FILES} devAcceleGlove.h) 
+endif( CISST_DEV_HAS_ACCELEGLOVE )
 
 if(CISST_DEV_HAS_LOPOMOCO) 
   set(SOURCE_FILES ${SOURCE_FILES} 
