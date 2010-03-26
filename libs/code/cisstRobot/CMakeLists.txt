@@ -77,17 +77,17 @@ SET(HEADER_FILES
   )
 
 # use for findblas and findlapack
-enable_language( Fortran )
+#enable_language( Fortran )
 
-include( FindBLAS )
-if( BLAS_FOUND )
-    cisst_add_to_internal( CISST_ADDITIONAL_LIBRARIES BLAS_LIBRARIES )
-endif( BLAS_FOUND )
+#include( FindBLAS )
+#if( BLAS_FOUND )
+#    cisst_add_to_internal( CISST_ADDITIONAL_LIBRARIES BLAS_LIBRARIES )
+#endif( BLAS_FOUND )
   
-include( FindLAPACK )
-if( LAPACK_FOUND )
-    cisst_add_to_internal( CISST_ADDITIONAL_LIBRARIES LAPACK_LIBRARIES )
-endif( LAPACK_FOUND )
+#include( FindLAPACK )
+#if( LAPACK_FOUND )
+#    cisst_add_to_internal( CISST_ADDITIONAL_LIBRARIES LAPACK_LIBRARIES )
+#endif( LAPACK_FOUND )
   
 
 CISST_ADD_LIBRARY_TO_PROJECT(cisstLibs)
