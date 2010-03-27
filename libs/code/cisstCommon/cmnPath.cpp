@@ -167,3 +167,26 @@ cmnPath::DirectorySeparator()
     return separator;
 }
 
+#if (CISST_OS == CISST_WINDOWS)
+    #include <direct.h> // for _getcwd
+#else
+    #include <unistd.h> // for getcwd
+#endif
+
+std::string cmnPath::GetWorkingDirectory(void)
+{
+    char * buffer = 0;
+    // use getcwd without a buffer, getcwd will allocate memory for us
+#if (CISST_OS == CISST_WINDOWS)
+    buffer = _getcwd(0, 0);
+#else
+    buffer = getcwd(0, 0);    
+#endif
+    std::string result(buffer);
+    // remember to free buffer
+    if (buffer) {
+        free(buffer);
+    }
+    return result;
+}
+

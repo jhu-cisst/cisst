@@ -146,7 +146,10 @@ public:
       name from the parent directory name.  It's equal to "/" on Linux, "\\"
       on Windows, etc.
     */
-    static const std::string & DirectorySeparator();
+    static const std::string & DirectorySeparator(void);
+
+    /*! Get working directory */
+    static std::string GetWorkingDirectory(void);
 };
 
 
