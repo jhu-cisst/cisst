@@ -19,6 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include "mtsCollectorQWidget.h"
+#include <cisstCommon/cmnPath.h>
 
 #include <QGroupBox>
 #include <QGridLayout>
@@ -26,17 +27,17 @@ http://www.cisst.org/cisst/license.txt.
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QSpinBox>
+#include <QLabel>
+#include <QFileDialog>
 
 mtsCollectorQWidget::mtsCollectorQWidget(void)
 {
     // create main layout
     CentralLayout = new QVBoxLayout(this);
-    CentralLayout->setContentsMargins(0, 0, 0, 0);
 
     // create group for manual trigger
     ManualBox = new QGroupBox("Manual start/stop");
     ManualLayout = new QVBoxLayout(this);
-    ManualLayout->setContentsMargins(0, 0, 0, 0);
     ManualStartStop = new QPushButton("Start collection", this);
     ManualStartStop->setCheckable(true);
     ManualLayout->addWidget(ManualStartStop);
@@ -46,7 +47,6 @@ mtsCollectorQWidget::mtsCollectorQWidget(void)
     // create group for scheduled collection
     ScheduledBox = new QGroupBox("Scheduled start/stop");
     ScheduledLayout = new QHBoxLayout(this);
-    ScheduledLayout->setContentsMargins(0, 0, 0, 0);
     ScheduledBegin = new QSpinBox(this);
     ScheduledBegin->setRange(0, 1000000);
     ScheduledBegin->setPrefix("Start in ");
@@ -57,7 +57,7 @@ mtsCollectorQWidget::mtsCollectorQWidget(void)
     ScheduledDuration->setPrefix("for ");
     ScheduledDuration->setSuffix(" s");
     ScheduledLayout->addWidget(ScheduledDuration);
-    ScheduledStart = new QPushButton("... start!", this);
+    ScheduledStart = new QPushButton("Start", this);
     ScheduledLayout->addWidget(ScheduledStart);
     ScheduledBox->setLayout(ScheduledLayout);
     CentralLayout->addWidget(ScheduledBox);
@@ -65,8 +65,12 @@ mtsCollectorQWidget::mtsCollectorQWidget(void)
     // create group for file setting
     FileBox = new QGroupBox("Output files");
     FileLayout = new QVBoxLayout(this);
-    FileLayout->setContentsMargins(0, 0, 0, 0);
-    FileNew = new QPushButton("New file(s)", this);
+    FileDialog = new QPushButton("Change directory", this);
+    FileLayout->addWidget(FileDialog);
+    FileDirectory = new QLabel(this);
+    FileDirectory->setText(cmnPath::GetWorkingDirectory().c_str());
+    FileLayout->addWidget(FileDirectory);
+    FileNew = new QPushButton("Start new file(s)", this);
     FileLayout->addWidget(FileNew);
     FileBox->setLayout(FileLayout);
     CentralLayout->addWidget(FileBox);
@@ -75,6 +79,8 @@ mtsCollectorQWidget::mtsCollectorQWidget(void)
                      this, SLOT(ManualStartStopSlot(bool)));
     QObject::connect(this->ScheduledStart, SIGNAL(clicked()),
                      this, SLOT(ScheduledStartSlot()));
+    QObject::connect(this->FileDialog, SIGNAL(clicked()),
+                     this, SLOT(FileDialogSlot()));
     QObject::connect(this->FileNew, SIGNAL(clicked()),
                      this, SLOT(FileNewSlot()));
 }
@@ -98,6 +104,20 @@ void mtsCollectorQWidget::ScheduledStartSlot(void)
     const double duration = ScheduledDuration->value();
     emit StartCollectionIn(begin);
     emit StopCollectionIn(begin + duration);
+}
+
+
+void mtsCollectorQWidget::FileDialogSlot(void)
+{
+    QString result;
+    result = QFileDialog::getExistingDirectory(this, QString("Select directory"),
+                                               FileDirectory->text(),
+                                               QFileDialog::ShowDirsOnly
+                                               | QFileDialog::DontResolveSymlinks);
+    if (!result.isNull()) {
+        FileDirectory->setText(result);
+        emit SetWorkingDirectory(result);
+    }
 }
 
 

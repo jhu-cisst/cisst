@@ -35,6 +35,7 @@ mtsCollectorQComponent::mtsCollectorQComponent(const std::string & taskName) :
        requiredInterface->AddFunction("StopCollection", Collection.StopCollection);
        requiredInterface->AddFunction("StartCollectionIn", Collection.StartCollectionIn);
        requiredInterface->AddFunction("StopCollectionIn", Collection.StopCollectionIn);
+       requiredInterface->AddFunction("SetWorkingDirectory", Collection.SetWorkingDirectory);
        requiredInterface->AddFunction("SetOutputToDefault", Collection.SetOutputToDefault);
     }
 }
@@ -56,6 +57,8 @@ void mtsCollectorQComponent::ConnectToWidget(QWidget * widget)
                      this, SLOT(StartCollectionInQSlot(double)));
     QObject::connect(widget, SIGNAL(StopCollectionIn(double)),
                      this, SLOT(StopCollectionInQSlot(double)));
+    QObject::connect(widget, SIGNAL(SetWorkingDirectory(QString)),
+                     this, SLOT(SetWorkingDirectoryQSlot(QString)));
     QObject::connect(widget, SIGNAL(SetOutputToDefault()),
                      this, SLOT(SetOutputToDefaultQSlot()));
 }
@@ -77,7 +80,6 @@ void mtsCollectorQComponent::StopCollectionQSlot(void)
 
 void mtsCollectorQComponent::StartCollectionInQSlot(double delay)
 {
-    std::cerr << "-----------------" << std::endl;
     CMN_LOG_CLASS_RUN_VERBOSE << "StartCollectionInQSlot: starting data collection in " << delay << "s" << std::endl;
     Collection.StartCollectionIn(mtsDouble(delay));
 }
@@ -87,6 +89,14 @@ void mtsCollectorQComponent::StopCollectionInQSlot(double delay)
 {
     CMN_LOG_CLASS_RUN_VERBOSE << "StopCollectionInQSlot: stopping data collection in " << delay << "s" << std::endl;
     Collection.StopCollectionIn(mtsDouble(delay));
+}
+
+
+void mtsCollectorQComponent::SetWorkingDirectoryQSlot(QString directoryQt)
+{
+    mtsStdString directory(directoryQt.toStdString());
+    Collection.SetWorkingDirectory(directory);
+    Collection.SetOutputToDefault();
 }
 
 

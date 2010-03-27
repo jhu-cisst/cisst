@@ -19,6 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstCommon/cmnLoggerQWidget.h>
+#include <cisstCommon/cmnPath.h>
 #include <cisstOSAbstraction/osaThreadedLogFile.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstMultiTask/mtsCollectorEvent.h>
@@ -38,6 +39,8 @@ const unsigned int NumSineTasks = 2;
 
 int main(int argc, char *argv[])
 {
+    std::cout << cmnPath::GetWorkingDirectory() << std::endl;
+
     // log configuration
     cmnLogger::SetLoD(CMN_LOG_LOD_VERY_VERBOSE);
     cmnLogger::AddChannel(std::cout, CMN_LOG_LOD_VERY_VERBOSE);

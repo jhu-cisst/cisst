@@ -29,6 +29,8 @@ class QVBoxLayout;
 class QHBoxLayout;
 class QPushButton;
 class QSpinBox;
+class QLabel;
+class QFileDialog;
 
 class mtsCollectorQWidget: public QWidget
 {
@@ -53,11 +55,14 @@ protected:
 
     QGroupBox * FileBox;
     QVBoxLayout * FileLayout;
+    QPushButton * FileDialog;
+    QLabel * FileDirectory;
     QPushButton * FileNew;
 
 public slots:
     void ManualStartStopSlot(bool checked);
     void ScheduledStartSlot(void);
+    void FileDialogSlot(void);
     void FileNewSlot(void);
 
 public:
@@ -66,6 +71,7 @@ signals:
     void StopCollection(void);
     void StartCollectionIn(double delay);
     void StopCollectionIn(double delay);
+    void SetWorkingDirectory(QString);
     void SetOutputToDefault(void);
 
 };

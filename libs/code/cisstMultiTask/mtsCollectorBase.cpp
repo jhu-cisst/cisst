@@ -21,6 +21,8 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstMultiTask/mtsCollectorBase.h>
+
+#include <cisstCommon/cmnPath.h>
 #include <cisstOSAbstraction/osaSleep.h>
 
 
@@ -42,6 +44,9 @@ mtsCollectorBase::mtsCollectorBase(const std::string & collectorName,
 {
     ++CollectorCount;
 
+    // set working directory
+    this->WorkingDirectoryMember.Data = cmnPath::GetWorkingDirectory();
+
     if (TaskManager == 0) {
         TaskManager = mtsTaskManager::GetInstance();
     }
@@ -51,6 +56,8 @@ mtsCollectorBase::mtsCollectorBase(const std::string & collectorName,
     if (this->ControlInterface) {
         // commands controlling the output
         ControlInterface->AddCommandVoid(&mtsCollectorBase::SetOutputToDefault, this, "SetOutputToDefault");
+        ControlInterface->AddCommandWrite(&mtsCollectorBase::SetWorkingDirectory, this, "SetWorkingDirectory");
+        ControlInterface->AddCommandRead(&mtsCollectorBase::GetWorkingDirectory, this, "GetWorkingDirectory");
         // start/stop commands
         ControlInterface->AddCommandVoid(&mtsCollectorBase::StartCollectionCommand, this, "StartCollection");
         ControlInterface->AddCommandWrite(&mtsCollectorBase::StartCollectionInCommand, this, "StartCollectionIn");
@@ -148,7 +155,9 @@ void mtsCollectorBase::SetOutputToDefault(const CollectorFileFormat fileFormat)
     }
 
     std::string fileName =
-        this->GetDefaultOutputName() + "." + suffix;
+        this->WorkingDirectoryMember.Data
+        + cmnPath::DirectorySeparator()
+        + this->GetDefaultOutputName() + "." + suffix;
 
     this->SetOutput(fileName, fileFormat);
 }
@@ -212,6 +221,18 @@ void mtsCollectorBase::SetDelimiter(void)
     } else {
         this->Delimiter = ' ';
     }
+}
+
+
+void mtsCollectorBase::SetWorkingDirectory(const mtsStdString & directory)
+{
+    this->WorkingDirectoryMember = directory;
+}
+
+
+void mtsCollectorBase::GetWorkingDirectory(mtsStdString & placeHolder) const
+{
+    placeHolder = this->WorkingDirectoryMember;
 }
 
 

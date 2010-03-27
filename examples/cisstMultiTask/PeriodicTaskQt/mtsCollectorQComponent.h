@@ -47,6 +47,7 @@ class mtsCollectorQComponent: public QObject, public mtsDevice
         mtsFunctionVoid StopCollection;
         mtsFunctionWrite StartCollectionIn;
         mtsFunctionWrite StopCollectionIn;
+        mtsFunctionWrite SetWorkingDirectory;
         mtsFunctionVoid SetOutputToDefault;
     } Collection;
 
@@ -55,6 +56,7 @@ class mtsCollectorQComponent: public QObject, public mtsDevice
     void StopCollectionQSlot(void);
     void StartCollectionInQSlot(double);
     void StopCollectionInQSlot(double);
+    void SetWorkingDirectoryQSlot(QString);
     void SetOutputToDefaultQSlot(void);
 };
 

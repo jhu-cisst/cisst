@@ -104,8 +104,11 @@ protected:
     /*! Flag for PrintHeader() method. */
     bool FirstRunningFlag;
 
-    /*! Output file name. */
+    /*! Output file name, including working directory. */
     std::string OutputFileName;
+
+    /*! Current directory to save data */
+    mtsStdString WorkingDirectoryMember;
 
     /*! Pointer on output stream, can be create and managed by this
       class or provided by a user. */
@@ -198,6 +201,11 @@ public:
     second(s). If it is zero (by default), it means 'stop now'. */
     virtual void StopCollection(const mtsDouble & delayInSeconds) = 0;
 
+    /*! Set working directory, usable with commands as well */
+    void SetWorkingDirectory(const mtsStdString & directory);
+
+    /*! Get working directory, usable with commands as well */
+    void GetWorkingDirectory(mtsStdString & placeHolder) const;
 
     //---------------------- Miscellaneous functions ------------------------//
     inline static unsigned int GetCollectorCount(void) { return CollectorCount; }
