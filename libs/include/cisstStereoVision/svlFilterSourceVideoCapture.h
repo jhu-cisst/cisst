@@ -243,7 +243,7 @@ public:
 };
 
 
-class svlVidCapSrcDialogThread
+class CISST_EXPORT svlVidCapSrcDialogThread
 {
 public:
     svlVidCapSrcDialogThread(unsigned int videoch) { VideoChannel = videoch; InitSuccess = false; Stopped = false; }

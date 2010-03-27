@@ -62,6 +62,7 @@ SET(SOURCE_FILES
     svlFilterPointTracker.cpp
     svlFilterStereoImageJoiner.cpp
     svlFilterImageFlipRotate.cpp
+    svlFilterCallback.cpp
 
   # Private System API
     svlImageCodecBMP.h             # private header
@@ -118,6 +119,7 @@ SET(HEADER_FILES
     svlFilterPointTracker.h
     svlFilterStereoImageJoiner.h
     svlFilterImageFlipRotate.h
+    svlFilterCallback.h
 
   # Trackers
     trackers/svlTrackerMSBruteForce.h
