@@ -49,17 +49,20 @@ public:
 
     /*! Default constructor. */
     inline mtsMatrix(void):
+        mtsGenericObject(),
         MatrixType(0, 0)
     {}
 
     /*! Constructor with memory allocation for a given size. */
     inline mtsMatrix(size_type rows, size_type cols):
+        mtsGenericObject(),
         MatrixType(rows, cols)
     {
         MatrixType::Zeros();
     }
 
     inline mtsMatrix(const nsize_type & size):
+        mtsGenericObject(),
         MatrixType(size)
     {
         MatrixType::Zeros();

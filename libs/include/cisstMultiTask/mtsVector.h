@@ -47,12 +47,14 @@ public:
 
     /*! Default constructor. */
     inline mtsVector(void):
+        mtsGenericObject(),
         VectorType(0)
     {}
 
     /*! Constructor with memory allocation for a given size.  Assign
         zero to all elements. */
     inline mtsVector(size_type size):
+        mtsGenericObject(),
         VectorType(size)
     {
         VectorType::Zeros();
