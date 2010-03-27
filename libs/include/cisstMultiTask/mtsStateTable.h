@@ -368,6 +368,9 @@ public:
     /*! Start the current cycle. This just records the starting timestamp (Tic). */
     void Start(void);
 
+    /*! Start if automatic advance is set and does nothing otherwise. */
+    void StartIfAutomatic(void);
+
     /*! Advance the pointers of the circular buffer. Note that since
       there is only a single writer, it is not necessary to use mutual
       exclusion primitives; the critical section can be handled by

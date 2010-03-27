@@ -34,7 +34,7 @@ http://www.cisst.org/cisst/license.txt.
 
 void mtsTask::DoRunInternal(void)
 {
-    StateTable.Start();
+    StateTables.ForEachVoid(&mtsStateTable::StartIfAutomatic);
     this->Run();
     // advance all state tables (if automatic) 
     StateTables.ForEachVoid(&mtsStateTable::AdvanceIfAutomatic);

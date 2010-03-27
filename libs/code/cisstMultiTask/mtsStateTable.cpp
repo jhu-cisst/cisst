@@ -150,6 +150,13 @@ void mtsStateTable::Start(void) {
 }
 
 
+void mtsStateTable::StartIfAutomatic(void) {
+    if (this->AutomaticAdvanceFlag) {
+        this->Start();
+    }
+}
+
+
 void mtsStateTable::Advance(void) {
     unsigned int i;
     unsigned int tmpIndex;
