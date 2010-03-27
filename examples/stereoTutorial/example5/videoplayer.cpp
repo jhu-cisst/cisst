@@ -35,14 +35,6 @@ http://www.cisst.org/cisst/license.txt.
 using namespace std;
 
 
-int callbackFunction(void * imageData, void * objectData){
-	vctDynamicMatrixRef<unsigned char>* image;
-	image = static_cast<vctDynamicMatrixRef<unsigned char>*>(imageData);
-	cerr << "called" << endl;
-	return 0;
-}
-
-
 ////////////////////
 //  Video Player  //
 ////////////////////
@@ -54,10 +46,7 @@ int VideoPlayer(const std::string pathname)
     // instantiating SVL stream and filters
     svlStreamManager viewer_stream(4);
     svlFilterSourceVideoFile viewer_source(1);
-	svlFilterCallback callback;
     svlFilterImageWindow viewer_window;
-
-	callback.SetCallback(callbackFunction,NULL);
 
     // setup source
     if (pathname.empty()) {
@@ -76,7 +65,6 @@ int VideoPlayer(const std::string pathname)
 
     // chain filters to pipeline
     if (viewer_stream.Trunk().Append(&viewer_source) != SVL_OK) goto labError;
-	if (viewer_stream.Trunk().Append(&callback) != SVL_OK) goto labError;
     if (viewer_stream.Trunk().Append(&viewer_window) != SVL_OK) goto labError;
 
     cerr << endl << "Starting stream... ";
