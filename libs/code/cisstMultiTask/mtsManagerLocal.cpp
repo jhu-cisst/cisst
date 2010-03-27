@@ -945,7 +945,7 @@ void mtsManagerLocal::StartAll(void)
     // If so, start that task for last.
     const osaThreadId threadId = osaGetCurrentThreadId();
 
-    mtsTask * componentTask, * componentTaskTemp;
+    mtsTask * componentTask;
 
     ComponentMapChange.Lock();
 
@@ -953,91 +953,39 @@ void mtsManagerLocal::StartAll(void)
     const ComponentMapType::const_iterator itEnd = ComponentMap.end();
     ComponentMapType::const_iterator itLastTask = ComponentMap.end();
 
-    for (; it != ComponentMap.end(); ++it) {
-        // Skip components of mtsDevice type
-        componentTaskTemp = dynamic_cast<mtsTask*>(it->second);
-        if (!componentTaskTemp) continue;
-
-        // Note that the order of dynamic casts matters to figure out
-        // a type of an original task since tasks have multiple inheritances.
-
-        // mtsTaskPeriodic type component
-        componentTaskTemp = dynamic_cast<mtsTaskPeriodic*>(it->second);
-        if (componentTaskTemp) {
-            componentTask = componentTaskTemp;
-        } else {
-            // mtsTaskFromSignal type component
-            componentTaskTemp = dynamic_cast<mtsTaskFromSignal*>(it->second);
-            if (componentTaskTemp) {
-                componentTask = componentTaskTemp;
-            } else {
-                // mtsTaskContinuous type component
-                componentTaskTemp = dynamic_cast<mtsTaskContinuous*>(it->second);
-                if (componentTaskTemp) {
-                    componentTask = componentTaskTemp;
+    for (; it != itEnd; ++it) {
+        // look for component 
+        componentTask = dynamic_cast<mtsTask*>(it->second);
+        if (componentTask) {
+            // Check if the task will use the current thread.
+            if (componentTask->Thread.GetId() == threadId) {
+                CMN_LOG_CLASS_INIT_WARNING << "StartAll: component \"" << it->first
+                                           << "\" uses current thread, will be started last." << std::endl;
+                if (itLastTask != ComponentMap.end()) {
+                    CMN_LOG_CLASS_RUN_ERROR << "StartAll: found another task using current thread (\"" 
+                                            << it->first << "\"), only first will be started (\""
+                                            << itLastTask->first << "\")." << std::endl;
                 } else {
-                    // mtsTaskFromCallback type component
-                    componentTaskTemp = dynamic_cast<mtsTaskFromCallback*>(it->second);
-                    if (componentTaskTemp) {
-                        componentTask = componentTaskTemp;
-                    } else {
-                        componentTask = 0;
-                        CMN_LOG_CLASS_RUN_ERROR << "StartAll: invalid component: unknown mtsTask type" << std::endl;
-                        continue;
-                    }
+                    // set iterator to last task to be started
+                    itLastTask = it;
                 }
-            }
-        }
-
-        // Check if the task will use the current thread.
-        if (componentTask->Thread.GetId() == threadId) {
-            CMN_LOG_CLASS_INIT_WARNING << "StartAll: component \"" << it->first << "\" uses current thread, will start last." << std::endl;
-            if (itLastTask != ComponentMap.end()) {
-                CMN_LOG_CLASS_RUN_ERROR << "StartAll: multiple tasks using current thread (only first will be started)." << std::endl;
             } else {
-                itLastTask = it;
+                CMN_LOG_CLASS_INIT_DEBUG << "StartAll: starting task \"" << it->first << "\"" << std::endl;
+                it->second->Start();  // If task will not use current thread, start it immediately.
             }
         } else {
-            CMN_LOG_CLASS_INIT_DEBUG << "StartAll: starting task \"" << it->first << "\"" << std::endl;
-            componentTask->Start();  // If task will not use current thread, start it immediately.
+            CMN_LOG_CLASS_INIT_DEBUG << "StartAll: starting device \"" << it->first << "\"" << std::endl;
+            it->second->Start();  // this is a device, it doesn't have a thread 
         }
     }
 
     if (itLastTask != ComponentMap.end()) {
-        // mtsTaskPeriodic type component
-        componentTaskTemp = dynamic_cast<mtsTaskPeriodic*>(itLastTask->second);
-        if (componentTaskTemp) {
-            componentTask = componentTaskTemp;
-        } else {
-            // mtsTaskFromSignal type component
-            componentTaskTemp = dynamic_cast<mtsTaskFromSignal*>(itLastTask->second);
-            if (componentTaskTemp) {
-                componentTask = componentTaskTemp;
-            } else {
-                // mtsTaskContinuous type component
-                componentTaskTemp = dynamic_cast<mtsTaskContinuous*>(itLastTask->second);
-                if (componentTaskTemp) {
-                    componentTask = componentTaskTemp;
-                } else {
-                    // mtsTaskFromCallback type component
-                    componentTaskTemp = dynamic_cast<mtsTaskFromCallback*>(itLastTask->second);
-                    if (componentTaskTemp) {
-                        componentTask = componentTaskTemp;
-                    } else {
-                        componentTask = NULL;
-                        CMN_LOG_CLASS_RUN_ERROR << "StartAll: invalid component: unknown mtsTask type (last component)" << std::endl;
-                    }
-                }
-            }
-        }
-
-        if (componentTask) {
-            componentTask->Start();
-        }
+        itLastTask->second->Start();
     }
 
     ComponentMapChange.Unlock();
 }
+
 
 void mtsManagerLocal::KillAll(void)
 {

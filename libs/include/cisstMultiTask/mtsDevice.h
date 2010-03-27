@@ -95,6 +95,10 @@ class CISST_EXPORT mtsDevice: public cmnGenericObject
       configure themselves */
     virtual void Configure(const std::string & filename = "") = 0;
 
+    /*! Virtual method called after components are connected and
+      before they get started.  Use to place initialization code. */
+    virtual void Start(void);
+
     /*! Method to add an interface to the device.  This method is
       virtual so that mtsTaskBase can redefine it and generate the
       appropriate type of interface, i.e. mtsTaskInterface as opposed
