@@ -22,59 +22,78 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlFilterCallback.h>
 
 
-svlFilterCallback::svlFilterCallback() :
+svlFilterBuffer::svlFilterBuffer() :
     svlFilterBase(),
-	myCallback(0),
-	myCallbackData(0)
+	VideoBindex(0),
+	IsFrameSet(false)
 {
     AddSupportedType(svlTypeImageRGB, svlTypeImageRGB);
 }
 
-svlFilterCallback::~svlFilterCallback()
+svlFilterBuffer::~svlFilterBuffer()
 {
 }
 
-int svlFilterCallback::Initialize(svlSample* inputdata)
+int svlFilterBuffer::Initialize(svlSample* inputdata)
 {
     OutputData = inputdata;
+
+	for (int i=0; i<VBsize; i++)
+			VideoBuffer[i].SetSize(GetHeight(),  GetWidth() * GetDataChannels());
+
     return SVL_OK;
 }
 
-int svlFilterCallback::ProcessFrame(svlProcInfo* procInfo, svlSample* inputdata)
+int svlFilterBuffer::ProcessFrame(svlProcInfo* procInfo, svlSample* inputdata)
 {
 	//The callback call should be single threaded just in case
 	svlSampleImageRGB* img = dynamic_cast<svlSampleImageRGB*>(inputdata);
-	vctDynamicMatrixRef<unsigned char> imageData = img->MatrixRef();
+	
 
     _OnSingleThread(procInfo) {
-		if(myCallback){
-			if((*myCallback)(&imageData,myCallbackData) != SVL_OK){
-				return SVL_FAIL;
+		int tmpind = 0;
+		if(!IsFrameSet){
+				IsFrameSetEvent.Raise();
+				IsFrameSet = true;
 			}
-		}	
+					
+			tmpind = VideoBindex + 1;
+			tmpind %= VBsize;
+
+			VideoTimeStamp[tmpind] = inputdata->GetTimestamp();
+
+			// Get Image Data
+			VideoBuffer[tmpind].Assign(img->MatrixRef());
+
+			VideoBindex = tmpind;
     }
     return SVL_OK;
 }
 
-unsigned int svlFilterCallback::GetWidth(unsigned int videoch)
+unsigned int svlFilterBuffer::GetWidth(unsigned int videoch)
 {
     if (!OutputData || !OutputData->IsImage()) return 0;
     return dynamic_cast<svlSampleImageBase*>(OutputData)->GetWidth(videoch);
 }
 
-unsigned int svlFilterCallback::GetHeight(unsigned int videoch)
+unsigned int svlFilterBuffer::GetHeight(unsigned int videoch)
 {
     if (!OutputData || !OutputData->IsImage()) return 0;
     return dynamic_cast<svlSampleImageBase*>(OutputData)->GetHeight(videoch);
 }
 
-int svlFilterCallback::SetCallback(CALLBACK_FUNC callback_in,void * callbackData_in)
+
+unsigned int svlFilterBuffer::GetDataChannels()
 {
-	if(callback_in && callbackData_in){
-		myCallback = callback_in;
-		myCallbackData = callbackData_in;
-		return SVL_OK;
-	}else{
-		return SVL_FAIL;
-	}
+    if (!OutputData || !OutputData->IsImage()) return 0;
+    return dynamic_cast<svlSampleImageBase*>(OutputData)->GetDataChannels();
 }
+
+
+vctDynamicMatrixRef<unsigned char> svlFilterBuffer::GetCurrentFrame()
+{
+			if(!IsFrameSet){
+				IsFrameSetEvent.Wait();
+			}	
+			return VideoBuffer[VideoBindex];
+		}

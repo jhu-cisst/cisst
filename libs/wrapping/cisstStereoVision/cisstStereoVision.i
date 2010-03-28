@@ -123,16 +123,16 @@ static int PythonCallBack(void * imgdata, void *callbackdata)
    vctDynamicMatrixRef<unsigned char>* image = 0; 
    image = static_cast<vctDynamicMatrixRef<unsigned char>*>(imgdata);
    //pythonImage = SWIG_NewPointerObj(SWIG_as_voidptr(image), SWIGTYPE_vctDynamicMatrixRef, SWIG_POINTER_NEW | 0 );
-   pythonImage = convert_vctDynamicMatrixRef_to_PyObject(*image);
+   pythonImage = convert_vctDynamicMatrixRef_to_PyObject(*image); //manual hack - should be using typemaps
    
    try{
 	   func = (PyObject *) callbackdata;             // Get Python function
 	   
-	   //arglist = Py_BuildValue("(O)",pythonImage);             // Build argument list
+	   arglist = Py_BuildValue("(O)",pythonImage);             // Build argument list
 	   
 	   //arglist = Py_BuildValue("i",1);
 	   
-	   if(func){
+	   if(func && arglist){
 		   result = PyEval_CallObject(func,arglist);     // Call Python
 		   Py_DECREF(arglist);                           // Trash arglist
 		   /*if (result) {                                 // If no errors, return double
@@ -204,7 +204,7 @@ typedef svlFilterSourceVideoCapture::ImageProperties ImageProperties;
 %include "cisstStereoVision/svlFilterCallback.h"
 
 
-
+/* Copied from http://www.swig.org/Doc1.1/HTML/Python.html#n11 */
 // Attach a new method to our plot widget for adding Python functions
 //%addmethods svlFilterCallback {
 %extend svlFilterCallback {
@@ -215,3 +215,6 @@ typedef svlFilterSourceVideoCapture::ImageProperties ImageProperties;
      Py_INCREF(pyfunc);
    }
 }
+
+
+%include "cisstStereoVision/svlFilterBuffer.h"

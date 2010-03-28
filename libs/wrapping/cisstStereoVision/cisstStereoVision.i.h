@@ -50,6 +50,7 @@ http://www.cisst.org/cisst/license.txt.
 #include "cisstStereoVision/svlFilterImageWindow.h"
 
 #include "cisstStereoVision/svlFilterCallback.h"
+#include "cisstStereoVision/svlFilterBuffer.h"
 
 
 
