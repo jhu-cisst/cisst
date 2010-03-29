@@ -1098,13 +1098,17 @@ bool mtsManagerLocal::Connect(
     }
 
     // Make sure all interfaces created so far are registered to the GCM.
-    if (!RegisterInterfaces(clientComponentName)) {
-        CMN_LOG_CLASS_RUN_ERROR << "Connect: failed to register interfaces: " << clientComponentName << std::endl;
-        return false;
+    if (GetComponent(clientComponentName)) {
+        if (!RegisterInterfaces(clientComponentName)) {
+            CMN_LOG_CLASS_RUN_ERROR << "Connect: failed to register interfaces: " << clientComponentName << std::endl;
+            return false;
+        }
     }
-    if (!RegisterInterfaces(serverComponentName)) {
-        CMN_LOG_CLASS_RUN_ERROR << "Connect: failed to register interfaces: " << serverComponentName << std::endl;
-        return false;
+    if (GetComponent(serverComponentName)) {
+        if (!RegisterInterfaces(serverComponentName)) {
+            CMN_LOG_CLASS_RUN_ERROR << "Connect: failed to register interfaces: " << serverComponentName << std::endl;
+            return false;
+        }
     }
 
     // Inform the global component manager of the fact that a new connection is
