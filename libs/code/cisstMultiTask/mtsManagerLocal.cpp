@@ -1098,18 +1098,22 @@ bool mtsManagerLocal::Connect(
     }
 
     // Make sure all interfaces created so far are registered to the GCM.
-    if (GetComponent(clientComponentName)) {
+    if (GetProcessName() == clientProcessName) {
         if (!RegisterInterfaces(clientComponentName)) {
             CMN_LOG_CLASS_RUN_ERROR << "Connect: failed to register interfaces: " << clientComponentName << std::endl;
             return false;
         }
     }
-    if (GetComponent(serverComponentName)) {
+    if (GetProcessName() == serverProcessName) {
         if (!RegisterInterfaces(serverComponentName)) {
             CMN_LOG_CLASS_RUN_ERROR << "Connect: failed to register interfaces: " << serverComponentName << std::endl;
             return false;
         }
     }
+
+    // All the other arguments' validities are checked by the GCM's Connect() 
+    // (e.g. Do components or interfaces actually exist) and, therefore, LCM 
+    // doesn't need to them here again.
 
     // Inform the global component manager of the fact that a new connection is
     // to be established.
@@ -1137,7 +1141,7 @@ bool mtsManagerLocal::Connect(
     else if (ProcessName == serverProcessName) {
         isConnectCalledByClientProcess = false;
     }
-    // This should not be the case: two external component cannot be connected.
+    // should not be the case: two external component cannot be connected.
     else {
         CMN_LOG_CLASS_RUN_ERROR << "Connect: Cannot connect two external components." << std::endl;
         return false;
