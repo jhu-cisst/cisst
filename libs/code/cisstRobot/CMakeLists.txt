@@ -45,6 +45,8 @@ SET(SOURCE_FILES
   robDH.cpp
   robLink.cpp
   robManipulator.cpp
+
+  robCollaborativeControlForce.cpp
   )
 
 # all header files
@@ -72,6 +74,8 @@ SET(HEADER_FILES
   robDH.h
   robLink.h
   robManipulator.h
+
+  robCollaborativeControlForce.h
   )
 
 # use for findblas and findlapack
