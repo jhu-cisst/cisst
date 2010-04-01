@@ -2,12 +2,12 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id$
+$Id$
 
-  Author(s):  Ankur Kapoor, Min Yang Jung
-  Created on: 2004-04-30
+Author(s):  Ankur Kapoor, Min Yang Jung
+Created on: 2004-04-30
 
-  (C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights Reserved.
+(C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -42,20 +42,20 @@ void mtsStateTable::IndexRange::ToStreamRaw(std::ostream & outputStream, const c
 int mtsStateTable::StateVectorBaseIDForUser;
 
 mtsStateTable::mtsStateTable(int size, const std::string & name):
-    HistoryLength(size),
-    NumberStateData(0),
-    IndexWriter(0),
-    IndexReader(0),
-    AutomaticAdvanceFlag(true),
-    StateVector(NumberStateData),
-    StateVectorDataNames(NumberStateData),
-    Ticks(size, mtsStateIndex::TimeTicksType(0)),
-    Tic(0.0),
-    Toc(0.0),
-    Period(0.0),
-    SumOfPeriods(0.0),
-    AveragePeriod(0.0),
-    Name(name)
+HistoryLength(size),
+NumberStateData(0),
+IndexWriter(0),
+IndexReader(0),
+AutomaticAdvanceFlag(true),
+StateVector(NumberStateData),
+StateVectorDataNames(NumberStateData),
+Ticks(size, mtsStateIndex::TimeTicksType(0)),
+Tic(0.0),
+Toc(0.0),
+Period(0.0),
+SumOfPeriods(0.0),
+AveragePeriod(0.0),
+Name(name)
 {
     // make sure history length is at least 3
     if (this->HistoryLength < 3) {
@@ -78,12 +78,14 @@ mtsStateTable::mtsStateTable(int size, const std::string & name):
     // Add Period to the StateTable.
     PeriodId = NewElement("Period", &Period);
 
+    // Add statistics
+    NewElement("PeriodStatistics", &PeriodStats);
+   
     // Currently there are three signals maintained internally at StateTable.
     // : "Toc", "Tic", "Period". So the value of StateVectorBaseIDForUser is
     // set to 3.
     StateVectorBaseIDForUser = StateVector.size();
 }
-
 
 mtsStateTable::~mtsStateTable()
 {
@@ -140,7 +142,7 @@ bool mtsStateTable::Write(mtsStateDataId id, const mtsGenericObject & object) {
 
 void mtsStateTable::Start(void) {
     if (TimeServer) {
-    	Tic = TimeServer->GetRelativeTime(); // in seconds
+        Tic = TimeServer->GetRelativeTime(); // in seconds
         // Since IndexReader and IndexWriter are initialized to 0,
         // the first period will be 0
         mtsDouble oldTic;
@@ -177,17 +179,20 @@ void mtsStateTable::Advance(void) {
         AveragePeriod = SumOfPeriods / Ticks[IndexWriter];
     }
 
+    //Update Period Statistics 
+    PeriodStats.AddSample(Period.Data);
+
     /* If for all cases, IndexReader is behind IndexWriter, we don't
-       need critical sections. This is based on the assumption that
-       there is only one Writer that has access to Advance method and
-       this is the only place where IndexReader is modified.  Oh ya!
-       another assumption, we don't have a buffer of size less than 3.
-     */
+    need critical sections. This is based on the assumption that
+    there is only one Writer that has access to Advance method and
+    this is the only place where IndexReader is modified.  Oh ya!
+    another assumption, we don't have a buffer of size less than 3.
+    */
 
     /* So far IndexReader < IndexWriter.
-       The following block doesn't modify IndexReader,
-       so the above condition still holds.
-     */
+    The following block doesn't modify IndexReader,
+    so the above condition still holds.
+    */
     tmpIndex = IndexWriter;
 
     // Write data in the state table from the different state data objects.
@@ -201,7 +206,7 @@ void mtsStateTable::Advance(void) {
     }
     // Get the Toc value and write it to the state table.
     if (TimeServer) {
-    	Toc = TimeServer->GetRelativeTime(); // in seconds
+        Toc = TimeServer->GetRelativeTime(); // in seconds
     }
     Write(TocId, Toc);
     // now increment the IndexWriter and set its Tick value
@@ -215,13 +220,13 @@ void mtsStateTable::Advance(void) {
         // check if a start time is set and has arrived
         if ((this->DataCollection.StartTime != 0.0)
             && (this->Tic >= this->DataCollection.StartTime)) {
-            // start collection
-            CMN_LOG_CLASS_RUN_DEBUG << "Advance: data collection started at " << this->Tic << std::endl;
-            // reset start time
-            this->DataCollection.StartTime = 0.0;
-            this->DataCollection.BatchRange.First = this->GetIndexReader();
-            this->DataCollection.BatchCounter = 0;
-            this->DataCollection.Collecting = true;
+                // start collection
+                CMN_LOG_CLASS_RUN_DEBUG << "Advance: data collection started at " << this->Tic << std::endl;
+                // reset start time
+                this->DataCollection.StartTime = 0.0;
+                this->DataCollection.BatchRange.First = this->GetIndexReader();
+                this->DataCollection.BatchCounter = 0;
+                this->DataCollection.Collecting = true;
         }
     }
     // are we collecting?
@@ -229,23 +234,23 @@ void mtsStateTable::Advance(void) {
         // check if a stop time is set and has arrived
         if ((this->DataCollection.StopTime != 0.0)
             && (this->Tic >= this->DataCollection.StopTime)) {
-            // stop collection
-            CMN_LOG_CLASS_RUN_DEBUG << "Advance: data collection stopped at " << this->Tic << std::endl;
-            // reset start time
-            this->DataCollection.StopTime = 0.0;
-            this->DataCollection.BatchRange.Last = this->GetIndexReader();
-            // request data actual for range collection
-            this->DataCollection.BatchRange.SetTimestamp(this->Tic);
-            this->DataCollection.BatchReady(this->DataCollection.BatchRange);
-            // stop collecting
-            this->DataCollection.Collecting = false;
+                // stop collection
+                CMN_LOG_CLASS_RUN_DEBUG << "Advance: data collection stopped at " << this->Tic << std::endl;
+                // reset start time
+                this->DataCollection.StopTime = 0.0;
+                this->DataCollection.BatchRange.Last = this->GetIndexReader();
+                // request data actual for range collection
+                this->DataCollection.BatchRange.SetTimestamp(this->Tic);
+                this->DataCollection.BatchReady(this->DataCollection.BatchRange);
+                // stop collecting
+                this->DataCollection.Collecting = false;
         } else {
             // still collecting
             this->DataCollection.BatchCounter++;
             // check if we have collected enough element for actual collection
             if (this->DataCollection.BatchCounter >= this->DataCollection.BatchSize) {
                 CMN_LOG_CLASS_RUN_DEBUG << "Advance: " << this->DataCollection.BatchCounter
-                                        << " element(s) available for data collection" << std::endl;
+                    << " element(s) available for data collection" << std::endl;
                 this->DataCollection.BatchRange.Last = this->GetIndexReader();
                 // request data actual for range collection
                 this->DataCollection.BatchRange.SetTimestamp(this->Tic);
@@ -271,7 +276,7 @@ void mtsStateTable::Kill(void) {
     // if the state table is still set to collect data, send error message, should have been stopped
     if (this->DataCollection.Collecting) {
         CMN_LOG_CLASS_INIT_ERROR << "Kill: data collection for state table \"" << this->Name
-                                 << "\" has not been stopped.  It is possible that the state collector will look for this state table after it has been deleted." << std::endl;
+            << "\" has not been stopped.  It is possible that the state collector will look for this state table after it has been deleted." << std::endl;
     }
 }
 
@@ -283,10 +288,10 @@ void mtsStateTable::ToStream(std::ostream & outputStream) const {
     for (i = 0; i < StateVector.size() - 1; i++) {
         if (!StateVectorDataNames[i].empty())
             outputStream << "[" << i << "]"
-                         << StateVectorDataNames[i].c_str() << " : ";
+            << StateVectorDataNames[i].c_str() << " : ";
     }
     outputStream << "[" << i << "]"
-                 << StateVectorDataNames[i].c_str() << std::endl;
+        << StateVectorDataNames[i].c_str() << std::endl;
 #if 0
     // the following is a data dump, it should go in ToStreamRaw
     for (i = 0; i < HistoryLength; i++) {
@@ -296,7 +301,7 @@ void mtsStateTable::ToStream(std::ostream & outputStream) const {
             if (StateVector[j]) {
                 out << " [" << j << "] "
                     << (*StateVector[j])[i]
-                    << " : ";
+                << " : ";
             }
         }
         if (i==IndexReader)
@@ -322,21 +327,21 @@ void mtsStateTable::Debug(std::ostream & out, unsigned int * listColumn, unsigne
     out << std::endl;
 
     for (i = 0; i < HistoryLength; i++) {
-    out << i << " ";
-    out << Ticks[i] << " ";
-    for (j = 0; j < number; j++) {
-        if (listColumn[j] < StateVector.size() && StateVector[listColumn[j]]) {
-        out << " [" << listColumn[j] << "] "
-            <<(*StateVector[listColumn[j]])[i] << " : ";
+        out << i << " ";
+        out << Ticks[i] << " ";
+        for (j = 0; j < number; j++) {
+            if (listColumn[j] < StateVector.size() && StateVector[listColumn[j]]) {
+                out << " [" << listColumn[j] << "] "
+                    <<(*StateVector[listColumn[j]])[i] << " : ";
+            }
         }
-    }
-    if (i == IndexReader) {
-        out << "<-- Index for Reader";
-    }
-    if (i == IndexWriter) {
-        out << "<== Index for Writer";
-    }
-    out << std::endl;
+        if (i == IndexReader) {
+            out << "<-- Index for Reader";
+        }
+        if (i == IndexWriter) {
+            out << "<== Index for Writer";
+        }
+        out << std::endl;
     }
 }
 
@@ -397,7 +402,7 @@ void mtsStateTable::CSVWrite(std::ostream& out, mtsGenericObject ** listColumn, 
 
 int mtsStateTable::GetStateVectorID(const std::string & dataName) const
 {
-	for (unsigned int i = 0; i < StateVectorDataNames.size(); i++) {
+    for (unsigned int i = 0; i < StateVectorDataNames.size(); i++) {
         if (StateVectorDataNames[i] == dataName) {
             return i;
         }
@@ -427,7 +432,7 @@ void mtsStateTable::SetDataCollectionEventTriggeringRatio(const double eventTrig
 void mtsStateTable::DataCollectionStart(const mtsDouble & delay)
 {
     CMN_LOG_CLASS_RUN_DEBUG << "DataCollectionStart: received request to start data collection in "
-                            << delay.Data << " seconds" << std::endl;
+        << delay.Data << " seconds" << std::endl;
     const double startTime = this->Tic + delay.Data;
     // if we are not yet collection
     if (!this->DataCollection.Collecting) {
@@ -435,7 +440,7 @@ void mtsStateTable::DataCollectionStart(const mtsDouble & delay)
         if (this->DataCollection.StartTime == 0) {
             // set time to start
             CMN_LOG_CLASS_RUN_DEBUG << "DataCollectionStart: data collection scheduled to start at "
-                                    << startTime << std::endl;
+                << startTime << std::endl;
             this->DataCollection.StartTime = startTime;
         } else {
             // we are set to collect but later, advance the collection
@@ -444,11 +449,11 @@ void mtsStateTable::DataCollectionStart(const mtsDouble & delay)
             // collect more data.
             if (this->DataCollection.StartTime > startTime) {
                 CMN_LOG_CLASS_RUN_DEBUG << "DataCollectionStart: data collection scheduled to start at "
-                                        << startTime << " (moved forward)" << std::endl;
+                    << startTime << " (moved forward)" << std::endl;
                 this->DataCollection.StartTime = startTime;
             } else {
                 CMN_LOG_CLASS_RUN_WARNING << "DataCollectionStart: received a new request to start data collection after previous request, ignored"
-                                          << std::endl;
+                    << std::endl;
             }
         }
     } else {
@@ -462,7 +467,7 @@ void mtsStateTable::DataCollectionStart(const mtsDouble & delay)
             } else {
                 // this will schedule a start after the scheduled stop
                 CMN_LOG_CLASS_RUN_DEBUG << "DataCollectionStart: data collection scheduled to start at "
-                                        << startTime << " (after a scheduled stop)" << std::endl;
+                    << startTime << " (after a scheduled stop)" << std::endl;
                 this->DataCollection.StartTime = startTime;
             }
         }
@@ -473,12 +478,12 @@ void mtsStateTable::DataCollectionStart(const mtsDouble & delay)
 void mtsStateTable::DataCollectionStop(const mtsDouble & delay)
 {
     CMN_LOG_CLASS_RUN_DEBUG << "DataCollectionStop: received request to stop data collection in "
-                            << delay.Data << " seconds" << std::endl;
+        << delay.Data << " seconds" << std::endl;
     double stopTime = this->Tic + delay.Data;
     // check is there is already a stop time scheduled
     if (this->DataCollection.StopTime == 0) {
         CMN_LOG_CLASS_RUN_DEBUG << "DataCollectionStop: data collection scheduled to stop at "
-                                << stopTime << std::endl;
+            << stopTime << std::endl;
         DataCollection.StopTime = stopTime;
     } else {
         // we are set to stop but earlier, delay the collection stop
@@ -487,11 +492,11 @@ void mtsStateTable::DataCollectionStop(const mtsDouble & delay)
         // more data.
         if (this->DataCollection.StopTime < stopTime) {
             CMN_LOG_CLASS_RUN_DEBUG << "DataCollectionStop: data collection scheduled to stop at "
-                                    << stopTime << " (moved back)" << std::endl;
+                << stopTime << " (moved back)" << std::endl;
             DataCollection.StopTime = stopTime;
         } else {
             CMN_LOG_CLASS_RUN_WARNING << "DataCollectionStop: received a new request to stop data collection before previous request, ignored"
-                                      << std::endl;
+                << std::endl;
         }
     }
 }

@@ -45,6 +45,7 @@ SET(SOURCE_FILES
     mtsMailBox.cpp
     mtsStateIndex.cpp
     mtsStateTable.cpp
+    mtsIntervalStatistics.cpp
 
     mtsTaskInterface.cpp
     mtsRequiredInterface.cpp
@@ -113,6 +114,7 @@ SET(HEADER_FILES
     mtsStateArrayBase.h
     mtsStateTable.h
     mtsStateData.h
+    mtsIntervalStatistics.h
 
     mtsTaskInterface.h
     mtsRequiredInterface.h

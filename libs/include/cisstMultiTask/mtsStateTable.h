@@ -36,6 +36,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsStateIndex.h>
 #include <cisstMultiTask/mtsHistory.h>
 #include <cisstMultiTask/mtsFunctionVoid.h>
+#include <cisstMultiTask/mtsIntervalStatistics.h>
+
 
 #include <vector>
 #include <iostream>
@@ -274,6 +276,9 @@ public:
         previous Tic). */
     mtsDouble Period;
 
+   /*! Periodicist Statistics */
+    mtsIntervalStatistics     PeriodStats;
+
  protected:
     /*! The sum of all the periods (time differences between
         consecutive Tic values); used to compute average period. */
@@ -291,6 +296,7 @@ public:
 
 	/*! Write specified data. */
 	bool Write(mtsStateDataId id, const mtsGenericObject & obj);
+ 
 
  public:
     /*! Constructor. Constructs a state table with a default
@@ -397,8 +403,7 @@ public:
         return AveragePeriod;
     }
 
-    /*! For debugging, dumps the current data table to output
-      stream. */
+    /*! For debugging, dumps the current data table to output stream. */
     void ToStream(std::ostream & out) const;
 
     /*! For debugging, dumps some values of the current data table to
