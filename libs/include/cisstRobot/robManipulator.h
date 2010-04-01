@@ -90,7 +90,7 @@ public:
   RNE( const vctDynamicVector<double>& q,
        const vctDynamicVector<double>& qd,
        const vctDynamicVector<double>& qdd,
-       const vctFixedSizeVector<double,6>& f=vctFixedSizeVector<double,6>(0.0),
+       const vctFixedSizeVector<double,6>& f,//=vctFixedSizeVector<double,6>(0.0),
        double g = 9.81 ) const;
   
   //! Coriolis/centrifugal and gravity
