@@ -242,17 +242,20 @@ class GlobalComponentManagerUI {open
           Fl_Button ButtonSignalOffsetIncrease {
             label {Offset +}
             callback {ButtonSignalOffsetIncreaseClicked = true;}
-            xywh {410 510 65 22} box GTK_UP_BOX color 7 labelsize 12 align 17 deactivate
+            xywh {410 525 65 16} box GTK_UP_BOX color 7 labelsize 12 align 18 deactivate
             code0 {ButtonSignalOffsetIncreaseClicked = false;}
           }
           Fl_Button ButtonSignalOffsetDecrease {
             label {Offset -}
             callback {ButtonSignalOffsetDecreaseClicked = true;}
-            xywh {410 535 65 22} box GTK_UP_BOX color 7 labelsize 12 align 17 deactivate
+            xywh {410 541 65 16} box GTK_UP_BOX color 7 labelsize 12 align 18 deactivate
             code0 {ButtonSignalOffsetDecreaseClicked = false;}
           }
           Fl_Output OutputYOffset {
             xywh {605 210 65 20} box THIN_DOWN_BOX color 49 labeltype NO_LABEL labelfont 1 labelsize 12 align 0 textsize 12
+          }
+          Fl_Output OutputYOffsetSignal {
+            xywh {410 510 65 15} box THIN_DOWN_BOX color 49 labeltype NO_LABEL labelfont 1 labelsize 12 align 16 textsize 12
           }
         }
       }

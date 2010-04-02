@@ -25,24 +25,25 @@
 /*
  * multiplot_cisst.h
  *
- * This is a modified version of the original MULTIPLOT.h to support the real-time
- * data visualizer of the Global Component Manager User Interface (FLTK) which is
- * a part of the cisst library. 
+ * This is a modified version of MULTIPLOT.h to support the real-time
+ * data collection and visualization of the Global Component Manager User
+ * Interface (FLTK) which is a part of the cisst library.
  * Please visit the cisst library (http://www.cisst.org/cisst) for more details.
  *
  * Author: Min Yang Jung (myj@jhu.edu)
- * Last updated: March 16, 2010
+ * Last updated: April 1, 2010
  * 
  * This modified version includes additional features that the original version
- * didn't support:
+ * doesn't support:
  * 
  * - Oscilloscope-like UI
- * - Pre-defined FLTK color samples
+ * - Pre-defined FLTK color codes
  * - Axis scaling (both x-axis and y-axis)
  * - Autoscaling
- * - Y-axis Offset
+ * - Y-axis Offset (global/per-signal)
  * - Show or hide a signal selectively
- * - Stop/resume
+ * - Hold/Resume
+ * - Signal removal
  * 
  * If there is any question, please contact to the author.
  */
@@ -60,6 +61,21 @@
 #include <FL/Fl_Gl_Window.H>
 #include <FL/gl.h>
 
+// FLTK color code definition
+#define RED          255.0f/255.0f, 0.0f,          0.0f
+#define GREEN        0.0f,          255.0f/255.0f, 0.0f
+#define YELLOW       255.0f/255.0f, 255.0f/255.0f, 0.0f
+#define BLUE         0.0f,          0.0f,          255.0f/255.0f
+#define FUCHSIA      255.0f/255.0f, 0.0f,          255.0f/255.0f
+#define AQUA         0.0f,          255.0f/255.0f, 255.0f/255.0f
+#define GRAY         192.0f/255.0f, 192.0f/255.0f, 192.0f/255.0f
+#define DARK_RED     128.0f/255.0f, 0.0f,          0.0f
+#define DARK_GREEN   0.0f,          128.0f/255.0f, 0.0f
+#define DARK_YELLOW  128.0f/255.0f, 128.0f/255.0f, 0.0f 
+#define LIGHT_PURPLE 153.0f/255.0f, 153.0f/255.0f, 204.0f/255.0f
+#define DARK_PURPLE  128.0f/255.0f, 0.0f,          128.0f/255.0f
+#define DARK_AQUA    0.0f,          128.0f/255.0f, 128.0f/255.0f
+#define DARK_GRAY    128.0f/255.0f, 128.0f/255.0f, 128.0f/255.0f
 
 #ifndef min
 	#define min(a,b) ( (a) < (b) ? (a) : (b) )
@@ -86,6 +102,7 @@ class PLOT_POINT
 		float b;
 		PLOT_POINT();
 		PLOT_POINT(float xx, float yy, float rr=1, float gg=1, float bb=1);
+        PLOT_POINT(float xx, float yy, const unsigned int colorIndex);
 };
 
 
@@ -162,6 +179,11 @@ class MULTIPLOT_BASE : public Fl_Gl_Window
 		void clear(unsigned int t);
 
         /**
+        *   remove registered signal
+        */
+        void remove(unsigned int trace);
+
+        /**
         *   Adjust y range
         */
         inline void AdjustYScale(const float ratio) {
@@ -172,11 +194,27 @@ class MULTIPLOT_BASE : public Fl_Gl_Window
         /**
         *   Y-Axis Offset
         */
-        inline void SetYOffset(const float offsetY) {
+        inline void SetYOffsetGlobal(const float offsetY) {
             OffsetY = offsetY;
         }
-        inline float GetYOffset(void) const {
+        inline float GetYOffsetGlobal(void) const {
             return OffsetY;
+        }
+
+        /**
+        *   Per-signal Y-axis Offset
+        */
+        inline void SetYOffsetSignal(const size_t index, const float offsetY) {
+            if (index >= traces.size()) {
+                return;
+            }
+            tsettings[index].yOffset = offsetY; 
+        }
+        inline float GetYOffsetSignal(const size_t index) const {
+            if (index >= traces.size()) {
+                return 0.0f;
+            }
+            return tsettings[index].yOffset;
         }
 
         /**
@@ -215,6 +253,17 @@ class MULTIPLOT_BASE : public Fl_Gl_Window
             return HoldDrawing;
         }
 
+        /**
+        *   Get a total number of currently added signals
+        */
+        inline unsigned int GetSignalCount(void) {
+            if (traces.size() == 1 && traces[0].size() == 0) {
+                return 0;
+            } else {
+                return traces.size();
+            }
+        }
+
 	protected:
 		unsigned int width; // window - width
 		unsigned int height; // window - height
@@ -242,7 +291,8 @@ class MULTIPLOT_BASE : public Fl_Gl_Window
 				float point_size;
 				float line_width;
                 bool show;
-				TRACE(){ pos=0; point_size=0.0; line_width=1; show=true; }
+                float yOffset;
+				TRACE(){ pos=0; point_size=0.0; line_width=1; show=true; yOffset=0.0f;}
 		};
 		std::vector< TRACE > tsettings;
 
@@ -280,7 +330,50 @@ public:
 
 // implementation:
 inline PLOT_POINT::PLOT_POINT() { x=y=0.0;r=g=b=1; }
-inline PLOT_POINT::PLOT_POINT(float xx, float yy, float rr, float gg, float bb) { x=xx;y=yy;r=rr;g=gg;b=bb; }
+inline PLOT_POINT::PLOT_POINT(float xx, float yy, float rr, float gg, float bb)
+{ 
+    x=xx;y=yy;r=rr;g=gg;b=bb; 
+}
+inline PLOT_POINT::PLOT_POINT(float xx, float yy, const unsigned int colorIndex)
+{
+    x=xx;y=yy;
+
+    switch (colorIndex) {
+        // RED
+        case 1: r = 255.0f/255.0f; g = 0.0f; b = 0.0f; break;
+        // GREEN
+        case 2: r = 0.0f; g = 255.0f/255.0f; b = 0.0f; break;
+        // YELLOW
+        case 3: r = 255.0f/255.0f; g = 255.0f/255.0f; b = 0.0f; break;
+        // BLUE
+        case 4: r = 0.0f; g = 0.0f; b = 255.0f/255.0f; break;
+        // FUCHSIA
+        case 5: r = 255.0f/255.0f; g = 0.0f; b = 255.0f/255.0f; break;
+        // AQUA
+        case 6: r = 0.0f; g = 255.0f/255.0f; b = 255.0f/255.0f; break;
+        // GRAY
+        case 9: r = 192.0f/255.0f; g = 192.0f/255.0f; b = 192.0f/255.0f; break;
+        // DARK_RED
+        case 10: r = 128.0f/255.0f; g = 0.0f; b = 0.0f; break;
+        // DARK_GREEN
+        case 11: r = 0.0f; g = 128.0f/255.0f; b = 0.0f; break;
+        // DARK_YELLOW
+        case 12: r = 128.0f/255.0f; g = 128.0f/255.0f; b = 0.0f; break;
+        // LIGHT_PURPLE
+        case 13: r = 153.0f/255.0f; g = 153.0f/255.0f; b = 204.0f/255.0f; break;
+        // DARK_PURPLE
+        case 14: r = 128.0f/255.0f; g = 0.0f/255.0f; b = 128.0f/255.0f; break;
+        /*
+        // DARK_AQUA
+        case 12: r = 0.0f/255.0f; g = 128.0f/255.0f; b = 128.0f/255.0f; break;
+        // DARK_GRAY
+        case 13: r = 128.0f/255.0f; g = 128.0f/255.0f; b = 128.0f/255.0f; break;
+        */
+        // WHITE
+        default:
+            r = 1.0f; g = 1.0f; b = 1.0f;
+    }
+}
 
 
 inline MULTIPLOT_BASE::MULTIPLOT_BASE(const int x, const int y, const int w, const int h, const char * ttitle) : Fl_Gl_Window(x,y,w,h,ttitle) 
@@ -411,11 +504,17 @@ inline void MULTIPLOT_BASE::clear(const bool keepPreviousData)
     */
 }
 
+inline void MULTIPLOT_BASE::remove(unsigned int trace)
+{
+    if (trace >= tsettings.size()) return;
+
+    clear(trace);
+}
+
 inline void MULTIPLOT_BASE::clear(unsigned int trace)
 {
-    // TODO: apply keepPreviousData flag
-        traces[trace].clear();
-        tsettings[trace].pos=0;
+    traces[trace].clear();
+    tsettings[trace].pos=0;
 }
 
 
@@ -629,8 +728,6 @@ inline void MULTIPLOT_BASE::draw()
         glEnd();
     }
 
-
-
     if (AutoScaleOn) {
         maximum.x=maximum.y=-FLT_MAX;
         minimum.x=minimum.y=FLT_MAX;
@@ -639,13 +736,12 @@ inline void MULTIPLOT_BASE::draw()
         minimum.x=FLT_MAX;
     }
 
-
 	if(scroll)
 	{
 		PLOT_POINT p;
 		for(unsigned int t=0;t<traces.size();t++)
 		{
-            if (!tsettings[t].show) {
+            if (!tsettings[t].show || tsettings[t].pos == 0) {
                 continue;
             }
 			glLineWidth(tsettings[t].line_width);
@@ -659,8 +755,10 @@ inline void MULTIPLOT_BASE::draw()
 					ps=0;
 				p=traces[t][ps];
                 
-                // apply Y-axis offset
+                // apply global Y-axis offset
                 p.y += OffsetY;
+                // apply per-signal y-axis offset
+                p.y += tsettings[t].yOffset;
 
 				if(tsettings[t].line_width>0)
 				{
@@ -695,6 +793,8 @@ inline void MULTIPLOT_BASE::draw()
 
                 // apply Y-axis offset
                 p.y += OffsetY;
+                // apply per-signal y-axis offset
+                p.y += tsettings[t].yOffset;
 
 				if(tsettings[t].point_size>0)
 				{
@@ -715,6 +815,10 @@ inline void MULTIPLOT_BASE::draw()
 	
 		for(unsigned int t=0;t<traces.size();t++)
 		{
+            // Prevent hidden signal to be plotted
+            if (!tsettings[t].show) {
+                return;
+            }
 			if(traces[t].size()>max_points)
 				step=traces[t].size()/float(max_points);
 
