@@ -17,6 +17,7 @@
   --- end cisst license ---
 */
 
+#pragma once
 #ifndef _mtsMacros_h
 #define _mtsMacros_h
 
@@ -51,6 +52,16 @@ public:                                                                      \
     void DeSerializeRaw(std::istream & inputStream) {                        \
         mtsGenericObject::DeSerializeRaw(inputStream);                       \
         className::DeSerializeRaw(inputStream);                              \
+    }                                                                        \
+    void ToStreamRaw(std::ostream & outputStream,                            \
+                     const char delimiter = ' ',                             \
+                     bool headerOnly = false,                                \
+                     const std::string & headerPrefix = "") const {          \
+        mtsGenericObject::ToStreamRaw(outputStream, delimiter,               \
+                                      headerOnly, headerPrefix);             \
+        outputStream << delimiter;                                           \
+        className::ToStreamRaw(outputStream, delimiter,                      \
+                               headerOnly, headerPrefix);                    \
     }                                                                        \
 };                                                                           \
 inline std::ostream & operator << (std::ostream & output,                    \

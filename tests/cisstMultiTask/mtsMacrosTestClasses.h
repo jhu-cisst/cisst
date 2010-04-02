@@ -3,10 +3,10 @@
 
 /*
   $Id$
-  
+
   Author(s):  Anton Deguet
   Created on: 2009-06-11
-  
+
   (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
   Reserved.
 
@@ -43,14 +43,23 @@ class mtsMacrosTestClassB
 {
 public:
     double Value;
-    
+
     /*! To stream human readable output */
     virtual void ToStream(std::ostream & outputStream) const {
         outputStream << this->Value << std::endl;
     }
 
+    /*! Print in machine processable format */
+    void ToStreamRaw(std::ostream & outputStream, const char CMN_UNUSED(delimiter) = ' ',
+                     bool headerOnly = false, const std::string & headerPrefix = "") const {
+        if (headerOnly) {
+            outputStream << headerPrefix << "value";
+        } else {
+            outputStream << Value;
+        }
+    }
 
-    void SerializeRaw(std::ostream & outputStream) const 
+    void SerializeRaw(std::ostream & outputStream) const
     {
         cmnSerializeRaw(outputStream, this->Value);
     }

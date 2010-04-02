@@ -350,6 +350,16 @@ protected:
                      << this->Angle();
     }
 
+    /*! Print in machine processable format */
+    void ToStreamRaw(std::ostream & outputStream, const char CMN_UNUSED(delimiter) = ' ',
+                     bool headerOnly = false, const std::string & headerPrefix = "") const {
+        if (headerOnly) {
+            outputStream << headerPrefix << "angle";
+        } else {
+            outputStream << this->Angle();
+        }
+    }
+
     /*! Binary serialization */
     void SerializeRaw(std::ostream & outputStream) const
     {

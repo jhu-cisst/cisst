@@ -653,6 +653,18 @@ public:
                      << this->Angle();
     }
 
+    /*! Print in machine processable format */
+    void ToStreamRaw(std::ostream & outputStream, const char delimiter = ' ',
+                     bool headerOnly = false, const std::string & headerPrefix = "") const {
+        this->Axis().ToStreamRaw(outputStream, delimiter, headerOnly, headerPrefix + "axis-");
+        outputStream << delimiter;
+        if (headerOnly) {
+            outputStream << headerPrefix << "angle";
+        } else {
+            outputStream << this->Angle();
+        }
+    }
+
     /*! Binary serialization */
     void SerializeRaw(std::ostream & outputStream) const
     {
