@@ -93,7 +93,6 @@ protected:
     TaskMapType TaskMap;
 
     /*! Static member variables */
-    static unsigned int CollectorCount;
     static mtsTaskManager * TaskManager;
 
     /*! Flag to determine if the collector is connected.  Once the
@@ -103,6 +102,12 @@ protected:
 
     /*! Flag for PrintHeader() method. */
     bool FirstRunningFlag;
+
+    /*! Counter for number of samples since the output has been set. */
+    unsigned int SampleCounter;
+
+    /*! Counter for number of sample since the last CollectionStopped event */
+    unsigned int SampleCounterForEvent;
 
     /*! Output file name, including working directory. */
     std::string OutputFileName;
@@ -160,6 +165,9 @@ protected:
     /*! Set some initial values */
     virtual void Startup(void) = 0;
 
+    /*! Create the provided interface for control. */
+    void SetupControlInterface(void);
+
 public:
     mtsCollectorBase(const std::string & collectorName, const CollectorFileFormat fileFormat);
 
@@ -201,14 +209,17 @@ public:
     second(s). If it is zero (by default), it means 'stop now'. */
     virtual void StopCollection(const mtsDouble & delayInSeconds) = 0;
 
+    /*! Function used to trigger Collection Started event. */
+    mtsFunctionVoid CollectionStartedEventTrigger;
+
+    /*! Function used to trigger Collection Started event. */
+    mtsFunctionWrite CollectionStoppedEventTrigger;
+
     /*! Set working directory, usable with commands as well */
     void SetWorkingDirectory(const mtsStdString & directory);
 
     /*! Get working directory, usable with commands as well */
     void GetWorkingDirectory(mtsStdString & placeHolder) const;
-
-    //---------------------- Miscellaneous functions ------------------------//
-    inline static unsigned int GetCollectorCount(void) { return CollectorCount; }
 
 };
 

@@ -25,6 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 CMN_IMPLEMENT_SERVICES(mtsCollectorQComponent);
 
 
+
 mtsCollectorQComponent::mtsCollectorQComponent(const std::string & taskName) :
     mtsDevice(taskName)
 {
@@ -37,6 +38,10 @@ mtsCollectorQComponent::mtsCollectorQComponent(const std::string & taskName) :
        requiredInterface->AddFunction("StopCollectionIn", Collection.StopCollectionIn);
        requiredInterface->AddFunction("SetWorkingDirectory", Collection.SetWorkingDirectory);
        requiredInterface->AddFunction("SetOutputToDefault", Collection.SetOutputToDefault);
+       requiredInterface->AddEventHandlerVoid(&mtsCollectorQComponent::CollectionStartedHandler, this,
+                                              "CollectionStarted", false);
+       requiredInterface->AddEventHandlerWrite(&mtsCollectorQComponent::CollectionStoppedHandler, this,
+                                               "CollectionStopped", false);
     }
 }
 
@@ -44,6 +49,18 @@ mtsCollectorQComponent::mtsCollectorQComponent(const std::string & taskName) :
 mtsCollectorQComponent::~mtsCollectorQComponent(void)
 {
     CMN_LOG_CLASS_INIT_DEBUG << "~mtsCollectorQComponent: destructor has been called" << std::endl;
+}
+
+
+void mtsCollectorQComponent::CollectionStartedHandler(void)
+{
+    emit CollectionStartedQSignal();
+}
+
+
+void mtsCollectorQComponent::CollectionStoppedHandler(const mtsUInt & count)
+{
+    emit CollectionStoppedQSignal(count.Data);
 }
 
 
@@ -61,6 +78,14 @@ void mtsCollectorQComponent::ConnectToWidget(QWidget * widget)
                      this, SLOT(SetWorkingDirectoryQSlot(QString)));
     QObject::connect(widget, SIGNAL(SetOutputToDefault()),
                      this, SLOT(SetOutputToDefaultQSlot()));
+    QObject::connect(this, SIGNAL(CollectorAddedQSignal()),
+                     widget, SLOT(CollectorAdded()));
+    QObject::connect(this, SIGNAL(CollectionStartedQSignal()),
+                     widget, SLOT(CollectionStarted()));
+    QObject::connect(this, SIGNAL(CollectionStoppedQSignal(unsigned int)),
+                     widget, SLOT(CollectionStopped(unsigned int)));
+    emit CollectorAddedQSignal();
+
 }
 
 

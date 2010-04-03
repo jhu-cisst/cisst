@@ -119,7 +119,7 @@ class CISST_EXPORT mtsCollectorEvent : public mtsCollectorBase
 
     /*! Flag indicating if the collector is started */
     bool Collecting;
-    
+
     /*! Scheduled start.  If time is set to zero, there is no
       scheduled start */
     double ScheduledStartTime;
@@ -212,6 +212,9 @@ class CISST_EXPORT mtsCollectorEvent : public mtsCollectorBase
     void StartCollection(const mtsDouble & delayInSeconds);
     void StopCollection(const mtsDouble & delayInSeconds);
     //@}
+
+ protected:
+    void SetCollecting(bool collecting);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsCollectorEvent)

@@ -55,7 +55,7 @@ void mtsCollectorEvent::CollectorEventVoid::PrintHeader(std::ostream & outputStr
 {
     outputStream << "# Id: " << this->EventId
                  << " Event void: \"" << this->ComponentName << "::" << this->InterfaceName << "::" << this->EventName << "\""
-                 << std::endl; 
+                 << std::endl;
 }
 
 
@@ -85,10 +85,10 @@ void mtsCollectorEvent::CollectorEventWrite::PrintHeader(std::ostream & outputSt
 {
     CMN_ASSERT(this->ArgumentPrototype);
     outputStream << "# Id: " << this->EventId
-                 << " Event write: \"" << this->ComponentName << "::" << this->InterfaceName << "::" << this->EventName 
+                 << " Event write: \"" << this->ComponentName << "::" << this->InterfaceName << "::" << this->EventName
                  << "(" << this->ArgumentPrototype->Services()->GetName() << ")\", ";
     this->ArgumentPrototype->ToStreamRaw(outputStream, ',', true);
-    outputStream << std::endl; 
+    outputStream << std::endl;
 }
 
 
@@ -120,15 +120,13 @@ bool mtsCollectorEvent::CheckCollectingStatus(void)
     if (this->Collecting
         && (this->ScheduledStopTime != 0.0) // stop time is set
         && (currentTime >= this->ScheduledStopTime)) {
-        this->Collecting = false;
-        this->ScheduledStopTime = 0.0; // we stop it
+        this->SetCollecting(false);
         CMN_LOG_CLASS_RUN_DEBUG << "CheckCollectingStatus: stopping collection at: " << currentTime << std::endl;
     } else {
         if ((!this->Collecting)
             && (this->ScheduledStartTime != 0.0)
             && (currentTime >= this->ScheduledStartTime)) {
-            this->Collecting = true;
-            this->ScheduledStartTime = 0.0; // we stop it
+            this->SetCollecting(true);
             CMN_LOG_CLASS_RUN_DEBUG << "CheckCollectingStatus: starting collection at: " << currentTime << std::endl;
         }
     }
@@ -474,6 +472,8 @@ void mtsCollectorEvent::SaveEventVoid(const CollectorEventVoid * event)
             this->PrintHeader(this->FileFormat);
         }
         *(this->OutputStream) << event->EventId << std::endl;
+        this->SampleCounter++;
+        this->SampleCounterForEvent++;
     }
 }
 
@@ -489,6 +489,8 @@ void mtsCollectorEvent::SaveEventWrite(const CollectorEventWrite * event, const 
         *(this->OutputStream) << event->EventId << this->Delimiter;
         payload->ToStreamRaw(*(this->OutputStream), this->Delimiter);
         *(this->OutputStream) << std::endl;
+        this->SampleCounter++;
+        this->SampleCounterForEvent++;
     }
 }
 
@@ -540,8 +542,7 @@ void mtsCollectorEvent::StartCollection(const mtsDouble & delay)
 {
     const double currentTime = this->TimeServer->GetRelativeTime();
     if (delay.Data == 0.0) {
-        this->Collecting = true;
-        this->ScheduledStartTime = 0.0;
+        this->SetCollecting(true);
         CMN_LOG_CLASS_RUN_DEBUG << "StartCollection: starting collection now (" << currentTime << ")" << std::endl;
     } else {
         this->ScheduledStartTime = currentTime + delay.Data;
@@ -554,11 +555,26 @@ void mtsCollectorEvent::StopCollection(const mtsDouble & delay)
 {
     const double currentTime = this->TimeServer->GetRelativeTime();
     if (delay.Data == 0.0) {
-        this->Collecting = false;
-        this->ScheduledStopTime = 0.0;
+        this->SetCollecting(false);
         CMN_LOG_CLASS_RUN_DEBUG << "StopCollection: stopping collection now (" << currentTime << ")" << std::endl;
     } else {
         this->ScheduledStopTime = currentTime + delay.Data;
         CMN_LOG_CLASS_RUN_DEBUG << "StopCollection: collection scheduled to stop at " << this->ScheduledStopTime << std::endl;
+    }
+}
+
+
+void mtsCollectorEvent::SetCollecting(bool collecting)
+{
+    this->Collecting = collecting;
+    if (this->Collecting) {
+        // start collecting
+        this->CollectionStartedEventTrigger();
+        this->ScheduledStartTime = 0.0;
+    } else {
+        // stop collecting
+        this->CollectionStoppedEventTrigger(mtsUInt(this->SampleCounterForEvent));
+        this->ScheduledStopTime = 0.0;
+        this->SampleCounterForEvent = 0;
     }
 }

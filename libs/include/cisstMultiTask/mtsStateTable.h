@@ -118,10 +118,21 @@ class CISST_EXPORT mtsStateTable: public cmnGenericObject {
         /*! Number of elements to be collected so far. */
         size_t BatchCounter;
 
+        /*! Number of elements collected since the last event */
+        size_t CounterForEvent;
+
         /*! Function used to trigger event sent to state collector
           when the data collection is needed.  The payload is the
           range defined by state indices. */
         mtsFunctionWrite BatchReady;
+
+        /*! Function used to trigger an event when the collection has
+          started */
+        mtsFunctionVoid CollectionStarted;
+
+        /*! Function used to trigger an event when the collection has
+          stopped */
+        mtsFunctionWrite CollectionStopped;
 
         /*! Default constructors */
         inline DataCollectionInfo(void):
@@ -129,7 +140,8 @@ class CISST_EXPORT mtsStateTable: public cmnGenericObject {
             StartTime(0.0),
             StopTime(0.0),
             BatchSize(0),
-            BatchCounter(0)
+            BatchCounter(0),
+            CounterForEvent(0)
         {}
 
         inline ~DataCollectionInfo() {}

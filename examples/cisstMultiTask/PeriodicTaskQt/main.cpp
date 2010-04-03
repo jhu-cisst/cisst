@@ -174,5 +174,8 @@ int main(int argc, char *argv[])
     taskManager->KillAll();
     taskManager->Cleanup();
 
+    // stop all logs
+    cmnLogger::SetLoD(CMN_LOG_LOD_NONE);
+
     return 0;
 }

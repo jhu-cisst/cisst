@@ -10,13 +10,13 @@
   (C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights
   Reserved.
 
---- begin cisst license - do not edit ---
+  --- begin cisst license - do not edit ---
 
-This software is provided "as is" under an open source license, with
-no warranty.  The complete license can be found in license.txt and
-http://www.cisst.org/cisst/license.txt.
+  This software is provided "as is" under an open source license, with
+  no warranty.  The complete license can be found in license.txt and
+  http://www.cisst.org/cisst/license.txt.
 
---- end cisst license ---
+  --- end cisst license ---
 */
 
 #include <cisstCommon/cmnExport.h>
@@ -36,7 +36,7 @@ void mtsTask::DoRunInternal(void)
 {
     StateTables.ForEachVoid(&mtsStateTable::StartIfAutomatic);
     this->Run();
-    // advance all state tables (if automatic) 
+    // advance all state tables (if automatic)
     StateTables.ForEachVoid(&mtsStateTable::AdvanceIfAutomatic);
 }
 
@@ -114,10 +114,11 @@ unsigned int mtsTask::ProcessQueuedEvents(void) {
 
 void mtsTask::Sleep(double timeInSeconds)
 {
-    if (Thread.IsValid())
+    if (Thread.IsValid()) {
         Thread.Sleep(timeInSeconds);
-    else
+    } else {
         osaSleep(timeInSeconds);
+    }
 }
 
 
@@ -164,7 +165,7 @@ bool mtsTask::WaitForState(TaskStateType desiredState, double timeout)
             if (TaskState == desiredState)
                 break;
             timeout = endTime - curTime;
-         }
+        }
         if (TaskState == desiredState) {
             CMN_LOG_CLASS_INIT_VERBOSE << "WaitForState: waited for " << curTime-startTime
                                        << " seconds." << std::endl;
@@ -254,7 +255,7 @@ bool mtsTask::AddStateTable(mtsStateTable * existingStateTable, bool addProvided
         mtsProvidedInterface * providedInterface = this->AddProvidedInterface(interfaceName);
         if (!providedInterface) {
             CMN_LOG_CLASS_INIT_ERROR << "AddStateTable: can no add provided interface \"" << interfaceName
-                                 << "\" to task \"" << this->GetName() << "\"" << std::endl;
+                                     << "\" to task \"" << this->GetName() << "\"" << std::endl;
             return false;
         }
         providedInterface->AddCommandWrite(&mtsStateTable::DataCollectionStart,
@@ -265,6 +266,10 @@ bool mtsTask::AddStateTable(mtsStateTable * existingStateTable, bool addProvided
                                            "StopCollection");
         providedInterface->AddEventWrite(existingStateTable->DataCollection.BatchReady,
                                          "BatchReady", mtsStateTable::IndexRange());
+        providedInterface->AddEventVoid(existingStateTable->DataCollection.CollectionStarted,
+                                        "CollectionStarted");
+        providedInterface->AddEventWrite(existingStateTable->DataCollection.CollectionStopped,
+                                         "CollectionStopped", mtsUInt());
     }
     CMN_LOG_CLASS_INIT_DEBUG << "AddStateTable: added state table \"" << tableName
                              << "\" and corresponding interface \"" << interfaceName

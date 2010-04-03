@@ -41,14 +41,15 @@ public:
     ~mtsCollectorQWidget(void) {};
 
 protected:
+    unsigned int NumberOfCollectors;
+    unsigned int NumberOfActiveCollectors;
+    unsigned int NumberOfSamples;
+
     QVBoxLayout * CentralLayout;
 
-    QGroupBox * ManualBox;
-    QVBoxLayout * ManualLayout;
+    QGroupBox * StartStopBox;
+    QGridLayout * StartStopLayout;
     QPushButton * ManualStartStop;
-
-    QGroupBox * ScheduledBox;
-    QHBoxLayout * ScheduledLayout;
     QSpinBox * ScheduledBegin;
     QSpinBox * ScheduledDuration;
     QPushButton * ScheduledStart;
@@ -59,11 +60,25 @@ protected:
     QLabel * FileDirectory;
     QPushButton * FileNew;
 
+    QGroupBox * StatsBox;
+    QGridLayout * StatsLayout;
+    QLabel * StatsCollectors;
+    QLabel * StatsNbCollectors;
+    QLabel * StatsTotalCollectors;
+    QLabel * StatsSamples;
+    QLabel * StatsNbSamples;
+
 public slots:
+    // used internally for buttons
     void ManualStartStopSlot(bool checked);
     void ScheduledStartSlot(void);
     void FileDialogSlot(void);
     void FileNewSlot(void);
+
+    // used to receive events from the QComponent
+    void CollectorAdded(void);
+    void CollectionStarted(void);
+    void CollectionStopped(unsigned int count);
 
 public:
 signals:
@@ -73,7 +88,6 @@ signals:
     void StopCollectionIn(double delay);
     void SetWorkingDirectory(QString);
     void SetOutputToDefault(void);
-
 };
 
 #endif  // _mtsCollectorQWidget_h

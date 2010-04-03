@@ -122,6 +122,7 @@ bool mtsCollectorState::Connect(void)
                                  << this->GetName() << "\"" << std::endl;
         return false;
     }
+
     // then connect the interface
     CMN_LOG_CLASS_INIT_DEBUG << "Connect: connecting required interface \"" << this->GetName() << "::StateTable\" to provided interface \""
                              << this->TargetTask->GetName() << "::StateTable" << this->TargetStateTable->GetName() << "\"" << std::endl;
@@ -154,6 +155,12 @@ void mtsCollectorState::Initialize(void)
         requiredInterface->AddEventHandlerWrite(&mtsCollectorState::BatchReadyHandler,
                                                 this,
                                                 "BatchReady");
+        // add events for progress, these should not be queued as they
+        // are pass-thru events
+        requiredInterface->AddEventHandlerVoid(&mtsCollectorState::CollectionStartedHandler, this,
+                                               "CollectionStarted", false);
+        requiredInterface->AddEventHandlerWrite(&mtsCollectorState::CollectionStoppedHandler, this,
+                                                "CollectionStopped", false);
     } else {
         CMN_LOG_CLASS_INIT_ERROR << "Connect: unable to add required interface to communicate with state table for \""
                                  << this->GetName() << "\"" << std::endl;
@@ -209,6 +216,18 @@ void mtsCollectorState::BatchReadyHandler(const mtsStateTable::IndexRange & rang
     CMN_LOG_CLASS_RUN_DEBUG << "BatchReadyHandler: called for batch ["
                             << range.First << ", " << range.Last << "]" << std::endl;
     BatchCollect(range);
+}
+
+
+void mtsCollectorState::CollectionStartedHandler(void)
+{
+    this->CollectionStartedEventTrigger();
+}
+
+
+void mtsCollectorState::CollectionStoppedHandler(const mtsUInt & count)
+{
+    this->CollectionStoppedEventTrigger(count);
 }
 
 

@@ -33,7 +33,7 @@ class mtsCollectorQComponent: public QObject, public mtsDevice
     Q_OBJECT;
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
- public:
+public:
     mtsCollectorQComponent(const std::string & taskName);
     ~mtsCollectorQComponent(void);
 
@@ -41,7 +41,7 @@ class mtsCollectorQComponent: public QObject, public mtsDevice
 
     void ConnectToWidget(QWidget * widget);
 
- protected:
+protected:
     struct {
         mtsFunctionVoid StartCollection;
         mtsFunctionVoid StopCollection;
@@ -51,13 +51,23 @@ class mtsCollectorQComponent: public QObject, public mtsDevice
         mtsFunctionVoid SetOutputToDefault;
     } Collection;
 
- public slots:
+    void CollectionStartedHandler(void);
+    void CollectionStoppedHandler(const mtsUInt & count);
+
+public slots:
     void StartCollectionQSlot(void);
     void StopCollectionQSlot(void);
     void StartCollectionInQSlot(double);
     void StopCollectionInQSlot(double);
     void SetWorkingDirectoryQSlot(QString);
     void SetOutputToDefaultQSlot(void);
+
+public:
+signals:
+    void CollectorAddedQSignal(void);
+    void CollectionStartedQSignal(void);
+    void CollectionStoppedQSignal(unsigned int);
+
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsCollectorQComponent);

@@ -80,7 +80,7 @@ Name(name)
 
     // Add statistics
     NewElement("PeriodStatistics", &PeriodStats);
-   
+
     // Currently there are three signals maintained internally at StateTable.
     // : "Toc", "Tic", "Period". So the value of StateVectorBaseIDForUser is
     // set to 3.
@@ -179,7 +179,7 @@ void mtsStateTable::Advance(void) {
         AveragePeriod = SumOfPeriods / Ticks[IndexWriter];
     }
 
-    //Update Period Statistics 
+    //Update Period Statistics
     PeriodStats.AddSample(Period.Data);
 
     /* If for all cases, IndexReader is behind IndexWriter, we don't
@@ -222,11 +222,15 @@ void mtsStateTable::Advance(void) {
             && (this->Tic >= this->DataCollection.StartTime)) {
                 // start collection
                 CMN_LOG_CLASS_RUN_DEBUG << "Advance: data collection started at " << this->Tic << std::endl;
+                // send collection started event
+                this->DataCollection.CollectionStarted();
                 // reset start time
                 this->DataCollection.StartTime = 0.0;
                 this->DataCollection.BatchRange.First = this->GetIndexReader();
                 this->DataCollection.BatchCounter = 0;
                 this->DataCollection.Collecting = true;
+                // reset counter for event
+                this->DataCollection.CounterForEvent = 0;
         }
     }
     // are we collecting?
@@ -242,11 +246,15 @@ void mtsStateTable::Advance(void) {
                 // request data actual for range collection
                 this->DataCollection.BatchRange.SetTimestamp(this->Tic);
                 this->DataCollection.BatchReady(this->DataCollection.BatchRange);
+                // send collection stopped event
+                this->DataCollection.CollectionStopped(mtsUInt(this->DataCollection.CounterForEvent));
+                this->DataCollection.CounterForEvent = 0;
                 // stop collecting
                 this->DataCollection.Collecting = false;
         } else {
             // still collecting
             this->DataCollection.BatchCounter++;
+            this->DataCollection.CounterForEvent++;
             // check if we have collected enough element for actual collection
             if (this->DataCollection.BatchCounter >= this->DataCollection.BatchSize) {
                 CMN_LOG_CLASS_RUN_DEBUG << "Advance: " << this->DataCollection.BatchCounter

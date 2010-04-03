@@ -26,7 +26,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaSleep.h>
 
 
-unsigned int mtsCollectorBase::CollectorCount;
 mtsTaskManager * mtsCollectorBase::TaskManager;
 
 //-------------------------------------------------------
@@ -42,38 +41,54 @@ mtsCollectorBase::mtsCollectorBase(const std::string & collectorName,
     OutputFile(0),
     Serializer(0)
 {
-    ++CollectorCount;
-
     // set working directory
     this->WorkingDirectoryMember.Data = cmnPath::GetWorkingDirectory();
 
     if (TaskManager == 0) {
         TaskManager = mtsTaskManager::GetInstance();
     }
+   
+    // add the control interface
+    this->SetupControlInterface();
 
-    // add a control interface to start and stop the data collection
-    this->ControlInterface = AddProvidedInterface("Control");
-    if (this->ControlInterface) {
-        // commands controlling the output
-        ControlInterface->AddCommandVoid(&mtsCollectorBase::SetOutputToDefault, this, "SetOutputToDefault");
-        ControlInterface->AddCommandWrite(&mtsCollectorBase::SetWorkingDirectory, this, "SetWorkingDirectory");
-        ControlInterface->AddCommandRead(&mtsCollectorBase::GetWorkingDirectory, this, "GetWorkingDirectory");
-        // start/stop commands
-        ControlInterface->AddCommandVoid(&mtsCollectorBase::StartCollectionCommand, this, "StartCollection");
-        ControlInterface->AddCommandWrite(&mtsCollectorBase::StartCollectionInCommand, this, "StartCollectionIn");
-        ControlInterface->AddCommandVoid(&mtsCollectorBase::StopCollectionCommand, this, "StopCollection");
-        ControlInterface->AddCommandWrite(&mtsCollectorBase::StopCollectionInCommand, this, "StopCollectionIn");
-    }
     Init();
 }
 
 
 mtsCollectorBase::~mtsCollectorBase()
 {
-    --CollectorCount;
     CMN_LOG_CLASS_INIT_VERBOSE << "destructor: collector " << GetName() << " ends." << std::endl;
 }
 
+
+void mtsCollectorBase::SetupControlInterface(void)
+{
+    // add a control interface to start and stop the data collection
+    this->ControlInterface = AddProvidedInterface("Control");
+    if (this->ControlInterface) {
+        // commands controlling the output
+        ControlInterface->AddCommandVoid(&mtsCollectorBase::SetOutputToDefault, this,
+                                         "SetOutputToDefault");
+        ControlInterface->AddCommandWrite(&mtsCollectorBase::SetWorkingDirectory, this,
+                                          "SetWorkingDirectory");
+        ControlInterface->AddCommandRead(&mtsCollectorBase::GetWorkingDirectory, this,
+                                         "GetWorkingDirectory");
+        // start/stop commands
+        ControlInterface->AddCommandVoid(&mtsCollectorBase::StartCollectionCommand, this,
+                                         "StartCollection");
+        ControlInterface->AddCommandWrite(&mtsCollectorBase::StartCollectionInCommand, this,
+                                          "StartCollectionIn");
+        ControlInterface->AddCommandVoid(&mtsCollectorBase::StopCollectionCommand, this,
+                                         "StopCollection");
+        ControlInterface->AddCommandWrite(&mtsCollectorBase::StopCollectionInCommand, this,
+                                          "StopCollectionIn");
+        // events
+        ControlInterface->AddEventVoid(this->CollectionStartedEventTrigger,
+                                       "CollectionStarted");
+        ControlInterface->AddEventWrite(this->CollectionStoppedEventTrigger,
+                                        "CollectionStopped", mtsUInt());
+    }
+}
 
 void mtsCollectorBase::SetOutput(const std::string & fileName,
                                   const CollectorFileFormat fileFormat)
@@ -95,6 +110,8 @@ void mtsCollectorBase::SetOutput(const std::string & fileName,
     this->SetDelimiter();
     this->OutputFileName = fileName;
     this->FirstRunningFlag = true;
+    this->SampleCounter = 0;
+    this->SampleCounterForEvent = 0;
 
     // initialize serializer
     if (FileFormat == COLLECTOR_FILE_FORMAT_BINARY) {
@@ -190,6 +207,8 @@ void mtsCollectorBase::SetOutput(std::ostream & outputStream, const CollectorFil
     this->FileFormat = fileFormat;
     this->SetDelimiter();
     this->FirstRunningFlag = true;
+    this->SampleCounter = 0;
+    this->SampleCounterForEvent = 0;
 
     // we are not using our own file
     this->OutputFile = 0;
