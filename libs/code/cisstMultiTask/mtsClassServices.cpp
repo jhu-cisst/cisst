@@ -151,7 +151,17 @@ CMN_IMPLEMENT_SERVICES(mtsManagerGlobalInterface)
 CMN_IMPLEMENT_SERVICES(mtsManagerLocal)
 CMN_IMPLEMENT_SERVICES(mtsManagerLocalInterface)
 
+/* Qt dependent classes */
+#include <cisstConfig.h>
+#if CISST_HAS_QT
 
+#include <cisstMultiTask/mtsCollectorQComponent.h>
+CMN_IMPLEMENT_SERVICES(mtsCollectorQComponent);
+
+#endif
+
+
+/* ICE dependent classes */
 #include <cisstMultiTask/mtsConfig.h>
 #if CISST_MTS_HAS_ICE
 

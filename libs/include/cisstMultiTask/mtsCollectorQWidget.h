@@ -32,7 +32,10 @@ class QSpinBox;
 class QLabel;
 class QFileDialog;
 
-class mtsCollectorQWidget: public QWidget
+// Always include last
+#include <cisstMultiTask/mtsExport.h>
+
+class CISST_EXPORT mtsCollectorQWidget: public QWidget
 {
     Q_OBJECT;
 

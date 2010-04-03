@@ -19,11 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstMultiTask/mtsRequiredInterface.h>
-
-#include "mtsCollectorQComponent.h"
-
-CMN_IMPLEMENT_SERVICES(mtsCollectorQComponent);
-
+#include <cisstMultiTask/mtsCollectorQComponent.h>
 
 
 mtsCollectorQComponent::mtsCollectorQComponent(const std::string & taskName) :

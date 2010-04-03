@@ -18,7 +18,7 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include "mtsCollectorQWidget.h"
+#include <cisstMultiTask/mtsCollectorQWidget.h>
 #include <cisstCommon/cmnPath.h>
 
 #include <QGroupBox>

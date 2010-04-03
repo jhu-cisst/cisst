@@ -14,8 +14,6 @@
 qt4_wrap_cpp(QT_WRAPPED_CPP
              displayQComponent.h
              displayQWidget.h
-             mtsCollectorQComponent.h
-             mtsCollectorQWidget.h
              )
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
@@ -26,10 +24,6 @@ add_executable(cisstMultiTaskPeriodicTaskQt
                displayQWidget.cpp
                displayQWidget.h
                main.cpp
-               mtsCollectorQComponent.cpp
-               mtsCollectorQComponent.h
-               mtsCollectorQWidget.cpp
-               mtsCollectorQWidget.h
                sineTask.cpp
                sineTask.h
                )

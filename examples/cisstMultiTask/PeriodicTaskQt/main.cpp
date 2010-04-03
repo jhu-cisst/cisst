@@ -23,6 +23,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaThreadedLogFile.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstMultiTask/mtsCollectorEvent.h>
+#include <cisstMultiTask/mtsCollectorQComponent.h>
+#include <cisstMultiTask/mtsCollectorQWidget.h>
 
 #include <QApplication>
 #include <QTabWidget>
@@ -31,8 +33,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <QWidget>
 
 #include "displayQComponent.h"
-#include "mtsCollectorQComponent.h"
-#include "mtsCollectorQWidget.h"
 #include "sineTask.h"
 
 const unsigned int NumSineTasks = 2;

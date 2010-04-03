@@ -141,6 +141,26 @@ SET(HEADER_FILES
     mtsHistory.h
     )
 
+# Qt widgets
+if(CISST_HAS_QT)
+  include_directories(${CMAKE_CURRENT_BINARY_DIR})
+  qt4_wrap_cpp(QT_WRAPPED_CPP
+               ../../include/cisstMultiTask/mtsCollectorQComponent.h
+               ../../include/cisstMultiTask/mtsCollectorQWidget.h
+               )
+  set(ADDITIONAL_SOURCE_FILES ${QT_WRAPPED_CPP})
+
+  set(SOURCE_FILES
+      ${SOURCE_FILES}
+      mtsCollectorQComponent.cpp
+      mtsCollectorQWidget.cpp)
+
+  set(HEADER_FILES
+      ${HEADER_FILES}
+      mtsCollectorQComponent.h
+      mtsCollectorQWidget.h)
+endif(CISST_HAS_QT)
+
 # make sure all options are set for all devices to OFF
 option(CISST_MTS_HAS_ICE "Enable inter-process communication (IPC) feature of cisstMultiTask, requires ICE from ZeroC" OFF)
 
@@ -257,6 +277,10 @@ CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/cisstMultiTaskBuild.cmake.in
 
 # Finally add the library
 CISST_ADD_LIBRARY_TO_PROJECT(cisstLibs)
+
+if(CISST_HAS_QT)
+  target_link_libraries(cisstMultiTask ${QT_LIBRARIES})
+endif(CISST_HAS_QT)
 
 if(CISST_MTS_HAS_ICE)
   if(WIN32)
