@@ -27,7 +27,7 @@ SET(SOURCE_FILES
   robConstantSO3.cpp
   robLinear.cpp
   robMapping.cpp
-  robQuintic.cpp
+#  robQuintic.cpp
   robSigmoid.cpp
   robSLERP.cpp
   robCasteljauSO3.cpp
@@ -56,7 +56,7 @@ SET(HEADER_FILES
   robFunction.h
   robLinear.h
   robMapping.h
-  robQuintic.h
+#  robQuintic.h
   robSigmoid.h
   robSLERP.h
   robCasteljauSO3.h
