@@ -245,6 +245,8 @@ void GCMUITask::Configure(const std::string & CMN_UNUSED(filename))
     GraphPane->SetAutoScale(false);
     GraphPane->set_grid(MP_LINEAR_GRID, MP_LINEAR_GRID, true);
     GraphPane->set_grid_color(GRAY);
+    //GraphPane->set_grid_color(DARK_GRAY);
+    //GraphPane->set_bg_color(1.0f, 1.0f, 1.0f);
 
     for (int i=0; i< MAX_ARGUMENT_PARAMETER_COUNT; ++i) {
         GraphPane->set_pointsize(i, 1.0);
@@ -1033,7 +1035,8 @@ void GCMUITask::OnButtonRemoveAllClicked(void)
         return;
     } else if (ret == 2) { // Yes
         while (UI.BrowserSelectedSignals->size() != 0) {
-            UI.BrowserSelectedSignals->value(1);
+            //UI.BrowserSelectedSignals->value(1);
+            UI.BrowserSelectedSignals->value(UI.BrowserSelectedSignals->size());
             OnButtonRemoveClicked();
         }
     }

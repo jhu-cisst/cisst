@@ -351,21 +351,23 @@ inline PLOT_POINT::PLOT_POINT(float xx, float yy, const unsigned int colorIndex)
         case 5: r = 255.0f/255.0f; g = 0.0f; b = 255.0f/255.0f; break;
         // AQUA
         case 6: r = 0.0f; g = 255.0f/255.0f; b = 255.0f/255.0f; break;
+        /*
         // GRAY
         case 9: r = 192.0f/255.0f; g = 192.0f/255.0f; b = 192.0f/255.0f; break;
+        */
         // DARK_RED
-        case 10: r = 128.0f/255.0f; g = 0.0f; b = 0.0f; break;
+        case 9: r = 128.0f/255.0f; g = 0.0f; b = 0.0f; break;
         // DARK_GREEN
-        case 11: r = 0.0f; g = 128.0f/255.0f; b = 0.0f; break;
+        case 10: r = 0.0f; g = 128.0f/255.0f; b = 0.0f; break;
         // DARK_YELLOW
-        case 12: r = 128.0f/255.0f; g = 128.0f/255.0f; b = 0.0f; break;
+        case 11: r = 128.0f/255.0f; g = 128.0f/255.0f; b = 0.0f; break;
         // LIGHT_PURPLE
-        case 13: r = 153.0f/255.0f; g = 153.0f/255.0f; b = 204.0f/255.0f; break;
+        case 12: r = 153.0f/255.0f; g = 153.0f/255.0f; b = 204.0f/255.0f; break;
         // DARK_PURPLE
-        case 14: r = 128.0f/255.0f; g = 0.0f/255.0f; b = 128.0f/255.0f; break;
-        /*
+        case 13: r = 128.0f/255.0f; g = 0.0f/255.0f; b = 128.0f/255.0f; break;
         // DARK_AQUA
-        case 12: r = 0.0f/255.0f; g = 128.0f/255.0f; b = 128.0f/255.0f; break;
+        case 14: r = 0.0f/255.0f; g = 128.0f/255.0f; b = 128.0f/255.0f; break;
+        /*
         // DARK_GRAY
         case 13: r = 128.0f/255.0f; g = 128.0f/255.0f; b = 128.0f/255.0f; break;
         */
