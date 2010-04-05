@@ -124,10 +124,17 @@ int main(int argc, char** argv){
   vctFrame4x4<double> Rtwb;
   // controller gains
   vctDynamicMatrix<double> Kp(7,7,0.0), Kd(7,7,0.0);
+  /* This leads to run-time error
   Kp[0][0] = 150.0;  Kp[1][1] = 150.0;  Kp[2][2] = 150.0;  Kp[3][3] = 20.0;
   Kp[4][4] = 2.0;   Kp[5][5] = 2.0;   Kp[6][6] = .5;
  
   Kd[0][0] = 5.5;   Kd[1][1] = 5.5;   Kd[2][2] = 5.5;  Kd[3][3] = 4.5;
+  Kd[4][4] = 0.01;  Kd[5][5] = 0.01;  Kd[6][6] = 0.001;
+  */
+  Kp[0][0] = 20.0;  Kp[1][1] = 20.0;  Kp[2][2] = 20.0;  Kp[3][3] = 10.0;
+  Kp[4][4] = 2.0;   Kp[5][5] = 2.0;   Kp[6][6] = .5;
+ 
+  Kd[0][0] = 3.5;   Kd[1][1] = 3.5;   Kd[2][2] = 3.5;  Kd[3][3] = 1.5;
   Kd[4][4] = 0.01;  Kd[5][5] = 0.01;  Kd[6][6] = 0.001;
 
   // the controller
