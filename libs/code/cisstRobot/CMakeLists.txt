@@ -2,13 +2,13 @@
 #
 # (C) Copyright 2003-2008 Johns Hopkins University (JHU), All Rights
 # Reserved.
-# 
+#
 # --- begin cisst license - do not edit ---
-# 
+#
 # This software is provided "as is" under an open source license, with
 # no warranty.  The complete license can be found in license.txt and
 # http://www.cisst.org/cisst/license.txt.
-# 
+#
 # --- end cisst license ---
 
 # set the library name
@@ -18,7 +18,6 @@ SET(LIBRARY cisstRobot)
 SET(DEPENDENCIES
     cisstCommon
     cisstVector
-#    cisstNumerical
     )
 
 # all source files
@@ -28,12 +27,11 @@ SET(SOURCE_FILES
 
 # all header files
 SET(HEADER_FILES
-
   robCollaborativeControlForce.h
   )
 
-if (CISST_HAS_CISSTNETLIB)
-    SET( HEADER_FILES 
+if (BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB)
+    SET( HEADER_FILES
          ${HEADER_FILES}
 	 robConstantR1.h
 	 robConstantSO3.h
@@ -51,18 +49,18 @@ if (CISST_HAS_CISSTNETLIB)
 	 robTrajectorySO3.h
 	 robTrajectoryManager.h
 	 robVariable.h
-	 
+
 	 robMass.h
 	 robJoint.h
-	 
+
 	 robDH.h
 	 robLink.h
 	 robManipulator.h
       )
-    SET( SOURCE_FILES 
+    SET( SOURCE_FILES
          ${SOURCE_FILES}
 	 robConstantR1.cpp
-	 robConstantSO3.cpp	
+	 robConstantSO3.cpp
 	 robLinear.cpp
 	 robMapping.cpp
 	 robQuintic.cpp
@@ -76,18 +74,21 @@ if (CISST_HAS_CISSTNETLIB)
 	 robTrajectorySO3.cpp
 	 robTrajectoryManager.cpp
 	 robVariable.cpp
-	 
+
 	 robJoint.cpp
 	 robMass.cpp
-	 
+
 	 robDH.cpp
 	 robLink.cpp
 	 robManipulator.cpp
 
       )
- else (CISST_HAS_SWIG_PYTHON)
+
+    set(DEPENDENCIES ${DEPENDENCIES} cisstNumerical)
+
+else (BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB)
   message( WARNING "cisstRobot requires cisstNetlib support. Most of cisstRobot modules will not be compiled without it.")
-endif(CISST_HAS_CISSTNETLIB)
+endif (BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB)
 
 
 # use for findblas and findlapack
@@ -97,12 +98,12 @@ endif(CISST_HAS_CISSTNETLIB)
 #if( BLAS_FOUND )
 #    cisst_add_to_internal( CISST_ADDITIONAL_LIBRARIES BLAS_LIBRARIES )
 #endif( BLAS_FOUND )
-  
+
 #include( FindLAPACK )
 #if( LAPACK_FOUND )
 #    cisst_add_to_internal( CISST_ADDITIONAL_LIBRARIES LAPACK_LIBRARIES )
 #endif( LAPACK_FOUND )
-  
+
 
 CISST_ADD_LIBRARY_TO_PROJECT(cisstLibs)
 
