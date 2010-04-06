@@ -97,6 +97,16 @@ public:
     /*! Binary deserialization */
     void DeSerializeRaw(std::istream & inputStream);
 
+    /*! Return a number of data (which can be visualized, i.e., type-casted 
+        to double). */
+    unsigned int GetNumberOfScalar(const bool visualizable = true) const;
+
+    /*! Return the index-th (zero-based) value of data typecasted to double. */
+    double GetScalarAsDouble(const size_t index) const;
+
+    /*! Return the name of index-th (zero-based) data typecasted to double. */
+    std::string GetScalarName(const size_t index) const;
+
 }; // _prmPositionJointGet_h
 
 

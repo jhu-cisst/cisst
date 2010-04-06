@@ -56,3 +56,30 @@ void prmPositionJointGet::DeSerializeRaw(std::istream & inputStream)
     BaseType::DeSerializeRaw(inputStream);
     this->PositionMember.DeSerializeRaw(inputStream);
 }
+
+unsigned int prmPositionJointGet::GetNumberOfScalar(const bool CMN_UNUSED(visualizable)) const 
+{
+    return PositionMember.size();
+}
+
+double prmPositionJointGet::GetScalarAsDouble(const size_t index) const 
+{
+    if (index >= GetNumberOfScalar()) {
+        return 0.0;
+    }
+
+    return static_cast<double>(this->PositionMember.at(index));
+}
+
+std::string prmPositionJointGet::GetScalarName(const size_t index) const 
+{
+    if (index >= GetNumberOfScalar()) {
+        return "N/A";
+    }
+
+    std::stringstream ss;
+    ss << "JointPosition";
+    ss << index;
+    
+    return ss.str();
+}
