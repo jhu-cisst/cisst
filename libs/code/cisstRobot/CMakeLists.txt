@@ -23,60 +23,72 @@ SET(DEPENDENCIES
 
 # all source files
 SET(SOURCE_FILES
-  robConstantR1.cpp
-  robConstantSO3.cpp
-  robLinear.cpp
-  robMapping.cpp
-#  robQuintic.cpp
-  robSigmoid.cpp
-  robSLERP.cpp
-  robCasteljauSO3.cpp
-  robSpace.cpp
-#  robTrackSE3.cpp
-  robTrajectory.cpp
-  robTrajectoryR1.cpp
-  robTrajectorySO3.cpp
-  robTrajectoryManager.cpp
-  robVariable.cpp
-  
-  robJoint.cpp
-  robMass.cpp
-  
-  robDH.cpp
-  robLink.cpp
-  robManipulator.cpp
-
   robCollaborativeControlForce.cpp
   )
 
 # all header files
 SET(HEADER_FILES
-  robConstantR1.h
-  robConstantSO3.h
-  robFunction.h
-  robLinear.h
-  robMapping.h
-#  robQuintic.h
-  robSigmoid.h
-  robSLERP.h
-  robCasteljauSO3.h
-  robSpace.h
-  robTrackSE3.h
-  robTrajectory.h
-  robTrajectoryR1.h
-  robTrajectorySO3.h
-  robTrajectoryManager.h
-  robVariable.h
-  
-  robMass.h
-  robJoint.h
-  
-  robDH.h
-  robLink.h
-  robManipulator.h
 
   robCollaborativeControlForce.h
   )
+
+if (CISST_HAS_CISSTNETLIB)
+    SET( HEADER_FILES 
+         ${HEADER_FILES}
+	 robConstantR1.h
+	 robConstantSO3.h
+	 robFunction.h
+	 robLinear.h
+	 robMapping.h
+	 robQuintic.h
+	 robSigmoid.h
+	 robSLERP.h
+	 robCasteljauSO3.h
+	 robSpace.h
+	 robTrackSE3.h
+	 robTrajectory.h
+	 robTrajectoryR1.h
+	 robTrajectorySO3.h
+	 robTrajectoryManager.h
+	 robVariable.h
+	 
+	 robMass.h
+	 robJoint.h
+	 
+	 robDH.h
+	 robLink.h
+	 robManipulator.h
+      )
+    SET( SOURCE_FILES 
+         ${SOURCE_FILES}
+	 robConstantR1.cpp
+	 robConstantSO3.cpp	
+	 robLinear.cpp
+	 robMapping.cpp
+	 robQuintic.cpp
+	 robSigmoid.cpp
+	 robSLERP.cpp
+	 robCasteljauSO3.cpp
+	 robSpace.cpp
+	 #  robTrackSE3.cpp
+	 robTrajectory.cpp
+	 robTrajectoryR1.cpp
+	 robTrajectorySO3.cpp
+	 robTrajectoryManager.cpp
+	 robVariable.cpp
+	 
+	 robJoint.cpp
+	 robMass.cpp
+	 
+	 robDH.cpp
+	 robLink.cpp
+	 robManipulator.cpp
+
+      )
+ else (CISST_HAS_SWIG_PYTHON)
+  message( WARNING "cisstRobot requires cisstNetlib support. Most of cisstRobot modules will not be compiled without it.")
+endif(CISST_HAS_CISSTNETLIB)
+
 
 # use for findblas and findlapack
 #enable_language( Fortran )
