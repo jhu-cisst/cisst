@@ -37,6 +37,7 @@ mtsCollectorBase::mtsCollectorBase(const std::string & collectorName,
     mtsTaskFromSignal(collectorName),
     FileFormat(fileFormat),
     ConnectedFlag(false),
+    TimeIntervalForProgressEvent(1.0 * cmn_s),
     OutputStream(0),
     OutputFile(0),
     Serializer(0)
@@ -47,7 +48,7 @@ mtsCollectorBase::mtsCollectorBase(const std::string & collectorName,
     if (TaskManager == 0) {
         TaskManager = mtsTaskManager::GetInstance();
     }
-   
+
     // add the control interface
     this->SetupControlInterface();
 
@@ -87,6 +88,8 @@ void mtsCollectorBase::SetupControlInterface(void)
                                        "CollectionStarted");
         ControlInterface->AddEventWrite(this->CollectionStoppedEventTrigger,
                                         "CollectionStopped", mtsUInt());
+        ControlInterface->AddEventWrite(this->ProgressEventTrigger,
+                                        "Progress", mtsUInt());
     }
 }
 

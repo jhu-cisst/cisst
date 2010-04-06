@@ -109,6 +109,12 @@ protected:
     /*! Counter for number of sample since the last CollectionStopped event */
     unsigned int SampleCounterForEvent;
 
+    /*! Interval between two progress events (in seconds) */
+    double TimeIntervalForProgressEvent;
+
+    /*! Time of last progress event */
+    double TimeOfLastProgressEvent;
+    
     /*! Output file name, including working directory. */
     std::string OutputFileName;
 
@@ -214,6 +220,9 @@ public:
 
     /*! Function used to trigger Collection Started event. */
     mtsFunctionWrite CollectionStoppedEventTrigger;
+
+    /*! Function used to trigger Progress event. */
+    mtsFunctionWrite ProgressEventTrigger;
 
     /*! Set working directory, usable with commands as well */
     void SetWorkingDirectory(const mtsStdString & directory);

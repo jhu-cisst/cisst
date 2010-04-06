@@ -56,6 +56,7 @@ protected:
 
     void CollectionStartedHandler(void);
     void CollectionStoppedHandler(const mtsUInt & count);
+    void ProgressHandler(const mtsUInt & count);
 
 public slots:
     void StartCollectionQSlot(void);
@@ -70,7 +71,7 @@ signals:
     void CollectorAddedQSignal(void);
     void CollectionStartedQSignal(void);
     void CollectionStoppedQSignal(unsigned int);
-
+    void ProgressQSignal(unsigned int);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsCollectorQComponent);

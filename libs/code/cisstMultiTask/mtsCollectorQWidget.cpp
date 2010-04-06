@@ -177,3 +177,10 @@ void mtsCollectorQWidget::CollectionStopped(unsigned int count)
     this->NumberOfSamples += count;
     this->StatsNbSamples->setNum(static_cast<int>(this->NumberOfSamples));
 }
+
+
+void mtsCollectorQWidget::Progress(unsigned int count)
+{
+    this->NumberOfSamples += count;
+    this->StatsNbSamples->setNum(static_cast<int>(this->NumberOfSamples));
+}

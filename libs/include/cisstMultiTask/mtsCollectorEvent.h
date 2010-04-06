@@ -214,7 +214,7 @@ class CISST_EXPORT mtsCollectorEvent : public mtsCollectorBase
     //@}
 
  protected:
-    void SetCollecting(bool collecting);
+    void SetCollecting(bool collecting, double currentTime);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsCollectorEvent)

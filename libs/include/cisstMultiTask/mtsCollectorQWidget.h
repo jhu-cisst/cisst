@@ -82,6 +82,7 @@ public slots:
     void CollectorAdded(void);
     void CollectionStarted(void);
     void CollectionStopped(unsigned int count);
+    void Progress(unsigned int count);
 
 public:
 signals:

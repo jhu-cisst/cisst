@@ -42,20 +42,20 @@ void mtsStateTable::IndexRange::ToStreamRaw(std::ostream & outputStream, const c
 int mtsStateTable::StateVectorBaseIDForUser;
 
 mtsStateTable::mtsStateTable(int size, const std::string & name):
-HistoryLength(size),
-NumberStateData(0),
-IndexWriter(0),
-IndexReader(0),
-AutomaticAdvanceFlag(true),
-StateVector(NumberStateData),
-StateVectorDataNames(NumberStateData),
-Ticks(size, mtsStateIndex::TimeTicksType(0)),
-Tic(0.0),
-Toc(0.0),
-Period(0.0),
-SumOfPeriods(0.0),
-AveragePeriod(0.0),
-Name(name)
+    HistoryLength(size),
+    NumberStateData(0),
+    IndexWriter(0),
+    IndexReader(0),
+    AutomaticAdvanceFlag(true),
+    StateVector(NumberStateData),
+    StateVectorDataNames(NumberStateData),
+    Ticks(size, mtsStateIndex::TimeTicksType(0)),
+    Tic(0.0),
+    Toc(0.0),
+    Period(0.0),
+    SumOfPeriods(0.0),
+    AveragePeriod(0.0),
+    Name(name)
 {
     // make sure history length is at least 3
     if (this->HistoryLength < 3) {
@@ -65,6 +65,7 @@ Name(name)
 
     // set the default number of elements for data collection batch
     this->DataCollection.BatchSize = this->HistoryLength / 3;
+    this->DataCollection.TimeIntervalForProgressEvent = 1.0 * cmn_s;
     this->DataCollection.BatchRange.SetValid(true);
     this->DataCollection.BatchRange.SetAutomaticTimestamp(false);
 
@@ -102,8 +103,9 @@ mtsStateIndex mtsStateTable::GetIndexReader(void) const {
 mtsStateTable::AccessorBase * mtsStateTable::GetAccessor(const std::string & name) const
 {
     for (unsigned int i = 0; i < StateVectorDataNames.size(); i++) {
-        if (name == StateVectorDataNames[i])
+        if (name == StateVectorDataNames[i]) {
             return StateVectorAccessors[i];
+        }
     }
     return 0;
 }
@@ -220,17 +222,18 @@ void mtsStateTable::Advance(void) {
         // check if a start time is set and has arrived
         if ((this->DataCollection.StartTime != 0.0)
             && (this->Tic >= this->DataCollection.StartTime)) {
-                // start collection
-                CMN_LOG_CLASS_RUN_DEBUG << "Advance: data collection started at " << this->Tic << std::endl;
-                // send collection started event
-                this->DataCollection.CollectionStarted();
-                // reset start time
-                this->DataCollection.StartTime = 0.0;
-                this->DataCollection.BatchRange.First = this->GetIndexReader();
-                this->DataCollection.BatchCounter = 0;
-                this->DataCollection.Collecting = true;
-                // reset counter for event
-                this->DataCollection.CounterForEvent = 0;
+            // start collection
+            CMN_LOG_CLASS_RUN_DEBUG << "Advance: data collection started at " << this->Tic << std::endl;
+            // send collection started event
+            this->DataCollection.CollectionStarted();
+            // reset start time
+            this->DataCollection.StartTime = 0.0;
+            this->DataCollection.BatchRange.First = this->GetIndexReader();
+            this->DataCollection.BatchCounter = 0;
+            this->DataCollection.Collecting = true;
+            // reset counter for event
+            this->DataCollection.CounterForEvent = 0;
+            this->DataCollection.TimeOfLastProgressEvent = this->Tic;
         }
     }
     // are we collecting?
@@ -238,19 +241,19 @@ void mtsStateTable::Advance(void) {
         // check if a stop time is set and has arrived
         if ((this->DataCollection.StopTime != 0.0)
             && (this->Tic >= this->DataCollection.StopTime)) {
-                // stop collection
-                CMN_LOG_CLASS_RUN_DEBUG << "Advance: data collection stopped at " << this->Tic << std::endl;
-                // reset start time
-                this->DataCollection.StopTime = 0.0;
-                this->DataCollection.BatchRange.Last = this->GetIndexReader();
-                // request data actual for range collection
-                this->DataCollection.BatchRange.SetTimestamp(this->Tic);
-                this->DataCollection.BatchReady(this->DataCollection.BatchRange);
-                // send collection stopped event
-                this->DataCollection.CollectionStopped(mtsUInt(this->DataCollection.CounterForEvent));
-                this->DataCollection.CounterForEvent = 0;
-                // stop collecting
-                this->DataCollection.Collecting = false;
+            // stop collection
+            CMN_LOG_CLASS_RUN_DEBUG << "Advance: data collection stopped at " << this->Tic << std::endl;
+            // reset start time
+            this->DataCollection.StopTime = 0.0;
+            this->DataCollection.BatchRange.Last = this->GetIndexReader();
+            // request data actual for range collection
+            this->DataCollection.BatchRange.SetTimestamp(this->Tic);
+            this->DataCollection.BatchReady(this->DataCollection.BatchRange);
+            // send collection stopped event
+            this->DataCollection.CollectionStopped(mtsUInt(this->DataCollection.CounterForEvent));
+            this->DataCollection.CounterForEvent = 0;
+            // stop collecting
+            this->DataCollection.Collecting = false;
         } else {
             // still collecting
             this->DataCollection.BatchCounter++;
@@ -258,13 +261,19 @@ void mtsStateTable::Advance(void) {
             // check if we have collected enough element for actual collection
             if (this->DataCollection.BatchCounter >= this->DataCollection.BatchSize) {
                 CMN_LOG_CLASS_RUN_DEBUG << "Advance: " << this->DataCollection.BatchCounter
-                    << " element(s) available for data collection" << std::endl;
+                                        << " element(s) available for data collection" << std::endl;
                 this->DataCollection.BatchRange.Last = this->GetIndexReader();
                 // request data actual for range collection
                 this->DataCollection.BatchRange.SetTimestamp(this->Tic);
                 this->DataCollection.BatchReady(this->DataCollection.BatchRange);
                 this->DataCollection.BatchCounter = 0;
                 this->DataCollection.BatchRange.First = this->GetIndexWriter();
+            }
+            // check if we have spent enough time for a progress event
+            if ((this->Tic - this->DataCollection.TimeOfLastProgressEvent) >= this->DataCollection.TimeIntervalForProgressEvent) {
+                this->DataCollection.Progress(mtsUInt(this->DataCollection.CounterForEvent));
+                this->DataCollection.CounterForEvent = 0;
+                this->DataCollection.TimeOfLastProgressEvent = this->Tic;
             }
         }
     }
@@ -284,7 +293,7 @@ void mtsStateTable::Kill(void) {
     // if the state table is still set to collect data, send error message, should have been stopped
     if (this->DataCollection.Collecting) {
         CMN_LOG_CLASS_INIT_ERROR << "Kill: data collection for state table \"" << this->Name
-            << "\" has not been stopped.  It is possible that the state collector will look for this state table after it has been deleted." << std::endl;
+                                 << "\" has not been stopped.  It is possible that the state collector will look for this state table after it has been deleted." << std::endl;
     }
 }
 
@@ -296,10 +305,10 @@ void mtsStateTable::ToStream(std::ostream & outputStream) const {
     for (i = 0; i < StateVector.size() - 1; i++) {
         if (!StateVectorDataNames[i].empty())
             outputStream << "[" << i << "]"
-            << StateVectorDataNames[i].c_str() << " : ";
+                         << StateVectorDataNames[i].c_str() << " : ";
     }
     outputStream << "[" << i << "]"
-        << StateVectorDataNames[i].c_str() << std::endl;
+                 << StateVectorDataNames[i].c_str() << std::endl;
 #if 0
     // the following is a data dump, it should go in ToStreamRaw
     for (i = 0; i < HistoryLength; i++) {
@@ -309,7 +318,7 @@ void mtsStateTable::ToStream(std::ostream & outputStream) const {
             if (StateVector[j]) {
                 out << " [" << j << "] "
                     << (*StateVector[j])[i]
-                << " : ";
+                    << " : ";
             }
         }
         if (i==IndexReader)

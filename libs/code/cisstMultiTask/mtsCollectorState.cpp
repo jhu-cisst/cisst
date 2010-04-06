@@ -161,6 +161,8 @@ void mtsCollectorState::Initialize(void)
                                                "CollectionStarted", false);
         requiredInterface->AddEventHandlerWrite(&mtsCollectorState::CollectionStoppedHandler, this,
                                                 "CollectionStopped", false);
+        requiredInterface->AddEventHandlerWrite(&mtsCollectorState::ProgressHandler, this,
+                                                "Progress", false);
     } else {
         CMN_LOG_CLASS_INIT_ERROR << "Connect: unable to add required interface to communicate with state table for \""
                                  << this->GetName() << "\"" << std::endl;
@@ -228,6 +230,12 @@ void mtsCollectorState::CollectionStartedHandler(void)
 void mtsCollectorState::CollectionStoppedHandler(const mtsUInt & count)
 {
     this->CollectionStoppedEventTrigger(count);
+}
+
+
+void mtsCollectorState::ProgressHandler(const mtsUInt & count)
+{
+    this->ProgressEventTrigger(count);
 }
 
 

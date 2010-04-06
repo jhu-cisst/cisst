@@ -117,16 +117,24 @@ bool mtsCollectorEvent::CheckCollectingStatus(void)
 {
     // get the current time and check agains scheduled start/stop time
     const double currentTime = this->TimeServer->GetRelativeTime();
-    if (this->Collecting
-        && (this->ScheduledStopTime != 0.0) // stop time is set
-        && (currentTime >= this->ScheduledStopTime)) {
-        this->SetCollecting(false);
-        CMN_LOG_CLASS_RUN_DEBUG << "CheckCollectingStatus: stopping collection at: " << currentTime << std::endl;
+    if (this->Collecting) {
+        // check if we have been collecting long enough to send a progress info (number of samples)
+        if ((currentTime - this->TimeOfLastProgressEvent) >= this->TimeIntervalForProgressEvent) {
+            this->ProgressEventTrigger(mtsUInt(this->SampleCounterForEvent));
+            this->SampleCounterForEvent = 0;
+            this->TimeOfLastProgressEvent = currentTime;
+        }        
+        // now check if we are supposed to stop
+        if ((this->ScheduledStopTime != 0.0) // stop time is set
+            && (currentTime >= this->ScheduledStopTime)) {
+            this->SetCollecting(false, currentTime);
+            CMN_LOG_CLASS_RUN_DEBUG << "CheckCollectingStatus: stopping collection at: " << currentTime << std::endl;
+        }
     } else {
-        if ((!this->Collecting)
-            && (this->ScheduledStartTime != 0.0)
+        // we are not collecting yet, check if we should start
+        if ((this->ScheduledStartTime != 0.0)
             && (currentTime >= this->ScheduledStartTime)) {
-            this->SetCollecting(true);
+            this->SetCollecting(true, currentTime);
             CMN_LOG_CLASS_RUN_DEBUG << "CheckCollectingStatus: starting collection at: " << currentTime << std::endl;
         }
     }
@@ -542,7 +550,7 @@ void mtsCollectorEvent::StartCollection(const mtsDouble & delay)
 {
     const double currentTime = this->TimeServer->GetRelativeTime();
     if (delay.Data == 0.0) {
-        this->SetCollecting(true);
+        this->SetCollecting(true, currentTime);
         CMN_LOG_CLASS_RUN_DEBUG << "StartCollection: starting collection now (" << currentTime << ")" << std::endl;
     } else {
         this->ScheduledStartTime = currentTime + delay.Data;
@@ -555,7 +563,7 @@ void mtsCollectorEvent::StopCollection(const mtsDouble & delay)
 {
     const double currentTime = this->TimeServer->GetRelativeTime();
     if (delay.Data == 0.0) {
-        this->SetCollecting(false);
+        this->SetCollecting(false, currentTime);
         CMN_LOG_CLASS_RUN_DEBUG << "StopCollection: stopping collection now (" << currentTime << ")" << std::endl;
     } else {
         this->ScheduledStopTime = currentTime + delay.Data;
@@ -564,13 +572,14 @@ void mtsCollectorEvent::StopCollection(const mtsDouble & delay)
 }
 
 
-void mtsCollectorEvent::SetCollecting(bool collecting)
+void mtsCollectorEvent::SetCollecting(bool collecting, double currentTime)
 {
     this->Collecting = collecting;
     if (this->Collecting) {
         // start collecting
         this->CollectionStartedEventTrigger();
         this->ScheduledStartTime = 0.0;
+        this->TimeOfLastProgressEvent = currentTime;
     } else {
         // stop collecting
         this->CollectionStoppedEventTrigger(mtsUInt(this->SampleCounterForEvent));

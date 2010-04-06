@@ -38,6 +38,8 @@ mtsCollectorQComponent::mtsCollectorQComponent(const std::string & taskName) :
                                               "CollectionStarted", false);
        requiredInterface->AddEventHandlerWrite(&mtsCollectorQComponent::CollectionStoppedHandler, this,
                                                "CollectionStopped", false);
+       requiredInterface->AddEventHandlerWrite(&mtsCollectorQComponent::ProgressHandler, this,
+                                               "Progress", false);
     }
 }
 
@@ -57,6 +59,12 @@ void mtsCollectorQComponent::CollectionStartedHandler(void)
 void mtsCollectorQComponent::CollectionStoppedHandler(const mtsUInt & count)
 {
     emit CollectionStoppedQSignal(count.Data);
+}
+
+
+void mtsCollectorQComponent::ProgressHandler(const mtsUInt & count)
+{
+    emit ProgressQSignal(count.Data);
 }
 
 
@@ -80,6 +88,8 @@ void mtsCollectorQComponent::ConnectToWidget(QWidget * widget)
                      widget, SLOT(CollectionStarted()));
     QObject::connect(this, SIGNAL(CollectionStoppedQSignal(unsigned int)),
                      widget, SLOT(CollectionStopped(unsigned int)));
+    QObject::connect(this, SIGNAL(ProgressQSignal(unsigned int)),
+                     widget, SLOT(Progress(unsigned int)));
     emit CollectorAddedQSignal();
 
 }
