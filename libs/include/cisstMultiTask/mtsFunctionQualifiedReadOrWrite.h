@@ -42,7 +42,9 @@ protected:
     typedef mtsCommandQualifiedReadOrWriteBase<ArgumentType> CommandType;
     CommandType * Command;
 
-    template<typename _userType1, typename _userType2, bool, bool>
+    // Portability note:  Visual Studio.NET 2003 did not compile with following (Error C2365), needed to add "a" and "b".
+    // template<typename _userType1, typename _userType2, bool, bool>
+    template<typename _userType1, typename _userType2, bool a, bool b>
     class ConditionalWrap {
         // default case: both parameters need to be wrapped
     public:

@@ -76,7 +76,9 @@ protected:
     /*! Argument 2 prototype */
     mtsGenericObject * Argument2Prototype;
 
-    template<bool, bool, typename dummy=void>
+    // Portability note:  Visual Studio.NET 2003 did not compile with following (Error C2365), needed to add "a" and "b".
+    // template<bool, bool, typename dummy=void>
+    template<bool a, bool b, typename dummy=void>
     class ConditionalCast {
         // Default case: Argument1Type, Argument2Type not derived from mtsGenericObjectProxy.
         // There are two cases to consider:
