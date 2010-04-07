@@ -49,7 +49,7 @@ public:
   double** Js;
   
   //! A tool
-  robManipulator *tool;
+  std::vector<robManipulator*> tool;
   
   //! A vector of links
   std::vector<robLink> links;
@@ -143,6 +143,8 @@ public:
     
 public:
   
+  robManipulator( const vctFrame4x4<double>& Rtw0 = vctFrame4x4<double>() );
+
   //! Manipulator generic constructor
   /**
      This constructor initializes a manipulator with the kinematics and dynamics
@@ -160,8 +162,9 @@ public:
      This method is non-const since it needs to update the position and 
      orientation of each link in order to render them in OpenGL
   */
-  vctFrame4x4<double>
-    ForwardKinematics( const vctDynamicVector<double>& q, int N = -1 )const;
+  virtual
+    vctFrame4x4<double>
+    ForwardKinematics( const vctDynamicVector<double>& q, int N = -1 ) const;
   
   //! Evaluate the inverse kinematics
   /**
@@ -171,14 +174,16 @@ public:
      \param[output] q The inverse kinematics solution
      \param Rts The desired position and orientation of the tool control point
      \param tolerance The error tolerance of the solution
-     \param Niteration The maximum number of iteration allowed to find a solution
+     \param Niteration The maximum number of iteration allowed to find asolution
      \return SUCCESS if a solution was found within the given tolerance and 
                      number of iterations. ERROR otherwise.
   */
-  robManipulator::Errno InverseKinematics( vctDynamicVector<double>& q, 
-					   const vctFrame4x4<double>& Rts, 
-					   double tolerance=1e-12, 
-					   size_t Niteration=1000 );
+  virtual 
+    robManipulator::Errno 
+    InverseKinematics( vctDynamicVector<double>& q, 
+		       const vctFrame4x4<double>& Rts, 
+		       double tolerance=1e-12, 
+		       size_t Niteration=1000 );
   
   //! Inverse dynamics in joint space
   /**
@@ -190,10 +195,11 @@ public:
      \param qdd A vector of joints accelerations
      \return A vector of joints torques
   */
-  vctDynamicVector<double> 
-  InverseDynamics( const vctDynamicVector<double>& q,
-		   const vctDynamicVector<double>& qd,
-		   const vctDynamicVector<double>& qdd ) const;
+  virtual
+    vctDynamicVector<double> 
+    InverseDynamics( const vctDynamicVector<double>& q,
+		     const vctDynamicVector<double>& qd,
+		     const vctDynamicVector<double>& qdd ) const;
   
   //! Inverse dynamics in operation space
   /**
@@ -209,10 +215,11 @@ public:
      \param vdwd A 6D vector of the TCP linear and angular accelerations
      \return A vector of joints torques
   */
-  vctDynamicVector<double> 
-  InverseDynamics( const vctDynamicVector<double>& q,
-		   const vctDynamicVector<double>& qd,
-		   const vctFixedSizeVector<double,6>& vdwd ) const;
+  virtual
+    vctDynamicVector<double> 
+    InverseDynamics( const vctDynamicVector<double>& q,
+		     const vctDynamicVector<double>& qd,
+		     const vctFixedSizeVector<double,6>& vdwd ) const;
   
   void Print() const ;
   

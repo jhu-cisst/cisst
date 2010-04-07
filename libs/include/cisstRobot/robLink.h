@@ -40,6 +40,9 @@ public:
   
   //! Default constructor
   robLink();
+
+  //!
+  robLink( const robDH& dh, const robMass& mass );
   
   //! Read the DH and body parameters
   /**

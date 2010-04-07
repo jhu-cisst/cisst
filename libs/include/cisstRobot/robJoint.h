@@ -81,6 +81,13 @@ public:
 
   //! Default constructor
   robJoint();
+  robJoint( robJoint::Type type,
+	    robJoint::Mode mode,
+	    double offset,
+	    double min,
+	    double max,
+	    double ftmax );
+
 
   //! Return the type of the joint
   /**

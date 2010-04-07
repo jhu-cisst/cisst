@@ -113,10 +113,13 @@ void free_rmatrix(double** m, long nrl, long ncl){
   free((FREE_ARG) (m+nrl-NR_END));
 }
 
+
+robManipulator::robManipulator( const vctFrame4x4<double>& Rtw0 )
+{  this->Rtw0 = Rtw0;  }
+
 robManipulator::robManipulator( const std::string& linkfile, 
 				const vctFrame4x4<double>& Rtw0 ){
   
-  this->tool = NULL;
   this->Rtw0 = Rtw0;
   
   if( LoadRobot( linkfile ) == robManipulator::EFAILURE ){
@@ -145,12 +148,21 @@ robManipulator::Errno robManipulator::LoadRobot( const std::string& filename ){
   }
 
   size_t N;       // the number of links
-  ifs >> N;
+  {
+    std::string line;
+    getline( ifs, line );
+    std::istringstream stringstream(line);
+    stringstream >> N;
+  }
 
   // read the links (kinematics+dynamics+geometry) from the input
   for( size_t i=0; i<N; i++ ){
+    std::string line;
+    getline( ifs, line );
+    std::istringstream stringstream(line);
+
     robLink li;
-    li.ReadLink( ifs );
+    li.ReadLink( stringstream );
     links.push_back( li );
   }
 
@@ -322,10 +334,6 @@ robManipulator::InverseKinematics( vctDynamicVector<double>& q,
 void robManipulator::JacobianBody( const vctDynamicVector<double>& q ) const {
 
   vctFrame4x4<double> U;  // set identity
-
-  if( tool != NULL ){
-    //U = tool->ForwardKinematics( 0.0 ); // set to tool if any
-  }
 
   for(int j=(int)links.size()-1; 0<=j; j--){
 

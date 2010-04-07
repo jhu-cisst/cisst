@@ -87,6 +87,11 @@ public:
   */
   robMass();
 
+  robMass( double m,
+	   const vctFixedSizeVector<double,3>& com,
+	   const vctFixedSizeMatrix<double,3,3>& D,
+	   const vctFixedSizeMatrix<double,3,3>& V );
+
   //! Return the mass
   /**
      \return The mass of the body
@@ -110,6 +115,8 @@ public:
   */
   vctFixedSizeMatrix<double,3,3> MomentOfInertia() const;
   
+  vctFixedSizeMatrix<double,3,3> MomentOfInertiaAtCOM() const;
+
   //! Read the mass from a input stream
   robMass::Errno ReadMass( std::istream& is );
   

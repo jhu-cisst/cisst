@@ -63,6 +63,11 @@ public:
   //! Default constructor
   robDH();
   
+  robDH( robDH::Convention convention,
+	 double alpha, double a, double theta, double d,
+	 const robJoint& joint );
+
+
   //! Default destructor
   ~robDH();
   

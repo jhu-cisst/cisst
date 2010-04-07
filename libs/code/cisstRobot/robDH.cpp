@@ -24,6 +24,16 @@ http://www.cisst.org/cisst/license.txt.
 #include <iostream>
 
 robDH::robDH() { alpha = a = theta = d = 0.0; }
+robDH::robDH( robDH::Convention convention,
+	      double alpha, double a, double theta, double d,
+	      const robJoint& joint ) :
+  robJoint( joint ),
+  convention( convention ),
+  alpha( alpha ),
+  a( a ),
+  theta( theta ),
+  d( d ){}
+
 robDH::~robDH(){}
 
 robDH::Convention robDH::GetConvention() const { return convention; }
@@ -99,6 +109,7 @@ robDH::Errno robDH::ReadDH( std::istream& is ) {
 		  convention.end(), 
 		  convention.begin(), 
 		  toupper );
+
 
   // match the mode string to a joint mode
   if( convention.compare( "STANDARD" ) == 0 )

@@ -19,6 +19,10 @@ http://www.cisst.org/cisst/license.txt.
 
 robLink::robLink(){}
 
+robLink::robLink( const robDH& dh, 
+		  const robMass& mass ) :
+  robDH( dh ), robMass( mass ) {}
+
 robLink::Errno robLink::ReadLink( std::istream& is ){ 
 
   if( ReadDH( is ) != robDH::ESUCCESS ){

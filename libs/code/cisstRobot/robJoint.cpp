@@ -5,14 +5,27 @@
 #include <iomanip>    // setw
 #include <ctype.h>    // toupper
 
-robJoint::robJoint(){
-  this->type = robJoint::HINGE;
-  this->mode = robJoint::ACTIVE;
-  this->qoffset = 0.0;
-  this->qmin = 0.0;
-  this->qmax = 0.0;
-  this->ftmax = 0.0;
-}
+robJoint::robJoint() : 
+  type( robJoint::HINGE ),
+  mode( robJoint::ACTIVE ),
+  qoffset( 0.0 ),
+  qmin( 0.0 ),
+  qmax( 0.0 ),
+  ftmax( 0.0 ) {}
+
+robJoint::robJoint( robJoint::Type type,
+		    robJoint::Mode mode,
+		    double offset,
+		    double min,
+		    double max,
+		    double ftmax ) :
+  type( type ),
+  mode( mode ),
+  qoffset( offset ),
+  qmin( min ),
+  qmax( max ),
+  ftmax( ftmax ) {}
+
 
 robJoint::Type robJoint::GetType() const { return type; }
 

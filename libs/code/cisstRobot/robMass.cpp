@@ -4,9 +4,25 @@
 robMass::robMass(){
   mass = 0.0;       // set the mass to zero
   com.SetAll(0.0);  // set the center of mass to zero
-  D.Eye();          // set the principal moment of inertia to zero
-  V.Eye();          // set the principal axes to identity
+
+  D[0][0] = 1.0;   D[0][1] = 0.0;   D[0][2] = 0.0; 
+  D[1][0] = 0.0;   D[1][1] = 1.0;   D[1][2] = 0.0; 
+  D[2][0] = 0.0;   D[2][1] = 0.0;   D[2][2] = 1.0; 
+
+  V[0][0] = 1.0;   V[0][1] = 0.0;   V[0][2] = 0.0; 
+  V[1][0] = 0.0;   V[1][1] = 1.0;   V[1][2] = 0.0; 
+  V[2][0] = 0.0;   V[2][1] = 0.0;   V[2][2] = 1.0; 
+
 }
+
+robMass::robMass( double m,
+		  const vctFixedSizeVector<double,3>& com,
+		  const vctFixedSizeMatrix<double,3,3>& D,
+		  const vctFixedSizeMatrix<double,3,3>& V ) :
+  mass( m ),
+  com( com ),
+  D( D ),
+  V( V ) {}
 
 double robMass::Mass() const 
 { return mass; }
@@ -17,6 +33,10 @@ vctFixedSizeVector<double,3> robMass::CenterOfMass() const
 vctFixedSizeMatrix<double,3,3> robMass::MomentOfInertia() const { 
   // Rotate and translate the moment of inertia to the body's origin.
   return ParallelAxis( Mass(), -CenterOfMass(), V.Transpose() * D * V );
+}
+
+vctFixedSizeMatrix<double,3,3> robMass::MomentOfInertiaAtCOM() const {
+  return V.Transpose() * D * V;
 }
 
 vctFixedSizeMatrix<double,3,3> 
@@ -43,10 +63,6 @@ robMass::ParallelAxis( double m,
 robMass::Errno robMass::ReadMass( std::istream& is ) {
 
   double x1, x2, x3, y1, y2, y3, z1, z2, z3; // principal axes
-
-  D[0][0] = 0.0;  D[0][1] = 0.0; D[0][2] = 0.0; 
-  D[1][0] = 0.0;  D[1][1] = 0.0; D[1][2] = 0.0; 
-  D[2][0] = 0.0;  D[2][1] = 0.0; D[2][2] = 0.0; 
 
   is >> mass                                 // read everything
      >> com[0] >> com[1] >> com[2] 
