@@ -13,13 +13,13 @@
 # --- end cisst license ---
 
 # name of project and executable
-project(devicesODEJointSpace)
+project(devicesODEBodies)
 
 # name the main executable and specifies with source files to use
-add_executable(devicesODEJointSpace
+add_executable(devicesODEBodies
                # code files to compile
 	       main
 	       )
 
 # link with the cisst libraries
-cisst_requires(devicesODEJointSpace "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstParameterTypes;cisstDevices")
+cisst_requires(devicesODEBodies "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstParameterTypes;cisstDevices")

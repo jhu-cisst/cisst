@@ -78,9 +78,9 @@ public:
     ProcessQueuedCommands();
 
     // meh, increment the position of each joint
-    for( int i=0; i<q.size(); i++ ) q[i] += dq/10.0;
-    for( int i=0; i<qd.size(); i++ ) qd[i] = 1/10.0;
-    for( int i=0; i<qdd.size(); i++ ) qdd[i] = 0.0;
+    for( int i=0; i<7; i++ ); //{ q[i]  += dq/100.0; }
+    for( int i=0; i<7; i++ ); //{ qd[i] = 1/100.0; }
+    for( int i=0; i<7; i++ ); //{ qdd[i] = 0.0; }
 
   }
   void Cleanup(){}
@@ -97,54 +97,43 @@ int main(int argc, char** argv){
   // Create and initialize 
   devGLUT glut(argc, argv);
 
-  // These are the list of models to be rendered in OpenGL
-  vector<devGeometry*> geoms;
-  geoms.push_back( glut.LoadOBJ("l1.obj") );
-  geoms.push_back( glut.LoadOBJ("l2.obj") );
-  geoms.push_back( glut.LoadOBJ("l3.obj") );
-  geoms.push_back( glut.LoadOBJ("l4.obj") );
-  geoms.push_back( glut.LoadOBJ("l5.obj") );
-  geoms.push_back( glut.LoadOBJ("l6.obj") );
-  geoms.push_back( glut.LoadOBJ("l7.obj") );
+  vector<string> geomfiles;
+  string path("/home/sleonard/Documents/CAD/WAM/");
+  geomfiles.push_back( path + "l1.obj" );
+  geomfiles.push_back( path + "l2.obj" );
+  geomfiles.push_back( path + "l3.obj" );
+  geomfiles.push_back( path + "l4.obj" );
+  geomfiles.push_back( path + "l5.obj" );
+  geomfiles.push_back( path + "l6.obj" );
+  geomfiles.push_back( path + "l7.obj" );
 
-  // Initial joint values
-  vctDynamicVector<double> qinit(7, 0.0);
-
-  /*** A trajectory ***/
-  Trajectory trajectory( "trajectory", 0.001, qinit );
-  taskManager->AddTask(&trajectory);
-
-  /*** Create the ODE world ***/
-  devODEWorld world( 0.0001 , vctFixedSizeVector<double,3>(0.0,0.0,-9.81) );
+  devODEWorld world( 0.0001 );                         // Create the ODE world
   world.Configure();
   taskManager->AddTask(&world);
 
-  /*** Create the controller task ***/
-  // base to world transformation
-  vctFrame4x4<double> Rtwb;
-  // controller gains
-  vctDynamicMatrix<double> Kp(7,7,0.0), Kd(7,7,0.0);
-  /* This leads to run-time error
-  Kp[0][0] = 150.0;  Kp[1][1] = 150.0;  Kp[2][2] = 150.0;  Kp[3][3] = 20.0;
-  Kp[4][4] = 2.0;   Kp[5][5] = 2.0;   Kp[6][6] = .5;
- 
-  Kd[0][0] = 5.5;   Kd[1][1] = 5.5;   Kd[2][2] = 5.5;  Kd[3][3] = 4.5;
-  Kd[4][4] = 0.01;  Kd[5][5] = 0.01;  Kd[6][6] = 0.001;
-  */
-  Kp[0][0] = 20.0;  Kp[1][1] = 20.0;  Kp[2][2] = 20.0;  Kp[3][3] = 10.0;
-  Kp[4][4] = 2.0;   Kp[5][5] = 2.0;   Kp[6][6] = .5;
- 
-  Kd[0][0] = 3.5;   Kd[1][1] = 3.5;   Kd[2][2] = 3.5;  Kd[3][3] = 1.5;
-  Kd[4][4] = 0.01;  Kd[5][5] = 0.01;  Kd[6][6] = 0.001;
+  vctDynamicVector<double> qinit(7, 0.0);              // Initial joint values
+  qinit[1] = 1;
+  Trajectory trajectory( "trajectory", 0.01, qinit );  // Create a trajectory
+  taskManager->AddTask(&trajectory);
+
+  // Create the controller task 
+  vctFrame4x4<double> Rtwb;                            // base transformation
+  Rtwb[2][3] = 0.2;                                    // lift the WAM up by .2m
+
+  vctDynamicMatrix<double> Kp(7,7,0.0), Kd(7,7,0.0);   // controller gains
+  Kp[0][0] = 20; Kp[1][1] = 20; Kp[2][2] = 20; Kp[3][3] = 15;
+  //Kp[4][4] =  2; Kp[5][5] =  2; Kp[6][6] =  1;
+  Kd[0][0] = 5; Kd[1][1] =  5; Kd[2][2] =  5; Kd[3][3] =   2;
+  //Kd[4][4] =  1; Kd[5][5] =  1; Kd[6][6] =  1;
 
   // the controller
-  devJointsPD ctrl(Kp, Kd, "controller", 0.001, "wam7.rob", qinit, Rtwb, geoms);
-  //devGravityCompensation ctrl( "controller", 0.001, "wam7.rob", Rtwb, geoms );
+  devJointsPD ctrl( Kp, Kd, "controller", 0.001, "wam7.rob", qinit, Rtwb );
+  //devGravityCompensation ctrl( "controller", 0.001, "wam7.rob", Rtwb);
   ctrl.Configure();
   taskManager->AddTask(&ctrl);
 
-  /*** The ODE device ***/
-  devODEManipulator wam( "ODEWAM", 0.001, world, "wam7.rob", qinit );
+  // The manipulator
+  devODEManipulator wam( "WAM",0.0001,world,"wam7.rob",qinit,Rtwb,geomfiles );
   wam.Configure();
   taskManager->AddTask(&wam);
 
@@ -154,10 +143,10 @@ int main(int argc, char** argv){
 
   // Connect the feedback input of the ctrl to the position output of the WAM
   taskManager->Connect( "controller", devControlLoop::FeedbackInterface, 
-                        "ODEWAM",  devODEManipulator::PositionsInterface );
+                        "WAM",  devODEManipulator::PositionsInterface );
 
   // Connect the torque output of the ctrl to the input of the WAM
-  taskManager->Connect( "ODEWAM",  devODEManipulator::FTInterface,
+  taskManager->Connect( "WAM",  devODEManipulator::FTInterface,
 			"controller", devControlLoop::OutputInterface );
 
   taskManager->CreateAll();
