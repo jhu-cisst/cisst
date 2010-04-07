@@ -53,7 +53,7 @@ class CISST_EXPORT devGLUT {
   devGLUT( int argc, char** argv);
   
   //! 
-  void Register( const devGeometry* geom );
+  static void Register( const devGeometry* geom );
 
   //! Draw everything
   void Draw();

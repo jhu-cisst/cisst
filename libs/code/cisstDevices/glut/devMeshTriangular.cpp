@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstDevices/glut/devMeshTriangular.h>
 #include <cisstCommon/cmnLogger.h>
 
+
 devMeshTriangular::devMeshTriangular() :
   vx(NULL),  vy(NULL),  vz(NULL), nvertices(0),
   p1(NULL),  p2(NULL),  p3(NULL), ntriangles(0),
@@ -79,16 +80,17 @@ void devMeshTriangular::Draw( ) const{
   glColor3f(0.6, 0.6, 0.6);              // set the color
   //glColor3f(RGB[0], RGB[1], RGB[2]);   // set the color
   
+  glBegin(GL_TRIANGLES);               // draw a triangle
   for( size_t i=0; i<ntriangles; i++ ){  // draw the mesh
 
-    glBegin(GL_TRIANGLES);               // draw a triangle
     glNormal3d( nx[i], ny[i], nz[i] );   // set the normal
+
     glVertex3d( vx[ p1[i] ], vy[ p1[i] ], vz[ p1[i] ] );  // set the vertices
     glVertex3d( vx[ p2[i] ], vy[ p2[i] ], vz[ p2[i] ] );
     glVertex3d( vx[ p3[i] ], vy[ p3[i] ], vz[ p3[i] ] );
 
-    glEnd();                             // done
   }
+  glEnd();                             // done
   
   glMultMatrix( Rtcopy.InverseSelf() ); // push the transformation's inverse
 }
@@ -250,9 +252,9 @@ devGeometry::Errno devMeshTriangular::LoadOBJ( const std::string& filename ){
     p3[i] = triangles[i][2];
 
     // compute the normal
-    vctFixedSizeVector<double,3> v1 = vertices[ triangles[i][0] ];
+    vctFixedSizeVector<double,3> v1 = vertices[ triangles[i][2] ];
     vctFixedSizeVector<double,3> v2 = vertices[ triangles[i][1] ];
-    vctFixedSizeVector<double,3> v3 = vertices[ triangles[i][2] ];
+    vctFixedSizeVector<double,3> v3 = vertices[ triangles[i][0] ];
     vctFixedSizeVector<double,3> n = (v2-v1)%(v3-v1);
     
     // watch out sometimes the facet degenerates to a line

@@ -46,7 +46,7 @@ void devGLUT::Keyboard(int k, int, int){
 
   //left arrow
   if(k == GLUT_KEY_LEFT){
-    azimuth -= 0.005;
+    azimuth -= 0.015;
     if(azimuth <0) {azimuth += 2*cmnPI;}
   }
 
@@ -55,15 +55,15 @@ void devGLUT::Keyboard(int k, int, int){
 
   //right arrow
   if(k == GLUT_KEY_RIGHT){
-    azimuth += 0.005;
+    azimuth += 0.015;
     if(azimuth > 2*cmnPI) {azimuth -= 2*cmnPI;}
   }
 
   //down arrow
   if(k == GLUT_KEY_DOWN) {if(elevation >= -cmnPI/2) {elevation -=0.005;}}
 
-  if(k == 'z') { distance *= 0.995; }
-  if(k == 'x') { distance *= 1.005; }
+  if(k == 'z') { distance *= 0.980; }
+  if(k == 'x') { distance *= 1.02; }
 
   glutPostRedisplay();
 }
@@ -148,7 +148,7 @@ void devGLUT::Draw(){
 
 void devGLUT::Register( const devGeometry* geom ){  
   if( glut != NULL && geom != NULL )
-    geoms.push_back( geom );
+    glut->geoms.push_back( geom );
 }
 
 devGeometry* devGLUT::LoadOBJ( const std::string& filename ){
@@ -218,13 +218,13 @@ devGLUT::devGLUT( int argc, char** argv){
   glEnable(GL_LIGHT1);
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_COLOR_MATERIAL);
-  //glEnable(GL_NORMALIZE);
+  glEnable(GL_NORMALIZE);
   //glEnable(GL_LINE_SMOOTH);
   //glEnable(GL_BLEND);
 
   azimuth = 0;
   elevation = 3.14/4.0;
-  distance = 3;
+  distance = 2;
   perspective = 60;
 
 }

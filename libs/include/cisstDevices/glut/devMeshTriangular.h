@@ -23,6 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 class CISST_EXPORT devMeshTriangular : public devGeometry {
 
  protected:
+ public:
 
   //! the coordinates of vertices
   double* vx;           // vertices x coordinates
