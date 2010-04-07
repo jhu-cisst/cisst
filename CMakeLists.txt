@@ -5,11 +5,11 @@
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
-# 
+#
 # This software is provided "as is" under an open source license, with
 # no warranty.  The complete license can be found in license.txt and
 # http://www.cisst.org/cisst/license.txt.
-# 
+#
 # --- end cisst license ---
 
 
@@ -36,13 +36,15 @@ ENDFUNCTION(CISST_ADD_TO_INTERNAL)
 option(CISST_CLEAR_INTERNALS "Clear cisst cache" OFF)
 mark_as_advanced(FORCE CISST_CLEAR_INTERNALS)
 if(CISST_CLEAR_INTERNALS)
-  set(CISST_ADDITIONAL_INCLUDE_DIRECTORIES "")
-  set(CISST_ADDITIONAL_LIBRARIES "")
-  set(CISST_ADDITIONAL_LINK_DIRECTORIES "")
-  set(CISST_ADDITIONAL_LINK_DIRECTORIES_DEBUG "")
-  set(CISST_ADDITIONAL_LINK_DIRECTORIES_OPTIMIZED "")
-  set(CISST_ADDITIONAL_PACKAGES "")
-  set(CISST_ADDITIONAL_CMAKE_FILES "")
+  set(CISST_ADDITIONAL_INCLUDE_DIRECTORIES        "" CACHE INTERNAL "CISST Internal variable")
+  set(CISST_ADDITIONAL_LIBRARIES                  "" CACHE INTERNAL "CISST Internal variable")
+  set(CISST_ADDITIONAL_LIBRARIES_DEBUG            "" CACHE INTERNAL "CISST Internal variable")
+  set(CISST_ADDITIONAL_LIBRARIES_OPTIMIZED        "" CACHE INTERNAL "CISST Internal variable")
+  set(CISST_ADDITIONAL_LINK_DIRECTORIES           "" CACHE INTERNAL "CISST Internal variable")
+  set(CISST_ADDITIONAL_LINK_DIRECTORIES_DEBUG     "" CACHE INTERNAL "CISST Internal variable")
+  set(CISST_ADDITIONAL_LINK_DIRECTORIES_OPTIMIZED "" CACHE INTERNAL "CISST Internal variable")
+  set(CISST_ADDITIONAL_PACKAGES                   "" CACHE INTERNAL "CISST Internal variable")
+  set(CISST_ADDITIONAL_CMAKE_FILES                "" CACHE INTERNAL "CISST Internal variable")
   set(CISST_CLEAR_INTERNALS OFF CACHE BOOL "Clear cisst cache" FORCE)
 endif(CISST_CLEAR_INTERNALS)
 
@@ -88,7 +90,7 @@ if(CISST_HAS_SWIG_PYTHON)
     find_package(SWIG ${CISST_SWIG_REQUIRED_VERSION} REQUIRED)
     # It looks like version is not yet supported by CMake for SWIG so we are checking manually
     if(${SWIG_VERSION} VERSION_LESS ${CISST_SWIG_REQUIRED_VERSION})
-        message("SWIG version ${SWIG_VERSION} is too low, cisst requires ${CISST_SWIG_REQUIRED_VERSION}")  
+        message("SWIG version ${SWIG_VERSION} is too low, cisst requires ${CISST_SWIG_REQUIRED_VERSION}")
     else(${SWIG_VERSION} VERSION_LESS ${CISST_SWIG_REQUIRED_VERSION})
         include(${SWIG_USE_FILE})
     endif(${SWIG_VERSION} VERSION_LESS ${CISST_SWIG_REQUIRED_VERSION})
@@ -277,7 +279,7 @@ INCLUDE(cisstMacros)
 # Finally, create lib targets
 ADD_SUBDIRECTORY(libs)
 
-# List of libraries to be built 
+# List of libraries to be built
 FOREACH(lib ${CISST_LIBS})
   IF(BUILD_LIBS_${lib})
     SET(CISST_LIBRARIES ${lib} ${CISST_LIBRARIES})
@@ -381,14 +383,14 @@ IF(WIN32)
     # Configuration is valid, build the path and compare it to the current one
     IF(CISST_PATH_CONFIGURATION_VALID)
 
-      # Initial settings for paths 
+      # Initial settings for paths
       SET(CISST_PATH_CMAKE_FORMAT
           "${EXECUTABLE_OUTPUT_PATH}/${CISST_PATH_CONFIGURATION}"
           "${LIBRARY_OUTPUT_PATH}/${CISST_PATH_CONFIGURATION}")
       SET(CISST_PYTHONPATH_CMAKE_FORMAT
           "${EXECUTABLE_OUTPUT_PATH}" "${EXECUTABLE_OUTPUT_PATH}/${CISST_PATH_CONFIGURATION}"
           "${LIBRARY_OUTPUT_PATH}" "${LIBRARY_OUTPUT_PATH}/${CISST_PATH_CONFIGURATION}")
-      
+
       # To find tests programs and libraries
       IF(BUILD_TESTS)
         SET(CISST_PATH_CMAKE_FORMAT
@@ -425,7 +427,7 @@ IF(WIN32)
             "${cisst_BINARY_DIR}/utilities/bin" "${cisst_BINARY_DIR}/utilities/bin/${CISST_PATH_CONFIGURATION}")
       ENDIF(BUILD_UTILITIES)
 
-      # Convert to native format to be able to compare 
+      # Convert to native format to be able to compare
       FILE(TO_NATIVE_PATH "${CISST_PATH_CMAKE_FORMAT}" CISST_PATH)
       FILE(TO_NATIVE_PATH "${CISST_PYTHONPATH_CMAKE_FORMAT}" CISST_PYTHONPATH)
 
@@ -466,7 +468,7 @@ IF(WIN32)
         ENDIF("${CISST_PATH}" STREQUAL "${CURRENT_CISST_PATH}")
 
       ENDIF("${CURRENT_CISST_PATH}" STREQUAL "\\registry")
-      
+
       # Do the same for PYTHONPATH if wrappers are compiled
       IF(CISST_HAS_SWIG_PYTHON)
         # If there is no existing path, add it
@@ -478,7 +480,7 @@ IF(WIN32)
           IF("${CISST_PYTHONPATH}" STREQUAL "${CURRENT_CISST_PYTHONPATH}")
             # MESSAGE("CISST_PATH is the same")
           ELSE("${CISST_PYTHONPATH}" STREQUAL "${CURRENT_CISST_PYTHONPATH}")
-            # The variable already exists and is different 
+            # The variable already exists and is different
             OPTION(CISST_PYTHONPATH_OVERWRITE "Overwrite existing CISST_PYTHONPATH" OFF)
             IF(CISST_PYTHONPATH_OVERWRITE)
               # Add it to register using cmake -E
