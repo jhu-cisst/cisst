@@ -6,20 +6,21 @@
 #include <cisstOSAbstraction.h>
 #include <cisstMultiTask.h>
 
-#include <map>
-
 #include "C2ServerTask.h"
 #include "C3Task.h"
 
 int main(int argc, char * argv[])
 {
-    if (argc != 2) {
+    // Set global component manager IP
+    std::string globalComponentManagerIP;
+    if (argc == 1) {
+        globalComponentManagerIP = "localhost";
+    } else if (argc == 2) {
+        globalComponentManagerIP = argv[1];
+    } else {
         std::cerr << "Usage: " << argv[0] << " (global component manager IP)" << std::endl;
         return 1;
     }
-    
-    // Set global component manager IP
-    const std::string globalComponentManagerIP(argv[1]);
     std::cout << "Global component manager IP: " << globalComponentManagerIP << std::endl;
 
     // log configuration

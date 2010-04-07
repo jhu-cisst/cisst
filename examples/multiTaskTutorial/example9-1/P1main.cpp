@@ -11,13 +11,16 @@
 
 int main(int argc, char * argv[])
 {
-    if (argc != 2) {
+    // Set global component manager IP
+    std::string globalComponentManagerIP;
+    if (argc == 1) {
+        globalComponentManagerIP = "localhost";
+    } else if (argc == 2) {
+        globalComponentManagerIP = argv[1];
+    } else {
         std::cerr << "Usage: " << argv[0] << " (global component manager IP)" << std::endl;
         return 1;
     }
-
-    // Set global component manager IP
-    const std::string globalComponentManagerIP(argv[1]);
     std::cout << "Global component manager IP: " << globalComponentManagerIP << std::endl;
 
     // log configuration
@@ -27,7 +30,7 @@ int main(int argc, char * argv[])
     osaThreadedLogFile threadedLog("P1");
     cmnLogger::GetMultiplexer()->AddChannel(threadedLog, CMN_LOG_LOD_VERY_VERBOSE);
 
-    // Get the local component manager
+    // Get local component manager instance
     mtsManagerLocal * localManager;
     try {
         localManager = mtsManagerLocal::GetInstance(globalComponentManagerIP, "P1");
