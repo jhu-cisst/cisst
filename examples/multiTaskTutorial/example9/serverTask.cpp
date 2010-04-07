@@ -7,29 +7,30 @@
 #include "fltkMutex.h"
 
 // required to implement the class services, see cisstCommon
-CMN_IMPLEMENT_SERVICES(serverTask);
+CMN_IMPLEMENT_SERVICES_TEMPLATED(serverTaskDouble);
+CMN_IMPLEMENT_SERVICES_TEMPLATED(serverTaskmtsDouble);
 
-serverTask::serverTask(const std::string & taskName, double period):
-    // base constructor, same task name and period.  Set the length of
-    // state table to 5000
-    mtsTaskPeriodic(taskName, period, false, 5000)
+template <class _dataType>
+serverTask<_dataType>::serverTask(const std::string & taskName, double period):
+    serverTaskBase(taskName, period)
 {
     // add ServerData to the StateTable defined in mtsTask
     this->StateTable.AddData(ReadValue, "ReadValue");
     // add one interface, this will create an mtsTaskInterface
     mtsProvidedInterface * provided = AddProvidedInterface("Provided");
     if (provided) {
-        provided->AddCommandVoid(&serverTask::Void, this, "Void");
-        provided->AddCommandWrite(&serverTask::Write, this, "Write");
+        provided->AddCommandVoid(&serverTask<_dataType>::Void, this, "Void");
+        provided->AddCommandWrite(&serverTask<_dataType>::Write, this, "Write");
         provided->AddCommandReadState(this->StateTable, this->ReadValue, "Read");
-        provided->AddCommandQualifiedRead(&serverTask::QualifiedRead, this, "QualifiedRead");
+        provided->AddCommandQualifiedRead(&serverTask<_dataType>::QualifiedRead, this, "QualifiedRead");
         provided->AddEventVoid(this->EventVoid, "EventVoid");
-        provided->AddEventWrite(this->EventWrite, "EventWrite", mtsDouble(3.14));
+        provided->AddEventWrite(this->EventWrite, "EventWrite", _dataType(3.14));
     }
 }
 
 
-void serverTask::Void(void)
+template <class _dataType>
+void serverTask<_dataType>::Void(void)
 {
     CMN_LOG_CLASS_RUN_VERBOSE << "Void" << std::endl;
     fltkMutex.Lock();
@@ -44,24 +45,27 @@ void serverTask::Void(void)
 }
 
 
-void serverTask::Write(const mtsDouble & data)
+template <class _dataType>
+void serverTask<_dataType>::Write(const _dataType & data)
 {
     CMN_LOG_CLASS_RUN_VERBOSE << "Write" << std::endl;
     fltkMutex.Lock();
     {
-        UI.WriteValue->value(data.Data);
+        UI.WriteValue->value((double)data);
     }
     fltkMutex.Unlock();
 }
 
 
-void serverTask::QualifiedRead(const mtsDouble & data, mtsDouble & placeHolder) const
+template <class _dataType>
+void serverTask<_dataType>::QualifiedRead(const _dataType & data, _dataType & placeHolder) const
 {
-    placeHolder.Data = data.Data + UI.ReadValue->value();
+    placeHolder = data + _dataType(UI.ReadValue->value());
 }
 
 
-void serverTask::Startup(void)
+template <class _dataType>
+void serverTask<_dataType>::Startup(void)
 {
     // make the UI visible
     fltkMutex.Lock();
@@ -72,7 +76,8 @@ void serverTask::Startup(void)
     fltkMutex.Unlock();
 }
 
-void serverTask::Run(void) {
+template <class _dataType>
+void serverTask<_dataType>::Run(void) {
     if (UIOpened()) {
         // process the commands received, i.e. possible SetServerAmplitude
         ProcessQueuedCommands();
@@ -87,16 +92,20 @@ void serverTask::Run(void) {
             
             if (UI.WriteEventRequested) {
                 CMN_LOG_CLASS_RUN_VERBOSE << "Run: WriteEventRequested" << std::endl;
-                this->EventWrite(mtsDouble(UI.ReadValue->value()));
+                this->EventWrite(_dataType(UI.ReadValue->value()));
                 UI.WriteEventRequested = false;
             }
             
-            this->ReadValue = UI.ReadValue->value();
+            this->ReadValue = _dataType(UI.ReadValue->value());
             Fl::check();
         }
     fltkMutex.Unlock();
     }
 }
+
+template class serverTask<double>;
+template class serverTask<mtsDouble>;
+
 
 /*
   Author(s):  Anton Deguet

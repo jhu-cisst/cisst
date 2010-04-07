@@ -42,6 +42,39 @@ protected:
     typedef mtsCommandQualifiedReadOrWriteBase<ArgumentType> CommandType;
     CommandType * Command;
 
+    template<typename _userType1, typename _userType2, bool, bool>
+    class ConditionalWrap {
+        // default case: both parameters need to be wrapped
+    public:
+        static mtsCommandBase::ReturnType Call(mtsCommandQualifiedReadBase* cmd, const _userType1 &arg1, _userType2 &arg2)
+        { const mtsGenericObjectProxyRef<_userType1> arg1w(arg1);
+          mtsGenericObjectProxyRef<_userType2> arg2w(arg2);
+          return cmd->Execute(arg1w, arg2w); }
+    };
+    template<typename _userType1, typename _userType2>
+    class ConditionalWrap<_userType1, _userType2, false, true> {
+        // specialization: only first parameter needs to be wrapped
+    public:
+        static mtsCommandBase::ReturnType Call(mtsCommandQualifiedReadBase* cmd, const _userType1 &arg1, _userType2 &arg2)
+        { const mtsGenericObjectProxyRef<_userType1> arg1w(arg1);
+          return cmd->Execute(arg1w, arg2); }
+    };
+    template<typename _userType1, typename _userType2>
+    class ConditionalWrap<_userType1, _userType2, true, false> {
+        // specialization: only second parameter needs to be wrapped
+    public:
+        static mtsCommandBase::ReturnType Call(mtsCommandQualifiedReadBase* cmd, const _userType1 &arg1, _userType2 &arg2)
+        { mtsGenericObjectProxyRef<_userType2> arg2w(arg2);
+          return cmd->Execute(arg1, arg2w); }
+    };
+    template<typename _userType1, typename _userType2>
+    class ConditionalWrap<_userType1, _userType2, true, true> {
+        // specialization: neither parameter needs to be wrapped
+    public:
+        static mtsCommandBase::ReturnType Call(mtsCommandQualifiedReadBase* cmd, const _userType1 &arg1, _userType2 &arg2)
+        { return cmd->Execute(arg1, arg2); }
+    };
+
  public:
     /*! Default constructor.  Does nothing, use Bind before
       using. */
@@ -94,6 +127,17 @@ protected:
       e.g., Command(argument) instead of Command->Execute(argument). */
     mtsCommandBase::ReturnType operator()(const mtsGenericObject & qualifier,
                                           ArgumentType & argument) const;
+
+	/*! Overloaded operator that accepts different argument types (for qualified read). */
+    template <class _userType1, class _userType2>
+    mtsCommandBase::ReturnType operator()(const _userType1& arg1, _userType2& arg2) const {
+        mtsCommandBase::ReturnType ret = Command ?
+            ConditionalWrap<_userType1, _userType2, 
+                            cmnIsDerivedFrom<_userType1, mtsGenericObject>::YES,
+                            cmnIsDerivedFrom<_userType1, mtsGenericObject>::YES>::Call(Command, arg1, arg2)
+          : mtsCommandBase::NO_INTERFACE;
+        return ret;
+    }
 
     /*! Access to underlying command object. */
     mtsCommandQualifiedReadOrWriteBase<ArgumentType> * GetCommand(void) const { return Command; }

@@ -30,6 +30,7 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include <cisstMultiTask/mtsCommandReadOrWriteBase.h>
+#include <cisstMultiTask/mtsGenericObjectProxy.h>
 #include <cisstMultiTask/mtsDevice.h>
 
 
@@ -68,6 +69,49 @@ protected:
     /*! Stores the receiver object of the command */
     ClassType * ClassInstantiation;
 
+    template<bool, typename dummy=void>
+    class ConditionalCast {
+        // Default case: ArgumentType not derived from mtsGenericObjectProxy
+    public:
+        static mtsCommandBase::ReturnType CallMethod(ClassType *ClassInst, ActionType Action, const mtsGenericObject &argument)
+        {
+            const ArgumentType * data = mtsGenericTypes<ArgumentType>::CastArg(argument);
+            if (data == 0) {
+                return mtsCommandBase::BAD_INPUT;
+            }
+            (ClassInst->*Action)(*data);
+            return mtsCommandBase::DEV_OK;
+        }
+    };
+    template<typename dummy>
+    class ConditionalCast<true, dummy> {
+        // Specialization: ArgumentType is derived from mtsGenericObjectProxy (and thus also from mtsGenericObject)
+        // In this case, we may need to create a temporary Proxy object.
+    public:
+        static mtsCommandBase::ReturnType CallMethod(ClassType *ClassInst, ActionType Action, const mtsGenericObject &argument)
+        {
+            // First, check if a Proxy object was passed.
+            const ArgumentType *data = dynamic_cast<const ArgumentType *>(&argument);
+            if (data) {
+                (ClassInst->*Action)(*data);
+                return mtsCommandBase::DEV_OK;
+            }
+            // If it isn't a Proxy, maybe it is a ProxyRef
+            typedef typename ArgumentType::RefType ArgumentRefType;
+            const ArgumentRefType *dataref = dynamic_cast<const ArgumentRefType *>(&argument);
+            if (!dataref) {
+                CMN_LOG_INIT_ERROR << "Write CallMethod could not cast from " << typeid(argument).name()
+                                   << " to const " << typeid(ArgumentRefType).name() << std::endl;
+                return mtsCommandBase::BAD_INPUT;
+            }
+            // Now, make the call using the temporary
+            ArgumentType temp;
+            temp.Assign(*dataref);
+            (ClassInst->*Action)(temp);
+            return mtsCommandBase::DEV_OK;
+        }
+    };
+
 private:
     /*! The constructor. Does nothing */
     mtsCommandWrite(void): BaseType() {}
@@ -87,7 +131,9 @@ public:
         Action(action),
         ClassInstantiation(classInstantiation)
     {
-        this->ArgumentPrototype = new ArgumentType(argumentPrototype);
+        //this->ArgumentPrototype = new ArgumentType(argumentPrototype);
+        //this->ArgumentPrototype = dynamic_cast<mtsGenericObject*>(argumentPrototype.Services()->Create());
+        this->ArgumentPrototype = mtsGenericTypes<ArgumentType>::ConditionalCreate(argumentPrototype, name);
     }
 
 
@@ -105,12 +151,9 @@ public:
     */
     virtual mtsCommandBase::ReturnType Execute(const mtsGenericObject & argument) {
         if (this->IsEnabled()) {
-            const ArgumentType * data = dynamic_cast< const ArgumentType * >(&argument);
-            if (data == 0) {
-                return mtsCommandBase::BAD_INPUT;
-            }
-            (ClassInstantiation->*Action)(*data);
-            return mtsCommandBase::DEV_OK;
+            //const ArgumentType * data = dynamic_cast< const ArgumentType * >(&argument);
+            return ConditionalCast<cmnIsDerivedFromTemplated<ArgumentType, mtsGenericObjectProxy>::YES
+                                  >::CallMethod(ClassInstantiation, Action, argument);
         }
         return mtsCommandBase::DISABLED;
     }

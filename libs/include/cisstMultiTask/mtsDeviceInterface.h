@@ -269,11 +269,27 @@ public:
 
 #ifndef SWIG // SWIG can not parse this
 
+    // Workaround for an apparent compiler bug in Visual Studio, where incorrect code is generated when the argument prototypes are
+    // allowed to default for some types.
+#if (CISST_OS == CISST_WINDOWS)
+    template <class __classType, class __argumentType>
+    inline mtsCommandReadBase * AddCommandRead(void (__classType::*method)(__argumentType &) const,
+                                               __classType * classInstantiation,
+                                               const std::string & commandName,
+                                               const __argumentType & argumentPrototype);
+
+    template <class __classType, class __argumentType>
+    inline mtsCommandReadBase * AddCommandRead(void (__classType::*method)(__argumentType &) const,
+                                               __classType * classInstantiation,
+                                               const std::string & commandName)
+    { return AddCommandRead(method, classInstantiation, commandName, __argumentType()); }
+#else
     template <class __classType, class __argumentType>
     inline mtsCommandReadBase * AddCommandRead(void (__classType::*method)(__argumentType &) const,
                                                __classType * classInstantiation,
                                                const std::string & commandName,
                                                const __argumentType & argumentPrototype = CMN_DEFAULT_TEMPLATED_CONSTRUCTOR(__argumentType));
+#endif
 
     /* AddCommandReadState and AddCommandWriteState are only relevant for tasks. */
     template <class _elementType>
@@ -303,6 +319,38 @@ public:
     \param commandName name as it should appear in the interface
     \param argumentPrototype example of argument that should be used to call this method.  This is specially useful for commands using objects of variable size (dynamic allocation)
     \returns pointer on the newly created and added command, null pointer (0) if creation or addition failed (name already used) */
+
+    // Workaround for an apparent compiler bug in Visual Studio, where incorrect code is generated when the argument prototypes are
+    // allowed to default for some types.
+#if (CISST_OS == CISST_WINDOWS)
+    template <class __classType, class __argumentType>
+    inline mtsCommandWriteBase * AddCommandWrite(void (__classType::*method)(const __argumentType &),
+                                                 __classType * classInstantiation,
+                                                 const std::string & commandName,
+                                                 const __argumentType & argumentPrototype);
+
+    template <class __classType, class __argumentType>
+    inline mtsCommandWriteBase * AddCommandWrite(void (__classType::*method)(const __argumentType &),
+                                                 __classType * classInstantiation,
+                                                 const std::string & commandName)
+    {
+        return AddCommandWrite<__classType, __argumentType>(method, classInstantiation, commandName, __argumentType());
+    }
+
+    template <class __classType, class __argument1Type, class __argument2Type>
+    inline mtsCommandQualifiedReadBase * AddCommandQualifiedRead(void (__classType::*method)(const __argument1Type &, __argument2Type &) const,
+                                                                 __classType * classInstantiation,
+                                                                 const std::string & commandName,
+                                                                 const __argument1Type & argument1Prototype,
+                                                                 const __argument2Type & argument2Prototype);
+
+    template <class __classType, class __argument1Type, class __argument2Type>
+    inline mtsCommandQualifiedReadBase * AddCommandQualifiedRead(void (__classType::*method)(const __argument1Type &, __argument2Type &) const,
+                                                                 __classType * classInstantiation,
+                                                                 const std::string & commandName)
+    { return AddCommandQualifiedRead(method, classInstantiation, commandName, __argument1Type(), __argument2Type()); }
+
+#else
     template <class __classType, class __argumentType>
     inline mtsCommandWriteBase * AddCommandWrite(void (__classType::*method)(const __argumentType &),
                                                  __classType * classInstantiation,
@@ -315,6 +363,8 @@ public:
                                                                  const std::string & commandName,
                                                                  const __argument1Type & argument1Prototype = CMN_DEFAULT_TEMPLATED_CONSTRUCTOR(__argument1Type),
                                                                  const __argument2Type & argument2Prototype = CMN_DEFAULT_TEMPLATED_CONSTRUCTOR(__argument2Type));
+#endif
+
 #endif // SWIG
 
     /*! Send a human readable description of the interface. */

@@ -9,7 +9,7 @@
 #include "serverTask.h"
 #include "clientTask.h"
 
-int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
+int main(int argc, char **argv)
 {
     // log configuration
     cmnLogger::SetLoD(CMN_LOG_LOD_VERY_VERBOSE);
@@ -23,12 +23,39 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
     cmnClassRegister::SetLoD("clientTask", CMN_LOG_LOD_VERY_VERBOSE);
     cmnClassRegister::SetLoD("serverTask", CMN_LOG_LOD_VERY_VERBOSE);
 
+    // Command line parameter:
+    //    1 -- server uses mtsDouble, client uses double
+    //    2 -- server uses double, client uses mtsDouble
+    //    3 -- server uses double, client uses double
+    //    default: server uses mtsDouble, client uses mtsDouble
+    bool clientGeneric = true;
+    bool serverGeneric = true;
+    if (argc > 1) {
+        if (argv[1][0] == '1')
+            clientGeneric = false;
+        else if (argv[1][0] == '2')
+            serverGeneric = false;
+        else if (argv[1][0] == '3') {
+            clientGeneric = false;
+            serverGeneric = false;
+        }
+    }
+
     // create our two tasks
     const double PeriodClient = 10 * cmn_ms; // in milliseconds
     const double PeriodServer = 10 * cmn_ms; // in milliseconds
-    serverTask * server = new serverTask("Server", PeriodServer);
-    clientTask * client = new clientTask("Client", PeriodClient);
 
+    serverTaskBase *server;
+    if (serverGeneric)
+        server = new serverTask<mtsDouble>("Server", PeriodServer);
+    else
+        server = new serverTask<double>("Server", PeriodServer);
+
+    clientTaskBase *client;
+    if (clientGeneric)
+        client = new clientTask<mtsDouble>("Client", PeriodClient);
+    else
+        client = new clientTask<double>("Client", PeriodClient);
 
     // add the tasks to the task manager
     mtsTaskManager * taskManager = mtsTaskManager::GetInstance();

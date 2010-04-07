@@ -12,13 +12,18 @@
 int main(int argc, char * argv[])
 {
 
-    if (argc != 3) {
-        std::cerr << "Usage: " << argv[0] << " GlobalManagerIP ServerTaskIP" << std::endl;
+    if (argc < 2) {
+        std::cerr << "Usage: " << argv[0] << " GlobalManagerIP [flag]" << std::endl;
+        std::cerr << "       flag = 1 to use double instead of mtsDouble" << std::endl;
         exit(-1);
     }
 
-    std::string globalTaskManagerIP(argv[1]);
-    std::string serverTaskIP(argv[2]);
+    std::string globalComponentManagerIP(argv[1]);
+    // Get the TaskManager instance and set operation mode
+    mtsManagerLocal *taskManager = mtsManagerLocal::GetInstance(globalComponentManagerIP, "ProcessClient");
+
+    // If flag is not specified, or not 1, then use generic type (mtsDouble)
+    bool useGeneric = (argc > 2)?(argv[2][0] != '1'):true;
 
     // log configuration
     cmnLogger::SetLoD(CMN_LOG_LOD_VERY_VERBOSE);
@@ -31,16 +36,18 @@ int main(int argc, char * argv[])
     cmnClassRegister::SetLoD("mtsTaskManager", CMN_LOG_LOD_VERY_VERBOSE);
     cmnClassRegister::SetLoD("clientTask", CMN_LOG_LOD_VERY_VERBOSE);
 
-    // create our server task
+    // create our client task
     const double PeriodClient = 10 * cmn_ms; // in milliseconds
-    clientTask * client = new clientTask("Client", PeriodClient);
+    clientTaskBase *client;
+    if (useGeneric)
+        client = new clientTask<mtsDouble>("Client", PeriodClient);
+    else
+        client = new clientTask<double>("Client", PeriodClient);
 
-    // Get the TaskManager instance and set operation mode
-    mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
     taskManager->AddTask(client);        
 
     // Connect the tasks across networks
-    taskManager->Connect("Client", "Required", "Server", "Provided");
+    taskManager->Connect("ProcessClient", "Client", "Required", "ProcessServer", "Server", "Provided");
 
     // create the tasks, i.e. find the commands
     taskManager->CreateAll();

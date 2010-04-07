@@ -9,7 +9,18 @@
 #include <cisstMultiTask.h>
 #include "serverUI.h"
 
-class serverTask: public mtsTaskPeriodic {
+class serverTaskBase: public mtsTaskPeriodic {
+public:
+    serverTaskBase(const std::string & taskName, double period) :
+        // base constructor, same task name and period.  Set the length of
+        // state table to 5000
+        mtsTaskPeriodic(taskName, period, false, 5000) {}
+    ~serverTaskBase() {}
+    virtual bool UIOpened(void) const = 0;    
+};
+
+template <class _dataType>
+class serverTask: public serverTaskBase {
     // used to control the log level, 5 by default
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 protected:
@@ -17,10 +28,10 @@ protected:
     mtsFunctionWrite EventWrite;
 
     void Void(void);
-    void Write(const mtsDouble & data);
-    void QualifiedRead(const mtsDouble & data, mtsDouble & placeHolder) const;
+    void Write(const _dataType & data);
+    void QualifiedRead(const _dataType & data, _dataType & placeHolder) const;
 
-    mtsDouble ReadValue;
+    _dataType ReadValue;
 
     void SendButtonClickEvent() { EventVoid(); }
 
@@ -31,7 +42,7 @@ public:
     // interval between calls to the periodic Run).  Also used to
     // populate the interface(s)
     serverTask(const std::string & taskName, double period);
-    ~serverTask() {};
+    ~serverTask() {}
     // all four methods are pure virtual in mtsTask
     void Configure(const std::string & CMN_UNUSED(filename)) {};
     void Startup(void);    // set some initial values
@@ -42,7 +53,10 @@ public:
     }
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(serverTask);
+typedef serverTask<double> serverTaskDouble;
+CMN_DECLARE_SERVICES_INSTANTIATION(serverTaskDouble);
+typedef serverTask<mtsDouble> serverTaskmtsDouble;
+CMN_DECLARE_SERVICES_INSTANTIATION(serverTaskmtsDouble);
 
 #endif // _serverTask_h
 

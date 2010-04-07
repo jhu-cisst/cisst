@@ -42,12 +42,14 @@ class mtsCommandQueuedWrite: public mtsCommandQueuedWriteBase
 public:
     typedef mtsCommandQueuedWriteBase BaseType;
     typedef _argumentType ArgumentType;
+    typedef typename mtsGenericTypes<ArgumentType>::FinalType ArgumentQueueType;
+    typedef typename mtsGenericTypesUnwrap<ArgumentQueueType>::BaseType ArgumentQueueBaseType;
 
     /*! This type. */
     typedef mtsCommandQueuedWrite<ArgumentType> ThisType;
 
 protected:
-    mtsQueue<ArgumentType> ArgumentsQueue;
+    mtsQueue<ArgumentQueueType> ArgumentsQueue;
 
 private:
     /*! Private copy constructor to prevent copies */
@@ -57,21 +59,21 @@ public:
 
     inline mtsCommandQueuedWrite(void):
         BaseType(),
-        ArgumentsQueue(0, ArgumentType())
+        ArgumentsQueue(0, ArgumentQueueType())
     {}
 
 
     inline mtsCommandQueuedWrite(mtsCommandWriteBase * actualCommand):
         BaseType(0, actualCommand),
-        ArgumentsQueue(0, ArgumentType())
+        ArgumentsQueue(0, ArgumentQueueType())
     {}
 
 
     inline mtsCommandQueuedWrite(mtsMailBox * mailBox, mtsCommandWriteBase * actualCommand, size_t size):
         BaseType(mailBox, actualCommand),
-        ArgumentsQueue(0, ArgumentType())
+        ArgumentsQueue(0, ArgumentQueueType())
     {
-        const ArgumentType * argumentPrototype = dynamic_cast<const ArgumentType *>(this->GetArgumentPrototype());
+        const ArgumentQueueType * argumentPrototype = dynamic_cast<const ArgumentQueueType *>(this->GetArgumentPrototype());
         if (argumentPrototype) {
             ArgumentsQueue.SetSize(size, *argumentPrototype);
         } else {
@@ -98,7 +100,7 @@ public:
                 CMN_LOG_INIT_WARNING << "Class mtsCommandQueuedWrite: Allocate(): changing ArgumentsQueue size from " << ArgumentsQueue.GetSize()
                                      << " to " << size << std::endl;
             }
-            const ArgumentType * argumentPrototype = dynamic_cast<const ArgumentType *>(this->GetArgumentPrototype());
+            const ArgumentQueueType * argumentPrototype = dynamic_cast<const ArgumentQueueType *>(this->GetArgumentPrototype());
             if (argumentPrototype) {
                 ArgumentsQueue.SetSize(size, *argumentPrototype);
             } else {
@@ -111,7 +113,7 @@ public:
 
     virtual mtsCommandBase::ReturnType Execute(const mtsGenericObject & argument) {
         if (this->IsEnabled()) {
-            const ArgumentType * argumentTyped = dynamic_cast<const ArgumentType*>(&argument);
+            const ArgumentQueueBaseType * argumentTyped = dynamic_cast<const ArgumentQueueBaseType*>(&argument);
             if (!argumentTyped) {
                 return mtsCommandBase::BAD_INPUT;
             }

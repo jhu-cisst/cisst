@@ -30,6 +30,7 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include <cisstMultiTask/mtsCommandReadOrWriteBase.h>
+#include <cisstMultiTask/mtsGenericObjectProxy.h>
 #include <cisstMultiTask/mtsDevice.h>
 
 
@@ -70,6 +71,65 @@ protected:
     /*! Stores the receiver object of the command */
     ClassType * ClassInstantiation;
 
+    template<bool, typename dummy=void>
+    class ConditionalCast {
+        // Default case: ArgumentType not derived from mtsGenericObjectProxy
+    public:
+        static mtsCommandBase::ReturnType CallMethod(ClassType *ClassInst, ActionType Action, ActionTypeOld ActionOld, mtsGenericObject &argument)
+        {
+            ArgumentType * data = mtsGenericTypes<ArgumentType>::CastArg(argument);
+            if (data == 0)
+                return mtsCommandBase::BAD_INPUT;
+            if (Action) {
+                if (!(ClassInst->*Action)(*data))
+                    return mtsCommandBase::COMMAND_FAILED;
+            }
+            else if (ActionOld)
+                (ClassInst->*ActionOld)(*data);
+            return mtsCommandBase::DEV_OK;
+        }
+    };
+
+    template<typename dummy>
+    class ConditionalCast<true, dummy> {
+        // Specialization: ArgumentType is derived from mtsGenericObjectProxy (and thus also from mtsGenericObject)
+        // In this case, we may need to create a temporary Proxy object.
+    public:
+        static mtsCommandBase::ReturnType CallMethod(ClassType *ClassInst, ActionType Action, ActionTypeOld ActionOld, mtsGenericObject &argument)
+        {
+            // First, check if a Proxy object was passed.
+            ArgumentType *data = dynamic_cast<ArgumentType *>(&argument);
+            if (data) {
+                if (Action) {
+                    if (!(ClassInst->*Action)(*data))
+                        return mtsCommandBase::COMMAND_FAILED;
+                }
+                else if (ActionOld)
+                    (ClassInst->*ActionOld)(*data);
+                return mtsCommandBase::DEV_OK;
+            }
+            // If it isn't a Proxy, maybe it is a ProxyRef
+            typedef typename ArgumentType::RefType ArgumentRefType;
+            ArgumentRefType *dataref = dynamic_cast<ArgumentRefType *>(&argument);
+            if (!dataref) {
+                CMN_LOG_INIT_ERROR << "Read CallMethod could not cast from " << typeid(argument).name()
+                                   << " to " << typeid(ArgumentRefType).name() << std::endl;
+                return mtsCommandBase::BAD_INPUT;
+            }
+            // Now, make the call using the temporary
+            ArgumentType temp;
+            if (Action) {
+                if (!(ClassInst->*Action)(temp))
+                    return mtsCommandBase::COMMAND_FAILED;
+            }
+            else if (ActionOld)
+                (ClassInst->*ActionOld)(temp);
+            // Finally, copy the data to the argument
+            *dataref = temp;
+            return mtsCommandBase::DEV_OK;
+        }
+    };
+
 public:
     /*! The constructor. Does nothing */
     mtsCommandRead(void): BaseType(), ClassInstantiation(0) {}
@@ -88,12 +148,13 @@ public:
         ClassInstantiation(classInstantiation)
     {
         //this->ArgumentPrototype = new ArgumentType(argumentPrototype);
-        this->ArgumentPrototype = dynamic_cast<mtsGenericObject*>(argumentPrototype.Services()->Create());
-        if (typeid(ArgumentType) != typeid(argumentPrototype)) {
-            CMN_LOG_INIT_ERROR << "mtsCommandRead: argument prototype is wrong type for command \"" << name << "\" (expected \""
-                               << typeid(ArgumentType).name() << "\", got \"" 
-                               << typeid(argumentPrototype).name() << "\")" << std::endl;
-        }
+        //this->ArgumentPrototype = dynamic_cast<mtsGenericObject*>(argumentPrototype.Services()->Create());
+        // if (typeid(ArgumentType) != typeid(argumentPrototype)) {
+        //    CMN_LOG_INIT_ERROR << "mtsCommandRead: argument prototype is wrong type for command \"" << name << "\" (expected \""
+        //                       << typeid(ArgumentType).name() << "\", got \"" 
+        //                       << typeid(argumentPrototype).name() << "\")" << std::endl;
+        //}
+        this->ArgumentPrototype = mtsGenericTypes<ArgumentType>::ConditionalCreate(argumentPrototype, name);
     }
 
     mtsCommandRead(ActionTypeOld action, ClassType * classInstantiation, const std::string & name,
@@ -104,12 +165,8 @@ public:
         ClassInstantiation(classInstantiation)
     {
         //this->ArgumentPrototype = new ArgumentType(argumentPrototype);
-        this->ArgumentPrototype = dynamic_cast<mtsGenericObject*>(argumentPrototype.Services()->Create());
-        if (typeid(ArgumentType) != typeid(argumentPrototype)) {
-            CMN_LOG_INIT_ERROR << "mtsCommandRead: argument prototype is wrong type for command \"" << name << "\" (expected \""
-                               << typeid(ArgumentType).name() << "\", got \"" 
-                               << typeid(argumentPrototype).name() << "\")" << std::endl;
-        }
+        //this->ArgumentPrototype = dynamic_cast<mtsGenericObject*>(argumentPrototype.Services()->Create());
+        this->ArgumentPrototype = mtsGenericTypes<ArgumentType>::ConditionalCreate(argumentPrototype, name);
     }
 
 
@@ -126,20 +183,9 @@ public:
       \param obj The data passed to the operation method
     */
     virtual mtsCommandBase::ReturnType Execute(mtsGenericObject & argument) {
-        if (this->IsEnabled()) {
-            ArgumentType * data = dynamic_cast< ArgumentType * >(&argument);
-            if (data == 0) {
-                return mtsCommandBase::BAD_INPUT;
-            }
-            mtsCommandBase::ReturnType ret = mtsCommandBase::DEV_OK;
-            if (Action) {
-                if (!(ClassInstantiation->*Action)(*data))
-                    ret = mtsCommandBase::COMMAND_FAILED;
-            }
-            else if (ActionOld)
-                (ClassInstantiation->*ActionOld)(*data);
-            return ret;
-        }
+        if (this->IsEnabled())
+            return ConditionalCast<cmnIsDerivedFromTemplated<ArgumentType, mtsGenericObjectProxy>::YES
+                                  >::CallMethod(ClassInstantiation, Action, ActionOld, argument);
         return mtsCommandBase::DISABLED;
     }
 

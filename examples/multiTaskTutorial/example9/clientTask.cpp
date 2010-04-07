@@ -5,10 +5,12 @@
 #include "clientTask.h"
 #include "fltkMutex.h"
 
-CMN_IMPLEMENT_SERVICES(clientTask);
+CMN_IMPLEMENT_SERVICES_TEMPLATED(clientTaskDouble);
+CMN_IMPLEMENT_SERVICES_TEMPLATED(clientTaskmtsDouble);
 
-clientTask::clientTask(const std::string & taskName, double period):
-    mtsTaskPeriodic(taskName, period, false, 5000)
+template <class _dataType>
+clientTask<_dataType>::clientTask(const std::string & taskName, double period):
+    clientTaskBase(taskName, period)
 {
     // to communicate with the interface of the resource
     mtsRequiredInterface * required = AddRequiredInterface("Required");
@@ -17,17 +19,19 @@ clientTask::clientTask(const std::string & taskName, double period):
         required->AddFunction("Write", this->WriteServer);
         required->AddFunction("Read", this->ReadServer);
         required->AddFunction("QualifiedRead", this->QualifiedReadServer);
-        required->AddEventHandlerVoid(&clientTask::EventVoidHandler, this, "EventVoid");
-        required->AddEventHandlerWrite(&clientTask::EventWriteHandler, this, "EventWrite");
+        required->AddEventHandlerVoid(&clientTask<_dataType>::EventVoidHandler, this, "EventVoid");
+        required->AddEventHandlerWrite(&clientTask<_dataType>::EventWriteHandler, this, "EventWrite");
     }
 }
 
 
-void clientTask::Configure(const std::string & CMN_UNUSED(filename))
+template <class _dataType>
+void clientTask<_dataType>::Configure(const std::string & CMN_UNUSED(filename))
 {}
 
 
-void clientTask::Startup(void) 
+template <class _dataType>
+void clientTask<_dataType>::Startup(void) 
 {
     // make the UI visible
     fltkMutex.Lock();
@@ -45,18 +49,20 @@ void clientTask::Startup(void)
 }
 
 
-void clientTask::EventWriteHandler(const mtsDouble & value)
+template <class _dataType>
+void clientTask<_dataType>::EventWriteHandler(const _dataType & value)
 {
     fltkMutex.Lock();
     {
-        double result = value.Data + UI.EventValue->value();
+        double result = (double)value + UI.EventValue->value();
         UI.EventValue->value(result);
     }
     fltkMutex.Unlock();
 }
 
 
-void clientTask::EventVoidHandler(void)
+template <class _dataType>
+void clientTask<_dataType>::EventVoidHandler(void)
 {
     fltkMutex.Lock();
     {
@@ -66,7 +72,8 @@ void clientTask::EventVoidHandler(void)
 }
 
 
-void clientTask::Run(void)
+template <class _dataType>
+void clientTask<_dataType>::Run(void)
 {
     if (this->UIOpened()) {
         ProcessQueuedEvents();
@@ -82,23 +89,23 @@ void clientTask::Run(void)
             
             if (UI.WriteRequested) {
                 CMN_LOG_CLASS_RUN_VERBOSE << "Run: WriteRequested" << std::endl;
-                this->WriteServer(mtsDouble(UI.WriteValue->value()));
+                this->WriteServer(_dataType(UI.WriteValue->value()));
                 UI.WriteRequested = false;
             }
             
             if (UI.ReadRequested) {
                 CMN_LOG_CLASS_RUN_VERBOSE << "Run: ReadRequested" << std::endl;
-                mtsDouble data;
+                _dataType data;
                 this->ReadServer(data);
-                UI.ReadValue->value(data.Data);
+                UI.ReadValue->value((double)data);
                 UI.ReadRequested = false;
             }
             
             if (UI.QualifiedReadRequested) {
                 CMN_LOG_CLASS_RUN_VERBOSE << "Run: QualifiedReadRequested" << std::endl;
-                mtsDouble data;
-                this->QualifiedReadServer(mtsDouble(UI.WriteValue->value()), data);
-                UI.QualifiedReadValue->value(data.Data);
+                _dataType data;
+                this->QualifiedReadServer(_dataType(UI.WriteValue->value()), data);
+                UI.QualifiedReadValue->value(data);
                 UI.QualifiedReadRequested = false;
             }
             Fl::check();
@@ -107,6 +114,9 @@ void clientTask::Run(void)
     }
 }
 
+
+template class clientTask<double>;
+template class clientTask<mtsDouble>;
 
 /*
   Author(s):  Anton Deguet

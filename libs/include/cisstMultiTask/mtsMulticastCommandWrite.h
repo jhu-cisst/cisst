@@ -31,6 +31,7 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include <cisstMultiTask/mtsMulticastCommandWriteBase.h>
+#include <cisstMultiTask/mtsGenericObjectProxy.h>
 #include <vector>
 
 // Always include last
@@ -47,14 +48,16 @@ class mtsMulticastCommandWrite: public mtsMulticastCommandWriteBase
 {
 public:
     typedef mtsMulticastCommandWriteBase BaseType;
-    typedef _argumentType ArgumentType;
+    typedef _argumentType ArgumentType;   // does not need to derive from mtsGenericObject
+    typedef typename mtsGenericTypes<ArgumentType>::FinalBaseType ArgumentFinalType;  // derived from mtsGenericObject
 
 public:
     /*! Default constructor. Does nothing. */
     mtsMulticastCommandWrite(const std::string & name, const ArgumentType & argumentPrototype):
         BaseType(name)
     {
-        this->ArgumentPrototype = new ArgumentType(argumentPrototype);
+        //this->ArgumentPrototype = new ArgumentType(argumentPrototype);
+        this->ArgumentPrototype = mtsGenericTypes<ArgumentType>::ConditionalCreate(argumentPrototype, name);
     }
 
     /*! Default destructor. Does nothing. */
@@ -67,7 +70,7 @@ public:
     /*! Execute all the commands in the composite. */
     virtual mtsCommandBase::ReturnType Execute(const mtsGenericObject & argument) {
         // cast argument first
-        const ArgumentType * data = dynamic_cast< const ArgumentType * >(&argument);
+        const ArgumentFinalType * data = dynamic_cast< const ArgumentFinalType * >(&argument);
         if (data == 0) {
             return mtsCommandBase::BAD_INPUT;
         }

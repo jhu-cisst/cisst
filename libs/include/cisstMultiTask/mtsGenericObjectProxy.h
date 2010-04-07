@@ -124,7 +124,7 @@ public:
 
     /*! Default constructor.  The data member is initialized using its
         default constructor. */
-    inline mtsGenericObjectProxyBase(void)
+    inline mtsGenericObjectProxyBase(void) : BaseType()
     {}
 
     /*! Copy constructor. */
@@ -134,28 +134,22 @@ public:
 
     inline ~mtsGenericObjectProxyBase(void) {}
 
-    /*! Assignment from DeRef and Ref classes. */
-    virtual void Assign(const DeRefType &)
-    { CMN_LOG_INIT_WARNING << "ProxyBase Assign DeRefType called for " << this->Services()->GetName() << std::endl; }
+    /*! Return pointer to data */
+    virtual value_type* GetData(void) { return 0; }
+    virtual const value_type* GetData(void) const { return 0; }
 
-#if 0
-    /*! Conversion assignment.  This allows to assign from a dereferenced object. */
-    inline ThisType & operator=(const DeRefType &data) {
+    /*! Conversion assignment. */
+    ThisType & operator=(const ThisType &data) {
         this->Assign(data);
         return *this;
     }
-#endif
 
-    virtual void Assign(const RefType &)
-    { CMN_LOG_INIT_WARNING << "ProxyBase Assign RefType called for " << this->Services()->GetName() << std::endl; }
-
-#if 0
-    /*! Conversion assignment.  This allows to assign from a reference object. */
-    inline ThisType & operator=(const RefType &data) {
-        this->Assign(data);
-        return *this;
+    virtual void Assign(const ThisType &other) {
+        *(this->GetData()) = *(other.GetData());
+        this->SetValid(other.Valid());
+        this->SetTimestamp(other.Timestamp());
     }
-#endif
+
 };
 
 
@@ -174,7 +168,7 @@ public:
 
     /*! Default constructor.  The data member is initialized using its
         default constructor. */
-    inline mtsGenericObjectProxy(void)
+    inline mtsGenericObjectProxy(void) : BaseType(), Data()
     {}
 
     /*! Copy constructor. */
@@ -193,21 +187,12 @@ public:
 
     inline ~mtsGenericObjectProxy(void) {}
 
-    /*! Assignment from same type (DeRefType and ThisType are the same). */
-    void Assign(const DeRefType & other) {
-        *this = other;
-    }
+    /*! Return pointer to data */
+    value_type* GetData(void) { return &Data; }
+    const value_type* GetData(void) const { return &Data; }
 
-    /*! Conversion assignment.  This allows to assign from a proxy ref object. */
-    void Assign(const RefType & other)
-    {
-        this->Data = *other.pData;
-        this->SetValid(other.Valid());
-        this->SetTimestamp(other.Timestamp());
-    }
-
-    /*! Conversion assignment.  This allows to assign from a proxy ref object. */
-    inline ThisType & operator=(const RefType &data) {
+    /*! Conversion assignment, from base type (i.e., Proxy or ProxyRef) to Proxy. */
+    ThisType & operator=(const BaseType &data) {
         this->Assign(data);
         return *this;
     }
@@ -298,18 +283,12 @@ public:
 
     inline ~mtsGenericObjectProxyRef(void) {}
 
-    /*! Assignment from same type (RefType and ThisType are the same). */
-    void Assign(const RefType & other) { *this = other; }
+    /*! Return pointer to data */
+    value_type* GetData(void) { return pData; }
+    const value_type* GetData(void) const { return pData; }
 
-    /*! Conversion assignment.  This allows to assign from a proxy ref object. */
-    void Assign(const DeRefType & other) {
-        *this->pData = other.Data;
-        this->SetValid(other.Valid());
-        this->SetTimestamp(other.Timestamp());
-    }
-
-    /*! Conversion assignment.  This allows to assign from a dereferenced object. */
-    inline ThisType & operator=(const DeRefType &data) {
+    /*! Conversion assignment, from base type (i.e., Proxy or ProxyRef) to ProxyRef. */
+    ThisType & operator=(const BaseType &data) {
         this->Assign(data);
         return *this;
     }
@@ -380,13 +359,34 @@ public:
     typedef mtsGenericObjectProxy<T>      FinalType;
     typedef mtsGenericObjectProxyRef<T>   FinalRefType;
     static FinalRefType *ConditionalWrap(T &obj) { return new FinalRefType(obj); }
-    template <typename C> static int CallAfterConditionalWrap(C* cmd, T &obj)
-        { FinalRefType arg(obj); return static_cast<int>(cmd->Execute(arg)); }
     static bool IsEqual(const T &obj1, const mtsGenericObject &obj2) {
         const FinalRefType *p2 = dynamic_cast<const FinalRefType *>(&obj2);
         return (p2?(&obj1 == p2->pData):false); }
     static void ConditionalFree(const FinalRefType *obj) { delete obj;}
-    static void Copy(const FinalType &from, FinalBaseType &to) { to.Assign(from); }
+    static mtsGenericObject* ConditionalCreate(const T &, const std::string &) 
+    {
+        //return new FinalType(arg);
+        return dynamic_cast<mtsGenericObject*>(FinalType::ClassServices()->Create());
+    }
+
+    static T* CastArg(mtsGenericObject &arg) {
+        FinalBaseType *tmp = dynamic_cast<FinalBaseType *>(&arg);
+        if (!tmp) {
+            CMN_LOG_INIT_ERROR << "CastArgImpl could not cast from " << typeid(arg).name()
+                               << " to " << typeid(FinalBaseType).name() << std::endl;
+            return 0;
+        }
+        return tmp->GetData();
+    }
+    static const T* CastArg(const mtsGenericObject &arg) {
+        const FinalBaseType *tmp = dynamic_cast<const FinalBaseType *>(&arg);
+        if (!tmp) {
+            CMN_LOG_INIT_ERROR << "CastArgImpl could not cast from const " << typeid(arg).name()
+                               << " to const " << typeid(FinalBaseType).name() << std::endl;
+            return 0;
+        }
+        return tmp->GetData();
+    }
 };
 
 template<typename T>
@@ -398,11 +398,21 @@ public:
     typedef T FinalType;
     typedef T FinalRefType;
     static FinalRefType *ConditionalWrap(T &obj) { return &obj; }
-    template <typename C> static int CallAfterConditionalWrap(C* cmd, T &obj)
-        { return static_cast<int>(cmd->Execute(obj)); }
     static bool IsEqual(const T &obj1, const mtsGenericObject &obj2) { return &obj1 == &obj2; }
     static void ConditionalFree(const FinalRefType *) {}
-    static void Copy(const FinalType &from, FinalBaseType &to) { to = from; }
+    static mtsGenericObject* ConditionalCreate(const T &arg, const std::string &name) { 
+        if (typeid(T) != *arg.Services()->TypeInfoPointer()) {
+            CMN_LOG_INIT_ERROR << "ConditionalCreate: argument prototype is wrong type for command \"" << name << "\" (expected \""
+                               << typeid(T).name() << "\", got \"" 
+                               << arg.Services()->TypeInfoPointer()->name() << "\")" << std::endl;
+        }
+        //return new FinalType(arg);
+        // PK: Following may not correctly handle dynamically sizeable types
+        return dynamic_cast<mtsGenericObject*>(FinalType::ClassServices()->Create()); 
+    }
+
+    static T* CastArg(mtsGenericObject &arg) { return dynamic_cast<T * >(&arg); }
+    static const T* CastArg(const mtsGenericObject &arg) { return dynamic_cast<const T * >(&arg); }
 };
 
 template<typename T>
@@ -414,13 +424,27 @@ public:
     typedef typename mtsGenericTypesImpl<T, cmnIsDerivedFrom<T, mtsGenericObject>::YES>::FinalType     FinalType;
     typedef typename mtsGenericTypesImpl<T, cmnIsDerivedFrom<T, mtsGenericObject>::YES>::FinalRefType  FinalRefType;
     static FinalRefType *ConditionalWrap(T &obj) { return impl::ConditionalWrap(obj); }
-    // PK TODO: The return type should be mtsCommandBase::ReturnType, but getting this to compile was problematic.
-    template <typename C> static int CallAfterConditionalWrap(C* cmd, T &obj)
-        { return impl::CallAfterConditionalWrap(cmd, obj); }
     static bool IsEqual(const T &obj1, const mtsGenericObject &obj2) { return impl::IsEqual(obj1, obj2); }
     static void ConditionalFree(const FinalRefType *obj) { impl::ConditionalFree(obj); }
-    // PK TODO: Copy can probably be eliminated if the assignment operators are properly defined.
-    static void Copy(const FinalType &from, FinalBaseType &to) { impl::Copy(from,to); }
+    static mtsGenericObject* ConditionalCreate(const T &arg, const std::string &name) { 
+        mtsGenericObject *tmp = impl::ConditionalCreate(arg, name);
+        if (!tmp)
+            CMN_LOG_INIT_ERROR << "ConditionalCreate returning NULL for " << name << std::endl;
+        return tmp;
+    }
+
+    static T* CastArg(mtsGenericObject &arg) { 
+        T* tmp = impl::CastArg(arg);
+        if (!tmp)
+            CMN_LOG_INIT_ERROR << "CastArg could not cast from " << typeid(arg).name() << " to " << typeid(T).name() << std::endl;
+        return tmp;
+    }
+    static const T* CastArg(const mtsGenericObject &arg) {
+        const T* tmp = impl::CastArg(arg);
+        if (!tmp)
+            CMN_LOG_INIT_ERROR << "CastArg could not cast from const " << typeid(arg).name() << " to const " << typeid(T).name() << std::endl;
+        return tmp;
+    }
 };
 
 template<typename T, bool>
@@ -429,23 +453,28 @@ class mtsGenericTypesUnwrapImpl
     // T is not a proxy type
 public:
     typedef T RefType;
+    typedef T BaseType;
 };
 
 template<typename T>
 class mtsGenericTypesUnwrapImpl<T, true>
 {
-    // T is a proxy ref type
+    // T is a proxy type
 public:
     typedef typename T::RefType RefType;
+    typedef typename T::BaseType BaseType;
 };
 
 template<typename T>
 class mtsGenericTypesUnwrap
 {
-    typedef mtsGenericTypesUnwrapImpl<T, cmnIsDerivedFromTemplated<T, mtsGenericObjectProxy >::YES> impl;
+    typedef mtsGenericTypesUnwrapImpl<T, cmnIsDerivedFromTemplated<T, mtsGenericObjectProxyBase >::YES> impl;
 public:
-    typedef typename mtsGenericTypesUnwrapImpl<T, cmnIsDerivedFromTemplated<T, mtsGenericObjectProxy >::YES>::RefType RefType;
+    typedef typename mtsGenericTypesUnwrapImpl<T, cmnIsDerivedFromTemplated<T, mtsGenericObjectProxyBase >::YES>::RefType RefType;
+    typedef typename mtsGenericTypesUnwrapImpl<T, cmnIsDerivedFromTemplated<T, mtsGenericObjectProxyBase >::YES>::BaseType BaseType;
 };
+
+
 #endif
 
 /* Some basic types defined here for now, could move somewhere else. */

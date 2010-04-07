@@ -31,7 +31,7 @@ http://www.cisst.org/cisst/license.txt.
 // These two includes are not required to compile this class but are
 // pretty much always needed in conjunction with commands.  To ease
 // the user's life, we include them now.
-#include <cisstMultiTask/mtsGenericObjectProxy.h>
+//include <cisstMultiTask/mtsGenericObjectProxy.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 
 #include <iostream>

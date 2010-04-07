@@ -30,7 +30,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnGenericObject.h>
 #include <cisstCommon/cmnClassRegisterMacros.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
-#include <cisstMultiTask/mtsGenericObjectProxy.h>
 #include <cisstMultiTask/mtsStateArrayBase.h>
 #include <cisstMultiTask/mtsStateArray.h>
 #include <cisstMultiTask/mtsStateIndex.h>
@@ -186,9 +185,7 @@ public:
         }
 
         bool Get(const mtsStateIndex & when, value_base_type & data) const {
-            // PK: This could be changed to an assignment (see below), once operator overloading is fixed
-            // data = History.Element(when.Index());
-            mtsGenericTypes<_elementType>::Copy(History.Element(when.Index()), data);
+            data = History.Element(when.Index());
             return Table.ValidateReadIndex(when);
         }
 

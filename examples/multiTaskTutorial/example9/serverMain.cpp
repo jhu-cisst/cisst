@@ -11,13 +11,19 @@
 int main(int argc, char * argv[])
 {
 
-    if (argc != 3) {
-        std::cerr << "Usage: " << argv[0] << " GlobalManagerIP ServerTaskIP" << std::endl;
+    if (argc < 2) {
+        std::cerr << "Usage: " << argv[0] << " GlobalManagerIP [flag]" << std::endl;
+        std::cerr << "       flag = 1 to use double instead of mtsDouble" << std::endl;
         exit(-1);
     }
 
-    std::string globalTaskManagerIP(argv[1]);
-    std::string serverTaskIP(argv[2]);
+    CMN_LOG_INIT_WARNING << "Starting server, IP = " << argv[1] << std::endl;
+    std::string globalComponentManagerIP(argv[1]);
+    // Get the TaskManager instance and set operation mode
+    mtsManagerLocal *taskManager = mtsManagerLocal::GetInstance(globalComponentManagerIP, "ProcessServer");
+
+    // If flag is not specified, or not 1, then use generic type (mtsDouble)
+    bool useGeneric = (argc > 2)?(argv[2][0] != '1'):true;
 
     // log configuration
     cmnLogger::SetLoD(CMN_LOG_LOD_VERY_VERBOSE);
@@ -32,10 +38,12 @@ int main(int argc, char * argv[])
 
     // create our server task
     const double PeriodServer = 10 * cmn_ms; // in milliseconds
-    serverTask * server = new serverTask("Server", PeriodServer);
+    serverTaskBase *server;
+    if (useGeneric)
+        server = new serverTask<mtsDouble>("Server", PeriodServer);
+    else
+        server = new serverTask<double>("Server", PeriodServer);
 
-    // Get the TaskManager instance and set operation mode
-    mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
     taskManager->AddTask(server);
 
     // create the tasks, i.e. find the commands

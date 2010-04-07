@@ -28,6 +28,8 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsQueue_h
 #define _mtsQueue_h
 
+#include <cisstMultiTask/mtsGenericObjectProxy.h>
+
 /*!
   \ingroup cisstMultiTask
 
@@ -135,7 +137,11 @@ public:
       \param in reference to the object to be copied
       \result Pointer to element in queue (use iterator instead?)
     */
-    inline const_pointer Put(const_reference newObject) {
+    //inline const_pointer Put(const_reference newObject)
+    //Following signature is equivalent for types that are not Proxy types. If a Proxy type,
+    //then we use the ProxyBase instead, so that we can also accept ProxyRef objects.
+    inline const_pointer Put(const typename mtsGenericTypesUnwrap<value_type>::BaseType &newObject)
+    {
         pointer newHead = this->Head + 1;
         // test if end of buffer
         if (newHead >= this->Sentinel) {

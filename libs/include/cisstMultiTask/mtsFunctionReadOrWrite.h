@@ -42,6 +42,23 @@ protected:
     typedef mtsCommandReadOrWriteBase<_argumentType> CommandType;
     CommandType * Command;
 
+    template<typename _userType, bool>
+    class ConditionalWrap {
+    public:
+        static mtsCommandBase::ReturnType Call(mtsCommandReadBase* cmd, _userType &arg)
+        { mtsGenericObjectProxyRef<_userType> argw(arg); return cmd->Execute(argw); }
+        static mtsCommandBase::ReturnType Call(mtsCommandWriteBase* cmd, const _userType &arg)
+        { mtsGenericObjectProxyRef<_userType> argw(arg); return cmd->Execute(argw); }
+    };
+    template<typename _userType>
+    class ConditionalWrap<_userType, true> {
+    public:
+        static mtsCommandBase::ReturnType Call(mtsCommandReadBase* cmd, _userType &arg)
+        { return cmd->Execute(arg); }
+        static mtsCommandBase::ReturnType Call(mtsCommandWriteBase* cmd, const _userType &arg)
+        { return cmd->Execute(arg); }
+    };
+
 public:
     /*! Default constructor.  Does nothing, use Bind before
       using. */
@@ -55,7 +72,7 @@ public:
     mtsFunctionReadOrWrite(const mtsDeviceInterface * associatedInterface, const std::string & commandName) {
         this->Bind(associatedInterface, commandName);
     }
-
+    
     /*! Destructor. */
     virtual ~mtsFunctionReadOrWrite() {}
 
@@ -102,12 +119,21 @@ public:
     mtsCommandBase::ReturnType operator()(ArgumentType& argument) const
     { return Command ? Command->Execute(argument) : mtsCommandBase::NO_INTERFACE; }
 #endif
-
-	/*! Overloaded operator that accepts different argument types. */
+    
+	/*! Overloaded operator that accepts different argument types (for read commands). */
     template <class _userType>
     mtsCommandBase::ReturnType operator()(_userType& argument) const {
         mtsCommandBase::ReturnType ret = Command ?
-            static_cast<mtsCommandBase::ReturnType>(mtsGenericTypes<_userType>::CallAfterConditionalWrap(Command, argument))
+            ConditionalWrap<_userType, cmnIsDerivedFrom<_userType, mtsGenericObject>::YES>::Call(Command, argument)
+          : mtsCommandBase::NO_INTERFACE;
+        return ret;
+    }
+
+	/*! Overloaded operator that accepts different argument types (for write commands). */
+    template <class _userType>
+    mtsCommandBase::ReturnType operator()(const _userType& argument) const {
+        mtsCommandBase::ReturnType ret = Command ?
+            ConditionalWrap<_userType, cmnIsDerivedFrom<_userType, mtsGenericObject>::YES>::Call(Command, argument)
           : mtsCommandBase::NO_INTERFACE;
         return ret;
     }
@@ -120,12 +146,11 @@ public:
 
     /*! Human readable output to stream. */
     void ToStream(std::ostream & outputStream) const;
-};
 
+};
 
 typedef mtsFunctionReadOrWrite<mtsGenericObject> mtsFunctionRead;
 typedef mtsFunctionReadOrWrite<const mtsGenericObject> mtsFunctionWrite;
-
 
 #endif // _mtsFunctionReadOrWrite_h
 
