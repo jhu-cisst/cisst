@@ -149,16 +149,16 @@ void callbackPopupSignalSelectionMenu(Fl_Widget * w, void *userdata)
         popupMenus[i].labelsize(12);
     }
     // Add cancel menu at the end
-    unsigned int i = signalNames.size();
-    memset(&popupMenus[i], 0, sizeof(Fl_Menu_Item));
-    popupMenus[i].text = STRING_CANCEL;
-    popupMenus[i].shortcut(FL_ALT + 'c');
-    popupMenus[i].callback(callbackSignalSelect);
-    popupMenus[i].user_data((void*) i);
-    popupMenus[i].flags = 0;
-    popupMenus[i].labeltype(FL_NORMAL_LABEL);
-    popupMenus[i].labelfont(FL_HELVETICA);
-    popupMenus[i].labelsize(12);
+    unsigned int j = signalNames.size();
+    memset(&popupMenus[j], 0, sizeof(Fl_Menu_Item));
+    popupMenus[j].text = STRING_CANCEL;
+    popupMenus[j].shortcut(FL_ALT + 'c');
+    popupMenus[j].callback(callbackSignalSelect);
+    popupMenus[j].user_data((void*) i);
+    popupMenus[j].flags = 0;
+    popupMenus[j].labeltype(FL_NORMAL_LABEL);
+    popupMenus[j].labelfont(FL_HELVETICA);
+    popupMenus[j].labelsize(12);
     // Add end mark
     memset(&popupMenus[signalNames.size() + 1], 0, sizeof(Fl_Menu_Item));
 
@@ -233,6 +233,7 @@ void GCMUITask::Configure(const std::string & CMN_UNUSED(filename))
             ipString += ipAddresses[i];
         }
     }
+
     buf->text(ipString.c_str());
 
     //
