@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: svlFilterCallback.h 1218 2010-02-22 16:08:09Z adeguet1 $
+  $Id: svlFilterBuffer.h 1218 2010-02-22 16:08:09Z adeguet1 $
 
   Author(s):	Daniel Mirota
   Created on:	2010-03-26
@@ -36,9 +36,19 @@ http://www.cisst.org/cisst/license.txt.
 
 #define VBsize 40
 
+
+typedef vctDynamicNArrayRef<unsigned char,3> NumpyNArrayType;
+typedef NumpyNArrayType::nsize_type SizeType;
+typedef NumpyNArrayType::nindex_type IndexType;
+typedef NumpyNArrayType::nstride_type StrideType;
+
+
 class CISST_EXPORT svlFilterBuffer : public svlFilterBase
 {
 public:
+
+
+
     /*!
      Constructor
     */
@@ -54,6 +64,7 @@ public:
 	unsigned int GetDataChannels();
 
 	vctDynamicMatrixRef<unsigned char> GetCurrentFrame();
+	int GetCurrentFrameNArray(NumpyNArrayType matrix_in);
 
 	
 private:
@@ -62,6 +73,9 @@ private:
 	double VideoTimeStamp[VBsize];
 	osaThreadSignal IsFrameSetEvent;
 	bool IsFrameSet;
+
+	NumpyNArrayType svlBufferNArrayRef;
+	NumpyNArrayType numpyNArrayRef;
 
     int Initialize(svlSample* inputdata);
     int ProcessFrame(svlProcInfo* procInfo, svlSample* inputdata);

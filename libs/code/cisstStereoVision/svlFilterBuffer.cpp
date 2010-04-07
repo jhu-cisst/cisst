@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: ui3VideoInterfaceFilter.cpp 1218 2010-02-22 16:08:09Z adeguet1 $
+  $Id: svlFliterBuffer.cpp 1218 2010-02-22 16:08:09Z adeguet1 $
 
   Author(s):	Daniel Mirota
   Created on:	2008-06-10
@@ -37,9 +37,10 @@ svlFilterBuffer::~svlFilterBuffer()
 int svlFilterBuffer::Initialize(svlSample* inputdata)
 {
     OutputData = inputdata;
-
+	
 	for (int i=0; i<VBsize; i++)
 			VideoBuffer[i].SetSize(GetHeight(),  GetWidth() * GetDataChannels());
+
 
     return SVL_OK;
 }
@@ -63,7 +64,7 @@ int svlFilterBuffer::ProcessFrame(svlProcInfo* procInfo, svlSample* inputdata)
 			VideoTimeStamp[tmpind] = inputdata->GetTimestamp();
 
 			// Get Image Data
-			VideoBuffer[tmpind].Assign(img->MatrixRef());
+			VideoBuffer[tmpind].FastCopyOf(img->MatrixRef());
 
 			VideoBindex = tmpind;
     }
@@ -96,4 +97,28 @@ vctDynamicMatrixRef<unsigned char> svlFilterBuffer::GetCurrentFrame()
 				IsFrameSetEvent.Wait();
 			}	
 			return VideoBuffer[VideoBindex];
+		}
+
+
+int svlFilterBuffer::GetCurrentFrameNArray(NumpyNArrayType matrix_in)
+{
+			if(!IsFrameSet){
+				IsFrameSetEvent.Wait();
+			}
+
+		    vctDynamicMatrixRef<unsigned char> currentImage = VideoBuffer[VideoBindex];
+
+			SizeType svlBufferNArrayRefSize(GetHeight(), GetWidth(), GetDataChannels());
+			StrideType svlBufferNArrayRefStride(currentImage.row_stride(), GetDataChannels(),currentImage.col_stride());
+			svlBufferNArrayRef.SetRef(currentImage.Pointer(),svlBufferNArrayRefSize,svlBufferNArrayRefStride);
+
+			//Set RGA submatrix to the current image
+			//VideoBuffer[VideoBindex]
+			SizeType startPosition(0,0,0);
+			SizeType length(GetHeight(),GetWidth(),GetDataChannels());
+			numpyNArrayRef.SubarrayOf(matrix_in,startPosition,length);
+
+			numpyNArrayRef.Assign(svlBufferNArrayRef);
+
+			return SVL_OK;
 		}
