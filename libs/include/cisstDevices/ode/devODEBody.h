@@ -21,6 +21,11 @@ http://www.cisst.org/cisst/license.txt.
 #include <ode/ode.h>
 #include <cisstVector/vctFrame4x4.h>
 
+#include <cisstDevices/glut/devMeshTriangular.h>
+#include <cisstDevices/glut/devGLUT.h>
+
+#include <cisstDevices/devExport.h>
+
 class CISST_EXPORT devODEBody {
 
 private:
@@ -29,7 +34,7 @@ private:
   dBodyID bodyid;
 
   //! The ODE mass
-  dMass mass;
+  dMass* mass;
 
   //! The indices of the triangles
   /**
@@ -62,7 +67,7 @@ private:
   /**
      This is a structure used by ODE to process collisions
   */
-  dGeomID        geom;
+  dGeomID geomid;
 
   //! The ODE space ID
   /**
@@ -78,9 +83,13 @@ private:
      \param filename The full path to an .obj filename
      \return SUCCESS if the mesh was properly loaded. ERROR otherwise
   */
-  int LoadOBJ( const std::string& filename );
+  int LoadOBJ( const std::string& filename,
+	       const vctFixedSizeVector<double,3>& com );
 
-  vctFixedSizeVector<double,3> tbcom;
+  //!
+  devMeshTriangular* geometry;
+
+  vctFrame4x4<double> Rtcomb;
 
 public:
 
@@ -91,9 +100,10 @@ public:
      \param spaceID The ID of the space used by the body
      \param Rt The position and orientation of the body wrt to the world frame
      \param m The mass of the body
-     \param com The center of mass of the body wrt to the body's coordinate frame
+     \param com The center of mass of the body wrt to the body's coordinate 
+                frame
      \param moit The moment of inertia tensor of the body about the COM
-center of mass
+                 center of mass
      \param geomfile The name of the Wavefront file used by the body
   */
   devODEBody( dWorldID worldid, 
@@ -102,7 +112,8 @@ center of mass
 	      double m,
 	      const vctFixedSizeVector<double,3>& com,
 	      const vctFixedSizeMatrix<double,3,3>& moit,
-	      const std::string& geomfile = std::string() );
+	      const std::string& geomfile,
+	      bool glutgeom = true );
 
   //! Default destructor
   ~devODEBody();
@@ -110,8 +121,13 @@ center of mass
   //! Query the ID of the body
   dBodyID BodyID() const { return bodyid; }
 
-  //vctMatrixRotation3<double> GetOrientation() const;
-  //vctFixedSizeVector<double,3> GetPosition() const;
+  //! Query the ID of the body
+  dGeomID GeomID() const { return geomid; }
+
+  void Update();
+
+  vctMatrixRotation3<double> GetOrientation() const;
+  vctFixedSizeVector<double,3> GetPosition() const;
 
 };
 

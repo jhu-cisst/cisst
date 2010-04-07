@@ -29,8 +29,6 @@ http://www.cisst.org/cisst/license.txt.
 
 class CISST_EXPORT devODEManipulator : public mtsTaskPeriodic {
 
-  //CMN_DECLARE_SERVICES( CMN_NO_DYNAMIC_CREATION , 10 );
-
  private:
 
   //! MTS vector of joint positions
@@ -87,8 +85,9 @@ class CISST_EXPORT devODEManipulator : public mtsTaskPeriodic {
 		     devODEWorld& world,
 		     const std::string& robotfilename,
 		     const vctDynamicVector<double> qinit,
-		     const std::vector<std::string>& geomfiles=std::vector<std::string>(),
-		     const vctFrame4x4<double>& Rtw0 = vctFrame4x4<double>() );
+		     const vctFrame4x4<double>& Rtw0,
+		     const std::vector<std::string>& geomfiles );
+
 
   void Configure( const std::string& fn="");
   void Startup();

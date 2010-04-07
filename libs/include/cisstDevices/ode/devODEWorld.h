@@ -69,11 +69,12 @@ private:
 
   //! The maximum number of contacts
   /**
-     This value determines the manimum number of contacts that can happen between
-     two bodies. Using several contact point slows down the simulation while too
-     few gives bad results (100 contacts points is actually quite large)
+     This value determines the manimum number of contacts that can happen 
+     between two bodies. Using several contact point slows down the simulation 
+     while too few gives bad results (100 contacts points is actually quite 
+     large)
   */
-  static const size_t NUM_CONTACTS = 100;
+  static const size_t NUM_CONTACTS = 50;
 
   std::vector<devODEBody*> bodies;
   std::vector<devODEJoint*> joints;
@@ -130,8 +131,8 @@ public:
   void Cleanup(){}
   void Run();
 
-  void Insert( devODEBody* body )  { bodies.push_back( body ); }
-  void Insert( devODEJoint* joint ) { joints.push_back( joint ); }
+  void Insert( devODEBody* body );
+  void Insert( devODEJoint* joint );
 
 };
 

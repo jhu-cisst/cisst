@@ -24,15 +24,15 @@ http://www.cisst.org/cisst/license.txt.
 const std::string devODEManipulator::PositionsInterface  = "PositionsInterface";
 const std::string devODEManipulator::FTInterface         = "FTInterface";
 
-devODEManipulator::devODEManipulator( const std::string& devname,
-				      double period,
-				      devODEWorld& world,
-				      const std::string& robotfilename,
-				      const vctDynamicVector<double> qinit,
-				      const std::vector<std::string>& geomfiles,
-				      const vctFrame4x4<double>& Rtw0 ) :
+devODEManipulator::devODEManipulator(const std::string& devname,
+				     double period,
+				     devODEWorld& world,
+				     const std::string& robotfilename,
+				     const vctDynamicVector<double> qinit,
+				     const vctFrame4x4<double>& Rtw0,
+				     const std::vector<std::string>& geomfiles):
   mtsTaskPeriodic( devname, period, true ) {
-
+  
   this->qinit = qinit;
 
   // Create a temporary manipulator
@@ -41,7 +41,7 @@ devODEManipulator::devODEManipulator( const std::string& devname,
   //! Create a new space for the manipulator
   dSpaceID spaceid = dSimpleSpaceCreate( world.SpaceID() );
 
-  /*** Initialize the links ***/
+  // Initialize the links
 
   // a temporary vector to hold pointers to bodies
   std::vector<devODEBody*> links;
@@ -51,11 +51,6 @@ devODEManipulator::devODEManipulator( const std::string& devname,
     // obtain the position and orientation of the ith link 
     vctFrame4x4<double> Rtwi = manipulator.ForwardKinematics( qinit, i+1 );
 
-    // Filename of the geometry
-    std::string geomfile;
-    if( i < geomfiles.size() ) 
-      { geomfile = geomfiles[i]; }
-
     // create and initialize the ith link
     devODEBody* link;
     link = new devODEBody( world.WorldID(),                         // world
@@ -63,14 +58,14 @@ devODEManipulator::devODEManipulator( const std::string& devname,
 			   Rtwi,                                    // pos+ori
 			   manipulator.links[i].Mass(),             // m   
 			   manipulator.links[i].CenterOfMass(),     // com
-			   manipulator.links[i].MomentOfInertia(),  // I  
-			   geomfile );
+			   manipulator.links[i].MomentOfInertiaAtCOM(),  // I  
+			   geomfiles[i] );
 
     world.Insert( link );
     links.push_back( link );
   }
 
-  /*** Initialize the joints ***/
+  // Initialize the joints
   dBodyID b1 = 0;                                // ID of initial proximal link
   vctFixedSizeVector<double,3> z(0.0, 0.0, 1.0); // the local Z axis
 
