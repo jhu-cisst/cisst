@@ -6,18 +6,17 @@ devJointsPD::devJointsPD( const vctDynamicMatrix<double>& Kp,
 			  double period,
 			  const std::string& robfile,
 			  const vctDynamicVector<double>& qinit,
-			  const vctFrame4x4<double>& Rt,
-			  const std::vector<devGeometry*> geoms ) :
-  devControlLoop( taskname, period, robfile, Rt, geoms ),
+			  const vctFrame4x4<double>& Rtwb ):
+  devControlLoop( taskname, period, robfile, Rtwb ),
   period(period) {
 
   this->Kp = Kp;
   this->Kd = Kd;
 
-  olde.SetSize( links.size() );
-  olde.SetAll( 0.0 );
-  oldq.SetSize( links.size() );
-  oldq = qinit;
+  eold.SetSize( links.size() );
+  eold.SetAll( 0.0 );
+  qold.SetSize( links.size() );
+  qold = qinit;
 }
 
 vctDynamicVector<double> 
@@ -30,14 +29,14 @@ devJointsPD::Control( const vctDynamicVector<double>& q ){
   ReadReferencePosition( qs );
   ReadReferenceVelocity( qsd );
   ReadReferenceAcceleration( qsdd );
-
-  vctDynamicVector<double> e = q - qs;
-  vctDynamicVector<double> ed = (e - olde)/period;
-  vctDynamicVector<double> qd = (q - oldq)/period;
   
-  vctDynamicVector<double> t = InverseDynamics( q, qd, qsdd ) - Kp*e - Kd*ed;
-  olde = e;
-  oldq = q;
+  vctDynamicVector<double> e = q - qs;
+  vctDynamicVector<double> ed = (e - eold)/period;
+  vctDynamicVector<double> qd = (q - qold)/period;
+  
+  vctDynamicVector<double> t = InverseDynamics( qs, qsd, qsdd ) - Kp*e - Kd*ed;
+  eold = e;
+  qold = q;
 
   return t;
   

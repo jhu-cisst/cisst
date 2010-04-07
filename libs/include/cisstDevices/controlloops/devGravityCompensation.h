@@ -9,12 +9,11 @@ class CISST_EXPORT devGravityCompensation : public devControlLoop {
 
 public:
 
-  devGravityCompensation( const std::string& taskname, 
-			  double period,
-			  const std::string& robfile,
-			  const vctFrame4x4<double>& Rtwb=vctFrame4x4<double>(),
-			  const std::vector<devGeometry*> geoms=std::vector<devGeometry*>() ) : 
-    devControlLoop( taskname, period, robfile, Rtwb, geoms ) {}
+  devGravityCompensation(const std::string& taskname, 
+			 double period,
+			 const std::string& robfile,
+			 const vctFrame4x4<double>& Rtwb=vctFrame4x4<double>()):
+    devControlLoop( taskname, period, robfile, Rtwb ) {}
 
   vctDynamicVector<double> Control( const vctDynamicVector<double>& q );
 };

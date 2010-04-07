@@ -1,7 +1,7 @@
 
 #include <cisstMultiTask/mtsTaskPeriodic.h>
 #include <cisstRobot/robManipulator.h>
-#include <cisstDevices/glut/devGeometry.h>
+
 #include <vector>
 
 #ifndef _devControlLoop_h
@@ -31,15 +31,12 @@ protected:
   mtsFunctionRead ReadReferenceVelocity;
   mtsFunctionRead ReadReferenceAcceleration;
   
-  std::vector<devGeometry*> geoms;
-  
 public:
   
   devControlLoop( const std::string& taskname, 
 		  double period, 
 		  const std::string& robfile,
-		  const vctFrame4x4<double>& Rt = vctFrame4x4<double>(),
-		  const std::vector<devGeometry*> geoms = std::vector<devGeometry*>() );
+		  const vctFrame4x4<double>& Rt = vctFrame4x4<double>() );
 
   ~devControlLoop(){}
 

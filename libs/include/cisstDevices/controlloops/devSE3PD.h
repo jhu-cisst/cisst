@@ -1,5 +1,5 @@
-
 #include <cisstDevices/controlloops/devControlLoop.h>
+#include <cisstDevices/devExport.h>
 
 #ifndef _devSE3PD_h
 #define _devSE3PD_h
@@ -8,19 +8,29 @@ class devSE3PD : public devControlLoop{
 
 private:
 
-  vctFixedSizeMatrix<double,6,6> Kp, Kd;
+  double period;
+
+  vctFixedSizeMatrix<double,3,3> Kv, Kvd;
+  vctFixedSizeMatrix<double,3,3> Kw, Kwd;
+
+  vctFixedSizeVector<double,3> etold;
+  vctFixedSizeVector<double,3> erold;
+  vctDynamicVector<double> qold;
 
 public:
 
-  devSe3PD( const vctFixedSize<double,6,6>& Kp,
-	    const vctFixedSize<double,6,6>& Kd,
+  devSE3PD( const vctFixedSizeMatrix<double,3,3>& Kv,
+	    const vctFixedSizeMatrix<double,3,3>& Kvd,
+	    const vctFixedSizeMatrix<double,3,3>& Kw,
+	    const vctFixedSizeMatrix<double,3,3>& Kwd,
 	    const std::string& taskname, 
 	    double period,
 	    const std::string& robfile,
-	    const vctFrame4x4<double>& Rt = vctFrame4x4<double>(),
-	    const std::vector<devGeometry*> geoms=std::vector<devGeometry*>() );
+	    const vctDynamicVector<double>& qinit,
+	    const vctFrame4x4<double>& Rtwb = vctFrame4x4<double>() );
 
-  void Run();
+  vctDynamicVector<double> Control( const vctDynamicVector<double>& q );
+
 };
 
 #endif

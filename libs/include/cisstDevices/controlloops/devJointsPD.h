@@ -1,4 +1,3 @@
-
 #include <cisstDevices/controlloops/devControlLoop.h>
 #include <cisstDevices/devExport.h>
 
@@ -12,8 +11,8 @@ private:
   vctDynamicMatrix<double> Kp, Kd;
   double period;
 
-  vctDynamicVector<double> olde;
-  vctDynamicVector<double> oldq;
+  vctDynamicVector<double> eold;
+  vctDynamicVector<double> qold;
 
 public:
 
@@ -23,8 +22,7 @@ public:
 	       double period,
 	       const std::string& robfile,
 	       const vctDynamicVector<double>& qinit,
-	       const vctFrame4x4<double>& Rtwb = vctFrame4x4<double>(),
-	       const std::vector<devGeometry*> geoms=std::vector<devGeometry*>() );
+	       const vctFrame4x4<double>& Rtwb = vctFrame4x4<double>() );
 
   vctDynamicVector<double> Control( const vctDynamicVector<double>& q );
 

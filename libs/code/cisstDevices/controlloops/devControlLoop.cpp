@@ -17,16 +17,11 @@ const std::string devControlLoop::WriteOutputCommand = "WriteOutput";
 devControlLoop::devControlLoop( const std::string& taskname, 
 				double period,
 				const std::string& robfile,
-				const vctFrame4x4<double>& Rt,
-				const std::vector<devGeometry*> geoms ) :
+				const vctFrame4x4<double>& Rt ) : 
   // initialize the task
   mtsTaskPeriodic( taskname, period, true ),
   // initialize the manipulator
   robManipulator( robfile, Rt ) {
-
-  // copy the geometries
-  if( !geoms.empty() )
-    { this->geoms.insert( this->geoms.begin(), geoms.begin(), geoms.end() ); }
 
   mtsProvidedInterface* interface;
 
@@ -104,10 +99,6 @@ void devControlLoop::Run(){
 
   if( enabled && q.size() == links.size() ){
     output = Control( q );
-    // any models to render?
-    if( !geoms.empty() ){ 
-      for( size_t i=0; i<geoms.size(); i++ )
-	{ geoms[i]->SetPositionOrientation( ForwardKinematics( q, i+1 ) ); }
-    }
   }
+
 }
