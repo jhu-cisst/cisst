@@ -154,7 +154,7 @@ void callbackPopupSignalSelectionMenu(Fl_Widget * w, void *userdata)
     popupMenus[j].text = STRING_CANCEL;
     popupMenus[j].shortcut(FL_ALT + 'c');
     popupMenus[j].callback(callbackSignalSelect);
-    popupMenus[j].user_data((void*) i);
+    popupMenus[j].user_data((void*) j);
     popupMenus[j].flags = 0;
     popupMenus[j].labeltype(FL_NORMAL_LABEL);
     popupMenus[j].labelfont(FL_HELVETICA);
