@@ -41,7 +41,7 @@ void mtsStateTable::IndexRange::ToStreamRaw(std::ostream & outputStream, const c
 
 int mtsStateTable::StateVectorBaseIDForUser;
 
-mtsStateTable::mtsStateTable(int size, const std::string & name):
+mtsStateTable::mtsStateTable(size_t size, const std::string & name):
     HistoryLength(size),
     NumberStateData(0),
     IndexWriter(0),
@@ -95,14 +95,14 @@ mtsStateTable::~mtsStateTable()
 
 /* All the const methods that can be called from reader or writer */
 mtsStateIndex mtsStateTable::GetIndexReader(void) const {
-    int tmp = IndexReader;
+    size_t tmp = IndexReader;
     return mtsStateIndex(this->Tic, tmp, Ticks[tmp], HistoryLength);
 }
 
 
 mtsStateTable::AccessorBase * mtsStateTable::GetAccessor(const std::string & name) const
 {
-    for (unsigned int i = 0; i < StateVectorDataNames.size(); i++) {
+    for (size_t i = 0; i < StateVectorDataNames.size(); i++) {
         if (name == StateVectorDataNames[i]) {
             return StateVectorAccessors[i];
         }
@@ -162,11 +162,11 @@ void mtsStateTable::StartIfAutomatic(void) {
 
 
 void mtsStateTable::Advance(void) {
-    unsigned int i;
-    unsigned int tmpIndex;
+    size_t i;
+    size_t tmpIndex;
     // newIndexWriter is the next row of the State Table.  Note that this
     // also corresponds to the row with the oldest data.
-    unsigned int newIndexWriter = (IndexWriter + 1) % HistoryLength;
+    size_t newIndexWriter = (IndexWriter + 1) % HistoryLength;
 
     // Update SumOfPeriods (add newest and subtract oldest)
     SumOfPeriods += Period;
@@ -300,7 +300,7 @@ void mtsStateTable::Kill(void) {
 
 void mtsStateTable::ToStream(std::ostream & outputStream) const {
     outputStream << "State Table: " << this->GetName() << std::endl;
-    unsigned int i;
+    size_t i;
     outputStream << "Ticks : ";
     for (i = 0; i < StateVector.size() - 1; i++) {
         if (!StateVectorDataNames[i].empty())
@@ -419,7 +419,7 @@ void mtsStateTable::CSVWrite(std::ostream& out, mtsGenericObject ** listColumn, 
 
 int mtsStateTable::GetStateVectorID(const std::string & dataName) const
 {
-    for (unsigned int i = 0; i < StateVectorDataNames.size(); i++) {
+    for (size_t i = 0; i < StateVectorDataNames.size(); i++) {
         if (StateVectorDataNames[i] == dataName) {
             return i;
         }
@@ -449,7 +449,7 @@ void mtsStateTable::SetDataCollectionEventTriggeringRatio(const double eventTrig
 void mtsStateTable::DataCollectionStart(const mtsDouble & delay)
 {
     CMN_LOG_CLASS_RUN_DEBUG << "DataCollectionStart: received request to start data collection in "
-        << delay.Data << " seconds" << std::endl;
+                            << delay.Data << " seconds" << std::endl;
     const double startTime = this->Tic + delay.Data;
     // if we are not yet collection
     if (!this->DataCollection.Collecting) {
@@ -457,7 +457,7 @@ void mtsStateTable::DataCollectionStart(const mtsDouble & delay)
         if (this->DataCollection.StartTime == 0) {
             // set time to start
             CMN_LOG_CLASS_RUN_DEBUG << "DataCollectionStart: data collection scheduled to start at "
-                << startTime << std::endl;
+                                    << startTime << std::endl;
             this->DataCollection.StartTime = startTime;
         } else {
             // we are set to collect but later, advance the collection
@@ -466,11 +466,11 @@ void mtsStateTable::DataCollectionStart(const mtsDouble & delay)
             // collect more data.
             if (this->DataCollection.StartTime > startTime) {
                 CMN_LOG_CLASS_RUN_DEBUG << "DataCollectionStart: data collection scheduled to start at "
-                    << startTime << " (moved forward)" << std::endl;
+                                        << startTime << " (moved forward)" << std::endl;
                 this->DataCollection.StartTime = startTime;
             } else {
                 CMN_LOG_CLASS_RUN_WARNING << "DataCollectionStart: received a new request to start data collection after previous request, ignored"
-                    << std::endl;
+                                          << std::endl;
             }
         }
     } else {
@@ -484,7 +484,7 @@ void mtsStateTable::DataCollectionStart(const mtsDouble & delay)
             } else {
                 // this will schedule a start after the scheduled stop
                 CMN_LOG_CLASS_RUN_DEBUG << "DataCollectionStart: data collection scheduled to start at "
-                    << startTime << " (after a scheduled stop)" << std::endl;
+                                        << startTime << " (after a scheduled stop)" << std::endl;
                 this->DataCollection.StartTime = startTime;
             }
         }
@@ -495,12 +495,12 @@ void mtsStateTable::DataCollectionStart(const mtsDouble & delay)
 void mtsStateTable::DataCollectionStop(const mtsDouble & delay)
 {
     CMN_LOG_CLASS_RUN_DEBUG << "DataCollectionStop: received request to stop data collection in "
-        << delay.Data << " seconds" << std::endl;
+                            << delay.Data << " seconds" << std::endl;
     double stopTime = this->Tic + delay.Data;
     // check is there is already a stop time scheduled
     if (this->DataCollection.StopTime == 0) {
         CMN_LOG_CLASS_RUN_DEBUG << "DataCollectionStop: data collection scheduled to stop at "
-            << stopTime << std::endl;
+                                << stopTime << std::endl;
         DataCollection.StopTime = stopTime;
     } else {
         // we are set to stop but earlier, delay the collection stop
@@ -509,11 +509,11 @@ void mtsStateTable::DataCollectionStop(const mtsDouble & delay)
         // more data.
         if (this->DataCollection.StopTime < stopTime) {
             CMN_LOG_CLASS_RUN_DEBUG << "DataCollectionStop: data collection scheduled to stop at "
-                << stopTime << " (moved back)" << std::endl;
+                                    << stopTime << " (moved back)" << std::endl;
             DataCollection.StopTime = stopTime;
         } else {
             CMN_LOG_CLASS_RUN_WARNING << "DataCollectionStop: received a new request to stop data collection before previous request, ignored"
-                << std::endl;
+                                      << std::endl;
         }
     }
 }

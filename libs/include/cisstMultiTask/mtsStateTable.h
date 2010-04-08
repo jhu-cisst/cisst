@@ -122,10 +122,10 @@ class CISST_EXPORT mtsStateTable: public cmnGenericObject {
 
         /*! Interval between two progress events (in seconds) */
         double TimeIntervalForProgressEvent;
-        
+
         /*! Time of last progress event */
         double TimeOfLastProgressEvent;
-        
+
         /*! Function used to trigger event sent to state collector
           when the data collection is needed.  The payload is the
           range defined by state indices. */
@@ -237,16 +237,16 @@ public:
  protected:
 
 	/*! The number of rows of the state data table. */
-	unsigned int HistoryLength;
+	size_t HistoryLength;
 
 	/*! The number of columns of the data table. */
-	unsigned int NumberStateData;
+	size_t NumberStateData;
 
 	/*! The index of the writer in the data table. */
-	unsigned int IndexWriter;
+	size_t IndexWriter;
 
 	/*! The index of the reader in the table. */
-	unsigned int IndexReader;
+	size_t IndexReader;
 
     /*! Automatic advance flag.  This flag is used by the method
       AdvanceIfAutomatic to decide if this state table should advance
@@ -314,12 +314,12 @@ public:
 
 	/*! Write specified data. */
 	bool Write(mtsStateDataId id, const mtsGenericObject & obj);
- 
+
 
  public:
     /*! Constructor. Constructs a state table with a default
       size of 256 rows. */
-    mtsStateTable(int size, const std::string & name);
+    mtsStateTable(size_t size, const std::string & name);
 
     /*! Default destructor. */
     ~mtsStateTable();
@@ -409,10 +409,15 @@ public:
     void Kill(void);
 
     inline double GetTic(void) const {
-        return Tic.Data;
+        return this->Tic.Data;
     }
+
     inline double GetToc(void) const {
-        return Toc.Data;
+        return this->Toc.Data;
+    }
+
+    inline size_t GetHistoryLength(void) const {
+        return this->HistoryLength;
     }
 
     /*! Return the moving average of the measured period (i.e., average of last
@@ -500,7 +505,7 @@ mtsStateDataId mtsStateTable::NewElement(const std::string & name, _elementType 
 template <class _elementType>
 mtsStateTable::AccessorBase *mtsStateTable::GetAccessor(const _elementType &element) const
 {
-    for (unsigned int i = 0; i < StateVectorElements.size(); i++) {
+    for (size_t i = 0; i < StateVectorElements.size(); i++) {
         if (mtsGenericTypes<_elementType>::IsEqual(element, *StateVectorElements[i]))
             return StateVectorAccessors[i];
     }
