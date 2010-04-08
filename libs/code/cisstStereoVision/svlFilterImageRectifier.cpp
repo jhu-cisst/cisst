@@ -378,6 +378,7 @@ int svlFilterImageRectifier::LoadLine(FILE* fp, double* dblbuf, unsigned int dbl
     int linebreak = 0;
     double dbl;
     double negexp[] = {1.0, 0.1, 0.01, 0.001, 0.0001, 0.00001, 0.000001, 0.0000001, 0.00000001, 0.000000001};
+	double negexpTens[] = {1.0, 0.0000000001, 0.00000000001, 0.000000000001, 0.000000000001, 0.000000000001, 0.000000000001, 0.000000000001, 0.000000000001, 0.0000000000001, 0.0000000000001};
     double posexp[] = {1.0, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, 10000000.0, 100000000.0, 1000000000.0};
 
     filepos = ftell(fp);
@@ -528,10 +529,16 @@ int svlFilterImageRectifier::LoadLine(FILE* fp, double* dblbuf, unsigned int dbl
 
         // x.xxxxxxxe?0x
             if (*tbuf == '-') {
-                tbuf += 2;
+                tbuf ++;
                 ival = *tbuf - 48; if (ival < 0 || ival > 9) break;
 
-            // x.xxxxxxxe-0?
+            // x.xxxxxxxe-?x
+                dbl *= negexpTens[ival];
+
+				tbuf ++;
+                ival = *tbuf - 48; if (ival < 0 || ival > 9) break;
+
+            // x.xxxxxxxe-x?
                 dbl *= negexp[ival];
             }
             else {
