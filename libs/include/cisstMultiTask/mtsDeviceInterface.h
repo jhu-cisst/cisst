@@ -86,26 +86,24 @@ class CISST_EXPORT mtsDeviceInterface: public cmnGenericObject
 
  public:
 
-    /*! Typedef for a map of name of zero argument command and name of
-      command. */
+    /*! Typedef for a map of name of zero argument command and name of command. */
     typedef cmnNamedMap<mtsCommandVoidBase> CommandVoidMapType;
 
-    /*! Typedef for a map of name of one argument command and name of
-      command. */
+    /*! Typedef for a map of name of one argument command and name of command. */
     typedef cmnNamedMap<mtsCommandReadBase> CommandReadMapType;
 
-    /*! Typedef for a map of name of one argument command and name of
-      command. */
+    /*! Typedef for a map of name of one argument command and name of command. */
     typedef cmnNamedMap<mtsCommandWriteBase> CommandWriteMapType;
 
-    /*! Typedef for a map of name of two argument command and name of
-      command. */
+    /*! Typedef for a map of name of two argument command and name of command. */
     typedef cmnNamedMap<mtsCommandQualifiedReadBase> CommandQualifiedReadMapType;
 
-    /*! Typedef for a map of event name and event generator
-      command. */
+    /*! Typedef for a map of event name and event generator command. */
     typedef cmnNamedMap<mtsMulticastCommandVoid> EventVoidMapType;
     typedef cmnNamedMap<mtsMulticastCommandWriteBase> EventWriteMapType;
+
+    /*! Typedef for a map of internally-generated commands (only used for garbage collection). */
+    typedef cmnNamedMap<mtsCommandBase> CommandInternalMapType;
 
  protected:
 
@@ -350,6 +348,19 @@ public:
                                                                  const std::string & commandName)
     { return AddCommandQualifiedRead(method, classInstantiation, commandName, __argument1Type(), __argument2Type()); }
 
+    template <class __classType, class __argumentType, class __filteredType>
+    inline mtsCommandWriteBase * AddCommandFilteredWrite(void (__classType::*premethod)(const __argumentType &, __filteredType &) const,
+                                                         void (__classType::*method)(const __filteredType &),
+                                                         __classType * classInstantiation, const std::string & commandName,
+                                                         const __argumentType & argumentPrototype,
+                                                         const __filteredType & filteredPrototype);
+
+    template <class __classType, class __argumentType, class __filteredType>
+    inline mtsCommandWriteBase * AddCommandFilteredWrite(void (__classType::*premethod)(const __argumentType &, __filteredType &) const,
+                                                         void (__classType::*method)(const __filteredType &),
+                                                         __classType * classInstantiation, const std::string & commandName)
+    { return AddCommandFilteredWrite(premethod, method, classInstantiation, commandName, __argumentType(), __filteredType()); }
+
 #else
     template <class __classType, class __argumentType>
     inline mtsCommandWriteBase * AddCommandWrite(void (__classType::*method)(const __argumentType &),
@@ -363,6 +374,13 @@ public:
                                                                  const std::string & commandName,
                                                                  const __argument1Type & argument1Prototype = CMN_DEFAULT_TEMPLATED_CONSTRUCTOR(__argument1Type),
                                                                  const __argument2Type & argument2Prototype = CMN_DEFAULT_TEMPLATED_CONSTRUCTOR(__argument2Type));
+
+    template <class __classType, class __argumentType, class __filteredType>
+    inline mtsCommandWriteBase * AddCommandFilteredWrite(void (__classType::*premethod)(const __argumentType &, __filteredType &) const,
+                                                         void (__classType::*method)(const __filteredType &),
+                                                         __classType * classInstantiation, const std::string & commandName,
+                                                         const __argumentType & argumentPrototype = CMN_DEFAULT_TEMPLATED_CONSTRUCTOR(__argumentType),
+                                                         const __filteredType & filteredPrototype = CMN_DEFAULT_TEMPLATED_CONSTRUCTOR(__filteredType));
 #endif
 
 #endif // SWIG
@@ -381,6 +399,7 @@ protected:
     CommandQualifiedReadMapType CommandsQualifiedRead; // Qualified Read (conversion, read at time index, ...)
     EventVoidMapType EventVoidGenerators; // Raise an event
     EventWriteMapType EventWriteGenerators; // Raise an event
+    CommandInternalMapType CommandsInternal; // Internal commands (not exposed to user)
 
 };
 

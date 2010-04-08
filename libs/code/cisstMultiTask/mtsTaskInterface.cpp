@@ -82,6 +82,14 @@ unsigned int mtsTaskInterface::ProcessMailBoxes(void)
 }
 
 
+std::vector<std::string> mtsTaskInterface::GetNamesOfCommandsVoid(void) const {
+    return CommandsQueuedVoid.GetNames();
+}
+
+std::vector<std::string> mtsTaskInterface::GetNamesOfCommandsWrite(void) const {
+    return CommandsQueuedWrite.GetNames();
+}
+
 mtsCommandVoidBase * mtsTaskInterface::GetCommandVoid(const std::string & commandName,
                                                       unsigned int userId) const {
     ThreadResourcesMapType::const_iterator iterator = ThreadResourcesMap.begin();

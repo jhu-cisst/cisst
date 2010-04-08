@@ -94,6 +94,7 @@ SET(HEADER_FILES
     mtsMulticastCommandWriteBase.h
     mtsCommandQueuedWrite.h
     mtsCommandQueuedWriteBase.h
+    mtsCommandFilteredQueuedWrite.h
     mtsFunctionReadOrWrite.h
     mtsEventWriteGeneratorProxy.h
 
@@ -284,13 +285,13 @@ endif(CISST_HAS_QT)
 
 if(CISST_MTS_HAS_ICE)
   if(WIN32)
-    set(ICE_LIBRARIES_OPTIMIZED Ice IceUtil)
-    set(ICE_LIBRARIES_DEBUG Iced IceUtild)
+	set(ICE_LIBRARIES_OPTIMIZED Ice IceUtil)
+	set(ICE_LIBRARIES_DEBUG Iced IceUtild)
     target_link_libraries(cisstMultiTask
-                          optimized Ice
-                          debug Iced
-                          optimized IceUtil
-                          debug IceUtild)
+                             optimized Ice
+                             debug Iced
+                             optimized IceUtil
+                             debug IceUtild)
     CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_LIBRARIES_DEBUG ICE_LIBRARIES_DEBUG)
     CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_LIBRARIES_OPTIMIZED ICE_LIBRARIES_OPTIMIZED)
   else(WIN32)

@@ -168,7 +168,6 @@ public:
 
     template <class _elementType>
     class Accessor : public AccessorBase {
-        typedef typename mtsGenericTypes<_elementType>::FinalBaseType value_base_type;
         typedef typename mtsGenericTypes<_elementType>::FinalType value_type;
         typedef typename mtsGenericTypes<_elementType>::FinalRefType value_ref_type;
         typedef typename mtsStateTable::Accessor<_elementType> ThisType;
@@ -184,7 +183,7 @@ public:
             History.Element(when.Index()).ToStream(outputStream);
         }
 
-        bool Get(const mtsStateIndex & when, value_base_type & data) const {
+        bool Get(const mtsStateIndex & when, value_type & data) const {
             data = History.Element(when.Index());
             return Table.ValidateReadIndex(when);
         }
@@ -201,14 +200,14 @@ public:
             return false;
         }
 
-        bool GetLatest(value_base_type & data) const {
+        bool GetLatest(value_type & data) const {
             return Get(Table.GetIndexReader(), data);
         }
         bool GetLatest(mtsGenericObject & data) const {
             return Get(Table.GetIndexReader(), data);
         }
 
-        void SetCurrent(const value_base_type & data) {
+        void SetCurrent(const value_type & data) {
             *Current = data;
         }
 

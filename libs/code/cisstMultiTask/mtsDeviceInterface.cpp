@@ -35,7 +35,8 @@ mtsDeviceInterface::mtsDeviceInterface(const std::string & interfaceName,
     CommandsWrite("CommandsWrite"),
     CommandsQualifiedRead("CommandsQualifiedRead"),
     EventVoidGenerators("EventVoidGenerators"),
-    EventWriteGenerators("EventWriteGenerators")
+    EventWriteGenerators("EventWriteGenerators"),
+    CommandsInternal("CommandsInternal")
 {
     CommandsVoid.SetOwner(*this);
     CommandsRead.SetOwner(*this);
@@ -43,6 +44,7 @@ mtsDeviceInterface::mtsDeviceInterface(const std::string & interfaceName,
     CommandsQualifiedRead.SetOwner(*this);
     EventVoidGenerators.SetOwner(*this);
     EventWriteGenerators.SetOwner(*this);
+    CommandsInternal.SetOwner(*this);
 }
 
 mtsCommandVoidBase * mtsDeviceInterface::GetCommandVoid(const std::string & commandName,
