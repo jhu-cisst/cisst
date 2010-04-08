@@ -302,3 +302,14 @@ MTS_INSTANTIATE_MATRIX(mtsLongMat, long);
 
 // Wrap mtsStateIndex
 %include "cisstMultiTask/mtsStateIndex.h"
+
+
+// to make sure cisst has Qt
+%include "cisstConfig.h"
+#if CISST_HAS_QT
+#define slots
+#define signals protected
+    // Wrap Qt Widgets and components
+    %include "cisstMultiTask/mtsCollectorQComponent.h"
+    %include "cisstMultiTask/mtsCollectorQWidget.h"
+#endif

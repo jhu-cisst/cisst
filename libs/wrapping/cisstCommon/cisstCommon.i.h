@@ -35,14 +35,19 @@ http://www.cisst.org/cisst/license.txt.
 
 
 /* Put header files here */
-#include "cisstCommon/cmnGenericObject.h"
-#include "cisstCommon/cmnGenericObjectProxy.h"
-#include "cisstCommon/cmnObjectRegister.h"
-#include "cisstCommon/cmnClassServicesBase.h"
-#include "cisstCommon/cmnClassRegister.h"
-#include "cisstCommon/cmnTypeTraits.h"
-#include "cisstCommon/cmnCallbackStreambuf.h"
-#include "cisstCommon/cmnPath.h"
+#include <cisstCommon/cmnGenericObject.h>
+#include <cisstCommon/cmnGenericObjectProxy.h>
+#include <cisstCommon/cmnObjectRegister.h>
+#include <cisstCommon/cmnClassServicesBase.h>
+#include <cisstCommon/cmnClassRegister.h>
+#include <cisstCommon/cmnTypeTraits.h>
+#include <cisstCommon/cmnCallbackStreambuf.h>
+#include <cisstCommon/cmnPath.h>
+
+#include <cisstConfig.h>
+#if CISST_HAS_QT
+    #include <cisstCommon/cmnLoggerQWidget.h>
+#endif
 
 #endif // _cisstCommon_i_h
 

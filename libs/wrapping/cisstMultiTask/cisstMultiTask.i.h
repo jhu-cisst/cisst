@@ -35,28 +35,34 @@ http://www.cisst.org/cisst/license.txt.
 
 
 /* Put header files here */
-#include "cisstCommon/cisstCommon.i.h"
-#include "cisstVector/cisstVector.i.h"
-#include "cisstOSAbstraction/cisstOSAbstraction.i.h"
+#include <cisstCommon/cisstCommon.i.h>
+#include <cisstVector/cisstVector.i.h>
+#include <cisstOSAbstraction/cisstOSAbstraction.i.h>
 
-#include "cisstMultiTask/mtsCommandBase.h"
-#include "cisstMultiTask/mtsCommandVoidBase.h"
-#include "cisstMultiTask/mtsCommandReadOrWriteBase.h"
-#include "cisstMultiTask/mtsDevice.h"
-#include "cisstMultiTask/mtsDeviceInterface.h"
-#include "cisstMultiTask/mtsTask.h"
-#include "cisstMultiTask/mtsTaskContinuous.h"
-#include "cisstMultiTask/mtsTaskPeriodic.h"
-#include "cisstMultiTask/mtsTaskFromSignal.h"
-#include "cisstMultiTask/mtsTaskInterface.h"
-#include "cisstMultiTask/mtsRequiredInterface.h"
-#include "cisstMultiTask/mtsTaskManager.h"
-#include "cisstMultiTask/mtsStateIndex.h"
-#include "cisstMultiTask/mtsCollectorBase.h"
-#include "cisstMultiTask/mtsCollectorState.h"
+#include <cisstMultiTask/mtsCommandBase.h>
+#include <cisstMultiTask/mtsCommandVoidBase.h>
+#include <cisstMultiTask/mtsCommandReadOrWriteBase.h>
+#include <cisstMultiTask/mtsDevice.h>
+#include <cisstMultiTask/mtsDeviceInterface.h>
+#include <cisstMultiTask/mtsTask.h>
+#include <cisstMultiTask/mtsTaskContinuous.h>
+#include <cisstMultiTask/mtsTaskPeriodic.h>
+#include <cisstMultiTask/mtsTaskFromSignal.h>
+#include <cisstMultiTask/mtsTaskInterface.h>
+#include <cisstMultiTask/mtsRequiredInterface.h>
+#include <cisstMultiTask/mtsTaskManager.h>
+#include <cisstMultiTask/mtsStateIndex.h>
+#include <cisstMultiTask/mtsCollectorBase.h>
+#include <cisstMultiTask/mtsCollectorState.h>
 
-#include "cisstMultiTask/mtsVector.h"
-#include "cisstMultiTask/mtsMatrix.h"
+#include <cisstMultiTask/mtsVector.h>
+#include <cisstMultiTask/mtsMatrix.h>
+
+#include <cisstConfig.h>
+#if CISST_HAS_QT
+    #include <cisstMultiTask/mtsCollectorQComponent.h>
+    #include <cisstMultiTask/mtsCollectorQWidget.h>
+#endif
 
 #endif // _cisstMultiTask_i_h
 
