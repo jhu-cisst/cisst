@@ -99,8 +99,11 @@ typedef mtsCommandQualifiedReadOrWriteBase<const mtsGenericObject> mtsCommandQua
 %extend mtsCommandReadOrWriteBase<const mtsGenericObject> {
     %pythoncode {
         def UpdateFromC(self):
-            tmpObject = self.GetArgumentClassServices().Create()
-            self.ArgumentType = tmpObject.__class__
+            try:
+                tmpObject = self.GetArgumentClassServices().Create()
+                self.ArgumentType = tmpObject.__class__
+            except TypeError, e:
+                print 'Write command ', self.GetName(), ': ', e
 
         def __call__(self, argument):
             if isinstance(argument, self.ArgumentType):
@@ -115,8 +118,12 @@ typedef mtsCommandQualifiedReadOrWriteBase<const mtsGenericObject> mtsCommandQua
 %extend mtsCommandReadOrWriteBase<mtsGenericObject> {
     %pythoncode {
         def UpdateFromC(self):
-            tmpObject = self.GetArgumentClassServices().Create()
-            self.ArgumentType = tmpObject.__class__
+            try:
+                tmpObject = self.GetArgumentClassServices().Create()
+                self.ArgumentType = tmpObject.__class__
+            except TypeError, e:
+                print 'Read command ', self.GetName(), ': ', e
+
 
         def __call__(self):
             # PK: figure out if the first statement (after try) is still needed
@@ -133,10 +140,13 @@ typedef mtsCommandQualifiedReadOrWriteBase<const mtsGenericObject> mtsCommandQua
 %extend mtsCommandQualifiedReadOrWriteBase<mtsGenericObject> {
     %pythoncode {
         def UpdateFromC(self):
-            tmp1Object = self.GetArgument1ClassServices().Create()
-            self.Argument1Type = tmp1Object.__class__
-            tmp2Object = self.GetArgument2ClassServices().Create()
-            self.Argument2Type = tmp2Object.__class__
+            try:
+                tmp1Object = self.GetArgument1ClassServices().Create()
+                self.Argument1Type = tmp1Object.__class__
+                tmp2Object = self.GetArgument2ClassServices().Create()
+                self.Argument2Type = tmp2Object.__class__
+            except TypeError, e:
+                print 'Qualified read command ', self.GetName(), ': ', e
 
         def __call__(self, argument1):
             argument2 = self.Argument2Type(self.GetArgument2Prototype())
