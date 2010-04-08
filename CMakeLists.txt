@@ -162,6 +162,9 @@ if(CISST_HAS_FLTK)
   find_package(FLTK REQUIRED)
   CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_INCLUDE_DIRECTORIES FLTK_INCLUDE_DIR)
   CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_LIBRARIES FLTK_LIBRARIES)
+  # If FLTK was built using CMake (i.e., there is an FLTKConfig.cmake), the FLTK_LIBRARIES (above) does not include the path,
+  # so we need to add FLTK_LIBRARY_DIRS (which is only defined if FLTK was built using CMake) to the link directories.
+  CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_LINK_DIRECTORIES FLTK_LIBRARY_DIRS)
 endif(CISST_HAS_FLTK)
 
 # Extra link flag if for Apple
