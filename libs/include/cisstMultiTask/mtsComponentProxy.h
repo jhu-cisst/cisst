@@ -21,14 +21,20 @@ http://www.cisst.org/cisst/license.txt.
 
 /*!
   \file
-  \brief Definition of Component Proxy
+  \brief Declaration of mtsComponentProxy
   \ingroup cisstMultiTask
 
-  A component proxy is of type mtsDevice rather than mtsTask. This helps
+  This class implements a component proxy which is internally created and
+  managed by the local component manager.  It also provides several utility 
+  functions for proxy-related processings such as the information extraction of
+  existing interfaces, creation of proxy objects, and updating pointers to 
+  command and function objects.
+
+  A component proxy is implemeneted as mtsDevice rather than mtsTask. This helps
   avoiding possible thread synchronization issues between ICE threads and
   cisst internal threads.
 
-  How proxy components exchange data across a network is as follows:
+  \note How proxy components exchange data across a network is as follows:
 
        Client Process                             Server Process
   ---------------------------             --------------------------------
@@ -42,6 +48,7 @@ http://www.cisst.org/cisst/license.txt.
                                           -> Serialization
             Deserialization  <-  Network  <- Return data (if any)
    <- Return data to app
+
 */
 
 #ifndef _mtsComponentProxy_h

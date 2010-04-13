@@ -31,7 +31,7 @@ public:
     //-------------------------------------------------------------------------
     //  Structures for Provided Interface Description
     //-------------------------------------------------------------------------
-    /*! Command object definition */
+    // Command object definition
 	struct CommandVoidElement {
         std::string Name;
 	};
@@ -39,9 +39,10 @@ public:
 	struct CommandWriteElement {
 		std::string Name;
         std::string ArgumentPrototypeSerialized;
+        bool Category; // 0 for generic write command, 1 for filtered write command
 	};
 
-	struct CommandReadElement {
+    struct CommandReadElement {
 		std::string Name;
         std::string ArgumentPrototypeSerialized;
 	};
@@ -52,7 +53,7 @@ public:
         std::string Argument2PrototypeSerialized;
 	};
 
-    /* Event object definition */
+    // Event object definition
 	struct EventVoidElement {
 		std::string Name;
 	};
@@ -109,7 +110,7 @@ public:
     };
 };
 
-/* Typedefs for easy access to internal classes */
+// Typedefs to access internal structures
 #define TYPEDEF( _class ) typedef mtsInterfaceCommon::_class _class;
 
 TYPEDEF(ProvidedInterfaceDescription);

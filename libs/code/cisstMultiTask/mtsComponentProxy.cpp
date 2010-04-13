@@ -295,12 +295,23 @@ bool mtsComponentProxy::CreateProvidedInterfaceProxy(const ProvidedInterfaceDesc
     CommandWriteVector::const_iterator itWrite = providedInterfaceDescription.CommandsWrite.begin();
     const CommandWriteVector::const_iterator itWriteEnd = providedInterfaceDescription.CommandsWrite.end();
     for (; itWrite != itWriteEnd; ++itWrite) {
-        commandName = itWrite->Name;
+        /*
+        // in case of generic write command
+        if (itWrite->Category == 0) {
+            commandName = itWrite->Name;
+        }
+        // in case of filtered write command
+        else {
+            commandName = itWrite->Name.substr(0, itWrite->Name.size() - 5); // 5 = strlen("Write")
+        }
+        */
+        
         newCommandWrite = new mtsCommandWriteProxy(commandName);
         if (!providedInterfaceProxy->GetCommandWriteMap().AddItem(commandName, newCommandWrite)) {
             delete newCommandWrite;
             delete providedInterfaceProxy;
-            CMN_LOG_CLASS_RUN_ERROR << "CreateProvidedInterfaceProxy: failed to add write command proxy: " << commandName << std::endl;
+            CMN_LOG_CLASS_RUN_ERROR << "CreateProvidedInterfaceProxy: failed to add " <<
+                (itWrite->Category == 0 ? "write" : "filtered write") << " command proxy: " << commandName << std::endl;
             return false;
         }
 
@@ -310,13 +321,15 @@ bool mtsComponentProxy::CreateProvidedInterfaceProxy(const ProvidedInterfaceDesc
         try {
             argumentPrototype = dynamic_cast<mtsGenericObject *>(deserializer.DeSerialize());
         } catch (std::exception e) {
-            CMN_LOG_CLASS_RUN_ERROR << "CreateProvidedInterfaceProxy: write command argument deserialization failed: " << e.what() << std::endl;
+            CMN_LOG_CLASS_RUN_ERROR << "CreateProvidedInterfaceProxy: failed to deserialize " <<
+                (itWrite->Category == 0 ? "write" : "filtered write") << " command argument: " << e.what() << std::endl;
             argumentPrototype = NULL;
         }
 
         if (!argumentPrototype) {
             delete providedInterfaceProxy;
-            CMN_LOG_CLASS_RUN_ERROR << "CreateProvidedInterfaceProxy: failed to create write command proxy: " << commandName << std::endl;
+            CMN_LOG_CLASS_RUN_ERROR << "CreateProvidedInterfaceProxy: failed to create " <<
+                (itWrite->Category == 0 ? "write" : "filtered write") << " command proxy: " << commandName << std::endl;
             return false;
         }
         newCommandWrite->SetArgumentPrototype(argumentPrototype);
@@ -712,7 +725,7 @@ bool mtsComponentProxy::UpdateCommandProxyID(
     }
     mtsProvidedInterface * instance = it->second;
 
-    // Set command proxy IDs in the provided interface proxy instance as the
+    // Set command proxy IDs in the provided interface proxy as the
     // function proxies' pointers fetched from server process.
 
     // Void command
@@ -986,12 +999,45 @@ void mtsComponentProxy::ExtractProvidedInterfaceDescription(
     const mtsDeviceInterface::CommandWriteMapType::MapType::const_iterator itWriteEnd = providedInterface->CommandsWrite.end();
     for (; itWrite != itWriteEnd; ++itWrite) {
         elementCommandWrite.Name = itWrite->second->GetName();
+        elementCommandWrite.Category = 0;
         // argument serialization
         streamBuffer.str("");
         serializer.Serialize(*(itWrite->second->GetArgumentPrototype()));
         elementCommandWrite.ArgumentPrototypeSerialized = streamBuffer.str();
         providedInterfaceDescription.CommandsWrite.push_back(elementCommandWrite);
     }
+
+    // Extract filtered write commands: mtsDeviceInterface::CommandsInternals 
+    // have two different types of command--filter command and write command.
+    // Since only the write command should be exposed to clients, we extract 
+    // write commands.
+    // See mtsTaskInterface::AddCommandFilteredWrite() for more details.
+    /*
+    size_t pos;
+    mtsCommandWriteBase * writeCommand;
+    mtsDeviceInterface::CommandInternalMapType::MapType::const_iterator itFilteredWrite = providedInterface->CommandsInternal.begin();
+    const mtsDeviceInterface::CommandInternalMapType::MapType::const_iterator itFilteredWriteEnd = providedInterface->CommandsInternal.end();
+    for (; itFilteredWrite != itFilteredWriteEnd; ++itFilteredWrite) {
+        elementCommandWrite.Name = itFilteredWrite->second->GetName();
+        elementCommandWrite.Category = 1;
+        pos = elementCommandWrite.Name.rfind("Write");
+        if (pos != std::string::npos && 
+            elementCommandWrite.Name.substr(pos).compare("Write") == 0) 
+        {
+            writeCommand = dynamic_cast<mtsCommandWriteBase*>(itFilteredWrite->second);
+            if (!writeCommand) {
+                CMN_LOG_RUN_ERROR << "ExtractProvidedInterfaceDescription: invalid write command in filtered write command: "
+                    << elementCommandWrite.Name << std::endl;
+                continue;
+            }
+            // argument serialization
+            streamBuffer.str("");
+            serializer.Serialize(*(writeCommand->GetArgumentPrototype()));
+            elementCommandWrite.ArgumentPrototypeSerialized = streamBuffer.str();
+            providedInterfaceDescription.CommandsWrite.push_back(elementCommandWrite);
+        }
+    }
+    */
 
     // Extract read commands
     CommandReadElement elementCommandRead;
