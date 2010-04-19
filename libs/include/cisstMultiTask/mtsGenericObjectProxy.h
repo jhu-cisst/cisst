@@ -135,8 +135,8 @@ public:
     inline ~mtsGenericObjectProxyBase(void) {}
 
     /*! Return pointer to data */
-    virtual value_type* GetData(void) { return 0; }
-    virtual const value_type* GetData(void) const { return 0; }
+    virtual value_type& GetData(void) = 0;
+    virtual const value_type& GetData(void) const = 0;
 
     /*! Conversion assignment. */
     ThisType & operator=(const ThisType &data) {
@@ -145,7 +145,7 @@ public:
     }
 
     virtual void Assign(const ThisType &other) {
-        *(this->GetData()) = *(other.GetData());
+        this->GetData() = other.GetData();
         this->SetValid(other.Valid());
         this->SetTimestamp(other.Timestamp());
     }
@@ -188,8 +188,8 @@ public:
     inline ~mtsGenericObjectProxy(void) {}
 
     /*! Return pointer to data */
-    value_type* GetData(void) { return &Data; }
-    const value_type* GetData(void) const { return &Data; }
+    value_type& GetData(void) { return Data; }
+    const value_type& GetData(void) const { return Data; }
 
     /*! Conversion assignment, from base type (i.e., Proxy or ProxyRef) to Proxy. */
     ThisType & operator=(const BaseType &data) {
@@ -255,7 +255,7 @@ template <class _elementType>
 class mtsGenericObjectProxyRef: public mtsGenericObjectProxyBase<_elementType>
 {
     /*! Default constructor.  Should not get called!! */
-    inline mtsGenericObjectProxyRef(void) : pData(0)
+    inline mtsGenericObjectProxyRef(void)
     {}
 
 public:
@@ -265,18 +265,25 @@ public:
     typedef typename mtsGenericObjectProxyBase<_elementType>::DeRefType DeRefType;
     typedef typename mtsGenericObjectProxyBase<_elementType>::RefType RefType;
 
-    value_type *pData;   // Could instead use: value_type &Data
+    value_type &rData;
 
     /*! Copy constructor. */
     inline mtsGenericObjectProxyRef(const ThisType & other) :
-        BaseType(other), pData(other.pData)
+        BaseType(other), rData(other.rData)
     {}
 
     /*! Conversion constructor.  This allows to construct the proxy
       object using an object of the actual type. */
-    // PK: should figure out a way to avoid the const_cast.
+    inline mtsGenericObjectProxyRef(value_type & data): rData(data)
+    {
+        this->SetValid(true);
+    }
+    // The const_cast can be eliminated by defining an mtsGenericObjectProxyConstRef,
+    // or by specializing mtsGenericObjectProxyRef for const objects,
+    // e.g., template <typename _elementType>
+    //       class mtsGenericObjectProxyRef<const _elementType>
     inline mtsGenericObjectProxyRef(const value_type & data):
-        pData(const_cast<value_type*>(&data))
+        rData(*const_cast<value_type*>(&data))
     {
         this->SetValid(true);
     }
@@ -284,8 +291,8 @@ public:
     inline ~mtsGenericObjectProxyRef(void) {}
 
     /*! Return pointer to data */
-    value_type* GetData(void) { return pData; }
-    const value_type* GetData(void) const { return pData; }
+    value_type& GetData(void) { return rData; }
+    const value_type& GetData(void) const { return rData; }
 
     /*! Conversion assignment, from base type (i.e., Proxy or ProxyRef) to ProxyRef. */
     ThisType & operator=(const BaseType &data) {
@@ -297,7 +304,7 @@ public:
       of the actual type without explicitly referencing the public
       data member "Data". */
     inline ThisType & operator=(value_type data) {
-        *this->pData = data;
+        this->rData = data;
         this->SetValid(true);
         return *this;
     }
@@ -307,30 +314,30 @@ public:
       member "Data". */
     //@{
     inline operator value_type & (void) {
-        return *this->pData;
+        return this->rData;
     }
     inline operator const value_type & (void) const {
-        return *this->pData;
+        return this->rData;
     }
     //@}
 
     /*! Serialization.  Relies on the specialization, if any, of cmnSerializeRaw. */
     inline void SerializeRaw(std::ostream & outputStream) const {
         mtsGenericObject::SerializeRaw(outputStream);
-        cmnSerializeRaw(outputStream, *this->pData);
+        cmnSerializeRaw(outputStream, this->rData);
     }
 
     /*! DeSerialization.  Relies on the specialization, if any, of cmnDeSerializeRaw. */
     inline void DeSerializeRaw(std::istream & inputStream) {
         mtsGenericObject::DeSerializeRaw(inputStream);
-        cmnDeSerializeRaw(inputStream, *this->pData);
+        cmnDeSerializeRaw(inputStream, this->rData);
     }
 
     /*! To stream method.  Uses the default << operator as defined for
         the actual type. */
     inline virtual void ToStream(std::ostream & outputStream) const {
         BaseType::ToStream(outputStream);
-        outputStream << " Value(ref): " << *this->pData;
+        outputStream << " Value(ref): " << this->rData;
     }
 
     /*! To stream raw data. */
@@ -341,7 +348,7 @@ public:
             outputStream << delimiter << headerPrefix << "-data(ref)";
         } else {
             BaseType::ToStreamRaw(outputStream, delimiter);
-            outputStream << delimiter << *this->pData;
+            outputStream << delimiter << this->rData;
         }
     }
 };
@@ -361,7 +368,7 @@ public:
     static FinalRefType *ConditionalWrap(T &obj) { return new FinalRefType(obj); }
     static bool IsEqual(const T &obj1, const mtsGenericObject &obj2) {
         const FinalRefType *p2 = dynamic_cast<const FinalRefType *>(&obj2);
-        return (p2?(&obj1 == p2->pData):false); }
+        return (p2?(&obj1 == &p2->rData):false); }
     static void ConditionalFree(const FinalRefType *obj) { delete obj;}
     static mtsGenericObject* ConditionalCreate(const T &, const std::string &) 
     {
@@ -376,7 +383,7 @@ public:
                                << " to " << typeid(FinalBaseType).name() << std::endl;
             return 0;
         }
-        return tmp->GetData();
+        return &(tmp->GetData());
     }
     static const T* CastArg(const mtsGenericObject &arg) {
         const FinalBaseType *tmp = dynamic_cast<const FinalBaseType *>(&arg);
@@ -385,7 +392,7 @@ public:
                                << " to const " << typeid(FinalBaseType).name() << std::endl;
             return 0;
         }
-        return tmp->GetData();
+        return &(tmp->GetData());
     }
 };
 
