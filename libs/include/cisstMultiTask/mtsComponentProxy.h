@@ -145,8 +145,25 @@ public:
     //-------------------------------------------------------------------------
     //  Methods to Manage Interface Proxy
     //-------------------------------------------------------------------------
-    /*! Create or remove a provided interface proxy */
+    /*! \brief Create provided interface proxy
+        \param providedInterfaceDescription Complete information about provided
+               interface to be created with arguments serialized
+        \return True if success, false otherwise
+        \note Since every component proxy is created as a device, we don't need
+              to consider queued void and queued write commands which provide a 
+              mechanism for thread-safe data exchange between components. 
+              However, we still need to provide such a mechanism for data
+              communication between an original client component and a server 
+              component proxy in the client process.  For this purpose, we clone
+              a provided interface proxy and create a provided interface proxy
+              instance which is used for only one user (client component). This
+              is conceptually identical to what AllocatedResources() does. */
     bool CreateProvidedInterfaceProxy(const ProvidedInterfaceDescription & providedInterfaceDescription);
+
+    /*! \brief Remove provided interface proxy
+        \param providedInterfaceProxyName Name of provided interface proxy to 
+               be removed
+        \return True if success, false otherwise */
     bool RemoveProvidedInterfaceProxy(const std::string & providedInterfaceProxyName);
 
     /*! Create or remove a required interface proxy */
@@ -213,12 +230,29 @@ public:
         const std::string & clientComponentName, const std::string & requiredInterfaceName,
         mtsComponentInterfaceProxy::EventGeneratorProxyPointerSet & eventGeneratorProxyPointers);
 
+    /*! \brief Get name of provided interface user
+        \param processName Name of user process 
+        \param componentName Name of user component */
+    static std::string GetProvidedInterfaceUserName(
+        const std::string & processName, const std::string & componentName);
+
     //-------------------------------------------------------------------------
     //  Utilities
     //-------------------------------------------------------------------------
-    /*! Extract complete information about all commands and event generators in
-        a provided interface. Argument prototypes are fetched with serialization. */
-    static void ExtractProvidedInterfaceDescription(mtsDeviceInterface * providedInterface,
+    /*! \brief Extract complete information about all commands and event 
+               generators in the provided interface specified. Argument 
+               prototypes are serialized.
+        \param providedInterface Provided interface instance
+        \param userId User id to use provided interface's resources. Should
+               be allocated in advance.  Can be zero as special case
+        \param providedInterfaceDescription Output parameter to contain
+               complete information about the provided interface specified. 
+        \note If userId is zero, command void/write map is directly accessed
+              (not through mtsDevice/TaskInterface::GetCommandVoid/Write() 
+              method).  This is as a special case since the userId of 
+              a component interface starts from one. */
+    static void ExtractProvidedInterfaceDescription(
+        mtsDeviceInterface * providedInterface, const unsigned int userId,
         ProvidedInterfaceDescription & providedInterfaceDescription);
 
     /*! Extract complete information about all functions and event handlers in

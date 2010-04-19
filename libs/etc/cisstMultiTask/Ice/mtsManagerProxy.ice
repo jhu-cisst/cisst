@@ -173,12 +173,13 @@ module mtsManagerProxy
         bool RemoveRequiredInterfaceProxy(string serverComponentProxyName, string requiredInterfaceProxyName);
 
         //  Connection Management
-        bool ConnectServerSideInterface(int providedInterfaceProxyInstanceID, ConnectionStringSet connectionStrings);
+        bool ConnectServerSideInterface(int userId, int providedInterfaceProxyInstanceID, ConnectionStringSet connectionStrings);
         bool ConnectClientSideInterface(int connectionID, ConnectionStringSet connectionStrings);
+        int PreAllocateResources(string userName, string serverProcessName, string serverComponentName, string serverProvidedInterfaceName);
 
         //  Getters
         ["cpp:const"] idempotent
-        bool GetProvidedInterfaceDescription(string componentName, string providedInterfaceName, out ProvidedInterfaceDescription providedInterface);
+        bool GetProvidedInterfaceDescription(int userId, string serverComponentName, string providedInterfaceName, out ProvidedInterfaceDescription providedInterface);
 
         ["cpp:const"] idempotent
         bool GetRequiredInterfaceDescription(string componentName, string requiredInterfaceName, out RequiredInterfaceDescription requiredInterface);
@@ -268,7 +269,7 @@ module mtsManagerProxy
         bool RemoveRequiredInterface(string processName, string componentName, string interfaceName);
 
         // Connection Management
-        int Connect(ConnectionStringSet connectionStrings); 
+        int Connect(ConnectionStringSet connectionStrings, out int userId); 
         bool ConnectConfirm(int connectionSessionID);
         bool Disconnect(ConnectionStringSet connectionStrings);
 
@@ -276,7 +277,7 @@ module mtsManagerProxy
         bool SetProvidedInterfaceProxyAccessInfo(ConnectionStringSet connectionStrings, string endpointInfo);
         bool GetProvidedInterfaceProxyAccessInfo(ConnectionStringSet connectionStrings, out string endpointInfo);
         bool InitiateConnect(int connectionID, ConnectionStringSet connectionStrings);
-        bool ConnectServerSideInterface(int providedInterfaceProxyInstanceId, ConnectionStringSet connectionStrings);
+        bool ConnectServerSideInterfaceRequest(int connectionID, int providedInterfaceProxyInstanceId, ConnectionStringSet connectionStrings);
 
 	};
 };

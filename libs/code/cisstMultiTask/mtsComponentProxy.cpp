@@ -23,6 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnUnits.h>
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
+#include <cisstMultiTask/mtsTaskInterface.h>
 #include <cisstMultiTask/mtsRequiredInterface.h>
 #include <cisstMultiTask/mtsFunctionReadOrWriteProxy.h>
 #include <cisstMultiTask/mtsFunctionQualifiedReadOrWriteProxy.h>
@@ -255,18 +256,17 @@ bool mtsComponentProxy::CreateProvidedInterfaceProxy(const ProvidedInterfaceDesc
     const std::string providedInterfaceName = providedInterfaceDescription.ProvidedInterfaceName;
 
     // Create a local provided interface (a provided interface proxy) but it
-    // is not immediately added to the component. It can be added only after
-    // all proxy objects (command proxies and event proxies) are confirmed to
-    // be successfully created.
+    // is not immediately added to the component. It is added to this component
+    // only after all proxy objects (command proxies and event proxies) are 
+    // confirmed to be successfully created.
     mtsProvidedInterface * providedInterfaceProxy = new mtsDeviceInterface(providedInterfaceName, this);
 
     // Create command proxies according to the information about the original
     // provided interface. CommandId is initially set to zero and will be
     // updated later by GetCommandId().
 
-    // Because argument prototypes in the interface description was serialized,
-    // they should be deserialized in order to be used to recover orignial argument
-    // prototypes.
+    // Since argument prototypes in the interface description have been serialized,
+    // they need to be deserialized.
     std::string commandName;
     mtsGenericObject * argumentPrototype = NULL,
                      * argument1Prototype = NULL,
@@ -295,17 +295,7 @@ bool mtsComponentProxy::CreateProvidedInterfaceProxy(const ProvidedInterfaceDesc
     CommandWriteVector::const_iterator itWrite = providedInterfaceDescription.CommandsWrite.begin();
     const CommandWriteVector::const_iterator itWriteEnd = providedInterfaceDescription.CommandsWrite.end();
     for (; itWrite != itWriteEnd; ++itWrite) {
-        /*
-        // in case of generic write command
-        if (itWrite->Category == 0) {
-            commandName = itWrite->Name;
-        }
-        // in case of filtered write command
-        else {
-            commandName = itWrite->Name.substr(0, itWrite->Name.size() - 5); // 5 = strlen("Write")
-        }
-        */
-        
+        commandName = itWrite->Name;
         newCommandWrite = new mtsCommandWriteProxy(commandName);
         if (!providedInterfaceProxy->GetCommandWriteMap().AddItem(commandName, newCommandWrite)) {
             delete newCommandWrite;
@@ -632,7 +622,7 @@ bool mtsComponentProxy::UpdateEventHandlerProxyID(const std::string & clientComp
     mtsComponentInterfaceProxy::EventGeneratorProxyPointerSet eventGeneratorProxyPointers;
     if (!interfaceProxyClient->SendFetchEventGeneratorProxyPointers(clientComponentName, requiredInterfaceName, eventGeneratorProxyPointers))
     {
-        CMN_LOG_CLASS_RUN_ERROR << "UpdateEventHandlerProxyID: failed to fetch event generator proxy pointers: " << requiredInterfaceName << std::endl;
+        CMN_LOG_CLASS_RUN_ERROR << "UpdateEventHandlerProxyID: failed to fetch event generator proxy pointers: " << clientComponentName << ":" << requiredInterfaceName << std::endl;
         return false;
     }
 
@@ -735,13 +725,13 @@ bool mtsComponentProxy::UpdateCommandProxyID(
     for (; itVoid != itVoidEnd; ++itVoid) {
         commandVoid = dynamic_cast<mtsCommandVoidProxy*>(instance->GetCommandVoid(itVoid->Name));
         if (!commandVoid) {
-            CMN_LOG_CLASS_RUN_ERROR << "UpdateCommandProxyID:: failed to update command void proxy id: " << itVoid->Name << std::endl;
+            CMN_LOG_CLASS_RUN_ERROR << "UpdateCommandProxyID: failed to update command void proxy id: " << itVoid->Name << std::endl;
             return false;
         }
         // Set client ID and network proxy. Note that SetNetworkProxy() should
         // be called before SetCommandID().
         if (!commandVoid->SetNetworkProxy(interfaceProxyServer, clientID)) {
-            CMN_LOG_CLASS_RUN_ERROR << "UpdateCommandProxyID:: failed to set network proxy: " << itVoid->Name << std::endl;
+            CMN_LOG_CLASS_RUN_ERROR << "UpdateCommandProxyID: failed to set network proxy: " << itVoid->Name << std::endl;
             return false;
         }
         // Set command void proxy's id and enable this command
@@ -756,12 +746,12 @@ bool mtsComponentProxy::UpdateCommandProxyID(
     for (; itWrite != itWriteEnd; ++itWrite) {
         commandWrite = dynamic_cast<mtsCommandWriteProxy*>(instance->GetCommandWrite(itWrite->Name));
         if (!commandWrite) {
-            CMN_LOG_CLASS_RUN_ERROR << "UpdateCommandProxyID:: failed to update command write proxy id: " << itWrite->Name << std::endl;
+            CMN_LOG_CLASS_RUN_ERROR << "UpdateCommandProxyID: failed to update command write proxy id: " << itWrite->Name << std::endl;
             return false;
         }
         // Set client ID and network proxy
         if (!commandWrite->SetNetworkProxy(interfaceProxyServer, clientID)) {
-            CMN_LOG_CLASS_RUN_ERROR << "UpdateCommandProxyID:: failed to set network proxy: " << itWrite->Name << std::endl;
+            CMN_LOG_CLASS_RUN_ERROR << "UpdateCommandProxyID: failed to set network proxy: " << itWrite->Name << std::endl;
             return false;
         }
         // Set command write proxy's id and enable this command
@@ -776,12 +766,12 @@ bool mtsComponentProxy::UpdateCommandProxyID(
     for (; itRead != itReadEnd; ++itRead) {
         commandRead = dynamic_cast<mtsCommandReadProxy*>(instance->GetCommandRead(itRead->Name));
         if (!commandRead) {
-            CMN_LOG_CLASS_RUN_ERROR << "UpdateCommandProxyID:: failed to update command read proxy id: " << itRead->Name << std::endl;
+            CMN_LOG_CLASS_RUN_ERROR << "UpdateCommandProxyID: failed to update command read proxy id: " << itRead->Name << std::endl;
             return false;
         }
         // Set client ID and network proxy
         if (!commandRead->SetNetworkProxy(interfaceProxyServer, clientID)) {
-            CMN_LOG_CLASS_RUN_ERROR << "UpdateCommandProxyID:: failed to set network proxy: " << itRead->Name << std::endl;
+            CMN_LOG_CLASS_RUN_ERROR << "UpdateCommandProxyID: failed to set network proxy: " << itRead->Name << std::endl;
             return false;
         }
         // Set command read proxy's id and enable this command
@@ -796,12 +786,12 @@ bool mtsComponentProxy::UpdateCommandProxyID(
     for (; itQualifiedRead != itQualifiedReadEnd; ++itQualifiedRead) {
         commandQualifiedRead = dynamic_cast<mtsCommandQualifiedReadProxy*>(instance->GetCommandQualifiedRead(itQualifiedRead->Name));
         if (!commandQualifiedRead) {
-            CMN_LOG_CLASS_RUN_ERROR << "UpdateCommandProxyID:: failed to update command qualifiedRead proxy id: " << itQualifiedRead->Name << std::endl;
+            CMN_LOG_CLASS_RUN_ERROR << "UpdateCommandProxyID: failed to update command qualifiedRead proxy id: " << itQualifiedRead->Name << std::endl;
             return false;
         }
         // Set client ID and network proxy
         if (!commandQualifiedRead->SetNetworkProxy(interfaceProxyServer, clientID)) {
-            CMN_LOG_CLASS_RUN_ERROR << "UpdateCommandProxyID:: failed to set network proxy: " << itQualifiedRead->Name << std::endl;
+            CMN_LOG_CLASS_RUN_ERROR << "UpdateCommandProxyID: failed to set network proxy: " << itQualifiedRead->Name << std::endl;
             return false;
         }
         // Set command qualified read proxy's id and enable this command
@@ -816,7 +806,8 @@ mtsProvidedInterface * mtsComponentProxy::CreateProvidedInterfaceInstance(
     const mtsProvidedInterface * providedInterfaceProxy, unsigned int & instanceID)
 {
     // Create a new instance of provided interface proxy
-    mtsProvidedInterface * providedInterfaceInstance = new mtsProvidedInterface;
+    mtsProvidedInterface * providedInterfaceInstance = 
+        new mtsProvidedInterface(providedInterfaceProxy->GetName(), this);
 
     // Clone command object proxies
     mtsDeviceInterface::CommandVoidMapType::const_iterator itVoidBegin =
@@ -854,6 +845,10 @@ mtsProvidedInterface * mtsComponentProxy::CreateProvidedInterfaceInstance(
     mtsDeviceInterface::EventWriteMapType::const_iterator itEventWriteGeneratorEnd =
         providedInterfaceProxy->EventWriteGenerators.end();
     providedInterfaceInstance->EventWriteGenerators.GetMap().insert(itEventWriteGeneratorBegin, itEventWriteGeneratorEnd);
+
+    // Don't need to clone queued void and queued write commands because 
+    // a server component proxy is created as a device which only can have 
+    // device-type interface (of type mtsDeviceInterface).
 
     // Assign a new provided interface proxy instance id
     instanceID = ++ProvidedInterfaceProxyInstanceID;
@@ -972,11 +967,17 @@ bool mtsComponentProxy::GetEventGeneratorProxyPointer(
     return true;
 }
 
+std::string mtsComponentProxy::GetProvidedInterfaceUserName(
+    const std::string & processName, const std::string & componentName)
+{
+    return std::string(processName + ":" + componentName);
+}
+
 //-------------------------------------------------------------------------
 //  Utilities
 //-------------------------------------------------------------------------
 void mtsComponentProxy::ExtractProvidedInterfaceDescription(
-    mtsDeviceInterface * providedInterface, ProvidedInterfaceDescription & providedInterfaceDescription)
+    mtsDeviceInterface * providedInterface, unsigned int userId, ProvidedInterfaceDescription & providedInterfaceDescription)
 {
     if (!providedInterface) return;
 
@@ -985,6 +986,7 @@ void mtsComponentProxy::ExtractProvidedInterfaceDescription(
     cmnSerializer serializer(streamBuffer);
 
     // Extract void commands
+    /*
     CommandVoidElement elementCommandVoid;
     mtsDeviceInterface::CommandVoidMapType::MapType::const_iterator itVoid = providedInterface->CommandsVoid.begin();
     const mtsDeviceInterface::CommandVoidMapType::MapType::const_iterator itVoidEnd = providedInterface->CommandsVoid.end();
@@ -992,8 +994,37 @@ void mtsComponentProxy::ExtractProvidedInterfaceDescription(
         elementCommandVoid.Name = itVoid->second->GetName();
         providedInterfaceDescription.CommandsVoid.push_back(elementCommandVoid);
     }
+    */
+    mtsCommandVoidBase * voidCommand;
+    CommandVoidElement elementCommandVoid;
+    const std::vector<std::string> namesOfVoidCommand = providedInterface->GetNamesOfCommandsVoid();
+    for (size_t i = 0; i < namesOfVoidCommand.size(); ++i) {
+        // Get void command.  Note that there are two different kinds of void
+        // command depending on a type of the provided interface.  If a device
+        // owns the provided interface, a void command is non-queued command.
+        // if a task owns the provided interface, a void command is a queued one.
+        voidCommand = providedInterface->GetCommandVoid(namesOfVoidCommand[i], userId);
+        if (!voidCommand) {
+            // If special case
+            if (userId == 0) {
+                mtsTaskInterface * taskInterface = dynamic_cast<mtsTaskInterface *>(providedInterface);
+                if (taskInterface) {
+                    voidCommand = taskInterface->CommandsQueuedVoid.begin()->second;
+                } else {
+                    voidCommand = providedInterface->CommandsVoid.begin()->second;
+                }
+            } else {
+                CMN_LOG_RUN_ERROR << "ExtractProvidedInterfaceDescription: null void command: " 
+                    << namesOfVoidCommand[i] << std::endl;
+                return;
+            }
+        }
+        elementCommandVoid.Name = voidCommand->GetName();
+        providedInterfaceDescription.CommandsVoid.push_back(elementCommandVoid);
+    }
 
     // Extract write commands
+    /*
     CommandWriteElement elementCommandWrite;
     mtsDeviceInterface::CommandWriteMapType::MapType::const_iterator itWrite = providedInterface->CommandsWrite.begin();
     const mtsDeviceInterface::CommandWriteMapType::MapType::const_iterator itWriteEnd = providedInterface->CommandsWrite.end();
@@ -1003,6 +1034,38 @@ void mtsComponentProxy::ExtractProvidedInterfaceDescription(
         // argument serialization
         streamBuffer.str("");
         serializer.Serialize(*(itWrite->second->GetArgumentPrototype()));
+        elementCommandWrite.ArgumentPrototypeSerialized = streamBuffer.str();
+        providedInterfaceDescription.CommandsWrite.push_back(elementCommandWrite);
+    }
+    */
+    mtsCommandWriteBase * writeCommand;
+    CommandWriteElement elementCommandWrite;
+    const std::vector<std::string> namesOfWriteCommand = providedInterface->GetNamesOfCommandsWrite();
+    for (size_t i = 0; i < namesOfWriteCommand.size(); ++i) {
+        // Get write command.  Note that there are two different kinds of write
+        // command depending on a type of the provided interface.  If a device
+        // owns the provided interface, a write command is a non-queued command.
+        // if a task owns the provided interface, a write command is a queued one.
+        writeCommand = providedInterface->GetCommandWrite(namesOfWriteCommand[i], userId);
+        if (!writeCommand) {
+            // If special case
+            if (userId == 0) {
+                mtsTaskInterface * taskInterface = dynamic_cast<mtsTaskInterface *>(providedInterface);
+                if (taskInterface) {
+                    writeCommand = taskInterface->CommandsQueuedWrite.begin()->second;
+                } else {
+                    writeCommand = providedInterface->CommandsWrite.begin()->second;
+                }
+            } else {
+                CMN_LOG_RUN_ERROR << "ExtractProvidedInterfaceDescription: null write command: " 
+                    << namesOfWriteCommand[i] << std::endl;
+                return;
+            }
+        }
+        elementCommandWrite.Name = writeCommand->GetName();
+        // serialize argument
+        streamBuffer.str("");
+        serializer.Serialize(*(writeCommand->GetArgumentPrototype()));
         elementCommandWrite.ArgumentPrototypeSerialized = streamBuffer.str();
         providedInterfaceDescription.CommandsWrite.push_back(elementCommandWrite);
     }
@@ -1040,6 +1103,7 @@ void mtsComponentProxy::ExtractProvidedInterfaceDescription(
     */
 
     // Extract read commands
+    /*
     CommandReadElement elementCommandRead;
     mtsDeviceInterface::CommandReadMapType::MapType::const_iterator itRead = providedInterface->CommandsRead.begin();
     const mtsDeviceInterface::CommandReadMapType::MapType::const_iterator itReadEnd = providedInterface->CommandsRead.end();
@@ -1051,8 +1115,22 @@ void mtsComponentProxy::ExtractProvidedInterfaceDescription(
         elementCommandRead.ArgumentPrototypeSerialized = streamBuffer.str();
         providedInterfaceDescription.CommandsRead.push_back(elementCommandRead);
     }
+    */
+    mtsCommandReadBase * readCommand;
+    CommandReadElement elementCommandRead;
+    const std::vector<std::string> namesOfReadCommand = providedInterface->GetNamesOfCommandsRead();
+    for (size_t i = 0; i < namesOfReadCommand.size(); ++i) {
+        readCommand = providedInterface->GetCommandRead(namesOfReadCommand[i]);
+        elementCommandRead.Name = readCommand->GetName();
+        // serialize argument
+        streamBuffer.str("");
+        serializer.Serialize(*(readCommand->GetArgumentPrototype()));
+        elementCommandRead.ArgumentPrototypeSerialized = streamBuffer.str();
+        providedInterfaceDescription.CommandsRead.push_back(elementCommandRead);
+    }
 
     // Extract qualified read commands
+    /*
     CommandQualifiedReadElement elementCommandQualifiedRead;
     mtsDeviceInterface::CommandQualifiedReadMapType::MapType::const_iterator itQualifiedRead = providedInterface->CommandsQualifiedRead.begin();
     const mtsDeviceInterface::CommandQualifiedReadMapType::MapType::const_iterator itQualifiedReadEnd = providedInterface->CommandsQualifiedRead.end();
@@ -1065,6 +1143,23 @@ void mtsComponentProxy::ExtractProvidedInterfaceDescription(
         // argument2 serialization
         streamBuffer.str("");
         serializer.Serialize(*(itQualifiedRead->second->GetArgument2Prototype()));
+        elementCommandQualifiedRead.Argument2PrototypeSerialized = streamBuffer.str();
+        providedInterfaceDescription.CommandsQualifiedRead.push_back(elementCommandQualifiedRead);
+    }
+    */
+    mtsCommandQualifiedReadBase * qualifiedReadCommand;
+    CommandQualifiedReadElement elementCommandQualifiedRead;
+    const std::vector<std::string> namesOfQualifiedReadCommand = providedInterface->GetNamesOfCommandsQualifiedRead();
+    for (size_t i = 0; i < namesOfQualifiedReadCommand.size(); ++i) {
+        qualifiedReadCommand = providedInterface->GetCommandQualifiedRead(namesOfQualifiedReadCommand[i]);
+        elementCommandQualifiedRead.Name = qualifiedReadCommand->GetName();
+        // serialize argument1
+        streamBuffer.str("");
+        serializer.Serialize(*(qualifiedReadCommand->GetArgument1Prototype()));
+        elementCommandQualifiedRead.Argument1PrototypeSerialized = streamBuffer.str();
+        // serialize argument2
+        streamBuffer.str("");
+        serializer.Serialize(*(qualifiedReadCommand->GetArgument2Prototype()));
         elementCommandQualifiedRead.Argument2PrototypeSerialized = streamBuffer.str();
         providedInterfaceDescription.CommandsQualifiedRead.push_back(elementCommandQualifiedRead);
     }
@@ -1084,7 +1179,7 @@ void mtsComponentProxy::ExtractProvidedInterfaceDescription(
     const mtsDeviceInterface::EventWriteMapType::MapType::const_iterator itEventWriteEnd = providedInterface->EventWriteGenerators.end();
     for (; itEventWrite != itEventWriteEnd; ++itEventWrite) {
         elementEventWrite.Name = itEventWrite->second->GetName();
-        // argument serialization
+        // serialize argument
         streamBuffer.str("");
         serializer.Serialize(*(itEventWrite->second->GetArgumentPrototype()));
         elementEventWrite.ArgumentPrototypeSerialized = streamBuffer.str();

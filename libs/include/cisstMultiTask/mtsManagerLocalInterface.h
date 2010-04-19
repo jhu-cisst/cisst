@@ -104,18 +104,58 @@ public:
     //-------------------------------------------------------------------------
     //  Connection Management
     //-------------------------------------------------------------------------
-    /*! Connect two local interfaces at server side. After LCM at client side
-        connects two interfaces, it lets LCM at server side connect two local
-        interfaces via the GCM. Internally, a network proxy client (of type
-        mtsComponentInterfaceProxyClient) is created and connects to a network
-        proxy server (of type mtsComponentInterfaceProxyClient). */
-    virtual bool ConnectServerSideInterface(const unsigned int providedInterfaceProxyInstanceID,
+    /*! \brief Connect interfaces at server side 
+        \param userId Provided interface's user id
+        \param providedInterfaceProxyInstanceID Provided interface instance id
+        \param clientProcessName Name of client process
+        \param clientComponentName Name of client component
+        \param clientRequiredInterfaceName Name of required interface
+        \param serverProcessName Name of server process
+        \param serverComponentName Name of server component
+        \param serverProvidedInterfaceName Name of provided interface
+        \param listenerID Id of local component manager (set as process name) 
+               that this method should call. Valid only in networked configuration
+        \return True if success, false otherwise 
+        \note This method is called by the global component manager and is 
+              always executed after ConnectClientSideInterface() is called. */
+    virtual bool ConnectServerSideInterface(
+        const int userId, const unsigned int providedInterfaceProxyInstanceID,
         const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientRequiredInterfaceName,
         const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverProvidedInterfaceName, const std::string & listenerID = "") = 0;
 
-    /*! Connect two local interfaces at client side. */
+    /*! \brief Connect interfaces at client side 
+        \param connectionID Connection session id issued by the global component
+               manager.
+        \param clientProcessName Name of client process
+        \param clientComponentName Name of client component
+        \param clientRequiredInterfaceName Name of required interface
+        \param serverProcessName Name of server process
+        \param serverComponentName Name of server component
+        \param serverProvidedInterfaceName Name of provided interface
+        \param listenerID Id of local component manager (set as process name) 
+               that this method should call. Valid only in networked configuration
+        \return True if success, false otherwise
+        \note If the local component manager with the client process establishes
+              a connection successfully, the manager should inform the global 
+              component manager (GCM) of its successful connection establishment
+              so that it registers this connection. Otherwise, the GCM cleans up 
+              the connection after timeout.  This method is always executed 
+              ahead of ConnectServerSideInterface(). */
     virtual bool ConnectClientSideInterface(const unsigned int connectionID,
         const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientRequiredInterfaceName,
+        const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverProvidedInterfaceName, const std::string & listenerID = "") = 0;
+
+    /*! \brief Pre-allocate provided interface's resources
+        \param userName Name of user that will use provided interface's resources.
+               Set as either clientProcessName:clientComponentName or local
+               component manager's process name.
+        \param serverProcessName Name of server process
+        \param serverComponentName Name of server component
+        \param serverProvidedInterfaceName Name of provided interface
+        \param listenerID Id of local component manager (set as process name) 
+               that this method should call. Valid only in networked configuration
+        \return New user id allocated by server component, -1 if error occurs */
+    virtual int PreAllocateResources(const std::string & userName,
         const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverProvidedInterfaceName, const std::string & listenerID = "") = 0;
 #endif
 
@@ -194,21 +234,52 @@ public:
                                     const int scalarIndex,
                                     const std::string & listenerID = "") = 0;
 
-    /*! Extract all the information on a provided interface (command objects
-        and event generators with arguments serialized) */
+    /*! \brief Extract all information about provided interface such as command
+               objects and event generators. Arguments are serialized, if any.
+        \param userId User id that will use provided interface's resource.
+        \param serverComponentName Name of component that owns provided interface
+        \param providedInterfaceName Name of provided interface
+        \param providedInterfaceDescription Placeholder to be populated with
+               provided interface information
+        \param listenerID Client ID that owns the component (specified by 
+               componentName argument). Valid only in the networked configuration.
+               Set as zero (by default) and ignored in standalone mode.
+        \return True if success, false otherwise
+        \note There are two cases for which this method is called. One is to 
+              support the component inspector of the global component manager
+              and the other one is to establish a connection between components.
+              In the latter case, this method is called whenever a client 
+              requests a new connection. With the networked configuration,
+              this method allocates a new user id which will be passed around 
+              across networks throughout connection process. */
     virtual bool GetProvidedInterfaceDescription(
-        const std::string & componentName,
+        const unsigned int userId,
+        const std::string & serverComponentName,
         const std::string & providedInterfaceName,
         ProvidedInterfaceDescription & providedInterfaceDescription, const std::string & listenerID = "") = 0;
 
-    /*! Extract all the information on a required interface (function objects
-        and event handlers with arguments serialized) */
+    /*! \brief Extract all information about required interface such as function
+               objects and event handlers.  Arguments are serialized, if any.
+        \param componentName Name of component
+        \param requiredInterfaceName Name of required interface
+        \param requiredInterfaceDescription Placeholder to be populated with 
+               required interface information
+        \param listenerID Client ID that owns the component (specified by 
+               componentName argument). Valid only in the networked configuration.
+               Set as zero (by default) and ignored in standalone mode.
+        \return True if success, false otherwise */
     virtual bool GetRequiredInterfaceDescription(
         const std::string & componentName,
         const std::string & requiredInterfaceName,
         RequiredInterfaceDescription & requiredInterfaceDescription, const std::string & listenerID = "") = 0;
 
-    /*! Returns a total number of interfaces that are running on a component */
+    /*! \brief Return a total number of interfaces that component has
+        \param componentName Name of component
+        \param listenerID Client ID that owns the component (specified by 
+               componentName argument). Valid only in the networked configuration.
+               Set as zero (by default) and ignored in standalone mode.
+        \return Total number of interfaces that the component specified has. 
+                -1 if error occurs */
     virtual int GetCurrentInterfaceCount(const std::string & componentName, const std::string & listenerID = "") = 0;
 #endif
 };

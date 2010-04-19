@@ -349,7 +349,6 @@ inline mtsCommandWriteBase * mtsTaskInterface::AddCommandFilteredWrite(void (__c
                                                                const __argumentType & argumentPrototype, const __filteredType & filteredPrototype) {
 
     std::string commandNameFilter(commandName+"Filter");
-    std::string commandNameWrite(commandName+"Write");
     mtsCommandQualifiedReadBase * filter = new mtsCommandQualifiedRead<__classType, __argumentType, __filteredType>
         (premethod, classInstantiation, commandNameFilter, argumentPrototype, filteredPrototype);
     if (!CommandsInternal.AddItem(commandNameFilter, filter, CMN_LOG_LOD_INIT_ERROR)) {
@@ -361,32 +360,16 @@ inline mtsCommandWriteBase * mtsTaskInterface::AddCommandFilteredWrite(void (__c
     //  For clarity, we store it in the internal map under the name commandName+"Write".
     mtsCommandWriteBase * command = new mtsCommandWrite<__classType, __filteredType>
         (method, classInstantiation, commandName, filteredPrototype);
-    if (!CommandsInternal.AddItem(commandNameWrite, command, CMN_LOG_LOD_INIT_ERROR)) {
-        CommandsInternal.RemoveItem(commandNameFilter);
+    if (!CommandsInternal.AddItem(commandName+"Write", command, CMN_LOG_LOD_INIT_ERROR)) {
         delete filter;
-        delete command;
         CMN_LOG_CLASS_INIT_ERROR << "AddCommandFilteredWrite: unable to add command \""
                                  << commandName << "\"" << std::endl;
         return 0;
     }
-
-    if (!CommandsWrite.AddItem(commandNameWrite, command)) {
-        CommandsInternal.RemoveItem(commandNameFilter);
-        CommandsInternal.RemoveItem(commandNameWrite);
-        delete filter;
-        delete command;
-        CMN_LOG_CLASS_INIT_ERROR << "AddCommandFilteredWrite: unable to add command \""
-                                 << commandNameWrite << "\"" << std::endl;
-        return 0;
-    }
-
     mtsCommandQueuedWriteBase * queuedCommand = new mtsCommandFilteredQueuedWrite<__argumentType, __filteredType>(filter, command);
     if (CommandsQueuedWrite.AddItem(commandName, queuedCommand, CMN_LOG_LOD_INIT_ERROR)) {
         return queuedCommand;
     } else {
-        CommandsInternal.RemoveItem(commandNameFilter);
-        CommandsInternal.RemoveItem(commandNameWrite);
-        CommandsWrite.RemoveItem(commandNameWrite);
         delete filter;
         delete command;
         delete queuedCommand;

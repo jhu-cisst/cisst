@@ -42,7 +42,7 @@ Ice.ImplicitContext = Shared
 #
 # Warn about connection exceptions
 #
-Ice.Warn.Connections = 1
+Ice.Warn.Connections = 0
 
 #
 # Network Tracing
@@ -67,8 +67,8 @@ Ice.Override.ConnectTimeout = 3000
 # (reference: http://www.zeroc.com/doc/Ice-3.3.1/manual/Adv_server.33.10.html
 #  and http://www.zeroc.com/doc/Ice-3.3.1/manual/PropRef.50.7.html)
 #
-Ice.ThreadPool.Client.Size = 4
-Ice.ThreadPool.Client.SizeMax = 4
+Ice.ThreadPool.Client.Size = 8
+Ice.ThreadPool.Client.SizeMax = 8
 
 #
 # Disable Active Connection Management (ACM)

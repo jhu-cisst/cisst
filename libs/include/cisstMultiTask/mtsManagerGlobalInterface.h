@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung
   Created on: 2009-11-15
 
-  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2009-2010 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -21,16 +21,16 @@ http://www.cisst.org/cisst/license.txt.
 
 /*!
   \file
-  \brief Definition of mtsManagerGlobalInterface
+  \brief Declaration of mtsManagerGlobalInterface
   \ingroup cisstMultiTask
 
-  This class defines an interface used by local component managers to communicate
+  This class declares an interface used by local component managers to communicate
   with the global component manager.  The interface is defined as a pure abstract
-  class to support two different scenarios that the interface is used for:
+  class to provide the identical APIs regardless current configuration (standalone
+  vs. networked)
 
-     Standalone vs. Network mode.
-
-  See mtsManagerLocalInteface.h for further comments.
+  \note Please refer to mtsManagerGlobal.h and mtsManagerProxyClient.h for 
+        implementation of this interface.
 */
 
 #ifndef _mtsManagerGlobalInterface_h
@@ -45,93 +45,160 @@ class CISST_EXPORT mtsManagerGlobalInterface : public cmnGenericObject
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
 public:
-    /* Typedef for the state of connection. See comments on Connect() for details. */
-    typedef enum {
-        CONNECT_ERROR = 0,
-        CONNECT_ID_BASE
-    } CONNECT_ID;
-
     //-------------------------------------------------------------------------
     //  Process Management
     //-------------------------------------------------------------------------
-    /*! Register a process */
+    /*! \brief Register process 
+        \param processName Name of process */
     virtual bool AddProcess(const std::string & processName) = 0;
 
-    /*! Find a process. */
+    /*! \brief Find process 
+        \param processName Name of process */
     virtual bool FindProcess(const std::string & processName) const = 0;
 
-    /*! Remove a process. */
+    /*! \brief Remove process 
+        \param processName Name of process */
     virtual bool RemoveProcess(const std::string & processName) = 0;
 
     //-------------------------------------------------------------------------
     //  Component Management
     //-------------------------------------------------------------------------
-    /*! Register a component. */
+    /*! \brief Register component
+        \param processName Name of process 
+        \param componentName Name of component */
     virtual bool AddComponent(const std::string & processName, const std::string & componentName) = 0;
 
-    /*! Find a component using process name and component name */
+    /*! \brief Find component using process name and component name
+        \param processName Name of process 
+        \param componentName Name of component */
     virtual bool FindComponent(const std::string & processName, const std::string & componentName) const = 0;
 
-    /*! Remove a component. */
+    /*! \brief Remove component
+        \param processName Name of process 
+        \param componentName Name of component */
     virtual bool RemoveComponent(const std::string & processName, const std::string & componentName) = 0;
 
     //-------------------------------------------------------------------------
     //  Interface Management
     //-------------------------------------------------------------------------
-    /*! Register an interface. An interface can be added/removed dynamically. */
+    /*! \brief Register provided interface. Can be called at run-time.
+        \param processName Name of process 
+        \param componentName Name of component 
+        \param interfaceName Name of provided interface to be added
+        \param isProxyInterface True if interface added is a proxy interface */
     virtual bool AddProvidedInterface(
         const std::string & processName, const std::string & componentName, const std::string & interfaceName, const bool isProxyInterface) = 0;
 
+    /*! \brief Register required interface. Can be called at run-time.
+        \param processName Name of process 
+        \param componentName Name of component 
+        \param interfaceName Name of required interface to be added
+        \param isProxyInterface True if interface added is a proxy interface */
     virtual bool AddRequiredInterface(
         const std::string & processName, const std::string & componentName, const std::string & interfaceName, const bool isProxyInterface) = 0;
 
-    /*! Find an interface using process name, component name, and interface name */
+    /*! \brief Find provided interface using process name, component name, and interface name
+        \param processName Name of process 
+        \param componentName Name of component 
+        \param interfaceName Name of provided interface */
     virtual bool FindProvidedInterface(
         const std::string & processName, const std::string & componentName, const std::string & interfaceName) const = 0;
 
+    /*! \brief Find required interface using process name, component name, and interface name
+        \param processName Name of process 
+        \param componentName Name of component 
+        \param interfaceName Name of required interface */
     virtual bool FindRequiredInterface(
         const std::string & processName, const std::string & componentName, const std::string & interfaceName) const = 0;
 
-    /*! Remove an interface. An interface can be added/removed dynamically. */
+    /*! \brief Remove provided interface. Can be called at run-time.
+        \param processName Name of process 
+        \param componentName Name of component 
+        \param interfaceName Name of provided interface to be removed */
     virtual bool RemoveProvidedInterface(
         const std::string & processName, const std::string & componentName, const std::string & interfaceName) = 0;
 
+    /*! \brief Remove required interface. Can be called at run-time.
+        \param processName Name of process 
+        \param componentName Name of component 
+        \param interfaceName Name of required interface to be removed */
     virtual bool RemoveRequiredInterface(
         const std::string & processName, const std::string & componentName, const std::string & interfaceName) = 0;
 
     //-------------------------------------------------------------------------
     //  Connection Management
     //-------------------------------------------------------------------------
-    /*! Connect two interfaces with timeout */
-    virtual unsigned int Connect(const std::string & requestProcessName,
+    /*! \brief Connect two interfaces 
+        \param requestProcessName Name of process that requests this connection
+        \param clientProcessName Name of client process
+        \param clientComponentName Name of client component
+        \param clientRequiredInterfaceName Name of client's required interface
+        \param serverProcessName Name of server process
+        \param serverComponentName Name of server component
+        \param serverProvidedInterfaceName Name of server's provided interface
+        \param userId User Id that provided interface allocates for this connection.
+                -1 if error occurs, zero if successful in standalone configuration,
+                non-zero positive value if successful in networked configuration
+        \return Connect session id issued by the global component manager.
+                Session id is used to clean up waiting connections (which have 
+                been requested but not yet established) after some timeout.
+                -1 if error occurs, zero or positive value if success */
+    virtual int Connect(const std::string & requestProcessName,
         const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientRequiredInterfaceName,
-        const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverProvidedInterfaceName) = 0;
+        const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverProvidedInterfaceName,
+        int & userId) = 0;
 
-    /*! Local component manager confirms that connection has been successfully
-        established.
-        Return true if the global component manager acknowledged the connection. */
+    /*! \brief Confirm that connection has been successfully established.
+        \param connectionSessionID Connection id
+        \return False if connection id is invalid, true otherwise */
     virtual bool ConnectConfirm(unsigned int connectionSessionID) = 0;
 
-    /*! Disconnect two interfaces */
+    /*! \brief Disconnect two interfaces
+        \param clientProcessName Name of client process
+        \param clientComponentName Name of client component
+        \param clientRequiredInterfaceName Name of required interface
+        \param serverProcessName Name of server process
+        \param serverComponentName Name of server component
+        \param serverProvidedInterfaceName Name of provided interface
+        \return True if success, false otherwise */
     virtual bool Disconnect(
         const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientRequiredInterfaceName,
         const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverProvidedInterfaceName) = 0;
 
-    /*! Let a client process initiate connection process. When LCM::Connect()
-        is called at server side, the server process internally calls this
-        method to start connection process at client side. */
 #if CISST_MTS_HAS_ICE
+    /*! \brief Initiate connection process
+        \param connectionID Connection id issued by GCM's Connect().
+        \param clientProcessName Name of client process
+        \param clientComponentName Name of client component
+        \param clientRequiredInterfaceName Name of required interface
+        \param serverProcessName Name of server process
+        \param serverComponentName Name of server component
+        \param serverProvidedInterfaceName Name of provided interface
+        \return True if success, false otherwise
+        \note Let a client process initiate connection process. When 
+              mtsLocalManager::Connect() is called at server side, the server 
+              process internally calls this method to make client process 
+              initiate connection process. */
     virtual bool InitiateConnect(const unsigned int connectionID,
         const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientRequiredInterfaceName,
         const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverProvidedInterfaceName) = 0;
 
-    /*! Let a server process connect components. Internally, a required
-        interface network proxy (of type mtsComponentInterfaceProxyClient)
-        is created, run, and connects to a provided interface network proxy
-        (of type mtsComponentInterfaceProxyServer).
-        A network proxy server uses providedInterfaceProxyInstanceID to
-        a proxy client object . */
-    virtual bool ConnectServerSideInterface(const unsigned int providedInterfaceProxyInstanceID,
+    /*! \brief Request the global component manager to connect interfaces at 
+               server side
+        \param connectionID Connection id issued by GCM's Connect(). Used to
+               look up user id for server side connection.
+        \param providedInterfaceProxyInstanceID Instance id of provided 
+               interface proxy. Used to set unique id of proxy client (of type
+               mtsComponentInterfaceProxyClient).
+        \param clientProcessName Name of client process
+        \param clientComponentName Name of client component
+        \param clientRequiredInterfaceName Name of required interface
+        \param serverProcessName Name of server process
+        \param serverComponentName Name of server component
+        \param serverProvidedInterfaceName Name of provided interface
+        \return True if success, false otherwise */
+    virtual bool ConnectServerSideInterfaceRequest(
+        const unsigned int connectionID, const unsigned int providedInterfaceProxyInstanceID,
         const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientRequiredInterfaceName,
         const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverProvidedInterfaceName) = 0;
 #endif
@@ -140,19 +207,36 @@ public:
     //  Networking
     //-------------------------------------------------------------------------
 #if CISST_MTS_HAS_ICE
-    /*! Add access information of a server proxy (i.e., provided interface proxy)
-        which a client proxy (i.e., required interface proxy) connects to. */
+    /*! \brief Set provided interface proxy's access information
+        \param clientProcessName Name of client process
+        \param clientComponentName Name of client component
+        \param clientRequiredInterfaceName Name of required interface
+        \param serverProcessName Name of server process
+        \param serverComponentName Name of server component
+        \param serverProvidedInterfaceName Name of provided interface
+        \param endpointInfo Endpoint access information
+        \return True if success, false otherwise
+        \note Required interfaceproxy uses this information to connect to 
+              provided interface proxy across networks. */
     virtual bool SetProvidedInterfaceProxyAccessInfo(
         const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientRequiredInterfaceName,
         const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverProvidedInterfaceName,
         const std::string & endpointInfo) = 0;
 
-    /*! Fetch endpoint information of a server proxy (i.e., provided interface
-        proxy) with connection information. A server component uses this method
-        to get endpoint information of proxy server so that a proxy client can
-        connect to proxy server. A client component uses this to duplicate the
-        endpoint information when there is a proxy server already running. In
-        the latter case, the first three arguments are given as "". */
+    /*! \brief Get provided interface proxy's access information
+        \param clientProcessName Name of client process
+        \param clientComponentName Name of client component
+        \param clientRequiredInterfaceName Name of required interface
+        \param serverProcessName Name of server process
+        \param serverComponentName Name of server component
+        \param serverProvidedInterfaceName Name of provided interface
+        \param endpointInfo Endpoint access information to be populated
+        \return True if success, false otherwise
+        \note If there is no provided interface proxy running in the client
+              process, the first three arguments ought to be provided properly.
+              If the proy has already been created before, client's required 
+              interface can be not specified.  In this case, the first three 
+              arguments are given as "". */
     virtual bool GetProvidedInterfaceProxyAccessInfo(
         const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientRequiredInterfaceName,
         const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverProvidedInterfaceName,

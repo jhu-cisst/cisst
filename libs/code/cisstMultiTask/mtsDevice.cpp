@@ -108,7 +108,7 @@ mtsDeviceInterface * mtsDevice::GetProvidedInterfaceFor(const std::string & requ
 }
 
 
-bool mtsDevice::ConnectRequiredInterface(const std::string & requiredInterfaceName, mtsDeviceInterface * providedInterface)
+bool mtsDevice::ConnectRequiredInterface(const std::string & requiredInterfaceName, mtsDeviceInterface * providedInterface, const int userId)
 {
     mtsRequiredInterface * requiredInterface = RequiredInterfaces.GetItem(requiredInterfaceName, CMN_LOG_LOD_INIT_ERROR);
     if (requiredInterface) {
@@ -117,9 +117,14 @@ bool mtsDevice::ConnectRequiredInterface(const std::string & requiredInterfaceNa
                                    << this->GetName()
                                    << "\" required interface \"" << requiredInterfaceName
                                    << "\" successfully connected to provided interface \"" << providedInterface->GetName() << "\"" << std::endl;
-        unsigned int userId = providedInterface->AllocateResources(this->GetName());
-        CMN_LOG_CLASS_INIT_VERBOSE << "ConnectRequiredInterface: binding commands and events with user Id \"" << userId << "\"" << std::endl;
-        return requiredInterface->BindCommandsAndEvents(userId);
+        unsigned int newUserId;
+        if (userId == 0) {
+            newUserId = providedInterface->AllocateResources(this->GetName());
+        } else {
+            newUserId = userId;
+        }
+        CMN_LOG_CLASS_INIT_VERBOSE << "ConnectRequiredInterface: binding commands and events with user Id \"" << newUserId << "\"" << std::endl;
+        return requiredInterface->BindCommandsAndEvents(newUserId);
     }
     return false;
 }

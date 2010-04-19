@@ -126,7 +126,7 @@ public:
     /*! Fetch pointers of event generator proxies from a provided interface
         proxy at server side */
     bool SendFetchEventGeneratorProxyPointers(
-        const std::string & requiredInterfaceName, const std::string & providedInterfaceName,
+        const std::string & clientComponentName, const std::string & requiredInterfaceName,
         mtsComponentInterfaceProxy::EventGeneratorProxyPointerSet & eventGeneratorProxyPointers);
 
     /*! Request execution of events */

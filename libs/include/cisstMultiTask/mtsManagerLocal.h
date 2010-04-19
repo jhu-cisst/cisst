@@ -131,18 +131,24 @@ protected:
     bool RegisterInterfaces(mtsDevice * component);
     bool RegisterInterfaces(const std::string & componentName);
 
-    /*! Connect two local interfaces. This method assumes two interfaces are in
-        the same process.
-
-        Returns: provided interface proxy instance id, if remote connection
-                 zero, if local connection
-                 -1,   if error occurs */
+    /*! \brief Connect two local interfaces. It is assumed that two components
+               are in the same process.
+        \param clientComponentName Name of client component
+        \param clientRequiredInterfaceName Name of required interface
+        \param serverComponentName Name of server component
+        \param serverProvidedInterfaceName Name of provided interface
+        \param userId User id allocated for this connection. Valid only for the
+               networked configuration. Zero by default.
+        \return zero if successful, -1 if error occurs. */
     int ConnectLocally(
         const std::string & clientComponentName, const std::string & clientRequiredInterfaceName,
-        const std::string & serverComponentName, const std::string & serverProvidedInterfaceName);
+        const std::string & serverComponentName, const std::string & serverProvidedInterfaceName,
+        const int userId = 0);
 
     //-------------------------------------------------------------------------
     //  Methods required by mtsManagerLocalInterface
+    //
+    //  See mtsManagerLocalInterface.h for detailed documentation.
     //-------------------------------------------------------------------------
 public:
 #if CISST_MTS_HAS_ICE
@@ -172,10 +178,10 @@ public:
     bool RemoveRequiredInterfaceProxy(
         const std::string & serverComponentProxyName, const std::string & requiredInterfaceProxyName, const std::string & listenerID = "");
 
-    /*! Extract all the information on a provided interface such as command
-        objects and events with arguments serialized */
+    /*! Get information about provided interface */
     bool GetProvidedInterfaceDescription(
-        const std::string & componentName,
+        const unsigned int userId,
+        const std::string & serverComponentName,
         const std::string & providedInterfaceName,
         ProvidedInterfaceDescription & providedInterfaceDescription, const std::string & listenerID = "");
 
@@ -190,14 +196,22 @@ public:
     int GetCurrentInterfaceCount(const std::string & componentName, const std::string & listenerID = "");
 
     /*! Connect interfaces at server side */
-    bool ConnectServerSideInterface(const unsigned int providedInterfaceProxyInstanceID,
+    bool ConnectServerSideInterface(
+        const int userId, const unsigned int providedInterfaceProxyInstanceID,
         const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientRequiredInterfaceName,
-        const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverProvidedInterfaceName, const std::string & listenerID = "");
+        const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverProvidedInterfaceName,
+        const std::string & listenerID = "");
 
-    /*! Connect interfaces at client side */
+    /*! Connect two local interfaces at client side. */
     bool ConnectClientSideInterface(const unsigned int connectionID,
         const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientRequiredInterfaceName,
-        const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverProvidedInterfaceName, const std::string & listenerID = "");
+        const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverProvidedInterfaceName,
+        const std::string & listenerID = "");
+
+    /*! Pre-allocate provided interface's resources */
+    int PreAllocateResources(const std::string & userName,
+        const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverProvidedInterfaceName, 
+        const std::string & listenerID = "");
 #endif
 
 #if !CISST_MTS_HAS_ICE
@@ -235,12 +249,40 @@ public:
     /*! Check if a component exists by its name */
     bool FindComponent(const std::string & componentName) const;
 
-    /* Connect two interfaces */
+    /* \brief Connect two local interfaces
+       \param clientComponentName Name of client component
+       \param clientRequiredInterfaceName Name of required interface
+       \param serverComponentName Name of server component
+       \param serverProvidedInterfaceName Name of provided interface
+       \return True if success, false otherwise
+       \note If connection is established successfully, this information is
+             reported to the global component manager (the local component 
+             manager does not keep any connection information). */
     bool Connect(
         const std::string & clientComponentName, const std::string & clientRequiredInterfaceName,
         const std::string & serverComponentName, const std::string & serverProvidedInterfaceName);
 
 #if CISST_MTS_HAS_ICE
+    /* \brief Connect two remote interfaces
+       \param clientProcessName Name of client process
+       \param clientComponentName Name of client component
+       \param clientRequiredInterfaceName Name of required interface
+       \param serverProcessName Name of server process
+       \param serverComponentName Name of server component
+       \param serverProvidedInterfaceName Name of provided interface
+       \return True if success, false otherwise
+       \note If connection is established successfully, this information is
+             reported to the global component manager. Since connection between
+             two interfaces should be established twice--once in the client 
+             process and once in the server process--there are two internal 
+             connection management methods: ConnectClientSideInterface() and
+             ConnectServerSideInterface().  ConnectClientSideInterface() is 
+             always executed first followed by ConnectServerSideInterface().
+             Connection request can be made at any process--server or client 
+             process.  That is, whichever process initiate connection request,
+             the result is the same. 
+             If this method is called against two local interfaces, the other 
+             Connect() method is internally called instead. */
     bool Connect(
         const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientRequiredInterfaceName,
         const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverProvidedInterfaceName);

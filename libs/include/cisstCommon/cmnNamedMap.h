@@ -150,7 +150,7 @@ public:
                  cmnLogLoD lod = CMN_LOG_LOD_RUN_ERROR);
 
     /*! Get an item by name */
-    _elementType * GetItem(const std::string & name, cmnLogLoD lod = CMN_LOG_LOD_RUN_ERROR) const;
+    _elementType * GetItem(const std::string & name, cmnLogLoD lod = CMN_LOG_LOD_RUN_WARNING) const;
 
     /*! Find an item by name */
     bool FindItem(const std::string & itemName) const;

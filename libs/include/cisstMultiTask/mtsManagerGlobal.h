@@ -163,10 +163,6 @@ protected:
         Map name: a name of component that has these interfaces. */
     typedef cmnNamedMap<mtsManagerGlobal::ConnectedInterfaceInfo> ConnectionMapType;
 
-    // Interface map consists of two pairs of containers:
-    // containers for connection map (provided/required interface maps) and
-    // containers for interface type flag map (provided/required interface maps)
-
     /*! Interface map: a map of registered interfaces in a component
         key=(interface name), value=(connection map)
         value can be null if an interface does not have any connection. */
@@ -181,6 +177,9 @@ protected:
         mtsManagerGlobal::Disconnect() for more details. */
     typedef std::map<std::string, bool> InterfaceTypeMapType;
 
+    /*! Interface map has two kinds of containers:
+        - containers for connection map
+        - containers for interface type flag map */
     typedef struct {
         ConnectedInterfaceMapType ProvidedInterfaceMap;
         ConnectedInterfaceMapType RequiredInterfaceMap;
@@ -219,8 +218,14 @@ protected:
         ConnectionElementMap. */
     osaMutex ConnectionElementMapChange;
 
-    /*! Connection id to issue a new connection session ID */
+    /*! Counter to issue a new connection ID */
     unsigned int ConnectionID;
+
+    /*! Typedef to get user id using connection id.  User id is set by provided
+        interface's AllocatedResources()
+        (see mtsManagerLocal::GetProvidedInterfaceDescription() for details). */
+    typedef std::map<unsigned int, int> UserIDMapType;
+    UserIDMapType UserIDMap;
 
 #if CISST_MTS_HAS_ICE
     /*! Network proxy server */
@@ -309,9 +314,10 @@ public:
     //-------------------------------------------------------------------------
     //  Connection Management
     //-------------------------------------------------------------------------
-    unsigned int Connect(const std::string & requestProcessName,
+    int Connect(const std::string & requestProcessName,
         const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientRequiredInterfaceName,
-        const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverProvidedInterfaceName);
+        const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverProvidedInterfaceName,
+        int & userId);
 
     bool ConnectConfirm(unsigned int connectionSessionID);
 
@@ -324,7 +330,8 @@ public:
         const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientRequiredInterfaceName,
         const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverProvidedInterfaceName);
 
-    bool ConnectServerSideInterface(const unsigned int providedInterfaceProxyInstanceID,
+    bool ConnectServerSideInterfaceRequest(
+        const unsigned int connectionID, const unsigned int providedInterfaceProxyInstanceID,
         const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientRequiredInterfaceName,
         const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverProvidedInterfaceName);
 #endif

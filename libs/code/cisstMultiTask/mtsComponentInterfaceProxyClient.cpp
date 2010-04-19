@@ -310,16 +310,16 @@ void mtsComponentInterfaceProxyClient::SendTestMessageFromClientToServer(const s
 }
 
 bool mtsComponentInterfaceProxyClient::SendFetchEventGeneratorProxyPointers(
-    const std::string & requiredInterfaceName, const std::string & providedInterfaceName,
+    const std::string & clientComponentName, const std::string & requiredInterfaceName,
     mtsComponentInterfaceProxy::EventGeneratorProxyPointerSet & eventGeneratorProxyPointers)
 {
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
-    LogPrint(mtsComponentInterfaceProxyClient, ">>>>> SEND: FetchEventGeneratorProxyPointers: req.int=" << requiredInterfaceName << ", prv.int=" << providedInterfaceName);
+    LogPrint(mtsComponentInterfaceProxyClient, ">>>>> SEND: FetchEventGeneratorProxyPointers: " << clientComponentName << ":" << requiredInterfaceName);
 #endif
 
     try {
         return ComponentInterfaceServerProxy->FetchEventGeneratorProxyPointers(
-            requiredInterfaceName, providedInterfaceName, eventGeneratorProxyPointers);
+            clientComponentName, requiredInterfaceName, eventGeneratorProxyPointers);
     } catch (const ::Ice::Exception & ex) {
         LogError(mtsComponentInterfaceProxyServer, "SendFetchEventGeneratorProxyPointers: network exception: " << ex);
         OnServerDisconnect();

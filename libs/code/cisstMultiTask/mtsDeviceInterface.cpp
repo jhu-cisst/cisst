@@ -228,7 +228,7 @@ unsigned int mtsDeviceInterface::AllocateResources(const std::string & userName)
     // requests
     this->UserCounter++;
     CMN_LOG_CLASS_INIT_VERBOSE << "AllocateResource: interface \"" << this->Name
-                               << "\"received request number "
+                               << "\" received request number "
                                << this->UserCounter << " from \""
                                << userName << "\"" << std::endl;
     return this->UserCounter;

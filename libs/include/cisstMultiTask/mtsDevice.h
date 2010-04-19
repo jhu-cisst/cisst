@@ -138,7 +138,8 @@ class CISST_EXPORT mtsDevice: public cmnGenericObject
 
     /*! Connect a required interface, used by mtsTaskManager */
     bool ConnectRequiredInterface(const std::string & requiredInterfaceName,
-                                  mtsDeviceInterface * providedInterface);
+                                  mtsDeviceInterface * providedInterface,
+                                  const int userId = 0);
 
  protected:
     /*! Thread Id counter.  Used to count how many "user" tasks are
