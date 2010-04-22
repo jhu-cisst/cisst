@@ -19,8 +19,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstDevices/ode/devODEWorld.h>
 #include <cisstCommon/cmnLogger.h>
 
-CMN_IMPLEMENT_SERVICES( devODEWorld );
-
 devODEWorld::devODEWorld( double period,
 			  const vctFixedSizeVector<double,3>& gravity ) : 
   mtsTaskPeriodic( "devODEWorld", period, true ),
@@ -32,7 +30,7 @@ devODEWorld::devODEWorld( double period,
   spaceid = dSimpleSpaceCreate(0);          // create a new space for geometries
   contactsgid = dJointGroupCreate(0);       // create a new contact group
 
-  floor = dCreatePlane( SpaceID(), 0.0, 0.0, 1.0, 0.0 );
+  //floor = dCreatePlane( SpaceID(), 0.0, 0.0, 1.0, 0.0 );
 
   // Set the gravity
   dWorldSetGravity( WorldID(), gravity[0], gravity[1], gravity[2] );
@@ -142,17 +140,17 @@ static void space_collision(void *argv, dGeomID o1, dGeomID o2){
 }
 
 void devODEWorld::Run() {
-
+  
   for( size_t i=0; i<joints.size(); i++ )
     { joints[i]->ApplyForceTorque(); }
 
-  dSpaceCollide( SpaceID(), (void*)this, space_collision);
+  //dSpaceCollide( SpaceID(), (void*)this, space_collision);
   dWorldStep( WorldID(), timestep );
 
   for( size_t i=0; i<bodies.size(); i++ )
     { bodies[i]->Update(); }
 
-  dJointGroupEmpty( GroupID() );
+  //dJointGroupEmpty( GroupID() );
 
 }
 

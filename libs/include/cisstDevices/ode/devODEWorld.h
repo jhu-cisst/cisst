@@ -29,8 +29,6 @@ http://www.cisst.org/cisst/license.txt.
 
 class CISST_EXPORT devODEWorld : public mtsTaskPeriodic {
 
-  CMN_DECLARE_SERVICES( CMN_NO_DYNAMIC_CREATION , CMN_LOG_LOD_RUN_DEBUG );
-
 private:
 
   //! The time step of the engine
@@ -135,7 +133,5 @@ public:
   void Insert( devODEJoint* joint );
 
 };
-
-CMN_DECLARE_SERVICES_INSTANTIATION( devODEWorld );
 
 #endif

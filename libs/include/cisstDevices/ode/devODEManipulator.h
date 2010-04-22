@@ -18,26 +18,18 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _devODEManipulator_h
 #define _devODEManipulator_h
 
-#include <string>
-
-#include <cisstMultiTask/mtsTaskPeriodic.h>
+#include <cisstDevices/manipulators/devManipulator.h>
 
 #include <cisstDevices/ode/devODEBody.h>
 #include <cisstDevices/ode/devODEJoint.h>
 #include <cisstDevices/ode/devODEWorld.h>
+
 #include <cisstDevices/devExport.h>
 
-class CISST_EXPORT devODEManipulator : public mtsTaskPeriodic {
+class CISST_EXPORT devODEManipulator : public devManipulator {
 
- private:
+ protected:
 
-  //! MTS vector of joint positions
-  mtsVector<double> jointspositions;
-
-  //! MTS function used to querry joints torques
-  mtsFunctionRead ReadFT;
-
-  //! A vector of joints
   std::vector<devODEJoint*> joints;
 
   vctDynamicVector<double> qinit;
@@ -68,6 +60,11 @@ class CISST_EXPORT devODEManipulator : public mtsTaskPeriodic {
 
  public: 
 
+  devODEManipulator( const std::string& devname, 
+		     double period,
+		     const vctDynamicVector<double>& qinit );
+
+
   //! ODE Manipulator generic constructor
   /**
      This constructor initializes an ODE manipulator with the kinematics and 
@@ -83,25 +80,16 @@ class CISST_EXPORT devODEManipulator : public mtsTaskPeriodic {
   devODEManipulator( const std::string& devname,
 		     double period,
 		     devODEWorld& world,
-		     const std::string& robotfilename,
+		     const std::string& manfile,
 		     const vctDynamicVector<double> qinit,
 		     const vctFrame4x4<double>& Rtw0,
 		     const std::vector<std::string>& geomfiles );
 
+  ~devODEManipulator(){}
 
-  void Configure( const std::string& fn="");
-  void Startup();
-  void Run();
-  void Cleanup();
-
-  static const std::string PositionsInterface;
-  static const std::string ReadPositionsCommand;
-
-  static const std::string FTInterface;
-  static const std::string WriteFTCommand;
+  vctDynamicVector<double> Read();
+  void Write( const vctDynamicVector<double>& ft );
 
 };
-
-//CMN_DECLARE_SERVICES_INSTANTIATION( devODEManipulator );
 
 #endif

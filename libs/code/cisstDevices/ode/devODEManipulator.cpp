@@ -15,14 +15,17 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include <cisstDevices/ode/devODEManipulator.h>
-#include <cisstDevices/controlloops/devControlLoop.h>
 #include <cisstRobot/robManipulator.h>
+#include <cisstDevices/ode/devODEManipulator.h>
 
 //CMN_IMPLEMENT_SERVICES( devODEManipulator );
 
-const std::string devODEManipulator::PositionsInterface  = "PositionsInterface";
-const std::string devODEManipulator::FTInterface         = "FTInterface";
+devODEManipulator::devODEManipulator( const std::string& devname,
+				      double period,
+				      const vctDynamicVector<double>& qinit ) :
+
+  devManipulator( devname, period, qinit.size() ),
+  qinit( qinit ){}
 
 devODEManipulator::devODEManipulator(const std::string& devname,
 				     double period,
@@ -31,9 +34,8 @@ devODEManipulator::devODEManipulator(const std::string& devname,
 				     const vctDynamicVector<double> qinit,
 				     const vctFrame4x4<double>& Rtw0,
 				     const std::vector<std::string>& geomfiles):
-  mtsTaskPeriodic( devname, period, true ) {
-  
-  this->qinit = qinit;
+  devManipulator( devname, period, qinit.size() ),
+  qinit( qinit ){
 
   // Create a temporary manipulator
   robManipulator manipulator( robotfilename, Rtw0 );
@@ -103,74 +105,19 @@ devODEManipulator::devODEManipulator(const std::string& devname,
 
     b1 = b2;                               // proximal is now distal
   }
-
-  // Set up the MTS interfaces
-  // Create a position interface
-  mtsProvidedInterface* interface;
-  interface = AddProvidedInterface( devODEManipulator::PositionsInterface );
-
-  // Configure the position interface
-  if( interface ){
-
-    // copy the initial joints positions to the state table
-    jointspositions.SetSize( qinit.size() );
-    jointspositions = qinit;                              
-    StateTable.AddData( jointspositions, "JointsPositions" );
-
-    // the position interface has a "ReadPositions" command
-    interface->AddCommandReadState( StateTable,
-				    jointspositions,
-				    devControlLoop::ReadFeedbackCommand );
-  }
-  else{
-    CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
-                       << ": Failed to create the provided interface for "
-                       << devODEManipulator::PositionsInterface
-                       << std::endl;
-    exit(-1);
-  }
-
-  // The manipulator requires a force/torque interface
-  AddRequiredInterface( devODEManipulator::FTInterface );
-
 }
 
-void devODEManipulator::Startup( ){
-  // Get the interface connected to the force/torque interface
-  mtsDeviceInterface* interface;
-  interface = GetProvidedInterfaceFor( devODEManipulator::FTInterface );
+vctDynamicVector<double> devODEManipulator::Read()
+{ return GetJointsPositions(); }
 
-  // Bind the command to read joint torques
-  if( interface )
-    { ReadFT.Bind( interface, devControlLoop::WriteOutputCommand ); }
-  else{
-    CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
-                       << ": Failed to get the provided interface for "
-                       << devODEManipulator::FTInterface
-                       << std::endl;
-  }
-}
-
-void devODEManipulator::Configure( const std::string& ){}
-void devODEManipulator::Cleanup(){}
-
-void devODEManipulator::Run(){
-
-  ProcessQueuedCommands();
-
-  jointspositions = GetJointsPositions();
-  mtsVector<double> ft;
-  ReadFT( ft );
-
-  if( ft.size() == joints.size() )
-    { SetForcesTorques( ft ); }
-
-}
+void devODEManipulator::Write( const vctDynamicVector<double>& ft )
+{ SetForcesTorques( ft ); }
 
 vctDynamicVector<double> devODEManipulator::GetJointsPositions() const {
   vctDynamicVector<double> q( joints.size(), 0.0 );
   for(size_t i=0; i<joints.size(); i++)
     { q[i] =  joints[i]->GetPosition(); }
+  //std::cout << q << std::endl;
   return q + qinit;
 }
 
@@ -182,6 +129,7 @@ vctDynamicVector<double> devODEManipulator::GetJointsVelocities() const {
 }
 
 void devODEManipulator::SetForcesTorques( const vctDynamicVector<double>& ft) {
+  //std::cout << "ft " << ft << std::endl;
   for(size_t i=0; i<joints.size(); i++ )
     { joints[i]->SetForceTorque( ft[i] ); }
 }
