@@ -526,9 +526,11 @@ robManipulator::RNE( const vctDynamicVector<double>& q,
 vctDynamicVector<double> 
 robManipulator::CCG( const vctDynamicVector<double>& q,
 		     const vctDynamicVector<double>& qd ) const {
+
   if( q.size() != qd.size() ){
-    std::cerr << "robManipulator::CCG: vectors must have the same size." 
-	      << std::endl;
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+		      << ": Size of q and qd do not match."
+		      << std::endl;
     return vctDynamicVector<double>();
   }
 
@@ -565,6 +567,34 @@ robManipulator::BiasAcceleration( const vctDynamicVector<double>& q,
 }
 
 // A is column major!
+vctDynamicMatrix<double> 
+robManipulator::JSinertia( const vctDynamicVector<double>& q ) const {
+
+  if( q.size() != links.size() ){
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+		      << ": Expected " << links.size() << " values. "
+		      << "Got " << q.size() 
+		      << std::endl;
+    return vctDynamicMatrix<double>();
+  }
+
+  vctDynamicMatrix<double> A( links.size(), links.size(), 0.0 );
+
+  for(size_t c=0; c<q.size(); c++){
+    vctDynamicVector<double> qd( q.size(), 0.0 );  // velocities to zero
+    vctDynamicVector<double> qdd( q.size(), 0.0 ); // accelerations to zero
+    vctFixedSizeVector<double,6> fext(0.0);
+    qdd[c] = 1.0;                                  // ith acceleration to 1
+
+    vctDynamicVector<double> h = RNE( q, qd, qdd, fext, 0.0  );
+    for( size_t r=0; r<links.size(); r++ )
+      { A[c][r] = h[r]; }
+  }
+
+  return A;
+
+}
+
 void robManipulator::JSinertia( double **A,
 				const vctDynamicVector<double>& q ) const {
 
@@ -618,25 +648,29 @@ void robManipulator::OSinertia( double Ac[6][6],
   // A = L  * L**T
   potrf(&UPLO, &NJOINTS, &A[0][0], &LDA, &INFO);
   if(INFO<0)
-    CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS
-			<< ": The " << INFO << "th argument to potrf is illegal."
-			<< std::endl;
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+		      << ": The " << INFO << "th argument to potrf is illegal."
+		      << std::endl;
   else if(0<INFO)
-    CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS
-			<< ": The matrix for potrf is not positive definite." 
-			<< std::endl;
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+		      << ": The matrix for potrf is not positive definite." 
+		      << std::endl;
 
   // invert A
   //
   potri(&UPLO, &NJOINTS, &A[0][0], &LDA, &INFO);
   if(INFO<0)
-    CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS
-			<< ": The " << INFO << "th argument to potri is illegal."
-			<< std::endl;
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+		      << ": The " << INFO << "th argument to potri is illegal."
+		      << std::endl;
   else if(0<INFO)
-    CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS
-			<< ": The matrix passed to potri is singular."
-			<< std::endl;
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+		      << ": The matrix passed to potri is singular."
+		      << std::endl;
+
+  for( size_t c=0; c<links.size(); c++ )
+    for( size_t r=c; r<links.size(); r++ )
+      A[r][c] = A[c][r];
 
   JacobianBody( q );
 
@@ -644,109 +678,140 @@ void robManipulator::OSinertia( double Ac[6][6],
   // C := alpha*B*A + beta*C,
   symm(&SIDE, &UPLO, &NEQS, &NJOINTS,
        &ALPHA, &A [0][0], &LDA, 
-               &Jn[0][0], &LDJ,
-       //&Jn[0][0], &LDJ,
+       &Jn[0][0], &LDJ,
        &BETA, &JAi[0][0], &LDJAi);
-
+  
   // J*A^-1*J'
   // C := alpha*op( A )*op( B ) + beta*C
   int LDAc = 6;
   gemm(&TRANSN, &TRANST, &NEQS, &NEQS, &NJOINTS,
        &ALPHA, &JAi[0][0], &LDJAi, 
-               &Jn[0][0],  &LDJ,
-       //&Jn[0][0],  &LDJ,
+       &Jn[0][0],  &LDJ,
        &BETA,  &Ac[0][0],  &LDAc);
-
+  /*
   // (J*A^-1*J')^-1
   // Factorize the symmetric matrix
-  // A = L  * L**T
   potrf(&UPLO, &NEQS, &Ac[0][0], &LDAc, &INFO);
   if(INFO<0)
-    CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS
-			<< ": The " << INFO << "th argument to potrf is illegal."
-			<< std::endl;
+    std::cout<<"OSinertia::dpotrf2: The " << INFO << " argument is illegal.\n";
   else if(0<INFO)
-    CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS
-			<< ": The matrix for potrf is not positive definite."
-			<< std::endl;
-
+    std::cout<<"OSinertia::dpotrf2: The matrix is not positive definite.\n";
   // invert
   potri(&UPLO, &NEQS, &Ac[0][0], &LDAc, &INFO);
   if(INFO<0)
-    CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS 
-			<< "The " << INFO << "th argument to potri is illegal."
-			<< std::endl;
+    std::cout<<"OSinertia::dpotri2: The " << INFO << " argument is illegal.\n";
   else if(0<INFO)
-    CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS
-			<< "The matrix passed to potri is singular."
-			<< std::endl;
+    std::cout<<"OSinertia::dpotri2: The matrix is singular.\n";
+  */
+
+  double I[6][6];
+  int LDI = 6;
+  for( int r=0; r<6; r++ )
+    for( int c=0; c<6; c++ )
+      I[r][c] = 0.0;
+  for( int r=0; r<6; r++ )
+    I[r][r] = 1.0;
+
+  double S[6];                // The singular values of A in decreasing order
+  double RCOND = -1;          // Use machine precision to determine rank(A)
+  int RANK;                   // The effective rank of A
+  int LWORK = 128;            // The (safe) size of the workspace
+  double WORK[128];           // The workspace
+  
+  // compute the minimum norm solution
+  gelss( &NEQS, &NEQS, &NEQS,
+	 &Ac[0][0], &LDI,           // 
+	 &I[0][0],  &LDI,           // error vector
+	 S, &RCOND, &RANK,          // SVD parameters
+	 WORK, &LWORK, &INFO );
+  
+  for( int r=0; r<6; r++ )
+    for( int c=0; c<6; c++ )
+      Ac[r][c] = I[r][c];
 
   free_rmatrix(   A, 0, 0 );
   free_rmatrix( JAi, 0, 0 );
 }
 
 vctDynamicVector<double> 
-robManipulator::InverseDynamics( const vctDynamicVector<double>& q,
-				 const vctDynamicVector<double>& qd,
-				 const vctFixedSizeVector<double,6>& vdwd )const{
+robManipulator::InverseDynamics(const vctDynamicVector<double>& q,
+				const vctDynamicVector<double>& qd,
+				const vctFixedSizeVector<double,6>& vdwd )const{
 
-  char UPLO = 'L';
-  int NEQS = 6;
-  int INC = 1;
-  char TRANST = 'T';
-  int NJOINTS = links.size();
-
-  double ALPHA =  1.0;      //
-  double BETA  =  0.0;      // 
-
-  double Ac[6][6];          // OS inertia matrix (lower half)
-  int LDAc = 6;             // 1st dimension of Ac
-  OSinertia(Ac,q);          // compute OS inertia matrix
-
-  int LDJ = 6;              // 1st dimention of Jn
-
-  vctFixedSizeVector<double,6> h = BiasAcceleration(q,qd); // h = Jdqd
-  double hv[6] = {h[0], h[1], h[2], h[3], h[4], h[5]};     // make an array of h
-
-  // Ac*h
-  // y := alpha*A*x + beta*y,
-  double Ach[6];                                       // symmetric matrix*vector
-  symv(&UPLO, &NEQS,
-       &ALPHA, &Ac[0][0], &LDAc, 
-       hv, &INC,
-       &BETA,  &Ach[0], &INC);
-
-  // J'*Ac*h
-  // y := alpha*A'*x + beta*y,
-  double* JTAch = new double[links.size()];
-  gemv(&TRANST, &NEQS, &NJOINTS,
-       &ALPHA, &Jn[0][0], &LDJ, 
-       Ach, &INC,
-       &BETA, JTAch, &INC);
-
-  // make sure there's a force, otherwise skip this and just consider ccg
+  
   double* JTAcF = new double[links.size()];
-  for(size_t i=0; i<links.size(); i++) JTAcF[i] = 0;
+  double* JTAch = new double[links.size()];
+  for(size_t i=0; i<links.size(); i++) JTAcF[i] = 0.0;
+  for(size_t i=0; i<links.size(); i++) JTAch[i] = 0.0;
+    
+  // make sure there's a force, otherwise skip this and just consider ccg
   if(0.0 < vdwd.Norm()){
 
+    char UPLO = 'L';
+    int NEQS = 6;
+    int INC = 1;
+    char TRANST = 'T';
+    int NJOINTS = links.size();
+    
+    double ALPHA =  1.0;      //
+    double BETA  =  0.0;      // 
+    
+    double Ac[6][6];          // OS inertia matrix
+    int LDAc = 6;             // 1st dimension of Ac
+    OSinertia( Ac, q );       // compute OS inertia matrix
+    
+    int LDJ = 6;              // 1st dimention of Jn
+    
+    vctFixedSizeVector<double,6> h;
+    h = BiasAcceleration( q, qd ); // h = Jdqd
+
+    double hv[6];            // make an array of h
+    for( int i=0; i<6; i++ ) { hv[i] = h[i]; }
+    
+    // Ac*h
+    // y := alpha*A*x + beta*y,
+    double Ach[6];                                  // symmetric matrix*vector
+    symv( &UPLO, &NEQS,
+	  &ALPHA, 
+	  &Ac[0][0], &LDAc, 
+	  &hv[0],    &INC,
+	  &BETA,  
+	  &Ach[0],   &INC );
+    
+    // J'*Ac*h
+    // y := alpha*A'*x + beta*y,
+    gemv( &TRANST, &NEQS, &NJOINTS,
+	  &ALPHA, 
+	  &Jn[0][0], &LDJ, 
+	  &Ach[0],   &INC, 
+	  &BETA, 
+	  &JTAch[0], &INC );
+    
     // Ac*F
-    double Fv[6] = {vdwd[0], vdwd[1], vdwd[2], vdwd[3], vdwd[4], vdwd[5]};
+    double Fv[6];            // make an array of vdwd
+    for( int i=0; i<6; i++ ) { Fv[i] = vdwd[i]; }
+
     double AcF[6];
-    symv(&UPLO,  &NEQS,
-         &ALPHA, &Ac[0][0], &LDAc, 
-	 Fv, &INC,
-         &BETA, AcF, &INC);
+    symv( &UPLO, &NEQS,
+	  &ALPHA, 
+	  &Ac[0][0], &LDAc, 
+	  &Fv[0],    &INC,
+	  &BETA, 
+	  &AcF[0],   &INC );
 
     // J'*Ac*F
     gemv(&TRANST, &NEQS, &NJOINTS,
-         &ALPHA, &Jn[0][0], &LDJ, 
-	 AcF, &INC,
-         &BETA, JTAcF, &INC);
+         &ALPHA, 
+	 &Jn[0][0], &LDJ, 
+	 &AcF[0], &INC,
+         &BETA, 
+	 &JTAcF[0], &INC);
+    
   }
 
-  vctDynamicVector<double> ccg = CCG(q, qd);         // compute the coriolis+grav
-
+  vctDynamicVector<double> ccg = CCG(q, qd);        // compute the coriolis+grav
   vctDynamicVector<double> trq( links.size(), 0.0 );// reserve enough elements
+
   for(size_t i=0; i<links.size(); i++)
     trq[i] = JTAcF[i] + ccg[i] - JTAch[i];
 
