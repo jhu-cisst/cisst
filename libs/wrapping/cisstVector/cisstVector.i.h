@@ -67,6 +67,17 @@ bool vctThrowUnlessIsSameTypeArray(PyObject * CMN_UNUSED(input))
 
 
 template <>
+bool vctThrowUnlessIsSameTypeArray<bool>(PyObject * input)
+{
+    if (PyArray_ObjectType(input, 0) != NPY_BOOL) {
+        PyErr_SetString(PyExc_ValueError, "Array must be of type bool");
+        return false;
+    }
+    return true;
+}
+
+
+template <>
 bool vctThrowUnlessIsSameTypeArray<char>(PyObject * input)
 {
     if (PyArray_ObjectType(input, 0) != NPY_INT8) {
@@ -169,6 +180,13 @@ template <class _elementType>
 int vctPythonType(void)
 {
     return NPY_NOTYPE; // unsupported type
+}
+
+
+template <>
+int vctPythonType<bool>(void)
+{
+    return NPY_BOOL;
 }
 
 
