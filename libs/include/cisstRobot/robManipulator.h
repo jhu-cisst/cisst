@@ -131,6 +131,9 @@ public:
      \param[input] A A pointer to an NxN matrix
      \param[output] The NxN manipulator inertia matrix
   */
+  vctDynamicMatrix<double> 
+    JSinertia( const vctDynamicVector<double>& q ) const;
+
   void JSinertia(double** A, const vctDynamicVector<double>& q ) const;
 		 
   
