@@ -46,9 +46,9 @@ set(HEADER_FILES
     devSartoriusSerial.h
     devExport.h
     devKeyboard.h
-    controlloops/devControlLoop.h
-    controlloops/devGravityCompensation.h
-    controlloops/devJointsPD.h
+#    controllers/devControlLoop.h
+#    controllers/devGravityCompensation.h
+#    controllers/devJointsPD.h
 #     can/devCAN.hpp
 #     wam/devGroup.hpp
 #     wam/devPuck.hpp
@@ -59,9 +59,9 @@ set(SOURCE_FILES
     devNull.cpp
     devSartoriusSerial.cpp
     devKeyboard.cpp
-    controlloops/devControlLoop.cpp
-    controlloops/devGravityCompensation.cpp
-    controlloops/devJointsPD.cpp
+#    controllers/devControlLoop.cpp
+#    controllers/devGravityCompensation.cpp
+#    controllers/devJointsPD.cpp
 #    can/devCAN.cpp
 #    wam/devGroup.cpp
 #    wam/devPuck.cpp
