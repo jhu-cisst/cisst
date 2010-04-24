@@ -132,7 +132,12 @@ typedef mtsCommandQualifiedReadOrWriteBase<const mtsGenericObject> mtsCommandQua
             except Exception:
                 argument = self.GetArgumentPrototype()
             self.Execute(argument)
-            return argument
+            # If argument has a GetDataCopy method, we assume it is derived from
+            # mtsGenericObjectProxy (%extend is used to add this method).
+            if hasattr(argument,"GetDataCopy"):
+                return argument.GetDataCopy()
+            else:
+                return argument
     }
 }
 
@@ -155,7 +160,12 @@ typedef mtsCommandQualifiedReadOrWriteBase<const mtsGenericObject> mtsCommandQua
             else:
                 realArgument1 = self.Argument1Type(argument1)
                 self.Execute(realArgument1, argument2)
-            return argument2
+            # If argument2 has a GetDataCopy method, we assume it is derived from
+            # mtsGenericObjectProxy (%extend is used to add this method).
+            if hasattr(argument2,"GetDataCopy"):
+                return argument2.GetDataCopy()
+            else:
+                return argument2
     }
 }
 
@@ -225,7 +235,7 @@ typedef mtsCommandQualifiedReadOrWriteBase<const mtsGenericObject> mtsCommandQua
 %define MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(name, elementType)
     // ignore the operator &
     %ignore mtsGenericObjectProxy<elementType>::operator value_type&;
-    %ignore mtsGenericObjectProxyBase<elementType>::operator value_type&;
+    %ignore mtsGenericObjectProxy<elementType>::operator const value_type&;
     // Instantiate the template
     %template(name ## Base) mtsGenericObjectProxyBase<elementType>;
     %template(name) mtsGenericObjectProxy<elementType>;
@@ -235,6 +245,10 @@ typedef mtsCommandQualifiedReadOrWriteBase<const mtsGenericObject> mtsCommandQua
     %}
     typedef mtsGenericObjectProxy<elementType> name;
     %types(name *);
+    %extend mtsGenericObjectProxy<elementType> {
+        elementType GetDataCopy() const
+        { return elementType($self->GetData()); }
+    }
 %enddef
 
 MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsDouble, double);
