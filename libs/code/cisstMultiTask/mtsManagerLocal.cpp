@@ -1119,24 +1119,42 @@ bool mtsManagerLocal::Connect(
         }
     }
 
-    // Validity check for arguments except process names is done by the global
+    // Validity check of arguments except process names is done by the global
     // component manager.
 
-    // Inform the global component manager of the fact that a new connection is
-    // to be established.
+    // To support bi-directional connection, retry establishing connection up to 
+    // 10 seconds. For instance, component A has a required interface that
+    // connects to component B's provided interface and the component B also 
+    // has a required interface that needs to connect to component A's provided
+    // interface.
+    const unsigned int maxRetryCount = 10;
+    unsigned int retryCount = 1;
     int userId;
-    const int connectionID = ManagerGlobal->Connect(ProcessName,
-        clientProcessName, clientComponentName, clientRequiredInterfaceName,
-        serverProcessName, serverComponentName, serverProvidedInterfaceName, userId);
+    int connectionID;
+
+    while (retryCount <= maxRetryCount) {
+        // Inform the global component manager of a new connection being established.
+        connectionID = ManagerGlobal->Connect(ProcessName,
+            clientProcessName, clientComponentName, clientRequiredInterfaceName,
+            serverProcessName, serverComponentName, serverProvidedInterfaceName, userId);
+        if (connectionID == -1) {
+            CMN_LOG_CLASS_INIT_ERROR << "Connect: Waiting for connection to be established.... Retrying " 
+                << retryCount++ << "/" << maxRetryCount << std::endl;
+            osaSleep(1 * cmn_s);
+        } else {
+            break;
+        }
+    }
+
     if (connectionID == -1) {
-        CMN_LOG_CLASS_RUN_ERROR << "Connect: Global Component Manager failed to reserve connection: "
+        CMN_LOG_CLASS_INIT_ERROR << "Connect: Global Component Manager failed to reserve connection: "
             << clientProcessName << ":" << clientComponentName << ":" << clientRequiredInterfaceName << " - "
             << serverProcessName << ":" << serverComponentName << ":" << serverProvidedInterfaceName << std::endl;
         return false;
     } else {
         const std::string userName = 
             mtsComponentProxy::GetProvidedInterfaceUserName(clientProcessName, clientComponentName);
-        CMN_LOG_CLASS_RUN_VERBOSE << "Connect: provided interface \""
+        CMN_LOG_CLASS_INIT_VERBOSE << "Connect: provided interface \""
             << serverProcessName << ":" << serverComponentName << ":" << serverProvidedInterfaceName << "\""
             << " allocated new user id \"" << userId << "\" for user \"" << userName << "\"" << std::endl;
     }

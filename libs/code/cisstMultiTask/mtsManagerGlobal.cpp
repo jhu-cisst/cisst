@@ -498,7 +498,7 @@ int mtsManagerGlobal::Connect(const std::string & requestProcessName,
 {
     // Check requestProcessName validity
     if (requestProcessName != clientProcessName && requestProcessName != serverProcessName) {
-        CMN_LOG_CLASS_RUN_ERROR << "Connect: invalid process name: " << requestProcessName << std::endl;
+        CMN_LOG_CLASS_RUN_ERROR << "Connect: invalid process is requesting connection: " << requestProcessName << std::endl;
         return -1;
     }
 
@@ -818,7 +818,7 @@ bool mtsManagerGlobal::IsAlreadyConnected(
     connectionMap = GetConnectionsOfProvidedInterface(
         serverProcessName, serverComponentName, serverProvidedInterfaceName);
     if (connectionMap) {
-        if (connectionMap->FindItem(GetInterfaceUID(clientProcessName, clientComponentName, clientProcessName)))
+        if (connectionMap->FindItem(GetInterfaceUID(clientProcessName, clientComponentName, clientRequiredInterfaceName)))
         {
             CMN_LOG_CLASS_RUN_VERBOSE << "Already established connection" << std::endl;
             return true;
@@ -887,8 +887,8 @@ bool mtsManagerGlobal::Disconnect(
                         if (localManagerServer->RemoveRequiredInterfaceProxy(clientComponentProxyName, clientRequiredInterfaceName, serverProcessName)) {
                             // If no interface exists on the component proxy, it should be removed.
                             const int interfaceCount = localManagerServer->GetCurrentInterfaceCount(clientComponentProxyName, serverProcessName);
-                            if (interfaceCount != -1) {
-                                if (interfaceCount == 0) {
+                            if (interfaceCount != -1) { // no component found
+                                if (interfaceCount == 0) { // remove components with no active interface
                                     CMN_LOG_CLASS_RUN_VERBOSE <<"Disconnect: remove client component proxy with no active interface: " << clientComponentProxyName << std::endl;
                                     if (!localManagerServer->RemoveComponentProxy(clientComponentProxyName, serverProcessName)) {
                                         CMN_LOG_CLASS_RUN_ERROR << "Disconnect: failed to remove client component proxy: "
@@ -1066,7 +1066,13 @@ void mtsManagerGlobal::GetNamesOfProcesses(std::vector<std::string>& namesOfProc
 
     // Filter out mtsManagerProxyServer process which has an ICE proxy that serves
     // local component managers.
-    namesOfProcesses.insert(namesOfProcesses.begin(), temp.begin() + 1, temp.end());
+    // Filter out local ICE proxy of type mtsManagerProxyServer.
+    for (size_t i = 0; i < temp.size(); ++i) {
+        if (temp[i] == "ManagerProxyServer") {
+            continue;
+        }
+        namesOfProcesses.push_back(temp[i]);
+    }
 }
 
 void mtsManagerGlobal::GetNamesOfComponents(const std::string & processName, 

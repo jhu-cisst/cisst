@@ -64,7 +64,7 @@ double prmPositionCartesianGet::GetScalarAsDouble(const size_t index) const
         return 0.0;
     }
 
-    if (0 <= index && index <= 2) {
+    if (index <= 2) {
         return static_cast<double>(this->PositionMember.Translation().at(index));
     } else {
         return static_cast<double>(this->PositionMember.Rotation().at(index - 3));
