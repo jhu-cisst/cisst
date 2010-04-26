@@ -33,28 +33,21 @@ http://www.cisst.org/cisst/license.txt.
 // TODO:
 // - Replace autorefresh/refresh buttons with callback mechanism
 // - Clear SignalsBeingPlotted when a process disconnects 
-// - If a command being visualized is removed, visualization UI should be reset 
-//   and wait for a user to choose a new command to visualize.
-// - Clear the current oscilloscope screen and refresh it so that a newly selected 
-//   signal can be visualized.
 //
 // Improvements:
-// - (two types of) offset controller -> associated with the channel / for global
 // - freeze (+export to file) / trigger / hold
 // - higher quality oscilloscope -> support stop & zoom => requires more and more data 
 //   to be collected???
 
 #define MAX_ARGUMENT_PARAMETER_COUNT 12
 #define STRING_CANCEL "Cancel"
-#define OFFSET_GLOBAL_DELTA 1.0
-#define OFFSET_SIGNAL_DELTA 0.5
+#define OFFSET_MAX_VALUE 100000.0f
 
 #define ENABLE_UI( _uiName )  UI._uiName->activate();
 #define DISABLE_UI( _uiName ) UI._uiName->deactivate();
 
 // GCMUITask object
 GCMUITask * GCMUI;
-
 
 //-------------------------------------------------------------------------
 //  Callback Functions
@@ -284,6 +277,10 @@ void GCMUITask::Configure(const std::string & CMN_UNUSED(filename))
     for (int i = 0; i < MAX_CHANNEL_COUNT; ++i) {
         ProgressBars[i]->maximum(1.0);
     }
+
+    // Offset controller
+    UI.SpinnerGlobalOffsetControl->range(0.0, (double)OFFSET_MAX_VALUE);
+    UI.SpinnerSignalOffsetControl->range(0.0, (double)OFFSET_MAX_VALUE);
 
     ResetDataVisualizerUI();
 }
@@ -861,8 +858,10 @@ void GCMUITask::CheckDataVisualizerInput(void)
     SET_CALLBACK_FUNCTION(ButtonXScaleUp);
     SET_CALLBACK_FUNCTION(ButtonXScaleDown);
     // Offset Buttons
-    SET_CALLBACK_FUNCTION(ButtonAllSignalOffsetIncrease);
-    SET_CALLBACK_FUNCTION(ButtonAllSignalOffsetDecrease);
+    SET_CALLBACK_FUNCTION(ButtonGlobalOffsetIncrease);
+    SET_CALLBACK_FUNCTION(ButtonGlobalOffsetDecrease);
+    SET_CALLBACK_FUNCTION(SpinnerGlobalOffsetControl);
+
     // Hold Button
     SET_CALLBACK_FUNCTION(ButtonHold);
     // Capture Button
@@ -880,6 +879,7 @@ void GCMUITask::CheckDataVisualizerInput(void)
     // Offset buttons
     SET_CALLBACK_FUNCTION(ButtonSignalOffsetIncrease);
     SET_CALLBACK_FUNCTION(ButtonSignalOffsetDecrease);
+    SET_CALLBACK_FUNCTION(SpinnerSignalOffsetControl);
 }
 
 void GCMUITask::ResetDataVisualizerUI(void)
@@ -907,13 +907,15 @@ void GCMUITask::ResetDataVisualizerUI(void)
     DISABLE_UI(ButtonAutoscale);
     DISABLE_UI(ButtonSignalOffsetIncrease);
     DISABLE_UI(ButtonSignalOffsetDecrease);
+    DISABLE_UI(SpinnerSignalOffsetControl);
 
     DISABLE_UI(ButtonXScaleUp);
     DISABLE_UI(ButtonXScaleDown);
     DISABLE_UI(ButtonYScaleUp);
     DISABLE_UI(ButtonYScaleDown);
-    DISABLE_UI(ButtonAllSignalOffsetIncrease);
-    DISABLE_UI(ButtonAllSignalOffsetDecrease);
+    DISABLE_UI(ButtonGlobalOffsetIncrease);
+    DISABLE_UI(ButtonGlobalOffsetDecrease);
+    DISABLE_UI(SpinnerGlobalOffsetControl);
     
     DISABLE_UI(ButtonHold);
     DISABLE_UI(ButtonCapture);
@@ -1003,13 +1005,15 @@ void GCMUITask::VisualizeSignal(SignalSelected & newSignal)
     ENABLE_UI(ButtonAutoscale);
     ENABLE_UI(ButtonSignalOffsetIncrease);
     ENABLE_UI(ButtonSignalOffsetDecrease);
+    ENABLE_UI(SpinnerSignalOffsetControl);
     // Update global UI
     ENABLE_UI(ButtonXScaleUp);
     ENABLE_UI(ButtonXScaleDown);
     ENABLE_UI(ButtonYScaleUp);
     ENABLE_UI(ButtonYScaleDown);
-    ENABLE_UI(ButtonAllSignalOffsetIncrease);
-    ENABLE_UI(ButtonAllSignalOffsetDecrease);
+    ENABLE_UI(ButtonGlobalOffsetIncrease);
+    ENABLE_UI(ButtonGlobalOffsetDecrease);
+    ENABLE_UI(SpinnerGlobalOffsetControl);
     ENABLE_UI(ButtonHold);
     //ENABLE_UI(ButtonCapture);
 
@@ -1120,6 +1124,7 @@ void GCMUITask::OnButtonYScaleUpClicked(void)
     GraphPane->AdjustYScale(2.0);
 
     GraphPane->SetAutoScale(false);
+    UI.ButtonAutoscale->value(0);
 
     UpdateMinMaxUI();
 }
@@ -1129,6 +1134,7 @@ void GCMUITask::OnButtonYScaleDownClicked(void)
     GraphPane->AdjustYScale(0.5);
 
     GraphPane->SetAutoScale(false);
+    UI.ButtonAutoscale->value(0);
 
     UpdateMinMaxUI();
 }
@@ -1155,9 +1161,9 @@ void GCMUITask::OnButtonXScaleDownClicked(void)
     GraphPane->clear(true);
 }
 
-void GCMUITask::OnButtonAllSignalOffsetIncreaseClicked(void)
+void GCMUITask::OnButtonGlobalOffsetIncreaseClicked(void)
 {
-    const float delta = OFFSET_GLOBAL_DELTA;
+    const float delta = GetGlobalOffsetDelta();
 
     GraphPane->SetAutoScale(false);
     GraphPane->SetYOffsetGlobal(GraphPane->GetYOffsetGlobal() + delta);
@@ -1170,9 +1176,9 @@ void GCMUITask::OnButtonAllSignalOffsetIncreaseClicked(void)
     UpdateMinMaxUI();
 }
 
-void GCMUITask::OnButtonAllSignalOffsetDecreaseClicked(void)
+void GCMUITask::OnButtonGlobalOffsetDecreaseClicked(void)
 {
-    const float delta = -OFFSET_GLOBAL_DELTA;
+    const float delta = -GetGlobalOffsetDelta();
 
     GraphPane->SetAutoScale(false);
     GraphPane->SetYOffsetGlobal(GraphPane->GetYOffsetGlobal() + delta);
@@ -1183,6 +1189,11 @@ void GCMUITask::OnButtonAllSignalOffsetDecreaseClicked(void)
     UI.OutputYOffset->value(buf);
 
     UpdateMinMaxUI();
+}
+
+void GCMUITask::OnSpinnerGlobalOffsetControlClicked(void)
+{
+    // NOP for now
 }
 
 void GCMUITask::OnButtonHoldClicked(void)
@@ -1204,13 +1215,15 @@ void GCMUITask::OnButtonHoldClicked(void)
         DISABLE_UI(ButtonAutoscale);
         DISABLE_UI(ButtonSignalOffsetIncrease);
         DISABLE_UI(ButtonSignalOffsetDecrease);
+        DISABLE_UI(SpinnerSignalOffsetControl);
         // Update global UI
         DISABLE_UI(ButtonXScaleUp);
         DISABLE_UI(ButtonXScaleDown);
         DISABLE_UI(ButtonYScaleUp);
         DISABLE_UI(ButtonYScaleDown);
-        DISABLE_UI(ButtonAllSignalOffsetIncrease);
-        DISABLE_UI(ButtonAllSignalOffsetDecrease);
+        DISABLE_UI(ButtonGlobalOffsetIncrease);
+        DISABLE_UI(ButtonGlobalOffsetDecrease);
+        DISABLE_UI(SpinnerGlobalOffsetControl);
         //DISABLE_UI(ButtonCapture);
     } else {
         UI.ButtonHold->label("Hold");
@@ -1227,13 +1240,15 @@ void GCMUITask::OnButtonHoldClicked(void)
         ENABLE_UI(ButtonAutoscale);
         ENABLE_UI(ButtonSignalOffsetIncrease);
         ENABLE_UI(ButtonSignalOffsetDecrease);
+        ENABLE_UI(SpinnerSignalOffsetControl);
         // Update global UI
         ENABLE_UI(ButtonXScaleUp);
         ENABLE_UI(ButtonXScaleDown);
         ENABLE_UI(ButtonYScaleUp);
         ENABLE_UI(ButtonYScaleDown);
-        ENABLE_UI(ButtonAllSignalOffsetIncrease);
-        ENABLE_UI(ButtonAllSignalOffsetDecrease);
+        ENABLE_UI(ButtonGlobalOffsetIncrease);
+        ENABLE_UI(ButtonGlobalOffsetDecrease);
+        ENABLE_UI(SpinnerGlobalOffsetControl);
         //ENABLE_UI(ButtonCapture);
     }
 }
@@ -1249,14 +1264,20 @@ void GCMUITask::OnButtonAutoScaleClicked(void)
         }
     }
 
-    GraphPane->SetAutoScale(true);
-    GraphPane->SetYOffsetGlobal(0.0f);
-
-    // Update offset value output window
     char buf[10] = "";
-    cmn_snprintf(buf, sizeof(buf), "%2.2f", GraphPane->GetYOffsetGlobal());
-    UI.OutputYOffset->value(buf);
+    if (UI.ButtonAutoscale->value() == 0) {
+        GraphPane->SetAutoScale(false);
+        UI.ButtonAutoscale->value(0);
+    } else {
+        GraphPane->SetAutoScale(true);
+        UI.ButtonAutoscale->value(1);
+        GraphPane->SetYOffsetGlobal(0.0f);
 
+        // Update offset value output window
+        cmn_snprintf(buf, sizeof(buf), "%2.2f", GraphPane->GetYOffsetGlobal());
+        UI.OutputYOffset->value(buf);
+    }
+    
     // Reset per-signal offset when autoscale operates
     GraphPane->SetYOffsetSignal(signal->MultiplotIndex, 0.0f);
     cmn_snprintf(buf, sizeof(buf), "%2.2f", GraphPane->GetYOffsetSignal(signal->MultiplotIndex));
@@ -1271,6 +1292,12 @@ void GCMUITask::OnButtonHideClicked(void)
         return;
     }
 
+    signal->State.Show = !signal->State.Show;
+
+    GraphPane->ShowSignal(signal->MultiplotIndex, signal->State.Show);
+
+    UpdateButtonHide(signal->State.Show);
+
     // If no signal is being plotted, disable global offset buttons
     bool isAnySignalShown = false;
     std::list<SignalSelected*>::const_iterator it = SignalsBeingPlotted.begin();
@@ -1278,19 +1305,13 @@ void GCMUITask::OnButtonHideClicked(void)
         isAnySignalShown |= (*it)->State.Show;
     }
     if (!isAnySignalShown) {
-        UI.ButtonAllSignalOffsetIncrease->deactivate();
-        UI.ButtonAllSignalOffsetDecrease->deactivate();
+        UI.ButtonGlobalOffsetIncrease->deactivate();
+        UI.ButtonGlobalOffsetDecrease->deactivate();
         return;
     } else {
-        UI.ButtonAllSignalOffsetIncrease->activate();
-        UI.ButtonAllSignalOffsetDecrease->activate();
-        }
-
-    signal->State.Show = !signal->State.Show;
-
-    GraphPane->ShowSignal(signal->MultiplotIndex, signal->State.Show);
-
-    UpdateButtonHide(signal->State.Show);
+        UI.ButtonGlobalOffsetIncrease->activate();
+        UI.ButtonGlobalOffsetDecrease->activate();
+    }
 }
 
 void GCMUITask::OnButtonSignalOffsetIncreaseClicked(void)
@@ -1303,7 +1324,7 @@ void GCMUITask::OnButtonSignalOffsetIncreaseClicked(void)
             return;
         }
 
-        const float delta = OFFSET_SIGNAL_DELTA;
+        const float delta = GetSignalOffsetDelta();
         const size_t index = signal->MultiplotIndex;
 
         GraphPane->SetAutoScale(false);
@@ -1328,7 +1349,7 @@ void GCMUITask::OnButtonSignalOffsetDecreaseClicked(void)
             return;
         }
 
-        const float delta = -OFFSET_SIGNAL_DELTA;
+        const float delta = -GetSignalOffsetDelta();
         const size_t index = signal->MultiplotIndex;
 
         GraphPane->SetAutoScale(false);
@@ -1341,6 +1362,11 @@ void GCMUITask::OnButtonSignalOffsetDecreaseClicked(void)
 
         UpdateMinMaxUI();
     }
+}
+
+void GCMUITask::OnSpinnerSignalOffsetControlClicked(void)
+{
+    // NOP (for now)
 }
 
 void GCMUITask::FetchCurrentValues(void)
@@ -1449,6 +1475,10 @@ void GCMUITask::UpdateMinMaxUI(void)
         Ymax = GraphPane->GetYMax();
     }
 
+    if (Ymin > Ymax) {
+        Ymin = Ymax = 0.0f;
+    }
+
     // Show min/max Y values
     char buf[10] = "";
     cmn_snprintf(buf, sizeof(buf), "%2.2f", Ymin);
@@ -1464,6 +1494,34 @@ void GCMUITask::UpdateButtonHide(const bool isShow)
     } else {
         UI.ButtonHide->label("Show");
     }
+}
+
+float GCMUITask::GetGlobalOffsetDelta()
+{
+    float offset = (float) UI.SpinnerGlobalOffsetControl->value();
+    if (offset < 0) {
+        UI.SpinnerGlobalOffsetControl->value(1.0f);
+        return 1.0f;
+    } else if (offset >= OFFSET_MAX_VALUE) {
+        UI.SpinnerGlobalOffsetControl->value(OFFSET_MAX_VALUE);
+        return OFFSET_MAX_VALUE;
+    }
+
+    return offset;
+}
+
+float GCMUITask::GetSignalOffsetDelta()
+{
+    float offset = (float) UI.SpinnerSignalOffsetControl->value();
+    if (offset < 0) {
+        UI.SpinnerSignalOffsetControl->value(1.0f);
+        return 1.0f;
+    } else if (offset >= OFFSET_MAX_VALUE) {
+        UI.SpinnerSignalOffsetControl->value(OFFSET_MAX_VALUE);
+        return OFFSET_MAX_VALUE;
+    }
+
+    return offset;
 }
 
 void GCMUITask::GetArgumentInformation(const std::string & processName, 

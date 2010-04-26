@@ -64,6 +64,9 @@ void SignalGenerator::Run(void)
         //newValue = sin((double)x) * (100.0 + 10.0 * (double)i) / 100.0;
         newValue = sin(2 * cmnPI * static_cast<double>(this->GetTick()) * Period / 2.0) 
             * (100.0 + 10.0 * (double)i) / 100.0;
+        if (i == PosGet.GetNumberOfScalar() - 1) {
+            newValue *= 10; // to test GCM visualizer with a signal of large amplitude
+        }
         ss << newValue << " ";
     }
     x++;

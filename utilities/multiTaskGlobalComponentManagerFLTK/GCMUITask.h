@@ -276,8 +276,9 @@ public:
     void OnButtonXScaleUpClicked(void);
     void OnButtonXScaleDownClicked(void);
     // Offset Buttons
-    void OnButtonAllSignalOffsetIncreaseClicked(void);
-    void OnButtonAllSignalOffsetDecreaseClicked(void);
+    void OnButtonGlobalOffsetIncreaseClicked(void);
+    void OnButtonGlobalOffsetDecreaseClicked(void);
+    void OnSpinnerGlobalOffsetControlClicked(void);
     // Hold Button
     void OnButtonHoldClicked(void);
     // Capture Button
@@ -296,6 +297,7 @@ public:
     // Offset buttons
     void OnButtonSignalOffsetIncreaseClicked(void);
     void OnButtonSignalOffsetDecreaseClicked(void);
+    void OnSpinnerSignalOffsetControlClicked(void);
 
     /*! Reset UI */
     void ResetDataVisualizerUI(void);
@@ -310,6 +312,11 @@ public:
     void UpdateMinMaxUI(void);
     // Update Hide/Show button
     void UpdateButtonHide(const bool isShow = true);
+
+    // Get unit value for global offset
+    float GetGlobalOffsetDelta();
+    // Get unit value for per-signal offset
+    float GetSignalOffsetDelta();
 
     //-------------------------------------------------------------------------
     //  Utilities
