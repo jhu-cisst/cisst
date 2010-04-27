@@ -247,7 +247,7 @@ typedef mtsCommandQualifiedReadOrWriteBase<const mtsGenericObject> mtsCommandQua
     %types(name *);
     %extend mtsGenericObjectProxy<elementType> {
         elementType GetDataCopy() const
-        { return elementType($self->GetData()); }
+        { return static_cast<elementType>($self->GetData()); }
     }
 %enddef
 
