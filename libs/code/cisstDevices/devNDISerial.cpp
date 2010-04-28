@@ -84,6 +84,7 @@ void devNDISerial::Configure(const std::string & filename)
     bool toolEnabled;
     std::string toolSerial, toolSerialLast;
     std::string toolDefinition;
+    Tool * tool;
 
     for (int i = 0; i < maxNumTools; i++) {
         std::stringstream context;
@@ -96,12 +97,16 @@ void devNDISerial::Configure(const std::string & filename)
             toolSerialLast = toolSerial;
             if (toolEnabled) {
                 if (toolDefinition == "") {
-                    AddTool(toolName, toolSerial.c_str());
+                    tool = AddTool(toolName, toolSerial.c_str());
                 } else {
-                    AddTool(toolName, toolSerial.c_str(), toolDefinition.c_str());
+                    tool = AddTool(toolName, toolSerial.c_str(), toolDefinition.c_str());
                 }
             }
         }
+        context << "/calibration";
+        config.GetXMLValue(context.str().c_str(), "@x", tool->TooltipOffset.X());
+        config.GetXMLValue(context.str().c_str(), "@y", tool->TooltipOffset.Y());
+        config.GetXMLValue(context.str().c_str(), "@z", tool->TooltipOffset.Z());
     }
 }
 

@@ -2,50 +2,29 @@
 
 <config>
 
-  <device port="COM3" />
+  <device port="COM3"
+          definition="" />
 
   <tools>
 
-    <tool name="Vicra Probe"
+    <tool name="Pointer"
           enabled="true"
           serial="34802401"
-          definition="C:\\Program Files\\Northern Digital Inc\\Tool Definition Files\\8700340.rom"
-          description="NDI Vicra passive probe (at JHMI)" />
+          definition="C:\\Program Files (x86)\\Northern Digital Inc\\Tool Definition Files\\8700340.rom"
+          description="">
+      <calibration x="-20.4072"
+                   y="-0.172478"
+                   z="-158.267" />
+    </tool>
 
-    <tool name="Vicra Big Reference"
+    <tool name="Patient"
           enabled="false"
           serial="34801403"
-          definition="C:\\Program Files\\Northern Digital Inc\\Tool Definition Files\\8700339.rom"
-          description="NDI Vicra passive reference (at JHMI)" />
-
-    <tool name="Vicra Small Reference"
-          enabled="false"
-          serial="34801401"
-          definition="C:\\Program Files\\Northern Digital Inc\\Tool Definition Files\\8700338.rom"
-          description="NDI Vicra passive reference (at JHMI)" />
-
-    <tool name="Polaris Probe"
-          enabled="false"
-          serial="32887C02"
-          definition=""
-          description="NDI Polaris active probe (at Homewood)" />
-
-    <tool name="Traxtal Probe"
-          enabled="false"
-          serial="3091280C"
-          definition=""
-          description="Traxtal active probe (at Homewood)" />
-
-    <tool name="Traxtal Cross"
-          enabled="false"
-          serial="3499D401"
-          definition="C:\\Program Files\\Northern Digital Inc\\Tool Definition Files\\Traxtal_C-Arm_Tracker.rom"
-          description="Traxtal passive c-arm tracker (at Homewood)" />
-
-    <tool name="Aurora Probe"
-          enabled="false"
-          serial="36BB5800"
-          definition=""
-          description="NDI Aurora probe (at JHMI)" />
+          definition="C:\\Program Files (x86)\\Northern Digital Inc\\Tool Definition Files\\8700339.rom"
+          description="">
+      <calibration x="0.0"
+                   y="0.0"
+                   z="0.0" />
+    </tool>
   </tools>
 </config>

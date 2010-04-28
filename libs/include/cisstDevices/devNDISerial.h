@@ -162,7 +162,7 @@ class CISST_EXPORT devNDISerial : public mtsTaskPeriodic
     ToolsType Tools;
     cmnNamedMap<Tool> PortToTool;
 
-    bool IsTracking;
+    mtsBool IsTracking;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(devNDISerial);
