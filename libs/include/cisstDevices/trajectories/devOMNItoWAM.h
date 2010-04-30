@@ -4,15 +4,25 @@
 #ifndef _devOMNItoWAM_h
 #define _devOMNItoWAM_h
 
+#include <cisstRobot/robManipulator.h>
 #include <cisstDevices/trajectories/devTrajectory.h>
 #include <cisstDevices/devExport.h>
 
 
-class CISST_EXPORT devOMNItoWAM : public devTrajectory {
+class CISST_EXPORT devOMNItoWAM : public devTrajectory{
 
  private:
 
-  vctDynamicVector<double> qt;
+  robManipulator* omni;
+  robManipulator* wam;
+
+  vctDynamicVector<double> qomni;
+  vctDynamicVector<double> qwam;
+  vctDynamicVector<double> qdwam;
+
+  vctFrame4x4<double> Rtw1, Rtw2;
+
+  double told;
 
  public:
 
@@ -20,14 +30,19 @@ class CISST_EXPORT devOMNItoWAM : public devTrajectory {
 		const std::string& InputFunctionName,
 		double period, 
 		bool enabled,
-		const vctDynamicVector<double>& yinit );
+		const std::string& fileomni,
+		const vctFrame4x4<double>& Rtw0omni,
+		const vctDynamicVector<double>& qomni,
+		const std::string& filewam,
+		const vctFrame4x4<double>& Rtw0wam,
+		const vctDynamicVector<double>& qwam );
 
-  void Reset( double dt, const vctDynamicVector<double>& ynew );
+  void Reset( double dt, const vctDynamicVector<double>& qomni );
 
   void Evaluate( double dt, 
-		 vctDynamicVector<double>& y,
-		 vctDynamicVector<double>& yd,
-		 vctDynamicVector<double>& ydd );
+		 vctDynamicVector<double>& q,
+		 vctDynamicVector<double>& qd,
+		 vctDynamicVector<double>& qdd );
 
 };
 

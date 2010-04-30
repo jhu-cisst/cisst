@@ -14,7 +14,9 @@ devLinearRn::devLinearRn( const std::string& TaskName,
 		 yinit ),
   y1( yinit ),
   y2( yinit ),
-  ydmax( ydmax ){}
+  ydmax( ydmax ){
+
+}
 
 void devLinearRn::Reset( double t, const vctDynamicVector<double>& ynew ){ 
 
@@ -38,7 +40,6 @@ void devLinearRn::Evaluate( double t,
   ydd.SetSize( y1.size() );
 
   mtsStatus = devTrajectory::EXPIRED;
-
   for( size_t i=0; i<dy.size(); i++ ){
     
     if( t < fabs(dy[i]) / fabs(ydmax[i]) ){
@@ -63,5 +64,6 @@ void devLinearRn::Evaluate( double t,
     }
 
   }
+
 
 }

@@ -45,7 +45,7 @@ devTrajectory::devTrajectory( const std::string& taskname,
     interface = this->AddRequiredInterface( devTrajectory::OutputInterface );
     if( interface ){
 
-      if( space & devTrajectory::JOINTS ){
+      if( space == devTrajectory::JOINTS ){
 	interface->AddFunction
 	  ( devController::InputJointPosition, mtsFnSetJointsPosition );
 	interface->AddFunction
@@ -54,7 +54,7 @@ devTrajectory::devTrajectory( const std::string& taskname,
 	  ( devController::InputJointAcceleration, mtsFnSetJointsAcceleration );
       }
       
-      if( space & devTrajectory::R3 ){
+      if( space == devTrajectory::R3 ){
 	interface->AddFunction
 	  ( devController::InputPosition, mtsFnSetPosition );
 	interface->AddFunction
@@ -63,7 +63,7 @@ devTrajectory::devTrajectory( const std::string& taskname,
 	  ( devController::InputLinearAcceleration, mtsFnSetLinearAcceleration);
       }
 
-      if( devTrajectory::SO3 ){
+      if( space == devTrajectory::SO3 ){
 	interface->AddFunction
 	  ( devController::InputOrientation, mtsFnSetOrientation );
 	interface->AddFunction
@@ -72,7 +72,7 @@ devTrajectory::devTrajectory( const std::string& taskname,
 	  (devController::InputAngularAcceleration,mtsFnSetAngularAcceleration);
       }
 
-      if( space & devTrajectory::SE3 ){
+      if( space == devTrajectory::SE3 ){
 	interface->AddFunction
 	  ( devController::InputPosition, mtsFnSetPosition );
 	interface->AddFunction
@@ -157,7 +157,10 @@ void devTrajectory::Run(){
     }
 
     if( !risingedge )
-      { risingedge=true; }
+      { 
+	//std::cout << "Trajectory enabled" << std::endl;
+	risingedge=true; 
+      }
 
   }
 

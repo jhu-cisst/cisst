@@ -4,31 +4,86 @@ devOMNItoWAM::devOMNItoWAM( const std::string& TaskName,
 			    const std::string& InputFunctionName,
 			    double period, 
 			    bool enabled,
-			    const vctDynamicVector<double>& yinit ):
+			    const std::string& fileomni,
+			    const vctFrame4x4<double>& Rtw0omni,
+			    const vctDynamicVector<double>& qomni,
+			    const std::string& filewam,
+			    const vctFrame4x4<double>& Rtw0wam,
+			    const vctDynamicVector<double>& qwam ) :
+
   devTrajectory( TaskName,
 		 InputFunctionName,
 		 period,
 		 enabled,
-		 devTrajectory::SE3,
-		 yinit ){}
+		 devTrajectory::JOINTS,
+		 qomni ),
+  qomni( qomni ),
+  qwam( qwam ),
+  told( 0.0 ){
 
+  omni = new robManipulator( fileomni, Rtw0omni );
+  wam = new robManipulator( filewam, Rtw0wam );
+  qdwam.SetSize( 7 );
+  qdwam.SetAll( 0.0 );
 
-void devOMNItoWAM::Reset( double, const vctDynamicVector<double>& ynew ){
-  this->qt = ynew;
 }
 
-void devOMNItoWAM::Evaluate( double dt,
-			     vctDynamicVector<double>& y,
-			     vctDynamicVector<double>& yd,
-			     vctDynamicVector<double>& ydd ){
+void devOMNItoWAM::Reset( double, const vctDynamicVector<double>& qomni )
+{ this->qomni = qomni; }
 
-  y.SetSize( 7 );
-  yd.SetSize( 6 );
-  ydd.SetSize( 6 );
+void devOMNItoWAM::Evaluate( double t,
 
-  y = qt;
-  yd.SetAll( 0.0 );
-  ydd.SetAll( 0.0 );
+			     vctDynamicVector<double>& q,
+			     vctDynamicVector<double>& qd,
+			     vctDynamicVector<double>& qdd ){
 
+  q = qwam;
+  qd.SetSize( 7 );
+  qdd.SetSize( 7 );
+
+  // The current position/orientation of the OMNI
+  qomni[5] = -cmnPI;
+  Rtw2 = omni->ForwardKinematics( qomni );
+
+  vctFrame4x4<double> Rt1w( Rtw1 );
+  Rt1w.InverseSelf();  
+
+  // The relative position/orientation of the OMNI
+  vctFrame4x4<double> Rt12 = Rt1w * Rtw2;
+
+  // Scale the position
+  Rt12[0][3] *= -5.0;
+  Rt12[1][3] *= 5.0;
+  Rt12[2][3] *= 5.0;
+  
+  // The current position/orientation of the WAM
+  Rtw1 = wam->ForwardKinematics( qwam );
+
+  // Solve the inverse kinematics using the previous solution (qold)
+  robManipulator::Errno errno;
+  errno = wam->InverseKinematics( q, Rtw1 * Rt12, 1e-12, 100 );
+
+  // Did ikin screwed up?
+  if( errno == robManipulator::ESUCCESS ){
+    // No! Then estimate the velocity and acceleration
+    double dt = t - told;
+    //qd = (q - qwam) / dt;
+    //qdd = (qd - qdwam) / dt;
+    qd.SetAll(0.0);
+    qdd.SetAll(0.0);
+    qwam = q;
+    qdwam = qd;    
+  }
+
+  else{
+    // Yes! Then return the old solution with no velocity
+    q = qwam;
+    qd.SetAll( 0.0 );
+    qdd.SetAll( 0.0 );
+  }
+
+  // Save the current position/orientation of the OMNI
+  Rtw1 = Rtw2;
+  told = t;
 }
 
