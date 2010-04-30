@@ -27,6 +27,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <FL/Fl_Browser.H>
 #include <FL/Fl_Menu.H>
 
+#include <string>
+
 extern void callbackVisualize(Fl_Widget*, void *userdata);
 
 class PopupBrowser : public Fl_Browser 
@@ -43,6 +45,13 @@ public:
                 if (Fl::event_button() == FL_RIGHT_MOUSE) {
                     // Check if there is any item that a user selected
                     if (this->value() == 0) {
+                        return 1;
+                    }
+
+                    // Show popup menu only for read command
+                    const std::string filter("R) ");
+                    const std::string selectedCommandName(text(value()));
+                    if (selectedCommandName.find(filter) == std::string::npos) {
                         return 1;
                     }
 
