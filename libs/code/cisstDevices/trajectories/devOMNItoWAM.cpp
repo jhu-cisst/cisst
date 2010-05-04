@@ -60,15 +60,12 @@ void devOMNItoWAM::Evaluate( double t,
   Rtw1 = wam->ForwardKinematics( qwam );
 
   // Solve the inverse kinematics using the previous solution (qold)
-  robManipulator::Errno errno;
-  errno = wam->InverseKinematics( q, Rtw1 * Rt12, 1e-12, 100 );
+  robManipulator::Errno manerrno;
+  manerrno = wam->InverseKinematics( q, Rtw1 * Rt12, 1e-12, 100 );
 
   // Did ikin screwed up?
-  if( errno == robManipulator::ESUCCESS ){
+  if( manerrno == robManipulator::ESUCCESS ){
     // No! Then estimate the velocity and acceleration
-    double dt = t - told;
-    //qd = (q - qwam) / dt;
-    //qdd = (qd - qdwam) / dt;
     qd.SetAll(0.0);
     qdd.SetAll(0.0);
     qwam = q;
