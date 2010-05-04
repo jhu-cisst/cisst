@@ -1,6 +1,6 @@
 
 #include <cisstMultiTask/mtsVector.h>
-#include <cisstMultiTask/mtsMatrix.h>
+#include <cisstMultiTask/mtsTransformationTypes.h>
 #include <cisstDevices/controllers/devController.h>
 #include <cisstDevices/devExport.h>
 
@@ -16,7 +16,7 @@ protected:
   mtsVector<double> mtsvs;
   mtsVector<double> mtsvsd;
 
-  mtsMatrix<double> mtsRws;
+  mtsDoubleQuatRot3 mtsqws;
   mtsVector<double> mtsws;
   mtsVector<double> mtswsd;
 

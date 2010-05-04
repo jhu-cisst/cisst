@@ -22,8 +22,6 @@ devComputedTorque::Control( const vctDynamicVector<double>& q,
 			    const vctDynamicVector<double>& qd,
 			    double dt ){
 
-  //std::cout << mtsqs << std::endl;
-
   // error = current - desired
   vctDynamicVector<double> e = q - mtsqs;
 

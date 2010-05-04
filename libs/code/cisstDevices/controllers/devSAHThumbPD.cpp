@@ -70,7 +70,6 @@ devSAHThumbPD::Control( const vctDynamicVector<double>& q,
   for( size_t i=0; i<4; i++ )
     { tau[i+1] = taufinger[i]; }
 
-
   return tau;
 
 }

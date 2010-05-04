@@ -20,6 +20,7 @@ class CISST_EXPORT devController: public mtsTaskPeriodic, public robManipulator{
   mtsFunctionRead mtsFnGetFeedback;
   
   double told;
+
   vctDynamicVector<double> qold;
 
  protected:
@@ -32,6 +33,8 @@ class CISST_EXPORT devController: public mtsTaskPeriodic, public robManipulator{
      false the torques are all zero.
   */
   mtsBool mtsEnabled;
+
+  
   bool risingedge;
 
  public:

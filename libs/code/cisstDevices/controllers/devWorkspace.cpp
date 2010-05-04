@@ -71,25 +71,6 @@ devWorkspace::Control( const vctDynamicVector<double>& q,
   etold = et;
   erold = er;  
   
-  /*
-  for( size_t i=0; i<links.size(); i++ ){
-    if( tau[i] < -links[i].ForceTorqueMax() )
-      tau[i] = -links[i].ForceTorqueMax();
-    if( links[i].ForceTorqueMax() < tau[i] )
-      tau[i] = links[i].ForceTorqueMax();
-  }
-  */
-  /*
-  std::cout 
-    << "tns: " << tns << std::endl
-    //<< "q: " << q << std::endl
-    //<< "qd: " << qd << std::endl
-    << "e: " << e << std::endl
-    //<< "er: " << er << std::endl
-    << "tau: " << tau  << std::endl
-    << std::endl;
-  */
-
   return tau;
   
 }
@@ -97,45 +78,23 @@ devWorkspace::Control( const vctDynamicVector<double>& q,
 vctFrame4x4<double> 
 devWorkspace::RelativePositionOrientation( const vctDynamicVector<double>& q ){
 
-  // Copy the desired (s) pos/ori wrt to world frame
-  vctFrame4x4<double> Rtws;
-  for( size_t r=0; r<3; r++ ){
-    for( size_t c=0; c<3; c++ ){
-      Rtws[r][c] = mtsRws[r][c];
-    }
-  }
-  for( size_t i=0; i<3; i++ )
-    { Rtws[i][3] = mtstws[i]; }
+  // Copy the desired pos/ori wrt to world frame
+  vctQuaternionRotation3<double> qws( mtsqws.X(), 
+				      mtsqws.Y(), 
+				      mtsqws.Z(),
+				      mtsqws.R() );
+  vctFixedSizeVector<double,3> tws( mtstws[0], mtstws[1], mtstws[2] );
+  vctFrame4x4<double> Rtws( qws, tws );
 
   // Current (n) position/orientation in world frame
   vctFrame4x4<double> Rtwn = ForwardKinematics( q );
-  
-  //std::cout << Rtwn.Translation() << Rtws.Translation() << std::endl;
 
   // Inverse of current pos/ori
   vctFrame4x4<double> Rtnw( Rtwn );
   Rtnw.InverseSelf();
-  
+
   // Desired position/orientation wrt to current frame
   return Rtnw * Rtws;
   
 }
 
-  /*
-  // desired orientation (relative to current frame) [ns os as]
-  vctFixedSizeVector<double,3> ns( Rtns[0][0], Rtns[1][0], Rtns[2][0] );
-  vctFixedSizeVector<double,3> os( Rtns[0][1], Rtns[1][1], Rtns[2][1] );
-  vctFixedSizeVector<double,3> as( Rtns[0][2], Rtns[1][2], Rtns[2][2] );
-  
-  // current orientation (relative to current frame) [n o a]
-  vctFixedSizeVector<double,3> n( 1.0, 0.0, 0.0 );
-  vctFixedSizeVector<double,3> o( 0.0, 1.0, 0.0 );
-  vctFixedSizeVector<double,3> a( 0.0, 0.0, 1.0 );
-  
-  // angular error
-  vctFixedSizeVector<double,3> er( -0.5*( (n%ns) + (o%os) + (a%as) ) );
-  
-  // angular error derivative
-  vctFixedSizeVector<double,3> erd = (er - erold)/dt;
-  */  
-  

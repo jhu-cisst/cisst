@@ -1,4 +1,5 @@
 #include <cisstDevices/controllers/devControllerSE3.h>
+#include <cisstVector/vctQuaternionRotation3.h>
 
 devControllerSE3::devControllerSE3( const std::string& taskname, 
 				    double period,
@@ -15,8 +16,8 @@ devControllerSE3::devControllerSE3( const std::string& taskname,
   // Configure the input interface
   if( interface ){
 
-    vctDynamicVector<double> q( links.size(), 0.0 );
-    vctFrame4x4<double> Rt = ForwardKinematics( q );
+    vctFrame4x4<double> Rt;
+    Rt = ForwardKinematics( vctDynamicVector<double>( links.size(), 0.0 ) );
 
     // POSITION
 
@@ -47,26 +48,26 @@ devControllerSE3::devControllerSE3( const std::string& taskname,
 
     // ORIENTATION
 
-    mtsRws.SetSize( 3, 3 );        // Create the orientation
-    mtsws.SetSize( 3 );            // Create the angular velocity
-    mtswsd.SetSize( 3 );           // Create the angular acceleration
+    vctMatrixRotation3<double> Rws( Rt[0][0], Rt[0][1], Rt[0][2], 
+				    Rt[1][0], Rt[1][1], Rt[1][2], 
+				    Rt[2][0], Rt[2][1], Rt[2][2],
+				    VCT_NORMALIZE );
+    mtsqws = vctQuaternionRotation3<double>( Rws );
 
-    for( size_t r=0; r<3; r++ ){
-      for( size_t c=0; c<3; c++ ){
-	mtsRws[r][c] = Rt[r][c];
-      }
-    }
+    mtsws.SetSize( 3 );            // Create the angular velocity
     mtsws.SetAll( 0.0 );           // Clear the angular velocity
+
+    mtswsd.SetSize( 3 );           // Create the angular acceleration
     mtswsd.SetAll( 0.0 );          // Clear the angular acceleration
 
     // Add the variables to the state table
-    StateTable.AddData( mtsRws, "Orientation" );
+    StateTable.AddData( mtsqws, "Orientation" );
     StateTable.AddData( mtsws,  "AngularVelocity" );
     StateTable.AddData( mtswsd, "AngularAcceleration" );
 
     // Let another task write to these vectors
     interface->AddCommandWriteState
-      ( StateTable, mtsRws, devController::InputOrientation );
+      ( StateTable, mtsqws, devController::InputOrientation );
 
     interface->AddCommandWriteState
       ( StateTable, mtsws, devController::InputAngularVelocity );
