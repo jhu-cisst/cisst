@@ -62,9 +62,9 @@ http://www.cisst.org/cisst/license.txt.
      CHECK IF THE PYTHON OBJECT (NAMED `$input') THAT WAS PASSED TO THIS TYPE MAP
      IS A PYARRAY, IS OF THE CORRECT DTYPE, AND IS ONE-DIMENSIONAL
     *****************************************************************************/
-
+    typedef $1_ltype VectorType;
     if (!(   vctThrowUnlessIsPyArray($input)
-          && vctThrowUnlessIsSameTypeArray<$1_ltype::value_type>($input)
+          && vctThrowUnlessIsSameTypeArray<VectorType::value_type>($input)
           && vctThrowUnlessDimension1($input)
           && vctThrowUnlessCorrectVectorSize($input, $1))
         ) {
@@ -77,10 +77,10 @@ http://www.cisst.org/cisst/license.txt.
 
     // Create a temporary vctDynamicVectorRef container
     const npy_intp size = PyArray_DIM($input, 0);
-    const npy_intp stride = PyArray_STRIDE($input, 0) / sizeof($1_ltype::value_type);
-    const $1_ltype::pointer data = reinterpret_cast<$1_ltype::pointer>(PyArray_DATA($input));
+    const npy_intp stride = PyArray_STRIDE($input, 0) / sizeof(VectorType::value_type);
+    const VectorType::pointer data = reinterpret_cast<VectorType::pointer>(PyArray_DATA($input));
 
-    const vctDynamicVectorRef<$1_ltype::value_type> tempContainer(size, data, stride);
+    const vctDynamicVectorRef<VectorType::value_type> tempContainer(size, data, stride);
 
     // Copy the data from the temporary container to the vctDynamicVector
     $1.ForceAssign(tempContainer);
@@ -101,10 +101,11 @@ http://www.cisst.org/cisst/license.txt.
      CREATE A NEW PYARRAY OBJECT
     *****************************************************************************/
 
+    typedef $1_ltype VectorType;
     //Create a new PyArray and set its size
     npy_intp* sizes = PyDimMem_NEW(1);
     sizes[0] = $1.size();
-    int type = vctPythonType<$1_ltype::value_type>();
+    int type = vctPythonType<VectorType::value_type>();
     $result = PyArray_SimpleNew(1, sizes, type);
 
     /*****************************************************************************
@@ -114,9 +115,9 @@ http://www.cisst.org/cisst/license.txt.
     // Create a temporary vctDynamicVectorRef container
     const npy_intp size = $1.size();
     const npy_intp stride = 1;
-    const $1_ltype::pointer data = reinterpret_cast<$1_ltype::pointer>(PyArray_DATA($result));
+    const VectorType::pointer data = reinterpret_cast<VectorType::pointer>(PyArray_DATA($result));
 
-    vctDynamicVectorRef<$1_ltype::value_type> tempContainer(size, data, stride);
+    vctDynamicVectorRef<VectorType::value_type> tempContainer(size, data, stride);
 
     // Copy the data from the vctDynamicConstVectorRef to the temporary container
     tempContainer.Assign($1);
@@ -142,8 +143,9 @@ http://www.cisst.org/cisst/license.txt.
      IS A PYARRAY, IS OF THE CORRECT DTYPE, IS ONE-DIMENSIONAL, AND IS WRITABLE
     *****************************************************************************/
 
+    typedef $*1_ltype VectorType;
     if (!(   vctThrowUnlessIsPyArray($input)
-          && vctThrowUnlessIsSameTypeArray<$*1_ltype::value_type>($input)
+          && vctThrowUnlessIsSameTypeArray<VectorType::value_type>($input)
           && vctThrowUnlessDimension1($input)
           && vctThrowUnlessCorrectVectorSize($input, *($1))
           && vctThrowUnlessIsWritable($input)
@@ -159,13 +161,13 @@ http://www.cisst.org/cisst/license.txt.
 
     // Create a temporary vctDynamicVectorRef container
     const npy_intp size = PyArray_DIM($input, 0);
-    const npy_intp stride = PyArray_STRIDE($input, 0) / sizeof($*1_ltype::value_type);
-    const $*1_ltype::pointer data = reinterpret_cast<$*1_ltype::pointer>(PyArray_DATA($input));
+    const npy_intp stride = PyArray_STRIDE($input, 0) / sizeof(VectorType::value_type);
+    const VectorType::pointer data = reinterpret_cast<VectorType::pointer>(PyArray_DATA($input));
 
-    const vctDynamicVectorRef<$*1_ltype::value_type> tempContainer(size, data, stride);
+    const vctDynamicVectorRef<VectorType::value_type> tempContainer(size, data, stride);
 
     // Create the vctDynamicVector
-    $1 = new $*1_ltype(tempContainer);
+    $1 = new VectorType(tempContainer);
 }
 
 
@@ -183,8 +185,9 @@ http://www.cisst.org/cisst/license.txt.
      CHECK IF THE CONTAINER HAS BEEN RESIZED
     *************************************************************************/
 
-    const $*1_ltype::size_type input_size = PyArray_DIM($input, 0);
-    const $*1_ltype::size_type output_size = $1->size();
+    typedef $*1_ltype VectorType;
+    const VectorType::size_type input_size = PyArray_DIM($input, 0);
+    const VectorType::size_type output_size = $1->size();
 
     if (input_size != output_size) {
         // Resize the PyArray by:
@@ -204,10 +207,10 @@ http://www.cisst.org/cisst/license.txt.
 
     // Create a temporary vctDynamicVectorRef container
     const npy_intp size = PyArray_DIM($input, 0);
-    const npy_intp stride = PyArray_STRIDE($input, 0) / sizeof($*1_ltype::value_type);
-    const $*1_ltype::pointer data = reinterpret_cast<$*1_ltype::pointer>(PyArray_DATA($input));
+    const npy_intp stride = PyArray_STRIDE($input, 0) / sizeof(VectorType::value_type);
+    const VectorType::pointer data = reinterpret_cast<VectorType::pointer>(PyArray_DATA($input));
 
-    vctDynamicVectorRef<$*1_ltype::value_type> tempContainer(size, data, stride);
+    vctDynamicVectorRef<VectorType::value_type> tempContainer(size, data, stride);
 
     // Copy the data from the temporary container to the vctDynamicVector
     tempContainer.Assign(*($1));
@@ -227,12 +230,13 @@ http://www.cisst.org/cisst/license.txt.
        Using: %typemap(out) vctDynamicVector &
      */
 
+    typedef $*1_ltype VectorType;
     //Create new size array and set size
     npy_intp* sizeOfReturnedVector = PyDimMem_NEW(1);
     sizeOfReturnedVector[0] = $1->size();
 
     //create a new PyArray from the reference returned by the C function
-    int type = vctPythonType<$*1_ltype::value_type>();
+    int type = vctPythonType<VectorType::value_type>();
     $result = PyArray_SimpleNewFromData(1, sizeOfReturnedVector, type,  $1->Pointer() );
 }
 
@@ -257,8 +261,9 @@ http://www.cisst.org/cisst/license.txt.
      IS A PYARRAY, IS OF THE CORRECT DTYPE, AND IS ONE-DIMENSIONAL
     *****************************************************************************/
 
+    typedef $*1_ltype VectorType;
     if (!(   vctThrowUnlessIsPyArray($input)
-          && vctThrowUnlessIsSameTypeArray<$*1_ltype::value_type>($input)
+          && vctThrowUnlessIsSameTypeArray<VectorType::value_type>($input)
           && vctThrowUnlessDimension1($input)
           && vctThrowUnlessCorrectVectorSize($input, *($1)))
         ) {
@@ -271,13 +276,13 @@ http://www.cisst.org/cisst/license.txt.
 
     // Create a temporary vctDynamicVectorRef container
     const npy_intp size = PyArray_DIM($input, 0);
-    const npy_intp stride = PyArray_STRIDE($input, 0) / sizeof($*1_ltype::value_type);
-    const $*1_ltype::pointer data = reinterpret_cast<$*1_ltype::pointer>(PyArray_DATA($input));
+    const npy_intp stride = PyArray_STRIDE($input, 0) / sizeof(VectorType::value_type);
+    const VectorType::pointer data = reinterpret_cast<VectorType::pointer>(PyArray_DATA($input));
 
-    const vctDynamicVectorRef<$*1_ltype::value_type> tempContainer(size, data, stride);
+    const vctDynamicVectorRef<VectorType::value_type> tempContainer(size, data, stride);
 
     // Create the vctDynamicVector
-    $1 = new $*1_ltype(tempContainer);
+    $1 = new VectorType(tempContainer);
 }
 
 
@@ -308,12 +313,13 @@ http://www.cisst.org/cisst/license.txt.
 
     /* To imitate const functionality, set the writable flag to false */
 
+    typedef $*1_ltype VectorType;
     //Create new size array and set size
     npy_intp* sizes = PyDimMem_NEW(1);
     sizes[0] = $1->size();
 
     // Look at the NumPy C API to see how these lines work: http://projects.scipy.org/numpy/wiki/NumPyCAPI
-    int type = vctPythonType<$*1_ltype::value_type>();
+    int type = vctPythonType<VectorType::value_type>();
     PyArray_Descr *descr = PyArray_DescrFromType(type);
     $result = PyArray_NewFromDescr(&PyArray_Type, descr, 1, sizes, NULL, $1->Pointer(), NPY_CARRAY_RO, NULL);
 }
@@ -340,8 +346,9 @@ http://www.cisst.org/cisst/license.txt.
      IS WRITABLE
     *************************************************************************/
 
+    typedef $1_ltype VectorType;
     if (!(   vctThrowUnlessIsPyArray($input)
-          && vctThrowUnlessIsSameTypeArray<$1_ltype::value_type>($input)
+          && vctThrowUnlessIsSameTypeArray<VectorType::value_type>($input)
           && vctThrowUnlessDimension1($input)
           && vctThrowUnlessCorrectVectorSize($input, $1)
           && vctThrowUnlessIsWritable($input))
@@ -355,8 +362,8 @@ http://www.cisst.org/cisst/license.txt.
     *************************************************************************/
 
     const npy_intp size = PyArray_DIM($input, 0);
-    const npy_intp stride = PyArray_STRIDE($input, 0) / sizeof($1_ltype::value_type);
-    const $1_ltype::pointer data = reinterpret_cast<$1_ltype::pointer>(PyArray_DATA($input));
+    const npy_intp stride = PyArray_STRIDE($input, 0) / sizeof(VectorType::value_type);
+    const VectorType::pointer data = reinterpret_cast<VectorType::pointer>(PyArray_DATA($input));
 
     $1.SetRef(size, data, stride);
 }
@@ -377,9 +384,10 @@ http://www.cisst.org/cisst/license.txt.
      CREATE A NEW PYARRAY OBJECT
     *****************************************************************************/
 
+    typedef $1_ltype VectorType;
     npy_intp *sizes = PyDimMem_NEW(1);
     sizes[0] = $1.size();
-    int type = vctPythonType<$1_ltype::value_type>();
+    int type = vctPythonType<VectorType::value_type>();
     $result = PyArray_SimpleNew(1, sizes, type);
 
     /*****************************************************************************
@@ -389,9 +397,9 @@ http://www.cisst.org/cisst/license.txt.
     // Create a temporary vctDynamicVectorRef container
     const npy_intp size = $1.size();
     const npy_intp stride = 1;
-    const $1_ltype::pointer data = reinterpret_cast<$1_ltype::pointer>(PyArray_DATA($result));
+    const VectorType::pointer data = reinterpret_cast<VectorType::pointer>(PyArray_DATA($result));
 
-    vctDynamicVectorRef<$1_ltype::value_type> tempContainer(size, data, stride);
+    vctDynamicVectorRef<VectorType::value_type> tempContainer(size, data, stride);
 
     // Copy the data from the vctDynamicVectorRef to the temporary container
     tempContainer.Assign($1);
@@ -418,8 +426,9 @@ http://www.cisst.org/cisst/license.txt.
      IS A PYARRAY, IS OF THE CORRECT DTYPE, AND IS ONE-DIMENSIONAL
     *****************************************************************************/
 
+    typedef $*1_ltype VectorType;
     if (!(   vctThrowUnlessIsPyArray($input)
-          && vctThrowUnlessIsSameTypeArray<$*1_ltype::value_type>($input)
+          && vctThrowUnlessIsSameTypeArray<VectorType::value_type>($input)
           && vctThrowUnlessDimension1($input)
           && vctThrowUnlessCorrectVectorSize($input, *($1)))
         ) {
@@ -432,10 +441,10 @@ http://www.cisst.org/cisst/license.txt.
 
     // Create the vctDynamicVectorRef
     const npy_intp size = PyArray_DIM($input, 0);
-    const npy_intp stride = PyArray_STRIDE($input, 0) / sizeof($*1_ltype::value_type);
-    const $*1_ltype::pointer data = reinterpret_cast<$*1_ltype::pointer>(PyArray_DATA($input));
+    const npy_intp stride = PyArray_STRIDE($input, 0) / sizeof(VectorType::value_type);
+    const VectorType::pointer data = reinterpret_cast<VectorType::pointer>(PyArray_DATA($input));
 
-    $1 = new $*1_ltype(size, data, stride);
+    $1 = new VectorType(size, data, stride);
 }
 
 
@@ -478,8 +487,9 @@ http://www.cisst.org/cisst/license.txt.
      IS A PYARRAY, IS OF THE CORRECT DTYPE, AND IS ONE-DIMENSIONAL
     *****************************************************************************/
 
+    typedef $1_ltype VectorType;
     if (!(   vctThrowUnlessIsPyArray($input)
-          && vctThrowUnlessIsSameTypeArray<$1_ltype::value_type>($input)
+          && vctThrowUnlessIsSameTypeArray<VectorType::value_type>($input)
           && vctThrowUnlessDimension1($input)
           && vctThrowUnlessCorrectVectorSize($input, $1))
         ) {
@@ -493,8 +503,8 @@ http://www.cisst.org/cisst/license.txt.
     *****************************************************************************/
 
     const npy_intp size = PyArray_DIM($input, 0);
-    const npy_intp stride = PyArray_STRIDE($input, 0) / sizeof($1_ltype::value_type);
-    const $1_ltype::pointer data = reinterpret_cast<$1_ltype::pointer>(PyArray_DATA($input));
+    const npy_intp stride = PyArray_STRIDE($input, 0) / sizeof(VectorType::value_type);
+    const VectorType::pointer data = reinterpret_cast<VectorType::pointer>(PyArray_DATA($input));
 
     $1.SetRef(size, data, stride);
 }
@@ -515,11 +525,12 @@ http://www.cisst.org/cisst/license.txt.
      CREATE A NEW PYARRAY OBJECT
     *****************************************************************************/
 
+    typedef $1_ltype VectorType;
     npy_intp *sizes = PyDimMem_NEW(1);
     sizes[0] = $1.size();
 
     // Look at the NumPy C API to see how these lines work: http://projects.scipy.org/numpy/wiki/NumPyCAPI
-    int type = vctPythonType<$1_ltype::value_type>();
+    int type = vctPythonType<VectorType::value_type>();
     PyArray_Descr *descr = PyArray_DescrFromType(type);
     $result = PyArray_NewFromDescr(&PyArray_Type, descr,  1, sizes, NULL, NULL, NPY_CARRAY, NULL);
     PyArray_FLAGS($result) &= ~NPY_WRITEABLE;
@@ -531,9 +542,9 @@ http://www.cisst.org/cisst/license.txt.
     // Create a temporary vctDynamicVectorRef container
     const npy_intp size = $1.size();
     const npy_intp stride = 1;
-    const $1_ltype::pointer data = reinterpret_cast<$1_ltype::pointer>(PyArray_DATA($result));
+    const VectorType::pointer data = reinterpret_cast<VectorType::pointer>(PyArray_DATA($result));
 
-    vctDynamicVectorRef<$1_ltype::value_type> tempContainer(size, data, stride);
+    vctDynamicVectorRef<VectorType::value_type> tempContainer(size, data, stride);
 
     // Copy the data from the vctDynamicConstVectorRef to the temporary container
     tempContainer.Assign($1);
@@ -560,8 +571,9 @@ http://www.cisst.org/cisst/license.txt.
      IS A PYARRAY, IS OF THE CORRECT DTYPE, AND IS ONE-DIMENSIONAL
     *****************************************************************************/
 
+    typedef $*1_ltype VectorType;
     if (!(   vctThrowUnlessIsPyArray($input)
-          && vctThrowUnlessIsSameTypeArray<$*1_ltype::value_type>($input)
+          && vctThrowUnlessIsSameTypeArray<VectorType::value_type>($input)
           && vctThrowUnlessDimension1($input)
           && vctThrowUnlessCorrectVectorSize($input, *($1)))
         ) {
@@ -574,10 +586,10 @@ http://www.cisst.org/cisst/license.txt.
 
     // Create the vctDynamicConstVectorRef
     const npy_intp size = PyArray_DIM($input, 0);
-    const npy_intp stride = PyArray_STRIDE($input, 0) / sizeof($*1_ltype::value_type);
-    const $*1_ltype::pointer data = reinterpret_cast<$*1_ltype::pointer>(PyArray_DATA($input));
+    const npy_intp stride = PyArray_STRIDE($input, 0) / sizeof(VectorType::value_type);
+    const VectorType::pointer data = reinterpret_cast<VectorType::pointer>(PyArray_DATA($input));
 
-    $1 = new $*1_ltype(size, data, stride);
+    $1 = new VectorType(size, data, stride);
 }
 
 
