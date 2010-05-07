@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):  Anton Deguet
+  Author(s):  Anton Deguet, Min Yang Jung
   Created on: 2007-04-08
 
-  (C) Copyright 2007-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2007-2010 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -149,11 +149,14 @@ public:
       class of the object must have the virtual method
       <code>SerializeRaw</code> re-defined to properly serialize the
       content of the object.
+      \param serializeObject If true, object content is serialized.
+             If false, only class services is serialized and object
+             content is not serialized. True by default.
 
       \note As this method relies on cmnSerializeRaw, it might throw
       an exception.
      */
-    void Serialize(const cmnGenericObject & object);
+    void Serialize(const cmnGenericObject & object, const bool serializeObject = true);
 
 
     /*! Serialize the class information if needed.  This method will

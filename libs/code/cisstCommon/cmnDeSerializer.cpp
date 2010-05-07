@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):  Anton Deguet
+  Author(s):  Anton Deguet, Min Yang Jung
   Created on: 2007-04-08
 
-  (C) Copyright 2007-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2007-2010 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -32,7 +32,7 @@ cmnDeSerializer::cmnDeSerializer(std::istream & inputStream):
 }
 
 
-cmnGenericObject * cmnDeSerializer::DeSerialize(void) {
+cmnGenericObject * cmnDeSerializer::DeSerialize(const bool serializeObject) {
     cmnGenericObject * object = 0;
     // get object services
     TypeId typeId;
@@ -40,7 +40,9 @@ cmnGenericObject * cmnDeSerializer::DeSerialize(void) {
     if (typeId == 0) {
         this->DeSerializeServices();
         // read again to deserialize coming object
-        object = this->DeSerialize();
+        if (serializeObject) {
+            object = this->DeSerialize();
+        }
     } else {
         const const_iterator end = ServicesContainer.end();
         const const_iterator iterator = ServicesContainer.find(typeId);
@@ -52,7 +54,9 @@ cmnGenericObject * cmnDeSerializer::DeSerialize(void) {
             if (object == 0) {
                 cmnThrow("cmnDeSerialize::DeSerialize: Dynamic creation failed");
             }
-            object->DeSerializeRaw(this->InputStream);
+            if (serializeObject) {
+                object->DeSerializeRaw(this->InputStream);
+            }
         }
     }
     return object;

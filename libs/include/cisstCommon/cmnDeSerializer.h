@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):  Anton Deguet
+  Author(s):  Anton Deguet, Min Yang Jung
   Created on: 2007-04-08
 
-  (C) Copyright 2007-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2007-2010 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -149,10 +149,14 @@ public:
       contains some class identifiers (pair of class name, remote
       class identifer) it will read them all until an object is found.
 
+      \param serializeObject If true, object content is serialized.
+             If false, only class services is serialized and object
+             content is not serialized. True by default.
+             
       \note As this method relies on cmnDeSerializeRaw, it might throw
       an exception.
     */
-    cmnGenericObject * DeSerialize(void);
+    cmnGenericObject * DeSerialize(const bool serializeObject = true);
 
 
     /*! De-serialize an object from the input stream.  This method
@@ -167,14 +171,16 @@ public:
       an exception.
     */
     template <class _elementType>
-    inline void DeSerialize(_elementType & object) {
+    inline void DeSerialize(_elementType & object, const bool serializeObject = true) {
         // get object services
         TypeId typeId;
         cmnDeSerializeRaw(this->InputStream, typeId);
         if (typeId == 0) {
             this->DeSerializeServices();
             // read again to deserialize coming object
-            this->DeSerialize(object);
+            if (serializeObject) {
+                this->DeSerialize(object);
+            }
         } else {
             const const_iterator end = ServicesContainer.end();
             const const_iterator iterator = ServicesContainer.find(typeId);
@@ -185,7 +191,9 @@ public:
                 if (servicesPointerLocal != object.Services()) {
                     CMN_LOG_CLASS_RUN_ERROR << "DeSerialize: Object types don't match" << std::endl;
                 } else {
-                    object.DeSerializeRaw(this->InputStream);
+                    if (serializeObject) {
+                        object.DeSerializeRaw(this->InputStream);
+                    }
                 }
             }
         }
