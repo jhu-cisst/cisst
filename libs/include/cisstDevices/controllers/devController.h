@@ -6,6 +6,8 @@
 
 #include <cisstDevices/devExport.h>
 
+#include <cisstMultiTask/mtsTransformationTypes.h>
+
 #ifndef _devController_h
 #define _devController_h
 
@@ -56,6 +58,9 @@ class CISST_EXPORT devController: public mtsTaskPeriodic, public robManipulator{
     Control( const vctDynamicVector<double>& q, 
 	     const vctDynamicVector<double>& qd, 
 	     double t ) = 0;
+
+  void GetFeedbackJoint(mtsVector<double>& q) const;
+  void GetFeedbackCartesian(const mtsVector<double>& qJoint, mtsFrm4x4& qCartesian) const;
     
   static const std::string ControlInterface;
   static const std::string Enable;
@@ -76,6 +81,10 @@ class CISST_EXPORT devController: public mtsTaskPeriodic, public robManipulator{
 
   static const std::string FeedbackInterface;
   static const std::string Feedback;
+
+  static const std::string FeedbackOutputInterface;
+  static const std::string FeedbackOutputJoint;
+  static const std::string FeedbackOutputCartesian;
 
   static const std::string OutputInterface;
   static const std::string Output;

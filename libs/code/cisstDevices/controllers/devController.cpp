@@ -20,6 +20,10 @@ const std::string devController::InputAngularAcceleration="InputAngularAccelerat
 const std::string devController::FeedbackInterface  = "ControllerFeedback";
 const std::string devController::Feedback           = "Feedback";
 
+const std::string devController::FeedbackOutputInterface  = "ControllerFeedbackOutput";
+const std::string devController::FeedbackOutputJoint      = "FeedbackOutputJoint";
+const std::string devController::FeedbackOutputCartesian  = "FeedbackOutputCartesian";
+
 const std::string devController::OutputInterface    = "ControllerOutput";
 const std::string devController::Output             = "Output";
 
@@ -65,6 +69,21 @@ devController::devController( const std::string& taskname,
       { interface->AddFunction( devManipulator::Output, mtsFnGetFeedback ); }
   }
 
+  // Create the feedback output interface
+  {
+    mtsProvidedInterface* interface;
+    interface = AddProvidedInterface( devController::FeedbackOutputInterface );
+    if( interface ){
+        interface->AddCommandRead(
+            &devController::GetFeedbackJoint, this, devController::FeedbackOutputJoint, 
+            mtsVector<double>());
+        interface->AddCommandQualifiedRead(
+            &devController::GetFeedbackCartesian, this, devController::FeedbackOutputCartesian,
+        //    mtsVector<double>(), vctFrame4x4<double>());
+            mtsVector<double>(), mtsFrm4x4());
+    }
+  }
+
 }
 
 void devController::Startup(){}
@@ -105,4 +124,15 @@ void devController::Run(){
 
   }
 
+}
+
+
+void devController::GetFeedbackJoint(mtsVector<double>& q) const
+{
+    mtsFnGetFeedback(q);
+}
+
+void devController::GetFeedbackCartesian(const mtsVector<double>& qJoint, mtsFrm4x4& qCartesian) const
+{
+    qCartesian = ForwardKinematics(qJoint);
 }
