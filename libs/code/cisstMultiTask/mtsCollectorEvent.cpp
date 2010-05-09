@@ -479,7 +479,8 @@ void mtsCollectorEvent::SaveEventVoid(const CollectorEventVoid * event)
         if (this->FirstRunningFlag) {
             this->PrintHeader(this->FileFormat);
         }
-        *(this->OutputStream) << event->EventId << std::endl;
+        *(this->OutputStream) << mtsTaskManager::GetInstance()->GetTimeServer().GetRelativeTime()
+            << this->Delimiter << event->EventId << std::endl;
         this->SampleCounter++;
         this->SampleCounterForEvent++;
     }
@@ -494,7 +495,8 @@ void mtsCollectorEvent::SaveEventWrite(const CollectorEventWrite * event, const 
         if (this->FirstRunningFlag) {
             this->PrintHeader(this->FileFormat);
         }
-        *(this->OutputStream) << event->EventId << this->Delimiter;
+        *(this->OutputStream) << mtsTaskManager::GetInstance()->GetTimeServer().GetRelativeTime()
+            << this->Delimiter << event->EventId << this->Delimiter;
         payload->ToStreamRaw(*(this->OutputStream), this->Delimiter);
         *(this->OutputStream) << std::endl;
         this->SampleCounter++;
