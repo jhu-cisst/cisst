@@ -25,6 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsFunctionVoid.h>
 #include <cisstMultiTask/mtsFunctionReadOrWrite.h>
 
+#include <vctPlot2DQWidget.h>
 #include <QMainWindow>
 #include <QObject>
 #include <QTimer>
@@ -45,9 +46,10 @@ class displayQDevice: public QObject, public mtsDevice
 
  protected:
     displayQWidget CentralWidget;
+    vctPlot2DQWidget PlotWidget;
     QMainWindow MainWindow;
     QTimer UpdateTimer;
-
+    
     struct {
        mtsFunctionRead GetData;
        mtsFunctionWrite SetAmplitude;

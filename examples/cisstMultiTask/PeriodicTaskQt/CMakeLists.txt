@@ -11,9 +11,14 @@
 # 
 # --- end cisst license ---
 
+# we need OpenGL
+find_package(Qt4 COMPONENTS QtGUI QtCore QtOpenGL REQUIRED)
+include(${QT_USE_FILE})
+
 qt4_wrap_cpp(QT_WRAPPED_CPP
              displayQComponent.h
              displayQWidget.h
+	     vctPlot2DQWidget.h
              )
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
@@ -26,6 +31,8 @@ add_executable(cisstMultiTaskPeriodicTaskQt
                main.cpp
                sineTask.cpp
                sineTask.h
+	       vctPlot2DQWidget.h
+	       vctPlot2DQWidget.cpp
                )
 
 target_link_libraries(cisstMultiTaskPeriodicTaskQt

@@ -24,6 +24,9 @@ http://www.cisst.org/cisst/license.txt.
 displayQWidget::displayQWidget(void)
 {
     // create the widgets
+    Plot = new vctPlot2DQWidget(this);
+    size_t traceId;
+    Plot->AddTrace("Data", traceId);
     DialAmplitude = new QDial(this);
     LabelAmplitude = new QLabel("Amplitude", this);
     ValueAmplitude = new QLabel("1", this);
@@ -40,11 +43,12 @@ displayQWidget::displayQWidget(void)
     CentralLayout = new QGridLayout(this);
     CentralLayout->setRowStretch(0, 1);
     CentralLayout->setColumnStretch(1, 1);
-    CentralLayout->addWidget(DialAmplitude, 0, 0, 1, 2);
-    CentralLayout->addWidget(LabelAmplitude, 1, 0);
-    CentralLayout->addWidget(ValueAmplitude, 1, 1);
-    CentralLayout->addWidget(LabelData, 2, 0);
-    CentralLayout->addWidget(ValueData, 2, 1);
+    CentralLayout->addWidget(Plot, 0, 0, 1, 2);
+    CentralLayout->addWidget(DialAmplitude, 1, 1, 1, 2);
+    CentralLayout->addWidget(LabelAmplitude, 2, 0);
+    CentralLayout->addWidget(ValueAmplitude, 2, 1);
+    CentralLayout->addWidget(LabelData, 3, 0);
+    CentralLayout->addWidget(ValueData, 3, 1);
 
     // connect Qt signals to slots
     QObject::connect(DialAmplitude, SIGNAL(valueChanged(int)),
