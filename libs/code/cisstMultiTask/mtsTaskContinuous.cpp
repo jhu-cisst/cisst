@@ -110,7 +110,7 @@ void mtsTaskContinuous::Create(void *data)
 void mtsTaskContinuous::Start(void)
 {
     if (TaskState == INITIALIZING) {
-        WaitToStart(3.0 * cmn_s);   // 3 seconds
+        WaitToStart(3.0 * cmn_minute);   // 3 minutes
     }
     if (TaskState == READY) {
         CMN_LOG_CLASS_INIT_VERBOSE << "Start: starting task " << this->GetName() << std::endl;
