@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: vctPlot2DQWidget.h 1238 2010-02-27 03:16:01Z auneri1 $
+  $Id: vctPlot2DBase.h 1238 2010-02-27 03:16:01Z auneri1 $
 
   Author(s):  Anton Deguet
   Created on: 2010-05-05
@@ -18,8 +18,8 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#ifndef _vctPlot2DQWidget_h
-#define _vctPlot2DQWidget_h
+#ifndef _vctPlot2DBase_h
+#define _vctPlot2DBase_h
 
 #include <map>
 #include <string>
@@ -27,17 +27,18 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstVector/vctDynamicVector.h>
 #include <cisstVector/vctFixedSizeVectorTypes.h>
 
-#include <QGLWidget>
-
-class vctPlot2DQWidget: public QGLWidget
+/*! Base class for 2D plotters.  Handles storage of 2D points, colors
+  and thicknesses, computation of scales and offsets. */
+class vctPlot2DBase
 {
-    Q_OBJECT;
 
 public:
 
+    /*! Storage for a given signal */
     class Trace 
     {
-        friend class vctPlot2DQWidget;
+        friend class vctPlot2DBase;
+        friend class vctPlot2DGLBase;
     public:
         Trace(const std::string & name, size_t numberOfPoints);
         ~Trace() {};
@@ -56,8 +57,8 @@ public:
         double LineWidth;
     };
 
-    vctPlot2DQWidget(QWidget * parent);
-    ~vctPlot2DQWidget(void) {};
+    vctPlot2DBase(void);
+    ~vctPlot2DBase(void) {};
 
     /*! Create a new trace, user needs to provide a placeholder to
       retrieve the traceId assigned.  This method checks if the name
@@ -87,11 +88,11 @@ public:
     DrawGrid(void);
 #endif
 
-    /*! Methods required for Qt */
+    /*! Methods required in all derived classes */
     //@{
-    virtual void initializeGL(void);
-    virtual void resizeGL(int w, int h);
-    virtual void paintGL(void);
+    virtual void RenderInitialize(void) = 0;
+    virtual void RenderResize(double width, double height) = 0;
+    virtual void Render(void) = 0;
     //@}
 
 protected:
@@ -112,4 +113,4 @@ protected:
     vctDouble3 BackgroundColor;
 };
 
-#endif  // _vctPlot2DQWidget_h
+#endif  // _vctPlot2DBase_h

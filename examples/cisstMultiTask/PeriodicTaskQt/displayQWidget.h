@@ -26,7 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <QLabel>
 #include <QPushButton>
 #include <QWidget>
-#include "vctPlot2DQWidget.h"
+#include <vctPlot2DQWidget.h>
 
 
 class displayQWidget : public QWidget

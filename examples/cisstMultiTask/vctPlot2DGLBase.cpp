@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: vctPlot2DQWidget.cpp 1238 2010-02-27 03:16:01Z auneri1 $
+  $Id: vctPlot2DGLBase.cpp 1238 2010-02-27 03:16:01Z auneri1 $
 
   Author(s):  Anton Deguet
   Created on: 2010-05-05
@@ -18,108 +18,23 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include "vctPlot2DQWidget.h"
+#include "vctPlot2DGLBase.h"
 
 
-vctPlot2DQWidget::Trace::Trace(const std::string & name, size_t numberOfPoints):
-    Active(true),
-    Name(name),
-    IndexFirst(0),
-    IndexLast(0),
-    Color(1.0, 1.0, 1.0),
-    LineWidth(1.0)
-{
-    this->Data.SetSize(numberOfPoints);
-}
+#if (CISST_OS == CISST_DARWIN)
+  #include <OpenGL/gl.h>
+#else
+  #include <GL/gl.h>
+#endif
 
 
-void vctPlot2DQWidget::Trace::AddPoint(const vctDouble2 & point)
-{
-    // look where to store this point
-    IndexLast = (IndexLast + 1) % this->Data.size();
-    if (IndexFirst == IndexLast ) {
-        IndexFirst = (IndexLast + 1) % this->Data.size();
-    }
-    Data.Element(IndexLast).Assign(point); 
-}
-
-
-void vctPlot2DQWidget::Trace::UpdateMinAndMax(vctDouble2 & min, vctDouble2 & max)
-{
-    size_t pointIndex;
-    size_t numberOfPoints;
-    double value;
-    size_t nb = 0;
-    numberOfPoints = this->Data.size();
-    for (pointIndex = this->IndexFirst;
-         pointIndex != this->IndexLast;
-         pointIndex = (pointIndex + 1) % numberOfPoints) {
-        nb++;
-        value = this->Data.Element(pointIndex).X(); // X
-        if (value < min.X()) {
-            min.X() = value;
-        } else if (value > max.X()) {
-            max.X() = value;
-        }
-        value = this->Data.Element(pointIndex).Y(); // Y
-        if (value < min.Y()) {
-            min.Y() = value;
-        } else if (value > max.Y()) {
-            max.Y() = value;
-        }
-    }
-    std::cout << nb << std::endl;
-}
-
-
-vctPlot2DQWidget::vctPlot2DQWidget(QWidget * parent):
-    QGLWidget(parent),
-    NumberOfPoints(200),
-    BackgroundColor(0.1, 0.1, 0.1)
+vctPlot2DGLBase::vctPlot2DGLBase(void):
+    vctPlot2DBase()
 {
 }
 
 
-bool vctPlot2DQWidget::AddTrace(const std::string & name, size_t & traceId)
-{
-    // check if the name already exists
-    TracesIdType::const_iterator found = this->TracesId.find(name);
-    const TracesIdType::const_iterator end = this->TracesId.end();
-    if (found == end) {
-        // new name
-        traceId = Traces.size();
-        Trace * newTrace = new Trace(name, this->NumberOfPoints);
-        Traces.push_back(newTrace);
-        TracesId[name] = traceId;
-        return true;
-    }
-    return false;
-}
-
-
-void vctPlot2DQWidget::SetNumberOfPoints(size_t numberOfPoints)
-{
-    this->NumberOfPoints = numberOfPoints;
-    if (this->NumberOfPoints < 3) {
-        this->NumberOfPoints = 3;
-    }
-}
-
-
-void vctPlot2DQWidget::AddPoint(size_t traceId, const vctDouble2 & point)
-{
-    this->Traces[traceId]->AddPoint(point);
-} 
-
-
-void vctPlot2DQWidget::SetBackgroundColor(const vctDouble3 & color)
-{
-    // should add check for [0,1]
-    this->BackgroundColor = color;
-}
-
-
-void vctPlot2DQWidget::initializeGL(void)
+void vctPlot2DGLBase::RenderInitialize(void)
 {
 	glMatrixMode(GL_MODELVIEW); // set the model view matrix
 	glLoadIdentity();
@@ -133,7 +48,7 @@ void vctPlot2DQWidget::initializeGL(void)
 }
 
 
-void vctPlot2DQWidget::resizeGL(int width, int height)
+void vctPlot2DGLBase::RenderResize(double width, double height)
 {
     this->Viewport.Assign(width, height);
     GLdouble w = static_cast<GLdouble>(width);
@@ -145,7 +60,7 @@ void vctPlot2DQWidget::resizeGL(int width, int height)
 }
 
 
-void vctPlot2DQWidget::paintGL(void)
+void vctPlot2DGLBase::Render(void)
 {
     size_t traceIndex;
     Trace * trace;

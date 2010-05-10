@@ -31,6 +31,8 @@ void displayTask::Configure(const std::string & CMN_UNUSED(filename))
                                << startValue << std::endl;
     UI.Amplitude->bounds(minValue, maxValue);
     UI.Amplitude->value(startValue);
+    size_t traceId;
+    UI.Plot->AddTrace("Data", traceId);
     AmplitudeData = startValue;
 }
 
@@ -38,6 +40,7 @@ void displayTask::Startup(void)
 {
     // make the UI visible
     UI.show(0, NULL);
+    UI.Plot->show();
 }
 
 void displayTask::Run(void)
@@ -45,6 +48,8 @@ void displayTask::Run(void)
     // get the data from the sine wave generator task
     Generator.GetData(Data);
     UI.Data->value(Data);
+    UI.Plot->AddPoint(0, vctDouble2(Data.Timestamp(), Data.Data));
+    UI.Plot->redraw();
     // check if the user has entered a new amplitude in UI
     if (UI.AmplitudeChanged) {
         // retrieve the new amplitude and send it to the sine task
