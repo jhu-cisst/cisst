@@ -27,9 +27,12 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstVector/vctDynamicVector.h>
 #include <cisstVector/vctFixedSizeVectorTypes.h>
 
+// Always include last
+#include <cisstVector/vctExport.h>
+
 /*! Base class for 2D plotters.  Handles storage of 2D points, colors
   and thicknesses, computation of scales and offsets. */
-class vctPlot2DBase
+class CISST_EXPORT vctPlot2DBase
 {
 
 public:
@@ -38,7 +41,8 @@ public:
     class Trace 
     {
         friend class vctPlot2DBase;
-        friend class vctPlot2DGLBase;
+        friend class vctPlot2DOpenGL;
+        friend class vctPlot2DOpenVTK;
     public:
         Trace(const std::string & name, size_t numberOfPoints);
         ~Trace() {};

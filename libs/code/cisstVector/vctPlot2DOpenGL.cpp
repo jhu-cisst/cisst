@@ -18,7 +18,7 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include "vctPlot2DGLBase.h"
+#include <cisstVector/vctPlot2DOpenGL.h>
 
 #if (CISST_OS == CISST_WINDOWS)
   #include <windows.h>
@@ -31,13 +31,13 @@ http://www.cisst.org/cisst/license.txt.
 #endif
 
 
-vctPlot2DGLBase::vctPlot2DGLBase(void):
+vctPlot2DOpenGL::vctPlot2DOpenGL(void):
     vctPlot2DBase()
 {
 }
 
 
-void vctPlot2DGLBase::RenderInitialize(void)
+void vctPlot2DOpenGL::RenderInitialize(void)
 {
 	glMatrixMode(GL_MODELVIEW); // set the model view matrix
 	glLoadIdentity();
@@ -51,7 +51,7 @@ void vctPlot2DGLBase::RenderInitialize(void)
 }
 
 
-void vctPlot2DGLBase::RenderResize(double width, double height)
+void vctPlot2DOpenGL::RenderResize(double width, double height)
 {
     this->Viewport.Assign(width, height);
     GLdouble w = static_cast<GLdouble>(width);
@@ -63,7 +63,7 @@ void vctPlot2DGLBase::RenderResize(double width, double height)
 }
 
 
-void vctPlot2DGLBase::Render(void)
+void vctPlot2DOpenGL::Render(void)
 {
     size_t traceIndex;
     Trace * trace;

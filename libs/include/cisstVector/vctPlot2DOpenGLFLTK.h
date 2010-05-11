@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: vctPlot2DQWidget.h 1238 2010-02-27 03:16:01Z auneri1 $
+  $Id: vctPlot2DOpenGLFLTK.h 1238 2010-02-27 03:16:01Z auneri1 $
 
   Author(s):  Anton Deguet
   Created on: 2010-05-05
@@ -18,8 +18,8 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#ifndef _vctPlot2DFLTK_h
-#define _vctPlot2DFLTK_h
+#ifndef _vctPlot2DOpenGLFLTK_h
+#define _vctPlot2DOpenGLFLTK_h
 
 #include <FL/Fl.H>
 #include <FL/Fl_Gl_Window.H>
@@ -28,13 +28,13 @@ http://www.cisst.org/cisst/license.txt.
 #include <vctPlot2DGLBase.h>
 
 
-class vctPlot2DFLTK: public Fl_Gl_Window, public vctPlot2DGLBase
+class vctPlot2DOpenGLFLTK: public Fl_Gl_Window, public vctPlot2DGLBase
 {
 public:
-    vctPlot2DFLTK(const int x, const int y,
+    vctPlot2DOpenGLFLTK(const int x, const int y,
 		  const int width, const int height,
 		  const char * title);
-    ~vctPlot2DFLTK(void) {};
+    ~vctPlot2DOpenGLFLTK(void) {};
 
 protected:
 
@@ -44,4 +44,4 @@ protected:
 };
 
 
-#endif // _vctPlot2DFLTK_h
+#endif // _vctPlot2DOpenGLFLTK_h

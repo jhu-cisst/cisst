@@ -18,7 +18,7 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include "vctPlot2DBase.h"
+#include <cisstVector/vctPlot2DBase.h>
 
 
 vctPlot2DBase::Trace::Trace(const std::string & name, size_t numberOfPoints):

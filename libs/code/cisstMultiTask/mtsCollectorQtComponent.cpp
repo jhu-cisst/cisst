@@ -19,10 +19,10 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstMultiTask/mtsRequiredInterface.h>
-#include <cisstMultiTask/mtsCollectorQComponent.h>
+#include <cisstMultiTask/mtsCollectorQtComponent.h>
 
 
-mtsCollectorQComponent::mtsCollectorQComponent(const std::string & taskName) :
+mtsCollectorQtComponent::mtsCollectorQtComponent(const std::string & taskName) :
     mtsDevice(taskName)
 {
     // create the cisstMultiTask interface with commands and events
@@ -34,41 +34,41 @@ mtsCollectorQComponent::mtsCollectorQComponent(const std::string & taskName) :
        requiredInterface->AddFunction("StopCollectionIn", Collection.StopCollectionIn);
        requiredInterface->AddFunction("SetWorkingDirectory", Collection.SetWorkingDirectory);
        requiredInterface->AddFunction("SetOutputToDefault", Collection.SetOutputToDefault);
-       requiredInterface->AddEventHandlerVoid(&mtsCollectorQComponent::CollectionStartedHandler, this,
+       requiredInterface->AddEventHandlerVoid(&mtsCollectorQtComponent::CollectionStartedHandler, this,
                                               "CollectionStarted", false);
-       requiredInterface->AddEventHandlerWrite(&mtsCollectorQComponent::CollectionStoppedHandler, this,
+       requiredInterface->AddEventHandlerWrite(&mtsCollectorQtComponent::CollectionStoppedHandler, this,
                                                "CollectionStopped", false);
-       requiredInterface->AddEventHandlerWrite(&mtsCollectorQComponent::ProgressHandler, this,
+       requiredInterface->AddEventHandlerWrite(&mtsCollectorQtComponent::ProgressHandler, this,
                                                "Progress", false);
     }
 }
 
 
-mtsCollectorQComponent::~mtsCollectorQComponent(void)
+mtsCollectorQtComponent::~mtsCollectorQtComponent(void)
 {
-    CMN_LOG_CLASS_INIT_DEBUG << "~mtsCollectorQComponent: destructor has been called" << std::endl;
+    CMN_LOG_CLASS_INIT_DEBUG << "~mtsCollectorQtComponent: destructor has been called" << std::endl;
 }
 
 
-void mtsCollectorQComponent::CollectionStartedHandler(void)
+void mtsCollectorQtComponent::CollectionStartedHandler(void)
 {
     emit CollectionStartedQSignal();
 }
 
 
-void mtsCollectorQComponent::CollectionStoppedHandler(const mtsUInt & count)
+void mtsCollectorQtComponent::CollectionStoppedHandler(const mtsUInt & count)
 {
     emit CollectionStoppedQSignal(count.Data);
 }
 
 
-void mtsCollectorQComponent::ProgressHandler(const mtsUInt & count)
+void mtsCollectorQtComponent::ProgressHandler(const mtsUInt & count)
 {
     emit ProgressQSignal(count.Data);
 }
 
 
-void mtsCollectorQComponent::ConnectToWidget(QWidget * widget)
+void mtsCollectorQtComponent::ConnectToWidget(QWidget * widget)
 {
     QObject::connect(widget, SIGNAL(StartCollection()),
                      this, SLOT(StartCollectionQSlot()));
@@ -95,35 +95,35 @@ void mtsCollectorQComponent::ConnectToWidget(QWidget * widget)
 }
 
 
-void mtsCollectorQComponent::StartCollectionQSlot(void)
+void mtsCollectorQtComponent::StartCollectionQSlot(void)
 {
     CMN_LOG_CLASS_RUN_VERBOSE << "StartCollectionQSlot: starting data collection" << std::endl;
     Collection.StartCollection();
 }
 
 
-void mtsCollectorQComponent::StopCollectionQSlot(void)
+void mtsCollectorQtComponent::StopCollectionQSlot(void)
 {
     CMN_LOG_CLASS_RUN_VERBOSE << "StopCollectionQSlot: stopping data collection" << std::endl;
     Collection.StopCollection();
 }
 
 
-void mtsCollectorQComponent::StartCollectionInQSlot(double delay)
+void mtsCollectorQtComponent::StartCollectionInQSlot(double delay)
 {
     CMN_LOG_CLASS_RUN_VERBOSE << "StartCollectionInQSlot: starting data collection in " << delay << "s" << std::endl;
     Collection.StartCollectionIn(mtsDouble(delay));
 }
 
 
-void mtsCollectorQComponent::StopCollectionInQSlot(double delay)
+void mtsCollectorQtComponent::StopCollectionInQSlot(double delay)
 {
     CMN_LOG_CLASS_RUN_VERBOSE << "StopCollectionInQSlot: stopping data collection in " << delay << "s" << std::endl;
     Collection.StopCollectionIn(mtsDouble(delay));
 }
 
 
-void mtsCollectorQComponent::SetWorkingDirectoryQSlot(QString directoryQt)
+void mtsCollectorQtComponent::SetWorkingDirectoryQSlot(QString directoryQt)
 {
     mtsStdString directory(directoryQt.toStdString());
     Collection.SetWorkingDirectory(directory);
@@ -131,7 +131,7 @@ void mtsCollectorQComponent::SetWorkingDirectoryQSlot(QString directoryQt)
 }
 
 
-void mtsCollectorQComponent::SetOutputToDefaultQSlot(void)
+void mtsCollectorQtComponent::SetOutputToDefaultQSlot(void)
 {
     CMN_LOG_CLASS_RUN_VERBOSE << "StopCollectionQSlot: set output to default" << std::endl;
     Collection.SetOutputToDefault();

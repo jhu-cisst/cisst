@@ -18,8 +18,8 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#ifndef _mtsCollectorQWidget_h
-#define _mtsCollectorQWidget_h
+#ifndef _mtsCollectorQtWidget_h
+#define _mtsCollectorQtWidget_h
 
 #include <QWidget>
 
@@ -33,15 +33,15 @@ class QLabel;
 class QFileDialog;
 
 // Always include last
-#include <cisstMultiTask/mtsExport.h>
+#include <cisstMultiTask/mtsExportQt.h>
 
-class CISST_EXPORT mtsCollectorQWidget: public QWidget
+class CISST_EXPORT mtsCollectorQtWidget: public QWidget
 {
     Q_OBJECT;
 
 public:
-    mtsCollectorQWidget(void);
-    ~mtsCollectorQWidget(void) {};
+    mtsCollectorQtWidget(void);
+    ~mtsCollectorQtWidget(void) {};
 
 protected:
     unsigned int NumberOfCollectors;
@@ -94,4 +94,4 @@ signals:
     void SetOutputToDefault(void);
 };
 
-#endif  // _mtsCollectorQWidget_h
+#endif  // _mtsCollectorQtWidget_h

@@ -18,7 +18,7 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include <cisstCommon/cmnLoggerQWidget.h>
+#include <cisstCommon/cmnLoggerQtWidget.h>
 #include <cisstCommon/cmnClassRegister.h>
 
 #include <QWidget>
@@ -33,10 +33,10 @@ http://www.cisst.org/cisst/license.txt.
 
 
 /*! Model class used for class register entries */
-class cmnLoggerQWidgetClassServicesModel: public QAbstractTableModel
+class cmnLoggerQtWidgetClassServicesModel: public QAbstractTableModel
 {
 public:
-    cmnLoggerQWidgetClassServicesModel(QObject * parent = 0);
+    cmnLoggerQtWidgetClassServicesModel(QObject * parent = 0);
     int rowCount(const QModelIndex & parent) const;
     int columnCount(const QModelIndex & parent) const;
     QVariant headerData(int section, Qt::Orientation orientation, int role) const;
@@ -47,10 +47,10 @@ public:
 
 
 /*! Delegate class to handle LoD changes in model */
-class cmnLoggerQWidgetLoDDelegate: public QItemDelegate
+class cmnLoggerQtWidgetLoDDelegate: public QItemDelegate
 {
 public:
-    cmnLoggerQWidgetLoDDelegate(QObject * parent = 0);
+    cmnLoggerQtWidgetLoDDelegate(QObject * parent = 0);
     QWidget * createEditor(QWidget * parent, const QStyleOptionViewItem & option, const QModelIndex & index) const;
 	void setEditorData(QWidget * editor, const QModelIndex & index) const;
     void setModelData(QWidget * editor, QAbstractItemModel * model, const QModelIndex & index) const;
@@ -58,131 +58,130 @@ public:
 };
 
 
-
-cmnLoggerQWidgetClassServicesModel::cmnLoggerQWidgetClassServicesModel(QObject * parent):
+cmnLoggerQtWidgetClassServicesModel::cmnLoggerQtWidgetClassServicesModel(QObject * parent):
     QAbstractTableModel(parent)
 {
 }
 
 
-int cmnLoggerQWidgetClassServicesModel::rowCount(const QModelIndex & CMN_UNUSED(parent)) const
+int cmnLoggerQtWidgetClassServicesModel::rowCount(const QModelIndex & CMN_UNUSED(parent)) const
 {
     return cmnClassRegister::size();
 }
 
 
-int cmnLoggerQWidgetClassServicesModel::columnCount(const QModelIndex & CMN_UNUSED(parent)) const
+int cmnLoggerQtWidgetClassServicesModel::columnCount(const QModelIndex & CMN_UNUSED(parent)) const
 {
     return 2;
 }
 
 
-QVariant cmnLoggerQWidgetClassServicesModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant cmnLoggerQtWidgetClassServicesModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if (orientation == Qt::Horizontal) {
-	if (role == Qt::DisplayRole) {
-	    if (section == 0) {
-		return QString("Class");
-	    } else if (section == 1) {
-		return QString("Filter level");
-	    }
-	}
+        if (role == Qt::DisplayRole) {
+            if (section == 0) {
+                return QString("Class");
+            } else if (section == 1) {
+                return QString("Filter level");
+            }
+        }
     }
     return QAbstractTableModel::headerData(section, orientation, role);
 }
 
 
-QVariant cmnLoggerQWidgetClassServicesModel::data(const QModelIndex & index, int role) const
+QVariant cmnLoggerQtWidgetClassServicesModel::data(const QModelIndex & index, int role) const
 {
     if (!index.isValid()) {
-	return QVariant();
+        return QVariant();
     }
 
     if (role == Qt::DisplayRole || role == Qt::EditRole) {
-	cmnClassRegister::const_iterator iterator = cmnClassRegister::begin();
-	std::advance(iterator, index.row());
-	if (index.column() == 0) {
-	    return QString(iterator->first.c_str());
-	} else {
-	    // get the string associated to the level of detail for display
-	    if (role == Qt::DisplayRole) {
-		return QString(cmnLogLoDString[iterator->second->GetLoD()]);
-	    } else {
-		// for edit, return the LoD itself
-		return QVariant(iterator->second->GetLoD());
-	    }
-	}
+        cmnClassRegister::const_iterator iterator = cmnClassRegister::begin();
+        std::advance(iterator, index.row());
+        if (index.column() == 0) {
+            return QString(iterator->first.c_str());
+        } else {
+            // get the string associated to the level of detail for display
+            if (role == Qt::DisplayRole) {
+                return QString(cmnLogLoDString[iterator->second->GetLoD()]);
+            } else {
+                // for edit, return the LoD itself
+                return QVariant(iterator->second->GetLoD());
+            }
+        }
     }
-
+    
     if (role == Qt::TextAlignmentRole) {
         return QVariant(Qt::AlignLeft | Qt::AlignTop);
     }
 
     if (role == Qt::ToolTipRole) {
-	if (index.column() == 0) {
-	    return QString("Class name, can't be modified");
-	} else {
-	    // get the string associated to the level of detail
-	    return QString("Level of Detail, modify using dropbox");
-	}
+        if (index.column() == 0) {
+            return QString("Class name, can't be modified");
+        } else {
+            // get the string associated to the level of detail
+            return QString("Level of Detail, modify using dropbox");
+        }
     }
 
     return QVariant();
 }
 
 
-Qt::ItemFlags cmnLoggerQWidgetClassServicesModel::flags(const QModelIndex & index) const
+Qt::ItemFlags cmnLoggerQtWidgetClassServicesModel::flags(const QModelIndex & index) const
 {
     if (!index.isValid()) {
-	return 0;
+        return 0;
     }
     // only the second column can be edited
     if (index.column() == 0) {
-	return QAbstractItemModel::flags(index);
+        return QAbstractItemModel::flags(index);
     } else {
-	return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
+        return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
     }
 }
 
 
-bool cmnLoggerQWidgetClassServicesModel::setData(const QModelIndex & index, const QVariant & value, int role)
+bool cmnLoggerQtWidgetClassServicesModel::setData(const QModelIndex & index,
+                                                  const QVariant & value, int role)
 {
     if (index.isValid() && (role == Qt::EditRole ||
-			    role == Qt::DisplayRole)) {
-	// add 1 to the row index to skip over the header
-	// addressBook[index.row()+1][index.column()] = value.toString();
-	cmnClassRegister::const_iterator iterator = cmnClassRegister::begin();
-	std::advance(iterator, index.row());
-	cmnClassRegister::SetLoD(iterator->first.c_str(),
-				 static_cast<cmnLogLoD>(value.toInt()));
+                            role == Qt::DisplayRole)) {
+        // add 1 to the row index to skip over the header
+        // addressBook[index.row()+1][index.column()] = value.toString();
+        cmnClassRegister::const_iterator iterator = cmnClassRegister::begin();
+        std::advance(iterator, index.row());
+        cmnClassRegister::SetLoD(iterator->first.c_str(),
+                                 static_cast<cmnLogLoD>(value.toInt()));
     }
     return true;
-
 }
 
 
-cmnLoggerQWidgetLoDDelegate::cmnLoggerQWidgetLoDDelegate(QObject * parent):
+cmnLoggerQtWidgetLoDDelegate::cmnLoggerQtWidgetLoDDelegate(QObject * parent):
     QItemDelegate(parent)
 {
 }
 
 
-QWidget * cmnLoggerQWidgetLoDDelegate::createEditor(QWidget * parent,
-						    const QStyleOptionViewItem & option,
-						    const QModelIndex & index) const
+QWidget * cmnLoggerQtWidgetLoDDelegate::createEditor(QWidget * parent,
+                                                     const QStyleOptionViewItem & option,
+                                                     const QModelIndex & index) const
 {
     QComboBox * comboBox = new QComboBox(parent);
     unsigned int lod;
     for (lod = CMN_LOG_LOD_NONE;
-	 lod < CMN_LOG_LOD_NOT_USED;
-	 lod++) {
-	comboBox->insertItem(lod, QString(cmnLogLoDString[lod]), QVariant(lod));
+         lod < CMN_LOG_LOD_NOT_USED;
+         lod++) {
+        comboBox->insertItem(lod, QString(cmnLogLoDString[lod]), QVariant(lod));
     }
     return comboBox;
 }
 
 
-void cmnLoggerQWidgetLoDDelegate::setEditorData(QWidget * editor,
+void cmnLoggerQtWidgetLoDDelegate::setEditorData(QWidget * editor,
 						const QModelIndex & index) const
 {
     int value = index.model()->data(index, Qt::EditRole).toInt();
@@ -192,8 +191,8 @@ void cmnLoggerQWidgetLoDDelegate::setEditorData(QWidget * editor,
 }
 
 
-void cmnLoggerQWidgetLoDDelegate::setModelData(QWidget * editor, QAbstractItemModel * model,
-						 const QModelIndex & index) const
+void cmnLoggerQtWidgetLoDDelegate::setModelData(QWidget * editor, QAbstractItemModel * model,
+                                                const QModelIndex & index) const
 {
     QComboBox * comboBox = static_cast<QComboBox *>(editor);
     int value = comboBox->currentIndex();
@@ -201,14 +200,15 @@ void cmnLoggerQWidgetLoDDelegate::setModelData(QWidget * editor, QAbstractItemMo
 }
 
 
-void cmnLoggerQWidgetLoDDelegate::updateEditorGeometry(QWidget * editor,
-						       const QStyleOptionViewItem & option, const QModelIndex & index) const
+void cmnLoggerQtWidgetLoDDelegate::updateEditorGeometry(QWidget * editor,
+                                                        const QStyleOptionViewItem & option,
+                                                        const QModelIndex & index) const
 {
     editor->setGeometry(option.rect);
 }
 
 
-cmnLoggerQWidget::cmnLoggerQWidget(QWidget * parent)
+cmnLoggerQtWidget::cmnLoggerQtWidget(QWidget * parent)
 {
     // create main widget and layout
     this->Widget = new QWidget(parent);
@@ -230,8 +230,8 @@ cmnLoggerQWidget::cmnLoggerQWidget(QWidget * parent)
     // table with level per class
     this->View = new QTableView(this->Widget);
     this->Layout->addWidget(this->View);
-    this->Model = new cmnLoggerQWidgetClassServicesModel(this->View); // parent to perform cleanup?
-    this->Delegate = new cmnLoggerQWidgetLoDDelegate(this->View); // parent to perform cleanup?
+    this->Model = new cmnLoggerQtWidgetClassServicesModel(this->View); // parent to perform cleanup?
+    this->Delegate = new cmnLoggerQtWidgetLoDDelegate(this->View); // parent to perform cleanup?
     this->View->verticalHeader()->hide(); // hide column of numbers
     this->View->setModel(this->Model);
     this->View->setItemDelegate(this->Delegate);

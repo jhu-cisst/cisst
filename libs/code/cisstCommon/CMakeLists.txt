@@ -94,9 +94,9 @@ if (CISST_HAS_QT)
     LIBRARY_DIR cisstCommon
     DEPENDENCIES cisstCommon
     SOURCE_FILES cmnClassServicesQt.cpp
-                 cmnLoggerQWidget.cpp
+                 cmnLoggerQtWidget.cpp
     HEADER_FILES cmnExportQt.h
-                 cmnLoggerQWidget.h)
+                 cmnLoggerQtWidget.h)
 
   target_link_libraries (cisstCommonQt ${QT_LIBRARIES})
 

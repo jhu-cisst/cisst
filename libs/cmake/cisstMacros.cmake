@@ -49,22 +49,23 @@ function (cisst_add_library ...)
   cisst_cmake_debug ("cisst_add_library called with: ${ARGV}")
 
   # set all keywords and their values to ""
-  set (FUNCTION_KEYWORDS LIBRARY LIBRARY_DIR PROJECT DEPENDENCIES SOURCE_FILES HEADER_FILES)
+  set (FUNCTION_KEYWORDS
+       LIBRARY LIBRARY_DIR PROJECT DEPENDENCIES
+       SOURCE_FILES HEADER_FILES
+       ADDITIONAL_SOURCE_FILES ADDITIONAL_HEADER_FILES)
+
+  # reset local variables
   foreach(keyword ${FUNCTION_KEYWORDS})
     set (${keyword} "")
-    cisst_cmake_debug ("cisst_add_library: ${keyword}: ${${keyword}}")
   endforeach(keyword)
 
   # parse input
   foreach (arg ${ARGV})
-    cisst_cmake_debug ("cisst_add_library: Parsing: ${arg}")
     list (FIND FUNCTION_KEYWORDS ${arg} ARGUMENT_IS_A_KEYWORD)
     if (${ARGUMENT_IS_A_KEYWORD} GREATER -1)
-      cisst_cmake_debug ("cisst_add_library: Found keyword: ${arg}")
       set (CURRENT_PARAMETER ${arg})
       set (${CURRENT_PARAMETER} "")
     else (${ARGUMENT_IS_A_KEYWORD} GREATER -1)
-      cisst_cmake_debug ("cisst_add_library: Found value: ${arg} for keyword ${CURRENT_PARAMETER}")
       set (${CURRENT_PARAMETER} ${${CURRENT_PARAMETER}} ${arg})
     endif (${ARGUMENT_IS_A_KEYWORD} GREATER -1)
   endforeach (arg)
@@ -139,12 +140,14 @@ function (cisst_add_library ...)
   # Add dependencies for linking, also check BUILD_xxx for dependencies
   if (DEPENDENCIES)
     # Check that dependencies are build
+    set (BUILD_DEPENDENCIES "")
     foreach (dependency ${DEPENDENCIES})
       set (BUILD_DEPENDENCIES ${BUILD_DEPENDENCIES} BUILD_LIBS_${dependency})
     endforeach (dependency)
     variable_requires (BUILD_LIBS_${LIBRARY} BUILD_LIBS_${LIBRARY} ${BUILD_DEPENDENCIES})
     # Set the link flags
     target_link_libraries (${LIBRARY} ${DEPENDENCIES})
+    cisst_cmake_debug ("cisst_add_library: Library ${LIBRARY} links against: ${DEPENDENCIES}")
     # Keep a trace of dependencies for main CMake level
     set (${LIBRARY}_DEPENDENCIES "${DEPENDENCIES}" CACHE STRING "Required libraries for ${LIBRARY}" FORCE)
     mark_as_advanced (${LIBRARY}_DEPENDENCIES)

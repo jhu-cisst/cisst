@@ -18,7 +18,7 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include <cisstMultiTask/mtsCollectorQWidget.h>
+#include <cisstMultiTask/mtsCollectorQtWidget.h>
 #include <cisstCommon/cmnPath.h>
 
 #include <QGroupBox>
@@ -30,7 +30,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <QLabel>
 #include <QFileDialog>
 
-mtsCollectorQWidget::mtsCollectorQWidget(void):
+mtsCollectorQtWidget::mtsCollectorQtWidget(void):
     NumberOfCollectors(0),
     NumberOfActiveCollectors(0),
     NumberOfSamples(0)
@@ -109,7 +109,7 @@ mtsCollectorQWidget::mtsCollectorQWidget(void):
 }
 
 
-void mtsCollectorQWidget::ManualStartStopSlot(bool checked)
+void mtsCollectorQtWidget::ManualStartStopSlot(bool checked)
 {
     if (checked) {
         ManualStartStop->setText("Stop now");
@@ -121,7 +121,7 @@ void mtsCollectorQWidget::ManualStartStopSlot(bool checked)
 }
 
 
-void mtsCollectorQWidget::ScheduledStartSlot(void)
+void mtsCollectorQtWidget::ScheduledStartSlot(void)
 {
     const double begin = ScheduledBegin->value();
     const double duration = ScheduledDuration->value();
@@ -130,7 +130,7 @@ void mtsCollectorQWidget::ScheduledStartSlot(void)
 }
 
 
-void mtsCollectorQWidget::FileDialogSlot(void)
+void mtsCollectorQtWidget::FileDialogSlot(void)
 {
     QString result;
     result = QFileDialog::getExistingDirectory(this, QString("Select directory"),
@@ -146,7 +146,7 @@ void mtsCollectorQWidget::FileDialogSlot(void)
 }
 
 
-void mtsCollectorQWidget::FileNewSlot(void)
+void mtsCollectorQtWidget::FileNewSlot(void)
 {
     this->NumberOfSamples = 0;
     StatsNbSamples->setNum(0);
@@ -154,7 +154,7 @@ void mtsCollectorQWidget::FileNewSlot(void)
 }
 
 
-void mtsCollectorQWidget::CollectorAdded(void)
+void mtsCollectorQtWidget::CollectorAdded(void)
 {
     this->NumberOfCollectors++;
     QString numberOfCollectors;
@@ -163,14 +163,14 @@ void mtsCollectorQWidget::CollectorAdded(void)
 }
 
 
-void mtsCollectorQWidget::CollectionStarted(void)
+void mtsCollectorQtWidget::CollectionStarted(void)
 {
     this->NumberOfActiveCollectors++;
     this->StatsNbCollectors->setNum(static_cast<int>(this->NumberOfActiveCollectors));
 }
 
 
-void mtsCollectorQWidget::CollectionStopped(unsigned int count)
+void mtsCollectorQtWidget::CollectionStopped(unsigned int count)
 {
     this->NumberOfActiveCollectors--;
     this->StatsNbCollectors->setNum(static_cast<int>(this->NumberOfActiveCollectors));
@@ -179,7 +179,7 @@ void mtsCollectorQWidget::CollectionStopped(unsigned int count)
 }
 
 
-void mtsCollectorQWidget::Progress(unsigned int count)
+void mtsCollectorQtWidget::Progress(unsigned int count)
 {
     this->NumberOfSamples += count;
     this->StatsNbSamples->setNum(static_cast<int>(this->NumberOfSamples));

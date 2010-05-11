@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: vctPlot2DQWidget.h 1238 2010-02-27 03:16:01Z auneri1 $
+  $Id: vctPlot2DOpenGLQtWidget.h 1238 2010-02-27 03:16:01Z auneri1 $
 
   Author(s):  Anton Deguet
   Created on: 2010-05-05
@@ -18,19 +18,22 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#ifndef _vctPlot2DQWidget_h
-#define _vctPlot2DQWidget_h
+#ifndef _vctPlot2DOpenGLQtWidget_h
+#define _vctPlot2DOpenGLQtWidget_h
 
 #include <QGLWidget>
-#include <vctPlot2DGLBase.h>
+#include <cisstVector/vctPlot2DOpenGL.h>
 
-class vctPlot2DQWidget: public QGLWidget, public vctPlot2DGLBase
+// Always include last
+#include <cisstVector/vctExportQt.h>
+
+class CISST_EXPORT vctPlot2DOpenGLQtWidget: public QGLWidget, public vctPlot2DOpenGL
 {
     Q_OBJECT;
 
 public:
-    vctPlot2DQWidget(QWidget * parent);
-    ~vctPlot2DQWidget(void) {};
+    vctPlot2DOpenGLQtWidget(QWidget * parent);
+    ~vctPlot2DOpenGLQtWidget(void) {};
 
 protected:
 
@@ -42,4 +45,4 @@ protected:
     //@}
 };
 
-#endif  // _vctPlot2DQWidget_h
+#endif  // _vctPlot2DOpenGLQtWidget_h

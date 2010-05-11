@@ -2,12 +2,12 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: $
+  $Id$
 
-  Author(s):  Anton Deguet
-  Created on: 2010-03-19
+  Author(s):	Anton Deguet
+  Created on:   2005-06-17
 
-  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2005-2007 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -17,14 +17,21 @@ no warranty.  The complete license can be found in license.txt and
 http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
-
 */
 
-#include <cisstConfig.h>
 
-#if CISST_HAS_QT
+/*! \file
+    \brief Rules of exporting.
+*/
 
-  #include <cisstCommon/cmnLoggerQtWidget.h>
-  CMN_IMPLEMENT_SERVICES(cmnLoggerQtWidget);
+// check if this module is build as a DLL
+#ifdef cisstMultiTaskQt_EXPORTS
+#define CISST_THIS_LIBRARY_AS_DLL
+#endif
 
-#endif // CISST_HAS_QT
+// include common defines
+#include <cisstCommon/cmnExportMacros.h>
+
+// avoid impact on other modules
+#undef CISST_THIS_LIBRARY_AS_DLL
+

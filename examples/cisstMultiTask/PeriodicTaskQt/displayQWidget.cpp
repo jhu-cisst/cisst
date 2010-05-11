@@ -24,7 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 displayQWidget::displayQWidget(void)
 {
     // create the widgets
-    Plot = new vctPlot2DQWidget(this);
+    Plot = new vctPlot2DOpenGLQtWidget(this);
     size_t traceId;
     Plot->AddTrace("Data", traceId);
     DialAmplitude = new QDial(this);

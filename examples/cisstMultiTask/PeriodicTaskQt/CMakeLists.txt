@@ -29,8 +29,8 @@ add_executable(cisstMultiTaskPeriodicTaskQt
                )
 
 target_link_libraries(cisstMultiTaskPeriodicTaskQt
-                      ${QT_LIBRARIES} vctPlot
+                      ${QT_LIBRARIES}
                       )
 cisst_requires(cisstMultiTaskPeriodicTaskQt
-               "cisstCommon;cisstOSAbstraction;cisstMultiTask"
+               "cisstCommon;cisstCommonQt;cisstVector;cisstVectorQt;cisstOSAbstraction;cisstMultiTask;cisstMultiTaskQt"
                )

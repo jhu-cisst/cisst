@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: $
+  $Id$
 
   Author(s):  Anton Deguet
   Created on: 2010-03-19
@@ -20,11 +20,11 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
+/* Qt dependent classes */
 #include <cisstConfig.h>
-
 #if CISST_HAS_QT
 
-  #include <cisstCommon/cmnLoggerQtWidget.h>
-  CMN_IMPLEMENT_SERVICES(cmnLoggerQtWidget);
+#include <cisstMultiTask/mtsCollectorQtComponent.h>
+CMN_IMPLEMENT_SERVICES(mtsCollectorQtComponent);
 
-#endif // CISST_HAS_QT
+#endif

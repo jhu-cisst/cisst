@@ -20,8 +20,8 @@ http://www.cisst.org/cisst/license.txt.
 
 #pragma once
 
-#ifndef _cmnLoggerQWidget_h
-#define _cmnLoggerQWidget_h
+#ifndef _cmnLoggerQtWidget_h
+#define _cmnLoggerQtWidget_h
 
 #include <cisstCommon/cmnGenericObject.h>
 
@@ -32,19 +32,19 @@ class QHBoxLayout;
 class QVBoxLayout;
 class QTableView;
 
-class cmnLoggerQWidgetClassServicesModel;
-class cmnLoggerQWidgetLoDDelegate;
+class cmnLoggerQtWidgetClassServicesModel;
+class cmnLoggerQtWidgetLoDDelegate;
 
 // Always include last
 #include <cisstCommon/cmnExportQt.h>
 
-class CISST_EXPORT cmnLoggerQWidget: public cmnGenericObject
+class CISST_EXPORT cmnLoggerQtWidget: public cmnGenericObject
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
  public:
 
-    cmnLoggerQWidget(QWidget * parent);
+    cmnLoggerQtWidget(QWidget * parent);
 
     inline QWidget * GetWidget(void) {
 	return this->Widget;
@@ -62,11 +62,11 @@ class CISST_EXPORT cmnLoggerQWidget: public cmnGenericObject
     QLabel * MainFilterData;
 
     // filter per class
-    cmnLoggerQWidgetClassServicesModel * Model;
-    cmnLoggerQWidgetLoDDelegate * Delegate;
+    cmnLoggerQtWidgetClassServicesModel * Model;
+    cmnLoggerQtWidgetLoDDelegate * Delegate;
     QTableView * View;
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(cmnLoggerQWidget);
+CMN_DECLARE_SERVICES_INSTANTIATION(cmnLoggerQtWidget);
 
-#endif // _cmnLoggerQWidget_h
+#endif // _cmnLoggerQtWidget_h

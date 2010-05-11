@@ -14,153 +14,124 @@
 #
 # --- end cisst license ---
 
-# set the library name
-SET(LIBRARY cisstMultiTask)
-
-# set dependencies
-SET(DEPENDENCIES
-    cisstCommon
-    cisstVector
-    cisstOSAbstraction
-    )
-
 # all source files
-SET(SOURCE_FILES
-    mtsClassServices.cpp
+set (SOURCE_FILES
+     mtsClassServices.cpp
 
-    mtsGenericObject.cpp
+     mtsGenericObject.cpp
 
-    mtsMulticastCommandVoid.cpp
-    mtsMulticastCommandWriteBase.cpp
+     mtsMulticastCommandVoid.cpp
+     mtsMulticastCommandWriteBase.cpp
 
-    mtsFunctionVoid.cpp
-    mtsFunctionReadOrWrite.cpp
-    mtsFunctionQualifiedReadOrWrite.cpp
+     mtsFunctionVoid.cpp
+     mtsFunctionReadOrWrite.cpp
+     mtsFunctionQualifiedReadOrWrite.cpp
 
-    mtsCommandQueuedVoidBase.cpp
-    mtsCommandQueuedWriteBase.cpp
+     mtsCommandQueuedVoidBase.cpp
+     mtsCommandQueuedWriteBase.cpp
 
-    mtsDevice.cpp
+     mtsDevice.cpp
 
-    mtsMailBox.cpp
-    mtsStateIndex.cpp
-    mtsStateTable.cpp
-    mtsIntervalStatistics.cpp
+     mtsMailBox.cpp
+     mtsStateIndex.cpp
+     mtsStateTable.cpp
+     mtsIntervalStatistics.cpp
 
-    mtsTaskInterface.cpp
-    mtsRequiredInterface.cpp
-    mtsTask.cpp
-    mtsTaskContinuous.cpp
-    mtsTaskPeriodic.cpp
-    mtsTaskFromCallback.cpp
-    mtsTaskFromSignal.cpp
+     mtsTaskInterface.cpp
+     mtsRequiredInterface.cpp
+     mtsTask.cpp
+     mtsTaskContinuous.cpp
+     mtsTaskPeriodic.cpp
+     mtsTaskFromCallback.cpp
+     mtsTaskFromSignal.cpp
 
-    mtsDeviceInterface.cpp
+     mtsDeviceInterface.cpp
 
-    mtsCollectorBase.cpp
-    mtsCollectorState.cpp
-    mtsCollectorEvent.cpp
+     mtsCollectorBase.cpp
+     mtsCollectorState.cpp
+     mtsCollectorEvent.cpp
 
-    mtsManagerLocal.cpp
-    mtsManagerGlobal.cpp
-    )
+     mtsManagerLocal.cpp
+     mtsManagerGlobal.cpp
+     )
 
 # all header files
-SET(HEADER_FILES
-    mtsMacros.h
-    mtsGenericObject.h
-    mtsGenericObjectProxy.h
+set (HEADER_FILES
+     mtsMacros.h
+     mtsGenericObject.h
+     mtsGenericObjectProxy.h
 
-    mtsFixedSizeVector.h
-    mtsFixedSizeVectorTypes.h
-    mtsVector.h
-    mtsMatrix.h
-    mtsTransformationTypes.h
+     mtsFixedSizeVector.h
+     mtsFixedSizeVectorTypes.h
+     mtsVector.h
+     mtsMatrix.h
+     mtsTransformationTypes.h
 
-    mtsCommandBase.h
-    mtsFunctionBase.h
+     mtsCommandBase.h
+     mtsFunctionBase.h
 
-    mtsCommandVoid.h
-    mtsCommandVoidBase.h
-    mtsMulticastCommandVoid.h
-    mtsCommandQueuedVoid.h
-    mtsCommandQueuedVoidBase.h
-    mtsFunctionVoid.h
+     mtsCommandVoid.h
+     mtsCommandVoidBase.h
+     mtsMulticastCommandVoid.h
+     mtsCommandQueuedVoid.h
+     mtsCommandQueuedVoidBase.h
+     mtsFunctionVoid.h
 
-    mtsCommandRead.h
-    mtsCommandWrite.h
-    mtsCommandReadOrWriteBase.h
-    mtsMulticastCommandWrite.h
-    mtsMulticastCommandWriteBase.h
-    mtsCommandQueuedWrite.h
-    mtsCommandQueuedWriteBase.h
-    mtsCommandFilteredQueuedWrite.h
-    mtsFunctionReadOrWrite.h
-    mtsEventWriteGeneratorProxy.h
+     mtsCommandRead.h
+     mtsCommandWrite.h
+     mtsCommandReadOrWriteBase.h
+     mtsMulticastCommandWrite.h
+     mtsMulticastCommandWriteBase.h
+     mtsCommandQueuedWrite.h
+     mtsCommandQueuedWriteBase.h
+     mtsCommandFilteredQueuedWrite.h
+     mtsFunctionReadOrWrite.h
+     mtsEventWriteGeneratorProxy.h
 
-    mtsCommandQualifiedRead.h
-    mtsCommandQualifiedReadOrWriteBase.h
-    mtsFunctionQualifiedReadOrWrite.h
+     mtsCommandQualifiedRead.h
+     mtsCommandQualifiedReadOrWriteBase.h
+     mtsFunctionQualifiedReadOrWrite.h
 
-    mtsExport.h
-    mtsForwardDeclarations.h
+     mtsExport.h
+     mtsForwardDeclarations.h
 
-    mtsDevice.h
+     mtsDevice.h
 
-    mtsQueue.h
-    mtsMailBox.h
-    mtsStateIndex.h
+     mtsQueue.h
+     mtsMailBox.h
+     mtsStateIndex.h
 
-    mtsStateArray.h
-    mtsStateArrayBase.h
-    mtsStateTable.h
-    mtsStateData.h
-    mtsIntervalStatistics.h
+     mtsStateArray.h
+     mtsStateArrayBase.h
+     mtsStateTable.h
+     mtsStateData.h
+     mtsIntervalStatistics.h
 
-    mtsTaskInterface.h
-    mtsRequiredInterface.h
-    mtsTask.h
-    mtsTaskContinuous.h
-    mtsTaskPeriodic.h
-    mtsTaskFromCallback.h
-    mtsTaskFromSignal.h
+     mtsTaskInterface.h
+     mtsRequiredInterface.h
+     mtsTask.h
+     mtsTaskContinuous.h
+     mtsTaskPeriodic.h
+     mtsTaskFromCallback.h
+     mtsTaskFromSignal.h
 
-    mtsTaskManager.h    # to be deleted
+     mtsTaskManager.h    # to be deleted
 
-    mtsDeviceInterface.h
-    mtsInterfaceCommon.h
+     mtsDeviceInterface.h
+     mtsInterfaceCommon.h
 
-    mtsCollectorBase.h
-    mtsCollectorState.h
-    mtsCollectorEvent.h
+     mtsCollectorBase.h
+     mtsCollectorState.h
+     mtsCollectorEvent.h
 
-    mtsManagerLocalInterface.h
-    mtsManagerLocal.h
-    mtsManagerGlobalInterface.h
-    mtsManagerGlobal.h
+     mtsManagerLocalInterface.h
+     mtsManagerLocal.h
+     mtsManagerGlobalInterface.h
+     mtsManagerGlobal.h
 
-    mtsHistory.h
-    )
+     mtsHistory.h
+     )
 
-# Qt widgets
-if(CISST_HAS_QT)
-  include_directories(${CMAKE_CURRENT_BINARY_DIR})
-  qt4_wrap_cpp(QT_WRAPPED_CPP
-               ../../include/cisstMultiTask/mtsCollectorQComponent.h
-               ../../include/cisstMultiTask/mtsCollectorQWidget.h
-               )
-  set(ADDITIONAL_SOURCE_FILES ${QT_WRAPPED_CPP})
-
-  set(SOURCE_FILES
-      ${SOURCE_FILES}
-      mtsCollectorQComponent.cpp
-      mtsCollectorQWidget.cpp)
-
-  set(HEADER_FILES
-      ${HEADER_FILES}
-      mtsCollectorQComponent.h
-      mtsCollectorQWidget.h)
-endif(CISST_HAS_QT)
 
 # make sure all options are set for all devices to OFF
 option(CISST_MTS_HAS_ICE "Enable inter-process communication (IPC) feature of cisstMultiTask, requires ICE from ZeroC" OFF)
@@ -277,29 +248,60 @@ CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/cisstMultiTaskBuild.cmake.in
                @ONLY)
 
 # Finally add the library
-CISST_ADD_LIBRARY_TO_PROJECT(cisstLibs)
+cisst_add_library(
+  LIBRARY cisstMultiTask
+  DEPENDENCIES cisstCommon cisstVector cisstOSAbstraction
+  SOURCE_FILES ${SOURCE_FILES}
+  HEADER_FILES ${HEADER_FILES}
+  ADDITIONAL_SOURCE_FILES ${ADDITIONAL_SOURCE_FILES})
 
-if(CISST_HAS_QT)
-  target_link_libraries(cisstMultiTask ${QT_LIBRARIES})
-endif(CISST_HAS_QT)
 
-if(CISST_MTS_HAS_ICE)
-  if(WIN32)
-	set(ICE_LIBRARIES_OPTIMIZED Ice IceUtil)
-	set(ICE_LIBRARIES_DEBUG Iced IceUtild)
-    target_link_libraries(cisstMultiTask
-                             optimized Ice
-                             debug Iced
-                             optimized IceUtil
-                             debug IceUtild)
-    CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_LIBRARIES_DEBUG ICE_LIBRARIES_DEBUG)
-    CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_LIBRARIES_OPTIMIZED ICE_LIBRARIES_OPTIMIZED)
-  else(WIN32)
-    set(ICE_LIBRARIES ${ICE_LIBRARY_NAME} IceUtil)
-    target_link_libraries(cisstMultiTask
-                          ${ICE_LIBRARIES})
-    CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_LIBRARIES ICE_LIBRARIES)
-  endif(WIN32)
+# Add linking to external libraries
+if (CISST_MTS_HAS_ICE)
+  if (WIN32)
+    set (ICE_LIBRARIES_OPTIMIZED Ice IceUtil)
+    set (ICE_LIBRARIES_DEBUG Iced IceUtild)
+    target_link_libraries (cisstMultiTask
+                           optimized Ice
+                           debug Iced
+                           optimized IceUtil
+                           debug IceUtild)
+    CISST_ADD_TO_INTERNAL (CISST_ADDITIONAL_LIBRARIES_DEBUG ICE_LIBRARIES_DEBUG)
+    CISST_ADD_TO_INTERNAL (CISST_ADDITIONAL_LIBRARIES_OPTIMIZED ICE_LIBRARIES_OPTIMIZED)
+  else (WIN32)
+    set (ICE_LIBRARIES ${ICE_LIBRARY_NAME} IceUtil)
+    target_link_libraries (cisstMultiTask
+                           ${ICE_LIBRARIES})
+    CISST_ADD_TO_INTERNAL (CISST_ADDITIONAL_LIBRARIES ICE_LIBRARIES)
+  endif (WIN32)
 
-endif(CISST_MTS_HAS_ICE)
+endif (CISST_MTS_HAS_ICE)
 
+
+# Qt widgets
+if (CISST_HAS_QT)
+
+  # To include Qt generated files
+  include_directories (${CMAKE_CURRENT_BINARY_DIR})
+  qt4_wrap_cpp (QT_WRAPPED_CPP
+               ../../include/cisstMultiTask/mtsCollectorQtComponent.h
+               ../../include/cisstMultiTask/mtsCollectorQtWidget.h)
+
+  cisst_add_library (
+    LIBRARY cisstMultiTaskQt
+    LIBRARY_DIR cisstMultiTask
+    DEPENDENCIES cisstCommon
+                 cisstOSAbstraction
+                 cisstVector
+                 cisstMultiTask
+    SOURCE_FILES mtsClassServicesQt.cpp
+                 mtsCollectorQtComponent.cpp
+                 mtsCollectorQtWidget.cpp
+    HEADER_FILES mtsCollectorQtComponent.h
+                 mtsCollectorQtWidget.h
+                 mtsExportQt.h
+    ADDITIONAL_SOURCE_FILES ${QT_WRAPPED_CPP})
+
+  target_link_libraries (cisstMultiTaskQt ${QT_LIBRARIES})
+
+endif(CISST_HAS_QT) 

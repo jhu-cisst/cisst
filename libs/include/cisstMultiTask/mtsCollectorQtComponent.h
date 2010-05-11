@@ -18,8 +18,8 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#ifndef _mtsCollectorQComponent_h
-#define _mtsCollectorQComponent_h
+#ifndef _mtsCollectorQtComponent_h
+#define _mtsCollectorQtComponent_h
 
 #include <cisstMultiTask/mtsDevice.h>
 #include <cisstMultiTask/mtsFunctionVoid.h>
@@ -29,16 +29,16 @@ http://www.cisst.org/cisst/license.txt.
 #include <QWidget>
 
 // Always include last
-#include <cisstMultiTask/mtsExport.h>
+#include <cisstMultiTask/mtsExportQt.h>
 
-class CISST_EXPORT mtsCollectorQComponent: public QObject, public mtsDevice
+class CISST_EXPORT mtsCollectorQtComponent: public QObject, public mtsDevice
 {
     Q_OBJECT;
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
 public:
-    mtsCollectorQComponent(const std::string & taskName);
-    ~mtsCollectorQComponent(void);
+    mtsCollectorQtComponent(const std::string & taskName);
+    ~mtsCollectorQtComponent(void);
 
     void Configure(const std::string & CMN_UNUSED(filename) = "") {};
 
@@ -74,6 +74,6 @@ signals:
     void ProgressQSignal(unsigned int);
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsCollectorQComponent);
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsCollectorQtComponent);
 
-#endif  // _mtsCollectorQComponent_h
+#endif  // _mtsCollectorQtComponent_h

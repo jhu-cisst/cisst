@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: vctPlot2DFLTK.cpp 1238 2010-02-27 03:16:01Z auneri1 $
+  $Id: vctPlot2DOpenGLFLTK.cpp 1238 2010-02-27 03:16:01Z auneri1 $
 
   Author(s):  Anton Deguet
   Created on: 2010-05-05
@@ -18,31 +18,31 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include "vctPlot2DFLTK.h"
+#include <cisstVector/vctPlot2DOpenGLFLTK.h>
 
-vctPlot2DFLTK::vctPlot2DFLTK(const int x, const int y,
+vctPlot2DOpenGLFLTK::vctPlot2DOpenGLFLTK(const int x, const int y,
 			     const int width, const int height,
 			     const char * title):
     Fl_Gl_Window(x, y, width, height, title),
-    vctPlot2DGLBase()
+    vctPlot2DOpenGLBase()
 {
     this->Viewport.X() = width;
     this->Viewport.Y() = height;
 }
 
 
-void vctPlot2DFLTK::initgl(void)
+void vctPlot2DOpenGLFLTK::initgl(void)
 {
-    vctPlot2DGLBase::RenderInitialize();
-    vctPlot2DGLBase::RenderResize(this->Viewport.X(), this->Viewport.Y());
+    vctPlot2DOpenGLBase::RenderInitialize();
+    vctPlot2DOpenGLBase::RenderResize(this->Viewport.X(), this->Viewport.Y());
 }
 
 
-void vctPlot2DFLTK::draw(void)
+void vctPlot2DOpenGLFLTK::draw(void)
 {
     if (!valid()) {
 	initgl();
 	valid(1);
     }
-    vctPlot2DGLBase::Render();
+    vctPlot2DOpenGLBase::Render();
 }

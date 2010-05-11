@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: vctPlot2DGLBase.h 1238 2010-02-27 03:16:01Z auneri1 $
+  $Id: vctPlot2DOpenGL.h 1238 2010-02-27 03:16:01Z auneri1 $
 
   Author(s):  Anton Deguet
   Created on: 2010-05-05
@@ -18,23 +18,21 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#ifndef _vctPlot2DGLBase_h
-#define _vctPlot2DGLBase_h
+#ifndef _vctPlot2DOpenGL_h
+#define _vctPlot2DOpenGL_h
 
-#include <map>
-#include <string>
+#include <cisstVector/vctPlot2DBase.h>
 
-#include <cisstVector/vctDynamicVector.h>
-#include <cisstVector/vctFixedSizeVectorTypes.h>
+// Always include last
+#include <cisstVector/vctExport.h>
 
-#include "vctPlot2DBase.h"
-
-class vctPlot2DGLBase: public vctPlot2DBase
+/*! 2D plot class using OpenGL for rendering */
+class CISST_EXPORT vctPlot2DOpenGL: public vctPlot2DBase
 {
 public:
 
-    vctPlot2DGLBase(void);
-    ~vctPlot2DGLBase(void) {};
+    vctPlot2DOpenGL(void);
+    ~vctPlot2DOpenGL(void) {};
 
  protected:
 
@@ -45,4 +43,4 @@ public:
 
 };
 
-#endif  // _vctPlot2DGLBase_h
+#endif  // _vctPlot2DOpenGL_h

@@ -18,13 +18,13 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include <cisstCommon/cmnLoggerQWidget.h>
+#include <cisstCommon/cmnLoggerQtWidget.h>
 #include <cisstCommon/cmnPath.h>
 #include <cisstOSAbstraction/osaThreadedLogFile.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstMultiTask/mtsCollectorEvent.h>
-#include <cisstMultiTask/mtsCollectorQComponent.h>
-#include <cisstMultiTask/mtsCollectorQWidget.h>
+#include <cisstMultiTask/mtsCollectorQtComponent.h>
+#include <cisstMultiTask/mtsCollectorQtWidget.h>
 
 #include <QApplication>
 #include <QTabWidget>
@@ -82,8 +82,8 @@ int main(int argc, char *argv[])
     // second tab for data collection
     QWidget * tab2Widget = new QWidget();
     QGridLayout * tab2Layout= new QGridLayout(tab2Widget);
-    mtsCollectorQWidget * collectorQWidget = new mtsCollectorQWidget();
-    tab2Layout->addWidget(collectorQWidget);
+    mtsCollectorQtWidget * collectorQtWidget = new mtsCollectorQtWidget();
+    tab2Layout->addWidget(collectorQtWidget);
     tabs->addTab(tab2Widget, "Collection");
 
     // get the component manager to add multiple sine generator tasks
@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
     sineTask * sine;
     displayQComponent * display;
     mtsCollectorState * stateCollector;
-    mtsCollectorQComponent * collectorQComponent;
+    mtsCollectorQtComponent * collectorQtComponent;
 
     // create an event collector
     mtsCollectorEvent * eventCollector =
@@ -99,11 +99,11 @@ int main(int argc, char *argv[])
                               mtsCollectorBase::COLLECTOR_FILE_FORMAT_CSV);
     taskManager->AddComponent(eventCollector);
     // add QComponent to control the event collector
-    collectorQComponent = new mtsCollectorQComponent("EventCollectorQComponent");
-    taskManager->AddComponent(collectorQComponent);
+    collectorQtComponent = new mtsCollectorQtComponent("EventCollectorQComponent");
+    taskManager->AddComponent(collectorQtComponent);
     // connect to the existing widget
-    collectorQComponent->ConnectToWidget(collectorQWidget);
-    taskManager->Connect(collectorQComponent->GetName(), "DataCollection",
+    collectorQtComponent->ConnectToWidget(collectorQtWidget);
+    taskManager->Connect(collectorQtComponent->GetName(), "DataCollection",
                          eventCollector->GetName(), "Control");
 
     // create multiple sine generators along with their widget and
@@ -130,10 +130,10 @@ int main(int argc, char *argv[])
         taskManager->AddComponent(stateCollector);
         stateCollector->Connect();
         // create the QComponent to bridge between the collection widget and the collector
-        collectorQComponent = new mtsCollectorQComponent(sine->GetName() + "StateCollectorQComponent");
-        taskManager->AddComponent(collectorQComponent);
-        collectorQComponent->ConnectToWidget(collectorQWidget);
-        taskManager->Connect(collectorQComponent->GetName(), "DataCollection",
+        collectorQtComponent = new mtsCollectorQtComponent(sine->GetName() + "StateCollectorQComponent");
+        taskManager->AddComponent(collectorQtComponent);
+        collectorQtComponent->ConnectToWidget(collectorQtWidget);
+        taskManager->Connect(collectorQtComponent->GetName(), "DataCollection",
                              stateCollector->GetName(), "Control");
 
         // add events to observe
@@ -146,7 +146,7 @@ int main(int argc, char *argv[])
     // third tab for logger widget
     QWidget * tab3Widget = new QWidget();
     QGridLayout * tab3Layout= new QGridLayout(tab3Widget);
-    cmnLoggerQWidget * loggerWidget = new cmnLoggerQWidget(tab3Widget);
+    cmnLoggerQtWidget * loggerWidget = new cmnLoggerQtWidget(tab3Widget);
     tab3Layout->addWidget(loggerWidget->GetWidget());    
     tabs->addTab(tab3Widget, "Logger");
 

@@ -3,7 +3,7 @@
 #
 # CMakeLists for cisstVector
 #
-# (C) Copyright 2003-2008 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2003-2010 Johns Hopkins University (JHU), All Rights
 # Reserved.
 # 
 # --- begin cisst license - do not edit ---
@@ -14,137 +14,181 @@
 # 
 # --- end cisst license ---
 
-# set the library name
-SET(LIBRARY cisstVector)
-
-# set dependencies
-SET(DEPENDENCIES
-    cisstCommon)
 
 # all source files
-SET(SOURCE_FILES
-    vctAngleRotation2.cpp
-    vctAxisAngleRotation3.cpp
-    vctFrameBase.cpp
-    vctFrame4x4ConstBase.cpp
-    vctMatrixRotation2.cpp
-    vctMatrixRotation2Base.cpp
-    vctMatrixRotation3.cpp
-    vctMatrixRotation3Base.cpp
-    vctMatrixRotation3ConstBase.cpp
-    vctPrintf.cpp
-    vctQuaternion.cpp
-    vctQuaternionBase.cpp
-    vctQuaternionRotation3.cpp
-    vctQuaternionRotation3Base.cpp
-    vctRandom.cpp
-    vctRodriguezRotation3.cpp
-    vctRodriguezRotation3Base.cpp
-    vctTypes.cpp
-    )
+set (SOURCE_FILES
+     vctAngleRotation2.cpp
+     vctAxisAngleRotation3.cpp
+     vctFrameBase.cpp
+     vctFrame4x4ConstBase.cpp
+     vctMatrixRotation2.cpp
+     vctMatrixRotation2Base.cpp
+     vctMatrixRotation3.cpp
+     vctMatrixRotation3Base.cpp
+     vctMatrixRotation3ConstBase.cpp
+     vctPrintf.cpp
+     vctQuaternion.cpp
+     vctQuaternionBase.cpp
+     vctQuaternionRotation3.cpp
+     vctQuaternionRotation3Base.cpp
+     vctRandom.cpp
+     vctRodriguezRotation3.cpp
+     vctRodriguezRotation3Base.cpp
+     vctTypes.cpp
+     )
 
 # all header files
-SET(HEADER_FILES
-    vctAngleRotation2.h
-    vctAxisAngleRotation3.h
-    vctBarycentricVector.h
-    vctBinaryOperations.h
-    vctContainerTraits.h
-    vctDeterminant.h
+set (HEADER_FILES
+     vctAngleRotation2.h
+     vctAxisAngleRotation3.h
+     vctBarycentricVector.h
+     vctBinaryOperations.h
+     vctContainerTraits.h
+     vctDeterminant.h
 
-    vctDynamicConstMatrixBase.h
-    vctDynamicConstMatrixRef.h
-    vctDynamicConstNArrayBase.h
-    vctDynamicConstNArrayRef.h
-    vctDynamicConstVectorBase.h
-    vctDynamicConstVectorRef.h
+     vctDynamicConstMatrixBase.h
+     vctDynamicConstMatrixRef.h
+     vctDynamicConstNArrayBase.h
+     vctDynamicConstNArrayRef.h
+     vctDynamicConstVectorBase.h
+     vctDynamicConstVectorRef.h
+     
+     vctDynamicCompactLoopEngines.h
 
-    vctDynamicCompactLoopEngines.h
+     vctDynamicMatrix.h
+     vctDynamicMatrixBase.h
+     vctDynamicMatrixLoopEngines.h
+     vctDynamicMatrixOwner.h
+     vctDynamicMatrixRef.h
+     vctDynamicMatrixRefOwner.h
+     vctDynamicMatrixTypes.h
 
-    vctDynamicMatrix.h
-    vctDynamicMatrixBase.h
-    vctDynamicMatrixLoopEngines.h
-    vctDynamicMatrixOwner.h
-    vctDynamicMatrixRef.h
-    vctDynamicMatrixRefOwner.h
-    vctDynamicMatrixTypes.h
+     vctDynamicNArray.h
+     vctDynamicNArrayBase.h
+     vctDynamicNArrayLoopEngines.h
+     vctDynamicNArrayOwner.h
+     vctDynamicNArrayRef.h
+     vctDynamicNArrayRefOwner.h
 
-    vctDynamicNArray.h
-    vctDynamicNArrayBase.h
-    vctDynamicNArrayLoopEngines.h
-    vctDynamicNArrayOwner.h
-    vctDynamicNArrayRef.h
-    vctDynamicNArrayRefOwner.h
+     vctDynamicVector.h
+     vctDynamicVectorBase.h
+     vctDynamicVectorLoopEngines.h
+     vctDynamicVectorOwner.h
+     vctDynamicVectorRef.h
+     vctDynamicVectorRefOwner.h
+     vctDynamicVectorTypes.h
 
-    vctDynamicVector.h
-    vctDynamicVectorBase.h
-    vctDynamicVectorLoopEngines.h
-    vctDynamicVectorOwner.h
-    vctDynamicVectorRef.h
-    vctDynamicVectorRefOwner.h
-    vctDynamicVectorTypes.h
-
-    vctExport.h
-    vctFastCopy.h
+     vctExport.h
+     vctFastCopy.h
  
-    vctFixedSizeConstVectorBase.h
-    vctFixedSizeConstVectorRef.h
-    vctFixedSizeConstMatrixBase.h
-    vctFixedSizeConstMatrixRef.h
+     vctFixedSizeConstVectorBase.h
+     vctFixedSizeConstVectorRef.h
+     vctFixedSizeConstMatrixBase.h
+     vctFixedSizeConstMatrixRef.h
+     
+     vctFixedSizeMatrix.h
+     vctFixedSizeMatrixBase.h
+     vctFixedSizeMatrixLoopEngines.h
+     vctFixedSizeMatrixRef.h
+     vctFixedSizeMatrixTraits.h
+     vctFixedSizeMatrixTypes.h
 
-    vctFixedSizeMatrix.h
-    vctFixedSizeMatrixBase.h
-    vctFixedSizeMatrixLoopEngines.h
-    vctFixedSizeMatrixRef.h
-    vctFixedSizeMatrixTraits.h
-    vctFixedSizeMatrixTypes.h
+     vctFixedSizeVector.h
+     vctFixedSizeVectorBase.h
+     vctFixedSizeVectorRef.h
+     vctFixedSizeVectorRecursiveEngines.h
+     vctFixedSizeVectorTraits.h
+     vctFixedSizeVectorTypes.h
 
-    vctFixedSizeVector.h
-    vctFixedSizeVectorBase.h
-    vctFixedSizeVectorRef.h
-    vctFixedSizeVectorRecursiveEngines.h
-    vctFixedSizeVectorTraits.h
-    vctFixedSizeVectorTypes.h
+     vctFixedStrideMatrixIterator.h
+     vctFixedStrideVectorIterator.h
+     vctFrameBase.h
+     vctFrame4x4.h
+     vctFrame4x4Base.h
+     vctFrame4x4ConstBase.h
 
-    vctFixedStrideMatrixIterator.h
-    vctFixedStrideVectorIterator.h
-    vctFrameBase.h
-    vctFrame4x4.h
-    vctFrame4x4Base.h
-    vctFrame4x4ConstBase.h
+     vctForwardDeclarations.h
+     vctMatrixRotation2.h
+     vctMatrixRotation2Base.h
+     vctMatrixRotation3.h
+     vctMatrixRotation3Ref.h
+     vctMatrixRotation3Base.h
+     vctMatrixRotation3ConstRef.h
+     vctMatrixRotation3ConstBase.h
+     vctPrintf.h
+     vctQuaternion.h
+     vctQuaternionBase.h
+     vctQuaternionRotation3.h
+     vctQuaternionRotation3Base.h
+     vctRandom.h
+     vctRandomFixedSizeVector.h
+     vctRandomFixedSizeMatrix.h
+     vctRandomDynamicVector.h
+     vctRandomDynamicMatrix.h
+     vctRandomDynamicNArray.h
+     vctRandomTransformations.h
+     vctRodriguezRotation3.h
+     vctRodriguezRotation3Base.h
+     vctStoreBackBinaryOperations.h
+     vctStoreBackUnaryOperations.h
+     vctTransformationTypes.h
+     vctTypes.h
+     vctUnaryOperations.h
 
-    vctForwardDeclarations.h
-    vctMatrixRotation2.h
-    vctMatrixRotation2Base.h
-    vctMatrixRotation3.h
-    vctMatrixRotation3Ref.h
-    vctMatrixRotation3Base.h
-    vctMatrixRotation3ConstRef.h
-    vctMatrixRotation3ConstBase.h
-    vctPrintf.h
-    vctQuaternion.h
-    vctQuaternionBase.h
-    vctQuaternionRotation3.h
-    vctQuaternionRotation3Base.h
-    vctRandom.h
-    vctRandomFixedSizeVector.h
-    vctRandomFixedSizeMatrix.h
-    vctRandomDynamicVector.h
-    vctRandomDynamicMatrix.h
-    vctRandomDynamicNArray.h
-    vctRandomTransformations.h
-    vctRodriguezRotation3.h
-    vctRodriguezRotation3Base.h
-    vctStoreBackBinaryOperations.h
-    vctStoreBackUnaryOperations.h
-    vctTransformationTypes.h
-    vctTypes.h
-    vctUnaryOperations.h
-
-    vctVarStrideNArrayIterator.h
-    vctVarStrideMatrixIterator.h
-    vctVarStrideVectorIterator.h
-    )
+     vctVarStrideNArrayIterator.h
+     vctVarStrideMatrixIterator.h
+     vctVarStrideVectorIterator.h
+     )
 
 
-CISST_ADD_LIBRARY_TO_PROJECT(cisstLibs)
+# Add vctPlot2D base class if any rendering code is available, i.e. OpenGL or VTK
+if (CISST_HAS_OPENGL OR CISST_HAS_VTK)
+  set (SOURCE_FILES
+       ${SOURCE_FILES}
+       vctPlot2DBase.cpp
+       vctPlot2DOpenGL.cpp
+       )
+  set (HEADER_FILES
+       ${HEADER_FILES}
+       vctPlot2DBase.h
+       vctPlot2DOpenGL.h
+       )
+endif (CISST_HAS_OPENGL OR CISST_HAS_VTK)
+
+
+cisst_add_library (
+  LIBRARY cisstVector
+  DEPENDENCIES cisstCommon
+  SOURCE_FILES ${SOURCE_FILES}
+  HEADER_FILES ${HEADER_FILES})
+
+
+# Qt widgets
+if (CISST_HAS_OPENGL AND CISST_HAS_QT)
+
+  # To include Qt generated files
+  include_directories (${CMAKE_CURRENT_BINARY_DIR})
+  qt4_wrap_cpp (QT_WRAPPED_CPP
+                ../../include/cisstVector/vctPlot2DOpenGLQtWidget.h)
+
+  cisst_add_library (
+    LIBRARY cisstVectorQt
+    LIBRARY_DIR cisstVector
+    DEPENDENCIES cisstCommon
+                 cisstVector
+    SOURCE_FILES vctPlot2DOpenGLQtWidget.cpp
+    HEADER_FILES vctPlot2DOpenGLQtWidget.h
+                 vctExportQt.h
+    ADDITIONAL_SOURCE_FILES ${QT_WRAPPED_CPP})
+
+  target_link_libraries (cisstVectorQt ${QT_LIBRARIES})
+
+endif (CISST_HAS_OPENGL AND CISST_HAS_QT)
+
+#   # FLTK extra code
+#   if (CISST_HAS_FLTK)
+#     set (PLOT_SOURCES ${PLOT_SOURCES}
+# 	 vctPlot2DFLTK.h
+# 	 vctPlot2DFLTK.cpp)
+#   endif (CISST_HAS_FLTK)
+
