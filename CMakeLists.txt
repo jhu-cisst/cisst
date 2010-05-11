@@ -17,6 +17,8 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6.2)
 PROJECT(cisst)
 
+option (CISST_HAS_CMAKE_DEBUG "Print extra messages when configuring with CMake" OFF)
+mark_as_advanced (CISST_HAS_CMAKE_DEBUG)
 
 # Function to expend a list without repetitions, forces the list to be internal
 FUNCTION(CISST_ADD_TO_INTERNAL list newElements)
@@ -258,9 +260,17 @@ SET(CISST_LIBS_UNSTABLE
     cisstRobot
     )
 
+# All libraries
 SET(CISST_LIBS
     ${CISST_LIBS_STABLE}
     ${CISST_LIBS_UNSTABLE})
+
+# Which librairies have Qt Widgets
+set(CISST_LIBS_WITH_QT
+    cisstCommon
+    cisstVector
+    cisstMultiTask)
+
 
 # Build by default
 FOREACH(lib ${CISST_LIBS_STABLE})
@@ -283,11 +293,21 @@ INCLUDE(cisstMacros)
 ADD_SUBDIRECTORY(libs)
 
 # List of libraries to be built
-FOREACH(lib ${CISST_LIBS})
-  IF(BUILD_LIBS_${lib})
-    SET(CISST_LIBRARIES ${lib} ${CISST_LIBRARIES})
-  ENDIF(BUILD_LIBS_${lib})
-ENDFOREACH(lib)
+foreach (lib ${CISST_LIBS})
+  if (BUILD_LIBS_${lib})
+    set (CISST_LIBRARIES ${lib} ${CISST_LIBRARIES})
+    if (CISST_HAS_QT)
+      list (FIND CISST_LIBS_WITH_QT ${lib} ${lib}_HAS_QT)
+      if (${${lib}_HAS_QT} GREATER -1)
+	set (CISST_LIBRARIES ${lib}Qt ${CISST_LIBRARIES})
+	set (CISST_BUILD_${lib}Qt ON)
+      else (${${lib}_HAS_QT} GREATER -1)
+	set (CISST_BUILD_${lib}Qt OFF)
+      endif (${${lib}_HAS_QT} GREATER -1)
+    endif (CISST_HAS_QT)
+  endif (BUILD_LIBS_${lib})
+endforeach (lib)
+cisst_cmake_debug("Libraries to be built: ${CISST_LIBRARIES}")
 
 # Contional builds
 IF(BUILD_TESTS)

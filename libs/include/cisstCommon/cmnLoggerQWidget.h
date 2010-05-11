@@ -36,7 +36,7 @@ class cmnLoggerQWidgetClassServicesModel;
 class cmnLoggerQWidgetLoDDelegate;
 
 // Always include last
-#include <cisstCommon/cmnExport.h>
+#include <cisstCommon/cmnExportQt.h>
 
 class CISST_EXPORT cmnLoggerQWidget: public cmnGenericObject
 {

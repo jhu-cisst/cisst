@@ -54,11 +54,3 @@ CMN_IMPLEMENT_SERVICES(cmnSerializer);
   CMN_IMPLEMENT_SERVICES(cmnXMLPath);
 
 #endif // CISST_HAS_XML
-
-
-#if CISST_HAS_QT
-
-  #include <cisstCommon/cmnLoggerQWidget.h>
-  CMN_IMPLEMENT_SERVICES(cmnLoggerQWidget);
-
-#endif // CISST_HAS_QT

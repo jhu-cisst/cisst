@@ -23,5 +23,5 @@ target_link_libraries(commonTutorialLoggerQt
                       )
 
 cisst_requires(commonTutorialLoggerQt
-               "cisstCommon"
+               "cisstCommon;cisstCommonQt"
                )

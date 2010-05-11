@@ -15,6 +15,156 @@
 # 
 # --- end cisst license ---
 
+
+# function used to determine if some extra configuration messages
+# should be displayed
+function (cisst_cmake_debug ...)
+  if (CISST_HAS_CMAKE_DEBUG)
+    message ("cisst CMake debug: ${ARGV}")
+  endif (CISST_HAS_CMAKE_DEBUG)
+endfunction (cisst_cmake_debug)
+
+
+# The function adds a library to a CISST-related project by processing the 
+# following parameters
+# 
+# - PROJECT (cisstLibs by default)
+# - LIBRARY is the name of the library, e.g. cisstVector
+# - LIBRARY_DIR, by default uses ${LIBRARY}, can be specified for special cases (e.g. cisstCommonQt) 
+# - DEPENDENCIES is a list of dependencies, for cisstVector, set it to cisstCommon
+# - SOURCE_FILES is a list of files, without any path (absolute or relative)
+# - HEADER_FILES is a list of files, without any path (absolute or relative)
+# - ADDITIONAL_SOURCE_FILES is a list of source files with a full path (e.g. generated source)
+# - ADDITIONAL_HEADER_FILES is a list of header files with a full path (e.g. configured/generated header)
+#
+# The function performs the following:
+# -- create the source and header lists of files with the right path
+# -- check the dependencies
+# -- add the link options based on the dependencies
+# -- add the library 
+# -- create the install targets for the headers as well as the library
+
+function (cisst_add_library ...)
+  # debug
+  cisst_cmake_debug ("cisst_add_library called with: ${ARGV}")
+
+  # set all keywords and their values to ""
+  set (FUNCTION_KEYWORDS LIBRARY LIBRARY_DIR PROJECT DEPENDENCIES SOURCE_FILES HEADER_FILES)
+  foreach(keyword ${FUNCTION_KEYWORDS})
+    set (${keyword} "")
+    cisst_cmake_debug ("cisst_add_library: ${keyword}: ${${keyword}}")
+  endforeach(keyword)
+
+  # parse input
+  foreach (arg ${ARGV})
+    cisst_cmake_debug ("cisst_add_library: Parsing: ${arg}")
+    list (FIND FUNCTION_KEYWORDS ${arg} ARGUMENT_IS_A_KEYWORD)
+    if (${ARGUMENT_IS_A_KEYWORD} GREATER -1)
+      cisst_cmake_debug ("cisst_add_library: Found keyword: ${arg}")
+      set (CURRENT_PARAMETER ${arg})
+      set (${CURRENT_PARAMETER} "")
+    else (${ARGUMENT_IS_A_KEYWORD} GREATER -1)
+      cisst_cmake_debug ("cisst_add_library: Found value: ${arg} for keyword ${CURRENT_PARAMETER}")
+      set (${CURRENT_PARAMETER} ${${CURRENT_PARAMETER}} ${arg})
+    endif (${ARGUMENT_IS_A_KEYWORD} GREATER -1)
+  endforeach (arg)
+
+  # fill defaults
+  if (PROJECT STREQUAL "")
+    set (PROJECT "cisstLibs")
+  endif (PROJECT STREQUAL "")
+  if (LIBRARY_DIR STREQUAL "")
+    set (LIBRARY_DIR ${LIBRARY})
+  endif (LIBRARY_DIR STREQUAL "")
+
+  # debug
+  foreach (keyword ${FUNCTION_KEYWORDS})
+    cisst_cmake_debug ("cisst_add_library: ${keyword}: ${${keyword}}")
+  endforeach (keyword)
+
+  # Build source list with full path
+  set (SOURCES "")
+  foreach (file ${SOURCE_FILES})
+    set (SOURCES ${SOURCES} ${${PROJECT_NAME}_SOURCE_DIR}/code/${LIBRARY_DIR}/${file})
+  endforeach (file)
+
+  # Build header list with full path and generate a main header file for the library
+  set (HEADERS "")
+  string (ASCII 35 CISST_STRING_POUND)
+  set (LIBRARY_MAIN_HEADER ${${PROJECT_NAME}_BINARY_DIR}/include/${LIBRARY}.h)
+  set (LIBRARY_MAIN_HEADER_TMP ${${PROJECT_NAME}_BINARY_DIR}/include/${LIBRARY}.h.tmp)
+
+  set (FILE_CONTENT "/* This file is generated automatically by CMake, DO NOT EDIT\n")
+  set (FILE_CONTENT ${FILE_CONTENT} "   CMake: ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}\n")
+  set (FILE_CONTENT ${FILE_CONTENT} "   System: ${CMAKE_SYSTEM}\n")
+  set (FILE_CONTENT ${FILE_CONTENT} "   Source: ${CMAKE_SOURCE_DIR} */\n\n")
+  set (FILE_CONTENT ${FILE_CONTENT} "${CISST_STRING_POUND}pragma once\n")
+  set (FILE_CONTENT ${FILE_CONTENT} "${CISST_STRING_POUND}ifndef _${LIBRARY}_h\n")
+  set (FILE_CONTENT ${FILE_CONTENT} "${CISST_STRING_POUND}define _${LIBRARY}_h\n\n")
+  foreach (file ${HEADER_FILES})
+    set (HEADERS ${HEADERS} ${${PROJECT_NAME}_SOURCE_DIR}/include/${LIBRARY_DIR}/${file})
+    set (FILE_CONTENT ${FILE_CONTENT} "${CISST_STRING_POUND}include <${LIBRARY}/${file}>\n")
+  endforeach (file)
+  set (FILE_CONTENT ${FILE_CONTENT} "\n${CISST_STRING_POUND}endif // _${LIBRARY}_h\n")
+  file (WRITE ${LIBRARY_MAIN_HEADER_TMP} ${FILE_CONTENT})
+
+  exec_program (${CMAKE_COMMAND}
+                ARGS -E copy_if_different
+                \"${LIBRARY_MAIN_HEADER_TMP}\"
+                \"${LIBRARY_MAIN_HEADER}\") 
+
+  exec_program (${CMAKE_COMMAND}
+                ARGS -E remove
+                \"${LIBRARY_MAIN_HEADER_TMP}\")
+
+  # Add the main header to the library, for IDEs
+  set (HEADERS ${HEADERS} ${LIBRARY_MAIN_HEADER})
+
+  # Use the additional include path
+  include_directories (${CISST_ADDITIONAL_INCLUDE_DIRECTORIES})
+
+  # Add the library
+  cisst_cmake_debug ("cisst_add_library: Adding library ${LIBRARY} using files ${SOURCES} ${HEADERS}")
+  add_library (${LIBRARY}
+               ${IS_SHARED}
+               ${SOURCES}
+               ${ADDITIONAL_SOURCE_FILES}
+               ${HEADERS}
+               ${ADDITIONAL_HEADER_FILES}
+               )
+
+  # Install the library
+  install_targets(/lib ${LIBRARY})
+
+  # Add dependencies for linking, also check BUILD_xxx for dependencies
+  if (DEPENDENCIES)
+    # Check that dependencies are build
+    foreach (dependency ${DEPENDENCIES})
+      set (BUILD_DEPENDENCIES ${BUILD_DEPENDENCIES} BUILD_LIBS_${dependency})
+    endforeach (dependency)
+    variable_requires (BUILD_LIBS_${LIBRARY} BUILD_LIBS_${LIBRARY} ${BUILD_DEPENDENCIES})
+    # Set the link flags
+    target_link_libraries (${LIBRARY} ${DEPENDENCIES})
+    # Keep a trace of dependencies for main CMake level
+    set (${LIBRARY}_DEPENDENCIES "${DEPENDENCIES}" CACHE STRING "Required libraries for ${LIBRARY}" FORCE)
+    mark_as_advanced (${LIBRARY}_DEPENDENCIES)
+  endif (DEPENDENCIES)
+
+  # Link to cisst additional libraries
+  target_link_libraries (${LIBRARY} ${CISST_ADDITIONAL_LIBRARIES})
+
+  # Install all header files
+  install_files (/include/${LIBRARY_DIR}
+                 ".h"
+                 ${HEADERS})
+  install_files (/include/
+                 ".h"
+                 ${LIBRARY_MAIN_HEADER})
+
+endfunction (cisst_add_library)
+
+
+
 # The macro adds a library to a CISST-related project by processing the 
 # externally defined variables listed below:
 #

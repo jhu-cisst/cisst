@@ -14,11 +14,9 @@
 #
 # --- end cisst license ---
 
-# set the library name
-SET(LIBRARY cisstCommon)
 
 # all source files
-SET(SOURCE_FILES
+set(SOURCE_FILES
     cmnClassRegister.cpp
     cmnClassServicesBase.cpp
     cmnClassServices.cpp
@@ -39,7 +37,7 @@ SET(SOURCE_FILES
     )
 
 # all header files
-SET(HEADER_FILES
+set(HEADER_FILES
     cmnAccessorMacros.h
     cmnAssert.h
     cmnCallbackStreambuf.h
@@ -79,24 +77,28 @@ SET(HEADER_FILES
     )
 
 # Conditional inclusion of cmnXMLPath in the cisstCommon project.
-IF(CISST_HAS_XML)
-  SET(SOURCE_FILES ${SOURCE_FILES} cmnXMLPath.cpp)
-  SET(HEADER_FILES ${HEADER_FILES} cmnXMLPath.h)
-ENDIF(CISST_HAS_XML)
+if (CISST_HAS_XML)
+  set (SOURCE_FILES ${SOURCE_FILES} cmnXMLPath.cpp)
+  set (HEADER_FILES ${HEADER_FILES} cmnXMLPath.h)
+endif (CISST_HAS_XML)
+
+cisst_add_library (
+  LIBRARY cisstCommon
+  SOURCE_FILES ${SOURCE_FILES}
+  HEADER_FILES ${HEADER_FILES})
 
 # Qt widgets
-if(CISST_HAS_QT)
-  include_directories(${CMAKE_CURRENT_BINARY_DIR})
-  set(SOURCE_FILES
-      ${SOURCE_FILES}
-      cmnLoggerQWidget.cpp)
-  set(HEADER_FILES
-      ${HEADER_FILES}
-      cmnLoggerQWidget.h)
-endif(CISST_HAS_QT)
+if (CISST_HAS_QT)
+  cisst_add_library (
+    LIBRARY cisstCommonQt
+    LIBRARY_DIR cisstCommon
+    DEPENDENCIES cisstCommon
+    SOURCE_FILES cmnClassServicesQt.cpp
+                 cmnLoggerQWidget.cpp
+    HEADER_FILES cmnExportQt.h
+                 cmnLoggerQWidget.h)
 
-CISST_ADD_LIBRARY_TO_PROJECT(cisstLibs)
+  target_link_libraries (cisstCommonQt ${QT_LIBRARIES})
 
-if(CISST_HAS_QT)
-  target_link_libraries(cisstCommon ${QT_LIBRARIES})
-endif(CISST_HAS_QT)
+endif (CISST_HAS_QT)
+
