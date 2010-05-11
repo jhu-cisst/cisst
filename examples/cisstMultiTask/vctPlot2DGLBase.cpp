@@ -20,6 +20,9 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "vctPlot2DGLBase.h"
 
+#if (CISST_OS == CISST_WINDOWS)
+  #include <windows.h>
+#endif
 
 #if (CISST_OS == CISST_DARWIN)
   #include <OpenGL/gl.h>
