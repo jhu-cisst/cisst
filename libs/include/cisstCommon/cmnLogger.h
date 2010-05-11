@@ -76,10 +76,26 @@ http://www.cisst.org/cisst/license.txt.
 
   \param lod The log level of detail of the message.
 */
-#define CMN_LOG_CLASS(lod) \
-    ((lod > cmnLogger::GetLoD()) || (lod > Services()->GetLoD()))?\
+#define CMN_LOG_CLASS_INSTANCE(objectPointer, lod) \
+    ((lod > cmnLogger::GetLoD()) || (lod > objectPointer->Services()->GetLoD()))?\
         (void*)0:\
-    ((cmnLODOutputMultiplexer(cmnLogger::GetMultiplexer(), lod).Ref()) << cmnLogLoDString[lod] << " - Class " << Services()->GetName() << ": ")
+    ((cmnLODOutputMultiplexer(cmnLogger::GetMultiplexer(), lod).Ref()) << cmnLogLoDString[lod] << " - Class " << objectPointer->Services()->GetName() << ": ")
+
+#define CMN_LOG_CLASS(lod) CMN_LOG_CLASS_INSTANCE(this, lod)
+
+
+/*! Macros defined to use #CMN_LOG_CLASS_INSTANCE for a given level of detail. */
+//@{
+#define CMN_LOG_CLASS_INSTANCE_INIT_ERROR(objectPointer)   CMN_LOG_CLASS_INSTANCE(objectPointer, CMN_LOG_LOD_INIT_ERROR)
+#define CMN_LOG_CLASS_INSTANCE_INIT_WARNING(objectPointer) CMN_LOG_CLASS_INSTANCE(objectPointer, CMN_LOG_LOD_INIT_WARNING)
+#define CMN_LOG_CLASS_INSTANCE_INIT_VERBOSE(objectPointer) CMN_LOG_CLASS_INSTANCE(objectPointer, CMN_LOG_LOD_INIT_VERBOSE)
+#define CMN_LOG_CLASS_INSTANCE_INIT_DEBUG(objectPointer)   CMN_LOG_CLASS_INSTANCE(objectPointer, CMN_LOG_LOD_INIT_DEBUG)
+#define CMN_LOG_CLASS_INSTANCE_RUN_ERROR(objectPointer)    CMN_LOG_CLASS_INSTANCE(objectPointer, CMN_LOG_LOD_RUN_ERROR)
+#define CMN_LOG_CLASS_INSTANCE_RUN_WARNING(objectPointer)  CMN_LOG_CLASS_INSTANCE(objectPointer, CMN_LOG_LOD_RUN_WARNING)
+#define CMN_LOG_CLASS_INSTANCE_RUN_VERBOSE(objectPointer)  CMN_LOG_CLASS_INSTANCE(objectPointer, CMN_LOG_LOD_RUN_VERBOSE)
+#define CMN_LOG_CLASS_INSTANCE_RUN_DEBUG(objectPointer)    CMN_LOG_CLASS_INSTANCE(objectPointer, CMN_LOG_LOD_RUN_DEBUG)
+#define CMN_LOG_CLASS_INSTANCE_VERY_VERBOSE(objectPointer) CMN_LOG_CLASS_INSTANCE(objectPointer, CMN_LOG_LOD_VERY_VERBOSE)
+//@}
 
 
 /*! Macros defined to use #CMN_LOG_CLASS for a given level of detail. */
