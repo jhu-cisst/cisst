@@ -52,7 +52,8 @@ void mtsTask::StartupInternal(void) {
          requiredIterator++) {
         connectedInterface = requiredIterator->second->GetConnectedInterface();
         if (!connectedInterface) {
-            CMN_LOG_CLASS_INIT_WARNING << "StartupInternal: void pointer to required interface (required not connected to provided)" << std::endl;
+            CMN_LOG_CLASS_INIT_WARNING << "StartupInternal: void pointer to required interface \""
+                                       << this->GetName() << ":" << requiredIterator->first << "\" (required not connected to provided)" << std::endl;
             success = false;
         }
     }
