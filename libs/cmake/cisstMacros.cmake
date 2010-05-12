@@ -8,11 +8,11 @@
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
-# 
+#
 # This software is provided "as is" under an open source license, with
 # no warranty.  The complete license can be found in license.txt and
 # http://www.cisst.org/cisst/license.txt.
-# 
+#
 # --- end cisst license ---
 
 
@@ -25,12 +25,12 @@ function (cisst_cmake_debug ...)
 endfunction (cisst_cmake_debug)
 
 
-# The function adds a library to a CISST-related project by processing the 
+# The function adds a library to a CISST-related project by processing the
 # following parameters
-# 
+#
 # - PROJECT (cisstLibs by default)
 # - LIBRARY is the name of the library, e.g. cisstVector
-# - LIBRARY_DIR, by default uses ${LIBRARY}, can be specified for special cases (e.g. cisstCommonQt) 
+# - LIBRARY_DIR, by default uses ${LIBRARY}, can be specified for special cases (e.g. cisstCommonQt)
 # - DEPENDENCIES is a list of dependencies, for cisstVector, set it to cisstCommon
 # - SOURCE_FILES is a list of files, without any path (absolute or relative)
 # - HEADER_FILES is a list of files, without any path (absolute or relative)
@@ -41,7 +41,7 @@ endfunction (cisst_cmake_debug)
 # -- create the source and header lists of files with the right path
 # -- check the dependencies
 # -- add the link options based on the dependencies
-# -- add the library 
+# -- add the library
 # -- create the install targets for the headers as well as the library
 
 function (cisst_add_library ...)
@@ -112,7 +112,7 @@ function (cisst_add_library ...)
   exec_program (${CMAKE_COMMAND}
                 ARGS -E copy_if_different
                 \"${LIBRARY_MAIN_HEADER_TMP}\"
-                \"${LIBRARY_MAIN_HEADER}\") 
+                \"${LIBRARY_MAIN_HEADER}\")
 
   exec_program (${CMAKE_COMMAND}
                 ARGS -E remove
@@ -168,7 +168,68 @@ endfunction (cisst_add_library)
 
 
 
-# The macro adds a library to a CISST-related project by processing the 
+
+# Function used to compare required libraries for a given target with
+# libraries actually compiled.  This macro adds the required link
+# options.
+function (cisst_target_link_libraries TARGET ...)
+  # debug
+  cisst_cmake_debug ("cisst_target_link_libraries called with: ${ARGV}")
+  if (${ARGC} LESS 2)
+    message ("cisst_target_link_libraries takes at least two arguments, target and one or more libraries.  Got: ${ARGV}")
+  endif (${ARGC} LESS 2)
+
+  set (REQUIRED_CISST_LIBRARIES ${ARGV})
+  list (GET REQUIRED_CISST_LIBRARIES 0 WHO_REQUIRES)
+  list (REMOVE_AT REQUIRED_CISST_LIBRARIES 0) # first one is the library name
+  cisst_cmake_debug ("cisst_target_link_libraries, library ${WHO_REQUIRES} to link against ${REQUIRED_CISST_LIBRARIES}")
+
+  if (CISST_BUILD_SHARED_LIBS)
+    add_definitions(-DCISST_DLL)
+  endif (CISST_BUILD_SHARED_LIBS)
+
+  # First test that all libraries should have been compiled
+  foreach (required ${REQUIRED_CISST_LIBRARIES})
+    if ("${CISST_LIBRARIES}"  MATCHES ${required})
+    else ("${CISST_LIBRARIES}"  MATCHES ${required})
+      message ("${WHO_REQUIRES} requires ${required} which doesn't exist or hasn't been compiled")
+    endif ("${CISST_LIBRARIES}"  MATCHES ${required})
+  endforeach (required)
+
+  # Second, create a list of libraries in the right order
+  foreach (existing ${CISST_LIBRARIES})
+    if ("${REQUIRED_CISST_LIBRARIES}" MATCHES ${existing})
+      set (CISST_LIBRARIES_TO_USE ${CISST_LIBRARIES_TO_USE} ${existing})
+    endif ("${REQUIRED_CISST_LIBRARIES}" MATCHES ${existing})
+  endforeach (existing)
+
+  # Include extra packages as needed
+  foreach (package ${CISST_ADDITIONAL_PACKAGES})
+    find_package(${package} REQUIRED)
+  endforeach (package)
+
+  # Include extra cmake files as needed
+  foreach (fileCMake ${CISST_ADDITIONAL_CMAKE_FILES})
+    include (${fileCMake})
+  endforeach (fileCMake)
+
+  # Finally, link with the required libraries
+  target_link_libraries(${WHO_REQUIRES} ${CISST_LIBRARIES_TO_USE} ${CISST_ADDITIONAL_LIBRARIES})
+
+  # Optimized/Debug libraries
+  foreach (lib ${CISST_ADDITIONAL_LIBRARIES_OPTIMIZED})
+    target_link_libraries (${WHO_REQUIRES} optimized ${lib})
+  endforeach (lib)
+  foreach (lib ${CISST_ADDITIONAL_LIBRARIES_DEBUG})
+    target_link_libraries (${WHO_REQUIRES} debug ${lib})
+  endforeach (lib)
+
+endfunction (cisst_target_link_libraries)
+
+
+
+# DEPRECATED, USE cisst_add_library INSTEAD
+# The macro adds a library to a CISST-related project by processing the
 # externally defined variables listed below:
 #
 # - LIBRARY is the name of the library, e.g. cisstVector
@@ -186,7 +247,7 @@ endfunction (cisst_add_library)
 # -- create the source and header lists of files with the right path
 # -- check the dependencies
 # -- add the link options based on the dependencies
-# -- add the library 
+# -- add the library
 # -- create the install targets for the headers as well as the library
 
 MACRO(CISST_ADD_LIBRARY_TO_PROJECT PROJECT_NAME)
@@ -222,7 +283,7 @@ IF(BUILD_LIBS_${LIBRARY} OR BUILD_${LIBRARY})
   EXEC_PROGRAM(${CMAKE_COMMAND}
                ARGS -E copy_if_different
                \"${LIBRARY_MAIN_HEADER_TMP}\"
-               \"${LIBRARY_MAIN_HEADER}\") 
+               \"${LIBRARY_MAIN_HEADER}\")
 
   EXEC_PROGRAM(${CMAKE_COMMAND}
                ARGS -E remove
@@ -275,6 +336,7 @@ ENDMACRO(CISST_ADD_LIBRARY_TO_PROJECT)
 
 
 
+# DEPRECATED, USE cisst_target_link_libraries INSTEAD
 # Macro used to compare required libraries for a given target with
 # libraries actually compiled.  This macro adds the required link
 # options.
@@ -287,7 +349,7 @@ MACRO(CISST_REQUIRES WHO_REQUIRES REQUIRED_CISST_LIBRARIES)
    # First test that all libraries should have been compiled
    FOREACH(required ${REQUIRED_CISST_LIBRARIES})
      IF("${CISST_LIBRARIES}"  MATCHES ${required})
-     ELSE("${CISST_LIBRARIES}"  MATCHES ${required})     
+     ELSE("${CISST_LIBRARIES}"  MATCHES ${required})
        MESSAGE("${WHO_REQUIRES} requires ${required} which doesn't exist or hasn't been compiled")
      ENDIF("${CISST_LIBRARIES}"  MATCHES ${required})
    ENDFOREACH(required)
@@ -311,7 +373,7 @@ MACRO(CISST_REQUIRES WHO_REQUIRES REQUIRED_CISST_LIBRARIES)
 
    # Finally, link with the required libraries
    TARGET_LINK_LIBRARIES(${WHO_REQUIRES} ${CISST_LIBRARIES_TO_USE} ${CISST_ADDITIONAL_LIBRARIES})
-   
+
    # Optimized/Debug libraries
    FOREACH(lib ${CISST_ADDITIONAL_LIBRARIES_OPTIMIZED})
      TARGET_LINK_LIBRARIES(${WHO_REQUIRES} optimized ${lib})
