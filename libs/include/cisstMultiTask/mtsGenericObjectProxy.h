@@ -436,7 +436,7 @@ public:
     static mtsGenericObject* ConditionalCreate(const T &arg, const std::string &name) { 
         mtsGenericObject *tmp = impl::ConditionalCreate(arg, name);
         if (!tmp)
-            CMN_LOG_INIT_ERROR << "ConditionalCreate returning NULL for " << name << std::endl;
+            CMN_LOG_INIT_ERROR << "ConditionalCreate returning NULL for " << name << " (maybe you should use CMN_DECLARE_SERVICES with CMN_DYNAMIC_CREATION)" << std::endl;
         return tmp;
     }
 
