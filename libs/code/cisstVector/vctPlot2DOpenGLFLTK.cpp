@@ -20,6 +20,8 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstVector/vctPlot2DOpenGLFLTK.h>
 
+#include <FL/Fl_Menu_Button.H>
+
 vctPlot2DOpenGLFLTK::vctPlot2DOpenGLFLTK(const int x, const int y,
                                          const int width, const int height,
                                          const char * title):
@@ -45,4 +47,32 @@ void vctPlot2DOpenGLFLTK::draw(void)
         valid(1);
     }
     vctPlot2DOpenGL::Render();
+}
+
+
+int vctPlot2DOpenGLFLTK::handle(int event) {
+    int button;
+    Fl_Menu_Button * popup;
+    switch(event) {
+    case FL_PUSH:
+        button = Fl::event_button();
+#if 0
+        popup = new Fl_Menu_Button(0, 0, 400, 400);
+        popup->type(Fl_Menu_Button::POPUP3);
+        popup->add("This|is|a popup|menu");
+        popup->show();
+#endif
+        std::cout << "Click button " << button << std::endl;
+        return 0;
+        break;
+    case FL_DRAG:
+    case FL_RELEASE:    
+    case FL_FOCUS :
+    case FL_UNFOCUS :
+    case FL_KEYBOARD:
+    case FL_SHORTCUT:
+    default:
+        // pass other events to the base class...
+        return Fl_Gl_Window::handle(event);
+  }
 }

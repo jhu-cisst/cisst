@@ -41,8 +41,11 @@ public:
 protected:
 
     /*! Methods required for FLTK */
+    //@{
     void initgl(void);
     void draw(void);
+    int handle(int event);
+    //@}
 };
 
 
