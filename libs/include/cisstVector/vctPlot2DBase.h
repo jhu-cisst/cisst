@@ -38,7 +38,7 @@ class CISST_EXPORT vctPlot2DBase
 public:
 
     /*! Storage for a given signal */
-    class Trace 
+    class Trace
     {
         friend class vctPlot2DBase;
         friend class vctPlot2DOpenGL;
@@ -76,11 +76,30 @@ public:
     /*! Add a point to a given trace */
     void AddPoint(size_t trace, const vctDouble2 & point);
 
+    /*! Data recentering */
+    void FitX(void);
+    void FitY(void);
+    void AlignMaxX(void);
+
+    /*! Automatic recentering */
+    void SetContinuousFitX(bool fit);
+    void SetContinuousFitY(bool fit);
+    void SetContinuousAlignMaxX(bool align);
+
+    inline bool GetContinuousFitX(void) const {
+        return this->ContinuousFitX;
+    }
+    inline bool GetContinuousFitY(void) const {
+        return this->ContinuousFitY;
+    }
+    inline bool GetContinuousAlignMaxX(void) const {
+        return this->ContinuousAlignMaxX;
+    }
 
 #if 0
     // no yet implemented
     void SetGridColor(const vctDouble3 & color);
-#endif 
+#endif
 
     /*! Set background color, defined as RGB between 0 and 1. */
     void SetBackgroundColor(const vctDouble3 & color);
@@ -112,6 +131,16 @@ protected:
 
     // viewport sizes
     vctDouble2 Viewport;
+    vctDouble2 Translation;
+    vctDouble2 Scale;
+
+    // continuous computation of scales and offsets
+    bool Continuous;
+    bool ContinuousFitX;
+    bool ContinuousFitY;
+    bool ContinuousAlignMaxX;
+    void ComputeBoundingBox(vctDouble2 & min, vctDouble2 & max);
+    void ContinuousUpdate(void);
 
     // background color
     vctDouble3 BackgroundColor;

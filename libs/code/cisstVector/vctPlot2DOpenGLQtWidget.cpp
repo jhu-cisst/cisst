@@ -20,6 +20,8 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstVector/vctPlot2DOpenGLQtWidget.h>
 
+#include <QMouseEvent>
+#include <QMenu>
 
 vctPlot2DOpenGLQtWidget::vctPlot2DOpenGLQtWidget(QWidget * parent):
     QGLWidget(parent),
@@ -43,4 +45,59 @@ void vctPlot2DOpenGLQtWidget::resizeGL(int width, int height)
 void vctPlot2DOpenGLQtWidget::paintGL(void)
 {
     vctPlot2DOpenGL::Render();
+}
+
+
+void vctPlot2DOpenGLQtWidget::mouseReleaseEvent(QMouseEvent * event)
+{
+    if (event->button() == Qt::RightButton) {
+        // local QMenu will be deleted
+        QMenu menu;
+
+        QAction * fitXnow = new QAction("Fit X now", this);
+        QAction * fitXalways = new QAction("Fit X always", this);
+        fitXalways->setCheckable(true);
+        fitXalways->setChecked(this->GetContinuousFitX());
+        menu.addAction(fitXnow);
+        menu.addAction(fitXalways);
+        connect(fitXnow, SIGNAL(triggered()), this, SLOT(FitXSlot()));
+        connect(fitXalways, SIGNAL(toggled(bool)), this, SLOT(SetContinuousFitXSlot(bool)));
+
+        menu.addSeparator();
+
+        QAction * fitYnow = new QAction("Fit Y now", this);
+        QAction * fitYalways = new QAction("Fit Y always", this);
+        fitYalways->setCheckable(true);
+        fitYalways->setChecked(this->GetContinuousFitY());
+        menu.addAction(fitYnow);
+        menu.addAction(fitYalways);
+        connect(fitYnow, SIGNAL(triggered()), this, SLOT(FitYSlot()));
+        connect(fitYalways, SIGNAL(toggled(bool)), this, SLOT(SetContinuousFitYSlot(bool)));
+
+        menu.exec(mapToGlobal(event->pos()));
+    }
+}
+
+
+void vctPlot2DOpenGLQtWidget::FitXSlot(void)
+{
+    this->FitX();
+}
+
+
+void vctPlot2DOpenGLQtWidget::FitYSlot(void)
+{
+    this->FitY();
+}
+
+
+void vctPlot2DOpenGLQtWidget::SetContinuousFitXSlot(bool checked)
+{
+    this->SetContinuousFitX(checked);
+}
+
+
+void vctPlot2DOpenGLQtWidget::SetContinuousFitYSlot(bool checked)
+{
+    this->SetContinuousFitY(checked);
 }

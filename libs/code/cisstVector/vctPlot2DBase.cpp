@@ -18,8 +18,9 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include <cisstVector/vctPlot2DBase.h>
 
+#include <cisstVector/vctPlot2DBase.h>
+#include <cisstCommon/cmnUnits.h>
 
 vctPlot2DBase::Trace::Trace(const std::string & name, size_t numberOfPoints):
     Active(true),
@@ -75,6 +76,10 @@ vctPlot2DBase::vctPlot2DBase(void):
     NumberOfPoints(200),
     BackgroundColor(0.1, 0.1, 0.1)
 {
+    Translation.SetAll(0.0);
+    Scale.SetAll(1.0);
+    SetContinuousFitX(true);
+    SetContinuousFitY(true);
 }
 
 
@@ -108,6 +113,91 @@ void vctPlot2DBase::AddPoint(size_t traceId, const vctDouble2 & point)
 {
     this->Traces[traceId]->AddPoint(point);
 } 
+
+
+void vctPlot2DBase::FitX(void)
+{
+    this->SetContinuousFitX(false);
+    vctDouble2 min, max;
+    this->ComputeBoundingBox(min, max);
+    this->Scale.X() = this->Viewport.X() / (max.X() - min.X());
+    this->Translation.Y() = - min.X() * this->Scale.X();
+}
+
+
+void vctPlot2DBase::FitY(void)
+{
+    this->SetContinuousFitY(false);
+    vctDouble2 min, max;
+    this->ComputeBoundingBox(min, max);
+    this->Scale.Y() = this->Viewport.Y() / (max.Y() - min.Y());
+    this->Translation.Y() = - min.Y() * this->Scale.Y();
+}
+
+
+void vctPlot2DBase::SetContinuousFitX(bool fit)
+{
+    this->ContinuousFitX = fit;
+    this->ContinuousAlignMaxX = false;
+    this->Continuous = (this->ContinuousFitX
+                        || this->ContinuousFitY
+                        || this->ContinuousAlignMaxX);
+}
+
+
+void vctPlot2DBase::SetContinuousFitY(bool fit)
+{
+    this->ContinuousFitY = fit;
+    this->Continuous = (this->ContinuousFitX
+                        || this->ContinuousFitY
+                        || this->ContinuousAlignMaxX);
+}
+
+
+void vctPlot2DBase::SetContinuousAlignMaxX(bool align)
+{
+    this->ContinuousAlignMaxX = align;
+    this->ContinuousFitX = false;
+    this->Continuous = (this->ContinuousFitX
+                        || this->ContinuousFitY
+                        || this->ContinuousAlignMaxX);
+}
+
+
+void vctPlot2DBase::ComputeBoundingBox(vctDouble2 & min, vctDouble2 & max)
+{
+    if (this->Traces.size() == 0) {
+        min.SetAll(-1.0);
+        max.SetAll(1.0);
+    } else {
+        size_t traceIndex;
+        const size_t numberOfTraces = this->Traces.size();
+        min.Assign(this->Traces[0]->Data.Element(0));
+        max.Assign(min);
+        for (traceIndex = 0;
+             traceIndex < numberOfTraces;
+             traceIndex++) {
+            this->Traces[traceIndex]->UpdateMinAndMax(min, max);
+        }
+    }
+}
+
+
+void vctPlot2DBase::ContinuousUpdate(void)
+{
+    if (Continuous) {
+        vctDouble2 min, max;
+        this->ComputeBoundingBox(min, max);
+        if (this->ContinuousFitX) {
+            this->Scale.X() = this->Viewport.X() / (max.X() - min.X());
+            this->Translation.X() = - min.X() * this->Scale.X();
+        }
+        if (this->ContinuousFitY) {
+            this->Scale.Y() = this->Viewport.Y() / (max.Y() - min.Y());
+            this->Translation.Y() = - min.Y() * this->Scale.Y();
+        }
+    }
+}
 
 
 void vctPlot2DBase::SetBackgroundColor(const vctDouble3 & color)

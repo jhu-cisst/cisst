@@ -71,28 +71,16 @@ void vctPlot2DOpenGL::Render(void)
     size_t pointIndex;
     size_t numberOfPoints;
 
+    // see if translation and scale need to be updated
+    this->ContinuousUpdate();
+
     // make sure there is no left over transformation
     glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
     // clear
     glClear(GL_COLOR_BUFFER_BIT);
 
-    // for now, find the min and max for X and Y for all traces
-    vctDouble2 min, max;
-    min.Assign(this->Traces[0]->Data.Element(0));
-    max.Assign(min);
-    for (traceIndex = 0;
-         traceIndex < numberOfTraces;
-         traceIndex++) {
-        this->Traces[traceIndex]->UpdateMinAndMax(min, max);
-    }
-    vctDouble2 scale;
-    scale.ElementwiseRatioOf(this->Viewport, max - min);
-    vctDouble2 offset;
-    offset.ElementwiseProductOf(min, scale);
-    offset.NegationSelf();
-
-    // plot all traces
+    // plot all traces.   this needs to be updated to use glScale and glTranslate to avoid all conputations on CPU
     for (traceIndex = 0;
          traceIndex < numberOfTraces;
          traceIndex++) {
@@ -106,8 +94,8 @@ void vctPlot2DOpenGL::Render(void)
         for (pointIndex = trace->IndexFirst;
              pointIndex != trace->IndexLast;
              pointIndex = (pointIndex + 1) % numberOfPoints) {
-            glVertex2d((trace->Data.Element(pointIndex).X() * scale.X()) + offset.X(),
-                       (trace->Data.Element(pointIndex).Y() * scale.Y()) + offset.Y());
+            glVertex2d((trace->Data.Element(pointIndex).X() * this->Scale.X()) + this->Translation.X(),
+                       (trace->Data.Element(pointIndex).Y() * this->Scale.Y()) + this->Translation.Y());
         }
         glEnd();
     }

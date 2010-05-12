@@ -42,7 +42,15 @@ protected:
     virtual void initializeGL(void);
     virtual void resizeGL(int w, int h);
     virtual void paintGL(void);
+    virtual void mouseReleaseEvent(QMouseEvent * event);
     //@}
+
+public slots:
+    void FitXSlot(void);
+    void FitYSlot(void);
+    void SetContinuousFitXSlot(bool);
+    void SetContinuousFitYSlot(bool);
+    
 };
 
 #endif  // _vctPlot2DOpenGLQtWidget_h

@@ -37,10 +37,11 @@ public:
  protected:
 
     /*! Define rendering function for OpenGL */
+    //@{
     virtual void RenderInitialize(void);
     virtual void RenderResize(double width, double height);
     virtual void Render(void);
-
+    //@}
 };
 
 #endif  // _vctPlot2DOpenGL_h
