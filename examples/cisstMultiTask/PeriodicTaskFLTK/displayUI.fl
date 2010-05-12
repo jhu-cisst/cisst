@@ -13,8 +13,8 @@ class displayUI {open
       Fl_Box Plot {
         label {Graph Region}
         xywh {10 10 385 310} box BORDER_BOX labelfont 1 labelsize 12
-        code0 {\#include <vctPlot2DFLTK.h>}
-        class vctPlot2DFLTK
+        code0 {\#include <cisstVector/vctPlot2DOpenGLFLTK.h>}
+        class vctPlot2DOpenGLFLTK
       }
       Fl_Value_Output Data {
         label {Data:} selected

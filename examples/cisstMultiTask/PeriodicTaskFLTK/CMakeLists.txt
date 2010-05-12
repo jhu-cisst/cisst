@@ -28,9 +28,10 @@ ADD_EXECUTABLE(cisstMultiTaskPeriodicTaskFLTK
                ${cisstMultiTaskPeriodicTaskFLTK_FLTK_UI_SRCS}
                )
 
-target_link_libraries(cisstMultiTaskPeriodicTaskFLTK
-                      vctPlot
-                      )
-
 # link with the cisst libraries
-CISST_REQUIRES("cisstMultiTaskPeriodicTaskFLTK" "cisstCommon;cisstOSAbstraction;cisstMultiTask")
+cisst_target_link_libraries(cisstMultiTaskPeriodicTaskFLTK
+                            cisstCommon
+                            cisstVector
+                            cisstVectorFLTK
+                            cisstOSAbstraction
+                            cisstMultiTask)

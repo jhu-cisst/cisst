@@ -25,15 +25,17 @@ http://www.cisst.org/cisst/license.txt.
 #include <FL/Fl_Gl_Window.H>
 #include <FL/gl.h>
 
-#include <vctPlot2DGLBase.h>
+#include <cisstVector/vctPlot2DOpenGL.h>
 
+// Always include last
+#include <cisstVector/vctExportFLTK.h>
 
-class vctPlot2DOpenGLFLTK: public Fl_Gl_Window, public vctPlot2DGLBase
+class CISST_EXPORT vctPlot2DOpenGLFLTK: public Fl_Gl_Window, public vctPlot2DOpenGL
 {
 public:
     vctPlot2DOpenGLFLTK(const int x, const int y,
-		  const int width, const int height,
-		  const char * title);
+                        const int width, const int height,
+                        const char * title);
     ~vctPlot2DOpenGLFLTK(void) {};
 
 protected:

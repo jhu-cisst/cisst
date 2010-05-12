@@ -21,10 +21,10 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstVector/vctPlot2DOpenGLFLTK.h>
 
 vctPlot2DOpenGLFLTK::vctPlot2DOpenGLFLTK(const int x, const int y,
-			     const int width, const int height,
-			     const char * title):
+                                         const int width, const int height,
+                                         const char * title):
     Fl_Gl_Window(x, y, width, height, title),
-    vctPlot2DOpenGLBase()
+    vctPlot2DOpenGL()
 {
     this->Viewport.X() = width;
     this->Viewport.Y() = height;
@@ -33,16 +33,16 @@ vctPlot2DOpenGLFLTK::vctPlot2DOpenGLFLTK(const int x, const int y,
 
 void vctPlot2DOpenGLFLTK::initgl(void)
 {
-    vctPlot2DOpenGLBase::RenderInitialize();
-    vctPlot2DOpenGLBase::RenderResize(this->Viewport.X(), this->Viewport.Y());
+    vctPlot2DOpenGL::RenderInitialize();
+    vctPlot2DOpenGL::RenderResize(this->Viewport.X(), this->Viewport.Y());
 }
 
 
 void vctPlot2DOpenGLFLTK::draw(void)
 {
     if (!valid()) {
-	initgl();
-	valid(1);
+        initgl();
+        valid(1);
     }
-    vctPlot2DOpenGLBase::Render();
+    vctPlot2DOpenGL::Render();
 }

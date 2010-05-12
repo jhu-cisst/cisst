@@ -185,10 +185,17 @@ if (CISST_HAS_OPENGL AND CISST_HAS_QT)
 
 endif (CISST_HAS_OPENGL AND CISST_HAS_QT)
 
-#   # FLTK extra code
-#   if (CISST_HAS_FLTK)
-#     set (PLOT_SOURCES ${PLOT_SOURCES}
-# 	 vctPlot2DFLTK.h
-# 	 vctPlot2DFLTK.cpp)
-#   endif (CISST_HAS_FLTK)
 
+# FLTK widgets
+if (CISST_HAS_OPENGL AND CISST_HAS_FLTK)
+
+  cisst_add_library (
+    LIBRARY cisstVectorFLTK
+    LIBRARY_DIR cisstVector
+    DEPENDENCIES cisstCommon
+                 cisstVector
+    SOURCE_FILES vctPlot2DOpenGLFLTK.cpp
+    HEADER_FILES vctPlot2DOpenGLFLTK.h
+                 vctExportFLTK.h)
+
+endif (CISST_HAS_OPENGL AND CISST_HAS_FLTK)

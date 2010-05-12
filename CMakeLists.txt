@@ -283,6 +283,10 @@ set(CISST_LIBS_WITH_QT
     cisstVector
     cisstMultiTask)
 
+# Which librairies have FLTK Widgets
+set(CISST_LIBS_WITH_FLTK
+    cisstVector)
+
 
 # Build by default
 FOREACH(lib ${CISST_LIBS_STABLE})
@@ -308,6 +312,7 @@ ADD_SUBDIRECTORY(libs)
 foreach (lib ${CISST_LIBS})
   if (BUILD_LIBS_${lib})
     set (CISST_LIBRARIES ${lib} ${CISST_LIBRARIES})
+    # Add libraries with Qt
     if (CISST_HAS_QT)
       list (FIND CISST_LIBS_WITH_QT ${lib} ${lib}_HAS_QT)
       if (${${lib}_HAS_QT} GREATER -1)
@@ -317,6 +322,16 @@ foreach (lib ${CISST_LIBS})
 	set (CISST_BUILD_${lib}Qt OFF)
       endif (${${lib}_HAS_QT} GREATER -1)
     endif (CISST_HAS_QT)
+    # Add libraries with FLTK
+    if (CISST_HAS_FLTK)
+      list (FIND CISST_LIBS_WITH_FLTK ${lib} ${lib}_HAS_FLTK)
+      if (${${lib}_HAS_FLTK} GREATER -1)
+	set (CISST_LIBRARIES ${lib}FLTK ${CISST_LIBRARIES})
+	set (CISST_BUILD_${lib}FLTK ON)
+      else (${${lib}_HAS_FLTK} GREATER -1)
+	set (CISST_BUILD_${lib}FLTK OFF)
+      endif (${${lib}_HAS_FLTK} GREATER -1)
+    endif (CISST_HAS_FLTK)
   endif (BUILD_LIBS_${lib})
 endforeach (lib)
 cisst_cmake_debug("Libraries to be built: ${CISST_LIBRARIES}")
