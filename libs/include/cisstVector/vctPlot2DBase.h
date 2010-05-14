@@ -59,6 +59,7 @@ public:
         void ComputeDataRangeXY(vctDouble2 & min, vctDouble2 & max);
 
         void SetNumberOfPoints(size_t numberOfPoints);
+        void SetColor(const vctDouble3 & color);
 
     protected:
         std::string Name;
@@ -89,12 +90,12 @@ public:
 
     /*! Data recentering, these methods re-align the data once only, based on all traces. */
     //@{
-    void FitX(void);
-    void FitX(double min, double max);
-    void FitY(void);
-    void FitY(double min, double max);
-    void FitXY(void);
-    void FitXY(vctDouble2 min, vctDouble2 max);
+    void FitX(double padding = 1.0);
+    void FitX(double min, double max, double padding = 1.0);
+    void FitY(double padding = 1.1);
+    void FitY(double min, double max, double padding = 1.1);
+    void FitXY(const vctDouble2 & padding = vctDouble2(1.0, 1.1));
+    void FitXY(vctDouble2 min, vctDouble2 max, const vctDouble2 & padding = vctDouble2(1.0, 1.1));
     void AlignMaxX(void);
     //@}
 
@@ -150,7 +151,11 @@ public:
 #if 0
     // no yet implemented
     void SetGridColor(const vctDouble3 & color);
+
 #endif
+
+    /*! Set color for a specific trace */
+    void SetColor(size_t traceId, const vctDouble3 & color);
 
     /*! Set background color, defined as RGB between 0 and 1. */
     void SetBackgroundColor(const vctDouble3 & color);

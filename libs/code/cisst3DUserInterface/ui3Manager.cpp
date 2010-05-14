@@ -877,8 +877,8 @@ void* ui3ManagerCVTKRendererProc::Proc(ui3Manager* baseref)
     // update once before starting so we can use the Show method
     baseref->SceneManager->VisibleObjects->Update(baseref->SceneManager);
     baseref->SceneManager->VisibleObjects->Show();
-
-    // rendering loop
+    
+	// rendering loop
     while (!KillThread) {
 
         // update VTK objects if needed

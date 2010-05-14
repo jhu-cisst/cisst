@@ -168,6 +168,15 @@ void vctPlot2DBase::Trace::ComputeDataRangeY(double & min, double & max)
 }
 
 
+void vctPlot2DBase::Trace::SetColor(const vctDouble3 & color)
+{
+    vctDouble3 clippedColor;
+    clippedColor.ClippedAboveOf(color, 1.0);
+    clippedColor.ClippedBelowOf(clippedColor, 0.0);
+    this->Color.Assign(clippedColor);
+}
+
+
 vctPlot2DBase::vctPlot2DBase(void):
     Frozen(false),
     BackgroundColor(0.1, 0.1, 0.1)
@@ -213,52 +222,56 @@ void vctPlot2DBase::AddPoint(size_t traceId, const vctDouble2 & point)
 } 
 
 
-void vctPlot2DBase::FitX(void)
+void vctPlot2DBase::FitX(double padding)
 {
     double min, max;
     this->ComputeDataRangeX(min, max);
-    this->FitX(min, max);
+    this->FitX(min, max, padding);
 }
 
 
-void vctPlot2DBase::FitX(double min, double max)
+void vctPlot2DBase::FitX(double min, double max, double padding)
 {
     this->ViewingRangeX.Assign(min, max);
-    this->Scale.X() = this->Viewport.X() / (max - min);
-    this->Translation.X() = - min * this->Scale.X();
+    this->Scale.X() = this->Viewport.X() / ((max - min) * padding);
+    this->Translation.X() = - min * this->Scale.X() * padding;
 }
 
 
-void vctPlot2DBase::FitY(void)
+void vctPlot2DBase::FitY(double padding)
 {
     double min, max;
     this->ComputeDataRangeY(min, max);
-    this->FitY(min, max);
+    this->FitY(min, max, padding);
 }
 
 
-void vctPlot2DBase::FitY(double min, double max)
+void vctPlot2DBase::FitY(double min, double max, double padding)
 {
     this->ViewingRangeY.Assign(min, max);
-    this->Scale.Y() = this->Viewport.Y() / (max - min);
-    this->Translation.Y() = - min * this->Scale.Y();
+    this->Scale.Y() = this->Viewport.Y() / ((max - min) * padding);
+    this->Translation.Y() = - min * this->Scale.Y() * padding;
 }
 
 
-void vctPlot2DBase::FitXY(void)
+void vctPlot2DBase::FitXY(const vctDouble2 & padding)
 {
     vctDouble2 min, max;
     this->ComputeDataRangeXY(min, max);
-    this->FitXY(min, max);
+    this->FitXY(min, max, padding);
 }
 
 
-void vctPlot2DBase::FitXY(vctDouble2 min, vctDouble2 max)
+void vctPlot2DBase::FitXY(vctDouble2 min, vctDouble2 max, const vctDouble2 & padding)
 {
     this->ViewingRangeX.Assign(min.X(), max.X());
     this->ViewingRangeY.Assign(min.Y(), max.Y());
-    this->Scale.ElementwiseRatioOf(this->Viewport, (max - min)); // scale = viewport / (max - min)
-    this->Translation.ElementwiseProductOf(min, this->Scale); // translation = - min * scale 
+    vctDouble2 temp;
+    temp.DifferenceOf(max, min);
+    temp.ElementwiseMultiply(padding);
+    this->Scale.ElementwiseRatioOf(this->Viewport, temp); // scale = viewport / (max - min)
+    temp.ElementwiseProductOf(min, padding);
+    this->Translation.ElementwiseProductOf(temp, this->Scale); // translation = - min * scale 
     this->Translation.NegationSelf();
 }
 
@@ -376,6 +389,12 @@ void vctPlot2DBase::ContinuousUpdate(void)
             this->FitY();
         }
     }
+}
+
+
+void vctPlot2DBase::SetColor(size_t traceId, const vctDouble3 & color)
+{
+    this->Traces[traceId]->SetColor(color);
 }
 
 

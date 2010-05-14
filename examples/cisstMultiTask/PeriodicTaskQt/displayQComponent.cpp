@@ -48,6 +48,7 @@ void displayQComponent::timerEvent(QTimerEvent * CMN_UNUSED(event))
     Generator.GetData(Data);
     CentralWidget.ValueData->setNum(Data.Data);
     CentralWidget.Plot->AddPoint(0, vctDouble2(Data.Timestamp(), Data.Data));
+    CentralWidget.Plot->updateGL();
 }
 
 
