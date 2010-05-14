@@ -43,7 +43,7 @@ class CISST_EXPORT mtsCommandQueuedVoidBase: public mtsCommandVoidBase
     typedef mtsCommandQueuedVoidBase ThisType;
 
  protected:
-    /*! Mailboxe used to queue the commands */
+    /*! Mailbox used to queue the commands */
     mtsMailBox * MailBox;
     /*! Actual command being queued. */
     mtsCommandVoidBase * ActualCommand;
@@ -91,6 +91,11 @@ class CISST_EXPORT mtsCommandQueuedVoidBase: public mtsCommandVoidBase
       its mailboxes fast enough. */
     virtual mtsCommandBase::ReturnType Execute(void) {
         if (this->IsEnabled()) {
+            if (!MailBox) {
+                CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedVoid: Execute: no mailbox for \""
+                                  << this->Name << "\"" << std::endl;
+                return mtsCommandBase::NO_MAILBOX;
+            }
             if (MailBox->Write(this)) {
                 return mtsCommandBase::DEV_OK;
             }
@@ -107,8 +112,8 @@ class CISST_EXPORT mtsCommandQueuedVoidBase: public mtsCommandVoidBase
     }
 
 
-    inline virtual const std::string & GetMailBoxName(void) const {
-        return this->MailBox->GetName();
+    inline virtual const std::string GetMailBoxName(void) const {
+        return this->MailBox ? this->MailBox->GetName() : "NULL";
     }
 };
 

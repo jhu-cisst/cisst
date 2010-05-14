@@ -47,6 +47,7 @@ template <class _argumentType>
 class mtsCommandReadOrWriteBase : public mtsCommandBase {
 
     friend class mtsMulticastCommandWriteBase;
+    friend class mtsCommandQueuedWriteGeneric;
 
 public:
     typedef mtsCommandBase BaseType;
@@ -96,73 +97,6 @@ public:
 
 protected:
 
-    inline virtual void SetArgumentPrototype(const mtsGenericObject * argumentPrototype) {
-        this->ArgumentPrototype = argumentPrototype;
-    }
-
-    const mtsGenericObject * ArgumentPrototype;
-
-};
-
-
-
-
-
-// note copied from class above, removed the template parameter and sticked to Write only
-// might want to template and specialize by "const mtsGenericObject *" or "mtsGenericObject *" 
-class mtsCommandWriteGenericBase : public mtsCommandBase {
-
-    friend class mtsMulticastCommandWriteBase;
-    friend class mtsCommandQueuedWriteGenericBase;
-
-public:
-    typedef mtsCommandBase BaseType;
-    
-    /*! The constructor. Does nothing */
-    mtsCommandWriteGenericBase(void):
-        BaseType(),
-        ArgumentPrototype(0)
-    {}
-
-    mtsCommandWriteGenericBase(const std::string & name):
-        BaseType(name),
-        ArgumentPrototype(0)
-    {}
-
-    /*! The destructor. Does nothing */
-    virtual ~mtsCommandWriteGenericBase() {}
-
-    /*! The execute method. Abstract method to be implemented by
-      derived classes to run the actual operation on the receiver
-
-      \param obj The data passed to the operation method
-
-      \result Boolean value, true if success, false otherwise */
-    virtual BaseType::ReturnType Execute(const mtsGenericObject * argument) = 0;
-
-    /*! For debugging. Generate a human readable output for the
-      command object */
-    virtual void ToStream(std::ostream & outputStream) const = 0;
-
-    /*! Execute method expects 1 argument. */
-    inline virtual unsigned int NumberOfArguments(void) const {
-        return 1;
-    }
-
-    /*! Return a pointer on the argument prototype */
-    inline virtual const mtsGenericObject * GetArgumentPrototype(void) const {
-        return this->ArgumentPrototype;
-    }
-
-    /*! Return const pointer of class services associated to the
-        argument type. */
-    inline const cmnClassServicesBase * GetArgumentClassServices(void) const {
-        return this->GetArgumentPrototype()->Services();
-    }
-
-    
-protected:
-    
     inline virtual void SetArgumentPrototype(const mtsGenericObject * argumentPrototype) {
         this->ArgumentPrototype = argumentPrototype;
     }

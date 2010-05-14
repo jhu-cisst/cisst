@@ -52,6 +52,9 @@ http://www.cisst.org/cisst/license.txt.
 // Using XML or not
 #define CISST_HAS_XML @CISST_HAS_XML@
 
+// Using IRE (and Swig/Python) or not
+#define CISST_HAS_IRE @BUILD_LIBS_cisstInteractive@
+
 // Using FLTK or not
 #define CISST_HAS_FLTK @CISST_HAS_FLTK@
 

@@ -30,13 +30,15 @@ mtsDeviceInterface::mtsDeviceInterface(const std::string & interfaceName,
     Device(device),
     Registered(false),
     UserCounter(0),
-    CommandsVoid("CommandsVoid"),
-    CommandsRead("CommandsRead"),
-    CommandsWrite("CommandsWrite"),
-    CommandsQualifiedRead("CommandsQualifiedRead"),
-    EventVoidGenerators("EventVoidGenerators"),
-    EventWriteGenerators("EventWriteGenerators"),
-    CommandsInternal("CommandsInternal")
+    // Maps take ownership of command objects that are added, so that
+    // cmnNamedMap methods RemoveItem and DeleteAll free allocated memory.
+    CommandsVoid("CommandsVoid", true),
+    CommandsRead("CommandsRead", true),
+    CommandsWrite("CommandsWrite", true),
+    CommandsQualifiedRead("CommandsQualifiedRead", true),
+    EventVoidGenerators("EventVoidGenerators", true),
+    EventWriteGenerators("EventWriteGenerators", true),
+    CommandsInternal("CommandsInternal", true)
 {
     CommandsVoid.SetOwner(*this);
     CommandsRead.SetOwner(*this);
@@ -208,20 +210,6 @@ bool mtsDeviceInterface::AddObserver(const std::string & eventName, mtsCommandWr
 }
 
 
-bool mtsDeviceInterface::AddObserver(const std::string & eventName, mtsCommandWriteGenericBase * handler)
-{
-    mtsMulticastCommandWriteBase * multicastCommand = EventWriteGenerators.GetItem(eventName);
-    if (multicastCommand) {
-        // should probably check for duplicates (have AddCommand return bool?)
-        multicastCommand->AddCommand(handler);
-        return true;
-    } else {
-        CMN_LOG_CLASS_INIT_ERROR << "AddObserver (write): cannot find event named \"" << eventName << "\"" << std::endl;
-        return false;
-    }
-}
-
-
 unsigned int mtsDeviceInterface::AllocateResources(const std::string & userName)
 {
     // no queued commands in this interface, we just keep track of the
@@ -234,6 +222,75 @@ unsigned int mtsDeviceInterface::AllocateResources(const std::string & userName)
     return this->UserCounter;
 }
 
+mtsCommandVoidBase* mtsDeviceInterface::AddCommandVoid(mtsCommandVoidBase *command)
+{
+    if (command) {
+        if (!CommandsVoid.AddItem(command->GetName(), command, CMN_LOG_LOD_INIT_ERROR)) {
+            delete command;
+            command = 0;
+            CMN_LOG_CLASS_INIT_ERROR << "AddCommandVoid: unable to add command \""
+                                     << command->GetName() << "\"" << std::endl;
+        }
+    } else {
+        CMN_LOG_CLASS_INIT_ERROR << "AddCommandVoid: unable to create command \""
+                                 << command->GetName() << "\"" << std::endl;
+    }
+    return command;
+}
+
+mtsCommandReadBase* mtsDeviceInterface::AddCommandRead(mtsCommandReadBase *command)
+{
+    if (command) {
+        if (!CommandsRead.AddItem(command->GetName(), command, CMN_LOG_LOD_INIT_ERROR)) {
+            delete command;
+            command = 0;
+            CMN_LOG_CLASS_INIT_ERROR << "AddCommandRead: unable to add command \""
+                                     << command->GetName() << "\"" << std::endl;
+        }
+    } else {
+        CMN_LOG_CLASS_INIT_ERROR << "AddCommandRead: unable to create command \""
+                                 << command->GetName() << "\"" << std::endl;
+    }
+    return command;
+}
+
+mtsCommandWriteBase* mtsDeviceInterface::AddCommandWrite(mtsCommandWriteBase *command)
+{
+    if (command) {
+        if (!CommandsWrite.AddItem(command->GetName(), command, CMN_LOG_LOD_INIT_ERROR)) {
+            delete command;
+            command = 0;
+            CMN_LOG_CLASS_INIT_ERROR << "AddCommandWrite: unable to add command \""
+                                     << command->GetName() << "\"" << std::endl;
+        }
+    } else {
+        CMN_LOG_CLASS_INIT_ERROR << "AddCommandWrite: unable to create command \""
+                                 << command->GetName() << "\"" << std::endl;
+    }
+    return command;
+}
+
+mtsCommandWriteBase* mtsDeviceInterface::AddCommandFilteredWrite(mtsCommandQualifiedReadBase *, mtsCommandWriteBase *)
+{
+    CMN_LOG_CLASS_INIT_ERROR << "AddCommandFilteredWrite: only valid for tasks" << std::endl;
+    return 0;
+}
+
+mtsCommandQualifiedReadBase* mtsDeviceInterface::AddCommandQualifiedRead(mtsCommandQualifiedReadBase *command)
+{
+    if (command) {
+        if (!CommandsQualifiedRead.AddItem(command->GetName(), command, CMN_LOG_LOD_INIT_ERROR)) {
+            delete command;
+            command = 0;
+            CMN_LOG_CLASS_INIT_ERROR << "AddCommandQualifiedRead: unable to add command \""
+                                     << command->GetName() << "\"" << std::endl;
+        }
+    } else {
+        CMN_LOG_CLASS_INIT_ERROR << "AddCommandQualifiedRead: unable to create command \""
+                                 << command->GetName() << "\"" << std::endl;
+    }
+    return command;
+}
 
 void mtsDeviceInterface::ToStream(std::ostream & outputStream) const
 {

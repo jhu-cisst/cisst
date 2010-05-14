@@ -71,9 +71,8 @@ protected:
 
     /*! Flag set to determine if the map "takes ownership" of data.
       If the map takes ownership it will perform the required `delete`
-      on its data when necessary.  The default is true, i.e. the map
-      destructor will attempt to delete its objects (as does
-      std::map). */
+      on its data when necessary.  The default is false, i.e. the map
+      destructor will not attempt to delete its objects. */
     bool TakesOwnership;
 
     /*! Name of the map, mostly for logging purposes. */

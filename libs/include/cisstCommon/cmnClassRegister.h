@@ -193,6 +193,7 @@ protected:
       enforce the consistency, we use the macro string conversion
       (#).
 
+      PK: FIX THIS
       \return bool True if successful, false if the class has not been
       registered (e.g. one can not register twice).  This might happen
       if a programmer doesn't give the right string name for the class

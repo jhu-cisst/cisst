@@ -25,17 +25,17 @@ CMN_IMPLEMENT_SERVICES(mtsIntervalStatistics);
 
 mtsIntervalStatistics::mtsIntervalStatistics():
 mtsGenericObject(),
+Sum(0.0),
+SumOfSquares(0.0),
+NumberOfSamples(0),
+TempMax(0.0),
+TempMin(0.0),
+Avg(0.0),
 StdDev(0.0),
 Max(0.0),
 Min(0.0),
-Avg(0.0),
-StatisticsUpdatePeriod(1.0),
-NumberOfSamples(0),
-Sum(0.0),
-SumOfSquares(0.0),
-TempMax(0.0),
-TempMin(0.0) {
-
+StatisticsUpdatePeriod(1.0)
+{
     // Get a pointer to the time server
     TimeServer = &mtsTaskManager::GetInstance()->GetTimeServer();
 }

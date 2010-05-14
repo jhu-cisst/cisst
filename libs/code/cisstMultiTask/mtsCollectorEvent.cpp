@@ -187,12 +187,12 @@ void mtsCollectorEvent::Startup(void)
     CMN_LOG_CLASS_INIT_DEBUG << "Startup() for collector \"" << this->GetName() << "\"" << std::endl;
     size_t index;
     CollectorEventWrite * collectorEvent;
-    mtsCommandWriteGenericBase * eventHandler;
+    mtsCommandWriteBase * eventHandler;
     const mtsGenericObject * argumentPrototype;
     for (index = 0; index < this->EventsWrite.size(); index++) {
         collectorEvent = this->EventsWrite[index];
         CMN_ASSERT(collectorEvent->RequiredInterface);
-        eventHandler = collectorEvent->RequiredInterface->GetEventHandlerWriteGeneric(collectorEvent->EventName);
+        eventHandler = collectorEvent->RequiredInterface->GetEventHandlerWrite(collectorEvent->EventName);
         CMN_ASSERT(eventHandler);
         argumentPrototype = eventHandler->GetArgumentPrototype();
         CMN_ASSERT(argumentPrototype);

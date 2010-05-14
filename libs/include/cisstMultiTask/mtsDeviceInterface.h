@@ -26,17 +26,21 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnGenericObject.h>
 #include <cisstCommon/cmnClassRegisterMacros.h>
 #include <cisstCommon/cmnNamedMap.h>
+#include <cisstCommon/cmnPortability.h>
 
 #include <cisstMultiTask/mtsCommandBase.h>
+#include <cisstMultiTask/mtsCommandVoid.h>
+#include <cisstMultiTask/mtsCommandRead.h>
+#include <cisstMultiTask/mtsCommandWrite.h>
+#include <cisstMultiTask/mtsCommandQualifiedRead.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsMulticastCommandWrite.h>
 #include <cisstMultiTask/mtsMulticastCommandVoid.h>
 #include <cisstMultiTask/mtsFunctionReadOrWrite.h>
+#include <cisstMultiTask/mtsStateTable.h>
 
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
-
-class mtsStateTable;
 
 /*!
   \file
@@ -105,7 +109,7 @@ class CISST_EXPORT mtsDeviceInterface: public cmnGenericObject
     /*! Typedef for a map of internally-generated commands (only used for garbage collection). */
     typedef cmnNamedMap<mtsCommandBase> CommandInternalMapType;
 
- protected:
+protected:
 
     /*! A string identifying the 'Name' of the interface. */
     std::string Name;
@@ -157,10 +161,10 @@ class CISST_EXPORT mtsDeviceInterface: public cmnGenericObject
       may be obsolete.
     */
     //@{
-    CommandVoidMapType & GetCommandVoidMap(void);
-    CommandReadMapType & GetCommandReadMap(void);
-    CommandWriteMapType & GetCommandWriteMap(void);
-    CommandQualifiedReadMapType & GetCommandQualifiedReadMap(void);
+    CISST_DEPRECATED CommandVoidMapType & GetCommandVoidMap(void);
+    CISST_DEPRECATED CommandReadMapType & GetCommandReadMap(void);
+    CISST_DEPRECATED CommandWriteMapType & GetCommandWriteMap(void);
+    CISST_DEPRECATED CommandQualifiedReadMapType & GetCommandQualifiedReadMap(void);
     //@}
 
     /*! Find a command based on its name. */
@@ -196,7 +200,6 @@ class CISST_EXPORT mtsDeviceInterface: public cmnGenericObject
     //@{
     virtual bool AddObserver(const std::string & eventName, mtsCommandVoidBase * handler);
     virtual bool AddObserver(const std::string & eventName, mtsCommandWriteBase * handler);
-    virtual bool AddObserver(const std::string & eventName, mtsCommandWriteGenericBase * handler);
     //@}
 
     /*! Get the names of events coming from this interface */
@@ -226,113 +229,102 @@ public:
 
     virtual void Cleanup(void) {};
 
-    /* The following method is implemented in mtsTaskInterface.h */
-    /*! Add a void command to a device interface based on a method and
-      an object instantiating the method.  AddCommandVoid will first
-      check the type of 'this' interface using dynamic_cast.  If the
-      interface is in fact of type mtsTaskInterface, the command
-      should be a queued command.  In this case,
-      mtsTaskInterface::AddCommandVoid is called.  If the type 'this'
-      interface is mtsDeviceInterface, a command is created using the
-      method pointer provided and then added to the map of commands.
-      If command can not be created or the command name has already
-      been used this method will return 0 (null pointer).
+#ifndef SWIG // SWIG cannot parse some of this
+    //****************************************************************************************************************************
+    // The templated methods that are used to create the commands and add them to the interface. Because these are templated, they
+    // cannot be virtual; thus, they rely on the above non-templated AddCommandXXX methods to provide polymorphic behavior.
 
-    \param method method pointer
-    \param classInstantiation an instantiation of the method's class
-    \param commandName name as it should appear in the interface
-    \returns pointer on the newly created and added command, null pointer (0) if creation or addition failed (name already used) */
+    /*! Add a void command to the provided interface based on a method and an object instantiating the method.
+        This method creates an mtsCommandVoid object and then calls the AddCommandVoid virtual method; this method
+        is overridden in mtsTaskInterface to queue the void command (thereby ensuring thread safety).
+        \param method method pointer
+        \param classInstantiation an instantiation of the method's class
+        \param commandName name as it should appear in the interface
+        \returns pointer on the newly created and added command, null pointer (0) if creation or addition failed (name already used) */
+
     template <class __classType>
     inline mtsCommandVoidBase * AddCommandVoid(void (__classType::*method)(void),
                                                __classType * classInstantiation,
-                                               const std::string & commandName);
+                                               const std::string & commandName)
+    {
+        return this->AddCommandVoid(new mtsCommandVoidMethod<__classType>(method, classInstantiation, commandName));
+    }
 
-    /* The following method is implemented in mtsTaskInterface.h */
-    /*! Add a void command to a device interface based on a void
-      function.  AddCommandVoid will first check the type of 'this'
-      interface using dynamic_cast.  If the interface is in fact of
-      type mtsTaskInterface, the command should be a queued command.
-      In this case, mtsTaskInterface::AddCommandVoid is called.  If
-      the type 'this' interface is mtsDeviceInterface, a command is
-      created using the function pointer provided and then added to
-      the map of commands.  If command can not be created or the
-      command name has already been used this method will return 0
-      (null pointer).
+    /*! Add a void command to the provided interface based on a void function.
+        This method creates an mtsCommandVoid object and then calls the AddCommandVoid virtual method; this method
+        is overridden in mtsTaskInterface to queue the void command (thereby ensuring thread safety).
+        \param function void function pointer
+        \param commandName name as it should appear in the interface
+        \returns pointer on the newly created and added command, null pointer (0) if creation or addition failed (name already used) */
 
-    \param function void function pointer
-    \param commandName name as it should appear in the interface
-    \returns pointer on the newly created and added command, null pointer (0) if creation or addition failed (name already used) */
     inline mtsCommandVoidBase * AddCommandVoid(void (*function)(void),
-                                               const std::string & commandName);
+                                               const std::string & commandName) {
+        return this->AddCommandVoid(new mtsCommandVoidFunction(function, commandName));
+    }
 
-#ifndef SWIG // SWIG can not parse this
 
-    // Workaround for an apparent compiler bug in Visual Studio, where incorrect code is generated when the argument prototypes are
-    // allowed to default for some types.
-#if (CISST_OS == CISST_WINDOWS)
+    /*! Add a read command to the provided interface based on a method and an object instantiating the method.
+        This method creates an mtsCommandRead object and then calls the AddCommandRead virtual method.
+        \param method method pointer
+        \param classInstantiation an instantiation of the method's class
+        \param commandName name as it should appear in the interface
+        \param argumentPrototype example of argument that should be used to call this method.  This is especially useful for commands using objects of variable size (dynamic allocation)
+        \returns pointer on the newly created and added command, null pointer (0) if creation or addition failed (name already used) */
+
     template <class __classType, class __argumentType>
     inline mtsCommandReadBase * AddCommandRead(void (__classType::*method)(__argumentType &) const,
                                                __classType * classInstantiation,
                                                const std::string & commandName,
-                                               const __argumentType & argumentPrototype);
+                                               const __argumentType & argumentPrototype) {
+        return this->AddCommandRead(new mtsCommandRead<__classType, __argumentType>(method, classInstantiation, commandName, argumentPrototype));
+    }
 
     template <class __classType, class __argumentType>
     inline mtsCommandReadBase * AddCommandRead(void (__classType::*method)(__argumentType &) const,
                                                __classType * classInstantiation,
                                                const std::string & commandName)
-    { return AddCommandRead(method, classInstantiation, commandName, __argumentType()); }
-#else
-    template <class __classType, class __argumentType>
-    inline mtsCommandReadBase * AddCommandRead(void (__classType::*method)(__argumentType &) const,
-                                               __classType * classInstantiation,
-                                               const std::string & commandName,
-                                               const __argumentType & argumentPrototype = CMN_DEFAULT_TEMPLATED_CONSTRUCTOR(__argumentType));
-#endif
+    { return this->AddCommandRead(method, classInstantiation, commandName, __argumentType()); }
 
-    /* AddCommandReadState and AddCommandWriteState are only relevant for tasks. */
+    /*! Adds command objects to read from the state table (by default, all tasks have state tables, but it is possible to have a
+        state table in a device). Note that there are two command objects: a 'read' command to get the latest value, and a
+        'qualified read' command to get the value at the specified time. */
+    // Note: Could use string for state, rather than the variable
     template <class _elementType>
     mtsCommandReadBase * AddCommandReadState(const mtsStateTable & stateTable,
                                              const _elementType & stateData, const std::string & commandName);
+
+    /*! Adds command object to read history (i.e., vector of data) from the state table. */
     template <class _elementType>
     mtsCommandQualifiedReadBase * AddCommandReadHistory(const mtsStateTable & stateTable, const _elementType & stateData,
                                                         const std::string & commandName);
+
+    /*! Adds command object to write to state table. */
     template <class _elementType>
     mtsCommandWriteBase * AddCommandWriteState(const mtsStateTable & stateTable,
                                                const _elementType & stateData, const std::string & commandName);
 
-    /* The following method is implemented in mtsTaskInterface.h */
-    /*! Add a write command to a device interface based on a method
-      and an object instantiating the method.  AddCommandWrite will
-      first check the type of 'this' interface using dynamic_cast.  If
-      the interface is in fact of type mtsTaskInterface, the command
-      should be a queued command.  In this case,
-      mtsTaskInterface::AddCommandWrite is called.  If the type 'this'
-      interface is mtsDeviceInterface, a command is created using the
-      method pointer provided and then added to the map of commands.
-      If command can not be created or the command name has already
-      been used this method will return 0 (null pointer).
+    /*! Add a write command to the provided interface based on a method and an object instantiating the method.
+        This method creates an mtsCommandWrite object and then calls the AddCommandWrite virtual method; this method
+        is overridden in mtsTaskInterface to queue the write command (thereby ensuring thread safety).
+        \param method method pointer
+        \param classInstantiation an instantiation of the method's class
+        \param commandName name as it should appear in the interface
+        \param argumentPrototype example of argument that should be used to call this method.  This is especially useful for commands using objects of variable size (dynamic allocation)
+        \returns pointer on the newly created and added command, null pointer (0) if creation or addition failed (name already used) */
 
-    \param method method pointer
-    \param classInstantiation an instantiation of the method's class
-    \param commandName name as it should appear in the interface
-    \param argumentPrototype example of argument that should be used to call this method.  This is specially useful for commands using objects of variable size (dynamic allocation)
-    \returns pointer on the newly created and added command, null pointer (0) if creation or addition failed (name already used) */
-
-    // Workaround for an apparent compiler bug in Visual Studio, where incorrect code is generated when the argument prototypes are
-    // allowed to default for some types.
-#if (CISST_OS == CISST_WINDOWS)
     template <class __classType, class __argumentType>
     inline mtsCommandWriteBase * AddCommandWrite(void (__classType::*method)(const __argumentType &),
                                                  __classType * classInstantiation,
                                                  const std::string & commandName,
-                                                 const __argumentType & argumentPrototype);
+                                                 const __argumentType & argumentPrototype) {
+        return this->AddCommandWrite(new mtsCommandWrite<__classType, __argumentType>(method, classInstantiation, commandName, argumentPrototype));
+    }
 
     template <class __classType, class __argumentType>
     inline mtsCommandWriteBase * AddCommandWrite(void (__classType::*method)(const __argumentType &),
                                                  __classType * classInstantiation,
-                                                 const std::string & commandName)
-    {
-        return AddCommandWrite<__classType, __argumentType>(method, classInstantiation, commandName, __argumentType());
+                                                 const std::string & commandName) {
+        return this->AddCommandWrite<__classType, __argumentType>(method, classInstantiation, commandName, __argumentType());
     }
 
     template <class __classType, class __argument1Type, class __argument2Type>
@@ -340,48 +332,38 @@ public:
                                                                  __classType * classInstantiation,
                                                                  const std::string & commandName,
                                                                  const __argument1Type & argument1Prototype,
-                                                                 const __argument2Type & argument2Prototype);
+                                                                 const __argument2Type & argument2Prototype) {
+        return this->AddCommandQualifiedRead(new mtsCommandQualifiedRead<__classType, __argument1Type, __argument2Type>
+                                             (method, classInstantiation, commandName, argument1Prototype, argument2Prototype));
+    }
+
+
 
     template <class __classType, class __argument1Type, class __argument2Type>
     inline mtsCommandQualifiedReadBase * AddCommandQualifiedRead(void (__classType::*method)(const __argument1Type &, __argument2Type &) const,
                                                                  __classType * classInstantiation,
-                                                                 const std::string & commandName)
-    { return AddCommandQualifiedRead(method, classInstantiation, commandName, __argument1Type(), __argument2Type()); }
+                                                                 const std::string & commandName) {
+        return this->AddCommandQualifiedRead(method, classInstantiation, commandName, __argument1Type(), __argument2Type());
+    }
 
     template <class __classType, class __argumentType, class __filteredType>
     inline mtsCommandWriteBase * AddCommandFilteredWrite(void (__classType::*premethod)(const __argumentType &, __filteredType &) const,
                                                          void (__classType::*method)(const __filteredType &),
                                                          __classType * classInstantiation, const std::string & commandName,
                                                          const __argumentType & argumentPrototype,
-                                                         const __filteredType & filteredPrototype);
+                                                         const __filteredType & filteredPrototype) {
+        std::string commandNameFilter(commandName+"Filter");
+        return this->AddCommandFilteredWrite(
+               new mtsCommandQualifiedRead<__classType, __argumentType, __filteredType>
+                                          (premethod, classInstantiation, commandNameFilter, argumentPrototype, filteredPrototype),
+               new mtsCommandWrite<__classType, __filteredType>(method, classInstantiation, commandName, filteredPrototype));
+    }
 
     template <class __classType, class __argumentType, class __filteredType>
     inline mtsCommandWriteBase * AddCommandFilteredWrite(void (__classType::*premethod)(const __argumentType &, __filteredType &) const,
                                                          void (__classType::*method)(const __filteredType &),
-                                                         __classType * classInstantiation, const std::string & commandName)
-    { return AddCommandFilteredWrite(premethod, method, classInstantiation, commandName, __argumentType(), __filteredType()); }
-
-#else
-    template <class __classType, class __argumentType>
-    inline mtsCommandWriteBase * AddCommandWrite(void (__classType::*method)(const __argumentType &),
-                                                 __classType * classInstantiation,
-                                                 const std::string & commandName,
-                                                 const __argumentType & argumentPrototype = CMN_DEFAULT_TEMPLATED_CONSTRUCTOR(__argumentType));
-
-    template <class __classType, class __argument1Type, class __argument2Type>
-    inline mtsCommandQualifiedReadBase * AddCommandQualifiedRead(void (__classType::*method)(const __argument1Type &, __argument2Type &) const,
-                                                                 __classType * classInstantiation,
-                                                                 const std::string & commandName,
-                                                                 const __argument1Type & argument1Prototype = CMN_DEFAULT_TEMPLATED_CONSTRUCTOR(__argument1Type),
-                                                                 const __argument2Type & argument2Prototype = CMN_DEFAULT_TEMPLATED_CONSTRUCTOR(__argument2Type));
-
-    template <class __classType, class __argumentType, class __filteredType>
-    inline mtsCommandWriteBase * AddCommandFilteredWrite(void (__classType::*premethod)(const __argumentType &, __filteredType &) const,
-                                                         void (__classType::*method)(const __filteredType &),
-                                                         __classType * classInstantiation, const std::string & commandName,
-                                                         const __argumentType & argumentPrototype = CMN_DEFAULT_TEMPLATED_CONSTRUCTOR(__argumentType),
-                                                         const __filteredType & filteredPrototype = CMN_DEFAULT_TEMPLATED_CONSTRUCTOR(__filteredType));
-#endif
+                                                         __classType * classInstantiation, const std::string & commandName) {
+        return this->AddCommandFilteredWrite(premethod, method, classInstantiation, commandName, __argumentType(), __filteredType()); }
 
 #endif // SWIG
 
@@ -389,6 +371,16 @@ public:
     void ToStream(std::ostream & outputStream) const;
 
 protected:
+
+    //****************************************************************************************************************************
+    // The virtual methods that add the commands to the internal maps. Note that these methods can be overridden in derived classes.
+    // For example, mtsTaskInterface overrides AddCommandVoid and AddCommandWrite to queue these commands to achieve thread-safety.
+    // These could be moved to the public interface, if needed.
+    virtual mtsCommandVoidBase* AddCommandVoid(mtsCommandVoidBase *command);
+    virtual mtsCommandReadBase* AddCommandRead(mtsCommandReadBase *command);
+    virtual mtsCommandWriteBase* AddCommandWrite(mtsCommandWriteBase *command);
+    virtual mtsCommandWriteBase* AddCommandFilteredWrite(mtsCommandQualifiedReadBase *filter, mtsCommandWriteBase *command);
+    virtual mtsCommandQualifiedReadBase* AddCommandQualifiedRead(mtsCommandQualifiedReadBase *command);
 
     bool AddEvent(const std::string & commandName, mtsMulticastCommandVoid * generator);
     bool AddEvent(const std::string & commandName, mtsMulticastCommandWriteBase * generator);
@@ -400,67 +392,62 @@ protected:
     EventVoidMapType EventVoidGenerators; // Raise an event
     EventWriteMapType EventWriteGenerators; // Raise an event
     CommandInternalMapType CommandsInternal; // Internal commands (not exposed to user)
-
 };
 
 
 
-// Now provides implementation of AddCommands and AddEvent knowing that mtsInterface has been defined
-#include <cisstMultiTask/mtsCommandVoid.h>
-#include <cisstMultiTask/mtsCommandRead.h>
-#include <cisstMultiTask/mtsCommandWrite.h>
-#include <cisstMultiTask/mtsCommandQualifiedRead.h>
-
 #ifndef SWIG
 
-template <class __classType, class __argumentType>
-inline mtsCommandReadBase * mtsDeviceInterface::AddCommandRead(void (__classType::*method)(__argumentType &) const,
-                                                               __classType * classInstantiation,
-                                                               const std::string & commandName,
-                                                               const __argumentType & argumentPrototype) {
-    mtsCommandReadBase * command = new mtsCommandRead<__classType, __argumentType>
-                                      (method, classInstantiation, commandName, argumentPrototype);
-    if (command) {
-        if (CommandsRead.AddItem(commandName, command, CMN_LOG_LOD_RUN_ERROR)) {
-            return command;
-        } else {
-            delete command;
-            CMN_LOG_CLASS_INIT_ERROR << "AddCommandRead: unable to add command \""
-                                     << commandName << "\"" << std::endl;
-            return 0;
-        }
-    } else {
-        CMN_LOG_CLASS_INIT_ERROR << "AddCommandRead: unable to create command \""
-                                 << commandName << "\"" << std::endl;
+template <class _elementType>
+mtsCommandReadBase * mtsDeviceInterface::AddCommandReadState(const mtsStateTable & stateTable,
+                                                             const _elementType & stateData, const std::string & commandName)
+{
+    typedef typename mtsGenericTypes<_elementType>::FinalType FinalType;
+    typedef typename mtsStateTable::Accessor<_elementType> AccessorType;
+
+    AccessorType * stateAccessor = dynamic_cast<AccessorType *>(stateTable.GetAccessor(stateData));
+    if (!stateAccessor) {
+        CMN_LOG_CLASS_INIT_ERROR << "AddCommandReadState: invalid accessor for command " << commandName << std::endl;
         return 0;
     }
+    this->AddCommandQualifiedRead(new mtsCommandQualifiedRead<AccessorType, mtsStateIndex, FinalType>
+                                  (&AccessorType::Get, stateAccessor, commandName, mtsStateIndex(), FinalType(stateData)));
+    return this->AddCommandRead(new mtsCommandRead<AccessorType, FinalType>
+                                  (&AccessorType::GetLatest, stateAccessor, commandName, FinalType(stateData)));
 }
 
+template <class _elementType>
+mtsCommandQualifiedReadBase * mtsDeviceInterface::AddCommandReadHistory(const mtsStateTable & stateTable,
+                                                                      const _elementType & stateData, const std::string & commandName)
+{
+    typedef typename mtsGenericTypes<_elementType>::FinalType FinalType;
+    typedef typename mtsStateTable::Accessor<_elementType> AccessorType;
 
-template <class __classType, class __argument1Type, class __argument2Type>
-inline mtsCommandQualifiedReadBase * mtsDeviceInterface::AddCommandQualifiedRead(void (__classType::*method)(const __argument1Type &, __argument2Type &) const,
-                                                                                 __classType * classInstantiation,
-                                                                                 const std::string & commandName,
-                                                                                 const __argument1Type & argument1Prototype,
-                                                                                 const __argument2Type & argument2Prototype) {
-    mtsCommandQualifiedReadBase * command = new mtsCommandQualifiedRead<__classType, __argument1Type, __argument2Type>
-                                               (method, classInstantiation, commandName, argument1Prototype, argument2Prototype);
-    if (command) {
-        if (CommandsQualifiedRead.AddItem(commandName, command, CMN_LOG_LOD_RUN_ERROR)) {
-            return command;
-        } else {
-            delete command;
-            CMN_LOG_CLASS_INIT_ERROR << "AddCommandQualifiedRead: unable to add command \""
-                                     << commandName << "\"" << std::endl;
-            return 0;
-        }
-    } else {
-        CMN_LOG_CLASS_INIT_ERROR << "AddCommandQualifiedRead: unable to create command \""
-                                 << commandName << "\"" << std::endl;
+    AccessorType * stateAccessor = dynamic_cast<AccessorType *>(stateTable.GetAccessor(stateData));
+    if (!stateAccessor) {
+        CMN_LOG_CLASS_INIT_ERROR << "AddCommandReadHistory: invalid accessor for command " << commandName << std::endl;
         return 0;
     }
+    return this->AddCommandQualifiedRead(new mtsCommandQualifiedRead<AccessorType, mtsStateIndex, mtsHistory<FinalType> >
+                         (&AccessorType::GetHistory, stateAccessor, commandName, mtsStateIndex(), mtsHistory<FinalType>()));
 }
 
+template <class _elementType>
+mtsCommandWriteBase * mtsDeviceInterface::AddCommandWriteState(const mtsStateTable & stateTable,
+                                                             const _elementType & stateData, const std::string & commandName)
+{
+    typedef typename mtsGenericTypes<_elementType>::FinalBaseType FinalBaseType;
+    typedef typename mtsGenericTypes<_elementType>::FinalType FinalType;
+    typedef typename mtsStateTable::Accessor<_elementType> AccessorType;
+    mtsCommandWriteBase * writeCommand = 0;
+    AccessorType * stateAccessor = dynamic_cast<AccessorType *>(stateTable.GetAccessor(stateData));
+    if (!stateAccessor) {
+        CMN_LOG_CLASS_INIT_ERROR << "AddCommandWriteState: invalid accessor for command " << commandName << std::endl;
+        return 0;
+    }
+    return this->AddCommandWrite(new mtsCommandWrite<AccessorType, FinalBaseType>
+                                 (&AccessorType::SetCurrent, stateAccessor, commandName, FinalType(stateData)));
+}
 
 template <class __argumentType>
 mtsCommandWriteBase * mtsDeviceInterface::AddEventWrite(const std::string & eventName,
@@ -492,7 +479,6 @@ bool mtsDeviceInterface::AddEventWrite(mtsFunctionWrite & eventTrigger, const st
     }
     return false;
 }
-
 
 #endif // SWIG
 

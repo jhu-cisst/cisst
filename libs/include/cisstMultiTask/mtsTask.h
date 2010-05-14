@@ -43,6 +43,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsHistory.h>
 #include <cisstMultiTask/mtsFunctionVoid.h>
 #include <cisstMultiTask/mtsTaskInterface.h>
+#include <cisstMultiTask/mtsRequiredInterface.h>
 
 #include <set>
 #include <map>

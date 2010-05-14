@@ -32,8 +32,7 @@ mtsRequiredInterface::mtsRequiredInterface(const std::string & interfaceName, mt
     CommandPointersWrite("CommandPointersWrite"),
     CommandPointersQualifiedRead("CommandPointersQualifiedRead"),
     EventHandlersVoid("EventHandlersVoid"),
-    EventHandlersWrite("EventHandlersWrite"),
-    EventHandlersWriteGeneric("EventHandlersWriteGeneric")
+    EventHandlersWrite("EventHandlersWrite")
 {
     CommandPointersVoid.SetOwner(*this);
     CommandPointersRead.SetOwner(*this);
@@ -41,7 +40,6 @@ mtsRequiredInterface::mtsRequiredInterface(const std::string & interfaceName, mt
     CommandPointersQualifiedRead.SetOwner(*this);
     EventHandlersVoid.SetOwner(*this);
     EventHandlersWrite.SetOwner(*this);
-    EventHandlersWriteGeneric.SetOwner(*this);
 }
 
 
@@ -98,11 +96,6 @@ std::vector<std::string> mtsRequiredInterface::GetNamesOfEventHandlersWrite(void
 }
 
 
-std::vector<std::string> mtsRequiredInterface::GetNamesOfEventHandlersWriteGeneric(void) const {
-    return EventHandlersWriteGeneric.GetNames();
-}
-
-
 mtsCommandVoidBase * mtsRequiredInterface::GetEventHandlerVoid(const std::string & eventName) const {
     return EventHandlersVoid.GetItem(eventName);
 }
@@ -110,11 +103,6 @@ mtsCommandVoidBase * mtsRequiredInterface::GetEventHandlerVoid(const std::string
 
 mtsCommandWriteBase * mtsRequiredInterface::GetEventHandlerWrite(const std::string & eventName) const {
     return EventHandlersWrite.GetItem(eventName);
-}
-
-
-mtsCommandWriteGenericBase * mtsRequiredInterface::GetEventHandlerWriteGeneric(const std::string & eventName) const {
-    return EventHandlersWriteGeneric.GetItem(eventName);
 }
 
 
@@ -268,23 +256,6 @@ bool mtsRequiredInterface::BindCommandsAndEvents(unsigned int userId)
         }
     }
 
-    EventHandlerWriteGenericMapType::iterator iterEventWriteGeneric;
-    for (iterEventWriteGeneric = EventHandlersWriteGeneric.begin();
-         iterEventWriteGeneric != EventHandlersWriteGeneric.end();
-         iterEventWriteGeneric++) {
-        result = ProvidedInterface->AddObserver(iterEventWriteGeneric->first, iterEventWriteGeneric->second);
-        if (!result) {
-            CMN_LOG_CLASS_INIT_WARNING << "BindCommandsAndEvents: failed to add observer for write event generic \""
-                                       << iterEventWriteGeneric->first << "\" (connecting \""
-                                       << this->GetName() << "\" to \""
-                                       << this->ProvidedInterface->GetName() << "\")"<< std::endl;
-        } else {
-            CMN_LOG_CLASS_INIT_DEBUG << "BindCommandsAndEvents: succeeded to add observer for write event generic \""
-                                     << iterEventWriteGeneric->first << "\" (connecting \""
-                                     << this->GetName() << "\" to \""
-                                     << this->ProvidedInterface->GetName() << "\")"<< std::endl;
-        }
-    }
     return success;
 }
 

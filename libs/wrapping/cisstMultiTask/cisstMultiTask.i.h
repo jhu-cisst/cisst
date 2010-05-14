@@ -58,11 +58,5 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsVector.h>
 #include <cisstMultiTask/mtsMatrix.h>
 
-#include <cisstConfig.h>
-#if CISST_HAS_QT
-    #include <cisstMultiTask/mtsCollectorQComponent.h>
-    #include <cisstMultiTask/mtsCollectorQWidget.h>
-#endif
-
 #endif // _cisstMultiTask_i_h
 

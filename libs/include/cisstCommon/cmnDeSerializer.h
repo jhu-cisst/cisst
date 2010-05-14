@@ -60,7 +60,9 @@ inline void cmnDeSerializeRaw(std::istream & inputStream, _elementType & data)
 {
     inputStream.read(reinterpret_cast<char *>(&data), sizeof(_elementType));
     if (inputStream.fail()) {
-        cmnThrow("cmnDeSerializeRaw(_elementType): Error occured with std::istream::read");
+        std::string message("cmnDeSerializeRaw(_elementType): Error occured with std::istream::read, _elementType = ");
+        message += typeid(_elementType).name();
+        cmnThrow(message);
     }
 }
 

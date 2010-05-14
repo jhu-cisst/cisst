@@ -49,7 +49,6 @@ public:
 
 protected:
     std::vector<BaseType *> Commands;
-    std::vector<mtsCommandWriteGenericBase *> CommandsGeneric;
 
 public:
     /*! Default constructor. Does nothing. */
@@ -62,9 +61,6 @@ public:
 
     /*! Add a command to the composite. */
     void AddCommand(BaseType * command);
-
-    /*! Add a generic command */
-    void AddCommand(mtsCommandWriteGenericBase * command);
 
     /*! Execute all the commands in the composite. */
     virtual mtsCommandBase::ReturnType Execute(const mtsGenericObject & argument) = 0;

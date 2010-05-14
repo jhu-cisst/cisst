@@ -19,7 +19,7 @@ class sineTask: public mtsTaskPeriodic {
     // an event is generated.
     double TriggerValue;
     // methods to set SineAmplitude and TriggerValue
-    void SetAmplitude(const mtsDouble & amp) { SineAmplitude = amp.Data; }
+    void SetAmplitude(const double &amp) { SineAmplitude = amp; }
     void SetTrigger(const mtsDouble & val) { TriggerValue = val.Data; }
     // method used to reset the trigger, we will add a command to the
     // interface for this method

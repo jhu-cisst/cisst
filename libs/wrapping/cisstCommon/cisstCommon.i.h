@@ -44,10 +44,5 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnCallbackStreambuf.h>
 #include <cisstCommon/cmnPath.h>
 
-#include <cisstConfig.h>
-#if CISST_HAS_QT
-    #include <cisstCommon/cmnLoggerQWidget.h>
-#endif
-
 #endif // _cisstCommon_i_h
 

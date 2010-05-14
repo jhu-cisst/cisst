@@ -37,7 +37,7 @@ bool mtsMailBox::ExecuteNext(void)
 
    mtsCommandQueuedVoidBase * commandVoid;
    mtsCommandQueuedWriteBase * commandWrite;
-   mtsCommandQueuedWriteGenericBase * commandWriteGeneric;
+   mtsCommandQueuedWriteGeneric * commandWriteGeneric;
 
    switch ((*command)->NumberOfArguments()) {
    case 0:
@@ -51,9 +51,9 @@ bool mtsMailBox::ExecuteNext(void)
            commandWrite->GetActualCommand()->Execute(*(commandWrite->ArgumentPeek()));
            commandWrite->ArgumentGet();  // Remove from parameter queue
        } else {
-           commandWriteGeneric = dynamic_cast<mtsCommandQueuedWriteGenericBase *>(*command);
+           commandWriteGeneric = dynamic_cast<mtsCommandQueuedWriteGeneric *>(*command);
            CMN_ASSERT(commandWriteGeneric);
-           commandWriteGeneric->GetActualCommand()->Execute(commandWriteGeneric->ArgumentPeek());
+           commandWriteGeneric->GetActualCommand()->Execute(*(commandWriteGeneric->ArgumentPeek()));
            commandWriteGeneric->ArgumentGet();  // Remove from parameter queue
        }
        break;

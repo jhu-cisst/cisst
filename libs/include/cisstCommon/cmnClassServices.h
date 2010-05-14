@@ -39,120 +39,114 @@ http://www.cisst.org/cisst/license.txt.
   specialize the method Create() based on the _hasDynamicCreation
   parameter to either create a new object of type _class (which
   requires a public default constructor) or do nothing and return 0
-  (null pointer).  The later means that dynamic creation is disabled.
+  (null pointer).  The latter means that dynamic creation is disabled.
 */
-template <bool _hasDynamicCreation>
+template <bool _hasDynamicCreation, typename _class>
 class cmnConditionalObjectFactory;
 
 
 /*! Specialization of cmnConditionalObjectFactory with disabled
   dynamic creation.
 */
-template<>
-class cmnConditionalObjectFactory<CMN_NO_DYNAMIC_CREATION>
+template<typename _class>
+class cmnConditionalObjectFactory<CMN_NO_DYNAMIC_CREATION, _class>
 {
 public:
-    template <class _class>
-    class ClassSpecialization {
-    public:
-        /*! Specialization of create when dynamic creation is
-          disabled.  Returns 0 (null pointer). */
-        inline static cmnGenericObject * Create(void) {
-            return 0;
-        }
 
-        /*! Specialization of create when dynamic creation is
-          disabled.  Returns 0 (null pointer). */
-        inline static cmnGenericObject * CreateArray(size_t CMN_UNUSED(size)) {
-            return 0;
-        }
+     /*! Specialization of create when dynamic creation is
+      disabled.  Returns 0 (null pointer). */
+    inline static cmnGenericObject * Create(void) {
+        return 0;
+    }
 
-        /*! Specialization of create when dynamic create is disabled.
-            Returns 0 (null pointer) .*/
-        inline static cmnGenericObject * Create(const cmnGenericObject & CMN_UNUSED(other)) {
-            return 0;
-        }
+    /*! Specialization of create when dynamic creation is
+       disabled.  Returns 0 (null pointer). */
+    inline static cmnGenericObject * CreateArray(size_t CMN_UNUSED(size)) {
+        return 0;
+    }
 
-        /*! Specialization of create for in place new with copy constructor */
-        inline static bool Create(cmnGenericObject * CMN_UNUSED(existing), const cmnGenericObject & CMN_UNUSED(other)) {
-            return false;
-        };
+    /*! Specialization of create when dynamic create is disabled.
+        Returns 0 (null pointer) .*/
+    inline static cmnGenericObject * Create(const cmnGenericObject & CMN_UNUSED(other)) {
+         return 0;
+    }
 
-        /*! Specialization of delete */
-        inline static bool Delete(cmnGenericObject * CMN_UNUSED(existing)) {
-            return false;
-        };
+    /*! Specialization of create for in place new with copy constructor */
+    inline static bool Create(cmnGenericObject * CMN_UNUSED(existing), const cmnGenericObject & CMN_UNUSED(other)) {
+        return false;
+    }
 
-    };
+    /*! Specialization of delete */
+    inline static bool Delete(cmnGenericObject * CMN_UNUSED(existing)) {
+        return false;
+    }
+
 };
 
 
 /*! Specialization of cmnConditionalObjectFactory with enabled dynamic
   creation.
 */
-template<>
-class cmnConditionalObjectFactory<CMN_DYNAMIC_CREATION>
+template<typename _class>
+class cmnConditionalObjectFactory<CMN_DYNAMIC_CREATION, _class>
 {
 public:
-    template <class _class>
-    class ClassSpecialization {
-        typedef _class value_type;
-    public:
-        /*! Specialization of create when dynamic creation is
-          enabled.  Call new for the given class.  This method
-          requires a default constructor for the aforementioned
-          class. */
-        inline static cmnGenericObject * Create(void) {
-            return new value_type;
+    typedef _class value_type;
+
+    /*! Specialization of create when dynamic creation is
+      enabled.  Call new for the given class.  This method
+      requires a default constructor for the aforementioned
+      class. */
+    inline static cmnGenericObject * Create(void) {
+        return new value_type;
+    }
+
+
+    /*! Specialization of create when dynamic creation is
+      enabled.  Call new[size] for the given class.  This method
+      requires a default constructor for the aforementioned
+      class. */
+    inline static cmnGenericObject * CreateArray(size_t size) {
+        return new value_type[size];
+    }
+
+
+    /*! Specialization of create(other) when dynamic creation is
+      enabled.  Call new for the given class.  This method
+      requires a copy constructor for the aforementioned class. */
+    inline static cmnGenericObject * Create(const cmnGenericObject & other) {
+        const value_type * otherPointer = dynamic_cast<const value_type *>(&other);
+        if (otherPointer) {
+            return new value_type(*otherPointer);
+        } else {
+            return 0;
         }
+    }
 
-
-        /*! Specialization of create when dynamic creation is
-          enabled.  Call new[size] for the given class.  This method
-          requires a default constructor for the aforementioned
-          class. */
-        inline static cmnGenericObject * CreateArray(size_t size) {
-            return new value_type[size];
+    /*! Specialization of create(other) when dynamic creation is
+      enabled.  Call new for the given class.  This method
+      requires a copy constructor for the aforementioned class. */
+    inline static bool Create(cmnGenericObject * existing, const cmnGenericObject & other) {
+        const value_type * otherPointer = dynamic_cast<const value_type *>(&other);
+        if (otherPointer) {
+            new(existing) value_type(*otherPointer);
+            return true;
+        } else {
+            return false;
         }
+    }
 
-
-        /*! Specialization of create(other) when dynamic creation is
-          enabled.  Call new for the given class.  This method
-          requires a copy constructor for the aforementioned class. */
-        inline static cmnGenericObject * Create(const cmnGenericObject & other) {
-            const value_type * otherPointer = dynamic_cast<const value_type *>(&other);
-            if (otherPointer) {
-                return new value_type(*otherPointer);
-            } else {
-                return 0;
-            }
+    /*! Specialization of delete when dynamic creation is
+      enabled.  Call destructor for the given class. */
+    inline static bool Delete(cmnGenericObject * existing) {
+        value_type * existingPointer = dynamic_cast<value_type *>(existing);
+        if (existingPointer) {
+            existingPointer->~value_type();
+            return true;
+        } else {
+            return false;
         }
-
-        /*! Specialization of create(other) when dynamic creation is
-          enabled.  Call new for the given class.  This method
-          requires a copy constructor for the aforementioned class. */
-        inline static bool Create(cmnGenericObject * existing, const cmnGenericObject & other) {
-            const value_type * otherPointer = dynamic_cast<const value_type *>(&other);
-            if (otherPointer) {
-                new(existing) value_type(*otherPointer);
-                return true;
-            } else {
-                return false;
-            }
-        }
-
-        /*! Specialization of delete when dynamic creation is
-          enabled.  Call destructor for the given class. */
-        inline static bool Delete(cmnGenericObject * existing) {
-            value_type * existingPointer = dynamic_cast<value_type *>(existing);
-            if (existingPointer) {
-                existingPointer->~value_type();
-                return true;
-            } else {
-                return false;
-            }
-        }
-    };
+    }
 };
 
 
@@ -185,37 +179,32 @@ class cmnClassServices: public cmnClassServicesBase {
 
     /* documented in base class */
     virtual cmnGenericObject * Create(void) const {
-        typedef cmnConditionalObjectFactory<_hasDynamicCreation> FactoryType;
-        typedef typename FactoryType::template ClassSpecialization<_class> CreatorType;
-        return CreatorType::Create();
+        typedef cmnConditionalObjectFactory<_hasDynamicCreation, _class> FactoryType;
+        return FactoryType::Create();
     }
 
     /* documented in base class */
     virtual cmnGenericObject * CreateArray(size_t size) const {
-        typedef cmnConditionalObjectFactory<_hasDynamicCreation> FactoryType;
-        typedef typename FactoryType::template ClassSpecialization<_class> CreatorType;
-        return CreatorType::CreateArray(size);
+        typedef cmnConditionalObjectFactory<_hasDynamicCreation, _class> FactoryType;
+        return FactoryType::CreateArray(size);
     }
 
     /* documented in base class */
     virtual cmnGenericObject * Create(const cmnGenericObject & other) const {
-        typedef cmnConditionalObjectFactory<_hasDynamicCreation> FactoryType;
-        typedef typename FactoryType::template ClassSpecialization<_class> CreatorType;
-        return CreatorType::Create(other);
+        typedef cmnConditionalObjectFactory<_hasDynamicCreation, _class> FactoryType;
+        return FactoryType::Create(other);
     }
 
     /* documented in base class */
     virtual bool Create(cmnGenericObject * existing, const cmnGenericObject & other) const {
-        typedef cmnConditionalObjectFactory<_hasDynamicCreation> FactoryType;
-        typedef typename FactoryType::template ClassSpecialization<_class> CreatorType;
-        return CreatorType::Create(existing, other);
+        typedef cmnConditionalObjectFactory<_hasDynamicCreation, _class> FactoryType;
+        return FactoryType::Create(existing, other);
     }
 
     /* documented in base class */
     virtual bool Delete(cmnGenericObject * existing) const {
-        typedef cmnConditionalObjectFactory<_hasDynamicCreation> FactoryType;
-        typedef typename FactoryType::template ClassSpecialization<_class> CreatorType;
-        return CreatorType::Delete(existing);
+        typedef cmnConditionalObjectFactory<_hasDynamicCreation, _class> FactoryType;
+        return FactoryType::Delete(existing);
     }
 
 };

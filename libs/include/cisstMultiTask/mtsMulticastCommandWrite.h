@@ -80,11 +80,6 @@ public:
         for (index = 0; index < commandsSize; index++) {
             Commands[index]->Execute(*data);
         }
-        // then call generic callbacks
-        const size_t commandsGenericSize = CommandsGeneric.size();
-        for (index = 0; index < commandsGenericSize; index++) {
-            CommandsGeneric[index]->Execute(data);
-        }
         return mtsCommandBase::DEV_OK;
     }
 };

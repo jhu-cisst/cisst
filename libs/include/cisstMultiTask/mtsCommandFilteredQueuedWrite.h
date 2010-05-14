@@ -34,21 +34,16 @@ http://www.cisst.org/cisst/license.txt.
   \ingroup cisstMultiTask
 
  */
-template <class _argumentType, class _filteredType>
-class mtsCommandFilteredQueuedWrite: public mtsCommandQueuedWrite<_filteredType>
+
+class mtsCommandFilteredQueuedWrite: public mtsCommandQueuedWriteGeneric
 {
 public:
-    typedef mtsCommandQueuedWrite<_filteredType> BaseType;
-    typedef _argumentType ArgumentType;
-    typedef _filteredType FilteredType;
-    typedef typename mtsGenericTypes<FilteredType>::FinalType FilteredFinalType;
-
-    /*! This type. */
-    typedef mtsCommandFilteredQueuedWrite<ArgumentType, FilteredType> ThisType;
+    typedef mtsCommandQueuedWriteGeneric  BaseType;
+    typedef mtsCommandFilteredQueuedWrite ThisType;
 
 protected:
     mtsCommandQualifiedReadBase * ActualFilter;
-    FilteredFinalType filterOutput;
+    mtsGenericObject *filterOutput;
 
 private:
     /*! Private copy constructor to prevent copies */
@@ -56,35 +51,27 @@ private:
 
 public:
 
-    inline mtsCommandFilteredQueuedWrite(void):
-        BaseType(), ActualFilter(0), filterOutput()
-    {}
-
-
     inline mtsCommandFilteredQueuedWrite(mtsCommandQualifiedReadBase *actualFilter, mtsCommandWriteBase * actualCommand):
-        BaseType(actualCommand), ActualFilter(actualFilter)
+        BaseType(0, actualCommand, 0), ActualFilter(actualFilter)
     {
-        const FilteredFinalType *ptr = dynamic_cast<const FilteredFinalType*>(actualFilter->GetArgument2Prototype());
-        if (ptr)
-            filterOutput = *ptr;
-        else
-            CMN_LOG_INIT_ERROR << "mtsCommandFilteredQueuedWrite: arg2 is NULL" << std::endl;
+        // PK: is there a better way to do this?
+        filterOutput = dynamic_cast<mtsGenericObject *>(actualFilter->GetArgument2Prototype()->Services()->Create());
     }
 
 
     inline mtsCommandFilteredQueuedWrite(mtsMailBox * mailBox, mtsCommandQualifiedReadBase * actualFilter, mtsCommandWriteBase * actualCommand, unsigned int size):
         BaseType(mailBox, actualCommand, size), ActualFilter(actualFilter)
     {
-        const FilteredFinalType *ptr = dynamic_cast<const FilteredFinalType*>(actualFilter->GetArgument2Prototype());
-        if (ptr)
-            filterOutput = *ptr;
-        else
-            CMN_LOG_INIT_ERROR << "mtsCommandFilteredQueuedWrite: arg2 is NULL" << std::endl;
+        // PK: is there a better way to do this?
+        filterOutput = dynamic_cast<mtsGenericObject *>(actualFilter->GetArgument2Prototype()->Services()->Create());
     }
 
 
     // ArgumentsQueue destructor should get called
-    inline virtual ~mtsCommandFilteredQueuedWrite() {}
+    inline virtual ~mtsCommandFilteredQueuedWrite()
+    {
+        if (filterOutput) delete filterOutput;
+    }
 
 
     inline virtual mtsCommandFilteredQueuedWrite * Clone(mtsMailBox * mailBox, unsigned int size) const {
@@ -99,10 +86,10 @@ public:
     virtual mtsCommandBase::ReturnType Execute(const mtsGenericObject & argument) {
         if (this->IsEnabled()) {
             // First, call the filter (qualified read)
-            mtsCommandBase::ReturnType ret = ActualFilter->Execute(argument, filterOutput);
+            mtsCommandBase::ReturnType ret = ActualFilter->Execute(argument, *filterOutput);
             if (ret != mtsCommandBase::DEV_OK) return ret;
             // Next, queue the write command
-            return BaseType::Execute(filterOutput);
+            return BaseType::Execute(*filterOutput);
         }
         return mtsCommandBase::DISABLED;
     }

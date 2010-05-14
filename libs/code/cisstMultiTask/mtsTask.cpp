@@ -25,7 +25,6 @@
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstOSAbstraction/osaGetTime.h>
 #include <cisstMultiTask/mtsTask.h>
-#include <cisstMultiTask/mtsTaskInterface.h>
 
 #include <iostream>
 

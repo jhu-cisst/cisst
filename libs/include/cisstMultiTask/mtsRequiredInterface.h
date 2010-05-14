@@ -138,14 +138,12 @@ protected:
     //@{
     virtual std::vector<std::string> GetNamesOfEventHandlersVoid(void) const;
     virtual std::vector<std::string> GetNamesOfEventHandlersWrite(void) const;
-    virtual std::vector<std::string> GetNamesOfEventHandlersWriteGeneric(void) const;
     //@}
 
     /*! Find an event handler based on its name. */
     //@{
     virtual mtsCommandVoidBase * GetEventHandlerVoid(const std::string & eventName) const;
     virtual mtsCommandWriteBase * GetEventHandlerWrite(const std::string & eventName) const;
-    virtual mtsCommandWriteGenericBase * GetEventHandlerWriteGeneric(const std::string & eventName) const;
     //@}
 
     void ConnectTo(mtsDeviceInterface * other) {
@@ -162,13 +160,11 @@ protected:
     inline void DisableAllEvents(void) {
         EventHandlersVoid.ForEachVoid(&mtsCommandBase::Disable);
         EventHandlersWrite.ForEachVoid(&mtsCommandBase::Disable);
-        EventHandlersWriteGeneric.ForEachVoid(&mtsCommandBase::Disable);
     }
 
     inline void EnableAllEvents(void) {
         EventHandlersVoid.ForEachVoid(&mtsCommandBase::Enable);
         EventHandlersWrite.ForEachVoid(&mtsCommandBase::Enable);
-        EventHandlersWriteGeneric.ForEachVoid(&mtsCommandBase::Enable);
     }
 
     /*! Process any queued events. */
@@ -245,8 +241,6 @@ protected:
     typedef cmnNamedMap<mtsCommandWriteBase> EventHandlerWriteMapType;
     EventHandlerVoidMapType EventHandlersVoid;
     EventHandlerWriteMapType EventHandlersWrite;
-    typedef cmnNamedMap<mtsCommandWriteGenericBase> EventHandlerWriteGenericMapType;
-    EventHandlerWriteGenericMapType EventHandlersWriteGeneric;
 
 public:
 
@@ -293,11 +287,12 @@ public:
                                                       const std::string & eventName,
                                                       bool queued = true);
 
+    // PK: Can we get rid of this?
     template <class __classType>
-    inline mtsCommandWriteGenericBase * AddEventHandlerWriteGeneric(void (__classType::*method)(const mtsGenericObject *),
-                                                                    __classType * classInstantiation,
-                                                                    const std::string & eventName,
-                                                                    bool queued = true);
+    inline mtsCommandWriteBase * AddEventHandlerWriteGeneric(void (__classType::*method)(const mtsGenericObject *),
+                                                             __classType * classInstantiation,
+                                                             const std::string & eventName,
+                                                             bool queued = true);
 };
 
 
@@ -356,22 +351,22 @@ inline mtsCommandWriteBase * mtsRequiredInterface::AddEventHandlerWrite(void (__
 
 
 template <class __classType>
-inline mtsCommandWriteGenericBase * mtsRequiredInterface::AddEventHandlerWriteGeneric(void (__classType::*method)(const mtsGenericObject *),
+inline mtsCommandWriteBase * mtsRequiredInterface::AddEventHandlerWriteGeneric(void (__classType::*method)(const mtsGenericObject *),
                                                                                       __classType * classInstantiation,
                                                                                       const std::string & eventName,
                                                                                       bool queued) {
-    mtsCommandWriteGenericBase * actualCommand =
+    mtsCommandWriteBase * actualCommand =
         new mtsCommandWriteGeneric<__classType>(method, classInstantiation, eventName, 0);
     if (queued) {
         if (MailBox) {
-            EventHandlersWriteGeneric.AddItem(eventName,  new mtsCommandQueuedWriteGeneric(MailBox, actualCommand, DEFAULT_ARG_BUFFER_LEN));
+            EventHandlersWrite.AddItem(eventName,  new mtsCommandQueuedWriteGeneric(MailBox, actualCommand, DEFAULT_ARG_BUFFER_LEN));
         } else {
-            CMN_LOG_CLASS_INIT_ERROR << "No mailbox for queued event handler write \"" << eventName << "\"" << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "No mailbox for queued event handler write generic \"" << eventName << "\"" << std::endl;
         }
     } else {
-        EventHandlersWriteGeneric.AddItem(eventName, actualCommand);
+        EventHandlersWrite.AddItem(eventName, actualCommand);
     }
-    return EventHandlersWriteGeneric.GetItem(eventName);
+    return EventHandlersWrite.GetItem(eventName);
 }
 #endif  // !SWIG
 

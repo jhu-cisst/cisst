@@ -29,8 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsFunctionBase.h>
 #include <cisstMultiTask/mtsCommandVoidBase.h>
-#include <cisstMultiTask/mtsDeviceInterface.h>
-#include <cisstMultiTask/mtsRequiredInterface.h>
+#include <cisstMultiTask/mtsForwardDeclarations.h>
 
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
@@ -85,8 +84,7 @@ class CISST_EXPORT mtsFunctionVoid: public mtsFunctionBase {
       \result Boolean value, true if success, false otherwise
     */
     bool AddToRequiredInterface(mtsRequiredInterface & intfc, const std::string & commandName,
-                                bool isRequired = true)
-    { return intfc.AddCommandPointer(commandName, Command, isRequired); }
+                                bool isRequired = true);
 
     /*! Overloaded operator to enable more intuitive syntax
       e.g., Command() instead of Command->Execute(). */

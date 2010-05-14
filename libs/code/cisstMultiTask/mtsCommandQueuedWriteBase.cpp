@@ -20,7 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
-#include <cisstMultiTask/mtsCommandQueuedWriteBase.h>
+#include <cisstMultiTask/mtsCommandQueuedWrite.h>
 
 
 void mtsCommandQueuedWriteBase::ToStream(std::ostream & outputStream) const {
@@ -35,7 +35,72 @@ void mtsCommandQueuedWriteBase::ToStream(std::ostream & outputStream) const {
 }
 
 
-void mtsCommandQueuedWriteGenericBase::ToStream(std::ostream & outputStream) const {
+mtsCommandQueuedWriteGeneric::mtsCommandQueuedWriteGeneric(mtsMailBox * mailBox, mtsCommandWriteBase * actualCommand, size_t size):
+        BaseType(mailBox, actualCommand),
+        ArgumentQueueSize(size),
+        ArgumentsQueue()
+{
+    if (this->ActualCommand) {
+        this->SetArgumentPrototype(ActualCommand->GetArgumentPrototype());
+    }
+    const mtsGenericObject * argumentPrototype = dynamic_cast<const mtsGenericObject *>(this->GetArgumentPrototype());
+    if (argumentPrototype) {
+        ArgumentsQueue.SetSize(size, *argumentPrototype);
+    } else {
+        CMN_LOG_INIT_DEBUG << "Class mtsCommandQueuedWriteGeneric: constructor: can't find argument prototype from actual command \""
+                           << this->GetName() << "\"" << std::endl;
+    }
+}
+
+void mtsCommandQueuedWriteGeneric::Allocate(size_t size)
+{
+    if (ArgumentsQueue.GetSize() != size) {
+        if (ArgumentsQueue.GetSize() > 0) {
+            // Probably should never happen
+            CMN_LOG_INIT_WARNING << "Class mtsCommandQueuedWriteGeneric: Allocate: changing ArgumentsQueue size from " << ArgumentsQueue.GetSize()
+                                 << " to " << size << std::endl;
+        }
+        const mtsGenericObject * argumentPrototype = dynamic_cast<const mtsGenericObject *>(this->GetArgumentPrototype());
+        if (argumentPrototype) {
+            CMN_LOG_INIT_DEBUG << "Class mtsCommandQueuedWriteGeneric: Allocate: resizing argument queue to " << size
+                               << " with \"" << argumentPrototype->Services()->GetName() << "\"" << std::endl; 
+            ArgumentsQueue.SetSize(size, *argumentPrototype);
+        } else {
+            CMN_LOG_INIT_ERROR << "Class mtsCommandQueuedWriteGeneric: Allocate: can't find argument prototype from actual command \""
+                               << this->GetName() << "\"" << std::endl;
+        }
+     }
+}
+
+    
+mtsCommandBase::ReturnType mtsCommandQueuedWriteGeneric::Execute(const mtsGenericObject & argument)
+{
+    if (this->IsEnabled()) {
+        if (!MailBox) {
+            CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWriteGeneric: Execute: no mailbox for \""
+                              << this->Name << "\"" << std::endl;
+            return mtsCommandBase::NO_MAILBOX;
+        }
+        // Now, copy the argument to the local storage.
+        if (ArgumentsQueue.Put(argument)) {
+            if (MailBox->Write(this)) {
+                return mtsCommandBase::DEV_OK;
+            } else {
+                CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWriteGeneric: Execute: mailbox full for \""
+                                  << this->Name << "\"" << std::endl;
+                ArgumentsQueue.Get();  // Pop argument from local storage
+            }
+        } else {
+            CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWriteGeneric: Execute: ArgumentsQueue full for \""
+                              << this->Name << "\"" << std::endl;
+        }
+        return mtsCommandBase::MAILBOX_FULL;
+    }
+    return mtsCommandBase::DISABLED;
+}
+
+
+void mtsCommandQueuedWriteGeneric::ToStream(std::ostream & outputStream) const {
     outputStream << "mtsCommandQueuedWrite: MailBox \"";
     if (this->MailBox) {
         outputStream << this->MailBox->GetName();

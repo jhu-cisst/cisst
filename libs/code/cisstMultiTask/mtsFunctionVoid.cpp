@@ -20,6 +20,8 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsFunctionVoid.h>
 #include <cisstMultiTask/mtsCommandVoidBase.h>
+#include <cisstMultiTask/mtsDeviceInterface.h>
+#include <cisstMultiTask/mtsRequiredInterface.h>
 
 
 bool mtsFunctionVoid::Bind(const mtsDeviceInterface * interface, const std::string & commandName)
@@ -28,6 +30,13 @@ bool mtsFunctionVoid::Bind(const mtsDeviceInterface * interface, const std::stri
         Command = interface->GetCommandVoid(commandName);
     }
     return interface && (Command != 0);
+}
+
+
+bool mtsFunctionVoid::AddToRequiredInterface(mtsRequiredInterface & intfc, const std::string & commandName,
+                                bool isRequired)
+{
+    return intfc.AddCommandPointer(commandName, Command, isRequired);
 }
 
 

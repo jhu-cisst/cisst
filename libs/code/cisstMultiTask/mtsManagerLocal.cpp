@@ -532,9 +532,10 @@ void mtsManagerLocal::GetDescriptionOfCommand(std::string & description,
     switch (commandType) {
         case 'V':
             {
-                mtsCommandVoidBase * command = providedInterface->GetCommandVoidMap().GetItem(actualCommandName);
+                mtsCommandVoidBase * command = providedInterface->GetCommandVoid(actualCommandName);
                 if (!command) {
-                    description = "No void command found";
+                    description = "No void command found for ";
+                    description += actualCommandName;
                     return;
                 }
                 description += "(none)";
@@ -542,9 +543,10 @@ void mtsManagerLocal::GetDescriptionOfCommand(std::string & description,
             break;
         case 'W':
             {
-                mtsCommandWriteBase * command = providedInterface->GetCommandWriteMap().GetItem(actualCommandName);
+                mtsCommandWriteBase * command = providedInterface->GetCommandWrite(actualCommandName);
                 if (!command) {
-                    description = "No write command found";
+                    description = "No write command found for ";
+                    description += actualCommandName;
                     return;
                 }
                 description += command->GetArgumentClassServices()->GetName();
@@ -554,7 +556,8 @@ void mtsManagerLocal::GetDescriptionOfCommand(std::string & description,
             {
                 mtsCommandReadBase * command = providedInterface->GetCommandRead(actualCommandName);
                 if (!command) {
-                    description = "No read command found";
+                    description = "No read command found for ";
+                    description += actualCommandName;
                     return;
                 }
                 description += command->GetArgumentClassServices()->GetName();
@@ -564,7 +567,8 @@ void mtsManagerLocal::GetDescriptionOfCommand(std::string & description,
             {
                 mtsCommandQualifiedReadBase * command = providedInterface->GetCommandQualifiedRead(actualCommandName);
                 if (!command) {
-                    description = "No qualified read command found";
+                    description = "No qualified read command found for ";
+                    description += actualCommandName;
                     return;
                 }
                 description = "Argument1 type: ";

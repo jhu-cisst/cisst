@@ -185,10 +185,3 @@ CMN_GENERIC_OBJECT_PROXY_INSTANTIATE(cmnBool, bool);
 %include "cisstCommon/cmnTypeTraits.h"
 %template(cmnTypeTraitsDouble) cmnTypeTraits<double>;
 %template(cmnTypeTraitsInt) cmnTypeTraits<int>;
-
-// to make sure cisst has Qt
-%include "cisstConfig.h"
-#if CISST_HAS_QT
-    // Wrap Logger Qt
-    %include "cisstCommon/cmnLoggerQWidget.h"
-#endif

@@ -188,10 +188,10 @@ public:
 
 
 template <class _classType>
-class mtsCommandWriteGeneric: public mtsCommandWriteGenericBase {
+class mtsCommandWriteGeneric: public mtsCommandWriteBase {
 
 public:
-    typedef mtsCommandWriteGenericBase BaseType;
+    typedef mtsCommandWriteBase BaseType;
 
     /*! Typedef for the specific interface. */
     typedef _classType ClassType;
@@ -258,10 +258,9 @@ public:
       applies the operation on the receiver.
       \param obj The data passed to the operation method
     */
-    virtual mtsCommandBase::ReturnType Execute(const mtsGenericObject * argument) {
+    virtual mtsCommandBase::ReturnType Execute(const mtsGenericObject & argument) {
         if (this->IsEnabled()) {
-            CMN_ASSERT(argument);
-            (ClassInstantiation->*Action)(argument);
+            (ClassInstantiation->*Action)(&argument);
             return mtsCommandBase::DEV_OK;
         }
         return mtsCommandBase::DISABLED;
