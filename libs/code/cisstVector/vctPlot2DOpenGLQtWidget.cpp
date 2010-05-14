@@ -81,12 +81,14 @@ void vctPlot2DOpenGLQtWidget::mouseReleaseEvent(QMouseEvent * event)
 
 void vctPlot2DOpenGLQtWidget::FitXSlot(void)
 {
+    this->SetContinuousFitX(false);
     this->FitX();
 }
 
 
 void vctPlot2DOpenGLQtWidget::FitYSlot(void)
 {
+    this->SetContinuousFitY(false);
     this->FitY();
 }
 

@@ -37,32 +37,47 @@ vctPlot2DBase::Trace::Trace(const std::string & name, size_t numberOfPoints):
 void vctPlot2DBase::Trace::AddPoint(const vctDouble2 & point)
 {
     // look where to store this point
-    IndexLast = (IndexLast + 1) % this->Data.size();
-    if (IndexFirst == IndexLast ) {
-        IndexFirst = (IndexLast + 1) % this->Data.size();
+    this->IndexLast++;
+    if (this->IndexLast == this->Data.size()) {
+        this->IndexLast = 0;
     }
-    Data.Element(IndexLast).Assign(point); 
+    if (this->IndexFirst == this->IndexLast ) {
+        this->IndexFirst++;
+        if (this->IndexFirst == this->Data.size()) {
+            this->IndexFirst = 0;
+        }
+    }
+    this->Data.Element(IndexLast).Assign(point);
 }
 
 
-void vctPlot2DBase::Trace::UpdateMinAndMax(vctDouble2 & min, vctDouble2 & max)
+void vctPlot2DBase::Trace::ComputeDataRangeXY(vctDouble2 & min, vctDouble2 & max)
 {
-    size_t pointIndex;
-    size_t numberOfPoints;
+    // using pointer arithmetic
+    vctDouble2 * currentPointer = this->Data.Pointer(0);
+    size_t indexLast;
+    const ptrdiff_t stridePointer = this->Data.stride();
+
+    // if the buffer is full, just scan all elements otherwise scan up to last index
+    if (this->IndexLast < this->IndexFirst) {
+        indexLast = this->Data.size();
+    } else {
+        indexLast = this->IndexLast;
+    }
+    const vctDouble2 * lastPointer = currentPointer + indexLast * stridePointer;
+    
+    // iterate
     double value;
-    size_t nb = 0;
-    numberOfPoints = this->Data.size();
-    for (pointIndex = this->IndexFirst;
-         pointIndex != this->IndexLast;
-         pointIndex = (pointIndex + 1) % numberOfPoints) {
-        nb++;
-        value = this->Data.Element(pointIndex).X(); // X
+    for (;
+         currentPointer != lastPointer;
+         currentPointer += stridePointer) {
+        value = currentPointer->X();
         if (value < min.X()) {
             min.X() = value;
         } else if (value > max.X()) {
             max.X() = value;
         }
-        value = this->Data.Element(pointIndex).Y(); // Y
+        value = currentPointer->Y();
         if (value < min.Y()) {
             min.Y() = value;
         } else if (value > max.Y()) {
@@ -72,10 +87,70 @@ void vctPlot2DBase::Trace::UpdateMinAndMax(vctDouble2 & min, vctDouble2 & max)
 }
 
 
+void vctPlot2DBase::Trace::ComputeDataRangeX(double & min, double & max)
+{
+    // using pointer arithmetic
+    vctDouble2 * currentPointer = this->Data.Pointer(0);
+    size_t indexLast;
+    const ptrdiff_t stridePointer = this->Data.stride();
+
+    // if the buffer is full, just scan all elements otherwise scan up to last index
+    if (this->IndexLast < this->IndexFirst) {
+        indexLast = this->Data.size();
+    } else {
+        indexLast = this->IndexLast;
+    }
+    const vctDouble2 * lastPointer = currentPointer + indexLast * stridePointer;
+    
+    // iterate
+    double value;
+    for (;
+         currentPointer != lastPointer;
+         currentPointer += stridePointer) {
+        value = currentPointer->X();
+        if (value < min) {
+            min = value;
+        } else if (value > max) {
+            max = value;
+        }
+    }
+}
+
+
+void vctPlot2DBase::Trace::ComputeDataRangeY(double & min, double & max)
+{
+    // using pointer arithmetic
+    vctDouble2 * currentPointer = this->Data.Pointer(0);
+    size_t indexLast;
+    const ptrdiff_t stridePointer = this->Data.stride();
+
+    // if the buffer is full, just scan all elements otherwise scan up to last index
+    if (this->IndexLast < this->IndexFirst) {
+        indexLast = this->Data.size();
+    } else {
+        indexLast = this->IndexLast;
+    }
+    const vctDouble2 * lastPointer = currentPointer + indexLast * stridePointer;
+    
+    // iterate
+    double value;
+    for (;
+         currentPointer != lastPointer;
+         currentPointer += stridePointer) {
+        value = currentPointer->Y();
+        if (value < min) {
+            min = value;
+        } else if (value > max) {
+            max = value;
+        }
+    }
+}
+
+
 vctPlot2DBase::vctPlot2DBase(void):
-    NumberOfPoints(200),
     BackgroundColor(0.1, 0.1, 0.1)
 {
+    SetNumberOfPoints(200);
     Translation.SetAll(0.0);
     Scale.SetAll(1.0);
     SetContinuousFitX(true);
@@ -117,21 +192,51 @@ void vctPlot2DBase::AddPoint(size_t traceId, const vctDouble2 & point)
 
 void vctPlot2DBase::FitX(void)
 {
-    this->SetContinuousFitX(false);
-    vctDouble2 min, max;
-    this->ComputeBoundingBox(min, max);
-    this->Scale.X() = this->Viewport.X() / (max.X() - min.X());
-    this->Translation.Y() = - min.X() * this->Scale.X();
+    double min, max;
+    this->ComputeDataRangeX(min, max);
+    this->FitX(min, max);
+}
+
+
+void vctPlot2DBase::FitX(double min, double max)
+{
+    this->ViewingRangeX.Assign(min, max);
+    this->Scale.X() = this->Viewport.X() / (max - min);
+    this->Translation.X() = - min * this->Scale.X();
 }
 
 
 void vctPlot2DBase::FitY(void)
 {
-    this->SetContinuousFitY(false);
+    double min, max;
+    this->ComputeDataRangeY(min, max);
+    this->FitY(min, max);
+}
+
+
+void vctPlot2DBase::FitY(double min, double max)
+{
+    this->ViewingRangeY.Assign(min, max);
+    this->Scale.Y() = this->Viewport.Y() / (max - min);
+    this->Translation.Y() = - min * this->Scale.Y();
+}
+
+
+void vctPlot2DBase::FitXY(void)
+{
     vctDouble2 min, max;
-    this->ComputeBoundingBox(min, max);
-    this->Scale.Y() = this->Viewport.Y() / (max.Y() - min.Y());
-    this->Translation.Y() = - min.Y() * this->Scale.Y();
+    this->ComputeDataRangeXY(min, max);
+    this->FitXY(min, max);
+}
+
+
+void vctPlot2DBase::FitXY(vctDouble2 min, vctDouble2 max)
+{
+    this->ViewingRangeX.Assign(min.X(), max.X());
+    this->ViewingRangeY.Assign(min.Y(), max.Y());
+    this->Scale.ElementwiseRatioOf(this->Viewport, (max - min)); // scale = viewport / (max - min)
+    this->Translation.ElementwiseProductOf(min, this->Scale); // translation = - min * scale 
+    this->Translation.NegationSelf();
 }
 
 
@@ -164,7 +269,45 @@ void vctPlot2DBase::SetContinuousAlignMaxX(bool align)
 }
 
 
-void vctPlot2DBase::ComputeBoundingBox(vctDouble2 & min, vctDouble2 & max)
+void vctPlot2DBase::ComputeDataRangeX(double & min, double & max)
+{
+    if (this->Traces.size() == 0) {
+        min = -1.0;
+        max = 1.0;
+    } else {
+        size_t traceIndex;
+        const size_t numberOfTraces = this->Traces.size();
+        min = this->Traces[0]->Data.Element(0).X();
+        max = min;
+        for (traceIndex = 0;
+             traceIndex < numberOfTraces;
+             traceIndex++) {
+            this->Traces[traceIndex]->ComputeDataRangeX(min, max);
+        }
+    }
+}
+
+
+void vctPlot2DBase::ComputeDataRangeY(double & min, double & max)
+{
+    if (this->Traces.size() == 0) {
+        min = -1.0;
+        max = 1.0;
+    } else {
+        size_t traceIndex;
+        const size_t numberOfTraces = this->Traces.size();
+        min = this->Traces[0]->Data.Element(0).Y();
+        max = min;
+        for (traceIndex = 0;
+             traceIndex < numberOfTraces;
+             traceIndex++) {
+            this->Traces[traceIndex]->ComputeDataRangeY(min, max);
+        }
+    }
+}
+
+
+void vctPlot2DBase::ComputeDataRangeXY(vctDouble2 & min, vctDouble2 & max)
 {
     if (this->Traces.size() == 0) {
         min.SetAll(-1.0);
@@ -177,7 +320,7 @@ void vctPlot2DBase::ComputeBoundingBox(vctDouble2 & min, vctDouble2 & max)
         for (traceIndex = 0;
              traceIndex < numberOfTraces;
              traceIndex++) {
-            this->Traces[traceIndex]->UpdateMinAndMax(min, max);
+            this->Traces[traceIndex]->ComputeDataRangeXY(min, max);
         }
     }
 }
@@ -186,15 +329,12 @@ void vctPlot2DBase::ComputeBoundingBox(vctDouble2 & min, vctDouble2 & max)
 void vctPlot2DBase::ContinuousUpdate(void)
 {
     if (Continuous) {
-        vctDouble2 min, max;
-        this->ComputeBoundingBox(min, max);
-        if (this->ContinuousFitX) {
-            this->Scale.X() = this->Viewport.X() / (max.X() - min.X());
-            this->Translation.X() = - min.X() * this->Scale.X();
-        }
-        if (this->ContinuousFitY) {
-            this->Scale.Y() = this->Viewport.Y() / (max.Y() - min.Y());
-            this->Translation.Y() = - min.Y() * this->Scale.Y();
+        if (this->ContinuousFitX && this->ContinuousFitY) {
+            this->FitXY();
+        } else if (this->ContinuousFitX) {
+            this->FitX();
+        } else if (this->ContinuousFitY) {
+            this->FitY();
         }
     }
 }

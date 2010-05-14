@@ -68,7 +68,6 @@ void vctPlot2DOpenGL::Render(void)
     size_t traceIndex;
     Trace * trace;
     const size_t numberOfTraces = this->Traces.size();
-    size_t pointIndex;
     size_t numberOfPoints;
 
     // see if translation and scale need to be updated
@@ -81,6 +80,10 @@ void vctPlot2DOpenGL::Render(void)
     glClear(GL_COLOR_BUFFER_BIT);
 
     // plot all traces.   this needs to be updated to use glScale and glTranslate to avoid all conputations on CPU
+    double * data;
+    size_t size;
+    glTranslated(this->Translation.X(), this->Translation.Y(), 0.0);
+    glScaled(this->Scale.X(), this->Scale.Y(), 1.0);
     for (traceIndex = 0;
          traceIndex < numberOfTraces;
          traceIndex++) {
@@ -90,13 +93,36 @@ void vctPlot2DOpenGL::Render(void)
                   trace->Color.Element(1),
                   trace->Color.Element(2));
         glLineWidth(trace->LineWidth);
-        glBegin(GL_LINE_STRIP);
-        for (pointIndex = trace->IndexFirst;
-             pointIndex != trace->IndexLast;
-             pointIndex = (pointIndex + 1) % numberOfPoints) {
-            glVertex2d((trace->Data.Element(pointIndex).X() * this->Scale.X()) + this->Translation.X(),
-                       (trace->Data.Element(pointIndex).Y() * this->Scale.Y()) + this->Translation.Y());
+        data = trace->Data.Element(0).Pointer();
+        size = trace->Data.size();
+        if (trace->IndexFirst >= trace->IndexLast) {
+            // circular buffer is full/split in two
+            glEnableClientState(GL_VERTEX_ARRAY);
+            glVertexPointer(2, GL_DOUBLE, 0, data);
+            // draw first part
+            glDrawArrays(GL_LINE_STRIP,
+                         trace->IndexFirst,
+                         size - trace->IndexFirst);
+            // draw second part
+            glDrawArrays(GL_LINE_STRIP,
+                         0,
+                         trace->IndexLast + 1);
+            glDisableClientState(GL_VERTEX_ARRAY);
+            // draw between end of buffer and beginning
+            glBegin(GL_LINE_STRIP);
+            glVertex2d(trace->Data.Element(size - 1).X(),
+                       trace->Data.Element(size - 1).Y());
+            glVertex2d(trace->Data.Element(0).X(),
+                       trace->Data.Element(0).Y());
+            glEnd();
+        } else {
+            // simpler case, all points contiguous
+            glEnableClientState(GL_VERTEX_ARRAY);
+            glVertexPointer(2, GL_DOUBLE, 0, data);
+            glDrawArrays(GL_LINE_STRIP,
+                         0,
+                         trace->IndexLast + 1);
+            glDisableClientState(GL_VERTEX_ARRAY);
         }
-        glEnd();
     }
 }
