@@ -54,6 +54,14 @@ void vctPlot2DOpenGLQtWidget::mouseReleaseEvent(QMouseEvent * event)
         // local QMenu will be deleted
         QMenu menu;
 
+        QAction * freeze = new QAction("Freeze", this);
+        freeze->setCheckable(true);
+        freeze->setChecked(this->GetFreeze());
+        menu.addAction(freeze);
+        connect(freeze, SIGNAL(toggled(bool)), this, SLOT(FreezeSlot(bool)));
+
+        menu.addSeparator();
+
         QAction * fitXnow = new QAction("Fit X now", this);
         QAction * fitXalways = new QAction("Fit X always", this);
         fitXalways->setCheckable(true);
@@ -76,6 +84,12 @@ void vctPlot2DOpenGLQtWidget::mouseReleaseEvent(QMouseEvent * event)
 
         menu.exec(mapToGlobal(event->pos()));
     }
+}
+
+
+void vctPlot2DOpenGLQtWidget::FreezeSlot(bool checked)
+{
+    this->Freeze(checked);
 }
 
 
@@ -103,3 +117,4 @@ void vctPlot2DOpenGLQtWidget::SetContinuousFitYSlot(bool checked)
 {
     this->SetContinuousFitY(checked);
 }
+

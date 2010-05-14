@@ -23,8 +23,10 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnUnits.h>
 
 vctPlot2DBase::Trace::Trace(const std::string & name, size_t numberOfPoints):
-    Active(true),
     Name(name),
+    Empty(true),
+    Visible(true),
+    Frozen(false),
     IndexFirst(0),
     IndexLast(0),
     Color(1.0, 1.0, 1.0),
@@ -36,18 +38,37 @@ vctPlot2DBase::Trace::Trace(const std::string & name, size_t numberOfPoints):
 
 void vctPlot2DBase::Trace::AddPoint(const vctDouble2 & point)
 {
-    // look where to store this point
-    this->IndexLast++;
-    if (this->IndexLast == this->Data.size()) {
-        this->IndexLast = 0;
+    if (!this->Frozen) { 
+        // look where to store this point
+        if (!this->Empty) {
+            this->IndexLast++;
+            if (this->IndexLast == this->Data.size()) {
+                this->IndexLast = 0;
+            }
+            if (this->IndexFirst == this->IndexLast ) {
+                this->IndexFirst++;
+                if (this->IndexFirst == this->Data.size()) {
+                    this->IndexFirst = 0;
+                }
+            }
+        } else {
+            this->Empty = false;
+        }
+        this->Data.Element(IndexLast).Assign(point);
     }
-    if (this->IndexFirst == this->IndexLast ) {
-        this->IndexFirst++;
-        if (this->IndexFirst == this->Data.size()) {
+}
+
+
+void vctPlot2DBase::Trace::Freeze(bool freeze)
+{
+    if (freeze != this->Frozen) {
+        this->Frozen = freeze;
+        if (!freeze) {
             this->IndexFirst = 0;
+            this->IndexLast = 0;
+            this->Empty = true;
         }
     }
-    this->Data.Element(IndexLast).Assign(point);
 }
 
 
@@ -148,6 +169,7 @@ void vctPlot2DBase::Trace::ComputeDataRangeY(double & min, double & max)
 
 
 vctPlot2DBase::vctPlot2DBase(void):
+    Frozen(false),
     BackgroundColor(0.1, 0.1, 0.1)
 {
     SetNumberOfPoints(200);
@@ -186,6 +208,7 @@ void vctPlot2DBase::SetNumberOfPoints(size_t numberOfPoints)
 
 void vctPlot2DBase::AddPoint(size_t traceId, const vctDouble2 & point)
 {
+    this->PointAddedSinceLastRender = true;
     this->Traces[traceId]->AddPoint(point);
 } 
 
@@ -240,6 +263,19 @@ void vctPlot2DBase::FitXY(vctDouble2 min, vctDouble2 max)
 }
 
 
+void vctPlot2DBase::Freeze(bool freeze)
+{
+    size_t traceIndex;
+    const size_t numberOfTraces = this->Traces.size();
+    for (traceIndex = 0;
+         traceIndex < numberOfTraces;
+         traceIndex++) {
+        this->Traces[traceIndex]->Freeze(freeze);
+    }
+    this->Frozen = freeze;
+}
+
+
 void vctPlot2DBase::SetContinuousFitX(bool fit)
 {
     this->ContinuousFitX = fit;
@@ -277,7 +313,8 @@ void vctPlot2DBase::ComputeDataRangeX(double & min, double & max)
     } else {
         size_t traceIndex;
         const size_t numberOfTraces = this->Traces.size();
-        min = this->Traces[0]->Data.Element(0).X();
+        vctPlot2DBase::Trace * trace = this->Traces[0]; // should really be looking for first visible trace
+        min = trace->Data.Element(trace->IndexFirst).X();
         max = min;
         for (traceIndex = 0;
              traceIndex < numberOfTraces;
@@ -296,7 +333,8 @@ void vctPlot2DBase::ComputeDataRangeY(double & min, double & max)
     } else {
         size_t traceIndex;
         const size_t numberOfTraces = this->Traces.size();
-        min = this->Traces[0]->Data.Element(0).Y();
+        vctPlot2DBase::Trace * trace = this->Traces[0]; // should really be looking for first visible trace
+        min = trace->Data.Element(trace->IndexFirst).Y();
         max = min;
         for (traceIndex = 0;
              traceIndex < numberOfTraces;
@@ -315,7 +353,8 @@ void vctPlot2DBase::ComputeDataRangeXY(vctDouble2 & min, vctDouble2 & max)
     } else {
         size_t traceIndex;
         const size_t numberOfTraces = this->Traces.size();
-        min.Assign(this->Traces[0]->Data.Element(0));
+        vctPlot2DBase::Trace * trace = this->Traces[0]; // should really be looking for first visible trace
+        min.Assign(trace->Data.Element(trace->IndexFirst));
         max.Assign(min);
         for (traceIndex = 0;
              traceIndex < numberOfTraces;
@@ -328,7 +367,7 @@ void vctPlot2DBase::ComputeDataRangeXY(vctDouble2 & min, vctDouble2 & max)
 
 void vctPlot2DBase::ContinuousUpdate(void)
 {
-    if (Continuous) {
+    if (this->Continuous && this->PointAddedSinceLastRender) {
         if (this->ContinuousFitX && this->ContinuousFitY) {
             this->FitXY();
         } else if (this->ContinuousFitX) {

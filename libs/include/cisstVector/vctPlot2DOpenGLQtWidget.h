@@ -46,6 +46,7 @@ protected:
     //@}
 
 public slots:
+    void FreezeSlot(bool);
     void FitXSlot(void);
     void FitYSlot(void);
     void SetContinuousFitXSlot(bool);

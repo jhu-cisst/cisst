@@ -52,6 +52,7 @@ public:
         ~Trace() {};
 
         void AddPoint(const vctDouble2 & point);
+        void Freeze(bool freeze);
 
         void ComputeDataRangeX(double & min, double & max);
         void ComputeDataRangeY(double & min, double & max);
@@ -60,8 +61,10 @@ public:
         void SetNumberOfPoints(size_t numberOfPoints);
 
     protected:
-        bool Active;
         std::string Name;
+        bool Empty;
+        bool Visible;
+        bool Frozen;
         vctDynamicVector<vctDouble2> Data;
         size_t IndexFirst;
         size_t IndexLast;
@@ -84,7 +87,8 @@ public:
     /*! Add a point to a given trace */
     void AddPoint(size_t trace, const vctDouble2 & point);
 
-    /*! Data recentering */
+    /*! Data recentering, these methods re-align the data once only, based on all traces. */
+    //@{
     void FitX(void);
     void FitX(double min, double max);
     void FitY(void);
@@ -92,8 +96,21 @@ public:
     void FitXY(void);
     void FitXY(vctDouble2 min, vctDouble2 max);
     void AlignMaxX(void);
+    //@}
+
+    /*! Freeze the circular buffers, i.e. AddPoint does nothing.  When
+      turned off (parameter is false), this is equivalent to starting
+      with an empty data set.  These methods work on all traces at
+      once. */
+    //@{
+    void Freeze(bool freeze);
+    inline bool GetFreeze(void) const {
+        return this->Frozen;
+    }
+    //@}
 
     /*! Automatic recentering */
+    //@{
     void SetContinuousFitX(bool fit);
     void SetContinuousFitY(bool fit);
     void SetContinuousAlignMaxX(bool align);
@@ -107,14 +124,28 @@ public:
     inline bool GetContinuousAlignMaxX(void) const {
         return this->ContinuousAlignMaxX;
     }
+    //@}
 
+    /*! To fit the data in the viewport we need to compute the range
+      for all traces.  To reduce the number of computations, three
+      methods are provided, one that compute the X range only, one for
+      the Y range only and one for both X and Y.  Each method uses a
+      single loop. */
+    //@{
+    void ComputeDataRangeX(double & min, double & max);
+    void ComputeDataRangeY(double & min, double & max);
+    void ComputeDataRangeXY(vctDouble2 & min, vctDouble2 & max);
+    //@}
+
+    //*! Get currently used viewing range */
+    //@{
     inline const vctDouble2 & GetViewingRangeX(void) const {
         return this->ViewingRangeX;
     }
-
     inline const vctDouble2 & GetViewingRangeY(void) const {
         return this->ViewingRangeY;
     }
+    //@}
 
 #if 0
     // no yet implemented
@@ -148,6 +179,7 @@ protected:
 
     // default number of points for all traces
     size_t NumberOfPoints;
+    bool Frozen;
 
     // viewport sizes
     vctDouble2 Viewport;
@@ -157,20 +189,11 @@ protected:
     vctDouble2 Scale;
 
     // continuous computation of scales and offsets
+    bool PointAddedSinceLastRender;
     bool Continuous;
     bool ContinuousFitX;
     bool ContinuousFitY;
     bool ContinuousAlignMaxX;
-    /*! To fit the data in the viewport we need to compute the range.
-      To reduce the number of computations, three methods are
-      provided, one that compute the X range only, one for the Y
-      range only and one for both X and Y.  Each method uses a
-      single loop. */
-    //@{
-    void ComputeDataRangeX(double & min, double & max);
-    void ComputeDataRangeY(double & min, double & max);
-    void ComputeDataRangeXY(vctDouble2 & min, vctDouble2 & max);
-    //@}
 
     /*! Method called at each iteration to figure out if an automatic
       update is needed or not. */

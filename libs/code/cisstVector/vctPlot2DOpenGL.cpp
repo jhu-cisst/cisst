@@ -88,41 +88,44 @@ void vctPlot2DOpenGL::Render(void)
          traceIndex < numberOfTraces;
          traceIndex++) {
         trace = this->Traces[traceIndex];
-        numberOfPoints = trace->Data.size();
-        glColor3d(trace->Color.Element(0),
-                  trace->Color.Element(1),
-                  trace->Color.Element(2));
-        glLineWidth(trace->LineWidth);
-        data = trace->Data.Element(0).Pointer();
-        size = trace->Data.size();
-        if (trace->IndexFirst >= trace->IndexLast) {
-            // circular buffer is full/split in two
-            glEnableClientState(GL_VERTEX_ARRAY);
-            glVertexPointer(2, GL_DOUBLE, 0, data);
-            // draw first part
-            glDrawArrays(GL_LINE_STRIP,
-                         trace->IndexFirst,
-                         size - trace->IndexFirst);
-            // draw second part
-            glDrawArrays(GL_LINE_STRIP,
-                         0,
-                         trace->IndexLast + 1);
-            glDisableClientState(GL_VERTEX_ARRAY);
-            // draw between end of buffer and beginning
-            glBegin(GL_LINE_STRIP);
-            glVertex2d(trace->Data.Element(size - 1).X(),
-                       trace->Data.Element(size - 1).Y());
-            glVertex2d(trace->Data.Element(0).X(),
-                       trace->Data.Element(0).Y());
-            glEnd();
-        } else {
-            // simpler case, all points contiguous
-            glEnableClientState(GL_VERTEX_ARRAY);
-            glVertexPointer(2, GL_DOUBLE, 0, data);
-            glDrawArrays(GL_LINE_STRIP,
-                         0,
-                         trace->IndexLast + 1);
-            glDisableClientState(GL_VERTEX_ARRAY);
+        if (trace->Visible) {
+            numberOfPoints = trace->Data.size();
+            glColor3d(trace->Color.Element(0),
+                      trace->Color.Element(1),
+                      trace->Color.Element(2));
+            glLineWidth(trace->LineWidth);
+            data = trace->Data.Element(0).Pointer();
+            size = trace->Data.size();
+            if (trace->IndexFirst >= trace->IndexLast) {
+                // circular buffer is full/split in two
+                glEnableClientState(GL_VERTEX_ARRAY);
+                glVertexPointer(2, GL_DOUBLE, 0, data);
+                // draw first part
+                glDrawArrays(GL_LINE_STRIP,
+                             trace->IndexFirst,
+                             size - trace->IndexFirst);
+                // draw second part
+                glDrawArrays(GL_LINE_STRIP,
+                             0,
+                             trace->IndexLast + 1);
+                glDisableClientState(GL_VERTEX_ARRAY);
+                // draw between end of buffer and beginning
+                glBegin(GL_LINE_STRIP);
+                glVertex2d(trace->Data.Element(size - 1).X(),
+                           trace->Data.Element(size - 1).Y());
+                glVertex2d(trace->Data.Element(0).X(),
+                           trace->Data.Element(0).Y());
+                glEnd();
+            } else {
+                // simpler case, all points contiguous
+                glEnableClientState(GL_VERTEX_ARRAY);
+                glVertexPointer(2, GL_DOUBLE, 0, data);
+                glDrawArrays(GL_LINE_STRIP,
+                             0,
+                             trace->IndexLast + 1);
+                glDisableClientState(GL_VERTEX_ARRAY);
+            }
         }
     }
+    this->PointAddedSinceLastRender = false;
 }
