@@ -7,7 +7,7 @@
   Author(s): Gorkem Sevinc, Anton Deguet
   Created on: 2009-09-04
 
-  (C) Copyright 2008-2009 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2009-2010 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -19,10 +19,11 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-// Sensable headers
+// Novint headers
 #include <hdl/hdl.h>
 #include <hdlu/hdlu.h>
 #include <cisstDevices/devNovintHDL.h>
+#include <cisstParameterTypes/prmEventButton.h>
 
 CMN_IMPLEMENT_SERVICES(devNovintHDL);
 
@@ -168,10 +169,10 @@ devNovintHDL::devNovintHDL(const std::string & taskName):
 
 
 devNovintHDL::devNovintHDL(const std::string & taskName, 
-                             const std::string & firstDeviceName):
+                           const std::string & firstDeviceName):
     mtsTaskFromCallbackAdapter(taskName, 5000)
 {
-    CMN_LOG_CLASS_INIT_DEBUG << "constructor called, looking for \"" << firstDeviceName << "\"" << std::endl;
+    CMN_LOG_CLASS_INIT_DEBUG << "constructor: looking for \"" << firstDeviceName << "\"" << std::endl;
     DevicesVector.SetSize(1);
     DevicesHandleVector.SetSize(1);
     DevicesVector(0) = new DeviceData;
@@ -202,40 +203,15 @@ devNovintHDL::devNovintHDL(const std::string & taskName,
 }
 
 
-devNovintHDL::devNovintHDL(const std::string & taskName,
-                           const std::string & firstDeviceName,
-                           const std::string & secondDeviceName,
-                           const std::string & thirdDeviceName,
-                           const std::string & fourthDeviceName):
-    mtsTaskFromCallbackAdapter(taskName, 5000)
-{
-    this->SetInterfaces(firstDeviceName, secondDeviceName, thirdDeviceName, fourthDeviceName);
-    this->SetupInterfaces();
-}
-
-
-devNovintHDL::devNovintHDL(const char * taskName,
-                           const char * firstDeviceName,
-                           const char * secondDeviceName,
-                           const char * thirdDeviceName,
-                           const char * fourthDeviceName):
-    mtsTaskFromCallbackAdapter(taskName, 5000)
-{
-    this->SetInterfaces(std::string(firstDeviceName), std::string(secondDeviceName), 
-                        std::string(thirdDeviceName), std::string(fourthDeviceName));
-    this->SetupInterfaces();
-}
-
-
 void devNovintHDL::SetInterfaces(const std::string & firstDeviceName,
                                   const std::string & secondDeviceName)
 {
     if (firstDeviceName == secondDeviceName) {
-        CMN_LOG_CLASS_INIT_ERROR << "In constructor: name of devices provided are identical, \""
+        CMN_LOG_CLASS_INIT_ERROR << "constructor: name of devices provided are identical, \""
                                  << firstDeviceName << "\" and \""
                                  << secondDeviceName << "\"" << std::endl;
     }
-    CMN_LOG_CLASS_INIT_DEBUG << "constructor called, looking for \"" << firstDeviceName
+    CMN_LOG_CLASS_INIT_DEBUG << "constructor: looking for \"" << firstDeviceName
                              << "\" and \"" << secondDeviceName << "\"" << std::endl;
     DevicesVector.SetSize(2);
     DevicesHandleVector.SetSize(2);
@@ -249,25 +225,6 @@ void devNovintHDL::SetInterfaces(const std::string & firstDeviceName,
     DevicesVector(1)->Name = secondDeviceName;
 }
 
-void devNovintHDL::SetInterfaces(const std::string & firstDeviceName,
-                                 const std::string & secondDeviceName,
-                                 const std::string & thirdDeviceName,
-                                 const std::string & fourthDeviceName)
-{
-    DevicesVector.SetSize(4);
-    DevicesHandleVector.SetSize(4);
-    int index = 0;
-    for(index; index < 4; index++)
-    {
-        DevicesVector(index) = new DeviceData;
-        DevicesVector(index)->DeviceNumber = index;
-    }
-    DevicesVector(0)->Name = firstDeviceName;
-    DevicesVector(1)->Name = secondDeviceName;
-    DevicesVector(2)->Name = thirdDeviceName;
-    DevicesVector(3)->Name = fourthDeviceName;
-}
-   
 
 void devNovintHDL::SetupInterfaces(void)
 {
@@ -357,7 +314,7 @@ void devNovintHDL::Create(void * data)
     const unsigned int end = this->DevicesVector.size();
     
     DeviceData * deviceData;
-    devNovintHDLHandle     * handle;
+    devNovintHDLHandle * handle;
     std::string interfaceName;
     HDLError error;
 
@@ -365,7 +322,12 @@ void devNovintHDL::Create(void * data)
 
     // Get the number of devices connected and display to the user
     this->DeviceCount = hdlCountDevices();
-    CMN_LOG_CLASS_INIT_VERBOSE << "Number of haptic devices connected: " << this->DeviceCount << std::endl;
+    CMN_LOG_CLASS_INIT_VERBOSE << "Create: number of haptic devices connected: " << this->DeviceCount << std::endl;
+
+    if (this->DeviceCount < this->DevicesVector.size()) {
+        CMN_LOG_CLASS_INIT_ERROR << "Create: not enough devices connected" << std::endl;
+        return;
+    }
 
     for (index; index != end; index++) {
         deviceData = DevicesVector(index);
@@ -374,12 +336,12 @@ void devNovintHDL::Create(void * data)
         CMN_ASSERT(deviceData);
 
         // Initialize device(s) based on name provided
-        handle->DeviceHandle = hdlInitNamedDevice(interfaceName.c_str());
+        handle->DeviceHandle = hdlInitIndexedDevice(index);
         
         error = hdlGetError();
         if (error != HDL_NO_ERROR)
         {
-            CMN_LOG_CLASS_INIT_ERROR << "Create: Failed to initialize haptic device number "
+            CMN_LOG_CLASS_INIT_ERROR << "Create: failed to initialize haptic device number "
                                      << index << " (" << interfaceName << ")" << std::endl;
             deviceData->DeviceEnabled = false;
             return;
@@ -389,11 +351,11 @@ void devNovintHDL::Create(void * data)
         // Get the device model and display to the user
         const char * model = hdlDeviceModel();
         if (model) {
-            CMN_LOG_CLASS_INIT_VERBOSE << "Create: Found device model: "
+            CMN_LOG_CLASS_INIT_VERBOSE << "Create: found device model: "
                                        << model << " for device \""
                                        << interfaceName << "\"" << std::endl;
         } else {
-            CMN_LOG_CLASS_INIT_ERROR << "Create: Can not find model name for device \""
+            CMN_LOG_CLASS_INIT_ERROR << "Create: can not find model name for device \""
                                      << interfaceName << "\"" << std::endl;
         }
     }
@@ -410,7 +372,7 @@ void devNovintHDL::Start(void)
     // Check for errors
     HDLError error = hdlGetError();
     if (error != HDL_NO_ERROR) {
-        CMN_LOG_CLASS_INIT_ERROR << "Start: Failed to start scheduler" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "Start: failed to start scheduler" << std::endl;
     }
     
     // Schedule the main callback that will communicate with the device
@@ -419,7 +381,7 @@ void devNovintHDL::Start(void)
                                                     false);
 
     if(this->Driver->CallbackHandle != HDL_NO_ERROR) {
-        CMN_LOG_CLASS_INIT_ERROR << "Invalid Servo op handle" << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "Start: invalid Servo op handle" << std::endl;
     }
 
     // Call base class Start function

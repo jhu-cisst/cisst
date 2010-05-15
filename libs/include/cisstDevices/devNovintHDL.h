@@ -7,7 +7,7 @@
   Author(s): Gorkem Sevinc, Anton Deguet
   Created on: 2009-09-04
 
-  (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2009-2010 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -23,14 +23,12 @@ http://www.cisst.org/cisst/license.txt.
 #define _devNovintHDL_h
 
 #include <cisstDevices/devConfig.h>
-
-//#if defined CISST_DEV_HAS_NOVINTHDL || defined DOXYGEN
 #include <cisstMultiTask/mtsTaskFromCallback.h>
-#include <cisstParameterTypes.h>
+#include <cisstParameterTypes/prmPositionCartesianGet.h>
+#include <cisstParameterTypes/prmForceCartesianSet.h>
 
 // Always include last
 #include <cisstDevices/devExport.h>
-
 
 // forward declaration for private data
 struct devNovintHDLDriverData;
@@ -49,8 +47,6 @@ protected:
         bool DeviceEnabled;
 
         // local copy of the buttons state as defined by Sensable
-        //mtsInt Buttons;
-        //bool ButtonPressed;
         mtsInt  Buttons;
         
         // local copy of the position and velocities
@@ -74,12 +70,7 @@ protected:
 
     void SetInterfaces(const std::string & firstDeviceName,
                        const std::string & secondDeviceName);
-    
-    void SetInterfaces(const std::string & firstDeviceName,
-                       const std::string & secondDeviceName,
-                       const std::string & thirdDeviceName,
-                       const std::string & fourthDeviceName);
-    
+
     void SetupInterfaces(void);
 
 private:
@@ -89,14 +80,13 @@ private:
 
 public:
     /*! Constructor for a single arm with a user specified name.  The
-      name must match the device name as defined by Sensable
-      drivers. Force output initially disabled*/
+      name is used for interface naming. Force output initially disabled. */
     devNovintHDL(const std::string & taskName,
                  const std::string & firstDeviceName);
 
     /*! Constructor for two arms with a user specified names.  The
-      names must match the device names as defined by Sensable
-      drivers. Force output initially disabled */
+      names are used for interface naming.   Which falcon will be used
+      depends on its index. Force output initially disabled */
     //@{
     devNovintHDL(const std::string & taskName,
                   const std::string & firstDeviceName,
@@ -105,23 +95,6 @@ public:
     devNovintHDL(const char * taskName,
                   const char * firstDeviceName,
                   const char * secondDeviceName);
-    //@}
-
-    /*! Constructor for four arms with a user specified names.  The
-      names must match the device names as defined by Sensable
-      drivers. Force output initially disabled */
-    //@{
-    devNovintHDL(const std::string & taskName,
-                  const std::string & firstDeviceName,
-                  const std::string & secondDeviceName,
-                  const std::string & thirdDeviceName,
-                  const std::string & fourthDeviceName);
-
-    devNovintHDL(const char * taskName,
-                  const char * firstDeviceName,
-                  const char * secondDeviceName,
-                  const char * thirdDeviceName,
-                  const char * fourthDeviceName);
     //@}
 
     ~devNovintHDL();
@@ -137,8 +110,6 @@ public:
 
 CMN_DECLARE_SERVICES_INSTANTIATION(devNovintHDL);
 
-
-//#endif // CISST_DEV_HAS_NOVINTHDL
 
 #endif // _devNovintHDL_h
 

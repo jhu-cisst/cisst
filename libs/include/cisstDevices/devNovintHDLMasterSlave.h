@@ -7,7 +7,7 @@
   Author(s): Gorkem Sevinc, Anton Deguet
   Created on: 2009-07-17
 
-  (C) Copyright 2008 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2009-2010 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -22,15 +22,13 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _devNovintHDLMasterSlave_h
 #define _devNovintHDLMasterSlave_h
 
-#include <cisstParameterTypes.h>
-#include <cisstCommon.h>
-#include <cisstMultiTask/mtsTaskFromCallback.h>
+
 #include <cisstDevices/devNovintHDL.h>
 #include <cisstRobot/robCollaborativeControlForce.h>
+#include <cisstParameterTypes/prmCollaborativeControlForce.h>
 
 // Always include last
 #include <cisstDevices/devExport.h>
-
 
 class CISST_EXPORT devNovintHDLMasterSlave: public devNovintHDL {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
@@ -40,12 +38,6 @@ public:
     devNovintHDLMasterSlave(const std::string & taskName,
                              const std::string & firstDeviceName,
                              const std::string & secondDeviceName);
-
-    devNovintHDLMasterSlave(const std::string & taskName,
-                             const std::string & firstDeviceName,
-                             const std::string & secondDeviceName,
-                             const std::string & thirdDeviceName,
-                             const std::string & fourthDeviceName);
 
     ~devNovintHDLMasterSlave(void) {};
 

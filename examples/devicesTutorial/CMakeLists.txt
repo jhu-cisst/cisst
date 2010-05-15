@@ -15,9 +15,9 @@
 if(CISST_HAS_FLTK)
   add_subdirectory(example2)
 
-  if(CISST_DEV_HAS_SENSABLEHD OR CISST_MTS_HAS_ICE)
-    add_subdirectory(example1)
-  endif(CISST_DEV_HAS_SENSABLEHD OR CISST_MTS_HAS_ICE)
+  if (CISST_DEV_HAS_SENSABLEHD OR CISST_DEV_HAS_NOVINTHDL OR CISST_MTS_HAS_ICE)
+    add_subdirectory (example1)
+  endif (CISST_DEV_HAS_SENSABLEHD OR CISST_DEV_HAS_NOVINTHDL OR CISST_MTS_HAS_ICE)
 
   if(CISST_DEV_HAS_SENSABLEHD)
     add_subdirectory(example3)

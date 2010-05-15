@@ -32,6 +32,7 @@ int main(void)
     displayTaskObject->Configure();
     taskManager->AddTask(displayTaskObject);
 
+    // this is not great if one has both sensable and novint, we pick sensable by default
 #if (CISST_DEV_HAS_SENSABLEHD == ON)
     // name as defined in Sensable configuration
     std::string omniName("Omni1");
@@ -42,19 +43,23 @@ int main(void)
     taskManager->Connect("DISP", "Robot", "Omni", omniName);
     taskManager->Connect("DISP", "Button1", "Omni", omniName + "Button1");
     taskManager->Connect("DISP", "Button2", "Omni", omniName + "Button2");
+#elif (CISST_DEV_HAS_NOVINTHDL == ON)
+    // name as defined in Sensable configuration
+    devNovintHDL * robotObject = new devNovintHDL("Novint", "Novint");
+	taskManager->AddTask(robotObject);
+
+    // connect the tasks
+    taskManager->Connect("DISP", "Robot", "Novint", "Novint");
+    taskManager->Connect("DISP", "Button1", "Novint", "NovintButton1");
+    taskManager->Connect("DISP", "Button2", "Novint", "NovintButton2");
 #endif
-
-    // generate a nice tasks diagram
-    std::ofstream dotFile("example1.dot"); 
-    taskManager->ToStreamDot(dotFile);
-    dotFile.close();
-
     // collect all state data in csv file
     mtsCollectorState * collector =
         new mtsCollectorState(robotObject->GetName(),
                               robotObject->GetDefaultStateTableName(),
                               mtsCollectorBase::COLLECTOR_FILE_FORMAT_CSV);
     collector->AddSignal(); // all signals
+    collector->Connect();
     taskManager->AddTask(collector);
 
     // create the tasks, i.e. find the commands
@@ -62,7 +67,7 @@ int main(void)
     // start the periodic Run
     taskManager->StartAll();
 
-    collector->Start();
+    collector->StartCollection(0.0 * cmn_ms);
 
     // wait until the close button of the UI is pressed
     while (true) {
@@ -71,6 +76,10 @@ int main(void)
             break;
         }
     }
+
+    collector->StopCollection(0.0 * cmn_ms);
+    osaSleep(10 * cmn_ms);
+
     // cleanup
     taskManager->KillAll();
 

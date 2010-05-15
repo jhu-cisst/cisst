@@ -15,9 +15,15 @@
 # name of project and executable
 PROJECT(devicesTutorialExample1)
 
-if (CISST_DEV_HAS_SENSABLEHD)
-  find_package(Sensable REQUIRED)
-  include_directories(${SENSABLE_INCLUDE_DIR})
+if (CISST_DEV_HAS_SENSABLEHD OR CISST_DEV_HAS_NOVINTHDL)
+  if (CISST_DEV_HAS_SENSABLEHD)
+    find_package(SensableHD REQUIRED)
+    include_directories(${SENSABLE_INCLUDE_DIR})
+  endif (CISST_DEV_HAS_SENSABLEHD)
+  if (CISST_DEV_HAS_NOVINTHDL)
+    find_package(NovintHDL REQUIRED)
+    include_directories(${NOVINT_INCLUDE_DIR})
+  endif (CISST_DEV_HAS_NOVINTHDL)
   
   # CMake command, generate .cxx and .h from .fl files
   FLTK_WRAP_UI(devicesTutorialExample1 displayUI.fl)
@@ -33,13 +39,19 @@ if (CISST_DEV_HAS_SENSABLEHD)
                  ${devicesTutorialExample1_FLTK_UI_SRCS}
                  )
 
-  target_link_libraries(devicesTutorialExample1
-                        ${SENSABLE_LIBRARIES}
-                        )
+  if (CISST_DEV_HAS_SENSABLEHD)
+    target_link_libraries(devicesTutorialExample1
+                          ${SENSABLE_LIBRARIES})
+  endif (CISST_DEV_HAS_SENSABLEHD)
+  if (CISST_DEV_HAS_NOVINTHDL)
+    target_link_libraries(devicesTutorialExample1
+                          ${NOVINT_LIBRARIES})
+  endif (CISST_DEV_HAS_NOVINTHDL)
+
   # link with the cisst libraries
   CISST_REQUIRES("devicesTutorialExample1" "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstParameterTypes;cisstDevices")
 
-endif (CISST_DEV_HAS_SENSABLEHD)
+endif (CISST_DEV_HAS_SENSABLEHD OR CISST_DEV_HAS_NOVINTHDL)
 
 
 if (CISST_MTS_HAS_ICE)
@@ -82,6 +94,3 @@ if (CISST_MTS_HAS_ICE)
 
   endif (CISST_DEV_HAS_SENSABLEHD)
 endif (CISST_MTS_HAS_ICE)
-
-
-

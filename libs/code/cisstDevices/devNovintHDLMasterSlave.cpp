@@ -7,7 +7,7 @@
   Author(s): Gorkem Sevinc, Anton Deguet
   Created on: 2009-09-04
 
-  (C) Copyright 2008-2009 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2009-2010 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -56,45 +56,6 @@ devNovintHDLMasterSlave::devNovintHDLMasterSlave(const std::string & taskName,
     SetupTeleoperationInterfaces(firstDeviceName, secondDeviceName, PairNumber);
 }
 
-devNovintHDLMasterSlave::devNovintHDLMasterSlave(const std::string & taskName,
-                                                 const std::string & firstDeviceName,
-                                                 const std::string & secondDeviceName,
-                                                 const std::string & thirdDeviceName,
-                                                 const std::string & fourthDeviceName):
-    devNovintHDL(taskName, firstDeviceName, secondDeviceName, 
-                  thirdDeviceName, fourthDeviceName)
-{
-    // Initialize the class and struct vectors
-    RobotPair.resize(2);
-    DevicePair.resize(2);
-    DevicePair[0] = new DevData;
-    DevicePair[1] = new DevData;
-    RobotPair[0] = new robCollaborativeControlForce(0.5, 
-                                                    0.5, 
-                                                    20.0, 
-                                                    robCollaborativeControlForce::ParameterType::ForceModeType::RATCHETED,
-                                                    1.0,
-                                                    1.0);
-    RobotPair[1] = new robCollaborativeControlForce(0.5, 
-                                                    0.5, 
-                                                    20.0, 
-                                                    robCollaborativeControlForce::ParameterType::ForceModeType::RATCHETED,
-                                                    1.0,
-                                                    1.0);
-
-    // Assign device numbers, * hard coded for now *
-    DevicePair[0]->MasterDeviceNo = 0;
-    DevicePair[0]->SlaveDeviceNo = 1;
-    DevicePair[1]->MasterDeviceNo = 2;
-    DevicePair[1]->SlaveDeviceNo = 3;
-    
-    // Pair Number assigns which pair is being used for the GUI. 
-    // Change this value to test the other pair, default is the first pair.
-    PairNumber = 0;
-    PairCount = 2;
-    //Initialize provided interfaces
-    SetupTeleoperationInterfaces(firstDeviceName, secondDeviceName, PairNumber);
-}
 
 void devNovintHDLMasterSlave::SetupTeleoperationInterfaces(const std::string & firstDeviceName, 
                                                            const std::string & secondDeviceName,

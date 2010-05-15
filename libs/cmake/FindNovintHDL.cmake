@@ -26,7 +26,7 @@
 # - Implemented for Windows only.
 
 IF(WIN32)
-  SET(NOVINT_SDK_DIR "D:/Program Files/Novint/HDAL_SDK_2.1.3")
+  SET(NOVINT_SDK_DIR "C:/Program Files/Novint/HDAL_SDK_2.1.3")
 
   FIND_LIBRARY(NOVINT_LIB_HDL hdl ${NOVINT_SDK_DIR}/lib)
   
