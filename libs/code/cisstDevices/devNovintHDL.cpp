@@ -367,21 +367,25 @@ void devNovintHDL::Create(void * data)
 
 void devNovintHDL::Start(void)
 {
-    // Start the device
-    hdlStart();
-    // Check for errors
-    HDLError error = hdlGetError();
-    if (error != HDL_NO_ERROR) {
-        CMN_LOG_CLASS_INIT_ERROR << "Start: failed to start scheduler" << std::endl;
-    }
+    if (this->DeviceCount < 1) {
+        CMN_LOG_CLASS_INIT_ERROR << "Start: not doing anything, no device found" << std::endl;
+    } else {
+        // Start the device
+        hdlStart();
+        // Check for errors
+        HDLError error = hdlGetError();
+        if (error != HDL_NO_ERROR) {
+            CMN_LOG_CLASS_INIT_ERROR << "Start: failed to start scheduler" << std::endl;
+        }
     
-    // Schedule the main callback that will communicate with the device
-    this->Driver->CallbackHandle = hdlCreateServoOp(mtsTaskFromCallbackAdapter::CallbackAdapter<HDLServoOpExitCode>,
-                                                    this->GetCallbackParameter(),
-                                                    false);
+        // Schedule the main callback that will communicate with the device
+        this->Driver->CallbackHandle = hdlCreateServoOp(mtsTaskFromCallbackAdapter::CallbackAdapter<HDLServoOpExitCode>,
+                                                        this->GetCallbackParameter(),
+                                                        false);
 
-    if(this->Driver->CallbackHandle != HDL_NO_ERROR) {
-        CMN_LOG_CLASS_INIT_ERROR << "Start: invalid Servo op handle" << std::endl;
+        if(this->Driver->CallbackHandle != HDL_NO_ERROR) {
+            CMN_LOG_CLASS_INIT_ERROR << "Start: invalid Servo op handle" << std::endl;
+        }
     }
 
     // Call base class Start function
@@ -391,20 +395,25 @@ void devNovintHDL::Start(void)
 
 void devNovintHDL::Kill(void)
 {
-    // For cleanup, unschedule callback and stop the scheduler
-    hdlStop();
-    hdlDestroyServoOp(this->Driver->CallbackHandle);
+    if (this->DeviceCount < 1) {
+        CMN_LOG_CLASS_INIT_ERROR << "Kill: not doing anything, no device found" << std::endl;
+        return;
+    } else {
+        // For cleanup, unschedule callback and stop the scheduler
+        hdlStop();
+        hdlDestroyServoOp(this->Driver->CallbackHandle);
 
-    // Disable the devices
-    unsigned int index = 0;
-    const unsigned int end = this->DevicesVector.size();
-    DeviceData * deviceData;
-    devNovintHDLHandle     * handle;
-    for (index; index != end; index++) {
-        deviceData = DevicesVector(index);
-        handle = DevicesHandleVector(index);
-        if (deviceData->DeviceEnabled) {
-            hdlUninitDevice(handle->DeviceHandle);
+        // Disable the devices
+        unsigned int index = 0;
+        const unsigned int end = this->DevicesVector.size();
+        DeviceData * deviceData;
+        devNovintHDLHandle * handle;
+        for (index; index != end; index++) {
+            deviceData = DevicesVector(index);
+            handle = DevicesHandleVector(index);
+            if (deviceData->DeviceEnabled) {
+                hdlUninitDevice(handle->DeviceHandle);
+            }
         }
     }
 
