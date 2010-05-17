@@ -46,10 +46,10 @@ public:
     {
         friend class vctPlot2DBase;
         friend class vctPlot2DOpenGL;
-        friend class vctPlot2DOpenVTK;
+        friend class vctPlot2DVTK;
     public:
-        Trace(const std::string & name, size_t numberOfPoints);
-        ~Trace() {};
+        Trace(const std::string & name, size_t numberOfPoints, size_t pointSize = 2);
+        ~Trace();
 
         void AddPoint(const vctDouble2 & point);
         void Freeze(bool freeze);
@@ -66,14 +66,18 @@ public:
         bool Empty;
         bool Visible;
         bool Frozen;
-        vctDynamicVector<vctDouble2> Data;
+        /*! Actual buffer containing the data, contiguous for rendering */
+        double * Buffer;
+        /*! Vector of references to the data to add, compute min/max, ... */
+        typedef vctFixedSizeVectorRef<double, 2, 1> PointRef;
+        vctDynamicVector<PointRef> Data;
         size_t IndexFirst;
         size_t IndexLast;
         vctDouble3 Color;
         double LineWidth;
     };
 
-    vctPlot2DBase(void);
+    vctPlot2DBase(size_t pointSize = 2);
     ~vctPlot2DBase(void) {};
 
     /*! Create a new trace, user needs to provide a placeholder to
@@ -175,6 +179,8 @@ public:
     //@}
 
 protected:
+    size_t PointSize;
+
     // keep traces in a vector
     typedef std::vector<Trace *> TracesType;
     TracesType Traces;

@@ -22,18 +22,37 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstVector/vctPlot2DBase.h>
 #include <cisstCommon/cmnUnits.h>
 
-vctPlot2DBase::Trace::Trace(const std::string & name, size_t numberOfPoints):
+vctPlot2DBase::Trace::Trace(const std::string & name, size_t numberOfPoints, size_t pointSize):
     Name(name),
     Empty(true),
     Visible(true),
     Frozen(false),
+    Buffer(0),
     IndexFirst(0),
     IndexLast(0),
     Color(1.0, 1.0, 1.0),
     LineWidth(1.0)
 {
+    // create the underlaying buffer and fill it with zeros
+    CMN_ASSERT(pointSize >= 2);
+    this->Buffer = new double[pointSize * numberOfPoints];
+    memset(this->Buffer, 0, pointSize * numberOfPoints);
     this->Data.SetSize(numberOfPoints);
+    // now set all the references
+    size_t index;
+    for (index = 0;
+         index < numberOfPoints;
+         index++) {
+        this->Data.Element(index).SetRef(this->Buffer + pointSize * index);
+    }
 }
+
+
+vctPlot2DBase::Trace::~Trace() {
+    if (this->Buffer) {
+        delete this->Buffer;
+    }
+};
 
 
 void vctPlot2DBase::Trace::AddPoint(const vctDouble2 & point)
@@ -75,7 +94,7 @@ void vctPlot2DBase::Trace::Freeze(bool freeze)
 void vctPlot2DBase::Trace::ComputeDataRangeXY(vctDouble2 & min, vctDouble2 & max)
 {
     // using pointer arithmetic
-    vctDouble2 * currentPointer = this->Data.Pointer(0);
+    PointRef * currentPointer = this->Data.Pointer(0);
     size_t indexLast;
     const ptrdiff_t stridePointer = this->Data.stride();
 
@@ -85,7 +104,7 @@ void vctPlot2DBase::Trace::ComputeDataRangeXY(vctDouble2 & min, vctDouble2 & max
     } else {
         indexLast = this->IndexLast;
     }
-    const vctDouble2 * lastPointer = currentPointer + indexLast * stridePointer;
+    const PointRef * lastPointer = currentPointer + indexLast * stridePointer;
     
     // iterate
     double value;
@@ -111,7 +130,7 @@ void vctPlot2DBase::Trace::ComputeDataRangeXY(vctDouble2 & min, vctDouble2 & max
 void vctPlot2DBase::Trace::ComputeDataRangeX(double & min, double & max)
 {
     // using pointer arithmetic
-    vctDouble2 * currentPointer = this->Data.Pointer(0);
+    PointRef * currentPointer = this->Data.Pointer(0);
     size_t indexLast;
     const ptrdiff_t stridePointer = this->Data.stride();
 
@@ -121,7 +140,7 @@ void vctPlot2DBase::Trace::ComputeDataRangeX(double & min, double & max)
     } else {
         indexLast = this->IndexLast;
     }
-    const vctDouble2 * lastPointer = currentPointer + indexLast * stridePointer;
+    const PointRef * lastPointer = currentPointer + indexLast * stridePointer;
     
     // iterate
     double value;
@@ -141,7 +160,7 @@ void vctPlot2DBase::Trace::ComputeDataRangeX(double & min, double & max)
 void vctPlot2DBase::Trace::ComputeDataRangeY(double & min, double & max)
 {
     // using pointer arithmetic
-    vctDouble2 * currentPointer = this->Data.Pointer(0);
+    PointRef * currentPointer = this->Data.Pointer(0);
     size_t indexLast;
     const ptrdiff_t stridePointer = this->Data.stride();
 
@@ -151,7 +170,7 @@ void vctPlot2DBase::Trace::ComputeDataRangeY(double & min, double & max)
     } else {
         indexLast = this->IndexLast;
     }
-    const vctDouble2 * lastPointer = currentPointer + indexLast * stridePointer;
+    const PointRef * lastPointer = currentPointer + indexLast * stridePointer;
     
     // iterate
     double value;
@@ -177,10 +196,12 @@ void vctPlot2DBase::Trace::SetColor(const vctDouble3 & color)
 }
 
 
-vctPlot2DBase::vctPlot2DBase(void):
+vctPlot2DBase::vctPlot2DBase(size_t pointSize):
+    PointSize(pointSize),
     Frozen(false),
     BackgroundColor(0.1, 0.1, 0.1)
 {
+    CMN_ASSERT(this->PointSize >= 2);
     SetNumberOfPoints(200);
     Translation.SetAll(0.0);
     Scale.SetAll(1.0);
@@ -197,7 +218,7 @@ bool vctPlot2DBase::AddTrace(const std::string & name, size_t & traceId)
     if (found == end) {
         // new name
         traceId = Traces.size();
-        Trace * newTrace = new Trace(name, this->NumberOfPoints);
+        Trace * newTrace = new Trace(name, this->NumberOfPoints, this->PointSize);
         Traces.push_back(newTrace);
         TracesId[name] = traceId;
         return true;
