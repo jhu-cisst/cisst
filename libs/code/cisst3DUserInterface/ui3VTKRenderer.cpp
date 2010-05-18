@@ -110,6 +110,12 @@ ui3VTKRenderer::~ui3VTKRenderer()
 }
 
 
+void ui3VTKRenderer::Start(void)
+{
+	this->RenderWindowInteractor->Start();
+}
+
+
 void ui3VTKRenderer::Render(void)
 {
     if (this->RenderWindow) {
