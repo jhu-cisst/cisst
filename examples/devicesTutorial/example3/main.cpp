@@ -23,7 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsTaskManager.h>
 #include <cisstDevices/devSensableHDMasterSlave.h>
-#ifdef CISST_HAS_IRE
+#if CISST_HAS_IRE
 #include <cisstInteractive.h>
 #endif
 #include <cisstCommon.h>
@@ -70,7 +70,7 @@ int main(int argc, char * argv[])
     // devSensableHDMasterSlave * sensableOmni = new devSensableHDMasterSlave("Omni", "Omni1", "Omni2", "Omni3", "Omni4");
     taskManager->AddTask(sensableOmni);
 
-#ifdef CISST_HAS_IRE
+#if CISST_HAS_IRE
     cmnObjectRegister::Register("TaskManager", taskManager);
 
     cout << "*** Launching IRE shell (C++ Thread) ***" << endl;
@@ -112,7 +112,7 @@ int main(int argc, char * argv[])
 
     osaSleep(PeriodDisplay * 2);
 
-#ifdef CISST_HAS_IRE
+#if CISST_HAS_IRE
     // Cleanup and exit
     IreThread.Wait();
 #endif
