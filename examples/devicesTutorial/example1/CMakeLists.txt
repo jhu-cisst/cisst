@@ -17,7 +17,7 @@ PROJECT(devicesTutorialExample1)
 
 if (CISST_DEV_HAS_SENSABLEHD OR CISST_DEV_HAS_NOVINTHDL)
   if (CISST_DEV_HAS_SENSABLEHD)
-    find_package(SensableHD REQUIRED)
+    find_package(Sensable REQUIRED)
     include_directories(${SENSABLE_INCLUDE_DIR})
   endif (CISST_DEV_HAS_SENSABLEHD)
   if (CISST_DEV_HAS_NOVINTHDL)
