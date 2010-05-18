@@ -39,8 +39,6 @@ const unsigned int NumSineTasks = 2;
 
 int main(int argc, char *argv[])
 {
-    std::cout << cmnPath::GetWorkingDirectory() << std::endl;
-
     // log configuration
     cmnLogger::SetLoD(CMN_LOG_LOD_VERY_VERBOSE);
     cmnLogger::AddChannel(std::cout, CMN_LOG_LOD_VERY_VERBOSE);

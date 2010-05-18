@@ -24,7 +24,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <QDial>
 #include <QGridLayout>
 #include <QLabel>
-#include <QPushButton>
 #include <QWidget>
 #include <cisstVector/vctPlot2DOpenGLQtWidget.h>
 
@@ -44,7 +43,6 @@ class displayQWidget : public QWidget
     QLabel * ValueAmplitude;
     QLabel * LabelData;
     QLabel * ValueData;
-    QPushButton * ButtonQuit;
 };
 
 #endif  // _displayQWidget_h
