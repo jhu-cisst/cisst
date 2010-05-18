@@ -48,6 +48,10 @@ public:
     /*! Type used to define the logging level of detail. */
     typedef cmnLogLoD LogLoDType;
 
+    /*! Type used to refer to cmnGenericObject by pointer, convenient to
+      pass a pointer by reference */
+    typedef cmnGenericObject * generic_pointer;
+
     /*!  Constructor. Sets the name of the class and the Level of Detail
       setting for the class.
 
@@ -55,7 +59,9 @@ public:
       \param typeInfo Runtime type as defined by C++ RTTI
       \param lod The Log Level of Detail setting to be used with this class.
     */
-    cmnClassServicesBase(const std::string & className, const std::type_info * typeInfo, LogLoDType lod = CMN_LOG_LOD_RUN_ERROR);
+    cmnClassServicesBase(const std::string & className,
+                         const std::type_info * typeInfo,
+                         LogLoDType lod = CMN_LOG_LOD_RUN_ERROR);
 
 
     /*! Virtual destructor.  Does nothing. */
@@ -73,19 +79,6 @@ public:
       where created with CMN_NO_DYNAMIC_CREATION.
     */
     virtual cmnGenericObject * Create(void) const = 0;
-
-    /*! Create a new empty array of objects of the same type as
-      represented by this object.  This can be used whenever an object
-      needs to be dynamically created (e.g. deserialization, object
-      factory).  This method uses the C++ "new[size]" operator and the
-      programmers should remember to use a matching "delete" if
-      needed.
-
-      \return a pointer to the newly created object or null if object
-      cannot be created.  This could happen when the class services
-      where created with CMN_NO_DYNAMIC_CREATION.
-    */
-    virtual cmnGenericObject * CreateArray(size_t size) const = 0;
 
     /*! Create a new empty object of the same type as represented by
       this object using the copy constructor.  This can be used
@@ -108,6 +101,25 @@ public:
 
     /*! Placement new using copy constructor */
     virtual bool Create(cmnGenericObject * existing, const cmnGenericObject & other) const = 0;
+
+    /*! Create a new empty array of objects of the same type as
+      represented by this object.  This can be used whenever an object
+      needs to be dynamically created (e.g. deserialization, object
+      factory).  This method uses the C++ "new[size]" operator and the
+      programmers should remember to use a matching "delete" if
+      needed.
+
+      \return a pointer to the newly created object or null if object
+      cannot be created.  This could happen when the class services
+      where created with CMN_NO_DYNAMIC_CREATION.
+    */
+    virtual cmnGenericObject * CreateArray(size_t size) const = 0;
+
+    /*! Create an array and fill with an existing object */
+    virtual cmnGenericObject * CreateArray(size_t size,
+                                           const cmnGenericObject & other) const = 0;
+
+    virtual bool DeleteArray(generic_pointer & data, size_t & size) const = 0;
 
     /*! Call destructor explicitely */
     virtual bool Delete(cmnGenericObject * existing) const = 0;

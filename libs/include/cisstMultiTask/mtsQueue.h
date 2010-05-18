@@ -198,10 +198,11 @@ public:
     typedef const value_type * const_pointer;
     typedef value_type & reference;
     typedef const value_type & const_reference;
-    typedef unsigned int size_type;
-    typedef unsigned int index_type;
+    typedef size_t size_type;
+    typedef size_t index_type;
 
 protected:
+    const cmnClassServicesBase * ClassServices;
     pointer Data;
     pointer Head;
     pointer Tail;
@@ -212,13 +213,8 @@ protected:
     void Allocate(size_type size, const_reference value) {
         this->Size = size;
         if (this->Size > 0) {
-            this->Data = reinterpret_cast<mtsGenericObject *>(value.Services()->CreateArray(this->Size));
-            index_type index;
-            for (index = 0; index < this->Size; index++) {
-                if (!(value.Services()->Create(&this->Data[index], value))) {
-                    CMN_LOG_RUN_ERROR << "Class mtsQueueGeneric: Allocate: failed while using in place new" << std::endl;
-                }
-            }
+            this->Data = reinterpret_cast<pointer>(this->ClassServices->CreateArray(this->Size, value));
+            CMN_ASSERT(this->Data);
         } else {
             this->Data = 0;
         }
@@ -231,6 +227,7 @@ protected:
 public:
 
     inline mtsQueueGeneric(void):
+        ClassServices(0),
         Data(0),
         Head(0),
         Tail(0),
@@ -240,19 +237,36 @@ public:
 
 
     inline mtsQueueGeneric(size_type size, const_reference value) {
+        this->ClassServices = value.Services();
         Allocate(size, value);
     }
 
 
     inline ~mtsQueueGeneric() {
-        delete [] Data;
+        cmnGenericObject * genericPointer = reinterpret_cast<cmnGenericObject *>(this->Data);
+        this->ClassServices->DeleteArray(genericPointer, this->Size);
     }
 
 
     /*! Sets the size of the queue (destructive, i.e. won't preserve
         previously queued elements). */
     inline void SetSize(size_type size, const_reference value) {
-        delete [] Data;
+        if (this->ClassServices != 0) { // if non zero, it has already been set
+            if (this->ClassServices != value.Services()) {
+                CMN_LOG_INIT_WARNING << "mtsQueueGeneric::SetSize: type of elements expected \""
+                                     << this->ClassServices->GetName() << "\", now using \""
+                                     << value.Services()->GetName() << "\"" << std::endl;
+            }
+            cmnGenericObject * genericPointer = reinterpret_cast<cmnGenericObject *>(this->Data);
+            this->ClassServices->DeleteArray(genericPointer, this->Size);
+            this->Data = reinterpret_cast<pointer>(genericPointer);
+            if (this->Data != 0) {
+                CMN_LOG_INIT_WARNING << "mtsQueueGeneric::SetSize: failed to delete data array for \""
+                                     << this->ClassServices->GetName() << "\"" << std::endl;
+            }
+            
+        }
+        this->ClassServices = value.Services();
         this->Allocate(size, value);
     }
 
@@ -302,8 +316,9 @@ public:
         }
         // queue new object and move head
         // using in place new to make sure copy constructor is used
-        if (!newObject.Services()->Create(this->Head, newObject))
-            CMN_LOG_INIT_WARNING << "mtsQueueGeneric::Put failed for " << newObject.Services()->GetName() << std::endl;
+        if (!this->ClassServices->Create(this->Head, newObject)) {
+            CMN_LOG_RUN_ERROR << "mtsQueueGeneric::Put failed for " << newObject.Services()->GetName() << std::endl;
+        }
         this->Head = newHead;
         return this->Head;
     }

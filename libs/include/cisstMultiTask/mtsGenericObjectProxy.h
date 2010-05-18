@@ -41,18 +41,16 @@ template <class _elementType> class mtsGenericObjectProxyRef;
 // Class services specialization for proxy objects.  We assume that we always want dynamic creation.
 // The specialization is that if the dynamic_cast to the Proxy type fails, we also try to dynamic_cast
 // to the ProxyRef type.
-template<typename _elementType>
+template <typename _elementType>
 class cmnConditionalObjectFactory<CMN_DYNAMIC_CREATION, mtsGenericObjectProxy<_elementType> > {
 public:
     typedef mtsGenericObjectProxy<_elementType> value_type;
     typedef mtsGenericObjectProxyRef<_elementType> value_reftype;
+    typedef value_type * pointer;
+    typedef cmnGenericObject * generic_pointer;
 
     inline static cmnGenericObject * Create(void) {
         return new value_type;
-    }
-
-    inline static cmnGenericObject * CreateArray(size_t size) {
-        return new value_type[size];
     }
 
     inline static cmnGenericObject * Create(const cmnGenericObject & other) {
@@ -74,6 +72,47 @@ public:
         const value_reftype * otherRefPointer = dynamic_cast<const value_reftype *>(&other);
         if (otherRefPointer) {
             new(existing) value_type(otherRefPointer->GetData());
+            return true;
+        }
+        return false;
+    }
+
+    inline static cmnGenericObject * CreateArray(size_t size) {
+        return new value_type[size];
+    }
+    
+    inline static cmnGenericObject * CreateArray(size_t size, const cmnGenericObject & other) {
+        const value_type * otherPointer = dynamic_cast<const value_type *>(&other);
+        pointer data, dummy;
+        size_t index;
+        if (otherPointer) {
+            data = static_cast<pointer>(::operator new(sizeof(value_type) * size));
+            for (index = 0; index < size; index++) {
+                dummy = new(&(data[index])) value_type(*otherPointer); // placement new with copy constructor
+            }
+            return data;
+        }
+        const value_reftype * otherRefPointer = dynamic_cast<const value_reftype *>(&other);
+        if (otherRefPointer) {
+            data = static_cast<pointer>(::operator new(sizeof(value_type) * size));
+            for (index = 0; index < size; index++) {
+                dummy = new(&(data[index])) value_type(otherRefPointer->GetData()); // placement new with copy constructor
+            }
+            return data;
+        }
+        return 0;
+    }
+
+    inline static bool DeleteArray(generic_pointer & data, size_t & size) {
+        pointer typedData = dynamic_cast<pointer>(data);
+        if (typedData) {
+            size_t index;
+            for (index = 0; index < size; index++) {
+                typedData[index].~value_type();
+            }
+            delete typedData;
+            data = 0;
+            size = 0;
             return true;
         }
         return false;
@@ -225,7 +264,9 @@ public:
 
     /*! Default constructor.  The data member is initialized using its
         default constructor. */
-    inline mtsGenericObjectProxy(void) : BaseType(), Data()
+    inline mtsGenericObjectProxy(void):
+        BaseType(),
+        Data()
     {}
 
     /*! Copy constructor. */
