@@ -36,7 +36,7 @@ vctPlot2DBase::Trace::Trace(const std::string & name, size_t numberOfPoints, siz
     // create the underlaying buffer and fill it with zeros
     CMN_ASSERT(pointSize >= 2);
     this->Buffer = new double[pointSize * numberOfPoints];
-    memset(this->Buffer, 0, pointSize * numberOfPoints);
+    memset(this->Buffer, 0, pointSize * numberOfPoints * sizeof(double));
     this->Data.SetSize(numberOfPoints);
     // now set all the references
     size_t index;
