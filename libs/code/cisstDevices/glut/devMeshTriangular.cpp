@@ -252,14 +252,14 @@ devGeometry::Errno devMeshTriangular::LoadOBJ( const std::string& filename ){
     p3[i] = triangles[i][2];
 
     // compute the normal
-    vctFixedSizeVector<double,3> v1 = vertices[ triangles[i][2] ];
+    vctFixedSizeVector<double,3> v1 = vertices[ triangles[i][0] ];
     vctFixedSizeVector<double,3> v2 = vertices[ triangles[i][1] ];
-    vctFixedSizeVector<double,3> v3 = vertices[ triangles[i][0] ];
+    vctFixedSizeVector<double,3> v3 = vertices[ triangles[i][2] ];
     vctFixedSizeVector<double,3> n = (v2-v1)%(v3-v1);
     
     // watch out sometimes the facet degenerates to a line
     try{ n.NormalizedSelf(); }
-    catch( std::runtime_error ){n = vctFixedSizeVector<double,3>(0.0, 0.0, 1.0);}
+    catch( std::exception ){n = vctFixedSizeVector<double,3>(0.0, 0.0, 1.0);}
 
     nx[i] = n[0];
     ny[i] = n[1];

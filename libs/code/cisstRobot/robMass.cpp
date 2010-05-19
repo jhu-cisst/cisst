@@ -62,7 +62,12 @@ robMass::ParallelAxis( double m,
 //! Read the mass from an input stream
 robMass::Errno robMass::ReadMass( std::istream& is ) {
 
-  double x1, x2, x3, y1, y2, y3, z1, z2, z3; // principal axes
+  double x1=1, x2=0, x3=0, y1=0, y2=1, y3=0, z1=0, z2=0, z3=1; // principal axes
+
+
+  mass = 1;
+  com = vctFixedSizeVector<double,3>(0.0);
+  D[0][0] = D[1][1] = D[2][2] = 1.0;
 
   is >> mass                                 // read everything
      >> com[0] >> com[1] >> com[2] 
@@ -81,7 +86,7 @@ robMass::Errno robMass::ReadMass( std::istream& is ) {
   vctDynamicVector<double> e1(3, x1, x2, x3);
   vctDynamicVector<double> e2(3, y1, y2, y3);
   vctDynamicVector<double> e3(3, z1, z2, z3);
-  V = vctMatrixRotation3<double>( e1, e2, e3, true, true );
+  V = vctMatrixRotation3<double>( e1, e2, e3, true, VCT_NORMALIZE );
 
   return robMass::ESUCCESS;
 

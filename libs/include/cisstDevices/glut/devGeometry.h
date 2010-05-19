@@ -24,7 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstVector/vctMatrixRotation3.h>
 #include <cisstVector/vctFrame4x4.h>
 
-#include <cisstRobot/robExport.h>
+#include <cisstDevices/devExport.h>
 
 //! Base class for geometry
 /**

@@ -2,11 +2,10 @@
 #include <string>
 
 #include <cisstMultiTask/mtsTaskPeriodic.h>
+#include <cisstMultiTask/mtsTransformationTypes.h>
 #include <cisstRobot/robManipulator.h>
 
 #include <cisstDevices/devExport.h>
-
-#include <cisstMultiTask/mtsTransformationTypes.h>
 
 #ifndef _devController_h
 #define _devController_h
