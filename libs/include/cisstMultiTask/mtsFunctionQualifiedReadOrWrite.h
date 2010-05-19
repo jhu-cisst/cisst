@@ -89,7 +89,7 @@ protected:
     }
 
     /*! Destructor. */
-    ~mtsFunctionQualifiedReadOrWrite() {}
+    ~mtsFunctionQualifiedReadOrWrite();
 
     /*! Return whether function is valid (i.e., command pointer is non-zero) */
     bool IsValid(void) const { return (Command != 0); }

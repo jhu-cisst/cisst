@@ -24,6 +24,9 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsRequiredInterface.h>
 
 
+mtsFunctionVoid::~mtsFunctionVoid()
+{}
+
 bool mtsFunctionVoid::Bind(const mtsDeviceInterface * interface, const std::string & commandName)
 {
     if (interface) {

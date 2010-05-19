@@ -74,7 +74,7 @@ public:
     }
     
     /*! Destructor. */
-    virtual ~mtsFunctionReadOrWrite() {}
+    virtual ~mtsFunctionReadOrWrite();
 
     /*! Bind the function object to a command.  The method will return
       false if the interface pointer is null, if the command can not

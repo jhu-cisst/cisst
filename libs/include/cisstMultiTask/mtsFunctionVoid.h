@@ -51,7 +51,7 @@ class CISST_EXPORT mtsFunctionVoid: public mtsFunctionBase {
     }
 
     /*! Destructor. */
-    ~mtsFunctionVoid() {}
+    ~mtsFunctionVoid();
 
     /*! Return whether function is valid (i.e., command pointer is non-zero) */
     bool IsValid(void) const { return (Command != 0); }
