@@ -46,6 +46,7 @@ set(HEADER_FILES
     devSartoriusSerial.h
     devExport.h
     devKeyboard.h
+    manipulators/devManipulator.h
 #    controllers/devControlLoop.h
 #    controllers/devGravityCompensation.h
 #    controllers/devJointsPD.h
@@ -59,6 +60,7 @@ set(SOURCE_FILES
     devNull.cpp
     devSartoriusSerial.cpp
     devKeyboard.cpp
+    manipulators/devManipulator.cpp
 #    controllers/devControlLoop.cpp
 #    controllers/devGravityCompensation.cpp
 #    controllers/devJointsPD.cpp
@@ -85,6 +87,7 @@ if( CISST_DEV_HAS_GLUT )
     ${HEADER_FILES}
     glut/devGeometry.h
     glut/devGLUT.h
+    glut/devGLUTManipulator.h
     glut/devMeshTriangular.h
     )
 
@@ -92,6 +95,7 @@ if( CISST_DEV_HAS_GLUT )
       ${SOURCE_FILES}
       glut/devGeometry.cpp
       glut/devGLUT.cpp
+      glut/devGLUTManipulator.cpp
       glut/devMeshTriangular.cpp
       )
 
