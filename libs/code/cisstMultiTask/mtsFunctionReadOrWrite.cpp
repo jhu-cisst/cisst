@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsRequiredInterface.h>
 
 // specialize for destructor
+/*
 template <>
 mtsFunctionReadOrWrite<mtsGenericObject>::~mtsFunctionReadOrWrite()
 {}
@@ -31,6 +32,7 @@ mtsFunctionReadOrWrite<mtsGenericObject>::~mtsFunctionReadOrWrite()
 template <>
 mtsFunctionReadOrWrite<const mtsGenericObject>::~mtsFunctionReadOrWrite()
 {}
+*/
 
 // specialize for Read using "mtsGenericObject &"
 template <>

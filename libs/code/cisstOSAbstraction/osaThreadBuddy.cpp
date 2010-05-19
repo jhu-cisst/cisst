@@ -134,7 +134,11 @@ osaThreadBuddy::~osaThreadBuddy() {
 }
 
 
+#if (CISST_OS == CISST_LINUX_RTAI)
+void osaThreadBuddy::Create(const char *name, double period, int stack_size)
+#else
 void osaThreadBuddy::Create(const char *name, double period, int CMN_UNUSED(stack_size))
+#endif
 {
     Period = period;
 #if (CISST_OS == CISST_LINUX_RTAI)

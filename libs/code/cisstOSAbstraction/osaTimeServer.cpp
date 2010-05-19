@@ -211,8 +211,8 @@ void osaTimeServer::Synchronize(void)
     counterPost = rt_get_time_ns();
     counterAvg = (counterPost + counterPre + 1)/2;
     if (rc == 0) {
-        timediff = (curTime.tv_sec - TimeOrigin.tv_sec)*1000000000LL +
-                   (curTime.tv_nsec - TimeOrigin.tv_nsec);
+        timediff = (curTime.tv_sec - INTERNALS(TimeOrigin).tv_sec)*1000000000LL +
+                   (curTime.tv_nsec - INTERNALS(TimeOrigin).tv_nsec);
     } else {
         CMN_LOG_CLASS_INIT_ERROR << "Synchronize: error return from clock_gettime" << std::endl;
         timediff = 0LL;
