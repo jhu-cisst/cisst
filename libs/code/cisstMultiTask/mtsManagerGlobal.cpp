@@ -504,7 +504,7 @@ int mtsManagerGlobal::Connect(const std::string & requestProcessName,
 
     // Check if the required interface specified actually exist.
     if (!FindRequiredInterface(clientProcessName, clientComponentName, clientRequiredInterfaceName)) {
-        CMN_LOG_CLASS_RUN_VERBOSE << "Connect: required interface does not exist: "
+        CMN_LOG_CLASS_RUN_ERROR << "Connect: required interface does not exist: "
             << GetInterfaceUID(clientProcessName, clientComponentName, clientRequiredInterfaceName)
             << std::endl;
         return -1;
@@ -512,7 +512,7 @@ int mtsManagerGlobal::Connect(const std::string & requestProcessName,
 
     // Check if the provided interface specified actually exist.
     if (!FindProvidedInterface(serverProcessName, serverComponentName, serverProvidedInterfaceName)) {
-        CMN_LOG_CLASS_RUN_VERBOSE << "Connect: provided interface does not exist: "
+        CMN_LOG_CLASS_RUN_ERROR << "Connect: provided interface does not exist: "
             << GetInterfaceUID(serverProcessName, serverComponentName, serverProvidedInterfaceName)
             << std::endl;
         return -1;
@@ -527,13 +527,13 @@ int mtsManagerGlobal::Connect(const std::string & requestProcessName,
                                  serverProvidedInterfaceName);
     // When error occurs (due to non-existing components, etc)
     if (ret < 0) {
-        CMN_LOG_CLASS_RUN_VERBOSE << "Connect: "
+        CMN_LOG_CLASS_RUN_ERROR << "Connect: "
             << "one or more processes, components, or interfaces are missing." << std::endl;
         return -1;
     }
     // When interfaces have already been connected to each other
     else if (ret > 0) {
-        CMN_LOG_CLASS_RUN_VERBOSE << "Connect: Two interfaces are already connected: "
+        CMN_LOG_CLASS_RUN_ERROR << "Connect: Two interfaces are already connected: "
             << GetInterfaceUID(clientProcessName, clientComponentName, clientRequiredInterfaceName)
             << " and "
             << GetInterfaceUID(serverProcessName, serverComponentName, serverProvidedInterfaceName)
