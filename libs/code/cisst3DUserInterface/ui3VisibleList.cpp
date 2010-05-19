@@ -68,6 +68,22 @@ void ui3VisibleList::RecursiveUpdateNeeded(void)
 }
 
 
+bool ui3VisibleList::UpdateVTKObjects(void)
+{
+    bool result = true;
+    const ListType::iterator end = Objects.end();
+    ListType::iterator iterator;
+
+    for (iterator = Objects.begin();
+         iterator != end;
+         ++iterator) {
+
+        result &= ((*iterator)->UpdateVTKObjects());
+    }
+    return result;
+}
+
+
 bool ui3VisibleList::Update(ui3SceneManager * sceneManager)
 {
     // debug

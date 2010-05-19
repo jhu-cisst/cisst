@@ -24,7 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsTaskManager.h>
 
-#include <cisstDaVinciAPI/cisstDaVinciAPI.h>
+#include <cisstDaVinciAPI/cdvReadWrite.h>
 
 #include <cisstCommon.h>
 #include <cisstStereoVision.h>
@@ -53,8 +53,12 @@ int main()
     cmnClassRegister::SetLoD("dvapi_stream", CMN_LOG_LOD_INIT_VERBOSE);
 
     mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
+#if 0
     cisstDaVinciAPI *daVinci = new cisstDaVinciAPI("daVinci", 0.0 /* period to be removed */,
                                                    "10.0.0.5", 5002, 0x1111, 50);
+#else
+    cdvReadWrite * daVinci = new cdvReadWrite("daVinci", 60 /* Hz */);
+#endif
     taskManager->AddTask(daVinci);
 
     ui3Manager guiManager;

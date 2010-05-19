@@ -109,6 +109,10 @@ public:
 
     bool CreateVTKObjects(void);
     
+    inline bool UpdateVTKObjects(void) {
+        return true;
+    }
+
     void SetAllButtonsUnselected(void);
 
     void SetDepth(double depth);

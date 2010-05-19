@@ -60,6 +60,8 @@ public:
       actual VTK objects */
     virtual bool CreateVTKObjects(void) = 0;
 
+    virtual bool UpdateVTKObjects(void) = 0;
+
     virtual bool Update(ui3SceneManager * sceneManager);
 
     virtual vtkProp3D * GetVTKProp(void);

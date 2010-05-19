@@ -59,6 +59,8 @@ public:
 
     bool CreateVTKObjects(void);
 
+    bool UpdateVTKObjects(void);
+
     bool Add(ui3VisibleObject * object);
 
     void RemoveLast(void) {

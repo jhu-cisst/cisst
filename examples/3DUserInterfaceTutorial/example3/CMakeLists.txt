@@ -24,7 +24,7 @@ add_executable (3DUserInterfaceTutorialExample3
 
 target_link_libraries (3DUserInterfaceTutorialExample3
                        3DUserInterfaceTutorialBehaviors
-                       ${daVinci_LIBRARIES}
+                       ${daVinci_ALL_LIBRARIES}
                        )
 
 # Copy VTK models to the build tree

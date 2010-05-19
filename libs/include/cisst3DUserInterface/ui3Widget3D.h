@@ -123,6 +123,8 @@ public:
 
     bool CreateVTKObjects(void);
 
+    inline bool UpdateVTKObjects(void) { return true; };
+
     void UpdateColor(bool selected);
 
     double GetIntention(const vctFrm3 & cursorPosition) const;

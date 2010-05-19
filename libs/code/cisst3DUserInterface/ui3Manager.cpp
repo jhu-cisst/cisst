@@ -883,6 +883,7 @@ void* ui3ManagerCVTKRendererProc::Proc(ui3Manager* baseref)
 
         // update VTK objects if needed
         baseref->SceneManager->VisibleObjects->Update(baseref->SceneManager);
+        baseref->SceneManager->VisibleObjects->UpdateVTKObjects();
 
         // signal renderers
         for (i = 0; i < renderercount; i ++) {

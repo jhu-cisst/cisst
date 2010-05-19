@@ -91,6 +91,8 @@ public:
     */
     bool CreateVTKObjects(void);
 
+    inline bool UpdateVTKObjects(void); 
+
     vtkProp3D * GetVTKProp(void);
 
     /*!

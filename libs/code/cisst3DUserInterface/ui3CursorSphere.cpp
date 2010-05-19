@@ -89,6 +89,12 @@ public:
     }
 
 
+    bool UpdateVTKObjects(void)
+    {
+        return true;
+    }
+
+
     void UpdateColor(bool isClutched, bool isPressed, bool is2D)
     {
         if (this->Created()) {
@@ -176,6 +182,13 @@ public:
         
         return true;
     }
+
+
+    bool UpdateVTKObjects(void)
+    {
+        return true;
+    }
+
 
     void SetCursorPosition(vct3 & position)
     {

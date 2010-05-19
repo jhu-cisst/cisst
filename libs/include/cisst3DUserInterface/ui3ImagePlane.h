@@ -93,6 +93,8 @@ public:
 
     virtual bool CreateVTKObjects(void);
 
+    inline bool UpdateVTKObjects(void) { return true; };
+
     /*!
      May be called any time after CreateVTKObjects().
      No critical thread-safety issues.

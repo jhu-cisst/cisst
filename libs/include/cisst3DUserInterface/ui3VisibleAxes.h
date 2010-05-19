@@ -49,6 +49,8 @@ public:
 
     bool CreateVTKObjects(void);
 
+    inline bool UpdateVTKObjects(void) { return true; };
+
     void SetSize(double size);
     
     void ShowLabels(void);
