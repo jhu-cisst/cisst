@@ -116,6 +116,10 @@ public:
         return true;
     }
 
+    inline bool UpdateVTKObjects(void) {
+        return true;
+    }
+
 protected:
     vtkVolumeReader * Input; // this class does NOT own the input
     vtkContourFilter * SkinExtractor;
@@ -194,6 +198,10 @@ public:
         return true;
     }
 
+    inline bool UpdateVTKObjects(void) {
+        return true;
+    }
+
 protected:
     vtkVolumeReader * Input; // this class does NOT own the input
     vtkContourFilter * BoneExtractor;
@@ -249,6 +257,10 @@ public:
         // Scale the actors.
         OutlineActor->SetScale(0.05);
         this->AddPart(this->OutlineActor);
+        return true;
+    }
+
+    inline bool UpdateVTKObjects(void) {
         return true;
     }
 
@@ -353,6 +365,11 @@ public:
         this->AddPart(this->sagittal);
         return true;
     }
+
+    inline bool UpdateVTKObjects(void) {
+        return true;
+    }
+
 
     void ShowHide(bool showAxial, bool showCoronal, bool showSagittal) {
         this->Lock();

@@ -70,6 +70,10 @@ public:
         return true;
     }
 
+    inline bool UpdateVTKObjects(void) {
+        return true;
+    }
+
     inline void SetText(const std::string & text)
     {
         if (this->Text) {

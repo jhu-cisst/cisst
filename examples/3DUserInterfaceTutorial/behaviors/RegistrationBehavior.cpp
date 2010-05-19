@@ -67,6 +67,10 @@ public:
         return true;
     }
 
+    inline bool UpdateVTKObjects(void) {
+        return true;
+    }
+
     double GetIntention(const vctFrm3 & cursorPosition) const {
         vct3 difference;
         difference.DifferenceOf(cursorPosition.Translation(), this->GetAbsoluteTransformation().Translation());
@@ -144,6 +148,10 @@ public:
             this->Actor = actors->GetNextActor();
             this->AddPart(this->Actor);
         }
+        return true;
+    }
+
+    inline bool UpdateVTKObjects(void) {
         return true;
     }
 

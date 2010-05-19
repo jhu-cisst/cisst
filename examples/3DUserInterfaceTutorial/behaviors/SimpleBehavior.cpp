@@ -77,6 +77,10 @@ public:
         return true;
     }
 
+    inline bool UpdateVTKObjects(void) {
+        return true;
+    }
+
     void ToggleColor(void) {
         if (this->Red) {
             this->Actor->GetProperty()->SetColor(0.1, 0.9, 0.2);
@@ -111,6 +115,7 @@ SimpleBehavior::SimpleBehavior(const std::string & name):
 
     this->VisibleObject1 = new SimpleBehaviorVisibleObject();
     this->VisibleList->Add(this->VisibleObject1);
+
 
     this->VisibleObject2 = new SimpleBehaviorVisibleObject();
     this->VisibleList->Add(this->VisibleObject2);
