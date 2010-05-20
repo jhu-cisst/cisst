@@ -37,7 +37,7 @@ devNovintHDLMasterSlave::devNovintHDLMasterSlave(const std::string & taskName,
     RobotPair[0] = new robCollaborativeControlForce(0.5, 
                                                     0.5, 
                                                     20.0, 
-                                                    robCollaborativeControlForce::ParameterType::ForceModeType::RATCHETED,
+                                                    robCollaborativeControlForce::ParameterType::RATCHETED,
                                                     1.0,
                                                     1.0);
     
