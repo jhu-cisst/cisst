@@ -37,7 +37,7 @@ devSensableHDMasterSlave::devSensableHDMasterSlave(const std::string & taskName,
     RobotPair[0] = new robCollaborativeControlForce(0.40, 
                                                     0.40, 
                                                     40.0, 
-                                                    robCollaborativeControlForce::ParameterType::ForceModeType::RATCHETED,
+                                                    robCollaborativeControlForce::ParameterType::RATCHETED,
                                                     1.0,
                                                     1.0);
     
@@ -72,13 +72,13 @@ devSensableHDMasterSlave::devSensableHDMasterSlave(const std::string & taskName,
     RobotPair[0] = new robCollaborativeControlForce(0.15, 
                                                     0.15, 
                                                     40.0, 
-                                                    robCollaborativeControlForce::ParameterType::ForceModeType::RATCHETED,
+                                                    robCollaborativeControlForce::ParameterType::RATCHETED,
                                                     1.0,
                                                     1.0);
     RobotPair[1] = new robCollaborativeControlForce(0.15, 
                                                     0.15, 
                                                     40.0, 
-                                                    robCollaborativeControlForce::ParameterType::ForceModeType::RATCHETED,
+                                                    robCollaborativeControlForce::ParameterType::RATCHETED,
                                                     1.0,
                                                     1.0);
 
