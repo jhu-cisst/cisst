@@ -282,7 +282,8 @@ bool mtsComponentProxy::CreateProvidedInterfaceProxy(const ProvidedInterfaceDesc
     for (; itVoid != itVoidEnd; ++itVoid) {
         commandName = itVoid->Name;
         newCommandVoid = new mtsCommandVoidProxy(commandName);
-        if (!providedInterfaceProxy->GetCommandVoidMap().AddItem(commandName, newCommandVoid)) {
+        //if (!providedInterfaceProxy->GetCommandVoidMap().AddItem(commandName, newCommandVoid)) {
+        if (!providedInterfaceProxy->AddCommandVoid(newCommandVoid)) {
             delete newCommandVoid;
             delete providedInterfaceProxy;
             CMN_LOG_CLASS_RUN_ERROR << "CreateProvidedInterfaceProxy: failed to add void command proxy: " << commandName << std::endl;
@@ -297,7 +298,8 @@ bool mtsComponentProxy::CreateProvidedInterfaceProxy(const ProvidedInterfaceDesc
     for (; itWrite != itWriteEnd; ++itWrite) {
         commandName = itWrite->Name;
         newCommandWrite = new mtsCommandWriteProxy(commandName);
-        if (!providedInterfaceProxy->GetCommandWriteMap().AddItem(commandName, newCommandWrite)) {
+        //if (!providedInterfaceProxy->GetCommandWriteMap().AddItem(commandName, newCommandWrite)) {
+        if (!providedInterfaceProxy->AddCommandWrite(newCommandWrite)) {
             delete newCommandWrite;
             delete providedInterfaceProxy;
             CMN_LOG_CLASS_RUN_ERROR << "CreateProvidedInterfaceProxy: failed to add " <<
@@ -332,7 +334,8 @@ bool mtsComponentProxy::CreateProvidedInterfaceProxy(const ProvidedInterfaceDesc
     for (; itRead != itReadEnd; ++itRead) {
         commandName = itRead->Name;
         newCommandRead = new mtsCommandReadProxy(commandName);
-        if (!providedInterfaceProxy->GetCommandReadMap().AddItem(commandName, newCommandRead)) {
+        //if (!providedInterfaceProxy->GetCommandReadMap().AddItem(commandName, newCommandRead)) {
+        if (!providedInterfaceProxy->AddCommandRead(newCommandRead)) {
             delete newCommandRead;
             delete providedInterfaceProxy;
             CMN_LOG_CLASS_RUN_ERROR << "CreateProvidedInterfaceProxy: failed to add read command proxy: " << commandName << std::endl;
@@ -364,7 +367,8 @@ bool mtsComponentProxy::CreateProvidedInterfaceProxy(const ProvidedInterfaceDesc
     for (; itQualifiedRead != itQualifiedReadEnd; ++itQualifiedRead) {
         commandName = itQualifiedRead->Name;
         newCommandQualifiedRead = new mtsCommandQualifiedReadProxy(commandName);
-        if (!providedInterfaceProxy->GetCommandQualifiedReadMap().AddItem(commandName, newCommandQualifiedRead)) {
+        //if (!providedInterfaceProxy->GetCommandQualifiedReadMap().AddItem(commandName, newCommandQualifiedRead)) {
+        if (!providedInterfaceProxy->AddCommandQualifiedRead(newCommandQualifiedRead)) {
             delete newCommandQualifiedRead;
             delete providedInterfaceProxy;
             CMN_LOG_CLASS_RUN_ERROR << "CreateProvidedInterfaceProxy: failed to add qualified read command proxy: " << commandName << std::endl;
