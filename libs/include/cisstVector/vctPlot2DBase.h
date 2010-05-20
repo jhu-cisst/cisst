@@ -92,14 +92,21 @@ public:
     /*! Add a point to a given trace */
     void AddPoint(size_t trace, const vctDouble2 & point);
 
-    /*! Data recentering, these methods re-align the data once only, based on all traces. */
+    /*! Data recentering, these methods re-align the data once only,
+      based on all traces.  Padding is used to make sure the data is
+      not plotted at the extreme edges of the window.  The padding
+      parameter indicates the percentage of space that should be left
+      empty.  For example, a 200 pixel window with a padding of 0.1
+      (10%) will leave a band of 10 pixels empty on each side of the
+      window.  By default, the padding in X (horizontal) is null and
+      10% (0.1) in Y (vertical). */
     //@{
-    void FitX(double padding = 1.0);
-    void FitX(double min, double max, double padding = 1.0);
-    void FitY(double padding = 1.1);
-    void FitY(double min, double max, double padding = 1.1);
-    void FitXY(const vctDouble2 & padding = vctDouble2(1.0, 1.1));
-    void FitXY(vctDouble2 min, vctDouble2 max, const vctDouble2 & padding = vctDouble2(1.0, 1.1));
+    void FitX(double padding = 0.0);
+    void FitX(double min, double max, double padding = 0.0);
+    void FitY(double padding = 0.1);
+    void FitY(double min, double max, double padding = 0.1);
+    void FitXY(const vctDouble2 & padding = vctDouble2(0.0, 0.1));
+    void FitXY(vctDouble2 min, vctDouble2 max, const vctDouble2 & padding = vctDouble2(0.0, 0.1));
     void AlignMaxX(void);
     //@}
 

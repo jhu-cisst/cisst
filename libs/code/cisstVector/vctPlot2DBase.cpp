@@ -254,8 +254,10 @@ void vctPlot2DBase::FitX(double padding)
 void vctPlot2DBase::FitX(double min, double max, double padding)
 {
     this->ViewingRangeX.Assign(min, max);
-    this->Scale.X() = this->Viewport.X() / ((max - min) * padding);
-    this->Translation.X() = - min * this->Scale.X() * padding;
+    this->Scale.X() = this->Viewport.X() / ((max - min) * (1.0 + padding));
+    this->Translation.X() =
+        - min * this->Scale.X()
+        + 0.5 * padding * this->Viewport.X();
 }
 
 
@@ -270,8 +272,10 @@ void vctPlot2DBase::FitY(double padding)
 void vctPlot2DBase::FitY(double min, double max, double padding)
 {
     this->ViewingRangeY.Assign(min, max);
-    this->Scale.Y() = this->Viewport.Y() / ((max - min) * padding);
-    this->Translation.Y() = - min * this->Scale.Y() * padding;
+    this->Scale.Y() = this->Viewport.Y() / ((max - min) * (1.0 + padding));
+    this->Translation.Y() =
+        - min * this->Scale.Y()
+        + 0.5 * padding * this->Viewport.Y();
 }
 
 
@@ -287,13 +291,19 @@ void vctPlot2DBase::FitXY(vctDouble2 min, vctDouble2 max, const vctDouble2 & pad
 {
     this->ViewingRangeX.Assign(min.X(), max.X());
     this->ViewingRangeY.Assign(min.Y(), max.Y());
-    vctDouble2 temp;
-    temp.DifferenceOf(max, min);
-    temp.ElementwiseMultiply(padding);
-    this->Scale.ElementwiseRatioOf(this->Viewport, temp); // scale = viewport / (max - min)
-    temp.ElementwiseProductOf(min, padding);
-    this->Translation.ElementwiseProductOf(temp, this->Scale); // translation = - min * scale 
+    // compute scale
+    vctDouble2 dataDiff;
+    dataDiff.DifferenceOf(max, min);
+    this->Scale.ElementwiseRatioOf(this->Viewport, dataDiff);
+    vctDouble2 pad(padding);
+    pad.Add(1.0);
+    this->Scale.ElementwiseDivide(pad);
+    // compute translation
+    this->Translation.ElementwiseProductOf(min, this->Scale);
     this->Translation.NegationSelf();
+    pad.ElementwiseProductOf(padding, this->Viewport);
+    pad.Multiply(0.5);
+    this->Translation.Add(pad);
 }
 
 
