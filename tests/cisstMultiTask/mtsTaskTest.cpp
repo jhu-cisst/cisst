@@ -41,7 +41,7 @@ mtsTaskTestTask::mtsTaskTestTask(const std::string & collectorName,
 //-----------------------------------------------------------------------------
 void mtsTaskTest::TestGetStateVectorID(void)
 {
-	const size_t default_column_count = 3;	// Toc, Tic, Period
+	const size_t default_column_count = mtsStateTable::StateVectorBaseIDForUser;
 	const size_t user_column_count = 2;	// Data1, Data2
 	const size_t total_column_count = default_column_count + user_column_count;
 	

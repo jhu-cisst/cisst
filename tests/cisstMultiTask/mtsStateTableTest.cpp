@@ -172,14 +172,15 @@ void mtsStateTableTest::TestGetStateVectorID(void)
 		"Toc", 
 		"Tic", 
 		"Period", 
+        "PeriodStatistics",
 		// user items
 		"Data1", 
 		"Data2" };	
 	
 	CPPUNIT_ASSERT_EQUAL(default_column_count, (int) StateTable.StateVectorDataNames.size());
 	{
-		StateTable.StateVectorDataNames.push_back(names[3]);
 		StateTable.StateVectorDataNames.push_back(names[4]);
+		StateTable.StateVectorDataNames.push_back(names[5]);
 	}
 	CPPUNIT_ASSERT_EQUAL(total_column_count, (int) StateTable.StateVectorDataNames.size());
 

@@ -82,9 +82,9 @@ mtsStateTable::mtsStateTable(size_t size, const std::string & name):
     // Add statistics
     NewElement("PeriodStatistics", &PeriodStats);
 
-    // Currently there are three signals maintained internally at StateTable.
-    // : "Toc", "Tic", "Period". So the value of StateVectorBaseIDForUser is
-    // set to 3.
+    // Currently there are four signals maintained internally at StateTable.
+    // : "Toc", "Tic", "Period", "PeriodStatistics". So the value of StateVectorBaseIDForUser is
+    // set to 4.
     StateVectorBaseIDForUser = StateVector.size();
 }
 
