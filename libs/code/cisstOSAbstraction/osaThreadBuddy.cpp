@@ -7,7 +7,7 @@
   Author(s): Ankur Kapoor, Min Yang Jung
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -25,13 +25,15 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnLogger.h>
 
 #if (CISST_OS == CISST_LINUX_RTAI)
-    #include <rtai_lxrt.h>
     #include <sys/mman.h> // for mlockall
     #include <rtai_lxrt.h> // for RTAI specific calls
     #include <sys/types.h>
     #include <sys/stat.h>
     #include <unistd.h>
-    #include <iostream>
+    #include <fstream> // to access /proc/modules
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,5,0))
+    #include <linux/module.h> // to query kernel module information
+#endif
     const char __lock_filepath[] = "/var/lock/subsys/rtai";
     const char __lock_filename[] = "/var/lock/subsys/rtai/rtai.lock";
     char __lock_file[256];
@@ -53,6 +55,92 @@ void __os_init(void)
     if (st.st_nlink > 1) {
         std::cerr << "__os_init Info: Another real-time program is already running" << std::endl;
     } 
+
+    // Check if all the required realtime kernel modules are loaded properly.
+    // MJUNG: This is to prevent cisst from crashing with segmentation fault when
+    // some of the kernel modules are not loaded.
+    bool allModulesLoaded = true;
+
+    // list of required real-time kernel modules
+    std::vector<std::string> RTModuleNames;
+    RTModuleNames.push_back("rtai_hal");
+    RTModuleNames.push_back("rtai_lxrt");
+    RTModuleNames.push_back("rtai_sem");
+    RTModuleNames.push_back("rtai_shm");
+    RTModuleNames.push_back("rtai_mbx");
+    RTModuleNames.push_back("rtai_fifos");
+
+    // list of kernel modules currently loaded
+    std::vector<std::string> loadedModuleNames;
+
+    std::string line;
+    std::ifstream moduleList("/proc/modules");
+    if (moduleList.is_open()) {
+        while (!moduleList.eof()) {
+            getline(moduleList, line);
+            loadedModuleNames.push_back(line);
+        }
+        moduleList.close();
+
+        bool found;
+        for (size_t i = 0; i < RTModuleNames.size(); ++i) {
+            found = false;
+            for (size_t j = 0; j < loadedModuleNames.size(); ++j) {
+                found |= (loadedModuleNames[j].find(RTModuleNames[i]) != std::string::npos);
+                if (found) {
+                    break;
+                }
+            }
+            if (!found) {
+                CMN_LOG_INIT_ERROR << "Check real-time module: " << RTModuleNames[i]
+                    << " is missing. Please load the module." << std::endl;
+            }
+
+            allModulesLoaded &= found;
+        }
+
+        if (!allModulesLoaded) {
+            CMN_LOG_INIT_ERROR << "Please load the missing module(s)." << std::endl;
+            exit(1);
+        }
+    } else {
+        // Check version of Linux kernel. query_module is only present up until
+        // kernel 2.4 and was removed in Linux 2.6.
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,5,0)
+        CMN_LOG_INIT_VERBOSE << "Linux kernel version: 2.4.x" << std::endl;
+
+        bool found;
+        int queryResult;
+        size_t ret;
+        char buf[1024] = "";
+        for (size_t i = 0; i < RTModuleNames.size(); ++i) {
+            found = false;
+            queryResult = query_module(RTModuleNames[i].c_str(), QM_INFO, buf, sizeof(buf), &ret);
+            if (queryResult != 0) {
+                found = false;
+                switch (queryResult) {
+                    case ENOENT: 
+                        CMN_LOG_INIT_ERROR << "Check real-time module: " << RTModuleNames[i]
+                            << " is missing. Please load the module." << std::endl;
+                        break;
+                    default:
+                        CMN_LOG_INIT_ERROR << "Check real-time module: unknown error" << std::endl;
+                }
+            } else {
+                found = true;
+            }
+
+            allModulesLoaded &= found;
+        }
+
+        if (!allModulesLoaded) {
+            CMN_LOG_INIT_ERROR << "Please load the missing module(s)." << std::endl;
+            exit(1);
+        }
+#else
+        CMN_LOG_INIT_VERBOSE << "Please make sure all real-time kernel modules are loaded beforehand" << std::endl;
+#endif
+    }
 
     // no prog runs, no harm to start again!
     rt_set_oneshot_mode();
@@ -141,6 +229,7 @@ void osaThreadBuddy::Create(const char *name, double period, int CMN_UNUSED(stac
 #endif
 {
     Period = period;
+
 #if (CISST_OS == CISST_LINUX_RTAI)
     // nam2num converts the character string 'name' to a long, using just the first
     // 6 characters.
@@ -157,8 +246,12 @@ void osaThreadBuddy::Create(const char *name, double period, int CMN_UNUSED(stac
     // so should be done with soft real time.
     // or maybe should have something like "really-soft-real-time"
     mlockall(MCL_CURRENT | MCL_FUTURE);
-    if (IsPeriodic())
-        rt_task_make_periodic_relative_ns(Data->RTTask, 0, (unsigned long)period);
+    if (IsPeriodic()) {
+        if (0 != rt_task_make_periodic_relative_ns(Data->RTTask, 0, (unsigned long)period)) {
+            CMN_LOG_INIT_ERROR << "Create: failed to make task run periodically" << std::endl;
+            exit(1);
+        }
+    }
 
 #elif (CISST_OS == CISST_WINDOWS)
     Data->DueTime.QuadPart = 0UL;
