@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s): Ankur Kapoor
+  Author(s): Ankur Kapoor, Min Yang Jung
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
