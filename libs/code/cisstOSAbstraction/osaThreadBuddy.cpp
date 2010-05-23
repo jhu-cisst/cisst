@@ -63,12 +63,12 @@ void __os_init(void)
 
     // list of required real-time kernel modules
     std::vector<std::string> RTModuleNames;
-    RTModuleNames.push_back("rtai_hal");
+    //RTModuleNames.push_back("rtai_hal");
     RTModuleNames.push_back("rtai_lxrt");
     RTModuleNames.push_back("rtai_sem");
-    RTModuleNames.push_back("rtai_shm");
-    RTModuleNames.push_back("rtai_mbx");
-    RTModuleNames.push_back("rtai_fifos");
+    //RTModuleNames.push_back("rtai_shm");
+    //RTModuleNames.push_back("rtai_mbx");
+    //RTModuleNames.push_back("rtai_fifos");
 
     // list of kernel modules currently loaded
     std::vector<std::string> loadedModuleNames;
