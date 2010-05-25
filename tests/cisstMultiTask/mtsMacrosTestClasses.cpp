@@ -24,3 +24,24 @@ http://www.cisst.org/cisst/license.txt.
 CMN_IMPLEMENT_SERVICES(mtsMacrosTestClassA);
 CMN_IMPLEMENT_SERVICES(mtsMacrosTestClassBProxy);
 
+size_t mtsMacrosTestClassB::DefaultConstructorCalls = 0;
+size_t mtsMacrosTestClassB::DestructorCalls = 0;
+size_t mtsMacrosTestClassB::CopyConstructorCalls = 0;
+
+mtsMacrosTestClassB::mtsMacrosTestClassB(void) {
+    DefaultConstructorCalls++;
+}
+
+mtsMacrosTestClassB::mtsMacrosTestClassB(const mtsMacrosTestClassB & other) {
+    CopyConstructorCalls++;
+}
+
+mtsMacrosTestClassB::~mtsMacrosTestClassB() {
+    DestructorCalls++;
+}
+
+void mtsMacrosTestClassB::ResetAllCounters(void) {
+    DefaultConstructorCalls = 0;
+    DestructorCalls = 0;
+    CopyConstructorCalls = 0;
+}

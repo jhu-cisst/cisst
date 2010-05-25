@@ -24,6 +24,7 @@ CISST_REQUIRES(cisstMultiTasksTestsLib "cisstCommon;cisstVector;cisstOSAbstracti
 # all source files
 SET(SOURCE_FILES
     mtsCollectorBaseTest.cpp
+    mtsQueueTest.cpp
     mtsStateTableTest.cpp
     mtsTaskTest.cpp
     mtsVectorTest.cpp
@@ -38,6 +39,7 @@ SET(SOURCE_FILES
 # all header files
 SET(HEADER_FILES
     mtsCollectorBaseTest.h
+    mtsQueueTest.h
     mtsStateTableTest.h
     mtsTaskTest.h
     mtsVectorTest.h

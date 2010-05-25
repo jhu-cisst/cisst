@@ -42,6 +42,18 @@ CMN_DECLARE_SERVICES_INSTANTIATION(mtsMacrosTestClassA);
 class mtsMacrosTestClassB
 {
 public:
+    static size_t DefaultConstructorCalls;
+    static size_t DestructorCalls;
+    static size_t CopyConstructorCalls;
+
+    mtsMacrosTestClassB(void);
+
+    mtsMacrosTestClassB(const mtsMacrosTestClassB & other);
+
+    ~mtsMacrosTestClassB();
+
+    static void ResetAllCounters(void);
+
     double Value;
 
     /*! To stream human readable output */
