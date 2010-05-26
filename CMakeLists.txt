@@ -149,20 +149,18 @@ ENDIF(CISST_HAS_CISSTNETLIB)
 
 # Support for OpenGL
 option (CISST_HAS_OPENGL "Is OpenGL available." OFF)
-if (CISST_HAS_QT)
+if (CISST_HAS_OPENGL)
   find_package (OpenGL REQUIRED)
   CISST_ADD_TO_INTERNAL (CISST_ADDITIONAL_INCLUDE_DIRECTORIES OPENGL_INCLUDE_DIR)
   CISST_ADD_TO_INTERNAL (CISST_ADDITIONAL_LIBRARIES OPENGL_LIBRARIES)
-endif(CISST_HAS_QT)
+endif(CISST_HAS_OPENGL)
 
 # Support for QT
 option (CISST_HAS_QT "Is Qt available.  If not, Qt widgets and some examples won't be compiled" OFF)
 if (CISST_HAS_QT)
-  if (CISST_HAS_OPENGL)
-    find_package (Qt4 COMPONENTS QtGUI QtCore QtOpenGL REQUIRED)
-  else (CISST_HAS_OPENGL)
-    find_package(Qt4 REQUIRED)
-  endif (CISST_HAS_OPENGL)
+  set (CISST_HAS_OPENGL ON CACHE BOOL "Is OpenGL available." FORCE)
+  set (QT_USE_QTOPENGL ON)
+  find_package(Qt4 REQUIRED)
   include(${QT_USE_FILE})
   set(CISST_QT_PACKAGE "Qt4" CACHE STRING "Qt Package Name")
   mark_as_advanced(CISST_QT_PACKAGE)
@@ -171,15 +169,17 @@ if (CISST_HAS_QT)
 endif(CISST_HAS_QT)
 
 # Support for FLTK
-option(CISST_HAS_FLTK "Is FLTK available.  If not, some examples and utilities won't be compiled" OFF)
-if(CISST_HAS_FLTK)
+option (CISST_HAS_FLTK "Is FLTK available.  If not, some examples and utilities won't be compiled" OFF)
+if (CISST_HAS_FLTK)
+  set (CISST_HAS_OPENGL ON CACHE BOOL "Is OpenGL available." FORCE)
+  set (CISST_HAS_OPENGL ON )
   find_package(FLTK REQUIRED)
   CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_INCLUDE_DIRECTORIES FLTK_INCLUDE_DIR)
   CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_LIBRARIES FLTK_LIBRARIES)
   # If FLTK was built using CMake (i.e., there is an FLTKConfig.cmake), the FLTK_LIBRARIES (above) does not include the path,
   # so we need to add FLTK_LIBRARY_DIRS (which is only defined if FLTK was built using CMake) to the link directories.
   CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_LINK_DIRECTORIES FLTK_LIBRARY_DIRS)
-endif(CISST_HAS_FLTK)
+endif (CISST_HAS_FLTK)
 
 # Extra link flag if for Apple
 IF(CISST_HAS_CISSTNETLIB AND APPLE AND CISST_BUILD_SHARED_LIBS)

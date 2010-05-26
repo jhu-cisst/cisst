@@ -10,11 +10,11 @@
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
-# 
+#
 # This software is provided "as is" under an open source license, with
 # no warranty.  The complete license can be found in license.txt and
 # http://www.cisst.org/cisst/license.txt.
-# 
+#
 # --- end cisst license ---
 
 
@@ -46,6 +46,16 @@ SET(PYTHON_INCLUDE_PATH "@PYTHON_INCLUDE_PATH@")
 SET(PYTHON_LIBRARIES "@PYTHON_LIBRARIES@")
 SET(PYTHON_DEBUG_LIBRARIES "@PYTHON_DEBUG_LIBRARIES@")
 
+set (CISST_HAS_XML @CISST_HAS_XML@)
+
+set (CISST_HAS_OPENGL @CISST_HAS_OPENGL@)
+
+set (CISST_HAS_QT @CISST_HAS_QT@)
+set (QT_USE_QTOPENGL @QT_USE_QTOPENGL@)
+
+set (CISST_HAS_FLTK @CISST_HAS_FLTK@)
+
+
 # Export all additional includes and libraries
 SET(CISST_ADDITIONAL_INCLUDE_DIRECTORIES "@CISST_ADDITIONAL_INCLUDE_DIRECTORIES@")
 SET(CISST_ADDITIONAL_LINK_DIRECTORIES "@CISST_ADDITIONAL_LINK_DIRECTORIES@")
@@ -71,7 +81,3 @@ SET(CISST_LIBRARY_DIR ${CISST_LIBRARY_DIR} ${CISST_ADDITIONAL_LINK_DIRECTORIES})
 
 # Where to install
 SET(CISST_INSTALL_PREFIX "@CMAKE_INSTALL_PREFIX@")
-
-
-# Indicates if cmnXMLPath was compiled
-SET(CISST_HAS_XML @CISST_HAS_XML@)
