@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):  Peter Kazanzides
+  Author(s):  Peter Kazanzides, Anton Deguet
   Created on: 2007-09-05
 
-  (C) Copyright 2007-2008 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2010 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -56,7 +56,7 @@ protected:
     pointer Sentinel;  // end marker
     size_type Size;
 
-    // private method, can only be used once by construtor.  Doesn't support resize!
+    // private method, can only be used once by constructor.  Doesn't support resize!
     void Allocate(size_type size, const_reference value) {
         this->Size = size;
         if (this->Size > 0) {
@@ -124,7 +124,11 @@ public:
 
     /*! Returns true if queue is full. */
     inline bool IsFull(void) const {
-        return this->GetAvailable() >= this->Size;
+        pointer oneAfterHead = this->Head + 1;
+        if (oneAfterHead >= this->Sentinel) {
+            oneAfterHead = this->Data;
+        }
+        return oneAfterHead == this->Tail;
     }
 
 
@@ -144,7 +148,7 @@ public:
     inline const_pointer Put(const typename mtsGenericTypesUnwrap<value_type>::BaseType &newObject)
     {
         pointer newHead = this->Head + 1;
-        // test if end of buffer
+        // test if end of buffer (same as IsFull method)
         if (newHead >= this->Sentinel) {
             newHead = this->Data;
         }
@@ -210,7 +214,7 @@ protected:
     pointer * Sentinel;  // end marker
     size_type Size;
 
-    // private method, can only be used once by construtor.  Doesn't support resize!
+    // private method, can only be used once by constructor.  Doesn't support resize!
     void Allocate(size_type size, const_reference value) {
         this->Size = size;
         if (this->Size > 0) {
@@ -222,7 +226,6 @@ protected:
                 CMN_ASSERT(typedPointer);
                 this->Data[index] = typedPointer;
             }
-            CMN_ASSERT(this->Data);
         } else {
             this->Data = 0;
         }
@@ -325,7 +328,7 @@ public:
     */
     inline const_pointer Put(const_reference newObject) {
         pointer * newHead = this->Head + 1;
-        // test if end of buffer
+        // test if end of buffer (same as IsFull method)
         if (newHead >= this->Sentinel) {
             newHead = this->Data;
         }
