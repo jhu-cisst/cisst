@@ -92,7 +92,7 @@ public:
     /*! Constructor from a 3D vector.
       \param axis A vector of size 3, its norm represents the angle.
     */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline vctRodriguezRotation3(const vctFixedSizeConstVectorBase<DIMENSION, __stride, value_type, __dataPtrType> & axis)
         throw(std::runtime_error)
     {
@@ -162,7 +162,7 @@ public:
       \param axis A vector of size 3, its norm represents the angle.
       \param normalizeInput Normalize the input or convert as is (#VCT_NORMALIZE or #VCT_DO_NOT_NORMALIZE)
     */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline vctRodriguezRotation3(const vctFixedSizeConstVectorBase<DIMENSION, __stride, value_type, __dataPtrType> & axis,
                                  bool normalizeInput)
     {

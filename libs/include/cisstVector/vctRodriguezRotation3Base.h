@@ -124,7 +124,7 @@ public:
     /*! Constructor from a 3D vector.
     \param axis A vector of size 3.
     */
-    template<int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline vctRodriguezRotation3Base(const vctFixedSizeConstVectorBase<DIMENSION, __stride, value_type, __dataPtrType> & axis):
         BaseType(axis)
     {}
@@ -138,7 +138,7 @@ public:
         vector. */
     static CISST_EXPORT const ThisType & Identity();
 
-    template <int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline ThisType & From(const vctFixedSizeConstVectorBase<3, __stride, value_type, __dataPtrType>& vector)
         throw(std::runtime_error)
     {
@@ -189,7 +189,7 @@ public:
 
 
 
-    template <int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline ThisType & FromNormalized(const vctFixedSizeConstVectorBase<3, __stride, value_type, __dataPtrType>& vector)
     {
         FromRaw(vector);
@@ -235,7 +235,7 @@ public:
 
 
 
-    template <int __stride, class __dataPtrType>
+    template <stride_type __stride, class __dataPtrType>
     inline ThisType & FromRaw(const vctFixedSizeConstVectorBase<3, __stride, value_type, __dataPtrType>& vector)
     {
         this->Assign(vector);
