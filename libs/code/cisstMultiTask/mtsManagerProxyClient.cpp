@@ -938,7 +938,7 @@ bool mtsManagerProxyClient::ManagerClientI::ConnectClientSideInterface(::Ice::In
     return ManagerProxyClient->ReceiveConnectClientSideInterface(connectionID, connectionStringSet);
 }
 
-int mtsManagerProxyClient::ManagerClientI::PreAllocateResources(const std::string & userName, const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverProvidedInterfaceName, const ::Ice::Current & current)
+int mtsManagerProxyClient::ManagerClientI::PreAllocateResources(const std::string & userName, const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverProvidedInterfaceName, const ::Ice::Current & CMN_UNUSED(current))
 {
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
     LogPrint(ManagerClientI, "<<<<< RECV: PreAllocateResources: " << userName << ", " << serverProcessName << ":" << serverComponentName << ":" << serverProvidedInterfaceName);
@@ -947,7 +947,7 @@ int mtsManagerProxyClient::ManagerClientI::PreAllocateResources(const std::strin
     return ManagerProxyClient->ReceivePreAllocateResources(userName, serverProcessName, serverComponentName, serverProvidedInterfaceName);
 }
 
-bool mtsManagerProxyClient::ManagerClientI::GetProvidedInterfaceDescription(::Ice::Int userId, const std::string & serverComponentName, const std::string & providedInterfaceName, ::mtsManagerProxy::ProvidedInterfaceDescription & providedInterfaceDescription, const ::Ice::Current &) const
+bool mtsManagerProxyClient::ManagerClientI::GetProvidedInterfaceDescription(::Ice::Int userId, const std::string & serverComponentName, const std::string & providedInterfaceName, ::mtsManagerProxy::ProvidedInterfaceDescription & providedInterfaceDescription, const ::Ice::Current & CMN_UNUSED(current)) const
 {
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
     LogPrint(ManagerClientI, "<<<<< RECV: GetProvidedInterfaceDescription: " << userId << ", " << serverComponentName << ":" << providedInterfaceName);
@@ -956,7 +956,7 @@ bool mtsManagerProxyClient::ManagerClientI::GetProvidedInterfaceDescription(::Ic
     return ManagerProxyClient->ReceiveGetProvidedInterfaceDescription(userId, serverComponentName, providedInterfaceName, providedInterfaceDescription);
 }
 
-bool mtsManagerProxyClient::ManagerClientI::GetRequiredInterfaceDescription(const std::string & componentName, const std::string & requiredInterfaceName, ::mtsManagerProxy::RequiredInterfaceDescription & requiredInterfaceDescription, const ::Ice::Current &) const
+bool mtsManagerProxyClient::ManagerClientI::GetRequiredInterfaceDescription(const std::string & componentName, const std::string & requiredInterfaceName, ::mtsManagerProxy::RequiredInterfaceDescription & requiredInterfaceDescription, const ::Ice::Current & CMN_UNUSED(current)) const
 {
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
     LogPrint(ManagerClientI, "<<<<< RECV: GetRequiredInterfaceDescription" << componentName << ", " << requiredInterfaceName << requiredInterfaceDescription.RequiredInterfaceName);

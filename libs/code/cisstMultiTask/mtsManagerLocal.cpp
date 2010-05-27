@@ -803,8 +803,8 @@ void mtsManagerLocal::GetArgumentInformation(std::string & argumentName,
     }
 
     // Get signal information
-    const int signalCount = argument->GetNumberOfScalar();
-    for (unsigned int i = 0; i < argument->GetNumberOfScalar(); ++i) {
+    const unsigned int signalCount = argument->GetNumberOfScalar();
+    for (unsigned int i = 0; i < signalCount; ++i) {
         signalNames.push_back(argument->GetScalarName(i));
     }
 }
@@ -823,7 +823,6 @@ void mtsManagerLocal::GetValuesOfCommand(SetOfValues & values,
     if (!providedInterface) return;
 
     // Get argument name
-    char commandType = *commandName.c_str();
     std::string actualCommandName = commandName.substr(3, commandName.size() - 2);
     mtsCommandReadBase * command = providedInterface->GetCommandRead(actualCommandName);
     if (!command) {
@@ -2126,7 +2125,7 @@ ConnectClientSideInterfaceError:
 }
 
 int mtsManagerLocal::PreAllocateResources(const std::string & userName, const std::string & serverProcessName, 
-    const std::string & serverComponentName, const std::string & serverProvidedInterfaceName, const std::string & listenerID)
+    const std::string & serverComponentName, const std::string & serverProvidedInterfaceName, const std::string & CMN_UNUSED(listenerID))
 {
     // Get component specified
     mtsComponent * component = GetComponent(serverComponentName);
