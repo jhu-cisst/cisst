@@ -28,7 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 unsigned int mtsManagerProxyClient::InstanceCounter = 0;
 
 mtsManagerProxyClient::mtsManagerProxyClient(const std::string & serverEndpointInfo)
-    : BaseClientType(ICE_PROPERTY_FILE_ROOT"config.LCM", serverEndpointInfo)
+    : BaseClientType("config.LCM", serverEndpointInfo)
 {
     ProxyName = "ManagerProxyClient";
 }

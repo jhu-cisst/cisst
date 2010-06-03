@@ -31,7 +31,7 @@ unsigned int mtsComponentInterfaceProxyClient::InstanceCounter = 0;
 
 mtsComponentInterfaceProxyClient::mtsComponentInterfaceProxyClient(
     const std::string & serverEndpointInfo, const unsigned int providedInterfaceProxyInstanceID)
-    : BaseClientType(ICE_PROPERTY_FILE_ROOT"config.client", serverEndpointInfo),
+    : BaseClientType("config.client", serverEndpointInfo),
       ProvidedInterfaceProxyInstanceID(providedInterfaceProxyInstanceID)
 {
     ProxyName = "ComponentInterfaceProxyServer";

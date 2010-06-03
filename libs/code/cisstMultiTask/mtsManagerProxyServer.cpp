@@ -28,7 +28,7 @@ std::string mtsManagerProxyServer::ConnectionIDKey = "ManagerConnectionID";
 unsigned int mtsManagerProxyServer::InstanceCounter = 0;
 
 mtsManagerProxyServer::mtsManagerProxyServer(const std::string & adapterName, const std::string & communicatorID)
-    : BaseServerType(ICE_PROPERTY_FILE_ROOT"config.GCM", adapterName, communicatorID, false)
+    : BaseServerType("config.GCM", adapterName, communicatorID, false)
 {
     ProxyName = "ManagerProxyServer";
 }
@@ -38,11 +38,19 @@ mtsManagerProxyServer::~mtsManagerProxyServer()
     Stop();
 }
 
+std::string mtsManagerProxyServer::GetConfigFullName(const std::string &propertyFileName)
+{
+    cmnPath path;
+    path.Add(ICE_PROPERTY_FILE_ROOT);
+    path.AddFromEnvironment("PATH", cmnPath::TAIL);
+    return path.Find(propertyFileName);
+}
+
 std::string mtsManagerProxyServer::GetGCMPortNumberAsString()
 {
     Ice::InitializationData initData;
     initData.properties = Ice::createProperties();
-    initData.properties->load(ICE_PROPERTY_FILE_ROOT"config.GCM");
+    initData.properties->load(GetConfigFullName("config.GCM"));
 
     return initData.properties->getProperty("GCM.Port");
 }
@@ -51,7 +59,7 @@ int mtsManagerProxyServer::GetGCMConnectTimeout()
 {
     Ice::InitializationData initData;
     initData.properties = Ice::createProperties();
-    initData.properties->load(ICE_PROPERTY_FILE_ROOT"config.GCM");
+    initData.properties->load(GetConfigFullName("config.GCM"));
 
     const std::string connectTimeoutString =
         initData.properties->getProperty("Ice.Override.ConnectTimeout");

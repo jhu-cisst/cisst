@@ -412,6 +412,9 @@ public:
         return mtsManagerProxyServer::ManagerCommunicatorID;
     }
 
+    /*! Returns full path name for config file */
+    static std::string GetConfigFullName(const std::string &propertyFileName);
+
     /*! Returns the port number that the global component manager uses */
     static std::string GetGCMPortNumberAsString();
 

@@ -26,6 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaMutex.h>
 #include <cisstCommon/cmnSerializer.h>
 #include <cisstCommon/cmnDeSerializer.h>
+#include <cisstCommon/cmnPath.h>
 
 #include <cisstMultiTask/mtsConfig.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
@@ -238,7 +239,8 @@ protected:
     //  ICE Related
     //-----------------------------------------------------
     /*! The name of a property file that configures proxy connection settings. */
-    const std::string IcePropertyFileName;
+    //const std::string IcePropertyFileName;
+	std::string IcePropertyFileName;
 
     /*! Ice initialization data */
     Ice::InitializationData IceInitData;
@@ -297,10 +299,13 @@ public:
         ProxyTypeMember(proxyType),
         ProxyState(PROXY_CONSTRUCTED),
         InitSuccessFlag(false),
-        IcePropertyFileName(propertyFileName),
         IceCommunicator(NULL),
         IceGUID("")
     {
+        cmnPath path;
+        path.Add(ICE_PROPERTY_FILE_ROOT);
+        path.AddFromEnvironment("PATH", cmnPath::TAIL);
+        IcePropertyFileName = path.Find(propertyFileName);
         //IceUtil::CtrlCHandler ctrCHandler(onCtrlC);
     }
 
