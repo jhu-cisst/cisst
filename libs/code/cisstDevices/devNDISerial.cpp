@@ -101,12 +101,12 @@ void devNDISerial::Configure(const std::string & filename)
                 } else {
                     tool = AddTool(toolName, toolSerial.c_str(), toolDefinition.c_str());
                 }
+                context << "/calibration";
+                config.GetXMLValue(context.str().c_str(), "@x", tool->TooltipOffset.X());
+                config.GetXMLValue(context.str().c_str(), "@y", tool->TooltipOffset.Y());
+                config.GetXMLValue(context.str().c_str(), "@z", tool->TooltipOffset.Z());
             }
         }
-        context << "/calibration";
-        config.GetXMLValue(context.str().c_str(), "@x", tool->TooltipOffset.X());
-        config.GetXMLValue(context.str().c_str(), "@y", tool->TooltipOffset.Y());
-        config.GetXMLValue(context.str().c_str(), "@z", tool->TooltipOffset.Z());
     }
 }
 
