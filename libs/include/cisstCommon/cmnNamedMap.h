@@ -232,7 +232,7 @@ bool cmnNamedMap<_elementType>::AddItem(const std::string & name, _elementType *
             CMN_LOG_CLASS(lod) << "AddItem: map \"" << MapName << "\" already contains an item named \""
                                << name << "\"." << std::endl;
         } else {
-            CMN_LOG(lod) << "class mtsMap: AddItem: map \"" << MapName << "\" already contains an item named \""
+            CMN_LOG(lod) << "cmnNamedMap::AddItem: map \"" << MapName << "\" already contains an item named \""
                          << name << "\"." << std::endl;
         }
     return false;
@@ -250,7 +250,7 @@ _elementType * cmnNamedMap<_elementType>::GetItem(const std::string & itemName, 
         if (this->Services()) {
             CMN_LOG_CLASS(lod) << "GetItem: can't find \"" << itemName << "\" in map \"" << MapName << "\"" << std::endl;
         } else {
-            CMN_LOG(lod) << "class mtsMap: GetItem: can't find \"" << itemName << "\" in map \"" << MapName << "\"" << std::endl;
+            CMN_LOG(lod) << "cmnNamedMap::GetItem: can't find \"" << itemName << "\" in map \"" << MapName << "\"" << std::endl;
         }
         return 0;
     }
@@ -272,7 +272,7 @@ bool cmnNamedMap<_elementType>::RemoveItem(const std::string & itemName, cmnLogL
         if (this->Services()) {
             CMN_LOG_CLASS(lod) << "RemoveItem: can't find \"" << itemName << "\" in map \"" << MapName << "\"" << std::endl;
         } else {
-            CMN_LOG(lod) << "class mtsMap: RemoveItem: can't find \"" << itemName << "\" in map \"" << MapName << "\"" << std::endl;
+            CMN_LOG(lod) << "cmnNamedMap::RemoveItem: can't find \"" << itemName << "\" in map \"" << MapName << "\"" << std::endl;
         }
         return false;
     }

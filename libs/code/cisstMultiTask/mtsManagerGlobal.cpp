@@ -29,11 +29,14 @@ http://www.cisst.org/cisst/license.txt.
 #endif // CISST_MTS_HAS_ICE
 
 
-mtsManagerGlobal::mtsManagerGlobal() : LocalManagerConnected(0), ConnectionID(0)
+mtsManagerGlobal::mtsManagerGlobal() : 
+    ProcessMap("ProcessMap"),
+    LocalManagerConnected(0), ConnectionID(0)
 #if CISST_MTS_HAS_ICE
     , ProxyServer(0)
 #endif
 {
+    ProcessMap.SetOwner(*this);
 }
 
 mtsManagerGlobal::~mtsManagerGlobal()
