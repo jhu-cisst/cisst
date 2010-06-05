@@ -240,7 +240,7 @@ mtsManagerLocal * mtsManagerLocal::GetInstance(const std::string & globalCompone
         // If no argument is specified, standalone configuration is set by default.
         if (globalComponentManagerIP == "" && thisProcessName == "" && thisProcessIP == "") {
             Instance = new mtsManagerLocal;
-            CMN_LOG_INIT_WARNING << "Inter-process communication support is disabled" << std::endl;
+            CMN_LOG_INIT_WARNING << "Reconfiguration: Inter-process communication support is disabled" << std::endl;
         } else {
             Instance = new mtsManagerLocal(globalComponentManagerIP, thisProcessName, thisProcessIP);
         }
@@ -260,7 +260,7 @@ mtsManagerLocal * mtsManagerLocal::GetInstance(const std::string & globalCompone
 
     // Allow configuration change from standalone mode to networked mode only
     if (dynamic_cast<mtsManagerGlobal*>(Instance->ManagerGlobal) == 0) {
-        CMN_LOG_INIT_WARNING << "Inter-process communication has already been set: skip reconfiguration" << std::endl;
+        CMN_LOG_INIT_WARNING << "Reconfiguration: Inter-process communication has already been set: skip reconfiguration" << std::endl;
         return Instance;
     }
 
@@ -284,7 +284,7 @@ mtsManagerLocal * mtsManagerLocal::GetInstance(const std::string & globalCompone
     try {
         newInstance = new mtsManagerLocal(globalComponentManagerIP, thisProcessName, thisProcessIP);
     } catch (const std::exception& ex) {
-        CMN_LOG_INIT_ERROR << "Failed to enable network support: " << ex.what() << std::endl;
+        CMN_LOG_INIT_ERROR << "Reconfiguration: failed to enable network support: " << ex.what() << std::endl;
         mtsManagerLocal::ConfigurationChange.Unlock();
         return Instance;
     }
@@ -299,7 +299,7 @@ mtsManagerLocal * mtsManagerLocal::GetInstance(const std::string & globalCompone
         const ComponentMapType::const_iterator itEnd = Instance->ComponentMap.end();
         for (; it != itEnd; ++it) {
             if (!newInstance->AddComponent(it->second)) {
-                CMN_LOG_INIT_ERROR << "Failed to trasnfer component while reconfiguring LCM: " << it->second->GetName() << std::endl;
+                CMN_LOG_INIT_ERROR << "Reconfiguration: failed to trasnfer component while reconfiguring LCM: " << it->second->GetName() << std::endl;
 
                 // Clean up new LCM object
                 delete newInstance;
@@ -308,7 +308,7 @@ mtsManagerLocal * mtsManagerLocal::GetInstance(const std::string & globalCompone
                 // Keep using current LCM
                 return Instance;
             } else {
-                CMN_LOG_INIT_VERBOSE << "Successfully transferred component: " << it->second->GetName() << std::endl;
+                CMN_LOG_INIT_VERBOSE << "Reconfiguration: Successfully transferred component: " << it->second->GetName() << std::endl;
             }
         }
     }
@@ -324,20 +324,34 @@ mtsManagerLocal * mtsManagerLocal::GetInstance(const std::string & globalCompone
         // Register all the connections established to the new GCM
         mtsManagerGlobalInterface * newGCM = newInstance->ManagerGlobal;
 
-        int userId;
+        int userId, connectionId;
         std::vector<mtsManagerGlobal::ConnectionStrings>::const_iterator it = list.begin();
         const std::vector<mtsManagerGlobal::ConnectionStrings>::const_iterator itEnd = list.end();
         for (; it != itEnd; ++it) {
-            userId = newGCM->Connect(thisProcessName,
+            connectionId = newGCM->Connect(thisProcessName,
                 thisProcessName, it->ClientComponentName, it->ClientRequiredInterfaceName,
                 thisProcessName, it->ServerComponentName, it->ServerProvidedInterfaceName,
                 userId);
-            if (userId == -1) {
-                CMN_LOG_INIT_ERROR << "Failed to transfer previous connection: "
+            if (connectionId == -1) {
+                CMN_LOG_INIT_ERROR << "Reconfiguration: failed to transfer previous connection: "
                     << thisProcessName << ":" << it->ClientComponentName << ":" << it->ClientRequiredInterfaceName << "-"
                     << thisProcessName << ":" << it->ServerComponentName << ":" << it->ServerProvidedInterfaceName << std::endl;
             } else {
-                CMN_LOG_INIT_VERBOSE << "Successfully transferred previous connection: "
+                // Notify the GCM of successful local connection (although nothing actually needs to happen).
+                if (!newGCM->ConnectConfirm(connectionId)) {
+                    CMN_LOG_RUN_ERROR << "Reconfiguration: failed to notify GCM of connection: "
+                        << it->ClientComponentName << ":" << it->ClientRequiredInterfaceName << "-"
+                        << it->ServerComponentName << ":" << it->ServerProvidedInterfaceName << std::endl;
+
+                    if (!newInstance->Disconnect(it->ClientComponentName, it->ClientRequiredInterfaceName, 
+                                                 it->ServerComponentName, it->ServerProvidedInterfaceName)) 
+                    {
+                        CMN_LOG_RUN_ERROR << "Reconfiguration: clean up error: disconnection failed: "
+                            << it->ClientComponentName << ":" << it->ClientRequiredInterfaceName << "-"
+                            << it->ServerComponentName << ":" << it->ServerProvidedInterfaceName << std::endl;
+                    }
+                }
+                CMN_LOG_INIT_VERBOSE << "Reconfiguration: Successfully transferred previous connection: "
                     << thisProcessName << ":" << it->ClientComponentName << ":" << it->ClientRequiredInterfaceName << "-"
                     << thisProcessName << ":" << it->ServerComponentName << ":" << it->ServerProvidedInterfaceName << std::endl;
             }
@@ -1204,10 +1218,14 @@ bool mtsManagerLocal::Connect(const std::string & clientComponentName, const std
 
     // Notify the GCM of successful local connection
     if (!ManagerGlobal->ConnectConfirm(connectionId)) {
-        CMN_LOG_CLASS_RUN_ERROR << "Connect: failed to notify GCM of this connection" << std::endl;
+        CMN_LOG_CLASS_RUN_ERROR << "Connect: failed to notify GCM of connection: " 
+            << clientComponentName << ":" << clientRequiredInterfaceName << " - "
+            << serverComponentName << ":" << serverProvidedInterfaceName << std::endl;
 
         if (!Disconnect(clientComponentName, clientRequiredInterfaceName, serverComponentName, serverProvidedInterfaceName)) {
-            CMN_LOG_CLASS_RUN_ERROR << "Connect: clean up error: disconnection failed" << std::endl;
+            CMN_LOG_CLASS_RUN_ERROR << "Connect: clean up error: disconnection failed: "
+                << clientComponentName << ":" << clientRequiredInterfaceName << " - "
+                << serverComponentName << ":" << serverProvidedInterfaceName << std::endl;
         }
     }
 
