@@ -231,14 +231,6 @@ void mtsManagerLocalTest::TestRegisterInterfaces(void)
     mtsManagerTestC2Device * component = new mtsManagerTestC2Device;
     const std::string componentName = component->GetName();
     
-    // Check initial values of Registered flag in interfaces 
-    mtsRequiredInterface * requiredInterface = component->GetRequiredInterface("r1");
-    CPPUNIT_ASSERT(!requiredInterface->GetRegistered());
-    mtsProvidedInterface * providedInterface;
-    providedInterface = component->GetProvidedInterface("p1");
-    CPPUNIT_ASSERT(!providedInterface->GetRegistered());
-    providedInterface = component->GetProvidedInterface("p2");
-    CPPUNIT_ASSERT(!providedInterface->GetRegistered());
     // Check initial values of GCM
     CPPUNIT_ASSERT(!globalManager->FindRequiredInterface("LCM", componentName, "r1"));
     CPPUNIT_ASSERT(!globalManager->FindProvidedInterface("LCM", componentName, "p1"));
@@ -249,27 +241,17 @@ void mtsManagerLocalTest::TestRegisterInterfaces(void)
     // Add the component. This includes registration of interfaces that have been added so far.
     CPPUNIT_ASSERT(localManager.AddComponent(component));
 
-    // Check updated values of Registered flag in interfaces
-    requiredInterface = component->GetRequiredInterface("r1");
-    CPPUNIT_ASSERT(requiredInterface->GetRegistered());
-    providedInterface = component->GetProvidedInterface("p1");
-    CPPUNIT_ASSERT(providedInterface->GetRegistered());
-    providedInterface = component->GetProvidedInterface("p2");
-    CPPUNIT_ASSERT(providedInterface->GetRegistered());
     // Check updated values of GCM
     CPPUNIT_ASSERT(globalManager->FindRequiredInterface("LCM", componentName, "r1"));
     CPPUNIT_ASSERT(globalManager->FindProvidedInterface("LCM", componentName, "p1"));
     CPPUNIT_ASSERT(globalManager->FindProvidedInterface("LCM", componentName, "p2"));
 
     // Now, create a new required and provided interface which have not been added.
-    requiredInterface = component->AddRequiredInterface("newRequiredInterface");
+    mtsRequiredInterface * requiredInterface = component->AddRequiredInterface("newRequiredInterface");
     CPPUNIT_ASSERT(requiredInterface);
-    providedInterface = component->AddProvidedInterface("newProvidedInterface");
+    mtsProvidedInterface * providedInterface = component->AddProvidedInterface("newProvidedInterface");
     CPPUNIT_ASSERT(providedInterface);
 
-    // Check initial values of Registered flag in each interface
-    CPPUNIT_ASSERT(!requiredInterface->GetRegistered());
-    CPPUNIT_ASSERT(!providedInterface->GetRegistered());
     // Check initial values of GCM
     CPPUNIT_ASSERT(!globalManager->FindRequiredInterface("LCM", componentName, requiredInterface->GetName()));
     CPPUNIT_ASSERT(!globalManager->FindProvidedInterface("LCM", componentName, providedInterface->GetName()));
@@ -277,9 +259,6 @@ void mtsManagerLocalTest::TestRegisterInterfaces(void)
     // Register the new interfaces
     CPPUNIT_ASSERT(localManager.RegisterInterfaces(component));
 
-    // Check updated values of Registered flag in each interface
-    CPPUNIT_ASSERT(requiredInterface->GetRegistered());
-    CPPUNIT_ASSERT(providedInterface->GetRegistered());
     // Check updated values of GCM
     CPPUNIT_ASSERT(globalManager->FindRequiredInterface("LCM", componentName, requiredInterface->GetName()));
     CPPUNIT_ASSERT(globalManager->FindProvidedInterface("LCM", componentName, providedInterface->GetName()));

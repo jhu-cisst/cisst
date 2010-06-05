@@ -59,16 +59,38 @@ int main(int argc, char **argv)
 
     // add the tasks to the task manager
     mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
+    // reconfiguration test 1
+#if 0
+    taskManager = mtsTaskManager::GetInstance("localhost", "localMainTest");
+#endif
+
     taskManager->AddTask(client);
     taskManager->AddTask(server);
+    // reconfiguration test 2
+#if 0
+    taskManager = mtsTaskManager::GetInstance("localhost", "localMainTest");
+#endif
 
     // connect the tasks, task.RequiresInterface -> task.ProvidesInterface
-    taskManager->Connect("Client", "Required", "Server", "Provided");
+    if (!taskManager->Connect("Client", "Required", "Server", "Provided")) {
+        CMN_LOG_INIT_ERROR << "Failed to connect: Client:Required-Server:Provided" << std::endl;
+        return 1;
+    }
+
+    // reconfiguration test 3
+#if 0
+    taskManager = mtsTaskManager::GetInstance("localhost", "localMainTest");
+#endif
 
     // create the tasks, i.e. find the commands
     taskManager->CreateAll();
     // start the periodic Run
     taskManager->StartAll();
+
+    // reconfiguration test 4
+#if 1
+    taskManager = mtsTaskManager::GetInstance("localhost", "localMainTest");
+#endif
 
     // wait until the close button of the UI is pressed
     while (server->UIOpened() || client->UIOpened()) {
