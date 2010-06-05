@@ -29,6 +29,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <iostream>
 #include <string>
 
+const std::string mtsTaskInterface::UserNameForGCMComponentInspector = "GCM-ComponentInspector";
+const unsigned int mtsTaskInterface::UserIdForGCMComponentInspector = 0;
 
 mtsTaskInterface::mtsTaskInterface(const std::string & name, mtsTask * task,
                                    mtsCommandVoidBase * postCommandQueuedCommand):
@@ -108,12 +110,21 @@ mtsCommandVoidBase * mtsTaskInterface::GetCommandVoid(const std::string & comman
                                    << std::endl;
         return iterator->second->GetCommandVoid(commandName);
     } else {
-        CMN_LOG_CLASS_INIT_ERROR << this->GetName()
-                                 << " can not provide void command \""
-                                 << commandName
-                                 << "\" to user ["
-                                 << userId << "] as this user did not use AllocateResources first."
-                                 << std::endl;
+        // Special case: user id 0 is used by the component inspector of the 
+        // global component manager to get information about commands in provided
+        // interfaces (see mtsManagerLocal::GetDescriptionOfCommand()).
+        // User id 0, therefore, should not be used by any other users.
+        if (userId == mtsTaskInterface::UserIdForGCMComponentInspector) {
+            const_cast<mtsTaskInterface*>(this)->AllocateResources(mtsTaskInterface::UserNameForGCMComponentInspector);
+            return GetCommandVoid(commandName, mtsTaskInterface::UserIdForGCMComponentInspector);
+        } else {
+            CMN_LOG_CLASS_INIT_ERROR << "Task \"" << this->GetName() << "\""
+                                     << " can not provide void command \""
+                                     << commandName
+                                     << "\" to user ["
+                                     << userId << "] as this user did not use AllocateResources first."
+                                     << std::endl;
+        }
         return 0;
     }
 }
@@ -137,12 +148,21 @@ mtsCommandWriteBase * mtsTaskInterface::GetCommandWrite(const std::string & comm
                                    << std::endl;
         return iterator->second->GetCommandWrite(commandName);
     } else {
-        CMN_LOG_CLASS_INIT_ERROR << "Task " << this->GetName()
-                                 << " can not provide write command \""
-                                 << commandName
-                                 << "\" to user ["
-                                 << userId << "] as this user did not use AllocateResources first."
-                                 << std::endl;
+        // Special case: user id 0 is used by the component inspector of the 
+        // global component manager to get information about commands in provided
+        // interfaces (see mtsManagerLocal::GetDescriptionOfCommand()).
+        // User id 0, therefore, should not be used by any other users.
+        if (userId == mtsTaskInterface::UserIdForGCMComponentInspector) {
+            const_cast<mtsTaskInterface*>(this)->AllocateResources(mtsTaskInterface::UserNameForGCMComponentInspector);
+            return GetCommandWrite(commandName, mtsTaskInterface::UserIdForGCMComponentInspector);
+        } else {
+            CMN_LOG_CLASS_INIT_ERROR << "Task \"" << this->GetName() << "\""
+                                     << " can not provide write command \""
+                                     << commandName
+                                     << "\" to user ["
+                                     << userId << "] as this user did not use AllocateResources first."
+                                     << std::endl;
+        }
         return 0;
     }
 }
@@ -223,8 +243,15 @@ unsigned int mtsTaskInterface::AllocateResources(const std::string & userName)
     // per "user thread", i.e. create/clone of mailboxes for queued
     // commands.
     Mutex.Lock();
-    this->UserCounter++;
-    unsigned int userId = this->UserCounter;
+    
+    unsigned int userId;
+    if (userName != mtsTaskInterface::UserNameForGCMComponentInspector) {
+        this->UserCounter++;
+        userId = this->UserCounter;
+    } else {
+        // We don't count GCM component inspector
+        userId = mtsTaskInterface::UserIdForGCMComponentInspector;
+    }
     CMN_LOG_CLASS_INIT_VERBOSE << "AllocateResources: interface \"" << this->Name
                                << "\" created new Id [" << userId
                                << "] for user \"" << userName << "\"" << std::endl;

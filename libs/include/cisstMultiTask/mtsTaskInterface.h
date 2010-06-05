@@ -110,7 +110,6 @@ class CISST_EXPORT mtsTaskInterface: public mtsDeviceInterface {
     typedef std::vector<ThreadResourcesPairType> ThreadResourcesMapType;
     ThreadResourcesMapType ThreadResourcesMap;
 
-public:
     typedef cmnNamedMap<mtsCommandQueuedVoidBase> CommandQueuedVoidMapType;
     typedef cmnNamedMap<mtsCommandQueuedWriteBase> CommandQueuedWriteMapType;
 
@@ -149,6 +148,11 @@ private:
       from the same thread, they can use different Ids but this is not
       required. */
     unsigned int AllocateResources(const std::string & userName);
+
+    /*! Special user id and name to allocate provided interface resources for 
+        the global component manager's component inspector. */
+    static const unsigned int UserIdForGCMComponentInspector;
+    static const std::string UserNameForGCMComponentInspector;
 
     /*! Constructor with a post queued command.  This constructor is
       used by mtsTaskFromSignal to provide the command used everytime

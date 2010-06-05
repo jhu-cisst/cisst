@@ -545,7 +545,9 @@ void mtsManagerLocal::GetNamesOfCommands(std::vector<std::string>& namesOfComman
                                          const std::string & CMN_UNUSED(listenerID))
 {
     ProvidedInterfaceDescription desc;
-    if (!GetProvidedInterfaceDescription(0, componentName, providedInterfaceName, desc)) {
+    if (!GetProvidedInterfaceDescription(mtsTaskInterface::UserIdForGCMComponentInspector, 
+            componentName, providedInterfaceName, desc)) 
+    {
         CMN_LOG_CLASS_RUN_ERROR << "GetNamesOfCommands: failed to get provided interface information: "
             << this->ProcessName << ":" << componentName << ":" << providedInterfaceName << std::endl;
         return;
@@ -580,7 +582,9 @@ void mtsManagerLocal::GetNamesOfEventGenerators(std::vector<std::string>& namesO
                                                 const std::string & CMN_UNUSED(listenerID))
 {
     ProvidedInterfaceDescription desc;
-    if (!GetProvidedInterfaceDescription(0, componentName, providedInterfaceName, desc)) {
+    if (!GetProvidedInterfaceDescription(mtsTaskInterface::UserIdForGCMComponentInspector, 
+            componentName, providedInterfaceName, desc)) 
+    {
         CMN_LOG_CLASS_RUN_ERROR << "GetNamesOfEventGenerators: failed to get provided interface information: "
             << this->ProcessName << ":" << componentName << ":" << providedInterfaceName << std::endl;
         return;
@@ -675,7 +679,8 @@ void mtsManagerLocal::GetDescriptionOfCommand(std::string & description,
     switch (commandType) {
         case 'V':
             {
-                mtsCommandVoidBase * command = providedInterface->GetCommandVoid(actualCommandName);
+                mtsCommandVoidBase * command = providedInterface->GetCommandVoid(
+                    actualCommandName, mtsTaskInterface::UserIdForGCMComponentInspector);
                 if (!command) {
                     description = "No void command found for ";
                     description += actualCommandName;
@@ -686,7 +691,8 @@ void mtsManagerLocal::GetDescriptionOfCommand(std::string & description,
             break;
         case 'W':
             {
-                mtsCommandWriteBase * command = providedInterface->GetCommandWrite(actualCommandName);
+                mtsCommandWriteBase * command = providedInterface->GetCommandWrite(
+                    actualCommandName, mtsTaskInterface::UserIdForGCMComponentInspector);
                 if (!command) {
                     description = "No write command found for ";
                     description += actualCommandName;
