@@ -28,7 +28,6 @@ mtsDeviceInterface::mtsDeviceInterface(const std::string & interfaceName,
                                        mtsDevice * device):
     Name(interfaceName),
     Device(device),
-    Registered(false),
     UserCounter(0),
     // Maps take ownership of command objects that are added, so that
     // cmnNamedMap methods RemoveItem and DeleteAll free allocated memory.

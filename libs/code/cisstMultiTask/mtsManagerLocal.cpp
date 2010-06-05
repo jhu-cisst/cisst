@@ -41,6 +41,8 @@ http://www.cisst.org/cisst/license.txt.
 
 // Static variable definition
 mtsManagerLocal * mtsManagerLocal::Instance;
+osaMutex mtsManagerLocal::ConfigurationChange;
+
 bool mtsManagerLocal::UnitTestEnabled = false;
 bool mtsManagerLocal::UnitTestNetworkProxyEnabled = false;
 
@@ -124,22 +126,35 @@ mtsManagerLocal::mtsManagerLocal(const std::string & globalComponentManagerIP,
         CMN_LOG_CLASS_INIT_WARNING << "Failed to connect to JGraph server" << std::endl;
     }
 #endif
+
+    // Create proxy
+    if (!CreateProxy()) {
+        cmnThrow(std::runtime_error("Failed to initialize global component manager proxy"));
+    }
+
+    // Set this machine's IP
+    SetIPAddress();
+}
+
+bool mtsManagerLocal::CreateProxy(void)
+{
     // If process ip is not specified (""), the first ip address detected is used as this process ip
     if (ProcessIP == "") {
         std::vector<std::string> ipAddresses;
         osaSocket::GetLocalhostIP(ipAddresses);
         ProcessIP = ipAddresses[0];
+
+        CMN_LOG_CLASS_INIT_VERBOSE << "Ip of this process was not specified. First ip detected ("
+            << ProcessIP << ") will be used instead" << std::endl;
     }
 
     // If process name is not specified (""), the ip address is used as this process name.
     if (ProcessName == "") {
         ProcessName = ProcessIP;
-    }
 
-    CMN_LOG_CLASS_INIT_VERBOSE << "Local component manager     : NETWORK mode" << std::endl;
-    CMN_LOG_CLASS_INIT_VERBOSE << "Global component manager IP : " << GlobalComponentManagerIP << std::endl;
-    CMN_LOG_CLASS_INIT_VERBOSE << "This process name           : " << ProcessName << std::endl;
-    CMN_LOG_CLASS_INIT_VERBOSE << "This process IP             : " << ProcessIP << std::endl;
+        CMN_LOG_CLASS_INIT_VERBOSE << "Name of this process was not specified. Ip address ("
+            << ProcessName << ") will be used instead" << std::endl;
+    }
 
     // Generate an endpoint string to connect to the global component manager
     std::stringstream ss;
@@ -147,25 +162,33 @@ mtsManagerLocal::mtsManagerLocal(const std::string & globalComponentManagerIP,
        << ":default -h " << GlobalComponentManagerIP
        << " -p " << mtsManagerProxyServer::GetGCMPortNumberAsString();
 
-    // In network mode, the gobal component manager is a network (ICE) proxy
-    // client of type mtsManagerProxyClient which transfers data to/from the
-    // GCM across network.
+    // Create a proxy for the GCM
     mtsManagerProxyClient * globalComponentManagerProxy = new mtsManagerProxyClient(ss.str());
 
-    // Run and connect to the global component manager
+    // Run the proxy and connect it to the global component manager
     if (!globalComponentManagerProxy->Start(this)) {
-        cmnThrow(std::runtime_error("Failed to initialize global component manager proxy"));
+        CMN_LOG_CLASS_INIT_ERROR << "Failed to initialize global component manager proxy" << std::endl;
+        delete globalComponentManagerProxy;
+        return false;
     }
 
     // Register process name to the global component manager.
     if (!globalComponentManagerProxy->AddProcess(ProcessName)) {
-        cmnThrow(std::runtime_error("Failed to register process name to the global component manager"));
+        CMN_LOG_CLASS_INIT_ERROR << "Failed to register process name to the global component manager" << std::endl;
+        delete globalComponentManagerProxy;
+        return false;
     }
 
     // In network mode, a process object doesn't need to be registered
     // to the global component manager.
-
     ManagerGlobal = globalComponentManagerProxy;
+
+    CMN_LOG_CLASS_INIT_VERBOSE << "Local component manager     : NETWORK mode" << std::endl;
+    CMN_LOG_CLASS_INIT_VERBOSE << "Global component manager IP : " << GlobalComponentManagerIP << std::endl;
+    CMN_LOG_CLASS_INIT_VERBOSE << "This process name           : " << ProcessName << std::endl;
+    CMN_LOG_CLASS_INIT_VERBOSE << "This process IP             : " << ProcessIP << std::endl;
+
+    return true;
 }
 #endif
 
@@ -214,14 +237,120 @@ mtsManagerLocal * mtsManagerLocal::GetInstance(const std::string & globalCompone
                                                const std::string & thisProcessIP)
 {
     if (!Instance) {
-        // If no argument is specified, this local component manager runs in standalone mode.
+        // If no argument is specified, standalone configuration is set by default.
         if (globalComponentManagerIP == "" && thisProcessName == "" && thisProcessIP == "") {
             Instance = new mtsManagerLocal;
-            CMN_LOG_INIT_WARNING << "WARNING: Inter-process communication support is disabled" << std::endl;
+            CMN_LOG_INIT_WARNING << "Inter-process communication support is disabled" << std::endl;
         } else {
             Instance = new mtsManagerLocal(globalComponentManagerIP, thisProcessName, thisProcessIP);
         }
+
+        return Instance;
     }
+
+    if (globalComponentManagerIP == "" && thisProcessName == "" && thisProcessIP == "") {
+        return Instance;
+    }
+
+    // If this local component manager has been previously configured as standalone
+    // mode and GetInstance() is called again with proper arguments, the manager is
+    // reconfigured as networked mode. For thread-safe transition of configuration
+    // from standalone mode to networked mode, a caller thread is blocked until
+    // the transition process finishes.
+
+    // Allow configuration change from standalone mode to networked mode only
+    if (dynamic_cast<mtsManagerGlobal*>(Instance->ManagerGlobal) == 0) {
+        CMN_LOG_INIT_WARNING << "Inter-process communication has already been set: skip reconfiguration" << std::endl;
+        return Instance;
+    }
+
+    CMN_LOG_INIT_VERBOSE << "Enable network support for local component manager (\"" << Instance->ProcessName << "\")" << std::endl;
+    CMN_LOG_INIT_VERBOSE << ": with global component manager IP : " << globalComponentManagerIP << std::endl;
+    CMN_LOG_INIT_VERBOSE << ": with this process name           : " << thisProcessName << std::endl;
+    CMN_LOG_INIT_VERBOSE << ": with this process IP             : " << (thisProcessIP == "" ? "\"\"" : thisProcessIP) << std::endl;
+
+    mtsManagerLocal::ConfigurationChange.Lock();
+
+    // Remember the current global component manager which was created locally
+    // (because local component manager was configured as standalone mode) and 
+    // contains all information about currently active components.
+    // Note that this->ManagerGlobal is replaced with a new instance of GCM
+    // proxy when the constructor of mtsManagerLocal() is called with proper
+    // arguments.
+    mtsManagerGlobalInterface * currentGCM = Instance->ManagerGlobal;
+
+    // Create a new singleton object of LCM with network support
+    mtsManagerLocal * newInstance = 0;
+    try {
+        newInstance = new mtsManagerLocal(globalComponentManagerIP, thisProcessName, thisProcessIP);
+    } catch (const std::exception& ex) {
+        CMN_LOG_INIT_ERROR << "Failed to enable network support: " << ex.what() << std::endl;
+        mtsManagerLocal::ConfigurationChange.Unlock();
+        return Instance;
+    }
+
+    //
+    // Transfer all internal data--i.e., components and connections--from current
+    // LCM to new LCM.
+    //
+    {
+        // Transfer component information
+        ComponentMapType::const_iterator it = Instance->ComponentMap.begin();
+        const ComponentMapType::const_iterator itEnd = Instance->ComponentMap.end();
+        for (; it != itEnd; ++it) {
+            if (!newInstance->AddComponent(it->second)) {
+                CMN_LOG_INIT_ERROR << "Failed to trasnfer component while reconfiguring LCM: " << it->second->GetName() << std::endl;
+
+                // Clean up new LCM object
+                delete newInstance;
+                mtsManagerLocal::ConfigurationChange.Unlock();
+
+                // Keep using current LCM
+                return Instance;
+            } else {
+                CMN_LOG_INIT_VERBOSE << "Successfully transferred component: " << it->second->GetName() << std::endl;
+            }
+        }
+    }
+
+    //
+    // Transfer connection information
+    //
+    {
+        // Get current connection information
+        std::vector<mtsManagerGlobal::ConnectionStrings> list;
+        currentGCM->GetListOfConnections(list);
+
+        // Register all the connections established to the new GCM
+        mtsManagerGlobalInterface * newGCM = newInstance->ManagerGlobal;
+
+        int userId;
+        std::vector<mtsManagerGlobal::ConnectionStrings>::const_iterator it = list.begin();
+        const std::vector<mtsManagerGlobal::ConnectionStrings>::const_iterator itEnd = list.end();
+        for (; it != itEnd; ++it) {
+            userId = newGCM->Connect(thisProcessName,
+                thisProcessName, it->ClientComponentName, it->ClientRequiredInterfaceName,
+                thisProcessName, it->ServerComponentName, it->ServerProvidedInterfaceName,
+                userId);
+            if (userId == -1) {
+                CMN_LOG_INIT_ERROR << "Failed to transfer previous connection: "
+                    << thisProcessName << ":" << it->ClientComponentName << ":" << it->ClientRequiredInterfaceName << "-"
+                    << thisProcessName << ":" << it->ServerComponentName << ":" << it->ServerProvidedInterfaceName << std::endl;
+            } else {
+                CMN_LOG_INIT_VERBOSE << "Successfully transferred previous connection: "
+                    << thisProcessName << ":" << it->ClientComponentName << ":" << it->ClientRequiredInterfaceName << "-"
+                    << thisProcessName << ":" << it->ServerComponentName << ":" << it->ServerProvidedInterfaceName << std::endl;
+            }
+        }
+    }
+
+    // Remove previous LCM instance
+    delete Instance;
+
+    // Replace singleton object
+    Instance = newInstance;
+
+    mtsManagerLocal::ConfigurationChange.Unlock();
 
     return Instance;
 }
@@ -243,7 +372,7 @@ bool mtsManagerLocal::AddComponent(mtsComponent * component)
     }
 
     // Register all the existing required interfaces and provided interfaces to
-    // the global component manager and mart them as registered.
+    // the global component manager and mark them as registered.
     if (!RegisterInterfaces(component)) {
         CMN_LOG_CLASS_RUN_ERROR << "AddComponent: failed to register interfaces" << std::endl;
         return false;
@@ -1471,7 +1600,7 @@ bool mtsManagerLocal::RegisterInterfaces(mtsDevice * component)
             CMN_LOG_CLASS_RUN_ERROR << "RegisterInterfaces: NULL required interface detected: " << interfaceNames[i] << std::endl;
             return false;
         } else {
-            if (requiredInterface->GetRegistered()) {
+            if (ManagerGlobal->FindRequiredInterface(ProcessName, componentName, interfaceNames[i])) {
                 continue;
             }
         }
@@ -1481,8 +1610,6 @@ bool mtsManagerLocal::RegisterInterfaces(mtsDevice * component)
                 << componentName << ":" << interfaceNames[i] << std::endl;
             return false;
         }
-
-        requiredInterface->SetRegistered();
     }
 
     mtsProvidedInterface * providedInterface;
@@ -1493,7 +1620,7 @@ bool mtsManagerLocal::RegisterInterfaces(mtsDevice * component)
             CMN_LOG_CLASS_RUN_ERROR << "RegisterInterfaces: NULL provided interface detected: " << interfaceNames[i] << std::endl;
             return false;
         } else {
-            if (providedInterface->GetRegistered()) {
+            if (ManagerGlobal->FindProvidedInterface(ProcessName, componentName, interfaceNames[i])) {
                 continue;
             }
         }
@@ -1503,8 +1630,6 @@ bool mtsManagerLocal::RegisterInterfaces(mtsDevice * component)
                 << componentName << ":" << interfaceNames[i] << std::endl;
             return false;
         }
-
-        providedInterface->SetRegistered();
     }
 
     return true;

@@ -113,14 +113,19 @@ protected:
 
     /*! Data structure to keep information about a connection */
     class ConnectionElement {
-    public:
-        // Name of connect request process
-        const std::string RequestProcessName;
+        // For unit-test
+        friend class mtsManagerGlobalTest;
+
+    protected:
         // This connection ID
         const unsigned int ConnectionID;
         // Connection status. False when waiting for a successful establishment,
         // True if successfully established.
         bool Connected;
+
+    public:
+        // Name of connect request process
+        const std::string RequestProcessName;
         // Set of strings
         const std::string ClientProcessName;
         const std::string ClientComponentName;
@@ -148,12 +153,24 @@ protected:
 #endif
         }
 
+        /*! Get connection id */
+        unsigned int GetConnectionID(void) const {
+            return ConnectionID;
+        }
+
+        /*! Get connection state */
+        inline bool IsConnected(void) const {
+            return Connected;
+        }
+
         /*! Set this connection as established */
-        inline void SetConnected() { Connected = true; }
+        inline void SetConnected(void) { 
+            Connected = true; 
+        }
 
         /*! Return true if this connection is timed out */
 #if CISST_MTS_HAS_ICE
-        inline bool CheckTimeout() const {
+        inline bool CheckTimeout(void) const {
             return (TimeoutTime - osaGetTime() <= 0);
         }
 #endif
@@ -334,6 +351,8 @@ public:
         const unsigned int connectionID, const unsigned int providedInterfaceProxyInstanceID,
         const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientRequiredInterfaceName,
         const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverProvidedInterfaceName);
+
+    void GetListOfConnections(std::vector<ConnectionStrings> & list) const;
 #endif
 
     //-------------------------------------------------------------------------
@@ -397,7 +416,7 @@ public:
                                  const std::string & commandName,
                                  std::string & description);
 
-    /*! Get description of a event generator in a provided interface */
+    /*! Get description of an event generator in a provided interface */
     void GetDescriptionOfEventGenerator(const std::string & processName, 
                                         const std::string & componentName, 
                                         const std::string & providedInterfaceName, 

@@ -26,7 +26,6 @@ mtsRequiredInterface::mtsRequiredInterface(const std::string & interfaceName, mt
     Name(interfaceName),
     MailBox(mailBox),
     ProvidedInterface(0),
-    Registered(false),
     CommandPointersVoid("CommandPointersVoid"),
     CommandPointersRead("CommandPointersRead"),
     CommandPointersWrite("CommandPointersWrite"),

@@ -190,6 +190,7 @@ public:
         const unsigned int connectionID, const unsigned int providedInterfaceProxyInstanceID,
         const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientRequiredInterfaceName,
         const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverProvidedInterfaceName);
+    void GetListOfConnections(std::vector<ConnectionStrings> & list) const;
 
     //-------------------------------------------------------------------------
     //  Event Generators (Event Sender) : Client -> Server

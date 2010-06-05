@@ -203,6 +203,19 @@ public:
         const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverProvidedInterfaceName) = 0;
 #endif
 
+    /*! Typedef for structure to represent a connection by a set of strings */
+    typedef struct {
+        std::string ClientProcessName;
+        std::string ClientComponentName;
+        std::string ClientRequiredInterfaceName;
+        std::string ServerProcessName;
+        std::string ServerComponentName;
+        std::string ServerProvidedInterfaceName;
+    } ConnectionStrings;
+
+    /*! Get a list of all active connections represented by a set of strings */
+    virtual void GetListOfConnections(std::vector<ConnectionStrings> & list) const = 0;
+
     //-------------------------------------------------------------------------
     //  Networking
     //-------------------------------------------------------------------------

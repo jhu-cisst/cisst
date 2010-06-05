@@ -22,24 +22,36 @@ http://www.cisst.org/cisst/license.txt.
 
 /*!
   \file
-  \brief Definition of Local Component Manager
+  \brief Declaration of Local Component Manager
   \ingroup cisstMultiTask
 
-  This class defines the local component manager (LCM) which replaces the
-  previous task manager (mtsTaskManager) and is implemented as a singleton.
+  This class defines the local component manager (LCM) that manages local
+  components and is unique in a process.  Since only one instance of LCM should
+  exist in a process, this class is implemented as singleton.  Thus, to get an 
+  instance of LCM, mtsManagerLocal::GetInstance() is to be called (instead of
+  constructor).
 
-  Major differences between the two are:
+  The LCM replaces the previous task manager (mtsTaskManager) which was similar
+  to the LCM without networking support.  Major differences between the two are:
 
-  1) The LCM manages tasks and devices as a unified object, a component, which
-  is of type mtsDevice. For this, task map and device map in the task manager
-  has been consolidated into a single data structure, component map.
+  1) The LCM manages tasks and devices as a unified object--component--which
+  is of type mtsDevice and is stored in a single data structure--component map.
+  That is, task map and device map in the previous task manager has been
+  consolidated into the component map.
 
-  2) The LCM does not keep the connection information; All connection information
-  are now maintained and managed by the global component manager (GCM).
+  2) While the previous task manager keeps all information about tasks (devices)
+  and connections, the LCM only keeps information about local components; it does
+  not keep any connection information.  All connection information are now 
+  managed by the global component manager (GCM) and the LCM requests and retrieves 
+  such information as needed.
 
-  \note Related classes: mtsManagerLocalInterface, mtsManagerGlobalInterface, mtsManagerGlobal
+  Note that this class implements mtsManagerLocalInterface class which defines 
+  common APIs to communicate with the GCM and is declared as pure virtual. See
+  mtsManagerProxyServer class as another example that implements the interface.
+
+  \note Related classes: mtsManagerLocalInterface, mtsManagerGlobalInterface, 
+  mtsManagerGlobal, mtsManagerProxyServer
 */
-
 
 #ifndef _mtsManagerLocal_h
 #define _mtsManagerLocal_h
@@ -66,16 +78,16 @@ private:
     /*! Singleton object */
     static mtsManagerLocal * Instance;
 
-    /*! Flag for unit tests. Enabled only for unit tests and set as false by default */
+    /*! Flag for unit tests. Enabled only for unit tests (false by default) */
     static bool UnitTestEnabled;
 
-    /*! Flag to skip network-related processing such as network proxy creation,
-        network proxy startup, remote connection, and so on. Set as false by default */
+    /*! Flag that allows unit tests to skip network-related processings such as 
+        network proxy creation/setup or remote connection (false by default) */
     static bool UnitTestNetworkProxyEnabled;
 
 protected:
-    /*! Typedef for component map: (component name, component object)
-        component object is a pointer to mtsDevice object. */
+    /*! Typedef for component map: key is component name, value is component
+        object */
     typedef cmnNamedMap<mtsDevice> ComponentMapType;
     ComponentMapType ComponentMap;
 
@@ -83,28 +95,32 @@ protected:
     osaTimeServer TimeServer;
 
     /*! Process name of this local component manager. Should be globally unique
-        across a system. */
+        across the whole system. */
     std::string ProcessName;
 
-    /*! IP address of the global component manager */
+    /*! IP address of the global component manager that this LCM connects to */
     const std::string GlobalComponentManagerIP;
 
-    /*! IP address of this machine. Set internally by SetIPAddress(). */
+    /*! IP address of this machine. Internally set by SetIPAddress(). */
     std::string ProcessIP;
 
-    /*! A list of all IP addresses detected on this machine */
+    /*! List of all IP addresses detected on this machine */
     std::vector<std::string> ProcessIPList;
 
     /*! Mutex to use ComponentMap safely */
     osaMutex ComponentMapChange;
 
-    /*! A pointer to the global component manager.
-        Depending on configurations, this points to two different objects:
-        - In standalone mode, this is an instance of the GCM (of type
-          mtsManagerGlobal) running in the same process.
-        - In network mode, this is a pointer to a proxy object for the GCM
-          (of type mtsManagerGlobalProxyClient) that links this LCM with the
-          GCM. In this case, the GCM normally runs in a different process. */
+    /*! Mutex for thread-safe transition of configuration from standalone mode to
+        networked mode */
+    static osaMutex ConfigurationChange;
+    
+    /*! Pointer to the global component manager.
+        Depending on configuration, this can be of two different type of object:
+        - In standalone mode: an instance of the GCM (of type
+          mtsManagerGlobal) which runs in the same process.
+        - In networked mode: a network proxy object for the GCM
+          (of type mtsManagerGlobalProxyClient) that possibly runs in a 
+          different process or a different host. */      
     mtsManagerGlobalInterface * ManagerGlobal;
 
     /*! Protected constructor (singleton) */
@@ -123,23 +139,32 @@ protected:
     void Initialize(void);
 
 #if CISST_MTS_HAS_ICE
-    /*! Set an IP address of this machine */
+    /*! \brief Set IP address of this machine */
     void SetIPAddress(void);
+
+    /*! \brief Create proxy objects and enable network support
+        \return True if success, false otherwise */    
+    bool CreateProxy(void);
 #endif
 
-    /*! Register all interfaces that a component has to the global component manager */
+    /*! \brief Register all interfaces that a component owns to the global 
+               component manager.  The GCM uses this information to connect
+               interfaces that are in different processes.
+        \param component Component object instance
+        \param componentName Name of component */
     bool RegisterInterfaces(mtsDevice * component);
     bool RegisterInterfaces(const std::string & componentName);
 
-    /*! \brief Connect two local interfaces. It is assumed that two components
-               are in the same process.
+    /*! \brief Connect two local interfaces. 
         \param clientComponentName Name of client component
         \param clientRequiredInterfaceName Name of required interface
         \param serverComponentName Name of server component
         \param serverProvidedInterfaceName Name of provided interface
-        \param userId User id allocated for this connection. Valid only for the
+        \param userId User id allocated for this connection. Valid only in the
                networked configuration. Zero by default.
-        \return zero if successful, -1 if error occurs. */
+        \return zero if successful, -1 if error occurs.
+        \note  It is assumed that two components are in the same process. Thus,
+               this does not work with components in different processes. */
     int ConnectLocally(
         const std::string & clientComponentName, const std::string & clientRequiredInterfaceName,
         const std::string & serverComponentName, const std::string & serverProvidedInterfaceName,
@@ -152,20 +177,32 @@ protected:
     //-------------------------------------------------------------------------
 public:
 #if CISST_MTS_HAS_ICE
-    /*! Create a component proxy. This should be called before an interface
-        proxy is created. */
+    /*! \brief Create component proxy
+        \param componentProxyName Name of component proxy
+        \param listenerID Not used
+        \note This should be called before an interface proxy is created. */
     bool CreateComponentProxy(const std::string & componentProxyName, const std::string & listenerID = "");
 
-    /*! Remove a component proxy. Note that all the interface proxies that the
-        proxy manages is automatically removed when removing a component proxy. */
+    /*! \brief Remove component proxy
+        \param componentProxyName Name of component proxy
+        \param listenerID Not used
+        \note Note that all the interface proxies that the proxy manages is 
+              automatically removed when removing a component proxy. */
     bool RemoveComponentProxy(const std::string & componentProxyName, const std::string & listenerID = "");
 
-    /*! Create a provided interface proxy using ProvidedInterfaceDescription */
+    /*! \brief Create provided interface proxy 
+        \param serverComponentProxyName Name of server component proxy that 
+               has provided interface to be duplicated
+        \param providedInterfaceDescription Full description of provided
+               interface to be duplicated
+        \param listenerID Not used */
     bool CreateProvidedInterfaceProxy(
         const std::string & serverComponentProxyName,
         const ProvidedInterfaceDescription & providedInterfaceDescription, const std::string & listenerID = "");
 
-    /*! Create a required interface proxy using RequiredInterfaceDescription */
+    /* AAAAAAAAAAAAAAAAAAAAAAA */
+    /*! \brief Create required interface proxy 
+        \param clientComponentProxyName Name of component proxy that has */
     bool CreateRequiredInterfaceProxy(
         const std::string & clientComponentProxyName,
         const RequiredInterfaceDescription & requiredInterfaceDescription, const std::string & listenerID = "");
@@ -215,12 +252,26 @@ public:
 #endif
 
 #if !CISST_MTS_HAS_ICE
-    /*! Get an instance of local component manager */
+    /*! Get a singleton object of local component manager */
     static mtsManagerLocal * GetInstance(void);
 #else
-    /*! Get an instance of local component manager.
-        If process ip is not specified, the first ip address detected is used.
-        If process name is not given, the ip address is used instead. */
+        
+
+
+    /*! \brief Return singleton object of local component manager.
+        \param globalComponentManagerIP Ip address of global component manager
+               that this local component manager connects to
+        \param thisProcessName Name of this process. If not specified, set as
+               ip address of this host by default
+        \param thisProcessIP IP address of this process. If not specified, set 
+               as the first ip address detected
+        \return Pointer to singleton object 
+        \note  If no argument is specified, local component manager is
+               configured as the standalone mode. If this method is called again 
+               with proper arguments, the singleton object is reconfigured as
+               the networked mode to support inter-process communication. During
+               this reconfiguration process, a caller thread is blocked for 
+               thread-safe transition of all internal data. */
     static mtsManagerLocal * GetInstance(const std::string & globalComponentManagerIP = "",
                                          const std::string & thisProcessName = "",
                                          const std::string & thisProcessIP = "");

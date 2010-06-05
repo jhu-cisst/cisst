@@ -117,9 +117,6 @@ protected:
     /*! Pointer on the device itself. */
     mtsDevice * Device;
 
-    /*! Set as true when this interface is registered to the globalcomponent manager */
-    bool Registered;
-
     /*! Default constructor. Does nothing, should not be used. */
     mtsDeviceInterface(void) {}
  public:
@@ -134,15 +131,6 @@ protected:
     /*! Returns the name of the interface. */
     virtual std::string GetName(void) const {
         return Name;
-    }
-
-    /*! Getter and setter for 'Registered' flag */
-    void SetRegistered(void) {
-        Registered = true;
-    }
-
-    bool GetRegistered(void) const {
-        return Registered;
     }
 
     /*! Get the names of commands provided by this interface. */
