@@ -221,7 +221,6 @@ osaThreadBuddy::~osaThreadBuddy() {
     delete Data;
 }
 
-
 #if (CISST_OS == CISST_LINUX_RTAI)
 void osaThreadBuddy::Create(const char *name, double period, int stack_size)
 #else
@@ -235,11 +234,14 @@ void osaThreadBuddy::Create(const char *name, double period, int CMN_UNUSED(stac
     // 6 characters.
     Data->RTTask = rt_task_init_schmod(nam2num(name), 0, stack_size, 0, SCHED_FIFO, 0xF);
     if (!Data->RTTask) {
-        CMN_LOG_INIT_ERROR << "OOPS!!! Couldn't create Proxy object" << std::endl;
+        CMN_LOG_INIT_ERROR << "osaThreadBuddy: failed to initialize real-time task: \"" << name << "\"" << std::endl;
+        CMN_LOG_INIT_ERROR << "Real-time task needs root permission to run properly. Check if you are root." << std::endl;
         exit(1);
     }
     if (rt_task_use_fpu(Data->RTTask, 1) < 0) {
-        CMN_LOG_INIT_ERROR << "OOPS!!! FPU couldn't be allocated" << std::endl;
+        CMN_LOG_INIT_ERROR << "osaThreadBuddy: failed to allocate FPU" << std::endl;
+        CMN_LOG_INIT_ERROR << "Real-time task needs root permission to run properly. Check if you are root." << std::endl;
+        exit(1);
     }
     // maybe this should be just before we make code real-time
     // causes failure of memory intensive calls such as openGL
@@ -248,7 +250,8 @@ void osaThreadBuddy::Create(const char *name, double period, int CMN_UNUSED(stac
     mlockall(MCL_CURRENT | MCL_FUTURE);
     if (IsPeriodic()) {
         if (0 != rt_task_make_periodic_relative_ns(Data->RTTask, 0, (unsigned long)period)) {
-            CMN_LOG_INIT_ERROR << "Create: failed to make task run periodically" << std::endl;
+            CMN_LOG_INIT_ERROR << "osaThreadBuddy: failed to make task run periodically" << std::endl;
+            CMN_LOG_INIT_ERROR << "Real-time task needs root permission to run properly. Check if you are root." << std::endl;
             exit(1);
         }
     }
@@ -263,7 +266,7 @@ void osaThreadBuddy::Create(const char *name, double period, int CMN_UNUSED(stac
         // been used, CreateWaitableTimer will return a handle to the existing timer.
         Data->WaitTimer = CreateWaitableTimer(NULL, true, NULL);
         if (Data->WaitTimer == NULL) {
-            CMN_LOG_INIT_ERROR << "OOPS! Couldn't create a waitable timer" << std::endl;
+            CMN_LOG_INIT_ERROR << "osaThreadBuddy: failed to create a waitable timer" << std::endl;
         }
     }
 
