@@ -1391,6 +1391,7 @@ bool mtsManagerGlobal::ConnectServerSideInterfaceRequest(
         clientProcessName, clientComponentName, clientRequiredInterfaceName,
         serverProcessName, serverComponentName, serverProvidedInterfaceName, serverProcessName);
 }
+#endif
 
 void mtsManagerGlobal::GetListOfConnections(std::vector<ConnectionStrings> & list) const
 {
@@ -1415,5 +1416,3 @@ void mtsManagerGlobal::GetListOfConnections(std::vector<ConnectionStrings> & lis
         list.push_back(connection);
     }
 }
-
-#endif

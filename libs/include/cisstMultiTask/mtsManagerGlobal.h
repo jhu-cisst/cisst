@@ -351,9 +351,9 @@ public:
         const unsigned int connectionID, const unsigned int providedInterfaceProxyInstanceID,
         const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientRequiredInterfaceName,
         const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverProvidedInterfaceName);
+#endif
 
     void GetListOfConnections(std::vector<ConnectionStrings> & list) const;
-#endif
 
     //-------------------------------------------------------------------------
     //  Getters
