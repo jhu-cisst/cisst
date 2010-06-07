@@ -61,14 +61,18 @@ int main(int argc, char **argv)
     mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
     // reconfiguration test 1
 #if 0
+#if CISST_MTS_HAS_ICE
     taskManager = mtsTaskManager::GetInstance("localhost", "localMainTest");
+#endif
 #endif
 
     taskManager->AddTask(client);
     taskManager->AddTask(server);
     // reconfiguration test 2
 #if 0
+#if CISST_MTS_HAS_ICE
     taskManager = mtsTaskManager::GetInstance("localhost", "localMainTest");
+#endif
 #endif
 
     // connect the tasks, task.RequiresInterface -> task.ProvidesInterface
@@ -79,7 +83,9 @@ int main(int argc, char **argv)
 
     // reconfiguration test 3
 #if 0
+#if CISST_MTS_HAS_ICE
     taskManager = mtsTaskManager::GetInstance("localhost", "localMainTest");
+#endif
 #endif
 
     // create the tasks, i.e. find the commands
@@ -89,7 +95,9 @@ int main(int argc, char **argv)
 
     // reconfiguration test 4
 #if 1
+#if CISST_MTS_HAS_ICE
     taskManager = mtsTaskManager::GetInstance("localhost", "localMainTest");
+#endif
 #endif
 
     // wait until the close button of the UI is pressed
