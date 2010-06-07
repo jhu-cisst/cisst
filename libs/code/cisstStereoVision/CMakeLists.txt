@@ -46,6 +46,7 @@ SET(SOURCE_FILES
     svlFilterSourceVideoCapture.cpp
     svlFilterSourceImageFile.cpp
     svlFilterSourceVideoFile.cpp
+    svlFilterSourceBuffer.cpp
     svlFilterImageFileWriter.cpp
     svlFilterVideoFileWriter.cpp
     svlFilterComputationalStereo.cpp
@@ -104,6 +105,7 @@ SET(HEADER_FILES
     svlFilterSourceVideoCapture.h
     svlFilterSourceImageFile.h
     svlFilterSourceVideoFile.h
+    svlFilterSourceBuffer.h
     svlFilterImageFileWriter.h
     svlFilterVideoFileWriter.h
     svlFilterComputationalStereo.h
