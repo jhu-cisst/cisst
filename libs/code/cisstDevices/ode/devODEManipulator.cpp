@@ -126,42 +126,61 @@ vctDynamicVector<double> devODEManipulator::GetJointsVelocities() const {
   return qd;
 }
 
-void devODEManipulator::SetJointsPositions( const vctDynamicVector<double>& q ){
-
-  // we don't really set the joint position. We use the joint positions to 
-  // compute the pos/ori of each body.
-  for(size_t i=0; i<joints.size(); i++){
-    
-    vctFrame4x4<double> Rtwi = ForwardKinematics( q, i+1 );
-    dBodyID bid = joints[i]->GetDistalBody();
-
-    dMatrix3 Rwi = { Rtwi[0][0], Rtwi[0][1], Rtwi[0][2], 0.0,
-		     Rtwi[1][0], Rtwi[1][1], Rtwi[1][2], 0.0,
-		     Rtwi[2][0], Rtwi[2][1], Rtwi[2][2], 0.0 };
-
-    dBodySetPosition( bid, Rtwi[0][3], Rtwi[1][3], Rtwi[2][3] );
-    dBodySetRotation( bid, Rwi );
-
-  }
-
-}
-
-void devODEManipulator::SetJointsVelocities(const vctDynamicVector<double>& ){
-}
 
 void devODEManipulator::SetForcesTorques( const vctDynamicVector<double>& ft) {
   for(size_t i=0; i<joints.size(); i++ )
     { joints[i]->SetForceTorque( ft[i] ); }
 }
 
-void devODEManipulator::SetState( const vctDynamicVector<double>& q,
-				  const vctDynamicVector<double>& qd ) {
-  SetJointsPositions( q );
-  SetJointsVelocities( qd );
+devODEManipulator::State devODEManipulator::GetState() const {
+
+  devODEManipulator::State state;
+  
+  for( size_t i=0; i<joints.size(); i++ ){
+    
+    dBodyID bid = joints[i]->GetDistalBody();
+
+    devODEBody::State si;
+
+    const dReal* R = dBodyGetRotation( bid );
+    const dReal* t = dBodyGetPosition( bid );
+    const dReal* v = dBodyGetLinearVel( bid );
+    const dReal* w = dBodyGetAngularVel( bid );
+
+    si.R = vctMatrixRotation3<double> ( R[0], R[1],  R[2], // R[3], 
+					R[4], R[5],  R[6], // R[7], 
+					R[8], R[9], R[10], // R[11], 
+					VCT_NORMALIZE );
+    si.t = vctFixedSizeVector<double,3>( t[0], t[1], t[2] );
+    si.v = vctFixedSizeVector<double,3>( v[0], v[1], v[2] );
+    si.w = vctFixedSizeVector<double,3>( w[0], w[1], w[2] );
+
+    state.push_back( si );
+
+  }
+
+  return state;
+
 }
 
-void devODEManipulator::GetState( vctDynamicVector<double>& q,
-				  vctDynamicVector<double>& qd ) const {
-  q = GetJointsPositions();
-  qd = GetJointsVelocities();
+
+void devODEManipulator::SetState( const devODEManipulator::State& state ){
+
+  for( size_t i=0; i<state.size(); i++ ){
+    
+    dBodyID bid = joints[i]->GetDistalBody();
+
+    dMatrix3 R = { state[i].R[0][0], state[i].R[0][1],  state[i].R[0][2], 0.0,
+		   state[i].R[1][0], state[i].R[1][1],  state[i].R[1][2], 0.0,
+		   state[i].R[2][0], state[i].R[2][1],  state[i].R[2][2], 0.0 };
+
+    dBodySetRotation( bid, R );
+    dBodySetPosition( bid, state[i].t[0], state[i].t[1], state[i].t[2] );
+    dBodySetLinearVel(  bid, state[i].v[0], state[i].v[1], state[i].v[2] );
+    dBodySetAngularVel( bid, state[i].w[0], state[i].w[1], state[i].w[2] );
+
+  }
+
 }
+
+

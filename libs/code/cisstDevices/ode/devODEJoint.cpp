@@ -73,10 +73,10 @@ devODEJoint::devODEJoint( dWorldID world,
 }
 
 dBodyID devODEJoint::GetProximalBody() const
-{ return dJointGetBody( JointID(), 0 ); }
+{ return dJointGetBody( JointID(), 1 ); }
 
 dBodyID devODEJoint::GetDistalBody() const
-{ return dJointGetBody( JointID(), 1 ); }
+{ return dJointGetBody( JointID(), 0 ); }
 
 dJointID devODEJoint::JointID() const { return jointid; }
 

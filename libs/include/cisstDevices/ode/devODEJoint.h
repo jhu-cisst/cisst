@@ -54,7 +54,7 @@ class CISST_EXPORT devODEJoint {
 	       double qmax );
 
   dBodyID GetProximalBody() const;
-  dBodyID GetDistalBody() const;
+  dBodyID GetDistalBody()   const;
 
   //! Return the ODE ID of the joint
   dJointID JointID() const;

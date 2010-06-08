@@ -28,7 +28,16 @@ http://www.cisst.org/cisst/license.txt.
 
 class CISST_EXPORT devODEBody {
 
-private:
+ public:
+
+  struct State{
+    vctMatrixRotation3<double>   R;
+    vctFixedSizeVector<double,3> t;
+    vctFixedSizeVector<double,3> v;
+    vctFixedSizeVector<double,3> w;
+  };
+
+ private:
   
   //! The ODE body ID
   dBodyID bodyid;
@@ -127,6 +136,7 @@ public:
   void Update();
 
   vctMatrixRotation3<double> GetOrientation() const;
+
   vctFixedSizeVector<double,3> GetPosition() const;
 
 };
