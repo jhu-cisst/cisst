@@ -18,50 +18,23 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _robFunction_h
 #define _robFunction_h
 
-#include <cisstRobot/robMapping.h>
-#include <cisstRobot/robVariable.h>
+#include <cisstRobot/robExport.h>
 
-class robFunction : public robMapping {
+class CISST_EXPORT robFunction{
   
-public:
+ protected:
 
-  enum Errno { ESUCCESS, EFAILURE, EUNDEFINED };
+  double t1;
+  double t2;
 
-  //! The attribute of a function
-  /** 
-      The attribute of a function indicates wheter the function is define for 
-      a given input. This is used to determine which function, in a piecewise 
-      function, is defined for a given input.
-  */
-  enum Context{
-    CUNDEFINED = 0,
-    CDEFINED, 
-    //INCOMING,
-    //OUTGOING,
-    //EXPIRED
-  };
-  
-  robFunction( robSpace input, robSpace output ) :  
-    robMapping( input, output ){}
+ public:
 
-  //virtual double Duration() const { return 0.0; }
+  robFunction( double t1, double t2 );
   
-  //! Is the function defined for the input
-  /**
-     \param[in] in An element drawn from a space
-     \return The context of the function 
-  */
-  virtual robFunction::Context GetContext( const robVariable& input ) const=0;
-  
-  //! Evaluate the function 
-  /**
-     Evaluate the function and its 1st and 2nd derivative
-     \param[in] input The element of the domain
-     \param[out] output The the output of the function
-  */
-  virtual robFunction::Errno Evaluate( const robVariable& input, 
-				       robVariable& output ) = 0;  
-  
+  virtual double StartTime() const;
+  virtual double StopTime() const;
+  virtual double Duration() const;
+
 };
 
 #endif
