@@ -144,13 +144,13 @@ void devODEWorld::Run() {
   for( size_t i=0; i<joints.size(); i++ )
     { joints[i]->ApplyForceTorque(); }
 
-  //dSpaceCollide( SpaceID(), (void*)this, space_collision);
+  dSpaceCollide( SpaceID(), (void*)this, space_collision);
   dWorldStep( WorldID(), timestep );
 
   for( size_t i=0; i<bodies.size(); i++ )
     { bodies[i]->Update(); }
 
-  //dJointGroupEmpty( GroupID() );
+  dJointGroupEmpty( GroupID() );
 
 }
 

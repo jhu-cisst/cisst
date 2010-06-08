@@ -15,30 +15,28 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include <cisstRobot/robManipulator.h>
 #include <cisstDevices/ode/devODEManipulator.h>
 
 //CMN_IMPLEMENT_SERVICES( devODEManipulator );
 
 devODEManipulator::devODEManipulator( const std::string& devname,
 				      double period,
-				      const vctDynamicVector<double>& qinit ) :
+				      const vctDynamicVector<double>& qinit ):
 
   devManipulator( devname, period, qinit.size() ),
+  robManipulator( "", vctFrame4x4<double>() ),
   qinit( qinit ){}
 
 devODEManipulator::devODEManipulator(const std::string& devname,
 				     double period,
 				     devODEWorld& world,
 				     const std::string& robotfilename,
-				     const vctDynamicVector<double> qinit,
 				     const vctFrame4x4<double>& Rtw0,
+				     const vctDynamicVector<double> qinit,
 				     const std::vector<std::string>& geomfiles):
   devManipulator( devname, period, qinit.size() ),
+  robManipulator( robotfilename, Rtw0 ),
   qinit( qinit ){
-
-  // Create a temporary manipulator
-  robManipulator manipulator( robotfilename, Rtw0 );
 
   //! Create a new space for the manipulator
   dSpaceID spaceid = dSimpleSpaceCreate( world.SpaceID() );
@@ -46,50 +44,50 @@ devODEManipulator::devODEManipulator(const std::string& devname,
   // Initialize the links
 
   // a temporary vector to hold pointers to bodies
-  std::vector<devODEBody*> links;
+  std::vector<devODEBody*> bodies;
 
-  for( size_t i=0; i<manipulator.links.size(); i++ ){
+  for( size_t i=0; i<links.size(); i++ ){
 
     // obtain the position and orientation of the ith link 
-    vctFrame4x4<double> Rtwi = manipulator.ForwardKinematics( qinit, i+1 );
+    vctFrame4x4<double> Rtwi = ForwardKinematics( qinit, i+1 );
 
     // create and initialize the ith link
-    devODEBody* link;
-    link = new devODEBody( world.WorldID(),                         // world
+    devODEBody* body;
+    body = new devODEBody( world.WorldID(),                         // world
 			   spaceid,                                 // space
 			   Rtwi,                                    // pos+ori
-			   manipulator.links[i].Mass(),             // m   
-			   manipulator.links[i].CenterOfMass(),     // com
-			   manipulator.links[i].MomentOfInertiaAtCOM(),  // I  
+			   links[i].Mass(),                         // m   
+			   links[i].CenterOfMass(),                 // com
+			   links[i].MomentOfInertiaAtCOM(),         // I  
 			   geomfiles[i] );
 
-    world.Insert( link );
-    links.push_back( link );
+    world.Insert( body );
+    bodies.push_back( body );
   }
 
   // Initialize the joints
   dBodyID b1 = 0;                                // ID of initial proximal link
   vctFixedSizeVector<double,3> z(0.0, 0.0, 1.0); // the local Z axis
 
-  for( size_t i=0; i<manipulator.links.size(); i++ ){
+  for( size_t i=0; i<links.size(); i++ ){
 
     // obtain the ID of the distal link 
-    dBodyID b2 = links[i]->BodyID();
+    dBodyID b2 = bodies[i]->BodyID();
     
     // obtain the position and orientation of the ith link
-    vctFrame4x4<double> Rtwi = manipulator.ForwardKinematics( qinit, i );
+    vctFrame4x4<double> Rtwi = ForwardKinematics( qinit, i );
     
     vctFixedSizeVector<double,3> anchor = Rtwi.Translation();
     vctFixedSizeVector<double,3> axis = Rtwi.Rotation() * z;
 
     int type = dJointTypeHinge;
-    if( manipulator.links[i].GetType() == robLink::SLIDER )
+    if( links[i].GetType() == robLink::SLIDER )
       { type = dJointTypeSlider; }
 
     // This is a bit tricky. The min must be greater than -pi and the max must
     // be less than pi. Otherwise it really screw things up
-    double qmin = manipulator.links[i].PositionMin();
-    double qmax = manipulator.links[i].PositionMax();
+    double qmin = links[i].PositionMin();
+    double qmax = links[i].PositionMax();
 
     devODEJoint* joint;
     joint =  new devODEJoint( world.WorldID(),     // the world ID
@@ -117,7 +115,7 @@ vctDynamicVector<double> devODEManipulator::GetJointsPositions() const {
   vctDynamicVector<double> q( joints.size(), 0.0 );
   for(size_t i=0; i<joints.size(); i++)
     { q[i] =  joints[i]->GetPosition(); }
-  //std::cout << q << std::endl;
+
   return q + qinit;
 }
 
@@ -128,8 +126,42 @@ vctDynamicVector<double> devODEManipulator::GetJointsVelocities() const {
   return qd;
 }
 
+void devODEManipulator::SetJointsPositions( const vctDynamicVector<double>& q ){
+
+  // we don't really set the joint position. We use the joint positions to 
+  // compute the pos/ori of each body.
+  for(size_t i=0; i<joints.size(); i++){
+    
+    vctFrame4x4<double> Rtwi = ForwardKinematics( q, i+1 );
+    dBodyID bid = joints[i]->GetDistalBody();
+
+    dMatrix3 Rwi = { Rtwi[0][0], Rtwi[0][1], Rtwi[0][2], 0.0,
+		     Rtwi[1][0], Rtwi[1][1], Rtwi[1][2], 0.0,
+		     Rtwi[2][0], Rtwi[2][1], Rtwi[2][2], 0.0 };
+
+    dBodySetPosition( bid, Rtwi[0][3], Rtwi[1][3], Rtwi[2][3] );
+    dBodySetRotation( bid, Rwi );
+
+  }
+
+}
+
+void devODEManipulator::SetJointsVelocities(const vctDynamicVector<double>& ){
+}
+
 void devODEManipulator::SetForcesTorques( const vctDynamicVector<double>& ft) {
-  //std::cout << "ft " << ft << std::endl;
   for(size_t i=0; i<joints.size(); i++ )
     { joints[i]->SetForceTorque( ft[i] ); }
+}
+
+void devODEManipulator::SetState( const vctDynamicVector<double>& q,
+				  const vctDynamicVector<double>& qd ) {
+  SetJointsPositions( q );
+  SetJointsVelocities( qd );
+}
+
+void devODEManipulator::GetState( vctDynamicVector<double>& q,
+				  vctDynamicVector<double>& qd ) const {
+  q = GetJointsPositions();
+  qd = GetJointsVelocities();
 }

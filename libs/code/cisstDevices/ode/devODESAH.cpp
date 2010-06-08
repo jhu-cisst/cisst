@@ -27,9 +27,8 @@ devODESAH::devODESAH( const std::string& devname,
 			 palmgeom,
 			 true );
   world.Insert( palm );
-  //dJointID fix = dJointCreateFixed( world.WorldID(), NULL );
-  //dJointAttach( fix, 0, palm->BodyID() );
-
+  dJointID fix = dJointCreateFixed( world.WorldID(), NULL );
+  dJointAttach( fix, 0, palm->BodyID() );
 
   vctMatrixRotation3<double> Rbt;
   vctFixedSizeVector<double,3> tbt( -3.0/1000.0, 27.1/1000.0, 0.0 );

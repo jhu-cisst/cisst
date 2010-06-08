@@ -72,7 +72,14 @@ devODEJoint::devODEJoint( dWorldID world,
   }
 }
 
+dBodyID devODEJoint::GetProximalBody() const
+{ return dJointGetBody( JointID(), 0 ); }
+
+dBodyID devODEJoint::GetDistalBody() const
+{ return dJointGetBody( JointID(), 1 ); }
+
 dJointID devODEJoint::JointID() const { return jointid; }
+
 dJointID devODEJoint::FrictionID() const { return frictionid; }
 
 //! Return the position
@@ -111,11 +118,12 @@ double devODEJoint::GetVelocity() const {
   }
 }
 
-void devODEJoint::SetForceTorque(double newft)
-{  ft = newft; }
-
 double devODEJoint::GetForceTorque() const
 { return ft; }
+
+
+void devODEJoint::SetForceTorque(double newft)
+{  ft = newft; }
 
 void devODEJoint::ApplyForceTorque(){ 
 

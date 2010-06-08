@@ -18,6 +18,8 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _devODEManipulator_h
 #define _devODEManipulator_h
 
+#include <cisstRobot/robManipulator.h>
+
 #include <cisstDevices/manipulators/devManipulator.h>
 
 #include <cisstDevices/ode/devODEBody.h>
@@ -26,21 +28,15 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstDevices/devExport.h>
 
-class CISST_EXPORT devODEManipulator : public devManipulator {
+class CISST_EXPORT devODEManipulator : 
+  public devManipulator,
+  public robManipulator {
 
  protected:
 
   std::vector<devODEJoint*> joints;
 
   vctDynamicVector<double> qinit;
-
-  //! Set the joint forces or torques
-  /**
-     This sets the force/torque value of each joint. This task will be applied
-     at each iteration of the world task. This method does NOT apply the FT 
-     values to each joint.
-   */
-  void SetForcesTorques( const vctDynamicVector<double>& ft);
 
   //! Return the joints positions
   /**
@@ -57,6 +53,25 @@ class CISST_EXPORT devODEManipulator : public devManipulator {
   */
   vctDynamicVector<double> GetJointsVelocities() const ;
 
+  //! Set the joints positions
+  /**
+     \param q A vector of joints positions
+  */
+  void SetJointsPositions( const vctDynamicVector<double>& q );
+
+  //! Set the joints velocities
+  /**
+     \param qd A vector of joints velocities
+  */
+  void SetJointsVelocities( const vctDynamicVector<double>& qd );
+
+  //! Set the joint forces or torques
+  /**
+     This sets the force/torque value of each joint. This task will be applied
+     at each iteration of the world task. This method does NOT apply the FT 
+     values to each joint.
+   */
+  void SetForcesTorques( const vctDynamicVector<double>& ft);
 
  public: 
 
@@ -81,11 +96,18 @@ class CISST_EXPORT devODEManipulator : public devManipulator {
 		     double period,
 		     devODEWorld& world,
 		     const std::string& manfile,
-		     const vctDynamicVector<double> qinit,
 		     const vctFrame4x4<double>& Rtw0,
+		     const vctDynamicVector<double> qinit,
 		     const std::vector<std::string>& geomfiles );
 
   ~devODEManipulator(){}
+
+
+  void GetState( vctDynamicVector<double>& q,
+		 vctDynamicVector<double>& qd ) const ;
+
+  void SetState( const vctDynamicVector<double>& q,
+		 const vctDynamicVector<double>& qd );
 
   vctDynamicVector<double> Read();
   void Write( const vctDynamicVector<double>& ft );

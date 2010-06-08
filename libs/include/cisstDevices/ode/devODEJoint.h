@@ -53,8 +53,12 @@ class CISST_EXPORT devODEJoint {
 	       double qmin,
 	       double qmax );
 
+  dBodyID GetProximalBody() const;
+  dBodyID GetDistalBody() const;
+
   //! Return the ODE ID of the joint
   dJointID JointID() const;
+
   //! Return the ODE ID of the joint friction
   dJointID FrictionID() const;
 
@@ -67,7 +71,7 @@ class CISST_EXPORT devODEJoint {
      \return The joint position (no unit)
   */
   double GetPosition() const;
-  
+
   //! Return the velocity
   /**
      Returns the joint velocity given by ODE
@@ -78,7 +82,6 @@ class CISST_EXPORT devODEJoint {
   //! Get the force/torque
   double GetForceTorque() const;
   
-
   //! Set the force/torque
   /**
      Set the force/torque. The new value is NOT cliped at the limit.
