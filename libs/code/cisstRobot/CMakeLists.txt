@@ -82,7 +82,6 @@ if (BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB)
 #	 robTrajectoryManager.cpp
 #	 robVariable.cpp
 
-	 robControllerJoints.cpp
 	 robComputedTorque.cpp
 
 	 robFunction.cpp
