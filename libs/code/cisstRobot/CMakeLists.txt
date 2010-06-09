@@ -33,23 +33,30 @@ SET(HEADER_FILES
 if (BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB)
     SET( HEADER_FILES
          ${HEADER_FILES}
-	 robConstantR1.h
-	 robConstantSO3.h
-	 robFunction.h
-	 robLinear.h
-	 robMapping.h
-	 robQuintic.h
-	 robSigmoid.h
-	 robSLERP.h
-	 robCasteljauSO3.h
-	 robSpace.h
-	 robTrackSE3.h
-	 robTrajectory.h
-	 robTrajectoryR1.h
-	 robTrajectorySO3.h
-	 robTrajectoryManager.h
-	 robVariable.h
+#	 robConstantR1.h
+#	 robConstantSO3.h
+#	 robFunction.h
+#	 robLinear.h
+#	 robMapping.h
+#	 robQuintic.h
+#	 robSigmoid.h
+#	 robSLERP.h
+#	 robCasteljauSO3.h
+#	 robSpace.h
+#	 robTrackSE3.h
+#	 robTrajectory.h
+#	 robTrajectoryR1.h
+#	 robTrajectorySO3.h
+#	 robTrajectoryManager.h
+#	 robVariable.h
 
+	 robComputedTorque.h
+	 robControllerJoints.h
+
+	 robFunction.h
+	 robFunctionRn.h
+	 robLinearRn.h
+	 
 	 robMass.h
 	 robJoint.h
 
@@ -59,21 +66,28 @@ if (BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB)
       )
     SET( SOURCE_FILES
          ${SOURCE_FILES}
-	 robConstantR1.cpp
-	 robConstantSO3.cpp
-	 robLinear.cpp
-	 robMapping.cpp
-	 robQuintic.cpp
-	 robSigmoid.cpp
-	 robSLERP.cpp
-	 robCasteljauSO3.cpp
-	 robSpace.cpp
-	 #  robTrackSE3.cpp
-	 robTrajectory.cpp
-	 robTrajectoryR1.cpp
-	 robTrajectorySO3.cpp
-	 robTrajectoryManager.cpp
-	 robVariable.cpp
+#	 robConstantR1.cpp
+#	 robConstantSO3.cpp
+#	 robLinear.cpp
+#	 robMapping.cpp
+#	 robQuintic.cpp
+#	 robSigmoid.cpp
+#	 robSLERP.cpp
+#	 robCasteljauSO3.cpp
+#	 robSpace.cpp
+#        robTrackSE3.cpp
+#	 robTrajectory.cpp
+#	 robTrajectoryR1.cpp
+#	 robTrajectorySO3.cpp
+#	 robTrajectoryManager.cpp
+#	 robVariable.cpp
+
+	 robControllerJoints.cpp
+	 robComputedTorque.cpp
+
+	 robFunction.cpp
+	 robFunctionRn.cpp
+	 robLinearRn.cpp
 
 	 robJoint.cpp
 	 robMass.cpp
