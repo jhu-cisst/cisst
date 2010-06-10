@@ -47,7 +47,13 @@ FIND_PATH( ICE_INCLUDE_DIR
              # some people may manually choose to install Ice here
              /usr/local/include
              # Windows
+             # 3.4.1
+               "C:/Program Files/ZeroC/Ice-3.4.1/include"
+               C:/Ice-3.4.1-VC90/include
+               C:/Ice-3.4.1-VC80/include
+               C:/Ice-3.4.1/include
              # 3.4.0
+               "C:/Program Files/ZeroC/Ice-3.4.0/include"
                C:/Ice-3.4.0-VC90/include
                C:/Ice-3.4.0-VC80/include
                C:/Ice-3.4.0/include
