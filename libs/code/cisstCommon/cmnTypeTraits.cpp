@@ -213,72 +213,72 @@ short cmnTypeTraits<short>::NaN() {
 }
 
 
-// ---------- long ----------
+// ---------- long long ----------
 template<>
-long & cmnTypeTraits<long>::ToleranceValue()
+long long & cmnTypeTraits<long long>::ToleranceValue()
 {
-    static long tolerance = 0;
+    static long long tolerance = 0;
     return tolerance;
 }
 
 template<>
-const long cmnTypeTraits<long>::DefaultTolerance = cmnTypeTraits<long>::ToleranceValue();
+const long long cmnTypeTraits<long long>::DefaultTolerance = cmnTypeTraits<long long>::ToleranceValue();
 
 template<>
-std::string cmnTypeTraits<long>::TypeName()
+std::string cmnTypeTraits<long long>::TypeName()
 {
-    return "long";
+    return "long long";
 }
 
 template<>
-long cmnTypeTraits<long>::PlusInfinity() {
+long long cmnTypeTraits<long long>::PlusInfinity() {
     // Not meaningful!  Here to avoid link errors
     return MaxPositiveValue();
 }
 
 template<>
-long cmnTypeTraits<long>::MinusInfinity() {
+long long cmnTypeTraits<long long>::MinusInfinity() {
     // Not meaningful!  Here to avoid link errors
     return MinNegativeValue();
 }
 
 template<>
-long cmnTypeTraits<long>::NaN() {
+long long cmnTypeTraits<long long>::NaN() {
     // Not meaningful!  Here to avoid link errors
     return 0;
 }
 
-// ---------- unsigned long ----------
+// ---------- unsigned long long ----------
 template<>
-unsigned long & cmnTypeTraits<unsigned long>::ToleranceValue()
+unsigned long long & cmnTypeTraits<unsigned long long>::ToleranceValue()
 {
-    static unsigned long tolerance = 0;
+    static unsigned long long tolerance = 0;
     return tolerance;
 }
 
 template<>
-const unsigned long cmnTypeTraits<unsigned long>::DefaultTolerance = cmnTypeTraits<unsigned long>::ToleranceValue();
+const unsigned long long cmnTypeTraits<unsigned long long>::DefaultTolerance = cmnTypeTraits<unsigned long long>::ToleranceValue();
 
 template<>
-std::string cmnTypeTraits<unsigned long>::TypeName()
+std::string cmnTypeTraits<unsigned long long>::TypeName()
 {
-    return "unsigned long";
+    return "unsigned long long";
 }
 
 template<>
-unsigned long cmnTypeTraits<unsigned long>::PlusInfinity() {
+unsigned long long cmnTypeTraits<unsigned long long>::PlusInfinity() {
     // Not meaningful!  Here to avoid link errors
     return MaxPositiveValue();
 }
 
 template<>
-unsigned long cmnTypeTraits<unsigned long>::MinusInfinity() {
+unsigned long long cmnTypeTraits<unsigned long long>::MinusInfinity() {
     // Not meaningful!  Here to avoid link errors
     return MinNegativeValue();
 }
 
 template<>
-unsigned long cmnTypeTraits<unsigned long>::NaN() {
+unsigned long long cmnTypeTraits<unsigned long long>::NaN() {
     // Not meaningful!  Here to avoid link errors
     return 0;
 }

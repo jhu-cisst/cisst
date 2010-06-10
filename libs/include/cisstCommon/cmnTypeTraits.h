@@ -269,7 +269,7 @@ inline bool cmnTypeTraits<double>::HasSign() {
 }
 
 template<>
-inline bool cmnTypeTraits<long>::HasSign() {
+inline bool cmnTypeTraits<long long>::HasSign() {
     return true;
 }
 
@@ -289,7 +289,7 @@ inline bool cmnTypeTraits<char>::HasSign() {
 }
 
 template<>
-inline bool cmnTypeTraits<unsigned long>::HasSign() {
+inline bool cmnTypeTraits<unsigned long long>::HasSign() {
     return false;
 }
 
@@ -321,7 +321,7 @@ inline bool cmnTypeTraits<double>::HasInfinity() {
 }
 
 template<>
-inline bool cmnTypeTraits<long>::HasInfinity() {
+inline bool cmnTypeTraits<long long>::HasInfinity() {
     return false;
 }
 
@@ -341,7 +341,7 @@ inline bool cmnTypeTraits<char>::HasInfinity() {
 }
 
 template<>
-inline bool cmnTypeTraits<unsigned long>::HasInfinity() {
+inline bool cmnTypeTraits<unsigned long long>::HasInfinity() {
     return false;
 }
 
@@ -372,7 +372,7 @@ inline bool cmnTypeTraits<double>::HasNaN() {
 }
 
 template<>
-inline bool cmnTypeTraits<long>::HasNaN() {
+inline bool cmnTypeTraits<long long>::HasNaN() {
     return false;
 }
 
@@ -392,7 +392,7 @@ inline bool cmnTypeTraits<char>::HasNaN() {
 }
 
 template<>
-inline bool cmnTypeTraits<unsigned long>::HasNaN() {
+inline bool cmnTypeTraits<unsigned long long>::HasNaN() {
     return false;
 }
 
@@ -423,7 +423,7 @@ inline bool cmnTypeTraits<double>::IsNaN(const double & value) {
 }
 
 template<>
-inline bool cmnTypeTraits<long>::IsNaN(const long & CMN_UNUSED(value)) {
+inline bool cmnTypeTraits<long long>::IsNaN(const long long & CMN_UNUSED(value)) {
     return false;
 }
 
@@ -443,7 +443,7 @@ inline bool cmnTypeTraits<char>::IsNaN(const char & CMN_UNUSED(value)) {
 }
 
 template<>
-inline bool cmnTypeTraits<unsigned long>::IsNaN(const unsigned long & CMN_UNUSED(value)) {
+inline bool cmnTypeTraits<unsigned long long>::IsNaN(const unsigned long long & CMN_UNUSED(value)) {
     return false;
 }
 
@@ -593,52 +593,52 @@ inline short cmnTypeTraits<short>::MinNegativeValue()
 }
 
 
-// ---------- long ----------
+// ---------- long long ----------
 template<>
-inline long cmnTypeTraits<long>::MaxPositiveValue()
+inline long long cmnTypeTraits<long long>::MaxPositiveValue()
 {
-    return LONG_MAX;
+    return LLONG_MAX;
 }
 
 template<>
-inline long cmnTypeTraits<long>::MinPositiveValue()
+inline long long cmnTypeTraits<long long>::MinPositiveValue()
 {
     return 1;
 }
 
 template<>
-inline long cmnTypeTraits<long>::MaxNegativeValue()
+inline long long cmnTypeTraits<long long>::MaxNegativeValue()
 {
     return -1;
 }
 
 template<>
-inline long cmnTypeTraits<long>::MinNegativeValue()
+inline long long cmnTypeTraits<long long>::MinNegativeValue()
 {
-    return LONG_MIN;
+    return LLONG_MIN;
 }
 
-// ---------- unsigned long ----------
+// ---------- unsigned long long ----------
 template<>
-inline unsigned long cmnTypeTraits<unsigned long>::MaxPositiveValue()
+inline unsigned long long cmnTypeTraits<unsigned long long>::MaxPositiveValue()
 {
-    return ULONG_MAX;
+    return ULLONG_MAX;
 }
 
 template<>
-inline unsigned long cmnTypeTraits<unsigned long>::MinPositiveValue()
+inline unsigned long long cmnTypeTraits<unsigned long long>::MinPositiveValue()
 {
     return 1;
 }
 
 template<>
-inline unsigned long cmnTypeTraits<unsigned long>::MaxNegativeValue()
+inline unsigned long long cmnTypeTraits<unsigned long long>::MaxNegativeValue()
 {
     return 0;
 }
 
 template<>
-inline unsigned long cmnTypeTraits<unsigned long>::MinNegativeValue()
+inline unsigned long long cmnTypeTraits<unsigned long long>::MinNegativeValue()
 {
     return 0;
 }
