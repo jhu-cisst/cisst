@@ -137,10 +137,10 @@ protected:
         void error(const ::std::string & message) {
             CMN_LOG_RUN_ERROR << "ICE: " << message << std::endl;
         }
-        //::Ice::LoggerPtr cloneWithPrefix(const ::std::string&) {
-        //    // TODO: Ice-3.4 support
-        //    return NULL;
-        //}
+        ::Ice::LoggerPtr cloneWithPrefix(const ::std::string&) {
+            // TODO: Ice-3.4 support
+            return NULL;
+        }
     };
 
     /*! Logger class using OutputDebugString() on Windows. */
@@ -164,10 +164,10 @@ protected:
         void error(const ::std::string & message) {
             Log("##### ERROR: " + message);
         }
-        //::Ice::LoggerPtr cloneWithPrefix(const ::std::string&) {
-        //    // TODO: Ice-3.4 support
-        //    return NULL;
-        //}
+        ::Ice::LoggerPtr cloneWithPrefix(const ::std::string&) {
+            // TODO: Ice-3.4 support
+            return NULL;
+        }
 
     protected:
         void Log(const std::string& log)
