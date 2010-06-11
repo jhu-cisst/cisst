@@ -456,6 +456,7 @@ void devSensableHD::Create(void * data)
         if (HD_DEVICE_ERROR(error = hdGetError())) {
             CMN_LOG_CLASS_INIT_ERROR << "Create: Failed to initialize haptic device \""
                                      << interfaceName << "\"" << std::endl;
+            hduPrintError(stderr, &error, "Failed to initialize haptic device");
             deviceData->DeviceEnabled = false;
             return;
         }
