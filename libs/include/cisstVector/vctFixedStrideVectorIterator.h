@@ -59,7 +59,7 @@ http://www.cisst.org/cisst/license.txt.
 
   \sa vctFixedStrideVectorIterator
 */
-template<class _elementType, int _stride>
+template <class _elementType, vct::stride_type _stride>
 class vctFixedStrideVectorConstIterator:
     public std::iterator<std::random_access_iterator_tag, _elementType>
 {
@@ -215,7 +215,7 @@ public:
 /*!  The non-const iterator with a fixed stride.
  \sa vctFixedStrideVectorConstIterator
 */
-template<class _elementType, int _stride>
+template<class _elementType, vct::stride_type _stride>
 class vctFixedStrideVectorIterator : public vctFixedStrideVectorConstIterator<_elementType, _stride>
 {
 public:
@@ -305,7 +305,7 @@ public:
 
 
 /*! const_iterator + difference_type required by STL */
-template<class _elementType, int _stride>
+template<class _elementType, vct::stride_type _stride>
 vctFixedStrideVectorConstIterator<_elementType, _stride>
 operator+(const vctFixedStrideVectorConstIterator<_elementType, _stride> & iterator,
           typename vctFixedStrideVectorConstIterator<_elementType, _stride>::difference_type difference)
@@ -316,7 +316,7 @@ operator+(const vctFixedStrideVectorConstIterator<_elementType, _stride> & itera
 
 
 /*! difference_type + const_iterator required by STL */
-template<class _elementType, int _stride>
+template<class _elementType, vct::stride_type _stride>
 vctFixedStrideVectorConstIterator<_elementType, _stride>
 operator+(typename vctFixedStrideVectorConstIterator<_elementType, _stride>::difference_type difference,
           const vctFixedStrideVectorConstIterator<_elementType, _stride> & iterator)
@@ -327,7 +327,7 @@ operator+(typename vctFixedStrideVectorConstIterator<_elementType, _stride>::dif
 
 
 /*! const_iterator - difference_type required by STL */
-template<class _elementType, int _stride>
+template<class _elementType, vct::stride_type _stride>
 vctFixedStrideVectorConstIterator<_elementType, _stride>
 operator-(const vctFixedStrideVectorConstIterator<_elementType, _stride> & iterator,
           typename vctFixedStrideVectorConstIterator<_elementType,_stride>::difference_type difference)
@@ -341,7 +341,7 @@ operator-(const vctFixedStrideVectorConstIterator<_elementType, _stride> & itera
   returns a non-const iterator, which is why it is declared separately
   from the other operator +.
 */
-template<class _elementType, int _stride>
+template<class _elementType, vct::stride_type _stride>
 vctFixedStrideVectorIterator<_elementType, _stride>
 operator+(const vctFixedStrideVectorIterator<_elementType, _stride> & iterator,
           typename vctFixedStrideVectorIterator<_elementType, _stride>::difference_type difference)
@@ -352,7 +352,7 @@ operator+(const vctFixedStrideVectorIterator<_elementType, _stride> & iterator,
 
 
 /*! difference_type + iterator required by STL */
-template<class _elementType, int _stride>
+template<class _elementType, vct::stride_type _stride>
 vctFixedStrideVectorIterator<_elementType, _stride>
 operator+(typename vctFixedStrideVectorIterator<_elementType, _stride>::difference_type difference,
           const vctFixedStrideVectorIterator<_elementType, _stride> & iterator)
@@ -363,7 +363,7 @@ operator+(typename vctFixedStrideVectorIterator<_elementType, _stride>::differen
 
 
 /*! iterator - difference_type required by STL */
-template<class _elementType, int _stride>
+template<class _elementType, vct::stride_type _stride>
 vctFixedStrideVectorIterator<_elementType, _stride>
 operator-(const vctFixedStrideVectorIterator<_elementType, _stride> & iterator,
           typename vctFixedStrideVectorIterator<_elementType, _stride>::difference_type difference)

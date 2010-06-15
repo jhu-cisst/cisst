@@ -65,7 +65,7 @@ http://www.cisst.org/cisst/license.txt.
 
   // the vectorSize variable can be set to any value at any time
   // before creating the vector.
-  unsigned int vectorSize = 12;
+  size_t vectorSize = 12;
 
   // constructor allocation
   vctDynamicVector<ElementType> v1(vectorSize);

@@ -79,7 +79,7 @@ protected:
 
     /*! Pseudo-index for the iterator. See complete documentation
       for a thorough discussion of this "meta index". */
-    int MetaIndex;
+    difference_type MetaIndex;
 
     /*! Pointer to the object being referred to by this iterator.
       It is not declared const, so we will be able to use it in the
@@ -94,9 +94,9 @@ protected:
       documentation for a detailed description of this algorithm. */
     void UpdateElementPointer(void)
     {
-        int metaindex = MetaIndex;
-        int offset = 0;
-        int modulus;
+        difference_type metaindex = MetaIndex;
+        difference_type offset = 0;
+        difference_type modulus;
 
         typename nstride_type::const_reverse_iterator stridesBegin = ContainerOwner->strides().rbegin();
         typename nsize_type::const_reverse_iterator sizesBegin = ContainerOwner->sizes().rbegin();
@@ -105,9 +105,9 @@ protected:
         for (; sizesBegin != sizesEnd;
              ++sizesBegin, ++stridesBegin) {
             sizes_value = (*sizesBegin == 0) ? 1 : *sizesBegin;
-            modulus = metaindex % static_cast<int>(sizes_value);
+            modulus = metaindex % static_cast<difference_type>(sizes_value);
             offset += modulus * (*stridesBegin);
-            metaindex /= static_cast<int>(sizes_value);
+            metaindex /= static_cast<difference_type>(sizes_value);
         }
 
         offset += metaindex * ContainerOwner->sizes()[0] * ContainerOwner->strides()[0];
@@ -129,7 +129,7 @@ public:
     /*! Constructor taking a non const element pointer; the
       starting position will be the first element of the nArray.
       Note that only read operations will be performed! */
-    vctVarStrideNArrayConstIterator(const OwnerType * container, int index = 0):
+    vctVarStrideNArrayConstIterator(const OwnerType * container, difference_type index = 0):
         ContainerOwner(container),
         MetaIndex(index)
     {
@@ -226,9 +226,9 @@ public:
     /*! Random access (return const reference). */
     const value_type & operator [] (difference_type index) const
     {
-        int metaindex = MetaIndex + index;
-        int offset = 0;
-        int modulus;
+        difference_type metaindex = MetaIndex + index;
+        difference_type offset = 0;
+        difference_type modulus;
 
         typename nstride_type::const_reverse_iterator stridesBegin = ContainerOwner->strides().rbegin();
         typename nsize_type::const_reverse_iterator sizesBegin = ContainerOwner->sizes().rbegin();
@@ -237,9 +237,9 @@ public:
         for (; sizesBegin != sizesEnd;
              ++sizesBegin, ++stridesBegin) {
             sizes_value = (*sizesBegin == 0) ? 1 : *sizesBegin;
-            modulus = metaindex % static_cast<int>(sizes_value);
+            modulus = metaindex % static_cast<difference_type>(sizes_value);
             offset += modulus * (*stridesBegin);
-            metaindex /= static_cast<int>(sizes_value);
+            metaindex /= static_cast<difference_type>(sizes_value);
         }
 
         value_type * pointer = const_cast<value_type *>( ContainerOwner->Pointer() );
@@ -324,7 +324,7 @@ public:
     /*! Constructor taking a non const element pointer; the
       starting position will be the first element of the nArray.
       Note that only read operations will be performed! */
-    vctVarStrideNArrayIterator(const OwnerType * container, int index = 0):
+    vctVarStrideNArrayIterator(const OwnerType * container, difference_type index = 0):
         BaseType(container, index)
     {}
 
@@ -407,9 +407,9 @@ public:
     /*! Add non const version of operator[] */
     value_type & operator[](difference_type index)
     {
-        int metaindex = this->MetaIndex + index;
-        int offset = 0;
-        int modulus;
+        difference_type metaindex = this->MetaIndex + index;
+        difference_type offset = 0;
+        difference_type modulus;
 
         typename nstride_type::const_reverse_iterator stridesBegin = this->ContainerOwner->strides().rbegin();
         typename nsize_type::const_reverse_iterator sizesBegin = this->ContainerOwner->sizes().rbegin();
@@ -419,9 +419,9 @@ public:
              sizesBegin != sizesEnd;
              ++sizesBegin, ++stridesBegin) {
             sizes_value = (*sizesBegin == 0) ? 1 : *sizesBegin;
-            modulus = metaindex % static_cast<int>(sizes_value);
+            modulus = metaindex % static_cast<difference_type>(sizes_value);
             offset += modulus * (*stridesBegin);
-            metaindex /= static_cast<int>(sizes_value);
+            metaindex /= static_cast<difference_type>(sizes_value);
         }
 
         value_type * pointer = const_cast<value_type *>(this->ContainerOwner->Pointer());

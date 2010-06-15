@@ -7,7 +7,7 @@
   Author(s):	Ofri Sadowsky, Anton Deguet
   Created on:	2004-07-02
 
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -65,10 +65,10 @@ protected:
     value_type * DataPtr;
 
     /* Strides between the elements of a matrix. */
-    difference_type ColumnStride;
-    int NumColumns;
-    difference_type RowStride;
-    int CurrentColumn;
+    stride_type ColumnStride;
+    difference_type NumColumns;
+    stride_type RowStride;
+    difference_type CurrentColumn;
 
     /*! An auxiliary method to wrap the column index of the iterator.
       If the current column exceeds the number of columns in the matrix,
@@ -108,8 +108,9 @@ public:
 
     /*! Constructor taking a non-const element pointer.  Note that
       only read operations will be performed! */
-    vctVarStrideMatrixConstIterator(value_type * dataPtr, difference_type columnStride,
-        int numColumns, difference_type rowStride, int initialColumn = 0):
+    vctVarStrideMatrixConstIterator(value_type * dataPtr, stride_type columnStride,
+                                    size_type numColumns, stride_type rowStride,
+                                    size_type initialColumn = 0):
         DataPtr(dataPtr),
         ColumnStride(columnStride),
         NumColumns(numColumns),
@@ -127,7 +128,8 @@ public:
       about creating a non-const iterator over a const container.
     */
     vctVarStrideMatrixConstIterator(const value_type * dataPtr, difference_type columnStride,
-        int numColumns, difference_type rowStride, int initialColumn = 0):
+                                    size_type numColumns, stride_type rowStride,
+                                    size_type initialColumn = 0):
         DataPtr(const_cast<value_type *>(dataPtr)),
         ColumnStride(columnStride),
         NumColumns(numColumns),
@@ -295,8 +297,9 @@ public:
       write operations on the refered object are permitted.  Note that
       there is no constructor that takes a const element pointer.
     */
-    vctVarStrideMatrixIterator(value_type * dataPtr, difference_type columnStride,
-        int numColumns, difference_type rowStride, int initialColumn = 0):
+    vctVarStrideMatrixIterator(value_type * dataPtr, stride_type columnStride,
+                               size_type numColumns, stride_type rowStride,
+                               size_type initialColumn = 0):
         BaseType(dataPtr, columnStride, numColumns, rowStride, initialColumn)
         {}
 
