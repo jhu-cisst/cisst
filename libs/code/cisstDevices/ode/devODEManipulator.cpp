@@ -17,15 +17,14 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstDevices/ode/devODEManipulator.h>
 
-//CMN_IMPLEMENT_SERVICES( devODEManipulator );
-
 devODEManipulator::devODEManipulator( const std::string& devname,
 				      double period,
 				      const vctDynamicVector<double>& qinit ):
 
   devManipulator( devname, period, qinit.size() ),
   robManipulator( "", vctFrame4x4<double>() ),
-  qinit( qinit ){}
+  qinit( qinit ),
+  base( NULL ){}
 
 devODEManipulator::devODEManipulator(const std::string& devname,
 				     double period,
@@ -36,7 +35,8 @@ devODEManipulator::devODEManipulator(const std::string& devname,
 				     const std::vector<std::string>& geomfiles):
   devManipulator( devname, period, qinit.size() ),
   robManipulator( robotfilename, Rtw0 ),
-  qinit( qinit ){
+  qinit( qinit ),
+  base( NULL ){
 
   //! Create a new space for the manipulator
   dSpaceID spaceid = dSimpleSpaceCreate( world.SpaceID() );
@@ -44,7 +44,7 @@ devODEManipulator::devODEManipulator(const std::string& devname,
   // Initialize the links
 
   // a temporary vector to hold pointers to bodies
-  std::vector<devODEBody*> bodies;
+  //std::vector<devODEBody*> bodies;
 
   for( size_t i=0; i<links.size(); i++ ){
 
@@ -105,6 +105,17 @@ devODEManipulator::devODEManipulator(const std::string& devname,
   }
 }
 
+dBodyID devODEManipulator::BaseID() const {
+  if( base == NULL ) return NULL;
+  else               return base->BodyID();
+}
+
+void devODEManipulator::Insert( devODEBody* body )
+{ bodies.push_back( body ); }
+
+void devODEManipulator::Insert( devODEJoint* joint )
+{ joints.push_back( joint ); }
+
 vctDynamicVector<double> devODEManipulator::Read()
 { return GetJointsPositions(); }
 
@@ -115,7 +126,6 @@ vctDynamicVector<double> devODEManipulator::GetJointsPositions() const {
   vctDynamicVector<double> q( joints.size(), 0.0 );
   for(size_t i=0; i<joints.size(); i++)
     { q[i] =  joints[i]->GetPosition(); }
-
   return q + qinit;
 }
 

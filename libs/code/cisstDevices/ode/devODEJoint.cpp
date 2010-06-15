@@ -24,7 +24,8 @@ devODEJoint::devODEJoint( dWorldID world,
 			  const vctFixedSizeVector<double,3>& anchor,
 			  const vctFixedSizeVector<double,3>& axis,
 			  double qmin,
-			  double qmax ){
+			  double qmax ) : 
+  ft( 0.0 ) {
   
   if( type == dJointTypeHinge ){
     

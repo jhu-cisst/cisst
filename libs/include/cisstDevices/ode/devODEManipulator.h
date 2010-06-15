@@ -41,8 +41,14 @@ class CISST_EXPORT devODEManipulator :
  protected:
 
   std::vector<devODEJoint*> joints;
+  std::vector<devODEBody*>  bodies;
 
   vctDynamicVector<double> qinit;
+
+  void Insert( devODEBody* body );
+  void Insert( devODEJoint* joint );
+
+  devODEBody* base;
 
  public: 
 
@@ -101,6 +107,8 @@ class CISST_EXPORT devODEManipulator :
 
   devODEManipulator::State GetState( ) const;
   void SetState( const devODEManipulator::State& state );
+
+  dBodyID BaseID() const;
 
 };
 

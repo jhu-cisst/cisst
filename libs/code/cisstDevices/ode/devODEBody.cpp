@@ -45,7 +45,7 @@ devODEBody::devODEBody( dWorldID worldid,
 				 (const dReal*)this->vertices,
 				 this->nvertices,
 				 this->triangles,
-				 this->ntriangles );
+				 this->ntriangles*3 );
     // Create the geom
     this->geomid = dCreateTriMesh( spaceid, this->meshid, NULL, NULL, NULL);
 
@@ -246,9 +246,9 @@ int devODEBody::LoadOBJ( const std::string& objfilename,
 
   // copy the indices (3 indices/triangle)
   for( size_t i=0; i<ntriangles; i++ ){
-    triangles[i*3+0] = (dTriIndex)tmptriangles[i][2];
+    triangles[i*3+0] = (dTriIndex)tmptriangles[i][0];
     triangles[i*3+1] = (dTriIndex)tmptriangles[i][1];
-    triangles[i*3+2] = (dTriIndex)tmptriangles[i][0];
+    triangles[i*3+2] = (dTriIndex)tmptriangles[i][2];
   }
 
   return 0;

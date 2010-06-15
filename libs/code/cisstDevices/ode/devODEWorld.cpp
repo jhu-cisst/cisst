@@ -92,6 +92,7 @@ bool devODEWorld::SelfCollision( dGeomID o1, dGeomID o2 ){
 }
 
 void devODEWorld::Collision( dGeomID o1, dGeomID o2 ){
+
   dContact contacts[devODEWorld::NUM_CONTACTS];
   
   for(size_t i=0; i<devODEWorld::NUM_CONTACTS; i++){
@@ -114,7 +115,7 @@ void devODEWorld::Collision( dGeomID o1, dGeomID o2 ){
     dBodyID body1 = dGeomGetBody(o1);
     dBodyID body2 = dGeomGetBody(o2);
     dJointID contact = dJointCreateContact(WorldID(), GroupID(), &contacts[i]);
-
+    
     dJointAttach (contact, body1, body2);
   }
 }
@@ -122,7 +123,7 @@ void devODEWorld::Collision( dGeomID o1, dGeomID o2 ){
 static void space_collision(void *argv, dGeomID o1, dGeomID o2){
   devODEWorld* world = (devODEWorld*)argv;
 
-  if(!world->SelfCollision(o1, o2)){
+  //if(!world->SelfCollision(o1, o2)){
     
     if (dGeomIsSpace(o1) || dGeomIsSpace(o2)) {
       // colliding a space with something
@@ -134,9 +135,12 @@ static void space_collision(void *argv, dGeomID o1, dGeomID o2){
     }
     else {
       // colliding two non-space geoms, so generate contacts
-      world->Collision( o1, o2 );
+      dBodyID b1 = dGeomGetBody( o1 );
+      dBodyID b2 = dGeomGetBody( o2 );
+      if( dAreConnected( b1, b2 ) == 0 )
+	{ world->Collision( o1, o2 ); }
     }
-  }
+    //}
 }
 
 void devODEWorld::Run() {
