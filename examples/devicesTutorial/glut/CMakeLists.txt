@@ -16,10 +16,9 @@
 project(devicesGLUTManipulator)
 
 # name the main executable and specifies with source files to use
-add_executable(devicesGLUTManipulator
-               # code files to compile
-               robodocglut.cpp
-               )
+add_executable( devicesGLUTManipulator    robodocglut.cpp )
+add_executable( wamglut                   wamglut.cpp )
 
 # link with the cisst libraries
 cisst_requires(devicesGLUTManipulator "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstParameterTypes;cisstDevices")
+cisst_requires(wamglut "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstParameterTypes;cisstDevices")
