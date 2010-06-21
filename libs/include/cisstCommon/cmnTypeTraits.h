@@ -256,7 +256,6 @@ private:
 
 #ifndef DOXYGEN
 
-
 /* Define which types are signed and which are unsigned */
 template<>
 inline bool cmnTypeTraits<float>::HasSign() {
@@ -269,7 +268,7 @@ inline bool cmnTypeTraits<double>::HasSign() {
 }
 
 template<>
-inline bool cmnTypeTraits<long long>::HasSign() {
+inline bool cmnTypeTraits<long long int>::HasSign() {
     return true;
 }
 
@@ -289,7 +288,7 @@ inline bool cmnTypeTraits<char>::HasSign() {
 }
 
 template<>
-inline bool cmnTypeTraits<unsigned long long>::HasSign() {
+inline bool cmnTypeTraits<unsigned long long int>::HasSign() {
     return false;
 }
 
@@ -321,7 +320,7 @@ inline bool cmnTypeTraits<double>::HasInfinity() {
 }
 
 template<>
-inline bool cmnTypeTraits<long long>::HasInfinity() {
+inline bool cmnTypeTraits<long long int>::HasInfinity() {
     return false;
 }
 
@@ -341,7 +340,7 @@ inline bool cmnTypeTraits<char>::HasInfinity() {
 }
 
 template<>
-inline bool cmnTypeTraits<unsigned long long>::HasInfinity() {
+inline bool cmnTypeTraits<unsigned long long int>::HasInfinity() {
     return false;
 }
 
@@ -372,7 +371,7 @@ inline bool cmnTypeTraits<double>::HasNaN() {
 }
 
 template<>
-inline bool cmnTypeTraits<long long>::HasNaN() {
+inline bool cmnTypeTraits<long long int>::HasNaN() {
     return false;
 }
 
@@ -392,7 +391,7 @@ inline bool cmnTypeTraits<char>::HasNaN() {
 }
 
 template<>
-inline bool cmnTypeTraits<unsigned long long>::HasNaN() {
+inline bool cmnTypeTraits<unsigned long long int>::HasNaN() {
     return false;
 }
 
@@ -423,7 +422,7 @@ inline bool cmnTypeTraits<double>::IsNaN(const double & value) {
 }
 
 template<>
-inline bool cmnTypeTraits<long long>::IsNaN(const long long & CMN_UNUSED(value)) {
+inline bool cmnTypeTraits<long long int>::IsNaN(const long long int & CMN_UNUSED(value)) {
     return false;
 }
 
@@ -443,7 +442,7 @@ inline bool cmnTypeTraits<char>::IsNaN(const char & CMN_UNUSED(value)) {
 }
 
 template<>
-inline bool cmnTypeTraits<unsigned long long>::IsNaN(const unsigned long long & CMN_UNUSED(value)) {
+inline bool cmnTypeTraits<unsigned long long int>::IsNaN(const unsigned long long int & CMN_UNUSED(value)) {
     return false;
 }
 
@@ -462,286 +461,43 @@ inline bool cmnTypeTraits<unsigned char>::IsNaN(const unsigned char & CMN_UNUSED
     return false;
 }
 
+
 /* Define limits for some types as inline functions */
-
-// ---------- float ----------
-template<>
-inline float cmnTypeTraits<float>::MaxPositiveValue()
-{
-    return FLT_MAX;
+#define CMN_TYPE_TRAITS_SPECIALIZE_LIMITS(type, maxPositiveValue, minPositiveValue, maxNegativeValue, minNegativeValue) \
+template<> inline type cmnTypeTraits<type>::MaxPositiveValue() { \
+    return maxPositiveValue; \
+} \
+template<> inline type cmnTypeTraits<type>::MinPositiveValue() { \
+    return minPositiveValue; \
+} \
+template<> inline type cmnTypeTraits<type>::MaxNegativeValue() { \
+    return maxNegativeValue; \
+} \
+template<> inline type cmnTypeTraits<type>::MinNegativeValue() { \
+    return minNegativeValue; \
 }
 
-template<>
-inline float cmnTypeTraits<float>::MinPositiveValue()
-{
-    return FLT_MIN;
-}
-
-template<>
-inline float cmnTypeTraits<float>::MaxNegativeValue()
-{
-    return -FLT_MIN;
-}
-
-template<>
-inline float cmnTypeTraits<float>::MinNegativeValue()
-{
-    return -FLT_MAX;
-}
-
-
-// ---------- double ----------
-template<>
-inline double cmnTypeTraits<double>::MaxPositiveValue()
-{
-    return DBL_MAX;
-}
-
-template<>
-inline double cmnTypeTraits<double>::MinPositiveValue()
-{
-    return DBL_MIN;
-}
-
-template<>
-inline double cmnTypeTraits<double>::MaxNegativeValue()
-{
-    return -DBL_MIN;
-}
-
-template<>
-inline double cmnTypeTraits<double>::MinNegativeValue()
-{
-    return -DBL_MAX;
-}
-
-
-// ---------- int ----------
-template<>
-inline int cmnTypeTraits<int>::MaxPositiveValue()
-{
-    return INT_MAX;
-}
-
-template<>
-inline int cmnTypeTraits<int>::MinPositiveValue()
-{
-    return 1;
-}
-
-template<>
-inline int cmnTypeTraits<int>::MaxNegativeValue()
-{
-    return -1;
-}
-
-template<>
-inline int cmnTypeTraits<int>::MinNegativeValue()
-{
-    return INT_MIN;
-}
-
-// ---------- char ----------
-template<>
-inline char cmnTypeTraits<char>::MaxPositiveValue()
-{
-    return CHAR_MAX;
-}
-
-template<>
-inline char cmnTypeTraits<char>::MinPositiveValue()
-{
-    return 1;
-}
-
-template<>
-inline char cmnTypeTraits<char>::MaxNegativeValue()
-{
-    return -1;
-}
-
-template<>
-inline char cmnTypeTraits<char>::MinNegativeValue()
-{
-    return CHAR_MIN;
-}
-
-
-// ---------- short ----------
-template<>
-inline short cmnTypeTraits<short>::MaxPositiveValue()
-{
-    return SHRT_MAX;
-}
-
-template<>
-inline short cmnTypeTraits<short>::MinPositiveValue()
-{
-    return 1;
-}
-
-template<>
-inline short cmnTypeTraits<short>::MaxNegativeValue()
-{
-    return -1;
-}
-
-template<>
-inline short cmnTypeTraits<short>::MinNegativeValue()
-{
-    return SHRT_MIN;
-}
-
-
-// ---------- long long ----------
-template<>
-inline long long cmnTypeTraits<long long>::MaxPositiveValue()
-{
-    return LLONG_MAX;
-}
-
-template<>
-inline long long cmnTypeTraits<long long>::MinPositiveValue()
-{
-    return 1;
-}
-
-template<>
-inline long long cmnTypeTraits<long long>::MaxNegativeValue()
-{
-    return -1;
-}
-
-template<>
-inline long long cmnTypeTraits<long long>::MinNegativeValue()
-{
-    return LLONG_MIN;
-}
-
-// ---------- unsigned long long ----------
-template<>
-inline unsigned long long cmnTypeTraits<unsigned long long>::MaxPositiveValue()
-{
-    return ULLONG_MAX;
-}
-
-template<>
-inline unsigned long long cmnTypeTraits<unsigned long long>::MinPositiveValue()
-{
-    return 1;
-}
-
-template<>
-inline unsigned long long cmnTypeTraits<unsigned long long>::MaxNegativeValue()
-{
-    return 0;
-}
-
-template<>
-inline unsigned long long cmnTypeTraits<unsigned long long>::MinNegativeValue()
-{
-    return 0;
-}
-
-// ---------- unsigned int ----------
-template<>
-inline unsigned int cmnTypeTraits<unsigned int>::MaxPositiveValue()
-{
-    return UINT_MAX;
-}
-
-template<>
-inline unsigned int cmnTypeTraits<unsigned int>::MinPositiveValue()
-{
-    return 1;
-}
-
-template<>
-inline unsigned int cmnTypeTraits<unsigned int>::MaxNegativeValue()
-{
-    return 0;
-}
-
-template<>
-inline unsigned int cmnTypeTraits<unsigned int>::MinNegativeValue()
-{
-    return 0;
-}
-
-// ---------- unsigned short ----------
-template<>
-inline unsigned short cmnTypeTraits<unsigned short>::MaxPositiveValue()
-{
-    return USHRT_MAX;
-}
-
-template<>
-inline unsigned short cmnTypeTraits<unsigned short>::MinPositiveValue()
-{
-    return 1;
-}
-
-template<>
-inline unsigned short cmnTypeTraits<unsigned short>::MaxNegativeValue()
-{
-    return 0;
-}
-
-template<>
-inline unsigned short cmnTypeTraits<unsigned short>::MinNegativeValue()
-{
-    return 0;
-}
-
-// ---------- unsigned char ----------
-template<>
-inline unsigned char cmnTypeTraits<unsigned char>::MaxPositiveValue()
-{
-    return UCHAR_MAX;
-}
-
-template<>
-inline unsigned char cmnTypeTraits<unsigned char>::MinPositiveValue()
-{
-    return 1;
-}
-
-template<>
-inline unsigned char cmnTypeTraits<unsigned char>::MaxNegativeValue()
-{
-    return 0;
-}
-
-template<>
-inline unsigned char cmnTypeTraits<unsigned char>::MinNegativeValue()
-{
-    return 0;
-}
-
-// ---------- bool ----------
-template<>
-inline bool cmnTypeTraits<bool>::MaxPositiveValue()
-{
-    return true;
-}
-
-template<>
-inline bool cmnTypeTraits<bool>::MinPositiveValue()
-{
-    return true;
-}
-
-template<>
-inline bool cmnTypeTraits<bool>::MaxNegativeValue()
-{
-    return false;
-}
-
-template<>
-inline bool cmnTypeTraits<bool>::MinNegativeValue()
-{
-    return false;
-}
+CMN_TYPE_TRAITS_SPECIALIZE_LIMITS(float, FLT_MAX, FLT_MIN, -FLT_MIN, -FLT_MAX);
+CMN_TYPE_TRAITS_SPECIALIZE_LIMITS(double, DBL_MAX, DBL_MIN, -DBL_MIN, -DBL_MAX);
+CMN_TYPE_TRAITS_SPECIALIZE_LIMITS(int, INT_MAX, 1, -1, INT_MIN);
+CMN_TYPE_TRAITS_SPECIALIZE_LIMITS(unsigned int, UINT_MAX, 1, 0, 0);
+CMN_TYPE_TRAITS_SPECIALIZE_LIMITS(char, CHAR_MAX, 1, -1, CHAR_MIN);
+CMN_TYPE_TRAITS_SPECIALIZE_LIMITS(unsigned char, CHAR_MAX, 1, 0, 0);
+CMN_TYPE_TRAITS_SPECIALIZE_LIMITS(short, SHRT_MAX, 1, -1, SHRT_MIN);
+CMN_TYPE_TRAITS_SPECIALIZE_LIMITS(unsigned short, SHRT_MAX, 1, 0, 0);
+#if (CISST_DATA_MODEL == CISST_LP64)
+  CMN_TYPE_TRAITS_SPECIALIZE_LIMITS(long int, LLONG_MAX, 1, -1, LLONG_MIN);
+#else
+  CMN_TYPE_TRAITS_SPECIALIZE_LIMITS(long int, LONG_MAX, 1, -1, LONG_MIN);
+#endif
+CMN_TYPE_TRAITS_SPECIALIZE_LIMITS(long long int, LLONG_MAX, 1, -1, LLONG_MIN);
+#if (CISST_DATA_MODEL == CISST_LP64)
+  CMN_TYPE_TRAITS_SPECIALIZE_LIMITS(unsigned long int, LLONG_MAX, 1, 0, 0);
+#else
+  CMN_TYPE_TRAITS_SPECIALIZE_LIMITS(unsigned long int, LONG_MAX, 1, 0, 0);
+#endif
+CMN_TYPE_TRAITS_SPECIALIZE_LIMITS(unsigned long long int, LLONG_MAX, 1, 0, 0);
+CMN_TYPE_TRAITS_SPECIALIZE_LIMITS(bool, true, true, false, false);
 
 #endif // DOXYGEN
 
@@ -792,4 +548,3 @@ public:
 #endif // !SWIG
 
 #endif // _cmnTypeTraits_h
-
