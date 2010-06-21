@@ -72,3 +72,6 @@ http://www.cisst.org/cisst/license.txt.
         %include "cisstDevices/devMicronTracker.h"
     #endif
 #endif
+
+%include "cisstDevices/devKeyboard.h"
+
