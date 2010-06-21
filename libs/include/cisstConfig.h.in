@@ -40,6 +40,9 @@ http://www.cisst.org/cisst/license.txt.
 // Was cisst compiled as shared libraries or static
 #define CISST_BUILD_SHARED_LIBS @CISST_BUILD_SHARED_LIBS@
 
+// For MSVC, CMake generator assumes either 32 or 64 bits compiler
+#define CISST_CMAKE_COMPILER_IS_MSVC_64 @CISST_CMAKE_COMPILER_IS_MSVC_64@
+
 // LAPACK3E, erc-cisst distribution of code from netlib.org
 #define CISST_HAS_CISSTNETLIB @CISST_HAS_CISSTNETLIB@
 

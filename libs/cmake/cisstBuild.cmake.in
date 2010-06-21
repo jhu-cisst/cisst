@@ -27,6 +27,8 @@ SET(CISST_LIBRARY_DIR "@CISST_BUILD_LINK_DIRECTORIES@")
 SET(CISST_CMAKE_DIR "@cisst_SOURCE_DIR@/libs/cmake")
 SET(CISST_SWIG_INCLUDE_DIR "@CISST_SWIG_INCLUDE_DIR@")
 
+# On Windows, CMake uses a different compiler at configuration time
+set (CISST_CMAKE_COMPILER_IS_MSVC_64 @CISST_CMAKE_COMPILER_IS_MSVC_64@)
 
 # Which libraries have been compiled
 SET(CISST_LIBRARIES "@CISST_LIBRARIES@")

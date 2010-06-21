@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2005-2009 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2005-2010 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -60,6 +60,13 @@ SET(cisst_EXECUTABLE_PATH "${EXECUTABLE_OUTPUT_PATH}")
 
 # Where to find cisst defined CMake Macros/Modules
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${cisst_SOURCE_DIR}/libs/cmake)
+
+# On Windows, CMake uses a different compiler at configuration time
+if (CMAKE_CL_64)
+  set (CISST_CMAKE_COMPILER_IS_MSVC_64 ON)
+else (CMAKE_CL_64)
+  set (CISST_CMAKE_COMPILER_IS_MSVC_64 OFF)
+endif (CMAKE_CL_64)
 
 # Options
 OPTION(BUILD_TESTS "Build tests." OFF)
