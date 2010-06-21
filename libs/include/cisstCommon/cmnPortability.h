@@ -85,6 +85,15 @@ http://www.cisst.org/cisst/license.txt.
 #define CISST_DOTNET2008 9
 //@}
 
+
+/*! Data models for 32 and 64 bits architectures. */
+//@{
+#define CISST_ILP32 1 // Integers, Longs and Pointers are 32 bits
+#define CISST_LP64 2 // Longs and Pointers are 64 bits - Linux, MacOS 64
+#define CISST_LLP64 3 // Long Longs and Pointers are 64 bits, longs are still 32 bits - Windows
+//@}
+
+
 // skip rest of tests for doxygen
 #ifndef DOXYGEN
 
@@ -141,6 +150,10 @@ http://www.cisst.org/cisst/license.txt.
   // check compiler versions
   #ifdef _MSC_VER
     #define CISST_COMPILER_IS_MSVC
+
+    #ifdef _WIN64
+      #define CISST_COMPILER_IS_MSVC_64
+    #endif
 
     #if (_MSC_VER == 1200)
       #define CISST_COMPILER CISST_VCPP6
@@ -206,6 +219,35 @@ http://www.cisst.org/cisst/license.txt.
 // and set to zero otherwise
 #  define CISST_OS_IS_WINDOWS 0
 #endif
+
+
+// Define CISST_DATA_MODEL, i.e. either CISST_LLP64 (Windows) or CISST_LP64 (Unix, most of them).  Also use ILP32.
+#if CISST_COMPILER == CISST_GCC
+  #ifdef _LP64
+    #define CISST_DATA_MODEL CISST_LP64
+  #else
+    #ifdef _LLP64
+      #define CISST_DATA_MODEL CISST_LPL64
+    #else
+      // default for now, might have to refine for cygwin? 
+      #define CISST_DATA_MODEL CISST_ILP32
+    #endif
+  #endif
+#endif // CISST_COMPILER == CISST_GCC
+
+#ifdef CISST_COMPILER_IS_MSVC
+  #ifdef CISST_COMPILER_IS_MSVC_64
+    #define CISST_DATA_MODEL CISST_LLP64
+  #else
+    #define CISST_DATA_MODEL CISST_ILP32
+  #endif
+#endif // CISST_COMPILER_IS_MSVC
+
+#ifndef CISST_DATA_MODEL
+  #define CISST_DATA_MODEL CISST_UNDEFINED
+#endif
+
+
 
 #endif // DOXYGEN end of doxygen section to skip
 
