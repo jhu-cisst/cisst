@@ -141,7 +141,7 @@ protected:
         ConnectionElement(const std::string & requestProcessName, const unsigned int connectionID,
             const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientRequiredInterfaceName,
             const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverProvidedInterfaceName)
-            : RequestProcessName(requestProcessName), ConnectionID(connectionID), Connected(false),
+            : ConnectionID(connectionID), Connected(false), RequestProcessName(requestProcessName),
               ClientProcessName(clientProcessName), ClientComponentName(clientComponentName), ClientRequiredInterfaceName(clientRequiredInterfaceName),
               ServerProcessName(serverProcessName), ServerComponentName(serverComponentName), ServerProvidedInterfaceName(serverProvidedInterfaceName)
         {
