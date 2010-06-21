@@ -54,8 +54,8 @@ void vctPlot2DOpenGL::RenderInitialize(void)
 void vctPlot2DOpenGL::RenderResize(double width, double height)
 {
     this->Viewport.Assign(width, height);
-    GLdouble w = static_cast<GLdouble>(width);
-    GLdouble h = static_cast<GLdouble>(height);
+    GLdouble w = static_cast<GLsizei>(width);
+    GLdouble h = static_cast<GLsizei>(height);
 	glViewport(0 , 0, w ,h); // set up viewport
 	glMatrixMode(GL_PROJECTION); // set the projection matrix
 	glLoadIdentity();
@@ -93,7 +93,7 @@ void vctPlot2DOpenGL::Render(void)
             glColor3d(trace->Color.Element(0),
                       trace->Color.Element(1),
                       trace->Color.Element(2));
-            glLineWidth(trace->LineWidth);
+            glLineWidth(static_cast<GLfloat>(trace->LineWidth));
             data = trace->Data.Element(0).Pointer();
             size = trace->Data.size();
             if (trace->IndexFirst >= trace->IndexLast) {
@@ -102,12 +102,12 @@ void vctPlot2DOpenGL::Render(void)
                 glVertexPointer(2, GL_DOUBLE, 0, data);
                 // draw first part
                 glDrawArrays(GL_LINE_STRIP,
-                             trace->IndexFirst,
-                             size - trace->IndexFirst);
+                             static_cast<GLint>(trace->IndexFirst),
+                             static_cast<GLsizei>(size - trace->IndexFirst));
                 // draw second part
                 glDrawArrays(GL_LINE_STRIP,
                              0,
-                             trace->IndexLast + 1);
+                             static_cast<GLsizei>(trace->IndexLast + 1));
                 glDisableClientState(GL_VERTEX_ARRAY);
                 // draw between end of buffer and beginning
                 glBegin(GL_LINE_STRIP);
@@ -122,7 +122,7 @@ void vctPlot2DOpenGL::Render(void)
                 glVertexPointer(2, GL_DOUBLE, 0, data);
                 glDrawArrays(GL_LINE_STRIP,
                              0,
-                             trace->IndexLast + 1);
+                             static_cast<GLsizei>(trace->IndexLast + 1));
                 glDisableClientState(GL_VERTEX_ARRAY);
             }
         }
