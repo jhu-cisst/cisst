@@ -49,8 +49,8 @@ protected:
     const cmnClassServicesBase * DataClassServices;
 
 public:
-    typedef unsigned int index_type;
-    typedef unsigned int size_type;
+    typedef size_t index_type;
+    typedef size_t size_type;
 
     /*! Default destructor. Does nothing. */
     inline virtual ~mtsStateArrayBase(void) {};

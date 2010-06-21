@@ -61,16 +61,16 @@ class CISST_EXPORT mtsCollectorState : public mtsCollectorBase
     RegisteredSignalElementType RegisteredSignalElements;
 
     /*! Offset for a sampling stride. */
-    unsigned int OffsetForNextRead;
+    size_t OffsetForNextRead;
 
     /*! Data index which should be read at the next time. */
-    int LastReadIndex;
+    ptrdiff_t LastReadIndex;
 
     /*! Local copy to reduce the number of reference in Collect() method. */
-    unsigned int TableHistoryLength;
+    size_t TableHistoryLength;
 
     /*! A stride value for data collector to skip several records. */
-    unsigned int SamplingInterval;
+    size_t SamplingInterval;
 
     /*! Pointers to the target task and the target state table. */
     mtsTask * TargetTask;
@@ -99,8 +99,8 @@ class CISST_EXPORT mtsCollectorState : public mtsCollectorBase
 
     /*! Fetch state table data */
     bool FetchStateTableData(const mtsStateTable * table,
-                             const unsigned int startIdx,
-                             const unsigned int endIdx);
+                             const size_t startIdx,
+                             const size_t endIdx);
 
     /*! Print out the signal names which are being collected. */
     void PrintHeader(const CollectorFileFormat & fileFormat);

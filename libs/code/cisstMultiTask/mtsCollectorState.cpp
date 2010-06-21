@@ -328,8 +328,8 @@ void mtsCollectorState::BatchCollect(const mtsStateTable::IndexRange & range)
         PrintHeader(this->FileFormat);
     }
 
-    const unsigned int StartIndex = range.First.Ticks()  % TableHistoryLength;
-    const unsigned int EndIndex = range.Last.Ticks() % TableHistoryLength;
+    const size_t StartIndex = range.First.Ticks()  % TableHistoryLength;
+    const size_t EndIndex = range.Last.Ticks() % TableHistoryLength;
 
     if (StartIndex < EndIndex) {
         // normal case
@@ -343,7 +343,7 @@ void mtsCollectorState::BatchCollect(const mtsStateTable::IndexRange & range)
         // first part: from the last read index to the bottom of the array
         if (FetchStateTableData(TargetStateTable, StartIndex, TableHistoryLength - 1)) {
             // second part: from the top of the array to the IndexReader
-            const unsigned int indexReader = TargetStateTable->IndexReader;
+            const size_t indexReader = TargetStateTable->IndexReader;
             if (FetchStateTableData(TargetStateTable, 0, indexReader)) {
                 LastReadIndex = (indexReader + (OffsetForNextRead - 1)) % TableHistoryLength;
             }
@@ -393,7 +393,7 @@ void mtsCollectorState::PrintHeader(const CollectorFileFormat & fileFormat)
             MarkHeaderEnd(*(this->OutputStream));
 
             // Remember the number of registered signals.
-            cmnULong cmnULongTotalSignalCount;
+            cmnULongLong cmnULongTotalSignalCount;
             cmnULongTotalSignalCount.Data = RegisteredSignalElements.size();
             StringStreamBufferForSerialization.str("");
             Serializer->Serialize(cmnULongTotalSignalCount);
@@ -427,21 +427,21 @@ bool mtsCollectorState::IsHeaderEndMark(const char * buffer)
 
 
 bool mtsCollectorState::FetchStateTableData(const mtsStateTable * table,
-                                            const unsigned int startIndex,
-                                            const unsigned int endIndex)
+                                            const size_t startIndex,
+                                            const size_t endIndex)
 {
     if (this->OutputStream) {
         if (this->OutputStream->good()) {
             if (FileFormat == COLLECTOR_FILE_FORMAT_BINARY) {
                 cmnULongLong timeTick;
-                unsigned int i;
+                size_t i, j;
                 for (i = startIndex; i <= endIndex; i += SamplingInterval) {
                     StringStreamBufferForSerialization.str("");
                     timeTick.Data = TargetStateTable->Ticks[i];
                     Serializer->Serialize(timeTick);
                     *(this->OutputStream) << StringStreamBufferForSerialization.str();
 
-                    for (unsigned int j = 0; j < RegisteredSignalElements.size(); ++j) {
+                    for (j = 0; j < RegisteredSignalElements.size(); ++j) {
                         StringStreamBufferForSerialization.str("");
                         Serializer->Serialize((*table->StateVector[RegisteredSignalElements[j].ID])[i]);
                         *(this->OutputStream) << StringStreamBufferForSerialization.str();
@@ -449,10 +449,10 @@ bool mtsCollectorState::FetchStateTableData(const mtsStateTable * table,
                 }
                 OffsetForNextRead = (i - endIndex == 0 ? SamplingInterval : i - endIndex);
             } else {
-                unsigned int i;
+                size_t i, j;
                 for (i = startIndex; i <= endIndex; i += SamplingInterval) {
                     *(this->OutputStream) << TargetStateTable->Ticks[i];
-                    for (unsigned int j = 0; j < RegisteredSignalElements.size(); ++j) {
+                    for (j = 0; j < RegisteredSignalElements.size(); ++j) {
                         *(this->OutputStream) << this->Delimiter;
                         (*table->StateVector[RegisteredSignalElements[j].ID])[i].ToStreamRaw(*(this->OutputStream), this->Delimiter);
                     }

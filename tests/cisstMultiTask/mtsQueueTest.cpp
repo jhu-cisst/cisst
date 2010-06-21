@@ -48,7 +48,7 @@ void mtsQueueTest::TestQueue_mtsDouble(void)
     // test with one element, fill the queue at least twice to test circular buffer
     size_t index;
     for (index = 0; index < 3 * queue.GetSize(); index++) {
-        element = index;
+        element = static_cast<double>(index);
         queue.Put(element);
         CPPUNIT_ASSERT(queue.GetAvailable() == 1);
         basePointer = queue.Peek();
@@ -70,7 +70,7 @@ void mtsQueueTest::TestQueue_mtsDouble(void)
 
     // test filling it up
     for (index = 0; index < queue.GetSize(); index++) {
-        element = index;
+        element = static_cast<double>(index);
         CPPUNIT_ASSERT(queue.Put(element));
         CPPUNIT_ASSERT(queue.GetAvailable() == index + 1);
         CPPUNIT_ASSERT(!queue.IsEmpty());

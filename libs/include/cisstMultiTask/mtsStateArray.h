@@ -166,14 +166,14 @@ bool mtsStateArray<_elementType>::GetHistory(index_type indexStart, index_type i
                                              mtsHistory<_elementType> & data) const
 {
     // Make sure vector is big enough
-    unsigned int numToCopy = (Data.size() + indexEnd - indexStart + 1)%Data.size();
+    size_t numToCopy = (Data.size() + indexEnd - indexStart + 1) % Data.size();
     if (data.size() < numToCopy) {
 		CMN_LOG_INIT_ERROR << "Class mtsStateArray: GetHistory(): provided array too small, size = "
                            << data.size() << ", requested copy = " << numToCopy << std::endl;
         return false;
     }
     // PK: probably should use iterators instead (or perhaps a cisstVector fastcopy?)
-    unsigned int i, j;
+    size_t i, j;
     if (indexEnd < indexStart) {  // wrap-around case
         for (i=0, j=indexStart; j < Data.size(); i++, j++)
             data[i] = Data[j];

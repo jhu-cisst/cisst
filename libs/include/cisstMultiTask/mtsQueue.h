@@ -46,8 +46,8 @@ public:
     typedef const value_type * const_pointer;
     typedef value_type & reference;
     typedef const value_type & const_reference;
-    typedef unsigned int size_type;
-    typedef unsigned int index_type;
+    typedef size_t size_type;
+    typedef size_t index_type;
 
 protected:
     pointer Data;
@@ -114,7 +114,7 @@ public:
       of slots used. */
     inline size_type GetAvailable(void) const
     {
-        int available = Head - Tail;
+        ptrdiff_t available = Head - Tail;
         if (available < 0) {
             available += Size;
         }
@@ -216,12 +216,17 @@ protected:
 
     // private method, can only be used once by constructor.  Doesn't support resize!
     void Allocate(size_type size, const_reference value) {
+        CMN_ASSERT(this->ClassServices);
         this->Size = size;
         if (this->Size > 0) {
             this->Data = new pointer[size];
             size_t index;
             for (index = 0; index < size; index++) {
                 cmnGenericObject * genericPointer = this->ClassServices->Create(value);
+                if (!genericPointer) {
+                    CMN_LOG_RUN_ERROR << "class mtsQueueGeneric: Allocate failed to create generic object for "
+                                      << this->ClassServices->GetName() << std::endl;
+                }
                 pointer typedPointer = dynamic_cast<pointer>(genericPointer);
                 CMN_ASSERT(typedPointer);
                 this->Data[index] = typedPointer;
@@ -258,6 +263,9 @@ public:
 
     inline mtsQueueGeneric(size_type size, const_reference value) {
         this->ClassServices = value.Services();
+        CMN_ASSERT(this->ClassServices);
+        CMN_LOG_INIT_DEBUG << "class mtsQueueGeneric: constructor, created queue of "
+                           << this->ClassServices->GetName() << std::endl;
         Allocate(size + 1, value);
     }
 
@@ -298,7 +306,7 @@ public:
       of slots used. */
     inline size_type GetAvailable(void) const
     {
-        int available = Head - Tail;
+        ptrdiff_t available = Head - Tail;
         if (available < 0) {
             available += Size;
         }
