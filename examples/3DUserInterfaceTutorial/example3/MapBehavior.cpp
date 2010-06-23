@@ -83,6 +83,10 @@ class MapMarker: public ui3VisibleObject
         return true;
     }
     
+    inline bool UpdateVTKObjects(void) {
+        return false;
+    }
+
     void SetColor(double r, double g, double b) {
         if (this->marker && (r+g+b)<= 3) {
             this->marker->GetProperty()->SetColor(r, g, b);
@@ -202,20 +206,20 @@ void MapBehavior::Startup(void)
     GetJointPositionECM.Bind(command);
     
     // get clutch interface
-    providedInterface = daVinci->GetProvidedInterface("MasterClutchPedal");
+    providedInterface = daVinci->GetProvidedInterface("Clutch");
     CMN_ASSERT(providedInterface);
     mtsCommandWrite<MapBehavior, prmEventButton> * clutchCallbackCommand =
             new mtsCommandWrite<MapBehavior, prmEventButton>(&MapBehavior::MasterClutchPedalCallback, this,
-                                                         "MasterClutchPedalCallback", prmEventButton());
+                                                         "Button", prmEventButton());
     CMN_ASSERT(clutchCallbackCommand);
     providedInterface->AddObserver("Button", clutchCallbackCommand);
     
     //get camera control interface
-    providedInterface = daVinci->GetProvidedInterface("CameraControlPedal");
+    providedInterface = daVinci->GetProvidedInterface("Camera");
     CMN_ASSERT(providedInterface);
     mtsCommandWrite<MapBehavior, prmEventButton> * cameraCallbackCommand =
             new mtsCommandWrite<MapBehavior, prmEventButton>(&MapBehavior::CameraControlPedalCallback, this,
-                                                         "CameraControlPedalCallback", prmEventButton());
+                                                         "Button", prmEventButton());
     CMN_ASSERT(cameraCallbackCommand);
     providedInterface->AddObserver("Button", cameraCallbackCommand);
 

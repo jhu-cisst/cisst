@@ -91,7 +91,7 @@ bool ui3MasterArm::SetInput(const std::string & positionDevice, const std::strin
                                         positionDevice, positionInterface);
 
     // setup master select button required interface 
-    requiredInterface = this->Manager->AddRequiredInterface(this->Name + "Button");
+    requiredInterface = this->Manager->AddRequiredInterface(this->Name + "Select");
     if (requiredInterface) {
         requiredInterface->AddEventHandlerWrite(&ui3MasterArm::ButtonEventHandler, this,
                                                 "Button");
@@ -103,7 +103,7 @@ bool ui3MasterArm::SetInput(const std::string & positionDevice, const std::strin
         return false;
     }
     // connect the master button device to the master button required interface
-    this->Manager->TaskManager->Connect(this->Manager->GetName(), this->Name + "Button",
+    this->Manager->TaskManager->Connect(this->Manager->GetName(), this->Name + "Select",
                                         buttonDevice, buttonInterface);
 
     // setup master clutch button required interface 

@@ -101,6 +101,10 @@ public:
         return true;
     }
     
+    inline bool UpdateVTKObjects(void) {
+        return false;
+    }
+
     void SetColor(double r, double g, double b) {
         if (this->probeActorS && (r+g+b)<= 3) {
             this->probeActorS->GetProperty()->SetColor(r, g, b);
@@ -174,6 +178,10 @@ class BehaviorLUSProbeJoint: public ui3VisibleObject
         return true;
     }
     
+    inline bool UpdateVTKObjects(void) {
+        return false;
+    }
+
     void SetColor(double r, double g, double b) {
         if (this->joint && (r+g+b)<= 3) {
             this->joint->GetProperty()->SetColor(r, g, b);
@@ -248,6 +256,10 @@ class BehaviorLUSProbeShaft: public ui3VisibleObject
         return true;
         }
 
+    inline bool UpdateVTKObjects(void) {
+        return false;
+    }
+
         void SetColor(double r, double g, double b) {
             if (this->shaftActor && (r+g+b)<= 3) {
                 this->shaftActor->GetProperty()->SetColor(r, g, b);
@@ -312,6 +324,10 @@ public:
 
         this->SetTransformation(this->Position);
         return true;
+    }
+
+    inline bool UpdateVTKObjects(void) {
+        return false;
     }
 
     inline void SetText(const std::string & text)
@@ -399,6 +415,9 @@ class BehaviorLUSBackground: public ui3VisibleObject
         return true;
     }
 
+    inline bool UpdateVTKObjects(void) {
+        return false;
+    }
 
     protected:
  
@@ -461,6 +480,9 @@ public:
         return true;
     }
     
+    inline bool UpdateVTKObjects(void) {
+        return false;
+    }
 
 protected:
 
@@ -526,6 +548,10 @@ class BehaviorLUSMarker: public ui3VisibleObject
         return true;
     }
     
+    inline bool UpdateVTKObjects(void) {
+        return false;
+    }
+
     void SetColor(double r, double g, double b) {
         if (this->joint && (r+g+b)<= 3) {
             this->joint->GetProperty()->SetColor(r, g, b);
@@ -730,7 +756,7 @@ void BehaviorLUS::Startup(void)
     GetJointPositionECM.Bind(command);
     
     // get clutch interface
-    providedInterface = daVinci->GetProvidedInterface("MasterClutchPedal");
+    providedInterface = daVinci->GetProvidedInterface("Clutch");
     CMN_ASSERT(providedInterface);
     mtsCommandWrite<BehaviorLUS, prmEventButton> * clutchCallbackCommand =
         new mtsCommandWrite<BehaviorLUS, prmEventButton>(&BehaviorLUS::MasterClutchPedalCallback, this,
@@ -739,7 +765,7 @@ void BehaviorLUS::Startup(void)
     providedInterface->AddObserver("Button", clutchCallbackCommand);
     
     //get camera control interface
-    providedInterface = daVinci->GetProvidedInterface("CameraControlPedal");
+    providedInterface = daVinci->GetProvidedInterface("Camera");
     CMN_ASSERT(providedInterface);
     mtsCommandWrite<BehaviorLUS, prmEventButton> * cameraCallbackCommand =
         new mtsCommandWrite<BehaviorLUS, prmEventButton>(&BehaviorLUS::CameraControlPedalCallback, this,

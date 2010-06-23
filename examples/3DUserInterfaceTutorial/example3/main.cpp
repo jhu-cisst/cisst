@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsTaskManager.h>
 
+#include <cisstDaVinciAPI/cdvReadOnly.h>
 #include <cisstDaVinciAPI/cdvReadWrite.h>
 
 #include <cisstCommon.h>
@@ -53,8 +54,8 @@ int main()
     cmnClassRegister::SetLoD("dvapi_stream", CMN_LOG_LOD_INIT_VERBOSE);
 
     mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
-#if 0
-    cisstDaVinciAPI *daVinci = new cisstDaVinciAPI("daVinci", 0.0 /* period to be removed */,
+#if 1
+    cdvReadOnly * daVinci = new cdvReadOnly("daVinci", 0.0 /* period to be removed */,
                                                    "10.0.0.5", 5002, 0x1111, 50);
 #else
     cdvReadWrite * daVinci = new cdvReadWrite("daVinci", 60 /* Hz */);
@@ -127,7 +128,7 @@ int main()
 
     svlCameraGeometry camera_geometry;
     // Load Camera calibration results
-    camera_geometry.LoadCalibration("/home/saw1/calibration/davinci_miccai/calib_results.txt");
+    camera_geometry.LoadCalibration("/home/saw1/calibration/davinci_mock_or/calib_results.txt");
     // Center world in between the two cameras (da Vinci specific)
     camera_geometry.SetWorldToCenter();
     // Rotate world by 180 degrees (VTK specific)
@@ -158,7 +159,7 @@ int main()
     guiManager.SetRenderTargetToRenderer("LeftEyeView",  svlRenderTargets::Get(1));
     guiManager.SetRenderTargetToRenderer("RightEyeView", svlRenderTargets::Get(0));
 
-#if 0
+#if 1
     // Add third camera: simple perspective camera placed in the world center
     camera_geometry.SetPerspective(400.0, 2);
 
@@ -185,7 +186,7 @@ int main()
     ui3MasterArm * rightMaster = new ui3MasterArm("MTMR");
     guiManager.AddMasterArm(rightMaster);
     rightMaster->SetInput(daVinci, "MTMR",
-                          daVinci, "MTMRButton",
+                          daVinci, "MTMRSelect",
                           daVinci, "MTMRClutch",
                           ui3MasterArm::PRIMARY);
     rightMaster->SetTransformation(transform, 0.8 /* scale factor */);
@@ -197,7 +198,7 @@ int main()
     ui3MasterArm * leftMaster = new ui3MasterArm("MTML");
     guiManager.AddMasterArm(leftMaster);
     leftMaster->SetInput(daVinci, "MTML",
-                         daVinci, "MTMLButton",
+                         daVinci, "MTMLSelect",
                          daVinci, "MTMLClutch",
                          ui3MasterArm::SECONDARY);
     leftMaster->SetTransformation(transform, 0.8 /* scale factor */);
