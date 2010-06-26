@@ -35,6 +35,7 @@ devODEManipulator::devODEManipulator(const std::string& devname,
 				     const std::vector<std::string>& geomfiles):
   devManipulator( devname, period, qinit.size() ),
   robManipulator( robotfilename, Rtw0 ),
+  worldid( world.WorldID() ),
   qinit( qinit ),
   base( NULL ){
 
@@ -103,6 +104,51 @@ devODEManipulator::devODEManipulator(const std::string& devname,
 
     b1 = b2;                               // proximal is now distal
   }
+}
+
+void devODEManipulator::Attach( robManipulator* tool ){
+
+  devODEManipulator* odetool = dynamic_cast<devODEManipulator*>( tool );
+
+  if( odetool != NULL ){
+
+    dJointID jid = dJointCreateSlider( WorldID(), 0 );
+    dJointAttach( jid, bodies.back()->BodyID(), odetool->BaseID() );
+    dJointSetSliderAxis( jid, 0.0, 0.0, 1.0 );
+    
+    dJointSetSliderParam( jid, dParamLoStop, 0.0 );
+    dJointSetSliderParam( jid, dParamHiStop, 0.0 );
+
+  }
+
+  robManipulator::Attach( tool );
+
+}
+
+void devODEManipulator::Disable(){
+
+  for( size_t i=0; i<bodies.size(); i++ )
+    { bodies[i]->Disable(); }
+
+  for( size_t i=0; i<tools.size(); i++ ){
+    devODEManipulator* odetool = dynamic_cast<devODEManipulator*>( tools[i] );
+    if( odetool != NULL )
+      { odetool->Disable(); }
+  }
+
+}
+
+void devODEManipulator::Enable(){
+
+  for( size_t i=0; i<bodies.size(); i++ )
+    { bodies[i]->Enable(); }
+
+  for( size_t i=0; i<tools.size(); i++ ){
+    devODEManipulator* odetool = dynamic_cast<devODEManipulator*>( tools[i] );
+    if( odetool != NULL )
+      { odetool->Enable(); }
+  }
+
 }
 
 dBodyID devODEManipulator::BaseID() const {

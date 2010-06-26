@@ -40,6 +40,9 @@ class CISST_EXPORT devODEManipulator :
 
  protected:
 
+  dWorldID worldid;
+  dWorldID WorldID() const { return worldid; }
+
   std::vector<devODEJoint*> joints;
   std::vector<devODEBody*>  bodies;
 
@@ -110,6 +113,11 @@ class CISST_EXPORT devODEManipulator :
 
   dBodyID BaseID() const;
 
+  void Attach( robManipulator* tool );
+
+  void Disable();
+  void Enable();
+  
 };
 
 #endif

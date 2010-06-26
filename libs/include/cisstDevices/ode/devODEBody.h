@@ -127,6 +127,9 @@ public:
   //! Default destructor
   ~devODEBody();
   
+  void Enable();
+  void Disable();
+
   //! Query the ID of the body
   dBodyID BodyID() const { return bodyid; }
 

@@ -9,7 +9,7 @@ devODEBHF1::devODEBHF1( const std::string& devname,
 			const std::string& metacarpgeom,
 			const std::string& proximalgeom,
 			const std::string& intermediategeom,
-			dBodyID palmbodyID,
+			devODEBody* palm,
 			double qmax ) : 
 
   // Initialize an empty ODE manipulator
@@ -25,7 +25,10 @@ devODEBHF1::devODEBHF1( const std::string& devname,
   // The ODE bodies of the finger
   devODEBody *metacarp, *proximal, *intermediate;
   devODEJoint *mcp1, *mcp2, *pip;
-
+  
+  dBodyID palmbodyID = NULL;
+  if( palm != NULL )
+    { palmbodyID = palm->BodyID(); }
 
   // position and orientation of the ith link 
   vctFrame4x4<double> Rtwi;
@@ -34,8 +37,10 @@ devODEBHF1::devODEBHF1( const std::string& devname,
 
   // Initialize the finger
   robBHF1 f1;  
-
-
+  if( palm != NULL ) {
+    f1.Rtw0 = ( vctFrame4x4<double>(palm->GetOrientation(), palm->GetPosition())
+		* f1.Rtw0 );
+  }
 
   //
   // First link and first joint
@@ -155,7 +160,7 @@ devODEBHF1::devODEBHF1( const std::string& devname,
 }
 
 void devODEBHF1::Write( const vctDynamicVector<double>& qs ){
-  
+
   double qs0 = qinit[0] + qs[0];
   double qs1 = qinit[1] + qs[1];
   double qs2 = qinit[2] + qs[1]*(45.0/140.0);
@@ -172,7 +177,7 @@ void devODEBHF1::Write( const vctDynamicVector<double>& qs ){
       else           { sm0->SetVelocity( -qmax ); }
     }
     else             { sm0->SetVelocity( 0.0 ); }
-    
+
   }
 
   if( sm1 != NULL ){

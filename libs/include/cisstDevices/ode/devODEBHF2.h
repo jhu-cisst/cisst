@@ -27,7 +27,8 @@ class CISST_EXPORT devODEBHF2 : public devODEManipulator {
 	      const std::string& metacarpgeom,
 	      const std::string& proximalgeom,
 	      const std::string& distalgeom,
-	      dBodyID palmbodiID = NULL,
+	      devODEBody* palm = NULL,
+	      //dBodyID palmbodiID = NULL,
 	      double qmax = 1.0 );
 
   //! Overload the Write method

@@ -8,7 +8,7 @@ devODEBHF3::devODEBHF3( const std::string& devname,
 			dSpaceID spaceid,
 			const std::string& proximalgeom,
 			const std::string& intermediategeom,
-			dBodyID palmbodyID,
+			devODEBody* palm,
 			double qmax ) : 
 
   // Initialize an empty ODE manipulator
@@ -23,6 +23,9 @@ devODEBHF3::devODEBHF3( const std::string& devname,
   // The ODE bodies of the finger
   devODEBody *proximal, *intermediate;
   devODEJoint *mcp2, *pip;
+  dBodyID palmbodyID = NULL;
+  if( palm != NULL ) 
+    { palmbodyID = palm->BodyID(); }
 
 
   // position and orientation of the ith link 
@@ -32,13 +35,15 @@ devODEBHF3::devODEBHF3( const std::string& devname,
 
   // Initialize the finger
   robBHF3 f3;  
-
+  if( palm != NULL ){
+    f3.Rtw0 = ( vctFrame4x4<double>(palm->GetOrientation(), palm->GetPosition())
+		* f3.Rtw0 );
+  }
 
 
   //
   // First link and first joint
   //
-
 
 
   // create and initialize the second link (proximal)
@@ -70,7 +75,7 @@ devODEBHF3::devODEBHF3( const std::string& devname,
 			      palmbodyID,                 // the first body
 			      proximal->BodyID(),         // the second body
 			      Rtwi.Rotation() *-z,        // the Z axis 
-			      1 );                      //
+			      1 );                        //
 
 
 

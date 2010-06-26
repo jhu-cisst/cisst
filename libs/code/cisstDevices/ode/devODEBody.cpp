@@ -93,6 +93,21 @@ devODEBody::~devODEBody(){
   if( vertices != NULL )  delete[] vertices;
 }
 
+void devODEBody::Enable(){ 
+  dBodySetLinearVel( BodyID(), 0, 0, 0);
+  dBodySetAngularVel( BodyID(), 0, 0, 0);
+  dBodyEnable( BodyID() ); 
+  dBodySetLinearVel( BodyID(), 0, 0, 0);
+  dBodySetAngularVel( BodyID(), 0, 0, 0);
+}
+void devODEBody::Disable(){ 
+  dBodySetLinearVel( BodyID(), 0, 0, 0);
+  dBodySetAngularVel( BodyID(), 0, 0, 0);
+  dBodyDisable( BodyID() ); 
+  dBodySetLinearVel( BodyID(), 0, 0, 0);
+  dBodySetAngularVel( BodyID(), 0, 0, 0);
+}
+
 void devODEBody::Update(){
   if( geometry != NULL ){
     vctMatrixRotation3<double> Rwb = GetOrientation();

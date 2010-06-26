@@ -9,7 +9,7 @@ devODEBHF2::devODEBHF2( const std::string& devname,
 			const std::string& metacarpgeom,
 			const std::string& proximalgeom,
 			const std::string& intermediategeom,
-			dBodyID palmbodyID,
+			devODEBody* palm,
 			double qmax ) : 
 
   // Initialize an empty ODE manipulator
@@ -25,6 +25,9 @@ devODEBHF2::devODEBHF2( const std::string& devname,
   // The ODE bodies of the finger
   devODEBody *metacarp, *proximal, *intermediate;
   devODEJoint *mcp1, *mcp2, *pip;
+  dBodyID palmbodyID = NULL;
+  if( palm != NULL )
+    { palmbodyID = palm->BodyID(); }
 
 
   // position and orientation of the ith link 
@@ -34,9 +37,12 @@ devODEBHF2::devODEBHF2( const std::string& devname,
 
   // Initialize the finger
   robBHF2 f2;  
+  if( palm != NULL ){
+    f2.Rtw0 = ( vctFrame4x4<double>(palm->GetOrientation(), palm->GetPosition())
+		* f2.Rtw0 );
+  }
 
-
-
+  
   //
   // First link and first joint
   //
@@ -56,6 +62,7 @@ devODEBHF2::devODEBHF2( const std::string& devname,
 
   // Create and initialize the first joint (MCP)
   Rtwi = f2.ForwardKinematics( q, robBHF2::BASE );
+
   mcp1 = new devODEJoint( world.WorldID(),            // the world ID
 			  palmbodyID,                 // the first body
 			  metacarp->BodyID(),         // the second body
@@ -69,10 +76,10 @@ devODEBHF2::devODEBHF2( const std::string& devname,
   world.Insert( mcp1 );
 
   sm0 = new devODEServoMotor( world.WorldID(), 
-			      palmbodyID,                 // the first body
-			      metacarp->BodyID(),         // the second body
-			      Rtwi.Rotation() *-z,        // the Z axis 
-			      1 );                      //
+			      palmbodyID,             // the first body
+			      metacarp->BodyID(),     // the second body
+			      Rtwi.Rotation() *-z,    // the Z axis 
+			      1 );                    //
 			      
 
 

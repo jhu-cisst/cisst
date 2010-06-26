@@ -127,7 +127,7 @@ void devODEJoint::SetForceTorque(double newft)
 {  ft = newft; }
 
 void devODEJoint::ApplyForceTorque(){ 
-
+  
   switch( dJointGetType( JointID() ) ){
 
   case dJointTypeHinge:
