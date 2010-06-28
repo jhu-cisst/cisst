@@ -227,7 +227,7 @@ http://www.cisst.org/cisst/license.txt.
     #define CISST_DATA_MODEL CISST_LP64
   #else
     #ifdef _LLP64
-      #define CISST_DATA_MODEL CISST_LPL64
+      #define CISST_DATA_MODEL CISST_LLP64
     #else
       // default for now, might have to refine for cygwin? 
       #define CISST_DATA_MODEL CISST_ILP32
