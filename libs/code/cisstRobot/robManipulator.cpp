@@ -113,7 +113,6 @@ void free_rmatrix(double** m, long nrl, long ncl){
   free((FREE_ARG) (m+nrl-NR_END));
 }
 
-
 robManipulator::robManipulator( const vctFrame4x4<double>& Rtw0 )
 {  this->Rtw0 = Rtw0;  }
 
@@ -128,6 +127,9 @@ robManipulator::robManipulator( const std::string& linkfile,
 		      << std::endl;
   }
 }
+
+void robManipulator::Attach( robManipulator* tool )
+{ tools.push_back( tool ); }
 				
 robManipulator::Errno robManipulator::LoadRobot( const std::string& filename ){
 
@@ -178,7 +180,7 @@ robManipulator::Errno robManipulator::LoadRobot( const std::string& filename ){
 //////////////////////////////////////
 
 vctFrame4x4<double> 
-robManipulator::ForwardKinematics( const vctDynamicVector<double>& q, 
+robManipulator::ForwardKinematics( const vctDynamicVector<double>& q,
 				   int N ) const {
 
   if( N == 0 ) return Rtw0;
@@ -188,8 +190,8 @@ robManipulator::ForwardKinematics( const vctDynamicVector<double>& q,
 
   if( ((int)q.size()) < N ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-		      << ": Expected " << N 
-		      << " joint positions. Got " << q.size() << "."
+		      << ": Expected " << N << " joint positions but "
+		      << "size(q) = " << q.size() << "."
 		      << std::endl;
     return Rtw0;
   }
@@ -210,6 +212,11 @@ robManipulator::ForwardKinematics( const vctDynamicVector<double>& q,
   // for link 1 to N
   for(int i=1; i<N; i++)
     Rtwi = Rtwi * links[i].ForwardKinematics( q[i] );
+
+  if( tools.size() == 1 ){
+    if( tools[0] != NULL )
+      { return Rtwi * tools[0]->ForwardKinematics( q, 0 ); }
+  }
 
   return Rtwi;
 }
@@ -244,7 +251,7 @@ robManipulator::InverseKinematics( vctDynamicVector<double>& q,
   int LDA = M;                // The leading dimension of the array A.
 
   // B is a pointer the the N vector containing the solution
-  double* B;                  // The N-by-NRHS matrix of right hand side matrix
+  double* B = new double[N];  // The N-by-NRHS matrix of right hand side matrix
   int LDB = N;                // The leading dimension of the array B.
 
   // These values are used for the SVD computation
@@ -286,8 +293,13 @@ robManipulator::InverseKinematics( vctDynamicVector<double>& q,
 
     // combine both errors in one R^6 vector
     double e[6] = { dt[0], dt[1], dt[2], dr[0], dr[1], dr[2] };
+
     // get a pointer
-    B = &e[0];
+    for( int j=0; j<N; j++ )
+      { B[j] = 0.0; }
+
+    for( int j=0; j<6; j++ )
+      { B[j] = e[j]; }
 
     // compute the minimum norm solution
     gelss( &M, &N, &NHRS,       // 6xN matrix
@@ -321,7 +333,7 @@ robManipulator::InverseKinematics( vctDynamicVector<double>& q,
   }
 
   delete[] S;
-
+  delete[] B;
   if( i==Niterations ) return robManipulator::EFAILURE;
   else return robManipulator::ESUCCESS;;
 }
@@ -365,13 +377,13 @@ void robManipulator::JacobianBody( const vctDynamicVector<double>& q ) const {
 
     }
 
-    if( links[j].GetConvention() == robDH::MODIFIED ){  // Modified DH
-      U = links[j].ForwardKinematics( q[j] ) * U;
-    }
+    if( links[j].GetConvention() == robDH::MODIFIED )  // Modified DH
+      { U = links[j].ForwardKinematics( q[j] ) * U; }
+
   }
 }
 
-void robManipulator::JacobianSpatial( const vctDynamicVector<double>& q ) const {
+void robManipulator::JacobianSpatial( const vctDynamicVector<double>& q ) const{
   
   JacobianBody( q );
 
@@ -534,8 +546,10 @@ robManipulator::CCG( const vctDynamicVector<double>& q,
     return vctDynamicVector<double>();
   }
 
-  return RNE( q,           // call Newton-Euler with only the joints 
-	      qd,          // positions and the joints velocities
+  
+
+  return RNE( q,           // call Newton-Euler with only the joints positions 
+	      qd,          // and the joints velocities
 	      vctDynamicVector<double>( q.size(), 0.0 ),
 	      vctFixedSizeVector<double,6>(0.0) );
 }
