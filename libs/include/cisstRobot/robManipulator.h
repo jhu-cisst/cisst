@@ -25,7 +25,12 @@ http://www.cisst.org/cisst/license.txt.
 
 class CISST_EXPORT robManipulator{
   
-public:
+ protected:
+  
+  //! A vector of tools
+  std::vector<robManipulator*> tools;
+  
+ public:
   
   enum Errno{ ESUCCESS, EFAILURE };
 
@@ -48,18 +53,15 @@ public:
   */
   double** Js;
   
-  //! A tool
-  std::vector<robManipulator*> tool;
-  
   //! A vector of links
   std::vector<robLink> links;
 
+  
   //! Load the kinematics and the dynamics of the robot
   robManipulator::Errno LoadRobot( const std::string& linkfile );
-  
-  //! Load the tool of the robot
-  robManipulator::Errno LoadTool( const std::string& toolfile );
 
+
+  
   //! Evaluate the body Jacobian
   /**
      Evaluates the geometric body Jacobian. This implements the algorithm of 
@@ -129,12 +131,11 @@ public:
   //! Compute the NxN manipulator inertia matrix
   /**
      \param[input] A A pointer to an NxN matrix
-     \param[output] The NxN manipulator inertia matrix
+     \param[output] A The NxN manipulator inertia matrix
   */
-  vctDynamicMatrix<double> 
-    JSinertia( const vctDynamicVector<double>& q ) const;
-
   void JSinertia(double** A, const vctDynamicVector<double>& q ) const;
+
+  vctDynamicMatrix<double> JSinertia( const vctDynamicVector<double>& q ) const;
 		 
   
   //! Compute the 6x6 manipulator inertia matrix in operation space
@@ -145,6 +146,8 @@ public:
   void OSinertia(double Ac[6][6], const vctDynamicVector<double>& q) const;
     
 public:
+
+  enum LinkID{ L0, L1, L2, L3, L4, L5, L6, L7, L8, L9, LN };
   
   robManipulator( const vctFrame4x4<double>& Rtw0 = vctFrame4x4<double>() );
 
@@ -153,7 +156,6 @@ public:
      This constructor initializes a manipulator with the kinematics and dynamics
      contained in a file.
      \param robotfilename The file with the kinematics and dynamics parameters
-     \param toolfilename The file with the kinmatics and dynamics of a tool
      \param Rtw0 The offset transformation of the robot base
   */
   robManipulator( const std::string& robotfilename,
@@ -209,7 +211,7 @@ public:
      Compute and return the inverse dynamics of the manipulator in operation
      space. InverseDynamics returns the joint torques that corresponds to a 
      manipulator with the given the joints positions, velocities and 
-     the tool control point (TCP) accelerations. The reason why joints positions 
+     the tool control point (TCP) accelerations. The reason why joints positions
      and velocities are given instead of the position and velocity of the TCP is
      that the coriolis, centrifugal and gravitational forces are uniquely 
      determined by the joints positions and velocties.
@@ -225,6 +227,9 @@ public:
 		     const vctFixedSizeVector<double,6>& vdwd ) const;
   
   void Print() const ;
+
+  //! Attach a tool
+  virtual void Attach( robManipulator* tool );
   
 };
 
