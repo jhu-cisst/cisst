@@ -237,6 +237,26 @@ public:
 
 
     /*!
+      \name Assignment operation between vectors containing the same data type but different owners
+      \param other The vector to be copied.
+    */
+    //@{
+    template <class __vectorOwnerType>
+    inline ThisType & Assign(const vctDynamicConstVectorBase<__vectorOwnerType, value_type> & other) {
+        if (this->FastCopyCompatible(other)) {
+            this->FastCopyOf(other, false);
+        } else {
+            vctDynamicVectorLoopEngines::
+                VoVi<typename vctUnaryOperations<value_type,
+                typename __vectorOwnerType::value_type>::Identity>::
+                Run(*this, other);
+        }
+        return *this;
+    }
+    //@}
+
+
+    /*!
       \name Assignment operation between vectors of different types.
 
       \param other The vector to be copied.
@@ -248,6 +268,7 @@ public:
             VoVi<typename vctUnaryOperations<value_type,
             typename __vectorOwnerType::value_type>::Identity>::
             Run(*this, other);
+        std::cout << "*";
         return *this;
     }
 

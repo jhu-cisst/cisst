@@ -25,6 +25,8 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnPortability.h>
 #include <cisstCommon/cmnThrow.h>
+#include <cisstCommon/cmnRequiresDeepCopy.h>
+
 #include <string.h> // for memcpy
 
 /*! \brief Container class for fast copy related methods.
@@ -128,7 +130,9 @@ public:
     inline static bool VectorCopyCompatible(const _vector1Type & vector1,
                                             const _vector2Type & vector2)
     {
-        return (VectorSizeCompatible(vector1, vector2)
+        return (!cmnRequiresDeepCopy<typename _vector1Type::value_type>()
+                && !cmnRequiresDeepCopy<typename _vector2Type::value_type>()
+                && VectorSizeCompatible(vector1, vector2)
                 && VectorStrideCompatible(vector1, vector2));
     }
 
@@ -136,7 +140,9 @@ public:
     inline static bool MatrixCopyCompatible(const _matrix1Type & matrix1,
                                             const _matrix2Type & matrix2)
     {
-        return (ContainerSizesCompatible(matrix1, matrix2)
+        return (!cmnRequiresDeepCopy<typename _matrix1Type::value_type>()
+                && !cmnRequiresDeepCopy<typename _matrix2Type::value_type>()
+                && ContainerSizesCompatible(matrix1, matrix2)
                 && MatrixStridesCompatible(matrix1, matrix2));
     }
 
@@ -144,7 +150,9 @@ public:
     inline static bool NArrayCopyCompatible(const _nArray1Type & nArray1,
                                             const _nArray2Type & nArray2)
     {
-        return (ContainerSizesCompatible(nArray1, nArray2)
+        return (!cmnRequiresDeepCopy<typename _nArray1Type::value_type>()
+                && !cmnRequiresDeepCopy<typename _nArray2Type::value_type>()
+                && ContainerSizesCompatible(nArray1, nArray2)
                 && NArrayStridesCompatible(nArray1, nArray2));
     }
     //@}

@@ -483,6 +483,26 @@ public:
 
 
     /*!
+      \name Assignment operation between matrices containing the same data type but different owners
+      \param other The matrix to be copied.
+    */
+    //@{
+    template <class __matrixOwnerType>
+    inline ThisType & Assign(const vctDynamicConstMatrixBase<__matrixOwnerType, value_type> & other) {
+        if (this->FastCopyCompatible(other)) {
+            this->FastCopyOf(other, false);
+        } else {
+            vctDynamicMatrixLoopEngines::
+                MoMi<typename vctUnaryOperations<value_type,
+                typename __matrixOwnerType::value_type>::Identity>::
+                Run(*this, other);
+        }
+        return *this;
+    }
+    //@}
+
+
+    /*!
       \name Assignment operation between matrices of different types.
 
       \param other The matrix to be copied.

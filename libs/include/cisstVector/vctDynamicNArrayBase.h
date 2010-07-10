@@ -366,6 +366,25 @@ public:
         }
     }
 
+    /*!
+      \name Assignment operation between arrays containing the same data type but different owners
+      \param other The array to be copied.
+    */
+    //@{
+    template <class __nArrayOwnerType>
+    inline ThisType & Assign(const vctDynamicConstNArrayBase<__nArrayOwnerType, value_type, DIMENSION> & other) {
+        if (this->FastCopyCompatible(other)) {
+            this->FastCopyOf(other, false);
+        } else {
+            vctDynamicNArrayLoopEngines<DIMENSION>::template
+                NoNi<typename vctUnaryOperations<value_type,
+                typename __nArrayOwnerType::value_type>::Identity>::
+                Run(*this, other);
+        }
+        return *this;
+    }
+    //@}
+
 
     /*!
       \name Assignment operation between nArrays of different types.
