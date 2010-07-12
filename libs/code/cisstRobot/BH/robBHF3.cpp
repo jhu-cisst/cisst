@@ -5,7 +5,7 @@ robBHF3::robBHF3() :
 							     0.0, 0.0,1.0,
 							     0.0,-1.0,0.0,
 							     VCT_NORMALIZE),
-				  vctFixedSizeVector<double,3>(-0.05, 0.0, 0.035)) ){
+				  vctFixedSizeVector<double,3>(-0.05, 0.0, 0.0365)) ){
 
   double m = 0.025;                               // Mass of each link          
   vctFixedSizeVector<double,3> com(0.0);          // Center of mass of each link

@@ -31,8 +31,8 @@ class CISST_EXPORT robFunction{
 
   robFunction( double t1, double t2 );
   
-  virtual double StartTime() const;
-  virtual double StopTime() const;
+  virtual double& StartTime();
+  virtual double& StopTime();
   virtual double Duration() const;
 
 };

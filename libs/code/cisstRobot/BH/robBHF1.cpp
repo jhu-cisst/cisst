@@ -2,7 +2,7 @@
 
 robBHF1::robBHF1() : 
   robBHFinger(vctFrame4x4<double>(vctMatrixRotation3<double>(),
-				  vctFixedSizeVector<double,3>(0.0,-0.025,0.035)) ){
+				  vctFixedSizeVector<double,3>(0.0,-0.026,0.0365)) ){
 
   double m = 0.025;                               // Mass of each link          
   vctFixedSizeVector<double,3> com(0.0);          // Center of mass of each link
@@ -70,12 +70,12 @@ robBHF1::ForwardKinematics( const vctDynamicVector<double>& q,
   case robBHFinger::BASE:
     return Rtw0;
 
-  case robBHFinger::MCP:
+  case robBHFinger::METACARP:
     return ( ForwardKinematics( q, robBHFinger::BASE ) * 
 	     links[0].ForwardKinematics( q[0] ) );
 
   case robBHFinger::PROXIMAL:
-    return ( ForwardKinematics( q, robBHFinger::MCP ) * 
+    return ( ForwardKinematics( q, robBHFinger::METACARP ) * 
 	     links[1].ForwardKinematics( q[1] ) );
 
   case robBHFinger::INTERMEDIATE:

@@ -32,18 +32,6 @@ class CISST_EXPORT robLinearRn : public robFunctionRn {
 
  public:
   
-  //! Define a linear function \f$L: R^1\rightarrow R^1 \f$
-  /**
-     Define a line passing throuh \f$(t_1,{y}_1)\f$ and 
-     \f$(t_2,{y}_2)\f$. The final time \f$t_2\f$ is determined by the
-     maximum velocities.  The function is bounded by \f$[t_1, t_2]\f$.
-     \param t1 The initial time
-     \param y1 The value \f${y}_1 = L(t_1)\f$
-     \param y2 The value \f${y}_2 = L(t_2)\f$
-     \param yd The slope along each dimension
-  */
-  robLinearRn( double t1, double y1, double y2, double yd );
-
   //! Define a linear function \f$L: R^1\rightarrow R^3 \f$
   /**
      Define a line passing throuh \f$(t_1,\mathbf{y}_1)\f$ and 
@@ -54,10 +42,10 @@ class CISST_EXPORT robLinearRn : public robFunctionRn {
      \param y2 The value \f$\mathbf{y}_2 = L(t_2)\f$
      \param vmax  The magnitude of the maximum linear velocity
   */
-  robLinearRn( double t1,
-	       const vctFixedSizeVector<double,3>& y1, 
+  robLinearRn( const vctFixedSizeVector<double,3>& y1, 
 	       const vctFixedSizeVector<double,3>& y2,
-	       double vmax );
+	       double vmax,
+	       double t1 = 0.0 );
   
   //! Define a linear function \f$L: R^1\rightarrow R^n \f$
   /**
@@ -69,10 +57,10 @@ class CISST_EXPORT robLinearRn : public robFunctionRn {
      \param y2 The value \f$\mathbf{y}_2 = L(t_2)\f$
      \param ydmax The maximum velocity for each dimension
   */
-  robLinearRn( double t1,
-	       const vctDynamicVector<double>& y1, 
+  robLinearRn( const vctDynamicVector<double>& y1, 
 	       const vctDynamicVector<double>& y2,
-	       const vctDynamicVector<double>& ydmax );
+	       const vctDynamicVector<double>& ydmax,
+	       double t1 = 0.0 );
 
   //! Evaluate the function
   /**
@@ -117,6 +105,15 @@ class CISST_EXPORT robLinearRn : public robFunctionRn {
 		 vctDynamicVector<double>& yd,
 		 vctDynamicVector<double>& ydd );
   
+  void Blend( robFunction* function, 
+	      const vctDynamicVector<double>& qd, 
+	      const vctDynamicVector<double>& qdd );
+
+  void Blend( robFunction* function, double vmax, double vdmax );
+
+
+  vctDynamicVector<double> Slope() const;
+
 };
 
 #endif

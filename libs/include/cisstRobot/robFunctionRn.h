@@ -38,9 +38,6 @@ class CISST_EXPORT robFunctionRn : public robFunction {
   
  public:
 
-  robFunctionRn( double t1, double y1, double y1d, double y1dd,
- 		 double t2, double y2, double y2d, double y2dd );
-
   robFunctionRn( double t1, 
 		 const vctFixedSizeVector<double,3>& y1, 
 		 const vctFixedSizeVector<double,3>& y1d, 
@@ -59,9 +56,13 @@ class CISST_EXPORT robFunctionRn : public robFunction {
 		 const vctDynamicVector<double>& y2d,
 		 const vctDynamicVector<double>& y2dd );
 
-  //robFunction* Concatenate( double t, robFunction* function );
+  void InitialState( vctDynamicVector<double>& y,
+		     vctDynamicVector<double>& yd,
+		     vctDynamicVector<double>& ydd );
 
-  virtual void Evaluate( double, double&, double&, double& ){}
+  void FinalState( vctDynamicVector<double>& y,
+		   vctDynamicVector<double>& yd,
+		   vctDynamicVector<double>& ydd );
 
   virtual void Evaluate( double, 
 			 vctFixedSizeVector<double,3>&, 
@@ -71,15 +72,14 @@ class CISST_EXPORT robFunctionRn : public robFunction {
   virtual void Evaluate( double, 
 			 vctDynamicVector<double>&, 
 			 vctDynamicVector<double>&, 
-			 vctDynamicVector<double>& ){}
+			 vctDynamicVector<double>& ) {}
   
-  virtual void Blend( double,
-		      robFunction*, 
-		      const vctDynamicVector<double>&, 
-		      const vctDynamicVector<double>& ){}
+  virtual void Blend( robFunction* function, 
+		      const vctDynamicVector<double>& qd, 
+		      const vctDynamicVector<double>& qdd ) = 0;
 
-  virtual void Blend( double, robFunction*, double, double ){}
-  
+  virtual void Blend( robFunction* function, double vmax, double vdmax ) = 0;
+
 
 };
 

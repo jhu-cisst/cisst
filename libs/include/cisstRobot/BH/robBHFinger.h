@@ -13,7 +13,7 @@ class CISST_EXPORT robBHFinger : public robManipulator {
   enum Phalanx 
   { 
     BASE,
-    MCP,
+    METACARP,
     PROXIMAL, 
     INTERMEDIATE, 
   };

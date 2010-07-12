@@ -19,26 +19,10 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnLogger.h>
 
-robLinearRn::robLinearRn( double t1, double q1, double q2, double qd ) :
-  robFunctionRn( t1, q1, 0.0, 0.0, t1, q2, 0.0, 0.0 ){
-
-  if( 0.0 < qd ){                    // ensure that qd is positive
-    t2 = t1 + fabs( q2-q1 ) / qd;    // compute t2
-  }
-  else{
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-		      << ": The velocity qd = " << qd << " is not positive."
-		      << std::endl;
-  }
-
-  ComputeParameters();               // evaluate the parameters
-  
-}
-
-robLinearRn::robLinearRn( double t1,
-			  const vctFixedSizeVector<double,3>& p1, 
+robLinearRn::robLinearRn( const vctFixedSizeVector<double,3>& p1, 
 			  const vctFixedSizeVector<double,3>& p2,
-			  double v ) : 
+			  double v,
+			  double t1 ) : 
   robFunctionRn( t1, 
 		 p1,
 		 vctDynamicVector<double>( 3, 0.0 ),
@@ -48,24 +32,16 @@ robLinearRn::robLinearRn( double t1,
 		 vctDynamicVector<double>( 3, 0.0 ),
 		 vctDynamicVector<double>( 3, 0.0 ) ){
 
-  if( 0.0 < v ){                                // ensure that v is positive
-    vctFixedSizeVector<double,3> dp = p2 - p1;
-    t2 = t1 + dp.Norm()/v;                      // Compute the final time t2
-  }
-  else{
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-		      << ": The velocity v = " << v << " is not positive."
-		      << std::endl;
-  }
-
-  ComputeParameters();                          // evaluate the parameters
+  vctFixedSizeVector<double,3> dp = p2 - p1;
+  StopTime() = StartTime() + dp.Norm() / fabs(v);  // Compute the final time t2
+  ComputeParameters();                             // evaluate the parameters
 
 }
 
-robLinearRn::robLinearRn( double t1, 
-			  const vctDynamicVector<double>& q1, 
+robLinearRn::robLinearRn( const vctDynamicVector<double>& q1, 
 			  const vctDynamicVector<double>& q2,
-			  const vctDynamicVector<double>& qd ) : 
+			  const vctDynamicVector<double>& qd,
+			  double t1 ) : 
   robFunctionRn( t1,
 		 q1,
 		 vctDynamicVector<double>( q1.size(), 0.0 ),
@@ -76,42 +52,76 @@ robLinearRn::robLinearRn( double t1,
 		 vctDynamicVector<double>( q1.size(), 0.0 ) ){
 
   if( (q1.size() == q2.size()) && (q1.size() == qd.size()) ){
-
+    
     // Compute the final time t2
     for( size_t i=0; i<q1.size(); i++ ){
-      if( 0.0 < qd[i] ){
-	double t2i = t1 + fabs( q2[i]-q1[i] ) / qd[i];	// compute t2i
-	if( t2 < t2i )
-	  { t2 = t2i; }
-      }
-      else{
-	CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-			  << ": The velocity qd[" << i << "] = " << qd[i] 
-			  << " is not positive."
-			  << std::endl;
-      }
-
+      double t2i = StartTime() + fabs( q2[i]-q1[i] ) / fabs( qd[i] );
+      if( StopTime() < t2i )
+	{ StopTime() = t2i; }
     }
-
     ComputeParameters();
+  }
+
+}
+
+void robLinearRn::Blend( robFunction* function, 
+			 const vctDynamicVector<double>&, 
+			 const vctDynamicVector<double>& ){
+
+  // The function must be a QLQ trajectory
+  robLinearRn* next = dynamic_cast<robLinearRn*>( function );
+
+  if( next != NULL ){      // cast must be successful
+
+    vctDynamicVector<double> q2i, q2id, q2idd;
+    vctDynamicVector<double> q2f, q2fd, q2fdd;
+    vctDynamicVector<double> slope = next->Slope();
+    next->InitialState( q2i, q2id, q2idd );
+    next->FinalState( q2f, q2fd, q2fdd );
+
+    // Create a new cruise segment but this one will start at StopTime 
+    *next = robLinearRn( q2i, q2f, slope, this->StopTime() );
 
   }
 
 }
 
+void robLinearRn::Blend( robFunction* function, double, double ){
+
+  // The function must be a QLQ trajectory
+  robLinearRn* next = dynamic_cast<robLinearRn*>( function );
+
+  if( next != NULL ){      // cast must be successful
+
+    vctDynamicVector<double> q2i, q2id, q2idd;
+    vctDynamicVector<double> q2f, q2fd, q2fdd;
+    vctDynamicVector<double> slope = next->Slope();
+    next->InitialState( q2i, q2id, q2idd );
+    next->FinalState( q2f, q2fd, q2fdd );
+
+    // Create a new cruise segment but this one will start at StopTime 
+    *next = robLinearRn( q2i, q2f, slope, this->StopTime() );
+
+  }
+
+}
+
+vctDynamicVector<double> robLinearRn::Slope() const { return m; }
+
 void robLinearRn::ComputeParameters(){
 
-                            // Compute the parameters 
-  if( t1 < t2 ){            // if t1 < t2, then we move
-    m = (y2-y1) / (t2-t1);  // compute the slope
-    b =  y1 - m*t1;         // compute the zero offset
+                                 // Compute the parameters 
+  if( StartTime() < StopTime() ){// if t1 < t2, then we move
+    m = (y2-y1) / Duration();    // compute the slope
+    b =  y1 - m*StartTime();     // compute the zero offset
   }
   else{                     // if t2 <= t1 then we stay at y1
     b = y1;                 // zero offset to y1
     m = y1d;                // no velocity
     y2 = y1;                // final config to y1
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-		      << ": t1 = " << t1 << " equals t2 = " << t2
+		      << ": t1 = " << StartTime() 
+		      << " equals t2 = " << StopTime()
 		      << " The trajectory will remain at y1 = " << y1
 		      << std::endl;
   }
@@ -121,8 +131,9 @@ void robLinearRn::ComputeParameters(){
 
 
 void robLinearRn::Evaluate( double t, double& q, double& qd, double& qdd ){
+  
 
-  if( t < t1 ){              // if t < t1
+  if( t < StartTime() ){
     if( y1.size() == 1 && y1d.size() == 1 && y1dd.size() == 1 ){
       q   = y1[0];
       qd  = y1d[0];
@@ -138,7 +149,7 @@ void robLinearRn::Evaluate( double t, double& q, double& qd, double& qdd ){
     }
   }
 
-  if( t1 <= t && t <= t2 ){                 // if t1 <= t <= t2
+  if( StartTime() <= t && t <= StopTime() ){
     if( m.size() == 1 && b.size() == 1 ){
       q   = m[0]*t + b[0];                  // interpolate 
       qd  = m[0];                           // constant velocity
@@ -151,7 +162,7 @@ void robLinearRn::Evaluate( double t, double& q, double& qd, double& qdd ){
     }
   }
 
-  if( t2 < t ){              // if t2 < t
+  if( StopTime() < t ){              // if t2 < t
     if( y2.size() == 1 && y2d.size() == 1 && y2dd.size() == 1 ){
       q   = y2[0];
       qd  = y2d[0];
@@ -171,11 +182,11 @@ void robLinearRn::Evaluate( double t, double& q, double& qd, double& qdd ){
 
 
 void robLinearRn::Evaluate( double t,
-			  vctFixedSizeVector<double,3>& p,
-			  vctFixedSizeVector<double,3>& v,
-			  vctFixedSizeVector<double,3>& vd ){
-
-  if( t < t1 ){              // if t < t1
+			    vctFixedSizeVector<double,3>& p,
+			    vctFixedSizeVector<double,3>& v,
+			    vctFixedSizeVector<double,3>& vd ){
+  
+  if( t < StartTime() ){
     if( y1.size() == 3 && y1d.size() == 3 && y1dd.size() == 3 ){
       p =  vctFixedSizeVector<double,3>( y1[0],   y1[1],   y1[2] );
       v =  vctFixedSizeVector<double,3>( y1d[0],  y1d[1],  y1d[2] );
@@ -191,7 +202,7 @@ void robLinearRn::Evaluate( double t,
     }
   }
 
-  if( t1 <= t && t <= t2 ){  // if t1 <= t <= t2
+  if( StartTime() <= t && t <= StopTime() ){
     if( m.size() == 3 && b.size() == 3 ){
       vctDynamicVector<double> tmp = m*t+b;                      // interpolate 
       p = vctFixedSizeVector<double,3>( tmp[0], tmp[1], tmp[2] );
@@ -205,7 +216,7 @@ void robLinearRn::Evaluate( double t,
     }
   }
 
-  if( t2 < t ){              // if t2 < t
+  if( StopTime() < t ){              // if t2 < t
     if( y2.size() == 3 && y2d.size() == 3 && y2dd.size() == 3 ){
       p =  vctFixedSizeVector<double,3>( y2[0],   y2[1],   y2[2] );
       v =  vctFixedSizeVector<double,3>( y2d[0],  y2d[1],  y2d[2] );
@@ -231,20 +242,20 @@ void robLinearRn::Evaluate( double t,
 			    vctDynamicVector<double>& qd,
 			    vctDynamicVector<double>& qdd ){
 
-  if( t < t1 ){              // if t < t1
+  if( t < StartTime() ){
     q = y1;                  // return p1
     qd = y1d;                // zero velocity
     qdd = y1dd;              // zero acceleration
   }
   
-  if( t1 <= t && t <= t2 ){  // if t1 <= t <= t2
+  if( StartTime() <= t && t <= StopTime() ){
     q = m*t+b;               // interpolate 
     qd = m;                  // constant velocity
     qdd.SetSize( q.size() );
     qdd.SetAll( 0.0 );       // zero acceleration
   }
 
-  if( t2 < t ){              // if t2 < t
+  if( StopTime() < t ){
     q = y2;                  // return p2
     qd = y2d;                // zero velocity
     qdd = y2dd;              // zero acceleration

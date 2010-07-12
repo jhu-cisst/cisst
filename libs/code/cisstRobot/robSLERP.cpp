@@ -18,114 +18,135 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstRobot/robSLERP.h>
 #include <cisstCommon/cmnLogger.h>
 
-robSLERP::robSLERP( double ti, const vctMatrixRotation3<double>& Rwi, 
-		    double tf, const vctMatrixRotation3<double>& Rwf ) : 
-  robFunction( robSpace::TIME, robSpace::ORIENTATION ) {
+robSLERP::robSLERP( const vctQuaternionRotation3<double>& qw1, 
+		    const vctQuaternionRotation3<double>& qw2,
+		    double wmax,
+		    double t1 ) : 
+  robFunctionSO3( t1,
+		  qw1,
+		  vctFixedSizeVector<double,3>( 0.0 ),
+		  vctFixedSizeVector<double,3>( 0.0 ),
+		  t1,
+		  qw2,
+		  vctFixedSizeVector<double,3>( 0.0 ),
+		  vctFixedSizeVector<double,3>( 0.0 ) ),
+  wmax( wmax )
+{  ComputeParameters( wmax );  }
 
-  // Check that the time values are greater than zero and that t1 < t2
-  if( (ti < 0) || (tf < 0) || (tf <= ti) ){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
-		      << ": " << ti << " must be less than " << tf << "." 
-		      << std::endl;
-  }
+robSLERP::robSLERP( const vctMatrixRotation3<double>& Rw1, 
+		    const vctMatrixRotation3<double>& Rw2,
+		    double wmax,
+		    double t1 ) : 
+  robFunctionSO3( t1,
+		  Rw1,
+		  vctFixedSizeVector<double,3>(0.0),
+		  vctFixedSizeVector<double,3>(0.0),
+		  t1,
+		  Rw2,
+		  vctFixedSizeVector<double,3>(0.0),
+		  vctFixedSizeVector<double,3>(0.0) ),
+  wmax( wmax )
+{  ComputeParameters( wmax );  }
 
-  this->ti = ti;
-  this->tf = tf;
 
-  // set the quaternions
-  this->qwi.From( Rwi );
-  this->qwf.From( Rwf );
+void robSLERP::ComputeParameters( double w ){
 
-  // cos(theta/2)
-  double ctheta = ( this->qwi.X()*this->qwf.X() + 
-		    this->qwi.Y()*this->qwf.Y() + 
-		    this->qwi.Z()*this->qwf.Z() + 
-		    this->qwi.R()*this->qwf.R() );
+  // cos( theta/2 )
+  double ctheta = ( qw1.X()*qw2.X() + 
+		    qw1.Y()*qw2.Y() + 
+		    qw1.Z()*qw2.Z() + 
+		    qw1.R()*qw2.R() );
 
-  // if negative, invert qf
+
+
+  // if theta is negative, invert q2
   if( ctheta < 0.0 ){
-    this->qwf.X() = -this->qwf.X();
-    this->qwf.Y() = -this->qwf.Y();
-    this->qwf.Z() = -this->qwf.Z();
-    this->qwf.R() = -this->qwf.R();
+    qw2.X() = -qw2.X();
+    qw2.Y() = -qw2.Y();
+    qw2.Z() = -qw2.Z();
+    qw2.R() = -qw2.R();
   }  
 
-  // relative rotation
-  vctMatrixRotation3<double> Riw;
-  Riw.InverseOf( Rwi );
-  vctMatrixRotation3<double> Rif;
-  Rif = Riw * Rwf;
 
-  // 
-  vctAxisAngleRotation3<double> rif( Rif );
-  this->w = Rwi * (rif.Axis() * rif.Angle() / (tf-ti));
-  
-}
+  // Compute the final time t2
+  if( 0 < fabs( w ) ){
 
-robFunction::Context robSLERP::GetContext( const robVariable& input ) const{
-
-  // Test the input is time
-  if( !input.IsTimeEnabled() ){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
-		      << ": Expected time input." 
-		      << std::endl;
-    return robFunction::CUNDEFINED;
-  }
-
-  // Check the context
-  double t = input.time;
-  if( this->ti <= t && t <= this->tf ) { return robFunction::CDEFINED; }
-  else                                 { return robFunction::CUNDEFINED; }
-
-}
-
-robFunction::Errno robSLERP::Evaluate( const robVariable& input, 
-				       robVariable& output ){
-
-  // Test the context
-  if( GetContext( input ) != robFunction::CDEFINED ){
-    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
-		      << ": Function is undefined for the input: " <<input.time 
-		      << std::endl;
-    return robFunction::EUNDEFINED;
-  }
-
-  // normalize the time
-  double t = input.time;
-  t = (t-ti) / (tf-ti);
-  if( t < 0.0 ) t = 0;
-  if( 1.0 < t ) t = 1;
+    // relative orientation
+    vctMatrixRotation3<double> R1w, R12;
+    R1w.InverseOf( vctMatrixRotation3<double>( qw1 ) );
+    R12 = R1w * vctMatrixRotation3<double>( qw2 );
     
-  // cos(theta)
-  double ctheta = ( this->qwi.X()*this->qwf.X() + 
-		    this->qwi.Y()*this->qwf.Y() +
-		    this->qwi.Z()*this->qwf.Z() +
-		    this->qwi.R()*this->qwf.R() );
+    // compute t2 based on the amount of rotation and the angular velocity
+    vctAxisAngleRotation3<double> r12( R12 );
+    StopTime() = StartTime() + r12.Angle() / fabs( w );
+    this->w = r12.Axis() * r12.Angle() / Duration();
+
+  }
   
-  // if qwi~=qwf, then theta~=0, then cos(theta)~=1 and return qwf
-  if ( 1.0 <= fabs(ctheta) ){
-    vctMatrixRotation3<double> R( this->qwf );
-    vctFixedSizeVector<double,3> w(0.0), wd(0.0);       // velocity+acceleration
-    output = robVariable( robSpace::ORIENTATION, R, w, wd );
-    return robFunction::ESUCCESS;
+  else{
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+		      << ": Angular velocity is zero." 
+		      << std::endl;
   }
 
+}
+
+void robSLERP::Evaluate( double t,
+			 vctQuaternionRotation3<double>& q,
+			 vctFixedSizeVector<double,3>& w,
+			 vctFixedSizeVector<double,3>& wd ){
+				       
+
+  // normalize the time between [0,1]
+  t = (t-StartTime()) / Duration();
+    
+  // deal with time less than zero, then we return the initial orientation
+  if( t < 0.0 ){ 
+    q = qw1;
+    w.SetAll( 0.0 );
+    wd.SetAll( 0.0 );
+    return;
+  }
+    
+    
+  // deal with tiime greater than one, then we return the final orientation
+  if( 1.0 < t ){
+    q = qw2;
+    w.SetAll( 0.0 );
+    wd.SetAll( 0.0 );
+    return;
+  }
+    
+
+
+  // cos(theta)
+  double ctheta = ( qw1.X()*qw2.X() + 
+		    qw1.Y()*qw2.Y() +
+		    qw1.Z()*qw2.Z() +
+		    qw1.R()*qw2.R() );
+    
+  // if qw1~=qw2, then theta~=0, then cos(theta)~=1 and return qw2
+  if ( 1.0 <= fabs(ctheta) ){
+    q = qw2;
+    w.SetAll( 0.0 );
+    wd.SetAll( 0.0 );
+    return;
+  }
+  
   // sin(theta)
   double stheta = sqrt(1.0 - ctheta*ctheta);
   
-  // if theta ~= Kpi, then sin(theta) ~= 0, then result is not fully defined
-  // we could rotate around any axis normal to qi or qf
+  // if theta ~= K*pi, then sin(theta) ~= 0, then result is not fully defined
+  // we could rotate around any axis normal to qw1 or qw2
   if( fabs(stheta) < 0.001 ){
-    vctQuaternionRotation3<double> q( (this->qwi.X() + this->qwf.X())*0.5,
-				      (this->qwi.Y() + this->qwf.Y())*0.5,    
-				      (this->qwi.Z() + this->qwf.Z())*0.5,
-				      (this->qwi.R() + this->qwf.R())*0.5,
-				      VCT_NORMALIZE );
-    vctMatrixRotation3<double> R( q );            // orientation
-    vctFixedSizeVector<double,3> w(0.0), wd(0.0); // zero angular acceleration
-    output = robVariable( robSpace::ORIENTATION, R, w, wd );
-
-    return robFunction::ESUCCESS;
+    q = vctQuaternionRotation3<double>( ( qw1.X() + qw2.X() )*0.5,
+					( qw1.Y() + qw2.Y() )*0.5,    
+					( qw1.Z() + qw2.Z() )*0.5,
+					( qw1.R() + qw2.R() )*0.5,
+					VCT_NORMALIZE );
+    w.SetAll(0.0);
+    wd.SetAll(0.0);
+    return;
   }
     
   // general case starts here
@@ -134,40 +155,34 @@ robFunction::Errno robSLERP::Evaluate( const robVariable& input,
   double B = sin(       t  * theta) / stheta;
   
   // Interpolate the slerp between qi and qf.
-  vctQuaternionRotation3<double> qwk( this->qwi.X()*A + this->qwf.X()*B,
-				      this->qwi.Y()*A + this->qwf.Y()*B,
-				      this->qwi.Z()*A + this->qwf.Z()*B,
-				      this->qwi.R()*A + this->qwf.R()*B,
+  q = vctQuaternionRotation3<double>( qw1.X()*A + qw2.X()*B,
+				      qw1.Y()*A + qw2.Y()*B,
+				      qw1.Z()*A + qw2.Z()*B,
+				      qw1.R()*A + qw2.R()*B,
 				      VCT_NORMALIZE );
-  vctMatrixRotation3<double> Rwk(qwk);
 
-  vctFixedSizeVector<double,3> wd(0.0);
-
-  output.IncludeBasis( Codomain().GetBasis(), Rwk, w, wd );
-
-  return robFunction::ESUCCESS;
+  w = vctMatrixRotation3<double>( q ) * this->w;
+  wd.SetAll(0.0);
+  
 }
 
-  /*
-  // compute the angular velocity from slerp(q0,q1,t) = (q1 q0^-1)^t q0
-  // slerp' = ln(q1q0^-1) slerp(q0,q1,t)
-  // and ln(q) = v theta ( q = [v sin(theta), cos(theta) ] )
-  vctQuaternionRotation3<double> q, q1, q0i;
-  q0i.InverseOf( this->qwi );
-  q1 = this->qwf;
-  q = q1 * q0i;        // q = q1 q0^-1 = [v sin(Omega); cos(Omega)]
-  
+void robSLERP::Blend( robFunction* function, double, double ){
 
-  double Omega = acos( q.R() );
-  w[0] = q.X() * Omega/sin(Omega);
-  w[1] = q.Y() * Omega/sin(Omega);
-  w[2] = q.Z() * Omega/sin(Omega);
-  
-  //w[0] = w[0]*2/(tf-ti);
-  //w[1] = w[1]*2/(tf-ti);
-  //w[2] = w[2]*2/(tf-ti);
+  // The function must be a QLQ trajectory
+  robSLERP* next = dynamic_cast<robSLERP*>( function );
 
-  vctMatrixRotation3<double> Rwi(this->qwi);
-  vctMatrixRotation3<double> Rwk;
-  Rwk = Rwi*Rik;
-  */
+  if( next != NULL ){      // cast must be successful
+
+    vctQuaternionRotation3<double> qi, qf;
+    vctFixedSizeVector<double,3> wi, wid, wf, wfd;
+
+    next->InitialState( qi, wi, wid );
+    next->FinalState( qf, wf, wfd );
+
+    // Create a new cruise segment but this one will start at StopTime 
+    *next = robSLERP( qi, qf, next->wmax, this->StopTime() );
+
+  }
+
+}
+

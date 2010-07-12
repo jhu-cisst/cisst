@@ -18,37 +18,39 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _robSLERP_h
 #define _robSLERP_h
 
-#include <iostream>
-
-#include <cisstVector/vctQuaternionRotation3.h>
-#include <cisstVector/vctMatrixRotation3.h>
-#include <cisstRobot/robFunction.h>
+#include <cisstRobot/robFunctionSO3.h>
 #include <cisstRobot/robExport.h>
 
 //! Define a spherical linear interpolation function 
-class CISST_EXPORT robSLERP : public robFunction {
+class CISST_EXPORT robSLERP : public robFunctionSO3 {
 
-protected:
-    
-  vctQuaternionRotation3<double> qwi;   // initial orientation
-  vctQuaternionRotation3<double> qwf;   // final orientation
-  double ti;                            // initial time
-  double tf;                            // final time
+  double wmax;
+  vctFixedSizeVector<double,3> w;
 
-  vctFixedSizeVector<double,3>  w;
+  void ComputeParameters( double wmax );
   
-public:
+ public:
   
-  //! Create a SLERP between ti and tf
-  robSLERP( double ti, const vctMatrixRotation3<double>& Ri, 
-	    double tf, const vctMatrixRotation3<double>& Rf);
+  robSLERP( const vctMatrixRotation3<double>& Rw1, 
+	    const vctMatrixRotation3<double>& Rw2,
+	    double w,
+	    double t1 = 0.0 );
   
-  //! Return true if the function is defined for the given input
-  robFunction::Context GetContext( const robVariable& input ) const; 
+  
+  robSLERP( const vctQuaternionRotation3<double>& qw1, 
+	    const vctQuaternionRotation3<double>& qw2,
+	    double w,
+	    double t1 = 0.0 );
+  
   
   //! Evaluate the function
-  robFunction::Errno Evaluate( const robVariable& input, robVariable& output );  
+  void Evaluate( double t,
+		 vctQuaternionRotation3<double>& q,
+		 vctFixedSizeVector<double,3>& w,
+		 vctFixedSizeVector<double,3>& wd );
   
+  void Blend( robFunction* function, double wmax, double wdmax );
+
 };
 
 #endif
