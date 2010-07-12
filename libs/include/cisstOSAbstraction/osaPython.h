@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s): Peter Kazanzides
-  Created on: 2005-12-21
+  Author(s):	Anton Deguet
+  Created on:	2009-11-08
 
-  (C) Copyright 2005-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -17,20 +17,22 @@ no warranty.  The complete license can be found in license.txt and
 http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
+
 */
 
 
-%module SineGeneratorPython
+/*!
+  \file
+  \brief Header files from cisstOSAbstraction required to compile the SWIG generated Python wrappers
+ */
+#pragma once
 
-%mutable;
+#ifndef _osaPython_h
+#define _osaPython_h
 
-%header %{
-    #include "cisstCommon/cmnPython.h"
-    #include "SineGenerator.h"
-%}
+#include <cisstCommon/cmnPython.h>
 
+#include <cisstOSAbstraction/osaTimeServer.h>
+#include <cisstOSAbstraction/osaSerialPort.h>
 
-%import "cisstCommon/cisstCommon.i"
-
-%include "SineGenerator.h"
-
+#endif // _osaPython_h

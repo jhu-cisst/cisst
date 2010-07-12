@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s): Peter Kazanzides
-  Created on: 2005-12-21
+  Author(s):  Anton Deguet
+  Created on: 2010-07-12
 
-  (C) Copyright 2005-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -17,20 +17,18 @@ no warranty.  The complete license can be found in license.txt and
 http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
+
 */
 
+// This file is provided to help transition.  Put in place in
+// July 2010, should be removed at one point.
 
-%module SineGeneratorPython
+#pragma once
 
-%mutable;
+#ifndef _cisstStereoVision_i_h
+#define _cisstStereoVision_i_h
 
-%header %{
-    #include "cisstCommon/cmnPython.h"
-    #include "SineGenerator.h"
-%}
+#error "Deprecated file, you should use #include <cisstStereoVision/svlPython.h> intead"
 
-
-%import "cisstCommon/cisstCommon.i"
-
-%include "SineGenerator.h"
+#endif // _cisstStereoVision_i_h
 

@@ -83,3 +83,10 @@ ELSE("${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
     CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_LIBRARIES CISST_RT_LIBRARY)
   ENDIF(UNIX AND NOT APPLE)
 ENDIF("${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
+
+# Python wrappers
+if (CISST_HAS_SWIG_PYTHON)
+  cisst_add_swig_module(MODULE cisstOSAbstraction
+                        INTERFACE_DIRECTORY ../../include/cisstOSAbstraction
+			CISST_LIBRARIES cisstCommon cisstOSAbstraction)
+endif (CISST_HAS_SWIG_PYTHON)

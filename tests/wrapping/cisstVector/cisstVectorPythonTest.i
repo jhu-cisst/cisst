@@ -28,14 +28,13 @@ http://www.cisst.org/cisst/license.txt.
 
 %header %{
     // Put header files here
-    #include "cisstVector/cisstVector.i.h"
+    #include <cisstVector/vctPython.h>
     #include "vctDynamicVectorTypemapsTest.h"
     #include "vctFixedSizeVectorTypemapsTest.h"
     #include "vctDynamicMatrixTypemapsTest.h"
     #include "vctFixedSizeMatrixTypemapsTest.h"
     #include "vctDynamicNArrayTypemapsTest.h"
 %}
-
 
 %include "vctDynamicVectorTypemapsTest.h"
 %template(vctDynamicVectorTypemapsTest_char) vctDynamicVectorTypemapsTest<char>;

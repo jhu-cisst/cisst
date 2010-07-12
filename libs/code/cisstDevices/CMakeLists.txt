@@ -5,13 +5,13 @@
 #
 # (C) Copyright 2008-2009 Johns Hopkins University (JHU), All Rights
 # Reserved.
-# 
+#
 # --- begin cisst license - do not edit ---
-# 
+#
 # This software is provided "as is" under an open source license, with
 # no warranty.  The complete license can be found in license.txt and
 # http://www.cisst.org/cisst/license.txt.
-# 
+#
 # --- end cisst license ---
 
 
@@ -83,7 +83,7 @@ if( CISST_DEV_HAS_GLUT )
     cisst_add_to_internal( CISST_ADDITIONAL_LIBRARIES GLUT_LIBRARIES )
   endif( GLUT_FOUND )
 
-  SET( HEADER_FILES 
+  SET( HEADER_FILES
     ${HEADER_FILES}
     glut/devGeometry.h
     glut/devGLUT.h
@@ -91,7 +91,7 @@ if( CISST_DEV_HAS_GLUT )
     glut/devMeshTriangular.h
     )
 
-    SET( SOURCE_FILES 
+    SET( SOURCE_FILES
       ${SOURCE_FILES}
       glut/devGeometry.cpp
       glut/devGLUT.cpp
@@ -105,28 +105,28 @@ endif( CISST_DEV_HAS_GLUT )
 if( CISST_DEV_HAS_ODE )
   find_package( ODE )
   if( ODE_FOUND )
-    
+
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DCISST_ODE_SUPPORT -DdDOUBLE")
     cisst_add_to_internal( CISST_ADDITIONAL_LIBRARIES ODE_LIBRARIES )
-    
-    SET( HEADER_FILES 
+
+    SET( HEADER_FILES
       ${HEADER_FILES}
       ode/devODEBody.h
       ode/devODEJoint.h
       ode/devODEManipulator.h
       ode/devODEWorld.h
       )
-    
-    SET( SOURCE_FILES 
+
+    SET( SOURCE_FILES
       ${SOURCE_FILES}
       ode/devODEBody.cpp
       ode/devODEJoint.cpp
       ode/devODEManipulator.cpp
-      ode/devODEWorld.cpp 
+      ode/devODEWorld.cpp
       )
-    
+
     endif( ODE_FOUND )
-    
+
 endif( CISST_DEV_HAS_ODE )
 
 if(CISST_DEV_HAS_SENSABLEHD)
@@ -155,17 +155,17 @@ endif( CISST_DEV_HAS_RTSOCKETCAN )
 
 if( CISST_DEV_HAS_ACCELEGLOVE )
   set(SOURCE_FILES ${SOURCE_FILES} devAcceleGlove.cpp)
-  set(HEADER_FILES ${HEADER_FILES} devAcceleGlove.h) 
+  set(HEADER_FILES ${HEADER_FILES} devAcceleGlove.h)
 endif( CISST_DEV_HAS_ACCELEGLOVE )
 
-if(CISST_DEV_HAS_LOPOMOCO) 
-  set(SOURCE_FILES ${SOURCE_FILES} 
-      devLoPoMoCo.cpp 
+if(CISST_DEV_HAS_LOPOMOCO)
+  set(SOURCE_FILES ${SOURCE_FILES}
+      devLoPoMoCo.cpp
       devLoPoMoCoOffsets.h
       devLoPoMoCoBoardIO.h)
-  set(HEADER_FILES ${HEADER_FILES} 
-      devLoPoMoCo.h) 
-endif(CISST_DEV_HAS_LOPOMOCO) 
+  set(HEADER_FILES ${HEADER_FILES}
+      devLoPoMoCo.h)
+endif(CISST_DEV_HAS_LOPOMOCO)
 
 if(CISST_DEV_HAS_OPENIGTLINK)
   find_package(OpenIGTLink REQUIRED)
@@ -239,7 +239,7 @@ endif(CISST_HAS_XML)
     FOREACH (it ${ui_files})
       GET_FILENAME_COMPONENT(outfile ${it} NAME_WE)
       GET_FILENAME_COMPONENT(infile ${it} ABSOLUTE)
-# the only thing we modified ... 
+# the only thing we modified ...
       SET(outfile ${cisst_BINARY_DIR}/libs/include/cisstDevices/${outfile}.h)
       ADD_CUSTOM_COMMAND(OUTPUT ${outfile}
         COMMAND ${QT_UIC_EXECUTABLE}
@@ -324,3 +324,15 @@ endif(CISST_DEV_HAS_MICRONTRACKER)
 if(CISST_HAS_QT)
   target_link_libraries(cisstDevices ${QT_LIBRARIES})
 endif(CISST_HAS_QT)
+
+# Python wrappers
+if (CISST_HAS_SWIG_PYTHON)
+  cisst_add_swig_module(MODULE cisstDevices
+                        INTERFACE_DIRECTORY ../../include/cisstDevices
+			CISST_LIBRARIES cisstDevices
+                                        cisstParameterTypes
+					cisstMultiTask
+					cisstOSAbstraction
+					cisstVector
+					cisstCommon)
+endif (CISST_HAS_SWIG_PYTHON)

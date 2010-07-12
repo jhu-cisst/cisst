@@ -5,13 +5,13 @@
 #
 # (C) Copyright 2003-2010 Johns Hopkins University (JHU), All Rights
 # Reserved.
-# 
+#
 # --- begin cisst license - do not edit ---
-# 
+#
 # This software is provided "as is" under an open source license, with
 # no warranty.  The complete license can be found in license.txt and
 # http://www.cisst.org/cisst/license.txt.
-# 
+#
 # --- end cisst license ---
 
 
@@ -94,3 +94,11 @@ ENDIF(CISST_HAS_CISSTNETLIB)
 
 
 CISST_ADD_LIBRARY_TO_PROJECT(cisstLibs)
+
+
+# Python wrappers
+if (CISST_HAS_SWIG_PYTHON)
+  cisst_add_swig_module(MODULE cisstNumerical
+                        INTERFACE_DIRECTORY ../../include/cisstNumerical
+			CISST_LIBRARIES cisstCommon cisstVector cisstNumerical)
+endif (CISST_HAS_SWIG_PYTHON)

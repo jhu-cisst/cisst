@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s): Anton Deguet
-  Created on: 2004-10-05
+  Author(s):  Anton Deguet
+  Created on: 2005-08-14
 
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2005-2007 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -17,27 +17,26 @@ no warranty.  The complete license can be found in license.txt and
 http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
+
 */
 
+%module cisstNumericalPython
 
-%module myReDerivedClassPython
-
-%header %{
-    #include "cisstCommon/cmnPython.h"
-    #include "cisstVector/vctPython.h"
-    #include "myReDerivedClass.h"
-%}
-
-%init %{
-    import_array() // numpy initialization
-%}
-
-%include "std_string.i"
+%include <std_string.i>
+%include <std_except.i>
 
 %import "cisstCommon/cisstCommon.i"
 %import "cisstVector/cisstVector.i"
 
-%import "myDerivedClassPython.i"
+%header %{
+#include <cisstNumerical/nmrPython.h>
+%}
 
-%include "myReDerivedClass.h"
+// Generate parameter documentation for IRE
+%feature("autodoc", "1");
 
+%include "cisstNumerical/nmrNetlib.h"
+
+#if CISST_HAS_CISSTNETLIB
+%include "cisstNumerical/nmrSVD.i"
+#endif

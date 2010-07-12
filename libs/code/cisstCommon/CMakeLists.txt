@@ -97,8 +97,12 @@ if (CISST_HAS_QT)
                  cmnLoggerQtWidget.cpp
     HEADER_FILES cmnExportQt.h
                  cmnLoggerQtWidget.h)
-
   target_link_libraries (cisstCommonQt ${QT_LIBRARIES})
-
 endif (CISST_HAS_QT)
 
+# Python wrappers
+if (CISST_HAS_SWIG_PYTHON)
+  cisst_add_swig_module(MODULE cisstCommon
+                        INTERFACE_DIRECTORY ../../include/cisstCommon
+			CISST_LIBRARIES cisstCommon)
+endif (CISST_HAS_SWIG_PYTHON)

@@ -25,8 +25,8 @@ http://www.cisst.org/cisst/license.txt.
 %mutable;
 
 %header %{
-    #include "cisstCommon/cisstCommon.i.h"
-    #include "cisstVector/cisstVector.i.h"
+    #include "cisstCommon/cmnPython.h"
+    #include "cisstVector/vctPython.h"
     #include "myDerivedClass.h"
 %}
 

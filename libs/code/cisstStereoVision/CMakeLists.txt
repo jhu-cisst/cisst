@@ -7,11 +7,11 @@
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
-# 
+#
 # This software is provided "as is" under an open source license, with
 # no warranty.  The complete license can be found in license.txt and
 # http://www.cisst.org/cisst/license.txt.
-# 
+#
 # --- end cisst license ---
 
 # set the library name
@@ -73,7 +73,7 @@ SET(SOURCE_FILES
     svlImageCodecPPM.cpp
     ipDeinterlacing.h              # private header
     ipDeinterlacing.cpp
-    svlStereoDP.h                  # private header 
+    svlStereoDP.h                  # private header
     svlStereoDP.cpp
     svlStereoDPMono.h              # private header
     svlStereoDPMono.cpp
@@ -346,7 +346,7 @@ IF(CISST_SVL_HAS_ZLIB AND ZLIB_FOUND)
 
     IF(CISST_SVL_HAS_PNG OR NOT PNG_OPTIONS)
         SET(PNG_OPTIONS
-            PNG_DEFINITIONS	
+            PNG_DEFINITIONS
             PNG_PNG_INCLUDE_DIR
             PNG_INCLUDE_DIR
             PNG_LIBRARY
@@ -826,3 +826,13 @@ SET(ADDITIONAL_HEADER_FILES ${CISST_SVL_CONFIG_FILE})
 # Finally create the library
 CISST_ADD_LIBRARY_TO_PROJECT(cisstLibs)
 
+# Python wrappers
+if (CISST_HAS_SWIG_PYTHON)
+  cisst_add_swig_module(MODULE cisstStereoVision
+                        INTERFACE_DIRECTORY ../../include/cisstStereoVision
+			CISST_LIBRARIES cisstStereoVision
+                                        cisstNumerical
+					cisstOSAbstraction
+					cisstVector
+					cisstCommon)
+endif (CISST_HAS_SWIG_PYTHON)

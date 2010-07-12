@@ -305,4 +305,11 @@ if (CISST_HAS_QT)
 
   target_link_libraries (cisstMultiTaskQt ${QT_LIBRARIES})
 
-endif(CISST_HAS_QT) 
+endif (CISST_HAS_QT)
+
+# Python wrappers
+if (CISST_HAS_SWIG_PYTHON)
+  cisst_add_swig_module(MODULE cisstMultiTask
+                        INTERFACE_DIRECTORY ../../include/cisstMultiTask
+			CISST_LIBRARIES cisstMultiTask cisstOSAbstraction cisstVector cisstCommon)
+endif (CISST_HAS_SWIG_PYTHON)

@@ -140,7 +140,6 @@ set (HEADER_FILES
      vctVarStrideVectorIterator.h
      )
 
-
 # Add vctPlot2D base class if any rendering code is available, i.e. OpenGL or VTK
 if (CISST_HAS_OPENGL OR CISST_HAS_VTK)
   set (SOURCE_FILES
@@ -199,3 +198,10 @@ if (CISST_HAS_OPENGL AND CISST_HAS_FLTK)
                  vctExportFLTK.h)
 
 endif (CISST_HAS_OPENGL AND CISST_HAS_FLTK)
+
+# Python wrappers
+if (CISST_HAS_SWIG_PYTHON)
+  cisst_add_swig_module(MODULE cisstVector
+                        INTERFACE_DIRECTORY ../../include/cisstVector
+			CISST_LIBRARIES cisstCommon cisstVector)
+endif (CISST_HAS_SWIG_PYTHON)

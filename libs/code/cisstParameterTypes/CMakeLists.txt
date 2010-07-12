@@ -88,3 +88,14 @@ SET(HEADER_FILES
     )
 
 CISST_ADD_LIBRARY_TO_PROJECT(cisstLibs)
+
+# Python wrappers
+if (CISST_HAS_SWIG_PYTHON)
+  cisst_add_swig_module(MODULE cisstParameterTypes
+                        INTERFACE_DIRECTORY ../../include/cisstParameterTypes
+			CISST_LIBRARIES cisstParameterTypes
+                                        cisstMultiTask
+					cisstOSAbstraction
+					cisstVector
+					cisstCommon)
+endif (CISST_HAS_SWIG_PYTHON)
