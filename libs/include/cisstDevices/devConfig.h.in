@@ -37,4 +37,7 @@ http://www.cisst.org/cisst/license.txt.
 // Using Novint HDL (i.e. Falcon, ...)
 #define CISST_DEV_HAS_NOVINTHDL @CISST_DEV_HAS_NOVINTHDL@
 
+// Support for Claron MicronTracker.
+#define CISST_DEV_HAS_MICRONTRACKER @CISST_DEV_HAS_MICRONTRACKER@
+
 #endif // _devConfig_h 

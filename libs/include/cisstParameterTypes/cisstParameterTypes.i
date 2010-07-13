@@ -74,3 +74,8 @@ http://www.cisst.org/cisst/license.txt.
 %include "cisstParameterTypes/prmPositionJointSet.h"
 %include "cisstParameterTypes/prmVelocityJointGet.h"
 %include "cisstParameterTypes/prmVelocityJointSet.h"
+
+%include "cisstParameterTypes/prmTransformationBase.h"
+%include "cisstParameterTypes/prmTransformationManager.h"
+%include "cisstParameterTypes/prmTransformationDynamic.h"
+%include "cisstParameterTypes/prmTransformationFixed.h"

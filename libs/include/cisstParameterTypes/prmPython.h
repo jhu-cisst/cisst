@@ -49,4 +49,9 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstParameterTypes/prmVelocityJointGet.h>
 #include <cisstParameterTypes/prmVelocityJointSet.h>
 
+#include <cisstParameterTypes/prmTransformationBase.h>
+#include <cisstParameterTypes/prmTransformationManager.h>
+#include <cisstParameterTypes/prmTransformationFixed.h>
+#include <cisstParameterTypes/prmTransformationDynamic.h>
+
 #endif // _prmPython_h

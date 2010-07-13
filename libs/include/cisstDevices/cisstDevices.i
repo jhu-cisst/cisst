@@ -34,6 +34,7 @@ http://www.cisst.org/cisst/license.txt.
 %include "swigrun.i"
 
 %import "cisstConfig.h"
+%import "cisstDevices/devConfig.h"
 
 %import "cisstCommon/cisstCommon.i"
 %import "cisstVector/cisstVector.i"

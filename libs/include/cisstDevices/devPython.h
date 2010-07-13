@@ -31,6 +31,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _devPython_h
 
 #include <cisstParameterTypes/prmPython.h>
+#include <cisstDevices/devConfig.h>
 
 #if CISST_HAS_XML
 #include <cisstDevices/devNDISerial.h>
