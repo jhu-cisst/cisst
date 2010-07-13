@@ -438,12 +438,20 @@ int svlFilterImageRectifier::LoadLine(FILE* fp, double* dblbuf, unsigned int dbl
 
             tbuf += 2;
 
-        // x.xxxxxxxe?00x
+        // x.xxxxxxxe?0xx
             if (*tbuf == '-') {
-                tbuf += 3;
+                tbuf += 2;
                 ival = *tbuf - 48; if (ival < 0 || ival > 9) break;
 
-            // x.xxxxxxxe-00?
+
+			// x.xxxxxxxe-0?x
+                dbl *= negexpTens[ival];
+
+				tbuf ++;
+                ival = *tbuf - 48; if (ival < 0 || ival > 9) break;
+
+
+            // x.xxxxxxxe-0x?
                 dbl *= negexp[ival];
             }
             else {
@@ -527,7 +535,7 @@ int svlFilterImageRectifier::LoadLine(FILE* fp, double* dblbuf, unsigned int dbl
 
             tbuf += 2;
 
-        // x.xxxxxxxe?0x
+        // x.xxxxxxxe?xx
             if (*tbuf == '-') {
                 tbuf ++;
                 ival = *tbuf - 48; if (ival < 0 || ival > 9) break;
@@ -545,7 +553,7 @@ int svlFilterImageRectifier::LoadLine(FILE* fp, double* dblbuf, unsigned int dbl
                 tbuf += 2;
                 ival = *tbuf - 48; if (ival < 0 || ival > 9) break;
 
-            // x.xxxxxxxe+0?
+            // x.xxxxxxxe+x?
                 dbl *= posexp[ival];
             }
 

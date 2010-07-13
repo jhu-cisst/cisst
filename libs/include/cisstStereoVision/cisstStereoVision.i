@@ -59,6 +59,7 @@ http://www.cisst.org/cisst/license.txt.
 
 
 %include "cisstStereoVision/svlFilterImageRectifier.h"
+%include "cisstStereoVision/svlFilterImageResizer.h"
 %include "cisstStereoVision/svlFilterSourceVideoFile.h"
 %include "cisstStereoVision/svlFilterVideoFileWriter.h"
 %include "cisstStereoVision/svlFilterSourceBuffer.h"
