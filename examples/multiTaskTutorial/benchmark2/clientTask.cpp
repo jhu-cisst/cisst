@@ -14,7 +14,7 @@ clientTask::clientTask(const std::string & taskName, double period):
     BenchmarkCompleted(false)
 {
     // to communicate with the interface of the resource
-    mtsRequiredInterface * requiredInterface = AddRequiredInterface("Required");
+    mtsInterfaceRequired * requiredInterface = AddInterfaceRequired("Required");
     if (requiredInterface) {
         requiredInterface->AddFunction("QualifiedRead", QualifiedReadFunction);
     }

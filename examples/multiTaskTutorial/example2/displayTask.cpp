@@ -11,7 +11,7 @@ CMN_IMPLEMENT_SERVICES(displayTask);
 displayTask::displayTask(const std::string taskName, double period):
     mtsTaskPeriodic(taskName, period, false, 5000)
 {
-    mtsRequiredInterface * required = AddRequiredInterface("DataGenerator");
+    mtsInterfaceRequired * required = AddInterfaceRequired("DataGenerator");
     if (required) {
         required->AddFunction("GetData", Generator.GetData);
         required->AddFunction("SetAmplitude", Generator.SetAmplitude);
@@ -20,9 +20,9 @@ displayTask::displayTask(const std::string taskName, double period):
         // create an event handler associated to the output port.  false
         // means not queued.
         required->AddEventHandlerWrite(&displayTask::HandleTrigger, this,
-                                       "TriggerEvent", false);
+                                       "TriggerEvent", MTS_EVENT_NOT_QUEUED);
     }
-    required = AddRequiredInterface("Clock");
+    required = AddInterfaceRequired("Clock");
     if (required) {
         required->AddFunction("GetTime", Clock.GetClockData);
     }
@@ -39,7 +39,7 @@ void displayTask::HandleTrigger(const mtsDouble & value)
     Wakeup();
 }
 
-void displayTask::Startup(void) 
+void displayTask::Startup(void)
 {
     TriggerValue = 0.0;
     WaitingForTrigger = false;
@@ -97,7 +97,7 @@ void displayTask::Run(void)
     ProcessQueuedEvents();
     CMN_LOG_RUN_VERBOSE << "Run: " << this->GetTick()
                         << " - Data: " << Data << std::endl;
-    
+
     if (UI.Closed == true) {
         Kill();
     } else {
@@ -115,10 +115,10 @@ void displayTask::Configure(const std::string & CMN_UNUSED(filename))
     minValue = 0.5;
     maxValue = 5.0;
     startValue =  1.0;
-    
+
     CMN_LOG_CLASS_INIT_VERBOSE << "Configure: Setting bounds to: " << minValue << ", " << maxValue << std::endl;
     CMN_LOG_CLASS_INIT_VERBOSE << "Configure: Setting start value to: " << startValue << std::endl;
-    
+
     UI.Amplitude->bounds(minValue, maxValue);
     UI.Amplitude->value(startValue);
     Amplitude = startValue;

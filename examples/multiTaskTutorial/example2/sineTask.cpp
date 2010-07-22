@@ -11,7 +11,7 @@ sineTask::sineTask(const std::string & taskName, double period):
     mtsTaskPeriodic(taskName, period, false, 5000)
 {
     StateTable.AddData(SineData, "SineData");
-    mtsProvidedInterface * mainInterface = AddProvidedInterface("MainInterface");
+    mtsInterfaceProvided * mainInterface = AddInterfaceProvided("MainInterface");
     if (mainInterface) {
         // add commands to access state table values
         mainInterface->AddCommandReadState(StateTable, SineData, "GetData");

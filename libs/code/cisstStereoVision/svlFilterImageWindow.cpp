@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):  Balazs Vagvolgyi
   Created on: 2008
 
@@ -21,6 +21,9 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstStereoVision/svlFilterImageWindow.h>
+#include <cisstStereoVision/svlFilterInput.h>
+#include <cisstOSAbstraction/osaThread.h>
+#include <cisstOSAbstraction/osaThreadSignal.h>
 
 #ifdef _WIN32
 #include "winWin32.h"
@@ -46,12 +49,29 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlImageWindowCallbackBase class ****/
 /*****************************************/
 
+
+svlImageWindowCallbackBase::~svlImageWindowCallbackBase()
+{
+}
+
 void svlImageWindowCallbackBase::OnNewFrame(unsigned int CMN_UNUSED(frameid))
 {
 }
 
 void svlImageWindowCallbackBase::OnUserEvent(unsigned int CMN_UNUSED(winid), bool CMN_UNUSED(ascii), unsigned int CMN_UNUSED(eventid))
 {
+}
+
+void svlImageWindowCallbackBase::GetMousePos(int & x, int & y)
+{
+    x = MouseX;
+    y = MouseY;
+}
+
+void svlImageWindowCallbackBase::SetMousePos(int x, int y)
+{
+    MouseX = x;
+    MouseY = y;
 }
 
 
@@ -80,9 +100,19 @@ CWindowManagerBase::~CWindowManagerBase()
     if (InitReadySignal) delete InitReadySignal;
 }
 
+void CWindowManagerBase::SetCallback(svlImageWindowCallbackBase* callback)
+{
+    Callback = callback;
+}
+
 void CWindowManagerBase::SetTitleText(const std::string title)
 {
     Title = title;
+}
+
+void CWindowManagerBase::SetTimestamp(double timestamp)
+{
+    Timestamp = timestamp;
 }
 
 int CWindowManagerBase::SetClientSize(unsigned int width, unsigned int height, unsigned int winid)
@@ -140,6 +170,14 @@ int CWindowManagerBase::WaitForInitEvent()
     return 0;
 }
 
+void CWindowManagerBase::LockBuffers()
+{
+}
+
+void CWindowManagerBase::UnlockBuffers()
+{
+}
+
 void CWindowManagerBase::OnNewFrame(unsigned int frameid)
 {
     if (Callback) Callback->OnNewFrame(frameid);
@@ -180,7 +218,6 @@ CMN_IMPLEMENT_SERVICES(svlFilterImageWindow)
 
 svlFilterImageWindow::svlFilterImageWindow() :
     svlFilterBase(),
-    cmnGenericObject(),
     TimestampEnabled(false),
     FullScreenFlag(false),
     PositionSetFlag(false),
@@ -189,13 +226,27 @@ svlFilterImageWindow::svlFilterImageWindow() :
     WindowManager(0),
     Callback(0)
 {
-    AddSupportedType(svlTypeImageRGB, svlTypeImageRGB);
-    AddSupportedType(svlTypeImageRGBStereo, svlTypeImageRGBStereo);
+    AddInput("input", true);
+    AddInputType("input", svlTypeImageRGB);
+    AddInputType("input", svlTypeImageRGBStereo);
+
+    AddOutput("output", true);
+    SetAutomaticOutputType(true);
 }
 
 svlFilterImageWindow::~svlFilterImageWindow()
 {
     Release();
+}
+
+void svlFilterImageWindow::SetFullScreen(bool fullscreen)
+{
+    FullScreenFlag = fullscreen;
+}
+
+bool svlFilterImageWindow::GetFullScreen()
+{
+    return FullScreenFlag;
 }
 
 void svlFilterImageWindow::SetWindowPosition(int x, int y, unsigned int videoch)
@@ -224,12 +275,17 @@ void svlFilterImageWindow::EnableTimestampInTitle(bool enable)
     else if (TimestampEnabled == 1) TimestampEnabled = -1; // restore original title
 }
 
-int svlFilterImageWindow::Initialize(svlSample* inputdata)
+void svlFilterImageWindow::SetCallback(svlImageWindowCallbackBase* callback)
+{
+    Callback = callback;
+}
+
+int svlFilterImageWindow::Initialize(svlSample* syncInput, svlSample* &syncOutput)
 {
     Release();
 
-    if (GetInputType() == svlTypeImageRGB) {
-        svlSampleImageRGB* img = dynamic_cast<svlSampleImageRGB*>(inputdata);
+    if (GetInput()->GetType() == svlTypeImageRGB) {
+        svlSampleImageRGB* img = dynamic_cast<svlSampleImageRGB*>(syncInput);
 
 #ifdef _WIN32
         WindowManager = new CWin32WindowManager(1);
@@ -246,7 +302,7 @@ int svlFilterImageWindow::Initialize(svlSample* inputdata)
         }
     }
     else {
-        svlSampleImageRGBStereo* stimg = dynamic_cast<svlSampleImageRGBStereo*>(inputdata);
+        svlSampleImageRGBStereo* stimg = dynamic_cast<svlSampleImageRGBStereo*>(syncInput);
 
 #ifdef _WIN32
         WindowManager = new CWin32WindowManager(2);
@@ -278,24 +334,17 @@ int svlFilterImageWindow::Initialize(svlSample* inputdata)
                                                                 this);
     WindowManager->WaitForInitEvent();
 
-    OutputData = inputdata;
+    syncOutput = syncInput;
 
     return SVL_OK;
 }
 
-int svlFilterImageWindow::ProcessFrame(svlProcInfo* procInfo, svlSample* inputdata)
+int svlFilterImageWindow::Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput)
 {
-    ///////////////////////////////////////////
-    // Check if the input sample has changed //
-      if (!IsNewSample(inputdata)) {
-          return SVL_ALREADY_PROCESSED;
-      }
-    ///////////////////////////////////////////
+    syncOutput = syncInput;
+    _SkipIfAlreadyProcessed(syncInput, syncOutput);
 
-    // Passing the same image for the next filter
-    OutputData = inputdata;
-
-    svlSampleImageBase* img = dynamic_cast<svlSampleImageBase*>(inputdata);
+    svlSampleImage* img = dynamic_cast<svlSampleImage*>(syncInput);
     unsigned int videochannels = img->GetVideoChannels();
     unsigned int idx;
 
@@ -303,7 +352,7 @@ int svlFilterImageWindow::ProcessFrame(svlProcInfo* procInfo, svlSample* inputda
     {
         WindowManager->LockBuffers();
 
-        if (TimestampEnabled == 1) WindowManager->SetTimestamp(inputdata->GetTimestamp());
+        if (TimestampEnabled == 1) WindowManager->SetTimestamp(syncInput->GetTimestamp());
         else if (TimestampEnabled == -1) {
             WindowManager->SetTimestamp(-1.0);
             TimestampEnabled = 0;

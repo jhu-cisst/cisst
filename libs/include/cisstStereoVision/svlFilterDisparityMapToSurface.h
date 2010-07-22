@@ -23,38 +23,32 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlFilterDisparityMapToSurface_h
 #define _svlFilterDisparityMapToSurface_h
 
-#include <cisstStereoVision/svlStreamManager.h>
+#include <cisstStereoVision/svlFilterBase.h>
 #include <cisstStereoVision/svlCameraGeometry.h>
 
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
 
 
-class CISST_EXPORT svlFilterDisparityMapToSurface : public svlFilterBase, public cmnGenericObject
+class CISST_EXPORT svlFilterDisparityMapToSurface : public svlFilterBase
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
 public:
     svlFilterDisparityMapToSurface();
-    virtual ~svlFilterDisparityMapToSurface();
 
     int SetCameraGeometry(const svlCameraGeometry & geometry);
     int SetROI(const svlRect & rect);
     int SetROI(int left, int top, int right, int bottom);
 
 protected:
-    virtual int Initialize(svlSample* inputdata);
-    virtual int ProcessFrame(svlProcInfo* procInfo, svlSample* inputdata);
-    virtual int Release();
+    virtual int Initialize(svlSample* syncInput, svlSample* &syncOutput);
+    virtual int Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput);
 
 private:
+    svlSampleImage3DMap OutputSurface;
+    svlCameraGeometry Geometry;
     svlRect ROI;
-    float BaseLine;
-    float RightCameraPosX;
-    float FocalLength;
-    float PPX;
-    float PPY;
-    float DisparityCorrection;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterDisparityMapToSurface)

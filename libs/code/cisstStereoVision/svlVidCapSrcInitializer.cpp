@@ -20,7 +20,7 @@
  
  */
 
-#include <cisstStereoVision/svlStreamManager.h>
+#include <cisstStereoVision/svlTypes.h>
 #include "svlVidCapSrcInitializer.h"
 
 #if (CISST_SVL_HAS_SVS == ON)
@@ -74,6 +74,6 @@ void svlInitializeVideoCapture()
 
 #ifdef _svlVidCapSrcDC1394_h
     delete new svlVidCapSrcDC1394;
-#endif // _svlVidCapSrcDC1394_h
+#endif // _svlVidCapSrcDC1394_h4
 }
 

@@ -8,7 +8,7 @@
 #include <cisstOSAbstraction.h>
 #include <cisstMultiTask.h>
 
-class clockDevice: public mtsDevice {
+class clockDevice: public mtsComponent {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
     
  protected:

@@ -25,10 +25,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <stdlib.h>
 #include <tchar.h>
 
-#define WM_USER_DESTROY     2000
-#define WM_USER_PAINT       2002
-#define DEFAULT_WINDOW_POS  0x7FFFFFFF
-
 
 /***************************************/
 /*** CWin32Window class ****************/
@@ -222,7 +218,13 @@ CWin32WindowManager::CWin32WindowManager(unsigned int numofwins) : CWindowManage
 
 CWin32WindowManager::~CWin32WindowManager()
 {
-    Destroy();
+    // Critical section: starts
+    csImage.Enter();
+
+        Destroy();
+
+    csImage.Leave();
+    // Critical section: ends
 }
 
 int CWin32WindowManager::DoModal(bool show, bool fullscreen)
@@ -318,10 +320,16 @@ int CWin32WindowManager::DoModal(bool show, bool fullscreen)
 void CWin32WindowManager::Show(bool show, int winid)
 {
     if (Windows && winid < static_cast<int>(NumOfWins)) {
-        if (winid < 0)
-            for (unsigned int i = 0; i < NumOfWins; i ++) Windows[i]->Show(show);
-        else
-            Windows[static_cast<unsigned int>(winid)]->Show(show);
+        // Critical section: starts
+        csImage.Enter();
+
+            if (winid < 0)
+                for (unsigned int i = 0; i < NumOfWins; i ++) Windows[i]->Show(show);
+            else
+                Windows[static_cast<unsigned int>(winid)]->Show(show);
+
+        csImage.Leave();
+        // Critical section: ends
     }
 }
 
@@ -362,16 +370,30 @@ void CWin32WindowManager::SetImageBuffer(unsigned char *buffer, unsigned int buf
             std::string title;
             Windows[winid]->GetTitle(title);
             std::ostringstream timestampstring;
-            timestampstring << " (timestamp=" << std::setprecision(3) << Timestamp << ")";
+            timestampstring << " (timestamp=" << std::fixed << std::setprecision(3) << Timestamp << ")";
             title += timestampstring.str();
-            Windows[winid]->SetTitle(title);
+
+            // Critical section: starts
+            csImage.Enter();
+
+                Windows[winid]->SetTitle(title);
+
+            csImage.Leave();
+            // Critical section: ends
         }
         else {
             if (Timestamp < 0.0) {
                 // Restore original timestamp
                 std::string title;
                 Windows[winid]->GetTitle(title);
-                Windows[winid]->SetTitle(title);
+
+                // Critical section: starts
+                csImage.Enter();
+
+                    Windows[winid]->SetTitle(title);
+
+                csImage.Leave();
+                // Critical section: ends
             }
         }
     }
@@ -387,8 +409,15 @@ void CWin32WindowManager::DrawImages()
             rect.right = Width[i];
             rect.top = 0;
             rect.bottom = Height[i];
-            InvalidateRect(WindowHandles[i], &rect, FALSE);
-            UpdateWindow(WindowHandles[i]);
+
+            // Critical section: starts
+            csImage.Enter();
+
+                InvalidateRect(WindowHandles[i], &rect, FALSE);
+                UpdateWindow(WindowHandles[i]);
+
+            csImage.Leave();
+            // Critical section: ends
         }
     }
 }
@@ -450,10 +479,11 @@ int CWin32WindowManager::FilterMessage(unsigned int winid, MSG* msg)
     switch (msg->message) {
 	    case WM_PAINT:
 	    case WM_USER_PAINT:
-		    hdc = BeginPaint(msg->hwnd, &ps);
-            if (ImageBuffers[winid]) {
-                // Critical section: starts
-                csImage.Enter();
+            // Critical section: starts
+//            csImage.Enter();
+
+		        hdc = BeginPaint(msg->hwnd, &ps);
+                if (ImageBuffers[winid]) {
                     SetDIBitsToDevice(hdc,
                                       0, 0,
                                       Width[winid], Height[winid],
@@ -462,10 +492,11 @@ int CWin32WindowManager::FilterMessage(unsigned int winid, MSG* msg)
                                       ImageBuffers[winid],
                                       &(BitmapInfos[winid]),
                                       DIB_RGB_COLORS);
-                csImage.Leave();
-                // Critical section: ends
-            }
-		    EndPaint(msg->hwnd, &ps);
+                }
+    		    EndPaint(msg->hwnd, &ps);
+
+//            csImage.Leave();
+            // Critical section: ends
 		break;
 
         case WM_MOUSEMOVE:
@@ -550,7 +581,13 @@ int CWin32WindowManager::FilterMessage(unsigned int winid, MSG* msg)
 	    break;
 
         case WM_USER_DESTROY:
-            Destroy();
+            // Critical section: starts
+            csImage.Enter();
+
+                Destroy();
+
+            csImage.Leave();
+            // Critical section: ends
         break;
 
         default:

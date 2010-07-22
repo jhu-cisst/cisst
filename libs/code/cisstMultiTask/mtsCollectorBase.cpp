@@ -24,7 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnPath.h>
 #include <cisstOSAbstraction/osaSleep.h>
-
+#include <cisstMultiTask/mtsInterfaceProvided.h>
 
 mtsTaskManager * mtsCollectorBase::TaskManager;
 
@@ -65,7 +65,7 @@ mtsCollectorBase::~mtsCollectorBase()
 void mtsCollectorBase::SetupControlInterface(void)
 {
     // add a control interface to start and stop the data collection
-    this->ControlInterface = AddProvidedInterface("Control");
+    this->ControlInterface = AddInterfaceProvided("Control");
     if (this->ControlInterface) {
         // commands controlling the output
         ControlInterface->AddCommandVoid(&mtsCollectorBase::SetOutputToDefault, this,

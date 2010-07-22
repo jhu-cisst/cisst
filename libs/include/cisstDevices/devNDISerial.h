@@ -70,7 +70,7 @@ class CISST_EXPORT devNDISerial : public mtsTaskPeriodic
         std::string Name;
         unsigned int FrameNumber;
         double ErrorRMS;
-        mtsProvidedInterface * Interface;
+        mtsInterfaceProvided * Interface;
         prmPositionCartesianGet TooltipPosition;
         prmPositionCartesianGet MarkerPosition;
 

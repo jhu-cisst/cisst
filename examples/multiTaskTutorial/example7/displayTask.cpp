@@ -12,7 +12,7 @@ displayTask::displayTask(const std::string & taskName, double period):
     mtsTaskPeriodic(taskName, period, false, 5000)
 {
     // to communicate with the interface of the resource
-    mtsRequiredInterface *req = AddRequiredInterface("DataGenerator");
+    mtsInterfaceRequired *req = AddInterfaceRequired("DataGenerator");
     if (req) {
        //req->AddFunction("CommandVoid", Generator.CommandVoid);
        req->AddFunction("GetData", Generator.GetData);

@@ -23,7 +23,7 @@ int main(void)
     // specify a higher, more verbose log level for these classes
     cmnClassRegister::SetLoD("sineTask", CMN_LOG_LOD_VERY_VERBOSE);
     cmnClassRegister::SetLoD("displayTask", CMN_LOG_LOD_VERY_VERBOSE);
-    cmnClassRegister::SetLoD("mtsTaskInterface", CMN_LOG_LOD_VERY_VERBOSE);
+    cmnClassRegister::SetLoD("mtsInterfaceProvided", CMN_LOG_LOD_VERY_VERBOSE);
     cmnClassRegister::SetLoD("mtsTaskManager", CMN_LOG_LOD_VERY_VERBOSE);
 
     // create our two tasks

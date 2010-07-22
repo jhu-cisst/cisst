@@ -12,27 +12,27 @@
 # --- end cisst license ---
 
 qt4_wrap_ui(QT_CLIENT_WRAPPED_UI
-            clientQWidget.ui
+            clientQtWidget.ui
             )
 qt4_wrap_cpp(QT_CLIENT_WRAPPED_CPP
-             clientQDevice.h
+             clientQtComponent.h
              )
 qt4_wrap_ui(QT_SERVER_WRAPPED_UI
-            serverQWidget.ui
+            serverQtWidget.ui
             )
 qt4_wrap_cpp(QT_SERVER_WRAPPED_CPP
-             serverQDevice.h
+             serverQtComponent.h
              )
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 add_executable(cisstMultiTaskCommandsAndEventsQt
                main.cpp
-               clientQDevice.cpp
-               clientQDevice.h
+               clientQtComponent.cpp
+               clientQtComponent.h
                ${QT_CLIENT_WRAPPED_UI}
                ${QT_CLIENT_WRAPPED_CPP}
-               serverQDevice.cpp
-               serverQDevice.h
+               serverQtComponent.cpp
+               serverQtComponent.h
                ${QT_SERVER_WRAPPED_UI}
                ${QT_SERVER_WRAPPED_CPP}
                )
@@ -50,8 +50,8 @@ if (CISST_MTS_HAS_ICE)
 
   add_executable(cisstMultiTaskCommandsAndEventsQtServer
                  serverMain.cpp
-                 serverQDevice.cpp
-                 serverQDevice.h
+                 serverQtComponent.cpp
+                 serverQtComponent.h
                  ${QT_SERVER_WRAPPED_UI}
                  ${QT_SERVER_WRAPPED_CPP}
                  )
@@ -64,8 +64,8 @@ if (CISST_MTS_HAS_ICE)
 
   add_executable(cisstMultiTaskCommandsAndEventsQtClient
                  clientMain.cpp
-                 clientQDevice.cpp
-                 clientQDevice.h
+                 clientQtComponent.cpp
+                 clientQtComponent.h
                  ${QT_CLIENT_WRAPPED_UI}
                  ${QT_CLIENT_WRAPPED_CPP}
                  )

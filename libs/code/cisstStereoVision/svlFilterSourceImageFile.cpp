@@ -3,9 +3,9 @@
 
 /*
   $Id$
-  
+
   Author(s):  Balazs Vagvolgyi
-  Created on: 2006 
+  Created on: 2006
 
   (C) Copyright 2006-2007 Johns Hopkins University (JHU), All Rights
   Reserved.
@@ -21,9 +21,9 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstStereoVision/svlFilterSourceImageFile.h>
+#include <cisstStereoVision/svlFilterOutput.h>
 
 #include <math.h>
-#include <string.h>
 
 #ifdef _MSC_VER
     // Quick fix for Visual Studio Intellisense:
@@ -45,45 +45,48 @@ CMN_IMPLEMENT_SERVICES(svlFilterSourceImageFile)
 
 svlFilterSourceImageFile::svlFilterSourceImageFile() :
     svlFilterSourceBase(),
-    cmnGenericObject(),
+    OutputImage(0),
     NumberOfDigits(0),
     From(0),
     To(0)
 {
-    OutputData = 0;
+    AddOutput("output", true);
+    SetAutomaticOutputType(false);
+    SetTargetFrequency(30.0);
 }
 
 svlFilterSourceImageFile::svlFilterSourceImageFile(unsigned int channelcount) :
     svlFilterSourceBase(),
-    cmnGenericObject(),
+    OutputImage(0),
     NumberOfDigits(0),
     From(0),
     To(0)
 {
-    OutputData = 0;
-
+    AddOutput("output", true);
+    SetAutomaticOutputType(false);
     SetChannelCount(channelcount);
+    SetTargetFrequency(30.0);
 }
 
 svlFilterSourceImageFile::~svlFilterSourceImageFile()
 {
     Release();
 
-    if (OutputData) delete OutputData;
+    if (OutputImage) delete OutputImage;
 }
 
 int svlFilterSourceImageFile::SetChannelCount(unsigned int channelcount)
 {
-    if (OutputData ||
+    if (OutputImage ||
         channelcount < 1 || channelcount > 2) return SVL_FAIL;
 
     if (channelcount == 1) {
-        AddSupportedType(svlTypeImageRGB);
-        OutputData = new svlSampleImageRGB;
+        GetOutput()->SetType(svlTypeImageRGB);
+        OutputImage = new svlSampleImageRGB;
     }
     else {
-        AddSupportedType(svlTypeImageRGBStereo);
-        OutputData = new svlSampleImageRGBStereo;
+        GetOutput()->SetType(svlTypeImageRGBStereo);
+        OutputImage = new svlSampleImageRGBStereo;
     }
 
     ImageCodec.SetSize(channelcount);
@@ -95,14 +98,14 @@ int svlFilterSourceImageFile::SetChannelCount(unsigned int channelcount)
     return SVL_OK;
 }
 
-int svlFilterSourceImageFile::Initialize()
+int svlFilterSourceImageFile::Initialize(svlSample* &syncOutput)
 {
-    if (OutputData == 0) return SVL_FAIL;
+    if (OutputImage == 0) return SVL_FAIL;
+    syncOutput = OutputImage;
 
     Release();
 
-    svlSampleImageBase* img = dynamic_cast<svlSampleImageBase*>(OutputData);
-    unsigned int videochannels = img->GetVideoChannels();
+    unsigned int videochannels = OutputImage->GetVideoChannels();
     unsigned int w, h;
 
     for (unsigned int i = 0; i < videochannels; i ++) {
@@ -132,8 +135,7 @@ int svlFilterSourceImageFile::Initialize()
         }
 
         // setting image size
-        svlSampleImageBase* img = dynamic_cast<svlSampleImageBase*>(OutputData);
-        img->SetSize(i, w, h);
+        OutputImage->SetSize(i, w, h);
     }
 
     return SVL_OK;
@@ -145,15 +147,17 @@ int svlFilterSourceImageFile::OnStart(unsigned int CMN_UNUSED(procCount))
     return SVL_OK;
 }
 
-int svlFilterSourceImageFile::ProcessFrame(svlProcInfo* procInfo)
+int svlFilterSourceImageFile::Process(svlProcInfo* procInfo, svlSample* &syncOutput)
 {
+    syncOutput = OutputImage;
+
     // Increment file counter
     if (FrameCounter > 0) {
         _OnSingleThread(procInfo)
         {
             FileCounter ++;
             if (FileCounter > To) {
-                if (LoopFlag) FileCounter = From;
+                if (GetLoop()) FileCounter = From;
                 else StopLoop = true;
             }
         }
@@ -163,7 +167,7 @@ int svlFilterSourceImageFile::ProcessFrame(svlProcInfo* procInfo)
         if (StopLoop) return SVL_STOP_REQUEST;
     }
 
-    // Try to keep TargetFrequency
+    // Try to keep target frequency
     _OnSingleThread(procInfo) WaitForTargetTimer();
 
     ////////////////////////////////////////////
@@ -173,8 +177,7 @@ int svlFilterSourceImageFile::ProcessFrame(svlProcInfo* procInfo)
           return SVL_ALREADY_PROCESSED;
     ////////////////////////////////////////////
 
-    svlSampleImageBase* img = dynamic_cast<svlSampleImageBase*>(OutputData);
-    unsigned int videochannels = img->GetVideoChannels();
+    unsigned int videochannels = OutputImage->GetVideoChannels();
     unsigned int idx;
 
     _ParallelLoop(procInfo, idx, videochannels)
@@ -183,7 +186,7 @@ int svlFilterSourceImageFile::ProcessFrame(svlProcInfo* procInfo)
         BuildFilePath(idx, FileCounter);
 
         // opening file
-        if (ImageCodec[idx]->Read(*img, idx, FilePath[idx], true) != SVL_OK)
+        if (ImageCodec[idx]->Read(*OutputImage, idx, FilePath[idx], true) != SVL_OK)
             return SVL_FAIL;
     }
 
@@ -202,13 +205,12 @@ int svlFilterSourceImageFile::Release()
 
 int svlFilterSourceImageFile::SetFilePath(const std::string & filepathprefix, const std::string & extension, int videoch)
 {
-    if (OutputData == 0)
+    if (OutputImage == 0)
         return SVL_FAIL;
     if (IsInitialized() == true)
         return SVL_ALREADY_INITIALIZED;
 
-    svlSampleImageBase* img = dynamic_cast<svlSampleImageBase*>(OutputData);
-    unsigned int videochannels = img->GetVideoChannels();
+    unsigned int videochannels = OutputImage->GetVideoChannels();
     if (videoch < 0 || videoch >= static_cast<int>(videochannels)) return SVL_FAIL;
 
     FilePathPrefix[videoch] = filepathprefix;
@@ -233,7 +235,7 @@ int svlFilterSourceImageFile::SetSequence(unsigned int numberofdigits, unsigned 
 
 int svlFilterSourceImageFile::BuildFilePath(int videoch, unsigned int framecounter)
 {
-    if (OutputData == 0)
+    if (OutputImage == 0)
         return SVL_FAIL;
 
     std::stringstream path;

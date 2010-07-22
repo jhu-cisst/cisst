@@ -22,13 +22,29 @@ SET(DEPENDENCIES
     cisstCommon
     cisstOSAbstraction
     cisstVector
+    cisstMultiTask
     )
 
 # all source files
 SET(SOURCE_FILES
   # Public System API
-    svlStreamDefs.cpp
+    svlTypes.cpp
+    svlClassServices.cpp
+    svlSampleText.cpp
+    svlSampleTargets.cpp
+    svlSampleTransform3D.cpp
+    svlSampleMatrixTypes.cpp
+    svlSampleMatrix.cpp
+    svlSampleImageTypes.cpp
+    svlSampleImage.cpp
+    svlSample.cpp
+    svlFile.cpp
     svlStreamManager.cpp
+    svlFilterBase.cpp
+    svlFilterInput.cpp
+    svlFilterOutput.cpp
+    svlFilterSourceBase.cpp
+    svlStreamProc.cpp
     svlSyncPoint.cpp
     svlSeries.cpp
     svlRenderTargets.cpp
@@ -37,10 +53,21 @@ SET(SOURCE_FILES
     svlImageIO.cpp
     svlVideoIO.cpp
     svlCameraGeometry.cpp
-    svlConverters.cpp
+    svlBufferMemory.cpp
+    svlBufferSample.cpp
     svlBufferImage.cpp
+    svlConverters.cpp
+    svlImageProcessingHelper.h    # private header
+    svlImageProcessingHelper.cpp
+    svlImageProcessing.cpp
+    svlDrawHelper.h               # private header
+    svlDrawHelper.cpp
+    svlDraw.cpp
+    svlOverlayObjects.cpp
 
   # Filter API
+    svlFilterSplitter.cpp
+    svlFilterImageOverlay.cpp
     svlFilterSourceDummy.cpp
     svlFilterImageDeinterlacer.cpp
     svlFilterSourceVideoCapture.cpp
@@ -53,40 +80,59 @@ SET(SOURCE_FILES
     svlFilterDisparityMapToSurface.cpp
     svlFilterStereoImageOptimizer.cpp
     svlFilterImageRectifier.cpp
-    svlFilterUnsharpMask.cpp
+    svlFilterImageCenterFinder.cpp
+    svlFilterImageUnsharpMask.cpp
     svlFilterImageSampler.cpp
-    svlFilterRGBSwapper.cpp
+    svlFilterImageChannelSwapper.cpp
     svlFilterStreamTypeConverter.cpp
-    svlFilterColorSpaceConverter.cpp
+    svlFilterImageColorConverter.cpp
     svlFilterImageCropper.cpp
+    svlFilterImageTranslation.cpp
     svlFilterImageResizer.cpp
-    svlFilterPointTracker.cpp
+    svlFilterImageTracker.cpp
     svlFilterStereoImageJoiner.cpp
+    svlFilterStereoImageSplitter.cpp
     svlFilterImageFlipRotate.cpp
-    svlFilterCallback.cpp
-    svlFilterBuffer.cpp
+    svlFilterLightSourceBuddy.cpp
 
   # Private System API
     svlImageCodecBMP.h             # private header
     svlImageCodecBMP.cpp
     svlImageCodecPPM.h             # private header
     svlImageCodecPPM.cpp
-    ipDeinterlacing.h              # private header
-    ipDeinterlacing.cpp
     svlStereoDP.h                  # private header
     svlStereoDP.cpp
     svlStereoDPMono.h              # private header
     svlStereoDPMono.cpp
 
   # Trackers
-    trackers/msbruteforce/svlTrackerMSBruteForce.cpp
+    svlTrackerMSBruteForce.cpp
     )
 
 # all header files
 SET(HEADER_FILES
   # Public System API
-    svlStreamDefs.h
+    svlForwardDeclarations.h
+    svlDefinitions.h
+    svlTypes.h
+    svlTypeCheckers.h
+    svlSampleText.h
+    svlSampleTargets.h
+    svlSampleTransform3D.h
+    svlSampleMatrixTypes.h
+    svlSampleMatrixCustom.h
+    svlSampleMatrix.h
+    svlSampleImageTypes.h
+    svlSampleImageCustom.h
+    svlSampleImage.h
+    svlSample.h
+    svlFile.h
     svlStreamManager.h
+    svlFilterBase.h
+    svlFilterInput.h
+    svlFilterOutput.h
+    svlFilterSourceBase.h
+    svlStreamProc.h
     svlSyncPoint.h
     svlSeries.h
     svlRenderTargets.h
@@ -96,10 +142,17 @@ SET(HEADER_FILES
     svlImageIO.h
     svlVideoIO.h
     svlCameraGeometry.h
-    svlConverters.h
+    svlBufferMemory.h
+    svlBufferSample.h
     svlBufferImage.h
+    svlConverters.h
+    svlImageProcessing.h
+    svlDraw.h
+    svlOverlayObjects.h
 
   # Filter API
+    svlFilterSplitter.h
+    svlFilterImageOverlay.h
     svlFilterSourceDummy.h
     svlFilterImageDeinterlacer.h
     svlFilterSourceVideoCapture.h
@@ -112,21 +165,23 @@ SET(HEADER_FILES
     svlFilterDisparityMapToSurface.h
     svlFilterStereoImageOptimizer.h
     svlFilterImageRectifier.h
-    svlFilterUnsharpMask.h
+    svlFilterImageCenterFinder.h
+    svlFilterImageUnsharpMask.h
     svlFilterImageSampler.h
-    svlFilterRGBSwapper.h
+    svlFilterImageChannelSwapper.h
     svlFilterStreamTypeConverter.h
-    svlFilterColorSpaceConverter.h
+    svlFilterImageColorConverter.h
     svlFilterImageCropper.h
+    svlFilterImageTranslation.h
     svlFilterImageResizer.h
-    svlFilterPointTracker.h
+    svlFilterImageTracker.h
     svlFilterStereoImageJoiner.h
+    svlFilterStereoImageSplitter.h
     svlFilterImageFlipRotate.h
-    svlFilterCallback.h
-    svlFilterBuffer.h
+    svlFilterLightSourceBuddy.h
 
   # Trackers
-    trackers/svlTrackerMSBruteForce.h
+    svlTrackerMSBruteForce.h
     )
 
 
@@ -138,18 +193,16 @@ IF(BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB)
         )
     SET(SOURCE_FILES
         ${SOURCE_FILES}
-        # Trackers
-        trackers/cisst/svlTrackerCisst.cpp
-        trackers/cisst/trkCisstWSSD.h      # private header
-        trackers/cisst/trkCisstWSSD.cpp
-        trackers/cisst/trkCisstNCC.h       # private header
-        trackers/cisst/trkCisstNCC.cpp
-        trackers/cisst/trkCisstBase.h      # private header
+        svlTrackerCisst.cpp
+        trackers/cisst/svlTrackerCisstWSSD.h      # private header
+        trackers/cisst/svlTrackerCisstWSSD.cpp
+        trackers/cisst/svlTrackerCisstNCC.h       # private header
+        trackers/cisst/svlTrackerCisstNCC.cpp
+        trackers/cisst/svlTrackerCisstBase.h      # private header
         )
         SET(HEADER_FILES
         ${HEADER_FILES}
-        # Trackers
-        trackers/svlTrackerCisst.h
+        svlTrackerCisst.h
         )
 ENDIF(BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB)
 
@@ -180,6 +233,10 @@ ENDIF(BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB)
 #    SET(CISST_SVL_HAS_WEBGUI "ON" CACHE INTERNAL "WebGUI switch")
 #ENDIF(SWIG_FOUND AND CISST_HAS_XML)
 
+IF(WIN32)
+    SET(PROGRAMFILES_DIR "$ENV{SystemDrive}/Program Files")
+    SET(PROGRAMFILES_X86_DIR "$ENV{SystemDrive}/Program Files (x86)")
+ENDIF(WIN32)
 
 # OpenCV
 IF(CISST_SVL_HAS_OPENCV OR NOT OpenCV_OPTIONS)
@@ -198,13 +255,87 @@ IF(CISST_SVL_HAS_OPENCV OR NOT OpenCV_OPTIONS)
         OpenCV_CXTS_LIBRARY
         OpenCV_HIGHGUI_LIBRARY
         OpenCV_ML_LIBRARY
-       #OpenCV_CVCAM_INCLUDE_DIR
-       #OpenCV_CVCAM_LIBRARY
-       #OpenCV_TRS_LIBRARY
         CACHE INTERNAL "List of OpenCV options"
         )
 
-    FIND_PACKAGE(OpenCV COMPONENTS CV CXCORE CVAUX HIGHGUI)
+    FIND_PACKAGE(OpenCV21 COMPONENTS CV CXCORE CVAUX HIGHGUI)
+    IF(OpenCV21_FOUND)
+        # Copy 'OpenCV21_' variable values to 'OpenCV_' variables
+        SET(OpenCV_FOUND YES)
+        SET(OpenCV_ROOT_DIR                 ${OpenCV21_ROOT_DIR})
+        SET(OpenCV_INCLUDE_DIRS             ${OpenCV21_INCLUDE_DIRS})
+        SET(OpenCV_CV_INCLUDE_DIR           ${OpenCV21_CV_INCLUDE_DIR})
+        SET(OpenCV_CXCORE_INCLUDE_DIR       ${OpenCV21_CXCORE_INCLUDE_DIR})
+        SET(OpenCV_CVAUX_INCLUDE_DIR        ${OpenCV21_CVAUX_INCLUDE_DIR})
+        SET(OpenCV_HIGHGUI_INCLUDE_DIR      ${OpenCV21_HIGHGUI_INCLUDE_DIR})
+        SET(OpenCV_LIBRARIES                ${OpenCV21_LIBRARIES})
+        SET(OpenCV_CV_LIBRARY               ${OpenCV21_CV_LIBRARY})
+        SET(OpenCV_CXCORE_LIBRARY           ${OpenCV21_CXCORE_LIBRARY})
+        SET(OpenCV_CVAUX_LIBRARY            ${OpenCV21_CVAUX_LIBRARY})
+        SET(OpenCV_CVHAARTRAINING_LIBRARY   ${OpenCV21_CVHAARTRAINING_LIBRARY})
+        SET(OpenCV_CXTS_LIBRARY             ${OpenCV21_CXTS_LIBRARY})
+        SET(OpenCV_HIGHGUI_LIBRARY          ${OpenCV21_HIGHGUI_LIBRARY})
+        SET(OpenCV_ML_LIBRARY               ${OpenCV21_ML_LIBRARY})
+    ELSE(OpenCV21_FOUND)
+        FIND_PACKAGE(OpenCV20 COMPONENTS CV CXCORE CVAUX HIGHGUI)
+        IF(OpenCV20_FOUND)
+            # Copy 'OpenCV20_' variable values to 'OpenCV_' variables
+            SET(OpenCV_FOUND YES)
+            SET(OpenCV_ROOT_DIR                 ${OpenCV20_ROOT_DIR})
+            SET(OpenCV_INCLUDE_DIRS             ${OpenCV20_INCLUDE_DIRS})
+            SET(OpenCV_CV_INCLUDE_DIR           ${OpenCV20_CV_INCLUDE_DIR})
+            SET(OpenCV_CXCORE_INCLUDE_DIR       ${OpenCV20_CXCORE_INCLUDE_DIR})
+            SET(OpenCV_CVAUX_INCLUDE_DIR        ${OpenCV20_CVAUX_INCLUDE_DIR})
+            SET(OpenCV_HIGHGUI_INCLUDE_DIR      ${OpenCV20_HIGHGUI_INCLUDE_DIR})
+            SET(OpenCV_LIBRARIES                ${OpenCV20_LIBRARIES})
+            SET(OpenCV_CV_LIBRARY               ${OpenCV20_CV_LIBRARY})
+            SET(OpenCV_CXCORE_LIBRARY           ${OpenCV20_CXCORE_LIBRARY})
+            SET(OpenCV_CVAUX_LIBRARY            ${OpenCV20_CVAUX_LIBRARY})
+            SET(OpenCV_CVHAARTRAINING_LIBRARY   ${OpenCV20_CVHAARTRAINING_LIBRARY})
+            SET(OpenCV_CXTS_LIBRARY             ${OpenCV20_CXTS_LIBRARY})
+            SET(OpenCV_HIGHGUI_LIBRARY          ${OpenCV20_HIGHGUI_LIBRARY})
+            SET(OpenCV_ML_LIBRARY               ${OpenCV20_ML_LIBRARY})
+        ELSE(OpenCV20_FOUND)
+            FIND_PACKAGE(OpenCV COMPONENTS CV CXCORE CVAUX HIGHGUI)
+        ENDIF(OpenCV20_FOUND)
+    ENDIF(OpenCV21_FOUND)
+
+    # Remove 'OpenCV2x_' variables, if any
+    UNSET(OpenCV21_ROOT_DIR CACHE)
+    UNSET(OpenCV21_INCLUDE_DIRS CACHE)
+    UNSET(OpenCV21_CV_INCLUDE_DIR CACHE)
+    UNSET(OpenCV21_CXCORE_INCLUDE_DIR CACHE)
+    UNSET(OpenCV21_CVAUX_INCLUDE_DIR CACHE)
+    UNSET(OpenCV21_CVCAM_INCLUDE_DIR CACHE)
+    UNSET(OpenCV21_HIGHGUI_INCLUDE_DIR CACHE)
+    UNSET(OpenCV21_LIBRARIES CACHE)
+    UNSET(OpenCV21_CV_LIBRARY CACHE)
+    UNSET(OpenCV21_CXCORE_LIBRARY CACHE)
+    UNSET(OpenCV21_CVAUX_LIBRARY CACHE)
+    UNSET(OpenCV21_CVCAM_LIBRARY CACHE)
+    UNSET(OpenCV21_CVHAARTRAINING_LIBRARY CACHE)
+    UNSET(OpenCV21_CXTS_LIBRARY CACHE)
+    UNSET(OpenCV21_HIGHGUI_LIBRARY CACHE)
+    UNSET(OpenCV21_ML_LIBRARY CACHE)
+    UNSET(OpenCV21_TRS_LIBRARY CACHE)
+    UNSET(OpenCV20_ROOT_DIR CACHE)
+    UNSET(OpenCV20_INCLUDE_DIRS CACHE)
+    UNSET(OpenCV20_CV_INCLUDE_DIR CACHE)
+    UNSET(OpenCV20_CXCORE_INCLUDE_DIR CACHE)
+    UNSET(OpenCV20_CVAUX_INCLUDE_DIR CACHE)
+    UNSET(OpenCV20_CVCAM_INCLUDE_DIR CACHE)
+    UNSET(OpenCV20_HIGHGUI_INCLUDE_DIR CACHE)
+    UNSET(OpenCV20_LIBRARIES CACHE)
+    UNSET(OpenCV20_CV_LIBRARY CACHE)
+    UNSET(OpenCV20_CXCORE_LIBRARY CACHE)
+    UNSET(OpenCV20_CVAUX_LIBRARY CACHE)
+    UNSET(OpenCV20_CVCAM_LIBRARY CACHE)
+    UNSET(OpenCV20_CVHAARTRAINING_LIBRARY CACHE)
+    UNSET(OpenCV20_CXTS_LIBRARY CACHE)
+    UNSET(OpenCV20_HIGHGUI_LIBRARY CACHE)
+    UNSET(OpenCV20_ML_LIBRARY CACHE)
+    UNSET(OpenCV20_TRS_LIBRARY CACHE)
+
     IF(OpenCV_FOUND)
         MARK_AS_ADVANCED(FORCE ${OpenCV_OPTIONS})
 
@@ -219,21 +350,22 @@ IF(CISST_SVL_HAS_OPENCV OR NOT OpenCV_OPTIONS)
 
         SET(SOURCE_FILES
             ${SOURCE_FILES}
+            svlFilterImageZoom.cpp
             svlFilterToolTracker.cpp
             svlVidCapSrcOpenCV.h        # private header
             svlVidCapSrcOpenCV.cpp
-            # Trackers
-            trackers/opencv/svlTrackerOpenCV.cpp
-            trackers/opencv/trkOCVColor.h        # private header
-            trackers/opencv/trkOCVColor.cpp
+            svlVideoCodecOpenCV.h       # private header
+            svlVideoCodecOpenCV.cpp
+            svlTrackerOCVMeanShift.cpp
             )
+
         SET(HEADER_FILES
             ${HEADER_FILES}
+            svlFilterImageZoom.h
             svlFilterToolTracker.h
-            # Trackers
-            trackers/svlTrackerOpenCV.h
+            svlTrackerOCVMeanShift.h
             )
-        MESSAGE(STATUS "OpenCV found - Switch to advanced view for details")
+        MESSAGE(STATUS "OpenCV found")
         OPTION(CISST_SVL_HAS_OPENCV "Compile OpenCV extensions" ON)
 
     ELSE(OpenCV_FOUND)
@@ -260,6 +392,11 @@ IF(CISST_SVL_HAS_JPEG OR NOT JPEG_OPTIONS)
         CACHE INTERNAL "List of JPEG options"
         )
 
+    IF(SVL_GNU_INCLUDE_DIR AND SVL_GNU_LIBRARY_DIR AND NOT JPEG_FOUND)
+        FIND_PATH(JPEG_INCLUDE_DIR jpeglib.h "${SVL_GNU_INCLUDE_DIR}")
+        FIND_FILE(JPEG_LIBRARY jpeg.lib "${SVL_GNU_LIBRARY_DIR}")
+    ENDIF(SVL_GNU_INCLUDE_DIR AND SVL_GNU_LIBRARY_DIR AND NOT JPEG_FOUND)
+
     FIND_PACKAGE(JPEG)
     IF(JPEG_FOUND)
         MARK_AS_ADVANCED(FORCE ${JPEG_OPTIONS})
@@ -279,6 +416,17 @@ IF(CISST_SVL_HAS_JPEG OR NOT JPEG_OPTIONS)
             )
         MESSAGE(STATUS "JPEG found - Switch to advanced view for details")
         OPTION(CISST_SVL_HAS_JPEG "Use JPEG extensions" ON)
+
+        IF(WIN32 AND NOT SVL_GNU_OPTIONS)
+            SET(SVL_GNU_OPTIONS
+                SVL_GNU_INCLUDE_DIR
+                SVL_GNU_LIBRARY_DIR
+                CACHE INTERNAL "List of GNU options"
+                )
+            SET(SVL_GNU_INCLUDE_DIR "${JPEG_INCLUDE_DIR}" CACHE PATH "GNU include directory")
+            GET_FILENAME_COMPONENT(SVL_GNU_LIBRARY_DIR "${JPEG_LIBRARY}" PATH CACHE)
+            MARK_AS_ADVANCED(FORCE SVL_GNU_INCLUDE_DIR SVL_GNU_LIBRARY_DIR)
+        ENDIF(WIN32 AND NOT SVL_GNU_OPTIONS)
 
     ELSE(JPEG_FOUND)
         IF(CISST_SVL_HAS_JPEG)
@@ -304,6 +452,11 @@ IF(CISST_SVL_HAS_ZLIB OR NOT ZLIB_OPTIONS)
         CACHE INTERNAL "List of ZLIB options"
         )
 
+    IF(SVL_GNU_INCLUDE_DIR AND SVL_GNU_LIBRARY_DIR AND NOT ZLIB_FOUND)
+        FIND_PATH(ZLIB_INCLUDE_DIR zlib.h "${SVL_GNU_INCLUDE_DIR}")
+        FIND_FILE(ZLIB_LIBRARY zlib.lib "${SVL_GNU_LIBRARY_DIR}")
+    ENDIF(SVL_GNU_INCLUDE_DIR AND SVL_GNU_LIBRARY_DIR AND NOT ZLIB_FOUND)
+
     FIND_PACKAGE(ZLIB)
     IF(ZLIB_FOUND)
         MARK_AS_ADVANCED(FORCE ${ZLIB_OPTIONS})
@@ -314,15 +467,28 @@ IF(CISST_SVL_HAS_ZLIB OR NOT ZLIB_OPTIONS)
             )
         SET(SVL_ADDITIONAL_LIBRARIES
             "${SVL_ADDITIONAL_LIBRARIES}"
-            "${ZLIB_LIBRARIES}"
+            "${ZLIB_LIBRARY}"
             )
         SET(SOURCE_FILES
             ${SOURCE_FILES}
             svlVideoCodecCVI.h              # private header
             svlVideoCodecCVI.cpp
+            svlVideoCodecUDPStream.h        # private header
+            svlVideoCodecUDPStream.cpp
             )
         MESSAGE(STATUS "ZLIB found - Switch to advanced view for details")
         OPTION(CISST_SVL_HAS_ZLIB "Use ZLIB extensions" ON)
+
+        IF(WIN32 AND NOT SVL_GNU_OPTIONS)
+            SET(SVL_GNU_OPTIONS
+                SVL_GNU_INCLUDE_DIR
+                SVL_GNU_LIBRARY_DIR
+                CACHE INTERNAL "List of GNU options"
+                )
+            SET(SVL_GNU_INCLUDE_DIR "${ZLIB_INCLUDE_DIR}" CACHE PATH "GNU include directory")
+            GET_FILENAME_COMPONENT(SVL_GNU_LIBRARY_DIR "${ZLIB_LIBRARY}" PATH CACHE)
+            MARK_AS_ADVANCED(FORCE SVL_GNU_INCLUDE_DIR SVL_GNU_LIBRARY_DIR)
+        ENDIF(WIN32 AND NOT SVL_GNU_OPTIONS)
 
     ELSE(ZLIB_FOUND)
         IF(CISST_SVL_HAS_ZLIB)
@@ -353,6 +519,11 @@ IF(CISST_SVL_HAS_ZLIB AND ZLIB_FOUND)
             PNG_LIBRARIES
             CACHE INTERNAL "List of PNG options"
             )
+
+        IF(SVL_GNU_INCLUDE_DIR AND SVL_GNU_LIBRARY_DIR)
+            FIND_PATH(PNG_PNG_INCLUDE_DIR png.h "${SVL_GNU_INCLUDE_DIR}")
+            FIND_FILE(PNG_LIBRARY libpng.lib "${SVL_GNU_LIBRARY_DIR}")
+        ENDIF(SVL_GNU_INCLUDE_DIR AND SVL_GNU_LIBRARY_DIR)
 
         FIND_PACKAGE(PNG)
         IF(PNG_FOUND)
@@ -409,14 +580,14 @@ IF(CISST_SVL_HAS_MIL OR NOT MIL_OPTIONS)
     SET(MIL_FOUND "NO")
     FIND_PATH(MIL_INCLUDE_DIR mil.h
               "/opt/matrox_imaging/mil/include"
-              "C:/Program Files/Matrox Imaging/Mil/Include"
-              "D:/Program Files/Matrox Imaging/Mil/Include"
+              "${PROGRAMFILES_DIR}/Matrox Imaging/Mil/Include"
+              "${PROGRAMFILES_X86_DIR}/Matrox Imaging/Mil/Include"
               DOC "What is the path where the file mil.h can be found"
               )
     FIND_LIBRARY(MIL_mil_LIBRARY mil
                  "/opt/matrox_imaging/mil/lib"
-                 "C:/Program Files/Matrox Imaging/Mil/LIB"
-                 "D:/Program Files/Matrox Imaging/Mil/LIB"
+                 "${PROGRAMFILES_DIR}/Matrox Imaging/Mil/LIB"
+                 "${PROGRAMFILES_X86_DIR}/Matrox Imaging/Mil/LIB"
                  DOC "Where can the MIL mil library be found"
                  )
     IF(MIL_INCLUDE_DIR)
@@ -470,10 +641,12 @@ IF(WIN32)
         svlVideoCodecVfW32.h    # private header
         svlVideoCodecVfW32.cpp
         svlFilterImageWindow.cpp
+        svlFilterImageWindowTargetSelect.cpp
         )
     SET(HEADER_FILES
         ${HEADER_FILES}
         svlFilterImageWindow.h
+        svlFilterImageWindowTargetSelect.h
         )
     SET(SVL_ADDITIONAL_LIBRARIES
         "${SVL_ADDITIONAL_LIBRARIES}"
@@ -512,9 +685,9 @@ IF(WIN32)
 
             SET(SOURCE_FILES
                 ${SOURCE_FILES}
-                svlVidCapSrcDirectShowInputSelector.h    # private header
+                svlVidCapSrcDirectShowInputSelector.h       # private header
                 svlVidCapSrcDirectShowInputSelector.cpp
-                svlVidCapSrcDirectShow.h           # private header
+                svlVidCapSrcDirectShow.h                    # private header
                 svlVidCapSrcDirectShow.cpp
                 )
             MESSAGE(STATUS "DirectShow found - Switch to advanced view for details")
@@ -546,30 +719,30 @@ IF(WIN32)
 
         SET(SVS_FOUND "NO")
         FIND_PATH(SVS_INCLUDE_DIR svs.h
-                  "C:/Program Files/SRI SVS42/src"
-                  "C:/Program Files/SRI International/SVS42/src"
-                  "C:/Program Files/SRI International/SVS41/src"
-                  "D:/Program Files/SRI SVS42/src"
-                  "D:/Program Files/SRI International/SVS42/src"
-                  "D:/Program Files/SRI International/SVS41/src"
+                  "${PROGRAMFILES_DIR}/SRI SVS42/src"
+                  "${PROGRAMFILES_DIR}/SRI International/SVS42/src"
+                  "${PROGRAMFILES_DIR}/SRI International/SVS41/src"
+                  "${PROGRAMFILES_X86_DIR}/SRI SVS42/src"
+                  "${PROGRAMFILES_X86_DIR}/SRI International/SVS42/src"
+                  "${PROGRAMFILES_X86_DIR}/SRI International/SVS41/src"
                   DOC "What is the path where the file svs.h can be found"
                   )
         FIND_LIBRARY(SVS_svs_LIBRARY svs
-                     "C:/Program Files/SRI SVS42/bin"
-                     "C:/Program Files/SRI International/SVS42/bin"
-                     "C:/Program Files/SRI International/SVS41/bin"
-                     "D:/Program Files/SRI SVS42/bin"
-                     "D:/Program Files/SRI International/SVS42/bin"
-                     "D:/Program Files/SRI International/SVS41/bin"
+                     "${PROGRAMFILES_DIR}/SRI SVS42/bin"
+                     "${PROGRAMFILES_DIR}/SRI International/SVS42/bin"
+                     "${PROGRAMFILES_DIR}/SRI International/SVS41/bin"
+                     "${PROGRAMFILES_X86_DIR}/SRI SVS42/bin"
+                     "${PROGRAMFILES_X86_DIR}/SRI International/SVS42/bin"
+                     "${PROGRAMFILES_X86_DIR}/SRI International/SVS41/bin"
                      DOC "Where can the SVS svs library be found"
                      )
         FIND_LIBRARY(SVS_svsgrab_LIBRARY svsgrab
-                     "C:/Program Files/SRI SVS42/bin"
-                     "C:/Program Files/SRI International/SVS42/bin"
-                     "C:/Program Files/SRI International/SVS41/bin"
-                     "D:/Program Files/SRI SVS42/bin"
-                     "D:/Program Files/SRI International/SVS42/bin"
-                     "D:/Program Files/SRI International/SVS41/bin"
+                     "${PROGRAMFILES_DIR}/SRI SVS42/bin"
+                     "${PROGRAMFILES_DIR}/SRI International/SVS42/bin"
+                     "${PROGRAMFILES_DIR}/SRI International/SVS41/bin"
+                     "${PROGRAMFILES_X86_DIR}/SRI SVS42/bin"
+                     "${PROGRAMFILES_X86_DIR}/SRI International/SVS42/bin"
+                     "${PROGRAMFILES_X86_DIR}/SRI International/SVS41/bin"
                      DOC "Where can the SVS svsgrab library be found"
                      )
         IF(SVS_INCLUDE_DIR)
@@ -615,7 +788,6 @@ IF(WIN32)
         MARK_AS_ADVANCED(FORCE ${SVS_OPTIONS})
         OPTION(CISST_SVL_HAS_SVS "Compile Videre Design (SVS) extensions" OFF)
     ENDIF(CISST_SVL_HAS_SVS OR NOT SVS_OPTIONS)
-
 
     ADD_DEFINITIONS(-DWIN32_LEAN_AND_MEAN)
 
@@ -736,10 +908,12 @@ IF(UNIX)
                 winX11.h                 # private header
                 winX11.cpp
                 svlFilterImageWindow.cpp
+                svlFilterImageWindowTargetSelect.cpp
                 )
             SET(HEADER_FILES
                 ${HEADER_FILES}
                 svlFilterImageWindow.h
+                svlFilterImageWindowTargetSelect.h
                 )
             MESSAGE(STATUS "X11 found - Switch to advanced view for details")
             OPTION(CISST_SVL_HAS_X11 "Compile X11 extensions" ON)
@@ -831,8 +1005,5 @@ if (CISST_HAS_SWIG_PYTHON)
   cisst_add_swig_module(MODULE cisstStereoVision
                         INTERFACE_DIRECTORY ../../include/cisstStereoVision
 			CISST_LIBRARIES cisstStereoVision
-                                        cisstNumerical
-					cisstOSAbstraction
-					cisstVector
-					cisstCommon)
+                                        ${DEPENDENCIES})
 endif (CISST_HAS_SWIG_PYTHON)

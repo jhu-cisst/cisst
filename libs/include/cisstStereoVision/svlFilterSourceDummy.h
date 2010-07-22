@@ -23,34 +23,34 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlFilterSourceDummy_h
 #define _svlFilterSourceDummy_h
 
-#include <cisstStereoVision/svlStreamManager.h>
+#include <cisstStereoVision/svlFilterSourceBase.h>
 
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
 
-#define SVL_DMYSRC_DATA_NOT_INITIALIZED     -7000
 
-class CISST_EXPORT svlFilterSourceDummy : public svlFilterSourceBase, public cmnGenericObject
+class CISST_EXPORT svlFilterSourceDummy : public svlFilterSourceBase
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
 public:
     svlFilterSourceDummy();
     svlFilterSourceDummy(svlStreamType type);
-    svlFilterSourceDummy(const svlSampleImageBase & image);
+    svlFilterSourceDummy(const svlSampleImage & image);
     virtual ~svlFilterSourceDummy();
 
     int SetType(svlStreamType type);
-    int SetImage(const svlSampleImageBase & image);
+    int SetImage(const svlSampleImage & image);
 
     int SetDimensions(unsigned int width, unsigned int height);
     void EnableNoiseImage(bool noise);
 
 protected:
-    virtual int Initialize();
-    virtual int ProcessFrame(svlProcInfo* procInfo);
+    virtual int Initialize(svlSample* &syncOutput);
+    virtual int Process(svlProcInfo* procInfo, svlSample* &syncOutput);
 
 private:
+    svlSample* OutputSample;
     unsigned int Width;
     unsigned int Height;
     bool Noise;

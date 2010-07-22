@@ -3,9 +3,9 @@
 
 /*
   $Id$
-  
+
   Author(s):  Balazs Vagvolgyi
-  Created on: 2008 
+  Created on: 2008
 
   (C) Copyright 2006-2007 Johns Hopkins University (JHU), All Rights
   Reserved.
@@ -21,9 +21,9 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstStereoVision/svlFilterImageFlipRotate.h>
+#include <cisstStereoVision/svlFilterInput.h>
 #include <cisstImage/imgUCharRGB.h>
 
-using namespace std;
 
 /***************************************/
 /*** svlFilterImageFlipRotate class ****/
@@ -33,14 +33,18 @@ CMN_IMPLEMENT_SERVICES(svlFilterImageFlipRotate)
 
 svlFilterImageFlipRotate::svlFilterImageFlipRotate() :
     svlFilterBase(),
-    cmnGenericObject()
+    OutputImage(0)
 {
-    AddSupportedType(svlTypeImageRGB, svlTypeImageRGB);
-    AddSupportedType(svlTypeImageMono8, svlTypeImageMono8);
-    AddSupportedType(svlTypeImageMono16, svlTypeImageMono16);
-    AddSupportedType(svlTypeImageRGBStereo, svlTypeImageRGBStereo);
-    AddSupportedType(svlTypeImageMono8Stereo, svlTypeImageMono8Stereo);
-    AddSupportedType(svlTypeImageMono16Stereo, svlTypeImageMono16Stereo);
+    AddInput("input", true);
+    AddInputType("input", svlTypeImageRGB);
+    AddInputType("input", svlTypeImageMono8);
+    AddInputType("input", svlTypeImageMono16);
+    AddInputType("input", svlTypeImageRGBStereo);
+    AddInputType("input", svlTypeImageMono8Stereo);
+    AddInputType("input", svlTypeImageMono16Stereo);
+
+    AddOutput("output", true);
+    SetAutomaticOutputType(true);
 
     CWQuarters[0] = CWQuarters[1] = 0;
     FlipHorizontal[0] = FlipHorizontal[1] = false;
@@ -52,54 +56,13 @@ svlFilterImageFlipRotate::~svlFilterImageFlipRotate()
     Release();
 }
 
-int svlFilterImageFlipRotate::Initialize(svlSample* inputdata)
+int svlFilterImageFlipRotate::Initialize(svlSample* syncInput, svlSample* &syncOutput)
 {
     Release();
 
-    svlSampleImageBase* output = 0;
-    svlSampleImageBase* input = dynamic_cast<svlSampleImageBase*>(inputdata);
+    OutputImage = dynamic_cast<svlSampleImage*>(syncInput->GetNewInstance());
+    svlSampleImage* input = dynamic_cast<svlSampleImage*>(syncInput);
     const unsigned int channels = input->GetVideoChannels();
-
-    switch (GetInputType()) {
-        case svlTypeImageRGB:
-            output = new svlSampleImageRGB;
-        break;
-
-        case svlTypeImageMono8:
-            output = new svlSampleImageMono8;
-        break;
-
-        case svlTypeImageMono16:
-            output = new svlSampleImageMono16;
-        break;
-
-        case svlTypeImageRGBStereo:
-            output = new svlSampleImageRGBStereo;
-        break;
-
-        case svlTypeImageMono8Stereo:
-            output = new svlSampleImageMono8Stereo;
-        break;
-
-        case svlTypeImageMono16Stereo:
-            output = new svlSampleImageMono16Stereo;
-        break;
-
-        case svlTypeImageRGBA:
-        case svlTypeImageRGBAStereo:
-        case svlTypeImageMonoFloat:
-        case svlTypeImage3DMap:
-        case svlTypeInvalid:
-        case svlTypeStreamSource:
-        case svlTypeStreamSink:
-        case svlTypeImageCustom:
-        case svlTypeRigidXform:
-        case svlTypePointCloud:
-        return SVL_FAIL;
-    }
-    if (output == 0)
-        return SVL_ALLOCATION_ERROR;
-    OutputData = output;
 
     // Initializing image sizes and processing parameters
     for (unsigned int i = 0; i < channels; i ++) {
@@ -203,33 +166,31 @@ int svlFilterImageFlipRotate::Initialize(svlSample* inputdata)
             }
         }
 
-        if (CWQuarters[i] == 0) output->SetSize(i, input->GetWidth(i), input->GetHeight(i));
-        else output->SetSize(i, input->GetHeight(i), input->GetWidth(i));
+        if (CWQuarters[i] == 0) OutputImage->SetSize(i, input->GetWidth(i), input->GetHeight(i));
+        else OutputImage->SetSize(i, input->GetHeight(i), input->GetWidth(i));
     }
+
+    syncOutput = OutputImage;
 
     return SVL_OK;
 }
 
-int svlFilterImageFlipRotate::ProcessFrame(svlProcInfo* procInfo, svlSample* inputdata)
+int svlFilterImageFlipRotate::Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput)
 {
-    ///////////////////////////////////////////
-    // Check if the input sample has changed //
-      if (!IsNewSample(inputdata))
-          return SVL_ALREADY_PROCESSED;
-    ///////////////////////////////////////////
+    syncOutput = OutputImage;
+    _SkipIfAlreadyProcessed(syncInput, syncOutput);
 
-    svlSampleImageBase* input = dynamic_cast<svlSampleImageBase*>(inputdata);
-    svlSampleImageBase* output = dynamic_cast<svlSampleImageBase*>(OutputData);
+    svlSampleImage* input = dynamic_cast<svlSampleImage*>(syncInput);
     unsigned int videochannels = input->GetVideoChannels();
     unsigned int idx;
 
     _ParallelLoop(procInfo, idx, videochannels)
     {
-        switch (GetInputType()) {
+        switch (GetInput()->GetType()) {
             case svlTypeImageRGB:
             case svlTypeImageRGBStereo:
                 FlipRotate<imgUCharRGB::Pixel>(reinterpret_cast<imgUCharRGB::Pixel*>(input->GetUCharPointer(idx)),
-                                               reinterpret_cast<imgUCharRGB::Pixel*>(output->GetUCharPointer(idx)),
+                                               reinterpret_cast<imgUCharRGB::Pixel*>(OutputImage->GetUCharPointer(idx)),
                                                input->GetWidth(idx), input->GetHeight(idx),
                                                QuickCopy[idx], StartOffset[idx], Stride[idx], LineStride[idx]);
             break;
@@ -237,7 +198,7 @@ int svlFilterImageFlipRotate::ProcessFrame(svlProcInfo* procInfo, svlSample* inp
             case svlTypeImageMono8:
             case svlTypeImageMono8Stereo:
                 FlipRotate<unsigned char>(input->GetUCharPointer(idx),
-                                          output->GetUCharPointer(idx),
+                                          OutputImage->GetUCharPointer(idx),
                                           input->GetWidth(idx), input->GetHeight(idx),
                                           QuickCopy[idx], StartOffset[idx], Stride[idx], LineStride[idx]);
             break;
@@ -245,21 +206,30 @@ int svlFilterImageFlipRotate::ProcessFrame(svlProcInfo* procInfo, svlSample* inp
             case svlTypeImageMono16:
             case svlTypeImageMono16Stereo:
                 FlipRotate<unsigned short>(reinterpret_cast<unsigned short*>(input->GetUCharPointer(idx)),
-                                           reinterpret_cast<unsigned short*>(output->GetUCharPointer(idx)),
+                                           reinterpret_cast<unsigned short*>(OutputImage->GetUCharPointer(idx)),
                                            input->GetWidth(idx), input->GetHeight(idx),
                                            QuickCopy[idx], StartOffset[idx], Stride[idx], LineStride[idx]);
             break;
 
             case svlTypeImageRGBA:
             case svlTypeImageRGBAStereo:
-            case svlTypeImageMonoFloat:
+            case svlTypeMatrixInt8:
+            case svlTypeMatrixInt16:
+            case svlTypeMatrixInt32:
+            case svlTypeMatrixInt64:
+            case svlTypeMatrixUInt8:
+            case svlTypeMatrixUInt16:
+            case svlTypeMatrixUInt32:
+            case svlTypeMatrixUInt64:
+            case svlTypeMatrixFloat:
+            case svlTypeMatrixDouble:
             case svlTypeImage3DMap:
             case svlTypeInvalid:
             case svlTypeStreamSource:
             case svlTypeStreamSink:
-            case svlTypeImageCustom:
-            case svlTypeRigidXform:
-            case svlTypePointCloud:
+            case svlTypeTransform3D:
+            case svlTypeTargets:
+            case svlTypeText:
             return SVL_FAIL;
         }
     }
@@ -269,9 +239,9 @@ int svlFilterImageFlipRotate::ProcessFrame(svlProcInfo* procInfo, svlSample* inp
 
 int svlFilterImageFlipRotate::Release()
 {
-    if (OutputData) {
-        delete OutputData;
-        OutputData = 0;
+    if (OutputImage) {
+        delete OutputImage;
+        OutputImage = 0;
     }
     return SVL_OK;
 }

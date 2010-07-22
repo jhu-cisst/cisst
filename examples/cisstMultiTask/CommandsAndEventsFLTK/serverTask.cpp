@@ -17,7 +17,7 @@ serverTask::serverTask(const std::string & taskName, double period):
     // add ServerData to the StateTable defined in mtsTask
     this->StateTable.AddData(ReadValue, "ReadValue");
     // add one interface, this will create an mtsTaskInterface
-    mtsProvidedInterface * provided = AddProvidedInterface("Provided");
+    mtsInterfaceProvided * provided = AddInterfaceProvided("Provided");
     if (provided) {
         provided->AddCommandVoid(&serverTask::Void, this, "Void");
         provided->AddCommandWrite(&serverTask::Write, this, "Write");
@@ -84,13 +84,13 @@ void serverTask::Run(void) {
                 this->EventVoid();
                 UI.VoidEventRequested = false;
             }
-            
+
             if (UI.WriteEventRequested) {
                 CMN_LOG_CLASS_RUN_VERBOSE << "Run: WriteEventRequested" << std::endl;
                 this->EventWrite(mtsDouble(UI.ReadValue->value()));
                 UI.WriteEventRequested = false;
             }
-            
+
             this->ReadValue = UI.ReadValue->value();
             Fl::check();
         }

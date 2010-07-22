@@ -187,7 +187,7 @@ public:
             return 2*(me+n)+k+(mg+2)*(n+7);
         }
     }
-    static inline CISSTNETLIB_INTEGER GetIWorkspaceSize(CISSTNETLIB_INTEGER ma, CISSTNETLIB_INTEGER me, CISSTNETLIB_INTEGER mg, CISSTNETLIB_INTEGER n)
+    static inline CISSTNETLIB_INTEGER GetIWorkspaceSize(CISSTNETLIB_INTEGER CMN_UNUSED(ma), CISSTNETLIB_INTEGER me, CISSTNETLIB_INTEGER mg, CISSTNETLIB_INTEGER n)
     {
         if ((me == 0) && (mg ==0)) {// case LS
             return 0;

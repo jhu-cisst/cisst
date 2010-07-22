@@ -22,17 +22,18 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsComponentProxy.h>
 #include <cisstMultiTask/mtsComponentInterfaceProxyClient.h>
 #include <cisstMultiTask/mtsFunctionVoid.h>
-#include <cisstMultiTask/mtsFunctionReadOrWriteProxy.h>
-#include <cisstMultiTask/mtsFunctionQualifiedReadOrWriteProxy.h>
+#include <cisstMultiTask/mtsFunctionReadProxy.h>
+#include <cisstMultiTask/mtsFunctionWriteProxy.h>
+#include <cisstMultiTask/mtsFunctionQualifiedReadProxy.h>
 
 #include <cisstOSAbstraction/osaSleep.h>
 
 unsigned int mtsComponentInterfaceProxyClient::InstanceCounter = 0;
 
 mtsComponentInterfaceProxyClient::mtsComponentInterfaceProxyClient(
-    const std::string & serverEndpointInfo, const unsigned int providedInterfaceProxyInstanceID)
+    const std::string & serverEndpointInfo, const unsigned int connectionID)
     : BaseClientType("config.client", serverEndpointInfo),
-      ProvidedInterfaceProxyInstanceID(providedInterfaceProxyInstanceID)
+      ConnectionID(connectionID)
 {
     ProxyName = "ComponentInterfaceProxyServer";
 }
@@ -79,7 +80,7 @@ bool mtsComponentInterfaceProxyClient::Start(mtsComponentProxy * proxyOwner)
     SetProxyOwner(proxyOwner, thisProcessName);
 
     // Connect to server proxy by adding this ICE proxy client to server
-    if (!ComponentInterfaceServerProxy->AddClient(GetProxyName(), (::Ice::Int) ProvidedInterfaceProxyInstanceID, ident)) {
+    if (!ComponentInterfaceServerProxy->AddClient(GetProxyName(), (::Ice::Int) ConnectionID, ident)) {
         LogError(mtsComponentInterfaceProxyClient, "AddClient() failed: duplicate proxy name or identity");
         return false;
     }

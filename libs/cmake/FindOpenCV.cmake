@@ -47,13 +47,15 @@ ENDIF(NOT OpenCV_FIND_COMPONENTS)
 
 # typical root dirs of installations, exactly one of them is used
 SET(OpenCV_POSSIBLE_ROOT_DIRS
-  "${OpenCV_ROOT_DIR}"
-  "$ENV{OpenCV_ROOT_DIR}"  
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Intel(R) Open Source Computer Vision Library_is1;Inno Setup: App Path]"
-  "$ENV{ProgramFiles}/OpenCV"
-  /usr/local
-  /usr
-  )
+    "${OpenCV_ROOT_DIR}"
+    "$ENV{OpenCV_ROOT_DIR}"  
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Intel(R) Open Source Computer Vision Library_is1;Inno Setup: App Path]"
+    "$ENV{SystemDrive}/OpenCV"                     # Windows: OpenCV default installation dir
+    "$ENV{SystemDrive}/Program Files/OpenCV"       # 32 bit ProgramFiles dir on Win32;  64 bit ProgramFiles dir on Win64
+    "$ENV{SystemDrive}/Program Files (x86)/OpenCV" # 32 bit ProgramFiles dir on Win64
+    /usr/local
+    /usr
+    )
 
 
 #

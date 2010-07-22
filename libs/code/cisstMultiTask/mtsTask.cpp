@@ -24,7 +24,10 @@
 #include <cisstOSAbstraction/osaThread.h>
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstOSAbstraction/osaGetTime.h>
+
 #include <cisstMultiTask/mtsTask.h>
+#include <cisstMultiTask/mtsInterfaceRequired.h>
+#include <cisstMultiTask/mtsInterfaceProvided.h>
 
 #include <iostream>
 
@@ -40,19 +43,20 @@ void mtsTask::DoRunInternal(void)
 }
 
 void mtsTask::StartupInternal(void) {
-    CMN_LOG_CLASS_INIT_VERBOSE << "Starting StartupInternal for " << Name << std::endl;
+    CMN_LOG_CLASS_INIT_VERBOSE << "StartupInternal: started for task \"" << this->GetName() << "\"" << std::endl;
 
     // Loop through the required interfaces and make sure they are all connected. This extra check is probably not needed.
     bool success = true;
-    RequiredInterfacesMapType::const_iterator requiredIterator = RequiredInterfaces.begin();
-    mtsDeviceInterface * connectedInterface;
+    InterfacesRequiredOrInputMapType::const_iterator requiredIterator = InterfacesRequiredOrInput.begin();
+    const mtsInterfaceProvidedOrOutput * connectedInterface;
     for (;
-         requiredIterator != RequiredInterfaces.end();
+         requiredIterator != InterfacesRequiredOrInput.end();
          requiredIterator++) {
         connectedInterface = requiredIterator->second->GetConnectedInterface();
         if (!connectedInterface) {
-            CMN_LOG_CLASS_INIT_WARNING << "StartupInternal: void pointer to required interface \""
-                                       << this->GetName() << ":" << requiredIterator->first << "\" (required not connected to provided)" << std::endl;
+            CMN_LOG_CLASS_INIT_WARNING << "StartupInternal: void pointer to required/input interface \""
+                                       << this->GetName() << ":" << requiredIterator->first
+                                       << "\" (required/input not connected to provided/output)" << std::endl;
             success = false;
         }
     }
@@ -62,51 +66,19 @@ void mtsTask::StartupInternal(void) {
         ChangeState(READY);
     }
     else {
-        CMN_LOG_CLASS_INIT_ERROR << "StartupInternal: task " << this->GetName() << " cannot be started." << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "StartupInternal: task \"" << this->GetName() << "\" cannot be started." << std::endl;
     }
-    CMN_LOG_CLASS_INIT_VERBOSE << "Ending StartupInternal for " << this->GetName() << std::endl;
+    CMN_LOG_CLASS_INIT_VERBOSE << "StartupInternal: ended for task \"" << this->GetName() << "\"" << std::endl;
 }
+
 
 void mtsTask::CleanupInternal() {
     // Call user-supplied cleanup function
     this->Cleanup();
     // Perform Cleanup on all interfaces provided
-    ProvidedInterfaces.ForEachVoid(&mtsDeviceInterface::Cleanup);
+    InterfacesProvidedOrOutput.ForEachVoid(&mtsInterfaceProvidedOrOutput::Cleanup);
     ChangeState(FINISHED);
-    CMN_LOG_CLASS_INIT_VERBOSE << "Done base class CleanupInternal " << this->GetName() << std::endl;
-}
-
-
-/********************* Methods to process queues  *********************/
-
-// Execute all commands in the mailbox.  This is just a temporary implementation, where
-// all commands in a mailbox are executed before moving on the next mailbox.  The final
-// implementation will probably look at timestamps.  We may also want to pass in a
-// parameter (enum) to set the mailbox processing policy.
-unsigned int mtsTask::ProcessMailBoxes(ProvidedInterfacesMapType & interfaces)
-{
-    unsigned int numberOfCommands = 0;
-    ProvidedInterfacesMapType::iterator iterator = interfaces.begin();
-    const ProvidedInterfacesMapType::iterator end = interfaces.end();
-    for (;
-         iterator != end;
-         ++iterator) {
-        numberOfCommands += iterator->second->ProcessMailBoxes();
-    }
-    return numberOfCommands;
-}
-
-
-unsigned int mtsTask::ProcessQueuedEvents(void) {
-    RequiredInterfacesMapType::iterator iterator = RequiredInterfaces.begin();
-    const RequiredInterfacesMapType::iterator end = RequiredInterfaces.end();
-    unsigned int numberOfEvents = 0;
-    for (;
-         iterator != end;
-         iterator++) {
-        numberOfEvents += iterator->second->ProcessMailBoxes();
-    }
-    return numberOfEvents;
+    CMN_LOG_CLASS_INIT_VERBOSE << "CleanupInternal: ended for task \"" << this->GetName() << "\"" << std::endl;
 }
 
 
@@ -150,12 +122,12 @@ bool mtsTask::WaitForState(TaskStateType desiredState, double timeout)
         return true;
     if (osaGetCurrentThreadId() == Thread.GetId()) {
         // This shouldn't happen
-        CMN_LOG_CLASS_INIT_WARNING << "WaitForState(" << TaskStateName(desiredState) << "): called from self for task "
-                                   << this->GetName() << std::endl;
+        CMN_LOG_CLASS_INIT_WARNING << "WaitForState(" << TaskStateName(desiredState) << "): called from self for task \""
+                                   << this->GetName() << "\"" << std::endl;
     }
     else {
-        CMN_LOG_CLASS_INIT_VERBOSE << "WaitForState: waiting for task " << this->GetName() << " to enter state "
-                                   << TaskStateName(desiredState) << std::endl;
+        CMN_LOG_CLASS_INIT_VERBOSE << "WaitForState: waiting for task \"" << this->GetName() << "\" to enter state \""
+                                   << TaskStateName(desiredState) << "\"" << std::endl;
         double curTime = osaGetTime();
         double startTime = curTime;
         double endTime = startTime + timeout;
@@ -170,9 +142,9 @@ bool mtsTask::WaitForState(TaskStateType desiredState, double timeout)
             CMN_LOG_CLASS_INIT_VERBOSE << "WaitForState: waited for " << curTime-startTime
                                        << " seconds." << std::endl;
         } else {
-            CMN_LOG_CLASS_INIT_ERROR << "WaitForState: task " << this->GetName()
-                                     << " did not reach state " << TaskStateName(desiredState)
-                                     << ", current state = " << GetTaskStateName() << std::endl;
+            CMN_LOG_CLASS_INIT_ERROR << "WaitForState: task \"" << this->GetName()
+                                     << "\" did not reach state \"" << TaskStateName(desiredState)
+                                     << "\", current state is \"" << GetTaskStateName() << "\"" << std::endl;
         }
     }
     return (TaskState == desiredState);
@@ -182,7 +154,7 @@ bool mtsTask::WaitForState(TaskStateType desiredState, double timeout)
 
 mtsTask::mtsTask(const std::string & name,
                  unsigned int sizeStateTable) :
-    mtsDevice(name),
+    mtsComponent(name),
     Thread(),
     TaskState(CONSTRUCTED),
     StateChange(),
@@ -200,7 +172,7 @@ mtsTask::mtsTask(const std::string & name,
 
 mtsTask::~mtsTask()
 {
-    CMN_LOG_CLASS_INIT_VERBOSE << "mtsTask destructor: deleting task " << this->GetName() << std::endl;
+    CMN_LOG_CLASS_INIT_VERBOSE << "destructor: deleting task \"" << this->GetName() << "\"" << std::endl;
     if (!IsTerminated()) {
         //It is safe to call CleanupInternal() more than once.
         //Should we call the user-supplied Cleanup()?
@@ -213,7 +185,7 @@ mtsTask::~mtsTask()
 
 void mtsTask::Kill(void)
 {
-    CMN_LOG_CLASS_INIT_VERBOSE << "Kill: " << this->GetName() << ", current state = " << GetTaskStateName() << std::endl;
+    CMN_LOG_CLASS_INIT_VERBOSE << "Kill: task \"" << this->GetName() << "\", current state \"" << GetTaskStateName() << "\"" << std::endl;
 
     // Kill each state table
     StateTables.ForEachVoid(&mtsStateTable::Kill);
@@ -241,20 +213,20 @@ const char * mtsTask::TaskStateName(TaskStateType state) const
 }
 
 
-bool mtsTask::AddStateTable(mtsStateTable * existingStateTable, bool addProvidedInterface) {
+bool mtsTask::AddStateTable(mtsStateTable * existingStateTable, bool addInterfaceProvided) {
     const std::string tableName = existingStateTable->GetName();
     const std::string interfaceName = "StateTable" + tableName;
     if (!this->StateTables.AddItem(tableName,
                                    existingStateTable,
                                    CMN_LOG_LOD_INIT_ERROR)) {
-        CMN_LOG_CLASS_INIT_ERROR << "AddStateTable: can not add state table \"" << tableName
+        CMN_LOG_CLASS_INIT_ERROR << "AddStateTable: can't add state table \"" << tableName
                                  << "\" to task \"" << this->GetName() << "\"" << std::endl;
         return false;
     }
-    if (addProvidedInterface) {
-        mtsProvidedInterface * providedInterface = this->AddProvidedInterface(interfaceName);
+    if (addInterfaceProvided) {
+        mtsInterfaceProvided * providedInterface = this->AddInterfaceProvided(interfaceName);
         if (!providedInterface) {
-            CMN_LOG_CLASS_INIT_ERROR << "AddStateTable: can no add provided interface \"" << interfaceName
+            CMN_LOG_CLASS_INIT_ERROR << "AddStateTable: can't add provided interface \"" << interfaceName
                                      << "\" to task \"" << this->GetName() << "\"" << std::endl;
             return false;
         }
@@ -282,19 +254,51 @@ bool mtsTask::AddStateTable(mtsStateTable * existingStateTable, bool addProvided
 
 /********************* Methods to manage interfaces *******************/
 
-mtsDeviceInterface * mtsTask::AddProvidedInterface(const std::string & newInterfaceName) {
-    mtsTaskInterface * newInterface = new mtsTaskInterface(newInterfaceName, this);
-    if (newInterface) {
-        if (ProvidedInterfaces.AddItem(newInterfaceName, newInterface)) {
-            return newInterface;
+mtsInterfaceRequired * mtsTask::AddInterfaceRequired(const std::string & interfaceRequiredName) {
+    // PK: move DEFAULT_EVENT_QUEUE_LEN somewhere else (not in mtsInterfaceProvided)
+    mtsMailBox * mailBox = new mtsMailBox(interfaceRequiredName + "Events", mtsInterfaceRequired::DEFAULT_EVENT_QUEUE_LEN);
+    mtsInterfaceRequired * result;
+    if (mailBox) {
+        // try to create and add interface
+        result = this->AddInterfaceRequiredUsingMailbox(interfaceRequiredName, mailBox);
+        if (!result) {
+            delete mailBox;
         }
-        CMN_LOG_CLASS_INIT_ERROR << "AddProvidedInterface: task " << this->GetName() << " unable to add interface \""
-                                 << newInterfaceName << "\"" << std::endl;
-        delete newInterface;
+        return result;
+    }
+    CMN_LOG_CLASS_INIT_ERROR << "AddInterfaceRequired: unable to create mailbox for \""
+                             << interfaceRequiredName << "\"" << std::endl;
+    delete mailBox;
+    return 0;
+}
+
+
+mtsInterfaceProvided * mtsTask::AddInterfaceProvided(const std::string & interfaceProvidedName,
+                                                     mtsInterfaceQueuingPolicy queuingPolicy)
+{
+    mtsInterfaceProvided * interfaceProvided;
+    if ((queuingPolicy == MTS_COMPONENT_POLICY)
+        || (queuingPolicy == MTS_COMMANDS_SHOULD_BE_QUEUED)) {
+        interfaceProvided = new mtsInterfaceProvided(interfaceProvidedName, this, MTS_COMMANDS_SHOULD_BE_QUEUED);
+    } else {
+        CMN_LOG_CLASS_INIT_WARNING << "AddInterfaceProvided: adding provided interface \"" << interfaceProvidedName
+                                   << "\" with policy MTS_COMMANDS_SHOULD_NOT_BE_QUEUED to task \""
+                                   << this->GetName() << "\". This bypasses built-ins thread safety mechanisms, make sure your commands are thread safe"
+                                   << std::endl;
+        interfaceProvided = new mtsInterfaceProvided(interfaceProvidedName, this, MTS_COMMANDS_SHOULD_NOT_BE_QUEUED);
+    }
+    if (interfaceProvided) {
+        if (InterfacesProvidedOrOutput.AddItem(interfaceProvidedName, interfaceProvided)) {
+            InterfacesProvided.push_back(interfaceProvided);
+            return interfaceProvided;
+        }
+        CMN_LOG_CLASS_INIT_ERROR << "AddInterfaceProvided: task " << this->GetName() << " unable to add interface \""
+                                 << interfaceProvidedName << "\"" << std::endl;
+        delete interfaceProvided;
         return 0;
     }
-    CMN_LOG_CLASS_INIT_ERROR << "AddProvidedInterface: task " << this->GetName() << " unable to create interface \""
-                             << newInterfaceName << "\"" << std::endl;
+    CMN_LOG_CLASS_INIT_ERROR << "AddInterfaceProvided: task " << this->GetName() << " unable to create interface \""
+                             << interfaceProvidedName << "\"" << std::endl;
     return 0;
 }
 
@@ -313,7 +317,7 @@ bool mtsTask::WaitToTerminate(double timeout)
 {
     bool ret = true;
     if (TaskState < FINISHING) {
-        CMN_LOG_CLASS_INIT_WARNING << "WaitToTerminate: not finishing task " << this->GetName() << std::endl;
+        CMN_LOG_CLASS_INIT_WARNING << "WaitToTerminate: not finishing task \"" << this->GetName() << "\"" << std::endl;
         ret = false;
     }
     else if (TaskState == FINISHING) {
@@ -322,8 +326,8 @@ bool mtsTask::WaitToTerminate(double timeout)
 
     // If task state is finished, we wait for the thread to be destroyed
     if ((TaskState == FINISHED) && Thread.IsValid()) {
-        CMN_LOG_CLASS_INIT_VERBOSE << "WaitToTerminate: waiting for task " << this->GetName()
-                                   << " thread to exit." << std::endl;
+        CMN_LOG_CLASS_INIT_VERBOSE << "WaitToTerminate: waiting for task \"" << this->GetName()
+                                   << "\" thread to exit." << std::endl;
         Thread.Wait();
     }
     return ret;
@@ -334,6 +338,6 @@ void mtsTask::ToStream(std::ostream & outputStream) const
 {
     outputStream << "Task name: " << Name << std::endl;
     StateTable.ToStream(outputStream);
-    ProvidedInterfaces.ToStream(outputStream);
-    RequiredInterfaces.ToStream(outputStream);
+    InterfacesProvidedOrOutput.ToStream(outputStream);
+    InterfacesRequiredOrInput.ToStream(outputStream);
 }

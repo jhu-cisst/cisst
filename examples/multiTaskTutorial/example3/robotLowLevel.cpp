@@ -20,14 +20,14 @@ robotLowLevel::robotLowLevel(const std::string & taskName, double period):
     DeltaJointRobot2.SetSize(NB_JOINTS);
 
     // create 4 interfaces, two for each robot
-    mtsProvidedInterface * robot1Interface =
-        AddProvidedInterface("Robot1");
-    mtsProvidedInterface * robot1ObserverInterface =
-        AddProvidedInterface("Robot1Observer");
-    mtsProvidedInterface * robot2Interface =
-        AddProvidedInterface("Robot2");
-    mtsProvidedInterface * robot2ObserverInterface =
-        AddProvidedInterface("Robot2Observer");
+    mtsInterfaceProvided * robot1Interface =
+        AddInterfaceProvided("Robot1");
+    mtsInterfaceProvided * robot1ObserverInterface =
+        AddInterfaceProvided("Robot1Observer");
+    mtsInterfaceProvided * robot2Interface =
+        AddInterfaceProvided("Robot2");
+    mtsInterfaceProvided * robot2ObserverInterface =
+        AddInterfaceProvided("Robot2Observer");
     // add the state data to the table
     StateTable.AddData(PositionJointRobot1, "PositionJointRobot1");
     StateTable.AddData(PositionJointRobot2, "PositionJointRobot2");

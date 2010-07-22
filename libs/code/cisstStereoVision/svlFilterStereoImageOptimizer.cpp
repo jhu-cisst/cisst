@@ -22,7 +22,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstStereoVision/svlFilterStereoImageOptimizer.h>
 
-using namespace std;
 
 /********************************************/
 /*** svlFilterStereoImageOptimizer class ****/
@@ -32,7 +31,6 @@ CMN_IMPLEMENT_SERVICES(svlFilterStereoImageOptimizer)
 
 svlFilterStereoImageOptimizer::svlFilterStereoImageOptimizer() :
     svlFilterBase(),
-    cmnGenericObject(),
     Disparity_Target(0),
     ROI_Target(0, 0, 0x7FFFFFFF, 0x7FFFFFFF),
     ColBal_Red(256),
@@ -40,7 +38,11 @@ svlFilterStereoImageOptimizer::svlFilterStereoImageOptimizer() :
     ColBal_Blue(256),
     RecomputeRatios(1)
 {
-    AddSupportedType(svlTypeImageRGBStereo, svlTypeImageRGBStereo);
+    AddInput("input", true);
+    AddInputType("input", svlTypeImageRGBStereo);
+
+    AddOutput("output", true);
+    SetAutomaticOutputType(true);
 }
 
 svlFilterStereoImageOptimizer::~svlFilterStereoImageOptimizer()
@@ -74,11 +76,11 @@ int svlFilterStereoImageOptimizer::SetRegionOfInterest(unsigned int left, unsign
     return SVL_OK;
 }
 
-int svlFilterStereoImageOptimizer::Initialize(svlSample* inputdata)
+int svlFilterStereoImageOptimizer::Initialize(svlSample* syncInput, svlSample* &syncOutput)
 {
     Release();
 
-    svlSampleImageRGBStereo* stimg = dynamic_cast<svlSampleImageRGBStereo*>(inputdata);
+    svlSampleImageRGBStereo* stimg = dynamic_cast<svlSampleImageRGBStereo*>(syncInput);
     int w0 = stimg->GetWidth(SVL_LEFT);
     int w1 = stimg->GetWidth(SVL_RIGHT);
     int h0 = stimg->GetHeight(SVL_LEFT);
@@ -115,24 +117,18 @@ int svlFilterStereoImageOptimizer::Initialize(svlSample* inputdata)
     if (ROI[SVL_RIGHT].left   >= w0) ROI[SVL_RIGHT].left   = w0 - 1;
     if (ROI[SVL_RIGHT].right  >= w0) ROI[SVL_RIGHT].right  = w0 - 1;
 
-    OutputData = inputdata;
+    syncOutput = syncInput;
 
     return SVL_OK;
 }
 
-int svlFilterStereoImageOptimizer::ProcessFrame(svlProcInfo* procInfo, svlSample* inputdata)
+int svlFilterStereoImageOptimizer::Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput)
 {
-    ///////////////////////////////////////////
-    // Check if the input sample has changed //
-      if (!IsNewSample(inputdata))
-          return SVL_ALREADY_PROCESSED;
-    ///////////////////////////////////////////
-
-    // Passing the same image for the next filter
-    OutputData = inputdata;
+    syncOutput = syncInput;
+    _SkipIfAlreadyProcessed(syncInput, syncOutput);
 
     unsigned int idx;
-    svlSampleImageBase* img = dynamic_cast<svlSampleImageBase*>(inputdata);
+    svlSampleImage* img = dynamic_cast<svlSampleImage*>(syncInput);
 
     if (FrameCounter == 0 || RecomputeRatios > 0) {
         // Compute color balance between left and right image
@@ -158,9 +154,9 @@ int svlFilterStereoImageOptimizer::ProcessFrame(svlProcInfo* procInfo, svlSample
                 k = j * width + roi_l;
                 for (i = roi_l; i < roi_r; i ++) {
                     pix = buffer + k;
-                    r += pix->R;
-                    g += pix->G;
-                    b += pix->B;
+                    r += pix->r;
+                    g += pix->g;
+                    b += pix->b;
                     k ++;
                 }
             }

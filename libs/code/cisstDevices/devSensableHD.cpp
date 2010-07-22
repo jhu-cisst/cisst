@@ -330,7 +330,7 @@ void devSensableHD::SetupInterfaces(void)
     const unsigned int end = this->DevicesVector.size();
     DeviceData * deviceData;
     std::string interfaceName;
-    mtsProvidedInterface * providedInterface;
+    mtsInterfaceProvided * providedInterface;
 
     for (index; index != end; index++) {
         // use local data pointer to make code more readable
@@ -352,7 +352,7 @@ void devSensableHD::SetupInterfaces(void)
 
         // create interface with the device name, i.e. the map key
         CMN_LOG_CLASS_INIT_DEBUG << "SetupInterfaces: creating interface \"" << interfaceName << "\"" << std::endl;
-        providedInterface = this->AddProvidedInterface(interfaceName);
+        providedInterface = this->AddInterfaceProvided(interfaceName);
 
         // add the state data to the table
         this->StateTable.AddData(deviceData->PositionCartesian, interfaceName + "PositionCartesian");
@@ -396,10 +396,10 @@ void devSensableHD::SetupInterfaces(void)
                                          deviceData->PositionCartesian.ReferenceFrame());
         
         // Add interfaces for button with events
-        providedInterface = this->AddProvidedInterface(interfaceName + "Button1");
+        providedInterface = this->AddInterfaceProvided(interfaceName + "Button1");
         deviceData->Button1Event.Bind(providedInterface->AddEventWrite("Button",
                                                                        prmEventButton()));
-        providedInterface = this->AddProvidedInterface(interfaceName + "Button2");
+        providedInterface = this->AddInterfaceProvided(interfaceName + "Button2");
         deviceData->Button2Event.Bind(providedInterface->AddEventWrite("Button",
                                                                        prmEventButton()));
 

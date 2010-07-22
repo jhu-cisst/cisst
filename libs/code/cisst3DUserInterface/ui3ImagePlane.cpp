@@ -211,7 +211,7 @@ void ui3ImagePlane::SetAlpha(const unsigned char alpha)
 }
 
 
-void ui3ImagePlane::SetImage(svlSampleImageBase* image, unsigned int channel)
+void ui3ImagePlane::SetImage(svlSampleImage* image, unsigned int channel)
 {
     if (this->TextureBuffer &&
         image &&

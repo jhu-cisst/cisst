@@ -23,15 +23,12 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlFilterComputationalStereo_h
 #define _svlFilterComputationalStereo_h
 
-#include <cisstStereoVision/svlStreamManager.h>
+#include <cisstStereoVision/svlFilterBase.h>
 #include <cisstStereoVision/svlCameraGeometry.h>
 
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
 
-
-#define SVL_STEREO_INPUT_MISMATCH       -5000
-#define SVL_STEREO_INIT_ERROR           -5001
 
 class CISST_EXPORT svlComputationalStereoMethodBase
 {
@@ -40,11 +37,11 @@ public:
     virtual ~svlComputationalStereoMethodBase() {}
 
     virtual int Initialize() = 0;
-    virtual int Process(svlSampleImageBase * images, int * depthmap) = 0;
+    virtual int Process(svlSampleImage * images, int * depthmap) = 0;
     virtual void Free() = 0;
 };
 
-class CISST_EXPORT svlFilterComputationalStereo : public svlFilterBase, public cmnGenericObject
+class CISST_EXPORT svlFilterComputationalStereo : public svlFilterBase
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
@@ -86,15 +83,17 @@ private:
     StereoMethod GetMethod();
 
 protected:
-    virtual int Initialize(svlSample* inputdata);
-    virtual int ProcessFrame(svlProcInfo* procInfo, svlSample* inputdata);
+    virtual int Initialize(svlSample* syncInput, svlSample* &syncOutput);
+    virtual int Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput);
     virtual int Release();
 
 private:
+    svlSampleMatrixFloat* OutputMatrix;
+
     svlComputationalStereoMethodBase* StereoAlgorithm;
     svlComputationalStereoMethodBase* XCheckStereoAlgorithm;
 
-    svlSampleImageBase* XCheckImage;
+    svlSampleImage* XCheckImage;
     vctDynamicMatrix<int> DisparityBuffer;
     vctDynamicMatrix<int> XCheckDisparityBuffer;
 

@@ -14,18 +14,18 @@ appTask::appTask(const std::string & taskName,
     mtsTaskPeriodic(taskName, period, false, 5000),
     ui(controlledRobot, observedRobot, this)
 {
-    mtsRequiredInterface *req = AddRequiredInterface("ControlledRobot");
-    if (req) {
-        req->AddFunction("GetPositionJoint", GetPositionJointControlled);
-        req->AddFunction("MovePositionJoint", MovePositionJointControlled);
-        req->AddEventHandlerWrite(&appTask::HandleMotionFinishedControlled, this,
-                                  "MotionFinished");
-        req->AddEventHandlerVoid(&appTask::HandleMotionStartedControlled, this,
-                                  "MotionStarted");
+    mtsInterfaceRequired * required = AddInterfaceRequired("ControlledRobot");
+    if (required) {
+        required->AddFunction("GetPositionJoint", GetPositionJointControlled);
+        required->AddFunction("MovePositionJoint", MovePositionJointControlled);
+        required->AddEventHandlerWrite(&appTask::HandleMotionFinishedControlled, this,
+                                       "MotionFinished");
+        required->AddEventHandlerVoid(&appTask::HandleMotionStartedControlled, this,
+                                      "MotionStarted");
     }
-    req = AddRequiredInterface("ObservedRobot");
-    if (req) {
-        req->AddFunction("GetPositionJoint", GetPositionJointObserved);
+    required = AddInterfaceRequired("ObservedRobot");
+    if (required) {
+        required->AddFunction("GetPositionJoint", GetPositionJointObserved);
     }
 }
 
@@ -33,7 +33,7 @@ appTask::appTask(const std::string & taskName,
 static osaMutex myMutex;
 
 void appTask::HandleMotionFinishedControlled(const PositionJointType & position)
-{ 
+{
     myMutex.Lock();
     ui.ShowMoving(false);
     CMN_LOG_RUN_VERBOSE << "Event motion finished at position: " << position << std::endl;
@@ -47,7 +47,7 @@ void appTask::HandleMotionStartedControlled(void)
     myMutex.Unlock();
 }
 
-void appTask::Startup(void) 
+void appTask::Startup(void)
 {
     Ticks = 0;
     ui.SetCloseHandler(Close);

@@ -3,9 +3,9 @@
 
 /*
   $Id$
-  
+
   Author(s):  Balazs Vagvolgyi
-  Created on: 2006 
+  Created on: 2006
 
   (C) Copyright 2006-2007 Johns Hopkins University (JHU), All Rights
   Reserved.
@@ -20,6 +20,8 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstStereoVision/svlFilterComputationalStereo.h>
+#include <cisstStereoVision/svlFilterInput.h>
+#include <cisstStereoVision/svlFilterOutput.h>
 
 #include "svlStereoDP.h"
 #include "svlStereoDPMono.h"
@@ -34,7 +36,6 @@ CMN_IMPLEMENT_SERVICES(svlFilterComputationalStereo)
 
 svlFilterComputationalStereo::svlFilterComputationalStereo() :
     svlFilterBase(),
-    cmnGenericObject(),
     StereoAlgorithm(0),
     XCheckStereoAlgorithm(0),
     XCheckImage(0),
@@ -51,24 +52,31 @@ svlFilterComputationalStereo::svlFilterComputationalStereo() :
     XCheckEnabled(false),
     Method(DynamicProgramming)
 {
-    AddSupportedType(svlTypeImageMono8Stereo, svlTypeImageMonoFloat);
-    AddSupportedType(svlTypeImageMono16Stereo, svlTypeImageMonoFloat);
-    AddSupportedType(svlTypeImageRGBStereo, svlTypeImageMonoFloat);
+    AddInput("input", true);
+    AddInputType("input", svlTypeImageMono8Stereo);
+    AddInputType("input", svlTypeImageMono16Stereo);
+    AddInputType("input", svlTypeImageRGBStereo);
 
-    OutputData = new svlSampleImageMonoFloat;
+    AddOutput("output", true);
+    SetAutomaticOutputType(false);
+    GetOutput()->SetType(svlTypeMatrixFloat);
+
+    OutputMatrix = new svlSampleMatrixFloat;
 }
 
 svlFilterComputationalStereo::~svlFilterComputationalStereo()
 {
     Release();
 
-    if (OutputData) delete OutputData;
+    if (OutputMatrix) delete OutputMatrix;
 }
 
-int svlFilterComputationalStereo::Initialize(svlSample* inputdata)
+int svlFilterComputationalStereo::Initialize(svlSample* syncInput, svlSample* &syncOutput)
 {
-    svlStreamType inputtype = GetInputType();
-    svlSampleImageBase* stimg = dynamic_cast<svlSampleImageBase*>(inputdata);
+    syncOutput = OutputMatrix;
+
+    svlStreamType inputtype = GetInput()->GetType();
+    svlSampleImage* stimg = dynamic_cast<svlSampleImage*>(syncInput);
 
     Release();
 
@@ -82,9 +90,8 @@ int svlFilterComputationalStereo::Initialize(svlSample* inputdata)
         return SVL_STEREO_INPUT_MISMATCH;
 
     // allocate buffers
-    svlSampleImageMonoFloat* output = dynamic_cast<svlSampleImageMonoFloat*>(OutputData);
-    output->SetSize(w1, h1);
-    output->MatrixRef().SetAll(0);
+    OutputMatrix->SetSize(w1, h1);
+    memset(OutputMatrix->GetUCharPointer(), 0, OutputMatrix->GetDataSize());
     DisparityBuffer.SetSize(h1, w1);
     SpatialFilterBuffer.SetSize(h1, w1);
 
@@ -190,20 +197,17 @@ int svlFilterComputationalStereo::Initialize(svlSample* inputdata)
     return SVL_OK;
 }
 
-int svlFilterComputationalStereo::ProcessFrame(svlProcInfo* procInfo, svlSample* inputdata)
+int svlFilterComputationalStereo::Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput)
 {
-    ///////////////////////////////////////////
-    // Check if the input sample has changed //
-      if (!IsNewSample(inputdata))
-          return SVL_ALREADY_PROCESSED;
-    ///////////////////////////////////////////
+    syncOutput = OutputMatrix;
+    _SkipIfAlreadyProcessed(syncInput, syncOutput);
 
-    svlSampleImageBase* stimg = dynamic_cast<svlSampleImageBase*>(inputdata);
+    svlSampleImage* stimg = dynamic_cast<svlSampleImage*>(syncInput);
 
     // Process data
     if (procInfo->count == 1 || procInfo->id == 1) {
         if (XCheckEnabled) {
-            svlStreamType inputtype = GetInputType();
+            svlStreamType inputtype = GetInput()->GetType();
 
             // Process data
             if (inputtype == svlTypeImageRGBStereo) {
@@ -261,19 +265,18 @@ int svlFilterComputationalStereo::ProcessFrame(svlProcInfo* procInfo, svlSample*
         }
 
         // Store disparity map
-        svlSampleImageMonoFloat* output = dynamic_cast<svlSampleImageMonoFloat*>(OutputData);
         ConvertDisparitiesToFloat(DisparityBuffer.Pointer(),
-                                  output->GetPointer(),
-                                  static_cast<int>(output->GetWidth()),
-                                  static_cast<int>(output->GetHeight()));
+                                  OutputMatrix->GetPointer(),
+                                  static_cast<int>(OutputMatrix->GetCols()),
+                                  static_cast<int>(OutputMatrix->GetRows()));
 
         // Apply spatial filter if enabled
         if (SpatialFilterRadius > 0) ApplySpatialFilter(SpatialFilterRadius,
-                                                        output->GetPointer(0, ROI.left, ROI.top),
+                                                        OutputMatrix->GetPointer(ROI.left, ROI.top),
                                                         SpatialFilterBuffer.Pointer(ROI.top, ROI.left),
                                                         ROI.right - ROI.left,
                                                         ROI.bottom - ROI.top,
-                                                        static_cast<int>(output->GetWidth()));
+                                                        static_cast<int>(OutputMatrix->GetCols()));
     }
 
     return SVL_OK;

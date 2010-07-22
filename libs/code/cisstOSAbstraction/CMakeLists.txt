@@ -42,6 +42,7 @@ SET(SOURCE_FILES
 
 # all header files
 SET(HEADER_FILES
+    osaForwardDeclarations.h
     osaCriticalSection.h
     osaDynamicLoader.h
     osaDynamicLoaderAndFactory.h

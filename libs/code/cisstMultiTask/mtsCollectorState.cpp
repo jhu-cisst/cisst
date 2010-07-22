@@ -26,6 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnThrow.h>
 #include <cisstOSAbstraction/osaGetTime.h>
 #include <cisstMultiTask/mtsTaskManager.h>
+#include <cisstMultiTask/mtsInterfaceRequired.h>
 
 #include <iostream>
 #include <fstream>
@@ -96,7 +97,7 @@ bool mtsCollectorState::SetStateTable(const std::string & taskName,
     TargetTask = dynamic_cast<mtsTask *>(componentPointer);
     if (!this->TargetTask) {
         cmnThrow(std::runtime_error("mtsCollectorState constructor: task \"" + taskName
-                                    + "\" found in task manager seems to be an mtsDevice, not mtsTask therefore it has no state table."));
+                                    + "\" found in task manager seems to be an mtsComponent, not mtsTask therefore it has no state table."));
     }
 
     // this task needs a pointer on the state table to perform a fast copy
@@ -146,23 +147,23 @@ void mtsCollectorState::Initialize(void)
     OffsetForNextRead = 0;
 
     // add a required interface to the collector task to communicate with the task containing the state table
-    mtsRequiredInterface * requiredInterface = this->AddRequiredInterface("StateTable");
-    if (requiredInterface) {
+    mtsInterfaceRequired * interfaceRequired = this->AddInterfaceRequired("StateTable");
+    if (interfaceRequired) {
         // functions to stop/start collection
-        requiredInterface->AddFunction("StartCollection", StateTableStartCollection);
-        requiredInterface->AddFunction("StopCollection", StateTableStopCollection);
+        interfaceRequired->AddFunction("StartCollection", StateTableStartCollection);
+        interfaceRequired->AddFunction("StopCollection", StateTableStopCollection);
         // event received when the state table fills up and needs to be collected
-        requiredInterface->AddEventHandlerWrite(&mtsCollectorState::BatchReadyHandler,
+        interfaceRequired->AddEventHandlerWrite(&mtsCollectorState::BatchReadyHandler,
                                                 this,
                                                 "BatchReady");
         // add events for progress, these should not be queued as they
         // are pass-thru events
-        requiredInterface->AddEventHandlerVoid(&mtsCollectorState::CollectionStartedHandler, this,
-                                               "CollectionStarted", false);
-        requiredInterface->AddEventHandlerWrite(&mtsCollectorState::CollectionStoppedHandler, this,
-                                                "CollectionStopped", false);
-        requiredInterface->AddEventHandlerWrite(&mtsCollectorState::ProgressHandler, this,
-                                                "Progress", false);
+        interfaceRequired->AddEventHandlerVoid(&mtsCollectorState::CollectionStartedHandler, this,
+                                               "CollectionStarted", MTS_EVENT_NOT_QUEUED);
+        interfaceRequired->AddEventHandlerWrite(&mtsCollectorState::CollectionStoppedHandler, this,
+                                                "CollectionStopped", MTS_EVENT_NOT_QUEUED);
+        interfaceRequired->AddEventHandlerWrite(&mtsCollectorState::ProgressHandler, this,
+                                                "Progress", MTS_EVENT_NOT_QUEUED);
     } else {
         CMN_LOG_CLASS_INIT_ERROR << "Connect: unable to add required interface to communicate with state table for \""
                                  << this->GetName() << "\"" << std::endl;

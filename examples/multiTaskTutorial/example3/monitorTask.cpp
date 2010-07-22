@@ -15,7 +15,7 @@ monitorTask::monitorTask(const std::string & taskName, double period):
     for (unsigned int i = 0; i < 2; i++) {
         interfaceName.str("");
         interfaceName << "Robot" << (i + 1);
-        mtsRequiredInterface * required = AddRequiredInterface(interfaceName.str());
+        mtsInterfaceRequired * required = AddInterfaceRequired(interfaceName.str());
         if (required) {
             required->AddFunction("GetStateIndex", Robot[i].GetStateIndex);
             required->AddFunction("GetPositionJoint", Robot[i].GetPositionJoint);
@@ -26,7 +26,7 @@ monitorTask::monitorTask(const std::string & taskName, double period):
     // as a resource
 }
 
-void monitorTask::Startup(void) 
+void monitorTask::Startup(void)
 {
     for (unsigned int i = 0; i < 2; i++) {
         CurrentPosition[i].ReconstructFrom(*(Robot[i].GetPositionJoint.GetArgument2Prototype()));
@@ -44,9 +44,9 @@ void monitorTask::Run(void)
         result = Robot[i].GetPositionJoint(StateIndex - 1, PreviousPosition[i]);
         if ((result == mtsCommandBase::DEV_OK) &&
            (CurrentPosition[i] != PreviousPosition[i])) {
-            if ((!CurrentPosition[i].Greater(lowerBound)) 
+            if ((!CurrentPosition[i].Greater(lowerBound))
                 || (!CurrentPosition[i].Lesser(upperBound))) {
-                CMN_LOG_CLASS_RUN_WARNING << "Run: robot " << i+1 << " out of bounds" 
+                CMN_LOG_CLASS_RUN_WARNING << "Run: robot " << i+1 << " out of bounds"
                                           << std::endl;
                 Robot[i].StopRobot();
             }

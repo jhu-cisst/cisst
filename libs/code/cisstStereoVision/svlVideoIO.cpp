@@ -22,7 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnPortability.h>
 #include <cisstStereoVision/svlVideoIO.h>
-#include <cisstStereoVision/svlStreamDefs.h>
+#include <cisstStereoVision/svlTypes.h>
 
 #if (CISST_OS == CISST_WINDOWS)
     #include "commdlg.h"
@@ -169,11 +169,11 @@ int svlVideoIO::DialogFilePath(bool save, const std::string &title, std::string 
     SetForegroundWindow(GetDesktopWindow());
 
     if (save) {
-        ofn.Flags = OFN_OVERWRITEPROMPT | OFN_ENABLESIZING | OFN_NOCHANGEDIR | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY;
+        ofn.Flags = OFN_OVERWRITEPROMPT | OFN_ENABLESIZING | OFN_NOCHANGEDIR | OFN_HIDEREADONLY;
         ok = GetSaveFileName(&ofn);
     }
     else {
-        ofn.Flags = OFN_ENABLESIZING    | OFN_NOCHANGEDIR  | OFN_FILEMUSTEXIST;
+        ofn.Flags = OFN_ENABLESIZING | OFN_NOCHANGEDIR;
         ok = GetOpenFileName(&ofn);
     }
 
@@ -233,7 +233,6 @@ int svlVideoIO::GetFormatList(std::string &formatlist)
     unsigned int i, j;
 
     for (i = 0; i < codeccount; i ++) {
-        if (i > 0) out << "\n";
         out << instance->Names[i] << " (";
         in.str(instance->Extensions[i]);
 
@@ -248,7 +247,7 @@ int svlVideoIO::GetFormatList(std::string &formatlist)
         }
 
         in.clear();
-        out << ")";
+        out << ")\n";
     }
 
     formatlist.assign(out.str());
@@ -376,16 +375,23 @@ svlVideoCodecBase* svlVideoIO::GetCodec(const std::string &filename)
     for (i = 0; i < size; i ++) {
         if (instance->Extensions[i].find(extension) != std::string::npos) {
 
+#if (CISST_OS == CISST_WINDOWS)
+            // Exception for AVI files in Windows:
+            //   Use Video for Windows instead of OpenCV
+            if (extension == ".avi;" &&
+                instance->Names[i].find("FFMPEG") != std::string::npos) continue;
+#endif // (CISST_OS == CISST_WINDOWS)
+
             ///////////////////////////
             // Enter critical section
             instance->CS.Enter();
 
-            // check if we have any unused image handlers in the cache
+            // check if we have any unused video handlers in the cache
             cacheitem = 0;
             cachesize = static_cast<int>(instance->CodecCacheUsed[i].size());
             while (cacheitem < cachesize && instance->CodecCacheUsed[i][cacheitem]) cacheitem ++;
 
-            // if there is no unused image handler in the
+            // if there is no unused video handler in the
             // cache, then increase the size of cache
             if (cacheitem >= cachesize) {
                 cacheitem = cachesize;
@@ -427,6 +433,7 @@ void svlVideoIO::ReleaseCodec(svlVideoCodecBase* codec)
         cachesize = instance->CodecCache[i].size();
         for (j = 0; j < cachesize; j ++) {
             if (codec == instance->CodecCache[i][j]) {
+                codec->Close();
                 instance->CodecCacheUsed[i][j] = false;
 
                 instance->CS.Leave();
@@ -484,6 +491,26 @@ bool svlVideoCodecBase::GetMultithreaded() const
 int svlVideoCodecBase::SetPos(const int CMN_UNUSED(pos))
 {
     return SVL_FAIL;
+}
+
+double svlVideoCodecBase::GetBegTime() const
+{
+    return -1.0;
+}
+
+double svlVideoCodecBase::GetEndTime() const
+{
+    return -1.0;
+}
+
+double svlVideoCodecBase::GetTimeAtPos(const int CMN_UNUSED(pos)) const
+{
+    return -1.0;
+}
+
+int svlVideoCodecBase::GetPosAtTime(const double CMN_UNUSED(time)) const
+{
+    return -1;
 }
 
 svlVideoIO::Compression* svlVideoCodecBase::GetCompression() const

@@ -43,11 +43,11 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlFilterSourceBuffer.h>
 #include <cisstStereoVision/svlFilterVideoFileWriter.h>
 
-#include <cisstStereoVision/svlFilterRGBSwapper.h>
+//#include <cisstStereoVision/svlFilterRGBSwapper.h>
 
 #include <cisstStereoVision/svlFilterImageWindow.h>
 
-#include <cisstStereoVision/svlFilterCallback.h>
-#include <cisstStereoVision/svlFilterBuffer.h>
+// #include <cisstStereoVision/svlFilterCallback.h>
+// #include <cisstStereoVision/svlFilterBuffer.h>
 
 #endif // _svlPython_h

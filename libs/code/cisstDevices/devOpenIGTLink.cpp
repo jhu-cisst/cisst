@@ -68,15 +68,15 @@ devOpenIGTLink::~devOpenIGTLink(void)
 void devOpenIGTLink::Initialize(void)
 {
     // required interfaces
-    mtsRequiredInterface * requiredInterface;
-    requiredInterface = AddRequiredInterface("RequiresPositionCartesian");
+    mtsInterfaceRequired * requiredInterface;
+    requiredInterface = AddInterfaceRequired("RequiresPositionCartesian");
     if (requiredInterface) {
         requiredInterface->AddFunction("GetPositionCartesian", GetPositionCartesian);
     }
 
     // provided interfaces
-    mtsProvidedInterface * providedInterface;
-    providedInterface = AddProvidedInterface("ProvidesPositionCartesian");
+    mtsInterfaceProvided * providedInterface;
+    providedInterface = AddInterfaceProvided("ProvidesPositionCartesian");
     if (providedInterface) {
         StateTable.AddData(FrameRecv, "FrameRecv");
         providedInterface->AddCommandReadState(StateTable, FrameRecv, "GetPositionCartesian");

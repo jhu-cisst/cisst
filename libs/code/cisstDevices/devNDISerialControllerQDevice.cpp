@@ -18,19 +18,19 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include <cisstMultiTask/mtsRequiredInterface.h>
+#include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstDevices/devNDISerialControllerQDevice.h>
 
 CMN_IMPLEMENT_SERVICES(devNDISerialControllerQDevice);
 
 
 devNDISerialControllerQDevice::devNDISerialControllerQDevice(const std::string & taskName) :
-    mtsDevice(taskName)
+    mtsComponent(taskName)
 {
     ControllerWidget.setupUi(&CentralWidget);
     CentralWidget.setWindowTitle(QString::fromStdString(taskName));
 
-    mtsRequiredInterface * required = AddRequiredInterface("Controller");
+    mtsInterfaceRequired * required = AddInterfaceRequired("Controller");
     if (required) {
         required->AddFunction("Beep", NDI.Beep);
         required->AddFunction("PortHandlesInitialize", NDI.Initialize);
@@ -40,7 +40,7 @@ devNDISerialControllerQDevice::devNDISerialControllerQDevice(const std::string &
         required->AddFunction("ToggleTracking", NDI.Track);
     }
 
-    required = AddRequiredInterface("DataCollector");
+    required = AddInterfaceRequired("DataCollector");
     if (required) {
         required->AddFunction("StartCollection", Collector.Start);
         required->AddFunction("StopCollection", Collector.Stop);

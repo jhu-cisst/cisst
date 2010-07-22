@@ -23,11 +23,17 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlConverters_h
 #define _svlConverters_h
 
-#include <cisstStereoVision/svlStreamDefs.h>
+#include <cisstStereoVision/svlTypes.h>
 
 namespace svlConverter
 {
-    void ConvertImage(svlSampleImageBase* inimage, svlSampleImageBase* outimage, int param = 0, unsigned int threads = 1, unsigned int threadid = 0);
+    int ConvertSample(const svlSample* inimage, svlSample* outimage,
+                      unsigned int threads = 1, unsigned int threadid = 0);
+    int ConvertImage(const svlSampleImage* inimage, svlSampleImage* outimage,
+                     int param = 0, unsigned int threads = 1, unsigned int threadid = 0);
+    int ConvertImage(const svlSampleImage* inimage, const unsigned int inchannel,
+                     svlSampleImage* outimage, const unsigned int outchannel,
+                     int param = 0, unsigned int threads = 1, unsigned int threadid = 0);
 
     void Gray8toRGB24(unsigned char* input, unsigned char* output, const unsigned int pixelcount);
     void Gray8toRGBA32(unsigned char* input, unsigned char* output, const unsigned int pixelcount);
@@ -36,9 +42,13 @@ namespace svlConverter
     void Gray16toRGBA32(unsigned short* input, unsigned char* output, const unsigned int pixelcount, const unsigned int shiftdown = 0);
     void Gray16toGray8(unsigned short* input, unsigned char* output, const unsigned int pixelcount, const unsigned int shiftdown = 0);
     void Gray32toRGB24(unsigned int* input, unsigned char* output, const unsigned int pixelcount, const unsigned int shiftdown = 0);
+    void Gray32toRGBA32(unsigned int* input, unsigned char* output, const unsigned int pixelcount, const unsigned int shiftdown = 0);
+    void Gray32toGray8(unsigned int* input, unsigned char* output, const unsigned int pixelcount, const unsigned int shiftdown = 0);
+    void Gray32toGray16(unsigned int* input, unsigned short* output, const unsigned int pixelcount, const unsigned int shiftdown = 0);
     void int32toRGB24(int* input, unsigned char* output, const unsigned int pixelcount, const int maxinputvalue = -1);
     void int32toRGBA32(int* input, unsigned char* output, const unsigned int pixelcount, const int maxinputvalue = -1);
     void int32toGray8(int* input, unsigned char* output, const unsigned int pixelcount, const int maxinputvalue = -1);
+    void int32toGray16(int* input, unsigned short* output, const unsigned int pixelcount, const int maxinputvalue = -1);
     void float32toRGB24(float* input, unsigned char* output, const unsigned int pixelcount, const float scalingratio = 1.0f, const int elementstride = 1);
     void float32toRGBA32(float* input, unsigned char* output, const unsigned int pixelcount, const float scalingratio = 1.0f, const int elementstride = 1);
     void float32toGray8(float* input, unsigned char* output, const unsigned int pixelcount, const float scalingratio = 1.0f, const int elementstride = 1);
@@ -57,6 +67,8 @@ namespace svlConverter
     void RGB24toHSL24(unsigned char* input, unsigned char* output, const unsigned int pixelcount, bool ch1 = true, bool ch2 = true, bool ch3 = true);
     void RGB24toHSL24P(unsigned char* input, unsigned char* output, const unsigned int pixelcount, bool ch1 = true, bool ch2 = true, bool ch3 = true);
     void RGBA32toRGB24(unsigned char* input, unsigned char* output, const unsigned int pixelcount);
+    void RGBA32toGray8(unsigned char* input, unsigned char* output, const unsigned int pixelcount, bool accurate = false, bool bgr = false);
+    void RGBA32toGray16(unsigned char* input, unsigned short* output, const unsigned int pixelcount, bool accurate = false, bool bgr = false);
     void YUV444toRGB24(unsigned char* input, unsigned char* output, const unsigned int pixelcount, bool ch1 = true, bool ch2 = true, bool ch3 = true);
     void YUV444PtoRGB24(unsigned char* input, unsigned char* output, const unsigned int pixelcount, bool ch1 = true, bool ch2 = true, bool ch3 = true);
     void YUV422toRGB24(unsigned char* input, unsigned char* output, const unsigned int pixelcount, bool ch1 = true, bool ch2 = true, bool ch3 = true);

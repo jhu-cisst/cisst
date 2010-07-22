@@ -139,6 +139,14 @@ class CISST_EXPORT cmnClassRegister {
     RegisterInstance(cmnClassServicesBase * classServicesPointer,
                      const std::string & className);
 
+    /*! Instance specific implementation of SetLoDForAllClasses.
+      \sa SetLoDForAllClasses */
+    bool SetLoDForAllClassesInstance(LogLoDType lod);
+
+    /*! Instance specific implementation of SetLoDForMatchingClasses.
+      \sa SetLoDForMatchingClasses */
+    bool SetLoDForMatchingClassesInstance(const std::string & stringToMatch, LogLoDType lod);
+
     /*! Instance specific implementation of ToString.
       \sa ToString */
     std::string ToStringInstance(void) const;
@@ -220,6 +228,34 @@ protected:
       \return bool True if the class is registered.
     */
     static bool SetLoD(const std::string & className, LogLoDType lod);
+
+
+    /*! The SetLoDForAllClasses method allows the user to specify the
+      lod for all registered classes.
+
+      \param lod The level of detail.
+
+      \return bool True if there is at least one class LoD was
+      modified
+    */
+    static inline bool SetLoDForAllClasses(LogLoDType lod) {
+        return Instance()->SetLoDForAllClassesInstance(lod);
+    }
+
+
+    /*! The SetLoDForMatchingClasses method allows the user to specify the lod
+      for all classes with a name matching a given string.  The string
+      matching is case sensitive.
+
+      \param stringToMatch A string found in class names (e.g. "cmn")
+      \param lod The level of detail.
+
+      \return bool True if there is at least one class LoD was
+      modified
+    */
+    static inline bool SetLoDForMatchingClasses(const std::string & stringToMatch, LogLoDType lod) {
+        return Instance()->SetLoDForMatchingClassesInstance(stringToMatch, lod);
+    }
 
 
     /*! Get the class services by name. Returns null if the class is

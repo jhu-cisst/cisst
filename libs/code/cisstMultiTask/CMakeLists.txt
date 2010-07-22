@@ -24,28 +24,32 @@ set (SOURCE_FILES
      mtsMulticastCommandWriteBase.cpp
 
      mtsFunctionVoid.cpp
-     mtsFunctionReadOrWrite.cpp
-     mtsFunctionQualifiedReadOrWrite.cpp
+     mtsFunctionRead.cpp
+     mtsFunctionWrite.cpp
+     mtsFunctionQualifiedRead.cpp
 
      mtsCommandQueuedVoidBase.cpp
      mtsCommandQueuedWriteBase.cpp
-
-     mtsDevice.cpp
+     mtsCommandFilteredQueuedWrite.cpp
 
      mtsMailBox.cpp
      mtsStateIndex.cpp
      mtsStateTable.cpp
      mtsIntervalStatistics.cpp
 
-     mtsTaskInterface.cpp
-     mtsRequiredInterface.cpp
+     mtsComponent.cpp
      mtsTask.cpp
      mtsTaskContinuous.cpp
      mtsTaskPeriodic.cpp
      mtsTaskFromCallback.cpp
      mtsTaskFromSignal.cpp
 
-     mtsDeviceInterface.cpp
+     mtsInterfaceProvidedOrOutput.cpp
+     mtsInterfaceProvided.cpp
+     mtsInterfaceOutput.cpp
+     mtsInterfaceRequiredOrInput.cpp
+     mtsInterfaceRequired.cpp
+     mtsInterfaceInput.cpp
 
      mtsCollectorBase.cpp
      mtsCollectorState.cpp
@@ -85,17 +89,16 @@ set (HEADER_FILES
      mtsCommandQueuedWrite.h
      mtsCommandQueuedWriteBase.h
      mtsCommandFilteredQueuedWrite.h
-     mtsFunctionReadOrWrite.h
+     mtsFunctionRead.h
+     mtsFunctionWrite.h
      mtsEventWriteGeneratorProxy.h
 
      mtsCommandQualifiedRead.h
      mtsCommandQualifiedReadOrWriteBase.h
-     mtsFunctionQualifiedReadOrWrite.h
+     mtsFunctionQualifiedRead.h
 
      mtsExport.h
      mtsForwardDeclarations.h
-
-     mtsDevice.h
 
      mtsQueue.h
      mtsMailBox.h
@@ -107,8 +110,7 @@ set (HEADER_FILES
      mtsStateData.h
      mtsIntervalStatistics.h
 
-     mtsTaskInterface.h
-     mtsRequiredInterface.h
+     mtsComponent.h
      mtsTask.h
      mtsTaskContinuous.h
      mtsTaskPeriodic.h
@@ -117,8 +119,13 @@ set (HEADER_FILES
 
      mtsTaskManager.h    # to be deleted
 
-     mtsDeviceInterface.h
      mtsInterfaceCommon.h
+     mtsInterfaceProvidedOrOutput.h
+     mtsInterfaceProvided.h
+     mtsInterfaceOutput.h
+     mtsInterfaceRequiredOrInput.h
+     mtsInterfaceRequired.h
+     mtsInterfaceInput.h
 
      mtsCollectorBase.h
      mtsCollectorState.h
@@ -164,8 +171,9 @@ if(CISST_MTS_HAS_ICE)
       mtsCommandWriteProxy.h
       mtsCommandReadProxy.h
       mtsCommandQualifiedReadProxy.h
-      mtsFunctionReadOrWriteProxy.h
-      mtsFunctionQualifiedReadOrWriteProxy.h
+      mtsFunctionReadProxy.h
+      mtsFunctionWriteProxy.h
+      mtsFunctionQualifiedReadProxy.h
       mtsMulticastCommandWriteProxy.h
       )
 

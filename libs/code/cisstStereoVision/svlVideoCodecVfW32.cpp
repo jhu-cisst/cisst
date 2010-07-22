@@ -240,19 +240,34 @@ int svlVideoCodecVfW32::GetPos() const
 
 int svlVideoCodecVfW32::SetPos(const int pos)
 {
-    if (pos < BegPos || pos >= EndPos) return SVL_FAIL;
+    if (pos < 0 || pos >= EndPos) return SVL_FAIL;
     Pos = pos;
     return SVL_OK;
 }
 
 svlVideoIO::Compression* svlVideoCodecVfW32::GetCompression() const
 {
-    if (!Codec) return 0;
-    // Make a copy and return the pointer to it
     // The caller will need to release it by calling the
     // svlVideoIO::ReleaseCompression() method
-    svlVideoIO::Compression* compression = reinterpret_cast<svlVideoIO::Compression*>(new unsigned char[Codec->size]);
-    memcpy(compression, Codec, Codec->size);
+    if (Codec) {
+        svlVideoIO::Compression* compression = reinterpret_cast<svlVideoIO::Compression*>(new unsigned char[Codec->size]);
+        memcpy(compression, Codec, Codec->size);
+    }
+    else {
+        unsigned int size = sizeof(svlVideoIO::Compression);
+        svlVideoIO::Compression* compression = reinterpret_cast<svlVideoIO::Compression*>(new unsigned char[size]);
+
+        std::string name("Invalid Codec (Video for Windows)");
+        memset(&(compression->extension[0]), 0, 16);
+        memcpy(&(compression->extension[0]), ".avi", 4);
+        memset(&(compression->name[0]), 0, 64);
+        memcpy(&(compression->name[0]), name.c_str(), std::min(static_cast<int>(name.length()), 63));
+        compression->size = size;
+        compression->supports_timestamps = false;
+        compression->datasize = 0;
+        compression->data[0] = 0;
+    }
+
     return compression;
 }
 
@@ -355,7 +370,7 @@ int svlVideoCodecVfW32::DialogCompression()
 	return ret;
 }
 
-int svlVideoCodecVfW32::Read(svlProcInfo* procInfo, svlSampleImageBase &image, const unsigned int videoch, const bool noresize)
+int svlVideoCodecVfW32::Read(svlProcInfo* procInfo, svlSampleImage &image, const unsigned int videoch, const bool noresize)
 {
     if (videoch >= image.GetVideoChannels()) return SVL_FAIL;
     if (!Opened || Writing) return SVL_FAIL;
@@ -417,7 +432,7 @@ int svlVideoCodecVfW32::Read(svlProcInfo* procInfo, svlSampleImageBase &image, c
     return SVL_OK;
 }
 
-int svlVideoCodecVfW32::Write(svlProcInfo* procInfo, const svlSampleImageBase &image, const unsigned int videoch)
+int svlVideoCodecVfW32::Write(svlProcInfo* procInfo, const svlSampleImage &image, const unsigned int videoch)
 {
     if (videoch >= image.GetVideoChannels()) return SVL_FAIL;
     if (!Opened || !Writing) return SVL_FAIL;

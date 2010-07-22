@@ -27,7 +27,6 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsMailBox_h
 #define _mtsMailBox_h
 
-#include <cisstMultiTask/mtsDeviceInterface.h>
 #include <cisstMultiTask/mtsQueue.h>
 
 // Always include last
@@ -37,35 +36,30 @@ http://www.cisst.org/cisst/license.txt.
 class CISST_EXPORT mtsMailBox
 {
     mtsQueue<mtsCommandBase *> CommandQueue;
-    std::string Name;  // for debugging output
-    mtsCommandVoidBase * PostCommandQueuedCommand; // command to execute a command is queued
+    
+    /*! Name provided for logs */
+    std::string Name;
+
+    /*! Command to execute when a command is queued.  This command has
+      to be provided when the mail box is constructed.  This
+      mechanism is used by mtsTaskFromSignal to wake up the task's
+      thread. */
+    mtsCommandVoidBase * PostCommandQueuedCommand;
 
 public:
-    inline mtsMailBox(const std::string & name, unsigned int size, mtsCommandVoidBase * postCommandQueuedCommand = 0):
-        CommandQueue(size, 0),
-        Name(name),
-        PostCommandQueuedCommand(postCommandQueuedCommand)
-    {}
+    mtsMailBox(const std::string & name,
+               size_t size,
+               mtsCommandVoidBase * postCommandQueuedCommand = 0);
 
+    ~mtsMailBox(void);
 
-    inline ~mtsMailBox(void) {}
+    const std::string & GetName(void) const;
 
+    /*! Write a command to the mailbox.  If a post command queued
+      command has been provided, the command is executed. */
+    bool Write(mtsCommandBase * command);
 
-    inline const std::string & GetName(void) const {
-        return Name;
-    }
-
-
-    inline bool Write(mtsCommandBase * command) {
-        bool result;
-        result = (CommandQueue.Put(command) != 0);
-        if (this->PostCommandQueuedCommand) {
-            this->PostCommandQueuedCommand->Execute();
-        }
-        return result;
-    }
-
-
+    /*! Execute the oldest command queued. */
     bool ExecuteNext(void);
 };
 

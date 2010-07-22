@@ -21,9 +21,8 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstStereoVision/svlFilterImageCropper.h>
-#include <string.h>
+#include <cisstStereoVision/svlImageProcessing.h>
 
-using namespace std;
 
 /******************************************/
 /*** svlFilterImageCropper class **********/
@@ -33,21 +32,23 @@ CMN_IMPLEMENT_SERVICES(svlFilterImageCropper)
 
 svlFilterImageCropper::svlFilterImageCropper() :
     svlFilterBase(),
-    cmnGenericObject()
+    OutputImage(0)
 {
-    AddSupportedType(svlTypeImageRGB, svlTypeImageRGB);
-    AddSupportedType(svlTypeImageMono8, svlTypeImageMono8);
-    AddSupportedType(svlTypeImageMono16, svlTypeImageMono16);
-    AddSupportedType(svlTypeImageRGBStereo, svlTypeImageRGBStereo);
-    AddSupportedType(svlTypeImageMono8Stereo, svlTypeImageMono8Stereo);
-    AddSupportedType(svlTypeImageMono16Stereo, svlTypeImageMono16Stereo);
-    AddSupportedType(svlTypeImageMonoFloat, svlTypeImageMonoFloat);
-    AddSupportedType(svlTypeImage3DMap, svlTypeImage3DMap);
+    AddInput("input", true);
+    AddInputType("input", svlTypeImageRGB);
+    AddInputType("input", svlTypeImageRGBA);
+    AddInputType("input", svlTypeImageMono8);
+    AddInputType("input", svlTypeImageMono16);
+    AddInputType("input", svlTypeImageRGBStereo);
+    AddInputType("input", svlTypeImageRGBAStereo);
+    AddInputType("input", svlTypeImageMono8Stereo);
+    AddInputType("input", svlTypeImageMono16Stereo);
+    AddInputType("input", svlTypeImage3DMap);
 
-    SetLeft[0] = SetLeft[1] = 0;
-    SetRight[0] = SetRight[1] = 639;
-    SetTop[0] = SetTop[1] = 0;
-    SetBottom[0] = SetBottom[1] = 479;
+    AddOutput("output", true);
+    SetAutomaticOutputType(true);
+
+    Enabled.SetAll(false);
 }
 
 svlFilterImageCropper::~svlFilterImageCropper()
@@ -55,194 +56,78 @@ svlFilterImageCropper::~svlFilterImageCropper()
     Release();
 }
 
-void svlFilterImageCropper::SetRectangle(unsigned int left, unsigned int top, unsigned int right, unsigned int bottom, unsigned int videoch)
+int svlFilterImageCropper::SetRectangle(const int left, const int top, const int right, const int bottom, unsigned int videoch)
 {
-    if (videoch > 1) return;
-    SetLeft[videoch] = left;
-    SetRight[videoch] = right;
-    SetTop[videoch] = top;
-    SetBottom[videoch] = bottom;
+    return SetRectangle(svlRect(left, top, right, bottom), videoch);
 }
 
-void svlFilterImageCropper::SetRectangle(const svlRect & rect, unsigned int videoch)
+int svlFilterImageCropper::SetRectangle(const svlRect & rect, unsigned int videoch)
 {
-    SetRectangle(rect.left, rect.top, rect.right, rect.bottom, videoch);
-}
+    if (IsInitialized() || videoch >= Rectangles.size()) return SVL_FAIL;
 
-int svlFilterImageCropper::Initialize(svlSample* inputdata)
-{
-    Release();
+    svlRect r(rect);
+    r.Normalize();
+    if ((r.right - r.left) < 1 || (r.right - r.left) > 4096 ||
+        (r.bottom - r.top) < 1 || (r.bottom - r.top) > 4096) return SVL_FAIL;
 
-    switch (GetInputType()) {
-        case svlTypeImageRGB:
-        {
-            svlSampleImageRGB* input = dynamic_cast<svlSampleImageRGB*>(inputdata);
-
-            svlSampleImageRGB* output = new svlSampleImageRGB;
-            if (output == 0)
-                return SVL_ALLOCATION_ERROR;
-            OutputData = output;
-
-            CheckAndFixRectangle(SVL_LEFT, input->GetWidth(), input->GetHeight());
-            output->SetSize(SVL_LEFT, Right[SVL_LEFT] - Left[SVL_LEFT] + 1, Bottom[SVL_LEFT] - Top[SVL_LEFT] + 1);
-        }
-        break;
-
-        case svlTypeImageRGBStereo:
-        {
-            svlSampleImageRGBStereo* input = dynamic_cast<svlSampleImageRGBStereo*>(inputdata);
-
-            svlSampleImageRGBStereo* output = new svlSampleImageRGBStereo;
-            if (output == 0)
-                return SVL_ALLOCATION_ERROR;
-            OutputData = output;
-
-            // Left channel
-            CheckAndFixRectangle(SVL_LEFT, input->GetWidth(SVL_LEFT), input->GetHeight(SVL_LEFT));
-            output->SetSize(SVL_LEFT, Right[SVL_LEFT] - Left[SVL_LEFT] + 1, Bottom[SVL_LEFT] - Top[SVL_LEFT] + 1);
-
-            // Right channel
-            CheckAndFixRectangle(SVL_RIGHT, input->GetWidth(SVL_RIGHT), input->GetHeight(SVL_RIGHT));
-            output->SetSize(SVL_RIGHT, Right[SVL_RIGHT] - Left[SVL_RIGHT] + 1, Bottom[SVL_RIGHT] - Top[SVL_RIGHT] + 1);
-        }
-        break;
-
-        case svlTypeImageMono8:
-        {
-            svlSampleImageMono8* input = dynamic_cast<svlSampleImageMono8*>(inputdata);
-
-            svlSampleImageMono8* output = new svlSampleImageMono8;
-            if (output == 0)
-                return SVL_ALLOCATION_ERROR;
-            OutputData = output;
-
-            CheckAndFixRectangle(SVL_LEFT, input->GetWidth(), input->GetHeight());
-            output->SetSize(SVL_LEFT, Right[SVL_LEFT] - Left[SVL_LEFT] + 1, Bottom[SVL_LEFT] - Top[SVL_LEFT] + 1);
-        }
-        break;
-
-        case svlTypeImageMono8Stereo:
-        {
-            svlSampleImageMono8Stereo* input = dynamic_cast<svlSampleImageMono8Stereo*>(inputdata);
-
-            svlSampleImageMono8Stereo* output = new svlSampleImageMono8Stereo;
-            if (output == 0)
-                return SVL_ALLOCATION_ERROR;
-            OutputData = output;
-
-            // Left channel
-            CheckAndFixRectangle(SVL_LEFT, input->GetWidth(SVL_LEFT), input->GetHeight(SVL_LEFT));
-            output->SetSize(SVL_LEFT, Right[SVL_LEFT] - Left[SVL_LEFT] + 1, Bottom[SVL_LEFT] - Top[SVL_LEFT] + 1);
-
-            // Right channel
-            CheckAndFixRectangle(SVL_RIGHT, input->GetWidth(SVL_RIGHT), input->GetHeight(SVL_RIGHT));
-            output->SetSize(SVL_RIGHT, Right[SVL_RIGHT] - Left[SVL_RIGHT] + 1, Bottom[SVL_RIGHT] - Top[SVL_RIGHT] + 1);
-        }
-        break;
-
-        case svlTypeImageMono16:
-        {
-            svlSampleImageMono16* input = dynamic_cast<svlSampleImageMono16*>(inputdata);
-
-            svlSampleImageMono16* output = new svlSampleImageMono16;
-            if (output == 0)
-                return SVL_ALLOCATION_ERROR;
-            OutputData = output;
-
-            CheckAndFixRectangle(SVL_LEFT, input->GetWidth(), input->GetHeight());
-            output->SetSize(SVL_LEFT, Right[SVL_LEFT] - Left[SVL_LEFT] + 1, Bottom[SVL_LEFT] - Top[SVL_LEFT] + 1);
-        }
-        break;
-
-        case svlTypeImageMono16Stereo:
-        {
-            svlSampleImageMono16Stereo* input = dynamic_cast<svlSampleImageMono16Stereo*>(inputdata);
-
-            svlSampleImageMono16Stereo* output = new svlSampleImageMono16Stereo;
-            if (output == 0)
-                return SVL_ALLOCATION_ERROR;
-            OutputData = output;
-
-            // Left channel
-            CheckAndFixRectangle(SVL_LEFT, input->GetWidth(SVL_LEFT), input->GetHeight(SVL_LEFT));
-            output->SetSize(SVL_LEFT, Right[SVL_LEFT] - Left[SVL_LEFT] + 1, Bottom[SVL_LEFT] - Top[SVL_LEFT] + 1);
-
-            // Right channel
-            CheckAndFixRectangle(SVL_RIGHT, input->GetWidth(SVL_RIGHT), input->GetHeight(SVL_RIGHT));
-            output->SetSize(SVL_RIGHT, Right[SVL_RIGHT] - Left[SVL_RIGHT] + 1, Bottom[SVL_RIGHT] - Top[SVL_RIGHT] + 1);
-        }
-        break;
-
-        case svlTypeImageMonoFloat:
-        {
-            svlSampleImageMonoFloat* input = dynamic_cast<svlSampleImageMonoFloat*>(inputdata);
-
-            svlSampleImageMonoFloat* output = new svlSampleImageMonoFloat;
-            if (output == 0)
-                return SVL_ALLOCATION_ERROR;
-            OutputData = output;
-
-            CheckAndFixRectangle(SVL_LEFT, input->GetWidth(), input->GetHeight());
-            output->SetSize(Right[SVL_LEFT] - Left[SVL_LEFT] + 1, Bottom[SVL_LEFT] - Top[SVL_LEFT] + 1);
-        }
-
-        case svlTypeImage3DMap:
-        {
-            svlSampleImage3DMap* input = dynamic_cast<svlSampleImage3DMap*>(inputdata);
-
-            svlSampleImage3DMap* output = new svlSampleImage3DMap;
-            if (output == 0)
-                return SVL_ALLOCATION_ERROR;
-            OutputData = output;
-
-            CheckAndFixRectangle(SVL_LEFT, input->GetWidth(), input->GetHeight());
-            output->SetSize(Right[SVL_LEFT] - Left[SVL_LEFT] + 1, Bottom[SVL_LEFT] - Top[SVL_LEFT] + 1);
-        }
-
-        // Other types may be added in the future
-        case svlTypeImageRGBA:
-        case svlTypeImageRGBAStereo:
-        case svlTypeInvalid:
-        case svlTypeStreamSource:
-        case svlTypeStreamSink:
-        case svlTypeImageCustom:
-        case svlTypeRigidXform:
-        case svlTypePointCloud:
-        break;
-    }
+    Rectangles[videoch].Assign(r);
+    Enabled[videoch] = true;
 
     return SVL_OK;
 }
 
-int svlFilterImageCropper::ProcessFrame(svlProcInfo* procInfo, svlSample* inputdata)
+int svlFilterImageCropper::SetCorner(const int x, const int y, unsigned int videoch)
 {
-    ///////////////////////////////////////////
-    // Check if the input sample has changed //
-      if (!IsNewSample(inputdata))
-          return SVL_ALREADY_PROCESSED;
-    ///////////////////////////////////////////
+    if (videoch >= Rectangles.size() || !Enabled[videoch]) return SVL_FAIL;
+    Rectangles[videoch].right = x + Rectangles[videoch].right - Rectangles[videoch].left;
+    Rectangles[videoch].bottom = y + Rectangles[videoch].bottom - Rectangles[videoch].top;
+    Rectangles[videoch].left = x;
+    Rectangles[videoch].top = y;
+    return SVL_OK;
+}
 
-    svlSampleImageBase* id = dynamic_cast<svlSampleImageBase*>(inputdata);
-    svlSampleImageBase* od = dynamic_cast<svlSampleImageBase*>(OutputData);
-    unsigned int videochannels = id->GetVideoChannels();
+int svlFilterImageCropper::SetCenter(const int x, const int y, unsigned int videoch)
+{
+    if (videoch >= Rectangles.size() || !Enabled[videoch]) return SVL_FAIL;
+    return SetCorner(x - (Rectangles[videoch].right - Rectangles[videoch].left) / 2,
+                     y - (Rectangles[videoch].bottom - Rectangles[videoch].top) / 2,
+                     videoch);
+}
+
+int svlFilterImageCropper::Initialize(svlSample* syncInput, svlSample* &syncOutput)
+{
+    Release();
+
+    OutputImage = dynamic_cast<svlSampleImage*>(syncInput->GetNewInstance());
+
+    svlSampleImage* input = dynamic_cast<svlSampleImage*>(syncInput);
+
+    for (unsigned int i = 0; i < input->GetVideoChannels(); i ++) {
+        if (Enabled[i]) {
+            OutputImage->SetSize(i, Rectangles[i].right - Rectangles[i].left, Rectangles[i].bottom - Rectangles[i].top); 
+        }
+        else {
+            OutputImage->SetSize(i, input->GetWidth(i), input->GetHeight(i));
+        }
+    }
+
+    syncOutput = OutputImage;
+
+    return SVL_OK;
+}
+
+int svlFilterImageCropper::Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput)
+{
+    syncOutput = OutputImage;
+    _SkipIfAlreadyProcessed(syncInput, syncOutput);
+
+    svlSampleImage* in_image = dynamic_cast<svlSampleImage*>(syncInput);
+    unsigned int videochannels = in_image->GetVideoChannels();
     unsigned int idx;
-    unsigned char *input = 0, *output = 0;
-    unsigned int j, width = 0, height = 0, stride = 0;
 
     _ParallelLoop(procInfo, idx, videochannels)
     {
-        stride = id->GetWidth(idx) * id->GetBPP();
-        width = od->GetWidth(idx) * od->GetBPP();
-        height = od->GetHeight(idx);
-        input = id->GetUCharPointer(idx, Left[idx], Top[idx]);
-        output = od->GetUCharPointer(idx);
-
-        // copy data
-        for (j = 0; j < height; j ++) {
-            memcpy(output, input, width);
-            input += stride;
-            output += width;
-        }
+        svlImageProcessing::Crop(in_image, idx, OutputImage, idx, Rectangles[idx].left, Rectangles[idx].top);
     }
 
     return SVL_OK;
@@ -250,36 +135,11 @@ int svlFilterImageCropper::ProcessFrame(svlProcInfo* procInfo, svlSample* inputd
 
 int svlFilterImageCropper::Release()
 {
-    if (OutputData) {
-        delete OutputData;
-        OutputData = 0;
+    if (OutputImage) {
+        delete OutputImage;
+        OutputImage = 0;
     }
 
     return SVL_OK;
-}
-
-void svlFilterImageCropper::CheckAndFixRectangle(unsigned int videoch, unsigned int width, unsigned int height)
-{
-    unsigned int ti;
-
-    // check rectangle corners and fix them if needed
-    if (SetLeft[videoch] >= width) Left[videoch] = width - 1;
-    else Left[videoch] = SetLeft[videoch];
-    if (SetRight[videoch] >= width) Right[videoch] = width - 1;
-    else Right[videoch] = SetRight[videoch];
-    ti = Left[videoch];
-    if (ti > Right[videoch]) {
-        Left[videoch] = Right[videoch];
-        Right[videoch] = ti;
-    }
-    if (SetTop[videoch] >= height) Top[videoch] = height - 1;
-    else Top[videoch] = SetTop[videoch];
-    if (SetBottom[videoch] >= height) Bottom[videoch] = height - 1;
-    else Bottom[videoch] = SetBottom[videoch];
-    ti = Top[videoch];
-    if (ti > Bottom[videoch]) {
-        Top[videoch] = Bottom[videoch];
-        Bottom[videoch] = ti;
-    }
 }
 

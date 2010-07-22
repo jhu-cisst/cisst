@@ -35,7 +35,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsStateIndex.h>
 #include <cisstMultiTask/mtsHistory.h>
 #include <cisstMultiTask/mtsFunctionVoid.h>
-#include <cisstMultiTask/mtsFunctionReadOrWrite.h>
+#include <cisstMultiTask/mtsFunctionRead.h>
+#include <cisstMultiTask/mtsFunctionWrite.h>
 #include <cisstMultiTask/mtsIntervalStatistics.h>
 
 

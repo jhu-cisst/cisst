@@ -20,8 +20,10 @@
  
  */
 
+#include <iostream>
+
 #include <cisstCommon/cmnPortability.h>
-#include <cisstStereoVision/svlStreamManager.h>
+#include <cisstStereoVision/svlTypes.h>
 #include "svlVideoCodecInitializer.h"
 
 #if (CISST_OS == CISST_WINDOWS)
@@ -30,7 +32,12 @@
 
 #if (CISST_SVL_HAS_ZLIB == ON)
 #include "svlVideoCodecCVI.h"
+#include "svlVideoCodecUDPStream.h"
 #endif // CISST_SVL_HAS_ZLIB
+
+#if (CISST_SVL_HAS_OPENCV == ON)
+#include "svlVideoCodecOpenCV.h"
+#endif // CISST_SVL_HAS_OPENCV
 
 
 void svlInitializeVideoCodecs()
@@ -42,5 +49,13 @@ void svlInitializeVideoCodecs()
 #ifdef _svlVideoCodecCVI_h
     delete new svlVideoCodecCVI;
 #endif // _svlVideoCodecCVI_h
+
+#ifdef _svlVideoCodecUDPStream_h
+    delete new svlVideoCodecUDPStream;
+#endif // _svlVideoCodecUDPStream_h
+    
+#ifdef _svlVideoCodecOpenCV_h
+    delete new svlVideoCodecOpenCV;
+#endif // _svlVideoCodecOpenCV_h
 }
 

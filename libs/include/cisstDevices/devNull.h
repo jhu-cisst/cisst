@@ -26,7 +26,7 @@ http://www.cisst.org/cisst/license.txt.
   \brief Defines a null device.
 */
 
-#include <cisstMultiTask/mtsDevice.h>
+#include <cisstMultiTask/mtsComponent.h>
 
 // Always include last
 #include <cisstDevices/devExport.h>
@@ -36,11 +36,11 @@ http://www.cisst.org/cisst/license.txt.
 
   This class provides a null device.
 */
-class CISST_EXPORT devNull: public mtsDevice {
+class CISST_EXPORT devNull: public mtsComponent {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
 public:
-    devNull(const std::string & name) : mtsDevice(name) {}
+    devNull(const std::string & name) : mtsComponent(name) {}
     ~devNull() {}
 
     void Configure(const std::string & CMN_UNUSED(filename) = "") {}

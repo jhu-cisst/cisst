@@ -32,10 +32,10 @@ int main(void)
     taskManager->CreateAll();
 
     // look for the interface we are going to use
-    mtsDeviceInterface * robotInterface = robotTask->GetProvidedInterface("Robot1");
+    mtsInterfaceProvided * robotInterface = robotTask->GetInterfaceProvided("Robot1");
     userInterface * UI = 0;
     if (robotInterface) {
-        // instantiate the UI in the current thread 
+        // instantiate the UI in the current thread
         UI = new userInterface("Robot1", robotInterface);
     } else {
         std::cerr << "It looks like there is no \"Robot1\" interface" << std::endl;

@@ -23,6 +23,37 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsCommandQueuedVoid.h>
 #include <cisstMultiTask/mtsCommandQueuedWrite.h>
 
+
+mtsMailBox::mtsMailBox(const std::string & name,
+                       size_t size,
+                       mtsCommandVoidBase * postCommandQueuedCommand):
+    CommandQueue(size, 0),
+    Name(name),
+    PostCommandQueuedCommand(postCommandQueuedCommand)
+{}
+
+
+mtsMailBox::~mtsMailBox(void)
+{}
+
+
+const std::string & mtsMailBox::GetName(void) const
+{
+    return this->Name;
+}
+
+
+bool mtsMailBox::Write(mtsCommandBase * command)
+{
+    bool result;
+    result = (CommandQueue.Put(command) != 0);
+    if (this->PostCommandQueuedCommand) {
+        this->PostCommandQueuedCommand->Execute();
+    }
+    return result;
+}
+
+
 // return false if nothing to execute; true otherwise.
 // NOTE: this will break if exceptions are thrown by the command objects
 // because the commands (and parameters) won't be removed from the queues.

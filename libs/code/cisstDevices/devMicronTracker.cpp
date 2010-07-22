@@ -40,7 +40,7 @@ devMicronTracker::devMicronTracker(const std::string & taskName, const double pe
     CameraFrameLeft.SetSize(640 * 480);
     CameraFrameRight.SetSize(640 * 480);
 
-    mtsProvidedInterface * provided = AddProvidedInterface("Controller");
+    mtsInterfaceProvided * provided = AddInterfaceProvided("Controller");
     if (provided) {
         StateTable.AddData(CameraFrameLeft, "CameraFrameLeft");
         StateTable.AddData(CameraFrameRight, "CameraFrameRight");
@@ -140,7 +140,7 @@ devMicronTracker::Tool * devMicronTracker::AddTool(const std::string & name, con
         CMN_LOG_CLASS_INIT_VERBOSE << "AddTool: created tool \"" << name << "\" with serial number: " << serialNumber << std::endl;
 
         // create an interface for tool
-        tool->Interface = AddProvidedInterface(name);
+        tool->Interface = AddInterfaceProvided(name);
         if (tool->Interface) {
             StateTable.AddData(tool->TooltipPosition, name + "Position");
             StateTable.AddData(tool->MarkerProjectionLeft, name + "MarkerProjectionLeft");

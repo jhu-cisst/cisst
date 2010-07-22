@@ -24,7 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _svlVideoCodecVfW32_h
 
 #include <cisstStereoVision/svlVideoIO.h>
-#include <cisstStereoVision/svlStreamDefs.h>
+#include <cisstStereoVision/svlTypes.h>
 
 #include "windows.h"
 #include "vfw.h"
@@ -51,8 +51,8 @@ public:
     virtual int SetCompression(const svlVideoIO::Compression *compression);
     virtual int DialogCompression();
 
-    virtual int Read(svlProcInfo* procInfo, svlSampleImageBase &image, const unsigned int videoch, const bool noresize = false);
-    virtual int Write(svlProcInfo* procInfo, const svlSampleImageBase &image, const unsigned int videoch);
+    virtual int Read(svlProcInfo* procInfo, svlSampleImage &image, const unsigned int videoch, const bool noresize = false);
+    virtual int Write(svlProcInfo* procInfo, const svlSampleImage &image, const unsigned int videoch);
 
 protected:
     void Flip(unsigned char* image);

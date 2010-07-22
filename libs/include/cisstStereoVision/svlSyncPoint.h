@@ -29,10 +29,6 @@ http://www.cisst.org/cisst/license.txt.
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
 
-#define SVL_SYNC_ERROR      -1
-#define SVL_SYNC_OK         0
-#define SVL_SYNC_TIMEOUT    1
-
 
 class CISST_EXPORT svlSyncPoint
 {

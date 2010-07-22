@@ -21,6 +21,8 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include <cisstDevices/devKeyboard.h>
+#include <cisstMultiTask/mtsInterfaceRequired.h>
+#include <cisstMultiTask/mtsInterfaceProvided.h>
 
 CMN_IMPLEMENT_SERVICES(devKeyboard);
 
@@ -43,9 +45,9 @@ void devKeyboard::AddKeyButtonEvent(char key, const std::string & interfaceName,
     keyData->State = false;
 
     // add interface
-    mtsProvidedInterface * providedInterface = this->GetProvidedInterface(interfaceName);
+    mtsInterfaceProvided * providedInterface = this->GetInterfaceProvided(interfaceName);
     if (!providedInterface) {
-        providedInterface = this->AddProvidedInterface(interfaceName);
+        providedInterface = this->AddInterfaceProvided(interfaceName);
     }
     keyData->WriteTrigger.Bind(providedInterface->AddEventWrite("Button",
                                prmEventButton()));
@@ -63,9 +65,9 @@ void devKeyboard::AddKeyVoidEvent(char key, const std::string & interfaceName, c
     keyData->State = false;
 
     // add interface
-    mtsProvidedInterface * providedInterface = this->GetProvidedInterface(interfaceName);
+    mtsInterfaceProvided * providedInterface = this->GetInterfaceProvided(interfaceName);
     if (!providedInterface) {
-        providedInterface = this->AddProvidedInterface(interfaceName);
+        providedInterface = this->AddInterfaceProvided(interfaceName);
     }
     keyData->VoidTrigger.Bind(providedInterface->AddEventVoid(eventName));
 }
@@ -82,9 +84,9 @@ void devKeyboard::AddKeyWriteCommand(char key, const std::string & interfaceName
     keyData->State = initialState;
 
     // add interface
-    mtsRequiredInterface * requiredInterface = this->GetRequiredInterface(interfaceName);
+    mtsInterfaceRequired * requiredInterface = this->GetInterfaceRequired(interfaceName);
     if (!requiredInterface) {
-        requiredInterface = this->AddRequiredInterface(interfaceName);
+        requiredInterface = this->AddInterfaceRequired(interfaceName);
     }
     requiredInterface->AddFunction(commandName, keyData->WriteTrigger);
 }

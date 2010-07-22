@@ -36,10 +36,10 @@
 class devLoPoMoCoBoardIO;
 
 /*!
- \ingroup mtsDeviceInterface
+ \ingroup cisstDevices
  A specific device class for the LoPoMoCo motion controller card.
  */
-class devLoPoMoCo: public mtsDevice {
+class devLoPoMoCo: public mtsComponent {
 
 	CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 

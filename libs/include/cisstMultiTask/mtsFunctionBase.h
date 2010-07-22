@@ -39,24 +39,11 @@ protected:
     virtual ~mtsFunctionBase() {}
 
 public:
+    /*! Detach the function from the command used.  Internally, sets the command pointer to 0 */
+    virtual bool Detach(void) = 0;
+
     /*! Return whether function is valid (i.e., command pointer is non-zero) */
     virtual bool IsValid(void) const = 0;
-
-    /*! Bind the function object to a command
-      \param interface Pointer to an interface whose command is to be queried
-      \param commandName Name of command
-      \result Boolean value, true if success, false otherwise
-    */
-    virtual bool Bind(const mtsDeviceInterface * associatedInterface, const std::string & commandName) = 0;
-
-    /*! Add the function object to the required interface
-      \param interface Required interface
-      \param commandName Name of command to bind with (string)
-      \param isRequired Whether or not the command is required (false if command is optional)
-      \result Boolean value, true if success, false otherwise
-    */
-    virtual bool AddToRequiredInterface(mtsRequiredInterface & intfc, const std::string & commandName,
-                                        bool isRequired = true) = 0;
 
     /*! Human readable output to stream. */
     virtual void ToStream(std::ostream & outputStream) const = 0;

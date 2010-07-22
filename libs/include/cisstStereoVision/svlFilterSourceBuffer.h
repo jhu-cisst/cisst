@@ -21,39 +21,35 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlFilterSourceBuffer_h
 #define _svlFilterSourceBuffer_h
 
-#include <cisstStereoVision/svlStreamManager.h>
-#include <cisstStereoVision/svlBufferImage.h>
+#include <cisstStereoVision/svlFilterSourceBase.h>
+#include <cisstStereoVision/svlBufferSample.h>
 
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
 
-#define SVL_DMYSRC_DATA_NOT_INITIALIZED     -7000
 
-class CISST_EXPORT svlFilterSourceBuffer : public svlFilterSourceBase, public cmnGenericObject
+class CISST_EXPORT svlFilterSourceBuffer : public svlFilterSourceBase
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
 public:
     svlFilterSourceBuffer();
-    svlFilterSourceBuffer(svlStreamType type);
-    svlFilterSourceBuffer(const svlSampleImageBase & image);
     virtual ~svlFilterSourceBuffer();
 
-    int SetType(svlStreamType type);
-    int SetImage(const svlSampleImageBase & image);
-    int SetDimensions(unsigned int width, unsigned int height);
-    int SetBuffer(svlBufferImage * buffer);
+    int SetBuffer(svlBufferSample& buffer);
+    void SetTimeout(const double timeout = 5.0);
 
 protected:
-    virtual int Initialize();
-    virtual int ProcessFrame(svlProcInfo* procInfo);
+    virtual int Initialize(svlSample* &syncOutput);
+    virtual int Process(svlProcInfo* procInfo, svlSample* &syncOutput);
 
 private:
-    unsigned int Width;
-    unsigned int Height;
-    svlBufferImage * Buffer;
+    svlSample* OutputSample;
+    svlBufferSample* Buffer;
+    double Timeout;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterSourceBuffer)
 
 #endif  // _svlFilterSourceBuffer_h
+

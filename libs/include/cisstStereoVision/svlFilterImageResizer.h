@@ -23,12 +23,13 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlFilterImageResizer_h
 #define _svlFilterImageResizer_h
 
-#include <cisstStereoVision/svlStreamManager.h>
+#include <cisstStereoVision/svlFilterBase.h>
 
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
 
-class CISST_EXPORT svlFilterImageResizer : public svlFilterBase, public cmnGenericObject
+
+class CISST_EXPORT svlFilterImageResizer : public svlFilterBase
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
@@ -38,38 +39,22 @@ public:
 
     int SetOutputSize(unsigned int width, unsigned int height, unsigned int videoch = SVL_LEFT);
     int SetOutputRatio(double widthratio, double heightratio, unsigned int videoch = SVL_LEFT);
-    void EnableInterpolation(bool enable = true) { InterpolationEnabled = enable; }
+    void SetInterpolation(bool enable);
 
 protected:
-    virtual int Initialize(svlSample* inputdata);
-    virtual int ProcessFrame(svlProcInfo* procInfo, svlSample* inputdata);
+    virtual int Initialize(svlSample* syncInput, svlSample* &syncOutput);
+    virtual int Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput);
     virtual int Release();
 
 private:
+    svlSampleImage* OutputImage;
+
     double WidthRatio[2];
     double HeightRatio[2];
     unsigned int Width[2];
     unsigned int Height[2];
-    unsigned char *TempBuffer[2];
     bool InterpolationEnabled;
-
-    int ResampleMono8(unsigned char* src, const unsigned int srcwidth, const unsigned int srcheight,
-                      unsigned char* dst, const unsigned int dstwidth, const unsigned int dstheight);
-    int ResampleAndInterpolateHMono8(unsigned char* src, const unsigned int srcwidth,
-                                     unsigned char* dst, const unsigned int dstwidth,
-                                     const unsigned int height);
-    int ResampleAndInterpolateVMono8(unsigned char* src, const unsigned int srcheight,
-                                     unsigned char* dst, const unsigned int dstheight,
-                                     const unsigned int width);
-
-    int ResampleRGB24(unsigned char* src, const unsigned int srcwidth, const unsigned int srcheight,
-                      unsigned char* dst, const unsigned int dstwidth, const unsigned int dstheight);
-    int ResampleAndInterpolateHRGB24(unsigned char* src, const unsigned int srcwidth,
-                                     unsigned char* dst, const unsigned int dstwidth,
-                                     const unsigned int height);
-    int ResampleAndInterpolateVRGB24(unsigned char* src, const unsigned int srcheight,
-                                     unsigned char* dst, const unsigned int dstheight,
-                                     const unsigned int width);
+    vctDynamicVector<unsigned char> Internals[2];
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterImageResizer)

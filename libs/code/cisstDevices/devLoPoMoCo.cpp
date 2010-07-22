@@ -27,7 +27,7 @@
 CMN_IMPLEMENT_SERVICES(devLoPoMoCo);
 
 devLoPoMoCo::devLoPoMoCo(const std::string& deviceName, unsigned int numberOfBoards) :
-    mtsDevice(deviceName) {
+    mtsComponent(deviceName) {
     this->numberOfBoards = numberOfBoards;
     numberOfAxes = NB_AXIS * numberOfBoards;
 
@@ -52,7 +52,7 @@ devLoPoMoCo::devLoPoMoCo(const std::string& deviceName, unsigned int numberOfBoa
 	NegativeIntercept.SetSize(numberOfAxes);
 	VoltageToCounts.SetSize(numberOfAxes);
 
-    mtsProvidedInterface * provided = AddProvidedInterface("WriteInterface"); 
+    mtsInterfaceProvided * provided = AddInterfaceProvided("WriteInterface"); 
     if(provided) { 
         //void commands, no parameters 
         provided->AddCommandVoid(&devLoPoMoCo::LatchEncoders, this, "LatchEncoders");

@@ -21,6 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstStereoVision/svlSyncPoint.h>
+#include <cisstStereoVision/svlDefinitions.h>
 
 
 /*************************************/

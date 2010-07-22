@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):  Balazs Vagvolgyi
   Created on: 2007
 
@@ -21,8 +21,8 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstStereoVision/svlStreamBranchSource.h>
+#include <cisstStereoVision/svlFilterOutput.h>
 #include <cisstOSAbstraction/osaSleep.h>
-#include <string.h>
 
 #ifdef _MSC_VER
     // Quick fix for Visual Studio Intellisense:
@@ -35,8 +35,6 @@ http://www.cisst.org/cisst/license.txt.
     #define CMN_UNUSED(argument) argument
 #endif
 
-using namespace std;
-
 
 /*************************************/
 /*** svlStreamBranchSource class *****/
@@ -47,7 +45,9 @@ svlStreamBranchSource::svlStreamBranchSource(svlStreamType type, unsigned int bu
     InputBlocked(false),
     SampleQueue(type, buffersize)
 {
-    AddSupportedType(type);
+    AddOutput("output", true);
+    SetAutomaticOutputType(false);
+    GetOutput()->SetType(type);
 }
 
 svlStreamBranchSource::svlStreamBranchSource() :
@@ -62,25 +62,29 @@ svlStreamBranchSource::~svlStreamBranchSource()
     Release();
 }
 
-int svlStreamBranchSource::Initialize()
+int svlStreamBranchSource::Initialize(svlSample* &syncOutput)
 {
     Release();
 
     // Pass unused but initialized sample downstream
-    OutputData = SampleQueue.Peek();
+    syncOutput = SampleQueue.Peek();
 
     return SVL_OK;
 }
 
-int svlStreamBranchSource::ProcessFrame(svlProcInfo* procInfo)
+int svlStreamBranchSource::Process(svlProcInfo* procInfo, svlSample* &syncOutput)
 {
     _OnSingleThread(procInfo)
     {
         do {
             if (IsRunning() == false) break;
-            OutputData = SampleQueue.Pull(0.5);
-        } while (OutputData == 0);
+            OutputSample = SampleQueue.Pull(0.5);
+        } while (OutputSample == 0);
     }
+
+    _SynchronizeThreads(procInfo);
+
+    syncOutput = OutputSample;
 
     return SVL_OK;
 }
@@ -96,11 +100,20 @@ bool svlStreamBranchSource::IsTypeSupported(svlStreamType type)
         case svlTypeImageMono16Stereo:
         case svlTypeImageRGBA:
         case svlTypeImageRGBAStereo:
-        case svlTypeImageMonoFloat:
+        case svlTypeMatrixInt8:
+        case svlTypeMatrixInt16:
+        case svlTypeMatrixInt32:
+        case svlTypeMatrixInt64:
+        case svlTypeMatrixUInt8:
+        case svlTypeMatrixUInt16:
+        case svlTypeMatrixUInt32:
+        case svlTypeMatrixUInt64:
+        case svlTypeMatrixFloat:
+        case svlTypeMatrixDouble:
         case svlTypeImage3DMap:
-        case svlTypeImageCustom:
-        case svlTypeRigidXform:
-        case svlTypePointCloud:
+        case svlTypeTransform3D:
+        case svlTypeTargets:
+        case svlTypeText:
             return true;
 
         case svlTypeInvalid:
@@ -111,15 +124,15 @@ bool svlStreamBranchSource::IsTypeSupported(svlStreamType type)
     return false;
 }
 
-void svlStreamBranchSource::SetInput(svlSample* inputdata)
+void svlStreamBranchSource::SetInput(svlSample* inputsample)
 {
-    SampleQueue.PreAllocate(*inputdata);
+    SampleQueue.PreAllocate(inputsample);
 }
 
-void svlStreamBranchSource::PushSample(svlSample* inputdata)
+void svlStreamBranchSource::PushSample(const svlSample* inputsample)
 {
     if (InputBlocked) return;
-    SampleQueue.Push(*inputdata);
+    SampleQueue.Push(inputsample);
 }
 
 int svlStreamBranchSource::GetBufferUsage()

@@ -3,9 +3,9 @@
 
 /*
   $Id$
-  
+
   Author(s):  Balazs Vagvolgyi
-  Created on: 2006 
+  Created on: 2006
 
   (C) Copyright 2006-2007 Johns Hopkins University (JHU), All Rights
   Reserved.
@@ -22,10 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstStereoVision/svlFilterImageSampler.h>
 #include <cisstStereoVision/svlConverters.h>
-#include <string.h>
-
-
-using namespace std;
+#include <cisstStereoVision/svlFilterInput.h>
 
 /******************************************/
 /*** svlFilterImageSampler class *********/
@@ -34,16 +31,18 @@ using namespace std;
 CMN_IMPLEMENT_SERVICES(svlFilterImageSampler)
 
 svlFilterImageSampler::svlFilterImageSampler() :
-    svlFilterBase(),
-    cmnGenericObject()
+    svlFilterBase()
 {
-    AddSupportedType(svlTypeImageMono8, svlTypeImageMono8);
-    AddSupportedType(svlTypeImageMono8Stereo, svlTypeImageMono8Stereo);
-    AddSupportedType(svlTypeImageMono16, svlTypeImageMono16);
-    AddSupportedType(svlTypeImageMono16Stereo, svlTypeImageMono16Stereo);
-    AddSupportedType(svlTypeImageRGB, svlTypeImageRGB);
-    AddSupportedType(svlTypeImageRGBStereo, svlTypeImageRGBStereo);
-    AddSupportedType(svlTypeImageMonoFloat, svlTypeImageMonoFloat);
+    AddInput("input", true);
+    AddInputType("input", svlTypeImageMono8);
+    AddInputType("input", svlTypeImageMono8Stereo);
+    AddInputType("input", svlTypeImageMono16);
+    AddInputType("input", svlTypeImageMono16Stereo);
+    AddInputType("input", svlTypeImageRGB);
+    AddInputType("input", svlTypeImageRGBStereo);
+
+    AddOutput("output", true);
+    SetAutomaticOutputType(true);
 
     CallbackObj = 0;
     FileHeader[0] = FileHeader[1] = 0;
@@ -62,20 +61,16 @@ void svlFilterImageSampler::SetCallback(svlImageSamplerCallbackBase* callbackobj
     CallbackObj = callbackobj;
 }
 
-int svlFilterImageSampler::Initialize(svlSample* inputdata)
+int svlFilterImageSampler::Initialize(svlSample* syncInput, svlSample* &syncOutput)
 {
-    svlSampleImageBase* image = dynamic_cast<svlSampleImageBase*>(inputdata);
+    svlSampleImage* image = dynamic_cast<svlSampleImage*>(syncInput);
     unsigned char* ucharptr;
     unsigned int dibhdrsize;
 
     Release();
 
-    switch (GetInputType()) {
+    switch (GetInput()->GetType()) {
         case svlTypeImageMono16:
-        case svlTypeImageMonoFloat:
-            ImageBuffer = new svlSampleImageMono8;
-            ImageBuffer->SetSize(*image);
-
         case svlTypeImageMono8:
             dibhdrsize = sizeof(svlDIBHeader) + 256 * sizeof(svlRGBA);
             ucharptr = new unsigned char[dibhdrsize];
@@ -203,7 +198,7 @@ int svlFilterImageSampler::Initialize(svlSample* inputdata)
         break;
 
         case svlTypeImageRGBStereo:
-            image = dynamic_cast<svlSampleImageRGBStereo*>(inputdata);
+            image = dynamic_cast<svlSampleImageRGBStereo*>(syncInput);
 
             Release();
 
@@ -255,38 +250,41 @@ int svlFilterImageSampler::Initialize(svlSample* inputdata)
 
         case svlTypeImageRGBA:
         case svlTypeImageRGBAStereo:
+        case svlTypeMatrixInt8:
+        case svlTypeMatrixInt16:
+        case svlTypeMatrixInt32:
+        case svlTypeMatrixInt64:
+        case svlTypeMatrixUInt8:
+        case svlTypeMatrixUInt16:
+        case svlTypeMatrixUInt32:
+        case svlTypeMatrixUInt64:
+        case svlTypeMatrixFloat:
+        case svlTypeMatrixDouble:
         case svlTypeImage3DMap:
         case svlTypeInvalid:
         case svlTypeStreamSource:
         case svlTypeStreamSink:
-        case svlTypeImageCustom:
-        case svlTypeRigidXform:
-        case svlTypePointCloud:
+        case svlTypeTransform3D:
+        case svlTypeTargets:
+        case svlTypeText:
             return SVL_INVALID_INPUT_TYPE;
     }
 
-    OutputData = inputdata;
+    syncOutput = syncInput;
 
     return SVL_OK;
 }
 
-int svlFilterImageSampler::ProcessFrame(svlProcInfo* procInfo, svlSample* inputdata)
+int svlFilterImageSampler::Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput)
 {
+    syncOutput = syncInput;
+
     _OnSingleThread(procInfo)
     {
-        svlSampleImageBase* inimage = dynamic_cast<svlSampleImageBase*>(inputdata);
-        svlSampleImageBase* outimage = 0;
+        svlSampleImage* inimage = dynamic_cast<svlSampleImage*>(syncInput);
+        svlSampleImage* outimage = 0;
 
-        switch (GetInputType()) {
-            case svlTypeImageMonoFloat:
-                // Convert float32 values to grayscale8
-                svlConverter::float32toGray8(reinterpret_cast<float*>(inimage->GetUCharPointer()),
-                                             ImageBuffer->GetUCharPointer(),
-                                             inimage->GetWidth() * inimage->GetHeight(),
-                                             DistanceScaling);
-                outimage = ImageBuffer;
-            break;
-
+        switch (GetInput()->GetType()) {
             case svlTypeImageMono16:
                 // Convert grayscale16 values to grayscale8
                 svlConverter::Gray16toGray8(reinterpret_cast<unsigned short*>(inimage->GetUCharPointer()),
@@ -313,30 +311,36 @@ int svlFilterImageSampler::ProcessFrame(svlProcInfo* procInfo, svlSample* inputd
             case svlTypeImageMono8Stereo:
             case svlTypeImageRGB:
             case svlTypeImageRGBStereo:
-                outimage = dynamic_cast<svlSampleImageBase*>(inputdata);
+                outimage = dynamic_cast<svlSampleImage*>(syncInput);
             break;
 
             case svlTypeImageRGBA:
             case svlTypeImageRGBAStereo:
+            case svlTypeMatrixInt8:
+            case svlTypeMatrixInt16:
+            case svlTypeMatrixInt32:
+            case svlTypeMatrixInt64:
+            case svlTypeMatrixUInt8:
+            case svlTypeMatrixUInt16:
+            case svlTypeMatrixUInt32:
+            case svlTypeMatrixUInt64:
+            case svlTypeMatrixFloat:
+            case svlTypeMatrixDouble:
             case svlTypeImage3DMap:
             case svlTypeInvalid:
             case svlTypeStreamSource:
             case svlTypeStreamSink:
-            case svlTypeImageCustom:
-            case svlTypeRigidXform:
-            case svlTypePointCloud:
+            case svlTypeTransform3D:
+            case svlTypeTargets:
+            case svlTypeText:
                 return SVL_INVALID_INPUT_TYPE;
         }
 
         if (CallbackObj) {
             CallbackObj->FrameCallback(outimage, FileHeader[0], DIBHeader[0], FileHeader[1], DIBHeader[1]);
             CallbackObj->PostCallback();
-            return SVL_OK;
         }
     }
-
-    // Passing the same image for the next filter
-    OutputData = inputdata;
 
     return SVL_OK;
 }

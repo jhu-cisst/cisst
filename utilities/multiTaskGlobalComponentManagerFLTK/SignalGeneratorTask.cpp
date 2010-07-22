@@ -30,8 +30,7 @@ SignalGenerator::SignalGenerator(const std::string & taskName, double period) : 
 {
     this->StateTable.AddData(PosGet, "PosData");
 
-    // add one interface, this will create an mtsTaskInterface
-    mtsProvidedInterface * provided = AddProvidedInterface("p1");
+    mtsInterfaceProvided * provided = AddInterfaceProvided("p1");
     if (provided) {
         provided->AddCommandReadState(this->StateTable, this->PosGet, "ReadPos");
     }

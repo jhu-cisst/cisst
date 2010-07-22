@@ -32,7 +32,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <QPushButton>
 #include <QWidget>
 
-#include "displayQComponent.h"
+#include "displayQtComponent.h"
 #include "sineTask.h"
 
 const unsigned int NumSineTasks = 2;
@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
 
     // set the log level of detail on select tasks
     cmnClassRegister::SetLoD("sineTask", CMN_LOG_LOD_VERY_VERBOSE);
-    cmnClassRegister::SetLoD("displayQComponent", CMN_LOG_LOD_VERY_VERBOSE);
+    cmnClassRegister::SetLoD("displayQtComponent", CMN_LOG_LOD_VERY_VERBOSE);
     cmnClassRegister::SetLoD("mtsManagerLocal", CMN_LOG_LOD_VERY_VERBOSE);
     cmnClassRegister::SetLoD("mtsManagerGlobal", CMN_LOG_LOD_VERY_VERBOSE);
     cmnClassRegister::SetLoD("mtsCollectorQComponent", CMN_LOG_LOD_VERY_VERBOSE);
@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
     // get the component manager to add multiple sine generator tasks
     mtsManagerLocal * taskManager = mtsManagerLocal::GetInstance();
     sineTask * sine;
-    displayQComponent * display;
+    displayQtComponent * display;
     mtsCollectorState * stateCollector;
     mtsCollectorQtComponent * collectorQtComponent;
 
@@ -114,7 +114,7 @@ int main(int argc, char *argv[])
         sine = new sineTask("SIN" + index.str(), 5.0 * cmn_ms);
         taskManager->AddComponent(sine);
         std::cout << *sine << std::endl;
-        display = new displayQComponent("DISP" + index.str());
+        display = new displayQtComponent("DISP" + index.str());
         taskManager->AddComponent(display);
         tab1Layout->addWidget(display->GetWidget(), 1, i);
         taskManager->Connect(display->GetName(), "DataGenerator",

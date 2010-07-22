@@ -13,12 +13,12 @@ clientTask::clientTask(const std::string & taskName, double period):
     SamplesCollected(0)
 {
     // to communicate with the interface of the resource
-    mtsRequiredInterface * required = AddRequiredInterface("Required1");
+    mtsInterfaceRequired * required = AddInterfaceRequired("Required1");
     if (required) {
         required->AddFunction("Write", this->WriteServer);
         required->AddFunction("Read", this->ReadServer);
     }
-    required = AddRequiredInterface("Required2");
+    required = AddInterfaceRequired("Required2");
     if (required) {
         required->AddFunction("TriggerEvent", this->TriggerEvent);
         required->AddEventHandlerWrite(&clientTask::EventWriteHandler, this, "EventWrite");

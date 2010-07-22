@@ -24,7 +24,11 @@ http://www.cisst.org/cisst/license.txt.
 #define _svlVidCapSrcDC1394_h
 
 #include <cisstStereoVision/svlFilterSourceVideoCapture.h>
-#include <cisstStereoVision/svlBufferImage.h>
+
+
+class svlBufferImage;
+class osaThread;
+class svlVidCapSrcDC1394Thread;
 
 
 /*********************************************************************
@@ -210,8 +214,6 @@ private:
     unsigned int PixelTypeBitSize[svlFilterSourceVideoCapture::PixelTypeCount];
 };
 
-
-class svlVidCapSrcDC1394Thread;
 
 class svlVidCapSrcDC1394 : public svlVidCapSrcBase, public cmnGenericObject
 {

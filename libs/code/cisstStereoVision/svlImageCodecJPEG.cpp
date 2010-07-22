@@ -21,7 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include "svlImageCodecJPEG.h"
-#include <cisstStereoVision/svlStreamDefs.h>
+#include <cisstStereoVision/svlTypes.h>
 #include <setjmp.h>
 #include "jpeglib.h"
 
@@ -307,13 +307,13 @@ int svlImageCodecJPEG::ReadDimensions(const unsigned char *buffer, const size_t 
     return SVL_OK;
 }
 
-int svlImageCodecJPEG::Read(svlSampleImageBase &image, const unsigned int videoch, const std::string &filename, bool noresize)
+int svlImageCodecJPEG::Read(svlSampleImage &image, const unsigned int videoch, const std::string &filename, bool noresize)
 {
     std::ifstream stream(filename.c_str(), std::ios_base::in | std::ios_base::binary);
     return Read(image, videoch, stream, noresize);
 }
 
-int svlImageCodecJPEG::Read(svlSampleImageBase &image, const unsigned int videoch, std::istream &stream, bool noresize)
+int svlImageCodecJPEG::Read(svlSampleImage &image, const unsigned int videoch, std::istream &stream, bool noresize)
 {
     if (videoch >= image.GetVideoChannels()) return SVL_FAIL;
 
@@ -411,7 +411,7 @@ int svlImageCodecJPEG::Read(svlSampleImageBase &image, const unsigned int videoc
     return SVL_OK;
 }
 
-int svlImageCodecJPEG::Read(svlSampleImageBase &image, const unsigned int videoch, const unsigned char *buffer, const size_t buffersize, bool noresize)
+int svlImageCodecJPEG::Read(svlSampleImage &image, const unsigned int videoch, const unsigned char *buffer, const size_t buffersize, bool noresize)
 {
     if (videoch >= image.GetVideoChannels()) return SVL_FAIL;
     if (!buffer) return SVL_FAIL;
@@ -497,13 +497,13 @@ int svlImageCodecJPEG::Read(svlSampleImageBase &image, const unsigned int videoc
     return SVL_OK;
 }
 
-int svlImageCodecJPEG::Write(const svlSampleImageBase &image, const unsigned int videoch, const std::string &filename, const int compression)
+int svlImageCodecJPEG::Write(const svlSampleImage &image, const unsigned int videoch, const std::string &filename, const int compression)
 {
     std::ofstream stream(filename.c_str(), std::ios_base::out | std::ios_base::binary);
     return Write(image, videoch, stream, compression);
 }
 
-int svlImageCodecJPEG::Write(const svlSampleImageBase &image, const unsigned int videoch, std::ostream &stream, const int compression)
+int svlImageCodecJPEG::Write(const svlSampleImage &image, const unsigned int videoch, std::ostream &stream, const int compression)
 {
     if (videoch >= image.GetVideoChannels()) return SVL_FAIL;
 
@@ -526,7 +526,7 @@ int svlImageCodecJPEG::Write(const svlSampleImageBase &image, const unsigned int
     return SVL_FAIL;
 }
 
-int svlImageCodecJPEG::Write(const svlSampleImageBase &image, const unsigned int videoch, unsigned char *buffer, size_t &buffersize, const int compression)
+int svlImageCodecJPEG::Write(const svlSampleImage &image, const unsigned int videoch, unsigned char *buffer, size_t &buffersize, const int compression)
 {
     if (videoch >= image.GetVideoChannels()) return SVL_FAIL;
     if (!buffer) return SVL_FAIL;

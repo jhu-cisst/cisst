@@ -23,46 +23,17 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlFilterImageWindow_h
 #define _svlFilterImageWindow_h
 
-#include <cisstStereoVision/svlStreamManager.h>
+#include <cisstStereoVision/svlFilterBase.h>
 
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
 
-#include <string>
 
-#define winInput_KEY_F1             112
-#define winInput_KEY_F2             113
-#define winInput_KEY_F3             114
-#define winInput_KEY_F4             115
-#define winInput_KEY_F5             116
-#define winInput_KEY_F6             117
-#define winInput_KEY_F7             118
-#define winInput_KEY_F8             119
-#define winInput_KEY_F9             120
-#define winInput_KEY_F10            121
-#define winInput_KEY_F11            122
-#define winInput_KEY_F12            123
-
-#define winInput_KEY_PAGEUP         33
-#define winInput_KEY_PAGEDOWN       34
-#define winInput_KEY_HOME           36
-#define winInput_KEY_END            35
-#define winInput_KEY_INSERT         45
-#define winInput_KEY_DELETE         46
-
-#define winInput_KEY_LEFT           37
-#define winInput_KEY_RIGHT          39
-#define winInput_KEY_UP             38
-#define winInput_KEY_DOWN           40
-
-#define winInput_MOUSEMOVE          1000
-#define winInput_LBUTTONDOWN        1001
-#define winInput_LBUTTONUP          1002
-#define winInput_RBUTTONDOWN        1003
-#define winInput_RBUTTONUP          1004
-
-
+// Forward declarations
 class CWindowManagerBase;
+class osaThread;
+class osaThreadSignal;
+
 
 class CISST_EXPORT svlImageWindowCallbackBase
 {
@@ -70,19 +41,19 @@ friend class CWindowManagerBase;
 friend class svlFilterImageWindow;
 
 public:
-    virtual ~svlImageWindowCallbackBase() {}
+    virtual ~svlImageWindowCallbackBase();
 
 protected:
     virtual void OnNewFrame(unsigned int frameid);
     virtual void OnUserEvent(unsigned int winid, bool ascii, unsigned int eventid);
-    void GetMousePos(int & x, int & y) { x = MouseX; y = MouseY; }
+    void GetMousePos(int & x, int & y);
 
 private:
     int MouseX;
     int MouseY;
 
     // called by the Window Manager
-    void SetMousePos(int x, int y) { MouseX = x; MouseY = y; }
+    void SetMousePos(int x, int y);
 };
 
 class CISST_EXPORT CWindowManagerBase
@@ -90,9 +61,9 @@ class CISST_EXPORT CWindowManagerBase
 public:
     CWindowManagerBase(unsigned int numofwins);
     virtual ~CWindowManagerBase();
-    void SetCallback(svlImageWindowCallbackBase* callback) { Callback = callback; }
+    void SetCallback(svlImageWindowCallbackBase* callback);
     void SetTitleText(const std::string title);
-    void SetTimestamp(double timestamp) { Timestamp = timestamp; }
+    void SetTimestamp(double timestamp);
     int SetClientSize(unsigned int width, unsigned int height, unsigned int winid);
     int SetWindowPosition(int x, int y, unsigned int winid);
     void ResetInitEvent();
@@ -101,8 +72,8 @@ public:
     // methods to overwrite
     virtual int DoModal(bool show, bool fullscreen) = 0;
     virtual void Show(bool show, int winid) = 0;
-    virtual void LockBuffers() {}
-    virtual void UnlockBuffers() {}
+    virtual void LockBuffers();
+    virtual void UnlockBuffers();
     virtual void SetImageBuffer(unsigned char *buffer, unsigned int buffersize, unsigned int winid) = 0;
     virtual void DrawImages() = 0;
     virtual void Destroy() = 0;
@@ -127,7 +98,7 @@ protected:
 class CWindowManagerThreadProc;
 
 
-class CISST_EXPORT svlFilterImageWindow : public svlFilterBase, public cmnGenericObject
+class CISST_EXPORT svlFilterImageWindow : public svlFilterBase
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
@@ -137,16 +108,16 @@ public:
     svlFilterImageWindow();
     virtual ~svlFilterImageWindow();
 
-    void SetFullScreen(bool fullscreen = true) { FullScreenFlag = fullscreen; }
-    bool GetFullScreen() { return FullScreenFlag; }
-    void SetWindowPosition(int x, int y, unsigned int videoch = SVL_LEFT);
-    void SetTitleText(const std::string title);
-    void EnableTimestampInTitle(bool enable = true);
-    void SetCallback(svlImageWindowCallbackBase* callback) { Callback = callback; }
+    virtual void SetFullScreen(bool fullscreen = true);
+    virtual bool GetFullScreen();
+    virtual void SetWindowPosition(int x, int y, unsigned int videoch = SVL_LEFT);
+    virtual void SetTitleText(const std::string title);
+    virtual void EnableTimestampInTitle(bool enable = true);
+    virtual void SetCallback(svlImageWindowCallbackBase* callback);
 
 protected:
-    virtual int Initialize(svlSample* inputdata);
-    virtual int ProcessFrame(svlProcInfo* procInfo, svlSample* inputdata);
+    virtual int Initialize(svlSample* syncInput, svlSample* &syncOutput);
+    virtual int Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput);
     virtual int Release();
 
 private:

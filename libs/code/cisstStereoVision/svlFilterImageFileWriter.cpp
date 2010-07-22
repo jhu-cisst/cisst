@@ -34,12 +34,14 @@ CMN_IMPLEMENT_SERVICES(svlFilterImageFileWriter)
 
 svlFilterImageFileWriter::svlFilterImageFileWriter() :
     svlFilterBase(),
-    cmnGenericObject(),
     TimestampsEnabled(false)
 {
-    AddSupportedType(svlTypeImageRGB, svlTypeImageRGB);
-    AddSupportedType(svlTypeImageRGBStereo, svlTypeImageRGBStereo);
-    AddSupportedType(svlTypeImageMonoFloat, svlTypeImageMonoFloat);
+    AddInput("input", true);
+    AddInputType("input", svlTypeImageRGB);
+    AddInputType("input", svlTypeImageRGBStereo);
+
+    AddOutput("output", true);
+    SetAutomaticOutputType(true);
 
     ImageCodec.SetSize(2);
     FilePathPrefix.SetSize(2);
@@ -49,7 +51,6 @@ svlFilterImageFileWriter::svlFilterImageFileWriter() :
     ImageCodec.SetAll(0);
     Disabled.SetAll(false);
 
-    DistanceScaling = 1.0f;
     // Continuous saving by default
     CaptureLength = -1;
 }
@@ -59,11 +60,11 @@ svlFilterImageFileWriter::~svlFilterImageFileWriter()
     Release();
 }
 
-int svlFilterImageFileWriter::Initialize(svlSample* inputdata)
+int svlFilterImageFileWriter::Initialize(svlSample* syncInput, svlSample* &syncOutput)
 {
     Release();
 
-    svlSampleImageBase* img = dynamic_cast<svlSampleImageBase*>(inputdata);
+    svlSampleImage* img = dynamic_cast<svlSampleImage*>(syncInput);
     unsigned int videochannels = img->GetVideoChannels();
 
     for (unsigned int i = 0; i < videochannels; i ++) {
@@ -76,48 +77,31 @@ int svlFilterImageFileWriter::Initialize(svlSample* inputdata)
         }
     }
 
-    if (inputdata->GetType() == svlTypeImageMonoFloat) {
-        ImageBuffer.SetSize(*inputdata);
-    }
-
-    OutputData = inputdata;
+    syncOutput = syncInput;
 
     return SVL_OK;
 }
 
-int svlFilterImageFileWriter::ProcessFrame(svlProcInfo* procInfo, svlSample* inputdata)
+int svlFilterImageFileWriter::Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput)
 {
-    // Passing the same image for the next filter
-    OutputData = inputdata;
+    syncOutput = syncInput;
 
     if (CaptureLength == 0) return SVL_OK;
 
-    svlSampleImageBase* tosave = 0;
-    svlSampleImageBase* img = dynamic_cast<svlSampleImageBase*>(OutputData);
+    svlSampleImage* img = dynamic_cast<svlSampleImage*>(syncOutput);
     unsigned int videochannels = img->GetVideoChannels();
-    std::stringstream path;
     unsigned int idx;
 
     _ParallelLoop(procInfo, idx, videochannels)
     {
         if (Disabled[idx]) continue;
 
-        if (img->GetType() == svlTypeImageMonoFloat) {
-            svlConverter::float32toRGB24(reinterpret_cast<float*>(img->GetUCharPointer(idx)),
-                                         ImageBuffer.GetUCharPointer(idx),
-                                         img->GetWidth(idx) * img->GetHeight(idx),
-                                         DistanceScaling);
-            tosave = &ImageBuffer;
-        }
-        else {
-            tosave = img;
-        }
-
+        std::stringstream path;
         path << FilePathPrefix[idx];
 
         if (TimestampsEnabled) {
             path.precision(3);
-            path << std::fixed << inputdata->GetTimestamp();
+            path << std::fixed << syncInput->GetTimestamp();
         }
         else {
             path.fill('0');
@@ -126,7 +110,7 @@ int svlFilterImageFileWriter::ProcessFrame(svlProcInfo* procInfo, svlSample* inp
 
         path << "." << Extension[idx];
 
-        if (ImageCodec[idx]->Write(*tosave, idx, path.str(), Compression[idx]) != SVL_OK) return SVL_FAIL;
+        if (ImageCodec[idx]->Write(*img, idx, path.str(), Compression[idx]) != SVL_OK) return SVL_FAIL;
     }
 
     _SynchronizeThreads(procInfo);
@@ -204,15 +188,5 @@ void svlFilterImageFileWriter::Pause()
 void svlFilterImageFileWriter::Record(int frames)
 {
     CaptureLength = frames;
-}
-
-void svlFilterImageFileWriter::SetDistanceIntensityRatio(float ratio)
-{
-    DistanceScaling = ratio;
-}
-
-float svlFilterImageFileWriter::GetDistanceIntensityRatio()
-{
-    return DistanceScaling;
 }
 

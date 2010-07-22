@@ -32,7 +32,6 @@ http://www.cisst.org/cisst/license.txt.
 
 /*!
   \ingroup cisstMultiTask
-
  */
 
 class mtsCommandFilteredQueuedWrite: public mtsCommandQueuedWriteGeneric
@@ -51,50 +50,23 @@ private:
 
 public:
 
-    inline mtsCommandFilteredQueuedWrite(mtsCommandQualifiedReadBase *actualFilter, mtsCommandWriteBase * actualCommand):
-        BaseType(0, actualCommand, 0), ActualFilter(actualFilter)
-    {
-        // PK: is there a better way to do this?
-        filterOutput = dynamic_cast<mtsGenericObject *>(actualFilter->GetArgument2Prototype()->Services()->Create());
-    }
+    mtsCommandFilteredQueuedWrite(mtsCommandQualifiedReadBase * actualFilter,
+                                  mtsCommandWriteBase * actualCommand);
 
+    mtsCommandFilteredQueuedWrite(mtsMailBox * mailBox,
+                                  mtsCommandQualifiedReadBase * actualFilter,
+                                  mtsCommandWriteBase * actualCommand,
+                                  size_t size);
 
-    inline mtsCommandFilteredQueuedWrite(mtsMailBox * mailBox, mtsCommandQualifiedReadBase * actualFilter, mtsCommandWriteBase * actualCommand, unsigned int size):
-        BaseType(mailBox, actualCommand, size), ActualFilter(actualFilter)
-    {
-        // PK: is there a better way to do this?
-        filterOutput = dynamic_cast<mtsGenericObject *>(actualFilter->GetArgument2Prototype()->Services()->Create());
-    }
+    virtual ~mtsCommandFilteredQueuedWrite();
 
-
-    // ArgumentsQueue destructor should get called
-    inline virtual ~mtsCommandFilteredQueuedWrite()
-    {
-        if (filterOutput) delete filterOutput;
-    }
-
-
-    inline virtual mtsCommandFilteredQueuedWrite * Clone(mtsMailBox * mailBox, unsigned int size) const {
-        return new mtsCommandFilteredQueuedWrite(mailBox, this->ActualFilter, this->ActualCommand, size);
-    }
+    mtsCommandFilteredQueuedWrite * Clone(mtsMailBox * mailBox, size_t size) const;
 
     /*! Return a pointer on the argument prototype */
-    inline virtual const mtsGenericObject * GetArgumentPrototype(void) const {
-        return this->ActualFilter->GetArgument1Prototype();
-    }
+    virtual const mtsGenericObject * GetArgumentPrototype(void) const;
 
-    virtual mtsCommandBase::ReturnType Execute(const mtsGenericObject & argument) {
-        if (this->IsEnabled()) {
-            // First, call the filter (qualified read)
-            mtsCommandBase::ReturnType ret = ActualFilter->Execute(argument, *filterOutput);
-            if (ret != mtsCommandBase::DEV_OK) return ret;
-            // Next, queue the write command
-            return BaseType::Execute(*filterOutput);
-        }
-        return mtsCommandBase::DISABLED;
-    }
-
+    mtsCommandBase::ReturnType Execute(const mtsGenericObject & argument);
 };
 
-#endif // _mtsCommandFilteredQueuedWrite_h
 
+#endif // _mtsCommandFilteredQueuedWrite_h

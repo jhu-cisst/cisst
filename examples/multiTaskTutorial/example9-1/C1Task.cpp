@@ -11,7 +11,7 @@ C1Task::C1Task(const std::string & taskName, double period):
     mtsTaskPeriodic(taskName, period, false, 5000)
 {
     // to communicate with the interface of the resource
-    mtsRequiredInterface * required = AddRequiredInterface("r1");
+    mtsInterfaceRequired * required = AddInterfaceRequired("r1");
     if (required) {
         required->AddFunction("Void", this->VoidServer1);
         required->AddFunction("Write", this->WriteServer1);
@@ -21,7 +21,7 @@ C1Task::C1Task(const std::string & taskName, double period):
         required->AddEventHandlerWrite(&C1Task::EventWriteHandler1, this, "EventWrite");
     }
 
-    required = AddRequiredInterface("r2");
+    required = AddInterfaceRequired("r2");
     if (required) {
         required->AddFunction("Void", this->VoidServer2);
         required->AddFunction("Write", this->WriteServer2);
@@ -47,7 +47,7 @@ void C1Task::Startup(void)
     }
     fltkMutex.Unlock();
     // check argument prototype for event handler
-    mtsRequiredInterface * required = GetRequiredInterface("r1");
+    mtsInterfaceRequired * required = GetInterfaceRequired("r1");
     CMN_ASSERT(required);
     mtsCommandWriteBase * eventHandler = required->GetEventHandlerWrite("EventWrite");
     CMN_ASSERT(eventHandler);

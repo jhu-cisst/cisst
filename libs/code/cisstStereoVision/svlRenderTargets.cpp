@@ -21,6 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstStereoVision/svlRenderTargets.h>
+#include <cisstStereoVision/svlConfig.h>
 
 #ifdef _MSC_VER
     // Quick fix for Visual Studio Intellisense:
@@ -36,8 +37,6 @@ http://www.cisst.org/cisst/license.txt.
 #if (CISST_SVL_HAS_MIL == ON)
     #include "svlVidCapSrcMIL.h"
 #endif // CISST_SVL_HAS_MIL
-
-using namespace std;
 
 
 /*************************************/

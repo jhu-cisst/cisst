@@ -23,7 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlStreamBranchSource_h
 #define _svlStreamBranchSource_h
 
-#include <cisstStereoVision/svlStreamManager.h>
+#include <cisstStereoVision/svlFilterSourceBase.h>
 #include <cisstStereoVision/svlSampleQueue.h>
 
 // Always include last!
@@ -33,22 +33,24 @@ http://www.cisst.org/cisst/license.txt.
 class svlStreamBranchSource : public svlFilterSourceBase
 {
 friend class svlStreamManager;
-friend class svlStreamControlMultiThread;
+friend class svlFilterOutput;
+friend class svlStreamProc;
 
 private:
     svlStreamBranchSource(svlStreamType type, unsigned int buffersize);
     svlStreamBranchSource();
     ~svlStreamBranchSource();
 
-    int Initialize();
-    int ProcessFrame(svlProcInfo* procInfo);
+    int Initialize(svlSample* &syncOutput);
+    int Process(svlProcInfo* procInfo, svlSample* &syncOutput);
 
     static bool IsTypeSupported(svlStreamType type);
-    void SetInput(svlSample* inputdata);
-    void PushSample(svlSample* inputdata);
+    void SetInput(svlSample* syncInput);
+    void PushSample(const svlSample* syncInput);
 
     bool InputBlocked;
     svlSampleQueue SampleQueue;
+    svlSample* OutputSample;
 
 public:
     int GetBufferUsage();

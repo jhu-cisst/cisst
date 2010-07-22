@@ -21,14 +21,15 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _devNDISerialToolQDevice_h
 #define _devNDISerialToolQDevice_h
 
-#include <cisstMultiTask/mtsDevice.h>
-#include <cisstMultiTask/mtsFunctionReadOrWrite.h>
+#include <cisstMultiTask/mtsComponent.h>
+#include <cisstMultiTask/mtsFunctionRead.h>
+#include <cisstMultiTask/mtsFunctionWrite.h>
 #include <cisstParameterTypes/prmPositionCartesianGet.h>
 #include <cisstDevices/devNDISerialToolQWidget.h>
 #include <cisstDevices/devExport.h>  // always include last
 
 
-class CISST_EXPORT devNDISerialToolQDevice : public QObject, public mtsDevice
+class CISST_EXPORT devNDISerialToolQDevice : public QObject, public mtsComponent
 {
     Q_OBJECT;
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);

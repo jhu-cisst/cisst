@@ -246,7 +246,7 @@ protected:
             delete this->Data[index];
         }
         delete [] this->Data;
-    
+        this->Data = 0;
     }
 
 public:
@@ -289,7 +289,6 @@ public:
                 CMN_LOG_INIT_WARNING << "mtsQueueGeneric::SetSize: failed to delete data array for \""
                                      << this->ClassServices->GetName() << "\"" << std::endl;
             }
-            
         }
         this->ClassServices = value.Services();
         this->Allocate(size + 1, value);

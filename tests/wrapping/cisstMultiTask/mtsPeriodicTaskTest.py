@@ -42,7 +42,7 @@ class PeriodicTaskTest(unittest.TestCase):
         self.failUnless(isinstance(periodicTask, cisstMultiTaskPythonTest.mtsPeriodicTaskTest))
         self.failUnless(isinstance(periodicTask, cisstMultiTask.mtsTaskPeriodic))
         self.failUnless(isinstance(periodicTask, cisstMultiTask.mtsTaskContinuous))
-        self.failUnless(isinstance(periodicTask, cisstMultiTask.mtsDevice))
+        self.failUnless(isinstance(periodicTask, cisstMultiTask.mtsComponent))
         self.failUnless(isinstance(periodicTask, cisstCommon.cmnGenericObject))
 
     def TestUpdateFromC(self):

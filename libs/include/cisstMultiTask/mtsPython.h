@@ -37,14 +37,13 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsCommandBase.h>
 #include <cisstMultiTask/mtsCommandVoidBase.h>
 #include <cisstMultiTask/mtsCommandReadOrWriteBase.h>
-#include <cisstMultiTask/mtsDevice.h>
-#include <cisstMultiTask/mtsDeviceInterface.h>
+#include <cisstMultiTask/mtsInterfaceProvided.h>
+#include <cisstMultiTask/mtsInterfaceRequired.h>
+#include <cisstMultiTask/mtsComponent.h>
 #include <cisstMultiTask/mtsTask.h>
 #include <cisstMultiTask/mtsTaskContinuous.h>
 #include <cisstMultiTask/mtsTaskPeriodic.h>
 #include <cisstMultiTask/mtsTaskFromSignal.h>
-#include <cisstMultiTask/mtsTaskInterface.h>
-#include <cisstMultiTask/mtsRequiredInterface.h>
 #include <cisstMultiTask/mtsTaskManager.h>
 #include <cisstMultiTask/mtsStateIndex.h>
 #include <cisstMultiTask/mtsCollectorBase.h>

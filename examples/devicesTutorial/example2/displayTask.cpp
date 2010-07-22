@@ -6,6 +6,8 @@
 #include "displayTask.h"
 #include "displayUI.h"
 
+#include <cisstMultiTask/mtsInterfaceRequired.h>
+
 CMN_IMPLEMENT_SERVICES(displayTask);
 
 displayTask::displayTask(const std::string & taskName, double period):
@@ -14,10 +16,10 @@ displayTask::displayTask(const std::string & taskName, double period):
     MaxWeight(0.0)
 {
     // to communicate with the interface of the resource
-    mtsRequiredInterface * requiredInterface = AddRequiredInterface("Scale");
-	if (requiredInterface) {
+    mtsInterfaceRequired * interfaceRequired = AddInterfaceRequired("Scale");
+	if (interfaceRequired) {
         // bound the mtsFunction to the command provided by the interface 
-        requiredInterface->AddFunction("GetWeight", GetWeight, mtsRequired);
+        interfaceRequired->AddFunction("GetWeight", GetWeight, mtsRequired);
     }
 }
 

@@ -63,9 +63,9 @@ void devNovintHDLMasterSlave::SetupTeleoperationInterfaces(const std::string & f
 {
     
     // Create the provided interface
-    mtsProvidedInterface * providedInterface;
+    mtsInterfaceProvided * providedInterface;
     std::string providedInterfaceName = "TeleoperationParameters" + firstDeviceName + secondDeviceName;
-    providedInterface = AddProvidedInterface(providedInterfaceName);
+    providedInterface = AddInterfaceProvided(providedInterfaceName);
 
     // Initialize Values
     DevData * pairData;

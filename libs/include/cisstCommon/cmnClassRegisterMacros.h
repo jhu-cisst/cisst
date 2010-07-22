@@ -97,6 +97,9 @@ http://www.cisst.org/cisst/license.txt.
     };
   \endcode
 
+  Finally, the macro #CMN_DECLARE_SERVICES_EXPORT_ALWAYS was introduced as a temporary
+  fix for template classes, such as mtsGenericObjectProxy.
+
   \param hasDynamicCreation Set this parameter to
   #CMN_DYNAMIC_CREATION to enable dynamic creation and
   #CMN_NO_DYNAMIC_CREATION to disable dynamic creation.  Dynamic
@@ -137,6 +140,26 @@ http://www.cisst.org/cisst/license.txt.
       } \
     private: \
       static cmnClassServicesBase * ClassServicesPointer;
+
+#ifdef CMN_DECLARE_SERVICES_EXPORT_ALWAYS
+#undef CMN_DECLARE_SERVICES_EXPORT_ALWAYS
+#endif
+#if WIN32 && _MSC_VER && CISST_DLL
+#define CMN_DECLARE_SERVICES_EXPORT_ALWAYS(hasDynamicCreation, lod) \
+    public: \
+      enum {HAS_DYNAMIC_CREATION = hasDynamicCreation}; \
+      enum {InitialLoD = lod}; \
+      _declspec(dllexport) static cmnClassServicesBase * ClassServices(void); \
+      virtual const cmnClassServicesBase * Services(void) const \
+      { \
+          return this->ClassServices(); \
+      } \
+    private: \
+      static cmnClassServicesBase * ClassServicesPointer;
+#else
+#define CMN_DECLARE_SERVICES_EXPORT_ALWAYS(hasDynamicCreation, lod) CMN_DECLARE_SERVICES_EXPORT(hasDynamicCreation, lod)
+#endif
+
 //@}
 
 

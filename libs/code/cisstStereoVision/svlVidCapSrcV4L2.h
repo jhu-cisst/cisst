@@ -24,9 +24,9 @@ http://www.cisst.org/cisst/license.txt.
 #define _svlVidCapSrcV4L2_h
 
 #include <cisstStereoVision/svlFilterSourceVideoCapture.h>
-#include <cisstStereoVision/svlBufferImage.h>
 
-
+class svlBufferImage;
+class osaThread;
 class svlVidCapSrcV4L2Thread;
 
 class svlVidCapSrcV4L2 : public svlVidCapSrcBase, public cmnGenericObject

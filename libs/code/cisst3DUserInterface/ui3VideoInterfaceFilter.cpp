@@ -25,42 +25,53 @@ http://www.cisst.org/cisst/license.txt.
 
 ui3VideoInterfaceFilter::ui3VideoInterfaceFilter(svlStreamType streamtype, int streamid, ui3BehaviorBase* behavior) :
     svlFilterBase(),
+    OutputImage(0),
     StreamID(streamid),
     ParentBehavior(behavior)
 {
     CMN_ASSERT(behavior);
-    AddSupportedType(streamtype, streamtype);
+
+    AddInput("input", true);
+    AddInputType("input", streamtype);
+    AddOutput("output", true);
+    SetAutomaticOutputType(true);
 }
 
 ui3VideoInterfaceFilter::~ui3VideoInterfaceFilter()
 {
 }
 
-int ui3VideoInterfaceFilter::Initialize(svlSample* inputdata)
+int ui3VideoInterfaceFilter::Initialize(svlSample* syncInput, svlSample* &syncOutput)
 {
-    OutputData = inputdata;
+    syncOutput = syncInput;
+    OutputImage = dynamic_cast<svlSampleImage*>(syncOutput);
     return SVL_OK;
 }
 
-int ui3VideoInterfaceFilter::ProcessFrame(svlProcInfo* procInfo, svlSample* inputdata)
+int ui3VideoInterfaceFilter::Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput)
 {
+    syncOutput = syncInput;
+    OutputImage = dynamic_cast<svlSampleImage*>(syncOutput);
+    _SkipIfAlreadyProcessed(syncInput, syncOutput);
+
     // for now, ui3BehaviorBase::OnStreamSample remains single threaded for the
     // sake of simplicity but we can make it multithreaded later by simply
     // passing the procInfo to it
     _OnSingleThread(procInfo) {
-        ParentBehavior->OnStreamSample(inputdata, StreamID);
+        ParentBehavior->OnStreamSample(syncInput, StreamID);
     }
     return SVL_OK;
 }
 
 unsigned int ui3VideoInterfaceFilter::GetWidth(unsigned int videoch)
 {
-    if (!OutputData || !OutputData->IsImage()) return 0;
-    return dynamic_cast<svlSampleImageBase*>(OutputData)->GetWidth(videoch);
+    if (!OutputImage) return 0;
+    return OutputImage->GetWidth(videoch);
 }
 
 unsigned int ui3VideoInterfaceFilter::GetHeight(unsigned int videoch)
 {
-    if (!OutputData || !OutputData->IsImage()) return 0;
-    return dynamic_cast<svlSampleImageBase*>(OutputData)->GetHeight(videoch);
+    if (!OutputImage) return 0;
+    return OutputImage->GetHeight(videoch);
 }
+

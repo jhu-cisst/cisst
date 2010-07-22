@@ -23,8 +23,8 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <QApplication>
 
-#include "clientQDevice.h"
-#include "serverQDevice.h"
+#include "clientQtComponent.h"
+#include "serverQtComponent.h"
 
 
 int main(int argc, char *argv[])
@@ -38,15 +38,15 @@ int main(int argc, char *argv[])
     cmnLogger::GetMultiplexer()->AddChannel(threadedLog, CMN_LOG_LOD_VERY_VERBOSE);
 
     // set the log level of detail on select tasks
-    cmnClassRegister::SetLoD("clientQDevice", CMN_LOG_LOD_VERY_VERBOSE);
-    cmnClassRegister::SetLoD("serverQDevice", CMN_LOG_LOD_VERY_VERBOSE);
+    cmnClassRegister::SetLoD("clientQtComponent", CMN_LOG_LOD_VERY_VERBOSE);
+    cmnClassRegister::SetLoD("serverQtComponent", CMN_LOG_LOD_VERY_VERBOSE);
 
     // create a Qt user interface
     QApplication application(argc, argv);
 
     // create the tasks with their respective UIs
-    serverQDevice * server = new serverQDevice("Server");
-    clientQDevice * client = new clientQDevice("Client");
+    serverQtComponent * server = new serverQtComponent("Server");
+    clientQtComponent * client = new clientQtComponent("Client");
 
     // add the tasks to the task manager
     mtsTaskManager * taskManager = mtsTaskManager::GetInstance();

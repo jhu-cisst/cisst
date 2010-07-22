@@ -24,10 +24,10 @@ devSAH::devSAH( const std::string& taskname,
 
   // Configure the interface
   // The SAH requires the following interface for each finger position
-  //AddRequiredInterface( devSAH::ThumbInterfaceName );
-  AddRequiredInterface( devSAH::FirstInterfaceName );
-  AddRequiredInterface( devSAH::MiddleInterfaceName );
-  AddRequiredInterface( devSAH::RingInterfaceName );
+  //AddInterfaceRequired( devSAH::ThumbInterfaceName );
+  AddInterfaceRequired( devSAH::FirstInterfaceName );
+  AddInterfaceRequired( devSAH::MiddleInterfaceName );
+  AddInterfaceRequired( devSAH::RingInterfaceName );
 
   // Now deal with the hardware
   // copy the port
@@ -100,8 +100,8 @@ devSAH::~devSAH(){
 
 void devSAH::Startup( ){
   /*
-  mtsDeviceInterface* thumbinterface;
-  thumbinterface = GetProvidedInterfaceFor( devSAH::ThumbInterfaceName );  
+  mtsInterfaceProvided* thumbinterface;
+  thumbinterface = GetInterfaceProvidedFor( devSAH::ThumbInterfaceName );  
   if( thumbinterface )
     {SetThumbPosition.Bind( thumbinterface, devSAH::SetThumbPositionCmd );}
   else{
@@ -112,8 +112,8 @@ void devSAH::Startup( ){
   }
   */
 
-  mtsDeviceInterface* firstinterface;
-  firstinterface = GetProvidedInterfaceFor( devSAH::FirstInterfaceName );  
+  mtsInterfaceProvided* firstinterface;
+  firstinterface = GetInterfaceProvidedFor( devSAH::FirstInterfaceName );  
   if( firstinterface )
     {SetFirstPosition.Bind( firstinterface, devSAH::SetFirstPositionCmd );}
   else{
@@ -123,8 +123,8 @@ void devSAH::Startup( ){
 		       << std::endl;
   }
 
-  mtsDeviceInterface* middleinterface;
-  middleinterface = GetProvidedInterfaceFor( devSAH::MiddleInterfaceName );  
+  mtsInterfaceProvided* middleinterface;
+  middleinterface = GetInterfaceProvidedFor( devSAH::MiddleInterfaceName );  
   if( middleinterface )
     {SetMiddlePosition.Bind( middleinterface, devSAH::SetMiddlePositionCmd );}
   else{
@@ -134,8 +134,8 @@ void devSAH::Startup( ){
 		       << std::endl;
   }
 
-  mtsDeviceInterface* ringinterface;
-  ringinterface = GetProvidedInterfaceFor( devSAH::RingInterfaceName );  
+  mtsInterfaceProvided* ringinterface;
+  ringinterface = GetInterfaceProvidedFor( devSAH::RingInterfaceName );  
   if( ringinterface )
     {SetRingPosition.Bind( ringinterface, devSAH::SetRingPositionCmd );}
   else{
@@ -239,8 +239,8 @@ devSAH::Errno devSAH::DisableFinger( devSAH::Finger finger ){
 
 /*
 devSAH::Errno devSAH::CreateFingerInterface( devSAH::Finger finger ){
-  mtsProvidedInterface* positioninterface = 
-    AddProvidedInterface( devSAH::PositionInterfaceName );
+  mtsInterfaceProvided* positioninterface = 
+    AddInterfaceProvided( devSAH::PositionInterfaceName );
 
   // Configure the position interface
   if( positioninterface ){

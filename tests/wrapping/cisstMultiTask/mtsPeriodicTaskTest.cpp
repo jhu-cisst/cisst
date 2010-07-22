@@ -35,18 +35,18 @@ mtsPeriodicTaskTest::mtsPeriodicTaskTest(double periodInSeconds):
     StateTable.AddData(this->Double, "Double");
     StateTable.AddData(this->Vector, "Vector");
     // add one interface, this will create an mtsTaskInterface
-    mtsProvidedInterface * providedInterface = AddProvidedInterface("MainInterface");
-    if (providedInterface) {
+    mtsInterfaceProvided * interfaceProvided = AddInterfaceProvided("MainInterface");
+    if (interfaceProvided) {
         // add command to access state table values to the interface
-        providedInterface->AddCommandReadState(StateTable, this->Double, "GetDouble");
-        providedInterface->AddCommandReadState(StateTable, this->Vector, "GetVector");
+        interfaceProvided->AddCommandReadState(StateTable, this->Double, "GetDouble");
+        interfaceProvided->AddCommandReadState(StateTable, this->Vector, "GetVector");
         // add command to add to vector
-        providedInterface->AddCommandWrite(&mtsPeriodicTaskTest::AddDouble, this, "AddDouble");
+        interfaceProvided->AddCommandWrite(&mtsPeriodicTaskTest::AddDouble, this, "AddDouble");
         // add command to zero all
-        providedInterface->AddCommandVoid(&mtsPeriodicTaskTest::ZeroAll, this, "ZeroAll");
+        interfaceProvided->AddCommandVoid(&mtsPeriodicTaskTest::ZeroAll, this, "ZeroAll");
     }
     // add a second (empty) interface, this will create an mtsTaskInterface
-    providedInterface = AddProvidedInterface("Empty Interface");
+    interfaceProvided = AddInterfaceProvided("Empty Interface");
 }
 
 

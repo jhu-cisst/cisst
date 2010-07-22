@@ -27,8 +27,8 @@ http://www.cisst.org/cisst/license.txt.
 #define _mtsStateData_h
 
 #include <cisstMultiTask/mtsStateTable.h>
-#include <cisstMultiTask/mtsDeviceInterface.h>
-#include <cisstMultiTask/mtsTaskInterface.h>
+#include <cisstMultiTask/mtsInterfaceProvided.h>
+#include <cisstMultiTask/mtsInterfaceProvided.h>
 #include <cisstMultiTask/mtsTask.h>
 #include <cisstMultiTask/mtsVector.h>
 
@@ -127,21 +127,21 @@ public:
       the specified time.  This is normally called from the
       constructor, and the commandName would typically be GetXXX,
       where XXX is the name of the state data. */
-    void AddReadCommandToInterface(mtsDeviceInterface * deviceInterface,
+    void AddReadCommandToInterface(mtsInterfaceProvided * interfaceProvided,
                                    const std::string & commandName) {
-        deviceInterface->AddCommandRead(&ThisType::GetLatest, this, commandName, this->Data);
-        deviceInterface->AddCommandQualifiedRead(&ThisType::Get, this, commandName, mtsStateIndex(), this->Data);
+        interfaceProvided->AddCommandRead(&ThisType::GetLatest, this, commandName, this->Data);
+        interfaceProvided->AddCommandQualifiedRead(&ThisType::Get, this, commandName, mtsStateIndex(), this->Data);
 #ifdef CISST_GETVECTOR
         // PK: fix the following
-        deviceInterface->AddCommandQualifiedRead(&ThisType::GetHistory, this, commandName+"History", mtsStateIndex(), mtsVector<value_type>());
+        interfaceProvided->AddCommandQualifiedRead(&ThisType::GetHistory, this, commandName+"History", mtsStateIndex(), mtsVector<value_type>());
 #endif
     }
 
     /*! Add write command to the specified task interface. Note that
       this must be a task so that the write is thread-safe. */
-    void AddWriteCommandToInterface(mtsTaskInterface * taskInterface,
+    void AddWriteCommandToInterface(mtsInterfaceProvided * interfaceProvided,
                                     const std::string & commandName) {
-        taskInterface->AddCommandWrite(&ThisType::Set, this, commandName);
+        interfaceProvided->AddCommandWrite(&ThisType::Set, this, commandName);
     }
 
 };

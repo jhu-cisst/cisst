@@ -55,10 +55,10 @@ devAcceleGlove::devAcceleGlove( const std::string& taskname,
 
 
 
-  mtsProvidedInterface* interface;
+  mtsInterfaceProvided* interface;
 
   // Create and configure the palm interface
-  interface = AddProvidedInterface( devAcceleGlove::PalmInterface );
+  interface = AddInterfaceProvided( devAcceleGlove::PalmInterface );
   if( interface ){
     palmposition.SetSize( 3 );
     palmposition.SetAll( 0.0 );
@@ -76,7 +76,7 @@ devAcceleGlove::devAcceleGlove( const std::string& taskname,
   }
 
   // Create and configure the thumb interface
-  interface = AddProvidedInterface( devAcceleGlove::ThumbInterface );
+  interface = AddInterfaceProvided( devAcceleGlove::ThumbInterface );
   if( interface ){
     thumbangles.SetSize( 4 );
     thumbangles.SetAll( 0.0 );
@@ -94,7 +94,7 @@ devAcceleGlove::devAcceleGlove( const std::string& taskname,
   }
 
   // Create and configure the first finger interface
-  interface = AddProvidedInterface( devAcceleGlove::FirstInterface );
+  interface = AddInterfaceProvided( devAcceleGlove::FirstInterface );
   if( interface ){
     firstangles.SetSize( 4 );
     firstangles.SetAll( 0.0 );
@@ -112,7 +112,7 @@ devAcceleGlove::devAcceleGlove( const std::string& taskname,
   }
 
   // Create and configure the middle finger interface
-  interface = AddProvidedInterface( devAcceleGlove::MiddleInterface );
+  interface = AddInterfaceProvided( devAcceleGlove::MiddleInterface );
   if( interface ){
     middleangles.SetSize( 4 );
     middleangles.SetAll( 0.0 );
@@ -130,7 +130,7 @@ devAcceleGlove::devAcceleGlove( const std::string& taskname,
   }
 
   // Create and configure the ring finger interface
-  interface = AddProvidedInterface( devAcceleGlove::RingInterface );
+  interface = AddInterfaceProvided( devAcceleGlove::RingInterface );
   if( interface ){
     ringangles.SetSize( 4 );
     ringangles.SetAll( 0.0 );

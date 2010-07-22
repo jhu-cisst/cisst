@@ -54,8 +54,8 @@ void vctPlot2DOpenGL::RenderInitialize(void)
 void vctPlot2DOpenGL::RenderResize(double width, double height)
 {
     this->Viewport.Assign(width, height);
-    GLdouble w = static_cast<GLsizei>(width);
-    GLdouble h = static_cast<GLsizei>(height);
+    GLsizei w = static_cast<GLsizei>(width);
+    GLsizei h = static_cast<GLsizei>(height);
 	glViewport(0 , 0, w ,h); // set up viewport
 	glMatrixMode(GL_PROJECTION); // set the projection matrix
 	glLoadIdentity();

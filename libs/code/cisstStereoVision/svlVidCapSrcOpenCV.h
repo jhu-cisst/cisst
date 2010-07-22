@@ -24,9 +24,10 @@ http://www.cisst.org/cisst/license.txt.
 #define _svlVidCapSrcOpenCV_h
 
 #include <cisstStereoVision/svlFilterSourceVideoCapture.h>
-#include <cisstStereoVision/svlBufferImage.h>
 
 
+class svlBufferImage;
+class osaThread;
 class svlVidCapSrcOpenCVThread;
 
 class svlVidCapSrcOpenCV : public svlVidCapSrcBase, public cmnGenericObject

@@ -30,12 +30,10 @@ http://www.cisst.org/cisst/license.txt.
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
 
-#define SVL_VID_END_REACHED         11
-
 
 // Forward declarations
-class svlSampleImageBase;
-class svlProcInfo;
+struct svlProcInfo;
+class svlSampleImage;
 class svlVideoCodecBase;
 
 
@@ -112,6 +110,11 @@ public:
     virtual int GetPos() const = 0;
     virtual int SetPos(const int pos);
 
+    virtual double GetBegTime() const;
+    virtual double GetEndTime() const;
+    virtual double GetTimeAtPos(const int pos) const;
+    virtual int GetPosAtTime(const double time) const;
+
     virtual svlVideoIO::Compression* GetCompression() const;
     virtual int SetCompression(const svlVideoIO::Compression *compression);
     virtual int DialogCompression();
@@ -119,8 +122,8 @@ public:
     virtual double GetTimestamp() const;
     virtual int SetTimestamp(const double timestamp);
 
-    virtual int Read(svlProcInfo* procInfo, svlSampleImageBase &image, const unsigned int videoch, const bool noresize = false) = 0;
-    virtual int Write(svlProcInfo* procInfo, const svlSampleImageBase &image, const unsigned int videoch) = 0;
+    virtual int Read(svlProcInfo* procInfo, svlSampleImage &image, const unsigned int videoch, const bool noresize = false) = 0;
+    virtual int Write(svlProcInfo* procInfo, const svlSampleImage &image, const unsigned int videoch) = 0;
 
 protected:
     void SetName(const std::string &name);

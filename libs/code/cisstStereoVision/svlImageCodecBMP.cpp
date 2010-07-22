@@ -27,8 +27,6 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlImageCodecBMP class **********/
 /*************************************/
 
-#define MAX_DIMENISION  8192
-
 CMN_IMPLEMENT_SERVICES(svlImageCodecBMP)
 
 svlImageCodecBMP::svlImageCodecBMP() :
@@ -76,13 +74,13 @@ int svlImageCodecBMP::ReadDimensions(const unsigned char *buffer, const size_t b
     return SVL_OK;
 }
 
-int svlImageCodecBMP::Read(svlSampleImageBase &image, const unsigned int videoch, const std::string &filename, bool noresize)
+int svlImageCodecBMP::Read(svlSampleImage &image, const unsigned int videoch, const std::string &filename, bool noresize)
 {
     std::ifstream stream(filename.c_str(), std::ios_base::in | std::ios_base::binary);
     return Read(image, videoch, stream, noresize);
 }
 
-int svlImageCodecBMP::Read(svlSampleImageBase &image, const unsigned int videoch, std::istream &stream, bool noresize)
+int svlImageCodecBMP::Read(svlSampleImage &image, const unsigned int videoch, std::istream &stream, bool noresize)
 {
     if (videoch >= image.GetVideoChannels()) return SVL_FAIL;
 
@@ -144,7 +142,7 @@ int svlImageCodecBMP::Read(svlSampleImageBase &image, const unsigned int videoch
     return SVL_OK;
 }
 
-int svlImageCodecBMP::Read(svlSampleImageBase &image, const unsigned int videoch, const unsigned char *buffer, const size_t buffersize, bool noresize)
+int svlImageCodecBMP::Read(svlSampleImage &image, const unsigned int videoch, const unsigned char *buffer, const size_t buffersize, bool noresize)
 {
     if (videoch >= image.GetVideoChannels()) return SVL_FAIL;
 
@@ -213,13 +211,13 @@ int svlImageCodecBMP::Read(svlSampleImageBase &image, const unsigned int videoch
     return SVL_OK;
 }
 
-int svlImageCodecBMP::Write(const svlSampleImageBase &image, const unsigned int videoch, const std::string &filename, const int compression)
+int svlImageCodecBMP::Write(const svlSampleImage &image, const unsigned int videoch, const std::string &filename, const int compression)
 {
     std::ofstream stream(filename.c_str(), std::ios_base::out | std::ios_base::binary);
     return Write(image, videoch, stream, compression);
 }
 
-int svlImageCodecBMP::Write(const svlSampleImageBase &image, const unsigned int videoch, std::ostream &stream, const int CMN_UNUSED(compression))
+int svlImageCodecBMP::Write(const svlSampleImage &image, const unsigned int videoch, std::ostream &stream, const int CMN_UNUSED(compression))
 {
     if (videoch >= image.GetVideoChannels()) return SVL_FAIL;
 
@@ -275,7 +273,7 @@ int svlImageCodecBMP::Write(const svlSampleImageBase &image, const unsigned int 
     return SVL_OK;
 }
 
-int svlImageCodecBMP::Write(const svlSampleImageBase &image, const unsigned int videoch, unsigned char *buffer, size_t &buffersize, const int CMN_UNUSED(compression))
+int svlImageCodecBMP::Write(const svlSampleImage &image, const unsigned int videoch, unsigned char *buffer, size_t &buffersize, const int CMN_UNUSED(compression))
 {
     if (videoch >= image.GetVideoChannels()) return SVL_FAIL;
     if (buffer == 0) return SVL_FAIL;

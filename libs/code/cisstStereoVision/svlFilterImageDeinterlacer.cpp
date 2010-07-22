@@ -21,9 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstStereoVision/svlFilterImageDeinterlacer.h>
-#include "ipDeinterlacing.h"
 
-using namespace std;
 
 /******************************************/
 /*** svlFilterImageDeinterlacer class *****/
@@ -32,88 +30,48 @@ using namespace std;
 CMN_IMPLEMENT_SERVICES(svlFilterImageDeinterlacer)
 
 svlFilterImageDeinterlacer::svlFilterImageDeinterlacer() :
-    svlFilterBase(),
-    cmnGenericObject()
+    svlFilterBase()
 {
-    AddSupportedType(svlTypeImageRGB, svlTypeImageRGB);
-    AddSupportedType(svlTypeImageRGBStereo, svlTypeImageRGBStereo);
-    MethodToUse = MethodNone;
+    AddInput("input", true);
+    AddInputType("input", svlTypeImageRGB);
+    AddInputType("input", svlTypeImageRGBStereo);
+
+    AddOutput("output", true);
+    SetAutomaticOutputType(true);
+
+    Algorithm = svlImageProcessing::DI_Blending;
 }
 
-svlFilterImageDeinterlacer::~svlFilterImageDeinterlacer()
+int svlFilterImageDeinterlacer::Initialize(svlSample* syncInput, svlSample* &syncOutput)
 {
-    Release();
-}
-
-int svlFilterImageDeinterlacer::Initialize(svlSample* inputdata)
-{
-    Release();
-
-    OutputData = inputdata;
-
+    syncOutput = syncInput;
     return SVL_OK;
 }
 
-int svlFilterImageDeinterlacer::ProcessFrame(svlProcInfo* procInfo, svlSample* inputdata)
+int svlFilterImageDeinterlacer::Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput)
 {
-    ///////////////////////////////////////////
-    // Check if the input sample has changed //
-      if (!IsNewSample(inputdata))
-          return SVL_ALREADY_PROCESSED;
-    ///////////////////////////////////////////
+    syncOutput = syncInput;
+    _SkipIfAlreadyProcessed(syncInput, syncOutput);
 
-    // Passing the same image for the next filter
-    OutputData = inputdata;
-
-    svlSampleImageBase* img = dynamic_cast<svlSampleImageBase*>(inputdata);
+    svlSampleImage* img = dynamic_cast<svlSampleImage*>(syncInput);
     unsigned int videochannels = img->GetVideoChannels();
     unsigned int idx;
 
     _ParallelLoop(procInfo, idx, videochannels)
     {
-        // Processing the input image directly
-        switch (MethodToUse) {
-            case MethodNone:
-                // NOP
-            break;
-
-            case MethodBlending:
-                Blending(img->GetUCharPointer(idx),
-                         static_cast<int>(img->GetWidth(idx)), static_cast<int>(img->GetHeight(idx)));
-            break;
-
-            case MethodDiscarding:
-                Discarding(img->GetUCharPointer(idx),
-                           static_cast<int>(img->GetWidth(idx)), static_cast<int>(img->GetHeight(idx)));
-            break;
-
-            case MethodAdaptiveBlending:
-                AdaptiveBlending(img->GetUCharPointer(idx),
-                                 static_cast<int>(img->GetWidth(idx)), static_cast<int>(img->GetHeight(idx)));
-            break;
-
-            case MethodAdaptiveDiscarding:
-                AdaptiveDiscarding(img->GetUCharPointer(idx),
-                                   static_cast<int>(img->GetWidth(idx)), static_cast<int>(img->GetHeight(idx)));
-            break;
-        }
+        svlImageProcessing::Deinterlace(img, idx, Algorithm);
     }
 
     return SVL_OK;
 }
 
-int svlFilterImageDeinterlacer::Release()
+void svlFilterImageDeinterlacer::SetAlgorithm(svlImageProcessing::DI_Algorithm algorithm)
 {
-    return SVL_OK;
+    Algorithm = algorithm;
 }
 
-void svlFilterImageDeinterlacer::SetMethod(svlFilterImageDeinterlacer::Method method)
+svlImageProcessing::DI_Algorithm svlFilterImageDeinterlacer::GetAlgorithm()
 {
-    MethodToUse = method;
-}
-
-svlFilterImageDeinterlacer::Method svlFilterImageDeinterlacer::GetMethod()
-{
-    return MethodToUse;
+    return Algorithm;
 }
 

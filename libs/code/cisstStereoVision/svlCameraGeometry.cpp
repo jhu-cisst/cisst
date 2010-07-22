@@ -21,21 +21,13 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstStereoVision/svlCameraGeometry.h>
-#include <cisstStereoVision/svlStreamDefs.h>
+#include <cisstStereoVision/svlTypes.h>
 #include <sstream>
 
 
 /*************************************/
 /*** svlCameraGeometry class *********/
 /*************************************/
-
-svlCameraGeometry::svlCameraGeometry()
-{
-}
-
-svlCameraGeometry::~svlCameraGeometry()
-{
-}
 
 void svlCameraGeometry::SetIntrinsics(const svlCameraGeometry::Intrinsics & intrinsics, const unsigned int cam_id)
 {
@@ -250,6 +242,34 @@ svlCameraGeometry::Intrinsics svlCameraGeometry::GetIntrinsics(const unsigned in
     return intrinsics;
 }
 
+const svlCameraGeometry::Intrinsics* svlCameraGeometry::GetIntrinsicsPtr(const unsigned int cam_id) const
+{
+    if (cam_id >= IntrinsicParams.size()) return 0;
+    return &(IntrinsicParams[cam_id]);
+}
+
+int svlCameraGeometry::GetIntrinsics(double& fcx, double& fcy,
+                                     double& ccx, double& ccy,
+                                     double& a,
+                                     double& kc0, double& kc1, double& kc2, double& kc3, double& kc4,
+                                     const unsigned int cam_id)
+{
+    if (cam_id >= IntrinsicParams.size()) return SVL_FAIL;
+
+    fcx = IntrinsicParams[cam_id].fc[0];
+    fcy = IntrinsicParams[cam_id].fc[1];
+    ccx = IntrinsicParams[cam_id].cc[0];
+    ccy = IntrinsicParams[cam_id].cc[1];
+    a   = IntrinsicParams[cam_id].a;
+    kc0 = IntrinsicParams[cam_id].kc[0];
+    kc1 = IntrinsicParams[cam_id].kc[1];
+    kc2 = IntrinsicParams[cam_id].kc[2];
+    kc3 = IntrinsicParams[cam_id].kc[3];
+    kc4 = IntrinsicParams[cam_id].kc[4];
+
+    return SVL_OK;
+}
+
 int svlCameraGeometry::GetExtrinsics(svlCameraGeometry::Extrinsics & extrinsics, const unsigned int cam_id) const
 {
     if (cam_id >= ExtrinsicParams.size()) return SVL_FAIL;
@@ -263,6 +283,28 @@ svlCameraGeometry::Extrinsics svlCameraGeometry::GetExtrinsics(const unsigned in
     memset(&extrinsics, 0, sizeof(Extrinsics));
     GetExtrinsics(extrinsics, cam_id);
     return extrinsics;
+}
+
+const svlCameraGeometry::Extrinsics* svlCameraGeometry::GetExtrinsicsPtr(const unsigned int cam_id) const
+{
+    if (cam_id >= ExtrinsicParams.size()) return 0;
+    return &(ExtrinsicParams[cam_id]);
+}
+
+int svlCameraGeometry::GetExtrinsics(double& om0, double& om1, double& om2,
+                                     double& T0, double& T1, double& T2,
+                                     const unsigned int cam_id)
+{
+    if (cam_id >= ExtrinsicParams.size()) return SVL_FAIL;
+
+    om0 = ExtrinsicParams[cam_id].om[0];
+    om1 = ExtrinsicParams[cam_id].om[1];
+    om2 = ExtrinsicParams[cam_id].om[2];
+    T0  = ExtrinsicParams[cam_id].T[0];
+    T1  = ExtrinsicParams[cam_id].T[1];
+    T2  = ExtrinsicParams[cam_id].T[2];
+
+    return SVL_OK;
 }
 
 int svlCameraGeometry::GetPosition(vctDouble3 & position, const unsigned int cam_id) const
@@ -421,6 +463,32 @@ int svlCameraGeometry::RotateWorldAboutY(double degrees)
     return SVL_OK;
 }
 
+int svlCameraGeometry::RotateWorldAboutZ(double degrees)
+{
+    const unsigned int camcount = ExtrinsicParams.size();
+    if (camcount == 0) return SVL_FAIL;
+
+    // Create axis-angle rotation
+    vctDoubleAxAnRot3 aarot(vctDouble3(0.0, 0.0, 1.0), degrees * 3.1415926535898 / 180.0);
+    vctDoubleFrm4x4 frame_from_aarot;
+    frame_from_aarot.Identity();
+    frame_from_aarot.Rotation().From(aarot);
+
+    // Apply transformation to cameras
+    vctDoubleFrm4x4 temp_frame;
+    vctDoubleMatRot3 w2c_R;
+    
+    for (unsigned int i = 0; i < camcount; i ++) {
+        frame_from_aarot.ApplyTo(ExtrinsicParams[i].frame, temp_frame);
+        ExtrinsicParams[i].frame = temp_frame;
+        w2c_R.FromRaw(temp_frame.Rotation());
+        ExtrinsicParams[i].om.From(w2c_R);
+        ExtrinsicParams[i].T = temp_frame.Translation();
+    }
+
+    return SVL_OK;
+}
+
 void svlCameraGeometry::Wrld2Cam(const unsigned int cam_id, vctDouble2 & point2D, const vctDouble3 & point3D)
 {
     point2D = Wrld2Cam(cam_id, point3D);
@@ -433,20 +501,51 @@ vctDouble2 svlCameraGeometry::Wrld2Cam(const unsigned int CMN_UNUSED(cam_id), co
     return result;
 }
 
-void svlCameraGeometry::Cam2Wrld(vctDouble3 & point3D,
-                                 const unsigned int cam_id1, const vctDouble2 & point2D_1,
-                                 const unsigned int cam_id2, const vctDouble2 & point2D_2)
+template<class _ValueType>
+void svlCameraGeometry::Cam2Wrld(vctFixedSizeVector<_ValueType, 3>& point3D,
+                                 const unsigned int cam_id1,
+                                 const vctFixedSizeVector<_ValueType, 2>& point2D_1,
+                                 const unsigned int cam_id2,
+                                 const vctFixedSizeVector<_ValueType, 2>& point2D_2)
 {
-    point3D = Cam2Wrld(cam_id1, point2D_1, cam_id2, point2D_2);
+    Extrinsics* ex2 = ExtrinsicParams.Pointer(cam_id2);
+    Intrinsics* in2 = IntrinsicParams.Pointer(cam_id2);
+    const _ValueType ppx = static_cast<_ValueType>(in2->cc[0]);
+    const _ValueType mindisp = static_cast<_ValueType>(0.01);
+    _ValueType disp, ratio;
+
+    double* pfrm = ex2->frame.Pointer();
+    const _ValueType axis1 = static_cast<_ValueType>(pfrm[0]);
+    const _ValueType axis2 = static_cast<_ValueType>(pfrm[5]);
+    const _ValueType axis3 = static_cast<_ValueType>(pfrm[10]);
+
+    disp = (point2D_1.X() - static_cast<_ValueType>(IntrinsicParams[cam_id1].cc[0])) - (point2D_2.X() - ppx);
+    if (disp < mindisp) disp = mindisp;
+
+    ratio = static_cast<_ValueType>(ExtrinsicParams[cam_id1].T.X() - ex2->T.X()) / disp;
+    if (ratio < 0) ratio = -ratio;
+
+    point3D.X() = axis1 * ratio * (ppx - point2D_2.X());
+    point3D.Y() = axis2 * ratio * (static_cast<_ValueType>(in2->cc[1]) - point2D_2.Y());
+    point3D.Z() = axis3 * ratio * static_cast<_ValueType>(in2->fc[0]);
 }
 
-vctDouble3 svlCameraGeometry::Cam2Wrld(const unsigned int CMN_UNUSED(cam_id1), const vctDouble2 & CMN_UNUSED(point2D_1),
-                                       const unsigned int CMN_UNUSED(cam_id2), const vctDouble2 & CMN_UNUSED(point2D_2))
+template void svlCameraGeometry::Cam2Wrld(vctDouble3&, const unsigned int, const vctDouble2&, const unsigned int, const vctDouble2&);
+template void svlCameraGeometry::Cam2Wrld(vctFloat3&, const unsigned int, const vctFloat2&, const unsigned int, const vctFloat2&);
+
+template<class _ValueType>
+vctFixedSizeVector<_ValueType, 3> svlCameraGeometry::Cam2Wrld(const unsigned int cam_id1,
+                                                              const vctFixedSizeVector<_ValueType, 2>& point2D_1,
+                                                              const unsigned int cam_id2,
+                                                              const vctFixedSizeVector<_ValueType, 2>& point2D_2)
 {
-    vctDouble3 result;
-    result.SetAll(0.0);
-    return result;
+    vctFixedSizeVector<_ValueType, 3> point3d;
+    Cam2Wrld<_ValueType>(point3d, cam_id1, point2D_1, cam_id2, point2D_2);
+    return point3d;
 }
+
+template vctDouble3 svlCameraGeometry::Cam2Wrld(const unsigned int, const vctDouble2&, const unsigned int, const vctDouble2&);
+template vctFloat3 svlCameraGeometry::Cam2Wrld(const unsigned int, const vctFloat2&, const unsigned int, const vctFloat2&);
 
 void svlCameraGeometry::Empty()
 {

@@ -108,7 +108,7 @@ public:
 
         // Set skin to semi-transparent.
         SkinActor->GetProperty()->SetOpacity(1.0);
-    
+
         // Scale the actors.
         SkinActor->SetScale(0.05);
 
@@ -303,7 +303,7 @@ public:
     {
     }
 
-    inline bool CreateVTKObjects(void) {      
+    inline bool CreateVTKObjects(void) {
         // Create slice planes.
         // Start by creating a black/white lookup table.
         bwLut = vtkLookupTable::New();
@@ -348,7 +348,7 @@ public:
         axial->SetInput(axialColors->GetOutput());
         axial->SetDisplayExtent(0,63, 0,63, 46, 46);
 
-        // Create the third (coronal) plane of the three planes. We use 
+        // Create the third (coronal) plane of the three planes. We use
         // the same approach as before except that the extent differs.
         coronalColors = vtkImageMapToColors::New();
         coronalColors->SetInputConnection(Input->GetOutputPort());
@@ -384,7 +384,7 @@ protected:
     vtkLookupTable * bwLut;
     vtkLookupTable * hueLut;
     vtkLookupTable * satLut;
-    
+
     vtkImageMapToColors * sagittalColors;
     vtkImageActor * sagittal;
     vtkImageMapToColors * axialColors;

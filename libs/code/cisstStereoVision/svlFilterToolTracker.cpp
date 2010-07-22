@@ -3,7 +3,7 @@
 
 /*
   $Id$
-  
+
   Author(s):  Balazs Vagvolgyi
   Created on: 2009
 
@@ -21,8 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstStereoVision/svlFilterToolTracker.h>
-
-using namespace std;
+#include <cisstStereoVision/svlFilterOutput.h>
 
 /******************************************/
 /*** svlFilterToolTracker class ***********/
@@ -32,26 +31,24 @@ CMN_IMPLEMENT_SERVICES(svlFilterToolTracker)
 
 svlFilterToolTracker::svlFilterToolTracker() :
     svlFilterBase(),
-    cmnGenericObject(),
     Algorithm(0),
     WarpedImage(0)
 {
-    AddSupportedType(svlTypeImageRGB, svlTypePointCloud);
-    AddSupportedType(svlTypeImageRGBStereo, svlTypePointCloud);
+    AddInput("input", true);
+    AddInputType("input", svlTypeImageRGB);
+    AddInputType("input", svlTypeImageRGBStereo);
 
-    svlSamplePointCloud* points = new svlSamplePointCloud;
+    AddOutput("output", true);
+    SetAutomaticOutputType(false);
+    GetOutput()->SetType(svlTypeTargets);
 
-    OutputData = points;
-
-    memset(&(Target[SVL_LEFT]), 0, sizeof(TargetType));
-    memset(&(Target[SVL_RIGHT]), 0, sizeof(TargetType));
+    memset(&(Targets[SVL_LEFT]), 0, sizeof(TargetType));
+    memset(&(Targets[SVL_RIGHT]), 0, sizeof(TargetType));
 }
 
 svlFilterToolTracker::~svlFilterToolTracker()
 {
     Release();
-
-    if (OutputData) delete OutputData;
 }
 
 int svlFilterToolTracker::SetAlgorithm(svlToolTrackerAlgorithmBase* algorithm)
@@ -68,54 +65,61 @@ int svlFilterToolTracker::SetInitialTarget(TargetType & target, unsigned int vid
 {
     if (videoch > 1) return SVL_FAIL;
 
-    Target[videoch] = target;
+    Targets[videoch] = target;
 
     return SVL_FAIL;
 }
 
-int svlFilterToolTracker::Initialize(svlSample* inputdata)
+int svlFilterToolTracker::Initialize(svlSample* syncInput, svlSample* &syncOutput)
 {
     if (Algorithm == 0) return SVL_FAIL;
 
-    svlSampleImageBase* img = dynamic_cast<svlSampleImageBase*>(inputdata);
-    svlSamplePointCloud* points = dynamic_cast<svlSamplePointCloud*>(OutputData);
+    svlSampleImage* img = dynamic_cast<svlSampleImage*>(syncInput);
 
     Release();
 
     unsigned int videochannels = img->GetVideoChannels();
+    vctDynamicMatrixRef<int> position;
 
-    WarpedImage = dynamic_cast<svlSampleImageBase*>(img->GetNewInstance());
+    WarpedImage = dynamic_cast<svlSampleImage*>(img->GetNewInstance());
     WarpedImage->SetSize(512, 512);
 
-    // Creating ouptut data structure
-    points->SetSize(3, videochannels);
-    points->points.SetAll(0.0);
+    // Creating output data structure
+    OutputTargets.SetDimensions(4);
+    OutputTargets.SetChannels(videochannels);
 
     // Set input parameters in algorithm
     Algorithm->SetInput(WarpedImage->GetWidth(), WarpedImage->GetHeight(), videochannels);
 
+    position.SetRef(4, videochannels, OutputTargets.GetPositionPointer());
+
     for (unsigned int i = 0; i < videochannels; i ++) {
 
-        // Storing temporary results until tracking starts
-        points->points.Element(0, i) = Target[i].tooltipos.X();
-        points->points.Element(1, i) = Target[i].tooltipos.Y();
-        points->points.Element(2, i) = Target[i].orientation;
-        points->points.Element(3, i) = Target[i].scale;
+        if (OutputTargets.GetFlag(i) > 0) {
+            // Storing temporary results until tracking starts
+            position.Element(0, i) = static_cast<int>(Targets[i].tooltipos.X());
+            position.Element(1, i) = static_cast<int>(Targets[i].tooltipos.Y());
+            position.Element(2, i) = static_cast<int>(Targets[i].orientation);
+            position.Element(3, i) = static_cast<int>(Targets[i].scale);
 
-        // Initializing targets in algorithm
-        Algorithm->SetInitialTarget(Target[i], i);
+            // Initializing targets in algorithm
+            Algorithm->SetInitialTarget(Targets[i], i);
+        }
     }
 
     // Initializing trackers
     Algorithm->Initialize();
 
+    syncOutput = &OutputTargets;
+
     return SVL_OK;
 }
 
-int svlFilterToolTracker::ProcessFrame(svlProcInfo* procInfo, svlSample* inputdata)
+int svlFilterToolTracker::Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput)
 {
-    svlSampleImageBase* img = dynamic_cast<svlSampleImageBase*>(inputdata);
-    svlSamplePointCloud* points = dynamic_cast<svlSamplePointCloud*>(OutputData);
+    syncOutput = &OutputTargets;
+
+    svlSampleImage* img = dynamic_cast<svlSampleImage*>(syncInput);
     unsigned int videochannels = img->GetVideoChannels();
     unsigned int idx;
 
@@ -124,9 +128,9 @@ int svlFilterToolTracker::ProcessFrame(svlProcInfo* procInfo, svlSample* inputda
         // compute warping matrix
         CvMat* affine_mat = cvCreateMat(2,3,CV_32FC1);
         CvPoint2D32f point2d;
-        point2d.x = static_cast<float>(Target[idx].tooltipos.X());
-        point2d.y = static_cast<float>(Target[idx].tooltipos.Y());
-        cv2DRotationMatrix(point2d, Target[idx].orientation, Target[idx].scale, affine_mat);
+        point2d.x = static_cast<float>(Targets[idx].tooltipos.X());
+        point2d.y = static_cast<float>(Targets[idx].tooltipos.Y());
+        cv2DRotationMatrix(point2d, Targets[idx].orientation, Targets[idx].scale, affine_mat);
         // Add translation
         cvmSet(affine_mat ,0 ,2, -1.0 * point2d.x);
         cvmSet(affine_mat ,1 ,2, -1.0 * point2d.y);
@@ -150,16 +154,23 @@ int svlFilterToolTracker::ProcessFrame(svlProcInfo* procInfo, svlSample* inputda
     _OnSingleThread(procInfo) {
         // convert warped parameters back to input image frame
         for (idx = 0; idx < videochannels; idx ++) {
-            Algorithm->GetTarget(Target[idx], idx);
+            Algorithm->GetTarget(Targets[idx], idx);
             // TO DO
         }
 
         // store results
+        vctDynamicMatrixRef<int> position;
+
+        position.SetRef(4, videochannels, OutputTargets.GetPositionPointer());
+
         for (idx = 0; idx < videochannels; idx ++) {
-            points->points.Element(0, idx) = Target[idx].tooltipos.X();
-            points->points.Element(1, idx) = Target[idx].tooltipos.Y();
-            points->points.Element(2, idx) = Target[idx].orientation;
-            points->points.Element(3, idx) = Target[idx].scale;
+
+            if (OutputTargets.GetFlag(idx) > 0) {
+                position.Element(0, idx) = static_cast<int>(Targets[idx].tooltipos.X());
+                position.Element(1, idx) = static_cast<int>(Targets[idx].tooltipos.Y());
+                position.Element(2, idx) = static_cast<int>(Targets[idx].orientation);
+                position.Element(3, idx) = static_cast<int>(Targets[idx].scale);
+            }
         }
     }
 
@@ -187,8 +198,8 @@ svlToolTrackerAlgorithmBase::svlToolTrackerAlgorithmBase() :
     Height(0),
     VideoChannels(0)
 {
-    memset(&(Target[SVL_LEFT]), 0, sizeof(svlFilterToolTracker::TargetType));
-    memset(&(Target[SVL_RIGHT]), 0, sizeof(svlFilterToolTracker::TargetType));
+    memset(&(Targets[SVL_LEFT]), 0, sizeof(svlFilterToolTracker::TargetType));
+    memset(&(Targets[SVL_RIGHT]), 0, sizeof(svlFilterToolTracker::TargetType));
 }
 
 svlToolTrackerAlgorithmBase::~svlToolTrackerAlgorithmBase()
@@ -204,12 +215,12 @@ void svlToolTrackerAlgorithmBase::SetInput(unsigned int width, unsigned int heig
 
 void svlToolTrackerAlgorithmBase::SetInitialTarget(svlFilterToolTracker::TargetType & target, unsigned int videoch)
 {
-    Target[videoch] = target;
+    Targets[videoch] = target;
 }
 
 void svlToolTrackerAlgorithmBase::GetTarget(svlFilterToolTracker::TargetType & target, unsigned int videoch)
 {
-    target =  Target[videoch];
+    target =  Targets[videoch];
 }
 
 int svlToolTrackerAlgorithmBase::Initialize()

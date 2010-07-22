@@ -1,5 +1,8 @@
 #include <cisstDevices/manipulators/devManipulator.h>
 
+#include <cisstMultiTask/mtsInterfaceProvided.h>
+
+
 const std::string devManipulator::InputInterface  = "InputInterface";
 const std::string devManipulator::Input           = "Input";
 
@@ -15,8 +18,8 @@ devManipulator::devManipulator( const std::string& taskname,
 
   {
     // The manipulator provides an input interface
-    mtsProvidedInterface* interface;
-    interface = AddProvidedInterface( devManipulator::InputInterface );
+    mtsInterfaceProvided * interface;
+    interface = AddInterfaceProvided( devManipulator::InputInterface );
     if( interface ){
       input.SetSize( N );
       input.SetAll( 0.0 );
@@ -28,8 +31,8 @@ devManipulator::devManipulator( const std::string& taskname,
   
   {
     // The manipulator provides an output interface
-    mtsProvidedInterface* interface;
-    interface = AddProvidedInterface( devManipulator::OutputInterface );
+    mtsInterfaceProvided * interface;
+    interface = AddInterfaceProvided( devManipulator::OutputInterface );
     if( interface ){
       output.SetSize( N );
       output.SetAll( 0.0 );

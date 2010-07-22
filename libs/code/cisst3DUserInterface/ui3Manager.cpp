@@ -21,8 +21,11 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisst3DUserInterface/ui3Manager.h>
 
+#include <cisstOSAbstraction/osaStopwatch.h>
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsTaskManager.h>
+#include <cisstMultiTask/mtsInterfaceRequired.h>
+#include <cisstMultiTask/mtsInterfaceProvided.h>
 #include <cisst3DUserInterface/ui3VTKRenderer.h>
 #include <cisst3DUserInterface/ui3ImagePlane.h>
 #include <cisst3DUserInterface/ui3SlaveArm.h>
@@ -82,7 +85,7 @@ bool ui3Manager::SetupMaM(mtsDevice * mamDevice, const std::string & mamInterfac
 bool ui3Manager::SetupMaM(const std::string & mamDevice, const std::string & mamInterface)
 {
     // add required interface to device to switch on/off master as mouse
-    mtsRequiredInterface * requiredInterface = this->AddRequiredInterface("MaM");
+    mtsInterfaceRequired * requiredInterface = this->AddInterfaceRequired("MaM");
     requiredInterface->AddEventHandlerWrite(&ui3Manager::MaMModeEventHandler, this, "Button");
 
     // connect the left master device to the right master required interface
@@ -200,18 +203,18 @@ bool ui3Manager::AddBehavior(ui3BehaviorBase * behavior,
     behavior->ConfigureMenuBar();
 
     // create a required interface for all behaviors to connect with the manager
-    mtsRequiredInterface * requiredInterface;
+    mtsInterfaceRequired * requiredInterface;
 
     // create a required interface for this behavior to connect with the manager
-    requiredInterface = behavior->AddRequiredInterface("ManagerInterface" + behavior->GetName());
+    requiredInterface = behavior->AddInterfaceRequired("ManagerInterface" + behavior->GetName());
     CMN_ASSERT(requiredInterface);
     requiredInterface->AddEventHandlerWrite(&ui3BehaviorBase::PrimaryMasterButtonCallback,
                                             behavior, "PrimaryMasterButton");
     requiredInterface->AddEventHandlerWrite(&ui3BehaviorBase::SecondaryMasterButtonCallback,
                                             behavior, "SecondaryMasterButton");
     std::string interfaceName("BehaviorInterface" + behavior->GetName());
-    mtsProvidedInterface * providedInterface;
-    providedInterface = this->AddProvidedInterface(interfaceName);
+    mtsInterfaceProvided * providedInterface;
+    providedInterface = this->AddInterfaceProvided(interfaceName);
     behavior->PrimaryMasterButtonEvent.Bind(providedInterface->AddEventWrite("PrimaryMasterButton", prmEventButton()));
     behavior->SecondaryMasterButtonEvent.Bind(providedInterface->AddEventWrite("SecondaryMasterButton", prmEventButton()));
 
@@ -265,18 +268,18 @@ void ui3Manager::ConnectAll(void)
     // to fix, what if multiple arms have the same role?
     // should we also show arms under their real name?
     // create an interface for all behaviors to access some state information
-    mtsRequiredInterface * requiredInterface;
+    mtsInterfaceRequired * requiredInterface;
     BehaviorList::iterator iterator;
     const BehaviorList::iterator end = this->Behaviors.end();
     for (iterator = this->Behaviors.begin();
          iterator != end;
          iterator++) {
-        requiredInterface = (*iterator)->AddRequiredInterface("ManagerInterface");
+        requiredInterface = (*iterator)->AddInterfaceRequired("ManagerInterface");
         CMN_ASSERT(requiredInterface);
     }
 
-    mtsProvidedInterface * behaviorsInterface = 
-        this->AddProvidedInterface("BehaviorsInterface");
+    mtsInterfaceProvided * behaviorsInterface = 
+        this->AddInterfaceProvided("BehaviorsInterface");
     if (behaviorsInterface) {
         MasterArmList::iterator armIterator;
         const MasterArmList::iterator armEnd = this->MasterArms.end();
@@ -303,7 +306,7 @@ void ui3Manager::ConnectAll(void)
             for (iterator = this->Behaviors.begin();
                  iterator != end;
                  iterator++) {
-                requiredInterface = (*iterator)->GetRequiredInterface("ManagerInterface");
+                requiredInterface = (*iterator)->GetInterfaceRequired("ManagerInterface");
                 CMN_ASSERT(requiredInterface);
                 switch (((*armIterator).second)->Role) {
                 case ui3MasterArm::PRIMARY:
@@ -737,7 +740,7 @@ void ui3Manager::OnStreamSample(svlSample* sample, int streamindex)
         // Check if there are any renderers waiting for this stream (there can be more than one)
         for (unsigned int i = 0; i < Renderers.size(); i ++) {
             if (Renderers[i] && Renderers[i]->streamindex == streamindex && Renderers[i]->imageplane) {
-                Renderers[i]->imageplane->SetImage(dynamic_cast<svlSampleImageBase*>(sample), Renderers[i]->streamchannel);
+                Renderers[i]->imageplane->SetImage(dynamic_cast<svlSampleImage*>(sample), Renderers[i]->streamchannel);
             }
         }
     }

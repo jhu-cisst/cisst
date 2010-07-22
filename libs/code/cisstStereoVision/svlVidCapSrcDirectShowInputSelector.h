@@ -23,8 +23,9 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlVidCapSrcDirectShowInputSelector_h
 #define _svlVidCapSrcDirectShowInputSelector_h
 
-#include "dshow.h"
+#include <iostream>
 #include <list>
+#include "dshow.h"
 
 
 class svlVidCapSrcDirectShowInputSelector

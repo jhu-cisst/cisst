@@ -16,11 +16,11 @@ sineTask::sineTask(const std::string & taskName, double period):
     // add SineData to the StateTable defined in mtsTask
     StateTable.AddData(SineData, "SineData");
     // add one interface, this will create an mtsTaskInterface
-    mtsProvidedInterface * provided = AddProvidedInterface("MainInterface");
+    mtsInterfaceProvided * provided = AddInterfaceProvided("MainInterface");
     if (provided) {
         // add command to access state table values to the interface
         provided->AddCommandReadState(StateTable, SineData, "GetData");
-        // add command to modify the sine amplitude 
+        // add command to modify the sine amplitude
         provided->AddCommandWrite(&sineTask::SetAmplitude, this, "SetAmplitude");
     }
 }

@@ -24,16 +24,19 @@ http://www.cisst.org/cisst/license.txt.
 CMN_IMPLEMENT_SERVICES(mtsCollectorEvent)
 
 #include <cisstMultiTask/mtsCollectorState.h>
-CMN_IMPLEMENT_SERVICES(mtsCollectorState)
+ CMN_IMPLEMENT_SERVICES(mtsCollectorState)
 
-#include <cisstMultiTask/mtsDevice.h>
-CMN_IMPLEMENT_SERVICES(mtsDevice)
+#include <cisstMultiTask/mtsComponent.h>
+CMN_IMPLEMENT_SERVICES(mtsComponent)
 
-#include <cisstMultiTask/mtsDeviceInterface.h>
-CMN_IMPLEMENT_SERVICES(mtsDeviceInterface)
+#include <cisstMultiTask/mtsInterfaceProvidedOrOutput.h>
+CMN_IMPLEMENT_SERVICES(mtsInterfaceProvidedOrOutput)
 
-#include <cisstMultiTask/mtsRequiredInterface.h>
-CMN_IMPLEMENT_SERVICES(mtsRequiredInterface)
+#include <cisstMultiTask/mtsInterfaceProvided.h>
+CMN_IMPLEMENT_SERVICES(mtsInterfaceProvided)
+
+#include <cisstMultiTask/mtsInterfaceRequired.h>
+CMN_IMPLEMENT_SERVICES(mtsInterfaceRequired)
 
 #include <cisstMultiTask/mtsStateIndex.h>
 CMN_IMPLEMENT_SERVICES(mtsStateIndex)
@@ -54,10 +57,6 @@ CMN_IMPLEMENT_SERVICES(mtsTaskFromCallbackAdapter)
 
 #include <cisstMultiTask/mtsTaskFromSignal.h>
 CMN_IMPLEMENT_SERVICES(mtsTaskFromSignal)
-
-#include <cisstMultiTask/mtsTaskInterface.h>
-CMN_IMPLEMENT_SERVICES(mtsTaskInterface)
-CMN_IMPLEMENT_SERVICES(mtsTaskInterfaceThreadResources)
 
 #include <cisstMultiTask/mtsTaskPeriodic.h>
 CMN_IMPLEMENT_SERVICES(mtsTaskPeriodic)

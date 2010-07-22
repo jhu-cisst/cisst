@@ -62,9 +62,9 @@ http://www.cisst.org/cisst/license.txt.
 %include "cisstStereoVision/svlFilterImageResizer.h"
 %include "cisstStereoVision/svlFilterSourceVideoFile.h"
 %include "cisstStereoVision/svlFilterVideoFileWriter.h"
-%include "cisstStereoVision/svlFilterSourceBuffer.h"
+ // %include "cisstStereoVision/svlFilterSourceBuffer.h"
 
-%include "cisstStereoVision/svlFilterRGBSwapper.h"
+ // %include "cisstStereoVision/svlFilterRGBSwapper.h"
 
 %include "cisstStereoVision/svlFilterImageWindow.h"
 
@@ -204,8 +204,8 @@ typedef svlFilterSourceVideoCapture::ImageProperties ImageProperties;
 %}
 
 
+#if 0 // adeguet1, this was introduced by Dan Mirota (I think, need to figure out why it is not in branch)
 %include "cisstStereoVision/svlFilterCallback.h"
-
 
 /* Copied from http://www.swig.org/Doc1.1/HTML/Python.html#n11 */
 // Attach a new method to our plot widget for adding Python functions
@@ -219,5 +219,6 @@ typedef svlFilterSourceVideoCapture::ImageProperties ImageProperties;
    }
 }
 
-
 %include "cisstStereoVision/svlFilterBuffer.h"
+#endif
+

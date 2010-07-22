@@ -26,6 +26,7 @@ http://www.cisst.org/cisst/license.txt.
     #include <cisstNumerical/nmrLSSolver.h>
 #endif
 #include <cisstDevices/devNDISerial.h>
+#include <cisstMultiTask/mtsInterfaceProvided.h>
 
 CMN_IMPLEMENT_SERVICES(devNDISerial);
 
@@ -34,7 +35,7 @@ devNDISerial::devNDISerial(const std::string & taskName, const double period) :
     mtsTaskPeriodic(taskName, period, false, 5000),
     IsTracking(false)
 {
-    mtsProvidedInterface * provided = AddProvidedInterface("Controller");
+    mtsInterfaceProvided * provided = AddInterfaceProvided("Controller");
     if (provided) {
         StateTable.AddData(IsTracking, "IsTracking");
 
@@ -479,7 +480,7 @@ devNDISerial::Tool * devNDISerial::AddTool(const std::string & name, const char 
         CMN_LOG_CLASS_INIT_VERBOSE << "AddTool: created tool \"" << name << "\" with serial number: " << serialNumber << std::endl;
 
         // create an interface for tool
-        tool->Interface = AddProvidedInterface(name);
+        tool->Interface = AddInterfaceProvided(name);
         if (tool->Interface) {
             StateTable.AddData(tool->TooltipPosition, name + "Position");
             tool->Interface->AddCommandReadState(StateTable, tool->TooltipPosition, "GetPositionCartesian");

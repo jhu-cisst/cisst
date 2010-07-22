@@ -17,8 +17,8 @@ C2ServerTask::C2ServerTask(const std::string & taskName, double period):
     // add ServerData to the StateTable defined in mtsTask
     this->StateTable.AddData(ReadValue1, "ReadValue1");
     this->StateTable.AddData(ReadValue2, "ReadValue2");
-    // add one interface, this will create an mtsTaskInterface
-    mtsProvidedInterface * provided = AddProvidedInterface("p1");
+    // add one interface, this will create an mtsInterfaceProvided
+    mtsInterfaceProvided * provided = AddInterfaceProvided("p1");
     if (provided) {
         provided->AddCommandVoid(&C2ServerTask::Void1, this, "Void");
         provided->AddCommandWrite(&C2ServerTask::Write1, this, "Write");
@@ -28,7 +28,7 @@ C2ServerTask::C2ServerTask(const std::string & taskName, double period):
         provided->AddEventWrite(this->EventWrite1, "EventWrite", mtsDouble(3.14));
     }
 
-    provided = AddProvidedInterface("p2");
+    provided = AddInterfaceProvided("p2");
     if (provided) {
         provided->AddCommandVoid(&C2ServerTask::Void2, this, "Void");
         provided->AddCommandWrite(&C2ServerTask::Write2, this, "Write");

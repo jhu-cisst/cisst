@@ -26,7 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaThread.h>
 #include <cisstOSAbstraction/osaThreadSignal.h>
 #include <cisstStereoVision/svlVideoIO.h>
-#include <cisstStereoVision/svlStreamDefs.h>
+#include <cisstStereoVision/svlTypes.h>
 
 
 class svlVideoCodecCVI : public svlVideoCodecBase, public cmnGenericObject
@@ -44,7 +44,13 @@ public:
     virtual int GetBegPos() const;
     virtual int GetEndPos() const;
     virtual int GetPos() const;
+    virtual int SetPos(const int pos);
 
+    virtual double GetBegTime() const;
+    virtual double GetEndTime() const;
+    virtual double GetTimeAtPos(const int pos) const;
+    virtual int GetPosAtTime(const double time) const;
+    
     virtual svlVideoIO::Compression* GetCompression() const;
     virtual int SetCompression(const svlVideoIO::Compression *compression);
     virtual int DialogCompression();
@@ -52,15 +58,17 @@ public:
     virtual double GetTimestamp() const;
     virtual int SetTimestamp(const double timestamp);
 
-    virtual int Read(svlProcInfo* procInfo, svlSampleImageBase &image, const unsigned int videoch, const bool noresize = false);
-    virtual int Write(svlProcInfo* procInfo, const svlSampleImageBase &image, const unsigned int videoch);
+    virtual int Read(svlProcInfo* procInfo, svlSampleImage &image, const unsigned int videoch, const bool noresize = false);
+    virtual int Write(svlProcInfo* procInfo, const svlSampleImage &image, const unsigned int videoch);
 
 protected:
     const std::string CodecName;
-    const std::string FileStartMarker;
+    const vctFixedSizeVector<std::string, 3> FileStartMarker;
     const std::string FrameStartMarker;
 
+    int Version;
     std::fstream* File;
+    long long int FooterOffset;
     unsigned int PartCount;
     unsigned int Width;
     unsigned int Height;
@@ -70,6 +78,9 @@ protected:
     bool Opened;
     bool Writing;
     double Timestamp;
+
+    vctDynamicVector<long long int> FrameOffsets;
+    vctDynamicVector<double> FrameTimestamps;
 
     unsigned char* yuvBuffer;
     unsigned int yuvBufferSize;

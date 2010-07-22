@@ -32,7 +32,7 @@ int main(int argc, char * argv[])
     osaThreadedLogFile threadedLog("example9Client");
     cmnLogger::GetMultiplexer()->AddChannel(threadedLog, CMN_LOG_LOD_VERY_VERBOSE);
     // specify a higher, more verbose log level for these classes
-    cmnClassRegister::SetLoD("mtsTaskInterface", CMN_LOG_LOD_VERY_VERBOSE);
+    cmnClassRegister::SetLoD("mtsInterfaceProvided", CMN_LOG_LOD_VERY_VERBOSE);
     cmnClassRegister::SetLoD("mtsTaskManager", CMN_LOG_LOD_VERY_VERBOSE);
     cmnClassRegister::SetLoD("clientTask", CMN_LOG_LOD_VERY_VERBOSE);
 

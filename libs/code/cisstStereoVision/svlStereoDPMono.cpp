@@ -21,15 +21,8 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include "svlStereoDPMono.h"
-
 #include <math.h>
-#include <string.h>
 
-#define MAX_UI16_VAL    0xFFFF
-#define MAX_I32_VAL     0x7FFFFFFF
-#define BIG_I32_VAL     100000000
-
-using namespace std;
 
 /******************************************/
 /*** svlStereoDPMono class ****************/
@@ -177,7 +170,7 @@ int svlStereoDPMono::Initialize()
 //    To be called once for each frame.
 //    Computes disparity map from the input image pair
 // *******************************************************************
-int svlStereoDPMono::Process(svlSampleImageBase *images, int *disparitymap)
+int svlStereoDPMono::Process(svlSampleImage *images, int *disparitymap)
 {
     if (images->GetVideoChannels() != 2 ||      // stereo ?
         images->GetDataChannels() != 1)         // 1 color channel ?

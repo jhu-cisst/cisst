@@ -20,6 +20,8 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnPortability.h>
 #include <cisstMultiTask/mtsTaskFromSignal.h>
+#include <cisstMultiTask/mtsInterfaceRequired.h>
+#include <cisstMultiTask/mtsInterfaceProvided.h>
 #include <cisstMultiTask/mtsCommandVoid.h>
 
 
@@ -71,47 +73,54 @@ void * mtsTaskFromSignal::RunInternal(void * CMN_UNUSED(data)) {
 }
 
 
-// this code is pretty much a copy of mtsDevice::AddRequiredInterface
-// except for the creation of the mailbox with a post cammand queued
-// command. I need to refactor, i.e. create a private
-// AddRequiredInterface(name, mailbox).
-mtsRequiredInterface * mtsTaskFromSignal::AddRequiredInterface(const std::string & requiredInterfaceName) {
-    // PK: move DEFAULT_EVENT_QUEUE_LEN somewhere else (not in mtsTaskInterface)
-    mtsMailBox * mailBox = new mtsMailBox(requiredInterfaceName + "Events", mtsTaskInterface::DEFAULT_EVENT_QUEUE_LEN,
+mtsInterfaceRequired * mtsTaskFromSignal::AddInterfaceRequired(const std::string & interfaceRequiredName) {
+    // create a mailbox with post command queued command
+    // PK: move DEFAULT_EVENT_QUEUE_LEN somewhere else (not in mtsInterfaceProvided)
+    mtsMailBox * mailBox = new mtsMailBox(interfaceRequiredName + "Events", mtsInterfaceRequired::DEFAULT_EVENT_QUEUE_LEN,
                                           this->PostCommandQueuedCommand);
-    mtsRequiredInterface * requiredInterface = new mtsRequiredInterface(requiredInterfaceName, mailBox);
-    if (mailBox && requiredInterface) {
-        if (RequiredInterfaces.AddItem(requiredInterfaceName, requiredInterface)) {
-            return requiredInterface;
-        }
-        CMN_LOG_CLASS_INIT_ERROR << "AddRequiredInterface: unable to add interface \""
-                                 << requiredInterfaceName << "\"" << std::endl;
-        if (requiredInterface) {
-            delete requiredInterface;
-        }
-        if (mailBox) {
+    mtsInterfaceRequired * result;
+    if (mailBox) {
+        // try to create and add interface
+        result = this->AddInterfaceRequiredUsingMailbox(interfaceRequiredName, mailBox);
+        if (!result) {
             delete mailBox;
         }
-        return 0;
+        return result;
     }
-    CMN_LOG_CLASS_INIT_ERROR << "AddRequiredInterface: unable to create interface or mailbox for \""
-                             << requiredInterfaceName << "\"" << std::endl;
+    CMN_LOG_CLASS_INIT_ERROR << "AddInterfaceRequired: unable to create mailbox for \""
+                             << interfaceRequiredName << "\"" << std::endl;    delete mailBox;
     return 0;
 }
 
 
-mtsDeviceInterface * mtsTaskFromSignal::AddProvidedInterface(const std::string & newInterfaceName) {
-    mtsTaskInterface * newInterface = new mtsTaskInterface(newInterfaceName, this, this->PostCommandQueuedCommand);
-    if (newInterface) {
-        if (ProvidedInterfaces.AddItem(newInterfaceName, newInterface)) {
-            return newInterface;
+mtsInterfaceProvided * mtsTaskFromSignal::AddInterfaceProvided(const std::string & interfaceProvidedName,
+                                                               mtsInterfaceQueuingPolicy queuingPolicy)
+{
+    mtsInterfaceProvided * interfaceProvided;
+    if ((queuingPolicy == MTS_COMPONENT_POLICY)
+        || (queuingPolicy == MTS_COMMANDS_SHOULD_BE_QUEUED)) {
+        interfaceProvided = new mtsInterfaceProvided(interfaceProvidedName, this,
+                                                     MTS_COMMANDS_SHOULD_BE_QUEUED,
+                                                     this->PostCommandQueuedCommand);
+    } else {
+        CMN_LOG_CLASS_INIT_WARNING << "AddInterfaceProvided: adding provided interface \"" << interfaceProvidedName
+                                   << "\" with policy MTS_COMMANDS_SHOULD_NOT_BE_QUEUED to task \""
+                                   << this->GetName() << "\". This bypasses built-ins thread safety mechanisms, make sure your commands are thread safe.  "
+                                   << "Furthermore, the thread will not wake up since the post queued command will not be executed. "
+                                   << std::endl;
+        interfaceProvided = new mtsInterfaceProvided(interfaceProvidedName, this, MTS_COMMANDS_SHOULD_NOT_BE_QUEUED);
+    }
+    if (interfaceProvided) {
+        if (InterfacesProvidedOrOutput.AddItem(interfaceProvidedName, interfaceProvided)) {
+            InterfacesProvided.push_back(interfaceProvided);
+            return interfaceProvided;
         }
-        CMN_LOG_CLASS_INIT_ERROR << "AddProvidedInterface: task \"" << this->GetName() << "\" unable to add interface \""
-                                 << newInterfaceName << "\"" << std::endl;
-        delete newInterface;
+        CMN_LOG_CLASS_INIT_ERROR << "AddInterfaceProvided: task \"" << this->GetName() << "\" unable to add interface \""
+                                 << interfaceProvidedName << "\"" << std::endl;
+        delete interfaceProvided;
         return 0;
     }
-    CMN_LOG_CLASS_INIT_ERROR << "AddProvidedInterface: task \"" << this->GetName() << "\" unable to create interface \""
-                             << newInterfaceName << "\"" << std::endl;
+    CMN_LOG_CLASS_INIT_ERROR << "AddInterfaceProvided: task \"" << this->GetName() << "\" unable to create interface \""
+                             << interfaceProvidedName << "\"" << std::endl;
     return 0;
 }

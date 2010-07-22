@@ -23,12 +23,15 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlFilterImageSampler_h
 #define _svlFilterImageSampler_h
 
-#include <cisstStereoVision/svlStreamManager.h>
+#include <cisstStereoVision/svlFilterBase.h>
 
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
 
+
+// Forward declarations
 class svlFilterImageSampler;
+
 
 class CISST_EXPORT svlImageSamplerCallbackBase
 {
@@ -39,7 +42,7 @@ public:
     virtual ~svlImageSamplerCallbackBase() {}
 
     // Callback
-    virtual void FrameCallback(svlSampleImageBase * image,
+    virtual void FrameCallback(svlSampleImage * image,
                                svlBMPFileHeader * fileheader1, svlDIBHeader * dibheader1,
                                svlBMPFileHeader * fileheader2, svlDIBHeader * dibheader2) = 0;
 
@@ -52,7 +55,7 @@ private:
     virtual void PostCallback() { FrameCounter ++; }
 };
 
-class CISST_EXPORT svlFilterImageSampler : public svlFilterBase, public cmnGenericObject
+class CISST_EXPORT svlFilterImageSampler : public svlFilterBase
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
@@ -65,15 +68,15 @@ public:
     float GetDistanceIntensityRatio() { return DistanceScaling; }
 
 protected:
-    virtual int Initialize(svlSample* inputdata);
-    virtual int ProcessFrame(svlProcInfo* procInfo, svlSample* inputdata);
+    virtual int Initialize(svlSample* syncInput, svlSample* &syncOutput);
+    virtual int Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput);
     virtual int Release();
 
 private:
     svlImageSamplerCallbackBase* CallbackObj;
     svlBMPFileHeader* FileHeader[2];
     svlDIBHeader* DIBHeader[2];
-    svlSampleImageBase* ImageBuffer;
+    svlSampleImage* ImageBuffer;
     float DistanceScaling;
 };
 

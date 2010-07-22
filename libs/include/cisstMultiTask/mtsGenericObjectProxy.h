@@ -252,7 +252,7 @@ public:
 template <class _elementType>
 class mtsGenericObjectProxy: public mtsGenericObjectProxyBase<_elementType>
 {
-    CMN_DECLARE_SERVICES_EXPORT(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES_EXPORT_ALWAYS(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
 public:
     typedef mtsGenericObjectProxy<_elementType> ThisType;

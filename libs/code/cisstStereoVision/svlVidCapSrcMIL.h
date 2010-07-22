@@ -25,10 +25,17 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstStereoVision/svlFilterSourceVideoCapture.h>
 #include <cisstStereoVision/svlRenderTargets.h>
-#include <cisstStereoVision/svlBufferImage.h>
-
 #include <mil.h>
 
+// For backwards compatibility
+#if M_MIL_CURRENT_INT_VERSION < 0x0900
+    typedef long    MIL_INT;
+    typedef long    MIL_INT32;
+#endif
+
+
+class osaThread;
+class svlBufferImage;
 
 class svlVidCapSrcMILRenderTarget : public svlRenderTargetBase
 {

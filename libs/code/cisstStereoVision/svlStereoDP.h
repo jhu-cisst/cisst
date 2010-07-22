@@ -26,8 +26,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlFilterComputationalStereo.h>
 
 
-#define ST_DP_TEMP_BUFF_SIZE        2048
-
 class svlStereoDP : public svlComputationalStereoMethodBase
 {
 public:
@@ -47,7 +45,7 @@ public:
     bool GetInterpolation() { return DisparityInterpolation; }
 
     virtual int Initialize();
-    virtual int Process(svlSampleImageBase *images, int *disparitymap);
+    virtual int Process(svlSampleImage *images, int *disparitymap);
     virtual void Free();
 
 private:

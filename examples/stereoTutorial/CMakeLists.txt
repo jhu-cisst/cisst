@@ -5,18 +5,24 @@
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
-# 
+#
 # This software is provided "as is" under an open source license, with
 # no warranty.  The complete license can be found in license.txt and
 # http://www.cisst.org/cisst/license.txt.
-# 
+#
 # --- end cisst license ---
 
 PROJECT(stereoTutorial)
 
-ADD_SUBDIRECTORY(example1)
-ADD_SUBDIRECTORY(example2)
-ADD_SUBDIRECTORY(example3)
-ADD_SUBDIRECTORY(example4)
-ADD_SUBDIRECTORY(example5)
-ADD_SUBDIRECTORY(example6)
+ADD_SUBDIRECTORY(simple)
+ADD_SUBDIRECTORY(cameraviewer)
+ADD_SUBDIRECTORY(stereocameraviewer)
+ADD_SUBDIRECTORY(computestereo)
+ADD_SUBDIRECTORY(videoplayer)
+ADD_SUBDIRECTORY(stereovideoplayer)
+ADD_SUBDIRECTORY(videoconverter)
+ADD_SUBDIRECTORY(pointtracker)
+ADD_SUBDIRECTORY(gridtracker)
+ADD_SUBDIRECTORY(svlmts1)
+#ADD_SUBDIRECTORY(webgui)
+

@@ -12,7 +12,7 @@ displayTask::displayTask(const std::string & taskName, double period):
     mtsTaskPeriodic(taskName, period, false, 5000)
 {
     // to communicate with the interface of the resource
-    mtsRequiredInterface * required = AddRequiredInterface("DataGenerator");
+    mtsInterfaceRequired * required = AddInterfaceRequired("DataGenerator");
     if (required) {
        required->AddFunction("GetData", Generator.GetData);
        required->AddFunction("SetAmplitude", Generator.SetAmplitude);
@@ -34,7 +34,7 @@ void displayTask::Configure(const std::string & CMN_UNUSED(filename))
     AmplitudeData = startValue;
 }
 
-void displayTask::Startup(void) 
+void displayTask::Startup(void)
 {
     // make the UI visible
     UI.show(0, NULL);
@@ -61,7 +61,7 @@ void displayTask::Run(void)
     // log some extra information
     CMN_LOG_CLASS_RUN_VERBOSE << "Run : " << this->GetTick()
                               << " - Data: " << Data << std::endl;
-    // update the UI, process UI events 
+    // update the UI, process UI events
     if (Fl::check() == 0) {
         Kill();
     }

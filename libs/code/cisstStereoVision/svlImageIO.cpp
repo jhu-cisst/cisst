@@ -20,8 +20,8 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
+#include <cisstStereoVision/svlDefinitions.h>
 #include <cisstStereoVision/svlImageIO.h>
-#include <cisstStereoVision/svlStreamDefs.h>
 #include "svlImageCodecInitializer.h"
 
 
@@ -244,7 +244,7 @@ int svlImageIO::ReadDimensions(const std::string &codec,
     return ret;
 }
 
-int svlImageIO::Read(svlSampleImageBase &image,
+int svlImageIO::Read(svlSampleImage &image,
                      const unsigned int videoch,
                      const std::string &filename,
                      bool noresize)
@@ -259,7 +259,7 @@ int svlImageIO::Read(svlSampleImageBase &image,
     return ret;
 }
 
-int svlImageIO::Read(svlSampleImageBase &image,
+int svlImageIO::Read(svlSampleImage &image,
                      const unsigned int videoch,
                      const std::string &codec,
                      std::istream &stream,
@@ -284,7 +284,7 @@ int svlImageIO::Read(svlSampleImageBase &image,
     return ret;
 }
 
-int svlImageIO::Read(svlSampleImageBase &image,
+int svlImageIO::Read(svlSampleImage &image,
                      const unsigned int videoch,
                      const std::string &codec,
                      const unsigned char *buffer,
@@ -301,7 +301,7 @@ int svlImageIO::Read(svlSampleImageBase &image,
     return ret;
 }
 
-int svlImageIO::Write(const svlSampleImageBase &image,
+int svlImageIO::Write(const svlSampleImage &image,
                       const unsigned int videoch,
                       const std::string &filename,
                       const int compression)
@@ -316,7 +316,7 @@ int svlImageIO::Write(const svlSampleImageBase &image,
     return ret;
 }
 
-int svlImageIO::Write(const svlSampleImageBase &image,
+int svlImageIO::Write(const svlSampleImage &image,
                       const unsigned int videoch,
                       const std::string &codec,
                       std::ostream &stream,
@@ -336,7 +336,7 @@ int svlImageIO::Write(const svlSampleImageBase &image,
     return ret;
 }
 
-int svlImageIO::Write(const svlSampleImageBase &image,
+int svlImageIO::Write(const svlSampleImage &image,
                       const unsigned int videoch,
                       const std::string &codec,
                       unsigned char *buffer,
@@ -397,7 +397,7 @@ int svlImageCodecBase::ReadDimensions(const unsigned char * CMN_UNUSED(buffer),
     return SVL_FAIL;
 }
 
-int svlImageCodecBase::Read(svlSampleImageBase & CMN_UNUSED(image),
+int svlImageCodecBase::Read(svlSampleImage & CMN_UNUSED(image),
                             const unsigned int CMN_UNUSED(videoch),
                             const std::string & CMN_UNUSED(filename),
                             bool CMN_UNUSED(noresize))
@@ -405,7 +405,7 @@ int svlImageCodecBase::Read(svlSampleImageBase & CMN_UNUSED(image),
     return SVL_FAIL;
 }
 
-int svlImageCodecBase::Read(svlSampleImageBase & CMN_UNUSED(image),
+int svlImageCodecBase::Read(svlSampleImage & CMN_UNUSED(image),
                             const unsigned int CMN_UNUSED(videoch),
                             std::istream & CMN_UNUSED(stream),
                             bool CMN_UNUSED(noresize))
@@ -413,7 +413,7 @@ int svlImageCodecBase::Read(svlSampleImageBase & CMN_UNUSED(image),
     return SVL_FAIL;
 }
 
-int svlImageCodecBase::Read(svlSampleImageBase & CMN_UNUSED(image),
+int svlImageCodecBase::Read(svlSampleImage & CMN_UNUSED(image),
                             const unsigned int CMN_UNUSED(videoch),
                             const unsigned char * CMN_UNUSED(buffer),
                             const size_t CMN_UNUSED(buffersize),
@@ -422,7 +422,7 @@ int svlImageCodecBase::Read(svlSampleImageBase & CMN_UNUSED(image),
     return SVL_FAIL;
 }
 
-int svlImageCodecBase::Write(const svlSampleImageBase & CMN_UNUSED(image),
+int svlImageCodecBase::Write(const svlSampleImage & CMN_UNUSED(image),
                              const unsigned int CMN_UNUSED(videoch),
                              const std::string & CMN_UNUSED(filename),
                              const int CMN_UNUSED(compression))
@@ -430,7 +430,7 @@ int svlImageCodecBase::Write(const svlSampleImageBase & CMN_UNUSED(image),
     return SVL_FAIL;
 }
 
-int svlImageCodecBase::Write(const svlSampleImageBase & CMN_UNUSED(image),
+int svlImageCodecBase::Write(const svlSampleImage & CMN_UNUSED(image),
                              const unsigned int CMN_UNUSED(videoch),
                              std::ostream & CMN_UNUSED(stream),
                              const int CMN_UNUSED(compression))
@@ -438,7 +438,7 @@ int svlImageCodecBase::Write(const svlSampleImageBase & CMN_UNUSED(image),
     return SVL_FAIL;
 }
 
-int svlImageCodecBase::Write(const svlSampleImageBase & image,
+int svlImageCodecBase::Write(const svlSampleImage & image,
                              const unsigned int videoch,
                              std::ostream & stream,
                              const std::string & CMN_UNUSED(codec),
@@ -447,7 +447,7 @@ int svlImageCodecBase::Write(const svlSampleImageBase & image,
     return Write(image, videoch, stream, compression);
 }
 
-int svlImageCodecBase::Write(const svlSampleImageBase & CMN_UNUSED(image),
+int svlImageCodecBase::Write(const svlSampleImage & CMN_UNUSED(image),
                              const unsigned int CMN_UNUSED(videoch),
                              unsigned char * CMN_UNUSED(buffer),
                              size_t & CMN_UNUSED(buffersize),
@@ -455,7 +455,7 @@ int svlImageCodecBase::Write(const svlSampleImageBase & CMN_UNUSED(image),
 {
     return SVL_FAIL;
 }
-int svlImageCodecBase::Write(const svlSampleImageBase & image,
+int svlImageCodecBase::Write(const svlSampleImage & image,
                              const unsigned int videoch,
                              unsigned char * buffer,
                              size_t & buffersize,

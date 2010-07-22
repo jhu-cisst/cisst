@@ -23,12 +23,13 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlFilterImageCropper_h
 #define _svlFilterImageCropper_h
 
-#include <cisstStereoVision/svlStreamManager.h>
+#include <cisstStereoVision/svlFilterBase.h>
 
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
 
-class CISST_EXPORT svlFilterImageCropper : public svlFilterBase, public cmnGenericObject
+
+class CISST_EXPORT svlFilterImageCropper : public svlFilterBase
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
@@ -36,25 +37,21 @@ public:
     svlFilterImageCropper();
     virtual ~svlFilterImageCropper();
 
-    void SetRectangle(unsigned int left, unsigned int top, unsigned int right, unsigned int bottom, unsigned int videoch = SVL_LEFT);
-    void SetRectangle(const svlRect & rect, unsigned int videoch = SVL_LEFT);
+    int SetRectangle(const int left, const int top, const int right, const int bottom, unsigned int videoch = SVL_LEFT);
+    int SetRectangle(const svlRect & rect, unsigned int videoch = SVL_LEFT);
+    int SetCorner(const int x, const int y, unsigned int videoch = SVL_LEFT);
+    int SetCenter(const int x, const int y, unsigned int videoch = SVL_LEFT);
 
 protected:
-    virtual int Initialize(svlSample* inputdata);
-    virtual int ProcessFrame(svlProcInfo* procInfo, svlSample* inputdata);
+    virtual int Initialize(svlSample* syncInput, svlSample* &syncOutput);
+    virtual int Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput);
     virtual int Release();
 
 private:
-    unsigned int SetLeft[2];
-    unsigned int SetRight[2];
-    unsigned int SetTop[2];
-    unsigned int SetBottom[2];
-    unsigned int Left[2];
-    unsigned int Right[2];
-    unsigned int Top[2];
-    unsigned int Bottom[2];
+    svlSampleImage* OutputImage;
 
-    void CheckAndFixRectangle(unsigned int videoch, unsigned int width, unsigned int height);
+    vctFixedSizeVector<svlRect, 2> Rectangles;
+    vctFixedSizeVector<bool, 2> Enabled;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterImageCropper)

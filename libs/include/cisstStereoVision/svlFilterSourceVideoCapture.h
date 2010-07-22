@@ -23,27 +23,19 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlFilterSourceVideoCapture_h
 #define _svlFilterSourceVideoCapture_h
 
-#include <cisstStereoVision/svlStreamManager.h>
-#include <string.h>
+#include <cisstStereoVision/svlFilterSourceBase.h>
+#include <cisstOSAbstraction/osaThreadSignal.h>
 
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
 
-#define SVL_VCS_DEVICE_NOT_INITIALIZED      -2000
-#define SVL_VCS_UNABLE_TO_OPEN              -2001
-#define SVL_VCS_UNABLE_TO_START_CAPTURE     -2002
-#define SVL_VCS_UNABLE_TO_SET_INPUT         -2003
-#define SVL_VCS_UNSUPPORTED_COLORSPACE      -2004
-#define SVL_VCS_UNSUPPORTED_SIZE            -2005
 
-#define SVL_VCS_ARRAY_LENGTH                50
-#define SVL_VCS_STRING_LENGTH               128
-
-
+// Forward declarations
 class svlVidCapSrcBase;
 class svlVidCapSrcDialogThread;
 
-class CISST_EXPORT svlFilterSourceVideoCapture : public svlFilterSourceBase, public cmnGenericObject
+
+class CISST_EXPORT svlFilterSourceVideoCapture : public svlFilterSourceBase
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
@@ -147,8 +139,8 @@ public:
 
     int SetChannelCount(unsigned int channelcount);
 
-    double GetTargetFrequency();
-    int SetTargetFrequency(double hertz);
+    void SetTargetFrequency(double hertz);
+    double GetTargetFrequency() const;
 
     int DialogSetup(unsigned int videoch = SVL_LEFT);
     int DialogDevice();
@@ -181,11 +173,12 @@ public:
     int LoadSettings(const char* filepath);
 
 protected:
-    virtual int Initialize();
-    virtual int ProcessFrame(svlProcInfo* procInfo);
+    virtual int Initialize(svlSample* &syncOutput);
+    virtual int Process(svlProcInfo* procInfo, svlSample* &syncOutput);
     virtual int Release();
 
 private:
+    svlSampleImage* OutputImage;
     unsigned int NumberOfChannels;
     unsigned int NumberOfSupportedAPIs;
     vctDynamicVector<cmnClassServicesBase*> SupportedAPIs;

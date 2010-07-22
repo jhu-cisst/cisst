@@ -59,7 +59,7 @@ class CISST_EXPORT devMicronTracker : public mtsTaskPeriodic
 
         std::string Name;
         std::string SerialNumber;
-        mtsProvidedInterface * Interface;
+        mtsInterfaceProvided * Interface;
         prmPositionCartesianGet TooltipPosition;
         prmPositionCartesianGet MarkerPosition;
         mtsDoubleVec MarkerProjectionLeft;

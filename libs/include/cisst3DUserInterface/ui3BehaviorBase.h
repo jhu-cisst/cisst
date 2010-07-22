@@ -27,7 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsStateData.h>
 #include <cisstParameterTypes/prmPositionCartesianGet.h>
 #include <cisstParameterTypes/prmEventButton.h>
-#include <cisstStereoVision/svlStreamManager.h>
+#include <cisstStereoVision/svlFilterBase.h>
 
 #include <cisst3DUserInterface/ui3ForwardDeclarations.h>
 #include <cisst3DUserInterface/ui3InputDeviceBase.h>

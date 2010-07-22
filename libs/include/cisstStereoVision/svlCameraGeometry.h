@@ -47,9 +47,6 @@ public:
     } Extrinsics;
 
 public:
-    svlCameraGeometry();
-    virtual ~svlCameraGeometry();
-
     friend CISST_EXPORT std::ostream & operator << (std::ostream & stream, const svlCameraGeometry & objref);
 
     void SetIntrinsics(const Intrinsics & intrinsics, const unsigned int cam_id = 0);
@@ -69,9 +66,19 @@ public:
 
     int GetIntrinsics(Intrinsics & intrinsics, const unsigned int cam_id = 0) const;
     Intrinsics GetIntrinsics(const unsigned int cam_id = 0) const;
+    const Intrinsics* GetIntrinsicsPtr(const unsigned int cam_id = 0) const;
+    int GetIntrinsics(double& fcx, double& fcy,
+                      double& ccx, double& ccy,
+                      double& a,
+                      double& kc0, double& kc1, double& kc2, double& kc3, double& kc4,
+                      const unsigned int cam_id = 0);
     int GetExtrinsics(Extrinsics & extrinsics, const unsigned int cam_id = 0) const;
     Extrinsics GetExtrinsics(const unsigned int cam_id = 0) const;
-
+    const Extrinsics* GetExtrinsicsPtr(const unsigned int cam_id = 0) const;
+    int GetExtrinsics(double& om0, double& om1, double& om2,
+                      double& T0, double& T1, double& T2,
+                      const unsigned int cam_id = 0);
+    
     int GetPosition(vctDouble3 & position, const unsigned int cam_id = 0) const;
     int GetAxis(vctDouble3 & axis, const unsigned int cam_id = 0) const;
     int GetViewUp(vctDouble3 & viewup, const unsigned int cam_id = 0) const;
@@ -84,15 +91,23 @@ public:
 
     int SetWorldToCenter();
     int RotateWorldAboutY(double degrees);
+    int RotateWorldAboutZ(double degrees);
 
     void Wrld2Cam(const unsigned int cam_id, vctDouble2 & point2D, const vctDouble3 & point3D);
     vctDouble2 Wrld2Cam(const unsigned int cam_id, const vctDouble3 & point3D);
 
-    void Cam2Wrld(vctDouble3 & point3D,
-                  const unsigned int cam_id1, const vctDouble2 & point2D_1,
-                  const unsigned int cam_id2, const vctDouble2 & point2D_2);
-    vctDouble3 Cam2Wrld(const unsigned int cam_id1, const vctDouble2 & point2D_1,
-                        const unsigned int cam_id2, const vctDouble2 & point2D_2);
+    template<class _ValueType>
+    void Cam2Wrld(vctFixedSizeVector<_ValueType, 3>& point3D,
+                  const unsigned int cam_id1,
+                  const vctFixedSizeVector<_ValueType, 2>& point2D_1,
+                  const unsigned int cam_id2,
+                  const vctFixedSizeVector<_ValueType, 2>& point2D_2);
+
+    template<class _ValueType>
+    vctFixedSizeVector<_ValueType, 3> Cam2Wrld(const unsigned int cam_id1,
+                                               const vctFixedSizeVector<_ValueType, 2>& point2D_1,
+                                               const unsigned int cam_id2,
+                                               const vctFixedSizeVector<_ValueType, 2>& point2D_2);
 
     void Empty();
 

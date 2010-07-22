@@ -22,6 +22,8 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "svlVidCapSrcDC1394.h"
 #include <cisstOSAbstraction/osaSleep.h>
+#include <cisstOSAbstraction/osaThread.h>
+#include <cisstStereoVision/svlBufferImage.h>
 
 #include <iostream>
 

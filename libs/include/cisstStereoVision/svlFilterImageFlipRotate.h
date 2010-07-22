@@ -23,13 +23,13 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlFilterImageFlipRotate_h
 #define _svlFilterImageFlipRotate_h
 
-#include <cisstStereoVision/svlStreamManager.h>
-#include <string.h>
+#include <cisstStereoVision/svlFilterBase.h>
 
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
 
-class CISST_EXPORT svlFilterImageFlipRotate : public svlFilterBase, public cmnGenericObject
+
+class CISST_EXPORT svlFilterImageFlipRotate : public svlFilterBase
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
@@ -45,14 +45,12 @@ public:
     int SetRotation(unsigned int videoch, int cw_quarters);
 
 protected:
-    virtual int Initialize(svlSample* inputdata);
-    virtual int ProcessFrame(svlProcInfo* procInfo, svlSample* inputdata);
+    virtual int Initialize(svlSample* syncInput, svlSample* &syncOutput);
+    virtual int Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput);
     virtual int Release();
 
 private:
-    template <class _pixelType>
-    void FlipRotate(_pixelType* input, _pixelType* output, const unsigned int inwidth, const unsigned int inheight,
-                    const int quickcopy, const int outstart, const int outstride, const int outlinestride);
+    svlSampleImage* OutputImage;
 
     int CWQuarters[2];
     bool FlipHorizontal[2];
@@ -62,6 +60,10 @@ private:
     int StartOffset[2];
     int Stride[2];
     int LineStride[2];
+
+    template <class _pixelType>
+    void FlipRotate(_pixelType* input, _pixelType* output, const unsigned int inwidth, const unsigned int inheight,
+                    const int quickcopy, const int outstart, const int outstride, const int outlinestride);
 };
 
 template <class _pixelType>

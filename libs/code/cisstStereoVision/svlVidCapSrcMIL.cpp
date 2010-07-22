@@ -20,9 +20,9 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include "svlVidCapSrcMIL.h"
+#include <cisstOSAbstraction/osaThread.h>
+#include <cisstStereoVision/svlBufferImage.h>
 #include <cisstOSAbstraction/osaSleep.h>
-
-using namespace std;
 
 
 /******************************************/
@@ -307,7 +307,7 @@ int svlVidCapSrcMIL::GetDeviceList(svlFilterSourceVideoCapture::DeviceInfo **dev
     int i, w, h, b;
     bool cap, ovrl;
     int devid[2];
-    string description;
+    std::string description;
 
     MILNumberOfDevices = 0;
 
@@ -322,8 +322,8 @@ int svlVidCapSrcMIL::GetDeviceList(svlFilterSourceVideoCapture::DeviceInfo **dev
             OverlaySupported[MILNumberOfDevices] = ovrl;
             Width[MILNumberOfDevices] = w;
             Height[MILNumberOfDevices] = h;
+            MILNumberOfDevices ++;
         }
-        MILNumberOfDevices ++;
     }
 
     // Allocate memory for device info array
@@ -340,12 +340,17 @@ int svlVidCapSrcMIL::GetDeviceList(svlFilterSourceVideoCapture::DeviceInfo **dev
             deviceinfo[0][i].id = devid[i];
 
             // name
-            if (devid[i]) description = "M_DEV1: ";
-            else description = "M_DEV0: ";
+            description = "Matrox Imaging Device (";
+            if (devid[i]) description += "M_DEV1: ";
+            else description += "M_DEV0: ";
             if (CaptureSupported[i] && OverlaySupported[i]) description += "Capture+Overlay";
             else if (CaptureSupported[i]) description += "Capture only";
             else if (OverlaySupported[i]) description += "Overlay only";
-            sprintf(deviceinfo[0][i].name, "Matrox Imaging Device (%s)", description.c_str());
+            description += ")";
+            memset(deviceinfo[0][i].name, 0, SVL_VCS_STRING_LENGTH);
+            memcpy(deviceinfo[0][i].name,
+                   description.c_str(),
+                   std::min(SVL_VCS_STRING_LENGTH - 1, static_cast<int>(description.length())));
 
             // inputs
             deviceinfo[0][i].inputcount = 0;
@@ -375,7 +380,7 @@ int svlVidCapSrcMIL::Open()
 
         // Opening device
         if (!MILInitializeDevice(DeviceID[i], CaptureEnabled[DeviceID[i]], OverlayEnabled[DeviceID[i]], w, h, b)) goto labError;
-        if (b != 3) goto labError;
+        if (b != 1 && b != 3) goto labError;
 
         // Allocate capture buffers
         ImageBuffer[i] = new svlBufferImage(w, h);
@@ -460,6 +465,7 @@ int svlVidCapSrcMIL::GetFormatList(unsigned int deviceid, svlFilterSourceVideoCa
     formatlist[0][0].rgb_order = true;
     formatlist[0][0].yuyv_order = false;
     formatlist[0][0].framerate = -1.0;
+    formatlist[0][0].custom_mode = -1;
 
     return 1;
 }
@@ -474,6 +480,7 @@ int svlVidCapSrcMIL::GetFormat(svlFilterSourceVideoCapture::ImageFormat& format,
     format.rgb_order = true;
     format.yuyv_order = false;
     format.framerate = -1.0;
+    format.custom_mode = -1;
 
     return SVL_OK;
 }
@@ -522,6 +529,7 @@ bool svlVidCapSrcMIL::MILInitializeApplication()
 {
     if (MilApplication == M_NULL) MappAlloc(M_DEFAULT, &MilApplication);
     if (MilApplication == M_NULL) return false;
+    MappControl(M_ERROR, M_PRINT_DISABLE);
     return true;
 }
 
@@ -541,7 +549,7 @@ bool svlVidCapSrcMIL::MILInitializeDevice(int device, bool capture, bool overlay
         MILReleaseDevice(device);
     }
 
-    MsysAlloc(M_SYSTEM_VIO, MilDeviceID[device], M_SETUP, &(MilSystem[device]));
+    MsysAlloc(M_SYSTEM_DEFAULT, MilDeviceID[device], M_SETUP, &(MilSystem[device]));
     if (MilSystem[device] == M_NULL) goto labError;
 
     if (MsysInquire(MilSystem[device], M_DIGITIZER_NUM, M_NULL) == 0) goto labError;
@@ -554,39 +562,46 @@ bool svlVidCapSrcMIL::MILInitializeDevice(int device, bool capture, bool overlay
     MilBands[device] = MdigInquire(MilDigitizer[device], M_SIZE_BAND, M_NULL); 
     MilBandBits[device] = MdigInquire(MilDigitizer[device], M_SIZE_BIT, M_NULL);
 
-    MbufAllocColor(MilSystem[device],
-                   MilBands[device],
-                   MilWidth[device],
-                   MilHeight[device],
-                   8+M_UNSIGNED, M_IMAGE+M_DISP+M_PROC+M_GRAB,
-                   &(MilDisplayImage[device]));
-    if (MilDisplayImage[device] == M_NULL) goto labError;
-
-    MbufClear(MilDisplayImage[device], 0);
-
-    MdispAlloc(MilSystem[device], M_DEFAULT, MIL_TEXT("M_DEFAULT"), M_AUXILIARY, &(MilDisplay[device]));
-    if (MilDisplay[device] == M_NULL) goto labError;
-
-    MdispControl(MilDisplay[device], M_SELECT_VIDEO_SOURCE, MilDigitizer[device]);
-
-    MdispSelect(MilDisplay[device], MilDisplayImage[device]);
-
-    MilOverlayEnabled[device] = overlay;
     if (overlay) {
+        MdispAlloc(MilSystem[device], M_DEFAULT, MIL_TEXT("M_DEFAULT"), M_DEFAULT, &(MilDisplay[device]));
+        if (MilDisplay[device] == M_NULL) {
+            MilOverlayEnabled[device] = false;
+            goto labError;
+        }
+
+        MbufAllocColor(MilSystem[device],
+                       MilBands[device],
+                       MilWidth[device],
+                       MilHeight[device],
+                       8+M_UNSIGNED, M_IMAGE+M_DISP+M_PROC+M_GRAB,
+                       &(MilDisplayImage[device]));
+        if (MilDisplayImage[device] == M_NULL) {
+            MilOverlayEnabled[device] = false;
+            goto labError;
+        }
+
+        MbufClear(MilDisplayImage[device], 0);
+#if M_MIL_CURRENT_INT_VERSION >= 0x0900
+        MdispControl(MilDisplay[device], M_SELECT_VIDEO_SOURCE, MilDigitizer[device]);
+#endif
+        MdispSelect(MilDisplay[device], MilDisplayImage[device]);
         MdispControl(MilDisplay[device], M_OVERLAY, M_ENABLE);
         MdispControl(MilDisplay[device], M_OVERLAY_CLEAR, M_DEFAULT);
         MdispControl(MilDisplay[device], M_OVERLAY_SHOW, M_ENABLE);
         MdispControl(MilDisplay[device], M_NO_TEARING, M_ENABLE);
 
         MdispInquire(MilDisplay[device], M_OVERLAY_ID, &MilOverlayImage[device]);
-        if (MilOverlayImage[device] == M_NULL) goto labError;
+        if (MilOverlayImage[device] == M_NULL) {
+            MilOverlayEnabled[device] = false;
+            goto labError;
+        }
 
         MdispControl(MilDisplay[device], M_TRANSPARENT_COLOR, static_cast<MIL_INT32>(M_BGR888(0,0,0)));
 
         MilOverlayBuffer[device] = new unsigned char[MilWidth[device] * MilHeight[device] * MilBands[device]];
     }
+    MilOverlayEnabled[device] = overlay;
 
-    MilCaptureEnabled[device] = capture;
     if (capture) {
         unsigned int i;
 
@@ -602,7 +617,10 @@ bool svlVidCapSrcMIL::MILInitializeDevice(int device, bool capture, bool overlay
     					   MilHeight[device],
     					   8+M_UNSIGNED, M_IMAGE+M_DISP+M_PROC+M_GRAB,
     					   &(MilCaptureParams[device].MilFrames[i]));
-            if (MilCaptureParams[device].MilFrames[i] == M_NULL) goto labError;
+            if (MilCaptureParams[device].MilFrames[i] == M_NULL) {
+                MilCaptureEnabled[device] = false;
+                goto labError;
+            }
 
     	    MbufClear(MilCaptureParams[device].MilFrames[i], 0);
     	}
@@ -624,6 +642,7 @@ bool svlVidCapSrcMIL::MILInitializeDevice(int device, bool capture, bool overlay
     				MILProcessingCallback,
     				&(MilCaptureParams[device]));
     }
+    MilCaptureEnabled[device] = capture;
 
     width = MilWidth[device];
     height = MilHeight[device];
@@ -662,7 +681,7 @@ void svlVidCapSrcMIL::MILReleaseDevice(int device)
        	MdigProcess(MilDigitizer[device],
     				MilCaptureParams[device].MilFrames,
     				MilCaptureBuffers,
-    				M_STOP+M_WAIT,
+    				M_STOP,//+M_WAIT,
     				M_DEFAULT,
     				MILProcessingCallback,
     				&(MilCaptureParams[device]));

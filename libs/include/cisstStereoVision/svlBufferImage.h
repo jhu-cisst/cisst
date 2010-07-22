@@ -25,7 +25,10 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstOSAbstraction/osaThreadSignal.h>
 #include <cisstOSAbstraction/osaCriticalSection.h>
-#include <cisstStereoVision/svlStreamDefs.h>
+#include <cisstStereoVision/svlTypes.h>
+
+// Always include last!
+#include <cisstStereoVision/svlExport.h>
 
 
 class CISST_EXPORT svlBufferImage

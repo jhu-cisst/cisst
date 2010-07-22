@@ -21,8 +21,6 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstStereoVision/svlSampleQueue.h>
-#include <cisstOSAbstraction/osaSleep.h>
-#include <string.h> // for memcpy
 
 
 /********************************/
@@ -32,31 +30,18 @@ http://www.cisst.org/cisst/license.txt.
 svlSampleQueue::svlSampleQueue(svlStreamType type, int length) :
     Type(type),
     Length(std::max(3, length)), // buffer size is greater or equal to 3
-    LockedPos(0),
-    Tail(1),
-    Head(1),
+    Tail(0),
+    Head(0),
     BufferUsage(0),
     DroppedSamples(0)
 {
-    int i;
-
     Buffer.SetSize(Length);
-    Buffer.SetAll(0);
-    BackwardPos.SetSize(Length);
-    ForwardPos.SetSize(Length);
 
     // Create samples in the buffer
-    for (i = 0; i < Length; i ++) {
+    ReadBuffer = svlSample::GetNewFromType(type);
+    for (int i = 0; i < Length; i ++) {
         Buffer[i] = svlSample::GetNewFromType(type);
     }
-
-    // Initialize chained list of samples
-    for (i = 2; i < Length; i ++) {
-        BackwardPos[i] = i - 1;
-        ForwardPos[i - 1] = i;
-    }
-    BackwardPos[1] = Length - 1;
-    ForwardPos[Length - 1] = 1;
 }
 
 svlSampleQueue::svlSampleQueue() :
@@ -70,6 +55,7 @@ svlSampleQueue::~svlSampleQueue()
     for (int i = 0; i < Length; i ++) {
         if (Buffer[i]) delete Buffer[i];
     }
+    if (ReadBuffer) delete ReadBuffer;
 }
 
 svlStreamType svlSampleQueue::GetType()
@@ -97,61 +83,67 @@ int svlSampleQueue::GetDroppedSampleCount()
     return DroppedSamples;
 }
 
-bool svlSampleQueue::PreAllocate(const svlSample & sample)
+bool svlSampleQueue::PreAllocate(const svlSample* sample)
 {
+    if (ReadBuffer->SetSize(sample) != SVL_OK) return false;
     for (int i = 0; i < Length; i ++) {
         if (Buffer[i]->SetSize(sample) != SVL_OK) return false;
     }
     return true;
 }
 
-bool svlSampleQueue::Push(const svlSample & sample)
+bool svlSampleQueue::Push(const svlSample* sample)
 {
-    if (Buffer[Head]->CopyOf(sample) != SVL_OK) return false;
-
     CS.Enter();
-        Head = ForwardPos[Head];
-        if (Head != Tail) {
-            BufferUsage ++;
-        }
-        else {
-            Tail = ForwardPos[Head];
+
+        Head ++;
+        if (Head >= Length) Head = 0;
+
+        if (Head == Tail) {
+            Tail ++;
+            if (Tail >= Length) Tail = 0;
+
             DroppedSamples ++;
         }
+        else {
+            BufferUsage ++;
+        }
+
+        if (BufferUsage == 1) NewSampleEvent.Raise();
+
     CS.Leave();
 
-    NewSampleEvent.Raise();
+    if (Buffer[Head]->CopyOf(sample) != SVL_OK) return false;
 
     return true;
 }
 
 svlSample* svlSampleQueue::Pull(double timeout)
 {
-    // Make sure a new frame has arrived since the last call
-    if (BufferUsage <= 1) {
-        if (!NewSampleEvent.Wait(timeout)) {
+    CS.Enter();
+
+        if (Tail == Head) {
+            CS.Leave();
+            NewSampleEvent.Wait(timeout);
             return 0;
         }
-    }
 
-    CS.Enter();
-        // Swap "tail" with "LockedPos" in the chained list
-        ForwardPos[LockedPos] = ForwardPos[Tail];
-        BackwardPos[LockedPos] = BackwardPos[Tail];
-        ForwardPos[BackwardPos[Tail]] = LockedPos;
-        BackwardPos[ForwardPos[Tail]] = LockedPos;
+        // Swap 'ReadBuffer' with 'Tail'
+        svlSample* temp = ReadBuffer;
+        ReadBuffer = Buffer[Tail];
+        Buffer[Tail] = temp;
 
-        LockedPos = Tail;
-        Tail = ForwardPos[Tail];
+        Tail ++; if (Tail >= Length) Tail = 0;
 
         BufferUsage --;
+
     CS.Leave();
 
-    return Buffer[LockedPos];
+    return ReadBuffer;
 }
 
 svlSample* svlSampleQueue::Peek()
 {
-    return Buffer[LockedPos];
+    return ReadBuffer;
 }
 

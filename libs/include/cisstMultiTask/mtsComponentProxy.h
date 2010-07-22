@@ -26,13 +26,13 @@ http://www.cisst.org/cisst/license.txt.
 
   This class implements a component proxy which is internally created and
   managed by the local component manager.  It also provides several utility 
-  functions for proxy-related processings such as the information extraction of
+  functions for proxy-related processings such as information extraction of
   existing interfaces, creation of proxy objects, and updating pointers to 
   command and function objects.
 
-  A component proxy is implemeneted as mtsDevice rather than mtsTask. This helps
-  avoiding possible thread synchronization issues between ICE threads and
-  cisst internal threads.
+  A component proxy is implemeneted as mtsComponent rather than mtsTask. This
+  helps avoiding potential thread synchronization issues between ICE threads 
+  and cisst internal threads.
 
   \note How proxy components exchange data across a network is as follows:
 
@@ -54,12 +54,13 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsComponentProxy_h
 #define _mtsComponentProxy_h
 
-#include <cisstMultiTask/mtsDevice.h>
-#include <cisstMultiTask/mtsDeviceInterface.h>
+#include <cisstMultiTask/mtsComponent.h>
+#include <cisstMultiTask/mtsInterfaceProvidedOrOutput.h>
 
 #include <cisstMultiTask/mtsFunctionVoid.h>
-#include <cisstMultiTask/mtsFunctionReadOrWrite.h>
-#include <cisstMultiTask/mtsFunctionQualifiedReadOrWrite.h>
+#include <cisstMultiTask/mtsFunctionRead.h>
+#include <cisstMultiTask/mtsFunctionWrite.h>
+#include <cisstMultiTask/mtsFunctionQualifiedRead.h>
 #include <cisstMultiTask/mtsCommandVoidProxy.h>
 #include <cisstMultiTask/mtsCommandWriteProxy.h>
 #include <cisstMultiTask/mtsCommandReadProxy.h>
@@ -73,34 +74,27 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsExport.h>
 
-class CISST_EXPORT mtsComponentProxy : public mtsDevice
+class CISST_EXPORT mtsComponentProxy : public mtsComponent
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
 protected:
     /*! Typedef to manage provided interface proxies of which type is
         mtsComponentInterfaceProxyServer. */
-    typedef cmnNamedMap<mtsComponentInterfaceProxyServer> ProvidedInterfaceNetworkProxyMapType;
-    ProvidedInterfaceNetworkProxyMapType ProvidedInterfaceNetworkProxies;
+    typedef cmnNamedMap<mtsComponentInterfaceProxyServer> InterfaceProvidedNetworkProxyMapType;
+    InterfaceProvidedNetworkProxyMapType InterfaceProvidedNetworkProxies;
 
     /*! Typedef to manage required interface proxies of which type is
         mtsComponentInterfaceProxyClient. */
-    typedef cmnNamedMap<mtsComponentInterfaceProxyClient> RequiredInterfaceNetworkProxyMapType;
-    RequiredInterfaceNetworkProxyMapType RequiredInterfaceNetworkProxies;
-
-    /*! Typedef to manage provided interface instaces */
-    typedef std::map<unsigned int, mtsProvidedInterface *> ProvidedInterfaceProxyInstanceMapType;
-    ProvidedInterfaceProxyInstanceMapType ProvidedInterfaceProxyInstanceMap;
-
-    /*! Counter for provided interface proxy instances. Unique within a component. */
-    unsigned int ProvidedInterfaceProxyInstanceID;
+    typedef cmnNamedMap<mtsComponentInterfaceProxyClient> InterfaceRequiredNetworkProxyMapType;
+    InterfaceRequiredNetworkProxyMapType InterfaceRequiredNetworkProxies;
 
     //-------------------------------------------------------------------------
     //  Data Structures for Server Component Proxy
     //-------------------------------------------------------------------------
-    /*! Sets of function proxy pointers. CreateProvidedInterfaceProxy() uses these
+    /*! Sets of function proxy pointers. CreateInterfaceProvidedProxy() uses these
         maps to assign commandIDs of the command proxies in a provided interface
-        proxy. See mtsComponentProxy::CreateRequiredInterfaceProxy() and
+        proxy. See mtsComponentProxy::CreateInterfaceRequiredProxy() and
         mtsComponentProxy::GetFunctionProxyPointers() for details. */
 
     /*! Typedef for function proxies */
@@ -138,9 +132,9 @@ public:
 
     /*! Register connection information which is used to clean up a logical
         connection when a network proxy client is detected as disconnected. */
-    bool AddConnectionInformation(const unsigned int providedInterfaceProxyInstanceID,
-        const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientRequiredInterfaceName,
-        const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverProvidedInterfaceName);
+    bool AddConnectionInformation(const unsigned int connectionID,
+        const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
+        const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceProvidedName);
 
     //-------------------------------------------------------------------------
     //  Methods to Manage Interface Proxy
@@ -158,62 +152,84 @@ public:
               a provided interface proxy and create a provided interface proxy
               instance which is used for only one user (client component). This
               is conceptually identical to what AllocatedResources() does. */
-    bool CreateProvidedInterfaceProxy(const ProvidedInterfaceDescription & providedInterfaceDescription);
+    bool CreateInterfaceProvidedProxy(const InterfaceProvidedDescription & providedInterfaceDescription);
 
     /*! \brief Remove provided interface proxy
         \param providedInterfaceProxyName Name of provided interface proxy to 
                be removed
         \return True if success, false otherwise */
-    bool RemoveProvidedInterfaceProxy(const std::string & providedInterfaceProxyName);
+    bool RemoveInterfaceProvidedProxy(const std::string & providedInterfaceProxyName);
 
     /*! Create or remove a required interface proxy */
-    bool CreateRequiredInterfaceProxy(const RequiredInterfaceDescription & requiredInterfaceDescription);
-    bool RemoveRequiredInterfaceProxy(const std::string & requiredInterfaceProxyName);
-
-    /*! Create a provided interface instance by cloning a provided interface
-        proxy. Conceptually, this method corresponds to
-        mtsDeviceInterface::AllocateResources(). */
-    mtsProvidedInterface * CreateProvidedInterfaceInstance(
-        const mtsProvidedInterface * providedInterfaceProxy, unsigned int & instanceID);
+    bool CreateInterfaceRequiredProxy(const InterfaceRequiredDescription & requiredInterfaceDescription);
+    bool RemoveInterfaceRequiredProxy(const std::string & requiredInterfaceProxyName);
 
     //-------------------------------------------------------------------------
     //  Methods to Manage Network Proxy
     //-------------------------------------------------------------------------
-    /*! Create a network proxy server which serves a provided interface proxy. */
+    /* \brief Create a network proxy server which serves a provided interface 
+              proxy. 
+       \param providedInterfaceName Name of provided interface
+       \param endpointAccessInfo [out] Information to access this network proxy.
+              Registered to the global component manager and network proxy 
+              clients use this information to connect to this proxy server.
+       \param communicatorID [out] ICE communicator id
+       \return True if success, false otherwise */
     bool CreateInterfaceProxyServer(const std::string & providedInterfaceProxyName,
                                     std::string & endpointAccessInfo,
                                     std::string & communicatorID);
 
-    /*! Create a network proxy client which serves a required interface proxy. */
+    /* \brief Create a network proxy client which serves a required interface 
+              proxy. 
+       \param requiredInterfaceProxyName Name of required interface
+       \param endpointAccessInfo Information to access network proxy server
+              which the global component manager provides.  A network proxy 
+              client uses this information to connect to a proxy server.
+       \param connectionID connection id that this proxy client is related to.
+       \return True if success, false otherwise */
     bool CreateInterfaceProxyClient(const std::string & requiredInterfaceProxyName,
                                     const std::string & serverEndpointInfo,
-                                    const std::string & CMN_UNUSED(communicatorID),
-                                    const unsigned int providedInterfaceProxyInstanceID);
+                                    const unsigned int connectionID);
 
-    /*! Check if a network proxy server for the provided interface proxy has
-        been created. */
+    /* \brief Check if a network proxy server to serve the provided interface 
+              proxy specified has been created. 
+       \param providedInterfaceName Name of provided interface
+       \return True if success, false otherwise */
     inline bool FindInterfaceProxyServer(const std::string & providedInterfaceName) const {
-        return ProvidedInterfaceNetworkProxies.FindItem(providedInterfaceName);
+        return InterfaceProvidedNetworkProxies.FindItem(providedInterfaceName);
     }
 
-    /*! Check if a network proxy client for the required interface proxy has
-        been created. */
+    /* \brief Check if a network proxy server to serve the required interface 
+              proxy specified has been created. 
+       \param requiredInterfaceName Name of required interface
+       \return True if success, false otherwise */
     inline bool FindInterfaceProxyClient(const std::string & requiredInterfaceName) const {
-        return RequiredInterfaceNetworkProxies.FindItem(requiredInterfaceName);
+        return InterfaceRequiredNetworkProxies.FindItem(requiredInterfaceName);
     }
 
-    /*! Assign command proxy IDs in a provided interface proxy at client side as
-        function proxy IDs fetched from a required interface proxy at server
-        side. */
-    bool UpdateCommandProxyID(
-        const std::string & serverProvidedInterfaceName, const std::string & CMN_UNUSED(clientComponentName),
-        const std::string & clientRequiredInterfaceName, const unsigned int providedInterfaceProxyInstanceId);
+    /*! \brief Assign ids of command proxies' in a provided interface proxy at
+               client side as those of function proxyies' fetched from a 
+               required interface proxy at server side.
+        \param connectionID Id of this connection (issued by the global 
+               component manager)
+        \param serverInterfaceProvidedName Name of provided interface proxy at
+               client side
+        \param clientInterfaceRequiredName Name of required interface
+        \note This method is called only by a client process
+        \return True if success, false otherwise */
+    bool UpdateCommandProxyID(const unsigned int connectionID,
+        const std::string & serverInterfaceProvidedName, const std::string & clientInterfaceRequiredName);
 
-    /*! Assign event handler IDs in a required interface proxy at server side
-        as event generator IDs fetched from a provided interface proxy at client
-        side. */
+    /*! \brief Assign ids of event handler proxies' in a required interface 
+               proxy at server side those of event generators' fetched from a 
+               provided interface proxy at client side. 
+        \param clientComponentName Name of client component
+        \param clientInterfaceRequiredName Name of required interface at server
+               side
+        \note This method is called only by a server process
+        \return True if success, false otherwise */
     bool UpdateEventHandlerProxyID(
-        const std::string & clientComponentName, const std::string & requiredInterfaceName);
+        const std::string & clientComponentName, const std::string & clientInterfaceRequiredName);
 
     //-------------------------------------------------------------------------
     //  Getters
@@ -233,7 +249,7 @@ public:
     /*! \brief Get name of provided interface user
         \param processName Name of user process 
         \param componentName Name of user component */
-    static std::string GetProvidedInterfaceUserName(
+    static std::string GetInterfaceProvidedUserName(
         const std::string & processName, const std::string & componentName);
 
     //-------------------------------------------------------------------------
@@ -242,23 +258,16 @@ public:
     /*! \brief Extract complete information about all commands and event 
                generators in the provided interface specified. Argument 
                prototypes are serialized.
-        \param providedInterface Provided interface instance
-        \param userId User id to use provided interface's resources. Should
-               be allocated in advance.  Can be zero as special case
+        \param providedInterface Provided interface
         \param providedInterfaceDescription Output parameter to contain
-               complete information about the provided interface specified. 
-        \note If userId is zero, command void/write map is directly accessed
-              (not through mtsDevice/TaskInterface::GetCommandVoid/Write() 
-              method).  This is as a special case since the userId of 
-              a component interface starts from one. */
-    static void ExtractProvidedInterfaceDescription(
-        mtsDeviceInterface * providedInterface, const unsigned int userId,
-        ProvidedInterfaceDescription & providedInterfaceDescription);
+               complete information about the provided interface specified. */
+    static void ExtractInterfaceProvidedDescription(mtsInterfaceProvided * providedInterface,
+        InterfaceProvidedDescription & providedInterfaceDescription);
 
     /*! Extract complete information about all functions and event handlers in
         a required interface. Argument prototypes are fetched with serialization. */
-    static void ExtractRequiredInterfaceDescription(mtsRequiredInterface * requiredInterface,
-        RequiredInterfaceDescription & requiredInterfaceDescription);
+    static void ExtractInterfaceRequiredDescription(mtsInterfaceRequired * requiredInterface,
+        InterfaceRequiredDescription & requiredInterfaceDescription);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsComponentProxy)

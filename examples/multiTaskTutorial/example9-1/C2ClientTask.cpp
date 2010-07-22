@@ -11,7 +11,7 @@ C2ClientTask::C2ClientTask(const std::string & taskName, double period):
     mtsTaskPeriodic(taskName, period, false, 5000)
 {
     // to communicate with the interface of the resource
-    mtsRequiredInterface * required = AddRequiredInterface("r1");
+    mtsInterfaceRequired * required = AddInterfaceRequired("r1");
     if (required) {
                 required->AddFunction("Void", this->VoidServer);
         required->AddFunction("Write", this->WriteServer);
@@ -37,7 +37,7 @@ void C2ClientTask::Startup(void)
     }
     fltkMutex.Unlock();
     // check argument prototype for event handler
-    mtsRequiredInterface * required = GetRequiredInterface("r1");
+    mtsInterfaceRequired * required = GetInterfaceRequired("r1");
     CMN_ASSERT(required);
     mtsCommandWriteBase * eventHandler = required->GetEventHandlerWrite("EventWrite");
     CMN_ASSERT(eventHandler);

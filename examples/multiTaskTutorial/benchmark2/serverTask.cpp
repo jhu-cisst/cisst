@@ -17,7 +17,7 @@ serverTask::serverTask(const std::string & taskName, double period):
 {
     NumberOfSamplesCollected = 0;
 
-    mtsProvidedInterface * providedInterface = AddProvidedInterface("Provided");
+    mtsInterfaceProvided * providedInterface = AddInterfaceProvided("Provided");
     if (providedInterface) {
         providedInterface->AddCommandQualifiedRead(&serverTask::QualifiedRead, this, "QualifiedRead");
     }

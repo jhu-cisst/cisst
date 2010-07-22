@@ -70,10 +70,10 @@ public:
     typedef std::vector<EventVoidElement>            EventVoidVector;
     typedef std::vector<EventWriteElement>           EventWriteVector;
 
-	class ProvidedInterfaceDescription {
+	class InterfaceProvidedDescription {
     public:
 		// Interface name
-        std::string ProvidedInterfaceName;
+        std::string InterfaceProvidedName;
 
 		// Commands
 		CommandVoidVector          CommandsVoid;
@@ -93,10 +93,10 @@ public:
     typedef CommandVoidVector  EventHandlerVoidVector;
     typedef CommandWriteVector EventHandlerWriteVector;
 
-    class RequiredInterfaceDescription {
+    class InterfaceRequiredDescription {
     public:
         // Interface name
-        std::string RequiredInterfaceName;
+        std::string InterfaceRequiredName;
 
         // Functions (i.e., command pointers)
         CommandPointerNames FunctionVoidNames;
@@ -113,8 +113,8 @@ public:
 // Typedefs to access internal structures
 #define TYPEDEF( _class ) typedef mtsInterfaceCommon::_class _class;
 
-TYPEDEF(ProvidedInterfaceDescription);
-TYPEDEF(RequiredInterfaceDescription);
+TYPEDEF(InterfaceProvidedDescription);
+TYPEDEF(InterfaceRequiredDescription);
 TYPEDEF(CommandVoidElement);
 TYPEDEF(CommandWriteElement);
 TYPEDEF(CommandReadElement);

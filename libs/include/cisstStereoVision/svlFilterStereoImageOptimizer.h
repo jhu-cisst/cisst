@@ -23,12 +23,13 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlFilterStereoImageOptimizer_h
 #define _svlFilterStereoImageOptimizer_h
 
-#include <cisstStereoVision/svlStreamManager.h>
+#include <cisstStereoVision/svlFilterBase.h>
 
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
 
-class CISST_EXPORT svlFilterStereoImageOptimizer : public svlFilterBase, public cmnGenericObject
+
+class CISST_EXPORT svlFilterStereoImageOptimizer : public svlFilterBase
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
@@ -43,8 +44,8 @@ public:
     void RecomputeColorBalance(bool always = false);
 
 protected:
-    virtual int Initialize(svlSample* inputdata);
-    virtual int ProcessFrame(svlProcInfo* procInfo, svlSample* inputdata);
+    virtual int Initialize(svlSample* syncInput, svlSample* &syncOutput);
+    virtual int Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput);
     virtual int Release();
 
 private:

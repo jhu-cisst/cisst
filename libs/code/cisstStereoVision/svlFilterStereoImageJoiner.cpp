@@ -3,9 +3,9 @@
 
 /*
   $Id$
-  
+
   Author(s):  Balazs Vagvolgyi
-  Created on: 2007 
+  Created on: 2007
 
   (C) Copyright 2006-2007 Johns Hopkins University (JHU), All Rights
   Reserved.
@@ -21,9 +21,8 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstStereoVision/svlFilterStereoImageJoiner.h>
-#include <string.h>
-
-using namespace std;
+#include <cisstStereoVision/svlFilterInput.h>
+#include <cisstStereoVision/svlFilterOutput.h>
 
 /******************************************/
 /*** svlFilterStereoImageJoiner class *****/
@@ -33,12 +32,16 @@ CMN_IMPLEMENT_SERVICES(svlFilterStereoImageJoiner)
 
 svlFilterStereoImageJoiner::svlFilterStereoImageJoiner() :
     svlFilterBase(),
-    cmnGenericObject(),
-    ImageLayout(SideBySide)
+    OutputImage(0),
+    Layout(svlLayoutSideBySide)
 {
-    AddSupportedType(svlTypeImageRGBStereo, svlTypeImageRGB);
-    AddSupportedType(svlTypeImageMono8Stereo, svlTypeImageMono8);
-    AddSupportedType(svlTypeImageMono16Stereo, svlTypeImageMono16);
+    AddInput("input", true);
+    AddInputType("input", svlTypeImageRGBStereo);
+    AddInputType("input", svlTypeImageMono8Stereo);
+    AddInputType("input", svlTypeImageMono16Stereo);
+
+    AddOutput("output", true);
+    SetAutomaticOutputType(false);
 }
 
 svlFilterStereoImageJoiner::~svlFilterStereoImageJoiner()
@@ -46,9 +49,22 @@ svlFilterStereoImageJoiner::~svlFilterStereoImageJoiner()
     Release();
 }
 
-int svlFilterStereoImageJoiner::Initialize(svlSample* inputdata)
+int svlFilterStereoImageJoiner::UpdateTypes(svlFilterInput &input, svlStreamType type)
 {
-    svlSampleImageBase* input = dynamic_cast<svlSampleImageBase*>(inputdata);
+    // Check if type is on the supported list
+    if (!input.IsTypeSupported(type)) return SVL_FAIL;
+
+    if      (type == svlTypeImageRGBStereo)    GetOutput()->SetType(svlTypeImageRGB);
+    else if (type == svlTypeImageMono8Stereo)  GetOutput()->SetType(svlTypeImageMono8);
+    else if (type == svlTypeImageMono16Stereo) GetOutput()->SetType(svlTypeImageMono16);
+    else return SVL_FAIL;
+
+    return SVL_OK;
+}
+
+int svlFilterStereoImageJoiner::Initialize(svlSample* syncInput, svlSample* &syncOutput)
+{
+    svlSampleImage* input = dynamic_cast<svlSampleImage*>(syncInput);
     unsigned int width = input->GetWidth(SVL_LEFT);
     unsigned int height = input->GetHeight(SVL_LEFT);
 
@@ -57,14 +73,14 @@ int svlFilterStereoImageJoiner::Initialize(svlSample* inputdata)
 
     Release();
 
-    switch (ImageLayout) {
-        case VerticalInterlaced:
-        case VerticalInterlacedRL:
+    switch (Layout) {
+        case svlLayoutInterlaced:
+        case svlLayoutInterlacedRL:
             height += input->GetHeight(SVL_RIGHT);
         break;
 
-        case SideBySide:
-        case SideBySideRL:
+        case svlLayoutSideBySide:
+        case svlLayoutSideBySideRL:
             width += input->GetWidth(SVL_RIGHT);
         break;
 
@@ -72,39 +88,35 @@ int svlFilterStereoImageJoiner::Initialize(svlSample* inputdata)
             return SVL_FAIL;
     }
 
-    svlSampleImageBase* output;
-    if (GetInputType() == svlTypeImageRGBStereo) output = new svlSampleImageRGB;
-    else if (GetInputType() == svlTypeImageMono8Stereo) output = new svlSampleImageMono8;
-    else if (GetInputType() == svlTypeImageMono16Stereo) output = new svlSampleImageMono16;
+    if      (GetInput()->GetType() == svlTypeImageRGBStereo)    OutputImage = new svlSampleImageRGB;
+    else if (GetInput()->GetType() == svlTypeImageMono8Stereo)  OutputImage = new svlSampleImageMono8;
+    else if (GetInput()->GetType() == svlTypeImageMono16Stereo) OutputImage = new svlSampleImageMono16;
     else return SVL_FAIL;
-    output->SetSize(width, height);
-    OutputData = output;
+    OutputImage->SetSize(width, height);
+
+    syncOutput = OutputImage;
 
     return SVL_OK;
 }
 
-int svlFilterStereoImageJoiner::ProcessFrame(svlProcInfo* procInfo, svlSample* inputdata)
+int svlFilterStereoImageJoiner::Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput)
 {
-    ///////////////////////////////////////////
-    // Check if the input sample has changed //
-    if (!IsNewSample(inputdata))
-        return SVL_ALREADY_PROCESSED;
-    ///////////////////////////////////////////
+    syncOutput = OutputImage;
+    _SkipIfAlreadyProcessed(syncInput, syncOutput);
 
     _OnSingleThread(procInfo)
     {
-        svlSampleImageBase* id = dynamic_cast<svlSampleImageBase*>(inputdata);
-        svlSampleImageBase* od = dynamic_cast<svlSampleImageBase*>(OutputData);
+        svlSampleImage* id = dynamic_cast<svlSampleImage*>(syncInput);
         unsigned int stride = id->GetWidth(SVL_LEFT) * id->GetBPP();
-        unsigned int height = id->GetHeight();
+        unsigned int height = id->GetHeight(SVL_LEFT);
         unsigned char *input1 = id->GetUCharPointer(SVL_LEFT);
         unsigned char *input2 = id->GetUCharPointer(SVL_RIGHT);
-        unsigned char *output = od->GetUCharPointer();
+        unsigned char *output = OutputImage->GetUCharPointer();
 
         // copy data
-        switch (ImageLayout) {
-            case VerticalInterlaced:
-            case SideBySide:
+        switch (Layout) {
+            case svlLayoutInterlaced:
+            case svlLayoutSideBySide:
                 for (unsigned int j = 0; j < height; j ++) {
                     memcpy(output, input1, stride);
                     input1 += stride;
@@ -115,8 +127,8 @@ int svlFilterStereoImageJoiner::ProcessFrame(svlProcInfo* procInfo, svlSample* i
                 }
             break;
 
-            case VerticalInterlacedRL:
-            case SideBySideRL:
+            case svlLayoutInterlacedRL:
+            case svlLayoutSideBySideRL:
                 for (unsigned int j = 0; j < height; j ++) {
                     memcpy(output, input2, stride);
                     input2 += stride;
@@ -137,17 +149,22 @@ int svlFilterStereoImageJoiner::ProcessFrame(svlProcInfo* procInfo, svlSample* i
 
 int svlFilterStereoImageJoiner::Release()
 {
-    if (OutputData) {
-        delete OutputData;
-        OutputData = 0;
+    if (OutputImage) {
+        delete OutputImage;
+        OutputImage = 0;
     }
     return SVL_OK;
 }
 
-int svlFilterStereoImageJoiner::SetLayout(Layout layout)
+int svlFilterStereoImageJoiner::SetLayout(svlStereoLayout layout)
 {
     if (IsInitialized()) return SVL_FAIL;
-    ImageLayout = layout;
+    Layout = layout;
     return SVL_OK;
+}
+
+svlStereoLayout svlFilterStereoImageJoiner::GetLayout()
+{
+    return Layout;
 }
 

@@ -25,16 +25,16 @@ protected:
     static osaMutex Mutex;
     unsigned long Ticks;
 
-    // Use cisstMultiTask function objects 
+    // Use cisstMultiTask function objects
     mtsFunctionRead GetPositionJoint;
     mtsFunctionWrite MovePositionJoint;
 
     // mts events callbacks, in this example started event is void,
     // end event is write
     void CallBackStarted(void);
-    mtsCommandVoidBase * CallBackStartedCommand; 
+    mtsCommandVoidBase * CallBackStartedCommand;
     void CallBackFinished(const PositionJointType &);
-    mtsCommandWriteBase * CallBackFinishedCommand; 
+    mtsCommandWriteBase * CallBackFinishedCommand;
 
     // Data member to store joint values
     PositionJointType Position;
@@ -56,7 +56,7 @@ protected:
 
 public:
     userInterface(const std::string & robotName,
-                  mtsDeviceInterface * interfacePointer);
+                  mtsInterfaceProvided * interfacePointer);
     ~userInterface();
     void Hide(void);
     bool CloseRequested;

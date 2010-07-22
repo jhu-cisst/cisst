@@ -25,13 +25,13 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstOSAbstraction/osaThreadSignal.h>
 #include <cisstOSAbstraction/osaCriticalSection.h>
-#include <cisstStereoVision/svlStreamDefs.h>
+#include <cisstStereoVision/svlTypes.h>
 
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
 
 
-class svlSampleQueue
+class CISST_EXPORT svlSampleQueue
 {
 public:
     svlSampleQueue(svlStreamType type, int length);
@@ -43,9 +43,9 @@ public:
     double GetUsageRatio();
     int GetDroppedSampleCount();
 
-    bool PreAllocate(const svlSample & sample);
+    bool PreAllocate(const svlSample* sample);
 
-    bool Push(const svlSample & sample);
+    bool Push(const svlSample* sample);
     svlSample* Pull(double timeout = 5.0);
     svlSample* Peek();
 
@@ -54,13 +54,11 @@ private:
 
     svlStreamType Type;
     const int Length;
-    vctDynamicVector<int> BackwardPos;
-    vctDynamicVector<int> ForwardPos;
-    int LockedPos;
     int Tail;
     int Head;
     int BufferUsage;
     int DroppedSamples;
+    svlSample* ReadBuffer;
     vctDynamicVector<svlSample*> Buffer;
     osaCriticalSection CS;
     osaThreadSignal NewSampleEvent;

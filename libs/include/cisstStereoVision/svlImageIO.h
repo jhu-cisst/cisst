@@ -23,8 +23,8 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlImageIO_h
 #define _svlImageIO_h
 
-#include <cisstVector/vctDynamicMatrixTypes.h>
 #include <cisstOSAbstraction/osaCriticalSection.h>
+#include <cisstVector/vctDynamicVector.h>
 #include <string>
 
 // Always include last!
@@ -32,7 +32,8 @@ http://www.cisst.org/cisst/license.txt.
 
 
 // Forward declarations
-class svlSampleImageBase;
+class svlSampleImage;
+class cmnClassServicesBase;
 
 /*************************************/
 /*** svlImageCodecBase class *********/
@@ -50,15 +51,15 @@ public:
     virtual int ReadDimensions(std::istream &stream, unsigned int &width, unsigned int &height);
     virtual int ReadDimensions(const unsigned char *buffer, const size_t buffersize, unsigned int &width, unsigned int &height);
 
-    virtual int Read(svlSampleImageBase &image, const unsigned int videoch, const std::string &filename, bool noresize = false);
-    virtual int Read(svlSampleImageBase &image, const unsigned int videoch, std::istream &stream, bool noresize = false);
-    virtual int Read(svlSampleImageBase &image, const unsigned int videoch, const unsigned char *buffer, const size_t buffersize, bool noresize = false);
+    virtual int Read(svlSampleImage &image, const unsigned int videoch, const std::string &filename, bool noresize = false);
+    virtual int Read(svlSampleImage &image, const unsigned int videoch, std::istream &stream, bool noresize = false);
+    virtual int Read(svlSampleImage &image, const unsigned int videoch, const unsigned char *buffer, const size_t buffersize, bool noresize = false);
 
-    virtual int Write(const svlSampleImageBase &image, const unsigned int videoch, const std::string &filename, const int compression = -1);
-    virtual int Write(const svlSampleImageBase &image, const unsigned int videoch, std::ostream &stream, const int compression = -1);
-    virtual int Write(const svlSampleImageBase &image, const unsigned int videoch, std::ostream &stream, const std::string &codec, const int compression = -1);
-    virtual int Write(const svlSampleImageBase &image, const unsigned int videoch, unsigned char *buffer, size_t &buffersize, const int compression = -1);
-    virtual int Write(const svlSampleImageBase &image, const unsigned int videoch, unsigned char *buffer, size_t &buffersize, const std::string &codec, const int compression = -1);
+    virtual int Write(const svlSampleImage &image, const unsigned int videoch, const std::string &filename, const int compression = -1);
+    virtual int Write(const svlSampleImage &image, const unsigned int videoch, std::ostream &stream, const int compression = -1);
+    virtual int Write(const svlSampleImage &image, const unsigned int videoch, std::ostream &stream, const std::string &codec, const int compression = -1);
+    virtual int Write(const svlSampleImage &image, const unsigned int videoch, unsigned char *buffer, size_t &buffersize, const int compression = -1);
+    virtual int Write(const svlSampleImage &image, const unsigned int videoch, unsigned char *buffer, size_t &buffersize, const std::string &codec, const int compression = -1);
 
 protected:
     void SetExtensionList(const std::string &list);
@@ -102,13 +103,13 @@ public:
     static int ReadDimensions(const std::string &codec, std::istream &stream, unsigned int &width, unsigned int &height);
     static int ReadDimensions(const std::string &codec, const unsigned char *buffer, const size_t buffersize, unsigned int &width, unsigned int &height);
 
-    static int Read(svlSampleImageBase &image, const unsigned int videoch, const std::string &filename, bool noresize = false);
-    static int Read(svlSampleImageBase &image, const unsigned int videoch, const std::string &codec, std::istream &stream, bool noresize = false);
-    static int Read(svlSampleImageBase &image, const unsigned int videoch, const std::string &codec, const unsigned char *buffer, const size_t buffersize, bool noresize = false);
+    static int Read(svlSampleImage &image, const unsigned int videoch, const std::string &filename, bool noresize = false);
+    static int Read(svlSampleImage &image, const unsigned int videoch, const std::string &codec, std::istream &stream, bool noresize = false);
+    static int Read(svlSampleImage &image, const unsigned int videoch, const std::string &codec, const unsigned char *buffer, const size_t buffersize, bool noresize = false);
 
-    static int Write(const svlSampleImageBase &image, const unsigned int videoch, const std::string &filename, const int compression = -1);
-    static int Write(const svlSampleImageBase &image, const unsigned int videoch, const std::string &codec, std::ostream &stream, const int compression = -1);
-    static int Write(const svlSampleImageBase &image, const unsigned int videoch, const std::string &codec, unsigned char *buffer, size_t &buffersize, const int compression = -1);
+    static int Write(const svlSampleImage &image, const unsigned int videoch, const std::string &filename, const int compression = -1);
+    static int Write(const svlSampleImage &image, const unsigned int videoch, const std::string &codec, std::ostream &stream, const int compression = -1);
+    static int Write(const svlSampleImage &image, const unsigned int videoch, const std::string &codec, unsigned char *buffer, size_t &buffersize, const int compression = -1);
 };
 
 

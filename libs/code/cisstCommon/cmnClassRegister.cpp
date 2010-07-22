@@ -41,18 +41,18 @@ const std::string * cmnClassRegister::RegisterInstance(cmnClassServicesBase* cla
 
     // check if this class is already registered
     if (existingServicesPointer != 0) {
-        CMN_LOG_INIT_ERROR << "Class cmnClassRegister: class \"" << className
+        CMN_LOG_INIT_ERROR << "Class cmnClassRegister: Register: class \"" << className
                            << "\" is already registered.  You should not have this problem, this is a bug!" << std::endl;
     } else {
         std::pair<iterator, bool> insertionResult;
         EntryType newEntry(className, classServicesPointer);
         insertionResult = ServicesContainer.insert(newEntry);
         if (insertionResult.second) {
-            CMN_LOG_INIT_VERBOSE << "Class cmnClassRegister: class \"" << className
+            CMN_LOG_INIT_VERBOSE << "Class cmnClassRegister: Register: class \"" << className
                                  << "\" has been registered with Log LoD \"" << cmnLogLoDString[classServicesPointer->GetLoD()] << "\"" << std::endl;
             return &((*insertionResult.first).first);
         } else {
-            CMN_LOG_INIT_ERROR << "Class cmnClassRegister: class \"" << className
+            CMN_LOG_INIT_ERROR << "Class cmnClassRegister: Register: class \"" << className
                                << "\" can not be inserted.  You should not have this problem, this is a bug!" << std::endl;
         }
     }
@@ -72,17 +72,70 @@ bool cmnClassRegister::SetLoD(const std::string & name, LogLoDType lod) {
     cmnClassServicesBase* classServicesPointer = FindClassServices(name);
     if (classServicesPointer != NULL) {
         classServicesPointer->SetLoD(lod);
-        CMN_LOG_INIT_VERBOSE << "Class cmnClassRegister::SetLoD(): class \"" << classServicesPointer->GetName()
+        CMN_LOG_INIT_VERBOSE << "Class cmnClassRegister: SetLoD: class \"" << classServicesPointer->GetName()
                              << "\" log LoD has been set to \""
                              << cmnLogLoDString[classServicesPointer->GetLoD()] << "\"" << std::endl;
     } else {
         // we need to warn the programmer
-        CMN_LOG_INIT_WARNING << "Class cmnClassRegister::SetLoD(): class \"" << name
+        CMN_LOG_INIT_WARNING << "Class cmnClassRegister: SetLoD: class \"" << name
                              << "\" is not registered (yet?) " << std::endl;
     }
     return false;
 }
 
+
+bool cmnClassRegister::SetLoDForAllClassesInstance(LogLoDType lod) {
+    iterator iter;
+    const iterator end = ServicesContainer.end();
+    bool result = false;
+    std::string allClasses;
+    cmnClassServicesBase * classServicesPointer;
+    for (iter = ServicesContainer.begin();
+         iter != end;
+         iter++) {
+        classServicesPointer = (*iter).second;
+        if (classServicesPointer != 0) {
+            result = true; // at least one class found
+            classServicesPointer->SetLoD(lod);
+            allClasses = allClasses + classServicesPointer->GetName() + ", ";
+        }
+    }
+    if (result) {
+        CMN_LOG_INIT_VERBOSE << "Class cmnClassRegister: SetLoDForAllClasses: log LoD has been set to \""
+                             << cmnLogLoDString[classServicesPointer->GetLoD()] << "\" for the following classes: "
+                             << allClasses << std::endl;
+    }
+    return result;
+}
+
+
+bool cmnClassRegister::SetLoDForMatchingClassesInstance(const std::string & stringToMatch, LogLoDType lod) {
+    iterator iter;
+    const iterator end = ServicesContainer.end();
+    bool result = false;
+    std::string allClasses;
+    std::string className;
+    cmnClassServicesBase * classServicesPointer;
+    for (iter = ServicesContainer.begin();
+         iter != end;
+         iter++) {
+        className = (*iter).first;
+        if (className.find(stringToMatch) != std::string::npos) {
+            classServicesPointer = (*iter).second;
+            if (classServicesPointer != 0) {
+                result = true; // at least one class found
+                classServicesPointer->SetLoD(lod);
+                allClasses = allClasses + className + ", ";
+            }
+        }
+    }
+    if (result) {
+        CMN_LOG_INIT_VERBOSE << "Class cmnClassRegister: SetLoDForMatchingClasses: log LoD has been set to \""
+                             << cmnLogLoDString[classServicesPointer->GetLoD()] << "\" for the following classes matching \""
+                             << stringToMatch << "\": " << allClasses << std::endl;
+    }
+    return result;
+}
 
 
 cmnClassServicesBase * cmnClassRegister::FindClassServicesInstance(const std::string & className) {
@@ -92,10 +145,10 @@ cmnClassServicesBase * cmnClassRegister::FindClassServicesInstance(const std::st
     iterator = ServicesContainer.find(className);
     if (iterator != end) {
             result = iterator->second;
-            CMN_LOG_RUN_VERBOSE << "Class cmnClassRegister::FindClassServicesInstance(): found class info for \""
+            CMN_LOG_RUN_VERBOSE << "Class cmnClassRegister: FindClassServices: found class info for \""
                                 << className << "\"" << std::endl;
     } else {
-        CMN_LOG_RUN_WARNING << "Class cmnClassRegister::FindClassServicesInstance(): couldn't find class info for \""
+        CMN_LOG_RUN_WARNING << "Class cmnClassRegister: FindClassServices: couldn't find class info for \""
                             << className << "\"" << std::endl;
     }
     return result;
@@ -110,7 +163,7 @@ cmnClassServicesBase * cmnClassRegister::FindClassServicesInstance(const std::ty
     while ((iterator != end) && (result == NULL)) {
         if (*((iterator->second)->TypeInfoPointer()) == typeInfo) {
             result = iterator->second;
-            CMN_LOG_RUN_VERBOSE << "Class cmnClassRegister::FindClassServicesInstance(): found class info for the given type_info"
+            CMN_LOG_RUN_VERBOSE << "Class cmnClassRegister: FindClassServicesInstance: found class info for the given type_info"
                                 << std::endl;
         }
         iterator++;
@@ -119,7 +172,7 @@ cmnClassServicesBase * cmnClassRegister::FindClassServicesInstance(const std::ty
 }
 
 
-cmnGenericObject * cmnClassRegister::Create(const std::string& className) {
+cmnGenericObject * cmnClassRegister::Create(const std::string & className) {
     cmnClassServicesBase * classServicesPointer = FindClassServices(className);
     if (classServicesPointer) {
         return (classServicesPointer->Create());

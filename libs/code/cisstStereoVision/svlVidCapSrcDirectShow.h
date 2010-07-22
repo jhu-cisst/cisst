@@ -96,10 +96,11 @@ public:
     STDMETHODIMP SampleCB(double SampleTime, IMediaSample *pSample);
     STDMETHODIMP BufferCB(double sampletime, unsigned char *buffer, long buffersize);
 
-    svlVidCapSrcDirectShowCB(svlBufferImage *buffer);
+    svlVidCapSrcDirectShowCB(svlBufferImage *buffer, bool topdown);
 
 protected:
     svlBufferImage *Buffer;
+    bool TopDown;
 };
 
 
@@ -127,6 +128,7 @@ private:
 	int *InputID;
 	int *CapWidth;
 	int *CapHeight;
+	bool *CapTopDown;
 	int *EnableRenderer;
     IBaseFilter **pCaptureFilter;
 	IBaseFilter **pIntermediatePreviewFilter;

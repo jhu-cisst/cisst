@@ -41,11 +41,11 @@ module mtsManagerProxy
         // client side (required interface)
 		string ClientProcessName;
         string ClientComponentName;
-        string ClientRequiredInterfaceName;
+        string ClientInterfaceRequiredName;
         // server side (provided interface)
         string ServerProcessName;
         string ServerComponentName;
-        string ServerProvidedInterfaceName;
+        string ServerInterfaceProvidedName;
 	};
 
     /*! String vector that contains names of objects (e.g. commands, event generators,
@@ -117,9 +117,9 @@ module mtsManagerProxy
     //-------------------------------------------
 	//	Provided Interface
 	//-------------------------------------------
-	struct ProvidedInterfaceDescription {
+	struct InterfaceProvidedDescription {
 		// Interface name
-		string ProvidedInterfaceName;
+		string InterfaceProvidedName;
 		// Commands
 		CommandVoidSequence          CommandsVoid;
 		CommandWriteSequence         CommandsWrite;
@@ -137,9 +137,9 @@ module mtsManagerProxy
     sequence<CommandVoidElement> EventHandlerVoidSequence;
     sequence<CommandWriteElement> EventHandlerWriteSequence;
 
-    struct RequiredInterfaceDescription {
+    struct InterfaceRequiredDescription {
         // Interface name
-        string RequiredInterfaceName;
+        string InterfaceRequiredName;
         // Functions (i.e., command pointers)
         CommandPointerNames FunctionVoidNames;
         CommandPointerNames FunctionWriteNames;
@@ -167,60 +167,59 @@ module mtsManagerProxy
         //  Proxy Object Control (Creation, Removal)
         bool CreateComponentProxy(string componentProxyName);
         bool RemoveComponentProxy(string componentProxyName);
-        bool CreateProvidedInterfaceProxy(string serverComponentProxyName, ProvidedInterfaceDescription providedInterface);
-        bool CreateRequiredInterfaceProxy(string clientComponentProxyName, RequiredInterfaceDescription requiredInterface);
-        bool RemoveProvidedInterfaceProxy(string clientComponentProxyName, string providedInterfaceProxyName);
-        bool RemoveRequiredInterfaceProxy(string serverComponentProxyName, string requiredInterfaceProxyName);
+        bool CreateInterfaceProvidedProxy(string serverComponentProxyName, InterfaceProvidedDescription interfaceProvided);
+        bool CreateInterfaceRequiredProxy(string clientComponentProxyName, InterfaceRequiredDescription interfaceRequired);
+        bool RemoveInterfaceProvidedProxy(string clientComponentProxyName, string interfaceProvidedProxyName);
+        bool RemoveInterfaceRequiredProxy(string serverComponentProxyName, string interfaceRequiredProxyName);
 
         //  Connection Management
-        bool ConnectServerSideInterface(int userId, int providedInterfaceProxyInstanceID, ConnectionStringSet connectionStrings);
+        bool ConnectServerSideInterface(int connectionID, ConnectionStringSet connectionStrings);
         bool ConnectClientSideInterface(int connectionID, ConnectionStringSet connectionStrings);
-        int PreAllocateResources(string userName, string serverProcessName, string serverComponentName, string serverProvidedInterfaceName);
 
         //  Getters
         ["cpp:const"] idempotent
-        bool GetProvidedInterfaceDescription(int userId, string serverComponentName, string providedInterfaceName, out ProvidedInterfaceDescription providedInterface);
+        bool GetInterfaceProvidedDescription(string serverComponentName, string interfaceProvidedName, out InterfaceProvidedDescription interfaceProvided);
 
         ["cpp:const"] idempotent
-        bool GetRequiredInterfaceDescription(string componentName, string requiredInterfaceName, out RequiredInterfaceDescription requiredInterface);
+        bool GetInterfaceRequiredDescription(string componentName, string interfaceRequiredName, out InterfaceRequiredDescription interfaceRequired);
 
         ["cpp:const"] idempotent
         string GetProcessName();
 
         ["cpp:const"] idempotent
-        int GetCurrentInterfaceCount(string componentName);
+        int GetTotalNumberOfInterfaces(string componentName);
 
         // Getters for component inspector
         ["cpp:const"] idempotent
-        void GetNamesOfCommands(string componentName, string providedInterfaceName, out NamesOfCommandsSequence names);
+        void GetNamesOfCommands(string componentName, string interfaceProvidedName, out NamesOfCommandsSequence names);
 
         ["cpp:const"] idempotent
-        void GetNamesOfEventGenerators(string componentName, string providedInterfaceName, out NamesOfEventGeneratorsSequence names);
+        void GetNamesOfEventGenerators(string componentName, string interfaceProvidedName, out NamesOfEventGeneratorsSequence names);
 
         ["cpp:const"] idempotent
-        void GetNamesOfFunctions(string componentName, string requiredInterfaceName, out NamesOfFunctionsSequence names);
+        void GetNamesOfFunctions(string componentName, string interfaceRequiredName, out NamesOfFunctionsSequence names);
 
         ["cpp:const"] idempotent
-        void GetNamesOfEventHandlers(string componentName, string requiredInterfaceName, out NamesOfEventHandlersSequence names);
+        void GetNamesOfEventHandlers(string componentName, string interfaceRequiredName, out NamesOfEventHandlersSequence names);
 
         ["cpp:const"] idempotent
-        void GetDescriptionOfCommand(string componentName, string providedInterfaceName, string commandName, out string description);
+        void GetDescriptionOfCommand(string componentName, string interfaceProvidedName, string commandName, out string description);
 
         ["cpp:const"] idempotent
-        void GetDescriptionOfEventGenerator(string componentName, string providedInterfaceName, string eventGeneratorName, out string description);
+        void GetDescriptionOfEventGenerator(string componentName, string interfaceProvidedName, string eventGeneratorName, out string description);
 
         ["cpp:const"] idempotent
-        void GetDescriptionOfFunction(string componentName, string requiredInterfaceName, string functionName, out string description);
+        void GetDescriptionOfFunction(string componentName, string interfaceRequiredName, string functionName, out string description);
 
         ["cpp:const"] idempotent
-        void GetDescriptionOfEventHandler(string componentName, string requiredInterfaceName, string eventHandlerName, out string description);
+        void GetDescriptionOfEventHandler(string componentName, string interfaceRequiredName, string eventHandlerName, out string description);
         
         // Getters for data visualization
         ["cpp:const"] idempotent
-        void GetArgumentInformation(string componentName, string providedInterfaceName, string commandName, out string argumentName, out NamesOfSignals signalNames);
+        void GetArgumentInformation(string componentName, string interfaceProvidedName, string commandName, out string argumentName, out NamesOfSignals signalNames);
 
         ["cpp:const"] idempotent
-        void GetValuesOfCommand(string componentName, string providedInterfaceName, string commandName, int scalarIndex, out SetOfValues signalValues);
+        void GetValuesOfCommand(string componentName, string interfaceProvidedName, string commandName, int scalarIndex, out SetOfValues signalValues);
 	};
 
 	interface ManagerServer
@@ -260,24 +259,24 @@ module mtsManagerProxy
         bool RemoveComponent(string processName, string componentName);
 
         // Interface Management
-        bool AddProvidedInterface(string processName, string componentName, string interfaceName, bool isProxyInterface);
-        bool AddRequiredInterface(string processName, string componentName, string interfaceName, bool isProxyInterface);
-        bool FindProvidedInterface(string processName, string componentName, string interfaceName);
+        bool AddInterfaceProvided(string processName, string componentName, string interfaceName, bool isProxyInterface);
+        bool AddInterfaceRequired(string processName, string componentName, string interfaceName, bool isProxyInterface);
+        bool FindInterfaceProvided(string processName, string componentName, string interfaceName);
         ["cpp:const"] idempotent
-        bool FindRequiredInterface(string processName, string componentName, string interfaceName);
-        bool RemoveProvidedInterface(string processName, string componentName, string interfaceName);
-        bool RemoveRequiredInterface(string processName, string componentName, string interfaceName);
+        bool FindInterfaceRequired(string processName, string componentName, string interfaceName);
+        bool RemoveInterfaceProvided(string processName, string componentName, string interfaceName);
+        bool RemoveInterfaceRequired(string processName, string componentName, string interfaceName);
 
         // Connection Management
-        int Connect(ConnectionStringSet connectionStrings, out int userId); 
+        int Connect(ConnectionStringSet connectionStrings); 
         bool ConnectConfirm(int connectionSessionID);
         bool Disconnect(ConnectionStringSet connectionStrings);
 
         // Networking
-        bool SetProvidedInterfaceProxyAccessInfo(ConnectionStringSet connectionStrings, string endpointInfo);
-        bool GetProvidedInterfaceProxyAccessInfo(ConnectionStringSet connectionStrings, out string endpointInfo);
+        bool SetInterfaceProvidedProxyAccessInfo(ConnectionStringSet connectionStrings, string endpointInfo);
+        bool GetInterfaceProvidedProxyAccessInfo(ConnectionStringSet connectionStrings, out string endpointInfo);
         bool InitiateConnect(int connectionID, ConnectionStringSet connectionStrings);
-        bool ConnectServerSideInterfaceRequest(int connectionID, int providedInterfaceProxyInstanceId, ConnectionStringSet connectionStrings);
+        bool ConnectServerSideInterfaceRequest(int connectionID, ConnectionStringSet connectionStrings);
 
 	};
 };

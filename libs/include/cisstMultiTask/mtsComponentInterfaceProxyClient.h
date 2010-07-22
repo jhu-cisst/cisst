@@ -49,10 +49,11 @@ protected:
     typedef std::map<CommandIDType, mtsProxySerializer *> PerEventSerializerMapType;
     PerEventSerializerMapType PerEventSerializerMap;
 
-    /*! ID of this proxy. mtsComponentInterfaceProxyServer handles multiple
-        network proxy clients (as a provided interface can be connected to
-        multiple required interfaces) and it uses this ID as unique client ID. */
-    unsigned int ProvidedInterfaceProxyInstanceID;
+    /*! Connection id that this proxy runs for. mtsComponentInterfaceProxyServer 
+        handles multiple network proxy clients (because multiple required 
+        interfaces can connect to one provided interface) and it uses this 
+        id as unique id.  See also comments for mtsComponentProxy::ConnectionId */
+    unsigned int ConnectionID;
 
     /*! Instance counter used to set a short name of this thread */
     static unsigned int InstanceCounter;
@@ -105,7 +106,7 @@ protected:
 public:
     /*! Constructor and destructor */
     mtsComponentInterfaceProxyClient(const std::string & serverEndpointInfo,
-                                     const unsigned int providedInterfaceProxyInstanceID);
+                                     const unsigned int connectionID);
     ~mtsComponentInterfaceProxyClient();
 
     /*! Entry point to run a proxy. */

@@ -34,6 +34,19 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsConfig.h>
 
+/*! Queuing policy for the interface */
+typedef enum {MTS_COMPONENT_POLICY, MTS_COMMANDS_SHOULD_NOT_BE_QUEUED, MTS_COMMANDS_SHOULD_BE_QUEUED} mtsInterfaceQueuingPolicy;
+
+/*! Queuing policy, i.e. what the user would like to do for
+  individual commands added using AddCommandVoid or
+  AddCommandWrite as well as event handlers */
+typedef enum {MTS_INTERFACE_COMMAND_POLICY, MTS_COMMAND_QUEUED, MTS_COMMAND_NOT_QUEUED} mtsCommandQueuingPolicy;
+
+/*! Queuing policy, i.e. what the user would like to do for
+  individual event handlers added using AddEventHandlerVoid or
+  AddEventHandlerWrite. */
+typedef enum {MTS_INTERFACE_EVENT_POLICY, MTS_EVENT_QUEUED, MTS_EVENT_NOT_QUEUED} mtsEventQueuingPolicy;
+
 // commands
 class mtsCommandBase;
 
@@ -47,28 +60,35 @@ template <class _argumentBaseType> class mtsCommandReadOrWriteBase;
 typedef mtsCommandReadOrWriteBase<mtsGenericObject> mtsCommandReadBase;
 typedef mtsCommandReadOrWriteBase<const mtsGenericObject> mtsCommandWriteBase;
 
-template <class _argumentType> class mtsFunctionReadOrWrite;
+class mtsFunctionRead;
+class mtsFunctionWrite;
 
 // two arguments commands
 template <class _argument2BaseType> class mtsCommandQualifiedReadOrWriteBase;
 typedef mtsCommandQualifiedReadOrWriteBase<mtsGenericObject> mtsCommandQualifiedReadBase;
 typedef mtsCommandQualifiedReadOrWriteBase<const mtsGenericObject> mtsCommandQualifiedWriteBase;
 
-template <class _argumentType> class mtsFunctionQualifiedReadOrWrite;
+class mtsFunctionQualifiedRead;
 
 // multicast commands
 class mtsMulticastCommandWriteBase;
 template <class _argumentType> class mtsMulticastCommandWrite;
 
 // interfaces and tasks
-class mtsDeviceInterface;
-typedef mtsDeviceInterface mtsProvidedInterface;
-class mtsDevice;
-typedef mtsDevice mtsComponent;
-class mtsTaskInterface;
-class mtsRequiredInterface;
+class mtsInterfaceProvidedOrOutput;
+class mtsInterfaceProvided;
+class mtsInterfaceOutput;
+class mtsInterfaceRequiredOrInput;
+class mtsInterfaceRequired;
+class mtsInterfaceInput;
+
+class mtsComponent;
+typedef mtsComponent mtsDevice; // for backward compatibility
 class mtsTask;
+class mtsTaskContinuous;
 class mtsTaskPeriodic;
+class mtsTaskFromCallback;
+class mtsTaskFromSignal;
 
 // containers
 class mtsMailBox;

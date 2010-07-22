@@ -20,6 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstDevices/devSartoriusSerial.h>
 #include <cisstOSAbstraction/osaSleep.h>
+#include <cisstMultiTask/mtsInterfaceProvided.h>
 
 #include <string.h> // for memcpy
 
@@ -62,7 +63,7 @@ void devSartoriusSerial::SetupInterface(void)
     // add weight to state table
     StateTable.AddData(this->Weight, "Weight");
     // add one interface, this will create an mtsTaskInterface
-    mtsProvidedInterface * providedInterface = AddProvidedInterface("Scale");
+    mtsInterfaceProvided * providedInterface = AddInterfaceProvided("Scale");
     if (providedInterface) {
         // add command to access state table values to the interface
         providedInterface->AddCommandReadState(this->StateTable, this->Weight, "GetWeight");

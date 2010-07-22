@@ -95,7 +95,7 @@ inline void cmnDeSerializeSizeRaw(std::istream & inputStream, size_t & data)
 inline void cmnDeSerializeRaw(std::istream & inputStream, std::string & data)
     throw (std::runtime_error)
 {
-    std::string::size_type size;
+    std::string::size_type size = 0;
     cmnDeSerializeSizeRaw(inputStream, size);
     data.resize(size);
     inputStream.read(const_cast<char *>(data.c_str()), size * sizeof(std::string::value_type));

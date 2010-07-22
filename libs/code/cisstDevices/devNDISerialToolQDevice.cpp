@@ -18,7 +18,7 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include <cisstMultiTask/mtsRequiredInterface.h>
+#include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstDevices/devNDISerialToolQDevice.h>
 
 #include <QDir>
@@ -28,13 +28,13 @@ CMN_IMPLEMENT_SERVICES(devNDISerialToolQDevice);
 
 
 devNDISerialToolQDevice::devNDISerialToolQDevice(const std::string & taskName) :
-    mtsDevice(taskName)
+    mtsComponent(taskName)
 {
     ToolWidget.setupUi(&CentralWidget);
     ToolWidget.ToolGroup->setTitle(QString::fromStdString(taskName));
     CentralWidget.setWindowTitle(QString::fromStdString(taskName));
 
-    mtsRequiredInterface * required = AddRequiredInterface(taskName);
+    mtsInterfaceRequired * required = AddInterfaceRequired(taskName);
     if (required) {
        required->AddFunction("GetPositionCartesian", NDI.GetPositionCartesian);
     }
@@ -47,7 +47,7 @@ devNDISerialToolQDevice::devNDISerialToolQDevice(const std::string & taskName) :
 }
 
 
-void devNDISerialToolQDevice::timerEvent(QTimerEvent * event)
+void devNDISerialToolQDevice::timerEvent(QTimerEvent * CMN_UNUSED(event))
 {
     NDI.GetPositionCartesian(NDI.PositionCartesian);
     if (NDI.PositionCartesian.Valid()) {

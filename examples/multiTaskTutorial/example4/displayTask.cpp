@@ -11,7 +11,7 @@ CMN_IMPLEMENT_SERVICES(displayTask);
 displayTask::displayTask(const std::string & taskName, double period):
     mtsTaskPeriodic(taskName, period, false, 5000)
 {
-    mtsRequiredInterface *req = AddRequiredInterface("DataGenerator");
+    mtsInterfaceRequired *req = AddInterfaceRequired("DataGenerator");
     if (req) {
         req->AddFunction("GetData", Generator.GetData);
         req->AddFunction("SetAmplitude", Generator.SetAmplitude);
@@ -20,9 +20,9 @@ displayTask::displayTask(const std::string & taskName, double period):
         // create an event handler associated to the output port.  false
         // means not queued.
         req->AddEventHandlerWrite(&displayTask::HandleTrigger, this,
-                                  "TriggerEvent", false);
+                                  "TriggerEvent", MTS_EVENT_NOT_QUEUED);
     }
-    req = AddRequiredInterface("Clock");
+    req = AddInterfaceRequired("Clock");
     if (req)
         req->AddFunction("GetTime", Clock.GetClockData);
 }

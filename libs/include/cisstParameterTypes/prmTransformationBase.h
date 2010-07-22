@@ -34,7 +34,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnClassRegisterMacros.h>
 #include <cisstVector/vctTransformationTypes.h>
 
-#include <cisstMultiTask/mtsFunctionReadOrWrite.h>
+#include <cisstMultiTask/mtsFunctionRead.h>
 #include <cisstParameterTypes/prmForwardDeclarations.h>
 
 // probably best to include streams

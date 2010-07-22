@@ -23,14 +23,14 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlFilterSourceImageFile_h
 #define _svlFilterSourceImageFile_h
 
-#include <cisstStereoVision/svlStreamManager.h>
+#include <cisstStereoVision/svlFilterSourceBase.h>
 #include <cisstStereoVision/svlImageIO.h>
 
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
 
 
-class CISST_EXPORT svlFilterSourceImageFile : public svlFilterSourceBase, public cmnGenericObject
+class CISST_EXPORT svlFilterSourceImageFile : public svlFilterSourceBase
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
@@ -44,12 +44,13 @@ public:
     int SetSequence(unsigned int numberofdigits = 0, unsigned int from = 0, unsigned int to = 0);
 
 protected:
-    virtual int Initialize();
+    virtual int Initialize(svlSample* &syncOutput);
     virtual int OnStart(unsigned int procCount);
-    virtual int ProcessFrame(svlProcInfo* procInfo);
+    virtual int Process(svlProcInfo* procInfo, svlSample* &syncOutput);
     virtual int Release();
 
 private:
+    svlSampleImage* OutputImage;
     vctDynamicVector<svlImageCodecBase*> ImageCodec;
     vctDynamicVector<std::string> FilePathPrefix;
     vctDynamicVector<std::string> Extension;

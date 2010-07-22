@@ -140,7 +140,7 @@ public:
       convenient way to extract the required sizes from the input
       containers.  The next call to the Solve() method will check that
       the parameters match the dimension. */
-    inline void Allocate(vctDynamicMatrix<CISSTNETLIB_DOUBLE> &C, vctDynamicMatrix<CISSTNETLIB_DOUBLE> &d) {
+    inline void Allocate(vctDynamicMatrix<CISSTNETLIB_DOUBLE> &C, vctDynamicMatrix<CISSTNETLIB_DOUBLE> & CMN_UNUSED(d)) {
         Allocate(C.rows(), C.cols());
     }
 		

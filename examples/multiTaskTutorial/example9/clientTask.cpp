@@ -13,7 +13,7 @@ clientTask<_dataType>::clientTask(const std::string & taskName, double period):
     clientTaskBase(taskName, period)
 {
     // to communicate with the interface of the resource
-    mtsRequiredInterface * required = AddRequiredInterface("Required");
+    mtsInterfaceRequired * required = AddInterfaceRequired("Required");
     if (required) {
         required->AddFunction("Void", this->VoidServer);
         required->AddFunction("Write", this->WriteServer);
@@ -41,7 +41,7 @@ void clientTask<_dataType>::Startup(void)
     }
     fltkMutex.Unlock();
     // check argument prototype for event handler
-    mtsRequiredInterface * required = GetRequiredInterface("Required");
+    mtsInterfaceRequired * required = GetInterfaceRequired("Required");
     CMN_ASSERT(required);
     mtsCommandWriteBase * eventHandler = required->GetEventHandlerWrite("EventWrite");
     CMN_ASSERT(eventHandler);

@@ -31,7 +31,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsCommandReadOrWriteBase.h>
 #include <cisstMultiTask/mtsGenericObjectProxy.h>
-#include <cisstMultiTask/mtsDevice.h>
 
 
 /*!

@@ -142,7 +142,7 @@ protected:
     void SetDelimiter(void);
 
     /*! Default control interface and methods used for the provided commands. */
-    mtsProvidedInterface * ControlInterface;
+    mtsInterfaceProvided * ControlInterface;
 
     /*! Methods used to populate the component provided interface. */
     inline void StartCollectionCommand(void) {

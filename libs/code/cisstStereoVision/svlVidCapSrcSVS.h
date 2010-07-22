@@ -28,6 +28,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <svsclass.h>
 
 
+class svlBufferImage;
+class osaThread;
 class svlVidCapSrcSVSThread;
 
 class svlVidCapSrcSVS : public svlVidCapSrcBase, public cmnGenericObject

@@ -27,15 +27,15 @@ http://www.cisst.org/cisst/license.txt.
 
   This class defines the local component manager (LCM) that manages local
   components and is unique in a process.  Since only one instance of LCM should
-  exist in a process, this class is implemented as singleton.  Thus, to get an 
-  instance of LCM, mtsManagerLocal::GetInstance() is to be called (instead of
-  constructor).
+  exist in a process, this class is implemented as singleton.  To get an 
+  instance of LCM, therefore, mtsManagerLocal::GetInstance() should be used
+  (instead of constructor).
 
   The LCM replaces the previous task manager (mtsTaskManager) which was similar
   to the LCM without networking support.  Major differences between the two are:
 
-  1) The LCM manages tasks and devices as a unified object--component--which
-  is of type mtsDevice and is stored in a single data structure--component map.
+  1) The LCM manages tasks and components as a unified object--component--which
+  is of type mtsComponent and is stored in a single data structure--component map.
   That is, task map and device map in the previous task manager has been
   consolidated into the component map.
 
@@ -68,9 +68,12 @@ http://www.cisst.org/cisst/license.txt.
 
 class CISST_EXPORT mtsManagerLocal: public mtsManagerLocalInterface
 {
+    // for unit-testing
     friend class mtsManagerLocalTest;
     friend class mtsManagerGlobalTest;
+    // for internal access to manage proxy objects
     friend class mtsManagerGlobal;
+    friend class mtsManagerProxyClient;
 
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
@@ -88,7 +91,7 @@ private:
 protected:
     /*! Typedef for component map: key is component name, value is component
         object */
-    typedef cmnNamedMap<mtsDevice> ComponentMapType;
+    typedef cmnNamedMap<mtsComponent> ComponentMapType;
     ComponentMapType ComponentMap;
 
     /*! Time server used by all tasks. */
@@ -152,30 +155,25 @@ protected:
                interfaces that are in different processes.
         \param component Component object instance
         \param componentName Name of component */
-    bool RegisterInterfaces(mtsDevice * component);
+    bool RegisterInterfaces(mtsComponent * component);
     bool RegisterInterfaces(const std::string & componentName);
 
     /*! \brief Connect two local interfaces. 
         \param clientComponentName Name of client component
-        \param clientRequiredInterfaceName Name of required interface
+        \param clientInterfaceRequiredName Name of required interface
         \param serverComponentName Name of server component
-        \param serverProvidedInterfaceName Name of provided interface
-        \param userId User id allocated for this connection. Valid only in the
-               networked configuration. Zero by default.
-        \return zero if successful, -1 if error occurs.
-        \note  It is assumed that two components are in the same process. Thus,
-               this does not work with components in different processes. */
-    int ConnectLocally(
-        const std::string & clientComponentName, const std::string & clientRequiredInterfaceName,
-        const std::string & serverComponentName, const std::string & serverProvidedInterfaceName,
-        const int userId = 0);
+        \param serverInterfaceProvidedName Name of provided interface
+        \return true if successful, false otherwise
+        \note  It is assumed that two components are in the same process. */
+    bool ConnectLocally(
+        const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
+        const std::string & serverComponentName, const std::string & serverInterfaceProvidedName);
 
     //-------------------------------------------------------------------------
     //  Methods required by mtsManagerLocalInterface
     //
     //  See mtsManagerLocalInterface.h for detailed documentation.
     //-------------------------------------------------------------------------
-public:
 #if CISST_MTS_HAS_ICE
     /*! \brief Create component proxy
         \param componentProxyName Name of component proxy
@@ -191,164 +189,99 @@ public:
     bool RemoveComponentProxy(const std::string & componentProxyName, const std::string & listenerID = "");
 
     /*! \brief Create provided interface proxy 
-        \param serverComponentProxyName Name of server component proxy that 
-               has provided interface to be duplicated
-        \param providedInterfaceDescription Full description of provided
-               interface to be duplicated
-        \param listenerID Not used */
-    bool CreateProvidedInterfaceProxy(
+        \param serverComponentProxyName Name of server component proxy
+        \param providedInterfaceDescription Description of provided interface */
+    bool CreateInterfaceProvidedProxy(
         const std::string & serverComponentProxyName,
-        const ProvidedInterfaceDescription & providedInterfaceDescription, const std::string & listenerID = "");
+        const InterfaceProvidedDescription & providedInterfaceDescription, const std::string & listenerID = "");
 
-    /* AAAAAAAAAAAAAAAAAAAAAAA */
     /*! \brief Create required interface proxy 
         \param clientComponentProxyName Name of component proxy that has */
-    bool CreateRequiredInterfaceProxy(
+    bool CreateInterfaceRequiredProxy(
         const std::string & clientComponentProxyName,
-        const RequiredInterfaceDescription & requiredInterfaceDescription, const std::string & listenerID = "");
+        const InterfaceRequiredDescription & requiredInterfaceDescription, const std::string & listenerID = "");
 
     /*! Remove a provided interface proxy */
-    bool RemoveProvidedInterfaceProxy(
+    bool RemoveInterfaceProvidedProxy(
         const std::string & clientComponentProxyName, const std::string & providedInterfaceProxyName, const std::string & listenerID = "");
 
     /*! Remove a required interface proxy */
-    bool RemoveRequiredInterfaceProxy(
+    bool RemoveInterfaceRequiredProxy(
         const std::string & serverComponentProxyName, const std::string & requiredInterfaceProxyName, const std::string & listenerID = "");
 
     /*! Get information about provided interface */
-    bool GetProvidedInterfaceDescription(
-        const unsigned int userId,
+    bool GetInterfaceProvidedDescription(
         const std::string & serverComponentName,
         const std::string & providedInterfaceName,
-        ProvidedInterfaceDescription & providedInterfaceDescription, const std::string & listenerID = "");
+        InterfaceProvidedDescription & providedInterfaceDescription, const std::string & listenerID = "");
 
     /*! Extract all the information on a required interface such as function
         objects and event handlers with arguments serialized */
-    bool GetRequiredInterfaceDescription(
+    bool GetInterfaceRequiredDescription(
         const std::string & componentName,
         const std::string & requiredInterfaceName,
-        RequiredInterfaceDescription & requiredInterfaceDescription, const std::string & listenerID = "");
+        InterfaceRequiredDescription & requiredInterfaceDescription, const std::string & listenerID = "");
 
-    /*! Returns a total number of interfaces that are running on a component */
-    int GetCurrentInterfaceCount(const std::string & componentName, const std::string & listenerID = "");
+    /*! Returns a total number of interfaces that a component has */
+    int GetTotalNumberOfInterfaces(const std::string & componentName, const std::string & listenerID = "");
 
-    /*! Connect interfaces at server side */
-    bool ConnectServerSideInterface(
-        const int userId, const unsigned int providedInterfaceProxyInstanceID,
-        const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientRequiredInterfaceName,
-        const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverProvidedInterfaceName,
+    /*! \brief Connect two local interfaces at server side
+        \param connectionID Id of this connection, which was issued by the global
+               component manager
+        \param clientProcessName Name of client process
+        \param clientComponentName Name of client component
+        \param clientInterfaceRequiredName Name of required interface
+        \param serverProcessName Name of server process
+        \param serverComponentName Name of server component
+        \param serverInterfaceProvidedName Name of provided interface
+        \param listenerID Not used (see documentation for ConnectClientSideInterface() 
+               in mtsManagerLocalInterface.h)
+        \return True if success, false otherwise */
+    bool ConnectServerSideInterface(const unsigned int connectionID,
+        const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
+        const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceProvidedName,
         const std::string & listenerID = "");
 
-    /*! Connect two local interfaces at client side. */
+    /*! \brief Connect two local interfaces at client side
+        \param connectionID Id of this connection, which was issued by the global
+               component manager
+        \param clientProcessName Name of client process
+        \param clientComponentName Name of client component
+        \param clientInterfaceRequiredName Name of required interface
+        \param serverProcessName Name of server process
+        \param serverComponentName Name of server component
+        \param serverInterfaceProvidedName Name of provided interface
+        \param listenerID Not used (see documentation for ConnectClientSideInterface() 
+               in mtsManagerLocalInterface.h)
+        \return True if success, false otherwise */
     bool ConnectClientSideInterface(const unsigned int connectionID,
-        const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientRequiredInterfaceName,
-        const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverProvidedInterfaceName,
-        const std::string & listenerID = "");
-
-    /*! Pre-allocate provided interface's resources */
-    int PreAllocateResources(const std::string & userName,
-        const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverProvidedInterfaceName, 
+        const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
+        const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceProvidedName,
         const std::string & listenerID = "");
 #endif
 
-#if !CISST_MTS_HAS_ICE
-    /*! Get a singleton object of local component manager */
-    static mtsManagerLocal * GetInstance(void);
-#else
-        
-
-
-    /*! \brief Return singleton object of local component manager.
-        \param globalComponentManagerIP Ip address of global component manager
-               that this local component manager connects to
-        \param thisProcessName Name of this process. If not specified, set as
-               ip address of this host by default
-        \param thisProcessIP IP address of this process. If not specified, set 
-               as the first ip address detected
-        \return Pointer to singleton object 
-        \note  If no argument is specified, local component manager is
-               configured as the standalone mode. If this method is called again 
-               with proper arguments, the singleton object is reconfigured as
-               the networked mode to support inter-process communication. During
-               this reconfiguration process, a caller thread is blocked for 
-               thread-safe transition of all internal data. */
-    static mtsManagerLocal * GetInstance(const std::string & globalComponentManagerIP = "",
-                                         const std::string & thisProcessName = "",
-                                         const std::string & thisProcessIP = "");
-
-#endif
-
+public:
     //-------------------------------------------------------------------------
     //  Component Management
     //-------------------------------------------------------------------------
     /*! Add a component to this local component manager. */
-    bool AddComponent(mtsDevice * component);
+    bool AddComponent(mtsComponent * component);
     bool /*CISST_DEPRECATED*/ AddTask(mtsTask * component); // For backward compatibility
-    bool /*CISST_DEPRECATED*/ AddDevice(mtsDevice * component); // For backward compatibility
+    bool /*CISST_DEPRECATED*/ AddDevice(mtsComponent * component); // For backward compatibility
 
     /*! Remove a component from this local component manager. */
-    bool RemoveComponent(mtsDevice * component);
+    bool RemoveComponent(mtsComponent * component);
     bool RemoveComponent(const std::string & componentName);
 
     /*! Retrieve a component by name. */
-    mtsDevice * GetComponent(const std::string & componentName) const;
+    mtsComponent * GetComponent(const std::string & componentName) const;
     mtsTask * GetComponentAsTask(const std::string & componentName) const;
 
-    mtsDevice /*CISST_DEPRECATED*/ * GetDevice(const std::string & deviceName); // For backward compatibility
+    mtsComponent /*CISST_DEPRECATED*/ * GetDevice(const std::string & deviceName); // For backward compatibility
     mtsTask /*CISST_DEPRECATED*/ * GetTask(const std::string & taskName); // For backward compatibility
 
     /*! Check if a component exists by its name */
     bool FindComponent(const std::string & componentName) const;
-
-    /* \brief Connect two local interfaces
-       \param clientComponentName Name of client component
-       \param clientRequiredInterfaceName Name of required interface
-       \param serverComponentName Name of server component
-       \param serverProvidedInterfaceName Name of provided interface
-       \return True if success, false otherwise
-       \note If connection is established successfully, this information is
-             reported to the global component manager (the local component 
-             manager does not keep any connection information). */
-    bool Connect(
-        const std::string & clientComponentName, const std::string & clientRequiredInterfaceName,
-        const std::string & serverComponentName, const std::string & serverProvidedInterfaceName);
-
-#if CISST_MTS_HAS_ICE
-    /* \brief Connect two remote interfaces
-       \param clientProcessName Name of client process
-       \param clientComponentName Name of client component
-       \param clientRequiredInterfaceName Name of required interface
-       \param serverProcessName Name of server process
-       \param serverComponentName Name of server component
-       \param serverProvidedInterfaceName Name of provided interface
-       \return True if success, false otherwise
-       \note If connection is established successfully, this information is
-             reported to the global component manager. Since connection between
-             two interfaces should be established twice--once in the client 
-             process and once in the server process--there are two internal 
-             connection management methods: ConnectClientSideInterface() and
-             ConnectServerSideInterface().  ConnectClientSideInterface() is 
-             always executed first followed by ConnectServerSideInterface().
-             Connection request can be made at any process--server or client 
-             process.  That is, whichever process initiate connection request,
-             the result is the same. 
-             If this method is called against two local interfaces, the other 
-             Connect() method is internally called instead. */
-    bool Connect(
-        const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientRequiredInterfaceName,
-        const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverProvidedInterfaceName);
-#endif
-
-    /*! Disconnect two interfaces */
-    bool Disconnect(
-        const std::string & clientComponentName, const std::string & clientRequiredInterfaceName,
-        const std::string & serverComponentName, const std::string & serverProvidedInterfaceName);
-
-#if CISST_MTS_HAS_ICE
-    bool Disconnect(
-        const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientRequiredInterfaceName,
-        const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverProvidedInterfaceName);
-#endif
 
     /*! Create all components. If a component is of type mtsTask, mtsTask::Create()
         is called internally. */
@@ -369,26 +302,108 @@ public:
     void Cleanup(void);
 
     //-------------------------------------------------------------------------
+    //  Connection Management
+    //-------------------------------------------------------------------------
+    /*! \brief Connect two local interfaces
+        \param clientComponentName Name of client component
+        \param clientInterfaceRequiredName Name of required interface
+        \param serverComponentName Name of server component
+        \param serverInterfaceProvidedName Name of provided interface
+        \return True if success, false otherwise
+        \note If connection is established successfully, this information is
+              reported to the global component manager (the local component 
+              manager does not keep any connection information). */
+    bool Connect(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
+                 const std::string & serverComponentName, const std::string & serverInterfaceProvidedName);
+
+#if CISST_MTS_HAS_ICE
+    /*! \brief Connect two remote interfaces
+        \param clientProcessName Name of client process
+        \param clientComponentName Name of client component
+        \param clientInterfaceRequiredName Name of required interface
+        \param serverProcessName Name of server process
+        \param serverComponentName Name of server component
+        \param serverInterfaceProvidedName Name of provided interface
+        \return True if success, false otherwise
+        \note If connection is established successfully, this information is
+              reported to the global component manager. Since connection between
+              two interfaces should be established twice--once in the client 
+              process and once in the server process--there are two internal 
+              connection management methods: ConnectClientSideInterface() and
+              ConnectServerSideInterface().  ConnectClientSideInterface() is 
+              always executed first and calls ConnectServerSideInterface()
+              internally in a blocking way (i.e., it waits for
+              ConnectServerSideInterface() to finish inside it).
+              Connection request can be made at any process--server or client 
+              process.  That is, whichever process initiate connection request,
+              the result is the same. 
+              If this method is called against two local interfaces, the other 
+              Connect() method is internally called instead. */
+    bool Connect(const std::string & clientProcessName, const std::string & clientComponentName,
+                 const std::string & clientInterfaceRequiredName,
+                 const std::string & serverProcessName, const std::string & serverComponentName,
+                 const std::string & serverInterfaceProvidedName);
+#endif
+
+    /*! Disconnect two interfaces */
+    bool Disconnect(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
+                    const std::string & serverComponentName, const std::string & serverInterfaceProvidedName);
+
+#if CISST_MTS_HAS_ICE
+    bool Disconnect(const std::string & clientProcessName, const std::string & clientComponentName,
+                    const std::string & clientInterfaceRequiredName,
+                    const std::string & serverProcessName, const std::string & serverComponentName,
+                    const std::string & serverInterfaceProvidedName);
+#endif
+
+    //-------------------------------------------------------------------------
     //  Getters and Utilities
     //-------------------------------------------------------------------------
+#if !CISST_MTS_HAS_ICE
+    /*! Get a singleton object of local component manager */
+    static mtsManagerLocal * GetInstance(void);
+#else
+    /*! \brief Return singleton object of local component manager.
+        \param globalComponentManagerIP Ip address of global component manager
+               that this local component manager connects to
+        \param thisProcessName Name of this process. If not specified, set as
+               ip address of this host by default
+        \param thisProcessIP IP address of this process. If not specified, set 
+               as the first ip address detected
+        \return Pointer to singleton object 
+        \note  If no argument is specified, local component manager is
+               configured as the standalone mode. If this method is called again 
+               with proper arguments, the singleton object is reconfigured as
+               the networked mode to support inter-process communication. During
+               this reconfiguration process, a caller thread is blocked for 
+               thread-safe transition of all internal data. */
+    static mtsManagerLocal * GetInstance(const std::string & globalComponentManagerIP = "",
+                                         const std::string & thisProcessName = "",
+                                         const std::string & thisProcessIP = "");
+
+#endif
+
     /*! Enumerate all the names of components added */
     std::vector<std::string> GetNamesOfComponents(void) const;
-    std::vector<std::string> /*CISST_DEPRECATED*/ GetNamesOfDevices(void) const;  // For backward compatibility
-    std::vector<std::string> /*CISST_DEPRECATED*/ GetNamesOfTasks(void) const;  // For backward compatibility
+    std::vector<std::string> CISST_DEPRECATED GetNamesOfDevices(void) const;  // For backward compatibility
+    std::vector<std::string> CISST_DEPRECATED GetNamesOfTasks(void) const;  // For backward compatibility
 
     void GetNamesOfComponents(std::vector<std::string>& namesOfComponents) const;
-    void /*CISST_DEPRECATED*/ GetNamesOfDevices(std::vector<std::string>& namesOfDevices) const; // For backward compatibility
-    void /*CISST_DEPRECATED*/ GetNamesOfTasks(std::vector<std::string>& namesOfTasks) const; // For backward compatibility
+    void CISST_DEPRECATED GetNamesOfDevices(std::vector<std::string>& namesOfDevices) const; // For backward compatibility
+    void CISST_DEPRECATED GetNamesOfTasks(std::vector<std::string>& namesOfTasks) const; // For backward compatibility
 
     /*! Return a reference to the time server. */
-    inline const osaTimeServer & GetTimeServer(void) {
+    inline const osaTimeServer & GetTimeServer(void) const {
         return TimeServer;
     }
 
     /*! Returns name of this local component manager */
-    inline const std::string GetProcessName(const std::string & CMN_UNUSED(listenerID) = "") {
+    inline const std::string GetProcessName(const std::string & CMN_UNUSED(listenerID) = "") const {
         return ProcessName;
     }
+
+    /*! Returns end user name to access provided interface's resources */
+    const std::string GetEndUserName(void) const;
 
 #if CISST_MTS_HAS_ICE
     /*! Get names of all commands in a provided interface */
@@ -460,14 +475,14 @@ public:
                             const std::string & CMN_UNUSED(listenerID) = "");
 
     /*! Return IP address of this process */
-    inline std::string GetIPAddress() const { return ProcessIP; }
+    inline const std::string & GetIPAddress(void) const { return ProcessIP; }
 
     /*! Return a list of all IP addresses detected on this machine. */
     static std::vector<std::string> GetIPAddressList(void);
     static void GetIPAddressList(std::vector<std::string> & ipAddresses);
 
     /*! Returns name of this local component manager (for mtsProxyBaseCommon.h) */
-    inline const std::string GetName() {
+    inline const std::string GetName(void) const {
         return GetProcessName();
     }
 #endif
@@ -491,24 +506,16 @@ public:
     }
 
     /*! Set endpoint access information */
-    bool SetProvidedInterfaceProxyAccessInfo(
-        const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientRequiredInterfaceName,
-        const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverProvidedInterfaceName,
-        const std::string & endpointInfo);
+    bool SetInterfaceProvidedProxyAccessInfo(const std::string & clientProcessName, const std::string & clientComponentName,
+                                             const std::string & clientInterfaceRequiredName,
+                                             const std::string & serverProcessName, const std::string & serverComponentName,
+                                             const std::string & serverInterfaceProvidedName,
+                                             const std::string & endpointInfo);
 
     /*! For testing purposes */
-    void DisconnectGCM();
-    void ReconnectGCM();
+    void DisconnectGCM(void);
+    void ReconnectGCM(void);
 #endif
-
-    //-------------------------------------------------------------------------
-    // Deprecated APIs
-    //-------------------------------------------------------------------------
-    void CISST_DEPRECATED SetServerTaskIP(const std::string) {}
-    void CISST_DEPRECATED SetGlobalTaskManagerIP(const std::string) {}
-
-    typedef enum { TASK_MANAGER_CLIENT, TASK_MANAGER_SERVER } ManagerType;
-    void CISST_DEPRECATED SetTaskManagerType(ManagerType CMN_UNUSED(type)) {}
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsManagerLocal)

@@ -21,8 +21,8 @@
 # Cisst = Use cisst internal logger (CMN_LOG and CMN_LOG_CLASS)
 # Windows = Use OutputDebugString() API for logging. Works only on Windows
 #
-#Logger = Cisst
-Logger = Windows
+Logger = Cisst
+#Logger = Windows
 
 #
 # MJ: Please do not modify these property settings since these configurations 

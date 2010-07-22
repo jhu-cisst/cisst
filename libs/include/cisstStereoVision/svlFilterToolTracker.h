@@ -23,16 +23,18 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlFilterToolTracker_h
 #define _svlFilterToolTracker_h
 
+#include <cisstStereoVision/svlFilterBase.h>
 #include <cisstVector/vctFixedSizeVectorTypes.h>
-#include <cisstStereoVision/svlStreamManager.h>
 
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
 
 
+// Forward declarations
 class svlToolTrackerAlgorithmBase;
 
-class CISST_EXPORT svlFilterToolTracker : public svlFilterBase, public cmnGenericObject
+
+class CISST_EXPORT svlFilterToolTracker : public svlFilterBase
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
@@ -50,14 +52,16 @@ public:
     int SetInitialTarget(TargetType & target, unsigned int videoch = SVL_LEFT);
 
 protected:
-    virtual int Initialize(svlSample* inputdata);
-    virtual int ProcessFrame(svlProcInfo* procInfo, svlSample* inputdata);
+    virtual int Initialize(svlSample* syncInput, svlSample* &syncOutput);
+    virtual int Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput);
     virtual int Release();
 
 private:
+    svlSampleTargets OutputTargets;
+    
     svlToolTrackerAlgorithmBase* Algorithm;
-    TargetType Target[2];
-    svlSampleImageBase* WarpedImage;
+    TargetType Targets[2];
+    svlSampleImage* WarpedImage;
 };
 
 class CISST_EXPORT svlToolTrackerAlgorithmBase
@@ -78,10 +82,10 @@ protected:
     unsigned int Width;
     unsigned int Height;
     unsigned int VideoChannels;
-    svlFilterToolTracker::TargetType Target[2];
+    svlFilterToolTracker::TargetType Targets[2];
 
     virtual int Initialize();
-    virtual int Process(svlProcInfo* procInfo, svlSampleImageBase* input) = 0;
+    virtual int Process(svlProcInfo* procInfo, svlSampleImage* input) = 0;
     virtual void Release();
 };
 

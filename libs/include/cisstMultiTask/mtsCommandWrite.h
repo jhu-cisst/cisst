@@ -31,7 +31,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsCommandReadOrWriteBase.h>
 #include <cisstMultiTask/mtsGenericObjectProxy.h>
-#include <cisstMultiTask/mtsDevice.h>
 
 
 /*!
@@ -201,7 +200,7 @@ public:
 
     /*! Typedef for pointer to member function of the specific interface
       class. */
-    typedef void(_classType::*ActionType)(const mtsGenericObject *);
+    typedef void(_classType::*ActionType)(const mtsGenericObject &);
 
 private:
     /*! Private copy constructor to prevent copies */
@@ -235,7 +234,7 @@ public:
         ClassInstantiation(classInstantiation)
     {
         // use dynamic creation with copy constructor if argument prototype has been provided
-        if (ArgumentPrototype) {
+        if (argumentPrototype) {
             cmnGenericObject * prototypePointer = argumentPrototype->Services()->Create(*argumentPrototype);
             CMN_ASSERT(prototypePointer);
             this->ArgumentPrototype = dynamic_cast<mtsGenericObject *>(prototypePointer);
@@ -260,7 +259,7 @@ public:
     */
     virtual mtsCommandBase::ReturnType Execute(const mtsGenericObject & argument) {
         if (this->IsEnabled()) {
-            (ClassInstantiation->*Action)(&argument);
+            (ClassInstantiation->*Action)(argument);
             return mtsCommandBase::DEV_OK;
         }
         return mtsCommandBase::DISABLED;

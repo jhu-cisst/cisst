@@ -23,14 +23,14 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlFilterImageFileWriter_h
 #define _svlFilterImageFileWriter_h
 
-#include <cisstStereoVision/svlStreamManager.h>
+#include <cisstStereoVision/svlFilterBase.h>
 #include <cisstStereoVision/svlImageIO.h>
 
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
 
 
-class CISST_EXPORT svlFilterImageFileWriter : public svlFilterBase, public cmnGenericObject
+class CISST_EXPORT svlFilterImageFileWriter : public svlFilterBase
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
@@ -44,12 +44,10 @@ public:
     void EnableTimestamps(bool enable = true);
     void Pause();
     void Record(int frames = -1);
-    void SetDistanceIntensityRatio(float ratio);
-    float GetDistanceIntensityRatio();
 
 protected:
-    virtual int Initialize(svlSample* inputdata);
-    virtual int ProcessFrame(svlProcInfo* procInfo, svlSample* inputdata);
+    virtual int Initialize(svlSample* syncInput, svlSample* &syncOutput);
+    virtual int Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput);
     virtual int Release();
 
 private:
@@ -59,8 +57,6 @@ private:
     vctDynamicVector<bool> Disabled;
     vctDynamicVector<int> Compression;
     bool TimestampsEnabled;
-    svlSampleImageRGB ImageBuffer;
-    float DistanceScaling;
     unsigned int CaptureLength;
 };
 

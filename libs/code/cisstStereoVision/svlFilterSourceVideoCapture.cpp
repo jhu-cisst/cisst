@@ -3,9 +3,9 @@
 
 /*
   $Id$
-  
+
   Author(s):  Balazs Vagvolgyi
-  Created on: 2006 
+  Created on: 2006
 
   (C) Copyright 2006-2008 Johns Hopkins University (JHU), All Rights
   Reserved.
@@ -20,9 +20,13 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
-#include <cisstCommon.h>
+
 #include <cisstStereoVision/svlFilterSourceVideoCapture.h>
+#include <cisstStereoVision/svlFilterOutput.h>
+#include <cisstOSAbstraction/osaThread.h>
 #include <cisstOSAbstraction/osaSleep.h>
+#include <cisstCommon/cmnGetChar.h>
+
 #include "svlVidCapSrcInitializer.h"
 
 #ifdef _MSC_VER
@@ -36,8 +40,6 @@ http://www.cisst.org/cisst/license.txt.
     #define CMN_UNUSED(argument) argument
 #endif
 
-using namespace std;
-
 #define MAX_PROPERTIES_BUFFER_SIZE      65536
 
 
@@ -49,30 +51,30 @@ CMN_IMPLEMENT_SERVICES(svlFilterSourceVideoCapture)
 
 svlFilterSourceVideoCapture::svlFilterSourceVideoCapture() :
     svlFilterSourceBase(),
-    cmnGenericObject(),
+    OutputImage(0),
     EnumeratedDevices(0),
     NumberOfEnumeratedDevices(-1),
     FormatList(0),
     FormatListSize(0)
 {
-    InitializeCaptureAPIs();
+    AddOutput("output", true);
+    SetAutomaticOutputType(false);
 
-    TargetFrequency = -1.0;
-    OutputData = 0;
+    InitializeCaptureAPIs();
 }
 
 svlFilterSourceVideoCapture::svlFilterSourceVideoCapture(unsigned int channelcount) :
     svlFilterSourceBase(),
-    cmnGenericObject(),
+    OutputImage(0),
     EnumeratedDevices(0),
     NumberOfEnumeratedDevices(-1),
     FormatList(0),
     FormatListSize(0)
 {
-    InitializeCaptureAPIs();
+    AddOutput("output", true);
+    SetAutomaticOutputType(false);
 
-    TargetFrequency = -1.0;
-    OutputData = 0;
+    InitializeCaptureAPIs();
 
     SetChannelCount(channelcount);
 }
@@ -81,8 +83,8 @@ svlFilterSourceVideoCapture::~svlFilterSourceVideoCapture()
 {
     Release();
 
-    if (OutputData) {
-        delete OutputData;
+    if (OutputImage) {
+        delete OutputImage;
 
         unsigned int i;
 
@@ -124,17 +126,17 @@ svlFilterSourceVideoCapture::~svlFilterSourceVideoCapture()
 
 int svlFilterSourceVideoCapture::SetChannelCount(unsigned int channelcount)
 {
-    if (OutputData) return SVL_FAIL;
+    if (OutputImage) return SVL_FAIL;
 
     if (channelcount == 1) {
-        AddSupportedType(svlTypeImageRGB);
+        GetOutput()->SetType(svlTypeImageRGB);
         // forcing output sample to handle external buffers
-        OutputData = new svlSampleImageRGB(false);
+        OutputImage = new svlSampleImageRGB(false);
     }
     else if (channelcount == 2) {
-        AddSupportedType(svlTypeImageRGBStereo);
+        GetOutput()->SetType(svlTypeImageRGBStereo);
         // forcing output sample to handle external buffers
-        OutputData = new svlSampleImageRGBStereo(false);
+        OutputImage = new svlSampleImageRGBStereo(false);
     }
     else return SVL_FAIL;
 
@@ -167,9 +169,10 @@ int svlFilterSourceVideoCapture::SetChannelCount(unsigned int channelcount)
     return SVL_OK;
 }
 
-int svlFilterSourceVideoCapture::Initialize()
+int svlFilterSourceVideoCapture::Initialize(svlSample* &syncOutput)
 {
-    if (OutputData == 0) return SVL_FAIL;
+    if (OutputImage == 0) return SVL_FAIL;
+    syncOutput = OutputImage;
 
     PlatformType platform;
     unsigned int i;
@@ -250,10 +253,10 @@ int svlFilterSourceVideoCapture::Initialize()
     // Requesting frames from the capture buffer to prepare output sample
     for (i = 0; i < NumberOfChannels; i ++) {
         if (NumberOfChannels == 2) {
-            dynamic_cast<svlSampleImageRGBStereo*>(OutputData)->SetData(DeviceObj[API[i]]->GetLatestFrame(false, APIChannelID[i]), i);
+            dynamic_cast<svlSampleImageRGBStereo*>(OutputImage)->SetMatrix(DeviceObj[API[i]]->GetLatestFrame(false, APIChannelID[i]), i);
         }
         else {
-            dynamic_cast<svlSampleImageRGB*>(OutputData)->SetData(DeviceObj[API[i]]->GetLatestFrame(false));
+            dynamic_cast<svlSampleImageRGB*>(OutputImage)->SetMatrix(DeviceObj[API[i]]->GetLatestFrame(false));
         }
     }
 
@@ -272,8 +275,10 @@ labError:
     return ret;
 }
 
-int svlFilterSourceVideoCapture::ProcessFrame(svlProcInfo* procInfo)
+int svlFilterSourceVideoCapture::Process(svlProcInfo* procInfo, svlSample* &syncOutput)
 {
+    syncOutput = OutputImage;
+
     svlImageRGB* image;
     unsigned int idx;
 
@@ -283,10 +288,10 @@ int svlFilterSourceVideoCapture::ProcessFrame(svlProcInfo* procInfo)
         image = DeviceObj[API[idx]]->GetLatestFrame(true, APIChannelID[idx]);
         if (image == 0) return SVL_FAIL;
         if (NumberOfChannels == 1) {
-            dynamic_cast<svlSampleImageRGB*>(OutputData)->SetData(image, idx);
+            dynamic_cast<svlSampleImageRGB*>(OutputImage)->SetMatrix(image, idx);
         }
         else {
-            dynamic_cast<svlSampleImageRGBStereo*>(OutputData)->SetData(image, idx);
+            dynamic_cast<svlSampleImageRGBStereo*>(OutputImage)->SetMatrix(image, idx);
         }
     }
 
@@ -439,19 +444,18 @@ labError:
     return ret;
 }
 
-double svlFilterSourceVideoCapture::GetTargetFrequency()
+void svlFilterSourceVideoCapture::SetTargetFrequency(double CMN_UNUSED(hertz))
+{
+}
+
+double svlFilterSourceVideoCapture::GetTargetFrequency() const
 {
     return -1.0;
 }
 
-int svlFilterSourceVideoCapture::SetTargetFrequency(double CMN_UNUSED(hertz))
-{
-    return SVL_FAIL;
-}
-
 int svlFilterSourceVideoCapture::DialogSetup(unsigned int videoch)
 {
-    if (OutputData == 0)
+    if (OutputImage == 0)
         return SVL_FAIL;
     if (IsInitialized() == true)
         return SVL_ALREADY_INITIALIZED;
@@ -460,21 +464,21 @@ int svlFilterSourceVideoCapture::DialogSetup(unsigned int videoch)
 
     int deviceid, inputid;
 
-    cout << " === Capture device selection ===" << endl;
+    std::cout << " === Capture device selection ===" << std::endl;
     deviceid = DialogDevice();
     if (deviceid < 0) return SVL_FAIL;
 
-    cout << endl << "  ==== Device input selection ====" << endl;
+    std::cout << std::endl << "  ==== Device input selection ====" << std::endl;
     inputid = DialogInput(deviceid);
 
     SetDevice(deviceid, inputid, videoch);
 
-    cout << endl << "  ===== Setup capture format =====" << endl;
+    std::cout << std::endl << "  ===== Setup capture format =====" << std::endl;
     DialogFormat(videoch);
 
     if (EnumeratedDevices[DeviceID[videoch]].platform == LinLibDC1394) {
 #if (CISST_SVL_HAS_DC1394 == ON)
-        cout << endl << "  ===== Setup external trigger =====" << endl;
+        std::cout << std::endl << "  ===== Setup external trigger =====" << std::endl;
         DialogTrigger(videoch);
 #endif // CISST_SVL_HAS_DC1394
     }
@@ -487,7 +491,7 @@ int svlFilterSourceVideoCapture::DialogSetup(unsigned int videoch)
 
 int svlFilterSourceVideoCapture::DialogDevice()
 {
-    if (OutputData == 0)
+    if (OutputImage == 0)
         return SVL_FAIL;
     if (IsInitialized() == true)
         return SVL_ALREADY_INITIALIZED;
@@ -496,21 +500,21 @@ int svlFilterSourceVideoCapture::DialogDevice()
 
     listsize = PrintDeviceList();
     if (listsize < 1) {
-        cout << " -!- No video capture devices have been found." << endl;
+        std::cout << " -!- No video capture devices have been found." << std::endl;
         return SVL_FAIL;
     }
 
-    cout << endl << " # Enter device ID: ";
-    cin >> deviceid;
+    std::cout << std::endl << " # Enter device ID: ";
+    std::cin >> deviceid;
     if (deviceid < 0) deviceid = 0;
     if (deviceid >= listsize) deviceid = listsize - 1;
-    
+
     return deviceid;
 }
 
 int svlFilterSourceVideoCapture::DialogInput(unsigned int deviceid)
 {
-    if (OutputData == 0)
+    if (OutputImage == 0)
         return SVL_FAIL;
     if (IsInitialized() == true)
         return SVL_ALREADY_INITIALIZED;
@@ -519,13 +523,13 @@ int svlFilterSourceVideoCapture::DialogInput(unsigned int deviceid)
 
     listsize = PrintInputList(deviceid);
     if (listsize > 0) {
-        cout << endl << "  # Enter input ID: ";
-        cin >> inputid;
+        std::cout << std::endl << "  # Enter input ID: ";
+        std::cin >> inputid;
         if (inputid < 0) inputid = 0;
         if (inputid >= listsize) inputid = listsize - 1;
     }
     else {
-        cout << "  -!- Input selection not available." << endl;
+        std::cout << "  -!- Input selection not available." << std::endl;
         inputid = 0;
     }
 
@@ -534,7 +538,7 @@ int svlFilterSourceVideoCapture::DialogInput(unsigned int deviceid)
 
 int svlFilterSourceVideoCapture::DialogFormat(unsigned int videoch)
 {
-    if (OutputData == 0)
+    if (OutputImage == 0)
         return SVL_FAIL;
     if (IsInitialized() == true)
         return SVL_ALREADY_INITIALIZED;
@@ -586,10 +590,10 @@ int svlFilterSourceVideoCapture::DialogFormat(unsigned int videoch)
 
         formatcount = PrintFormatList(videoch);
         if (formatcount > 0) {
-            cout << endl << "  # Enter format ID: ";
-            cin >> formatid;
+            std::cout << std::endl << "  # Enter format ID: ";
+            std::cin >> formatid;
             if (formatid < 0 || formatid >= formatcount) {
-                cout << "  -!- Invalid format ID" << endl;
+                std::cout << "  -!- Invalid format ID" << std::endl;
                 return SVL_FAIL;
             }
 
@@ -599,44 +603,44 @@ int svlFilterSourceVideoCapture::DialogFormat(unsigned int videoch)
             }
             else {
                 int roiwidth, roiheight, roileft, roitop, framerate, colorspace;
-                cout << "  # Enter ROI width (max=" << formats[formatid].custom_maxwidth << "; unit=" << formats[formatid].custom_unitwidth << "): ";
-                cin >> roiwidth;
+                std::cout << "  # Enter ROI width (max=" << formats[formatid].custom_maxwidth << "; unit=" << formats[formatid].custom_unitwidth << "): ";
+                std::cin >> roiwidth;
                 if (roiwidth < 1 || roiwidth >= static_cast<int>(formats[formatid].custom_maxwidth)) {
-                    cout << "  -!- Invalid ROI width" << endl;
+                    std::cout << "  -!- Invalid ROI width" << std::endl;
                     return SVL_FAIL;
                 }
-                cout << "  # Enter ROI height (max=" << formats[formatid].custom_maxheight << "; unit=" << formats[formatid].custom_unitheight << "): ";
-                cin >> roiheight;
+                std::cout << "  # Enter ROI height (max=" << formats[formatid].custom_maxheight << "; unit=" << formats[formatid].custom_unitheight << "): ";
+                std::cin >> roiheight;
                 if (roiheight < 1 || roiheight >= static_cast<int>(formats[formatid].custom_maxheight)) {
-                    cout << "  -!- Invalid ROI height" << endl;
+                    std::cout << "  -!- Invalid ROI height" << std::endl;
                     return SVL_FAIL;
                 }
-                cout << "  # Enter ROI left (max=" << formats[formatid].custom_maxwidth - 1 << "; unit=" << formats[formatid].custom_unitleft << "): ";
-                cin >> roileft;
+                std::cout << "  # Enter ROI left (max=" << formats[formatid].custom_maxwidth - 1 << "; unit=" << formats[formatid].custom_unitleft << "): ";
+                std::cin >> roileft;
                 if (roileft < 0 || roileft >= (static_cast<int>(formats[formatid].custom_maxwidth) - 1)) {
-                    cout << "  -!- Invalid ROI left" << endl;
+                    std::cout << "  -!- Invalid ROI left" << std::endl;
                     return SVL_FAIL;
                 }
-                cout << "  # Enter ROI top (max=" << formats[formatid].custom_maxheight - 1 << "; unit=" << formats[formatid].custom_unittop << "): ";
-                cin >> roitop;
+                std::cout << "  # Enter ROI top (max=" << formats[formatid].custom_maxheight - 1 << "; unit=" << formats[formatid].custom_unittop << "): ";
+                std::cin >> roitop;
                 if (roitop < 0 || roitop >= (static_cast<int>(formats[formatid].custom_maxheight) - 1)) {
-                    cout << "  -!- Invalid ROI top" << endl;
+                    std::cout << "  -!- Invalid ROI top" << std::endl;
                     return SVL_FAIL;
                 }
-                cout << "  # Enter framerate [percentage of maximum available framerate] (min=1; max=100): ";
-                cin >> framerate;
+                std::cout << "  # Enter framerate [percentage of maximum available framerate] (min=1; max=100): ";
+                std::cin >> framerate;
                 if (framerate < 1 || framerate > 100) {
-                    cout << "  -!- Invalid framerate" << endl;
+                    std::cout << "  -!- Invalid framerate" << std::endl;
                     return SVL_FAIL;
                 }
-                cout << "  == Select color space ==" << endl;
+                std::cout << "  == Select color space ==" << std::endl;
                 for (i = 0; i < PixelTypeCount && formats[formatid].custom_colorspaces[i] != PixelUnknown; i ++) {
-                    cout << "  " << i << ") " << GetPixelTypeName(formats[formatid].custom_colorspaces[i]) << endl;
+                    std::cout << "  " << i << ") " << GetPixelTypeName(formats[formatid].custom_colorspaces[i]) << std::endl;
                 }
-                cout << "  # Enter color space ID: ";
-                cin >> colorspace;
+                std::cout << "  # Enter color space ID: ";
+                std::cin >> colorspace;
                 if (colorspace < 0 || colorspace >= i) {
-                    cout << "  -!- Invalid color space" << endl;
+                    std::cout << "  -!- Invalid color space" << std::endl;
                     return SVL_FAIL;
                 }
 
@@ -654,7 +658,7 @@ int svlFilterSourceVideoCapture::DialogFormat(unsigned int videoch)
             ReleaseFormatList(formats);
         }
         else {
-            cout << "  -!- Format selection not available." << endl;
+            std::cout << "  -!- Format selection not available." << std::endl;
         }
     }
 
@@ -663,7 +667,7 @@ int svlFilterSourceVideoCapture::DialogFormat(unsigned int videoch)
 
 int svlFilterSourceVideoCapture::DialogTrigger(unsigned int videoch)
 {
-    if (OutputData == 0)
+    if (OutputImage == 0)
         return SVL_FAIL;
     if (IsInitialized() == true)
         return SVL_ALREADY_INITIALIZED;
@@ -684,42 +688,42 @@ int svlFilterSourceVideoCapture::DialogTrigger(unsigned int videoch)
         int ivalue;
         std::string str;
 
-        cout << endl << "  # Enable external trigger? ['y' or 'n']: ";
-        cin >> str;
+        std::cout << std::endl << "  # Enable external trigger? ['y' or 'n']: ";
+        std::cin >> str;
         if (str.compare("y") != 0) {
             memset(&trigger, 0, sizeof(ExternalTrigger));
-            cout << "    External trigger DISABLED" << endl;
+            std::cout << "    External trigger DISABLED" << std::endl;
             SetTrigger(trigger, videoch);
             return SVL_OK;
         }
         trigger.enable = true;
-        cout << "    External trigger ENABLED" << endl;
+        std::cout << "    External trigger ENABLED" << std::endl;
 
-        cout << "  # Enter trigger mode ['0'-'5' or '14'-'15']: ";
-        cin >> ivalue;
+        std::cout << "  # Enter trigger mode ['0'-'5' or '14'-'15']: ";
+        std::cin >> ivalue;
         if (ivalue < 0) ivalue = 0;
         trigger.mode = ivalue;
 
-        cout << "  # Enter trigger source ['0'-'3']: ";
-        cin >> ivalue;
+        std::cout << "  # Enter trigger source ['0'-'3']: ";
+        std::cin >> ivalue;
         if (ivalue < 0) ivalue = 0;
         trigger.source = ivalue;
 
-        cout << "  # Enter trigger polarity ['h' or 'l']: ";
-        cin >> str;
+        std::cout << "  # Enter trigger polarity ['h' or 'l']: ";
+        std::cin >> str;
         if (str.compare("h") == 0) {
             trigger.polarity = 1;
-            cout << "    Trigger polarity set to HIGH" << endl;
+            std::cout << "    Trigger polarity set to HIGH" << std::endl;
         }
         else {
             trigger.polarity = 0;
-            cout << "    Trigger polarity set to LOW" << endl;
+            std::cout << "    Trigger polarity set to LOW" << std::endl;
         }
 
         SetTrigger(trigger, videoch);
     }
     else {
-        cout << "  -!- External trigger not supported." << endl;
+        std::cout << "  -!- External trigger not supported." << std::endl;
     }
 
     return SVL_OK;
@@ -904,7 +908,7 @@ int svlFilterSourceVideoCapture::DialogImageProperties(unsigned int videoch)
 
 int svlFilterSourceVideoCapture::GetDeviceList(DeviceInfo **deviceinfolist, bool update)
 {
-    if (OutputData == 0)
+    if (OutputImage == 0)
         return SVL_FAIL;
     if (IsInitialized() == true)
         return SVL_ALREADY_INITIALIZED;
@@ -1029,14 +1033,14 @@ void svlFilterSourceVideoCapture::ReleaseDeviceList(DeviceInfo *deviceinfolist)
 
 int svlFilterSourceVideoCapture::PrintDeviceList(bool update)
 {
-    if (OutputData == 0)
+    if (OutputImage == 0)
         return SVL_FAIL;
 
     DeviceInfo *devices = 0;
     int devicecount = GetDeviceList(&devices, update);
 
     for (int i = 0; i < devicecount; i ++) {
-        cout << " " << i << ") " << devices[i].name << endl;
+        std::cout << " " << i << ") " << devices[i].name << std::endl;
     }
 
     ReleaseDeviceList(devices);
@@ -1046,9 +1050,9 @@ int svlFilterSourceVideoCapture::PrintDeviceList(bool update)
 
 int svlFilterSourceVideoCapture::PrintInputList(int deviceid, bool update)
 {
-    if (OutputData == 0)
+    if (OutputImage == 0)
         return SVL_FAIL;
-    
+
     DeviceInfo *devices = 0;
     int devicecount = GetDeviceList(&devices, update);
 
@@ -1059,7 +1063,7 @@ int svlFilterSourceVideoCapture::PrintInputList(int deviceid, bool update)
 
     int inputcount = devices[deviceid].inputcount;
     for (int i = 0; i < inputcount; i ++) {
-        cout << "  " << i << ") " << devices[deviceid].inputnames[i] << endl;
+        std::cout << "  " << i << ") " << devices[deviceid].inputnames[i] << std::endl;
     }
 
     ReleaseDeviceList(devices);
@@ -1069,7 +1073,7 @@ int svlFilterSourceVideoCapture::PrintInputList(int deviceid, bool update)
 
 int svlFilterSourceVideoCapture::SetDevice(int deviceid, int inputid, unsigned int videoch)
 {
-    if (OutputData == 0)
+    if (OutputImage == 0)
         return SVL_FAIL;
     if (IsInitialized() == true)
         return SVL_ALREADY_INITIALIZED;
@@ -1084,7 +1088,7 @@ int svlFilterSourceVideoCapture::SetDevice(int deviceid, int inputid, unsigned i
 
 int svlFilterSourceVideoCapture::GetDevice(int & deviceid, int & inputid, unsigned int videoch)
 {
-    if (OutputData == 0)
+    if (OutputImage == 0)
         return SVL_FAIL;
     if (videoch >= NumberOfChannels)
         return SVL_WRONG_CHANNEL;
@@ -1097,7 +1101,7 @@ int svlFilterSourceVideoCapture::GetDevice(int & deviceid, int & inputid, unsign
 
 int svlFilterSourceVideoCapture::GetFormatList(ImageFormat **formatlist, unsigned int videoch)
 {
-    if (OutputData == 0)
+    if (OutputImage == 0)
         return SVL_FAIL;
     if (formatlist == 0)
         return SVL_FAIL;
@@ -1124,35 +1128,35 @@ void svlFilterSourceVideoCapture::ReleaseFormatList(ImageFormat *formatlist)
 
 int svlFilterSourceVideoCapture::PrintFormatList(unsigned int videoch)
 {
-    if (OutputData == 0)
+    if (OutputImage == 0)
         return SVL_FAIL;
-    
+
     int i, j;
     ImageFormat *formats = 0;
     int formatcount = GetFormatList(&formats, videoch);
 
     for (i = 0; i < formatcount; i ++) {
-        cout << "  " << i << ") " << formats[i].width << "x" << formats[i].height << " ";
-        cout << GetPixelTypeName(formats[i].colorspace);
+        std::cout << "  " << i << ") " << formats[i].width << "x" << formats[i].height << " ";
+        std::cout << GetPixelTypeName(formats[i].colorspace);
         if (formats[i].framerate > 0.0) {
-            cout << " (<=" << formats[i].framerate << "fps)" << endl;
+            std::cout << " (<=" << formats[i].framerate << "fps)" << std::endl;
         }
         else {
-            cout << " (unknown framerate)" << endl;
+            std::cout << " (unknown framerate)" << std::endl;
         }
         if (formats[i].custom_mode >= 0) {
-            cout << "      [CUSTOM mode=" << formats[i].custom_mode << endl;
-            cout << "              maxsize=(" << formats[i].custom_maxwidth << ", " << formats[i].custom_maxheight << "); ";
-            cout << "unit=(" << formats[i].custom_unitwidth << ", " << formats[i].custom_unitheight << ")" << endl;
-            cout << "              roipos=(" << formats[i].custom_roileft << ", " << formats[i].custom_roitop << "); ";
-            cout << "unit=(" << formats[i].custom_unitleft << ", " << formats[i].custom_unittop << ")" << endl;
-            cout << "              colorspaces=(";
+            std::cout << "      [CUSTOM mode=" << formats[i].custom_mode << std::endl;
+            std::cout << "              maxsize=(" << formats[i].custom_maxwidth << ", " << formats[i].custom_maxheight << "); ";
+            std::cout << "unit=(" << formats[i].custom_unitwidth << ", " << formats[i].custom_unitheight << ")" << std::endl;
+            std::cout << "              roipos=(" << formats[i].custom_roileft << ", " << formats[i].custom_roitop << "); ";
+            std::cout << "unit=(" << formats[i].custom_unitleft << ", " << formats[i].custom_unittop << ")" << std::endl;
+            std::cout << "              colorspaces=(";
             for (j = 0; j < PixelTypeCount && formats[i].custom_colorspaces[j] != PixelUnknown; j ++) {
-                if (j > 0) cout << ", ";
-                cout << GetPixelTypeName(formats[i].custom_colorspaces[j]);
+                if (j > 0) std::cout << ", ";
+                std::cout << GetPixelTypeName(formats[i].custom_colorspaces[j]);
             }
-            cout << ")" << endl;
-            cout << "              pattern=" << GetPatternTypeName(formats[i].custom_pattern) << "]" << endl;
+            std::cout << ")" << std::endl;
+            std::cout << "              pattern=" << GetPatternTypeName(formats[i].custom_pattern) << "]" << std::endl;
         }
     }
 
@@ -1163,9 +1167,9 @@ int svlFilterSourceVideoCapture::PrintFormatList(unsigned int videoch)
 
 int svlFilterSourceVideoCapture::SelectFormat(unsigned int formatid, unsigned int videoch)
 {
-    if (OutputData == 0)
+    if (OutputImage == 0)
         return SVL_FAIL;
-    
+
     ImageFormat *formats = 0;
     int formatcount = GetFormatList(&formats, videoch);
     int ret = SVL_FAIL;
@@ -1181,7 +1185,7 @@ int svlFilterSourceVideoCapture::SelectFormat(unsigned int formatid, unsigned in
 
 int svlFilterSourceVideoCapture::SetFormat(ImageFormat& format, unsigned int videoch)
 {
-    if (OutputData == 0)
+    if (OutputImage == 0)
         return SVL_FAIL;
     if (IsInitialized() == true)
         return SVL_ALREADY_INITIALIZED;
@@ -1196,7 +1200,7 @@ int svlFilterSourceVideoCapture::SetFormat(ImageFormat& format, unsigned int vid
 
 int svlFilterSourceVideoCapture::GetFormat(ImageFormat& format, unsigned int videoch)
 {
-    if (OutputData == 0)
+    if (OutputImage == 0)
         return SVL_FAIL;
     if (videoch >= NumberOfChannels)
         return SVL_WRONG_CHANNEL;
@@ -1210,7 +1214,7 @@ int svlFilterSourceVideoCapture::GetFormat(ImageFormat& format, unsigned int vid
 
 int svlFilterSourceVideoCapture::SetTrigger(ExternalTrigger& trigger, unsigned int videoch)
 {
-    if (OutputData == 0)
+    if (OutputImage == 0)
         return SVL_FAIL;
     if (IsInitialized() == true)
         return SVL_ALREADY_INITIALIZED;
@@ -1224,7 +1228,7 @@ int svlFilterSourceVideoCapture::SetTrigger(ExternalTrigger& trigger, unsigned i
 
 int svlFilterSourceVideoCapture::GetTrigger(ExternalTrigger& trigger, unsigned int videoch)
 {
-    if (OutputData == 0)
+    if (OutputImage == 0)
         return SVL_FAIL;
     if (videoch >= NumberOfChannels)
         return SVL_WRONG_CHANNEL;
@@ -1326,9 +1330,9 @@ std::string svlFilterSourceVideoCapture::GetPatternTypeName(PatternType patternt
 
 int svlFilterSourceVideoCapture::SaveSettings(const char* filepath)
 {
-    if (OutputData == 0)
+    if (OutputImage == 0)
         return SVL_FAIL;
-    
+
     unsigned int writelen;
     int err, devid, intvalue;
     unsigned char emptybuffer[SVL_VCS_STRING_LENGTH];
@@ -1421,7 +1425,7 @@ labError:
 
 int svlFilterSourceVideoCapture::LoadSettings(const char* filepath)
 {
-    if (OutputData == 0)
+    if (OutputImage == 0)
         return SVL_FAIL;
     if (IsInitialized() == true)
         return SVL_ALREADY_INITIALIZED;

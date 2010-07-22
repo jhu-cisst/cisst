@@ -33,6 +33,7 @@ mtsMacrosTestClassB::mtsMacrosTestClassB(void) {
 }
 
 mtsMacrosTestClassB::mtsMacrosTestClassB(const mtsMacrosTestClassB & other) {
+    this->Value = other.Value;
     CopyConstructorCalls++;
 }
 
