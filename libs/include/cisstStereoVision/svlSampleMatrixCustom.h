@@ -42,14 +42,16 @@ public:
 
     svlSampleMatrixCustom() :
         svlSampleMatrix(),
-        OwnData(true)
+        OwnData(true),
+        InvalidElement(0)
     {
         Matrix = new vctDynamicMatrix<_ValueType>;
     }
 
     svlSampleMatrixCustom(bool owndata) :
         svlSampleMatrix(),
-        OwnData(owndata)
+        OwnData(owndata),
+        InvalidElement(0)
     {
         if (OwnData) Matrix = new vctDynamicMatrix<_ValueType>;
         else Matrix = 0;
@@ -273,21 +275,33 @@ public:
 
     _ValueType* GetPointer(const unsigned int col, const unsigned int row)
     {
-        if (Matrix) return Matrix->Pointer(col, row);
+        if (Matrix) return Matrix->Pointer(row, col);
         return 0;
     }
 
     const _ValueType* GetPointer(const unsigned int col, const unsigned int row) const
     {
-        if (Matrix) return Matrix->Pointer(col, row);
+        if (Matrix) return Matrix->Pointer(row, col);
         return 0;
     }
 
+    _ValueType& Element(const unsigned int col, const unsigned int row)
+    {
+        if (Matrix) return Matrix->Element(row, col);
+        return InvalidElement;
+    }
+
+    const _ValueType& Element(const unsigned int col, const unsigned int row) const
+    {
+        if (Matrix) return Matrix->Element(row, col);
+        return InvalidElement;
+    }
 
 private:
     bool OwnData;
     vctDynamicMatrix<_ValueType>* Matrix;
     vctDynamicMatrix<_ValueType> InvalidMatrix;
+    _ValueType InvalidElement;
 };
 
 #endif // _svlSampleMatrixCustom_h

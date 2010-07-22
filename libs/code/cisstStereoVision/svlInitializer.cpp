@@ -198,5 +198,13 @@ void svlInitialize()
 #ifdef _svlFilterImageWindowTargetSelect_h
     delete new svlFilterImageWindowTargetSelect;
 #endif // _svlFilterImageWindowTargetSelect_h
+
+#ifdef _svlFilterSourceBuffer_h
+    delete new svlFilterSourceBuffer;
+#endif // _svlFilterSourceBuffer_h
+
+#ifdef _svlFilterSourceTextFile_h
+    delete new svlFilterSourceTextFile;
+#endif // _svlFilterSourceTextFile_h
 }
 

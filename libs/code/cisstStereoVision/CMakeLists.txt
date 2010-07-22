@@ -66,34 +66,35 @@ SET(SOURCE_FILES
     svlOverlayObjects.cpp
 
   # Filter API
-    svlFilterSplitter.cpp
-    svlFilterImageOverlay.cpp
-    svlFilterSourceDummy.cpp
-    svlFilterImageDeinterlacer.cpp
-    svlFilterSourceVideoCapture.cpp
-    svlFilterSourceImageFile.cpp
-    svlFilterSourceVideoFile.cpp
-    svlFilterSourceBuffer.cpp
-    svlFilterImageFileWriter.cpp
-    svlFilterVideoFileWriter.cpp
     svlFilterComputationalStereo.cpp
     svlFilterDisparityMapToSurface.cpp
-    svlFilterStereoImageOptimizer.cpp
-    svlFilterImageRectifier.cpp
     svlFilterImageCenterFinder.cpp
-    svlFilterImageUnsharpMask.cpp
-    svlFilterImageSampler.cpp
     svlFilterImageChannelSwapper.cpp
-    svlFilterStreamTypeConverter.cpp
     svlFilterImageColorConverter.cpp
     svlFilterImageCropper.cpp
-    svlFilterImageTranslation.cpp
-    svlFilterImageResizer.cpp
-    svlFilterImageTracker.cpp
-    svlFilterStereoImageJoiner.cpp
-    svlFilterStereoImageSplitter.cpp
+    svlFilterImageDeinterlacer.cpp
+    svlFilterImageFileWriter.cpp
     svlFilterImageFlipRotate.cpp
+    svlFilterImageOverlay.cpp
+    svlFilterImageRectifier.cpp
+    svlFilterImageResizer.cpp
+    svlFilterImageSampler.cpp
+    svlFilterImageTracker.cpp
+    svlFilterImageTranslation.cpp
+    svlFilterImageUnsharpMask.cpp
     svlFilterLightSourceBuddy.cpp
+    svlFilterSourceBuffer.cpp
+    svlFilterSourceDummy.cpp
+    svlFilterSourceImageFile.cpp
+    svlFilterSourceTextFile.cpp
+    svlFilterSourceVideoCapture.cpp
+    svlFilterSourceVideoFile.cpp
+    svlFilterSplitter.cpp
+    svlFilterStereoImageJoiner.cpp
+    svlFilterStereoImageOptimizer.cpp
+    svlFilterStereoImageSplitter.cpp
+    svlFilterStreamTypeConverter.cpp
+    svlFilterVideoFileWriter.cpp
 
   # Private System API
     svlImageCodecBMP.h             # private header
@@ -151,34 +152,35 @@ SET(HEADER_FILES
     svlOverlayObjects.h
 
   # Filter API
-    svlFilterSplitter.h
-    svlFilterImageOverlay.h
-    svlFilterSourceDummy.h
-    svlFilterImageDeinterlacer.h
-    svlFilterSourceVideoCapture.h
-    svlFilterSourceImageFile.h
-    svlFilterSourceVideoFile.h
-    svlFilterSourceBuffer.h
-    svlFilterImageFileWriter.h
-    svlFilterVideoFileWriter.h
     svlFilterComputationalStereo.h
     svlFilterDisparityMapToSurface.h
-    svlFilterStereoImageOptimizer.h
-    svlFilterImageRectifier.h
     svlFilterImageCenterFinder.h
-    svlFilterImageUnsharpMask.h
-    svlFilterImageSampler.h
     svlFilterImageChannelSwapper.h
-    svlFilterStreamTypeConverter.h
     svlFilterImageColorConverter.h
     svlFilterImageCropper.h
-    svlFilterImageTranslation.h
-    svlFilterImageResizer.h
-    svlFilterImageTracker.h
-    svlFilterStereoImageJoiner.h
-    svlFilterStereoImageSplitter.h
+    svlFilterImageDeinterlacer.h
+    svlFilterImageFileWriter.h
     svlFilterImageFlipRotate.h
+    svlFilterImageOverlay.h
+    svlFilterImageRectifier.h
+    svlFilterImageResizer.h
+    svlFilterImageSampler.h
+    svlFilterImageTracker.h
+    svlFilterImageTranslation.h
+    svlFilterImageUnsharpMask.h
     svlFilterLightSourceBuddy.h
+    svlFilterSourceBuffer.h
+    svlFilterSourceDummy.h
+    svlFilterSourceImageFile.h
+    svlFilterSourceTextFile.h
+    svlFilterSourceVideoCapture.h
+    svlFilterSourceVideoFile.h
+    svlFilterSplitter.h
+    svlFilterStereoImageJoiner.h
+    svlFilterStereoImageOptimizer.h
+    svlFilterStereoImageSplitter.h
+    svlFilterStreamTypeConverter.h
+    svlFilterVideoFileWriter.h
 
   # Trackers
     svlTrackerMSBruteForce.h

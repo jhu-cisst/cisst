@@ -21,6 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlFilterSourceBuffer.h>
 #include <cisstStereoVision/svlFilterOutput.h>
 
+
 /*************************************/
 /*** svlFilterSourceBuffer class *****/
 /*************************************/

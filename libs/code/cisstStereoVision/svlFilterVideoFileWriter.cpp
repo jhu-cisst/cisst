@@ -287,7 +287,6 @@ int svlFilterVideoFileWriter::GetCodec(svlVideoIO::Compression **compression, un
         !CodecParams[videoch] ||
         CodecParams[videoch]->size < sizeof(svlVideoIO::Compression)) return SVL_FAIL;
 
-    svlVideoIO::ReleaseCompression(compression[0]);
     compression[0] = reinterpret_cast<svlVideoIO::Compression*>(new unsigned char[CodecParams[videoch]->size]);
     memcpy(compression[0], CodecParams[videoch], CodecParams[videoch]->size);
 
