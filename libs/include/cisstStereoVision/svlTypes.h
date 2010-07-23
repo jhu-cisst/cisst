@@ -40,6 +40,9 @@ http://www.cisst.org/cisst/license.txt.
     #include <opencv/cv.h>
     #include <opencv/highgui.h>
   #endif
+#else
+// to compile the same API
+typedef void IplImage;
 #endif // CISST_SVL_HAS_OPENCV
 
 #include <cisstStereoVision/svlSample.h>
