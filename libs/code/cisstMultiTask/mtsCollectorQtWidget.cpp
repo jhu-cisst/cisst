@@ -40,7 +40,7 @@ mtsCollectorQtWidget::mtsCollectorQtWidget(void):
 
     // create group for manual trigger
     StartStopBox = new QGroupBox("Start stop");
-    StartStopLayout = new QGridLayout(this);
+    StartStopLayout = new QGridLayout(this->StartStopBox);
     StartStopBox->setLayout(StartStopLayout);
     CentralLayout->addWidget(StartStopBox);
     // manual start
@@ -63,7 +63,7 @@ mtsCollectorQtWidget::mtsCollectorQtWidget(void):
 
     // create group for file setting
     FileBox = new QGroupBox("Output files");
-    FileLayout = new QVBoxLayout(this);
+    FileLayout = new QVBoxLayout(this->FileBox);
     FileBox->setLayout(FileLayout);
     CentralLayout->addWidget(FileBox);
     // add buttons
@@ -77,7 +77,7 @@ mtsCollectorQtWidget::mtsCollectorQtWidget(void):
 
     // create group for stats
     StatsBox = new QGroupBox("Statistics");
-    StatsLayout = new QGridLayout(this);
+    StatsLayout = new QGridLayout(this->StatsBox);
     StatsBox->setLayout(StatsLayout);
     CentralLayout->addWidget(StatsBox);
     // add labels

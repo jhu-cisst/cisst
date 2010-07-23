@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
     cmnClassRegister::SetLoD("displayQtComponent", CMN_LOG_LOD_VERY_VERBOSE);
     cmnClassRegister::SetLoD("mtsManagerLocal", CMN_LOG_LOD_VERY_VERBOSE);
     cmnClassRegister::SetLoD("mtsManagerGlobal", CMN_LOG_LOD_VERY_VERBOSE);
-    cmnClassRegister::SetLoD("mtsCollectorQComponent", CMN_LOG_LOD_VERY_VERBOSE);
+    cmnClassRegister::SetLoD("mtsCollectorQtComponent", CMN_LOG_LOD_VERY_VERBOSE);
     cmnClassRegister::SetLoD("mtsCollectorState", CMN_LOG_LOD_VERY_VERBOSE);
     cmnClassRegister::SetLoD("mtsCollectorEvent", CMN_LOG_LOD_VERY_VERBOSE);
     cmnClassRegister::SetLoD("mtsStateTable", CMN_LOG_LOD_VERY_VERBOSE);
