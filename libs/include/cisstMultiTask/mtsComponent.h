@@ -90,7 +90,8 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
       If the creation or addition failed (name already exists), the
       caller must make sure he/she deletes the unused mailbox. */
     mtsInterfaceRequired * AddInterfaceRequiredUsingMailbox(const std::string & interfaceRequiredName,
-                                                            mtsMailBox * mailBox);
+                                                            mtsMailBox * mailBox,
+                                                            mtsRequiredType required);
 
     /*! Create and add a provided interface with an existing mailbox.
       If the creation or addition failed (name already exists), the
@@ -177,7 +178,8 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
       connected to another task and use the provided interface of the
       other task.  The required interface created also contains a list
       of event handlers to be used as observers. */
-    virtual mtsInterfaceRequired * AddInterfaceRequired(const std::string & interfaceRequiredName);
+    virtual mtsInterfaceRequired * AddInterfaceRequired(const std::string & interfaceRequiredName,
+                                                        mtsRequiredType isRequired = MTS_REQUIRED);
 
     // provided for backward compatibility
     inline CISST_DEPRECATED mtsInterfaceRequired * AddRequiredInterface(const std::string & requiredInterfaceName) {

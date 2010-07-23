@@ -23,8 +23,10 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnSerializer.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 
-mtsInterfaceRequired::mtsInterfaceRequired(const std::string & interfaceName, mtsMailBox * mailBox) :
-    mtsInterfaceRequiredOrInput(interfaceName),
+mtsInterfaceRequired::mtsInterfaceRequired(const std::string & interfaceName,
+                                           mtsMailBox * mailBox,
+                                           mtsRequiredType required):
+    mtsInterfaceRequiredOrInput(interfaceName, required),
     MailBox(mailBox),
     FunctionsVoid("FunctionsVoid"),
     FunctionsRead("FunctionsRead"),
@@ -236,7 +238,7 @@ bool mtsInterfaceRequired::BindCommandsAndEvents(void)
                 }
             }
         }
-        if (!iter->second->IsRequired) {
+        if (iter->second->Required == MTS_OPTIONAL) {
             result = true;
         }
         success &= result;
@@ -272,7 +274,7 @@ bool mtsInterfaceRequired::BindCommandsAndEvents(void)
                 }
             }
         }
-        if (!iter->second->IsRequired) {
+        if (iter->second->Required == MTS_OPTIONAL) {
             result = true;
         }
         success &= result;
@@ -308,7 +310,7 @@ bool mtsInterfaceRequired::BindCommandsAndEvents(void)
                 }
             }
         }
-        if (!iter->second->IsRequired) {
+        if (iter->second->Required == MTS_OPTIONAL) {
             result = true;
         }
         success &= result;
@@ -344,7 +346,7 @@ bool mtsInterfaceRequired::BindCommandsAndEvents(void)
                 }
             }
         }
-        if (!iter->second->IsRequired) {
+        if (iter->second->Required == MTS_OPTIONAL) {
             result = true;
         }
         success &= result;
@@ -437,25 +439,29 @@ void mtsInterfaceRequired::ToStream(std::ostream & outputStream) const
 }
 
 
-bool mtsInterfaceRequired::AddFunction(const std::string & functionName, mtsFunctionVoid & function, bool required)
+bool mtsInterfaceRequired::AddFunction(const std::string & functionName, mtsFunctionVoid & function,
+                                       mtsRequiredType required)
 {
     return FunctionsVoid.AddItem(functionName, new FunctionInfo(function, required));
 }
 
 
-bool mtsInterfaceRequired::AddFunction(const std::string & functionName, mtsFunctionRead & function, bool required)
+bool mtsInterfaceRequired::AddFunction(const std::string & functionName, mtsFunctionRead & function,
+                                       mtsRequiredType required)
 {
     return FunctionsRead.AddItem(functionName, new FunctionInfo(function, required));
 }
 
 
-bool mtsInterfaceRequired::AddFunction(const std::string & functionName, mtsFunctionWrite & function, bool required)
+bool mtsInterfaceRequired::AddFunction(const std::string & functionName, mtsFunctionWrite & function,
+                                       mtsRequiredType required)
 {
     return FunctionsWrite.AddItem(functionName, new FunctionInfo(function, required));
 }
 
 
-bool mtsInterfaceRequired::AddFunction(const std::string & functionName, mtsFunctionQualifiedRead & function, bool required)
+bool mtsInterfaceRequired::AddFunction(const std::string & functionName, mtsFunctionQualifiedRead & function,
+                                       mtsRequiredType required)
 {
     return FunctionsQualifiedRead.AddItem(functionName, new FunctionInfo(function, required));
 }

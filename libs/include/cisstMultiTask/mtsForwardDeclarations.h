@@ -47,6 +47,9 @@ typedef enum {MTS_INTERFACE_COMMAND_POLICY, MTS_COMMAND_QUEUED, MTS_COMMAND_NOT_
   AddEventHandlerWrite. */
 typedef enum {MTS_INTERFACE_EVENT_POLICY, MTS_EVENT_QUEUED, MTS_EVENT_NOT_QUEUED} mtsEventQueuingPolicy;
 
+/*! Type for optional functions and interfaces */
+typedef enum {MTS_OPTIONAL, MTS_REQUIRED} mtsRequiredType;
+
 // commands
 class mtsCommandBase;
 

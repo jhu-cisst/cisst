@@ -285,7 +285,8 @@ public:
     /********************* Methods to manage interfaces *******************/
 
     /* documented in base class */
-    mtsInterfaceRequired * AddInterfaceRequired(const std::string & interfaceRequiredName);
+    mtsInterfaceRequired * AddInterfaceRequired(const std::string & interfaceRequiredName,
+                                                mtsRequiredType required = MTS_REQUIRED);
 
     /* documented in base class */
     mtsInterfaceProvided * AddInterfaceProvided(const std::string & newInterfaceName,

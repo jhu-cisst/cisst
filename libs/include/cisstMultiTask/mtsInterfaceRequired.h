@@ -98,18 +98,21 @@ protected:
 
     /*! Default size for queues of events */
     enum {DEFAULT_EVENT_QUEUE_LEN = 16};
-    
+
     /*! Constructor. Sets the name, device pointer, and mailbox for queued events.
 
       \param interfaceName Name of required interface
 
       \param mbox Mailbox to use for queued events (for tasks); set to
-                  0 for devices Could use a boolean (useMbox) for last
-                  parameter or delete it completely, and decide
-                  whether or not to allocate a mailbox based on
-                  dynamic type of device.
+      0 for devices (i.e. mtsComponent) while tasks (derived from
+      mtsTask) create a mailbox and then provide the mailbox to the
+      required interface.
+
+      \param isRequired Used to indicate if the component should
+      function even if this interface is not connected to a provided
+      interface.
     */
-    mtsInterfaceRequired(const std::string & interfaceName, mtsMailBox * mailBox);
+    mtsInterfaceRequired(const std::string & interfaceName, mtsMailBox * mailBox, mtsRequiredType required = MTS_REQUIRED);
 
     /*! Default destructor. */
     virtual ~mtsInterfaceRequired();
@@ -171,11 +174,11 @@ protected:
         friend class mtsInterfaceRequired;
     protected:
         mtsFunctionBase * FunctionPointer;
-        bool IsRequired;
+        mtsRequiredType Required;
     public:
-        FunctionInfo(mtsFunctionBase & function, bool isRequired):
+        FunctionInfo(mtsFunctionBase & function, mtsRequiredType required):
             FunctionPointer(&function),
-            IsRequired(isRequired)
+            Required(required)
         {}
 
         ~FunctionInfo() {}
@@ -188,7 +191,7 @@ protected:
         void ToStream(std::ostream & outputStream) const
         {
             outputStream << *FunctionPointer;
-            if (!IsRequired) {
+            if (Required == MTS_OPTIONAL) {
                 outputStream << " (optional)";
             } else {
                 outputStream << " (required)";
@@ -229,13 +232,13 @@ protected:
 
 public:
 
-    bool AddFunction(const std::string & functionName, mtsFunctionVoid & function, bool required = true);
+    bool AddFunction(const std::string & functionName, mtsFunctionVoid & function, mtsRequiredType required = MTS_REQUIRED);
 
-    bool AddFunction(const std::string & functionName, mtsFunctionRead & function, bool required = true);
+    bool AddFunction(const std::string & functionName, mtsFunctionRead & function, mtsRequiredType required = MTS_REQUIRED);
 
-    bool AddFunction(const std::string & functionName, mtsFunctionWrite & function, bool required = true);
+    bool AddFunction(const std::string & functionName, mtsFunctionWrite & function, mtsRequiredType required = MTS_REQUIRED);
 
-    bool AddFunction(const std::string & functionName, mtsFunctionQualifiedRead & function, bool required = true);
+    bool AddFunction(const std::string & functionName, mtsFunctionQualifiedRead & function, mtsRequiredType required = MTS_REQUIRED);
 
     template <class __classType>
     inline mtsCommandVoidBase * AddEventHandlerVoid(void (__classType::*method)(void),

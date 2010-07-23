@@ -126,7 +126,7 @@ bool mtsCollectorEvent::CheckCollectingStatus(void)
             this->ProgressEventTrigger(mtsUInt(this->SampleCounterForEvent));
             this->SampleCounterForEvent = 0;
             this->TimeOfLastProgressEvent = currentTime;
-        }        
+        }
         // now check if we are supposed to stop
         if ((this->ScheduledStopTime != 0.0) // stop time is set
             && (currentTime >= this->ScheduledStopTime)) {

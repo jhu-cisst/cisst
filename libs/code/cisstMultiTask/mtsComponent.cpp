@@ -403,9 +403,10 @@ mtsInterfaceRequired * mtsComponent::AddInterfaceRequiredExisting(const std::str
 
 
 mtsInterfaceRequired * mtsComponent::AddInterfaceRequiredUsingMailbox(const std::string & interfaceRequiredName,
-                                                                      mtsMailBox * mailBox)
+                                                                      mtsMailBox * mailBox,
+                                                                      mtsRequiredType required)
 {
-    mtsInterfaceRequired * interfaceRequired = new mtsInterfaceRequired(interfaceRequiredName, mailBox);
+    mtsInterfaceRequired * interfaceRequired = new mtsInterfaceRequired(interfaceRequiredName, mailBox, required);
     if (interfaceRequired) {
         if (InterfacesRequiredOrInput.AddItem(interfaceRequiredName, interfaceRequired)) {
             InterfacesRequired.push_back(interfaceRequired);
@@ -424,9 +425,10 @@ mtsInterfaceRequired * mtsComponent::AddInterfaceRequiredUsingMailbox(const std:
 }
 
 
-mtsInterfaceRequired * mtsComponent::AddInterfaceRequired(const std::string & interfaceRequiredName) {
+mtsInterfaceRequired * mtsComponent::AddInterfaceRequired(const std::string & interfaceRequiredName,
+                                                          mtsRequiredType required) {
     // by default, no mailbox for base component, events are not queued
-    return this->AddInterfaceRequiredUsingMailbox(interfaceRequiredName, 0);
+    return this->AddInterfaceRequiredUsingMailbox(interfaceRequiredName, 0, required);
 }
 
 

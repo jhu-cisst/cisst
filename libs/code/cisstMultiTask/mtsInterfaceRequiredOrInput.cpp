@@ -21,9 +21,11 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsInterfaceRequiredOrInput.h>
 
 
-mtsInterfaceRequiredOrInput::mtsInterfaceRequiredOrInput(const std::string & interfaceName):
+mtsInterfaceRequiredOrInput::mtsInterfaceRequiredOrInput(const std::string & interfaceName,
+                                                         mtsRequiredType required):
     Name(interfaceName),
-    InterfaceProvidedOrOutput(0)
+    InterfaceProvidedOrOutput(0),
+    Required(required)
 {
 }
 
@@ -41,4 +43,10 @@ const std::string & mtsInterfaceRequiredOrInput::GetName(void) const
 
 const mtsInterfaceProvidedOrOutput * mtsInterfaceRequiredOrInput::GetConnectedInterface(void) const {
     return this->InterfaceProvidedOrOutput;
+}
+
+
+mtsRequiredType mtsInterfaceRequiredOrInput::IsRequired(void) const
+{
+    return this->Required;
 }

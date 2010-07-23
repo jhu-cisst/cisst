@@ -58,6 +58,9 @@ protected:
     /*! Pointer to provided interface that we are connected to. */
     mtsInterfaceProvidedOrOutput * InterfaceProvidedOrOutput;
 
+    /*! Indicates if the interface must be connected. */
+    mtsRequiredType Required;
+
     /*! Default constructor. Does nothing, should not be used. */
     mtsInterfaceRequiredOrInput(void) {}
 
@@ -65,7 +68,8 @@ protected:
     /*! Constructor. Sets the name.
         \param interfaceName Name of required interface
     */
-    mtsInterfaceRequiredOrInput(const std::string & interfaceName);
+    mtsInterfaceRequiredOrInput(const std::string & interfaceName,
+                                mtsRequiredType required = MTS_REQUIRED);
 
     /*! Default destructor. */
     virtual ~mtsInterfaceRequiredOrInput();
@@ -78,6 +82,9 @@ protected:
     virtual bool CouldConnectTo(mtsInterfaceProvidedOrOutput * interfaceProvidedOrOutput) = 0;
     virtual bool ConnectTo(mtsInterfaceProvidedOrOutput * interfaceProvidedOrOutput) = 0;
     virtual bool Disconnect(void) = 0;
+
+    /*! Check if this interface is required or not for the component to function. */
+    mtsRequiredType IsRequired(void) const;
 
     /*! Bind command and events.  This method needs to provide a user
       Id so that GetCommandVoid and GetCommandWrite (queued

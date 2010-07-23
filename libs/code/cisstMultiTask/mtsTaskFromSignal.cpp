@@ -73,7 +73,9 @@ void * mtsTaskFromSignal::RunInternal(void * CMN_UNUSED(data)) {
 }
 
 
-mtsInterfaceRequired * mtsTaskFromSignal::AddInterfaceRequired(const std::string & interfaceRequiredName) {
+mtsInterfaceRequired * mtsTaskFromSignal::AddInterfaceRequired(const std::string & interfaceRequiredName,
+                                                               mtsRequiredType required)
+{
     // create a mailbox with post command queued command
     // PK: move DEFAULT_EVENT_QUEUE_LEN somewhere else (not in mtsInterfaceProvided)
     mtsMailBox * mailBox = new mtsMailBox(interfaceRequiredName + "Events", mtsInterfaceRequired::DEFAULT_EVENT_QUEUE_LEN,
@@ -81,14 +83,15 @@ mtsInterfaceRequired * mtsTaskFromSignal::AddInterfaceRequired(const std::string
     mtsInterfaceRequired * result;
     if (mailBox) {
         // try to create and add interface
-        result = this->AddInterfaceRequiredUsingMailbox(interfaceRequiredName, mailBox);
+        result = this->AddInterfaceRequiredUsingMailbox(interfaceRequiredName, mailBox, required);
         if (!result) {
             delete mailBox;
         }
         return result;
     }
     CMN_LOG_CLASS_INIT_ERROR << "AddInterfaceRequired: unable to create mailbox for \""
-                             << interfaceRequiredName << "\"" << std::endl;    delete mailBox;
+                             << interfaceRequiredName << "\"" << std::endl;
+    delete mailBox;
     return 0;
 }
 

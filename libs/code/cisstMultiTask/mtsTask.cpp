@@ -54,10 +54,16 @@ void mtsTask::StartupInternal(void) {
          requiredIterator++) {
         connectedInterface = requiredIterator->second->GetConnectedInterface();
         if (!connectedInterface) {
-            CMN_LOG_CLASS_INIT_WARNING << "StartupInternal: void pointer to required/input interface \""
-                                       << this->GetName() << ":" << requiredIterator->first
-                                       << "\" (required/input not connected to provided/output)" << std::endl;
-            success = false;
+            if (requiredIterator->second->IsRequired() == MTS_REQUIRED) {
+                CMN_LOG_CLASS_INIT_ERROR << "StartupInternal: void pointer to required/input interface \""
+                                         << this->GetName() << ":" << requiredIterator->first
+                                         << "\" (required/input not connected to provided/output)" << std::endl;
+                success = false;
+            } else {
+                CMN_LOG_CLASS_INIT_WARNING << "StartupInternal: void pointer to optional required/input interface \""
+                                           << this->GetName() << ":" << requiredIterator->first
+                                           << "\" (required/input not connected to provided/output)" << std::endl;
+            }
         }
     }
     if (success) {
@@ -254,13 +260,15 @@ bool mtsTask::AddStateTable(mtsStateTable * existingStateTable, bool addInterfac
 
 /********************* Methods to manage interfaces *******************/
 
-mtsInterfaceRequired * mtsTask::AddInterfaceRequired(const std::string & interfaceRequiredName) {
+mtsInterfaceRequired * mtsTask::AddInterfaceRequired(const std::string & interfaceRequiredName,
+                                                     mtsRequiredType required)
+{
     // PK: move DEFAULT_EVENT_QUEUE_LEN somewhere else (not in mtsInterfaceProvided)
     mtsMailBox * mailBox = new mtsMailBox(interfaceRequiredName + "Events", mtsInterfaceRequired::DEFAULT_EVENT_QUEUE_LEN);
     mtsInterfaceRequired * result;
     if (mailBox) {
         // try to create and add interface
-        result = this->AddInterfaceRequiredUsingMailbox(interfaceRequiredName, mailBox);
+        result = this->AddInterfaceRequiredUsingMailbox(interfaceRequiredName, mailBox, required);
         if (!result) {
             delete mailBox;
         }
