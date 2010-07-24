@@ -47,7 +47,7 @@ class CISST_EXPORT cmnLoggerQtWidget: public cmnGenericObject
     cmnLoggerQtWidget(QWidget * parent);
 
     inline QWidget * GetWidget(void) {
-	return this->Widget;
+        return this->Widget;
     }
 
  protected:

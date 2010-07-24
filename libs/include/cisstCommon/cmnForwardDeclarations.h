@@ -39,6 +39,8 @@ class cmnGenericObject;
 
 class cmnLogger;
 
+class cmnLODOutputMultiplexer;
+
 class cmnObjectRegister;
 
 class cmnPath;

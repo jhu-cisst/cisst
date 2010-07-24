@@ -43,10 +43,6 @@ int main(int argc, char *argv[])
     cmnLogger::SetLoD(CMN_LOG_LOD_VERY_VERBOSE);
     cmnLogger::AddChannel(std::cout, CMN_LOG_LOD_VERY_VERBOSE);
 
-    // add a log per thread
-    osaThreadedLogFile threadedLog("PeriodicTaskQt-");
-    cmnLogger::AddChannel(threadedLog, CMN_LOG_LOD_VERY_VERBOSE);
-
     // set the log level of detail on select tasks
     cmnClassRegister::SetLoD("sineTask", CMN_LOG_LOD_VERY_VERBOSE);
     cmnClassRegister::SetLoD("displayQtComponent", CMN_LOG_LOD_VERY_VERBOSE);
@@ -96,6 +92,7 @@ int main(int argc, char *argv[])
         new mtsCollectorEvent("EventCollector",
                               mtsCollectorBase::COLLECTOR_FILE_FORMAT_CSV);
     taskManager->AddComponent(eventCollector);
+    eventCollector->UseSeparateLogFile("event-collector-log.txt");
     // add QComponent to control the event collector
     collectorQtComponent = new mtsCollectorQtComponent("EventCollectorQComponent");
     taskManager->AddComponent(collectorQtComponent);
@@ -112,6 +109,7 @@ int main(int argc, char *argv[])
 
         // create the generator and its widget
         sine = new sineTask("SIN" + index.str(), 5.0 * cmn_ms);
+        sine->UseSeparateLogFileDefault();
         taskManager->AddComponent(sine);
         std::cout << *sine << std::endl;
         display = new displayQtComponent("DISP" + index.str());
@@ -126,6 +124,7 @@ int main(int argc, char *argv[])
                                                mtsCollectorBase::COLLECTOR_FILE_FORMAT_CSV);
         stateCollector->AddSignal("SineData");
         taskManager->AddComponent(stateCollector);
+        stateCollector->UseSeparateLogFileDefault();
         stateCollector->Connect();
         // create the QComponent to bridge between the collection widget and the collector
         collectorQtComponent = new mtsCollectorQtComponent(sine->GetName() + "StateCollectorQComponent");
@@ -145,7 +144,7 @@ int main(int argc, char *argv[])
     QWidget * tab3Widget = new QWidget();
     QGridLayout * tab3Layout= new QGridLayout(tab3Widget);
     cmnLoggerQtWidget * loggerWidget = new cmnLoggerQtWidget(tab3Widget);
-    tab3Layout->addWidget(loggerWidget->GetWidget());    
+    tab3Layout->addWidget(loggerWidget->GetWidget());
     tabs->addTab(tab3Widget, "Logger");
 
     // one large quit button under all tabs
@@ -162,7 +161,7 @@ int main(int argc, char *argv[])
     // create and start all tasks
     taskManager->CreateAll();
     taskManager->StartAll();
-    
+
     // run Qt user interface
     mainWidget->resize(NumSineTasks * 220, 360);
     mainWidget->show();

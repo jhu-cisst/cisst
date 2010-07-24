@@ -32,6 +32,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnPortability.h>
 #include <cisstCommon/cmnForwardDeclarations.h>
+#include <cisstCommon/cmnLogger.h>
 
 #include <string>
 #include <iostream>
@@ -110,6 +111,12 @@ public:
     /*! De-serialize the content of the object without any extra
       information, i.e. no class type nor format version. */
     virtual void DeSerializeRaw(std::istream & inputStream);
+
+    /*! Get the multiplexer to use for logging.  This is used by the
+      macro CMN_LOG_CLASS to determine the log destination.  By
+      default, it uses cmnLogger.  This method can be overloaded to
+      define a log file/stream per object. */
+    virtual cmnLogger::StreamBufType * GetLogMultiplexer(void) const;
 };
 
 

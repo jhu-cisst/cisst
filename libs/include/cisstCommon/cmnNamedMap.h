@@ -86,9 +86,15 @@ protected:
 
     /*! Method use to emulate the cmnGenericObject interface used by
       CMN_LOG_CLASS macros. */
+    //@{
     inline const cmnClassServicesBase * Services(void) const {
         return this->OwnerServices;
     }
+
+    inline cmnLogger::StreamBufType * GetLogMultiplexer(void) const {
+        return cmnLogger::GetMultiplexer();
+    }
+    //@}
 
 public:
     /*! Default constructor, initialize the internal map and set the

@@ -76,3 +76,8 @@ void cmnGenericObject::DeSerializeRaw(std::istream & CMN_UNUSED(inputStream)) {
     CMN_LOG_CLASS_RUN_ERROR << "No de-serialization implemented for: " << Services()->GetName();
 }
 
+
+cmnLogger::StreamBufType * cmnGenericObject::GetLogMultiplexer(void) const
+{
+    return cmnLogger::GetMultiplexer();
+}

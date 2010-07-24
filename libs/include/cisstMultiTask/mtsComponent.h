@@ -107,11 +107,13 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
 
  public:
 
+    typedef mtsComponent ThisType;
+
     /*! Default constructor. Sets the name. */
     mtsComponent(const std::string & deviceName);
 
     /*! Default destructor. Does nothing. */
-    virtual ~mtsComponent() {}
+    virtual ~mtsComponent();
 
     /*! Returns the name of the component. */
     const std::string & GetName(void) const;
@@ -227,7 +229,29 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     bool ConnectInterfaceRequiredOrInput(const std::string & interfaceRequiredOrInputName,
                                          mtsInterfaceProvidedOrOutput * interfaceProvidedOrOutput);
 
+    /*! Tells this component to use its own file for log.  By default
+      the messages are also sent to cmnLogger but this can be changed
+      setting forwardToLogger to false.  The default file name is
+      based on the component's name, followed by the date and
+      '-log.txt' */
+    void UseSeparateLogFileDefault(bool forwardToLogger = true);
+
+    /*! Tells this component to use its own file for log.  By default
+      the messages are also sent to cmnLogger but this can be changed
+      setting forwardToLogger to false.  */
+    void UseSeparateLogFile(const std::string & filename, bool forwardToLogger = true);
+
+    /*! Overload GetLodMultiplexer.  This method is used for all class
+      level log (i.e. CMN_LOG_CLASS) and allows to redirect the log to
+      a separate file for each component when activated by
+      UseSeparateLogFile or UseSeparateLogFileDefault. */
+    cmnLogger::StreamBufType * GetLogMultiplexer(void) const;
+
  protected:
+
+    bool UseSeparateLogFileFlag;
+    cmnLogger::StreamBufType LoDMultiplexerStreambuf;
+    std::ofstream LogFile;
 
     /*! Thread Id counter.  Used to count how many "user" tasks are
       connected from a single thread.  In most cases the count

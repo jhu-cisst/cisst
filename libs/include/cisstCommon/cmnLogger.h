@@ -78,8 +78,9 @@ http://www.cisst.org/cisst/license.txt.
 */
 #define CMN_LOG_CLASS_INSTANCE(objectPointer, lod) \
     ((lod > cmnLogger::GetLoD()) || (lod > objectPointer->Services()->GetLoD()))?\
-        (void*)0:\
-    ((cmnLODOutputMultiplexer(cmnLogger::GetMultiplexer(), lod).Ref()) << cmnLogLoDString[lod] << " - Class " << objectPointer->Services()->GetName() << ": ")
+    (void*)0:\
+    ((cmnLODOutputMultiplexer(objectPointer->GetLogMultiplexer(), lod).Ref()) << cmnLogLoDString[lod] << " - Class " << objectPointer->Services()->GetName() << ": ")
+
 
 #define CMN_LOG_CLASS(lod) CMN_LOG_CLASS_INSTANCE(this, lod)
 
@@ -251,7 +252,7 @@ class CISST_EXPORT cmnLogger {
     LogLoDType LoD;
 
     /*! Single multiplexer used to stream the log out */
-    cmnLODMultiplexerStreambuf<char> LoDMultiplexerStreambuf;
+    StreamBufType LoDMultiplexerStreambuf;
 
     /*! Instance specific implementation of SetLoD.  \sa SetLoD */
     void SetLoDInstance(LogLoDType lod);

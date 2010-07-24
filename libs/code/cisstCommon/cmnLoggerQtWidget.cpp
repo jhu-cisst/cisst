@@ -112,7 +112,7 @@ QVariant cmnLoggerQtWidgetClassServicesModel::data(const QModelIndex & index, in
             }
         }
     }
-    
+
     if (role == Qt::TextAlignmentRole) {
         return QVariant(Qt::AlignLeft | Qt::AlignTop);
     }
@@ -182,10 +182,9 @@ QWidget * cmnLoggerQtWidgetLoDDelegate::createEditor(QWidget * parent,
 
 
 void cmnLoggerQtWidgetLoDDelegate::setEditorData(QWidget * editor,
-						const QModelIndex & index) const
+                                                 const QModelIndex & index) const
 {
     int value = index.model()->data(index, Qt::EditRole).toInt();
-    std::cout << "Current value at " << index.row() << ": " << value << std::endl; 
     QComboBox * comboBox = static_cast<QComboBox *>(editor);
     comboBox->setCurrentIndex(value);
 }
