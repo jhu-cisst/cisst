@@ -480,6 +480,7 @@ void mtsCollectorEvent::SaveEventVoid(const CollectorEventVoid * event)
     if (this->CheckCollectingStatus()) {
         // if this method is called for the first time, print out some information.
         if (this->FirstRunningFlag) {
+            this->OpenFileIfNeeded();
             this->PrintHeader(this->FileFormat);
         }
         *(this->OutputStream) << mtsTaskManager::GetInstance()->GetTimeServer().GetRelativeTime()
@@ -496,6 +497,7 @@ void mtsCollectorEvent::SaveEventWrite(const CollectorEventWrite * event, const 
     if (this->CheckCollectingStatus()) {
         // if this method is called for the first time, print out some information.
         if (this->FirstRunningFlag) {
+            this->OpenFileIfNeeded();
             this->PrintHeader(this->FileFormat);
         }
         *(this->OutputStream) << mtsTaskManager::GetInstance()->GetTimeServer().GetRelativeTime()

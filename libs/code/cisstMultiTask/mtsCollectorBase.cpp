@@ -40,6 +40,7 @@ mtsCollectorBase::mtsCollectorBase(const std::string & collectorName,
     TimeIntervalForProgressEvent(1.0 * cmn_s),
     OutputStream(0),
     OutputFile(0),
+    FileOpened(false),
     Serializer(0)
 {
     // set working directory
@@ -138,17 +139,27 @@ void mtsCollectorBase::SetOutput(const std::string & fileName,
         Delimiter = ' ';
         break;
     }
+    this->FileOpened = false;
+}
 
+
+void mtsCollectorBase::OpenFileIfNeeded(void)
+{
+    if (this->FileOpened || (this->OutputFile == 0)) {
+        return;
+    }
     // open the output file and update the internal stream pointer
     switch (FileFormat) {
     case COLLECTOR_FILE_FORMAT_CSV:
     case COLLECTOR_FILE_FORMAT_PLAIN_TEXT:
         CMN_LOG_CLASS_INIT_VERBOSE << "SetOutput: opening file \"" << this->OutputFileName << "\" in text/append mode" << std::endl;
         this->OutputFile->open(this->OutputFileName.c_str(), std::ios::app);
+        this->FileOpened = true;
         break;
     case COLLECTOR_FILE_FORMAT_BINARY:
         CMN_LOG_CLASS_INIT_VERBOSE << "SetOutput: opening file \"" << this->OutputFileName << "\" in binary/append mode" << std::endl;
         this->OutputFile->open(this->OutputFileName.c_str(), std::ios::binary | std::ios::app);
+        this->FileOpened = true;
         break;
     default:
         CMN_LOG_CLASS_INIT_ERROR << "SetOutput: unexpected file format.";

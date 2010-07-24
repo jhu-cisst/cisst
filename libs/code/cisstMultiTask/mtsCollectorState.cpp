@@ -326,6 +326,7 @@ void mtsCollectorState::BatchCollect(const mtsStateTable::IndexRange & range)
 
     // If this method is called for the first time, print out some information.
     if (FirstRunningFlag) {
+        this->OpenFileIfNeeded();
         PrintHeader(this->FileFormat);
     }
 

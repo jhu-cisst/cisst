@@ -126,6 +126,9 @@ protected:
     std::ostream * OutputStream;
     std::ofstream * OutputFile;
 
+    /*! Check if the output file is already opened */
+    bool FileOpened;
+
     /*! Delimiter used in a log file. Set by the constructor according
       to mtsCollectorBase::CollectorLogFormat. */
     char Delimiter;
@@ -206,6 +209,10 @@ public:
       format will be COLLECTOR_FILE_FORMAT_CSV, otherwise it will use
       the previously used format. */
     void SetOutputToDefault(void);
+
+    /*! Files are not created or opened when SetOutput is called, this
+      method will open the file if needed. */
+    void OpenFileIfNeeded(void);
 
     /*! Begin collecting data. Data collection will begin after delayedStart
     second(s). If it is zero (by default), it means 'start now'. */
