@@ -58,6 +58,9 @@ public:
     virtual unsigned int GetRows() const = 0;
     virtual unsigned int GetColStride() const = 0;
     virtual unsigned int GetRowStride() const = 0;
+    virtual const std::string Str(const unsigned int width, const unsigned int precision, const int errorvalue) const = 0;
+    virtual const std::string Str(const unsigned int width, const unsigned int precision, const unsigned int errorvalue) const = 0;
+    virtual const std::string Str(const unsigned int width, const unsigned int precision, const double errorvalue) const = 0;
 
     template <class _TypeIn>
     int ImportData(_TypeIn *input, const unsigned int size);

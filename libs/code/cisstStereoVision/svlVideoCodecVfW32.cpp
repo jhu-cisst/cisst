@@ -247,15 +247,17 @@ int svlVideoCodecVfW32::SetPos(const int pos)
 
 svlVideoIO::Compression* svlVideoCodecVfW32::GetCompression() const
 {
+    svlVideoIO::Compression* compression = 0;
+
     // The caller will need to release it by calling the
     // svlVideoIO::ReleaseCompression() method
     if (Codec) {
-        svlVideoIO::Compression* compression = reinterpret_cast<svlVideoIO::Compression*>(new unsigned char[Codec->size]);
+        compression = reinterpret_cast<svlVideoIO::Compression*>(new unsigned char[Codec->size]);
         memcpy(compression, Codec, Codec->size);
     }
     else {
         unsigned int size = sizeof(svlVideoIO::Compression);
-        svlVideoIO::Compression* compression = reinterpret_cast<svlVideoIO::Compression*>(new unsigned char[size]);
+        compression = reinterpret_cast<svlVideoIO::Compression*>(new unsigned char[size]);
 
         std::string name("Invalid Codec (Video for Windows)");
         memset(&(compression->extension[0]), 0, 16);

@@ -36,23 +36,37 @@ public:
     svlFilterSourceTextFile();
     virtual ~svlFilterSourceTextFile();
 
+    void SetErrorValue(const float errorvalue);
+    float GetErrorValue() const;
     int SetColumns(const unsigned int columns);
     unsigned int GetColumns() const;
-    int AddFile(const std::string& filepath, const int timestamp_column = -1);
+    int AddFile(const std::string& filepath, const int timestamp_column = -1, const double timestamp_unit = cmn_s);
     void RemoveFiles();
 
 protected:
     virtual int Initialize(svlSample* &syncOutput);
+    virtual int OnStart(unsigned int procCount);
     virtual int Process(svlProcInfo* procInfo, svlSample* &syncOutput);
     virtual int Release();
+    virtual void OnResetTimer();
 
 private:
     svlSampleMatrixFloat OutputMatrix;
+    svlSampleMatrixFloat WorkMatrix;
     vctDynamicVector<std::string> FilePaths;
     vctDynamicVector<std::ifstream*> Files;
     vctDynamicVector<int> TimeColumns;
+    vctDynamicVector<double> TimeUnits;
+    vctDynamicVector<bool> HoldLine;
     vctDynamicVector<char> LineBuffer;
     unsigned int Columns;
+    bool ResetPosition;
+
+    vctDynamicVector<double> FirstTimestamps;
+    vctDynamicVector<double> Timestamps;
+    osaStopwatch Timer;
+    float ErrorValue;
+    bool ResetTimer;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterSourceTextFile)

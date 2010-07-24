@@ -262,10 +262,10 @@ class CISST_EXPORT svlOverlayStaticRect : public svlOverlay
 public:
     svlOverlayStaticRect();
     svlOverlayStaticRect(unsigned int videoch,
-                   bool visible,
-                   svlRect rect,
-                   svlRGB color,
-                   bool fill = true);
+                         bool visible,
+                         svlRect rect,
+                         svlRGB color,
+                         bool fill = true);
     virtual ~svlOverlayStaticRect();
 
     void SetRect(svlRect rect);

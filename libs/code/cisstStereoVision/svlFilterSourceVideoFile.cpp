@@ -373,8 +373,7 @@ int svlFilterSourceVideoFile::Release()
     }
 
     if (Timer.IsRunning()) Timer.Stop();
-
-    SetTargetFrequency(-1.0);
+    StopTargetTimer();
 
     return SVL_OK;
 }

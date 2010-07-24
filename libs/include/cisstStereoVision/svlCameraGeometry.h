@@ -61,7 +61,7 @@ public:
     void SetExtrinsics(const double om0, const double om1, const double om2,
                        const double T0, const double T1, const double T2,
                        const unsigned int cam_id = 0);
-    void SetPerspective(const double focallength, const unsigned int cam_id = 0);
+    void SetPerspective(const double focallength, const unsigned int width, const unsigned int height, const unsigned int cam_id = 0);
     int LoadCalibration(const std::string & filepath);
 
     int GetIntrinsics(Intrinsics & intrinsics, const unsigned int cam_id = 0) const;

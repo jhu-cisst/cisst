@@ -86,9 +86,9 @@ void svlCameraGeometry::SetExtrinsics(const double om0, const double om1, const 
     ExtrinsicParams[cam_id].frame.From(ExtrinsicParams[cam_id].om, ExtrinsicParams[cam_id].T);
 }
 
-void svlCameraGeometry::SetPerspective(const double focallength, const unsigned int cam_id)
+void svlCameraGeometry::SetPerspective(const double focallength, const unsigned int width, const unsigned int height, const unsigned int cam_id)
 {
-    SetIntrinsics(focallength, focallength, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, cam_id);
+    SetIntrinsics(focallength, focallength, width / 2, height / 2, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, cam_id);
 }
 
 int svlCameraGeometry::LoadCalibration(const std::string & filepath)
@@ -494,10 +494,21 @@ void svlCameraGeometry::Wrld2Cam(const unsigned int cam_id, vctDouble2 & point2D
     point2D = Wrld2Cam(cam_id, point3D);
 }
 
-vctDouble2 svlCameraGeometry::Wrld2Cam(const unsigned int CMN_UNUSED(cam_id), const vctDouble3 & CMN_UNUSED(point3D))
+vctDouble2 svlCameraGeometry::Wrld2Cam(const unsigned int cam_id, const vctDouble3 & point3D)
 {
     vctDouble2 result;
-    result.SetAll(0.0);
+    double z = point3D[2];
+
+    if (z > 0.001) {
+        Intrinsics* in = IntrinsicParams.Pointer(cam_id);
+        z = in->fc[0] / z;
+        result[0] = z * point3D[0] + in->cc[0];
+        result[1] = z * point3D[1] + in->cc[1];
+    }
+    else {
+        result[0] = result[1] = -1.0;
+    }
+
     return result;
 }
 

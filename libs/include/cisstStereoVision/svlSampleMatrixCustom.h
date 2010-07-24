@@ -297,6 +297,51 @@ public:
         return InvalidElement;
     }
 
+    const std::string Str(const unsigned int width, const unsigned int precision, const int errorvalue) const
+    {
+        std::stringstream strstr;
+        Str(strstr, width, precision, errorvalue);
+        return strstr.str();
+    }
+
+    const std::string Str(const unsigned int width, const unsigned int precision, const unsigned int errorvalue) const
+    {
+        std::stringstream strstr;
+        Str(strstr, width, precision, errorvalue);
+        return strstr.str();
+    }
+
+    const std::string Str(const unsigned int width, const unsigned int precision, const double errorvalue) const
+    {
+        std::stringstream strstr;
+        Str(strstr, width, precision, errorvalue);
+        return strstr.str();
+    }
+
+    template <class _TypeIn>
+    void Str(std::stringstream& strstr, const unsigned int width, const unsigned int precision, _TypeIn errorvalue) const
+    {
+        // Create error value string
+        vctDynamicVector<char> errorstr(width + 1, '.');
+        errorstr[width] = 0;
+
+        _ValueType val, error = static_cast<_ValueType>(errorvalue);
+        const unsigned int cols = GetCols();
+        const unsigned int rows = GetRows();
+        unsigned int c, r;
+
+        for (r = 0; r < rows; r ++) {
+            strstr << std::fixed << std::setprecision(precision);
+            for (c = 0; c < cols; c ++) {
+                if (c > 0)  strstr << " ";
+                val = Element(c, r);
+                if (val != error) strstr << std::setw(width) << val;
+                else strstr << errorstr.Pointer();
+            }
+            strstr << std::endl;
+        }
+    }
+
 private:
     bool OwnData;
     vctDynamicMatrix<_ValueType>* Matrix;

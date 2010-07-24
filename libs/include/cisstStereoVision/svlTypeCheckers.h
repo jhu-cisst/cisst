@@ -90,7 +90,7 @@ inline bool IsTypeDouble<double>(double CMN_UNUSED(val)) { return true; }
 #define MAX_INT16   32767
 #define MIN_INT16   -32768
 #define MAX_INT32   2147483647
-#define MIN_INT32   -2147483648
+#define MIN_INT32   -2147483647
 #define MAX_UINT8   255
 #define MIN_UINT8   0
 #define MAX_UINT16  65535
