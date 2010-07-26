@@ -250,8 +250,8 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
  protected:
 
     bool UseSeparateLogFileFlag;
-    cmnLogger::StreamBufType LoDMultiplexerStreambuf;
-    std::ofstream LogFile;
+    cmnLogger::StreamBufType * LoDMultiplexerStreambuf;
+    std::ofstream * LogFile;
 
     /*! Thread Id counter.  Used to count how many "user" tasks are
       connected from a single thread.  In most cases the count
