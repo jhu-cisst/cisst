@@ -43,6 +43,15 @@ mtsComponent::mtsComponent(const std::string & componentName):
 }
 
 
+mtsComponent::mtsComponent(void):
+    LoDMultiplexerStreambuf(0),
+    LogFile(0)
+{
+    LoDMultiplexerStreambuf = new cmnLogger::StreamBufType;
+    LogFile = new std::ofstream;
+}
+
+
 mtsComponent::~mtsComponent()
 {
     if (this->LoDMultiplexerStreambuf) {

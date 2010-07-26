@@ -29,7 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 class svlFile
 {
     enum OpenMode {
-        R  = 1,
+        R = 1,
         W = 2
     };
 

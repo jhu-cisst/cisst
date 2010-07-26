@@ -75,7 +75,7 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
 
     /*! Default constructor. Protected to prevent creation of a component
       without a name. */
-    mtsComponent(void) {}
+    mtsComponent(void);
 
     /*! Add an already existing interface required to the interface,
       the user must pay attention to mailbox (or lack of) used to
