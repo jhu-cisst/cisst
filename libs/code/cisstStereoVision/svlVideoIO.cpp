@@ -528,11 +528,6 @@ int svlVideoCodecBase::DialogCompression()
     return SVL_FAIL;
 }
 
-double svlVideoCodecBase::GetTimestamp() const
-{
-    return -1.0;
-}
-
 int svlVideoCodecBase::SetTimestamp(const double CMN_UNUSED(timestamp))
 {
     return SVL_FAIL;

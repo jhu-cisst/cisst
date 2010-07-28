@@ -44,6 +44,7 @@ svlVideoCodecOpenCV::svlVideoCodecOpenCV() :
     Pos(-1),
     Writing(false),
     Opened(false),
+    Framerate(30.0),
     OCVReader(0),
     OCVWriter(0)
 {
@@ -83,7 +84,7 @@ int svlVideoCodecOpenCV::Open(const std::string &filename, unsigned int &width, 
 
         width = static_cast<unsigned int>(cvGetCaptureProperty(OCVReader, CV_CAP_PROP_FRAME_WIDTH));
         height = static_cast<unsigned int>(cvGetCaptureProperty(OCVReader, CV_CAP_PROP_FRAME_HEIGHT));
-        framerate = cvGetCaptureProperty(OCVReader, CV_CAP_PROP_FPS);
+        Framerate = framerate = cvGetCaptureProperty(OCVReader, CV_CAP_PROP_FPS);
 
         BegPos = 0;
         Pos = 1; // already captured a frame
@@ -206,7 +207,6 @@ svlVideoIO::Compression* svlVideoCodecOpenCV::GetCompression() const
     memset(&(compression->name[0]), 0, 64);
     memcpy(&(compression->name[0]), name.c_str(), std::min(static_cast<int>(name.length()), 63));
     compression->size = size;
-    compression->supports_timestamps = false;
     compression->datasize = 0;
     compression->data[0] = 0;
 
@@ -247,11 +247,16 @@ int svlVideoCodecOpenCV::DialogCompression()
     memcpy(&(Codec->extension[0]), ".avi", 4);
     memset(&(Codec->name[0]), 0, 64);
     memcpy(&(Codec->name[0]), fourccstr.c_str(), std::min(static_cast<int>(fourccstr.length()), 63));
-    Codec->supports_timestamps = false;
     Codec->datasize = 0;
     Codec->data[0] = 0;
 
 	return SVL_OK;
+}
+
+double svlVideoCodecOpenCV::GetTimestamp() const
+{
+    if (!Opened || Writing) return -1.0;
+    return static_cast<double>(Pos) / Framerate;
 }
 
 int svlVideoCodecOpenCV::Read(svlProcInfo* procInfo, svlSampleImage &image, const unsigned int videoch, const bool noresize)

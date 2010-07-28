@@ -99,7 +99,7 @@ int main(int CMN_UNUSED(argc), char** CMN_UNUSED(argv))
     tracker.GetOutput()->Connect(overlay.GetInput("targets"));
 
     // start stream
-    stream.Start();
+    stream.Play();
 
     int ch = 0;
     while (ch != 'q') ch = cmnGetChar();

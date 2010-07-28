@@ -167,7 +167,6 @@ int svlVideoCodecUDPStream::Create(const std::string &filename, const unsigned i
         memset(&(Codec->name[0]), 0, 64);
         memcpy(&(Codec->name[0]), name.c_str(), std::min(static_cast<int>(name.length()), 63));
         Codec->size = sizeof(svlVideoIO::Compression);
-        Codec->supports_timestamps = true;
         Codec->datasize = 1;
         Codec->data[0] = 4;
     }
@@ -293,7 +292,6 @@ svlVideoIO::Compression* svlVideoCodecUDPStream::GetCompression() const
     memset(&(compression->name[0]), 0, 64);
     memcpy(&(compression->name[0]), name.c_str(), std::min(static_cast<int>(name.length()), 63));
     compression->size = size;
-    compression->supports_timestamps = true;
     compression->datasize = 1;
     if (Codec) compression->data[0] = Codec->data[0];
     else compression->data[0] = 4; // Set default compression level to 4
@@ -321,7 +319,6 @@ int svlVideoCodecUDPStream::SetCompression(const svlVideoIO::Compression *compre
     memset(&(Codec->name[0]), 0, 64);
     memcpy(&(Codec->name[0]), name.c_str(), std::min(static_cast<int>(name.length()), 63));
     Codec->size = sizeof(svlVideoIO::Compression);
-    Codec->supports_timestamps = true;
     Codec->datasize = 1;
     if (compression->data[0] <= 9) Codec->data[0] = compression->data[0];
     else Codec->data[0] = 4;
@@ -348,7 +345,6 @@ int svlVideoCodecUDPStream::DialogCompression()
     memset(&(Codec->name[0]), 0, 64);
     memcpy(&(Codec->name[0]), name.c_str(), std::min(static_cast<int>(name.length()), 63));
     Codec->size = sizeof(svlVideoIO::Compression);
-    Codec->supports_timestamps = true;
     Codec->datasize = 1;
     Codec->data[0] = static_cast<unsigned char>(level);
 

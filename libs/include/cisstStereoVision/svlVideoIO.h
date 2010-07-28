@@ -49,7 +49,6 @@ public:
         unsigned int    size;
         char            extension[16];
         char            name[64];
-        bool            supports_timestamps;
         unsigned int    datasize;
         unsigned char   data[1];
     } Compression;
@@ -119,7 +118,7 @@ public:
     virtual int SetCompression(const svlVideoIO::Compression *compression);
     virtual int DialogCompression();
 
-    virtual double GetTimestamp() const;
+    virtual double GetTimestamp() const = 0;
     virtual int SetTimestamp(const double timestamp);
 
     virtual int Read(svlProcInfo* procInfo, svlSampleImage &image, const unsigned int videoch, const bool noresize = false) = 0;

@@ -41,6 +41,7 @@ svlVideoCodecVfW32::svlVideoCodecVfW32() :
     KeyFrameEvery(10),
     Writing(false),
     Opened(false),
+    Framerate(30.0),
     pAviFile(0),
     pAviStream(0),
     pAviStreamCompressed(0),
@@ -85,7 +86,7 @@ int svlVideoCodecVfW32::Open(const std::string &filename, unsigned int &width, u
 
                 Pos = BegPos = AviStreamInfo.dwStart;
                 EndPos = AviStreamInfo.dwStart + AviStreamInfo.dwLength;
-                framerate = static_cast<double>(AviStreamInfo.dwRate) / AviStreamInfo.dwScale;
+                Framerate = framerate = static_cast<double>(AviStreamInfo.dwRate) / AviStreamInfo.dwScale;
 
                 BITMAPINFOHEADER* header = reinterpret_cast<BITMAPINFOHEADER*>(temp);
                 Width = static_cast<unsigned int>(header->biWidth);
@@ -265,7 +266,6 @@ svlVideoIO::Compression* svlVideoCodecVfW32::GetCompression() const
         memset(&(compression->name[0]), 0, 64);
         memcpy(&(compression->name[0]), name.c_str(), std::min(static_cast<int>(name.length()), 63));
         compression->size = size;
-        compression->supports_timestamps = false;
         compression->datasize = 0;
         compression->data[0] = 0;
     }
@@ -354,7 +354,6 @@ int svlVideoCodecVfW32::DialogCompression()
                     memcpy(&(Codec->extension[0]), ".avi", 4);
                     memset(&(Codec->name[0]), 0, 64);
                     memcpy(&(Codec->name[0]), name.c_str(), std::min(static_cast<int>(name.length()), 63));
-                    Codec->supports_timestamps = false;
                     Codec->datasize = sizeof(AVICOMPRESSOPTIONS);
                     memcpy(&(Codec->data[0]), options, Codec->datasize);
 
@@ -370,6 +369,12 @@ int svlVideoCodecVfW32::DialogCompression()
     DeleteFile("_temp_.avi");
 
 	return ret;
+}
+
+double svlVideoCodecVfW32::GetTimestamp() const
+{
+    if (!Opened || Writing) return -1.0;
+    return static_cast<double>(Pos) / Framerate;
 }
 
 int svlVideoCodecVfW32::Read(svlProcInfo* procInfo, svlSampleImage &image, const unsigned int videoch, const bool noresize)

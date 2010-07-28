@@ -63,6 +63,11 @@ int VideoConverter(std::string &src_path, std::string &dst_path, bool loadcodec)
         writer.SetFilePath(dst_path);
     }
 
+#if 1
+    svlFilterImageResizer resizer;
+    resizer.SetOutputRatio(0.5, 0.5);
+#endif
+
     if (loadcodec) {
         if (writer.LoadCodec("codec.dat") != SVL_OK) {
             if (writer.DialogCodec() != SVL_OK) {
@@ -83,8 +88,12 @@ int VideoConverter(std::string &src_path, std::string &dst_path, bool loadcodec)
     writer.GetCodecName(encoder);
 
     // chain filters to pipeline
-    stream.SetSourceFilter(&source);
-    source.GetOutput()->Connect(writer.GetInput());
+    svlFilterOutput* output = 0;
+    stream.SetSourceFilter(&source);     output = source.GetOutput();
+#if 1
+    output->Connect(resizer.GetInput()); output = resizer.GetOutput();
+#endif
+    output->Connect(writer.GetInput());  output = writer.GetOutput();
 
     cerr << "Converting: '" << src_path << "' to '" << dst_path <<"' using codec: '" << encoder << "'" << endl;
 

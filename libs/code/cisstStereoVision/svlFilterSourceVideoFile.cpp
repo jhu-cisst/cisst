@@ -331,11 +331,12 @@ int svlFilterSourceVideoFile::Process(svlProcInfo* procInfo, svlSample* &syncOut
             if (ret != SVL_OK) break;
 
             if (idx == 0) {
-                if (!IsTargetTimerRunning()) {
 
-                    // Synchronizing all channels to channel #0
-                    timestamp = Codec[idx]->GetTimestamp();
-                    if (timestamp > 0.0) {
+                // Get timestamp stored in the video file
+                timestamp = Codec[idx]->GetTimestamp();
+                if (timestamp > 0.0) {
+
+                    if (!IsTargetTimerRunning()) {
 
                         // Try to keep orignal frame intervals
                         if (ResetTimer || Codec[idx]->GetPos() == 1) {
@@ -348,16 +349,10 @@ int svlFilterSourceVideoFile::Process(svlProcInfo* procInfo, svlSample* &syncOut
                             timespan = (timestamp - FirstTimestamp) - Timer.GetElapsedTime();
                             if (timespan > 0.0) osaSleep(timespan);
                         }
-
-                        // Set timestamp to the one stored in the video file
-                        OutputImage->SetTimestamp(timestamp);
-
-                        continue;
                     }
                 }
 
-                // Ask Stream Manager for current timestamp
-                OutputImage->SetTimestamp(-1.0);
+                OutputImage->SetTimestamp(timestamp);
             }
         }
     }
@@ -475,6 +470,18 @@ int svlFilterSourceVideoFile::GetLength(unsigned int videoch) const
 {
     if (Codec.size() <= videoch || !Codec[videoch]) return SVL_FAIL;
     return (Codec[videoch]->GetEndPos() + 1);
+}
+
+unsigned int svlFilterSourceVideoFile::GetWidth(unsigned int videoch)
+{
+    if (!IsInitialized()) return 0;
+    return OutputImage->GetWidth(videoch);
+}
+
+unsigned int svlFilterSourceVideoFile::GetHeight(unsigned int videoch)
+{
+    if (!IsInitialized()) return 0;
+    return OutputImage->GetHeight(videoch);
 }
 
 int svlFilterSourceVideoFile::GetPositionAtTime(const double time, unsigned int videoch) const

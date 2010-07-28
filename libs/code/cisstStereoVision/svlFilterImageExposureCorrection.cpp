@@ -1,0 +1,154 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
+/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
+
+/*
+  $Id: $
+  
+  Author(s):  Balazs Vagvolgyi
+  Created on: 2010
+
+  (C) Copyright 2006-2010 Johns Hopkins University (JHU), All Rights
+  Reserved.
+
+--- begin cisst license - do not edit ---
+
+This software is provided "as is" under an open source license, with
+no warranty.  The complete license can be found in license.txt and
+http://www.cisst.org/cisst/license.txt.
+
+--- end cisst license ---
+
+*/
+
+#include <cisstStereoVision/svlFilterImageExposureCorrection.h>
+
+
+/**********************************************/
+/*** svlFilterImageExposureCorrection class ***/
+/**********************************************/
+
+CMN_IMPLEMENT_SERVICES(svlFilterImageExposureCorrection)
+
+svlFilterImageExposureCorrection::svlFilterImageExposureCorrection() :
+    svlFilterBase(),
+    Brightness(0.0),
+    Contrast(0.0),
+    Gamma(0.0)
+{
+    AddInput("input", true);
+    AddInputType("input", svlTypeImageRGB);
+    AddInputType("input", svlTypeImageRGBStereo);
+    AddInputType("input", svlTypeImageRGBA);
+    AddInputType("input", svlTypeImageRGBAStereo);
+    AddInputType("input", svlTypeImageMono8);
+    AddInputType("input", svlTypeImageMono8Stereo);
+
+// Might be added in the future
+//    AddInputType("input", svlTypeImageMono16);
+//    AddInputType("input", svlTypeImageMono16Stereo);
+
+    AddOutput("output", true);
+    SetAutomaticOutputType(true);
+}
+
+void svlFilterImageExposureCorrection::SetBrightness(const double brightness)
+{
+    Brightness = brightness;
+    if (Brightness > 100.0) Brightness = 100.0;
+    else  if (Brightness < -100.0) Brightness = -100.0;
+    CalculateCurve();
+}
+
+double svlFilterImageExposureCorrection::GetBrightness() const
+{
+    return Brightness;
+}
+
+void svlFilterImageExposureCorrection::SetContrast(const double contrast)
+{
+    Contrast = contrast;
+    if (Contrast > 100.0) Contrast = 100.0;
+    else  if (Contrast < -100.0) Contrast = -100.0;
+    CalculateCurve();
+}
+
+double svlFilterImageExposureCorrection::GetContrast() const
+{
+    return Contrast;
+}
+
+void svlFilterImageExposureCorrection::SetGamma(const double gamma)
+{
+    Gamma = gamma;
+    if (Gamma > 100.0) Gamma = 100.0;
+    else  if (Gamma < -100.0) Gamma = -100.0;
+    CalculateCurve();
+}
+
+double svlFilterImageExposureCorrection::GetGamma() const
+{
+    return Gamma;
+}
+
+int svlFilterImageExposureCorrection::Initialize(svlSample* syncInput, svlSample* &syncOutput)
+{
+    syncOutput = syncInput;
+
+    CalculateCurve();
+
+    return SVL_OK;
+}
+
+int svlFilterImageExposureCorrection::Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput)
+{
+    syncOutput = syncInput;
+    _SkipIfAlreadyProcessed(syncInput, syncOutput);
+
+    svlSampleImage* img = dynamic_cast<svlSampleImage*>(syncInput);
+    const unsigned int videochannels = img->GetVideoChannels();
+    const unsigned int stride = img->GetDataChannels();
+    const unsigned int datachannels = ((stride == 4) ? 3 : stride); // Skip Alpha in case of RGBA
+    const unsigned int toskip = stride - datachannels;
+    unsigned int pixelcount, i, j, vch;
+    unsigned char* ptr;
+
+    _ParallelLoop(procInfo, vch, videochannels)
+    {
+        pixelcount = img->GetWidth(vch) * img->GetHeight(vch);
+        ptr = img->GetUCharPointer(vch);
+
+        for (i = 0; i < pixelcount; i ++) {
+
+            j = datachannels;
+            while (j) {
+                *ptr = Curve[*ptr]; ptr ++;
+                j --;
+            }
+
+            ptr += toskip;
+        }
+    }
+
+    return SVL_OK;
+}
+
+void svlFilterImageExposureCorrection::CalculateCurve()
+{
+    const double scale100 = 2.55;
+    double cntrst, gmma, dbval;
+    int result;
+
+    cntrst = pow(10.0, Contrast / 100.0);
+    gmma = pow(10.0, -Gamma / 100.0);
+
+    // Calculate Curve
+    for (unsigned int i = 0; i < 256; i ++) {
+        dbval = (Brightness * scale100 + cntrst * i) / 255.0;
+        result = static_cast<int>(pow(dbval, gmma) * 255.0 + 0.5);
+
+        if (result < 0) result = 0;
+        else if (result > 255) result = 255;
+        Curve[i] = result;
+    }    
+}
+

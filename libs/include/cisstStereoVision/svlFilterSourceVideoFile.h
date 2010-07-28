@@ -84,6 +84,8 @@ public:
     int GetLength(unsigned int videoch = SVL_LEFT) const;
 
     // Run-time methods (available when 'Initialized')
+    unsigned int GetWidth(unsigned int videoch = SVL_LEFT);
+    unsigned int GetHeight(unsigned int videoch = SVL_LEFT);
     int GetPositionAtTime(const double time, unsigned int videoch = SVL_LEFT) const;
     double GetTimeAtPosition(const int position, unsigned int videoch = SVL_LEFT) const;
 

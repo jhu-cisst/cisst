@@ -206,5 +206,13 @@ void svlInitialize()
 #ifdef _svlFilterSourceTextFile_h
     delete new svlFilterSourceTextFile;
 #endif // _svlFilterSourceTextFile_h
+    
+#ifdef _svlFilterImageExposureCorrection_h
+    delete new svlFilterImageExposureCorrection;
+#endif // _svlFilterImageExposureCorrection_h
+    
+#ifdef _svlFilterVideoExposureManager_h
+    delete new svlFilterVideoExposureManager;
+#endif // _svlFilterVideoExposureManager_h
 }
 

@@ -48,6 +48,8 @@ public:
     virtual int SetCompression(const svlVideoIO::Compression *compression);
     virtual int DialogCompression();
 
+    virtual double GetTimestamp() const;
+
     virtual int Read(svlProcInfo* procInfo, svlSampleImage &image, const unsigned int videoch, const bool noresize = false);
     virtual int Write(svlProcInfo* procInfo, const svlSampleImage &image, const unsigned int videoch);
 
@@ -60,6 +62,7 @@ protected:
     int Pos;
     bool Writing;
     bool Opened;
+    double Framerate;
 
     CvCapture* OCVReader;
     CvVideoWriter* OCVWriter;

@@ -23,6 +23,7 @@ ADD_SUBDIRECTORY(stereovideoplayer)
 ADD_SUBDIRECTORY(videoconverter)
 ADD_SUBDIRECTORY(pointtracker)
 ADD_SUBDIRECTORY(gridtracker)
+ADD_SUBDIRECTORY(exposurecorrection)
 ADD_SUBDIRECTORY(svlmts1)
 #ADD_SUBDIRECTORY(webgui)
 

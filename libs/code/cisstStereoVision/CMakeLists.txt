@@ -73,6 +73,7 @@ SET(SOURCE_FILES
     svlFilterImageColorConverter.cpp
     svlFilterImageCropper.cpp
     svlFilterImageDeinterlacer.cpp
+    svlFilterImageExposureCorrection.cpp
     svlFilterImageFileWriter.cpp
     svlFilterImageFlipRotate.cpp
     svlFilterImageOverlay.cpp
@@ -94,6 +95,7 @@ SET(SOURCE_FILES
     svlFilterStereoImageOptimizer.cpp
     svlFilterStereoImageSplitter.cpp
     svlFilterStreamTypeConverter.cpp
+    svlFilterVideoExposureManager.cpp
     svlFilterVideoFileWriter.cpp
 
   # Private System API
@@ -159,6 +161,7 @@ SET(HEADER_FILES
     svlFilterImageColorConverter.h
     svlFilterImageCropper.h
     svlFilterImageDeinterlacer.h
+    svlFilterImageExposureCorrection.h
     svlFilterImageFileWriter.h
     svlFilterImageFlipRotate.h
     svlFilterImageOverlay.h
@@ -180,6 +183,7 @@ SET(HEADER_FILES
     svlFilterStereoImageOptimizer.h
     svlFilterStereoImageSplitter.h
     svlFilterStreamTypeConverter.h
+    svlFilterVideoExposureManager.h
     svlFilterVideoFileWriter.h
 
   # Trackers
