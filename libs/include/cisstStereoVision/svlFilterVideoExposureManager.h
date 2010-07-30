@@ -56,11 +56,9 @@ protected:
     svlFilterSourceVideoCapture* SourceFilter;
     double Tolerance;
     unsigned char Threshold;
-    unsigned int MaxGain;
-    unsigned int MaxShutter;
+    int MaxGain;
+    int MaxShutter;
 
-    unsigned int PrevGain;
-    unsigned int PrevShutter;
     vctFixedSizeVector<unsigned int, 256> Histogram;
 
     virtual void GetSaturationRatio(svlSampleImage* image, const unsigned int videoch, double& saturation, unsigned int& maxval);
