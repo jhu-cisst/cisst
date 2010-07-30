@@ -45,6 +45,8 @@ protected:
     virtual int Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput);
 
 private:
+    svlSampleImage* OutputImage;
+
     vctFixedSizeVector<int, SVL_MAX_CHANNELS> HorizTranslation;
     vctFixedSizeVector<int, SVL_MAX_CHANNELS> VertTranslation;
 

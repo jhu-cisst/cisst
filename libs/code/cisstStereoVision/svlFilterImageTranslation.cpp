@@ -30,7 +30,8 @@ http://www.cisst.org/cisst/license.txt.
 CMN_IMPLEMENT_SERVICES(svlFilterImageTranslation)
 
 svlFilterImageTranslation::svlFilterImageTranslation() :
-    svlFilterBase()
+    svlFilterBase(),
+    OutputImage(0)
 {
     AddInput("input", true);
     AddInputType("input", svlTypeImageRGB);
@@ -45,17 +46,18 @@ svlFilterImageTranslation::svlFilterImageTranslation() :
 
 int svlFilterImageTranslation::Initialize(svlSample* syncInput, svlSample* &syncOutput)
 {
-    syncOutput = syncInput;
+    OutputImage = dynamic_cast<svlSampleImage*>(syncInput->GetNewInstance());
+    OutputImage->CopyOf(syncInput);
+    syncOutput = OutputImage;
     return SVL_OK;
 }
 
 int svlFilterImageTranslation::Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput)
 {
-    syncOutput = syncInput;
-    _SkipIfAlreadyProcessed(syncInput, syncOutput);
+    syncOutput = OutputImage;
+    _SkipIfAlreadyProcessed(syncInput, OutputImage);
 
     svlSampleImage* id = dynamic_cast<svlSampleImage*>(syncInput);
-    svlSampleImage* od = dynamic_cast<svlSampleImage*>(syncOutput);
     unsigned int videochannels = id->GetVideoChannels();
     unsigned int idx;
 
@@ -63,7 +65,7 @@ int svlFilterImageTranslation::Process(svlProcInfo* procInfo, svlSample* syncInp
     {
         // Processing
         Translate(id->GetUCharPointer(idx),
-                  od->GetUCharPointer(idx),
+                  OutputImage->GetUCharPointer(idx),
                   id->GetWidth(idx) * id->GetBPP(),
                   id->GetHeight(idx),
                   HorizTranslation[idx] * id->GetBPP(),

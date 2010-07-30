@@ -47,22 +47,23 @@ public:
     virtual unsigned int GetMaxGain() const;
     virtual void SetMaxShutter(unsigned int maxshutter);
     virtual unsigned int GetMaxShutter() const;
-    virtual void SetChangeStep(unsigned int step);
-    virtual unsigned int GetChangeStep() const;
 
 protected:
     virtual int Initialize(svlSample* syncInput, svlSample* &syncOutput);
     virtual int Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput);
-    
+
 protected:
     svlFilterSourceVideoCapture* SourceFilter;
     double Tolerance;
     unsigned char Threshold;
     unsigned int MaxGain;
     unsigned int MaxShutter;
-    unsigned int ChangeStep;
 
-    virtual double GetSaturationRatio(svlSampleImage* image, const unsigned int videoch);
+    unsigned int PrevGain;
+    unsigned int PrevShutter;
+    vctFixedSizeVector<unsigned int, 256> Histogram;
+
+    virtual void GetSaturationRatio(svlSampleImage* image, const unsigned int videoch, double& saturation, unsigned int& maxval);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterVideoExposureManager)
