@@ -34,8 +34,8 @@ robCubicSO3::robCubicSO3( const vctMatrixRotation3<double>& Rw1,
 		  Rw2,
 		  vctFixedSizeVector<double,3>( 0.0 ),
 		  vctFixedSizeVector<double,3>( 0.0 ) ),
+  wmax( wmax ),
   qwmid( Rwmid ){
-
 
   vctMatrixRotation3<double> R1w( Rw1 );
   R1w.InverseSelf();
@@ -44,7 +44,6 @@ robCubicSO3::robCubicSO3( const vctMatrixRotation3<double>& Rw1,
   vctAxisAngleRotation3<double> r12( R12 );
   
   StopTime() = StartTime() + r12.Angle() / wmax;
-
 
 }
 
@@ -61,9 +60,8 @@ robCubicSO3::robCubicSO3( const vctQuaternionRotation3<double>& qw1,
 		  qw2,
 		  vctFixedSizeVector<double,3>( 0.0 ),
 		  vctFixedSizeVector<double,3>( 0.0 ) ),
+  wmax( wmax ),
   qwmid( qwmid ){
-
-  
 
   vctMatrixRotation3<double> R1w( qw1 ), Rw2( qw2 );
   R1w.InverseSelf();
@@ -107,9 +105,9 @@ robCubicSO3::SLERP( const vctQuaternionRotation3<double> &q1,
 
 
 void robCubicSO3::Evaluate( double t,
-				vctQuaternionRotation3<double>& q,
-				vctFixedSizeVector<double,3>& w,
-				vctFixedSizeVector<double,3>& wd ){
+			    vctQuaternionRotation3<double>& q,
+			    vctFixedSizeVector<double,3>& w,
+			    vctFixedSizeVector<double,3>& wd ){
 
   if( t < StartTime() ){
     q = qw1;
@@ -128,29 +126,36 @@ void robCubicSO3::Evaluate( double t,
 
 
   t = ( t - StartTime() ) / Duration();
-  vctQuaternionRotation3<double> qwmid = SLERP( qw1, qwmid, t );
-  vctQuaternionRotation3<double> qmid2 = SLERP( qwmid, qw2, t );
-  q = SLERP( qwmid, qmid2, t );
+  vctQuaternionRotation3<double> qtmp1 = SLERP( qw1, qwmid, t );
+  vctQuaternionRotation3<double> qtmp2 = SLERP( qwmid, qw2, t );
+  q = SLERP( qtmp1, qtmp2, t );
 
   w.SetAll(0.0);
   wd.SetAll(0.0);
+  
+}
+
+void robCubicSO3::Blend( robFunction* function, double, double ){
+
+  // The function must be a QLQ trajectory
+  robCubicSO3* next = dynamic_cast<robCubicSO3*>( function );
+
+  if( next != NULL ){      // cast must be successful
+
+    vctQuaternionRotation3<double> qi, qm, qf;
+    vctFixedSizeVector<double,3> wi, wid;
+    vctFixedSizeVector<double,3> wf, wfd;
+
+    next->InitialState( qi, wi, wid );
+    next->IntermediateState( qm );
+    next->FinalState( qf, wf, wfd );
+
+    // Create a new cruise segment but this one will start at StopTime 
+    *next = robCubicSO3( qi, qm, qf, next->wmax, this->StopTime() );
+
+  }
 
 }
 
-  /*
-  // Check to see if we need to "flip" one quaternion in order to take the 
-  // shortest arc
-  // cos(theta)
-  double ctheta = ( this->qw1.X()*this->qw2.X() + 
-		    this->qw1.Y()*this->qw2.Y() + 
-		    this->qw1.Z()*this->qw2.Z() + 
-		    this->qw1.R()*this->qw2.R() );
-
-  // if negative, invert qw2
-  if( ctheta < 0.0 ){
-    this->qw2.X() = -this->qw2.X();
-    this->qw2.Y() = -this->qw2.Y();
-    this->qw2.Z() = -this->qw2.Z();
-    this->qw2.R() = -this->qw2.R();
-  } 
-  */
+void robCubicSO3::IntermediateState( vctQuaternionRotation3<double>& q )
+{ q = qwmid; }

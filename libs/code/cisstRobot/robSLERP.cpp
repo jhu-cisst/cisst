@@ -168,7 +168,6 @@ void robSLERP::Evaluate( double t,
 
 void robSLERP::Blend( robFunction* function, double, double ){
 
-  // The function must be a QLQ trajectory
   robSLERP* next = dynamic_cast<robSLERP*>( function );
 
   if( next != NULL ){      // cast must be successful

@@ -28,6 +28,7 @@ class CISST_EXPORT robCubicSO3 : public robFunctionSO3 {
 
  private:
   
+  double wmax;
   vctQuaternionRotation3<double> qwmid;   // midpoint orientation
   
   vctQuaternionRotation3<double> 
@@ -60,7 +61,9 @@ class CISST_EXPORT robCubicSO3 : public robFunctionSO3 {
 		 vctFixedSizeVector<double,3>& w,
 		 vctFixedSizeVector<double,3>& wd );
   
-  void Blend( robFunction*, double, double ){}
+  void Blend( robFunction* function, double wmax, double wdmax );
+
+  void IntermediateState( vctQuaternionRotation3<double>& q );
 
 };
 

@@ -96,11 +96,11 @@ class CISST_EXPORT robQuintic : public robFunctionRn {
 		 vctDynamicVector<double>& ydd );
   
 
-  void Blend( robFunction*, 
-	      const vctDynamicVector<double>&, 
-	      const vctDynamicVector<double>& ){}
+  void Blend( robFunction* function, 
+	      const vctDynamicVector<double>& qdmax, 
+	      const vctDynamicVector<double>& qddmax );
 
-  void Blend( robFunction*, double, double ){}
+  void Blend( robFunction*, double, double );
 };
 
 #endif

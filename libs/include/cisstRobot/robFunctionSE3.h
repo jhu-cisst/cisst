@@ -52,6 +52,8 @@ class CISST_EXPORT robFunctionSE3 : public robFunction {
 		  const vctFixedSizeVector<double,6>& v2w2,
 		  const vctFixedSizeVector<double,6>& v2dw2d );
 
+  ~robFunctionSE3();
+
   void InitialState( vctFrame4x4<double>& Rtw1,
 		     vctFixedSizeVector<double,6>& v1w1,
 		     vctFixedSizeVector<double,6>& v1dw1d );
@@ -66,6 +68,8 @@ class CISST_EXPORT robFunctionSE3 : public robFunction {
 			 vctFixedSizeVector<double,6>&) = 0;
 
   virtual void Blend( robFunction* function, double vmax, double vdmax ) = 0;
+
+  robFunctionSE3& operator=( const robFunctionSE3& function );
 
 };
 

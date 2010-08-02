@@ -64,6 +64,9 @@ class CISST_EXPORT robFunctionRn : public robFunction {
 		   vctDynamicVector<double>& yd,
 		   vctDynamicVector<double>& ydd );
 
+  void InitialState( vctFixedSizeVector<double,3>& p, double& v, double& vd );
+  void FinalState  ( vctFixedSizeVector<double,3>& p, double& v, double& vd );
+
   virtual void Evaluate( double, 
 			 vctFixedSizeVector<double,3>&, 
 			 vctFixedSizeVector<double,3>&, 

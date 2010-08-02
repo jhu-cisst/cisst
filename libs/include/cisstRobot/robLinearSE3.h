@@ -25,15 +25,14 @@ class CISST_EXPORT robLinearSE3 : public robFunctionSE3 {
 
  protected:
 
-  double vmax, vdmax;
-  double wmax, wdmax;
+  double vmax;
+  double wmax;
 
  public:
 
   robLinearSE3( const vctFrame4x4<double>& Rtw1,
 		const vctFrame4x4<double>& Rtw2,
 		double vmax, double wmax,
-		double vdmax, double wdmax,
 		double t1 = 0.0 );
 
   void Evaluate( double t, 
@@ -42,6 +41,8 @@ class CISST_EXPORT robLinearSE3 : public robFunctionSE3 {
 		 vctFixedSizeVector<double,6>& vdwd );
 
   void Blend( robFunction* function, double vmax, double vdmax );
+
+  robLinearSE3& operator=( const robLinearSE3& function );
 
 };
 

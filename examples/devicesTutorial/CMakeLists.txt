@@ -12,6 +12,12 @@
 # 
 # --- end cisst license ---
 
+if( CISST_DEV_HAS_ROBOTCOMPONENTS )
+
+  add_subdirectory( robotcomponents )
+
+endif( CISST_DEV_HAS_ROBOTCOMPONENTS )
+
 if(CISST_HAS_FLTK)
   add_subdirectory(example2)
 

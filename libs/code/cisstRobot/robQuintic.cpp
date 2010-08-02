@@ -82,6 +82,47 @@ robQuintic::robQuintic( double t1,
 
 }
 
+void robQuintic::Blend( robFunction* function, 
+			const vctDynamicVector<double>&, 
+			const vctDynamicVector<double>& ){
+
+  // The function must be a QLQ trajectory
+  robQuintic* next = dynamic_cast<robQuintic*>( function );
+
+  if( next != NULL ){      // cast must be successful
+
+    vctDynamicVector<double> q2i, q2id, q2idd;
+    vctDynamicVector<double> q2f, q2fd, q2fdd;
+    next->InitialState( q2i, q2id, q2idd );
+    next->FinalState( q2f, q2fd, q2fdd );
+
+    // Create a new cruise segment but this one will start at StopTime 
+    *next = robQuintic( this->StopTime(),                  q2i, q2id, q2idd,
+			this->StopTime()+next->Duration(), q2f, q2fd, q2fdd );
+    
+  }
+
+}
+
+void robQuintic::Blend( robFunction* function, double, double ){
+
+  // The function must be a QLQ trajectory
+  robQuintic* next = dynamic_cast<robQuintic*>( function );
+
+  if( next != NULL ){      // cast must be successful
+
+    vctDynamicVector<double> q2i, q2id, q2idd;
+    vctDynamicVector<double> q2f, q2fd, q2fdd;
+    next->InitialState( q2i, q2id, q2idd );
+    next->FinalState( q2f, q2fd, q2fdd );
+
+    // Create a new cruise segment but this one will start at StopTime 
+    *next = robQuintic( this->StopTime(),                  q2i, q2id, q2idd,
+			this->StopTime()+next->Duration(), q2f, q2fd, q2fdd );
+    
+  }
+
+}
 
 void robQuintic::Evaluate( double t, 
 			   vctFixedSizeVector<double,3>& y,
@@ -142,7 +183,6 @@ void robQuintic::Evaluate( double t,
   }
 
 }
-
 
 void robQuintic::Evaluate( double t, 
 			   vctDynamicVector<double>& y,

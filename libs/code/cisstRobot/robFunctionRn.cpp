@@ -46,3 +46,26 @@ void robFunctionRn::FinalState( vctDynamicVector<double>& y,
   yd = y2d;
   ydd = y2dd;
 }
+
+
+void robFunctionRn::InitialState( vctFixedSizeVector<double,3>& p,
+				  double& v, 
+				  double& vd ){
+  if( y1.size() == 3 ){ 
+    p = vctFixedSizeVector<double,3>( y1[0],   y1[1],   y1[2] ); 
+    v = y1d.Norm();
+    vd = 0.0;
+  }
+}
+
+
+
+void robFunctionRn::FinalState( vctFixedSizeVector<double,3>& p,
+				double& v,
+				double& vd ){
+  if( y2.size() == 3 ){ 
+    p = vctFixedSizeVector<double,3>( y2[0],   y2[1],   y2[2] ); 
+    v = y2d.Norm();
+    vd = 0.0;
+  }
+}

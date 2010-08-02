@@ -5,7 +5,6 @@
 robLinearSE3::robLinearSE3( const vctFrame4x4<double>& Rtw1,
 			    const vctFrame4x4<double>& Rtw2,
 			    double vmax, double wmax,
-			    double vdmax, double wdmax,
 			    double t1 ) : 
   robFunctionSE3( t1, 
 		  Rtw1, 
@@ -15,7 +14,7 @@ robLinearSE3::robLinearSE3( const vctFrame4x4<double>& Rtw1,
 		  Rtw2,
 		  vctFixedSizeVector<double,6>( 0.0 ),
 		  vctFixedSizeVector<double,6>( 0.0 ) ),
-  vmax( vmax ), vdmax( vdmax ), wmax( wmax ), wdmax( wdmax ){
+  vmax( vmax ), wmax( wmax ){
 
   vctFrame4x4<double> Rt1w( Rtw1 );
   Rt1w.InverseSelf();
@@ -54,12 +53,67 @@ robLinearSE3::robLinearSE3( const vctFrame4x4<double>& Rtw1,
   rotation = new robSLERP( Rw1, Rw2, wmax, t1 );  
 
   if( translation != NULL )
-    { t2 = translation->StopTime(); }
+    { StopTime() = translation->StopTime(); }
 
   if( rotation != NULL ){
-    if( t2 < rotation->StopTime() )
-      { t2 = rotation->StopTime(); }
+    if( StopTime() < rotation->StopTime() )
+      { StopTime() = rotation->StopTime(); }
   }
+
+  vctDynamicVector<double> t, v, vd;
+  translation->Evaluate( StartTime(), t, v, vd );
+
+}
+
+robLinearSE3& robLinearSE3::operator=( const robLinearSE3& function ){
+
+  if( this != &function ){
+
+    robFunctionSE3::operator=( function );
+    this->vmax = function.vmax;
+    this->wmax = function.wmax;
+
+    if( this->translation != NULL ){ 
+
+      robLinearRn* linear = NULL;
+      linear = dynamic_cast<robLinearRn*>( function.translation );
+
+      if( linear != NULL )
+	{ *( (robLinearRn*)this->translation ) = *linear; }
+
+    }
+
+    if( this->rotation != NULL ){ 
+
+      robSLERP* slerp = NULL;
+      slerp = dynamic_cast<robSLERP*>( function.rotation );
+
+      if( slerp != NULL )
+	{ *( (robSLERP*)this->rotation ) = *slerp; }
+      
+    }
+
+  }
+
+  return *this;
+}
+
+void robLinearSE3::Blend( robFunction* function, double, double ){
+
+  robLinearSE3* next = dynamic_cast<robLinearSE3*>( function );
+
+  if( next != NULL ){      // cast must be successful
+
+    vctFrame4x4<double> Rtwi, Rtwf;
+    vctFixedSizeVector<double,6> vwi, vdwdi, vwf, vdwdf;
+
+    next->InitialState( Rtwi, vwi, vdwdi );
+    next->FinalState( Rtwf, vwf, vdwdf );
+
+    robLinearSE3 tmp( Rtwi, Rtwf, next->vmax, next->wmax, this->StopTime());
+    *next = tmp;
+
+  }  
 
 }
 
@@ -69,7 +123,9 @@ void robLinearSE3::Evaluate( double t,
 			     vctFixedSizeVector<double,6>& vdwd ){
 
   vctFixedSizeVector<double,3> p(0.0), v(0.0), vd(0.0);
+
   if( translation != NULL ){
+
     robLinearRn* linear = dynamic_cast< robLinearRn* >( translation );
     if( linear != NULL )
       { linear->Evaluate( t, p, v, vd ); }
@@ -88,6 +144,7 @@ void robLinearSE3::Evaluate( double t,
   vctQuaternionRotation3<double> q;
   vctFixedSizeVector<double,3> w(0.0), wd(0.0);
   if( rotation != NULL ){
+
     robSLERP* slerp = dynamic_cast< robSLERP* >( rotation );
     if( slerp != NULL )
       { slerp->Evaluate( t, q, w, wd ); }

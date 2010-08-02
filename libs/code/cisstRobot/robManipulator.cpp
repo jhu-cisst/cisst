@@ -334,6 +334,7 @@ robManipulator::InverseKinematics( vctDynamicVector<double>& q,
 
   delete[] S;
   delete[] B;
+
   if( i==Niterations ) return robManipulator::EFAILURE;
   else return robManipulator::ESUCCESS;;
 }
