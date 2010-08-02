@@ -18,87 +18,91 @@ SET( LIBRARY cisstRobot)
 SET( DEPENDENCIES cisstCommon cisstVector )
 
 # all source files
-SET(
+
+SET( SOURCE_FILES  robCollaborativeControlForce.cpp )
+SET( HEADER_FILES  robCollaborativeControlForce.h )
+
+if( BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB )
   
-  SOURCE_FILES
-
-  robFunction.cpp
-  robFunctionSO3.cpp
-  robFunctionSE3.cpp
-  robFunctionRn.cpp
-
-  robLinearRn.cpp
-  robQuintic.cpp
-  robQLQRn.cpp
-
-  robSLERP.cpp
-  robCubicSO3.cpp
-
-  robLinearSE3.cpp
-#  robCSCSO3.cpp
+  SET(
+    
+    SOURCE_FILES
+    
+    robFunction.cpp
+    robFunctionSO3.cpp
+    robFunctionSE3.cpp
+    robFunctionRn.cpp
+    
+    robLinearRn.cpp
+    robQuintic.cpp
+    robQLQRn.cpp
+    
+    robSLERP.cpp
+    robCubicSO3.cpp
+    
+    robLinearSE3.cpp
+    #  robCSCSO3.cpp
+    
+    robJoint.cpp
+    robMass.cpp
+    
+    robDH.cpp
+    robLink.cpp
+    robManipulator.cpp
+    
+    BH/robBH.cpp
+    BH/robBHF1.cpp
+    BH/robBHF2.cpp
+    BH/robBHF3.cpp
+    
+    SAH/robSAH.cpp
+    SAH/robSAHFinger.cpp
+    SAH/robSAHThumb.cpp
+    
+    robComputedTorque.cpp
+    robPD.cpp
+    
+    )
   
-  robJoint.cpp
-  robMass.cpp
-  
-  robDH.cpp
-  robLink.cpp
-  robManipulator.cpp
+  # all header files
+  SET(HEADER_FILES
+    
+    robFunction.h
+    robFunctionRn.h
+    robFunctionSE3.h
+    robFunctionSO3.h
+    
+    robLinearRn.h
+    robLinearSE3.h
+    robQuintic.h
+    robQLQRn.h
+    robSLERP.h
+    robCubicSO3.h
+    #  robCSCSO3.h
+    
+    robMass.h
+    robJoint.h
+    
+    robDH.h
+    robLink.h
+    robManipulator.h
+    
+    BH/robBH.h
+    BH/robBHF1.h
+    BH/robBHF2.h
+    BH/robBHF3.h
+    
+    SAH/robSAH.h
+    SAH/robSAHFinger.h
+    SAH/robSAHThumb.h
+    
+    robControllerJoints.h
+    robComputedTorque.h
+    robPD.h
+    
+    )
 
-  robCollaborativeControlForce.cpp
-
-  BH/robBH.cpp
-  BH/robBHF1.cpp
-  BH/robBHF2.cpp
-  BH/robBHF3.cpp
-
-  SAH/robSAH.cpp
-  SAH/robSAHFinger.cpp
-  SAH/robSAHThumb.cpp
-
-  robComputedTorque.cpp
-  robPD.cpp
-
-  )
-
-# all header files
-SET(HEADER_FILES
-
-  robFunction.h
-  robFunctionRn.h
-  robFunctionSE3.h
-  robFunctionSO3.h
-
-  robLinearRn.h
-  robLinearSE3.h
-  robQuintic.h
-  robQLQRn.h
-  robSLERP.h
-  robCubicSO3.h
-#  robCSCSO3.h
-  
-  robMass.h
-  robJoint.h
-  
-  robDH.h
-  robLink.h
-  robManipulator.h
-
-  robCollaborativeControlForce.h
-
-  BH/robBH.h
-  BH/robBHF1.h
-  BH/robBHF2.h
-  BH/robBHF3.h
-
-  SAH/robSAH.h
-  SAH/robSAHFinger.h
-  SAH/robSAHThumb.h
-
-  robControllerJoints.h
-  robComputedTorque.h
-  robPD.h
-
-  )
+endif( BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB )
 
 # use for findblas and findlapack
 #enable_language( Fortran )
