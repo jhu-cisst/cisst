@@ -5,6 +5,7 @@
 #include <cisstMultiTask/mtsTaskManager.h>
 #include <fstream>
 #include <cisstOSAbstraction/osaGetTime.h>
+#include <cisstOSAbstraction/osaSleep.h>
 
 using namespace std;
 
@@ -121,11 +122,11 @@ int main(){
   taskManager->CreateAll();
   kb.Start();
   sink.Start();
-  usleep(1000000);
+  osaSleep(1.0);
   source.Start();
   trajectory.Start();
 
-  pause();
+  getchar();
 
   return 0;
 }

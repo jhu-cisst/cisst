@@ -24,10 +24,9 @@ SET( HEADER_FILES  robCollaborativeControlForce.h )
 
 if( BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB )
   
-  SET(
+  SET(SOURCE_FILES
     
-    SOURCE_FILES
-    
+    ${SOURCE_FILES}
     robFunction.cpp
     robFunctionSO3.cpp
     robFunctionSE3.cpp
@@ -66,7 +65,8 @@ if( BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB )
   
   # all header files
   SET(HEADER_FILES
-    
+
+    ${HEADER_FILES}
     robFunction.h
     robFunctionRn.h
     robFunctionSE3.h

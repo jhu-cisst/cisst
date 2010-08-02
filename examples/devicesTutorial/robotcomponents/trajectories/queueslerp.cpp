@@ -107,7 +107,7 @@ int main(){
   file.Start();
   trajectory.Start();
 
-  pause();
+  getchar();
 
   return 0;
 }

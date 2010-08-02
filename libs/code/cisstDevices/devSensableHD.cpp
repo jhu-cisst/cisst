@@ -28,6 +28,8 @@ http://www.cisst.org/cisst/license.txt.
 #define MTS_TASK_CALLBACK_CONVENTION HDCALLBACK
 #include <cisstDevices/devSensableHD.h>
 
+#include <cisstMultiTask/mtsInterfaceProvided.h>
+
 CMN_IMPLEMENT_SERVICES(devSensableHD);
 
 struct devSensableHDDriverData {

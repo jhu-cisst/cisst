@@ -27,7 +27,7 @@ displayTask::displayTask(const std::string & taskName, double period):
     mtsTaskPeriodic(taskName, period, false, 500),
     ExitFlag(false)
 {
-    mtsRequiredInterface *requiredInterface = AddRequiredInterface("TeleoperationParameters");
+    mtsInterfaceRequired *requiredInterface = AddRequiredInterface("TeleoperationParameters");
     if(requiredInterface)
     {
         requiredInterface->AddFunction("GetMasterClutch", GetMasterClutch);

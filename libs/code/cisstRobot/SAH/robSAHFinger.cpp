@@ -17,36 +17,36 @@ robSAHFinger::robSAHFinger( const vctFrame4x4<double>& Rtb0 ) :
   robJoint mcp1( robJoint::HINGE,       // hinge joint
 		 robJoint::ACTIVE,      // active
 		 0.0,                   // zero offset
-		 -15.0*M_PI/180.0,      // min angle: -15 degrees
-		 15.0*M_PI/180.0,       // max angle:  15 degrees
+		 -15.0*cmnPI/180.0,      // min angle: -15 degrees
+		 15.0*cmnPI/180.0,       // max angle:  15 degrees
 		 0.0 );                 // to hell with torques
 
   // The metacarpophalangeal joint (flextion/extension)
   robJoint mcp2( robJoint::HINGE,
 		 robJoint::ACTIVE,
 		 0.0, 
-		 -4.0*M_PI/180.0, 
-		 75.0*M_PI/180.0, 
+		 -4.0*cmnPI/180.0, 
+		 75.0*cmnPI/180.0, 
 		 0.0 );
   
   // The proximal interphalangeal joint
   robJoint pip( robJoint::HINGE, 
 		robJoint::ACTIVE,
 		0.0, 
-		5.0*M_PI/180.0, 
-		75.0*M_PI/180.0, 
+		5.0*cmnPI/180.0, 
+		75.0*cmnPI/180.0, 
 		0.0 );
 
   // The distal interphalangeal joint
   robJoint dip( robJoint::HINGE, 
 		robJoint::ACTIVE,
 		0.0, 
-		5.0*M_PI/180.0, 
-		75.0*M_PI/180.0, 
+		5.0*cmnPI/180.0, 
+		75.0*cmnPI/180.0, 
 		0.0 );
 
   // insert the "knuckle"
-  links.push_back( robLink( robDH(robDH::STANDARD, M_PI_2, 0.0, 0.0, 0.0, mcp1),
+  links.push_back( robLink( robDH(robDH::STANDARD, cmnPI_2, 0.0, 0.0, 0.0, mcp1),
 			    mass ) );
 
   // insert the proximal phalanx

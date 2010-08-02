@@ -5,6 +5,8 @@
 #include <cisstDevices/devKeyboard.h>
 
 #include <cisstMultiTask/mtsTaskManager.h>
+#include <cisstOSAbstraction/osaSleep.h>
+
 #include <fstream>
 using namespace std;
 
@@ -145,12 +147,12 @@ int main(){
   taskManager->CreateAll();
   //taskManager->StartAll();
   setpoints.Start();
-  usleep(100000);
+  osaSleep(1);
   kb.Start();
   file.Start();
   trajectory.Start();
 
-  pause();
+  getchar();
 
   return 0;
 }

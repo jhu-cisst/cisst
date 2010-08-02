@@ -3,9 +3,11 @@
 #include <cisstDevices/devKeyboard.h>
 #include <cisstDevices/robotcomponents/trajectories/devLinearR3.h>
 #include <cisstMultiTask/mtsTaskManager.h>
-#include <fstream>
-#include <cisstOSAbstraction/osaGetTime.h>
 
+#include <cisstOSAbstraction/osaGetTime.h>
+#include <cisstOSAbstraction/osaSleep.h>
+
+#include <fstream>
 using namespace std;
 
 class Source : public devRobotComponent {
@@ -115,11 +117,11 @@ int main(){
   taskManager->CreateAll();
   kb.Start();
   sink.Start();
-  usleep(1000000);
+  osaSleep(1);
   source.Start();
   trajectory.Start();
 
-  pause();
+  getchar();
 
   return 0;
 }

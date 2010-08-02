@@ -13,7 +13,7 @@ displayTask::displayTask(const std::string & taskName, double period):
     ExitFlag(false)
 {
     // to communicate with the interface of the resource
-    mtsRequiredInterface * requiredInterface = AddRequiredInterface("Robot");
+    mtsInterfaceRequired * requiredInterface = AddRequiredInterface("Robot");
 	if (requiredInterface) {
         // bound the mtsFunction to the command provided by the interface 
         requiredInterface->AddFunction("GetPositionCartesian", GetCartesianPosition, mtsRequired);
@@ -42,7 +42,7 @@ void displayTask::Configure(const std::string & CMN_UNUSED(filename))
 void displayTask::Startup(void) 
 {
     // find the interface which has been connected to our resource port
-    mtsProvidedInterface * providedInterface = GetProvidedInterfaceFor("Robot");
+    mtsInterfaceProvided * providedInterface = this->GetInterfaceProvided("Robot");
     // make sure an interface has been connected
     if (providedInterface) {
         // get a pointer on tip node --- name is hardcoded, bad, need a way to query all possible names

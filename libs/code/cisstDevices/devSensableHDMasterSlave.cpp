@@ -21,6 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 
 // Sensable headers
 #include <cisstDevices/devSensableHDMasterSlave.h>
+#include <cisstMultiTask/mtsInterfaceProvided.h>
 
 CMN_IMPLEMENT_SERVICES(devSensableHDMasterSlave);
 
