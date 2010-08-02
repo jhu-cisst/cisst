@@ -19,7 +19,7 @@ displayTask::displayTask(const std::string & taskName, double period):
     mtsInterfaceRequired * interfaceRequired = AddInterfaceRequired("Scale");
 	if (interfaceRequired) {
         // bound the mtsFunction to the command provided by the interface 
-        interfaceRequired->AddFunction("GetWeight", GetWeight, mtsRequired);
+        interfaceRequired->AddFunction("GetWeight", GetWeight, MTS_REQUIRED);
     }
 }
 

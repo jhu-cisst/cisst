@@ -13,20 +13,20 @@ displayTask::displayTask(const std::string & taskName, double period):
     ExitFlag(false)
 {
     // to communicate with the interface of the resource
-    mtsInterfaceRequired * requiredInterface = AddRequiredInterface("Robot");
+    mtsInterfaceRequired * requiredInterface = AddInterfaceRequired("Robot");
 	if (requiredInterface) {
         // bound the mtsFunction to the command provided by the interface 
-        requiredInterface->AddFunction("GetPositionCartesian", GetCartesianPosition, mtsRequired);
-        requiredInterface->AddFunction("GetVelocityCartesian", GetCartesianVelocity, mtsOptional);
-        requiredInterface->AddFunction("GetPositionJoint", GetJointPosition, mtsOptional);
+        requiredInterface->AddFunction("GetPositionCartesian", GetCartesianPosition, MTS_REQUIRED);
+        requiredInterface->AddFunction("GetVelocityCartesian", GetCartesianVelocity, MTS_OPTIONAL);
+        requiredInterface->AddFunction("GetPositionJoint", GetJointPosition, MTS_OPTIONAL);
     }
     // to communicate with the interface of the resource
-    requiredInterface = AddRequiredInterface("Button1");
+    requiredInterface = AddInterfaceRequired("Button1");
 	if (requiredInterface) {
         requiredInterface->AddEventHandlerWrite(&displayTask::Button1EventHandler, this,
                                                 "Button");
     }
-    requiredInterface = AddRequiredInterface("Button2");
+    requiredInterface = AddInterfaceRequired("Button2");
 	if (requiredInterface) {
         requiredInterface->AddEventHandlerWrite(&displayTask::Button2EventHandler, this,
                                                 "Button");
