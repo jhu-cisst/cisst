@@ -52,7 +52,8 @@ mtsComponent::mtsComponent(void):
 }
 
 
-mtsComponent::mtsComponent(const mtsComponent & CMN_UNUSED(other))
+mtsComponent::mtsComponent(const mtsComponent & other):
+    cmnGenericObject(other)
 {
     cmnThrow("Class mtsComponent: copy constructor for mtsComponent should never be called");
 }
