@@ -25,6 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _svlForwardDeclarations_h
 
 class svlFilterBase;
+class svlFilterSourceBase;
 
 class svlFilterInput;
 class svlFilterOutput;

@@ -37,12 +37,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlExport.h>
 
 
-// Forward declarations
-class svlFilterSourceBase;
-class svlStreamManager;
-class svlStreamProc;
-
-
 class CISST_EXPORT svlFilterBase : public mtsComponent
 {
     friend class svlFilterInput;
