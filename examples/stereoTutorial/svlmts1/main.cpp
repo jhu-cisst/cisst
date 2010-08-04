@@ -90,6 +90,8 @@ int main(void)
     // cleanup
     taskManager->KillAll();
     taskManager->Cleanup();
+    
+    stream.Release();
 
     return 0;
 }
