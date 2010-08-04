@@ -626,7 +626,6 @@ int svlStreamManager::GetStreamStatus(void) const
     return StreamStatus;
 }
 
-
 void svlStreamManager::CreateInterfaces(void)
 {
     mtsInterfaceProvided * interfaceProvided = this->AddInterfaceProvided("Control", MTS_COMMANDS_SHOULD_NOT_BE_QUEUED);
@@ -638,7 +637,6 @@ void svlStreamManager::CreateInterfaces(void)
     }
 }
 
-
 void svlStreamManager::PlayCommand(void)
 {
     if (this->Play() != SVL_OK) {
@@ -647,7 +645,6 @@ void svlStreamManager::PlayCommand(void)
     }
 }
 
-
 void svlStreamManager::InitializeCommand(void)
 {
     if (this->Initialize() != SVL_OK) {
@@ -655,7 +652,6 @@ void svlStreamManager::InitializeCommand(void)
                                 << this->GetName() << "\"" << std::endl;
     }
 }
-
 
 void svlStreamManager::SetSourceFilterCommand(const mtsStdString & source)
 {
@@ -677,4 +673,5 @@ void svlStreamManager::SetSourceFilterCommand(const mtsStdString & source)
     }
     // finally call the SetSourceFilter method
     SetSourceFilter(filter);
+
 }

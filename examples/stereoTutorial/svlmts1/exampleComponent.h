@@ -24,41 +24,15 @@
 #define _exampleComponent_h
 
 #include <cisstMultiTask.h>
+#include <cisstStereoVision/svlRequiredInterfaces.h>
 #include <cisstStereoVision/svlFilterSourceVideoFile.h>
+
 #include "exampleFilter.h"
+
 
 class exampleComponent: public mtsTaskPeriodic
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
-
-protected:
- 
-    // Video file source commands
-    struct {
-        mtsFunctionRead  Get;
-        mtsFunctionWrite Set;
-        mtsFunctionWrite SetChannels;
-        mtsFunctionWrite SetFilename;
-        mtsFunctionWrite SetPosition;
-        mtsFunctionWrite SetRange;
-        mtsFunctionWrite SetFramerate;
-        mtsFunctionWrite SetLoop;
-    } SourceConfig;
-    svlFilterSourceVideoFile::Config SourceState;
-
-    // Test filter commands & state
-    struct {
-       mtsFunctionRead  Get;
-       mtsFunctionWrite Set;
-    } FilterParams;
-    exampleFilter::Parameters FilterState;
-
-    struct {
-        mtsFunctionWrite SetSourceFilter;
-        mtsFunctionVoid Initialize;
-        mtsFunctionVoid Release;
-        mtsFunctionVoid Play;
-    } StreamControl;
 
 public:
     // see sineTask.h documentation
@@ -67,6 +41,20 @@ public:
     void Startup(void);
     void Run(void);
     void Cleanup(void) {};
+
+protected:
+
+    // Test filter commands & state
+    struct {
+        mtsFunctionRead  Get;
+        mtsFunctionWrite Set;
+    } FilterParams;
+    exampleFilter::Parameters FilterState;
+
+    IReqFilterSourceVideoFile SourceConfig;
+    IReqStreamManager StreamControl;
+
+    svlFilterSourceVideoFile::Config SourceState;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(exampleComponent);

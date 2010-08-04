@@ -56,17 +56,6 @@ public:
         friend std::ostream & operator << (std::ostream & stream, const Config & objref);
     };
 
-    virtual void CreateInterfaces();
-    virtual void confGet(ThisType::Config & objref) const;
-    virtual void confSet(const ThisType::Config & objref);
-    virtual void confSetChannels(const int & channels);
-    virtual void confSetPathL(const std::string & filepath);
-    virtual void confSetPathR(const std::string & filepath);
-    virtual void confSetPosL(const int & position);
-    virtual void confSetPosR(const int & position);
-    virtual void confSetRangeL(const vctInt2 & position);
-    virtual void confSetRangeR(const vctInt2 & position);
-
 public:
     svlFilterSourceVideoFile();
     svlFilterSourceVideoFile(unsigned int channelcount);
@@ -106,6 +95,21 @@ private:
 
 protected:
     Config Settings;
+
+    virtual void CreateInterfaces();
+    virtual void GetCommand(ThisType::Config & objref) const;
+    virtual void SetCommand(const ThisType::Config & objref);
+    virtual void SetChannelsCommand(const int & channels);
+    virtual void SetPathLCommand(const std::string & filepath);
+    virtual void SetPathRCommand(const std::string & filepath);
+    virtual void SetPosLCommand(const int & position);
+    virtual void SetPosRCommand(const int & position);
+    virtual void SetRangeLCommand(const vctInt2 & position);
+    virtual void SetRangeRCommand(const vctInt2 & position);
+    virtual void GetPositionAtTimeLCommand(const double & time, int & position) const;
+    virtual void GetPositionAtTimeRCommand(const double & time, int & position) const;
+    virtual void GetTimeAtPositionLCommand(const int & position, double & time) const;
+    virtual void GetTimeAtPositionRCommand(const int & position, double & time) const;
 };
 
 typedef mtsGenericObjectProxy<svlFilterSourceVideoFile::Config> svlFilterSourceVideoFile_Config;

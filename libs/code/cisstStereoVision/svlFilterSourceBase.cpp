@@ -81,17 +81,7 @@ svlFilterSourceBase::~svlFilterSourceBase()
 {
 }
 
-void svlFilterSourceBase::confSetFramerate(const mtsDouble& framerate)
-{
-    SetTargetFrequency(framerate);
-}
-
-void svlFilterSourceBase::confSetLoop(const mtsBool& loop)
-{
-    SetLoop(loop);
-}
-
-void svlFilterSourceBase::SetTargetFrequency(double hertz)
+void svlFilterSourceBase::SetTargetFrequency(const double & hertz)
 {
     SourceSettings.Framerate = hertz;
 }
@@ -101,7 +91,7 @@ double svlFilterSourceBase::GetTargetFrequency() const
     return SourceSettings.Framerate;
 }
 
-void svlFilterSourceBase::SetLoop(bool loop)
+void svlFilterSourceBase::SetLoop(const bool & loop)
 {
     SourceSettings.Loop = loop;
 }
@@ -121,7 +111,7 @@ void svlFilterSourceBase::Play()
     Play(-1);
 }
 
-void svlFilterSourceBase::Play(const int frames)
+void svlFilterSourceBase::Play(const int & frames)
 {
     PlayCounter = frames;
 

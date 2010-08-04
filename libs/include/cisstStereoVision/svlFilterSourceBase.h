@@ -53,22 +53,19 @@ public:
         bool Loop;
     };
 
-    virtual void confSetFramerate(const mtsDouble& framerate);
-    virtual void confSetLoop(const mtsBool& loop);
-
 public:
     svlFilterSourceBase();
     svlFilterSourceBase(bool autotimestamps);
     virtual ~svlFilterSourceBase();
 
-    virtual void SetTargetFrequency(double hertz);
+    virtual void SetTargetFrequency(const double & hertz);
     virtual double GetTargetFrequency() const;
-    virtual void SetLoop(bool loop = true);
+    virtual void SetLoop(const bool & loop);
     virtual bool GetLoop() const;
 
     void Pause();
     void Play();
-    void Play(const int frames);
+    void Play(const int & frames);
 
 protected:
     virtual int Initialize(svlSample* &syncOutput);

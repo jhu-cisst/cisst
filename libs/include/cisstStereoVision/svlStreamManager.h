@@ -73,11 +73,12 @@ private:
     int StreamStatus;
 
     void InternalStop(unsigned int callingthreadID);
-    // wrappers around C++ API used for command pattern
-    void CreateInterfaces(void);
-    void PlayCommand(void);
-    void InitializeCommand(void);
-    void SetSourceFilterCommand(const mtsStdString & source);
+
+protected:
+    virtual void CreateInterfaces(void);
+    virtual void PlayCommand(void);
+    virtual void InitializeCommand(void);
+    virtual void SetSourceFilterCommand(const mtsStdString & source);
 };
 
 #endif // _svlStreamManager_h

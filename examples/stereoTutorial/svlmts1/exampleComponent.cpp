@@ -29,41 +29,21 @@
 #endif
 
 
-/*************************/
+/******************************/
 /*** exampleComponent class ***/
-/*************************/
+/******************************/
 
 CMN_IMPLEMENT_SERVICES(exampleComponent);
 
 exampleComponent::exampleComponent(const std::string & taskName, double period):
-    mtsTaskPeriodic(taskName, period, false, 50)
+    mtsTaskPeriodic(taskName, period, false, 50),
+    SourceConfig("example_SourceVideoFile", this),
+    StreamControl("example_StreamManager", this)
 {
-    mtsInterfaceRequired * required;
-
-    required = AddInterfaceRequired("FilterParams");
+    mtsInterfaceRequired* required = AddInterfaceRequired("FilterParams");
     if (required) {
         required->AddFunction("Get", FilterParams.Get);
         required->AddFunction("Set", FilterParams.Set);
-    }
-    
-    required = AddInterfaceRequired("SourceConfig");
-    if (required) {
-        required->AddFunction("Get",          SourceConfig.Get);
-        required->AddFunction("Set",          SourceConfig.Set);
-        required->AddFunction("SetChannels",  SourceConfig.SetChannels);
-        required->AddFunction("SetFilename",  SourceConfig.SetFilename);
-        required->AddFunction("SetPosition",  SourceConfig.SetPosition);
-        required->AddFunction("SetRange",     SourceConfig.SetRange);
-        required->AddFunction("SetFramerate", SourceConfig.SetFramerate);
-        required->AddFunction("SetLoop",      SourceConfig.SetLoop);
-    }
-
-    required = AddInterfaceRequired("StreamControl");
-    if (required) {
-        required->AddFunction("SetSourceFilter", StreamControl.SetSourceFilter);
-        required->AddFunction("Initialize", StreamControl.Initialize);
-        required->AddFunction("Release", StreamControl.Release);
-        required->AddFunction("Play", StreamControl.Play);
     }
 }
 

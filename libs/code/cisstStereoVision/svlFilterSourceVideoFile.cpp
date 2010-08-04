@@ -131,90 +131,6 @@ svlFilterSourceVideoFile::~svlFilterSourceVideoFile()
     if (OutputImage) delete OutputImage;
 }
 
-void svlFilterSourceVideoFile::CreateInterfaces()
-{
-    // Add NON-QUEUED provided interface for configuration management
-    mtsInterfaceProvided* provided = AddInterfaceProvided("Settings", MTS_COMMANDS_SHOULD_NOT_BE_QUEUED);
-    if (provided) {
-        provided->AddCommandRead (&svlFilterSourceVideoFile::confGet,          this, "Get", Settings);
-        provided->AddCommandWrite(&svlFilterSourceVideoFile::confSet,          this, "Set");
-        provided->AddCommandWrite(&svlFilterSourceVideoFile::confSetChannels,  this, "SetChannels");
-        provided->AddCommandWrite(&svlFilterSourceVideoFile::confSetPathL,     this, "SetFilename");
-        provided->AddCommandWrite(&svlFilterSourceVideoFile::confSetPathL,     this, "SetLeftFilename");
-        provided->AddCommandWrite(&svlFilterSourceVideoFile::confSetPathR,     this, "SetRightFilename");
-        provided->AddCommandWrite(&svlFilterSourceVideoFile::confSetPosL,      this, "SetPosition");
-        provided->AddCommandWrite(&svlFilterSourceVideoFile::confSetPosL,      this, "SetLeftPosition");
-        provided->AddCommandWrite(&svlFilterSourceVideoFile::confSetPosR,      this, "SetRightPosition");
-        provided->AddCommandWrite(&svlFilterSourceVideoFile::confSetRangeL,    this, "SetRange");
-        provided->AddCommandWrite(&svlFilterSourceVideoFile::confSetRangeL,    this, "SetLeftRange");
-        provided->AddCommandWrite(&svlFilterSourceVideoFile::confSetRangeR,    this, "SetRightRange");
-        provided->AddCommandWrite(&svlFilterSourceBase::confSetFramerate, dynamic_cast<svlFilterSourceBase*>(this), "SetFramerate");
-        provided->AddCommandWrite(&svlFilterSourceBase::confSetLoop,      dynamic_cast<svlFilterSourceBase*>(this), "SetLoop");
-    }
-}
-
-void svlFilterSourceVideoFile::confGet(svlFilterSourceVideoFile::Config& objref) const
-{
-    objref.SetChannels(Settings.Channels);
-
-    objref = Settings;
-    objref.Framerate = GetTargetFrequency();
-    objref.Loop = GetLoop();
-    for (int i = 0; i < objref.Channels; i ++) {
-        objref.Length[i] = GetLength(i);
-        objref.Position[i] = GetPosition(i);
-    }
-}
-
-void svlFilterSourceVideoFile::confSet(const svlFilterSourceVideoFile::Config& objref)
-{
-    if (objref.Channels < 0) return;
-
-    SetChannelCount(static_cast<unsigned int>(objref.Channels));
-    for (int i = 0; i < objref.Channels; i ++) {
-        SetFilePath(objref.FilePath[i], i);
-        SetPosition(objref.Position[i], i);
-        SetRange(objref.Range[i], i);
-    }
-    SetTargetFrequency(objref.Framerate);
-    SetLoop(objref.Loop);
-}
-
-void svlFilterSourceVideoFile::confSetChannels(const int& channels)
-{
-    SetChannelCount(static_cast<unsigned int>(channels));
-}
-
-void svlFilterSourceVideoFile::confSetPathL(const std::string& filepath)
-{
-    SetFilePath(filepath, SVL_LEFT);
-}
-
-void svlFilterSourceVideoFile::confSetPathR(const std::string& filepath)
-{
-    SetFilePath(filepath, SVL_RIGHT);
-}
-
-void svlFilterSourceVideoFile::confSetPosL(const int& position)
-{
-    SetPosition(position, SVL_LEFT);
-}
-
-void svlFilterSourceVideoFile::confSetPosR(const int& position)
-{
-    SetPosition(position, SVL_RIGHT);
-}
-
-void svlFilterSourceVideoFile::confSetRangeL(const vctInt2& range)
-{
-    SetRange(range, SVL_LEFT);
-}
-
-void svlFilterSourceVideoFile::confSetRangeR(const vctInt2& range)
-{
-    SetRange(range, SVL_RIGHT);
-}
-
 int svlFilterSourceVideoFile::SetChannelCount(unsigned int channelcount)
 {
     if (OutputImage) return SVL_FAIL;
@@ -495,3 +411,117 @@ double svlFilterSourceVideoFile::GetTimeAtPosition(const int position, unsigned 
     if (Codec.size() <= videoch || !Codec[videoch]) return -1.0;
     return (Codec[videoch]->GetTimeAtPos(position));
 }
+
+void svlFilterSourceVideoFile::CreateInterfaces()
+{
+    // Add NON-QUEUED provided interface for configuration management
+    mtsInterfaceProvided* provided = AddInterfaceProvided("Settings", MTS_COMMANDS_SHOULD_NOT_BE_QUEUED);
+    if (provided) {
+        provided->AddCommandRead (&svlFilterSourceVideoFile::GetCommand,          this, "Get", Settings);
+        provided->AddCommandWrite(&svlFilterSourceVideoFile::SetCommand,          this, "Set");
+        provided->AddCommandWrite(&svlFilterSourceVideoFile::SetChannelsCommand,  this, "SetChannels");
+        provided->AddCommandWrite(&svlFilterSourceVideoFile::SetPathLCommand,     this, "SetFilename");
+        provided->AddCommandWrite(&svlFilterSourceVideoFile::SetPathLCommand,     this, "SetLeftFilename");
+        provided->AddCommandWrite(&svlFilterSourceVideoFile::SetPathRCommand,     this, "SetRightFilename");
+        provided->AddCommandWrite(&svlFilterSourceVideoFile::SetPosLCommand,      this, "SetPosition");
+        provided->AddCommandWrite(&svlFilterSourceVideoFile::SetPosLCommand,      this, "SetLeftPosition");
+        provided->AddCommandWrite(&svlFilterSourceVideoFile::SetPosRCommand,      this, "SetRightPosition");
+        provided->AddCommandWrite(&svlFilterSourceVideoFile::SetRangeLCommand,    this, "SetRange");
+        provided->AddCommandWrite(&svlFilterSourceVideoFile::SetRangeLCommand,    this, "SetLeftRange");
+        provided->AddCommandWrite(&svlFilterSourceVideoFile::SetRangeRCommand,    this, "SetRightRange");
+        provided->AddCommandQualifiedRead(&svlFilterSourceVideoFile::GetPositionAtTimeLCommand, this, "GetPositionAtTime");
+        provided->AddCommandQualifiedRead(&svlFilterSourceVideoFile::GetPositionAtTimeLCommand, this, "GetLeftPositionAtTime");
+        provided->AddCommandQualifiedRead(&svlFilterSourceVideoFile::GetPositionAtTimeRCommand, this, "GetRightPositionAtTime");
+        provided->AddCommandQualifiedRead(&svlFilterSourceVideoFile::GetTimeAtPositionLCommand, this, "GetTimeAtPosition");
+        provided->AddCommandQualifiedRead(&svlFilterSourceVideoFile::GetTimeAtPositionLCommand, this, "GetLeftTimeAtPosition");
+        provided->AddCommandQualifiedRead(&svlFilterSourceVideoFile::GetTimeAtPositionRCommand, this, "GetRightTimeAtPosition");
+        provided->AddCommandWrite(&svlFilterSourceBase::SetTargetFrequency, dynamic_cast<svlFilterSourceBase*>(this), "SetFramerate");
+        provided->AddCommandWrite(&svlFilterSourceBase::SetLoop,            dynamic_cast<svlFilterSourceBase*>(this), "SetLoop");
+        provided->AddCommandVoid (&svlFilterSourceBase::Pause,              dynamic_cast<svlFilterSourceBase*>(this), "Pause");
+        provided->AddCommandVoid (&svlFilterSourceBase::Play,               dynamic_cast<svlFilterSourceBase*>(this), "Play");
+        provided->AddCommandWrite(&svlFilterSourceBase::Play,               dynamic_cast<svlFilterSourceBase*>(this), "PlayFrames");
+    }
+}
+
+void svlFilterSourceVideoFile::GetCommand(svlFilterSourceVideoFile::Config& objref) const
+{
+    objref.SetChannels(Settings.Channels);
+    
+    objref = Settings;
+    objref.Framerate = GetTargetFrequency();
+    objref.Loop = GetLoop();
+    for (int i = 0; i < objref.Channels; i ++) {
+        objref.Length[i] = GetLength(i);
+        objref.Position[i] = GetPosition(i);
+    }
+}
+
+void svlFilterSourceVideoFile::SetCommand(const svlFilterSourceVideoFile::Config& objref)
+{
+    if (objref.Channels < 0) return;
+    
+    SetChannelCount(static_cast<unsigned int>(objref.Channels));
+    for (int i = 0; i < objref.Channels; i ++) {
+        SetFilePath(objref.FilePath[i], i);
+        SetPosition(objref.Position[i], i);
+        SetRange(objref.Range[i], i);
+    }
+    SetTargetFrequency(objref.Framerate);
+    SetLoop(objref.Loop);
+}
+
+void svlFilterSourceVideoFile::SetChannelsCommand(const int& channels)
+{
+    SetChannelCount(static_cast<unsigned int>(channels));
+}
+
+void svlFilterSourceVideoFile::SetPathLCommand(const std::string& filepath)
+{
+    SetFilePath(filepath, SVL_LEFT);
+}
+
+void svlFilterSourceVideoFile::SetPathRCommand(const std::string& filepath)
+{
+    SetFilePath(filepath, SVL_RIGHT);
+}
+
+void svlFilterSourceVideoFile::SetPosLCommand(const int& position)
+{
+    SetPosition(position, SVL_LEFT);
+}
+
+void svlFilterSourceVideoFile::SetPosRCommand(const int& position)
+{
+    SetPosition(position, SVL_RIGHT);
+}
+
+void svlFilterSourceVideoFile::SetRangeLCommand(const vctInt2& range)
+{
+    SetRange(range, SVL_LEFT);
+}
+
+void svlFilterSourceVideoFile::SetRangeRCommand(const vctInt2& range)
+{
+    SetRange(range, SVL_RIGHT);
+}
+
+void svlFilterSourceVideoFile::GetPositionAtTimeLCommand(const double & time, int & position) const
+{
+    position = GetPositionAtTime(time, SVL_LEFT);
+}
+
+void svlFilterSourceVideoFile::GetPositionAtTimeRCommand(const double & time, int & position) const
+{
+    position = GetPositionAtTime(time, SVL_RIGHT);
+}
+
+void svlFilterSourceVideoFile::GetTimeAtPositionLCommand(const int & position, double & time) const
+{
+    time = GetTimeAtPosition(position, SVL_LEFT);
+}
+
+void svlFilterSourceVideoFile::GetTimeAtPositionRCommand(const int & position, double & time) const
+{
+    time = GetTimeAtPosition(position, SVL_RIGHT);
+}
+
