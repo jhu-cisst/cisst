@@ -22,12 +22,7 @@
 
 
 #include "exampleComponent.h"
-
-//#define SET_EVERYTHING_TOGETHER
-#ifdef SET_EVERYTHING_TOGETHER
-    #include <cisstStereoVision/svlFilterSourceVideoFile.h>
-#endif
-
+#include <cisstStereoVision/svlFilterSourceVideoCapture.h>
 
 /******************************/
 /*** exampleComponent class ***/
@@ -49,34 +44,37 @@ exampleComponent::exampleComponent(const std::string & taskName, double period):
 
 void exampleComponent::Startup(void)
 {
-#ifdef SET_EVERYTHING_TOGETHER
-
-    // Setting everything in one command
-    svlFilterSourceVideoFile::Config source_state;
-    source_state.SetChannels(1);             // Mono (single channel) video stream
-    source_state.FilePath[0] = "crop2.avi";  // Filename
-    source_state.Position[0] = 0;            // Start from beginning (same as default)
-    source_state.Range[0] = vctInt2(-1, -1); // Play the whole video (same as default)
-    source_state.Framerate = -1.0;           // Don't specify framerate; use framerate from file
-                                             // header or timestamps if available (same as default)
-    source_state.Loop = true;                // Return to beginning when at end of file (same as default)
-    SourceConfig.Set(source_state);
-
-#else
-
-    // Setting parameters one-by-one
     SourceConfig.SetChannels(1);
+
+#ifdef CAMERA_SOURCE
+    SourceConfig.EnumerateDevices();
+
+    svlFilterSourceVideoCapture::DeviceInfoListType devlist;
+    SourceConfig.GetDeviceList(devlist);
+    CMN_LOG_CLASS_RUN_VERBOSE << devlist << std::endl;
+
+    SourceConfig.SetDevice(0);
+    SourceConfig.SetInput(0);
+
+    svlFilterSourceVideoCapture::FormatListType formlist;
+    SourceConfig.GetFormatList(0, formlist);
+    CMN_LOG_CLASS_RUN_VERBOSE << formlist << std::endl;
+
+    SourceConfig.SelectFormat(1);
+#else
     SourceConfig.SetFilename(mtsStdString("crop2.avi"));
     // Not needed because same as default:
     //SourceConfig.SetPosition(0);
     //SourceConfig.SetRange(mtsInt2(vctInt2(-1, -1)));
     //SourceConfig.SetFramerate(-1.0);
     //SourceConfig.SetLoop(true);
-
 #endif
 
+    // connect filters together
     StreamControl.SetSourceFilter(mtsStdString("StreamSource"));
-    StreamControl.Release();
+    mtsTaskManager::GetInstance()->Connect("ExampleFilter", "input", "StreamSource", "output");
+    mtsTaskManager::GetInstance()->Connect("Window", "input", "ExampleFilter", "output");
+
     StreamControl.Initialize();
     StreamControl.Play();
 }

@@ -64,6 +64,14 @@ public:
     IReqFilterSourceVideoFile(const std::string& name, mtsComponent* owner);
     ~IReqFilterSourceVideoFile();
 
+    // svlFilterSourceBase commands
+    mtsFunctionWrite         SetFramerate;
+    mtsFunctionWrite         SetLoop;
+    mtsFunctionVoid          Pause;
+    mtsFunctionVoid          Play;
+    mtsFunctionWrite         PlayFrames;
+
+    // svlFilterSourceVideoFile commands
     mtsFunctionRead          Get;
     mtsFunctionWrite         Set;
     mtsFunctionWrite         SetChannels;
@@ -82,15 +90,64 @@ public:
     mtsFunctionQualifiedRead GetTimeAtPosition;
     mtsFunctionQualifiedRead GetLeftTimeAtPosition;
     mtsFunctionQualifiedRead GetRightTimeAtPosition;
-    mtsFunctionWrite         SetFramerate;
-    mtsFunctionWrite         SetLoop;
-    mtsFunctionVoid          Pause;
-    mtsFunctionVoid          Play;
-    mtsFunctionWrite         PlayFrames;
 
 private:
     IReqFilterSourceVideoFile();
     IReqFilterSourceVideoFile(const IReqFilterSourceVideoFile& instance);
+
+    std::string Name;
+    mtsComponent* Owner;
+};
+
+
+/******************************************/
+/*** IReqFilterSourceVideoCapture class ***/
+/******************************************/
+
+class IReqFilterSourceVideoCapture
+{
+public:
+    IReqFilterSourceVideoCapture(const std::string& name, mtsComponent* owner);
+    ~IReqFilterSourceVideoCapture();
+
+    // svlFilterSourceBase commands
+    mtsFunctionVoid          Pause;
+    mtsFunctionVoid          Play;
+    mtsFunctionWrite         PlayFrames;
+
+    // svlFilterSourceVideoCapture commands
+    mtsFunctionVoid          EnumerateDevices;
+    mtsFunctionRead          GetDeviceList;
+    mtsFunctionRead          Get;
+    mtsFunctionWrite         Set;
+    mtsFunctionWrite         SetChannels;
+    mtsFunctionWrite         SetDevice;
+    mtsFunctionWrite         SetLeftDevice;
+    mtsFunctionWrite         SetRightDevice;
+    mtsFunctionWrite         SetInput;
+    mtsFunctionWrite         SetLeftInput;
+    mtsFunctionWrite         SetRightInput;
+    mtsFunctionWrite         SetFormat;
+    mtsFunctionWrite         SetLeftFormat;
+    mtsFunctionWrite         SetRightFormat;
+    mtsFunctionWrite         SelectFormat;
+    mtsFunctionWrite         SelectLeftFormat;
+    mtsFunctionWrite         SelectRightFormat;
+    mtsFunctionWrite         SetTrigger;
+    mtsFunctionWrite         SetLeftTrigger;
+    mtsFunctionWrite         SetRightTrigger;
+    mtsFunctionWrite         SetImageProperties;
+    mtsFunctionWrite         SetLeftImageProperties;
+    mtsFunctionWrite         SetRightImageProperties;
+    mtsFunctionWrite         SaveSettings;
+    mtsFunctionWrite         LoadSettings;
+    mtsFunctionQualifiedRead GetFormatList;
+    mtsFunctionQualifiedRead GetTrigger;
+    mtsFunctionQualifiedRead GetImageProperties;
+
+private:
+    IReqFilterSourceVideoCapture();
+    IReqFilterSourceVideoCapture(const IReqFilterSourceVideoCapture& instance);
 
     std::string Name;
     mtsComponent* Owner;

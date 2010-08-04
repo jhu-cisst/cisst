@@ -133,10 +133,40 @@ public:
         unsigned int saturation;
     } ImageProperties;
 
+    class Config
+    {
+    public:
+        Config();
+        Config(const Config& objref);
+
+        int                               Channels;
+        vctDynamicVector<int>             Device;
+        vctDynamicVector<int>             Input;
+        vctDynamicVector<ImageFormat>     Format;
+        vctDynamicVector<ImageProperties> Properties;
+        vctDynamicVector<ExternalTrigger> Trigger;
+
+        void SetChannels(const int channels);
+        friend std::ostream & operator << (std::ostream & stream, const Config & objref);
+    };
+
+    typedef svlFilterSourceVideoCapture ThisType;
+    typedef vctDynamicVector<DeviceInfo> DeviceInfoListType;
+    typedef vctDynamicVector<ImageFormat> FormatListType;
+
+    friend std::ostream & operator << (std::ostream & stream, const DeviceInfo & objref);
+    friend std::ostream & operator << (std::ostream & stream, const ImageFormat & objref);
+    friend std::ostream & operator << (std::ostream & stream, const ImageProperties & objref);
+    friend std::ostream & operator << (std::ostream & stream, const ExternalTrigger & objref);
+    friend std::ostream & operator << (std::ostream & stream, const DeviceInfoListType & objref);
+    friend std::ostream & operator << (std::ostream & stream, const FormatListType & objref);
+
+public:
     svlFilterSourceVideoCapture();
     svlFilterSourceVideoCapture(unsigned int channelcount);
     virtual ~svlFilterSourceVideoCapture();
 
+    int EnumerateDevices();
     int SetChannelCount(unsigned int channelcount);
 
     void SetTargetFrequency(double hertz);
@@ -149,25 +179,25 @@ public:
     int DialogTrigger(unsigned int videoch = SVL_LEFT);
     int DialogImageProperties(unsigned int videoch = SVL_LEFT);
 
-    int GetDeviceList(DeviceInfo **deviceinfolist, bool update = false);
-    void ReleaseDeviceList(DeviceInfo *deviceinfolist);
+    int GetDeviceList(DeviceInfo **deviceinfolist) const;
+    void ReleaseDeviceList(DeviceInfo *deviceinfolist) const;
     int PrintDeviceList(bool update = false);
     int PrintInputList(int deviceid, bool update = false);
     int SetDevice(int deviceid, int inputid = 0, unsigned int videoch = SVL_LEFT);
-    int GetDevice(int & deviceid, int & inputid, unsigned int videoch = SVL_LEFT);
+    int GetDevice(int & deviceid, int & inputid, unsigned int videoch = SVL_LEFT) const;
 
-    int GetFormatList(ImageFormat **formatlist, unsigned int videoch = SVL_LEFT);
-    void ReleaseFormatList(ImageFormat *formatlist);
+    int GetFormatList(ImageFormat **formatlist, unsigned int videoch = SVL_LEFT) const;
+    void ReleaseFormatList(ImageFormat *formatlist) const;
     int PrintFormatList(unsigned int videoch = SVL_LEFT);
     int SelectFormat(unsigned int formatid, unsigned int videoch = SVL_LEFT);
-    int SetFormat(ImageFormat& format, unsigned int videoch = SVL_LEFT);
-    int GetFormat(ImageFormat& format, unsigned int videoch = SVL_LEFT);
-    int SetTrigger(ExternalTrigger& trigger, unsigned int videoch = SVL_LEFT);
-    int GetTrigger(ExternalTrigger& trigger, unsigned int videoch = SVL_LEFT);
-    int SetImageProperties(ImageProperties& properties, unsigned int videoch = SVL_LEFT);
-    int GetImageProperties(ImageProperties& properties, unsigned int videoch = SVL_LEFT);
-    std::string GetPixelTypeName(PixelType pixeltype);
-    std::string GetPatternTypeName(PatternType patterntype);
+    int SetFormat(const ImageFormat& format, unsigned int videoch = SVL_LEFT);
+    int GetFormat(ImageFormat& format, unsigned int videoch = SVL_LEFT) const;
+    int SetTrigger(const ExternalTrigger& trigger, unsigned int videoch = SVL_LEFT);
+    int GetTrigger(ExternalTrigger& trigger, unsigned int videoch = SVL_LEFT) const;
+    int SetImageProperties(const ImageProperties& properties, unsigned int videoch = SVL_LEFT);
+    int GetImageProperties(ImageProperties& properties, unsigned int videoch = SVL_LEFT) const;
+    static std::string GetPixelTypeName(PixelType pixeltype);
+    static std::string GetPatternTypeName(PatternType patterntype);
 
     int SaveSettings(const char* filepath);
     int LoadSettings(const char* filepath);
@@ -204,6 +234,31 @@ private:
     int CreateCaptureAPIHandlers();
     int SetImageProperties(unsigned int videoch = SVL_LEFT);
     int GetImageProperties(unsigned int videoch = SVL_LEFT);
+
+protected:
+    virtual void CreateInterfaces();
+    virtual void EnumerateDevicesCommand(void);
+    virtual void GetDeviceListCommand(ThisType::DeviceInfoListType & devicelist) const;
+    virtual void GetCommand(ThisType::Config & objref) const;
+    virtual void SetCommand(const ThisType::Config & objref);
+    virtual void SetChannelsCommand(const int & channels);
+    virtual void SetDeviceLCommand(const int & deviceid);
+    virtual void SetDeviceRCommand(const int & deviceid);
+    virtual void SetInputLCommand(const int & inputid);
+    virtual void SetInputRCommand(const int & inputid);
+    virtual void SetFormatLCommand(const ThisType::ImageFormat & format);
+    virtual void SetFormatRCommand(const ThisType::ImageFormat & format);
+    virtual void SelectFormatLCommand(const int & formatid);
+    virtual void SelectFormatRCommand(const int & formatid);
+    virtual void SetTriggerLCommand(const ThisType::ExternalTrigger & trigger);
+    virtual void SetTriggerRCommand(const ThisType::ExternalTrigger & trigger);
+    virtual void SetImagePropertiesLCommand(const ThisType::ImageProperties & properties);
+    virtual void SetImagePropertiesRCommand(const ThisType::ImageProperties & properties);
+    virtual void SaveSettingsCommand(const std::string & filepath);
+    virtual void LoadSettingsCommand(const std::string & filepath);
+    virtual void GetFormatListCommand(const unsigned int & videoch, ThisType::FormatListType & formatlist) const;
+    virtual void GetTriggerCommand(const unsigned int & videoch, ThisType::ExternalTrigger & trigger) const;
+    virtual void GetImagePropertiesCommand(const unsigned int & videoch, ThisType::ImageProperties & properties) const;
 };
 
 
@@ -252,6 +307,19 @@ private:
     bool InitSuccess;
     bool Stopped;
 };
+
+typedef mtsGenericObjectProxy<svlFilterSourceVideoCapture::Config> svlFilterSourceVideoCapture_Config;
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterSourceVideoCapture_Config);
+typedef mtsGenericObjectProxy<svlFilterSourceVideoCapture::DeviceInfoListType> svlFilterSourceVideoCapture_DeviceList;
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterSourceVideoCapture_DeviceList);
+typedef mtsGenericObjectProxy<svlFilterSourceVideoCapture::FormatListType> svlFilterSourceVideoCapture_FormatList;
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterSourceVideoCapture_FormatList);
+typedef mtsGenericObjectProxy<svlFilterSourceVideoCapture::ImageFormat> svlFilterSourceVideoCapture_Format;
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterSourceVideoCapture_Format);
+typedef mtsGenericObjectProxy<svlFilterSourceVideoCapture::ImageProperties> svlFilterSourceVideoCapture_ImageProperties;
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterSourceVideoCapture_ImageProperties);
+typedef mtsGenericObjectProxy<svlFilterSourceVideoCapture::ExternalTrigger> svlFilterSourceVideoCapture_Trigger;
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterSourceVideoCapture_Trigger);
 
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterSourceVideoCapture)
 

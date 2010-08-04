@@ -51,7 +51,11 @@ int main(void)
     stream.SetName("Stream");
     taskManager->AddComponent(&stream);
 
-    svlFilterSourceVideoFile stream_source(1);
+#ifdef CAMERA_SOURCE
+    svlFilterSourceVideoCapture stream_source;
+#else
+    svlFilterSourceVideoFile stream_source;
+#endif
     stream_source.SetName("StreamSource");
     taskManager->AddComponent(&stream_source);
 
@@ -65,10 +69,6 @@ int main(void)
 
     exampleComponent exampleComponentObject("ExampleComponent", PeriodComponent);
     taskManager->AddComponent(&exampleComponentObject);
-
-    // connect filters together
-    taskManager->Connect("ExampleFilter", "input", "StreamSource", "output");
-    taskManager->Connect("Window", "input", "ExampleFilter", "output");
 
     // connect components, component.RequiresInterface -> component.ProvidesInterface
     taskManager->Connect("ExampleComponent", "StreamControl", "Stream", "Control");

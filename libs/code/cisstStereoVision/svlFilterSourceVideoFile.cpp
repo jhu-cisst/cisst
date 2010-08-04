@@ -417,7 +417,12 @@ void svlFilterSourceVideoFile::CreateInterfaces()
     // Add NON-QUEUED provided interface for configuration management
     mtsInterfaceProvided* provided = AddInterfaceProvided("Settings", MTS_COMMANDS_SHOULD_NOT_BE_QUEUED);
     if (provided) {
-        provided->AddCommandRead (&svlFilterSourceVideoFile::GetCommand,          this, "Get", Settings);
+        provided->AddCommandWrite(&svlFilterSourceBase::SetTargetFrequency, dynamic_cast<svlFilterSourceBase*>(this), "SetFramerate");
+        provided->AddCommandWrite(&svlFilterSourceBase::SetLoop,            dynamic_cast<svlFilterSourceBase*>(this), "SetLoop");
+        provided->AddCommandVoid (&svlFilterSourceBase::Pause,              dynamic_cast<svlFilterSourceBase*>(this), "Pause");
+        provided->AddCommandVoid (&svlFilterSourceBase::Play,               dynamic_cast<svlFilterSourceBase*>(this), "Play");
+        provided->AddCommandWrite(&svlFilterSourceBase::Play,               dynamic_cast<svlFilterSourceBase*>(this), "PlayFrames");
+        provided->AddCommandRead (&svlFilterSourceVideoFile::GetCommand,          this, "Get");
         provided->AddCommandWrite(&svlFilterSourceVideoFile::SetCommand,          this, "Set");
         provided->AddCommandWrite(&svlFilterSourceVideoFile::SetChannelsCommand,  this, "SetChannels");
         provided->AddCommandWrite(&svlFilterSourceVideoFile::SetPathLCommand,     this, "SetFilename");
@@ -435,11 +440,6 @@ void svlFilterSourceVideoFile::CreateInterfaces()
         provided->AddCommandQualifiedRead(&svlFilterSourceVideoFile::GetTimeAtPositionLCommand, this, "GetTimeAtPosition");
         provided->AddCommandQualifiedRead(&svlFilterSourceVideoFile::GetTimeAtPositionLCommand, this, "GetLeftTimeAtPosition");
         provided->AddCommandQualifiedRead(&svlFilterSourceVideoFile::GetTimeAtPositionRCommand, this, "GetRightTimeAtPosition");
-        provided->AddCommandWrite(&svlFilterSourceBase::SetTargetFrequency, dynamic_cast<svlFilterSourceBase*>(this), "SetFramerate");
-        provided->AddCommandWrite(&svlFilterSourceBase::SetLoop,            dynamic_cast<svlFilterSourceBase*>(this), "SetLoop");
-        provided->AddCommandVoid (&svlFilterSourceBase::Pause,              dynamic_cast<svlFilterSourceBase*>(this), "Pause");
-        provided->AddCommandVoid (&svlFilterSourceBase::Play,               dynamic_cast<svlFilterSourceBase*>(this), "Play");
-        provided->AddCommandWrite(&svlFilterSourceBase::Play,               dynamic_cast<svlFilterSourceBase*>(this), "PlayFrames");
     }
 }
 

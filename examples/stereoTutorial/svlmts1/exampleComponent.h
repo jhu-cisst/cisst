@@ -23,10 +23,15 @@
 #ifndef _exampleComponent_h
 #define _exampleComponent_h
 
+#define CAMERA_SOURCE
+
 #include <cisstMultiTask.h>
 #include <cisstStereoVision/svlRequiredInterfaces.h>
-#include <cisstStereoVision/svlFilterSourceVideoFile.h>
-
+#ifdef CAMERA_SOURCE
+    #include <cisstStereoVision/svlFilterSourceVideoCapture.h>
+#else
+    #include <cisstStereoVision/svlFilterSourceVideoFile.h>
+#endif
 #include "exampleFilter.h"
 
 
@@ -51,10 +56,15 @@ protected:
     } FilterParams;
     exampleFilter::Parameters FilterState;
 
+#ifdef CAMERA_SOURCE
+    IReqFilterSourceVideoCapture SourceConfig;
+    svlFilterSourceVideoCapture::Config SourceState;
+#else
     IReqFilterSourceVideoFile SourceConfig;
-    IReqStreamManager StreamControl;
-
     svlFilterSourceVideoFile::Config SourceState;
+#endif
+
+    IReqStreamManager StreamControl;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(exampleComponent);

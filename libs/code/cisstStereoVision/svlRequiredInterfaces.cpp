@@ -60,6 +60,11 @@ IReqFilterSourceVideoFile::IReqFilterSourceVideoFile(const std::string& name, mt
     if (Owner) {
         mtsInterfaceRequired* required = Owner->AddInterfaceRequired(name);
         if (required) {
+            required->AddFunction("SetFramerate",           SetFramerate);
+            required->AddFunction("SetLoop",                SetLoop);
+            required->AddFunction("Pause",                  Pause);
+            required->AddFunction("Play",                   Play);
+            required->AddFunction("PlayFrames",             PlayFrames);
             required->AddFunction("Get",                    Get);
             required->AddFunction("Set",                    Set);
             required->AddFunction("SetChannels",            SetChannels);
@@ -78,16 +83,63 @@ IReqFilterSourceVideoFile::IReqFilterSourceVideoFile(const std::string& name, mt
             required->AddFunction("GetTimeAtPosition",      GetTimeAtPosition);
             required->AddFunction("GetLeftTimeAtPosition",  GetLeftTimeAtPosition);
             required->AddFunction("GetRightTimeAtPosition", GetRightTimeAtPosition);
-            required->AddFunction("SetFramerate",           SetFramerate);
-            required->AddFunction("SetLoop",                SetLoop);
-            required->AddFunction("Pause",                  Pause);
-            required->AddFunction("Play",                   Play);
-            required->AddFunction("PlayFrames",             PlayFrames);
         }
     }
 }
 
 IReqFilterSourceVideoFile::~IReqFilterSourceVideoFile()
+{
+    if (Owner) Owner->RemoveInterfaceRequired(Name);
+}
+
+
+/******************************************/
+/*** IReqFilterSourceVideoCapture class ***/
+/******************************************/
+
+IReqFilterSourceVideoCapture::IReqFilterSourceVideoCapture(const std::string& name, mtsComponent* owner) :
+    Name(name),
+    Owner(owner)
+{
+    if (Owner) {
+        mtsInterfaceRequired* required = Owner->AddInterfaceRequired(name);
+        if (required) {
+            required->AddFunction("Pause",                   Pause);
+            required->AddFunction("Play",                    Play);
+            required->AddFunction("PlayFrames",              PlayFrames);
+            required->AddFunction("EnumerateDevices",        EnumerateDevices);
+            required->AddFunction("GetDeviceList",           GetDeviceList);
+            required->AddFunction("Get",                     Get);
+            required->AddFunction("Set",                     Set);
+            required->AddFunction("SetChannels",             SetChannels);
+            required->AddFunction("SetDevice",               SetDevice);
+            required->AddFunction("SetLeftDevice",           SetLeftDevice);
+            required->AddFunction("SetRightDevice",          SetRightDevice);
+            required->AddFunction("SetInput",                SetInput);
+            required->AddFunction("SetLeftInput",            SetLeftInput);
+            required->AddFunction("SetRightInput",           SetRightInput);
+            required->AddFunction("SetFormat",               SetFormat);
+            required->AddFunction("SetLeftFormat",           SetLeftFormat);
+            required->AddFunction("SetRightFormat",          SetRightFormat);
+            required->AddFunction("SelectFormat",            SelectFormat);
+            required->AddFunction("SelectLeftFormat",        SelectLeftFormat);
+            required->AddFunction("SelectRightFormat",       SelectRightFormat);
+            required->AddFunction("SetTrigger",              SetTrigger);
+            required->AddFunction("SetLeftTrigger",          SetLeftTrigger);
+            required->AddFunction("SetRightTrigger",         SetRightTrigger);
+            required->AddFunction("SetImageProperties",      SetImageProperties);
+            required->AddFunction("SetLeftImageProperties",  SetLeftImageProperties);
+            required->AddFunction("SetRightImageProperties", SetRightImageProperties);
+            required->AddFunction("SaveSettings",            SaveSettings);
+            required->AddFunction("LoadSettings",            LoadSettings);
+            required->AddFunction("GetFormatList",           GetFormatList);
+            required->AddFunction("GetTrigger",              GetTrigger);
+            required->AddFunction("GetImageProperties",      GetImageProperties);
+        }
+    }
+}
+
+IReqFilterSourceVideoCapture::~IReqFilterSourceVideoCapture()
 {
     if (Owner) Owner->RemoveInterfaceRequired(Name);
 }

@@ -48,14 +48,14 @@ public:
     svlFilterBase(void);
     virtual ~svlFilterBase();
 
-    bool IsInitialized(void);
-    bool IsRunning(void);
-    unsigned int GetFrameCounter(void);
+    bool IsInitialized(void) const;
+    bool IsRunning(void) const;
+    unsigned int GetFrameCounter(void) const;
 
-    svlFilterInput* GetInput(void);
-    svlFilterOutput* GetOutput(void);
-    svlFilterInput* GetInput(const std::string &inputname);
-    svlFilterOutput* GetOutput(const std::string &outputname);
+    svlFilterInput* GetInput(void) const;
+    svlFilterOutput* GetOutput(void) const;
+    svlFilterInput* GetInput(const std::string &inputname) const;
+    svlFilterOutput* GetOutput(const std::string &outputname) const;
 
 protected:
     unsigned int FrameCounter;

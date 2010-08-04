@@ -76,25 +76,25 @@ svlFilterBase::~svlFilterBase()
     }
 }
 
-bool svlFilterBase::IsInitialized()
+bool svlFilterBase::IsInitialized() const
 {
     return Initialized;
 }
 
-bool svlFilterBase::IsRunning()
+bool svlFilterBase::IsRunning() const
 {
     return Running;
 }
 
-unsigned int svlFilterBase::GetFrameCounter()
+unsigned int svlFilterBase::GetFrameCounter() const
 {
     return FrameCounter;
 }
 
-svlFilterInput* svlFilterBase::GetInput()
+svlFilterInput* svlFilterBase::GetInput() const
 {
     svlFilterInput * input;
-    mtsComponent::InterfacesInputListType::iterator iterinputs;
+    mtsComponent::InterfacesInputListType::const_iterator iterinputs;
     for (iterinputs = InterfacesInput.begin();
          iterinputs != InterfacesInput.end();
          iterinputs ++) {
@@ -106,10 +106,10 @@ svlFilterInput* svlFilterBase::GetInput()
     return 0;
 }
 
-svlFilterOutput* svlFilterBase::GetOutput()
+svlFilterOutput* svlFilterBase::GetOutput() const
 {
     svlFilterOutput * output;
-    mtsComponent::InterfacesOutputListType::iterator iteroutputs;
+    mtsComponent::InterfacesOutputListType::const_iterator iteroutputs;
     for (iteroutputs = InterfacesOutput.begin();
          iteroutputs != InterfacesOutput.end();
          iteroutputs ++) {
@@ -121,12 +121,12 @@ svlFilterOutput* svlFilterBase::GetOutput()
     return 0;
 }
 
-svlFilterInput* svlFilterBase::GetInput(const std::string &inputname)
+svlFilterInput* svlFilterBase::GetInput(const std::string &inputname) const
 {
     return dynamic_cast<svlFilterInput *>(GetInterfaceInput(inputname));
 }
 
-svlFilterOutput* svlFilterBase::GetOutput(const std::string &outputname)
+svlFilterOutput* svlFilterBase::GetOutput(const std::string &outputname) const
 {
     return dynamic_cast<svlFilterOutput *>(GetInterfaceOutput(outputname));
 }

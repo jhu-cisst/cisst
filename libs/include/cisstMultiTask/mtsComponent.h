@@ -216,7 +216,7 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     mtsInterfaceRequired * GetInterfaceRequired(const std::string & interfaceRequiredName);
 
     /*! Get an input interface identified by its name */
-    mtsInterfaceInput * GetInterfaceInput(const std::string & interfaceInputName);
+    mtsInterfaceInput * GetInterfaceInput(const std::string & interfaceInputName) const;
 
     /*! Get the total number of required interfaces */
     size_t GetNumberOfInterfacesRequired(void) const;
