@@ -25,6 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _cmnForwardDeclarations_h
 #define _cmnForwardDeclarations_h
 
+#include <string>
 
 class cmnClassRegister;
 
@@ -38,6 +39,9 @@ class cmnDeSerializer;
 class cmnGenericObject;
 
 class cmnLogger;
+
+template <class _element, class _trait = std::char_traits<_element> >
+class cmnMultiplexerStreambufProxy;
 
 class cmnLODOutputMultiplexer;
 

@@ -29,6 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _cmnLODMultiplexerStreambuf_h
 #define _cmnLODMultiplexerStreambuf_h
 
+#include <cisstCommon/cmnForwardDeclarations.h>
 #include <cisstCommon/cmnPortability.h>
 #include <cisstCommon/cmnLogLoD.h>
 
@@ -36,10 +37,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <list>
 #include <algorithm>
 #include <fstream>
-
-
-template<class _element, class _trait = std::char_traits<_element> >
-class cmnMultiplexerStreambufProxy;
 
 /*! \brief A Streambuffer class that allows output to multiple
   streambuf objects for Level of Detail information.
@@ -108,7 +105,7 @@ class cmnMultiplexerStreambufProxy;
 
    \sa C++ manual on basic_ostream and basic_streambuf. cmnOutputMultiplexer.h
  */
-template<class _element, class _trait = std::char_traits<_element> >
+template <class _element, class _trait = std::char_traits<_element> >
 class cmnLODMultiplexerStreambuf : public std::basic_streambuf<_element, _trait>
 {
     friend class cmnMultiplexerStreambufProxy<_element, _trait>;
@@ -187,6 +184,10 @@ class cmnLODMultiplexerStreambuf : public std::basic_streambuf<_element, _trait>
     inline void RemoveChannel(std::ostream& outstream) {
         RemoveChannel(outstream.rdbuf());
     }
+
+
+    /*! Remove all output channels. */
+    void RemoveAllChannels(void);
 
 
     /*!
@@ -277,7 +278,7 @@ class cmnLODMultiplexerStreambuf : public std::basic_streambuf<_element, _trait>
 //********************************
 
 
-template<class _element, class _trait>
+template <class _element, class _trait>
 bool cmnLODMultiplexerStreambuf<_element, _trait>::AddChannel(ChannelType * channel, LogLoDType lod)
 {
     IteratorType it = FindChannel(channel);
@@ -290,7 +291,7 @@ bool cmnLODMultiplexerStreambuf<_element, _trait>::AddChannel(ChannelType * chan
 }
 
 
-template<class _element, class _trait>
+template <class _element, class _trait>
 void cmnLODMultiplexerStreambuf<_element, _trait>::RemoveChannel(ChannelType * channel)
 {
     IteratorType it = FindChannel(channel);
@@ -301,7 +302,17 @@ void cmnLODMultiplexerStreambuf<_element, _trait>::RemoveChannel(ChannelType * c
 }
 
 
-template<class _element, class _trait>
+template <class _element, class _trait>
+void cmnLODMultiplexerStreambuf<_element, _trait>::RemoveAllChannels(void)
+{
+    IteratorType it;
+    for (it = m_ChannelContainer.begin(); it != m_ChannelContainer.end(); it++) {
+        m_ChannelContainer.erase(it);
+    }
+}
+
+
+template <class _element, class _trait>
 bool cmnLODMultiplexerStreambuf<_element, _trait>::SetChannelLOD(ChannelType * channel, LogLoDType lod)
 {
     IteratorType it = FindChannel(channel);
@@ -313,7 +324,7 @@ bool cmnLODMultiplexerStreambuf<_element, _trait>::SetChannelLOD(ChannelType * c
 }
 
 
-template<class _element, class _trait>
+template <class _element, class _trait>
 bool cmnLODMultiplexerStreambuf<_element, _trait>::GetChannelLOD(const ChannelType * channel, LogLoDType & lod) const
 {
     ConstIteratorType it = FindChannel(channel);
@@ -325,7 +336,7 @@ bool cmnLODMultiplexerStreambuf<_element, _trait>::GetChannelLOD(const ChannelTy
 }
 
 
-template<class _element, class _trait>
+template <class _element, class _trait>
 std::streamsize cmnLODMultiplexerStreambuf<_element, _trait>::xsputn(const _element * s, std::streamsize n, LogLoDType lod)
 {
     std::streamsize ssize(0);
@@ -338,7 +349,7 @@ std::streamsize cmnLODMultiplexerStreambuf<_element, _trait>::xsputn(const _elem
 }
 
 
-template<class _element, class _trait>
+template <class _element, class _trait>
 int cmnLODMultiplexerStreambuf<_element, _trait>::sync()
 {
     IteratorType it;
@@ -350,7 +361,7 @@ int cmnLODMultiplexerStreambuf<_element, _trait>::sync()
 }
 
 
-template<class _element, class _trait>
+template <class _element, class _trait>
 typename cmnLODMultiplexerStreambuf<_element, _trait>::int_type
 cmnLODMultiplexerStreambuf<_element, _trait>::overflow(int_type c, LogLoDType lod)
 {
@@ -371,7 +382,7 @@ cmnLODMultiplexerStreambuf<_element, _trait>::overflow(int_type c, LogLoDType lo
 }
 
 
-template<class _element, class _trait>
+template <class _element, class _trait>
 std::streamsize cmnLODMultiplexerStreambuf<_element, _trait>::xsputn(const _element *s, std::streamsize n)
 {
     std::streamsize ssize(0);
@@ -383,7 +394,7 @@ std::streamsize cmnLODMultiplexerStreambuf<_element, _trait>::xsputn(const _elem
 }
 
 
-template<class _element, class _trait>
+template <class _element, class _trait>
 typename cmnLODMultiplexerStreambuf<_element, _trait>::int_type
 cmnLODMultiplexerStreambuf<_element, _trait>::overflow(int_type c)
 {
@@ -403,7 +414,7 @@ cmnLODMultiplexerStreambuf<_element, _trait>::overflow(int_type c)
 }
 
 
-template<class _element, class _trait>
+template <class _element, class _trait>
 typename cmnLODMultiplexerStreambuf<_element, _trait>::IteratorType
 cmnLODMultiplexerStreambuf<_element, _trait>::FindChannel(const ChannelType *channel)
 {
@@ -417,7 +428,7 @@ cmnLODMultiplexerStreambuf<_element, _trait>::FindChannel(const ChannelType *cha
 }
 
 
-template<class _element, class _trait>
+template <class _element, class _trait>
 typename cmnLODMultiplexerStreambuf<_element, _trait>::ConstIteratorType
 cmnLODMultiplexerStreambuf<_element, _trait>::FindChannel(const ChannelType *channel) const
 {
