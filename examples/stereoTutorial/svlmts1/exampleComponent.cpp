@@ -37,8 +37,8 @@ CMN_IMPLEMENT_SERVICES(exampleComponent);
 
 exampleComponent::exampleComponent(const std::string & taskName, double period):
     mtsTaskPeriodic(taskName, period, false, 50),
-    SourceConfig("example_SourceVideoFile", this),
-    StreamControl("example_StreamManager", this)
+    SourceConfig("SourceConfig", this),
+    StreamControl("StreamControl", this)
 {
     mtsInterfaceRequired* required = AddInterfaceRequired("FilterParams");
     if (required) {
@@ -54,7 +54,7 @@ void exampleComponent::Startup(void)
     // Setting everything in one command
     svlFilterSourceVideoFile::Config source_state;
     source_state.SetChannels(1);             // Mono (single channel) video stream
-    source_state.FilePath[0] = "crop1.avi";  // Filename
+    source_state.FilePath[0] = "crop2.avi";  // Filename
     source_state.Position[0] = 0;            // Start from beginning (same as default)
     source_state.Range[0] = vctInt2(-1, -1); // Play the whole video (same as default)
     source_state.Framerate = -1.0;           // Don't specify framerate; use framerate from file
@@ -66,7 +66,7 @@ void exampleComponent::Startup(void)
 
     // Setting parameters one-by-one
     SourceConfig.SetChannels(1);
-    SourceConfig.SetFilename(mtsStdString("crop1.avi"));
+    SourceConfig.SetFilename(mtsStdString("crop2.avi"));
     // Not needed because same as default:
     //SourceConfig.SetPosition(0);
     //SourceConfig.SetRange(mtsInt2(vctInt2(-1, -1)));
