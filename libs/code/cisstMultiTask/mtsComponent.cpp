@@ -325,7 +325,7 @@ mtsComponent::GetInterfaceRequired(const std::string & interfaceRequiredName)
 
 
 mtsInterfaceInput *
-mtsComponent::GetInterfaceInput(const std::string & interfaceInputName)
+mtsComponent::GetInterfaceInput(const std::string & interfaceInputName) const
 {
     return dynamic_cast<mtsInterfaceInput *>(InterfacesRequiredOrInput.GetItem(interfaceInputName,
                                                                                CMN_LOG_LOD_INIT_ERROR));
