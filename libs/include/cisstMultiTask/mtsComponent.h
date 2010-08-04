@@ -77,6 +77,11 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
       without a name. */
     mtsComponent(void);
 
+    /*! Default copy constructor.  Protected to prevent copy as it is
+      not support yet.  It is not clear why one would use a copy
+      constructor on a component anyway. */
+    mtsComponent(const mtsComponent & other);
+
     /*! Add an already existing interface required to the interface,
       the user must pay attention to mailbox (or lack of) used to
       create the required interface.  By default, mtsComponent uses a
@@ -249,8 +254,17 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
 
  protected:
 
+    /*! Flag to keep track of separate log file use */
     bool UseSeparateLogFileFlag;
+    
+    /*! Pointers on multiplexer used by this component for logging
+      purposes.  By default the file "LogFile" is the only output
+      stream but a user can add any stream using
+      mtsComponent::GetLogMultiplexer combined with
+      cmnLODMultiplexerStreambuf::AddChannel. */
     cmnLogger::StreamBufType * LoDMultiplexerStreambuf;
+
+    /*! Default log file used for this component logging */
     std::ofstream * LogFile;
 
     /*! Thread Id counter.  Used to count how many "user" tasks are

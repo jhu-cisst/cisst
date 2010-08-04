@@ -37,26 +37,31 @@ mtsComponent::mtsComponent(const std::string & componentName):
 {
     InterfacesProvidedOrOutput.SetOwner(*this);
     InterfacesRequiredOrInput.SetOwner(*this);
-
-    LoDMultiplexerStreambuf = new cmnLogger::StreamBufType;
-    LogFile = new std::ofstream;
 }
 
 
 mtsComponent::mtsComponent(void):
+    UseSeparateLogFileFlag(false),
     LoDMultiplexerStreambuf(0),
-    LogFile(0)
+    LogFile(0),
+    InterfacesProvidedOrOutput("InterfacesProvided"),
+    InterfacesRequiredOrInput("InterfacesRequiredOrInput")
 {
-    LoDMultiplexerStreambuf = new cmnLogger::StreamBufType;
-    LogFile = new std::ofstream;
+    InterfacesProvidedOrOutput.SetOwner(*this);
+    InterfacesRequiredOrInput.SetOwner(*this);
+}
+
+
+mtsComponent::mtsComponent(const mtsComponent & CMN_UNUSED(other))
+{
+    cmnThrow("Class mtsComponent: copy constructor for mtsComponent should never be called");
 }
 
 
 mtsComponent::~mtsComponent()
 {
     if (this->LoDMultiplexerStreambuf) {
-        this->LoDMultiplexerStreambuf->RemoveChannel(*(this->LogFile));
-        this->LoDMultiplexerStreambuf->RemoveChannel(cmnLogger::GetMultiplexer());
+        this->LoDMultiplexerStreambuf->RemoveAllChannels();
         delete this->LoDMultiplexerStreambuf;
     }
     if (this->LogFile) {
@@ -648,23 +653,37 @@ void mtsComponent::UseSeparateLogFile(const std::string & filename, bool forward
     }
     CMN_LOG_CLASS_INIT_DEBUG << "UseSeparateLogFile: called for component \""
                              << this->GetName() << "\"" << std::endl;
-    // create log file
+    // create the multiplexer and log file if needed
+    if (!this->LoDMultiplexerStreambuf) {
+        this->LoDMultiplexerStreambuf = new cmnLogger::StreamBufType();
+    }
+    // if there is already a log file, remove it from multiplexer, close it and delete it
     if (this->LogFile) {
-        this->LogFile->open(filename.c_str());
-        if (this->LogFile->is_open() && this->LoDMultiplexerStreambuf) {
-            // set the multiplexer and change flag et the end!
-            CMN_LOG_CLASS_INIT_DEBUG << "UseSeparateLogFile: opened log file \"" << filename
-                                     << "\" for component \"" << this->GetName() << "\"" << std::endl;
-            this->LoDMultiplexerStreambuf->AddChannel(*(this->LogFile), CMN_LOG_LOD_VERY_VERBOSE);
-            if (forwardToLogger) {
-                this->LoDMultiplexerStreambuf->AddChannel(cmnLogger::GetMultiplexer(), CMN_LOG_LOD_VERY_VERBOSE);
-            }
-            this->UseSeparateLogFileFlag = true;
-        } else {
-            // can't open file, do not switch flag
-            CMN_LOG_CLASS_INIT_ERROR << "UseSeparateLogFile: can't open log file \"" << filename
-                                     << "\" for component \"" << this->GetName() << "\"" << std::endl;
+        this->LoDMultiplexerStreambuf->RemoveChannel(*(this->LogFile));
+        this->LogFile->close();
+        delete this->LogFile;
+        CMN_LOG_CLASS_INIT_DEBUG << "UseSeparateLogFile: closed and removed previous log file for component \""
+                                 << this->GetName() << "\"" << std::endl;
+    }
+    // create a new log file and add it to the multiplexer
+    this->LogFile = new std::ofstream();
+    this->LogFile->open(filename.c_str());
+    if (this->LogFile->is_open()) {
+        // set the multiplexer and change flag et the end!
+        CMN_LOG_CLASS_INIT_DEBUG << "UseSeparateLogFile: opened log file \"" << filename
+                                 << "\" for component \"" << this->GetName() << "\"" << std::endl;
+        this->LoDMultiplexerStreambuf->AddChannel(*(this->LogFile), CMN_LOG_LOD_VERY_VERBOSE);
+        if (forwardToLogger) {
+            // note that if the component multiplexer already existed
+            // and the cmnLogger multiplexer was already added, this
+            // line has no effect
+            this->LoDMultiplexerStreambuf->AddChannel(cmnLogger::GetMultiplexer(), CMN_LOG_LOD_VERY_VERBOSE);
         }
+        this->UseSeparateLogFileFlag = true;
+    } else {
+        // can't open file, do not switch flag
+        CMN_LOG_CLASS_INIT_ERROR << "UseSeparateLogFile: can't open log file \"" << filename
+                                 << "\" for component \"" << this->GetName() << "\"" << std::endl;
     }
 }
 
@@ -673,7 +692,7 @@ cmnLogger::StreamBufType * mtsComponent::GetLogMultiplexer(void) const
 {
     if (this->UseSeparateLogFileFlag) {
         ThisType * nonConstThis = const_cast<ThisType *>(this);
-        return (nonConstThis->LoDMultiplexerStreambuf);
+        return nonConstThis->LoDMultiplexerStreambuf;
     }
     return cmnGenericObject::GetLogMultiplexer();
 }
