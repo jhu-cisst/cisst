@@ -372,12 +372,12 @@ public:
     /*! Get names of all provided interfaces in a component */
     void GetNamesOfInterfacesProvidedOrOutput(const std::string & processName,
                                               const std::string & componentName,
-                                              std::vector<std::string>& namesOfInterfacesProvided);
+                                              std::vector<std::string> & namesOfInterfacesProvided);
 
     /*! Get names of all required interfaces in a component */
     void GetNamesOfInterfacesRequiredOrInput(const std::string & processName,
                                              const std::string & componentName,
-                                             std::vector<std::string>& namesOfInterfacesRequired);
+                                             std::vector<std::string> & namesOfInterfacesRequired);
 
 #if CISST_MTS_HAS_ICE
     /*! Get names of all commands in a provided interface */
