@@ -32,22 +32,24 @@ class CISST_EXPORT svlCameraGeometry
 {
 public:
     typedef struct _Intrinsics {
+        friend CISST_EXPORT std::ostream & operator << (std::ostream & stream, const _Intrinsics & objref);
+
         double fc[2];
         double cc[2];
         double a;
         double kc[5];
-        friend std::ostream & operator << (std::ostream & stream, const _Intrinsics & objref);
     } Intrinsics;
 
     typedef struct _Extrinsics {
+        friend CISST_EXPORT std::ostream & operator << (std::ostream & stream, const _Extrinsics & objref);
+
         vctDoubleRodRot3 om;
         vctDouble3       T;
         vctDoubleFrm4x4  frame;
-        friend std::ostream & operator << (std::ostream & stream, const _Extrinsics & objref);
     } Extrinsics;
 
 public:
-    friend std::ostream & operator << (std::ostream & stream, const svlCameraGeometry & objref);
+    friend CISST_EXPORT std::ostream & operator << (std::ostream & stream, const svlCameraGeometry & objref);
 
     void SetIntrinsics(const Intrinsics & intrinsics, const unsigned int cam_id = 0);
     void SetIntrinsics(const double fc[2], const double cc[2], const double a, const double kc[5], const unsigned int cam_id = 0);
@@ -116,9 +118,11 @@ private:
     vctDynamicVector<Extrinsics> ExtrinsicParams;
 };
 
-std::ostream & operator << (std::ostream & stream, const svlCameraGeometry::_Intrinsics & objref);
-std::ostream & operator << (std::ostream & stream, const svlCameraGeometry::_Extrinsics & objref);
-std::ostream & operator << (std::ostream & stream, const svlCameraGeometry & objref);
+
+CISST_EXPORT std::ostream & operator << (std::ostream & stream, const svlCameraGeometry::_Intrinsics & objref);
+CISST_EXPORT std::ostream & operator << (std::ostream & stream, const svlCameraGeometry::_Extrinsics & objref);
+CISST_EXPORT std::ostream & operator << (std::ostream & stream, const svlCameraGeometry & objref);
+
 
 #endif // _svlCameraGeometry_h
 

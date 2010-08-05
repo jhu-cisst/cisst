@@ -20,7 +20,8 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
-#include <cisstMultitask/mtsInterfaceRequired.h>
+#include <cisstMultiTask/mtsComponent.h>
+#include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstStereoVision/svlRequiredInterfaces.h>
 
 

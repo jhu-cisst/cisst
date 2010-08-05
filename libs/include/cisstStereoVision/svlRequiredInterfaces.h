@@ -23,14 +23,17 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlRequiredInterfaces_h
 #define _svlRequiredInterfaces_h
 
-#include <cisstMultitask/mtsComponent.h>
-#include <cisstMultitask/mtsFunctionVoid.h>
-#include <cisstMultitask/mtsFunctionRead.h>
-#include <cisstMultitask/mtsFunctionQualifiedRead.h>
-#include <cisstMultitask/mtsFunctionWrite.h>
+#include <cisstMultiTask/mtsFunctionVoid.h>
+#include <cisstMultiTask/mtsFunctionRead.h>
+#include <cisstMultiTask/mtsFunctionQualifiedRead.h>
+#include <cisstMultiTask/mtsFunctionWrite.h>
 
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
+
+// Forward declarations
+class mtsComponent;
+
 
 /*******************************/
 /*** IReqStreamManager class ***/

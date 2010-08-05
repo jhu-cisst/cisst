@@ -43,6 +43,8 @@ public:
     class Config : public SourceConfig
     {
     public:
+        friend CISST_EXPORT std::ostream & operator << (std::ostream & stream, const Config & objref);
+
         Config();
         Config(const Config& objref);
 
@@ -53,7 +55,6 @@ public:
         vctDynamicVector<vctInt2>     Range;
 
         void SetChannels(const int channels);
-        friend std::ostream & operator << (std::ostream & stream, const Config & objref);
     };
 
 public:
@@ -112,14 +113,16 @@ protected:
     virtual void GetTimeAtPositionRCommand(const int & position, double & time) const;
 };
 
-std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoFile::Config & objref);
-
 typedef mtsGenericObjectProxy<svlFilterSourceVideoFile::Config> svlFilterSourceVideoFile_Config;
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterSourceVideoFile_Config);
 typedef mtsGenericObjectProxy<vctInt2> svlFilterSourceVideoFile_vctInt2;
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterSourceVideoFile_vctInt2);
 
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterSourceVideoFile)
+
+
+CISST_EXPORT std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoFile::Config & objref);
+
 
 #endif // _svlFilterSourceVideoFile_h
 

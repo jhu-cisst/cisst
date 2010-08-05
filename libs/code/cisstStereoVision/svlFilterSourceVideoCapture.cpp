@@ -83,17 +83,6 @@ void svlFilterSourceVideoCapture::Config::SetChannels(const int channels)
     }
 }
 
-std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::Config& objref)
-{
-    for (int i = 0; i < objref.Channels; i ++) {
-        if (i > 0) stream << ", (";
-        else stream << "(";
-        stream << objref.Device[i] << ", "
-               << objref.Input[i]  << ")";
-    }
-    return stream;
-}
-
 
 /*******************************************/
 /*** svlFilterSourceVideoCapture class *****/
@@ -106,255 +95,6 @@ CMN_IMPLEMENT_SERVICES_TEMPLATED(svlFilterSourceVideoCapture_FormatList)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(svlFilterSourceVideoCapture_Format)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(svlFilterSourceVideoCaptureImageProperties)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(svlFilterSourceVideoCapture_Trigger)
-
-std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::DeviceInfoListType & objref)
-{
-    const unsigned int size = objref.size();
-
-    for (unsigned int i = 0; i < size; i ++) {
-
-        stream << " "
-               << i
-               << ") "
-               << objref[i].name
-               << std::endl;
-    }
-
-    return stream;
-}
-
-std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::FormatListType & objref)
-{
-    const unsigned int size = objref.size();
-
-    for (unsigned int i = 0; i < size; i ++) {
-
-        stream << " "
-               << i
-               << ") "
-               << objref[i].width
-               << "x"
-               << objref[i].height
-               << " ";
-
-        stream << svlFilterSourceVideoCapture::GetPixelTypeName(objref[i].colorspace);
-
-        if (objref[i].framerate > 0.0) {
-
-            stream << " (<="
-                   << objref[i].framerate
-                   << "fps)";
-        }
-        else {
-
-            stream << " (unknown framerate)";
-        }
-
-        if (objref[i].custom_mode >= 0) {
-
-            stream << " [CUSTOM mode="
-                   << objref[i].custom_mode
-                   << "]";
-        }
-        stream << std::endl;
-    }
-
-    return stream;
-}
-
-std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::DeviceInfo & objref)
-{
-    stream << objref.name;
-
-    switch (objref.platform) {
-        case svlFilterSourceVideoCapture::WinDirectShow:
-            stream << " [DirectShow device]";
-        break;
-
-        case svlFilterSourceVideoCapture::WinSVS:
-            stream << " [Videre Design SVS device]";
-        break;
-
-        case svlFilterSourceVideoCapture::LinVideo4Linux2:
-            stream << " [Video4Linux2 device]";
-        break;
-
-        case svlFilterSourceVideoCapture::LinLibDC1394:
-            stream << " [DC1394 IIDC/DCAM device]";
-        break;
-
-        case svlFilterSourceVideoCapture::OpenCV:
-            stream << " [Detected by OpenCV]";
-        break;
-
-        case svlFilterSourceVideoCapture::MatroxImaging:
-            stream << " [Matrox Imaging device]";
-        break;
-
-        case svlFilterSourceVideoCapture::NumberOfPlatformTypes:
-            stream << " [Unknown device type]";
-        default:
-        break;
-    }
-
-    if (objref.testok) stream << " [Tested]";
-
-    stream << std::endl;
-
-    for (int i = 0; i < objref.inputcount; i ++) {
-
-        if (i == 0) stream << "   Inputs:"
-                           << std::endl;
-        stream << "    "
-               << i
-               << ") ";
-
-        if (i != objref.activeinput) stream << " ";
-        else stream << "*";
-
-        stream << objref.inputnames[i]
-               << std::endl;
-    }
-
-    return stream;
-}
-
-std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::ImageFormat & objref)
-{
-    stream << " "
-           << objref.width
-           << "x"
-           << objref.height
-           << " ";
-
-    stream << svlFilterSourceVideoCapture::GetPixelTypeName(objref.colorspace);
-
-    if (objref.framerate > 0.0) {
-
-        stream << " (<="
-               << objref.framerate
-               << "fps)"
-               << std::endl;
-    }
-    else {
-
-        stream << " (unknown framerate)"
-               << std::endl;
-    }
-
-    if (objref.custom_mode >= 0) {
-
-        stream << "  [CUSTOM mode="
-               << objref.custom_mode
-               << std::endl;
-
-        stream << "          maxsize=("
-               << objref.custom_maxwidth
-               << ", "
-               << objref.custom_maxheight
-               << "); ";
-
-        stream << "unit=(" << objref.custom_unitwidth
-        << ", "
-        << objref.custom_unitheight
-        << ")"
-        << std::endl;
-
-        stream << "          roipos=("
-               << objref.custom_roileft
-               << ", "
-               << objref.custom_roitop
-               << "); ";
-
-        stream << "unit=("
-               << objref.custom_unitleft
-               << ", "
-               << objref.custom_unittop
-               << ")"
-               << std::endl;
-
-        stream << "          colorspaces=(";
-
-        for (unsigned int j = 0;
-             j < svlFilterSourceVideoCapture::PixelTypeCount &&
-             objref.custom_colorspaces[j] != svlFilterSourceVideoCapture::PixelUnknown;
-             j ++) {
-
-            if (j > 0) std::cout << ", ";
-
-            stream << svlFilterSourceVideoCapture::GetPixelTypeName(objref.custom_colorspaces[j]);
-        }
-
-        stream << ")"
-               << std::endl;
-
-        stream << "          pattern="
-               << svlFilterSourceVideoCapture::GetPatternTypeName(objref.custom_pattern)
-               << "]"
-               << std::endl;
-    }
-
-    return stream;
-}
-
-std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::ImageProperties & objref)
-{
-    stream << " shutter:       "
-           << objref.shutter;
-    if (objref.manual & svlFilterSourceVideoCapture::propShutter) stream << " auto";
-    stream << std::endl;
-
-    stream << " gain:          "
-           << objref.gain;
-    if (objref.manual & svlFilterSourceVideoCapture::propGain) stream << " auto";
-    stream << std::endl;
-
-    stream << " white balance: "
-           << objref.wb_u_b
-           << ", "
-           << objref.wb_v_r;
-    if (objref.manual & svlFilterSourceVideoCapture::propWhiteBalance) stream << " auto";
-    stream << std::endl;
-
-    stream << " brightness:    "
-           << objref.brightness;
-    if (objref.manual & svlFilterSourceVideoCapture::propBrightness) stream << " auto";
-    stream << std::endl;
-
-    stream << " gamma:         "
-           << objref.gamma;
-    if (objref.manual & svlFilterSourceVideoCapture::propGamma) stream << " auto";
-    stream << std::endl;
-
-    stream << " saturation:    "
-           << objref.saturation;
-    if (objref.manual & svlFilterSourceVideoCapture::propSaturation) stream << " auto";
-    stream << std::endl;
-
-    return stream;
-}
-
-std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::ExternalTrigger & objref)
-{
-    stream << " enabled:  ";
-    if (objref.enable) stream << "true";
-    else stream << "false";
-    stream << std::endl;
-
-    stream << " mode:     "
-           << objref.mode;
-    stream << std::endl;
-
-    stream << " source:   "
-           << objref.source;
-    stream << std::endl;
-
-    stream << " polarity: "
-           << objref.polarity;
-    stream << std::endl;
-
-    return stream;
-}
 
 svlFilterSourceVideoCapture::svlFilterSourceVideoCapture() :
     svlFilterSourceBase(),
@@ -2328,5 +2068,270 @@ void* svlVidCapSrcDialogThread::Proc(svlFilterSourceVideoCapture* baseref)
     }
 
 	return this;
+}
+
+
+/****************************/
+/*** Stream out operators ***/
+/****************************/
+
+std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::Config& objref)
+{
+    for (int i = 0; i < objref.Channels; i ++) {
+        if (i > 0) stream << ", (";
+        else stream << "(";
+        stream << objref.Device[i] << ", "
+               << objref.Input[i]  << ")";
+    }
+    return stream;
+}
+
+std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::DeviceInfoListType & objref)
+{
+    const unsigned int size = objref.size();
+
+    for (unsigned int i = 0; i < size; i ++) {
+
+        stream << " "
+               << i
+               << ") "
+               << objref[i].name
+               << std::endl;
+    }
+
+    return stream;
+}
+
+std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::FormatListType & objref)
+{
+    const unsigned int size = objref.size();
+
+    for (unsigned int i = 0; i < size; i ++) {
+
+        stream << " "
+               << i
+               << ") "
+               << objref[i].width
+               << "x"
+               << objref[i].height
+               << " ";
+
+        stream << svlFilterSourceVideoCapture::GetPixelTypeName(objref[i].colorspace);
+
+        if (objref[i].framerate > 0.0) {
+
+            stream << " (<="
+                   << objref[i].framerate
+                   << "fps)";
+        }
+        else {
+
+            stream << " (unknown framerate)";
+        }
+
+        if (objref[i].custom_mode >= 0) {
+
+            stream << " [CUSTOM mode="
+                   << objref[i].custom_mode
+                   << "]";
+        }
+        stream << std::endl;
+    }
+
+    return stream;
+}
+
+std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::DeviceInfo & objref)
+{
+    stream << objref.name;
+
+    switch (objref.platform) {
+        case svlFilterSourceVideoCapture::WinDirectShow:
+            stream << " [DirectShow device]";
+        break;
+
+        case svlFilterSourceVideoCapture::WinSVS:
+            stream << " [Videre Design SVS device]";
+        break;
+
+        case svlFilterSourceVideoCapture::LinVideo4Linux2:
+            stream << " [Video4Linux2 device]";
+        break;
+
+        case svlFilterSourceVideoCapture::LinLibDC1394:
+            stream << " [DC1394 IIDC/DCAM device]";
+        break;
+
+        case svlFilterSourceVideoCapture::OpenCV:
+            stream << " [Detected by OpenCV]";
+        break;
+
+        case svlFilterSourceVideoCapture::MatroxImaging:
+            stream << " [Matrox Imaging device]";
+        break;
+
+        case svlFilterSourceVideoCapture::NumberOfPlatformTypes:
+            stream << " [Unknown device type]";
+        default:
+        break;
+    }
+
+    if (objref.testok) stream << " [Tested]";
+
+    stream << std::endl;
+
+    for (int i = 0; i < objref.inputcount; i ++) {
+
+        if (i == 0) stream << "   Inputs:"
+                           << std::endl;
+        stream << "    "
+               << i
+               << ") ";
+
+        if (i != objref.activeinput) stream << " ";
+        else stream << "*";
+
+        stream << objref.inputnames[i]
+               << std::endl;
+    }
+
+    return stream;
+}
+
+std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::ImageFormat & objref)
+{
+    stream << " "
+           << objref.width
+           << "x"
+           << objref.height
+           << " ";
+
+    stream << svlFilterSourceVideoCapture::GetPixelTypeName(objref.colorspace);
+
+    if (objref.framerate > 0.0) {
+
+        stream << " (<="
+               << objref.framerate
+               << "fps)"
+               << std::endl;
+    }
+    else {
+
+        stream << " (unknown framerate)"
+               << std::endl;
+    }
+
+    if (objref.custom_mode >= 0) {
+
+        stream << "  [CUSTOM mode="
+               << objref.custom_mode
+               << std::endl;
+
+        stream << "          maxsize=("
+               << objref.custom_maxwidth
+               << ", "
+               << objref.custom_maxheight
+               << "); ";
+
+        stream << "unit=(" << objref.custom_unitwidth
+        << ", "
+        << objref.custom_unitheight
+        << ")"
+        << std::endl;
+
+        stream << "          roipos=("
+               << objref.custom_roileft
+               << ", "
+               << objref.custom_roitop
+               << "); ";
+
+        stream << "unit=("
+               << objref.custom_unitleft
+               << ", "
+               << objref.custom_unittop
+               << ")"
+               << std::endl;
+
+        stream << "          colorspaces=(";
+
+        for (unsigned int j = 0;
+             j < svlFilterSourceVideoCapture::PixelTypeCount &&
+             objref.custom_colorspaces[j] != svlFilterSourceVideoCapture::PixelUnknown;
+             j ++) {
+
+            if (j > 0) std::cout << ", ";
+
+            stream << svlFilterSourceVideoCapture::GetPixelTypeName(objref.custom_colorspaces[j]);
+        }
+
+        stream << ")"
+               << std::endl;
+
+        stream << "          pattern="
+               << svlFilterSourceVideoCapture::GetPatternTypeName(objref.custom_pattern)
+               << "]"
+               << std::endl;
+    }
+
+    return stream;
+}
+
+std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::ImageProperties & objref)
+{
+    stream << " shutter:       "
+           << objref.shutter;
+    if (objref.manual & svlFilterSourceVideoCapture::propShutter) stream << " auto";
+    stream << std::endl;
+
+    stream << " gain:          "
+           << objref.gain;
+    if (objref.manual & svlFilterSourceVideoCapture::propGain) stream << " auto";
+    stream << std::endl;
+
+    stream << " white balance: "
+           << objref.wb_u_b
+           << ", "
+           << objref.wb_v_r;
+    if (objref.manual & svlFilterSourceVideoCapture::propWhiteBalance) stream << " auto";
+    stream << std::endl;
+
+    stream << " brightness:    "
+           << objref.brightness;
+    if (objref.manual & svlFilterSourceVideoCapture::propBrightness) stream << " auto";
+    stream << std::endl;
+
+    stream << " gamma:         "
+           << objref.gamma;
+    if (objref.manual & svlFilterSourceVideoCapture::propGamma) stream << " auto";
+    stream << std::endl;
+
+    stream << " saturation:    "
+           << objref.saturation;
+    if (objref.manual & svlFilterSourceVideoCapture::propSaturation) stream << " auto";
+    stream << std::endl;
+
+    return stream;
+}
+
+std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::ExternalTrigger & objref)
+{
+    stream << " enabled:  ";
+    if (objref.enable) stream << "true";
+    else stream << "false";
+    stream << std::endl;
+
+    stream << " mode:     "
+           << objref.mode;
+    stream << std::endl;
+
+    stream << " source:   "
+           << objref.source;
+    stream << std::endl;
+
+    stream << " polarity: "
+           << objref.polarity;
+    stream << std::endl;
+
+    return stream;
 }
 
