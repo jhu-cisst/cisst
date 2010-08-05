@@ -28,6 +28,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsComponentProxy.h>
 #endif // CISST_MTS_HAS_ICE
 
+#include <iostream>
+#include <iterator>
 
 mtsManagerGlobal::mtsManagerGlobal() :
     ProcessMap("ProcessMap"),
