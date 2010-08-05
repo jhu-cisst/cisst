@@ -29,12 +29,14 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultitask/mtsFunctionQualifiedRead.h>
 #include <cisstMultitask/mtsFunctionWrite.h>
 
+// Always include last!
+#include <cisstStereoVision/svlExport.h>
 
 /*******************************/
 /*** IReqStreamManager class ***/
 /*******************************/
 
-class IReqStreamManager
+class CISST_EXPORT IReqStreamManager
 {
 public:
     IReqStreamManager(const std::string& name, mtsComponent* owner);
@@ -58,7 +60,7 @@ private:
 /*** IReqFilterSourceVideoFile class ***/
 /***************************************/
 
-class IReqFilterSourceVideoFile
+class CISST_EXPORT IReqFilterSourceVideoFile
 {
 public:
     IReqFilterSourceVideoFile(const std::string& name, mtsComponent* owner);
@@ -104,7 +106,7 @@ private:
 /*** IReqFilterSourceVideoCapture class ***/
 /******************************************/
 
-class IReqFilterSourceVideoCapture
+class CISST_EXPORT IReqFilterSourceVideoCapture
 {
 public:
     IReqFilterSourceVideoCapture(const std::string& name, mtsComponent* owner);

@@ -133,7 +133,7 @@ public:
         unsigned int saturation;
     } ImageProperties;
 
-    class Config
+    class CISST_EXPORT Config
     {
     public:
         Config();
@@ -147,19 +147,19 @@ public:
         vctDynamicVector<ExternalTrigger> Trigger;
 
         void SetChannels(const int channels);
-        friend std::ostream & operator << (std::ostream & stream, const Config & objref);
+        friend CISST_EXPORT std::ostream & operator << (std::ostream & stream, const Config & objref);
     };
 
     typedef svlFilterSourceVideoCapture ThisType;
     typedef vctDynamicVector<DeviceInfo> DeviceInfoListType;
     typedef vctDynamicVector<ImageFormat> FormatListType;
 
-    friend std::ostream & operator << (std::ostream & stream, const DeviceInfo & objref);
-    friend std::ostream & operator << (std::ostream & stream, const ImageFormat & objref);
-    friend std::ostream & operator << (std::ostream & stream, const ImageProperties & objref);
-    friend std::ostream & operator << (std::ostream & stream, const ExternalTrigger & objref);
-    friend std::ostream & operator << (std::ostream & stream, const DeviceInfoListType & objref);
-    friend std::ostream & operator << (std::ostream & stream, const FormatListType & objref);
+    friend CISST_EXPORT std::ostream & operator << (std::ostream & stream, const DeviceInfo & objref);
+    friend CISST_EXPORT std::ostream & operator << (std::ostream & stream, const ImageFormat & objref);
+    friend CISST_EXPORT std::ostream & operator << (std::ostream & stream, const ImageProperties & objref);
+    friend CISST_EXPORT std::ostream & operator << (std::ostream & stream, const ExternalTrigger & objref);
+    friend CISST_EXPORT std::ostream & operator << (std::ostream & stream, const DeviceInfoListType & objref);
+    friend CISST_EXPORT std::ostream & operator << (std::ostream & stream, const FormatListType & objref);
 
 public:
     svlFilterSourceVideoCapture();
@@ -311,13 +311,13 @@ private:
     bool Stopped;
 };
 
-std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::Config & objref);
-std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::DeviceInfo & objref);
-std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::ImageFormat & objref);
-std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::ImageProperties & objref);
-std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::ExternalTrigger & objref);
-std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::DeviceInfoListType & objref);
-std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::FormatListType & objref);
+CISST_EXPORT std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::Config & objref);
+CISST_EXPORT std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::DeviceInfo & objref);
+CISST_EXPORT std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::ImageFormat & objref);
+CISST_EXPORT std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::ImageProperties & objref);
+CISST_EXPORT std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::ExternalTrigger & objref);
+CISST_EXPORT std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::DeviceInfoListType & objref);
+CISST_EXPORT std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::FormatListType & objref);
 
 
 typedef mtsGenericObjectProxy<svlFilterSourceVideoCapture::Config> svlFilterSourceVideoCapture_Config;
