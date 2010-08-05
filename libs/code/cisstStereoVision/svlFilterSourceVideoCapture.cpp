@@ -104,7 +104,7 @@ CMN_IMPLEMENT_SERVICES_TEMPLATED(svlFilterSourceVideoCapture_Config)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(svlFilterSourceVideoCapture_DeviceList)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(svlFilterSourceVideoCapture_FormatList)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(svlFilterSourceVideoCapture_Format)
-CMN_IMPLEMENT_SERVICES_TEMPLATED(svlFilterSourceVideoCapture_ImageProperties)
+CMN_IMPLEMENT_SERVICES_TEMPLATED(svlFilterSourceVideoCaptureImageProperties)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(svlFilterSourceVideoCapture_Trigger)
 
 std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::DeviceInfoListType & objref)
