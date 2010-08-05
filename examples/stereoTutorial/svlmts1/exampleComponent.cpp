@@ -47,20 +47,12 @@ void exampleComponent::Startup(void)
     SourceConfig.SetChannels(1);
 
 #ifdef CAMERA_SOURCE
-    SourceConfig.EnumerateDevices();
-
-    svlFilterSourceVideoCapture::DeviceInfoListType devlist;
-    SourceConfig.GetDeviceList(devlist);
-    CMN_LOG_CLASS_RUN_VERBOSE << devlist << std::endl;
-
-    SourceConfig.SetDevice(0);
-    SourceConfig.SetInput(0);
-
-    svlFilterSourceVideoCapture::FormatListType formlist;
-    SourceConfig.GetFormatList(0, formlist);
-    CMN_LOG_CLASS_RUN_VERBOSE << formlist << std::endl;
-
-    SourceConfig.SelectFormat(1);
+    int deviceid = 0;
+    int inputid = 0;
+    int formatid = 0;
+    SourceConfig.SetDevice(deviceid);
+    SourceConfig.SetInput(inputid);
+    SourceConfig.SelectFormat(formatid);
 #else
     SourceConfig.SetFilename(mtsStdString("crop2.avi"));
     // Not needed because same as default:
@@ -76,6 +68,29 @@ void exampleComponent::Startup(void)
     mtsTaskManager::GetInstance()->Connect("Window", "input", "ExampleFilter", "output");
 
     StreamControl.Initialize();
+
+#ifdef CAMERA_SOURCE
+    // Print some configuration information
+    svlFilterSourceVideoCapture::DeviceInfoListType devlist;
+    svlFilterSourceVideoCapture::FormatListType formlist;
+    svlFilterSourceVideoCapture::ImageProperties properties;
+    svlFilterSourceVideoCapture::ExternalTrigger trigger;
+    
+    SourceConfig.GetDeviceList(devlist);
+    SourceConfig.GetFormatList(formlist);
+    SourceConfig.GetImageProperties(properties);
+    SourceConfig.GetTrigger(trigger);
+    
+    CMN_LOG_CLASS_RUN_VERBOSE << std::endl
+                              << "Available devices:" << std::endl << devlist
+                              << "Selected device: " << devlist.Element(deviceid)
+                              << "Selected input: " << inputid << std::endl
+                              << "Available formats:" << std::endl << formlist
+                              << "Selected format: " << std::endl << formlist.Element(formatid)
+                              << "Image properties:" << std::endl << properties
+                              << "External trigger:" << std::endl << trigger;
+#endif
+    
     StreamControl.Play();
 }
 

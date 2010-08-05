@@ -1181,7 +1181,10 @@ int svlVidCapSrcDC1394::GetFormatList(unsigned int deviceid, svlFilterSourceVide
                 }
             }
             if (l < svlFilterSourceVideoCapture::PixelUnknown) {
+                templist[i].width = -1;
+                templist[i].height = -1;
                 templist[i].custom_colorspaces[l] = svlFilterSourceVideoCapture::PixelUnknown;
+                validlistsize --;
             }
         }
         else {
@@ -1189,12 +1192,11 @@ int svlVidCapSrcDC1394::GetFormatList(unsigned int deviceid, svlFilterSourceVide
             templist[i].height = -1;
             templist[i].colorspace = svlFilterSourceVideoCapture::PixelUnknown;
             validlistsize --;
-            continue;
         }
     }
 
     formatlist[0] = new svlFilterSourceVideoCapture::ImageFormat[validlistsize];
-    for (i = 0, j = 0; i < listsize; i ++) {
+    for (i = 0, j = 0; i < listsize && j < validlistsize; i ++) {
         if (templist[i].width > 0 && templist[i].height > 0 &&
             templist[i].colorspace != svlFilterSourceVideoCapture::PixelUnknown) {
             memcpy(formatlist[0] + j, templist + i, sizeof(svlFilterSourceVideoCapture::ImageFormat));

@@ -256,9 +256,12 @@ protected:
     virtual void SetImagePropertiesRCommand(const ThisType::ImageProperties & properties);
     virtual void SaveSettingsCommand(const std::string & filepath);
     virtual void LoadSettingsCommand(const std::string & filepath);
-    virtual void GetFormatListCommand(const unsigned int & videoch, ThisType::FormatListType & formatlist) const;
-    virtual void GetTriggerCommand(const unsigned int & videoch, ThisType::ExternalTrigger & trigger) const;
-    virtual void GetImagePropertiesCommand(const unsigned int & videoch, ThisType::ImageProperties & properties) const;
+    virtual void GetFormatListLCommand(ThisType::FormatListType & formatlist) const;
+    virtual void GetFormatListRCommand(ThisType::FormatListType & formatlist) const;
+    virtual void GetTriggerLCommand(ThisType::ExternalTrigger & trigger) const;
+    virtual void GetTriggerRCommand(ThisType::ExternalTrigger & trigger) const;
+    virtual void GetImagePropertiesLCommand(ThisType::ImageProperties & properties) const;
+    virtual void GetImagePropertiesRCommand(ThisType::ImageProperties & properties) const;
 };
 
 
@@ -307,6 +310,15 @@ private:
     bool InitSuccess;
     bool Stopped;
 };
+
+std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::Config & objref);
+std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::DeviceInfo & objref);
+std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::ImageFormat & objref);
+std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::ImageProperties & objref);
+std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::ExternalTrigger & objref);
+std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::DeviceInfoListType & objref);
+std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::FormatListType & objref);
+
 
 typedef mtsGenericObjectProxy<svlFilterSourceVideoCapture::Config> svlFilterSourceVideoCapture_Config;
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterSourceVideoCapture_Config);

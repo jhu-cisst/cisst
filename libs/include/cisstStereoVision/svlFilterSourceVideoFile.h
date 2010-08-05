@@ -112,6 +112,8 @@ protected:
     virtual void GetTimeAtPositionRCommand(const int & position, double & time) const;
 };
 
+std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoFile::Config & objref);
+
 typedef mtsGenericObjectProxy<svlFilterSourceVideoFile::Config> svlFilterSourceVideoFile_Config;
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterSourceVideoFile_Config);
 typedef mtsGenericObjectProxy<vctInt2> svlFilterSourceVideoFile_vctInt2;

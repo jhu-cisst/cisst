@@ -133,8 +133,14 @@ IReqFilterSourceVideoCapture::IReqFilterSourceVideoCapture(const std::string& na
             required->AddFunction("SaveSettings",            SaveSettings);
             required->AddFunction("LoadSettings",            LoadSettings);
             required->AddFunction("GetFormatList",           GetFormatList);
+            required->AddFunction("GetLeftFormatList",       GetLeftFormatList);
+            required->AddFunction("GetRightFormatList",      GetRightFormatList);
             required->AddFunction("GetTrigger",              GetTrigger);
+            required->AddFunction("GetLeftTrigger",          GetLeftTrigger);
+            required->AddFunction("GetRightTrigger",         GetRightTrigger);
             required->AddFunction("GetImageProperties",      GetImageProperties);
+            required->AddFunction("GetLeftImageProperties",  GetLeftImageProperties);
+            required->AddFunction("GetRightImageProperties", GetRightImageProperties);
         }
     }
 }

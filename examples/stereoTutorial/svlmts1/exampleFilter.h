@@ -64,6 +64,10 @@ protected:
     mtsGenericObjectProxy<Parameters> Params;
 };
 
+
+std::ostream & operator << (std::ostream & stream, const exampleFilter::Parameters & objref);
+
+
 typedef mtsGenericObjectProxy<exampleFilter::Parameters> exampleFilterParametersProxy;
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(exampleFilterParametersProxy);
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(exampleFilter)

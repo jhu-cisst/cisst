@@ -47,7 +47,7 @@ public:
     } Extrinsics;
 
 public:
-    friend CISST_EXPORT std::ostream & operator << (std::ostream & stream, const svlCameraGeometry & objref);
+    friend std::ostream & operator << (std::ostream & stream, const svlCameraGeometry & objref);
 
     void SetIntrinsics(const Intrinsics & intrinsics, const unsigned int cam_id = 0);
     void SetIntrinsics(const double fc[2], const double cc[2], const double a, const double kc[5], const unsigned int cam_id = 0);
@@ -115,6 +115,10 @@ private:
     vctDynamicVector<Intrinsics> IntrinsicParams;
     vctDynamicVector<Extrinsics> ExtrinsicParams;
 };
+
+std::ostream & operator << (std::ostream & stream, const svlCameraGeometry::_Intrinsics & objref);
+std::ostream & operator << (std::ostream & stream, const svlCameraGeometry::_Extrinsics & objref);
+std::ostream & operator << (std::ostream & stream, const svlCameraGeometry & objref);
 
 #endif // _svlCameraGeometry_h
 

@@ -111,39 +111,45 @@ public:
     ~IReqFilterSourceVideoCapture();
 
     // svlFilterSourceBase commands
-    mtsFunctionVoid          Pause;
-    mtsFunctionVoid          Play;
-    mtsFunctionWrite         PlayFrames;
+    mtsFunctionVoid  Pause;
+    mtsFunctionVoid  Play;
+    mtsFunctionWrite PlayFrames;
 
     // svlFilterSourceVideoCapture commands
-    mtsFunctionVoid          EnumerateDevices;
-    mtsFunctionRead          GetDeviceList;
-    mtsFunctionRead          Get;
-    mtsFunctionWrite         Set;
-    mtsFunctionWrite         SetChannels;
-    mtsFunctionWrite         SetDevice;
-    mtsFunctionWrite         SetLeftDevice;
-    mtsFunctionWrite         SetRightDevice;
-    mtsFunctionWrite         SetInput;
-    mtsFunctionWrite         SetLeftInput;
-    mtsFunctionWrite         SetRightInput;
-    mtsFunctionWrite         SetFormat;
-    mtsFunctionWrite         SetLeftFormat;
-    mtsFunctionWrite         SetRightFormat;
-    mtsFunctionWrite         SelectFormat;
-    mtsFunctionWrite         SelectLeftFormat;
-    mtsFunctionWrite         SelectRightFormat;
-    mtsFunctionWrite         SetTrigger;
-    mtsFunctionWrite         SetLeftTrigger;
-    mtsFunctionWrite         SetRightTrigger;
-    mtsFunctionWrite         SetImageProperties;
-    mtsFunctionWrite         SetLeftImageProperties;
-    mtsFunctionWrite         SetRightImageProperties;
-    mtsFunctionWrite         SaveSettings;
-    mtsFunctionWrite         LoadSettings;
-    mtsFunctionQualifiedRead GetFormatList;
-    mtsFunctionQualifiedRead GetTrigger;
-    mtsFunctionQualifiedRead GetImageProperties;
+    mtsFunctionVoid  EnumerateDevices;
+    mtsFunctionRead  GetDeviceList;
+    mtsFunctionRead  Get;
+    mtsFunctionWrite Set;
+    mtsFunctionWrite SetChannels;
+    mtsFunctionWrite SetDevice;
+    mtsFunctionWrite SetLeftDevice;
+    mtsFunctionWrite SetRightDevice;
+    mtsFunctionWrite SetInput;
+    mtsFunctionWrite SetLeftInput;
+    mtsFunctionWrite SetRightInput;
+    mtsFunctionWrite SetFormat;
+    mtsFunctionWrite SetLeftFormat;
+    mtsFunctionWrite SetRightFormat;
+    mtsFunctionWrite SelectFormat;
+    mtsFunctionWrite SelectLeftFormat;
+    mtsFunctionWrite SelectRightFormat;
+    mtsFunctionWrite SetTrigger;
+    mtsFunctionWrite SetLeftTrigger;
+    mtsFunctionWrite SetRightTrigger;
+    mtsFunctionWrite SetImageProperties;
+    mtsFunctionWrite SetLeftImageProperties;
+    mtsFunctionWrite SetRightImageProperties;
+    mtsFunctionWrite SaveSettings;
+    mtsFunctionWrite LoadSettings;
+    mtsFunctionRead  GetFormatList;
+    mtsFunctionRead  GetLeftFormatList;
+    mtsFunctionRead  GetRightFormatList;
+    mtsFunctionRead  GetTrigger;
+    mtsFunctionRead  GetLeftTrigger;
+    mtsFunctionRead  GetRightTrigger;
+    mtsFunctionRead  GetImageProperties;
+    mtsFunctionRead  GetLeftImageProperties;
+    mtsFunctionRead  GetRightImageProperties;
 
 private:
     IReqFilterSourceVideoCapture();

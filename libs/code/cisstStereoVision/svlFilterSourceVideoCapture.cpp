@@ -126,11 +126,10 @@ std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCap
 std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::FormatListType & objref)
 {
     const unsigned int size = objref.size();
-    unsigned int i, j;
 
-    for (i = 0; i < size; i ++) {
+    for (unsigned int i = 0; i < size; i ++) {
 
-        stream << "  "
+        stream << " "
                << i
                << ") "
                << objref[i].width
@@ -144,66 +143,20 @@ std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCap
 
             stream << " (<="
                    << objref[i].framerate
-                   << "fps)"
-                   << std::endl;
+                   << "fps)";
         }
         else {
 
-            stream << " (unknown framerate)"
-                   << std::endl;
+            stream << " (unknown framerate)";
         }
 
         if (objref[i].custom_mode >= 0) {
 
-            stream << "      [CUSTOM mode="
+            stream << " [CUSTOM mode="
                    << objref[i].custom_mode
-                   << std::endl;
-
-            stream << "              maxsize=("
-                   << objref[i].custom_maxwidth
-                   << ", "
-                   << objref[i].custom_maxheight
-                   << "); ";
-
-            stream << "unit=(" << objref[i].custom_unitwidth
-                   << ", "
-                   << objref[i].custom_unitheight
-                   << ")"
-                   << std::endl;
-
-            stream << "              roipos=("
-                   << objref[i].custom_roileft
-                   << ", "
-                   << objref[i].custom_roitop
-                   << "); ";
-
-            stream << "unit=("
-                   << objref[i].custom_unitleft
-                   << ", "
-                   << objref[i].custom_unittop
-                   << ")"
-                   << std::endl;
-
-            stream << "              colorspaces=(";
-
-            for (j = 0;
-                 j < svlFilterSourceVideoCapture::PixelTypeCount &&
-                 objref[i].custom_colorspaces[j] != svlFilterSourceVideoCapture::PixelUnknown;
-                 j ++) {
-
-                if (j > 0) std::cout << ", ";
-
-                stream << svlFilterSourceVideoCapture::GetPixelTypeName(objref[i].custom_colorspaces[j]);
-            }
-
-            stream << ")"
-                   << std::endl;
-
-            stream << "              pattern="
-                   << svlFilterSourceVideoCapture::GetPatternTypeName(objref[i].custom_pattern)
-                   << "]"
-                   << std::endl;
+                   << "]";
         }
+        stream << std::endl;
     }
 
     return stream;
@@ -268,7 +221,8 @@ std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCap
 
 std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::ImageFormat & objref)
 {
-    stream << objref.width
+    stream << " "
+           << objref.width
            << "x"
            << objref.height
            << " ";
@@ -290,11 +244,11 @@ std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCap
 
     if (objref.custom_mode >= 0) {
 
-        stream << "      [CUSTOM mode="
+        stream << "  [CUSTOM mode="
                << objref.custom_mode
                << std::endl;
 
-        stream << "              maxsize=("
+        stream << "          maxsize=("
                << objref.custom_maxwidth
                << ", "
                << objref.custom_maxheight
@@ -306,7 +260,7 @@ std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCap
         << ")"
         << std::endl;
 
-        stream << "              roipos=("
+        stream << "          roipos=("
                << objref.custom_roileft
                << ", "
                << objref.custom_roitop
@@ -319,7 +273,7 @@ std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCap
                << ")"
                << std::endl;
 
-        stream << "              colorspaces=(";
+        stream << "          colorspaces=(";
 
         for (unsigned int j = 0;
              j < svlFilterSourceVideoCapture::PixelTypeCount &&
@@ -334,7 +288,7 @@ std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCap
         stream << ")"
                << std::endl;
 
-        stream << "              pattern="
+        stream << "          pattern="
                << svlFilterSourceVideoCapture::GetPatternTypeName(objref.custom_pattern)
                << "]"
                << std::endl;
@@ -345,34 +299,34 @@ std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCap
 
 std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::ImageProperties & objref)
 {
-    stream << "   shutter:       "
+    stream << " shutter:       "
            << objref.shutter;
     if (objref.manual & svlFilterSourceVideoCapture::propShutter) stream << " auto";
     stream << std::endl;
 
-    stream << "   gain:          "
+    stream << " gain:          "
            << objref.gain;
     if (objref.manual & svlFilterSourceVideoCapture::propGain) stream << " auto";
     stream << std::endl;
 
-    stream << "   white balance: "
+    stream << " white balance: "
            << objref.wb_u_b
            << ", "
            << objref.wb_v_r;
     if (objref.manual & svlFilterSourceVideoCapture::propWhiteBalance) stream << " auto";
     stream << std::endl;
 
-    stream << "   brightness:    "
+    stream << " brightness:    "
            << objref.brightness;
     if (objref.manual & svlFilterSourceVideoCapture::propBrightness) stream << " auto";
     stream << std::endl;
 
-    stream << "   gamma:         "
+    stream << " gamma:         "
            << objref.gamma;
     if (objref.manual & svlFilterSourceVideoCapture::propGamma) stream << " auto";
     stream << std::endl;
 
-    stream << "   saturation:    "
+    stream << " saturation:    "
            << objref.saturation;
     if (objref.manual & svlFilterSourceVideoCapture::propSaturation) stream << " auto";
     stream << std::endl;
@@ -382,20 +336,20 @@ std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCap
 
 std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoCapture::ExternalTrigger & objref)
 {
-    stream << "   enabled:  ";
+    stream << " enabled:  ";
     if (objref.enable) stream << "true";
     else stream << "false";
     stream << std::endl;
 
-    stream << "   mode:     "
+    stream << " mode:     "
            << objref.mode;
     stream << std::endl;
 
-    stream << "   source:   "
+    stream << " source:   "
            << objref.source;
     stream << std::endl;
 
-    stream << "   polarity: "
+    stream << " polarity: "
            << objref.polarity;
     stream << std::endl;
 
@@ -1448,6 +1402,12 @@ int svlFilterSourceVideoCapture::SetDevice(int deviceid, int inputid, unsigned i
     DeviceID[videoch] = deviceid;
     InputID[videoch] = inputid;
 
+    // Make sure devices are enumerated
+    if (NumberOfEnumeratedDevices < 1) EnumerateDevices();
+
+    // Set default format to the first format in the list
+    SelectFormat(0, videoch);
+
     return SVL_OK;
 }
 
@@ -1956,9 +1916,15 @@ void svlFilterSourceVideoCapture::CreateInterfaces()
         provided->AddCommandWrite(&svlFilterSourceVideoCapture::SetImagePropertiesRCommand, this, "SetRightImageProperties");
         provided->AddCommandWrite(&svlFilterSourceVideoCapture::SaveSettingsCommand,        this, "SaveSettings");
         provided->AddCommandWrite(&svlFilterSourceVideoCapture::LoadSettingsCommand,        this, "LoadSettings");
-        provided->AddCommandQualifiedRead(&svlFilterSourceVideoCapture::GetFormatListCommand,      this, "GetFormatList");
-        provided->AddCommandQualifiedRead(&svlFilterSourceVideoCapture::GetTriggerCommand,         this, "GetTrigger");
-        provided->AddCommandQualifiedRead(&svlFilterSourceVideoCapture::GetImagePropertiesCommand, this, "GetImageProperties");
+        provided->AddCommandRead (&svlFilterSourceVideoCapture::GetFormatListLCommand,      this, "GetFormatList");
+        provided->AddCommandRead (&svlFilterSourceVideoCapture::GetFormatListLCommand,      this, "GetLeftFormatList");
+        provided->AddCommandRead (&svlFilterSourceVideoCapture::GetFormatListRCommand,      this, "GetRightFormatList");
+        provided->AddCommandRead (&svlFilterSourceVideoCapture::GetTriggerLCommand,         this, "GetTrigger");
+        provided->AddCommandRead (&svlFilterSourceVideoCapture::GetTriggerLCommand,         this, "GetLeftTrigger");
+        provided->AddCommandRead (&svlFilterSourceVideoCapture::GetTriggerRCommand,         this, "GetRightTrigger");
+        provided->AddCommandRead (&svlFilterSourceVideoCapture::GetImagePropertiesLCommand, this, "GetImageProperties");
+        provided->AddCommandRead (&svlFilterSourceVideoCapture::GetImagePropertiesLCommand, this, "GetLeftImageProperties");
+        provided->AddCommandRead (&svlFilterSourceVideoCapture::GetImagePropertiesRCommand, this, "GetRightImageProperties");
     }
 }
 
@@ -2022,6 +1988,9 @@ void svlFilterSourceVideoCapture::SetCommand(const svlFilterSourceVideoCapture::
 {
     if (objref.Channels < 0) return;
 
+    // Make sure devices are enumerated
+    if (NumberOfEnumeratedDevices < 1) EnumerateDevices();
+
     SetChannelCount(static_cast<unsigned int>(objref.Channels));
     for (int i = 0; i < objref.Channels; i ++) {
         if (SetDevice(objref.Device[i], objref.Input[i], i) != SVL_OK) {
@@ -2038,6 +2007,9 @@ void svlFilterSourceVideoCapture::SetCommand(const svlFilterSourceVideoCapture::
         if (SetTrigger(objref.Trigger[i], i) != SVL_OK) {
             CMN_LOG_CLASS_INIT_ERROR << "SetCommand: \"SetTrigger(., " << i << ")\" returned error" << std::endl;
         }
+
+        // Set default format to the first format in the list
+        SelectFormat(0, i);
     }
 }
 
@@ -2060,6 +2032,12 @@ void svlFilterSourceVideoCapture::SetDeviceLCommand(const int & deviceid)
         return;
     }
     DeviceID[SVL_LEFT] = deviceid;
+
+    // Make sure devices are enumerated
+    if (NumberOfEnumeratedDevices < 1) EnumerateDevices();
+
+    // Set default format to the first format in the list
+    SelectFormat(0, SVL_LEFT);
 }
 
 void svlFilterSourceVideoCapture::SetDeviceRCommand(const int & deviceid)
@@ -2074,6 +2052,12 @@ void svlFilterSourceVideoCapture::SetDeviceRCommand(const int & deviceid)
         return;
     }
     DeviceID[SVL_RIGHT] = deviceid;
+
+    // Make sure devices are enumerated
+    if (NumberOfEnumeratedDevices < 1) EnumerateDevices();
+
+    // Set default format to the first format in the list
+    SelectFormat(0, SVL_RIGHT);
 }
 
 void svlFilterSourceVideoCapture::SetInputLCommand(const int & inputid)
@@ -2174,12 +2158,12 @@ void svlFilterSourceVideoCapture::LoadSettingsCommand(const std::string & filepa
     }
 }
 
-void svlFilterSourceVideoCapture::GetFormatListCommand(const unsigned int & videoch, svlFilterSourceVideoCapture::FormatListType & formatlist) const
+void svlFilterSourceVideoCapture::GetFormatListLCommand(svlFilterSourceVideoCapture::FormatListType & formatlist) const
 {
     ImageFormat* formats = 0;
-    int formatcount = GetFormatList(&formats, videoch);
+    int formatcount = GetFormatList(&formats, SVL_LEFT);
     if (formatcount < 1) {
-        CMN_LOG_CLASS_INIT_WARNING << "GetFormatListCommand: no available image formats have been found for channel #" << videoch << std::endl;
+        CMN_LOG_CLASS_INIT_WARNING << "GetFormatListCommand: no available image formats have been found for channel 0"<< std::endl;
         formatlist.SetSize(0);
         return;
     }
@@ -2189,20 +2173,52 @@ void svlFilterSourceVideoCapture::GetFormatListCommand(const unsigned int & vide
     }
     ReleaseFormatList(formats);
 
-    CMN_LOG_CLASS_INIT_VERBOSE << "GetFormatListCommand: number of available images formats for channel #" << videoch << ": " << formatcount << std::endl;
+    CMN_LOG_CLASS_INIT_VERBOSE << "GetFormatListCommand: number of available images formats for channel 0: " << formatcount << std::endl;
 }
 
-void svlFilterSourceVideoCapture::GetTriggerCommand(const unsigned int & videoch, svlFilterSourceVideoCapture::ExternalTrigger & trigger) const
+void svlFilterSourceVideoCapture::GetFormatListRCommand(svlFilterSourceVideoCapture::FormatListType & formatlist) const
 {
-    if (GetTrigger(trigger, videoch) != SVL_OK) {
-        CMN_LOG_CLASS_INIT_ERROR << "GetTriggerCommand: \"GetTrigger(., " << videoch << ")\" returned error" << std::endl;
+    ImageFormat* formats = 0;
+    int formatcount = GetFormatList(&formats, SVL_RIGHT);
+    if (formatcount < 1) {
+        CMN_LOG_CLASS_INIT_WARNING << "GetFormatListCommand: no available image formats have been found for channel 1"<< std::endl;
+        formatlist.SetSize(0);
+        return;
+    }
+    formatlist.SetSize(formatcount);
+    for (int i = 0; i < formatcount; i ++) {
+        memcpy(formatlist.Pointer(i), &(formats[i]), sizeof(ImageFormat));
+    }
+    ReleaseFormatList(formats);
+    
+    CMN_LOG_CLASS_INIT_VERBOSE << "GetFormatListCommand: number of available images formats for channel 1: " << formatcount << std::endl;
+}
+
+void svlFilterSourceVideoCapture::GetTriggerLCommand(svlFilterSourceVideoCapture::ExternalTrigger & trigger) const
+{
+    if (GetTrigger(trigger, SVL_LEFT) != SVL_OK) {
+        CMN_LOG_CLASS_INIT_ERROR << "GetTriggerCommand: \"GetTrigger(., 0)\" returned error" << std::endl;
     }
 }
 
-void svlFilterSourceVideoCapture::GetImagePropertiesCommand(const unsigned int & videoch, svlFilterSourceVideoCapture::ImageProperties & properties) const
+void svlFilterSourceVideoCapture::GetTriggerRCommand(svlFilterSourceVideoCapture::ExternalTrigger & trigger) const
 {
-    if (GetImageProperties(properties, videoch) != SVL_OK) {
-        CMN_LOG_CLASS_INIT_ERROR << "GetImagePropertiesCommand: \"GetImageProperties(., " << videoch << ")\" returned error" << std::endl;
+    if (GetTrigger(trigger, SVL_RIGHT) != SVL_OK) {
+        CMN_LOG_CLASS_INIT_ERROR << "GetTriggerCommand: \"GetTrigger(., 1)\" returned error" << std::endl;
+    }
+}
+
+void svlFilterSourceVideoCapture::GetImagePropertiesLCommand(svlFilterSourceVideoCapture::ImageProperties & properties) const
+{
+    if (GetImageProperties(properties, SVL_LEFT) != SVL_OK) {
+        CMN_LOG_CLASS_INIT_ERROR << "GetImagePropertiesCommand: \"GetImageProperties(., 0)\" returned error" << std::endl;
+    }
+}
+
+void svlFilterSourceVideoCapture::GetImagePropertiesRCommand(svlFilterSourceVideoCapture::ImageProperties & properties) const
+{
+    if (GetImageProperties(properties, SVL_RIGHT) != SVL_OK) {
+        CMN_LOG_CLASS_INIT_ERROR << "GetImagePropertiesCommand: \"GetImageProperties(., 1)\" returned error" << std::endl;
     }
 }
 
