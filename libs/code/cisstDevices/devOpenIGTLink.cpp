@@ -20,6 +20,8 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstDevices/devOpenIGTLink.h>
+#include <cisstMultiTask/mtsInterfaceRequired.h>
+#include <cisstMultiTask/mtsInterfaceProvided.h>
 
 CMN_IMPLEMENT_SERVICES(devOpenIGTLink);
 
