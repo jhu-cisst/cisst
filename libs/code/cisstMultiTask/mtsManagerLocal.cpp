@@ -1226,8 +1226,8 @@ bool mtsManagerLocal::Connect(const std::string & clientComponentName, const std
     }
 
     const int connectionId = ManagerGlobal->Connect(ProcessName,
-        ProcessName, clientComponentName, clientInterfaceRequiredName,
-        ProcessName, serverComponentName, serverInterfaceProvidedName);
+                                                    ProcessName, clientComponentName, clientInterfaceRequiredName,
+                                                    ProcessName, serverComponentName, serverInterfaceProvidedName);
     if (connectionId == -1) {
         CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to get connection id from the Global Component Manager: "
                                  << clientComponentName << ":" << clientInterfaceRequiredName << " - "
@@ -1241,8 +1241,8 @@ bool mtsManagerLocal::Connect(const std::string & clientComponentName, const std
                                     serverComponentName, serverInterfaceProvidedName);
     if (!ret) {
         CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to establish local connection: "
-            << clientComponentName << ":" << clientInterfaceRequiredName << " - "
-            << serverComponentName << ":" << serverInterfaceProvidedName << std::endl;
+                                 << clientComponentName << ":" << clientInterfaceRequiredName << " - "
+                                 << serverComponentName << ":" << serverInterfaceProvidedName << std::endl;
         return false;
     }
 
@@ -1438,11 +1438,19 @@ bool mtsManagerLocal::ConnectLocally(const std::string & clientComponentName, co
         return false;
     }
 
+    bool interfacesSwapped = false;
     mtsInterfaceProvidedOrOutput * serverInterfaceProvidedOrOutput = serverComponent->GetInterfaceProvidedOrOutput(serverInterfaceProvidedName);
     if (!serverInterfaceProvidedOrOutput) {
-        CMN_LOG_CLASS_INIT_ERROR << "ConnectLocally: failed to get provided/output interface \"" << serverInterfaceProvidedName << "\""
-                                 << " in component \"" << serverComponentName << "\"" << std::endl;
-        return false;
+        // test for swapped interfaces
+        CMN_LOG_CLASS_INIT_DEBUG << "ConnectLocally: looking for provided/output interface in first component as well" << std::endl;
+        serverInterfaceProvidedOrOutput = clientComponent->GetInterfaceProvidedOrOutput(clientInterfaceRequiredName);
+        if (!serverInterfaceProvidedOrOutput) {
+            CMN_LOG_CLASS_INIT_ERROR << "ConnectLocally: failed to get provided/output interface \"" << serverInterfaceProvidedName << "\""
+                                     << " in component \"" << serverComponentName << "\"" << std::endl;
+            return false;
+        } else {
+            interfacesSwapped = true;
+        }
     }
 
 #if 0
@@ -1509,16 +1517,29 @@ bool mtsManagerLocal::ConnectLocally(const std::string & clientComponentName, co
     // internally called to create a new provided interface instance for the
     // client component.  This solves thread-safety issues in data exchange
     // across a network.
-    if (!clientComponent->ConnectInterfaceRequiredOrInput(clientInterfaceRequiredName, interfaceProvidedOrOutputInstance)) {
-        CMN_LOG_CLASS_INIT_ERROR << "ConnectLocally: failed to connect interfaces: "
-                                 << clientComponentName << ":" << clientInterfaceRequiredName << " - "
-                                 << serverComponentName << ":" << serverInterfaceProvidedName << std::endl;
-        return false;
+    if (!interfacesSwapped) {
+        if (!clientComponent->ConnectInterfaceRequiredOrInput(clientInterfaceRequiredName, interfaceProvidedOrOutputInstance)) {
+            CMN_LOG_CLASS_INIT_ERROR << "ConnectLocally: failed to connect interfaces: "
+                                     << clientComponentName << ":" << clientInterfaceRequiredName << " - "
+                                     << serverComponentName << ":" << serverInterfaceProvidedName << std::endl;
+            return false;
+        } else {
+            CMN_LOG_CLASS_INIT_VERBOSE << "ConnectLocally: successfully connected: "
+                                       << clientComponentName << ":" << clientInterfaceRequiredName << " - "
+                                       << serverComponentName << ":" << serverInterfaceProvidedName << std::endl;
+        }
+    } else {
+        if (!serverComponent->ConnectInterfaceRequiredOrInput(serverInterfaceProvidedName, interfaceProvidedOrOutputInstance)) {
+            CMN_LOG_CLASS_INIT_ERROR << "ConnectLocally: failed to connect interfaces: "
+                                     << serverComponentName << ":" << serverInterfaceProvidedName << " - "
+                                     << clientComponentName << ":" << clientInterfaceRequiredName << std::endl;
+            return false;
+        } else {
+            CMN_LOG_CLASS_INIT_VERBOSE << "ConnectLocally: successfully connected: "
+                                       << serverComponentName << ":" << serverInterfaceProvidedName << " - "
+                                       << clientComponentName << ":" << clientInterfaceRequiredName << std::endl;
+        }
     }
-
-    CMN_LOG_CLASS_INIT_VERBOSE << "ConnectLocally: successfully connected: "
-                               << clientComponentName << ":" << clientInterfaceRequiredName << " - "
-                               << serverComponentName << ":" << serverInterfaceProvidedName << std::endl;
 
     return true;
 }

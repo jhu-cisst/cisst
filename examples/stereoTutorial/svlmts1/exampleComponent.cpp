@@ -64,8 +64,8 @@ void exampleComponent::Startup(void)
 
     // connect filters together
     StreamControl.SetSourceFilter(mtsStdString("StreamSource"));
-    mtsTaskManager::GetInstance()->Connect("ExampleFilter", "input", "StreamSource", "output");
-    mtsTaskManager::GetInstance()->Connect("Window", "input", "ExampleFilter", "output");
+    mtsTaskManager::GetInstance()->Connect("StreamSource", "output", "ExampleFilter", "input");
+    mtsTaskManager::GetInstance()->Connect( "ExampleFilter", "output", "Window", "input");
 
     StreamControl.Initialize();
 
