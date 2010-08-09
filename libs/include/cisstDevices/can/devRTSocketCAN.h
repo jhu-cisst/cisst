@@ -49,8 +49,12 @@ private:
   //! The socket address for the CAN address family
   struct sockaddr_can addr;
 
+  static const size_t MAX_NUM_FILTERS = 32;
+
   //! CAN filter. These are way too "WAMish" 
-  struct can_filter filters[3];
+  struct can_filter filters[MAX_NUM_FILTERS];
+  size_t filterscnt;
+
   
 public:
 
@@ -81,7 +85,7 @@ public:
      \param block Block the device until the operation is completed. This
                   parameter is irrelevant for devRTSocketCAN.
   */
-  devCAN::Errno Send( const devCANFrame& frame, 
+  devCAN::Errno Send( const devCAN::Frame& frame, 
 		      devCAN::Flags flags = devCAN::MSG_NOFLAG );
 
   //! Receive a CAN frame
@@ -91,9 +95,12 @@ public:
      \param block Block the device until a CAN frame is received. This
                   parameter is irrelevant for devRTSocketCAN.
   */
-  devCAN::Errno Recv( devCANFrame& frame, 
+  devCAN::Errno Recv( devCAN::Frame& frame, 
 		      devCAN::Flags flags = devCAN::MSG_NOFLAG );
   
+  devCAN::Errno AddFilter( const devCAN::Filter& filter );
+  
+
 };
 
 #endif // _devRTSocketCAN_hpp

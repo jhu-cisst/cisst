@@ -22,7 +22,8 @@ http://www.cisst.org/cisst/license.txt.
 
 devRTSocketCAN::devRTSocketCAN( const std::string& devicename, 
 				devCAN::Rate rate ) : 
-  devCAN( rate ){
+  devCAN( rate ),
+  filterscnt( 0 ) {
 
   // Check if the device name is empty
   if( devicename.empty() ){
@@ -41,6 +42,8 @@ devCAN::Errno devRTSocketCAN::Open(){
 
   struct ifreq ifr;
 
+  int errno;
+
   // create a socket
   canfd = rt_dev_socket(PF_CAN, SOCK_RAW, CAN_RAW);
   if( canfd < 0 ){
@@ -52,15 +55,15 @@ devCAN::Errno devRTSocketCAN::Open(){
 
   // Get CAN interface index by name
   strncpy(ifr.ifr_name, devicename.data(), IFNAMSIZ);
-  if( rt_dev_ioctl(canfd, SIOCGIFINDEX, &ifr) ){
+  errno = rt_dev_ioctl( canfd, SIOCGIFINDEX, &ifr );
+  if( errno != 0 ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
 		      << ": Couldn't get the CAN interface index by name."
+		      << "Error code was: " << errno
 		      << std::endl;
     return devCAN::EFAILURE;
   }
-
-  // Set CAN filters
-  // These are WAM specific filters and don't belong here
+  /*
   filters[0].can_mask = 0x0000041F;  // mask broadcast to a group
   filters[0].can_id   = 0x00000403;  // allow group 3
 
@@ -70,26 +73,31 @@ devCAN::Errno devRTSocketCAN::Open(){
   filters[2].can_mask = 0x0000041F;  // mask broadcast to a group
   filters[2].can_id   = 0x00000000;  // allow direct messages to the host
 
-  // Add the filter to the socket
-  if( rt_dev_setsockopt(canfd, 
-			SOL_CAN_RAW, 
-			CAN_RAW_FILTER, 
-			filters, 
-			3*sizeof(struct can_filter)) ){
+  // Set the filter to the socket
+  if( rt_dev_setsockopt( canfd, 
+			 SOL_CAN_RAW, 
+			 CAN_RAW_FILTER, 
+			 (void*)(&(filters[0])), 
+			 3*sizeof(struct can_filter) ) ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
 		      << ": Couldn't set the socket filters." 
 		      << std::endl;
-    return EFAILURE;
+    return devCAN::EFAILURE;
   }
+  */
 
   // Bind the socket to the local address
   memset(&addr, 0, sizeof(addr));     // clear the address
   addr.can_ifindex = ifr.ifr_ifindex; // ifr_ifindex was set from SIOCGIFINDEX
   addr.can_family = AF_CAN;           // Address Family CAN
 
-  if( rt_dev_bind(canfd, (struct sockaddr*)&addr, sizeof(struct sockaddr_can))){
+  errno = rt_dev_bind( canfd, 
+		       (struct sockaddr*)&addr, 
+		       sizeof(struct sockaddr_can) );
+  if( errno != 0 ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
 		      << ": Couldn't bind the socket." 
+		      << "Error code was: " << errno
 		      << std::endl;
     return EFAILURE;
   }
@@ -152,9 +160,10 @@ devCAN::Errno devRTSocketCAN::Close(){
 
 // Send a can frame
 // Note that block is useless for Socket CAN
-devCAN::Errno devRTSocketCAN::Send( const devCANFrame& canframe, 
+devCAN::Errno devRTSocketCAN::Send( const devCAN::Frame& canframe, 
 				    devCAN::Flags  ){
-
+  //std::cout << "SEND" << std::endl;
+  //std::cout << canframe << std::endl;
   // copy the data in to a RTSocket CAN frame
   // can_frame_t is defined in xenomai/include/rtdm/rtcan.h
   can_frame_t frame;
@@ -184,7 +193,7 @@ devCAN::Errno devRTSocketCAN::Send( const devCANFrame& canframe,
 }
 
 // Receive a CAN frame
-devCAN::Errno devRTSocketCAN::Recv( devCANFrame& canframe, 
+devCAN::Errno devRTSocketCAN::Recv( devCAN::Frame& canframe, 
 				    devCAN::Flags ){
 
   struct can_frame frame;            // the RT Socket CAN frame
@@ -207,10 +216,79 @@ devCAN::Errno devRTSocketCAN::Recv( devCANFrame& canframe,
     return EFAILURE;
   }
 
-  // create a devCANFrame
-  canframe = devCANFrame( frame.can_id, frame.data, frame.can_dlc );
+  // create a devCAN::Frame
+  canframe = devCAN::Frame( frame.can_id, frame.data, frame.can_dlc );
+  //CMN_LOG_RUN_ERROR << "RECV" << std::endl;
+  //CMN_LOG_RUN_ERROR<< canframe << std::endl;
 
   return ESUCCESS;
 }
 
+
+devCAN::Errno devRTSocketCAN::AddFilter( const devCAN::Filter& filter ){
+
+  if( filterscnt < devRTSocketCAN::MAX_NUM_FILTERS ){
+    /*
+    std::cout << std::hex << std::setfill('0') << std::setw(4)
+	      << (int)filter.mask << " " << (int)filter.id
+	      << std::dec << std::endl;
+    */
+    filters[filterscnt].can_mask = filter.mask;
+    filters[filterscnt].can_id   = filter.id;
+    filterscnt++;
+
+    // Set the filter to the socket
+    if( rt_dev_setsockopt( canfd, 
+			   SOL_CAN_RAW, 
+			   CAN_RAW_FILTER, 
+			   filters, 
+			   filterscnt*sizeof(struct can_filter) ) ){
+      CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+			<< ": Couldn't set the socket filters." 
+			<< std::endl;
+      return devCAN::EFAILURE;
+    }
+
+    return devCAN::ESUCCESS;
+  }
+
+  else{
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+		      << ": Reached maximum number of filters." 
+		      << std::endl;
+    return devCAN::EFAILURE;
+  }
+
+}
+
 #endif
+
+
+  // Set CAN filters
+  // These are WAM specific filters and don't belong here
+
+  /*
+  filters[0].can_mask = 0x000005EF;  // Mask position feedback from puck 12
+  filters[1].can_mask = 0x000005EF;  // Mask property feedback from puck 11
+  filters[2].can_mask = 0x000005EF;  // Mask position feedback from puck 12
+  filters[3].can_mask = 0x000005EF;  // Mask property feedback from puck 12
+  filters[4].can_mask = 0x000005EF;  // Mask position feedback from puck 13
+  filters[5].can_mask = 0x000005EF;  // Mask property feedback from puck 13
+  filters[6].can_mask = 0x000005EF;  // Mask position feedback from puck 14
+  filters[7].can_mask = 0x000005EF;  // Mask property feedback from puck 14
+
+  filters[0].can_id   = 0x00000566;  // Match property feedback from puck 11
+  filters[1].can_id   = 0x00000586;  // Match property feedback from puck 12
+  filters[2].can_id   = 0x000005A6;  // Match property feedback from puck 13
+  filters[3].can_id   = 0x000005C6;  // Match property feedback from puck 14
+
+  filters[4].can_id   = 0x00000563;  // Match position feedback from puck 12
+  filters[5].can_id   = 0x00000583;  // Match position feedback from puck 12
+  filters[6].can_id   = 0x000005A3;  // Match position feedback from puck 13
+  filters[7].can_id   = 0x000005C3;  // Match position feedback from puck 14
+
+  //filters[8].can_mask = 0x0000041F;  // mask broadcast to a group
+  //filters[8].can_id   = 0x00000000;  // allow direct messages to the host
+  
+  */
+

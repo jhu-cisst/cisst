@@ -19,22 +19,22 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnLogger.h>
 
 // Default initialization of a CAN frame
-devCANFrame::devCANFrame(){ 
+devCAN::Frame::Frame(){ 
   // Clear up everything
   this->id = 0;                              // default ID 
   this->nbytes=0;                            // no data
-  for(devCANFrame::DataLength i=0; i<8; i++) // clear the data
+  for(devCAN::Frame::DataLength i=0; i<8; i++) // clear the data
     { this->data[i] = 0x00; }
 }
 
-devCANFrame::devCANFrame( devCANFrame::ID id, 
-			  devCANFrame::DataField data,
-			  devCANFrame::DataLength nbytes ){
+devCAN::Frame::Frame( devCAN::Frame::ID id, 
+		      devCAN::Frame::DataField data,
+		      devCAN::Frame::DataLength nbytes ){
 
   // Clear up everything before starting
   this->id = 0;                              // default ID 
   this->nbytes = 0;                          // no data
-  for(devCANFrame::DataLength i=0; i<8; i++) // clear the data
+  for(devCAN::Frame::DataLength i=0; i<8; i++) // clear the data
     { this->data[i] = 0x00; }
 
   // A can ID has 11 bits. Ensure that only 11 bits are used
@@ -53,9 +53,9 @@ devCANFrame::devCANFrame( devCANFrame::ID id,
     }
 
     else{
-      this->id = (0x07FF & id);                       // Copy the CAN ID
-      this->nbytes = nbytes;                          // Copy the data length
-      for(devCANFrame::DataLength i=0; i<nbytes; i++) // Copy the nbytes of data
+      this->id = (0x07FF & id);                         // Copy the CAN ID
+      this->nbytes = nbytes;                            // Copy the data length
+      for(devCAN::Frame::DataLength i=0; i<nbytes; i++) // Copy the data
 	{ this->data[i] = data[i]; }
     }
 
