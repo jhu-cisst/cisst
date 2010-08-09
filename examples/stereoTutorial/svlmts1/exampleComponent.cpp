@@ -47,12 +47,9 @@ void exampleComponent::Startup(void)
     SourceConfig.SetChannels(1);
 
 #ifdef CAMERA_SOURCE
-    int deviceid = 0;
-    int inputid = 0;
-    int formatid = 0;
-    SourceConfig.SetDevice(deviceid);
-    SourceConfig.SetInput(inputid);
-    SourceConfig.SelectFormat(formatid);
+    SourceConfig.SetDevice(0);
+    SourceConfig.SetInput(0);
+    SourceConfig.SelectFormat(0);
 #else
     SourceConfig.SetFilename(mtsStdString("crop2.avi"));
     // Not needed because same as default:
@@ -69,27 +66,51 @@ void exampleComponent::Startup(void)
 
     StreamControl.Initialize();
 
-#ifdef CAMERA_SOURCE
     // Print some configuration information
+#ifdef CAMERA_SOURCE
+    int deviceid;
+    int inputid;
+    svlFilterSourceVideoCapture::ImageFormat format;
     svlFilterSourceVideoCapture::DeviceInfoListType devlist;
     svlFilterSourceVideoCapture::FormatListType formlist;
     svlFilterSourceVideoCapture::ImageProperties properties;
     svlFilterSourceVideoCapture::ExternalTrigger trigger;
-    
+
+    SourceConfig.GetDevice(deviceid);
+    SourceConfig.GetInput(inputid);
+    SourceConfig.GetFormat(format);
     SourceConfig.GetDeviceList(devlist);
     SourceConfig.GetFormatList(formlist);
     SourceConfig.GetImageProperties(properties);
     SourceConfig.GetTrigger(trigger);
-    
+
     CMN_LOG_CLASS_RUN_VERBOSE << std::endl
                               << "Available devices:" << std::endl << devlist
                               << "Selected device: " << devlist.Element(deviceid)
                               << "Selected input: " << inputid << std::endl
                               << "Available formats:" << std::endl << formlist
-                              << "Selected format: " << std::endl << formlist.Element(formatid)
+                              << "Selected format: " << std::endl << format
                               << "Image properties:" << std::endl << properties
                               << "External trigger:" << std::endl << trigger;
+#else
+    std::string filename;
+    int length;
+
+    SourceConfig.GetFilename(filename);
+    SourceConfig.GetLength(length);
+    
+    CMN_LOG_CLASS_RUN_VERBOSE << std::endl
+                              << "File name: " << filename << std::endl
+                              << "File length (number of video frames): " << length << std::endl;
 #endif
+
+    vctInt2 dimensions;
+    SourceConfig.GetDimensions(dimensions);
+    
+    CMN_LOG_CLASS_RUN_VERBOSE << std::endl
+                              << "Source image dimensions: "
+                              << dimensions[0] << " x " << dimensions[1]
+                              << std::endl;
     
     StreamControl.Play();
 }
@@ -99,9 +120,5 @@ void exampleComponent::Run(void)
     FilterParams.Get(FilterState);
     FilterState.IntValue2 --;
     FilterParams.Set(FilterState);
-
-    SourceConfig.Get(SourceState);
-
-    CMN_LOG_CLASS_RUN_VERBOSE << "Run : " << this->GetTick() << " - Data: " << SourceState << std::endl;
 }
 

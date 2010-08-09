@@ -1404,6 +1404,18 @@ std::string svlFilterSourceVideoCapture::GetPatternTypeName(PatternType patternt
     }
 }
 
+unsigned int svlFilterSourceVideoCapture::GetWidth(unsigned int videoch) const
+{
+    if (!IsInitialized()) return 0;
+    return OutputImage->GetWidth(videoch);
+}
+
+unsigned int svlFilterSourceVideoCapture::GetHeight(unsigned int videoch) const
+{
+    if (!IsInitialized()) return 0;
+    return OutputImage->GetHeight(videoch);
+}
+
 int svlFilterSourceVideoCapture::SaveSettings(const char* filepath)
 {
     if (OutputImage == 0)
@@ -1656,6 +1668,19 @@ void svlFilterSourceVideoCapture::CreateInterfaces()
         provided->AddCommandWrite(&svlFilterSourceVideoCapture::SetImagePropertiesRCommand, this, "SetRightImageProperties");
         provided->AddCommandWrite(&svlFilterSourceVideoCapture::SaveSettingsCommand,        this, "SaveSettings");
         provided->AddCommandWrite(&svlFilterSourceVideoCapture::LoadSettingsCommand,        this, "LoadSettings");
+        provided->AddCommandRead (&svlFilterSourceVideoCapture::GetChannelsCommand,         this, "GetChannels");
+        provided->AddCommandRead (&svlFilterSourceVideoCapture::GetDeviceLCommand,          this, "GetDevice");
+        provided->AddCommandRead (&svlFilterSourceVideoCapture::GetDeviceLCommand,          this, "GetLeftDevice");
+        provided->AddCommandRead (&svlFilterSourceVideoCapture::GetDeviceRCommand,          this, "GetRightDevice");
+        provided->AddCommandRead (&svlFilterSourceVideoCapture::GetInputLCommand,           this, "GetInput");
+        provided->AddCommandRead (&svlFilterSourceVideoCapture::GetInputLCommand,           this, "GetLeftInput");
+        provided->AddCommandRead (&svlFilterSourceVideoCapture::GetInputRCommand,           this, "GetRightInput");
+        provided->AddCommandRead (&svlFilterSourceVideoCapture::GetFormatLCommand,          this, "GetFormat");
+        provided->AddCommandRead (&svlFilterSourceVideoCapture::GetFormatLCommand,          this, "GetLeftFormat");
+        provided->AddCommandRead (&svlFilterSourceVideoCapture::GetFormatRCommand,          this, "GetRightFormat");
+        provided->AddCommandRead (&svlFilterSourceVideoCapture::GetDimensionsLCommand,      this, "GetDimensions");
+        provided->AddCommandRead (&svlFilterSourceVideoCapture::GetDimensionsLCommand,      this, "GetLeftDimensions");
+        provided->AddCommandRead (&svlFilterSourceVideoCapture::GetDimensionsRCommand,      this, "GetRightDimensions");
         provided->AddCommandRead (&svlFilterSourceVideoCapture::GetFormatListLCommand,      this, "GetFormatList");
         provided->AddCommandRead (&svlFilterSourceVideoCapture::GetFormatListLCommand,      this, "GetLeftFormatList");
         provided->AddCommandRead (&svlFilterSourceVideoCapture::GetFormatListRCommand,      this, "GetRightFormatList");
@@ -1896,6 +1921,69 @@ void svlFilterSourceVideoCapture::LoadSettingsCommand(const std::string & filepa
     if (LoadSettings(filepath.c_str()) != SVL_OK) {
         CMN_LOG_CLASS_INIT_ERROR << "LoadSettingsCommand: \"LoadSettings(\"" << filepath << "\")\" returned error" << std::endl;
     }
+}
+
+void svlFilterSourceVideoCapture::GetChannelsCommand(int & channels) const
+{
+    channels = NumberOfChannels;
+}
+
+void svlFilterSourceVideoCapture::GetDeviceLCommand(int & deviceid) const
+{
+    int intput;
+    if (GetDevice(deviceid, intput, SVL_LEFT) != SVL_OK) {
+        CMN_LOG_CLASS_INIT_ERROR << "GetDeviceLCommand: \"GetDevice(., ., 0)\" returned error" << std::endl;
+    }
+}
+
+void svlFilterSourceVideoCapture::GetDeviceRCommand(int & deviceid) const
+{
+    int intput;
+    if (GetDevice(deviceid, intput, SVL_RIGHT) != SVL_OK) {
+        CMN_LOG_CLASS_INIT_ERROR << "GetDeviceRCommand: \"GetDevice(., ., 1)\" returned error" << std::endl;
+    }
+}
+
+void svlFilterSourceVideoCapture::GetInputLCommand(int & inputid) const
+{
+    int device;
+    if (GetDevice(device, inputid, SVL_LEFT) != SVL_OK) {
+        CMN_LOG_CLASS_INIT_ERROR << "GetInputLCommand: \"GetDevice(., ., 0)\" returned error" << std::endl;
+    }
+}
+
+void svlFilterSourceVideoCapture::GetInputRCommand(int & inputid) const
+{
+    int device;
+    if (GetDevice(device, inputid, SVL_RIGHT) != SVL_OK) {
+        CMN_LOG_CLASS_INIT_ERROR << "GetInputRCommand: \"GetDevice(., ., 1)\" returned error" << std::endl;
+    }
+}
+
+void svlFilterSourceVideoCapture::GetFormatLCommand(ThisType::ImageFormat & format) const
+{
+    if (GetFormat(format, SVL_LEFT) != SVL_OK) {
+        CMN_LOG_CLASS_INIT_ERROR << "GetFormatLCommand: \"GetFormat(., 0)\" returned error" << std::endl;
+    }
+}
+
+void svlFilterSourceVideoCapture::GetFormatRCommand(ThisType::ImageFormat & format) const
+{
+    if (GetFormat(format, SVL_RIGHT) != SVL_OK) {
+        CMN_LOG_CLASS_INIT_ERROR << "GetFormatRCommand: \"GetFormat(., 1)\" returned error" << std::endl;
+    }
+}
+
+void svlFilterSourceVideoCapture::GetDimensionsLCommand(vctInt2 & dimensions) const
+{
+    dimensions[0] = static_cast<int>(GetWidth(SVL_LEFT));
+    dimensions[1] = static_cast<int>(GetHeight(SVL_LEFT));
+}
+
+void svlFilterSourceVideoCapture::GetDimensionsRCommand(vctInt2 & dimensions) const
+{
+    dimensions[0] = static_cast<int>(GetWidth(SVL_RIGHT));
+    dimensions[1] = static_cast<int>(GetHeight(SVL_RIGHT));
 }
 
 void svlFilterSourceVideoCapture::GetFormatListLCommand(svlFilterSourceVideoCapture::FormatListType & formatlist) const

@@ -136,8 +136,6 @@ public:
     class CISST_EXPORT Config
     {
     public:
-        friend CISST_EXPORT std::ostream & operator << (std::ostream & stream, const Config & objref);
-
         Config();
         Config(const Config& objref);
 
@@ -154,13 +152,6 @@ public:
     typedef svlFilterSourceVideoCapture ThisType;
     typedef vctDynamicVector<DeviceInfo> DeviceInfoListType;
     typedef vctDynamicVector<ImageFormat> FormatListType;
-
-    friend CISST_EXPORT std::ostream & operator << (std::ostream & stream, const DeviceInfo & objref);
-    friend CISST_EXPORT std::ostream & operator << (std::ostream & stream, const ImageFormat & objref);
-    friend CISST_EXPORT std::ostream & operator << (std::ostream & stream, const ImageProperties & objref);
-    friend CISST_EXPORT std::ostream & operator << (std::ostream & stream, const ExternalTrigger & objref);
-    friend CISST_EXPORT std::ostream & operator << (std::ostream & stream, const DeviceInfoListType & objref);
-    friend CISST_EXPORT std::ostream & operator << (std::ostream & stream, const FormatListType & objref);
 
 public:
     svlFilterSourceVideoCapture();
@@ -199,6 +190,9 @@ public:
     int GetImageProperties(ImageProperties& properties, unsigned int videoch = SVL_LEFT) const;
     static std::string GetPixelTypeName(PixelType pixeltype);
     static std::string GetPatternTypeName(PatternType patterntype);
+
+    unsigned int GetWidth(unsigned int videoch = SVL_LEFT) const;
+    unsigned int GetHeight(unsigned int videoch = SVL_LEFT) const;
 
     int SaveSettings(const char* filepath);
     int LoadSettings(const char* filepath);
@@ -257,6 +251,15 @@ protected:
     virtual void SetImagePropertiesRCommand(const ThisType::ImageProperties & properties);
     virtual void SaveSettingsCommand(const std::string & filepath);
     virtual void LoadSettingsCommand(const std::string & filepath);
+    virtual void GetChannelsCommand(int & channels) const;
+    virtual void GetDeviceLCommand(int & deviceid) const;
+    virtual void GetDeviceRCommand(int & deviceid) const;
+    virtual void GetInputLCommand(int & inputid) const;
+    virtual void GetInputRCommand(int & inputid) const;
+    virtual void GetFormatLCommand(ThisType::ImageFormat & format) const;
+    virtual void GetFormatRCommand(ThisType::ImageFormat & format) const;
+    virtual void GetDimensionsLCommand(vctInt2 & dimensions) const;
+    virtual void GetDimensionsRCommand(vctInt2 & dimensions) const;
     virtual void GetFormatListLCommand(ThisType::FormatListType & formatlist) const;
     virtual void GetFormatListRCommand(ThisType::FormatListType & formatlist) const;
     virtual void GetTriggerLCommand(ThisType::ExternalTrigger & trigger) const;

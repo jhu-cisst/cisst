@@ -22,6 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstStereoVision/svlFilterSourceImageFile.h>
 #include <cisstStereoVision/svlFilterOutput.h>
+#include <cisstMultiTask/mtsInterfaceProvided.h>
 
 #include <math.h>
 
@@ -42,6 +43,7 @@ http://www.cisst.org/cisst/license.txt.
 /***************************************/
 
 CMN_IMPLEMENT_SERVICES(svlFilterSourceImageFile)
+CMN_IMPLEMENT_SERVICES_TEMPLATED(svlFilterSourceImageFile_FileInfo)
 
 svlFilterSourceImageFile::svlFilterSourceImageFile() :
     svlFilterSourceBase(),
@@ -50,6 +52,8 @@ svlFilterSourceImageFile::svlFilterSourceImageFile() :
     From(0),
     To(0)
 {
+    CreateInterfaces();
+
     AddOutput("output", true);
     SetAutomaticOutputType(false);
     SetTargetFrequency(30.0);
@@ -62,6 +66,8 @@ svlFilterSourceImageFile::svlFilterSourceImageFile(unsigned int channelcount) :
     From(0),
     To(0)
 {
+    CreateInterfaces();
+    
     AddOutput("output", true);
     SetAutomaticOutputType(false);
     SetChannelCount(channelcount);
@@ -233,6 +239,18 @@ int svlFilterSourceImageFile::SetSequence(unsigned int numberofdigits, unsigned 
     return SVL_OK;
 }
 
+unsigned int svlFilterSourceImageFile::GetWidth(unsigned int videoch) const
+{
+    if (!IsInitialized()) return 0;
+    return OutputImage->GetWidth(videoch);
+}
+
+unsigned int svlFilterSourceImageFile::GetHeight(unsigned int videoch) const
+{
+    if (!IsInitialized()) return 0;
+    return OutputImage->GetHeight(videoch);
+}
+
 int svlFilterSourceImageFile::BuildFilePath(int videoch, unsigned int framecounter)
 {
     if (OutputImage == 0)
@@ -251,5 +269,124 @@ int svlFilterSourceImageFile::BuildFilePath(int videoch, unsigned int framecount
     FilePath[videoch] = path.str();
 
     return SVL_OK;
+}
+
+void svlFilterSourceImageFile::CreateInterfaces()
+{
+    // Add NON-QUEUED provided interface for configuration management
+    mtsInterfaceProvided* provided = AddInterfaceProvided("Settings", MTS_COMMANDS_SHOULD_NOT_BE_QUEUED);
+    if (provided) {
+        provided->AddCommandWrite(&svlFilterSourceBase::SetTargetFrequency, dynamic_cast<svlFilterSourceBase*>(this), "SetFramerate");
+        provided->AddCommandWrite(&svlFilterSourceBase::SetLoop,            dynamic_cast<svlFilterSourceBase*>(this), "SetLoop");
+        provided->AddCommandVoid (&svlFilterSourceBase::Pause,              dynamic_cast<svlFilterSourceBase*>(this), "Pause");
+        provided->AddCommandVoid (&svlFilterSourceBase::Play,               dynamic_cast<svlFilterSourceBase*>(this), "Play");
+        provided->AddCommandWrite(&svlFilterSourceBase::Play,               dynamic_cast<svlFilterSourceBase*>(this), "PlayFrames");
+        provided->AddCommandWrite(&svlFilterSourceImageFile::SetChannelsCommand,    this, "SetChannels");
+        provided->AddCommandWrite(&svlFilterSourceImageFile::SetFileCommand,        this, "SetFile");
+        provided->AddCommandRead (&svlFilterSourceImageFile::GetChannelsCommand,    this, "GetChannels");
+        provided->AddCommandRead (&svlFilterSourceImageFile::GetFileCommand,        this, "GetFile");
+        provided->AddCommandRead (&svlFilterSourceImageFile::GetDimensionsLCommand, this, "GetDimensions");
+        provided->AddCommandRead (&svlFilterSourceImageFile::GetDimensionsLCommand, this, "GetLeftDimensions");
+        provided->AddCommandRead (&svlFilterSourceImageFile::GetDimensionsRCommand, this, "GetRightDimensions");
+    }
+}
+
+void svlFilterSourceImageFile::SetChannelsCommand(const int& channels)
+{
+    if (SetChannelCount(static_cast<unsigned int>(channels)) != SVL_OK) {
+        CMN_LOG_CLASS_INIT_ERROR << "SetChannelsCommand: \"SetChannelCount(" << channels << ")\" returned error" << std::endl;
+    }
+}
+
+void svlFilterSourceImageFile::SetFileCommand(const FileInfo & fileinfo)
+{
+    if (fileinfo.channel >= ImageCodec.size()) {
+        CMN_LOG_CLASS_INIT_ERROR << "SetFileCommand: \"FileInfo::channel\" argument value ("
+                                 << fileinfo.channel
+                                 << ") is out of range"
+                                 << std::endl;
+        return;
+    }
+    if (SetFilePath(fileinfo.path_prefix, fileinfo.path_extension, fileinfo.channel) != SVL_OK) {
+        CMN_LOG_CLASS_INIT_ERROR << "SetFileCommand: \"SetFilePath(\""
+                                 << fileinfo.path_prefix
+                                 << "\", \""
+                                 << fileinfo.path_extension
+                                 << "\", "
+                                 << fileinfo.channel
+                                 << ")\" returned error"
+                                 << std::endl;
+        return;
+    }
+    if (SetSequence(fileinfo.sequence_digits, fileinfo.sequence_from, fileinfo.sequence_to) != SVL_OK) {
+        CMN_LOG_CLASS_INIT_ERROR << "SetFileCommand: \"SetSequence("
+                                 << fileinfo.sequence_digits
+                                 << ", "
+                                 << fileinfo.sequence_from
+                                 << ", "
+                                 << fileinfo.sequence_to
+                                 << ")\" returned error"
+                                 << std::endl;
+    }
+}
+
+void svlFilterSourceImageFile::GetChannelsCommand(int & channels) const
+{
+    channels = ImageCodec.size();
+}
+
+void svlFilterSourceImageFile::GetFileCommand(FileInfo & fileinfo) const
+{
+    if (fileinfo.channel >= ImageCodec.size()) {
+        CMN_LOG_CLASS_INIT_ERROR << "GetFileCommand: \"FileInfo::channel\" argument value ("
+                                 << fileinfo.channel
+                                 << ") is out of range"
+                                 << std::endl;
+        return;
+    }
+    fileinfo.path_prefix     = FilePathPrefix[fileinfo.channel];
+    fileinfo.path_extension  = Extension[fileinfo.channel];
+    fileinfo.sequence_digits = NumberOfDigits;
+    fileinfo.sequence_from   = From;
+    fileinfo.sequence_to     = To;
+}
+
+void svlFilterSourceImageFile::GetDimensionsLCommand(vctInt2 & dimensions) const
+{
+    dimensions[0] = static_cast<int>(GetWidth(SVL_LEFT));
+    dimensions[1] = static_cast<int>(GetHeight(SVL_LEFT));
+    if (dimensions[0] <= 0 || dimensions[1] <= 0) {
+        CMN_LOG_CLASS_INIT_ERROR << "GetDimensionsLCommand: invalid image dimensions; "
+                                 << "make sure the stream is already initialized"
+                                 << std::endl;
+    }
+}
+
+void svlFilterSourceImageFile::GetDimensionsRCommand(vctInt2 & dimensions) const
+{
+    dimensions[0] = static_cast<int>(GetWidth(SVL_RIGHT));
+    dimensions[1] = static_cast<int>(GetHeight(SVL_RIGHT));
+    if (dimensions[0] <= 0 || dimensions[1] <= 0) {
+        CMN_LOG_CLASS_INIT_ERROR << "GetDimensionsRCommand: invalid image dimensions; "
+                                 << "make sure the stream is already initialized"
+                                 << std::endl;
+    }
+}
+
+
+/****************************/
+/*** Stream out operators ***/
+/****************************/
+
+std::ostream & operator << (std::ostream & stream, const svlFilterSourceImageFile::FileInfo & objref)
+{
+    stream << "File name prefix: " << objref.path_prefix << std::endl
+           << "File extension: " << objref.path_extension << std::endl
+           << "Number of sequence digits: " << objref.sequence_digits << std::endl
+           << "Sequence starts at frame: " << objref.sequence_from << std::endl
+           << "Sequence ends at frame: " << objref.sequence_to << std::endl
+           << "Video channel: " << objref.channel << std::endl;
+    
+    return stream;
 }
 

@@ -23,6 +23,8 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlRequiredInterfaces_h
 #define _svlRequiredInterfaces_h
 
+#include <cisstVector/vctFixedSizeVectorTypes.h>
+#include <cisstVector/vctFixedSizeMatrixTypes.h>
 #include <cisstMultiTask/mtsFunctionVoid.h>
 #include <cisstMultiTask/mtsFunctionRead.h>
 #include <cisstMultiTask/mtsFunctionQualifiedRead.h>
@@ -33,6 +35,20 @@ http://www.cisst.org/cisst/license.txt.
 
 // Forward declarations
 class mtsComponent;
+
+
+/*********************************/
+/*** SVL-MTS type declarations ***/
+/*********************************/
+
+typedef mtsGenericObjectProxy<float> svlFloat;
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFloat);
+typedef mtsGenericObjectProxy<vct3> svlDouble3;
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlDouble3);
+typedef mtsGenericObjectProxy<vct3x3> svlDouble3x3;
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlDouble3x3);
+typedef mtsGenericObjectProxy<vctInt2> svlInt2;
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlInt2);
 
 
 /*******************************/
@@ -60,45 +76,68 @@ private:
 
 
 /***************************************/
-/*** IReqFilterSourceVideoFile class ***/
+/*** IReqFilterSourceImageFile class ***/
 /***************************************/
 
-class CISST_EXPORT IReqFilterSourceVideoFile
+class CISST_EXPORT IReqFilterSourceImageFile
 {
 public:
-    IReqFilterSourceVideoFile(const std::string& name, mtsComponent* owner);
-    ~IReqFilterSourceVideoFile();
+    IReqFilterSourceImageFile(const std::string& name, mtsComponent* owner);
+    ~IReqFilterSourceImageFile();
 
     // svlFilterSourceBase commands
-    mtsFunctionWrite         SetFramerate;
-    mtsFunctionWrite         SetLoop;
-    mtsFunctionVoid          Pause;
-    mtsFunctionVoid          Play;
-    mtsFunctionWrite         PlayFrames;
+    mtsFunctionWrite SetFramerate;
+    mtsFunctionWrite SetLoop;
+    mtsFunctionVoid  Pause;
+    mtsFunctionVoid  Play;
+    mtsFunctionWrite PlayFrames;
 
     // svlFilterSourceVideoFile commands
-    mtsFunctionRead          Get;
-    mtsFunctionWrite         Set;
-    mtsFunctionWrite         SetChannels;
-    mtsFunctionWrite         SetFilename;
-    mtsFunctionWrite         SetLeftFilename;
-    mtsFunctionWrite         SetRightFilename;
-    mtsFunctionWrite         SetPosition;
-    mtsFunctionWrite         SetLeftPosition;
-    mtsFunctionWrite         SetRightPosition;
-    mtsFunctionWrite         SetRange;
-    mtsFunctionWrite         SetLeftRange;
-    mtsFunctionWrite         SetRightRange;
-    mtsFunctionQualifiedRead GetPositionAtTime;
-    mtsFunctionQualifiedRead GetLeftPositionAtTime;
-    mtsFunctionQualifiedRead GetRightPositionAtTime;
-    mtsFunctionQualifiedRead GetTimeAtPosition;
-    mtsFunctionQualifiedRead GetLeftTimeAtPosition;
-    mtsFunctionQualifiedRead GetRightTimeAtPosition;
+    mtsFunctionWrite SetChannels;
+    mtsFunctionWrite SetFile;
+    mtsFunctionRead  GetChannels;
+    mtsFunctionRead  GetFile;
+    mtsFunctionRead  GetDimensions;
+    mtsFunctionRead  GetLeftDimensions;
+    mtsFunctionRead  GetRightDimensions;
 
 private:
-    IReqFilterSourceVideoFile();
-    IReqFilterSourceVideoFile(const IReqFilterSourceVideoFile& instance);
+    IReqFilterSourceImageFile();
+    IReqFilterSourceImageFile(const IReqFilterSourceImageFile& instance);
+
+    std::string Name;
+    mtsComponent* Owner;
+};
+
+
+/**************************************/
+/*** IReqFilterSourceTextFile class ***/
+/**************************************/
+
+class CISST_EXPORT IReqFilterSourceTextFile
+{
+public:
+    IReqFilterSourceTextFile(const std::string& name, mtsComponent* owner);
+    ~IReqFilterSourceTextFile();
+
+    // svlFilterSourceBase commands
+    mtsFunctionWrite SetFramerate;
+    mtsFunctionWrite SetLoop;
+    mtsFunctionVoid  Pause;
+    mtsFunctionVoid  Play;
+    mtsFunctionWrite PlayFrames;
+
+    // svlFilterSourceVideoFile commands
+    mtsFunctionWrite SetErrorValue;
+    mtsFunctionWrite SetColumns;
+    mtsFunctionRead  AddFile;
+    mtsFunctionRead  GetErrorValue;
+    mtsFunctionRead  GetColumns;
+    mtsFunctionRead  RemoveFiles;
+
+private:
+    IReqFilterSourceTextFile();
+    IReqFilterSourceTextFile(const IReqFilterSourceTextFile& instance);
 
     std::string Name;
     mtsComponent* Owner;
@@ -146,6 +185,19 @@ public:
     mtsFunctionWrite SetRightImageProperties;
     mtsFunctionWrite SaveSettings;
     mtsFunctionWrite LoadSettings;
+    mtsFunctionRead  GetChannels;
+    mtsFunctionRead  GetDevice;
+    mtsFunctionRead  GetLeftDevice;
+    mtsFunctionRead  GetRightDevice;
+    mtsFunctionRead  GetInput;
+    mtsFunctionRead  GetLeftInput;
+    mtsFunctionRead  GetRightInput;
+    mtsFunctionRead  GetFormat;
+    mtsFunctionRead  GetLeftFormat;
+    mtsFunctionRead  GetRightFormat;
+    mtsFunctionRead  GetDimensions;
+    mtsFunctionRead  GetLeftDimensions;
+    mtsFunctionRead  GetRightDimensions;
     mtsFunctionRead  GetFormatList;
     mtsFunctionRead  GetLeftFormatList;
     mtsFunctionRead  GetRightFormatList;
@@ -160,6 +212,92 @@ private:
     IReqFilterSourceVideoCapture();
     IReqFilterSourceVideoCapture(const IReqFilterSourceVideoCapture& instance);
 
+    std::string Name;
+    mtsComponent* Owner;
+};
+
+
+/***************************************/
+/*** IReqFilterSourceVideoFile class ***/
+/***************************************/
+
+class CISST_EXPORT IReqFilterSourceVideoFile
+{
+public:
+    IReqFilterSourceVideoFile(const std::string& name, mtsComponent* owner);
+    ~IReqFilterSourceVideoFile();
+
+    // svlFilterSourceBase commands
+    mtsFunctionWrite         SetFramerate;
+    mtsFunctionWrite         SetLoop;
+    mtsFunctionVoid          Pause;
+    mtsFunctionVoid          Play;
+    mtsFunctionWrite         PlayFrames;
+
+    // svlFilterSourceVideoFile commands
+    mtsFunctionWrite         SetChannels;
+    mtsFunctionWrite         SetFilename;
+    mtsFunctionWrite         SetLeftFilename;
+    mtsFunctionWrite         SetRightFilename;
+    mtsFunctionWrite         SetPosition;
+    mtsFunctionWrite         SetLeftPosition;
+    mtsFunctionWrite         SetRightPosition;
+    mtsFunctionWrite         SetRange;
+    mtsFunctionWrite         SetLeftRange;
+    mtsFunctionWrite         SetRightRange;
+    mtsFunctionRead          GetChannels;
+    mtsFunctionRead          GetFilename;
+    mtsFunctionRead          GetLeftFilename;
+    mtsFunctionRead          GetRightFilename;
+    mtsFunctionRead          GetLength;
+    mtsFunctionRead          GetLeftLength;
+    mtsFunctionRead          GetRightLength;
+    mtsFunctionRead          GetPosition;
+    mtsFunctionRead          GetLeftPosition;
+    mtsFunctionRead          GetRightPosition;
+    mtsFunctionRead          GetRange;
+    mtsFunctionRead          GetLeftRange;
+    mtsFunctionRead          GetRightRange;
+    mtsFunctionRead          GetDimensions;
+    mtsFunctionRead          GetLeftDimensions;
+    mtsFunctionRead          GetRightDimensions;
+    mtsFunctionQualifiedRead GetPositionAtTime;
+    mtsFunctionQualifiedRead GetLeftPositionAtTime;
+    mtsFunctionQualifiedRead GetRightPositionAtTime;
+    mtsFunctionQualifiedRead GetTimeAtPosition;
+    mtsFunctionQualifiedRead GetLeftTimeAtPosition;
+    mtsFunctionQualifiedRead GetRightTimeAtPosition;
+
+private:
+    IReqFilterSourceVideoFile();
+    IReqFilterSourceVideoFile(const IReqFilterSourceVideoFile& instance);
+
+    std::string Name;
+    mtsComponent* Owner;
+};
+
+
+/****************************************/
+/*** IReqFilterLightSourceBuddy class ***/
+/****************************************/
+
+class CISST_EXPORT IReqFilterLightSourceBuddy
+{
+public:
+    IReqFilterLightSourceBuddy(const std::string& name, mtsComponent* owner);
+    ~IReqFilterLightSourceBuddy();
+    
+    mtsFunctionWrite SetEnable;
+    mtsFunctionWrite SetCalibration;
+    mtsFunctionWrite SetLightBalance;
+    mtsFunctionRead  GetEnable;
+    mtsFunctionRead  GetCalibration;
+    mtsFunctionRead  GetLightBalance;
+    
+private:
+    IReqFilterLightSourceBuddy();
+    IReqFilterLightSourceBuddy(const IReqFilterLightSourceBuddy& instance);
+    
     std::string Name;
     mtsComponent* Owner;
 };

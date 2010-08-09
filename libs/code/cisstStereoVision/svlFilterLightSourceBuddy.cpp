@@ -21,6 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstStereoVision/svlFilterLightSourceBuddy.h>
+#include <cisstMultiTask/mtsInterfaceProvided.h>
 
 
 /*****************************************/
@@ -31,8 +32,11 @@ CMN_IMPLEMENT_SERVICES(svlFilterLightSourceBuddy)
 
 svlFilterLightSourceBuddy::svlFilterLightSourceBuddy() :
     svlFilterBase(),
-    Enabled(true)
+    Enabled(true),
+    LightBalance(1.0, 1.0, 1.0)
 {
+    CreateInterfaces();
+    
     AddInput("input", true);
     AddInputType("input", svlTypeImageRGB);
     AddInputType("input", svlTypeImageRGBStereo);
@@ -44,27 +48,46 @@ svlFilterLightSourceBuddy::svlFilterLightSourceBuddy() :
     SetLightBalance(vct3(50.0, 50.0, 50.0));
 }
 
-void svlFilterLightSourceBuddy::SetEnable(bool enable)
+void svlFilterLightSourceBuddy::SetEnable(const bool & enable)
 {
     Enabled = enable;
 }
 
-int svlFilterLightSourceBuddy::SetCalibration(vct3x3 & matrix)
+void svlFilterLightSourceBuddy::SetCalibration(const vct3x3 & matrix)
 {
     CalibMatrix = matrix;
-    return InvertMatrix(CalibMatrix, CalibMatrixInv);
+    if (InvertMatrix(CalibMatrix, CalibMatrixInv) != SVL_OK) {
+        CMN_LOG_CLASS_INIT_ERROR << "SetCalibration: calibration matrix is not invertable" << std::endl;
+    }
 }
 
-void svlFilterLightSourceBuddy::SetLightBalance(vct3 balance)
+void svlFilterLightSourceBuddy::SetLightBalance(const vct3 & balance)
 {
-    vct3x3 m1, m2;
+    LightBalance = balance;
 
+    vct3x3 m1, m2;
+    
     m1.Element(0, 0) = 100.0 / balance[0]; m1.Element(1, 0) = .0;                 m1.Element(2, 0) = .0;
     m1.Element(0, 1) = .0;                 m1.Element(1, 1) = 100.0 / balance[1]; m1.Element(2, 1) = .0;
     m1.Element(0, 2) = .0;                 m1.Element(1, 2) = .0;                 m1.Element(2, 2) = 100.0 / balance[2];
-
+    
     m2.ProductOf(m1, CalibMatrixInv);
     CorrectionMatrix.ProductOf(CalibMatrix, m2);
+}
+
+void svlFilterLightSourceBuddy::GetEnable(bool & enable) const
+{
+    enable = Enabled;
+}
+
+void svlFilterLightSourceBuddy::GetCalibration(vct3x3 & matrix) const
+{
+    matrix = CalibMatrix;
+}
+
+void svlFilterLightSourceBuddy::GetLightBalance(vct3 & balance) const
+{
+    balance = LightBalance;
 }
 
 int svlFilterLightSourceBuddy::Initialize(svlSample* syncInput, svlSample* &syncOutput)
@@ -154,5 +177,19 @@ int svlFilterLightSourceBuddy::InvertMatrix(const vct3x3 & matrix, vct3x3 & inve
 	inverse.Element(2, 2) =  (m00 * m11 - m10 * m01) * detinv;
 
     return SVL_OK;
+}
+
+void svlFilterLightSourceBuddy::CreateInterfaces()
+{
+    // Add NON-QUEUED provided interface for configuration management
+    mtsInterfaceProvided* provided = AddInterfaceProvided("Settings", MTS_COMMANDS_SHOULD_NOT_BE_QUEUED);
+    if (provided) {
+        provided->AddCommandWrite(&svlFilterLightSourceBuddy::SetEnable,       this, "SetEnable");
+        provided->AddCommandWrite(&svlFilterLightSourceBuddy::SetCalibration,  this, "SetCalibration");
+        provided->AddCommandWrite(&svlFilterLightSourceBuddy::SetLightBalance, this, "SetLightBalance");
+        provided->AddCommandRead (&svlFilterLightSourceBuddy::GetEnable,       this, "GetEnable");
+        provided->AddCommandRead (&svlFilterLightSourceBuddy::GetCalibration,  this, "GetCalibration");
+        provided->AddCommandRead (&svlFilterLightSourceBuddy::GetLightBalance, this, "GetLightBalance");
+    }
 }
 

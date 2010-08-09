@@ -38,26 +38,6 @@ class CISST_EXPORT svlFilterSourceVideoFile : public svlFilterSourceBase
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
 public:
-    typedef svlFilterSourceVideoFile ThisType;
-
-    class Config : public SourceConfig
-    {
-    public:
-        friend CISST_EXPORT std::ostream & operator << (std::ostream & stream, const Config & objref);
-
-        Config();
-        Config(const Config& objref);
-
-        int                           Channels;
-        vctDynamicVector<std::string> FilePath;
-        vctDynamicVector<int>         Length;
-        vctDynamicVector<int>         Position;
-        vctDynamicVector<vctInt2>     Range;
-
-        void SetChannels(const int channels);
-    };
-
-public:
     svlFilterSourceVideoFile();
     svlFilterSourceVideoFile(unsigned int channelcount);
     ~svlFilterSourceVideoFile();
@@ -74,8 +54,8 @@ public:
     int GetLength(unsigned int videoch = SVL_LEFT) const;
 
     // Run-time methods (available when 'Initialized')
-    unsigned int GetWidth(unsigned int videoch = SVL_LEFT);
-    unsigned int GetHeight(unsigned int videoch = SVL_LEFT);
+    unsigned int GetWidth(unsigned int videoch = SVL_LEFT) const;
+    unsigned int GetHeight(unsigned int videoch = SVL_LEFT) const;
     int GetPositionAtTime(const double time, unsigned int videoch = SVL_LEFT) const;
     double GetTimeAtPosition(const int position, unsigned int videoch = SVL_LEFT) const;
 
@@ -88,6 +68,10 @@ protected:
 
 private:
     svlSampleImage* OutputImage;
+    vctDynamicVector<std::string> FilePath;
+    vctDynamicVector<int> Length;
+    vctDynamicVector<int> Position;
+    vctDynamicVector<vctInt2> Range;
     vctDynamicVector<svlVideoCodecBase*> Codec;
     bool ResetTimer;
     double FirstTimestamp;
@@ -95,11 +79,9 @@ private:
     osaStopwatch Timer;
 
 protected:
-    Config Settings;
+    typedef svlFilterSourceVideoFile ThisType;
 
     virtual void CreateInterfaces();
-    virtual void GetCommand(ThisType::Config & objref) const;
-    virtual void SetCommand(const ThisType::Config & objref);
     virtual void SetChannelsCommand(const int & channels);
     virtual void SetPathLCommand(const std::string & filepath);
     virtual void SetPathRCommand(const std::string & filepath);
@@ -107,22 +89,24 @@ protected:
     virtual void SetPosRCommand(const int & position);
     virtual void SetRangeLCommand(const vctInt2 & position);
     virtual void SetRangeRCommand(const vctInt2 & position);
+    virtual void GetChannelsCommand(int & channels) const;
+    virtual void GetPathLCommand(std::string & filepath) const;
+    virtual void GetPathRCommand(std::string & filepath) const;
+    virtual void GetLengthLCommand(int & length) const;
+    virtual void GetLengthRCommand(int & length) const;
+    virtual void GetPosLCommand(int & position) const;
+    virtual void GetPosRCommand(int & position) const;
+    virtual void GetRangeLCommand(vctInt2 & range) const;
+    virtual void GetRangeRCommand(vctInt2 & range) const;
+    virtual void GetDimensionsLCommand(vctInt2 & dimensions) const;
+    virtual void GetDimensionsRCommand(vctInt2 & dimensions) const;
     virtual void GetPositionAtTimeLCommand(const double & time, int & position) const;
     virtual void GetPositionAtTimeRCommand(const double & time, int & position) const;
     virtual void GetTimeAtPositionLCommand(const int & position, double & time) const;
     virtual void GetTimeAtPositionRCommand(const int & position, double & time) const;
 };
 
-typedef mtsGenericObjectProxy<svlFilterSourceVideoFile::Config> svlFilterSourceVideoFile_Config;
-CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterSourceVideoFile_Config);
-typedef mtsGenericObjectProxy<vctInt2> svlFilterSourceVideoFile_vctInt2;
-CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterSourceVideoFile_vctInt2);
-
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterSourceVideoFile)
-
-
-CISST_EXPORT std::ostream & operator << (std::ostream & stream, const svlFilterSourceVideoFile::Config & objref);
-
 
 #endif // _svlFilterSourceVideoFile_h
 

@@ -35,6 +35,16 @@ class CISST_EXPORT svlFilterSourceImageFile : public svlFilterSourceBase
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
 public:
+    typedef struct _FileInfo {
+        std::string  path_prefix;
+        std::string  path_extension;
+        unsigned int sequence_digits;
+        unsigned int sequence_from;
+        unsigned int sequence_to;
+        unsigned int channel;
+    } FileInfo;
+
+public:
     svlFilterSourceImageFile();
     svlFilterSourceImageFile(unsigned int channelcount);
     virtual ~svlFilterSourceImageFile();
@@ -42,6 +52,9 @@ public:
     int SetChannelCount(unsigned int channelcount);
     int SetFilePath(const std::string & filepathprefix, const std::string & extension, int videoch = SVL_LEFT);
     int SetSequence(unsigned int numberofdigits = 0, unsigned int from = 0, unsigned int to = 0);
+
+    unsigned int GetWidth(unsigned int videoch = SVL_LEFT) const;
+    unsigned int GetHeight(unsigned int videoch = SVL_LEFT) const;
 
 protected:
     virtual int Initialize(svlSample* &syncOutput);
@@ -62,9 +75,25 @@ private:
     bool StopLoop;
 
     int BuildFilePath(int videoch, unsigned int framecounter = 0);
+
+protected:
+    virtual void CreateInterfaces();
+    virtual void SetChannelsCommand(const int & channels);
+    virtual void SetFileCommand(const FileInfo & fileinfo);
+    virtual void GetChannelsCommand(int & channels) const;
+    virtual void GetFileCommand(FileInfo & fileinfo) const;
+    virtual void GetDimensionsLCommand(vctInt2 & dimensions) const;
+    virtual void GetDimensionsRCommand(vctInt2 & dimensions) const;
 };
 
+typedef mtsGenericObjectProxy<svlFilterSourceImageFile::FileInfo> svlFilterSourceImageFile_FileInfo;
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterSourceImageFile_FileInfo);
+
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterSourceImageFile)
+
+
+CISST_EXPORT std::ostream & operator << (std::ostream & stream, const svlFilterSourceImageFile::FileInfo & objref);
+
 
 #endif // _svlFilterSourceImageFile_h
 

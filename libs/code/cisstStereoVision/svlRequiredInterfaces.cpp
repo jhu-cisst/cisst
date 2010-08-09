@@ -25,6 +25,16 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlRequiredInterfaces.h>
 
 
+/*********************************/
+/*** SVL-MTS type declarations ***/
+/*********************************/
+
+CMN_IMPLEMENT_SERVICES_TEMPLATED(svlFloat)
+CMN_IMPLEMENT_SERVICES_TEMPLATED(svlDouble3)
+CMN_IMPLEMENT_SERVICES_TEMPLATED(svlDouble3x3)
+CMN_IMPLEMENT_SERVICES_TEMPLATED(svlInt2)
+
+
 /*******************************/
 /*** IReqStreamManager class ***/
 /*******************************/
@@ -51,44 +61,65 @@ IReqStreamManager::~IReqStreamManager()
 
 
 /***************************************/
-/*** IReqFilterSourceVideoFile class ***/
+/*** IReqFilterSourceImageFile class ***/
 /***************************************/
 
-IReqFilterSourceVideoFile::IReqFilterSourceVideoFile(const std::string& name, mtsComponent* owner) :
+IReqFilterSourceImageFile::IReqFilterSourceImageFile(const std::string& name, mtsComponent* owner) :
     Name(name),
     Owner(owner)
 {
     if (Owner) {
         mtsInterfaceRequired* required = Owner->AddInterfaceRequired(name);
         if (required) {
-            required->AddFunction("SetFramerate",           SetFramerate);
-            required->AddFunction("SetLoop",                SetLoop);
-            required->AddFunction("Pause",                  Pause);
-            required->AddFunction("Play",                   Play);
-            required->AddFunction("PlayFrames",             PlayFrames);
-            required->AddFunction("Get",                    Get);
-            required->AddFunction("Set",                    Set);
-            required->AddFunction("SetChannels",            SetChannels);
-            required->AddFunction("SetFilename",            SetFilename);
-            required->AddFunction("SetLeftFilename",        SetLeftFilename);
-            required->AddFunction("SetRightFilename",       SetRightFilename);
-            required->AddFunction("SetPosition",            SetPosition);
-            required->AddFunction("SetLeftPosition",        SetLeftPosition);
-            required->AddFunction("SetRightPosition",       SetRightPosition);
-            required->AddFunction("SetRange",               SetRange);
-            required->AddFunction("SetLeftRange",           SetLeftRange);
-            required->AddFunction("SetRightRange",          SetRightRange);
-            required->AddFunction("GetPositionAtTime",      GetPositionAtTime);
-            required->AddFunction("GetLeftPositionAtTime",  GetLeftPositionAtTime);
-            required->AddFunction("GetRightPositionAtTime", GetRightPositionAtTime);
-            required->AddFunction("GetTimeAtPosition",      GetTimeAtPosition);
-            required->AddFunction("GetLeftTimeAtPosition",  GetLeftTimeAtPosition);
-            required->AddFunction("GetRightTimeAtPosition", GetRightTimeAtPosition);
+            required->AddFunction("SetFramerate",       SetFramerate);
+            required->AddFunction("SetLoop",            SetLoop);
+            required->AddFunction("Pause",              Pause);
+            required->AddFunction("Play",               Play);
+            required->AddFunction("PlayFrames",         PlayFrames);
+            required->AddFunction("SetChannels",        SetChannels);
+            required->AddFunction("SetFile",            SetFile);
+            required->AddFunction("GetChannels",        GetChannels);
+            required->AddFunction("GetFile",            GetFile);
+            required->AddFunction("GetDimensions",      GetDimensions);
+            required->AddFunction("GetLeftDimensions",  GetLeftDimensions);
+            required->AddFunction("GetRightDimensions", GetRightDimensions);
         }
     }
 }
 
-IReqFilterSourceVideoFile::~IReqFilterSourceVideoFile()
+IReqFilterSourceImageFile::~IReqFilterSourceImageFile()
+{
+    if (Owner) Owner->RemoveInterfaceRequired(Name);
+}
+
+
+/***************************************/
+/*** IReqFilterSourceTextFile class ***/
+/***************************************/
+
+IReqFilterSourceTextFile::IReqFilterSourceTextFile(const std::string& name, mtsComponent* owner) :
+    Name(name),
+    Owner(owner)
+{
+    if (Owner) {
+        mtsInterfaceRequired* required = Owner->AddInterfaceRequired(name);
+        if (required) {
+            required->AddFunction("SetFramerate",  SetFramerate);
+            required->AddFunction("SetLoop",       SetLoop);
+            required->AddFunction("Pause",         Pause);
+            required->AddFunction("Play",          Play);
+            required->AddFunction("PlayFrames",    PlayFrames);
+            required->AddFunction("SetErrorValue", SetErrorValue);
+            required->AddFunction("SetColumns",    SetColumns);
+            required->AddFunction("AddFile",       AddFile);
+            required->AddFunction("GetErrorValue", GetErrorValue);
+            required->AddFunction("GetColumns",    GetColumns);
+            required->AddFunction("RemoveFiles",   RemoveFiles);
+        }
+    }
+}
+
+IReqFilterSourceTextFile::~IReqFilterSourceTextFile()
 {
     if (Owner) Owner->RemoveInterfaceRequired(Name);
 }
@@ -133,6 +164,19 @@ IReqFilterSourceVideoCapture::IReqFilterSourceVideoCapture(const std::string& na
             required->AddFunction("SetRightImageProperties", SetRightImageProperties);
             required->AddFunction("SaveSettings",            SaveSettings);
             required->AddFunction("LoadSettings",            LoadSettings);
+            required->AddFunction("GetChannels",             GetChannels);
+            required->AddFunction("GetDevice",               GetDevice);
+            required->AddFunction("GetLeftDevice",           GetLeftDevice);
+            required->AddFunction("GetRightDevice",          GetRightDevice);
+            required->AddFunction("GetInput",                GetInput);
+            required->AddFunction("GetLeftInput",            GetLeftInput);
+            required->AddFunction("GetRightInput",           GetRightInput);
+            required->AddFunction("GetFormat",               GetFormat);
+            required->AddFunction("GetLeftFormat",           GetLeftFormat);
+            required->AddFunction("GetRightFormat",          GetRightFormat);
+            required->AddFunction("GetDimensions",           GetDimensions);
+            required->AddFunction("GetLeftDimensions",       GetLeftDimensions);
+            required->AddFunction("GetRightDimensions",      GetRightDimensions);
             required->AddFunction("GetFormatList",           GetFormatList);
             required->AddFunction("GetLeftFormatList",       GetLeftFormatList);
             required->AddFunction("GetRightFormatList",      GetRightFormatList);
@@ -147,6 +191,91 @@ IReqFilterSourceVideoCapture::IReqFilterSourceVideoCapture(const std::string& na
 }
 
 IReqFilterSourceVideoCapture::~IReqFilterSourceVideoCapture()
+{
+    if (Owner) Owner->RemoveInterfaceRequired(Name);
+}
+
+
+/***************************************/
+/*** IReqFilterSourceVideoFile class ***/
+/***************************************/
+
+IReqFilterSourceVideoFile::IReqFilterSourceVideoFile(const std::string& name, mtsComponent* owner) :
+    Name(name),
+    Owner(owner)
+{
+    if (Owner) {
+        mtsInterfaceRequired* required = Owner->AddInterfaceRequired(name);
+        if (required) {
+            required->AddFunction("SetFramerate",           SetFramerate);
+            required->AddFunction("SetLoop",                SetLoop);
+            required->AddFunction("Pause",                  Pause);
+            required->AddFunction("Play",                   Play);
+            required->AddFunction("PlayFrames",             PlayFrames);
+            required->AddFunction("SetChannels",            SetChannels);
+            required->AddFunction("SetFilename",            SetFilename);
+            required->AddFunction("SetLeftFilename",        SetLeftFilename);
+            required->AddFunction("SetRightFilename",       SetRightFilename);
+            required->AddFunction("SetPosition",            SetPosition);
+            required->AddFunction("SetLeftPosition",        SetLeftPosition);
+            required->AddFunction("SetRightPosition",       SetRightPosition);
+            required->AddFunction("SetRange",               SetRange);
+            required->AddFunction("SetLeftRange",           SetLeftRange);
+            required->AddFunction("SetRightRange",          SetRightRange);
+            required->AddFunction("GetChannels",            GetChannels);
+            required->AddFunction("GetFilename",            GetFilename);
+            required->AddFunction("GetLeftFilename",        GetLeftFilename);
+            required->AddFunction("GetRightFilename",       GetRightFilename);
+            required->AddFunction("GetLength",              GetLength);
+            required->AddFunction("GetLeftLength",          GetLeftLength);
+            required->AddFunction("GetRightLength",         GetRightLength);
+            required->AddFunction("GetPosition",            GetPosition);
+            required->AddFunction("GetLeftPosition",        GetLeftPosition);
+            required->AddFunction("GetRightPosition",       GetRightPosition);
+            required->AddFunction("GetRange",               GetRange);
+            required->AddFunction("GetLeftRange",           GetLeftRange);
+            required->AddFunction("GetRightRange",          GetRightRange);
+            required->AddFunction("GetDimensions",          GetDimensions);
+            required->AddFunction("GetLeftDimensions",      GetLeftDimensions);
+            required->AddFunction("GetRightDimensions",     GetRightDimensions);
+            required->AddFunction("GetPositionAtTime",      GetPositionAtTime);
+            required->AddFunction("GetLeftPositionAtTime",  GetLeftPositionAtTime);
+            required->AddFunction("GetRightPositionAtTime", GetRightPositionAtTime);
+            required->AddFunction("GetTimeAtPosition",      GetTimeAtPosition);
+            required->AddFunction("GetLeftTimeAtPosition",  GetLeftTimeAtPosition);
+            required->AddFunction("GetRightTimeAtPosition", GetRightTimeAtPosition);
+        }
+    }
+}
+
+IReqFilterSourceVideoFile::~IReqFilterSourceVideoFile()
+{
+    if (Owner) Owner->RemoveInterfaceRequired(Name);
+}
+
+
+/****************************************/
+/*** IReqFilterLightSourceBuddy class ***/
+/****************************************/
+
+IReqFilterLightSourceBuddy::IReqFilterLightSourceBuddy(const std::string& name, mtsComponent* owner) :
+    Name(name),
+    Owner(owner)
+{
+    if (Owner) {
+        mtsInterfaceRequired* required = Owner->AddInterfaceRequired(name);
+        if (required) {
+            required->AddFunction("SetEnable",       SetEnable);
+            required->AddFunction("SetCalibration",  SetCalibration);
+            required->AddFunction("SetLightBalance", SetLightBalance);
+            required->AddFunction("GetEnable",       GetEnable);
+            required->AddFunction("GetCalibration",  GetCalibration);
+            required->AddFunction("GetLightBalance", GetLightBalance);
+        }
+    }
+}
+
+IReqFilterLightSourceBuddy::~IReqFilterLightSourceBuddy()
 {
     if (Owner) Owner->RemoveInterfaceRequired(Name);
 }

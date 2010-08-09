@@ -21,6 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlFilterSourceTextFile.h>
 #include <cisstStereoVision/svlFilterOutput.h>
 #include <cisstOSAbstraction/osaSleep.h>
+#include <cisstMultiTask/mtsInterfaceProvided.h>
 
 
 /*************************************/
@@ -28,6 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 /*************************************/
 
 CMN_IMPLEMENT_SERVICES(svlFilterSourceTextFile)
+CMN_IMPLEMENT_SERVICES_TEMPLATED(svlFilterSourceTextFile_FileInfo)
 
 svlFilterSourceTextFile::svlFilterSourceTextFile() :
     svlFilterSourceBase(false),  // manual timestamp management
@@ -35,6 +37,8 @@ svlFilterSourceTextFile::svlFilterSourceTextFile() :
     ResetPosition(true),
     ErrorValue(-1000000.0)
 {
+    CreateInterfaces();
+    
     AddOutput("output", true);
     SetAutomaticOutputType(false);
     GetOutput()->SetType(svlTypeMatrixFloat);
@@ -45,50 +49,56 @@ svlFilterSourceTextFile::~svlFilterSourceTextFile()
     Release();
 }
 
-void svlFilterSourceTextFile::SetErrorValue(const float errorvalue)
+void svlFilterSourceTextFile::SetErrorValue(const float & errorvalue)
 {
     ErrorValue = errorvalue;
 }
 
-float svlFilterSourceTextFile::GetErrorValue() const
+void svlFilterSourceTextFile::SetColumns(const unsigned int & columns)
 {
-    return ErrorValue;
-}
-
-int svlFilterSourceTextFile::SetColumns(const unsigned int columns)
-{
-    if (Columns < 1) return SVL_FAIL;
+    if (Columns < 1) {
+        CMN_LOG_CLASS_INIT_ERROR << "SetColumns method was called with an argument value less than 1" << std::endl;
+        return;
+    }
     Columns = columns;
-    return SVL_OK;
 }
 
-unsigned int svlFilterSourceTextFile::GetColumns() const
+void svlFilterSourceTextFile::AddFile(const FileInfo & fileinfo)
 {
-    return Columns;
-}
-
-int svlFilterSourceTextFile::AddFile(const std::string& filepath, const int timestamp_column, const double timestamp_unit)
-{
-    if (IsInitialized()) return SVL_FAIL;
+    if (IsInitialized()) {
+        CMN_LOG_CLASS_INIT_ERROR << "AddFile: failed to add file; filter is already initialized" << std::endl;
+        return;
+    }
 
     const unsigned int size = FilePaths.size();
     FilePaths.resize(size + 1);
-    FilePaths[size] = filepath;
+    FilePaths[size] = fileinfo.filepath;
     TimeColumns.resize(size + 1);
-    TimeColumns[size] = timestamp_column;
+    TimeColumns[size] = fileinfo.timestamp_column;
     TimeUnits.resize(size + 1);
-    TimeUnits[size] = timestamp_unit;
-
-    return SVL_OK;
+    TimeUnits[size] = fileinfo.timestamp_unit;
 }
 
-void svlFilterSourceTextFile::RemoveFiles()
+void svlFilterSourceTextFile::GetErrorValue(float & errorvalue) const
 {
-    if (!IsInitialized()) {
-        FilePaths.SetSize(0);
-        TimeColumns.SetSize(0);
-        TimeUnits.SetSize(0);
+    errorvalue = ErrorValue;
+}
+
+void svlFilterSourceTextFile::GetColumns(unsigned int & columns) const
+{
+    columns = Columns;
+}
+
+void svlFilterSourceTextFile::RemoveFiles(void)
+{
+    if (IsInitialized()) {
+        CMN_LOG_CLASS_INIT_ERROR << "RemoveFiles: failed to remove files; filter is already initialized" << std::endl;
+        return;
     }
+
+    FilePaths.SetSize(0);
+    TimeColumns.SetSize(0);
+    TimeUnits.SetSize(0);
 }
 
 int svlFilterSourceTextFile::Initialize(svlSample* &syncOutput)
@@ -302,5 +312,38 @@ int svlFilterSourceTextFile::Release()
 void svlFilterSourceTextFile::OnResetTimer()
 {
     ResetTimer = true;
+}
+
+void svlFilterSourceTextFile::CreateInterfaces()
+{
+    // Add NON-QUEUED provided interface for configuration management
+    mtsInterfaceProvided* provided = AddInterfaceProvided("Settings", MTS_COMMANDS_SHOULD_NOT_BE_QUEUED);
+    if (provided) {
+        provided->AddCommandWrite(&svlFilterSourceBase::SetTargetFrequency, dynamic_cast<svlFilterSourceBase*>(this), "SetFramerate");
+        provided->AddCommandWrite(&svlFilterSourceBase::SetLoop,            dynamic_cast<svlFilterSourceBase*>(this), "SetLoop");
+        provided->AddCommandVoid (&svlFilterSourceBase::Pause,              dynamic_cast<svlFilterSourceBase*>(this), "Pause");
+        provided->AddCommandVoid (&svlFilterSourceBase::Play,               dynamic_cast<svlFilterSourceBase*>(this), "Play");
+        provided->AddCommandWrite(&svlFilterSourceBase::Play,               dynamic_cast<svlFilterSourceBase*>(this), "PlayFrames");
+        provided->AddCommandWrite(&svlFilterSourceTextFile::SetErrorValue, this, "SetErrorValue");
+        provided->AddCommandWrite(&svlFilterSourceTextFile::SetColumns,    this, "SetColumns");
+        provided->AddCommandWrite(&svlFilterSourceTextFile::AddFile,       this, "AddFile");
+        provided->AddCommandRead (&svlFilterSourceTextFile::GetErrorValue, this, "GetErrorValue");
+        provided->AddCommandRead (&svlFilterSourceTextFile::GetColumns,    this, "GetColumns");
+        provided->AddCommandVoid (&svlFilterSourceTextFile::RemoveFiles,   this, "RemoveFiles");
+    }
+}
+
+
+/****************************/
+/*** Stream out operators ***/
+/****************************/
+
+std::ostream & operator << (std::ostream & stream, const svlFilterSourceTextFile::FileInfo & objref)
+{
+    stream << "File path: " << objref.filepath << std::endl
+           << "Timestamp column: " << objref.timestamp_column << std::endl
+           << "Timestamp unit: " << objref.timestamp_unit << std::endl;
+
+    return stream;
 }
 

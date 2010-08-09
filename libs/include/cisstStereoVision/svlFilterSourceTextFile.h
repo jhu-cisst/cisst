@@ -33,15 +33,22 @@ class CISST_EXPORT svlFilterSourceTextFile : public svlFilterSourceBase
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
 public:
+    typedef struct _FileInfo {
+        std::string filepath;
+        int timestamp_column;
+        double timestamp_unit;
+    } FileInfo;
+
+public:
     svlFilterSourceTextFile();
     virtual ~svlFilterSourceTextFile();
 
-    void SetErrorValue(const float errorvalue);
-    float GetErrorValue() const;
-    int SetColumns(const unsigned int columns);
-    unsigned int GetColumns() const;
-    int AddFile(const std::string& filepath, const int timestamp_column = -1, const double timestamp_unit = cmn_s);
-    void RemoveFiles();
+    virtual void SetErrorValue(const float & errorvalue);
+    virtual void SetColumns(const unsigned int & columns);
+    virtual void AddFile(const FileInfo & fileinfo);
+    virtual void GetErrorValue(float & errorvalue) const;
+    virtual void GetColumns(unsigned int & columns) const;
+    virtual void RemoveFiles(void);
 
 protected:
     virtual int Initialize(svlSample* &syncOutput);
@@ -67,9 +74,19 @@ private:
     osaStopwatch Timer;
     float ErrorValue;
     bool ResetTimer;
+
+protected:
+    virtual void CreateInterfaces();
 };
 
+typedef mtsGenericObjectProxy<svlFilterSourceTextFile::FileInfo> svlFilterSourceTextFile_FileInfo;
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterSourceTextFile_FileInfo);
+
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterSourceTextFile)
+
+
+CISST_EXPORT std::ostream & operator << (std::ostream & stream, const svlFilterSourceTextFile::FileInfo & objref);
+
 
 #endif  // _svlFilterSourceTextFile_h
 
