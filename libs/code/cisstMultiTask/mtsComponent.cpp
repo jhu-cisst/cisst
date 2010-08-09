@@ -612,30 +612,6 @@ void mtsComponent::ToStream(std::ostream & outputStream) const
 }
 
 
-std::string mtsComponent::ToGraphFormat(void) const
-{
-    std::string buffer("add taska [[");
-    buffer = "add taska [[" + Name + "],[";
-    InterfacesRequiredOrInputMapType::const_iterator reqit = InterfacesRequiredOrInput.begin();
-    while (reqit != InterfacesRequiredOrInput.end()) {
-        buffer += reqit->first;
-        reqit++;
-        if (reqit != InterfacesRequiredOrInput.end())
-            buffer += ",";
-    }
-    buffer += "],[";
-    InterfacesProvidedOrOutputMapType::const_iterator provit = InterfacesProvidedOrOutput.begin();
-    while (provit != InterfacesProvidedOrOutput.end()) {
-        buffer += provit->first;
-        provit++;
-        if (provit != InterfacesProvidedOrOutput.end())
-            buffer += ",";
-    }
-    buffer += "]]\n";
-    return buffer;
-}
-
-
 void mtsComponent::UseSeparateLogFileDefault(bool forwardToLogger)
 {
     std::string currentDateTime;

@@ -19,8 +19,8 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+#include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsConfig.h>
-#include <cisstOSAbstraction/osaSocket.h>
 #include <cisstMultiTask/mtsManagerGlobal.h>
 
 #if CISST_MTS_HAS_ICE
@@ -37,13 +37,59 @@ mtsManagerGlobal::mtsManagerGlobal() :
 #if CISST_MTS_HAS_ICE
     , ProxyServer(0)
 #endif
+    , JGraphSocket(osaSocket::TCP)
+    , JGraphSocketConnected(false)
 {
     ProcessMap.SetOwner(*this);
+
+    ConnectToTaskViewer();
 }
 
 mtsManagerGlobal::~mtsManagerGlobal()
 {
     Cleanup();
+}
+
+bool mtsManagerGlobal::ConnectToTaskViewer(const std::string &ipAddress, unsigned short port)
+{
+    // Try to connect to the JGraph application software (Java program).
+    // Note that the JGraph application also sends event messages back via the socket,
+    // though we don't currently read them. To do this, it would be best to implement
+    // the Global Component Manager as a periodic task.
+    CMN_LOG_CLASS_INIT_WARNING << "Attempting to connect to TaskViewer" << std::endl;
+    JGraphSocketConnected = JGraphSocket.Connect(ipAddress, port);
+    if (JGraphSocketConnected) {
+        osaSleep(1.0 * cmn_s);  // need to wait or JGraph server will not start properly
+        // Now, send all existing components and connections
+        std::vector<std::string> processList;
+        std::vector<std::string> componentList;
+        size_t i, j;  // could use iterators instead
+        GetNamesOfProcesses(processList);
+        for (i = 0; i < processList.size(); i++) {
+            componentList.clear();
+            GetNamesOfComponents(processList[i], componentList);
+            for (j = 0; j < componentList.size(); j++) {
+                // Ignore proxy components
+                if (!IsProxyComponent(componentList[j])) {
+                    std::string message = GetComponentInGraphFormat(processList[i], componentList[j]);
+                    if (message != "") {
+                        CMN_LOG_CLASS_INIT_VERBOSE << "Sending " << message << std::endl;
+                        JGraphSocket.Send(message);
+                    }
+                }
+            }
+        }
+        std::vector<ConnectionStrings> connectionList;
+        GetListOfConnections(connectionList);
+        for (i = 0; i < connectionList.size(); i++) {
+            std::string message = GetConnectionInGraphFormat(connectionList[i]);
+            CMN_LOG_CLASS_INIT_VERBOSE << "Sending " << message << std::endl;
+            JGraphSocket.Send(message);
+        }
+    } else {
+        CMN_LOG_CLASS_INIT_WARNING << "Failed to connect to JGraph server" << std::endl;
+    }
+    return JGraphSocketConnected;
 }
 
 //-------------------------------------------------------------------------
@@ -52,6 +98,9 @@ mtsManagerGlobal::~mtsManagerGlobal()
 bool mtsManagerGlobal::Cleanup(void)
 {
     bool ret = true;
+
+    JGraphSocket.Close();
+    JGraphSocketConnected = false;
 
     // Remove all processes safely
     ProcessMapType::iterator itProcess = ProcessMap.begin();
@@ -247,6 +296,19 @@ bool mtsManagerGlobal::AddComponent(const std::string & processName, const std::
         (ProcessMap.GetMap())[processName] = componentMap;
     }
 
+    // PK TEMP: special handling if componentName ends with "-END"
+    if (componentName.find("-END", componentName.length()-4) != std::string::npos) {
+        if (JGraphSocketConnected) {
+            std::string componentNameOnly = componentName.substr(0, componentName.length()-4);
+            std::string buffer = GetComponentInGraphFormat(processName, componentNameOnly);
+            if (buffer != "") {
+                CMN_LOG_CLASS_INIT_VERBOSE << "Sending " << buffer << std::endl;
+                JGraphSocket.Send(buffer);
+            }
+        }
+        return true;
+    }
+
     bool ret = componentMap->AddItem(componentName, 0);
     if (!ret) {
         CMN_LOG_CLASS_RUN_ERROR << "AddComponent: Can't add a component: "
@@ -312,6 +374,40 @@ bool mtsManagerGlobal::RemoveComponent(const std::string & processName, const st
     ret &= componentMap->RemoveItem(componentName);
 
     return ret;
+}
+
+std::string mtsManagerGlobal::GetComponentInGraphFormat(const std::string &processName,
+                                                        const std::string &componentName) const
+{
+    size_t i;
+    std::vector<std::string> requiredList;
+    std::vector<std::string> providedList;
+    GetNamesOfInterfacesRequiredOrInput(processName, componentName, requiredList);
+    GetNamesOfInterfacesProvidedOrOutput(processName, componentName, providedList);
+    // For now, ignore components that don't have any interfaces
+    if ((requiredList.size() == 0) && (providedList.size() == 0))
+        return "";
+    std::string buffer;
+    buffer = "add taska [[" + processName + ":" + componentName + "],[";
+    for (i = 0; i < requiredList.size(); i++) {
+        buffer += requiredList[i];
+        if (i < requiredList.size()-1)
+            buffer += ",";
+    }
+    buffer += "],[";
+    for (i = 0; i < providedList.size(); i++) {
+        buffer += providedList[i];
+        if (i < providedList.size()-1)
+            buffer += ",";
+    }
+    buffer += "]]\n";
+    return buffer;
+}
+
+bool mtsManagerGlobal::IsProxyComponent(const std::string & componentName) const
+{
+    // PK: Need to fix this to be more robust
+    return (componentName.find("Proxy", componentName.length()-5) != std::string::npos);
 }
 
 //-------------------------------------------------------------------------
@@ -773,6 +869,15 @@ int mtsManagerGlobal::Connect(const std::string & requestProcessName,
     ConnectionElementMap.insert(std::make_pair(ConnectionID, element));
     ConnectionElementMapChange.Unlock();
 
+    // Send to TaskViewer if present
+    if (JGraphSocketConnected) {
+        std::string message = "add edge [" + clientProcessName + ":" + clientComponentNameActual + ", "
+                                           + serverProcessName + ":" + serverComponentNameActual + ", "
+                                           + clientInterfaceRequiredNameActual + ", "
+                                           + serverInterfaceProvidedNameActual + "]\n";
+        CMN_LOG_CLASS_INIT_VERBOSE << "Sending " << message << std::endl;
+        JGraphSocket.Send(message);
+    }
     // Increase counter for next connection id
     ++ConnectionID;
 
@@ -1099,7 +1204,7 @@ mtsManagerGlobal::GetConnectionsOfInterfaceRequiredOrInput(const std::string & c
     return connectionMap;
 }
 
-void mtsManagerGlobal::GetNamesOfProcesses(std::vector<std::string>& namesOfProcesses)
+void mtsManagerGlobal::GetNamesOfProcesses(std::vector<std::string>& namesOfProcesses) const
 {
     std::vector<std::string> temp;
     ProcessMap.GetNames(temp);
@@ -1116,7 +1221,7 @@ void mtsManagerGlobal::GetNamesOfProcesses(std::vector<std::string>& namesOfProc
 }
 
 void mtsManagerGlobal::GetNamesOfComponents(const std::string & processName,
-                                            std::vector<std::string>& namesOfComponents)
+                                            std::vector<std::string>& namesOfComponents) const
 {
     ComponentMapType * components = ProcessMap.GetItem(processName);
     if (!components) return;
@@ -1126,7 +1231,7 @@ void mtsManagerGlobal::GetNamesOfComponents(const std::string & processName,
 
 void mtsManagerGlobal::GetNamesOfInterfacesProvidedOrOutput(const std::string & processName,
                                                             const std::string & componentName,
-                                                            std::vector<std::string>& namesOfInterfacesProvided)
+                                                            std::vector<std::string>& namesOfInterfacesProvided) const
 {
     ComponentMapType * components = ProcessMap.GetItem(processName);
     if (!components) return;
@@ -1139,7 +1244,7 @@ void mtsManagerGlobal::GetNamesOfInterfacesProvidedOrOutput(const std::string & 
 
 void mtsManagerGlobal::GetNamesOfInterfacesRequiredOrInput(const std::string & processName,
                                                            const std::string & componentName,
-                                                           std::vector<std::string>& namesOfInterfacesRequired)
+                                                           std::vector<std::string>& namesOfInterfacesRequired) const
 {
     ComponentMapType * components = ProcessMap.GetItem(processName);
     if (!components) return;
@@ -1155,7 +1260,7 @@ void mtsManagerGlobal::GetNamesOfInterfacesRequiredOrInput(const std::string & p
 void mtsManagerGlobal::GetNamesOfCommands(const std::string & processName,
                                           const std::string & componentName,
                                           const std::string & providedInterfaceName,
-                                          std::vector<std::string>& namesOfCommands)
+                                          std::vector<std::string>& namesOfCommands) const
 {
     if (!LocalManagerConnected) return;
 
@@ -1165,7 +1270,7 @@ void mtsManagerGlobal::GetNamesOfCommands(const std::string & processName,
 void mtsManagerGlobal::GetNamesOfEventGenerators(const std::string & processName,
                                                  const std::string & componentName,
                                                  const std::string & providedInterfaceName,
-                                                 std::vector<std::string>& namesOfEventGenerators)
+                                                 std::vector<std::string>& namesOfEventGenerators) const
 {
     if (!LocalManagerConnected) return;
 
@@ -1175,7 +1280,7 @@ void mtsManagerGlobal::GetNamesOfEventGenerators(const std::string & processName
 void mtsManagerGlobal::GetNamesOfFunctions(const std::string & processName,
                                            const std::string & componentName,
                                            const std::string & requiredInterfaceName,
-                                           std::vector<std::string>& namesOfFunctions)
+                                           std::vector<std::string>& namesOfFunctions) const
 {
     if (!LocalManagerConnected) return;
 
@@ -1185,7 +1290,7 @@ void mtsManagerGlobal::GetNamesOfFunctions(const std::string & processName,
 void mtsManagerGlobal::GetNamesOfEventHandlers(const std::string & processName,
                                                const std::string & componentName,
                                                const std::string & requiredInterfaceName,
-                                               std::vector<std::string>& namesOfEventHandlers)
+                                               std::vector<std::string>& namesOfEventHandlers) const
 {
     if (!LocalManagerConnected) return;
 
@@ -1196,7 +1301,7 @@ void mtsManagerGlobal::GetDescriptionOfCommand(const std::string & processName,
                                                const std::string & componentName,
                                                const std::string & providedInterfaceName,
                                                const std::string & commandName,
-                                               std::string & description)
+                                               std::string & description) const
 {
     if (!LocalManagerConnected) return;
 
@@ -1207,7 +1312,7 @@ void mtsManagerGlobal::GetDescriptionOfEventGenerator(const std::string & proces
                                                       const std::string & componentName,
                                                       const std::string & providedInterfaceName,
                                                       const std::string & eventGeneratorName,
-                                                      std::string & description)
+                                                      std::string & description) const
 {
     if (!LocalManagerConnected) return;
 
@@ -1218,7 +1323,7 @@ void mtsManagerGlobal::GetDescriptionOfFunction(const std::string & processName,
                                                 const std::string & componentName,
                                                 const std::string & requiredInterfaceName,
                                                 const std::string & functionName,
-                                                std::string & description)
+                                                std::string & description) const
 {
     if (!LocalManagerConnected) return;
 
@@ -1229,7 +1334,7 @@ void mtsManagerGlobal::GetDescriptionOfEventHandler(const std::string & processN
                                                     const std::string & componentName,
                                                     const std::string & requiredInterfaceName,
                                                     const std::string & eventHandlerName,
-                                                    std::string & description)
+                                                    std::string & description) const
 {
     if (!LocalManagerConnected) return;
 
@@ -1241,7 +1346,7 @@ void mtsManagerGlobal::GetArgumentInformation(const std::string & processName,
                                               const std::string & providedInterfaceName,
                                               const std::string & commandName,
                                               std::string & argumentName,
-                                              std::vector<std::string> & signalNames)
+                                              std::vector<std::string> & signalNames) const
 {
     if (!LocalManagerConnected) return;
 
@@ -1253,7 +1358,7 @@ void mtsManagerGlobal::GetValuesOfCommand(const std::string & processName,
                                           const std::string & providedInterfaceName,
                                           const std::string & commandName,
                                           const int scalarIndex,
-                                          mtsManagerLocalInterface::SetOfValues & values)
+                                          mtsManagerLocalInterface::SetOfValues & values) const
 {
     if (!LocalManagerConnected) return;
 
@@ -1439,4 +1544,13 @@ void mtsManagerGlobal::GetListOfConnections(std::vector<ConnectionStrings> & lis
 
         list.push_back(connection);
     }
+}
+
+std::string mtsManagerGlobal::GetConnectionInGraphFormat(const ConnectionStrings &connection) const
+{
+    std::string buffer = "add edge [" + connection.ClientProcessName + ":" + connection.ClientComponentName + ", "
+                                      + connection.ServerProcessName + ":" + connection.ServerComponentName + ", "
+                                      + connection.ClientInterfaceRequiredName + ", "
+                                      + connection.ServerInterfaceProvidedName + "]\n";
+    return buffer;
 }

@@ -321,8 +321,6 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     /*! Send a human readable description of the component. */
     void ToStream(std::ostream & outputStream) const;
 
-    /*! Put in format suitable for graph visualization. */
-    std::string ToGraphFormat(void) const;
 };
 
 

@@ -36,6 +36,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstOSAbstraction/osaMutex.h>
 #include <cisstOSAbstraction/osaGetTime.h>
+#include <cisstOSAbstraction/osaSocket.h>
 
 #include <cisstMultiTask/mtsManagerLocalInterface.h>
 #include <cisstMultiTask/mtsManagerGlobalInterface.h>
@@ -249,6 +250,9 @@ protected:
     mtsManagerProxyServer * ProxyServer;
 #endif
 
+    osaSocket JGraphSocket;
+    bool JGraphSocketConnected;
+
     //-------------------------------------------------------------------------
     //  Processing Methods
     //-------------------------------------------------------------------------
@@ -285,6 +289,11 @@ public:
     ~mtsManagerGlobal();
 
     //-------------------------------------------------------------------------
+    //  Interface to Task Viewer (Java program based on JGraph)
+    //-------------------------------------------------------------------------
+    bool ConnectToTaskViewer(const std::string &ipAddress = "localhost", unsigned short port = 4444);
+
+    //-------------------------------------------------------------------------
     //  Process Management
     //-------------------------------------------------------------------------
     bool AddProcess(const std::string & processName);
@@ -303,6 +312,10 @@ public:
     bool FindComponent(const std::string & processName, const std::string & componentName) const;
 
     bool RemoveComponent(const std::string & processName, const std::string & componentName);
+
+    std::string GetComponentInGraphFormat(const std::string & processName, const std::string & componentName) const;
+
+    bool IsProxyComponent(const std::string & componentName) const;
 
     //-------------------------------------------------------------------------
     //  Interface Management
@@ -350,6 +363,8 @@ public:
 
     void GetListOfConnections(std::vector<ConnectionStrings> & list) const;
 
+    std::string GetConnectionInGraphFormat(const ConnectionStrings &connection) const;
+
     //-------------------------------------------------------------------------
     //  Getters
     //-------------------------------------------------------------------------
@@ -363,74 +378,74 @@ public:
     void GetIPAddress(std::vector<std::string> & ipAddresses) const;
 
     /*! Get names of all processes */
-    void GetNamesOfProcesses(std::vector<std::string>& namesOfProcesses);
+    void GetNamesOfProcesses(std::vector<std::string>& namesOfProcesses) const;
 
     /*! Get names of all components in a process */
     void GetNamesOfComponents(const std::string & processName,
-                              std::vector<std::string>& namesOfComponents);
+                              std::vector<std::string>& namesOfComponents) const;
 
     /*! Get names of all provided interfaces in a component */
     void GetNamesOfInterfacesProvidedOrOutput(const std::string & processName,
                                               const std::string & componentName,
-                                              std::vector<std::string> & namesOfInterfacesProvided);
+                                              std::vector<std::string> & namesOfInterfacesProvided) const;
 
     /*! Get names of all required interfaces in a component */
     void GetNamesOfInterfacesRequiredOrInput(const std::string & processName,
                                              const std::string & componentName,
-                                             std::vector<std::string> & namesOfInterfacesRequired);
+                                             std::vector<std::string> & namesOfInterfacesRequired) const;
 
 #if CISST_MTS_HAS_ICE
     /*! Get names of all commands in a provided interface */
     void GetNamesOfCommands(const std::string & processName,
                             const std::string & componentName,
                             const std::string & providedInterfaceName,
-                            std::vector<std::string>& namesOfCommands);
+                            std::vector<std::string>& namesOfCommands) const;
 
     /*! Get names of all event generators in a provided interface */
     void GetNamesOfEventGenerators(const std::string & processName,
                                    const std::string & componentName,
                                    const std::string & providedInterfaceName,
-                                   std::vector<std::string>& namesOfEventGenerators);
+                                   std::vector<std::string>& namesOfEventGenerators) const;
 
     /*! Get names of all functions in a required interface */
     void GetNamesOfFunctions(const std::string & processName,
                              const std::string & componentName,
                              const std::string & requiredInterfaceName,
-                             std::vector<std::string>& namesOfFunctions);
+                             std::vector<std::string>& namesOfFunctions) const;
 
     /*! Get names of all event handlers in a required interface */
     void GetNamesOfEventHandlers(const std::string & processName,
                                  const std::string & componentName,
                                  const std::string & requiredInterfaceName,
-                                 std::vector<std::string>& namesOfEventHandlers);
+                                 std::vector<std::string>& namesOfEventHandlers) const;
 
     /*! Get description of a command in a provided interface */
     void GetDescriptionOfCommand(const std::string & processName,
                                  const std::string & componentName,
                                  const std::string & providedInterfaceName,
                                  const std::string & commandName,
-                                 std::string & description);
+                                 std::string & description) const;
 
     /*! Get description of an event generator in a provided interface */
     void GetDescriptionOfEventGenerator(const std::string & processName,
                                         const std::string & componentName,
                                         const std::string & providedInterfaceName,
                                         const std::string & eventGeneratorName,
-                                        std::string & description);
+                                        std::string & description) const;
 
     /*! Get description of a function in a required interface */
     void GetDescriptionOfFunction(const std::string & processName,
                                   const std::string & componentName,
                                   const std::string & requiredInterfaceName,
                                   const std::string & functionName,
-                                  std::string & description);
+                                  std::string & description) const;
 
     /*! Get description of a function in a required  interface */
     void GetDescriptionOfEventHandler(const std::string & processName,
                                       const std::string & componentName,
                                       const std::string & requiredInterfaceName,
                                       const std::string & eventHandlerName,
-                                      std::string & description);
+                                      std::string & description) const;
 
     /*! Get parameter information (name, argument count, argument type) */
     void GetArgumentInformation(const std::string & processName,
@@ -438,7 +453,7 @@ public:
                                 const std::string & providedInterfaceName,
                                 const std::string & commandName,
                                 std::string & argumentName,
-                                std::vector<std::string> & argumentParameterNames);
+                                std::vector<std::string> & argumentParameterNames) const;
 
     /*! Get current values of read commands */
     void GetValuesOfCommand(const std::string & processName,
@@ -446,7 +461,7 @@ public:
                             const std::string & providedInterfaceName,
                             const std::string & commandName,
                             const int scalarIndex,
-                            mtsManagerLocalInterface::SetOfValues & values);
+                            mtsManagerLocalInterface::SetOfValues & values) const;
 #endif
 
     /*! Get a process object (local component manager object) */

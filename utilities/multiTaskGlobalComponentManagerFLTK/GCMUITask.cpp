@@ -336,6 +336,13 @@ void GCMUITask::Run(void)
         return;
     }
 
+    // Connect to Task Viewer
+    if (UI.ButtonTaskViewerClicked) {
+        // can specify IP address and port number (default is "localhost", 4444)
+        GlobalComponentManager.ConnectToTaskViewer();
+        UI.ButtonTaskViewerClicked = false;
+    }
+
     if (Fl::check() == 0) {
         Kill();
     }

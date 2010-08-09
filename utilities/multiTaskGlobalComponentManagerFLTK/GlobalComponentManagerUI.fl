@@ -73,7 +73,7 @@ class GlobalComponentManagerUI {open
           }
           Fl_Light_Button ButtonAutoRefresh {
             label {Auto Refresh}
-            xywh {560 160 105 50} box GTK_UP_BOX value 1 color 7 labelfont 1 labelsize 12 align 16
+            xywh {560 147 105 40} box GTK_UP_BOX value 1 color 7 labelfont 1 labelsize 12 align 16
           }
           Fl_Browser BrowserProvidedInterfaces {
             label {Provided Interfaces}
@@ -86,8 +86,14 @@ class GlobalComponentManagerUI {open
           Fl_Button ButtonRefresh {
             label Refresh
             callback {ButtonRefreshClicked = true;}
-            xywh {560 105 105 45} box GTK_UP_BOX color 7 labelfont 1 labelsize 12
+            xywh {560 104 105 40} box GTK_UP_BOX color 7 labelfont 1 labelsize 12
             code0 {ButtonRefreshClicked = false;}
+          }
+          Fl_Button ButtonTaskViewer {
+            label {Task Viewer}
+            callback {ButtonTaskViewerClicked = true;}
+            xywh {560 190 105 40} box GTK_UP_BOX color 7 labelfont 1 labelsize 12
+            code0 {ButtonTaskViewerClicked = false;}
           }
         }
         Fl_Group DataVisualizer {
@@ -299,6 +305,8 @@ class GlobalComponentManagerUI {open
   decl {bool ButtonAutoRefreshClicked;} {public
   }
   decl {bool ButtonRefreshClicked;} {public
+  }
+  decl {bool ButtonTaskViewerClicked;} {public
   }
   decl {bool ButtonRemoveClicked;} {public
   }

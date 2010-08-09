@@ -51,30 +51,12 @@ bool mtsManagerLocal::UnitTestNetworkProxyEnabled = false;
 #define DEFAULT_PROCESS_NAME "LCM"
 
 mtsManagerLocal::mtsManagerLocal(void)
-#if 0
-    , JGraphSocket(osaSocket::TCP)
-#endif
 {
     Initialize();
 
     if (!UnitTestEnabled) {
         TimeServer.SetTimeOrigin();
     }
-
-#if 0
-    JGraphSocketConnected = false;
-
-    // Try to connect to the JGraph application software (Java program).
-    // Note that the JGraph application also sends event messages back via the socket,
-    // though we don't currently read them. To do this, it would be best to implement
-    // the TaskManager as a periodic task.
-    JGraphSocketConnected = JGraphSocket.Connect("127.0.0.1", 4444);
-    if (JGraphSocketConnected) {
-        osaSleep(1.0 * cmn_s);  // need to wait or JGraph server will not start properly
-    } else {
-        CMN_LOG_CLASS_INIT_WARNING << "Failed to connect to JGraph server" << std::endl;
-    }
-#endif
 
     // In standalone mode, process name is set as DEFAULT_PROCESS_NAME by
     // default since there is only one instance of local task manager.
@@ -113,21 +95,6 @@ mtsManagerLocal::mtsManagerLocal(const std::string & globalComponentManagerIP,
     if (!UnitTestEnabled) {
         TimeServer.SetTimeOrigin();
     }
-
-#if 0
-    JGraphSocketConnected = false;
-
-    // Try to connect to the JGraph application software (Java program).
-    // Note that the JGraph application also sends event messages back via the socket,
-    // though we don't currently read them. To do this, it would be best to implement
-    // the TaskManager as a periodic task.
-    JGraphSocketConnected = JGraphSocket.Connect("127.0.0.1", 4444);
-    if (JGraphSocketConnected) {
-        osaSleep(1.0 * cmn_s);  // need to wait or JGraph server will not start properly
-    } else {
-        CMN_LOG_CLASS_INIT_WARNING << "Failed to connect to JGraph server" << std::endl;
-    }
-#endif
 
     // Create proxy
     if (!CreateProxy()) {
@@ -211,9 +178,6 @@ void mtsManagerLocal::Initialize(void)
 
 void mtsManagerLocal::Cleanup(void)
 {
-    //JGraphSocket.Close();
-    //JGraphSocketConnected = false;
-
     if (ManagerGlobal) {
         delete ManagerGlobal;
         ManagerGlobal = 0;
@@ -397,6 +361,8 @@ bool mtsManagerLocal::AddComponent(mtsComponent * component)
 
     CMN_LOG_CLASS_INIT_VERBOSE << "AddComponent: "
                                << "successfully added component to the global component manager: " << componentName << std::endl;
+    // PK TEMP
+    ManagerGlobal->AddComponent(ProcessName, componentName+"-END");
 
     bool success;
     ComponentMapChange.Lock();
