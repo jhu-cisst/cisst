@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlFilterInput.h>
 #include <cisstOSAbstraction/osaThread.h>
 #include <cisstOSAbstraction/osaThreadSignal.h>
+#include <cisstMultiTask/mtsInterfaceProvided.h>
 
 #ifdef _WIN32
 #include "winWin32.h"
@@ -86,7 +87,7 @@ CWindowManagerBase::CWindowManagerBase(unsigned int numofwins) :
     Height(0),
     PosX(0),
     PosY(0),
-    Callback(0),
+    EventHandler(0),
     InitReadySignal(0)
 {
 }
@@ -102,7 +103,7 @@ CWindowManagerBase::~CWindowManagerBase()
 
 void CWindowManagerBase::SetCallback(svlImageWindowCallbackBase* callback)
 {
-    Callback = callback;
+    EventHandler = callback;
 }
 
 void CWindowManagerBase::SetTitleText(const std::string title)
@@ -180,22 +181,22 @@ void CWindowManagerBase::UnlockBuffers()
 
 void CWindowManagerBase::OnNewFrame(unsigned int frameid)
 {
-    if (Callback) Callback->OnNewFrame(frameid);
+    if (EventHandler) EventHandler->OnNewFrame(frameid);
 }
 
 void CWindowManagerBase::OnUserEvent(unsigned int winid, bool ascii, unsigned int eventid)
 {
-    if (Callback) Callback->OnUserEvent(winid, ascii, eventid);
+    if (EventHandler) EventHandler->OnUserEvent(winid, ascii, eventid);
 }
 
 void CWindowManagerBase::GetMousePos(int& x, int& y)
 {
-    if (Callback) Callback->GetMousePos(x, y);
+    if (EventHandler) EventHandler->GetMousePos(x, y);
 }
 
 void CWindowManagerBase::SetMousePos(int x, int y)
 {
-    if (Callback) Callback->SetMousePos(x, y);
+    if (EventHandler) EventHandler->SetMousePos(x, y);
 }
 
 
@@ -205,7 +206,9 @@ void CWindowManagerBase::SetMousePos(int x, int y)
 
 void* CWindowManagerThreadProc::Proc(svlFilterImageWindow* obj)
 {
-    obj->WindowManager->DoModal(true, obj->GetFullScreen());
+    bool fullscreen;
+    obj->GetFullScreen(fullscreen);
+    obj->WindowManager->DoModal(true, fullscreen);
 	return this;
 }
 
@@ -218,14 +221,15 @@ CMN_IMPLEMENT_SERVICES(svlFilterImageWindow)
 
 svlFilterImageWindow::svlFilterImageWindow() :
     svlFilterBase(),
-    TimestampEnabled(false),
     FullScreenFlag(false),
     PositionSetFlag(false),
     Thread(0),
     ThreadProc(0),
     WindowManager(0),
-    Callback(0)
+    EventHandler(0)
 {
+    CreateInterfaces();
+    
     AddInput("input", true);
     AddInputType("input", svlTypeImageRGB);
     AddInputType("input", svlTypeImageRGBStereo);
@@ -239,45 +243,71 @@ svlFilterImageWindow::~svlFilterImageWindow()
     Release();
 }
 
-void svlFilterImageWindow::SetFullScreen(bool fullscreen)
+int svlFilterImageWindow::SetPosition(const int x, const int y, const unsigned int videoch)
+{
+    if (videoch > 1) return SVL_FAIL;
+
+    if (PositionSetFlag) {
+        PosX[videoch] = x;
+        PosY[videoch] = y;
+    }
+    else {
+        PosX[SVL_LEFT] = PosX[SVL_RIGHT] = x;
+        PosY[SVL_LEFT] = PosY[SVL_RIGHT] = y;
+    }
+    PositionSetFlag = true;
+
+    return SVL_OK;
+}
+
+int svlFilterImageWindow::GetPosition(int & x, int & y, unsigned int videoch) const
+{
+    if (videoch > 1 || !PositionSetFlag) return SVL_FAIL;
+
+    x = PosX[videoch];
+    y = PosY[videoch];
+
+    return SVL_OK;
+}
+
+void svlFilterImageWindow::SetEventHandler(svlImageWindowCallbackBase* handler)
+{
+    EventHandler = handler;
+}
+
+void svlFilterImageWindow::SetFullScreen(const bool & fullscreen)
 {
     FullScreenFlag = fullscreen;
 }
 
-bool svlFilterImageWindow::GetFullScreen()
-{
-    return FullScreenFlag;
-}
-
-void svlFilterImageWindow::SetWindowPosition(int x, int y, unsigned int videoch)
-{
-    if (videoch == SVL_LEFT || videoch == SVL_RIGHT) {
-        if (PositionSetFlag) {
-            PosX[videoch] = x;
-            PosY[videoch] = y;
-        }
-        else {
-            PosX[SVL_LEFT] = PosX[SVL_RIGHT] = x;
-            PosY[SVL_LEFT] = PosY[SVL_RIGHT] = y;
-        }
-        PositionSetFlag = true;
-    }
-}
-
-void svlFilterImageWindow::SetTitleText(const std::string title)
+void svlFilterImageWindow::SetTitle(const std::string & title)
 {
     Title = title;
 }
 
-void svlFilterImageWindow::EnableTimestampInTitle(bool enable)
+void svlFilterImageWindow::GetFullScreen(bool & fullscreen) const
 {
-    if (enable) TimestampEnabled = 1; // display timestamp
-    else if (TimestampEnabled == 1) TimestampEnabled = -1; // restore original title
+    fullscreen = FullScreenFlag;
+}
+
+void svlFilterImageWindow::GetTitle(std::string & title) const
+{
+    title = Title;
+}
+
+int svlFilterImageWindow::SetWindowPosition(const int x, const int y, const unsigned int videoch)
+{
+    return SetPosition(x, y, videoch);
+}
+
+void svlFilterImageWindow::SetTitleText(const std::string & title)
+{
+    SetTitle(title);
 }
 
 void svlFilterImageWindow::SetCallback(svlImageWindowCallbackBase* callback)
 {
-    Callback = callback;
+    SetEventHandler(callback);
 }
 
 int svlFilterImageWindow::Initialize(svlSample* syncInput, svlSample* &syncOutput)
@@ -322,7 +352,7 @@ int svlFilterImageWindow::Initialize(svlSample* syncInput, svlSample* &syncOutpu
     }
 
     WindowManager->SetTitleText(Title);
-    WindowManager->SetCallback(Callback);
+    WindowManager->SetCallback(EventHandler);
 
     // Start GUI thread
     ThreadProc = new CWindowManagerThreadProc;
@@ -351,15 +381,6 @@ int svlFilterImageWindow::Process(svlProcInfo* procInfo, svlSample* syncInput, s
     _OnSingleThread(procInfo)
     {
         WindowManager->LockBuffers();
-
-        if (TimestampEnabled == 1) WindowManager->SetTimestamp(syncInput->GetTimestamp());
-        else if (TimestampEnabled == -1) {
-            WindowManager->SetTimestamp(-1.0);
-            TimestampEnabled = 0;
-        }
-        else {
-            WindowManager->SetTimestamp(0.0);
-        }
     }
 
     _SynchronizeThreads(procInfo);
@@ -375,7 +396,7 @@ int svlFilterImageWindow::Process(svlProcInfo* procInfo, svlSample* syncInput, s
     {
         WindowManager->UnlockBuffers();
         WindowManager->DrawImages();
-        if (Callback) Callback->OnNewFrame(FrameCounter);
+        if (EventHandler) EventHandler->OnNewFrame(FrameCounter);
     }
 
     return SVL_OK;
@@ -398,5 +419,51 @@ int svlFilterImageWindow::Release()
         WindowManager = 0;
     }
     return SVL_OK;
+}
+
+void svlFilterImageWindow::CreateInterfaces()
+{
+    // Add NON-QUEUED provided interface for configuration management
+    mtsInterfaceProvided* provided = AddInterfaceProvided("Settings", MTS_COMMANDS_SHOULD_NOT_BE_QUEUED);
+    if (provided) {
+        provided->AddCommandWrite(&svlFilterImageWindow::SetFullScreen,       this, "SetFullScreen");
+        provided->AddCommandWrite(&svlFilterImageWindow::SetTitle,            this, "SetTitle");
+        provided->AddCommandWrite(&svlFilterImageWindow::SetPositionLCommand, this, "SetPosition");
+        provided->AddCommandWrite(&svlFilterImageWindow::SetPositionLCommand, this, "SetLeftPosition");
+        provided->AddCommandWrite(&svlFilterImageWindow::SetPositionRCommand, this, "SetRightPosition");
+        provided->AddCommandRead (&svlFilterImageWindow::GetFullScreen,       this, "GetFullScreen");
+        provided->AddCommandRead (&svlFilterImageWindow::GetTitle,            this, "GetTitle");
+        provided->AddCommandRead (&svlFilterImageWindow::GetPositionLCommand, this, "GetPosition");
+        provided->AddCommandRead (&svlFilterImageWindow::GetPositionLCommand, this, "GetLeftPosition");
+        provided->AddCommandRead (&svlFilterImageWindow::GetPositionRCommand, this, "GetRightPosition");
+    }
+}
+
+void svlFilterImageWindow::SetPositionLCommand(const vctInt2 & position)
+{
+    SetPosition(position[0], position[1], SVL_LEFT);
+}
+
+void svlFilterImageWindow::SetPositionRCommand(const vctInt2 & position)
+{
+    SetPosition(position[0], position[1], SVL_RIGHT);
+}
+
+void svlFilterImageWindow::GetPositionLCommand(vctInt2 & position) const
+{
+    if (!PositionSetFlag) {
+        CMN_LOG_CLASS_INIT_ERROR << "GetPositionLCommand: failed to get position; position has not yet been initialized" << std::endl;
+        return;
+    }
+    GetPosition(position[0], position[1], SVL_LEFT);
+}
+
+void svlFilterImageWindow::GetPositionRCommand(vctInt2 & position) const
+{
+    if (!PositionSetFlag) {
+        CMN_LOG_CLASS_INIT_ERROR << "GetPositionRCommand: failed to get position; position has not yet been initialized" << std::endl;
+        return;
+    }
+    GetPosition(position[0], position[1], SVL_RIGHT);
 }
 

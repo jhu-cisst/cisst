@@ -80,24 +80,24 @@ void svlFilterImageWindowTargetSelect::GetTargets(svlSampleTargets& targets) con
     targets = Targets;
 }
 
-void svlFilterImageWindowTargetSelect::SetFullScreen(bool fullscreen)
+void svlFilterImageWindowTargetSelect::SetFullScreen(const bool & fullscreen)
 {
     svlFilterImageWindow::SetFullScreen(fullscreen);
 }
 
-bool svlFilterImageWindowTargetSelect::GetFullScreen()
+void svlFilterImageWindowTargetSelect::SetEventHandler(svlImageWindowCallbackBase* handler)
 {
-    return svlFilterImageWindow::GetFullScreen();
+    svlFilterImageWindow::SetEventHandler(handler);
 }
 
-void svlFilterImageWindowTargetSelect::EnableTimestampInTitle(bool enable)
+void svlFilterImageWindowTargetSelect::GetFullScreen(bool & fullscreen) const
 {
-    svlFilterImageWindow::EnableTimestampInTitle(enable);
+    svlFilterImageWindow::GetFullScreen(fullscreen);
 }
 
 void svlFilterImageWindowTargetSelect::SetCallback(svlImageWindowCallbackBase* callback)
 {
-    svlFilterImageWindow::SetCallback(callback);
+    svlFilterImageWindow::SetEventHandler(callback);
 }
 
 int svlFilterImageWindowTargetSelect::Initialize(svlSample* syncInput, svlSample* &syncOutput)
@@ -112,7 +112,7 @@ int svlFilterImageWindowTargetSelect::Initialize(svlSample* syncInput, svlSample
 
     syncOutput = syncInput;
 
-    svlFilterImageWindow::SetCallback(this);
+    svlFilterImageWindow::SetEventHandler(this);
     return svlFilterImageWindow::Initialize(DisplayImage, syncOutput);
 }
 

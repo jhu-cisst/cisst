@@ -39,7 +39,8 @@ public:
 
     int SetOutputSize(unsigned int width, unsigned int height, unsigned int videoch = SVL_LEFT);
     int SetOutputRatio(double widthratio, double heightratio, unsigned int videoch = SVL_LEFT);
-    void SetInterpolation(bool enable);
+    void SetInterpolation(const bool & enable);
+    void GetInterpolation(bool & enable) const;
 
 protected:
     virtual int Initialize(svlSample* syncInput, svlSample* &syncOutput);
@@ -55,6 +56,17 @@ private:
     unsigned int Height[2];
     bool InterpolationEnabled;
     vctDynamicVector<unsigned char> Internals[2];
+
+protected:
+    virtual void CreateInterfaces();
+    virtual void SetOutputDimensionLCommand(const vctInt2 & dimension);
+    virtual void SetOutputDimensionRCommand(const vctInt2 & dimension);
+    virtual void SetOutputRatioLCommand(const vctDouble2 & ratio);
+    virtual void SetOutputRatioRCommand(const vctDouble2 & ratio);
+    virtual void GetOutputDimensionLCommand(vctInt2 & dimension) const;
+    virtual void GetOutputDimensionRCommand(vctInt2 & dimension) const;
+    virtual void GetOutputRatioLCommand(vctDouble2 & ratio) const;
+    virtual void GetOutputRatioRCommand(vctDouble2 & ratio) const;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterImageResizer)

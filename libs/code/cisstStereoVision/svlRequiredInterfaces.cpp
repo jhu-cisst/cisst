@@ -30,6 +30,7 @@ http://www.cisst.org/cisst/license.txt.
 /*********************************/
 
 CMN_IMPLEMENT_SERVICES_TEMPLATED(svlFloat)
+CMN_IMPLEMENT_SERVICES_TEMPLATED(svlDouble2)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(svlDouble3)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(svlDouble3x3)
 CMN_IMPLEMENT_SERVICES_TEMPLATED(svlInt2)
@@ -254,6 +255,89 @@ IReqFilterSourceVideoFile::~IReqFilterSourceVideoFile()
 }
 
 
+/********************************/
+/*** IReqFilterSplitter class ***/
+/********************************/
+
+IReqFilterSplitter::IReqFilterSplitter(const std::string& name, mtsComponent* owner) :
+    Name(name),
+    Owner(owner)
+{
+    if (Owner) {
+        mtsInterfaceRequired* required = Owner->AddInterfaceRequired(name);
+        if (required) {
+            required->AddFunction("AddOutput", AddOutput);
+        }
+    }
+}
+
+IReqFilterSplitter::~IReqFilterSplitter()
+{
+    if (Owner) Owner->RemoveInterfaceRequired(Name);
+}
+
+
+/*************************************/
+/*** IReqFilterImageRotation class ***/
+/*************************************/
+
+IReqFilterImageRotation::IReqFilterImageRotation(const std::string& name, mtsComponent* owner) :
+    Name(name),
+    Owner(owner)
+{
+    if (Owner) {
+        mtsInterfaceRequired* required = Owner->AddInterfaceRequired(name);
+        if (required) {
+            required->AddFunction("SetInterpolation",        SetInterpolation);
+            required->AddFunction("SetOutputDimension",      SetOutputDimension);
+            required->AddFunction("SetLeftOutputDimension",  SetLeftOutputDimension);
+            required->AddFunction("SetRightOutputDimension", SetRightOutputDimension);
+            required->AddFunction("SetOutputRatio",          SetOutputRatio);
+            required->AddFunction("SetLeftOutputRatio",      SetLeftOutputRatio);
+            required->AddFunction("SetRightOutputRatio",     SetRightOutputRatio);
+            required->AddFunction("GetInterpolation",        GetInterpolation);
+            required->AddFunction("GetLeftOutputDimension",  GetLeftOutputDimension);
+            required->AddFunction("GetRightOutputDimension", GetRightOutputDimension);
+            required->AddFunction("GetOutputRatio",          GetOutputRatio);
+            required->AddFunction("GetLeftOutputRatio",      GetLeftOutputRatio);
+            required->AddFunction("GetRightOutputRatio",     GetRightOutputRatio);
+        }
+    }
+}
+
+IReqFilterImageRotation::~IReqFilterImageRotation()
+{
+    if (Owner) Owner->RemoveInterfaceRequired(Name);
+}
+
+
+/****************************************/
+/*** IReqFilterImageTranslation class ***/
+/****************************************/
+
+IReqFilterImageTranslation::IReqFilterImageTranslation(const std::string& name, mtsComponent* owner) :
+    Name(name),
+    Owner(owner)
+{
+    if (Owner) {
+        mtsInterfaceRequired* required = Owner->AddInterfaceRequired(name);
+        if (required) {
+            required->AddFunction("SetTranslation",      SetTranslation);
+            required->AddFunction("SetLeftTranslation",  SetLeftTranslation);
+            required->AddFunction("SetRightTranslation", SetRightTranslation);
+            required->AddFunction("GetTranslation",      GetTranslation);
+            required->AddFunction("GetLeftTranslation",  GetLeftTranslation);
+            required->AddFunction("GetRightTranslation", GetRightTranslation);
+        }
+    }
+}
+
+IReqFilterImageTranslation::~IReqFilterImageTranslation()
+{
+    if (Owner) Owner->RemoveInterfaceRequired(Name);
+}
+
+
 /****************************************/
 /*** IReqFilterLightSourceBuddy class ***/
 /****************************************/
@@ -276,6 +360,60 @@ IReqFilterLightSourceBuddy::IReqFilterLightSourceBuddy(const std::string& name, 
 }
 
 IReqFilterLightSourceBuddy::~IReqFilterLightSourceBuddy()
+{
+    if (Owner) Owner->RemoveInterfaceRequired(Name);
+}
+
+
+/*****************************************/
+/*** IReqFilterStereoImageJoiner class ***/
+/*****************************************/
+
+IReqFilterStereoImageJoiner::IReqFilterStereoImageJoiner(const std::string& name, mtsComponent* owner) :
+    Name(name),
+    Owner(owner)
+{
+    if (Owner) {
+        mtsInterfaceRequired* required = Owner->AddInterfaceRequired(name);
+        if (required) {
+            required->AddFunction("SetLayout", SetLayout);
+            required->AddFunction("GetLayout", GetLayout);
+        }
+    }
+}
+
+IReqFilterStereoImageJoiner::~IReqFilterStereoImageJoiner()
+{
+    if (Owner) Owner->RemoveInterfaceRequired(Name);
+}
+
+
+/***********************************/
+/*** IReqFilterImageWindow class ***/
+/***********************************/
+
+IReqFilterImageWindow::IReqFilterImageWindow(const std::string& name, mtsComponent* owner) :
+    Name(name),
+    Owner(owner)
+{
+    if (Owner) {
+        mtsInterfaceRequired* required = Owner->AddInterfaceRequired(name);
+        if (required) {
+            required->AddFunction("SetFullScreen",    SetFullScreen);
+            required->AddFunction("SetTitle",         SetTitle);
+            required->AddFunction("SetPosition",      SetPosition);
+            required->AddFunction("SetLeftPosition",  SetLeftPosition);
+            required->AddFunction("SetRightPosition", SetRightPosition);
+            required->AddFunction("GetFullScreen",    GetFullScreen);
+            required->AddFunction("GetTitle",         GetTitle);
+            required->AddFunction("GetPosition",      GetPosition);
+            required->AddFunction("GetLeftPosition",  GetLeftPosition);
+            required->AddFunction("GetRightPosition", GetRightPosition);
+        }
+    }
+}
+
+IReqFilterImageWindow::~IReqFilterImageWindow()
 {
     if (Owner) Owner->RemoveInterfaceRequired(Name);
 }

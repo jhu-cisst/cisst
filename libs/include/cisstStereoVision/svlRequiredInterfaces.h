@@ -43,6 +43,8 @@ class mtsComponent;
 
 typedef mtsGenericObjectProxy<float> svlFloat;
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFloat);
+typedef mtsGenericObjectProxy<vct2> svlDouble2;
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlDouble2);
 typedef mtsGenericObjectProxy<vct3> svlDouble3;
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlDouble3);
 typedef mtsGenericObjectProxy<vct3x3> svlDouble3x3;
@@ -277,6 +279,87 @@ private:
 };
 
 
+/********************************/
+/*** IReqFilterSplitter class ***/
+/********************************/
+
+class CISST_EXPORT IReqFilterSplitter
+{
+public:
+    IReqFilterSplitter(const std::string& name, mtsComponent* owner);
+    ~IReqFilterSplitter();
+
+    mtsFunctionWrite AddOutput;
+
+private:
+    IReqFilterSplitter();
+    IReqFilterSplitter(const IReqFilterSplitter& instance);
+
+    std::string Name;
+    mtsComponent* Owner;
+};
+
+
+/*************************************/
+/*** IReqFilterImageRotation class ***/
+/*************************************/
+
+class CISST_EXPORT IReqFilterImageRotation
+{
+public:
+    IReqFilterImageRotation(const std::string& name, mtsComponent* owner);
+    ~IReqFilterImageRotation();
+
+    mtsFunctionWrite SetInterpolation;
+    mtsFunctionWrite SetOutputDimension;
+    mtsFunctionWrite SetLeftOutputDimension;
+    mtsFunctionWrite SetRightOutputDimension;
+    mtsFunctionWrite SetOutputRatio;
+    mtsFunctionWrite SetLeftOutputRatio;
+    mtsFunctionWrite SetRightOutputRatio;
+    mtsFunctionRead  GetInterpolation;
+    mtsFunctionRead  GetOutputDimension;
+    mtsFunctionRead  GetLeftOutputDimension;
+    mtsFunctionRead  GetRightOutputDimension;
+    mtsFunctionRead  GetOutputRatio;
+    mtsFunctionRead  GetLeftOutputRatio;
+    mtsFunctionRead  GetRightOutputRatio;
+
+private:
+    IReqFilterImageRotation();
+    IReqFilterImageRotation(const IReqFilterImageRotation& instance);
+
+    std::string Name;
+    mtsComponent* Owner;
+};
+
+
+/****************************************/
+/*** IReqFilterImageTranslation class ***/
+/****************************************/
+
+class CISST_EXPORT IReqFilterImageTranslation
+{
+public:
+    IReqFilterImageTranslation(const std::string& name, mtsComponent* owner);
+    ~IReqFilterImageTranslation();
+
+    mtsFunctionWrite SetTranslation;
+    mtsFunctionWrite SetLeftTranslation;
+    mtsFunctionWrite SetRightTranslation;
+    mtsFunctionRead  GetTranslation;
+    mtsFunctionRead  GetLeftTranslation;
+    mtsFunctionRead  GetRightTranslation;
+
+private:
+    IReqFilterImageTranslation();
+    IReqFilterImageTranslation(const IReqFilterImageTranslation& instance);
+
+    std::string Name;
+    mtsComponent* Owner;
+};
+
+
 /****************************************/
 /*** IReqFilterLightSourceBuddy class ***/
 /****************************************/
@@ -286,18 +369,70 @@ class CISST_EXPORT IReqFilterLightSourceBuddy
 public:
     IReqFilterLightSourceBuddy(const std::string& name, mtsComponent* owner);
     ~IReqFilterLightSourceBuddy();
-    
+
     mtsFunctionWrite SetEnable;
     mtsFunctionWrite SetCalibration;
     mtsFunctionWrite SetLightBalance;
     mtsFunctionRead  GetEnable;
     mtsFunctionRead  GetCalibration;
     mtsFunctionRead  GetLightBalance;
-    
+
 private:
     IReqFilterLightSourceBuddy();
     IReqFilterLightSourceBuddy(const IReqFilterLightSourceBuddy& instance);
+
+    std::string Name;
+    mtsComponent* Owner;
+};
+
+
+/*****************************************/
+/*** IReqFilterStereoImageJoiner class ***/
+/*****************************************/
+
+class CISST_EXPORT IReqFilterStereoImageJoiner
+{
+public:
+    IReqFilterStereoImageJoiner(const std::string& name, mtsComponent* owner);
+    ~IReqFilterStereoImageJoiner();
     
+    mtsFunctionWrite SetLayout;
+    mtsFunctionRead  GetLayout;
+    
+private:
+    IReqFilterStereoImageJoiner();
+    IReqFilterStereoImageJoiner(const IReqFilterStereoImageJoiner& instance);
+    
+    std::string Name;
+    mtsComponent* Owner;
+};
+
+
+/***********************************/
+/*** IReqFilterImageWindow class ***/
+/***********************************/
+
+class CISST_EXPORT IReqFilterImageWindow
+{
+public:
+    IReqFilterImageWindow(const std::string& name, mtsComponent* owner);
+    ~IReqFilterImageWindow();
+
+    mtsFunctionWrite SetFullScreen;
+    mtsFunctionWrite SetTitle;
+    mtsFunctionWrite SetPosition;
+    mtsFunctionWrite SetLeftPosition;
+    mtsFunctionWrite SetRightPosition;
+    mtsFunctionRead  GetFullScreen;
+    mtsFunctionRead  GetTitle;
+    mtsFunctionRead  GetPosition;
+    mtsFunctionRead  GetLeftPosition;
+    mtsFunctionRead  GetRightPosition;
+
+private:
+    IReqFilterImageWindow();
+    IReqFilterImageWindow(const IReqFilterImageWindow& instance);
+
     std::string Name;
     mtsComponent* Owner;
 };

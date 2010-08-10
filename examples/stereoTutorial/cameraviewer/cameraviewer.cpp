@@ -222,10 +222,8 @@ int CameraViewer(bool interpolation, bool save, int width, int height)
         window_cb.SplitterOutput = output;
     }
     window_cb.ImageWriterFilter = &imagewriter;
-    window.SetCallback(&window_cb);
-    window.SetTitleText("Camera Viewer");
-    window.EnableTimestampInTitle();
-
+    window.SetEventHandler(&window_cb);
+    window.SetTitle("Camera Viewer");
 
     // Add buffer status overlay
     svlOverlayAsyncOutputProperties buffer_overlay(SVL_LEFT,

@@ -85,7 +85,7 @@ protected:
     unsigned int NumOfWins;
     unsigned int *Width, *Height;
     int *PosX, *PosY;
-    svlImageWindowCallbackBase* Callback;
+    svlImageWindowCallbackBase* EventHandler;
     osaThreadSignal *InitReadySignal;
 
     void OnNewFrame(unsigned int frameid);
@@ -108,12 +108,19 @@ public:
     svlFilterImageWindow();
     virtual ~svlFilterImageWindow();
 
-    virtual void SetFullScreen(bool fullscreen = true);
-    virtual bool GetFullScreen();
-    virtual void SetWindowPosition(int x, int y, unsigned int videoch = SVL_LEFT);
-    virtual void SetTitleText(const std::string title);
-    virtual void EnableTimestampInTitle(bool enable = true);
-    virtual void SetCallback(svlImageWindowCallbackBase* callback);
+    virtual int SetPosition(const int x, const int y, const unsigned int videoch = SVL_LEFT);
+    virtual int GetPosition(int & x, int & y, unsigned int videoch = SVL_LEFT) const;
+    virtual void SetEventHandler(svlImageWindowCallbackBase* handler);
+
+    virtual void SetFullScreen(const bool & fullscreen);
+    virtual void SetTitle(const std::string & title);
+    virtual void GetFullScreen(bool & fullscreen) const;
+    virtual void GetTitle(std::string & title) const;
+
+    // Deprecated methods: replace them with their corresponding new versions above
+    virtual CISST_DEPRECATED int SetWindowPosition(const int x, const int y, const unsigned int videoch = SVL_LEFT);
+    virtual CISST_DEPRECATED void SetTitleText(const std::string & title);
+    virtual CISST_DEPRECATED void SetCallback(svlImageWindowCallbackBase* callback);
 
 protected:
     virtual int Initialize(svlSample* syncInput, svlSample* &syncOutput);
@@ -121,7 +128,6 @@ protected:
     virtual int Release();
 
 private:
-    int TimestampEnabled;
     bool FullScreenFlag;
     bool PositionSetFlag;
     int PosX[2], PosY[2];
@@ -131,7 +137,14 @@ private:
     bool StopThread;
 
     CWindowManagerBase* WindowManager;
-    svlImageWindowCallbackBase* Callback;
+    svlImageWindowCallbackBase* EventHandler;
+
+protected:
+    virtual void CreateInterfaces();
+    virtual void SetPositionLCommand(const vctInt2 & position);
+    virtual void SetPositionRCommand(const vctInt2 & position);
+    virtual void GetPositionLCommand(vctInt2 & position) const;
+    virtual void GetPositionRCommand(vctInt2 & position) const;
 };
 
 

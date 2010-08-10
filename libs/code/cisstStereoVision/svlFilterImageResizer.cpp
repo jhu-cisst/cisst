@@ -23,6 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlFilterImageResizer.h>
 #include <cisstStereoVision/svlImageProcessing.h>
 #include <cisstStereoVision/svlFilterInput.h>
+#include <cisstMultiTask/mtsInterfaceProvided.h>
 
 
 /******************************************/
@@ -35,6 +36,8 @@ svlFilterImageResizer::svlFilterImageResizer() :
     svlFilterBase(),
     OutputImage(0)
 {
+    CreateInterfaces();
+
     AddInput("input", true);
     AddInputType("input", svlTypeImageRGB);
     AddInputType("input", svlTypeImageMono8);
@@ -66,9 +69,14 @@ int svlFilterImageResizer::SetOutputSize(unsigned int width, unsigned int height
     return SVL_OK;
 }
 
-void svlFilterImageResizer::SetInterpolation(bool enable)
+void svlFilterImageResizer::SetInterpolation(const bool & enable)
 {
     InterpolationEnabled = enable;
+}
+
+void svlFilterImageResizer::GetInterpolation(bool & enable) const
+{
+    enable = InterpolationEnabled;
 }
 
 int svlFilterImageResizer::SetOutputRatio(double widthratio, double heightratio, unsigned int videoch)
@@ -132,6 +140,10 @@ int svlFilterImageResizer::Initialize(svlSample* syncInput, svlSample* &syncOutp
             if (Width[i] < 1) Width[i] = 1;
             if (Height[i] < 1) Height[i] = 1;
         }
+        else {
+            WidthRatio[i] = static_cast<double>(Width[i]) / OutputImage->GetWidth(i);
+            HeightRatio[i] = static_cast<double>(Height[i]) / OutputImage->GetHeight(i);
+        }
 
         OutputImage->SetSize(i, Width[i], Height[i]);
     }
@@ -165,5 +177,95 @@ int svlFilterImageResizer::Release()
         OutputImage = 0;
     }
     return SVL_OK;
+}
+
+void svlFilterImageResizer::CreateInterfaces()
+{
+    // Add NON-QUEUED provided interface for configuration management
+    mtsInterfaceProvided* provided = AddInterfaceProvided("Settings", MTS_COMMANDS_SHOULD_NOT_BE_QUEUED);
+    if (provided) {
+        provided->AddCommandWrite(&svlFilterImageResizer::SetInterpolation,           this, "SetInterpolation");
+        provided->AddCommandWrite(&svlFilterImageResizer::SetOutputDimensionLCommand, this, "SetOutputDimension");
+        provided->AddCommandWrite(&svlFilterImageResizer::SetOutputDimensionLCommand, this, "SetLeftOutputDimension");
+        provided->AddCommandWrite(&svlFilterImageResizer::SetOutputDimensionRCommand, this, "SetRightOutputDimension");
+        provided->AddCommandWrite(&svlFilterImageResizer::SetOutputRatioLCommand,     this, "SetOutputRatio");
+        provided->AddCommandWrite(&svlFilterImageResizer::SetOutputRatioLCommand,     this, "SetLeftOutputRatio");
+        provided->AddCommandWrite(&svlFilterImageResizer::SetOutputRatioRCommand,     this, "SetRightOutputRatio");
+        provided->AddCommandRead (&svlFilterImageResizer::GetInterpolation,           this, "GetInterpolation");
+        provided->AddCommandRead (&svlFilterImageResizer::GetOutputDimensionLCommand, this, "GetOutputDimension");
+        provided->AddCommandRead (&svlFilterImageResizer::GetOutputDimensionLCommand, this, "GetLeftOutputDimension");
+        provided->AddCommandRead (&svlFilterImageResizer::GetOutputDimensionRCommand, this, "GetRightOutputDimension");
+        provided->AddCommandRead (&svlFilterImageResizer::GetOutputRatioLCommand,     this, "GetOutputRatio");
+        provided->AddCommandRead (&svlFilterImageResizer::GetOutputRatioLCommand,     this, "GetLeftOutputRatio");
+        provided->AddCommandRead (&svlFilterImageResizer::GetOutputRatioRCommand,     this, "GetRightOutputRatio");
+    }
+}
+
+void svlFilterImageResizer::SetOutputDimensionLCommand(const vctInt2 & dimension)
+{
+    if (IsInitialized()) {
+        CMN_LOG_CLASS_INIT_ERROR << "SetOutputDimensionLCommand: failed to set dimension; filter is already initialized" << std::endl;
+        return;
+    }
+    if (SetOutputSize(dimension[0], dimension[1], SVL_LEFT) != SVL_OK) {
+        CMN_LOG_CLASS_INIT_ERROR << "SetOutputDimensionLCommand: invalid image size (" << dimension[0] << ", " << dimension[1] << ")" << std::endl;
+    }
+}
+
+void svlFilterImageResizer::SetOutputDimensionRCommand(const vctInt2 & dimension)
+{
+    if (IsInitialized()) {
+        CMN_LOG_CLASS_INIT_ERROR << "SetOutputDimensionRCommand: failed to set dimension; filter is already initialized" << std::endl;
+        return;
+    }
+    if (SetOutputSize(dimension[0], dimension[1], SVL_RIGHT) != SVL_OK) {
+        CMN_LOG_CLASS_INIT_ERROR << "SetOutputDimensionRCommand: invalid image size (" << dimension[0] << ", " << dimension[1] << ")" << std::endl;
+    }
+}
+
+void svlFilterImageResizer::SetOutputRatioLCommand(const vctDouble2 & ratio)
+{
+    if (IsInitialized()) {
+        CMN_LOG_CLASS_INIT_ERROR << "SetOutputRatioLCommand: failed to set dimension; filter is already initialized" << std::endl;
+        return;
+    }
+    if (SetOutputRatio(ratio[0], ratio[1], SVL_LEFT) != SVL_OK) {
+        CMN_LOG_CLASS_INIT_ERROR << "SetOutputRatioLCommand: invalid image size (" << ratio[0] << ", " << ratio[1] << ")" << std::endl;
+    }
+}
+
+void svlFilterImageResizer::SetOutputRatioRCommand(const vctDouble2 & ratio)
+{
+    if (IsInitialized()) {
+        CMN_LOG_CLASS_INIT_ERROR << "SetOutputRatioRCommand: failed to set dimension; filter is already initialized" << std::endl;
+        return;
+    }
+    if (SetOutputRatio(ratio[0], ratio[1], SVL_RIGHT) != SVL_OK) {
+        CMN_LOG_CLASS_INIT_ERROR << "SetOutputRatioRCommand: invalid image size (" << ratio[0] << ", " << ratio[1] << ")" << std::endl;
+    }
+}
+
+void svlFilterImageResizer::GetOutputDimensionLCommand(vctInt2 & dimension) const
+{
+    dimension[0] = Width[SVL_LEFT];
+    dimension[1] = Height[SVL_LEFT];
+}
+
+void svlFilterImageResizer::GetOutputDimensionRCommand(vctInt2 & dimension) const
+{
+    dimension[0] = Width[SVL_RIGHT];
+    dimension[1] = Height[SVL_RIGHT];
+}
+
+void svlFilterImageResizer::GetOutputRatioLCommand(vctDouble2 & ratio) const
+{
+    ratio[0] = WidthRatio[SVL_LEFT];
+    ratio[1] = HeightRatio[SVL_LEFT];
+}
+
+void svlFilterImageResizer::GetOutputRatioRCommand(vctDouble2 & ratio) const
+{
+    ratio[0] = WidthRatio[SVL_RIGHT];
+    ratio[1] = HeightRatio[SVL_RIGHT];
 }
 

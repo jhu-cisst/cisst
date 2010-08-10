@@ -233,20 +233,20 @@ int CameraViewer(bool interpolation, bool save, int width, int height, int fulls
         window_cb.VideoWriterFilter = &videowriter;
         window_cb.SplitterOutput = splitteroutput;
     }
-    window.SetCallback(&window_cb);
-    window.SetTitleText("Camera Viewer");
+    window.SetEventHandler(&window_cb);
+    window.SetTitle("Camera Viewer");
 	if (fullscreen >= 0) {
-		window.SetFullScreen();
+		window.SetFullScreen(true);
 		if (fullscreen == 0) {
-			window.SetWindowPosition(offsetx, 0, SVL_LEFT);
-			window.SetWindowPosition(offsetx, height / 2, SVL_RIGHT);
+			window.SetPosition(offsetx, 0, SVL_LEFT);
+			window.SetPosition(offsetx, height / 2, SVL_RIGHT);
 		}
 		else if (fullscreen == 1) {
-			window.SetWindowPosition(offsetx, 0, SVL_LEFT);
-			window.SetWindowPosition(offsetx + width / 2, 0, SVL_RIGHT);
+			window.SetPosition(offsetx, 0, SVL_LEFT);
+			window.SetPosition(offsetx + width / 2, 0, SVL_RIGHT);
 		}
 		else if (fullscreen == 2) {
-			window.SetWindowPosition(offsetx, 0);
+			window.SetPosition(offsetx, 0);
 		}
 	}
 

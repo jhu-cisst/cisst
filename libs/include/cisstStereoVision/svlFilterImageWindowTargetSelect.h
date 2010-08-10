@@ -45,11 +45,14 @@ public:
     virtual void GetTargets(svlSampleTargets& targets) const;
 
 protected:
-    virtual void SetFullScreen(bool fullscreen = true);
-    virtual bool GetFullScreen();
-    virtual void EnableTimestampInTitle(bool enable = true);
-    virtual void SetCallback(svlImageWindowCallbackBase* callback);
+    virtual void SetFullScreen(const bool & fullscreen);
+    virtual void SetEventHandler(svlImageWindowCallbackBase* handler);
+    virtual void GetFullScreen(bool & fullscreen) const;
 
+    // Deprecated methods
+    virtual CISST_DEPRECATED void SetCallback(svlImageWindowCallbackBase* callback);
+
+protected:
     virtual int Initialize(svlSample* syncInput, svlSample* &syncOutput);
     virtual int Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput);
 

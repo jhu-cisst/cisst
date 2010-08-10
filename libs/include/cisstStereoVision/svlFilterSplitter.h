@@ -34,6 +34,13 @@ class CISST_EXPORT svlFilterSplitter : public svlFilterBase
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
 public:
+    typedef struct _OutputInfo {
+        std::string  name;
+        unsigned int threadcount;
+        unsigned int buffersize;
+    } OutputInfo;
+
+public:
     svlFilterSplitter();
 
     int AddOutput(const std::string &name, const unsigned int threadcount = 1, const unsigned int buffersize = 3);
@@ -45,9 +52,20 @@ protected:
 
 private:
     vctDynamicVector<svlFilterOutput*> AsyncOutputs;
+
+protected:
+    virtual void CreateInterfaces();
+    virtual void AddOutputCommand(const OutputInfo & output);
 };
 
+typedef mtsGenericObjectProxy<svlFilterSplitter::OutputInfo> svlFilterSplitter_OutputInfo;
+CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterSplitter_OutputInfo);
+
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterSplitter)
+
+
+CISST_EXPORT std::ostream & operator << (std::ostream & stream, const svlFilterSplitter::OutputInfo & objref);
+
 
 #endif // _svlFilterSplitter_h
 

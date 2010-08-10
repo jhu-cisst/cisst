@@ -23,6 +23,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlFilterStereoImageJoiner.h>
 #include <cisstStereoVision/svlFilterInput.h>
 #include <cisstStereoVision/svlFilterOutput.h>
+#include <cisstMultiTask/mtsInterfaceProvided.h>
+
 
 /******************************************/
 /*** svlFilterStereoImageJoiner class *****/
@@ -35,6 +37,8 @@ svlFilterStereoImageJoiner::svlFilterStereoImageJoiner() :
     OutputImage(0),
     Layout(svlLayoutSideBySide)
 {
+    CreateInterfaces();
+    
     AddInput("input", true);
     AddInputType("input", svlTypeImageRGBStereo);
     AddInputType("input", svlTypeImageMono8Stereo);
@@ -163,8 +167,36 @@ int svlFilterStereoImageJoiner::SetLayout(svlStereoLayout layout)
     return SVL_OK;
 }
 
-svlStereoLayout svlFilterStereoImageJoiner::GetLayout()
+svlStereoLayout svlFilterStereoImageJoiner::GetLayout() const
 {
     return Layout;
+}
+
+void svlFilterStereoImageJoiner::CreateInterfaces()
+{
+    // Add NON-QUEUED provided interface for configuration management
+    mtsInterfaceProvided* provided = AddInterfaceProvided("Settings", MTS_COMMANDS_SHOULD_NOT_BE_QUEUED);
+    if (provided) {
+        provided->AddCommandWrite(&svlFilterStereoImageJoiner::SetLayoutCommand, this, "SetLayout");
+        provided->AddCommandRead (&svlFilterStereoImageJoiner::GetLayoutCommand, this, "GetLayout");
+    }
+}
+
+void svlFilterStereoImageJoiner::SetLayoutCommand(const int & layout)
+{
+    if (IsInitialized()) {
+        CMN_LOG_CLASS_INIT_ERROR << "SetLayoutCommand: failed to select layout; filter is already initialized" << std::endl;
+        return;
+    }
+    if (layout < svlLayoutInterlaced || layout > svlLayoutSideBySideRL) {
+        CMN_LOG_CLASS_INIT_ERROR << "SetLayoutCommand: failed to select layout; invalid layout type" << std::endl;
+        return;
+    }
+    SetLayout(static_cast<svlStereoLayout>(layout));
+}
+
+void svlFilterStereoImageJoiner::GetLayoutCommand(int & layout) const
+{
+    layout = GetLayout();
 }
 

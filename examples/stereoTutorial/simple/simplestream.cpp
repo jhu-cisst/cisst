@@ -90,7 +90,7 @@ int main()
     resizer.SetInterpolation(true);
 
     // Setup window
-    window.SetTitleText("Window 1");
+    window.SetTitle("Window 1");
 
     // Setup unsharp masking
     // (Tip: enable OpenCV in CMake for higher performance)
@@ -147,7 +147,7 @@ int main()
     overlay.AddOverlay(fps_overlay);
 
     // Setup branch window
-    window2.SetTitleText("Window 2");
+    window2.SetTitle("Window 2");
 
     // Add new output to splitter
     splitter.AddOutput("output2");

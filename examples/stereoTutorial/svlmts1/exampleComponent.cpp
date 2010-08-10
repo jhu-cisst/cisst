@@ -20,9 +20,8 @@
 
  */
 
-
 #include "exampleComponent.h"
-#include <cisstStereoVision/svlFilterSourceVideoCapture.h>
+
 
 /******************************/
 /*** exampleComponent class ***/
@@ -32,8 +31,9 @@ CMN_IMPLEMENT_SERVICES(exampleComponent);
 
 exampleComponent::exampleComponent(const std::string & taskName, double period):
     mtsTaskPeriodic(taskName, period, false, 50),
-    SourceConfig("SourceConfig", this),
-    StreamControl("StreamControl", this)
+    StreamControl("StreamControl", this),
+    SourceConfig("SourceConfig",   this),
+    WindowConfig("WindowConfig",   this)
 {
     mtsInterfaceRequired* required = AddInterfaceRequired("FilterParams");
     if (required) {
@@ -54,10 +54,13 @@ void exampleComponent::Startup(void)
     SourceConfig.SetFilename(mtsStdString("crop2.avi"));
     // Not needed because same as default:
     //SourceConfig.SetPosition(0);
-    //SourceConfig.SetRange(mtsInt2(vctInt2(-1, -1)));
+    //SourceConfig.SetRange(vctInt2(-1, -1));
     //SourceConfig.SetFramerate(-1.0);
     //SourceConfig.SetLoop(true);
 #endif
+
+    WindowConfig.SetTitle(mtsStdString("Image window"));
+    WindowConfig.SetPosition(vctInt2(20, 20));
 
     // connect filters together
     StreamControl.SetSourceFilter(mtsStdString("StreamSource"));
@@ -98,11 +101,24 @@ void exampleComponent::Startup(void)
 
     SourceConfig.GetFilename(filename);
     SourceConfig.GetLength(length);
-    
+
     CMN_LOG_CLASS_RUN_VERBOSE << std::endl
                               << "File name: " << filename << std::endl
                               << "File length (number of video frames): " << length << std::endl;
 #endif
+
+    bool win_fullscreen;
+    std::string win_title;
+    vctInt2 win_position;
+
+    WindowConfig.GetFullScreen(win_fullscreen);
+    WindowConfig.GetTitle(win_title);
+    WindowConfig.GetPosition(win_position);
+
+    CMN_LOG_CLASS_RUN_VERBOSE << std::endl
+                              << "Window is fullscreen: " << (win_fullscreen ? "true" : "false") << std::endl
+                              << "Window title: \"" << win_title << "\"" << std::endl
+                              << "Window position: (" << win_position.X() << ", " << win_position.Y() << ")" << std::endl;
 
     vctInt2 dimensions;
     SourceConfig.GetDimensions(dimensions);

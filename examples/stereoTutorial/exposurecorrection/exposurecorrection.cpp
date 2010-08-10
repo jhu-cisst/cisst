@@ -104,7 +104,7 @@ int ExposureCorrection(std::string &src_path)
         source.SetFilePath(src_path);
     }
 
-    window.SetCallback(&window_cb);
+    window.SetEventHandler(&window_cb);
     window_cb.ExposureCorrectionFilter = &exposurecorrection;
 
     // chain filters to pipeline

@@ -63,7 +63,7 @@ int VideoPlayer(std::string pathname)
     }
 
     // setup image window
-    window.SetTitleText("Video Player");
+    window.SetTitle("Video Player");
 
     // chain filters to pipeline
     stream.SetSourceFilter(&source);

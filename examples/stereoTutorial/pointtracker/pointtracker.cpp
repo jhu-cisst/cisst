@@ -45,7 +45,7 @@ int main(int CMN_UNUSED(argc), char** CMN_UNUSED(argv))
 
     // setup selector
     selector.SetMaxTargets(20);
-    selector.SetTitleText("Select targets (then press SPACE)");
+    selector.SetTitle("Select targets (then press SPACE)");
 
     // setup tracker
     svlTrackerMSBruteForce trackeralgo;
@@ -84,8 +84,8 @@ int main(int CMN_UNUSED(argc), char** CMN_UNUSED(argv))
     splitter.AddOutput("tracker");
 
     // setup results window
-    window.SetWindowPosition(50, 50);
-    window.SetTitleText("Tracking results");
+    window.SetPosition(50, 50);
+    window.SetTitle("Tracking results");
 
     // chain filters to pipeline
     stream.SetSourceFilter(&source);

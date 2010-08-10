@@ -71,9 +71,10 @@ int main(void)
     taskManager->AddComponent(&exampleComponentObject);
 
     // connect components, component.RequiresInterface -> component.ProvidesInterface
-    taskManager->Connect("ExampleComponent", "StreamControl", "Stream", "Control");
-    taskManager->Connect("ExampleComponent", "SourceConfig", "StreamSource", "Settings");
-    taskManager->Connect("ExampleComponent", "FilterParams", "ExampleFilter", "Parameters");
+    taskManager->Connect("ExampleComponent", "StreamControl", "Stream",        "Control");
+    taskManager->Connect("ExampleComponent", "SourceConfig",  "StreamSource",  "Settings");
+    taskManager->Connect("ExampleComponent", "WindowConfig",  "Window",        "Settings");
+    taskManager->Connect("ExampleComponent", "FilterParams",  "ExampleFilter", "Parameters");
 
     // create the tasks, i.e. find the commands
     taskManager->CreateAll();

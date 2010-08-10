@@ -23,16 +23,21 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlFilterSplitter.h>
 #include <cisstStereoVision/svlFilterInput.h>
 #include <cisstStereoVision/svlFilterOutput.h>
+#include <cisstMultiTask/mtsInterfaceProvided.h>
+
 
 /**************************************/
 /*** svlFilterSplitter class **********/
 /**************************************/
 
 CMN_IMPLEMENT_SERVICES(svlFilterSplitter)
+CMN_IMPLEMENT_SERVICES_TEMPLATED(svlFilterSplitter_OutputInfo)
 
 svlFilterSplitter::svlFilterSplitter() :
     svlFilterBase()
 {
+    CreateInterfaces();
+    
     AddInput("input", true);
     AddInputType("input", svlTypeImageRGB);
     AddInputType("input", svlTypeImageRGBA);
@@ -120,5 +125,38 @@ int svlFilterSplitter::Process(svlProcInfo* procInfo, svlSample* syncInput, svlS
     }
 
     return SVL_OK;
+}
+
+void svlFilterSplitter::CreateInterfaces()
+{
+    // Add NON-QUEUED provided interface for configuration management
+    mtsInterfaceProvided* provided = AddInterfaceProvided("Settings", MTS_COMMANDS_SHOULD_NOT_BE_QUEUED);
+    if (provided) {
+        provided->AddCommandWrite(&svlFilterSplitter::AddOutputCommand, this, "AddOutput");
+    }
+}
+
+void svlFilterSplitter::AddOutputCommand(const svlFilterSplitter::OutputInfo & output)
+{
+    if (AddOutput(output.name, output.threadcount, output.buffersize) != SVL_OK) {
+        CMN_LOG_CLASS_INIT_ERROR << "AddOutputCommand: the splitter already has an output of the same name (\""
+                                 << output.name
+                                 << "\")"
+                                 << std::endl;
+    }
+}
+
+
+/****************************/
+/*** Stream out operators ***/
+/****************************/
+
+std::ostream & operator << (std::ostream & stream, const svlFilterSplitter::OutputInfo & objref)
+{
+    stream << "Output name: " << objref.name << std::endl
+           << "Thread count: " << objref.threadcount << std::endl
+           << "Buffer size: " << objref.buffersize << std::endl;
+
+    return stream;
 }
 

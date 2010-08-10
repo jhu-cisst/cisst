@@ -38,7 +38,7 @@ public:
     virtual ~svlFilterStereoImageJoiner();
 
     int SetLayout(svlStereoLayout layout);
-    svlStereoLayout GetLayout();
+    svlStereoLayout GetLayout() const;
 
 protected:
     virtual int UpdateTypes(svlFilterInput &input, svlStreamType type);
@@ -50,6 +50,11 @@ private:
     svlSampleImage* OutputImage;
 
     svlStereoLayout Layout;
+    
+protected:
+    virtual void CreateInterfaces();
+    virtual void SetLayoutCommand(const int & layout);
+    virtual void GetLayoutCommand(int & layout) const;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterStereoImageJoiner)

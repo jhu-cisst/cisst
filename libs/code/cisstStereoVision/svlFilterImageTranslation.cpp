@@ -21,6 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstStereoVision/svlFilterImageTranslation.h>
+#include <cisstMultiTask/mtsInterfaceProvided.h>
 
 
 /****************************************/
@@ -33,6 +34,8 @@ svlFilterImageTranslation::svlFilterImageTranslation() :
     svlFilterBase(),
     OutputImage(0)
 {
+    CreateInterfaces();
+    
     AddInput("input", true);
     AddInputType("input", svlTypeImageRGB);
     AddInputType("input", svlTypeImageRGBStereo);
@@ -128,5 +131,43 @@ void svlFilterImageTranslation::Translate(unsigned char* src, unsigned char* des
         src += width;
         dest += width;
     }
+}
+
+void svlFilterImageTranslation::CreateInterfaces()
+{
+    // Add NON-QUEUED provided interface for configuration management
+    mtsInterfaceProvided* provided = AddInterfaceProvided("Settings", MTS_COMMANDS_SHOULD_NOT_BE_QUEUED);
+    if (provided) {
+        provided->AddCommandWrite(&svlFilterImageTranslation::SetTranslationLCommand, this, "SetTranslation");
+        provided->AddCommandWrite(&svlFilterImageTranslation::SetTranslationLCommand, this, "SetLeftTranslation");
+        provided->AddCommandWrite(&svlFilterImageTranslation::SetTranslationRCommand, this, "SetRightTranslation");
+        provided->AddCommandRead (&svlFilterImageTranslation::GetTranslationLCommand, this, "GetTranslation");
+        provided->AddCommandRead (&svlFilterImageTranslation::GetTranslationLCommand, this, "GetLeftTranslation");
+        provided->AddCommandRead (&svlFilterImageTranslation::GetTranslationRCommand, this, "GetRightTranslation");
+    }
+}
+
+void svlFilterImageTranslation::SetTranslationLCommand(const vctInt2 & translation)
+{
+    HorizTranslation[SVL_LEFT] = translation[0];
+    VertTranslation[SVL_LEFT] = translation[1];
+}
+
+void svlFilterImageTranslation::SetTranslationRCommand(const vctInt2 & translation)
+{
+    HorizTranslation[SVL_RIGHT] = translation[0];
+    VertTranslation[SVL_RIGHT] = translation[1];
+}
+
+void svlFilterImageTranslation::GetTranslationLCommand(vctInt2 & translation) const
+{
+    translation[0] = HorizTranslation[SVL_LEFT];
+    translation[1] = VertTranslation[SVL_LEFT];
+}
+
+void svlFilterImageTranslation::GetTranslationRCommand(vctInt2 & translation) const
+{
+    translation[0] = HorizTranslation[SVL_RIGHT];
+    translation[1] = VertTranslation[SVL_RIGHT];
 }
 

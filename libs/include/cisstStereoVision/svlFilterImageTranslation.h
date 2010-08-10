@@ -51,6 +51,13 @@ private:
     vctFixedSizeVector<int, SVL_MAX_CHANNELS> VertTranslation;
 
     void Translate(unsigned char* src, unsigned char* dest, const int width, const int height, const int trhoriz, const int trvert);
+
+protected:
+    virtual void CreateInterfaces();
+    virtual void SetTranslationLCommand(const vctInt2 & translation);
+    virtual void SetTranslationRCommand(const vctInt2 & translation);
+    virtual void GetTranslationLCommand(vctInt2 & translation) const;
+    virtual void GetTranslationRCommand(vctInt2 & translation) const;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterImageTranslation)
