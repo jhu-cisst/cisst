@@ -368,10 +368,19 @@ SET(CISST_BUILD_CISSTNETLIB_LIBRARIES ${CISSTNETLIB_LIBRARIES} ${CISSTNETLIB_F95
 IF(NOT UNIX)
     SET(CISST_BUILD_CISSTNETLIB_LIBRARIES ${CISST_BUILD_CISSTNETLIB_LIBRARIES} ${CISSTNETLIB_GCC_LIBRARIES})
 ENDIF(NOT UNIX)
-CONFIGURE_FILE(${cisst_SOURCE_DIR}/libs/cmake/cisstBuild.cmake.in
-               ${cisst_BINARY_DIR}/cisstBuild.cmake
-               @ONLY)
+# Preserved for backward compatibility
+configure_file (${cisst_SOURCE_DIR}/libs/cmake/cisstBuild.cmake.in
+                ${cisst_BINARY_DIR}/cisstBuild.cmake
+                @ONLY)
+# Very similar file but usable with CMake find_package NO_MODULE (if
+# the user builds against the cisst build tree)
+configure_file (${cisst_SOURCE_DIR}/libs/cmake/cisstBuild.cmake.in
+                ${cisst_BINARY_DIR}/cisst-config.cmake
+                @ONLY)
 
+# Generate cisst-config.cmake to work with find_package NO_MODULE (if
+# the user builds against an "installed" version of cisst) -- not
+# supported yet
 SET(CISST_INSTALLED_INCLUDE_DIRECTORIES ${CMAKE_INSTALL_PREFIX}/include)
 SET(CISST_INSTALLED_DOXYGEN_DIRECTORY ${CMAKE_INSTALL_PREFIX}/include)
 SET(CISST_INSTALLED_LINK_DIRECTORIES ${CMAKE_INSTALL_PREFIX}/lib)
