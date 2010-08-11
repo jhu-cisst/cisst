@@ -4,7 +4,7 @@
 project (myProject)
 cmake_minimum_required (VERSION 2.6)
 
-find_package (cisst REQUIRED NO_MODULE)
+find_package (cisst REQUIRED)
 
 if (cisst_FOUND)
   # Modify CMake configuration to use cisst
