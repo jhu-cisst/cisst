@@ -360,12 +360,17 @@ IF(CISST_SVL_HAS_OPENCV OR NOT OpenCV_OPTIONS)
             ${SOURCE_FILES}
             svlFilterImageZoom.cpp
             svlFilterToolTracker.cpp
-            svlVidCapSrcOpenCV.h        # private header
-            svlVidCapSrcOpenCV.cpp
             svlVideoCodecOpenCV.h       # private header
             svlVideoCodecOpenCV.cpp
             svlTrackerOCVMeanShift.cpp
             )
+        IF(NOT WIN32)
+            SET(SOURCE_FILES
+                ${SOURCE_FILES}
+                svlVidCapSrcOpenCV.h        # private header
+                svlVidCapSrcOpenCV.cpp
+            )
+        ENDIF(NOT WIN32)
 
         SET(HEADER_FILES
             ${HEADER_FILES}

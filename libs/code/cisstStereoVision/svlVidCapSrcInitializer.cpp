@@ -40,9 +40,9 @@
 #include "svlVidCapSrcDC1394.h"
 #endif // CISST_SVL_HAS_DC1394
 
-#if (CISST_SVL_HAS_OPENCV == ON)
+#if (CISST_SVL_HAS_OPENCV == ON) && (CISST_OS != CISST_WINDOWS)
 #include "svlVidCapSrcOpenCV.h"
-#endif // CISST_SVL_HAS_OPENCV
+#endif // CISST_SVL_HAS_OPENCV AND NOT CISST_WINDOWS
 
 // See header for details:
 //#if (CISST_SVL_HAS_MIL == ON)
