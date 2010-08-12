@@ -21,6 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstStereoVision/svlFilterImageExposureCorrection.h>
+#include <cisstMultiTask/mtsInterfaceProvided.h>
 
 
 /**********************************************/
@@ -35,6 +36,8 @@ svlFilterImageExposureCorrection::svlFilterImageExposureCorrection() :
     Contrast(0.0),
     Gamma(0.0)
 {
+    CreateInterfaces();
+    
     AddInput("input", true);
     AddInputType("input", svlTypeImageRGB);
     AddInputType("input", svlTypeImageRGBStereo);
@@ -51,7 +54,7 @@ svlFilterImageExposureCorrection::svlFilterImageExposureCorrection() :
     SetAutomaticOutputType(true);
 }
 
-void svlFilterImageExposureCorrection::SetBrightness(const double brightness)
+void svlFilterImageExposureCorrection::SetBrightness(const double & brightness)
 {
     Brightness = brightness;
     if (Brightness > 100.0) Brightness = 100.0;
@@ -59,12 +62,12 @@ void svlFilterImageExposureCorrection::SetBrightness(const double brightness)
     CalculateCurve();
 }
 
-double svlFilterImageExposureCorrection::GetBrightness() const
+void svlFilterImageExposureCorrection::GetBrightness(double & brightness) const
 {
-    return Brightness;
+    brightness = Brightness;
 }
 
-void svlFilterImageExposureCorrection::SetContrast(const double contrast)
+void svlFilterImageExposureCorrection::SetContrast(const double & contrast)
 {
     Contrast = contrast;
     if (Contrast > 100.0) Contrast = 100.0;
@@ -72,12 +75,12 @@ void svlFilterImageExposureCorrection::SetContrast(const double contrast)
     CalculateCurve();
 }
 
-double svlFilterImageExposureCorrection::GetContrast() const
+void svlFilterImageExposureCorrection::GetContrast(double & contrast) const
 {
-    return Contrast;
+    contrast = Contrast;
 }
 
-void svlFilterImageExposureCorrection::SetGamma(const double gamma)
+void svlFilterImageExposureCorrection::SetGamma(const double & gamma)
 {
     Gamma = gamma;
     if (Gamma > 100.0) Gamma = 100.0;
@@ -85,9 +88,9 @@ void svlFilterImageExposureCorrection::SetGamma(const double gamma)
     CalculateCurve();
 }
 
-double svlFilterImageExposureCorrection::GetGamma() const
+void svlFilterImageExposureCorrection::GetGamma(double & gamma) const
 {
-    return Gamma;
+    gamma = Gamma;
 }
 
 int svlFilterImageExposureCorrection::Initialize(svlSample* syncInput, svlSample* &syncOutput)
@@ -150,5 +153,19 @@ void svlFilterImageExposureCorrection::CalculateCurve()
         else if (result > 255) result = 255;
         Curve[i] = result;
     }    
+}
+
+void svlFilterImageExposureCorrection::CreateInterfaces()
+{
+    // Add NON-QUEUED provided interface for configuration management
+    mtsInterfaceProvided* provided = AddInterfaceProvided("Settings", MTS_COMMANDS_SHOULD_NOT_BE_QUEUED);
+    if (provided) {
+        provided->AddCommandWrite(&svlFilterImageExposureCorrection::SetBrightness, this, "SetBrightness");
+        provided->AddCommandWrite(&svlFilterImageExposureCorrection::SetContrast,   this, "SetContrast");
+        provided->AddCommandWrite(&svlFilterImageExposureCorrection::SetGamma,      this, "SetGamma");
+        provided->AddCommandRead (&svlFilterImageExposureCorrection::GetBrightness, this, "GetBrightness");
+        provided->AddCommandRead (&svlFilterImageExposureCorrection::GetContrast,   this, "GetContrast");
+        provided->AddCommandRead (&svlFilterImageExposureCorrection::GetGamma,      this, "GetGamma");
+    }
 }
 

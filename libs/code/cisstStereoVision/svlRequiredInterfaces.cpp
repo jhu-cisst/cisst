@@ -277,11 +277,38 @@ IReqFilterSplitter::~IReqFilterSplitter()
 }
 
 
-/*************************************/
-/*** IReqFilterImageRotation class ***/
-/*************************************/
+/***********************************************/
+/*** IReqFilterImageExposureCorrection class ***/
+/***********************************************/
 
-IReqFilterImageRotation::IReqFilterImageRotation(const std::string& name, mtsComponent* owner) :
+IReqFilterImageExposureCorrection::IReqFilterImageExposureCorrection(const std::string& name, mtsComponent* owner) :
+    Name(name),
+    Owner(owner)
+{
+    if (Owner) {
+        mtsInterfaceRequired* required = Owner->AddInterfaceRequired(name);
+        if (required) {
+            required->AddFunction("SetBrightness", SetBrightness);
+            required->AddFunction("SetContrast",   SetContrast);
+            required->AddFunction("SetGamma",      SetGamma);
+            required->AddFunction("GetBrightness", GetBrightness);
+            required->AddFunction("GetContrast",   GetContrast);
+            required->AddFunction("GetGamma",      GetGamma);
+        }
+    }
+}
+
+IReqFilterImageExposureCorrection::~IReqFilterImageExposureCorrection()
+{
+    if (Owner) Owner->RemoveInterfaceRequired(Name);
+}
+
+
+/************************************/
+/*** IReqFilterImageResizer class ***/
+/************************************/
+
+IReqFilterImageResizer::IReqFilterImageResizer(const std::string& name, mtsComponent* owner) :
     Name(name),
     Owner(owner)
 {
@@ -305,7 +332,7 @@ IReqFilterImageRotation::IReqFilterImageRotation(const std::string& name, mtsCom
     }
 }
 
-IReqFilterImageRotation::~IReqFilterImageRotation()
+IReqFilterImageResizer::~IReqFilterImageResizer()
 {
     if (Owner) Owner->RemoveInterfaceRequired(Name);
 }

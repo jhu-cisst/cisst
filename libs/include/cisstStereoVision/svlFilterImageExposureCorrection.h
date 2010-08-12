@@ -36,12 +36,12 @@ class CISST_EXPORT svlFilterImageExposureCorrection : public svlFilterBase
 public:
     svlFilterImageExposureCorrection();
 
-    virtual void SetBrightness(const double brightness);
-    virtual double GetBrightness() const;
-    virtual void SetContrast(const double contrast);
-    virtual double GetContrast() const;
-    virtual void SetGamma(const double gamma);
-    virtual double GetGamma() const;
+    virtual void SetBrightness(const double & brightness);
+    virtual void SetContrast(const double & contrast);
+    virtual void SetGamma(const double & gamma);
+    virtual void GetContrast(double & contrast) const;
+    virtual void GetBrightness(double & brightness) const;
+    virtual void GetGamma(double & gamma) const;
 
 protected:
     virtual int Initialize(svlSample* syncInput, svlSample* &syncOutput);
@@ -55,6 +55,9 @@ protected:
     vctFixedSizeVector<unsigned char, 255> Curve;
     
     virtual void CalculateCurve();
+
+protected:
+    virtual void CreateInterfaces();
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterImageExposureCorrection)

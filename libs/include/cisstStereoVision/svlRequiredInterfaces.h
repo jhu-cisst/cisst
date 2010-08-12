@@ -300,15 +300,41 @@ private:
 };
 
 
-/*************************************/
-/*** IReqFilterImageRotation class ***/
-/*************************************/
+/***********************************************/
+/*** IReqFilterImageExposureCorrection class ***/
+/***********************************************/
 
-class CISST_EXPORT IReqFilterImageRotation
+class CISST_EXPORT IReqFilterImageExposureCorrection
 {
 public:
-    IReqFilterImageRotation(const std::string& name, mtsComponent* owner);
-    ~IReqFilterImageRotation();
+    IReqFilterImageExposureCorrection(const std::string& name, mtsComponent* owner);
+    ~IReqFilterImageExposureCorrection();
+
+    mtsFunctionWrite SetBrightness;
+    mtsFunctionWrite SetContrast;
+    mtsFunctionWrite SetGamma;
+    mtsFunctionRead  GetBrightness;
+    mtsFunctionRead  GetContrast;
+    mtsFunctionRead  GetGamma;
+
+private:
+    IReqFilterImageExposureCorrection();
+    IReqFilterImageExposureCorrection(const IReqFilterImageExposureCorrection& instance);
+
+    std::string Name;
+    mtsComponent* Owner;
+};
+
+
+/************************************/
+/*** IReqFilterImageResizer class ***/
+/************************************/
+
+class CISST_EXPORT IReqFilterImageResizer
+{
+public:
+    IReqFilterImageResizer(const std::string& name, mtsComponent* owner);
+    ~IReqFilterImageResizer();
 
     mtsFunctionWrite SetInterpolation;
     mtsFunctionWrite SetOutputDimension;
@@ -326,8 +352,8 @@ public:
     mtsFunctionRead  GetRightOutputRatio;
 
 private:
-    IReqFilterImageRotation();
-    IReqFilterImageRotation(const IReqFilterImageRotation& instance);
+    IReqFilterImageResizer();
+    IReqFilterImageResizer(const IReqFilterImageResizer& instance);
 
     std::string Name;
     mtsComponent* Owner;
