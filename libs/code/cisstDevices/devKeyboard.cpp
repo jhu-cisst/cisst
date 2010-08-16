@@ -73,14 +73,33 @@ void devKeyboard::AddKeyVoidEvent(char key, const std::string & interfaceName, c
 }
 
 
-void devKeyboard::AddKeyWriteCommand(char key, const std::string & interfaceName, const std::string & commandName, bool initialState)
+void devKeyboard::AddKeyVoidFunction(char key, const std::string & interfaceName, const std::string & commandName)
 {
     // create new key data and add to list
     KeyData * keyData = new KeyData;
     KeyboardDataMap.insert(std::make_pair(key, keyData));
 
     // set key action
-    keyData->Type = WRITE_COMMAND;
+    keyData->Type = VOID_FUNCTION;
+    keyData->State = false;
+
+    // add interface
+    mtsInterfaceRequired * requiredInterface = this->GetInterfaceRequired(interfaceName);
+    if (!requiredInterface) {
+        requiredInterface = this->AddInterfaceRequired(interfaceName);
+    }
+    requiredInterface->AddFunction(commandName, keyData->VoidTrigger);
+}
+
+
+void devKeyboard::AddKeyWriteFunction(char key, const std::string & interfaceName, const std::string & commandName, bool initialState)
+{
+    // create new key data and add to list
+    KeyData * keyData = new KeyData;
+    KeyboardDataMap.insert(std::make_pair(key, keyData));
+
+    // set key action
+    keyData->Type = WRITE_FUNCTION;
     keyData->State = initialState;
 
     // add interface
@@ -116,8 +135,7 @@ void devKeyboard::Run(void)
         {
             if (iterator->first == KeyboardInput) {
                 keyData = iterator->second;
-                switch (keyData->Type)
-                {
+                switch (keyData->Type) {
                 case BUTTON_EVENT:
                     if (keyData->Toggle == true) {
                         if (keyData->State == true) {
@@ -138,15 +156,18 @@ void devKeyboard::Run(void)
                     keyData->VoidTrigger();
                     CMN_LOG_CLASS_RUN_DEBUG << "Run " << KeyboardInput << " sending void event " << std::endl;
                     break;
-                case WRITE_COMMAND:
+                case VOID_FUNCTION:
+                    keyData->VoidTrigger();
+                    CMN_LOG_CLASS_RUN_DEBUG << "Run " << KeyboardInput << " calling void function " << std::endl;
+                    break;
+                case WRITE_FUNCTION:
                     mtsBool value = keyData->State;
                     keyData->WriteTrigger(value);
                     keyData->State = !(keyData->State);
-                    CMN_LOG_CLASS_RUN_DEBUG << "Run " << KeyboardInput << " sending write command " << value << std::endl;
+                    CMN_LOG_CLASS_RUN_DEBUG << "Run " << KeyboardInput << " calling write command " << value << std::endl;
                     break;
                 }
             }
         }
     }
 }
-

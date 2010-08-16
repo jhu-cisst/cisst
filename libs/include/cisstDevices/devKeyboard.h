@@ -32,7 +32,13 @@ http://www.cisst.org/cisst/license.txt.
 // Always include last
 #include <cisstDevices/devExport.h>
 
+/*! Class used to create trigger events and commands using a keyboard.
+  The user has to bind keys to a given required interface function or
+  to a provided interface event.
 
+  This class also maintains an internal flag for a special "Quit" key.
+  The user can define the quit key using SetQuitKey and query if the
+  key has been pressed using if (keyboard.Done()). */
 class CISST_EXPORT devKeyboard: public mtsTaskContinuous {
     // declare services, requires dynamic creation
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
@@ -43,14 +49,47 @@ public:
     void Startup(void){};
     void Run(void);
     void Cleanup(void) {};
-    
-    enum TriggerType {BUTTON_EVENT, VOID_EVENT, WRITE_COMMAND};
 
-    void AddKeyButtonEvent(char key, const std::string & interfaceName, bool toggle); 
+    enum TriggerType {BUTTON_EVENT, VOID_EVENT, VOID_FUNCTION, WRITE_FUNCTION};
+
+    /*! Add a write event with a payload of type prmEventButton to the
+      provided interface "interfaceName".  If the keyboard component doesn't
+      already have such interface, it will create one.
+
+      The toggle flag allows to emulate a continuously pressed button
+      and will emit alternatively prmEventButton::PRESSED and
+      prmEventButton::RELEASED.  It the toggle is set to false, the
+      event is always of type prmEventButton::RELEASED.  */
+    void AddKeyButtonEvent(char key, const std::string & interfaceName, bool toggle);
+
+    /*! Add a void event to the provided interface "interfaceName".
+      If the keyboard component doesn't already have such interface,
+      it will create one. */
     void AddKeyVoidEvent(char key, const std::string & interfaceName, const std::string & eventName);
-    void AddKeyWriteCommand(char key, const std::string & interfaceName, const std::string & commandName, bool initialState);
+
+    /*! Add a void function to required interface "interfaceName".
+      If the keyboard component doesn't already have such interface,
+      it will create one. */
+    void AddKeyVoidFunction(char key, const std::string & interfaceName, const std::string & commandName);
+
+    /*! Add a write function to required interface "interfaceName".
+      If the keyboard component doesn't already have such interface,
+      it will create one.  The function will send an mtsBool,
+      alternatively 'true' and 'false'. */
+    void AddKeyWriteFunction(char key, const std::string & interfaceName, const std::string & commandName, bool initialState);
+
+    // for backward compatibility
+    inline CISST_DEPRECATED void AddKeyWriteCommand(char key, const std::string & interfaceName, const std::string & commandName, bool initialState) {
+        AddKeyWriteFunction(key, interfaceName, commandName, initialState);
+    }
+
+    /*! Set the quit key.  Once the quit key has been pressed the
+      keyboard component stop triggering events and commands.  State
+      can be checked using the Done() method. */
     void SetQuitKey(char quitKey);
 
+    /*! Data used internally to store all the possible actions
+      associated to a key pressed. */
     struct KeyData {
         bool Toggle;
         bool State;
