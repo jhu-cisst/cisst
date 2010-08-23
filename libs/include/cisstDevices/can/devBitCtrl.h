@@ -19,7 +19,7 @@ class devBitCtrl : public devCAN {
    
    devBitCtrl( const std::string& candevname, devCAN::Rate rate );
    ~devBitCtrl();
-   
+
    devCAN::Errno Open();
    devCAN::Errno Close();
    
@@ -29,6 +29,9 @@ class devBitCtrl : public devCAN {
    devCAN::Errno Recv( devCAN::Frame& frame, 
 		       devCAN::Flags flags = devCAN::MSG_NOFLAG );
    
+   devCAN::Errno AddFilter( const devCAN::Filter& ) { return devCAN::ESUCCESS; }
+	 
+
 };
 
 #endif
