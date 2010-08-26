@@ -51,59 +51,59 @@ private:
 	
 	/******  Functions used to parse input file *********/
 
-	VALID_MACRO parser::getMacro(int startValue) ;
+	VALID_MACRO getMacro(int startValue) ;
 	
-	int parser::changeState(VALID_MACRO m) ;
+	int changeState(VALID_MACRO m) ;
 	
-	int parser::runState(VALID_MACRO m) ;
+	int runState(VALID_MACRO m) ;
 	
-	int parser::parseComponent() ;
+	int parseComponent() ;
 
-	int parser::parseStateTableData() ;
+	int parseStateTableData() ;
 
-	int parser::parseStateTableDataLine() ;
+	int parseStateTableDataLine() ;
 
-	int parser::parseInterfaceProvided() ;
+	int parseInterfaceProvided() ;
 
-	int parser::parseInterfaceRequired() ;
+	int parseInterfaceRequired() ;
 
-	int parser::parseInterfaceRequiredEnd() ;
+	int parseInterfaceRequiredEnd() ;
 
-	int parser::parseCommandVoid() ;
+	int parseCommandVoid() ;
 
-	int parser::parseCommandRead() ;
+	int parseCommandRead() ;
 
-	int parser::parseCommandReadState() ;
+	int parseCommandReadState() ;
 
-	int parser::parseCommandWrite() ;
+	int parseCommandWrite() ;
 
-	int parser::parseCommandQualifiedRead() ;
+	int parseCommandQualifiedRead() ;
 
-	int parser::parseFunction() ;
+	int parseFunction() ;
 
-	int parser::parseEventVoid() ;
+	int parseEventVoid() ;
 
-	int parser::parseEventWrite() ;
+	int parseEventWrite() ;
 
-	int parser::parseEventHandlerWrite() ;
+	int parseEventHandlerWrite() ;
 
-	int parser::parseEventHandlerVoid() ;
+	int parseEventHandlerVoid() ;
 
 	
 public:
 	/** Constructor
 	*	takes the name of the file to be parsed as an argument
 	*/
-	parser::parser(string filename);
+	parser(std::string filename);
 	
-	int parser::parseFile() ;
+	int parseFile() ;
 
 	/** Generates code for the component that has been parsed
 	*	appends _init.cpp to the name of the input file
 	*/
-	void parser::GenerateCode() ;
+	void GenerateCode() ;
 
-	inline Component * parser::getComponent() { return component; } ;
+	inline Component * getComponent() { return component; } ;
 
 };
 

@@ -9,7 +9,7 @@
 
 int main(int argc, char* argv[])
 {
-	string filename = argv[1];
+    std::string filename = argv[1];
 
 	parser * parseTool = new parser(filename);
 	std::ifstream fin;

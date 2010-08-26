@@ -32,7 +32,7 @@ static const std::string macroNames[] =  { "DECLARE_COMPONENT",
  "INTERFACE_REQUIRED_END"
 };
 
-	parser::parser(string fullname){
+parser::parser(std::string fullname){
 		line = "";
 		state = 0;
 		fullName = fullname;
