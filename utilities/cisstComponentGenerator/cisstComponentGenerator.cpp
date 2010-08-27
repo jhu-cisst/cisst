@@ -5,24 +5,25 @@
 #include <string>
 #include <iostream>
 #include <fstream>
-#include "parser.h"
+#include <ccgParser.h>
 
 int main(int argc, char* argv[])
 {
-    std::string filename = argv[1];
+    std::string input = argv[1];
+    std::string output = argv[2];
 
-	parser * parseTool = new parser(filename);
+    cmnLogger::AddChannel(std::cout);
+
+	ccgParser * parser = new ccgParser(input);
 	std::ifstream fin;
 	fin.open(argv[1]);
 	std::string s;
 
-	//getline(fin, s);
-	//cout << s << endl;
+	if(!parser->ParseFile()) {
+		std::cout << "An error occurred while parsing: " << input << std::endl;
+    }
 
-	if(!parseTool->parseFile())
-		std::cout << "Error!" << std::endl;
-
-	parseTool->GenerateCode();
+	parser->GenerateCode(output);
 
 	fin.close();
 }

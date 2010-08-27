@@ -21,7 +21,8 @@ set (EXECUTABLE_OUTPUT_PATH ${cisstUtilities_BINARY_DIR}/bin)
 # List all utilities
 set (CISST_UTILITIES 
      multiTaskGlobalComponentManager
-     multiTaskGlobalComponentManagerFLTK)
+     multiTaskGlobalComponentManagerFLTK
+     cisstComponentGenerator)
 
 # Which utilities to build
 foreach (utility ${CISST_UTILITIES})
