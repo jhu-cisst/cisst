@@ -17,8 +17,9 @@
 if (CISST_HAS_FLTK)
   add_subdirectory (PeriodicTaskFLTK)
   add_subdirectory (CommandsAndEventsFLTK)
+  add_subdirectory (ComponentGenerator)
 else (CISST_HAS_FLTK)
-  message (WARNING " cisstMultiTask examples PeriodicTaskFLTK and CommandsAndEventsFLTK will not be compiled since they require CISST_HAS_FLTK")
+  message (WARNING " cisstMultiTask examples PeriodicTaskFLTK, CommandsAndEventsFLTK and ComponentGenerator will not be compiled since they require CISST_HAS_FLTK")
 endif (CISST_HAS_FLTK)
 
 if (CISST_HAS_QT)

@@ -62,6 +62,7 @@ set (SOURCE_FILES
 # all header files
 set (HEADER_FILES
      mtsMacros.h
+     mtsComponentGeneratorMacros.h
      mtsGenericObject.h
      mtsGenericObjectProxy.h
 

@@ -317,6 +317,59 @@ function (cisst_add_swig_module ...)
 endfunction (cisst_add_swig_module)
 
 
+# Function to use cisstComponentGenerator, this function assumes input
+# files are provided using a relative path
+function (cisst_component_generator GENERATED_FILES_VAR_PREFIX ...)
+  # debug
+  cisst_cmake_debug ("cisst_component_generator called with: ${ARGV}")
+  if (${ARGC} LESS 1)
+    message ("cisst_component_generator takes at least one argument.")
+  endif (${ARGC} LESS 1)
+  list (REMOVE_AT ARGV 0) # first one is name of variable
+
+  # make sure cisstComponentGenerator is being build and find it
+  # try to figure out if this is build along with cisst
+  if (TARGET cisstCommon)
+    # make sure the target existsOUTPUT_NAME
+    if (TARGET cisstComponentGenerator)
+      # if the target exists, use its destination
+      get_target_property (CISST_CG_EXECUTABLE cisstComponentGenerator LOCATION)
+    else (TARGET cisstComponentGenerator)
+      message (SEND_ERROR "To use the cisst_component_generator function (for ${GENERATED_FILES_VAR_PREFIX}) you need to build cisstComponentGenerator, turn BUILD_UTILITIES ON first and then BUILD_UTILITIES_cisstComponentGenerator")
+    endif (TARGET cisstComponentGenerator)
+  else (TARGET cisstCommon)
+    # assumes this is an external project, find using the path provided in cisst-config.cmake
+    find_program (CISST_CG_EXECUTABLE cisstComponentGenerator
+                  PATHS "${CISST_BINARY_DIR}/utilities/bin")
+  endif (TARGET cisstCommon)
+
+  # loop over input files
+  foreach (input ${ARGV})
+    # find input name
+    cisst_cmake_debug ("cisst_component_generator: found input file: ${input}")
+    get_filename_component (INPUT_WE "${input}" NAME_WE)
+    set (input_absolute "${CMAKE_CURRENT_SOURCE_DIR}/${input}")
+    # create output name and concatenate to list available in parent scope
+    set (output_absolute "${CMAKE_CURRENT_BINARY_DIR}/${INPUT_WE}_initGenerated.cpp")
+    cisst_cmake_debug ("cisst_component_generator: adding output file: ${output_absolute}")
+    set (GENERATED_FILES ${GENERATED_FILES} ${output_absolute})
+    # tell cmake the output is generated and how to generate it
+    set_source_files_properties (${output_absolute} PROPERTIES GENERATED 1)
+    add_custom_command (OUTPUT ${output_absolute}
+                        COMMAND "${CISST_CG_EXECUTABLE}"
+			${input_absolute} ${output_absolute}
+			MAIN_DEPENDENCY ${input}
+			DEPENDS ${CISST_CG_EXECUTABLE}
+                        COMMENT "cisstComponentGenerator for ${INPUT_WE}")
+  endforeach(input)
+
+  # create variable to store all generated files names
+  set (${GENERATED_FILES_VAR_PREFIX}_CISST_CG_SRCS ${GENERATED_FILES} PARENT_SCOPE)
+  
+endfunction (cisst_component_generator)
+
+
+
 
 # DEPRECATED, USE cisst_add_library INSTEAD
 # The macro adds a library to a CISST-related project by processing the

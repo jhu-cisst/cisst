@@ -69,9 +69,9 @@ else (CMAKE_CL_64)
 endif (CMAKE_CL_64)
 
 # Options
+OPTION(BUILD_UTILITIES "Build utility programs built using cisst." OFF)
 OPTION(BUILD_TESTS "Build tests." OFF)
 OPTION(BUILD_EXAMPLES "Build examples." OFF)
-OPTION(BUILD_UTILITIES "Build utility programs built using cisst." OFF)
 
 IF(UNIX)
   OPTION(BUILD_DOC "Build the documentation." OFF)
@@ -258,13 +258,13 @@ ENDIF(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
 SET(CISST_LIBS_STABLE
     cisstCommon
     cisstVector
+    cisstOSAbstraction
+    cisstMultiTask
     )
 
 SET(CISST_LIBS_UNSTABLE
     cisstNumerical
     cisstInteractive
-    cisstOSAbstraction
-    cisstMultiTask
     cisstParameterTypes
     cisstDevices
     cisstImage
@@ -338,6 +338,10 @@ endforeach (lib)
 cisst_cmake_debug("Libraries to be built: ${CISST_LIBRARIES}")
 
 # Contional builds
+IF(BUILD_UTILITIES)
+  ADD_SUBDIRECTORY(utilities)
+ENDIF(BUILD_UTILITIES)
+
 IF(BUILD_TESTS)
   # Settings for CTest
   ENABLE_TESTING()
@@ -350,10 +354,6 @@ ENDIF(BUILD_TESTS)
 IF(BUILD_EXAMPLES)
   ADD_SUBDIRECTORY(examples)
 ENDIF(BUILD_EXAMPLES)
-
-IF(BUILD_UTILITIES)
-  ADD_SUBDIRECTORY(utilities)
-ENDIF(BUILD_UTILITIES)
 
 IF(BUILD_DOC)
   ADD_SUBDIRECTORY(doc)
