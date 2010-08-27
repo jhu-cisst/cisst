@@ -49,73 +49,73 @@ class ccgParser: public cmnGenericObject {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
 private:
-	// a string that holds the text of the file
-	std::string Line;
+    // a string that holds the text of the file
+    std::string Line;
     size_t LineNumber;
 
     // full name of the file being parsed
-	std::string FullName;
+    std::string FullName;
 
-	// an object that holds the information for the new component
-	ccgComponent * Component;
+    // an object that holds the information for the new component
+    ccgComponent * Component;
 
     // the current state
-	ccgState State;
+    ccgState State;
 
-	/******  Functions used to parse input file *********/
+    /******  Functions used to parse input file *********/
 
-	ccgMacro GetMacro(int startValue);
+    ccgMacro GetMacro(int startValue);
 
-	int ChangeState(ccgMacro macro);
+    int ChangeState(ccgMacro macro);
 
-	int RunState(ccgMacro macro);
+    int RunState(ccgMacro macro);
 
-	int ParseComponent(void);
+    int ParseComponent(void);
 
-	int ParseStateTableData(void);
+    int ParseStateTableData(void);
 
-	int ParseStateTableDataLine(void);
+    int ParseStateTableDataLine(void);
 
-	int ParseInterfaceProvided(void);
+    int ParseInterfaceProvided(void);
 
-	int ParseInterfaceRequired(void);
+    int ParseInterfaceRequired(void);
 
-	int ParseInterfaceRequiredEnd(void);
+    int ParseInterfaceRequiredEnd(void);
 
-	int ParseCommandVoid(void);
+    int ParseCommandVoid(void);
 
-	int ParseCommandRead(void);
+    int ParseCommandRead(void);
 
-	int ParseCommandReadState(void);
+    int ParseCommandReadState(void);
 
-	int ParseCommandWrite(void);
+    int ParseCommandWrite(void);
 
-	int ParseCommandQualifiedRead(void);
+    int ParseCommandQualifiedRead(void);
 
-	int ParseFunction(void);
+    int ParseFunction(void);
 
-	int ParseEventVoid(void);
+    int ParseEventVoid(void);
 
-	int ParseEventWrite(void);
+    int ParseEventWrite(void);
 
-	int ParseEventHandlerWrite(void);
+    int ParseEventHandlerWrite(void);
 
-	int ParseEventHandlerVoid(void);
+    int ParseEventHandlerVoid(void);
 
 
 public:
-	/** Constructor
-	*	takes the name of the file to be parsed as an argument
-	*/
-	ccgParser(const std::string & filename);
+    /** Constructor
+    *    takes the name of the file to be parsed as an argument
+    */
+    ccgParser(const std::string & filename);
 
-	int ParseFile(void);
+    int ParseFile(void);
 
-	/** Generates code for the component that has been parsed
-	*/
-	void GenerateCode(const std::string & filename);
+    /** Generates code for the component that has been parsed
+    */
+    void GenerateCode(const std::string & filename);
 
-	inline ccgComponent * getComponent(void) {
+    inline ccgComponent * getComponent(void) {
         return Component;
     }
 

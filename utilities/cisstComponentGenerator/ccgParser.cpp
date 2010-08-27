@@ -80,12 +80,12 @@ int ccgParser::ParseFile(void)
         LineNumber++;
         CMN_LOG_CLASS_RUN_VERBOSE << "ParseFile: " << Line << ", " << CCG_PARSER_LOG << std::endl;
         if ((macro = GetMacro(0)) != NEG_MACRO || State == CCG_PROCESSING_MTS_STATE_TABLE) {
-            if (ChangeState(macro))	{
+            if (ChangeState(macro)) {
                 CMN_LOG_CLASS_RUN_VERBOSE << "ParseFile: " << CCG_PARSER_LOG << std::endl;
                 RunState(macro);
                 //if(!runState(macro)) {
-                //	cout << "Error: Format Error in " << macroNames[macro] << std::endl;
-                //	return 0;
+                //    cout << "Error: Format Error in " << macroNames[macro] << std::endl;
+                //    return 0;
                 //}
             } else {
                 CMN_LOG_CLASS_RUN_ERROR << "ParseFile: illegal state change, " << CCG_PARSER_LOG << std::endl;
@@ -183,7 +183,7 @@ int ccgParser::ChangeState(ccgMacro macro)
         default:
             //std::cout << m << std::endl;
             return 0;
-		}
+        }
         break;
     default:
         return 0;
@@ -474,17 +474,17 @@ int ccgParser::ParseInterfaceRequiredEnd(void)
 
 int ccgParser::ParseFunction(void)
 {
-		size_t namestart = Line.find('\"');
-		size_t nameend = Line.find('\"', namestart+1)+1;
-		size_t funcstart = Line.find(' ', nameend)+1;
-		std::string name, func;
+    size_t namestart = Line.find('\"');
+    size_t nameend = Line.find('\"', namestart+1)+1;
+    size_t funcstart = Line.find(' ', nameend)+1;
+    std::string name, func;
 
-		name = Line.substr(namestart, nameend - namestart);
-		func = Line.substr(funcstart, Line.find(')', funcstart) - funcstart);
+    name = Line.substr(namestart, nameend - namestart);
+    func = Line.substr(funcstart, Line.find(')', funcstart) - funcstart);
 
-		//std::cout << name << " " << func << std::endl;
-		Component->AddFunctionToInterface(func, name);
-		return 1;
+    //std::cout << name << " " << func << std::endl;
+    Component->AddFunctionToInterface(func, name);
+    return 1;
 }
 
 

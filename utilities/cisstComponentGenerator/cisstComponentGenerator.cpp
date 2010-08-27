@@ -14,16 +14,16 @@ int main(int argc, char* argv[])
 
     cmnLogger::AddChannel(std::cout);
 
-	ccgParser * parser = new ccgParser(input);
-	std::ifstream fin;
-	fin.open(argv[1]);
-	std::string s;
+    ccgParser * parser = new ccgParser(input);
+    std::ifstream fin;
+    fin.open(argv[1]);
+    std::string s;
 
-	if(!parser->ParseFile()) {
-		std::cout << "An error occurred while parsing: " << input << std::endl;
+    if(!parser->ParseFile()) {
+        std::cout << "An error occurred while parsing: " << input << std::endl;
     }
 
-	parser->GenerateCode(output);
+    parser->GenerateCode(output);
 
-	fin.close();
+    fin.close();
 }
