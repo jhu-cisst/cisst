@@ -4,7 +4,7 @@
 /*
   $Id$
 
-  Author(s):  Peter Kazanzides
+  Author(s):  Peter Kazanzides, Ali Uneri
   Created on: 2009
 
   (C) Copyright 2007-2009 Johns Hopkins University (JHU), All Rights Reserved.
@@ -49,6 +49,9 @@ http://www.cisst.org/cisst/license.txt.
 
   \note Please refer to osAbstractionTutorial/sockets for usage examples.
   \note Disconnection is detected when a socket attempts to write to another socket and does not received an ACK.
+
+  \todo GetIP() could be static or external to the osaSocket class.
+  \todo Perhaps GetLocalhostIP() should be outside the class.
 */
 
 #ifndef _osaSocket_h
@@ -76,8 +79,8 @@ class osaSocket;
 template <class _element, class _trait = std::char_traits<_element> >
 class osaSocketStreambuf: public std::basic_streambuf<_element, _trait>
 {
-public:
-  
+ public:
+
     typedef std::basic_streambuf<_element, _trait> BaseClassType;
 
     osaSocketStreambuf(osaSocket * socket):
@@ -86,13 +89,13 @@ public:
         CMN_ASSERT(this->Socket);
     }
 
-protected:
+ protected:
     typedef typename std::basic_streambuf<_element, _trait>::int_type int_type;
-  
+
     /*! Override the basic_streambuf sync for the current file
       output. */
     virtual int sync(void);
-  
+
     /*! Override the basic_streambuf xsputn for the current file
       output. */
     virtual std::streamsize xsputn(const _element * s, std::streamsize n);
@@ -100,15 +103,15 @@ protected:
     /*! Override the basic_streambuf xsgetn for the current file
       output. */
     virtual std::streamsize xsgetn(_element * s, std::streamsize n);
-    
+
     /*! Override the basic_streambuf overflow. overflow() is called
       when sputc() discovers it does not have space in the storage
       buffer. In our case, it's always. See more on it in the
       basic_streambuf documentation.
      */
     virtual int_type overflow(int_type c = _trait::eof());
-  
-private:
+
+ private:
     osaSocket * Socket;
 };
 
@@ -117,7 +120,7 @@ private:
 template <class _element, class _trait>
 int osaSocketStreambuf<_element, _trait>::sync(void)
 {
-    // do nothing, flush on this->socket? 
+    // do nothing, flush on this->socket?
     return 0;
 }
 
@@ -139,7 +142,7 @@ osaSocketStreambuf<_element, _trait>::xsgetn(_element * s, std::streamsize n)
 
 
 template <class _element, class _trait>
-typename osaSocketStreambuf<_element, _trait>::int_type 
+typename osaSocketStreambuf<_element, _trait>::int_type
 osaSocketStreambuf<_element, _trait>::overflow(int_type c)
 {
     // follow the basic_streambuf standard
@@ -151,7 +154,7 @@ osaSocketStreambuf<_element, _trait>::overflow(int_type c)
 
 #endif // OSA_SOCKET_WITH_STREAM
 
-class CISST_EXPORT osaSocket: public cmnGenericObject
+class CISST_EXPORT osaSocket : public cmnGenericObject
 #ifdef OSA_SOCKET_WITH_STREAM
 , public std::iostream
 #endif // OSA_SOCKET_WITH_STREAM
@@ -169,7 +172,7 @@ class CISST_EXPORT osaSocket: public cmnGenericObject
     osaSocketStreambuf<char> Streambuf;
 #endif // OSA_SOCKET_WITH_STREAM
 
-public:
+ public:
     enum SocketTypes { UDP, TCP };
 
     /*! \brief Default constructor */
@@ -184,14 +187,12 @@ public:
     };
 
     /*! \return The first IP address of the localhost as a string */
-    // Perhaps this should be outside the class
     static std::string GetLocalhostIP(void);
 
     /*! \brief Retrieve IP address of the localhost as string from each network
                interface (which may be more than two)
         \param IPaddresses container for IP address as string
         \return Number of IP address retrieved with IPaddresses filled */
-    // Perhaps this should be outside the class
     static int GetLocalhostIP(std::vector<std::string> & IPaddress);
 
     /*! \brief Sets the port of a UDP server */
@@ -213,14 +214,14 @@ public:
         \param port Server's port number
         \return true if the connection was successful */
     bool Connect(const std::string & host, unsigned short port);
- 
+
     /*! \brief Send a byte array via the socket
         \param bufsend Buffer holding bytes to be sent
         \param msglen Number of bytes to send
         \param timeoutSec is the longest time we should wait to send something (NA for UDP)
-        \return Number of bytes sent (-1 if error) 
+        \return Number of bytes sent (-1 if error)
         \note  Since this is a nonblocking call the socket might not be ready to send right away
-               so a short timeout will help in cases when large amount of data is sent 
+               so a short timeout will help in cases when large amount of data is sent
                around. If the socket is not ready within the timeout then the connection will be closed
     */
     int Send(const char * bufsend, unsigned int msglen, const double timeoutSec = 0.0 );
@@ -239,7 +240,7 @@ public:
         \return Number of bytes received. 0 if timeout is reached and/or no data is received. */
     int Receive(char * bufrecv, unsigned int maxlen, const double timeoutSec = 0.0);
 
-    /*! \brief Close the socket 
+    /*! \brief Close the socket
         \return False if close fails*/
     bool Close(void);
 
@@ -254,12 +255,11 @@ public:
     }
 #endif // OSA_SOCKET_WITH_STREAM
 
-protected:
+ protected:
 
-    
-    /*! \brief osaSocketServer constructor (for use by osaSocketServer) 
+    /*! \brief osaSocketServer constructor (for use by osaSocketServer)
         \param Void pointer is used to her avoid including WinSock2.h, the pointer is cast to proper socket in cpp file.
-        
+
         */
     osaSocket(void * socketFDPtr);
 
@@ -269,7 +269,7 @@ protected:
     SocketTypes SocketType;
     int SocketFD;
     bool Connected;
-  
+
     friend class osaSocketServer;
 };
 

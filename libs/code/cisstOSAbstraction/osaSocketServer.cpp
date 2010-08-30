@@ -4,7 +4,7 @@
 /*
 $Id$
 
-Author(s):  Mark Finkelstein, Ali Uneri
+Author(s):  Mark Finkelstein, Ali Uneri, Peter Kazanzides
 Created on: 2009-08-17
 
 (C) Copyright 2007-2009 Johns Hopkins University (JHU), All Rights Reserved.
@@ -41,9 +41,10 @@ http://www.cisst.org/cisst/license.txt.
 
 osaSocketServer::osaSocketServer(void)
 {
+    int retval = 0;
 #if (CISST_OS == CISST_WINDOWS)
     WSADATA wsaData;
-    int retval = WSAStartup(WINSOCKVERSION, &wsaData);
+    retval = WSAStartup(WINSOCKVERSION, &wsaData);
     if (retval != 0) {
         CMN_LOG_CLASS_RUN_ERROR << "osaSocketServer: WSAStartup failed with error code " << retval << std::endl;
         return;
@@ -55,6 +56,12 @@ osaSocketServer::osaSocketServer(void)
         CMN_LOG_CLASS_RUN_ERROR << "osaSocketServer: failed to create a socket" << std::endl;
     }
     CMN_LOG_CLASS_RUN_VERBOSE << "osaSocketServer: created socket server " << ServerSocketFD << std::endl;
+
+    const char optval = 0;
+    retval = setsockopt(ServerSocketFD, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(int));
+    if (retval == SOCKET_ERROR) {
+        CMN_LOG_CLASS_RUN_ERROR << "osaSocketServer: failed to set socket options" << std::endl;
+    }
 
     // Change to non-blocking socket
 #if (CISST_OS == CISST_WINDOWS)
@@ -94,6 +101,8 @@ bool osaSocketServer::AssignPort(unsigned short port)
     }
     return true;
 }
+
+
 bool osaSocketServer::Listen(int backlog)
 {
     int retval = listen(ServerSocketFD, backlog);
@@ -103,6 +112,8 @@ bool osaSocketServer::Listen(int backlog)
     }
     return true;
 }
+
+
 osaSocket * osaSocketServer::Accept(void)
 {
     struct sockaddr_in serverAddr;
@@ -111,13 +122,14 @@ osaSocket * osaSocketServer::Accept(void)
     if (newSocketFD == INVALID_SOCKET) {
         return 0;
     }
-    CMN_LOG_CLASS_INIT_DEBUG << "Accept: connection request accepted " <<  inet_ntoa (serverAddr.sin_addr)<<":"<<ntohs(serverAddr.sin_port)<<std::endl;
+    CMN_LOG_CLASS_INIT_DEBUG << "Accept: connection request accepted " <<  inet_ntoa (serverAddr.sin_addr)<<":"<<ntohs(serverAddr.sin_port) << std::endl;
     osaSocket * newSocket = new osaSocket(&newSocketFD);
     //connected so set the sockets state to true;
     newSocket->Connected = true;
     //Clients.insert(std::pair<int, osaSocket *>(newSocketFD, newSocket));
     return newSocket;
 }
+
 
 void osaSocketServer::Close(void)
 {
@@ -131,5 +143,3 @@ void osaSocketServer::Close(void)
         ServerSocketFD = -1;
     }
 }
-
-

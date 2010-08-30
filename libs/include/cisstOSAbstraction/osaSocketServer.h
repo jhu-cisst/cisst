@@ -4,7 +4,7 @@
 /*
   $Id$
 
-  Author(s):  Mark Finkelstein, Ali Uneri
+  Author(s):  Mark Finkelstein, Ali Uneri, Peter Kazanzides
   Created on: 2009-08-17
 
   (C) Copyright 2007-2009 Johns Hopkins University (JHU), All Rights Reserved.
@@ -54,7 +54,7 @@ class CISST_EXPORT osaSocketServer: public cmnGenericObject
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
-public:
+ public:
     /*! \brief Default constructor */
     osaSocketServer(void);
 
@@ -77,7 +77,7 @@ public:
     /*! \brief Close the listening socket  */
     void Close(void);
 
-protected:
+ protected:
 
     int ServerSocketFD;
 };
