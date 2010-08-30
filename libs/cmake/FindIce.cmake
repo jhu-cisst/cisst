@@ -78,11 +78,14 @@ IF( ICE_INCLUDE_DIR )
     get_filename_component(ICE_HOME_STRING ${ICE_INCLUDE_DIR} PATH)
     set(ICE_HOME ${ICE_HOME_STRING} CACHE PATH "Ice home directory")
 
-    message( STATUS "Setting ICE_HOME to ${ICE_HOME}" )
+    message ( STATUS "Setting ICE_HOME to ${ICE_HOME}" )
 
     # include and lib dirs are easy
-    SET( ICE_INCLUDE_DIR ${ICE_INCLUDE_DIR} ${ICE_HOME}/share/slice ${ICE_HOME}/share/ice/slice )
-    SET( ICE_LIBRARY_DIR ${ICE_HOME}/lib )
+    set ( ICE_INCLUDE_DIR ${ICE_INCLUDE_DIR}
+                          ${ICE_HOME}/share/slice
+                          ${ICE_HOME}/share/ice/slice
+                          ${ICE_HOME}/share/Ice/slice )
+    set ( ICE_LIBRARY_DIR ${ICE_HOME}/lib )
 
     # debian package splits off slice files into a different place
     IF( ICE_HOME MATCHES /usr )
