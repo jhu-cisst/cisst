@@ -57,8 +57,8 @@ osaSocketServer::osaSocketServer(void)
     }
     CMN_LOG_CLASS_RUN_VERBOSE << "osaSocketServer: created socket server " << ServerSocketFD << std::endl;
 
-    const char optval = 0;
-    retval = setsockopt(ServerSocketFD, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(int));
+    int optval = 1;
+    retval = setsockopt(ServerSocketFD, SOL_SOCKET, SO_REUSEADDR, reinterpret_cast<const char *>(&optval), sizeof(optval));
     if (retval == SOCKET_ERROR) {
         CMN_LOG_CLASS_RUN_ERROR << "osaSocketServer: failed to set socket options" << std::endl;
     }
