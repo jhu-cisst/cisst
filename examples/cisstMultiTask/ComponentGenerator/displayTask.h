@@ -7,7 +7,7 @@
 
 #include <cisstMultiTask.h>
 #include "displayUI.h"
-
+#include <sineData.h>
 
 class displayTask: public mtsTaskPeriodic {
     // set log level to "Run Error"
@@ -18,7 +18,7 @@ protected:
     MTS_DECLARE_COMPONENT(displayTask, mtsTaskPeriodic);
 
     // local copy of data used in commands
-    double Data;
+    sineData Data;
     mtsDouble AmplitudeData;
 
     MTS_INTERFACE_REQUIRED_BEGIN(DataGenerator);

@@ -22,6 +22,7 @@ set (EXECUTABLE_OUTPUT_PATH ${cisstUtilities_BINARY_DIR}/bin)
 set (CISST_UTILITIES 
      multiTaskGlobalComponentManager
      multiTaskGlobalComponentManagerFLTK
+     cisstDataGenerator
      cisstComponentGenerator)
 
 # Which utilities to build

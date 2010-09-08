@@ -371,6 +371,62 @@ endfunction (cisst_component_generator)
 
 
 
+# Function to use cisstDataGenerator, this function assumes input
+# files are provided using a relative path
+function (cisst_data_generator GENERATED_FILES_VAR_PREFIX ...)
+  # debug
+  cisst_cmake_debug ("cisst_data_generator called with: ${ARGV}")
+  if (${ARGC} LESS 1)
+    message ("cisst_data_generator takes at least one argument.")
+  endif (${ARGC} LESS 1)
+  list (REMOVE_AT ARGV 0) # first one is name of variable
+
+  # make sure cisstDataGenerator is being build and find it
+  # try to figure out if this is build along with cisst
+  if (TARGET cisstCommon)
+    # make sure the target existsOUTPUT_NAME
+    if (TARGET cisstDataGenerator)
+      # if the target exists, use its destination
+      get_target_property (CISST_DG_EXECUTABLE cisstDataGenerator LOCATION)
+    else (TARGET cisstDataGenerator)
+      message (SEND_ERROR "To use the cisst_data_generator function (for ${GENERATED_FILES_VAR_PREFIX}) you need to build cisstDataGenerator, turn BUILD_UTILITIES ON first and then BUILD_UTILITIES_cisstDataGenerator")
+    endif (TARGET cisstDataGenerator)
+  else (TARGET cisstCommon)
+    # assumes this is an external project, find using the path provided in cisst-config.cmake
+    find_program (CISST_DG_EXECUTABLE cisstDataGenerator
+                  PATHS "${CISST_BINARY_DIR}/utilities/bin")
+  endif (TARGET cisstCommon)
+
+  # loop over input files
+  foreach (input ${ARGV})
+    # find input name
+    cisst_cmake_debug ("cisst_data_generator: found input file: ${input}")
+    get_filename_component (INPUT_WE "${input}" NAME_WE)
+    set (input_absolute "${CMAKE_CURRENT_SOURCE_DIR}/${input}")
+    # create output name and concatenate to list available in parent scope
+    set (header_absolute "${CMAKE_CURRENT_BINARY_DIR}/${INPUT_WE}.h")
+    set (code_absolute "${CMAKE_CURRENT_BINARY_DIR}/${INPUT_WE}.cpp")
+    cisst_cmake_debug ("cisst_data_generator: adding output files: ${header_absolute} ${code_absolute}")
+    set (GENERATED_FILES ${GENERATED_FILES} ${header_absolute} ${code_absolute})
+    # tell cmake the output is generated and how to generate it
+    set_source_files_properties (${header_absolute} PROPERTIES GENERATED 1)
+    set_source_files_properties (${code_absolute} PROPERTIES GENERATED 1)
+    add_custom_command (OUTPUT ${header_absolute} ${code_absolute}
+                        COMMAND "${CISST_DG_EXECUTABLE}"
+			${input_absolute} ${CMAKE_CURRENT_BINARY_DIR} ${INPUT_WE}.h ${CMAKE_CURRENT_BINARY_DIR} ${INPUT_WE}.cpp
+			MAIN_DEPENDENCY ${input}
+			DEPENDS ${CISST_DG_EXECUTABLE}
+                        COMMENT "cisstDataGenerator for ${INPUT_WE}")
+  endforeach(input)
+
+  # create variable to store all generated files names
+  set (${GENERATED_FILES_VAR_PREFIX}_CISST_DG_SRCS ${GENERATED_FILES} PARENT_SCOPE)
+  
+endfunction (cisst_data_generator)
+
+
+
+
 # DEPRECATED, USE cisst_add_library INSTEAD
 # The macro adds a library to a CISST-related project by processing the
 # externally defined variables listed below:

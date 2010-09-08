@@ -1,0 +1,10 @@
+typename sineData
+
+include <cisstVector/vctFixedSizeVector.h>
+
+default-log-lod CMN_LOG_LOD_RUN_VERBOSE
+
+typedef vctFixedSizeVector<double, 2> AmplitudesType
+
+member double Sine signal
+member AmplitudesType Amplitudes desired and actual amplitude

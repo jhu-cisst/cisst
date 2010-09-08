@@ -40,7 +40,7 @@ void displayTask::Run(void)
 {
     // get the data from the sine wave generator task
     Generator.GetData(Data);
-    UI.Data->value(Data);
+    UI.Data->value(Data.GetSine());
     // check if the user has entered a new amplitude in UI
     if (UI.AmplitudeChanged) {
         // retrieve the new amplitude and send it to the sine task
