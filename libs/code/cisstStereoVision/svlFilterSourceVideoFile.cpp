@@ -97,6 +97,7 @@ int svlFilterSourceVideoFile::SetChannelCount(unsigned int channelcount)
     Length.SetSize(channelcount);
     Position.SetSize(channelcount);
     Range.SetSize(channelcount);
+    Range.SetAll(vctInt2(-1, -1));
 
     return SVL_OK;
 }
@@ -136,6 +137,8 @@ int svlFilterSourceVideoFile::Initialize(svlSample* &syncOutput)
 
         Length[i] = Codec[i]->GetEndPos() + 1;
         Position[i] = Codec[i]->GetPos();
+        if (Range[i][0] < 0) Range[i][0] = 0;
+        if (Range[i][1] < 0) Range[i][1] = Length[i];
 
         // Create image sample of matching dimensions
         OutputImage->SetSize(i, width, height);
