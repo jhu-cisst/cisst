@@ -146,18 +146,33 @@ int svlFilterImageCenterFinder::Process(svlProcInfo* procInfo, svlSample* syncIn
 
         CenterX[vch] = x;
         CenterY[vch] = y;
+    }
 
-        while (ReceivingFilter) {
-            svlFilterImageCropper* cropper = dynamic_cast<svlFilterImageCropper*>(ReceivingFilter);
-            if (cropper) {
-                cropper->SetCenter(x, y, vch);
+    _SynchronizeThreads(procInfo);
+
+    _OnSingleThread(procInfo) {
+
+        x = y = 0;
+        for (vch = 0; vch < videochannels; vch ++) {
+            x += CenterX[vch];
+            y += CenterY[vch];
+        }
+        x /= videochannels;
+        y /= videochannels;
+
+        for (vch = 0; vch < videochannels; vch ++) {
+            while (ReceivingFilter) {
+                svlFilterImageCropper* cropper = dynamic_cast<svlFilterImageCropper*>(ReceivingFilter);
+                if (cropper) {
+                    cropper->SetCenter(x, y, vch);
+                    break;
+                }
+#if (CISST_SVL_HAS_OPENCV == ON)
+                svlFilterImageZoom* zoom = dynamic_cast<svlFilterImageZoom*>(ReceivingFilter);
+                if (zoom) zoom->SetCenter(x, y, vch);
+#endif // CISST_SVL_HAS_OPENCV
                 break;
             }
-#if (CISST_SVL_HAS_OPENCV == ON)
-            svlFilterImageZoom* zoom = dynamic_cast<svlFilterImageZoom*>(ReceivingFilter);
-            if (zoom) zoom->SetCenter(x, y, vch);
-#endif // CISST_SVL_HAS_OPENCV
-            break;
         }
     }
 

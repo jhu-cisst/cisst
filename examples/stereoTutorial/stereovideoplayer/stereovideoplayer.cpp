@@ -40,12 +40,15 @@ public:
     ,MousePressed(false)
     ,OffsetX(0)
     ,OffsetY(0)
+    ,Gamma(0)
     ,ImageShifter(0)
     {
     }
 
     void OnUserEvent(unsigned int CMN_UNUSED(winid), bool ascii, unsigned int eventid)
     {
+        double gamma;
+
         // handling user inputs
         if (ascii) {
             switch (eventid) {
@@ -59,6 +62,22 @@ public:
 						cout << endl << " >>> Adjustments disabled <<<" << endl;
 					}
                 }
+                break;
+
+                case '9':
+                    if (Gamma) {
+                        Gamma->GetGamma(gamma);
+                        cout << endl << " >>> Gamma: " << gamma << endl;
+                        Gamma->SetGamma(gamma - 5.0);
+                    }
+                break;
+
+                case '0':
+                    if (Gamma) {
+                        Gamma->GetGamma(gamma);
+                        cout << endl << " >>> Gamma: " << gamma << endl;
+                        Gamma->SetGamma(gamma + 5.0);
+                    }
                 break;
 
                 default:
@@ -106,6 +125,7 @@ public:
 	int OffsetY;
 	int MouseOriginX;
 	int MouseOriginY;
+    svlFilterImageExposureCorrection* Gamma;
     svlFilterImageTranslation* ImageShifter;
 };
 
@@ -120,8 +140,11 @@ int StereoVideoPlayer(const string& filepath_left, const string& filepath_right,
     svlInitialize();
 
     // instantiating SVL stream and filters
-    svlStreamManager stream(1);
+    svlStreamManager stream(8);
     svlFilterSourceVideoFile source(2);
+    svlFilterImageExposureCorrection gamma;
+    svlFilterImageCenterFinder centerfinder;
+    svlFilterImageZoom zoom;
     svlFilterImageTranslation shifter;
     svlFilterImageResizer resizer;
     svlFilterImageWindow window;
@@ -138,6 +161,17 @@ int StereoVideoPlayer(const string& filepath_left, const string& filepath_right,
                                    svlRGB(255, 255, 255),  // text color
                                    svlRGB(0, 0, 128));     // background color
     overlay.AddOverlay(ts_overlay);
+
+    // setup center finder and zoom
+    centerfinder.SetReceivingFilter(&zoom);
+    centerfinder.SetMask(false);
+    centerfinder.SetThreshold(40);
+    zoom.SetZoom(2.0, SVL_LEFT);
+    zoom.SetZoom(2.0, SVL_RIGHT);
+    zoom.SetInterpolation(true);
+
+    // setup gamma correction
+    gamma.SetGamma(20.0);
 
     // setup source
     source.SetFilePath(filepath_left, SVL_LEFT);
@@ -157,62 +191,75 @@ int StereoVideoPlayer(const string& filepath_left, const string& filepath_right,
 		else if (fullscreen == 2) {
 		    resizer.SetOutputSize(width, height / 2, SVL_LEFT);
 			resizer.SetOutputSize(width, height / 2, SVL_RIGHT);
-//			joiner.SetLayout(svlLayoutInterlaced);
+            joiner.SetLayout(svlLayoutInterlaced);
 		}
 		else {
 		    resizer.SetOutputSize(width, height, SVL_LEFT);
 			resizer.SetOutputSize(width, height, SVL_RIGHT);
 		}
     }
-/*
+
     // setup image window
-	window_cb.ImageShifter = &shifter;
-    window.SetCallback(&window_cb);
-    window.SetTitleText("Camera Viewer");
+    window_cb.Gamma = &gamma;
+    window_cb.ImageShifter = &shifter;
+    window.SetEventHandler(&window_cb);
+    window.SetTitle("Camera Viewer");
 	if (fullscreen >= 0) {
-		window.SetFullScreen();
+        window.SetFullScreen(true);
 		if (fullscreen == 0) {
-			window.SetWindowPosition(offsetx, 0, SVL_LEFT);
-			window.SetWindowPosition(offsetx, height / 2, SVL_RIGHT);
+            window.SetPosition(offsetx, 0);
+            window.SetPosition(offsetx, height / 2);
 		}
 		else if (fullscreen == 1) {
-			window.SetWindowPosition(offsetx, 0, SVL_LEFT);
-			window.SetWindowPosition(offsetx + width / 2, 0, SVL_RIGHT);
+            window.SetPosition(offsetx, 0, SVL_LEFT);
+            window.SetPosition(offsetx + width / 2, 0, SVL_RIGHT);
 		}
 		else if (fullscreen == 2) {
-			window.SetWindowPosition(offsetx, 0);
+            window.SetPosition(offsetx, 0);
 		}
 	}
-*/
+
     // chain filters to pipeline
     svlFilterOutput *output;
 
     // Add source
     stream.SetSourceFilter(&source);
     output = source.GetOutput();
-/*
+
     // Add shifter if fullscreen
 	if (fullscreen >= 0) {
         output->Connect(shifter.GetInput());
         output = shifter.GetOutput();
 	}
-*/
+
     // Add resizer if required
     if (width > 0 && height > 0) {
         output->Connect(resizer.GetInput());
         output = resizer.GetOutput();
     }
 
+    // Add center finder
+    output->Connect(centerfinder.GetInput());
+    output = centerfinder.GetOutput();
+
+    // Add zoom
+    output->Connect(zoom.GetInput());
+    output = zoom.GetOutput();
+
+    // Add gamma
+    output->Connect(gamma.GetInput());
+    output = gamma.GetOutput();
+
     // Add joiner if stereo mode = interlaced
 	if (fullscreen == 2) {
         output->Connect(joiner.GetInput());
         output = joiner.GetOutput();
 	}
-/*
+
     // Add overlay
     output->Connect(overlay.GetInput());
     output = overlay.GetOutput();
-*/
+
     // Add window
     output->Connect(window.GetInput());
     output = window.GetOutput();
@@ -311,7 +358,7 @@ int main(int argc, char** argv)
     bool interpolation;
 
     options = argc - 1;
-    if (options < 0) {
+    if (options < 2) {
         PrintHelp();
         return 1;
     }
@@ -322,16 +369,10 @@ int main(int argc, char** argv)
 	fullscreen = -1;
 	offsetx = 0;
 
-    //string file_left = argv[1];
-    //string file_right = argv[2];
+    string file_left = argv[1];
+    string file_right = argv[2];
 
-    string file_left = "crop1.avi";
-    string file_right = "crop2.avi";
-    fullscreen = 2;
-    width = 800;
-    height = 600;
-
-    for (i = 1; i <= options; i ++) {
+    for (i = 3; i <= options; i ++) {
         if (argv[i][0] != '-') continue;
 
         switch (argv[i][1]) {
