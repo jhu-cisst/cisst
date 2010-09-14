@@ -62,13 +62,16 @@ int VideoPlayer(std::string pathname)
         }
     }
 
+    //source.SetTargetFrequency(30.0);
+
     // setup image window
     window.SetTitle("Video Player");
+    window.SetFullScreen(true);
 
     // chain filters to pipeline
     stream.SetSourceFilter(&source);
-    source.GetOutput()->Connect(overlay.GetInput());
-    overlay.GetOutput()->Connect(window.GetInput());
+    //source.GetOutput()->Connect(overlay.GetInput());
+    source.GetOutput()->Connect(window.GetInput());
 
     cerr << endl << "Starting stream... ";
 

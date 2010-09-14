@@ -43,6 +43,7 @@ public:
 		,ImageShifter(0)
         ,ImageWriterFilter(0)
         ,VideoWriterFilter(0)
+        ,Gamma(0)
         ,SplitterOutput(0)
         ,Recording(false)
     {
@@ -50,6 +51,8 @@ public:
 
     void OnUserEvent(unsigned int CMN_UNUSED(winid), bool ascii, unsigned int eventid)
     {
+        double gamma;
+
         // handling user inputs
         if (ascii) {
             switch (eventid) {
@@ -91,6 +94,22 @@ public:
 						cout << endl << " >>> Adjustments disabled <<<" << endl;
 					}
                 }
+                break;
+
+                case '9':
+                    if (Gamma) {
+                        Gamma->GetGamma(gamma);
+                        cout << endl << " >>> Gamma: " << gamma << endl;
+                        Gamma->SetGamma(gamma - 5.0);
+                    }
+                break;
+
+                case '0':
+                    if (Gamma) {
+                        Gamma->GetGamma(gamma);
+                        cout << endl << " >>> Gamma: " << gamma << endl;
+                        Gamma->SetGamma(gamma + 5.0);
+                    }
                 break;
 
                 default:
@@ -141,6 +160,7 @@ public:
     svlFilterImageTranslation* ImageShifter;
     svlFilterImageFileWriter* ImageWriterFilter;
     svlFilterVideoFileWriter* VideoWriterFilter;
+    svlFilterImageExposureCorrection* Gamma;
     svlFilterOutput* SplitterOutput;
     bool Recording;
 };
@@ -157,6 +177,8 @@ int CameraViewer(bool interpolation, bool save, int width, int height, int fulls
     // instantiating SVL stream and filters
     svlStreamManager stream(8);
     svlFilterSourceVideoCapture source(2);
+    svlFilterVideoExposureManager exposure;
+    svlFilterImageExposureCorrection gamma;
     svlFilterSplitter splitter;
     svlFilterImageTranslation shifter;
     svlFilterImageResizer resizer;
@@ -184,6 +206,16 @@ int CameraViewer(bool interpolation, bool save, int width, int height, int fulls
         source.DialogSetup(SVL_LEFT);
         source.DialogSetup(SVL_RIGHT);
     }
+
+    // setup exposure manager
+    exposure.SetVideoCaptureFilter(&source);
+    exposure.SetSaturationTolerance(0.1);
+    exposure.SetSaturationThreshold(230);
+    exposure.SetMaxShutter(1305);
+    exposure.SetMaxGain(1000);
+
+    // setup gamma correction
+    gamma.SetGamma(10.0);
 
     // setup splitter
     splitter.AddOutput("output2", 8, 200);
@@ -229,6 +261,7 @@ int CameraViewer(bool interpolation, bool save, int width, int height, int fulls
     // setup image window
     window_cb.ImageWriterFilter = &imagewriter;
 	window_cb.ImageShifter = &shifter;
+    window_cb.Gamma = &gamma;
     if (save == true) {
         window_cb.VideoWriterFilter = &videowriter;
         window_cb.SplitterOutput = splitteroutput;
@@ -256,6 +289,14 @@ int CameraViewer(bool interpolation, bool save, int width, int height, int fulls
     // Add source
     stream.SetSourceFilter(&source);
         output = source.GetOutput();
+
+    // Add exposure correction
+    output->Connect(exposure.GetInput());
+        output = exposure.GetOutput();
+
+    // Add gamma correction
+    output->Connect(gamma.GetInput());
+        output = gamma.GetOutput();
 
     // Add splitter
     output->Connect(splitter.GetInput());

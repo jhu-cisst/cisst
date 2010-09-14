@@ -641,6 +641,7 @@ int svlFilterSourceVideoCapture::DialogSetup(unsigned int videoch)
 #if (CISST_SVL_HAS_DC1394 == ON)
         std::cout << std::endl << "  ===== Setup external trigger =====" << std::endl;
         DialogTrigger(videoch);
+        std::cout << std::endl;
 #endif // CISST_SVL_HAS_DC1394
     }
     else {
@@ -753,6 +754,7 @@ int svlFilterSourceVideoCapture::DialogFormat(unsigned int videoch)
         if (formatcount > 0) {
             std::cout << std::endl << "  # Enter format ID: ";
             std::cin >> formatid;
+            std::cin.ignore();
             if (formatid < 0 || formatid >= formatcount) {
                 std::cout << "  -!- Invalid format ID" << std::endl;
                 return SVL_FAIL;
@@ -763,43 +765,84 @@ int svlFilterSourceVideoCapture::DialogFormat(unsigned int videoch)
                 SelectFormat(formatid, videoch);
             }
             else {
-                int roiwidth, roiheight, roileft, roitop, framerate, colorspace;
-                std::cout << "  # Enter ROI width (max=" << formats[formatid].custom_maxwidth << "; unit=" << formats[formatid].custom_unitwidth << "): ";
-                std::cin >> roiwidth;
+                char input[256];
+                int roiwidth, roiheight, roileft, roitop, framerate, colorspace, defaultval;
+
+                defaultval = formats[formatid].width;
+                std::cout << "  # Enter ROI width (max=" << formats[formatid].custom_maxwidth
+                                            << "; unit=" << formats[formatid].custom_unitwidth
+                                         << "; default=" << defaultval << "): ";
+                std::cin.getline(input, 256);
+                if (std::cin.gcount() > 1) roiwidth = atoi(input);
+                else roiwidth = defaultval;
+                std::cout << "    ROI width = " << roiwidth << std::endl;
                 if (roiwidth < 1 || roiwidth >= static_cast<int>(formats[formatid].custom_maxwidth)) {
                     std::cout << "  -!- Invalid ROI width" << std::endl;
                     return SVL_FAIL;
                 }
-                std::cout << "  # Enter ROI height (max=" << formats[formatid].custom_maxheight << "; unit=" << formats[formatid].custom_unitheight << "): ";
-                std::cin >> roiheight;
+
+                defaultval = formats[formatid].height;
+                std::cout << "  # Enter ROI height (max=" << formats[formatid].custom_maxheight
+                                             << "; unit=" << formats[formatid].custom_unitheight
+                                          << "; default=" << defaultval << "): ";
+                std::cin.getline(input, 256);
+                if (std::cin.gcount() > 1) roiheight = atoi(input);
+                else roiheight = defaultval;
+                std::cout << "    ROI height = " << roiheight << std::endl;
                 if (roiheight < 1 || roiheight >= static_cast<int>(formats[formatid].custom_maxheight)) {
                     std::cout << "  -!- Invalid ROI height" << std::endl;
                     return SVL_FAIL;
                 }
-                std::cout << "  # Enter ROI left (max=" << formats[formatid].custom_maxwidth - 1 << "; unit=" << formats[formatid].custom_unitleft << "): ";
-                std::cin >> roileft;
+
+                defaultval = (formats[formatid].custom_maxwidth - roiwidth) / 2;
+                std::cout << "  # Enter ROI left (max=" << formats[formatid].custom_maxwidth - 1
+                                           << "; unit=" << formats[formatid].custom_unitleft
+                                        << "; default=" << defaultval << "): ";
+                std::cin.getline(input, 256);
+                if (std::cin.gcount() > 1) roileft = atoi(input);
+                else roileft = defaultval;
+                std::cout << "    ROI left = " << roileft << std::endl;
                 if (roileft < 0 || roileft >= (static_cast<int>(formats[formatid].custom_maxwidth) - 1)) {
                     std::cout << "  -!- Invalid ROI left" << std::endl;
                     return SVL_FAIL;
                 }
-                std::cout << "  # Enter ROI top (max=" << formats[formatid].custom_maxheight - 1 << "; unit=" << formats[formatid].custom_unittop << "): ";
-                std::cin >> roitop;
+
+                defaultval = (formats[formatid].custom_maxheight - roiheight) / 2;
+                std::cout << "  # Enter ROI top (max=" << formats[formatid].custom_maxheight - 1
+                                          << "; unit=" << formats[formatid].custom_unittop
+                                       << "; default=" << defaultval << "): ";
+                std::cin.getline(input, 256);
+                if (std::cin.gcount() > 1) roitop = atoi(input);
+                else roitop = defaultval;
+                std::cout << "    ROI top = " << roitop << std::endl;
                 if (roitop < 0 || roitop >= (static_cast<int>(formats[formatid].custom_maxheight) - 1)) {
                     std::cout << "  -!- Invalid ROI top" << std::endl;
                     return SVL_FAIL;
                 }
-                std::cout << "  # Enter framerate [percentage of maximum available framerate] (min=1; max=100): ";
-                std::cin >> framerate;
+
+                std::cout << "  # Enter framerate [percentage of maximum available framerate] (min=1; max=100; default=100): ";
+                std::cin.getline(input, 256);
+                if (std::cin.gcount() > 1) framerate = atoi(input);
+                else framerate = 100;
+                std::cout << "    Framerate = " << framerate << std::endl;
                 if (framerate < 1 || framerate > 100) {
                     std::cout << "  -!- Invalid framerate" << std::endl;
                     return SVL_FAIL;
                 }
+
+                defaultval = -1;
                 std::cout << "  == Select color space ==" << std::endl;
                 for (i = 0; i < PixelTypeCount && formats[formatid].custom_colorspaces[i] != PixelUnknown; i ++) {
                     std::cout << "  " << i << ") " << GetPixelTypeName(formats[formatid].custom_colorspaces[i]) << std::endl;
+                    if (formats[formatid].custom_colorspaces[i] == PixelRAW8) defaultval = i;
                 }
-                std::cout << "  # Enter color space ID: ";
-                std::cin >> colorspace;
+                std::cout << "  # Enter color space ID";
+                if (defaultval >= 0) std::cout << " (default=" << GetPixelTypeName(formats[formatid].custom_colorspaces[defaultval]) << ")";
+                std::cout << ": ";
+                std::cin.getline(input, 256);
+                if (std::cin.gcount() > 1) colorspace = atoi(input);
+                else colorspace = defaultval;
+                std::cout << "    Color space = " << GetPixelTypeName(formats[formatid].custom_colorspaces[colorspace]) << std::endl;
                 if (colorspace < 0 || colorspace >= i) {
                     std::cout << "  -!- Invalid color space" << std::endl;
                     return SVL_FAIL;
@@ -849,16 +892,16 @@ int svlFilterSourceVideoCapture::DialogTrigger(unsigned int videoch)
         int ivalue;
         std::string str;
 
-        std::cout << std::endl << "  # Enable external trigger? ['y' or 'n']: ";
-        std::cin >> str;
+        std::cout << "  # Enable external trigger? ['y' or 'n'; default=NO]: ";
+        ivalue = cmnGetChar();
         if (str.compare("y") != 0) {
             memset(&trigger, 0, sizeof(ExternalTrigger));
-            std::cout << "    External trigger DISABLED" << std::endl;
+            std::cout << "NO" << std::endl;
             SetTrigger(trigger, videoch);
             return SVL_OK;
         }
         trigger.enable = true;
-        std::cout << "    External trigger ENABLED" << std::endl;
+        std::cout << " YES" << std::endl;
 
         std::cout << "  # Enter trigger mode ['0'-'5' or '14'-'15']: ";
         std::cin >> ivalue;

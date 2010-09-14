@@ -1119,6 +1119,10 @@ int svlVidCapSrcDC1394::GetFormatList(unsigned int deviceid, svlFilterSourceVide
     double *fpslist;
     unsigned int fpslistsize, i, j, k, l;
 
+#if (__verbose__ >= 4)
+    cerr << "svlVidCapSrcDC1394::GetFormatList - modes.num = " << modes.num << "; listsize = " << listsize << endl;
+#endif
+
     for (i = 0; i < modes.num; i ++) {
         if (GetFormatFromMode(modes.modes[i], templist[i]) != SVL_OK) {
             templist[i].width = -1;
@@ -1156,6 +1160,9 @@ int svlVidCapSrcDC1394::GetFormatList(unsigned int deviceid, svlFilterSourceVide
     svlFilterSourceVideoCapture::PixelType cstype;
 
     for (j = 0; i < listsize; i ++, j ++) {
+#if (__verbose__ >= 4)
+        cerr << "svlVidCapSrcDC1394::GetFormatList - Format7 mode " << j;
+#endif
         if (f7modes.mode[j].present) {
             templist[i].width = f7modes.mode[j].size_x;
             templist[i].height = f7modes.mode[j].size_y;
@@ -1180,11 +1187,22 @@ int svlVidCapSrcDC1394::GetFormatList(unsigned int deviceid, svlFilterSourceVide
                     l ++;
                 }
             }
-            if (l < svlFilterSourceVideoCapture::PixelUnknown) {
+            // Set the rest of the list to invalid color space
+            for (k = l; k < svlFilterSourceVideoCapture::PixelTypeCount; k ++) {
+                templist[i].custom_colorspaces[k] = svlFilterSourceVideoCapture::PixelUnknown;
+            }
+            if (l < 1) {
                 templist[i].width = -1;
                 templist[i].height = -1;
-                templist[i].custom_colorspaces[l] = svlFilterSourceVideoCapture::PixelUnknown;
                 validlistsize --;
+#if (__verbose__ >= 4)
+                cerr << " error: invalid color space" << endl;
+#endif
+            }
+            else {
+#if (__verbose__ >= 4)
+                cerr << " success" << endl;
+#endif
             }
         }
         else {
@@ -1192,8 +1210,15 @@ int svlVidCapSrcDC1394::GetFormatList(unsigned int deviceid, svlFilterSourceVide
             templist[i].height = -1;
             templist[i].colorspace = svlFilterSourceVideoCapture::PixelUnknown;
             validlistsize --;
+#if (__verbose__ >= 4)
+            cerr << " error: not implemented" << endl;
+#endif
         }
     }
+
+#if (__verbose__ >= 4)
+    cerr << "svlVidCapSrcDC1394::GetFormatList - validlistsize = " << validlistsize << endl;
+#endif
 
     formatlist[0] = new svlFilterSourceVideoCapture::ImageFormat[validlistsize];
     for (i = 0, j = 0; i < listsize && j < validlistsize; i ++) {
