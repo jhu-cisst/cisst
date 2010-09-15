@@ -63,7 +63,7 @@ int VideoConverter(std::string &src_path, std::string &dst_path, bool loadcodec)
         writer.SetFilePath(dst_path);
     }
 
-#if 1
+#if 0
     svlFilterImageResizer resizer;
     resizer.SetOutputRatio(0.5, 0.5);
 #endif
@@ -90,7 +90,7 @@ int VideoConverter(std::string &src_path, std::string &dst_path, bool loadcodec)
     // chain filters to pipeline
     svlFilterOutput* output = 0;
     stream.SetSourceFilter(&source);     output = source.GetOutput();
-#if 1
+#if 0
     output->Connect(resizer.GetInput()); output = resizer.GetOutput();
 #endif
     output->Connect(writer.GetInput());  output = writer.GetOutput();

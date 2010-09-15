@@ -20,16 +20,24 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
-#include <cisstStereoVision/svlTypes.h>
+#ifndef _svlProcInfo_h
+#define _svlProcInfo_h
+
+// Always include last!
+#include <cisstStereoVision/svlExport.h>
+
+// Forward declarations
+class osaCriticalSection;
+class svlSyncPoint;
 
 
-CMN_IMPLEMENT_SERVICES_TEMPLATED(svlSampleImageMono8)
-CMN_IMPLEMENT_SERVICES_TEMPLATED(svlSampleImageMono8Stereo)
-CMN_IMPLEMENT_SERVICES_TEMPLATED(svlSampleImageMono16)
-CMN_IMPLEMENT_SERVICES_TEMPLATED(svlSampleImageMono16Stereo)
-CMN_IMPLEMENT_SERVICES_TEMPLATED(svlSampleImageRGB)
-CMN_IMPLEMENT_SERVICES_TEMPLATED(svlSampleImageRGBA)
-CMN_IMPLEMENT_SERVICES_TEMPLATED(svlSampleImageRGBStereo)
-CMN_IMPLEMENT_SERVICES_TEMPLATED(svlSampleImageRGBAStereo)
-CMN_IMPLEMENT_SERVICES_TEMPLATED(svlSampleImage3DMap)
+struct CISST_EXPORT svlProcInfo
+{
+    unsigned int        count;
+    unsigned int        id;
+    svlSyncPoint*       sync;
+    osaCriticalSection* cs;
+};
+
+#endif // _svlProcInfo_h
 

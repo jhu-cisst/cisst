@@ -30,7 +30,7 @@ http://www.cisst.org/cisst/license.txt.
 
 // Forward declarations
 class svlSampleMatrix;
-
+struct svlProcInfo;
 
 class CISST_EXPORT svlSampleImage : public svlSample
 {
@@ -66,6 +66,10 @@ public:
     virtual unsigned int GetHeight(const unsigned int videochannel = 0) const = 0;
     virtual unsigned int GetRowStride(const unsigned int videochannel = 0) const = 0;
     virtual unsigned int GetDataSize(const unsigned int videochannel) const = 0;
+
+    // Used to split up the image for multi-threaded processing
+    virtual svlSampleImage* GetSubImage(const unsigned int top, const unsigned int height, const unsigned int videochannel = 0) = 0;
+    virtual svlSampleImage* GetSubImage(svlProcInfo* procInfo, const unsigned int videochannel = 0) = 0;
 
     int ImportData(unsigned char* input, const unsigned int size, const int param = 0, const unsigned int videoch = SVL_LEFT);
     int ImportData(unsigned short* input, const unsigned int size, const int param = 0, const unsigned int videoch = SVL_LEFT);

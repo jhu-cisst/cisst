@@ -118,6 +118,7 @@ SET(HEADER_FILES
   # Public System API
     svlForwardDeclarations.h
     svlDefinitions.h
+    svlProcInfo.h
     svlTypes.h
     svlTypeCheckers.h
     svlSampleText.h

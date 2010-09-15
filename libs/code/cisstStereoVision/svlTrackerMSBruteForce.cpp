@@ -640,6 +640,7 @@ void svlTrackerMSBruteForce::MatchTemplateNCC(unsigned char* img, unsigned char*
     const unsigned int imgwinstride = imgstride - winsize * 3;
     const int imgwidth_m1 = static_cast<int>(Width) - 1;
     const int imgheight_m1 = static_cast<int>(Height) - 1;
+    const int tmpheight_m1 = tmpheight - 1;
 
     int i, j, k, l, sum, hfrom, vfrom;
     int tmpxfrom, tmpxto, tmpyfrom, tmpyto;
@@ -688,33 +689,45 @@ void svlTrackerMSBruteForce::MatchTemplateNCC(unsigned char* img, unsigned char*
 
     for (v = 0, l = vfrom; v < winsize; v ++, l ++) {
 
-        yoffs = 0;
+        tmprowcount = 0;
+
         tmpyfrom = l;
-        if (tmpyfrom < 0) {
-            tmpyfrom = 0;
-            yoffs = -tmpyfrom;
+        if (tmpyfrom <= imgheight_m1) {
+            yoffs = 0;
+            if (tmpyfrom < 0) {
+                tmpyfrom = 0;
+                yoffs = -tmpyfrom;
+            }
+            tmpyto = l + tmpheight_m1;
+            if (tmpyto >= 0) {
+                if (tmpyto > imgheight_m1) {
+                    tmpyto = imgheight_m1;
+                }
+                tmprowcount = tmpyto - tmpyfrom + 1;
+            }
         }
-        tmpyto = l + tmpheight - 1;
-        if (tmpyto > imgheight_m1) {
-            tmpyto = imgheight_m1;
-        }
-        tmprowcount = tmpyto - tmpyfrom + 1;
 
         if (tmprowcount > 0) {
 
             for (h = 0, k = hfrom; h < winsize; h ++, k ++) {
 
-                xoffs = 0;
-                tmpxfrom = k;
-                if (tmpxfrom < 0) {
-                    tmpxfrom = 0;
-                    xoffs = -tmpxfrom;
+                tmpcolcount = 0;
+
+                tmpxfrom = l;
+                if (tmpxfrom <= imgwidth_m1) {
+                    xoffs = 0;
+                    if (tmpxfrom < 0) {
+                        tmpxfrom = 0;
+                        xoffs = -tmpxfrom;
+                    }
+                    tmpxto = l + tmpheight_m1;
+                    if (tmpxto >= 0) {
+                        if (tmpxto > imgwidth_m1) {
+                            tmpxto = imgwidth_m1;
+                        }
+                        tmpcolcount = tmpxto - tmpxfrom + 1;
+                    }
                 }
-                tmpxto = k + tmpheight - 1;
-                if (tmpxto > imgwidth_m1) {
-                    tmpxto = imgwidth_m1;
-                }
-                tmpcolcount = tmpxto - tmpxfrom + 1;
 
                 if (tmpcolcount > 0) {
 

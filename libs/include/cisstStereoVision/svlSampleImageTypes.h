@@ -37,7 +37,6 @@ typedef svlSampleImageCustom<unsigned char,  3, 1>   svlSampleImageRGB;
 typedef svlSampleImageCustom<unsigned char,  4, 1>   svlSampleImageRGBA;
 typedef svlSampleImageCustom<unsigned char,  3, 2>   svlSampleImageRGBStereo;
 typedef svlSampleImageCustom<unsigned char,  4, 2>   svlSampleImageRGBAStereo;
-//typedef svlSampleImageCustom<float,          1, 1>   svlSampleImageMonoFloat;
 typedef svlSampleImageCustom<float,          3, 1>   svlSampleImage3DMap;
 
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlSampleImageMono8)
@@ -48,7 +47,6 @@ CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlSampleImageRGB)
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlSampleImageRGBA)
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlSampleImageRGBStereo)
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlSampleImageRGBAStereo)
-//CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlSampleImageMonoFloat)
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlSampleImage3DMap)
 
 #endif // _svlSampleImageTypes_h

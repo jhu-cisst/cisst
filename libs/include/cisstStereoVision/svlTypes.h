@@ -77,17 +77,6 @@ typedef vctDynamicMatrix<unsigned char> svlImageRGBA;
 // Miscellaneous structure type definitions //
 //////////////////////////////////////////////
 
-class osaCriticalSection;
-class svlSyncPoint;
-
-struct CISST_EXPORT svlProcInfo
-{
-    unsigned int        count;
-    unsigned int        id;
-    svlSyncPoint*       sync;
-    osaCriticalSection* cs;
-};
-
 struct CISST_EXPORT svlRect
 {
     svlRect();

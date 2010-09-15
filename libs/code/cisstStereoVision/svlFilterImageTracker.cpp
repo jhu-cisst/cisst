@@ -68,8 +68,10 @@ svlFilterImageTracker::svlFilterImageTracker() :
     AddInputType("targets", svlTypeTargets);
 
     AddOutput("output", true);
-    SetAutomaticOutputType(false);
-    GetOutput()->SetType(svlTypeTargets);
+    SetAutomaticOutputType(true);
+
+    AddOutput("targets", false);
+    SetOutputType("targets", svlTypeTargets);
 
     Trackers.SetSize(SVL_MAX_CHANNELS);
     Trackers.SetAll(0);
@@ -162,21 +164,22 @@ int svlFilterImageTracker::Initialize(svlSample* syncInput, svlSample* &syncOutp
     VideoChannels = dynamic_cast<svlSampleImage*>(syncInput)->GetVideoChannels();
 
     // Initializing frame-skip counter
-    FrameCount = -1;
+    FrameCount = 0;
 
     if (RigidBody) {
         RigidBodyAngle.SetSize(VideoChannels);
         RigidBodyScale.SetSize(VideoChannels);
     }
 
-    syncOutput = &OutputTargets;
+    syncOutput = syncInput;
+    GetOutput("targets")->SetupSample(&OutputTargets);
 
     return SVL_OK;
 }
 
 int svlFilterImageTracker::Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput)
 {
-    syncOutput = &OutputTargets;
+    syncOutput = syncInput;
 
     // Skipping frames (if requested)
     if (FrameCount < FramesToSkip) {
@@ -193,7 +196,7 @@ int svlFilterImageTracker::Process(svlProcInfo* procInfo, svlSample* syncInput, 
 
     const int weight = static_cast<int>(1000.0 * MovingAverageWeight);
     const int weightsum = weight + 1000;
-    unsigned int vch, i, targetcount = OutputTargets.GetMaxTargets();
+    unsigned int vch, i, targetcount;
 
     // Resetting positions (if requested)
     _OnSingleThread(procInfo)
@@ -248,9 +251,10 @@ int svlFilterImageTracker::Process(svlProcInfo* procInfo, svlSample* syncInput, 
         }
     }
 
-    if (targetcount < 1) return SVL_OK;
-
     _SynchronizeThreads(procInfo);
+
+    targetcount = OutputTargets.GetMaxTargets();
+    if (targetcount < 1) return SVL_OK;
 
     _ParallelLoop(procInfo, vch, VideoChannels)
     {
@@ -305,6 +309,8 @@ int svlFilterImageTracker::Process(svlProcInfo* procInfo, svlSample* syncInput, 
                 target_buffer ++;
             }
         }
+
+        GetOutput("targets")->PushSample(&OutputTargets);
     }
 
     return SVL_OK;

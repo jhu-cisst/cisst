@@ -189,16 +189,6 @@ int CameraViewer(bool interpolation, bool save, int width, int height, int fulls
     svlFilterImageFileWriter imagewriter;
     svlFilterVideoFileWriter videowriter;
 
-    // Add framerate overlay
-    svlOverlayFramerate fps_overlay(SVL_LEFT,              // background video channel
-                                    true,                  // visible
-                                    &window,        // filter
-                                    svlRect(4, 4, 47, 20), // bounding rectangle
-                                    14.0,                  // font size
-                                    svlRGB(255, 255, 255), // text color
-                                    svlRGB(0, 0, 0));      // background color
-    overlay.AddOverlay(fps_overlay);
-
     // setup source
     // Delete "device.dat" to reinitialize input device
     if (source.LoadSettings("stereodevice.dat") != SVL_OK) {
@@ -215,7 +205,7 @@ int CameraViewer(bool interpolation, bool save, int width, int height, int fulls
     exposure.SetMaxGain(1000);
 
     // setup gamma correction
-    gamma.SetGamma(10.0);
+    gamma.SetGamma(0.0);
 
     // setup splitter
     splitter.AddOutput("output2", 8, 200);
@@ -283,6 +273,26 @@ int CameraViewer(bool interpolation, bool save, int width, int height, int fulls
 		}
 	}
 
+    // Add buffer status overlay
+    svlOverlayAsyncOutputProperties buffer_overlay(SVL_LEFT,
+                                                   true,
+                                                   splitteroutput,
+                                                   svlRect(4, 4, 225, 20),
+                                                   14.0,
+                                                   svlRGB(255, 255, 255),
+                                                   svlRGB(0, 128, 0));
+    if (save) overlay.AddOverlay(buffer_overlay);
+
+    // Add framerate overlay
+    svlOverlayFramerate fps_overlay(SVL_LEFT,               // background video channel
+                                    true,                   // visible
+                                    &window,                // filter
+                                    svlRect(4, 24, 47, 40), // bounding rectangle
+                                    14.0,                   // font size
+                                    svlRGB(255, 255, 255),  // text color
+                                    svlRGB(128, 0, 0));     // background color
+    overlay.AddOverlay(fps_overlay);
+
     // chain filters to pipeline
     svlFilterOutput *output;
 
@@ -332,8 +342,8 @@ int CameraViewer(bool interpolation, bool save, int width, int height, int fulls
     output->Connect(window.GetInput());
         output = window.GetOutput();
 
-    // If saving enabled, then add video writer on separate branch
     if (save == true) {
+        // If saving enabled, then add video writer on separate branch
         splitteroutput->SetBlock(true);
         splitteroutput->Connect(videowriter.GetInput());
     }
@@ -353,6 +363,8 @@ int CameraViewer(bool interpolation, bool save, int width, int height, int fulls
         cerr << "  In image window:" << endl;
         cerr << "    'a'   - Enable/disable adjustments" << endl;
         cerr << "    's'   - Take image snapshots" << endl;
+        cerr << "    '9'   - Reduce gamma" << endl;
+        cerr << "    '0'   - Increase gamma" << endl;
         if (save == true) {
             cerr << "    SPACE - Video recorder control: Record/Pause" << endl;
         }

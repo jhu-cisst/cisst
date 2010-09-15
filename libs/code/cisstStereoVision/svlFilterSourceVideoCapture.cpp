@@ -414,10 +414,10 @@ int svlFilterSourceVideoCapture::Initialize(svlSample* &syncOutput)
     // Requesting frames from the capture buffer to prepare output sample
     for (i = 0; i < NumberOfChannels; i ++) {
         if (NumberOfChannels == 2) {
-            dynamic_cast<svlSampleImageRGBStereo*>(OutputImage)->SetMatrix(DeviceObj[API[i]]->GetLatestFrame(false, APIChannelID[i]), i);
+            dynamic_cast<svlSampleImageRGBStereo*>(OutputImage)->SetMatrix(*(DeviceObj[API[i]]->GetLatestFrame(false, APIChannelID[i])), i);
         }
         else {
-            dynamic_cast<svlSampleImageRGB*>(OutputImage)->SetMatrix(DeviceObj[API[i]]->GetLatestFrame(false));
+            dynamic_cast<svlSampleImageRGB*>(OutputImage)->SetMatrix(*(DeviceObj[API[i]]->GetLatestFrame(false)));
         }
     }
 
@@ -449,10 +449,10 @@ int svlFilterSourceVideoCapture::Process(svlProcInfo* procInfo, svlSample* &sync
         image = DeviceObj[API[idx]]->GetLatestFrame(true, APIChannelID[idx]);
         if (image == 0) return SVL_FAIL;
         if (NumberOfChannels == 1) {
-            dynamic_cast<svlSampleImageRGB*>(OutputImage)->SetMatrix(image, idx);
+            dynamic_cast<svlSampleImageRGB*>(OutputImage)->SetMatrix(*image, idx);
         }
         else {
-            dynamic_cast<svlSampleImageRGBStereo*>(OutputImage)->SetMatrix(image, idx);
+            dynamic_cast<svlSampleImageRGBStereo*>(OutputImage)->SetMatrix(*image, idx);
         }
     }
 

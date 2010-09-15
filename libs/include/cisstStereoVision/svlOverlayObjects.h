@@ -441,5 +441,32 @@ private:
 };
 
 
+class svlOverlayAsyncOutputProperties : public svlOverlayStaticText
+{
+public:
+    svlOverlayAsyncOutputProperties();
+    svlOverlayAsyncOutputProperties(unsigned int videoch,
+                                    bool visible,
+                                    svlFilterOutput* output,
+                                    svlRect rect,
+                                    double fontsize,
+                                    svlRGB txtcolor);
+    svlOverlayAsyncOutputProperties(unsigned int videoch,
+                                    bool visible,
+                                    svlFilterOutput* output,
+                                    svlRect rect,
+                                    double fontsize,
+                                    svlRGB txtcolor,
+                                    svlRGB bgcolor);
+    virtual ~svlOverlayAsyncOutputProperties();
+
+protected:
+    virtual void DrawInternal(svlSampleImage* bgimage, svlSample* input);
+
+private:
+    svlFilterOutput* Output;
+};
+
+
 #endif // _svlOverlayObjects_h
 

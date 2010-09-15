@@ -1077,3 +1077,55 @@ void svlOverlayTimestamp::DrawInternal(svlSampleImage* bgimage, svlSample* CMN_U
     svlOverlayStaticText::DrawInternal(bgimage, 0);
 }
 
+
+/*********************************************/
+/*** svlOverlayAsyncOutputProperties class ***/
+/*********************************************/
+
+svlOverlayAsyncOutputProperties::svlOverlayAsyncOutputProperties() :
+    svlOverlayStaticText(),
+    Output(0)
+{
+}
+
+svlOverlayAsyncOutputProperties::svlOverlayAsyncOutputProperties(unsigned int videoch,
+                                                                 bool visible,
+                                                                 svlFilterOutput* output,
+                                                                 svlRect rect,
+                                                                 double fontsize,
+                                                                 svlRGB txtcolor) :
+    svlOverlayStaticText(videoch, visible, "", rect, fontsize, txtcolor),
+    Output(output)
+{
+}
+
+svlOverlayAsyncOutputProperties::svlOverlayAsyncOutputProperties(unsigned int videoch,
+                                                                 bool visible,
+                                                                 svlFilterOutput* output,
+                                                                 svlRect rect,
+                                                                 double fontsize,
+                                                                 svlRGB txtcolor,
+                                                                 svlRGB bgcolor) :
+    svlOverlayStaticText(videoch, visible, "", rect, fontsize, txtcolor, bgcolor),
+    Output(output)
+{
+}
+
+svlOverlayAsyncOutputProperties::~svlOverlayAsyncOutputProperties()
+{
+}
+
+void svlOverlayAsyncOutputProperties::DrawInternal(svlSampleImage* bgimage, svlSample* CMN_UNUSED(input))
+{
+    if (Output) {
+        double usageratio = Output->GetBufferUsageRatio();
+        int dropped = Output->GetDroppedSampleCount();
+
+        std::stringstream strstr;
+        strstr << "Buffer: " << std::fixed << std::setprecision(1) << usageratio * 100.0 << "%, Dropped: " << dropped;
+        SetText(strstr.str());
+    }
+
+    svlOverlayStaticText::DrawInternal(bgimage, 0);
+}
+

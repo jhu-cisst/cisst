@@ -49,6 +49,10 @@ int svlFilterVideoExposureManager::SetVideoCaptureFilter(svlFilterSourceVideoCap
 {
     if (IsInitialized()) return SVL_FAIL;
     SourceFilter = sourcefilter;
+#if (CISST_OS != CISST_LINUX_RTAI) && (CISST_OS != CISST_LINUX) && (CISST_OS != CISST_SOLARIS) && (CISST_OS != CISST_QNX)
+    // Doesn't seem to be working when (CISST_OS == CISST_DARWIN)
+    SourceFilter = 0;
+#endif
     return SVL_OK;
 }
 

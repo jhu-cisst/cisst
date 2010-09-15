@@ -23,7 +23,9 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlSampleImageCustom_h
 #define _svlSampleImageCustom_h
 
+#include <cisstVector/vctDynamicMatrixRef.h>
 #include <cisstStereoVision/svlTypeCheckers.h>
+#include <cisstStereoVision/svlProcInfo.h>
 #include <cisstStereoVision/svlSampleImage.h>
 #include <cisstStereoVision/svlSampleMatrix.h>
 #include <cisstStereoVision/svlImageIO.h>
@@ -48,7 +50,8 @@ public:
         OwnData(true)
     {
         for (unsigned int vch = 0; vch < _VideoChannels; vch ++) {
-            Image[vch] = new vctDynamicMatrix<_ValueType>;
+            OwnImage[vch] = new vctDynamicMatrix<_ValueType>;
+            Image[vch].SetRef(*(OwnImage[vch]));
 #if (CISST_SVL_HAS_OPENCV == ON)
             int ocvdepth = GetOCVDepth();
             if (ocvdepth >= 0) OCVImageHeader[vch] = cvCreateImageHeader(cvSize(0, 0), ocvdepth, _DataChannels);
@@ -62,8 +65,13 @@ public:
         OwnData(owndata)
     {
         for (unsigned int vch = 0; vch < _VideoChannels; vch ++) {
-            if (OwnData) Image[vch] = new vctDynamicMatrix<_ValueType>;
-            else Image[vch] = 0;
+            if (OwnData) {
+                OwnImage[vch] = new vctDynamicMatrix<_ValueType>;
+                Image[vch].SetRef(*(OwnImage[vch]));
+            }
+            else {
+                OwnImage[vch] = 0;
+            }
 #if (CISST_SVL_HAS_OPENCV == ON)
             int ocvdepth = GetOCVDepth();
             if (ocvdepth >= 0) OCVImageHeader[vch] = cvCreateImageHeader(cvSize(0, 0), ocvdepth, _DataChannels);
@@ -80,7 +88,7 @@ public:
     ~svlSampleImageCustom()
     {
         for (unsigned int vch = 0; vch < _VideoChannels; vch ++) {
-            if (OwnData) delete Image[vch];
+            if (OwnImage[vch]) delete OwnImage[vch];
 #if (CISST_SVL_HAS_OPENCV == ON)
             if (OCVImageHeader[vch]) cvReleaseImageHeader(&(OCVImageHeader[vch]));
 #endif // CISST_SVL_HAS_OPENCV
@@ -195,9 +203,8 @@ public:
     bool IsInitialized() const
     {
         for (unsigned int vch = 0; vch < _VideoChannels; vch ++) {
-            if (Image[vch] == 0 ||
-                Image[vch]->width() < _DataChannels ||
-                Image[vch]->height() < 1) return false;
+            if (Image[vch].width() < _DataChannels ||
+                Image[vch].height() < 1) return false;
         }
         return true;
     }
@@ -348,10 +355,11 @@ public:
 
     void SetSize(const unsigned int videochannel, const unsigned int width, const unsigned int height)
     {
-        if (videochannel < _VideoChannels && Image[videochannel]) {
+        if (OwnData && videochannel < _VideoChannels) {
             if (GetWidth (videochannel) == width &&
                 GetHeight(videochannel) == height) return;
-            Image[videochannel]->SetSize(height,  width * _DataChannels);
+            OwnImage[videochannel]->SetSize(height,  width * _DataChannels);
+            Image[videochannel].SetRef(*(OwnImage[videochannel]));
 #if (CISST_SVL_HAS_OPENCV == ON)
             if (OCVImageHeader[videochannel]) {
                 cvInitImageHeader(OCVImageHeader[videochannel],
@@ -383,26 +391,60 @@ public:
 
     unsigned int GetWidth(const unsigned int videochannel = 0) const
     {
-        if (videochannel < _VideoChannels && Image[videochannel]) return (Image[videochannel]->width() / _DataChannels);
+        if (videochannel < _VideoChannels) return (Image[videochannel].width() / _DataChannels);
         return 0;
     }
 
     unsigned int GetHeight(const unsigned int videochannel = 0) const
     {
-        if (videochannel < _VideoChannels && Image[videochannel]) return Image[videochannel]->height();
+        if (videochannel < _VideoChannels) return Image[videochannel].height();
         return 0;
     }
 
     unsigned int GetRowStride(const unsigned int videochannel = 0) const
     {
-        if (videochannel < _VideoChannels && Image[videochannel]) return Image[videochannel]->width();
+        if (videochannel < _VideoChannels) return Image[videochannel].width();
         return 0;
     }
 
     unsigned int GetDataSize(const unsigned int videochannel) const
     {
-        if (videochannel < _VideoChannels && Image[videochannel]) {
+        if (videochannel < _VideoChannels) {
             return (GetBPP() * GetWidth(videochannel) * GetHeight(videochannel));
+        }
+        return 0;
+    }
+
+    svlSampleImage* GetSubImage(const unsigned int top, const unsigned int height, const unsigned int videochannel = 0)
+    {
+        if (videochannel < _VideoChannels) {
+
+            const unsigned int width = GetWidth(videochannel);
+
+            // Create sub-matrix reference
+            vctDynamicMatrixRef<_ValueType> subref(Image[videochannel], top, 0, height, width);
+
+            // Create sub-sample image
+            svlSampleImageCustom<_ValueType, _DataChannels, 1>* subimage = new svlSampleImageCustom<_ValueType, _DataChannels, 1>(false);
+
+            // Set sub-sample image to sub-matrix reference
+            subimage->SetMatrix(subref);
+
+            return subimage;
+        }
+        return 0;
+    }
+
+    svlSampleImage* GetSubImage(svlProcInfo* procInfo, const unsigned int videochannel = 0)
+    {
+        if (videochannel < _VideoChannels) {
+
+            unsigned int height = GetHeight(videochannel);
+            unsigned int from, to;
+
+            _GetParallelSubRange(procInfo, height, from, to);
+
+            return GetSubImage(from, to - from, videochannel);
         }
         return 0;
     }
@@ -412,10 +454,11 @@ public:
     // svlSampleImageCustom specific methods //
     ///////////////////////////////////////////
 
-    int SetMatrix(vctDynamicMatrix<_ValueType>* matrix, unsigned int videochannel = 0)
+    template <class __ownerType>
+    int SetMatrix(vctDynamicMatrixBase<__ownerType, _ValueType>& matrix, unsigned int videochannel = 0)
     {
         if (!OwnData && videochannel < _VideoChannels) {
-            Image[videochannel] = matrix;
+            Image[videochannel].SetRef(matrix);
 #if (CISST_SVL_HAS_OPENCV == ON)
             if (OCVImageHeader[videochannel]) {
                 cvInitImageHeader(OCVImageHeader[videochannel],
@@ -432,59 +475,60 @@ public:
         return SVL_FAIL;
     }
 
-    vctDynamicMatrix<_ValueType> & GetMatrixRef(const unsigned int videochannel = 0)
+    vctDynamicMatrixRef<_ValueType> GetMatrixRef(const unsigned int videochannel = 0)
     {
-        if (videochannel < _VideoChannels && Image[videochannel]) return *(Image[videochannel]);
+        if (videochannel < _VideoChannels) return Image[videochannel];
         else return InvalidMatrix;
     }
 
-    const vctDynamicMatrix<_ValueType> & GetMatrixRef(const unsigned int videochannel = 0) const
+    const vctDynamicMatrixRef<_ValueType> GetMatrixRef(const unsigned int videochannel = 0) const
     {
-        if (videochannel < _VideoChannels && Image[videochannel]) return *(Image[videochannel]);
+        if (videochannel < _VideoChannels) return Image[videochannel];
         else return InvalidMatrix;
     }
 
     _ValueType* GetPointer(const unsigned int videochannel = 0)
     {
-        if (videochannel < _VideoChannels && Image[videochannel]) return Image[videochannel]->Pointer();
+        if (videochannel < _VideoChannels) return Image[videochannel].Pointer();
         return 0;
     }
 
     const _ValueType* GetPointer(const unsigned int videochannel = 0) const
     {
-        if (videochannel < _VideoChannels && Image[videochannel]) return Image[videochannel]->Pointer();
+        if (videochannel < _VideoChannels) return Image[videochannel].Pointer();
         return 0;
     }
 
     _ValueType* GetPointer(const unsigned int videochannel, const unsigned int x, const unsigned int y)
     {
-        if (videochannel < _VideoChannels && Image[videochannel]) {
-            return Image[videochannel]->Pointer(y, x * _DataChannels);
+        if (videochannel < _VideoChannels) {
+            return Image[videochannel].Pointer(y, x * _DataChannels);
         }
         return 0;
     }
 
     const _ValueType* GetPointer(const unsigned int videochannel, const unsigned int x, const unsigned int y) const
     {
-        if (videochannel < _VideoChannels && Image[videochannel]) {
-            return Image[videochannel]->Pointer(y, x * _DataChannels);
+        if (videochannel < _VideoChannels) {
+            return Image[videochannel].Pointer(y, x * _DataChannels);
         }
         return 0;
     }
 
 private:
     bool OwnData;
-    vctDynamicMatrix<_ValueType>* Image[_VideoChannels];
-    vctDynamicMatrix<_ValueType> InvalidMatrix;
+    vctDynamicMatrixRef<_ValueType> Image[_VideoChannels];
+    vctDynamicMatrix<_ValueType>*   OwnImage[_VideoChannels];
+    vctDynamicMatrix<_ValueType>    InvalidMatrix;
 
 #if (CISST_SVL_HAS_OPENCV == ON)
     IplImage* OCVImageHeader[_VideoChannels];
 
     int GetOCVDepth()
     {
-        if (IsTypeUInt8<_ValueType>(static_cast<_ValueType>(0))) return IPL_DEPTH_8U;
+        if (IsTypeUInt8 <_ValueType>(static_cast<_ValueType>(0))) return IPL_DEPTH_8U;
         if (IsTypeUInt16<_ValueType>(static_cast<_ValueType>(0))) return IPL_DEPTH_16U;
-        if (IsTypeFloat<_ValueType>(static_cast<_ValueType>(0))) return IPL_DEPTH_32F;
+        if (IsTypeFloat <_ValueType>(static_cast<_ValueType>(0))) return IPL_DEPTH_32F;
         return -1;
     }
 #endif // CISST_SVL_HAS_OPENCV

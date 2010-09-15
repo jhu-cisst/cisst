@@ -120,6 +120,7 @@ int svlFilterImageCropper::Process(svlProcInfo* procInfo, svlSample* syncInput, 
 {
     syncOutput = OutputImage;
     _SkipIfAlreadyProcessed(syncInput, syncOutput);
+    syncOutput->SetTimestamp(syncInput->GetTimestamp());
 
     svlSampleImage* in_image = dynamic_cast<svlSampleImage*>(syncInput);
     unsigned int videochannels = in_image->GetVideoChannels();

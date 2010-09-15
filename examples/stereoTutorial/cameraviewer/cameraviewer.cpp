@@ -24,88 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision.h>
 #include <cisstCommon/cmnGetChar.h>
 
-
 using namespace std;
-
-
-class svlOverlayAsyncOutputProperties : public svlOverlayStaticText
-{
-public:
-    svlOverlayAsyncOutputProperties();
-    svlOverlayAsyncOutputProperties(unsigned int videoch,
-                                    bool visible,
-                                    svlFilterOutput* output,
-                                    svlRect rect,
-                                    double fontsize,
-                                    svlRGB txtcolor);
-    svlOverlayAsyncOutputProperties(unsigned int videoch,
-                                    bool visible,
-                                    svlFilterOutput* output,
-                                    svlRect rect,
-                                    double fontsize,
-                                    svlRGB txtcolor,
-                                    svlRGB bgcolor);
-    virtual ~svlOverlayAsyncOutputProperties();
-
-protected:
-    virtual void DrawInternal(svlSampleImage* bgimage, svlSample* input);
-
-private:
-    svlFilterOutput* Output;
-};
-
-
-/*********************************************/
-/*** svlOverlayAsyncOutputProperties class ***/
-/*********************************************/
-
-svlOverlayAsyncOutputProperties::svlOverlayAsyncOutputProperties() :
-    svlOverlayStaticText(),
-    Output(0)
-{
-}
-
-svlOverlayAsyncOutputProperties::svlOverlayAsyncOutputProperties(unsigned int videoch,
-                                                                 bool visible,
-                                                                 svlFilterOutput* output,
-                                                                 svlRect rect,
-                                                                 double fontsize,
-                                                                 svlRGB txtcolor) :
-    svlOverlayStaticText(videoch, visible, "", rect, fontsize, txtcolor),
-    Output(output)
-{
-}
-
-svlOverlayAsyncOutputProperties::svlOverlayAsyncOutputProperties(unsigned int videoch,
-                                                                 bool visible,
-                                                                 svlFilterOutput* output,
-                                                                 svlRect rect,
-                                                                 double fontsize,
-                                                                 svlRGB txtcolor,
-                                                                 svlRGB bgcolor) :
-    svlOverlayStaticText(videoch, visible, "", rect, fontsize, txtcolor, bgcolor),
-    Output(output)
-{
-}
-
-svlOverlayAsyncOutputProperties::~svlOverlayAsyncOutputProperties()
-{
-}
-
-void svlOverlayAsyncOutputProperties::DrawInternal(svlSampleImage* bgimage, svlSample* CMN_UNUSED(input))
-{
-    if (Output) {
-        double usageratio = Output->GetBufferUsageRatio();
-        int dropped = Output->GetDroppedSampleCount();
-
-        std::stringstream strstr;
-        strstr << "Buffer: " << std::fixed << std::setprecision(1) << usageratio * 100.0 << "%, Dropped: " << dropped;
-        SetText(strstr.str());
-    }
-
-    svlOverlayStaticText::DrawInternal(bgimage, 0);
-}
-
 
 
 ///////////////////////////////////
@@ -119,6 +38,7 @@ public:
         svlImageWindowCallbackBase()
         ,ImageWriterFilter(0)
         ,RecorderFilter(0)
+        ,Gamma(0)
         ,SplitterOutput(0)
         ,Recording(false)
     {
@@ -126,6 +46,8 @@ public:
 
     void OnUserEvent(unsigned int CMN_UNUSED(winid), bool ascii, unsigned int eventid)
     {
+        double gamma;
+
         // handling user inputs
         if (ascii) {
             switch (eventid) {
@@ -153,6 +75,22 @@ public:
                     }
                 break;
 
+                case '9':
+                    if (Gamma) {
+                        Gamma->GetGamma(gamma);
+                        cout << endl << " >>> Gamma: " << gamma << endl;
+                        Gamma->SetGamma(gamma - 5.0);
+                    }
+                break;
+
+                case '0':
+                    if (Gamma) {
+                        Gamma->GetGamma(gamma);
+                        cout << endl << " >>> Gamma: " << gamma << endl;
+                        Gamma->SetGamma(gamma + 5.0);
+                    }
+                break;
+
                 default:
                     return;
             }
@@ -161,6 +99,7 @@ public:
 
     svlFilterImageFileWriter* ImageWriterFilter;
     svlFilterVideoFileWriter* RecorderFilter;
+    svlFilterImageExposureCorrection* Gamma;
     svlFilterOutput* SplitterOutput;
     bool Recording;
 };
@@ -177,7 +116,11 @@ int CameraViewer(bool interpolation, bool save, int width, int height)
     // instantiating SVL stream and filters
     svlStreamManager stream(1);
     svlFilterSourceVideoCapture source(1);
+    svlFilterVideoExposureManager exposure;
+    svlFilterImageExposureCorrection gamma;
+#if (CISST_OS == CISST_WINDOWS)
     svlFilterImageChannelSwapper rgb_swapper;
+#endif // (CISST_OS == CISST_WINDOWS)
     svlFilterSplitter splitter;
     svlFilterImageResizer resizer;
     svlFilterImageWindow window;
@@ -194,9 +137,19 @@ int CameraViewer(bool interpolation, bool save, int width, int height)
         source.DialogSetup();
     }
 
+    // setup exposure manager
+    exposure.SetVideoCaptureFilter(&source);
+    exposure.SetSaturationTolerance(0.1);
+    exposure.SetSaturationThreshold(230);
+    exposure.SetMaxShutter(1305);
+    exposure.SetMaxGain(1000);
+
+    // setup gamma correction
+    gamma.SetGamma(0.0);
+
     // setup splitter
-    splitter.AddOutput("output2", 8);
-    svlFilterOutput* output = splitter.GetOutput("output2");
+    splitter.AddOutput("output2", 8, 200);
+    svlFilterOutput* splitteroutput = splitter.GetOutput("output2");
 
     // setup writer
     if (save == true) {
@@ -217,18 +170,19 @@ int CameraViewer(bool interpolation, bool save, int width, int height)
     }
 
     // setup image window
+    window_cb.ImageWriterFilter = &imagewriter;
+    window_cb.Gamma = &gamma;
     if (save == true) {
         window_cb.RecorderFilter = &videowriter;
-        window_cb.SplitterOutput = output;
+        window_cb.SplitterOutput = splitteroutput;
     }
-    window_cb.ImageWriterFilter = &imagewriter;
     window.SetEventHandler(&window_cb);
     window.SetTitle("Camera Viewer");
 
     // Add buffer status overlay
     svlOverlayAsyncOutputProperties buffer_overlay(SVL_LEFT,
                                                    true,
-                                                   output,
+                                                   splitteroutput,
                                                    svlRect(4, 4, 225, 20),
                                                    14.0,
                                                    svlRGB(255, 255, 255),
@@ -245,30 +199,52 @@ int CameraViewer(bool interpolation, bool save, int width, int height)
                                     svlRGB(128, 0, 0));
     overlay.AddOverlay(fps_overlay);
 
-
     // chain filters to pipeline
+    svlFilterOutput *output;
+
+    // Add source
     stream.SetSourceFilter(&source);
-#if 0 // RGB input: needs to be converted to BGR
-    source.GetOutput()->Connect(rgb_swapper.GetInput());
-    rgb_swapper.GetOutput()->Connect(imagewriter.GetInput());
-#else // BGR input
-    source.GetOutput()->Connect(imagewriter.GetInput());
-#endif
+        output = source.GetOutput();
+
+#if (CISST_OS == CISST_WINDOWS)
+    output->Connect(rgb_swapper.GetInput());
+        output = rgb_swapper.GetOutput();
+#endif // (CISST_OS == CISST_WINDOWS)
+
+    // Add exposure correction
+    output->Connect(exposure.GetInput());
+        output = exposure.GetOutput();
+
+    // Add gamma correction
+    output->Connect(gamma.GetInput());
+        output = gamma.GetOutput();
+
+    // Add splitter
+    output->Connect(splitter.GetInput());
+        output = splitter.GetOutput();
+
+    // Add resizer if required
     if (width > 0 && height > 0) {
-        imagewriter.GetOutput()->Connect(resizer.GetInput());
-        resizer.GetOutput()->Connect(splitter.GetInput());
+        output->Connect(resizer.GetInput());
+            output = resizer.GetOutput();
     }
-    else {
-        imagewriter.GetOutput()->Connect(splitter.GetInput());
-    }
-    splitter.GetOutput()->Connect(overlay.GetInput());
-    overlay.GetOutput()->Connect(window.GetInput());
+
+    // Add image file writer
+    output->Connect(imagewriter.GetInput());
+        output = imagewriter.GetOutput();
+
+    // Add overlay
+    output->Connect(overlay.GetInput());
+        output = overlay.GetOutput();
+
+    // Add window
+    output->Connect(window.GetInput());
+        output = window.GetOutput();
 
     if (save == true) {
-        // put the recorder on a branch in order to enable buffering
-        output->SetBlock(true);
-//        output->Connect(window2.GetInput());
-        output->Connect(videowriter.GetInput());
+        // If saving enabled, then add video writer on separate branch
+        splitteroutput->SetBlock(true);
+        splitteroutput->Connect(videowriter.GetInput());
     }
 
     cerr << endl << "Starting stream... ";
@@ -280,19 +256,17 @@ int CameraViewer(bool interpolation, bool save, int width, int height)
 
     // wait for keyboard input in command window
     int ch;
-    bool paused;
-
-    paused = false;
 
     cerr << endl << "Keyboard commands:" << endl << endl;
     cerr << "  In image window:" << endl;
+    cerr << "    's'   - Take image snapshot" << endl;
+    cerr << "    '9'   - Reduce gamma" << endl;
+    cerr << "    '0'   - Increase gamma" << endl;
     if (save == true) {
         cerr << "    SPACE - Video recorder control: Record/Pause" << endl;
     }
-    cerr << "    's'   - Take image snapshot" << endl;
     cerr << "  In command window:" << endl;
     cerr << "    'i'   - Adjust image properties" << endl;
-    cerr << "    'p'   - Pause/Resume capture" << endl;
     cerr << "    'q'   - Quit" << endl << endl;
 
     do {
@@ -306,21 +280,6 @@ int CameraViewer(bool interpolation, bool save, int width, int height)
                 cerr << endl << endl;
             break;
 
-            case 'p':
-                if (paused) {
-                    // Resume playback
-                    source.Play();
-                    paused = false;
-                    cerr << "Capture resumed..." << endl;
-                }
-                else {
-                    // Pause source
-                    source.Pause();
-                    paused = true;
-                    cerr << "Capture paused..." << endl;
-                }
-            break;
-                
             default:
             break;
         }
