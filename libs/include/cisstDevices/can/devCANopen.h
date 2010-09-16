@@ -16,7 +16,7 @@ class CISST_EXPORT devCANopen {
      ESUCCESS, EFAILURE
    };
    
- private:
+ public:
    
    devCAN* candevice;
    bool deviceopened;
@@ -137,8 +137,10 @@ class CISST_EXPORT devCANopen {
 					unsigned int speed );
    devCANopen::Errno HomingAcceleration ( CiA301::Node::ID nodeid, 
 					int acceleration );
-   devCANopen::Errno HomingMethod ( CiA301::Node::ID nodeid, int method );
+   devCANopen::Errno HomingMethod ( CiA301::Node::ID nodeid, 
+				    int method );
 
+   devCANopen::Errno PVTBufferClear( CiA301::Node::ID nodeid );
 };
 
 #endif  // _CANOPEN_INCLUDED

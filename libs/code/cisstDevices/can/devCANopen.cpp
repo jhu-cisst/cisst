@@ -61,17 +61,15 @@ devCANopen::Errno devCANopen::Read( devCAN::Frame& frame ){
 }
 
 devCANopen::Errno devCANopen::Write( const devCAN::Frame& frame ){
-   
    if( candevice == NULL ){
-     CMN_LOG_INIT_ERROR << "Failed to write CAN frame." << std::endl;
+      CMN_LOG_INIT_ERROR << "Failed to write CAN frame." << std::endl;
      return devCANopen::EFAILURE;
    }
-
+   std::cout << frame << std::endl;
    if( candevice->Send( frame ) != devCAN::ESUCCESS ){
      CMN_LOG_INIT_ERROR << "Failed to write CAN frame." << std::endl;
      return devCANopen::EFAILURE;
    }
-   
    return devCANopen::ESUCCESS;
 }
 
@@ -385,6 +383,22 @@ devCANopen::Errno devCANopen::TPDO26( CiA301::Node::ID nodeid,
   return devCANopen::ESUCCESS;
 }
 
+devCANopen::Errno devCANopen::TPDO26( CiA301::Node::ID nodeid, 
+				      CiA301::TPDO26::Mapping mapping,
+				      CiA301::TPDO26::Data value ){
+  if( SDO( nodeid, 
+	   CiA301::SDO::INITIATE_WRITE, 
+	   CiA301::TPDO26( mapping, value ) )
+      != devCANopen::ESUCCESS ){
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+		      << " Failed to set TPDO26 mapping."
+		      << std::endl;
+    return devCANopen::EFAILURE;
+  }
+  return devCANopen::ESUCCESS;
+}
+
+
 
 
 // CiA 402
@@ -392,7 +406,7 @@ devCANopen::Errno devCANopen::TPDO26( CiA301::Node::ID nodeid,
 // Set the control word Control word
 devCANopen::Errno devCANopen::SetControlWord( CiA301::Node::ID nodeid, 
 					      CiA402::ControlWord::Word word ){
-  if( SDO( nodeid, CiA301::SDO::INITIATE_WRITE, CiA402::ControlWord( word ) )
+   if( SDO( nodeid, CiA301::SDO::INITIATE_WRITE, CiA402::ControlWord( word ) )
       != devCANopen::ESUCCESS ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
 		      << " Failed to set the control word " << nodeid
@@ -550,3 +564,89 @@ devCANopen::Errno devCANopen::HomingMode( CiA301::Node::ID nodeid ){
   return devCANopen::ESUCCESS;
 }
 
+devCANopen::Errno devCANopen::HomeOffset( CiA301::Node::ID nodeid,
+					  int offset ){
+  if( SDO( nodeid, 
+	   CiA301::SDO::INITIATE_WRITE, 
+	   CiA402::HomeOffset( offset ) )
+      != devCANopen::ESUCCESS ){
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+		      << " Failed to set homing offset " << nodeid
+		      << std::endl;
+    return devCANopen::EFAILURE;
+  }
+  return devCANopen::ESUCCESS;
+}
+
+devCANopen::Errno devCANopen::HomingZeroSpeed( CiA301::Node::ID nodeid, 
+					       unsigned int speed ){
+  if( SDO( nodeid, 
+	   CiA301::SDO::INITIATE_WRITE, 
+	   CiA402::HomingSpeed( CiA402::HomingSpeed::ZERO, speed ) )
+      != devCANopen::ESUCCESS ){
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+		      << " Failed to set homing zero speed " << nodeid
+		      << std::endl;
+    return devCANopen::EFAILURE;
+  }
+  return devCANopen::ESUCCESS;
+}
+
+devCANopen::Errno devCANopen::HomingSwitchSpeed( CiA301::Node::ID nodeid,
+						 unsigned int speed ){
+  if( SDO( nodeid, 
+	   CiA301::SDO::INITIATE_WRITE, 
+	   CiA402::HomingSpeed( CiA402::HomingSpeed::SWITCH, speed ) )
+      != devCANopen::ESUCCESS ){
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+		      << " Failed to set homing switch speed " << nodeid
+		      << std::endl;
+    return devCANopen::EFAILURE;
+  }
+  return devCANopen::ESUCCESS;
+}
+
+devCANopen::Errno devCANopen::HomingMethod( CiA301::Node::ID nodeid, 
+					    int method ){
+   if( SDO( nodeid, 
+	    CiA301::SDO::INITIATE_WRITE, 
+	    CiA402::HomingMethod( method ) )
+      != devCANopen::ESUCCESS ){
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+		      << " Failed to set homing method " << nodeid
+		      << std::endl;
+    return devCANopen::EFAILURE;
+  }
+  return devCANopen::ESUCCESS;
+}
+
+
+devCANopen::Errno devCANopen::HomingAcceleration ( CiA301::Node::ID nodeid, 
+						   int acceleration ){
+  if( SDO( nodeid, 
+	   CiA301::SDO::INITIATE_WRITE, 
+	   CiA402::HomingAcceleration( acceleration ) )
+      != devCANopen::ESUCCESS ){
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+		      << " Failed to set homing acceleration " << nodeid
+		      << std::endl;
+    return devCANopen::EFAILURE;
+  }
+  return devCANopen::ESUCCESS;
+}
+
+
+
+// PVT
+devCANopen::Errno devCANopen::PVTBufferClear( CiA301::Node::ID nodeid ){
+  if( SDO( nodeid, 
+	   CiA301::SDO::INITIATE_WRITE, 
+	   CiA402::PVTClearBuffer() )
+      != devCANopen::ESUCCESS ){
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+		      << " Failed to set clear PVT buffer " << nodeid
+		      << std::endl;
+    return devCANopen::EFAILURE;
+  }
+  return devCANopen::ESUCCESS;
+}

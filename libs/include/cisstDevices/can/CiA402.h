@@ -41,6 +41,8 @@ namespace CiA402{
       CiA301::Object( 0x6064 ){}
   };
 
+   
+   // Homing stuff
   struct HomeOffset : public CiA301::Object {
     HomeOffset( int offset ) : 
       CiA301::Object( 0x607C, 0, offset ){}
@@ -48,23 +50,29 @@ namespace CiA402{
 
   struct HomingMethod : public CiA301::Object {
     HomingMethod( int method ) : 
-      CiA301::Object( 0x6098, method ){}
+      CiA301::Object( 0x6098, 0, method ){}
   };
 
-
-  struct HomingSpeeds : public CiA301::Object {
+  struct HomingSpeed : public CiA301::Object {
     enum Search{ SWITCH = 0x01, ZERO = 0x02 };
-    HomingSpeeds( HomingSpeeds::Search search, unsigned int speed ) : 
+    HomingSpeed( HomingSpeed::Search search, unsigned int speed ) : 
       CiA301::Object( 0x6099, search, speed ){}
   };
 
   struct HomingAcceleration : public CiA301::Object {
     HomingAcceleration( int acceleration ) : 
-      CiA301::Object( 0x609A, acceleration ){}
+      CiA301::Object( 0x609A, 0, acceleration ){}
   };
 
+   
+  // PVT stuff 
+  struct PVTClearBuffer : public CiA301::Object{
+    PVTClearBuffer() : 
+    CiA301::Object( 0x60C4, 6, 0 ){}
+  };
 
-  /*
+   
+   /*
   enum Index
     {
       HOMING_ACCELERATION      = 0x609A,

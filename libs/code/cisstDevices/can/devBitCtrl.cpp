@@ -114,7 +114,6 @@ devCAN::Errno devBitCtrl::Recv( devCAN::Frame& frame, devCAN::Flags ){
    
 devCAN::Errno devBitCtrl::Send( const devCAN::Frame& frame, devCAN::Flags ){
 	
-
    // ensure the device is opened
    if( canfd != -1 ){
 	
@@ -131,7 +130,7 @@ devCAN::Errno devBitCtrl::Send( const devCAN::Frame& frame, devCAN::Flags ){
 	
       // write the message
       int nbyteswrite = write( canfd, &canmsg, sizeof(canmsg_t) );
-	
+
       // check the number of bytes
       if( nbyteswrite != sizeof( canmsg_t ) ){
 	 CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
@@ -140,7 +139,7 @@ devCAN::Errno devBitCtrl::Send( const devCAN::Frame& frame, devCAN::Flags ){
 	                   << std::endl;
 	 return devCAN::EFAILURE;	
       }
-	
+
       return devCAN::ESUCCESS;
 
    }

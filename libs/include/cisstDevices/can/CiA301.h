@@ -1,6 +1,8 @@
+
 #ifndef _CiA301_h
 #define _CiA301_h
 
+#include <cisstDevices/can/devCAN.h>
 
 namespace CiA301{
 
@@ -16,17 +18,10 @@ namespace CiA301{
 	NODE_3 = 0x003,
 	NODE_4 = 0x004,
 	NODE_5 = 0x005,
+	NODE_6 = 0x006,
       };
     
-    CiA301::Node::ID operator++( CiA301::Node::ID id, int  ){
-      if( id == CiA301::Node::NODE_0 ) return CiA301::Node::NODE_0;
-      if( id == CiA301::Node::NODE_1 ) return CiA301::Node::NODE_2;
-      if( id == CiA301::Node::NODE_2 ) return CiA301::Node::NODE_3;
-      if( id == CiA301::Node::NODE_3 ) return CiA301::Node::NODE_4;
-      if( id == CiA301::Node::NODE_4 ) return CiA301::Node::NODE_5;
-      if( id == CiA301::Node::NODE_5 ) return CiA301::Node::NODE_5;
-      return CiA301::Node::NODE_0;
-    }
+    CiA301::Node::ID operator++( CiA301::Node::ID& id, int  );
 
   }
   
@@ -46,7 +41,7 @@ namespace CiA301{
   namespace BOOTUP
   {
     namespace COBID{
-      const CiA301::COBID LOW  = 0x0701;
+      const CiA301::COBID LOW  = 0x0700;
       const CiA301::COBID HIGH = 0x077F;
     }
   }
@@ -60,7 +55,7 @@ namespace CiA301{
   {
     namespace COBID
     {
-      const devCAN::Frame::ID LOW  = 0x0081;
+      const devCAN::Frame::ID LOW  = 0x0080;
       const devCAN::Frame::ID HIGH = 0x00FF;
     }
     
@@ -82,7 +77,7 @@ namespace CiA301{
 
     namespace COBID
     {
-      const devCAN::Frame::ID LOW  = 0x0181;
+      const devCAN::Frame::ID LOW  = 0x0180;
       const devCAN::Frame::ID HIGH = 0x057F;
     } // COBID
 
@@ -103,7 +98,7 @@ namespace CiA301{
     
     namespace COBID
     {
-      const devCAN::Frame::ID LOW  = 0x0581;
+      const devCAN::Frame::ID LOW  = 0x0600;
       const devCAN::Frame::ID HIGH = 0x067F;
     }
     
