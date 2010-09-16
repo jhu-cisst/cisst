@@ -65,7 +65,7 @@ devCANopen::Errno devCANopen::Write( const devCAN::Frame& frame ){
       CMN_LOG_INIT_ERROR << "Failed to write CAN frame." << std::endl;
      return devCANopen::EFAILURE;
    }
-   std::cout << frame << std::endl;
+   //std::cout << frame << std::endl;
    if( candevice->Send( frame ) != devCAN::ESUCCESS ){
      CMN_LOG_INIT_ERROR << "Failed to write CAN frame." << std::endl;
      return devCANopen::EFAILURE;
@@ -172,6 +172,18 @@ void devCANopen::Unpack( const devCAN::Frame& frame,
 		  ( datafield[5] <<  8 ) |
 		  ( datafield[4]       ) );
 }
+
+void devCANopen::Unpack( const devCAN::Frame& frame,
+			 CiA301::COBID& cobid,
+			 long long& data ){
+  cobid = frame.GetID();
+  const devCAN::Frame::Data* datafield = frame.GetData();
+  data = 0;
+  for( size_t i=0; i<frame.GetLength(); i++ ){
+     data = data | ( datafield[i] << (i*8) );
+  }
+}
+
 
 // protocols
 devCANopen::Errno devCANopen::SDO( CiA301::Node::ID nodeid,

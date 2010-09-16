@@ -38,6 +38,10 @@ class CISST_EXPORT devCANopen {
 		CiA301::NMT::State& state );
 
    void Unpack( const devCAN::Frame& frame,
+		CiA301::COBID& cobid,
+		long long& value );
+
+   void Unpack( const devCAN::Frame& frame,
 		CiA301::Node::ID& nodeid,
 		CiA301::SDO::Command& command,
 		CiA301::Object& object );
