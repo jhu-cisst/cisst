@@ -21,6 +21,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <iostream>
 #include <iomanip>
 
+#include <cisstVector/vctDynamicVector.h>
+
 //! Generic CAN bus
 /**
    The only thing this class does is to define the interface that must be
@@ -90,7 +92,7 @@ public:
     //! The message (8 bytes)
     Frame::DataField data;
     
-    //! The length of the message in bytes
+    //! The lenght of the message in bytes
     Frame::DataLength nbytes;
     
   public:
@@ -107,10 +109,10 @@ public:
     /**
        Set the id of the CAN frame and the message
     */
-    Frame( Frame::ID canid, 
-	   Frame::DataField data, 
-	   Frame::DataLength nbytes );
-    
+    Frame( Frame::ID canid, Frame::DataField data, Frame::DataLength nbytes );
+
+    Frame( Frame::ID canid, const vctDynamicVector<Frame::Data>& data );
+
     //! Return the identifier of the frame
     Frame::ID GetID() const { return id; }
   
@@ -130,16 +132,16 @@ public:
        \param cf[in] A CAN frame
     */
     friend std::ostream& operator<<( std::ostream& os, const Frame& frame ){
-        os <<"ID: 0x" 
-           << std::hex << std::setfill('0') << std::setw(4) 
-           << (int)frame.GetID() << std::endl
-           << "Length: " << (int)frame.GetLength() << std::endl 
-           << "Data: ";
-        for( Frame::DataLength i=0; i<frame.GetLength(); i++ )
-            os << "0x" << std::hex << std::setfill('0') << std::setw(2) 
-               << (int)(frame.data[i]) << " ";
-        os << std::dec;
-        return os;
+      os <<"ID: 0x" 
+	 << std::hex << std::setfill('0') << std::setw(4) 
+	 << (int)frame.GetID() << std::endl
+	 << "Length: " << (int)frame.GetLength() << std::endl 
+	 << "Data: ";
+      for( Frame::DataLength i=0; i<frame.GetLength(); i++ )
+	os << "0x" << std::hex << std::setfill('0') << std::setw(2) 
+	   << (int)(frame.data[i]) << " ";
+      os << std::dec;
+      return os;
     }
     
   }; // Frame

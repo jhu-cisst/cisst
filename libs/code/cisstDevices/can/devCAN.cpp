@@ -62,6 +62,39 @@ devCAN::Frame::Frame( devCAN::Frame::ID id,
   }
 }
 
+devCAN::Frame::Frame( devCAN::Frame::ID id, 
+		      const vctDynamicVector<devCAN::Frame::Data>& data ){
+
+  // Clear up everything before starting
+  this->id = 0;                              // default ID 
+  this->nbytes = 0;                          // no data
+  for(devCAN::Frame::DataLength i=0; i<8; i++) // clear the data
+    { this->data[i] = 0x00; }
+
+  // A can ID has 11 bits. Ensure that only 11 bits are used
+  if( (~0x07FF) & id ){
+    CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS
+			<< ": Illegal CAN id: " << id 
+			<< std::endl;
+  }
+
+  else{
+    // Now check that no more than 8 bytes are given
+    if( 8 < data.size() ){
+      CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS
+			  << ": Illegal message length: " << data.size()
+			  << std::endl;
+    }
+
+    else{
+      this->id = (0x07FF & id);                         // Copy the CAN ID
+      this->nbytes = data.size();                       // Copy the data length
+      for(devCAN::Frame::DataLength i=0; i<nbytes; i++) // Copy the data
+	{ this->data[i] = data[i]; }
+    }
+  }
+}
+
 // default constructor of a can device
 devCAN::devCAN( devCAN::Rate rate ){ 
 

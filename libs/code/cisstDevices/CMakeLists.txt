@@ -76,7 +76,6 @@ if( CISST_DEV_HAS_BITCTRL )
   if( BITCTRL_FOUND )
     include_directories( ${BITCTRL_INCLUDE_DIR} )
     set( SOURCE_FILES ${SOURCE_FILES} can/devCAN.cpp 
-                                      can/CiA301.cpp
                                       can/devCANopen.cpp 
                                       can/devBitCtrl.cpp )
     set( HEADER_FILES ${HEADER_FILES} can/devCAN.h   
