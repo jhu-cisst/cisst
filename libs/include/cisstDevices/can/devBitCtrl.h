@@ -4,9 +4,12 @@
 #define _devBitCtrl_h
 
 #include <cisstDevices/can/devCAN.h>
-//#include <cisstDevices/devExport.h>
 
-class devBitCtrl : public devCAN {
+#include <cisstDevices/devExport.h>
+
+class CISST_EXPORT devBitCtrl : public devCAN {
+
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
  private:
    
@@ -33,5 +36,7 @@ class devBitCtrl : public devCAN {
 	 
 
 };
+
+CMN_DECLARE_SERVICES_INSTANTIATION(devBitCtrl)
 
 #endif
