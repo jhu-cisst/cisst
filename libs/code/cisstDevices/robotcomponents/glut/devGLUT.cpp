@@ -18,6 +18,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnConstants.h>
 #include <cisstDevices/robotcomponents/glut/devGLUT.h>
 #include <cisstDevices/robotcomponents/glut/devMeshTriangular.h>
+#include <cisstOSAbstraction/osaSleep.h>
 
 #include <iostream>
 
@@ -144,6 +145,10 @@ void devGLUT::Draw(){
     { geoms[i]->Draw(); }
 
   glutSwapBuffers();
+
+  if (sleepPeriod >= 0) {
+      osaSleep(sleepPeriod * cmn_s);
+  }
 }
 
 void devGLUT::Register( const devGeometry* geom ){  
@@ -166,6 +171,7 @@ devGLUT::devGLUT( int argc, char** argv){
   this->y = 0;
   this->width = 640;
   this->height = 480;
+  this->sleepPeriod = -1.0;
 
   glutInit(&argc, argv);
 

@@ -36,6 +36,8 @@ class CISST_EXPORT devGLUT {
   double elevation;     // elevation from the X-Y plane
   double distance;      // distance from the origin
   float perspective;  // camera FOV
+
+  double sleepPeriod;  // to save CPU
   
   void DrawXYZ();     // draw the X-Y-Z axis
   void DrawGrid(double width, int subdivisions); // draw the floor
@@ -62,6 +64,11 @@ class CISST_EXPORT devGLUT {
   void Keyboard( int k, int x, int y );
 
   devGeometry* LoadOBJ( const std::string& filename );
+
+  //! Setter
+  void SetSleepPeriod( const double sleepPeriodInSec ) {
+      sleepPeriod = sleepPeriodInSec;
+  }
 
   static void Refresh();
 };
