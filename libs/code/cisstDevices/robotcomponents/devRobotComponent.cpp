@@ -1292,7 +1292,7 @@ void devRobotComponent::Run(){
   if( Enabled() ){
 
     if( !risingedge ){
-      CMN_LOG_RUN_ERROR << GetName() << " is enabled." << std::endl;
+      CMN_LOG_RUN_WARNING << GetName() << " is enabled." << std::endl;
       risingedge = true;
     }
 
@@ -1303,7 +1303,7 @@ void devRobotComponent::Run(){
   else{
 
     if( risingedge ){
-      CMN_LOG_RUN_ERROR << GetName() << " is disabled." << std::endl;
+      CMN_LOG_RUN_WARNING << GetName() << " is disabled." << std::endl;
       risingedge = false;
     }
 
