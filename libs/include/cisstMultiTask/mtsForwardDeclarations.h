@@ -113,11 +113,6 @@ inline std::string mtsObjectName(const mtsGenericObject * object) {
 }
 
 
-// flag for required interfaces lists of commands
-const bool mtsRequired = true;
-const bool mtsOptional = false;
-
-
 // classes defined when ICE is used
 #if CISST_MTS_HAS_ICE
 class mtsComponentProxy;
