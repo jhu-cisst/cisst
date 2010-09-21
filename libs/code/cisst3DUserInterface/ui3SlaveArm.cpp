@@ -61,7 +61,7 @@ bool ui3SlaveArm::SetInput(const std::string & positionDevice, const std::string
     requiredInterface = this->Manager->AddInterfaceRequired(this->Name);
     if (requiredInterface) {
         // bound the mtsFunction to the command provided by the interface 
-        requiredInterface->AddFunction("GetPositionCartesian", this->GetCartesianPositionFunction, mtsRequired);
+        requiredInterface->AddFunction("GetPositionCartesian", this->GetCartesianPositionFunction, MTS_REQUIRED);
     } else {
         CMN_LOG_CLASS_INIT_ERROR << "SetInput: failed to add \""
                                  << this->Name

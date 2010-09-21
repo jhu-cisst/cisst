@@ -312,7 +312,7 @@ void ui3Manager::ConnectAll(void)
                 case ui3MasterArm::PRIMARY:
                     requiredInterface->AddFunction(commandName,
                                                    (*iterator)->GetPrimaryMasterPosition,
-                                                   mtsRequired);
+                                                   MTS_REQUIRED);
                     CMN_LOG_CLASS_INIT_DEBUG << "ConnectAll: added required command \""
                                              << commandName << "\" to required interface \"ManagerInterface\" of behavior \"" 
                                              << (*iterator)->GetName() << "\" to be bound to \"GetPrimaryMasterPosition\"" << std::endl;
@@ -320,7 +320,7 @@ void ui3Manager::ConnectAll(void)
                 case ui3MasterArm::SECONDARY:
                     requiredInterface->AddFunction(commandName,
                                                    (*iterator)->GetSecondaryMasterPosition,
-                                                   mtsRequired);
+                                                   MTS_REQUIRED);
                     CMN_LOG_CLASS_INIT_DEBUG << "ConnectAll: added required command \""
                                              << commandName << "\" to required interface \"ManagerInterface\" of behavior \"" 
                                              << (*iterator)->GetName() << "\" to be bound to \"GetSecondaryMasterPosition\"" << std::endl;

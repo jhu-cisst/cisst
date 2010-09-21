@@ -23,7 +23,8 @@ http://www.cisst.org/cisst/license.txt.
 #define _ui3BehaviorBase_h
 
 #include <cisstMultiTask/mtsTaskContinuous.h>
-#include <cisstMultiTask/mtsFunctionReadOrWrite.h>
+#include <cisstMultiTask/mtsFunctionRead.h>
+#include <cisstMultiTask/mtsFunctionWrite.h>
 #include <cisstMultiTask/mtsStateData.h>
 #include <cisstParameterTypes/prmPositionCartesianGet.h>
 #include <cisstParameterTypes/prmEventButton.h>
