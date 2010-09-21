@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2003-2007 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2003-2010 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # CMakeLists for cisstImage
@@ -14,24 +14,19 @@
 # 
 # --- end cisst license ---
 
-# set the library name
-SET(LIBRARY cisstImage)
-
-# set dependencies
-SET(DEPENDENCIES
-    cisstCommon
-    cisstVector)
-
 # all source files
-SET(SOURCE_FILES
-    imgUCharRGB.cpp
-    )
+set (SOURCE_FILES
+     imgUCharRGB.cpp
+     )
 
 # all header files
-SET(HEADER_FILES
-    imgExport.h
-    imgUCharRGB.h
-    )
+set (HEADER_FILES
+     imgExport.h
+     imgUCharRGB.h
+     )
 
-
-CISST_ADD_LIBRARY_TO_PROJECT(cisstLibs)
+cisst_add_library (LIBRARY cisstImage
+                   DEPENDENCIES cisstCommon cisstVector
+                   SOURCE_FILES ${SOURCE_FILES}
+                   HEADER_FILES ${HEADER_FILES}
+                   )

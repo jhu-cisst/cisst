@@ -15,90 +15,86 @@
 # --- end cisst license ---
 
 
-# set the library name
-SET(LIBRARY cisstNumerical)
-
-# set dependencies
-SET(DEPENDENCIES
-    cisstCommon
-    cisstVector)
-
 # all source files
-SET(SOURCE_FILES
-    nmrBernsteinPolynomial.cpp
-    nmrBernsteinPolynomialLineIntegral.cpp
-    nmrGaussJordanInverse.cpp
-    nmrMultiIndexCounter.cpp
-    nmrMultiVariablePowerBasis.cpp
-    nmrPolynomialBase.cpp
-    nmrPolynomialTermPowerIndex.cpp
-    nmrSingleVariablePowerBasis.cpp
-    nmrStandardPolynomial.cpp
-    )
+set (SOURCE_FILES
+     nmrBernsteinPolynomial.cpp
+     nmrBernsteinPolynomialLineIntegral.cpp
+     nmrGaussJordanInverse.cpp
+     nmrMultiIndexCounter.cpp
+     nmrMultiVariablePowerBasis.cpp
+     nmrPolynomialBase.cpp
+     nmrPolynomialTermPowerIndex.cpp
+     nmrSingleVariablePowerBasis.cpp
+     nmrStandardPolynomial.cpp
+     )
 
 
 # all header files
-SET(HEADER_FILES
-    nmrBernsteinPolynomial.h
-    nmrBernsteinPolynomialLineIntegral.h
-    nmrDynAllocPolynomialContainer.h
-    nmrExport.h
-    nmrGaussJordanInverse.h
-    nmrIsOrthonormal.h
-    nmrMultiIndexCounter.h
-    nmrMultiVariablePowerBasis.h
-    nmrPolynomialBase.h
-    nmrPolynomialContainer.h
-    nmrPolynomialTermPowerIndex.h
-    nmrSingleVariablePowerBasis.h
-    nmrStandardPolynomial.h
-    )
+set (HEADER_FILES
+     nmrBernsteinPolynomial.h
+     nmrBernsteinPolynomialLineIntegral.h
+     nmrDynAllocPolynomialContainer.h
+     nmrExport.h
+     nmrGaussJordanInverse.h
+     nmrIsOrthonormal.h
+     nmrMultiIndexCounter.h
+     nmrMultiVariablePowerBasis.h
+     nmrPolynomialBase.h
+     nmrPolynomialContainer.h
+     nmrPolynomialTermPowerIndex.h
+     nmrSingleVariablePowerBasis.h
+     nmrStandardPolynomial.h
+     )
 
-IF(CISST_HAS_CISSTNETLIB)
-  SET(SOURCE_FILES
-      ${SOURCE_FILES}
-      nmrLDPSolver.cpp
+if (CISST_HAS_CISSTNETLIB)
+  set (SOURCE_FILES
+       ${SOURCE_FILES}
+       nmrLDPSolver.cpp
 #      lsi solver is included in nmrLSqLin
 #      nmrLSISolver.cpp
-      nmrLSqLin.cpp
-      nmrPInverse.cpp
-      nmrPInverseEconomy.cpp
-      nmrRegistrationRigid.cpp
-      nmrSVD.cpp
-      nmrSVDEconomy.cpp
+       nmrLSqLin.cpp
+       nmrPInverse.cpp
+       nmrPInverseEconomy.cpp
+       nmrRegistrationRigid.cpp
+       nmrSVD.cpp
+       nmrSVDEconomy.cpp
       )
-  SET(HEADER_FILES
-      ${HEADER_FILES}
-      nmrNetlib.h
-      nmrInverse.h
-      nmrLDPSolver.h
+  set (HEADER_FILES
+       ${HEADER_FILES}
+       nmrNetlib.h
+       nmrInverse.h
+       nmrLDPSolver.h
 #     dgels solver is include in nmrLSqLin
 #      nmrLSSolver.h
 #     lsi solver is include in nmrLSqLin
 #      nmrLSISolver.h
-      nmrLSqLin.h
-      nmrLU.h
+       nmrLSqLin.h
+       nmrLU.h
 #      nmrLUSolver.h
-      nmrHFTISolver.h
-      nmrNNLSSolver.h
-      nmrCallBack.h
-      nmrPInverse.h
-      nmrPInverseEconomy.h
-      nmrRegistrationRigid.h
-      nmrSVD.h
-      nmrSVDEconomy.h
-#      nmrSVDSolver.h
-      nmrSVDRSSolver.h
-      )
-ENDIF(CISST_HAS_CISSTNETLIB)
+       nmrHFTISolver.h
+       nmrNNLSSolver.h
+       nmrCallBack.h
+       nmrPInverse.h
+       nmrPInverseEconomy.h
+       nmrRegistrationRigid.h
+       nmrSVD.h
+       nmrSVDEconomy.h
+#       nmrSVDSolver.h
+       nmrSVDRSSolver.h
+       )
+endif (CISST_HAS_CISSTNETLIB)
 
 
-CISST_ADD_LIBRARY_TO_PROJECT(cisstLibs)
+cisst_add_library (LIBRARY cisstNumerical
+                   DEPENDENCIES cisstCommon cisstVector
+                   HEADER_FILES ${HEADER_FILES}
+                   SOURCE_FILES ${SOURCE_FILES}
+                   )
 
 
 # Python wrappers
 if (CISST_HAS_SWIG_PYTHON)
-  cisst_add_swig_module(MODULE cisstNumerical
+  cisst_add_swig_module (MODULE cisstNumerical
                         INTERFACE_DIRECTORY ../../include/cisstNumerical
-			CISST_LIBRARIES cisstCommon cisstVector cisstNumerical)
+                        CISST_LIBRARIES cisstCommon cisstVector cisstNumerical)
 endif (CISST_HAS_SWIG_PYTHON)

@@ -3,7 +3,7 @@
 #
 # CMakeLists for cisstOSAbstraction
 #
-# (C) Copyright 2003-2007 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2003-2010 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -14,80 +14,79 @@
 #
 # --- end cisst license ---
 
-# set the library name
-SET(LIBRARY cisstOSAbstraction)
-
-# set dependencies
-SET(DEPENDENCIES
-    cisstCommon)
 
 # all source files
-SET(SOURCE_FILES
-    osaClassServices.cpp
-    osaCriticalSection.cpp
-    osaDynamicLoader.cpp
-    osaDynamicLoaderAndFactory.cpp
-    osaGetTime.cpp
-    osaMutex.cpp
-    osaSerialPort.cpp
-    osaSleep.cpp
-    osaSocket.cpp
-    osaSocketServer.cpp
-    osaStopwatch.cpp
-    osaThread.cpp
-    osaThreadBuddy.cpp
-    osaThreadSignal.cpp
-    osaTimeServer.cpp
-    )
+set (SOURCE_FILES
+     osaClassServices.cpp
+     osaCriticalSection.cpp
+     osaDynamicLoader.cpp
+     osaDynamicLoaderAndFactory.cpp
+     osaGetTime.cpp
+     osaMutex.cpp
+     osaSerialPort.cpp
+     osaSleep.cpp
+     osaSocket.cpp
+     osaSocketServer.cpp
+     osaStopwatch.cpp
+     osaThread.cpp
+     osaThreadBuddy.cpp
+     osaThreadSignal.cpp
+     osaTimeServer.cpp
+     )
 
 # all header files
-SET(HEADER_FILES
-    osaForwardDeclarations.h
-    osaCriticalSection.h
-    osaDynamicLoader.h
-    osaDynamicLoaderAndFactory.h
-    osaExport.h
-    osaGetTime.h
-    osaMutex.h
-    osaSerialPort.h
-    osaSleep.h
-    osaSocket.h
-    osaSocketServer.h
-    osaStopwatch.h
-    osaThread.h
-    osaThreadAdapter.h
-    osaThreadBuddy.h
-    osaThreadedLogFile.h
-    osaThreadSignal.h
-    osaTimeServer.h
-    )
+set (HEADER_FILES
+     osaForwardDeclarations.h
+     osaCriticalSection.h
+     osaDynamicLoader.h
+     osaDynamicLoaderAndFactory.h
+     osaExport.h
+     osaGetTime.h
+     osaMutex.h
+     osaSerialPort.h
+     osaSleep.h
+     osaSocket.h
+     osaSocketServer.h
+     osaStopwatch.h
+     osaThread.h
+     osaThreadAdapter.h
+     osaThreadBuddy.h
+     osaThreadedLogFile.h
+     osaThreadSignal.h
+     osaTimeServer.h
+     )
 
-CISST_ADD_LIBRARY_TO_PROJECT(cisstLibs)
+cisst_add_library (LIBRARY cisstOSAbstraction
+                   DEPENDENCIES cisstCommon
+                   SOURCE_FILES ${SOURCE_FILES}
+                   HEADER_FILES ${HEADER_FILES}
+                   )
 
-IF(WIN32)
-    SET(CISST_WSOCK_LIBRARY WSOCK32)
-    TARGET_LINK_LIBRARIES(cisstOSAbstraction ${CISST_WSOCK_LIBRARY})
-    CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_LIBRARIES CISST_WSOCK_LIBRARY)
-ENDIF(WIN32)
+
+if (WIN32)
+    set (CISST_WSOCK_LIBRARY WSOCK32)
+    target_link_libraries (cisstOSAbstraction ${CISST_WSOCK_LIBRARY})
+    cisst_add_to_internal (CISST_ADDITIONAL_LIBRARIES CISST_WSOCK_LIBRARY)
+endif (WIN32)
 
 # QNX does not require rt library for clock_gettime (contained in libc)
-IF("${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
-  # QNX requires socket library
-  SET(CISST_SOCKET_LIBRARY socket)
-  TARGET_LINK_LIBRARIES(cisstOSAbstraction ${CISST_SOCKET_LIBRARY})
-  CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_LIBRARIES CISST_SOCKET_LIBRARY)
-ELSE("${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
-  IF(UNIX AND NOT APPLE)
+if ("${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
+   # QNX requires socket library
+   set (CISST_SOCKET_LIBRARY socket)
+   target_link_libraries (cisstOSAbstraction ${CISST_SOCKET_LIBRARY})
+   cisst_add_to_internal (CISST_ADDITIONAL_LIBRARIES CISST_SOCKET_LIBRARY)
+else ("${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
+  if (UNIX AND NOT APPLE)
     # clock_gettime requires linking with librt
-    SET(CISST_RT_LIBRARY rt)
-    TARGET_LINK_LIBRARIES(cisstOSAbstraction ${CISST_RT_LIBRARY})
-    CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_LIBRARIES CISST_RT_LIBRARY)
-  ENDIF(UNIX AND NOT APPLE)
-ENDIF("${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
+    set (CISST_RT_LIBRARY rt)
+    target_link_libraries (cisstOSAbstraction ${CISST_RT_LIBRARY})
+    cisst_add_to_internal (CISST_ADDITIONAL_LIBRARIES CISST_RT_LIBRARY)
+  endif (UNIX AND NOT APPLE)
+endif ("${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
 
 # Python wrappers
 if (CISST_HAS_SWIG_PYTHON)
-  cisst_add_swig_module(MODULE cisstOSAbstraction
-                        INTERFACE_DIRECTORY ../../include/cisstOSAbstraction
-			CISST_LIBRARIES cisstCommon cisstOSAbstraction)
+  cisst_add_swig_module (MODULE cisstOSAbstraction
+                         INTERFACE_DIRECTORY ../../include/cisstOSAbstraction
+                         CISST_LIBRARIES cisstCommon cisstOSAbstraction)
 endif (CISST_HAS_SWIG_PYTHON)

@@ -11,91 +11,84 @@
 #
 # --- end cisst license ---
 
-# set the library name
-SET(LIBRARY cisstParameterTypes)
-
-# set dependencies
-SET(DEPENDENCIES
-    cisstCommon
-    cisstVector
-    cisstOSAbstraction
-    cisstMultiTask
-    cisstRobot
-    )
 
 # all source files
-SET(SOURCE_FILES
-    prmEventButton.cpp
-    prmMotionBase.cpp
+set (SOURCE_FILES
+     prmEventButton.cpp
+     prmMotionBase.cpp
 
-    prmPositionJointGet.cpp
-    prmPositionJointSet.cpp
-    prmVelocityJointGet.cpp
-    prmVelocityJointSet.cpp
+     prmPositionJointGet.cpp
+     prmPositionJointSet.cpp
+     prmVelocityJointGet.cpp
+     prmVelocityJointSet.cpp
 
-    prmPositionCartesianGet.cpp
-    prmPositionCartesianSet.cpp
-    prmVelocityCartesianGet.cpp
-    prmVelocityCartesianSet.cpp
-    prmForceCartesianGet.cpp
-    prmForceCartesianSet.cpp
+     prmPositionCartesianGet.cpp
+     prmPositionCartesianSet.cpp
+     prmVelocityCartesianGet.cpp
+     prmVelocityCartesianSet.cpp
+     prmForceCartesianGet.cpp
+     prmForceCartesianSet.cpp
 
-    prmTransformationBase.cpp
-    prmTransformationFixed.cpp
-    prmTransformationDynamic.cpp
-    prmTransformationManager.cpp
+     prmTransformationBase.cpp
+     prmTransformationFixed.cpp
+     prmTransformationDynamic.cpp
+     prmTransformationManager.cpp
 
-    prmMaskedVector.cpp
-    prmActuatorState.cpp
-    prmRobotState.cpp
-    prmActuatorParameters.cpp
-    prmGainParameters.cpp
+     prmMaskedVector.cpp
+     prmActuatorState.cpp
+     prmRobotState.cpp
+     prmActuatorParameters.cpp
+     prmGainParameters.cpp
 
-    prmCollaborativeControlForce.cpp
-    )
+     prmCollaborativeControlForce.cpp
+     )
 
 # all header files
-SET(HEADER_FILES
-    prmEventButton.h
-    prmExport.h
-    prmForwardDeclarations.h
-    prmMotionBase.h
+set (HEADER_FILES
+     prmEventButton.h
+     prmExport.h
+     prmForwardDeclarations.h
+     prmMotionBase.h
 
-    prmPositionJointGet.h
-    prmPositionJointSet.h
-    prmVelocityJointGet.h
-    prmVelocityJointSet.h
+     prmPositionJointGet.h
+     prmPositionJointSet.h
+     prmVelocityJointGet.h
+     prmVelocityJointSet.h
 
-    prmPositionCartesianGet.h
-    prmPositionCartesianSet.h
-    prmVelocityCartesianGet.h
-    prmVelocityCartesianSet.h
-    prmForceCartesianGet.h
-    prmForceCartesianSet.h
+     prmPositionCartesianGet.h
+     prmPositionCartesianSet.h
+     prmVelocityCartesianGet.h
+     prmVelocityCartesianSet.h
+     prmForceCartesianGet.h
+     prmForceCartesianSet.h
 
-    prmTransformationBase.h
-    prmTransformationFixed.h
-    prmTransformationDynamic.h
-    prmTransformationManager.h
+     prmTransformationBase.h
+     prmTransformationFixed.h
+     prmTransformationDynamic.h
+     prmTransformationManager.h
 
-    prmMaskedVector.h
-    prmActuatorState.h
-    prmRobotState.h
-    prmActuatorParameters.h
-    prmGainParameters.h
+     prmMaskedVector.h
+     prmActuatorState.h
+     prmRobotState.h
+     prmActuatorParameters.h
+     prmGainParameters.h
 
-    prmCollaborativeControlForce.h
-    )
+     prmCollaborativeControlForce.h
+     )
 
-CISST_ADD_LIBRARY_TO_PROJECT(cisstLibs)
+cisst_add_library (LIBRARY cisstParameterTypes
+                   DEPENDENCIES cisstCommon cisstVector cisstOSAbstraction cisstMultiTask cisstRobot
+                   SOURCE_FILES ${SOURCE_FILES}
+                   HEADER_FILES ${HEADER_FILES}
+                   )
 
 # Python wrappers
 if (CISST_HAS_SWIG_PYTHON)
-  cisst_add_swig_module(MODULE cisstParameterTypes
-                        INTERFACE_DIRECTORY ../../include/cisstParameterTypes
-			CISST_LIBRARIES cisstParameterTypes
-                                        cisstMultiTask
-					cisstOSAbstraction
-					cisstVector
-					cisstCommon)
+  cisst_add_swig_module (MODULE cisstParameterTypes
+                         INTERFACE_DIRECTORY ../../include/cisstParameterTypes
+                         CISST_LIBRARIES cisstParameterTypes
+                                         cisstMultiTask
+                                         cisstOSAbstraction
+                                         cisstVector
+                                         cisstCommon)
 endif (CISST_HAS_SWIG_PYTHON)
