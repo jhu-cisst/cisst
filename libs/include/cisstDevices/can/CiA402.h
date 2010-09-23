@@ -22,9 +22,23 @@ namespace CiA402{
 	CiA301::SDO( CiA301::SDO::INITIATE_WRITE, 0x6040, 0, word ){}
    };
    
+   struct StatusWord : public CiA301::SDO {
+      enum Word
+	{
+	   NOT_READY_TO_SWITCH_ON = 0,
+	   SWITCH_ON_DISABLED     = 1,
+	   READY_TO_SWITCH_ON     = 2,
+	   OPERATION_DISABLED     = 3,
+	   OPERATION_ENABLED      = 4,
+	   QUICK_STOP_ACTIVE      = 5,
+	   FAULT                  = 6
+	};
+   };
+   
    struct OperationMode : public CiA301::SDO {
       enum Mode
 	{	
+           IDLE     = 0,
 	   POSITION = 1,
 	   VELOCITY = 3,
 	   TORQUE   = 4,
