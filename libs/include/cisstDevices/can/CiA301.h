@@ -30,7 +30,7 @@ namespace CiA301{
       
       CiA301::Object::DataField    data;
       
-      Object(){}	   
+      Object(){} 
       Object( const CiA301::Object::DataField&  data ) : data( data ) {}
 
       friend std::ostream& operator<<( std::ostream& os, 

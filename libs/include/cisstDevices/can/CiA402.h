@@ -33,6 +33,8 @@ namespace CiA402{
 	   QUICK_STOP_ACTIVE      = 5,
 	   FAULT                  = 6
 	};
+      StatusWord() :
+	CiA301::SDO( CiA301::SDO::INITIATE_READ, 0x6041, 0, 0 ){}
    };
    
    struct OperationMode : public CiA301::SDO {
@@ -92,6 +94,8 @@ namespace CiA402{
 	};
       PVTBuffer( CiA402::PVTBuffer::Config config ) :
 	CiA301::SDO( CiA301::SDO::INITIATE_WRITE, 0x60C4, config, 0 ){}
+      PVTBuffer( CiA402::PVTBuffer::Config config, int val ) :
+	CiA301::SDO( CiA301::SDO::INITIATE_READ, 0x60C4, config, val ){}
    };
    
    
