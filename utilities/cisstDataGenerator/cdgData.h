@@ -86,6 +86,9 @@ public:
     void GenerateCode(std::ostream & output, const std::string & header) const;
 
 protected:
+    bool StripComments(std::istream & input, std::ostream & content,
+                       size_t & errorLine, std::string & errorMessage);
+
     void GenerateStandardMethodsHeader(std::ostream & output) const;
 
     void GenerateSerializeRawCode(std::ostream & output) const;

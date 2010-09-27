@@ -25,12 +25,20 @@ http://www.cisst.org/cisst/license.txt.
 
 void cdgData::ParseFile(std::ifstream & input, const std::string & filename)
 {
-    std::string line;
+    std::stringstream content;
+    size_t errorLine;
+    std::string errorMessage;
+    if (!this->StripComments(input, content, errorLine, errorMessage)) {
+        std::cerr << filename << ":" << errorLine << ": error: " << errorMessage << std::endl;
+        return;
+    }
+
     cmnTokenizer tokenizer;
+    std::string line;
     size_t lineNumber = 0;
-    while (!input.eof()) {
+    while (!content.eof()) {
         lineNumber++;
-        getline(input, line);
+        getline(content, line);
         tokenizer.Parse(line);
         if (tokenizer.GetNumTokens() > 1) {
             const char * const * tokens = tokenizer.GetTokensArray();
@@ -74,7 +82,8 @@ void cdgData::ParseFile(std::ifstream & input, const std::string & filename)
                 typeDef.Name = *tokens;
                 Typedefs.push_back(typeDef);
             } else {
-                std::cout << filename << ":" << lineNumber << ": error: Invalid keyword \"" << *tokens << "\"" << std::endl;
+                std::cerr << filename << ":" << lineNumber << ": error: Invalid keyword \"" << *tokens
+                          << "\"" << std::endl;
             }
         }
     }
@@ -86,6 +95,91 @@ void cdgData::ParseFile(std::ifstream & input, const std::string & filename)
             }
         }
     }
+}
+
+
+bool cdgData::StripComments(std::istream & input, std::ostream & content,
+                            size_t & errorLine, std::string & errorMessage)
+{
+    // this implementation is not the fastest possible but it should
+    // be fine since it should be used on rather small files
+    bool cCommentOpened = false;
+    std::string line;
+    size_t lineNumber = 0;
+    size_t lineCommentOpened;
+    size_t slashStarPos, starSlashPos, slashSlashPos;
+    bool stripSlashSlash, foundWrongStarSlash;
+    while (!input.eof()) {
+        lineNumber++;
+        getline(input, line);
+        // if there is a C comment opened in previous line, try to find the end of it
+        if (cCommentOpened) {
+            // look for star slash comment close
+            slashStarPos = line.find("*/"); 
+            if (slashStarPos != std::string::npos) {
+                line.replace(0, starSlashPos, starSlashPos + 1, ' '); // replace by n spaces
+                cCommentOpened = false;
+            } else {
+                line.resize(0);
+            }
+        }
+
+        // search for any form of comment in code
+        do {
+            // find first of slash star or slash slash comment
+            stripSlashSlash = false;
+            slashSlashPos = line.find("//");
+            // if slash slash comes first, just remove the end of line
+            if (slashSlashPos != std::string::npos) {
+                slashStarPos = line.find("/*");
+                if (slashStarPos != std::string::npos) {
+                    if (slashSlashPos < slashStarPos) {
+                        stripSlashSlash = true;
+                    }
+                } else {
+                    stripSlashSlash = true;
+                }
+            }
+            if (stripSlashSlash) {
+                line.resize(slashSlashPos);
+            }
+            // now look for slash star and star slash
+            slashStarPos = line.find("/*");
+            starSlashPos = line.find("*/");
+            foundWrongStarSlash = false;
+            if (slashStarPos != std::string::npos) {
+                if (starSlashPos != std::string::npos) {
+                    if (starSlashPos < slashStarPos) {
+                        foundWrongStarSlash = true;
+                    } else {
+                        line.replace(slashStarPos, starSlashPos - slashStarPos + 2, starSlashPos - slashStarPos + 2, ' ');
+                    }
+                } else {
+                    cCommentOpened = true;
+                    lineCommentOpened = lineNumber;
+                    line.resize(slashStarPos);
+                }
+            } else {
+                if (starSlashPos != std::string::npos) {
+                    foundWrongStarSlash = true;
+                }
+            }
+            if (foundWrongStarSlash) {
+                errorLine = lineNumber;
+                errorMessage = "Found comment closing \"*/\" before opening \"/*\"";
+                return false;
+            }
+        } while ((slashStarPos != std::string::npos) &&
+                 (slashSlashPos != std::string::npos) &&
+                 !cCommentOpened);
+        content << line << std::endl;
+    }
+    if (cCommentOpened) {
+        errorLine = lineCommentOpened;
+        errorMessage = "Comment opened with \"/*\" was never closed";
+        return false;
+    }
+    return true;
 }
 
 
@@ -104,7 +198,7 @@ void cdgData::GenerateHeader(std::ostream & output) const
            << "    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, " << DefaultLogLoD << ");" << std::endl;
     {
         output << " public:" << std::endl
-               << "    typedef mtsGenericObject BaseType;" << std::endl; 
+               << "    typedef mtsGenericObject BaseType;" << std::endl;
         for (index = 0; index < Typedefs.size(); index++) {
             Typedefs[index].GenerateHeader(output);
         }

@@ -6,5 +6,8 @@ default-log-lod CMN_LOG_LOD_RUN_VERBOSE
 
 typedef vctFixedSizeVector<double, 2> AmplitudesType
 
-member double Sine signal
+/* comment //
+   some other stuff
+*/
+member /* comment 1 */double/* // */Sine signal
 member AmplitudesType Amplitudes desired and actual amplitude
