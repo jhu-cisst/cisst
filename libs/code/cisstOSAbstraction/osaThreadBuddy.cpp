@@ -40,7 +40,9 @@ http://www.cisst.org/cisst/license.txt.
 #elif (CISST_OS == CISST_WINDOWS)
     #include <windows.h>
 #elif (CISST_OS == CISST_QNX)
-    #include <time.h>
+    #include <sys/siginfo.h>
+    #include <sys/neutrino.h>
+# include <time.h>
 #else
     #include <sys/time.h>
     #include <sys/select.h>
@@ -200,9 +202,11 @@ struct osaThreadBuddyInternals {
     char Name[6];
     osaThreadBuddyInternals() : WaitTimer(NULL) {}
 #elif (CISST_OS == CISST_QNX)
-    struct timespec DueTime;
+    //struct timespec DueTime;
     bool IsSuspended;
-    char Name[6];
+    //char Name[6];
+    int coid;          // connection id
+    int chid;          // channel id
 #else
     struct timeval DueTime;
     bool IsSuspended;
@@ -271,12 +275,36 @@ void osaThreadBuddy::Create(const char *name, double period, int CMN_UNUSED(stac
     }
 
 #elif (CISST_OS == CISST_QNX)
-    Data->DueTime.tv_sec = 0;
-    Data->DueTime.tv_nsec = 0;
-    Data->IsSuspended = false;
-    for (unsigned int i = 0; i < sizeof(Data->Name); i++) Data->Name[i] = name[i];
-    Data->Name[sizeof(Data->Name)-1] = 0;
 
+   timer_t timerid;                     // timer ID
+   struct itimerspec timer;             // the timer data struct
+   struct sigevent event;               // event to deliver
+   
+   // create a communication channel (maintain thread priority)
+   Data->chid = ChannelCreate( _NTO_CHF_FIXED_PRIORITY );
+   if( Data->chid == -1 )
+     { CMN_LOG_INIT_ERROR << "Channel not created" << std::endl; }
+   
+   // create a connection on the channel
+   Data->coid = ConnectAttach( 0, 0, Data->chid, 0, 0 );
+   if( Data->coid == -1 )
+     { CMN_LOG_INIT_ERROR << "Connection not created" << std::endl; }
+   
+   // set the pulse event
+   SIGEV_PULSE_INIT( &event, Data->coid, SIGEV_PULSE_PRIO_INHERIT, 1, 0 );
+   
+   // create the timer for the pulse event
+   if( timer_create( CLOCK_REALTIME, &event, &timerid ) == -1 )
+     { CMN_LOG_INIT_ERROR << "Timer not created" << std::endl; }
+
+   timer.it_value.tv_sec = 0;          // initial event (s)
+   timer.it_value.tv_nsec = period;    // initial event (ns)
+   timer.it_interval.tv_sec = 0;       // periodic event (s)
+   timer.it_interval.tv_nsec = period; // periodic event (ns)
+
+   // start the timer
+   timer_settime( timerid, 0, &timer, NULL );
+   
 #else // default unix
     Data->DueTime.tv_sec = 0;
     Data->DueTime.tv_usec = 0;
@@ -318,23 +346,10 @@ void osaThreadBuddy::WaitForPeriod(void)
     WaitForSingleObject(Data->WaitTimer, INFINITE);
 
 #elif (CISST_OS == CISST_QNX)
-    /* MJUNG: Here nanosleep was used to replace pselect() but there is another function:
-       nanospin() - BUSY-WAIT WITHOUT THREAD BLOCKING for a period of time.
-       (cf. nanosleep() - SUSPEND a thread until a timeout or signal occurs) 
-       
-       Refer to the folowing note: 
 
-       The nanospin() functions are designed for use with hardware that requires short 
-       time delays between accesses. You should use them to delay only for times less 
-       than a few milliseconds. For longer delays, use the POSIX timer_*() functions. 
-       (http://www.qnx.com/developers/docs/6.4.1/neutrino/lib_ref/n/nanospin.html)
-    */
-    struct timespec timeout;
-    timeout.tv_sec = 0;
-    timeout.tv_nsec = (long)(Period);
-    if (nanosleep(&timeout, NULL) != 0) {
-        CMN_LOG_RUN_WARNING << "WaitForPeriod: nanosleep() was interrupted by a signal" << std::endl;
-    }
+   // wait to receive the next pulse
+   struct _pulse pulse;
+   MsgReceivePulse( Data->chid, &pulse, sizeof(pulse), NULL );
 
 #else // default unix
     struct timespec timeout;
@@ -346,6 +361,7 @@ void osaThreadBuddy::WaitForPeriod(void)
 
 void osaThreadBuddy::WaitForRemainingPeriod(void)
 {
+   
 #if (CISST_OS == CISST_LINUX_RTAI)
     if (IsPeriodic())
         rt_task_wait_period();
@@ -405,35 +421,12 @@ void osaThreadBuddy::WaitForRemainingPeriod(void)
     } while (Data->IsSuspended);
 
 #elif (CISST_OS == CISST_QNX)
-    if (!IsPeriodic())
-        return;
-    double elapsedTime, timeRemaining;
-    struct timespec timeNow, timeLater;
-    struct timespec timeSleep;
-    do {
-        if (Data->DueTime.tv_nsec == 0 && Data->DueTime.tv_sec == 0) {
-            // this is the first time this is being called;
-            if (clock_gettime(CLOCK_REALTIME, &Data->DueTime) == -1) {
-                CMN_LOG_RUN_ERROR << "WaitForRemainingPeriod(): failed to get time information" << std::endl;
-            }
-        }
-        if (clock_gettime(CLOCK_REALTIME, &timeNow) == -1) {
-            CMN_LOG_RUN_ERROR << "WaitForRemainingPeriod(): failed to get time information" << std::endl;
-        }
-        elapsedTime = (double)(1000 * 1000 * 1000 * (timeNow.tv_sec - Data->DueTime.tv_sec) 
-                + (timeNow.tv_nsec - Data->DueTime.tv_nsec)); // in nsec
-        timeRemaining = Period - elapsedTime;
-        timeSleep.tv_sec = 0;
-        timeSleep.tv_nsec = (long)timeRemaining;
-        if (nanosleep(&timeSleep, NULL) != 0) {
-            CMN_LOG_RUN_WARNING << "WaitForPeriod: nanosleep() was interrupted by a signal" << std::endl;
-        }
-        if (clock_gettime(CLOCK_REALTIME, &timeLater) == -1) {
-            CMN_LOG_RUN_ERROR << "WaitForRemainingPeriod(): failed to get time information" << std::endl;
-        }
-        Data->DueTime.tv_sec = timeLater.tv_sec;
-        Data->DueTime.tv_nsec = timeLater.tv_nsec;
-    } while (Data->IsSuspended);
+
+   if (!IsPeriodic()) { return; }
+   
+   // wait to receive the next pulse
+   struct _pulse pulse;
+   MsgReceivePulse( Data->chid, &pulse, sizeof(pulse), NULL );
 
 #else // default unix
     if (!IsPeriodic())
