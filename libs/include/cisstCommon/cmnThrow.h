@@ -30,6 +30,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _cmnThrow_h
 #define _cmnThrow_h
 
+
 #include <cisstCommon/cmnLogger.h>
 
 #include <stdexcept>
@@ -45,7 +46,7 @@ http://www.cisst.org/cisst/license.txt.
   that if the exception is of type \c std::exception, the message is
   logged (using the \c what method).<br> This function attempts to
   dynamically cast the exception.  If the cast succeeds, the cmnThrow
-  will log the message using #CMN_LOG (level of detail 1).  If the
+  will log the message using #CMN_LOG (level of detail).  If the
   cast fails, cmnThrow will log a less informative message anyway.<br>
   Once the message has been logged, cmnThrow simply uses \c throw to
   throw the exception.
@@ -73,21 +74,21 @@ http://www.cisst.org/cisst/license.txt.
   std::exception but this is not a requirement.
  */
 template <class _exceptionType>
-inline void cmnThrow(const _exceptionType & except) throw(_exceptionType) {
+inline void cmnThrow(const _exceptionType & except, cmnLogLoD lod = CMN_LOG_LOD_INIT_ERROR) throw(_exceptionType) {
     // try to create an std::exception pointer
     const std::exception * stdExcept = dynamic_cast<const std::exception *>(&except);
     if (stdExcept) {
-        CMN_LOG_INIT_ERROR << "cmnThrow with std::exception ("
-                           << stdExcept->what()
-                           << ")"
-                           << std::endl;
+        CMN_LOG(lod) << "cmnThrow with std::exception ("
+                     << stdExcept->what()
+                     << ")"
+                     << std::endl;
     } else {
-        CMN_LOG_INIT_ERROR << "cmnThrow with non std::exception"
-                           << std::endl;
+        CMN_LOG(lod) << "cmnThrow with non std::exception"
+                     << std::endl;
     }
 #ifdef CMN_THROW_DOES_ABORT
-    CMN_LOG_INIT_ERROR << "cmnThrow is configured to abort() (CMN_THROW_DOES_ABORT defined)"
-                       << std::endl;
+    CMN_LOG(lod) << "cmnThrow is configured to abort() (CMN_THROW_DOES_ABORT defined)"
+                 << std::endl;
     std::abort();
 #else
     throw except;
@@ -108,12 +109,12 @@ inline void cmnThrow(const _exceptionType & except) throw(_exceptionType) {
     \sa cmnThrow and #CMN_ASSERT
  */
 //@{
-inline void cmnThrow(const std::string & message) throw(std::runtime_error) {
-    cmnThrow(std::runtime_error(message));
+inline void cmnThrow(const std::string & message, cmnLogLoD lod = CMN_LOG_LOD_INIT_ERROR) throw(std::runtime_error) {
+    cmnThrow(std::runtime_error(message), lod);
 }
 
-inline void cmnThrow(const char * message) throw(std::runtime_error) {
-    cmnThrow(std::runtime_error(std::string(message)));
+inline void cmnThrow(const char * message, cmnLogLoD lod = CMN_LOG_LOD_INIT_ERROR) throw(std::runtime_error) {
+    cmnThrow(std::runtime_error(std::string(message)), lod);
 }
 //@}
 
