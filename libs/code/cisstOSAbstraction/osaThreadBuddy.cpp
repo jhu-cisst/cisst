@@ -22,6 +22,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <iostream>
 
 #include <cisstOSAbstraction/osaThreadBuddy.h>
+#include <cisstOSAbstraction/osaTimeServer.h>
+#include <cisstCommon/cmnUnits.h>
 #include <cisstCommon/cmnLogger.h>
 
 #if (CISST_OS == CISST_LINUX_RTAI)
@@ -228,10 +230,26 @@ osaThreadBuddy::~osaThreadBuddy() {
 #if (CISST_OS == CISST_LINUX_RTAI)
 void osaThreadBuddy::Create(const char *name, double period, int stack_size)
 #else
-void osaThreadBuddy::Create(const char *name, double period, int CMN_UNUSED(stack_size))
+void osaThreadBuddy::Create(const char *name, double period, int stack_size )
 #endif
 {
-    Period = period;
+   osaAbsoluteTime tv;
+   tv.sec = (long)( period * cmn_ns );               // number of seconds
+   tv.nsec = (long)( period - tv.sec*1000000000 );   // remainder
+
+   Create( name, tv, stack_size );
+
+}
+
+   
+#if (CISST_OS == CISST_LINUX_RTAI)
+void osaThreadBuddy::Create(const char *name, const osaAbsoluteTime& tv, int stack_size)
+#else
+void osaThreadBuddy::Create(const char *name, const osaAbsoluteTime& tv, int CMN_UNUSED(stack_size))
+#endif
+{
+   
+    Period = tv.sec*1000000000 + tv.nsec;
 
 #if (CISST_OS == CISST_LINUX_RTAI)
     // nam2num converts the character string 'name' to a long, using just the first
@@ -297,10 +315,10 @@ void osaThreadBuddy::Create(const char *name, double period, int CMN_UNUSED(stac
    if( timer_create( CLOCK_REALTIME, &event, &timerid ) == -1 )
      { CMN_LOG_INIT_ERROR << "Timer not created" << std::endl; }
 
-   timer.it_value.tv_sec = 0;          // initial event (s)
-   timer.it_value.tv_nsec = period;    // initial event (ns)
-   timer.it_interval.tv_sec = 0;       // periodic event (s)
-   timer.it_interval.tv_nsec = period; // periodic event (ns)
+   timer.it_value.tv_sec = tv.sec;      // initial event (s)
+   timer.it_value.tv_nsec = tv.nsec;    // initial event (ns)
+   timer.it_interval.tv_sec = tv.sec;   // periodic event (s)
+   timer.it_interval.tv_nsec = tv.nsec; // periodic event (ns)
 
    // start the timer
    timer_settime( timerid, 0, &timer, NULL );

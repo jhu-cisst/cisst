@@ -28,8 +28,10 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsTaskPeriodic_h
 #define _mtsTaskPeriodic_h
 
+#include <cisstCommon/cmnUnits.h>
 #include <cisstMultiTask/mtsTaskContinuous.h>
 #include <cisstOSAbstraction/osaThreadBuddy.h>
+#include <cisstOSAbstraction/osaTimeServer.h>
 
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
@@ -60,8 +62,9 @@ protected:
 	osaThreadBuddy ThreadBuddy;
 
 	/*! The period of the task, in seconds. */
-	double Period;
-
+        double Period;
+        osaAbsoluteTime atPeriod;
+   
 	/*! True if the task is hard real time. It is always false for non-real
 	  time systems. */
 	bool IsHardRealTime;
@@ -106,6 +109,12 @@ public:
                     unsigned int sizeStateTable = 256,
                     bool newThread = true);
 
+   mtsTaskPeriodic(const std::string & name,
+                    const osaAbsoluteTime& periodicity,
+                    bool isHardRealTime = false,
+                    unsigned int sizeStateTable = 256,
+                    bool newThread = true);
+
 	/*! Default Destructor. */
 	virtual ~mtsTaskPeriodic();
 
@@ -117,8 +126,8 @@ public:
 
     /********************* Methods for task period and overrun ************/
 
-	/*! Return the periodicity of the task, in seconds */
-	double GetPeriodicity(void) const { return Period; }
+       /*! Return the periodicity of the task, in seconds */
+       double GetPeriodicity(void) const { return atPeriod.sec + atPeriod.nsec*cmn_ns; }
 
     /*! Return true if thread is periodic.  Currently, returns true if
       the thread was created with a period > 0. */

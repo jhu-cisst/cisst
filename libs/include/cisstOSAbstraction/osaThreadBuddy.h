@@ -29,6 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _osaThreadBuddy_h
 
 #include <cisstCommon/cmnPortability.h>
+#include <cisstOSAbstraction/osaTimeServer.h>
 #include <cisstOSAbstraction/osaThread.h>
 
 // Always include last
@@ -84,6 +85,7 @@ public:
     \param stack_size The stack size allocated to the thread. A
       default value of 8Kb is used. */
     void Create(const char *name, double period, int stack_size = 1024*256);
+    void Create(const char *name, const osaAbsoluteTime& tv, int stack_size = 1024*256 );
 
     /*! Delete the thread buddy. */
     void Delete();

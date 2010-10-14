@@ -54,7 +54,7 @@ void * mtsTaskPeriodic::RunInternal(void *data)
 void mtsTaskPeriodic::StartupInternal(void) {
     CMN_LOG_CLASS_INIT_VERBOSE << "Starting StartupInternal (periodic) for " << Name << std::endl;
     // user defined initialization, find commands from associated resource interfaces
-    ThreadBuddy.Create(GetName().c_str(), cmnInternalTo_ns(Period)); // convert to nano seconds
+    ThreadBuddy.Create(GetName().c_str(), atPeriod); // convert to nano seconds
 
     // Call base class StartupInternal, which also calls user-supplied Startup.
     BaseType::StartupInternal();
@@ -95,16 +95,31 @@ void mtsTaskPeriodic::StartInternal(void)
 /********************* Task constructor and destructor *****************/
 
 mtsTaskPeriodic::mtsTaskPeriodic(const std::string & name, double periodicityInSeconds,
-                                 bool isHardRealTime, unsigned int sizeStateTable,
-                                 bool newThread):
+ 				 bool isHardRealTime, unsigned int sizeStateTable,
+				 bool newThread):
     mtsTaskContinuous(name, sizeStateTable, newThread),
     ThreadBuddy(),
-	Period(periodicityInSeconds),
+    Period(periodicityInSeconds),
     IsHardRealTime(isHardRealTime)
 {
-    CMN_ASSERT(Period > 0);
+   atPeriod.sec = (long)floor( periodicityInSeconds );
+   atPeriod.nsec = (long)(( periodicityInSeconds - atPeriod.sec )*1000000000 );
+   CMN_ASSERT(Period > 0);
 }
 
+mtsTaskPeriodic::mtsTaskPeriodic( const std::string & name, 
+				  const osaAbsoluteTime& period,
+				  bool isHardRealTime, 
+				  unsigned int sizeStateTable,
+				  bool newThread ):
+    mtsTaskContinuous(name, sizeStateTable, newThread),
+    ThreadBuddy(),
+    Period( period.sec + period.nsec * cmn_ns ),
+    atPeriod( period ),
+    IsHardRealTime(isHardRealTime)
+{
+   CMN_ASSERT( GetPeriodicity() > 0 );
+}
 
 mtsTaskPeriodic::~mtsTaskPeriodic() {
     CMN_LOG_CLASS_RUN_DEBUG << "mtsTaskPeriodic destructor: deleting task " << Name << std::endl;
