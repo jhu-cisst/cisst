@@ -29,7 +29,6 @@ http://www.cisst.org/cisst/license.txt.
 /*************************************/
 
 CMN_IMPLEMENT_SERVICES(svlFilterSourceTextFile)
-CMN_IMPLEMENT_SERVICES_TEMPLATED(svlFilterSourceTextFile_FileInfo)
 
 svlFilterSourceTextFile::svlFilterSourceTextFile() :
     svlFilterSourceBase(false),  // manual timestamp management
@@ -264,7 +263,7 @@ int svlFilterSourceTextFile::Process(svlProcInfo* procInfo, svlSample* &syncOutp
 
             // Holding lines not having current samples
             for (r = 0; r < file_count; r ++) {
-                if ((Timestamps[r] - timestamp) > 0.02) HoldLine[r] = true;
+                if ((Timestamps[r] - timestamp) > 0.01) HoldLine[r] = true;
                 else HoldLine[r] = false;
             }
 
@@ -331,6 +330,33 @@ void svlFilterSourceTextFile::CreateInterfaces()
         provided->AddCommandRead (&svlFilterSourceTextFile::GetColumns,    this, "GetColumns");
         provided->AddCommandVoid (&svlFilterSourceTextFile::RemoveFiles,   this, "RemoveFiles");
     }
+}
+
+
+/***********************************************/
+/*** svlFilterSourceTextFile::FileInfo class ***/
+/***********************************************/
+
+CMN_IMPLEMENT_SERVICES_TEMPLATED(svlFilterSourceTextFile_FileInfo)
+
+svlFilterSourceTextFile::FileInfo::FileInfo() :
+    timestamp_column(-1),
+    timestamp_unit(1.0)
+{
+}
+
+svlFilterSourceTextFile::FileInfo::FileInfo(const std::string & _filepath, const int & _timestamp_column, const double & _timestamp_unit) :
+    filepath(_filepath),
+    timestamp_column(_timestamp_column),
+    timestamp_unit(_timestamp_unit)
+{
+}
+
+void svlFilterSourceTextFile::FileInfo::Assign(const std::string & _filepath, const int & _timestamp_column, const double & _timestamp_unit)
+{
+    filepath = _filepath;
+    timestamp_column = _timestamp_column;
+    timestamp_unit = _timestamp_unit;
 }
 
 

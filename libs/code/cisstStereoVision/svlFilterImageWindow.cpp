@@ -360,8 +360,8 @@ int svlFilterImageWindow::Initialize(svlSample* syncInput, svlSample* &syncOutpu
     StopThread = false;
     WindowManager->ResetInitEvent();
     Thread->Create<CWindowManagerThreadProc, svlFilterImageWindow*>(ThreadProc,
-                                                                &CWindowManagerThreadProc::Proc,
-                                                                this);
+                                                                    &CWindowManagerThreadProc::Proc,
+                                                                    this);
     WindowManager->WaitForInitEvent();
 
     syncOutput = syncInput;

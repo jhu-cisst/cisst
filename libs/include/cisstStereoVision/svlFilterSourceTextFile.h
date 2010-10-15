@@ -33,11 +33,16 @@ class CISST_EXPORT svlFilterSourceTextFile : public svlFilterSourceBase
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
 public:
-    typedef struct _FileInfo {
+    struct FileInfo
+    {
+        FileInfo();
+        FileInfo(const std::string & _filepath, const int & _timestamp_column, const double & _timestamp_unit);
+        void Assign(const std::string & _filepath, const int & _timestamp_column, const double & _timestamp_unit);
+
         std::string filepath;
         int timestamp_column;
         double timestamp_unit;
-    } FileInfo;
+    };
 
 public:
     svlFilterSourceTextFile();
