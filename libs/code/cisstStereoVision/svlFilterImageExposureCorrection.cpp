@@ -106,6 +106,7 @@ int svlFilterImageExposureCorrection::Process(svlProcInfo* procInfo, svlSample* 
 {
     syncOutput = syncInput;
     _SkipIfAlreadyProcessed(syncInput, syncOutput);
+    _SkipIfDisabled();
 
     svlSampleImage* img = dynamic_cast<svlSampleImage*>(syncInput);
     const unsigned int videochannels = img->GetVideoChannels();

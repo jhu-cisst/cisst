@@ -55,6 +55,7 @@ int svlFilterImageColorConverter::Process(svlProcInfo* procInfo, svlSample* sync
 {
     syncOutput = syncInput;
     _SkipIfAlreadyProcessed(syncInput, syncOutput);
+    _SkipIfDisabled();
 
     if (InputColorSpace == OutputColorSpace) return SVL_OK;
 

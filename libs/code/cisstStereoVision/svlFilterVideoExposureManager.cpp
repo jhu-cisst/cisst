@@ -113,6 +113,7 @@ int svlFilterVideoExposureManager::Process(svlProcInfo* procInfo, svlSample* syn
 {
     syncOutput = syncInput;
     _SkipIfAlreadyProcessed(syncInput, syncOutput);
+    _SkipIfDisabled();
 
     if (SourceFilter) {
         _OnSingleThread(procInfo)

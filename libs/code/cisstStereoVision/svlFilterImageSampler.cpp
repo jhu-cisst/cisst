@@ -278,6 +278,7 @@ int svlFilterImageSampler::Initialize(svlSample* syncInput, svlSample* &syncOutp
 int svlFilterImageSampler::Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput)
 {
     syncOutput = syncInput;
+    _SkipIfDisabled();
 
     _OnSingleThread(procInfo)
     {

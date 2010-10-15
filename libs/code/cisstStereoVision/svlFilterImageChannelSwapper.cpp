@@ -50,6 +50,7 @@ int svlFilterImageChannelSwapper::Process(svlProcInfo* procInfo, svlSample* sync
 {
     syncOutput = syncInput;
     _SkipIfAlreadyProcessed(syncInput, syncOutput);
+    _SkipIfDisabled();
 
     svlSampleImage* img = dynamic_cast<svlSampleImage*>(syncInput);
     unsigned int i, videochannels = img->GetVideoChannels();

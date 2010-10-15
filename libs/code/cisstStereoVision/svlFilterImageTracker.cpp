@@ -180,6 +180,7 @@ int svlFilterImageTracker::Initialize(svlSample* syncInput, svlSample* &syncOutp
 int svlFilterImageTracker::Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput)
 {
     syncOutput = syncInput;
+    _SkipIfDisabled();
 
     // Skipping frames (if requested)
     if (FrameCount < FramesToSkip) {

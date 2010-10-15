@@ -78,6 +78,7 @@ int svlFilterImageCenterFinder::Process(svlProcInfo* procInfo, svlSample* syncIn
 {
     syncOutput = syncInput;
     _SkipIfAlreadyProcessed(syncInput, syncOutput);
+    _SkipIfDisabled();
 
     svlSampleImage* image  = dynamic_cast<svlSampleImage*>(syncInput);
     unsigned int i, j, width, height, vch, videochannels = image->GetVideoChannels();

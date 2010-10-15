@@ -126,6 +126,7 @@ int svlFilterStereoImageOptimizer::Process(svlProcInfo* procInfo, svlSample* syn
 {
     syncOutput = syncInput;
     _SkipIfAlreadyProcessed(syncInput, syncOutput);
+    _SkipIfDisabled();
 
     unsigned int idx;
     svlSampleImage* img = dynamic_cast<svlSampleImage*>(syncInput);

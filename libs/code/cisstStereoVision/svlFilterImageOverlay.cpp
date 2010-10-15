@@ -115,6 +115,7 @@ int svlFilterImageOverlay::Initialize(svlSample* syncInput, svlSample* &syncOutp
 int svlFilterImageOverlay::Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput)
 {
     syncOutput = syncInput;
+    _SkipIfDisabled();
 
     _OnSingleThread(procInfo) {
         _SampleCacheMap::iterator itersample;

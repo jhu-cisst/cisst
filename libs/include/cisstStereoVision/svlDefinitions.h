@@ -50,6 +50,9 @@ http://www.cisst.org/cisst/license.txt.
 #define _SkipIfAlreadyProcessed(input, output) \
             if(!IsNewSample(input)){syncOutput=output;return SVL_ALREADY_PROCESSED;}
 
+#define _SkipIfDisabled() \
+            if(IsDisabled())return SVL_OK;
+
 #define STR2FOURCC(fcc_string) (reinterpret_cast<const unsigned int*>(fcc_string)[0])
 
 #define MIN3(a, b, c)       (a <= b) ? \

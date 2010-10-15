@@ -376,10 +376,8 @@ IReqFilterLightSourceBuddy::IReqFilterLightSourceBuddy(const std::string& name, 
     if (Owner) {
         mtsInterfaceRequired* required = Owner->AddInterfaceRequired(name, MTS_OPTIONAL);
         if (required) {
-            required->AddFunction("SetEnable",       SetEnable);
             required->AddFunction("SetCalibration",  SetCalibration);
             required->AddFunction("SetLightBalance", SetLightBalance);
-            required->AddFunction("GetEnable",       GetEnable);
             required->AddFunction("GetCalibration",  GetCalibration);
             required->AddFunction("GetLightBalance", GetLightBalance);
         }

@@ -396,10 +396,8 @@ public:
     IReqFilterLightSourceBuddy(const std::string& name, mtsComponent* owner);
     ~IReqFilterLightSourceBuddy();
 
-    mtsFunctionWrite SetEnable;
     mtsFunctionWrite SetCalibration;
     mtsFunctionWrite SetLightBalance;
-    mtsFunctionRead  GetEnable;
     mtsFunctionRead  GetCalibration;
     mtsFunctionRead  GetLightBalance;
 

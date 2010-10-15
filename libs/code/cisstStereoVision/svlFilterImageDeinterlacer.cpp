@@ -52,6 +52,7 @@ int svlFilterImageDeinterlacer::Process(svlProcInfo* procInfo, svlSample* syncIn
 {
     syncOutput = syncInput;
     _SkipIfAlreadyProcessed(syncInput, syncOutput);
+    _SkipIfDisabled();
 
     svlSampleImage* img = dynamic_cast<svlSampleImage*>(syncInput);
     unsigned int videochannels = img->GetVideoChannels();

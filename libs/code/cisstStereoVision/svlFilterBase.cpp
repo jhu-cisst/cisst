@@ -45,10 +45,12 @@ svlFilterBase::svlFilterBase() :
     mtsComponent(),
     FrameCounter(0),
     StateTable(3, "StateTable"),
+    Enabled(true),
+    EnabledInternal(true),
     Initialized(false),
     Running(false),
-    PrevInputTimestamp(-1.0),
-    AutoType(false)
+    AutoType(false),
+    PrevInputTimestamp(-1.0)
 {
 }
 
@@ -198,6 +200,39 @@ int svlFilterBase::SetOutputType(const std::string &outputname, svlStreamType ty
 void svlFilterBase::SetAutomaticOutputType(bool autotype)
 {
     AutoType = autotype;
+}
+
+void svlFilterBase::SetEnable(const bool & enable)
+{
+    Enabled = enable;
+    if (!Running) EnabledInternal = enable;
+}
+
+void svlFilterBase::GetEnable(bool & enable) const
+{
+    enable = EnabledInternal;
+}
+
+void svlFilterBase::Enable()
+{
+    Enabled = true;
+    if (!Running) EnabledInternal = true;
+}
+
+void svlFilterBase::Disable()
+{
+    Enabled = false;
+    if (!Running) EnabledInternal = false;
+}
+
+bool svlFilterBase::IsEnabled() const
+{
+    return EnabledInternal;
+}
+
+bool svlFilterBase::IsDisabled() const
+{
+    return !EnabledInternal;
 }
 
 int svlFilterBase::UpdateTypes(svlFilterInput & CMN_UNUSED(input), svlStreamType CMN_UNUSED(type))

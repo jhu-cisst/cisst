@@ -115,6 +115,7 @@ int svlFilterSplitter::Initialize(svlSample* syncInput, svlSample* &syncOutput)
 int svlFilterSplitter::Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput)
 {
     syncOutput = syncInput;
+    _SkipIfDisabled();
 
     _OnSingleThread(procInfo) {
         // Non-trunk outputs copy the input sample into their buffers

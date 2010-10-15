@@ -50,38 +50,48 @@ public:
 
     bool IsInitialized(void) const;
     bool IsRunning(void) const;
+
     unsigned int GetFrameCounter(void) const;
 
-    svlFilterInput* GetInput(void) const;
-    svlFilterOutput* GetOutput(void) const;
-    svlFilterInput* GetInput(const std::string &inputname) const;
-    svlFilterOutput* GetOutput(const std::string &outputname) const;
+    svlFilterInput  * GetInput(void) const;
+    svlFilterOutput * GetOutput(void) const;
+    svlFilterInput  * GetInput(const std::string &inputname) const;
+    svlFilterOutput * GetOutput(const std::string &outputname) const;
+
+    void SetEnable(const bool & enable);
+    void GetEnable(bool & enable) const;
+    void Enable();
+    void Disable();
+    bool IsEnabled() const;
+    bool IsDisabled() const;
 
 protected:
     unsigned int FrameCounter;
     mtsStateTable StateTable;
 
-    svlFilterInput * AddInput(const std::string & inputName, bool trunk = true);
+    svlFilterInput  * AddInput(const std::string & inputName, bool trunk = true);
     svlFilterOutput * AddOutput(const std::string & outputName, bool trunk = true);
     int AddInputType(const std::string &inputname, svlStreamType type);
     int SetOutputType(const std::string &outputname, svlStreamType type);
     void SetAutomaticOutputType(bool autotype);
 
-    virtual int UpdateTypes(svlFilterInput &input, svlStreamType type);
-    virtual int Initialize(svlSample* syncInput, svlSample* &syncOutput) = 0;
-    virtual int OnStart(unsigned int procCount);
-    virtual int Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput) = 0;
+    virtual int  UpdateTypes(svlFilterInput &input, svlStreamType type);
+    virtual int  Initialize(svlSample* syncInput, svlSample* &syncOutput) = 0;
+    virtual int  OnStart(unsigned int procCount);
+    virtual int  Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput) = 0;
     virtual void OnStop(void);
-    virtual int Release(void);
+    virtual int  Release(void);
 
-    int IsDataValid(svlStreamType type, svlSample* data);
+    int  IsDataValid(svlStreamType type, svlSample* data);
     bool IsNewSample(svlSample* sample);
 
 private:
-    bool Initialized;
-    bool Running;
+    bool   Enabled;
+    bool   EnabledInternal;
+    bool   Initialized;
+    bool   Running;
+    bool   AutoType;
     double PrevInputTimestamp;
-    bool AutoType;
 };
 
 #endif // _svlFilterBase_h

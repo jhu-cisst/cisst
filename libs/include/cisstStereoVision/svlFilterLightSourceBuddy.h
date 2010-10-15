@@ -36,10 +36,8 @@ class CISST_EXPORT svlFilterLightSourceBuddy : public svlFilterBase
 public:
     svlFilterLightSourceBuddy();
 
-    virtual void SetEnable(const bool & enable);
     virtual void SetCalibration(const vct3x3 & matrix);
     virtual void SetLightBalance(const vct3 & balance);
-    virtual void GetEnable(bool & enable) const;
     virtual void GetCalibration(vct3x3 & matrix) const;
     virtual void GetLightBalance(vct3 & balance) const;
 
@@ -48,7 +46,6 @@ protected:
     virtual int Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput);
 
 private:
-    bool Enabled;
     vct3x3 CalibMatrix;
     vct3x3 CalibMatrixInv;
     vct3x3 CorrectionMatrix;

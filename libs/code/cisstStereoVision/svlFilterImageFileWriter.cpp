@@ -85,6 +85,7 @@ int svlFilterImageFileWriter::Initialize(svlSample* syncInput, svlSample* &syncO
 int svlFilterImageFileWriter::Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput)
 {
     syncOutput = syncInput;
+    _SkipIfDisabled();
 
     if (CaptureLength == 0) return SVL_OK;
 

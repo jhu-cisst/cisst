@@ -32,7 +32,6 @@ CMN_IMPLEMENT_SERVICES(svlFilterLightSourceBuddy)
 
 svlFilterLightSourceBuddy::svlFilterLightSourceBuddy() :
     svlFilterBase(),
-    Enabled(true),
     LightBalance(1.0, 1.0, 1.0)
 {
     CreateInterfaces();
@@ -46,11 +45,6 @@ svlFilterLightSourceBuddy::svlFilterLightSourceBuddy() :
 
     CalibMatrix = CalibMatrixInv = vct3x3::Eye();
     SetLightBalance(vct3(50.0, 50.0, 50.0));
-}
-
-void svlFilterLightSourceBuddy::SetEnable(const bool & enable)
-{
-    Enabled = enable;
 }
 
 void svlFilterLightSourceBuddy::SetCalibration(const vct3x3 & matrix)
@@ -75,11 +69,6 @@ void svlFilterLightSourceBuddy::SetLightBalance(const vct3 & balance)
     CorrectionMatrix.ProductOf(CalibMatrix, m2);
 }
 
-void svlFilterLightSourceBuddy::GetEnable(bool & enable) const
-{
-    enable = Enabled;
-}
-
 void svlFilterLightSourceBuddy::GetCalibration(vct3x3 & matrix) const
 {
     matrix = CalibMatrix;
@@ -100,8 +89,7 @@ int svlFilterLightSourceBuddy::Process(svlProcInfo* procInfo, svlSample* syncInp
 {
     syncOutput = syncInput;
     _SkipIfAlreadyProcessed(syncInput, syncOutput);
-
-    if (!Enabled) return SVL_OK;
+    _SkipIfDisabled();
 
     svlSampleImage* img = dynamic_cast<svlSampleImage*>(syncInput);
     unsigned int videochannels = img->GetVideoChannels();
@@ -184,10 +172,8 @@ void svlFilterLightSourceBuddy::CreateInterfaces()
     // Add NON-QUEUED provided interface for configuration management
     mtsInterfaceProvided* provided = AddInterfaceProvided("Settings", MTS_COMMANDS_SHOULD_NOT_BE_QUEUED);
     if (provided) {
-        provided->AddCommandWrite(&svlFilterLightSourceBuddy::SetEnable,       this, "SetEnable");
         provided->AddCommandWrite(&svlFilterLightSourceBuddy::SetCalibration,  this, "SetCalibration");
         provided->AddCommandWrite(&svlFilterLightSourceBuddy::SetLightBalance, this, "SetLightBalance");
-        provided->AddCommandRead (&svlFilterLightSourceBuddy::GetEnable,       this, "GetEnable");
         provided->AddCommandRead (&svlFilterLightSourceBuddy::GetCalibration,  this, "GetCalibration");
         provided->AddCommandRead (&svlFilterLightSourceBuddy::GetLightBalance, this, "GetLightBalance");
     }

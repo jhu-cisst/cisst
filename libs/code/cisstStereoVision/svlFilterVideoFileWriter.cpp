@@ -111,6 +111,7 @@ int svlFilterVideoFileWriter::OnStart(unsigned int CMN_UNUSED(procCount))
 int svlFilterVideoFileWriter::Process(svlProcInfo* procInfo, svlSample* syncInput, svlSample* &syncOutput)
 {
     syncOutput = syncInput;
+    _SkipIfDisabled();
 
     _OnSingleThread(procInfo) {
         if (Action) {

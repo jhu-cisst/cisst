@@ -142,6 +142,9 @@ void* svlStreamProc::Proc(svlStreamManager* baseref)
         // Execute only if multi-threaded - END
         }
 
+        // Enabled/Disabled flag to be ignored in case of
+        // source filters. Use Pause and Play instead.
+
         // Check for errors and stop request
         if (baseref->StopThread || baseref->StreamStatus != SVL_OK) break;
 
@@ -189,6 +192,12 @@ void* svlStreamProc::Proc(svlStreamManager* baseref)
                 if (sync->Sync(ThreadID) != SVL_SYNC_OK) break;
 
             // Execute only if multi-threaded - END
+            }
+
+            // Thread-safe propagation of Enabled flag to EnabledInternal.
+            // This step introduces at most 1 frame delay to the Enabled/Disabled state.
+            if (ThreadID == 0) {
+                filter->EnabledInternal = filter->Enabled;
             }
 
             // Check for errors and stop request
