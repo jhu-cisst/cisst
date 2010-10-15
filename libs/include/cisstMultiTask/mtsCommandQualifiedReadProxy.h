@@ -28,7 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsCommandQualifiedReadProxy_h
 #define _mtsCommandQualifiedReadProxy_h
 
-#include <cisstMultiTask/mtsCommandQualifiedReadOrWriteBase.h>
+#include <cisstMultiTask/mtsCommandQualifiedReadBase.h>
 #include <cisstMultiTask/mtsCommandProxyBase.h>
 #include <cisstMultiTask/mtsProxySerializer.h>
 
@@ -39,7 +39,7 @@ http://www.cisst.org/cisst/license.txt.
   When Execute() method is called, the command id with two payloads is sent to
   the connected peer interface across a network.
 */
-class mtsCommandQualifiedReadProxy : public mtsCommandQualifiedReadBase, public mtsCommandProxyBase
+class mtsCommandQualifiedReadProxy: public mtsCommandQualifiedReadBase, public mtsCommandProxyBase
 {
     friend class mtsComponentProxy;
 
@@ -78,18 +78,18 @@ public:
     }
 
     /*! The execute method. */
-    mtsCommandBase::ReturnType Execute(const mtsGenericObject & argument1, mtsGenericObject & argument2) {
+    mtsExecutionResult Execute(const mtsGenericObject & argument1, mtsGenericObject & argument2) {
         if (IsDisabled()) {
-            return mtsCommandBase::DISABLED;
+            return mtsExecutionResult::DISABLED;
         }
 
         if (NetworkProxyServer) {
             if (!NetworkProxyServer->SendExecuteCommandQualifiedReadSerialized(ClientID, CommandID, argument1, argument2)) {
-                return mtsCommandBase::COMMAND_FAILED;
+                return mtsExecutionResult::COMMAND_FAILED;
             }
         }
 
-        return mtsCommandBase::DEV_OK;
+        return mtsExecutionResult::DEV_OK;
     }
 
     /*! Generate human readable description of this object */

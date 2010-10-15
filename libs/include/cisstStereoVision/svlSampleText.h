@@ -35,6 +35,8 @@ class CISST_EXPORT svlSampleText : public svlSample
 
 public:
     svlSampleText();
+    svlSampleText(const svlSampleText & other);
+
     svlSample* GetNewInstance() const;
     svlStreamType GetType() const;
     int SetSize(const svlSample* sample);

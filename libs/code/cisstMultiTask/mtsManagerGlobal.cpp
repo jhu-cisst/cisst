@@ -19,9 +19,10 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include <cisstOSAbstraction/osaSleep.h>
+#include <cisstOSAbstraction/osaSocket.h>
 #include <cisstMultiTask/mtsConfig.h>
 #include <cisstMultiTask/mtsManagerGlobal.h>
+#include <cisstMultiTask/mtsManagerComponentServer.h>
 
 #if CISST_MTS_HAS_ICE
 #include <cisstMultiTask/mtsManagerProxyServer.h>
@@ -33,63 +34,18 @@ http://www.cisst.org/cisst/license.txt.
 
 mtsManagerGlobal::mtsManagerGlobal() :
     ProcessMap("ProcessMap"),
-    LocalManagerConnected(0), ConnectionID(0)
+    LocalManager(0), LocalManagerConnected(0), ConnectionID(0)
 #if CISST_MTS_HAS_ICE
     , ProxyServer(0)
 #endif
-    , JGraphSocket(osaSocket::TCP)
-    , JGraphSocketConnected(false)
+    , ManagerComponentServer(0)
 {
     ProcessMap.SetOwner(*this);
-
-    ConnectToTaskViewer();
 }
 
 mtsManagerGlobal::~mtsManagerGlobal()
 {
     Cleanup();
-}
-
-bool mtsManagerGlobal::ConnectToTaskViewer(const std::string &ipAddress, unsigned short port)
-{
-    // Try to connect to the JGraph application software (Java program).
-    // Note that the JGraph application also sends event messages back via the socket,
-    // though we don't currently read them. To do this, it would be best to implement
-    // the Global Component Manager as a periodic task.
-    CMN_LOG_CLASS_INIT_WARNING << "Attempting to connect to TaskViewer" << std::endl;
-    JGraphSocketConnected = JGraphSocket.Connect(ipAddress, port);
-    if (JGraphSocketConnected) {
-        osaSleep(1.0 * cmn_s);  // need to wait or JGraph server will not start properly
-        // Now, send all existing components and connections
-        std::vector<std::string> processList;
-        std::vector<std::string> componentList;
-        size_t i, j;  // could use iterators instead
-        GetNamesOfProcesses(processList);
-        for (i = 0; i < processList.size(); i++) {
-            componentList.clear();
-            GetNamesOfComponents(processList[i], componentList);
-            for (j = 0; j < componentList.size(); j++) {
-                // Ignore proxy components
-                if (!IsProxyComponent(componentList[j])) {
-                    std::string message = GetComponentInGraphFormat(processList[i], componentList[j]);
-                    if (message != "") {
-                        CMN_LOG_CLASS_INIT_VERBOSE << "Sending " << message << std::endl;
-                        JGraphSocket.Send(message);
-                    }
-                }
-            }
-        }
-        std::vector<ConnectionStrings> connectionList;
-        GetListOfConnections(connectionList);
-        for (i = 0; i < connectionList.size(); i++) {
-            std::string message = GetConnectionInGraphFormat(connectionList[i]);
-            CMN_LOG_CLASS_INIT_VERBOSE << "Sending " << message << std::endl;
-            JGraphSocket.Send(message);
-        }
-    } else {
-        CMN_LOG_CLASS_INIT_WARNING << "Failed to connect to JGraph server" << std::endl;
-    }
-    return JGraphSocketConnected;
 }
 
 //-------------------------------------------------------------------------
@@ -99,8 +55,7 @@ bool mtsManagerGlobal::Cleanup(void)
 {
     bool ret = true;
 
-    JGraphSocket.Close();
-    JGraphSocketConnected = false;
+
 
     // Remove all processes safely
     ProcessMapType::iterator itProcess = ProcessMap.begin();
@@ -161,28 +116,42 @@ bool mtsManagerGlobal::AddProcess(const std::string & processName)
 
 bool mtsManagerGlobal::AddProcessObject(mtsManagerLocalInterface * localManagerObject, const bool isManagerProxyServer)
 {
-    if (LocalManagerConnected) {
-        CMN_LOG_CLASS_RUN_ERROR << "AddProcessObject: local manager object has already been registered." << std::endl;
-        return false;
-    }
-
     // Name of local component manager which is now connecting
     std::string processName;
 
-    // If localManagerObject is of type mtsManagerProxyServer, process name can
-    // be set without calling mtsManagerLocalInterface::GetProcessName()
-    if (isManagerProxyServer) {
+    // localManagerObject can be of type either mtsManagerLocal (isManagerProxyServer 
+    // = false) or mtsManagerProxyServer (isManagerProxyServer = true).
 #if CISST_MTS_HAS_ICE
+    mtsManagerLocal * localLCM = 0;
+
+    if (isManagerProxyServer) {
+        if (LocalManagerConnected) {
+            CMN_LOG_CLASS_RUN_ERROR << "AddProcessObject: local manager object has already been registered." << std::endl;
+            return false;
+        }
+
         mtsManagerProxyServer * managerProxyServer = dynamic_cast<mtsManagerProxyServer *>(localManagerObject);
         if (!managerProxyServer) {
             CMN_LOG_CLASS_RUN_ERROR << "AddProcessObject: invalid object type (mtsManagerProxyServer expected)" << std::endl;
             return false;
         }
         processName = managerProxyServer->GetProxyName();
-#endif
     } else {
+        if (LocalManager) {
+            CMN_LOG_CLASS_RUN_ERROR << "AddProcessObject: \"local\" local manager object has already been registered." << std::endl;
+            return false;
+        }
+
+        localLCM = dynamic_cast<mtsManagerLocal*>(localManagerObject);
+        if (!localLCM) {
+            CMN_LOG_CLASS_RUN_ERROR << "AddProcessObject: invalid type of \"local\" local manager object" << std::endl;
+            return false;
+        }
+#endif
         processName = localManagerObject->GetProcessName();
+#if CISST_MTS_HAS_ICE
     }
+#endif
 
     // Check if the local component manager has already been registered.
     if (FindProcess(processName)) {
@@ -200,7 +169,15 @@ bool mtsManagerGlobal::AddProcessObject(mtsManagerLocalInterface * localManagerO
     }
 
     // Register to local manager object map
-    LocalManagerConnected = localManagerObject;
+#if CISST_MTS_HAS_ICE
+    if (!isManagerProxyServer) {
+        LocalManager = localLCM;
+    } else {
+#endif
+        LocalManagerConnected = localManagerObject;
+#if CISST_MTS_HAS_ICE
+    }
+#endif
 
     return true;
 }
@@ -244,6 +221,14 @@ mtsManagerLocalInterface * mtsManagerGlobal::GetProcessObject(const std::string 
         CMN_LOG_CLASS_RUN_ERROR << "GetProcessObject: Can't find registered process: " << processName << std::endl;
         return false;
     }
+
+#if CISST_MTS_HAS_ICE
+    if (LocalManager) {
+        if (LocalManager->GetProcessName() == processName) {
+            return LocalManager;
+        }
+    }
+#endif
 
     return LocalManagerConnected;
 }
@@ -298,13 +283,12 @@ bool mtsManagerGlobal::AddComponent(const std::string & processName, const std::
 
     // PK TEMP: special handling if componentName ends with "-END"
     if (componentName.find("-END", componentName.length()-4) != std::string::npos) {
-        if (JGraphSocketConnected) {
-            std::string componentNameOnly = componentName.substr(0, componentName.length()-4);
-            std::string buffer = GetComponentInGraphFormat(processName, componentNameOnly);
-            if (buffer != "") {
-                CMN_LOG_CLASS_INIT_VERBOSE << "Sending " << buffer << std::endl;
-                JGraphSocket.Send(buffer);
-            }
+        if (ManagerComponentServer) {
+            mtsDescriptionComponent componentInfo;
+            componentInfo.ProcessName = processName;
+            componentInfo.ComponentName = componentName.substr(0, componentName.length()-4);
+            componentInfo.ClassName = "?";
+            ManagerComponentServer->AddComponentEvent(componentInfo);
         }
         return true;
     }
@@ -374,40 +358,6 @@ bool mtsManagerGlobal::RemoveComponent(const std::string & processName, const st
     ret &= componentMap->RemoveItem(componentName);
 
     return ret;
-}
-
-std::string mtsManagerGlobal::GetComponentInGraphFormat(const std::string &processName,
-                                                        const std::string &componentName) const
-{
-    size_t i;
-    std::vector<std::string> requiredList;
-    std::vector<std::string> providedList;
-    GetNamesOfInterfacesRequiredOrInput(processName, componentName, requiredList);
-    GetNamesOfInterfacesProvidedOrOutput(processName, componentName, providedList);
-    // For now, ignore components that don't have any interfaces
-    if ((requiredList.size() == 0) && (providedList.size() == 0))
-        return "";
-    std::string buffer;
-    buffer = "add taska [[" + processName + ":" + componentName + "],[";
-    for (i = 0; i < requiredList.size(); i++) {
-        buffer += requiredList[i];
-        if (i < requiredList.size()-1)
-            buffer += ",";
-    }
-    buffer += "],[";
-    for (i = 0; i < providedList.size(); i++) {
-        buffer += providedList[i];
-        if (i < providedList.size()-1)
-            buffer += ",";
-    }
-    buffer += "]]\n";
-    return buffer;
-}
-
-bool mtsManagerGlobal::IsProxyComponent(const std::string & componentName) const
-{
-    // PK: Need to fix this to be more robust
-    return (componentName.find("Proxy", componentName.length()-5) != std::string::npos);
 }
 
 //-------------------------------------------------------------------------
@@ -611,11 +561,13 @@ int mtsManagerGlobal::Connect(const std::string & requestProcessName,
     std::ostream_iterator< std::string > output(allOptions, " ");
     bool interfacesSwapped = false;
 
+    // MJ: commented out this policy to allow the 3rd process can initiate a connection
+    // between two different processes.
     // Check requestProcessName validity
-    if (requestProcessName != clientProcessName && requestProcessName != serverProcessName) {
-        CMN_LOG_CLASS_INIT_ERROR << "Connect: invalid process is requesting connection: " << requestProcessName << std::endl;
-        return -1;
-    }
+    //if (requestProcessName != clientProcessName && requestProcessName != serverProcessName) {
+    //    CMN_LOG_CLASS_INIT_ERROR << "Connect: invalid process is requesting connection: " << requestProcessName << std::endl;
+    //    return -1;
+    //}
 
     // Check if the required interface specified actually exist.
     if (!FindInterfaceRequiredOrInput(clientProcessName, clientComponentName, clientInterfaceRequiredName)) {
@@ -716,11 +668,30 @@ int mtsManagerGlobal::Connect(const std::string & requestProcessName,
         const std::string clientComponentProxyName = GetComponentProxyName(clientProcessName, clientComponentNameActual);
         if (!FindComponent(serverProcessName, clientComponentProxyName)) {
             // If not, create one.
-            if (!LocalManagerConnected->CreateComponentProxy(clientComponentProxyName, serverProcessName)) {
-                CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to create client component proxy "
-                                         << "\"" << clientComponentProxyName << "\" in server process "
-                                         << "\"" << serverProcessName << "\"" << std::endl;
-                return -1;
+            if (LocalManager) {
+                if (LocalManager->GetProcessName() == serverProcessName) {
+                    if (!LocalManager->CreateComponentProxy(clientComponentProxyName, serverProcessName)) {
+                        CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to create client component proxy "
+                            << "\"" << clientComponentProxyName << "\" in server process "
+                            << "\"" << serverProcessName << "\"" << std::endl;
+                        return -1;
+                    }
+                } else {
+                    if (!LocalManagerConnected->CreateComponentProxy(clientComponentProxyName, serverProcessName)) {
+                        CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to create client component proxy "
+                            << "\"" << clientComponentProxyName << "\" in server process "
+                            << "\"" << serverProcessName << "\"" << std::endl;
+                        return -1;
+                    }
+                }
+            } else {
+                if (!LocalManagerConnected->CreateComponentProxy(clientComponentProxyName, serverProcessName)) {
+                    CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to create client component proxy "
+                        << "\"" << clientComponentProxyName << "\" in server process "
+                        << "\"" << serverProcessName << "\"" << std::endl;
+                    return -1;
+                }
+
             }
             CMN_LOG_CLASS_INIT_VERBOSE << "Connect: successfully created client component proxy "
                                        << "\"" << clientComponentProxyName << "\" in server process "
@@ -731,11 +702,30 @@ int mtsManagerGlobal::Connect(const std::string & requestProcessName,
         const std::string serverComponentProxyName = GetComponentProxyName(serverProcessName, serverComponentNameActual);
         if (!FindComponent(clientProcessName, serverComponentProxyName)) {
             // If not, create one.
-            if (!LocalManagerConnected->CreateComponentProxy(serverComponentProxyName, clientProcessName)) {
-                CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to create server component proxy "
-                                         << "\"" << serverComponentProxyName << "\" in client process "
-                                         << "\"" << clientProcessName << "\"" << std::endl;
-                return -1;
+            if (LocalManager) {
+                if (LocalManager->GetProcessName() == clientProcessName) {
+                    if (!LocalManager->CreateComponentProxy(serverComponentProxyName, clientProcessName)) {
+                        CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to create server component proxy "
+                            << "\"" << serverComponentProxyName << "\" in client process "
+                            << "\"" << clientProcessName << "\"" << std::endl;
+                        return -1;
+                    }
+                } else {
+                    if (!LocalManagerConnected->CreateComponentProxy(serverComponentProxyName, clientProcessName)) {
+                        CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to create server component proxy "
+                                                 << "\"" << serverComponentProxyName << "\" in client process "
+                                                 << "\"" << clientProcessName << "\"" << std::endl;
+                        return -1;
+                    }
+                }
+            } else {
+                if (!LocalManagerConnected->CreateComponentProxy(serverComponentProxyName, clientProcessName)) {
+                    CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to create server component proxy "
+                                             << "\"" << serverComponentProxyName << "\" in client process "
+                                             << "\"" << clientProcessName << "\"" << std::endl;
+                    return -1;
+                }
+
             }
             CMN_LOG_CLASS_INIT_VERBOSE << "Connect: successfully created server component proxy "
                                        << "\"" << serverComponentProxyName << "\" in client process "
@@ -772,21 +762,61 @@ int mtsManagerGlobal::Connect(const std::string & requestProcessName,
         if (!foundRequiredInterfaceProxy) {
             // Extract required interface information from the client process
             InterfaceRequiredDescription requiredInterfaceDescription;
-            if (!LocalManagerConnected->GetInterfaceRequiredDescription(
-                    clientComponentNameActual, clientInterfaceRequiredNameActual, requiredInterfaceDescription, clientProcessName))
-            {
-                CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to get required interface description: "
-                                         << GetInterfaceUID(clientProcessName, clientComponentNameActual, clientInterfaceRequiredNameActual) << std::endl;
-                return -1;
-            }
 
-            // Let the server process create required interface proxy
-            if (!LocalManagerConnected->CreateInterfaceRequiredProxy(
-                    clientComponentProxyName, requiredInterfaceDescription, serverProcessName))
-            {
-                CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to create required interface proxy in server process: "
-                                         << "\"" << clientComponentProxyName << "\" in \"" << serverProcessName << "\"" << std::endl;
-                return -1;
+            if (LocalManager) {
+                if (LocalManager->GetProcessName() == clientProcessName) {
+                    if (!LocalManager->GetInterfaceRequiredDescription(
+                            clientComponentNameActual, clientInterfaceRequiredNameActual, requiredInterfaceDescription, clientProcessName))
+                    {
+                        CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to get required interface description: "
+                                                 << GetInterfaceUID(clientProcessName, clientComponentNameActual, clientInterfaceRequiredNameActual) << std::endl;
+                        return -1;
+                    }
+                } else {
+                    if (!LocalManagerConnected->GetInterfaceRequiredDescription(
+                            clientComponentNameActual, clientInterfaceRequiredNameActual, requiredInterfaceDescription, clientProcessName))
+                    {
+                        CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to get required interface description: "
+                                                 << GetInterfaceUID(clientProcessName, clientComponentNameActual, clientInterfaceRequiredNameActual) << std::endl;
+                        return -1;
+                    }
+                }
+
+                // Let the server process create required interface proxy
+                if (LocalManager->GetProcessName() == serverProcessName) {
+                    if (!LocalManager->CreateInterfaceRequiredProxy(
+                            clientComponentProxyName, requiredInterfaceDescription, serverProcessName))
+                    {
+                        CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to create required interface proxy in server process: "
+                                                 << "\"" << clientComponentProxyName << "\" in \"" << serverProcessName << "\"" << std::endl;
+                        return -1;
+                    }
+                } else {
+                    if (!LocalManagerConnected->CreateInterfaceRequiredProxy(
+                            clientComponentProxyName, requiredInterfaceDescription, serverProcessName))
+                    {
+                        CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to create required interface proxy in server process: "
+                                                 << "\"" << clientComponentProxyName << "\" in \"" << serverProcessName << "\"" << std::endl;
+                        return -1;
+                    }
+                }
+            } else {
+                if (!LocalManagerConnected->GetInterfaceRequiredDescription(
+                        clientComponentNameActual, clientInterfaceRequiredNameActual, requiredInterfaceDescription, clientProcessName))
+                {
+                    CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to get required interface description: "
+                                             << GetInterfaceUID(clientProcessName, clientComponentNameActual, clientInterfaceRequiredNameActual) << std::endl;
+                    return -1;
+                }
+
+                // Let the server process create required interface proxy
+                if (!LocalManagerConnected->CreateInterfaceRequiredProxy(
+                        clientComponentProxyName, requiredInterfaceDescription, serverProcessName))
+                {
+                    CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to create required interface proxy in server process: "
+                                             << "\"" << clientComponentProxyName << "\" in \"" << serverProcessName << "\"" << std::endl;
+                    return -1;
+                }
             }
         }
 
@@ -794,21 +824,61 @@ int mtsManagerGlobal::Connect(const std::string & requestProcessName,
         if (!foundProvidedInterfaceProxy) {
             // Extract provided interface information from the server process
             InterfaceProvidedDescription providedInterfaceDescription;
-            if (!LocalManagerConnected->GetInterfaceProvidedDescription(
-                    serverComponentName, serverInterfaceProvidedNameActual, providedInterfaceDescription, serverProcessName))
-            {
-                CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to get provided interface description: "
-                                         << GetInterfaceUID(serverProcessName, serverComponentNameActual, serverInterfaceProvidedNameActual) << std::endl;
-                return -1;
-            }
+            if (LocalManager) {
+                if (LocalManager->GetProcessName() == serverProcessName) {
+                    if (!LocalManager->GetInterfaceProvidedDescription(
+                            serverComponentName, serverInterfaceProvidedNameActual, providedInterfaceDescription, serverProcessName))
+                    {
+                        CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to get provided interface description: "
+                                                 << GetInterfaceUID(serverProcessName, serverComponentNameActual, serverInterfaceProvidedNameActual) << std::endl;
+                        return -1;
+                    }
+                } else {
+                    if (!LocalManagerConnected->GetInterfaceProvidedDescription(
+                        serverComponentName, serverInterfaceProvidedNameActual, providedInterfaceDescription, serverProcessName))
+                    {
+                        CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to get provided interface description: "
+                            << GetInterfaceUID(serverProcessName, serverComponentNameActual, serverInterfaceProvidedNameActual) << std::endl;
+                        return -1;
+                    }
 
-            // Let the client process create provided interface proxy
-            if (!LocalManagerConnected->CreateInterfaceProvidedProxy(
-                    serverComponentProxyName, providedInterfaceDescription, clientProcessName))
-            {
-                CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to create provided interface proxy in client process: "
-                                         << "\"" << serverComponentProxyName << "\" in \"" << clientProcessName << "\"" << std::endl;
-                return -1;
+                }
+
+                // Let the client process create provided interface proxy
+                if (LocalManager->GetProcessName() == clientProcessName) {
+                    if (!LocalManager->CreateInterfaceProvidedProxy(
+                            serverComponentProxyName, providedInterfaceDescription, clientProcessName))
+                    {
+                        CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to create provided interface proxy in client process: "
+                                                 << "\"" << serverComponentProxyName << "\" in \"" << clientProcessName << "\"" << std::endl;
+                        return -1;
+                    }
+                } else {
+                    if (!LocalManagerConnected->CreateInterfaceProvidedProxy(
+                            serverComponentProxyName, providedInterfaceDescription, clientProcessName))
+                    {
+                        CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to create provided interface proxy in client process: "
+                                                 << "\"" << serverComponentProxyName << "\" in \"" << clientProcessName << "\"" << std::endl;
+                        return -1;
+                    }
+                }
+            } else {
+                if (!LocalManagerConnected->GetInterfaceProvidedDescription(
+                        serverComponentName, serverInterfaceProvidedNameActual, providedInterfaceDescription, serverProcessName))
+                {
+                    CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to get provided interface description: "
+                                             << GetInterfaceUID(serverProcessName, serverComponentNameActual, serverInterfaceProvidedNameActual) << std::endl;
+                    return -1;
+                }
+
+                // Let the client process create provided interface proxy
+                if (!LocalManagerConnected->CreateInterfaceProvidedProxy(
+                        serverComponentProxyName, providedInterfaceDescription, clientProcessName))
+                {
+                    CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to create provided interface proxy in client process: "
+                                             << "\"" << serverComponentProxyName << "\" in \"" << clientProcessName << "\"" << std::endl;
+                    return -1;
+                }
             }
         }
     }
@@ -869,15 +939,10 @@ int mtsManagerGlobal::Connect(const std::string & requestProcessName,
     ConnectionElementMap.insert(std::make_pair(ConnectionID, element));
     ConnectionElementMapChange.Unlock();
 
-    // Send to TaskViewer if present
-    if (JGraphSocketConnected) {
-        std::string message = "add edge [" + clientProcessName + ":" + clientComponentNameActual + ", "
-                                           + serverProcessName + ":" + serverComponentNameActual + ", "
-                                           + clientInterfaceRequiredNameActual + ", "
-                                           + serverInterfaceProvidedNameActual + "]\n";
-        CMN_LOG_CLASS_INIT_VERBOSE << "Sending " << message << std::endl;
-        JGraphSocket.Send(message);
-    }
+    // Send connection event to ManagerComponentServer
+    if (ManagerComponentServer)
+        ManagerComponentServer->AddConnectionEvent(element->GetDescriptionConnection());
+
     // Increase counter for next connection id
     ++ConnectionID;
 
@@ -1262,9 +1327,16 @@ void mtsManagerGlobal::GetNamesOfCommands(const std::string & processName,
                                           const std::string & providedInterfaceName,
                                           std::vector<std::string>& namesOfCommands) const
 {
-    if (!LocalManagerConnected) return;
+    if (LocalManager) {
+        if (LocalManager->GetProcessName() == processName) {
+            LocalManager->GetNamesOfCommands(namesOfCommands, componentName, providedInterfaceName, processName);
+            return;
+        }
+    }
 
-    LocalManagerConnected->GetNamesOfCommands(namesOfCommands, componentName, providedInterfaceName, processName);
+    if (LocalManagerConnected) {
+        LocalManagerConnected->GetNamesOfCommands(namesOfCommands, componentName, providedInterfaceName, processName);
+    }
 }
 
 void mtsManagerGlobal::GetNamesOfEventGenerators(const std::string & processName,
@@ -1272,9 +1344,16 @@ void mtsManagerGlobal::GetNamesOfEventGenerators(const std::string & processName
                                                  const std::string & providedInterfaceName,
                                                  std::vector<std::string>& namesOfEventGenerators) const
 {
-    if (!LocalManagerConnected) return;
+    if (LocalManager) {
+        if (LocalManager->GetProcessName() == processName) {
+            LocalManager->GetNamesOfEventGenerators(namesOfEventGenerators, componentName, providedInterfaceName, processName);
+            return;
+        }
+    }
 
-    LocalManagerConnected->GetNamesOfEventGenerators(namesOfEventGenerators, componentName, providedInterfaceName, processName);
+    if (LocalManagerConnected) {
+        LocalManagerConnected->GetNamesOfEventGenerators(namesOfEventGenerators, componentName, providedInterfaceName, processName);
+    }
 }
 
 void mtsManagerGlobal::GetNamesOfFunctions(const std::string & processName,
@@ -1282,9 +1361,16 @@ void mtsManagerGlobal::GetNamesOfFunctions(const std::string & processName,
                                            const std::string & requiredInterfaceName,
                                            std::vector<std::string>& namesOfFunctions) const
 {
-    if (!LocalManagerConnected) return;
+    if (LocalManager) {
+        if (LocalManager->GetProcessName() == processName) {
+            LocalManager->GetNamesOfFunctions(namesOfFunctions, componentName, requiredInterfaceName, processName);
+            return;
+        }
+    }
 
-    LocalManagerConnected->GetNamesOfFunctions(namesOfFunctions, componentName, requiredInterfaceName, processName);
+    if (LocalManagerConnected) {
+        LocalManagerConnected->GetNamesOfFunctions(namesOfFunctions, componentName, requiredInterfaceName, processName);
+    }
 }
 
 void mtsManagerGlobal::GetNamesOfEventHandlers(const std::string & processName,
@@ -1292,9 +1378,16 @@ void mtsManagerGlobal::GetNamesOfEventHandlers(const std::string & processName,
                                                const std::string & requiredInterfaceName,
                                                std::vector<std::string>& namesOfEventHandlers) const
 {
-    if (!LocalManagerConnected) return;
+    if (LocalManager) {
+        if (LocalManager->GetProcessName() == processName) {
+            LocalManager->GetNamesOfEventHandlers(namesOfEventHandlers, componentName, requiredInterfaceName, processName);
+            return;
+        }
+    }
 
-    LocalManagerConnected->GetNamesOfEventHandlers(namesOfEventHandlers, componentName, requiredInterfaceName, processName);
+    if (LocalManagerConnected) {
+        LocalManagerConnected->GetNamesOfEventHandlers(namesOfEventHandlers, componentName, requiredInterfaceName, processName);
+    }
 }
 
 void mtsManagerGlobal::GetDescriptionOfCommand(const std::string & processName,
@@ -1303,9 +1396,16 @@ void mtsManagerGlobal::GetDescriptionOfCommand(const std::string & processName,
                                                const std::string & commandName,
                                                std::string & description) const
 {
-    if (!LocalManagerConnected) return;
+    if (LocalManager) {
+        if (LocalManager->GetProcessName() == processName) {
+            LocalManager->GetDescriptionOfCommand(description, componentName, providedInterfaceName, commandName, processName);
+            return;
+        }
+    }
 
-    LocalManagerConnected->GetDescriptionOfCommand(description, componentName, providedInterfaceName, commandName, processName);
+    if (LocalManagerConnected) {
+        LocalManagerConnected->GetDescriptionOfCommand(description, componentName, providedInterfaceName, commandName, processName);
+    }
 }
 
 void mtsManagerGlobal::GetDescriptionOfEventGenerator(const std::string & processName,
@@ -1314,9 +1414,16 @@ void mtsManagerGlobal::GetDescriptionOfEventGenerator(const std::string & proces
                                                       const std::string & eventGeneratorName,
                                                       std::string & description) const
 {
-    if (!LocalManagerConnected) return;
+    if (LocalManager) {
+        if (LocalManager->GetProcessName() == processName) {
+            LocalManager->GetDescriptionOfEventGenerator(description, componentName, providedInterfaceName, eventGeneratorName, processName);
+            return;
+        }
+    }
 
-    LocalManagerConnected->GetDescriptionOfEventGenerator(description, componentName, providedInterfaceName, eventGeneratorName, processName);
+    if (LocalManagerConnected) {
+        LocalManagerConnected->GetDescriptionOfEventGenerator(description, componentName, providedInterfaceName, eventGeneratorName, processName);
+    }
 }
 
 void mtsManagerGlobal::GetDescriptionOfFunction(const std::string & processName,
@@ -1325,9 +1432,16 @@ void mtsManagerGlobal::GetDescriptionOfFunction(const std::string & processName,
                                                 const std::string & functionName,
                                                 std::string & description) const
 {
-    if (!LocalManagerConnected) return;
+    if (LocalManager) {
+        if (LocalManager->GetProcessName() == processName) {
+            LocalManager->GetDescriptionOfFunction(description, componentName, requiredInterfaceName, functionName, processName);
+            return;
+        }
+    }
 
-    LocalManagerConnected->GetDescriptionOfFunction(description, componentName, requiredInterfaceName, functionName, processName);
+    if (LocalManagerConnected) {
+        LocalManagerConnected->GetDescriptionOfFunction(description, componentName, requiredInterfaceName, functionName, processName);
+    }
 }
 
 void mtsManagerGlobal::GetDescriptionOfEventHandler(const std::string & processName,
@@ -1336,9 +1450,16 @@ void mtsManagerGlobal::GetDescriptionOfEventHandler(const std::string & processN
                                                     const std::string & eventHandlerName,
                                                     std::string & description) const
 {
-    if (!LocalManagerConnected) return;
+    if (LocalManager) {
+        if (LocalManager->GetProcessName() == processName) {
+            LocalManager->GetDescriptionOfEventHandler(description, componentName, requiredInterfaceName, eventHandlerName, processName);
+            return;
+        }
+    }
 
-    LocalManagerConnected->GetDescriptionOfEventHandler(description, componentName, requiredInterfaceName, eventHandlerName, processName);
+    if (LocalManagerConnected) {
+        LocalManagerConnected->GetDescriptionOfEventHandler(description, componentName, requiredInterfaceName, eventHandlerName, processName);
+    }
 }
 
 void mtsManagerGlobal::GetArgumentInformation(const std::string & processName,
@@ -1348,9 +1469,16 @@ void mtsManagerGlobal::GetArgumentInformation(const std::string & processName,
                                               std::string & argumentName,
                                               std::vector<std::string> & signalNames) const
 {
-    if (!LocalManagerConnected) return;
+    if (LocalManager) {
+        if (LocalManager->GetProcessName() == processName) {
+            LocalManager->GetArgumentInformation(argumentName, signalNames, componentName, providedInterfaceName, commandName, processName);
+            return;
+        }
+    }
 
-    LocalManagerConnected->GetArgumentInformation(argumentName, signalNames, componentName, providedInterfaceName, commandName, processName);
+    if (LocalManagerConnected) {
+        LocalManagerConnected->GetArgumentInformation(argumentName, signalNames, componentName, providedInterfaceName, commandName, processName);
+    }
 }
 
 void mtsManagerGlobal::GetValuesOfCommand(const std::string & processName,
@@ -1360,9 +1488,16 @@ void mtsManagerGlobal::GetValuesOfCommand(const std::string & processName,
                                           const int scalarIndex,
                                           mtsManagerLocalInterface::SetOfValues & values) const
 {
-    if (!LocalManagerConnected) return;
+    if (LocalManager) {
+        if (LocalManager->GetProcessName() == processName) {
+            LocalManager->GetValuesOfCommand(values, componentName, providedInterfaceName, commandName, scalarIndex, processName);
+            return;
+        }
+    }
 
-    LocalManagerConnected->GetValuesOfCommand(values, componentName, providedInterfaceName, commandName, scalarIndex, processName);
+    if (LocalManagerConnected) {
+        LocalManagerConnected->GetValuesOfCommand(values, componentName, providedInterfaceName, commandName, scalarIndex, processName);
+    }
 }
 
 #endif
@@ -1522,35 +1657,16 @@ bool mtsManagerGlobal::ConnectServerSideInterfaceRequest(const unsigned int conn
 }
 #endif
 
-void mtsManagerGlobal::GetListOfConnections(std::vector<ConnectionStrings> & list) const
+void mtsManagerGlobal::GetListOfConnections(std::vector<mtsDescriptionConnection> & list) const
 {
-    ConnectionStrings connection;
+    mtsDescriptionConnection connection;
 
     ConnectionElementMapType::const_iterator it = ConnectionElementMap.begin();
     const ConnectionElementMapType::const_iterator itEnd = ConnectionElementMap.end();
 
     for (; it != itEnd; ++it) {
         // Check if this connection has been successfully established
-        if (!it->second->IsConnected()) {
-            continue;
-        }
-
-        connection.ClientProcessName           = it->second->ClientProcessName;
-        connection.ClientComponentName         = it->second->ClientComponentName;
-        connection.ClientInterfaceRequiredName = it->second->ClientInterfaceRequiredName;
-        connection.ServerProcessName           = it->second->ServerProcessName;
-        connection.ServerComponentName         = it->second->ServerComponentName;
-        connection.ServerInterfaceProvidedName = it->second->ServerInterfaceProvidedName;
-
-        list.push_back(connection);
+        if (it->second->IsConnected())
+            list.push_back(it->second->GetDescriptionConnection());
     }
-}
-
-std::string mtsManagerGlobal::GetConnectionInGraphFormat(const ConnectionStrings &connection) const
-{
-    std::string buffer = "add edge [" + connection.ClientProcessName + ":" + connection.ClientComponentName + ", "
-                                      + connection.ServerProcessName + ":" + connection.ServerComponentName + ", "
-                                      + connection.ClientInterfaceRequiredName + ", "
-                                      + connection.ServerInterfaceProvidedName + "]\n";
-    return buffer;
 }

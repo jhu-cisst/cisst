@@ -21,61 +21,42 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cppunit/TestCase.h>
 #include <cppunit/extensions/HelperMacros.h>
-
-//#include <cisstMultiTask/mtsCollector.h>
 #include <cisstMultiTask/mtsTaskPeriodic.h>
 
 #include <string>
 
-// To be used for TestAddSignal() ---------------------------------------------
+
 class mtsTaskTestTask : public mtsTaskPeriodic {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, 5);
 
-//protected:
-	//mtsStateData<cmnDouble> TestData;
-
 public:
-	mtsTaskTestTask(const std::string & collectorName, 
+	mtsTaskTestTask(const std::string & name, 
                     double period);
 	virtual ~mtsTaskTestTask() {}
 
 	// implementation of four methods that are pure virtual in mtsTask
     void Configure(const std::string) {}
-	void Startup(void)	{}
-	void Run(void)		{}
-    void Cleanup(void)	{}
+	void Startup(void) {}
+	void Run(void) {}
+    void Cleanup(void) {}
+    void TestGetStateVectorID(void);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsTaskTestTask);
 
-// Tester class ---------------------------------------------------------------
+
 class mtsTaskTest: public CppUnit::TestFixture
 {
     CPPUNIT_TEST_SUITE(mtsTaskTest);
-	{		
-		// public variables and methods		
-		
-		// private variables and methods
+	{
 		CPPUNIT_TEST(TestGetStateVectorID);
-
-	}
+    }
     CPPUNIT_TEST_SUITE_END();
 	
-private:
-	//mtsCollector * Collector;
-    
 public:
-    void setUp(void) {
-		//Collector = new mtsCollector("collector", 10 * cmn_ms);
-    }
+    void setUp(void) {}
     
-    void tearDown(void) {
-		//delete Collector;
-    }
-    
-	// public variables and methods
-	//void TestFindSignal(void);
-	
-	// private variables and methods
+    void tearDown(void) {}
+
 	void TestGetStateVectorID(void);
 };

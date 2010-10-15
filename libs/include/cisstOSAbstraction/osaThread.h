@@ -257,6 +257,9 @@ public:
     /*! Wait for thread to receive a "wakeup" signal/event. */
     inline void WaitForWakeup(void) { Signal.Wait(); }
 
+    /*! Wait for thread to receive a "wakeup" signal/event. */
+    inline void WaitForWakeup(double timeoutInSec) { Signal.Wait(timeoutInSec); }
+
     /*! Signal the thread to wake up. */
     inline void Wakeup(void) { Signal.Raise(); }
 

@@ -21,7 +21,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnUnits.h>
 #include <cisstMultiTask/mtsStateTable.h>
-//#include <cisstMultiTask/mtsTaskManager.h>
 
 #include "mtsTaskTest.h"
 
@@ -29,46 +28,28 @@ http://www.cisst.org/cisst/license.txt.
 
 CMN_IMPLEMENT_SERVICES(mtsTaskTestTask);
 
-//-----------------------------------------------------------------------------
-mtsTaskTestTask::mtsTaskTestTask(const std::string & collectorName, 
+mtsTaskTestTask::mtsTaskTestTask(const std::string & name, 
                                  double period) :
-	mtsTaskPeriodic(collectorName, period, false, 5000)
+	mtsTaskPeriodic(name, period, false, 50)
 {
 }
 
-//-----------------------------------------------------------------------------
-//	Tests for public variables and methods
-//-----------------------------------------------------------------------------
-void mtsTaskTest::TestGetStateVectorID(void)
+void mtsTaskTestTask::TestGetStateVectorID(void)
 {
-	const size_t default_column_count = mtsStateTable::StateVectorBaseIDForUser;
+    mtsDouble data1, data2;
+	const size_t default_column_count = StateTable.GetNumberOfElements();
+    CPPUNIT_ASSERT_EQUAL(default_column_count, static_cast<size_t>(4));
 	const size_t user_column_count = 2;	// Data1, Data2
 	const size_t total_column_count = default_column_count + user_column_count;
-	
-    /*
-	const std::string names[total_column_count] = { 
-		// added by default
-		"Toc", 
-		"Tic", 
-		"Period", 
-		// user items
-		"Data1", 
-		"Data2" };	
-    */
-	
-	mtsTaskTestTask task("task", 10 * cmn_ms);
-    mtsStateTable StateTable(20, "Test");
-	
-	CPPUNIT_ASSERT(default_column_count == StateTable.StateVectorDataNames.size());
-	{
-		StateTable.StateVectorDataNames.push_back("Data1");
-		StateTable.StateVectorDataNames.push_back("Data2");
-	}
-	CPPUNIT_ASSERT(total_column_count == StateTable.StateVectorDataNames.size());
+    StateTable.AddData(data1, "Data1");
+    StateTable.AddData(data2, "Data2");
+	CPPUNIT_ASSERT(total_column_count == StateTable.GetNumberOfElements());
 }
 
-//-----------------------------------------------------------------------------
-//	Tests for private variables and methods
-//-----------------------------------------------------------------------------
+void mtsTaskTest::TestGetStateVectorID(void)
+{
+    mtsTaskTestTask task("testingTask", 10 * cmn_ms);
+    task.TestGetStateVectorID();
+}
 
 CPPUNIT_TEST_SUITE_REGISTRATION(mtsTaskTest);

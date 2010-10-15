@@ -61,41 +61,28 @@ http://www.cisst.org/cisst/license.txt.
 #define CISST_EXPORT
 #define CISST_DEPRECATED
 
+// enums defined in mtsForwardDeclarations
+%include "cisstMultiTask/mtsForwardDeclarations.h"
+
+%include "cisstMultiTask/mtsExecutionResult.h"
+
 // Wrap commands
 %include "cisstMultiTask/mtsCommandBase.h"
-%include "cisstMultiTask/mtsCommandVoidBase.h"
-%include "cisstMultiTask/mtsCommandReadOrWriteBase.h"
-%include "cisstMultiTask/mtsCommandQualifiedReadOrWriteBase.h"
-
-%template(mtsCommandReadBase) mtsCommandReadOrWriteBase<mtsGenericObject>;
-%template(mtsCommandWriteBase) mtsCommandReadOrWriteBase<const mtsGenericObject>;
-%template(mtsCommandQualifiedReadBase) mtsCommandQualifiedReadOrWriteBase<mtsGenericObject>;
-%template(mtsCommandQualifiedWriteBase) mtsCommandQualifiedReadOrWriteBase<const mtsGenericObject>;
-%{
-    typedef mtsCommandReadOrWriteBase<mtsGenericObject> mtsCommandReadBase;
-    typedef mtsCommandReadOrWriteBase<const mtsGenericObject> mtsCommandWriteBase;
-    typedef mtsCommandQualifiedReadOrWriteBase<mtsGenericObject> mtsCommandQualifiedReadBase;
-    typedef mtsCommandQualifiedReadOrWriteBase<const mtsGenericObject> mtsCommandQualifiedWriteBase;
-%}
-typedef mtsCommandReadOrWriteBase<mtsGenericObject> mtsCommandReadBase;
-typedef mtsCommandReadOrWriteBase<const mtsGenericObject> mtsCommandWriteBase;
-typedef mtsCommandQualifiedReadOrWriteBase<mtsGenericObject> mtsCommandQualifiedReadBase;
-typedef mtsCommandQualifiedReadOrWriteBase<const mtsGenericObject> mtsCommandQualifiedWriteBase;
-%types(mtsCommandReadBase *);
-%types(mtsCommandWriteBase *);
-%types(mtsCommandQualifiedReadBase *);
-%types(mtsCommandQualifiedWriteBase *);
+%include "cisstMultiTask/mtsCommandVoid.h"
+%include "cisstMultiTask/mtsCommandRead.h"
+%include "cisstMultiTask/mtsCommandWriteBase.h"
+%include "cisstMultiTask/mtsCommandQualifiedReadBase.h"
 
 // Extend mtsCommandVoid
-%extend mtsCommandVoidBase {
+%extend mtsCommandVoid {
     %pythoncode {
         def __call__(self):
-            return self.Execute()
+            return self.Execute(MTS_NOT_BLOCKING).GetResult()
     }
 }
 
 // Extend mtsCommandWrite
-%extend mtsCommandReadOrWriteBase<const mtsGenericObject> {
+%extend mtsCommandWriteBase {
     %pythoncode {
         def UpdateFromC(self):
             try:
@@ -106,19 +93,19 @@ typedef mtsCommandQualifiedReadOrWriteBase<const mtsGenericObject> mtsCommandQua
 
         def __call__(self, argument):
             if isinstance(argument, self.ArgumentType):
-                return self.Execute(argument)
+                return self.Execute(argument, MTS_NOT_BLOCKING).GetResult()
             else:
                 realArgument = self.ArgumentType(argument)
-                return self.Execute(realArgument)
+                return self.Execute(realArgument, MTS_NOT_BLOCKING).GetResult()
     }
 }
 
 // Extend mtsCommandRead
-%extend mtsCommandReadOrWriteBase<mtsGenericObject> {
+%extend mtsCommandRead {
     %pythoncode {
         def UpdateFromC(self):
             try:
-                tmpObject = self.GetArgumentClassServices().Create()
+                tmpObject = self.GetArgumentPrototype().Services().Create()
                 self.ArgumentType = tmpObject.__class__
             except TypeError, e:
                 print 'Read command ', self.GetName(), ': ', e
@@ -130,6 +117,7 @@ typedef mtsCommandQualifiedReadOrWriteBase<const mtsGenericObject> mtsCommandQua
                 argument = self.ArgumentType(self.GetArgumentPrototype())
             except Exception:
                 argument = self.GetArgumentPrototype()
+            # Probably should check return value below
             self.Execute(argument)
             # If argument has a GetDataCopy method, we assume it is derived from
             # mtsGenericObjectProxy (%extend is used to add this method).
@@ -141,7 +129,7 @@ typedef mtsCommandQualifiedReadOrWriteBase<const mtsGenericObject> mtsCommandQua
 }
 
 // Extend mtsCommandQualifiedRead
-%extend mtsCommandQualifiedReadOrWriteBase<mtsGenericObject> {
+%extend mtsCommandQualifiedReadBase {
     %pythoncode {
         def UpdateFromC(self):
             try:
@@ -154,6 +142,7 @@ typedef mtsCommandQualifiedReadOrWriteBase<const mtsGenericObject> mtsCommandQua
 
         def __call__(self, argument1):
             argument2 = self.Argument2Type(self.GetArgument2Prototype())
+            # Probably should check return value of self.Execute
             if isinstance(argument1, self.Argument1Type):
                 self.Execute(argument1, argument2)
             else:
@@ -260,6 +249,11 @@ MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsLong, long);
 MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsULong, unsigned long);
 MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsBool, bool);
 MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsStdString, std::string);
+
+%include "cisstMultiTask/mtsParameterTypes.h"
+//PK TEMP: following does not work
+//typedef std::vector<mtsDescriptionConnection> mtsDescriptionConnectionStdVec;
+//MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsDescriptionConnectionVec, mtsDescriptionConnectionStdVec);
 
 // Wrap mtsVector
 %import "cisstMultiTask/mtsVector.h"

@@ -32,14 +32,14 @@ void mtsMulticastCommandQualifiedReadOrWrite<_argumentType>::AddCommand(BaseType
 
 
 template <class _argumentType>
-mtsCommandBase::ReturnType mtsMulticastCommandQualifiedReadOrWrite<_argumentType>::Execute(const cmnGenericObject & qualifier, ArgumentType argument) {
-    int result = static_cast<int>(mtsCommandBase::DEV_OK);
+mtsExecutionResult mtsMulticastCommandQualifiedReadOrWrite<_argumentType>::Execute(const cmnGenericObject & qualifier, ArgumentType argument) {
+    int result = static_cast<int>(mtsExecutionResult::DEV_OK);
     for (unsigned int i = 0; i < Commands.size(); i++) {
         result =
-            (result << static_cast<int>(mtsCommandBase::RETURN_TYPE_BIT_SIZE))
+            (result << static_cast<int>(mtsExecutionResult::RETURN_TYPE_BIT_SIZE))
             | static_cast<int>(Commands[i]->Execute(qualifier, argument));
     }
-    return static_cast<mtsCommandBase::ReturnType>(result);
+    return static_cast<mtsExecutionResult::ReturnType>(result);
 }
 
 

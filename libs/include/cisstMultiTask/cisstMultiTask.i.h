@@ -28,7 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _cisstMultiTask_i_h
 #define _cisstMultiTask_i_h
 
-#error "Deprecated file, you should use #include <cisstMultiTask/mtsPython.h> intead"
+#error "Deprecated file, you should use #include <cisstMultiTask/mtsPython.h> instead"
 
 #endif // _cisstMultiTask_i_h
 

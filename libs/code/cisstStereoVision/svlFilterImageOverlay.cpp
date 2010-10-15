@@ -108,29 +108,6 @@ void svlFilterImageOverlay::AddOverlay(svlOverlay & overlay)
 
 int svlFilterImageOverlay::Initialize(svlSample* syncInput, svlSample* &syncOutput)
 {
-    svlOverlayInput* overlayinput = 0;
-    svlOverlay* overlay = FirstOverlay;
-    svlFilterInput* input = 0;
-
-    while (overlay) {
-        // Cross casting to the input base class
-        overlayinput = dynamic_cast<svlOverlayInput*>(overlay);
-
-        if (overlayinput) {
-        // Overlays with input
-            input = GetInput(overlayinput->InputName);
-
-            if (input && overlayinput->IsInputTypeValid(input->GetType())) {
-                overlayinput->Input = input;
-            }
-            else {
-                overlayinput->Input = 0;
-            }
-        }
-
-        overlay = overlay->Next;
-    }
-
     syncOutput = syncInput;
     return SVL_OK;
 }
@@ -143,21 +120,26 @@ int svlFilterImageOverlay::Process(svlProcInfo* procInfo, svlSample* syncInput, 
         _SampleCacheMap::iterator itersample;
         svlSampleImage* src_image = dynamic_cast<svlSampleImage*>(syncInput);
         svlOverlayInput* overlayinput = 0;
+        svlFilterInput* input = 0;
         svlOverlay* overlay = FirstOverlay;
         svlSample* ovrlsample = 0;
 
         while (overlay) {
             // Cross casting to the input base class
             overlayinput = dynamic_cast<svlOverlayInput*>(overlay);
-
-            if (overlayinput && overlayinput->Input) {
+            if (overlayinput) {
             // Overlays with input
-                itersample = SampleCache.find(overlayinput->Input);
-                if (itersample != SampleCache.end()) {
-                    ovrlsample = overlayinput->Input->PullSample(true, 0.0);
-                    if (ovrlsample) itersample->second = ovrlsample;
-                    else ovrlsample = itersample->second;
-                    if (ovrlsample) overlay->Draw(src_image, ovrlsample);
+
+                input = GetInput(overlayinput->InputName);
+                if (input && overlayinput->IsInputTypeValid(input->GetType())) {
+
+                    itersample = SampleCache.find(input);
+                    if (itersample != SampleCache.end()) {
+                        ovrlsample = input->PullSample(true, 0.0);
+                        if (ovrlsample) itersample->second = ovrlsample;
+                        else ovrlsample = itersample->second;
+                        if (ovrlsample) overlay->Draw(src_image, ovrlsample);
+                    }
                 }
             }
             else {

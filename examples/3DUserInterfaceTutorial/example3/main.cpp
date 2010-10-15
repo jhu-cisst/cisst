@@ -49,18 +49,18 @@ int main()
     cmnClassRegister::SetLoD("ui3BehaviorBase", CMN_LOG_LOD_VERY_VERBOSE);
     cmnClassRegister::SetLoD("ui3Manager", CMN_LOG_LOD_VERY_VERBOSE);
     cmnClassRegister::SetLoD("mtsTaskInterface", CMN_LOG_LOD_VERY_VERBOSE);
-    cmnClassRegister::SetLoD("mtsTaskManager", CMN_LOG_LOD_VERY_VERBOSE);
+    cmnClassRegister::SetLoD("mtsComponentManager", CMN_LOG_LOD_VERY_VERBOSE);
     cmnClassRegister::SetLoD("BehaviorLUS", CMN_LOG_LOD_VERY_VERBOSE);
     cmnClassRegister::SetLoD("dvapi_stream", CMN_LOG_LOD_INIT_VERBOSE);
 
-    mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
+    mtsComponentManager * componentManager = mtsComponentManager::GetInstance();
 #if 1
     cdvReadOnly * daVinci = new cdvReadOnly("daVinci", 0.0 /* period to be removed */,
                                                    "10.0.0.5", 5002, 0x1111, 50);
 #else
     cdvReadWrite * daVinci = new cdvReadWrite("daVinci", 60 /* Hz */);
 #endif
-    taskManager->AddTask(daVinci);
+    componentManager->AddComponent(daVinci);
 
     ui3Manager guiManager;
 
@@ -159,7 +159,7 @@ int main()
     guiManager.SetRenderTargetToRenderer("LeftEyeView",  svlRenderTargets::Get(1));
     guiManager.SetRenderTargetToRenderer("RightEyeView", svlRenderTargets::Get(0));
 
-#if 1
+#if 0
     // Add third camera: simple perspective camera placed in the world center
     camera_geometry.SetPerspective(400.0, 2);
 
@@ -225,10 +225,10 @@ int main()
     guiManager.ConnectAll();
 
     // following should be replaced by a utility function or method of ui3Manager 
-    taskManager->CreateAll();
+    componentManager->CreateAll();
     osaSleep(10.0 * cmn_s);
     
-    taskManager->StartAll();
+    componentManager->StartAll();
     osaSleep(1.0 * cmn_s);
 
     int ch;
@@ -241,8 +241,8 @@ int main()
         osaSleep(100.0 * cmn_ms);
     } while (ch != 'q');
 
-    taskManager->KillAll();
-    taskManager->Cleanup();
+    componentManager->KillAll();
+    componentManager->Cleanup();
 
 #if HAS_ULTRASOUDS
     vidUltrasoundStream.RemoveAll();

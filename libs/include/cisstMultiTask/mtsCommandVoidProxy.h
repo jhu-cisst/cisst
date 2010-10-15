@@ -28,7 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsCommandVoidProxy_h
 #define _mtsCommandVoidProxy_h
 
-#include <cisstMultiTask/mtsCommandVoidBase.h>
+#include <cisstMultiTask/mtsCommandVoid.h>
 #include <cisstMultiTask/mtsCommandProxyBase.h>
 
 /*!
@@ -38,15 +38,15 @@ http://www.cisst.org/cisst/license.txt.
   called, CommandID is sent to a connected required interface proxy across a
   network without payload.
 */
-class mtsCommandVoidProxy: public mtsCommandVoidBase, public mtsCommandProxyBase
+class mtsCommandVoidProxy: public mtsCommandVoid, public mtsCommandProxyBase
 {
 public:
-    typedef mtsCommandVoidBase BaseType;
+    typedef mtsCommandVoid BaseType;
 
 public:
-    /*! Constructor. Command proxy is disabled by defaultand is enabled when
+    /*! Constructor. Command proxy is disabled by default and is enabled when
         command id and network proxy are set. */
-    mtsCommandVoidProxy(const std::string & commandName) : BaseType(commandName) {
+    mtsCommandVoidProxy(const std::string & commandName): BaseType(0, commandName) {
         Disable();
     }
 
@@ -54,22 +54,22 @@ public:
     ~mtsCommandVoidProxy() {}
 
     /*! Execute void command */
-    mtsCommandBase::ReturnType Execute() {
-        if (IsDisabled()) return mtsCommandBase::DISABLED;
+    mtsExecutionResult Execute(mtsBlockingType blocking) {
+        if (IsDisabled()) return mtsExecutionResult::DISABLED;
 
         if (NetworkProxyServer) {
             // Command void execution: client (request) -> server (execution)
-            if (!NetworkProxyServer->SendExecuteCommandVoid(ClientID, CommandID)) {
-                return mtsCommandBase::COMMAND_FAILED;
+            if (!NetworkProxyServer->SendExecuteCommandVoid(ClientID, CommandID, blocking)) {
+                return mtsExecutionResult::COMMAND_FAILED;
             }
         } else {
             // Event void execution: server (event generator) -> client (event handler)
             if (!NetworkProxyClient->SendExecuteEventVoid(CommandID)) {
-                return mtsCommandBase::COMMAND_FAILED;
+                return mtsExecutionResult::COMMAND_FAILED;
             }
         }
 
-        return mtsCommandBase::DEV_OK;
+        return mtsExecutionResult::DEV_OK;
     }
 
     /*! Generate human readable description of this object */

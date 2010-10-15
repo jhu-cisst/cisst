@@ -25,8 +25,8 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
 
     // add the tasks to the task manager
     mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
-    taskManager->AddTask(client);
-    taskManager->AddTask(server);
+    taskManager->AddComponent(client);
+    taskManager->AddComponent(server);
 
     // connect the two tasks. The server task provides a provided interface
 	// and the client task requires a required interface.

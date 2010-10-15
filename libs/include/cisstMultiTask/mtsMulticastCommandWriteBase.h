@@ -7,7 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2008 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -30,7 +30,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _mtsMulticastCommandWriteBase_h
 
 
-#include <cisstMultiTask/mtsCommandReadOrWriteBase.h>
+#include <cisstMultiTask/mtsCommandWriteBase.h>
 #include <vector>
 
 // Always include last
@@ -63,7 +63,8 @@ public:
     void AddCommand(BaseType * command);
 
     /*! Execute all the commands in the composite. */
-    virtual mtsCommandBase::ReturnType Execute(const mtsGenericObject & argument) = 0;
+    virtual mtsExecutionResult Execute(const mtsGenericObject & argument,
+                                       mtsBlockingType blocking) = 0;
 
     /* documented in base class */
     virtual void ToStream(std::ostream & outputStream) const;

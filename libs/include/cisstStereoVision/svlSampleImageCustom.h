@@ -80,6 +80,21 @@ public:
         }
     }
 
+    svlSampleImageCustom(const svlSampleImageCustom & other) :
+        svlSampleImage(other),
+        OwnData(true)
+    {
+        for (unsigned int vch = 0; vch < _VideoChannels; vch ++) {
+            OwnImage[vch] = new vctDynamicMatrix<_ValueType>;
+#if (CISST_SVL_HAS_OPENCV == ON)
+            int ocvdepth = GetOCVDepth();
+            if (ocvdepth >= 0) OCVImageHeader[vch] = cvCreateImageHeader(cvSize(0, 0), ocvdepth, _DataChannels);
+            else OCVImageHeader[vch] = 0;
+#endif // CISST_SVL_HAS_OPENCV
+        }
+        CopyOf(other);
+    }
+
 
     ////////////////
     // Destructor //
@@ -226,22 +241,38 @@ public:
 
     virtual void SerializeRaw(std::ostream & outputStream) const
     {
+        mtsGenericObject::SerializeRaw(outputStream);
+
         std::string codec;
         int compression;
         GetEncoder(codec, compression);
         cmnSerializeRaw(outputStream, GetType());
         cmnSerializeRaw(outputStream, GetTimestamp());
         cmnSerializeRaw(outputStream, codec);
+
+        bool hasdata = true;
         for (unsigned int vch = 0; vch < _VideoChannels; vch ++) {
-            if (svlImageIO::Write(*this, vch, codec, outputStream, compression) != SVL_OK) {
-                cmnThrow("svlSampleImageCustom::SerializeRaw(): Error occured with svlImageIO::Write");
+            if (GetWidth(vch) < 1 || GetHeight(vch) < 1) hasdata = false;
+        }
+        cmnSerializeRaw(outputStream, hasdata);
+
+        if (hasdata) {
+            for (unsigned int vch = 0; vch < _VideoChannels; vch ++) {
+                if (svlImageIO::Write(*this, vch, codec, outputStream, compression) != SVL_OK) {
+// Exeptions are not handled yet.
+// TO DO: Restore code once exception handling is corrected.
+//                    cmnThrow("svlSampleImageCustom::SerializeRaw(): Error occured with svlImageIO::Write");
+                }
             }
         }
     }
 
     virtual void DeSerializeRaw(std::istream & inputStream)
     {
+        mtsGenericObject::DeSerializeRaw(inputStream);
+
         int type = -1;
+        bool hasdata;
         double timestamp;
         std::string codec;
         cmnDeSerializeRaw(inputStream, type);
@@ -252,9 +283,15 @@ public:
         cmnDeSerializeRaw(inputStream, timestamp);
         SetTimestamp(timestamp);
         cmnDeSerializeRaw(inputStream, codec);
-        for (unsigned int vch = 0; vch < _VideoChannels; vch ++) {
-            if (svlImageIO::Read(*this, vch, codec, inputStream, false) != SVL_OK) {
-                cmnThrow("svlSampleImageCustom::DeSerializeRaw(): Error occured with svlImageIO::Read");
+        cmnDeSerializeRaw(inputStream, hasdata);
+
+        if (hasdata) {
+            for (unsigned int vch = 0; vch < _VideoChannels; vch ++) {
+                if (svlImageIO::Read(*this, vch, codec, inputStream, false) != SVL_OK) {
+// Exeptions are not handled yet.
+// TO DO: Restore code once exception handling is corrected.
+//                    cmnThrow("svlSampleImageCustom::DeSerializeRaw(): Error occured with svlImageIO::Read");
+                }
             }
         }
     }

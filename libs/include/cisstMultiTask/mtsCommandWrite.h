@@ -7,7 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -29,7 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _mtsCommandWrite_h
 
 
-#include <cisstMultiTask/mtsCommandReadOrWriteBase.h>
+#include <cisstMultiTask/mtsCommandWriteBase.h>
 #include <cisstMultiTask/mtsGenericObjectProxy.h>
 
 
@@ -72,14 +72,14 @@ protected:
     class ConditionalCast {
         // Default case: ArgumentType not derived from mtsGenericObjectProxy
     public:
-        static mtsCommandBase::ReturnType CallMethod(ClassType *ClassInst, ActionType Action, const mtsGenericObject &argument)
+        static mtsExecutionResult CallMethod(ClassType *ClassInst, ActionType Action, const mtsGenericObject &argument)
         {
             const ArgumentType * data = mtsGenericTypes<ArgumentType>::CastArg(argument);
             if (data == 0) {
-                return mtsCommandBase::BAD_INPUT;
+                return mtsExecutionResult::BAD_INPUT;
             }
             (ClassInst->*Action)(*data);
-            return mtsCommandBase::DEV_OK;
+            return mtsExecutionResult::DEV_OK;
         }
     };
     template<typename dummy>
@@ -87,13 +87,13 @@ protected:
         // Specialization: ArgumentType is derived from mtsGenericObjectProxy (and thus also from mtsGenericObject)
         // In this case, we may need to create a temporary Proxy object.
     public:
-        static mtsCommandBase::ReturnType CallMethod(ClassType *ClassInst, ActionType Action, const mtsGenericObject &argument)
+        static mtsExecutionResult CallMethod(ClassType *ClassInst, ActionType Action, const mtsGenericObject &argument)
         {
             // First, check if a Proxy object was passed.
             const ArgumentType *data = dynamic_cast<const ArgumentType *>(&argument);
             if (data) {
                 (ClassInst->*Action)(*data);
-                return mtsCommandBase::DEV_OK;
+                return mtsExecutionResult::DEV_OK;
             }
             // If it isn't a Proxy, maybe it is a ProxyRef
             typedef typename ArgumentType::RefType ArgumentRefType;
@@ -101,13 +101,13 @@ protected:
             if (!dataref) {
                 CMN_LOG_INIT_ERROR << "Write CallMethod could not cast from " << typeid(argument).name()
                                    << " to const " << typeid(ArgumentRefType).name() << std::endl;
-                return mtsCommandBase::BAD_INPUT;
+                return mtsExecutionResult::BAD_INPUT;
             }
             // Now, make the call using the temporary
             ArgumentType temp;
             temp.Assign(*dataref);
             (ClassInst->*Action)(temp);
-            return mtsCommandBase::DEV_OK;
+            return mtsExecutionResult::DEV_OK;
         }
     };
 
@@ -148,22 +148,24 @@ public:
       applies the operation on the receiver.
       \param obj The data passed to the operation method
     */
-    virtual mtsCommandBase::ReturnType Execute(const mtsGenericObject & argument) {
+    virtual mtsExecutionResult Execute(const mtsGenericObject & argument,
+                                       mtsBlockingType CMN_UNUSED(blocking)) {
         if (this->IsEnabled()) {
             //const ArgumentType * data = dynamic_cast< const ArgumentType * >(&argument);
             return ConditionalCast<cmnIsDerivedFromTemplated<ArgumentType, mtsGenericObjectProxy>::YES
                                   >::CallMethod(ClassInstantiation, Action, argument);
         }
-        return mtsCommandBase::DISABLED;
+        return mtsExecutionResult::DISABLED;
     }
 
     /*! Direct execute can be used for mtsMulticastCommandWrite */
-    inline mtsCommandBase::ReturnType Execute(const ArgumentType & argument) {
+    inline mtsExecutionResult Execute(const ArgumentType & argument,
+                                      mtsBlockingType CMN_UNUSED(blocking)) {
         if (this->IsEnabled()) {
             (ClassInstantiation->*Action)(argument);
-            return mtsCommandBase::DEV_OK;
+            return mtsExecutionResult::DEV_OK;
         }
-        return mtsCommandBase::DISABLED;
+        return mtsExecutionResult::DISABLED;
     }
 
     /* commented in base class */
@@ -177,7 +179,6 @@ public:
             outputStream << "Not initialized properly";
         }
     }
-
 };
 
 
@@ -257,16 +258,17 @@ public:
       applies the operation on the receiver.
       \param obj The data passed to the operation method
     */
-    virtual mtsCommandBase::ReturnType Execute(const mtsGenericObject & argument) {
+    mtsExecutionResult Execute(const mtsGenericObject & argument,
+                               mtsBlockingType CMN_UNUSED(blocking)) {
         if (this->IsEnabled()) {
             (ClassInstantiation->*Action)(argument);
-            return mtsCommandBase::DEV_OK;
+            return mtsExecutionResult::DEV_OK;
         }
-        return mtsCommandBase::DISABLED;
+        return mtsExecutionResult::DISABLED;
     }
 
-    /* commented in base class */
-    virtual void ToStream(std::ostream & outputStream) const {
+    /* documented in base class */
+    void ToStream(std::ostream & outputStream) const {
         outputStream << "mtsCommandWriteGeneric: ";
         if (this->ClassInstantiation) {
             outputStream << this->Name << "(const mtsGenericObject *) using class/object \""
@@ -276,7 +278,6 @@ public:
             outputStream << "Not initialized properly";
         }
     }
-
 };
 
 

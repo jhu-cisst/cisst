@@ -44,10 +44,13 @@ int main(int argc, char * argv[])
     else
         client = new clientTask<double>("Client", PeriodClient);
 
-    taskManager->AddTask(client);        
+    taskManager->AddComponent(client);        
 
     // Connect the tasks across networks
-    taskManager->Connect("ProcessClient", "Client", "Required", "ProcessServer", "Server", "Provided");
+    if (!taskManager->Connect("ProcessClient", "Client", "Required", "ProcessServer", "Server", "Provided")) {
+        CMN_LOG_INIT_ERROR << "Connect failed" << std::endl;
+        return 1;
+    }
 
     // create the tasks, i.e. find the commands
     taskManager->CreateAll();

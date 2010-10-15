@@ -152,13 +152,13 @@ bool mtsComponentInterfaceProxyServer::OnClientDisconnect(const ClientIDType cli
         return false;
     }
 
-    ConnectionStrings * element = &it->second;
-    const std::string clientProcessName = element->ClientProcessName;
-    const std::string clientComponentName = element->ClientComponentName;
-    const std::string clientInterfaceRequiredName = element->ClientInterfaceRequiredName;
-    const std::string serverProcessName = element->ServerProcessName;
-    const std::string serverComponentName = element->ServerComponentName;
-    const std::string serverInterfaceProvidedName = element->ServerInterfaceProvidedName;
+    mtsDescriptionConnection * element = &it->second;
+    const std::string clientProcessName = element->Client.ProcessName;
+    const std::string clientComponentName = element->Client.ComponentName;
+    const std::string clientInterfaceRequiredName = element->Client.InterfaceName;
+    const std::string serverProcessName = element->Server.ProcessName;
+    const std::string serverComponentName = element->Server.ComponentName;
+    const std::string serverInterfaceProvidedName = element->Server.InterfaceName;
 
     // Remove the process logically
     mtsManagerLocal * localManager = mtsManagerLocal::GetInstance();
@@ -267,9 +267,12 @@ bool mtsComponentInterfaceProxyServer::AddConnectionInformation(const unsigned i
         return false;
     }
 
-    ConnectionStrings element(clientProcessName, clientComponentName, clientInterfaceRequiredName,
-                              serverProcessName, serverComponentName, serverInterfaceProvidedName);
-    ConnectionStringMap.insert(std::make_pair(connectionID, element));
+    mtsDescriptionConnection connection(
+        clientProcessName, clientComponentName, clientInterfaceRequiredName,
+        serverProcessName, serverComponentName, serverInterfaceProvidedName,
+        connectionID);
+
+    ConnectionStringMap.insert(std::make_pair(connectionID, connection));
 
     return true;
 }
@@ -286,7 +289,7 @@ void mtsComponentInterfaceProxyServer::ReceiveExecuteEventVoid(const CommandIDTy
         return;
     }
 
-    eventVoidGeneratorProxy->Execute();
+    eventVoidGeneratorProxy->Execute(MTS_NOT_BLOCKING);
 }
 
 void mtsComponentInterfaceProxyServer::ReceiveExecuteEventWriteSerialized(const CommandIDType commandID, const std::string & serializedArgument)
@@ -310,7 +313,7 @@ void mtsComponentInterfaceProxyServer::ReceiveExecuteEventWriteSerialized(const 
         return;
     }
 
-    eventWriteGeneratorProxy->Execute(*argument);
+    eventWriteGeneratorProxy->Execute(*argument, MTS_NOT_BLOCKING);
 }
 
 //-------------------------------------------------------------------------
@@ -362,7 +365,8 @@ bool mtsComponentInterfaceProxyServer::SendFetchFunctionProxyPointers(
     }
 }
 
-bool mtsComponentInterfaceProxyServer::SendExecuteCommandVoid(const ClientIDType clientID, const CommandIDType commandID)
+bool mtsComponentInterfaceProxyServer::SendExecuteCommandVoid(
+    const ClientIDType clientID, const CommandIDType commandID, const mtsBlockingType blocking)
 {
     ComponentInterfaceClientProxyType * clientProxy = GetNetworkProxyClient(clientID);
     if (!clientProxy) {
@@ -371,11 +375,12 @@ bool mtsComponentInterfaceProxyServer::SendExecuteCommandVoid(const ClientIDType
     }
 
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
-    LogPrint(mtsComponentInterfaceProxyServer, ">>>>> SEND: SendExecuteCommandVoid: " << commandID);
+    LogPrint(mtsComponentInterfaceProxyServer, ">>>>> SEND: SendExecuteCommandVoid: " << commandID << ", "
+        << (blocking == MTS_BLOCKING ? "BLOCKING" : "NON-BLOCKING"));
 #endif
 
     try {
-        (*clientProxy)->ExecuteCommandVoid(commandID);
+        (*clientProxy)->ExecuteCommandVoid(commandID, (blocking == MTS_BLOCKING));
     } catch (const ::Ice::Exception & ex) {
         LogError(mtsComponentInterfaceProxyServer, "SendExecuteCommandVoid: network exception: " << ex);
         OnClientDisconnect(clientID);
@@ -385,11 +390,13 @@ bool mtsComponentInterfaceProxyServer::SendExecuteCommandVoid(const ClientIDType
     return true;
 }
 
-bool mtsComponentInterfaceProxyServer::SendExecuteCommandWriteSerialized(const ClientIDType clientID, const CommandIDType commandID, const mtsGenericObject & argument)
+bool mtsComponentInterfaceProxyServer::SendExecuteCommandWriteSerialized(
+    const ClientIDType clientID, const CommandIDType commandID, const mtsGenericObject & argument, const mtsBlockingType blocking)
 {
     ComponentInterfaceClientProxyType * clientProxy = GetNetworkProxyClient(clientID);
     if (!clientProxy) {
-        LogError(mtsComponentInterfaceProxyServer, "SendExecuteCommandWriteSerialized: no proxy client found or inactive proxy: " << clientID);
+        LogError(mtsComponentInterfaceProxyServer, "SendExecuteCommandWriteSerialized: no proxy client found or inactive proxy: " 
+            << clientID << ", " << (blocking == MTS_BLOCKING ? "BLOCKING" : "NON-BLOCKING"));
         return false;
     }
 
@@ -409,11 +416,12 @@ bool mtsComponentInterfaceProxyServer::SendExecuteCommandWriteSerialized(const C
     }
 
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
-    LogPrint(mtsComponentInterfaceProxyServer, ">>>>> SEND: SendExecuteCommandWriteSerialized: " << commandID << ", " << serializedArgument.size() << " bytes");
+    LogPrint(mtsComponentInterfaceProxyServer, ">>>>> SEND: SendExecuteCommandWriteSerialized: " << commandID << ", " << serializedArgument.size() << " bytes"
+        << ", " << (blocking == MTS_BLOCKING ? "BLOCKING" : "NON-BLOCKING"));
 #endif
 
     try {
-        (*clientProxy)->ExecuteCommandWriteSerialized(commandID, serializedArgument);
+        (*clientProxy)->ExecuteCommandWriteSerialized(commandID, serializedArgument, (blocking == MTS_BLOCKING));
     } catch (const ::Ice::Exception & ex) {
         LogError(mtsComponentInterfaceProxyServer, "SendExecuteCommandWriteSerialized: network exception: " << ex);
         OnClientDisconnect(clientID);

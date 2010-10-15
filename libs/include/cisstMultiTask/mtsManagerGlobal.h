@@ -36,13 +36,16 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstOSAbstraction/osaMutex.h>
 #include <cisstOSAbstraction/osaGetTime.h>
-#include <cisstOSAbstraction/osaSocket.h>
 
 #include <cisstMultiTask/mtsManagerLocalInterface.h>
 #include <cisstMultiTask/mtsManagerGlobalInterface.h>
+#include <cisstMultiTask/mtsParameterTypes.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 
 #include <cisstMultiTask/mtsExport.h>
+
+// Forward declaration
+class mtsManagerComponentServer;
 
 class CISST_EXPORT mtsManagerGlobal : public mtsManagerGlobalInterface
 {
@@ -159,7 +162,18 @@ protected:
             return ConnectionID;
         }
 
-        /*! Get connection state */
+        mtsDescriptionConnection GetDescriptionConnection(void) const {
+            mtsDescriptionConnection conn;
+            conn.Client.ProcessName = ClientProcessName;
+            conn.Client.ComponentName = ClientComponentName;
+            conn.Client.InterfaceName = ClientInterfaceRequiredName;
+            conn.Server.ProcessName = ServerProcessName;
+            conn.Server.ComponentName = ServerComponentName;
+            conn.Server.InterfaceName = ServerInterfaceProvidedName;
+            conn.ConnectionID = ConnectionID;
+            return conn;
+        }
+
         inline bool IsConnected(void) const {
             return Connected;
         }
@@ -229,7 +243,16 @@ protected:
     /*! Instance of connected local component manager. Note that the global
         component manager communicates with the only one instance of
         mtsManagerLocalInterface regardless of connection type (standalone
-        or network mode) */
+        or network mode) 
+        
+        MJ: (8/20/10) To support a local connection between the global component
+        manager and a local component manager on the same process, this 
+        assumption is slightly modified such that the GCM can have two different 
+        type of connections -- local and remote connections.  When the GCM 
+        executes commands, it checks if it has a local connection to the LCM on 
+        the same process and, if yes, it sends the command to the local LCM.  
+        If not, it delivers the command to a remote LCM as before. */
+    mtsManagerLocal * LocalManager;
     mtsManagerLocalInterface * LocalManagerConnected;
 
     /*! Mutex for ConnectionElementMap because several threads possibly access
@@ -250,8 +273,7 @@ protected:
     mtsManagerProxyServer * ProxyServer;
 #endif
 
-    osaSocket JGraphSocket;
-    bool JGraphSocketConnected;
+    mtsManagerComponentServer *ManagerComponentServer;
 
     //-------------------------------------------------------------------------
     //  Processing Methods
@@ -288,10 +310,7 @@ public:
     mtsManagerGlobal();
     ~mtsManagerGlobal();
 
-    //-------------------------------------------------------------------------
-    //  Interface to Task Viewer (Java program based on JGraph)
-    //-------------------------------------------------------------------------
-    bool ConnectToTaskViewer(const std::string &ipAddress = "localhost", unsigned short port = 4444);
+    void SetMCS(mtsManagerComponentServer *mcs) { ManagerComponentServer = mcs; }
 
     //-------------------------------------------------------------------------
     //  Process Management
@@ -312,10 +331,6 @@ public:
     bool FindComponent(const std::string & processName, const std::string & componentName) const;
 
     bool RemoveComponent(const std::string & processName, const std::string & componentName);
-
-    std::string GetComponentInGraphFormat(const std::string & processName, const std::string & componentName) const;
-
-    bool IsProxyComponent(const std::string & componentName) const;
 
     //-------------------------------------------------------------------------
     //  Interface Management
@@ -361,9 +376,7 @@ public:
         const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceProvidedName);
 #endif
 
-    void GetListOfConnections(std::vector<ConnectionStrings> & list) const;
-
-    std::string GetConnectionInGraphFormat(const ConnectionStrings &connection) const;
+    void GetListOfConnections(std::vector<mtsDescriptionConnection> & list) const;
 
     //-------------------------------------------------------------------------
     //  Getters

@@ -7,7 +7,7 @@
   Author(s):	Anton Deguet
   Created on:	2009-11-08
 
-  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2009-2010 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -35,8 +35,9 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaPython.h>
 
 #include <cisstMultiTask/mtsCommandBase.h>
-#include <cisstMultiTask/mtsCommandVoidBase.h>
-#include <cisstMultiTask/mtsCommandReadOrWriteBase.h>
+#include <cisstMultiTask/mtsCommandVoid.h>
+#include <cisstMultiTask/mtsCommandRead.h>
+#include <cisstMultiTask/mtsCommandWriteBase.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstMultiTask/mtsComponent.h>
@@ -48,6 +49,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsStateIndex.h>
 #include <cisstMultiTask/mtsCollectorBase.h>
 #include <cisstMultiTask/mtsCollectorState.h>
+#include <cisstMultiTask/mtsParameterTypes.h>
 
 #include <cisstMultiTask/mtsVector.h>
 #include <cisstMultiTask/mtsMatrix.h>

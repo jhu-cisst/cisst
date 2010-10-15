@@ -17,7 +17,6 @@ class displayTask: public mtsTaskPeriodic {
     mtsDouble Data;
     mtsDouble Amplitude;
     mtsDouble TriggerValue;
-    volatile bool WaitingForTrigger;
 
     struct GeneratorStruct {
        // functions which will be bound to commands
@@ -25,6 +24,7 @@ class displayTask: public mtsTaskPeriodic {
        mtsFunctionWrite SetAmplitude;
        mtsFunctionWrite SetTriggerValue;
        mtsFunctionVoid ResetTrigger;
+       mtsEventReceiverWrite TriggerEvent;
     } Generator;
 
     struct ClockStruct {

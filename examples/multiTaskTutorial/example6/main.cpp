@@ -27,7 +27,7 @@ int main(void)
     robotLowLevel * robotTask = new robotLowLevel("RobotControl", 100 * cmn_ms);
 
     // add single task, do not connect anything
-    taskManager->AddTask(robotTask);
+    taskManager->AddComponent(robotTask);
     // create the thread for the task
     taskManager->CreateAll();
 

@@ -36,10 +36,10 @@ svlSampleTargets::svlSampleTargets() :
 {
 }
 
-svlSampleTargets::svlSampleTargets(const svlSampleTargets & targets) :
-    svlSample()
+svlSampleTargets::svlSampleTargets(const svlSampleTargets & other) :
+    svlSample(other)
 {
-    CopyOf(targets);
+    CopyOf(other);
 }
 
 svlSample* svlSampleTargets::GetNewInstance() const
@@ -114,6 +114,10 @@ unsigned int svlSampleTargets::GetDataSize() const
 
 void svlSampleTargets::SerializeRaw(std::ostream & outputStream) const
 {
+    mtsGenericObject::SerializeRaw(outputStream);
+
+    cmnSerializeRaw(outputStream, GetType());
+    cmnSerializeRaw(outputStream, GetTimestamp());
     cmnSerializeRaw(outputStream, Channels);
     cmnSerializeRaw(outputStream, Dimensions);
     cmnSerializeRaw(outputStream, Matrix);
@@ -121,6 +125,17 @@ void svlSampleTargets::SerializeRaw(std::ostream & outputStream) const
 
 void svlSampleTargets::DeSerializeRaw(std::istream & inputStream)
 {
+    mtsGenericObject::DeSerializeRaw(inputStream);
+
+    int type = -1;
+    double timestamp;
+    cmnDeSerializeRaw(inputStream, type);
+    if (type != GetType()) {
+        CMN_LOG_CLASS_RUN_ERROR << "Deserialized sample type mismatch " << std::endl;
+        return;
+    }
+    cmnDeSerializeRaw(inputStream, timestamp);
+    SetTimestamp(timestamp);
     cmnDeSerializeRaw(inputStream, Channels);
     cmnDeSerializeRaw(inputStream, Dimensions);
     cmnDeSerializeRaw(inputStream, Matrix);

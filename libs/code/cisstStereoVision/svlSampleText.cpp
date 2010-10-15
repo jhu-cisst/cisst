@@ -29,8 +29,15 @@ http://www.cisst.org/cisst/license.txt.
 
 CMN_IMPLEMENT_SERVICES(svlSampleText)
 
-svlSampleText::svlSampleText() : svlSample()
+svlSampleText::svlSampleText() :
+    svlSample()
 {
+}
+
+svlSampleText::svlSampleText(const svlSampleText & other) :
+    svlSample(other)
+{
+    CopyOf(other);
 }
 
 svlSample* svlSampleText::GetNewInstance() const
@@ -105,11 +112,26 @@ unsigned int svlSampleText::GetDataSize() const
 
 void svlSampleText::SerializeRaw(std::ostream & outputStream) const
 {
+    mtsGenericObject::SerializeRaw(outputStream);
+
+    cmnSerializeRaw(outputStream, GetType());
+    cmnSerializeRaw(outputStream, GetTimestamp());
     cmnSerializeRaw(outputStream, String);
 }
 
 void svlSampleText::DeSerializeRaw(std::istream & inputStream)
 {
+    mtsGenericObject::DeSerializeRaw(inputStream);
+
+    int type = -1;
+    double timestamp;
+    cmnDeSerializeRaw(inputStream, type);
+    if (type != GetType()) {
+        CMN_LOG_CLASS_RUN_ERROR << "Deserialized sample type mismatch " << std::endl;
+        return;
+    }
+    cmnDeSerializeRaw(inputStream, timestamp);
+    SetTimestamp(timestamp);
     cmnDeSerializeRaw(inputStream, String);
 }
 

@@ -116,7 +116,7 @@ int main(int argc, char * argv[])
         UITaskObject = new UITask("UITask", PeriodDisplay);
         UITaskObject->Configure();
 
-        taskManager->AddTask(UITaskObject);
+        taskManager->AddComponent(UITaskObject);
     } else {
         //-------------------------------------------------------------------------
         // Create a task which works over networks
@@ -128,13 +128,13 @@ int main(int argc, char * argv[])
             UITaskObject = new UITask("UITask", PeriodDisplay);
             UITaskObject->Configure();
             
-            taskManager->AddTask(UITaskObject);
-            taskManager->AddTask(sineTaskObject);
+            taskManager->AddComponent(UITaskObject);
+            taskManager->AddComponent(sineTaskObject);
         } else {
             displayTaskObject = new displayTask(clientTaskName, PeriodDisplay);
             displayTaskObject->Configure();
 
-            taskManager->AddTask(displayTaskObject);        
+            taskManager->AddComponent(displayTaskObject);        
         }
 
         // Connect the tasks across networks

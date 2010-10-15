@@ -136,21 +136,51 @@ int svlFilterOutput::SetBlock(bool block)
 
 int svlFilterOutput::Connect(svlFilterInput *input)
 {
-    if (!Filter ||
-        !input || !input->Filter ||
-        Connected || input->Connected ||
-        Filter->Initialized || input->Filter->Initialized) return SVL_FAIL;
+    if (!this->Filter) {
+        CMN_LOG_CLASS_INIT_ERROR << "Connect: this output is not associated to any filter" << std::endl;
+        return SVL_FAIL;
+    }
+    if (!input) {
+        CMN_LOG_CLASS_INIT_ERROR << "Connect: null input pointer passed to this method" << std::endl;
+        return SVL_FAIL;
+    }
+    if (!input->Filter) {
+        CMN_LOG_CLASS_INIT_ERROR << "Connect: input passed to this method is not associated to any filter" << std::endl;
+        return SVL_FAIL;
+    }
+    if (this->Connected) {
+        CMN_LOG_CLASS_INIT_ERROR << "Connect: this output is already connected" << std::endl;
+        return SVL_FAIL;
+    }
+    if (input->Connected) {
+        CMN_LOG_CLASS_INIT_ERROR << "Connect: input passed to this method is already connected" << std::endl;
+        return SVL_FAIL;
+    }
+    if (this->Filter->Initialized) {
+        CMN_LOG_CLASS_INIT_ERROR << "Connect: filter associated to this output is already initialized" << std::endl;
+        return SVL_FAIL;
+    }
+    if (input->Filter->Initialized) {
+        CMN_LOG_CLASS_INIT_ERROR << "Connect: filter associated to the input is already initialized" << std::endl;
+        return SVL_FAIL;
+    }
 
     // Setup output types in the connected filter
     if (input->Trunk && input->Filter->AutoType) {
         // Automatic setup
-        if (!input->IsTypeSupported(Type)) return SVL_FAIL;
+        if (!input->IsTypeSupported(Type)) {
+            CMN_LOG_CLASS_INIT_ERROR << "Connect: input doesn't support output type (auto)" << std::endl;
+            return SVL_FAIL;
+        }
         svlFilterOutput* output = input->Filter->GetOutput();
         if (output) output->SetType(Type);
     }
     else {
         // Manual setup
-        if (input->Filter->UpdateTypes(*input, Type) != SVL_OK) return SVL_FAIL;
+        if (input->Filter->UpdateTypes(*input, Type) != SVL_OK) {
+            CMN_LOG_CLASS_INIT_ERROR << "Connect: input doesn't support output type (manual)" << std::endl;
+            return SVL_FAIL;
+        }
     }
 
     if (!Trunk && input->Trunk) {

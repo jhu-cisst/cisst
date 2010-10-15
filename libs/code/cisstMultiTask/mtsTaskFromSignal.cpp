@@ -28,12 +28,12 @@ http://www.cisst.org/cisst/license.txt.
 mtsTaskFromSignal::mtsTaskFromSignal(const std::string & name,
                                      unsigned int sizeStateTable):
     mtsTaskContinuous(name, sizeStateTable),
-    PostCommandQueuedCommand(0)
+    PostCommandQueuedCallable(0)
 {
-    this->PostCommandQueuedCommand = new mtsCommandVoidMethod<mtsTaskFromSignal>(&mtsTaskFromSignal::PostCommandQueuedMethod,
-                                                                                 this, "Post command queued command");
-    if (!this->PostCommandQueuedCommand) {
-        CMN_LOG_CLASS_INIT_ERROR << "constructor: can't create post command queued command based on method." << std::endl;
+    this->PostCommandQueuedCallable = new mtsCallableVoidMethod<mtsTaskFromSignal>(&mtsTaskFromSignal::PostCommandQueuedMethod,
+                                                                                   this);
+    if (!this->PostCommandQueuedCallable) {
+        CMN_LOG_CLASS_INIT_ERROR << "constructor: can't create post command queued callable based on method." << std::endl;
     }
 }
 
@@ -46,17 +46,17 @@ void mtsTaskFromSignal::PostCommandQueuedMethod(void) {
 
 void * mtsTaskFromSignal::RunInternal(void * CMN_UNUSED(data)) {
     CMN_LOG_CLASS_INIT_VERBOSE << "RunInternal: begin task " << this->GetName() << std::endl;
-    if (TaskState == INITIALIZING) {
+    if (this->State == mtsComponentState::INITIALIZING) {
         this->StartupInternal();
     }
 
-	while ((TaskState == ACTIVE) || (TaskState == READY)) {
-        while (TaskState == READY) {
+    while ((this->State == mtsComponentState::ACTIVE) || (this->State == mtsComponentState::READY)) {
+        while (this->State == mtsComponentState::READY) {
             // Suspend the task until there is a call to Start().
             CMN_LOG_CLASS_INIT_VERBOSE << "RunInternal: wait to start task \"" << this->GetName() << "\"" << std::endl;
             WaitForWakeup();
         }
-        if (TaskState == ACTIVE) {
+        if (this->State == mtsComponentState::ACTIVE) {
             DoRunInternal();
             // put the task to sleep until next signal
             CMN_LOG_CLASS_RUN_DEBUG << "RunInternal: about to put thread to sleep for task \"" << this->GetName() << "\"" << std::endl;
@@ -64,12 +64,21 @@ void * mtsTaskFromSignal::RunInternal(void * CMN_UNUSED(data)) {
         }
     }
 
-    if (TaskState == FINISHING) {
-    	CMN_LOG_CLASS_INIT_VERBOSE << "RunInternal: end of task \"" << this->GetName() << "\"" << std::endl;
+    if (this->State == mtsComponentState::FINISHING) {
+        CMN_LOG_CLASS_INIT_VERBOSE << "RunInternal: end of task \"" << this->GetName() << "\"" << std::endl;
         this->CleanupInternal();
     }
     void * returnValue = this->ReturnValue;
     return returnValue;
+}
+
+
+void mtsTaskFromSignal::Kill(void)
+{
+    CMN_LOG_CLASS_INIT_VERBOSE << "Kill: task \"" << this->GetName() << "\", current state \"" << this->State << "\"" << std::endl;
+    mtsTask::Kill();
+    // only difference is that we need to wake up the thread to make sure it processes the request
+    this->Thread.Wakeup();
 }
 
 
@@ -79,7 +88,7 @@ mtsInterfaceRequired * mtsTaskFromSignal::AddInterfaceRequired(const std::string
     // create a mailbox with post command queued command
     // PK: move DEFAULT_EVENT_QUEUE_LEN somewhere else (not in mtsInterfaceProvided)
     mtsMailBox * mailBox = new mtsMailBox(interfaceRequiredName + "Events", mtsInterfaceRequired::DEFAULT_EVENT_QUEUE_LEN,
-                                          this->PostCommandQueuedCommand);
+                                          this->PostCommandQueuedCallable);
     mtsInterfaceRequired * result;
     if (mailBox) {
         // try to create and add interface
@@ -97,14 +106,14 @@ mtsInterfaceRequired * mtsTaskFromSignal::AddInterfaceRequired(const std::string
 
 
 mtsInterfaceProvided * mtsTaskFromSignal::AddInterfaceProvided(const std::string & interfaceProvidedName,
-                                                               mtsInterfaceQueuingPolicy queuingPolicy)
+                                                               mtsInterfaceQueueingPolicy queueingPolicy)
 {
     mtsInterfaceProvided * interfaceProvided;
-    if ((queuingPolicy == MTS_COMPONENT_POLICY)
-        || (queuingPolicy == MTS_COMMANDS_SHOULD_BE_QUEUED)) {
+    if ((queueingPolicy == MTS_COMPONENT_POLICY)
+        || (queueingPolicy == MTS_COMMANDS_SHOULD_BE_QUEUED)) {
         interfaceProvided = new mtsInterfaceProvided(interfaceProvidedName, this,
                                                      MTS_COMMANDS_SHOULD_BE_QUEUED,
-                                                     this->PostCommandQueuedCommand);
+                                                     this->PostCommandQueuedCallable);
     } else {
         CMN_LOG_CLASS_INIT_WARNING << "AddInterfaceProvided: adding provided interface \"" << interfaceProvidedName
                                    << "\" with policy MTS_COMMANDS_SHOULD_NOT_BE_QUEUED to task \""

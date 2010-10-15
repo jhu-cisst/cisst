@@ -70,8 +70,8 @@ bool ui3SlaveArm::SetInput(const std::string & positionDevice, const std::string
         return false;
     }
     // connect the master device to the master required interface
-    this->Manager->TaskManager->Connect(this->Manager->GetName(), this->Name,
-                                        positionDevice, positionInterface);
+    this->Manager->ComponentManager->Connect(this->Manager->GetName(), this->Name,
+                                             positionDevice, positionInterface);
     return true;
 }
 

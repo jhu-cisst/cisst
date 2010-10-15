@@ -45,7 +45,7 @@ IReqStreamManager::IReqStreamManager(const std::string& name, mtsComponent* owne
     Owner(owner)
 {
     if (Owner) {
-        mtsInterfaceRequired* required = Owner->AddInterfaceRequired(name);
+        mtsInterfaceRequired* required = Owner->AddInterfaceRequired(name, MTS_OPTIONAL);
         if (required) {
             required->AddFunction("SetSourceFilter", SetSourceFilter);
             required->AddFunction("Initialize",      Initialize);
@@ -70,7 +70,7 @@ IReqFilterSourceImageFile::IReqFilterSourceImageFile(const std::string& name, mt
     Owner(owner)
 {
     if (Owner) {
-        mtsInterfaceRequired* required = Owner->AddInterfaceRequired(name);
+        mtsInterfaceRequired* required = Owner->AddInterfaceRequired(name, MTS_OPTIONAL);
         if (required) {
             required->AddFunction("SetFramerate",       SetFramerate);
             required->AddFunction("SetLoop",            SetLoop);
@@ -103,7 +103,7 @@ IReqFilterSourceTextFile::IReqFilterSourceTextFile(const std::string& name, mtsC
     Owner(owner)
 {
     if (Owner) {
-        mtsInterfaceRequired* required = Owner->AddInterfaceRequired(name);
+        mtsInterfaceRequired* required = Owner->AddInterfaceRequired(name, MTS_OPTIONAL);
         if (required) {
             required->AddFunction("SetFramerate",  SetFramerate);
             required->AddFunction("SetLoop",       SetLoop);
@@ -135,7 +135,7 @@ IReqFilterSourceVideoCapture::IReqFilterSourceVideoCapture(const std::string& na
     Owner(owner)
 {
     if (Owner) {
-        mtsInterfaceRequired* required = Owner->AddInterfaceRequired(name);
+        mtsInterfaceRequired* required = Owner->AddInterfaceRequired(name, MTS_OPTIONAL);
         if (required) {
             required->AddFunction("Pause",                   Pause);
             required->AddFunction("Play",                    Play);
@@ -206,7 +206,7 @@ IReqFilterSourceVideoFile::IReqFilterSourceVideoFile(const std::string& name, mt
     Owner(owner)
 {
     if (Owner) {
-        mtsInterfaceRequired* required = Owner->AddInterfaceRequired(name);
+        mtsInterfaceRequired* required = Owner->AddInterfaceRequired(name, MTS_OPTIONAL);
         if (required) {
             required->AddFunction("SetFramerate",           SetFramerate);
             required->AddFunction("SetLoop",                SetLoop);
@@ -264,7 +264,7 @@ IReqFilterSplitter::IReqFilterSplitter(const std::string& name, mtsComponent* ow
     Owner(owner)
 {
     if (Owner) {
-        mtsInterfaceRequired* required = Owner->AddInterfaceRequired(name);
+        mtsInterfaceRequired* required = Owner->AddInterfaceRequired(name, MTS_OPTIONAL);
         if (required) {
             required->AddFunction("AddOutput", AddOutput);
         }
@@ -286,7 +286,7 @@ IReqFilterImageExposureCorrection::IReqFilterImageExposureCorrection(const std::
     Owner(owner)
 {
     if (Owner) {
-        mtsInterfaceRequired* required = Owner->AddInterfaceRequired(name);
+        mtsInterfaceRequired* required = Owner->AddInterfaceRequired(name, MTS_OPTIONAL);
         if (required) {
             required->AddFunction("SetBrightness", SetBrightness);
             required->AddFunction("SetContrast",   SetContrast);
@@ -313,7 +313,7 @@ IReqFilterImageResizer::IReqFilterImageResizer(const std::string& name, mtsCompo
     Owner(owner)
 {
     if (Owner) {
-        mtsInterfaceRequired* required = Owner->AddInterfaceRequired(name);
+        mtsInterfaceRequired* required = Owner->AddInterfaceRequired(name, MTS_OPTIONAL);
         if (required) {
             required->AddFunction("SetInterpolation",        SetInterpolation);
             required->AddFunction("SetOutputDimension",      SetOutputDimension);
@@ -347,7 +347,7 @@ IReqFilterImageTranslation::IReqFilterImageTranslation(const std::string& name, 
     Owner(owner)
 {
     if (Owner) {
-        mtsInterfaceRequired* required = Owner->AddInterfaceRequired(name);
+        mtsInterfaceRequired* required = Owner->AddInterfaceRequired(name, MTS_OPTIONAL);
         if (required) {
             required->AddFunction("SetTranslation",      SetTranslation);
             required->AddFunction("SetLeftTranslation",  SetLeftTranslation);
@@ -374,7 +374,7 @@ IReqFilterLightSourceBuddy::IReqFilterLightSourceBuddy(const std::string& name, 
     Owner(owner)
 {
     if (Owner) {
-        mtsInterfaceRequired* required = Owner->AddInterfaceRequired(name);
+        mtsInterfaceRequired* required = Owner->AddInterfaceRequired(name, MTS_OPTIONAL);
         if (required) {
             required->AddFunction("SetEnable",       SetEnable);
             required->AddFunction("SetCalibration",  SetCalibration);
@@ -401,7 +401,7 @@ IReqFilterStereoImageJoiner::IReqFilterStereoImageJoiner(const std::string& name
     Owner(owner)
 {
     if (Owner) {
-        mtsInterfaceRequired* required = Owner->AddInterfaceRequired(name);
+        mtsInterfaceRequired* required = Owner->AddInterfaceRequired(name, MTS_OPTIONAL);
         if (required) {
             required->AddFunction("SetLayout", SetLayout);
             required->AddFunction("GetLayout", GetLayout);
@@ -424,7 +424,7 @@ IReqFilterImageWindow::IReqFilterImageWindow(const std::string& name, mtsCompone
     Owner(owner)
 {
     if (Owner) {
-        mtsInterfaceRequired* required = Owner->AddInterfaceRequired(name);
+        mtsInterfaceRequired* required = Owner->AddInterfaceRequired(name, MTS_OPTIONAL);
         if (required) {
             required->AddFunction("SetFullScreen",    SetFullScreen);
             required->AddFunction("SetTitle",         SetTitle);

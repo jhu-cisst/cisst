@@ -3,40 +3,45 @@
 #
 # CMakeLists for cisstOSAbstraction tests
 #
-# (C) Copyright 2006-2007 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2006-2010 Johns Hopkins University (JHU), All Rights
 # Reserved.
-# 
+#
 # --- begin cisst license - do not edit ---
-# 
+#
 # This software is provided "as is" under an open source license, with
 # no warranty.  The complete license can be found in license.txt and
 # http://www.cisst.org/cisst/license.txt.
-# 
+#
 # --- end cisst license ---
 
 
 # all source files
-SET(SOURCE_FILES
-    osaMutexTest.cpp
-    osaSocketTest.cpp
-    osaThreadTest.cpp
-    )
+set (SOURCE_FILES
+     osaMutexTest.cpp
+     osaPipeTest.cpp
+     osaSocketTest.cpp
+     osaThreadTest.cpp
+     )
 
 # all header files
-SET(HEADER_FILES
-    osaMutexTest.h
-    osaSocketTest.h
-    osaThreadTest.h
-    )
+set (HEADER_FILES
+     osaMutexTest.h
+     osaPipeTest.h
+     osaSocketTest.h
+     osaThreadTest.h
+     )
 
-# Add executable for C++ tests
-ADD_EXECUTABLE(cisstOSAbstractionTests ${SOURCE_FILES} ${HEADER_FILES})
-TARGET_LINK_LIBRARIES(cisstOSAbstractionTests cisstTestsMain )
-CISST_REQUIRES("cisstOSAbstractionTests" "cisstCommon;cisstOSAbstraction")
+# add executable for C++ tests
+add_executable (cisstOSAbstractionTestsPipeUtility osaPipeUtility.cpp)
 
-# Threads
-FIND_PACKAGE(Threads REQUIRED)
-TARGET_LINK_LIBRARIES(cisstOSAbstractionTests ${CMAKE_THREAD_LIBS_INIT})
+add_executable (cisstOSAbstractionTests ${SOURCE_FILES} ${HEADER_FILES})
+target_link_libraries (cisstOSAbstractionTests cisstTestsMain )
+cisst_target_link_libraries (cisstOSAbstractionTests cisstCommon cisstOSAbstraction)
+add_dependencies(cisstOSAbstractionTests cisstOSAbstractionTestsPipeUtility)
 
-# To generate a CTest list of tests
-CISST_ADD_TESTS(cisstOSAbstractionTests)
+# threads
+find_package (Threads REQUIRED)
+target_link_libraries (cisstOSAbstractionTests ${CMAKE_THREAD_LIBS_INIT})
+
+# to generate a CTest list of tests
+cisst_add_test (cisstOSAbstractionTests INSTANCES 2 ITERATIONS 2)

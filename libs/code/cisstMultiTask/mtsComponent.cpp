@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
+  Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet, Min Yang Jung
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -24,29 +24,37 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsInterfaceOutput.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstMultiTask/mtsInterfaceInput.h>
+#include <cisstMultiTask/mtsManagerComponentBase.h>
+#include <cisstMultiTask/mtsManagerComponentServices.h>
+#include <cisstMultiTask/mtsParameterTypes.h>
 
 #include <cisstOSAbstraction/osaGetTime.h>
+#include <cisstOSAbstraction/osaSleep.h>
 
 mtsComponent::mtsComponent(const std::string & componentName):
     Name(componentName),
-    UseSeparateLogFileFlag(false),
-    LoDMultiplexerStreambuf(0),
-    LogFile(0),
     InterfacesProvidedOrOutput("InterfacesProvided"),
     InterfacesRequiredOrInput("InterfacesRequiredOrInput")
 {
-    InterfacesProvidedOrOutput.SetOwner(*this);
-    InterfacesRequiredOrInput.SetOwner(*this);
+    Initialize();
 }
 
 
 mtsComponent::mtsComponent(void):
-    UseSeparateLogFileFlag(false),
-    LoDMultiplexerStreambuf(0),
-    LogFile(0),
     InterfacesProvidedOrOutput("InterfacesProvided"),
     InterfacesRequiredOrInput("InterfacesRequiredOrInput")
 {
+    Initialize();
+}
+
+void mtsComponent::Initialize(void)
+{
+    UseSeparateLogFileFlag = false;
+    LoDMultiplexerStreambuf = 0;
+    LogFile = 0;
+
+    ManagerComponentServices = 0;
+
     InterfacesProvidedOrOutput.SetOwner(*this);
     InterfacesRequiredOrInput.SetOwner(*this);
 }
@@ -64,10 +72,15 @@ mtsComponent::~mtsComponent()
     if (this->LoDMultiplexerStreambuf) {
         this->LoDMultiplexerStreambuf->RemoveAllChannels();
         delete this->LoDMultiplexerStreambuf;
+        this->LoDMultiplexerStreambuf = 0;
     }
     if (this->LogFile) {
         this->LogFile->close();
         delete this->LogFile;
+    }
+
+    if (ManagerComponentServices) {
+        delete ManagerComponentServices;
     }
 }
 
@@ -84,10 +97,27 @@ void mtsComponent::SetName(const std::string & componentName)
 }
 
 
+void mtsComponent::Create(void)
+{
+    CMN_LOG_CLASS_INIT_VERBOSE << "Create: default create method for component \""
+                               << this->GetName() << "\"" << std::endl;
+    this->State = mtsComponentState::READY;
+}
+
+
 void mtsComponent::Start(void)
 {
     CMN_LOG_CLASS_INIT_VERBOSE << "Start: default start method for component \""
                                << this->GetName() << "\"" << std::endl;
+    this->State = mtsComponentState::ACTIVE;
+}
+
+
+void mtsComponent::Kill(void)
+{
+    CMN_LOG_CLASS_INIT_VERBOSE << "Kill: default kill method for component \""
+                               << this->GetName() << "\"" << std::endl;
+    this->State = mtsComponentState::FINISHED;
 }
 
 
@@ -133,11 +163,11 @@ std::vector<std::string> mtsComponent::GetNamesOfInterfacesOutput(void) const
 
 
 mtsInterfaceProvided * mtsComponent::AddInterfaceProvided(const std::string & interfaceProvidedName,
-                                                          mtsInterfaceQueuingPolicy queuingPolicy)
+                                                          mtsInterfaceQueueingPolicy queueingPolicy)
 {
     mtsInterfaceProvided * interfaceProvided;
-    if ((queuingPolicy == MTS_COMPONENT_POLICY)
-        || (queuingPolicy == MTS_COMMANDS_SHOULD_NOT_BE_QUEUED)) {
+    if ((queueingPolicy == MTS_COMPONENT_POLICY)
+        || (queueingPolicy == MTS_COMMANDS_SHOULD_NOT_BE_QUEUED)) {
         interfaceProvided = new mtsInterfaceProvided(interfaceProvidedName, this, MTS_COMMANDS_SHOULD_NOT_BE_QUEUED);
     } else {
         CMN_LOG_CLASS_INIT_WARNING << "AddInterfaceProvided: adding provided interface \"" << interfaceProvidedName
@@ -239,7 +269,7 @@ bool mtsComponent::RemoveInterfaceProvided(const std::string & interfaceProvided
     // MJUNG: this code is NOT thread safe.
     if (!InterfacesProvidedOrOutput.RemoveItem(interfaceProvidedName)) {
         CMN_LOG_CLASS_RUN_ERROR << "RemoveInterfaceProvided: failed to remove provided interface \""
-                                 << interfaceProvidedName << "\"" << std::endl;
+                                << interfaceProvidedName << "\"" << std::endl;
         return false;
     }
 
@@ -311,24 +341,27 @@ bool mtsComponent::RemoveInterfaceOutput(const std::string & interfaceOutputName
 mtsInterfaceRequiredOrInput *
 mtsComponent::GetInterfaceRequiredOrInput(const std::string & interfaceRequiredOrInputName)
 {
-    return InterfacesRequiredOrInput.GetItem(interfaceRequiredOrInputName,
-                                             CMN_LOG_LOD_INIT_ERROR);
+    // MJ: do we really want CMN_LOG_LOD_INIT_ERROR?
+    return InterfacesRequiredOrInput.GetItem(interfaceRequiredOrInputName);
+                                             //CMN_LOG_LOD_INIT_ERROR);
 }
 
 
 mtsInterfaceRequired *
 mtsComponent::GetInterfaceRequired(const std::string & interfaceRequiredName)
 {
-    return dynamic_cast<mtsInterfaceRequired *>(InterfacesRequiredOrInput.GetItem(interfaceRequiredName,
-                                                                                  CMN_LOG_LOD_INIT_ERROR));
+    // MJ: do we really want CMN_LOG_LOD_INIT_ERROR?
+    return dynamic_cast<mtsInterfaceRequired *>(InterfacesRequiredOrInput.GetItem(interfaceRequiredName));
+                                                                                  //CMN_LOG_LOD_INIT_ERROR));
 }
 
 
 mtsInterfaceInput *
 mtsComponent::GetInterfaceInput(const std::string & interfaceInputName) const
 {
-    return dynamic_cast<mtsInterfaceInput *>(InterfacesRequiredOrInput.GetItem(interfaceInputName,
-                                                                               CMN_LOG_LOD_INIT_ERROR));
+    // MJ: do we really want CMN_LOG_LOD_INIT_ERROR?
+    return dynamic_cast<mtsInterfaceInput *>(InterfacesRequiredOrInput.GetItem(interfaceInputName));
+                                                                               //CMN_LOG_LOD_INIT_ERROR));
 }
 
 
@@ -673,3 +706,463 @@ cmnLogger::StreamBufType * mtsComponent::GetLogMultiplexer(void) const
     }
     return cmnGenericObject::GetLogMultiplexer();
 }
+
+
+bool mtsComponent::IsRunning(void) const
+{
+    return (this->State == mtsComponentState::ACTIVE);
+ }
+
+
+bool mtsComponent::IsStarted(void) const
+{
+    return (this->State >= mtsComponentState::READY);
+}
+
+
+bool mtsComponent::IsTerminated(void) const
+{
+    return (this->State == mtsComponentState::FINISHED);
+}
+
+
+bool mtsComponent::IsEndTask(void) const
+{
+    return (this->State >= mtsComponentState::FINISHING);
+}
+
+
+const mtsComponentState & mtsComponent::GetState(void) const
+{
+    return this->State;
+}
+
+
+bool mtsComponent::WaitForState(mtsComponentState desiredState, double timeout)
+{
+    if (timeout != 0.0) {
+        CMN_LOG_CLASS_INIT_VERBOSE << "WaitForState: called for component \"" << this->GetName()
+                                   << "\" for state \"" << desiredState << "\" has no effect for mtsComponent" << std::endl;
+    }
+    return true;
+}
+
+mtsInterfaceRequired * mtsComponent::EnableDynamicComponentManagement(void)
+{
+    // Extend internal required interface (to Manager Component) to include event handlers
+    mtsInterfaceRequired * required = AddInterfaceRequired(
+        mtsManagerComponentBase::InterfaceNames::InterfaceInternalRequired);
+    if (!required) {
+        CMN_LOG_CLASS_INIT_ERROR << "EnableDynamicComponentManagement: failed to add internal required interface to component " 
+            << "\"" << GetName() << "\"" << std::endl;
+        return 0;
+    } else {
+        CMN_LOG_CLASS_INIT_VERBOSE << "EnableDynamicComponentManagement: successfully added internal required interface" << std::endl;
+    }
+
+    // Check if manager component service object has already been created
+    if (ManagerComponentServices) {
+        CMN_LOG_CLASS_INIT_WARNING << "EnableDynamicComponentManagement: redefine ManagerComponentServices object" << std::endl;
+        delete ManagerComponentServices;
+    }
+
+    ManagerComponentServices = new mtsManagerComponentServices(required);
+    ManagerComponentServices->InitializeInterfaceInternalRequired();
+
+    CMN_LOG_CLASS_INIT_VERBOSE << "EnableDynamicComponentManagement: successfully initialized dynamic component management services" << std::endl;
+
+    return required;
+}
+
+bool mtsComponent::AddInterfaceInternal(const bool useMangerComponentServices)
+{
+    // Add required interface
+    std::string interfaceName;
+    if (useMangerComponentServices) {
+        // If a user component needs to use the dynamic component management services,
+        // mtsComponent::EnableDynamicComponentManagement() should be called beforehand 
+        // in the user component's constructor so that the internal required interface and DCC
+        // service object is properly initialized.
+        // Only validity of such internal structures is checked here.
+        mtsInterfaceRequired * required = GetInterfaceRequired(
+            mtsManagerComponentBase::InterfaceNames::InterfaceInternalRequired);
+        if (!required) {
+            CMN_LOG_CLASS_INIT_ERROR << "AddInterfaceInternal: dynamic component management service (1) is not properly initialized" << std::endl;
+            return false;
+        }
+        if (!ManagerComponentServices) {
+            CMN_LOG_CLASS_INIT_ERROR << "AddInterfaceInternal: dynamic component management service (2) is not properly initialized" << std::endl;
+            return false;
+        }
+    }
+
+    // Add provided interface
+    mtsInterfaceProvided *provided = 0;
+    interfaceName = mtsManagerComponentBase::InterfaceNames::InterfaceInternalProvided;
+    if (GetInterfaceProvided(interfaceName))
+        CMN_LOG_INIT_WARNING << "AddInterfaceInternal: provided interface already present" << std::endl;
+    else {
+        provided = AddInterfaceProvided(interfaceName);
+        if (provided) {
+            provided->AddCommandWrite(&mtsComponent::InterfaceInternalCommands_ComponentStop,
+                                      this, mtsManagerComponentBase::CommandNames::ComponentStop);
+            provided->AddCommandWrite(&mtsComponent::InterfaceInternalCommands_ComponentResume,
+                                      this, mtsManagerComponentBase::CommandNames::ComponentResume);
+            provided->AddEventWrite(EventGeneratorChangeState, mtsManagerComponentBase::EventNames::ChangeState, mtsComponentStateChange());
+            //CMN_LOG_CLASS_INIT_VERBOSE << "AddInterfaceInternal: successfully added internal provided interface" << std::endl;
+        }
+        else
+            CMN_LOG_CLASS_INIT_ERROR << "AddInterfaceInternal: failed to add internal provided interface: " << interfaceName << std::endl;
+    }
+
+    return true;
+}
+
+void mtsComponent::InterfaceInternalCommands_ComponentStop(const mtsComponentStatusControl & arg)
+{
+    // MJ: How to implement "Stopping device-type component which might be already running"?
+    //
+    // Possible solutions might be:
+    // - For device-type component: disable all commands and functions in all
+    //   interfaces of this component.
+    // - For task-type component: the above + call Suspend()
+    //
+    // The current implementation only can handle task-type component through mtsTask::Suspend()
+
+    CMN_LOG_CLASS_RUN_VERBOSE << "InterfaceInternalCommands_ComponentStop: stopping component: " << GetName() << std::endl;
+
+    // Stop device-type component
+    mtsTask * task = dynamic_cast<mtsTask *>(this);
+    if (!task) {
+        // TODO: implement stopping a device-type component
+        cmnThrow("InterfaceInternalCommands_ComponentStop: TODO - implement this function");
+        return;
+    }
+    // Stop task-type component
+    else {
+        task->Suspend();
+    }
+
+    CMN_LOG_CLASS_RUN_VERBOSE << "InterfaceInternalCommands_ComponentStart: stopped component:  " << GetName() << std::endl;
+}
+
+void mtsComponent::InterfaceInternalCommands_ComponentResume(const mtsComponentStatusControl & arg)
+{
+    // MJ: How to implement "Resuming device-type component which might be already running"?
+    //
+    // Possible solutions might be:
+    // - For device-type component: enable all commands and functions in all
+    //   interfaces of this component.
+    // - For task-type component: the above + call Start()
+
+    CMN_LOG_CLASS_RUN_VERBOSE << "InterfaceInternalCommands_ComponentResume: resuming component: " << GetName() << std::endl;
+
+    // Stop device-type component
+    mtsTask * task = dynamic_cast<mtsTask *>(this);
+    if (!task) {
+        // TODO: implement stopping a device-type component
+        cmnThrow("InterfaceInternalCommands_ComponentResume: TODO - implement this function");
+        return;
+    }
+    // Stop task-type component
+    else {
+        task->Start();
+    }
+
+    CMN_LOG_CLASS_RUN_VERBOSE << "InterfaceInternalCommands_ComponentResume: resumed component:  " << GetName() << std::endl;
+}
+
+/*
+bool mtsComponent::RequestComponentCreate(const std::string & className, const std::string & componentName) const
+{
+    if (!InternalInterfaceFunctions.ComponentCreate.IsValid()) {
+        CMN_LOG_CLASS_RUN_ERROR << "RequestComponentCreate: invalid function - has not been bound to command" << std::endl;
+        return false;
+    }
+
+    mtsDescriptionComponent arg;
+    arg.ProcessName   = mtsManagerLocal::GetInstance()->GetProcessName();
+    arg.ClassName     = className;
+    arg.ComponentName = componentName;
+
+    // MJ: TODO: change this with blocking command
+    InternalInterfaceFunctions.ComponentCreate(arg);
+
+    CMN_LOG_CLASS_RUN_VERBOSE << "RequestComponentCreate: requested component creation: " << arg << std::endl;
+
+    return true;
+}
+
+bool mtsComponent::RequestComponentCreate(
+    const std::string& processName, const std::string & className, const std::string & componentName) const
+{
+    if (!InternalInterfaceFunctions.ComponentCreate.IsValid()) {
+        CMN_LOG_CLASS_RUN_ERROR << "RequestComponentCreate: invalid function - has not been bound to command" << std::endl;
+        return false;
+    }
+
+    mtsDescriptionComponent arg;
+    arg.ProcessName   = processName;
+    arg.ClassName     = className;
+    arg.ComponentName = componentName;
+
+    // MJ: TODO: change this with blocking command
+    InternalInterfaceFunctions.ComponentCreate(arg);
+
+    CMN_LOG_CLASS_RUN_VERBOSE << "RequestComponentCreate: requested component creation: " << arg << std::endl;
+
+    return true;
+}
+
+bool mtsComponent::RequestComponentConnect(
+    const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
+    const std::string & serverComponentName, const std::string & serverInterfaceProvidedName) const
+{
+    if (!InternalInterfaceFunctions.ComponentConnect.IsValid()) {
+        CMN_LOG_CLASS_RUN_ERROR << "RequestComponentConnect: invalid function - has not been bound to command" << std::endl;
+        return false;
+    }
+
+    mtsDescriptionConnection arg;
+    const std::string thisProcessName = mtsManagerLocal::GetInstance()->GetProcessName();
+    arg.Client.ProcessName   = thisProcessName;
+    arg.Client.ComponentName = clientComponentName;
+    arg.Client.InterfaceName = clientInterfaceRequiredName;
+    arg.Server.ProcessName   = thisProcessName;
+    arg.Server.ComponentName = serverComponentName;
+    arg.Server.InterfaceName = serverInterfaceProvidedName;
+    arg.ConnectionID = -1;  // not yet assigned
+
+    // MJ: TODO: change this with blocking command
+    InternalInterfaceFunctions.ComponentConnect(arg);
+
+    CMN_LOG_CLASS_RUN_VERBOSE << "RequestComponentConnect: requested component connection: " << arg << std::endl;
+
+    return true;
+}
+
+bool mtsComponent::RequestComponentConnect(
+    const std::string & clientProcessName,
+    const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
+    const std::string & serverProcessName,
+    const std::string & serverComponentName, const std::string & serverInterfaceProvidedName) const
+{
+    if (!InternalInterfaceFunctions.ComponentConnect.IsValid()) {
+        CMN_LOG_CLASS_RUN_ERROR << "RequestComponentConnect: invalid function - has not been bound to command" << std::endl;
+        return false;
+    }
+
+    mtsDescriptionConnection arg;
+    arg.Client.ProcessName   = clientProcessName;
+    arg.Client.ComponentName = clientComponentName;
+    arg.Client.InterfaceName = clientInterfaceRequiredName;
+    arg.Server.ProcessName   = serverProcessName;
+    arg.Server.ComponentName = serverComponentName;
+    arg.Server.InterfaceName = serverInterfaceProvidedName;
+    arg.ConnectionID = -1;  // not yet assigned
+
+    // MJ: TODO: change this with blocking command
+    InternalInterfaceFunctions.ComponentConnect(arg);
+
+    CMN_LOG_CLASS_RUN_VERBOSE << "RequestComponentConnect: requested component connection: " << arg << std::endl;
+
+    return true;
+}
+
+bool mtsComponent::RequestComponentStart(const std::string & componentName, const double delayInSecond) const
+{
+    if (!InternalInterfaceFunctions.ComponentStart.IsValid()) {
+        CMN_LOG_CLASS_RUN_ERROR << "RequestComponentStart: invalid function - has not been bound to command" << std::endl;
+        return false;
+    }
+
+    mtsComponentStatusControl arg;
+    arg.ProcessName   = mtsManagerLocal::GetInstance()->GetProcessName();
+    arg.ComponentName = componentName;
+    arg.DelayInSecond = delayInSecond;
+    arg.Command       = mtsComponentStatusControl::COMPONENT_START;
+
+    // MJ: TODO: change this with blocking command
+    InternalInterfaceFunctions.ComponentStart(arg);
+
+    CMN_LOG_CLASS_RUN_VERBOSE << "RequestComponentStart: requested component start: " << arg << std::endl;
+
+    return true;
+}
+
+bool mtsComponent::RequestComponentStart(const std::string& processName, const std::string & componentName,
+                                         const double delayInSecond) const
+{
+    if (!InternalInterfaceFunctions.ComponentStart.IsValid()) {
+        CMN_LOG_CLASS_RUN_ERROR << "RequestComponentStart: invalid function - has not been bound to command" << std::endl;
+        return false;
+    }
+
+    mtsComponentStatusControl arg;
+    arg.ProcessName   = processName;
+    arg.ComponentName = componentName;
+    arg.DelayInSecond = delayInSecond;
+    arg.Command       = mtsComponentStatusControl::COMPONENT_START;
+
+    // MJ: TODO: change this with blocking command
+    InternalInterfaceFunctions.ComponentStart(arg);
+
+    CMN_LOG_CLASS_RUN_VERBOSE << "RequestComponentStart: requested component start: " << arg << std::endl;
+
+    return true;
+}
+
+bool mtsComponent::RequestComponentStop(const std::string & componentName, const double delayInSecond) const
+{
+    if (!InternalInterfaceFunctions.ComponentStop.IsValid()) {
+        CMN_LOG_CLASS_RUN_ERROR << "RequestComponentStop: invalid function - has not been bound to command" << std::endl;
+        return false;
+    }
+
+    mtsComponentStatusControl arg;
+    arg.ProcessName   = mtsManagerLocal::GetInstance()->GetProcessName();
+    arg.ComponentName = componentName;
+    arg.DelayInSecond = delayInSecond;
+    arg.Command       = mtsComponentStatusControl::COMPONENT_STOP;
+
+    // MJ: TODO: change this with blocking command
+    InternalInterfaceFunctions.ComponentStop(arg);
+
+    CMN_LOG_CLASS_RUN_VERBOSE << "RequestComponentStop: requested component stop: " << arg << std::endl;
+
+    return true;
+}
+
+bool mtsComponent::RequestComponentStop(const std::string& processName, const std::string & componentName,
+                                        const double delayInSecond) const
+{
+    if (!InternalInterfaceFunctions.ComponentStop.IsValid()) {
+        CMN_LOG_CLASS_RUN_ERROR << "RequestComponentStop: invalid function - has not been bound to command" << std::endl;
+        return false;
+    }
+
+    mtsComponentStatusControl arg;
+    arg.ProcessName   = processName;
+    arg.ComponentName = componentName;
+    arg.DelayInSecond = delayInSecond;
+    arg.Command       = mtsComponentStatusControl::COMPONENT_STOP;
+
+    // MJ: TODO: change this with blocking command
+    InternalInterfaceFunctions.ComponentStop(arg);
+
+    CMN_LOG_CLASS_RUN_VERBOSE << "RequestComponentStop: requested component stop: " << arg << std::endl;
+
+    return true;
+}
+
+bool mtsComponent::RequestComponentResume(const std::string & componentName, const double delayInSecond) const
+{
+    if (!InternalInterfaceFunctions.ComponentResume.IsValid()) {
+        CMN_LOG_CLASS_RUN_ERROR << "RequestComponentResume: invalid function - has not been bound to command" << std::endl;
+        return false;
+    }
+
+    mtsComponentStatusControl arg;
+    arg.ProcessName   = mtsManagerLocal::GetInstance()->GetProcessName();
+    arg.ComponentName = componentName;
+    arg.DelayInSecond = delayInSecond;
+    arg.Command       = mtsComponentStatusControl::COMPONENT_RESUME;
+
+    // MJ: TODO: change this with blocking command
+    InternalInterfaceFunctions.ComponentResume(arg);
+
+    CMN_LOG_CLASS_RUN_VERBOSE << "RequestComponentResume: requested component resume: " << arg << std::endl;
+
+    return true;
+}
+
+bool mtsComponent::RequestComponentResume(const std::string& processName, const std::string & componentName,
+                                          const double delayInSecond) const
+{
+    if (!InternalInterfaceFunctions.ComponentResume.IsValid()) {
+        CMN_LOG_CLASS_RUN_ERROR << "RequestComponentResume: invalid function - has not been bound to command" << std::endl;
+        return false;
+    }
+
+    mtsComponentStatusControl arg;
+    arg.ProcessName   = processName;
+    arg.ComponentName = componentName;
+    arg.DelayInSecond = delayInSecond;
+    arg.Command       = mtsComponentStatusControl::COMPONENT_RESUME;
+
+    // MJ: TODO: change this with blocking command
+    InternalInterfaceFunctions.ComponentResume(arg);
+
+    CMN_LOG_CLASS_RUN_VERBOSE << "RequestComponentResume: requested component resume: " << arg << std::endl;
+
+    return true;
+}
+
+bool mtsComponent::RequestGetNamesOfProcesses(std::vector<std::string> & namesOfProcesses) const
+{
+    if (!InternalInterfaceFunctions.GetNamesOfProcesses.IsValid()) {
+        CMN_LOG_CLASS_RUN_ERROR << "RequestGetNamesOfProcesses: invalid function - has not been bound to command" << std::endl;
+        return false;
+    }
+
+    mtsStdStringVec names;
+    InternalInterfaceFunctions.GetNamesOfProcesses(names);
+
+    mtsParameterTypes::ConvertVectorStringType(names, namesOfProcesses);
+
+    return true;
+}
+
+bool mtsComponent::RequestGetNamesOfComponents(const std::string & processName, std::vector<std::string> & namesOfComponents) const
+{
+    if (!InternalInterfaceFunctions.GetNamesOfComponents.IsValid()) {
+        CMN_LOG_CLASS_RUN_ERROR << "RequestGetNamesOfComponents: invalid function - has not been bound to command" << std::endl;
+        return false;
+    }
+
+    mtsStdStringVec names;
+    InternalInterfaceFunctions.GetNamesOfComponents(mtsStdString(processName), names);
+
+    mtsParameterTypes::ConvertVectorStringType(names, namesOfComponents);
+
+    return true;
+}
+
+bool mtsComponent::RequestGetNamesOfInterfaces(const std::string & processName,
+                                               const std::string & componentName,
+                                               std::vector<std::string> & namesOfInterfacesRequired,
+                                               std::vector<std::string> & namesOfInterfacesProvided) const
+{
+    if (!InternalInterfaceFunctions.GetNamesOfInterfaces.IsValid()) {
+        CMN_LOG_CLASS_RUN_ERROR << "RequestGetNamesOfInterfaces: invalid function - has not been bound to command" << std::endl;
+        return false;
+    }
+
+    // input arg
+    mtsDescriptionComponent argIn;
+    argIn.ProcessName   = processName;
+    argIn.ComponentName = componentName;
+
+    // output arg
+    mtsDescriptionInterface argOut;
+
+    InternalInterfaceFunctions.GetNamesOfInterfaces(argIn, argOut);
+
+    mtsParameterTypes::ConvertVectorStringType(argOut.InterfaceRequiredNames, namesOfInterfacesRequired);
+    mtsParameterTypes::ConvertVectorStringType(argOut.InterfaceProvidedNames, namesOfInterfacesProvided);
+
+    return true;
+}
+
+bool mtsComponent::RequestGetListOfConnections(std::vector<mtsDescriptionConnection> & listOfConnections) const
+{
+    if (!InternalInterfaceFunctions.GetListOfConnections.IsValid()) {
+        CMN_LOG_CLASS_RUN_ERROR << "RequestGetListOfConnections: invalid function - has not been bound to command" << std::endl;
+        return false;
+    }
+
+    InternalInterfaceFunctions.GetListOfConnections(listOfConnections);
+
+    return true;
+}
+*/

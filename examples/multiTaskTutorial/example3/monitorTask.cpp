@@ -36,13 +36,13 @@ void monitorTask::Startup(void)
 
 void monitorTask::Run(void)
 {
-    mtsCommandBase::ReturnType result;
+    mtsExecutionResult result;
     // check the positions of both robots
     for (unsigned int i = 0; i < 2; i++) {
         Robot[i].GetStateIndex(StateIndex);  // time index of robot state table
         Robot[i].GetPositionJoint(StateIndex, CurrentPosition[i]); // current data
         result = Robot[i].GetPositionJoint(StateIndex - 1, PreviousPosition[i]);
-        if ((result == mtsCommandBase::DEV_OK) &&
+        if ((result == mtsExecutionResult::DEV_OK) &&
            (CurrentPosition[i] != PreviousPosition[i])) {
             if ((!CurrentPosition[i].Greater(lowerBound))
                 || (!CurrentPosition[i].Lesser(upperBound))) {

@@ -7,7 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -30,10 +30,15 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstOSAbstraction/osaThread.h>
 
-#include <cisstMultiTask/mtsCommandBase.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
+// #include <cisstMultiTask/mtsCommandBase.h>
+#include <cisstMultiTask/mtsComponentState.h>
+#include <cisstMultiTask/mtsFunctionWrite.h>
+#include <cisstMultiTask/mtsFunctionRead.h>
+#include <cisstMultiTask/mtsFunctionQualifiedRead.h>
 #include <cisstMultiTask/mtsMulticastCommandVoid.h>
 #include <cisstMultiTask/mtsMulticastCommandWrite.h>
+#include <cisstMultiTask/mtsParameterTypes.h>
 
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
@@ -73,6 +78,9 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     /*! A string identifying the 'Name' of the component. */
     std::string Name;
 
+    /*! Component state. */
+    mtsComponentState State;
+
     /*! Default constructor. Protected to prevent creation of a component
       without a name. */
     mtsComponent(void);
@@ -81,6 +89,9 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
       not support yet.  It is not clear why one would use a copy
       constructor on a component anyway. */
     mtsComponent(const mtsComponent & other);
+
+    /*! Initializer */
+    void Initialize(void);
 
     /*! Add an already existing interface required to the interface,
       the user must pay attention to mailbox (or lack of) used to
@@ -131,9 +142,18 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
       configure themselves */
     virtual void Configure(const std::string & filename = "");
 
-    /*! Virtual method called after components are connected and
-      before they get started.  Use to place initialization code. */
+    /*! Virtual method to create the components, e.g. for tasks create
+      the required threads.  For other components, place
+      initialization code. */
+    virtual void Create(void);
+
+    /*! Virtual method called after components are connected to start
+        the computations and message processing. */
     virtual void Start(void);
+
+    /*! Virtual method to stop the computations and message
+        processing.  See Start. */
+    virtual void Kill(void);
 
     /*! Method to add a provided interface to the component.  This
       method is virtual so that mtsTaskBase can redefine it and
@@ -141,7 +161,7 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
       i.e. mtsInterfaceProvided as opposed to mtsInterfaceProvided for
       mtsComponent. */
     virtual mtsInterfaceProvided * AddInterfaceProvided(const std::string & interfaceProvidedName,
-                                                        mtsInterfaceQueuingPolicy queuingPolicy = MTS_COMPONENT_POLICY);
+                                                        mtsInterfaceQueueingPolicy queueingPolicy = MTS_COMPONENT_POLICY);
 
     // provided for backward compatibility
     inline CISST_DEPRECATED mtsInterfaceProvided * AddProvidedInterface(const std::string & interfaceProvidedName) {
@@ -252,11 +272,34 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
       UseSeparateLogFile or UseSeparateLogFileDefault. */
     cmnLogger::StreamBufType * GetLogMultiplexer(void) const;
 
+    /********************* Methods to query the task state ****************/
+
+    /*! Return true if task is active. */
+    bool IsRunning(void) const;
+    inline bool CISST_DEPRECATED Running(void) const {
+        return this->IsRunning();
+    }
+
+    /*! Return true if task was started. */
+    bool IsStarted(void) const;
+
+    /*! Return true if task is terminated. */
+    bool IsTerminated(void) const;
+
+    /*! Return true if task is marked for killing. */
+    bool IsEndTask(void) const;
+
+    /*! Return task state. */
+    const mtsComponentState & GetState(void) const;
+
  protected:
+
+    /*! Helper function to wait on a state change, with specified timeout in seconds. */
+    virtual bool WaitForState(mtsComponentState desiredState, double timeout);
 
     /*! Flag to keep track of separate log file use */
     bool UseSeparateLogFileFlag;
-    
+
     /*! Pointers on multiplexer used by this component for logging
       purposes.  By default the file "LogFile" is the only output
       stream but a user can add any stream using
@@ -316,11 +359,37 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
       via the required interfaces. */
     size_t ProcessQueuedEvents(void);
 
+    /*! Dynamic component management service provider */
+    mtsManagerComponentServices * ManagerComponentServices;
+
+    /*! \brief Enable support for dynamic component management services
+        \return Pointer to internal required interface, if success.  
+                NULL otherwise.
+        \note If user component needs dynamic component management services, 
+              this method should be called by user component's constructor */
+    mtsInterfaceRequired * EnableDynamicComponentManagement(void);
+
+    /*! Event generator to inform the manager component client of the state
+        change of this component */
+    mtsFunctionWrite EventGeneratorChangeState;
+
+    /*! \brief Add internal interfaces 
+        \param useMangerComponentServices True to allow this component to use
+               dynamic component control services through mts command pattern
+               to control other components.  
+               If true, the internal required interface is added to this 
+               component (the internal provided interface is added by default) */
+    bool AddInterfaceInternal(const bool useMangerComponentServices = false);
+
+    /*! Internal commands to process command execution request coming from manager
+        component client */
+    void InterfaceInternalCommands_ComponentStop(const mtsComponentStatusControl & arg);
+    void InterfaceInternalCommands_ComponentResume(const mtsComponentStatusControl & arg);
+
  public:
 
     /*! Send a human readable description of the component. */
     void ToStream(std::ostream & outputStream) const;
-
 };
 
 

@@ -39,6 +39,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnClassRegister.h>
 #include <cisstMultiTask/mtsConfig.h>
 #include <cisstMultiTask/mtsInterfaceCommon.h>
+#include <cisstMultiTask/mtsParameterTypes.h>
 
 class CISST_EXPORT mtsManagerGlobalInterface : public cmnGenericObject
 {
@@ -195,18 +196,8 @@ public:
         const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceProvidedName) = 0;
 #endif
 
-    /*! Typedef for structure to represent a connection by a set of strings */
-    typedef struct {
-        std::string ClientProcessName;
-        std::string ClientComponentName;
-        std::string ClientInterfaceRequiredName;
-        std::string ServerProcessName;
-        std::string ServerComponentName;
-        std::string ServerInterfaceProvidedName;
-    } ConnectionStrings;
-
     /*! Get a list of all active connections represented by a set of strings */
-    virtual void GetListOfConnections(std::vector<ConnectionStrings> & list) const = 0;
+    virtual void GetListOfConnections(std::vector<mtsDescriptionConnection> & list) const = 0;
 
     //-------------------------------------------------------------------------
     //  Networking

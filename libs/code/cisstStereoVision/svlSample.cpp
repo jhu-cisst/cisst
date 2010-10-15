@@ -28,9 +28,16 @@ http://www.cisst.org/cisst/license.txt.
 /******************************/
 
 svlSample::svlSample() :
-    cmnGenericObject(),
+    mtsGenericObject(),
     EncoderParameter(-1)
 {
+}
+
+svlSample::svlSample(const svlSample & other) :
+    mtsGenericObject(other)
+{
+    SetTimestamp(other.Timestamp);
+    SetEncoder(other.Encoder, other.EncoderParameter);
 }
 
 svlSample::~svlSample()

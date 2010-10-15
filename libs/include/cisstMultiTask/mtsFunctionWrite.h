@@ -28,7 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include <cisstMultiTask/mtsFunctionBase.h>
-#include <cisstMultiTask/mtsCommandReadOrWriteBase.h>
+#include <cisstMultiTask/mtsCommandWriteBase.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsGenericObjectProxy.h>
 
@@ -37,29 +37,22 @@ http://www.cisst.org/cisst/license.txt.
 
 class CISST_EXPORT mtsFunctionWrite: public mtsFunctionBase {
 protected:
-    typedef mtsCommandReadOrWriteBase<const mtsGenericObject> CommandType;
+    typedef mtsCommandWriteBase CommandType;
     CommandType * Command;
 
     template <typename _userType, bool>
     class ConditionalWrap {
     public:
-        static mtsCommandBase::ReturnType Call(mtsCommandReadBase * command, _userType & argument) {
+        static mtsExecutionResult Call(mtsCommandWriteBase * command, const _userType & argument, mtsBlockingType blocking) {
             mtsGenericObjectProxyRef<_userType> argumentWrapped(argument);
-            return command->Execute(argumentWrapped);
-        }
-        static mtsCommandBase::ReturnType Call(mtsCommandWriteBase * command, const _userType & argument) {
-            mtsGenericObjectProxyRef<_userType> argumentWrapped(argument);
-            return command->Execute(argumentWrapped);
+            return command->Execute(argumentWrapped, blocking);
         }
     };
     template <typename _userType>
     class ConditionalWrap<_userType, true> {
     public:
-        static mtsCommandBase::ReturnType Call(mtsCommandReadBase * command, _userType & argument) {
-            return command->Execute(argument);
-        }
-        static mtsCommandBase::ReturnType Call(mtsCommandWriteBase * command, const _userType & argument) {
-            return command->Execute(argument);
+        static mtsExecutionResult Call(mtsCommandWriteBase * command, const _userType & argument, mtsBlockingType blocking) {
+            return command->Execute(argument, blocking);
         }
     };
 
@@ -86,19 +79,29 @@ public:
 
     /*! Overloaded operator to enable more intuitive syntax
       e.g., Command(argument) instead of Command->Execute(argument). */
-    mtsCommandBase::ReturnType operator()(const mtsGenericObject & argument) const;
+    mtsExecutionResult operator()(const mtsGenericObject & argument) const;
+
+    mtsExecutionResult ExecuteBlocking(const mtsGenericObject & argument) const;
 
 	/*! Overloaded operator that accepts different argument types. */
     template <class _userType>
-    mtsCommandBase::ReturnType operator()(const _userType & argument) const {
-        mtsCommandBase::ReturnType ret = Command ?
-            ConditionalWrap<_userType, cmnIsDerivedFrom<_userType, mtsGenericObject>::YES>::Call(Command, argument)
-          : mtsCommandBase::NO_INTERFACE;
-        return ret;
+    mtsExecutionResult operator()(const _userType & argument) const {
+        mtsExecutionResult result = Command ?
+            ConditionalWrap<_userType, cmnIsDerivedFrom<_userType, mtsGenericObject>::YES>::Call(Command, argument, MTS_NOT_BLOCKING)
+          : mtsExecutionResult::NO_INTERFACE;
+        return result;
+    }
+
+    template <class _userType>
+    mtsExecutionResult ExecuteBlocking(const _userType & argument) const {
+        mtsExecutionResult result = Command ?
+            ConditionalWrap<_userType, cmnIsDerivedFrom<_userType, mtsGenericObject>::YES>::Call(Command, argument, MTS_BLOCKING)
+          : mtsExecutionResult::NO_INTERFACE;
+        return result;
     }
 
     /*! Access to underlying command object. */
-    mtsCommandReadOrWriteBase<const mtsGenericObject> * GetCommand(void) const;
+    CommandType * GetCommand(void) const;
 
     /*! Access to the command argument prototype. */
     const mtsGenericObject * GetArgumentPrototype(void) const;

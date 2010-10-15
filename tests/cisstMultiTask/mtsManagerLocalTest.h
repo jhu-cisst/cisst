@@ -3,11 +3,11 @@
 
 /*
   $Id$
-  
-  Author(s):  Min Yang Jung
+
+  Author(s):  Min Yang Jung, Anton Deguet
   Created on: 2009-11-17
-  
-  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
+
+  (C) Copyright 2009-2010 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -28,19 +28,18 @@ class mtsManagerLocal;
 class mtsManagerLocalTest: public CppUnit::TestFixture
 {
 private:
-    //mtsManagerLocal *localManager1, *localManager2;
 
     CPPUNIT_TEST_SUITE(mtsManagerLocalTest);
     {
         CPPUNIT_TEST(TestInitialize);
         CPPUNIT_TEST(TestConstructor);
         CPPUNIT_TEST(TestCleanup);
-        
+
         CPPUNIT_TEST(TestAddComponent);
         CPPUNIT_TEST(TestFindComponent);
         CPPUNIT_TEST(TestRemoveComponent);
         CPPUNIT_TEST(TestRegisterInterfaces);
-        
+
         CPPUNIT_TEST(TestGetInstance);
         CPPUNIT_TEST(TestGetComponent);
         CPPUNIT_TEST(TestGetNamesOfComponents);
@@ -49,14 +48,8 @@ private:
         CPPUNIT_TEST(TestGetTimeServer);
         CPPUNIT_TEST(TestGetProcessName);
 
-        CPPUNIT_TEST(TestCreateAll);
-        CPPUNIT_TEST(TestStartAll);
-        CPPUNIT_TEST(TestKillAll);
-
         CPPUNIT_TEST(TestConnectLocally);
         CPPUNIT_TEST(TestConnectDisconnect);
-
-        CPPUNIT_TEST(TestLocalCommandsAndEvents);
 
 #if CISST_MTS_HAS_ICE
         CPPUNIT_TEST(TestGetIPAddressList);
@@ -67,9 +60,8 @@ private:
         CPPUNIT_TEST(TestCreateInterfaceProvidedProxy);
         CPPUNIT_TEST(TestRemoveInterfaceRequiredProxy);
         CPPUNIT_TEST(TestRemoveInterfaceProvidedProxy);
-        CPPUNIT_TEST(TestRemoteCommandsAndEvents);
 #endif
-	}
+    }
     CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -86,7 +78,7 @@ public:
     void TestFindComponent(void);
     void TestRemoveComponent(void);
     void TestRegisterInterfaces(void);
-    
+
     void TestGetInstance(void);
     void TestGetComponent(void);
     void TestGetNamesOfComponents(void);
@@ -95,13 +87,8 @@ public:
     void TestGetTimeServer(void);
     void TestGetProcessName(void);
 
-    void TestCreateAll(void);
-    void TestStartAll(void);
-    void TestKillAll(void);
-    
     void TestConnectLocally(void);
     void TestConnectDisconnect(void);
-    void TestLocalCommandsAndEvents(void);
 
 #if CISST_MTS_HAS_ICE
     void TestGetIPAddressList(void);
@@ -112,6 +99,5 @@ public:
     void TestCreateInterfaceProvidedProxy(void);
     void TestRemoveInterfaceRequiredProxy(void);
     void TestRemoveInterfaceProvidedProxy(void);
-    void TestRemoteCommandsAndEvents(void);
 #endif
 };

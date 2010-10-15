@@ -147,8 +147,8 @@ module mtsComponentInterfaceProxy
         bool FetchFunctionProxyPointers(string requiredInterfaceName, out FunctionProxyPointerSet functionProxyPointers);
 
         /*! Execute command across a network */
-		void ExecuteCommandVoid(long commandID);
-        void ExecuteCommandWriteSerialized(long commandID, string argument);
+		void ExecuteCommandVoid(long commandID, bool blocking);
+        void ExecuteCommandWriteSerialized(long commandID, string argument, bool blocking);
         void ExecuteCommandReadSerialized(long commandID, out string argument);
         void ExecuteCommandQualifiedReadSerialized(long commandID, string argumentIn, out string argumentOut);
 	};

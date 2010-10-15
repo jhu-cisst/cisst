@@ -17,10 +17,7 @@ displayTask::displayTask(const std::string taskName, double period):
         required->AddFunction("SetAmplitude", Generator.SetAmplitude);
         required->AddFunction("SetTriggerValue", Generator.SetTriggerValue);
         required->AddFunction("ResetTrigger", Generator.ResetTrigger);
-        // create an event handler associated to the output port.  false
-        // means not queued.
-        required->AddEventHandlerWrite(&displayTask::HandleTrigger, this,
-                                       "TriggerEvent", MTS_EVENT_NOT_QUEUED);
+        required->AddEventReceiver("TriggerEvent", Generator.TriggerEvent);
     }
     required = AddInterfaceRequired("Clock");
     if (required) {
@@ -31,18 +28,16 @@ displayTask::displayTask(const std::string taskName, double period):
 displayTask::~displayTask()
 {}
 
+// Not needed if we only wish to wait on the event
 void displayTask::HandleTrigger(const mtsDouble & value)
 {
     CMN_LOG_RUN_VERBOSE << "HandleTrigger: Trigger event (" << this->GetName() << "): "
                         << value << std::endl;
-    WaitingForTrigger = false;
-    Wakeup();
 }
 
 void displayTask::Startup(void)
 {
     TriggerValue = 0.0;
-    WaitingForTrigger = false;
 
     Generator.SetAmplitude(Amplitude);
     Generator.SetTriggerValue(TriggerValue);
@@ -77,36 +72,50 @@ void displayTask::Run(void)
         Generator.ResetTrigger();
         UI.DoReset = false;
     }
+    if (UI.SetHandlerChanged) {
+        UI.SetHandlerChanged = false;
+        if (UI.SetHandler->value()) {
+            if (Generator.TriggerEvent.SetHandler(&displayTask::HandleTrigger, this))
+                CMN_LOG_RUN_VERBOSE << "Run: Set event handler" << std::endl;
+            else
+                CMN_LOG_RUN_VERBOSE << "Run: Failed to set event handler" << std::endl;
+        }
+        else {
+            if (Generator.TriggerEvent.RemoveHandler())
+                CMN_LOG_RUN_VERBOSE << "Run: Removed event handler" << std::endl;
+            else
+                CMN_LOG_RUN_VERBOSE << "Run: Failed to remove event handler" << std::endl;
+        }
+    }
     if (UI.TriggerWaitChanged) {
         UI.TriggerWaitChanged = false;
         if (UI.WaitForTrigger->value()) {
             CMN_LOG_RUN_VERBOSE << "Run: Waiting for trigger." << std::endl;
             // Reset trigger to make sure we get one
             Generator.ResetTrigger();
-            WaitingForTrigger = true;
-            while (WaitingForTrigger) {
-                displayUI::Semaphore = false;
-                // use mtsTask::WaitForWakeup to freeze until trigger
-                // event wakes us up
-                WaitForWakeup();
+            if (UI.ReceiveArg->value()) {
+                mtsDouble arg;
+                if (Generator.TriggerEvent.Wait(arg))
+                    CMN_LOG_RUN_VERBOSE << "Run: Got event arg = " << arg.Data << std::endl;
+                else
+                    CMN_LOG_RUN_ERROR << "Run: failed to get arg on wait" << std::endl;
             }
+            else
+                Generator.TriggerEvent.Wait();
             // Uncheck the box
             UI.WaitForTrigger->value(0);
         }
     }
     ProcessQueuedEvents();
+#if 0
     CMN_LOG_RUN_VERBOSE << "Run: " << this->GetTick()
                         << " - Data: " << Data << std::endl;
+#endif
 
-    if (UI.Closed == true) {
+    if (UI.Closed == true)
         Kill();
-    } else {
-        if (!displayUI::Semaphore) {
-            displayUI::Semaphore = true;
-            Fl::check();
-            displayUI::Semaphore = false;
-        }
-    }
+    else
+        Fl::check();
 }
 
 void displayTask::Configure(const std::string & CMN_UNUSED(filename))
@@ -138,6 +147,6 @@ This software is provided "as is" under an open source license, with
 no warranty.  The complete license can be found in license.txt and
 http://www.cisst.org/cisst/license.txt.
 
---- end cisst license ---
+--- End cisst license ---
 
 */

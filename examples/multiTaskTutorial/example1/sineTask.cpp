@@ -37,6 +37,7 @@ void sineTask::Run(void) {
         * sin(2 * cmnPI * static_cast<double>(this->GetTick()) * Period / 10.0);
     //SineData.SetTimestamp(StateTable.GetTic());
     //SineData.SetValid(true);
+    std::cout << SineData << std::endl;
 }
 
 /*

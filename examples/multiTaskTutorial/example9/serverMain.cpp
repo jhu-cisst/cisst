@@ -44,7 +44,7 @@ int main(int argc, char * argv[])
     else
         server = new serverTask<double>("Server", PeriodServer);
 
-    taskManager->AddTask(server);
+    taskManager->AddComponent(server);
 
     // create the tasks, i.e. find the commands
     taskManager->CreateAll();

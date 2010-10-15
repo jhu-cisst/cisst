@@ -53,12 +53,13 @@ protected:
 
 public:
     /*! Execute all the commands in the composite. */
-    virtual mtsCommandBase::ReturnType Execute(const mtsGenericObject & argument) {
-        unsigned int index;
+    virtual mtsExecutionResult Execute(const mtsGenericObject & argument,
+                                       mtsBlockingType CMN_UNUSED(blocking)) {
+        size_t index;
         for (index = 0; index < Commands.size(); ++index) {
-            Commands[index]->Execute(argument);
+            Commands[index]->Execute(argument, MTS_NOT_BLOCKING);
         }
-        return mtsCommandBase::DEV_OK;
+        return mtsExecutionResult::DEV_OK;
     }
 
     /*! Set an argument prototype */
@@ -67,7 +68,7 @@ public:
     }
 
     /*! Getter */
-    inline mtsProxySerializer * GetSerializer() {
+    inline mtsProxySerializer * GetSerializer(void) {
         return &Serializer;
     }
 };

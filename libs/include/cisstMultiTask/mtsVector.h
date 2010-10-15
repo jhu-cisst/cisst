@@ -157,5 +157,7 @@ CMN_DECLARE_SERVICES_INSTANTIATION(mtsUCharVec);
 typedef mtsVector<bool> mtsBoolVec;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsBoolVec);
 
+typedef mtsVector<std::string> mtsStdStringVec;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsStdStringVec);
 
 #endif // _mtsVector_h

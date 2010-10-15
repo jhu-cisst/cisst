@@ -104,6 +104,7 @@ ADD_DEPENDENCIES(cisstMultiTask_CREATE_PYTHON_TESTS_LIST
                  cisstMultiTask
                  _cisstCommonPython
                  _cisstVectorPython
+                 _cisstOSAbstractionPython
                  _cisstMultiTaskPython
 		 cisstMultiTaskPythonTest
 		 _cisstMultiTaskPythonTestPython

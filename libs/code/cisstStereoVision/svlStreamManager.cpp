@@ -39,6 +39,8 @@ http://www.cisst.org/cisst/license.txt.
 /*** svlStreamManager class **********/
 /*************************************/
 
+CMN_IMPLEMENT_SERVICES(svlStreamManager);
+
 svlStreamManager::svlStreamManager() :
     ThreadCount(1),
     SyncPoint(0),
@@ -69,18 +71,32 @@ svlStreamManager::~svlStreamManager()
     Release();
 }
 
-int svlStreamManager::SetSourceFilter(svlFilterSourceBase* source)
+int svlStreamManager::SetSourceFilter(svlFilterSourceBase * source)
 {
-    if (source == 0) return SVL_FAIL;
-    if (source == StreamSource) return SVL_OK;
-    if (Initialized) return SVL_ALREADY_INITIALIZED;
-
+    if (source == 0) {
+        CMN_LOG_CLASS_INIT_ERROR << "SetSourceFilter: null source pointer provided for stream \""
+                                 << this->GetName() << "\"" << std::endl;
+        return SVL_FAIL;
+    }
+    if (source == StreamSource) {
+        CMN_LOG_CLASS_INIT_DEBUG << "SetSourceFilter: same pointer provided for stream \""
+                                 << this->GetName() << "\"" << std::endl;
+        return SVL_OK;
+    }
+    if (Initialized) {
+        CMN_LOG_CLASS_INIT_ERROR << "SetSourceFilter: stream \"" << this->GetName()
+                                 << "\" is already initialized, can't change associated source filter" << std::endl;        
+        return SVL_ALREADY_INITIALIZED;
+    }
+    
     StreamSource = source;
-
+    CMN_LOG_CLASS_INIT_DEBUG << "SetSourceFilter: filter \"" << source->GetName() << "\" associated to stream \""
+                             << this->GetName() << "\"" << std::endl;
     return SVL_OK;
 }
 
-int svlStreamManager::Initialize()
+
+int svlStreamManager::Initialize(void)
 {
     if (Initialized) {
         CMN_LOG_CLASS_INIT_WARNING << "Initialize: stream \"" << this->GetName()
@@ -201,7 +217,7 @@ int svlStreamManager::Initialize()
 
     Initialized = true;
     StreamStatus = SVL_STREAM_INITIALIZED;
-
+    CMN_LOG_CLASS_INIT_DEBUG << "Initialize: stream \"" << this->GetName() << "\" initialized" << std::endl;
     return SVL_OK;
 }
 
@@ -657,21 +673,21 @@ void svlStreamManager::SetSourceFilterCommand(const mtsStdString & source)
 {
     // look for the source in the component manager
     mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
-    mtsComponent * component = taskManager->GetComponent(source);
+    std::string sourceName = source; // remove timestamp 
+    mtsComponent * component = taskManager->GetComponent(sourceName);
     if (!component) {
         CMN_LOG_CLASS_INIT_ERROR << "SetSourceFilterCommand: stream \"" << this->GetName()
-                                 << "\" can't find component \"" << source << "\"" << std::endl;
+                                 << "\" can't find component \"" << sourceName << "\"" << std::endl;
         return;
     }
     // make sure this is a source filter
     svlFilterSourceBase * filter = dynamic_cast<svlFilterSourceBase *>(component);
     if (!filter) {
         CMN_LOG_CLASS_INIT_ERROR << "SetSourceFilterCommand: stream \"" << this->GetName()
-                                 << "\" can't use component \"" << source
+                                 << "\" can't use component \"" << sourceName
                                  << "\" as it doesn't seem to be of type \"svlFilterSourceBase\"" << std::endl;
         return;
     }
     // finally call the SetSourceFilter method
     SetSourceFilter(filter);
-
 }

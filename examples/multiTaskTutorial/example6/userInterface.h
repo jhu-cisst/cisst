@@ -32,7 +32,7 @@ protected:
     // mts events callbacks, in this example started event is void,
     // end event is write
     void CallBackStarted(void);
-    mtsCommandVoidBase * CallBackStartedCommand;
+    mtsCommandVoid * CallBackStartedCommand;
     void CallBackFinished(const PositionJointType &);
     mtsCommandWriteBase * CallBackFinishedCommand;
 

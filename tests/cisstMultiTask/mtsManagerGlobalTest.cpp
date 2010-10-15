@@ -25,7 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstOSAbstraction/osaSleep.h>
 
-#include "mtsManagerTestClasses.h"
+#include "mtsTestComponents.h"
 
 #define P1 "P1"
 #define P2 "P2"

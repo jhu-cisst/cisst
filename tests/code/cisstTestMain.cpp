@@ -3,11 +3,11 @@
 
 /*
   $Id$
-  
+
   Author(s):  Anton Deguet
   Created on: 2003-07-28
 
-  (C) Copyright 2003-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2003-2010 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -61,7 +61,7 @@ CppUnit::Test* FindTestInTestSuite(CppUnit::Test* tests, const std::string& name
         }
     }
     return NULL;
-} 
+}
 
 
 CppUnit::Test * InstantiateTests(const cisstTestParameters::TestNameContainerType & testNames)
@@ -69,7 +69,7 @@ CppUnit::Test * InstantiateTests(const cisstTestParameters::TestNameContainerTyp
     CppUnit::Test * wholeRegistry = CppUnit::TestFactoryRegistry::getRegistry().makeTest();
     if (testNames.empty())
         return wholeRegistry;
-    
+
     CppUnit::TestSuite * testSuite = new CppUnit::TestSuite("");
     cisstTestParameters::TestNameContainerType::const_iterator nameIterator
         = testNames.begin();
@@ -80,7 +80,7 @@ CppUnit::Test * InstantiateTests(const cisstTestParameters::TestNameContainerTyp
         } else {
             std::cerr << "Failed to instantiate " << (*nameIterator) << std::endl;
         }
-        
+
         ++nameIterator;
     }
     return testSuite;
@@ -111,8 +111,9 @@ int ListAllTestsInTestSuite(CppUnit::Test* tests) {
 
 
 /*! Recursion used to fill the CMake/ctest compatible list of tests. */
-int GenerateCTestFile(CppUnit::Test* tests, const std::string& programName) {
-    int count = 0;
+int GenerateCTestFile(CppUnit::Test * tests, const std::string & programName,
+                      unsigned int iterations, unsigned int instances) {
+    unsigned int count = 0;
     // try to see if this is a TestSuite
     CppUnit::TestSuite* testSuite = dynamic_cast<CppUnit::TestSuite *>(tests);
     // it's a suite, check all components
@@ -122,16 +123,16 @@ int GenerateCTestFile(CppUnit::Test* tests, const std::string& programName) {
         for (testIterator = allTestsVector.begin();
              testIterator != allTestsVector.end();
              testIterator++) {
-            count += GenerateCTestFile(*testIterator, programName);
+            count += GenerateCTestFile(*testIterator, programName, iterations, instances);
         }
     } else {
         // it's a test, add it to the list
         count++;
         std::cout << "ADD_TEST(\"C++: "
-                  << tests->getName() << "-i5-o5"
+                  << tests->getName() << "-i" << iterations << "-o" << instances
                   << "\" " << programName
-                  << " -r -i 5 -o 5 -t "
-                  << tests->getName()
+                  << " -r -i " << iterations << " -o " << instances
+                  << " -t " << tests->getName()
                   << ")" << std::endl;
     }
     return count;
@@ -148,18 +149,22 @@ int main(int argc, const char *argv[])
     }
 
     CppUnit::TestSuite * allTests = new CppUnit::TestSuite("All Tests");
-    int instanceCounter;
-    for (instanceCounter = 0; instanceCounter < testParameters.GetNumInstances(); ++instanceCounter) {
-        allTests->addTest( InstantiateTests(testParameters.GetTestNames()) );
+    size_t instanceCounter = testParameters.GetNumInstances();
+    if (instanceCounter == 0) {
+        std::cout << "Error, the number of instances must be at least 1" << std::endl;
+        return 1;
     }
-    
+    // add the first instance so we can list all tests
+    allTests->addTest( InstantiateTests(testParameters.GetTestNames()) );
+    --instanceCounter;
+
     if (testParameters.GetTestRunMode() == cisstTestParameters::LIST_TESTS) {
         ListAllTestsInTestSuite(allTests);
         return 0;
     }
 
     if (testParameters.GetTestRunMode() == cisstTestParameters::GENERATE_CTEST_FILE) {
-        GenerateCTestFile(allTests, testParameters.GetProgramName());
+        GenerateCTestFile(allTests, testParameters.GetProgramName(), testParameters.GetNumIterations(), testParameters.GetNumInstances());
         return 0;
     }
 
@@ -168,9 +173,14 @@ int main(int argc, const char *argv[])
         std::cout << "-------------------------------- Total " << testCount
                   << " test(s)" << std::endl;
     }
-    
+
+    // add remaining instance to run the tests
+    for (; instanceCounter > 0; --instanceCounter) {
+        allTests->addTest( InstantiateTests(testParameters.GetTestNames()) );
+    }
+
     if (testParameters.GetTestRunMode() == cisstTestParameters::RUN_TESTS ||
-		testParameters.GetTestRunMode() == cisstTestParameters::RUN_AND_LIST_TESTS) {
+        testParameters.GetTestRunMode() == cisstTestParameters::RUN_AND_LIST_TESTS) {
         CppUnit::RepeatedTest * repeatedTest =
             new CppUnit::RepeatedTest(allTests, testParameters.GetNumIterations());
         CppUnit::TextUi::TestRunner runner;

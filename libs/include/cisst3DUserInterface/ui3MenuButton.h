@@ -55,6 +55,7 @@ public:
     ui3MenuButton(const std::string & description, const std::string & iconFile,
                   void (_classType::*action)(void), _classType * classInstantiation,
                   double buttonSize):
+        Description(description),
         CheckButton(false),
         Position(0.0, 0.0, 0.0),
         CheckState(false),
@@ -70,8 +71,7 @@ public:
 		IconFile(iconFile)
     {
         // Create a mtsFunction around the callback command
-        this->Command = new mtsCommandVoidMethod<_classType>(action, classInstantiation, description);
-        this->CallBack.Bind(this->Command);
+        this->Callable = new mtsCallableVoidMethod<_classType>(action, classInstantiation);
 		this->CreateVTKObjects();
     }
 
@@ -161,6 +161,8 @@ public:
     virtual bool IsCursorOver(const vct2 & cursor2D);
 
 protected:
+    std::string Description;
+
     /*!
      Flag indicates whether the button is a check button.
     */
@@ -196,8 +198,7 @@ protected:
     vct2 BottomLeft2D, TopRight2D;
     double ButtonSize;
 
-    mtsFunctionVoid CallBack;
-    mtsCommandVoidBase * Command;
+    mtsCallableVoidBase * Callable;
 
 	std::string IconFile;
 };

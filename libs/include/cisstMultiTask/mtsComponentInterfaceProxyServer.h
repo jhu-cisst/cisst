@@ -25,6 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsComponentInterfaceProxy.h>
 #include <cisstMultiTask/mtsProxyBaseServer.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
+#include <cisstMultiTask/mtsParameterTypes.h>
 
 #include <cisstMultiTask/mtsExport.h>
 
@@ -51,32 +52,13 @@ protected:
     typedef std::map<CommandIDType, mtsProxySerializer *> PerCommandSerializerMapType;
     PerCommandSerializerMapType PerCommandSerializerMap;
 
-    /*! Set of strings that represent a connection */
-    class ConnectionStrings {
-    public:
-        // Set of strings
-        const std::string ClientProcessName;
-        const std::string ClientComponentName;
-        const std::string ClientInterfaceRequiredName;
-        const std::string ServerProcessName;
-        const std::string ServerComponentName;
-        const std::string ServerInterfaceProvidedName;
-
-        ConnectionStrings(
-            const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
-            const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceProvidedName)
-            : ClientProcessName(clientProcessName), ClientComponentName(clientComponentName), ClientInterfaceRequiredName(clientInterfaceRequiredName),
-              ServerProcessName(serverProcessName), ServerComponentName(serverComponentName), ServerInterfaceProvidedName(serverInterfaceProvidedName)
-        {}
-    };
-
-    /*! Map to fetch a ConnectionStrings instance by client id.
+    /*! Map to retrieve connection information by client id.
         key=(client id)
-        value=(an instance of ConnectionStrings)
+        value=(an instance of mtsDescriptionConnection)
 
         This map is used to disconnect currently established connection when a
         network proxy client is detected as disconnected. */
-    typedef std::map<ClientIDType, ConnectionStrings> ConnectionStringMapType;
+    typedef std::map<ClientIDType, mtsDescriptionConnection> ConnectionStringMapType;
     ConnectionStringMapType ConnectionStringMap;
 
     /*! String key to set an implicit per-proxy context for connection id */
@@ -171,11 +153,11 @@ public:
         mtsComponentInterfaceProxy::FunctionProxyPointerSet & functionProxyPointers);
 
     /*! Execute commands and events. This will call function proxies in the required
-        interface proxy at server process.
+        interface proxy at the server process.
         clientID designates which network proxy client should execute a command
         and commandID represents which function proxy object should be called. */
-    bool SendExecuteCommandVoid(const ClientIDType clientID, const CommandIDType commandID);
-    bool SendExecuteCommandWriteSerialized(const ClientIDType clientID, const CommandIDType commandID, const mtsGenericObject & argument);
+    bool SendExecuteCommandVoid(const ClientIDType clientID, const CommandIDType commandID, const mtsBlockingType blocking);
+    bool SendExecuteCommandWriteSerialized(const ClientIDType clientID, const CommandIDType commandID, const mtsGenericObject & argument, const mtsBlockingType blocking);
     bool SendExecuteCommandReadSerialized(const ClientIDType clientID, const CommandIDType commandID, mtsGenericObject & argument);
     bool SendExecuteCommandQualifiedReadSerialized(const ClientIDType clientID, const CommandIDType commandID, const mtsGenericObject & argumentIn, mtsGenericObject & argumentOut);
 

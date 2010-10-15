@@ -36,6 +36,7 @@ class CISST_EXPORT svlSampleMatrix : public svlSample
 {
 public:
     svlSampleMatrix();
+    svlSampleMatrix(const svlSampleMatrix & other);
     virtual ~svlSampleMatrix();
 
     virtual svlSample* GetNewInstance() const = 0;

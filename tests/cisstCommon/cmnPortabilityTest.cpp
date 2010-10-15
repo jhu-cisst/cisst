@@ -57,8 +57,9 @@ void cmnPortabilityTest::TestWithCMake(void) {
                                           "CC",
                                           "CC",
                                           "icc",
-	                                      "cl",
-                                          "cl"};
+	                                      "cl", /* CISST_DOTNET2003 */
+	                                      "cl", /* CISST_DOTNET2005 */
+                                          "cl"  /* CISST_DOTNET2008 */};
 
     CPPUNIT_ASSERT(cmnOperatingSystemsStrings[CISST_OS] == CISST_CMAKE_SYSTEM_NAME);
     if (CISST_COMPILER == CISST_GCC) {

@@ -12,18 +12,18 @@
 #
 # --- end cisst license ---
 
-PROJECT(stereoTutorial)
+project (stereoTutorial)
 
-ADD_SUBDIRECTORY(simple)
-ADD_SUBDIRECTORY(cameraviewer)
-ADD_SUBDIRECTORY(stereocameraviewer)
-ADD_SUBDIRECTORY(computestereo)
-ADD_SUBDIRECTORY(videoplayer)
-ADD_SUBDIRECTORY(stereovideoplayer)
-ADD_SUBDIRECTORY(videoconverter)
-ADD_SUBDIRECTORY(pointtracker)
-ADD_SUBDIRECTORY(gridtracker)
-ADD_SUBDIRECTORY(exposurecorrection)
-ADD_SUBDIRECTORY(svlmts1)
+add_subdirectory (simple)
+add_subdirectory (cameraviewer)
+add_subdirectory (stereocameraviewer)
+add_subdirectory (computestereo)
+add_subdirectory (videoplayer)
+add_subdirectory (stereovideoplayer)
+add_subdirectory (videoconverter)
+add_subdirectory (pointtracker)
+add_subdirectory (gridtracker)
+add_subdirectory (exposurecorrection)
+add_subdirectory (svlmts1)
 #ADD_SUBDIRECTORY(webgui)
 

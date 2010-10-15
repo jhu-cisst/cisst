@@ -5,10 +5,9 @@
   $Id$
 
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
-  Created on: 2005-05-03
+  Created on: 2005-05-02
 
-  (C) Copyright 2005-2009 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2005-2009 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -22,22 +21,70 @@ http://www.cisst.org/cisst/license.txt.
 
 /*!
   \file
-  \brief Define an internal command for cisstMultiTask
+  \brief Defines base class for a queued void command.
 */
-
 
 #ifndef _mtsCommandQueuedVoid_h
 #define _mtsCommandQueuedVoid_h
 
-#include <cisstMultiTask/mtsCommandQueuedVoidBase.h>
+#include <cisstMultiTask/mtsCommandVoid.h>
+#include <cisstMultiTask/mtsMailBox.h>
 
-/*! This "class" is equivalent to the base class
-  mtsCommandQueuedVoidBase as we don't need any templating for the
-  end-user class.  A typedef is enough, we don't need to derive from
-  the base class.  We preserved the same filenames just for
-  consistency. */
-typedef mtsCommandQueuedVoidBase mtsCommandQueuedVoid;
+// Always include last
+#include <cisstMultiTask/mtsExport.h>
+
+class CISST_EXPORT mtsCommandQueuedVoid: public mtsCommandVoid
+{
+ public:
+    /*! Base type */
+    typedef mtsCommandVoid BaseType;
+
+    /*! This type. */
+    typedef mtsCommandQueuedVoid ThisType;
+
+ protected:
+    /*! Mailbox used to queue the commands */
+    mtsMailBox * MailBox;
+    /*! Queue of flags to indicate if the command is blocking or
+      not */
+    mtsQueue<mtsBlockingType> BlockingFlagQueue;
+
+ private:
+    /*! Private copy constructor to prevent copies */
+    mtsCommandQueuedVoid(const ThisType & CMN_UNUSED(other));
+
+ public:
+    mtsCommandQueuedVoid(void);
+
+    mtsCommandQueuedVoid(mtsCallableVoidBase * callable,
+                         const std::string & name,
+                         mtsMailBox * mailBox,
+                         size_t size);
+
+    inline virtual ~mtsCommandQueuedVoid() {}
+
+
+    virtual mtsCommandQueuedVoid * Clone(mtsMailBox * mailBox, size_t size) const;
+
+    inline virtual void Allocate(unsigned int CMN_UNUSED(size)) {}
+
+    /*! For a queued command, Execute means queueing the command.
+      This method will return mtsExecutionResult::DEV_OK if the command
+      has been queued, it doesn't mean that the actual has been
+      executed yet.  If the command has been disabled (see
+      mtsCommandBase::Disable()), Execute will return
+      mtsExecutionResult::DISABLED.  finally, if the mailbox is full,
+      Execute() will return mtsExecutionResult::MAILBOX_FULL.  This can
+      happen if the task receiving the command doesn't process/empty
+      its mailboxes fast enough. */
+    mtsExecutionResult Execute(mtsBlockingType blocking);
+
+    mtsBlockingType BlockingFlagGet(void);
+
+    std::string GetMailBoxName(void) const;
+
+    void ToStream(std::ostream & outputStream) const;
+};
 
 
 #endif // _mtsCommandQueuedVoid_h
-

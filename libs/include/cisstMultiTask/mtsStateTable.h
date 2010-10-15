@@ -240,9 +240,6 @@ public:
 	/*! The number of rows of the state data table. */
 	size_t HistoryLength;
 
-	/*! The number of columns of the data table. */
-	size_t NumberStateData;
-
 	/*! The index of the writer in the data table. */
 	size_t IndexWriter;
 
@@ -296,7 +293,7 @@ public:
     mtsDouble Period;
 
    /*! Periodicist Statistics */
-    mtsIntervalStatistics     PeriodStats;
+    mtsIntervalStatistics PeriodStats;
 
  protected:
     /*! The sum of all the periods (time differences between
@@ -360,7 +357,7 @@ public:
 
     /*! Add an element to the table (alternative to NewElement). */
     template <class _elementType>
-    void AddData(_elementType &element, const std::string & name = "") {
+    void AddData(_elementType & element, const std::string & name = "") {
         NewElement(name, &element);
     }
 
@@ -406,8 +403,8 @@ public:
     /*! Advance if automatic advance is set and does nothing otherwise. */
     void AdvanceIfAutomatic(void);
 
-    /*! Kill, called when the task is being stopped.  Used for cleanup. */
-    void Kill(void);
+    /*! Cleanup called when the task is being stopped. */
+    void Cleanup(void);
 
     inline double GetTic(void) const {
         return this->Tic.Data;
@@ -419,6 +416,10 @@ public:
 
     inline size_t GetHistoryLength(void) const {
         return this->HistoryLength;
+    }
+
+    inline size_t GetNumberOfElements(void) const {
+        return this->StateVector.size();
     }
 
     /*! Return the moving average of the measured period (i.e., average of last
@@ -445,19 +446,8 @@ public:
 
     void CSVWrite(std::ostream & out, mtsGenericObject ** listColumn, unsigned int number, bool nonZeroOnly = false);
 
-    /*! A base column index of StateTable for a signal registered by user. */
-    static int StateVectorBaseIDForUser;
-
-    //-------------------------------------------------------------------------
-    //  Data Collection
-    //-------------------------------------------------------------------------
-    /*! Fetch state table data. */
-    //void GetStateTableHistory(mtsDoubleVecHistory & history,
-    //                          const unsigned int signalIndex,
-    //                          const unsigned int lastFetchIndex);
-
     /*! Return the name of this state table. */
-    inline const std::string GetName(void) const { return Name; }
+    inline const std::string & GetName(void) const { return Name; }
 
     /*! Determine a ratio to generate a data collection event. */
     void DataCollectionEventTriggeringRatio(const mtsDouble & eventTriggeringRatio);
@@ -493,14 +483,13 @@ mtsStateDataId mtsStateTable::NewElement(const std::string & name, _elementType 
     mtsStateArray<FinalType> * elementHistory =
         new mtsStateArray<FinalType>(*element, HistoryLength);
     StateVector.push_back(elementHistory);
-    NumberStateData = StateVector.size();
     FinalRefType *pdata = mtsGenericTypes<_elementType>::ConditionalWrap(*element);
     StateVectorElements.push_back(pdata);
 
     StateVectorDataNames.push_back(name);
-    AccessorBase * accessor = new Accessor<_elementType>(*this, NumberStateData-1, elementHistory, pdata);
+    AccessorBase * accessor = new Accessor<_elementType>(*this, StateVector.size() - 1, elementHistory, pdata);
     StateVectorAccessors.push_back(accessor);
-    return NumberStateData-1;
+    return StateVector.size() - 1;
 }
 
 template <class _elementType>

@@ -87,8 +87,8 @@ bool ui3MasterArm::SetInput(const std::string & positionDevice, const std::strin
         return false;
     }
     // connect the master device to the master required interface
-    this->Manager->TaskManager->Connect(this->Manager->GetName(), this->Name,
-                                        positionDevice, positionInterface);
+    this->Manager->ComponentManager->Connect(this->Manager->GetName(), this->Name,
+                                             positionDevice, positionInterface);
 
     // setup master select button required interface 
     requiredInterface = this->Manager->AddInterfaceRequired(this->Name + "Select");
@@ -103,8 +103,8 @@ bool ui3MasterArm::SetInput(const std::string & positionDevice, const std::strin
         return false;
     }
     // connect the master button device to the master button required interface
-    this->Manager->TaskManager->Connect(this->Manager->GetName(), this->Name + "Select",
-                                        buttonDevice, buttonInterface);
+    this->Manager->ComponentManager->Connect(this->Manager->GetName(), this->Name + "Select",
+                                             buttonDevice, buttonInterface);
 
     // setup master clutch button required interface 
     requiredInterface = this->Manager->AddInterfaceRequired(this->Name + "Clutch");
@@ -119,8 +119,8 @@ bool ui3MasterArm::SetInput(const std::string & positionDevice, const std::strin
         return false;
     }
     // connect the master clutch device to the master clutch required interface
-    this->Manager->TaskManager->Connect(this->Manager->GetName(), this->Name + "Clutch",
-                                        clutchDevice, clutchInterface);
+    this->Manager->ComponentManager->Connect(this->Manager->GetName(), this->Name + "Clutch",
+                                             clutchDevice, clutchInterface);
 
     return true;
 }

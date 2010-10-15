@@ -7,7 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -25,8 +25,8 @@ http://www.cisst.org/cisst/license.txt.
   \brief Defines a base class for a command with one argument
 */
 
-#ifndef _mtsCommandQualifiedReadOrWriteBase_h
-#define _mtsCommandQualifiedReadOrWriteBase_h
+#ifndef _mtsCommandQualifiedReadBase_h
+#define _mtsCommandQualifiedReadBase_h
 
 
 #include <cisstMultiTask/mtsCommandBase.h>
@@ -43,24 +43,23 @@ http://www.cisst.org/cisst/license.txt.
   This allows to use the same base class for const and non-const
   object references. */
 
-template <class _argument2Type>
-class mtsCommandQualifiedReadOrWriteBase: public mtsCommandBase {
+class mtsCommandQualifiedReadBase: public mtsCommandBase {
 public:
     typedef mtsCommandBase BaseType;
     typedef const mtsGenericObject Argument1Type;
-    typedef _argument2Type Argument2Type;
+    typedef mtsGenericObject Argument2Type;
 
     /*! The constructor. Does nothing */
-    mtsCommandQualifiedReadOrWriteBase(void):
+    mtsCommandQualifiedReadBase(void):
         BaseType()
     {}
 
-    mtsCommandQualifiedReadOrWriteBase(const std::string & name):
+    mtsCommandQualifiedReadBase(const std::string & name):
         BaseType(name)
     {}
 
     /*! The destructor. Does nothing */
-    virtual ~mtsCommandQualifiedReadOrWriteBase() {}
+    virtual ~mtsCommandQualifiedReadBase() {}
 
     /*! The execute method. Abstract method to be implemented by
       derived classes to run the actual operation on the receiver
@@ -68,15 +67,19 @@ public:
       \param obj The data passed to the operation method
 
       \result Boolean value, true if success, false otherwise */
-    virtual BaseType::ReturnType Execute(Argument1Type & argument1, Argument2Type & argument2) = 0;
+    virtual mtsExecutionResult Execute(Argument1Type & argument1, Argument2Type & argument2) = 0;
 
-    /*! For debugging. Generate a human readable output for the
-      command object */
-    virtual void ToStream(std::ostream &out) const = 0;
+    /* documented in base class */
+    virtual void ToStream(std::ostream & outputStream) const = 0;
 
-    /*! Execute method expects 1 argument. */
-    virtual unsigned int NumberOfArguments(void) const {
-        return 1;
+    /* documented in base class  */
+    inline size_t NumberOfArguments(void) const {
+        return 2;
+    }
+
+    /*! documented in base class */
+    inline bool Returns(void) const {
+        return false;
     }
 
     /*! Return a pointer on the argument 1 prototype */
@@ -100,5 +103,5 @@ public:
 };
 
 
-#endif // _mtsCommandQualifiedReadOrWriteBase_h
+#endif // _mtsCommandQualifiedReadBase_h
 

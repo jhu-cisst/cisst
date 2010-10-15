@@ -30,7 +30,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _mtsMulticastCommandVoid_h
 
 
-#include <cisstMultiTask/mtsCommandVoidBase.h>
+#include <cisstMultiTask/mtsCommandVoid.h>
 #include <vector>
 
 // Always include last
@@ -45,10 +45,10 @@ http://www.cisst.org/cisst/license.txt.
   one interface. This is the no argument version, that is the execute
   method takes no argument.
  */
-class mtsMulticastCommandVoid: public mtsCommandVoidBase
+class mtsMulticastCommandVoid: public mtsCommandVoid
 {
 public:
-    typedef mtsCommandVoidBase BaseType;
+    typedef mtsCommandVoid BaseType;
 
 protected:
     /*! Vector to commands that constitute the composite command. */
@@ -56,19 +56,16 @@ protected:
 
 public:
     /*! Default constructor. Does nothing. */
-    mtsMulticastCommandVoid(const std::string & name): BaseType(name) {}
+    mtsMulticastCommandVoid(const std::string & name);
 
     /*! Default destructor. Does nothing. */
-    ~mtsMulticastCommandVoid() {}
+    ~mtsMulticastCommandVoid();
 
     /*! Add a command to the composite. */
     void AddCommand(BaseType * command);
 
-    /*! Get command (should use iterator instead) */
-
-
     /*! Execute all the commands in the composite. */
-    virtual mtsCommandBase::ReturnType Execute(void);
+    virtual mtsExecutionResult Execute(mtsBlockingType CMN_UNUSED(blocking));
 
     /* documented in base class */
     virtual void ToStream(std::ostream & outputStream) const;

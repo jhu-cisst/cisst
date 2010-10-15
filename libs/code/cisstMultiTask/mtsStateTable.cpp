@@ -39,16 +39,13 @@ void mtsStateTable::IndexRange::ToStreamRaw(std::ostream & outputStream, const c
 }
 
 
-int mtsStateTable::StateVectorBaseIDForUser;
-
 mtsStateTable::mtsStateTable(size_t size, const std::string & name):
     HistoryLength(size),
-    NumberStateData(0),
     IndexWriter(0),
     IndexReader(0),
     AutomaticAdvanceFlag(true),
-    StateVector(NumberStateData),
-    StateVectorDataNames(NumberStateData),
+    StateVector(0),
+    StateVectorDataNames(0),
     Ticks(size, mtsStateIndex::TimeTicksType(0)),
     Tic(0.0),
     Toc(0.0),
@@ -81,11 +78,6 @@ mtsStateTable::mtsStateTable(size_t size, const std::string & name):
 
     // Add statistics
     NewElement("PeriodStatistics", &PeriodStats);
-
-    // Currently there are four signals maintained internally at StateTable.
-    // : "Toc", "Tic", "Period", "PeriodStatistics". So the value of StateVectorBaseIDForUser is
-    // set to 4.
-    StateVectorBaseIDForUser = StateVector.size();
 }
 
 mtsStateTable::~mtsStateTable()
@@ -288,11 +280,11 @@ void mtsStateTable::AdvanceIfAutomatic(void) {
 }
 
 
-void mtsStateTable::Kill(void) {
-    CMN_LOG_CLASS_INIT_DEBUG << "Kill: state table \"" << this->Name << "\"" << std::endl;
+void mtsStateTable::Cleanup(void) {
+    CMN_LOG_CLASS_INIT_DEBUG << "Cleanup: state table \"" << this->Name << "\"" << std::endl;
     // if the state table is still set to collect data, send error message, should have been stopped
     if (this->DataCollection.Collecting) {
-        CMN_LOG_CLASS_INIT_ERROR << "Kill: data collection for state table \"" << this->Name
+        CMN_LOG_CLASS_INIT_ERROR << "Cleanup: data collection for state table \"" << this->Name
                                  << "\" has not been stopped.  It is possible that the state collector will look for this state table after it has been deleted." << std::endl;
     }
 }

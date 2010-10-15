@@ -183,45 +183,45 @@ void MapBehavior::Startup(void)
 
     this->ECM1 = this->Manager->GetSlaveArm("ECM1");
 
-    // To get the joint values, we need to access the device directly
-    mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
-    CMN_ASSERT(taskManager);
-    mtsDevice * daVinci = taskManager->GetTask("daVinci");
+    // To get the joint values, we need to access the component directly
+    mtsComponentManager * componentManager = mtsComponentManager::GetInstance();
+    CMN_ASSERT(componentManager);
+    mtsComponent * daVinci = componentManager->GetComponent("daVinci");
     CMN_ASSERT(daVinci);
         // get PSM1 interface
-    mtsProvidedInterface * providedInterface = daVinci->GetProvidedInterface("PSM1");
-    CMN_ASSERT(providedInterface);
-    mtsCommandReadBase * command = providedInterface->GetCommandRead("GetPositionJoint");
+    mtsInterfaceProvided * interfaceProvided = daVinci->GetInterfaceProvided("PSM1");
+    CMN_ASSERT(interfaceProvided);
+    mtsCommandRead * command = interfaceProvided->GetCommandRead("GetPositionJoint");
     CMN_ASSERT(command);
     GetJointPositionSlave.Bind(command);
-    command = providedInterface->GetCommandRead("GetPositionCartesian");
+    command = interfaceProvided->GetCommandRead("GetPositionCartesian");
     CMN_ASSERT(command);
     GetCartesianPositionSlave.Bind(command);
     
     // get slave interface
-    providedInterface = daVinci->GetProvidedInterface("ECM1");
-    CMN_ASSERT(providedInterface);
-    command = providedInterface->GetCommandRead("GetPositionJoint");
+    interfaceProvided = daVinci->GetInterfaceProvided("ECM1");
+    CMN_ASSERT(interfaceProvided);
+    command = interfaceProvided->GetCommandRead("GetPositionJoint");
     CMN_ASSERT(command);
     GetJointPositionECM.Bind(command);
     
     // get clutch interface
-    providedInterface = daVinci->GetProvidedInterface("Clutch");
-    CMN_ASSERT(providedInterface);
+    interfaceProvided = daVinci->GetInterfaceProvided("Clutch");
+    CMN_ASSERT(interfaceProvided);
     mtsCommandWrite<MapBehavior, prmEventButton> * clutchCallbackCommand =
             new mtsCommandWrite<MapBehavior, prmEventButton>(&MapBehavior::MasterClutchPedalCallback, this,
                                                          "Button", prmEventButton());
     CMN_ASSERT(clutchCallbackCommand);
-    providedInterface->AddObserver("Button", clutchCallbackCommand);
+    interfaceProvided->AddObserver("Button", clutchCallbackCommand);
     
     //get camera control interface
-    providedInterface = daVinci->GetProvidedInterface("Camera");
-    CMN_ASSERT(providedInterface);
+    interfaceProvided = daVinci->GetInterfaceProvided("Camera");
+    CMN_ASSERT(interfaceProvided);
     mtsCommandWrite<MapBehavior, prmEventButton> * cameraCallbackCommand =
             new mtsCommandWrite<MapBehavior, prmEventButton>(&MapBehavior::CameraControlPedalCallback, this,
                                                          "Button", prmEventButton());
     CMN_ASSERT(cameraCallbackCommand);
-    providedInterface->AddObserver("Button", cameraCallbackCommand);
+    interfaceProvided->AddObserver("Button", cameraCallbackCommand);
 
     this->PreviousSlavePosition.Assign(this->Slave1Position.Position().Translation());
 

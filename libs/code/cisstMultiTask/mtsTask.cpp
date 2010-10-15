@@ -7,7 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Min Yang Jung
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights
   Reserved.
 
   --- begin cisst license - do not edit ---
@@ -28,6 +28,7 @@
 #include <cisstMultiTask/mtsTask.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
+#include <cisstMultiTask/mtsManagerComponentBase.h>
 
 #include <iostream>
 
@@ -69,7 +70,7 @@ void mtsTask::StartupInternal(void) {
     if (success) {
         // Call user-supplied startup function
         this->Startup();
-        ChangeState(READY);
+        ChangeState(mtsComponentState::READY);
     }
     else {
         CMN_LOG_CLASS_INIT_ERROR << "StartupInternal: task \"" << this->GetName() << "\" cannot be started." << std::endl;
@@ -81,9 +82,14 @@ void mtsTask::StartupInternal(void) {
 void mtsTask::CleanupInternal() {
     // Call user-supplied cleanup function
     this->Cleanup();
+
+    // Kill each state table
+    StateTables.ForEachVoid(&mtsStateTable::Cleanup);
+
     // Perform Cleanup on all interfaces provided
     InterfacesProvidedOrOutput.ForEachVoid(&mtsInterfaceProvidedOrOutput::Cleanup);
-    ChangeState(FINISHED);
+
+    ChangeState(mtsComponentState::FINISHED);
     CMN_LOG_CLASS_INIT_VERBOSE << "CleanupInternal: ended for task \"" << this->GetName() << "\"" << std::endl;
 }
 
@@ -114,46 +120,55 @@ void mtsTask::SetThreadReturnValue(void * returnValue) {
     ReturnValue = returnValue;
 }
 
-void mtsTask::ChangeState(TaskStateType newState)
+void mtsTask::ChangeState(mtsComponentState::Enum newState)
 {
     StateChange.Lock();
-    TaskState = newState;
+    this->State = newState;
     StateChange.Unlock();
     StateChangeSignal.Raise();
+
+    // Inform the manager component client of the state change
+    mtsInterfaceProvided * interfaceInternalProvided = 
+        GetInterfaceProvided(mtsManagerComponentBase::InterfaceNames::InterfaceInternalProvided);
+    if (interfaceInternalProvided) {
+        mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
+        EventGeneratorChangeState(mtsComponentStateChange(LCM->GetProcessName(), this->GetName(), this->State.GetState()));
+    }
 }
 
-bool mtsTask::WaitForState(TaskStateType desiredState, double timeout)
+bool mtsTask::WaitForState(mtsComponentState desiredState, double timeout)
 {
-    if (TaskState == desiredState)
+    if (this->State == desiredState) {
         return true;
+    }
     if (osaGetCurrentThreadId() == Thread.GetId()) {
         // This shouldn't happen
-        CMN_LOG_CLASS_INIT_WARNING << "WaitForState(" << TaskStateName(desiredState) << "): called from self for task \""
+        CMN_LOG_CLASS_INIT_WARNING << "WaitForState(" << desiredState << "): called from self for task \""
                                    << this->GetName() << "\"" << std::endl;
-    }
-    else {
+    } else {
         CMN_LOG_CLASS_INIT_VERBOSE << "WaitForState: waiting for task \"" << this->GetName() << "\" to enter state \""
-                                   << TaskStateName(desiredState) << "\"" << std::endl;
+                                   << desiredState << "\"" << std::endl;
         double curTime = osaGetTime();
         double startTime = curTime;
         double endTime = startTime + timeout;
         while (timeout > 0) {
             StateChangeSignal.Wait(timeout);
             curTime = osaGetTime();
-            if (TaskState == desiredState)
+            if (this->State == desiredState) {
                 break;
+            }
             timeout = endTime - curTime;
         }
-        if (TaskState == desiredState) {
+        if (this->State == desiredState) {
             CMN_LOG_CLASS_INIT_VERBOSE << "WaitForState: waited for " << curTime-startTime
                                        << " seconds." << std::endl;
         } else {
             CMN_LOG_CLASS_INIT_ERROR << "WaitForState: task \"" << this->GetName()
-                                     << "\" did not reach state \"" << TaskStateName(desiredState)
-                                     << "\", current state is \"" << GetTaskStateName() << "\"" << std::endl;
+                                     << "\" did not reach state \"" << desiredState
+                                     << "\", current state is \"" << this->State << "\"" << std::endl;
         }
     }
-    return (TaskState == desiredState);
+    return (this->State == desiredState);
 }
 
 /********************* Task constructor and destructor *****************/
@@ -162,7 +177,7 @@ mtsTask::mtsTask(const std::string & name,
                  unsigned int sizeStateTable) :
     mtsComponent(name),
     Thread(),
-    TaskState(CONSTRUCTED),
+    InitializationDelay(3.0 * cmn_s), // if this value is modified, update documentation in header file
     StateChange(),
     StateChangeSignal(),
     StateTable(sizeStateTable, "StateTable"),
@@ -191,30 +206,14 @@ mtsTask::~mtsTask()
 
 void mtsTask::Kill(void)
 {
-    CMN_LOG_CLASS_INIT_VERBOSE << "Kill: task \"" << this->GetName() << "\", current state \"" << GetTaskStateName() << "\"" << std::endl;
-
-    // Kill each state table
-    StateTables.ForEachVoid(&mtsStateTable::Kill);
+    CMN_LOG_CLASS_INIT_VERBOSE << "Kill: task \"" << this->GetName() << "\", current state \"" << this->State << "\"" << std::endl;
 
     // If the task has only been constructed (i.e., no thread created), then we just enter the FINISHED state directly.
     // Otherwise, we set the state to FINISHING and let the thread (RunInternal) set it to FINISHED.
-    if (TaskState == CONSTRUCTED) {
-        ChangeState(FINISHED);
+    if (this->State == mtsComponentState::CONSTRUCTED) {
+        ChangeState(mtsComponentState::FINISHED);
     } else {
-        ChangeState(FINISHING);
-    }
-}
-
-
-/********************* Methods to query the task state ****************/
-
-const char * mtsTask::TaskStateName(TaskStateType state) const
-{
-    static const char * const taskStateNames[] = { "constructed", "initializing", "ready", "active", "finishing", "finished" };
-    if ((state < CONSTRUCTED) || (state > FINISHED)) {
-        return "unknown";
-    } else {
-        return taskStateNames[state];
+        ChangeState(mtsComponentState::FINISHING);
     }
 }
 
@@ -263,30 +262,23 @@ bool mtsTask::AddStateTable(mtsStateTable * existingStateTable, bool addInterfac
 mtsInterfaceRequired * mtsTask::AddInterfaceRequired(const std::string & interfaceRequiredName,
                                                      mtsRequiredType required)
 {
-    // PK: move DEFAULT_EVENT_QUEUE_LEN somewhere else (not in mtsInterfaceProvided)
+    // PK: move DEFAULT_EVENT_QUEUE_LEN somewhere else
     mtsMailBox * mailBox = new mtsMailBox(interfaceRequiredName + "Events", mtsInterfaceRequired::DEFAULT_EVENT_QUEUE_LEN);
     mtsInterfaceRequired * result;
-    if (mailBox) {
-        // try to create and add interface
-        result = this->AddInterfaceRequiredUsingMailbox(interfaceRequiredName, mailBox, required);
-        if (!result) {
-            delete mailBox;
-        }
-        return result;
-    }
-    CMN_LOG_CLASS_INIT_ERROR << "AddInterfaceRequired: unable to create mailbox for \""
-                             << interfaceRequiredName << "\"" << std::endl;
-    delete mailBox;
-    return 0;
+    // try to create and add interface
+    result = this->AddInterfaceRequiredUsingMailbox(interfaceRequiredName, mailBox, required);
+    if (!result)
+        delete mailBox;
+    return result;
 }
 
 
 mtsInterfaceProvided * mtsTask::AddInterfaceProvided(const std::string & interfaceProvidedName,
-                                                     mtsInterfaceQueuingPolicy queuingPolicy)
+                                                     mtsInterfaceQueueingPolicy queueingPolicy)
 {
     mtsInterfaceProvided * interfaceProvided;
-    if ((queuingPolicy == MTS_COMPONENT_POLICY)
-        || (queuingPolicy == MTS_COMMANDS_SHOULD_BE_QUEUED)) {
+    if ((queueingPolicy == MTS_COMPONENT_POLICY)
+        || (queueingPolicy == MTS_COMMANDS_SHOULD_BE_QUEUED)) {
         interfaceProvided = new mtsInterfaceProvided(interfaceProvidedName, this, MTS_COMMANDS_SHOULD_BE_QUEUED);
     } else {
         CMN_LOG_CLASS_INIT_WARNING << "AddInterfaceProvided: adding provided interface \"" << interfaceProvidedName
@@ -315,25 +307,26 @@ mtsInterfaceProvided * mtsTask::AddInterfaceProvided(const std::string & interfa
 
 bool mtsTask::WaitToStart(double timeout)
 {
-    if (TaskState == INITIALIZING) {
-        WaitForState(READY, timeout);
+    if (this->State == mtsComponentState::INITIALIZING) {
+        WaitForState(mtsComponentState::READY, timeout);
     }
-    return (TaskState >= READY);
+    return (this->State >= mtsComponentState::READY);
 }
+
 
 bool mtsTask::WaitToTerminate(double timeout)
 {
     bool ret = true;
-    if (TaskState < FINISHING) {
+    if (this->State < mtsComponentState::FINISHING) {
         CMN_LOG_CLASS_INIT_WARNING << "WaitToTerminate: not finishing task \"" << this->GetName() << "\"" << std::endl;
         ret = false;
     }
-    else if (TaskState == FINISHING) {
-        ret = WaitForState(FINISHED, timeout);
+    else if (this->State == mtsComponentState::FINISHING) {
+        ret = WaitForState(mtsComponentState::FINISHED, timeout);
     }
 
     // If task state is finished, we wait for the thread to be destroyed
-    if ((TaskState == FINISHED) && Thread.IsValid()) {
+    if ((this->State == mtsComponentState::FINISHED) && Thread.IsValid()) {
         CMN_LOG_CLASS_INIT_VERBOSE << "WaitToTerminate: waiting for task \"" << this->GetName()
                                    << "\" thread to exit." << std::endl;
         Thread.Wait();
@@ -348,4 +341,10 @@ void mtsTask::ToStream(std::ostream & outputStream) const
     StateTable.ToStream(outputStream);
     InterfacesProvidedOrOutput.ToStream(outputStream);
     InterfacesRequiredOrInput.ToStream(outputStream);
+}
+
+
+void mtsTask::SetInitializationDelay(double delay)
+{
+    this->InitializationDelay = delay;
 }

@@ -29,10 +29,11 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstStereoVision/svlExport.h>
 
 
-class CISST_EXPORT svlSample : public cmnGenericObject
+class CISST_EXPORT svlSample : public mtsGenericObject
 {
 public:
     svlSample();
+    svlSample(const svlSample & other);
     virtual ~svlSample();
     virtual svlSample* GetNewInstance() const = 0;
     virtual svlStreamType GetType() const = 0;

@@ -46,10 +46,10 @@ int main(void)
     }
     CMN_LOG_INIT_VERBOSE << "Global component manager started successfully." << std::endl;
 
-    // Get the local component manager as standalone mode
+    // Get the local component manager as "networked with GCM" mode
     mtsTaskManager * taskManager;
     try {
-        taskManager = mtsTaskManager::GetInstance();
+        taskManager = mtsTaskManager::GetInstance(globalComponentManager);
     } catch (...) {
         CMN_LOG_INIT_ERROR << "Failed to initialize local component manager" << std::endl;
         return 1;

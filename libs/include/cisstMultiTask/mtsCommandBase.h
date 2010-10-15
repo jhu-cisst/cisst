@@ -32,6 +32,7 @@ http://www.cisst.org/cisst/license.txt.
 // pretty much always needed in conjunction with commands.  To ease
 // the user's life, we include them now.
 //include <cisstMultiTask/mtsGenericObjectProxy.h>
+#include <cisstMultiTask/mtsExecutionResult.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 
 #include <iostream>
@@ -58,25 +59,6 @@ protected:
     bool EnableFlag;
 
 public:
-    /* use to bitshift and or for return value of a composite
-       would limit the number of composite interfaces to 31 for
-       an int return value
-    */
-    enum { RETURN_TYPE_BIT_SIZE = 1 };
-
-    /* the error value is -ve of the return value */
-    enum ReturnType {
-        DEV_OK = 0,
-        DEV_NOT_OK = 1,
-        BAD_COMMAND = 12,
-        NO_MAILBOX = 13,
-        BAD_INPUT = 14,
-        NO_INTERFACE = 15,
-        MAILBOX_FULL = 16,
-        DISABLED = 17,
-        COMMAND_FAILED = 18  // Read or QualifiedRead returned 'false'
-    };
-
     /*! The constructor. Does nothing */
     inline mtsCommandBase(void):
         Name("??"),
@@ -100,12 +82,14 @@ public:
         ToStream(outputStream);
         return outputStream.str();
     };
-    virtual void ToStream(std::ostream & out) const = 0;
+    virtual void ToStream(std::ostream & outputStream) const = 0;
     //@}
 
     /*! Returns number of arguments (parameters) expected by Execute
       method.  Must be overloaded in derived classes. */
-    virtual unsigned int NumberOfArguments(void) const = 0;
+    virtual size_t NumberOfArguments(void) const = 0;
+
+    virtual bool Returns(void) const = 0;
 
     /*! Set and access the "enable" flag.  This flag is used to
       determine if the command actually uses the provided method or
@@ -139,10 +123,10 @@ public:
 /*! Stream out operator for all classes derived from mtsCommandBase.
   This operator uses the ToStream method so that the output can be
   different for each derived class. */
-inline std::ostream & operator << (std::ostream & output,
+inline std::ostream & operator << (std::ostream & outputStream,
                                    const mtsCommandBase & command) {
-    command.ToStream(output);
-    return output;
+    command.ToStream(outputStream);
+    return outputStream;
 }
 
 

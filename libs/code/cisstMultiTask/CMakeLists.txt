@@ -19,18 +19,35 @@ set (SOURCE_FILES
      mtsClassServices.cpp
 
      mtsGenericObject.cpp
+     mtsExecutionResult.cpp
 
      mtsMulticastCommandVoid.cpp
      mtsMulticastCommandWriteBase.cpp
 
      mtsFunctionVoid.cpp
+     mtsFunctionVoidReturn.cpp
      mtsFunctionRead.cpp
      mtsFunctionWrite.cpp
+     mtsFunctionWriteReturn.cpp
      mtsFunctionQualifiedRead.cpp
 
-     mtsCommandQueuedVoidBase.cpp
+     mtsEventReceiver.cpp
+
+     mtsCommandVoid.cpp
+     mtsCommandQueuedVoid.cpp
+
+     mtsCommandVoidReturn.cpp
+     mtsCommandQueuedVoidReturn.cpp
+
+     mtsCommandWriteReturn.cpp
+     mtsCommandQueuedWriteReturn.cpp
+
      mtsCommandQueuedWriteBase.cpp
+
+     mtsCommandFilteredWrite.cpp
      mtsCommandFilteredQueuedWrite.cpp
+
+     mtsCommandRead.cpp
 
      mtsMailBox.cpp
      mtsStateIndex.cpp
@@ -38,6 +55,7 @@ set (SOURCE_FILES
      mtsIntervalStatistics.cpp
 
      mtsComponent.cpp
+     mtsComponentState.cpp
      mtsTask.cpp
      mtsTaskContinuous.cpp
      mtsTaskPeriodic.cpp
@@ -57,6 +75,13 @@ set (SOURCE_FILES
 
      mtsManagerLocal.cpp
      mtsManagerGlobal.cpp
+     mtsManagerComponentBase.cpp
+     mtsManagerComponentServer.cpp
+     mtsManagerComponentClient.cpp
+     mtsManagerComponentServices.cpp
+
+     mtsParameterTypes.cpp
+     mtsComponentViewer.cpp
      )
 
 # all header files
@@ -65,6 +90,7 @@ set (HEADER_FILES
      mtsComponentGeneratorMacros.h
      mtsGenericObject.h
      mtsGenericObjectProxy.h
+     mtsExecutionResult.h
 
      mtsFixedSizeVector.h
      mtsFixedSizeVectorTypes.h
@@ -75,28 +101,46 @@ set (HEADER_FILES
      mtsCommandBase.h
      mtsFunctionBase.h
 
+     mtsCallableVoidBase.h
+     mtsCallableVoidMethod.h
+     mtsCallableVoidFunction.h
      mtsCommandVoid.h
-     mtsCommandVoidBase.h
-     mtsMulticastCommandVoid.h
      mtsCommandQueuedVoid.h
-     mtsCommandQueuedVoidBase.h
+     mtsMulticastCommandVoid.h
      mtsFunctionVoid.h
 
+     mtsCallableVoidReturnBase.h
+     mtsCallableVoidReturnMethod.h
+     mtsCommandVoidReturn.h
+     mtsCommandQueuedVoidReturn.h
+     mtsFunctionVoidReturn.h
+
+     mtsCallableWriteReturnBase.h
+     mtsCallableWriteReturnMethod.h
+     mtsCommandWriteReturn.h
+     mtsCommandQueuedWriteReturn.h
+     mtsFunctionWriteReturn.h
+
+     mtsCallableReadBase.h
+     mtsCallableReadMethod.h
+     mtsCallableReadReturnVoidMethod.h
      mtsCommandRead.h
      mtsCommandWrite.h
-     mtsCommandReadOrWriteBase.h
+     mtsCommandWriteBase.h
      mtsMulticastCommandWrite.h
      mtsMulticastCommandWriteBase.h
      mtsCommandQueuedWrite.h
      mtsCommandQueuedWriteBase.h
+     mtsCommandFilteredWrite.h
      mtsCommandFilteredQueuedWrite.h
      mtsFunctionRead.h
      mtsFunctionWrite.h
-     mtsEventWriteGeneratorProxy.h
 
      mtsCommandQualifiedRead.h
-     mtsCommandQualifiedReadOrWriteBase.h
+     mtsCommandQualifiedReadBase.h
      mtsFunctionQualifiedRead.h
+
+     mtsEventReceiver.h
 
      mtsExport.h
      mtsForwardDeclarations.h
@@ -112,6 +156,7 @@ set (HEADER_FILES
      mtsIntervalStatistics.h
 
      mtsComponent.h
+     mtsComponentState.h
      mtsTask.h
      mtsTaskContinuous.h
      mtsTaskPeriodic.h
@@ -136,6 +181,13 @@ set (HEADER_FILES
      mtsManagerLocal.h
      mtsManagerGlobalInterface.h
      mtsManagerGlobal.h
+     mtsManagerComponentBase.h
+     mtsManagerComponentServer.h
+     mtsManagerComponentClient.h
+     mtsManagerComponentServices.h
+
+     mtsParameterTypes.h
+     mtsComponentViewer.h
 
      mtsHistory.h
      )
@@ -176,6 +228,7 @@ if(CISST_MTS_HAS_ICE)
       mtsFunctionWriteProxy.h
       mtsFunctionQualifiedReadProxy.h
       mtsMulticastCommandWriteProxy.h
+      mtsEventWriteGeneratorProxy.h
       )
 
   SET(ICE_RESOURCE_DIR ${cisst_SOURCE_DIR}/libs/etc/cisstMultiTask/Ice)

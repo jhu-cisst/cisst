@@ -57,6 +57,15 @@ public:
         else Matrix = 0;
     }
 
+    svlSampleMatrixCustom(const svlSampleMatrixCustom & other) :
+        svlSampleMatrix(other),
+        OwnData(true),
+        InvalidElement(0)
+    {
+        Matrix = new vctDynamicMatrix<_ValueType>;
+        CopyOf(other);
+    }
+
 
     ////////////////
     // Destructor //
@@ -170,6 +179,8 @@ public:
 
     virtual void SerializeRaw(std::ostream & outputStream) const
     {
+        mtsGenericObject::SerializeRaw(outputStream);
+
         if (IsInitialized()) {
             cmnSerializeRaw(outputStream, GetType());
             cmnSerializeRaw(outputStream, GetTimestamp());
@@ -179,6 +190,8 @@ public:
 
     virtual void DeSerializeRaw(std::istream & inputStream)
     {
+        mtsGenericObject::DeSerializeRaw(inputStream);
+
         int type = -1;
         double timestamp;
         cmnDeSerializeRaw(inputStream, type);

@@ -39,9 +39,9 @@ int main(int argc, char **argv)
         new displayTask("DISP", PeriodDisplay);
     displayTaskObject->Configure();
     // add the tasks to the task manager and connect them
-    taskManager->AddTask(sineTaskObject);
-    taskManager->AddDevice(clockDeviceObject);
-    taskManager->AddTask(displayTaskObject);
+    taskManager->AddComponent(sineTaskObject);
+    taskManager->AddComponent(clockDeviceObject);
+    taskManager->AddComponent(displayTaskObject);
     taskManager->Connect("DISP", "DataGenerator", "SIN", "MainInterface");
     taskManager->Connect("DISP", "Clock", "CLOC", "MainInterface");
 

@@ -30,10 +30,10 @@ int main(void)
     appTask * appTaskControl2 = new appTask("ControlRobot2", "Robot2", "Robot1", 150 * cmn_ms);
 
     // add all tasks
-    taskManager->AddTask(robot1Task);
-    taskManager->AddTask(robot2Task);
-    taskManager->AddTask(appTaskControl1);
-    taskManager->AddTask(appTaskControl2);
+    taskManager->AddComponent(robot1Task);
+    taskManager->AddComponent(robot2Task);
+    taskManager->AddComponent(appTaskControl1);
+    taskManager->AddComponent(appTaskControl2);
 
     taskManager->CreateAll();
     taskManager->StartAll();

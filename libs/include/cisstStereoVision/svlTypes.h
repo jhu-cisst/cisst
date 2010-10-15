@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _svlTypes_h
 
 #include <cisstCommon/cmnLogger.h>
+#include <cisstMultiTask/mtsGenericObject.h>
 #include <cisstVector/vctFixedSizeVectorTypes.h>
 #include <cisstVector/vctFixedSizeMatrixTypes.h>
 #include <cisstVector/vctDynamicVectorTypes.h>

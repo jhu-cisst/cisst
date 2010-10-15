@@ -6,7 +6,7 @@
 
   Author(s):  Peter Kazanzides, Anton Deguet
 
-  (C) Copyright 2007 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2010 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -19,7 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include <cisstMultiTask/mtsFunctionWrite.h>
-#include <cisstMultiTask/mtsCommandReadOrWriteBase.h>
+#include <cisstMultiTask/mtsCommandWriteBase.h>
 
 
 mtsFunctionWrite::~mtsFunctionWrite()
@@ -46,12 +46,17 @@ bool mtsFunctionWrite::Bind(CommandType * command) {
 }
 
 
-mtsCommandBase::ReturnType mtsFunctionWrite::operator()(const mtsGenericObject & argument) const {
-    return Command ? Command->Execute(argument) : mtsCommandBase::NO_INTERFACE;
+mtsExecutionResult mtsFunctionWrite::operator()(const mtsGenericObject & argument) const {
+    return Command ? Command->Execute(argument, MTS_NOT_BLOCKING) : mtsExecutionResult::NO_INTERFACE;
 }
 
 
-mtsCommandReadOrWriteBase<const mtsGenericObject> * mtsFunctionWrite::GetCommand(void) const {
+mtsExecutionResult mtsFunctionWrite::ExecuteBlocking(const mtsGenericObject & argument) const {
+    return Command ? Command->Execute(argument, MTS_BLOCKING) : mtsExecutionResult::NO_INTERFACE;
+}
+
+
+mtsFunctionWrite::CommandType * mtsFunctionWrite::GetCommand(void) const {
     return Command;
 }
 

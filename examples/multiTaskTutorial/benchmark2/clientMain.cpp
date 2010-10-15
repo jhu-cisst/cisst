@@ -64,7 +64,7 @@ int main(int argc, char * argv[])
 
     // Get the TaskManager instance and set operation mode
     mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
-    taskManager->AddTask(client);        
+    taskManager->AddComponent(client);        
 
     // Connect the tasks across networks
     taskManager->Connect("Client", "Required", "Server", "Provided");

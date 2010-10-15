@@ -346,7 +346,9 @@ public:
         // queue new object and move head
         // using in place new to make sure copy constructor is used
         if (!this->ClassServices->Create(*(this->Head), newObject)) {
+            // if Create fails, it does not modify the input parameter (this->Head)
             CMN_LOG_RUN_ERROR << "mtsQueueGeneric::Put failed for " << newObject.Services()->GetName() << std::endl;
+            return 0;
         }
         this->Head = newHead;
         return *(this->Head);

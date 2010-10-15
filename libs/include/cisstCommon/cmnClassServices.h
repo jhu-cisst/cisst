@@ -132,7 +132,10 @@ public:
 
     /*! Specialization of create(other) when dynamic creation is
       enabled.  Call new for the given class.  This method
-      requires a copy constructor for the aforementioned class. */
+      requires a copy constructor for the aforementioned class. 
+      Returns false on failure, in which case input parameter (existing) is
+      not modified.
+     */
     inline static bool Create(cmnGenericObject * existing, const cmnGenericObject & other) {
         const value_type * otherPointer = dynamic_cast<const value_type *>(&other);
         if (otherPointer) {

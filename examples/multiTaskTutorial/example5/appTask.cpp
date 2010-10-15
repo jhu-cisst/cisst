@@ -27,10 +27,10 @@ void appTask::Startup(void)
     ui.SetCloseHandler(Close);
 
     mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
-    controlledTask = dynamic_cast<robotLowLevel*>(taskManager->GetTask(ui.GetControlledName()));
+    controlledTask = dynamic_cast<robotLowLevel*>(taskManager->GetComponent(ui.GetControlledName()));
     if (!controlledTask)
         CMN_LOG_INIT_ERROR << "Controlled task not a robot!" << std::endl;
-    observedTask = dynamic_cast<robotLowLevel*>(taskManager->GetTask(ui.GetObservedName()));
+    observedTask = dynamic_cast<robotLowLevel*>(taskManager->GetComponent(ui.GetObservedName()));
     if (!observedTask)
         CMN_LOG_INIT_ERROR << "Observed task not a robot!" << std::endl;
 

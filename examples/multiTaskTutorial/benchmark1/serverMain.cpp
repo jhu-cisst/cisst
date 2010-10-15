@@ -31,7 +31,7 @@ int main(int argc, char * argv[])
 
     // Get the TaskManager instance and set operation mode
     mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
-    taskManager->AddTask(server);
+    taskManager->AddComponent(server);
 
     // create the tasks, i.e. find the commands
     taskManager->CreateAll();

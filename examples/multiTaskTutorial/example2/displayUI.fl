@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0107 
+version 1.0109 
 header_name {.h} 
 code_name {.cxx}
 class displayUI {open
@@ -8,7 +8,7 @@ class displayUI {open
   } {
     Fl_Window DisplayWindow {
       label DisplayWindow open
-      xywh {1338 111 254 269} type Double visible
+      xywh {1064 120 254 305} type Double visible
     } {
       Fl_Value_Output Data {
         label {Data:}
@@ -18,7 +18,7 @@ class displayUI {open
         label Close
         callback {DisplayWindow->hide();
 Closed = true;}
-        tooltip {Quit the application} xywh {90 210 75 25} box THIN_UP_BOX
+        tooltip {Quit the application} xywh {90 256 75 25} box THIN_UP_BOX
       }
       Fl_Dial Amplitude {
         label {Amplitude:}
@@ -42,7 +42,16 @@ Closed = true;}
       }
       Fl_Value_Output Time {
         label {Time:}
-        xywh {65 170 155 25}
+        xywh {65 216 155 25}
+      }
+      Fl_Check_Button SetHandler {
+        label {Set Handler}
+        callback {SetHandlerChanged = true;}
+        xywh {21 169 25 25} down_box DOWN_BOX
+      }
+      Fl_Check_Button ReceiveArg {
+        label {Receive Arg}
+        xywh {141 169 25 25} down_box DOWN_BOX
       }
     }
     code {AmplitudeChanged = false;} {}
@@ -50,18 +59,11 @@ Closed = true;}
     code {TriggerWaitChanged = false;} {}
     code {DoReset = false;} {}
     code {Closed = false;} {}
+    code {SetHandlerChanged = false;} {}
   }
   Function {show(int argc, char**argv)} {open
   } {
-    code {bool done = false;
-while (!done) {
-    if (!Semaphore) {
-        Semaphore = true;
-        DisplayWindow->show();
-        done = true;
-        Semaphore = false;
-    }
-}} {}
+    code {DisplayWindow->show();} {}
   }
   decl {bool AmplitudeChanged;} {public
   }
@@ -73,6 +75,6 @@ while (!done) {
   }
   decl {bool Closed;} {public
   }
-  decl {static bool Semaphore;} {public
+  decl {bool SetHandlerChanged;} {public
   }
 } 

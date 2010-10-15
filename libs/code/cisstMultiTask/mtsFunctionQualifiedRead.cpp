@@ -6,7 +6,7 @@
 
   Author(s):  Peter Kazanzides, Anton Deguet
 
-  (C) Copyright 2007 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2007-2010 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -19,7 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include <cisstMultiTask/mtsFunctionQualifiedRead.h>
-#include <cisstMultiTask/mtsCommandQualifiedReadOrWriteBase.h>
+#include <cisstMultiTask/mtsCommandQualifiedReadBase.h>
 
 
 mtsFunctionQualifiedRead::~mtsFunctionQualifiedRead()
@@ -47,14 +47,14 @@ bool mtsFunctionQualifiedRead::Bind(CommandType * command) {
 }
 
 
-mtsCommandBase::ReturnType mtsFunctionQualifiedRead::operator()(const mtsGenericObject & qualifier,
+mtsExecutionResult mtsFunctionQualifiedRead::operator()(const mtsGenericObject & qualifier,
                                                                 mtsGenericObject & argument) const
 {
-    return Command ? Command->Execute(qualifier, argument) : mtsCommandBase::NO_INTERFACE;
+    return Command ? Command->Execute(qualifier, argument) : mtsExecutionResult::NO_INTERFACE;
 }
 
 
-mtsCommandQualifiedReadOrWriteBase<mtsGenericObject> * mtsFunctionQualifiedRead::GetCommand(void) const {
+mtsFunctionQualifiedRead::CommandType * mtsFunctionQualifiedRead::GetCommand(void) const {
     return Command;
 }
 

@@ -49,12 +49,12 @@ protected:
       thread creation. */
     void * RunInternal(void * argument);
 
-    /*! Method used to by the command PostCommandQueuedCommand to wake
+    /*! Method used to by the callable PostCommandQueuedCallable to wake
       up the thread when any queued command or event is sent */
     void PostCommandQueuedMethod(void);
 
-    /*! Command created around the PostCommandQueuedMethod. */
-    mtsCommandVoidBase * PostCommandQueuedCommand;
+    /*! Callable created around the PostCommandQueuedMethod. */
+    mtsCallableVoidBase * PostCommandQueuedCallable;
 
 public:
     /*! Create a task with name 'name' and set the state table size.
@@ -74,10 +74,13 @@ public:
     virtual ~mtsTaskFromSignal() {}
 
     /* documented in base class */
-    virtual mtsInterfaceRequired * AddInterfaceRequired(const std::string & interfaceRequiredName,
-                                                        mtsRequiredType required = MTS_REQUIRED);
-    virtual mtsInterfaceProvided * AddInterfaceProvided(const std::string & newInterfaceName,
-                                                        mtsInterfaceQueuingPolicy queuingPolicy = MTS_COMPONENT_POLICY);
+	void Kill(void);
+
+    mtsInterfaceRequired * AddInterfaceRequired(const std::string & interfaceRequiredName,
+                                                mtsRequiredType required = MTS_REQUIRED);
+
+    mtsInterfaceProvided * AddInterfaceProvided(const std::string & newInterfaceName,
+                                                mtsInterfaceQueueingPolicy queueingPolicy = MTS_COMPONENT_POLICY);
 
 };
 

@@ -305,10 +305,7 @@ void cmnLODMultiplexerStreambuf<_element, _trait>::RemoveChannel(ChannelType * c
 template <class _element, class _trait>
 void cmnLODMultiplexerStreambuf<_element, _trait>::RemoveAllChannels(void)
 {
-    IteratorType it;
-    for (it = m_ChannelContainer.begin(); it != m_ChannelContainer.end(); it++) {
-        m_ChannelContainer.erase(it);
-    }
+    m_ChannelContainer.clear();
 }
 
 

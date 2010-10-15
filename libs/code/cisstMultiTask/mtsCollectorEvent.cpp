@@ -226,7 +226,7 @@ std::string mtsCollectorEvent::GetDefaultOutputName(void)
 mtsComponent * mtsCollectorEvent::CheckComponent(const std::string & componentName) const
 {
     // todo, replace with GetComponent when available
-    mtsComponent * componentPointer = TaskManager->GetTask(componentName);
+    mtsComponent * componentPointer = TaskManager->GetComponent(componentName);
     if (!componentPointer) {
         CMN_LOG_CLASS_INIT_ERROR << "component \"" << componentName
                                  << "\" not found in task manager for collector \""

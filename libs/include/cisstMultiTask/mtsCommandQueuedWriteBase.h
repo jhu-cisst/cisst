@@ -7,7 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2005-05-02
 
-  (C) Copyright 2005-2008 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2005-2010 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -27,7 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsCommandQueuedWriteBase_h
 #define _mtsCommandQueuedWriteBase_h
 
-#include <cisstMultiTask/mtsCommandReadOrWriteBase.h>
+#include <cisstMultiTask/mtsCommandWriteBase.h>
 #include <cisstMultiTask/mtsMailBox.h>
 
 // Always include last
@@ -39,18 +39,24 @@ protected:
     mtsMailBox * MailBox;
     mtsCommandWriteBase * ActualCommand;
 
+    /*! Queue of flags to indicate if the command is blocking or
+      not */
+    mtsQueue<mtsBlockingType> BlockingFlagQueue;
+
 private:
     inline mtsCommandQueuedWriteBase(void):
         BaseType("??"),
         MailBox(0),
-        ActualCommand(0)
+        ActualCommand(0),
+        BlockingFlagQueue(0, MTS_NOT_BLOCKING)
     {}
 
 public:
-    inline mtsCommandQueuedWriteBase(mtsMailBox * mailBox, mtsCommandWriteBase * actualCommand):
+    inline mtsCommandQueuedWriteBase(mtsMailBox * mailBox, mtsCommandWriteBase * actualCommand, size_t size):
         BaseType(actualCommand->GetName()),
         MailBox(mailBox),
-        ActualCommand(actualCommand)
+        ActualCommand(actualCommand),
+        BlockingFlagQueue(size, MTS_NOT_BLOCKING)
     {
         this->SetArgumentPrototype(ActualCommand->GetArgumentPrototype());
     }
@@ -74,7 +80,8 @@ public:
     virtual void Allocate(size_t size) = 0;
 
 
-    virtual mtsCommandBase::ReturnType Execute(const mtsGenericObject & argument) = 0;
+    virtual mtsExecutionResult Execute(const mtsGenericObject & argument,
+                                       mtsBlockingType blocking) = 0;
 
 
     virtual const mtsGenericObject * ArgumentPeek(void) const = 0;
@@ -82,13 +89,11 @@ public:
 
     virtual mtsGenericObject * ArgumentGet(void) = 0;
 
+    mtsBlockingType BlockingFlagGet(void);
 
     inline virtual const std::string GetMailBoxName(void) const {
         return this->MailBox ? this->MailBox->GetName() : "NULL";
     }
 };
 
-
-
 #endif // _mtsCommandQueuedWrite_h
-

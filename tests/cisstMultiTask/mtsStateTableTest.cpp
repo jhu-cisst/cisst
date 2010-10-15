@@ -7,7 +7,7 @@
   Author(s):  Min Yang Jung
   Created on: 2009-03-05
   
-  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2009-2010 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -19,9 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-//#include <cisstCommon/cmnUnits.h>
 #include <cisstMultiTask/mtsStateTable.h>
-//#include <cisstMultiTask/mtsTaskManager.h>
 
 #include "mtsStateTableTest.h"
 
@@ -163,9 +161,10 @@ void mtsStateTableTest::TestGetStateVectorID(void)
 {
     mtsStateTable StateTable(20, "Test");
 
-    const int default_column_count = mtsStateTable::StateVectorBaseIDForUser;
-	const int user_column_count = 2;	// Data1, Data2
-	const int total_column_count = default_column_count + user_column_count;
+    const size_t default_column_count = StateTable.GetNumberOfElements();
+    CPPUNIT_ASSERT_EQUAL(default_column_count, static_cast<size_t>(4));
+	const size_t user_column_count = 2;	// Data1, Data2
+	const size_t total_column_count = default_column_count + user_column_count;
 	
 	const std::string names[10] = {
 		// added by default
@@ -177,15 +176,13 @@ void mtsStateTableTest::TestGetStateVectorID(void)
 		"Data1", 
 		"Data2" };	
 	
-	CPPUNIT_ASSERT_EQUAL(default_column_count, (int) StateTable.StateVectorDataNames.size());
-	{
-		StateTable.StateVectorDataNames.push_back(names[4]);
-		StateTable.StateVectorDataNames.push_back(names[5]);
-	}
-	CPPUNIT_ASSERT_EQUAL(total_column_count, (int) StateTable.StateVectorDataNames.size());
+	CPPUNIT_ASSERT_EQUAL(default_column_count, StateTable.StateVectorDataNames.size());
+    StateTable.StateVectorDataNames.push_back(names[4]);
+    StateTable.StateVectorDataNames.push_back(names[5]);
+	CPPUNIT_ASSERT_EQUAL(total_column_count, StateTable.StateVectorDataNames.size());
 
     for (int i = 0; i < total_column_count; ++i) {
-        CPPUNIT_ASSERT(i == StateTable.GetStateVectorID(names[i]));
+        CPPUNIT_ASSERT_EQUAL(i, StateTable.GetStateVectorID(names[i]));
     }
 }
 

@@ -7,7 +7,7 @@
   Author(s):	Anton Deguet
   Created on:	2007-10-07
 
-  (C) Copyright 2007-2009 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2007-2010 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -30,50 +30,75 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnClassServices.h>
 #include <cisstMultiTask/mtsGenericObject.h>
-//include <cisstMultiTask/mtsGenericObjectProxy.h>
 
 #include <cisstMultiTask/mtsConfig.h>
 
-/*! Queuing policy for the interface */
-typedef enum {MTS_COMPONENT_POLICY, MTS_COMMANDS_SHOULD_NOT_BE_QUEUED, MTS_COMMANDS_SHOULD_BE_QUEUED} mtsInterfaceQueuingPolicy;
+/*! Queueing policy for the interface */
+typedef enum {MTS_COMPONENT_POLICY, MTS_COMMANDS_SHOULD_NOT_BE_QUEUED, MTS_COMMANDS_SHOULD_BE_QUEUED} mtsInterfaceQueueingPolicy;
 
-/*! Queuing policy, i.e. what the user would like to do for
+/*! Queueing policy, i.e. what the user would like to do for
   individual commands added using AddCommandVoid or
   AddCommandWrite as well as event handlers */
-typedef enum {MTS_INTERFACE_COMMAND_POLICY, MTS_COMMAND_QUEUED, MTS_COMMAND_NOT_QUEUED} mtsCommandQueuingPolicy;
+typedef enum {MTS_INTERFACE_COMMAND_POLICY, MTS_COMMAND_QUEUED, MTS_COMMAND_NOT_QUEUED} mtsCommandQueueingPolicy;
 
-/*! Queuing policy, i.e. what the user would like to do for
+/*! Queueing policy, i.e. what the user would like to do for
   individual event handlers added using AddEventHandlerVoid or
   AddEventHandlerWrite. */
-typedef enum {MTS_INTERFACE_EVENT_POLICY, MTS_EVENT_QUEUED, MTS_EVENT_NOT_QUEUED} mtsEventQueuingPolicy;
+typedef enum {MTS_INTERFACE_EVENT_POLICY, MTS_EVENT_QUEUED, MTS_EVENT_NOT_QUEUED} mtsEventQueueingPolicy;
 
 /*! Type for optional functions and interfaces */
 typedef enum {MTS_OPTIONAL, MTS_REQUIRED} mtsRequiredType;
 
+/*! Type to define is a command is blocking or not */
+typedef enum {MTS_BLOCKING, MTS_NOT_BLOCKING} mtsBlockingType;
+
 // commands
 class mtsCommandBase;
 
-// void commands
-class mtsCommandVoidBase;
-template <class _interfaceType> class mtsCommandVoid;
+// void callables and commands
+class mtsCallableVoidBase;
+template <class _classType> class mtsCallableVoidMethod;
+class mtsCallableVoidFunction;
+class mtsCommandVoid;
+class mtsCommandQueuedVoid;
 class mtsFunctionVoid;
 
-// one argument commands
-template <class _argumentBaseType> class mtsCommandReadOrWriteBase;
-typedef mtsCommandReadOrWriteBase<mtsGenericObject> mtsCommandReadBase;
-typedef mtsCommandReadOrWriteBase<const mtsGenericObject> mtsCommandWriteBase;
+// void return callables and commands
+class mtsCallableVoidReturnBase;
+template <class _classType, class _returnType> class mtsCallableVoidReturnMethod;
+class mtsCommandVoidReturn;
+class mtsCommandQueuedVoidReturn;
+class mtsFunctionVoidReturn;
 
+// read commands
+class mtsCallableReadBase;
+template <class _classType, class _argumentType> class mtsCallableReadMethod;
+class mtsCommandRead;
 class mtsFunctionRead;
+
+// write commands
+class mtsCommandWriteBase;
+template <class _classType, class _argumentType> class mtsCommandWrite;
 class mtsFunctionWrite;
 
-// two arguments commands
-template <class _argument2BaseType> class mtsCommandQualifiedReadOrWriteBase;
-typedef mtsCommandQualifiedReadOrWriteBase<mtsGenericObject> mtsCommandQualifiedReadBase;
-typedef mtsCommandQualifiedReadOrWriteBase<const mtsGenericObject> mtsCommandQualifiedWriteBase;
+// write with returned value commands
+class mtsCallableWriteReturnBase;
+template <class _classType, class _argumentType, class _returnType> class mtsCallableWriteReturnMethod;
+class mtsCommandWriteReturn;
+class mtsCommandQueuedWriteReturn;
+class mtsFunctionWriteReturn;
 
+// qualified read commands
+class mtsCommandQualifiedReadBase;
+template <class _classType, class _argument1Type, class _argument2Type> class mtsCommandQualifiedRead;
 class mtsFunctionQualifiedRead;
 
-// multicast commands
+// event receivers
+class mtsEventReceiverBase;
+class mtsEventReceiverVoid;
+class mtsEventReceiverWrite;
+
+// multicast write commands
 class mtsMulticastCommandWriteBase;
 template <class _argumentType> class mtsMulticastCommandWrite;
 
@@ -85,6 +110,7 @@ class mtsInterfaceRequiredOrInput;
 class mtsInterfaceRequired;
 class mtsInterfaceInput;
 
+class mtsCommandState;
 class mtsComponent;
 typedef mtsComponent mtsDevice; // for backward compatibility
 class mtsTask;
@@ -130,6 +156,10 @@ class mtsManagerLocal;
 class mtsManagerLocalInterface;
 class mtsManagerGlobal;
 class mtsManagerGlobalInterface;
+
+class mtsManagerComponentServices;
+class mtsManagerComponentClient;
+class mtsManagerComponentServer;
 
 #endif  // _mtsForwardDeclarations_h
 

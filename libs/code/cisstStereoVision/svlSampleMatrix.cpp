@@ -33,6 +33,11 @@ svlSampleMatrix::svlSampleMatrix() :
 {
 }
 
+svlSampleMatrix::svlSampleMatrix(const svlSampleMatrix & other) :
+    svlSample(other)
+{
+}
+
 svlSampleMatrix::~svlSampleMatrix()
 {
 }

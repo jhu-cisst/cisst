@@ -66,7 +66,8 @@ svlFilterBase* svlFilterInput::GetConnectedFilter(void)
 
 int svlFilterInput::AddType(svlStreamType type)
 {
-    if (!Filter || Filter->IsInitialized()) return SVL_FAIL;
+    // TO DO: figure out if filter needs to be initialized
+    if (!Filter/* || Filter->IsInitialized()*/) return SVL_FAIL;
 
     unsigned int size = SupportedTypes.size();
     SupportedTypes.resize(size + 1);

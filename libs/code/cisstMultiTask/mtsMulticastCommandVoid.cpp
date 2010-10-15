@@ -7,7 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2007 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -22,6 +22,15 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsMulticastCommandVoid.h>
 
 
+mtsMulticastCommandVoid::mtsMulticastCommandVoid(const std::string & name):
+    BaseType(0, name)
+{}
+
+
+mtsMulticastCommandVoid::~mtsMulticastCommandVoid()
+{}
+
+
 void mtsMulticastCommandVoid::AddCommand(BaseType * command) {
     if (command) {
         this->Commands.push_back(command);
@@ -29,14 +38,14 @@ void mtsMulticastCommandVoid::AddCommand(BaseType * command) {
 }
 
 
-mtsCommandBase::ReturnType mtsMulticastCommandVoid::Execute(void) {
-    int result = static_cast<int>(mtsCommandBase::DEV_OK);
-    for (unsigned int i = 0; i < Commands.size(); i++) {
+mtsExecutionResult mtsMulticastCommandVoid::Execute(mtsBlockingType CMN_UNUSED(blocking)) {
+    int result = static_cast<int>(mtsExecutionResult::DEV_OK);
+    for (size_t i = 0; i < Commands.size(); i++) {
         result =
-            (result << static_cast<int>(mtsCommandBase::RETURN_TYPE_BIT_SIZE))
-            | static_cast<int>(Commands[i]->Execute());
+            (result << static_cast<int>(mtsExecutionResult::RETURN_TYPE_BIT_SIZE))
+            | static_cast<int>((Commands[i]->Execute(MTS_NOT_BLOCKING)).GetResult());
     }
-    return static_cast<mtsCommandBase::ReturnType>(result);
+    return static_cast<mtsExecutionResult::Enum>(result);
 }
 
 

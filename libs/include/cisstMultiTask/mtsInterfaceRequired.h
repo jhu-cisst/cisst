@@ -27,13 +27,15 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnNamedMap.h>
 
 #include <cisstMultiTask/mtsCommandBase.h>
+
+#include <cisstMultiTask/mtsCallableVoidMethod.h>
+#include <cisstMultiTask/mtsCallableVoidFunction.h>
 #include <cisstMultiTask/mtsCommandVoid.h>
 #include <cisstMultiTask/mtsCommandWrite.h>
 #include <cisstMultiTask/mtsCommandQueuedVoid.h>
 #include <cisstMultiTask/mtsCommandQueuedWrite.h>
-#include <cisstMultiTask/mtsFunctionVoid.h>
-#include <cisstMultiTask/mtsFunctionQualifiedRead.h>
 
+#include <cisstMultiTask/mtsFunctionBase.h>
 
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
@@ -85,6 +87,7 @@ class CISST_EXPORT mtsInterfaceRequired: public mtsInterfaceRequiredOrInput
     friend class mtsComponentInterfaceProxyClient;
     friend class mtsManagerLocal;
     friend class mtsManagerLocalTest;
+    friend class mtsEventReceiverBase;
 
 protected:
 
@@ -121,8 +124,10 @@ protected:
     //@{
     virtual std::vector<std::string> GetNamesOfFunctions(void) const;
     virtual std::vector<std::string> GetNamesOfFunctionsVoid(void) const;
-    virtual std::vector<std::string> GetNamesOfFunctionsRead(void) const;
+    virtual std::vector<std::string> GetNamesOfFunctionsVoidReturn(void) const;
     virtual std::vector<std::string> GetNamesOfFunctionsWrite(void) const;
+    virtual std::vector<std::string> GetNamesOfFunctionsWriteReturn(void) const;
+    virtual std::vector<std::string> GetNamesOfFunctionsRead(void) const;
     virtual std::vector<std::string> GetNamesOfFunctionsQualifiedRead(void) const;
     //@}
 
@@ -134,7 +139,7 @@ protected:
 
     /*! Find an event handler based on its name. */
     //@{
-    virtual mtsCommandVoidBase * GetEventHandlerVoid(const std::string & eventName) const;
+    virtual mtsCommandVoid * GetEventHandlerVoid(const std::string & eventName) const;
     virtual mtsCommandWriteBase * GetEventHandlerWrite(const std::string & eventName) const;
     //@}
 
@@ -167,30 +172,31 @@ protected:
 protected:
  public: // adeguet1 todo fix -- this has been added for ostream << operator
 #ifndef SWIG  // SWIG cannot deal with this
-    class FunctionInfo
+    template <class _PointerType>
+    class FunctionOrReceiverInfo
     {
         // For GCM UI
         friend class mtsManagerLocal;
         friend class mtsInterfaceRequired;
     protected:
-        mtsFunctionBase * FunctionPointer;
+        _PointerType * Pointer;
         mtsRequiredType Required;
     public:
-        FunctionInfo(mtsFunctionBase & function, mtsRequiredType required):
-            FunctionPointer(&function),
+        FunctionOrReceiverInfo(_PointerType & func_or_recv, mtsRequiredType required):
+            Pointer(&func_or_recv),
             Required(required)
         {}
 
-        ~FunctionInfo() {}
+        ~FunctionOrReceiverInfo() {}
 
         inline void Detach(void) {
-            FunctionPointer->Detach();
-            FunctionPointer = 0;
+            Pointer->Detach();
+            Pointer = 0;
         }
 
         void ToStream(std::ostream & outputStream) const
         {
-            outputStream << *FunctionPointer;
+            outputStream << *Pointer;
             if (Required == MTS_OPTIONAL) {
                 outputStream << " (optional)";
             } else {
@@ -199,6 +205,10 @@ protected:
         }
     };
 
+    typedef FunctionOrReceiverInfo<mtsFunctionBase> FunctionInfo;
+    typedef FunctionOrReceiverInfo<mtsEventReceiverVoid> ReceiverVoidInfo;
+    typedef FunctionOrReceiverInfo<mtsEventReceiverWrite> ReceiverWriteInfo;
+
 #endif // !SWIG
  protected:
 
@@ -206,26 +216,44 @@ protected:
       queued or not based on the default policy for the interface and
       the user's requested policy.  This method also generates a
       warning or error in the log if needed. */
-    bool UseQueueBasedOnInterfacePolicy(mtsEventQueuingPolicy queuingPolicy,
+    bool UseQueueBasedOnInterfacePolicy(mtsEventQueueingPolicy queueingPolicy,
                                         const std::string & methodName,
                                         const std::string & eventName);
+
+    bool AddEventHandlerToReceiver(const std::string & eventName, mtsCommandVoid * handler) const;
+    bool AddEventHandlerToReceiver(const std::string & eventName, mtsCommandWriteBase * handler) const;
 
     typedef cmnNamedMap<FunctionInfo> FunctionInfoMapType;
 
     /*! Typedef for a map of name of zero argument command and name of command. */
     FunctionInfoMapType FunctionsVoid; // Void (command)
 
-    /*! Typedef for a map of name of one argument command and name of command. */
-    FunctionInfoMapType FunctionsRead; // Read (state read)
+    /*! Typedef for a map of name of zero argument command and name of command. */
+    FunctionInfoMapType FunctionsVoidReturn; // Void return (command)
 
     /*! Typedef for a map of name of one argument command and name of command. */
     FunctionInfoMapType FunctionsWrite; // Write (command)
 
+    /*! Typedef for a map of name of one argument command and name of command. */
+    FunctionInfoMapType FunctionsWriteReturn; // Write return (command)
+
+    /*! Typedef for a map of name of one argument command and name of command. */
+    FunctionInfoMapType FunctionsRead; // Read (state read)
+
     /*! Typedef for a map of name of two argument command and name of command. */
     FunctionInfoMapType FunctionsQualifiedRead; // Qualified Read (conversion, read at time index, ...)
 
+    typedef cmnNamedMap<ReceiverVoidInfo> EventReceiverVoidMapType;
+    typedef cmnNamedMap<ReceiverWriteInfo> EventReceiverWriteMapType;
+
+    /*! Typedef for a receiver of void events */
+    EventReceiverVoidMapType EventReceiversVoid; // Void (event)
+
+    /*! Typedef for a receiver of write events */
+    EventReceiverWriteMapType EventReceiversWrite; // Write (event)
+
     /*! Typedef for a map of event name and event handler (command object). */
-    typedef cmnNamedMap<mtsCommandVoidBase> EventHandlerVoidMapType;
+    typedef cmnNamedMap<mtsCommandVoid> EventHandlerVoidMapType;
     typedef cmnNamedMap<mtsCommandWriteBase> EventHandlerWriteMapType;
     EventHandlerVoidMapType EventHandlersVoid;
     EventHandlerWriteMapType EventHandlersWrite;
@@ -234,83 +262,65 @@ public:
 
     bool AddFunction(const std::string & functionName, mtsFunctionVoid & function, mtsRequiredType required = MTS_REQUIRED);
 
-    bool AddFunction(const std::string & functionName, mtsFunctionRead & function, mtsRequiredType required = MTS_REQUIRED);
+    bool AddFunction(const std::string & functionName, mtsFunctionVoidReturn & function, mtsRequiredType required = MTS_REQUIRED);
 
     bool AddFunction(const std::string & functionName, mtsFunctionWrite & function, mtsRequiredType required = MTS_REQUIRED);
 
+    bool AddFunction(const std::string & functionName, mtsFunctionWriteReturn & function, mtsRequiredType required = MTS_REQUIRED);
+
+    bool AddFunction(const std::string & functionName, mtsFunctionRead & function, mtsRequiredType required = MTS_REQUIRED);
+
     bool AddFunction(const std::string & functionName, mtsFunctionQualifiedRead & function, mtsRequiredType required = MTS_REQUIRED);
 
-    template <class __classType>
-    inline mtsCommandVoidBase * AddEventHandlerVoid(void (__classType::*method)(void),
-                                                    __classType * classInstantiation,
-                                                    const std::string & eventName,
-                                                    mtsEventQueuingPolicy queuingPolicy = MTS_INTERFACE_EVENT_POLICY);
+    bool AddEventReceiver(const std::string & eventName, mtsEventReceiverVoid & receiver, mtsRequiredType required = MTS_REQUIRED);
 
-    inline mtsCommandVoidBase * AddEventHandlerVoid(void (*function)(void),
-                                                    const std::string & eventName,
-                                                    mtsEventQueuingPolicy = MTS_INTERFACE_EVENT_POLICY);
+    bool AddEventReceiver(const std::string & eventName, mtsEventReceiverWrite & receiver, mtsRequiredType required = MTS_REQUIRED);
+
+    mtsCommandVoid * AddEventHandlerVoid(mtsCallableVoidBase * callable,
+                                         const std::string & eventName,
+                                         mtsEventQueueingPolicy queueingPolicy = MTS_INTERFACE_EVENT_POLICY);
+    template <class __classType>
+    inline mtsCommandVoid * AddEventHandlerVoid(void (__classType::*method)(void),
+                                                __classType * classInstantiation,
+                                                const std::string & eventName,
+                                                mtsEventQueueingPolicy queueingPolicy = MTS_INTERFACE_EVENT_POLICY) {
+        mtsCallableVoidBase * callable = new mtsCallableVoidMethod<__classType>(method, classInstantiation);
+        return this->AddEventHandlerVoid(callable, eventName, queueingPolicy);
+    }
+
+    inline mtsCommandVoid * AddEventHandlerVoid(void (*function)(void),
+                                                const std::string & eventName,
+                                                mtsEventQueueingPolicy queueingPolicy = MTS_INTERFACE_EVENT_POLICY) {
+        mtsCallableVoidBase * callable = new mtsCallableVoidFunction(function);
+        return this->AddEventHandlerVoid(callable, eventName, queueingPolicy);
+    }
 
     template <class __classType, class __argumentType>
     inline mtsCommandWriteBase * AddEventHandlerWrite(void (__classType::*method)(const __argumentType &),
                                                       __classType * classInstantiation,
                                                       const std::string & eventName,
-                                                      mtsEventQueuingPolicy queuingPolicy = MTS_INTERFACE_EVENT_POLICY);
+                                                      mtsEventQueueingPolicy queueingPolicy = MTS_INTERFACE_EVENT_POLICY);
 
     // PK: Can we get rid of this?
     template <class __classType>
     inline mtsCommandWriteBase * AddEventHandlerWriteGeneric(void (__classType::*method)(const mtsGenericObject &),
                                                              __classType * classInstantiation,
                                                              const std::string & eventName,
-                                                             mtsEventQueuingPolicy queuingPolicy = MTS_INTERFACE_EVENT_POLICY);
+                                                             mtsEventQueueingPolicy queueingPolicy = MTS_INTERFACE_EVENT_POLICY);
+
+    bool RemoveEventHandlerVoid(const std::string &eventName);
+    bool RemoveEventHandlerWrite(const std::string &eventName);
 };
 
 
 #ifndef SWIG
-template <class __classType>
-inline mtsCommandVoidBase * mtsInterfaceRequired::AddEventHandlerVoid(void (__classType::*method)(void),
-                                                                      __classType * classInstantiation,
-                                                                      const std::string & eventName,
-                                                                      mtsEventQueuingPolicy queuingPolicy)
-{
-    bool queued = this->UseQueueBasedOnInterfacePolicy(queuingPolicy, "AddEventHandlerVoid", eventName);
-    mtsCommandVoidBase * actualCommand = new mtsCommandVoidMethod<__classType>(method, classInstantiation, eventName);
-    if (queued) {
-        if (MailBox)
-            EventHandlersVoid.AddItem(eventName, new mtsCommandQueuedVoid(MailBox, actualCommand));
-        else
-            CMN_LOG_CLASS_INIT_ERROR << "No mailbox for queued event handler void \"" << eventName << "\"" << std::endl;
-    } else {
-        EventHandlersVoid.AddItem(eventName, actualCommand);
-    }
-    return EventHandlersVoid.GetItem(eventName);
-}
-
-
-inline mtsCommandVoidBase * mtsInterfaceRequired::AddEventHandlerVoid(void (*function)(void),
-                                                                      const std::string & eventName,
-                                                                      mtsEventQueuingPolicy queuingPolicy)
-{
-    bool queued = this->UseQueueBasedOnInterfacePolicy(queuingPolicy, "AddEventHandlerVoid", eventName);
-    mtsCommandVoidBase * actualCommand = new mtsCommandVoidFunction(function, eventName);
-    if (queued) {
-        if (MailBox)
-            EventHandlersVoid.AddItem(eventName, new mtsCommandQueuedVoid(MailBox, actualCommand));
-        else
-            CMN_LOG_CLASS_INIT_ERROR << "No mailbox for queued event handler void (func) \"" << eventName << "\"" << std::endl;
-    } else {
-        EventHandlersVoid.AddItem(eventName, actualCommand);
-    }
-    return EventHandlersVoid.GetItem(eventName);
-}
-
-
 template <class __classType, class __argumentType>
 inline mtsCommandWriteBase * mtsInterfaceRequired::AddEventHandlerWrite(void (__classType::*method)(const __argumentType &),
                                                                         __classType * classInstantiation,
                                                                         const std::string & eventName,
-                                                                        mtsEventQueuingPolicy queuingPolicy)
+                                                                        mtsEventQueueingPolicy queueingPolicy)
 {
-    bool queued = this->UseQueueBasedOnInterfacePolicy(queuingPolicy, "AddEventHandlerWrite", eventName);
+    bool queued = this->UseQueueBasedOnInterfacePolicy(queueingPolicy, "AddEventHandlerWrite", eventName);
     mtsCommandWriteBase * actualCommand =
         new mtsCommandWrite<__classType, __argumentType>(method, classInstantiation, eventName, __argumentType());
     if (queued) {
@@ -321,7 +331,9 @@ inline mtsCommandWriteBase * mtsInterfaceRequired::AddEventHandlerWrite(void (__
     } else {
         EventHandlersWrite.AddItem(eventName, actualCommand);
     }
-    return EventHandlersWrite.GetItem(eventName);
+    mtsCommandWriteBase *handler = EventHandlersWrite.GetItem(eventName);
+    AddEventHandlerToReceiver(eventName, handler);  // does nothing if event receiver does not exist
+    return  handler;
 }
 
 
@@ -329,12 +341,13 @@ template <class __classType>
 inline mtsCommandWriteBase * mtsInterfaceRequired::AddEventHandlerWriteGeneric(void (__classType::*method)(const mtsGenericObject &),
                                                                                __classType * classInstantiation,
                                                                                const std::string & eventName,
-                                                                               mtsEventQueuingPolicy queuingPolicy)
+                                                                               mtsEventQueueingPolicy queueingPolicy)
 {
-    bool queued = this->UseQueueBasedOnInterfacePolicy(queuingPolicy, "AddEventHandlerWriteGeneric", eventName);
+    bool queued = this->UseQueueBasedOnInterfacePolicy(queueingPolicy, "AddEventHandlerWriteGeneric", eventName);
     mtsCommandWriteBase * actualCommand =
         new mtsCommandWriteGeneric<__classType>(method, classInstantiation, eventName, 0);
     if (queued) {
+        // PK: check for MailBox overlaps with code in UseQueueBasedOnInterfacePolicy
         if (MailBox) {
             EventHandlersWrite.AddItem(eventName,  new mtsCommandQueuedWriteGeneric(MailBox, actualCommand, DEFAULT_EVENT_QUEUE_LEN));
         } else {
@@ -343,7 +356,9 @@ inline mtsCommandWriteBase * mtsInterfaceRequired::AddEventHandlerWriteGeneric(v
     } else {
         EventHandlersWrite.AddItem(eventName, actualCommand);
     }
-    return EventHandlersWrite.GetItem(eventName);
+    mtsCommandWriteBase *handler = EventHandlersWrite.GetItem(eventName);
+    AddEventHandlerToReceiver(eventName, handler);  // does nothing if event receiver does not exist
+    return  handler;
 }
 #endif  // !SWIG
 

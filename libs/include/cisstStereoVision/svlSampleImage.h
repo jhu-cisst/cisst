@@ -36,6 +36,7 @@ class CISST_EXPORT svlSampleImage : public svlSample
 {
 public:
     svlSampleImage();
+    svlSampleImage(const svlSampleImage & other);
     virtual ~svlSampleImage();
 
     virtual svlSample* GetNewInstance() const = 0;

@@ -42,6 +42,8 @@ class osaCriticalSection;
 
 class CISST_EXPORT svlStreamManager: public mtsComponent
 {
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+
 friend class svlStreamProc;
 
 public:
@@ -80,6 +82,8 @@ protected:
     virtual void InitializeCommand(void);
     virtual void SetSourceFilterCommand(const mtsStdString & source);
 };
+
+CMN_DECLARE_SERVICES_INSTANTIATION(svlStreamManager);
 
 #endif // _svlStreamManager_h
 

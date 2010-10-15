@@ -34,7 +34,7 @@ http://www.cisst.org/cisst/license.txt.
 /*!
   Defines a master arm with cursor and callbacks
 */
-class CISST_EXPORT ui3SlaveArm: cmnGenericObject
+class CISST_EXPORT ui3SlaveArm: public cmnGenericObject
 {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 

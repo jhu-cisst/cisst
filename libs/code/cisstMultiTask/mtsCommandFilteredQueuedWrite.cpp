@@ -19,14 +19,16 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include <cisstMultiTask/mtsCommandFilteredQueuedWrite.h>
-#include <cisstMultiTask/mtsCommandQualifiedReadOrWriteBase.h>
+#include <cisstMultiTask/mtsCommandQualifiedReadBase.h>
 
 mtsCommandFilteredQueuedWrite::mtsCommandFilteredQueuedWrite(mtsCommandQualifiedReadBase * actualFilter,
                                                              mtsCommandWriteBase * actualCommand):
     BaseType(0, actualCommand, 0), ActualFilter(actualFilter)
 {
     // PK: is there a better way to do this?
-    filterOutput = dynamic_cast<mtsGenericObject *>(actualFilter->GetArgument2Prototype()->Services()->Create());
+    if (actualFilter) {
+        FilterOutput = dynamic_cast<mtsGenericObject *>(actualFilter->GetArgument2Prototype()->Services()->Create());
+    }
 }
 
 
@@ -37,14 +39,18 @@ mtsCommandFilteredQueuedWrite::mtsCommandFilteredQueuedWrite(mtsMailBox * mailBo
     ActualFilter(actualFilter)
 {
     // PK: is there a better way to do this?
-    filterOutput = dynamic_cast<mtsGenericObject *>(actualFilter->GetArgument2Prototype()->Services()->Create());
+    if (actualFilter) {
+        FilterOutput = dynamic_cast<mtsGenericObject *>(actualFilter->GetArgument2Prototype()->Services()->Create());
+    }
 }
 
 
 // ArgumentsQueue destructor should get called
 mtsCommandFilteredQueuedWrite::~mtsCommandFilteredQueuedWrite()
 {
-    if (filterOutput) delete filterOutput;
+    if (FilterOutput) {
+        delete FilterOutput;
+    }
 }
 
 
@@ -61,14 +67,16 @@ const mtsGenericObject * mtsCommandFilteredQueuedWrite::GetArgumentPrototype(voi
 }
 
 
-mtsCommandBase::ReturnType mtsCommandFilteredQueuedWrite::Execute(const mtsGenericObject & argument)
+mtsExecutionResult mtsCommandFilteredQueuedWrite::Execute(const mtsGenericObject & argument, mtsBlockingType blocking)
 {
     if (this->IsEnabled()) {
         // First, call the filter (qualified read)
-        mtsCommandBase::ReturnType ret = ActualFilter->Execute(argument, *filterOutput);
-        if (ret != mtsCommandBase::DEV_OK) return ret;
+        mtsExecutionResult result = ActualFilter->Execute(argument, *FilterOutput);
+        if (result != mtsExecutionResult::DEV_OK) {
+            return result;
+        }
         // Next, queue the write command
-        return BaseType::Execute(*filterOutput);
+        return BaseType::Execute(*FilterOutput, blocking);
     }
-    return mtsCommandBase::DISABLED;
+    return mtsExecutionResult::DISABLED;
 }

@@ -19,16 +19,53 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include <cisstMultiTask/mtsFunctionVoid.h>
-#include <cisstMultiTask/mtsCommandVoidBase.h>
+#include <cisstMultiTask/mtsCommandVoid.h>
 
 
 mtsFunctionVoid::~mtsFunctionVoid()
 {}
 
 
-mtsCommandBase::ReturnType mtsFunctionVoid::operator()() const
+bool mtsFunctionVoid::Detach(void)
 {
-    return Command ? Command->Execute() : mtsCommandBase::NO_INTERFACE;
+    if (this->IsValid()) {
+        this->Command = 0;
+        return true;
+    }
+    return false;
+}
+
+
+bool mtsFunctionVoid::IsValid(void) const
+{
+    return (this->Command != 0);
+}
+
+
+bool mtsFunctionVoid::Bind(CommandType * command)
+{
+    if (this->Command) {
+        CMN_LOG_INIT_WARNING << "Class mtsFunctionVoid: Bind called on already bound function:" << this << std::endl;
+    }
+    this->Command = command;
+    return (command != 0);
+}
+
+
+mtsExecutionResult mtsFunctionVoid::operator()(void) const
+{
+    return Command ? Command->Execute(MTS_NOT_BLOCKING) : mtsExecutionResult::NO_INTERFACE;
+}
+
+
+mtsExecutionResult mtsFunctionVoid::ExecuteBlocking(void) const
+{
+    return Command ? Command->Execute(MTS_BLOCKING) : mtsExecutionResult::NO_INTERFACE;
+}
+
+
+mtsCommandVoid * mtsFunctionVoid::GetCommand(void) const {
+    return Command;
 }
 
 

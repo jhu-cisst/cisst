@@ -195,7 +195,7 @@ bool mtsComponentInterfaceProxyClient::ReceiveFetchFunctionProxyPointers(
     return proxyOwner->GetFunctionProxyPointers(requiredInterfaceName, functionProxyPointers);
 }
 
-void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandVoid(const CommandIDType commandID)
+void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandVoid(const CommandIDType commandID, const mtsBlockingType blocking)
 {
     mtsFunctionVoid * functionVoid = reinterpret_cast<mtsFunctionVoid *>(commandID);
     if (!functionVoid) {
@@ -204,10 +204,17 @@ void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandVoid(const CommandID
     }
 
     // Execute the command
-    (*functionVoid)();
+        (*functionVoid)();
+/*
+    if (blocking == MTS_BLOCKING) {
+        (*functionVoid).ExecuteBlocking();
+    } else {
+        (*functionVoid)();
+    }
+*/
 }
 
-void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandWriteSerialized(const CommandIDType commandID, const std::string & serializedArgument)
+void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandWriteSerialized(const CommandIDType commandID, const std::string & serializedArgument, const mtsBlockingType blocking)
 {
     mtsFunctionWriteProxy * functionWriteProxy = reinterpret_cast<mtsFunctionWriteProxy*>(commandID);
     if (!functionWriteProxy) {
@@ -224,7 +231,14 @@ void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandWriteSerialized(cons
     }
 
     // Execute the command
-    (*functionWriteProxy)(*argument);
+        (*functionWriteProxy)(*argument);
+/*
+    if (blocking == MTS_BLOCKING) {
+        (*functionWriteProxy).ExecuteBlocking(*argument);
+    } else {
+        (*functionWriteProxy)(*argument);
+    }
+*/
 }
 
 void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandReadSerialized(const CommandIDType commandID, std::string & serializedArgument)
@@ -237,8 +251,8 @@ void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandReadSerialized(const
 
     // Create a temporary argument which includes dynamic allocation internally.
     // Therefore, this object should be deallocated manually.
-    mtsGenericObject * tempArgument = dynamic_cast<mtsGenericObject *>(
-        functionReadProxy->GetCommand()->GetArgumentClassServices()->Create());
+    mtsGenericObject * tempArgument =
+        dynamic_cast<mtsGenericObject *>(functionReadProxy->GetCommand()->GetArgumentPrototype()->Services()->Create());
     if (!tempArgument) {
         LogError(mtsComponentInterfaceProxyClient, "ReceiveExecuteCommandReadSerialized: failed to create a temporary argument");
         return;
@@ -485,23 +499,33 @@ bool mtsComponentInterfaceProxyClient::ComponentInterfaceClientI::FetchFunctionP
 }
 
 void mtsComponentInterfaceProxyClient::ComponentInterfaceClientI::ExecuteCommandVoid(
-    ::Ice::Long commandID, const ::Ice::Current & CMN_UNUSED(current))
+    ::Ice::Long commandID, bool blocking, const ::Ice::Current & CMN_UNUSED(current))
 {
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
-    LogPrint(mtsComponentInterfaceProxyClient, "<<<<< RECV: ExecuteCommandVoid: " << commandID);
+    LogPrint(mtsComponentInterfaceProxyClient, "<<<<< RECV: ExecuteCommandVoid: " << commandID << ", "
+        << (blocking ? "BLOCKING" : "NON-BLOCKING"));
 #endif
 
-    ComponentInterfaceProxyClient->ReceiveExecuteCommandVoid(commandID);
+    if (blocking) {
+        ComponentInterfaceProxyClient->ReceiveExecuteCommandVoid(commandID, MTS_BLOCKING);
+    } else {
+        ComponentInterfaceProxyClient->ReceiveExecuteCommandVoid(commandID, MTS_NOT_BLOCKING);
+    }
 }
 
 void mtsComponentInterfaceProxyClient::ComponentInterfaceClientI::ExecuteCommandWriteSerialized(
-    ::Ice::Long commandID, const ::std::string & argument, const ::Ice::Current & CMN_UNUSED(current))
+    ::Ice::Long commandID, const ::std::string & argument, bool blocking, const ::Ice::Current & CMN_UNUSED(current))
 {
 #ifdef ENABLE_DETAILED_MESSAGE_EXCHANGE_LOG
-    LogPrint(mtsComponentInterfaceProxyClient, "<<<<< RECV: ExecuteCommandWriteSerialized: " << commandID << ", " << argument.size());
+    LogPrint(mtsComponentInterfaceProxyClient, "<<<<< RECV: ExecuteCommandWriteSerialized: " << commandID << ", " 
+        << argument.size() << ", " << (blocking ? "BLOCKING" : "NON-BLOCKING"));
 #endif
 
-    ComponentInterfaceProxyClient->ReceiveExecuteCommandWriteSerialized(commandID, argument);
+    if (blocking) {
+        ComponentInterfaceProxyClient->ReceiveExecuteCommandWriteSerialized(commandID, argument, MTS_BLOCKING);
+    } else {
+        ComponentInterfaceProxyClient->ReceiveExecuteCommandWriteSerialized(commandID, argument, MTS_NOT_BLOCKING);
+    }
 }
 
 void mtsComponentInterfaceProxyClient::ComponentInterfaceClientI::ExecuteCommandReadSerialized(

@@ -34,6 +34,12 @@ svlSampleTransform3D::svlSampleTransform3D() :
 {
 }
 
+svlSampleTransform3D::svlSampleTransform3D(const svlSampleTransform3D & other) :
+    svlSample(other)
+{
+    CopyOf(other);
+}
+
 svlSample* svlSampleTransform3D::GetNewInstance() const
 {
     return new svlSampleTransform3D;
@@ -100,11 +106,26 @@ unsigned int svlSampleTransform3D::GetDataSize() const
 
 void svlSampleTransform3D::SerializeRaw(std::ostream & outputStream) const
 {
+    mtsGenericObject::SerializeRaw(outputStream);
+
+    cmnSerializeRaw(outputStream, GetType());
+    cmnSerializeRaw(outputStream, GetTimestamp());
     cmnSerializeRaw(outputStream, Matrix);
 }
 
 void svlSampleTransform3D::DeSerializeRaw(std::istream & inputStream)
 {
+    mtsGenericObject::DeSerializeRaw(inputStream);
+
+    int type = -1;
+    double timestamp;
+    cmnDeSerializeRaw(inputStream, type);
+    if (type != GetType()) {
+        CMN_LOG_CLASS_RUN_ERROR << "Deserialized sample type mismatch " << std::endl;
+        return;
+    }
+    cmnDeSerializeRaw(inputStream, timestamp);
+    SetTimestamp(timestamp);
     cmnDeSerializeRaw(inputStream, Matrix);
 }
 

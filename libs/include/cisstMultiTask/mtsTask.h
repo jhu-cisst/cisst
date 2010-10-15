@@ -7,7 +7,7 @@
   Author(s):  Ankur Kapoor, Peter Kazanzides, Anton Deguet, Min Yang Jung
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -61,43 +61,22 @@ class CISST_EXPORT mtsTask: public mtsComponent
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
     friend class mtsManagerLocal;
-    friend class mtsManagerLocalTest;
 
 public:
     typedef mtsComponent BaseType;
 
-    /*! The task states:
-
-        CONSTRUCTED  -- Initial state set by mtsTask constructor.
-        INITIALIZING -- Set by mtsTask::Create.  The task stays in this state until the
-                        thread calls mtsTask::RunInternal, which calls mtsTask::StartupInternal
-                        and the user-supplied mtsTask::Startup. If a new thread is created,
-                        the call to mtsTask::RunInternal happens some time after the call
-                        to mtsTask::Create.
-        READY        -- Set by mtsTask::StartupInternal. This means that the task is ready
-                        to be used (i.e., all interfaces have been initialized). Also,
-                        a task can return to the READY state (from the ACTIVE state) in
-                        response to a call to mtsTask::Suspend.
-        ACTIVE       -- Set by mtsTask::Start.  This is the normal running state, where
-                        the task is calling the user-supplied mtsTask::Run method.
-        FINISHING    -- Set by mtsTask::Kill. If the mtsTask::Run method is currently
-                        executing, it will finish, but no further calls will be made.
-                        The task will then call mtsTask::CleanupInternal, which calls
-                        the user-supplied mtsTask::Cleanup. The state will then be set
-                        to FINISHED.
-        FINISHED     -- The task has finished.
-    */
-
-    enum TaskStateType { CONSTRUCTED, INITIALIZING, READY, ACTIVE, FINISHING, FINISHED };
-
 protected:
     /************************ Protected task data  *********************/
 
-	/*! The OS independent thread object. */
-	osaThread Thread;
+    /*! The OS independent thread object. */
+    osaThread Thread;
 
-    /*! The task state. */
-    TaskStateType TaskState;
+    /*! Delay given for the task to start.  During initialization the
+      task thread will wait for the specified delay (set by default to
+      3 minutes in the constructor).  Increasing this delay can be
+      useful when using mtsTaskFromCallback if the callback might take
+      more than 3 minutes to trigger the task's Run method. */
+    double InitializationDelay;
 
     /*! Mutex used when changing task states. Do not change this directly, use the
         ChangeState method instead. */
@@ -106,16 +85,16 @@ protected:
     /*! Signal for caller to wait on task state changes. */
     osaThreadSignal StateChangeSignal;
 
-	/*! The state data table object to store the states of the task. */
-	mtsStateTable StateTable;
+    /*! The state data table object to store the states of the task. */
+    mtsStateTable StateTable;
 
     /*! Map of state tables, includes the default StateTable under the
       name "StateTable" */
     typedef cmnNamedMap<mtsStateTable> StateTableMapType;
     StateTableMapType StateTables;
 
-	/*! True if the task took more time to do computation than allocated time.
-	  */
+    /*! True if the task took more time to do computation than allocated time.
+      */
     bool OverranPeriod;
 
     /*! The data passed to the thread. */
@@ -126,21 +105,21 @@ protected:
 
     /********************* Methods that call user methods *****************/
 
-	/*! The member function that is passed as 'start routine' argument for
-	  thread creation. */
-	virtual void * RunInternal(void * argument) = 0;
+    /*! The member function that is passed as 'start routine' argument for
+      thread creation. */
+    virtual void * RunInternal(void * argument) = 0;
 
     /*! The main part of the Run loop that is the same for all derived classes.
         This should not be overloaded. */
     void DoRunInternal(void);
 
-	/*! The member funtion that is executed as soon as the thread gets created.
-	  It does some housekeeping before the user code can be executed. */
-	virtual void StartupInternal(void);
+    /*! The member funtion that is executed as soon as the thread gets created.
+      It does some housekeeping before the user code can be executed. */
+    virtual void StartupInternal(void);
 
-	/*! The member function that is executed once the task terminates. This
-	  does some cleanup work. */
-	virtual void CleanupInternal(void);
+    /*! The member function that is executed once the task terminates. This
+      does some cleanup work. */
+    virtual void CleanupInternal(void);
 
     /**************** Methods for managing task timing ********************/
 
@@ -161,16 +140,16 @@ protected:
 
     /*********** Methods for changing task state **************************/
 
-    /*! Helper function to change the task state. */
-    void ChangeState(TaskStateType newState);
+    /* documented in base class */
+    void ChangeState(mtsComponentState::Enum newState);
 
-    /*! Helper function to wait on a state change, with specified timeout in seconds. */
-    bool WaitForState(TaskStateType desiredState, double timeout);
+    /* documented in base class */
+    bool WaitForState(mtsComponentState desiredState, double timeout);
 
 public:
     /********************* Task constructor and destructor *****************/
 
-	/*! Create a task with name 'name' and set the state table size (see mtsStateTable).
+    /*! Create a task with name 'name' and set the state table size (see mtsStateTable).
         This is the task base class. Tasks should be derived from one of the
         existing derived classes:  mtsTaskContinuous, mtsTaskPeriodic, and
         mtsTaskFromCallback.
@@ -185,7 +164,7 @@ public:
               of the 6 character limit imposed by RTAI/Linux.
 
         \sa mtsComponent, mtsTaskContinuous, mtsTaskPeriodic, mtsTaskFromCallback
-	 */
+     */
     mtsTask(const std::string & name,
             unsigned int sizeStateTable = 256);
 
@@ -195,62 +174,42 @@ public:
     /********************* Methods to be defined by user *****************/
     /* The Run, Startup, and Cleanup methods could be made protected.    */
 
-	/*! Virtual method that gets overloaded to run the actual task.
-	  */
+    /*! Virtual method that gets overloaded to run the actual task.
+      */
     virtual void Run(void) = 0;
 
-	/*! Virtual method that gets overloaded, and is run before the
-	    task is started.
-	  */
+    /*! Virtual method that gets overloaded, and is run before the
+        task is started.
+      */
     virtual void Startup(void) {}
 
-	/*! Virtual method that gets overloaded, and is run after the
-	    task gets killed using Kill() method.
-	  */
-	virtual void Cleanup(void) {}
+    /*! Virtual method that gets overloaded, and is run after the
+        task gets killed using Kill() method.
+      */
+    virtual void Cleanup(void) {}
 
-	/*! Virtual method that gets called when the task/interface needs
-	  to be configured. Should it take XML info?? */
-	virtual void Configure(const std::string & CMN_UNUSED(filename) = "") {}
+    /*! Virtual method that gets called when the task/interface needs
+      to be configured. Should it take XML info?? */
+    virtual void Configure(const std::string & CMN_UNUSED(filename) = "") {}
+
+    /*! Set the initialization delay.  See InitializationDelay. */
+    void SetInitializationDelay(double delay);
 
     /********************* Methods to change task state ******************/
     /* Maybe some or all of these should be pure virtual functions.      */
 
     /* Create a new thread (if needed). */
-    virtual void Create(void *data) = 0;
-    void Create(void) { Create(0); }
+    virtual void Create(void * data) = 0;
+    inline void Create(void) { Create(0); }
 
-	/*! Start or resume execution of the task. */
-	virtual void Start(void) = 0;
+    /*! Start or resume execution of the task. */
+    virtual void Start(void) = 0;
 
-	/*! Suspend the execution of the task. */
+    /*! Suspend the execution of the task. */
     virtual void Suspend(void) = 0;
 
-	/*! End the task */
-	virtual void Kill(void);
-
-    /********************* Methods to query the task state ****************/
-
-	/*! Return true if task is active. */
-    inline bool Running(void) const { return (TaskState == ACTIVE); }
-
-	/*! Return true if task was started. */
-	inline bool IsStarted(void) const { return (TaskState >= READY); }
-
-    /*! Return true if task is terminated. */
-	inline bool IsTerminated(void) const { return (TaskState == FINISHED); }
-
-	/*! Return true if task is marked for killing. */
-	inline bool IsEndTask(void) const { return (TaskState >= FINISHING); }
-
-    /*! Return task state. */
-    inline TaskStateType GetTaskState(void) const { return TaskState; }
-
-    /*! Convert tasks state to string representation. */
-    const char * TaskStateName(TaskStateType state) const;
-
-    /*! Return task state as a string. */
-    inline const char * GetTaskStateName(void) const { return TaskStateName(TaskState); }
+    /*! End the task */
+    void Kill(void);
 
     /*! Return the average period. */
     double GetAveragePeriod(void) const { return StateTable.GetAveragePeriod(); }
@@ -290,22 +249,22 @@ public:
 
     /* documented in base class */
     mtsInterfaceProvided * AddInterfaceProvided(const std::string & newInterfaceName,
-                                                mtsInterfaceQueuingPolicy queuingPolicy = MTS_COMPONENT_POLICY);
+                                                mtsInterfaceQueueingPolicy queueingPolicy = MTS_COMPONENT_POLICY);
 
 
     /********************* Methods for task synchronization ***************/
 
-	/*! Wait for task to start.
+    /*! Wait for task to start.
         \param timeout The timeout in seconds
         \returns true if task has started; false if timeout occurred before task started.
      */
     virtual bool WaitToStart(double timeout);
 
-	/*! Wait for task to finish (after issuing a task Kill).
-	  \param timeout  The timeout in seconds
-	  \returns  true if the task terminated without timeout happening;
+    /*! Wait for task to finish (after issuing a task Kill).
+      \param timeout  The timeout in seconds
+      \returns  true if the task terminated without timeout happening;
                 false if timeout occured and task did not finish
-	  */
+      */
     virtual bool WaitToTerminate(double timeout);
 
     /*! Suspend this task until the Wakeup method is called. */
@@ -325,14 +284,14 @@ public:
         return false;
     }
 
-	/*! Return true if task overran allocated period. Note that this is not
+    /*! Return true if task overran allocated period. Note that this is not
         restricted to mtsTaskPeriodic.  For example, an mtsTaskFromCallback
         can overrun if a second callback occurs before the first is finished. */
     inline virtual bool IsOverranPeriod(void) const {
         return OverranPeriod;
     }
 
-	/*! Reset overran period flag. */
+    /*! Reset overran period flag. */
     inline virtual void ResetOverranPeriod(void) {
         OverranPeriod = false;
     }

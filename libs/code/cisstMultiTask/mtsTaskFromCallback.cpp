@@ -7,7 +7,7 @@
   Author(s):  Peter Kazanzides
   Created on: 2008-09-18
 
-  (C) Copyright 2008 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2008-2010 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -30,19 +30,20 @@ http://www.cisst.org/cisst/license.txt.
 
 void * mtsTaskFromCallback::RunInternal(void * CMN_UNUSED(data)) {
     if (inRunInternal) {
-        if (TaskState == ACTIVE)
+        if (this->State == mtsComponentState::ACTIVE) {
            this->OverranPeriod = true;
+        }
         return 0;
     }
     inRunInternal = true;
-    if (TaskState == INITIALIZING)
+    if (this->State == mtsComponentState::INITIALIZING) {
         this->StartupInternal();
-
-    if (TaskState == ACTIVE)
+    }
+    if (this->State == mtsComponentState::ACTIVE) {
         DoRunInternal();
-
-    if (TaskState == FINISHING) {
-    	CMN_LOG_CLASS_INIT_VERBOSE << "RunInternal: end of task " << this->GetName() << std::endl;
+    }
+    if (this->State == mtsComponentState::FINISHING) {
+        CMN_LOG_CLASS_INIT_VERBOSE << "RunInternal: end of task " << this->GetName() << std::endl;
         this->CleanupInternal();
     }
     // Make copy on stack before clearing inRunInternal
@@ -50,6 +51,7 @@ void * mtsTaskFromCallback::RunInternal(void * CMN_UNUSED(data)) {
     inRunInternal = false;
     return ret;
 }
+
 
 void mtsTaskFromCallback::StartupInternal(void)
 {
@@ -60,35 +62,38 @@ void mtsTaskFromCallback::StartupInternal(void)
     BaseType::StartupInternal();
 }
 
+
 /********************* Methods to change task state ******************/
 
 void mtsTaskFromCallback::Create(void * CMN_UNUSED(data))
 {
-    if (TaskState != CONSTRUCTED) {
+    if (this->State != mtsComponentState::CONSTRUCTED) {
         CMN_LOG_CLASS_INIT_ERROR << "Create: task " << this->GetName() << " cannot be created, state = "
-                                 << GetTaskStateName() << std::endl;
+                                 << this->State << std::endl;
         return;
     }
-    ChangeState(INITIALIZING);
+    ChangeState(mtsComponentState::INITIALIZING);
 }
+
 
 void mtsTaskFromCallback::Start(void)
 {
-    if (TaskState == INITIALIZING)
-        WaitToStart(3.0);
-    if (TaskState == READY) {
+    if (this->State == mtsComponentState::INITIALIZING) {
+        WaitToStart(this->InitializationDelay);
+    }
+    if (this->State == mtsComponentState::READY) {
         CMN_LOG_CLASS_INIT_VERBOSE << "Start: starting task " << this->GetName() << std::endl;
-        ChangeState(ACTIVE);
+        ChangeState(mtsComponentState::ACTIVE);
     } else {
-        CMN_LOG_CLASS_INIT_ERROR << "Start: could not start task " << this->GetName() << ", state = " << GetTaskStateName() << std::endl;
+        CMN_LOG_CLASS_INIT_ERROR << "Start: could not start task " << this->GetName() << ", state = " << this->State << std::endl;
     }
 }
 
 void mtsTaskFromCallback::Suspend(void)
 {
-    if (TaskState == ACTIVE) {
+    if (this->State == mtsComponentState::ACTIVE) {
         CMN_LOG_CLASS_RUN_VERBOSE << "Suspend: suspending task " << this->GetName() << std::endl;
-        ChangeState(READY);
+        ChangeState(mtsComponentState::READY);
         CMN_LOG_CLASS_RUN_VERBOSE << "Suspend: suspended task " << this->GetName() << std::endl;
     }
 }

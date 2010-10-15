@@ -214,5 +214,10 @@ void svlInitialize()
 #ifdef _svlFilterVideoExposureManager_h
     delete new svlFilterVideoExposureManager;
 #endif // _svlFilterVideoExposureManager_h
+
+#ifdef _svlStreamManager_h
+    delete new svlStreamManager;
+#endif // _svlStreamManager_h
+
 }
 

@@ -4,10 +4,10 @@
 /*
   $Id$
 
-  Author(s):  Ankur Kapoor
+  Author(s):  Ankur Kapoor, Anton Deguet
   Created on: 2004-04-30
 
-  (C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -29,9 +29,10 @@ http://www.cisst.org/cisst/license.txt.
 #define _mtsCommandVoid_h
 
 
-#include <cisstMultiTask/mtsCommandVoidBase.h>
-#include <string>
+#include <cisstMultiTask/mtsCommandBase.h>
 
+// Always include last
+#include <cisstMultiTask/mtsExport.h>
 
 /*!
   \ingroup cisstMultiTask
@@ -42,142 +43,57 @@ http://www.cisst.org/cisst/license.txt.
   method, i.e. it requires the class and method name as well as an
   instantiation of the class to get and actual pointer on the
   method. */
-template <class _classType>
-class mtsCommandVoidMethod: public mtsCommandVoidBase {
+class CISST_EXPORT mtsCommandVoid: public mtsCommandBase {
 
 public:
-    typedef mtsCommandVoidBase BaseType;
-
-    /*! Typedef for the specific interface. */
-    typedef _classType ClassType;
+    typedef mtsCommandBase BaseType;
 
     /*! This type. */
-    typedef mtsCommandVoidMethod<ClassType> ThisType;
-
-    /*! Typedef for pointer to member function (method) of a specific
-      class (_classType). */
-    typedef void(_classType::*ActionType)(void);
+    typedef mtsCommandVoid ThisType;
 
 private:
     /*! Private copy constructor to prevent copies */
-    inline mtsCommandVoidMethod(const ThisType & CMN_UNUSED(other)) {}
+    mtsCommandVoid(const ThisType & CMN_UNUSED(other));
 
 protected:
     /*! The pointer to member function of the receiver class that
       is to be invoked for a particular instance of the command. */
-    ActionType Action;
-
-    /*! Stores the receiver object of the command. */
-    ClassType * ClassInstantiation;
+    mtsCallableVoidBase * Callable;
 
 public:
     /*! The constructor. Does nothing. */
-    mtsCommandVoidMethod(void): BaseType(), ClassInstantiation(0) {}
+    mtsCommandVoid(void);
 
     /*! The constructor.
       \param action Pointer to the member function that is to be called
       by the invoker of the command
       \param classInstantiation Pointer to the receiver of the command
       \param name A string to identify the command. */
-    mtsCommandVoidMethod(ActionType action, ClassType * classInstantiation, const std::string & name):
-        BaseType(name),
-        Action(action),
-        ClassInstantiation(classInstantiation)
-    {}
+    mtsCommandVoid(mtsCallableVoidBase * callable, const std::string & name);
 
     /*! The destructor. Does nothing */
-    virtual ~mtsCommandVoidMethod() {}
+    virtual ~mtsCommandVoid();
 
     /*! The execute method. Calling the execute method from the
       invoker applies the operation on the receiver.
     */
-    virtual mtsCommandBase::ReturnType Execute(void) {
-        if (this->IsEnabled()) {
-            (ClassInstantiation->*Action)();
-            return mtsCommandBase::DEV_OK;
-        }
-        return mtsCommandBase::DISABLED;
-    }
+    virtual mtsExecutionResult Execute(mtsBlockingType CMN_UNUSED(blocking));
 
-    /* commented in base class */
-    virtual void ToStream(std::ostream & outputStream) const {
-        outputStream << "mtsCommandVoidMethod: ";
-        if (this->ClassInstantiation) {
-            outputStream << this->Name << "(void) using class/object \""
-                         << mtsObjectName(this->ClassInstantiation) << "\" currently "
-                         << (this->IsEnabled() ? "enabled" : "disabled");
-        } else {
-            outputStream << "Not initialized properly";
-        }
-    }
-};
+    /*! Get a direct pointer to the callable object.  This method is
+      used for queued commands.  The caller should still use the
+      Execute method which will queue the command.  When the command
+      is de-queued, one needs access to the callable object to call
+      the final method or function. */
+    mtsCallableVoidBase * GetCallable(void) const;
 
+    /* documented in base class */
+    void ToStream(std::ostream & outputStream) const;
 
-/*!
-  \ingroup cisstMultiTask
+    /* documented in base class */
+    size_t NumberOfArguments(void) const;
 
-  A templated version of command object with zero arguments for
-  execute.  This command is based on a void function, i.e. it only
-  requires a pointer on a void function. */
-class mtsCommandVoidFunction: public mtsCommandVoidBase {
-
-public:
-    typedef mtsCommandVoidBase BaseType;
-
-    /*! This type. */
-    typedef mtsCommandVoidFunction ThisType;
-
-    /*! Typedef for pointer to member function */
-    typedef void(*ActionType)(void);
-
-private:
-    /*! Private copy constructor to prevent copies */
-    inline mtsCommandVoidFunction(const ThisType & CMN_UNUSED(other));
-
-protected:
-    /*! The pointer to function used when the command is executed. */
-    ActionType Action;
-
-public:
-    /*! The constructor. Does nothing */
-    mtsCommandVoidFunction(): BaseType(), Action(0) {}
-
-    /*! The constructor.
-      \param action Pointer to the function that is to be called
-      by the invoker of the command
-      \param name A string to identify the command. */
-    mtsCommandVoidFunction(ActionType action, const std::string & name):
-        BaseType(name),
-        Action(action)
-    {}
-
-    /*! The destructor. Does nothing */
-    virtual ~mtsCommandVoidFunction() {}
-
-    /*! The execute method. Calling the execute method from the invoker
-      applies the operation on the receiver.
-      \param from The data passed to the conversion operation
-      \param to The result obtained from the conversion operation
-    */
-    virtual mtsCommandBase::ReturnType Execute(void) {
-        if (this->IsEnabled()) {
-            (*Action)();
-            return mtsCommandBase::DEV_OK;
-        } else {
-            return mtsCommandBase::DISABLED;
-        }
-    }
-
-    /* commented in base class */
-    virtual void ToStream(std::ostream & outputStream) const {
-        outputStream << "mtsCommandVoidFunction: ";
-        if (this->Action) {
-            outputStream << this->Name << "(void)";
-        } else {
-            outputStream << "Not initialized properly";
-        }
-    }
-
+    /* documented in base class */
+    bool Returns(void) const;
 };
 
 

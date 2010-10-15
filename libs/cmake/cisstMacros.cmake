@@ -4,7 +4,7 @@
 # Author(s):  Anton Deguet
 # Created on: 2004-01-22
 #
-# (C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -93,7 +93,6 @@ function (cisst_add_library ...)
   set (HEADERS "")
   string (ASCII 35 CISST_STRING_POUND)
   set (LIBRARY_MAIN_HEADER ${${PROJECT_NAME}_BINARY_DIR}/include/${LIBRARY}.h)
-  set (LIBRARY_MAIN_HEADER_TMP ${LIBRARY_MAIN_HEADER}.tmp)
 
   set (FILE_CONTENT "/* This file is generated automatically by CMake, DO NOT EDIT\n")
   set (FILE_CONTENT ${FILE_CONTENT} "   CMake: ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}\n")
@@ -107,16 +106,7 @@ function (cisst_add_library ...)
     set (FILE_CONTENT ${FILE_CONTENT} "${CISST_STRING_POUND}include <${LIBRARY}/${file}>\n")
   endforeach (file)
   set (FILE_CONTENT ${FILE_CONTENT} "\n${CISST_STRING_POUND}endif // _${LIBRARY}_h\n")
-  file (WRITE ${LIBRARY_MAIN_HEADER_TMP} ${FILE_CONTENT})
-
-  exec_program (${CMAKE_COMMAND}
-                ARGS -E copy_if_different
-                \"${LIBRARY_MAIN_HEADER_TMP}\"
-                \"${LIBRARY_MAIN_HEADER}\")
-
-  exec_program (${CMAKE_COMMAND}
-                ARGS -E remove
-                \"${LIBRARY_MAIN_HEADER_TMP}\")
+  file (WRITE ${LIBRARY_MAIN_HEADER} ${FILE_CONTENT})
 
   # Add the main header to the library, for IDEs
   set (HEADERS ${HEADERS} ${LIBRARY_MAIN_HEADER})
@@ -585,17 +575,55 @@ ENDMACRO(CISST_REQUIRES)
 
 
 
-# Macro to add all the available tests
-MACRO(CISST_ADD_TESTS testProgram)
+# function to add all the available tests
+function (cisst_add_test ...)
+  # debug
+  cisst_cmake_debug ("cisst_add_test called with: ${ARGV}")
+
+  if (${ARGC} LESS 5)
+    message ("cisst_add_test takes 5 arguments, test program, INSTANCES and number, ITERATIONS and number.  Got: ${ARGV}")
+  endif (${ARGC} LESS 5)
+
+  set (ALL_ARGS ${ARGV})
+  list (GET ALL_ARGS 0 TEST_PROGRAM)
+  list (REMOVE_AT ALL_ARGS 0) # first one is the test program
+  cisst_cmake_debug ("cisst_add_test, test program ${TEST_PROGRAM} to ne used with options ${ALL_ARGS}")
+
+  # set all keywords and their values to ""
+  set (FUNCTION_KEYWORDS
+       ITERATIONS
+       INSTANCES)
+
+  # reset local variables
+  foreach(keyword ${FUNCTION_KEYWORDS})
+    set (${keyword} "")
+  endforeach(keyword)
+
+  # parse input
+  foreach (arg ${ALL_ARGS})
+    list (FIND FUNCTION_KEYWORDS ${arg} ARGUMENT_IS_A_KEYWORD)
+    if (${ARGUMENT_IS_A_KEYWORD} GREATER -1)
+      set (CURRENT_PARAMETER ${arg})
+      set (${CURRENT_PARAMETER} "")
+    else (${ARGUMENT_IS_A_KEYWORD} GREATER -1)
+      set (${CURRENT_PARAMETER} ${${CURRENT_PARAMETER}} ${arg})
+    endif (${ARGUMENT_IS_A_KEYWORD} GREATER -1)
+  endforeach (arg)
+
+  # debug
+  foreach (keyword ${FUNCTION_KEYWORDS})
+    cisst_cmake_debug ("cisst_add_test: ${keyword}: ${${keyword}}")
+  endforeach (keyword)
+
   # Once the test program is compiled, run it to create a list of available tests
-  ADD_CUSTOM_COMMAND(TARGET ${testProgram}
-                     POST_BUILD
-                     COMMAND ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/${testProgram}
-                     ARGS -d > ${CMAKE_CURRENT_BINARY_DIR}/DartTestfile-${testProgram}.txt
-                     COMMENT "Generating DartTestfile-${testProgram}.txt")
+  add_custom_command (TARGET ${TEST_PROGRAM}
+                      POST_BUILD
+                      COMMAND ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/${TEST_PROGRAM}
+                      ARGS -d -i ${ITERATIONS} -o ${INSTANCES} > ${CMAKE_CURRENT_BINARY_DIR}/DartTestfile-${TEST_PROGRAM}.txt
+                      COMMENT "Generating DartTestfile-${TEST_PROGRAM}.txt")
 
   # Add the custom build list
-  SET_DIRECTORY_PROPERTIES(PROPERTIES TEST_INCLUDE_FILE
-                           "${CMAKE_CURRENT_BINARY_DIR}/DartTestfile-${testProgram}.txt")
-ENDMACRO(CISST_ADD_TESTS)
+  set_directory_properties (PROPERTIES TEST_INCLUDE_FILE
+                            "${CMAKE_CURRENT_BINARY_DIR}/DartTestfile-${TEST_PROGRAM}.txt")
+endfunction (cisst_add_test)
 

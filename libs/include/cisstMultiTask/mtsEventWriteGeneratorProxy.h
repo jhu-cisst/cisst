@@ -60,9 +60,9 @@ public:
     // virtual void AddCommand(BaseType * command);
 
     /*! Execute all the commands in the composite. */
-    virtual mtsCommandBase::ReturnType Execute(const mtsGenericObject & argument) {
+    virtual mtsExecutionResult Execute(const mtsGenericObject & argument) {
         if (this->Commands[0]) {
-            return this->Commands[0]->Execute(argument);
+            return this->Commands[0]->Execute(argument, MTS_NOT_BLOCKING);
         }
     }
 

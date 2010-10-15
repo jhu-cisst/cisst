@@ -338,8 +338,10 @@ void GCMUITask::Run(void)
 
     // Connect to Task Viewer
     if (UI.ButtonTaskViewerClicked) {
+#if 0 // PK TEMP
         // can specify IP address and port number (default is "localhost", 4444)
         GlobalComponentManager.ConnectToTaskViewer();
+#endif
         UI.ButtonTaskViewerClicked = false;
     }
 

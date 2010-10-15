@@ -60,14 +60,14 @@ protected:
 
 public:  // PKAZ (was protected, but needed access for daVinci example)
     void Get(const mtsStateIndex & when, value_type & data) const {
-        //if (!Table) return mtsCommandBase::DEV_NOT_OK;
-        //return Table->ReadFromReader(Id, when, data)?mtsCommandBase::DEV_OK:mtsCommandBase::DEV_NOT_OK;
+        //if (!Table) return mtsExecutionResult::DEV_NOT_OK;
+        //return Table->ReadFromReader(Id, when, data)?mtsExecutionResult::DEV_OK:mtsExecutionResult::DEV_NOT_OK;
         //if (Table) Table->ReadFromReader(Id, when, data);
         if (Accessor) Accessor->Get(when, data);
     }
 
     void GetLatest(value_type & obj) const {
-        //if (!Table) return mtsCommandBase::DEV_NOT_OK;
+        //if (!Table) return mtsExecutionResult::DEV_NOT_OK;
         //return Get(Table->GetIndexReader(), obj);
         //if (Table) Get(Table->GetIndexReader(), obj);
         if (Accessor) Accessor->GetLatest(obj);

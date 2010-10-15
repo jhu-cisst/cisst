@@ -34,6 +34,12 @@ svlSampleImage::svlSampleImage() :
     SetEncoder("bmp", 0);
 }
 
+svlSampleImage::svlSampleImage(const svlSampleImage & other) :
+    svlSample(other)
+{
+    SetEncoder("bmp", 0);
+}
+
 svlSampleImage::~svlSampleImage()
 {
 }

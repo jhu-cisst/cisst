@@ -22,6 +22,7 @@ set (EXECUTABLE_OUTPUT_PATH ${cisstUtilities_BINARY_DIR}/bin)
 set (CISST_UTILITIES 
      multiTaskGlobalComponentManager
      multiTaskGlobalComponentManagerFLTK
+     multiTaskGlobalComponentManagerEx
      cisstDataGenerator
      cisstComponentGenerator)
 
@@ -38,6 +39,9 @@ variable_requires(BUILD_UTILITIES_multiTaskGlobalComponentManager REQUIREMENT_ME
 variable_requires(BUILD_UTILITIES_multiTaskGlobalComponentManagerFLTK REQUIREMENT_MET BUILD_LIBS_cisstMultiTask)
 variable_requires(BUILD_UTILITIES_multiTaskGlobalComponentManagerFLTK REQUIREMENT_MET CISST_MTS_HAS_ICE)
 variable_requires(BUILD_UTILITIES_multiTaskGlobalComponentManagerFLTK REQUIREMENT_MET CISST_HAS_FLTK)
+
+variable_requires(BUILD_UTILITIES_multiTaskGlobalComponentManagerEx REQUIREMENT_MET BUILD_LIBS_cisstMultiTask)
+variable_requires(BUILD_UTILITIES_multiTaskGlobalComponentManagerEx REQUIREMENT_MET CISST_MTS_HAS_ICE)
 
 # Create targets for each utility
 foreach (utility ${CISST_UTILITIES})

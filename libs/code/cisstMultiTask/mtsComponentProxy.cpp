@@ -598,7 +598,7 @@ bool mtsComponentProxy::UpdateEventHandlerProxyID(const std::string & clientComp
     mtsComponentInterfaceProxy::EventGeneratorProxySequence::const_iterator itEnd;
 
     // Update event void handlers
-    mtsCommandVoidBase * eventHandlerVoidBase;
+    mtsCommandVoid * eventHandlerVoidBase;
     mtsCommandVoidProxy * eventHandlerVoid;
     it = eventGeneratorProxyPointers.EventGeneratorVoidProxies.begin();
     itEnd = eventGeneratorProxyPointers.EventGeneratorVoidProxies.end();
@@ -848,7 +848,7 @@ bool mtsComponentProxy::GetEventGeneratorProxyPointer(
     const std::string & clientComponentName, const std::string & requiredInterfaceName,
     mtsComponentInterfaceProxy::EventGeneratorProxyPointerSet & eventGeneratorProxyPointers)
 {
-    mtsManagerLocal * localManager = mtsManagerLocal::GetInstance();
+    mtsManagerLocal * localManager = mtsManagerLocal::GetSafeInstance();
     mtsComponent * clientComponent = localManager->GetComponent(clientComponentName);
     if (!clientComponent) {
         CMN_LOG_CLASS_INIT_ERROR << "GetEventGeneratorProxyPointer: no client component found: " << clientComponentName << std::endl;
@@ -926,7 +926,7 @@ void mtsComponentProxy::ExtractInterfaceProvidedDescription(
     // queued container is updated for both queued and non-queued commands.
 
     // Extract void commands
-    mtsCommandVoidBase * voidCommand;
+    mtsCommandVoid * voidCommand;
     CommandVoidElement elementCommandVoid;
     const std::vector<std::string> namesOfVoidCommand = endUserInterface->GetNamesOfCommandsVoid();
     for (size_t i = 0; i < namesOfVoidCommand.size(); ++i) {
@@ -962,7 +962,7 @@ void mtsComponentProxy::ExtractInterfaceProvidedDescription(
     }
 
     // Extract read commands
-    mtsCommandReadBase * readCommand;
+    mtsCommandRead * readCommand;
     CommandReadElement elementCommandRead;
     const std::vector<std::string> namesOfReadCommand = endUserInterface->GetNamesOfCommandsRead();
     for (size_t i = 0; i < namesOfReadCommand.size(); ++i) {

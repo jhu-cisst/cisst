@@ -28,7 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsCommandWriteProxy_h
 #define _mtsCommandWriteProxy_h
 
-#include <cisstMultiTask/mtsCommandReadOrWriteBase.h>
+#include <cisstMultiTask/mtsCommandWriteBase.h>
 #include <cisstMultiTask/mtsCommandProxyBase.h>
 #include <cisstMultiTask/mtsProxySerializer.h>
 
@@ -39,7 +39,7 @@ http://www.cisst.org/cisst/license.txt.
   method is called, the command id with payload is sent to the connected peer
   interface across a network.
 */
-class mtsCommandWriteProxy : public mtsCommandWriteBase, public mtsCommandProxyBase
+class mtsCommandWriteProxy: public mtsCommandWriteBase, public mtsCommandProxyBase
 {
     friend class mtsComponentProxy;
     friend class mtsMulticastCommandWriteBase;
@@ -76,22 +76,23 @@ public:
     }
 
     /*! Direct execute can be used for mtsMulticastCommandWrite. */
-    inline mtsCommandBase::ReturnType Execute(const ArgumentType & argument) {
-        if (IsDisabled()) return mtsCommandBase::DISABLED;
+    inline mtsExecutionResult Execute(const mtsGenericObject & argument,
+                                      mtsBlockingType blocking) {
+        if (IsDisabled()) return mtsExecutionResult::DISABLED;
 
         if (NetworkProxyServer) {
             // Command write execution: client (request) -> server (execution)
-            if (!NetworkProxyServer->SendExecuteCommandWriteSerialized(ClientID, CommandID, argument)) {
-                return mtsCommandBase::COMMAND_FAILED;
+            if (!NetworkProxyServer->SendExecuteCommandWriteSerialized(ClientID, CommandID, argument, blocking)) {
+                return mtsExecutionResult::COMMAND_FAILED;
             }
         } else {
             // Event write execution: server (event generator) -> client (event handler)
             if (!NetworkProxyClient->SendExecuteEventWriteSerialized(CommandID, argument)) {
-                return mtsCommandBase::COMMAND_FAILED;
+                return mtsExecutionResult::COMMAND_FAILED;
             }
         }
 
-        return mtsCommandBase::DEV_OK;
+        return mtsExecutionResult::DEV_OK;
     }
 
     /*! Getter for per-command (de)serializer */
