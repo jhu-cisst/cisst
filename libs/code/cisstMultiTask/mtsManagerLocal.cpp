@@ -700,35 +700,48 @@ bool mtsManagerLocal::AddComponent(mtsComponent * component)
         return false;
     }
 
-    // Add internal interfaces depending on a type of the component.
-    // Manager component client
-    mtsManagerComponentClient * managerComponentClient = dynamic_cast<mtsManagerComponentClient*>(component);
-    mtsManagerComponentServer * managerComponentServer = dynamic_cast<mtsManagerComponentServer*>(component);
-    if (managerComponentClient) {
-        if (!managerComponentClient->AddInterfaceComponent()) {
-            CMN_LOG_CLASS_INIT_ERROR << "AddComponent: failed to add \"Component\" interfaces: " << componentName << std::endl;
+    // If dynamic component management is enabled
+    if (component->GetInterfaceRequired(
+        mtsManagerComponentBase::InterfaceNames::InterfaceInternalRequired))
+    {
+        // Add internal provided and required interface for dynamic component management service
+        if (!component->AddInterfaceInternal(true)) {
+            CMN_LOG_CLASS_INIT_ERROR << "AddComponent: failed to add \"Internal\" provided and required interfaces: " << componentName << std::endl;
             return false;
         }
-        if (!managerComponentClient->AddInterfaceLCM()) {
-            CMN_LOG_CLASS_INIT_ERROR << "AddComponent: failed to add \"LCM\" interfaces: " << componentName << std::endl;
-            return false;
-        }
-    }
-    // Manager component server
-    else if (managerComponentServer) {
-        if (!managerComponentServer->AddInterfaceGCM()) {
-            CMN_LOG_CLASS_INIT_ERROR << "AddComponent: failed to add \"GCM\" interfaces: " << componentName << std::endl;
-            return false;
-        }
-    }
-    // User(generic) component
+    } 
+    // If dynamic component management is not enabled
     else {
-        // Add a internal provided interface.  This interface is connected to the
-        // manager component client and is used to inform it of the change of 
-        // the running state of this component (more features can be added later).
-        if (!component->AddInterfaceInternal()) {
-            CMN_LOG_CLASS_INIT_ERROR << "AddComponent: failed to add \"Internal\" provided interfaces: " << componentName << std::endl;
-            return false;
+        // Add internal interfaces depending on a type of the component.
+        // Manager component client
+        mtsManagerComponentClient * managerComponentClient = dynamic_cast<mtsManagerComponentClient*>(component);
+        mtsManagerComponentServer * managerComponentServer = dynamic_cast<mtsManagerComponentServer*>(component);
+        if (managerComponentClient) {
+            if (!managerComponentClient->AddInterfaceComponent()) {
+                CMN_LOG_CLASS_INIT_ERROR << "AddComponent: failed to add \"Component\" interfaces: " << componentName << std::endl;
+                return false;
+            }
+            if (!managerComponentClient->AddInterfaceLCM()) {
+                CMN_LOG_CLASS_INIT_ERROR << "AddComponent: failed to add \"LCM\" interfaces: " << componentName << std::endl;
+                return false;
+            }
+        }
+        // Manager component server
+        else if (managerComponentServer) {
+            if (!managerComponentServer->AddInterfaceGCM()) {
+                CMN_LOG_CLASS_INIT_ERROR << "AddComponent: failed to add \"GCM\" interfaces: " << componentName << std::endl;
+                return false;
+            }
+        }
+        // User(generic) component
+        else {
+            // Add a internal provided interface.  This interface is connected to the
+            // manager component client and is used to inform it of the change of 
+            // the running state of this component (more features can be added later).
+            if (!component->AddInterfaceInternal()) {
+                CMN_LOG_CLASS_INIT_ERROR << "AddComponent: failed to add \"Internal\" provided interfaces: " << componentName << std::endl;
+                return false;
+            }
         }
     }
 
@@ -756,56 +769,6 @@ bool mtsManagerLocal::AddComponent(mtsComponent * component)
     }
 
     CMN_LOG_CLASS_INIT_VERBOSE << "AddComponent: "
-                               << "successfully added component to local component manager: " << componentName << std::endl;
-
-    return true;
-}
-
-bool mtsManagerLocal::AddComponentWithControlService(mtsComponent * component)
-{
-    if (!component) {
-        CMN_LOG_CLASS_INIT_ERROR << "AddComponentWithControlService: invalid component" << std::endl;
-        return false;
-    }
-
-    const std::string componentName = component->GetName();
-
-    // Try to register new component to the global component manager first.
-    if (!ManagerGlobal->AddComponent(ProcessName, componentName)) {
-        CMN_LOG_CLASS_INIT_ERROR << "AddComponentWithControlService: failed to add component: " << componentName << std::endl;
-        return false;
-    }
-
-    // Add a internal provided interface as well as a internal required interface.
-    if (!component->AddInterfaceInternal(true)) {
-        CMN_LOG_CLASS_INIT_ERROR << "AddComponentWithControlService: failed to add \"Internal\" provided and required interfaces: " << componentName << std::endl;
-        return false;
-    }
-
-    // Register all the existing required interfaces and provided interfaces to
-    // the global component manager and mark them as registered.
-    if (!RegisterInterfaces(component)) {
-        CMN_LOG_CLASS_INIT_ERROR << "AddComponentWithControlService: failed to register interfaces" << std::endl;
-        return false;
-    }
-
-    CMN_LOG_CLASS_INIT_VERBOSE << "AddComponentWithControlService: "
-                               << "successfully added component to the global component manager: " << componentName << std::endl;
-    // PK TEMP
-    ManagerGlobal->AddComponent(ProcessName, componentName+"-END");
-
-    bool success;
-    ComponentMapChange.Lock();
-    success = ComponentMap.AddItem(componentName, component);
-    ComponentMapChange.Unlock();
-
-    if (!success) {
-        CMN_LOG_CLASS_INIT_ERROR << "AddComponentWithControlService: "
-                                 << "failed to add component to local component manager: " << componentName << std::endl;
-        return false;
-    }
-
-    CMN_LOG_CLASS_INIT_VERBOSE << "AddComponentWithControlService: "
                                << "successfully added component to local component manager: " << componentName << std::endl;
 
     return true;
@@ -1461,7 +1424,7 @@ bool mtsManagerLocal::CreateManagerComponents(void)
             // that the ComponentViewer will be in a separate process.
             mtsComponentViewer *componentViewer = new mtsComponentViewer("ComponentViewer", 1.0*cmn_s);
             CMN_LOG_CLASS_INIT_VERBOSE << "CreateManagerComponents: Creating ComponentViewer" << std::endl;
-            if (!AddComponentWithControlService(componentViewer)) {
+            if (!AddComponent(componentViewer)) {
                 CMN_LOG_CLASS_INIT_ERROR << "CreateManagerComponents: failed to add ComponentViewer" << std::endl;
                 return false;
             }

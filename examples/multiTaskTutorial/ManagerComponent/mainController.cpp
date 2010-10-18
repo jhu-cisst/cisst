@@ -57,7 +57,7 @@ int main(int argc, char * argv[])
 
     // create our server task
     ManagerComponent * managerComponent = new ManagerComponent("ManagerComponent", 1 * cmn_s);
-    if (!ComponentManager->AddComponentWithControlService(managerComponent)) {
+    if (!ComponentManager->AddComponent(managerComponent)) {
         std::cerr << "Failed to add component: " << managerComponent->GetName() << std::endl;
         return 1;
     }

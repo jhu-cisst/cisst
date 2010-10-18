@@ -341,10 +341,6 @@ public:
     bool CISST_DEPRECATED AddTask(mtsTask * component); // For backward compatibility
     bool CISST_DEPRECATED AddDevice(mtsComponent * component); // For backward compatibility
 
-    /*! \brief Add a component to this local component manager and enable support
-               for the dynamic component control */
-    bool AddComponentWithControlService(mtsComponent * component);
-
     /*! \brief Remove a component from this local component manager. */
     bool RemoveComponent(mtsComponent * component);
     bool RemoveComponent(const std::string & componentName);

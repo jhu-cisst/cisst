@@ -54,7 +54,7 @@ CMN_IMPLEMENT_SERVICES(mtsManagerComponentBase);
 mtsManagerComponentBase::mtsManagerComponentBase(const std::string & componentName)
     : mtsTaskFromSignal(componentName, 50)
 {
-    UseSeparateLogFileDefault();
+    //UseSeparateLogFileDefault();
 }
 
 mtsManagerComponentBase::~mtsManagerComponentBase()
