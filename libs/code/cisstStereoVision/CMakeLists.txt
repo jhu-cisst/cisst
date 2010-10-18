@@ -14,9 +14,6 @@
 #
 # --- end cisst license ---
 
-# set the library name
-SET(LIBRARY cisstStereoVision)
-
 # set dependencies
 SET(DEPENDENCIES
     cisstCommon
@@ -1012,7 +1009,11 @@ SET_SOURCE_FILES_PROPERTIES("${CISST_SVL_CONFIG_FILE}"
 SET(ADDITIONAL_HEADER_FILES ${CISST_SVL_CONFIG_FILE})
 
 # Finally create the library
-CISST_ADD_LIBRARY_TO_PROJECT(cisstLibs)
+cisst_add_library (
+  LIBRARY cisstStereoVision
+  DEPENDENCIES ${DEPENDENCIES}
+  SOURCE_FILES ${SOURCE_FILES}
+  HEADER_FILES ${HEADER_FILES})
 
 # Python wrappers
 if (CISST_HAS_SWIG_PYTHON)

@@ -14,13 +14,6 @@
 #
 # --- end cisst license ---
 
-# set the library name
-SET(LIBRARY cisstOSAbstraction)
-
-# set dependencies
-SET(DEPENDENCIES
-    cisstCommon)
-
 # all source files
 SET(SOURCE_FILES
     osaClassServices.cpp
@@ -64,7 +57,11 @@ SET(HEADER_FILES
     osaTimeServer.h
     )
 
-CISST_ADD_LIBRARY_TO_PROJECT(cisstLibs)
+cisst_add_library (
+  LIBRARY cisstOSAbstraction
+  DEPENDENCIES cisstCommon
+  SOURCE_FILES ${SOURCE_FILES}
+  HEADER_FILES ${HEADER_FILES})
 
 IF(WIN32)
     SET(CISST_WSOCK_LIBRARY WSOCK32)
