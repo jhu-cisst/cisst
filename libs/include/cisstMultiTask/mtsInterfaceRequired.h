@@ -100,7 +100,7 @@ protected:
  public:
 
     /*! Default size for queues of events */
-    enum {DEFAULT_EVENT_QUEUE_LEN = 16};
+    enum {DEFAULT_EVENT_QUEUE_LEN = 64};
 
     /*! Constructor. Sets the name, device pointer, and mailbox for queued events.
 

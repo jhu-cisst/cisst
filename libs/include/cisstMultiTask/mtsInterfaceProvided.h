@@ -103,7 +103,7 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterfaceProvidedOrOutput {
     typedef mtsInterfaceProvidedOrOutput BaseType;
 
     /*! Default length for argument buffers */
-    enum {DEFAULT_ARG_BUFFER_LEN = 16};
+    enum {DEFAULT_ARG_BUFFER_LEN = 64};
 
     /*! Typedef for a map of name and void commands. */
     typedef cmnNamedMap<mtsCommandVoid> CommandVoidMapType;
