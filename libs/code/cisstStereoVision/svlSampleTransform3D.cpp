@@ -43,6 +43,7 @@ svlSampleTransform3D::svlSampleTransform3D(const svlSampleTransform3D & other) :
 svlSampleTransform3D & svlSampleTransform3D::operator= (const svlSampleTransform3D & other)
 {
     CopyOf(other);
+    return *this;
 }
 
 svlSample* svlSampleTransform3D::GetNewInstance() const

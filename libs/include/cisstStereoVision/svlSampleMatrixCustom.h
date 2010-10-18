@@ -84,6 +84,7 @@ public:
     svlSampleMatrixCustom & operator= (const svlSampleMatrixCustom<_ValueType> & other)
     {
         CopyOf(other);
+        return *this;
     }
 
 

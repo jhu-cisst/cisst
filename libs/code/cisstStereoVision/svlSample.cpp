@@ -48,6 +48,7 @@ svlSample & svlSample::operator= (const svlSample & other)
 {
     SetTimestamp(other.Timestamp);
     SetEncoder(other.Encoder, other.EncoderParameter);
+    return *this;
 }
 
 bool svlSample::IsInitialized() const

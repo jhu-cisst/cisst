@@ -118,6 +118,7 @@ public:
     svlSampleImageCustom & operator= (const svlSampleImageCustom<_ValueType, _DataChannels, _VideoChannels> & other)
     {
         CopyOf(other);
+        return *this;
     }
 
 
