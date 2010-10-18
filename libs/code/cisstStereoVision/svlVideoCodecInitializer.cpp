@@ -57,5 +57,8 @@ void svlInitializeVideoCodecs()
 #ifdef _svlVideoCodecOpenCV_h
     delete new svlVideoCodecOpenCV;
 #endif // _svlVideoCodecOpenCV_h
+
+    // Create svlVideoIO singleton object
+    svlVideoIO::GetInstance();
 }
 

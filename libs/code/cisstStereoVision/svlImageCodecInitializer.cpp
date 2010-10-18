@@ -52,5 +52,8 @@ void svlInitializeImageCodecs()
 #ifdef _svlImageCodecPNG_h
     delete new svlImageCodecPNG;
 #endif // _svlImageCodecPNG_h
+
+    // Create svlImageIO singleton object
+    svlImageIO::GetInstance();
 }
 

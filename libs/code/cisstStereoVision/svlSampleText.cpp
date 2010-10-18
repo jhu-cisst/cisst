@@ -40,6 +40,11 @@ svlSampleText::svlSampleText(const svlSampleText & other) :
     CopyOf(other);
 }
 
+svlSampleText & svlSampleText::operator= (const svlSampleText & other)
+{
+    CopyOf(other);
+}
+
 svlSample* svlSampleText::GetNewInstance() const
 {
     return new svlSampleText;

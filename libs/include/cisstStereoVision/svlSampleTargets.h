@@ -36,6 +36,7 @@ class CISST_EXPORT svlSampleTargets : public svlSample
 public:
     svlSampleTargets();
     svlSampleTargets(const svlSampleTargets & other);
+    svlSampleTargets & operator= (const svlSampleTargets & other);
 
     svlSample* GetNewInstance() const;
     svlStreamType GetType() const;

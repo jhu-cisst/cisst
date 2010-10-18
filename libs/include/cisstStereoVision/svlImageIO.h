@@ -75,6 +75,8 @@ private:
 
 class CISST_EXPORT svlImageIO
 {
+    friend void svlInitializeImageCodecs();
+
 private:
     typedef vctDynamicVector<cmnClassServicesBase*> _CodecList;
     typedef vctDynamicVector<svlImageCodecBase*> _CodecCacheList;

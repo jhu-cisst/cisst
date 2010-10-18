@@ -43,6 +43,8 @@ class svlVideoCodecBase;
 
 class CISST_EXPORT svlVideoIO
 {
+    friend void svlInitializeVideoCodecs();
+
 public:
     typedef struct _Compression
     {

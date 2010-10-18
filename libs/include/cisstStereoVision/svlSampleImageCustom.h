@@ -80,12 +80,13 @@ public:
         }
     }
 
-    svlSampleImageCustom(const svlSampleImageCustom & other) :
+    svlSampleImageCustom(const svlSampleImageCustom<_ValueType, _DataChannels, _VideoChannels> & other) :
         svlSampleImage(other),
         OwnData(true)
     {
         for (unsigned int vch = 0; vch < _VideoChannels; vch ++) {
             OwnImage[vch] = new vctDynamicMatrix<_ValueType>;
+            Image[vch].SetRef(*(OwnImage[vch]));
 #if (CISST_SVL_HAS_OPENCV == ON)
             int ocvdepth = GetOCVDepth();
             if (ocvdepth >= 0) OCVImageHeader[vch] = cvCreateImageHeader(cvSize(0, 0), ocvdepth, _DataChannels);
@@ -108,6 +109,15 @@ public:
             if (OCVImageHeader[vch]) cvReleaseImageHeader(&(OCVImageHeader[vch]));
 #endif // CISST_SVL_HAS_OPENCV
         }
+    }
+
+    ///////////////
+    // Operators //
+    ///////////////
+
+    svlSampleImageCustom & operator= (const svlSampleImageCustom<_ValueType, _DataChannels, _VideoChannels> & other)
+    {
+        CopyOf(other);
     }
 
 
@@ -250,13 +260,13 @@ public:
         cmnSerializeRaw(outputStream, GetTimestamp());
         cmnSerializeRaw(outputStream, codec);
 
-        bool hasdata = true;
+        int hasdata = 1;
         for (unsigned int vch = 0; vch < _VideoChannels; vch ++) {
-            if (GetWidth(vch) < 1 || GetHeight(vch) < 1) hasdata = false;
+            if (GetWidth(vch) < 1 || GetHeight(vch) < 1) hasdata = 0;
         }
         cmnSerializeRaw(outputStream, hasdata);
 
-        if (hasdata) {
+        if (hasdata == 1) {
             for (unsigned int vch = 0; vch < _VideoChannels; vch ++) {
                 if (svlImageIO::Write(*this, vch, codec, outputStream, compression) != SVL_OK) {
 // Exeptions are not handled yet.
@@ -272,9 +282,9 @@ public:
         mtsGenericObject::DeSerializeRaw(inputStream);
 
         int type = -1;
-        bool hasdata;
         double timestamp;
         std::string codec;
+        int hasdata;
         cmnDeSerializeRaw(inputStream, type);
         if (type != GetType()) {
             CMN_LOG_CLASS_RUN_ERROR << "Deserialized sample type mismatch " << std::endl;
@@ -285,7 +295,7 @@ public:
         cmnDeSerializeRaw(inputStream, codec);
         cmnDeSerializeRaw(inputStream, hasdata);
 
-        if (hasdata) {
+        if (hasdata == 1) {
             for (unsigned int vch = 0; vch < _VideoChannels; vch ++) {
                 if (svlImageIO::Read(*this, vch, codec, inputStream, false) != SVL_OK) {
 // Exeptions are not handled yet.

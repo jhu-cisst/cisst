@@ -101,7 +101,11 @@ int svlFilterImageZoom::Process(svlProcInfo* procInfo, svlSample* syncInput, svl
 {
     syncOutput = OutputImage;
     _SkipIfAlreadyProcessed(syncInput, syncOutput);
-    _SkipIfDisabled();
+
+    if (IsDisabled()) {
+        syncOutput = syncInput;
+        return SVL_OK;
+    }
 
     svlSampleImage* input = dynamic_cast<svlSampleImage*>(syncInput);
     const unsigned int videochannels = input->GetVideoChannels();

@@ -23,7 +23,6 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlSampleImageTypes_h
 #define _svlSampleImageTypes_h
 
-#include <cisstMultiTask/mtsGenericObjectProxy.h>
 #include <cisstStereoVision/svlSampleImageCustom.h>
 
 // Always include last!

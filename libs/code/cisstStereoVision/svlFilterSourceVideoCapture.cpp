@@ -890,38 +890,43 @@ int svlFilterSourceVideoCapture::DialogTrigger(unsigned int videoch)
     if (EnumeratedDevices[DeviceID[videoch]].platform == LinLibDC1394) {
         ExternalTrigger trigger;
         int ivalue;
+        char input[256];
         std::string str;
 
-        std::cout << "  # Enable external trigger? ['y' or 'n'; default=NO]: ";
+        std::cout << "  # Enable external trigger? ['y' - YES; other - NO]: ";
         ivalue = cmnGetChar();
-        if (str.compare("y") != 0) {
+        if (ivalue != 'y') {
             memset(&trigger, 0, sizeof(ExternalTrigger));
             std::cout << "NO" << std::endl;
             SetTrigger(trigger, videoch);
             return SVL_OK;
         }
         trigger.enable = true;
-        std::cout << " YES" << std::endl;
+        std::cout << "YES" << std::endl;
 
         std::cout << "  # Enter trigger mode ['0'-'5' or '14'-'15']: ";
-        std::cin >> ivalue;
-        if (ivalue < 0) ivalue = 0;
+        std::cin.getline(input, 256);
+        if (std::cin.gcount() > 1) ivalue = atoi(input);
+        else ivalue = 0;
+        if (ivalue < 0 || (ivalue > 5 && (ivalue != 14 || ivalue != 15))) ivalue = 0;
         trigger.mode = ivalue;
 
         std::cout << "  # Enter trigger source ['0'-'3']: ";
-        std::cin >> ivalue;
-        if (ivalue < 0) ivalue = 0;
+        std::cin.getline(input, 256);
+        if (std::cin.gcount() > 1) ivalue = atoi(input);
+        else ivalue = 0;
+        if (ivalue < 0 || ivalue > 3) ivalue = 0;
         trigger.source = ivalue;
 
-        std::cout << "  # Enter trigger polarity ['h' or 'l']: ";
-        std::cin >> str;
-        if (str.compare("h") == 0) {
+        std::cout << "  # Enter trigger polarity ['h' - HIGH; other - LOW]: ";
+        ivalue = cmnGetChar();
+        if (ivalue == 'h') {
             trigger.polarity = 1;
-            std::cout << "    Trigger polarity set to HIGH" << std::endl;
+            std::cout << "HIGH" << std::endl;
         }
         else {
             trigger.polarity = 0;
-            std::cout << "    Trigger polarity set to LOW" << std::endl;
+            std::cout << "LOW" << std::endl;
         }
 
         SetTrigger(trigger, videoch);

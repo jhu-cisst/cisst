@@ -44,6 +44,12 @@ svlSample::~svlSample()
 {
 }
 
+svlSample & svlSample::operator= (const svlSample & other)
+{
+    SetTimestamp(other.Timestamp);
+    SetEncoder(other.Encoder, other.EncoderParameter);
+}
+
 bool svlSample::IsInitialized() const
 {
     return false;

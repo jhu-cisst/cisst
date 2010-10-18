@@ -42,6 +42,11 @@ svlSampleTargets::svlSampleTargets(const svlSampleTargets & other) :
     CopyOf(other);
 }
 
+svlSampleTargets & svlSampleTargets::operator= (const svlSampleTargets & other)
+{
+    CopyOf(other);
+}
+
 svlSample* svlSampleTargets::GetNewInstance() const
 {
     return new svlSampleTargets;

@@ -34,6 +34,8 @@ class CISST_EXPORT svlSample : public mtsGenericObject
 public:
     svlSample();
     svlSample(const svlSample & other);
+    svlSample & operator= (const svlSample & other);
+
     virtual ~svlSample();
     virtual svlSample* GetNewInstance() const = 0;
     virtual svlStreamType GetType() const = 0;

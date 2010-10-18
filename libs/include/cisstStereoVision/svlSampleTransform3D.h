@@ -36,6 +36,7 @@ class CISST_EXPORT svlSampleTransform3D : public svlSample
 public:
     svlSampleTransform3D();
     svlSampleTransform3D(const svlSampleTransform3D & other);
+    svlSampleTransform3D & operator= (const svlSampleTransform3D & other);
 
     svlSample* GetNewInstance() const;
     svlStreamType GetType() const;

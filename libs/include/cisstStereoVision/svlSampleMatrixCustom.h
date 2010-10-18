@@ -57,7 +57,7 @@ public:
         else Matrix = 0;
     }
 
-    svlSampleMatrixCustom(const svlSampleMatrixCustom & other) :
+    svlSampleMatrixCustom(const svlSampleMatrixCustom<_ValueType> & other) :
         svlSampleMatrix(other),
         OwnData(true),
         InvalidElement(0)
@@ -74,6 +74,16 @@ public:
     ~svlSampleMatrixCustom()
     {
         if (OwnData) delete Matrix;
+    }
+
+
+    ///////////////
+    // Operators //
+    ///////////////
+
+    svlSampleMatrixCustom & operator= (const svlSampleMatrixCustom<_ValueType> & other)
+    {
+        CopyOf(other);
     }
 
 
