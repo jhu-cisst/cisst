@@ -441,7 +441,7 @@ private:
 };
 
 
-class svlOverlayAsyncOutputProperties : public svlOverlayStaticText
+class CISST_EXPORT svlOverlayAsyncOutputProperties : public svlOverlayStaticText
 {
 public:
     svlOverlayAsyncOutputProperties();
