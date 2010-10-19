@@ -93,7 +93,7 @@ class CISST_EXPORT devRobotComponent : public mtsTaskPeriodic {
   
  protected:
 
-  class RnIO : public IO {
+  class CISST_EXPORT RnIO : public IO {
     
   private:
     
@@ -129,7 +129,7 @@ class CISST_EXPORT devRobotComponent : public mtsTaskPeriodic {
 
 
 
-  class R3IO : public IO {
+  class CISST_EXPORT R3IO : public IO {
     
   private:
     
@@ -164,7 +164,7 @@ class CISST_EXPORT devRobotComponent : public mtsTaskPeriodic {
 
 
 
-  class SE3IO : public IO {
+  class CISST_EXPORT SE3IO : public IO {
 
   private:
     
@@ -198,7 +198,7 @@ class CISST_EXPORT devRobotComponent : public mtsTaskPeriodic {
   }; // End SE3iO
 
 
-  class SO3IO : public IO {
+  class CISST_EXPORT SO3IO : public IO {
 
   private:
     
