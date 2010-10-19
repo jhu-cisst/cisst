@@ -40,7 +40,7 @@ protected:
 
     /*! Internal functions to use services provided by manager component client */
     // Dynamic component management
-    struct {
+    struct ManagementStruct {
         mtsFunctionWrite Create;
         mtsFunctionWrite Connect;
         mtsFunctionWrite Start;
@@ -49,7 +49,7 @@ protected:
     } ServiceComponentManagement;
 
     // Getters
-    struct {
+    struct GetterStruct {
         mtsFunctionRead          GetNamesOfProcesses;
         mtsFunctionQualifiedRead GetNamesOfComponents; // in: process name, out: components' names
         mtsFunctionQualifiedRead GetNamesOfInterfaces; // in: process name, out: interfaces' names
