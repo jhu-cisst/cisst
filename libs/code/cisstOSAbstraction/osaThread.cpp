@@ -26,6 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
     #include <pthread.h>
     #include <sched.h>
+    #include <string.h>
 #elif (CISST_OS == CISST_WINDOWS)
     #include <windows.h>
 #endif
