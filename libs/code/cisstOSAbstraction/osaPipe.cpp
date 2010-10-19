@@ -23,7 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnAssert.h>
 #include <cisstOSAbstraction/osaPipe.h>
 #include <string.h>
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) ||       (CISST_OS == CISST_QNX)
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
 #include <signal.h>
 #include <unistd.h>
 #elif (CISST_OS == CISST_WINDOWS)
@@ -35,7 +35,7 @@ http://www.cisst.org/cisst/license.txt.
 
 struct osaPipeInternals {
 	/*! OS dependent variables */
-	#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_QNX)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
 		int pid;
 	#elif (CISST_OS == CISST_WINDOWS)
 		HANDLE hProcess;
@@ -53,7 +53,7 @@ osaPipe::osaPipe() {
 }
 
 void osaPipe::Open(char * const command[], const std::string & mode) {
-	#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
 		if (pipe(toProgram) < 0 || pipe(fromProgram) < 0)
 			perror("Can't create pipe in osaPipe::Open");
 	#elif (CISST_OS == CISST_WINDOWS)
@@ -74,7 +74,7 @@ void osaPipe::Open(char * const command[], const std::string & mode) {
 			}
 		}
 
-	#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
 		/* Spawn a child and parent process for communication */
 		INTERNALS(pid) = fork();
 
@@ -137,21 +137,21 @@ void osaPipe::Open(char * const command[], const std::string & mode) {
 
 void osaPipe::Close(bool killProcess) {
 	if (writeFlag)
-	#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
 		close(toProgram[WRITE_HANDLE]);
 	#elif (CISST_OS == CISST_WINDOWS)
 		_close(toProgram[WRITE_HANDLE]);
 	#endif
 
 	if (readFlag)
-	#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
 		close(fromProgram[READ_HANDLE]);
 	#elif (CISST_OS == CISST_WINDOWS)
 		_close(fromProgram[READ_HANDLE]);
 	#endif
 
 	if (killProcess)
-	#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
 		kill(INTERNALS(pid), SIGKILL);
 	#elif (CISST_OS == CISST_WINDOWS)
 		CloseHandle(INTERNALS(hProcess));
@@ -160,7 +160,7 @@ void osaPipe::Close(bool killProcess) {
 }
 
 int osaPipe::Read(char *buffer, int maxLength) const {
-	#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
 		ssize_t ret = read(fromProgram[READ_HANDLE], buffer, sizeof(char)*maxLength);
 	#elif (CISST_OS == CISST_WINDOWS)
 		int ret = _read(fromProgram[READ_HANDLE], buffer, sizeof(char)*maxLength);
@@ -173,7 +173,7 @@ int osaPipe::Read(char *buffer, int maxLength) const {
 }
 
 int osaPipe::Write(const char *buffer) {
-	#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
 		ssize_t ret = write(toProgram[WRITE_HANDLE], buffer, sizeof(char)*strlen(buffer));
 	#elif (CISST_OS == CISST_WINDOWS)
 		int ret = _write(toProgram[WRITE_HANDLE], buffer, sizeof(char)*strlen(buffer));

@@ -195,6 +195,8 @@ struct osaThreadBuddyInternals {
 #if (CISST_OS == CISST_LINUX_RTAI)
     // A pointer to the thread buddy on RTAI.
     RT_TASK *RTTask;
+#elif (CISST_OS == CISST_LINUX_XENOMAI)
+    // 
 #elif (CISST_OS == CISST_WINDOWS)
     // A pointer to void on all other operating systems
     HANDLE WaitTimer;
@@ -278,6 +280,27 @@ void osaThreadBuddy::Create(const char *name, const osaAbsoluteTime& tv, int CMN
         }
     }
 
+#elif (CISST_OS == CISST_LINUX_XENOMAI)
+    pthread_t tid = pthread_self();
+    if( tid != NULL ){
+        struct timespec tsperiod, tsnow;
+        tsperiod.tv_sec = tv.sec;
+        tsperiod.tv_nsec = tv.nsec;
+        clock_gettime( CLOCK_REALTIME, &tsnow );
+        tsnow.tv_sec++;
+        int retval = pthread_make_periodic_np( tid, &tsnow, &tsperiod );
+        if( retval != 0 ){
+            CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+                              << "Failed to make periodic. "
+                              << strerror(retval) << ": " << retval 
+                              << std::endl;
+        }
+    }
+    else{
+        CMN_LOG_RUN_WARNING << CMN_LOG_DETAILS
+                            << "Calling thread is not a POSIX skin thread."
+                            << std::endl;
+    }
 #elif (CISST_OS == CISST_WINDOWS)
     Data->DueTime.QuadPart = 0UL;
     Data->IsSuspended = false;
@@ -352,7 +375,16 @@ void osaThreadBuddy::WaitForPeriod(void)
 
 #if (CISST_OS == CISST_LINUX_RTAI)
     rt_task_wait_period();
-
+#elif (CISST_OS == CISST_LINUX_XENOMAI)
+    unsigned long overruns;
+    int retval = pthread_wait_np( &overruns );
+    if( retval != 0 ){
+        CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+                          << "Failed to wait for next period. "
+                          << strerror(retval) << ": " << retval << ". "
+                          << "Overruns: " << overruns
+                          << std::endl;
+    }
 #elif (CISST_OS == CISST_WINDOWS)
     // this might change in future when we introduce our own
     // scheduler/dispatcher but even then our sleep might be better
@@ -383,7 +415,18 @@ void osaThreadBuddy::WaitForRemainingPeriod(void)
 #if (CISST_OS == CISST_LINUX_RTAI)
     if (IsPeriodic())
         rt_task_wait_period();
-
+#elif (CISST_OS == CISST_LINUX_XENOMAI)
+    if( IsPeriodic() ){
+        unsigned long overruns;
+        int retval = pthread_wait_np( &overruns );
+        if( retval != 0 ){
+            CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+                              << "Failed to wait for next period. "
+                              << strerror(retval) << ": " << retval << ". "
+                              << "Overruns: " << overruns
+                              << std::endl;
+        }
+    }
 #elif (CISST_OS == CISST_WINDOWS)
     if (!IsPeriodic())
         return;
@@ -493,6 +536,7 @@ void osaThreadBuddy::Resume(void)
 {
 #if (CISST_OS == CISST_LINUX_RTAI)
     rt_task_resume(Data->RTTask);
+#elif (CISST_OS == CISST_LINUX_XENOMAI)
 #else
     Data->IsSuspended = false;
 #endif
@@ -502,6 +546,7 @@ void osaThreadBuddy::Suspend(void)
 {
 #if (CISST_OS == CISST_LINUX_RTAI)
     rt_task_suspend(Data->RTTask);
+#elif (CISST_OS == CISST_LINUX_XENOMAI)
 #else 
     Data->IsSuspended = true;
 #endif

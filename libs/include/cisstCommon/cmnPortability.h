@@ -61,6 +61,7 @@ http://www.cisst.org/cisst/license.txt.
 #define CISST_CYGWIN 7
 #define CISST_DARWIN 8
 #define CISST_QNX 9
+#define CISST_LINUX_XENOMAI 10
 //@}
 
 /*! \name Testing the compiler */
@@ -108,6 +109,10 @@ http://www.cisst.org/cisst/license.txt.
     #undef CISST_OS
     #define CISST_OS CISST_LINUX_RTAI
   #endif // linux RTAI
+  #if (CISST_HAS_LINUX_XENOMAI == ON) // overwrite if Xenomai
+    #undef CISST_OS
+    #define CISST_OS CISST_LINUX_XENOMAI
+  #endif // linux Xenomai
   #ifdef sun
     #define CISST_OS CISST_SOLARIS
   #endif // sun
@@ -185,6 +190,10 @@ http://www.cisst.org/cisst/license.txt.
     #undef CISST_OS
     #define CISST_OS CISST_LINUX_RTAI
   #endif // linux RTAI
+  #if (CISST_HAS_LINUX_XENOMAI == ON) // overwrite if Xenomai
+    #undef CISST_OS
+    #define CISST_OS CISST_LINUX_XENOMAI
+  #endif // linux Xenomai
   #ifndef CISST_OS // windows at last
     #define CISST_OS CISST_WINDOWS
   #endif // windows

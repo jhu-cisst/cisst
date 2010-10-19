@@ -44,7 +44,7 @@ http://www.cisst.org/cisst/license.txt.
         }                                               \
     } while (0)
     #endif /*timersub*/
-#elif (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS)
+#elif (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_XENOMAI)
     #include <sys/time.h>
     #if (CISST_OS == CISST_SOLARIS) || (CISST_COMPILER == CISST_GCC) 
     #ifndef timersub
@@ -98,7 +98,7 @@ public:
         CMN_LOG_INIT_WARNING << "Class osaStopwatch: Can NOT use HighPerformance Counter, time granularity is about: "
                              << TimeGranularity * cmn_ms << " ms" << std::endl;
     }
-#elif (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
+#elif (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
     this->TimeGranularity = 1.0e-6; // 1 microsecond
 #endif
         Reset();
@@ -115,7 +115,7 @@ public:
         AccumulatedTime = 0;
 #if (CISST_OS == CISST_WINDOWS) || (CISST_OS == CISST_CYGWIN)
         StartTicks = 0;
-#elif (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) 
+#elif (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_XENOMAI)
         StartTimeOfDay.tv_sec = 0;
         StartTimeOfDay.tv_usec = 0;
 #elif (CISST_OS == CISST_QNX)
@@ -141,7 +141,7 @@ public:
         else {
             StartTicks = ::GetTickCount();
         }
-#elif (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) 
+#elif (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_XENOMAI)
         gettimeofday(&StartTimeOfDay, 0);
 #elif (CISST_OS == CISST_QNX)
         if (clock_gettime(CLOCK_REALTIME, &StartTimeOfDay) == -1) {
@@ -210,7 +210,7 @@ private:
             endTicks = ::GetTickCount();
             totalSeconds = static_cast<double>(endTicks - StartTicks) / 1000.0;
         }
-#elif (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS)
+#elif (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_XENOMAI)
         timeval endTimeOfDay;
         timeval diffTime;
         gettimeofday(&endTimeOfDay, 0);
@@ -238,7 +238,7 @@ private:
 
 #if (CISST_OS == CISST_WINDOWS) || (CISST_OS == CISST_CYGWIN)
     SecondsCounter StartTicks;
-#elif (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS)
+#elif (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_XENOMAI)
     timeval StartTimeOfDay;
 #elif (CISST_OS == CISST_QNX)
     struct timespec StartTimeOfDay;

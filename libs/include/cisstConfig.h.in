@@ -49,6 +49,9 @@ http://www.cisst.org/cisst/license.txt.
 // RTAI Realtime extension for Linux
 #define CISST_HAS_LINUX_RTAI @CISST_HAS_LINUX_RTAI@
 
+// Xenomai Realtime extension for Linux
+#define CISST_HAS_LINUX_XENOMAI @CISST_HAS_LINUX_XENOMAI@
+
 // Using OpenCV for optimized image processing
 #define CISST_HAS_OPENCV @SVL_HAS_OPENCV@
 

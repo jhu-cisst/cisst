@@ -29,7 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 #if (CISST_OS == CISST_LINUX_RTAI)
     #include <rtai_sem.h>
     #include <rtai_types.h>
-#elif (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
+#elif (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
     #include <pthread.h>
     #include <errno.h>
     #include <string.h>
@@ -43,7 +43,7 @@ struct osaMutexInternals {
 //#if (CISST_OS == CISST_LINUX_RTAI)
 //	SEM* Mutex;
 //#endif // CISST_LINUX_RTAI
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_QNX)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
     pthread_mutex_t Mutex;
 #elif (CISST_OS == CISST_WINDOWS)
 	HANDLE Mutex;
@@ -65,7 +65,7 @@ struct osaMutexInternals {
 
 osaMutex::osaMutex(void)
 {
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_QNX)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
     CMN_ASSERT(sizeof(Internals) >= SizeOfInternals());
     if (pthread_mutex_init(&INTERNALS(Mutex), 0) != 0) {
         CMN_LOG_INIT_ERROR << "Class osaMutex: error in constructor \"" << strerror(errno) << "\"" << std::endl;
@@ -84,7 +84,7 @@ osaMutex::osaMutex(void)
 
 osaMutex::~osaMutex() 
 {
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_QNX)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
     pthread_mutex_destroy(&INTERNALS(Mutex));
 #elif (CISST_OS == CISST_WINDOWS)
     if (INTERNALS(Mutex)) {
@@ -106,7 +106,7 @@ unsigned int osaMutex::SizeOfInternals(void) {
 
 void osaMutex::Lock(void) 
 {
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_QNX)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
     pthread_mutex_lock(&INTERNALS(Mutex));
 #elif (CISST_OS == CISST_WINDOWS)
     WaitForSingleObject(INTERNALS(Mutex), INFINITE);
@@ -121,7 +121,7 @@ void osaMutex::Lock(void)
 
 void osaMutex::Unlock(void) 
 {
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_QNX)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
     pthread_mutex_unlock(&INTERNALS(Mutex));
 #elif (CISST_OS == CISST_WINDOWS)
     ReleaseMutex(INTERNALS(Mutex));

@@ -107,7 +107,7 @@ g
       \returns The result of the callback method which must be of type
       _callBackReturnType type, which is the same as the return type of
       the 'start routine' defined by the platform. */
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
     static void * CallbackAndDestroy(_callBackArgumentType obj) {
         osaHeapCallBack* _this = (osaHeapCallBack*) obj;
         _callBackReturnType result = (_this->Obj->*_this->CallBackFunction)(_this->UserData);

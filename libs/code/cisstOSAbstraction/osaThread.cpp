@@ -23,7 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaThread.h>
 #include <cisstOSAbstraction/osaSleep.h>
 
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
     #include <pthread.h>
     #include <sched.h>
 #elif (CISST_OS == CISST_WINDOWS)
@@ -31,7 +31,7 @@ http://www.cisst.org/cisst/license.txt.
 #endif
 
 struct osaThreadIdInternals {
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
     /*! OS dependent thread id. */
     pthread_t ThreadId;
 #elif (CISST_OS == CISST_WINDOWS)
@@ -63,7 +63,7 @@ bool osaThreadId::Equal(const osaThreadId & other) const
 {
     osaThreadId * nonConstThis = const_cast<osaThreadId *>(this);
     osaThreadId * nonConstOther = const_cast<osaThreadId *>(&other);
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
     return (pthread_equal(reinterpret_cast<osaThreadIdInternals*>(nonConstThis->Internals)->ThreadId,
                           reinterpret_cast<osaThreadIdInternals*>(nonConstOther->Internals)->ThreadId) != 0 ? true : false); 
 #elif (CISST_OS == CISST_WINDOWS)
@@ -77,7 +77,7 @@ bool osaThreadId::Equal(const osaThreadId & other) const
 void osaThreadId::ToStream(std::ostream & outputStream) const
 {
     osaThreadId * nonConstThis = const_cast<osaThreadId *>(this);
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_WINDOWS) || (CISST_SOLARIS) || (CISST_OS == CISST_QNX)
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_WINDOWS) || (CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
     outputStream << reinterpret_cast<osaThreadIdInternals*>(nonConstThis->Internals)->ThreadId;
 #elif (CISST_OS == CISST_DARWIN)
     outputStream << &(reinterpret_cast<osaThreadIdInternals*>(nonConstThis->Internals)->ThreadId);
@@ -103,7 +103,7 @@ osaThreadId osaGetCurrentThreadId(void)
 
 struct osaThreadInternals {
 
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
     pthread_t Thread;
 #elif (CISST_OS == CISST_WINDOWS)
     HANDLE Thread;
@@ -137,7 +137,7 @@ void osaThread::CreateInternal(const char *name, void* cb, void* userdata, bool 
                          << (newThread?" (new)":"") << std::endl;
     
     if (newThread) {
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
         pthread_attr_t new_attr;
         pthread_attr_init(&new_attr);
         /*
@@ -147,7 +147,13 @@ void osaThread::CreateInternal(const char *name, void* cb, void* userdata, bool 
           pthread_attr_setschedparam(&new_attr, &new_param);
         */
         typedef void *(*CB_FuncType)(void *);
-        pthread_create(&INTERNALS(Thread), &new_attr, (CB_FuncType)cb, userdata);
+        int retval = pthread_create(&INTERNALS(Thread), &new_attr, (CB_FuncType)cb, userdata);
+        if( retval != 0 ){
+            CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+                              << "pthread_create failed. "
+                              << strerror(retval) << ": " << retval 
+                              << std::endl;
+        }
         pthread_attr_destroy(&new_attr);
         // Set thread Id
         reinterpret_cast<osaThreadIdInternals*>(ThreadId.Internals)->ThreadId = INTERNALS(Thread);
@@ -183,8 +189,14 @@ void osaThread::CreateInternal(const char *name, void* cb, void* userdata, bool 
 // PK: Should we check if Delete is being called on self?
 void osaThread::Delete(void)
 {
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
-    pthread_cancel (INTERNALS(Thread));
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+    int retval = pthread_cancel (INTERNALS(Thread));
+    if( retval != 0 ){
+        CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+                          << "pthread_cancel failed. " 
+                          << strerror(retval) << ": " << retval 
+                          << std::endl;
+    }
 #elif (CISST_OS == CISST_WINDOWS)
     TerminateThread(INTERNALS(Thread), 0);
 #endif // CISST_WINDOWS
@@ -200,9 +212,15 @@ void osaThread::Delete(void)
 // what about Windows?
 void osaThread::Wait(void) 
 {
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
     // will return EDEADLK if called from current thread
-    pthread_join(INTERNALS(Thread), NULL);
+    int retval = pthread_join(INTERNALS(Thread), NULL);
+    if( retval != 0 ){
+        CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+                          << "pthread_join failed. "
+                          << strerror(retval) << ": " << retval 
+                          << std::endl;
+    }
 #elif (CISST_OS == CISST_WINDOWS)
     WaitForSingleObject(INTERNALS(Thread), INFINITE);
 #endif // CISST_WINDOWS
@@ -216,7 +234,7 @@ PriorityType osaThread::GetPriority(void) const
 
 void osaThread::SetPriority(PriorityType priority) 
 {
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
     struct sched_param param;
     param.sched_priority = priority;
     pthread_setschedparam(INTERNALS(Thread), Policy, &param);
@@ -234,7 +252,7 @@ SchedulingPolicyType osaThread::GetSchedulingPolicy(void)
 
 void osaThread::SetSchedulingPolicy(SchedulingPolicyType policy) 
 {
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
     struct sched_param param;
     param.sched_priority = Priority;
     pthread_setschedparam(INTERNALS(Thread), policy, &param);
@@ -259,7 +277,7 @@ void osaThread::Sleep(double timeInSeconds)
 
 void osaCurrentThreadYield(void)
 {
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX)
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
     // Using sched_yield instead of pthread_yield because the former is in the POSIX standard
     // (pthread_yield was only in the draft of the standard).
     sched_yield();

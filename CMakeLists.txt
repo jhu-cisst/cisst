@@ -216,6 +216,33 @@ IF(CMN_ASSERT_THROWS_EXCEPTION)
   ADD_DEFINITIONS(-DCMN_ASSERT_THROWS_EXCEPTION)
 ENDIF(CMN_ASSERT_THROWS_EXCEPTION)
 
+# Check for Xenomai
+option( CISST_HAS_LINUX_XENOMAI "Use the Xenomai real time extensions for Linux." OFF )
+if( CISST_HAS_LINUX_XENOMAI )
+
+  find_package( XENOMAI )
+
+  # add /usr/xenomai/include
+  cisst_add_to_internal( CISST_ADDITIONAL_INCLUDE_DIRECTORIES XENOMAI_INCLUDE_DIR )
+
+  # add /usr/xenomai/include/posix. This is a *must* since we want to 
+  # to use xenomai/include/posix/pthread.h 
+  cisst_add_to_internal( CISST_ADDITIONAL_INCLUDE_DIRECTORIES XENOMAI_INCLUDE_POSIX_DIR )
+
+  # add libnative libxenomai librtdm libpthread_rt
+  cisst_add_to_internal( CISST_ADDITIONAL_LIBRARIES XENOMAI_LIBRARY_NATIVE )
+  cisst_add_to_internal( CISST_ADDITIONAL_LIBRARIES XENOMAI_LIBRARY_PTHREAD_RT )
+  cisst_add_to_internal( CISST_ADDITIONAL_LIBRARIES XENOMAI_LIBRARY_RTDM )
+  cisst_add_to_internal( CISST_ADDITIONAL_LIBRARIES XENOMAI_LIBRARY_XENOMAI )
+
+  # add -D_GNU_SOURCE -D_REENTRANT -D__XENO__ -pipe
+  add_definitions( "${XENOMAI_DEFINITIONS}" )
+
+  # add Xenomai wrappers for pthread
+  set( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${XENOMAI_EXE_LINKER_FLAGS}" )
+
+
+endif( CISST_HAS_LINUX_XENOMAI )
 
 # Put "." in the rpath of all CISST shared libraries.
 LINK_DIRECTORIES(. ${LIBRARY_OUTPUT_PATH})
