@@ -68,7 +68,7 @@ int main(){
   devKeyboard kb;
   kb.SetQuitKey('q');
   kb.AddKeyWriteCommand('n', "next", devSetPoints::NextSetPoint, false );
-  taskManager->AddTask( &kb );
+  taskManager->AddComponent( &kb );
 
   std::vector< vctDynamicVector<double> > q;
   q.push_back( q1 );
@@ -80,10 +80,10 @@ int main(){
   q.push_back( q2 );
 
   devSetPoints setpoints( "setpoints", q );
-  taskManager->AddTask( &setpoints );
+  taskManager->AddComponent( &setpoints );
 
   File file( "trajrn", 3 );
-  taskManager->AddTask( &file );
+  taskManager->AddComponent( &file );
 
   devQLQRn trajectory( "trajectory",
 		       0.01,
@@ -93,7 +93,7 @@ int main(){
 		       q1,
 		       qd,
 		       qdd );
-  taskManager->AddTask( &trajectory );
+  taskManager->AddComponent( &trajectory );
 
   taskManager->Connect( "keyboard",  "next",
 			"setpoints", devSetPoints::Control );

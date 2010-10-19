@@ -64,7 +64,7 @@ int main(){
   devKeyboard kb;
   kb.SetQuitKey('q');
   kb.AddKeyWriteCommand('n', "next", devSetPoints::NextSetPoint, false );
-  taskManager->AddTask( &kb );
+  taskManager->AddComponent( &kb );
 
   std::vector< vctQuaternionRotation3<double> > q;
   q.push_back( q1 );
@@ -76,10 +76,10 @@ int main(){
   q.push_back( q2 );
 
   devSetPoints setpoints( "setpoints", q );
-  taskManager->AddTask( &setpoints );
+  taskManager->AddComponent( &setpoints );
 
   File file( "trajso3" );
-  taskManager->AddTask( &file );
+  taskManager->AddComponent( &file );
 
   devSLERP trajectory( "trajectory",
 		       0.01,
@@ -88,7 +88,7 @@ int main(){
 		       devTrajectory::POSITION,
 		       q1,
 		       w );
-  taskManager->AddTask( &trajectory );
+  taskManager->AddComponent( &trajectory );
 
   taskManager->Connect( "keyboard",  "next",
 			"setpoints", devSetPoints::Control );

@@ -30,10 +30,10 @@ int main(void)
     displayTask * displayTaskObject =
         new displayTask("Display", PeriodDisplay * cmn_ms);
     displayTaskObject->Configure();
-    taskManager->AddTask(displayTaskObject);
+    taskManager->AddComponent(displayTaskObject);
 
     devSartoriusSerial * scaleObject = new devSartoriusSerial("Sartorius", "/dev/tty.KeySerial1");
-	taskManager->AddTask(scaleObject);
+	taskManager->AddComponent(scaleObject);
 
     // connect the tasks
     taskManager->Connect("Display", "Scale", "Sartorius", "Scale");

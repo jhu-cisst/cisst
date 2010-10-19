@@ -82,13 +82,13 @@ int main(){
 			devRobotComponent::EnableCommand, true );
   kb.AddKeyWriteCommand('e', "EnableTraj",  
 			devRobotComponent::EnableCommand, true );
-  taskManager->AddTask( &kb );
+  taskManager->AddComponent( &kb );
 
   Source source( "sines" );
-  taskManager->AddTask( &source );
+  taskManager->AddComponent( &source );
 
   Sink sink( "sink" );
-  taskManager->AddTask( &sink );
+  taskManager->AddComponent( &sink );
 
   devLinearR3 trajectory( "Trajectory",
 			  0.01,
@@ -97,7 +97,7 @@ int main(){
 			  devTrajectory::POSITION,
 			  vctDynamicVector<double>( 3, 0.0 ),
 			  vmax );
-  taskManager->AddTask( &trajectory );
+  taskManager->AddComponent( &trajectory );
 
   taskManager->Connect( "keyboard",  "EnableSource",
 			"Source",     Source::Control );

@@ -58,7 +58,7 @@ int main(){
   devKeyboard kb;
   kb.SetQuitKey('q');
   kb.AddKeyWriteCommand('n', "next", devSetPoints::NextSetPoint, false );
-  taskManager->AddTask( &kb );
+  taskManager->AddComponent( &kb );
 
   std::vector< vctFixedSizeVector<double,3> > p;
   p.push_back( p1 );
@@ -70,10 +70,10 @@ int main(){
   p.push_back( p2 );
 
   devSetPoints setpoints( "setpoints", p );
-  taskManager->AddTask( &setpoints );
+  taskManager->AddComponent( &setpoints );
 
   File file( "trajrn" );
-  taskManager->AddTask( &file );
+  taskManager->AddComponent( &file );
 
   devLinearR3 trajectory( "trajectory",
 			  0.01,
@@ -82,7 +82,7 @@ int main(){
 			  devTrajectory::POSITION,
 			  p1,
 			  v );
-  taskManager->AddTask( &trajectory );
+  taskManager->AddComponent( &trajectory );
 
   taskManager->Connect( "keyboard",  "next",
 			"setpoints", devSetPoints::Control );

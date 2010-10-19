@@ -15,7 +15,7 @@ int main( int argc, char** argv ){
   devKeyboard keyboard;
   keyboard.SetQuitKey('q');
   keyboard.AddKeyWriteCommand( 'n', "next", devSetPoints::NextSetPoint, true );
-  taskManager->AddTask( &keyboard );
+  taskManager->AddComponent( &keyboard );
 
   vctDynamicVector<double> qinit( 7, 0.0 );
   vctDynamicVector<double> qfinal( 7, 1.0 );
@@ -24,7 +24,7 @@ int main( int argc, char** argv ){
   Q.push_back( qfinal );
   Q.push_back( qinit );
   devSetPoints setpoints( "setpoints", Q );
-  taskManager->AddTask(&setpoints);
+  taskManager->AddComponent(&setpoints);
   
   vctDynamicVector<double> qdmax( 7, 0.1 );
   vctDynamicVector<double> qddmax( 7, 0.05 );
@@ -36,7 +36,7 @@ int main( int argc, char** argv ){
 		       qinit, 
 		       qdmax,
 		       qddmax );
-  taskManager->AddTask(&trajectory);
+  taskManager->AddComponent(&trajectory);
 
   std::string path("libs/etc/cisstRobot/WAM/");
   std::vector<std::string> links;
@@ -56,7 +56,7 @@ int main( int argc, char** argv ){
 			 vctDynamicVector<double>( 7, 0.0 ),
 			 links,
 			 path + "l0.obj" );
-  taskManager->AddTask(&WAM);
+  taskManager->AddComponent(&WAM);
 
 
   if (!taskManager->Connect( keyboard.GetName(),  "next",
