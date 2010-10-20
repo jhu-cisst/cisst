@@ -146,6 +146,19 @@ int main()
                                     svlRGB(32, 32, 32));   // background color
     overlay.AddOverlay(fps_overlay);
 
+    // Add framerate overlay
+    svlOverlayStaticBar bar_overlay(SVL_LEFT,                    // background video channel
+                                    true,                        // visible
+                                    vct2(-10.0, 25.0),           // range
+                                    2.8,                         // value
+                                    false,                       // vertical
+                                    svlRect(400, 200, 620, 220), // bounding rectangle
+                                    svlRGB(160, 200, 160),       // color
+                                    svlRGB(100, 128, 100),       // background color
+                                    2,                           // border width
+                                    svlRGB(64, 64, 64));         // border color
+    overlay.AddOverlay(bar_overlay);
+
     // Setup branch window
     window2.SetTitle("Window 2");
 

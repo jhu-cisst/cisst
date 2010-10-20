@@ -918,6 +918,215 @@ void svlOverlayStaticPoly::DrawInternal(svlSampleImage* bgimage, svlSample* CMN_
 
 
 /*********************************/
+/*** svlOverlayStaticBar class ***/
+/*********************************/
+
+svlOverlayStaticBar::svlOverlayStaticBar() :
+    svlOverlay(),
+    Range(0.0, 100.0),
+    Value(50.0),
+    Vertical(true),
+    Rect(0, 0, 10, 10),
+    Color(255, 255, 255),
+    BGColor(128, 128, 128),
+    BorderWidth(1),
+    BorderColor(0, 0, 0)
+{
+}
+
+svlOverlayStaticBar::svlOverlayStaticBar(unsigned int videoch,
+                                         bool visible,
+                                         vct2 range,
+                                         double value,
+                                         bool vertical,
+                                         svlRect rect,
+                                         svlRGB color,
+                                         svlRGB bgcolor,
+                                         unsigned int borderwidth,
+                                         svlRGB bordercolor) :
+    svlOverlay(videoch, visible),
+    Range(range),
+    Value(value),
+    Vertical(vertical),
+    Rect(rect),
+    Color(color),
+    BGColor(bgcolor),
+    BorderWidth(borderwidth),
+    BorderColor(bordercolor)
+{
+    Rect.Normalize();
+}
+
+svlOverlayStaticBar::svlOverlayStaticBar(unsigned int videoch,
+                                         bool visible,
+                                         vct2 range,
+                                         double value,
+                                         bool vertical,
+                                         svlRect rect,
+                                         svlRGB color,
+                                         svlRGB bgcolor) :
+    svlOverlay(videoch, visible),
+    Range(range),
+    Value(value),
+    Vertical(vertical),
+    Rect(rect),
+    Color(color),
+    BGColor(bgcolor),
+    BorderWidth(0),
+    BorderColor(0, 0, 0)
+{
+    Rect.Normalize();
+}
+
+svlOverlayStaticBar::~svlOverlayStaticBar()
+{
+}
+
+void svlOverlayStaticBar::SetRange(const vct2 range)
+{
+    Range = range;
+}
+
+void svlOverlayStaticBar::SetRange(const double from, const double to)
+{
+    Range[0] = from;
+    Range[1] = to;
+}
+
+void svlOverlayStaticBar::SetValue(const double value)
+{
+    Value = value;
+}
+
+void svlOverlayStaticBar::SetDirection(const bool vertical)
+{
+    Vertical = vertical;
+}
+
+void svlOverlayStaticBar::SetRect(svlRect rect)
+{
+    Rect = rect;
+    Rect.Normalize();
+}
+
+void svlOverlayStaticBar::SetColor(svlRGB color)
+{
+    Color = color;
+}
+
+void svlOverlayStaticBar::SetBackgroundColor(svlRGB bgcolor)
+{
+    BGColor = bgcolor;
+}
+
+void svlOverlayStaticBar::SetBorderWidth(const unsigned int pixels)
+{
+    BorderWidth = pixels;
+}
+
+void svlOverlayStaticBar::SetBorderColor(svlRGB bordercolor)
+{
+    BorderColor = bordercolor;
+}
+
+vct2 svlOverlayStaticBar::GetRange() const
+{
+    return Range;
+}
+
+void svlOverlayStaticBar::GetRange(double & from, double & to) const
+{
+    from = Range[0];
+    to = Range[1];
+}
+
+double svlOverlayStaticBar::GetValue() const
+{
+    return Value;
+}
+
+bool svlOverlayStaticBar::GetDirection() const
+{
+    return Vertical;
+}
+
+svlRect svlOverlayStaticBar::GetRect() const
+{
+    return Rect;
+}
+
+svlRGB svlOverlayStaticBar::GetColor() const
+{
+    return Color;
+}
+
+svlRGB svlOverlayStaticBar::GetBackgroundColor() const
+{
+    return BGColor;
+}
+
+unsigned int svlOverlayStaticBar::GetBorderWidth() const
+{
+    return BorderWidth;
+}
+
+svlRGB svlOverlayStaticBar::GetBorderColor() const
+{
+    return BorderColor;
+}
+
+void svlOverlayStaticBar::DrawInternal(svlSampleImage* bgimage, svlSample* CMN_UNUSED(input))
+{
+    svlRect rect1, rect2;
+
+    if (BorderWidth > 0) {
+        rect1.left = Rect.left - BorderWidth;
+        rect1.right = Rect.right + BorderWidth;
+        rect1.top = Rect.top - BorderWidth;
+        rect1.bottom = Rect.bottom + BorderWidth;
+
+        if (rect1.left <= rect1.right &&
+            rect1.top  <= rect1.bottom) svlDraw::Rectangle(bgimage, VideoCh, rect1, BorderColor, true);
+    }
+
+    double range;
+    if (Range[0] != Range[1]) range = Range[1] - Range[0];
+    else range = 100.0;
+    double position = (Value - Range[0]) / range;
+    if (position < 0.0) position = 0.0;
+    else if (position > 1.0) position = 1.0;
+
+    if (Vertical) {
+        rect1.left = Rect.left;
+        rect1.right = Rect.right;
+        rect1.top =  Rect.bottom - static_cast<int>(static_cast<double>(Rect.bottom - Rect.top) * position);
+        rect1.bottom = Rect.bottom;
+
+        rect2.left = Rect.left;
+        rect2.right = Rect.right;
+        rect2.top = Rect.top;
+        rect2.bottom = rect1.top;
+    }
+    else {
+        rect1.left = Rect.left;
+        rect1.right = Rect.left + static_cast<int>(static_cast<double>(Rect.right - Rect.left) * position);
+        rect1.top = Rect.top;
+        rect1.bottom = Rect.bottom;
+
+        rect2.left = rect1.right;
+        rect2.right = Rect.right;
+        rect2.top = Rect.top;
+        rect2.bottom = Rect.bottom;
+    }
+
+    if (rect1.left <= rect1.right &&
+        rect1.top  <= rect1.bottom) svlDraw::Rectangle(bgimage, VideoCh, rect1, Color, true);
+    if (rect2.left <= rect2.right &&
+        rect2.top  <= rect2.bottom) svlDraw::Rectangle(bgimage, VideoCh, rect2, BGColor, true);
+}
+
+
+/*********************************/
 /*** svlOverlayFramerate class ***/
 /*********************************/
 

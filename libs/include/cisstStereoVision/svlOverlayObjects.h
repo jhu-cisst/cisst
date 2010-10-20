@@ -378,6 +378,65 @@ private:
 };
 
 
+class CISST_EXPORT svlOverlayStaticBar : public svlOverlay
+{
+public:
+    svlOverlayStaticBar();
+    svlOverlayStaticBar(unsigned int videoch,
+                        bool visible,
+                        vct2 range,
+                        double value,
+                        bool vertical,
+                        svlRect rect,
+                        svlRGB color,
+                        svlRGB bgcolor,
+                        unsigned int borderwidth,
+                        svlRGB bordercolor);
+    svlOverlayStaticBar(unsigned int videoch,
+                        bool visible,
+                        vct2 range,
+                        double value,
+                        bool vertical,
+                        svlRect rect,
+                        svlRGB color,
+                        svlRGB bgcolor);
+    virtual ~svlOverlayStaticBar();
+
+    void SetRange(const vct2 range);
+    void SetRange(const double from, const double to);
+    void SetValue(const double value);
+    void SetDirection(const bool vertical);
+    void SetRect(svlRect rect);
+    void SetColor(svlRGB color);
+    void SetBackgroundColor(svlRGB bgcolor);
+    void SetBorderWidth(const unsigned int pixels);
+    void SetBorderColor(svlRGB bordercolor);
+
+    vct2 GetRange() const;
+    void GetRange(double & from, double & to) const;
+    double GetValue() const;
+    bool GetDirection() const;
+    svlRect GetRect() const;
+    svlRGB GetColor() const;
+    svlRGB GetBackgroundColor() const;
+    unsigned int GetBorderWidth() const;
+    svlRGB GetBorderColor() const;
+
+protected:
+    virtual void DrawInternal(svlSampleImage* bgimage, svlSample* input);
+
+private:
+    vct2 Range;
+    double Value;
+    bool Vertical;
+    svlRect Rect;
+    svlRGB Color;
+    svlRGB BGColor;
+    unsigned int BorderWidth;
+    svlRGB BorderColor;
+};
+
+
 class CISST_EXPORT svlOverlayFramerate : public svlOverlayStaticText
 {
 public:
