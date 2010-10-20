@@ -22,8 +22,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstParameterTypes/prmTransformationFixed.h>
 
-CMN_IMPLEMENT_SERVICES(prmTransformationFixed);
-
 
 /*! Destructor.  The frame is also removed from the frame manager.
   The children of this frame will inherit its parent when the frame is

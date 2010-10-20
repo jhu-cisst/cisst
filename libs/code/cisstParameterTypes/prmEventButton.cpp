@@ -19,8 +19,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstParameterTypes/prmEventButton.h>
 
-CMN_IMPLEMENT_SERVICES(prmEventButton);
-
 prmEventButton::~prmEventButton()
 {
 }

@@ -19,8 +19,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstParameterTypes/prmVelocityJointSet.h>
 
-CMN_IMPLEMENT_SERVICES(prmVelocityJointSet);
-
 prmVelocityJointSet::~prmVelocityJointSet()
 {
 }

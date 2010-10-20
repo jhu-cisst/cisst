@@ -19,9 +19,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstParameterTypes/prmVelocityCartesianSet.h>
 
-
-CMN_IMPLEMENT_SERVICES(prmVelocityCartesianSet);
-
 prmVelocityCartesianSet::~prmVelocityCartesianSet()
 {
 }

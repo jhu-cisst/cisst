@@ -19,9 +19,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstParameterTypes/prmPositionJointGet.h>
 
-
-CMN_IMPLEMENT_SERVICES(prmPositionJointGet);
-
 prmPositionJointGet::~prmPositionJointGet()
 {
 }

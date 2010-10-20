@@ -19,8 +19,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstParameterTypes/prmPositionCartesianSet.h>
 
-CMN_IMPLEMENT_SERVICES(prmPositionCartesianSet);
-
 prmPositionCartesianSet::~prmPositionCartesianSet()
 {
 }

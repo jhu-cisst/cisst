@@ -24,9 +24,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstParameterTypes/prmTransformationManager.h>
 
 
-CMN_IMPLEMENT_SERVICES(prmTransformationBase);
-
-
 /*! \brief Destructor.  The frame is also removed from the frame manager.
       
   Any frame using this frame as a reference will be modified to use its pparent as reference. 

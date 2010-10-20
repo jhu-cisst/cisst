@@ -19,8 +19,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstParameterTypes/prmForceCartesianSet.h>
 
-CMN_IMPLEMENT_SERVICES(prmForceCartesianSet);
-
 prmForceCartesianSet::~prmForceCartesianSet()
 {
 }

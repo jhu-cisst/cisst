@@ -34,13 +34,11 @@ set (SOURCE_FILES
      prmTransformationDynamic.cpp
      prmTransformationManager.cpp
 
-     prmMaskedVector.cpp
      prmActuatorState.cpp
      prmRobotState.cpp
      prmActuatorParameters.cpp
-     prmGainParameters.cpp
 
-     prmCollaborativeControlForce.cpp
+     prmClassServices.cpp
      )
 
 # all header files

@@ -18,8 +18,6 @@ http://www.cisst.org/cisst/license.txt.
 */
 #include <cisstParameterTypes/prmActuatorParameters.h>
 
-CMN_IMPLEMENT_SERVICES(prmActuatorParameters);
-
 void prmActuatorParameters::SetSize(size_type size){
 
     ForwardLimitMember.SetSize(size);

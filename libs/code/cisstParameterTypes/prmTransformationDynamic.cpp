@@ -22,8 +22,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstParameterTypes/prmTransformationDynamic.h>
 
-CMN_IMPLEMENT_SERVICES(prmTransformationDynamic);
-
 prmTransformationDynamic::~prmTransformationDynamic() 
 {
     //nothing for now. 

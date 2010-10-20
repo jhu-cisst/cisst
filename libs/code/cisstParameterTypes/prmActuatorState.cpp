@@ -16,10 +16,9 @@ http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
 */
+
 #include <cisstParameterTypes/prmActuatorState.h>
 
-
-CMN_IMPLEMENT_SERVICES(prmActuatorState);
 
 prmActuatorState::prmActuatorState(size_type size)
 {

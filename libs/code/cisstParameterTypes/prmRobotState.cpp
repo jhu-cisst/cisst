@@ -16,9 +16,8 @@ http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
 */
-#include <cisstParameterTypes/prmRobotState.h>
 
-CMN_IMPLEMENT_SERVICES(prmRobotState);
+#include <cisstParameterTypes/prmRobotState.h>
 
 prmRobotState::prmRobotState()
 {
@@ -30,6 +29,7 @@ prmRobotState::prmRobotState()
     CartesianPositionError().SetSize(6);
 
 }
+
 prmRobotState::prmRobotState(size_type size)
 {
     SetSize(size);

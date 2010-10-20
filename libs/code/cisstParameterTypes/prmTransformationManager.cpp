@@ -20,9 +20,6 @@
 #include <cisstParameterTypes/prmTransformationManager.h>
 
 
-CMN_IMPLEMENT_SERVICES(prmTransformationManager);
-
-
 //default world definition: NULL reference, identity transform.
 prmTransformationFixed prmTransformationManager::TheWorld = prmTransformationFixed("The_World");
 
