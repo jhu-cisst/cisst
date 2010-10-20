@@ -18,15 +18,15 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#ifndef _osaPipeTest_h
-#define _osaPipeTest_h
+#ifndef _osaPipeExecTest_h
+#define _osaPipeExecTest_h
 
 #include <cppunit/TestCase.h>
 #include <cppunit/extensions/HelperMacros.h>
 
-class osaPipeTest : public CppUnit::TestFixture
+class osaPipeExecTest : public CppUnit::TestFixture
 {
-	CPPUNIT_TEST_SUITE(osaPipeTest);
+	CPPUNIT_TEST_SUITE(osaPipeExecTest);
     {
         CPPUNIT_TEST(TestPipe);
     }
@@ -42,4 +42,4 @@ public:
     void TestPipe(void);
 };
 
-#endif // _osaPipeTest_h
+#endif // _osaPipeExecTest_h

@@ -18,7 +18,7 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-/* This is a simple echo program used for osaPipeTest */
+/* This is a simple echo program used for osaPipeExecTest */
 
 #include <stdio.h>
 

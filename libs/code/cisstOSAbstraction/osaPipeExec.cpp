@@ -21,19 +21,19 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstCommon/cmnAssert.h>
-#include <cisstOSAbstraction/osaPipe.h>
+#include <cisstOSAbstraction/osaPipeExec.h>
 #include <string.h>
 #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
 #include <signal.h>
 #include <unistd.h>
 #elif (CISST_OS == CISST_WINDOWS)
-#include <io.h>
 #include <fcntl.h>
+#include <io.h>
 #include <process.h>
 #include <windows.h>
 #endif
 
-struct osaPipeInternals {
+struct osaPipeExecInternals {
 	/*! OS dependent variables */
 #if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
 		int pid;
@@ -42,39 +42,44 @@ struct osaPipeInternals {
 	#endif
 };
 
-#define INTERNALS(A) (reinterpret_cast<osaPipeInternals*>(Internals)->A)
+#define INTERNALS(A) (reinterpret_cast<osaPipeExecInternals*>(Internals)->A)
 
-unsigned int osaPipe::SizeOfInternals(void) {
-    return sizeof(osaPipeInternals);
+unsigned int osaPipeExec::SizeOfInternals(void) {
+    return sizeof(osaPipeExecInternals);
 }
 
-osaPipe::osaPipe() {
+osaPipeExec::osaPipeExec() {
     CMN_ASSERT(sizeof(Internals) >= SizeOfInternals());
 }
 
-void osaPipe::Open(char * const command[], const std::string & mode) {
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+osaPipeExec::~osaPipeExec() {
+	Close();
+}
+
+void osaPipeExec::Open(const std::string & cmd, const std::string & mode) {
+	#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
 		if (pipe(toProgram) < 0 || pipe(fromProgram) < 0)
-			perror("Can't create pipe in osaPipe::Open");
+			perror("Can't create pipe in osaPipeExec::Open");
 	#elif (CISST_OS == CISST_WINDOWS)
 		if (_pipe(toProgram, 4096, O_BINARY | O_NOINHERIT) < 0 || _pipe(fromProgram, 4096, O_BINARY | O_NOINHERIT) < 0)
-			perror("Can't create pipe in osaPipe::Open");
+			perror("Can't create pipe in osaPipeExec::Open");
 	#endif
 
-		readFlag = writeFlag = false;
-		std::string::const_iterator it;
-		for (it = mode.begin(); it != mode.end(); it++) {
-			switch (*it) {
-				case 'r':
-					readFlag = true;
-					break;
-				case 'w':
-					writeFlag = true;
-					break;
-			}
+	readFlag = writeFlag = false;
+	std::string::const_iterator it;
+	for (it = mode.begin(); it != mode.end(); it++) {
+		switch (*it) {
+			case 'r':
+				readFlag = true;
+				break;
+			case 'w':
+				writeFlag = true;
+				break;
 		}
+	}
 
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+	char * const command[] = {(char * const) cmd.c_str(), NULL};
+	#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
 		/* Spawn a child and parent process for communication */
 		INTERNALS(pid) = fork();
 
@@ -101,10 +106,10 @@ void osaPipe::Open(char * const command[], const std::string & mode) {
 			if (command != NULL && command[0] != NULL)
 				execvp(command[0], command);
 			else
-				perror("Exec failed in osaPipe::Open because command is empty");
+				perror("Exec failed in osaPipeExec::Open because command is empty");
 
 			/* If we get here then exec failed */
-			perror("Exec failed in osaPipe::Open");
+			perror("Exec failed in osaPipeExec::Open");
 		}
 	#elif (CISST_OS == CISST_WINDOWS)
 		/* Replace stdin and stdout to receive from and write to the pipe */
@@ -125,9 +130,9 @@ void osaPipe::Open(char * const command[], const std::string & mode) {
 		if (command != NULL && command[0] != NULL)
 			INTERNALS(hProcess) = (HANDLE) _spawnvp(P_NOWAIT, command[0], command);
 		else
-			perror("Spawn failed in osaPipe::Open because command is empty");
+			perror("Spawn failed in osaPipeExec::Open because command is empty");
 		if (!INTERNALS(hProcess))
-			perror("Spawn failed in osaPipe::Open");
+			perror("Spawn failed in osaPipeExec::Open");
 
 		/* These aren't needed now */
 		fclose(stdin);
@@ -135,52 +140,76 @@ void osaPipe::Open(char * const command[], const std::string & mode) {
 	#endif
 }
 
-void osaPipe::Close(bool killProcess) {
+void osaPipeExec::Close(bool killProcess) {
 	if (writeFlag)
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+	#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
 		close(toProgram[WRITE_HANDLE]);
 	#elif (CISST_OS == CISST_WINDOWS)
 		_close(toProgram[WRITE_HANDLE]);
 	#endif
 
 	if (readFlag)
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+	#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
 		close(fromProgram[READ_HANDLE]);
 	#elif (CISST_OS == CISST_WINDOWS)
 		_close(fromProgram[READ_HANDLE]);
 	#endif
 
-	if (killProcess)
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+	if (killProcess) {
+	#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
 		kill(INTERNALS(pid), SIGKILL);
 	#elif (CISST_OS == CISST_WINDOWS)
 		CloseHandle(INTERNALS(hProcess));
 		TerminateProcess(INTERNALS(hProcess), 0);
 	#endif
+	}
 }
 
-int osaPipe::Read(char *buffer, int maxLength) const {
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
-		ssize_t ret = read(fromProgram[READ_HANDLE], buffer, sizeof(char)*maxLength);
+int osaPipeExec::Read(char *buffer, int maxLength) const {
+	#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+		ssize_t bytesRead = read(fromProgram[READ_HANDLE], buffer, maxLength*sizeof(char));
 	#elif (CISST_OS == CISST_WINDOWS)
-		int ret = _read(fromProgram[READ_HANDLE], buffer, sizeof(char)*maxLength);
+		int bytesRead = _read(fromProgram[READ_HANDLE], buffer, maxLength*sizeof(char));
 	#endif
-	if (ret == -1)
+
+	if (bytesRead == -1)
 		return -1;
 	else
-		return (int) (ret / sizeof(char));
+		return static_cast<int>(bytesRead / sizeof(char));
 	return -1;
 }
 
-int osaPipe::Write(const char *buffer) {
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
-		ssize_t ret = write(toProgram[WRITE_HANDLE], buffer, sizeof(char)*strlen(buffer));
+std::string osaPipeExec::Read(int maxLength) const {
+	char * buffer = static_cast<char *>(malloc(maxLength*sizeof(char)));
+	int charsRead = Read(buffer, maxLength);
+
+	std::string result;
+	if (charsRead != -1) {
+		buffer[charsRead] = '\0';
+		result = std::string(buffer);
+	}
+	free(buffer);
+	return result;
+}
+
+int osaPipeExec::Write(const char * buffer) {
+	return Write(buffer, strlen(buffer)+1);
+}
+
+int osaPipeExec::Write(const char * buffer, int n) {
+	#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+		ssize_t bytesWritten = write(toProgram[WRITE_HANDLE], buffer, n*(sizeof(char)));
 	#elif (CISST_OS == CISST_WINDOWS)
-		int ret = _write(toProgram[WRITE_HANDLE], buffer, sizeof(char)*strlen(buffer));
+		int bytesWritten = _write(toProgram[WRITE_HANDLE], buffer, n*sizeof(char));
 	#endif
-	if (ret == -1)
+
+	if (bytesWritten == -1)
 		return -1;
 	else
-		return (int) (ret / sizeof(char));
+		return static_cast<int>(bytesWritten / sizeof(char));
 	return -1;
+}
+
+int osaPipeExec::Write(const std::string & s) {
+	return Write(s.c_str());
 }

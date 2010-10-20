@@ -18,7 +18,7 @@
 # all source files
 set (SOURCE_FILES
      osaMutexTest.cpp
-     osaPipeTest.cpp
+     osaPipeExecTest.cpp
      osaSocketTest.cpp
      osaThreadTest.cpp
      )
@@ -26,18 +26,18 @@ set (SOURCE_FILES
 # all header files
 set (HEADER_FILES
      osaMutexTest.h
-     osaPipeTest.h
+     osaPipeExecTest.h
      osaSocketTest.h
      osaThreadTest.h
      )
 
 # add executable for C++ tests
-add_executable (cisstOSAbstractionTestsPipeUtility osaPipeUtility.cpp)
+add_executable (cisstOSAbstractionTestsPipeExecUtility osaPipeExecUtility.cpp)
 
 add_executable (cisstOSAbstractionTests ${SOURCE_FILES} ${HEADER_FILES})
 target_link_libraries (cisstOSAbstractionTests cisstTestsMain )
 cisst_target_link_libraries (cisstOSAbstractionTests cisstCommon cisstOSAbstraction)
-add_dependencies(cisstOSAbstractionTests cisstOSAbstractionTestsPipeUtility)
+add_dependencies(cisstOSAbstractionTests cisstOSAbstractionTestsPipeExecUtility)
 
 # threads
 find_package (Threads REQUIRED)

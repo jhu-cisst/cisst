@@ -20,44 +20,44 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnAssert.h>
 #include <cisstCommon/cmnRandomSequence.h>
-#include <cisstOSAbstraction/osaPipe.h>
+#include <cisstOSAbstraction/osaPipeExec.h>
 
-#include "osaPipeTest.h"
+#include "osaPipeExecTest.h"
 
 
-void osaPipeTest::TestPipeInternalsSize(void)
+void osaPipeExecTest::TestPipeInternalsSize(void)
 {
-	CPPUNIT_ASSERT(osaPipe::INTERNALS_SIZE >= osaPipe::SizeOfInternals());
+	CPPUNIT_ASSERT(osaPipeExec::INTERNALS_SIZE >= osaPipeExec::SizeOfInternals());
 }
 
 
-void osaPipeTest::TestPipe(void)
+void osaPipeExecTest::TestPipe(void)
 {
-	osaPipe pipe;
-	std::string testProgramName = std::string(CISST_BUILD_ROOT) + std::string("/tests/bin/cisstOSAbstractionTestsPipeUtility");
-	char * const command[] = {(char * const) testProgramName.c_str(), NULL};
+	osaPipeExec pipe;
+	std::string command = std::string(CISST_BUILD_ROOT) + std::string("/tests/bin/cisstOSAbstractionTestsPipeExecUtility");
 	pipe.Open(command, "rw");
 
 	// Generate random test string between 0 and 999 characters
-    const int length = cmnRandomSequence::GetInstance().ExtractRandomInt(0, 999);
-	char * testString = static_cast<char *>(malloc((length + 1) * sizeof(char)));
+	const int length = cmnRandomSequence::GetInstance().ExtractRandomInt(0, 9) + 1;
+	char * testString = static_cast<char *>(malloc(length * sizeof(char)));
 	char * s;
 	// Generate random ASCII characters while avoiding '\0'
-	for (s = testString; s < (testString + length); s++) {
-		*s = cmnRandomSequence::GetInstance().ExtractRandomChar(1, 127);
+	for (s = testString; s < (testString + length-1); s++) {
+		*s = cmnRandomSequence::GetInstance().ExtractRandomChar('A', 'z');
     }
 	*s = '\0';
 
 	// If this gives problems, wrap this in a loop similar to read
-	int result = pipe.Write(testString);
-	CPPUNIT_ASSERT_EQUAL(length, result);
+	int charsWritten = pipe.Write(testString);
+	CPPUNIT_ASSERT_EQUAL(length, charsWritten);
 
-	// Keep reading there there is still data to be read
+	// Keep reading while there is still data to be read
 	const int bufferLength = 1000;
 	char buffer[bufferLength];
 	char * bufferEnd = buffer + bufferLength + 1;
 	s = buffer;
 	int charsRead = 0;
+	int result;
 	while ((charsRead < length)
            && (s < bufferEnd)) {
 		result = pipe.Read(s, bufferEnd-s);
@@ -65,18 +65,28 @@ void osaPipeTest::TestPipe(void)
 		s += result;
 	}
 	CPPUNIT_ASSERT(s < bufferEnd);
-	*s = '\0';
 	CPPUNIT_ASSERT_EQUAL(length, charsRead);
-	CPPUNIT_ASSERT_EQUAL(std::string(testString), std::string(buffer));
+	std::string test(testString);
+	CPPUNIT_ASSERT_EQUAL(test, std::string(buffer));
+
+	// Test the std::string versions of Read and Write
+	charsWritten = pipe.Write(test);
+	CPPUNIT_ASSERT_EQUAL(length, charsWritten);
+
+	std::string current;
+	while (static_cast<int>(current.length()) < length-1) {
+		current += pipe.Read(length-current.length());
+	}
+	CPPUNIT_ASSERT_EQUAL(static_cast<int>(current.length()), length-1);
+	CPPUNIT_ASSERT_EQUAL(test, current);
 
 	free(testString);
 	pipe.Close();
 
-	// Currently, this creates a debug error on Visual Studio 2008. I should look at this.
 	result = pipe.Write(testString);
 	CPPUNIT_ASSERT_EQUAL(-1, result);
 	result = pipe.Read(buffer, length);
 	CPPUNIT_ASSERT_EQUAL(-1, result);
 }
 
-CPPUNIT_TEST_SUITE_REGISTRATION(osaPipeTest);
+CPPUNIT_TEST_SUITE_REGISTRATION(osaPipeExecTest);
