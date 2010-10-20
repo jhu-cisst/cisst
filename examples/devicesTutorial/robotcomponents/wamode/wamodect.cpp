@@ -39,8 +39,10 @@ int main(int argc, char** argv){
   devGLUT glut(argc, argv);
 
   vctDynamicVector<double> qinit(7, 0.0);              // Initial joint values
-  vctMatrixRotation3<double> Rw0;
-  vctFixedSizeVector<double,3> tw0(0.0);
+  vctMatrixRotation3<double> Rw0(  0, 0, -1,
+				   0, 1, 0,
+				   1, 0, 0 );
+  vctFixedSizeVector<double,3> tw0(0.0, 0.0, 1.0);
   vctFrame4x4<double> Rtw0(Rw0,tw0);                   // base transformation
 
   vector<string> geomfiles;
@@ -54,7 +56,7 @@ int main(int argc, char** argv){
   geomfiles.push_back( path + "l7.obj" );
 
   // Create the world
-  devODEWorld world( 0.0001 );
+  devODEWorld world( 0.001 );
   taskManager->AddComponent(&world);
 
   devKeyboard keyboard;
@@ -75,7 +77,7 @@ int main(int argc, char** argv){
   // Create a rajectory
   vctDynamicVector<double> qdmax(7, 0.1), qddmax(7, .05);
   devQLQRn trajectory( "trajectory", 
-		       0.001, 
+		       0.01, 
 		       true,
 		       devTrajectory::QUEUE,
 		       devTrajectory::POSITION,
@@ -94,7 +96,7 @@ int main(int argc, char** argv){
   Kp[5][5] =  800;    Kd[5][5] =  50;  
   Kp[6][6] = 20000;   Kd[6][6] = 100;
   devComputedTorque controller( "controller",
-				0.001,
+				0.01,
 				true,
 				"libs/etc/cisstRobot/WAM/wam7.rob",
 				Rtw0, 
@@ -104,7 +106,7 @@ int main(int argc, char** argv){
 
   // The WAM
   devODEManipulator WAM( "WAM",          // The task name "WAM"
-			 0.001,          // The WAM runs at 200Hz
+			 0.01,          // The WAM runs at 200Hz
 			 true,
 			 //devManipulator::POSITION,
 			 devManipulator::FORCETORQUE,
@@ -136,8 +138,7 @@ int main(int argc, char** argv){
   taskManager->CreateAll();
   taskManager->StartAll();
 
-  getchar();
-  //glutMainLoop();
+  glutMainLoop();
 
   return 0;
 }
