@@ -14,7 +14,7 @@ int main( int argc, char** argv ){
 
   devKeyboard keyboard;
   keyboard.SetQuitKey('q');
-  keyboard.AddKeyWriteCommand( 'n', "next", devSetPoints::NextSetPoint, true );
+  keyboard.AddKeyWriteFunction( 'n', "next", devSetPoints::NextSetPoint, true );
   taskManager->AddComponent( &keyboard );
 
   vctDynamicVector<double> qinit( 7, 0.0 );

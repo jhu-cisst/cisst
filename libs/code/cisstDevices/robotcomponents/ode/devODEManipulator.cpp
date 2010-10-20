@@ -206,7 +206,8 @@ void devODEManipulator::Write(){
       vctDynamicVector<double> q;
       double t;
       input->GetPosition( q, t ); 
-      SetPosition( q );
+      if( q.size() == links.size() ) 
+	SetPosition( q );
     }
     break;
 
@@ -215,7 +216,8 @@ void devODEManipulator::Write(){
       vctDynamicVector<double> qd;
       double t;
       input->GetVelocity( qd, t ); 
-      SetVelocity( qd );
+      if( qd.size() == links.size() ) 
+	SetVelocity( qd );
     }
     break;
 
@@ -224,7 +226,8 @@ void devODEManipulator::Write(){
       vctDynamicVector<double> ft;
       double t;
       input->GetForceTorque( ft, t ); 
-      SetForcesTorques( ft );
+      if( ft.size() == links.size() ) 
+	SetForcesTorques( ft );
     }
     break;
 
@@ -232,7 +235,6 @@ void devODEManipulator::Write(){
     break;
 
   }
-
 }
 
 void devODEManipulator::SetPosition( const vctDynamicVector<double>& qs ){

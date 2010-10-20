@@ -18,9 +18,20 @@
 // To run the show
 #include <cisstMultiTask/mtsTaskManager.h>
 
+#if (CISST_OS == CISST_LINUX_XENOMAI)
+#include <sys/mman.h>
+#include <native/task.h>
+#endif
+
 using namespace std;
 
 int main(int argc, char** argv){
+
+#if (CISST_OS == CISST_LINUX_XENOMAI)
+  RT_TASK main;
+  mlockall( MCL_CURRENT | MCL_FUTURE );
+  rt_task_shadow( &main, "main", 30, 0 );
+#endif
 
   mtsTaskManager* taskManager = mtsTaskManager::GetInstance();
 
@@ -29,7 +40,7 @@ int main(int argc, char** argv){
 
   vctDynamicVector<double> qinit(7, 0.0);              // Initial joint values
   vctMatrixRotation3<double> Rw0;
-  vctFixedSizeVector<double,3> tw0;
+  vctFixedSizeVector<double,3> tw0(0.0);
   vctFrame4x4<double> Rtw0(Rw0,tw0);                   // base transformation
 
   vector<string> geomfiles;
@@ -44,12 +55,13 @@ int main(int argc, char** argv){
 
   // Create the world
   devODEWorld world( 0.0001 );
-  taskManager->AddTask(&world);
+  taskManager->AddComponent(&world);
 
-  devKeyboard kb;
-  kb.SetQuitKey('q');
-  kb.AddKeyWriteCommand('n', "NextSetPoint", devSetPoints::NextSetPoint, true);
-  taskManager->AddTask( &kb );
+  devKeyboard keyboard;
+  keyboard.SetQuitKey('q');
+  keyboard.AddKeyWriteFunction( 'n', "NextSetPoint", devSetPoints::NextSetPoint,
+				true);
+  taskManager->AddComponent( &keyboard );
 
   // Create a set point generator
   std::vector< vctDynamicVector<double> > q;
@@ -58,19 +70,19 @@ int main(int argc, char** argv){
   q.push_back( q1 );
   q.push_back( qinit );
   devSetPoints setpoints( "setpoints", q );
-  taskManager->AddTask( &setpoints );
+  taskManager->AddComponent( &setpoints );
 
   // Create a rajectory
   vctDynamicVector<double> qdmax(7, 0.1), qddmax(7, .05);
   devQLQRn trajectory( "trajectory", 
-		       0.1, 
+		       0.001, 
 		       true,
 		       devTrajectory::QUEUE,
 		       devTrajectory::POSITION,
 		       qinit,
 		       qdmax,
 		       qddmax );
-  taskManager->AddTask( &trajectory );
+  taskManager->AddComponent( &trajectory );
 
   // Create the controller
   vctDynamicMatrix<double> Kp(7, 7, 0.0), Kd(7, 7, 0.0);
@@ -82,48 +94,50 @@ int main(int argc, char** argv){
   Kp[5][5] =  800;    Kd[5][5] =  50;  
   Kp[6][6] = 20000;   Kd[6][6] = 100;
   devComputedTorque controller( "controller",
-				0.01,
+				0.001,
 				true,
-				"wam7.rob",
+				"libs/etc/cisstRobot/WAM/wam7.rob",
 				Rtw0, 
 				Kp, 
 				Kd );
-  //taskManager->AddTask( &controller );
+  taskManager->AddComponent( &controller );
 
   // The WAM
   devODEManipulator WAM( "WAM",          // The task name "WAM"
 			 0.001,          // The WAM runs at 200Hz
 			 true,
-			 devManipulator::POSITION,
+			 //devManipulator::POSITION,
+			 devManipulator::FORCETORQUE,
 			 world,          // The world used to simulate the WAM
-			 "wam7.rob",     // The WAM configuration file
+			 "libs/etc/cisstRobot/WAM/wam7.rob",
 			 Rtw0,           // The transformation of the base
 			 qinit,          // The initial joint positions
 			 geomfiles );    // The geometries
-  taskManager->AddTask( &WAM );
+  taskManager->AddComponent( &WAM );
 
-  taskManager->Connect( "keyboard", "NextSetPoint",
-			"setpoints", devSetPoints::Control );
+  taskManager->Connect( keyboard.GetName(),   "NextSetPoint",
+			setpoints.GetName(),  devSetPoints::Control );
 
-  taskManager->Connect( "trajectory", devTrajectory::Input,
-			"setpoints", devSetPoints::Output );
+  taskManager->Connect( trajectory.GetName(), devTrajectory::Input,
+			setpoints.GetName(),  devSetPoints::Output );
+
+  taskManager->Connect( trajectory.GetName(), devTrajectory::Output,
+			controller.GetName(), devController::Input );
+
+  taskManager->Connect( controller.GetName(), devController::Output,
+			WAM.GetName(),        devManipulator::Input );
+
+  taskManager->Connect( controller.GetName(), devController::Feedback,
+			WAM.GetName(),        devManipulator::Output );
   /*
-  taskManager->Connect( "trajectory", devTrajectory::Output,
-			"controller", devController::Input );
-
-  taskManager->Connect( "controller", devController::Output,
-			"WAM",      devManipulator::Input );
-
-  taskManager->Connect( "controller", devController::Feedback,
-			"WAM",      devManipulator::Output );
+  taskManager->Connect( trajectory.GetName(), devTrajectory::Output,
+			WAM.GetName(), devManipulator::Input );
   */
-  taskManager->Connect( "trajectory", devTrajectory::Output,
-			"WAM", devManipulator::Input );
-
   taskManager->CreateAll();
   taskManager->StartAll();
 
-  glutMainLoop();
+  getchar();
+  //glutMainLoop();
 
   return 0;
 }

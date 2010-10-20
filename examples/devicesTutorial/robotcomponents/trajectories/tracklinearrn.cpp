@@ -7,6 +7,11 @@
 #include <cisstOSAbstraction/osaGetTime.h>
 #include <cisstOSAbstraction/osaSleep.h>
 
+#if (CISST_OS == CISST_LINUX_XENOMAI)
+#include <sys/mman.h>
+#include <native/task.h>
+#endif
+
 using namespace std;
 
 class Source : public devRobotComponent {
@@ -72,6 +77,12 @@ public:
 
 int main(){
 
+#if (CISST_OS == CISST_LINUX_XENOMAI)
+  RT_TASK main;
+  mlockall( MCL_CURRENT | MCL_FUTURE );
+  rt_task_shadow( &main, "main", 30, 0 );
+#endif
+
   mtsTaskManager* taskManager = mtsTaskManager::GetInstance();
 
   vctDynamicVector<double> qd( 3,
@@ -81,12 +92,12 @@ int main(){
 
   devKeyboard kb;
   kb.SetQuitKey('q');
-  kb.AddKeyWriteCommand('e', "EnableSource",
-			devRobotComponent::EnableCommand, true );
-  kb.AddKeyWriteCommand('e', "EnableSink",  
-			devRobotComponent::EnableCommand, true );
-  kb.AddKeyWriteCommand('e', "EnableTraj",  
-			devRobotComponent::EnableCommand, true );
+  kb.AddKeyWriteFunction( 'e', "EnableSource",
+			  devRobotComponent::EnableCommand, true );
+  kb.AddKeyWriteFunction( 'e', "EnableSink",  
+			  devRobotComponent::EnableCommand, true );
+  kb.AddKeyWriteFunction( 'e', "EnableTraj",  
+			  devRobotComponent::EnableCommand, true );
   taskManager->AddComponent( &kb );
 
   Source source( "sines", 3 );

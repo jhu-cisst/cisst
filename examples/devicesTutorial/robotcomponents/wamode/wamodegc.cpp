@@ -11,13 +11,20 @@
 // To run the show
 #include <cisstMultiTask/mtsTaskManager.h>
 
+#if (CISST_OS == CISST_LINUX_XENOMAI)
+#include <sys/mman.h>
+#include <native/task.h>
+#endif
+
 using namespace std;
 
 int main(int argc, char** argv){
 
-  // log configuration
-  //cmnLogger::SetLoD(CMN_LOG_LOD_VERY_VERBOSE);
-  //cmnLogger::GetMultiplexer()->AddChannel(std::cout, CMN_LOG_LOD_VERY_VERBOSE);
+#if (CISST_OS == CISST_LINUX_XENOMAI)
+  RT_TASK main;
+  mlockall( MCL_CURRENT | MCL_FUTURE );
+  rt_task_shadow( &main, "main", 30, 0 );
+#endif
 
   mtsTaskManager* taskManager = mtsTaskManager::GetInstance();
 
@@ -26,7 +33,7 @@ int main(int argc, char** argv){
 
   vctDynamicVector<double> qinit(7, 0.0);              // Initial joint values
   vctMatrixRotation3<double> Rw0;
-  vctFixedSizeVector<double,3> tw0;
+  vctFixedSizeVector<double,3> tw0(0.0);
   vctFrame4x4<double> Rtw0(Rw0,tw0);                   // base transformation
 
   vector<string> geomfiles;
@@ -41,7 +48,7 @@ int main(int argc, char** argv){
 
   // Create the world
   devODEWorld world( 0.0001 );
-  taskManager->AddTask(&world);
+  taskManager->AddComponent(&world);
 
   // The WAM
   devODEManipulator WAM( "WAM", 
@@ -49,23 +56,26 @@ int main(int argc, char** argv){
 			 true,
 			 devManipulator::FORCETORQUE,
 			 world, 
-			 "wam7.rob", 
+			 "libs/etc/cisstRobot/WAM/wam7.rob",
 			 Rtw0, 
 			 qinit,
 			 geomfiles );
-  taskManager->AddTask( &WAM );
+  taskManager->AddComponent( &WAM );
 
   // the controller
-  devGravityCompensation controller("controller", 0.001, true,
-				    "wam7.rob",  Rtw0 );
-  taskManager->AddTask(&controller);
+  devGravityCompensation controller( "controller", 
+				     0.001, 
+				     true,
+				     "libs/etc/cisstRobot/WAM/wam7.rob",
+				     Rtw0 );
+  taskManager->AddComponent(&controller);
 
-  taskManager->Connect( "controller", devController::Output,
-			"WAM",        devManipulator::Input );
+  taskManager->Connect( controller.GetName(), devController::Output,
+			WAM.GetName(),        devManipulator::Input );
 
-  taskManager->Connect( "controller", devController::Feedback,
-			"WAM",        devManipulator::Output );
-
+  taskManager->Connect( controller.GetName(), devController::Feedback,
+			WAM.GetName(),        devManipulator::Output );
+  
   taskManager->CreateAll();
   taskManager->StartAll();
 

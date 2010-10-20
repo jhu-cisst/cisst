@@ -9,6 +9,7 @@ set( HEADER_FILES
   robotcomponents/controllers/devController.h
   robotcomponents/controllers/devGravityCompensation.h
   robotcomponents/controllers/devComputedTorque.h
+  robotcomponents/controllers/devPDGC.h
 
   robotcomponents/trajectories/devTrajectory.h
   robotcomponents/trajectories/devLinearR3.h
@@ -31,6 +32,7 @@ set( SOURCE_FILES
   robotcomponents/controllers/devController.cpp
   robotcomponents/controllers/devComputedTorque.cpp
   robotcomponents/controllers/devGravityCompensation.cpp
+  robotcomponents/controllers/devPDGC.cpp
 
   robotcomponents/trajectories/devTrajectory.cpp
 

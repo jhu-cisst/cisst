@@ -79,7 +79,7 @@ endif( CISST_DEV_HAS_BITCTRL )
 # Check for RT Socket CAN
 if( CISST_DEV_HAS_RTSOCKETCAN )
   set( SOURCE_FILES ${SOURCE_FILES} can/devRTSocketCAN.cpp )
-  set( HEADER_FILES ${HEADER_FILES} can/devRTSocketCAN.hpp )
+  set( HEADER_FILES ${HEADER_FILES} can/devRTSocketCAN.h )
 endif( CISST_DEV_HAS_RTSOCKETCAN )
 
 if( CISST_DEV_HAS_ACCELEGLOVE )

@@ -22,14 +22,21 @@ void devGravityCompensation::Control(){
 
   double t;
   vctDynamicVector<double> q;
-  vctDynamicVector<double> qd(links.size(), 0.0);
-  vctDynamicVector<double> qdd(links.size(), 0.0);
 
   // Fetch the position
   feedback->GetPosition( q, t );
-  
-  // inverse dynamics 
-  output->SetForceTorque( InverseDynamics( q, qd, qdd ) );
+  if( q.size() != links.size() ){
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+		      << "size(q) = " << q.size() << " "
+		      << "N = " << links.size() << std::endl;
+  }
+
+  if( q.size() == links.size() ){
+    vctDynamicVector<double> qd(links.size(), 0.0);   // zero velocity
+    vctDynamicVector<double> qdd(links.size(), 0.0);  // zero acceleration
+    // inverse dynamics 
+    output->SetForceTorque( InverseDynamics( q, qd, qdd ) );
+  }
 
 }
 

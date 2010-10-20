@@ -45,36 +45,70 @@ void devComputedTorque::Control(){
   vctDynamicVector<double> tau(links.size(), 0.0);
 
   input->GetPosition( qs, t );
-  input->GetVelocity( qsd, t );
-  input->GetAcceleration( qsdd, t );
-  feedback->GetPosition( q, t );
-
-  if( 0 < told ){
-
-    double dt = t - told;
-
-    vctDynamicVector<double> qd = (q - qold)/dt;
-
-    // error = current - desired
-    vctDynamicVector<double> e = q - qs;
-    // error time derivative
-    vctDynamicVector<double> ed = (e - eold)/dt;      
-  
-    // Inertia matrix at q
-    vctDynamicMatrix<double> M = JSinertia( q );
-  
-    // Compute the coriolis+gravity load
-    vctDynamicVector<double> ccg = CCG( q, qd );
-  
-    // compute the augmented PD output
-    tau = M*( qsdd - Kp*e - Kd*ed ) + ccg;
-    
-    eold = e;
-
+  if( qs.size() != links.size() ){
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+		      << "size(q) = " << qs.size() << " "
+		      << "N = " << links.size() << std::endl;
   }
 
-  qold = q;
-  told = t;
+  input->GetVelocity( qsd, t );
+  if( qsd.size() != links.size() ){
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+		      << "size(qsd) = " << qsd.size() << " "
+		      << "N = " << links.size() << std::endl;
+  }
 
-  output->SetForceTorque( tau );
+  input->GetAcceleration( qsdd, t );
+  if( qsdd.size() != links.size() ){
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+		      << "size(qsdd) = " << qsdd.size() << " "
+		      << "N = " << links.size() << std::endl;
+  }
+  
+  feedback->GetPosition( q, t );
+  if( q.size() != links.size() ){
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+		      << "size(q) = " << q.size() << " "
+		      << "N = " << links.size() << std::endl;
+  }
+
+  if( q.size() == links.size() &&
+      qs.size() == links.size() && 
+      qsd.size() == links.size() &&
+      qsdd.size() == links.size() ){
+	
+    if( 0 < told ){
+
+      double dt = t - told;
+      
+      // evaluate the velocity
+      vctDynamicVector<double> qd( links.size(), 0.0 );
+      if( 0 < dt ) qd = (q - qold)/dt;
+
+      // error = current - desired
+      vctDynamicVector<double> e = q - qs;
+
+      // error time derivative
+      vctDynamicVector<double> ed( links.size(), 0.0 );
+      if( 0 < dt ) ed = (e - eold)/dt;      
+  
+      // Inertia matrix at q
+      vctDynamicMatrix<double> M = JSinertia( q );
+  
+      // Compute the coriolis+gravity load
+      vctDynamicVector<double> ccg = CCG( q, qd );
+  
+      // compute the augmented PD output
+      tau = M*( qsdd - Kp*e - Kd*ed ) + ccg;
+      
+      eold = e;
+    }
+
+    qold = q;
+    told = t;
+
+    output->SetForceTorque( tau );
+  }
+
 }
+

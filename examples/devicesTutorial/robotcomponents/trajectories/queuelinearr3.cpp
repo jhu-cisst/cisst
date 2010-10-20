@@ -8,6 +8,12 @@
 #include <cisstOSAbstraction/osaSleep.h>
 
 #include <fstream>
+
+#if (CISST_OS == CISST_LINUX_XENOMAI)
+#include <sys/mman.h>
+#include <native/task.h>
+#endif
+
 using namespace std;
 
 class File : public devRobotComponent {
@@ -39,6 +45,12 @@ public:
 
 int main(){
 
+#if (CISST_OS == CISST_LINUX_XENOMAI)
+  RT_TASK main;
+  mlockall( MCL_CURRENT | MCL_FUTURE );
+  rt_task_shadow( &main, "main", 30, 0 );
+#endif
+
   mtsTaskManager* taskManager = mtsTaskManager::GetInstance();
 
   vctFixedSizeVector<double,3> p1( rand()*10.0/RAND_MAX-5.0,
@@ -57,7 +69,7 @@ int main(){
 
   devKeyboard kb;
   kb.SetQuitKey('q');
-  kb.AddKeyWriteCommand('n', "next", devSetPoints::NextSetPoint, false );
+  kb.AddKeyWriteFunction('n', "next", devSetPoints::NextSetPoint, false );
   taskManager->AddComponent( &kb );
 
   std::vector< vctFixedSizeVector<double,3> > p;

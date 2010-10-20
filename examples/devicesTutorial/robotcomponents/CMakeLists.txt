@@ -2,7 +2,6 @@
 
 add_subdirectory( trajectories )
 
-
 if( CISST_DEV_HAS_ODE )
 
   add_subdirectory( wamode )

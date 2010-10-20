@@ -26,7 +26,11 @@ vctDynamicVector<double> devQLQRn::GetInput(){
   vctDynamicVector<double> q( qold );
   if( input != NULL )
     { input->GetPosition( q, t ); }
-
+  if( q.size() != qold.size() ){
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+		      << "devQLQRn::GetInput: size mismatch" 
+		      << std::endl;
+  }
   return q;
 }
 
@@ -74,7 +78,7 @@ void devQLQRn::Evaluate( double t, robFunction* function ){
     vctDynamicVector<double> q, qd, qdd;
     
     linearrn->Evaluate( t, q, qd, qdd );
-    //std::cout << t << " " << q << std::endl;
+
     output->SetPosition( q );
     output->SetVelocity( qd );
     output->SetAcceleration( qdd );

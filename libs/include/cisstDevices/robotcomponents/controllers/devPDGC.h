@@ -1,31 +1,41 @@
-#include <cisstDevices/robotcomponents/controllers/devControllerJoints.h>
-#include <cisstDevices/devExport.h>
-
 #ifndef _devPDGC_h
 #define _devPDGC_h
 
-class CISST_EXPORT devPDGC : public devControllerJoints {
+#include <cisstVector/vctDynamicMatrix.h>
+#include <cisstRobot/robManipulator.h>
 
- protected:
+#include <cisstDevices/robotcomponents/controllers/devController.h>
+#include <cisstDevices/devExport.h>
+
+class CISST_EXPORT devPDGC : 
+  public devController,
+  public robManipulator {
+
+ private:
+
+  RnIO* input;
+  RnIO* output;
+  RnIO* feedback;
 
   vctDynamicMatrix<double> Kp;
   vctDynamicMatrix<double> Kd;
 
+  vctDynamicVector<double> qold;
   vctDynamicVector<double> eold;
+
+  double told;
 
  public:
 
   devPDGC( const std::string& taskname, 
-	    double period,
-	    const std::string& robfile,
-	    const vctFrame4x4<double>& Rtw0, 
-	    bool enabled,
-	    const vctDynamicMatrix<double>& Kp,
-	    const vctDynamicMatrix<double>& Kd );
+	   double period,
+	   bool enabled,
+	   const std::string& robfile,
+	   const vctFrame4x4<double>& Rtw0, 
+	   const vctDynamicMatrix<double>& Kp,
+	   const vctDynamicMatrix<double>& Kd );
   
-  vctDynamicVector<double> Control( const vctDynamicVector<double>& q,
-				    const vctDynamicVector<double>& qd,
-				    double t );
+  void Control();
 
 };
 
