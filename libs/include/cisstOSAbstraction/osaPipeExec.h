@@ -42,6 +42,7 @@ class osaPipeExec {
 
 	int toProgram[2];
 	int fromProgram[2];
+	bool connected;
 	bool readFlag;
 	bool writeFlag;
 
@@ -54,11 +55,12 @@ class osaPipeExec {
 
 		/* Open a pipe using command and specifying read/write flags mode, which
 		should be "r", "w", or "rw" specifying which direction(s) the pipe should
-		go */
-		void Open(const std::string & command, const std::string & mode);
+		go. Returns true if the Open succeeded, false otherwise */
+		bool Open(const std::string & command, const std::string & mode);
 
-		/* Close the pipe */
-		void Close(bool killProcess = true);
+		/* Close the pipe. Returns true if the Close succeeded, false
+		otherwise. */
+		bool Close(bool killProcess = true);
 
 		/* Read at most maxLength characters from the pipe into buffer. Return
 		number of characters read or -1 for an error */

@@ -48,7 +48,7 @@ unsigned int osaPipeExec::SizeOfInternals(void) {
     return sizeof(osaPipeExecInternals);
 }
 
-osaPipeExec::osaPipeExec() {
+osaPipeExec::osaPipeExec() : connected(false) {
     CMN_ASSERT(sizeof(Internals) >= SizeOfInternals());
 }
 
@@ -56,112 +56,153 @@ osaPipeExec::~osaPipeExec() {
 	Close();
 }
 
-void osaPipeExec::Open(const std::string & cmd, const std::string & mode) {
-	#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
-		if (pipe(toProgram) < 0 || pipe(fromProgram) < 0)
-			perror("Can't create pipe in osaPipeExec::Open");
-	#elif (CISST_OS == CISST_WINDOWS)
-		if (_pipe(toProgram, 4096, O_BINARY | O_NOINHERIT) < 0 || _pipe(fromProgram, 4096, O_BINARY | O_NOINHERIT) < 0)
-			perror("Can't create pipe in osaPipeExec::Open");
-	#endif
+bool osaPipeExec::Open(const std::string & cmd, const std::string & mode) {
+	if (connected)
+		return false;
+	else {
+		#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+			if (pipe(toProgram) < 0 || pipe(fromProgram) < 0) {
+				perror("Can't create pipe in osaPipeExec::Open");
+				return false;
+			}
+		#elif (CISST_OS == CISST_WINDOWS)
+			if (_pipe(toProgram, 4096, O_BINARY | O_NOINHERIT) < 0 || _pipe(fromProgram, 4096, O_BINARY | O_NOINHERIT) < 0) {
+				perror("Can't create pipe in osaPipeExec::Open");
+				return false;
+			}
+		#endif
 
-	readFlag = writeFlag = false;
-	std::string::const_iterator it;
-	for (it = mode.begin(); it != mode.end(); it++) {
-		switch (*it) {
-			case 'r':
-				readFlag = true;
-				break;
-			case 'w':
-				writeFlag = true;
-				break;
+		readFlag = writeFlag = false;
+		std::string::const_iterator it;
+		for (it = mode.begin(); it != mode.end(); it++) {
+			switch (*it) {
+				case 'r':
+					readFlag = true;
+					break;
+				case 'w':
+					writeFlag = true;
+					break;
+			}
 		}
-	}
 
-	char * const command[] = {(char * const) cmd.c_str(), NULL};
-	#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
-		/* Spawn a child and parent process for communication */
-		INTERNALS(pid) = fork();
+		char * const command[] = {(char * const) cmd.c_str(), NULL};
+		#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+			/* Spawn a child and parent process for communication */
+			INTERNALS(pid) = fork();
 
-		/* Parent process to send and receive output */
-		if (INTERNALS(pid) > 0) {
+			/* Parent process to send and receive output */
+			if (INTERNALS(pid) > 0) {
+				/* We want input to come from parent to the program and output the other
+				direction. Thus we don't need these ends of the pipe */
+				if (close(toProgram[READ_HANDLE]) == -1)
+					return false;
+				if (close(fromProgram[WRITE_HANDLE]) == -1)
+					return false;
+
+				if (!writeFlag && close(toProgram[WRITE_HANDLE]) == -1)
+					return false;
+				if (!readFlag && close(fromProgram[READ_HANDLE]) == -1)
+					return false;
+
+				connected = true;
+				return true;
+			}
+
+			/* Child thread to run the program */
+			else if (INTERNALS(pid) == 0) {
+				/* Replace stdin and stdout to receive from and write to the pipe */
+				if (dup2(toProgram[READ_HANDLE], 0) == -1)
+					return false;
+				if (dup2(fromProgram[WRITE_HANDLE], 1) == -1)
+					return false;
+
+				/* Start the command */
+				if (command != NULL && command[0] != NULL)
+					execvp(command[0], command);
+				else
+					perror("Exec failed in osaPipeExec::Open because command is empty");
+
+				/* If we get here then exec failed */
+				perror("Exec failed in osaPipeExec::Open");
+				return false;
+			}
+		#elif (CISST_OS == CISST_WINDOWS)
+			/* Replace stdin and stdout to receive from and write to the pipe */
+			if (_dup2(toProgram[READ_HANDLE], _fileno(stdin)) == -1)
+				return false;
+			if (_dup2(fromProgram[WRITE_HANDLE], _fileno(stdout)) == -1)
+				return false;
+
 			/* We want input to come from parent to the program and output the other
 			direction. Thus we don't need these ends of the pipe */
-			close(toProgram[READ_HANDLE]);
-			close(fromProgram[WRITE_HANDLE]);
+			if (_close(fromProgram[WRITE_HANDLE]) == -1)
+				return false;
+			if (_close(toProgram[READ_HANDLE]) == -1)
+				return false;
 
-			if (!writeFlag)
-				close(toProgram[WRITE_HANDLE]);
-			if (!readFlag)
-				close(fromProgram[READ_HANDLE]);
-		}
+			if (!writeFlag && _close(toProgram[WRITE_HANDLE]) == -1)
+				return false;
+			if (!readFlag && _close(fromProgram[READ_HANDLE]) == -1)
+				return false;
 
-		/* Child thread to run the program */
-		else if (INTERNALS(pid) == 0) {
-			/* Replace stdin and stdout to receive from and write to the pipe */
-			dup2(toProgram[READ_HANDLE], 0);
-			dup2(fromProgram[WRITE_HANDLE], 1);
-
-			/* Start the command */
+			/* Spawn process */
 			if (command != NULL && command[0] != NULL)
-				execvp(command[0], command);
-			else
-				perror("Exec failed in osaPipeExec::Open because command is empty");
+				INTERNALS(hProcess) = (HANDLE) _spawnvp(P_NOWAIT, command[0], command);
+			else {
+				perror("Spawn failed in osaPipeExec::Open because command is empty");
+				return false;
+			}
+			if (!INTERNALS(hProcess)) {
+				perror("Spawn failed in osaPipeExec::Open");
+				return false;
+			}
 
-			/* If we get here then exec failed */
-			perror("Exec failed in osaPipeExec::Open");
-		}
-	#elif (CISST_OS == CISST_WINDOWS)
-		/* Replace stdin and stdout to receive from and write to the pipe */
-		_dup2(toProgram[READ_HANDLE], _fileno(stdin));
-		_dup2(fromProgram[WRITE_HANDLE], _fileno(stdout));
+			/* These aren't needed now */
+			fclose(stdin);
+			fclose(stdout);
+		#endif
 
-		/* We want input to come from parent to the program and output the other
-		direction. Thus we don't need these ends of the pipe */
-		int ret = _close(fromProgram[WRITE_HANDLE]);
-		ret = _close(toProgram[READ_HANDLE]);
-
-		if (!writeFlag)
-			ret = _close(toProgram[WRITE_HANDLE]);
-		if (!readFlag)
-			ret = _close(fromProgram[READ_HANDLE]);
-
-		/* Spawn process */
-		if (command != NULL && command[0] != NULL)
-			INTERNALS(hProcess) = (HANDLE) _spawnvp(P_NOWAIT, command[0], command);
-		else
-			perror("Spawn failed in osaPipeExec::Open because command is empty");
-		if (!INTERNALS(hProcess))
-			perror("Spawn failed in osaPipeExec::Open");
-
-		/* These aren't needed now */
-		fclose(stdin);
-		fclose(stdout);
-	#endif
+		connected = true;
+		return true;
+	}
 }
 
-void osaPipeExec::Close(bool killProcess) {
-	if (writeFlag)
-	#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
-		close(toProgram[WRITE_HANDLE]);
-	#elif (CISST_OS == CISST_WINDOWS)
-		_close(toProgram[WRITE_HANDLE]);
-	#endif
+bool osaPipeExec::Close(bool killProcess) {
+	if (!connected)
+		return false;
+	else {
+		if (writeFlag)
+		#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+			if (close(toProgram[WRITE_HANDLE]) == -1)
+				return false;
+		#elif (CISST_OS == CISST_WINDOWS)
+			if (_close(toProgram[WRITE_HANDLE]) == -1)
+				return false;
+		#endif
 
-	if (readFlag)
-	#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
-		close(fromProgram[READ_HANDLE]);
-	#elif (CISST_OS == CISST_WINDOWS)
-		_close(fromProgram[READ_HANDLE]);
-	#endif
+		if (readFlag)
+		#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+			if (close(fromProgram[READ_HANDLE]) == -1)
+				return false;
+		#elif (CISST_OS == CISST_WINDOWS)
+			if (_close(fromProgram[READ_HANDLE]) == -1)
+				return false;
+		#endif
 
-	if (killProcess) {
-	#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
-		kill(INTERNALS(pid), SIGKILL);
-	#elif (CISST_OS == CISST_WINDOWS)
-		CloseHandle(INTERNALS(hProcess));
-		TerminateProcess(INTERNALS(hProcess), 0);
-	#endif
+		if (killProcess) {
+		#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+			if (kill(INTERNALS(pid), SIGKILL) == -1)
+				return false;
+		#elif (CISST_OS == CISST_WINDOWS)
+			if (CloseHandle(INTERNALS(hProcess)) == 0)
+				return false;
+			if (TerminateProcess(INTERNALS(hProcess), 0) == 0)
+				return false;
+		#endif
+		}
+
+		connected = false;
+		return true;
 	}
 }
 

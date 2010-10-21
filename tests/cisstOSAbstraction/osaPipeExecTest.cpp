@@ -35,7 +35,12 @@ void osaPipeExecTest::TestPipe(void)
 {
 	osaPipeExec pipe;
 	std::string command = std::string(CISST_BUILD_ROOT) + std::string("/tests/bin/cisstOSAbstractionTestsPipeExecUtility");
-	pipe.Open(command, "rw");
+
+	// Test opening twice, make sure it fails the second time
+	bool opened = pipe.Open(command, "rw");
+	CPPUNIT_ASSERT_EQUAL(true, opened);
+	opened = pipe.Open(command, "rw");
+	CPPUNIT_ASSERT_EQUAL(false, opened);
 
 	// Generate random test string between 0 and 999 characters
 	const int length = cmnRandomSequence::GetInstance().ExtractRandomInt(0, 9) + 1;
@@ -81,7 +86,12 @@ void osaPipeExecTest::TestPipe(void)
 	CPPUNIT_ASSERT_EQUAL(test, current);
 
 	free(testString);
-	pipe.Close();
+
+	// Test closing twice, make sure it fails the second time
+	bool closed = pipe.Close();
+	CPPUNIT_ASSERT_EQUAL(true, closed);
+	closed = pipe.Close();
+	CPPUNIT_ASSERT_EQUAL(false, closed);
 
 	result = pipe.Write(testString);
 	CPPUNIT_ASSERT_EQUAL(-1, result);
