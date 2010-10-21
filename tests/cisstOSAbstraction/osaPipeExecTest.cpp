@@ -43,7 +43,7 @@ void osaPipeExecTest::TestPipe(void)
 	CPPUNIT_ASSERT_EQUAL(false, opened);
 
 	// Generate random test string between 0 and 999 characters
-	const int length = cmnRandomSequence::GetInstance().ExtractRandomInt(0, 9) + 1;
+	const int length = cmnRandomSequence::GetInstance().ExtractRandomInt(0, 999) + 1;
 	char * testString = static_cast<char *>(malloc(length * sizeof(char)));
 	char * s;
 	// Generate random ASCII characters while avoiding '\0'
