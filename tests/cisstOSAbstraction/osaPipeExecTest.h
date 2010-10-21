@@ -26,13 +26,13 @@ http://www.cisst.org/cisst/license.txt.
 
 class osaPipeExecTest : public CppUnit::TestFixture
 {
-	CPPUNIT_TEST_SUITE(osaPipeExecTest);
+    CPPUNIT_TEST_SUITE(osaPipeExecTest);
     {
         CPPUNIT_TEST(TestPipe);
     }
-	CPPUNIT_TEST(TestPipeInternalsSize);
+    CPPUNIT_TEST(TestPipeInternalsSize);
 
-	CPPUNIT_TEST_SUITE_END();
+    CPPUNIT_TEST_SUITE_END();
 
 public:
     /*! Test that structure for internal size is large enough */

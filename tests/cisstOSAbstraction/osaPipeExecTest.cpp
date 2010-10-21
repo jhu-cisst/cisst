@@ -27,76 +27,76 @@ http://www.cisst.org/cisst/license.txt.
 
 void osaPipeExecTest::TestPipeInternalsSize(void)
 {
-	CPPUNIT_ASSERT(osaPipeExec::INTERNALS_SIZE >= osaPipeExec::SizeOfInternals());
+    CPPUNIT_ASSERT(osaPipeExec::INTERNALS_SIZE >= osaPipeExec::SizeOfInternals());
 }
 
 
 void osaPipeExecTest::TestPipe(void)
 {
-	osaPipeExec pipe;
-	std::string command = std::string(CISST_BUILD_ROOT) + std::string("/tests/bin/cisstOSAbstractionTestsPipeExecUtility");
+    osaPipeExec pipe;
+    std::string command = std::string(CISST_BUILD_ROOT) + std::string("/tests/bin/cisstOSAbstractionTestsPipeExecUtility");
 
-	// Test opening twice, make sure it fails the second time
-	bool opened = pipe.Open(command, "rw");
-	CPPUNIT_ASSERT_EQUAL(true, opened);
-	opened = pipe.Open(command, "rw");
-	CPPUNIT_ASSERT_EQUAL(false, opened);
+    // Test opening twice, make sure it fails the second time
+    bool opened = pipe.Open(command, "rw");
+    CPPUNIT_ASSERT_EQUAL(true, opened);
+    opened = pipe.Open(command, "rw");
+    CPPUNIT_ASSERT_EQUAL(false, opened);
 
-	// Generate random test string between 0 and 999 characters
-	const int length = cmnRandomSequence::GetInstance().ExtractRandomInt(0, 999) + 1;
-	char * testString = static_cast<char *>(malloc(length * sizeof(char)));
-	char * s;
-	// Generate random ASCII characters while avoiding '\0'
-	for (s = testString; s < (testString + length-1); s++) {
-		*s = cmnRandomSequence::GetInstance().ExtractRandomChar(1, 127);
+    // Generate random test string between 0 and 999 characters
+    const int length = cmnRandomSequence::GetInstance().ExtractRandomInt(0, 999) + 1;
+    char * testString = static_cast<char *>(malloc(length * sizeof(char)));
+    char * s;
+    // Generate random ASCII characters while avoiding '\0'
+    for (s = testString; s < (testString + length-1); s++) {
+        *s = cmnRandomSequence::GetInstance().ExtractRandomChar(1, 127);
     }
-	*s = '\0';
+    *s = '\0';
 
-	// If this gives problems, wrap this in a loop similar to read
-	int charsWritten = pipe.Write(testString);
-	CPPUNIT_ASSERT_EQUAL(length, charsWritten);
+    // If this gives problems, wrap this in a loop similar to read
+    int charsWritten = pipe.Write(testString);
+    CPPUNIT_ASSERT_EQUAL(length, charsWritten);
 
-	// Keep reading while there is still data to be read
-	const int bufferLength = 1000;
-	char buffer[bufferLength];
-	char * bufferEnd = buffer + bufferLength + 1;
-	s = buffer;
-	int charsRead = 0;
-	int result;
-	while ((charsRead < length)
+    // Keep reading while there is still data to be read
+    const int bufferLength = 1000;
+    char buffer[bufferLength];
+    char * bufferEnd = buffer + bufferLength + 1;
+    s = buffer;
+    int charsRead = 0;
+    int result;
+    while ((charsRead < length)
            && (s < bufferEnd)) {
-		result = pipe.Read(s, bufferEnd-s);
-		charsRead += result;
-		s += result;
-	}
-	CPPUNIT_ASSERT(s < bufferEnd);
-	CPPUNIT_ASSERT_EQUAL(length, charsRead);
-	std::string test(testString);
-	CPPUNIT_ASSERT_EQUAL(test, std::string(buffer));
+        result = pipe.Read(s, bufferEnd-s);
+        charsRead += result;
+        s += result;
+    }
+    CPPUNIT_ASSERT(s < bufferEnd);
+    CPPUNIT_ASSERT_EQUAL(length, charsRead);
+    std::string test(testString);
+    CPPUNIT_ASSERT_EQUAL(test, std::string(buffer));
 
-	// Test the std::string versions of Read and Write
-	charsWritten = pipe.Write(test);
-	CPPUNIT_ASSERT_EQUAL(length, charsWritten);
+    // Test the std::string versions of Read and Write
+    charsWritten = pipe.Write(test);
+    CPPUNIT_ASSERT_EQUAL(length, charsWritten);
 
-	std::string current;
-	while (static_cast<int>(current.length()) < length-1) {
-		current += pipe.Read(length-current.length());
-	}
-	CPPUNIT_ASSERT_EQUAL(static_cast<int>(current.length()), length-1);
-	CPPUNIT_ASSERT_EQUAL(test, current);
+    std::string current;
+    while (static_cast<int>(current.length()) < length-1) {
+        current += pipe.Read(length-current.length());
+    }
+    CPPUNIT_ASSERT_EQUAL(static_cast<int>(current.length()), length-1);
+    CPPUNIT_ASSERT_EQUAL(test, current);
 
-	free(testString);
+    free(testString);
 
-	// Test closing twice, make sure it fails the second time
-	bool closed = pipe.Close();
-	CPPUNIT_ASSERT_EQUAL(true, closed);
-	closed = pipe.Close();
-	CPPUNIT_ASSERT_EQUAL(false, closed);
+    // Test closing twice, make sure it fails the second time
+    bool closed = pipe.Close();
+    CPPUNIT_ASSERT_EQUAL(true, closed);
+    closed = pipe.Close();
+    CPPUNIT_ASSERT_EQUAL(false, closed);
 
-	result = pipe.Write(testString);
-	CPPUNIT_ASSERT_EQUAL(-1, result);
-	result = pipe.Read(buffer, length);
-	CPPUNIT_ASSERT_EQUAL(-1, result);
+    result = pipe.Write(testString);
+    CPPUNIT_ASSERT_EQUAL(-1, result);
+    result = pipe.Read(buffer, length);
+    CPPUNIT_ASSERT_EQUAL(-1, result);
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(osaPipeExecTest);
