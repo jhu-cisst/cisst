@@ -292,12 +292,12 @@ SET(CISST_LIBS_STABLE
 SET(CISST_LIBS_UNSTABLE
     cisstNumerical
     cisstInteractive
+    cisstRobot
     cisstParameterTypes
     cisstDevices
     cisstImage
     cisstStereoVision
     cisst3DUserInterface
-    cisstRobot
     )
 
 # All libraries
