@@ -48,7 +48,7 @@ void osaPipeExecTest::TestPipe(void)
 	char * s;
 	// Generate random ASCII characters while avoiding '\0'
 	for (s = testString; s < (testString + length-1); s++) {
-		*s = cmnRandomSequence::GetInstance().ExtractRandomChar('A', 'z');
+		*s = cmnRandomSequence::GetInstance().ExtractRandomChar(1, 127);
     }
 	*s = '\0';
 
