@@ -11,9 +11,6 @@
 # 
 # --- end cisst license ---
 
-# set the library name
-SET( LIBRARY cisstRobot)
-
 # set dependencies
 SET( DEPENDENCIES cisstCommon cisstVector )
 
@@ -24,6 +21,7 @@ SET( HEADER_FILES  robCollaborativeControlForce.h )
 
 if( BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB )
   
+  SET(DEPENDENCIES ${DEPENDENCIES} cisstNumerical)
   SET(SOURCE_FILES
     
     ${SOURCE_FILES}
@@ -117,7 +115,12 @@ endif( BUILD_LIBS_cisstNumerical AND CISST_HAS_CISSTNETLIB )
 #    cisst_add_to_internal( CISST_ADDITIONAL_LIBRARIES LAPACK_LIBRARIES )
 #endif( LAPACK_FOUND )
   
+# Finally create the library
+cisst_add_library (
+  LIBRARY cisstRobot
+  DEPENDENCIES ${DEPENDENCIES}
+  SOURCE_FILES ${SOURCE_FILES}
+  HEADER_FILES ${HEADER_FILES})
 
-CISST_ADD_LIBRARY_TO_PROJECT(cisstLibs)
 
 
