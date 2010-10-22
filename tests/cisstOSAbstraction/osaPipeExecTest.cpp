@@ -44,7 +44,7 @@ void osaPipeExecTest::TestPipe(void)
 
     // Generate random test string between 0 and 999 characters
     const int length = cmnRandomSequence::GetInstance().ExtractRandomInt(0, 999) + 1;
-    char * testString = static_cast<char *>(malloc(length * sizeof(char)));
+    char * testString = new char[length];
     char * s;
     // Generate random ASCII characters while avoiding '\0'
     for (s = testString; s < (testString + length-1); s++) {
@@ -85,7 +85,7 @@ void osaPipeExecTest::TestPipe(void)
     CPPUNIT_ASSERT_EQUAL(static_cast<int>(current.length()), length-1);
     CPPUNIT_ASSERT_EQUAL(test, current);
 
-    free(testString);
+    delete[] testString;
 
     // Test closing twice, make sure it fails the second time
     bool closed = pipe.Close();

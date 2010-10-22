@@ -22,7 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <stdio.h>
 
-int main() {
+int main(void) {
     char c;
     /* Line-buffered I/OO can interfere with the pipe, so disable it */
     setvbuf(stdout, NULL, _IONBF, 0);

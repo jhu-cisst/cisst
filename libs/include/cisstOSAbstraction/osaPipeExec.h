@@ -23,13 +23,6 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _osaPipeExec_h
 #define _osaPipeExec_h
 
-#ifndef READ_HANDLE
-#define READ_HANDLE 0
-#endif
-#ifndef WRITE_HANDLE
-#define WRITE_HANDLE 1
-#endif
-
 class osaPipeExec {
     /*! Internals that are OS-dependent */
     enum {INTERNALS_SIZE = 32};
@@ -40,18 +33,21 @@ class osaPipeExec {
     static unsigned int SizeOfInternals(void);
     friend class osaPipeExecTest;
 
-    int toProgram[2];
-    int fromProgram[2];
-    bool connected;
-    bool readFlag;
-    bool writeFlag;
+    int ToProgram[2];
+    int FromProgram[2];
+    bool Connected;
+    bool ReadFlag;
+    bool WriteFlag;
+
+    /* Free resources before returning an error */
+    void Abort(void);
 
     public:
         /* Constructor just asserts that internals size is okay */
-        osaPipeExec();
+        osaPipeExec(void);
 
         /* Destructor calls Close() */
-        ~osaPipeExec();
+        ~osaPipeExec(void);
 
         /* Open a pipe using command and specifying read/write flags mode, which
         should be "r", "w", or "rw" specifying which direction(s) the pipe should
