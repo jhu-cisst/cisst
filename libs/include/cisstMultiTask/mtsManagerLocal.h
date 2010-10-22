@@ -73,7 +73,6 @@ class CISST_EXPORT mtsManagerLocal: public mtsManagerLocalInterface
     // for unit-testing
     friend class mtsManagerLocalTest;
     friend class mtsManagerGlobalTest;
-    friend class mtsCommandAndEventTest;
     // for internal access to manage proxy objects
     friend class mtsManagerGlobal;
     friend class mtsManagerProxyClient;
