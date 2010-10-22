@@ -24,7 +24,8 @@ cisst_target_link_libraries (cisstMultiTasksTestsLib cisstCommon cisstVector cis
 # all source files
 set (SOURCE_FILES
      mtsCollectorBaseTest.cpp
-     mtsCommandAndEventTest.cpp
+     mtsCommandAndEventLocalTest.cpp
+     mtsCommandAndEventNetworkedTest.cpp
      mtsComponentStateTest.cpp
      mtsQueueTest.cpp
      mtsStateTableTest.cpp
@@ -41,7 +42,8 @@ set (SOURCE_FILES
 # all header files
 set (HEADER_FILES
      mtsCollectorBaseTest.h
-     mtsCommandAndEventTest.h
+     mtsCommandAndEventLocalTest.h
+     mtsCommandAndEventNetworkedTest.h
      mtsComponentStateTest.h
      mtsQueueTest.h
      mtsStateTableTest.h
@@ -56,10 +58,34 @@ set (HEADER_FILES
      mtsManagerLocalTest.h
     )
 
-# Add executable for C++ tests
+# add executable for C++ tests
 add_executable (cisstMultiTaskTests ${SOURCE_FILES} ${HEADER_FILES})
 target_link_libraries (cisstMultiTaskTests cisstTestsMain cisstMultiTasksTestsLib)
 cisst_target_link_libraries (cisstMultiTaskTests cisstCommon cisstVector cisstOSAbstraction cisstMultiTask)
 
-# To generate a CTest list of tests
+
+# ICE related code
+if (CISST_MTS_HAS_ICE)
+  # create our own component manager with special IOs for pipe communication
+  add_executable (cisstMultiTaskTestsComponentManager
+                  mtsTestComponentManager.cpp)
+  cisst_target_link_libraries (cisstMultiTaskTestsComponentManager cisstCommon cisstVector cisstOSAbstraction cisstMultiTask)
+  # create an empty process usable to dynamically create components and connect
+  add_executable (cisstMultiTaskTestsProcess
+                  mtsTestProcess.cpp)
+  cisst_target_link_libraries (cisstMultiTaskTestsProcess cisstCommon cisstVector cisstOSAbstraction cisstMultiTask)
+  # create a program to configure multiple processes to be tested, also triggers creation and connection of components
+  add_executable (cisstMultiTaskTestsConfigurationManager
+                  mtsTestConfigurationManager.cpp)
+  cisst_target_link_libraries (cisstMultiTaskTestsConfigurationManager cisstCommon cisstVector cisstOSAbstraction cisstMultiTask)
+
+  # make sure these programs are compiled before the test program
+  add_dependencies (cisstMultiTaskTests
+                    cisstMultiTaskTestsComponentManager
+                    cisstMultiTaskTestsProcess
+                    cisstMultiTaskTestsConfigurationManager)
+endif (CISST_MTS_HAS_ICE)
+
+
+# to generate a CTest list of tests
 cisst_add_test (cisstMultiTaskTests ITERATIONS 1 INSTANCES 1)

@@ -2,12 +2,12 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id$
+  $Id: mtsCommandAndEventNetworkedTest.cpp 1897 2010-10-15 16:52:19Z adeguet1 $
 
-  Author(s):  Min Yang Jung, Anton Deguet
-  Created on: 2009-11-17
+  Author(s):  Anton Deguet
+  Created on: 2010-10-20
 
-  (C) Copyright 2009-2010 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -19,7 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include "mtsCommandAndEventTest.h"
+#include "mtsCommandAndEventNetworkedTest.h"
 
 #include <cisstMultiTask/mtsManagerGlobal.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
@@ -35,30 +35,37 @@ http://www.cisst.org/cisst/license.txt.
 
 const double TransitionDelay = 3.0 * cmn_s;
 
-mtsCommandAndEventTest::mtsCommandAndEventTest()
-{
-    mtsManagerLocal::UnitTestEnabled = true;
-#if !CISST_MTS_HAS_ICE
-    mtsManagerLocal::UnitTestNetworkProxyEnabled = false;
-#else
-    mtsManagerLocal::UnitTestNetworkProxyEnabled = true;
-#endif
-}
-
-
-void mtsCommandAndEventTest::setUp(void)
+mtsCommandAndEventNetworkedTest::mtsCommandAndEventNetworkedTest()
 {
 }
 
 
-void mtsCommandAndEventTest::tearDown(void)
+void mtsCommandAndEventNetworkedTest::setUp(void)
 {
+    std::string command;
+    bool result;
+
+    // start network manager
+    command = std::string(CISST_BUILD_ROOT) + std::string("/tests/bin/cisstMultiTaskTestsComponentManager");
+	result = PipeComponentManager.Open(command, "rw");
+	CPPUNIT_ASSERT_EQUAL(true, result);
 }
 
+
+void mtsCommandAndEventNetworkedTest::tearDown(void)
+{
+	bool result;
+    
+    // close and kill all processes
+    result = PipeComponentManager.Close();
+	CPPUNIT_ASSERT_EQUAL(true, result);
+}
+
+#if 0
 template <class _clientType, class _serverType>
-void mtsCommandAndEventTest::TestExecution(_clientType * client, _serverType * server,
-                                           double clientExecutionDelay, double serverExecutionDelay,
-                                           double blockingDelay)
+void mtsCommandAndEventNetworkedTest::TestExecution(_clientType * client, _serverType * server,
+                                                    double clientExecutionDelay, double serverExecutionDelay,
+                                                    double blockingDelay)
 {
     mtsComponentManager * manager = mtsComponentManager::GetInstance();
 
@@ -236,27 +243,32 @@ void mtsCommandAndEventTest::TestExecution(_clientType * client, _serverType * s
     manager->RemoveComponent(client);
     manager->RemoveComponent(server);
 }
+#endif
 
 
 template <class _elementType>
-void mtsCommandAndEventTest::TestLocalDeviceDevice(void)
+void mtsCommandAndEventNetworkedTest::TestDeviceDevice(void)
 {
+    osaSleep(30.0 * cmn_s);
+    /*
     mtsTestDevice2<_elementType> * client = new mtsTestDevice2<_elementType>;
     mtsTestDevice3<_elementType> * server = new mtsTestDevice3<_elementType>;
     TestExecution(client, server, 0.0, 0.0);
     delete client;
     delete server;
+    */
 }
-void mtsCommandAndEventTest::TestLocalDeviceDevice_mtsInt(void) {
-    mtsCommandAndEventTest::TestLocalDeviceDevice<mtsInt>();
+void mtsCommandAndEventNetworkedTest::TestDeviceDevice_mtsInt(void) {
+    mtsCommandAndEventNetworkedTest::TestDeviceDevice<mtsInt>();
 }
-void mtsCommandAndEventTest::TestLocalDeviceDevice_int(void) {
-    mtsCommandAndEventTest::TestLocalDeviceDevice<int>();
+void mtsCommandAndEventNetworkedTest::TestDeviceDevice_int(void) {
+    mtsCommandAndEventNetworkedTest::TestDeviceDevice<int>();
 }
 
 
+#if 0
 template <class _elementType>
-void mtsCommandAndEventTest::TestLocalPeriodicPeriodic(void)
+void mtsCommandAndEventNetworkedTest::TestPeriodicPeriodic(void)
 {
     mtsTestPeriodic1<_elementType> * client = new mtsTestPeriodic1<_elementType>("mtsTestPeriodic1Client");
     mtsTestPeriodic1<_elementType> * server = new mtsTestPeriodic1<_elementType>("mtsTestPeriodic1Server");
@@ -267,16 +279,16 @@ void mtsCommandAndEventTest::TestLocalPeriodicPeriodic(void)
     delete client;
     delete server;
 }
-void mtsCommandAndEventTest::TestLocalPeriodicPeriodic_mtsInt(void) {
-    mtsCommandAndEventTest::TestLocalPeriodicPeriodic<mtsInt>();
+void mtsCommandAndEventNetworkedTest::TestPeriodicPeriodic_mtsInt(void) {
+    mtsCommandAndEventNetworkedTest::TestPeriodicPeriodic<mtsInt>();
 }
-void mtsCommandAndEventTest::TestLocalPeriodicPeriodic_int(void) {
-    mtsCommandAndEventTest::TestLocalPeriodicPeriodic<int>();
+void mtsCommandAndEventNetworkedTest::TestPeriodicPeriodic_int(void) {
+    mtsCommandAndEventNetworkedTest::TestPeriodicPeriodic<int>();
 }
 
 
 template <class _elementType>
-void mtsCommandAndEventTest::TestLocalContinuousContinuous(void)
+void mtsCommandAndEventNetworkedTest::TestContinuousContinuous(void)
 {
     mtsTestContinuous1<_elementType> * client = new mtsTestContinuous1<_elementType>("mtsTestContinuous1Client");
     mtsTestContinuous1<_elementType> * server = new mtsTestContinuous1<_elementType>("mtsTestContinuous1Server");
@@ -287,16 +299,16 @@ void mtsCommandAndEventTest::TestLocalContinuousContinuous(void)
     delete client;
     delete server;
 }
-void mtsCommandAndEventTest::TestLocalContinuousContinuous_mtsInt(void) {
-    mtsCommandAndEventTest::TestLocalContinuousContinuous<mtsInt>();
+void mtsCommandAndEventNetworkedTest::TestContinuousContinuous_mtsInt(void) {
+    mtsCommandAndEventNetworkedTest::TestContinuousContinuous<mtsInt>();
 }
-void mtsCommandAndEventTest::TestLocalContinuousContinuous_int(void) {
-    mtsCommandAndEventTest::TestLocalContinuousContinuous<int>();
+void mtsCommandAndEventNetworkedTest::TestContinuousContinuous_int(void) {
+    mtsCommandAndEventNetworkedTest::TestContinuousContinuous<int>();
 }
 
 
 template <class _elementType>
-void mtsCommandAndEventTest::TestLocalFromCallbackFromCallback(void)
+void mtsCommandAndEventNetworkedTest::TestFromCallbackFromCallback(void)
 {
     mtsTestFromCallback1<_elementType> * client = new mtsTestFromCallback1<_elementType>("mtsTestFromCallback1Client");
     mtsTestCallbackTrigger * clientTrigger = new mtsTestCallbackTrigger(client);
@@ -313,16 +325,16 @@ void mtsCommandAndEventTest::TestLocalFromCallbackFromCallback(void)
     delete serverTrigger;
     delete server;
 }
-void mtsCommandAndEventTest::TestLocalFromCallbackFromCallback_mtsInt(void) {
-    mtsCommandAndEventTest::TestLocalFromCallbackFromCallback<mtsInt>();
+void mtsCommandAndEventNetworkedTest::TestFromCallbackFromCallback_mtsInt(void) {
+    mtsCommandAndEventNetworkedTest::TestFromCallbackFromCallback<mtsInt>();
 }
-void mtsCommandAndEventTest::TestLocalFromCallbackFromCallback_int(void) {
-    mtsCommandAndEventTest::TestLocalFromCallbackFromCallback<int>();
+void mtsCommandAndEventNetworkedTest::TestFromCallbackFromCallback_int(void) {
+    mtsCommandAndEventNetworkedTest::TestFromCallbackFromCallback<int>();
 }
 
 
 template <class _elementType>
-void mtsCommandAndEventTest::TestLocalFromSignalFromSignal(void)
+void mtsCommandAndEventNetworkedTest::TestFromSignalFromSignal(void)
 {
     mtsTestFromSignal1<_elementType> * client = new mtsTestFromSignal1<_elementType>("mtsTestFromSignal1Client");
     mtsTestFromSignal1<_elementType> * server = new mtsTestFromSignal1<_elementType>("mtsTestFromSignal1Server");
@@ -333,16 +345,16 @@ void mtsCommandAndEventTest::TestLocalFromSignalFromSignal(void)
     delete client;
     delete server;
 }
-void mtsCommandAndEventTest::TestLocalFromSignalFromSignal_mtsInt(void) {
-    mtsCommandAndEventTest::TestLocalFromSignalFromSignal<mtsInt>();
+void mtsCommandAndEventNetworkedTest::TestFromSignalFromSignal_mtsInt(void) {
+    mtsCommandAndEventNetworkedTest::TestFromSignalFromSignal<mtsInt>();
 }
-void mtsCommandAndEventTest::TestLocalFromSignalFromSignal_int(void) {
-    mtsCommandAndEventTest::TestLocalFromSignalFromSignal<int>();
+void mtsCommandAndEventNetworkedTest::TestFromSignalFromSignal_int(void) {
+    mtsCommandAndEventNetworkedTest::TestFromSignalFromSignal<int>();
 }
 
 
 template <class _elementType>
-void mtsCommandAndEventTest::TestLocalPeriodicPeriodicBlocking(void)
+void mtsCommandAndEventNetworkedTest::TestPeriodicPeriodicBlocking(void)
 {
     const double blockingDelay = 0.5 * cmn_s;
     mtsTestPeriodic1<_elementType> * client = new mtsTestPeriodic1<_elementType>("mtsTestPeriodic1Client");
@@ -354,16 +366,16 @@ void mtsCommandAndEventTest::TestLocalPeriodicPeriodicBlocking(void)
     delete client;
     delete server;
 }
-void mtsCommandAndEventTest::TestLocalPeriodicPeriodicBlocking_mtsInt(void) {
-    mtsCommandAndEventTest::TestLocalPeriodicPeriodicBlocking<mtsInt>();
+void mtsCommandAndEventNetworkedTest::TestPeriodicPeriodicBlocking_mtsInt(void) {
+    mtsCommandAndEventNetworkedTest::TestPeriodicPeriodicBlocking<mtsInt>();
 }
-void mtsCommandAndEventTest::TestLocalPeriodicPeriodicBlocking_int(void) {
-    mtsCommandAndEventTest::TestLocalPeriodicPeriodicBlocking<int>();
+void mtsCommandAndEventNetworkedTest::TestPeriodicPeriodicBlocking_int(void) {
+    mtsCommandAndEventNetworkedTest::TestPeriodicPeriodicBlocking<int>();
 }
 
 
 template <class _elementType>
-void mtsCommandAndEventTest::TestLocalContinuousContinuousBlocking(void)
+void mtsCommandAndEventNetworkedTest::TestContinuousContinuousBlocking(void)
 {
     const double blockingDelay = 0.5 * cmn_s;
     mtsTestContinuous1<_elementType> * client = new mtsTestContinuous1<_elementType>("mtsTestContinuous1Client");
@@ -375,16 +387,16 @@ void mtsCommandAndEventTest::TestLocalContinuousContinuousBlocking(void)
     delete client;
     delete server;
 }
-void mtsCommandAndEventTest::TestLocalContinuousContinuousBlocking_mtsInt(void) {
-    mtsCommandAndEventTest::TestLocalContinuousContinuousBlocking<mtsInt>();
+void mtsCommandAndEventNetworkedTest::TestContinuousContinuousBlocking_mtsInt(void) {
+    mtsCommandAndEventNetworkedTest::TestContinuousContinuousBlocking<mtsInt>();
 }
-void mtsCommandAndEventTest::TestLocalContinuousContinuousBlocking_int(void) {
-    mtsCommandAndEventTest::TestLocalContinuousContinuousBlocking<int>();
+void mtsCommandAndEventNetworkedTest::TestContinuousContinuousBlocking_int(void) {
+    mtsCommandAndEventNetworkedTest::TestContinuousContinuousBlocking<int>();
 }
 
 
 template <class _elementType>
-void mtsCommandAndEventTest::TestLocalFromCallbackFromCallbackBlocking(void)
+void mtsCommandAndEventNetworkedTest::TestFromCallbackFromCallbackBlocking(void)
 {
     const double blockingDelay = 0.5 * cmn_s;
     mtsTestFromCallback1<_elementType> * client = new mtsTestFromCallback1<_elementType>("mtsTestFromCallback1Client");
@@ -402,16 +414,16 @@ void mtsCommandAndEventTest::TestLocalFromCallbackFromCallbackBlocking(void)
     delete serverTrigger;
     delete server;
 }
-void mtsCommandAndEventTest::TestLocalFromCallbackFromCallbackBlocking_mtsInt(void) {
-    mtsCommandAndEventTest::TestLocalFromCallbackFromCallbackBlocking<mtsInt>();
+void mtsCommandAndEventNetworkedTest::TestFromCallbackFromCallbackBlocking_mtsInt(void) {
+    mtsCommandAndEventNetworkedTest::TestFromCallbackFromCallbackBlocking<mtsInt>();
 }
-void mtsCommandAndEventTest::TestLocalFromCallbackFromCallbackBlocking_int(void) {
-    mtsCommandAndEventTest::TestLocalFromCallbackFromCallbackBlocking<int>();
+void mtsCommandAndEventNetworkedTest::TestFromCallbackFromCallbackBlocking_int(void) {
+    mtsCommandAndEventNetworkedTest::TestFromCallbackFromCallbackBlocking<int>();
 }
 
 
 template <class _elementType>
-void mtsCommandAndEventTest::TestLocalFromSignalFromSignalBlocking(void)
+void mtsCommandAndEventNetworkedTest::TestFromSignalFromSignalBlocking(void)
 {
     const double blockingDelay = 0.5 * cmn_s;
     mtsTestFromSignal1<_elementType> * client = new mtsTestFromSignal1<_elementType>("mtsTestFromSignal1Client");
@@ -423,16 +435,16 @@ void mtsCommandAndEventTest::TestLocalFromSignalFromSignalBlocking(void)
     delete client;
     delete server;
 }
-void mtsCommandAndEventTest::TestLocalFromSignalFromSignalBlocking_mtsInt(void) {
-    mtsCommandAndEventTest::TestLocalFromSignalFromSignalBlocking<mtsInt>();
+void mtsCommandAndEventNetworkedTest::TestFromSignalFromSignalBlocking_mtsInt(void) {
+    mtsCommandAndEventNetworkedTest::TestFromSignalFromSignalBlocking<mtsInt>();
 }
-void mtsCommandAndEventTest::TestLocalFromSignalFromSignalBlocking_int(void) {
-    mtsCommandAndEventTest::TestLocalFromSignalFromSignalBlocking<int>();
+void mtsCommandAndEventNetworkedTest::TestFromSignalFromSignalBlocking_int(void) {
+    mtsCommandAndEventNetworkedTest::TestFromSignalFromSignalBlocking<int>();
 }
 
 
 template <class _elementType>
-void mtsCommandAndEventTest::TestArgumentPrototypes(void)
+void mtsCommandAndEventNetworkedTest::TestArgumentPrototypes(void)
 {
     typedef _elementType value_type;
 
@@ -509,100 +521,12 @@ void mtsCommandAndEventTest::TestArgumentPrototypes(void)
     delete client;
     delete server;
 }
-void mtsCommandAndEventTest::TestArgumentPrototypes_mtsInt(void) {
-    mtsCommandAndEventTest::TestArgumentPrototypes<mtsInt>();
+void mtsCommandAndEventNetworkedTest::TestArgumentPrototypes_mtsInt(void) {
+    mtsCommandAndEventNetworkedTest::TestArgumentPrototypes<mtsInt>();
 }
-void mtsCommandAndEventTest::TestArgumentPrototypes_int(void) {
-    mtsCommandAndEventTest::TestArgumentPrototypes<int>();
+void mtsCommandAndEventNetworkedTest::TestArgumentPrototypes_int(void) {
+    mtsCommandAndEventNetworkedTest::TestArgumentPrototypes<int>();
 }
+#endif
 
-
-/*
-void mtsCommandAndEventTest::TestRemoteDeviceDevice(void)
-{
-    mtsManagerGlobal managerGlobal;
-
-    // Prepare local managers for this test
-    mtsTestDevice1 * P1C1 = new mtsTestDevice1;
-    mtsTestDevice2 * P1C2 = new mtsTestDevice2;
-    mtsTestDevice2 * P2C2 = new mtsTestDevice2;
-    mtsTestDevice3 * P2C3 = new mtsTestDevice3;
-
-    mtsManagerLocalInterface * managerLocal1 = new mtsManagerLocal(P1);
-    mtsManagerLocal * managerLocal1Object = dynamic_cast<mtsManagerLocal*>(managerLocal1);
-    managerLocal1Object->ManagerGlobal = &managerGlobal;
-    managerGlobal.AddProcess(managerLocal1->GetProcessName());
-    managerLocal1Object->AddComponent(P1C1);
-    managerLocal1Object->AddComponent(P1C2);
-    managerLocal1Object->UnitTestEnabled = true; // run in unit test mode
-    managerLocal1Object->UnitTestNetworkProxyEnabled = false; // but disable network proxy processings
-
-    mtsManagerLocalInterface * managerLocal2 = new mtsManagerLocal(P2);
-    mtsManagerLocal * managerLocal2Object = dynamic_cast<mtsManagerLocal*>(managerLocal2);
-    managerLocal2Object->ManagerGlobal = &managerGlobal;
-    managerGlobal.AddProcess(managerLocal2->GetProcessName());
-    managerLocal2Object->AddComponent(P2C2);
-    managerLocal2Object->AddComponent(P2C3);
-    managerLocal2Object->UnitTestEnabled = true; // run in unit test mode
-    managerLocal2Object->UnitTestNetworkProxyEnabled = false; // but disable network proxy processings
-
-    // Connect two interfaces (establish remote connection) and test if commands
-    // and events work correctly.
-    CPPUNIT_ASSERT(managerLocal1Object->Connect(P1, C1, r1, P2, C2, p1));
-
-    // Check initial values
-    CPPUNIT_ASSERT_EQUAL(-1, P2C2->InterfaceRequired1.GetValue());
-    CPPUNIT_ASSERT_EQUAL(-1, P2C2->InterfaceProvided1.GetValue());
-    CPPUNIT_ASSERT_EQUAL(-1, P2C2->InterfaceProvided2.GetValue());
-    CPPUNIT_ASSERT_EQUAL(-1, P2C3->InterfaceRequired1.GetValue());
-
-    // Test void command
-    P2C3->InterfaceRequired1.CommandVoid();
-    //CPPUNIT_ASSERT_EQUAL(-1, P2C2->InterfaceRequired1.GetValue());
-    //CPPUNIT_ASSERT_EQUAL(-1, P2C2->InterfaceProvided1.GetValue());
-    //CPPUNIT_ASSERT_EQUAL(0,  P2C2->InterfaceProvided2.GetValue());
-    //CPPUNIT_ASSERT_EQUAL(-1, P2C3->InterfaceRequired1.GetValue());
-
-    // Test write command
-    //mtsInt valueWrite;
-    //valueWrite.Data = 2;
-    //P2C3->InterfaceRequired1.CommandWrite(valueWrite);
-    //CPPUNIT_ASSERT_EQUAL(-1, P2C2->InterfaceRequired1.GetValue());
-    //CPPUNIT_ASSERT_EQUAL(-1, P2C2->InterfaceProvided1.GetValue());
-    //CPPUNIT_ASSERT_EQUAL(valueWrite.Data,  P2C2->InterfaceProvided2.GetValue());
-    //CPPUNIT_ASSERT_EQUAL(-1, P2C3->InterfaceRequired1.GetValue());
-
-    //// Test read command
-    //mtsInt valueRead;
-    //valueRead.Data = 0;
-    //P2C3->InterfaceRequired1.CommandRead(valueRead);
-    //CPPUNIT_ASSERT_EQUAL(valueWrite.Data, valueRead.Data);
-    //CPPUNIT_ASSERT_EQUAL(-1, P2C2->InterfaceRequired1.GetValue());
-    //CPPUNIT_ASSERT_EQUAL(-1, P2C2->InterfaceProvided1.GetValue());
-    //CPPUNIT_ASSERT_EQUAL(valueWrite.Data,  P2C2->InterfaceProvided2.GetValue());
-    //CPPUNIT_ASSERT_EQUAL(-1, P2C3->InterfaceRequired1.GetValue());
-
-    //// Test qualified read command
-    //valueWrite.Data = 3;
-    //valueRead.Data = 0;
-    //P2C3->InterfaceRequired1.CommandQualifiedRead(valueWrite, valueRead);
-    //CPPUNIT_ASSERT_EQUAL(-1, P2C2->InterfaceRequired1.GetValue());
-    //CPPUNIT_ASSERT_EQUAL(-1, P2C2->InterfaceProvided1.GetValue());
-    //CPPUNIT_ASSERT_EQUAL(-1, P2C3->InterfaceRequired1.GetValue());
-
-    //// Test void event
-    //P2C2->InterfaceProvided2.EventVoid();
-    //CPPUNIT_ASSERT_EQUAL(-1, P2C2->InterfaceRequired1.GetValue());
-    //CPPUNIT_ASSERT_EQUAL(-1, P2C2->InterfaceProvided1.GetValue());
-    //CPPUNIT_ASSERT_EQUAL(0, P2C3->InterfaceRequired1.GetValue());
-
-    //// Test write event
-    //valueWrite.Data = 4;
-    //P2C2->InterfaceProvided2.EventWrite(valueWrite);
-    //CPPUNIT_ASSERT_EQUAL(-1, P2C2->InterfaceRequired1.GetValue());
-    //CPPUNIT_ASSERT_EQUAL(-1, P2C2->InterfaceProvided1.GetValue());
-    //CPPUNIT_ASSERT_EQUAL(valueWrite.Data, P2C3->InterfaceRequired1.GetValue());
-}
-*/
-
-CPPUNIT_TEST_SUITE_REGISTRATION(mtsCommandAndEventTest);
+CPPUNIT_TEST_SUITE_REGISTRATION(mtsCommandAndEventNetworkedTest);
