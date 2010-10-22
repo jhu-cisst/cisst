@@ -18,38 +18,36 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
     osaThreadedLogFile threadedLog("example9Local");
     cmnLogger::GetMultiplexer()->AddChannel(threadedLog, CMN_LOG_LOD_VERY_VERBOSE);
     // specify a higher, more verbose log level for these classes
-    cmnClassRegister::SetLoD("mtsTaskInterface", CMN_LOG_LOD_VERY_VERBOSE);
-    cmnClassRegister::SetLoD("mtsTaskManager", CMN_LOG_LOD_VERY_VERBOSE);
     cmnClassRegister::SetLoD("clientTask", CMN_LOG_LOD_VERY_VERBOSE);
     cmnClassRegister::SetLoD("serverTask", CMN_LOG_LOD_VERY_VERBOSE);
 
-    // create our two tasks
+    // create our two components
     const double PeriodClient = 10 * cmn_ms; // in milliseconds
     const double PeriodServer = 10 * cmn_ms; // in milliseconds
     serverTask * server = new serverTask("Server", PeriodServer);
     clientTask * client = new clientTask("Client", PeriodClient);
 
 
-    // add the tasks to the task manager
-    mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
-    taskManager->AddTask(client);
-    taskManager->AddTask(server);
+    // add the tasks to the component manager
+    mtsComponentManager * componentManager = mtsComponentManager::GetInstance();
+    componentManager->AddComponent(client);
+    componentManager->AddComponent(server);
 
-    // connect the tasks, task.RequiresInterface -> task.ProvidesInterface
-    taskManager->Connect("Client", "Required", "Server", "Provided");
+    // connect the components, task.RequiresInterface -> task.ProvidesInterface
+    componentManager->Connect("Client", "Required", "Server", "Provided");
 
-    // create the tasks, i.e. find the commands
-    taskManager->CreateAll();
+    // create the components, i.e. find the commands
+    componentManager->CreateAll();
     // start the periodic Run
-    taskManager->StartAll();
+    componentManager->StartAll();
 
     // wait until the close button of the UI is pressed
     while (server->UIOpened() || client->UIOpened()) {
         osaSleep(10.0 * cmn_ms); // sleep to save CPU
     }
     // cleanup
-    taskManager->KillAll();
-    taskManager->Cleanup();
+    componentManager->KillAll();
+    componentManager->Cleanup();
     return 0;
 }
 

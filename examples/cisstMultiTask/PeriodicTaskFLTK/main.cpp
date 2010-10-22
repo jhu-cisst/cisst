@@ -22,45 +22,43 @@ int main(void)
     // specify a higher, more verbose log level for these classes
     cmnClassRegister::SetLoD("sineTask", CMN_LOG_LOD_VERY_VERBOSE);
     cmnClassRegister::SetLoD("displayTask", CMN_LOG_LOD_VERY_VERBOSE);
-    cmnClassRegister::SetLoD("mtsTaskInterface", CMN_LOG_LOD_VERY_VERBOSE);
-    cmnClassRegister::SetLoD("mtsTaskManager", CMN_LOG_LOD_VERY_VERBOSE);
 
     // create our two tasks
     const double PeriodSine = 1 * cmn_ms; // in milliseconds
     const double PeriodDisplay = 50 * cmn_ms; // in milliseconds
-    mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
+    mtsComponentManager * componentManager = mtsComponentManager::GetInstance();
     sineTask * sineTaskObject = new sineTask("SIN", PeriodSine);
     displayTask * displayTaskObject = new displayTask("DISP", PeriodDisplay);
     displayTaskObject->Configure();
 
-    // add the tasks to the task manager
-    taskManager->AddTask(sineTaskObject);
-    taskManager->AddTask(displayTaskObject);
+    // add the tasks to the component manager
+    componentManager->AddComponent(sineTaskObject);
+    componentManager->AddComponent(displayTaskObject);
 
-    // connect the tasks, task.RequiresInterface -> task.ProvidesInterface
-    taskManager->Connect("DISP", "DataGenerator", "SIN", "MainInterface");
+    // connect the components, task.RequiresInterface -> task.ProvidesInterface
+    componentManager->Connect("DISP", "DataGenerator", "SIN", "MainInterface");
 
     // generate a nice tasks diagram
     std::ofstream dotFile("example1.dot"); 
-    taskManager->ToStreamDot(dotFile);
+    componentManager->ToStreamDot(dotFile);
     dotFile.close();
 
-    // create the tasks, i.e. find the commands
-    taskManager->CreateAll();
+    // create the components, i.e. find the commands
+    componentManager->CreateAll();
     // start the periodic Run
-    taskManager->StartAll();
+    componentManager->StartAll();
 
     // wait until the close button of the UI is pressed
     while (!displayTaskObject->IsTerminated()) {
         osaSleep(100.0 * cmn_ms); // sleep to save CPU
     }
     // cleanup
-    taskManager->KillAll();
+    componentManager->KillAll();
 
     osaSleep(PeriodSine * 2);
     while (!sineTaskObject->IsTerminated()) osaSleep(PeriodSine);
 
-    taskManager->Cleanup();
+    componentManager->Cleanup();
     return 0;
 }
 
