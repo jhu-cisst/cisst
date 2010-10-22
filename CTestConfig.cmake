@@ -72,13 +72,21 @@ if (BUILD_LIBS_cisstOSAbstraction)
   set (BUILDNAME_TMP ${BUILDNAME_TMP}Os)
 endif (BUILD_LIBS_cisstOSAbstraction)
 
-if (BUILD_LIBS_cisstStereoVision)
-  set (BUILDNAME_TMP ${BUILDNAME_TMP}Sv)
-endif (BUILD_LIBS_cisstStereoVision)
+if (BUILD_LIBS_cisstRobot)
+  set (BUILDNAME_TMP ${BUILDNAME_TMP}Ro)
+endif (BUILD_LIBS_cisstRobot)
+
+if (BUILD_LIBS_cisstParameterTypes)
+  set (BUILDNAME_TMP ${BUILDNAME_TMP}Pt)
+endif (BUILD_LIBS_cisstParameterTypes)
 
 if (BUILD_LIBS_cisstMultiTask)
   set (BUILDNAME_TMP ${BUILDNAME_TMP}Mt)
 endif (BUILD_LIBS_cisstMultiTask)
+
+if (BUILD_LIBS_cisstStereoVision)
+  set (BUILDNAME_TMP ${BUILDNAME_TMP}Sv)
+endif (BUILD_LIBS_cisstStereoVision)
 
 if (BUILD_LIBS_cisstDevices)
   set (BUILDNAME_TMP ${BUILDNAME_TMP}Dv)
