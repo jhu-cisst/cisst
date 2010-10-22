@@ -78,7 +78,7 @@ public:
     };
 
     vctPlot2DBase(size_t pointSize = 2);
-    ~vctPlot2DBase(void) {};
+    virtual ~vctPlot2DBase(void) {};
 
     /*! Create a new trace, user needs to provide a placeholder to
       retrieve the traceId assigned.  This method checks if the name

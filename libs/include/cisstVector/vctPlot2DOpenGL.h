@@ -32,7 +32,7 @@ class CISST_EXPORT vctPlot2DOpenGL: public vctPlot2DBase
 public:
 
     vctPlot2DOpenGL(void);
-    ~vctPlot2DOpenGL(void) {};
+    virtual ~vctPlot2DOpenGL(void) {};
 
  protected:
 
