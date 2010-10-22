@@ -30,7 +30,9 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _svlPython_h
 #define _svlPython_h
 
+#include <cisstCommon/cmnPython.h>
 #include <cisstVector/vctPython.h>
+#include <cisstMultiTask/mtsPython.h>
 
 #include <cisstStereoVision/svlInitializer.h>
 

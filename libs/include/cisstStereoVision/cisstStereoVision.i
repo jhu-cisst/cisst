@@ -37,6 +37,7 @@ http://www.cisst.org/cisst/license.txt.
 
 %import "cisstCommon/cisstCommon.i"
 %import "cisstVector/cisstVector.i"
+%import "cisstMultiTask/cisstMultiTask.i"
 
 %init %{
     import_array() // numpy initialization
@@ -57,9 +58,10 @@ http://www.cisst.org/cisst/license.txt.
 
 %include "cisstStereoVision/svlStreamManager.h"
 
-
+%include "cisstStereoVision/svlFilterBase.h"
 %include "cisstStereoVision/svlFilterImageRectifier.h"
 %include "cisstStereoVision/svlFilterImageResizer.h"
+%include "cisstStereoVision/svlFilterSourceBase.h"
 %include "cisstStereoVision/svlFilterSourceVideoFile.h"
 %include "cisstStereoVision/svlFilterVideoFileWriter.h"
  // %include "cisstStereoVision/svlFilterSourceBuffer.h"
