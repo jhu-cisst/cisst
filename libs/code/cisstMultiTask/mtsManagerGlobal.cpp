@@ -884,7 +884,7 @@ int mtsManagerGlobal::Connect(const std::string & requestProcessName,
     }
 #endif
 
-    InterfaceMapType * interfaceMap;
+    InterfaceMapType * interfaceMap = 0;
 
     // Connect client's required interface with server's provided interface.
     ConnectionMapType * connectionMap =

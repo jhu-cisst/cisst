@@ -358,8 +358,8 @@ public:
     void DeSerializeRaw(std::istream & inputStream)
     {
         // get and set size
-        size_type myRows;
-        size_type myCols;
+        size_type myRows = 0;
+        size_type myCols = 0;
         cmnDeSerializeSizeRaw(inputStream, myRows);
         cmnDeSerializeSizeRaw(inputStream, myCols);
         this->SetSize(myRows, myCols);

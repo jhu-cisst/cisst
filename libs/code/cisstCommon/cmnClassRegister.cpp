@@ -115,7 +115,7 @@ bool cmnClassRegister::SetLoDForMatchingClassesInstance(const std::string & stri
     bool result = false;
     std::string allClasses;
     std::string className;
-    cmnClassServicesBase * classServicesPointer;
+    cmnClassServicesBase * classServicesPointer = 0;
     for (iter = ServicesContainer.begin();
          iter != end;
          iter++) {

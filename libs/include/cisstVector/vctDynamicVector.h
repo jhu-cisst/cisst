@@ -358,7 +358,7 @@ public:
     void DeSerializeRaw(std::istream & inputStream)
     {
         // get and set size
-        size_type mySize;
+        size_type mySize = 0;
         cmnDeSerializeSizeRaw(inputStream, mySize);
         this->SetSize(mySize);
 
