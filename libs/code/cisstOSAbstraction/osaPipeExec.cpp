@@ -270,7 +270,7 @@ int osaPipeExec::Read(char *buffer, int maxLength) const {
 }
 
 std::string osaPipeExec::Read(int maxLength) const {
-    char * buffer = new char[maxLength];
+    char * buffer = new char[maxLength+1];
     int charsRead = Read(buffer, maxLength);
 
     std::string result;
