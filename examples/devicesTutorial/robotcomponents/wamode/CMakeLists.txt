@@ -19,7 +19,7 @@ project(wamode)
 add_executable( wamodegc wamodegc.cpp )
 add_executable( wamodect wamodect.cpp )
 add_executable( wamodepdgc wamodepdgc.cpp )
-add_executable( test test.cpp )
+
 
 # link with the cisst libraries
 cisst_requires( wamodegc "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstParameterTypes;cisstDevices;cisstRobot")
@@ -28,6 +28,5 @@ cisst_requires( wamodect "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiT
 
 cisst_requires( wamodepdgc "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstParameterTypes;cisstDevices;cisstRobot")
 
-cisst_requires( test "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstParameterTypes;cisstDevices;cisstRobot")
 
 
