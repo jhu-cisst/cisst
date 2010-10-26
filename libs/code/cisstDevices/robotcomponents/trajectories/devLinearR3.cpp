@@ -17,6 +17,12 @@ devLinearR3::devLinearR3( const std::string& TaskName,
 
   output = RequireOutputR3( devTrajectory::Output, variables );
 
+  // Set the output in case the trajectory is started after other components
+  vctDynamicVector<double> qd(pold.size(), 0.0), qdd(pold.size(), 0.0);
+  output->SetPosition( pold );
+  output->SetVelocity( qd );
+  output->SetAcceleration( qdd );
+
 }
 
 vctFixedSizeVector<double,3> devLinearR3::GetInput(){
@@ -46,13 +52,19 @@ void devLinearR3::Evaluate( double t, robFunction* function ){
   if( linearrn != NULL ){
 
     vctDynamicVector<double> q, qd, qdd;
-
     linearrn->Evaluate( t, q, qd, qdd );
 
     output->SetPosition( q );
     output->SetVelocity( qd );
     output->SetAcceleration( qdd );
  
+  }
+  else{
+    // Set the output in case the trajectory is started after other components
+    vctDynamicVector<double> qd(pold.size(), 0.0), qdd(pold.size(), 0.0);
+    output->SetPosition( pold );
+    output->SetVelocity( qd );
+    output->SetAcceleration( qdd );
   }
 
 }

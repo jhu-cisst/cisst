@@ -22,6 +22,13 @@ devLinearIK::devLinearIK( const std::string& TaskName,
 
   output = RequireOutputRn( devTrajectory::Output, variables, qinit.size() );
 
+  // Set the output in case the trajectory is started after other components
+  vctDynamicVector<double> qd( qold.size(), 0.0) ;
+  vctDynamicVector<double> qdd( qold.size(), 0.0) ;
+
+  output->SetPosition( qold );
+  output->SetVelocity( qd );
+  output->SetVelocity( qdd );
 }
 
 vctFrame4x4<double> devLinearIK::GetInput(){
@@ -74,7 +81,16 @@ void devLinearIK::Evaluate( double t, robFunction* function ){
     output->SetVelocity( qdd );
  
   }
-  
+  else{
+    // Set the output in case the trajectory is started after other components
+    vctDynamicVector<double> qd( qold.size(), 0.0) ;
+    vctDynamicVector<double> qdd( qold.size(), 0.0) ;
+
+    output->SetPosition( qold );
+    output->SetVelocity( qd );
+    output->SetVelocity( qdd );
+  }
+
 }
 
 robFunction* devLinearIK::Queue( double t, robFunction* function ){

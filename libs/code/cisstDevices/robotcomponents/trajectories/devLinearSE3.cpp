@@ -14,16 +14,21 @@ devLinearSE3::devLinearSE3( const std::string& TaskName,
   vmax( vmax ),
   wmax( wmax ){
 
-  input  = RequireInputSE3( devTrajectory::Input, 
-			    devRobotComponent::POSITION );
-
+  input  = RequireInputSE3( devTrajectory::Input, devRobotComponent::POSITION );
   output = RequireOutputSE3( devTrajectory::Output, variables );
+  
+  // Set the output in case the trajectory is started after other components
+  vctFixedSizeVector<double,6> vw(0.0), vdwd(0.0);
+  output->SetPosition( Rtold );
+  output->SetVelocity( vw );
+  output->SetAcceleration( vdwd );
 
 }
 
 vctFrame4x4<double> devLinearSE3::GetInput(){
   double t;
   vctFrame4x4<double> Rt( Rtold );
+
   if( input != NULL )
     { input->GetPosition( Rt, t ); }
 
@@ -41,14 +46,19 @@ void devLinearSE3::Evaluate( double t, robFunction* function ){
 
   if( linearse3 != NULL ){
     vctFrame4x4<double> Rt;
-    vctFixedSizeVector<double,6> vw, vdwd;
+    vctFixedSizeVector<double,6> vw(0.0), vdwd(0.0);
 
     linearse3->Evaluate( t, Rt, vw, vdwd );
 
     output->SetPosition( Rt );
     output->SetVelocity( vw );
     output->SetAcceleration( vdwd );
- 
+  }
+  else{
+    vctFixedSizeVector<double,6> vw(0.0), vdwd(0.0);
+    output->SetPosition( Rtold );
+    output->SetVelocity( vw );
+    output->SetAcceleration( vdwd );
   }
 
 }

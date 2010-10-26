@@ -19,6 +19,13 @@ devQLQRn::devQLQRn( const std::string& TaskName,
 			   qinit.size() );
 
   output = RequireOutputRn( devTrajectory::Output, variables, qinit.size() );
+
+  // Set the output in case the trajectory is started after other components
+  vctDynamicVector<double>  qd( qold.size(), 0.0), qdd( qold.size(), 0.0 );
+  output->SetPosition( qold );
+  output->SetVelocity( qd );
+  output->SetAcceleration( qdd );
+
 }
 
 vctDynamicVector<double> devQLQRn::GetInput(){
@@ -80,6 +87,13 @@ void devQLQRn::Evaluate( double t, robFunction* function ){
     linearrn->Evaluate( t, q, qd, qdd );
 
     output->SetPosition( q );
+    output->SetVelocity( qd );
+    output->SetAcceleration( qdd );
+  }
+  else{
+    // Set the output in case the trajectory is started after other components
+    vctDynamicVector<double>  qd( qold.size(), 0.0), qdd( qold.size(), 0.0 );
+    output->SetPosition( qold );
     output->SetVelocity( qd );
     output->SetAcceleration( qdd );
   }

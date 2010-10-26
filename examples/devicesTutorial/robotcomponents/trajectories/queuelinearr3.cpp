@@ -9,11 +9,6 @@
 
 #include <fstream>
 
-#if (CISST_OS == CISST_LINUX_XENOMAI)
-#include <sys/mman.h>
-#include <native/task.h>
-#endif
-
 using namespace std;
 
 class File : public devRobotComponent {
@@ -26,7 +21,7 @@ private:
 public:
 
   File( const std::string& fname ): 
-    devRobotComponent( "file", 0.01, true ){
+    devRobotComponent( "file", 0.001, true ){
     input = ProvideInputR3( "input", 
 			    devRobotComponent::POSITION |
 			    devRobotComponent::VELOCITY |
@@ -45,12 +40,6 @@ public:
 
 int main(){
 
-#if (CISST_OS == CISST_LINUX_XENOMAI)
-  RT_TASK main;
-  mlockall( MCL_CURRENT | MCL_FUTURE );
-  rt_task_shadow( &main, "main", 30, 0 );
-#endif
-
   mtsTaskManager* taskManager = mtsTaskManager::GetInstance();
 
   vctFixedSizeVector<double,3> p1( rand()*10.0/RAND_MAX-5.0,
@@ -67,10 +56,10 @@ int main(){
 				   rand()*10.0/RAND_MAX-5.0 );
   double v = rand()*10.0/RAND_MAX;
 
-  devKeyboard kb;
-  kb.SetQuitKey('q');
-  kb.AddKeyWriteFunction('n', "next", devSetPoints::NextSetPoint, false );
-  taskManager->AddComponent( &kb );
+  devKeyboard keyboard;
+  keyboard.SetQuitKey('q');
+  keyboard.AddKeyWriteFunction('n', "next", devSetPoints::NextSetPoint, true );
+  taskManager->AddComponent( &keyboard );
 
   std::vector< vctFixedSizeVector<double,3> > p;
   p.push_back( p1 );
@@ -88,7 +77,7 @@ int main(){
   taskManager->AddComponent( &file );
 
   devLinearR3 trajectory( "trajectory",
-			  0.01,
+			  0.001,
 			  true,
 			  devTrajectory::QUEUE,
 			  devTrajectory::POSITION,
@@ -96,25 +85,28 @@ int main(){
 			  v );
   taskManager->AddComponent( &trajectory );
 
-  taskManager->Connect( "keyboard",  "next",
-			"setpoints", devSetPoints::Control );
+  taskManager->Connect( keyboard.GetName(),  "next",
+			setpoints.GetName(), devSetPoints::Control );
 
-  taskManager->Connect( "trajectory", devTrajectory::Input,
-                        "setpoints",  devSetPoints::Output );
+  taskManager->Connect( trajectory.GetName(), devTrajectory::Input,
+                        setpoints.GetName(),  devSetPoints::Output );
 
-  taskManager->Connect( "trajectory", devTrajectory::Output,
-                        "file",       "input" );
+  taskManager->Connect( trajectory.GetName(), devTrajectory::Output,
+                        file.GetName(),       "input" );
 
 
   taskManager->CreateAll();
-  //taskManager->StartAll();
-  kb.Start();
+
+  keyboard.Start();
   setpoints.Start();
-  osaSleep(1);
-  file.Start();
+
+  while( !setpoints.IsRunning() )  osaSleep(0.01);
   trajectory.Start();
 
-  getchar();
+  while( !trajectory.IsRunning() ) osaSleep(0.01);
+  file.Start();
+
+  pause();
 
   return 0;
 }

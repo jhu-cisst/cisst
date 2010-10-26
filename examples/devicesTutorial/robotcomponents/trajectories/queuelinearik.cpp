@@ -10,11 +10,6 @@
 #include <fstream>
 using namespace std;
 
-#if (CISST_OS == CISST_LINUX_XENOMAI)
-#include <sys/mman.h>
-#include <native/task.h>
-#endif
-
 class File : public devRobotComponent {
 
 private:
@@ -48,12 +43,6 @@ double myrand( double low, double high )
 { return (rand()/((double)RAND_MAX)) * fabs( high-low ) - low; }
 
 int main(){
-
-#if (CISST_OS == CISST_LINUX_XENOMAI)
-  RT_TASK main;
-  mlockall( MCL_CURRENT | MCL_FUTURE );
-  rt_task_shadow( &main, "main", 30, 0 );
-#endif
 
   mtsTaskManager* taskManager = mtsTaskManager::GetInstance();
 
@@ -114,10 +103,10 @@ int main(){
   double v = rand()*1.0/RAND_MAX;
   double w = rand()*1.0/RAND_MAX;
 
-  devKeyboard kb;
-  kb.SetQuitKey('q');
-  kb.AddKeyWriteFunction('n', "next", devSetPoints::NextSetPoint, false );
-  taskManager->AddComponent( &kb );
+  devKeyboard keyboard;
+  keyboard.SetQuitKey('q');
+  keyboard.AddKeyWriteFunction('n', "next", devSetPoints::NextSetPoint, true );
+  taskManager->AddComponent( &keyboard );
 
   std::vector< vctFrame4x4<double> > Rt;
   Rt.push_back( Rt1 );
@@ -145,25 +134,28 @@ int main(){
 			  q1 );
   taskManager->AddComponent( &trajectory );
 
-  taskManager->Connect( "keyboard",  "next",
-			"setpoints", devSetPoints::Control );
+  taskManager->Connect( keyboard.GetName(),  "next",
+			setpoints.GetName(), devSetPoints::Control );
 
-  taskManager->Connect( "trajectory", devTrajectory::Input,
-                        "setpoints",  devSetPoints::Output );
+  taskManager->Connect( trajectory.GetName(), devTrajectory::Input,
+                        setpoints.GetName(),  devSetPoints::Output );
 
-  taskManager->Connect( "trajectory", devTrajectory::Output,
-                        "file",       "input" );
+  taskManager->Connect( trajectory.GetName(), devTrajectory::Output,
+                        file.GetName(),       "input" );
 
 
   taskManager->CreateAll();
-  //taskManager->StartAll();
+
+  keyboard.Start();
   setpoints.Start();
-  osaSleep(1);
-  kb.Start();
-  file.Start();
+
+  while( !setpoints.IsRunning() )  osaSleep(0.01);
   trajectory.Start();
 
-  getchar();
+  while( !trajectory.IsRunning() ) osaSleep(0.01);
+  file.Start();
+
+  pause();
 
   return 0;
 }

@@ -9,7 +9,7 @@ devSetPoints::devSetPoints
 ( const std::string& taskname,
   const std::vector< vctDynamicVector<double> >& setpoints ) :
 
-  devRobotComponent( taskname, 0.01, true ), 
+  devRobotComponent( taskname, 0.001, true ), 
   rnsetpoints( setpoints ),
   cnt(0),
   state( false ),
@@ -32,7 +32,7 @@ devSetPoints::devSetPoints
 devSetPoints::devSetPoints
 ( const std::string& taskname,
   const std::vector< vctFixedSizeVector<double,3> >& setpoints ) : 
-  devRobotComponent( taskname, 0.01, true ), 
+  devRobotComponent( taskname, 0.001, true ), 
   r3setpoints( setpoints ),
   cnt(0),
   state( false ),
@@ -55,7 +55,7 @@ devSetPoints::devSetPoints
 ( const std::string& taskname,
   const std::vector< vctQuaternionRotation3<double> >& setpoints ) :
 
-  devRobotComponent( taskname, 0.01, true ), 
+  devRobotComponent( taskname, 0.001, true ), 
   so3setpoints( setpoints ),
   cnt(0),
   state( false ),
@@ -77,13 +77,13 @@ devSetPoints::devSetPoints
 devSetPoints::devSetPoints
 ( const std::string& taskname,
   const std::vector< vctFrame4x4<double> >& setpoints ) :
-
-  devRobotComponent( taskname, 0.01, true ), 
+  
+  devRobotComponent( taskname, 0.001, true ), 
   se3setpoints( setpoints ),
   cnt(0),
   state( false ),
   stateold( false ){
-  
+
   se3output = ProvideOutputSE3( devSetPoints::Output,
 				devRobotComponent::POSITION );
 

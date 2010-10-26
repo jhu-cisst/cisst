@@ -33,6 +33,12 @@ devSLERP::devSLERP( const std::string& TaskName,
 
   output = RequireOutputSO3( devTrajectory::Output, variables );
   
+  // Set the output in case the trajectory is started after other components
+  vctFixedSizeVector<double,3> w(0.0), wd(0.0);
+  output->SetRotation( qold );
+  output->SetVelocity( w );
+  output->SetAcceleration( wd );
+
 }
 
 vctQuaternionRotation3<double> devSLERP::GetInput(){
@@ -63,7 +69,15 @@ void devSLERP::Evaluate( double t, robFunction* function ){
     output->SetAcceleration( wd );
  
   }
+  else{
 
+    // Set the output in case the trajectory is started after other components
+    vctFixedSizeVector<double,3> w(0.0), wd(0.0);
+    output->SetRotation( qold );
+    output->SetVelocity( w );
+    output->SetAcceleration( wd );
+
+  }
 }
 
 robFunction* devSLERP::Queue( double t, robFunction* function ){
