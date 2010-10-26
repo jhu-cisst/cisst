@@ -21,9 +21,9 @@ add_executable( wamodect wamodect.cpp )
 
 
 # link with the cisst libraries
-cisst_requires( wamodegc "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstParameterTypes;cisstDevices;cisstRobot")
+cisst_target_link_libraries( wamodegc "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstParameterTypes;cisstDevices;cisstRobot")
 
-cisst_requires( wamodect "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstParameterTypes;cisstDevices;cisstRobot")
+cisst_target_link_libraries( wamodect "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstParameterTypes;cisstDevices;cisstRobot")
 
 
 

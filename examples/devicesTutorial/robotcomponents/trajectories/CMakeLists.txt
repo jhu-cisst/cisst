@@ -31,20 +31,20 @@ add_executable( queuelinearse3 queuelinearse3.cpp )
 add_executable( queuelinearik queuelinearik.cpp )
 
 # link with the cisst libraries
-cisst_requires( queuelinearrn "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstParameterTypes;cisstDevices;cisstRobot")
+cisst_target_link_libraries( queuelinearrn "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstParameterTypes;cisstDevices;cisstRobot")
 
-cisst_requires( tracklinearrn "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstParameterTypes;cisstDevices;cisstRobot")
+cisst_target_link_libraries( tracklinearrn "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstParameterTypes;cisstDevices;cisstRobot")
 
-cisst_requires( queuelinearr3 "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstParameterTypes;cisstDevices;cisstRobot")
+cisst_target_link_libraries( queuelinearr3 "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstParameterTypes;cisstDevices;cisstRobot")
 
-cisst_requires( tracklinearr3 "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstParameterTypes;cisstDevices;cisstRobot")
+cisst_target_link_libraries( tracklinearr3 "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstParameterTypes;cisstDevices;cisstRobot")
 
-cisst_requires( queueqlqrn "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstParameterTypes;cisstDevices;cisstRobot")
+cisst_target_link_libraries( queueqlqrn "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstParameterTypes;cisstDevices;cisstRobot")
 
-cisst_requires( queueslerp "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstParameterTypes;cisstDevices;cisstRobot")
+cisst_target_link_libraries( queueslerp "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstParameterTypes;cisstDevices;cisstRobot")
 
-cisst_requires( queuelinearse3 "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstParameterTypes;cisstDevices;cisstRobot")
+cisst_target_link_libraries( queuelinearse3 "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstParameterTypes;cisstDevices;cisstRobot")
 
-cisst_requires( queuelinearik "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstParameterTypes;cisstDevices;cisstRobot")
+cisst_target_link_libraries( queuelinearik "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstParameterTypes;cisstDevices;cisstRobot")
 
 

@@ -20,9 +20,9 @@ add_executable( robodocglut robodocglut.cpp )
 add_executable( wamglut wamglut.cpp )
 
 # link with the cisst libraries
-cisst_requires( robodocglut "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstParameterTypes;cisstDevices;cisstRobot")
+cisst_target_link_libraries( robodocglut "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstParameterTypes;cisstDevices;cisstRobot")
 
-cisst_requires( wamglut "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstParameterTypes;cisstDevices;cisstRobot")
+cisst_target_link_libraries( wamglut "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask;cisstParameterTypes;cisstDevices;cisstRobot")
 
 
 

@@ -11,20 +11,9 @@
 // To run the show
 #include <cisstMultiTask/mtsTaskManager.h>
 
-#if (CISST_OS == CISST_LINUX_XENOMAI)
-#include <sys/mman.h>
-#include <native/task.h>
-#endif
-
 using namespace std;
 
 int main(int argc, char** argv){
-
-#if (CISST_OS == CISST_LINUX_XENOMAI)
-  RT_TASK main;
-  mlockall( MCL_CURRENT | MCL_FUTURE );
-  rt_task_shadow( &main, "main", 30, 0 );
-#endif
 
   mtsTaskManager* taskManager = mtsTaskManager::GetInstance();
 
@@ -32,8 +21,10 @@ int main(int argc, char** argv){
   devGLUT glut(argc, argv);
 
   vctDynamicVector<double> qinit(7, 0.0);              // Initial joint values
-  vctMatrixRotation3<double> Rw0;
-  vctFixedSizeVector<double,3> tw0(0.0);
+  vctMatrixRotation3<double> Rw0( 0, 0, -1,
+				  0, 1, 0,
+				  1, 0, 0 );
+  vctFixedSizeVector<double,3> tw0(0.0, 0.0, 1.0);
   vctFrame4x4<double> Rtw0(Rw0,tw0);                   // base transformation
 
   vector<string> geomfiles;
@@ -47,12 +38,12 @@ int main(int argc, char** argv){
   geomfiles.push_back( path + "l7.obj" );
 
   // Create the world
-  devODEWorld world( 0.0001 );
+  devODEWorld world( 0.001 );
   taskManager->AddComponent(&world);
 
   // The WAM
   devODEManipulator WAM( "WAM", 
-			 0.001, 
+			 0.01, 
 			 true,
 			 devManipulator::FORCETORQUE,
 			 world, 
@@ -64,7 +55,7 @@ int main(int argc, char** argv){
 
   // the controller
   devGravityCompensation controller( "controller", 
-				     0.001, 
+				     0.01, 
 				     true,
 				     "libs/etc/cisstRobot/WAM/wam7.rob",
 				     Rtw0 );
