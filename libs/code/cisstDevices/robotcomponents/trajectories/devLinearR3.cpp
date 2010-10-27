@@ -1,14 +1,15 @@
 #include <cisstRobot/robLinearRn.h>
 #include <cisstDevices/robotcomponents/trajectories/devLinearR3.h>
 
-devLinearR3::devLinearR3( const std::string& TaskName, 
+devLinearR3::devLinearR3( const std::string& name, 
 			  double period, 
-			  bool enabled,
+			  devTrajectory::State state,
+			  osaCPUMask cpumask,
 			  devTrajectory::Mode mode,
 			  devTrajectory::Variables variables,
 			  const vctFixedSizeVector<double,3>& pinit,
 			  double vmax ) : 
-  devTrajectory( TaskName, period, enabled, mode ),
+  devTrajectory( name, period, state, cpumask, mode ),
   pold( pinit ),
   vmax( vmax ){
 

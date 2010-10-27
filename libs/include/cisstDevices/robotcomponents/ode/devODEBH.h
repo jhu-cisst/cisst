@@ -21,7 +21,8 @@ class CISST_EXPORT devODEBH : public devODEManipulator {
 
   devODEBH( const std::string& devname,
 	    double period,
-	    bool enabled,
+	    devManipulator::State state,
+	    osaCPUMask mask,
 	    devODEWorld& world,
 	    const vctFrame4x4<double>& Rtw0,
 	    const std::string& palmgeom,

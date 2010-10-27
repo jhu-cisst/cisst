@@ -21,7 +21,7 @@ private:
 public:
 
   File( const std::string& fname ): 
-    devRobotComponent( "file", 0.001, true ){
+    devRobotComponent( "file", 0.001, File::ENABLED, OSA_CPUANY ){
     input = ProvideInputR3( "input", 
 			    devRobotComponent::POSITION |
 			    devRobotComponent::VELOCITY |
@@ -78,7 +78,8 @@ int main(){
 
   devLinearR3 trajectory( "trajectory",
 			  0.001,
-			  true,
+			  devTrajectory::ENABLED,
+			  OSA_CPUANY,
 			  devTrajectory::QUEUE,
 			  devTrajectory::POSITION,
 			  p1,

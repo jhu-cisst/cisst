@@ -34,9 +34,10 @@ class CISST_EXPORT devLinearIK : public devTrajectory, public robManipulator {
 
  public:
 
-  devLinearIK( const std::string& TaskName, 
+  devLinearIK( const std::string& name, 
 	       double period, 
-	       bool enabled,
+	       devTrajectory::State state,
+	       osaCPUMask cpumask,
 	       devTrajectory::Mode mode,
 	       devTrajectory::Variables variables,
 	       double vmax, double wmax, 

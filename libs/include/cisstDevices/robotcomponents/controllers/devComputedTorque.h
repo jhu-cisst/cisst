@@ -28,9 +28,10 @@ class CISST_EXPORT devComputedTorque :
 
  public:
 
-  devComputedTorque( const std::string& taskname, 
+  devComputedTorque( const std::string& name, 
 		     double period,
-		     bool enabled,
+		     devController::State state,
+		     osaCPUMask mask,
 		     const std::string& robfile,
 		     const vctFrame4x4<double>& Rtw0, 
 		     const vctDynamicMatrix<double>& Kp,

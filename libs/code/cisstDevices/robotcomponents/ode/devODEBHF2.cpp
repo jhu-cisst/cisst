@@ -7,7 +7,8 @@ const double devODEBHF2::VELMAX = 1.0;
 
 devODEBHF2::devODEBHF2( const std::string& devname,
 			double period,
-			bool enabled,
+			devManipulator::State state,
+			osaCPUMask mask,
 			devODEWorld& world,
 			dSpaceID spaceid,
 			const std::string& metacarpgeom,
@@ -17,7 +18,7 @@ devODEBHF2::devODEBHF2( const std::string& devname,
 			double qmax ) : 
 
   // Initialize an empty ODE manipulator
-  devODEManipulator( devname, period, enabled ),
+  devODEManipulator( devname, period, state, mask ),
   sm0( NULL ),
   sm1( NULL ),
   sm2( NULL ),

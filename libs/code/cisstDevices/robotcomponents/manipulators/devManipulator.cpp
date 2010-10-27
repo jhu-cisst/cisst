@@ -6,11 +6,12 @@ const std::string devManipulator::Output = "Output";
 
 const std::string devManipulator::SetMode = "SetMode";
 
-devManipulator::devManipulator( const std::string& taskname, 
+devManipulator::devManipulator( const std::string& name, 
 				double period,
-				bool enabled,
+				devManipulator::State state,
+				osaCPUMask cpumask,
 				devManipulator::Mode mode ) : 
-  devRobotComponent( taskname, period, enabled ),
+  devRobotComponent( name, period, state, cpumask ),
   mtsMode( mode ){
 
   // Create the control interface

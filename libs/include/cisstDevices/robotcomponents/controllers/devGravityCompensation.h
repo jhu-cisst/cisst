@@ -22,9 +22,10 @@ class CISST_EXPORT devGravityCompensation :
 
  public:
 
-  devGravityCompensation( const std::string& taskname, 
+  devGravityCompensation( const std::string& name, 
 			  double period,
-			  bool enabled,
+			  devController::State state,
+			  osaCPUMask mask,
 			  const std::string& robfile,
 			  const vctFrame4x4<double>& Rtwb );
 

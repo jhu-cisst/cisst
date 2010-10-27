@@ -38,13 +38,14 @@ int main(int argc, char** argv){
   geomfiles.push_back( path + "l7.obj" );
 
   // Create the world
-  devODEWorld world( 0.001 );
+  devODEWorld world( 0.001, OSA_CPUANY );
   taskManager->AddComponent(&world);
 
   // The WAM
   devODEManipulator WAM( "WAM", 
 			 0.01, 
-			 true,
+			 devManipulator::ENABLED,
+			 OSA_CPUANY,
 			 devManipulator::FORCETORQUE,
 			 world, 
 			 "libs/etc/cisstRobot/WAM/wam7.rob",
@@ -56,7 +57,8 @@ int main(int argc, char** argv){
   // the controller
   devGravityCompensation controller( "controller", 
 				     0.01, 
-				     true,
+				     devManipulator::ENABLED,
+				     OSA_CPUANY,
 				     "libs/etc/cisstRobot/WAM/wam7.rob",
 				     Rtw0 );
   taskManager->AddComponent(&controller);

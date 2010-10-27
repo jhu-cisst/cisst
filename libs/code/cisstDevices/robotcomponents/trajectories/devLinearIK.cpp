@@ -1,8 +1,9 @@
 #include <cisstDevices/robotcomponents/trajectories/devLinearIK.h>
 
-devLinearIK::devLinearIK( const std::string& TaskName, 
+devLinearIK::devLinearIK( const std::string& name, 
 			  double period, 
-			  bool enabled,
+			  devTrajectory::State state,
+			  osaCPUMask mask,
 			  devTrajectory::Mode mode,
 			  devTrajectory::Variables variables,
 			  double vmax, 
@@ -10,7 +11,7 @@ devLinearIK::devLinearIK( const std::string& TaskName,
 			  const std::string& robfile,
 			  const vctFrame4x4<double>& Rtw0,
 			  const vctDynamicVector<double>& qinit ) :
-  devTrajectory( TaskName, period, enabled, mode ),
+  devTrajectory( name, period, state, mask, mode ),
   robManipulator( robfile, Rtw0 ),
   Rtold( ForwardKinematics( qinit ) ),
   qold( qinit ),

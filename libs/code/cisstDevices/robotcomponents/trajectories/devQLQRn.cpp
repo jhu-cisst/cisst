@@ -1,15 +1,16 @@
 #include <cisstRobot/robQLQRn.h>
 #include <cisstDevices/robotcomponents/trajectories/devQLQRn.h>
 
-devQLQRn::devQLQRn( const std::string& TaskName, 
+devQLQRn::devQLQRn( const std::string& name, 
 		    double period,
-		    bool enabled,
+		    devTrajectory::State state,
+		    osaCPUMask cpumask,
 		    devTrajectory::Mode mode,
 		    devTrajectory::Variables variables,
 		    const vctDynamicVector<double>& qinit,
 		    const vctDynamicVector<double>& qdmax,
 		    const vctDynamicVector<double>& qddmax ) :
-  devTrajectory( TaskName, period, enabled, mode ),
+  devTrajectory( name, period, state, cpumask, mode ),
   qold( qinit ),
   qdmax( qdmax ),
   qddmax( qddmax ){

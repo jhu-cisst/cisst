@@ -32,9 +32,10 @@ class CISST_EXPORT devLinearSE3 : public devTrajectory {
   
  public:
   
-  devLinearSE3( const std::string& TaskName,
+  devLinearSE3( const std::string& name,
 		double period,
-		bool enabled,
+		devTrajectory::State state,
+		osaCPUMask cpumask,
 		devTrajectory::Mode mode,
 		devTrajectory::Variables variables,
 		const vctFrame4x4<double>& Rtinit , 

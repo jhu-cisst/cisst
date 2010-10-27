@@ -45,7 +45,7 @@ int main(int argc, char** argv){
   geomfiles.push_back( path + "l7.obj" );
 
   // Create the world
-  devODEWorld world( 0.001 );
+  devODEWorld world( 0.001, OSA_CPU1 );
   taskManager->AddComponent(&world);
 
   devKeyboard keyboard;
@@ -67,7 +67,8 @@ int main(int argc, char** argv){
   vctDynamicVector<double> qdmax(7, 0.1), qddmax(7, .05);
   devQLQRn trajectory( "trajectory", 
 		       0.01, 
-		       true,
+		       devTrajectory::ENABLED,
+		       OSA_CPUANY,
 		       devTrajectory::QUEUE,
 		       devTrajectory::POSITION,
 		       qinit,
@@ -86,7 +87,8 @@ int main(int argc, char** argv){
   Kp[6][6] = 20000;   Kd[6][6] = 100;
   devComputedTorque controller( "controller",
 				0.01,
-				true,
+				devController::ENABLED,
+				OSA_CPU2,
 				"libs/etc/cisstRobot/WAM/wam7.rob",
 				Rtw0, 
 				Kp, 
@@ -96,7 +98,8 @@ int main(int argc, char** argv){
   // The WAM
   devODEManipulator WAM( "WAM",          // The task name "WAM"
 			 0.01,           // The WAM runs at 200Hz
-			 true,
+			 devManipulator::ENABLED,
+			 OSA_CPUANY,
 			 //devManipulator::POSITION,
 			 devManipulator::FORCETORQUE,
 			 world,          // The world used to simulate the WAM

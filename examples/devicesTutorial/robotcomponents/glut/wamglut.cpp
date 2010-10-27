@@ -30,7 +30,8 @@ int main( int argc, char** argv ){
   vctDynamicVector<double> qddmax( 7, 0.05 );
   devQLQRn trajectory( "trajectory", 
 		       0.01, 
-		       true, 
+		       devTrajectory::ENABLED,
+		       OSA_CPUANY,
 		       devTrajectory::QUEUE,
 		       devTrajectory::POSITION,
 		       qinit, 
@@ -51,6 +52,8 @@ int main( int argc, char** argv ){
 
   devGLUTManipulator WAM("WAM", 
 			 0.03,
+			 devManipulator::ENABLED,
+			 OSA_CPUANY,
 			 path + "wam7.rob",
 			 vctFrame4x4<double>(),
 			 vctDynamicVector<double>( 7, 0.0 ),

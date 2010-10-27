@@ -55,6 +55,8 @@ class CISST_EXPORT devGLUTManipulator :
   */
   devGLUTManipulator( const std::string& devname,
 		      double period,
+		      devManipulator::State state,
+		      osaCPUMask mask,
 		      const std::string& robotfn,
 		      const vctFrame4x4<double>& Rtw0,
 		      const vctDynamicVector<double>& qinit,

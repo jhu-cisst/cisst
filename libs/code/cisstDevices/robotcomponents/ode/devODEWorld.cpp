@@ -20,8 +20,9 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnLogger.h>
 
 devODEWorld::devODEWorld( double period,
+			  osaCPUMask mask,
 			  const vctFixedSizeVector<double,3>& gravity ) : 
-  mtsTaskPeriodic( "devODEWorld", period, true ),
+  devRobotComponent( "devODEWorld", period, devODEWorld::ENABLED, mask ),
   timestep(period) {
   
   dInitODE2(0);                             // initialize the engine
@@ -143,7 +144,7 @@ static void space_collision(void *argv, dGeomID o1, dGeomID o2){
   }
 }
 
-void devODEWorld::Run() {
+void devODEWorld::RunComponent() {
   
   for( size_t i=0; i<joints.size(); i++ )
     { joints[i]->ApplyForceTorque(); }

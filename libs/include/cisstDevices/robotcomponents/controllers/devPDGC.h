@@ -27,9 +27,10 @@ class CISST_EXPORT devPDGC :
 
  public:
 
-  devPDGC( const std::string& taskname, 
+  devPDGC( const std::string& name, 
 	   double period,
-	   bool enabled,
+	   devController::State state,
+	   osaCPUMask mask,
 	   const std::string& robfile,
 	   const vctFrame4x4<double>& Rtw0, 
 	   const vctDynamicMatrix<double>& Kp,

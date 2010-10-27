@@ -52,7 +52,15 @@ int main(int argc, char** argv){
   taskManager->AddTask(&world);
 
   // The WAM
-  devODEManipulator WAM("WAM", 0.001, world, "wam7.rob", qinit, Rtw0,geomfiles);
+  devODEManipulator WAM( "WAM", 
+			 0.001, 
+			 devManipulator::ENABLED,
+			 OSA_CPU1,
+			 world, 
+			 "wam7.rob", 
+			 qinit, 
+			 Rtw0,
+			 geomfiles);
   taskManager->AddTask( &WAM );
 
   // Create a (dummy) trajectory

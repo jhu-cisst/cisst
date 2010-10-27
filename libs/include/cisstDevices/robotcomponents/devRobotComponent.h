@@ -4,6 +4,9 @@
 
 #include <cisstMultiTask/mtsTransformationTypes.h>
 #include <cisstMultiTask/mtsTaskPeriodic.h>
+
+#include <cisstOSAbstraction/osaCPUAffinity.h>
+
 #include <cisstDevices/devExport.h>
 
 class CISST_EXPORT devRobotComponent : public mtsTaskPeriodic {
@@ -234,25 +237,32 @@ class CISST_EXPORT devRobotComponent : public mtsTaskPeriodic {
 
  private:
   
-  std::string name;
+  osaCPUMask cpumask;
 
-  //! MTS bool to enable the controller's output
-  /**
-     When enabled is true, the controller writes commanded torques. When
-     false the torques are all zero.
-  */
-  mtsBool mtsEnabled;
+  mtsInt mtsState;
   bool risingedge;
-  bool Enabled() const;
 
+ public:
+
+  enum State
+  {
+    ENABLED,
+    DISABLED
+  };
+  
  protected:
 
-  devRobotComponent( const std::string& name, double period, bool enabled );
+  devRobotComponent::State GetState() const;
+
+  devRobotComponent( const std::string& name, 
+		     double period,
+		     devRobotComponent::State state,
+		     osaCPUMask mask = OSA_CPUANY );
 
  public:
 
   void Configure(){}
-  void Startup(){}
+  void Startup();
   void Run();
   void Cleanup(){}
 
@@ -315,44 +325,10 @@ class CISST_EXPORT devRobotComponent : public mtsTaskPeriodic {
   SE3IO* RequireInputSE3( const std::string& name,
 			  devRobotComponent::Variables variables );
   
-  virtual void RunComponent() {}
+  virtual void RunComponent(){}
 
 };
 
 
 #endif
 
-/*
-class CISST_EXPORT Cartesian : public IO {
-
- private:
-  
-  mtsFrame<double>  Rt;
-  mtsVector<double> vw;
-  mtsVector<double> vdwd;
-  mtsVector<double> fm;
-  
- public:
-  
-  Cartesian( Cartesian::Variables variables );
-
-  SetPosition    ( const vctFrame4x4<double>& Rt   );
-  SetVelocity    ( const vctFixedSizeVector<double,6>& vw  );
-  SetAcceleration( const vctFixedSizeVector<double,6>& vdwd );
-  SetForceTorque ( const vctFixedSizeVector<double,6>& ft  );
-
-  GetPosition    ( vctFrame4x4<double>& Rt,            double& t );
-  GetVelocity    ( vctFixedSizeVector<double,6>& vw,   double& t );
-  GetAcceleration( vctFixedSizeVector<double,6>& vdwd, double& t );
-  GetForceTorque ( vctFixedSizeVector<double,6>& ft,   double& t );
-
-};
-
-class Variables
-
-
-  std::string SetPositionFnName;
-  std::string SetVelocityFnName;
-  std::string SetAccelerationFnName;
-  std::string SetForceTorqueFnName;
-*/

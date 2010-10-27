@@ -48,9 +48,10 @@ class CISST_EXPORT devSLERP : public devTrajectory {
   
  public:
   
-  devSLERP( const std::string& TaskName,
+  devSLERP( const std::string& name,
 	    double period,
-	    bool enabled,
+	    devTrajectory::State state,
+	    osaCPUMask mask,
 	    devTrajectory::Mode mode,
 	    devTrajectory::Variables variables,
 	    const vctQuaternionRotation3<double>& qinit , 

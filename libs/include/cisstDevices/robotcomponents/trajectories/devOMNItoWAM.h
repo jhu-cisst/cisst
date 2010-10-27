@@ -26,10 +26,11 @@ class CISST_EXPORT devOMNItoWAM : public devTrajectoryRn {
 
  public:
 
-  devOMNItoWAM( const std::string& taskname, 
+  devOMNItoWAM( const std::string& name, 
 		const std::string& InputFunctionName,
 		double period, 
-		bool enabled,
+		devTrajectory::State state,
+		osaCPUMask cpumask,
 		const std::string& fileomni,
 		const vctFrame4x4<double>& Rtw0omni,
 		const vctDynamicVector<double>& qomni,

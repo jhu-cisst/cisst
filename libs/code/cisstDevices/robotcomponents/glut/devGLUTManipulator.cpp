@@ -21,13 +21,15 @@ http://www.cisst.org/cisst/license.txt.
 
 devGLUTManipulator::devGLUTManipulator( const std::string& devname,
 					double period,
+					devManipulator::State state,
+					osaCPUMask mask,
 					const std::string& robotfn,
 					const vctFrame4x4<double>& Rtw0,
 					const vctDynamicVector<double>& qinit,
 					const std::vector<std::string>& geomsfn,
 					const std::string& basefn ) :
 
-  devManipulator( devname, period, true, devManipulator::POSITION ),
+  devManipulator( devname, period, state, mask, devManipulator::POSITION ),
   robManipulator( robotfn, Rtw0 ),
   base(NULL){
 

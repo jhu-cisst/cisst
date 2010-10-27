@@ -17,6 +17,7 @@
 # all source files
 SET(SOURCE_FILES
     osaClassServices.cpp
+    osaCPUAffinity.cpp
     osaCriticalSection.cpp
     osaDynamicLoader.cpp
     osaDynamicLoaderAndFactory.cpp
@@ -37,6 +38,7 @@ SET(SOURCE_FILES
 # all header files
 SET(HEADER_FILES
     osaForwardDeclarations.h
+    osaCPUAffinity.h
     osaCriticalSection.h
     osaDynamicLoader.h
     osaDynamicLoaderAndFactory.h

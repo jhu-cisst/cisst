@@ -17,14 +17,15 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstDevices/robotcomponents/trajectories/devSLERP.h>
 
-devSLERP::devSLERP( const std::string& TaskName, 
+devSLERP::devSLERP( const std::string& name, 
 		    double period,
-		    bool enabled,
+		    devTrajectory::State state,
+		    osaCPUMask cpumask,
 		    devTrajectory::Mode mode,
 		    devTrajectory::Variables variables,
 		    const vctQuaternionRotation3<double>& qinit, 
 		    double wmax ) : 
-  devTrajectory( TaskName, period, enabled, mode ),
+  devTrajectory( name, period, state, cpumask, mode ),
   qold( qinit ),
   wmax(wmax){
 

@@ -1,14 +1,15 @@
 #include <cisstRobot/robLinearRn.h>
 #include <cisstDevices/robotcomponents/trajectories/devLinearRn.h>
 
-devLinearRn::devLinearRn( const std::string& TaskName, 
+devLinearRn::devLinearRn( const std::string& name, 
 			  double period,
-			  bool enabled,
+			  devTrajectory::State state,
+			  osaCPUMask cpumask,
 			  devTrajectory::Mode mode,
 			  devTrajectory::Variables variables,
 			  const vctDynamicVector<double>& qinit,
 			  const vctDynamicVector<double>& qdmax ) :
-  devTrajectory( TaskName, period, enabled, mode ),
+  devTrajectory( name, period, state, cpumask, mode ),
   input( NULL ),
   output( NULL ),
   qold( qinit ),

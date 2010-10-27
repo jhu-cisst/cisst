@@ -15,7 +15,10 @@ class CISST_EXPORT devController: public devRobotComponent {
 
  public:
   
-  devController( const std::string& taskname, double period, bool enabled );
+  devController( const std::string& name, 
+		 double period,
+		 devController::State state, 
+		 osaCPUMask mask );
   ~devController(){}
 
   static const std::string Input;

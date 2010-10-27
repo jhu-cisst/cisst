@@ -1,9 +1,10 @@
 #include <cisstDevices/robotcomponents/trajectories/devOMNItoWAM.h>
 
-devOMNItoWAM::devOMNItoWAM( const std::string& TaskName, 
+devOMNItoWAM::devOMNItoWAM( const std::string& name, 
 			    const std::string& InputFunctionName,
 			    double period, 
-			    bool enabled,
+			    devTrajectory::State state,
+			    osaCPUMask cpumask,
 			    const std::string& fileomni,
 			    const vctFrame4x4<double>& Rtw0omni,
 			    const vctDynamicVector<double>& qomni,
@@ -11,7 +12,7 @@ devOMNItoWAM::devOMNItoWAM( const std::string& TaskName,
 			    const vctFrame4x4<double>& Rtw0wam,
 			    const vctDynamicVector<double>& qwam ) :
 
-  devTrajectoryRn( TaskName, InputFunctionName, period, enabled, qomni ),
+  devTrajectoryRn( name, InputFunctionName, period, enabled, qomni ),
   qomni( qomni ),
   qwam( qwam ),
   told( 0.0 ){

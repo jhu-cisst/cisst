@@ -68,7 +68,8 @@ class CISST_EXPORT devODEManipulator :
 
   devODEManipulator( const std::string& devname, 
 		     double period,
-		     bool enabled );
+		     devManipulator::State state,
+		     osaCPUMask mask );
 
   //! ODE Manipulator generic constructor
   /**
@@ -84,7 +85,8 @@ class CISST_EXPORT devODEManipulator :
   */
   devODEManipulator( const std::string& devname,
 		     double period,
-		     bool enabled,
+		     devManipulator::State state,
+		     osaCPUMask mask,
 		     devManipulator::Mode mode,
 		     devODEWorld& world,
 		     const std::string& manfile,

@@ -7,13 +7,13 @@ const std::string devTrajectory::Output    = "Output";
 
 const std::string devTrajectory::SetMode   = "SetMode";
 
-devTrajectory::devTrajectory( const std::string& TaskName, 
+devTrajectory::devTrajectory( const std::string& name, 
 			      double period,
-			      bool enabled,
+			      devTrajectory::State state,
+			      osaCPUMask cpumask,
 			      devTrajectory::Mode mode ) :
-
-  devRobotComponent( TaskName, period, enabled ),  // set the task
-  mtsMode( mode ),                             // start in queue mode
+  devRobotComponent( name, period, state, cpumask ),  // set the task
+  mtsMode( mode ),                                    // start in queue mode
   tstart( -1.0 ){
 
   // Create the control interface

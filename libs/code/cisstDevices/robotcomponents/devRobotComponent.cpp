@@ -1082,18 +1082,20 @@ devRobotComponent::SE3IO::GetForceTorque
 
 devRobotComponent::devRobotComponent( const std::string& name, 
 				      double period, 
-				      bool enabled ) :
+				      devRobotComponent::State state,
+				      osaCPUMask cpumask ) :
   mtsTaskPeriodic( name, period, true ),
-  mtsEnabled( enabled ),
+  cpumask( cpumask ),
+  mtsState( (int)state ),
   risingedge( false ) {
   
   // Create the control interface
   mtsInterfaceProvided* cinterface;
   cinterface = AddInterfaceProvided( devRobotComponent::Control );
   if( cinterface ){
-    StateTable.AddData( mtsEnabled, "Enabled" );
+    StateTable.AddData( mtsState, "Enabled" );
     cinterface->AddCommandWriteState
-      ( StateTable, mtsEnabled, devRobotComponent::EnableCommand );
+      ( StateTable, mtsState, devRobotComponent::EnableCommand );
   }
 
 }
@@ -1282,14 +1284,26 @@ devRobotComponent::RequireInputSE3
 }
 
 
-bool devRobotComponent::Enabled() const
-{ return mtsEnabled; }
+devRobotComponent::State devRobotComponent::GetState() const
+{ return devRobotComponent::State( (int) mtsState ); }
+
+void devRobotComponent::Startup(){
+
+  // Set the affinity of the component
+  if( osaCPUSetAffinity( cpumask ) != OSASUCCESS ){
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+		      << "Failed to set the affinity of component "
+		      << GetName() << std::endl;
+  }
+
+}
+
 
 void devRobotComponent::Run(){
 
   ProcessQueuedCommands();
 
-  if( Enabled() ){
+  if( GetState() == devRobotComponent::ENABLED ){
 
     if( !risingedge ){
       CMN_LOG_RUN_WARNING << GetName() << " is enabled." << std::endl;

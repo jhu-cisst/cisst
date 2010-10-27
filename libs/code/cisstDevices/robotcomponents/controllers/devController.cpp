@@ -4,9 +4,10 @@ const std::string devController::Input    = "Input";
 const std::string devController::Output   = "Output";
 const std::string devController::Feedback = "Feedback";
 
-devController::devController( const std::string& taskname, 
+devController::devController( const std::string& name, 
 			      double period,
-			      bool enabled ) : 
-  devRobotComponent( taskname, period, enabled ){}
+			      devController::State state,
+			      osaCPUMask mask ) : 
+  devRobotComponent( name, period, state, mask ){}
 
 void devController::RunComponent() { Control(); }

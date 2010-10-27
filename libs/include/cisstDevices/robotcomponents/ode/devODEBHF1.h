@@ -25,7 +25,8 @@ class CISST_EXPORT devODEBHF1 : public devODEManipulator {
 
   devODEBHF1( const std::string& devname,
 	      double period,
-	      bool enabled,
+	      devManipulator::State state,
+	      osaCPUMask mask,
 	      devODEWorld& world,
 	      dSpaceID spaceid,
 	      const std::string& metacarpgeom,

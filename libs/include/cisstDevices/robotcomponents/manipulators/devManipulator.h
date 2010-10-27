@@ -37,7 +37,8 @@ class CISST_EXPORT devManipulator : public devRobotComponent {
 
   devManipulator( const std::string& taskname, 
 		  double period, 
-		  bool enabled,
+		  devManipulator::State state,
+		  osaCPUMask cpumask,
 		  devManipulator::Mode mode );
   ~devManipulator(){}
   

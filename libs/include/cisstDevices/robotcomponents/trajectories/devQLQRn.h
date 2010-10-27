@@ -32,9 +32,10 @@ class CISST_EXPORT devQLQRn : public devTrajectory {
 
  public:
 
-  devQLQRn( const std::string& TaskName, 
+  devQLQRn( const std::string& name, 
 	    double period, 
-	    bool enabled,
+	    devTrajectory::State state,
+	    osaCPUMask mask,
 	    devTrajectory::Mode mode,
 	    devTrajectory::Variables variables,
 	    const vctDynamicVector<double>& qinit,

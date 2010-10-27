@@ -28,9 +28,10 @@ class CISST_EXPORT devLinearRn : public devTrajectory {
 
  public:
 
-  devLinearRn( const std::string& TaskName, 
+  devLinearRn( const std::string& name, 
 	       double period, 
-	       bool enabled,
+	       devTrajectory::State state,
+	       osaCPUMask cpumask,
 	       devTrajectory::Mode mode,
 	       devTrajectory::Variables variables,
 	       const vctDynamicVector<double>& qinit,

@@ -3,13 +3,14 @@
 
 devLinearSE3::devLinearSE3( const std::string& TaskName,
 			    double period,
-			    bool enabled,
+			    devTrajectory::State state,
+			    osaCPUMask cpumask,
 			    devTrajectory::Mode mode,
 			    devTrajectory::Variables variables,
 			    const vctFrame4x4<double>& Rtinit,
 			    double vmax, 
 			    double wmax ) : 
-  devTrajectory( TaskName, period, enabled, mode ),
+  devTrajectory( TaskName, period, state, cpumask, mode ),
   Rtold( Rtinit ),
   vmax( vmax ),
   wmax( wmax ){

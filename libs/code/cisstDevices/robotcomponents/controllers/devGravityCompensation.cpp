@@ -1,11 +1,12 @@
 #include <cisstDevices/robotcomponents/controllers/devGravityCompensation.h>
 
-devGravityCompensation::devGravityCompensation(const std::string& taskname, 
+devGravityCompensation::devGravityCompensation(const std::string& name, 
 					       double period,
-					       bool enabled,
+					       devController::State state,
+					       osaCPUMask mask,
 					       const std::string& robfile,
 					       const vctFrame4x4<double>& Rtw0):
-  devController( taskname, period, enabled ),
+  devController( name, period, state, mask ),
   robManipulator( robfile, Rtw0 ){
   
   output = RequireOutputRn( devController::Output,

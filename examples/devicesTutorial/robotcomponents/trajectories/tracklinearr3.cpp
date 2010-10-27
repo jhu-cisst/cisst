@@ -21,7 +21,7 @@ private:
 public:
 
   Source( const std::string& fname ): 
-    devRobotComponent( "Source", 0.2, false ) {
+    devRobotComponent( "Source", 0.2, Source::DISABLED, OSA_CPUANY ) {
 
     output = ProvideOutputR3( "Output", devRobotComponent::POSITION );
     ifs.open( fname.data() );
@@ -50,7 +50,7 @@ private:
 public:
 
   Sink( const std::string& fname ): 
-    devRobotComponent( "Sink", 0.01, true ),
+    devRobotComponent( "Sink", 0.01, Sink::ENABLED, OSA_CPUANY ),
     tstart( osaGetTime()) {
 
     input = ProvideInputR3( "Input", 
@@ -93,7 +93,8 @@ int main(){
 
   devLinearR3 trajectory( "Trajectory",
 			  0.01,
-			  false,
+			  devTrajectory::ENABLED,
+			  OSA_CPUANY,
 			  devTrajectory::TRACK,
 			  devTrajectory::POSITION,
 			  vctDynamicVector<double>( 3, 0.0 ),

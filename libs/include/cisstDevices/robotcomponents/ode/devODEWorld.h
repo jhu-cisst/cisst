@@ -20,14 +20,14 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <ode/ode.h>
 
+#include <cisstDevices/robotcomponents/devRobotComponent.h>
 #include <cisstDevices/robotcomponents/ode/devODEBody.h>
 #include <cisstDevices/robotcomponents/ode/devODEJoint.h>
 
-#include <cisstMultiTask/mtsTaskPeriodic.h>
 #include <cisstVector/vctFixedSizeVector.h>
 #include <cisstDevices/devExport.h>
 
-class CISST_EXPORT devODEWorld : public mtsTaskPeriodic {
+class CISST_EXPORT devODEWorld : public devRobotComponent {
 
 private:
 
@@ -88,6 +88,7 @@ public:
                     \$\begin{bmatrix} 0 & 0 & -9.81 \end{bmatrix}\$.
   */
   devODEWorld( double period,
+	       osaCPUMask mask,
 	       const vctFixedSizeVector<double,3>& gravity = 
 	       vctFixedSizeVector<double,3>(0.0, 0.0, -9.81) );
 
@@ -124,10 +125,7 @@ public:
   */
   void Collision( dGeomID o1, dGeomID o2 );
 
-  void Configure( const std::string& = "" ){}
-  void Startup(){}
-  void Cleanup(){}
-  void Run();
+  void RunComponent();
 
   void Insert( devODEBody* body );
   void Insert( devODEJoint* joint );

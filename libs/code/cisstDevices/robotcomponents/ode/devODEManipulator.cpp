@@ -19,9 +19,10 @@ http://www.cisst.org/cisst/license.txt.
 
 devODEManipulator::devODEManipulator( const std::string& devname,
 				      double period,
-				      bool enabled ) : 
+				      devManipulator::State state,
+				      osaCPUMask mask ) : 
 
-  devManipulator( devname, period, enabled, devManipulator::FORCETORQUE ),
+  devManipulator( devname, period, state, mask, devManipulator::FORCETORQUE ),
   robManipulator( "", vctFrame4x4<double>() ),
   base( NULL ){
   
@@ -39,14 +40,15 @@ devODEManipulator::devODEManipulator( const std::string& devname,
 
 devODEManipulator::devODEManipulator(const std::string& devname,
 				     double period,
-				     bool enabled,
+				     devManipulator::State state,
+				     osaCPUMask mask,
 				     devManipulator::Mode mode,
 				     devODEWorld& world,
 				     const std::string& robotfilename,
 				     const vctFrame4x4<double>& Rtw0,
 				     const vctDynamicVector<double> qinit,
 				     const std::vector<std::string>& geomfiles):
-  devManipulator( devname, period, enabled, mode ),
+  devManipulator( devname, period, state, mask, mode ),
   robManipulator( robotfilename, Rtw0 ),
   worldid( world.WorldID() ),
   qinit( qinit ),

@@ -1,14 +1,15 @@
 #include <cisstDevices/robotcomponents/controllers/devPDGC.h>
 
-devPDGC::devPDGC( const std::string& taskname, 
+devPDGC::devPDGC( const std::string& name, 
 		  double period,
-		  bool enabled,
+		  devController::State state,
+		  osaCPUMask mask,
 		  const std::string& robfile,
 		  const vctFrame4x4<double>& Rtw0,
 		  const vctDynamicMatrix<double>& Kp,
 		  const vctDynamicMatrix<double>& Kd ) :
   
-  devController( taskname, period, enabled ),
+  devController( name, period, state, mask ),
   robManipulator( robfile, Rtw0 ),
   input( NULL ),
   output( NULL ),

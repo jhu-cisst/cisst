@@ -2,7 +2,8 @@
 
 devODEBH::devODEBH( const std::string& devname,
 		    double period,
-		    bool enabled,
+		    devManipulator::State state,
+		    osaCPUMask mask,
 		    devODEWorld& world,
 		    const vctFrame4x4<double>& Rtwb,
 		    const std::string& palmgeom,
@@ -10,7 +11,7 @@ devODEBH::devODEBH( const std::string& devname,
 		    const std::string& progeom,
 		    const std::string& intgeom ) : 
 
-  devODEManipulator( devname, period, enabled ){
+  devODEManipulator( devname, period, state, mask ){
 
   vctFixedSizeMatrix<double,3,3> I(0.0);
   I[0][0] = ( 0.04*0.04 + 0.05*0.05 ) / 3.0;
@@ -25,17 +26,17 @@ devODEBH::devODEBH( const std::string& devname,
 			 palmgeom, true );   
   world.Insert( base );
   
-  f1 = new devODEBHF1( devname+"F1", period, enabled,
+  f1 = new devODEBHF1( devname+"F1", period, state, mask,
 		       world, world.SpaceID(), 
 		       metgeom, progeom, intgeom, 
 		       base, 0.5 );
   
-  f2 = new devODEBHF2( devname+"F2", period, enabled,
+  f2 = new devODEBHF2( devname+"F2", period, state, mask,
 		       world, world.SpaceID(), 
 		       metgeom, progeom, intgeom, 
 		       base, 0.5 );
   
-  f3 = new devODEBHF3( devname+"F3", period, enabled,
+  f3 = new devODEBHF3( devname+"F3", period, state, mask,
 		       world, world.SpaceID(),
 		       progeom, intgeom, 
 		       base, 0.5 );

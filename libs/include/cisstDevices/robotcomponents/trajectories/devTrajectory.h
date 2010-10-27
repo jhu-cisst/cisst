@@ -19,15 +19,6 @@ class CISST_EXPORT devTrajectory : public devRobotComponent {
     IDLE  = 2
   };
 
-  //! Status of a trajectory
-  enum State
-  {
-    PENDING   = 0,
-    ACTIVE    = 1,
-    FINISHED  = 2,
-    UNDEFINED = 3
-  };
-
  private:
 
   std::vector< robFunction* > functions;
@@ -68,9 +59,10 @@ class CISST_EXPORT devTrajectory : public devRobotComponent {
 
  public:
   
-  devTrajectory( const std::string& TaskName,
+  devTrajectory( const std::string& name,
 		 double period, 
-		 bool enabled,
+		 devTrajectory::State state,
+		 osaCPUMask mask,
 		 devTrajectory::Mode mode );
 
   ~devTrajectory(){}

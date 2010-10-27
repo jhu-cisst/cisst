@@ -7,7 +7,8 @@ const double devODEBHF3::VELMAX = 1.0;
 
 devODEBHF3::devODEBHF3( const std::string& devname,
 			double period,
-			bool enabled,
+			devManipulator::State state,
+			osaCPUMask mask,
 			devODEWorld& world,
 			dSpaceID spaceid,
 			const std::string& proximalgeom,
@@ -16,7 +17,7 @@ devODEBHF3::devODEBHF3( const std::string& devname,
 			double qmax ) : 
 
   // Initialize an empty ODE manipulator
-  devODEManipulator( devname, period, enabled ),
+  devODEManipulator( devname, period, state, mask ),
   sm1( NULL ),
   sm2( NULL ),
   period( period ),
