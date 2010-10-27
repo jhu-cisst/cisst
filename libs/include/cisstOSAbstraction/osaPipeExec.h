@@ -23,7 +23,11 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _osaPipeExec_h
 #define _osaPipeExec_h
 
-class osaPipeExec {
+
+// Always include last
+#include <cisstOSAbstraction/osaExport.h>
+
+class CISST_EXPORT osaPipeExec {
     /*! Internals that are OS-dependent */
     enum {INTERNALS_SIZE = 32};
     char Internals[INTERNALS_SIZE];

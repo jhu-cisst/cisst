@@ -305,7 +305,7 @@ public:
     priority. The scheduler makes the next ready thread of the same
     priority active.
  */
-void osaCurrentThreadYield(void);
+CISST_EXPORT void osaCurrentThreadYield(void);
 
 
 
