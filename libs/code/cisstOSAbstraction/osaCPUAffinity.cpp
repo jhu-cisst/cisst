@@ -47,5 +47,6 @@ osaErrno osaCPUSetAffinity( osaCPUMask mask ){
 
 #endif
 
+  return OSAFAILURE;
 }
 
