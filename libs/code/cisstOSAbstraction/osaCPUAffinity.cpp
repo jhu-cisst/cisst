@@ -7,6 +7,8 @@
     (CISST_OS == CISST_LINUX_XENOMAI) 
 #include <unistd.h>
 #include <sched.h>
+#elif (CISST_OS == CISST_WINDOWS)
+#include <windows.h>
 #endif
 
 int osaCPUGetCount(){
@@ -16,6 +18,10 @@ int osaCPUGetCount(){
 #if (CISST_OS == CISST_LINUX)                       ||	\
     (CISST_OS == CISST_LINUX_XENOMAI) 
   cpucount = sysconf( _SC_NPROCESSORS_ONLN );
+#elif (CISST_OS == CISST_WINDOWS)
+	SYSTEM_INFO sysinfo;
+	GetSystemInfo( &sysinfo );
+	cpucount = sysinfo.dwNumberOfProcessors;
 #endif
 
   return cpucount;
@@ -41,6 +47,17 @@ osaErrno osaCPUSetAffinity( osaCPUMask mask ){
   }
 
   if( sched_setaffinity( 0, sizeof( set ), &set ) == 0 )
+    { return OSASUCCESS; }
+  else
+    { return OSAFAILURE; }
+
+#elif (CISST_OS == CISST_WINDOWS)
+
+  // Let the OS do the load balancing
+  if( mask == OSA_CPUANY ) 
+    { return OSASUCCESS; }
+
+  if( SetThreadAffinityMask( GetCurrentThread(), mask ) != 0 )
     { return OSASUCCESS; }
   else
     { return OSAFAILURE; }
