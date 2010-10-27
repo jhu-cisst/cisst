@@ -71,6 +71,16 @@ IF(WIN32)
     CISST_ADD_TO_INTERNAL(CISST_ADDITIONAL_LIBRARIES CISST_WSOCK_LIBRARY)
 ENDIF(WIN32)
 
+IF(CISST_HAS_LINUX_RTAI)
+  # Check for existence of query_module, which was removed in kernel
+  # versions 2.6+ (and possibly some earlier ones).
+  INCLUDE(CheckFunctionExists)
+  CHECK_FUNCTION_EXISTS("query_module" CMAKE_HAVE_QUERY_MODULE)
+  IF (CMAKE_HAVE_QUERY_MODULE)
+    ADD_DEFINITIONS(-DCMAKE_HAVE_QUERY_MODULE)
+  ENDIF (CMAKE_HAVE_QUERY_MODULE)
+ENDIF(CISST_HAS_LINUX_RTAI)
+
 # QNX does not require rt library for clock_gettime (contained in libc)
 IF("${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
   # QNX requires socket library

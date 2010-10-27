@@ -33,8 +33,10 @@ http://www.cisst.org/cisst/license.txt.
     #include <sys/stat.h>
     #include <unistd.h>
     #include <fstream> // to access /proc/modules
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,5,0))
+#ifdef CMAKE_HAVE_QUERY_MODULE
     #include <linux/module.h> // to query kernel module information
+    // Just in case <linux/module.h> does not declare query_module (e.g., Fedora kernel 2.4.20)
+    extern "C" int query_module(const char *name, int which, void *buf, size_t bufsize, size_t *ret);
 #endif
     const char __lock_filepath[] = "/var/lock/subsys/rtai";
     const char __lock_filename[] = "/var/lock/subsys/rtai/rtai.lock";
@@ -76,7 +78,6 @@ void __os_init(void)
 
     // list of kernel modules currently loaded
     std::vector<std::string> loadedModuleNames;
-
     std::string line;
     std::ifstream moduleList("/proc/modules");
     if (moduleList.is_open()) {
@@ -110,7 +111,7 @@ void __os_init(void)
     } else {
         // Check version of Linux kernel. query_module is only present up until
         // kernel 2.4 and was removed in Linux 2.6.
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,5,0)
+#ifdef CMAKE_HAVE_QUERY_MODULE
         CMN_LOG_INIT_VERBOSE << "Linux kernel version: 2.4.x" << std::endl;
 
         bool found;
@@ -273,7 +274,7 @@ void osaThreadBuddy::Create(const char *name, const osaAbsoluteTime& tv, int CMN
     // or maybe should have something like "really-soft-real-time"
     mlockall(MCL_CURRENT | MCL_FUTURE);
     if (IsPeriodic()) {
-        if (0 != rt_task_make_periodic_relative_ns(Data->RTTask, 0, (unsigned long)period)) {
+        if (0 != rt_task_make_periodic_relative_ns(Data->RTTask, 0, (unsigned long)Period)) {
             CMN_LOG_INIT_ERROR << "osaThreadBuddy: failed to make task run periodically" << std::endl;
             CMN_LOG_INIT_ERROR << "Real-time task needs root permission to run properly. Check if you are root." << std::endl;
             exit(1);
