@@ -30,6 +30,9 @@ http://www.cisst.org/cisst/license.txt.
 #endif
 #include <cisstCommon/cmnExportMacros.h>
 
+// avoid impact on other modules
+#undef CISST_THIS_LIBRARY_AS_DLL
+
 class CISST_EXPORT mtsMacrosTestClassA: public mtsGenericObject
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, 5);
@@ -39,7 +42,7 @@ class CISST_EXPORT mtsMacrosTestClassA: public mtsGenericObject
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsMacrosTestClassA);
 
 
-class mtsMacrosTestClassB
+class CISST_EXPORT mtsMacrosTestClassB
 {
 public:
     static size_t DefaultConstructorCalls;
