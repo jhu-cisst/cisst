@@ -29,8 +29,8 @@ class osaPipeExecTest : public CppUnit::TestFixture
     CPPUNIT_TEST_SUITE(osaPipeExecTest);
     {
         CPPUNIT_TEST(TestPipe);
-    }
-    CPPUNIT_TEST(TestPipeInternalsSize);
+		CPPUNIT_TEST(TestPipeInternalsSize);
+	}
 
     CPPUNIT_TEST_SUITE_END();
 
@@ -41,5 +41,4 @@ public:
     /*! Test communication with cisstOSAbstractionTestsPipeUtility */
     void TestPipe(void);
 };
-
 #endif // _osaPipeExecTest_h
