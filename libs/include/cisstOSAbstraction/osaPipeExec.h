@@ -79,8 +79,8 @@ class CISST_EXPORT osaPipeExec {
         of characters written or -1 for an error */
         int Write(const char * buffer, int n);
 
-        /* Write s to the pipe and return the number of characters read or -1 for
-        an error */
+        /* Write s to the pipe and return the number of characters read or -1
+        for an error */
         int Write(const std::string & s);
 };
 #endif // _osaPipeExec_h
