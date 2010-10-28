@@ -21,6 +21,8 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cppunit/TestCase.h>
 #include <cppunit/extensions/HelperMacros.h>
+#include <cisstCommon/cmnGenericObject.h>
+#include <cisstCommon/cmnUnits.h>
 #include <cisstOSAbstraction/osaPipeExec.h>
 
 /*
@@ -31,9 +33,11 @@ http://www.cisst.org/cisst/license.txt.
 
   Name of tests are Test<_clientType><_serverType>{,Blocking}.
 */
-class mtsCommandAndEventNetworkedTest: public CppUnit::TestFixture
+class mtsCommandAndEventNetworkedTest: public CppUnit::TestFixture, public cmnGenericObject
 {
 private:
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+
     CPPUNIT_TEST_SUITE(mtsCommandAndEventNetworkedTest);
     {
         CPPUNIT_TEST(TestDeviceDevice_mtsInt);
@@ -74,6 +78,28 @@ public:
 
     void setUp(void);
     void tearDown(void);
+
+    // send a message and retrieve result
+    bool SendAndReceive(osaPipeExec & pipe,
+                        const std::string & send,
+                        std::string & received,
+                        const double & timeOut = 1.0 * cmn_s);
+
+    // send message and test for time out as well as expected answer
+    void SendAndVerify(osaPipeExec & pipe,
+                       const std::string & send,
+                       const std::string & expected,
+                       const double & timeOut = 1.0 * cmn_s);
+
+    // start all components
+    void StartAllComponents(void);
+
+    // quit all components
+    void StopAllComponents(void);
+
+    // test that all components are alive
+    void PingAllComponents(void);
+
 #if 0
     template <class _clientType, class _serverType>
     void TestExecution(_clientType * client, _serverType * server,
@@ -121,3 +147,6 @@ public:
     void TestArgumentPrototypes_int(void);
 #endif
 };
+
+
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsCommandAndEventNetworkedTest);

@@ -25,7 +25,6 @@ cisst_target_link_libraries (cisstMultiTasksTestsLib cisstCommon cisstVector cis
 set (SOURCE_FILES
      mtsCollectorBaseTest.cpp
      mtsCommandAndEventLocalTest.cpp
-     mtsCommandAndEventNetworkedTest.cpp
      mtsComponentStateTest.cpp
      mtsQueueTest.cpp
      mtsStateTableTest.cpp
@@ -43,7 +42,6 @@ set (SOURCE_FILES
 set (HEADER_FILES
      mtsCollectorBaseTest.h
      mtsCommandAndEventLocalTest.h
-     mtsCommandAndEventNetworkedTest.h
      mtsComponentStateTest.h
      mtsQueueTest.h
      mtsStateTableTest.h
@@ -57,6 +55,18 @@ set (HEADER_FILES
      mtsManagerGlobalTest.h
      mtsManagerLocalTest.h
     )
+
+# add ICE related tests
+if (CISST_MTS_HAS_ICE)
+  set (SOURCE_FILES
+       ${SOURCE_FILES}
+       mtsCommandAndEventNetworkedTest.cpp
+      )
+  set (HEADER_FILES
+       ${HEADER_FILES}
+       mtsCommandAndEventNetworkedTest.h
+      )
+endif (CISST_MTS_HAS_ICE)
 
 # add executable for C++ tests
 add_executable (cisstMultiTaskTests ${SOURCE_FILES} ${HEADER_FILES})

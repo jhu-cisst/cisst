@@ -26,15 +26,48 @@ http://www.cisst.org/cisst/license.txt.
 
 int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
 {
-    // Create and start global component manager
+    std::string command;
     mtsManagerGlobal globalComponentManager;
-    if (!globalComponentManager.StartServer()) {
+
+    // create and start global component manager
+    std::cin >> command;
+    if (command == "start") {
+        if (!globalComponentManager.StartServer()) {
+            std::cout << "start failed" << std::endl;
+            return 1;
+        } else {
+            std::cout << "start succeeded" << std::endl;
+        }
+    } else {
+        std::cout << "wrong command" << std::endl;
         return 1;
     }
 
-    while (1) {
-        osaSleep(10 * cmn_ms);
+    // normal operations
+    bool stop = false;
+    while (!stop) {
+        std::cin >> command;
+        if (command == std::string("stop")) {
+            stop = true;
+        } else if (command == std::string("ping")) {
+            std::cout << "ok" << std::endl;
+        } else {
+            std::cout << "unknown command \"" << command << "\"" << std::endl;
+        }
     }
 
+    // stop component manager
+    if (!globalComponentManager.StopServer()) {
+        std::cout << "stop failed" << std::endl;
+        return 1;
+    } else {
+        std::cout << "stop succeeded" << std::endl;
+    }
+
+    // wait to be killed by pipe
+    while (true) {
+        osaSleep(1.0 * cmn_hour);
+    }
+ 
     return 0;
 }

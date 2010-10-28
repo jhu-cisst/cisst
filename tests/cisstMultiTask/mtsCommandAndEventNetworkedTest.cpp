@@ -21,6 +21,8 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "mtsCommandAndEventNetworkedTest.h"
 
+CMN_IMPLEMENT_SERVICES(mtsCommandAndEventNetworkedTest);
+
 #include <cisstMultiTask/mtsManagerGlobal.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 
@@ -40,26 +42,88 @@ mtsCommandAndEventNetworkedTest::mtsCommandAndEventNetworkedTest()
 }
 
 
+bool mtsCommandAndEventNetworkedTest::SendAndReceive(osaPipeExec & pipe,
+                                                     const std::string & send,
+                                                     std::string & received,
+                                                     const double & timeOut)
+{
+    pipe.Write(send.c_str(), send.size());
+    pipe.Write("\n", 1);
+    // read data until \n arrives while not exceeding time alloted
+    received = "";
+    char charRead = '\0';
+    size_t byteRead;
+    const osaTimeServer & timeServer = mtsComponentManager::GetInstance()->GetTimeServer();
+    const double endTime = timeServer.GetRelativeTime() + timeOut;
+    bool timeExpired = false;
+    while ((charRead != '\n')
+           && (!timeExpired)) {
+        byteRead = pipe.Read(&charRead, 1);
+        if ((byteRead == 1)
+            && (charRead != '\n')) {
+            received = received + charRead;
+        }
+        timeExpired = (timeServer.GetRelativeTime() > endTime);
+    }
+    if (timeExpired) {
+        CMN_LOG_CLASS_RUN_ERROR << "SendAndReceive: timed out while sending \"" << send
+                                << "\", allowed time was " << timeOut << " seconds" << std::endl;
+        return false;
+    }
+    return true;
+}
+
+
+void mtsCommandAndEventNetworkedTest::SendAndVerify(osaPipeExec & pipe,
+                                                    const std::string & send,
+                                                    const std::string & expected,
+                                                    const double & timeOut)
+{
+    CPPUNIT_ASSERT(pipe.IsConnected());
+    std::string answer;
+    if (!SendAndReceive(pipe, send, answer, timeOut)) {
+        std::string message = "time out while sending \"" + send + "\"";
+        CPPUNIT_FAIL(message);
+        return;
+    }
+    CPPUNIT_ASSERT_EQUAL(expected, answer);
+}
+
+
+void mtsCommandAndEventNetworkedTest::StartAllComponents(void)
+{
+    SendAndVerify(PipeComponentManager, "start", "start succeeded");
+}
+
+
+void mtsCommandAndEventNetworkedTest::StopAllComponents(void)
+{
+    SendAndVerify(PipeComponentManager, "stop", "stop succeeded");
+}
+
+
+void mtsCommandAndEventNetworkedTest::PingAllComponents(void)
+{
+    SendAndVerify(PipeComponentManager, "ping", "ok");
+}
+
+
 void mtsCommandAndEventNetworkedTest::setUp(void)
 {
     std::string command;
-    bool result;
-
     // start network manager
     command = std::string(CISST_BUILD_ROOT) + std::string("/tests/bin/cisstMultiTaskTestsComponentManager");
-	result = PipeComponentManager.Open(command, "rw");
-	CPPUNIT_ASSERT_EQUAL(true, result);
+	PipeComponentManager.Open(command, "rw");
 }
 
 
 void mtsCommandAndEventNetworkedTest::tearDown(void)
 {
-	bool result;
-    
     // close and kill all processes
-    result = PipeComponentManager.Close();
-	CPPUNIT_ASSERT_EQUAL(true, result);
+    PipeComponentManager.Close();
 }
+
+
 
 #if 0
 template <class _clientType, class _serverType>
@@ -249,7 +313,9 @@ void mtsCommandAndEventNetworkedTest::TestExecution(_clientType * client, _serve
 template <class _elementType>
 void mtsCommandAndEventNetworkedTest::TestDeviceDevice(void)
 {
-    osaSleep(30.0 * cmn_s);
+    StartAllComponents();
+    PingAllComponents();
+    StopAllComponents();
     /*
     mtsTestDevice2<_elementType> * client = new mtsTestDevice2<_elementType>;
     mtsTestDevice3<_elementType> * server = new mtsTestDevice3<_elementType>;
