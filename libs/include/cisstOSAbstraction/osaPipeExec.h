@@ -33,7 +33,7 @@ class CISST_EXPORT osaPipeExec {
     char Internals[INTERNALS_SIZE];
 
     /*! Return the size of the actual object used by the OS.  This is
-      used for testing only. */ 
+      used for testing only. */
     static unsigned int SizeOfInternals(void);
     friend class osaPipeExecTest;
 
@@ -82,5 +82,10 @@ class CISST_EXPORT osaPipeExec {
         /* Write s to the pipe and return the number of characters read or -1
         for an error */
         int Write(const std::string & s);
+
+        /*! Indicate if the pipe is opened (or at least supposed to be
+          opened) */
+        bool IsConnected(void) const;
 };
+
 #endif // _osaPipeExec_h

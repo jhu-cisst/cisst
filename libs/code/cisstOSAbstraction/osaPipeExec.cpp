@@ -332,3 +332,9 @@ int osaPipeExec::Write(const char * buffer, int n) {
 int osaPipeExec::Write(const std::string & s) {
     return Write(s.c_str());
 }
+
+
+bool osaPipeExec::IsConnected(void) const
+{
+    return this->Connected;
+}
