@@ -1,3 +1,19 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
+/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
+
+/*
+  $Id$
+
+  (C) Copyright 2010 Johns Hopkins University (JHU), All Rights Reserved.
+
+--- begin cisst license - do not edit ---
+
+This software is provided "as is" under an open source license, with
+no warranty.  The complete license can be found in license.txt and
+http://www.cisst.org/cisst/license.txt.
+
+--- end cisst license ---
+*/
 
 #include <cisstCommon/cmnPortability.h>
 #include <cisstCommon/cmnLogger.h>
@@ -17,7 +33,7 @@ int osaCPUGetCount(){
   
 #if (CISST_OS == CISST_LINUX)                       ||	\
     (CISST_OS == CISST_LINUX_XENOMAI) 
-  cpucount = sysconf( _SC_NPROCESSORS_ONLN );
+    cpucount = sysconf( _SC_NPROCESSORS_ONLN );
 #elif (CISST_OS == CISST_WINDOWS)
 	SYSTEM_INFO sysinfo;
 	GetSystemInfo( &sysinfo );
@@ -66,4 +82,3 @@ osaErrno osaCPUSetAffinity( osaCPUMask mask ){
 
   return OSAFAILURE;
 }
-
