@@ -15,7 +15,7 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include <cisstDevices/manipulators/WAM/devWAM.h>
+#include <cisstDevices/robotcomponents/manipulators/Barrett/devWAM.h>
 #include <cisstCommon/cmnLogger.h>
 using namespace std;
 
@@ -30,10 +30,14 @@ const std::string devWAM::Input           = "WAMInput";
 // main constructor
 devWAM::devWAM( const std::string& taskname, 
 		double period, 
+		osaCPUMask mask,
 		devCAN* candev, 
 		const vctDynamicVector<double>& qinit ) :
-  devManipulator( taskname, period, qinit.size() ),
-  qinit( qinit ){
+  devManipulator( taskname, period, devManipulator::ENABLED, mask, devManipulator::FORCETORQUE ),
+  input( NULL ),
+  output( NULL ),
+  qinit( qinit ),
+  q( qinit ){
 
   // only 4 or 7 pucks are allowed
   if( qinit.size() != 4 && qinit.size() != 7 ){
@@ -42,6 +46,17 @@ devWAM::devWAM( const std::string& taskname,
 		       << std::endl;
     exit(-1);
   }
+
+
+  input = ProvideInputRn( devManipulator::Input,
+                          devRobotComponent::POSITION |
+			  devRobotComponent::FORCETORQUE,
+			  qinit.size() );
+
+  output = ProvideOutputRn( devManipulator::Output,
+			    devRobotComponent::POSITION,
+			    qinit.size() );
+
   // Adjust the pucks vector to the number of requested joints
   pucks.resize( qinit.size() );
 
@@ -58,8 +73,12 @@ devWAM::devWAM( const std::string& taskname,
 
 }
 
-void devWAM::Cleanup()
-{ candev->Close(); }
+devWAM::~devWAM(){}
+
+void devWAM::Cleanup(){
+  SetIdleMode();
+  candev->Close(); 
+}
 
 void devWAM::Configure( const std::string& ){
 
@@ -75,6 +94,11 @@ void devWAM::Configure( const std::string& ){
     exit(-1);
   }
   CMN_LOG_INIT_VERBOSE << "The CAN device is opened." << std::endl;
+
+  // This filter is to process position messages from pucks 1-4
+  candev->AddFilter( devCAN::Filter( 0x051F, 0x0403 ) );
+  // This filter is to process position messages from pucks 1-4
+  //candev->AddFilter( devCAN::Filter( 0x07FF, 0x0443 ) );
 
   //
   // Set up the safety module
@@ -151,7 +175,7 @@ void devWAM::Configure( const std::string& ){
   CMN_LOG_INIT_VERBOSE << "Creating groups." << std::endl;
   // create'n initialize the groups with their ID and the canbus
   // The group ID are available in devGroup.h.
-  for( devGroup::ID gid=devGroup::BROADCAST; gid<devGroup::PROPFEEDBACK; gid++ )
+  for( devGroup::ID gid=devGroup::BROADCAST; gid<devGroup::LASTGROUP; gid++ )
     { groups.push_back( devGroup( gid, candev ) ); }
   
   // Add the pucks ID to each group
@@ -161,7 +185,7 @@ void devWAM::Configure( const std::string& ){
   for( devPuck::ID pid=devPuck::PUCK_ID1; pid<=devPuck::PUCK_ID4; pid++ ){
     groups[devGroup::BROADCAST].AddPuckIDToGroup( pid );
     groups[devGroup::UPPERARM].AddPuckIDToGroup( pid );
-    groups[devGroup::UPPERARMPROP].AddPuckIDToGroup( pid );
+    groups[devGroup::UPPERARM_POSITION].AddPuckIDToGroup( pid );
   }
   
   // The second loop handles the pucks in the forearm (if any)
@@ -170,12 +194,17 @@ void devWAM::Configure( const std::string& ){
     for(devPuck::ID pid=devPuck::PUCK_ID5; pid<=devPuck::PUCK_ID7; pid++){
       groups[devGroup::BROADCAST].AddPuckIDToGroup( pid );
       groups[devGroup::FOREARM].AddPuckIDToGroup( pid );
-      groups[devGroup::FOREARMPROP].AddPuckIDToGroup( pid );
+      groups[devGroup::FOREARM_POSITION].AddPuckIDToGroup( pid );
     }
   }
   else
     { CMN_LOG_INIT_VERBOSE << "Skipping forearm." << std::endl; }
-
+  
+  groups[devGroup::HAND_POSITION].AddPuckIDToGroup( devPuck::PUCK_IDF1 );
+  groups[devGroup::HAND_POSITION].AddPuckIDToGroup( devPuck::PUCK_IDF2 );
+  groups[devGroup::HAND_POSITION].AddPuckIDToGroup( devPuck::PUCK_IDF3 );
+  groups[devGroup::HAND_POSITION].AddPuckIDToGroup( devPuck::PUCK_IDF4 );
+  
   //
   // Now set up the pucks
   //
@@ -200,6 +229,8 @@ void devWAM::Configure( const std::string& ){
 
   // Wait a bit to let the pucks to boot
   usleep(300000);
+
+  
 
   // count number of pucks that are "ready"
   CMN_LOG_INIT_VERBOSE << "Querying the status of the pucks" << std::endl;
@@ -227,6 +258,7 @@ void devWAM::Configure( const std::string& ){
     }
   }
 
+  
   // make sure that all the pucks are ready
   if( npucksready != pucks.size() ){
     CMN_LOG_INIT_ERROR << CMN_LOG_DETAILS
@@ -302,8 +334,38 @@ void devWAM::Configure( const std::string& ){
   // Initialize the position of the WAM
   //
   SendPositions( qinit );
-  
+  input->SetPosition( qinit );
 }
+
+
+void devWAM::SetForceTorqueMode(){
+  //devManipulator::SetForceTorqueMode();
+  if( SetPucksMode( devPuck::MODE_TORQUE ) != devWAM::ESUCCESS ){
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+		      << " Failed to set torque mode."
+		      << std::endl;
+  }
+}
+
+void devWAM::SetPositionMode(){
+  //devManipulator::SetPositionMode();
+  if( SetPucksMode( devPuck::MODE_POSITION ) != devWAM::ESUCCESS ){
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+		      << " Failed to set position mode."
+		      << std::endl;
+  }
+}
+
+
+void devWAM::SetIdleMode(){
+  //devManipulator::SetIdleMode();
+  if( SetPucksMode( devPuck::MODE_IDLE ) != devWAM::ESUCCESS ){
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+		      << " Failed to set idle mode." 
+		      << std::endl;
+  }
+}
+
 
 devWAM::Errno devWAM::SetVelocityWarning( devProperty::Value vw ){
   if( safetymodule.SetProperty( devProperty::VELWARNING, vw, true ) 
@@ -339,10 +401,22 @@ devWAM::Errno devWAM::SetTorqueWarning( devProperty::Value tw ){
 }
 
 devWAM::Errno devWAM::SetTorqueFault( devProperty::Value tf ){
-  if( safetymodule.SetProperty( devProperty::TRQFAULT, tf, true ) 
+  // Do not query the SM since it will answer with a reply to group 3!
+  if( safetymodule.SetProperty( devProperty::TRQFAULT, tf, false ) 
       != devSafetyModule::ESUCCESS ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
 		      << ": Unable to set the torques fault." 
+		      << std::endl;
+    return devWAM::EFAILURE;
+  }
+  return devWAM::ESUCCESS;
+}
+
+devWAM::Errno devWAM::SetPucksMode( devProperty::Value mode ){
+  if( groups[devGroup::BROADCAST].SetProperty( devProperty::MODE, mode, false ) 
+      != devGroup::ESUCCESS ){
+    CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+		      << ": Failed to wake up the pucks." 
 		      << std::endl;
     return devWAM::EFAILURE;
   }
@@ -362,7 +436,7 @@ devWAM::Errno devWAM::SetPucksStatus( devProperty::Value ps ){
 
 // set the motor positions 
 devWAM::Errno devWAM::SendPositions( const vctDynamicVector<double>& jq ){
-  
+
   if( jq.size() != pucks.size() ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
 		      << ": Expected " << pucks.size() << " joint angles. "
@@ -375,6 +449,7 @@ devWAM::Errno devWAM::SendPositions( const vctDynamicVector<double>& jq ){
   // this is necessary because otherwise the safety module will monitor a large
   // change of joint position in a short amount of time and trigger a velocity 
   // fault.
+  
   if( safetymodule.SetProperty( devProperty::IGNOREFAULT, 8, true ) 
       != devSafetyModule::ESUCCESS ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
@@ -383,6 +458,7 @@ devWAM::Errno devWAM::SendPositions( const vctDynamicVector<double>& jq ){
     return devWAM::EFAILURE;
   }
   
+
   // convert the joints positions to motor positions
   vctDynamicVector<double> mq = JointsPos2MotorsPos( jq );
   
@@ -403,11 +479,11 @@ devWAM::Errno devWAM::SendPositions( const vctDynamicVector<double>& jq ){
 			<< (int)pucks[i].GetID()
 			<< std::endl;
     }
-
-    usleep(1000); // don't know if this is necessary anymore
+    //usleep(1000); // don't know if this is necessary anymore
   }
 
   // reset the safety module
+  
   if( safetymodule.SetProperty( devProperty::IGNOREFAULT, 1, true ) 
       != devSafetyModule::ESUCCESS ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
@@ -416,35 +492,51 @@ devWAM::Errno devWAM::SendPositions( const vctDynamicVector<double>& jq ){
     return devWAM::EFAILURE;
   }
   
+
   return devWAM::ESUCCESS;
 }
 
-vctDynamicVector<double> devWAM::Read(){
+void devWAM::Read(){
   vctDynamicVector<double> q;
+  QueryPositions();
   RecvPositions( q );
-  return q;
+  output->SetPosition(q);
 }
 
-// query the joint positions
-devWAM::Errno devWAM::RecvPositions( vctDynamicVector<double>& jq ){
-
+devWAM::Errno devWAM::QueryPositions(){
   // Query all the motor (broadcast group)
-  if( groups[ devGroup::BROADCAST ].GetProperty( devProperty::POS ) 
+  if( groups[ devGroup::UPPERARM_POSITION ].GetProperty( devProperty::POS ) 
       != devGroup::ESUCCESS ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
 		      << ": Failed to query the pucks."
 		      << std::endl;
     return devWAM::EFAILURE;
   }
+  
+
+  if( pucks.size() == 7 ){
+    if( groups[ devGroup::FOREARM_POSITION ].GetProperty( devProperty::POS ) 
+	!= devGroup::ESUCCESS ){
+      CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+			<< ": Failed to query the pucks."
+			<< std::endl;
+      return devWAM::EFAILURE;
+    }
+  }
+
+  return devWAM::ESUCCESS;
+}
+
+// query the joint positions
+devWAM::Errno devWAM::RecvPositions( vctDynamicVector<double>& jq ){
 
   // this will hold the motor positions
   vctDynamicVector<double> mq( pucks.size(), 0.0 );
 
   // wait for the pucks to respond
   for(size_t i=0; i<pucks.size(); i++){
-
     // receive a response from a puck
-    devCANFrame canframe;
+    devCAN::Frame canframe;
     if( candev->Recv( canframe ) != devCAN::ESUCCESS ){
       CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
 			<< ": Failed to receive a CAN frame."
@@ -458,8 +550,8 @@ devWAM::Errno devWAM::RecvPositions( vctDynamicVector<double>& jq ){
 
       devProperty::ID propid;
       devProperty::Value position;
-      // Unpack the can frame
 
+      // Unpack the can frame
       if( pucks[pid-1].UnpackCANFrame( canframe, propid, position ) 
 	  != devPuck::ESUCCESS ){
 	CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
@@ -479,15 +571,49 @@ devWAM::Errno devWAM::RecvPositions( vctDynamicVector<double>& jq ){
 		    ((double)pucks[pid-1].CountsPerRevolution() ) );
     }
   }
-  
   // convert the motor positions to joints positions
   jq = MotorsPos2JointsPos( mq );
 
   return devWAM::ESUCCESS;
 }
 
-void devWAM::Write(  const vctDynamicVector<double>& jt )
-{ SendTorques( jt );  }
+void devWAM::Write(){
+  
+  switch( GetMode() ){
+   
+  case devManipulator::FORCETORQUE:
+    {
+      double t;
+      vctDynamicVector<double> jt;
+      input->GetForceTorque( jt, t );
+      SendTorques( jt );
+    }
+    break;
+    
+  case devManipulator::POSITION:
+    {
+      double t;
+      static double q7 = 0.0;
+      q7 += 0.0001;
+      vctDynamicVector<double> q;
+      input->GetPosition( q, t );
+      q[0] = q7;
+      //std::cout << "Qin: " << q << std::endl;
+      SendPositions( q );
+    }
+    break;
+
+  case devManipulator::VELOCITY:
+  case devManipulator::IDLE:
+    {
+      vctDynamicVector<double> jt( pucks.size(), 0.0 );
+      //std::cout << "I: " << jt << std::endl;
+      SendTorques( jt );
+    }
+    break;
+  }
+
+}
 
 // Send joint torques
 devWAM::Errno devWAM::SendTorques( const vctDynamicVector<double>& jt ){
@@ -514,7 +640,7 @@ devWAM::Errno devWAM::SendTorques( const vctDynamicVector<double>& jt ){
       { currents[i] = mt[i] * pucks[i].IpNm(); }
     
     // pack the torques in a can frames
-    devCANFrame canframe;
+    devCAN::Frame canframe;
     if( PackCurrents( canframe, devGroup::UPPERARM, currents ) 
 	!= devWAM::ESUCCESS ){
       CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
@@ -558,7 +684,7 @@ devWAM::Errno devWAM::SendTorques( const vctDynamicVector<double>& jt ){
       { currents[i] = mt[i+4] * pucks[i+4].IpNm(); }
 
     // pack the torques in a CAN frame
-    devCANFrame canframe;
+    devCAN::Frame canframe;
     if( PackCurrents( canframe, devGroup::FOREARM, currents ) 
 	!= devWAM::ESUCCESS ){
       CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
@@ -581,7 +707,7 @@ devWAM::Errno devWAM::SendTorques( const vctDynamicVector<double>& jt ){
 
 // pack motor torques in a CAN frame
 // this should go into devGroup
-devWAM::Errno devWAM::PackCurrents( devCANFrame& canframe, 
+devWAM::Errno devWAM::PackCurrents( devCAN::Frame& canframe, 
 				    devGroup::ID gid, 
 				    const double I[4]) {
   
@@ -619,7 +745,7 @@ devWAM::Errno devWAM::PackCurrents( devCANFrame& canframe,
     msg[7]=(unsigned char)(  currents[3]    &0x00FF);
     
     // build a can frame addressed to the group ID 
-    canframe = devCANFrame( devGroup::CANID( gid ), msg, 8 );
+    canframe = devCAN::Frame( devGroup::CANID( gid ), msg, 8 );
     return devWAM::ESUCCESS;
   }
   else{
@@ -641,3 +767,40 @@ devWAM::JointsPos2MotorsPos( const vctDynamicVector<double>& jq )
 vctDynamicVector<double> 
 devWAM::JointsTrq2MotorsTrq( const vctDynamicVector<double>& jt )
 {  return jtrq2mtrq*jt;  }
+
+  /*
+  if( firsttime ){
+
+    vctDynamicVector<double> jt(7, 0.0);
+    std::cout << jt << std::endl;
+    //SendTorques( jt );
+    firsttime = false;
+
+    switch( GetMode() ){
+    case devManipulator::FORCETORQUE:
+      SetPucksMode( devPuck::MODE_TORQUE );
+      break;
+    case devManipulator::POSITION:
+      SetPucksMode( devPuck::MODE_POSITION );
+      break;
+    }
+
+
+  }
+  */
+  //else{
+  //devProperty::Value val;
+  //pucks[0].GetProperty( devProperty::MODE, val );
+  //std::cout << val << std::endl;
+  /*(
+  if( GetMode() == devManipulator::POSITION && val == devPuck::MODE_TORQUE){
+
+    SetPucksMode( devPuck::MODE_POSITION );
+
+	for( int i=0; i<7; i++ ){
+	  pucks[i].GetProperty( devProperty::MODE, val );
+	  std::cout << val << " ";
+	}
+	std::cout << std::endl;
+      }
+  */

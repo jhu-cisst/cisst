@@ -19,7 +19,7 @@ int main(int argc, char** argv){
 
   // Create and initialize 
   devGLUT glut(argc, argv);
-
+  
   vctDynamicVector<double> qinit(7, 0.0);              // Initial joint values
   vctMatrixRotation3<double> Rw0( 0, 0, -1,
 				  0, 1, 0,
@@ -38,14 +38,14 @@ int main(int argc, char** argv){
   geomfiles.push_back( path + "l7.obj" );
 
   // Create the world
-  devODEWorld world( 0.001, OSA_CPUANY );
+  devODEWorld world( 0.001, OSA_CPU1 );
   taskManager->AddComponent(&world);
 
   // The WAM
   devODEManipulator WAM( "WAM", 
-			 0.01, 
+			 0.001, 
 			 devManipulator::ENABLED,
-			 OSA_CPUANY,
+			 OSA_CPU2,
 			 devManipulator::FORCETORQUE,
 			 world, 
 			 "libs/etc/cisstRobot/WAM/wam7.rob",
@@ -56,9 +56,9 @@ int main(int argc, char** argv){
 
   // the controller
   devGravityCompensation controller( "controller", 
-				     0.01, 
+				     0.001, 
 				     devManipulator::ENABLED,
-				     OSA_CPUANY,
+				     OSA_CPU3,
 				     "libs/etc/cisstRobot/WAM/wam7.rob",
 				     Rtw0 );
   taskManager->AddComponent(&controller);
@@ -68,7 +68,7 @@ int main(int argc, char** argv){
 
   taskManager->Connect( controller.GetName(), devController::Feedback,
 			WAM.GetName(),        devManipulator::Output );
-  
+
   taskManager->CreateAll();
   taskManager->StartAll();
 

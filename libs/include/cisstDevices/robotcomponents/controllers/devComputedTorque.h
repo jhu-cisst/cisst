@@ -26,6 +26,10 @@ class CISST_EXPORT devComputedTorque :
 
   double told;
 
+ protected:
+
+  void Evaluate();
+
  public:
 
   devComputedTorque( const std::string& name, 
@@ -37,7 +41,6 @@ class CISST_EXPORT devComputedTorque :
 		     const vctDynamicMatrix<double>& Kp,
 		     const vctDynamicMatrix<double>& Kd );
 
-  void Control();
 
 };
 

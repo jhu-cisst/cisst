@@ -28,9 +28,9 @@ int main(int argc, char** argv){
   devGLUT glut(argc, argv);
 
   vctDynamicVector<double> qinit(7, 0.0);              // Initial joint values
-  vctMatrixRotation3<double> Rw0(  0, 0, -1,
-				   0, 1, 0,
-				   1, 0, 0 );
+  vctMatrixRotation3<double> Rw0(  0.0, 0.0, -1.0,
+				   0.0, 1.0,  0.0,
+				   1.0, 0.0,  0.0 );
   vctFixedSizeVector<double,3> tw0(0.0, 0.0, 1.0);
   vctFrame4x4<double> Rtw0(Rw0,tw0);                   // base transformation
 
@@ -66,9 +66,9 @@ int main(int argc, char** argv){
   // Create a rajectory
   vctDynamicVector<double> qdmax(7, 0.1), qddmax(7, .05);
   devQLQRn trajectory( "trajectory", 
-		       0.01, 
+		       0.001, 
 		       devTrajectory::ENABLED,
-		       OSA_CPUANY,
+		       OSA_CPU2,
 		       devTrajectory::QUEUE,
 		       devTrajectory::POSITION,
 		       qinit,
@@ -86,9 +86,9 @@ int main(int argc, char** argv){
   Kp[5][5] =  800;    Kd[5][5] =  50;  
   Kp[6][6] = 20000;   Kd[6][6] = 100;
   devComputedTorque controller( "controller",
-				0.01,
+				0.002,
 				devController::ENABLED,
-				OSA_CPU2,
+				OSA_CPU3,
 				"libs/etc/cisstRobot/WAM/wam7.rob",
 				Rtw0, 
 				Kp, 
@@ -97,10 +97,9 @@ int main(int argc, char** argv){
 
   // The WAM
   devODEManipulator WAM( "WAM",          // The task name "WAM"
-			 0.01,           // The WAM runs at 200Hz
+			 0.001,          // The WAM runs at 200Hz
 			 devManipulator::ENABLED,
-			 OSA_CPUANY,
-			 //devManipulator::POSITION,
+			 OSA_CPU4,
 			 devManipulator::FORCETORQUE,
 			 world,          // The world used to simulate the WAM
 			 "libs/etc/cisstRobot/WAM/wam7.rob",
@@ -123,10 +122,7 @@ int main(int argc, char** argv){
 
   taskManager->Connect( controller.GetName(), devController::Feedback,
 			WAM.GetName(),        devManipulator::Output );
-  /*
-  taskManager->Connect( trajectory.GetName(), devTrajectory::Output,
-			WAM.GetName(), devManipulator::Input );
-  */
+
   taskManager->CreateAll();
   taskManager->StartAll();
 

@@ -35,7 +35,7 @@ devPDGC::devPDGC( const std::string& name,
 
 }
 
-void devPDGC::Control(){
+void devPDGC::Evaluate(){
   
   double t;
   vctDynamicVector<double> q(links.size(), 0.0);

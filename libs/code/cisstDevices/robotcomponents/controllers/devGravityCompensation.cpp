@@ -19,7 +19,7 @@ devGravityCompensation::devGravityCompensation(const std::string& name,
 
 }
 
-void devGravityCompensation::Control(){
+void devGravityCompensation::Evaluate(){
 
   double t;
   vctDynamicVector<double> q;
@@ -36,7 +36,8 @@ void devGravityCompensation::Control(){
     vctDynamicVector<double> qd(links.size(), 0.0);   // zero velocity
     vctDynamicVector<double> qdd(links.size(), 0.0);  // zero acceleration
     // inverse dynamics 
-    output->SetForceTorque( InverseDynamics( q, qd, qdd ) );
+    vctDynamicVector<double> tau =  InverseDynamics( q, qd, qdd );
+    output->SetForceTorque( tau );
   }
 
 }

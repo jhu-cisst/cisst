@@ -25,6 +25,10 @@ class CISST_EXPORT devPDGC :
 
   double told;
 
+ protected:
+
+  void Evaluate();
+
  public:
 
   devPDGC( const std::string& name, 
@@ -36,7 +40,6 @@ class CISST_EXPORT devPDGC :
 	   const vctDynamicMatrix<double>& Kp,
 	   const vctDynamicMatrix<double>& Kd );
   
-  void Control();
 
 };
 

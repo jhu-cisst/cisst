@@ -36,8 +36,10 @@ void SpecialFunc(int c, int x, int y)
 void DisplayFunc()
 { devGLUT::glut->Draw(); }
 
-void IdleFunc()
-{ devGLUT::glut->Refresh(); }
+void IdleFunc(){
+  devGLUT::glut->Refresh(); 
+  osaSleep( 0.03 );
+}
 
 // process the keyboard input
 void devGLUT::Keyboard(int k, int, int){
@@ -146,9 +148,6 @@ void devGLUT::Draw(){
 
   glutSwapBuffers();
 
-  if (sleepPeriod >= 0) {
-      osaSleep(sleepPeriod * cmn_s);
-  }
 }
 
 void devGLUT::Register( const devGeometry* geom ){  
@@ -171,7 +170,7 @@ devGLUT::devGLUT( int argc, char** argv){
   this->y = 0;
   this->width = 640;
   this->height = 480;
-  this->sleepPeriod = -1.0;
+  //this->sleepPeriod = -1.0;
 
   glutInit(&argc, argv);
 

@@ -50,6 +50,31 @@ set( SOURCE_FILES
   )
 
 
+if( CISST_DEV_HAS_RTSOCKETCAN )
+
+  SET( HEADER_FILES
+
+    ${HEADER_FILES} 
+
+    robotcomponents/manipulators/Barrett/devWAM.h
+    robotcomponents/manipulators/Barrett/devPuck.h
+    robotcomponents/manipulators/Barrett/devGroup.h
+    robotcomponents/manipulators/Barrett/devProperties.h
+
+    )
+
+  SET( SOURCE_FILES
+
+    ${SOURCE_FILES} 
+
+    robotcomponents/manipulators/Barrett/devWAM.cpp
+    robotcomponents/manipulators/Barrett/devPuck.cpp
+    robotcomponents/manipulators/Barrett/devGroup.cpp
+
+    )
+
+endif( CISST_DEV_HAS_RTSOCKETCAN )
+
 # Check for GLUT
 if( CISST_DEV_HAS_GLUT )
 

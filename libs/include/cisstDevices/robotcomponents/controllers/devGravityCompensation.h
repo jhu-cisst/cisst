@@ -18,7 +18,7 @@ class CISST_EXPORT devGravityCompensation :
 
  protected:
 
-  void Control();
+  void Evaluate();
 
  public:
 

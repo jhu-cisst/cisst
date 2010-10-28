@@ -36,7 +36,7 @@ devComputedTorque::devComputedTorque( const std::string& name,
 			     links.size() );
 }
 
-void devComputedTorque::Control(){
+void devComputedTorque::Evaluate(){
 
   double t;
   vctDynamicVector<double> q(links.size(), 0.0);

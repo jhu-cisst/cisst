@@ -11,7 +11,7 @@ class CISST_EXPORT devController: public devRobotComponent {
 
   void RunComponent();
 
-  virtual void Control() = 0;
+  virtual void Evaluate() = 0;
 
  public:
   

@@ -82,10 +82,10 @@ int main(int argc, char** argv){
 			"controller", devController::InputInterface );
 
   taskManager->Connect( "controller", devController::OutputInterface,
-			"WAM",      devManipulator::InputInterface );
+			"WAM",        devManipulator::InputInterface );
 
   taskManager->Connect( "controller", devController::FeedbackInterface,
-			"WAM",      devManipulator::OutputInterface );
+			"WAM",        devManipulator::OutputInterface );
 
 
   taskManager->CreateAll();

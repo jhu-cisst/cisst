@@ -48,7 +48,7 @@ class CISST_EXPORT devRobotComponent : public mtsTaskPeriodic {
     
     IO::Type      type;
     devRobotComponent::Variables variables;
-    
+
   protected:
     
     mtsInterfaceProvided* pinterface;
@@ -239,15 +239,15 @@ class CISST_EXPORT devRobotComponent : public mtsTaskPeriodic {
   
   osaCPUMask cpumask;
 
-  mtsInt mtsState;
+  mtsBool mtsState;
   bool risingedge;
 
  public:
 
   enum State
   {
-    ENABLED,
-    DISABLED
+    DISABLED,
+    ENABLED
   };
   
  protected:

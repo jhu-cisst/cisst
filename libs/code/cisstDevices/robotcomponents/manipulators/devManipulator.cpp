@@ -41,8 +41,8 @@ devManipulator::Mode devManipulator::GetMode(){
 }
 
 void devManipulator::RunComponent(){
-  Read();
   Write();
+  Read();
 }
 
 

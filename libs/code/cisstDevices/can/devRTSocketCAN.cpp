@@ -131,18 +131,17 @@ devCAN::Errno devRTSocketCAN::Open(){
     return EFAILURE;
   }
 
-  /*
   nanosecs_rel_t timeout = 50000000;
   if (rt_dev_ioctl(canfd, RTCAN_RTIOC_SND_TIMEOUT, &timeout) ){
     perror("devRTSocketCAN::open: Couldn't set the send timeout: ");
-    return FAILURE;
+    return EFAILURE;
   }
 
   if( rt_dev_ioctl(canfd, RTCAN_RTIOC_RCV_TIMEOUT, &timeout) ){
     perror("devRTSocketCAN::open: Couldn't set the recv timeout: ");
-    return FAILURE;
+    return EFAILURE;
   }
-  */
+
 
   return ESUCCESS;
 }
@@ -175,13 +174,18 @@ devCAN::Errno devRTSocketCAN::Send( const devCAN::Frame& canframe,
     { frame.data[i] = data[i]; }
 
   // send the frame
+  int error = rt_dev_send( canfd, 
+			   (void*)&frame, 
+			   sizeof(can_frame_t), 
+			   0 );
+  /*
   int error = rt_dev_sendto( canfd, 
-			     (void*)&frame, 
-			     sizeof(can_frame_t), 
-			     0,
-			     (struct sockaddr*)&addr, 
-			     sizeof(addr) );
-
+			   (void*)&frame, 
+			   sizeof(can_frame_t), 
+			   0,
+			   (struct sockaddr*)&addr, 
+			   sizeof(addr) );
+  */
   if( error < 0 ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS 
 		      << ": Failed to send CAN frame." 
@@ -198,29 +202,31 @@ devCAN::Errno devRTSocketCAN::Recv( devCAN::Frame& canframe,
 
   struct can_frame frame;            // the RT Socket CAN frame
   memset(&frame, 0, sizeof(frame));  // clear the frame
-
+  
+  int error =  rt_dev_recv( canfd, 
+				(void*)&frame, 
+				sizeof(can_frame_t), 
+				0 );
+  /*
   struct sockaddr_can addr;          // the source address
   socklen_t addrlen = sizeof(addr);  // the size of the source address
-
   int error =  rt_dev_recvfrom( canfd, 
 				(void*)&frame, 
 				sizeof(can_frame_t), 
 				0,
 				(struct sockaddr*)&addr, 
 				&addrlen );
+  */
 
   if( error < 0 ){
     CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-		      << ": Failed to receive the frame." 
+		      << ": Failed to receive the frame. Error: " << error 
 		      << std::endl;
     return EFAILURE;
   }
 
   // create a devCAN::Frame
   canframe = devCAN::Frame( frame.can_id, frame.data, frame.can_dlc );
-  //CMN_LOG_RUN_ERROR << "RECV" << std::endl;
-  //CMN_LOG_RUN_ERROR<< canframe << std::endl;
-
   return ESUCCESS;
 }
 

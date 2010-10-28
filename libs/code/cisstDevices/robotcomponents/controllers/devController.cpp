@@ -10,4 +10,4 @@ devController::devController( const std::string& name,
 			      osaCPUMask mask ) : 
   devRobotComponent( name, period, state, mask ){}
 
-void devController::RunComponent() { Control(); }
+void devController::RunComponent() { Evaluate(); }

@@ -1086,7 +1086,7 @@ devRobotComponent::devRobotComponent( const std::string& name,
 				      osaCPUMask cpumask ) :
   mtsTaskPeriodic( name, period, true ),
   cpumask( cpumask ),
-  mtsState( (int)state ),
+  mtsState( (bool)state ),
   risingedge( false ) {
   
   // Create the control interface
