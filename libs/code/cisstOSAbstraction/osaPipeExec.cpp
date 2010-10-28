@@ -77,21 +77,21 @@ bool osaPipeExec::Open(const std::string & cmd, const std::string & mode) {
         return false;
     else {
         #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
-            if (pipe(ToProgram) < 0) {
+            if (pipe(ToProgram) == -1) {
                 CMN_LOG_INIT_ERROR << "Can't create pipe in osaPipeExec::Open" << std::endl;
                 return false;
             }
-            if (pipe(FromProgram) < 0) {
+            if (pipe(FromProgram) == -1) {
                 CMN_LOG_INIT_ERROR << "Can't create pipe in osaPipeExec::Open" << std::endl;
                 Abort();
                 return false;
             }
         #elif (CISST_OS == CISST_WINDOWS)
-            if (_pipe(ToProgram, 4096, O_BINARY | O_NOINHERIT) < 0) {
+            if (_pipe(ToProgram, 4096, O_BINARY | O_NOINHERIT) == -1) {
                 CMN_LOG_INIT_ERROR << "Can't create pipe in osaPipeExec::Open" << std::endl;
                 return false;
             }
-            if (_pipe(FromProgram, 4096, O_BINARY | O_NOINHERIT) < 0) {
+            if (_pipe(FromProgram, 4096, O_BINARY | O_NOINHERIT) == -1) {
                 CMN_LOG_INIT_ERROR << "Can't create pipe in osaPipeExec::Open" << std::endl;
                 Abort();
                 return false;
@@ -145,11 +145,11 @@ bool osaPipeExec::Open(const std::string & cmd, const std::string & mode) {
             /* Child thread to run the program */
             else if (INTERNALS(pid) == 0) {
                 /* Replace stdin and stdout to receive from and write to the pipe */
-                if (dup2(ToProgram[READ_END], 0) == -1) {
+                if (dup2(ToProgram[READ_END], STDIN_FILENO) == -1) {
                     Abort();
                     return false;
                 }
-                if (dup2(FromProgram[WRITE_END], 1) == -1) {
+                if (dup2(FromProgram[WRITE_END], STDOUT_FILENO) == -1) {
                     Abort();
                     return false;
                 }
@@ -166,6 +166,10 @@ bool osaPipeExec::Open(const std::string & cmd, const std::string & mode) {
                 return false;
             }
         #elif (CISST_OS == CISST_WINDOWS)
+			/* Copy stdin and stdout before we close them so we can restore them after the spawn */
+            int stdinCopy = _dup(_fileno(stdin));
+            int stdoutCopy = _dup(_fileno(stdout));
+
             /* Replace stdin and stdout to receive from and write to the pipe */
             if (_dup2(ToProgram[READ_END], _fileno(stdin)) == -1) {
                 Abort();
@@ -182,6 +186,7 @@ bool osaPipeExec::Open(const std::string & cmd, const std::string & mode) {
                 Abort();
                 return false;
             }
+
             if (_close(ToProgram[READ_END]) == -1) {
                 Abort();
                 return false;
@@ -209,6 +214,16 @@ bool osaPipeExec::Open(const std::string & cmd, const std::string & mode) {
                 Abort();
                 return false;
             }
+
+			/* Restore stdin and stdout for the parent */
+            if (_dup2(stdinCopy, _fileno(stdin)) == -1) {
+                Abort();
+                return false;
+            }
+            if (_dup2(stdoutCopy, _fileno(stdout)) == -1) {
+                Abort();
+                return false;
+            }
         #endif
 
         Connected = true;
@@ -220,32 +235,34 @@ bool osaPipeExec::Close(bool killProcess) {
     if (!Connected)
         return false;
     else {
-        if (WriteFlag)
         #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
-            if (close(ToProgram[WRITE_END]) == -1)
+            if (WriteFlag && close(ToProgram[WRITE_END]) == -1)
                 return false;
         #elif (CISST_OS == CISST_WINDOWS)
-            if (_close(ToProgram[WRITE_END]) == -1)
+            if (WriteFlag && _close(ToProgram[WRITE_END]) == -1)
                 return false;
         #endif
 
-        if (ReadFlag)
         #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
-            if (close(FromProgram[READ_END]) == -1)
+            if (ReadFlag && close(FromProgram[READ_END]) == -1)
                 return false;
         #elif (CISST_OS == CISST_WINDOWS)
-            if (_close(FromProgram[READ_END]) == -1)
+            if (ReadFlag && _close(FromProgram[READ_END]) == -1)
                 return false;
         #endif
+
+        ReadFlag = WriteFlag = false;
 
         if (killProcess) {
         #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
             if (kill(INTERNALS(pid), SIGKILL) == -1)
                 return false;
         #elif (CISST_OS == CISST_WINDOWS)
+			/* It would be better to check the return value of TerminateProcess, but it
+			randomly fails with error code 5 ("access is denied"), causing failures
+			even though the process actually does terminate */
+			TerminateProcess(INTERNALS(hProcess), ERROR_SUCCESS);
             if (CloseHandle(INTERNALS(hProcess)) == 0)
-                return false;
-            if (TerminateProcess(INTERNALS(hProcess), 0) == 0)
                 return false;
         #endif
         }
@@ -257,16 +274,22 @@ bool osaPipeExec::Close(bool killProcess) {
 
 int osaPipeExec::Read(char *buffer, int maxLength) const {
     #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
-        ssize_t bytesRead = read(FromProgram[READ_END], buffer, maxLength*sizeof(char));
+        ssize_t bytesRead = -1;
     #elif (CISST_OS == CISST_WINDOWS)
-        int bytesRead = _read(FromProgram[READ_END], buffer, maxLength*sizeof(char));
+        int bytesRead = -1;
     #endif
 
-    if (bytesRead == -1)
+    if (Connected)
+    #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+        bytesRead = read(FromProgram[READ_END], buffer, maxLength*sizeof(char));
+    #elif (CISST_OS == CISST_WINDOWS)
+        bytesRead = _read(FromProgram[READ_END], buffer, maxLength*sizeof(char));
+    #endif
+
+	if (bytesRead == -1)
         return -1;
     else
         return static_cast<int>(bytesRead / sizeof(char));
-    return -1;
 }
 
 std::string osaPipeExec::Read(int maxLength) const {
@@ -288,16 +311,22 @@ int osaPipeExec::Write(const char * buffer) {
 
 int osaPipeExec::Write(const char * buffer, int n) {
     #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
-        ssize_t bytesWritten = write(ToProgram[WRITE_END], buffer, n*(sizeof(char)));
+        ssize_t bytesWritten = -1;
     #elif (CISST_OS == CISST_WINDOWS)
-        int bytesWritten = _write(ToProgram[WRITE_END], buffer, n*sizeof(char));
+        int bytesWritten = -1;
+    #endif
+
+    if (Connected)
+    #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+        bytesWritten = write(ToProgram[WRITE_END], buffer, n*sizeof(char));
+    #elif (CISST_OS == CISST_WINDOWS)
+        bytesWritten = _write(ToProgram[WRITE_END], buffer, n*sizeof(char));
     #endif
 
     if (bytesWritten == -1)
         return -1;
     else
         return static_cast<int>(bytesWritten / sizeof(char));
-    return -1;
 }
 
 int osaPipeExec::Write(const std::string & s) {
