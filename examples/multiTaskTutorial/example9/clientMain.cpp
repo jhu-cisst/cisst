@@ -52,7 +52,7 @@ int main(int argc, char * argv[])
     // Get the TaskManager instance and set operation mode
     mtsManagerLocal * taskManager;
     try {
-        taskManager = mtsManagerLocal::GetInstance(globalComponentManagerIP, "ProcessServer");
+        taskManager = mtsManagerLocal::GetInstance(globalComponentManagerIP, "ProcessClient");
     } catch (...) {
         CMN_LOG_INIT_ERROR << "Failed to initialize local component manager" << std::endl;
         return 1;
