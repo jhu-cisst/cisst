@@ -10,21 +10,6 @@
 
 int main(int argc, char * argv[])
 {
-
-    if (argc < 2) {
-        std::cerr << "Usage: " << argv[0] << " GlobalManagerIP [flag]" << std::endl;
-        std::cerr << "       flag = 1 to use double instead of mtsDouble" << std::endl;
-        exit(-1);
-    }
-
-    CMN_LOG_INIT_WARNING << "Starting server, IP = " << argv[1] << std::endl;
-    std::string globalComponentManagerIP(argv[1]);
-    // Get the TaskManager instance and set operation mode
-    mtsManagerLocal *taskManager = mtsManagerLocal::GetInstance(globalComponentManagerIP, "ProcessServer");
-
-    // If flag is not specified, or not 1, then use generic type (mtsDouble)
-    bool useGeneric = (argc > 2)?(argv[2][0] != '1'):true;
-
     // log configuration
     cmnLogger::SetLoD(CMN_LOG_LOD_VERY_VERBOSE);
     cmnLogger::GetMultiplexer()->AddChannel(std::cout, CMN_LOG_LOD_VERY_VERBOSE);
@@ -35,6 +20,42 @@ int main(int argc, char * argv[])
     cmnClassRegister::SetLoD("mtsInterfaceProvided", CMN_LOG_LOD_VERY_VERBOSE);
     cmnClassRegister::SetLoD("mtsTaskManager", CMN_LOG_LOD_VERY_VERBOSE);
     cmnClassRegister::SetLoD("serverTask", CMN_LOG_LOD_VERY_VERBOSE);
+
+    std::string globalComponentManagerIP;
+    bool useGeneric;
+
+    if (argc != 3) {
+        std::cerr << "Usage: " << argv[0] << " [GlobalManagerIP] [flag]" << std::endl;
+        std::cerr << "       GlobalManagerIP is set as 127.0.0.1 by default" << std::endl;
+        std::cerr << "       flag = 1 to use double instead of mtsDouble" << std::endl;
+    }
+
+    // Set global component manager's ip and argument type
+    // If flag is not specified, or not 1, then use generic type (mtsDouble)
+    if (argc == 1) {
+        globalComponentManagerIP = "localhost";
+        useGeneric = true;
+    } else if (argc == 2) {
+        globalComponentManagerIP = argv[1];
+        useGeneric = true;
+    } else if (argc == 3) {
+        globalComponentManagerIP = argv[1];
+        useGeneric = (argv[2][0] != '1');
+    } else {
+        exit(-1);
+    }
+    
+    std::cout << "Starting server, IP = " << globalComponentManagerIP << std::endl;
+    std::cout << "Use " << (useGeneric ? "mtsDouble" : "double") << std::endl;
+
+    // Get the TaskManager instance and set operation mode
+    mtsManagerLocal * taskManager;
+    try {
+        taskManager = mtsManagerLocal::GetInstance(globalComponentManagerIP, "ProcessServer");
+    } catch (...) {
+        CMN_LOG_INIT_ERROR << "Failed to initialize local component manager" << std::endl;
+        return 1;
+    }
 
     // create our server task
     const double PeriodServer = 10 * cmn_ms; // in milliseconds
