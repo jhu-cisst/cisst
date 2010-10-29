@@ -25,6 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstOSAbstraction/osaThreadedLogFile.h>
 #include <cisstMultiTask/mtsManagerGlobal.h>
+#include <cisstMultiTask/mtsManagerLocal.h>
 
 int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
 {
@@ -45,8 +46,22 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
     }
     CMN_LOG_INIT_VERBOSE << "Global component manager started..." << std::endl;
 
+    // Get local component manager instance
+    mtsManagerLocal * localManager;
+    try {
+        localManager = mtsManagerLocal::GetInstance(globalComponentManager);
+    } catch (...) {
+        CMN_LOG_INIT_ERROR << "Failed to initialize local component manager" << std::endl;
+        return 1;
+    }
+
+    // create the tasks, i.e. find the commands
+    localManager->CreateAll();
+    // start the periodic Run
+    localManager->StartAll();
+
     while (1) {
-        osaSleep(10 * cmn_ms);
+        osaSleep(100 * cmn_ms);
     }
 
     return 0;

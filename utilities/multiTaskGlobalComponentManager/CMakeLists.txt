@@ -12,12 +12,11 @@
 # 
 # --- end cisst license ---
 
-# name of project and executable
 project (multiTaskGlobalComponentManager)
 
 # name the main executable and specifies with source files to use
-ADD_EXECUTABLE(multiTaskGlobalComponentManager
-               main.cpp)
+ADD_EXECUTABLE(multiTaskGlobalComponentManager main.cpp)
 
 # link with the cisst libraries
 CISST_REQUIRES("multiTaskGlobalComponentManager" "cisstCommon;cisstOSAbstraction;cisstMultiTask")
+
