@@ -41,5 +41,5 @@ if (BUILD_LIBS_cisstParameterTypes)
   # no need to have a warning message for library dependencies, CISST_REQUIRES macro will send the warning
 endif (BUILD_LIBS_cisstParameterTypes)
 
-add_subdirectory(ManagerComponent)
+add_subdirectory(testManagerComponent)
 
