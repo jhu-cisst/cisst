@@ -39,8 +39,8 @@ int main(void)
 
     // Create and start global component manager that serves local component
     // managers running across networks.
-    mtsManagerGlobal globalComponentManager;
-    if (!globalComponentManager.StartServer()) {
+    mtsManagerGlobal * globalComponentManager = new mtsManagerGlobal;
+    if (!globalComponentManager->StartServer()) {
         CMN_LOG_INIT_ERROR << "Failed to start global component manager." << std::endl;
         return 1;
     }
@@ -49,7 +49,7 @@ int main(void)
     // Get the local component manager as "networked with GCM" mode
     mtsTaskManager * taskManager;
     try {
-        taskManager = mtsTaskManager::GetInstance(globalComponentManager);
+        taskManager = mtsTaskManager::GetInstance(*globalComponentManager);
     } catch (...) {
         CMN_LOG_INIT_ERROR << "Failed to initialize local component manager" << std::endl;
         return 1;
@@ -57,7 +57,7 @@ int main(void)
 
     // Create GCM UI task
     const double period = 1 * cmn_ms;
-    GCMUITask * GCMUITaskObject = new GCMUITask("GCMUI", period, globalComponentManager);
+    GCMUITask * GCMUITaskObject = new GCMUITask("GCMUI", period, *globalComponentManager);
     GCMUITaskObject->Configure();
     taskManager->AddComponent(GCMUITaskObject);
 
@@ -71,14 +71,14 @@ int main(void)
         osaSleep(10 * cmn_ms);
     }
 
+    // Cleanup global component manager
+    if (!globalComponentManager->StopServer()) {
+        CMN_LOG_RUN_ERROR << "Failed to stop global component manager." << std::endl;
+    }
+
     // Cleanup local component manager
     taskManager->KillAll();
     taskManager->Cleanup();
-
-    // Cleanup global component manager
-    if (!globalComponentManager.StopServer()) {
-        CMN_LOG_RUN_ERROR << "Failed to stop global component manager." << std::endl;
-    }
 
     return 0;
 }

@@ -138,6 +138,9 @@ void mtsManagerProxyServer::Runner(ThreadArguments<mtsManagerGlobal> * arguments
         std::string error("mtsManagerProxyServer: ");
         error += msg;
         ProxyServer->GetLogger()->error(error);
+    } catch (...) {
+        std::string error("mtsManagerProxyServer: exception at mtsManagerProxyServer::Runner()");
+        ProxyServer->GetLogger()->error(error);
     }
 
     ProxyServer->GetLogger()->trace("mtsManagerProxyServer", "Proxy server terminates.....");
@@ -149,9 +152,14 @@ void mtsManagerProxyServer::Stop()
 {
     LogPrint(mtsManagerProxyServer, "ManagerProxy server stops.");
 
-    BaseServerType::Stop();
-
-    Sender->Stop();
+    try {
+        BaseServerType::Stop();
+        Sender->Stop();
+    } catch (const Ice::Exception& e) {
+        std::string error("mtsManagerProxyServer: ");
+        error += e.what();
+        LogError(mtsManagerProxyServer, error);
+    }
 }
 
 void mtsManagerProxyServer::ConnectCheckTimeout()

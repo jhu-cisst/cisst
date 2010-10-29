@@ -134,7 +134,10 @@ void mtsComponentInterfaceProxyClient::Runner(ThreadArguments<mtsComponentProxy>
         std::string error("mtsComponentInterfaceProxyClient: ");
         error += msg;
         ProxyClient->GetLogger()->error(error);
-    }
+    } catch (...) {
+        std::string error("mtsComponentInterfaceProxyClient: exception at mtsComponentInterfaceProxyClient::Runner()");
+        ProxyClient->GetLogger()->error(error);
+    } 
 
     ProxyClient->GetLogger()->trace("mtsComponentInterfaceProxyClient", "Proxy client terminates");
 
@@ -151,7 +154,13 @@ void mtsComponentInterfaceProxyClient::Stop()
     //ManagerServerProxy->Shutdown();
     //ComponentInterfaceServerProxy->ice_getConnection()->close(false); // close gracefully
 
-    BaseClientType::Stop();
+    try {
+        BaseClientType::Stop();
+    } catch (const Ice::Exception& e) {
+        std::string error("mtsComponentInterfaceProxyClient: ");
+        error += e.what();
+        LogError(mtsManagerProxyClient, error);
+    }
 }
 
 bool mtsComponentInterfaceProxyClient::OnServerDisconnect()
