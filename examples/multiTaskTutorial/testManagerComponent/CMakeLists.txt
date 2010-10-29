@@ -16,23 +16,26 @@
 PROJECT(TestManagerComponent)
 
 # name the main executable and specifies with source files to use
-ADD_EXECUTABLE(testManagerComponentLocal mainControllerLocal.cpp
-                                         ManagerComponentLocal.h ManagerComponentLocal.cpp
-                                         CounterOddComponent.h CounterOddComponent.cpp
-                                         CounterEvenComponent.h CounterEvenComponent.cpp)
-CISST_REQUIRES("testManagerComponentLocal" "cisstCommon;cisstOSAbstraction;cisstMultiTask")
+ADD_EXECUTABLE(multiTaskTestManagerComponentLocal 
+               mainControllerLocal.cpp
+               ManagerComponentLocal.h ManagerComponentLocal.cpp
+               CounterOddComponent.h CounterOddComponent.cpp
+               CounterEvenComponent.h CounterEvenComponent.cpp)
+CISST_REQUIRES("multiTaskTestManagerComponentLocal" "cisstCommon;cisstOSAbstraction;cisstMultiTask")
 
 # compile network version if ICE is available
 if (CISST_MTS_HAS_ICE)
 
   # name the main executable and specifies with source files to use
-  ADD_EXECUTABLE(testManagerComponentController mainController.cpp
-                                                ManagerComponent.h ManagerComponent.cpp)
-  CISST_REQUIRES("testManagerComponentController" "cisstCommon;cisstOSAbstraction;cisstMultiTask")
+  ADD_EXECUTABLE(multiTaskTestManagerComponentController 
+                 mainController.cpp
+                 ManagerComponent.h ManagerComponent.cpp)
+  CISST_REQUIRES("multiTaskTestManagerComponentController" "cisstCommon;cisstOSAbstraction;cisstMultiTask")
 
   # name the main executable and specifies with source files to use
-  ADD_EXECUTABLE(testManagerComponentCounter mainCounter.cpp
-                                             CounterOddComponent.h CounterOddComponent.cpp
-                                             CounterEvenComponent.h CounterEvenComponent.cpp)
-  CISST_REQUIRES("testManagerComponentCounter" "cisstCommon;cisstOSAbstraction;cisstMultiTask")
+  ADD_EXECUTABLE(multiTaskTestManagerComponentCounter 
+                 mainCounter.cpp
+                 CounterOddComponent.h CounterOddComponent.cpp
+                 CounterEvenComponent.h CounterEvenComponent.cpp)
+  CISST_REQUIRES("multiTaskTestManagerComponentCounter" "cisstCommon;cisstOSAbstraction;cisstMultiTask")
 endif (CISST_MTS_HAS_ICE)

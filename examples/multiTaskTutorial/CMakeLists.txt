@@ -28,9 +28,9 @@ endif (CISST_HAS_SWIG_PYTHON)
 
 if (CISST_MTS_HAS_ICE)
   add_subdirectory(example7)
-  add_subdirectory(example9-1)
+  add_subdirectory(testComplexConnections)
 else (CISST_MTS_HAS_ICE)
-  message(WARNING " multiTaskTutorial example7 and example9-1 will not be compiled since they require CISST_MTS_HAS_ICE")
+  message(WARNING " multiTaskTutorial example7 and testComplexConnections will not be compiled since they require CISST_MTS_HAS_ICE")
 endif (CISST_MTS_HAS_ICE)
 
 add_subdirectory(example9) # show all types of commands and events + ICE if available
