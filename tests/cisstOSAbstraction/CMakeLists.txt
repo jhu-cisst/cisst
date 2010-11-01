@@ -34,6 +34,8 @@ set (HEADER_FILES
 # add executable for C++ tests
 add_executable (cisstOSAbstractionTestsPipeExecUtility osaPipeExecUtility.cpp)
 
+# to find executables generated, provide internal configuration
+add_definitions(-DCMAKE_CFG_INTDIR_WITH_QUOTES="${CMAKE_CFG_INTDIR}")
 add_executable (cisstOSAbstractionTests ${SOURCE_FILES} ${HEADER_FILES})
 target_link_libraries (cisstOSAbstractionTests cisstTestsMain )
 cisst_target_link_libraries (cisstOSAbstractionTests cisstCommon cisstOSAbstraction)

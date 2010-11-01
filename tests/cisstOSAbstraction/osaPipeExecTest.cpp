@@ -33,19 +33,19 @@ void osaPipeExecTest::TestPipeInternalsSize(void)
 
 void osaPipeExecTest::TestPipe(void)
 {
-    osaPipeExec pipe;
-	#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
-		std::string command = std::string(CISST_BUILD_ROOT) + std::string("/tests/bin/cisstOSAbstractionTestsPipeExecUtility");
-	#elif (CISST_OS == CISST_WINDOWS)
-		std::string command = std::string(CISST_BUILD_ROOT) + std::string("/tests/bin/") + std::string(CMAKE_INTDIR)
-                          + std::string("/cisstOSAbstractionTestsPipeExecUtility");
-	#endif
+    osaPipeExec pipe1, pipe2;
+    std::string command =
+        std::string(CISST_BUILD_ROOT) + std::string("/tests/bin/") + CMAKE_CFG_INTDIR_WITH_QUOTES
+        + std::string("/cisstOSAbstractionTestsPipeExecUtility");
 
     /* Test opening twice, make sure it fails the second time */
-    bool opened = pipe.Open(command, "rw");
+    bool opened = pipe1.Open(command, "rw");
     CPPUNIT_ASSERT_EQUAL(true, opened);
-    opened = pipe.Open(command, "rw");
+    opened = pipe1.Open(command, "rw");
     CPPUNIT_ASSERT_EQUAL(false, opened);
+
+    opened = pipe2.Open(command, "rw");
+    CPPUNIT_ASSERT_EQUAL(true, opened);
 
     /* Generate random test string between 0 and 999 characters */
     const int length = cmnRandomSequence::GetInstance().ExtractRandomInt(0, 999) + 1;
@@ -60,7 +60,10 @@ void osaPipeExecTest::TestPipe(void)
     *s = '\0';
 
     /* If this gives problems, wrap this in a loop similar to the read loop */
-    int charsWritten = pipe.Write(testString);
+    int charsWritten = pipe1.Write(testString);
+    CPPUNIT_ASSERT_EQUAL(length, charsWritten);
+
+    charsWritten = pipe2.Write(testString);
     CPPUNIT_ASSERT_EQUAL(length, charsWritten);
 
     /* Keep reading while there is still data to be read */
@@ -72,7 +75,7 @@ void osaPipeExecTest::TestPipe(void)
 
     while ((charsRead < length)
            && (s < bufferEnd)) {
-        result = pipe.Read(s, bufferEnd-s);
+        result = pipe1.Read(s, bufferEnd-s);
 		CPPUNIT_ASSERT(result != -1);
         charsRead += result;
         s += result;
@@ -83,27 +86,44 @@ void osaPipeExecTest::TestPipe(void)
     std::string test(testString);
     CPPUNIT_ASSERT_EQUAL(test, std::string(buffer));
 
+    s = buffer;
+    charsRead = 0;
+    while ((charsRead < length)
+           && (s < bufferEnd)) {
+        result = pipe2.Read(s, bufferEnd-s);
+		CPPUNIT_ASSERT(result != -1);
+        charsRead += result;
+        s += result;
+    }
+
+    CPPUNIT_ASSERT(s < bufferEnd);
+    CPPUNIT_ASSERT_EQUAL(length, charsRead);
+    CPPUNIT_ASSERT_EQUAL(test, std::string(buffer));
+
     /* Test the std::string versions of Read and Write */
-    charsWritten = pipe.Write(test);
+    charsWritten = pipe1.Write(test);
     CPPUNIT_ASSERT_EQUAL(length, charsWritten);
 
     std::string current;
     while (static_cast<int>(current.length()) < length-1) {
-        current += pipe.Read(length-current.length());
+        current += pipe1.Read(length-current.length());
     }
     CPPUNIT_ASSERT_EQUAL(static_cast<int>(current.length()), length-1);
     CPPUNIT_ASSERT_EQUAL(test, current);
 
     /* Test closing twice, make sure it fails the second time */
-    bool closed = pipe.Close();
+    bool closed = pipe1.Close();
     CPPUNIT_ASSERT_EQUAL(true, closed);
-    closed = pipe.Close();
+    closed = pipe1.Close();
     CPPUNIT_ASSERT_EQUAL(false, closed);
 
-    result = pipe.Write(testString);
+    result = pipe1.Write(testString);
     CPPUNIT_ASSERT_EQUAL(-1, result);
-    result = pipe.Read(buffer, length);
+    result = pipe1.Read(buffer, length);
     CPPUNIT_ASSERT_EQUAL(-1, result);
+
+    closed = pipe2.Close();
+    CPPUNIT_ASSERT_EQUAL(true, closed);
 
 	delete[] testString;
 }
