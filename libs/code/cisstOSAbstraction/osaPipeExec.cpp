@@ -50,11 +50,25 @@ unsigned int osaPipeExec::SizeOfInternals(void) {
     return sizeof(osaPipeExecInternals);
 }
 
-osaPipeExec::osaPipeExec() : Connected(false) {
+
+osaPipeExec::osaPipeExec():
+    Connected(false),
+    Name("unnamed")
+{
     CMN_ASSERT(sizeof(Internals) >= SizeOfInternals());
 }
 
-osaPipeExec::~osaPipeExec(void) {
+
+osaPipeExec::osaPipeExec(const std::string & name):
+    Connected(false),
+    Name(name)
+{
+    CMN_ASSERT(sizeof(Internals) >= SizeOfInternals());
+}
+
+
+osaPipeExec::~osaPipeExec(void)
+{
     Close();
 }
 
@@ -73,9 +87,9 @@ void osaPipeExec::Abort(void) {
 }
 
 bool osaPipeExec::Open(const std::string & cmd, const std::string & mode) {
-    if (Connected)
+    if (Connected) {
         return false;
-    else {
+    } else {
         #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
             if (pipe(ToProgram) == -1) {
                 CMN_LOG_INIT_ERROR << "Can't create pipe in osaPipeExec::Open" << std::endl;
@@ -337,4 +351,10 @@ int osaPipeExec::Write(const std::string & s) {
 bool osaPipeExec::IsConnected(void) const
 {
     return this->Connected;
+}
+
+
+const std::string & osaPipeExec::GetName(void) const
+{
+    return this->Name;
 }

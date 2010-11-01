@@ -42,13 +42,17 @@ class CISST_EXPORT osaPipeExec {
     bool Connected;
     bool ReadFlag;
     bool WriteFlag;
+    std::string Name;
 
     /* Free resources before returning an error */
     void Abort(void);
 
     public:
-        /* Constructor just asserts that internals size is okay */
+        /*! Constructor just asserts that internals size is okay */
         osaPipeExec(void);
+
+        /*! Constructor with name */
+        osaPipeExec(const std::string & name);
 
         /* Destructor calls Close() */
         ~osaPipeExec(void);
@@ -86,6 +90,9 @@ class CISST_EXPORT osaPipeExec {
         /*! Indicate if the pipe is opened (or at least supposed to be
           opened) */
         bool IsConnected(void) const;
+
+        /*! Get name provided in constructor. */
+        const std::string & GetName(void) const;
 };
 
 #endif // _osaPipeExec_h
