@@ -49,6 +49,10 @@ class CISST_EXPORT osaPipeExec {
     /*! Free resources before returning an error */
     void CloseAllPipes(void);
 
+    /* Parse out the command and arguments and return an array in the form
+    that execvp/_spawnvp accept */
+    char ** parseCommand(const std::string & executable, const std::vector<std::string> & arguments);
+
  public:
     /*! Constructor just asserts that internals size is okay */
     osaPipeExec(void);
