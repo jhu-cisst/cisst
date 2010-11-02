@@ -99,6 +99,7 @@ void mtsCommandAndEventNetworkedTest::SendAndVerify(osaPipeExec & pipe,
 void mtsCommandAndEventNetworkedTest::StartAllComponents(void)
 {
     // manager just needs start
+    SendAndVerify(PipeComponentManager, "connect", "component manager connected");
     SendAndVerify(PipeComponentManager, "start", "start succeeded");
     // server needs to connect and start
     SendAndVerify(PipeProcessServer, "connect", "server connected");

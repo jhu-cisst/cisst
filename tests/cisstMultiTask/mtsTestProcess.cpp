@@ -90,7 +90,7 @@ int main(int argc, char * argv[])
         } else {
             std::cout << "unknown command \"" << command << "\"" << std::endl;
         }
-        osaSleep(1.0 * cmn_s);
+        osaSleep(10.0 * cmn_ms);
     }
     
     // stop component manager

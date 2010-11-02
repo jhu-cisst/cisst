@@ -50,7 +50,7 @@ int main(int argc, char * argv[])
     // start the periodic Run
     ComponentManager->StartAll();
     
-    while (1) {
+    while (true) {
         osaSleep(10 * cmn_ms);
     }
     

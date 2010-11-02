@@ -23,21 +23,54 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnPortability.h>
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsManagerGlobal.h>
+#include <cisstMultiTask/mtsManagerLocal.h>
+
+const double TransitionDelay = 5.0 * cmn_s;
 
 int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
 {
     std::string command;
     mtsManagerGlobal globalComponentManager;
+    mtsManagerLocal * localManager;
 
     // create and start global component manager
     std::cin >> command;
-    if (command == "start") {
+    if (command == "connect") {
         if (!globalComponentManager.StartServer()) {
-            std::cout << "start failed" << std::endl;
+            std::cout << "connect failed" << std::endl;
             return 1;
         } else {
-            std::cout << "start succeeded" << std::endl;
+            try {
+                localManager = mtsManagerLocal::GetInstance(globalComponentManager);
+            } catch (...) {
+                std::cout << "connect failed" << std::endl;
+                return 1;
+            }
+            std::cout << "component manager connected" << std::endl;
         }
+    } else {
+        std::cout << "wrong command" << std::endl;
+        return 1;
+    }
+
+    // create and start local components
+    std::cin >> command;
+    if (command == "start") {
+        // create the tasks, i.e. find the commands
+        localManager->CreateAll();
+        if (!localManager->WaitForStateAll(mtsComponentState::READY, TransitionDelay)) {
+            std::cout << "failed to reach state READY for component manager" << std::endl;
+            return 1;
+        }
+        // start the periodic Run
+        localManager->StartAll();
+        if (!localManager->WaitForStateAll(mtsComponentState::ACTIVE, TransitionDelay)) {
+            std::cout << "failed to reach state ACTIVE for component manager" << std::endl;
+            return 1;
+        }
+
+        // send message to confirm everything seems fine
+        std::cout << "start succeeded" << std::endl;
     } else {
         std::cout << "wrong command" << std::endl;
         return 1;
@@ -54,10 +87,16 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
         } else {
             std::cout << "unknown command \"" << command << "\"" << std::endl;
         }
-        osaSleep(1.0 * cmn_s);
+        osaSleep(10.0 * cmn_ms);
     }
 
     // stop component manager
+    localManager->KillAll();
+    if (!localManager->WaitForStateAll(mtsComponentState::FINISHED, TransitionDelay)) {
+        std::cout << "failed to reach state FINISHED for component manager" << std::endl;
+        return 1;
+    }
+
     if (!globalComponentManager.StopServer()) {
         std::cout << "stop failed" << std::endl;
         return 1;
