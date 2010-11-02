@@ -22,11 +22,18 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <stdio.h>
 
-int main(void) {
+int main(int argc, char ** argv) {
     char c;
     /* Line-buffered I/O can interfere with the pipe, so disable it */
     setvbuf(stdout, NULL, _IONBF, 0);
     setvbuf(stdin, NULL, _IONBF, 0);
+
+    if (argc > 1) {
+        for (int i = 1; i < argc; i++)
+            printf("%s", argv[i]);
+        putchar('\0');
+    }
+
     while ((c = getchar()) != EOF)
         putchar(c);
 }

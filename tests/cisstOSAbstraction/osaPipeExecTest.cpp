@@ -24,7 +24,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "osaPipeExecTest.h"
 
-
 void osaPipeExecTest::TestPipeInternalsSize(void)
 {
     CPPUNIT_ASSERT(osaPipeExec::INTERNALS_SIZE >= osaPipeExec::SizeOfInternals());
@@ -132,6 +131,16 @@ void osaPipeExecTest::TestPipe(void)
     CPPUNIT_ASSERT_EQUAL(std::string(""), returnString);
     pipe1.Close();
 
+    /* Test using arguments */
+    std::vector<std::string> arguments;
+    arguments.push_back("a");
+    arguments.push_back("b");
+    arguments.push_back("c");
+    pipe1.Open(command, arguments, "rw");
+    readLength(pipe1, buffer, 4);
+    CPPUNIT_ASSERT_EQUAL(std::string("abc"), std::string(buffer));
+    pipe1.Close();
+
 #if 0
     /* Currently, there's no way for the pipe to tell if the command actually
     executed successfully. Once there is, uncomment this */
@@ -140,7 +149,7 @@ void osaPipeExecTest::TestPipe(void)
     CPPUNIT_ASSERT_EQUAL(true, opened);
     charsWritten = pipe1.Write(testString);
     CPPUNIT_ASSERT_EQUAL(-1, charsWritten);
-    std::string returnString = pipe1.Read(length);
+    returnString = pipe1.Read(length);
     CPPUNIT_ASSERT_EQUAL(std::string(""), returnString);
     closed = pipe1.Close();
     CPPUNIT_ASSERT_EQUAL(true, closed);
