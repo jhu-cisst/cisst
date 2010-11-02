@@ -70,7 +70,6 @@ const mtsGenericObject * mtsCommandFilteredQueuedWrite::GetArgumentPrototype(voi
 mtsExecutionResult mtsCommandFilteredQueuedWrite::Execute(const mtsGenericObject & argument, mtsBlockingType blocking)
 {
     if (this->IsEnabled()) {
-#if 1
         // First, call the filter (qualified read)
         mtsExecutionResult result = ActualFilter->Execute(argument, *FilterOutput);
         if (result != mtsExecutionResult::DEV_OK) {
@@ -78,9 +77,6 @@ mtsExecutionResult mtsCommandFilteredQueuedWrite::Execute(const mtsGenericObject
         }
         // Next, queue the write command
         return BaseType::Execute(*FilterOutput, blocking);
-#else   // PK Proposal
-        return classInstance->PreMethod(argument, *filterOutput, ActualFilter, blocking);
-#endif
     }
     return mtsExecutionResult::DISABLED;
 }

@@ -61,25 +61,8 @@ int main(void)
     GCMUITaskObject->Configure();
     taskManager->AddComponent(GCMUITaskObject);
 
-#if 1
-    // PK: This does not seem to be necessary. The system still starts the ComponentViewer
-    //     even in a network case.
-
-    // Create component viewer
-    mtsComponentViewer *componentViewer = new mtsComponentViewer("ComponentViewer", 1.0*cmn_s);
-    taskManager->AddComponent(componentViewer);
-
-#endif
-
     // Create task and start local component manager
     taskManager->CreateAll();
-#if 0
-    // Connect task viewer to mtsManagerComponentServer, which was created internally
-    taskManager->Connect(componentViewer->GetName(),
-                         mtsComponent::NameOfInterfaceInternalRequired,
-                         mtsManagerComponentServer::NameOfManagerComponentServer,
-                         mtsManagerComponentServer::NameOfInterfaceGCMProvided);
-#endif
     taskManager->StartAll();
 
 

@@ -399,31 +399,6 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterfaceProvidedOrOutput {
                                              queueingPolicy);
     }
     //@}
-#if 0   // PK: PROPOSAL
-    template <class __classType, class __argumentType, class __filteredType>
-        inline mtsCommandWriteBase * AddCommandFilteredWrite(mtsCommandBase::ReturnType (__classType::*premethod)(const __argumentType &,
-                                                                                         const __filteredType &, // maybe not?
-                                                                                         mtsCommandWrite<__filteredType> *, // could be base
-                                                                                         bool) const,
-                                                         void (__classType::*method)(const __filteredType &),
-                                                         __classType * classInstantiation, const std::string & commandName,
-                                                         const __argumentType & argumentPrototype,
-                                                         const __filteredType & filteredPrototype) {
-        return this->AddCommandFilteredWrite(premethod, classInstantiation,
-                                             new mtsCommandWrite<__classType, __filteredType>(method, classInstantiation, commandName, filteredPrototype));
-    }
-
-    template <class __classType, class __argumentType, class __filteredType>
-        inline mtsCommandWriteBase * AddCommandFilteredWrite(mtsCommandBase::ReturnType (__classType::*premethod)(const __argumentType &,
-                                                                                         const __filteredType &, // maybe not?
-                                                                                         mtsCommandWrite<__filteredType> *, // could be base
-                                                                                         bool) const,
-                                                             void (__classType::*method)(const __filteredType &),
-                                                             __classType * classInstantiation, const std::string & commandName) {
-        return this->AddCommandFilteredWrite(premethod, method, classInstantiation, commandName,
-                                             __argumentType(), __filteredType());
-    }
-#endif  // PK: PROPOSAL
 #endif // SWIG
 
     /*! Add events to the interface.  This method creates the

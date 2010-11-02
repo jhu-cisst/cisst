@@ -433,17 +433,9 @@ void ireFramework::LaunchIREShellInstance(const char * startup, bool newPythonTh
         Py_DECREF(pModule);
     }
     else {
-        // As a backup, start just a plain Python shell
-#if 1
         IRE_State = IRE_FINISHED;
         PyErr_Clear();
         cmnThrow(std::runtime_error("LaunchIREShellInstance: import irepy has failed.  Check libraries."));
-#else
-        PyErr_Clear();
-        CMN_LOG_INIT_WARNING << "LaunchIREShellInstance: import irepy has failed, starting Python" << std::endl;
-        PyRun_InteractiveLoop(0,0);
-        CMN_LOG_INIT_WARNING << "LaunchIREShellInstance: import irepy has failed, finishing Python" << std::endl;
-#endif
     }
 #if 0
     // Set IRE_State to IRE_FINISHED on exit, unless IRE started in a new Python thread.
