@@ -89,6 +89,26 @@ void osaPipeExec::CloseAllPipes(void)
 #endif
 }
 
+char ** osaPipeExec::parseCommand(const std::string & executable, const std::vector<std::string> & arguments)
+{
+    typedef char * charPointer;
+    charPointer * command = new charPointer[arguments.size() + 2]; // executable name, arguments, 0
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+        command[0] = const_cast<char *>(executable.c_str());
+#elif (CISST_OS == CISST_WINDOWS)
+        std::string quotedExecutable = '"' + executable + '"';
+        command[0] = const_cast<char *>(quotedExecutable.c_str());
+#endif
+    for (size_t argumentCounter = 0;
+         argumentCounter < arguments.size();
+         argumentCounter++) {
+        command[argumentCounter + 1] = const_cast<char *>(arguments[argumentCounter].c_str());
+    }
+    command[arguments.size() + 1] = NULL; // null terminated list
+
+    return command;
+}
+
 
 bool osaPipeExec::Open(const std::string & executable, const std::string & mode)
 {
@@ -140,7 +160,7 @@ bool osaPipeExec::Open(const std::string & executable,
         }
     }
 
-
+    char ** command = NULL;
 #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
     /* Spawn a child and parent process for communication */
     INTERNALS(pid) = fork();
@@ -183,17 +203,7 @@ bool osaPipeExec::Open(const std::string & executable,
             return false;
         }
 
-        /* Start the command */
-        typedef char * charPointer;
-        charPointer * command = new charPointer[arguments.size() + 2]; // executable name, arguments, 0
-        command[0] = const_cast<char *>(executable.c_str());
-        for (size_t argumentCounter = 0;
-             argumentCounter < arguments.size();
-             argumentCounter++) {
-            command[argumentCounter + 1] = const_cast<char *>(arguments[argumentCounter].c_str());
-        }
-        command[arguments.size() + 1] = 0; // null terminated list
-        
+        command = parseCommand(executable, arguments);
         if (command != NULL && command[0] != NULL) {
             execvp(command[0], command);
         } else {
@@ -203,7 +213,7 @@ bool osaPipeExec::Open(const std::string & executable,
 
         /* If we get here then exec failed */
         CMN_LOG_INIT_ERROR << "Class osaPipeExec: Open: exec failed for pipe \"" << this->Name << "\"" << std::endl;
-        delete command;
+        delete[] command;
         CloseAllPipes();
         return false;
     }
@@ -243,45 +253,37 @@ bool osaPipeExec::Open(const std::string & executable,
         return false;
     }
 
-    /* Spawn process */
-    std::string quotedExecutable;
-    typedef char * charPointer;
-    charPointer * command = new charPointer[arguments.size() + 2]; // executable name, arguments, 0
-    quotedExecutable = "\"" + executable + "\"";
-    command[0] = const_cast<char *>(quotedExecutable.c_str());
-    for (size_t argumentCounter = 0;
-         argumentCounter < arguments.size();
-         argumentCounter++) {
-        command[argumentCounter + 1] = const_cast<char *>(arguments[argumentCounter].c_str());
-    }
-    command[arguments.size() + 1] = 0; // null terminated list
-    
+    command = parseCommand(executable, arguments);
     if (command != NULL && command[0] != NULL) {
         INTERNALS(hProcess) = (HANDLE) _spawnvp(P_NOWAIT, command[0], command);
     } else {
         CMN_LOG_INIT_ERROR << "Class osaPipeExec: Open: exec failed for pipe \"" << this->Name
                            << "\" because the program name is empty" << std::endl;
-        delete command;
+        delete[] command;
         CloseAllPipes();
         return false;
     }
     if (!INTERNALS(hProcess)) {
         CMN_LOG_INIT_ERROR << "Class osaPipeExec: Open: exec failed for pipe \"" << this->Name << "\"" << std::endl;
+        delete[] command;
         CloseAllPipes();
         return false;
     }
 
     /* Restore stdin and stdout for the parent */
     if (_dup2(stdinCopy, _fileno(stdin)) == -1) {
+        delete[] command;
         CloseAllPipes();
         return false;
     }
     if (_dup2(stdoutCopy, _fileno(stdout)) == -1) {
+        delete[] command;
         CloseAllPipes();
         return false;
     }
 #endif
 
+    delete[] command;
     Connected = true;
     return true;
 }
