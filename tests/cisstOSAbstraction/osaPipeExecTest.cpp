@@ -30,6 +30,23 @@ void osaPipeExecTest::TestPipeInternalsSize(void)
     CPPUNIT_ASSERT(osaPipeExec::INTERNALS_SIZE >= osaPipeExec::SizeOfInternals());
 }
 
+void osaPipeExecTest::readLength(osaPipeExec & pipe, int length, char * buffer)
+{
+    char * s = buffer;
+    char * bufferEnd = buffer + length + 1;
+    int charsRead = 0;
+    int result;
+    while ((charsRead < length)
+           && (s < bufferEnd)) {
+        result = pipe.Read(s, bufferEnd-s);
+		CPPUNIT_ASSERT(result != -1);
+        charsRead += result;
+        s += result;
+    }
+
+    CPPUNIT_ASSERT(s < bufferEnd);
+    CPPUNIT_ASSERT_EQUAL(length, charsRead);
+}
 
 void osaPipeExecTest::TestPipe(void)
 {
@@ -68,36 +85,11 @@ void osaPipeExecTest::TestPipe(void)
 
     /* Keep reading while there is still data to be read */
     char * buffer = new char[length];
-    char * bufferEnd = buffer + length + 1;
-    s = buffer;
-    int charsRead = 0;
-    int result;
-
-    while ((charsRead < length)
-           && (s < bufferEnd)) {
-        result = pipe1.Read(s, bufferEnd-s);
-		CPPUNIT_ASSERT(result != -1);
-        charsRead += result;
-        s += result;
-    }
-
-    CPPUNIT_ASSERT(s < bufferEnd);
-    CPPUNIT_ASSERT_EQUAL(length, charsRead);
+    readLength(pipe1, length, buffer);
     std::string test(testString);
     CPPUNIT_ASSERT_EQUAL(test, std::string(buffer));
 
-    s = buffer;
-    charsRead = 0;
-    while ((charsRead < length)
-           && (s < bufferEnd)) {
-        result = pipe2.Read(s, bufferEnd-s);
-		CPPUNIT_ASSERT(result != -1);
-        charsRead += result;
-        s += result;
-    }
-
-    CPPUNIT_ASSERT(s < bufferEnd);
-    CPPUNIT_ASSERT_EQUAL(length, charsRead);
+    readLength(pipe2, length, buffer);
     CPPUNIT_ASSERT_EQUAL(test, std::string(buffer));
 
     /* Test the std::string versions of Read and Write */
@@ -117,7 +109,7 @@ void osaPipeExecTest::TestPipe(void)
     closed = pipe1.Close();
     CPPUNIT_ASSERT_EQUAL(false, closed);
 
-    result = pipe1.Write(testString);
+    int result = pipe1.Write(testString);
     CPPUNIT_ASSERT_EQUAL(-1, result);
     result = pipe1.Read(buffer, length);
     CPPUNIT_ASSERT_EQUAL(-1, result);
