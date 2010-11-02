@@ -35,9 +35,13 @@ CMN_IMPLEMENT_SERVICES(mtsCommandAndEventNetworkedTest);
 
 #define DEFAULT_PROCESS_NAME "LCM"
 
-const double TransitionDelay = 3.0 * cmn_s;
+const double TransitionDelay = 10.0 * cmn_s;
 
-mtsCommandAndEventNetworkedTest::mtsCommandAndEventNetworkedTest()
+mtsCommandAndEventNetworkedTest::mtsCommandAndEventNetworkedTest():
+    PipeComponentManager("component manager"),
+    PipeProcessServer("server"),
+    PipeProcessClient("client"),
+    PipeConfigurationManager("configuration manager")
 {
 }
 
@@ -67,7 +71,8 @@ bool mtsCommandAndEventNetworkedTest::SendAndReceive(osaPipeExec & pipe,
     }
     if (timeExpired) {
         CMN_LOG_CLASS_RUN_ERROR << "SendAndReceive: timed out while sending \"" << send
-                                << "\", allowed time was " << timeOut << " seconds" << std::endl;
+                                << "\" on pipe \"" << pipe.GetName() << "\", allowed time was "
+                                << timeOut << " seconds" << std::endl;
         return false;
     }
     return true;
@@ -79,41 +84,75 @@ void mtsCommandAndEventNetworkedTest::SendAndVerify(osaPipeExec & pipe,
                                                     const std::string & expected,
                                                     const double & timeOut)
 {
-    CPPUNIT_ASSERT(pipe.IsConnected());
+    std::string pipeName = "pipe " + pipe.GetName(); 
+    CPPUNIT_ASSERT_MESSAGE(pipeName, pipe.IsConnected());
     std::string answer;
     if (!SendAndReceive(pipe, send, answer, timeOut)) {
-        std::string message = "time out while sending \"" + send + "\"";
+        std::string message = pipeName + ": time out while waiting for reply to \"" + send + "\"";
         CPPUNIT_FAIL(message);
         return;
     }
-    CPPUNIT_ASSERT_EQUAL(expected, answer);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(pipeName, expected, answer);
 }
 
 
 void mtsCommandAndEventNetworkedTest::StartAllComponents(void)
 {
+    // manager just needs start
     SendAndVerify(PipeComponentManager, "start", "start succeeded");
+    // server needs to connect and start
+    SendAndVerify(PipeProcessServer, "connect", "server connected");
+    SendAndVerify(PipeProcessServer, "start", "start succeeded");
+    // client needs to connect and start
+    SendAndVerify(PipeProcessClient, "connect", "client connected");
+    SendAndVerify(PipeProcessClient, "start", "start succeeded");
 }
 
 
 void mtsCommandAndEventNetworkedTest::StopAllComponents(void)
 {
     SendAndVerify(PipeComponentManager, "stop", "stop succeeded");
+    SendAndVerify(PipeProcessServer, "stop", "stop succeeded");
+    SendAndVerify(PipeProcessClient, "stop", "stop succeeded");
 }
 
 
 void mtsCommandAndEventNetworkedTest::PingAllComponents(void)
 {
     SendAndVerify(PipeComponentManager, "ping", "ok");
+    SendAndVerify(PipeProcessServer, "ping", "ok");
+    SendAndVerify(PipeProcessClient, "ping", "ok");
 }
 
 
 void mtsCommandAndEventNetworkedTest::setUp(void)
 {
-    std::string command;
+    std::string executable;
+    std::vector<std::string> arguments;
+
+    std::string executablePath =
+        std::string(CISST_BUILD_ROOT) + std::string("/tests/bin/")
+        + CMAKE_CFG_INTDIR_WITH_QUOTES + std::string("/");
+
     // start network manager
-    command = std::string(CISST_BUILD_ROOT) + std::string("/tests/bin/cisstMultiTaskTestsComponentManager");
-	PipeComponentManager.Open(command, "rw");
+    executable = executablePath + std::string("cisstMultiTaskTestsComponentManager");
+	if (!PipeComponentManager.Open(executable, "rw")) {
+        std::cout << "Error occurred while starting component manager" << std::endl;
+    }
+
+    // start server process
+    executable = executablePath + std::string("cisstMultiTaskTestsProcess");
+    arguments.resize(1);
+    arguments[0] = std::string("server");
+	if (!PipeProcessServer.Open(executable, arguments, "rw")) {
+        std::cout << "Error occurred while starting server process" << std::endl;
+    }
+
+    // start client process
+    arguments[0] = std::string("client");
+	if (!PipeProcessClient.Open(executable, arguments, "rw")) {
+        std::cout << "Error occurred while starting client process" << std::endl;
+    }
 }
 
 
@@ -121,6 +160,8 @@ void mtsCommandAndEventNetworkedTest::tearDown(void)
 {
     // close and kill all processes
     PipeComponentManager.Close();
+    PipeProcessServer.Close();
+    PipeProcessClient.Close();
 }
 
 

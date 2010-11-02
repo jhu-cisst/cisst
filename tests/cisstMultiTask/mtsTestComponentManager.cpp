@@ -54,6 +54,7 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
         } else {
             std::cout << "unknown command \"" << command << "\"" << std::endl;
         }
+        osaSleep(1.0 * cmn_s);
     }
 
     // stop component manager
