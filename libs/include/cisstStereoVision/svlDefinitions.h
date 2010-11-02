@@ -55,13 +55,13 @@ http://www.cisst.org/cisst/license.txt.
 
 #define STR2FOURCC(fcc_string) (reinterpret_cast<const unsigned int*>(fcc_string)[0])
 
-#define MIN3(a, b, c)       (a <= b) ? \
-                                ((a <= c) ? a : c) : \
-                                ((b <= c) ? b : c)
+#define MIN3(a, b, c)       (((a) <= (b)) ? \
+                                (((a) <= (c)) ? (a) : (c)) : \
+                                (((b) <= (c)) ? (b) : (c)))
 
-#define MAX3(a, b, c)       (a >= b) ? \
-                                ((a >= c) ? a : c) : \
-                                ((b >= c) ? b : c)
+#define MAX3(a, b, c)       (((a) >= (b)) ? \
+                                (((a) >= (c)) ? (a) : (c)) : \
+                                (((b) >= (c)) ? (b) : (c)))
 
 
 ////////////////
