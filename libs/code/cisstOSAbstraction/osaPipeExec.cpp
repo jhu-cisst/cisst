@@ -22,7 +22,6 @@
 
 #include <cisstCommon/cmnAssert.h>
 #include <cisstOSAbstraction/osaPipeExec.h>
-#include <string.h>
 #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
 #include <signal.h>
 #include <unistd.h>

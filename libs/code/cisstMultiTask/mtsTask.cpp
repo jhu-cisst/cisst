@@ -283,7 +283,7 @@ mtsInterfaceProvided * mtsTask::AddInterfaceProvided(const std::string & interfa
     } else {
         CMN_LOG_CLASS_INIT_WARNING << "AddInterfaceProvided: adding provided interface \"" << interfaceProvidedName
                                    << "\" with policy MTS_COMMANDS_SHOULD_NOT_BE_QUEUED to task \""
-                                   << this->GetName() << "\". This bypasses built-ins thread safety mechanisms, make sure your commands are thread safe"
+                                   << this->GetName() << "\". This bypasses built-in thread safety mechanisms, make sure your commands are thread safe"
                                    << std::endl;
         interfaceProvided = new mtsInterfaceProvided(interfaceProvidedName, this, MTS_COMMANDS_SHOULD_NOT_BE_QUEUED);
     }

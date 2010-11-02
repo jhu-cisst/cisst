@@ -23,6 +23,8 @@
 #ifndef _osaPipeExec_h
 #define _osaPipeExec_h
 
+#include <vector>
+#include <string>
 
 // Always include last
 #include <cisstOSAbstraction/osaExport.h>

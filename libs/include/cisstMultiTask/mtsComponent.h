@@ -156,10 +156,8 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     virtual void Kill(void);
 
     /*! Method to add a provided interface to the component.  This
-      method is virtual so that mtsTaskBase can redefine it and
-      generate the appropriate type of interface,
-      i.e. mtsInterfaceProvided as opposed to mtsInterfaceProvided for
-      mtsComponent. */
+      method is virtual so that mtsTask can redefine it and
+      create a provided interface that includes queues for thread safety. */
     virtual mtsInterfaceProvided * AddInterfaceProvided(const std::string & interfaceProvidedName,
                                                         mtsInterfaceQueueingPolicy queueingPolicy = MTS_COMPONENT_POLICY);
 

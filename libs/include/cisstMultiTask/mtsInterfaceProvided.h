@@ -47,7 +47,7 @@ http://www.cisst.org/cisst/license.txt.
 /*!
   \ingroup cisstMultiTask
 
-  This class implements the provided interface for a component of type
+  This class implements the provided interface for a component,
   mtsComponent.  It provides services via command objects, which have
   four signatures:
 
@@ -61,7 +61,7 @@ http://www.cisst.org/cisst/license.txt.
      Void:           no parameters
      Write:          one const parameter
 
-  Clients (tasks or devices) connect to this interface and obtain pointers
+  Clients (components) connect to this interface and obtain pointers
   to command objects. They can then execute these command objects to obtain
   the desired service.  Clients can also provide event handlers to the
   interface -- these are actually command objects that the device will
@@ -72,19 +72,20 @@ http://www.cisst.org/cisst/license.txt.
   members are for access by the owning device, in order to populate
   the lists of commands and events.
 
-  Tasks use the mtsInterfaceProvided class.  Although it provides many of the
-  same capabilities, it makes use of queues for many of the commands to
-  obtain thread safety.
-
-  The main difference between a task interface and a device
-  interface is that the former uses queues for Void and Write
+  Note that this class is instantiated by both mtsComponent and its derived mtsTask classes,
+  via the virtual method AddInterfaceProvided. Because mtsTask (and its derived classes)
+  have a thread, they (by default) instantiate mtsInterfaceProvided with a queueing policy
+  of MTS_COMMANDS_SHOULD_BE_QUEUED.
+  In this case, the provided interface uses queues for Void and Write
   commands in order to maintain thread safety. Furthermore, a separate
   queue is allocated for each client that connects to this interface --
   this ensures that each queue has only a single writer (the client)
   and a single reader (this task), so thread-safety can be achieved
   without relying on potentially blocking mutexes. This is implemented
-  by the internal ThreadResources class, which provides a separate "instance"
-  of the provided interface to the client task.
+  by the GetEndUserInterface method, which returns a new mtsInterfaceProvided
+  object to the client component. In other words, the original provided interface
+  acts as a provided interface factory that generates a "copy" of the provided
+  interface for every client.
 
 */
 class CISST_EXPORT mtsInterfaceProvided: public mtsInterfaceProvidedOrOutput {
