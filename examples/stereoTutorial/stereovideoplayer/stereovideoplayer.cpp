@@ -143,8 +143,10 @@ int StereoVideoPlayer(const string& filepath_left, const string& filepath_right,
     svlStreamManager stream(8);
     svlFilterSourceVideoFile source(2);
     svlFilterImageExposureCorrection gamma;
+#if (CISST_SVL_HAS_OPENCV == ON)
     svlFilterImageCenterFinder centerfinder;
     svlFilterImageZoom zoom;
+#endif // CISST_SVL_HAS_OPENCV
     svlFilterImageTranslation shifter;
     svlFilterImageResizer resizer;
     svlFilterImageWindow window;
@@ -162,6 +164,7 @@ int StereoVideoPlayer(const string& filepath_left, const string& filepath_right,
                                    svlRGB(0, 0, 128));     // background color
     overlay.AddOverlay(ts_overlay);
 
+#if (CISST_SVL_HAS_OPENCV == ON)
     // setup center finder and zoom
     centerfinder.SetReceivingFilter(&zoom);
     centerfinder.SetMask(false);
@@ -169,6 +172,7 @@ int StereoVideoPlayer(const string& filepath_left, const string& filepath_right,
     zoom.SetZoom(2.0, SVL_LEFT);
     zoom.SetZoom(2.0, SVL_RIGHT);
     zoom.SetInterpolation(true);
+#endif // CISST_SVL_HAS_OPENCV
 
     // setup gamma correction
     gamma.SetGamma(20.0);
@@ -238,6 +242,7 @@ int StereoVideoPlayer(const string& filepath_left, const string& filepath_right,
         output = resizer.GetOutput();
     }
 
+#if (CISST_SVL_HAS_OPENCV == ON)
     // Add center finder
     output->Connect(centerfinder.GetInput());
     output = centerfinder.GetOutput();
@@ -245,6 +250,7 @@ int StereoVideoPlayer(const string& filepath_left, const string& filepath_right,
     // Add zoom
     output->Connect(zoom.GetInput());
     output = zoom.GetOutput();
+#endif // CISST_SVL_HAS_OPENCV
 
     // Add gamma
     output->Connect(gamma.GetInput());
