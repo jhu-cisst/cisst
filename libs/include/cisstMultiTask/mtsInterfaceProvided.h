@@ -28,7 +28,6 @@ http://www.cisst.org/cisst/license.txt.
 #define _mtsInterfaceProvided_h
 
 #include <cisstCommon/cmnPortability.h>
-#include <cisstOSAbstraction/osaMutex.h>
 
 #include <cisstMultiTask/mtsMailBox.h>
 #include <cisstMultiTask/mtsCallableVoidMethod.h>
@@ -511,9 +510,6 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterfaceProvidedOrOutput {
 
     /*! Post command queued command */
     mtsCallableVoidBase * PostCommandQueuedCallable;
-
-    /*! Semaphore used internally */
-    osaMutex Mutex;
 
 protected:
     mtsMailBox * GetMailBox(void);

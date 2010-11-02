@@ -49,8 +49,7 @@ mtsInterfaceProvided::mtsInterfaceProvided(const std::string & name, mtsComponen
     EventVoidGenerators("EventVoidGenerators", true),
     EventWriteGenerators("EventWriteGenerators", true),
     CommandsInternal("CommandsInternal", true),
-    PostCommandQueuedCallable(postCommandQueuedCallable),
-    Mutex()
+    PostCommandQueuedCallable(postCommandQueuedCallable)
 {
     // make sure queueing policy is set
     if (queueingPolicy == MTS_COMPONENT_POLICY) {
@@ -100,8 +99,7 @@ mtsInterfaceProvided::mtsInterfaceProvided(mtsInterfaceProvided * originalInterf
     EventVoidGenerators("EventVoidGenerators", true),
     EventWriteGenerators("EventWriteGenerators", true),
     CommandsInternal("CommandsInternal", true),
-    PostCommandQueuedCallable(originalInterface->PostCommandQueuedCallable),
-    Mutex()
+    PostCommandQueuedCallable(originalInterface->PostCommandQueuedCallable)
 {
     // set owner for all maps (to make logs more readable)
     CommandsVoid.SetOwner(*this);
