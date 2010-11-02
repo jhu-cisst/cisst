@@ -35,7 +35,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstNumerical/nmrCallBack.h>
 
-#include <cnetlib.h>
+//include <cnetlib.h>
 
 /*!
   \ingroup cisstNumerical
