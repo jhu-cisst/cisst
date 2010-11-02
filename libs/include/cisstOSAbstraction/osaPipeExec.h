@@ -10,13 +10,13 @@
   (C) Copyright 2010 Johns Hopkins University (JHU), All Rights
   Reserved.
 
---- begin cisst license - do not edit ---
+  --- begin cisst license - do not edit ---
 
-This software is provided "as is" under an open source license, with
-no warranty.  The complete license can be found in license.txt and
-http://www.cisst.org/cisst/license.txt.
+  This software is provided "as is" under an open source license, with
+  no warranty.  The complete license can be found in license.txt and
+  http://www.cisst.org/cisst/license.txt.
 
---- end cisst license ---
+  --- end cisst license ---
 
 */
 
@@ -44,55 +44,59 @@ class CISST_EXPORT osaPipeExec {
     bool WriteFlag;
     std::string Name;
 
-    /* Free resources before returning an error */
-    void Abort(void);
+    /*! Free resources before returning an error */
+    void CloseAllPipes(void);
 
-    public:
-        /*! Constructor just asserts that internals size is okay */
-        osaPipeExec(void);
+ public:
+    /*! Constructor just asserts that internals size is okay */
+    osaPipeExec(void);
 
-        /*! Constructor with name */
-        osaPipeExec(const std::string & name);
+    /*! Constructor with name */
+    osaPipeExec(const std::string & name);
 
-        /* Destructor calls Close() */
-        ~osaPipeExec(void);
+    /*! Destructor calls Close() */
+    ~osaPipeExec(void);
 
-        /* Open a pipe using command and specifying read/write flags mode, which
-        should be "r", "w", or "rw" specifying which direction(s) the pipe should
-        go. Returns true if the Open succeeded, false otherwise */
-        bool Open(const std::string & command, const std::string & mode);
+    /*! Open a pipe using command and specifying read/write flags
+      mode, which should be "r", "w", or "rw" specifying which
+      direction(s) the pipe should go. Returns true if the Open
+      succeeded, false otherwise */
+    bool Open(const std::string & executable, const std::string & mode);
 
-        /* Close the pipe. Returns true if the Close succeeded, false
-        otherwise. */
-        bool Close(bool killProcess = true);
+    bool Open(const std::string & executable, const std::vector<std::string> & parameters,
+              const std::string & mode);
 
-        /* Read at most maxLength characters from the pipe into buffer. Return
-        number of characters read or -1 for an error */
-        int Read(char * buffer, int maxLength) const;
+    /*! Close the pipe. Returns true if the Close succeeded, false
+      otherwise. */
+    bool Close(bool killProcess = true);
 
-        /* Read at most maxLength characters from the pipe, including '\0', and
-        return an std::string containing those characters or empty string for
-        an error */
-        std::string Read(int maxLength) const;
+    /*! Read at most maxLength characters from the pipe into
+      buffer. Return number of characters read or -1 for an error */
+    int Read(char * buffer, int maxLength) const;
 
-        /* Write the null-terminated buffer to the pipe. Return the number of
-        characters written or -1 for an error */
-        int Write(const char * buffer);
+    /*! Read at most maxLength characters from the pipe, including
+      '\0', and return an std::string containing those characters or
+      empty string for an error */
+    std::string Read(int maxLength) const;
 
-        /* Write the the first n characters of buffer to pipe. Return the number
-        of characters written or -1 for an error */
-        int Write(const char * buffer, int n);
+    /*! Write the null-terminated buffer to the pipe. Return the
+      number of characters written or -1 for an error */
+    int Write(const char * buffer);
 
-        /* Write s to the pipe and return the number of characters read or -1
-        for an error */
-        int Write(const std::string & s);
+    /*! Write the the first n characters of buffer to pipe. Return the
+      number of characters written or -1 for an error */
+    int Write(const char * buffer, int n);
 
-        /*! Indicate if the pipe is opened (or at least supposed to be
-          opened) */
-        bool IsConnected(void) const;
+    /*! Write s to the pipe and return the number of characters read
+       or -1 for an error */
+    int Write(const std::string & s);
 
-        /*! Get name provided in constructor. */
-        const std::string & GetName(void) const;
+    /*! Indicate if the pipe is opened (or at least supposed to be
+      opened) */
+    bool IsConnected(void) const;
+
+    /*! Get name provided in constructor. */
+    const std::string & GetName(void) const;
 };
 
 #endif // _osaPipeExec_h
