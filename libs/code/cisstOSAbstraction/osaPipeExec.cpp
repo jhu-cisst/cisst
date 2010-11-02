@@ -93,12 +93,7 @@ char ** osaPipeExec::parseCommand(const std::string & executable, const std::vec
 {
     typedef char * charPointer;
     charPointer * command = new charPointer[arguments.size() + 2]; // executable name, arguments, 0
-#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
-        command[0] = const_cast<char *>(executable.c_str());
-#elif (CISST_OS == CISST_WINDOWS)
-        std::string quotedExecutable = '"' + executable + '"';
-        command[0] = const_cast<char *>(quotedExecutable.c_str());
-#endif
+    command[0] = const_cast<char *>(executable.c_str());
     for (size_t argumentCounter = 0;
          argumentCounter < arguments.size();
          argumentCounter++) {
@@ -115,7 +110,6 @@ bool osaPipeExec::Open(const std::string & executable, const std::string & mode)
     std::vector<std::string> arguments;
     return Open(executable, arguments, mode);
 }
-
 
 bool osaPipeExec::Open(const std::string & executable,
                        const std::vector<std::string> & arguments,

@@ -34,6 +34,11 @@ class osaPipeExecTest : public CppUnit::TestFixture
 
     CPPUNIT_TEST_SUITE_END();
 
+    /* Keep attempting to read until length characters have been read. Causes
+    an infinite loop if length characters have not been written or if line
+    buffering is being used */
+    void readLength(osaPipeExec & pipe, int length, char * buffer);
+
 public:
     /*! Test that structure for internal size is large enough */
     void TestPipeInternalsSize(void);
