@@ -71,7 +71,6 @@ osaPipeExec::~osaPipeExec(void)
     Close();
 }
 
-
 void osaPipeExec::CloseAllPipes(char ** command)
 {
     CMN_LOG_INIT_ERROR << "Class osaPipeExec: CloseAllPipes: called for pipe \"" << this->Name << "\"" << std::endl;
@@ -340,7 +339,9 @@ int osaPipeExec::Read(char *buffer, int maxLength) const {
     int bytesRead = -1;
 #endif
 
-    if (Connected) {
+    /* Check for ReadFlag before opening. This is unnecessary on Unix but it
+    prevents a debug assertion error on Windows */
+    if (Connected && ReadFlag) {
 #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
         bytesRead = read(FromProgram[READ_END], buffer, maxLength*sizeof(char));
 #elif (CISST_OS == CISST_WINDOWS)
@@ -382,7 +383,7 @@ int osaPipeExec::Write(const char * buffer, int n) {
     int bytesWritten = -1;
 #endif
 
-    if (Connected) {
+    if (Connected && WriteFlag) {
 #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
         bytesWritten = write(ToProgram[WRITE_END], buffer, n*sizeof(char));
 #elif (CISST_OS == CISST_WINDOWS)
@@ -401,12 +402,10 @@ int osaPipeExec::Write(const std::string & s) {
     return Write(s.c_str());
 }
 
-
 bool osaPipeExec::IsConnected(void) const
 {
     return this->Connected;
 }
-
 
 const std::string & osaPipeExec::GetName(void) const
 {

@@ -30,7 +30,7 @@ void osaPipeExecTest::TestPipeInternalsSize(void)
     CPPUNIT_ASSERT(osaPipeExec::INTERNALS_SIZE >= osaPipeExec::SizeOfInternals());
 }
 
-void osaPipeExecTest::readLength(osaPipeExec & pipe, int length, char * buffer)
+void osaPipeExecTest::readLength(osaPipeExec & pipe, char * buffer, int length)
 {
     char * s = buffer;
     char * bufferEnd = buffer + length + 1;
@@ -43,7 +43,6 @@ void osaPipeExecTest::readLength(osaPipeExec & pipe, int length, char * buffer)
         charsRead += result;
         s += result;
     }
-
     CPPUNIT_ASSERT(s < bufferEnd);
     CPPUNIT_ASSERT_EQUAL(length, charsRead);
 }
@@ -85,11 +84,11 @@ void osaPipeExecTest::TestPipe(void)
 
     /* Keep reading while there is still data to be read */
     char * buffer = new char[length];
-    readLength(pipe1, length, buffer);
+    readLength(pipe1, buffer, length);
     std::string test(testString);
     CPPUNIT_ASSERT_EQUAL(test, std::string(buffer));
 
-    readLength(pipe2, length, buffer);
+    readLength(pipe2, buffer, length);
     CPPUNIT_ASSERT_EQUAL(test, std::string(buffer));
 
     /* Test the std::string versions of Read and Write */
@@ -116,6 +115,36 @@ void osaPipeExecTest::TestPipe(void)
 
     closed = pipe2.Close();
     CPPUNIT_ASSERT_EQUAL(true, closed);
+
+    /* Test other Open modes. We don't test "r" because we don't have a good
+    test utility for that */
+    pipe1.Open(command, "");
+    charsWritten = pipe1.Write(testString);
+    CPPUNIT_ASSERT_EQUAL(-1, charsWritten);
+    std::string returnString = pipe1.Read(length);
+    CPPUNIT_ASSERT_EQUAL(std::string(""), returnString);
+    pipe1.Close();
+
+    pipe1.Open(command, "w");
+    charsWritten = pipe1.Write(testString);
+    CPPUNIT_ASSERT_EQUAL(length, charsWritten);
+    returnString = pipe1.Read(length);
+    CPPUNIT_ASSERT_EQUAL(std::string(""), returnString);
+    pipe1.Close();
+
+#if 0
+    /* Currently, there's no way for the pipe to tell if the command actually
+    executed successfully. Once there is, uncomment this */
+    /* Test opening a command that doesn't exist */
+    opened = pipe1.Open("abcdefghijklmnopqrstuvwxyz", "rw");
+    CPPUNIT_ASSERT_EQUAL(true, opened);
+    charsWritten = pipe1.Write(testString);
+    CPPUNIT_ASSERT_EQUAL(-1, charsWritten);
+    std::string returnString = pipe1.Read(length);
+    CPPUNIT_ASSERT_EQUAL(std::string(""), returnString);
+    closed = pipe1.Close();
+    CPPUNIT_ASSERT_EQUAL(true, closed);
+#endif
 
 	delete[] testString;
 }
