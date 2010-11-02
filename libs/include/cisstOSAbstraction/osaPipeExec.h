@@ -46,12 +46,19 @@ class CISST_EXPORT osaPipeExec {
     bool WriteFlag;
     std::string Name;
 
-    /*! Free resources before returning an error */
-    void CloseAllPipes(void);
+    /*! Free resources before returning an error. Also free the command
+    pointer */
+    void CloseAllPipes(char ** command);
 
     /* Parse out the command and arguments and return an array in the form
     that execvp/_spawnvp accept */
-    char ** parseCommand(const std::string & executable, const std::vector<std::string> & arguments);
+    char ** ParseCommand(const std::string & executable, const std::vector<std::string> & arguments);
+
+#if (CISST_OS == CISST_WINDOWS)
+	/* Restore I/O to their original values before returning false. Not needed
+	for Unix because it uses fork instead of spawn */
+	void RestoreIO(int newStdin, int newStdout);
+#endif
 
  public:
     /*! Constructor just asserts that internals size is okay */
