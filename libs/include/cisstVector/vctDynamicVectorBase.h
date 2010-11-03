@@ -268,7 +268,6 @@ public:
             VoVi<typename vctUnaryOperations<value_type,
             typename __vectorOwnerType::value_type>::Identity>::
             Run(*this, other);
-        std::cout << "*";
         return *this;
     }
 
