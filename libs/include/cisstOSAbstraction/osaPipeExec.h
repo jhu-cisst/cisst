@@ -47,16 +47,18 @@ class CISST_EXPORT osaPipeExec {
     std::string Name;
 
     /*! Free resources before returning an error. Also free the command
-    pointer */
+      pointer */
     void CloseAllPipes(char ** command);
 
-    /* Parse out the command and arguments and return an array in the form
-    that execvp/_spawnvp accept */
-    char ** ParseCommand(const std::string & executable, const std::vector<std::string> & arguments);
+    /*! Parse out the command and arguments and return an array in the
+      form that execvp/_spawnvp accept */
+    char ** ParseCommand(const std::string & executable,
+                         const std::vector<std::string> & arguments);
 
 #if (CISST_OS == CISST_WINDOWS)
-	/* Restore I/O to their original values before returning false. Not needed
-	for Unix because it uses fork instead of spawn */
+	/*! Restore I/O to their original values before returning
+      false. Not needed for Unix because it uses fork instead of
+      spawn */
 	void RestoreIO(int newStdin, int newStdout);
 #endif
 
@@ -70,13 +72,18 @@ class CISST_EXPORT osaPipeExec {
     /*! Destructor calls Close() */
     ~osaPipeExec(void);
 
-    /*! Open a pipe using command and specifying read/write flags
-      mode, which should be "r", "w", or "rw" specifying which
+    /*! Open a pipe using an existing executable and specifying
+      read/write mode.  Mode can be "r", "w", or "rw" specifying which
       direction(s) the pipe should go. Returns true if the Open
       succeeded, false otherwise */
     bool Open(const std::string & executable, const std::string & mode);
 
-    bool Open(const std::string & executable, const std::vector<std::string> & parameters,
+    /*! Open a pipe using an existing executable with a vector of
+      arguments and specifying read/write mode.  Mode can be "r", "w",
+      or "rw" specifying which direction(s) the pipe should
+      go. Returns true if the Open succeeded, false otherwise */
+    bool Open(const std::string & executable,
+              const std::vector<std::string> & parameters,
               const std::string & mode);
 
     /*! Close the pipe. Returns true if the Close succeeded, false
@@ -101,7 +108,7 @@ class CISST_EXPORT osaPipeExec {
     int Write(const char * buffer, int n);
 
     /*! Write s to the pipe and return the number of characters read
-       or -1 for an error */
+      or -1 for an error */
     int Write(const std::string & s);
 
     /*! Indicate if the pipe is opened (or at least supposed to be

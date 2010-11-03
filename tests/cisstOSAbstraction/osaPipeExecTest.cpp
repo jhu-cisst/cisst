@@ -133,12 +133,12 @@ void osaPipeExecTest::TestPipe(void)
 
     /* Test using arguments */
     std::vector<std::string> arguments;
-    arguments.push_back("a");
-    arguments.push_back("b");
-    arguments.push_back("c");
+    arguments.push_back("a a");
+    arguments.push_back(" b");
+    arguments.push_back("c ");
     pipe1.Open(command, arguments, "rw");
-    readLength(pipe1, buffer, 4);
-    CPPUNIT_ASSERT_EQUAL(std::string("abc"), std::string(buffer));
+    readLength(pipe1, buffer, 11);
+    CPPUNIT_ASSERT_EQUAL(std::string("a a; b;c ;"), std::string(buffer));
     pipe1.Close();
 
 #if 0

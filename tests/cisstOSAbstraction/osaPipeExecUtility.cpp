@@ -29,11 +29,13 @@ int main(int argc, char ** argv) {
     setvbuf(stdin, NULL, _IONBF, 0);
 
     if (argc > 1) {
-        for (int i = 1; i < argc; i++)
-            printf("%s", argv[i]);
+        for (int i = 1; i < argc; i++) {
+            printf("%s;", argv[i]);
+        }
         putchar('\0');
     }
 
-    while ((c = getchar()) != EOF)
+    while ((c = getchar()) != EOF) {
         putchar(c);
+    }
 }

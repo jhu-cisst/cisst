@@ -24,6 +24,7 @@
 #include <cisstOSAbstraction/osaPipeExec.h>
 #include <string.h>
 #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+#include <sys/errno.h>
 #include <signal.h>
 #include <unistd.h>
 #elif (CISST_OS == CISST_WINDOWS)
@@ -131,11 +132,13 @@ bool osaPipeExec::Open(const std::string & executable,
 
 #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
     if (pipe(ToProgram) == -1) {
-        CMN_LOG_INIT_ERROR << "Class osaPipeExec: Open: can't create pipe \"" << this->Name << "\"" << std::endl;
+        CMN_LOG_INIT_ERROR << "Class osaPipeExec: Open: can't create pipe \"" << this->Name << "\" ("
+                           << strerror(errno) << ")" << std::endl;
         return false;
     }
     if (pipe(FromProgram) == -1) {
-        CMN_LOG_INIT_ERROR << "Class osaPipeExec: Open: can't create pipe \"" << this->Name << "\"" << std::endl;
+        CMN_LOG_INIT_ERROR << "Class osaPipeExec: Open: can't create pipe \"" << this->Name << "\" ("
+                           << strerror(errno) << ")" << std::endl;
         CloseAllPipes(NULL);
         return false;
     }
@@ -340,7 +343,7 @@ int osaPipeExec::Read(char *buffer, int maxLength) const {
 #endif
 
     /* Check for ReadFlag before opening. This is unnecessary on Unix but it
-    prevents a debug assertion error on Windows */
+       prevents a debug assertion error on Windows */
     if (Connected && ReadFlag) {
 #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
         bytesRead = read(FromProgram[READ_END], buffer, maxLength*sizeof(char));
@@ -398,14 +401,18 @@ int osaPipeExec::Write(const char * buffer, int n) {
     }
 }
 
-int osaPipeExec::Write(const std::string & s) {
+
+int osaPipeExec::Write(const std::string & s)
+{
     return Write(s.c_str());
 }
+
 
 bool osaPipeExec::IsConnected(void) const
 {
     return this->Connected;
 }
+
 
 const std::string & osaPipeExec::GetName(void) const
 {
