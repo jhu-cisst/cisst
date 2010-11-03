@@ -30,3 +30,15 @@ mtsInterfaceProvidedOrOutput::mtsInterfaceProvidedOrOutput(const std::string & i
     Component(component)
 {
 }
+
+
+const std::string & mtsInterfaceProvidedOrOutput::GetName(void) const
+{
+    return this->Name;
+}
+    
+
+void mtsInterfaceProvidedOrOutput::Cleanup(void)
+{
+    CMN_LOG_CLASS_INIT_DEBUG << "Cleanup: default implementation from mtsInterfaceProvidedOrOutput called" << std::endl;
+}

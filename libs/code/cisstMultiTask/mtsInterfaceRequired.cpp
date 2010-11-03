@@ -259,6 +259,8 @@ bool mtsInterfaceRequired::Disconnect(void)
     for (iterEventWrite = EventHandlersWrite.begin(); iterEventWrite != EventHandlersWrite.end(); iterEventWrite++)
         InterfaceProvided->RemoveObserver(iterEventWrite->first, iterEventWrite->second);
 #endif
+    // set pointer to interface provided or input to 0
+    InterfaceProvidedOrOutput = 0;
     return true;
 }
 

@@ -76,15 +76,10 @@ class CISST_EXPORT mtsInterfaceProvidedOrOutput: public cmnGenericObject
     virtual ~mtsInterfaceProvidedOrOutput() {}
 
     /*! Returns the name of the interface. */
-    inline const std::string & GetName(void) const {
-        return this->Name;
-    }
+    const std::string & GetName(void) const;
 
-public:
-
-    virtual void Cleanup(void) {};
-
-protected:
+    /*! Cleanup method */
+    virtual void Cleanup(void);
 };
 
 
