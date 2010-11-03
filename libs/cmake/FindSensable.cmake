@@ -131,3 +131,32 @@ IF(APPLE)
                    SENSABLE_LIBRARIES_DEBUG
                    SENSABLE_LIBRARIES)
 ENDIF(APPLE)
+
+if("${CMAKE_SYSTEM}" MATCHES "Linux")
+
+ set( SENSABLE_SEARCH_PATH /usr /usr/local )
+  
+  find_path( SENSABLE_DIR include/HD/hd.h ${SENSABLE_SEARCH_PATH} )
+  
+  if( SENSABLE_DIR ) 
+
+    set( SENSABLE_INCLUDE_DIR ${SENSABLE_DIR}/include )
+    set( SENSABLE_FOUND true )
+    
+    find_library( SENSABLE_LIB_HD HD  ${SENSABLE_DIR}/lib)
+    find_library( SENSABLE_LIB_HDU HDU  ${SENSABLE_DIR}/lib)
+    find_library( SENSABLE_LIB_HL HL  ${SENSABLE_DIR}/lib)
+    find_library( SENSABLE_LIB_HLU HLU  ${SENSABLE_DIR}/lib)
+
+    set( SENSABLE_LIBRARIES 
+        ${SENSABLE_LIB_HD}
+        ${SENSABLE_LIB_HDU}
+        ${SENSABLE_LIB_HL}
+        ${SENSABLE_LIB_HLU} )    
+    
+  MARK_AS_ADVANCED( SENSABLE_LIB_HD SENSABLE_LIB_HDU SENSABLE_LIB_HL SENSABLE_LIB_HLU )
+
+
+  endif( SENSABLE_DIR )
+
+endif("${CMAKE_SYSTEM}" MATCHES "Linux")
