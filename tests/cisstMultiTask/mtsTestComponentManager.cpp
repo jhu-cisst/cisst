@@ -46,7 +46,7 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
                 std::cout << "connect failed" << std::endl;
                 return 1;
             }
-            std::cout << "component manager connected" << std::endl;
+            std::cout << "component_manager connected" << std::endl;
         }
     } else {
         std::cout << "wrong command" << std::endl;
@@ -59,13 +59,13 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
         // create the tasks, i.e. find the commands
         localManager->CreateAll();
         if (!localManager->WaitForStateAll(mtsComponentState::READY, TransitionDelay)) {
-            std::cout << "failed to reach state READY for component manager" << std::endl;
+            std::cout << "failed to reach state READY for component_manager" << std::endl;
             return 1;
         }
         // start the periodic Run
         localManager->StartAll();
         if (!localManager->WaitForStateAll(mtsComponentState::ACTIVE, TransitionDelay)) {
-            std::cout << "failed to reach state ACTIVE for component manager" << std::endl;
+            std::cout << "failed to reach state ACTIVE for component_manager" << std::endl;
             return 1;
         }
 
@@ -78,22 +78,30 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
 
     // normal operations
     bool stop = false;
+    std::string process;
     while (!stop) {
         std::cin >> command;
         if (command == std::string("stop")) {
             stop = true;
         } else if (command == std::string("ping")) {
             std::cout << "ok" << std::endl;
+        } else if (command == std::string("has_process")) {
+            std::cin >> process;
+            if (globalComponentManager.FindProcess(process)) {
+                std::cout << process << " found" << std::endl;
+            } else {
+                std::cout << process << " not found" << std::endl;
+            }
         } else {
             std::cout << "unknown command \"" << command << "\"" << std::endl;
         }
         osaSleep(10.0 * cmn_ms);
     }
 
-    // stop component manager
+    // stop component_manager
     localManager->KillAll();
     if (!localManager->WaitForStateAll(mtsComponentState::FINISHED, TransitionDelay)) {
-        std::cout << "failed to reach state FINISHED for component manager" << std::endl;
+        std::cout << "failed to reach state FINISHED for component_manager" << std::endl;
         return 1;
     }
 

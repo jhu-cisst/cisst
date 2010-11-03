@@ -38,10 +38,10 @@ CMN_IMPLEMENT_SERVICES(mtsCommandAndEventNetworkedTest);
 const double TransitionDelay = 10.0 * cmn_s;
 
 mtsCommandAndEventNetworkedTest::mtsCommandAndEventNetworkedTest():
-    PipeComponentManager("component manager"),
+    PipeComponentManager("component_manager"),
     PipeProcessServer("server"),
     PipeProcessClient("client"),
-    PipeConfigurationManager("configuration manager")
+    PipeConfigurationManager("configuration_manager")
 {
 }
 
@@ -98,15 +98,14 @@ void mtsCommandAndEventNetworkedTest::SendAndVerify(osaPipeExec & pipe,
 
 void mtsCommandAndEventNetworkedTest::StartAllComponents(void)
 {
-    // manager just needs start
-    SendAndVerify(PipeComponentManager, "connect", "component manager connected");
+    SendAndVerify(PipeComponentManager, "connect", "component_manager connected");
     SendAndVerify(PipeComponentManager, "start", "start succeeded");
-    // server needs to connect and start
     SendAndVerify(PipeProcessServer, "connect", "server connected");
     SendAndVerify(PipeProcessServer, "start", "start succeeded");
-    // client needs to connect and start
     SendAndVerify(PipeProcessClient, "connect", "client connected");
     SendAndVerify(PipeProcessClient, "start", "start succeeded");
+    SendAndVerify(PipeConfigurationManager, "connect", "configuration_manager connected");
+    SendAndVerify(PipeConfigurationManager, "start", "start succeeded");
 }
 
 
@@ -115,6 +114,7 @@ void mtsCommandAndEventNetworkedTest::StopAllComponents(void)
     SendAndVerify(PipeComponentManager, "stop", "stop succeeded");
     SendAndVerify(PipeProcessServer, "stop", "stop succeeded");
     SendAndVerify(PipeProcessClient, "stop", "stop succeeded");
+    SendAndVerify(PipeConfigurationManager, "stop", "stop succeeded");
 }
 
 
@@ -123,6 +123,16 @@ void mtsCommandAndEventNetworkedTest::PingAllComponents(void)
     SendAndVerify(PipeComponentManager, "ping", "ok");
     SendAndVerify(PipeProcessServer, "ping", "ok");
     SendAndVerify(PipeProcessClient, "ping", "ok");
+    SendAndVerify(PipeConfigurationManager, "ping", "ok");
+}
+
+
+void mtsCommandAndEventNetworkedTest::VerifyProcesses(void)
+{
+    SendAndVerify(PipeComponentManager, "has_process client", "client found");
+    SendAndVerify(PipeComponentManager, "has_process server", "server found");
+    SendAndVerify(PipeComponentManager, "has_process configuration_manager", "configuration_manager found");
+    SendAndVerify(PipeComponentManager, "has_process whatever_that_should_not_exist", "whatever_that_should_not_exist not found");
 }
 
 
@@ -154,6 +164,13 @@ void mtsCommandAndEventNetworkedTest::setUp(void)
 	if (!PipeProcessClient.Open(executable, arguments, "rw")) {
         std::cout << "Error occurred while starting client process" << std::endl;
     }
+
+    // start configuration manager
+    executable = executablePath + std::string("cisstMultiTaskTestsConfigurationManager");
+    arguments.resize(0);
+	if (!PipeConfigurationManager.Open(executable, "rw")) {
+        std::cout << "Error occurred while starting configuration manager" << std::endl;
+    }
 }
 
 
@@ -163,6 +180,7 @@ void mtsCommandAndEventNetworkedTest::tearDown(void)
     PipeComponentManager.Close();
     PipeProcessServer.Close();
     PipeProcessClient.Close();
+    PipeConfigurationManager.Close();
 }
 
 
@@ -357,6 +375,7 @@ void mtsCommandAndEventNetworkedTest::TestDeviceDevice(void)
 {
     StartAllComponents();
     PingAllComponents();
+    VerifyProcesses();
     StopAllComponents();
     /*
     mtsTestDevice2<_elementType> * client = new mtsTestDevice2<_elementType>;

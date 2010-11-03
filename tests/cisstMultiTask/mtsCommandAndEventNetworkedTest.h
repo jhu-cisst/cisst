@@ -100,6 +100,9 @@ public:
     // test that all components are alive
     void PingAllComponents(void);
 
+    // test that all processes are registered on component manager
+    void VerifyProcesses(void);
+
 #if 0
     template <class _clientType, class _serverType>
     void TestExecution(_clientType * client, _serverType * server,
