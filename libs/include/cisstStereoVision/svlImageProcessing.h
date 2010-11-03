@@ -64,9 +64,11 @@ namespace svlImageProcessing
     int CISST_EXPORT Resize(svlSampleImage* src_img, unsigned int src_videoch, svlSampleImage* dst_img, unsigned int dst_videoch, bool interpolation, vctDynamicVector<unsigned char>& internals);
     int CISST_EXPORT Deinterlace(svlSampleImage* image, unsigned int videoch, DI_Algorithm algorithm);
     int CISST_EXPORT DisparityMapToSurface(svlSampleMatrixFloat* disparity_map, svlSampleImage3DMap* mesh_3d, svlCameraGeometry& camera_geometry, svlRect& roi);
-    int CISST_EXPORT Rectify(svlSampleImage* src_img, unsigned int src_videoch, svlSampleImage* dst_img, unsigned int dst_videoch, const std::string& table_filename, bool interpolation, Internals& internals);
     int CISST_EXPORT Rectify(svlSampleImage* src_img, unsigned int src_videoch, svlSampleImage* dst_img, unsigned int dst_videoch, const std::string& table_filename, bool interpolation);
+    int CISST_EXPORT Rectify(svlSampleImage* src_img, unsigned int src_videoch, svlSampleImage* dst_img, unsigned int dst_videoch, const std::string& table_filename, bool interpolation, Internals& internals);
     int CISST_EXPORT Rectify(svlSampleImage* src_img, unsigned int src_videoch, svlSampleImage* dst_img, unsigned int dst_videoch, bool interpolation, Internals& internals);
+    int CISST_EXPORT SetExposure(svlSampleImage* image, unsigned int videoch, double brightness, double contrast, double gamma);
+    int CISST_EXPORT SetExposure(svlSampleImage* image, unsigned int videoch, double brightness, double contrast, double gamma, Internals& internals);
 };
 
 #endif // _svlImageProcessing_h

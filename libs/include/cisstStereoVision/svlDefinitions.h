@@ -190,7 +190,6 @@ enum svlStreamType
     ,svlTypeImageMono8Stereo  // Dual Grayscale image (8bpp)
     ,svlTypeImageMono16       // Single Grayscale image (16bpp)
     ,svlTypeImageMono16Stereo // Dual Grayscale image (16bpp)
-//    ,svlTypeImageMonoFloat    // Single float image (32bpp)
     ,svlTypeImage3DMap        // Three floats per pixel for storing 3D coordinates
     ,svlTypeMatrixInt8        // Matrix of type 'char'
     ,svlTypeMatrixInt16       // Matrix of type 'short'

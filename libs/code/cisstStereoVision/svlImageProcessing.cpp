@@ -95,6 +95,7 @@ int svlImageProcessing::Crop(svlSampleImage* src_img, unsigned int src_videoch,
     return SVL_OK;
 }
 
+
 int svlImageProcessing::Resize(svlSampleImage* src_img, unsigned int src_videoch,
                                svlSampleImage* dst_img, unsigned int dst_videoch,
                                bool interpolation)
@@ -237,6 +238,7 @@ int svlImageProcessing::Resize(svlSampleImage* src_img, unsigned int src_videoch
     return SVL_OK;
 }
 
+
 int svlImageProcessing::Deinterlace(svlSampleImage* image, unsigned int videoch, svlImageProcessing::DI_Algorithm algorithm)
 {
     if (!image || image->GetVideoChannels() <= videoch || image->GetBPP() != 3) return SVL_FAIL;
@@ -273,6 +275,7 @@ int svlImageProcessing::Deinterlace(svlSampleImage* image, unsigned int videoch,
 
     return SVL_OK;
 }
+
 
 int svlImageProcessing::DisparityMapToSurface(svlSampleMatrixFloat* disparity_map,
                                               svlSampleImage3DMap* mesh_3d,
@@ -338,6 +341,16 @@ int svlImageProcessing::DisparityMapToSurface(svlSampleMatrixFloat* disparity_ma
     }
 
     return SVL_OK;
+}
+
+
+int svlImageProcessing::Rectify(svlSampleImage* src_img, unsigned int src_videoch,
+                                svlSampleImage* dst_img, unsigned int dst_videoch,
+                                const std::string& table_filename,
+                                bool interpolation)
+{
+    Internals internals;
+    return Rectify(src_img, src_videoch, dst_img, dst_videoch, table_filename, interpolation, internals);
 }
 
 int svlImageProcessing::Rectify(svlSampleImage* src_img, unsigned int src_videoch,
@@ -486,19 +499,57 @@ int svlImageProcessing::Rectify(svlSampleImage* src_img, unsigned int src_videoc
 
 int svlImageProcessing::Rectify(svlSampleImage* src_img, unsigned int src_videoch,
                                 svlSampleImage* dst_img, unsigned int dst_videoch,
-                                const std::string& table_filename,
-                                bool interpolation)
-{
-    Internals internals;
-    return Rectify(src_img, src_videoch, dst_img, dst_videoch, table_filename, interpolation, internals);
-}
-
-int svlImageProcessing::Rectify(svlSampleImage* src_img, unsigned int src_videoch,
-                                svlSampleImage* dst_img, unsigned int dst_videoch,
                                 bool interpolation,
                                 svlImageProcessing::Internals& internals)
 {
     return Rectify(src_img, src_videoch, dst_img, dst_videoch, "", interpolation, internals);
+}
+
+
+int svlImageProcessing::SetExposure(svlSampleImage* image, unsigned int videoch, double brightness, double contrast, double gamma)
+{
+    svlImageProcessing::Internals internals;
+    return SetExposure(image, videoch, brightness, contrast, gamma, internals);
+}
+
+int svlImageProcessing::SetExposure(svlSampleImage* image, unsigned int videoch, double brightness, double contrast, double gamma, svlImageProcessing::Internals& internals)
+{
+    if (!image || image->GetVideoChannels() <= videoch ||
+        image->GetBPP() != image->GetDataChannels()) return SVL_FAIL;
+
+    svlImageProcessingHelper::ExposureInternals* exposure = dynamic_cast<svlImageProcessingHelper::ExposureInternals*>(internals.Get());
+    if (!exposure) {
+        exposure = new svlImageProcessingHelper::ExposureInternals;
+        internals.Set(exposure);
+    }
+
+    // Will not do anything if parameters have not changed
+    exposure->SetBrightness(brightness);
+    exposure->SetContrast(contrast);
+    exposure->SetGamma(gamma);
+    exposure->CalculateCurve();
+
+    const unsigned int datachannels = image->GetDataChannels();
+    const unsigned int toskip = (image->GetAlphaChannel() >= 0) ? 1 : 0;
+    unsigned int pixelcount = image->GetWidth(videoch) * image->GetHeight(videoch);
+    vctFixedSizeVectorRef<unsigned char, 255, 1> curve(exposure->Curve);
+
+    unsigned char* ptr = image->GetUCharPointer(videoch);
+    unsigned int i;
+
+    while (pixelcount) {
+
+        i = datachannels;
+        while (i) {
+            *ptr = curve[*ptr]; ptr ++;
+            i --;
+        }
+        ptr += toskip;
+
+        pixelcount --;
+    }
+
+    return SVL_OK;
 }
 
 

@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _svlImageProcessingHelper_h
 
 #include <string>
+#include <cisstVector/vctFixedSizeVectorTypes.h>
 
 
 class svlImageProcessingInternals
@@ -114,6 +115,33 @@ namespace svlImageProcessingHelper
         int LoadLine(std::ifstream &file, double* dblbuf, char* chbuf, unsigned int size, int explen);
         void TransposeLUTArray(unsigned int* index, unsigned int size, unsigned int width, unsigned int height);
         void Release();
+    };
+
+    //////////////
+    // Exposure //
+    //////////////
+
+    class ExposureInternals : public svlImageProcessingInternals
+    {
+    public:
+        ExposureInternals();
+
+        void SetBrightness(double brightness);
+        double GetBrightness();
+        void SetContrast(double contrast);
+        double GetContrast();
+        void SetGamma(double gamma);
+        double GetGamma();
+
+        void CalculateCurve();
+
+        vctFixedSizeVector<unsigned char, 255> Curve;
+
+    private:
+        double Brightness;
+        double Contrast;
+        double Gamma;
+        bool Modified;
     };
 };
 

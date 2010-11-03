@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _svlFilterImageExposureCorrection_h
 
 #include <cisstStereoVision/svlFilterBase.h>
+#include <cisstStereoVision/svlImageProcessing.h>
 
 // Always include last!
 #include <cisstStereoVision/svlExport.h>
@@ -52,9 +53,7 @@ protected:
     double Contrast;
     double Gamma;
 
-    vctFixedSizeVector<unsigned char, 255> Curve;
-    
-    virtual void CalculateCurve();
+    svlImageProcessing::Internals Exposure;
 
 protected:
     virtual void CreateInterfaces();

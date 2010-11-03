@@ -437,6 +437,42 @@ public:
         return (sizeof(_ValueType) * _DataChannels);
     }
 
+    int GetAlphaChannel() const
+    {
+        switch (GetType()) {
+            case svlTypeImageRGBA:
+            case svlTypeImageRGBAStereo:
+                return 3;
+            break;
+
+            case svlTypeImageMono8:
+            case svlTypeImageMono8Stereo:
+            case svlTypeImageMono16:
+            case svlTypeImageMono16Stereo:
+            case svlTypeImage3DMap:
+            case svlTypeImageRGB:
+            case svlTypeImageRGBStereo:
+            case svlTypeMatrixInt8:
+            case svlTypeMatrixInt16:
+            case svlTypeMatrixInt32:
+            case svlTypeMatrixInt64:
+            case svlTypeMatrixUInt8:
+            case svlTypeMatrixUInt16:
+            case svlTypeMatrixUInt32:
+            case svlTypeMatrixUInt64:
+            case svlTypeMatrixFloat:
+            case svlTypeMatrixDouble:
+            case svlTypeInvalid:
+            case svlTypeStreamSource:
+            case svlTypeStreamSink:
+            case svlTypeTransform3D:
+            case svlTypeTargets:
+            case svlTypeText:
+            break;
+        }
+        return SVL_FAIL;
+    }
+
     unsigned int GetWidth(const unsigned int videochannel = 0) const
     {
         if (videochannel < _VideoChannels) return (Image[videochannel].width() / _DataChannels);

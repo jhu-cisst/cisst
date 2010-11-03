@@ -952,3 +952,88 @@ void svlImageProcessingHelper::RectificationInternals::Release()
     blendSrc4Size = 0;
 }
 
+
+/*********************************************************/
+/*** svlImageProcessingHelper::ExposureInternals class ***/
+/*********************************************************/
+
+svlImageProcessingHelper::ExposureInternals::ExposureInternals() :
+    svlImageProcessingInternals(),
+    Brightness(0.0),
+    Contrast(0.0),
+    Gamma(0.0),
+    Modified(true)
+{
+    Curve.SetAll(0);
+}
+
+void svlImageProcessingHelper::ExposureInternals::SetBrightness(double brightness)
+{
+    if (brightness > 100.0) brightness = 100.0;
+    else  if (brightness < -100.0) brightness = -100.0;
+
+    if (Brightness != brightness) {
+        Brightness = brightness;
+        Modified = true;
+    }
+}
+
+double svlImageProcessingHelper::ExposureInternals::GetBrightness()
+{
+    return Brightness;
+}
+
+void svlImageProcessingHelper::ExposureInternals::SetContrast(double contrast)
+{
+    if (contrast > 100.0) contrast = 100.0;
+    else  if (contrast < -100.0) contrast = -100.0;
+
+    if (Contrast != contrast) {
+        Contrast = contrast;
+        Modified = true;
+    }
+}
+
+double svlImageProcessingHelper::ExposureInternals::GetContrast()
+{
+    return Contrast;
+}
+
+void svlImageProcessingHelper::ExposureInternals::SetGamma(double gamma)
+{
+    if (gamma > 100.0) gamma = 100.0;
+    else  if (gamma < -100.0) gamma = -100.0;
+
+    if (Gamma != gamma) {
+        Gamma = gamma;
+        Modified = true;
+    }
+}
+
+double svlImageProcessingHelper::ExposureInternals::GetGamma()
+{
+    return Gamma;
+}
+
+void svlImageProcessingHelper::ExposureInternals::CalculateCurve()
+{
+    if (!Modified) return;
+
+    const double cntrst = pow(10.0, Contrast / 100.0);
+    const double gmma = pow(10.0, -Gamma / 100.0);
+    const double scale100 = 2.55;
+    double dbval;
+    int result;
+
+    for (unsigned int i = 0; i < 256; i ++) {
+        dbval = (Brightness * scale100 + cntrst * i) / 255.0;
+        result = static_cast<int>(pow(dbval, gmma) * 255.0 + 0.5);
+
+        if (result < 0) result = 0;
+        else if (result > 255) result = 255;
+        Curve[i] = result;
+    }
+
+    Modified = false;
+}
+

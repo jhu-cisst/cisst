@@ -22,6 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstStereoVision/svlFilterImageExposureCorrection.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
+#include "svlImageProcessingHelper.h"
 
 
 /**********************************************/
@@ -58,8 +59,7 @@ void svlFilterImageExposureCorrection::SetBrightness(const double & brightness)
 {
     Brightness = brightness;
     if (Brightness > 100.0) Brightness = 100.0;
-    else  if (Brightness < -100.0) Brightness = -100.0;
-    CalculateCurve();
+    else if (Brightness < -100.0) Brightness = -100.0;
 }
 
 void svlFilterImageExposureCorrection::GetBrightness(double & brightness) const
@@ -71,8 +71,7 @@ void svlFilterImageExposureCorrection::SetContrast(const double & contrast)
 {
     Contrast = contrast;
     if (Contrast > 100.0) Contrast = 100.0;
-    else  if (Contrast < -100.0) Contrast = -100.0;
-    CalculateCurve();
+    else if (Contrast < -100.0) Contrast = -100.0;
 }
 
 void svlFilterImageExposureCorrection::GetContrast(double & contrast) const
@@ -84,8 +83,7 @@ void svlFilterImageExposureCorrection::SetGamma(const double & gamma)
 {
     Gamma = gamma;
     if (Gamma > 100.0) Gamma = 100.0;
-    else  if (Gamma < -100.0) Gamma = -100.0;
-    CalculateCurve();
+    else if (Gamma < -100.0) Gamma = -100.0;
 }
 
 void svlFilterImageExposureCorrection::GetGamma(double & gamma) const
@@ -96,9 +94,6 @@ void svlFilterImageExposureCorrection::GetGamma(double & gamma) const
 int svlFilterImageExposureCorrection::Initialize(svlSample* syncInput, svlSample* &syncOutput)
 {
     syncOutput = syncInput;
-
-    CalculateCurve();
-
     return SVL_OK;
 }
 
@@ -110,50 +105,14 @@ int svlFilterImageExposureCorrection::Process(svlProcInfo* procInfo, svlSample* 
 
     svlSampleImage* img = dynamic_cast<svlSampleImage*>(syncInput);
     const unsigned int videochannels = img->GetVideoChannels();
-    const unsigned int stride = img->GetDataChannels();
-    const unsigned int datachannels = ((stride == 4) ? 3 : stride); // Skip Alpha in case of RGBA
-    const unsigned int toskip = stride - datachannels;
-    unsigned int pixelcount, i, j, vch;
-    unsigned char* ptr;
+    unsigned int vch;
 
     _ParallelLoop(procInfo, vch, videochannels)
     {
-        pixelcount = img->GetWidth(vch) * img->GetHeight(vch);
-        ptr = img->GetUCharPointer(vch);
-
-        for (i = 0; i < pixelcount; i ++) {
-
-            j = datachannels;
-            while (j) {
-                *ptr = Curve[*ptr]; ptr ++;
-                j --;
-            }
-
-            ptr += toskip;
-        }
+        svlImageProcessing::SetExposure(img, vch, Brightness, Contrast, Gamma, Exposure);
     }
 
     return SVL_OK;
-}
-
-void svlFilterImageExposureCorrection::CalculateCurve()
-{
-    const double scale100 = 2.55;
-    double cntrst, gmma, dbval;
-    int result;
-
-    cntrst = pow(10.0, Contrast / 100.0);
-    gmma = pow(10.0, -Gamma / 100.0);
-
-    // Calculate Curve
-    for (unsigned int i = 0; i < 256; i ++) {
-        dbval = (Brightness * scale100 + cntrst * i) / 255.0;
-        result = static_cast<int>(pow(dbval, gmma) * 255.0 + 0.5);
-
-        if (result < 0) result = 0;
-        else if (result > 255) result = 255;
-        Curve[i] = result;
-    }    
 }
 
 void svlFilterImageExposureCorrection::CreateInterfaces()

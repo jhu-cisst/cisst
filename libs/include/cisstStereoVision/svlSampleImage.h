@@ -63,6 +63,7 @@ public:
     virtual unsigned int GetVideoChannels() const = 0;
     virtual unsigned int GetDataChannels() const = 0;
     virtual unsigned int GetBPP() const = 0;
+    virtual int GetAlphaChannel() const = 0;
     virtual unsigned int GetWidth(const unsigned int videochannel = 0) const = 0;
     virtual unsigned int GetHeight(const unsigned int videochannel = 0) const = 0;
     virtual unsigned int GetRowStride(const unsigned int videochannel = 0) const = 0;
