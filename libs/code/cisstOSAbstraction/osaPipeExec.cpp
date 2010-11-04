@@ -51,7 +51,6 @@ unsigned int osaPipeExec::SizeOfInternals(void) {
     return sizeof(osaPipeExecInternals);
 }
 
-
 osaPipeExec::osaPipeExec():
     Connected(false),
     Name("unnamed")
@@ -93,7 +92,14 @@ char ** osaPipeExec::ParseCommand(const std::string & executable, const std::vec
 {
     typedef char * charPointer;
     charPointer * command = new charPointer[arguments.size() + 2]; // executable name, arguments, 0
+#if (CISST_OS == CISST_WINDOWS)
+	/* Needed because Windows parses spaces strangely unless the whole string
+	is quoted */
+	std::string quotedExecutable = '"' + executable + '"';
+    command[0] = const_cast<char *>(quotedExecutable.c_str());
+#else
     command[0] = const_cast<char *>(executable.c_str());
+#endif
     for (size_t argumentCounter = 0;
          argumentCounter < arguments.size();
          argumentCounter++) {
