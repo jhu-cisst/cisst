@@ -41,7 +41,7 @@ class CISST_EXPORT mtsMailBox
     /*! Name provided for logs */
     std::string Name;
 
-    /*! Command to execute when a command is queued.  This command has
+    /*! Command to execute after a command is queued.  This command has
       to be provided when the mail box is constructed.  This
       mechanism is used by mtsTaskFromSignal to wake up the task's
       thread. */
@@ -74,6 +74,8 @@ public:
     /*! Execute the oldest command queued. */
     bool ExecuteNext(void);
 
+    /*! Returns true if mailbox is empty. */
+    bool IsEmpty(void) const { return CommandQueue.IsEmpty(); }
 };
 
 

@@ -440,6 +440,9 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterfaceProvidedOrOutput {
       required. */
     mtsInterfaceProvided * GetEndUserInterface(const std::string & userName);
 
+    mtsInterfaceProvided * GetOriginalInterface(void) const
+    { return this->OriginalInterface; }
+
     /*! Method used to process all commands queued in mailboxes.  This
       method should only be used by the component that owns the
       interface for thread safety. */

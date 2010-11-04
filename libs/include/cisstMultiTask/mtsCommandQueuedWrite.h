@@ -133,7 +133,7 @@ public:
             if (ArgumentsQueue.Put(*argumentTyped) &&
                 BlockingFlagQueue.Put(blocking)) {
                 if (MailBox->Write(this)) {
-                    if (blocking == MTS_BLOCKING) {
+                    if ((blocking == MTS_BLOCKING) && !MailBox->IsEmpty()) {
                         MailBox->ThreadSignalWait();
                     }
                     return mtsExecutionResult::DEV_OK;

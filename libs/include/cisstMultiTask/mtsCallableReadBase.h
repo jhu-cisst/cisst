@@ -34,7 +34,7 @@ http://www.cisst.org/cisst/license.txt.
   \ingroup cisstMultiTask
 
   A base class command object with an execute method that uses a
-  placeholded to retrieve some data.  This pure virtual base class is
+  placeholder to retrieve some data.  This pure virtual base class is
   derived to support either global functions or methods with the
   signature "void method(_resultType & result) const" */
 class mtsCallableReadBase

@@ -64,7 +64,8 @@ mtsExecutionResult mtsCommandQueuedWriteReturn::Execute(const mtsGenericObject &
                               << this->Name << "\"" <<  std::endl;
             return mtsExecutionResult::MAILBOX_FULL;
         }
-        MailBox->ThreadSignalWait();
+        if (!MailBox->IsEmpty())
+            MailBox->ThreadSignalWait();
         return mtsExecutionResult::DEV_OK;
     }
     return mtsExecutionResult::DISABLED;

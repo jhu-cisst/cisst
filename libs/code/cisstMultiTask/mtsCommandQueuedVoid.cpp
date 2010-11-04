@@ -56,7 +56,7 @@ mtsExecutionResult mtsCommandQueuedVoid::Execute(mtsBlockingType blocking)
         }
         if (BlockingFlagQueue.Put(blocking)) {
             if (MailBox->Write(this)) {
-                if (blocking == MTS_BLOCKING) {
+                if ((blocking == MTS_BLOCKING) && !MailBox->IsEmpty()) {
                     MailBox->ThreadSignalWait();
                 }
                 return mtsExecutionResult::DEV_OK;
