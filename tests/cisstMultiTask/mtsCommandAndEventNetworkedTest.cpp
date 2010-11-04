@@ -376,7 +376,9 @@ void mtsCommandAndEventNetworkedTest::TestDeviceDevice(void)
     StartAllComponents();
     PingAllComponents();
     VerifyProcesses();
+    SendAndVerify(PipeConfigurationManager, "createComponent server mtsTestDevice1 server", "component created");
     StopAllComponents();
+
     /*
     mtsTestDevice2<_elementType> * client = new mtsTestDevice2<_elementType>;
     mtsTestDevice3<_elementType> * server = new mtsTestDevice3<_elementType>;

@@ -115,10 +115,10 @@ int main(int CMN_UNUSED(argc), char ** CMN_UNUSED(argv))
         } else if (command == std::string("ping")) {
             std::cout << "ok" << std::endl;
         } else if (command == std::string("createComponent")) {
-            cin >> process1Name;
-            cin >> componentType;
-            cin >> component1Name;
-            need ----
+            std::cin >> process1Name;
+            std::cin >> componentType;
+            std::cin >> component1Name;
+            std::cout << "need to implement dynamic creation for " << process1Name << " " << componentType << " " << component1Name << std::endl;
         } else {
             std::cout << "unknown command \"" << command << "\"" << std::endl;
         }
