@@ -32,17 +32,14 @@ void osaPipeExecTest::TestPipeInternalsSize(void)
 void osaPipeExecTest::readLength(osaPipeExec & pipe, char * buffer, int length)
 {
     char * s = buffer;
-    char * bufferEnd = buffer + length + 1;
     int charsRead = 0;
     int result;
-    while ((charsRead < length)
-           && (s < bufferEnd)) {
-        result = pipe.Read(s, bufferEnd-s);
+    while (charsRead < length) {
+        result = pipe.Read(s, length-charsRead);
 		CPPUNIT_ASSERT(result != -1);
         charsRead += result;
         s += result;
     }
-    CPPUNIT_ASSERT(s < bufferEnd);
     CPPUNIT_ASSERT_EQUAL(length, charsRead);
 }
 
@@ -155,6 +152,7 @@ void osaPipeExecTest::TestPipe(void)
     CPPUNIT_ASSERT_EQUAL(true, closed);
 #endif
 
+	delete[] buffer;
 	delete[] testString;
 }
 
