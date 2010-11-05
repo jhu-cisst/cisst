@@ -364,7 +364,7 @@ void CWin32WindowManager::SetImageBuffer(unsigned char *buffer, unsigned int buf
                 dst += linesize;
             }
         }
-
+/*
         // Display timestamp if requested
         if (Timestamp > 0.0) {
             std::string title;
@@ -396,6 +396,7 @@ void CWin32WindowManager::SetImageBuffer(unsigned char *buffer, unsigned int buf
                 // Critical section: ends
             }
         }
+*/
     }
 }
 

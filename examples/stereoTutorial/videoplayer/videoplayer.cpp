@@ -70,8 +70,8 @@ int VideoPlayer(std::string pathname)
 
     // chain filters to pipeline
     stream.SetSourceFilter(&source);
-    //source.GetOutput()->Connect(overlay.GetInput());
-    source.GetOutput()->Connect(window.GetInput());
+    source.GetOutput()->Connect(overlay.GetInput());
+    overlay.GetOutput()->Connect(window.GetInput());
 
     cerr << endl << "Starting stream... ";
 

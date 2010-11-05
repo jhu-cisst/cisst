@@ -65,7 +65,7 @@ int main()
     svlFilterImageResizer resizer;
     svlFilterImageWindow window;
     svlFilterSplitter splitter;
-    svlFilterImageUnsharpMask unsharpmask;
+    svlFilterImageUnsharpMask filtering;
     svlFilterImageOverlay overlay;
     svlFilterImageWindow window2;
 
@@ -94,8 +94,8 @@ int main()
 
     // Setup unsharp masking
     // (Tip: enable OpenCV in CMake for higher performance)
-    unsharpmask.SetAmount(200);
-    unsharpmask.SetRadius(3);
+    filtering.SetAmount(200);
+    filtering.SetRadius(3);
 
     // Setup overlays
     // Add image overlay
@@ -168,8 +168,8 @@ int main()
     // Chain filters to trunk
     stream.SetSourceFilter(&source);
     source.GetOutput()->Connect(splitter.GetInput());
-    splitter.GetOutput()->Connect(unsharpmask.GetInput());
-    unsharpmask.GetOutput()->Connect(overlay.GetInput());
+    splitter.GetOutput()->Connect(filtering.GetInput());
+    filtering.GetOutput()->Connect(overlay.GetInput());
     overlay.GetOutput()->Connect(window.GetInput());
 
     splitter.GetOutput("output2")->Connect(resizer.GetInput());

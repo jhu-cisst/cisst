@@ -25,6 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <string>
 #include <cisstVector/vctFixedSizeVectorTypes.h>
+#include <cisstVector/vctDynamicMatrixTypes.h>
 
 
 class svlImageProcessingInternals
@@ -48,6 +49,20 @@ public:
 
 namespace svlImageProcessingHelper
 {
+    /////////////////
+    // Convolution //
+    /////////////////
+
+    void ConvolutionRGB(unsigned char* input, unsigned char* output, const int width, const int height, vctDynamicVector<int> & kernel, bool horizontal);
+    void ConvolutionRGBA(unsigned char* input, unsigned char* output, const int width, const int height, vctDynamicVector<int> & kernel, bool horizontal);
+    void ConvolutionMono8(unsigned char* input, unsigned char* output, const int width, const int height, vctDynamicVector<int> & kernel, bool horizontal);
+    void ConvolutionMono16(unsigned short* input, unsigned short* output, const int width, const int height, vctDynamicVector<int> & kernel, bool horizontal);
+
+    void ConvolutionRGB(unsigned char* input, unsigned char* output, const int width, const int height, vctDynamicMatrix<int> & kernel);
+    void ConvolutionRGBA(unsigned char* input, unsigned char* output, const int width, const int height, vctDynamicMatrix<int> & kernel);
+    void ConvolutionMono8(unsigned char* input, unsigned char* output, const int width, const int height, vctDynamicMatrix<int> & kernel);
+    void ConvolutionMono16(unsigned short* input, unsigned short* output, const int width, const int height, vctDynamicMatrix<int> & kernel);
+
     //////////////
     // Resizing //
     //////////////

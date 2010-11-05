@@ -189,8 +189,6 @@ int svlFilterStreamTypeConverter::Process(svlProcInfo* procInfo, svlSample* sync
                                        param,
                                        procInfo->count, procInfo->id);
 
-            _OnSingleThread(procInfo) outimg->SetTimestamp(inimg->GetTimestamp());
-
             return SVL_OK;
         }
         else if (inmtrx) {
@@ -202,7 +200,6 @@ int svlFilterStreamTypeConverter::Process(svlProcInfo* procInfo, svlSample* sync
                     param = static_cast<int>(Scaling * 1000.0);
                 }
                 outimg->ImportMatrix(inmtrx, param);
-                outimg->SetTimestamp(inmtrx->GetTimestamp());
             }
             return SVL_OK;
         }
@@ -215,14 +212,12 @@ int svlFilterStreamTypeConverter::Process(svlProcInfo* procInfo, svlSample* sync
         if (inmtrx) {
             _OnSingleThread(procInfo) {
                 outmtrx->ImportMatrix(inmtrx);
-                outmtrx->SetTimestamp(inmtrx->GetTimestamp());
             }
             return SVL_OK;
         }
         else if (inimg) {
             _OnSingleThread(procInfo) {
                 outmtrx->ImportImage(inimg);
-                outmtrx->SetTimestamp(inimg->GetTimestamp());
             }
             return SVL_OK;
         }
