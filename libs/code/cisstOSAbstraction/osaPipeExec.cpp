@@ -95,15 +95,22 @@ char ** osaPipeExec::ParseCommand(const std::string & executable, const std::vec
 #if (CISST_OS == CISST_WINDOWS)
 	/* Needed because Windows parses spaces strangely unless the whole string
 	is quoted */
-	std::string quotedExecutable = '"' + executable + '"';
-    command[0] = const_cast<char *>(quotedExecutable.c_str());
+	std::string quotedString = '"' + executable + '"';
+    command[0] = strdup(quotedString.c_str());
 #else
     command[0] = const_cast<char *>(executable.c_str());
 #endif
     for (size_t argumentCounter = 0;
          argumentCounter < arguments.size();
          argumentCounter++) {
+#if (CISST_OS == CISST_WINDOWS)
+        /* Windows needs each argument quoted or it will parse them as
+		separate */
+        quotedString = '"' + arguments[argumentCounter] + '"';
+        command[argumentCounter + 1] = strdup(quotedString.c_str());
+#else
         command[argumentCounter + 1] = const_cast<char *>(arguments[argumentCounter].c_str());
+#endif
     }
     command[arguments.size() + 1] = NULL; // null terminated list
 
@@ -273,7 +280,10 @@ bool osaPipeExec::Open(const std::string & executable,
 
     command = ParseCommand(executable, arguments);
     if (command != NULL && command[0] != NULL) {
-        INTERNALS(hProcess) = (HANDLE) _spawnvp(P_NOWAIT, command[0], command);
+		/* We need to quote the arguments but not the file name. Evidently, Windows
+		parses the two differently. Therefore we use executable.c_str() instead
+		of command[0]*/
+        INTERNALS(hProcess) = (HANDLE) _spawnvp(P_NOWAIT, executable.c_str(), command);
     } else {
         CMN_LOG_INIT_ERROR << "Class osaPipeExec: Open: exec failed for pipe \"" << this->Name
                            << "\" because the program name is empty" << std::endl;

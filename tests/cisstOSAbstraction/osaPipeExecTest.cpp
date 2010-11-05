@@ -59,8 +59,8 @@ void osaPipeExecTest::TestPipe(void)
     opened = pipe2.Open(command, "rw");
     CPPUNIT_ASSERT_EQUAL(true, opened);
 
-    /* Generate random test string between 0 and 999 characters */
-    const int length = cmnRandomSequence::GetInstance().ExtractRandomInt(0, 999) + 1;
+    /* Generate random test string between 10 and 100 characters */
+    const int length = cmnRandomSequence::GetInstance().ExtractRandomInt(10, 100) + 1;
     char * testString = new char[length];
     char * s;
     /* Generate random alphabetic characters while avoiding '\0'. Note that,
@@ -131,11 +131,11 @@ void osaPipeExecTest::TestPipe(void)
     /* Test using arguments */
     std::vector<std::string> arguments;
     arguments.push_back("a a");
-    arguments.push_back(" b");
-    arguments.push_back("c ");
+    arguments.push_back("b ");
+    arguments.push_back(" c");
     pipe1.Open(command, arguments, "rw");
     readLength(pipe1, buffer, 11);
-    CPPUNIT_ASSERT_EQUAL(std::string("a a; b;c ;"), std::string(buffer));
+    CPPUNIT_ASSERT_EQUAL(std::string("a a;b ; c;"), std::string(buffer));
     pipe1.Close();
 
 #if 0
