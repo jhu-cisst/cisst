@@ -494,7 +494,7 @@ int CX11WindowManager::DoModal(bool show, bool fullscreen)
                                   Width[i], Height[i]);
                     }
 #endif // CISST_SVL_HAS_XV
-
+/*
                     for (i = 0; i < NumOfWins; i ++) {
                         if (CustomTitleEnabled[i] < 0) {
                             // Restore original timestamp
@@ -509,6 +509,7 @@ int CX11WindowManager::DoModal(bool show, bool fullscreen)
                                                    None, NULL, 0, NULL);
                         }
                     }
+*/
                 csImage.Leave();
             }
         }
@@ -622,7 +623,7 @@ void CX11WindowManager::SetImageBuffer(unsigned char *buffer, unsigned int buffe
  
     const unsigned int pixsize = Width[winid] * Height[winid];
     if (buffersize > (pixsize * 3)) return;
-
+/*
     // Modify title if requested
     if (Timestamp > 0.0) {
         char timestampstring[32];
@@ -634,7 +635,7 @@ void CX11WindowManager::SetImageBuffer(unsigned char *buffer, unsigned int buffe
         if (Timestamp == 0.0) CustomTitleEnabled[winid] = 0;
         else CustomTitleEnabled[winid] = -1;
     }
-
+*/
 #if (CISST_SVL_HAS_XV == ON)
     // convert image to YUV2 directly into the output buffer
     svlConverter::BGR24toYUV422(buffer,
