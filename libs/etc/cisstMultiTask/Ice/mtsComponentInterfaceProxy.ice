@@ -71,25 +71,6 @@ module mtsComponentInterfaceProxy
     sequence<EventWriteInfo>           EventWriteSequence;
 
     //-----------------------------------------------------------------------------
-	//	Provided Interface Related Definition
-	//-----------------------------------------------------------------------------	
-	// Data structure definition
-	struct ProvidedInterfaceInfo {
-		// Interface name
-		string InterfaceName;
-		
-		// Commands
-		CommandVoidSequence          CommandsVoid;
-		CommandWriteSequence         CommandsWrite;
-		CommandReadSequence          CommandsRead;
-		CommandQualifiedReadSequence CommandsQualifiedRead;
-        
-        // Events
-		EventVoidSequence            EventsVoid;
-		EventWriteSequence           EventsWrite;
-	};
-
-    //-----------------------------------------------------------------------------
 	//	Function Proxy Related Definition
 	//-----------------------------------------------------------------------------	
     // The information about the function proxies.

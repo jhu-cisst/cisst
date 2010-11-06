@@ -310,6 +310,9 @@ void mtsManagerProxyServer::ConvertInterfaceRequiredDescription(
     // Conversion of required interface name
     dest.InterfaceRequiredName = src.InterfaceRequiredName;
 
+    // Conversion of "IsRequired" attribute
+    dest.IsRequired = src.IsRequired;
+
     // Conversion of function void vector
     dest.FunctionVoidNames.insert(dest.FunctionVoidNames.begin(), src.FunctionVoidNames.begin(), src.FunctionVoidNames.end());
 
@@ -465,6 +468,9 @@ void mtsManagerProxyServer::ConstructInterfaceRequiredDescriptionFrom(
 
     // Construct required interface name
     dest.InterfaceRequiredName = src.InterfaceRequiredName;
+
+    // Construct "IsRequired" attribute
+    dest.IsRequired = src.IsRequired;
 
     // Construct function void vector
     dest.FunctionVoidNames.insert(dest.FunctionVoidNames.begin(), src.FunctionVoidNames.begin(), src.FunctionVoidNames.end());

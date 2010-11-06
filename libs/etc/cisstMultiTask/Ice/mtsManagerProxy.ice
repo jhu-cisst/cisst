@@ -140,6 +140,8 @@ module mtsManagerProxy
     struct InterfaceRequiredDescription {
         // Interface name
         string InterfaceRequiredName;
+        // Is required
+        bool IsRequired;
         // Functions (i.e., command pointers)
         CommandPointerNames FunctionVoidNames;
         CommandPointerNames FunctionWriteNames;

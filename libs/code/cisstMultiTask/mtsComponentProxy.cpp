@@ -63,9 +63,10 @@ mtsComponentProxy::~mtsComponentProxy()
 bool mtsComponentProxy::CreateInterfaceRequiredProxy(const InterfaceRequiredDescription & requiredInterfaceDescription)
 {
     const std::string requiredInterfaceName = requiredInterfaceDescription.InterfaceRequiredName;
+    const mtsRequiredType isRequired = (requiredInterfaceDescription.IsRequired ? MTS_REQUIRED : MTS_OPTIONAL);
 
     // Create a local required interface (a required interface proxy)
-    mtsInterfaceRequired * requiredInterfaceProxy = AddInterfaceRequired(requiredInterfaceName);
+    mtsInterfaceRequired * requiredInterfaceProxy = AddInterfaceRequired(requiredInterfaceName, isRequired);
     if (!requiredInterfaceProxy) {
         CMN_LOG_CLASS_INIT_ERROR << "CreateInterfaceRequiredProxy: failed to add required interface proxy: " << requiredInterfaceName << std::endl;
         return false;
@@ -1046,6 +1047,9 @@ void mtsComponentProxy::ExtractInterfaceRequiredDescription(
     // Serializer initialization
     std::stringstream streamBuffer;
     cmnSerializer serializer(streamBuffer);
+
+    // Extract "IsRequired" attribute
+    requiredInterfaceDescription.IsRequired = requiredInterface->IsRequired();
 
     // Extract void functions
     requiredInterfaceDescription.FunctionVoidNames = requiredInterface->GetNamesOfFunctionsVoid();

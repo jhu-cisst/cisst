@@ -107,6 +107,9 @@ public:
         // Event handlers
         EventHandlerVoidVector  EventHandlersVoid;
 		EventHandlerWriteVector EventHandlersWrite;
+
+        // "IsRequired" attribute
+        bool IsRequired; // MTS_OPTIONAL or MTS_REQUIRED (mtsRequiredType)
     };
 };
 
