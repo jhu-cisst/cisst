@@ -25,8 +25,8 @@ http://www.cisst.org/cisst/license.txt.
 int main(int argc, char ** argv) {
     char c;
     /* Line-buffered I/O can interfere with the pipe, so disable it */
-    setvbuf(stdout, NULL, _IONBF, 0);
-    setvbuf(stdin, NULL, _IONBF, 0);
+    setvbuf(stdout, 0, _IONBF, 0);
+    setvbuf(stdin, 0, _IONBF, 0);
 
     if (argc > 1) {
         for (int i = 1; i < argc; i++) {
