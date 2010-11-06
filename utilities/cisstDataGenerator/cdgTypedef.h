@@ -26,16 +26,17 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnGenericObject.h>
 #include <cisstCommon/cmnClassRegisterMacros.h>
 
-class cdgTypedef: cmnGenericObject {
+class cdgTypedef: public cmnGenericObject {
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
     friend class cdgData;
+    friend class cdgFile;
 
-    std::string Definition;
+    std::string Type;
     std::string Name;
 
 public:
-    void GenerateHeader(std::ostream & output) const;
+    void GenerateHeader(std::ostream & outputStream) const;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(cdgTypedef);

@@ -20,32 +20,32 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
-#include "cdgDataMember.h"
+#include "cdgMember.h"
 
-CMN_IMPLEMENT_SERVICES(cdgDataMember);
+CMN_IMPLEMENT_SERVICES(cdgMember);
 
 
-cdgDataMember::cdgDataMember():
+cdgMember::cdgMember():
     UsesClassTypedef(false),
     Description("no-description-provided")
 {
 }
 
 
-void cdgDataMember::GenerateHeaderDeclaration(std::ostream & output) const
+void cdgMember::GenerateHeaderDeclaration(std::ostream & output) const
 {
     output << "    " << Type << " " << Name << "; // " << Description << std::endl;    
 }
 
 
-void cdgDataMember::GenerateHeaderAccessors(std::ostream & output) const
+void cdgMember::GenerateHeaderAccessors(std::ostream & output) const
 {
     output << "    const " << Type << " & Get" << Name << "(void) const;" << std::endl
            << "    void Set" << Name << "(const " << Type << " & newValue);" << std::endl;
 }
 
 
-void cdgDataMember::GenerateCodeAccessors(std::ostream & output, const std::string & className) const
+void cdgMember::GenerateCodeAccessors(std::ostream & output, const std::string & className) const
 {
     std::string returnType;
     if (UsesClassTypedef) {

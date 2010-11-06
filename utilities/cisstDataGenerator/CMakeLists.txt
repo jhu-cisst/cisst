@@ -1,3 +1,5 @@
+# -*- Mode: CMAKE; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-
+# ex: set filetype=cmake softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab:
 #
 # $Id: CMakeLists.txt 213 2009-04-01 15:12:08Z adeguet1 $
 #
@@ -17,10 +19,12 @@ include_directories (${CMAKE_CURRENT_SOURCE_DIR})
 # name the main executable and specifies with source files to use
 add_executable (cisstDataGenerator
                 cisstDataGenerator.cpp
-                cdgData.h
-                cdgData.cpp
-                cdgDataMember.h
-                cdgDataMember.cpp
+                cdgFile.h
+                cdgFile.cpp
+                cdgClass.h
+                cdgClass.cpp
+                cdgMember.h
+                cdgMember.cpp
                 cdgTypedef.h
                 cdgTypedef.cpp
 		)

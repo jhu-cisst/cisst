@@ -25,29 +25,17 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <iostream>
 #include <vector>
-#include <cisstCommon/cmnTokenizer.h>
 
-#include "cdgDataMember.h"
+#include "cdgMember.h"
 #include "cdgTypedef.h"
 
-/* example:
-
-include <cisstVector/vctFixedSizeTypes.h>
-include <iostream>
-
-typename newType
-
-typedef vctFixedSizeVector<vctFixedSizeVector<3, double>, 3> MatrixType;
-typedef IndexType Index
-
-member double Sine Sine
-member vctDouble3 Position End effector
-member std::string Name Human readable name
-member IndexType Index
+/*
 
  */
 
-class cdgData {
+class cdgClass {
+
+    friend class cdgFile;
 
     /*! Name of the data type to be created. */
     std::string Name;
@@ -69,25 +57,21 @@ class cdgData {
       their names (e.g "unsigned int", "std::vector<std::vector<int>
       >"). */
     //@{
-    typedef std::vector<cdgTypedef> TypedefsType;
+    typedef std::vector<cdgTypedef *> TypedefsType;
     TypedefsType Typedefs;
     //@}
     
     /*! List of data members.  Corresponds to keyword "member" in
       cisst data description file. */
-    typedef std::vector<cdgDataMember> MembersType;
-    MembersType DataMembers;
+    typedef std::vector<cdgMember *> MembersType;
+    MembersType Members;
 
 public:
-    void ParseFile(std::ifstream & input, const std::string & filename);
-
     void GenerateHeader(std::ostream & output) const;
 
-    void GenerateCode(std::ostream & output, const std::string & header) const;
+    void GenerateCode(std::ostream & output) const;
 
 protected:
-    bool StripComments(std::istream & input, std::ostream & content,
-                       size_t & errorLine, std::string & errorMessage);
 
     void GenerateStandardMethodsHeader(std::ostream & output) const;
 

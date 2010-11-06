@@ -21,7 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <iostream>
-#include "cdgData.h"
+#include "cdgFile.h"
 
 /* example:
 
@@ -58,19 +58,25 @@ int main(int argc, char* argv[])
     std::string headerFull = headerDir + "/" + headerName;
     std::string codeFull = codeDir + "/" + codeName;
 
-    cdgData data;
+    cdgFile file;
     std::ifstream input(inputName.c_str());
+    bool parseSucceeded;
     if (input.is_open()) {
-        data.ParseFile(input, inputName);
+        parseSucceeded = file.ParseFile(input, inputName);
         input.close();
+        if (!parseSucceeded) {
+            std::cout << "Error, failed to parse file \"" << inputName << "\"" << std::endl;
+            return -1;
+        }
     } else {
-        std::cout << "Error, can't open file (read) \"" << inputName << "\"" << std::endl;
+        std::cout << "Error, can't open file (read mode)\"" << inputName << "\"" << std::endl;
         return -1;
     }
 
     std::ofstream header(headerFull.c_str());
     if (header.is_open()) {
-        data.GenerateHeader(header);
+        std::cout << "Generating header file \"" << headerFull << "\"" << std::endl;
+        file.GenerateHeader(header);
         header.close();
     } else {
         std::cout << "Error, can't open file (write) \"" << headerFull << "\"" << std::endl;
@@ -79,7 +85,8 @@ int main(int argc, char* argv[])
 
     std::ofstream code(codeFull.c_str());
     if (code.is_open()) {
-        data.GenerateCode(code, headerName);
+        std::cout << "Generating code file \"" << codeFull << "\"" << std::endl;
+        file.GenerateCode(code, headerName);
         code.close();
     } else {
         std::cout << "Error, can't open file (write) \"" << codeFull << "\"" << std::endl;

@@ -25,7 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 CMN_IMPLEMENT_SERVICES(cdgTypedef);
 
 
-void cdgTypedef::GenerateHeader(std::ostream & output) const
+void cdgTypedef::GenerateHeader(std::ostream & outputStream) const
 {
-    output << "    typedef " << Definition << " " << Name << ";" << std::endl;
+    outputStream << "    typedef " << Type << " " << Name << ";" << std::endl;
 }
