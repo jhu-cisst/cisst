@@ -1332,10 +1332,11 @@ void mtsManagerProxyServer::ManagerServerI::Run()
         // Check connection element map to cancel timed out connection elements
         ManagerProxyServer->ConnectCheckTimeout();
 
+        // smmy: do we need this???
         //IceUtil::Monitor<IceUtil::Mutex>::Lock lock(*this);
         // Check connections at every 1 second
-        ManagerProxyServer->MonitorConnections();
-        osaSleep(1 * cmn_s);
+        //ManagerProxyServer->MonitorConnections();
+        osaSleep(mtsProxyConfig::CheckPeriodForManagerConnections);
     }
 #endif
 }

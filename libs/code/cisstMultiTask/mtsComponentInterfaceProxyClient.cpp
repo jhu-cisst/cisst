@@ -449,7 +449,7 @@ void mtsComponentInterfaceProxyClient::ComponentInterfaceClientI::Run()
 #else
     while (this->IsActiveProxy())
     {
-        osaSleep(5 * cmn_s);
+        osaSleep(mtsProxyConfig::RefreshPeriodForInterfaces);
 
         try {
             Server->Refresh();

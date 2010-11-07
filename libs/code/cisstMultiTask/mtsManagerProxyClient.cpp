@@ -829,7 +829,7 @@ void mtsManagerProxyClient::ManagerClientI::Run()
 #else
     while (this->IsActiveProxy())
     {
-        osaSleep(5 * cmn_s);
+        osaSleep(mtsProxyConfig::RefreshPeriodForManagers);
 
         try {
             Server->Refresh();

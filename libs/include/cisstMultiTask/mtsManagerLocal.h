@@ -198,13 +198,6 @@ protected:
                InterfaceComponent.Provided) */
     bool ConnectToManagerComponentClient(const std::string & componentName);
 
-    /*! \brief Connect all local components which have internal interfaces to the
-               manager component client (connect InterfaceInternal.Required -
-               InterfaceComponent.Provided)
-               This allows user components to use  cisstMultiTask's Command
-               Pattern to communicate with local component manager. */
-    bool ConnectAllToManagerComponentClient(void);
-
 #if CISST_MTS_HAS_ICE
     /*! \brief Set IP address of this machine */
     void SetIPAddress(void);

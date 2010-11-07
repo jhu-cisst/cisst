@@ -24,7 +24,10 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 
 // Names of components
-const std::string mtsManagerComponentBase::ComponentNames::ManagerComponentServer = "MNGR-COMP-SERVER";
+//const std::string mtsManagerComponentBase::ComponentNames::ManagerComponentServer = "MNGR-COMP-SERVER";
+//const std::string mtsManagerComponentBase::ComponentNames::ManagerComponentClientSuffix = "_MNGR-COMP-CLIENT";
+const std::string mtsManagerComponentBase::ComponentNames::ManagerComponentServer = "MCS";
+const std::string mtsManagerComponentBase::ComponentNames::ManagerComponentClientSuffix = "_MCC";
 // Names of interfaces
 const std::string mtsManagerComponentBase::InterfaceNames::InterfaceInternalProvided  = "InterfaceInternalProvided";
 const std::string mtsManagerComponentBase::InterfaceNames::InterfaceInternalRequired  = "InterfaceInternalRequired";
@@ -54,7 +57,6 @@ CMN_IMPLEMENT_SERVICES(mtsManagerComponentBase);
 mtsManagerComponentBase::mtsManagerComponentBase(const std::string & componentName)
     : mtsTaskFromSignal(componentName, 50)
 {
-    //UseSeparateLogFileDefault();
 }
 
 mtsManagerComponentBase::~mtsManagerComponentBase()
@@ -69,4 +71,17 @@ void mtsManagerComponentBase::Run(void)
 
 void mtsManagerComponentBase::Cleanup(void)
 {
+}
+
+bool mtsManagerComponentBase::IsManagerComponentServer(const std::string & componentName)
+{
+   return (componentName == mtsManagerComponentBase::ComponentNames::ManagerComponentServer);
+}
+
+bool mtsManagerComponentBase::IsManagerComponentClient(const std::string & componentName)
+{
+    static const std::string suffix = mtsManagerComponentBase::ComponentNames::ManagerComponentClientSuffix;
+
+    // MJ TEMP: special handling if componentName ends with "-MCC"
+    return (std::string::npos != componentName.find(suffix, componentName.length() - suffix.size()));
 }

@@ -145,8 +145,7 @@ bool mtsComponentInterfaceProxyServer::OnClientDisconnect(const ClientIDType cli
         return false;
     }
 
-    // Remove client from client list. This will prevent further network
-    // processings from being executed.
+    // Remove client from client list to disable further command execution
     if (!BaseServerType::RemoveClientByClientID(clientID)) {
         LogError(mtsComponentInterfaceProxyServer, "OnClientDisconnect: failed to remove client from client map: " << clientID);
         return false;
@@ -160,6 +159,7 @@ bool mtsComponentInterfaceProxyServer::OnClientDisconnect(const ClientIDType cli
         return false;
     }
 
+#if 0
     mtsDescriptionConnection * element = &it->second;
     const std::string clientProcessName = element->Client.ProcessName;
     const std::string clientComponentName = element->Client.ComponentName;
@@ -181,6 +181,7 @@ bool mtsComponentInterfaceProxyServer::OnClientDisconnect(const ClientIDType cli
             << mtsManagerGlobal::GetInterfaceUID(clientProcessName, clientComponentName, clientInterfaceRequiredName) << " - "
             << mtsManagerGlobal::GetInterfaceUID(serverProcessName, serverComponentName, serverInterfaceProvidedName) << std::endl);
     }
+#endif
 
     return true;
 }
@@ -567,9 +568,10 @@ void mtsComponentInterfaceProxyServer::ComponentInterfaceServerI::Run()
 #else
     while(IsActiveProxy())
     {
+        // smmy: do we need this???
         // Check all connections at every 1 second
-        ComponentInterfaceProxyServer->MonitorConnections();
-        osaSleep(1 * cmn_s);
+        //ComponentInterfaceProxyServer->MonitorConnections();
+        osaSleep(mtsProxyConfig::CheckPeriodForInterfaceConnections);
     }
 #endif
 }

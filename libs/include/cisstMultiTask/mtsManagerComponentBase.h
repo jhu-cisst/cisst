@@ -47,8 +47,8 @@ http://www.cisst.org/cisst/license.txt.
   one MCC, i.e., one MCC per LCM.
 
   The cisstMultiTask's command pattern is based on a pair of interfaces that
-  are connected to each other.  The following diagram shows how interfaces are
-  defined and how interfaces are connected to each other.
+  are connected to each other.  The following diagram shows how user and internal
+  interfaces are defined and how such interfaces are connected to each other.
 
   (INTFC = one provided interface + one required interface)
 
@@ -73,16 +73,15 @@ http://www.cisst.org/cisst/license.txt.
                      User Component
                 with internal interfaces
 
-
-  There are four internal connections between components in a system.
+  The cisstMultiTask has four different set of internal connections between 
+  components.
 
   1) InterfaceInternal.Required - InterfaceComponent.Provided
-     : Established when mtsManagerLocal::CreateAll() gets called
-       (See mtsManagerLocal::ConnectAllToManagerComponentClient())
+     : Established whenever mtsManagerLocal::AddComponent() gets called
 
   2) InterfaceLCM.Required - InterfaceGCM.Provided
-     : Established when mtsManagerLocal::CreateAll() gets called
-       (See mtsManagerLocal::ConnectManagerComponentClientToServer())
+     : Established when a singleton of mtsManagerLocal gets instantiated
+       (See mtsManagerLocal's constructor)
 
   3) InterfaceGCM.Required - InterfaceLCM.Provided
      : When MCC connects to MCS
@@ -106,6 +105,7 @@ public:
     public:
         /*! Name of manager component server.  Should be globally unique */
         const static std::string ManagerComponentServer;
+        const static std::string ManagerComponentClientSuffix;
     };
 
     /*! Interface name definitions */
@@ -149,6 +149,10 @@ public:
     mtsManagerComponentBase(const std::string & componentName);
     virtual ~mtsManagerComponentBase();
 
+    static bool IsManagerComponentServer(const std::string & componentName);
+    static bool IsManagerComponentClient(const std::string & componentName);
+
+    // mtsTask implementation
     virtual void Startup(void) = 0;
     virtual void Run(void);
     virtual void Cleanup(void);

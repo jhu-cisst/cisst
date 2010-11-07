@@ -48,10 +48,9 @@ CMN_IMPLEMENT_SERVICES(mtsDescriptionComponent);
 void mtsDescriptionComponent::ToStream(std::ostream & outputStream) const 
 {
     mtsGenericObject::ToStream(outputStream);
-    outputStream << std::endl
-                 << "Process: " << this->ProcessName
+    outputStream << ", Process: " << this->ProcessName
                  << ", Class: " << this->ClassName
-                 << ", Name: " << this->ComponentName << std::endl;
+                 << ", Name: " << this->ComponentName;
 }
 
 void mtsDescriptionComponent::SerializeRaw(std::ostream & outputStream) const
@@ -79,8 +78,7 @@ CMN_IMPLEMENT_SERVICES(mtsDescriptionInterface);
 void mtsDescriptionInterface::ToStream(std::ostream & outputStream) const 
 {
     mtsGenericObject::ToStream(outputStream);
-    outputStream << std::endl
-                 << "Process: " << this->ProcessName
+    outputStream << ", Process: " << this->ProcessName
                  << ", Component: " << this->ComponentName << ", ";
 
     outputStream << "Required interfaces: ";
@@ -137,9 +135,8 @@ mtsDescriptionConnection::mtsDescriptionConnection(
 
 void mtsDescriptionConnection::ToStream(std::ostream & outputStream) const
 {
-    //mtsGenericObject::ToStream(outputStream);
-
-    outputStream << "(" << ConnectionID << ") "
+    mtsGenericObject::ToStream(outputStream);
+    outputStream << ", (" << ConnectionID << ") "
                  << mtsManagerGlobal::GetInterfaceUID(Client.ProcessName, Client.ComponentName, Client.InterfaceName)
                  << " - "
                  << mtsManagerGlobal::GetInterfaceUID(Server.ProcessName, Server.ComponentName, Server.InterfaceName);
@@ -179,8 +176,7 @@ CMN_IMPLEMENT_SERVICES(mtsComponentStatusControl);
 void mtsComponentStatusControl::ToStream(std::ostream & outputStream) const
 {
     mtsGenericObject::ToStream(outputStream);
-    outputStream << std::endl
-                 << "Process: " << this->ProcessName
+    outputStream << ", Process: " << this->ProcessName
                  << ", component: " << this->ComponentName
                  << ", delay: " << this->DelayInSecond
                  << ", command: ";
@@ -220,12 +216,10 @@ CMN_IMPLEMENT_SERVICES(mtsComponentStateChange);
 
 void mtsComponentStateChange::ToStream(std::ostream & outputStream) const
 {
-    //mtsGenericObject::ToStream(outputStream);
-    outputStream << std::endl
-                 << "Process: " << this->ProcessName
+    mtsGenericObject::ToStream(outputStream);
+    outputStream << ", Process: " << this->ProcessName
                  << ", component: " << this->ComponentName
-                 << ", state: " << mtsComponentState::ToString(this->NewState)
-                 << std::endl;
+                 << ", state: " << mtsComponentState::ToString(this->NewState);
 }
 
 void mtsComponentStateChange::SerializeRaw(std::ostream & outputStream) const

@@ -28,8 +28,6 @@ http://www.cisst.org/cisst/license.txt.
 
 CMN_IMPLEMENT_SERVICES(mtsManagerComponentClient);
 
-const std::string SuffixManagerComponentClient = "_MNGR-COMP-CLIENT";
-
 mtsManagerComponentClient::mtsManagerComponentClient(const std::string & componentName)
     : mtsManagerComponentBase(componentName)
 {
@@ -42,7 +40,7 @@ mtsManagerComponentClient::~mtsManagerComponentClient()
 std::string mtsManagerComponentClient::GetNameOfManagerComponentClient(const std::string & processName)
 {
     std::string name(processName);
-    name += SuffixManagerComponentClient;
+    name += mtsManagerComponentBase::ComponentNames::ManagerComponentClientSuffix;
 
     return name;
 }
@@ -58,7 +56,7 @@ std::string mtsManagerComponentClient::GetNameOfInterfaceComponentRequired(const
 
 void mtsManagerComponentClient::Startup(void)
 {
-   CMN_LOG_CLASS_INIT_VERBOSE << "Manager component CLIENT starts" << std::endl;
+   CMN_LOG_CLASS_INIT_VERBOSE << "MCC starts" << std::endl;
 }
 
 void mtsManagerComponentClient::Run(void)
@@ -198,7 +196,8 @@ bool mtsManagerComponentClient::AddInterfaceLCM(void)
 bool mtsManagerComponentClient::AddNewClientComponent(const std::string & clientComponentName)
 {
     if (InterfaceComponentFunctionMap.FindItem(clientComponentName)) {
-        CMN_LOG_CLASS_INIT_VERBOSE << "AddNewClientComponent: component is already known: " << clientComponentName << std::endl;
+        CMN_LOG_CLASS_INIT_VERBOSE << "AddNewClientComponent: component is already known: "
+            << "\"" << clientComponentName << "\"" << std::endl;
         return true;
     }
 
@@ -398,25 +397,12 @@ void mtsManagerComponentClient::InterfaceLCMCommands_ComponentCreate(const mtsDe
     // 1. Create a component
     // 2. Add the created component to the local component manager
     // 3. Add internal interfaces to the component (InterfaceInternal).
-    if (!CreateAndAddNewComponent(arg.ClassName, arg.ComponentName)) {
-        CMN_LOG_CLASS_RUN_ERROR << "InterfaceLCMCommands_ComponentCreate: failed to execute \"ComponentCreate\": " << arg << std::endl;
-        return;
-    }
-
     // 4. Create InterfaceComponent's required interface which connects to 
     //    InterfaceInternal's provided interface.
-    if (!AddNewClientComponent(arg.ComponentName)) {
-        CMN_LOG_CLASS_INIT_ERROR << "InterfaceLCMCommands_ComponentCreate: "
-            << "failed to add InterfaceComponent's required interface to manager component client: "
-            << "\"" << arg.ComponentName << "\"" << std::endl;
-        return;
-    }
-
     // 5. Connect InterfaceInternal's interfaces to InterfaceComponent's
     //    interfaces.
-    mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
-    if (!LCM->ConnectToManagerComponentClient(arg.ComponentName)) {
-        CMN_LOG_CLASS_RUN_ERROR << "InterfaceLCMCommands_ComponentCreate: failed to connect component to manager component client: " << arg << std::endl;
+    if (!CreateAndAddNewComponent(arg.ClassName, arg.ComponentName)) {
+        CMN_LOG_CLASS_RUN_ERROR << "InterfaceLCMCommands_ComponentCreate: failed to execute \"ComponentCreate\": " << arg << std::endl;
         return;
     }
 

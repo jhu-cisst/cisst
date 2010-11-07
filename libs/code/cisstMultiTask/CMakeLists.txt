@@ -209,6 +209,7 @@ if(CISST_MTS_HAS_ICE)
   SET(HEADER_FILES ${HEADER_FILES}
       mtsComponentProxy.h
 
+      mtsProxyConfig.h
       mtsProxyBaseCommon.h
       mtsProxyBaseClient.h
       mtsProxyBaseServer.h

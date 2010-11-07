@@ -37,6 +37,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaMutex.h>
 #include <cisstOSAbstraction/osaGetTime.h>
 
+#include <cisstMultiTask/mtsProxyConfig.h>
 #include <cisstMultiTask/mtsManagerLocalInterface.h>
 #include <cisstMultiTask/mtsManagerGlobalInterface.h>
 #include <cisstMultiTask/mtsParameterTypes.h>
@@ -150,10 +151,9 @@ protected:
               ServerProcessName(serverProcessName), ServerComponentName(serverComponentName), ServerInterfaceProvidedName(serverInterfaceProvidedName)
         {
 #if CISST_MTS_HAS_ICE
-            //const double Timeout = (double) mtsManagerProxyServer::GetGCMConnectTimeout() / 1000.0;
-            const double Timeout = 5.0;
-            // Time when this object is timed out is set as current time plus timeout.
-            TimeoutTime = osaGetTime() + Timeout;
+            // When current time plus Timeout expires, this connection elements
+            // gets invalidated by the GCM.
+            TimeoutTime = osaGetTime() + mtsProxyConfig::ConnectConfirmTimeOut;
 #endif
         }
 
@@ -255,9 +255,9 @@ protected:
     mtsManagerLocal * LocalManager;
     mtsManagerLocalInterface * LocalManagerConnected;
 
-    /*! Mutex for ConnectionElementMap because several threads possibly access
-        ConnectionElementMap. */
-    osaMutex ConnectionElementMapChange;
+    /*! Mutex for thread-safe connection processing (there could be possibly multiple
+        threads that try to establish a connection */
+    osaMutex ConnectionChange;
 
     /*! Counter to issue a new connection ID */
     unsigned int ConnectionID;
