@@ -6,6 +6,9 @@
 #include "serverTask.h"
 #include "fltkMutex.h"
 
+// MJ: test code
+#include <cisstOSAbstraction/osaSleep.h>
+
 // required to implement the class services, see cisstCommon
 CMN_IMPLEMENT_SERVICES_TEMPLATED(serverTaskDouble);
 CMN_IMPLEMENT_SERVICES_TEMPLATED(serverTaskmtsDouble);
@@ -54,6 +57,14 @@ void serverTask<_dataType>::Write(const _dataType & data)
         UI.WriteValue->value((double)data);
     }
     fltkMutex.Unlock();
+
+    // MJ: test code
+    static int count = 0;
+    if (count++ >= 1) {
+        std::cout << "-------------- SLEEP FOR " << (double)data << " seconds : START" << std::endl;
+        osaSleep((double)data);
+        std::cout << "-------------- SLEEP FOR " << (double)data << " seconds : END" << std::endl;
+    }
 }
 
 
