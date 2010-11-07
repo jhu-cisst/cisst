@@ -213,14 +213,13 @@ void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandVoid(const CommandID
     }
 
     // Execute the command
-        (*functionVoid)();
-/*
+    //(*functionVoid)();
     if (blocking == MTS_BLOCKING) {
         (*functionVoid).ExecuteBlocking();
+        std::cout << "################## BLOCKING VOID ##################" << std::endl;
     } else {
         (*functionVoid)();
     }
-*/
 }
 
 void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandWriteSerialized(const CommandIDType commandID, const std::string & serializedArgument, const mtsBlockingType blocking)
@@ -240,14 +239,13 @@ void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandWriteSerialized(cons
     }
 
     // Execute the command
-        (*functionWriteProxy)(*argument);
-/*
+    //(*functionWriteProxy)(*argument);
     if (blocking == MTS_BLOCKING) {
         (*functionWriteProxy).ExecuteBlocking(*argument);
+        std::cout << "################## BLOCKING WRITE ##################" << std::endl;
     } else {
         (*functionWriteProxy)(*argument);
     }
-*/
 }
 
 void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandReadSerialized(const CommandIDType commandID, std::string & serializedArgument)
