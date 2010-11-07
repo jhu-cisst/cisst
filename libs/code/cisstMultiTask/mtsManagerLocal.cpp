@@ -267,7 +267,7 @@ mtsManagerLocal * mtsManagerLocal::GetInstance(const std::string & globalCompone
 
     // If this local component manager has been previously configured as standalone
     // mode and GetInstance() is called again with proper arguments, the manager is
-    // reconfigured as networked mode. For thread-safe transition of configuration
+    // reconfigured as networked mode.  For thread-safe transition of configuration
     // from standalone mode to networked mode, a caller thread is blocked until
     // the transition process finishes.
 
@@ -298,34 +298,47 @@ mtsManagerLocal * mtsManagerLocal::GetInstance(const std::string & globalCompone
         newInstance = new mtsManagerLocal(globalComponentManagerIP, thisProcessName, thisProcessIP);
     } catch (const std::exception& ex) {
         CMN_LOG_INIT_ERROR << "Class mtsManagerLocal: Reconfiguration: failed to enable network support: " << ex.what() << std::endl;
+        if (newInstance) {
+            delete newInstance;
+        }
         mtsManagerLocal::ConfigurationChange.Unlock();
         return Instance;
     }
 
-    // Create manager components
+    // Create internal manager components
+    InstanceReconfiguration = newInstance;
     if (!newInstance->CreateManagerComponents()) {
-        CMN_LOG_INIT_ERROR << "class mtsManagerLocal: GetInstance: Failed to add internal manager components" << std::endl;
+        CMN_LOG_INIT_ERROR << "class mtsManagerLocal: GetInstance: failed to create MCC/MCS" << std::endl;
+
+        // Clean up new LCM object
+        delete newInstance;
+        mtsManagerLocal::ConfigurationChange.Unlock();
+
+        // Keep using current LCM
+        return Instance;
     }
+    InstanceReconfiguration = 0;
 
     //
     // Transfer all internal data--i.e., components and connections--from current
     // LCM to new LCM.
     //
     {   // Transfer component information
+        std::string componentName;
         ComponentMapType::const_iterator it = Instance->ComponentMap.begin();
         const ComponentMapType::const_iterator itEnd = Instance->ComponentMap.end();
-        const std::string managerComponentName =
-            mtsManagerComponentClient::GetNameOfManagerComponentClient(Instance->GetProcessName());
         for (; it != itEnd; ++it) {
+            componentName = it->second->GetName();
             // Do not trasnfer manager components (both client and server).  They will be created
             // again by CreateManagerComponents() later.
-            if (it->second->GetName() == managerComponentName ||
-                it->second->GetName() == mtsManagerComponentBase::ComponentNames::ManagerComponentServer) {
+            if (mtsManagerComponentBase::IsManagerComponentServer(componentName) ||
+                mtsManagerComponentBase::IsManagerComponentClient(componentName))
+            {
                 continue;
             }
             if (!newInstance->AddComponent(it->second)) {
-                CMN_LOG_INIT_ERROR << "Class mtsManagerLocal: Reconfiguration: failed to trasnfer component while reconfiguring LCM: "
-                                   << it->second->GetName() << std::endl;
+                CMN_LOG_INIT_ERROR << "Class mtsManagerLocal: Reconfiguration: failed to trasnfer component: "
+                                   << componentName << std::endl;
 
                 // Clean up new LCM object
                 delete newInstance;
@@ -334,8 +347,8 @@ mtsManagerLocal * mtsManagerLocal::GetInstance(const std::string & globalCompone
                 // Keep using current LCM
                 return Instance;
             } else {
-                CMN_LOG_INIT_VERBOSE << "Class mtsManagerLocal: Reconfiguration: Successfully transferred component: "
-                                     << it->second->GetName() << std::endl;
+                CMN_LOG_INIT_VERBOSE << "Class mtsManagerLocal: Reconfiguration: successfully transferred component: "
+                                     << componentName << std::endl;
             }
         }
     }
@@ -411,20 +424,6 @@ mtsManagerLocal * mtsManagerLocal::GetInstance(const std::string & globalCompone
             }
         }
     }
-
-    // Create internal manager components
-    InstanceReconfiguration = newInstance;
-    if (!newInstance->CreateManagerComponents()) {
-        CMN_LOG_INIT_ERROR << "Class mtsManagerLocal: Reconfiguration: failed to create internal manager components" << std::endl;
-
-        // Clean up new LCM object
-        delete newInstance;
-        mtsManagerLocal::ConfigurationChange.Unlock();
-
-        // Keep using current LCM
-        return Instance;
-    }
-    InstanceReconfiguration = 0;
 
     // Remove previous LCM instance
     delete Instance;
@@ -2431,7 +2430,7 @@ void mtsManagerLocal::SetIPAddress(void)
     osaSocket::GetLocalhostIP(ipAddresses);
 
     for (size_t i = 0; i < ipAddresses.size(); ++i) {
-        CMN_LOG_CLASS_INIT_VERBOSE << "This machine's IP address : " << ipAddresses[i] << std::endl;
+        CMN_LOG_CLASS_INIT_VERBOSE << "IP detected: (" << i + 1 << ") " << ipAddresses[i] << std::endl;
     }
 
     ProcessIPList.insert(ProcessIPList.begin(), ipAddresses.begin(), ipAddresses.end());
