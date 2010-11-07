@@ -36,6 +36,10 @@ class cdgTypedef: public cmnGenericObject {
     std::string Name;
 
 public:
+    static bool IsKeyword(const std::string & keyword);
+    bool SetValue(const std::string & keyword, const std::string & value,
+                  std::string & errorMessage);
+    bool IsValid(std::string & errorMessage);
     void GenerateHeader(std::ostream & outputStream) const;
 };
 

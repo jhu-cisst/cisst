@@ -61,6 +61,9 @@ public:
     void GenerateHeader(std::ostream & outputStream) const;
 
     void GenerateCode(std::ostream & outputStream, const std::string & header) const;
+
+protected:
+    static void RemoveTrailingSpaces(std::string & value);
 };
 
 #endif // _cdgFile_h

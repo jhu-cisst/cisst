@@ -25,6 +25,59 @@ http://www.cisst.org/cisst/license.txt.
 CMN_IMPLEMENT_SERVICES(cdgTypedef);
 
 
+
+bool cdgTypedef::IsKeyword(const std::string & keyword)
+{
+    if ((keyword == "name")
+        || (keyword == "type")) {
+        return true;
+    }
+    return false;
+}
+
+
+bool cdgTypedef::SetValue(const std::string & keyword,
+                          const std::string & value,
+                          std::string & errorMessage)
+{
+    errorMessage.clear();
+    if (keyword == "name") {
+        if (!this->Name.empty()) {
+            errorMessage = "name already set";
+            return false;
+        }
+        this->Name = value;
+        return true;
+    }
+    if (keyword == "type") {
+        if (!this->Type.empty()) {
+            errorMessage = "type already set";
+            return false;
+        }
+        this->Type = value;
+        return true;
+    }
+    errorMessage = "unhandled keyword \"" + keyword + "\"";
+    return false;
+}
+
+
+bool cdgTypedef::IsValid(std::string & errorMessage)
+{
+    errorMessage.clear();
+    bool isValid = true;
+    if (this->Name.empty()) {
+        isValid = false;
+        errorMessage += " [no name defined] ";
+    }
+    if (this->Type.empty()) {
+        isValid = false;
+        errorMessage += " [no type defined] ";
+    }
+    return isValid;
+}
+
+
 void cdgTypedef::GenerateHeader(std::ostream & outputStream) const
 {
     outputStream << "    typedef " << Type << " " << Name << ";" << std::endl;

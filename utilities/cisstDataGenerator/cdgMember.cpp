@@ -26,9 +26,84 @@ CMN_IMPLEMENT_SERVICES(cdgMember);
 
 
 cdgMember::cdgMember():
-    UsesClassTypedef(false),
-    Description("no-description-provided")
+    UsesClassTypedef(false)
 {
+}
+
+
+bool cdgMember::IsKeyword(const std::string & keyword)
+{
+    if ((keyword == "name")
+        || (keyword == "type")
+        || (keyword == "description")
+        || (keyword == "default")
+        || (keyword == "accessors")
+        || (keyword == "scope")) {
+        return true;
+    }
+    return false;
+}
+
+
+bool cdgMember::SetValue(const std::string & keyword,
+                         const std::string & value,
+                         std::string & errorMessage)
+{
+    errorMessage.clear();
+    if (keyword == "name") {
+        if (!this->Name.empty()) {
+            errorMessage = "name already set";
+            return false;
+        }
+        this->Name = value;
+        return true;
+    }
+    if (keyword == "type") {
+        if (!this->Type.empty()) {
+            errorMessage = "type already set";
+            return false;
+        }
+        this->Type = value;
+        return true;
+    }
+    if (keyword == "description") {
+        if (!this->Description.empty()) {
+            errorMessage = "description already set";
+            return false;
+        }
+        this->Description = value;
+        return true;
+    }
+    if (keyword == "default") {
+        std::cerr << "------------ default not handled yet ---------" << std::endl;
+        return true;
+    }
+    if (keyword == "accessors") {
+        std::cerr << "------------ accessors not handled yet ---------" << std::endl;
+        return true;
+    }
+    if (keyword == "scope") {
+        std::cerr << "------------ scope not handled yet ---------" << std::endl;
+        return true;
+    }
+    errorMessage = "unhandled keyword \"" + keyword + "\"";
+    return false;
+}
+
+
+bool cdgMember::IsValid(std::string & errorMessage)
+{
+    errorMessage.clear();
+    bool isValid = true;
+    if (this->Name.empty()) {
+        isValid = false;
+        errorMessage += " [no name defined] ";
+    }
+    if (this->Type.empty()) {
+        isValid = false;
+        errorMessage += " [no type defined] ";
+    }
+    return isValid;
 }
 
 
