@@ -203,24 +203,21 @@ mtsInterfaceOutput * mtsComponent::AddInterfaceOutput(const std::string & interf
 mtsInterfaceProvidedOrOutput *
 mtsComponent::GetInterfaceProvidedOrOutput(const std::string & interfaceProvidedOrOutputName)
 {
-    return InterfacesProvidedOrOutput.GetItem(interfaceProvidedOrOutputName,
-                                              CMN_LOG_LOD_INIT_ERROR);
+    return InterfacesProvidedOrOutput.GetItem(interfaceProvidedOrOutputName);
 }
 
 
 mtsInterfaceProvided *
 mtsComponent::GetInterfaceProvided(const std::string & interfaceProvidedName) const
 {
-    return dynamic_cast<mtsInterfaceProvided *>(InterfacesProvidedOrOutput.GetItem(interfaceProvidedName,
-                                                                                   CMN_LOG_LOD_INIT_ERROR));
+    return dynamic_cast<mtsInterfaceProvided *>(InterfacesProvidedOrOutput.GetItem(interfaceProvidedName));
 }
 
 
 mtsInterfaceOutput *
 mtsComponent::GetInterfaceOutput(const std::string & interfaceOutputName) const
 {
-    return dynamic_cast<mtsInterfaceOutput *>(InterfacesProvidedOrOutput.GetItem(interfaceOutputName,
-                                                                                 CMN_LOG_LOD_INIT_ERROR));
+    return dynamic_cast<mtsInterfaceOutput *>(InterfacesProvidedOrOutput.GetItem(interfaceOutputName));
 }
 
 
@@ -341,27 +338,21 @@ bool mtsComponent::RemoveInterfaceOutput(const std::string & interfaceOutputName
 mtsInterfaceRequiredOrInput *
 mtsComponent::GetInterfaceRequiredOrInput(const std::string & interfaceRequiredOrInputName)
 {
-    // MJ: do we really want CMN_LOG_LOD_INIT_ERROR?
     return InterfacesRequiredOrInput.GetItem(interfaceRequiredOrInputName);
-                                             //CMN_LOG_LOD_INIT_ERROR);
 }
 
 
 mtsInterfaceRequired *
 mtsComponent::GetInterfaceRequired(const std::string & interfaceRequiredName)
 {
-    // MJ: do we really want CMN_LOG_LOD_INIT_ERROR?
     return dynamic_cast<mtsInterfaceRequired *>(InterfacesRequiredOrInput.GetItem(interfaceRequiredName));
-                                                                                  //CMN_LOG_LOD_INIT_ERROR));
 }
 
 
 mtsInterfaceInput *
 mtsComponent::GetInterfaceInput(const std::string & interfaceInputName) const
 {
-    // MJ: do we really want CMN_LOG_LOD_INIT_ERROR?
     return dynamic_cast<mtsInterfaceInput *>(InterfacesRequiredOrInput.GetItem(interfaceInputName));
-                                                                               //CMN_LOG_LOD_INIT_ERROR));
 }
 
 
@@ -571,7 +562,7 @@ std::vector<std::string> mtsComponent::GetNamesOfInterfacesInput(void) const
 
 const mtsInterfaceProvidedOrOutput * mtsComponent::GetInterfaceProvidedOrOutputFor(const std::string & interfaceRequiredOrInputName) {
     mtsInterfaceRequiredOrInput * interfaceRequiredOrInput =
-        InterfacesRequiredOrInput.GetItem(interfaceRequiredOrInputName, CMN_LOG_LOD_INIT_WARNING);
+        InterfacesRequiredOrInput.GetItem(interfaceRequiredOrInputName);
     return interfaceRequiredOrInput ? interfaceRequiredOrInput->GetConnectedInterface() : 0;
 }
 
@@ -580,7 +571,7 @@ bool mtsComponent::ConnectInterfaceRequiredOrInput(const std::string & interface
                                                    mtsInterfaceProvidedOrOutput * interfaceProvidedOrOutput)
 {
     mtsInterfaceRequiredOrInput * interfaceRequiredOrInput =
-        InterfacesRequiredOrInput.GetItem(interfaceRequiredOrInputName, CMN_LOG_LOD_INIT_ERROR);
+        InterfacesRequiredOrInput.GetItem(interfaceRequiredOrInputName);
     if (interfaceRequiredOrInput) {
         if (interfaceRequiredOrInput->ConnectTo(interfaceProvidedOrOutput)) {
             CMN_LOG_CLASS_INIT_VERBOSE << "ConnectInterfaceRequiredOrInput: component \""

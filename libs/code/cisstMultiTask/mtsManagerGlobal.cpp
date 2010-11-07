@@ -604,7 +604,7 @@ int mtsManagerGlobal::Connect(const std::string & requestProcessName,
                 allOptions << "this component has the following provided/output interface(s): ";
                 std::copy(options.begin(), options.end(), output);
             }
-            CMN_LOG_CLASS_INIT_ERROR << "Connect: provided/output interface has not be added to manager \""
+            CMN_LOG_CLASS_INIT_ERROR << "Connect: provided/output interface has not been added to manager \""
                                      << GetInterfaceUID(serverProcessName, serverComponentName, serverInterfaceProvidedName)
                                      << "\", " << allOptions.str() << std::endl;
             return -1;
