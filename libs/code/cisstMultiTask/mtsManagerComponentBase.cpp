@@ -47,6 +47,9 @@ const std::string mtsManagerComponentBase::CommandNames::GetNamesOfProcesses  = 
 const std::string mtsManagerComponentBase::CommandNames::GetNamesOfComponents = "GetNamesOfComponents";
 const std::string mtsManagerComponentBase::CommandNames::GetNamesOfInterfaces = "GetNamesOfInterfaces";
 const std::string mtsManagerComponentBase::CommandNames::GetListOfConnections = "GetListOfConnections";
+const std::string mtsManagerComponentBase::CommandNames::GetEndUserInterface = "GetEndUserInterface";
+const std::string mtsManagerComponentBase::CommandNames::AddObserverList = "AddObserverList";
+
 // Names of events
 const std::string mtsManagerComponentBase::EventNames::AddComponent  = "AddComponentEvent";
 const std::string mtsManagerComponentBase::EventNames::AddConnection = "AddConnectionEvent";

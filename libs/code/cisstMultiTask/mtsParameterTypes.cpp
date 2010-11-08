@@ -21,6 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsParameterTypes.h>
 #include <cisstMultiTask/mtsManagerGlobal.h>
+#include <cisstMultiTask/mtsInterfaceProvided.h>
 
 // Utility functions
 void mtsParameterTypes::ConvertVectorStringType(const mtsStdStringVec & mtsVec, std::vector<std::string> & stdVec)
@@ -238,4 +239,61 @@ void mtsComponentStateChange::DeSerializeRaw(std::istream & inputStream)
     int newState;
     cmnDeSerializeRaw(inputStream, newState);
     NewState = static_cast<mtsComponentState::Enum>(newState);
+}
+
+//-----------------------------------------------------------------------------
+// GetEndUserInterface (provided interface)
+//
+
+CMN_IMPLEMENT_SERVICES(mtsEndUserInterfaceArg);
+
+void mtsEndUserInterfaceArg::ToStream(std::ostream & outputStream) const
+{
+    outputStream << "EndUserInterface to "
+                 << (OriginalInterface ? OriginalInterface->GetName() : "???")
+                 << (EndUserInterface ? " valid" : " invalid") << " for client"
+                 << UserName << std::endl;
+}
+
+void mtsEndUserInterfaceArg::SerializeRaw(std::ostream & outputStream) const
+{
+    mtsGenericObject::SerializeRaw(outputStream);
+    cmnSerializeRaw(outputStream, UserName);
+    cmnSerializeRaw(outputStream, OriginalInterface);
+    cmnSerializeRaw(outputStream, EndUserInterface);
+}
+
+void mtsEndUserInterfaceArg::DeSerializeRaw(std::istream & inputStream)
+{
+    mtsGenericObject::DeSerializeRaw(inputStream);
+    cmnDeSerializeRaw(inputStream, UserName);
+    cmnDeSerializeRaw(inputStream, OriginalInterface);
+    cmnDeSerializeRaw(inputStream, EndUserInterface);
+}
+
+//-----------------------------------------------------------------------------
+// AddObserverList
+//
+
+CMN_IMPLEMENT_SERVICES(mtsEventHandlerList);
+
+// Shouldn't need to serialize or deserialize this class, or even print it out
+
+void mtsEventHandlerList::ToStream(std::ostream & outputStream) const
+{
+    outputStream << "EventHandlerList (ToStream not implemented)" << std::endl;
+}
+
+void mtsEventHandlerList::SerializeRaw(std::ostream & outputStream) const
+{
+    mtsGenericObject::SerializeRaw(outputStream);
+    cmnSerializeRaw(outputStream, Provided);
+    CMN_LOG_CLASS_RUN_WARNING << "SerializeRaw not implemented" << std::endl;
+}
+
+void mtsEventHandlerList::DeSerializeRaw(std::istream & inputStream)
+{
+    mtsGenericObject::DeSerializeRaw(inputStream);
+    cmnDeSerializeRaw(inputStream, Provided);
+    CMN_LOG_CLASS_RUN_WARNING << "DeSerializeRaw not implemented" << std::endl;
 }

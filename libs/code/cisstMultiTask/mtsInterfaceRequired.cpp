@@ -36,6 +36,7 @@ mtsInterfaceRequired::mtsInterfaceRequired(const std::string & interfaceName,
                                            mtsRequiredType required):
     mtsInterfaceRequiredOrInput(interfaceName, required),
     MailBox(mailBox),
+    InterfaceProvided(0),
     FunctionsVoid("FunctionsVoid"),
     FunctionsVoidReturn("FunctionsVoidReturn"),
     FunctionsWrite("FunctionsWrite"),
@@ -70,6 +71,10 @@ mtsInterfaceRequired::~mtsInterfaceRequired()
     FunctionsQualifiedRead.DeleteAll();
 }
 
+const mtsInterfaceProvidedOrOutput * mtsInterfaceRequired::GetConnectedInterface(void) const
+{
+    return InterfaceProvided;
+}
 
 bool mtsInterfaceRequired::UseQueueBasedOnInterfacePolicy(mtsEventQueueingPolicy queueingPolicy,
                                                           const std::string & methodName,
@@ -194,8 +199,8 @@ mtsCommandWriteBase * mtsInterfaceRequired::GetEventHandlerWrite(const std::stri
 
 bool mtsInterfaceRequired::ConnectTo(mtsInterfaceProvidedOrOutput * interfaceProvidedOrOutput) {
     // make sure we are connecting to a provided interface
-    mtsInterfaceProvided * interfaceProvided = dynamic_cast<mtsInterfaceProvided *>(interfaceProvidedOrOutput);
-    if (!interfaceProvided) {
+    mtsInterfaceProvided *provided = dynamic_cast<mtsInterfaceProvided *>(interfaceProvidedOrOutput);
+    if (!provided) {
         CMN_LOG_CLASS_INIT_ERROR << "ConnectTo: can not connect input interface \""
                                  << interfaceProvidedOrOutput->GetName() << "\" to required interface \""
                                  << this->GetName() << "\", can only connect required with provided or input with output"
@@ -203,24 +208,23 @@ bool mtsInterfaceRequired::ConnectTo(mtsInterfaceProvidedOrOutput * interfacePro
         return false;
     }
     // get the end user interface
-    mtsInterfaceProvided * endUserInterface = interfaceProvided->GetEndUserInterface(this->GetName());
-    if (!endUserInterface) {
+    InterfaceProvided = provided->GetEndUserInterface(this->GetName());
+    if (!InterfaceProvided) {
         CMN_LOG_CLASS_INIT_ERROR << "ConnectTo: failed to get an end user provided interface for \""
-                                 << interfaceProvided->GetName() << "\" while connecting the required interface \""
+                                 << provided->GetName() << "\" while connecting the required interface \""
                                  << this->GetName() << "\"" << std::endl;
         return false;
     }
     // provide a different log message based on result
-    if (endUserInterface == interfaceProvided) {
+    if (provided == InterfaceProvided) {
         CMN_LOG_CLASS_INIT_VERBOSE << "ConnectTo: connecting required interface \""
                                    << this->GetName() << "\" to existing provided interface \""
-                                   << endUserInterface->GetName() << "\"" << std::endl;
+                                   << provided->GetName() << "\"" << std::endl;
     } else {
         CMN_LOG_CLASS_INIT_VERBOSE << "ConnectTo: connecting required interface \""
                                    << this->GetName() << "\" to newly created provided interface \""
-                                   << endUserInterface->GetName() << "\"" << std::endl;
+                                   << provided->GetName() << "\"" << std::endl;
     }
-    this->InterfaceProvidedOrOutput = endUserInterface;
     // and now connect all commands and events
     return this->BindCommandsAndEvents();
 }
@@ -260,7 +264,7 @@ bool mtsInterfaceRequired::Disconnect(void)
         InterfaceProvided->RemoveObserver(iterEventWrite->first, iterEventWrite->second);
 #endif
     // set pointer to interface provided or input to 0
-    InterfaceProvidedOrOutput = 0;
+    InterfaceProvided = 0;
     return true;
 }
 
@@ -269,14 +273,17 @@ bool mtsInterfaceRequired::BindCommandsAndEvents(void)
 {
     bool success = true;
     bool result;
-    mtsInterfaceProvided * interfaceProvided =
-        dynamic_cast<mtsInterfaceProvided *>(this->InterfaceProvidedOrOutput);
-    if (!interfaceProvided) {
+    if (!this->InterfaceProvided) {
         CMN_LOG_CLASS_INIT_ERROR << "BindCommandsAndEvents: required interface \""
                                  << this->GetName() << "\" is not connected to a valid provided interface" << std::endl;
         return false;
     }
-    // First, do the command pointers
+
+    // First, do the command pointers. This may not be thread-safe if the client component is active. We could execute
+    // this in the thread of the client component to achieve thread-safety (see, for example, the way that GetEndUserInterface
+    // and AddObserverList are executed in the thread of the server component). For now, we assume that the client component (with
+    // required interface) will not be active during the connection process, though the server component (with provided interface)
+    // might be active.
     FunctionInfoMapType::iterator iter;
     mtsFunctionVoid * functionVoid;
     for (iter = FunctionsVoid.begin();
@@ -294,17 +301,17 @@ bool mtsInterfaceRequired::BindCommandsAndEvents(void)
                                          << typeid(iter->second->Pointer).name() << "\")" << std::endl;
                 result = false;
             } else {
-                result = functionVoid->Bind(interfaceProvided->GetCommandVoid(iter->first));
+                result = functionVoid->Bind(InterfaceProvided->GetCommandVoid(iter->first));
                 if (!result) {
                     CMN_LOG_CLASS_INIT_WARNING << "BindCommandsAndEvents: failed for void command \""
                                                << iter->first << "\" (connecting \""
                                                << this->GetName() << "\" to \""
-                                               << interfaceProvided->GetName() << "\")"<< std::endl;
+                                               << InterfaceProvided->GetName() << "\")"<< std::endl;
                 } else {
                     CMN_LOG_CLASS_INIT_DEBUG << "BindCommandsAndEvents: succeeded for void command \""
                                              << iter->first << "\" (connecting \""
                                              << this->GetName() << "\" to \""
-                                             << interfaceProvided->GetName() << "\")"<< std::endl;
+                                             << InterfaceProvided->GetName() << "\")"<< std::endl;
                 }
             }
         }
@@ -330,17 +337,17 @@ bool mtsInterfaceRequired::BindCommandsAndEvents(void)
                                          << typeid(iter->second->Pointer).name() << "\")" << std::endl;
                 result = false;
             } else {
-                result = functionVoidReturn->Bind(interfaceProvided->GetCommandVoidReturn(iter->first));
+                result = functionVoidReturn->Bind(InterfaceProvided->GetCommandVoidReturn(iter->first));
                 if (!result) {
                     CMN_LOG_CLASS_INIT_WARNING << "BindCommandsAndEvents: failed for void with return command \""
                                                << iter->first << "\" (connecting \""
                                                << this->GetName() << "\" to \""
-                                               << interfaceProvided->GetName() << "\")"<< std::endl;
+                                               << InterfaceProvided->GetName() << "\")"<< std::endl;
                 } else {
                     CMN_LOG_CLASS_INIT_DEBUG << "BindCommandsAndEvents: succeeded for void with return command \""
                                              << iter->first << "\" (connecting \""
                                              << this->GetName() << "\" to \""
-                                             << interfaceProvided->GetName() << "\")"<< std::endl;
+                                             << InterfaceProvided->GetName() << "\")"<< std::endl;
                 }
             }
         }
@@ -366,17 +373,17 @@ bool mtsInterfaceRequired::BindCommandsAndEvents(void)
                                          << typeid(iter->second->Pointer).name() << "\")" << std::endl;
                 result = false;
             } else {
-                result = functionWrite->Bind(interfaceProvided->GetCommandWrite(iter->first));
+                result = functionWrite->Bind(InterfaceProvided->GetCommandWrite(iter->first));
                 if (!result) {
                     CMN_LOG_CLASS_INIT_WARNING << "BindCommandsAndEvents: failed for write command \""
                                                << iter->first << "\" (connecting \""
                                                << this->GetName() << "\" to \""
-                                               << interfaceProvided->GetName() << "\")"<< std::endl;
+                                               << InterfaceProvided->GetName() << "\")"<< std::endl;
                 } else {
                     CMN_LOG_CLASS_INIT_DEBUG << "BindCommandsAndEvents: succeeded for write command \""
                                              << iter->first << "\" (connecting \""
                                              << this->GetName() << "\" to \""
-                                             << interfaceProvided->GetName() << "\")"<< std::endl;
+                                             << InterfaceProvided->GetName() << "\")"<< std::endl;
                 }
             }
         }
@@ -402,17 +409,17 @@ bool mtsInterfaceRequired::BindCommandsAndEvents(void)
                                          << typeid(iter->second->Pointer).name() << "\")" << std::endl;
                 result = false;
             } else {
-                result = functionWriteReturn->Bind(interfaceProvided->GetCommandWriteReturn(iter->first));
+                result = functionWriteReturn->Bind(InterfaceProvided->GetCommandWriteReturn(iter->first));
                 if (!result) {
                     CMN_LOG_CLASS_INIT_WARNING << "BindCommandsAndEvents: failed for write with result command \""
                                                << iter->first << "\" (connecting \""
                                                << this->GetName() << "\" to \""
-                                               << interfaceProvided->GetName() << "\")"<< std::endl;
+                                               << InterfaceProvided->GetName() << "\")"<< std::endl;
                 } else {
                     CMN_LOG_CLASS_INIT_DEBUG << "BindCommandsAndEvents: succeeded for write with result command \""
                                              << iter->first << "\" (connecting \""
                                              << this->GetName() << "\" to \""
-                                             << interfaceProvided->GetName() << "\")"<< std::endl;
+                                             << InterfaceProvided->GetName() << "\")"<< std::endl;
                 }
             }
         }
@@ -438,17 +445,17 @@ bool mtsInterfaceRequired::BindCommandsAndEvents(void)
                                          << typeid(iter->second->Pointer).name() << "\")" << std::endl;
                 result = false;
             } else {
-                result = functionRead->Bind(interfaceProvided->GetCommandRead(iter->first));
+                result = functionRead->Bind(InterfaceProvided->GetCommandRead(iter->first));
                 if (!result) {
                     CMN_LOG_CLASS_INIT_WARNING << "BindCommandsAndEvents: failed for read command \""
                                                << iter->first << "\" (connecting \""
                                                << this->GetName() << "\" to \""
-                                               << interfaceProvided->GetName() << "\")"<< std::endl;
+                                               << InterfaceProvided->GetName() << "\")"<< std::endl;
                 } else {
                     CMN_LOG_CLASS_INIT_DEBUG << "BindCommandsAndEvents: succeeded for read command \""
                                              << iter->first  << "\" (connecting \""
                                              << this->GetName() << "\" to \""
-                                             << interfaceProvided->GetName() << "\")"<< std::endl;
+                                             << InterfaceProvided->GetName() << "\")"<< std::endl;
                 }
             }
         }
@@ -474,17 +481,17 @@ bool mtsInterfaceRequired::BindCommandsAndEvents(void)
                                          << typeid(iter->second->Pointer).name() << "\")" << std::endl;
                 result = false;
             } else {
-                result = functionQualifiedRead->Bind(interfaceProvided->GetCommandQualifiedRead(iter->first));
+                result = functionQualifiedRead->Bind(InterfaceProvided->GetCommandQualifiedRead(iter->first));
                 if (!result) {
                     CMN_LOG_CLASS_INIT_WARNING << "BindCommandsAndEvents: failed for qualified read command \""
                                                << iter->first << "\" (connecting \""
                                                << this->GetName() << "\" to \""
-                                               << interfaceProvided->GetName() << "\")"<< std::endl;
+                                               << InterfaceProvided->GetName() << "\")"<< std::endl;
                 } else {
                     CMN_LOG_CLASS_INIT_DEBUG << "BindCommandsAndEvents: succeeded for qualified read command \""
                                              << iter->first << "\" (connecting \""
                                              << this->GetName() << "\" to \""
-                                             << interfaceProvided->GetName() << "\")"<< std::endl;
+                                             << InterfaceProvided->GetName() << "\")"<< std::endl;
                 }
             }
         }
@@ -497,75 +504,40 @@ bool mtsInterfaceRequired::BindCommandsAndEvents(void)
     if (!success) {
         CMN_LOG_CLASS_INIT_ERROR << "BindCommandsAndEvents: required commands missing (connecting \""
                                  << this->GetName() << "\" to \""
-                                 << interfaceProvided->GetName() << "\")"<< std::endl;
+                                 << InterfaceProvided->GetName() << "\")"<< std::endl;
     }
 
-    // Now, the event receivers
+    // Now, do the event receivers and handlers. This is thread-safe, even if the server component (with provided
+    // interface) is active because the event handlers (observers) are added in the thread of the server component.
+    // For efficiency, we make a list of the event handlers and then add them with a single call to the server component.
+    mtsEventHandlerList EventList(InterfaceProvided);
+
     EventReceiverVoidMapType::iterator iterReceiverVoid;
     for (iterReceiverVoid = EventReceiversVoid.begin();
          iterReceiverVoid != EventReceiversVoid.end();
          iterReceiverVoid++) {
-        result = interfaceProvided->AddObserver(iterReceiverVoid->first, iterReceiverVoid->second->Pointer->GetCommand());
-        if (!result) {
-            CMN_LOG_CLASS_INIT_WARNING << "BindCommandsAndEvents: failed to add observer for void event receiver \""
-                                       << iterReceiverVoid->first << "\" (connecting \""
-                                       << this->GetName() << "\" to \""
-                                       << interfaceProvided->GetName() << "\")"<< std::endl;
-        } else {
-            CMN_LOG_CLASS_INIT_DEBUG << "BindCommandsAndEvents: succeeded to add observer for void event receiver \""
-                                     << iterReceiverVoid->first << "\" (connecting \""
-                                     << this->GetName() << "\" to \""
-                                     << interfaceProvided->GetName() << "\")"<< std::endl;
-        }
-        if (iterReceiverVoid->second->Required == MTS_OPTIONAL) {
-            result = true;
-        }
-        success &= result;
+        EventList.VoidEvents.push_back(mtsEventHandlerList::InfoVoid(
+                             iterReceiverVoid->first, iterReceiverVoid->second->Pointer->GetCommand(), iterReceiverVoid->second->Required));
     }
+
     EventReceiverWriteMapType::iterator iterReceiverWrite;
     for (iterReceiverWrite = EventReceiversWrite.begin();
          iterReceiverWrite != EventReceiversWrite.end();
          iterReceiverWrite++) {
-        result = interfaceProvided->AddObserver(iterReceiverWrite->first, iterReceiverWrite->second->Pointer->GetCommand());
-        if (!result) {
-            CMN_LOG_CLASS_INIT_WARNING << "BindCommandsAndEvents: failed to add observer for write event receiver \""
-                                       << iterReceiverWrite->first << "\" (connecting \""
-                                       << this->GetName() << "\" to \""
-                                       << interfaceProvided->GetName() << "\")"<< std::endl;
-        } else {
-            CMN_LOG_CLASS_INIT_DEBUG << "BindCommandsAndEvents: succeeded to add observer for write event receiver \""
-                                     << iterReceiverWrite->first << "\" (connecting \""
-                                     << this->GetName() << "\" to \""
-                                     << interfaceProvided->GetName() << "\")"<< std::endl;
-        }
-        if (iterReceiverWrite->second->Required == MTS_OPTIONAL) {
-            result = true;
-        }
-        success &= result;
+        EventList.WriteEvents.push_back(mtsEventHandlerList::InfoWrite(
+                              iterReceiverWrite->first, iterReceiverWrite->second->Pointer->GetCommand(), iterReceiverWrite->second->Required));
     }
 
-
-    // Now, do the event handlers
     EventHandlerVoidMapType::iterator iterEventVoid;
     for (iterEventVoid = EventHandlersVoid.begin();
          iterEventVoid != EventHandlersVoid.end();
          iterEventVoid++) {
-        // First, attempt to add it to the event receiver (if one is present)
-        result = AddEventHandlerToReceiver(iterEventVoid->first, iterEventVoid->second);
-        // If there is no event receiver, add it directly to the provided interface
-        if (!result)
-            result = interfaceProvided->AddObserver(iterEventVoid->first, iterEventVoid->second);
-        if (!result) {
-            CMN_LOG_CLASS_INIT_WARNING << "BindCommandsAndEvents: failed to add observer for void event \""
-                                       << iterEventVoid->first << "\" (connecting \""
-                                       << this->GetName() << "\" to \""
-                                       << interfaceProvided->GetName() << "\")"<< std::endl;
-        } else {
-            CMN_LOG_CLASS_INIT_DEBUG << "BindCommandsAndEvents: succeeded to add observer for void event \""
-                                     << iterEventVoid->first << "\" (connecting \""
-                                     << this->GetName() << "\" to \""
-                                     << interfaceProvided->GetName() << "\")"<< std::endl;
-        }
+        // First, attempt to add it to the event receiver (if one is present).
+        // If there is no event receiver, add it directly to the provided interface.
+        // Note that event handlers are considered optional.
+        if (!AddEventHandlerToReceiver(iterEventVoid->first, iterEventVoid->second))
+            EventList.VoidEvents.push_back(mtsEventHandlerList::InfoVoid(
+                                 iterEventVoid->first, iterEventVoid->second, MTS_OPTIONAL));
     }
 
     EventHandlerWriteMapType::iterator iterEventWrite;
@@ -573,20 +545,47 @@ bool mtsInterfaceRequired::BindCommandsAndEvents(void)
          iterEventWrite != EventHandlersWrite.end();
          iterEventWrite++) {
         // First, attempt to add it to the event receiver (if one is present)
-        result = AddEventHandlerToReceiver(iterEventWrite->first, iterEventWrite->second);
         // If there is no event receiver, add it directly to the provided interface
-        if (!result)
-            result = interfaceProvided->AddObserver(iterEventWrite->first, iterEventWrite->second);
-        if (!result) {
-            CMN_LOG_CLASS_INIT_WARNING << "BindCommandsAndEvents: failed to add observer for write event \""
-                                       << iterEventWrite->first << "\" (connecting \""
+        // Note that event handlers are considered optional.
+        if (!AddEventHandlerToReceiver(iterEventWrite->first, iterEventWrite->second))
+            EventList.WriteEvents.push_back(mtsEventHandlerList::InfoWrite(
+                                  iterEventWrite->first, iterEventWrite->second, MTS_OPTIONAL));
+    }
+
+    // Send the request to add all the event handlers
+    InterfaceProvided->AddObserverList(EventList, EventList);
+
+    // Now, check the results
+    unsigned int i;
+    for (i = 0; i < EventList.VoidEvents.size(); i++) {
+        if (!EventList.VoidEvents[i].Result) {
+            CMN_LOG_CLASS_INIT_WARNING << "BindCommandsAndEvents: failed to add observer for void event \""
+                                       << EventList.VoidEvents[i].EventName << "\" (connecting \""
                                        << this->GetName() << "\" to \""
-                                       << interfaceProvided->GetName() << "\")"<< std::endl;
+                                       << InterfaceProvided->GetName() << "\")"<< std::endl;
+            if (EventList.VoidEvents[i].Required == MTS_REQUIRED)
+                success = false;
+        } else {
+            CMN_LOG_CLASS_INIT_DEBUG << "BindCommandsAndEvents: succeeded to add observer for void event \""
+                                     << EventList.VoidEvents[i].EventName << "\" (connecting \""
+                                     << this->GetName() << "\" to \""
+                                     << InterfaceProvided->GetName() << "\")"<< std::endl;
+        }
+    }
+
+    for (i = 0; i < EventList.WriteEvents.size(); i++) {
+        if (!EventList.WriteEvents[i].Result) {
+            CMN_LOG_CLASS_INIT_WARNING << "BindCommandsAndEvents: failed to add observer for write event \""
+                                       << EventList.WriteEvents[i].EventName << "\" (connecting \""
+                                       << this->GetName() << "\" to \""
+                                       << InterfaceProvided->GetName() << "\")"<< std::endl;
+            if (EventList.WriteEvents[i].Required == MTS_REQUIRED)
+                success = false;
         } else {
             CMN_LOG_CLASS_INIT_DEBUG << "BindCommandsAndEvents: succeeded to add observer for write event \""
-                                     << iterEventWrite->first << "\" (connecting \""
+                                     << EventList.WriteEvents[i].EventName << "\" (connecting \""
                                      << this->GetName() << "\" to \""
-                                     << interfaceProvided->GetName() << "\")"<< std::endl;
+                                     << InterfaceProvided->GetName() << "\")"<< std::endl;
         }
     }
 

@@ -94,6 +94,9 @@ protected:
     /*! Mailbox (if supported). */
     mtsMailBox * MailBox;
 
+    /*! Pointer to provided interface that we are connected to. */
+    mtsInterfaceProvided * InterfaceProvided;
+
     /*! Default constructor. Does nothing, should not be used. */
     mtsInterfaceRequired(void) {}
 
@@ -119,6 +122,8 @@ protected:
 
     /*! Default destructor. */
     virtual ~mtsInterfaceRequired();
+
+    const mtsInterfaceProvidedOrOutput * GetConnectedInterface(void) const;
 
     /*! Get the names of commands required by this interface. */
     //@{

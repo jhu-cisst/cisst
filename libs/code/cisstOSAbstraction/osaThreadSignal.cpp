@@ -288,6 +288,7 @@ unsigned int osaThreadSignal::SizeOfInternals(void) {
 void osaThreadSignal::Raise()
 {
 #if (CISST_OS == CISST_WINDOWS)
+    CMN_LOG_INIT_VERBOSE << "Thread signal raise called for handle " << INTERNALS(hEvent) << std::endl;
     ::SetEvent(INTERNALS(hEvent));
 #endif
 
@@ -319,7 +320,39 @@ void osaThreadSignal::Raise()
 
 void osaThreadSignal::Wait()
 {
+#if (CISST_OS == CISST_WINDOWS)
+    ResetEvent(INTERNALS(hEvent));
+    CMN_LOG_INIT_VERBOSE << "osaThreadSignal::Wait called for " << INTERNALS(hEvent) << std::endl;
+    //DWORD ret = WaitForSingleObject(INTERNALS(hEvent), INFINITE);
+    HANDLE handles[1] = { INTERNALS(hEvent) };
+    bool done = false;
+    while (!done) {
+        DWORD ret = MsgWaitForMultipleObjects(1, handles, FALSE, INFINITE, QS_ALLEVENTS);
+        if (ret == WAIT_OBJECT_0)
+            done = true;
+        else if (ret == WAIT_OBJECT_0+1) {
+            MSG msg ; 
+            // Read all of the messages in this next loop, 
+            // removing each message as we read it.
+            while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) 
+            { 
+                // If it is a quit message, exit.
+                if (msg.message == WM_QUIT) {
+                    CMN_LOG_RUN_WARNING << "osaThreadSignal::Wait got quit message" << std::endl;
+                    done = true;
+                }
+                // Otherwise, dispatch the message.
+                DispatchMessage(&msg); 
+            } // End of PeekMessage while loop.
+        }
+        else {
+            CMN_LOG_INIT_ERROR << "osaThreadSignal::Wait: error return = " << ret << std::endl;
+            done = true;
+        }
+    }
+#else
     Wait(10000.0);
+#endif
 }
 
 bool osaThreadSignal::Wait(double timeoutInSec)
@@ -415,4 +448,18 @@ bool osaThreadSignal::Wait(double timeoutInSec)
 #endif
 
     return true;
+}
+
+void osaThreadSignal::ToStream(std::ostream & outputStream) const
+{
+    osaThreadSignal * nonConstThis = const_cast<osaThreadSignal *>(this);
+    outputStream << "osaThreadSignal: ";
+#if (CISST_OS == CISST_WINDOWS)
+    outputStream << "handle = " << (reinterpret_cast<osaThreadSignalInternals*>(nonConstThis->Internals))->hEvent;
+#endif
+#if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+    //pthread_mutex_t gnuMutex;
+    //pthread_cond_t gnuCondition;
+    outputStream << "condition_state = " << Condition_State;
+#endif
 }

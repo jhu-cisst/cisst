@@ -38,6 +38,9 @@
 void mtsTask::DoRunInternal(void)
 {
     StateTables.ForEachVoid(&mtsStateTable::StartIfAutomatic);
+    // Make sure following is called
+    if (InterfaceProvidedToManager)
+        InterfaceProvidedToManager->ProcessMailBoxes();
     this->Run();
     // advance all state tables (if automatic)
     StateTables.ForEachVoid(&mtsStateTable::AdvanceIfAutomatic);
@@ -89,6 +92,8 @@ void mtsTask::CleanupInternal() {
     // Perform Cleanup on all interfaces provided
     InterfacesProvidedOrOutput.ForEachVoid(&mtsInterfaceProvidedOrOutput::Cleanup);
 
+    delete InterfaceProvidedToManagerCallable;
+
     ChangeState(mtsComponentState::FINISHED);
     CMN_LOG_CLASS_INIT_VERBOSE << "CleanupInternal: ended for task \"" << this->GetName() << "\"" << std::endl;
 }
@@ -128,9 +133,7 @@ void mtsTask::ChangeState(mtsComponentState::Enum newState)
     StateChangeSignal.Raise();
 
     // Inform the manager component client of the state change
-    mtsInterfaceProvided * interfaceInternalProvided = 
-        GetInterfaceProvided(mtsManagerComponentBase::InterfaceNames::InterfaceInternalProvided);
-    if (interfaceInternalProvided) {
+    if (InterfaceProvidedToManager) {
         mtsManagerLocal * LCM = mtsManagerLocal::GetInstance();
         EventGeneratorChangeState(mtsComponentStateChange(LCM->GetProcessName(), this->GetName(), this->State.GetState()));
     }
@@ -188,6 +191,7 @@ mtsTask::mtsTask(const std::string & name,
 {
     this->StateTables.SetOwner(*this);
     this->AddStateTable(&this->StateTable);
+    this->InterfaceProvidedToManagerCallable = new mtsCallableVoidMethod<mtsTask>(&mtsTask::ProcessManagerCommandsIfNotActive, this);
 }
 
 
@@ -279,11 +283,14 @@ mtsInterfaceProvided * mtsTask::AddInterfaceProvided(const std::string & interfa
     mtsInterfaceProvided * interfaceProvided;
     if ((queueingPolicy == MTS_COMPONENT_POLICY)
         || (queueingPolicy == MTS_COMMANDS_SHOULD_BE_QUEUED)) {
-        interfaceProvided = new mtsInterfaceProvided(interfaceProvidedName, this, MTS_COMMANDS_SHOULD_BE_QUEUED);
+        mtsCallableVoidBase * postCommandQueuedCallable = 0;
+        if (interfaceProvidedName == mtsManagerComponentBase::InterfaceNames::InterfaceInternalProvided)
+            postCommandQueuedCallable = InterfaceProvidedToManagerCallable;
+        interfaceProvided = new mtsInterfaceProvided(interfaceProvidedName, this, MTS_COMMANDS_SHOULD_BE_QUEUED, postCommandQueuedCallable);
     } else {
         CMN_LOG_CLASS_INIT_WARNING << "AddInterfaceProvided: adding provided interface \"" << interfaceProvidedName
                                    << "\" with policy MTS_COMMANDS_SHOULD_NOT_BE_QUEUED to task \""
-                                   << this->GetName() << "\". This bypasses built-in thread safety mechanisms, make sure your commands are thread safe"
+                                   << this->GetName() << "\". This bypasses built-in thread safety mechanisms, make sure your commands are thread safe."
                                    << std::endl;
         interfaceProvided = new mtsInterfaceProvided(interfaceProvidedName, this, MTS_COMMANDS_SHOULD_NOT_BE_QUEUED);
     }
@@ -334,6 +341,50 @@ bool mtsTask::WaitToTerminate(double timeout)
     return ret;
 }
 
+
+void mtsTask::ProcessManagerCommandsIfNotActive()
+{
+    if (InterfaceProvidedToManager) {
+        // Lock the StateChange mutex so that the task state does not change
+        StateChange.Lock();
+        if (!IsRunning()) {
+            CMN_LOG_CLASS_INIT_VERBOSE << "Task " << this->GetName() << " not active, processing internal mailbox" << std::endl;
+            InterfaceProvidedToManager->ProcessMailBoxes();
+        }
+        else { // Wake up the thread just in case (e.g., for mtsTaskFromSignal)
+            CMN_LOG_CLASS_INIT_VERBOSE << "Task " << this->GetName() << " active, not processing internal mailbox" << std::endl;
+            this->Thread.Wakeup();
+        }
+        StateChange.Unlock();
+    }
+}
+
+bool mtsTask::CheckForOwnThread(void) const
+{
+// PK TEMP: Set to 0 to temporarily disable queued internal commands
+#if 1
+    return (osaGetCurrentThreadId() == Thread.GetId());
+#else
+    return true;
+#endif
+}
+
+mtsInterfaceProvided *mtsTask::GetEndUserInterface(mtsInterfaceProvided *interfaceProvided, const std::string &userName)
+{
+    if (CheckForOwnThread()) {
+        CMN_LOG_CLASS_RUN_VERBOSE << "GetEndUserInterface: called from own thread for component "
+                                  << this->GetName() << std::endl;
+        return interfaceProvided->GetEndUserInterfaceInternal(userName);
+    }
+    return mtsComponent::GetEndUserInterface(interfaceProvided, userName);
+}
+
+void mtsTask::AddObserverList(const mtsEventHandlerList &argin, mtsEventHandlerList &argout)
+{
+    if (CheckForOwnThread())
+        InterfaceInternalCommands_AddObserverList(argin, argout);
+    mtsComponent::AddObserverList(argin, argout);
+}
 
 void mtsTask::ToStream(std::ostream & outputStream) const
 {

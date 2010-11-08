@@ -29,6 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsCommandQueuedWriteReturn.h>
 #include <cisstMultiTask/mtsCommandFilteredWrite.h>
 #include <cisstMultiTask/mtsCommandFilteredQueuedWrite.h>
+#include <cisstMultiTask/mtsComponent.h>
 
 #include <iostream>
 #include <string>
@@ -248,7 +249,7 @@ size_t mtsInterfaceProvided::ProcessMailBoxes(void)
         }
         return numberOfCommands;
     }
-    CMN_LOG_CLASS_RUN_ERROR << "ProcessMailBoxes: called on end user interface. " << std::endl;
+    CMN_LOG_CLASS_RUN_ERROR << "ProcessMailBoxes: called on end user interface for " << this->GetName() << std::endl;
     return 0;
 }
 
@@ -597,18 +598,25 @@ mtsInterfaceProvided * mtsInterfaceProvided::GetEndUserInterface(const std::stri
         return this;
     }
 
-    // else we need to duplicate this interface
+    // else we need to duplicate this interface.
+    // We use the component services to queue this request, so that it is thread-safe.
+    return Component->GetEndUserInterface(this, userName);
+}
+
+
+mtsInterfaceProvided * mtsInterfaceProvided::GetEndUserInterfaceInternal(const std::string & userName)
+{
+    // Note that we don't check for duplicate user names (don't need to care whether there are duplicates)
     this->UserCounter++;
-    CMN_LOG_CLASS_INIT_VERBOSE << "GetEndUserInterface: interface \"" << this->Name
+    CMN_LOG_CLASS_INIT_VERBOSE << "GetEndUserInterface: component \"" << Component->GetName()
+                               << "\" interface \"" << this->Name
                                << "\" creating new copy (#" << this->UserCounter
                                << ") for user \"" << userName << "\"" << std::endl;
     // new end user interface created with default size for mailbox
     mtsInterfaceProvided * interfaceProvided = new mtsInterfaceProvided(this,
                                                                         userName,
                                                                         DEFAULT_ARG_BUFFER_LEN);
-    //InterfacesProvidedCreated.resize(InterfacesProvidedCreated.size() + 1,
-    //                                 InterfaceProvidedCreatedPairType(this->UserCounter, interfaceProvided));
-    InterfacesProvidedCreated.push_back(InterfaceProvidedCreatedPairType(this->UserCounter, interfaceProvided));
+    InterfacesProvidedCreated.push_back(InterfaceProvidedCreatedPairType(UserCounter, interfaceProvided));
 
     return interfaceProvided;
 }
@@ -741,9 +749,9 @@ mtsCommandVoid * mtsInterfaceProvided::GetCommandVoid(const std::string & comman
     if (this->EndUserInterface) {
         return CommandsVoid.GetItem(commandName, CMN_LOG_LOD_INIT_ERROR);
     }
-    CMN_LOG_CLASS_INIT_ERROR << "GetCommandVoid: can not retrieve a command from \"factory\" interface \""
+    CMN_LOG_CLASS_INIT_ERROR << "GetCommandVoid: cannot retrieve command " << commandName << " from \"factory\" interface \""
                              << this->GetName()
-                             << "\", you must call GetEndUserInterface to make sure you are using a end-user interface"
+                             << "\", you must call GetEndUserInterface to make sure you are using an end-user interface"
                              << std::endl;
     return 0;
 }
@@ -753,9 +761,9 @@ mtsCommandVoidReturn * mtsInterfaceProvided::GetCommandVoidReturn(const std::str
     if (this->EndUserInterface) {
         return CommandsVoidReturn.GetItem(commandName, CMN_LOG_LOD_INIT_ERROR);
     }
-    CMN_LOG_CLASS_INIT_ERROR << "GetCommandVoidReturn: can not retrieve a command from \"factory\" interface \""
+    CMN_LOG_CLASS_INIT_ERROR << "GetCommandVoidReturn: cannot retrieve command " << commandName << " from \"factory\" interface \""
                              << this->GetName()
-                             << "\", you must call GetEndUserInterface to make sure you are using a end-user interface"
+                             << "\", you must call GetEndUserInterface to make sure you are using an end-user interface"
                              << std::endl;
     return 0;
 }
@@ -765,9 +773,9 @@ mtsCommandWriteBase * mtsInterfaceProvided::GetCommandWrite(const std::string & 
     if (this->EndUserInterface) {
         return CommandsWrite.GetItem(commandName, CMN_LOG_LOD_INIT_ERROR);
     }
-    CMN_LOG_CLASS_INIT_ERROR << "GetCommandWrite: can not retrieve a command from \"factory\" interface \""
+    CMN_LOG_CLASS_INIT_ERROR << "GetCommandWrite: cannot retrieve command " << commandName << " from \"factory\" interface \""
                              << this->GetName()
-                             << "\", you must call GetEndUserInterface to make sure you are using a end-user interface"
+                             << "\", you must call GetEndUserInterface to make sure you are using an end-user interface"
                              << std::endl;
     return 0;
 }
@@ -777,9 +785,9 @@ mtsCommandWriteReturn * mtsInterfaceProvided::GetCommandWriteReturn(const std::s
     if (this->EndUserInterface) {
         return CommandsWriteReturn.GetItem(commandName, CMN_LOG_LOD_INIT_ERROR);
     }
-    CMN_LOG_CLASS_INIT_ERROR << "GetCommandWriteReturn: can not retrieve a command from \"factory\" interface \""
+    CMN_LOG_CLASS_INIT_ERROR << "GetCommandWriteReturn: cannot retrieve command " << commandName << " from \"factory\" interface \""
                              << this->GetName()
-                             << "\", you must call GetEndUserInterface to make sure you are using a end-user interface"
+                             << "\", you must call GetEndUserInterface to make sure you are using an end-user interface"
                              << std::endl;
     return 0;
 }
@@ -849,3 +857,9 @@ bool mtsInterfaceProvided::AddObserver(const std::string & eventName, mtsCommand
         return false;
     }
 }
+
+void mtsInterfaceProvided::AddObserverList(const mtsEventHandlerList & argin, mtsEventHandlerList & argout)
+{
+    Component->AddObserverList(argin, argout);
+}
+

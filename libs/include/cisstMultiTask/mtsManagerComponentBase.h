@@ -135,6 +135,9 @@ public:
         const static std::string GetNamesOfComponents;
         const static std::string GetNamesOfInterfaces;
         const static std::string GetListOfConnections;
+        // Establishing connections
+        const static std::string GetEndUserInterface;
+        const static std::string AddObserverList;
     };
 
     /*! Event name definitions */

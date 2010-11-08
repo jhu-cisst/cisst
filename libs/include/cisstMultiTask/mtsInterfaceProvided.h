@@ -94,6 +94,9 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterfaceProvidedOrOutput {
     friend class mtsComponentProxy;
     // To get information about event generators in this interface
     friend class mtsManagerLocal;
+    // To call GetEndUserInterfaceInternal
+    friend class mtsComponent;
+    friend class mtsTask;
 
  public:
     /*! This type */
@@ -426,8 +429,8 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterfaceProvidedOrOutput {
     //@{
     bool AddObserver(const std::string & eventName, mtsCommandVoid * handler);
     bool AddObserver(const std::string & eventName, mtsCommandWriteBase * handler);
+    void AddObserverList(const mtsEventHandlerList &argin, mtsEventHandlerList &argout);
     //@}
-
 
     /*!
       \todo documentation outdated
@@ -458,6 +461,8 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterfaceProvidedOrOutput {
     mtsInterfaceProvided(mtsInterfaceProvided * interfaceProvided,
                          const std::string & userName,
                          size_t mailBoxSize);
+
+    mtsInterfaceProvided * GetEndUserInterfaceInternal(const std::string & userName);
 
     /*! Utility method to determine if a command should be queued or
       not based on the default policy for the interface and the user's

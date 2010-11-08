@@ -72,6 +72,8 @@ http://www.cisst.org/cisst/license.txt.
 %include "cisstMultiTask/mtsCommandRead.h"
 %include "cisstMultiTask/mtsCommandWriteBase.h"
 %include "cisstMultiTask/mtsCommandQualifiedReadBase.h"
+// Wrap event receivers
+%include "cisstMultiTask/mtsEventReceiver.h"
 
 // Extend mtsCommandVoid
 %extend mtsCommandVoid {
@@ -108,6 +110,8 @@ http://www.cisst.org/cisst/license.txt.
                 tmpObject = self.GetArgumentPrototype().Services().Create()
                 self.ArgumentType = tmpObject.__class__
             except TypeError, e:
+                print 'Read command ', self.GetName(), ': ', e
+            except AttributeError, e:
                 print 'Read command ', self.GetName(), ': ', e
 
 

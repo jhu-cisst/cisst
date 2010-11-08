@@ -29,13 +29,14 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnNamedMap.h>
 
 #include <cisstOSAbstraction/osaThread.h>
+#include <cisstOSAbstraction/osaMutex.h>
 
 #include <cisstMultiTask/mtsForwardDeclarations.h>
-// #include <cisstMultiTask/mtsCommandBase.h>
 #include <cisstMultiTask/mtsComponentState.h>
 #include <cisstMultiTask/mtsFunctionWrite.h>
 #include <cisstMultiTask/mtsFunctionRead.h>
 #include <cisstMultiTask/mtsFunctionQualifiedRead.h>
+#include <cisstMultiTask/mtsFunctionWriteReturn.h>
 #include <cisstMultiTask/mtsMulticastCommandVoid.h>
 #include <cisstMultiTask/mtsMulticastCommandWrite.h>
 #include <cisstMultiTask/mtsParameterTypes.h>
@@ -80,6 +81,15 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
 
     /*! Component state. */
     mtsComponentState State;
+
+    /*! Provided interface for component management. */
+    mtsInterfaceProvided *InterfaceProvidedToManager;
+
+    struct InternalCommandsStruct {
+        osaMutex Mutex;        
+        mtsFunctionWriteReturn GetEndUserInterface;
+        mtsFunctionWriteReturn AddObserverList;
+    } InternalCommands;
 
     /*! Default constructor. Protected to prevent creation of a component
       without a name. */
@@ -252,6 +262,14 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     bool ConnectInterfaceRequiredOrInput(const std::string & interfaceRequiredOrInputName,
                                          mtsInterfaceProvidedOrOutput * interfaceProvidedOrOutput);
 
+    /*! Call interfaceProvided->GetEndUserInterface(userName) in a thread-safe manner (i.e., from
+        component's thread if it has one). */
+    virtual mtsInterfaceProvided *GetEndUserInterface(mtsInterfaceProvided *interfaceProvided, const std::string &userName);
+
+    /*! Add list of event handlers as observers in the specified provided interface.
+        For active tasks, this is queued and executed from the component's thread. */
+    virtual void AddObserverList(const mtsEventHandlerList &argin, mtsEventHandlerList &argout);
+
     /*! Tells this component to use its own file for log.  By default
       the messages are also sent to cmnLogger but this can be changed
       setting forwardToLogger to false.  The default file name is
@@ -383,6 +401,10 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
         component client */
     void InterfaceInternalCommands_ComponentStop(const mtsComponentStatusControl & arg);
     void InterfaceInternalCommands_ComponentResume(const mtsComponentStatusControl & arg);
+
+    /*! Internal commands to process command execution request coming from LCM (by invoking class methods) */
+    void InterfaceInternalCommands_GetEndUserInterface(const mtsEndUserInterfaceArg & argin, mtsEndUserInterfaceArg &argout);
+    void InterfaceInternalCommands_AddObserverList(const mtsEventHandlerList & argin, mtsEventHandlerList &argout);
 
  public:
 

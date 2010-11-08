@@ -1827,7 +1827,6 @@ bool mtsManagerLocal::ConnectLocally(const std::string & clientComponentName, co
         return false;
     }
 
-    bool interfacesSwapped = false;
     mtsInterfaceProvidedOrOutput * serverInterfaceProvidedOrOutput = serverComponent->GetInterfaceProvidedOrOutput(serverInterfaceProvidedName);
     if (!serverInterfaceProvidedOrOutput) {
         // test for swapped interfaces
@@ -1838,96 +1837,20 @@ bool mtsManagerLocal::ConnectLocally(const std::string & clientComponentName, co
                                      << " in component \"" << serverComponentName << "\"" << std::endl;
             return false;
         } else {
-            interfacesSwapped = true;
+            CMN_LOG_CLASS_INIT_DEBUG << "ConnectLocally: Swapping client/server" << std::endl;
+            return ConnectLocally(serverComponentName, serverInterfaceProvidedName, clientComponentName, clientInterfaceRequiredName, clientProcessName);
         }
     }
 
-#if 0
-    // If a server component is a proxy, it should create a new instance of
-    // provided interface proxy and clone all the proxy objects in it (e.g.
-    // command and event object proxies). This is a crucial step for thread-
-    // safe data exchange over networks.
-    // See mtsComponentProxy::CreateInterfaceProvidedProxy() for details.
-    mtsInterfaceProvided * interfaceProvidedInstance = 0;
-
-#if CISST_MTS_HAS_ICE
-    const bool isServerComponentProxy = IsProxyComponent(serverComponentName);
-    if (isServerComponentProxy) {
-        mtsComponentProxy * serverComponentProxy = dynamic_cast<mtsComponentProxy *>(serverComponent);
-        if (!serverComponentProxy) {
-            CMN_LOG_CLASS_INIT_ERROR << "ConnectLocally: invalid type of server component: " << serverComponentName << std::endl;
-            return false;
-        }
-
-        // Issue a new resource user id and create provided interface instance
-        interfaceProvidedInstance = serverComponentProxy->CreateInterfaceProvidedInstance(serverInterfaceProvided, interfaceProvidedInstanceID);
-        if (!interfaceProvidedInstance) {
-            CMN_LOG_CLASS_INIT_ERROR << "ConnectLocally: failed to create provided interface proxy instance: "
-                                     << clientComponentName << ":" << clientInterfaceRequiredName << std::endl;
-            return -1;
-        }
-
-        /* TODO: How to resolve a problem of receiving duplicate events?
-        // Disable event void (see mtsCommandBase.h for detailed comments)
-        mtsComponentInterface::EventVoidMapType::const_iterator itVoid =
-            interfaceProvidedInstance->EventVoidGenerators.begin();
-        const mtsComponentInterface::EventVoidMapType::const_iterator itVoidEnd =
-            interfaceProvidedInstance->EventVoidGenerators.end();
-        for (; itVoid != itVoidEnd; ++itVoid) {
-            itVoid->second->DisableEvent();
-        }
-
-        // Disable event write
-        mtsComponentInterface::EventWriteMapType::const_iterator itWrite =
-            interfaceProvidedInstance->EventWriteGenerators.begin();
-        const mtsComponentInterface::EventWriteMapType::const_iterator itWriteEnd =
-            interfaceProvidedInstance->EventWriteGenerators.end();
-        for (; itWrite != itWriteEnd; ++itWrite) {
-            itWrite->second->DisableEvent();
-        }
-        */
-
-        CMN_LOG_CLASS_INIT_VERBOSE << "ConnectLocally: "
-                                   << "created provided interface proxy instance: id = "
-                                   << interfaceProvidedInstanceID << std::endl;
-    }
-#endif
-
-    // If interfaceProvidedInstance is 0, it is assumed that this connection
-    // is established between two original interfaces.
-    if (!interfaceProvidedInstance) {
-        interfaceProvidedInstance = serverInterfaceProvided;
-    }
-#endif
-
-    mtsInterfaceProvidedOrOutput * interfaceProvidedOrOutputInstance = serverInterfaceProvidedOrOutput;
-
-    // Connect two interfaces. mtsInterfaceProvided::GetEndUserInterface() is
-    // internally called to create a new provided interface instance for the
-    // client component.  This solves thread-safety issues in data exchange
-    // across a network.
-    if (!interfacesSwapped) {
-        if (!clientComponent->ConnectInterfaceRequiredOrInput(clientInterfaceRequiredName, interfaceProvidedOrOutputInstance)) {
-            CMN_LOG_CLASS_INIT_ERROR << "ConnectLocally: failed to connect interfaces: "
-                                     << clientComponentName << ":" << clientInterfaceRequiredName << " - "
-                                     << serverComponentName << ":" << serverInterfaceProvidedName << std::endl;
-            return false;
-        } else {
-            CMN_LOG_CLASS_INIT_VERBOSE << "ConnectLocally: successfully connected: "
-                                       << clientComponentName << ":" << clientInterfaceRequiredName << " - "
-                                       << serverComponentName << ":" << serverInterfaceProvidedName << std::endl;
-        }
+    if (!clientComponent->ConnectInterfaceRequiredOrInput(clientInterfaceRequiredName, serverInterfaceProvidedOrOutput)) {
+        CMN_LOG_CLASS_INIT_ERROR << "ConnectLocally: failed to connect interfaces: "
+                                 << clientComponentName << ":" << clientInterfaceRequiredName << " - "
+                                 << serverComponentName << ":" << serverInterfaceProvidedName << std::endl;
+        return false;
     } else {
-        if (!serverComponent->ConnectInterfaceRequiredOrInput(serverInterfaceProvidedName, interfaceProvidedOrOutputInstance)) {
-            CMN_LOG_CLASS_INIT_ERROR << "ConnectLocally: failed to connect interfaces: "
-                                     << serverComponentName << ":" << serverInterfaceProvidedName << " - "
-                                     << clientComponentName << ":" << clientInterfaceRequiredName << std::endl;
-            return false;
-        } else {
-            CMN_LOG_CLASS_INIT_VERBOSE << "ConnectLocally: successfully connected: "
-                                       << serverComponentName << ":" << serverInterfaceProvidedName << " - "
-                                       << clientComponentName << ":" << clientInterfaceRequiredName << std::endl;
-        }
+        CMN_LOG_CLASS_INIT_VERBOSE << "ConnectLocally: successfully connected: "
+                                   << clientComponentName << ":" << clientInterfaceRequiredName << " - "
+                                   << serverComponentName << ":" << serverInterfaceProvidedName << std::endl;
     }
 
     // Post-connect processing to handle the special case 1:

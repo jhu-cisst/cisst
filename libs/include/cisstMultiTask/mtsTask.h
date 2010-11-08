@@ -103,6 +103,9 @@ protected:
     /*! The return value for RunInternal. */
     void * ReturnValue;
 
+    /*! Callable object used when queueing. */
+    mtsCallableVoidBase * InterfaceProvidedToManagerCallable;
+
     /********************* Methods that call user methods *****************/
 
     /*! The member function that is passed as 'start routine' argument for
@@ -252,6 +255,13 @@ public:
                                                 mtsInterfaceQueueingPolicy queueingPolicy = MTS_COMPONENT_POLICY);
 
 
+    /*! Call interfaceProvided->GetEndUserInterface(userName) from component's thread */
+    mtsInterfaceProvided *GetEndUserInterface(mtsInterfaceProvided *interfaceProvided, const std::string &userName);
+
+    /*! Add list of event handlers as observers in the specified provided interface.
+        For active tasks, this is queued and executed from the component's thread. */
+    void AddObserverList(const mtsEventHandlerList &argin, mtsEventHandlerList &argout);
+
     /********************* Methods for task synchronization ***************/
 
     /*! Wait for task to start.
@@ -276,6 +286,12 @@ public:
     inline virtual void Wakeup(void) {
         Thread.Wakeup();
     }
+
+    /*! Conditionally process internal mailbox */
+    void ProcessManagerCommandsIfNotActive();
+
+    /*! Returns true if currently executing in thread-space of component. */
+    bool CheckForOwnThread(void) const;
 
     /********************* Methods for task period and overrun ************/
 
