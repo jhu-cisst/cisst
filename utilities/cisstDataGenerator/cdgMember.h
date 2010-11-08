@@ -23,10 +23,10 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _cdgMember_h
 #define _cdgMember_h
 
-#include <cisstCommon/cmnGenericObject.h>
-#include <cisstCommon/cmnClassRegisterMacros.h>
+#include "cdgScope.h"
 
-class cdgMember: cmnGenericObject {
+class cdgMember: public cdgScope
+{
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
     friend class cdgFile;
@@ -39,10 +39,15 @@ class cdgMember: cmnGenericObject {
 
 public:
     cdgMember(void);
-    bool IsKeyword(const std::string & keyword) const;
+
+    cdgScope::Type GetScope(void) const;
+    bool HasKeyword(const std::string & keyword) const;
+    bool HasScope(const std::string & keyword,
+                  cdgScope::Stack & scopes);
     bool SetValue(const std::string & keyword, const std::string & value,
                   std::string & errorMessage);
     bool IsValid(std::string & errorMessage) const;
+
     void GenerateHeaderDeclaration(std::ostream & output) const;
     void GenerateHeaderAccessors(std::ostream & output) const;
     void GenerateCodeAccessors(std::ostream & output, const std::string & className) const;

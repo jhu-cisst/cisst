@@ -20,19 +20,34 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
-#ifndef _cdgTypedef_h
-#define _cdgTypedef_h
+#ifndef _cdgGlobal_h
+#define _cdgGlobal_h
 
-#include "cdgScope.h"
+#include <iostream>
+#include <vector>
 
-class cdgTypedef: public cdgScope {
+#include "cdgClass.h"
+
+/*
+
+ */
+
+class cdgGlobal: public cdgScope
+{
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
-    friend class cdgData;
-    friend class cdgFile;
-
-    std::string Type;
+    /*! Name used for include guards */
     std::string Name;
+
+    /*! List of header files to include.  Corresponds to keyword
+      "include" in cisst data description file. */
+    typedef std::vector<std::string> IncludesType;
+    IncludesType Includes;
+
+    /*! List of classes.  Corresponds to keyword "class" in
+      cisst data description file. */
+    typedef std::vector<cdgClass *> ClassesType;
+    ClassesType Classes;
 
 public:
     cdgScope::Type GetScope(void) const;
@@ -43,9 +58,11 @@ public:
                   std::string & errorMessage);
     bool IsValid(std::string & errorMessage) const;
 
-    void GenerateHeader(std::ostream & outputStream) const;
+    void GenerateHeader(std::ostream & output) const;
+    void GenerateCode(std::ostream & output,
+                      const std::string & header) const;
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(cdgTypedef);
+CMN_DECLARE_SERVICES_INSTANTIATION(cdgGlobal);
 
-#endif // _cdgTypedef_h
+#endif // _cdgGlobal_h

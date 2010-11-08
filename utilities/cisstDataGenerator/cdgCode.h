@@ -20,21 +20,26 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
-#ifndef _cdgTypedef_h
-#define _cdgTypedef_h
+#ifndef _cdgCode_h
+#define _cdgCode_h
+
+#include <iostream>
+#include <vector>
 
 #include "cdgScope.h"
 
-class cdgTypedef: public cdgScope {
+/*
+
+ */
+
+class cdgCode: public cdgScope
+{
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
-    friend class cdgData;
-    friend class cdgFile;
-
-    std::string Type;
-    std::string Name;
-
 public:
+    enum Type {CDG_HEADER, CDG_CODE};
+    cdgCode(const Type & type);
+
     cdgScope::Type GetScope(void) const;
     bool HasKeyword(const std::string & keyword) const;
     bool HasScope(const std::string & keyword,
@@ -43,9 +48,13 @@ public:
                   std::string & errorMessage);
     bool IsValid(std::string & errorMessage) const;
 
-    void GenerateHeader(std::ostream & outputStream) const;
+    void GenerateHeader(std::ostream & output) const;
+    void GenerateCode(std::ostream & output) const;
+
+protected:
+    Type TypeMember;
 };
 
-CMN_DECLARE_SERVICES_INSTANTIATION(cdgTypedef);
+CMN_DECLARE_SERVICES_INSTANTIATION(cdgCode);
 
-#endif // _cdgTypedef_h
+#endif // _cdgCode_h

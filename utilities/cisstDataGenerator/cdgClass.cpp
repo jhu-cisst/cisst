@@ -22,11 +22,47 @@
 
 #include "cdgClass.h"
 
+CMN_IMPLEMENT_SERVICES(cdgClass);
 
-bool cdgClass::IsKeyword(const std::string & keyword) const
+
+cdgScope::Type cdgClass::GetScope(void) const
+{
+    return cdgScope::CDG_CLASS;
+}
+
+
+bool cdgClass::HasKeyword(const std::string & keyword) const
 {
     if ((keyword == "name")
         || (keyword == "default-log-lod")) {
+        return true;
+    }
+    return false;
+}
+
+
+bool cdgClass::HasScope(const std::string & keyword,
+                        cdgScope::Stack & scopes)
+{
+    if (keyword == "typedef") {
+        cdgTypedef * newTypedef = new cdgTypedef;
+        scopes.push_back(newTypedef);
+        Typedefs.push_back(newTypedef);
+        return true;
+    } else if (keyword == "member") {
+        cdgMember * newMember = new cdgMember;
+        scopes.push_back(newMember);
+        Members.push_back(newMember);
+        return true;
+    } else if (keyword == "header-snippet") {
+        cdgCode * newCode = new cdgCode(cdgCode::CDG_HEADER);
+        scopes.push_back(newCode);
+        Codes.push_back(newCode);
+        return true;
+    } else if (keyword == "code-snippet") {
+        cdgCode * newCode = new cdgCode(cdgCode::CDG_CODE);
+        scopes.push_back(newCode);
+        Codes.push_back(newCode);
         return true;
     }
     return false;

@@ -22,17 +22,6 @@
 
 #include "cdgFile.h"
 
-enum cdgScopeType {CDG_GLOBAL,
-                   CDG_CLASS,
-                   CDG_TYPEDEF,
-                   CDG_MEMBER,
-                   CDG_CODE};
-
-const std::string cdgScopeNames[] = {"global",
-                                     "class",
-                                     "member",
-                                     "code"};
-
 bool cdgFile::ParseFile(std::ifstream & input, const std::string & filename)
 {
     bool errorFound = false; // any error found, stop parsing and return false
@@ -43,19 +32,15 @@ bool cdgFile::ParseFile(std::ifstream & input, const std::string & filename)
     std::string word, temp; // each word is created by concatenating characters
     bool wordFinished, lineFinished; // start real processing or upgrade line count
     bool semiColumn, curlyOpen, curlyClose; // special characters
-    std::list<cdgScopeType> scopes; // scope being parsed
     std::string keyword, value; // parses "keyword <value .....>;"
     bool curlyOpenExpected = false;
     size_t curlyCounter = 0; // for code snippets, need to balance {};
     // global initialization
-    scopes.push_back(CDG_GLOBAL);
+    cdgScope::Stack scopes; // scope being parsed
+    this->Global = new cdgGlobal;
+    scopes.push_back(this->Global);
     keyword.clear();
     value.clear();
-
-    // objects created
-    cdgClass * currentClass;
-    cdgTypedef * currentTypedef;
-    cdgMember * currentMember;
 
     // parsing character by character
     while (input.get(currentChar) && !errorFound) {
@@ -126,91 +111,49 @@ bool cdgFile::ParseFile(std::ifstream & input, const std::string & filename)
                     curlyOpenExpected = false;
                 }
             } else {
-                switch (scopes.back()) {
-                case CDG_GLOBAL:
+                switch (scopes.back()->GetScope()) {
+                case cdgScope::CDG_GLOBAL:
+                case cdgScope::CDG_CLASS:
+                case cdgScope::CDG_MEMBER:
+                case cdgScope::CDG_TYPEDEF:
                     // first define the current step, either find new keyword or new scope
                     if (keyword.empty()) {
                         value.clear();
-                        if (word == "include") {
-                            keyword = "include";
-                        } else if (word == "class") {
-                            keyword.clear();
-                            scopes.push_back(CDG_CLASS);
-                            currentClass = new cdgClass;
-                            Classes.push_back(currentClass);
-                            if (!curlyOpen) {
-                                curlyOpenExpected = true;
-                            }
-                        } else {
-                            std::cerr << filename << ":" << lineNumber << ": error: unexpected keyword \""
-                                      << word << "\" in scope \"" << cdgScopeNames[scopes.back()]
-                                      << "\"" << std::endl;
-                            errorFound = true;
-                        }
-                    } else {
-                        value += word + " ";
-                        if (semiColumn) {
-                            // we are done for this set keyword/value
-                            RemoveTrailingSpaces(value);
-                            this->Includes.push_back(value);
-                            keyword.clear();
-                        }
-                    }
-                    word.clear();
-                    break;
-
-
-                case CDG_CLASS:
-                    // first define the current step, either find new keyword or new scope
-                    if (keyword.empty()) {
-                        value.clear();
-                        if (currentClass->IsKeyword(word)) {
+                        if (scopes.back()->HasKeyword(word)) {
                             keyword = word;
-                        } else if (word == "typedef") {
+                        } else if (scopes.back()->HasScope(word, scopes)) {
                             keyword.clear();
-                            scopes.push_back(CDG_TYPEDEF);
-                            currentTypedef = new cdgTypedef;
-                            currentClass->Typedefs.push_back(currentTypedef);
-                            if (!curlyOpen) {
-                                curlyOpenExpected = true;
-                            }
-                        } else if (word == "member") {
-                            keyword.clear();
-                            scopes.push_back(CDG_MEMBER);
-                            currentMember = new cdgMember;
-                            currentClass->Members.push_back(currentMember);
-                            if (!curlyOpen) {
-                                curlyOpenExpected = true;
-                            }
-                        } else if ((word == "header-snippet")
-                                   || (word == "code-snippet")) {
-                            keyword = word;
-                            scopes.push_back(CDG_CODE);
                             if (!curlyOpen) {
                                 curlyOpenExpected = true;
                             }
                         } else if (!word.empty()) {
                             std::cerr << filename << ":" << lineNumber << ": error: unexpected keyword \""
-                                      << word << "\" in scope \"" << cdgScopeNames[scopes.back()]
+                                      << word << "\" in scope \"" << scopes.back()->GetScopeName()
                                       << "\"" << std::endl;
                             errorFound = true;
                         }
                         if (curlyClose) {
-                            if (!currentClass->IsValid(errorMessage)) {
+                            if (!scopes.back()->IsValid(errorMessage)) {
                                 std::cerr << filename << ":" << lineNumber << ": error: " << errorMessage
-                                          << " in scope \"" << cdgScopeNames[scopes.back()] << "\"" << std::endl;
+                                          << " in scope \"" << scopes.back()->GetScopeName() << "\"" << std::endl;
                                 errorFound = true;
                             }
                             scopes.pop_back();
+                            if (!scopes.back()) {
+                                std::cerr << filename << ":" << lineNumber << ": error: found one too many closing \"}\""
+                                          << std::endl;
+                                errorFound = true;
+                            }
                         }
                     } else {
                         value += word + " ";
                         if (semiColumn) {
                             // we are done for this set keyword/value
                             RemoveTrailingSpaces(value);
-                            if (!currentClass->SetValue(keyword, value, errorMessage)) {
+                            errorMessage.clear();
+                            if (!scopes.back()->SetValue(keyword, value, errorMessage)) {
                                 std::cerr << filename << ":" << lineNumber << ": error: " << errorMessage
-                                          << " in scope \"" << cdgScopeNames[scopes.back()] << "\"" << std::endl;
+                                          << " in scope \"" << scopes.back()->GetScopeName() << "\"" << std::endl;
                                 errorFound = true;
                             }
                             keyword.clear();
@@ -220,90 +163,16 @@ bool cdgFile::ParseFile(std::ifstream & input, const std::string & filename)
                     break;
 
 
-                case CDG_MEMBER:
-                    // first define the current step, either find new keyword or new scope
-                    if (keyword.empty()) {
-                        value.clear();
-                        if (currentMember->IsKeyword(word)) {
-                            keyword = word;
-                        } else if (!word.empty()) {
-                            std::cerr << filename << ":" << lineNumber << ": error: unexpected keyword \""
-                                      << word << "\" in scope \"" << cdgScopeNames[scopes.back()]
-                                      << "\"" << std::endl;
-                            errorFound = true;
-                        }
-                        if (curlyClose) {
-                            if (!currentMember->IsValid(errorMessage)) {
-                                std::cerr << filename << ":" << lineNumber << ": error: " << errorMessage
-                                          << " in scope \"" << cdgScopeNames[scopes.back()] << "\"" << std::endl;
-                                errorFound = true;
-                            }
-                            scopes.pop_back();
-                        }
-                    } else {
-                        value += word + " ";
-                        if (semiColumn) {
-                            // we are done for this set keyword/value
-                            RemoveTrailingSpaces(value);
-                            if (!currentMember->SetValue(keyword, value, errorMessage)) {
-                                std::cerr << filename << ":" << lineNumber << ": error: " << errorMessage
-                                          << " in scope \"" << cdgScopeNames[scopes.back()] << "\"" << std::endl;
-                                errorFound = true;
-                            }
-                            keyword.clear();
-                        }
-                    }
-                    word.clear();
-                    break;
-
-
-                case CDG_TYPEDEF:
-                    // first define the current step, either find new keyword or new scope
-                    if (keyword.empty()) {
-                        value.clear();
-                        if (currentTypedef->IsKeyword(word)) {
-                            keyword = word;
-                        } else if (!word.empty()) {
-                            std::cerr << filename << ":" << lineNumber << ": error: unexpected keyword \""
-                                      << word << "\" in scope \"" << cdgScopeNames[scopes.back()]
-                                      << "\"" << std::endl;
-                            errorFound = true;
-                        }
-                        if (curlyClose) {
-                            if (!currentTypedef->IsValid(errorMessage)) {
-                                std::cerr << filename << ":" << lineNumber << ": error: " << errorMessage
-                                          << " in scope \"" << cdgScopeNames[scopes.back()] << "\"" << std::endl;
-                                errorFound = true;
-                            }
-                            scopes.pop_back();
-                        }
-                    } else {
-                        value += word + " ";
-                        if (semiColumn) {
-                            // we are done for this set keyword/value
-                            RemoveTrailingSpaces(value);
-                            if (!currentTypedef->SetValue(keyword, value, errorMessage)) {
-                                std::cerr << filename << ":" << lineNumber << ": error: " << errorMessage
-                                          << " in scope \"" << cdgScopeNames[scopes.back()] << "\"" << std::endl;
-                                errorFound = true;
-                            }
-                            keyword.clear();
-                        }
-                    }
-                    word.clear();
-                    break;
-
-
-                case CDG_CODE:
+                case cdgScope::CDG_CODE:
                 default:
                     std::cerr << filename << ":" << lineNumber << ": error: invalid scope ("
-                              << cdgScopeNames[scopes.back()] << ")" << std::endl;
+                              << scopes.back()->GetScopeName() << ")" << std::endl;
                     errorFound = true;
                     break;
                 } // end of switch scope
 
                 // if we found some code to be parsed
-                if (scopes.back() == CDG_CODE) {
+                if (scopes.back()->GetScope() == cdgScope::CDG_CODE) {
                     if (curlyOpenExpected) {
                         curlyCounter = 0;
                     } else {
@@ -335,7 +204,7 @@ bool cdgFile::ParseFile(std::ifstream & input, const std::string & filename)
                     if (curlyOpenExpected) {
                         std::cerr << filename << ":" << lineNumber << ": error: missing opening \"}\""
                                   << " for \"" << keyword << "\" in scope \""
-                                  << cdgScopeNames[scopes.back()] << "\""  << std::endl;
+                                  << scopes.back()->GetScopeName() << "\""  << std::endl;
                         errorFound = true;
                     }
                 } // end of code snippet parsing
@@ -356,9 +225,9 @@ bool cdgFile::ParseFile(std::ifstream & input, const std::string & filename)
     } // while loop for character
 
     // some sanity checks
-    if (scopes.back() != CDG_GLOBAL) {
+    if (scopes.back()->GetScope() != cdgScope::CDG_GLOBAL) {
         std::cerr << filename << ":" << lineNumber << ": error: invalid scope ("
-                  << cdgScopeNames[scopes.back()] << ")" << std::endl;
+                  << scopes.back()->GetScope() << ")" << std::endl;
         errorFound = true;
     }
     if (curlyCounter != 0) {
@@ -375,39 +244,24 @@ bool cdgFile::ParseFile(std::ifstream & input, const std::string & filename)
 }
 
 
-void cdgFile::GenerateHeader(std::ostream & outputStream) const
-{
-    size_t index;
-    outputStream << "#ifndef _" << Name << "_h" << std::endl
-                 << "#define _" << Name << "_h" << std::endl
-                 << "#include <cisstMultiTask/mtsGenericObject.h>" << std::endl;
-
-    for (index = 0; index < Includes.size(); index++) {
-        outputStream << "#include " << Includes[index] << std::endl;
-    }
-    for (index = 0; index < Classes.size(); index++) {
-        Classes[index]->GenerateHeader(outputStream);
-    }
-    outputStream << "#endif // _" << Name << "_h" << std::endl;
-}
-
-
-void cdgFile::GenerateCode(std::ostream & outputStream, const std::string & header) const
-{
-    size_t index;
-    outputStream << "#include <" << header << ">" << std::endl
-                 << "#include <cisstCommon/cmnSerializer.h>" << std::endl
-                 << "#include <cisstCommon/cmnDeSerializer.h>" << std::endl;
-
-    for (index = 0; index < Classes.size(); index++) {
-        Classes[index]->GenerateCode(outputStream);
-    }
-}
-
 
 void cdgFile::RemoveTrailingSpaces(std::string & value)
 {
     while (value[(value.length() - 1)] == ' ') {
         value.resize(value.length() - 1);
     }
+}
+
+
+void cdgFile::GenerateHeader(std::ostream & outputStream) const
+{
+    this->Global->GenerateHeader(outputStream);
+}
+
+
+void cdgFile::GenerateCode(std::ostream & outputStream,
+                             const std::string & header) const
+{
+    this->Global->GenerateCode(outputStream,
+                               header);
 }

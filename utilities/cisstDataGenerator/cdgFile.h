@@ -26,9 +26,7 @@
 #include <iostream>
 #include <vector>
 
-#include "cdgClass.h"
-#include "cdgMember.h"
-#include "cdgTypedef.h"
+#include "cdgGlobal.h"
 
 /*
   \todo strip space at end of value
@@ -42,25 +40,16 @@
 
 class cdgFile {
 
-    /*! Name used for include guards */
-    std::string Name;
-
-    /*! List of header files to include.  Corresponds to keyword
-      "include" in cisst data description file. */
-    typedef std::vector<std::string> IncludesType;
-    IncludesType Includes;
-
-    /*! List of classes.  Corresponds to keyword "class" in
-      cisst data description file. */
-    typedef std::vector<cdgClass *> ClassesType;
-    ClassesType Classes;
+    cdgGlobal * Global;
 
 public:
-    bool ParseFile(std::ifstream & input, const std::string & filename);
+    bool ParseFile(std::ifstream & input,
+                   const std::string & filename);
 
     void GenerateHeader(std::ostream & outputStream) const;
 
-    void GenerateCode(std::ostream & outputStream, const std::string & header) const;
+    void GenerateCode(std::ostream & outputStream,
+                      const std::string & header) const;
 
 protected:
     static void RemoveTrailingSpaces(std::string & value);
