@@ -53,7 +53,7 @@ protected:
     double Contrast;
     double Gamma;
 
-    svlImageProcessing::Internals Exposure;
+    vctDynamicVector<svlImageProcessing::Internals> Exposure;
 
 protected:
     virtual void CreateInterfaces();
