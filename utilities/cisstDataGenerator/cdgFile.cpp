@@ -164,10 +164,8 @@ bool cdgFile::ParseFile(std::ifstream & input, const std::string & filename)
                     // first define the current step, either find new keyword or new scope
                     if (keyword.empty()) {
                         value.clear();
-                        if (word == "name") {
-                            keyword = "name";
-                        } else if (word == "default-log-lod") {
-                            keyword = "default-log-lod";
+                        if (currentClass->IsKeyword(word)) {
+                            keyword = word;
                         } else if (word == "typedef") {
                             keyword.clear();
                             scopes.push_back(CDG_TYPEDEF);
@@ -198,6 +196,11 @@ bool cdgFile::ParseFile(std::ifstream & input, const std::string & filename)
                             errorFound = true;
                         }
                         if (curlyClose) {
+                            if (!currentClass->IsValid(errorMessage)) {
+                                std::cerr << filename << ":" << lineNumber << ": error: " << errorMessage
+                                          << " in scope \"" << cdgScopeNames[scopes.back()] << "\"" << std::endl;
+                                errorFound = true;
+                            }
                             scopes.pop_back();
                         }
                     } else {
@@ -205,14 +208,9 @@ bool cdgFile::ParseFile(std::ifstream & input, const std::string & filename)
                         if (semiColumn) {
                             // we are done for this set keyword/value
                             RemoveTrailingSpaces(value);
-                            if (keyword == "name") {
-                                currentClass->Name = value;
-                            } else if (keyword == "default-log-lod") {
-                                currentClass->DefaultLogLoD = value;
-                            } else {
-                                std::cerr << filename << ":" << lineNumber << ": error: unhandled keyword \""
-                                          << word << "\" in scope \"" << cdgScopeNames[scopes.back()]
-                                          << "\"" << std::endl;
+                            if (!currentClass->SetValue(keyword, value, errorMessage)) {
+                                std::cerr << filename << ":" << lineNumber << ": error: " << errorMessage
+                                          << " in scope \"" << cdgScopeNames[scopes.back()] << "\"" << std::endl;
                                 errorFound = true;
                             }
                             keyword.clear();
@@ -361,6 +359,7 @@ bool cdgFile::ParseFile(std::ifstream & input, const std::string & filename)
     if (scopes.back() != CDG_GLOBAL) {
         std::cerr << filename << ":" << lineNumber << ": error: invalid scope ("
                   << cdgScopeNames[scopes.back()] << ")" << std::endl;
+        errorFound = true;
     }
     if (curlyCounter != 0) {
         std::cerr << filename << ":" << lineNumber << ": error: missing closing \"}\"" << std::endl;

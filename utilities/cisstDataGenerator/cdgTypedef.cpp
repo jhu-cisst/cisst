@@ -26,7 +26,7 @@ CMN_IMPLEMENT_SERVICES(cdgTypedef);
 
 
 
-bool cdgTypedef::IsKeyword(const std::string & keyword)
+bool cdgTypedef::IsKeyword(const std::string & keyword) const
 {
     if ((keyword == "name")
         || (keyword == "type")) {
@@ -62,7 +62,7 @@ bool cdgTypedef::SetValue(const std::string & keyword,
 }
 
 
-bool cdgTypedef::IsValid(std::string & errorMessage)
+bool cdgTypedef::IsValid(std::string & errorMessage) const
 {
     errorMessage.clear();
     bool isValid = true;

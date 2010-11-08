@@ -39,10 +39,10 @@ class cdgMember: cmnGenericObject {
 
 public:
     cdgMember(void);
-    static bool IsKeyword(const std::string & keyword);
+    bool IsKeyword(const std::string & keyword) const;
     bool SetValue(const std::string & keyword, const std::string & value,
                   std::string & errorMessage);
-    bool IsValid(std::string & errorMessage);
+    bool IsValid(std::string & errorMessage) const;
     void GenerateHeaderDeclaration(std::ostream & output) const;
     void GenerateHeaderAccessors(std::ostream & output) const;
     void GenerateCodeAccessors(std::ostream & output, const std::string & className) const;

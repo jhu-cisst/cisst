@@ -67,8 +67,12 @@ class cdgClass {
     MembersType Members;
 
 public:
-    void GenerateHeader(std::ostream & output) const;
+    bool IsKeyword(const std::string & keyword) const;
+    bool SetValue(const std::string & keyword, const std::string & value,
+                  std::string & errorMessage);
+    bool IsValid(std::string & errorMessage) const;
 
+    void GenerateHeader(std::ostream & output) const;
     void GenerateCode(std::ostream & output) const;
 
 protected:

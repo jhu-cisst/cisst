@@ -31,7 +31,7 @@ cdgMember::cdgMember():
 }
 
 
-bool cdgMember::IsKeyword(const std::string & keyword)
+bool cdgMember::IsKeyword(const std::string & keyword) const
 {
     if ((keyword == "name")
         || (keyword == "type")
@@ -91,7 +91,7 @@ bool cdgMember::SetValue(const std::string & keyword,
 }
 
 
-bool cdgMember::IsValid(std::string & errorMessage)
+bool cdgMember::IsValid(std::string & errorMessage) const
 {
     errorMessage.clear();
     bool isValid = true;

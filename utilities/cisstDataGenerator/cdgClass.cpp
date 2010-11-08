@@ -22,6 +22,55 @@
 
 #include "cdgClass.h"
 
+
+bool cdgClass::IsKeyword(const std::string & keyword) const
+{
+    if ((keyword == "name")
+        || (keyword == "default-log-lod")) {
+        return true;
+    }
+    return false;
+}
+
+
+bool cdgClass::SetValue(const std::string & keyword,
+                        const std::string & value,
+                        std::string & errorMessage)
+{
+    errorMessage.clear();
+    if (keyword == "name") {
+        if (!this->Name.empty()) {
+            errorMessage = "name already set";
+            return false;
+        }
+        this->Name = value;
+        return true;
+    }
+    if (keyword == "default-log-lod") {
+        if (!this->DefaultLogLoD.empty()) {
+            errorMessage = "default-log-lod already set";
+            return false;
+        }
+        this->DefaultLogLoD = value;
+        return true;
+    }
+    errorMessage = "unhandled keyword \"" + keyword + "\"";
+    return false;
+}
+
+
+bool cdgClass::IsValid(std::string & errorMessage) const
+{
+    errorMessage.clear();
+    bool isValid = true;
+    if (this->Name.empty()) {
+        isValid = false;
+        errorMessage += " [no name defined] ";
+    }
+    return isValid;
+}
+
+
 void cdgClass::GenerateHeader(std::ostream & output) const
 {
     size_t index;
