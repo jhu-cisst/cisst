@@ -304,9 +304,11 @@ int CX11WindowManager::DoModal(bool show, bool fullscreen)
 
     while (1) {
 #if (CISST_SVL_HAS_XV == ON)
+        osaSleep(0.001);
         if (!xvupdateimage) {
             while (XPending(xDisplay)) {
 #else // CISST_SVL_HAS_XV
+        osaSleep(0.001);
         if (XPending(xDisplay)) {
 #endif // CISST_SVL_HAS_XV
                 XNextEvent(xDisplay, &event);

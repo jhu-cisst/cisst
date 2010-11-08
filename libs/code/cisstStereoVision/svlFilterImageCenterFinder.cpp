@@ -131,14 +131,16 @@ int svlFilterImageCenterFinder::Process(svlProcInfo* procInfo, svlSample* syncIn
             a = *v / height; v ++; sum += a;
             x += a * i;
         }
-        x /= sum;
+        if (sum != 0) x /= sum;
+        else x = CenterX[vch];
 
         y = sum = 0;
         for (j = 0; j < height; j ++) {
             a = *h; h ++; sum += a;
             y += a * j;
         }
-        y /= sum;
+        if (sum != 0) y /= sum;
+        else y = CenterY[vch];
 
         if (FrameCounter > 0 && Smoothing > 0.0) {
             x = static_cast<int>((Smoothing * CenterX[vch] + x) / (1.0 + Smoothing));
