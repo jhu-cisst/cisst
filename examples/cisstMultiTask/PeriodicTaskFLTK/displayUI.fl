@@ -1,0 +1,42 @@
+# data file for the Fltk User Interface Designer (fluid)
+version 1.0109 
+header_name {.h} 
+code_name {.cxx}
+class displayUI {open
+} {
+  Function {displayUI()} {open
+  } {
+    Fl_Window DisplayWindow {
+      label DisplayWindow open
+      xywh {445 163 485 330} type Double visible
+    } {
+      Fl_Box Plot {
+        label {Graph Region}
+        xywh {10 10 385 310} box BORDER_BOX labelfont 1 labelsize 12
+        code0 {\#include <cisstVector/vctPlot2DOpenGLFLTK.h>}
+        class vctPlot2DOpenGLFLTK
+      }
+      Fl_Value_Output Data {
+        label {Data:} selected
+        xywh {400 25 75 25} box THIN_DOWN_BOX align 5
+      }
+      Fl_Return_Button Close {
+        label Close
+        callback {DisplayWindow->hide();}
+        xywh {400 295 75 25} box THIN_UP_BOX
+      }
+      Fl_Dial Amplitude {
+        label {Amplitude:}
+        callback {AmplitudeChanged = true;}
+        xywh {400 135 75 75} box OSHADOW_BOX color 1 align 1
+      }
+    }
+    code {AmplitudeChanged = false;} {}
+  }
+  Function {show(int argc, char**argv)} {open
+  } {
+    code {DisplayWindow->show();} {}
+  }
+  decl {bool AmplitudeChanged;} {public
+  }
+} 

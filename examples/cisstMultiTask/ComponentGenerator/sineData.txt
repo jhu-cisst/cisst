@@ -1,0 +1,62 @@
+// anything after header-include is used for #include in the generated header file.
+include <cisstVector/vctFixedSizeVectorTypes.h>;
+
+class {
+    name sineData; // required
+
+    default-log-lod CMN_LOG_LOD_RUN_ERROR;
+
+    // typedef uses the last token on the line as type name, anything in the middle defined the type
+    // the equivalent typedef will be defined in the class scope
+    typedef {
+        name VectorType;
+        type vctFixedSizeVector<double, 2>;
+    }
+
+    // member allows to define a data type
+    member {
+        name StartPoint;
+        // only required field, can use a previously defined typedef
+        type sineData::VectorType;
+        // optional but strongly recommended
+        description Segment start point;
+        // by default the data generator will provide accessors
+        accessors true;
+        // by default all members are protected, can also use `public` or `private`
+        scope public;
+    }
+
+    member {
+        name StopPoint;  
+        type sineData::VectorType;
+        description Segment stop point;
+        default VectorType(0, 0);
+    }
+
+    member {
+        name Length;
+        type double;
+	default 0;
+    }
+
+    member {
+        name Sine;
+        type double;
+	default 0;
+    }
+
+    header-snippet {
+        // ... put any code here, extra methods declaration for the header file ...
+        // this code will be placed in the class scope
+        void ExtraMethod(void) const;
+    }
+
+    code-snippet{
+        #include <cisstVector/vctRandom.h>
+
+        // put any code here for the code file
+        void myDataType::ExtraMethod(void) {
+            std::cout << "Hello" << std::endl;
+        }
+    }
+}

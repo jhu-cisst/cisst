@@ -1,0 +1,147 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
+/* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
+
+/*
+  $Id$
+
+  Author(s):  Ankur Kapoor, Peter Kazanzides
+  Created on: 2004-04-30
+
+  (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights
+  Reserved.
+
+--- begin cisst license - do not edit ---
+
+This software is provided "as is" under an open source license, with
+no warranty.  The complete license can be found in license.txt and
+http://www.cisst.org/cisst/license.txt.
+
+--- end cisst license ---
+*/
+
+#include <cisstMultiTask/mtsTaskPeriodic.h>
+#include <cisstCommon/cmnUnits.h>
+#include <cisstOSAbstraction/osaThreadBuddy.h>
+#include <cisstOSAbstraction/osaSleep.h>
+
+
+/********************* Methods that call user methods *****************/
+
+void * mtsTaskPeriodic::RunInternal(void *data)
+{
+    if (this->State == mtsComponentState::INITIALIZING) {
+        SaveThreadStartData(data);
+        this->StartupInternal();
+        if (CaptureThread) {
+            return 0;
+        }
+    }
+
+    while ((this->State == mtsComponentState::ACTIVE) || (this->State == mtsComponentState::READY)) {
+        if (this->State == mtsComponentState::ACTIVE) {
+            DoRunInternal();
+            if (StateTable.GetToc() - StateTable.GetTic() > Period) OverranPeriod = true;
+        }
+        // Wait for remaining period also handles thread suspension
+        ThreadBuddy.WaitForRemainingPeriod();
+    }
+
+    CMN_LOG_CLASS_RUN_WARNING << "End of task " << Name << std::endl;
+    CleanupInternal();
+    return this->ReturnValue;
+}
+
+void mtsTaskPeriodic::StartupInternal(void) {
+    CMN_LOG_CLASS_INIT_VERBOSE << "Starting StartupInternal (periodic) for " << Name << std::endl;
+    // user defined initialization, find commands from associated resource interfaces
+    ThreadBuddy.Create(GetName().c_str(), atPeriod); // convert to nano seconds
+
+    // Call base class StartupInternal, which also calls user-supplied Startup.
+    BaseType::StartupInternal();
+
+    // allow no more stack allocation. allowing this will
+    // break realtime performance.
+    // lock all pages too
+    //ThreadBuddy.LockStack();
+    if (IsHardRealTime) {
+        // Might as well wait for loop to start before going hard-real-time
+        while ((this->State == mtsComponentState::READY) && !CaptureThread) {
+            ThreadBuddy.WaitForRemainingPeriod();
+        }
+        ThreadBuddy.MakeHardRealTime();
+    }
+}
+
+
+void mtsTaskPeriodic::CleanupInternal() {
+
+    if (IsHardRealTime) {
+        ThreadBuddy.MakeSoftRealTime();
+    }
+    ThreadBuddy.UnlockStack();
+
+    //If the task was waiting on a queue, i.e. semaphore, mailbox,
+    //etc, it is removed from such a queue and messaging tasks
+    //pending on its message queue are unblocked with an error return.
+    ThreadBuddy.Delete();
+
+    BaseType::CleanupInternal();
+}
+
+void mtsTaskPeriodic::StartInternal(void)
+{
+    ThreadBuddy.Resume();
+}
+
+/********************* Task constructor and destructor *****************/
+
+mtsTaskPeriodic::mtsTaskPeriodic(const std::string & name, double periodicityInSeconds,
+ 				 bool isHardRealTime, unsigned int sizeStateTable,
+				 bool newThread):
+    mtsTaskContinuous(name, sizeStateTable, newThread),
+    ThreadBuddy(),
+    Period(periodicityInSeconds),
+    IsHardRealTime(isHardRealTime)
+{
+   atPeriod.sec = (long)floor( periodicityInSeconds );
+   atPeriod.nsec = (long)(( periodicityInSeconds - atPeriod.sec )*1000000000 );
+   CMN_ASSERT(Period > 0);
+}
+
+mtsTaskPeriodic::mtsTaskPeriodic( const std::string & name, 
+				  const osaAbsoluteTime& period,
+				  bool isHardRealTime, 
+				  unsigned int sizeStateTable,
+				  bool newThread ):
+    mtsTaskContinuous(name, sizeStateTable, newThread),
+    ThreadBuddy(),
+    Period( period.sec + period.nsec * cmn_ns ),
+    atPeriod( period ),
+    IsHardRealTime(isHardRealTime)
+{
+   CMN_ASSERT( GetPeriodicity() > 0 );
+}
+
+mtsTaskPeriodic::~mtsTaskPeriodic() {
+    CMN_LOG_CLASS_RUN_DEBUG << "mtsTaskPeriodic destructor: deleting task " << Name << std::endl;
+    //If the task was waiting on a queue, i.e. semaphore, mailbox,
+    //etc, it is removed from such a queue and messaging tasks
+    //pending on its message queue are unblocked with an error return.
+
+    Kill();
+    // Now, wait for 2 periods to see if it was killed
+    osaSleep(2.0 * this->Period); // all expressed in seconds
+}
+
+
+/********************* Methods to change task state ******************/
+
+void mtsTaskPeriodic::Suspend(void)
+{
+    if (this->State == mtsComponentState::ACTIVE) {
+        BaseType::Suspend();
+        ThreadBuddy.Suspend();
+        CMN_LOG_CLASS_RUN_DEBUG << "Suspended task " << Name << std::endl;
+    }
+}
+

@@ -1,0 +1,52 @@
+# data file for the Fltk User Interface Designer (fluid)
+version 1.0109 
+header_name {.h} 
+code_name {.cxx}
+class serverUI {open
+} {
+  Function {serverUI()} {open
+  } {
+    Fl_Window ServerWindow {
+      label Server open
+      xywh {785 393 356 258} type Double visible
+    } {
+      Fl_Return_Button Close {
+        label Close
+        callback {ServerWindow->hide();  Opened = false;}
+        xywh {230 215 105 30} box THIN_UP_BOX
+      }
+      Fl_Check_Button VoidValue {
+        label Void
+        xywh {130 9 35 26} down_box THIN_DOWN_BOX align 4
+      }
+      Fl_Value_Output WriteValue {
+        label Write
+        xywh {130 47 195 27}
+      }
+      Fl_Button VoidEventButton {
+        label {Void Event}
+        callback {this->VoidEventRequested = true;}
+        xywh {15 125 115 30}
+      }
+      Fl_Button WriteEventButton {
+        label {Write Event}
+        callback {this->WriteEventRequested = true;}
+        xywh {15 165 115 30}
+      }
+      Fl_Value_Slider ReadValue {
+        label Read
+        xywh {130 85 195 25} type {Horz Knob} align 4 maximum 100 step 1 value 50 textsize 14
+      }
+    }
+  }
+  Function {show(int argc, char**argv)} {open
+  } {
+    code {ServerWindow->show();} {}
+  }
+  decl {bool VoidEventRequested;} {public
+  }
+  decl {bool WriteEventRequested;} {public
+  }
+  decl {bool Opened;} {public
+  }
+} 
