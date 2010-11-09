@@ -79,7 +79,7 @@ http://www.cisst.org/cisst/license.txt.
 #define CMN_LOG_CLASS_INSTANCE(objectPointer, lod) \
     ((cmnLogger::GetLoD() & lod) || (objectPointer->Services()->GetLoD() & lod))? \
     (void*)0:\
-    ((cmnLODOutputMultiplexer(objectPointer->GetLogMultiplexer(), lod).Ref()) << cmnLogLoDString[lod] << " - Class " << objectPointer->Services()->GetName() << ": ")
+    ((cmnLODOutputMultiplexer(objectPointer->GetLogMultiplexer(), lod).Ref()) << cmnLogBitsetToString(lod) << " - Class " << objectPointer->Services()->GetName() << ": ")
 
 
 #define CMN_LOG_CLASS(lod) CMN_LOG_CLASS_INSTANCE(this, lod)
@@ -136,7 +136,7 @@ http://www.cisst.org/cisst/license.txt.
 #define CMN_LOG(lod) \
     (cmnLogger::GetLoD() & lod)?              \
     (void*)0: \
-    ((cmnLODOutputMultiplexer(cmnLogger::GetMultiplexer(), lod).Ref()) << cmnLogLoDString[lod] << " - ")
+    ((cmnLODOutputMultiplexer(cmnLogger::GetMultiplexer(), lod).Ref()) << cmnLogBitsetToString(lod) << " - ")
 
 
 /*! Macros defined to use #CMN_LOG for a given level of detail. */

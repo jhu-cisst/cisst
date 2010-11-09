@@ -42,9 +42,9 @@ http://www.cisst.org/cisst/license.txt.
 
 class myGenericObject: public cmnGenericObject {
  public:
-    inline void Message(cmnLogLoD lod) {
-        CMN_LOG(lod) << "Function " << Services()->GetName() << ": " << lod << std::endl;
-        CMN_LOG_CLASS(lod) << lod << std::endl;
+    inline void Message(cmnLogBitset lod) {
+        CMN_LOG(lod) << "Function " << Services()->GetName() << ": " << cmnLogBitsetToIndex(lod) << std::endl;
+        CMN_LOG_CLASS(lod) << cmnLogBitsetToIndex(lod) << std::endl;
     }
 };
 

@@ -17,6 +17,7 @@
 # all source files
 set (SOURCE_FILES
      cmnClassRegisterTest.cpp
+     cmnLogLoDTest.cpp
      cmnObjectRegisterTest.cpp
      cmnPathTest.cpp
      cmnPortabilityTest.cpp
@@ -27,6 +28,7 @@ set (SOURCE_FILES
 # all header files
 set (HEADER_FILES
      cmnClassRegisterTest.h
+     cmnLogLoDTest.h
      cmnObjectRegisterTest.h
      cmnPathTest.h
      cmnPortabilityTest.h

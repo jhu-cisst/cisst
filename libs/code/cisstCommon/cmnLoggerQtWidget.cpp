@@ -105,7 +105,7 @@ QVariant cmnLoggerQtWidgetClassServicesModel::data(const QModelIndex & index, in
         } else {
             // get the string associated to the level of detail for display
             if (role == Qt::DisplayRole) {
-                return QString(cmnLogLoDString[iterator->second->GetLoD()]);
+                return QString(cmnLogBitsetToString(iterator->second->GetLoD()).c_str());
             } else {
                 // for edit, return the LoD itself
                 return QVariant(iterator->second->GetLoD());
@@ -172,13 +172,11 @@ QWidget * cmnLoggerQtWidgetLoDDelegate::createEditor(QWidget * parent,
 {
     QComboBox * comboBox = new QComboBox(parent);
     unsigned int lod;
-#if 0
-    for (lod = CMN_LOG_LOD_NONE;
-         lod < CMN_LOG_LOD_NOT_USED;
+    for (lod = 0;
+         lod <= 8;
          lod++) {
-        comboBox->insertItem(lod, QString(cmnLogLoDString[lod]), QVariant(lod));
+        comboBox->insertItem(lod, QString(cmnLogBitsetToString(cmnIndexToLogBitset(lod)).c_str()), QVariant(lod));
     }
-#endif
     return comboBox;
 }
 
@@ -223,7 +221,7 @@ cmnLoggerQtWidget::cmnLoggerQtWidget(QWidget * parent)
     this->MainFilterLayout->setContentsMargins(0, 0, 0, 0);
     this->MainFilterLabel = new QLabel("Overall filter", this->MainFilterWidget);
     this->MainFilterLayout->addWidget(this->MainFilterLabel);
-    this->MainFilterData = new QLabel(cmnLogLoDString[cmnLogger::GetLoD()], this->MainFilterWidget);
+    this->MainFilterData = new QLabel(cmnLogMaskToString(cmnLogger::GetLoD()).c_str(), this->MainFilterWidget);
     this->MainFilterLayout->addWidget(this->MainFilterData);
     this->MainFilterLabel->setAlignment(Qt::AlignVCenter | Qt::AlignRight);
     this->MainFilterData->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);

@@ -55,6 +55,6 @@ void cmnLogger::SetLoDInstance(LogLoDType lod) {
         lod = CMN_LOG_LOD_VERY_VERBOSE;
     }
 #endif
-    CMN_LOG(CMN_LOG_BIT_INIT_WARNING) << "Class cmnLogger: level of Detail set to \"" << cmnLogLoDString[lod] << "\"" << std::endl;
+    CMN_LOG(CMN_LOG_BIT_INIT_WARNING) << "Class cmnLogger: level of Detail set to \"" << lod << "\"" << std::endl;
     LoD = lod;
 }

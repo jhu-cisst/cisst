@@ -471,8 +471,8 @@ int osaSerialPort::Write(const char * data, int nBytes)
     }
 
     int numBytes = write(this->FileDescriptor, data, nBytes);
-    CMN_LOG_CLASS_VERY_VERBOSE << "Wrote " << data << std::endl
-                               << "(" << nBytes << " bytes) on port " << this->PortName << std::endl;
+    CMN_LOG_CLASS_RUN_DEBUG << "Wrote " << data << std::endl
+                            << "(" << nBytes << " bytes) on port " << this->PortName << std::endl;
     return numBytes;
 }
 #endif
@@ -532,8 +532,8 @@ int osaSerialPort::Write(const unsigned char * data, int nBytes)
     }
 
     int numBytes = write(FileDescriptor, data, nBytes);
-    CMN_LOG_CLASS_VERY_VERBOSE << "Wrote " << data << std::endl
-                               << "(" << nBytes << " bytes) on port " << PortName << std::endl;
+    CMN_LOG_CLASS_RUN_DEBUG << "Wrote " << data << std::endl
+                            << "(" << nBytes << " bytes) on port " << PortName << std::endl;
     return numBytes;
 }
 #endif
@@ -613,6 +613,7 @@ int osaSerialPort::Read(char * data, int nBytes)
 
     int numBytes = read(FileDescriptor, data, nBytes); // get chars if there
 
+#if 0
     // this is only to log a message of level 8
     const cmnLogLoD lod = CMN_LOG_LOD_VERY_VERBOSE;
     if (numBytes > 0) {
@@ -628,6 +629,7 @@ int osaSerialPort::Read(char * data, int nBytes)
     } else {
         CMN_LOG_CLASS(lod) << "Nothing to read" << std::endl;
     }
+#endif
     return numBytes;
 }
 #endif
@@ -702,7 +704,7 @@ int osaSerialPort::Read(unsigned char * data, int nBytes)
     }
 
     int numBytes = read(FileDescriptor, data, nBytes); // get chars if there
-
+#if 0
     // this is only to log a message of level 8
     const cmnLogLoD lod = CMN_LOG_LOD_VERY_VERBOSE;
     char* message;
@@ -716,6 +718,7 @@ int osaSerialPort::Read(unsigned char * data, int nBytes)
     } else {
         CMN_LOG_CLASS(lod) << "Nothing to read" << std::endl;
     }
+    #endif
     return numBytes;
 }
 #endif

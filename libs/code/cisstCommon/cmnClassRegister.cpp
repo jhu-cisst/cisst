@@ -49,7 +49,7 @@ const std::string * cmnClassRegister::RegisterInstance(cmnClassServicesBase* cla
         insertionResult = ServicesContainer.insert(newEntry);
         if (insertionResult.second) {
             CMN_LOG_INIT_VERBOSE << "Class cmnClassRegister: Register: class \"" << className
-                                 << "\" has been registered with Log LoD \"" << classServicesPointer->GetLoD() << "\"" << std::endl;
+                                 << "\" has been registered with Log LoD \"" << cmnLogMaskToString(classServicesPointer->GetLoD()) << "\"" << std::endl;
             return &((*insertionResult.first).first);
         } else {
             CMN_LOG_INIT_ERROR << "Class cmnClassRegister: Register: class \"" << className
