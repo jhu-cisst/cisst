@@ -1497,7 +1497,7 @@ bool mtsManagerGlobal::StartServer()
     ProxyServer = new mtsManagerProxyServer("ManagerServerAdapter", mtsManagerProxyServer::GetManagerCommunicatorID());
 
     // Run proxy server
-    if (!ProxyServer->Start(this)) {
+    if (!ProxyServer->StartProxy(this)) {
         CMN_LOG_CLASS_RUN_ERROR << "StartServer: Proxy failed to start: " << GetName() << std::endl;
         return false;
     }
@@ -1525,7 +1525,7 @@ bool mtsManagerGlobal::StopServer()
     LocalManagerConnected = 0;
 
     // Stop proxy server
-    ProxyServer->Stop();
+    ProxyServer->StopProxy();
     ProxyServer->GetLogger()->trace("mtsManagerGlobal", "Global component manager stopped.");
 
     delete ProxyServer;

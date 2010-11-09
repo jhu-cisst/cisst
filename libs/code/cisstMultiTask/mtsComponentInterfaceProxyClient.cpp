@@ -33,20 +33,21 @@ unsigned int mtsComponentInterfaceProxyClient::InstanceCounter = 0;
 mtsComponentInterfaceProxyClient::mtsComponentInterfaceProxyClient(
     const std::string & serverEndpointInfo, const unsigned int connectionID)
     : BaseClientType("config.client", serverEndpointInfo),
-      ConnectionID(connectionID)
+      ConnectionID(connectionID),
+      ComponentInterfaceServerProxy(0)
 {
     ProxyName = "ComponentInterfaceProxyServer";
 }
 
 mtsComponentInterfaceProxyClient::~mtsComponentInterfaceProxyClient()
 {
-    Stop();
+    StopProxy();
 }
 
 //-----------------------------------------------------------------------------
 //  Proxy Start-up
 //-----------------------------------------------------------------------------
-bool mtsComponentInterfaceProxyClient::Start(mtsComponentProxy * proxyOwner)
+bool mtsComponentInterfaceProxyClient::StartProxy(mtsComponentProxy * proxyOwner)
 {
     // Initialize Ice object.
     IceInitialize();
@@ -58,19 +59,19 @@ bool mtsComponentInterfaceProxyClient::Start(mtsComponentProxy * proxyOwner)
 
     // Client configuration for bidirectional communication
     Ice::ObjectAdapterPtr adapter = IceCommunicator->createObjectAdapter("");
-    Ice::Identity ident;
-    ident.name = GetGUID();
-    ident.category = "";
+    Ice::Identity id;
+    id.name = GetIceGUID();
+    id.category = "";
 
     mtsComponentInterfaceProxy::ComponentInterfaceClientPtr client =
         new ComponentInterfaceClientI(IceCommunicator, IceLogger, ComponentInterfaceServerProxy, this);
-    adapter->add(client, ident);
+    adapter->add(client, id);
     adapter->activate();
     ComponentInterfaceServerProxy->ice_getConnection()->setAdapter(adapter);
 
     // Set an implicit context (per proxy context)
     IceCommunicator->getImplicitContext()->put(
-        mtsComponentInterfaceProxyServer::GetConnectionIDKey(), IceCommunicator->identityToString(ident));
+        mtsComponentInterfaceProxyServer::GetConnectionIDKey(), IceCommunicator->identityToString(id));
 
     // Set proxy owner and name of this proxy object
     std::string thisProcessName = "On";
@@ -80,7 +81,7 @@ bool mtsComponentInterfaceProxyClient::Start(mtsComponentProxy * proxyOwner)
     SetProxyOwner(proxyOwner, thisProcessName);
 
     // Connect to server proxy by adding this ICE proxy client to server
-    if (!ComponentInterfaceServerProxy->AddClient(GetProxyName(), (::Ice::Int) ConnectionID, ident)) {
+    if (!ComponentInterfaceServerProxy->AddClient(GetProxyName(), (::Ice::Int) ConnectionID, id)) {
         LogError(mtsComponentInterfaceProxyClient, "AddClient() failed: duplicate proxy name or identity");
         return false;
     }
@@ -89,10 +90,9 @@ bool mtsComponentInterfaceProxyClient::Start(mtsComponentProxy * proxyOwner)
     ThreadArgumentsInfo.Proxy = this;
     ThreadArgumentsInfo.Runner = mtsComponentInterfaceProxyClient::Runner;
 
-    // Set a short name of this thread as CIPC which means "Component Interface
-    // Proxy Client." Such a condensed naming rule is required because a total
-    // number of characters in a thread name is sometimes limited to a small
-    // number (e.g. LINUX RTAI).
+    // Set a short name of this thread as "CIPC" (Component Interface Proxy 
+    // Client) to meet the requirement that some of operating system have -- 
+    // only a few characters can be used as a thread name (e.g. Linux RTAI)
     std::stringstream ss;
     ss << "CIPC" << mtsComponentInterfaceProxyClient::InstanceCounter++;
     std::string threadName = ss.str();
@@ -104,11 +104,28 @@ bool mtsComponentInterfaceProxyClient::Start(mtsComponentProxy * proxyOwner)
     return true;
 }
 
-void mtsComponentInterfaceProxyClient::StartClient()
+void mtsComponentInterfaceProxyClient::CreateProxy(void) 
 {
-    Sender->Start();
+    ComponentInterfaceServerProxy = mtsComponentInterfaceProxy::ComponentInterfaceServerPrx::checkedCast(ProxyObject);
+    if (!ComponentInterfaceServerProxy) {
+        throw "mtsComponentInterfaceProxyClient: CreateProxy() failed - invalid proxy";
+    }
 
-    // This is a blocking call that should be run in a different thread.
+    Server = new ComponentInterfaceClientI(IceCommunicator, IceLogger, ComponentInterfaceServerProxy, this);
+}
+
+void mtsComponentInterfaceProxyClient::RemoveProxy(void)
+{
+    Server->Stop();
+
+    ComponentInterfaceServerProxy = 0;
+}
+
+void mtsComponentInterfaceProxyClient::StartClient(void)
+{
+    Server->Start();
+
+    // This is a blocking call that should run in a different thread.
     IceCommunicator->waitForShutdown();
 }
 
@@ -117,22 +134,18 @@ void mtsComponentInterfaceProxyClient::Runner(ThreadArguments<mtsComponentProxy>
     mtsComponentInterfaceProxyClient * ProxyClient =
         dynamic_cast<mtsComponentInterfaceProxyClient*>(arguments->Proxy);
     if (!ProxyClient) {
-        CMN_LOG_RUN_ERROR << "mtsComponentInterfaceProxyClient: failed to create a proxy client." << std::endl;
+        CMN_LOG_RUN_ERROR << "mtsComponentInterfaceProxyClient: failed to get proxy client." << std::endl;
         return;
     }
 
     ProxyClient->GetLogger()->trace("mtsComponentInterfaceProxyClient", "proxy client starts");
 
     try {
-        ProxyClient->SetAsActiveProxy();
+        ProxyClient->ChangeProxyState(PROXY_STATE_ACTIVE);
         ProxyClient->StartClient();
     } catch (const Ice::Exception& e) {
         std::string error("mtsComponentInterfaceProxyClient: ");
         error += e.what();
-        ProxyClient->GetLogger()->error(error);
-    } catch (const char * msg) {
-        std::string error("mtsComponentInterfaceProxyClient: ");
-        error += msg;
         ProxyClient->GetLogger()->error(error);
     } catch (...) {
         std::string error("mtsComponentInterfaceProxyClient: exception at mtsComponentInterfaceProxyClient::Runner()");
@@ -141,31 +154,36 @@ void mtsComponentInterfaceProxyClient::Runner(ThreadArguments<mtsComponentProxy>
 
     ProxyClient->GetLogger()->trace("mtsComponentInterfaceProxyClient", "Proxy client terminates");
 
-    ProxyClient->Stop();
+    ProxyClient->StopProxy();
 }
 
-void mtsComponentInterfaceProxyClient::Stop()
+void mtsComponentInterfaceProxyClient::StopProxy()
 {
     if (!IsActiveProxy()) return;
-
-    LogPrint(mtsComponentInterfaceProxyClient, "ComponentInterfaceProxy client stops.");
 
     // Let a server disconnect this client safely.
     //ManagerServerProxy->Shutdown();
     //ComponentInterfaceServerProxy->ice_getConnection()->close(false); // close gracefully
 
     try {
-        BaseClientType::Stop();
+        BaseClientType::StopProxy();
     } catch (const Ice::Exception& e) {
         std::string error("mtsComponentInterfaceProxyClient: ");
         error += e.what();
         LogError(mtsManagerProxyClient, error);
     }
+
+    IceGUID = "";
+
+    LogPrint(mtsManagerProxyClient, "Stopped component interface proxy client");
 }
 
 bool mtsComponentInterfaceProxyClient::OnServerDisconnect()
 {
-    Stop();
+    CMN_LOG_CLASS_RUN_ERROR << "Component interface proxy \"" << ProxyName << "\" detected SERVER(INTERFACE) DISCONNECTION "
+                            << "(" << EndpointInfo << ")" << std::endl;
+
+    StopProxy();
 
     return true;
 }
@@ -213,10 +231,8 @@ void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandVoid(const CommandID
     }
 
     // Execute the command
-    //(*functionVoid)();
     if (blocking == MTS_BLOCKING) {
         (*functionVoid).ExecuteBlocking();
-        std::cout << "################## BLOCKING VOID ##################" << std::endl;
     } else {
         (*functionVoid)();
     }
@@ -239,10 +255,8 @@ void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandWriteSerialized(cons
     }
 
     // Execute the command
-    //(*functionWriteProxy)(*argument);
     if (blocking == MTS_BLOCKING) {
         (*functionWriteProxy).ExecuteBlocking(*argument);
-        std::cout << "################## BLOCKING WRITE ##################" << std::endl;
     } else {
         (*functionWriteProxy)(*argument);
     }
@@ -445,27 +459,26 @@ void mtsComponentInterfaceProxyClient::ComponentInterfaceClientI::Run()
         ComponentInterfaceProxyClient->SendTestMessageFromClientToServer(ss.str());
     }
 #else
-    while (this->IsActiveProxy())
-    {
+    while (this->IsActiveProxy()) {
         osaSleep(mtsProxyConfig::RefreshPeriodForInterfaces);
-
         try {
             Server->Refresh();
         } catch (const ::Ice::Exception & ex) {
-            LogPrint(mtsComponentInterfaceProxyClient, "Refresh failed: " << Server->ice_toString() << "\n" << ex);
+            LogPrint(mtsComponentInterfaceProxyClient, "Refresh to Component Interface Server failed (" 
+                << Server->ice_toString() << ")" << std::endl << ex);
             if (ComponentInterfaceProxyClient) {
                 ComponentInterfaceProxyClient->OnServerDisconnect();
             }
         }
     }
 #endif
+    
+    LogPrint(mtsManagerProxyClient, "mtsComponentInterfaceProxyClient::ComponentInterfaceClientI - terminated");
 }
 
 void mtsComponentInterfaceProxyClient::ComponentInterfaceClientI::Stop()
 {
     if (!IsActiveProxy()) return;
-
-    LogPrint(ComponentInterfaceClientI, "Stop and destroy callback sender");
 
     ComponentInterfaceProxyClient = NULL;
 
@@ -479,6 +492,8 @@ void mtsComponentInterfaceProxyClient::ComponentInterfaceClientI::Stop()
         SenderThreadPtr = 0;
     }
     callbackSenderThread->getThreadControl().join();
+
+    LogPrint(ComponentInterfaceClientI, "Stopped and destroyed server communication callback thread");
 }
 
 //-----------------------------------------------------------------------------

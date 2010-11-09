@@ -35,7 +35,7 @@ mtsManagerProxyServer::mtsManagerProxyServer(const std::string & adapterName, co
 
 mtsManagerProxyServer::~mtsManagerProxyServer()
 {
-    Stop();
+    StopProxy();
 }
 
 std::string mtsManagerProxyServer::GetConfigFullName(const std::string &propertyFileName)
@@ -70,12 +70,12 @@ int mtsManagerProxyServer::GetGCMConnectTimeout()
 //-----------------------------------------------------------------------------
 //  Proxy Start-up
 //-----------------------------------------------------------------------------
-bool mtsManagerProxyServer::Start(mtsManagerGlobal * proxyOwner)
+bool mtsManagerProxyServer::StartProxy(mtsManagerGlobal * proxyOwner)
 {
     // Initialize Ice object.
     IceInitialize();
 
-    if (!InitSuccessFlag) {
+    if (!this->InitSuccessFlag) {
         LogError(mtsManagerProxyServer, "ICE proxy Initialization failed");
         return false;
     }
@@ -101,7 +101,7 @@ bool mtsManagerProxyServer::Start(mtsManagerGlobal * proxyOwner)
     ss << "MPS" << mtsManagerProxyServer::InstanceCounter++;
     std::string threadName = ss.str();
 
-    // Create worker thread. Note that it is created but is not yet running.
+    // Create worker thread. It is created here but does not get started here.
     WorkerThread.Create<ProxyWorker<mtsManagerGlobal>, ThreadArguments<mtsManagerGlobal>*>(
         &ProxyWorkerInfo, &ProxyWorker<mtsManagerGlobal>::Run, &ThreadArgumentsInfo, threadName.c_str());
 
@@ -112,7 +112,7 @@ void mtsManagerProxyServer::StartServer()
 {
     Sender->Start();
 
-    // This is a blocking call that should be run in a different thread.
+    // This is a blocking call that should run in a different thread.
     IceCommunicator->waitForShutdown();
 }
 
@@ -128,7 +128,7 @@ void mtsManagerProxyServer::Runner(ThreadArguments<mtsManagerGlobal> * arguments
     ProxyServer->GetLogger()->trace("mtsManagerProxyServer", "Proxy server starts.....");
 
     try {
-        ProxyServer->SetAsActiveProxy();
+        ProxyServer->ChangeProxyState(PROXY_STATE_ACTIVE);
         ProxyServer->StartServer();
     } catch (const Ice::Exception& e) {
         std::string error("mtsManagerProxyServer: ");
@@ -145,15 +145,15 @@ void mtsManagerProxyServer::Runner(ThreadArguments<mtsManagerGlobal> * arguments
 
     ProxyServer->GetLogger()->trace("mtsManagerProxyServer", "Proxy server terminates.....");
 
-    ProxyServer->Stop();
+    ProxyServer->StopProxy();
 }
 
-void mtsManagerProxyServer::Stop()
+void mtsManagerProxyServer::StopProxy()
 {
     LogPrint(mtsManagerProxyServer, "ManagerProxy server stops.");
 
     try {
-        BaseServerType::Stop();
+        BaseServerType::StopProxy();
         Sender->Stop();
     } catch (const Ice::Exception& e) {
         std::string error("mtsManagerProxyServer: ");

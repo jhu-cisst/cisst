@@ -113,7 +113,7 @@ mtsManagerLocal::mtsManagerLocal(const std::string & globalComponentManagerIP,
     Initialize();
 
     // Create network proxies
-    if (!CreateProxy()) {
+    if (!ConnectToGlobalComponentManager()) {
         cmnThrow(std::runtime_error("Failed to initialize global component manager proxy"));
     }
 
@@ -127,9 +127,9 @@ mtsManagerLocal::mtsManagerLocal(const std::string & globalComponentManagerIP,
     Configuration = LCM_CONFIG_NETWORKED;
 }
 
-bool mtsManagerLocal::CreateProxy(void)
+bool mtsManagerLocal::ConnectToGlobalComponentManager(void)
 {
-    // If process ip is not specified (""), the first ip address detected is used as this process ip
+    // If process ip is not specified (""), the first ip address detected is used as primary ip
     if (ProcessIP == "") {
         std::vector<std::string> ipAddresses;
         osaSocket::GetLocalhostIP(ipAddresses);
@@ -156,8 +156,8 @@ bool mtsManagerLocal::CreateProxy(void)
     // Create a proxy for the GCM
     mtsManagerProxyClient * globalComponentManagerProxy = new mtsManagerProxyClient(ss.str());
 
-    // Run the proxy and connect it to the global component manager
-    if (!globalComponentManagerProxy->Start(this)) {
+    // Run Ice proxy and connect to the global component manager
+    if (!globalComponentManagerProxy->StartProxy(this)) {
         CMN_LOG_CLASS_INIT_ERROR << "Failed to initialize global component manager proxy" << std::endl;
         delete globalComponentManagerProxy;
         return false;
@@ -2752,7 +2752,7 @@ void mtsManagerLocal::DisconnectGCM()
     mtsManagerProxyClient * globalComponentManagerProxy = dynamic_cast<mtsManagerProxyClient*>(ManagerGlobal);
     CMN_ASSERT(globalComponentManagerProxy);
 
-    globalComponentManagerProxy->Stop();
+    globalComponentManagerProxy->StopProxy();
 }
 
 void mtsManagerLocal::ReconnectGCM()
@@ -2760,7 +2760,7 @@ void mtsManagerLocal::ReconnectGCM()
     mtsManagerProxyClient * globalComponentManagerProxy = dynamic_cast<mtsManagerProxyClient*>(ManagerGlobal);
     CMN_ASSERT(globalComponentManagerProxy);
 
-    if (!globalComponentManagerProxy->Start(this)) {
+    if (!globalComponentManagerProxy->StartProxy(this)) {
         CMN_LOG_CLASS_INIT_ERROR << "ReconnectGCM: Start failed" << std::endl;
         return;
     }

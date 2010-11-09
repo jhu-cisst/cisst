@@ -126,10 +126,10 @@ public:
     ~mtsComponentInterfaceProxyServer();
 
     /*! Entry point to run a proxy. */
-    bool Start(mtsComponentProxy * owner);
+    bool StartProxy(mtsComponentProxy * owner);
 
     /*! Stop the proxy (clean up thread-related resources) */
-    void Stop();
+    void StopProxy();
 
     /*! Register per-command (de)serializer */
     bool AddPerCommandSerializer(const CommandIDType commandID, mtsProxySerializer * serializer);

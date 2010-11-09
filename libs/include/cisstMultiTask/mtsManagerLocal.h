@@ -202,9 +202,9 @@ protected:
     /*! \brief Set IP address of this machine */
     void SetIPAddress(void);
 
-    /*! \brief Create proxy objects and enable network support
+    /*! \brief Create Ice proxy for this LCM and connects to the GCM
         \return True if success, false otherwise */
-    bool CreateProxy(void);
+    bool ConnectToGlobalComponentManager(void);
 #endif
 
     /*! \brief Register all interfaces that a component owns to the global
@@ -581,6 +581,7 @@ public:
     //  Networking
     //-------------------------------------------------------------------------
 #if CISST_MTS_HAS_ICE
+public:
     /*! Check if a component is a proxy object based on its name */
     static bool IsProxyComponent(const std::string & componentName) {
         const std::string proxyStr = "Proxy";

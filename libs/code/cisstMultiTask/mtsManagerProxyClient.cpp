@@ -25,146 +25,10 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstOSAbstraction/osaSleep.h>
 
-unsigned int mtsManagerProxyClient::InstanceCounter = 0;
-
-mtsManagerProxyClient::mtsManagerProxyClient(const std::string & serverEndpointInfo)
-    : BaseClientType("config.LCM", serverEndpointInfo)
-{
-    ProxyName = "ManagerProxyClient";
-}
-
-mtsManagerProxyClient::~mtsManagerProxyClient()
-{
-    Stop();
-}
-
-//-----------------------------------------------------------------------------
-//  Proxy Start-up
-//-----------------------------------------------------------------------------
-bool mtsManagerProxyClient::Start(mtsManagerLocal * proxyOwner)
-{
-    // Initialize Ice object.
-    BaseClientType::IceInitialize();
-
-    if (!InitSuccessFlag) {
-        LogError(mtsManagerProxyClient, "ICE proxy initialization failed");
-        return false;
-    }
-
-    // Client configuration for bidirectional communication
-    Ice::ObjectAdapterPtr adapter = IceCommunicator->createObjectAdapter("");
-    Ice::Identity ident;
-    ident.name = GetGUID();
-    ident.category = "";
-
-    mtsManagerProxy::ManagerClientPtr client =
-        new ManagerClientI(IceCommunicator, IceLogger, ManagerServerProxy, this);
-    adapter->add(client, ident);
-    adapter->activate();
-    ManagerServerProxy->ice_getConnection()->setAdapter(adapter);
-
-    // Set an implicit context (per proxy context)
-    IceCommunicator->getImplicitContext()->put(
-        mtsManagerProxyServer::GetConnectionIDKey(), IceCommunicator->identityToString(ident));
-
-    // Set proxy owner and name of this proxy object
-    SetProxyOwner(proxyOwner);
-
-    // Connect to server proxy through adding this ICE proxy to server proxy
-    if (!ManagerServerProxy->AddClient(GetProxyName(), ident)) {
-        LogError(mtsManagerProxyClient, "AddClient() failed: duplicate proxy name or identity");
-        return false;
-    }
-
-    // Create a worker thread here but is not running yet.
-    ThreadArgumentsInfo.Proxy = this;
-    ThreadArgumentsInfo.Runner = mtsManagerProxyClient::Runner;
-
-    // Set a short name of this thread as MPC which means "Manager Proxy Client."
-    // Such a condensed naming rule is required because a total number of
-    // characters in a thread name is sometimes limited to a small number (e.g.
-    // LINUX RTAI).
-    std::stringstream ss;
-    ss << "MPC" << mtsManagerProxyClient::InstanceCounter++;
-    std::string threadName = ss.str();
-
-    // Create worker thread. Note that it is created but is not yet running.
-    WorkerThread.Create<ProxyWorker<mtsManagerLocal>, ThreadArguments<mtsManagerLocal>*>(
-        &ProxyWorkerInfo, &ProxyWorker<mtsManagerLocal>::Run, &ThreadArgumentsInfo, threadName.c_str());
-
-    return true;
-}
-
-void mtsManagerProxyClient::StartClient()
-{
-    Sender->Start();
-
-    // This is a blocking call that should be run in a different thread.
-    IceCommunicator->waitForShutdown();
-}
-
-void mtsManagerProxyClient::Runner(ThreadArguments<mtsManagerLocal> * arguments)
-{
-    mtsManagerProxyClient * ProxyClient =
-        dynamic_cast<mtsManagerProxyClient*>(arguments->Proxy);
-    if (!ProxyClient) {
-        CMN_LOG_RUN_ERROR << "mtsManagerProxyClient: failed to create a proxy client." << std::endl;
-        return;
-    }
-
-    ProxyClient->GetLogger()->trace("mtsManagerProxyClient", "proxy client starts");
-
-    try {
-        ProxyClient->SetAsActiveProxy();
-        ProxyClient->StartClient();
-    } catch (const Ice::Exception& e) {
-        std::string error("mtsManagerProxyClient: ");
-        error += e.what();
-        ProxyClient->GetLogger()->error(error);
-    } catch (const char * msg) {
-        std::string error("mtsManagerProxyClient: ");
-        error += msg;
-        ProxyClient->GetLogger()->error(error);
-    } catch (...) {
-        std::string error("mtsManagerProxyClient: exception at mtsManagerProxyClient::Runner()");
-        ProxyClient->GetLogger()->error(error);
-    } 
-
-    ProxyClient->GetLogger()->trace("mtsManagerProxyClient", "proxy client terminates");
-
-    ProxyClient->Stop();
-}
-
-void mtsManagerProxyClient::Stop()
-{
-    if (!IsActiveProxy()) return;
-
-    LogPrint(mtsManagerProxyClient, "ManagerProxy client stops.");
-
-    // Let a server disconnect this client safely.
-    //ManagerServerProxy->Shutdown();
-    //ManagerServerProxy->ice_getConnection()->close(false); // close gracefully
-
-    try {
-        BaseClientType::Stop();
-    } catch (const Ice::Exception& e) {
-        std::string error("mtsManagerProxyClient: ");
-        error += e.what();
-        LogError(mtsManagerProxyClient, error);
-    }
-}
-
-bool mtsManagerProxyClient::OnServerDisconnect()
-{
-    Stop();
-
-    return true;
-}
-
-void mtsManagerProxyClient::GetConnectionStringSet(mtsManagerProxy::ConnectionStringSet & connectionStringSet,
+void GetConnectionStringSet(mtsManagerProxy::ConnectionStringSet & connectionStringSet,
     const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
     const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceProvidedName,
-    const std::string & requestProcessName)
+    const std::string & requestProcessName = "")
 {
     connectionStringSet.ClientProcessName = clientProcessName;
     connectionStringSet.ClientComponentName = clientComponentName;
@@ -173,6 +37,159 @@ void mtsManagerProxyClient::GetConnectionStringSet(mtsManagerProxy::ConnectionSt
     connectionStringSet.ServerComponentName = serverComponentName;
     connectionStringSet.ServerInterfaceProvidedName = serverInterfaceProvidedName;
     connectionStringSet.RequestProcessName = requestProcessName;
+}
+
+unsigned int mtsManagerProxyClient::InstanceCounter = 0;
+
+mtsManagerProxyClient::mtsManagerProxyClient(const std::string & serverEndpointInfo)
+    : ManagerServerProxy(0),
+      BaseClientType("config.LCM", serverEndpointInfo)
+{
+    ProxyName = "ManagerProxyClient";
+}
+
+mtsManagerProxyClient::~mtsManagerProxyClient()
+{
+    StopProxy();
+}
+
+//-----------------------------------------------------------------------------
+//  Proxy Start-up
+//-----------------------------------------------------------------------------
+bool mtsManagerProxyClient::StartProxy(mtsManagerLocal * proxyOwner)
+{
+    // Initialize Ice object
+    IceInitialize();
+
+    if (!InitSuccessFlag) {
+        LogError(mtsManagerProxyClient, "ICE proxy initialization failed");
+        return false;
+    }
+
+    // Client configuration for bidirectional communication
+    Ice::ObjectAdapterPtr adapter = IceCommunicator->createObjectAdapter("");
+    Ice::Identity id;
+    id.name = GetIceGUID();
+    id.category = "";
+
+    mtsManagerProxy::ManagerClientPtr client =
+        new ManagerClientI(IceCommunicator, IceLogger, ManagerServerProxy, this);
+    adapter->add(client, id);
+    adapter->activate();
+    ManagerServerProxy->ice_getConnection()->setAdapter(adapter);
+
+    // Set an implicit context (per proxy context)
+    IceCommunicator->getImplicitContext()->put(
+        mtsManagerProxyServer::GetConnectionIDKey(), IceCommunicator->identityToString(id));
+
+    // Set proxy owner and name of this proxy object
+    SetProxyOwner(proxyOwner);
+
+    // Connect to server proxy through adding this ICE proxy to server proxy
+    if (!ManagerServerProxy->AddClient(GetProxyName(), id)) {
+        LogError(mtsManagerProxyClient, "AddClient() failed: duplicate proxy name or identity");
+        return false;
+    }
+
+    // Thread arguments for a worker thread
+    ThreadArgumentsInfo.Proxy = this;
+    ThreadArgumentsInfo.Runner = mtsManagerProxyClient::Runner;
+
+    // Set a short name of this thread as "MPC" (Manager Proxy Client) to meet
+    // the requirement that some of operating system have -- only a few characters
+    // can be used as a thread name (e.g. Linux RTAI)
+    std::stringstream ss;
+    ss << "MPC" << mtsManagerProxyClient::InstanceCounter++;
+    std::string threadName = ss.str();
+
+    // Create worker thread (will get started later)
+    WorkerThread.Create<ProxyWorker<mtsManagerLocal>, ThreadArguments<mtsManagerLocal>*>(
+        &ProxyWorkerInfo, &ProxyWorker<mtsManagerLocal>::Run, &ThreadArgumentsInfo, threadName.c_str());
+
+    return true;
+}
+
+void mtsManagerProxyClient::CreateProxy(void) 
+{
+    ManagerServerProxy = mtsManagerProxy::ManagerServerPrx::checkedCast(ProxyObject);
+    if (!ManagerServerProxy) {
+        throw "mtsManagerProxyClient: CreateProxy() failed - invalid proxy";
+    }
+
+    Server = new ManagerClientI(IceCommunicator, IceLogger, ManagerServerProxy, this);
+}
+
+void mtsManagerProxyClient::RemoveProxy(void) 
+{
+    Server->Stop();
+
+    ManagerServerProxy = 0;
+}
+
+void mtsManagerProxyClient::StartClient(void)
+{
+    Server->Start();
+
+    // This is a blocking call that should run in a different thread.
+    IceCommunicator->waitForShutdown();
+}
+
+void mtsManagerProxyClient::Runner(ThreadArguments<mtsManagerLocal> * arguments)
+{
+    mtsManagerProxyClient * ProxyClient = dynamic_cast<mtsManagerProxyClient*>(arguments->Proxy);
+    if (!ProxyClient) {
+        CMN_LOG_RUN_ERROR << "mtsManagerProxyClient: failed to get proxy client." << std::endl;
+        return;
+    }
+
+    ProxyClient->GetLogger()->trace("mtsManagerProxyClient", "proxy client starts");
+
+    try {
+        ProxyClient->ChangeProxyState(PROXY_STATE_ACTIVE);
+        ProxyClient->StartClient();
+    } catch (const Ice::Exception& e) {
+        std::string error("mtsManagerProxyClient: ");
+        error += e.what();
+        ProxyClient->GetLogger()->error(error);
+    } catch (...) {
+        std::string error("mtsManagerProxyClient: exception at mtsManagerProxyClient::Runner()");
+        ProxyClient->GetLogger()->error(error);
+    } 
+
+    ProxyClient->GetLogger()->trace("mtsManagerProxyClient", "proxy client terminates");
+
+    ProxyClient->StopProxy();
+}
+
+void mtsManagerProxyClient::StopProxy()
+{
+    if (!IsActiveProxy()) return;
+
+    // Let a server disconnect this client safely.
+    //ManagerServerProxy->Shutdown();
+    //ManagerServerProxy->ice_getConnection()->close(false); // close gracefully
+
+    try {
+        BaseClientType::StopProxy();
+    } catch (const Ice::Exception& e) {
+        std::string error("mtsManagerProxyClient: ");
+        error += e.what();
+        LogError(mtsManagerProxyClient, error);
+    }
+
+    IceGUID = "";
+
+    LogPrint(mtsManagerProxyClient, "Stopped manager proxy client");
+}
+
+bool mtsManagerProxyClient::OnServerDisconnect(void)
+{
+    CMN_LOG_CLASS_RUN_ERROR << "LCM \"" << ProxyName << "\" detected GCM DISCONNECTION "
+                            << "(" << EndpointInfo << ")" << std::endl;
+    
+    StopProxy();
+
+    return true;
 }
 
 //-------------------------------------------------------------------------
@@ -806,7 +823,7 @@ mtsManagerProxyClient::ManagerClientI::~ManagerClientI()
 
 void mtsManagerProxyClient::ManagerClientI::Start()
 {
-    ManagerProxyClient->GetLogger()->trace("mtsManagerProxyClient", "Send thread starts");
+    ManagerProxyClient->GetLogger()->trace("mtsManagerProxyClient", "Server communication callback thread starts");
 
     SenderThreadPtr->start();
 }
@@ -827,27 +844,25 @@ void mtsManagerProxyClient::ManagerClientI::Run()
         ManagerProxyClient->SendTestMessageFromClientToServer(ss.str());
     }
 #else
-    while (this->IsActiveProxy())
-    {
+    while (this->IsActiveProxy()) {
         osaSleep(mtsProxyConfig::RefreshPeriodForManagers);
-
         try {
             Server->Refresh();
         } catch (const ::Ice::Exception & ex) {
-            LogPrint(mtsManagerProxyClient, "Refresh failed: " << Server->ice_toString() << "\n" << ex);
+            LogPrint(mtsManagerProxyClient, "Refresh to GCM failed (" << Server->ice_toString() << ")" << std::endl << ex);
             if (ManagerProxyClient) {
                 ManagerProxyClient->OnServerDisconnect();
             }
         }
     }
 #endif
+
+    LogPrint(mtsManagerProxyClient, "mtsManagerProxyClient::ManagerClientI - terminated");
 }
 
 void mtsManagerProxyClient::ManagerClientI::Stop()
 {
     if (!IsActiveProxy()) return;
-
-    LogPrint(ManagerClientI, "Stop and destroy callback sender");
 
     ManagerProxyClient = NULL;
 
@@ -861,6 +876,8 @@ void mtsManagerProxyClient::ManagerClientI::Stop()
         SenderThreadPtr = 0;
     }
     callbackSenderThread->getThreadControl().join();
+
+    LogPrint(ManagerClientI, "Stopped and destroyed server communication callback thread");
 }
 
 //-----------------------------------------------------------------------------

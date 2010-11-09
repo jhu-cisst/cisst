@@ -42,7 +42,7 @@ mtsComponentProxy::~mtsComponentProxy()
     InterfaceProvidedNetworkProxyMapType::MapType::const_iterator itProvidedProxy = InterfaceProvidedNetworkProxies.begin();
     const InterfaceProvidedNetworkProxyMapType::MapType::const_iterator itProvidedProxyEnd = InterfaceProvidedNetworkProxies.end();
     for (; itProvidedProxy != itProvidedProxyEnd; ++itProvidedProxy) {
-        itProvidedProxy->second->Stop();
+        itProvidedProxy->second->StopProxy();
     }
     InterfaceProvidedNetworkProxies.DeleteAll();
 
@@ -50,7 +50,7 @@ mtsComponentProxy::~mtsComponentProxy()
     InterfaceRequiredNetworkProxyMapType::MapType::const_iterator itRequiredProxy = InterfaceRequiredNetworkProxies.begin();
     const InterfaceRequiredNetworkProxyMapType::MapType::const_iterator itRequiredProxyEnd = InterfaceRequiredNetworkProxies.end();
     for (; itRequiredProxy != itRequiredProxyEnd; ++itRequiredProxy) {
-        itRequiredProxy->second->Stop();
+        itRequiredProxy->second->StopProxy();
     }
     InterfaceRequiredNetworkProxies.DeleteAll();
 
@@ -506,7 +506,7 @@ bool mtsComponentProxy::CreateInterfaceProxyServer(const std::string & providedI
     }
 
     // Run provided interface proxy (i.e., component interface proxy server)
-    if (!providedInterfaceProxy->Start(this)) {
+    if (!providedInterfaceProxy->StartProxy(this)) {
         CMN_LOG_CLASS_INIT_ERROR << "CreateInterfaceProxyServer: proxy failed to start: " << providedInterfaceProxyName << std::endl;
         return false;
     }
@@ -536,7 +536,7 @@ bool mtsComponentProxy::CreateInterfaceProxyClient(const std::string & requiredI
     }
 
     // Run required interface proxy (i.e., component interface proxy client)
-    if (!requiredInterfaceProxy->Start(this)) {
+    if (!requiredInterfaceProxy->StartProxy(this)) {
         CMN_LOG_CLASS_INIT_ERROR << "CreateInterfaceProxyClient: proxy failed to start: " << requiredInterfaceProxyName << std::endl;
         return false;
     }

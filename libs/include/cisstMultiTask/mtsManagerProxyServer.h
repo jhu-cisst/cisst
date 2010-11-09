@@ -138,10 +138,10 @@ public:
     ~mtsManagerProxyServer();
 
     /*! Entry point to run a proxy */
-    bool Start(mtsManagerGlobal * owner);
+    bool StartProxy(mtsManagerGlobal * owner);
 
     /*! Stop the proxy (clean up thread-related resources) */
-    void Stop();
+    void StopProxy();
 
     /*! Construct mtsManagerProxy::ConnectionStringSet structure */
     void ConstructConnectionStringSet(

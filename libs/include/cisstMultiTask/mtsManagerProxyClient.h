@@ -32,7 +32,6 @@ http://www.cisst.org/cisst/license.txt.
 class CISST_EXPORT mtsManagerProxyClient :
     public mtsProxyBaseClient<mtsManagerLocal>, public mtsManagerGlobalInterface
 {
-
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
     /*! Typedef for base type. */
@@ -43,10 +42,10 @@ class CISST_EXPORT mtsManagerProxyClient :
     ManagerServerProxyType ManagerServerProxy;
 
 protected:
-    /*! Definitions for send thread */
+    /*! Definitions for server communication callback thread */
     class ManagerClientI;
     typedef IceUtil::Handle<ManagerClientI> ManagerClientIPtr;
-    ManagerClientIPtr Sender;
+    ManagerClientIPtr Server;
 
     /*! Instance counter used to set a short name of this thread */
     static unsigned int InstanceCounter;
@@ -54,36 +53,23 @@ protected:
     //-------------------------------------------------------------------------
     //  Proxy Implementation
     //-------------------------------------------------------------------------
-    /*! Create a proxy object and a send thread. */
-    void CreateProxy() {
-        ManagerServerProxy =
-            mtsManagerProxy::ManagerServerPrx::checkedCast(ProxyObject);
-        if (!ManagerServerProxy) {
-            throw "mtsManagerProxyClient: Invalid proxy";
-        }
+    /*! Create GCM proxy (server) and server communication callback thread.
+        This methods gets called by the base class (mtsProxyBaseClient). */
+    void CreateProxy(void);
 
-        Sender = new ManagerClientI(IceCommunicator, IceLogger, ManagerServerProxy, this);
-    }
+    /*! Destroy connected GCM proxy including server communication callback thread.
+        This methods gets called by the base class (mtsProxyBaseClient). */
+    void RemoveProxy(void);
 
-    /*! Create a proxy object and a send thread. */
-    void RemoveProxy() {
-        Sender->Stop();
-    }
+    /*! Start server communication callback thread (blocking call).
+        Internally, mtsManagerProxyClient::ManagerClientI::Start() is called. */
+    void StartClient(void);
 
-    /*! Start a send thread and wait for shutdown (blocking call). */
-    void StartClient();
+    /*! Called when server disconnection is detected or any exception occurs. */
+    bool OnServerDisconnect(void);
 
-    /*! Called when server disconnection is detected */
-    bool OnServerDisconnect();
-
-    /*! Thread runner */
+    /*! Runner for server communication callback thread */
     static void Runner(ThreadArguments<mtsManagerLocal> * arguments);
-
-    /*! Miscellaneous methods */
-    void GetConnectionStringSet(mtsManagerProxy::ConnectionStringSet & connectionStringSet,
-        const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
-        const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceProvidedName,
-        const std::string & requestProcessName = "");
 
     //-------------------------------------------------------------------------
     //  Event Handlers : Server -> Client
@@ -142,10 +128,10 @@ public:
     ~mtsManagerProxyClient();
 
     /*! Entry point to run a proxy. */
-    bool Start(mtsManagerLocal * proxyOwner);
+    bool StartProxy(mtsManagerLocal * proxyOwner);
 
     /*! Stop the proxy (clean up thread-related resources) */
-    void Stop(void);
+    void StopProxy(void);
 
     //-------------------------------------------------------------------------
     //  Implementation of mtsManagerGlobalInterface

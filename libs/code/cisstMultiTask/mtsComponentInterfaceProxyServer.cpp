@@ -39,13 +39,13 @@ mtsComponentInterfaceProxyServer::mtsComponentInterfaceProxyServer(
 
 mtsComponentInterfaceProxyServer::~mtsComponentInterfaceProxyServer()
 {
-    Stop();
+    StopProxy();
 }
 
 //-----------------------------------------------------------------------------
 //  Proxy Start-up
 //-----------------------------------------------------------------------------
-bool mtsComponentInterfaceProxyServer::Start(mtsComponentProxy * proxyOwner)
+bool mtsComponentInterfaceProxyServer::StartProxy(mtsComponentProxy * proxyOwner)
 {
     // Initialize Ice object.
     IceInitialize();
@@ -56,10 +56,10 @@ bool mtsComponentInterfaceProxyServer::Start(mtsComponentProxy * proxyOwner)
     }
 
     // Set the owner and name of this proxy object
-    std::string thisProcessName = "On";
+    std::string suffix = "On";
     mtsManagerLocal * managerLocal = mtsManagerLocal::GetInstance();
-    thisProcessName += managerLocal->GetProcessName();
-    SetProxyOwner(proxyOwner, thisProcessName);
+    suffix += managerLocal->GetProcessName();
+    SetProxyOwner(proxyOwner, suffix);
 
     // Create a worker thread here and returns immediately.
     ThreadArgumentsInfo.Proxy = this;
@@ -84,7 +84,7 @@ void mtsComponentInterfaceProxyServer::StartServer()
 {
     Sender->Start();
 
-    // This is a blocking call that should be run in a different thread.
+    // This is a blocking call that should run in a different thread.
     IceCommunicator->waitForShutdown();
 }
 
@@ -100,7 +100,7 @@ void mtsComponentInterfaceProxyServer::Runner(ThreadArguments<mtsComponentProxy>
     ProxyServer->GetLogger()->trace("mtsComponentInterfaceProxyServer", "proxy server starts");
 
     try {
-        ProxyServer->SetAsActiveProxy();
+        ProxyServer->ChangeProxyState(PROXY_STATE_ACTIVE);
         ProxyServer->StartServer();
     } catch (const Ice::Exception& e) {
         std::string error("mtsComponentInterfaceProxyServer: ");
@@ -117,15 +117,15 @@ void mtsComponentInterfaceProxyServer::Runner(ThreadArguments<mtsComponentProxy>
 
     ProxyServer->GetLogger()->trace("mtsComponentInterfaceProxyServer", "Proxy server terminates");
 
-    ProxyServer->Stop();
+    ProxyServer->StopProxy();
 }
 
-void mtsComponentInterfaceProxyServer::Stop()
+void mtsComponentInterfaceProxyServer::StopProxy()
 {
     LogPrint(mtsComponentInterfaceProxyClient, "ComponentInterfaceProxy server stops.");
 
     try {
-        BaseServerType::Stop();
+        BaseServerType::StopProxy();
         Sender->Stop();
     } catch (const Ice::Exception& e) {
         std::string error("mtsComponentInterfaceProxyServer: ");
