@@ -140,7 +140,7 @@ int main(){
   while( !trajectory.IsRunning() ) osaSleep(0.01);
   file.Start();
 
-  pause();
+  getchar();
 
   return 0;
 }

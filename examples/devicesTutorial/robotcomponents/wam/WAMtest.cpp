@@ -23,7 +23,7 @@ int main(){
   taskManager->CreateAll();
   taskManager->StartAll();
 
-  pause();
+  getchar();
 
   return 0;
 }
