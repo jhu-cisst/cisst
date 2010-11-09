@@ -77,7 +77,7 @@ http://www.cisst.org/cisst/license.txt.
   \param lod The log level of detail of the message.
 */
 #define CMN_LOG_CLASS_INSTANCE(objectPointer, lod) \
-    ((lod > cmnLogger::GetLoD()) || (lod > objectPointer->Services()->GetLoD()))?\
+    ((cmnLogger::GetLoD() & lod) || (objectPointer->Services()->GetLoD() & lod))? \
     (void*)0:\
     ((cmnLODOutputMultiplexer(objectPointer->GetLogMultiplexer(), lod).Ref()) << cmnLogLoDString[lod] << " - Class " << objectPointer->Services()->GetName() << ": ")
 
@@ -87,29 +87,27 @@ http://www.cisst.org/cisst/license.txt.
 
 /*! Macros defined to use #CMN_LOG_CLASS_INSTANCE for a given level of detail. */
 //@{
-#define CMN_LOG_CLASS_INSTANCE_INIT_ERROR(objectPointer)   CMN_LOG_CLASS_INSTANCE(objectPointer, CMN_LOG_LOD_INIT_ERROR)
-#define CMN_LOG_CLASS_INSTANCE_INIT_WARNING(objectPointer) CMN_LOG_CLASS_INSTANCE(objectPointer, CMN_LOG_LOD_INIT_WARNING)
-#define CMN_LOG_CLASS_INSTANCE_INIT_VERBOSE(objectPointer) CMN_LOG_CLASS_INSTANCE(objectPointer, CMN_LOG_LOD_INIT_VERBOSE)
-#define CMN_LOG_CLASS_INSTANCE_INIT_DEBUG(objectPointer)   CMN_LOG_CLASS_INSTANCE(objectPointer, CMN_LOG_LOD_INIT_DEBUG)
-#define CMN_LOG_CLASS_INSTANCE_RUN_ERROR(objectPointer)    CMN_LOG_CLASS_INSTANCE(objectPointer, CMN_LOG_LOD_RUN_ERROR)
-#define CMN_LOG_CLASS_INSTANCE_RUN_WARNING(objectPointer)  CMN_LOG_CLASS_INSTANCE(objectPointer, CMN_LOG_LOD_RUN_WARNING)
-#define CMN_LOG_CLASS_INSTANCE_RUN_VERBOSE(objectPointer)  CMN_LOG_CLASS_INSTANCE(objectPointer, CMN_LOG_LOD_RUN_VERBOSE)
-#define CMN_LOG_CLASS_INSTANCE_RUN_DEBUG(objectPointer)    CMN_LOG_CLASS_INSTANCE(objectPointer, CMN_LOG_LOD_RUN_DEBUG)
-#define CMN_LOG_CLASS_INSTANCE_VERY_VERBOSE(objectPointer) CMN_LOG_CLASS_INSTANCE(objectPointer, CMN_LOG_LOD_VERY_VERBOSE)
+#define CMN_LOG_CLASS_INSTANCE_INIT_ERROR(objectPointer)   CMN_LOG_CLASS_INSTANCE(objectPointer, CMN_LOG_BIT_INIT_ERROR)
+#define CMN_LOG_CLASS_INSTANCE_INIT_WARNING(objectPointer) CMN_LOG_CLASS_INSTANCE(objectPointer, CMN_LOG_BIT_INIT_WARNING)
+#define CMN_LOG_CLASS_INSTANCE_INIT_VERBOSE(objectPointer) CMN_LOG_CLASS_INSTANCE(objectPointer, CMN_LOG_BIT_INIT_VERBOSE)
+#define CMN_LOG_CLASS_INSTANCE_INIT_DEBUG(objectPointer)   CMN_LOG_CLASS_INSTANCE(objectPointer, CMN_LOG_BIT_INIT_DEBUG)
+#define CMN_LOG_CLASS_INSTANCE_RUN_ERROR(objectPointer)    CMN_LOG_CLASS_INSTANCE(objectPointer, CMN_LOG_BIT_RUN_ERROR)
+#define CMN_LOG_CLASS_INSTANCE_RUN_WARNING(objectPointer)  CMN_LOG_CLASS_INSTANCE(objectPointer, CMN_LOG_BIT_RUN_WARNING)
+#define CMN_LOG_CLASS_INSTANCE_RUN_VERBOSE(objectPointer)  CMN_LOG_CLASS_INSTANCE(objectPointer, CMN_LOG_BIT_RUN_VERBOSE)
+#define CMN_LOG_CLASS_INSTANCE_RUN_DEBUG(objectPointer)    CMN_LOG_CLASS_INSTANCE(objectPointer, CMN_LOG_BIT_RUN_DEBUG)
 //@}
 
 
 /*! Macros defined to use #CMN_LOG_CLASS for a given level of detail. */
 //@{
-#define CMN_LOG_CLASS_INIT_ERROR   CMN_LOG_CLASS(CMN_LOG_LOD_INIT_ERROR)
-#define CMN_LOG_CLASS_INIT_WARNING CMN_LOG_CLASS(CMN_LOG_LOD_INIT_WARNING)
-#define CMN_LOG_CLASS_INIT_VERBOSE CMN_LOG_CLASS(CMN_LOG_LOD_INIT_VERBOSE)
-#define CMN_LOG_CLASS_INIT_DEBUG   CMN_LOG_CLASS(CMN_LOG_LOD_INIT_DEBUG)
-#define CMN_LOG_CLASS_RUN_ERROR    CMN_LOG_CLASS(CMN_LOG_LOD_RUN_ERROR)
-#define CMN_LOG_CLASS_RUN_WARNING  CMN_LOG_CLASS(CMN_LOG_LOD_RUN_WARNING)
-#define CMN_LOG_CLASS_RUN_VERBOSE  CMN_LOG_CLASS(CMN_LOG_LOD_RUN_VERBOSE)
-#define CMN_LOG_CLASS_RUN_DEBUG    CMN_LOG_CLASS(CMN_LOG_LOD_RUN_DEBUG)
-#define CMN_LOG_CLASS_VERY_VERBOSE CMN_LOG_CLASS(CMN_LOG_LOD_VERY_VERBOSE)
+#define CMN_LOG_CLASS_INIT_ERROR   CMN_LOG_CLASS(CMN_LOG_BIT_INIT_ERROR)
+#define CMN_LOG_CLASS_INIT_WARNING CMN_LOG_CLASS(CMN_LOG_BIT_INIT_WARNING)
+#define CMN_LOG_CLASS_INIT_VERBOSE CMN_LOG_CLASS(CMN_LOG_BIT_INIT_VERBOSE)
+#define CMN_LOG_CLASS_INIT_DEBUG   CMN_LOG_CLASS(CMN_LOG_BIT_INIT_DEBUG)
+#define CMN_LOG_CLASS_RUN_ERROR    CMN_LOG_CLASS(CMN_LOG_BIT_RUN_ERROR)
+#define CMN_LOG_CLASS_RUN_WARNING  CMN_LOG_CLASS(CMN_LOG_BIT_RUN_WARNING)
+#define CMN_LOG_CLASS_RUN_VERBOSE  CMN_LOG_CLASS(CMN_LOG_BIT_RUN_VERBOSE)
+#define CMN_LOG_CLASS_RUN_DEBUG    CMN_LOG_CLASS(CMN_LOG_BIT_RUN_DEBUG)
 //@}
 
 
@@ -130,28 +128,27 @@ http://www.cisst.org/cisst/license.txt.
   any other output stream:
 
   \code
-  CMN_LOG_INIT_ERROR << "This is a message of LoD CMN_LOG_LOD_INIT_ERROR" << argc << std::endl;
+  CMN_LOG_INIT_ERROR << "This is a message of LoD CMN_LOG_MASK_INIT_ERROR" << argc << std::endl;
   \endcode
 
   \param lod The log level of detail of the message.
 */
 #define CMN_LOG(lod) \
-    (lod > cmnLogger::GetLoD())? \
+    (cmnLogger::GetLoD() & lod)?              \
     (void*)0: \
     ((cmnLODOutputMultiplexer(cmnLogger::GetMultiplexer(), lod).Ref()) << cmnLogLoDString[lod] << " - ")
 
 
 /*! Macros defined to use #CMN_LOG for a given level of detail. */
 //@{
-#define CMN_LOG_INIT_ERROR   CMN_LOG(CMN_LOG_LOD_INIT_ERROR)
-#define CMN_LOG_INIT_WARNING CMN_LOG(CMN_LOG_LOD_INIT_WARNING)
-#define CMN_LOG_INIT_VERBOSE CMN_LOG(CMN_LOG_LOD_INIT_VERBOSE)
-#define CMN_LOG_INIT_DEBUG   CMN_LOG(CMN_LOG_LOD_INIT_DEBUG)
-#define CMN_LOG_RUN_ERROR    CMN_LOG(CMN_LOG_LOD_RUN_ERROR)
-#define CMN_LOG_RUN_WARNING  CMN_LOG(CMN_LOG_LOD_RUN_WARNING)
-#define CMN_LOG_RUN_VERBOSE  CMN_LOG(CMN_LOG_LOD_RUN_VERBOSE)
-#define CMN_LOG_RUN_DEBUG    CMN_LOG(CMN_LOG_LOD_RUN_DEBUG)
-#define CMN_LOG_VERY_VERBOSE CMN_LOG(CMN_LOG_LOD_VERY_VERBOSE)
+#define CMN_LOG_INIT_ERROR   CMN_LOG(CMN_LOG_BIT_INIT_ERROR)
+#define CMN_LOG_INIT_WARNING CMN_LOG(CMN_LOG_BIT_INIT_WARNING)
+#define CMN_LOG_INIT_VERBOSE CMN_LOG(CMN_LOG_BIT_INIT_VERBOSE)
+#define CMN_LOG_INIT_DEBUG   CMN_LOG(CMN_LOG_BIT_INIT_DEBUG)
+#define CMN_LOG_RUN_ERROR    CMN_LOG(CMN_LOG_BIT_RUN_ERROR)
+#define CMN_LOG_RUN_WARNING  CMN_LOG(CMN_LOG_BIT_RUN_WARNING)
+#define CMN_LOG_RUN_VERBOSE  CMN_LOG(CMN_LOG_BIT_RUN_VERBOSE)
+#define CMN_LOG_RUN_DEBUG    CMN_LOG(CMN_LOG_BIT_RUN_DEBUG)
 //@}
 
 
@@ -228,24 +225,24 @@ class CISST_EXPORT cmnLogger {
     /*! Type used to define the logging level of detail. */
     typedef cmnLODMultiplexerStreambuf<char> StreamBufType;
 
-    typedef cmnLogLoD LogLoDType;
+    typedef cmnLogBitset LogLoDType;
 
  private:
     /*! Global Level of Detail used to filter all messages.
 
-      - CMN_LOG_LOD_INIT_ERROR: Errors during the initialization.
-      - CMN_LOG_LOD_INIT_WARNING: Warnings during the initialization.
-      - CMN_LOG_LOD_INIT_VERBOSE and CMN_LOG_LOD_INIT_DEBUG: Extra messages during the initialization.
-      - CMN_LOG_LOD_RUN_ERROR: Errors during normal operations (also defined as #CMN_LOG_DEFAULT_LOD).
-      - CMN_LOG_LOD_RUN_WARNING: Warnings during normal operations.
-      - CMN_LOG_LOD_RUN_VERBOSE and CMN_LOG_LOD_RUN_DEBUG: Extra messages during normal operations.
-      - CMN_LOG_LOD_VERY_VERBOSE: Very verbose.
+      - CMN_LOG_MASK_INIT_ERROR: Errors during the initialization.
+      - CMN_LOG_MASK_INIT_WARNING: Warnings during the initialization.
+      - CMN_LOG_MASK_INIT_VERBOSE and CMN_LOG_MASK_INIT_DEBUG: Extra messages during the initialization.
+      - CMN_LOG_MASK_RUN_ERROR: Errors during normal operations (also defined as #CMN_LOG_DEFAULT_LOD).
+      - CMN_LOG_MASK_RUN_WARNING: Warnings during normal operations.
+      - CMN_LOG_MASK_RUN_VERBOSE and CMN_LOG_MASK_RUN_DEBUG: Extra messages during normal operations.
+      - CMN_LOG_MASK_VERY_VERBOSE: Very verbose.
 
       The idea is that for most classes, important errors happens
       during the initialization (constructor, opening a serial port,
       configuring some hardware device, open a grapical context, etc.)
       and during the normal operations, time can become critical.
-      Therefore a level CMN_LOG_LOD_RUN_ERROR would log a lot of
+      Therefore a level CMN_LOG_MASK_RUN_ERROR would log a lot of
       information at the beginning and only the critical messages
       during the normal operations.
     */
@@ -277,7 +274,7 @@ class CISST_EXPORT cmnLogger {
     }
 
     /*! Instance specific implementation of ResumeDefaultLog. */
-    inline void ResumeDefaultLogInstance(LogLoDType newLoD = CMN_LOG_LOD_RUN_ERROR) {
+    inline void ResumeDefaultLogInstance(LogLoDType newLoD = CMN_LOG_MASK_DEFAULT) {
         LoDMultiplexerStreambuf.AddChannel(*(DefaultLogFile()), newLoD);
     }
 
@@ -347,7 +344,7 @@ class CISST_EXPORT cmnLogger {
       this can be halted by using HaltDefaultLog().  Using
       ResumeDefaultLog() allows to resume the log to "cisstLog.txt"
       without losing previous logs. */
-    static void ResumeDefaultLog(LogLoDType newLoD = CMN_LOG_LOD_RUN_ERROR) {
+    static void ResumeDefaultLog(LogLoDType newLoD = CMN_LOG_MASK_DEFAULT) {
         Instance()->ResumeDefaultLogInstance(newLoD);
     }
 
@@ -355,7 +352,7 @@ class CISST_EXPORT cmnLogger {
       provided is used to filter the messages, i.e. any message with a
       level of detail higher than the level associated to the output
       stream will not be streamed. */
-    static void AddChannel(std::ostream & outputStream, LogLoDType lod = CMN_LOG_LOD_VERY_VERBOSE) {
+    static void AddChannel(std::ostream & outputStream, LogLoDType lod = CMN_LOG_MASK_ALL) {
         Instance()->AddChannelInstance(outputStream, lod);
     }
 

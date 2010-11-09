@@ -49,7 +49,7 @@ const std::string * cmnClassRegister::RegisterInstance(cmnClassServicesBase* cla
         insertionResult = ServicesContainer.insert(newEntry);
         if (insertionResult.second) {
             CMN_LOG_INIT_VERBOSE << "Class cmnClassRegister: Register: class \"" << className
-                                 << "\" has been registered with Log LoD \"" << cmnLogLoDString[classServicesPointer->GetLoD()] << "\"" << std::endl;
+                                 << "\" has been registered with Log LoD \"" << classServicesPointer->GetLoD() << "\"" << std::endl;
             return &((*insertionResult.first).first);
         } else {
             CMN_LOG_INIT_ERROR << "Class cmnClassRegister: Register: class \"" << className
@@ -74,7 +74,7 @@ bool cmnClassRegister::SetLoD(const std::string & name, LogLoDType lod) {
         classServicesPointer->SetLoD(lod);
         CMN_LOG_INIT_VERBOSE << "Class cmnClassRegister: SetLoD: class \"" << classServicesPointer->GetName()
                              << "\" log LoD has been set to \""
-                             << cmnLogLoDString[classServicesPointer->GetLoD()] << "\"" << std::endl;
+                             << classServicesPointer->GetLoD() << "\"" << std::endl;
     } else {
         // we need to warn the programmer
         CMN_LOG_INIT_WARNING << "Class cmnClassRegister: SetLoD: class \"" << name
@@ -102,7 +102,7 @@ bool cmnClassRegister::SetLoDForAllClassesInstance(LogLoDType lod) {
     }
     if (result) {
         CMN_LOG_INIT_VERBOSE << "Class cmnClassRegister: SetLoDForAllClasses: log LoD has been set to \""
-                             << cmnLogLoDString[classServicesPointer->GetLoD()] << "\" for the following classes: "
+                             << classServicesPointer->GetLoD() << "\" for the following classes: "
                              << allClasses << std::endl;
     }
     return result;
@@ -131,7 +131,7 @@ bool cmnClassRegister::SetLoDForMatchingClassesInstance(const std::string & stri
     }
     if (result) {
         CMN_LOG_INIT_VERBOSE << "Class cmnClassRegister: SetLoDForMatchingClasses: log LoD has been set to \""
-                             << cmnLogLoDString[classServicesPointer->GetLoD()] << "\" for the following classes matching \""
+                             << classServicesPointer->GetLoD() << "\" for the following classes matching \""
                              << stringToMatch << "\": " << allClasses << std::endl;
     }
     return result;
@@ -203,6 +203,6 @@ void cmnClassRegister::ToStreamInstance(std::ostream & outputStream) const {
     for (iterator = ServicesContainer.begin(); iterator != end; iterator++) {
         outputStream << " - " << iterator->first
                      << " (typeid name \"" << iterator->second->TypeInfoPointer()->name()
-                     << "\", LoD \"" << cmnLogLoDString[iterator->second->GetLoD()] << "\")" << std::endl;
+                     << "\", LoD \"" << iterator->second->GetLoD() << "\")" << std::endl;
     }
 }

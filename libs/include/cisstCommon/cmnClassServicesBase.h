@@ -46,7 +46,7 @@ http://www.cisst.org/cisst/license.txt.
 class CISST_EXPORT cmnClassServicesBase {
 public:
     /*! Type used to define the logging level of detail. */
-    typedef cmnLogLoD LogLoDType;
+    typedef cmnLogBitset LogLoDType;
 
     /*! Type used to refer to cmnGenericObject by pointer, convenient to
       pass a pointer by reference */

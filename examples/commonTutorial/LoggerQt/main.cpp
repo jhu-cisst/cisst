@@ -27,9 +27,11 @@ http://www.cisst.org/cisst/license.txt.
 
 int main(int argc, char *argv[])
 {
+    CMN_LOG_INIT_ERROR << "Test" << std::endl;
+
     // log configuration
-    cmnLogger::SetLoD(CMN_LOG_LOD_VERY_VERBOSE);
-    cmnLogger::GetMultiplexer()->AddChannel(std::cout, CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::SetLoD(CMN_LOG_MASK_ALL);
+    cmnLogger::GetMultiplexer()->AddChannel(std::cout, CMN_LOG_MASK_ALL);
 
     // create a Qt user interface
     QApplication application(argc, argv);

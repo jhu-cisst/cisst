@@ -68,6 +68,10 @@ int main (void) {
     } else {
         std::cout << "Did you really enter \"0\"?" << std::endl;
     }
+    
+
+    std::cout << CMN_LOG_MASK_INIT_ERROR << std::endl;
+    std::cout << CMN_LOG_MASK_RUN_ERROR << std::endl;
 
     return 0;
 }

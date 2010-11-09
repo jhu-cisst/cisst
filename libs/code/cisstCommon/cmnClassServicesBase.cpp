@@ -33,10 +33,12 @@ cmnClassServicesBase::cmnClassServicesBase(const std::string & className, const 
 
 
 void cmnClassServicesBase::SetLoD(LogLoDType newLoD) {
+    #if 0
     if (newLoD < CMN_LOG_LOD_NONE) {
         newLoD = CMN_LOG_LOD_NONE;
     } else if (newLoD > CMN_LOG_LOD_VERY_VERBOSE) {
         newLoD = CMN_LOG_LOD_VERY_VERBOSE;
     }
+    #endif
     LoDMember = newLoD;
 }

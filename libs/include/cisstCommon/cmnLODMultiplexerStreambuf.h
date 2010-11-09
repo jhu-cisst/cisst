@@ -117,7 +117,7 @@ class cmnLODMultiplexerStreambuf : public std::basic_streambuf<_element, _trait>
     /*!
       The type of Level of Detail
      */
-    typedef cmnLogLoD LogLoDType;
+    typedef cmnLogBitset LogLoDType;
 
     typedef std::pair<ChannelType *, LogLoDType> ElementType;
 
@@ -134,7 +134,7 @@ class cmnLODMultiplexerStreambuf : public std::basic_streambuf<_element, _trait>
       \param fileStream Default Filestream
      */
     cmnLODMultiplexerStreambuf(std::ofstream & fileStream) {
-        this->AddChannel(fileStream.rdbuf(), CMN_LOG_LOD_VERY_VERBOSE);
+        this->AddChannel(fileStream.rdbuf(), CMN_LOG_MASK_ALL);
     }
 
     /*!
@@ -339,8 +339,9 @@ std::streamsize cmnLODMultiplexerStreambuf<_element, _trait>::xsputn(const _elem
     std::streamsize ssize(0);
     IteratorType it;
     for (it = m_ChannelContainer.begin(); it != m_ChannelContainer.end(); it++) {
-        if (lod <= (*it).second)
+        if (lod & ((*it).second)) {
             ssize = ((*it).first)->sputn(s, n);
+        }
     }
     return ssize;
 }
@@ -370,8 +371,9 @@ cmnLODMultiplexerStreambuf<_element, _trait>::overflow(int_type c, LogLoDType lo
 
     // multiplexing
     for (it = m_ChannelContainer.begin(); it != m_ChannelContainer.end(); it++) {
-        if (lod <= (*it).second)
+        if (lod & (*it).second) {
             ((*it).first)->sputc( _trait::to_char_type(c) );
+        }
     }
 
     // follow the basic_streambuf standard

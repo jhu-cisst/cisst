@@ -110,11 +110,13 @@ private:
 
     /*! Sets the Level of Detail. */
     void SetLOD(LogLoDType lod) {
+        #if 0
         if (lod < CMN_LOG_LOD_NONE) {
             lod = CMN_LOG_LOD_NONE;
         } else if (lod > CMN_LOG_LOD_VERY_VERBOSE) {
             lod = CMN_LOG_LOD_VERY_VERBOSE;
         }
+        #endif
         m_LOD = lod;
     }
 

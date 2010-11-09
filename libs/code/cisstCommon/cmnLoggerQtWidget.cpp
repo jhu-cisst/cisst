@@ -154,7 +154,7 @@ bool cmnLoggerQtWidgetClassServicesModel::setData(const QModelIndex & index,
         cmnClassRegister::const_iterator iterator = cmnClassRegister::begin();
         std::advance(iterator, index.row());
         cmnClassRegister::SetLoD(iterator->first.c_str(),
-                                 static_cast<cmnLogLoD>(value.toInt()));
+                                 static_cast<cmnLogBitset>(value.toInt()));
     }
     return true;
 }
@@ -172,11 +172,13 @@ QWidget * cmnLoggerQtWidgetLoDDelegate::createEditor(QWidget * parent,
 {
     QComboBox * comboBox = new QComboBox(parent);
     unsigned int lod;
+#if 0
     for (lod = CMN_LOG_LOD_NONE;
          lod < CMN_LOG_LOD_NOT_USED;
          lod++) {
         comboBox->insertItem(lod, QString(cmnLogLoDString[lod]), QVariant(lod));
     }
+#endif
     return comboBox;
 }
 
