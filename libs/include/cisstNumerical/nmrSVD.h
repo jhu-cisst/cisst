@@ -445,7 +445,7 @@ public:
       \sa nmrSVDDynamicData::Allocate
     */
     template <class _matrixOwnerTypeA>
-    nmrSVDDynamicData(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> & A)
+    nmrSVDDynamicData(const vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> & A)
     {
         this->Allocate(A);
     }
@@ -530,7 +530,7 @@ public:
     */
     template <class _matrixOwnerTypeA>
     inline 
-    void Allocate(vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> & A)
+    void Allocate(const vctDynamicMatrixBase<_matrixOwnerTypeA, CISSTNETLIB_DOUBLE> & A)
     {
         this->Allocate(A.rows(), A.cols(), A.StorageOrder());
     }
