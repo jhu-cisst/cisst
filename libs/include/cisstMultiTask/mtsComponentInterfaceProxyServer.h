@@ -43,7 +43,7 @@ class CISST_EXPORT mtsComponentInterfaceProxyServer :
     typedef mtsProxyBaseServer<mtsComponentProxy, ComponentInterfaceClientProxyType, unsigned int> BaseServerType;
 
 protected:
-    /*! Definitions for send thread */
+    /*! Definitions of send thread */
     class ComponentInterfaceServerI;
     typedef IceUtil::Handle<ComponentInterfaceServerI> ComponentInterfaceServerIPtr;
     ComponentInterfaceServerIPtr Sender;
@@ -56,16 +56,16 @@ protected:
         key=(client id)
         value=(an instance of mtsDescriptionConnection)
 
-        This map is used to disconnect currently established connection when a
-        network proxy client is detected as disconnected. */
+        This map is used to disconnect interface proxies when any error occurs or
+        Ice proxy disconnection is detected. */
     typedef std::map<ClientIDType, mtsDescriptionConnection> ConnectionStringMapType;
     ConnectionStringMapType ConnectionStringMap;
 
-    /*! String key to set an implicit per-proxy context for connection id */
+    /*! String key to set implicit per-proxy context for connection id */
     static std::string ConnectionIDKey;
 
-    /*! Communicator (proxy) ID to initialize mtsComponentInterfaceProxyServer.
-        A component interface proxy client uses this ID to connect to a proxy
+    /*! Communicator (proxy) id to initialize mtsComponentInterfaceProxyServer.
+        A component interface proxy client uses this id to connect to a proxy
         server. */
     static std::string InterfaceCommunicatorID;
 
@@ -75,27 +75,24 @@ protected:
     //-------------------------------------------------------------------------
     //  Proxy Implementation
     //-------------------------------------------------------------------------
-    /*! Create a servant */
-    Ice::ObjectPtr CreateServant() {
-        Sender = new ComponentInterfaceServerI(IceCommunicator, IceLogger, this);
-        return Sender;
-    }
+    /*! Create servant */
+    Ice::ObjectPtr CreateServant(void);
 
-    /*! Start a send thread and wait for shutdown (this is a blocking method). */
-    void StartServer();
+    /*! Start send thread and wait for shutdown (this is a blocking method). */
+    void StartServer(void);
 
     /*! Thread runner */
     static void Runner(ThreadArguments<mtsComponentProxy> * arguments);
 
-    /*! Get a network proxy client object using clientID. If no network proxy
-        client with the clientID is not connected or the proxy is inactive,
-        this method returns NULL. */
+    /*! Get a network proxy client using clientID. If no network proxy client
+        with the clientID is found or it's inactive proxy, returns NULL. */
     ComponentInterfaceClientProxyType * GetNetworkProxyClient(const ClientIDType clientID);
 
     /*! Monitor all the current connections */
-    void MonitorConnections() {
-        BaseServerType::Monitor();
-    }
+    void MonitorConnections(void);
+
+    /*! Remove servant */
+    void RemoveServant(void);
 
     /*! Event handler for client's disconnect event */
     bool OnClientDisconnect(const ClientIDType clientID);
@@ -129,7 +126,7 @@ public:
     bool StartProxy(mtsComponentProxy * owner);
 
     /*! Stop the proxy (clean up thread-related resources) */
-    void StopProxy();
+    void StopProxy(void);
 
     /*! Register per-command (de)serializer */
     bool AddPerCommandSerializer(const CommandIDType commandID, mtsProxySerializer * serializer);
@@ -165,12 +162,12 @@ public:
     //  Getters
     //-------------------------------------------------------------------------
     /*! Returns connection id key */
-    inline static std::string GetConnectionIDKey() {
+    inline static const std::string GetConnectionIDKey(void) {
         return mtsComponentInterfaceProxyServer::ConnectionIDKey;
     }
 
     /*! Returns communicator (proxy) ID */
-    inline static std::string GetInterfaceCommunicatorID() {
+    inline static const std::string GetInterfaceCommunicatorID(void) {
         return mtsComponentInterfaceProxyServer::InterfaceCommunicatorID;
     }
 

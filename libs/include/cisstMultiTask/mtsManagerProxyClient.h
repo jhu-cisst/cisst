@@ -42,7 +42,7 @@ class CISST_EXPORT mtsManagerProxyClient :
     ManagerServerProxyType ManagerServerProxy;
 
 protected:
-    /*! Definitions for server communication callback thread */
+    /*! Definitions of callback thread to communicate with server */
     class ManagerClientI;
     typedef IceUtil::Handle<ManagerClientI> ManagerClientIPtr;
     ManagerClientIPtr Server;
@@ -53,22 +53,24 @@ protected:
     //-------------------------------------------------------------------------
     //  Proxy Implementation
     //-------------------------------------------------------------------------
-    /*! Create GCM proxy (server) and server communication callback thread.
+    /*! Create GCM proxy (server) and callback thread to communicate with
+        server.
         This methods gets called by the base class (mtsProxyBaseClient). */
     void CreateProxy(void);
 
-    /*! Destroy connected GCM proxy including server communication callback thread.
+    /*! Destroy connected GCM proxy including callback thread to communicate
+        with server.
         This methods gets called by the base class (mtsProxyBaseClient). */
     void RemoveProxy(void);
 
-    /*! Start server communication callback thread (blocking call).
+    /*! Start callback thread to communicate with server (blocking call).
         Internally, mtsManagerProxyClient::ManagerClientI::Start() is called. */
     void StartClient(void);
 
     /*! Called when server disconnection is detected or any exception occurs. */
-    bool OnServerDisconnect(void);
+    bool OnServerDisconnect(const Ice::Exception & ex);
 
-    /*! Runner for server communication callback thread */
+    /*! Runner for callback thread to communicate with server */
     static void Runner(ThreadArguments<mtsManagerLocal> * arguments);
 
     //-------------------------------------------------------------------------

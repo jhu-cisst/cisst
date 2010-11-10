@@ -152,9 +152,9 @@ void mtsComponentInterfaceProxyClient::Runner(ThreadArguments<mtsComponentProxy>
         ProxyClient->GetLogger()->error(error);
     } 
 
-    ProxyClient->GetLogger()->trace("mtsComponentInterfaceProxyClient", "Proxy client terminates");
-
-    ProxyClient->StopProxy();
+    // smmy: check if this causes crashes AFTER updating this file
+    //ProxyClient->GetLogger()->trace("mtsComponentInterfaceProxyClient", "Proxy client terminates");
+    //ProxyClient->StopProxy();
 }
 
 void mtsComponentInterfaceProxyClient::StopProxy()
@@ -167,6 +167,7 @@ void mtsComponentInterfaceProxyClient::StopProxy()
 
     try {
         BaseClientType::StopProxy();
+        Server->Stop();
     } catch (const Ice::Exception& e) {
         std::string error("mtsComponentInterfaceProxyClient: ");
         error += e.what();
@@ -178,10 +179,12 @@ void mtsComponentInterfaceProxyClient::StopProxy()
     LogPrint(mtsManagerProxyClient, "Stopped component interface proxy client");
 }
 
-bool mtsComponentInterfaceProxyClient::OnServerDisconnect()
+bool mtsComponentInterfaceProxyClient::OnServerDisconnect(const Ice::Exception & ex)
 {
-    CMN_LOG_CLASS_RUN_ERROR << "Component interface proxy \"" << ProxyName << "\" detected SERVER(INTERFACE) DISCONNECTION "
-                            << "(" << EndpointInfo << ")" << std::endl;
+    // Ice - ConnectionLostException - forceful closure by peer
+    // Ice - ForcedCloseConnectionException - after forceful closure by peer
+    CMN_LOG_CLASS_RUN_ERROR << "Component interface proxy \"" << ProxyName << "\" detected SERVER COMPONENT DISCONNECTION "
+        << "(connection id: \"" << ConnectionID << "\")" << std::endl;
 
     StopProxy();
 
@@ -358,7 +361,7 @@ bool mtsComponentInterfaceProxyClient::SendFetchEventGeneratorProxyPointers(
             clientComponentName, requiredInterfaceName, eventGeneratorProxyPointers);
     } catch (const ::Ice::Exception & ex) {
         LogError(mtsComponentInterfaceProxyServer, "SendFetchEventGeneratorProxyPointers: network exception: " << ex);
-        OnServerDisconnect();
+        OnServerDisconnect(ex);
         return false;
     }
 }
@@ -373,7 +376,7 @@ bool mtsComponentInterfaceProxyClient::SendExecuteEventVoid(const CommandIDType 
         ComponentInterfaceServerProxy->ExecuteEventVoid(commandID);
     } catch (const ::Ice::Exception & ex) {
         LogError(mtsComponentInterfaceProxyServer, "SendExecuteEventVoid: network exception: " << ex);
-        OnServerDisconnect();
+        OnServerDisconnect(ex);
         return false;
     }
 
@@ -405,7 +408,7 @@ bool mtsComponentInterfaceProxyClient::SendExecuteEventWriteSerialized(const Com
         ComponentInterfaceServerProxy->ExecuteEventWriteSerialized(commandID, serializedArgument);
     } catch (const ::Ice::Exception & ex) {
         LogError(mtsComponentInterfaceProxyServer, "SendExecuteEventWriteSerialized: network exception: " << ex);
-        OnServerDisconnect();
+        OnServerDisconnect(ex);
         return false;
     }
 
@@ -464,10 +467,9 @@ void mtsComponentInterfaceProxyClient::ComponentInterfaceClientI::Run()
         try {
             Server->Refresh();
         } catch (const ::Ice::Exception & ex) {
-            LogPrint(mtsComponentInterfaceProxyClient, "Refresh to Component Interface Server failed (" 
-                << Server->ice_toString() << ")" << std::endl << ex);
+            LogPrint(mtsComponentInterfaceProxyClient, "refresh failed (" << Server->ice_toString() << ")" << std::endl << ex);
             if (ComponentInterfaceProxyClient) {
-                ComponentInterfaceProxyClient->OnServerDisconnect();
+                ComponentInterfaceProxyClient->OnServerDisconnect(ex);
             }
         }
     }
@@ -480,8 +482,6 @@ void mtsComponentInterfaceProxyClient::ComponentInterfaceClientI::Stop()
 {
     if (!IsActiveProxy()) return;
 
-    ComponentInterfaceProxyClient = NULL;
-
     IceUtil::ThreadPtr callbackSenderThread;
     {
         IceUtil::Monitor<IceUtil::Mutex>::Lock lock(*this);
@@ -493,7 +493,8 @@ void mtsComponentInterfaceProxyClient::ComponentInterfaceClientI::Stop()
     }
     callbackSenderThread->getThreadControl().join();
 
-    LogPrint(ComponentInterfaceClientI, "Stopped and destroyed server communication callback thread");
+    ComponentInterfaceProxyClient = 0;
+    LogPrint(ComponentInterfaceClientI, "Stopped and destroyed callback thread to communicate with server");
 }
 
 //-----------------------------------------------------------------------------

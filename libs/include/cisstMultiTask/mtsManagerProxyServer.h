@@ -44,7 +44,7 @@ class CISST_EXPORT mtsManagerProxyServer :
     typedef mtsProxyBaseServer<mtsManagerGlobal, ManagerClientProxyType, std::string> BaseServerType;
 
 protected:
-    /*! Definitions for send thread */
+    /*! Definitions of send thread */
     class ManagerServerI;
     typedef IceUtil::Handle<ManagerServerI> ManagerServerIPtr;
     ManagerServerIPtr Sender;
@@ -62,29 +62,27 @@ protected:
     //-------------------------------------------------------------------------
     //  Proxy Implementation
     //-------------------------------------------------------------------------
-    /*! Create a servant */
-    Ice::ObjectPtr CreateServant() {
-        Sender = new ManagerServerI(IceCommunicator, IceLogger, this);
-        return Sender;
-    }
+    /*! Create servant */
+    Ice::ObjectPtr CreateServant(void);
 
-    /*! Start a send thread and wait for shutdown (this is a blocking method). */
+    /*! Start send thread and wait for shutdown (this is a blocking method). */
     void StartServer();
 
     /*! Thread runner */
     static void Runner(ThreadArguments<mtsManagerGlobal> * arguments);
 
     /*! Get a network proxy client using clientID. If no network proxy client
-        with the clientID found or inactive proxy, this method returns NULL. */
+        with the clientID is found or it's inactive proxy, returns NULL. */
     ManagerClientProxyType * GetNetworkProxyClient(const ClientIDType clientID);
 
     /*! Monitor all the current connections */
-    void MonitorConnections() {
-        BaseServerType::Monitor();
-    }
+    void MonitorConnections(void);
 
     /*! Check connection timeout */
-    void ConnectCheckTimeout();
+    void CheckConnectConfirmTimeout(void);
+
+    /*! Remove servant */
+    void RemoveServant(void);
 
     /*! Event handler for client's disconnect event */
     bool OnClientDisconnect(const ClientIDType clientID);
@@ -142,12 +140,6 @@ public:
 
     /*! Stop the proxy (clean up thread-related resources) */
     void StopProxy();
-
-    /*! Construct mtsManagerProxy::ConnectionStringSet structure */
-    void ConstructConnectionStringSet(
-        const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
-        const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceProvidedName,
-        ::mtsManagerProxy::ConnectionStringSet & connectionStringSet);
 
     /*! Data structure converters */
     static void ConvertInterfaceProvidedDescription(

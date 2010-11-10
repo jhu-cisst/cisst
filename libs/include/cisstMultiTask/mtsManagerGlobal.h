@@ -497,11 +497,11 @@ public:
     //-------------------------------------------------------------------------
 #if CISST_MTS_HAS_ICE
     /*! Start network proxy server. The server's listening port number is
-    fetched from config.server file. (default port number: 10705) */
-    bool StartServer();
+        fetched from config.server file (default port: 10705) */
+    bool StartServer(void);
 
     /*! Stop network proxy server */
-    bool StopServer();
+    bool StopServer(void);
 
     bool SetInterfaceProvidedProxyAccessInfo(
         const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
@@ -522,9 +522,10 @@ public:
         const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceProvidedName,
         std::string & endpointInfo);
 
-    /*! Periodically check connection element map to cancel timed out connection
-        elements. */
-    void ConnectCheckTimeout();
+    /*! Check if there is any pending connection.  All new connections should be
+        confirmed by the LCM within timeout after the GCM issues a new connection
+        id.  Otherwise, the GCM actively disconnects the pending connection. */
+    void CheckConnectConfirmTimeout(void);
 #endif
 };
 

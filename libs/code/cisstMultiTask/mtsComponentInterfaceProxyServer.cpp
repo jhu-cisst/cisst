@@ -80,6 +80,22 @@ bool mtsComponentInterfaceProxyServer::StartProxy(mtsComponentProxy * proxyOwner
     return true;
 }
 
+Ice::ObjectPtr mtsComponentInterfaceProxyServer::CreateServant(void) 
+{
+    Sender = new ComponentInterfaceServerI(IceCommunicator, IceLogger, this);
+
+    return Sender;
+}
+
+void mtsComponentInterfaceProxyServer::RemoveServant(void)
+{
+    Sender->Stop();
+
+    // smmy: TDOO: iterate all clients and stop/clean-up all proxies
+    // CloseAllClients() - defined in mtsProxyBaseServer.h
+    //Sender = 0;
+}
+
 void mtsComponentInterfaceProxyServer::StartServer()
 {
     Sender->Start();
@@ -106,23 +122,18 @@ void mtsComponentInterfaceProxyServer::Runner(ThreadArguments<mtsComponentProxy>
         std::string error("mtsComponentInterfaceProxyServer: ");
         error += e.what();
         ProxyServer->GetLogger()->error(error);
-    } catch (const char * msg) {
-        std::string error("mtsComponentInterfaceProxyServer: ");
-        error += msg;
-        ProxyServer->GetLogger()->error(error);
     } catch (...) {
         std::string error("mtsComponentInterfaceProxyServer: exception at mtsComponentInterfaceProxyServer::Runner()");
         ProxyServer->GetLogger()->error(error);
     }
 
     ProxyServer->GetLogger()->trace("mtsComponentInterfaceProxyServer", "Proxy server terminates");
-
     ProxyServer->StopProxy();
 }
 
 void mtsComponentInterfaceProxyServer::StopProxy()
 {
-    LogPrint(mtsComponentInterfaceProxyClient, "ComponentInterfaceProxy server stops.");
+    if (!IsActiveProxy()) return;
 
     try {
         BaseServerType::StopProxy();
@@ -132,22 +143,29 @@ void mtsComponentInterfaceProxyServer::StopProxy()
         error += e.what();
         LogError(mtsManagerProxyClient, error);
     }
+
+    IceGUID = "";
+
+    LogPrint(mtsComponentInterfaceProxyServer, "Stopped component interface proxy server");
 }
 
 bool mtsComponentInterfaceProxyServer::OnClientDisconnect(const ClientIDType clientID)
 {
     if (!IsActiveProxy()) return true;
 
+    LogError(mtsComponentInterfaceProxyServer, "Component interface client detected SERVER COMPONENT DISCONNECTION: "
+        << "client id: \"" << clientID << "\"");
+
     // Get network proxy client serving the client with the clientID
     ComponentInterfaceClientProxyType * clientProxy = GetNetworkProxyClient(clientID);
     if (!clientProxy) {
-        LogError(mtsComponentInterfaceProxyServer, "OnClientDisconnect: no client proxy found with client id: " << clientID);
+        LogError(mtsComponentInterfaceProxyServer, "OnClientDisconnect: no client proxy found with client id: \"" << clientID <<"\"");
         return false;
     }
 
     // Remove client from client list to disable further command execution
     if (!BaseServerType::RemoveClientByClientID(clientID)) {
-        LogError(mtsComponentInterfaceProxyServer, "OnClientDisconnect: failed to remove client from client map: " << clientID);
+        LogError(mtsComponentInterfaceProxyServer, "OnClientDisconnect: failed to remove client from client map: \"" << clientID <<"\"");
         return false;
     }
 
@@ -155,7 +173,7 @@ bool mtsComponentInterfaceProxyServer::OnClientDisconnect(const ClientIDType cli
     // client has been serving.
     ConnectionStringMapType::iterator it = ConnectionStringMap.find(clientID);
     if (it == ConnectionStringMap.end()) {
-        LogError(mtsComponentInterfaceProxyServer, "OnClientDisconnect: no connection information found: " << clientID);
+        LogError(mtsComponentInterfaceProxyServer, "OnClientDisconnect: no connection information found: \"" << clientID <<"\"");
         return false;
     }
 
@@ -183,7 +201,14 @@ bool mtsComponentInterfaceProxyServer::OnClientDisconnect(const ClientIDType cli
     }
 #endif
 
+    LogPrint(mtsComponentInterfaceProxyServer, "OnClientDisconnect: successfully removed component interface: \"" << clientID << "\"");
+
     return true;
+}
+
+void mtsComponentInterfaceProxyServer::MonitorConnections(void) 
+{
+    BaseServerType::Monitor();
 }
 
 mtsComponentInterfaceProxyServer::ComponentInterfaceClientProxyType * mtsComponentInterfaceProxyServer::GetNetworkProxyClient(const ClientIDType clientID)
@@ -191,13 +216,13 @@ mtsComponentInterfaceProxyServer::ComponentInterfaceClientProxyType * mtsCompone
     ComponentInterfaceClientProxyType * clientProxy = GetClientByClientID(clientID);
     if (!clientProxy) {
         LogError(mtsComponentInterfaceProxyServer, "GetNetworkProxyClient: no client proxy connected with client id: " << clientID);
-        return NULL;
+        return 0;
     }
 
     // Check if this network proxy server is active. We don't need to check if
     // a proxy client is still active since any disconnection or inactive proxy
     // has already been detected and taken care of.
-    return (IsActiveProxy() ? clientProxy : NULL);
+    return (IsActiveProxy() ? clientProxy : 0);
 }
 
 //-------------------------------------------------------------------------
@@ -566,21 +591,31 @@ void mtsComponentInterfaceProxyServer::ComponentInterfaceServerI::Run()
         ComponentInterfaceProxyServer->SendTestMessageFromServerToClient(ss.str());
     }
 #else
-    while(IsActiveProxy())
-    {
-        // smmy: do we need this???
-        // Check all connections at every 1 second
-        //ComponentInterfaceProxyServer->MonitorConnections();
+    while(IsActiveProxy()) {
         osaSleep(mtsProxyConfig::CheckPeriodForInterfaceConnections);
+        // smmy: CheckConnectConfirmTimeout() can cause exceptions which should be handled through
+        // OnClientDisconnect().
+        try {
+            // Check connections at every 1 second
+            IceUtil::Monitor<IceUtil::Mutex>::Lock lock(*this);
+            ComponentInterfaceProxyServer->MonitorConnections();
+        } catch (const Ice::Exception & ex) {
+            std::cout << "##################### ComponentInterfaceProxyServer DISCONNECT" << std::endl;
+            // smmy: how to call OnClientDisconnect() with client id??
+            //LogPrint(mtsManagerProxyServer, "Client refresh failed (" << Server->ice_toString() << ")" << std::endl << ex);
+            // how to get client id value???
+            //if (ManagerProxyServer) {
+            //    ManagerProxyClient->OnClientDisconnect();
+            //}
+        }
     }
 #endif
 }
 
 void mtsComponentInterfaceProxyServer::ComponentInterfaceServerI::Stop()
 {
-    if (!ComponentInterfaceProxyServer->IsActiveProxy()) return;
+    if (!IsActiveProxy()) return;
 
-    // TODO: Review the following codes
     IceUtil::ThreadPtr callbackSenderThread;
     {
         IceUtil::Monitor<IceUtil::Mutex>::Lock lock(*this);
@@ -591,6 +626,8 @@ void mtsComponentInterfaceProxyServer::ComponentInterfaceServerI::Stop()
         SenderThreadPtr = 0; // Resolve cyclic dependency.
     }
     callbackSenderThread->getThreadControl().join();
+
+    LogPrint(ComponentInterfaceServerI, "Stopped and destroyed callback thread to communicate with clients");
 }
 
 //-----------------------------------------------------------------------------
@@ -646,7 +683,7 @@ void mtsComponentInterfaceProxyServer::ComponentInterfaceServerI::Shutdown(const
 
     const ConnectionIDType connectionID = current.ctx.find(mtsComponentInterfaceProxyServer::ConnectionIDKey)->second;
 
-    // TODO:
+    // TODO: smmy
     // Set as true to represent that this connection (session) is going to be closed.
     // After this flag is set, no message is allowed to be sent to a server.
     //ComponentInterfaceProxyServer->ShutdownSession(current);

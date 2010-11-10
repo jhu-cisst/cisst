@@ -51,25 +51,25 @@ protected:
         feteched from the global component manager. */
     const std::string EndpointInfo;
 
-    /*! Start proxy client. Gets called by user (application) */
+    /*! Start proxy client. Entry point to initialize Ice proxy client objects.
+        Gets called by user (application) */
     virtual bool StartProxy(_proxyOwner * proxyOwner) = 0;
 
     /*! Initialize Ice proxy client.  Called by StartProxy(). */
     virtual void IceInitialize(void);
 
     /*! Create ICE proxy client object */
-    virtual void CreateProxy() = 0;
+    virtual void CreateProxy(void) = 0;
 
     /*! Called whenever server disconnection is detected */
-    virtual bool OnServerDisconnect() = 0;
+    virtual bool OnServerDisconnect(const Ice::Exception & ex) = 0;
 
     /*! Remove ICE proxy client object */
-    virtual void RemoveProxy() = 0;
+    virtual void RemoveProxy(void) = 0;
 
     /*! Clean up ICE related resources */
     virtual void IceCleanup(void);
 
-    // TODO: smmy This should be moved to derived classes
     /*! Stop and clean up proxy client */
     virtual void StopProxy(void);
 
@@ -104,28 +104,28 @@ void mtsProxyBaseClient<_proxyOwner>::IceInitialize(void)
 
         ChangeProxyState(BaseType::PROXY_STATE_READY);
 
-        IceLogger->trace("mtsProxyBaseClient", "Client proxy initialization success.");
+        IceLogger->trace("mtsProxyBaseClient", "ICE init - Client proxy initialization success.");
     } catch (const Ice::ConnectionRefusedException & e) {
         if (IceLogger) {
-            IceLogger->error("mtsProxyBaseClient: Connection refused. Check if server is running.");
+            IceLogger->error("mtsProxyBaseClient: ICE init - Connection refused. Check if server is running.");
             IceLogger->trace("mtsProxyBaseClient", e.what());
         } else {
-            std::cout << "ERROR - mtsProxyBaseClient: Connection refused. Check if server is running." << std::endl;
-            std::cout << "ERROR - mtsProxyBaseClient: " << e.what() << std::endl;
+            CMN_LOG_RUN_ERROR << "mtsProxyBaseClient: ICE init - Connection refused. Check if server is running." << std::endl;
+            CMN_LOG_RUN_ERROR << "mtsProxyBaseClient: " << e.what() << std::endl;
         }
     } catch (const Ice::Exception & e) {
         if (IceLogger) {
-            IceLogger->error("mtsProxyBaseClient: Client proxy initialization error");
+            IceLogger->error("mtsProxyBaseClient: ICE init - Client proxy initialization error");
             IceLogger->trace("mtsProxyBaseClient", e.what());
         } else {
-            std::cout << "ERROR - mtsProxyBaseClient: Client proxy initialization error." << std::endl;
-            std::cout << "ERROR - mtsProxyBaseClient: " << e.what() << std::endl;
+            CMN_LOG_RUN_ERROR << "mtsProxyBaseClient: ICE init - Client proxy initialization error." << std::endl;
+            CMN_LOG_RUN_ERROR << "mtsProxyBaseClient: " << e.what() << std::endl;
         }
     } catch (...) {
         if (IceLogger) {
-            IceLogger->error("mtsProxyBaseClient: exception");
+            IceLogger->error("mtsProxyBaseClient: ICE init - exception");
         } else {
-            std::cout << "ERROR - mtsProxyBaseClient: exception" << std::endl;
+            CMN_LOG_RUN_ERROR << "mtsProxyBaseClient: ICE init - exception" << std::endl;
         }
     }
 
@@ -134,11 +134,11 @@ void mtsProxyBaseClient<_proxyOwner>::IceInitialize(void)
             IceCommunicator->destroy();
         } catch (const Ice::Exception & e) {
             if (IceLogger) {
-                IceLogger->error("mtsProxyBaseClient: Client proxy clean-up error");
+                IceLogger->error("mtsProxyBaseClient: ICE init - Client proxy clean-up error");
                 IceLogger->trace("mtsProxyBaseClient", e.what());
             } else {
-                std::cerr << "ERROR - mtsProxyBaseClient: Client proxy clean-up error." << std::endl;
-                std::cerr << "ERROR - mtsProxyBaseClient: " << e.what() << std::endl;
+                CMN_LOG_RUN_ERROR << "mtsProxyBaseClient: ICE init - Client proxy clean-up error." << std::endl;
+                CMN_LOG_RUN_ERROR << "mtsProxyBaseClient: " << e.what() << std::endl;
             }
         }
     }
@@ -162,14 +162,13 @@ void mtsProxyBaseClient<_proxyOwner>::StopProxy(void)
     if (IceCommunicator) {
         try {
             IceCommunicator->destroy();
-            IceCommunicator = NULL;
-            IceLogger->trace("mtsProxyBaseClient", "Proxy client clean-up success.");
+            IceCommunicator = 0;
+            IceLogger->trace("mtsProxyBaseClient", "Proxy client clean-up success");
         } catch (const Ice::Exception& e) {
-            IceLogger->trace("mtsProxyBaseClient", "Proxy client clean-up failure.");
+            IceLogger->trace("mtsProxyBaseClient", "Proxy client clean-up failure");
             IceLogger->trace("mtsProxyBaseClient", e.what());
-        } catch (const char* msg) {
-            IceLogger->error("mtsProxyBaseClient: Proxy client clean-up failure.");
-            IceLogger->trace("mtsProxyBaseClient", msg);
+        } catch (...) {
+            IceLogger->error("mtsProxyBaseClient: Proxy client clean-up failure");
         }
     }
 

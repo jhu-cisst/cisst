@@ -27,6 +27,20 @@ std::string mtsManagerProxyServer::ManagerCommunicatorID = "ManagerServerCommuni
 std::string mtsManagerProxyServer::ConnectionIDKey = "ManagerConnectionID";
 unsigned int mtsManagerProxyServer::InstanceCounter = 0;
 
+/*! Construct mtsManagerProxy::ConnectionStringSet structure */
+void ConstructConnectionStringSet(
+    const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
+    const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceProvidedName,
+    ::mtsManagerProxy::ConnectionStringSet & connectionStringSet)
+{
+    connectionStringSet.ClientProcessName = clientProcessName;
+    connectionStringSet.ClientComponentName = clientComponentName;
+    connectionStringSet.ClientInterfaceRequiredName = clientInterfaceRequiredName;
+    connectionStringSet.ServerProcessName = serverProcessName;
+    connectionStringSet.ServerComponentName = serverComponentName;
+    connectionStringSet.ServerInterfaceProvidedName = serverInterfaceProvidedName;
+}
+
 mtsManagerProxyServer::mtsManagerProxyServer(const std::string & adapterName, const std::string & communicatorID)
     : BaseServerType("config.GCM", adapterName, communicatorID, false)
 {
@@ -75,7 +89,7 @@ bool mtsManagerProxyServer::StartProxy(mtsManagerGlobal * proxyOwner)
     // Initialize Ice object.
     IceInitialize();
 
-    if (!this->InitSuccessFlag) {
+    if (!InitSuccessFlag) {
         LogError(mtsManagerProxyServer, "ICE proxy Initialization failed");
         return false;
     }
@@ -108,7 +122,23 @@ bool mtsManagerProxyServer::StartProxy(mtsManagerGlobal * proxyOwner)
     return true;
 }
 
-void mtsManagerProxyServer::StartServer()
+Ice::ObjectPtr mtsManagerProxyServer::CreateServant(void)
+{
+    Sender = new ManagerServerI(IceCommunicator, IceLogger, this);
+
+    return Sender;
+}
+
+void mtsManagerProxyServer::RemoveServant(void)
+{
+    Sender->Stop();
+
+    // smmy: TDOO: iterate all clients and stop/clean-up all proxies
+    // CloseAllClients() - defined in mtsProxyBaseServer.h
+    //Sender = 0;
+}
+
+void mtsManagerProxyServer::StartServer(void)
 {
     Sender->Start();
 
@@ -118,14 +148,13 @@ void mtsManagerProxyServer::StartServer()
 
 void mtsManagerProxyServer::Runner(ThreadArguments<mtsManagerGlobal> * arguments)
 {
-    mtsManagerProxyServer * ProxyServer =
-        dynamic_cast<mtsManagerProxyServer*>(arguments->Proxy);
+    mtsManagerProxyServer * ProxyServer = dynamic_cast<mtsManagerProxyServer*>(arguments->Proxy);
     if (!ProxyServer) {
-        CMN_LOG_RUN_ERROR << "mtsManagerProxyServer: Failed to create a proxy server." << std::endl;
+        CMN_LOG_RUN_ERROR << "mtsManagerProxyServer: failed to get proxy server" << std::endl;
         return;
     }
 
-    ProxyServer->GetLogger()->trace("mtsManagerProxyServer", "Proxy server starts.....");
+    ProxyServer->GetLogger()->trace("mtsManagerProxyServer", "proxy server starts");
 
     try {
         ProxyServer->ChangeProxyState(PROXY_STATE_ACTIVE);
@@ -134,23 +163,18 @@ void mtsManagerProxyServer::Runner(ThreadArguments<mtsManagerGlobal> * arguments
         std::string error("mtsManagerProxyServer: ");
         error += e.what();
         ProxyServer->GetLogger()->error(error);
-    } catch (const char * msg) {
-        std::string error("mtsManagerProxyServer: ");
-        error += msg;
-        ProxyServer->GetLogger()->error(error);
     } catch (...) {
         std::string error("mtsManagerProxyServer: exception at mtsManagerProxyServer::Runner()");
         ProxyServer->GetLogger()->error(error);
     }
 
-    ProxyServer->GetLogger()->trace("mtsManagerProxyServer", "Proxy server terminates.....");
-
+    ProxyServer->GetLogger()->trace("mtsManagerProxyServer", "proxy server terminates");
     ProxyServer->StopProxy();
 }
 
-void mtsManagerProxyServer::StopProxy()
+void mtsManagerProxyServer::StopProxy(void)
 {
-    LogPrint(mtsManagerProxyServer, "ManagerProxy server stops.");
+    if (!IsActiveProxy()) return;
 
     try {
         BaseServerType::StopProxy();
@@ -160,66 +184,64 @@ void mtsManagerProxyServer::StopProxy()
         error += e.what();
         LogError(mtsManagerProxyServer, error);
     }
-}
 
-void mtsManagerProxyServer::ConnectCheckTimeout()
-{
-    ProxyOwner->ConnectCheckTimeout();
+    IceGUID = "";
+
+    LogPrint(mtsManagerProxyServer, "Stopped manager proxy server");
 }
 
 bool mtsManagerProxyServer::OnClientDisconnect(const ClientIDType clientID)
 {
     if (!IsActiveProxy()) return true;
 
+    LogError(mtsManagerProxyServer, "Global Component Manager detected LCM DISCONNECTION: \"" << clientID << "\"");
+
     // Get network proxy client serving the client with the clientID
     ManagerClientProxyType * clientProxy = GetNetworkProxyClient(clientID);
     if (!clientProxy) {
-        LogError(mtsManagerProxyServer, "OnClientDisconnect: no client proxy found with client id: " << clientID);
+        LogError(mtsManagerProxyServer, "OnClientDisconnect: no client proxy found with client id: \"" << clientID << "\"");
         return false;
     }
 
     // Remove client from client list. This prevents further network processing
     // requests from being executed.
     if (!BaseServerType::RemoveClientByClientID(clientID)) {
-        LogError(mtsManagerProxyServer, "OnClientDisconnect: failed to remove client from client map: " << clientID);
+        LogError(mtsManagerProxyServer, "OnClientDisconnect: failed to remove client from client map: \"" << clientID << "\"");
         return false;
     }
 
     // Remove the process logically
     if (!ProxyOwner->RemoveProcess(clientID)) {
-        LogError(mtsManagerProxyServer, "OnClientDisconnect: failed to remove process: " << clientID);
+        LogError(mtsManagerProxyServer, "OnClientDisconnect: failed to remove process: \"" << clientID << "\"");
         return false;
     }
 
-    LogPrint(mtsManagerProxyServer, "OnClientDisconnect: successfully removed process: " << clientID);
+    LogPrint(mtsManagerProxyServer, "OnClientDisconnect: successfully removed process: \"" << clientID << "\"");
 
     return true;
+}
+
+void mtsManagerProxyServer::MonitorConnections(void) 
+{
+    BaseServerType::Monitor();
+}
+
+void mtsManagerProxyServer::CheckConnectConfirmTimeout(void)
+{
+    ProxyOwner->CheckConnectConfirmTimeout();
 }
 
 mtsManagerProxyServer::ManagerClientProxyType * mtsManagerProxyServer::GetNetworkProxyClient(const ClientIDType clientID)
 {
     ManagerClientProxyType * clientProxy = GetClientByClientID(clientID);
     if (!clientProxy) {
-        return NULL;
+        return 0;
     }
 
     // Check if this network proxy server is active. We don't need to check if
     // a proxy client is still active since any disconnection or inactive proxy
     // has already been detected and taken care of.
-    return (IsActiveProxy() ? clientProxy : NULL);
-}
-
-void mtsManagerProxyServer::ConstructConnectionStringSet(
-    const std::string & clientProcessName, const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
-    const std::string & serverProcessName, const std::string & serverComponentName, const std::string & serverInterfaceProvidedName,
-    ::mtsManagerProxy::ConnectionStringSet & connectionStringSet)
-{
-    connectionStringSet.ClientProcessName = clientProcessName;
-    connectionStringSet.ClientComponentName = clientComponentName;
-    connectionStringSet.ClientInterfaceRequiredName = clientInterfaceRequiredName;
-    connectionStringSet.ServerProcessName = serverProcessName;
-    connectionStringSet.ServerComponentName = serverComponentName;
-    connectionStringSet.ServerInterfaceProvidedName = serverInterfaceProvidedName;
+    return (IsActiveProxy() ? clientProxy : 0);
 }
 
 void mtsManagerProxyServer::ConvertInterfaceProvidedDescription(
@@ -1327,36 +1349,48 @@ void mtsManagerProxyServer::ManagerServerI::Run()
         ManagerProxyServer->SendTestMessageFromServerToClient(ss.str());
     }
 #else
-    while(IsActiveProxy())
-    {
-        // Check connection element map to cancel timed out connection elements
-        ManagerProxyServer->ConnectCheckTimeout();
-
-        // smmy: do we need this???
-        //IceUtil::Monitor<IceUtil::Mutex>::Lock lock(*this);
-        // Check connections at every 1 second
-        //ManagerProxyServer->MonitorConnections();
+    // smmy: REVIEW THIS PART!!!!!!!
+    while (IsActiveProxy()) {
         osaSleep(mtsProxyConfig::CheckPeriodForManagerConnections);
+        // smmy: CheckConnectConfirmTimeout() can cause exceptions which should be handled through
+        // OnClientDisconnect().
+        try {
+            // smmy: why this doesn't work???
+            // Check if there is any pending connection to remove
+            //ManagerProxyServer->CheckConnectConfirmTimeout();
+
+            // Check connections at every 1 second
+            IceUtil::Monitor<IceUtil::Mutex>::Lock lock(*this);
+            ManagerProxyServer->MonitorConnections();
+        } catch (const Ice::Exception & ex) {
+            std::cout << "##################### ManagerProxyServer DISCONNECT" << std::endl;
+            // smmy: how to call OnClientDisconnect() with client id??
+            //LogPrint(mtsManagerProxyServer, "Client refresh failed (" << Server->ice_toString() << ")" << std::endl << ex);
+            // how to get client id value???
+            //if (ManagerProxyServer) {
+            //    ManagerProxyClient->OnClientDisconnect();
+            //}
+        }
     }
 #endif
 }
 
 void mtsManagerProxyServer::ManagerServerI::Stop()
 {
-    if (!ManagerProxyServer->IsActiveProxy()) return;
+    if (!IsActiveProxy()) return;
 
-    // TODO: Review the following codes
     IceUtil::ThreadPtr callbackSenderThread;
     {
         IceUtil::Monitor<IceUtil::Mutex>::Lock lock(*this);
 
-        // Change this from active to 'prepare stop(?)'
         notify();
 
         callbackSenderThread = SenderThreadPtr;
         SenderThreadPtr = 0; // Resolve cyclic dependency.
     }
     callbackSenderThread->getThreadControl().join();
+
+    LogPrint(ManagerServerI, "Stopped and destroyed callback thread to communicate with clients");
 }
 
 //-----------------------------------------------------------------------------

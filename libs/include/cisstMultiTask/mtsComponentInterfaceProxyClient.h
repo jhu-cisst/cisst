@@ -62,20 +62,22 @@ protected:
     //-------------------------------------------------------------------------
     //  Proxy Implementation
     //-------------------------------------------------------------------------
-    /*! Create provided interface proxy (server) and server communication callback thread.
+    /*! Create provided interface proxy (server) and callback thread to 
+        communicate with server.
         This methods gets called by the base class (mtsProxyBaseClient). */
     void CreateProxy(void);
 
-    /*! Destroy connected provided interface proxy including server communication callback thread.
+    /*! Destroy connected provided interface proxy including callback thread to 
+        communicate with server.
         This methods gets called by the base class (mtsProxyBaseClient). */
     void RemoveProxy(void);
 
-    /*! Start server communication callback thread (blocking call).
+    /*! Start callback thread to communicate with server (blocking call).
         Internally, mtsManagerProxyClient::ManagerClientI::Start() is called. */
     void StartClient(void);
 
     /*! Called when server disconnection is detected or any exception occurs. */
-    bool OnServerDisconnect(void);
+    bool OnServerDisconnect(const Ice::Exception & ex);
 
     /*! Runner for server communication callback thread */
     static void Runner(ThreadArguments<mtsComponentProxy> * arguments);

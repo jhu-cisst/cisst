@@ -938,11 +938,10 @@ int mtsManagerGlobal::Connect(const std::string & requestProcessName,
 }
 
 #if CISST_MTS_HAS_ICE
-void mtsManagerGlobal::ConnectCheckTimeout()
+void mtsManagerGlobal::CheckConnectConfirmTimeout(void)
 {
     if (ConnectionElementMap.empty()) return;
 
-    /* smmy
     ConnectionChange.Lock();
 
     ConnectionElement * element;
@@ -967,13 +966,15 @@ void mtsManagerGlobal::ConnectCheckTimeout()
                                   << GetInterfaceUID(element->ClientProcessName, element->ClientComponentName, element->ClientInterfaceRequiredName) << " - "
                                   << GetInterfaceUID(element->ServerProcessName, element->ServerComponentName, element->ServerInterfaceProvidedName) << std::endl;
 
+        // smmy
+        // TODO: active disconnect (to clean up all the pending requests)
+
         // Remove an element
         delete element;
         ConnectionElementMap.erase(it++);
     }
 
     ConnectionChange.Unlock();
-    */
 }
 #endif
 
@@ -1491,7 +1492,7 @@ void mtsManagerGlobal::GetValuesOfCommand(const std::string & processName,
 //  Networking
 //-------------------------------------------------------------------------
 #if CISST_MTS_HAS_ICE
-bool mtsManagerGlobal::StartServer()
+bool mtsManagerGlobal::StartServer(void)
 {
     // Create an instance of mtsComponentInterfaceProxyServer
     ProxyServer = new mtsManagerProxyServer("ManagerServerAdapter", mtsManagerProxyServer::GetManagerCommunicatorID());
@@ -1510,15 +1511,15 @@ bool mtsManagerGlobal::StartServer()
     return true;
 }
 
-bool mtsManagerGlobal::StopServer()
+bool mtsManagerGlobal::StopServer(void)
 {
     if (!ProxyServer) {
-        CMN_LOG_CLASS_RUN_ERROR << "StopServer: Proxy is not initialized" << std::endl;
+        CMN_LOG_CLASS_RUN_ERROR << "StopServer: no proxy server found" << std::endl;
         return false;
     }
 
     if (!ProxyServer->IsActiveProxy()) {
-        CMN_LOG_CLASS_RUN_ERROR << "StopServer: Proxy is not running: " << GetName() << std::endl;
+        CMN_LOG_CLASS_RUN_ERROR << "StopServer: no active proxy server: " << "\"" << ProxyServer->GetProxyName() << "\"" << std::endl;
         return false;
     }
 
