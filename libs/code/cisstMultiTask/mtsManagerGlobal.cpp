@@ -1526,8 +1526,8 @@ bool mtsManagerGlobal::StopServer(void)
     LocalManagerConnected = 0;
 
     // Stop proxy server
-    ProxyServer->StopProxy();
     ProxyServer->GetLogger()->trace("mtsManagerGlobal", "Global component manager stopped.");
+    ProxyServer->StopProxy();
 
     delete ProxyServer;
 

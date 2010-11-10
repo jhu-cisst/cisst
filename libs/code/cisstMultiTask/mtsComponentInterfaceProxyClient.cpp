@@ -152,7 +152,7 @@ void mtsComponentInterfaceProxyClient::Runner(ThreadArguments<mtsComponentProxy>
         ProxyClient->GetLogger()->error(error);
     } 
 
-    // smmy: check if this causes crashes AFTER updating this file
+    // smmy: check if this causes crashes
     //ProxyClient->GetLogger()->trace("mtsComponentInterfaceProxyClient", "Proxy client terminates");
     //ProxyClient->StopProxy();
 }
@@ -462,13 +462,15 @@ void mtsComponentInterfaceProxyClient::ComponentInterfaceClientI::Run()
         ComponentInterfaceProxyClient->SendTestMessageFromClientToServer(ss.str());
     }
 #else
-    while (this->IsActiveProxy()) {
+    while (IsActiveProxy()) {
         osaSleep(mtsProxyConfig::RefreshPeriodForInterfaces);
         try {
             Server->Refresh();
         } catch (const ::Ice::Exception & ex) {
             LogPrint(mtsComponentInterfaceProxyClient, "refresh failed (" << Server->ice_toString() << ")" << std::endl << ex);
             if (ComponentInterfaceProxyClient) {
+                // smmy: GCM, LCM_S, LCM_C: if LCM_C dies, LCM_S crashes at
+                // the following line
                 ComponentInterfaceProxyClient->OnServerDisconnect(ex);
             }
         }

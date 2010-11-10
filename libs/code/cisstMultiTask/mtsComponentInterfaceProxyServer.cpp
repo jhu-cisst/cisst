@@ -591,22 +591,16 @@ void mtsComponentInterfaceProxyServer::ComponentInterfaceServerI::Run()
         ComponentInterfaceProxyServer->SendTestMessageFromServerToClient(ss.str());
     }
 #else
-    while(IsActiveProxy()) {
+    while (IsActiveProxy()) {
         osaSleep(mtsProxyConfig::CheckPeriodForInterfaceConnections);
-        // smmy: CheckConnectConfirmTimeout() can cause exceptions which should be handled through
-        // OnClientDisconnect().
+
+        // Check connections at every 1 second
+        IceUtil::Monitor<IceUtil::Mutex>::Lock lock(*this);
+
         try {
-            // Check connections at every 1 second
-            IceUtil::Monitor<IceUtil::Mutex>::Lock lock(*this);
             ComponentInterfaceProxyServer->MonitorConnections();
         } catch (const Ice::Exception & ex) {
-            std::cout << "##################### ComponentInterfaceProxyServer DISCONNECT" << std::endl;
-            // smmy: how to call OnClientDisconnect() with client id??
-            //LogPrint(mtsManagerProxyServer, "Client refresh failed (" << Server->ice_toString() << ")" << std::endl << ex);
-            // how to get client id value???
-            //if (ManagerProxyServer) {
-            //    ManagerProxyClient->OnClientDisconnect();
-            //}
+            LogPrint(mtsManagerProxyServer::ManagerServerI, "Server component disconnection detected");
         }
     }
 #endif

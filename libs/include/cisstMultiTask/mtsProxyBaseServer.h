@@ -419,7 +419,7 @@ void mtsProxyBaseServerType::CloseClient(const ConnectionIDType & connectionID, 
         std::stringstream ss;
         ss << "CloseClient: cannot find client with connection id: " << connectionID;
         std::string s = ss.str();
-        this->IceLogger->warning(s);
+        IceLogger->warning(s);
         return;
     }
 
@@ -431,6 +431,8 @@ void mtsProxyBaseServerType::CloseClient(const ConnectionIDType & connectionID, 
 template<class _proxyOwner, class _clientProxyType, class _clientIDType>
 void mtsProxyBaseServerType::Monitor(void) 
 {
+    if (!IsActiveProxy()) return;
+
     typename ConnectionIDMapType::iterator it = ConnectionIDMap.begin();
     while (it != ConnectionIDMap.end()) {
         // smmy: it would be good to be able to check isShutdown()

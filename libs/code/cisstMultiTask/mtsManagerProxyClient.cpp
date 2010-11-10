@@ -157,7 +157,6 @@ void mtsManagerProxyClient::Runner(ThreadArguments<mtsManagerLocal> * arguments)
     } 
 
     ProxyClient->GetLogger()->trace("mtsManagerProxyClient", "proxy client terminates");
-
     ProxyClient->StopProxy();
 }
 
