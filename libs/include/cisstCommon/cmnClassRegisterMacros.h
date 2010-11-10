@@ -259,7 +259,7 @@ cmnClassServicesBase * cmnClassServicesInstantiate<className>(void) \
 { \
     static cmnClassServices<className::HAS_DYNAMIC_CREATION, className> classServices(#className, \
                                                                                       &typeid(className), \
-                                                                                      static_cast<cmnLogBitset>(className::InitialLoD)); \
+                                                                                      className::InitialLoD); \
     return static_cast<cmnClassServicesBase *>(&classServices); \
 } \
 static cmnClassServicesBase * className##ClassServicesPointer = className::ClassServices();
@@ -287,7 +287,7 @@ cmnClassServicesBase * cmnClassServicesInstantiate<className>(void) \
 { \
     static cmnClassServices<className::HAS_DYNAMIC_CREATION, className> classServices(#className, \
                                                                                       &typeid(className), \
-                                                                                      static_cast<cmnLogBitset>(className::InitialLoD)); \
+                                                                                      className::InitialLoD); \
     return static_cast<cmnClassServicesBase *>(&classServices); \
 } \
 static cmnClassServicesBase * className##ClassServicesPointer = className::ClassServices();

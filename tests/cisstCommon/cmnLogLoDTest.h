@@ -29,8 +29,9 @@ class cmnLogLoDTest : public CppUnit::TestFixture
 {
     CPPUNIT_TEST_SUITE(cmnLogLoDTest);
     {
-        CPPUNIT_TEST(TestLogBitsetToIndex);
-        CPPUNIT_TEST(TestIndexToLogBitset);
+        CPPUNIT_TEST(TestLogLevelToIndex);
+        CPPUNIT_TEST(TestIndexToLogLevel);
+        CPPUNIT_TEST(TestMasks);
     }
     CPPUNIT_TEST_SUITE_END();
     
@@ -41,8 +42,9 @@ class cmnLogLoDTest : public CppUnit::TestFixture
     void tearDown(void) {
     }
     
-    void TestLogBitsetToIndex(void);
-    void TestIndexToLogBitset(void);
+    void TestLogLevelToIndex(void);
+    void TestIndexToLogLevel(void);
+    void TestMasks(void);
 };
 
 

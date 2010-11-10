@@ -152,10 +152,10 @@ public:
       added. */
     bool AddItem(const std::string & name,
                  _elementType * item,
-                 cmnLogBitset lod = CMN_LOG_BIT_RUN_ERROR);
+                 cmnLogLevel lod = CMN_LOG_LEVEL_RUN_ERROR);
 
     /*! Get an item by name */
-    _elementType * GetItem(const std::string & name, cmnLogBitset lod = CMN_LOG_BIT_RUN_WARNING) const;
+    _elementType * GetItem(const std::string & name, cmnLogLevel lod = CMN_LOG_LEVEL_RUN_WARNING) const;
 
     /*! Find an item by name */
     bool FindItem(const std::string & itemName) const;
@@ -163,7 +163,7 @@ public:
     /*! Remove an item from the internal map.  The log level of
       details is used to determine the lod of a message if the item
       can not be removed. */
-    bool RemoveItem(const std::string & name, cmnLogBitset lod = CMN_LOG_BIT_RUN_ERROR);
+    bool RemoveItem(const std::string & name, cmnLogLevel lod = CMN_LOG_LEVEL_RUN_ERROR);
 
     /*! List of names used, i.e. list of keys in the map */
     //@{
@@ -229,7 +229,7 @@ public:
 
 
 template <class _elementType>
-bool cmnNamedMap<_elementType>::AddItem(const std::string & name, _elementType *item, cmnLogBitset lod)
+bool cmnNamedMap<_elementType>::AddItem(const std::string & name, _elementType *item, cmnLogLevel lod)
 {
     // check if this name already exists
     const typename MapType::const_iterator iterator = Map.find(name);
@@ -248,7 +248,7 @@ bool cmnNamedMap<_elementType>::AddItem(const std::string & name, _elementType *
 }
 
 template <class _elementType>
-_elementType * cmnNamedMap<_elementType>::GetItem(const std::string & itemName, cmnLogBitset lod) const {
+_elementType * cmnNamedMap<_elementType>::GetItem(const std::string & itemName, cmnLogLevel lod) const {
     const typename MapType::const_iterator iter = Map.find(itemName);
     if (iter != Map.end()) {
         return iter->second;
@@ -270,7 +270,7 @@ bool cmnNamedMap<_elementType>::FindItem(const std::string & itemName) const {
 }
 
 template <class _elementType>
-bool cmnNamedMap<_elementType>::RemoveItem(const std::string & itemName, cmnLogBitset lod)
+bool cmnNamedMap<_elementType>::RemoveItem(const std::string & itemName, cmnLogLevel lod)
 {
     // check if this name already exists
     const typename MapType::iterator iterator = Map.find(itemName);

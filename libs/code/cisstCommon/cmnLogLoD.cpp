@@ -22,7 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnLogLoD.h>
 
-const std::string cmnLogBitsetString[] = {
+const std::string cmnLogLevelString[] = {
     "No log",
     "Error (init)",
     "Warning (init)",
@@ -35,10 +35,10 @@ const std::string cmnLogBitsetString[] = {
 };
 
 
-size_t cmnLogBitsetToIndex(const cmnLogBitset & bitset)
+size_t cmnLogLevelToIndex(const cmnLogLevel & level)
 {
     // position of first bit set to 1
-    cmnLogBitset copy = bitset;
+    cmnLogLevel copy = level;
     size_t position = 8;
     while (position > 0) {
         if (0x80 & copy) {
@@ -51,31 +51,31 @@ size_t cmnLogBitsetToIndex(const cmnLogBitset & bitset)
 }
 
 
-cmnLogBitset cmnIndexToLogBitset(const size_t & index)
+cmnLogLevel cmnIndexToLogLevel(const size_t & index)
 {
-    cmnLogBitset result;
+    cmnLogLevel result;
     result = (1 << (index - 1));
     return result;
 }
 
 
-const std::string & cmnLogBitsetToString(const cmnLogBitset & bitset)
+const std::string & cmnLogLevelToString(const cmnLogLevel & level)
 {
-    return cmnLogBitsetString[cmnLogBitsetToIndex(bitset)];
+    return cmnLogLevelString[cmnLogLevelToIndex(level)];
 }
 
 
-std::string cmnLogMaskToString(const cmnLogBitset & bitset)
+std::string cmnLogMaskToString(const cmnLogMask & mask)
 {
-    if (bitset) {
+    if (mask) {
         std::string result;
         for (size_t index = 0; index < 8; index++) {
-            if (bitset & 1<<index) {
-                result += cmnLogBitsetString[index + 1] + " ";
+            if (mask & 1<<index) {
+                result += cmnLogLevelString[index + 1] + " ";
             }
         }
         return result;
     } else {
-        return cmnLogBitsetString[0];
+        return cmnLogLevelString[0];
     }
 }

@@ -143,7 +143,7 @@ void cmnClassRegisterTest::TestRegistrationDynamicNoInline(void) {
 
 
 void cmnClassRegisterTest::TestLoD(void) {
-    cmnLogBitset lod;
+    cmnLogLevel lod;
     const cmnClassServicesBase* classAServices = 0;
     TestA objectA;
 
@@ -199,45 +199,45 @@ void cmnClassRegisterTest::TestLog(void) {
     cmnLogger::SetLoD(CMN_LOG_LOD_RUN_ERROR);
 
     OutputStream.str("");
-    objectA.Message(CMN_LOG_BIT_INIT_DEBUG);
+    objectA.Message(CMN_LOG_LEVEL_INIT_DEBUG);
     std::string expectedLog =
-        std::string(cmnLogBitsetToString(CMN_LOG_BIT_INIT_DEBUG))
+        std::string(cmnLogLevelToString(CMN_LOG_LEVEL_INIT_DEBUG))
         + " - Function " + objectA.Services()->GetName() + ": 4\n"
-        + std::string(cmnLogBitsetToString(CMN_LOG_BIT_INIT_DEBUG))
+        + std::string(cmnLogLevelToString(CMN_LOG_LEVEL_INIT_DEBUG))
         + " - Class " + objectA.Services()->GetName() + ": 4\n";
     std::cout << OutputStream.str() << std::endl
               << expectedLog << std::endl;
     CPPUNIT_ASSERT(OutputStream.str() == expectedLog);
 
     OutputStream.str("");
-    objectA.Message(CMN_LOG_BIT_RUN_ERROR);
+    objectA.Message(CMN_LOG_LEVEL_RUN_ERROR);
     expectedLog =
-        std::string(cmnLogBitsetToString(CMN_LOG_BIT_RUN_ERROR))
+        std::string(cmnLogLevelToString(CMN_LOG_LEVEL_RUN_ERROR))
         + " - Function " + objectA.Services()->GetName() + ": 5\n"
-        + std::string(cmnLogBitsetToString(CMN_LOG_BIT_RUN_ERROR))
+        + std::string(cmnLogLevelToString(CMN_LOG_LEVEL_RUN_ERROR))
         + " - Class " + objectA.Services()->GetName() + ": 5\n";
     CPPUNIT_ASSERT(OutputStream.str() == expectedLog);
 
     /* global LoD prevails, nothing goes thru */
     OutputStream.str("");
-    objectA.Message(CMN_LOG_BIT_RUN_WARNING);
+    objectA.Message(CMN_LOG_LEVEL_RUN_WARNING);
     CPPUNIT_ASSERT(OutputStream.str() == "");
 
     /* set a higher global LoD */
     cmnLogger::SetLoD(CMN_LOG_LOD_RUN_DEBUG);
     OutputStream.str("");
-    objectA.Message(CMN_LOG_BIT_RUN_WARNING);
+    objectA.Message(CMN_LOG_LEVEL_RUN_WARNING);
     expectedLog =
-        std::string(cmnLogBitsetToString(CMN_LOG_BIT_RUN_WARNING))
+        std::string(cmnLogLevelToString(CMN_LOG_LEVEL_RUN_WARNING))
         + " - Function " + objectA.Services()->GetName() + ": 6\n"
-        + std::string(cmnLogBitsetToString(CMN_LOG_BIT_RUN_WARNING))
+        + std::string(cmnLogLevelToString(CMN_LOG_LEVEL_RUN_WARNING))
         + " - Class " + objectA.Services()->GetName() + ": 6\n";
     CPPUNIT_ASSERT(OutputStream.str() == expectedLog);
 
     OutputStream.str("");
-    objectA.Message(CMN_LOG_BIT_RUN_DEBUG);
+    objectA.Message(CMN_LOG_LEVEL_RUN_DEBUG);
     expectedLog =
-        std::string(cmnLogBitsetToString(CMN_LOG_BIT_RUN_DEBUG))
+        std::string(cmnLogLevelToString(CMN_LOG_LEVEL_RUN_DEBUG))
         + " - Function " + objectA.Services()->GetName() + ": 8\n";
     CPPUNIT_ASSERT(OutputStream.str() == expectedLog);
 }

@@ -105,7 +105,7 @@ QVariant cmnLoggerQtWidgetClassServicesModel::data(const QModelIndex & index, in
         } else {
             // get the string associated to the level of detail for display
             if (role == Qt::DisplayRole) {
-                return QString(cmnLogBitsetToString(iterator->second->GetLoD()).c_str());
+                return QString(cmnLogLevelToString(iterator->second->GetLoD()).c_str());
             } else {
                 // for edit, return the LoD itself
                 return QVariant(iterator->second->GetLoD());
@@ -154,7 +154,7 @@ bool cmnLoggerQtWidgetClassServicesModel::setData(const QModelIndex & index,
         cmnClassRegister::const_iterator iterator = cmnClassRegister::begin();
         std::advance(iterator, index.row());
         cmnClassRegister::SetLoD(iterator->first.c_str(),
-                                 static_cast<cmnLogBitset>(value.toInt()));
+                                 cmnIndexToLogLevel(value.toInt()));
     }
     return true;
 }
@@ -175,7 +175,7 @@ QWidget * cmnLoggerQtWidgetLoDDelegate::createEditor(QWidget * parent,
     for (lod = 0;
          lod <= 8;
          lod++) {
-        comboBox->insertItem(lod, QString(cmnLogBitsetToString(cmnIndexToLogBitset(lod)).c_str()), QVariant(lod));
+        comboBox->insertItem(lod, QString(cmnLogLevelToString(cmnIndexToLogLevel(lod)).c_str()), QVariant(lod));
     }
     return comboBox;
 }
