@@ -82,7 +82,10 @@ public:
 
     /*! Overloaded operator to enable more intuitive syntax
       e.g., Command(argument) instead of Command->Execute(argument). */
-    mtsExecutionResult operator()(mtsGenericObject & argument) const;
+    mtsExecutionResult operator()(mtsGenericObject & argument) const
+    { return Execute(argument); }
+
+    mtsExecutionResult Execute(mtsGenericObject & argument) const;
 
 #ifndef SWIG
 	/*! Overloaded operator that accepts different argument types. */

@@ -63,7 +63,10 @@ class CISST_EXPORT mtsFunctionVoid: public mtsFunctionBase {
 
     /*! Overloaded operator to enable more intuitive syntax
       e.g., Command() instead of Command->Execute(). */
-    mtsExecutionResult operator()(void) const;
+    mtsExecutionResult operator()(void) const { return Execute(); }
+
+    /*! Non-blocking call */
+    mtsExecutionResult Execute(void) const;
 
     /*! Blocking call */
     mtsExecutionResult ExecuteBlocking(void) const;

@@ -82,14 +82,20 @@ public:
 
     /*! Overloaded operator to enable more intuitive syntax
       e.g., Command(argument) instead of Command->Execute(argument). */
-    mtsExecutionResult operator()(const mtsGenericObject & argument) const;
+    mtsExecutionResult operator()(const mtsGenericObject & argument) const
+    { return Execute(argument); }
 
+    mtsExecutionResult Execute(const mtsGenericObject & argument) const;
     mtsExecutionResult ExecuteBlocking(const mtsGenericObject & argument) const;
 
 #ifndef SWIG
 	/*! Overloaded operator that accepts different argument types. */
     template <class _userType>
-    mtsExecutionResult operator()(const _userType & argument) const {
+    mtsExecutionResult operator()(const _userType & argument) const
+    { return Execute(argument); }
+
+    template <class _userType>
+    mtsExecutionResult Execute(const _userType & argument) const {
         mtsExecutionResult result = Command ?
             ConditionalWrap<_userType, cmnIsDerivedFrom<_userType, mtsGenericObject>::YES>::Call(Command, argument, MTS_NOT_BLOCKING)
           : mtsExecutionResult::NO_INTERFACE;

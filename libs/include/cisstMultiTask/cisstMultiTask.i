@@ -229,47 +229,140 @@ http://www.cisst.org/cisst/license.txt.
 %extend mtsFunctionVoid {
     %pythoncode {
         def __call__(self):
-            return self.GetCommand()()
+            return self.Execute().GetResult()
     }
 }
 
 // Extend mtsFunctionVoidReturn
 %extend mtsFunctionVoidReturn {
     %pythoncode {
+        def UpdateFromC(self):
+            try:
+                tmpObject = self.GetResultPrototype().Services().Create()
+                self.ArgumentType = tmpObject.__class__
+            except TypeError, e:
+                print 'VoidReturn function ', self.GetName(), ': ', e
+
+
         def __call__(self):
-            return self.GetCommand()()
+            # PK: figure out if the first statement (after try) is still needed
+            try:
+                argument = self.ArgumentType(self.GetResultPrototype())
+            except Exception:
+                argument = self.GetResultPrototype()
+            # Probably should check return value below
+            self.Execute(argument)
+            # If argument has a GetDataCopy method, we assume it is derived from
+            # mtsGenericObjectProxy (%extend is used to add this method).
+            if hasattr(argument,"GetDataCopy"):
+                return argument.GetDataCopy()
+            else:
+                return argument
     }
 }
 
 // Extend mtsFunctionRead
 %extend mtsFunctionRead {
     %pythoncode {
+        def UpdateFromC(self):
+            try:
+                tmpObject = self.GetArgumentPrototype().Services().Create()
+                self.ArgumentType = tmpObject.__class__
+            except TypeError, e:
+                print 'Read function ', self.GetName(), ': ', e
+
+
         def __call__(self):
-            return self.GetCommand()()
+            # PK: figure out if the first statement (after try) is still needed
+            try:
+                argument = self.ArgumentType(self.GetArgumentPrototype())
+            except Exception:
+                argument = self.GetArgumentPrototype()
+            # Probably should check return value below
+            self.Execute(argument)
+            # If argument has a GetDataCopy method, we assume it is derived from
+            # mtsGenericObjectProxy (%extend is used to add this method).
+            if hasattr(argument,"GetDataCopy"):
+                return argument.GetDataCopy()
+            else:
+                return argument
     }
 }
 
 // Extend mtsFunctionWrite
 %extend mtsFunctionWrite {
     %pythoncode {
+        def UpdateFromC(self):
+            try:
+                tmpObject = self.GetArgumentPrototype().Services().Create()
+                self.ArgumentType = tmpObject.__class__
+            except TypeError, e:
+                print 'Write function ', self.GetName(), ': ', e
+
         def __call__(self, argument):
-            return self.GetCommand()(argument)
+            if isinstance(argument, self.ArgumentType):
+                return self.Execute(argument).GetResult()
+            else:
+                realArgument = self.ArgumentType(argument)
+                return self.Execute(realArgument).GetResult()
     }
 }
 
 // Extend mtsFunctionWriteReturn
 %extend mtsFunctionWriteReturn {
     %pythoncode {
+        def UpdateFromC(self):
+            try:
+                tmp1Object = self.GetArgumentPrototype().Services().Create()
+                self.ArgumentType = tmp1Object.__class__
+                tmp2Object = self.GetResultPrototype().Services().Create()
+                self.ResultType = tmp2Object.__class__
+            except TypeError, e:
+                print 'WriteReturn function ', self.GetName(), ': ', e
+
         def __call__(self, argument):
-            return self.GetCommand()(argument)
+            result = self.ResultType(self.GetResultPrototype())
+            # Probably should check return value of self.Execute
+            if isinstance(argument, self.ArgumentType):
+                self.Execute(argument, result)
+            else:
+                realArgument = self.ArgumentType(argument1)
+                self.Execute(realArgument, result)
+            # If result has a GetDataCopy method, we assume it is derived from
+            # mtsGenericObjectProxy (%extend is used to add this method).
+            if hasattr(result,"GetDataCopy"):
+                return result.GetDataCopy()
+            else:
+                return result
     }
 }
 
 // Extend mtsFunctionQualifiedRead
 %extend mtsFunctionQualifiedRead {
     %pythoncode {
-        def __call__(self, argument):
-            return self.GetCommand()(argument)
+        def UpdateFromC(self):
+            try:
+                tmp1Object = self.GetArgument1Prototype().Services().Create()
+                self.Argument1Type = tmp1Object.__class__
+                tmp2Object = self.GetArgument2Prototype().Services().Create()
+                self.Argument2Type = tmp2Object.__class__
+            except TypeError, e:
+                print 'Qualified read function ', self.GetName(), ': ', e
+
+        def __call__(self, argument1):
+            argument2 = self.Argument2Type(self.GetArgument2Prototype())
+            # Probably should check return value of self.Execute
+            if isinstance(argument1, self.Argument1Type):
+                self.Execute(argument1, argument2)
+            else:
+                realArgument1 = self.Argument1Type(argument1)
+                self.Execute(realArgument1, argument2)
+            # If argument2 has a GetDataCopy method, we assume it is derived from
+            # mtsGenericObjectProxy (%extend is used to add this method).
+            if hasattr(argument2,"GetDataCopy"):
+                return argument2.GetDataCopy()
+            else:
+                return argument2
     }
 }
 
@@ -289,7 +382,9 @@ http://www.cisst.org/cisst/license.txt.
             for interface in interfaces:
                 interfaceNoSpace = interface.replace(' ', '')
                 self.__dict__[interfaceNoSpace] = mtsComponent.GetInterfaceRequired(self, interface)
-                self.__dict__[interfaceNoSpace].UpdateFromC()
+                # Only call UpdateFromC if required interface is connected to a provided interface
+                if self.__dict__[interfaceNoSpace].GetConnectedInterface():
+                    self.__dict__[interfaceNoSpace].UpdateFromC()
     }
 }
 
@@ -301,9 +396,16 @@ http://www.cisst.org/cisst/license.txt.
             commands = mtsInterfaceProvided.GetNamesOfCommandsVoid(self)
             for command in commands:
                 self.__dict__[command] = mtsInterfaceProvided.GetCommandVoid(self, command)
+            commands = mtsInterfaceProvided.GetNamesOfCommandsVoidReturn(self)
+            for command in commands:
+                self.__dict__[command] = mtsInterfaceProvided.GetCommandVoidReturn(self, command)
             commands = mtsInterfaceProvided.GetNamesOfCommandsWrite(self)
             for command in commands:
                 self.__dict__[command] = mtsInterfaceProvided.GetCommandWrite(self, command)
+                self.__dict__[command].UpdateFromC()
+            commands = mtsInterfaceProvided.GetNamesOfCommandsWriteReturn(self)
+            for command in commands:
+                self.__dict__[command] = mtsInterfaceProvided.GetCommandWriteReturn(self, command)
                 self.__dict__[command].UpdateFromC()
             commands = mtsInterfaceProvided.GetNamesOfCommandsQualifiedRead(self)
             for command in commands:
@@ -321,18 +423,37 @@ http://www.cisst.org/cisst/license.txt.
 %extend mtsInterfaceRequired {
     %pythoncode {
         def UpdateFromC(self):
-            commands = mtsInterfaceRequired.GetNamesOfFunctionsVoid(self)
-            for command in commands:
-                self.__dict__[command] = mtsInterfaceRequired.GetFunctionVoid(self, command)
-            commands = mtsInterfaceRequired.GetNamesOfFunctionsWrite(self)
-            for command in commands:
-                self.__dict__[command] = mtsInterfaceRequired.GetFunctionWrite(self, command)
-            commands = mtsInterfaceRequired.GetNamesOfFunctionsQualifiedRead(self)
-            for command in commands:
-                self.__dict__[command] = mtsInterfaceRequired.GetFunctionQualifiedRead(self, command)
-            commands = mtsInterfaceRequired.GetNamesOfFunctionsRead(self)
-            for command in commands:
-                self.__dict__[command] = mtsInterfaceRequired.GetFunctionRead(self, command)
+            if not self.GetConnectedInterface():
+                print 'Required interface ', self.GetName(), ' not yet connected.'
+                return
+            functions = mtsInterfaceRequired.GetNamesOfFunctionsVoid(self)
+            for function in functions:
+                self.__dict__[function] = mtsInterfaceRequired.GetFunctionVoid(self, function)
+            functions = mtsInterfaceRequired.GetNamesOfFunctionsVoidReturn(self)
+            for function in functions:
+                print 'FunctionVoidReturn = ', function
+                self.__dict__[function] = mtsInterfaceRequired.GetFunctionVoidReturn(self, function)
+                self.__dict__[function].UpdateFromC()
+            functions = mtsInterfaceRequired.GetNamesOfFunctionsWrite(self)
+            for function in functions:
+                print 'FunctionWrite = ', function
+                self.__dict__[function] = mtsInterfaceRequired.GetFunctionWrite(self, function)
+                self.__dict__[function].UpdateFromC()
+            functions = mtsInterfaceRequired.GetNamesOfFunctionsWriteReturn(self)
+            for function in functions:
+                print 'FunctionWriteReturn = ', function
+                self.__dict__[function] = mtsInterfaceRequired.GetFunctionWriteReturn(self, function)
+                self.__dict__[function].UpdateFromC()
+            functions = mtsInterfaceRequired.GetNamesOfFunctionsQualifiedRead(self)
+            for function in functions:
+                print 'FunctionQualifiedRead = ', function
+                self.__dict__[function] = mtsInterfaceRequired.GetFunctionQualifiedRead(self, function)
+                self.__dict__[function].UpdateFromC()
+            functions = mtsInterfaceRequired.GetNamesOfFunctionsRead(self)
+            for function in functions:
+                print 'FunctionRead = ', function
+                self.__dict__[function] = mtsInterfaceRequired.GetFunctionRead(self, function)
+                self.__dict__[function].UpdateFromC()
     }
 }
 

@@ -47,8 +47,8 @@ bool mtsFunctionQualifiedRead::Bind(CommandType * command) {
 }
 
 
-mtsExecutionResult mtsFunctionQualifiedRead::operator()(const mtsGenericObject & qualifier,
-                                                                mtsGenericObject & argument) const
+mtsExecutionResult mtsFunctionQualifiedRead::Execute(const mtsGenericObject & qualifier,
+                                                     mtsGenericObject & argument) const
 {
     return Command ? Command->Execute(qualifier, argument) : mtsExecutionResult::NO_INTERFACE;
 }

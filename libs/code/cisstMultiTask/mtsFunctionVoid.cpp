@@ -52,7 +52,7 @@ bool mtsFunctionVoid::Bind(CommandType * command)
 }
 
 
-mtsExecutionResult mtsFunctionVoid::operator()(void) const
+mtsExecutionResult mtsFunctionVoid::Execute(void) const
 {
     return Command ? Command->Execute(MTS_NOT_BLOCKING) : mtsExecutionResult::NO_INTERFACE;
 }

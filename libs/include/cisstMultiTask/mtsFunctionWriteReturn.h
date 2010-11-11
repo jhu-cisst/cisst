@@ -108,12 +108,20 @@ class CISST_EXPORT mtsFunctionWriteReturn: public mtsFunctionBase {
     /*! Overloaded operator to enable more intuitive syntax
       e.g., Command() instead of Command->Execute(). */
     mtsExecutionResult operator()(const mtsGenericObject & argument,
-                                  mtsGenericObject & result) const;
+                                  mtsGenericObject & result) const
+    { return Execute(argument, result); }
+
+    mtsExecutionResult Execute(const mtsGenericObject & argument,
+                               mtsGenericObject & result) const;
 
 #ifndef SWIG
 	/*! Overloaded operator that accepts different argument types (for write return). */
     template <class __argumentType, class __resultType>
-    mtsExecutionResult operator()(const __argumentType & argument, __resultType & result) const {
+    mtsExecutionResult operator()(const __argumentType & argument, __resultType & result) const
+    { return Execute(argument, result); }
+
+    template <class __argumentType, class __resultType>
+    mtsExecutionResult Execute(const __argumentType & argument, __resultType & result) const {
         mtsExecutionResult executionResult = Command ?
             ConditionalWrap<__argumentType, __resultType,
                             cmnIsDerivedFrom<__argumentType, mtsGenericObject>::YES,

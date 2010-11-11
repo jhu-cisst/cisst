@@ -53,7 +53,7 @@ bool mtsFunctionWriteReturn::Bind(CommandType * command)
 }
 
 
-mtsExecutionResult mtsFunctionWriteReturn::operator()(const mtsGenericObject & argument,
+mtsExecutionResult mtsFunctionWriteReturn::Execute(const mtsGenericObject & argument,
                                                       mtsGenericObject & result) const
 {
     return Command ? Command->Execute(argument, result) : mtsExecutionResult::NO_INTERFACE;

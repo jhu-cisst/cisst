@@ -83,12 +83,19 @@ class CISST_EXPORT mtsFunctionVoidReturn: public mtsFunctionBase {
 
     /*! Overloaded operator to enable more intuitive syntax
       e.g., Command() instead of Command->Execute(). */
-    mtsExecutionResult operator()(mtsGenericObject & result) const;
+    mtsExecutionResult operator()(mtsGenericObject & result) const
+    { return Execute(result); }
+
+    mtsExecutionResult Execute(mtsGenericObject & result) const;
 
 #ifndef SWIG
 	/*! Overloaded operator that accepts different argument types. */
     template <class _userType>
-    mtsExecutionResult operator()(_userType & result) const {
+    mtsExecutionResult operator()(_userType & result) const
+    { return Execute(result); }
+
+    template <class _userType>
+    mtsExecutionResult Execute(_userType & result) const {
         mtsExecutionResult executionResult = Command ?
             ConditionalWrap<_userType, cmnIsDerivedFrom<_userType, mtsGenericObject>::YES>::Call(Command, result)
           : mtsExecutionResult::NO_INTERFACE;
