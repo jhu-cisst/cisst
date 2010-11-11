@@ -22,18 +22,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnLogLoD.h>
 
-const std::string cmnLogLevelString[] = {
-    "No log",
-    "Error (init)",
-    "Warning (init)",
-    "Message (init)",
-    "Debug (init)",
-    "Error (run)",
-    "Warning (run)",
-    "Message (run)",
-    "Debug (run)"
-};
-
 
 size_t cmnLogLevelToIndex(const cmnLogLevel & level)
 {
@@ -61,7 +49,22 @@ cmnLogLevel cmnIndexToLogLevel(const size_t & index)
 
 const std::string & cmnLogLevelToString(const cmnLogLevel & level)
 {
-    return cmnLogLevelString[cmnLogLevelToIndex(level)];
+    static const std::string strings[] = {
+        "No log",
+        "Error (init)",
+        "Warning (init)",
+        "Message (init)",
+        "Debug (init)",
+        "Error (run)",
+        "Warning (run)",
+        "Message (run)",
+        "Debug (run)"
+    };
+    size_t index = cmnLogLevelToIndex(level);
+    if (index > 8) {
+        index = 8;
+    }
+    return strings[cmnLogLevelToIndex(level)];
 }
 
 
@@ -71,11 +74,11 @@ std::string cmnLogMaskToString(const cmnLogMask & mask)
         std::string result;
         for (size_t index = 0; index < 8; index++) {
             if (mask & 1<<index) {
-                result += cmnLogLevelString[index + 1] + " ";
+                result += cmnLogLevelToString(index + 1) + " ";
             }
         }
         return result;
     } else {
-        return cmnLogLevelString[0];
+        return cmnLogLevelToString(0);
     }
 }

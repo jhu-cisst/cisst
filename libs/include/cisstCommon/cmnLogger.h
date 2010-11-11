@@ -77,7 +77,7 @@ http://www.cisst.org/cisst/license.txt.
   \param lod The log level of detail of the message.
 */
 #define CMN_LOG_CLASS_INSTANCE(objectPointer, lod) \
-    ((cmnLogger::GetLoD() & lod) || (objectPointer->Services()->GetLoD() & lod))? \
+    (!(cmnLogger::GetLoD() & objectPointer->Services()->GetLoD() & lod))? \
     (void*)0:\
     ((cmnLODOutputMultiplexer(objectPointer->GetLogMultiplexer(), lod).Ref()) << cmnLogLevelToString(lod) << " - Class " << objectPointer->Services()->GetName() << ": ")
 
@@ -134,7 +134,7 @@ http://www.cisst.org/cisst/license.txt.
   \param lod The log level of detail of the message.
 */
 #define CMN_LOG(lod) \
-    (cmnLogger::GetLoD() & lod)?              \
+    (!(cmnLogger::GetLoD() & lod))? \
     (void*)0: \
     ((cmnLODOutputMultiplexer(cmnLogger::GetMultiplexer(), lod).Ref()) << cmnLogLevelToString(lod) << " - ")
 

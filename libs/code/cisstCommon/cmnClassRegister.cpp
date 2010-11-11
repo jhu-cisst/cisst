@@ -10,13 +10,13 @@
   (C) Copyright 2002-2008 Johns Hopkins University (JHU), All Rights
   Reserved.
 
---- begin cisst license - do not edit ---
+  --- begin cisst license - do not edit ---
 
-This software is provided "as is" under an open source license, with
-no warranty.  The complete license can be found in license.txt and
-http://www.cisst.org/cisst/license.txt.
+  This software is provided "as is" under an open source license, with
+  no warranty.  The complete license can be found in license.txt and
+  http://www.cisst.org/cisst/license.txt.
 
---- end cisst license ---
+  --- end cisst license ---
 
 */
 
@@ -144,9 +144,9 @@ cmnClassServicesBase * cmnClassRegister::FindClassServicesInstance(const std::st
     cmnClassServicesBase * result = NULL;
     iterator = ServicesContainer.find(className);
     if (iterator != end) {
-            result = iterator->second;
-            CMN_LOG_RUN_VERBOSE << "Class cmnClassRegister: FindClassServices: found class info for \""
-                                << className << "\"" << std::endl;
+        result = iterator->second;
+        CMN_LOG_RUN_VERBOSE << "Class cmnClassRegister: FindClassServices: found class info for \""
+                            << className << "\"" << std::endl;
     } else {
         CMN_LOG_RUN_WARNING << "Class cmnClassRegister: FindClassServices: couldn't find class info for \""
                             << className << "\"" << std::endl;

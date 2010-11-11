@@ -4,9 +4,11 @@
 
 #include <iostream>
 #include <cisstCommon/cmnPortability.h>
+#include <cisstCommon/cmnLogger.h>
 
 
 int main (void) {
+
 #if (CISST_OS == CISST_WINDOWS)
     std::cout << "Running Windows" << std::endl;
 #elif (CISST_OS == CISST_LINUX)
@@ -69,10 +71,6 @@ int main (void) {
         std::cout << "Did you really enter \"0\"?" << std::endl;
     }
     
-
-    std::cout << CMN_LOG_MASK_INIT_ERROR << std::endl;
-    std::cout << CMN_LOG_MASK_RUN_ERROR << std::endl;
-
     return 0;
 }
 

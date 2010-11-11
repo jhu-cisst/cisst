@@ -30,8 +30,8 @@ int main(int argc, char *argv[])
     CMN_LOG_INIT_ERROR << "Test" << std::endl;
 
     // log configuration
-    cmnLogger::SetLoD(CMN_LOG_MASK_ALL);
-    cmnLogger::GetMultiplexer()->AddChannel(std::cout, CMN_LOG_MASK_ALL);
+    cmnLogger::SetLoD(CMN_LOG_ALLOW_ALL);
+    cmnLogger::GetMultiplexer()->AddChannel(std::cout, CMN_LOG_ALLOW_ALL);
 
     // create a Qt user interface
     QApplication application(argc, argv);
