@@ -402,6 +402,8 @@ int osaPipeExec::ReadUntil(char * buffer, int length, char stopChar) const
     char lastChar = stopChar+1; // dummy value that's not stopChar
     while (charsRead < length && lastChar != stopChar) {
         result = Read(s, 1);
+        if (result == -1)
+            return -1;
         charsRead += result;
         s += result;
         lastChar = *(s-1);
@@ -415,7 +417,7 @@ std::string osaPipeExec::ReadString(int length) const
     char * buffer = new char[length];
     int charsRead = ReadUntil(buffer, length, '\0');
     std::string result;
-    if (charsRead != 0 && buffer[charsRead-1] == '\0')
+    if (charsRead > 0 && buffer[charsRead-1] == '\0')
         result = std::string(buffer);
     delete[] buffer;
     return result;
