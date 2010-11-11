@@ -103,8 +103,11 @@ class CISST_EXPORT osaPipeExec {
     stopChar is read. Return the number of characters read */
     int ReadUntil(char * buffer, int maxLength, char stopChar) const;
 
-    /*! Read at most maxLength characters from the pipe, but stop reading if
-    a '\0' is read */
+    /*! std::string version of ReadUntil
+    stopChar is read. Return the number of characters read */
+    std::string ReadUntil(int maxLength, char stopChar) const;
+
+    /*! Equivalent to ReadUntil(maxLength, '\0') */
     std::string ReadString(int maxLength) const;
 
     /*! Write the null-terminated buffer to the pipe. Return the

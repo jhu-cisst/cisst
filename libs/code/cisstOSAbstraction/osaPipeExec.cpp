@@ -412,15 +412,21 @@ int osaPipeExec::ReadUntil(char * buffer, int length, char stopChar) const
 }
 
 
-std::string osaPipeExec::ReadString(int length) const
+std::string osaPipeExec::ReadUntil(int length, char stopChar) const
 {
     char * buffer = new char[length];
-    int charsRead = ReadUntil(buffer, length, '\0');
+    int charsRead = ReadUntil(buffer, length, stopChar);
     std::string result;
-    if (charsRead > 0 && buffer[charsRead-1] == '\0')
+    if (charsRead > 0 && buffer[charsRead-1] == stopChar)
         result = std::string(buffer);
     delete[] buffer;
     return result;
+}
+
+
+std::string osaPipeExec::ReadString(int length) const
+{
+    return ReadUntil(length, '\0');
 }
 
 
