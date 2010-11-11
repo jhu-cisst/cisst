@@ -235,6 +235,11 @@ mtsManagerLocal * mtsManagerLocal::GetInstance(void)
 {
     if (!Instance) {
         Instance = new mtsManagerLocal;
+
+        // Create manager components
+        if (!Instance->CreateManagerComponents()) {
+            CMN_LOG_INIT_ERROR << "class mtsManagerLocal: GetInstance: Failed to add internal manager components" << std::endl;
+        }
     }
 
     return Instance;
