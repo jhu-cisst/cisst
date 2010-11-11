@@ -44,6 +44,8 @@ class CISST_EXPORT prmActuatorState: public mtsGenericObject
 
 public:
     typedef prmActuatorState ThisType;
+    typedef mtsGenericObject BaseType;
+
     typedef unsigned int size_type;
 
     /*! default constructor - does nothing for now */
@@ -148,6 +150,13 @@ public:
 
     /*! Human readable output to stream. */
     void ToStream(std::ostream & outputStream) const;
+
+
+    /*! Binary serialization */
+    void SerializeRaw(std::ostream & outputStream) const;
+
+    /*! Binary deserialization */
+    void DeSerializeRaw(std::istream & inputStream);
 
 }; 
 

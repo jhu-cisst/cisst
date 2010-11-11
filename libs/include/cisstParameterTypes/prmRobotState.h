@@ -45,7 +45,9 @@ class CISST_EXPORT prmRobotState: public mtsGenericObject
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
 public:
-    typedef prmRobotState ThisType;
+    typedef prmRobotState       ThisType;
+    typedef mtsGenericObject    BaseType;
+
     typedef unsigned int size_type;
 
     /*! default constructor - does nothing for now */
@@ -94,6 +96,11 @@ public:
         return true;
     }
 
+    /*! Binary serialization */
+    void SerializeRaw(std::ostream & outputStream) const;
+
+    /*! Binary deserialization */
+    void DeSerializeRaw(std::istream & inputStream);
 
     /*! Set and Get methods for the Joint position. */
     //@{
@@ -161,7 +168,8 @@ public:
     MTS_DECLARE_MEMBER_AND_ACCESSORS(vctDoubleFrm4x4, EndEffectorFrame);
     //@}
 
-   
+
+
 
 }; // _prmRobotState_h
 

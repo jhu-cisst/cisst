@@ -53,3 +53,37 @@ void prmActuatorState::SetSize(size_type size){
     HomeSwitchOnMember.SetSize(size);
     IsHomedMember.SetSize(size);
 }
+
+void prmActuatorState::SerializeRaw(std::ostream & outputStream) const
+{
+    BaseType::SerializeRaw(outputStream);
+    PositionMember.SerializeRaw(outputStream);
+    VelocityMember.SerializeRaw(outputStream);
+    InMotionMember.SerializeRaw(outputStream);
+    MotorOffMember.SerializeRaw(outputStream);
+    SoftFwdLimitHitMember.SerializeRaw(outputStream);
+    SoftRevLimitHitMember.SerializeRaw(outputStream);
+    HardFwdLimitHitMember.SerializeRaw(outputStream);
+    HardRevLimitHitMember.SerializeRaw(outputStream);
+    HomeSwitchOnMember.SerializeRaw(outputStream);
+    IsHomedMember.SerializeRaw(outputStream);
+    cmnSerializeRaw(outputStream,EStopONMember);
+}
+
+void prmActuatorState::DeSerializeRaw(std::istream & inputStream)
+{
+    BaseType::DeSerializeRaw(inputStream);
+    PositionMember.DeSerializeRaw(inputStream);
+    VelocityMember.DeSerializeRaw(inputStream);
+    InMotionMember.DeSerializeRaw(inputStream);
+    MotorOffMember.DeSerializeRaw(inputStream);
+    SoftFwdLimitHitMember.DeSerializeRaw(inputStream);
+    SoftRevLimitHitMember.DeSerializeRaw(inputStream);
+    HardFwdLimitHitMember.DeSerializeRaw(inputStream);
+    HardRevLimitHitMember.DeSerializeRaw(inputStream);
+    HomeSwitchOnMember.DeSerializeRaw(inputStream);
+    IsHomedMember.DeSerializeRaw(inputStream);
+    cmnDeSerializeRaw(inputStream,EStopONMember);
+}
+
+

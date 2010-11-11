@@ -44,6 +44,8 @@ class CISST_EXPORT prmPositionCartesianSet: public prmMotionBase
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 
  protected:
+    typedef prmMotionBase BaseType;
+
     /*! The controllable frame node in the transformation tree this
       command will act on */
     prmTransformationBasePtr MovingFrame;
@@ -275,6 +277,12 @@ class CISST_EXPORT prmPositionCartesianSet: public prmMotionBase
     {
         return this->Mask;
     }
+
+    /*! Binary serialization */
+    void SerializeRaw(std::ostream & outputStream) const;
+
+    /*! Binary deserialization */
+    void DeSerializeRaw(std::istream & inputStream);
 
     
 }; // _prmPositionCartesianSet_h

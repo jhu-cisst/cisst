@@ -54,7 +54,7 @@ Only use getters unless you know what you are doing.
 //using mtsVectors here because prm lib does not define Long Vectors
 //galil position is in counts...so
 */
-class CISST_EXPORT prmActuatorParameters: public cmnGenericObject
+class CISST_EXPORT prmActuatorParameters: public mtsGenericObject
 
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
@@ -64,6 +64,7 @@ private:
 
 public:
     typedef prmActuatorParameters ThisType;
+    typedef mtsGenericObject BaseType;
     typedef unsigned int size_type;
 
 
@@ -77,6 +78,14 @@ public:
     /*!destructor
     */
     virtual ~prmActuatorParameters(){};
+
+
+    /*! Binary serialization */
+    void SerializeRaw(std::ostream & outputStream) const;
+
+    /*! Binary deserialization */
+    void DeSerializeRaw(std::istream & inputStream);
+
 
     /*! Set and Get methods for actuator settings
     Can use this in order to reset the position
