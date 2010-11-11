@@ -47,7 +47,8 @@ struct osaPipeExecInternals {
 
 #define INTERNALS(A) (reinterpret_cast<osaPipeExecInternals*>(Internals)->A)
 
-unsigned int osaPipeExec::SizeOfInternals(void) {
+unsigned int osaPipeExec::SizeOfInternals(void)
+{
     return sizeof(osaPipeExecInternals);
 }
 
@@ -307,7 +308,8 @@ bool osaPipeExec::Open(const std::string & executable,
 }
 
 
-bool osaPipeExec::Close(bool killProcess) {
+bool osaPipeExec::Close(bool killProcess)
+{
     if (!Connected) {
         return false;
     } else {
@@ -351,7 +353,8 @@ bool osaPipeExec::Close(bool killProcess) {
 }
 
 
-int osaPipeExec::Read(char *buffer, int maxLength) const {
+int osaPipeExec::Read(char *buffer, int maxLength) const
+{
 #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
     ssize_t bytesRead = -1;
 #elif (CISST_OS == CISST_WINDOWS)
@@ -376,7 +379,8 @@ int osaPipeExec::Read(char *buffer, int maxLength) const {
 }
 
 
-std::string osaPipeExec::Read(int maxLength) const {
+std::string osaPipeExec::Read(int maxLength) const
+{
     char * buffer = new char[maxLength+1];
     int charsRead = Read(buffer, maxLength);
 
@@ -390,12 +394,42 @@ std::string osaPipeExec::Read(int maxLength) const {
 }
 
 
-int osaPipeExec::Write(const char * buffer) {
+int osaPipeExec::ReadUntil(char * buffer, int length, char stopChar) const
+{
+    char * s = buffer;
+    int charsRead = 0;
+    int result;
+    char lastChar = stopChar+1; // dummy value that's not stopChar
+    while (charsRead < length && lastChar != stopChar) {
+        result = Read(s, 1);
+        charsRead += result;
+        s += result;
+        lastChar = *(s-1);
+    }
+    return charsRead;
+}
+
+
+std::string osaPipeExec::ReadString(int length) const
+{
+    char * buffer = new char[length];
+    int charsRead = ReadUntil(buffer, length, '\0');
+    std::string result;
+    if (charsRead != 0 && buffer[charsRead-1] == '\0')
+        result = std::string(buffer);
+    delete[] buffer;
+    return result;
+}
+
+
+int osaPipeExec::Write(const char * buffer)
+{
     return Write(buffer, strlen(buffer)+1);
 }
 
 
-int osaPipeExec::Write(const char * buffer, int n) {
+int osaPipeExec::Write(const char * buffer, int n)
+{
 #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
     ssize_t bytesWritten = -1;
 #elif (CISST_OS == CISST_WINDOWS)
