@@ -114,13 +114,17 @@ class CISST_EXPORT osaPipeExec {
       number of characters written or -1 for an error */
     int Write(const char * buffer);
 
-    /*! Write the the first n characters of buffer to pipe. Return the
+    /*! Write the first n characters of buffer to pipe. Return the
       number of characters written or -1 for an error */
     int Write(const char * buffer, int n);
 
     /*! Write s to the pipe and return the number of characters read
       or -1 for an error */
     int Write(const std::string & s);
+
+    /*! Write the first n characters of s to pipe. Return the number of
+      characters written or -1 for an error */
+    int Write(const std::string & s, int n);
 
     /*! Indicate if the pipe is opened (or at least supposed to be
       opened) */

@@ -430,12 +430,6 @@ std::string osaPipeExec::ReadString(int length) const
 }
 
 
-int osaPipeExec::Write(const char * buffer)
-{
-    return Write(buffer, strlen(buffer)+1);
-}
-
-
 int osaPipeExec::Write(const char * buffer, int n)
 {
 #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
@@ -460,9 +454,21 @@ int osaPipeExec::Write(const char * buffer, int n)
 }
 
 
+int osaPipeExec::Write(const char * buffer)
+{
+    return Write(buffer, strlen(buffer)+1);
+}
+
+
 int osaPipeExec::Write(const std::string & s)
 {
     return Write(s.c_str());
+}
+
+
+int osaPipeExec::Write(const std::string & s, int n)
+{
+    return Write(s.c_str(), n);
 }
 
 
