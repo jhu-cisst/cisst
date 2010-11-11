@@ -131,6 +131,16 @@ protected:
     virtual std::vector<std::string> GetNamesOfFunctionsQualifiedRead(void) const;
     //@}
 
+    /*! Find a function based on its name. */
+    //@{
+    mtsFunctionVoid * GetFunctionVoid(const std::string & functionName) const;
+    mtsFunctionVoidReturn * GetFunctionVoidReturn(const std::string & functionName) const;
+    mtsFunctionWrite * GetFunctionWrite(const std::string & functionName) const;
+    mtsFunctionWriteReturn * GetFunctionWriteReturn(const std::string & functionName) const;
+    mtsFunctionRead * GetFunctionRead(const std::string & functionName) const;
+    mtsFunctionQualifiedRead * GetFunctionQualifiedRead(const std::string & functionName) const;
+    //@}
+
     /*! Get the names of event handlers that exist in this interface */
     //@{
     virtual std::vector<std::string> GetNamesOfEventHandlersVoid(void) const;
