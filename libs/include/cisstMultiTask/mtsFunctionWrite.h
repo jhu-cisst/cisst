@@ -36,10 +36,12 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsExport.h>
 
 class CISST_EXPORT mtsFunctionWrite: public mtsFunctionBase {
-protected:
+public:
     typedef mtsCommandWriteBase CommandType;
+protected:
     CommandType * Command;
 
+#ifndef SWIG
     template <typename _userType, bool>
     class ConditionalWrap {
     public:
@@ -55,6 +57,7 @@ protected:
             return command->Execute(argument, blocking);
         }
     };
+#endif
 
 public:
     /*! Default constructor.  Does nothing, use Bind before
@@ -83,6 +86,7 @@ public:
 
     mtsExecutionResult ExecuteBlocking(const mtsGenericObject & argument) const;
 
+#ifndef SWIG
 	/*! Overloaded operator that accepts different argument types. */
     template <class _userType>
     mtsExecutionResult operator()(const _userType & argument) const {
@@ -99,6 +103,7 @@ public:
           : mtsExecutionResult::NO_INTERFACE;
         return result;
     }
+#endif
 
     /*! Access to underlying command object. */
     CommandType * GetCommand(void) const;

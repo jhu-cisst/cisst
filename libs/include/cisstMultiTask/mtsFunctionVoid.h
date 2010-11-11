@@ -35,8 +35,9 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsExport.h>
 
 class CISST_EXPORT mtsFunctionVoid: public mtsFunctionBase {
- protected:
+ public:
     typedef mtsCommandVoid CommandType;
+ protected:
     CommandType * Command;
 
  public:

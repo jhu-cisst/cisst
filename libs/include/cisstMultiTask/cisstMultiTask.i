@@ -69,8 +69,10 @@ http://www.cisst.org/cisst/license.txt.
 // Wrap commands
 %include "cisstMultiTask/mtsCommandBase.h"
 %include "cisstMultiTask/mtsCommandVoid.h"
+%include "cisstMultiTask/mtsCommandVoidReturn.h"
 %include "cisstMultiTask/mtsCommandRead.h"
 %include "cisstMultiTask/mtsCommandWriteBase.h"
+%include "cisstMultiTask/mtsCommandWriteReturn.h"
 %include "cisstMultiTask/mtsCommandQualifiedReadBase.h"
 
 // Extend mtsCommandVoid
@@ -78,6 +80,34 @@ http://www.cisst.org/cisst/license.txt.
     %pythoncode {
         def __call__(self):
             return self.Execute(MTS_NOT_BLOCKING).GetResult()
+    }
+}
+
+// Extend mtsCommandVoidReturn
+%extend mtsCommandVoidReturn {
+    %pythoncode {
+        def UpdateFromC(self):
+            try:
+                tmpObject = self.GetResultPrototype().Services().Create()
+                self.ArgumentType = tmpObject.__class__
+            except TypeError, e:
+                print 'VoidReturn command ', self.GetName(), ': ', e
+
+
+        def __call__(self):
+            # PK: figure out if the first statement (after try) is still needed
+            try:
+                argument = self.ArgumentType(self.GetResultPrototype())
+            except Exception:
+                argument = self.GetResultPrototype()
+            # Probably should check return value below
+            self.Execute(argument)
+            # If argument has a GetDataCopy method, we assume it is derived from
+            # mtsGenericObjectProxy (%extend is used to add this method).
+            if hasattr(argument,"GetDataCopy"):
+                return argument.GetDataCopy()
+            else:
+                return argument
     }
 }
 
@@ -97,6 +127,35 @@ http://www.cisst.org/cisst/license.txt.
             else:
                 realArgument = self.ArgumentType(argument)
                 return self.Execute(realArgument, MTS_NOT_BLOCKING).GetResult()
+    }
+}
+
+// Extend mtsCommandWriteReturn
+%extend mtsCommandWriteReturn {
+    %pythoncode {
+        def UpdateFromC(self):
+            try:
+                tmp1Object = self.GetArgumentPrototype().Services().Create()
+                self.ArgumentType = tmp1Object.__class__
+                tmp2Object = self.GetResultPrototype().Services().Create()
+                self.ResultType = tmp2Object.__class__
+            except TypeError, e:
+                print 'WriteReturn command ', self.GetName(), ': ', e
+
+        def __call__(self, argument):
+            result = self.ResultType(self.GetResultPrototype())
+            # Probably should check return value of self.Execute
+            if isinstance(argument, self.ArgumentType):
+                self.Execute(argument, result)
+            else:
+                realArgument = self.ArgumentType(argument1)
+                self.Execute(realArgument, result)
+            # If result has a GetDataCopy method, we assume it is derived from
+            # mtsGenericObjectProxy (%extend is used to add this method).
+            if hasattr(result,"GetDataCopy"):
+                return result.GetDataCopy()
+            else:
+                return result
     }
 }
 
@@ -157,6 +216,64 @@ http://www.cisst.org/cisst/license.txt.
     }
 }
 
+// Wrap functions
+%include "cisstMultiTask/mtsFunctionBase.h"
+%include "cisstMultiTask/mtsFunctionVoid.h"
+%include "cisstMultiTask/mtsFunctionVoidReturn.h"
+%include "cisstMultiTask/mtsFunctionRead.h"
+%include "cisstMultiTask/mtsFunctionWrite.h"
+%include "cisstMultiTask/mtsFunctionWriteReturn.h"
+%include "cisstMultiTask/mtsFunctionQualifiedRead.h"
+
+// Extend mtsFunctionVoid
+%extend mtsFunctionVoid {
+    %pythoncode {
+        def __call__(self):
+            return self.GetCommand()()
+    }
+}
+
+// Extend mtsFunctionVoidReturn
+%extend mtsFunctionVoidReturn {
+    %pythoncode {
+        def __call__(self):
+            return self.GetCommand()()
+    }
+}
+
+// Extend mtsFunctionRead
+%extend mtsFunctionRead {
+    %pythoncode {
+        def __call__(self):
+            return self.GetCommand()()
+    }
+}
+
+// Extend mtsFunctionWrite
+%extend mtsFunctionWrite {
+    %pythoncode {
+        def __call__(self, argument):
+            return self.GetCommand()(argument)
+    }
+}
+
+// Extend mtsFunctionWriteReturn
+%extend mtsFunctionWriteReturn {
+    %pythoncode {
+        def __call__(self, argument):
+            return self.GetCommand()(argument)
+    }
+}
+
+// Extend mtsFunctionQualifiedRead
+%extend mtsFunctionQualifiedRead {
+    %pythoncode {
+        def __call__(self, argument):
+            return self.GetCommand()(argument)
+    }
+}
+
+
 // Wrap tasks and components
 %include "cisstMultiTask/mtsComponent.h"
 %extend mtsComponent {
@@ -167,6 +284,11 @@ http://www.cisst.org/cisst/license.txt.
                 interfaceNoSpace = interface.replace(' ', '')
                 interfaceFrontEnd = mtsComponent.GetInterfaceProvided(self, interface)
                 self.__dict__[interfaceNoSpace] = mtsInterfaceProvided.GetEndUserInterface(interfaceFrontEnd, 'Python')
+                self.__dict__[interfaceNoSpace].UpdateFromC()
+            interfaces = mtsComponent.GetNamesOfInterfacesRequired(self)
+            for interface in interfaces:
+                interfaceNoSpace = interface.replace(' ', '')
+                self.__dict__[interfaceNoSpace] = mtsComponent.GetInterfaceRequired(self, interface)
                 self.__dict__[interfaceNoSpace].UpdateFromC()
     }
 }
@@ -194,13 +316,30 @@ http://www.cisst.org/cisst/license.txt.
     }
 }
 
+%include "cisstMultiTask/mtsInterfaceRequiredOrInput.h"
+%include "cisstMultiTask/mtsInterfaceRequired.h"
+%extend mtsInterfaceRequired {
+    %pythoncode {
+        def UpdateFromC(self):
+            commands = mtsInterfaceRequired.GetNamesOfFunctionsVoid(self)
+            for command in commands:
+                self.__dict__[command] = mtsInterfaceRequired.GetFunctionVoid(self, command)
+            commands = mtsInterfaceRequired.GetNamesOfFunctionsWrite(self)
+            for command in commands:
+                self.__dict__[command] = mtsInterfaceRequired.GetFunctionWrite(self, command)
+            commands = mtsInterfaceRequired.GetNamesOfFunctionsQualifiedRead(self)
+            for command in commands:
+                self.__dict__[command] = mtsInterfaceRequired.GetFunctionQualifiedRead(self, command)
+            commands = mtsInterfaceRequired.GetNamesOfFunctionsRead(self)
+            for command in commands:
+                self.__dict__[command] = mtsInterfaceRequired.GetFunctionRead(self, command)
+    }
+}
+
 %include "cisstMultiTask/mtsTask.h"
 %include "cisstMultiTask/mtsTaskContinuous.h"
 %include "cisstMultiTask/mtsTaskPeriodic.h"
 %include "cisstMultiTask/mtsTaskFromSignal.h"
-
-%include "cisstMultiTask/mtsInterfaceRequiredOrInput.h"
-%include "cisstMultiTask/mtsInterfaceRequired.h"
 
 %include "cisstMultiTask/mtsManagerLocal.h"
 %extend mtsManagerLocal {

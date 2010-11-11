@@ -36,10 +36,12 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsExport.h>
 
 class CISST_EXPORT mtsFunctionQualifiedRead: public mtsFunctionBase {
-protected:
+public:
     typedef mtsCommandQualifiedReadBase CommandType;
+protected:
     CommandType * Command;
 
+#ifndef SWIG
     // Portability note:  Visual Studio.NET 2003 did not compile with following (Error C2365), needed to add "a" and "b".
     // template<typename _userType1, typename _userType2, bool, bool>
     template <typename _userType1, typename _userType2, bool a, bool b>
@@ -81,6 +83,7 @@ protected:
                                        const _userType1 & argument1, _userType2 & argument2) {
             return command->Execute(argument1, argument2); }
     };
+#endif
 
  public:
     /*! Default constructor.  Does nothing, use Bind before
@@ -108,6 +111,7 @@ protected:
     mtsExecutionResult operator()(const mtsGenericObject & qualifier,
                                   mtsGenericObject & argument) const;
 
+#ifndef SWIG
 	/*! Overloaded operator that accepts different argument types (for qualified read). */
     template <class _userType1, class _userType2>
     mtsExecutionResult operator()(const _userType1 & argument1, _userType2 & argument2) const {
@@ -118,6 +122,7 @@ protected:
           : mtsExecutionResult::NO_INTERFACE;
         return result;
     }
+#endif
 
     /*! Access to underlying command object. */
     CommandType * GetCommand(void) const;

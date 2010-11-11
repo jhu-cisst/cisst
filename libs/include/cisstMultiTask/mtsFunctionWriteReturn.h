@@ -37,10 +37,12 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsExport.h>
 
 class CISST_EXPORT mtsFunctionWriteReturn: public mtsFunctionBase {
- protected:
+ public:
     typedef mtsCommandWriteReturn CommandType;
+ protected:
     CommandType * Command;
 
+#ifndef SWIG
     template <typename __argumentType, typename __resultType, bool a, bool b>
     class ConditionalWrap {
     public:
@@ -80,6 +82,7 @@ class CISST_EXPORT mtsFunctionWriteReturn: public mtsFunctionBase {
             return command->Execute(argument, result);
         }
     };
+#endif
 
  public:
     /*! Default constructor.  Does nothing, use Instantiate before
@@ -107,6 +110,7 @@ class CISST_EXPORT mtsFunctionWriteReturn: public mtsFunctionBase {
     mtsExecutionResult operator()(const mtsGenericObject & argument,
                                   mtsGenericObject & result) const;
 
+#ifndef SWIG
 	/*! Overloaded operator that accepts different argument types (for write return). */
     template <class __argumentType, class __resultType>
     mtsExecutionResult operator()(const __argumentType & argument, __resultType & result) const {
@@ -118,6 +122,7 @@ class CISST_EXPORT mtsFunctionWriteReturn: public mtsFunctionBase {
           : mtsExecutionResult::NO_INTERFACE;
         return executionResult;
     }
+#endif
 
     /*! Access to underlying command object. */
     CommandType * GetCommand(void) const;
