@@ -95,27 +95,26 @@ private:
  public:
 
     typedef cmnLODMultiplexerStreambuf<_element, _trait> ChannelType;
-    typedef typename ChannelType::LogLoDType LogLoDType;
     typedef typename std::basic_streambuf<_element, _trait>::int_type int_type;
 
     /*! Constructor: initialize the true output multiplexer and the current LOD. */
-    cmnMultiplexerStreambufProxy(ChannelType *output, LogLoDType lod)
-        : m_OutputChannel(output), m_LOD(lod)
+    cmnMultiplexerStreambufProxy(ChannelType *output, cmnLogLevel level)
+        : OutputChannel(output), LogLevel(level)
         {}
 
     /*! Returns the Level of Detail. */
-    LogLoDType GetLOD(void) const {
-        return m_LOD;
+    cmnLogLevel GetLOD(void) const {
+        return LogLevel;
     }
 
     /*! Sets the Level of Detail. */
-    void SetLOD(LogLoDType lod) {
-        m_LOD = lod;
+    void SetLOD(cmnLogLevel level) {
+        LogLevel = level;
     }
 
     /*! Returns a pointer to the output multiplexer. */
     ChannelType * GetOutput(void) const {
-        return m_OutputChannel;
+        return OutputChannel;
     }
 
     // Here we override the basic_streambuf methods for multiplexing.
@@ -125,7 +124,7 @@ private:
  protected:
 
     /*! Override the basic_streambuf xsputn to do the multiplexing. */
-    virtual std::streamsize xsputn(const _element *s, std::streamsize n);
+    virtual std::streamsize xsputn(const _element * s, std::streamsize n);
 
     /*! Override the basic_streambuf sync for multiplexing. */
     virtual int sync(void);
@@ -138,8 +137,8 @@ private:
 
 
  private:
-    ChannelType * m_OutputChannel;
-    LogLoDType m_LOD;
+    ChannelType * OutputChannel;
+    cmnLogLevel LogLevel;
 
 };
 
@@ -150,18 +149,18 @@ private:
 
 
 /*! Override the basic_streambuf xsputn to do the multiplexing. */
-template<class _element, class _trait>
+template <class _element, class _trait>
 std::streamsize cmnMultiplexerStreambufProxy<_element, _trait>::xsputn(const _element *s, std::streamsize n)
 {
-    return m_OutputChannel->xsputn(s, n, m_LOD);
+    return OutputChannel->xsputn(s, n, LogLevel);
 }
 
 
 /*! Override the basic_streambuf sync for multiplexing. */
-template<class _element, class _trait>
+template <class _element, class _trait>
 int cmnMultiplexerStreambufProxy<_element, _trait>::sync()
 {
-    return m_OutputChannel->sync();
+    return OutputChannel->sync();
 }
 
 
@@ -173,9 +172,8 @@ template<class _element, class _trait>
 typename cmnMultiplexerStreambufProxy<_element, _trait>::int_type
 cmnMultiplexerStreambufProxy<_element, _trait>::overflow(int_type c)
 {
-    return m_OutputChannel->overflow(c, m_LOD);
+    return OutputChannel->overflow(c, LogLevel);
 }
 
 
 #endif  // _cmnMultiplexerStreambufProxy_h
-

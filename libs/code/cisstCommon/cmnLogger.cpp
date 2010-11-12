@@ -48,6 +48,6 @@ cmnLogger * cmnLogger::Instance(void) {
 }
 
 void cmnLogger::SetLoDInstance(LogLoDType lod) {
-    CMN_LOG_INIT_WARNING << "Class cmnLogger: level of Detail set to \"" << lod << "\"" << std::endl;
+    CMN_LOG_INIT_VERBOSE << "Class cmnLogger: overall level of detail set to \"" << cmnLogLevelToString(lod) << "\"" << std::endl;
     LoD = lod;
 }

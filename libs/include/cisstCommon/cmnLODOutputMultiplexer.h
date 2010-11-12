@@ -60,7 +60,7 @@ http://www.cisst.org/cisst/license.txt.
 
        cmnLODOutputMultiplexer multiplexerOutput(&lodMultiplexetStreambuf, CMN_LOG_LOD_RUN_ERROR);
 
-       lodMultiplexerStreambuf.AddChannel(log, CMN_LOG_LOD_RUN_ERROR;
+       lodMultiplexerStreambuf.AddChannel(log, CMN_LOG_LOD_RUN_ERROR);
        lodMultiplexerStreambuf.AddChannel(windowoutputstream, CMN_LOG_LOD_INIT_WARNING);
 
        multiplexerStreambuf << "Hello, world" << endl;  // channel the message only to 'log'
@@ -83,15 +83,13 @@ private:
 
     typedef std::ostream BaseType;
 
-    typedef SinkType::LogLoDType LogLoDType;
-
     /*!
       Constructor that initializes base class and stores LOD.
     */
-    cmnLODOutputMultiplexer(SinkType * multiplexer, LogLoDType lod)
-        : BaseType(NULL), m_StreambufProxy(multiplexer, lod) {
+    cmnLODOutputMultiplexer(SinkType * multiplexer, cmnLogLevel level)
+        : BaseType(NULL), StreambufProxy(multiplexer, level) {
         if (multiplexer != NULL) {
-            init(&m_StreambufProxy);
+            init(&StreambufProxy);
         }
     }
 
@@ -111,20 +109,20 @@ private:
     /*!
       Returns the Level of Detail.
      */
-    LogLoDType GetLOD(void) const {
-        return m_StreambufProxy.GetLOD();
+    cmnLogLevel GetLOD(void) const {
+        return StreambufProxy.GetLOD();
     }
 
     /*!
       Sets the Level of Detail.
      */
-    void SetLOD(LogLoDType lod) {
-        m_StreambufProxy.SetLOD(lod);
+    void SetLOD(cmnLogLevel lod) {
+        StreambufProxy.SetLOD(lod);
     }
 
 
  private:
-    cmnMultiplexerStreambufProxy<char_type> m_StreambufProxy;
+    cmnMultiplexerStreambufProxy<char_type> StreambufProxy;
 
 };
 

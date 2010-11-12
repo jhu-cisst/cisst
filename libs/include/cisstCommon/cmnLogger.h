@@ -274,7 +274,7 @@ class CISST_EXPORT cmnLogger {
     }
 
     /*! Instance specific implementation of ResumeDefaultLog. */
-    inline void ResumeDefaultLogInstance(LogLoDType newLoD = CMN_LOG_ALLOW_DEFAULT) {
+    inline void ResumeDefaultLogInstance(LogLoDType newLoD) {
         LoDMultiplexerStreambuf.AddChannel(*(DefaultLogFile()), newLoD);
     }
 

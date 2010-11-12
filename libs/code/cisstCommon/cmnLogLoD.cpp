@@ -47,7 +47,7 @@ cmnLogLevel cmnIndexToLogLevel(const size_t & index)
 }
 
 
-const std::string & cmnLogLevelToString(const cmnLogLevel & level)
+const std::string & cmnLogIndexToString(const size_t & index)
 {
     static const std::string strings[] = {
         "No log",
@@ -60,13 +60,20 @@ const std::string & cmnLogLevelToString(const cmnLogLevel & level)
         "Message (run)",
         "Debug (run)"
     };
-    size_t index = cmnLogLevelToIndex(level);
-    if (index > 8) {
-        index = 8;
+    size_t validIndex = index;
+    if (validIndex > 8) {
+        validIndex = 8;
     }
-    return strings[cmnLogLevelToIndex(level)];
+    return strings[validIndex];
 }
 
+
+const std::string & cmnLogLevelToString(const cmnLogLevel & level)
+{
+    return cmnLogIndexToString(cmnLogLevelToIndex(level));
+}
+
+#include <iostream>
 
 std::string cmnLogMaskToString(const cmnLogMask & mask)
 {
@@ -74,11 +81,11 @@ std::string cmnLogMaskToString(const cmnLogMask & mask)
         std::string result;
         for (size_t index = 0; index < 8; index++) {
             if (mask & 1<<index) {
-                result += cmnLogLevelToString(index + 1) + " ";
+                result = cmnLogIndexToString(index + 1) + " " + result;
             }
         }
         return result;
     } else {
-        return cmnLogLevelToString(0);
+        return cmnLogIndexToString(0);
     }
 }

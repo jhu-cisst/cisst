@@ -74,7 +74,7 @@ bool cmnClassRegister::SetLoD(const std::string & name, LogLoDType lod) {
         classServicesPointer->SetLoD(lod);
         CMN_LOG_INIT_VERBOSE << "Class cmnClassRegister: SetLoD: class \"" << classServicesPointer->GetName()
                              << "\" log LoD has been set to \""
-                             << classServicesPointer->GetLoD() << "\"" << std::endl;
+                             << cmnLogMaskToString(classServicesPointer->GetLoD()) << "\"" << std::endl;
     } else {
         // we need to warn the programmer
         CMN_LOG_INIT_WARNING << "Class cmnClassRegister: SetLoD: class \"" << name
@@ -102,7 +102,7 @@ bool cmnClassRegister::SetLoDForAllClassesInstance(LogLoDType lod) {
     }
     if (result) {
         CMN_LOG_INIT_VERBOSE << "Class cmnClassRegister: SetLoDForAllClasses: log LoD has been set to \""
-                             << classServicesPointer->GetLoD() << "\" for the following classes: "
+                             << cmnLogMaskToString(classServicesPointer->GetLoD()) << "\" for the following classes: "
                              << allClasses << std::endl;
     }
     return result;
@@ -131,7 +131,7 @@ bool cmnClassRegister::SetLoDForMatchingClassesInstance(const std::string & stri
     }
     if (result) {
         CMN_LOG_INIT_VERBOSE << "Class cmnClassRegister: SetLoDForMatchingClasses: log LoD has been set to \""
-                             << classServicesPointer->GetLoD() << "\" for the following classes matching \""
+                             << cmnLogMaskToString(classServicesPointer->GetLoD()) << "\" for the following classes matching \""
                              << stringToMatch << "\": " << allClasses << std::endl;
     }
     return result;
@@ -145,10 +145,10 @@ cmnClassServicesBase * cmnClassRegister::FindClassServicesInstance(const std::st
     iterator = ServicesContainer.find(className);
     if (iterator != end) {
         result = iterator->second;
-        CMN_LOG_RUN_VERBOSE << "Class cmnClassRegister: FindClassServices: found class info for \""
-                            << className << "\"" << std::endl;
+        CMN_LOG_RUN_DEBUG << "Class cmnClassRegister: FindClassServices: found class info for \""
+                          << className << "\"" << std::endl;
     } else {
-        CMN_LOG_RUN_WARNING << "Class cmnClassRegister: FindClassServices: couldn't find class info for \""
+        CMN_LOG_RUN_VERBOSE << "Class cmnClassRegister: FindClassServices: couldn't find class info for \""
                             << className << "\"" << std::endl;
     }
     return result;

@@ -36,8 +36,24 @@ http://www.cisst.org/cisst/license.txt.
 // always include last
 #include <cisstCommon/cmnExport.h>
 
+/*! Type used for all messages to indicate the level (nature) of the
+  message.  Each level uses one bit out of 8.  There is an implicit
+  order between the levels i.e. they are sorted as follow:
+  # Init
+    # Error
+    # Warning
+    # Verbose (aka message)
+    # Debug
+  # Run
+    # Error
+    # Warning
+    # Verbose (aka message)
+    # Debug
+
+  Messages will be logged or not based on the different filters used.
+  Each filter uses the type cmnLogMask.
+*/
 typedef short cmnLogLevel;
-typedef short cmnLogMask;
 
 #define CMN_LOG_LEVEL_NONE         0x00 // 00000000
 #define CMN_LOG_LEVEL_INIT_ERROR   0x01 // 00000001
@@ -48,6 +64,8 @@ typedef short cmnLogMask;
 #define CMN_LOG_LEVEL_RUN_WARNING  0x20 // 00100000
 #define CMN_LOG_LEVEL_RUN_VERBOSE  0x40 // 01000000
 #define CMN_LOG_LEVEL_RUN_DEBUG    0x80 // 10000000
+
+typedef short cmnLogMask;
 
 #define CMN_LOG_ALLOW_NONE    0x00 // 00000000
 #define CMN_LOG_ALLOW_ERROR   0x11 // 00010001
@@ -62,6 +80,7 @@ typedef short cmnLogMask;
   less important the message is.  Lower values are used for the
   initialization phase (i.e. constructor, configuration, ...) while
   the higher values are used for normal operations. */
+//@{
 #define CMN_LOG_LOD_NONE         0x00 // 00000000
 #define CMN_LOG_LOD_INIT_ERROR   0x01 // 00000001
 #define CMN_LOG_LOD_INIT_WARNING 0x03 // 00000011
@@ -73,15 +92,29 @@ typedef short cmnLogMask;
 #define CMN_LOG_LOD_RUN_DEBUG    0xFF // 11111111
 #define CMN_LOG_LOD_VERY_VERBOSE 0xFF // 11111111
 #define CMN_LOG_DEFAULT_LOD      CMN_LOG_ALLOW_WARNING
+//@}
 
+/*! Convert a log level to an index.  The index value will be between
+  0 and 8 (included).  This can be used to list all possible levels
+  of detail associated to a message. */
+size_t CISST_EXPORT cmnLogLevelToIndex(const cmnLogLevel & level);
 
-size_t CISST_EXPORT cmnLogLevelToIndex(const cmnLogLevel & bitset);
-
+/*! Convert an index to a level of detail.  This can be used for a
+  program that needs to list all possible levels of detail */
 cmnLogLevel CISST_EXPORT cmnIndexToLogLevel(const size_t & index);
 
-const std::string & CISST_EXPORT cmnLogLevelToString(const cmnLogLevel & bitset);
+/*! Provide a human readable string (e.g. "Error (init)") for a given
+  index (index correpond to the position of a single bit in a log
+  mask). */
+const std::string & CISST_EXPORT cmnLogIndexToString(const size_t & index);
 
-std::string CISST_EXPORT cmnLogMaskToString(const cmnLogMask & bitset);
+/*! Provide a human readable string for a log level.  This is used in
+  all log output to indicate the message level (Error, Warning,
+  Message, Debug during initialization or run). */
+const std::string & CISST_EXPORT cmnLogLevelToString(const cmnLogLevel & level);
+
+/*! Provide a human readable list of all message levels the mask will
+  allow. */
+std::string CISST_EXPORT cmnLogMaskToString(const cmnLogMask & mask);
 
 #endif // _cmnLogLoD_h
-
