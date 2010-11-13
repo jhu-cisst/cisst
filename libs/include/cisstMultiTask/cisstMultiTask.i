@@ -90,7 +90,7 @@ http://www.cisst.org/cisst/license.txt.
             try:
                 tmpObject = self.GetResultPrototype().Services().Create()
                 self.ArgumentType = tmpObject.__class__
-            except TypeError, e:
+            except Exception, e:
                 print 'VoidReturn command ', self.GetName(), ': ', e
 
 
@@ -118,7 +118,7 @@ http://www.cisst.org/cisst/license.txt.
             try:
                 tmpObject = self.GetArgumentClassServices().Create()
                 self.ArgumentType = tmpObject.__class__
-            except TypeError, e:
+            except Exception, e:
                 print 'Write command ', self.GetName(), ': ', e
 
         def __call__(self, argument):
@@ -139,7 +139,7 @@ http://www.cisst.org/cisst/license.txt.
                 self.ArgumentType = tmp1Object.__class__
                 tmp2Object = self.GetResultPrototype().Services().Create()
                 self.ResultType = tmp2Object.__class__
-            except TypeError, e:
+            except Exception, e:
                 print 'WriteReturn command ', self.GetName(), ': ', e
 
         def __call__(self, argument):
@@ -166,7 +166,7 @@ http://www.cisst.org/cisst/license.txt.
             try:
                 tmpObject = self.GetArgumentPrototype().Services().Create()
                 self.ArgumentType = tmpObject.__class__
-            except TypeError, e:
+            except Exception, e:
                 print 'Read command ', self.GetName(), ': ', e
 
 
@@ -196,7 +196,7 @@ http://www.cisst.org/cisst/license.txt.
                 self.Argument1Type = tmp1Object.__class__
                 tmp2Object = self.GetArgument2ClassServices().Create()
                 self.Argument2Type = tmp2Object.__class__
-            except TypeError, e:
+            except Exception, e:
                 print 'Qualified read command ', self.GetName(), ': ', e
 
         def __call__(self, argument1):
@@ -240,8 +240,8 @@ http://www.cisst.org/cisst/license.txt.
             try:
                 tmpObject = self.GetResultPrototype().Services().Create()
                 self.ArgumentType = tmpObject.__class__
-            except TypeError, e:
-                print 'VoidReturn function ', self.GetName(), ': ', e
+            except Exception, e:
+                print 'VoidReturn function ', self.GetCommand().GetName(), ': ', e
 
 
         def __call__(self):
@@ -268,8 +268,8 @@ http://www.cisst.org/cisst/license.txt.
             try:
                 tmpObject = self.GetArgumentPrototype().Services().Create()
                 self.ArgumentType = tmpObject.__class__
-            except TypeError, e:
-                print 'Read function ', self.GetName(), ': ', e
+            except Exception, e:
+                print 'Read function ', self.GetCommand().GetName(), ': ', e
 
 
         def __call__(self):
@@ -296,8 +296,8 @@ http://www.cisst.org/cisst/license.txt.
             try:
                 tmpObject = self.GetArgumentPrototype().Services().Create()
                 self.ArgumentType = tmpObject.__class__
-            except TypeError, e:
-                print 'Write function ', self.GetName(), ': ', e
+            except Exception, e:
+                print 'Write function ', self.GetCommand().GetName(), ': ', e
 
         def __call__(self, argument):
             if isinstance(argument, self.ArgumentType):
@@ -317,8 +317,8 @@ http://www.cisst.org/cisst/license.txt.
                 self.ArgumentType = tmp1Object.__class__
                 tmp2Object = self.GetResultPrototype().Services().Create()
                 self.ResultType = tmp2Object.__class__
-            except TypeError, e:
-                print 'WriteReturn function ', self.GetName(), ': ', e
+            except Exception, e:
+                print 'WriteReturn function ', self.GetCommand().GetName(), ': ', e
 
         def __call__(self, argument):
             result = self.ResultType(self.GetResultPrototype())
@@ -346,8 +346,8 @@ http://www.cisst.org/cisst/license.txt.
                 self.Argument1Type = tmp1Object.__class__
                 tmp2Object = self.GetArgument2Prototype().Services().Create()
                 self.Argument2Type = tmp2Object.__class__
-            except TypeError, e:
-                print 'Qualified read function ', self.GetName(), ': ', e
+            except Exception, e:
+                print 'Qualified read function ', self.GetCommand().GetName(), ': ', e
 
         def __call__(self, argument1):
             argument2 = self.Argument2Type(self.GetArgument2Prototype())
@@ -431,27 +431,22 @@ http://www.cisst.org/cisst/license.txt.
                 self.__dict__[function] = mtsInterfaceRequired.GetFunctionVoid(self, function)
             functions = mtsInterfaceRequired.GetNamesOfFunctionsVoidReturn(self)
             for function in functions:
-                print 'FunctionVoidReturn = ', function
                 self.__dict__[function] = mtsInterfaceRequired.GetFunctionVoidReturn(self, function)
                 self.__dict__[function].UpdateFromC()
             functions = mtsInterfaceRequired.GetNamesOfFunctionsWrite(self)
             for function in functions:
-                print 'FunctionWrite = ', function
                 self.__dict__[function] = mtsInterfaceRequired.GetFunctionWrite(self, function)
                 self.__dict__[function].UpdateFromC()
             functions = mtsInterfaceRequired.GetNamesOfFunctionsWriteReturn(self)
             for function in functions:
-                print 'FunctionWriteReturn = ', function
                 self.__dict__[function] = mtsInterfaceRequired.GetFunctionWriteReturn(self, function)
                 self.__dict__[function].UpdateFromC()
             functions = mtsInterfaceRequired.GetNamesOfFunctionsQualifiedRead(self)
             for function in functions:
-                print 'FunctionQualifiedRead = ', function
                 self.__dict__[function] = mtsInterfaceRequired.GetFunctionQualifiedRead(self, function)
                 self.__dict__[function].UpdateFromC()
             functions = mtsInterfaceRequired.GetNamesOfFunctionsRead(self)
             for function in functions:
-                print 'FunctionRead = ', function
                 self.__dict__[function] = mtsInterfaceRequired.GetFunctionRead(self, function)
                 self.__dict__[function].UpdateFromC()
     }
@@ -509,11 +504,10 @@ MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsLong, long);
 MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsULong, unsigned long);
 MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsBool, bool);
 MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsStdString, std::string);
+MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsStdStringVecProxy, stdStringVec);
 
 %include "cisstMultiTask/mtsParameterTypes.h"
-//PK TEMP: following does not work
-//typedef std::vector<mtsDescriptionConnection> mtsDescriptionConnectionStdVec;
-//MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsDescriptionConnectionVec, mtsDescriptionConnectionStdVec);
+MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsDescriptionConnectionVec, mtsDescriptionConnectionStdVec);
 
 // Wrap mtsVector
 %import "cisstMultiTask/mtsVector.h"
@@ -546,6 +540,7 @@ MTS_INSTANTIATE_VECTOR(mtsIntVec, int);
 MTS_INSTANTIATE_VECTOR(mtsShortVec, short);
 MTS_INSTANTIATE_VECTOR(mtsLongVec, long);
 MTS_INSTANTIATE_VECTOR(mtsUCharVec, unsigned char);
+MTS_INSTANTIATE_VECTOR(mtsStdStringVec, std::string);
 
 // Wrap mtsMatrix
 %import "cisstMultiTask/mtsMatrix.h"

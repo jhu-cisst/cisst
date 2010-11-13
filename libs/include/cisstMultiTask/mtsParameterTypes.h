@@ -115,16 +115,18 @@ public:
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsDescriptionConnection);
 
-typedef mtsGenericObjectProxy<std::vector<mtsDescriptionConnection> > mtsDescriptionConnectionVec;
+typedef std::vector<mtsDescriptionConnection> mtsDescriptionConnectionStdVec;
+typedef mtsGenericObjectProxy<mtsDescriptionConnectionStdVec> mtsDescriptionConnectionVec;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsDescriptionConnectionVec);
 
 // Define stream out operator for std::vector<mtsDescriptionConnection>
 inline std::ostream & operator << (std::ostream & output,
-                            const std::vector<mtsDescriptionConnection> & object) {
+                            const mtsDescriptionConnectionStdVec & object) {
     output << "[";
     for (size_t i = 0; i < object.size(); i++) {
         object[i].ToStream(output);
-        output << ", ";
+        if (i < object.size()-1)
+            output << ", ";
     }
     output << "]";
     return output;
