@@ -33,6 +33,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnPortability.h>
 #include <cisstCommon/cmnForwardDeclarations.h>
 #include <cisstCommon/cmnClassServicesBase.h>
+#include <cisstCommon/cmnGenericObject.h>
 #include <cisstCommon/cmnLogger.h>
 
 
