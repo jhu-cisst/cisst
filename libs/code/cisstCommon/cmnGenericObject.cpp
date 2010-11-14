@@ -30,12 +30,16 @@ http://www.cisst.org/cisst/license.txt.
 
 bool cmnGenericObject::ReconstructFrom(const cmnGenericObject & other) {
     const cmnClassServicesBase * services = this->Services();
+#if 0
+    // Following are now done in services->Create(this, other)
+
     // test that both objects are of the same type
     if (services != other.Services()) {
         return false;
     }
     // call destructor on the existing object
     services->Delete(this);
+#endif
     // call copy constructor
     services->Create(this, other);
     return true;
