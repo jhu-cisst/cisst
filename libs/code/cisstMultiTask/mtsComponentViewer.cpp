@@ -19,18 +19,20 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstCommon/cmnUnits.h>
-#include <cisstOSAbstraction/osaSleep.h>
+#include <cisstOSAbstraction/osaPipeExec.h>
 #include <cisstMultiTask/mtsComponentViewer.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
+
+void mtsComponentViewer::WriteString(osaPipeExec & pipe, const std::string & s)
+{
+    pipe.Write(s, s.length());
+}
 
 CMN_IMPLEMENT_SERVICES(mtsComponentViewer)
 
 mtsComponentViewer::mtsComponentViewer(const std::string & name, double periodicityInSeconds) :
     mtsTaskPeriodic(name, periodicityInSeconds),
-    JGraphSocket(osaSocket::TCP),
-    JGraphSocketConnected(false),
-    UDrawSocket(osaSocket::TCP),
-    UDrawSocketConnected(false)
+    UDrawPipeConnected(false)
 {
     // MJ TEMP
 #if 0
@@ -61,20 +63,18 @@ mtsComponentViewer::~mtsComponentViewer()
 void mtsComponentViewer::Startup(void)
 {
     CMN_LOG_CLASS_INIT_VERBOSE << "Startup called" << std::endl;
-    // Try to connect to JGraph or UDrawGraph viewer
-    if (!JGraphSocketConnected)
-        ConnectToJGraph();
-    if (!UDrawSocketConnected)
+    // Try to connect to UDrawGraph viewer
+    if (!UDrawPipeConnected)
         ConnectToUDrawGraph();
-    if (JGraphSocketConnected || UDrawSocketConnected)
+    if (UDrawPipeConnected)
         SendAllInfo();
 }
 
 void mtsComponentViewer::Run(void)
 {
-    if (!UDrawSocketConnected) {
+    if (!UDrawPipeConnected) {
        ConnectToUDrawGraph();
-       if (UDrawSocketConnected) {
+       if (UDrawPipeConnected) {
            CMN_LOG_CLASS_INIT_VERBOSE << "Run: Sending all info" << std::endl;
            SendAllInfo();
        }
@@ -95,14 +95,9 @@ void mtsComponentViewer::Run(void)
 
 void mtsComponentViewer::Cleanup(void)
 {
-    if (JGraphSocketConnected) {
-        JGraphSocket.Close();
-        JGraphSocketConnected = false;
-    }
-
-    if (UDrawSocketConnected) {
-        UDrawSocket.Close();
-        UDrawSocketConnected = false;
+    if (UDrawPipeConnected) {
+        UDrawPipe.Close();
+        UDrawPipeConnected = false;
     }
 }
 
@@ -110,43 +105,27 @@ void mtsComponentViewer::Cleanup(void)
 
 void mtsComponentViewer::AddComponent(const mtsDescriptionComponent &componentInfo)
 {
-    if (JGraphSocketConnected) {
-        std::string buffer = GetComponentInGraphFormat(componentInfo.ProcessName, componentInfo.ComponentName);
-        if (buffer != "") {
-            CMN_LOG_CLASS_INIT_VERBOSE << "Sending " << buffer << std::endl;
-            JGraphSocket.Send(buffer);
-        }
-    }
-    if (UDrawSocketConnected) {
+    if (UDrawPipeConnected) {
         std::string buffer = GetComponentInUDrawGraphFormat(componentInfo.ProcessName, componentInfo.ComponentName);
         if (buffer != "") {
             CMN_LOG_CLASS_INIT_VERBOSE << "Sending " << buffer << std::endl;
-            UDrawSocket.Send(buffer);
-            char response[256];
-            if (UDrawSocket.Receive(response, sizeof(response), 1.0))
-                CMN_LOG_CLASS_INIT_VERBOSE << "Received response from UDraw(Graph): " << response << std::endl;
+            UDrawPipe.Write(buffer, static_cast<int>(buffer.length()));
+            buffer = UDrawPipe.ReadUntil(256, '\n');
+            if (buffer != "")
+                CMN_LOG_CLASS_INIT_VERBOSE << "Received response from UDraw(Graph): " << buffer << std::endl;
         }
     }
 }
 
 void mtsComponentViewer::AddConnection(const mtsDescriptionConnection &connection)
 {
-    // Send to TaskViewer if present
-    if (JGraphSocketConnected) {
-        std::string message = "add edge [" + connection.Client.ProcessName + ":" + connection.Client.ComponentName + ", "
-                                           + connection.Server.ProcessName + ":" + connection.Server.ComponentName + ", "
-                                           + connection.Client.InterfaceName + ", "
-                                           + connection.Server.InterfaceName + "]\n";
-        CMN_LOG_CLASS_INIT_VERBOSE << "Sending " << message << std::endl;
-        JGraphSocket.Send(message);
-    }
-    if (UDrawSocketConnected) {
-        char response[256];
+    if (UDrawPipeConnected) {
+        char IDString[256];
         std::string message("graph(update([],[new_edge(\"");
-        sprintf(response, "%d", connection.ConnectionID);
-        message.append(response);
+        sprintf(IDString, "%d", connection.ConnectionID);
+        message.append(IDString);
         message.append("\", \"C\", [a(\"OBJECT\", \"");
-        message.append(response);
+        message.append(IDString);
         message.append("\"), a(\"INFO\", \"");
         message.append(connection.Client.InterfaceName + "<->" + connection.Server.InterfaceName);
         message.append("\")], \"");
@@ -155,48 +134,38 @@ void mtsComponentViewer::AddConnection(const mtsDescriptionConnection &connectio
         message.append(connection.Server.ProcessName + ":" + connection.Server.ComponentName);
         message.append("\")]))\n");
         CMN_LOG_CLASS_INIT_VERBOSE << "Sending " << message << std::endl;
-        UDrawSocket.Send(message);
-        if (UDrawSocket.Receive(response, sizeof(response), 1.0))
+        UDrawPipe.Write(message, static_cast<int>(message.length()));
+        std::string response = UDrawPipe.ReadUntil(256, '\n');
+        if (response != "")
             CMN_LOG_CLASS_INIT_VERBOSE << "Received response from UDraw(Graph): " << response << std::endl;
     }
 }
 
 //********************************* Local (protected) methods ***********************************************
 
-bool mtsComponentViewer::ConnectToJGraph(const std::string &ipAddress, unsigned short port)
+bool mtsComponentViewer::ConnectToUDrawGraph(void)
 {
-    // Try to connect to the JGraph application software (Java program).
-    // Note that the JGraph application also sends event messages back via the socket,
-    // though we don't currently read them.
-    CMN_LOG_CLASS_INIT_WARNING << "Attempting to connect to JGraph TaskViewer" << std::endl;
-    JGraphSocketConnected = JGraphSocket.Connect(ipAddress, port);
-    if (JGraphSocketConnected) {
-        osaSleep(1.0 * cmn_s);  // need to wait or JGraph server will not start properly
-        CMN_LOG_CLASS_INIT_VERBOSE << "Connected to JGraph TaskViewer" << std::endl;
-    }
-    return JGraphSocketConnected;
-}
-
-bool mtsComponentViewer::ConnectToUDrawGraph(const std::string &ipAddress, unsigned short port)
-{
-    // Try to connect to UDrawGraph on port 2554
-    // (Note: default UDrawGraph port is 2542, but this may be a target for hackers).
-    UDrawSocketConnected = UDrawSocket.Connect(ipAddress, port);
+    // Try to connect to UDrawGraph
+    std::vector<std::string> arguments;
+    arguments.push_back("-pipe");
+    UDrawPipeConnected = UDrawPipe.Open("uDrawGraph", arguments, "rw");
     // wait for initial OK
-    if (UDrawSocketConnected) {
-        char response[256];
-        if (UDrawSocket.Receive(response, sizeof(response), 3.0)) {
+    if (UDrawPipeConnected) {
+        std::string response = UDrawPipe.ReadUntil(256, '\n');
+        if (response != "") {
             CMN_LOG_CLASS_INIT_VERBOSE << "Received response from UDraw(Graph): " << response << std::endl;
-            UDrawSocket.Send("drag_and_drop(dragging_on)\n");
-            if (UDrawSocket.Receive(response, sizeof(response), 1.0))
+            WriteString(UDrawPipe, "drag_and_drop(dragging_on)\n");
+            response = UDrawPipe.ReadUntil(256, '\n');
+            if (response != "")
                CMN_LOG_CLASS_INIT_VERBOSE << "Received response from UDraw(Graph), drag_and_drop: " << response << std::endl;
-            UDrawSocket.Send("graph(new([]))\n");
-            if (UDrawSocket.Receive(response, sizeof(response), 1.0))
+            WriteString(UDrawPipe, "graph(new([]))\n");
+            response = UDrawPipe.ReadUntil(256, '\n');
+            if (response != "")
                CMN_LOG_CLASS_INIT_VERBOSE << "Received response from UDraw(Graph), new: " << response << std::endl;
         }
         CMN_LOG_CLASS_INIT_VERBOSE << "Connected to UDraw(Graph)" << std::endl;
     }
-    return UDrawSocketConnected;
+    return UDrawPipeConnected;
 }
 
 bool mtsComponentViewer::IsProxyComponent(const std::string & componentName) const
@@ -229,10 +198,10 @@ void mtsComponentViewer::SendAllInfo(void)
         for (i = 0; i < connectionList.size(); i++)
             this->AddConnection(connectionList[i]);
     }
-    if (UDrawSocketConnected) {
-        char response[256];
-        UDrawSocket.Send("menu(layout(improve_all))\n");
-        if (UDrawSocket.Receive(response, sizeof(response), 3.0))
+    if (UDrawPipeConnected) {
+        WriteString(UDrawPipe, "menu(layout(improve_all))\n");
+        std::string response = UDrawPipe.ReadUntil(256, '\n');
+        if (response != "")
            CMN_LOG_CLASS_INIT_VERBOSE << "Received response from UDraw(Graph), improve_all: " << response << std::endl;
     }
 }
