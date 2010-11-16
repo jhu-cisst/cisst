@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2004-08-31
 
-  (C) Copyright 2004-2008 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -56,15 +56,14 @@ http://www.cisst.org/cisst/license.txt.
   The message is streamed along with a Level of Detail to cmnLogger
   provided that two conditions are met:
 
-  - The level of detail associated to the message must be lower or
-    equal to the level of detail used to filter the messages at the
-    global level.  This global level of detail is set via the
-    cmnLogger.
+  - The overall log mask must allow the level of detail associated to
+    the message.  The overall mask can be set using
+    cmnLogger::SetMask.
 
-  - The level of detail associated to the message must be lower or
-    equal to the level of detail used to filter the messages by the
-    class itself.  To modify the class specific level of detail, see
-    cmnClassServicesBase and cmnClassRegister
+  - The class specific log mask must allow the level of detail
+    associated to the message.  Class specific masks can be set using
+    cmnLogger::SetMaskClass, cmnLogger::SetMaskClassMatching or
+    cmnLogger::SetMaskClassAll.
 
   The macro creates an output stream if the level of detail of the
   message satisfies the two criteria defined above.  It can be used as
@@ -77,7 +76,7 @@ http://www.cisst.org/cisst/license.txt.
   \param lod The log level of detail of the message.
 */
 #define CMN_LOG_CLASS_INSTANCE(objectPointer, lod) \
-    (!(cmnLogger::GetLoD() & objectPointer->Services()->GetLoD() & lod))? \
+    (!(cmnLogger::GetMask() & objectPointer->Services()->GetLogMask() & lod))? \
     (void*)0:\
     ((cmnLODOutputMultiplexer(objectPointer->GetLogMultiplexer(), lod).Ref()) << cmnLogLevelToString(lod) << " - Class " << objectPointer->Services()->GetName() << ": ")
 
@@ -119,9 +118,9 @@ http://www.cisst.org/cisst/license.txt.
   #CMN_LOG_CLASS.
 
   The message is streamed along with a Level of Detail to cmnLogger
-  provided that the level of detail associated to the message is lower
-  or equal to the level of detail used to filter the messages at the
-  global level.  This global level of detail is set via the cmnLogger.
+  provided that the overall log mask must allow the level of detail
+  associated to the message.  The overall mask can be set using
+  cmnLogger::SetMask.
 
   The macro creates an output stream if the level of detail of the
   message satisfies the criterion defined above.  It can be used as
@@ -134,7 +133,7 @@ http://www.cisst.org/cisst/license.txt.
   \param lod The log level of detail of the message.
 */
 #define CMN_LOG(lod) \
-    (!(cmnLogger::GetLoD() & lod))? \
+    (!(cmnLogger::GetMask() & lod))? \
     (void*)0: \
     ((cmnLODOutputMultiplexer(cmnLogger::GetMultiplexer(), lod).Ref()) << cmnLogLevelToString(lod) << " - ")
 
@@ -177,7 +176,7 @@ http://www.cisst.org/cisst/license.txt.
 
   cmnLogger is defined as a singleton, i.e. there is only one instance
   of cmnLogger.  This unique object maintains the data required for
-  the cisst logging system.  The desing of the logging system
+  the cisst logging system.  The design of the logging system
   relies on:
 
   - Human readable messages are associated to a Level of Detail.
@@ -193,29 +192,31 @@ http://www.cisst.org/cisst/license.txt.
 
   To filter the messages, the user can use:
 
-  - The global level of detail defined in cmnLogger.  Any message with
-    a level of detail greater than the global level of detail will be
-    ignored (at minimal execution time cost).  This level of detail is
-    used by #CMN_LOG_CLASS and #CMN_LOG.  To modify the global level
-    of detail, use cmnLogger::SetLoD(newLoD).
+  - The global log mask defined in cmnLogger.  Any message with a
+    level of detail incompatible with overall log mask will be ignored
+    (at minimal execution time cost).  This mask is used by
+    #CMN_LOG_CLASS and #CMN_LOG.  To modify the overall mask, use
+    cmnLogger::SetMask(newMask).
 
-  - Each class defines a level of detail.  This allows to tune the log
-    based on the user's needs.  One can for example allow all the
-    messages (from errors to warnings) from a given class and block
-    all the messages from every other class.  As for the global level
-    of detail, if a message's level of detail is greater than the
-    class level of detail, it will be ignored (at minimal execution
-    time cost).  This level of detail is used only be #CMN_LOG_CLASS.
-    To modify a class level of detail, use either the class register
-    with cmnClassRegister::SetLoD("className", newLoD) or the class
-    services with object.Services()->SetLoD(newLoD).
+  - Each class relies on its own log mask.  This allows to tune the
+    log based on the user's needs.  One can for example allow all the
+    messages (from errors to debug) from a given class and block all
+    the messages from every other class.  As for the overall log mask,
+    if a message's level of detail is incompatible with the class
+    mask, it will be ignored (at minimal execution time cost).  This
+    log mask is used only be #CMN_LOG_CLASS.  To modify a class log
+    mask, use either the logger with
+    cmnLogger::SetMaskClass("className", newMask),
+    cmnLogger::SetMaskClassMatching("cmn", newMask),
+    cmnLogger::SetMaskClassAll(newMask) or the class services with
+    object.Services()->SetLogMask(newMask).
 
-  - The output streams level of details.  Each output stream has its
-    own level of detail and will stream only the messages with a level
-    of details lesser or equal to his.  This allows for example to log
-    everything to a file while printing only the high priority ones to
-    std::cout.  To set the level of detail of an output stream, use
-    cmnLogger::GetMultiplexer()->AddChannel(newStream, newLoD).
+  - The output streams masks.  Each output stream has its own log mask
+    and will stream only the messages with a compatible level of
+    detail.  This allows for example to log everything to a file while
+    printing only the high priority ones to std::cout.  To set the
+    level of detail of an output stream, use
+    cmnLogger::AddChannel(newStream, newMask).
 
   \sa cmnClassRegister cmnClassServicesBase cmnLODOutputMultiplexer
 */
@@ -225,63 +226,52 @@ class CISST_EXPORT cmnLogger {
     /*! Type used to define the logging level of detail. */
     typedef cmnLODMultiplexerStreambuf<char> StreamBufType;
 
-    typedef cmnLogMask LogLoDType;
-
  private:
     /*! Global Level of Detail used to filter all messages.
 
-      - CMN_LOG_MASK_INIT_ERROR: Errors during the initialization.
-      - CMN_LOG_MASK_INIT_WARNING: Warnings during the initialization.
-      - CMN_LOG_MASK_INIT_VERBOSE and CMN_LOG_MASK_INIT_DEBUG: Extra messages during the initialization.
-      - CMN_LOG_MASK_RUN_ERROR: Errors during normal operations (also defined as #CMN_LOG_DEFAULT_LOD).
-      - CMN_LOG_MASK_RUN_WARNING: Warnings during normal operations.
-      - CMN_LOG_MASK_RUN_VERBOSE and CMN_LOG_MASK_RUN_DEBUG: Extra messages during normal operations.
-      - CMN_LOG_MASK_VERY_VERBOSE: Very verbose.
+      - CMN_LOG_ALLOW_INIT_ERROR: Errors during the initialization.
+      - CMN_LOG_ALLOW_INIT_WARNING: Warnings during the initialization.
+      - CMN_LOG_ALLOW_INIT_VERBOSE and CMN_LOG_MASK_INIT_DEBUG: Extra messages during the initialization.
+      - CMN_LOG_ALLOW_RUN_ERROR: Errors during normal operations (also defined as #CMN_LOG_DEFAULT_LOD).
+      - CMN_LOG_ALLOW_RUN_WARNING: Warnings during normal operations.
+      - CMN_LOG_ALLOW_RUN_VERBOSE and CMN_LOG_MASK_RUN_DEBUG: Extra messages during normal operations.
 
       The idea is that for most classes, important errors happens
       during the initialization (constructor, opening a serial port,
       configuring some hardware device, open a grapical context, etc.)
       and during the normal operations, time can become critical.
-      Therefore a level CMN_LOG_MASK_RUN_ERROR would log a lot of
-      information at the beginning and only the critical messages
-      during the normal operations.
     */
-    LogLoDType LoD;
+    cmnLogMask Mask;
 
     /*! Single multiplexer used to stream the log out */
     StreamBufType LoDMultiplexerStreambuf;
 
-    /*! Instance specific implementation of SetLoD.  \sa SetLoD */
-    void SetLoDInstance(LogLoDType lod);
+    /*! Instance specific implementation of SetMask.
+      \sa SetMask */
+    void SetMaskInstance(cmnLogMask mask);
 
-    /*! Instance specific implementation of GetLoD.  \sa GetLoD */
-    inline LogLoDType GetLoDInstance(void) const {
-        return LoD;
-    }
+    /*! Instance specific implementation of GetMaskInstance.
+      \sa GetMask */
+    cmnLogMask GetMaskInstance(void);
 
     /*! Instance specific implementation of GetMultiplexer.
       \sa GetMultiplexer */
-    inline StreamBufType * GetMultiplexerInstance(void) {
-        return &(LoDMultiplexerStreambuf);
-    }
+    StreamBufType * GetMultiplexerInstance(void);
 
     /*! Create and get a pointer on the default log file. */
     std::ofstream * DefaultLogFile(const std::string & defaultLogFileName = "cisstLog.txt");
 
     /*! Instance specific implementation of HaltDefaultLog. */
-    inline void HaltDefaultLogInstance(void) {
-        LoDMultiplexerStreambuf.RemoveChannel(*(DefaultLogFile()));
-    }
+    void HaltDefaultLogInstance(void);
 
     /*! Instance specific implementation of ResumeDefaultLog. */
-    inline void ResumeDefaultLogInstance(LogLoDType newLoD) {
-        LoDMultiplexerStreambuf.AddChannel(*(DefaultLogFile()), newLoD);
-    }
+    void ResumeDefaultLogInstance(cmnLogMask newMask);
 
     /*! Instance specific implementation of AddChannel */
-    inline void AddChannelInstance(std::ostream & outputStream, LogLoDType lod) {
-        LoDMultiplexerStreambuf.AddChannel(outputStream, lod);
-    }
+    void AddChannelInstance(std::ostream & outputStream, cmnLogMask mask);
+
+    /*! Instance specific implementation of RemoveChannel */
+    void RemoveChannelInstance(std::ostream & outputStream);
 
  protected:
     /*! Constructor.  The only constructor must be private in order to
@@ -289,35 +279,72 @@ class CISST_EXPORT cmnLogger {
     cmnLogger(const std::string & defaultLogFileName = "cisstLog.txt");
 
  public:
-    /*! The log is instantiated as a singleton.  To access
-      the unique instantiation, one needs to use this static method.
-      The instantiated log is created at the first call of
-      this method since it is a static variable declared in this
-      method's scope.
+    /*! The log is instantiated as a singleton.  To access the unique
+      instantiation, one needs to use this static method.  The
+      instantiated log is created at the first call of this method
+      since it is a static variable declared in this method's scope.
 
-      \return A pointer to the log. */
+      \return A pointer to the logger. */
     static cmnLogger * Instance(void);
 
 
-    /*! Set the global Level of Detail to filter the log messages.
-
-      \param lod The global level of detail used to filter the log.
-
-      \sa SetLoDInstance */
-    static void SetLoD(LogLoDType lod) {
-        Instance()->SetLoDInstance(lod);
+    /*! Set the global mask used to filter the log messages.
+      \param mask The overall mask used to filter the log.
+      \sa SetMaskInstance */
+    static void SetMask(cmnLogMask mask) {
+        Instance()->SetMaskInstance(mask);
     }
 
-    /*! Get the global Level of Detail used to filter the log
-      messages.
-
-      \return The global level of detail used to filter the log.
-
-      \sa GetLoDInstance */
-    static LogLoDType GetLoD(void) {
-        return Instance()->GetLoDInstance();
+    static void CISST_DEPRECATED SetLoD(cmnLogMask mask) {
+        Instance()->SetMaskInstance(mask);
     }
 
+    /*! Get the global mask used to filter the log messages.
+      \return The global mask used to filter the log.
+      \sa GetMaskInstance */
+    static cmnLogMask GetMask(void) {
+        return Instance()->GetMaskInstance();
+    }
+
+    static cmnLogMask CISST_DEPRECATED GetLoD(void) {
+        return Instance()->GetMaskInstance();
+    }
+
+
+    /*! Specify the log mask for a specific class.  See
+      cmnClassRegister::SetLogMaskClass.
+
+      \param className The name of the class
+      \param mask The log mask to be applied
+
+      \return bool True if the class is registered.
+    */
+    static bool SetMaskClass(const std::string & className, cmnLogMask mask);
+
+
+    /*! Specify the log mask for all registered classes.  See
+        cmnClassRegister::SetLogMaskClassAll.
+
+      \param mask The log mask to be applied
+
+      \return bool True if there is at least one class mask was
+      modified
+    */
+    static bool SetMaskClassAll(cmnLogMask mask);
+
+
+    /*! Specify the log mask for all classes with a name matching a
+      given string.  See cmnClassRegister::SetLogMaskClassMatching.
+
+      \param stringToMatch A string found in class names (e.g. "cmn")
+      \param mask The log mask to be applied
+
+      \return bool True if there is at least one class LoD was
+      modified
+    */
+    static bool SetMaskClassMatching(const std::string & stringToMatch, cmnLogMask mask);
+
+    
     /*! Returns the cmnLODMultiplexerStreambuf directly. This allows
       manipulation of the streambuffer for operations such as adding or
       deleting channels for the stream..
@@ -344,7 +371,7 @@ class CISST_EXPORT cmnLogger {
       this can be halted by using HaltDefaultLog().  Using
       ResumeDefaultLog() allows to resume the log to "cisstLog.txt"
       without losing previous logs. */
-    static void ResumeDefaultLog(LogLoDType newLoD = CMN_LOG_ALLOW_DEFAULT) {
+    static void ResumeDefaultLog(cmnLogMask newLoD = CMN_LOG_ALLOW_DEFAULT) {
         Instance()->ResumeDefaultLogInstance(newLoD);
     }
 
@@ -352,8 +379,12 @@ class CISST_EXPORT cmnLogger {
       provided is used to filter the messages, i.e. any message with a
       level of detail higher than the level associated to the output
       stream will not be streamed. */
-    static void AddChannel(std::ostream & outputStream, LogLoDType lod = CMN_LOG_ALLOW_ALL) {
+    static inline void AddChannel(std::ostream & outputStream, cmnLogMask lod = CMN_LOG_ALLOW_ALL) {
         Instance()->AddChannelInstance(outputStream, lod);
+    }
+
+    static inline void RemoveChannel(std::ostream & outputStream) {
+        Instance()->RemoveChannelInstance(outputStream);
     }
 
 };

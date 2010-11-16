@@ -35,15 +35,15 @@ CMN_IMPLEMENT_SERVICES_TEMPLATED(TestD34);
 
 void cmnClassRegisterTest::setUp(void)
 {
-    cmnLogger::AddChannel(OutputStream, CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::AddChannel(OutputStream, CMN_LOG_ALLOW_ALL);
 }
 
 
 void cmnClassRegisterTest::tearDown(void)
 {
     /* restore the class LoD for multiple iterations of this tests*/
-    cmnClassRegister::SetLoD("TestA", CMN_LOG_LOD_RUN_ERROR);
-    cmnLogger::GetMultiplexer()->RemoveChannel(OutputStream);
+    cmnLogger::SetMaskClass("TestA", CMN_LOG_ALLOW_DEFAULT);
+    cmnLogger::RemoveChannel(OutputStream);
 }
 
 
@@ -150,8 +150,8 @@ void cmnClassRegisterTest::TestLoD(void) {
     /* access the class lod via the class itself, therefore should
        find the default LoD, i.e. 5.  this will force the
        registration */
-    lod = objectA.ClassServices()->GetLoD();
-    CPPUNIT_ASSERT(lod == CMN_LOG_LOD_RUN_ERROR);
+    lod = objectA.ClassServices()->GetLogMask();
+    CPPUNIT_ASSERT(lod == CMN_LOG_ALLOW_DEFAULT);
 
     /* try again via the class register, but first check that the
        class is known */
@@ -165,28 +165,28 @@ void cmnClassRegisterTest::TestLoD(void) {
 
     /* set the LoD via the class and check via the class and class
        register */
-    objectA.ClassServices()->SetLoD(CMN_LOG_LOD_VERY_VERBOSE);
-    lod = objectA.ClassServices()->GetLoD();
+    objectA.ClassServices()->SetLogMask(CMN_LOG_LOD_VERY_VERBOSE);
+    lod = objectA.ClassServices()->GetLogMask();
     CPPUNIT_ASSERT(lod == CMN_LOG_LOD_VERY_VERBOSE);
-    lod = cmnClassRegister::FindClassServices("TestA")->GetLoD();
+    lod = cmnClassRegister::FindClassServices("TestA")->GetLogMask();
     CPPUNIT_ASSERT(lod == CMN_LOG_LOD_VERY_VERBOSE);
 
     /* set the LoD via the class register and check via the class and
        the class register (with macro) */
-    cmnClassRegister::SetLoD("TestA", CMN_LOG_LOD_INIT_VERBOSE);
-    lod = objectA.ClassServices()->GetLoD();
+    cmnClassRegister::SetLogMaskClass("TestA", CMN_LOG_LOD_INIT_VERBOSE);
+    lod = objectA.ClassServices()->GetLogMask();
     CPPUNIT_ASSERT(lod == CMN_LOG_LOD_INIT_VERBOSE);
-    lod = cmnClassRegister::FindClassServices("TestA")->GetLoD();
+    lod = cmnClassRegister::FindClassServices("TestA")->GetLogMask();
     CPPUNIT_ASSERT(lod == CMN_LOG_LOD_INIT_VERBOSE);
 
     /* set the global LoD */
-    cmnLogger::SetLoD(CMN_LOG_LOD_RUN_ERROR);
-    CPPUNIT_ASSERT(cmnLogger::GetLoD() == CMN_LOG_LOD_RUN_ERROR);
-    cmnLogger::SetLoD(CMN_LOG_LOD_RUN_DEBUG);
-    CPPUNIT_ASSERT(cmnLogger::GetLoD() == CMN_LOG_LOD_RUN_DEBUG);
+    cmnLogger::SetMask(CMN_LOG_LOD_RUN_ERROR);
+    CPPUNIT_ASSERT(cmnLogger::GetMask() == CMN_LOG_LOD_RUN_ERROR);
+    cmnLogger::SetMask(CMN_LOG_LOD_RUN_DEBUG);
+    CPPUNIT_ASSERT(cmnLogger::GetMask() == CMN_LOG_LOD_RUN_DEBUG);
 
     /* restore the class LoD for multiple iterations of this tests*/
-    cmnClassRegister::SetLoD("TestA", CMN_LOG_LOD_RUN_ERROR);
+    cmnClassRegister::SetLogMaskClass("TestA", CMN_LOG_LOD_RUN_ERROR);
 }
 
 
@@ -195,8 +195,8 @@ void cmnClassRegisterTest::TestLog(void) {
 
     /* set the level of detail for class TestA */
     TestA objectA;
-    cmnClassRegister::SetLoD("TestA", CMN_LOG_LOD_RUN_WARNING);
-    cmnLogger::SetLoD(CMN_LOG_LOD_RUN_ERROR);
+    cmnClassRegister::SetLogMaskClass("TestA", CMN_LOG_LOD_RUN_WARNING);
+    cmnLogger::SetMask(CMN_LOG_LOD_RUN_ERROR);
 
     OutputStream.str("");
     objectA.Message(CMN_LOG_LEVEL_INIT_DEBUG);
@@ -205,8 +205,6 @@ void cmnClassRegisterTest::TestLog(void) {
         + " - Function " + objectA.Services()->GetName() + ": 4\n"
         + std::string(cmnLogLevelToString(CMN_LOG_LEVEL_INIT_DEBUG))
         + " - Class " + objectA.Services()->GetName() + ": 4\n";
-    std::cout << OutputStream.str() << std::endl
-              << expectedLog << std::endl;
     CPPUNIT_ASSERT(OutputStream.str() == expectedLog);
 
     OutputStream.str("");
@@ -224,7 +222,7 @@ void cmnClassRegisterTest::TestLog(void) {
     CPPUNIT_ASSERT(OutputStream.str() == "");
 
     /* set a higher global LoD */
-    cmnLogger::SetLoD(CMN_LOG_LOD_RUN_DEBUG);
+    cmnLogger::SetMask(CMN_LOG_LOD_RUN_DEBUG);
     OutputStream.str("");
     objectA.Message(CMN_LOG_LEVEL_RUN_WARNING);
     expectedLog =

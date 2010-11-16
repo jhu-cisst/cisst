@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet
   Created on: 2009-11-16
 
-  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2010 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -30,26 +30,26 @@ int main(int argc, char *argv[])
     CMN_LOG_INIT_ERROR << "Test" << std::endl;
 
     // log configuration
-    cmnLogger::SetLoD(CMN_LOG_ALLOW_ALL);
-    cmnLogger::GetMultiplexer()->AddChannel(std::cout, CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
+    cmnLogger::AddChannel(std::cout, CMN_LOG_ALLOW_ALL);
 
     // create a Qt user interface
     QApplication application(argc, argv);
-    
+
     // create a widget to control the logger
     QWidget * mainWidget = new QWidget();
     mainWidget->setWindowTitle("commonTutorial Logget Qt");
     QVBoxLayout * mainLayout = new QVBoxLayout(mainWidget);
-    
+
     cmnLoggerQtWidget * loggerWidget = new cmnLoggerQtWidget(mainWidget);
     mainLayout->addWidget(loggerWidget->GetWidget());
-    
+
     // add a quit buttom
     QPushButton * buttonQuit = new QPushButton("Quit", mainWidget);
     mainLayout->addWidget(buttonQuit);
     QObject::connect(buttonQuit, SIGNAL(clicked()),
                      QApplication::instance(), SLOT(quit()));
-  
+
     // run Qt user interface
     mainWidget->show();
     application.exec();

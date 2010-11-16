@@ -7,7 +7,7 @@
   Author(s): Anton Deguet, Min Yang Jung
   Created on: 2004-12-10
 
-  (C) Copyright 2004-2009 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2004-2010 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -185,17 +185,17 @@ bool osaSerialPort::Close(void)
 
 
 #if (CISST_OS == CISST_WINDOWS)
-bool osaSerialPort::Configure(void) { 
-    
+bool osaSerialPort::Configure(void) {
+
     CMN_LOG_CLASS_INIT_VERBOSE << "Start Configure for port " << PortName << std::endl;
-    
-  
+
+
     // check that the port is opened
     if (!IsOpenedFlag) {
         CMN_LOG_CLASS_INIT_ERROR << CMN_LOG_DETAILS << "Can not Configure a closed port " << PortName << std::endl;
         return false;
     }
-    
+
     DCB portOptions = {0};
     if (!GetCommState(PortHandle, &portOptions)) {
         CMN_LOG_CLASS_INIT_ERROR << CMN_LOG_DETAILS << "Unable to retrieve current settings for " << PortName << std::endl;
@@ -203,7 +203,7 @@ bool osaSerialPort::Configure(void) {
     } else {
         // set baud rate
         portOptions.BaudRate = this->BaudRate;
-        
+
         // set character size
         portOptions.ByteSize = this->CharacterSize;
 
@@ -230,7 +230,7 @@ bool osaSerialPort::Configure(void) {
             portOptions.StopBits = TWOSTOPBITS; // 2 stop bits
             break;
         case StopBitsOne:
-            portOptions.StopBits = ONESTOPBIT; // 1 stop bit  
+            portOptions.StopBits = ONESTOPBIT; // 1 stop bit
             break;
         default:
             CMN_LOG_CLASS_INIT_ERROR << CMN_LOG_DETAILS << "Fatal error on port " << this->PortName << std::endl;
@@ -267,7 +267,7 @@ bool osaSerialPort::Configure(void) {
 
         // get any early notifications
         //SetCommMask(PortHandle, EV_RXCHAR);
-  
+
         // set comm buffer sizes (input buffer = 2048, output buffer = 1024)
         SetupComm(PortHandle, 2048, 1024);
 
@@ -281,8 +281,8 @@ bool osaSerialPort::Configure(void) {
 #endif
 
 #if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
-bool osaSerialPort::Configure(void) { 
-    
+bool osaSerialPort::Configure(void) {
+
     CMN_LOG_CLASS_INIT_VERBOSE << "Start Configure for port " << this->PortName << std::endl;
 
     // check that the port is opened
@@ -291,18 +291,18 @@ bool osaSerialPort::Configure(void) {
         return false;
     }
 
-    // read current termio settings  
+    // read current termio settings
     struct termios portOptions;
     tcgetattr(this->FileDescriptor, &portOptions);
 
     // set input and output speed
 #if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_LINUX_XENOMAI)
     cfsetspeed(&portOptions, this->BaudRate); // might be BSD only, if doesn't compile/work on Linux use CISST_DARWIN
-#endif    
+#endif
     cfsetispeed(&portOptions, this->BaudRate);
     cfsetospeed(&portOptions, this->BaudRate);
-    
-    // set character size  
+
+    // set character size
     portOptions.c_cflag &= ~CSIZE;
     portOptions.c_cflag |= this->CharacterSize; // 5, 6, 7 or 8 data bits
 
@@ -332,7 +332,7 @@ bool osaSerialPort::Configure(void) {
         portOptions.c_cflag |= CSTOPB; // 2 stop bits
         break;
     case StopBitsOne:
-        portOptions.c_cflag &= ~CSTOPB; // 1 stop bit  
+        portOptions.c_cflag &= ~CSTOPB; // 1 stop bit
         break;
     default:
         CMN_LOG_CLASS_INIT_ERROR << CMN_LOG_DETAILS << "Fatal error on port " << this->PortName << std::endl;
@@ -350,7 +350,7 @@ bool osaSerialPort::Configure(void) {
     switch (this->FlowControl) {
     case FlowControlNone:
         portOptions.c_iflag &= ~(IXOFF | IXON);
-#if (CISST_OS == CISST_QNX)        
+#if (CISST_OS == CISST_QNX)
         portOptions.c_cflag &= ~IHFLOW;
         portOptions.c_cflag &= ~OHFLOW;
 #else
@@ -359,7 +359,7 @@ bool osaSerialPort::Configure(void) {
         break;
     case FlowControlHardware:
         portOptions.c_iflag &= ~(IXOFF | IXON);
-#if (CISST_OS == CISST_QNX)        
+#if (CISST_OS == CISST_QNX)
         portOptions.c_cflag |= IHFLOW;
         portOptions.c_cflag |= OHFLOW;
 #else
@@ -367,7 +367,7 @@ bool osaSerialPort::Configure(void) {
 #endif
         break;
     case FlowControlSoftware:
-#if (CISST_OS == CISST_QNX)        
+#if (CISST_OS == CISST_QNX)
         portOptions.c_cflag &= ~IHFLOW;
         portOptions.c_cflag &= ~OHFLOW;
 #else
@@ -380,19 +380,19 @@ bool osaSerialPort::Configure(void) {
     }
 
     // defaults we don't modify
-    portOptions.c_cflag |= CLOCAL; // modem control off  
-    portOptions.c_cflag |= CREAD; // enable reads from port  
-    portOptions.c_lflag &= ~ICANON; // Turn off line by line mode  
-    portOptions.c_lflag &= ~ECHO; // no echo of TX characters  
-    portOptions.c_lflag &= ~ISIG; // no input ctrl char checking  
-    portOptions.c_iflag &= ~ICRNL; // do not map CR to NL on in  
-    portOptions.c_oflag &= ~OCRNL; // do not map CR to NL on out  
-    portOptions.c_oflag &= ~OPOST; // no output ctrl char checking 
-    portOptions.c_iflag &= ~IGNCR; // allow CR characters 
-    // set minimum number of characters read() returns on  
-    // set read delay, time = VTIME x 100 mS  
-    portOptions.c_cc[VMIN] = 0; // read can return with no chars  
-    portOptions.c_cc[VTIME] = 1; // read waits this much for chars 
+    portOptions.c_cflag |= CLOCAL; // modem control off
+    portOptions.c_cflag |= CREAD; // enable reads from port
+    portOptions.c_lflag &= ~ICANON; // Turn off line by line mode
+    portOptions.c_lflag &= ~ECHO; // no echo of TX characters
+    portOptions.c_lflag &= ~ISIG; // no input ctrl char checking
+    portOptions.c_iflag &= ~ICRNL; // do not map CR to NL on in
+    portOptions.c_oflag &= ~OCRNL; // do not map CR to NL on out
+    portOptions.c_oflag &= ~OPOST; // no output ctrl char checking
+    portOptions.c_iflag &= ~IGNCR; // allow CR characters
+    // set minimum number of characters read() returns on
+    // set read delay, time = VTIME x 100 mS
+    portOptions.c_cc[VMIN] = 0; // read can return with no chars
+    portOptions.c_cc[VTIME] = 1; // read waits this much for chars
 
     // apply changes
     tcsetattr(this->FileDescriptor, TCSADRAIN, &portOptions);
@@ -566,9 +566,9 @@ int osaSerialPort::Read(char * data, int nBytes)
         return dwLength;
     }
 
-    // only try to read number of bytes in queue 
+    // only try to read number of bytes in queue
     ClearCommError(PortHandle, &dwErrorFlags, &ComStat);
-    
+
     dwLength = std::min((DWORD) nBytes, ComStat.cbInQue);
 
     if (dwLength > 0) {
@@ -610,26 +610,7 @@ int osaSerialPort::Read(char * data, int nBytes)
         CMN_LOG_CLASS_RUN_ERROR << CMN_LOG_DETAILS << "Can not Read from a closed port " << PortName << std::endl;
         return 0;
     }
-
     int numBytes = read(FileDescriptor, data, nBytes); // get chars if there
-
-#if 0
-    // this is only to log a message of level 8
-    const cmnLogLoD lod = CMN_LOG_LOD_VERY_VERBOSE;
-    if (numBytes > 0) {
-        char * message;
-        // create a message only if this is required.  based on CMN_LOG_CLASS code
-        if ((lod > cmnLogger::GetLoD()) || (lod > Services()->GetLoD())) {
-            message = (char*) malloc(sizeof(char) * (numBytes + 2));
-            memcpy(message, data, numBytes);
-            message[numBytes] = '\0';
-            CMN_LOG_CLASS(lod) << "Read " << message << std::endl
-                               << "(" << numBytes << " bytes)" << std::endl;
-        }
-    } else {
-        CMN_LOG_CLASS(lod) << "Nothing to read" << std::endl;
-    }
-#endif
     return numBytes;
 }
 #endif
@@ -658,9 +639,9 @@ int osaSerialPort::Read(unsigned char * data, int nBytes)
         return dwLength;
     }
 
-    // only try to read number of bytes in queue 
+    // only try to read number of bytes in queue
     ClearCommError(PortHandle, &dwErrorFlags, &ComStat);
-    
+
     dwLength = std::min((DWORD) nBytes, ComStat.cbInQue);
 
     if (dwLength > 0) {
@@ -704,21 +685,6 @@ int osaSerialPort::Read(unsigned char * data, int nBytes)
     }
 
     int numBytes = read(FileDescriptor, data, nBytes); // get chars if there
-#if 0
-    // this is only to log a message of level 8
-    const cmnLogLoD lod = CMN_LOG_LOD_VERY_VERBOSE;
-    char* message;
-    // create a message only if this is required.  based on CMN_LOG_CLASS code
-    if ((lod > cmnLogger::GetLoD()) || (lod > Services()->GetLoD())) {
-        message = (char*) malloc(sizeof(char) * (numBytes + 2));
-        memcpy(message, data, numBytes);
-        message[numBytes] = '\0';
-        CMN_LOG_CLASS(lod) << "Read " << message << std::endl
-                           << "(" << numBytes << " bytes)" << std::endl;
-    } else {
-        CMN_LOG_CLASS(lod) << "Nothing to read" << std::endl;
-    }
-    #endif
     return numBytes;
 }
 #endif
@@ -734,12 +700,12 @@ bool osaSerialPort::WriteBreak(double breakLengthInSeconds)
         return false;
     }
     if (!SetCommBreak(PortHandle)) {
-        CMN_LOG_CLASS_RUN_ERROR << "WriteBreak: unable to set break on port  " << PortName << std::endl;        
+        CMN_LOG_CLASS_RUN_ERROR << "WriteBreak: unable to set break on port  " << PortName << std::endl;
         return false;
     }
     osaSleep(breakLengthInSeconds);
     if (!ClearCommBreak(PortHandle)) {
-        CMN_LOG_CLASS_RUN_ERROR << "WriteBreak: unable to clear break on port  " << PortName << std::endl;        
+        CMN_LOG_CLASS_RUN_ERROR << "WriteBreak: unable to clear break on port  " << PortName << std::endl;
         return false;
     }
     return true;
@@ -791,7 +757,7 @@ bool osaSerialPort::Flush(void)
         return false;
     }
     if (!FlushFileBuffers(PortHandle)) {
-        CMN_LOG_CLASS_RUN_ERROR << "Flush: unable to flush port " << PortName << std::endl;        
+        CMN_LOG_CLASS_RUN_ERROR << "Flush: unable to flush port " << PortName << std::endl;
         return false;
     }
     CMN_LOG_CLASS_RUN_VERBOSE << "Flush: end of method " << PortName << std::endl;

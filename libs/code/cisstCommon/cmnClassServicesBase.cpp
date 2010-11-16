@@ -24,14 +24,35 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnClassServicesBase.h>
 #include <cisstCommon/cmnClassRegister.h>
 
-cmnClassServicesBase::cmnClassServicesBase(const std::string & className, const std::type_info * typeInfo, LogLoDType lod):
-    TypeInfoMember(typeInfo)
+cmnClassServicesBase::cmnClassServicesBase(const std::string & className, const std::type_info * typeInfo,
+                                           cmnLogMask mask):
+    TypeInfoMember(typeInfo),
+    LogMask(mask)
 {
-    this->SetLoD(lod);
     NameMember = cmnClassRegister::Register(this, className);
 }
 
 
-void cmnClassServicesBase::SetLoD(LogLoDType newLoD) {
-    LoDMember = newLoD;
+
+const std::string & cmnClassServicesBase::GetName(void) const
+{
+    return (*NameMember);
+}
+
+
+const std::type_info * cmnClassServicesBase::TypeInfoPointer(void) const
+{
+    return TypeInfoMember;
+}
+
+
+const cmnLogMask & cmnClassServicesBase::GetLogMask(void) const
+{
+    return LogMask;
+}
+
+
+void cmnClassServicesBase::SetLogMask(cmnLogMask mask)
+{
+    LogMask = mask;
 }

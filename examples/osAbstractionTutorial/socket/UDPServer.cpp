@@ -26,10 +26,10 @@ http://www.cisst.org/cisst/license.txt.
 int main(void)
 {
     // log configuration
-    cmnLogger::SetLoD(CMN_LOG_LOD_VERY_VERBOSE);
-    cmnLogger::GetMultiplexer()->AddChannel(std::cout, CMN_LOG_LOD_VERY_VERBOSE);
-    cmnClassRegister::SetLoD("osaSocket", CMN_LOG_LOD_VERY_VERBOSE);
-    cmnClassRegister::SetLoD("osaSocketServer", CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
+    cmnLogger::AddChannel(std::cout, CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskClass("osaSocket", CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskClass("osaSocketServer", CMN_LOG_ALLOW_ALL);
 
     osaSocket socket(osaSocket::UDP);
     unsigned short port = 1234;

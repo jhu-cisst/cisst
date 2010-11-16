@@ -3,11 +3,11 @@
 
 /*
   $Id$
-  
+
   Author(s):  Anton Deguet
   Created on: 2005-05-04
-  
-  (C) Copyright 2005-2007 Johns Hopkins University (JHU), All Rights
+
+  (C) Copyright 2005-2010 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -32,10 +32,10 @@ http://www.cisst.org/cisst/license.txt.
 // main function
 int main(void) {
     // add cout for all log
-    cmnLogger::GetMultiplexer()->AddChannel(std::cout, CMN_LOG_LOD_RUN_ERROR);
+    cmnLogger::AddChannel(std::cout, CMN_LOG_ALLOW_ALL);
     cmnLogger::HaltDefaultLog();
-    cmnLogger::ResumeDefaultLog(CMN_LOG_LOD_VERY_VERBOSE);
-    cmnClassRegister::SetLoD("osaSerialPort", CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::ResumeDefaultLog(CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskClass("osaSerialPort", CMN_LOG_ALLOW_ALL);
 
     osaSerialPort serialPort;
     serialPort.SetPortNumber(1);

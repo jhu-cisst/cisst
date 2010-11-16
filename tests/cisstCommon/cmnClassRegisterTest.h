@@ -49,21 +49,21 @@ class myGenericObject: public cmnGenericObject {
 };
 
 class TestA: public myGenericObject {
-    /* register this class with a default LoD 5 */
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    /* register this class with default mask */
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 public:
 };
 CMN_DECLARE_SERVICES_INSTANTIATION(TestA);
 
 class TestB : public myGenericObject {
-    /* register this class with a default LoD 7 */
+    /* register this class with mask CMN_LOG_LOD_RUN_VERBOSE */
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_VERBOSE);
 public:
 };
 CMN_DECLARE_SERVICES_INSTANTIATION(TestB);
 
 class TestC : public myGenericObject {
-    /* register this class with a default LoD 3 */
+    /* register this class with mask CMN_LOG_LOD_INIT_VERBOSE */
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_INIT_VERBOSE);
 public:
 };
@@ -75,7 +75,7 @@ public:
 };
 
 class TestC2: public TestC {
-    /* register this class with a default LoD 1 */
+    /* register this class with a mas CMN_LOG_LOD_RUN_ERROR */
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 public:
     unsigned int Size;
@@ -105,8 +105,8 @@ CMN_DECLARE_SERVICES_INSTANTIATION(TestC2);
 
 template <int _x, int _y>
 class TestD: public cmnGenericObject {
-    /* register these classes with LoD 9 */
-    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_VERY_VERBOSE);
+    /* register these classes with mask */
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_ALL);
 public:
     enum {X = _x};
     enum {Y = _y};

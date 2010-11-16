@@ -153,8 +153,8 @@ bool cmnLoggerQtWidgetClassServicesModel::setData(const QModelIndex & index,
         // addressBook[index.row()+1][index.column()] = value.toString();
         cmnClassRegister::const_iterator iterator = cmnClassRegister::begin();
         std::advance(iterator, index.row());
-        cmnClassRegister::SetLoD(iterator->first.c_str(),
-                                 cmnIndexToLogLevel(value.toInt()));
+        cmnClassRegister::SetLogMaskClass(iterator->first.c_str(),
+                                          cmnIndexToLogLevel(value.toInt()));
     }
     return true;
 }
@@ -221,7 +221,7 @@ cmnLoggerQtWidget::cmnLoggerQtWidget(QWidget * parent)
     this->MainFilterLayout->setContentsMargins(0, 0, 0, 0);
     this->MainFilterLabel = new QLabel("Overall filter", this->MainFilterWidget);
     this->MainFilterLayout->addWidget(this->MainFilterLabel);
-    this->MainFilterData = new QLabel(cmnLogMaskToString(cmnLogger::GetLoD()).c_str(), this->MainFilterWidget);
+    this->MainFilterData = new QLabel(cmnLogMaskToString(cmnLogger::GetMask()).c_str(), this->MainFilterWidget);
     this->MainFilterLayout->addWidget(this->MainFilterData);
     this->MainFilterLabel->setAlignment(Qt::AlignVCenter | Qt::AlignRight);
     this->MainFilterData->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);

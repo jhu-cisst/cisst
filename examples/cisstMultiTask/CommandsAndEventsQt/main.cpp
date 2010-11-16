@@ -7,7 +7,7 @@
   Author(s):  Anton Deguet, Ali Uneri
   Created on: 2009-10-26
 
-  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2009-2010 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -30,16 +30,16 @@ http://www.cisst.org/cisst/license.txt.
 int main(int argc, char *argv[])
 {
     // log configuration
-    cmnLogger::SetLoD(CMN_LOG_LOD_VERY_VERBOSE);
-    cmnLogger::GetMultiplexer()->AddChannel(std::cout, CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
+    cmnLogger::AddChannel(std::cout, CMN_LOG_ALLOW_ALL);
 
     // add a log per thread
     osaThreadedLogFile threadedLog("CommandsAndEventsQt-");
-    cmnLogger::GetMultiplexer()->AddChannel(threadedLog, CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::AddChannel(threadedLog, CMN_LOG_ALLOW_ALL);
 
     // set the log level of detail on select tasks
-    cmnClassRegister::SetLoD("clientQtComponent", CMN_LOG_LOD_VERY_VERBOSE);
-    cmnClassRegister::SetLoD("serverQtComponent", CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::SetMaskClass("clientQtComponent", CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskClass("serverQtComponent", CMN_LOG_ALLOW_ALL);
 
     // create a Qt user interface
     QApplication application(argc, argv);

@@ -154,7 +154,7 @@ public:
       \param serializeObject If true, object content is serialized.
              If false, only class services is serialized and object
              content is not serialized. True by default.
-             
+
       \note As this method relies on cmnDeSerializeRaw, it might throw
       an exception.
     */
