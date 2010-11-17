@@ -286,6 +286,52 @@ private:
 };
 
 
+class CISST_EXPORT svlOverlayStaticEllipse : public svlOverlay
+{
+public:
+    svlOverlayStaticEllipse();
+    svlOverlayStaticEllipse(unsigned int videoch,
+                            bool visible,
+                            const svlPoint2D center,
+                            int radius_horiz,
+                            int radius_vert,
+                            double angle,
+                            svlRGB color,
+                            bool fill = true);
+    svlOverlayStaticEllipse(unsigned int videoch,
+                            bool visible,
+                            const svlPoint2D center,
+                            int radius,
+                            svlRGB color,
+                            bool fill = true);
+    virtual ~svlOverlayStaticEllipse();
+
+    void SetCenter(const svlPoint2D center);
+    void SetRadius(const int radius_horiz, const int radius_vert);
+    void SetRadius(const int radius);
+    void SetAngle(const double angle);
+    void SetColor(svlRGB color);
+    void SetFill(bool fill);
+
+    svlPoint2D GetCenter() const;
+    void GetRadius(int & radius_horiz, int & radius_vert) const;
+    double GetAngle() const;
+    svlRGB GetColor() const;
+    bool GetFill() const;
+
+protected:
+    virtual void DrawInternal(svlSampleImage* bgimage, svlSample* input);
+
+private:
+    svlPoint2D Center;
+    int RadiusHoriz;
+    int RadiusVert;
+    double Angle;
+    svlRGB Color;
+    bool Fill;
+};
+
+
 class CISST_EXPORT svlOverlayStaticTriangle : public svlOverlay
 {
 public:
