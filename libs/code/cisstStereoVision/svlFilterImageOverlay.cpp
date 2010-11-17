@@ -171,9 +171,12 @@ void svlFilterImageOverlay::AddOverlaysInternal()
                 LastOverlay->Next = OverlaysToAdd[i];
                 OverlaysToAdd[i]->Prev = LastOverlay;
                 LastOverlay = OverlaysToAdd[i];
+                LastOverlay->Next = 0;
             }
             else {
                 FirstOverlay = LastOverlay = OverlaysToAdd[i];
+                FirstOverlay->Prev = 0;
+                FirstOverlay->Next = 0;
             }
         }
 

@@ -323,6 +323,8 @@ void mtsComponentInterfaceProxyServer::ReceiveExecuteEventWriteSerialized(const 
     }
 
     eventWriteGeneratorProxy->Execute(*argument, MTS_NOT_BLOCKING);
+
+    delete argument;
 }
 
 //-------------------------------------------------------------------------
