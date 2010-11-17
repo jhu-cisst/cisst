@@ -92,6 +92,8 @@ private:
     // The current state of the IRE (see above enum)
     static IRE_STATES IRE_State;
 
+    static void *IreThreadState;
+
     void InitShellInstance(void);
 
     void FinalizeShellInstance(void);
@@ -243,6 +245,12 @@ public:
     /*! If the current IRE state is IRE_FINISHED, change it to IRE_INITIALIZED (calling InitShell if
         necessary). This is provided to facililate relaunching of the IRE. */
     static void Reset();
+
+    /*! Release the global interpreter lock. This is intended to be used as a callback (e.g., in osaThreadSignal) */
+    static void UnblockThreads();
+
+    /*! Re-acquire the global interpreter lock. This is intended to be used as a callback (e.g., in osaThreadSignal) */
+    static void BlockThreads();
 };
 
 #endif // _ireFramework_h

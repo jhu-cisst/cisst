@@ -294,6 +294,8 @@ void PyTextCtrlHook::InitModule(const char * name)
 bool ireFramework::NewPythonThread = false;
 ireFramework::IRE_STATES ireFramework::IRE_State = ireFramework::IRE_NOT_CONSTRUCTED;
 
+void *ireFramework::IreThreadState = 0;
+
 // pInstance was removed from the class so that ireFramework.h does not
 // need to include <Python.h>.  This avoids some compiler warnings on Linux.
 //PyObject* ireFramework::pInstance = 0;
@@ -495,5 +497,16 @@ void ireFramework::Reset()
         else
             IRE_State = IRE_INITIALIZED;
     }
+}
+
+void ireFramework::UnblockThreads()
+{
+    IreThreadState = static_cast<void *>(PyEval_SaveThread());
+}
+
+void ireFramework::BlockThreads()
+{
+    if (IreThreadState)
+        PyEval_RestoreThread(static_cast<PyThreadState *>(IreThreadState));
 }
 
