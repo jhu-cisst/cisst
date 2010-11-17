@@ -33,7 +33,9 @@ CMN_IMPLEMENT_SERVICES(svlFilterImageOverlay)
 svlFilterImageOverlay::svlFilterImageOverlay() :
     svlFilterBase(),
     FirstOverlay(0),
-    LastOverlay(0)
+    LastOverlay(0),
+    OverlaysToAddUsed(0),
+    OverlaysToAdd(10)
 {
     svlFilterBase::AddInput("input", true);
     AddInputType("input", svlTypeImageRGB);
@@ -96,14 +98,16 @@ int svlFilterImageOverlay::AddInputText(const std::string &name)
 
 void svlFilterImageOverlay::AddOverlay(svlOverlay & overlay)
 {
-    if (LastOverlay) {
-        LastOverlay->Next = &overlay;
-        overlay.Prev = LastOverlay;
-        LastOverlay = &overlay;
-    }
-    else {
-        FirstOverlay = LastOverlay = &overlay;
-    }
+    CS.Enter();
+
+        unsigned int size = OverlaysToAdd.size();
+
+        OverlaysToAddUsed ++;
+        if (OverlaysToAddUsed > size) OverlaysToAdd.resize(size + 10);
+
+        OverlaysToAdd[OverlaysToAddUsed - 1] = &overlay;
+
+    CS.Leave();
 }
 
 int svlFilterImageOverlay::Initialize(svlSample* syncInput, svlSample* &syncOutput)
@@ -118,6 +122,9 @@ int svlFilterImageOverlay::Process(svlProcInfo* procInfo, svlSample* syncInput, 
     _SkipIfDisabled();
 
     _OnSingleThread(procInfo) {
+        // Add pending overlays in a thread safe manner
+        if (OverlaysToAddUsed) AddOverlaysInternal();
+
         _SampleCacheMap::iterator itersample;
         svlSampleImage* src_image = dynamic_cast<svlSampleImage*>(syncInput);
         svlOverlayInput* overlayinput = 0;
@@ -153,5 +160,25 @@ int svlFilterImageOverlay::Process(svlProcInfo* procInfo, svlSample* syncInput, 
     }
 
     return SVL_OK;
+}
+
+void svlFilterImageOverlay::AddOverlaysInternal()
+{
+    CS.Enter();
+
+        for (unsigned int i = 0; i < OverlaysToAddUsed; i ++) {
+            if (LastOverlay) {
+                LastOverlay->Next = OverlaysToAdd[i];
+                OverlaysToAdd[i]->Prev = LastOverlay;
+                LastOverlay = OverlaysToAdd[i];
+            }
+            else {
+                FirstOverlay = LastOverlay = OverlaysToAdd[i];
+            }
+        }
+
+        OverlaysToAddUsed = 0;
+
+    CS.Leave();
 }
 
