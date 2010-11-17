@@ -81,7 +81,7 @@ class CISST_EXPORT mtsManagerLocal: public mtsManagerLocalInterface
     // for reconfiguration
     friend class mtsComponentProxy;
 
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 public:
     /*! Typedef for local component manager's configuration */

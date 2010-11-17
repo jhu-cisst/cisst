@@ -223,7 +223,7 @@ bool mtsTask::AddStateTable(mtsStateTable * existingStateTable, bool addInterfac
     const std::string interfaceName = "StateTable" + tableName;
     if (!this->StateTables.AddItem(tableName,
                                    existingStateTable,
-                                   CMN_LOG_LOD_INIT_ERROR)) {
+                                   CMN_LOG_LEVEL_INIT_ERROR)) {
         CMN_LOG_CLASS_INIT_ERROR << "AddStateTable: can't add state table \"" << tableName
                                  << "\" to task \"" << this->GetName() << "\"" << std::endl;
         return false;

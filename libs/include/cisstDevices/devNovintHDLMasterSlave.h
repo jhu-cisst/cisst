@@ -31,7 +31,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstDevices/devExport.h>
 
 class CISST_EXPORT devNovintHDLMasterSlave: public devNovintHDL {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 public:
 

@@ -67,19 +67,23 @@ typedef short cmnLogLevel;
 
 typedef short cmnLogMask;
 
-#define CMN_LOG_ALLOW_NONE    0x00 // 00000000
-#define CMN_LOG_ALLOW_ERROR   0x11 // 00010001
-#define CMN_LOG_ALLOW_WARNING 0x33 // 00110011
-#define CMN_LOG_ALLOW_VERBOSE 0x77 // 01110111
-#define CMN_LOG_ALLOW_DEBUG   0xFF // 11111111
-#define CMN_LOG_ALLOW_ALL     0xFF // 11111111
-#define CMN_LOG_ALLOW_DEFAULT CMN_LOG_ALLOW_WARNING
+#define CMN_LOG_ALLOW_NONE                0x00 // 00000000
+#define CMN_LOG_ALLOW_ERRORS              0x11 // 00010001
+#define CMN_LOG_ALLOW_WARNINGS            0x22 // 00100010
+#define CMN_LOG_ALLOW_ERRORS_AND_WARNINGS 0x33// 00110011
+#define CMN_LOG_ALLOW_VERBOSE             0x77 // 01110111
+#define CMN_LOG_ALLOW_DEBUG               0xFF // 11111111
+#define CMN_LOG_ALLOW_ALL                 0xFF // 11111111
+#define CMN_LOG_ALLOW_DEFAULT CMN_LOG_ALLOW_ERRORS_AND_WARNINGS
 
 /*! Values used to represent the different level of details associated
   to messages and filters used in cmnLogger.  The higher the value the
   less important the message is.  Lower values are used for the
   initialization phase (i.e. constructor, configuration, ...) while
-  the higher values are used for normal operations. */
+  the higher values are used for normal operations.
+
+  These are provided for backward compatibility.
+ */
 //@{
 #define CMN_LOG_LOD_NONE         0x00 // 00000000
 #define CMN_LOG_LOD_INIT_ERROR   0x01 // 00000001
@@ -90,8 +94,8 @@ typedef short cmnLogMask;
 #define CMN_LOG_LOD_RUN_WARNING  0x3F // 00111111
 #define CMN_LOG_LOD_RUN_VERBOSE  0x7F // 01111111
 #define CMN_LOG_LOD_RUN_DEBUG    0xFF // 11111111
-#define CMN_LOG_LOD_VERY_VERBOSE 0xFF // 11111111
-#define CMN_LOG_DEFAULT_LOD      CMN_LOG_ALLOW_WARNING
+#define CMN_LOG_LOD_VERY_VERBOSE CMN_LOG_LOD_RUN_DEBUG
+#define CMN_LOG_DEFAULT_LOD      CMN_LOG_ALLOW_ERRORS_AND_WARNINGS
 //@}
 
 /*! Convert a log level to an index.  The index value will be between

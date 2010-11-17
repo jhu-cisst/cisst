@@ -127,7 +127,7 @@ http://www.cisst.org/cisst/license.txt.
   any other output stream:
 
   \code
-  CMN_LOG_INIT_ERROR << "This is a message of LoD CMN_LOG_MASK_INIT_ERROR" << argc << std::endl;
+  CMN_LOG_INIT_ERROR << "This is a message of LoD CMN_LOG_LEVEL_INIT_ERROR" << argc << std::endl;
   \endcode
 
   \param lod The log level of detail of the message.
@@ -229,12 +229,17 @@ class CISST_EXPORT cmnLogger {
  private:
     /*! Global Level of Detail used to filter all messages.
 
-      - CMN_LOG_ALLOW_INIT_ERROR: Errors during the initialization.
-      - CMN_LOG_ALLOW_INIT_WARNING: Warnings during the initialization.
-      - CMN_LOG_ALLOW_INIT_VERBOSE and CMN_LOG_MASK_INIT_DEBUG: Extra messages during the initialization.
-      - CMN_LOG_ALLOW_RUN_ERROR: Errors during normal operations (also defined as #CMN_LOG_DEFAULT_LOD).
-      - CMN_LOG_ALLOW_RUN_WARNING: Warnings during normal operations.
-      - CMN_LOG_ALLOW_RUN_VERBOSE and CMN_LOG_MASK_RUN_DEBUG: Extra messages during normal operations.
+      - CMN_LOG_LEVEL_INIT_ERROR: Errors during the initialization.
+      - CMN_LOG_LEVEL_INIT_WARNING: Warnings during the initialization.
+      - CMN_LOG_LEVEL_INIT_VERBOSE and CMN_LOG_LEVEL_INIT_DEBUG: Extra messages during the initialization.
+      - CMN_LOG_LEVEL_RUN_ERROR: Errors during normal operations (also defined as #CMN_LOG_DEFAULT_LOD).
+      - CMN_LOG_LEVEL_RUN_WARNING: Warnings during normal operations.
+      - CMN_LOG_LEVEL_RUN_VERBOSE and CMN_LOG_LEVEL_RUN_DEBUG: Extra messages during normal operations.
+      
+      Users can define their log mask combining the different log
+      levels (e.g. CMN_LOG_LEVEL_RUN_ERROR | CMN_LOG_LEVEL_INIT_ERROR)
+      or use existing masks defined in cmnLogLoD.h
+      (e.g. CMN_LOG_ALLOW_ERRORS_AND_WARNINGS).
 
       The idea is that for most classes, important errors happens
       during the initialization (constructor, opening a serial port,
@@ -379,8 +384,9 @@ class CISST_EXPORT cmnLogger {
       provided is used to filter the messages, i.e. any message with a
       level of detail higher than the level associated to the output
       stream will not be streamed. */
-    static inline void AddChannel(std::ostream & outputStream, cmnLogMask lod = CMN_LOG_ALLOW_ALL) {
-        Instance()->AddChannelInstance(outputStream, lod);
+    static inline void AddChannel(std::ostream & outputStream,
+                                  cmnLogMask mask = CMN_LOG_ALLOW_ALL) {
+        Instance()->AddChannelInstance(outputStream, mask);
     }
 
     static inline void RemoveChannel(std::ostream & outputStream) {

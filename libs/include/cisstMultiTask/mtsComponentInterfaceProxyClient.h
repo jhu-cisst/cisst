@@ -30,7 +30,7 @@ http://www.cisst.org/cisst/license.txt.
 
 class CISST_EXPORT mtsComponentInterfaceProxyClient : public mtsProxyBaseClient<mtsComponentProxy>
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
     /*! Typedef for base type. */
     typedef mtsProxyBaseClient<mtsComponentProxy> BaseClientType;

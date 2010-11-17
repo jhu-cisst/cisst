@@ -120,7 +120,7 @@ inline void cmnSerializeRaw(std::ostream & outputStream, const std::string & dat
   \sa cmnDeSerializer cmnGenericObject
 */
 class CISST_EXPORT cmnSerializer: public cmnGenericObject {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 public:
 

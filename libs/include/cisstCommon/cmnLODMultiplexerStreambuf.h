@@ -82,10 +82,10 @@ http://www.cisst.org/cisst/license.txt.
        ofstream log("logfile.txt");
        windowoutputstream display;    // hypothesized class
 
-       lodMultiplexerStreambuf.AddChannel(&log.rdbuf(), CMN_LOG_LOD_RUN_ERROR);
-       lodMultiplexerStreambuf.AddChannel(&windowoutputstream.rdbuf(), CMN_LOG_LOD_INIT_WARNING);
+       lodMultiplexerStreambuf.AddChannel(&log, CMN_LOG_ALLOW_ALL);
+       lodMultiplexerStreambuf.AddChannel(&windowoutputstream, CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
 
-       cmnLODOutputMultiplexer multiplexerOutput(&lodMultiplexetStreambuf, CMN_LOG_LOD_INIT_VERBOSE);
+       cmnLODOutputMultiplexer multiplexerOutput(&lodMultiplexetStreambuf, CMN_LOG_LEVEL_INIT_DEBUG);
 
        multiplexerStreambuf << "Hello, world" << endl;  // channel the message only to 'log'
      \endcode
@@ -335,7 +335,7 @@ std::streamsize cmnLODMultiplexerStreambuf<_element, _trait>::xsputn(const _elem
     std::streamsize ssize(0);
     IteratorType it;
     for (it = Channels.begin(); it != Channels.end(); it++) {
-        if ((level & ((*it).second))) {
+        if (level & ((*it).second)) {
             ssize = ((*it).first)->sputn(s, n);
         }
     }
@@ -368,7 +368,7 @@ cmnLODMultiplexerStreambuf<_element, _trait>::overflow(int_type c, cmnLogLevel l
 
     // multiplexing
     for (it = Channels.begin(); it != Channels.end(); it++) {
-        if ((level & (*it).second)) {
+        if (level & ((*it).second)) {
             ((*it).first)->sputc( _trait::to_char_type(c) );
         }
     }

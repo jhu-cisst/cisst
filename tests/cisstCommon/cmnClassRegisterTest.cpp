@@ -165,11 +165,11 @@ void cmnClassRegisterTest::TestLoD(void) {
 
     /* set the LoD via the class and check via the class and class
        register */
-    objectA.ClassServices()->SetLogMask(CMN_LOG_LOD_VERY_VERBOSE);
+    objectA.ClassServices()->SetLogMask(CMN_LOG_ALLOW_ALL);
     lod = objectA.ClassServices()->GetLogMask();
-    CPPUNIT_ASSERT(lod == CMN_LOG_LOD_VERY_VERBOSE);
+    CPPUNIT_ASSERT(lod == CMN_LOG_ALLOW_ALL);
     lod = cmnClassRegister::FindClassServices("TestA")->GetLogMask();
-    CPPUNIT_ASSERT(lod == CMN_LOG_LOD_VERY_VERBOSE);
+    CPPUNIT_ASSERT(lod == CMN_LOG_ALLOW_ALL);
 
     /* set the LoD via the class register and check via the class and
        the class register (with macro) */

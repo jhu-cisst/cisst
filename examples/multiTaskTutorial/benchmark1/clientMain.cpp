@@ -51,10 +51,10 @@ int main(int argc, char * argv[])
     std::string globalTaskManagerIP(argv[1]);
 
     // Log configuration
-    cmnLogger::SetLoD(CMN_LOG_LOD_RUN_ERROR);
+    cmnLogger::SetMask(CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
     // add a log per thread
     osaThreadedLogFile threadedLog("example9Client");
-    cmnLogger::GetMultiplexer()->AddChannel(threadedLog, CMN_LOG_LOD_RUN_ERROR);
+    cmnLogger::AddChannel(threadedLog, CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
 
     // create our server task
     clientTask * client = new clientTask("Client", confClientPeriod);

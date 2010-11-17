@@ -35,7 +35,7 @@ class svlImageTracker;
 
 class CISST_EXPORT svlFilterImageTracker : public svlFilterBase
 {
-    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 public:
     svlFilterImageTracker();

@@ -36,7 +36,7 @@
 
 class CISST_EXPORT svlWebObjectBase : public cmnGenericObject
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 friend class svlWebPublisher;
 

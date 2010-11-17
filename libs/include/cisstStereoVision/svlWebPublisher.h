@@ -40,7 +40,7 @@ class svlWebObjectBase;
 
 class CISST_EXPORT svlWebPublisher : public cmnGenericObject
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
     typedef std::pair<std::string, svlWebObjectBase*> _ObjectPair;
     typedef std::map<std::string, svlWebObjectBase*> _ObjectMap;

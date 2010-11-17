@@ -79,7 +79,7 @@
 
 class CISST_EXPORT prmTransformationManager: cmnGenericObject
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
     friend class prmTransformationBase;
 
 public:

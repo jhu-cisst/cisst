@@ -88,7 +88,7 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 class CISST_EXPORT mtsInterfaceProvided: public mtsInterfaceProvidedOrOutput {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
     // To dynamically create and add command proxies and event proxies
     friend class mtsComponentProxy;

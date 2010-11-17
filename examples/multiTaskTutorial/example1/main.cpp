@@ -15,16 +15,15 @@ using namespace std;
 int main(void)
 {
     // log configuration
-    cmnLogger::SetLoD(CMN_LOG_LOD_VERY_VERBOSE);
-    cmnLogger::GetMultiplexer()->AddChannel(cout, CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
+    cmnLogger::AddChannel(cout, CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
     // add a log per thread
     osaThreadedLogFile threadedLog("example1-");
-    cmnLogger::GetMultiplexer()->AddChannel(threadedLog, CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::AddChannel(threadedLog, CMN_LOG_ALLOW_ALL);
     // specify a higher, more verbose log level for these classes
-    cmnClassRegister::SetLoD("sineTask", CMN_LOG_LOD_VERY_VERBOSE);
-    cmnClassRegister::SetLoD("displayTask", CMN_LOG_LOD_VERY_VERBOSE);
-    cmnClassRegister::SetLoD("mtsInterfaceProvided", CMN_LOG_LOD_VERY_VERBOSE);
-    cmnClassRegister::SetLoD("mtsTaskManager", CMN_LOG_LOD_VERY_VERBOSE);
+    cmnLogger::SetMaskClass("sineTask", CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskClass("displayTask", CMN_LOG_ALLOW_ALL);
+    cmnLogger::SetMaskClassMatching("mts", CMN_LOG_ALLOW_ALL);
 
     // create our two tasks
     const double PeriodSine = 1 * cmn_ms; // in milliseconds

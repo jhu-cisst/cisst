@@ -34,7 +34,7 @@ template <class _elementType, vct::size_type _size>
 class mtsFixedSizeVector: public mtsGenericObject,
                           public vctFixedSizeVector<_elementType, _size> {
     // declare services, requires dynamic creation
-    CMN_DECLARE_SERVICES_EXPORT(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES_EXPORT(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 public:
     /* defines useful types */
     VCT_CONTAINER_TRAITS_TYPEDEFS(_elementType);

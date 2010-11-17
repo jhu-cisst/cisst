@@ -39,7 +39,7 @@ http://www.cisst.org/cisst/license.txt.
 
 class CISST_EXPORT prmForceCartesianSet: public prmMotionBase
 {
-    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 public:
     typedef prmMotionBase BaseType;
     typedef vctFixedSizeVector<double, 6> ForceType;

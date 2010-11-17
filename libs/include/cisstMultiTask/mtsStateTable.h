@@ -69,7 +69,7 @@ typedef int mtsStateDataId;
  */
 class CISST_EXPORT mtsStateTable: public cmnGenericObject {
 
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
     friend class mtsCollectorState;
     friend class mtsTask;
@@ -82,7 +82,7 @@ class CISST_EXPORT mtsStateTable: public cmnGenericObject {
       the state indices for begin/end. */
     class IndexRange: public mtsGenericObject
     {
-        CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+        CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
     public:
         mtsStateIndex First;
         mtsStateIndex Last;

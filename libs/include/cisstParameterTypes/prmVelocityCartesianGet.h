@@ -38,7 +38,7 @@ http://www.cisst.org/cisst/license.txt.
 /*! Cartesian velocity get command argument */
 class CISST_EXPORT prmVelocityCartesianGet: public mtsGenericObject
 {
-	CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+	CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
  public:
     typedef mtsGenericObject BaseType;

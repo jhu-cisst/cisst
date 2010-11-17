@@ -44,7 +44,7 @@ public:
 //
 class CISST_EXPORT mtsDescriptionComponent: public mtsGenericObject
 {
-    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 public:
     std::string ProcessName;
@@ -64,7 +64,7 @@ CMN_DECLARE_SERVICES_INSTANTIATION(mtsDescriptionComponent);
 //
 class CISST_EXPORT mtsDescriptionInterface: public mtsGenericObject
 {
-    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 public:
     std::string ProcessName;
@@ -85,7 +85,7 @@ CMN_DECLARE_SERVICES_INSTANTIATION(mtsDescriptionInterface);
 //
 class CISST_EXPORT mtsDescriptionConnection: public mtsGenericObject
 {
-    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 public:
 #ifndef SWIG
@@ -136,7 +136,7 @@ inline std::ostream & operator << (std::ostream & output,
 //
 class CISST_EXPORT mtsComponentStatusControl : public mtsGenericObject
 {
-    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 public:
     typedef enum { 
@@ -163,7 +163,7 @@ CMN_DECLARE_SERVICES_INSTANTIATION(mtsComponentStatusControl);
 //
 class CISST_EXPORT mtsComponentStateChange : public mtsGenericObject
 {
-    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 public:
     mtsComponentStateChange() {}

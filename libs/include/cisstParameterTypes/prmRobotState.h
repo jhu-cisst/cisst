@@ -42,7 +42,7 @@ TODO: seperate cartesian state and the joint state to 2 different classes.
 */
 class CISST_EXPORT prmRobotState: public mtsGenericObject
 {
-    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
+    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 public:
     typedef prmRobotState ThisType;
