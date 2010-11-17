@@ -90,9 +90,6 @@ private:
     /*! Return the size of the actual object used by the OS.  This is
         used for testing only. */
     static unsigned int SizeOfInternals(void);
-
-    /*! Private copy constructor */
-    osaThreadSignal(const osaThreadSignal &other);
 };
 
 #endif // _osaThreadSignal_h
