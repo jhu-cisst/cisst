@@ -51,6 +51,12 @@ protected:
     mtsMulticastCommandWriteProxy(const std::string & name) : BaseType(name)
     {}
 
+    ~mtsMulticastCommandWriteProxy() {
+        if (ArgumentPrototype) {
+            delete ArgumentPrototype;
+        }
+    }
+
 public:
     /*! Execute all the commands in the composite. */
     virtual mtsExecutionResult Execute(const mtsGenericObject & argument,
@@ -64,7 +70,7 @@ public:
 
     /*! Set an argument prototype */
     void SetArgumentPrototype(mtsGenericObject * argumentPrototype) {
-        this->ArgumentPrototype = argumentPrototype;
+        ArgumentPrototype = argumentPrototype;
     }
 
     /*! Getter */

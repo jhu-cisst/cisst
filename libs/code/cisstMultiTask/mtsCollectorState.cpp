@@ -526,6 +526,9 @@ bool mtsCollectorState::ConvertBinaryToText(const std::string sourceBinaryFileNa
         CMN_LOG_INIT_ERROR << "Class mtsCollectorState: ConvertBinaryToText: corrupted header (missing number of signals)." << std::endl;
         inFile.close();
         outFile.close();
+        // release memory internally allocated by deserializer
+        delete element;
+
         return false;
     }
 
@@ -551,6 +554,9 @@ bool mtsCollectorState::ConvertBinaryToText(const std::string sourceBinaryFileNa
         }
 
         currentPos = inFile.tellg();
+
+        // release memory internally allocated by deserializer
+        delete element;
     }
 
     CMN_LOG_INIT_VERBOSE << "Class mtsCollectorState: ConvertBinaryToText: conversion completed: " << targetPlainTextFileName << std::endl;

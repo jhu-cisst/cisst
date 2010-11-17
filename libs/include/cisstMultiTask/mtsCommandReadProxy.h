@@ -56,6 +56,11 @@ public:
     mtsCommandReadProxy(const std::string & commandName) : BaseType(commandName) {
         Disable();
     }
+    ~mtsCommandReadProxy() {
+        if (ArgumentPrototype) {
+            delete ArgumentPrototype;
+        }
+    }
 
     /*! Set command id and register serializer to network proxy. This method
         should be called after SetNetworkProxy() is called. */
