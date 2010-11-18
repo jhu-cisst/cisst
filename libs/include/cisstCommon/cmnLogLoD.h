@@ -70,7 +70,7 @@ typedef short cmnLogMask;
 #define CMN_LOG_ALLOW_NONE                0x00 // 00000000
 #define CMN_LOG_ALLOW_ERRORS              0x11 // 00010001
 #define CMN_LOG_ALLOW_WARNINGS            0x22 // 00100010
-#define CMN_LOG_ALLOW_ERRORS_AND_WARNINGS 0x33// 00110011
+#define CMN_LOG_ALLOW_ERRORS_AND_WARNINGS 0x33 // 00110011
 #define CMN_LOG_ALLOW_VERBOSE             0x77 // 01110111
 #define CMN_LOG_ALLOW_DEBUG               0xFF // 11111111
 #define CMN_LOG_ALLOW_ALL                 0xFF // 11111111

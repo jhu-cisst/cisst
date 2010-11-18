@@ -670,7 +670,7 @@ void mtsComponent::UseSeparateLogFile(const std::string & filename, bool forward
     this->LogFile = new std::ofstream();
     this->LogFile->open(filename.c_str());
     if (this->LogFile->is_open()) {
-        // set the multiplexer and change flag et the end!
+        // set the multiplexer and change flag at the end!
         CMN_LOG_CLASS_INIT_DEBUG << "UseSeparateLogFile: opened log file \"" << filename
                                  << "\" for component \"" << this->GetName() << "\"" << std::endl;
         this->LoDMultiplexerStreambuf->AddChannel(*(this->LogFile), CMN_LOG_ALLOW_ALL);
@@ -678,7 +678,7 @@ void mtsComponent::UseSeparateLogFile(const std::string & filename, bool forward
             // note that if the component multiplexer already existed
             // and the cmnLogger multiplexer was already added, this
             // line has no effect
-            this->LoDMultiplexerStreambuf->AddChannel(cmnLogger::GetMultiplexer(), CMN_LOG_ALLOW_ALL);
+            this->LoDMultiplexerStreambuf->AddMultiplexer(cmnLogger::GetMultiplexer());
         }
         this->UseSeparateLogFileFlag = true;
     } else {

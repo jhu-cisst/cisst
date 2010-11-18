@@ -41,6 +41,8 @@ int main(int argc, char *argv[])
 {
     // log configuration
     cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
+    cmnLogger::HaltDefaultLog();
+    cmnLogger::ResumeDefaultLog(CMN_LOG_ALLOW_VERBOSE);
     cmnLogger::AddChannel(std::cout, CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
 
     // set the log level of detail on select tasks

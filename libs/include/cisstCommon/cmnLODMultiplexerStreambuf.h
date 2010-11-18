@@ -112,6 +112,7 @@ class cmnLODMultiplexerStreambuf : public std::basic_streambuf<_element, _trait>
 
     public:
 
+    typedef cmnLODMultiplexerStreambuf<_element, _trait> ThisType;
     typedef std::basic_streambuf<_element, _trait> BaseClassType;
     typedef std::basic_streambuf<_element, _trait> ChannelType;
 
@@ -124,6 +125,10 @@ class cmnLODMultiplexerStreambuf : public std::basic_streambuf<_element, _trait>
     typedef std::list<ElementType> ChannelContainerType;
 	typedef typename ChannelContainerType::iterator IteratorType;
 	typedef typename ChannelContainerType::const_iterator ConstIteratorType;
+
+    typedef std::list<ThisType *> MultiplexerContainerType;
+	typedef typename MultiplexerContainerType::iterator MultiplexerIteratorType;
+	typedef typename MultiplexerContainerType::const_iterator MultiplexerConstIteratorType;
 
     /*!
       Create Multiplexer with a default output filestream
@@ -161,6 +166,9 @@ class cmnLODMultiplexerStreambuf : public std::basic_streambuf<_element, _trait>
     }
 
 
+    bool AddMultiplexer(ThisType * multiplexer);
+
+
     /*!
       Remove an output channel.
 
@@ -168,7 +176,10 @@ class cmnLODMultiplexerStreambuf : public std::basic_streambuf<_element, _trait>
       change occurs if the pointer is not on the list of channels for
       this multiplexer.
      */
-    void RemoveChannel(ChannelType *channel);
+    void RemoveChannel(ChannelType * channel);
+
+
+    void RemoveMultiplexer(ThisType * multiplexer);
 
 
     /*! Remove an output channel.  This methods relies on the
@@ -177,7 +188,7 @@ class cmnLODMultiplexerStreambuf : public std::basic_streambuf<_element, _trait>
 
       \param outstream Output stream providing the rdbuf.
     */
-    inline void RemoveChannel(std::ostream& outstream) {
+    inline void RemoveChannel(std::ostream & outstream) {
         RemoveChannel(outstream.rdbuf());
     }
 
@@ -256,15 +267,29 @@ private:
      */
     ChannelContainerType Channels;
 
-    /*! Find a channel in the container and return the container's iterator
-      for the element with that channel.
+    /*! Find a channel in the container and return the container's
+      iterator for the element with that channel.
      */
     IteratorType FindChannel(const ChannelType * channel);
 
-    /*! Find a channel in the container and return the container's iterator
-      for the element with that channel.
+    /*! Find a channel in the container and return the container's
+      iterator for the element with that channel.
      */
     ConstIteratorType FindChannel(const ChannelType * channel) const;
+
+    /*! The actual container that stores multiplexers addresses.
+     */
+    MultiplexerContainerType Multiplexers;
+
+    /*! Find a multiplexer in the container and return the container's
+      iterator for the element with that multiplexer.
+     */
+    MultiplexerIteratorType FindMultiplexer(const ThisType * multiplexer);
+
+    /*! Find a multiplexer in the container and return the container's
+      iterator for the element with that multiplexer.
+     */
+    MultiplexerConstIteratorType FindMultiplexer(const ThisType * multiplexer) const;
 };
 
 
@@ -288,6 +313,19 @@ bool cmnLODMultiplexerStreambuf<_element, _trait>::AddChannel(ChannelType * chan
 
 
 template <class _element, class _trait>
+bool cmnLODMultiplexerStreambuf<_element, _trait>::AddMultiplexer(ThisType * multiplexer)
+{
+    MultiplexerIteratorType it = FindMultiplexer(multiplexer);
+
+    if (it == Multiplexers.end()) {
+        Multiplexers.insert(it, multiplexer);
+        return true;
+    }
+    return false;
+}
+
+
+template <class _element, class _trait>
 void cmnLODMultiplexerStreambuf<_element, _trait>::RemoveChannel(ChannelType * channel)
 {
     IteratorType it = FindChannel(channel);
@@ -299,9 +337,21 @@ void cmnLODMultiplexerStreambuf<_element, _trait>::RemoveChannel(ChannelType * c
 
 
 template <class _element, class _trait>
+void cmnLODMultiplexerStreambuf<_element, _trait>::RemoveMultiplexer(ThisType * multiplexer)
+{
+    MultiplexerIteratorType it = FindMultiplexer(multiplexer);
+
+    if (it != Multiplexers.end()) {
+        Multiplexers.erase(it);
+    }
+}
+
+
+template <class _element, class _trait>
 void cmnLODMultiplexerStreambuf<_element, _trait>::RemoveAllChannels(void)
 {
     Channels.clear();
+    Multiplexers.clear();
 }
 
 
@@ -332,12 +382,24 @@ bool cmnLODMultiplexerStreambuf<_element, _trait>::GetChannelMask(const ChannelT
 template <class _element, class _trait>
 std::streamsize cmnLODMultiplexerStreambuf<_element, _trait>::xsputn(const _element * s, std::streamsize n, cmnLogLevel level)
 {
+    // for channels, compare to channel's mask
     std::streamsize ssize(0);
-    IteratorType it;
-    for (it = Channels.begin(); it != Channels.end(); it++) {
-        if (level & ((*it).second)) {
-            ssize = ((*it).first)->sputn(s, n);
+    IteratorType channelIt;
+    const IteratorType channelEnd = Channels.end(); 
+    for (channelIt = Channels.begin();
+         channelIt != channelEnd;
+         ++channelIt) {
+        if (level & ((*channelIt).second)) {
+            ssize = ((*channelIt).first)->sputn(s, n);
         }
+    }
+    // for multiplexers, just send message along with log level
+    MultiplexerIteratorType multiplexerIt;
+    const MultiplexerIteratorType multiplexerEnd = Multiplexers.end();
+    for (multiplexerIt = Multiplexers.begin();
+         multiplexerIt != multiplexerEnd;
+         ++multiplexerIt) {
+        ssize = (*multiplexerIt)->xsputn(s, n, level);
     }
     return ssize;
 }
@@ -346,10 +408,21 @@ std::streamsize cmnLODMultiplexerStreambuf<_element, _trait>::xsputn(const _elem
 template <class _element, class _trait>
 int cmnLODMultiplexerStreambuf<_element, _trait>::sync(void)
 {
-    IteratorType it;
-    // synchronize all the channels
-    for (it = Channels.begin(); it != Channels.end(); it++) {
-        ((*it).first)->pubsync();
+    IteratorType channelIt;
+    // synchronize all channels
+    const IteratorType channelEnd = Channels.end(); 
+    for (channelIt = Channels.begin();
+         channelIt != channelEnd;
+         ++channelIt) {
+        ((*channelIt).first)->pubsync();
+    }
+    // synchronize all multiplexers
+    MultiplexerIteratorType multiplexerIt;
+    const MultiplexerIteratorType multiplexerEnd = Multiplexers.end();
+    for (multiplexerIt = Multiplexers.begin();
+         multiplexerIt != multiplexerEnd;
+         ++multiplexerIt) {
+        (*multiplexerIt)->sync();
     }
     return 0;
 }
@@ -364,15 +437,24 @@ cmnLODMultiplexerStreambuf<_element, _trait>::overflow(int_type c, cmnLogLevel l
         return (_trait::not_eof(c));
     }
 
-    IteratorType it;
-
     // multiplexing
-    for (it = Channels.begin(); it != Channels.end(); it++) {
-        if (level & ((*it).second)) {
-            ((*it).first)->sputc( _trait::to_char_type(c) );
+    IteratorType channelIt;
+    const IteratorType channelEnd = Channels.end(); 
+    for (channelIt = Channels.begin();
+         channelIt != channelEnd;
+         ++channelIt) {
+        if (level & ((*channelIt).second)) {
+            ((*channelIt).first)->sputc(_trait::to_char_type(c));
         }
     }
-
+    // for multiplexers, just send message along with log level
+    MultiplexerIteratorType multiplexerIt;
+    const MultiplexerIteratorType multiplexerEnd = Multiplexers.end();
+    for (multiplexerIt = Multiplexers.begin();
+         multiplexerIt != multiplexerEnd;
+         ++multiplexerIt) {
+        (*multiplexerIt)->overflow(c, level);
+    }
     // follow the basic_streambuf standard
     return _trait::not_eof(c);
 }
@@ -382,9 +464,21 @@ template <class _element, class _trait>
 std::streamsize cmnLODMultiplexerStreambuf<_element, _trait>::xsputn(const _element *s, std::streamsize n)
 {
     std::streamsize ssize(0);
-    IteratorType it;
-    for (it = Channels.begin(); it != Channels.end(); it++) {
-        ssize = ((*it).first)->sputn(s, n);
+    // channels
+    IteratorType channelIt;
+    const IteratorType channelEnd = Channels.end(); 
+    for (channelIt = Channels.begin();
+         channelIt != channelEnd;
+         ++channelIt) {
+        ssize = ((*channelIt).first)->sputn(s, n);
+    }
+    // for multiplexers, just send message along
+    MultiplexerIteratorType multiplexerIt;
+    const MultiplexerIteratorType multiplexerEnd = Multiplexers.end();
+    for (multiplexerIt = Multiplexers.begin();
+         multiplexerIt != multiplexerEnd;
+         ++multiplexerIt) {
+        ssize = (*multiplexerIt)->xsputn(s, n);
     }
     return ssize;
 }
@@ -399,11 +493,21 @@ cmnLODMultiplexerStreambuf<_element, _trait>::overflow(int_type c)
         return (_trait::not_eof(c));
     }
 
-    IteratorType it;
-
-    // multiplexing
-    for (it = Channels.begin(); it != Channels.end(); it++) {
-        ((*it).first)->sputc( _trait::to_char_type(c) );
+    // channels
+    IteratorType channelIt;
+    const IteratorType channelEnd = Channels.end(); 
+    for (channelIt = Channels.begin();
+         channelIt != channelEnd;
+         ++channelIt) {
+        ((*channelIt).first)->sputc(_trait::to_char_type(c));
+    }
+    // for multiplexers, just send message along
+    MultiplexerIteratorType multiplexerIt;
+    const MultiplexerIteratorType multiplexerEnd = Multiplexers.end();
+    for (multiplexerIt = Multiplexers.begin();
+         multiplexerIt != multiplexerEnd;
+         ++multiplexerIt) {
+        (*multiplexerIt)->overflow(c);
     }
 
     // follow the basic_streambuf standard
@@ -433,6 +537,36 @@ cmnLODMultiplexerStreambuf<_element, _trait>::FindChannel(const ChannelType * ch
     ConstIteratorType it = Channels.begin();
     while (it != Channels.end()) {
         if ((*it).first == channel) {
+            break;
+        }
+        ++it;
+    }
+    return it;
+}
+
+
+template <class _element, class _trait>
+typename cmnLODMultiplexerStreambuf<_element, _trait>::MultiplexerIteratorType
+cmnLODMultiplexerStreambuf<_element, _trait>::FindMultiplexer(const ThisType * multiplexer)
+{
+    MultiplexerIteratorType it = Multiplexers.begin();
+    while (it != Multiplexers.end()) {
+        if ((*it) == multiplexer) {
+            break;
+        }
+        ++it;
+    }
+    return it;
+}
+
+
+template <class _element, class _trait>
+typename cmnLODMultiplexerStreambuf<_element, _trait>::MultiplexerConstIteratorType
+cmnLODMultiplexerStreambuf<_element, _trait>::FindMultiplexer(const ThisType * multiplexer) const
+{
+    MultiplexerConstIteratorType it = Multiplexers.begin();
+    while (it != Multiplexers.end()) {
+        if ((*it) == multiplexer) {
             break;
         }
         ++it;
