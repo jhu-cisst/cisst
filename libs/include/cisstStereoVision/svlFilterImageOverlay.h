@@ -57,10 +57,18 @@ private:
     _SampleCacheMap SampleCache;
 
     osaCriticalSection CS;
+
+    unsigned int ImageInputsToAddUsed;
+    unsigned int TargetInputsToAddUsed;
+    unsigned int TextInputsToAddUsed;
     unsigned int OverlaysToAddUsed;
+    vctDynamicVector<std::string> ImageInputsToAdd;
+    vctDynamicVector<std::string> TargetInputsToAdd;
+    vctDynamicVector<std::string> TextInputsToAdd;
     vctDynamicVector<svlOverlay*> OverlaysToAdd;
 
-    void AddOverlaysInternal();
+    bool IsInputAlreadyQueued(const std::string &name);
+    void AddQueuedItems();
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterImageOverlay)
