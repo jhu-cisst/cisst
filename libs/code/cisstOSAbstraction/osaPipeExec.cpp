@@ -24,9 +24,13 @@
 #include <cisstOSAbstraction/osaPipeExec.h>
 #include <string.h>
 #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
-#include <sys/errno.h>
-#include <signal.h>
-#include <unistd.h>
+  #if (CISST_OS == CISST_QNX)
+  #include <errno.h>
+  #else
+  #include <sys/errno.h>
+  #endif
+  #include <signal.h>
+  #include <unistd.h>
 #elif (CISST_OS == CISST_WINDOWS)
 #include <fcntl.h>
 #include <io.h>
