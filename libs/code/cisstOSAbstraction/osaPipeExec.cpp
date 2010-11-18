@@ -421,8 +421,10 @@ std::string osaPipeExec::ReadUntil(int length, char stopChar) const
     char * buffer = new char[length];
     int charsRead = ReadUntil(buffer, length, stopChar);
     std::string result;
-    if (charsRead > 0 && buffer[charsRead-1] == stopChar)
+    if (charsRead > 0 && buffer[charsRead-1] == stopChar) {
+        buffer[charsRead] = '\0';
         result = std::string(buffer);
+    }
     delete[] buffer;
     return result;
 }
