@@ -39,6 +39,7 @@ class CISST_EXPORT osaPipeExec {
     static unsigned int SizeOfInternals(void);
     friend class osaPipeExecTest;
 
+    char ** Command;
     int ToProgram[2];
     int FromProgram[2];
     bool Connected;
@@ -48,7 +49,7 @@ class CISST_EXPORT osaPipeExec {
 
     /*! Free resources before returning an error. Also free the command
       pointer */
-    void CloseAllPipes(char ** command);
+    void CloseAllPipes(void);
 
     /*! Parse out the command and arguments and return an array in the
       form that execvp/_spawnvp accept */
@@ -63,11 +64,8 @@ class CISST_EXPORT osaPipeExec {
 #endif
 
  public:
-    /*! Constructor just asserts that internals size is okay */
-    osaPipeExec(void);
-
     /*! Constructor with name */
-    osaPipeExec(const std::string & name);
+    osaPipeExec(const std::string & name = "unnamed");
 
     /*! Destructor calls Close() */
     ~osaPipeExec(void);
