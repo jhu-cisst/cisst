@@ -32,7 +32,8 @@ svlOverlay::svlOverlay() :
     VideoCh(0),
     Visible(true),
     Next(0),
-    Prev(0)
+    Prev(0),
+    Used(false)
 {
 }
 
@@ -41,7 +42,8 @@ svlOverlay::svlOverlay(unsigned int videoch,
     VideoCh(videoch),
     Visible(visible),
     Next(0),
-    Prev(0)
+    Prev(0),
+    Used(false)
 {
 }
 
@@ -67,6 +69,11 @@ unsigned int svlOverlay::GetVideoChannel() const
 bool svlOverlay::GetVisible() const
 {
     return Visible;
+}
+
+bool svlOverlay::IsUsed() const
+{
+    return Used;
 }
 
 void svlOverlay::Draw(svlSampleImage* bgimage, svlSample* input)

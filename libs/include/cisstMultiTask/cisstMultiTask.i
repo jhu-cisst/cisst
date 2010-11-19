@@ -38,6 +38,7 @@ http://www.cisst.org/cisst/license.txt.
 %import "cisstCommon/cisstCommon.i"
 %import "cisstVector/cisstVector.i"
 %import "cisstOSAbstraction/cisstOSAbstraction.i"
+%import "cisstMultiTask/mtsConfig.h"
 
 %init %{
     import_array() // numpy initialization
@@ -237,11 +238,14 @@ http://www.cisst.org/cisst/license.txt.
 %extend mtsFunctionVoidReturn {
     %pythoncode {
         def UpdateFromC(self):
-            try:
-                tmpObject = self.GetResultPrototype().Services().Create()
-                self.ArgumentType = tmpObject.__class__
-            except Exception, e:
-                print 'VoidReturn function ', self.GetCommand().GetName(), ': ', e
+            if self.IsValid():
+                try:
+                    tmpObject = self.GetResultPrototype().Services().Create()
+                    self.ArgumentType = tmpObject.__class__
+                except Exception, e:
+                    print 'VoidReturn function ', self.GetCommand().GetName(), ': ', e
+            else:
+                print 'VoidReturn function not valid'
 
 
         def __call__(self):
@@ -265,11 +269,14 @@ http://www.cisst.org/cisst/license.txt.
 %extend mtsFunctionRead {
     %pythoncode {
         def UpdateFromC(self):
-            try:
-                tmpObject = self.GetArgumentPrototype().Services().Create()
-                self.ArgumentType = tmpObject.__class__
-            except Exception, e:
-                print 'Read function ', self.GetCommand().GetName(), ': ', e
+            if self.IsValid():
+                try:
+                    tmpObject = self.GetArgumentPrototype().Services().Create()
+                    self.ArgumentType = tmpObject.__class__
+                except Exception, e:
+                    print 'Read function ', self.GetCommand().GetName(), ': ', e
+            else:
+                print 'Read function not valid'
 
 
         def __call__(self):
@@ -293,11 +300,14 @@ http://www.cisst.org/cisst/license.txt.
 %extend mtsFunctionWrite {
     %pythoncode {
         def UpdateFromC(self):
-            try:
-                tmpObject = self.GetArgumentPrototype().Services().Create()
-                self.ArgumentType = tmpObject.__class__
-            except Exception, e:
-                print 'Write function ', self.GetCommand().GetName(), ': ', e
+            if self.IsValid():
+                try:
+                    tmpObject = self.GetArgumentPrototype().Services().Create()
+                    self.ArgumentType = tmpObject.__class__
+                except Exception, e:
+                    print 'Write function ', self.GetCommand().GetName(), ': ', e
+            else:
+                print 'Write function not valid'
 
         def __call__(self, argument):
             if isinstance(argument, self.ArgumentType):
@@ -312,13 +322,16 @@ http://www.cisst.org/cisst/license.txt.
 %extend mtsFunctionWriteReturn {
     %pythoncode {
         def UpdateFromC(self):
-            try:
-                tmp1Object = self.GetArgumentPrototype().Services().Create()
-                self.ArgumentType = tmp1Object.__class__
-                tmp2Object = self.GetResultPrototype().Services().Create()
-                self.ResultType = tmp2Object.__class__
-            except Exception, e:
-                print 'WriteReturn function ', self.GetCommand().GetName(), ': ', e
+            if self.IsValid():
+                try:
+                    tmp1Object = self.GetArgumentPrototype().Services().Create()
+                    self.ArgumentType = tmp1Object.__class__
+                    tmp2Object = self.GetResultPrototype().Services().Create()
+                    self.ResultType = tmp2Object.__class__
+                except Exception, e:
+                    print 'WriteReturn function ', self.GetCommand().GetName(), ': ', e
+            else:
+                print 'WriteReturn function not valid'
 
         def __call__(self, argument):
             result = self.ResultType(self.GetResultPrototype())
@@ -341,13 +354,16 @@ http://www.cisst.org/cisst/license.txt.
 %extend mtsFunctionQualifiedRead {
     %pythoncode {
         def UpdateFromC(self):
-            try:
-                tmp1Object = self.GetArgument1Prototype().Services().Create()
-                self.Argument1Type = tmp1Object.__class__
-                tmp2Object = self.GetArgument2Prototype().Services().Create()
-                self.Argument2Type = tmp2Object.__class__
-            except Exception, e:
-                print 'Qualified read function ', self.GetCommand().GetName(), ': ', e
+            if self.IsValid():
+                try:
+                    tmp1Object = self.GetArgument1Prototype().Services().Create()
+                    self.Argument1Type = tmp1Object.__class__
+                    tmp2Object = self.GetArgument2Prototype().Services().Create()
+                    self.Argument2Type = tmp2Object.__class__
+                except Exception, e:
+                    print 'Qualified read function ', self.GetCommand().GetName(), ': ', e
+            else:
+                print 'QualifiedRead function not valid'
 
         def __call__(self, argument1):
             argument2 = self.Argument2Type(self.GetArgument2Prototype())
@@ -457,6 +473,7 @@ http://www.cisst.org/cisst/license.txt.
 %include "cisstMultiTask/mtsTaskPeriodic.h"
 %include "cisstMultiTask/mtsTaskFromSignal.h"
 
+%include "cisstMultiTask/mtsManagerLocalInterface.h"
 %include "cisstMultiTask/mtsManagerLocal.h"
 %extend mtsManagerLocal {
     %pythoncode {

@@ -46,6 +46,7 @@ public:
     void SetVisible(bool visible);
     unsigned int GetVideoChannel() const;
     bool GetVisible() const;
+    bool IsUsed() const;
 
 protected:
     virtual void DrawInternal(svlSampleImage* bgimage, svlSample* input) = 0;
@@ -60,6 +61,7 @@ protected:
 private:
     svlOverlay* Next;
     svlOverlay* Prev;
+    bool Used;
 };
 
 
