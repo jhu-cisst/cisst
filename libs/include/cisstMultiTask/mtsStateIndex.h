@@ -117,7 +117,7 @@ public:
 	/*! Overloaded operator */
 	mtsStateIndex& operator-=(int number) {
 		TimeTicks -= number;
-		TimeIndex = TimeTicks % BufferLength;
+		TimeIndex = static_cast<int>(TimeTicks % BufferLength);
 		return *this;
 	}
 
