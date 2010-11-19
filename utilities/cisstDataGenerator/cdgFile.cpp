@@ -47,6 +47,7 @@ bool cdgFile::ParseFile(std::ifstream & input, const std::string & filename)
         semiColumn = false;
         curlyOpen = false;
         curlyClose = false;
+        lineFinished = false;
 
         // find curly brackets
         switch (currentChar) {
