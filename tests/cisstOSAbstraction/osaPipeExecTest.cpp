@@ -29,20 +29,6 @@ void osaPipeExecTest::TestPipeInternalsSize(void)
     CPPUNIT_ASSERT(osaPipeExec::INTERNALS_SIZE >= osaPipeExec::SizeOfInternals());
 }
 
-void osaPipeExecTest::readLength(osaPipeExec & pipe, char * buffer, int length)
-{
-    char * s = buffer;
-    int charsRead = 0;
-    int result;
-    while (charsRead < length) {
-        result = pipe.Read(s, length-charsRead);
-		CPPUNIT_ASSERT(result != -1);
-        charsRead += result;
-        s += result;
-    }
-    CPPUNIT_ASSERT_EQUAL(length, charsRead);
-}
-
 void osaPipeExecTest::TestPipe(void)
 {
     osaPipeExec pipe1, pipe2;
@@ -79,13 +65,12 @@ void osaPipeExecTest::TestPipe(void)
     CPPUNIT_ASSERT_EQUAL(length, charsWritten);
 
     /* Keep reading while there is still data to be read */
-    char * buffer = new char[length];
-    readLength(pipe1, buffer, length);
+    std::string resultString = pipe1.ReadString(length);
     std::string test(testString);
-    CPPUNIT_ASSERT_EQUAL(test, std::string(buffer));
+    CPPUNIT_ASSERT_EQUAL(test, resultString);
 
-    readLength(pipe2, buffer, length);
-    CPPUNIT_ASSERT_EQUAL(test, std::string(buffer));
+    resultString = pipe2.ReadString(length);
+    CPPUNIT_ASSERT_EQUAL(test, resultString);
 
     /* Test the std::string versions of Read and Write */
     charsWritten = pipe1.Write(test);
@@ -106,6 +91,7 @@ void osaPipeExecTest::TestPipe(void)
 
     int result = pipe1.Write(testString);
     CPPUNIT_ASSERT_EQUAL(-1, result);
+    char * buffer = new char[length];
     result = pipe1.Read(buffer, length);
     CPPUNIT_ASSERT_EQUAL(-1, result);
 
@@ -134,8 +120,8 @@ void osaPipeExecTest::TestPipe(void)
     arguments.push_back("b ");
     arguments.push_back(" c");
     pipe1.Open(command, arguments, "rw");
-    readLength(pipe1, buffer, 11);
-    CPPUNIT_ASSERT_EQUAL(std::string("a a;b ; c;"), std::string(buffer));
+    resultString = pipe1.ReadString(length);
+    CPPUNIT_ASSERT_EQUAL(std::string("a a;b ; c;"), resultString);
     pipe1.Close();
 
 #if 0

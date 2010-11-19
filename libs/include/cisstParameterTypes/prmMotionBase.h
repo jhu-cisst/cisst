@@ -36,6 +36,9 @@ http://www.cisst.org/cisst/license.txt.
 class CISST_EXPORT prmMotionBase: public mtsGenericObject
 {
  public:
+
+    typedef mtsGenericObject BaseType;
+
     /* default constructor*/
     inline prmMotionBase():
         BlockingFlagMember(NO_WAIT),
@@ -84,6 +87,15 @@ class CISST_EXPORT prmMotionBase: public mtsGenericObject
         this->IsCoordinatedMember = isCoordinated; 
         this->IsGoalOnlyMember = isGoalOnly; 
     }
+
+
+
+    /*! Binary serialization */
+    void SerializeRaw(std::ostream & outputStream) const;
+
+    /*! Binary deserialization */
+    void DeSerializeRaw(std::istream & inputStream);
+
    
     /*! Set and get methods for blocking flag. */
     //@{
@@ -126,6 +138,7 @@ class CISST_EXPORT prmMotionBase: public mtsGenericObject
     //@{
     CMN_DECLARE_MEMBER_AND_ACCESSORS(bool, IsGoalOnly);
     //@}
+
 
 };
 

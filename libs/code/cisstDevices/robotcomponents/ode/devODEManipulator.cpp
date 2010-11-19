@@ -83,7 +83,7 @@ devODEManipulator::devODEManipulator(const std::string& devname,
 			   links[i].CenterOfMass(),                 // com
 			   links[i].MomentOfInertiaAtCOM(),         // I  
 			   geomfiles[i] );
-
+    
     world.Insert( body );
     bodies.push_back( body );
   }

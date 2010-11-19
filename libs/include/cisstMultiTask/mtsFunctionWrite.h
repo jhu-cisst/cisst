@@ -36,10 +36,12 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsExport.h>
 
 class CISST_EXPORT mtsFunctionWrite: public mtsFunctionBase {
-protected:
+public:
     typedef mtsCommandWriteBase CommandType;
+protected:
     CommandType * Command;
 
+#ifndef SWIG
     template <typename _userType, bool>
     class ConditionalWrap {
     public:
@@ -55,6 +57,7 @@ protected:
             return command->Execute(argument, blocking);
         }
     };
+#endif
 
 public:
     /*! Default constructor.  Does nothing, use Bind before
@@ -79,13 +82,20 @@ public:
 
     /*! Overloaded operator to enable more intuitive syntax
       e.g., Command(argument) instead of Command->Execute(argument). */
-    mtsExecutionResult operator()(const mtsGenericObject & argument) const;
+    mtsExecutionResult operator()(const mtsGenericObject & argument) const
+    { return Execute(argument); }
 
+    mtsExecutionResult Execute(const mtsGenericObject & argument) const;
     mtsExecutionResult ExecuteBlocking(const mtsGenericObject & argument) const;
 
+#ifndef SWIG
 	/*! Overloaded operator that accepts different argument types. */
     template <class _userType>
-    mtsExecutionResult operator()(const _userType & argument) const {
+    mtsExecutionResult operator()(const _userType & argument) const
+    { return Execute(argument); }
+
+    template <class _userType>
+    mtsExecutionResult Execute(const _userType & argument) const {
         mtsExecutionResult result = Command ?
             ConditionalWrap<_userType, cmnIsDerivedFrom<_userType, mtsGenericObject>::YES>::Call(Command, argument, MTS_NOT_BLOCKING)
           : mtsExecutionResult::NO_INTERFACE;
@@ -99,6 +109,7 @@ public:
           : mtsExecutionResult::NO_INTERFACE;
         return result;
     }
+#endif
 
     /*! Access to underlying command object. */
     CommandType * GetCommand(void) const;

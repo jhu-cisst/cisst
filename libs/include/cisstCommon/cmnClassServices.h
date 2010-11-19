@@ -33,6 +33,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnPortability.h>
 #include <cisstCommon/cmnForwardDeclarations.h>
 #include <cisstCommon/cmnClassServicesBase.h>
+#include <cisstCommon/cmnGenericObject.h>
+#include <cisstCommon/cmnLogger.h>
 
 
 /*! This class is a helper for cmnClassServices.  Its goal is to
@@ -137,8 +139,16 @@ public:
       not modified.
      */
     inline static bool Create(cmnGenericObject * existing, const cmnGenericObject & other) {
+        //if (*(existing->Services()->TypeInfoPointer()) != *(other.Services()->TypeInfoPointer())) {
+        if (existing->Services() != other.Services()) {
+            CMN_LOG_RUN_WARNING << "cmnClassServices::Create with in-place new called for different classes, existing = "
+                                << existing->Services()->GetName()
+                                << ", other = " << other.Services()->GetName() << std::endl;
+            return false;
+        }
         const value_type * otherPointer = dynamic_cast<const value_type *>(&other);
         if (otherPointer) {
+            existing->Services()->Delete(existing);
             new(existing) value_type(*otherPointer);
             return true;
         } else {
@@ -278,6 +288,10 @@ class cmnClassServices: public cmnClassServicesBase {
         return FactoryType::Delete(existing);
     }
 
+    /* documented in base class */
+    virtual size_t GetSize(void) const {
+        return sizeof(_class);
+    }
 };
 
 

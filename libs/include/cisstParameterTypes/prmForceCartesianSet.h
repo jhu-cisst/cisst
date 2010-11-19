@@ -41,6 +41,7 @@ class CISST_EXPORT prmForceCartesianSet: public prmMotionBase
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 public:
+
     typedef prmMotionBase BaseType;
     typedef vctFixedSizeVector<double, 6> ForceType;
     typedef vctFixedSizeVector<bool, 6> MaskType;

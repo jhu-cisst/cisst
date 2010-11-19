@@ -55,6 +55,12 @@ private:
     svlOverlay* FirstOverlay;
     svlOverlay* LastOverlay;
     _SampleCacheMap SampleCache;
+
+    osaCriticalSection CS;
+    unsigned int OverlaysToAddUsed;
+    vctDynamicVector<svlOverlay*> OverlaysToAdd;
+
+    void AddOverlaysInternal();
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION_EXPORT(svlFilterImageOverlay)

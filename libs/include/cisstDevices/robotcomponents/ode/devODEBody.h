@@ -19,14 +19,17 @@ http://www.cisst.org/cisst/license.txt.
 #define _devODEBody_h
 
 #include <ode/ode.h>
-#include <cisstVector/vctFrame4x4.h>
 
-#include <cisstDevices/robotcomponents/glut/devMeshTriangular.h>
-#include <cisstDevices/robotcomponents/glut/devGLUT.h>
+// Need to include these first otherwise there's a mess with
+//  #defines in cisstConfig.h
+#include <cisstDevices/robotcomponents/osg/devOSGBody.h>
 
+#include <cisstVector/vctMatrixRotation3.h>
 #include <cisstDevices/devExport.h>
 
-class CISST_EXPORT devODEBody {
+class devODEWorld;
+
+class CISST_EXPORT devODEBody : public devOSGBody {
 
  public:
 
@@ -37,34 +40,28 @@ class CISST_EXPORT devODEBody {
     vctFixedSizeVector<double,3> w;
   };
 
+
  private:
+
+  // This is used to update the position of the OSG body from the 
+  // ODE position
+  class OSGCallback : public osg::NodeCallback {    
+  public:
+    OSGCallback();
+    void operator()( osg::Node* node, osg::NodeVisitor* nv );
+  };
+
+  //! The name of the body
+  std::string name;
   
+  //! The World ID
+  devODEWorld* world;
+
   //! The ODE body ID
   dBodyID bodyid;
 
   //! The ODE mass
   dMass* mass;
-
-  //! The indices of the triangles
-  /**
-     This array contains the indices of each triangle. The first 3
-     entries are the indices to the vertices of the first triangle. The next 3
-     entries are the indices to the vertices of the second triangle and so on.
-     The size of this array is 3*ntriangles.
-  */
-  dTriIndex* triangles;
-  size_t ntriangles;
-
-  //! The vertices of the facets
-  /**
-     This array contains the coordinates of each vertex. The first 3 dVector3
-     contains the coordinates of the 1st vertex, the second dVector3 contains
-     the coordinates of the second vertex and so on. The vertices are no in any
-     specific order and should be used in combination with the indices array.
-     The size of this array is nvertices.
-  */
-  dVector3* vertices;
-  size_t nvertices;
 
   //! The ODE mesh ID
   /**
@@ -78,29 +75,24 @@ class CISST_EXPORT devODEBody {
   */
   dGeomID geomid;
 
+  //! Data used by ODE Tri Mesh
+  dVector3* Vertices;
+  int       VertexCount;
+  dTriIndex* Indices;
+  int        IndexCount;
+
   //! The ODE space ID
   /**
     This is a structure used by ODE to represent collision spaces
   */
   dSpaceID space;
 
-  //! Load an OBJ file
-  /**
-     This load an .obj (wavefront) file into memory. It calls 
-     robMeshTriangular::Load(const std::string&) to load the mesh then allocates
-     and populate the vertices and indices arrays
-     \param filename The full path to an .obj filename
-     \return SUCCESS if the mesh was properly loaded. ERROR otherwise
-  */
-  int LoadOBJ( const std::string& filename,
-	       const vctFixedSizeVector<double,3>& com );
-
-  //!
-  devMeshTriangular* geometry;
-
   vctFrame4x4<double> Rtcomb;
 
-public:
+  void BuildODETriMesh( dSpaceID spaceid, 
+			const vctFixedSizeVector<double,3>& com );
+
+ public:
 
   //! Main constructor
   /**
@@ -115,14 +107,20 @@ public:
                  center of mass
      \param geomfile The name of the Wavefront file used by the body
   */
-  devODEBody( dWorldID worldid, 
-	      dSpaceID spaceid,
+  devODEBody( const std::string& name,
 	      const vctFrame4x4<double>& Rt,
 	      double m,
 	      const vctFixedSizeVector<double,3>& com,
 	      const vctFixedSizeMatrix<double,3,3>& moit,
-	      const std::string& geomfile,
-	      bool glutgeom = true );
+	      const std::string& model,
+	      dSpaceID spaceid,
+	      devODEWorld* odeWorld );
+
+  devODEBody( const std::string& name,
+	      const vctFrame4x4<double>& Rtwb,
+	      const std::string& model,
+	      dSpaceID spaceid,
+	      devODEWorld* odeWorld );
 
   //! Default destructor
   ~devODEBody();
@@ -131,10 +129,13 @@ public:
   void Disable();
 
   //! Query the ID of the body
-  dBodyID BodyID() const { return bodyid; }
+  dBodyID GetBodyID() const { return bodyid; }
+
+  //! Get the body name
+  std::string GetName() const { return name; }
 
   //! Query the ID of the body
-  dGeomID GeomID() const { return geomid; }
+  dGeomID GetGeomID() const { return geomid; }
 
   void Update();
 

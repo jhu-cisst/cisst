@@ -36,6 +36,8 @@ class CISST_EXPORT prmGainParameters: public mtsGenericObject {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 
 public:
+    typedef mtsGenericObject    BaseType;
+
     int AxisNumber;
     double PGain;
     double IGain;
@@ -95,6 +97,48 @@ public:
         << ", " << OScale
         << ", " << FrictionFF;
     }
+
+    /*! Binary serialization */
+    void SerializeRaw(std::ostream & outputStream) const {
+
+
+        BaseType::SerializeRaw(outputStream);
+
+        cmnSerializeRaw(outputStream,AxisNumber);
+        cmnSerializeRaw(outputStream,PGain);
+        cmnSerializeRaw(outputStream,IGain);
+        cmnSerializeRaw(outputStream,DGain);
+        cmnSerializeRaw(outputStream,AccelerationFF);
+        cmnSerializeRaw(outputStream,VelocityFF);
+        cmnSerializeRaw(outputStream,ILimit);
+        cmnSerializeRaw(outputStream,ErrorLimit);
+        cmnSerializeRaw(outputStream,Offset);
+        cmnSerializeRaw(outputStream,DACLimit);
+        cmnSerializeRaw(outputStream,OScale);
+        cmnSerializeRaw(outputStream,FrictionFF);
+
+    }
+
+    /*! Binary deserialization */
+    void DeSerializeRaw(std::istream & inputStream) {
+
+        BaseType::DeSerializeRaw(inputStream);
+
+        cmnDeSerializeRaw(inputStream,AxisNumber);
+        cmnDeSerializeRaw(inputStream,PGain);
+        cmnDeSerializeRaw(inputStream,IGain);
+        cmnDeSerializeRaw(inputStream,DGain);
+        cmnDeSerializeRaw(inputStream,AccelerationFF);
+        cmnDeSerializeRaw(inputStream,VelocityFF);
+        cmnDeSerializeRaw(inputStream,ILimit);
+        cmnDeSerializeRaw(inputStream,ErrorLimit);
+        cmnDeSerializeRaw(inputStream,Offset);
+        cmnDeSerializeRaw(inputStream,DACLimit);
+        cmnDeSerializeRaw(inputStream,OScale);
+        cmnDeSerializeRaw(inputStream,FrictionFF);
+
+        }
+
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(prmGainParameters)

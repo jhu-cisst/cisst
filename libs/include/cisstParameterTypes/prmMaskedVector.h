@@ -43,6 +43,8 @@ public:
     /*! This type. */
     typedef prmMaskedVector<_elementType> ThisType;
     
+    typedef mtsGenericObject    BaseType;
+
     typedef vctDynamicVector<_elementType> DataType;
 
 protected:
@@ -126,6 +128,20 @@ public:
     virtual void ToStream(std::ostream & outputStream) const {
         mtsGenericObject::ToStream(outputStream);
         outputStream<<" , "<<DataMember<<" , "<<MaskMember;
+    }
+
+    /*! Binary serialization */
+    void SerializeRaw(std::ostream & outputStream) const{
+        BaseType::SerializeRaw(outputStream);
+        MaskMember.SerializeRaw(outputStream);
+        DataMember.SerializeRaw(outputStream);
+    }
+
+    /*! Binary deserialization */
+    void DeSerializeRaw(std::istream & inputStream){
+        BaseType::DeSerializeRaw(inputStream);
+        MaskMember.DeSerializeRaw(inputStream);
+        DataMember.DeSerializeRaw(inputStream);
     }
 };
 

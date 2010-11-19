@@ -39,6 +39,7 @@ class CISST_EXPORT prmVelocityJointSet: public prmMotionBase
 {
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 protected:
+
     /*! Masks joints not involved in this move, true --> corresponding
     joint index velocities will be used */
     CMN_DECLARE_MEMBER_AND_ACCESSORS(vctBoolVec, Mask);
@@ -98,6 +99,14 @@ public:
 
     /*! destructor */
     virtual ~prmVelocityJointSet();
+
+
+    /*! Binary serialization */
+    void SerializeRaw(std::ostream & outputStream) const;
+
+    /*! Binary deserialization */
+    void DeSerializeRaw(std::istream & inputStream);
+
 
 }; // _prmVelocityJointSet_h
 

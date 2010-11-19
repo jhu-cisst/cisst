@@ -613,4 +613,23 @@ CMN_DECLARE_SERVICES_INSTANTIATION(mtsBool);
 typedef mtsGenericObjectProxy<std::string> mtsStdString;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsStdString);
 
+typedef std::vector<std::string> stdStringVec;
+// Add Proxy to name to distinguish this from mtsVector<std::string>
+typedef mtsGenericObjectProxy<stdStringVec> mtsStdStringVecProxy;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsStdStringVecProxy);
+
+// Define stream out operator for stdStringVec
+inline std::ostream & operator << (std::ostream & output,
+                            const stdStringVec & object) {
+    output << "[";
+    for (size_t i = 0; i < object.size(); i++) {
+        output << object[i];
+        if (i < object.size()-1)
+            output << ", ";
+    }
+    output << "]";
+    return output;
+}
+
+
 #endif

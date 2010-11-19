@@ -58,6 +58,12 @@ public:
         Disable();
     }
 
+    ~mtsCommandWriteProxy() {
+        if (ArgumentPrototype) {
+            delete ArgumentPrototype;
+        }
+    }
+
     /*! Set command id and register serializer to network proxy. This method
         should be called after SetNetworkProxy() is called. */
     void SetCommandID(const CommandIDType & commandID) {

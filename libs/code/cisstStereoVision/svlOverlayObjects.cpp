@@ -671,6 +671,135 @@ void svlOverlayStaticRect::DrawInternal(svlSampleImage* bgimage, svlSample* CMN_
 }
 
 
+/*************************************/
+/*** svlOverlayStaticEllipse class ***/
+/*************************************/
+
+svlOverlayStaticEllipse::svlOverlayStaticEllipse() :
+    svlOverlay(),
+    Center(0, 0),
+    RadiusHoriz(0),
+    RadiusVert(0),
+    Angle(0.0),
+    Color(255, 255, 255),
+    Fill(true)
+{
+}
+
+svlOverlayStaticEllipse::svlOverlayStaticEllipse(unsigned int videoch,
+                                                 bool visible,
+                                                 const svlPoint2D center,
+                                                 int radius_horiz,
+                                                 int radius_vert,
+                                                 double angle,
+                                                 svlRGB color,
+                                                 bool fill) :
+    svlOverlay(videoch, visible),
+    Center(center),
+    RadiusHoriz(radius_horiz),
+    RadiusVert(radius_vert),
+    Angle(angle),
+    Color(color),
+    Fill(fill)
+{
+}
+
+svlOverlayStaticEllipse::svlOverlayStaticEllipse(unsigned int videoch,
+                                                 bool visible,
+                                                 const svlPoint2D center,
+                                                 int radius,
+                                                 svlRGB color,
+                                                 bool fill) :
+    svlOverlay(videoch, visible),
+    Center(center),
+    RadiusHoriz(radius),
+    RadiusVert(radius),
+    Angle(0.0),
+    Color(color),
+    Fill(fill)
+{
+}
+
+svlOverlayStaticEllipse::~svlOverlayStaticEllipse()
+{
+}
+
+void svlOverlayStaticEllipse::SetCenter(const svlPoint2D center)
+{
+    Center = center;
+}
+
+void svlOverlayStaticEllipse::SetRadius(const int radius_horiz, const int radius_vert)
+{
+    RadiusHoriz = radius_horiz;
+    RadiusVert  = radius_vert;
+}
+
+void svlOverlayStaticEllipse::SetRadius(const int radius)
+{
+    RadiusHoriz = RadiusVert = radius;
+}
+
+void svlOverlayStaticEllipse::SetAngle(const double angle)
+{
+    Angle = angle;
+}
+
+void svlOverlayStaticEllipse::SetColor(svlRGB color)
+{
+    Color = color;
+}
+
+void svlOverlayStaticEllipse::SetFill(bool fill)
+{
+    Fill = fill;
+}
+
+svlPoint2D svlOverlayStaticEllipse::GetCenter() const
+{
+    return Center;
+}
+
+void svlOverlayStaticEllipse::GetRadius(int & radius_horiz, int & radius_vert) const
+{
+    radius_horiz = RadiusHoriz;
+    radius_vert  = RadiusVert;
+}
+
+double svlOverlayStaticEllipse::GetAngle() const
+{
+    return Angle;
+}
+
+svlRGB svlOverlayStaticEllipse::GetColor() const
+{
+    return Color;
+}
+
+bool svlOverlayStaticEllipse::GetFill() const
+{
+    return Fill;
+}
+
+void svlOverlayStaticEllipse::DrawInternal(svlSampleImage* bgimage, svlSample* CMN_UNUSED(input))
+{
+#if (CISST_SVL_HAS_OPENCV == ON)
+
+    cvEllipse(bgimage->IplImageRef(VideoCh),
+              cvPoint(Center.x, Center.y),
+              cvSize(RadiusHoriz, RadiusVert),
+              Angle, 0.0, 360.0,
+              cvScalar(Color.r, Color.g, Color.b),
+              (Fill ? -1 : 1));
+
+#else // CISST_SVL_HAS_OPENCV
+
+    // TO DO: to be implemented
+
+#endif // CISST_SVL_HAS_OPENCV
+}
+
+
 /**************************************/
 /*** svlOverlayStaticTriangle class ***/
 /**************************************/

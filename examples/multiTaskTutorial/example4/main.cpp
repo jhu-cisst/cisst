@@ -64,6 +64,8 @@ int main(int argc, char **argv)
     // Wait for IRE to initialize itself
     while (ireFramework::IsStarting())
         osaSleep(0.5 * cmn_s);  // Wait 0.5 seconds
+    // TEMP: Set callbacks for osaThreadSignal::Wait
+    osaThreadSignal::SetWaitCallbacks(IreThread.GetId(), &ireFramework::UnblockThreads, &ireFramework::BlockThreads);
     // Loop until IRE and display task are both exited
     while (ireFramework::IsActive() || !displayTaskObject->IsTerminated())
         osaSleep(0.5 * cmn_s);  // Wait 0.5 seconds

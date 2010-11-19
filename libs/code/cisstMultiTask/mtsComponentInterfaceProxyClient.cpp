@@ -246,6 +246,9 @@ void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandWriteSerialized(cons
     } else {
         (*functionWriteProxy)(*argument);
     }
+
+    // Release memory internally created by deserializer
+    delete argument;
 }
 
 void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandReadSerialized(const CommandIDType commandID, std::string & serializedArgument)
@@ -302,6 +305,8 @@ void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandQualifiedReadSeriali
         functionQualifiedReadProxy->GetCommand()->GetArgument2ClassServices()->Create());
     if (!tempArgumentOut) {
         LogError(mtsComponentInterfaceProxyClient, "ReceiveExecuteCommandQualifiedReadSerialized: failed to create a temporary argument");
+        // release memory internally allocated by deserializer
+        delete argumentIn;
         return;
     }
 
@@ -311,6 +316,8 @@ void mtsComponentInterfaceProxyClient::ReceiveExecuteCommandQualifiedReadSeriali
     // Serialize
     deserializer->Serialize(*tempArgumentOut, serializedArgumentOut);
 
+    // Release memory internally created by deserializer
+    delete argumentIn;
     // Deallocate memory
     delete tempArgumentOut;
 

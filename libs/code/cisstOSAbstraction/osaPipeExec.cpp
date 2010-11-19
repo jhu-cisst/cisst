@@ -24,7 +24,11 @@
 #include <cisstOSAbstraction/osaPipeExec.h>
 #include <string.h>
 #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_QNX)
+#include <errno.h>
+#else
 #include <sys/errno.h>
+#endif
 #include <signal.h>
 #include <unistd.h>
 #elif (CISST_OS == CISST_WINDOWS)
@@ -47,19 +51,13 @@ struct osaPipeExecInternals {
 
 #define INTERNALS(A) (reinterpret_cast<osaPipeExecInternals*>(Internals)->A)
 
-unsigned int osaPipeExec::SizeOfInternals(void) {
+unsigned int osaPipeExec::SizeOfInternals(void)
+{
     return sizeof(osaPipeExecInternals);
 }
 
-osaPipeExec::osaPipeExec():
-    Connected(false),
-    Name("unnamed")
-{
-    CMN_ASSERT(sizeof(Internals) >= SizeOfInternals());
-}
-
-
 osaPipeExec::osaPipeExec(const std::string & name):
+    Command(0),
     Connected(false),
     Name(name)
 {
@@ -71,10 +69,10 @@ osaPipeExec::~osaPipeExec(void)
     Close();
 }
 
-void osaPipeExec::CloseAllPipes(char ** command)
+void osaPipeExec::CloseAllPipes(void)
 {
     CMN_LOG_INIT_ERROR << "Class osaPipeExec: CloseAllPipes: called for pipe \"" << this->Name << "\"" << std::endl;
-    delete[] command;
+    delete[] Command;
 #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
     close(ToProgram[READ_END]);
     close(ToProgram[WRITE_END]);
@@ -104,12 +102,12 @@ char ** osaPipeExec::ParseCommand(const std::string & executable, const std::vec
          argumentCounter < arguments.size();
          argumentCounter++) {
 #if (CISST_OS == CISST_WINDOWS)
-        /* Windows needs each argument quoted or it will parse them as
-		separate */
-        quotedString = '"' + arguments[argumentCounter] + '"';
-        command[argumentCounter + 1] = strdup(quotedString.c_str());
+    /* Windows needs each argument quoted or it will parse them as
+    separate */
+    quotedString = '"' + arguments[argumentCounter] + '"';
+    command[argumentCounter + 1] = strdup(quotedString.c_str());
 #else
-        command[argumentCounter + 1] = const_cast<char *>(arguments[argumentCounter].c_str());
+    command[argumentCounter + 1] = const_cast<char *>(arguments[argumentCounter].c_str());
 #endif
     }
     command[arguments.size() + 1] = 0; // null terminated list
@@ -121,10 +119,10 @@ char ** osaPipeExec::ParseCommand(const std::string & executable, const std::vec
 void osaPipeExec::RestoreIO(int newStdin, int newStdout)
 {
     if (_dup2(newStdin, _fileno(stdin)) == -1) {
-        CloseAllPipes(0);
+        CloseAllPipes();
     }
     if (_dup2(newStdout, _fileno(stdout)) == -1) {
-        CloseAllPipes(0);
+        CloseAllPipes();
     }
 }
 #endif
@@ -152,7 +150,7 @@ bool osaPipeExec::Open(const std::string & executable,
     if (pipe(FromProgram) == -1) {
         CMN_LOG_INIT_ERROR << "Class osaPipeExec: Open: can't create pipe \"" << this->Name << "\" ("
                            << strerror(errno) << ")" << std::endl;
-        CloseAllPipes(0);
+        CloseAllPipes();
         return false;
     }
 #elif (CISST_OS == CISST_WINDOWS)
@@ -162,7 +160,7 @@ bool osaPipeExec::Open(const std::string & executable,
     }
     if (_pipe(FromProgram, 4096, O_BINARY | O_NOINHERIT) == -1) {
         CMN_LOG_INIT_ERROR << "Class osaPipeExec: Open: can't create pipe \"" << this->Name << "\"" << std::endl;
-        CloseAllPipes(0);
+        CloseAllPipes();
         return false;
     }
 #endif
@@ -180,7 +178,6 @@ bool osaPipeExec::Open(const std::string & executable,
         }
     }
 
-    char ** command = 0;
 #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
     /* Spawn a child and parent process for communication */
     INTERNALS(pid) = fork();
@@ -190,20 +187,20 @@ bool osaPipeExec::Open(const std::string & executable,
         /* We want input to come from parent to the program and output the other
            direction. Thus we don't need these ends of the pipe */
         if (close(ToProgram[READ_END]) == -1) {
-            CloseAllPipes(0);
+            CloseAllPipes();
             return false;
         }
         if (close(FromProgram[WRITE_END]) == -1) {
-            CloseAllPipes(0);
+            CloseAllPipes();
             return false;
         }
 
         if (!WriteFlag && close(ToProgram[WRITE_END]) == -1) {
-            CloseAllPipes(0);
+            CloseAllPipes();
             return false;
         }
         if (!ReadFlag && close(FromProgram[READ_END]) == -1) {
-            CloseAllPipes(0);
+            CloseAllPipes();
             return false;
         }
 
@@ -215,17 +212,17 @@ bool osaPipeExec::Open(const std::string & executable,
     else if (INTERNALS(pid) == 0) {
         /* Replace stdin and stdout to receive from and write to the pipe */
         if (dup2(ToProgram[READ_END], STDIN_FILENO) == -1) {
-            CloseAllPipes(0);
+            CloseAllPipes();
             return false;
         }
         if (dup2(FromProgram[WRITE_END], STDOUT_FILENO) == -1) {
-            CloseAllPipes(0);
+            CloseAllPipes();
             return false;
         }
 
-        command = ParseCommand(executable, arguments);
-        if (command != 0 && command[0] != 0) {
-            execvp(command[0], command);
+        Command = ParseCommand(executable, arguments);
+        if (Command != 0 && Command[0] != 0) {
+            execvp(Command[0], Command);
         } else {
             CMN_LOG_INIT_ERROR << "Class osaPipeExec: Open: exec failed for pipe \"" << this->Name
                                << "\" because the program name is empty" << std::endl;
@@ -233,7 +230,7 @@ bool osaPipeExec::Open(const std::string & executable,
 
         /* If we get here then exec failed */
         CMN_LOG_INIT_ERROR << "Class osaPipeExec: Open: exec failed for pipe \"" << this->Name << "\"" << std::endl;
-        CloseAllPipes(command);
+        CloseAllPipes();
         return false;
     }
 #elif (CISST_OS == CISST_WINDOWS)
@@ -244,12 +241,12 @@ bool osaPipeExec::Open(const std::string & executable,
     /* Replace stdin and stdout to receive from and write to the pipe */
     if (_dup2(ToProgram[READ_END], _fileno(stdin)) == -1) {
 		RestoreIO(stdinCopy, stdoutCopy);
-        CloseAllPipes(0);
+        CloseAllPipes();
         return false;
     }
     if (_dup2(FromProgram[WRITE_END], _fileno(stdout)) == -1) {
 		RestoreIO(stdinCopy, stdoutCopy);
-        CloseAllPipes(0);
+        CloseAllPipes();
         return false;
     }
 
@@ -257,57 +254,58 @@ bool osaPipeExec::Open(const std::string & executable,
        direction. Thus we don't need these ends of the pipe */
     if (_close(FromProgram[WRITE_END]) == -1) {
 		RestoreIO(stdinCopy, stdoutCopy);
-        CloseAllPipes(0);
+        CloseAllPipes();
         return false;
     }
 
     if (_close(ToProgram[READ_END]) == -1) {
 		RestoreIO(stdinCopy, stdoutCopy);
-        CloseAllPipes(0);
+        CloseAllPipes();
         return false;
     }
 
     if (!WriteFlag && _close(ToProgram[WRITE_END]) == -1) {
 		RestoreIO(stdinCopy, stdoutCopy);
-        CloseAllPipes(0);
+        CloseAllPipes();
         return false;
     }
     if (!ReadFlag && _close(FromProgram[READ_END]) == -1) {
 		RestoreIO(stdinCopy, stdoutCopy);
-        CloseAllPipes(0);
+        CloseAllPipes();
         return false;
     }
 
-    command = ParseCommand(executable, arguments);
-    if (command != 0 && command[0] != 0) {
+    Command = ParseCommand(executable, arguments);
+    if (Command != 0 && Command[0] != 0) {
 		/* We need to quote the arguments but not the file name. Evidently, Windows
 		parses the two differently. Therefore we use executable.c_str() instead
-		of command[0]*/
-        INTERNALS(hProcess) = (HANDLE) _spawnvp(P_NOWAIT, executable.c_str(), command);
+		of Command[0]*/
+        INTERNALS(hProcess) = (HANDLE) _spawnvp(P_NOWAIT, executable.c_str(), Command);
     } else {
         CMN_LOG_INIT_ERROR << "Class osaPipeExec: Open: exec failed for pipe \"" << this->Name
                            << "\" because the program name is empty" << std::endl;
 		RestoreIO(stdinCopy, stdoutCopy);
-        CloseAllPipes(command);
+        CloseAllPipes();
         return false;
     }
     if (!INTERNALS(hProcess)) {
         CMN_LOG_INIT_ERROR << "Class osaPipeExec: Open: exec failed for pipe \"" << this->Name << "\"" << std::endl;
 		RestoreIO(stdinCopy, stdoutCopy);
-        CloseAllPipes(command);
+        CloseAllPipes();
         return false;
     }
 
     RestoreIO(stdinCopy, stdoutCopy);
 #endif
 
-    delete[] command;
+    delete[] Command;
     Connected = true;
     return true;
 }
 
 
-bool osaPipeExec::Close(bool killProcess) {
+bool osaPipeExec::Close(bool killProcess)
+{
     if (!Connected) {
         return false;
     } else {
@@ -351,7 +349,8 @@ bool osaPipeExec::Close(bool killProcess) {
 }
 
 
-int osaPipeExec::Read(char *buffer, int maxLength) const {
+int osaPipeExec::Read(char *buffer, int maxLength) const
+{
 #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
     ssize_t bytesRead = -1;
 #elif (CISST_OS == CISST_WINDOWS)
@@ -376,7 +375,8 @@ int osaPipeExec::Read(char *buffer, int maxLength) const {
 }
 
 
-std::string osaPipeExec::Read(int maxLength) const {
+std::string osaPipeExec::Read(int maxLength) const
+{
     char * buffer = new char[maxLength+1];
     int charsRead = Read(buffer, maxLength);
 
@@ -390,12 +390,46 @@ std::string osaPipeExec::Read(int maxLength) const {
 }
 
 
-int osaPipeExec::Write(const char * buffer) {
-    return Write(buffer, strlen(buffer)+1);
+int osaPipeExec::ReadUntil(char * buffer, int length, char stopChar) const
+{
+    char * s = buffer;
+    int charsRead = 0;
+    int result;
+    char lastChar = stopChar+1; // dummy value that's not stopChar
+    while (charsRead < length && lastChar != stopChar) {
+        result = Read(s, 1);
+        if (result == -1)
+            return -1;
+        charsRead += result;
+        s += result;
+        lastChar = *(s-1);
+    }
+    return charsRead;
 }
 
 
-int osaPipeExec::Write(const char * buffer, int n) {
+std::string osaPipeExec::ReadUntil(int length, char stopChar) const
+{
+    char * buffer = new char[length+1];
+    int charsRead = ReadUntil(buffer, length, stopChar);
+    std::string result;
+    if (charsRead > 0 && buffer[charsRead-1] == stopChar) {
+        buffer[charsRead] = '\0';
+        result = std::string(buffer);
+    }
+    delete[] buffer;
+    return result;
+}
+
+
+std::string osaPipeExec::ReadString(int length) const
+{
+    return ReadUntil(length, '\0');
+}
+
+
+int osaPipeExec::Write(const char * buffer, int n)
+{
 #if (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_SOLARIS) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
     ssize_t bytesWritten = -1;
 #elif (CISST_OS == CISST_WINDOWS)
@@ -418,9 +452,21 @@ int osaPipeExec::Write(const char * buffer, int n) {
 }
 
 
+int osaPipeExec::Write(const char * buffer)
+{
+    return Write(buffer, strlen(buffer)+1);
+}
+
+
 int osaPipeExec::Write(const std::string & s)
 {
     return Write(s.c_str());
+}
+
+
+int osaPipeExec::Write(const std::string & s, int n)
+{
+    return Write(s.c_str(), n);
 }
 
 

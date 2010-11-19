@@ -25,3 +25,32 @@ prmVelocityCartesianSet::~prmVelocityCartesianSet()
 
 
 
+void prmVelocityCartesianSet::SerializeRaw(std::ostream & outputStream) const
+{
+    BaseType::SerializeRaw(outputStream);
+    //! \todo Review SerializeRaw and DeserializeRaw, they don't seriliaze the frame pointers.
+
+    //MovingFrame.SerializeRaw(outputStream);
+    //ReferenceFrame.SerializeRaw(outputStream);
+    Velocity.SerializeRaw(outputStream);
+    VelocityAngular.SerializeRaw(outputStream);
+    Acceleration.SerializeRaw(outputStream);
+    AccelerationAngular.SerializeRaw(outputStream);
+    Mask.SerializeRaw(outputStream);
+
+}
+
+void prmVelocityCartesianSet::DeSerializeRaw(std::istream & inputStream)
+{
+    BaseType::DeSerializeRaw(inputStream);
+    //! \todo Review SerializeRaw and DeserializeRaw, they don't seriliaze the frame pointers.
+
+    //MovingFrame.DeSerializeRaw(inputStream);
+    //ReferenceFrame.DeSerializeRaw(inputStream);
+    Velocity.DeSerializeRaw(inputStream);
+    VelocityAngular.DeSerializeRaw(inputStream);
+    Acceleration.DeSerializeRaw(inputStream);
+    AccelerationAngular.DeSerializeRaw(inputStream);
+    Mask.DeSerializeRaw(inputStream);
+
+}

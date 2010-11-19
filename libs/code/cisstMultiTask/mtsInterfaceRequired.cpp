@@ -171,6 +171,30 @@ std::vector<std::string> mtsInterfaceRequired::GetNamesOfFunctionsQualifiedRead(
     return FunctionsQualifiedRead.GetNames();
 }
 
+mtsFunctionVoid * mtsInterfaceRequired::GetFunctionVoid(const std::string & functionName) const {
+    return dynamic_cast<mtsFunctionVoid *>(FunctionsVoid.GetItem(functionName, CMN_LOG_LOD_INIT_ERROR)->Pointer);
+}
+
+mtsFunctionVoidReturn * mtsInterfaceRequired::GetFunctionVoidReturn(const std::string & functionName) const {
+    return dynamic_cast<mtsFunctionVoidReturn *>(FunctionsVoidReturn.GetItem(functionName, CMN_LOG_LOD_INIT_ERROR)->Pointer);
+}
+
+mtsFunctionWrite * mtsInterfaceRequired::GetFunctionWrite(const std::string & functionName) const {
+    return dynamic_cast<mtsFunctionWrite *>(FunctionsWrite.GetItem(functionName, CMN_LOG_LOD_INIT_ERROR)->Pointer);
+}
+
+mtsFunctionWriteReturn * mtsInterfaceRequired::GetFunctionWriteReturn(const std::string & functionName) const {
+    return dynamic_cast<mtsFunctionWriteReturn *>(FunctionsWriteReturn.GetItem(functionName, CMN_LOG_LOD_INIT_ERROR)->Pointer);
+}
+
+mtsFunctionRead * mtsInterfaceRequired::GetFunctionRead(const std::string & functionName) const {
+    return dynamic_cast<mtsFunctionRead *>(FunctionsRead.GetItem(functionName, CMN_LOG_LOD_INIT_ERROR)->Pointer);
+}
+
+mtsFunctionQualifiedRead * mtsInterfaceRequired::GetFunctionQualifiedRead(const std::string & functionName) const {
+    return dynamic_cast<mtsFunctionQualifiedRead *>(FunctionsQualifiedRead.GetItem(functionName, CMN_LOG_LOD_INIT_ERROR)->Pointer);
+}
+
 
 std::vector<std::string> mtsInterfaceRequired::GetNamesOfEventHandlersVoid(void) const {
     return EventHandlersVoid.GetNames();

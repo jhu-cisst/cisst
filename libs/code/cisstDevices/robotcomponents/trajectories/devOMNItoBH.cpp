@@ -51,7 +51,7 @@ robFunction* devOMNItoBH::Track( double t1, robFunction* ){
       for( size_t i=0; i<qnew.size()-1; i++ )
 	{ qnew[i] += 0.001; }
     }
-    qnew[ qnew.size()-1 ] = M_PI;
+    qnew[ qnew.size()-1 ] = cmnPI;
   }
 
   vctDynamicVector<double> qd = ( qnew - qold ) / GetPeriodicity();

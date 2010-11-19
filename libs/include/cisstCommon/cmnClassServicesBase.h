@@ -119,8 +119,11 @@ class CISST_EXPORT cmnClassServicesBase
 
     virtual bool DeleteArray(generic_pointer & data, size_t & size) const = 0;
 
-    /*! Call destructor explicitely */
+    /*! Call destructor explicitly */
     virtual bool Delete(cmnGenericObject * existing) const = 0;
+
+    /*! Get the size of the class */
+    virtual size_t GetSize(void) const = 0;
 
     /*! Get the name associated with the class.
 
